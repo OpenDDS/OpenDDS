@@ -35,19 +35,21 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
   try
     {
       DDS::DomainParticipantFactory_var dpf = TheParticipantFactoryWithArgs(argc, argv);
+
+      Options configopt(argc, argv);
+      Options plainopt;
+
+      ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) Running colocation opt %C\n"),
+        configopt.collocation_str.c_str()
+      ));
+
       DDS::DomainParticipant_var participant1;
       DDS::DomainParticipant_var participant2;
 
       {
         OpenDDS::DCPS::TypeSupport_var typsup = new Xyz::FooTypeSupportImpl;
 
-        Options configopt(argc, argv);
-        ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) Running colocation opt %C\n"),
-          configopt.collocation_str.c_str()
-        ));
         Factory fconfig(configopt, typsup);
-
-        Options plainopt;
         Factory fplain(plainopt, typsup);
 
         DDS::DataReaderListener_var drl1(new DataReaderListenerImpl(configopt));

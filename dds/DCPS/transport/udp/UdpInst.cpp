@@ -9,10 +9,10 @@
 #include "UdpLoader.h"
 
 #include <dds/DCPS/LogAddr.h>
-#include "dds/DCPS/transport/framework/TransportDefs.h"
-#include "dds/DCPS/transport/framework/NetworkAddress.h"
+#include <dds/DCPS/transport/framework/TransportDefs.h>
+#include <dds/DCPS/NetworkResource.h>
 
-#include "ace/Configuration.h"
+#include <ace/Configuration.h>
 
 #include <iostream>
 #include <sstream>
@@ -37,7 +37,7 @@ UdpInst::UdpInst(const std::string& name)
 TransportImpl_rch
 UdpInst::new_impl()
 {
-  return make_rch<UdpTransport>(ref(*this));
+  return make_rch<UdpTransport>(rchandle_from(this));
 }
 
 int
@@ -46,7 +46,8 @@ UdpInst::load(ACE_Configuration_Heap& cf,
 {
   TransportInst::load(cf, sect); // delegate to parent
 
-  ACE_TString local_address_s;
+  // Explicitly initialize this string to stop gcc 11 from issuing a warning.
+  ACE_TString local_address_s(ACE_TEXT(""));
   GET_CONFIG_TSTRING_VALUE(cf, sect, ACE_TEXT("local_address"),
                            local_address_s);
 
@@ -65,7 +66,7 @@ OPENDDS_STRING
 UdpInst::dump_to_str() const
 {
   std::ostringstream os;
-  os << TransportInst::dump_to_str() << std::endl;
+  os << TransportInst::dump_to_str();
 
   os << formatNameForDump("local_address") << LogAddr(local_address()).str() << std::endl;
   os << formatNameForDump("send_buffer_size") << this->send_buffer_size_ << std::endl;
@@ -77,14 +78,14 @@ size_t
 UdpInst::populate_locator(OpenDDS::DCPS::TransportLocator& info, ConnectionInfoFlags) const
 {
   if (this->local_address() != ACE_INET_Addr()) {
-    NetworkAddress network_address;
+    NetworkResource network_resource;
     if (!this->local_address_string().empty()) {
-      network_address = NetworkAddress(this->local_address_string());
+      network_resource = NetworkResource(this->local_address_string());
     } else {
-      network_address = NetworkAddress(get_fully_qualified_hostname());
+      network_resource = NetworkResource(get_fully_qualified_hostname());
     }
     ACE_OutputCDR cdr;
-    cdr << network_address;
+    cdr << network_resource;
 
     const CORBA::ULong len = static_cast<CORBA::ULong>(cdr.total_length());
     char* buffer = const_cast<char*>(cdr.buffer()); // safe

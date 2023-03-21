@@ -88,6 +88,7 @@ public:
   }
 
 private:
+  mutable ACE_Thread_Mutex mutex_;
   DistributedConditionSet_rch dcs_;
   const OPENDDS_STRING actor_;
 

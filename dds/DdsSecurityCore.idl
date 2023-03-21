@@ -23,16 +23,11 @@
 #include "DdsDcpsPublication.idl"
 #include "DdsDcpsSubscription.idl"
 #include "DdsSecurityParams.idl"
+#include "DdsDynamicData.idl"
 
 // The types in this file shall be serialized with XCDR encoding version 1
 module DDS {
   module Security {
-
-    // Since DynamicData is a feature of the XTypes spec (which isn't yet supported) the
-    // native type is replaced with an empty interface to satisfy the access-control methods
-    // which use the type.
-    local interface DynamicData {
-    };
 
     // Per the security spec these types are expected to be visible in
     // the DDS::Security namespace. They are defined in dds/DdsDcpsCore.idl
@@ -489,7 +484,6 @@ module DDS {
         in    DataReader          reader,
         in    InstanceHandle_t    publication_handle,
         in    DynamicData         key,
-        in    InstanceHandle_t    instance_handle,
         inout SecurityException   ex);
 
       boolean

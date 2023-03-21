@@ -11,7 +11,7 @@
 #include "RcObject.h"
 #include "Definitions.h"
 #include "SequenceNumber.h"
-#include "ValueWriter.h"
+#include "ValueDispatcher.h"
 #include "ReceivedDataElementList.h"
 
 #include <dds/DdsDcpsCoreTypeSupportImpl.h>
@@ -58,19 +58,19 @@ public:
     DDS::Time_t timestamp;
     SequenceNumber sequence_number;
     const void* data;
-    const ValueWriterDispatcher& data_dispatcher;
+    const ValueDispatcher& data_dispatcher;
 
     Sample(DDS::InstanceHandle_t instance,
            DDS::InstanceStateKind instance_state,
            const DDS::Time_t& timestamp,
            const SequenceNumber& sequence_number,
            const void* data,
-           const ValueWriterDispatcher& data_dispatcher);
+           const ValueDispatcher& data_dispatcher);
 
     Sample(DDS::InstanceHandle_t instance,
            DDS::InstanceStateKind instance_state,
            const ReceivedDataElement& rde,
-           const ValueWriterDispatcher& data_dispatcher);
+           const ValueDispatcher& data_dispatcher);
   };
 
   // Group 1: Reader/Writer enabled, deleted, QoS changed

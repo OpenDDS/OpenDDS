@@ -17,10 +17,11 @@
 #include "dds/DCPS/GuidUtils.h"
 #include "dds/DCPS/Message_Block_Ptr.h"
 #include "dds/DCPS/Serializer.h"
+#include "dds/DCPS/Util.h"
 
-#include "dds/DCPS/RTPS/BaseMessageTypes.h"
-#include "dds/DCPS/RTPS/BaseMessageUtils.h"
+#include "dds/DCPS/RTPS/MessageUtils.h"
 #include "dds/DCPS/RTPS/MessageTypes.h"
+#include "dds/DCPS/RTPS/MessageParser.h"
 #include "dds/DCPS/RTPS/RtpsCoreTypeSupportImpl.h"
 
 #include <openssl/err.h>
@@ -134,14 +135,6 @@ namespace {
     return k;
   }
 
-  template <typename T, typename TSeq>
-  void push_back(TSeq& seq, const T& t)
-  {
-    const unsigned int i = seq.length();
-    seq.length(i + 1);
-    seq[i] = t;
-  }
-
   const unsigned submessage_key_index = 0;
 }
 
@@ -169,7 +162,7 @@ ParticipantCryptoHandle CryptoBuiltInImpl::register_local_participant(
   const KeyMaterial key = make_key(h,
     participant_security_attributes.plugin_participant_attributes & PLUGIN_PARTICIPANT_SECURITY_ATTRIBUTES_FLAG_IS_RTPS_ENCRYPTED);
   KeySeq keys;
-  push_back(keys, key);
+  DCPS::push_back(keys, key);
 
   ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
   keys_[h] = keys;
@@ -334,7 +327,7 @@ DatawriterCryptoHandle CryptoBuiltInImpl::register_local_datawriter(
   KeySeq keys;
 
   if (is_builtin_volatile(properties)) {
-    push_back(keys, make_volatile_placeholder());
+    DCPS::push_back(keys, make_volatile_placeholder());
 
   } else {
     // See Table 70 "register_local_datawriter" for the use of the key sequence
@@ -342,7 +335,7 @@ DatawriterCryptoHandle CryptoBuiltInImpl::register_local_datawriter(
     bool used_h = false;
     if (security_attributes.is_submessage_protected) {
       const KeyMaterial key = make_key(h, plugin_attribs & FLAG_IS_SUBMESSAGE_ENCRYPTED);
-      push_back(keys, key);
+      DCPS::push_back(keys, key);
       used_h = true;
       if (security_debug.bookkeeping && !security_debug.showkeys) {
         ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {bookkeeping} CryptoBuiltInImpl::register_local_datawriter ")
@@ -358,7 +351,7 @@ DatawriterCryptoHandle CryptoBuiltInImpl::register_local_datawriter(
     if (security_attributes.is_payload_protected) {
       const unsigned int key_id = used_h ? generate_handle() : h;
       const KeyMaterial_AES_GCM_GMAC key = make_key(key_id, plugin_attribs & FLAG_IS_PAYLOAD_ENCRYPTED);
-      push_back(keys, key);
+      DCPS::push_back(keys, key);
       if (security_debug.bookkeeping && !security_debug.showkeys) {
         ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {bookkeeping} CryptoBuiltInImpl::register_local_datawriter ")
           ACE_TEXT("created payload key with id %C for LDWCH %d\n"),
@@ -510,7 +503,7 @@ DatareaderCryptoHandle CryptoBuiltInImpl::register_local_datareader(
   KeySeq keys;
 
   if (is_builtin_volatile(properties)) {
-    push_back(keys, make_volatile_placeholder());
+    DCPS::push_back(keys, make_volatile_placeholder());
 
   } else if (security_attributes.is_submessage_protected) {
     const KeyMaterial key = make_key(h, plugin_attribs & FLAG_IS_SUBMESSAGE_ENCRYPTED);
@@ -524,7 +517,7 @@ DatareaderCryptoHandle CryptoBuiltInImpl::register_local_datareader(
         ACE_TEXT("created submessage key for LDRCH %d:\n%C"), h,
         to_dds_string(key).c_str()));
     }
-    push_back(keys, key);
+    DCPS::push_back(keys, key);
   }
 
   ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
@@ -765,7 +758,7 @@ namespace {
       ACE_Message_Block mb(to_mb(p.value.get_buffer()), size);
       Serializer ser(&mb, common_encoding);
       if (ser << keys[i]) {
-        push_back(tokens, t);
+        DCPS::push_back(tokens, t);
       } else {
         ACE_ERROR((LM_ERROR,
           "(%P|%t) ERROR: keys_to_tokens: Failed to serialize\n"));
@@ -788,7 +781,7 @@ namespace {
             Serializer ser(&mb, common_encoding);
             KeyMaterial_AES_GCM_GMAC key;
             if (ser >> key) {
-              push_back(keys, key);
+              DCPS::push_back(keys, key);
             } else {
               ACE_ERROR((LM_ERROR,
                 "(%P|%t) ERROR: tokens_to_keys: Failed to deserialize\n"));
@@ -1393,7 +1386,6 @@ bool CryptoBuiltInImpl::encode_submessage(
   NativeCryptoHandle sender_handle,
   SecurityException& ex)
 {
-  ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
   const KeyTable_t::const_iterator iter = keys_.find(sender_handle);
   if (iter == keys_.end()) {
     encoded_rtps_submessage = plain_rtps_submessage;
@@ -1531,8 +1523,6 @@ bool CryptoBuiltInImpl::encode_datawriter_submessage(
     }
   }
 
-  guard.release();
-
   const bool ok = encode_submessage(encoded_rtps_submessage,
                                     plain_rtps_submessage, encode_handle, ex);
   if (ok) {
@@ -1559,8 +1549,8 @@ bool CryptoBuiltInImpl::encode_datareader_submessage(
   }
 
   NativeCryptoHandle encode_handle = sending_datareader_crypto;
+  ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
   if (receiving_datawriter_crypto_list.length() == 1) {
-    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
     const KeyTable_t::const_iterator iter = keys_.find(encode_handle);
     if (iter != keys_.end()) {
       const KeySeq& dr_keys = iter->second;
@@ -1713,7 +1703,7 @@ bool CryptoBuiltInImpl::preprocess_secure_submsg(
                           encoded_rtps_submessage.length());
   mb_in.wr_ptr(encoded_rtps_submessage.length());
   Serializer de_ser(&mb_in, common_encoding);
-  CryptoHeader ch;
+  CryptoHeader ch = CryptoHeader();
   if (!(de_ser.skip(RTPS::SMHDR_SZ) && (de_ser >> ch))) {
     ACE_ERROR((LM_ERROR,
       "(%P|%t) CryptoBuiltInImpl::preprocess_secure_submsg: "
@@ -1977,7 +1967,7 @@ bool CryptoBuiltInImpl::decode_rtps_message(
     return CommonUtilities::set_security_error(ex, -2, 0, "Failed to deserialize Header");
   }
 
-  CryptoHeader ch;
+  CryptoHeader ch = CryptoHeader();
   CryptoFooter cf;
   bool haveCryptoHeader = false, haveCryptoFooter = false;
   const char* afterSrtpsPrefix = 0;
@@ -2119,7 +2109,7 @@ bool CryptoBuiltInImpl::decode_submessage(
   de_ser.swap_bytes((flags & RTPS::FLAG_E) != ACE_CDR_BYTE_ORDER);
   ACE_CDR::UShort octetsToNext;
   de_ser >> octetsToNext;
-  CryptoHeader ch;
+  CryptoHeader ch = CryptoHeader();
   de_ser.endianness(ENDIAN_BIG);
   de_ser >> ch;
   de_ser.skip(octetsToNext - CRYPTO_HEADER_LENGTH);
@@ -2293,7 +2283,7 @@ bool CryptoBuiltInImpl::decode_serialized_payload(
                           encoded_buffer.length());
   mb_in.wr_ptr(encoded_buffer.length());
   Serializer de_ser(&mb_in, common_encoding);
-  CryptoHeader ch;
+  CryptoHeader ch = CryptoHeader();
   if (!(de_ser >> ch)) {
     return CommonUtilities::set_security_error(ex, -3, 4, "Failed to deserialize CryptoHeader");
   }

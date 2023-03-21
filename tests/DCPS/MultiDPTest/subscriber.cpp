@@ -17,7 +17,9 @@
 #include "common.h"
 
 #include "tests/DCPS/FooType5/FooDefTypeSupportImpl.h"
+#include "tests/Utils/WaitForSample.h"
 
+#include <dds/DCPS/BuiltInTopicUtils.h>
 #include <dds/DCPS/Service_Participant.h>
 #include <dds/DCPS/Marked_Default_Qos.h>
 #include <dds/DCPS/Qos_Helper.h>
@@ -60,7 +62,7 @@ int parse_args(int argc, ACE_TCHAR *argv[])
     //  -m num_instances_per_writer defaults to 1
     //  -i num_samples_per_instance defaults to 1
     //  -v verbose transport debug
-    //  -o directory of synch files used to coordinate publisher and subscriber
+    //  -o directory of synch file used to coordinate publisher and subscriber
     //     defaults to current directory
     const ACE_TCHAR *currentArg = 0;
 
@@ -75,10 +77,7 @@ int parse_args(int argc, ACE_TCHAR *argv[])
       arg_shifter.consume_arg();
     } else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-o"))) != 0) {
       synch_file_dir = currentArg;
-      pub_ready_filename = synch_file_dir + pub_ready_filename;
       pub_finished_filename = synch_file_dir + pub_finished_filename;
-      sub_ready_filename = synch_file_dir + sub_ready_filename;
-      sub_finished_filename = synch_file_dir + sub_finished_filename;
 
       arg_shifter.consume_arg ();
     } else if (arg_shifter.cur_arg_strncasecmp(ACE_TEXT("-safety-profile")) == 0) {
@@ -128,6 +127,7 @@ void init_dcps_objects(int i)
       inst->load(ach, sect_key);
       config->instances_.push_back(inst);
       TheTransportRegistry->bind_config(config_name, participant[i]);
+
     }
   }
 
@@ -233,23 +233,41 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     init_dcps_objects(0);
     init_dcps_objects(1);
 
-    // Indicate that the subscriber is ready
-    FILE* readers_ready = ACE_OS::fopen(sub_ready_filename.c_str(), ACE_TEXT("w"));
-    if (readers_ready == 0) {
-      ACE_ERROR((LM_ERROR,
-        ACE_TEXT("(%P|%t) ERROR: Unable to create subscriber ready file\n")));
+#if defined (OPENDDS_SAFETY_PROFILE) && !defined (DDS_HAS_MINIMUM_BIT)
+    if (safety_profile) {
+      int num_participants = 0;
+
+      // wait for Discovery to complete
+      ::DDS::Subscriber_var bit_subscriber = participant[1]->get_builtin_subscriber();
+      ::DDS::DataReader_var part_rdr = bit_subscriber->lookup_datareader(OpenDDS::DCPS::BUILT_IN_PARTICIPANT_TOPIC);
+      ::DDS::ParticipantBuiltinTopicDataDataReader_var part_reader = ::DDS::ParticipantBuiltinTopicDataDataReader::_narrow(part_rdr.in());
+
+      if (CORBA::is_nil (part_reader.in ())) {
+        ACE_ERROR((LM_ERROR, "(%P|%t) subscriber: failed to get BUILT_IN_PARTICIPANT_TOPIC datareader.\n"));
+      }
+
+      ::DDS::SampleInfoSeq part_infos(3);
+      ::DDS::ParticipantBuiltinTopicDataSeq part_data(3);
+
+      while (num_participants < 2) {
+        Utils::waitForSample(part_rdr);
+
+        int ret = part_reader->read(part_data,
+                                    part_infos,
+                                    3,
+                                    DDS::ANY_SAMPLE_STATE,
+                                    DDS::ANY_VIEW_STATE,
+                                    DDS::ALIVE_INSTANCE_STATE);
+
+        if (ret != ::DDS::RETCODE_OK && ret != ::DDS::RETCODE_NO_DATA) {
+          ACE_ERROR ((LM_ERROR,
+            "(%P|%t) subscriber:  failed to read BIT participant data.\n"));
+        } else {
+          num_participants = part_data.length();
+        }
+      }
     }
-
-    // Wait for the publisher to be ready
-    const ACE_Time_Value small_time(0, 250000);
-    FILE* writers_ready = 0;
-    do {
-      ACE_OS::sleep(small_time);
-      writers_ready = ACE_OS::fopen(pub_ready_filename.c_str(), ACE_TEXT("r"));
-    } while (!writers_ready);
-
-    if (readers_ready) ACE_OS::fclose(readers_ready);
-    if (writers_ready) ACE_OS::fclose(writers_ready);
+#endif // OPENDDS_SAFETY_PROFILE && !DDS_HAS_MINIMUM_BIT
 
     int expected = num_datawriters * num_instances_per_writer * num_samples_per_instance;
 
@@ -280,22 +298,6 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
       ACE_OS::sleep(1);
     }
-
-    // Indicate that the subscriber is done
-    FILE* readers_completed = ACE_OS::fopen(sub_finished_filename.c_str(), ACE_TEXT("w"));
-    if (!readers_completed) {
-      ACE_ERROR((LM_ERROR,
-        ACE_TEXT("(%P|%t) ERROR: Unable to create subscriber completed file\n")));
-    }
-
-    // Wait for the publisher to finish
-    while (!writers_completed) {
-      ACE_OS::sleep(small_time);
-      writers_completed = ACE_OS::fopen(pub_finished_filename.c_str(), ACE_TEXT("r"));
-    }
-
-    if (readers_completed) ACE_OS::fclose(readers_completed);
-    if (writers_completed) ACE_OS::fclose(writers_completed);
 
   } catch (const TestException&) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) TestException caught in main(). ")));

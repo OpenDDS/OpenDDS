@@ -58,15 +58,17 @@ Publisher::Publisher(const long domain_id, std::size_t samples_per_thread, bool 
       qos.durability.kind = DDS::TRANSIENT_LOCAL_DURABILITY_QOS;
     }
 #ifndef OPENDDS_NO_OWNERSHIP_PROFILE
-    qos.history.depth = static_cast<CORBA::Long>(samples_per_thread_);
+    qos.history.kind = DDS::KEEP_ALL_HISTORY_QOS;
+    qos.history.depth = static_cast<CORBA::Long>(samples_per_thread_ * 2);
 #endif
+
     dw_ = pub->create_datawriter(topic.in(), qos, 0, OpenDDS::DCPS::DEFAULT_STATUS_MASK);
     if (!dw_) {
       throw std::runtime_error("create_datawriter failed!\n");
     }
     OpenDDS::DCPS::DataWriterImpl* wi = dynamic_cast<OpenDDS::DCPS::DataWriterImpl*>(dw_.in());
     if (wi) {
-      ACE_DEBUG((LM_INFO, (pfx_ + "  writer id: %C\n").c_str(), OpenDDS::DCPS::LogGuid(wi->get_repo_id()).c_str()));
+      ACE_DEBUG((LM_INFO, (pfx_ + "  writer id: %C\n").c_str(), OpenDDS::DCPS::LogGuid(wi->get_guid()).c_str()));
     } else {
       throw std::runtime_error("dynamic_cast<OpenDDS::DCPS::DataWriterImpl*>(dw_.in()) failed!\n");
     }
@@ -92,10 +94,12 @@ Publisher::Publisher(const long domain_id, std::size_t samples_per_thread, bool 
 
 int Publisher::publish()
 {
+  OpenDDS::DCPS::DataWriterImpl* p = dynamic_cast<OpenDDS::DCPS::DataWriterImpl*>(writer_.in());
+  OPENDDS_ASSERT(p);
   if (!durable_) {
-    ACE_DEBUG((LM_INFO, (pfx_ + "->wait_match() before write\n").c_str()));
+    ACE_DEBUG((LM_INFO, (pfx_ + "->wait_match() before write for %C\n").c_str(), OpenDDS::DCPS::LogGuid(p->get_guid()).c_str()));
     Utils::wait_match(dw_, 1);
-    ACE_DEBUG((LM_INFO, (pfx_ + "<-match found! before write\n").c_str()));
+    ACE_DEBUG((LM_INFO, (pfx_ + "<-match found! before write for %C\n").c_str(), OpenDDS::DCPS::LogGuid(p->get_guid()).c_str()));
   }
 
   // Intentionally inefficient to stress various pathways related to publication:
@@ -116,12 +120,12 @@ int Publisher::publish()
   }
 
   if (durable_) {
-    ACE_DEBUG((LM_INFO, (pfx_ + "->wait_match()\n").c_str()));
+    ACE_DEBUG((LM_INFO, (pfx_ + "->wait_match() before write for %C\n").c_str(), OpenDDS::DCPS::LogGuid(p->get_guid()).c_str()));
     Utils::wait_match(dw_, 1);
-    ACE_DEBUG((LM_INFO, (pfx_ + "<-match found!\n").c_str()));
+    ACE_DEBUG((LM_INFO, (pfx_ + "<-match found! before write for %C\n").c_str(), OpenDDS::DCPS::LogGuid(p->get_guid()).c_str()));
   }
 
-  DDS::Duration_t interval = {300, 0};
+  DDS::Duration_t interval = {DDS::DURATION_INFINITE_SEC, DDS::DURATION_INFINITE_NSEC};
   ACE_DEBUG((LM_INFO, (pfx_ + "  waiting for acks\n").c_str()));
   if (DDS::RETCODE_OK != dw_->wait_for_acknowledgments(interval)) {
     ACE_ERROR((LM_ERROR, (pfx_ + " ERROR: timed out waiting for acks!\n").c_str()));
@@ -180,6 +184,7 @@ void Publisher::configure_transport()
     ach.set_string_value(sect_key, ACE_TEXT("heartbeat_period"), ACE_TEXT("200"));
     ach.set_string_value(sect_key, ACE_TEXT("heartbeat_response_delay"), ACE_TEXT("100"));
     inst->load(ach, sect_key);
+    config->passive_connect_duration_ = 600000;
     config->instances_.push_back(inst);
     TheTransportRegistry->bind_config(config_name, dp_);
   }

@@ -57,15 +57,22 @@ module bool {
 module _case {
   const long _typeid = 0;
 
+  enum _enum {
+    _short,
+    _long
+  };
+
   struct _struct;
   @topic
   struct _struct {
     @key long _private;
+    _enum enum_value;
   };
 
   union _union;
   @topic
-  union _union switch (@key long) {
-    case 2: short _public;
+  union _union switch (@key _enum) {
+    case _short: _enum _private;
+    case _long: short _public;
   };
 };

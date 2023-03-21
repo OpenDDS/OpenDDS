@@ -1,0 +1,3675 @@
+Thu Jun 23 23:13:14 UTC 2022  Adam Mitz  <mitza@objectcomputing.com>
+        commit b100719194e53670b6893187f5e9e95aa626397a
+
+          Merge pull request #3570 from iguessthislldo/igtd/3.21.0-news
+
+          3.21.0 NEWS
+
+Thu Jun 23 23:13:07 UTC 2022  Adam Mitz  <mitza@objectcomputing.com>
+        commit ab32e99ae2fdb9133528c7c0f12c26160ddd6433
+
+          Merge pull request #3572 from
+          iguessthislldo/igtd/transport-debug-doc
+
+          Document `transport_debug` Category Names
+
+Thu Jun 23 22:29:30 UTC 2022  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit d7fe35be3b2b85b1d2987fcee52c047461790824
+
+        * NEWS.md:
+
+          Update NEWS.md
+
+Thu Jun 23 21:44:43 UTC 2022  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit 7fad58add76783408e2e531e2aa32a485eaa2405
+
+        * dds/DCPS/transport/framework/TransportDebug.h:
+
+          Document `transport_debug` Category Names
+
+          To match documentation being added to the devguide.
+
+Wed Jun 22 17:47:58 UTC 2022  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit 82b0359461e71c763d1d4a0c0831cd362b39faa6
+
+        * NEWS.md:
+
+          Initial 3.21.0 NEWS
+
+Tue Jun 21 21:23:47 UTC 2022  Adam Mitz  <mitza@objectcomputing.com>
+        commit 9f065c06148d53c8b3ad4ee430d20db5ee2e1a48
+
+          Merge pull request #3567 from mitza-oci/warnings
+
+          rtps_udp: removed unused MetaSubmessage ctor, fixed locking (from
+          #3516)
+
+Tue Jun 21 21:23:36 UTC 2022  Adam Mitz  <mitza@objectcomputing.com>
+        commit 01c4d77467374820e09eee6e8070e79eafc63150
+
+          Merge pull request #3561 from sonndinh/task_586
+
+          Fix BuiltInTopicTest timeout error
+
+Mon Jun 20 04:37:54 UTC 2022  Timothy Simpson  <simpsont@objectcomputing.com>
+        commit 1694ba7911ec90d73cb16e429ee4d0996e0ba9e9
+
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.h:
+
+          fix addr_guids warning, lock for remote_reader_guids
+
+          (cherry picked from commit
+          b3cd46ce7d1334f373c3868786d12853b89b5a6f)
+
+Mon Jun 20 18:38:23 UTC 2022  Adam Mitz  <mitza@objectcomputing.com>
+        commit f61866d0c38e0cad3483dca445a6ec73c6894ac6
+
+        * dds/DCPS/transport/rtps_udp/MetaSubmessage.h:
+
+          rtps_udp: removed unused MetaSubmessage ctor
+
+Mon Jun 20 17:02:56 UTC 2022  Son Dinh  <dinhs@objectcomputing.com>
+        commit ec7b8960669b7bf2fa2210849b7fedc2859d9253
+
+        * tests/DCPS/BuiltInTopicTest/monitor.cpp:
+
+          Remove sleep to wait for discovered participants
+
+Mon Jun 20 16:20:39 UTC 2022  Son Dinh  <dinhs@objectcomputing.com>
+        commit 99c0c72a7c2cc16e0f3b5fd0c5013791a43751d5
+
+        * tests/DCPS/BuiltInTopicTest/DataReaderListener.cpp:
+        * tests/DCPS/BuiltInTopicTest/monitor.cpp:
+        * tests/DCPS/BuiltInTopicTest/publisher.cpp:
+        * tests/DCPS/BuiltInTopicTest/subscriber.cpp:
+
+          From reviews
+
+Sat Jun 18 20:34:45 UTC 2022  Adam Mitz  <mitza@objectcomputing.com>
+        commit 7cf76b4a37da685b8b060d0ae8ed0240dda69acc
+
+          Merge pull request #3563 from jrw972/opendds-557
+
+          StaticDiscovery mpmrmw generates too much load
+
+Fri Jun 17 16:04:01 UTC 2022  Son Dinh  <dinhs@objectcomputing.com>
+        commit 879a7efbb11e181524aad391865dec476c9e1a33
+
+        * tests/DCPS/BuiltInTopicTest/DataReaderListener.cpp:
+        * tests/DCPS/BuiltInTopicTest/subscriber.cpp:
+
+          Update return value of read_bit_instance
+
+Fri Jun 17 15:07:11 UTC 2022  Son Dinh  <dinhs@objectcomputing.com>
+        commit 69a28a610c1e90d4e684e342efa77ad829599760
+
+        * tests/DCPS/BuiltInTopicTest/monitor.cpp:
+
+          Fix lint
+
+Fri Jun 17 15:01:22 UTC 2022  Son Dinh  <dinhs@objectcomputing.com>
+        commit 9e6e3c674fdf0e29259357a38adc0fe6a79bc903
+
+        * tests/DCPS/BuiltInTopicTest/common.h:
+
+          Add common file
+
+Fri Jun 17 14:59:52 UTC 2022  Son Dinh  <dinhs@objectcomputing.com>
+        commit f7b17099f362b9c35ab884e01d17f292c1fbb028
+
+        * tests/DCPS/BuiltInTopicTest/DataReaderListener.cpp:
+        * tests/DCPS/BuiltInTopicTest/DataReaderListener.h:
+        * tests/DCPS/BuiltInTopicTest/Writer.cpp:
+        * tests/DCPS/BuiltInTopicTest/Writer.h:
+
+          Update style
+
+Fri Jun 17 14:40:53 UTC 2022  Son Dinh  <dinhs@objectcomputing.com>
+        commit 78a02a8bc78939799f41d6fad723e319c0b637ff
+
+        * tests/DCPS/BuiltInTopicTest/monitor.cpp:
+        * tests/DCPS/BuiltInTopicTest/publisher.cpp:
+        * tests/DCPS/BuiltInTopicTest/run_test.pl:
+        * tests/DCPS/BuiltInTopicTest/subscriber.cpp:
+
+          Use a common header file. Remove sleep in Perl script
+
+Wed Jun 15 20:15:40 UTC 2022  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 18f3c41a1731f331a589926b72721f05e17619f9
+
+        * tests/DCPS/StaticDiscovery/DataReaderListenerImpl.cpp:
+        * tests/DCPS/StaticDiscovery/DataReaderListenerImpl.h:
+        * tests/DCPS/StaticDiscovery/StaticDiscoveryTest.cpp:
+
+          Fix Coverity warnings
+
+Fri Jun 17 04:22:36 UTC 2022  Adam Mitz  <mitza@objectcomputing.com>
+        commit 0eb508f97c2ee2c849169dfa168ebf1580a372e7
+
+          Merge pull request #3542 from
+          simpsont-oci/trial_removing_addr_guids
+
+          Remove addr_guids from BundlingCacheKey for Performance
+
+Thu Jun 16 20:35:49 UTC 2022  Timothy Simpson  <simpsont@objectcomputing.com>
+        commit b3871b3927cd9a76dcbab2f107b8519f973b7aee
+
+        * dds/DCPS/transport/rtps_udp/BundlingCacheKey.h:
+        * dds/DCPS/transport/rtps_udp/LocatorCacheKey.h:
+
+          more cleanup, fix build errors
+
+Thu Jun 16 17:23:08 UTC 2022  Timothy Simpson  <simpsont@objectcomputing.com>
+        commit 3bc2ba30bd91d4315283d94604cf57e4bed772b0
+
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.h:
+
+          bundle struct refactor
+
+Thu Jun 16 17:14:26 UTC 2022  Timothy Simpson  <simpsont@objectcomputing.com>
+        commit 8cb931e6527eac450a2a191244769c34bb7941b2
+
+        * dds/DCPS/transport/rtps_udp/BundlingCacheKey.h:
+
+          remove unused code
+
+Thu Jun 16 17:12:33 UTC 2022  Timothy Simpson  <simpsont@objectcomputing.com>
+        commit 5eeee2e40c81873e03ec30338beeb5c8d5db0348
+
+        * dds/DCPS/transport/rtps_udp/BundlingCacheKey.h:
+        * dds/DCPS/transport/rtps_udp/MetaSubmessage.h:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.cpp:
+
+          remove unused code
+
+Thu Jun 16 13:59:55 UTC 2022  Adam Mitz  <mitza@objectcomputing.com>
+        commit 29bc1d59397dfe70674e7db9f0142aa440903a8f
+
+          Merge pull request #3564 from jrw972/opendds-589
+
+          RtpsRelay reports error when participant cannot be found for
+          removal
+
+Thu Jun 16 13:59:44 UTC 2022  Adam Mitz  <mitza@objectcomputing.com>
+        commit 2509635a1ce8b0119b9ac54245a0257118ce54b5
+
+          Merge pull request #3560 from jwillemsen/patch-22
+
+          configure: use ACE/TAO 6.5.17/2.5.17 for --doc-group
+
+Thu Jun 16 00:40:32 UTC 2022  Timothy Simpson  <simpsont@objectcomputing.com>
+        commit 06a31e65d48aa766799a9a661c27fcfb56ea6935
+
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.h:
+
+          revert lock
+
+Wed Jun 15 21:06:36 UTC 2022  Timothy Simpson  <simpsont@objectcomputing.com>
+        commit 726718999ca7eb79c99728818d1d807b73ebbd63
+
+        * dds/DCPS/transport/rtps_udp/BundlingCacheKey.h:
+        * dds/DCPS/transport/rtps_udp/LocatorCacheKey.h:
+        * dds/DCPS/transport/rtps_udp/RoutedGuidPair.h:
+
+          memcmp changes to make coverity happy
+
+Wed Jun 15 21:06:12 UTC 2022  Timothy Simpson  <simpsont@objectcomputing.com>
+        commit 8e017a10357ae6d745bb6a6847eabe9dcda7be85
+
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.h:
+
+          partially revert bundling changes, address map changes will need
+          more thought
+
+Wed Jun 15 19:00:49 UTC 2022  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 078edfe6d3ea308fdfb287ac090d211be4e3dcd5
+
+        * tools/rtpsrelay/RelayParticipantStatusReporter.cpp:
+
+          RtpsRelay reports error when participant cannot be found for
+          removal
+
+          Problem
+          -------
+
+          The RelayParticipantStatusReport issues a warning when removing a
+          participant. If the participant has already been removed, then it
+          probably indicates a bug in discovery and/or the builtin topics.
+          However, the RtpsRelay will continue to operate correctly.
+
+          Solution
+          --------
+
+          Downgrade to a warning.
+
+Wed Jun 15 18:37:17 UTC 2022  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit a20047123c9f34000784cc607f466b2d80b95e3d
+
+        * tests/dcps_tests.lst:
+
+          StaticDiscovery mpmrmw generates too much load
+
+          Problem
+          -------
+
+          Tests on Windows buildfarm VMs show that the StaticDiscovery
+          mpmrmw
+          configuration may be generating too much load.
+
+          Solution
+          --------
+
+          Use a smaller configuration.
+
+Wed Jun 15 18:01:26 UTC 2022  Son Dinh  <dinhs@objectcomputing.com>
+        commit fa04ce54b2ce2ec84e20273c066659620f51e4b9
+
+        * tests/DCPS/BuiltInTopicTest/monitor.cpp:
+
+          More style update
+
+Wed Jun 15 17:12:15 UTC 2022  Son Dinh  <dinhs@objectcomputing.com>
+        commit ef900ea2b8ba5a90b846d2bc86ac02cadf13b9fe
+
+        * tests/DCPS/BuiltInTopicTest/publisher.cpp:
+        * tests/DCPS/BuiltInTopicTest/subscriber.cpp:
+
+          Update style
+
+Wed Jun 15 16:21:39 UTC 2022  Son Dinh  <dinhs@objectcomputing.com>
+        commit f847ea8128e4f4cdcbc139884df9b0cf567c0b23
+
+        * tests/DCPS/BuiltInTopicTest/publisher.cpp:
+        * tests/DCPS/BuiltInTopicTest/subscriber.cpp:
+
+          Wait for monitor 2. Remove 15s waiting
+
+Tue Jun 14 07:20:48 UTC 2022  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit 38f34e5e89e68493a59105e916ae3c69ee4fc8a8
+
+        * configure:
+
+          Upgrade to ACE 6.5.17/TAO 2.5.17
+
+Mon Jun 13 14:26:54 UTC 2022  Adam Mitz  <mitza@objectcomputing.com>
+        commit 3439a81c95678a095a187d09f03ace9aa4f3eb1d
+
+          Merge pull request #3559 from
+          simpsont-oci/tsan_instance_state_registered
+
+          Fix TSAN Issues Surrounding InstanceState::registered_
+
+Fri Jun 10 21:09:41 UTC 2022  Timothy Simpson  <simpsont@objectcomputing.com>
+        commit 4d64156f44509cda003f8b942ba89a54dcd2d3a3
+
+        * tests/unit-tests/dds/DCPS/AddressCache.cpp:
+
+          fix test build
+
+Fri Jun 10 20:09:30 UTC 2022  Timothy Simpson  <simpsont@objectcomputing.com>
+        commit ef7466768c49618fcc14714fe653810f033396aa
+
+        * dds/DCPS/AddressCache.h:
+        * dds/DCPS/NetworkAddress.h:
+        * dds/DCPS/transport/rtps_udp/BundlingCacheKey.h:
+        * dds/DCPS/transport/rtps_udp/LocatorCacheKey.h:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.h:
+
+          bundling data structures revamp
+
+Fri Jun 10 17:06:04 UTC 2022  Timothy Simpson  <simpsont@objectcomputing.com>
+        commit baa073aff8ecb81ee9e5d8d463444dc849b6ece4
+
+        * dds/DCPS/InstanceState.cpp:
+
+          Fix TSAN Issues Surrounding InstanceState::registered_
+
+Thu Jun 09 23:20:30 UTC 2022  Adam Mitz  <mitza@objectcomputing.com>
+        commit 6adeacab27f56c69d77202c3a684faf715a37071
+
+          Merge pull request #3555 from sonndinh/task_587
+
+          Revert autobuild_brief_html_to_text.pl to only read autobuild's
+          brief output
+
+Thu Jun 09 22:05:11 UTC 2022  Adam Mitz  <mitza@objectcomputing.com>
+        commit 6dd9e91f40ccdd3a449c5eb0573c44462bc8fe1e
+
+          Merge pull request #3554 from mitza-oci/guidelines
+
+          Updated development guidelines
+
+Thu Jun 09 22:05:01 UTC 2022  Adam Mitz  <mitza@objectcomputing.com>
+        commit dc0d8b4124e0f49d675394f5ea99d6973b96c950
+
+          Merge pull request #3552 from
+          iguessthislldo/igtd/dynamictypes-run-test-pl
+
+          Fix Issues with DynamicTypes run_test.pl
+
+Thu Jun 09 20:04:31 UTC 2022  Timothy Simpson  <simpsont@objectcomputing.com>
+        commit c02e7d4d889967486122c803c8e49985c8652469
+
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.cpp:
+
+          try to fix static discovery
+
+Mon Jun 06 19:50:03 UTC 2022  Timothy Simpson  <simpsont@objectcomputing.com>
+        commit 7cbc4338bdd9053ee93f504024647c22b31ee136
+
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.cpp:
+
+          check writer before using
+
+Mon Jun 06 17:42:06 UTC 2022  Timothy Simpson  <simpsont@objectcomputing.com>
+        commit ff17fa91f431b5eb0bc86472229ffc8f3a9bc14e
+
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.h:
+
+          Trial Removing addr_guids from BundlingCacheKey for Performance
+
+Thu Jun 09 19:34:13 UTC 2022  Son Dinh  <dinhs@objectcomputing.com>
+        commit 48f523b4b8a2b698251b286ab53b18c1a2465dd3
+
+        * .github/workflows/build_and_test.yml:
+        * tools/scripts/autobuild_brief_html_to_text.pl:
+
+          Use updated autobuild
+
+Thu Jun 09 19:26:30 UTC 2022  Adam Mitz  <mitza@objectcomputing.com>
+        commit 2c4fa151daacf381d897ce580eba988ab55f0578
+
+        * docs/internal/dev_guidelines.rst:
+
+          Apply suggestions from code review
+
+          Co-authored-by: Fred Hornsey <fred@hornsey.us>
+
+Thu Jun 09 18:09:32 UTC 2022  Adam Mitz  <mitza@objectcomputing.com>
+        commit 4b2185804b4b923810e4be83dc1e31c05712dc26
+
+        * docs/internal/dev_guidelines.rst:
+
+          Updated development guidelines
+
+          - mostly based on what we learned in #3544
+          - and a  few other clarifications
+
+Thu Jun 09 00:51:44 UTC 2022  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit 0cf10991d828f2e3e1068ef049b7787d7f6650c3
+
+        * tests/DCPS/DynamicTypes/run_test.pl:
+
+          Fix Issues with DynamicTypes run_test.pl
+
+          - When one subtest fails, it appears the logs for all the
+          subtests are
+          dumped. This is fixed by using a separate TestFramework for each
+          subtest.
+          - Using `!=` to compare string instead of `ne` caused 8 out of
+          the 20
+          subtests to be skipped.
+
+          These changes also appear to have the side effect of fixing an
+          issue the
+          test has on the scoreboard, but I'm still investigating that.
+
+Wed Jun 08 21:46:54 UTC 2022  Adam Mitz  <mitza@objectcomputing.com>
+        commit ffd3cf278646888ac50b65edc2d064a047ffe704
+
+          Merge pull request #3547 from
+          iguessthislldo/igtd/release-script-ssh
+
+          Release Script now uses SFTP instead of FTP
+
+Wed Jun 08 21:46:45 UTC 2022  Adam Mitz  <mitza@objectcomputing.com>
+        commit 123b2d01ce6c0ea54cbc18d0ce64992267ee156d
+
+          Merge pull request #3546 from
+          simpsont-oci/wait_for_ack_race_sub_loop
+
+          Cleanup Test Wait Logic for WaitForAckRace and
+          EntityLifecycleStressTest Tests
+
+Wed Jun 08 15:44:52 UTC 2022  Timothy Simpson  <simpsont@objectcomputing.com>
+        commit 7992f549266b4e23090e48480c10e16d7a407bc6
+
+        * tests/DCPS/EntityLifecycleStress/subscriber.cpp:
+        * tests/DCPS/WaitForAckRace/subscriber.cpp:
+
+          avoid std::this_thread::sleep_* functions, fix wait_for_data
+          logic
+
+Tue Jun 07 23:20:50 UTC 2022  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit 5e2db6831f68d4aea1f3d223ce378c3cc91e5c59
+
+        * tools/scripts/mock_download_server.py:
+
+          Tweak mock_download_server.py Message
+
+Tue Jun 07 22:11:44 UTC 2022  Adam Mitz  <mitza@objectcomputing.com>
+        commit 1c676c61e5255047e4d5f38bc23cf4132c2bb65a
+
+          Merge pull request #3545 from jrw972/opendds-557
+
+          StaticDiscovery shutdown looks like startup
+
+Tue Jun 07 22:10:49 UTC 2022  Adam Mitz  <mitza@objectcomputing.com>
+        commit 818a0367e668e4ae19148868e0dfd9b5f959f229
+
+          Merge pull request #3529 from jardiamj/LogGuid-issue3036-fix
+
+          Substituted GuidConverter with calls to LogGuid as per issue
+          #3036
+
+Tue Jun 07 22:10:27 UTC 2022  Adam Mitz  <mitza@objectcomputing.com>
+        commit 89fe5742b0b1c53f6332eabc22263fc5b6a514ab
+
+          Merge pull request #3527 from sonndinh/task_543_get_ip
+
+          Update logic for choosing address and hostname in NetworkResource
+
+Tue Jun 07 21:31:50 UTC 2022  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit d52c5b45ee56347685924f09d0ad7fab90f4dda8
+
+        * tools/scripts/gitrelease.pl:
+        * tools/scripts/mock_download_server.py:
+
+          Release Script now uses SFTP instead of FTP
+
+          This requires https://metacpan.org/pod/Net::SFTP::Foreign and
+          that the
+          ssh server can be connected to just by using `ssh USER@HOST`.
+          This
+          should avoid various difficulties and possible security issues
+          with FTP.
+
+          Also:
+          - Added a `--skip-github` option to skip any step that has to do
+          with
+          GitHub, whether this is the remote git interactions or using the
+          GitHub API. This replaces the `--ignore-github-token` option
+          which did
+          some of this, but could cause some weird issues.
+          - Added `mock_download_server.py` which, along with a SSH server
+          on the
+          local system, can be used to mock the SFTP upload operations.
+          These
+          were harder to mock before because both a HTTP server and a FTP
+          server
+          had to be set up. Now just a SSH server has to be setup and the
+          script
+          provides the HTTP server. It also can generate a fake existing
+          directory structure for the release script to interact with.
+
+Tue Jun 07 18:28:53 UTC 2022  Timothy Simpson  <simpsont@objectcomputing.com>
+        commit a7ffbaebef12ac2be4a7f871464c0c1f5412e9ea
+
+        * tests/DCPS/WaitForAckRace/subscriber.cpp:
+
+          WaitForAckRace DataReaderListener Should Loop Over Available
+          Samples
+
+Tue Jun 07 01:34:51 UTC 2022  Son Dinh  <dinhs@objectcomputing.com>
+        commit be7531df9420e47584b71209f51ad2b816b90b3d
+
+        * dds/DCPS/DomainParticipantImpl.cpp:
+        * docs/internal/dev_guidelines.rst:
+
+          Update logs in delete_topic_i
+
+Mon Jun 06 23:11:18 UTC 2022  Adam Mitz  <mitza@objectcomputing.com>
+        commit 5dcaa52059560c100b66677779aa6d238d2cc9b3
+
+          Merge pull request #3544 from simpsont-oci/avoid_packing_rcobject
+
+          Avoid pragma pack of RcObject
+
+Mon Jun 06 23:11:05 UTC 2022  Adam Mitz  <mitza@objectcomputing.com>
+        commit 3ef0e619c5122d4c7944c802acb68e3228a8e8e6
+
+          Merge pull request #3541 from
+          simpsont-oci/run_multiple_timing_checks
+
+          Run TimingChecker Multiple Times For Stress Tests
+
+Mon Jun 06 21:48:48 UTC 2022  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 71155b477037c103281d039f5b12abb561d592ed
+
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.h:
+        * tests/DCPS/StaticDiscovery/DataReaderListenerImpl.cpp:
+        * tests/DCPS/StaticDiscovery/run_test.pl:
+
+          StaticDiscovery shutdown looks like startup
+
+          Problem
+          -------
+
+          Due to lazy loading in the transport framework, StaticDiscovery
+          "simulates" heartbeats and acknacks to drive discovery. That is,
+          StaticDiscovery declares local writer/remote reader and local
+          reader/remote writer pairs to the RtpsUdpDataLink. The datalink
+          sends
+          heartbeats and acknacks for local writers and readers. When
+          activity
+          from the remote is detected (which may be simulated), the
+          association
+          is added and the local writer/reader is created.
+
+          When a writer or reader is deleted, the data link resumes this
+          behavior, i.e., it sends heartbeats for writers that don't exist
+          and
+          acknacks for readers that don't exist. These messages can causes
+          the
+          association to be added again.  For tests that rely on the
+          publication/subscription match status, this presents a problem
+          since
+          they will need to wait an additional cycle (10 times the
+          heartbeat
+          period) to shutdown.
+
+          Solution
+          --------
+
+          Do not send acknacks for readers that don't exist.
+
+Mon Jun 06 19:50:18 UTC 2022  Adam Mitz  <mitza@objectcomputing.com>
+        commit 6c6dfa1b56fa83ab9e7142df76733f493745ae02
+
+          Merge pull request #3540 from jrw972/stop-preassociation-acknacks
+
+          Associations not removed when participant expires
+
+Mon Jun 06 19:43:12 UTC 2022  Timothy Simpson  <simpsont@objectcomputing.com>
+        commit 56b9e4537b073a379a4524934583b8282c10c3bf
+
+        * dds/DCPS/transport/rtps_udp/BundlingCacheKey.h:
+        * dds/DCPS/transport/rtps_udp/LocatorCacheKey.h:
+
+          Avoid pragma pack of RcObject
+
+Mon Jun 06 16:41:40 UTC 2022  Timothy Simpson  <simpsont@objectcomputing.com>
+        commit 74549ef55585daa9aefdb8ad72516e68f1f2938f
+
+        * tests/stress-tests/dds/DCPS/TimingChecker.cpp:
+
+          Run TimingChecker Multiple Times For Stress Tests
+
+Mon Jun 06 15:19:01 UTC 2022  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 354b5f618a6efdc22030f199a3e6f93b963947b7
+
+        * dds/DCPS/RTPS/Sedp.cpp:
+        * dds/DCPS/transport/framework/TransportClient.cpp:
+
+          Associations not removed when participant expires
+
+          Problem
+          -------
+
+          Suppose that a local participant is using the RTPS transport and
+          that
+          a remote participant's lease duration is less than the passive
+          connect
+          duration. Suppose that discovery proceeds to the point where a
+          reader
+          on the local is sending preassociation acknacks to a remote
+          writer
+          when the writer terminates.
+
+          The local reader will continue to send preassociation acknacks
+          because
+          the call to remove the remote writer never comes.
+
+          Solution
+          --------
+
+          Add a call to `stop_accepting_or_connecting` when a pending
+          association is removed.
+
+Sat Jun 04 04:28:23 UTC 2022  Timothy Simpson  <simpsont@objectcomputing.com>
+        commit 1e70b18e4759437a62b009592ef5feeb1affdfea
+
+          Merge pull request #3538 from
+          simpsont-oci/fix_address_hashing_and_cache_locking_issues
+
+          Fix Address Hashing and Cache Locking Issues For RTPS
+
+Sat Jun 04 04:28:08 UTC 2022  Timothy Simpson  <simpsont@objectcomputing.com>
+        commit 6398ed67a708c5bd2563f181d47136e433cd7dff
+
+          Merge pull request #3535 from
+          simpsont-oci/stress_tests_skip_slow_machines
+
+          Change Strictness of Stress Test Requirements Based on Machine
+          Performance
+
+Fri Jun 03 18:32:51 UTC 2022  Timothy Simpson  <simpsont@objectcomputing.com>
+        commit 927d38dedc409bbbee206831647fa665c13ab7af
+
+        * dds/DCPS/AddressCache.h:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.h:
+
+          Fix Address Hashing and Cache Locking Issues For RTPS
+
+Fri Jun 03 17:45:41 UTC 2022  Son Dinh  <dinhs@objectcomputing.com>
+        commit d9e4dbd0c9fdf69bb0d29bf119ef44400bf3a502
+
+        * dds/DCPS/NetworkResource.cpp:
+        * dds/DCPS/NetworkResource.h:
+
+          task_543_get_ip
+
+Fri Jun 03 15:38:58 UTC 2022  Timothy Simpson  <simpsont@objectcomputing.com>
+        commit b56597adbc435cd394ec29f166ecf9cac3946adc
+
+        * tests/stress-tests/dds/DCPS/MultiTask.cpp:
+        * tests/stress-tests/dds/DCPS/SporadicTask.cpp:
+
+          Apply suggestions from code review
+
+          Co-authored-by: Adam Mitz <mitza@objectcomputing.com>
+
+Fri Jun 03 05:56:30 UTC 2022  Son Dinh  <dinhs@objectcomputing.com>
+        commit 43edbca787679a89fc6927782819dd1fa4d273d3
+
+        * .github/workflows/build_and_test.yml:
+        * dds/DCPS/NetworkResource.cpp:
+
+          Cleanup
+
+Thu Jun 02 18:17:28 UTC 2022  Son Dinh  <dinhs@objectcomputing.com>
+        commit c80ea3955ba3f0705d0561a2af0e5f68e1fc5263
+
+        * .github/workflows/build_and_test.yml:
+
+          Add more w22 tests
+
+Thu Jun 02 17:51:43 UTC 2022  Son Dinh  <dinhs@objectcomputing.com>
+        commit 852765717f42be92f3f147489b81f95500a7b338
+
+        * dds/DCPS/NetworkResource.cpp:
+
+          Don't need to set port when picking an IP
+
+Thu Jun 02 16:39:04 UTC 2022  Timothy Simpson  <simpsont@objectcomputing.com>
+        commit 302a0242351923bc28e99744357c1659f488cbe2
+
+        * tests/stress-tests/dds/DCPS/TimingChecker.cpp:
+
+          fix whitespace
+
+Thu Jun 02 16:25:17 UTC 2022  Timothy Simpson  <simpsont@objectcomputing.com>
+        commit e03f01ada55b3f356f6e2d66202c301a71c9abfa
+
+        * tests/stress-tests/dds/DCPS/MultiTask.cpp:
+        * tests/stress-tests/dds/DCPS/SporadicTask.cpp:
+        * tests/stress-tests/dds/DCPS/StressTests.mpc:
+        * tests/stress-tests/dds/DCPS/TimingChecker.cpp:
+        * tests/stress-tests/dds/DCPS/TimingChecker.h:
+
+          switch check to timing scheduled timer deltas
+
+Thu Jun 02 13:08:45 UTC 2022  Adam Mitz  <mitza@objectcomputing.com>
+        commit 1d17335bf3a71d976ffcfd7e9fcdda86dee3895b
+
+          Merge pull request #3534 from simpsont-oci/v8_long_double
+
+          V8 Generation LongDouble Fixes And Minor Formatting Cleanup
+
+Thu Jun 02 04:44:05 UTC 2022  Son Dinh  <dinhs@objectcomputing.com>
+        commit d807dfaeb7ff8e68e13c32ea85d53a266ef9196f
+
+        * dds/DCPS/NetworkResource.cpp:
+
+          Rerun workflow
+
+Thu Jun 02 03:46:44 UTC 2022  Son Dinh  <dinhs@objectcomputing.com>
+        commit 095edf5ae07739aea91b2d3ff7f7d9d6077ae64c
+
+        * dds/DCPS/NetworkResource.cpp:
+
+          Set correct port number
+
+Wed Jun 01 21:30:52 UTC 2022  Timothy Simpson  <simpsont@objectcomputing.com>
+        commit b8e77387a8459ed97ab602990d99dfdeb9b65246
+
+        * tests/stress-tests/dds/DCPS/MultiTask.cpp:
+        * tests/stress-tests/dds/DCPS/SporadicTask.cpp:
+
+          Skip Stress Test Execution On Machines With Timing Issues
+
+Wed Jun 01 19:20:20 UTC 2022  Timothy Simpson  <simpsont@objectcomputing.com>
+        commit fd0285f5c57d1eb6dcd30b3149c82c835d375be0
+
+        * MPC/config/dcps_v8.mpb:
+        * dds/idl/v8_generator.cpp:
+
+          V8 Generation LongDouble Fixes And Minor Formatting Cleanup
+
+Wed Jun 01 16:54:52 UTC 2022  Son Dinh  <dinhs@objectcomputing.com>
+        commit bf88c8fe2ba3c021824f46be305e8726100b5d4d
+
+        * dds/DCPS/NetworkResource.cpp:
+
+          Log both IP and port
+
+Wed Jun 01 06:09:23 UTC 2022  Son Dinh  <dinhs@objectcomputing.com>
+        commit 9ee67abca83369308cd8860e4b267fa7e216007a
+
+        * dds/DCPS/NetworkResource.cpp:
+
+          More logs
+
+Wed Jun 01 01:27:03 UTC 2022  Timothy Simpson  <simpsont@objectcomputing.com>
+        commit 4c8c1a55b5cc4aaa6fbfddff6d562c4bd043f431
+
+          Merge pull request #3531 from mitza-oci/recorder-locking
+
+          RecorderImpl: updated locking for writers_
+
+Wed Jun 01 01:26:50 UTC 2022  Timothy Simpson  <simpsont@objectcomputing.com>
+        commit 3a93f64829d9ae60e508050dab2fe2a27162ba86
+
+          Merge pull request #3530 from mitza-oci/master
+
+          OpenDDS_Rtps_Udp: use msvc_bigobj
+
+Tue May 31 21:09:29 UTC 2022  Adam Mitz  <mitza@objectcomputing.com>
+        commit ef8a019f84d41d54d9ffa77e0b115b17c4cd01a3
+
+        * dds/DCPS/RecorderImpl.cpp:
+
+          RecorderImpl: updated locking for writers_
+
+          based on the way DataReaderImpl does it
+
+Tue May 31 17:37:12 UTC 2022  Son Dinh  <dinhs@objectcomputing.com>
+        commit f84c97b8b4b976d1f9fcf954076c1763dc313fb4
+
+        * dds/DCPS/NetworkResource.cpp:
+
+          Fix compile error
+
+Tue May 31 17:17:07 UTC 2022  Son Dinh  <dinhs@objectcomputing.com>
+        commit 7dcda82140f6a4859b582828650e27729b062f1e
+
+        * .github/workflows/build_and_test.yml:
+
+          Enable all w22 tests
+
+Tue May 31 16:40:24 UTC 2022  Son Dinh  <dinhs@objectcomputing.com>
+        commit e7d2da574adaf1f622958eb4a1845d6aed88e50f
+
+        * dds/DCPS/NetworkResource.cpp:
+
+          Fix compile errors
+
+Tue May 31 16:28:16 UTC 2022  Son Dinh  <dinhs@objectcomputing.com>
+        commit 183fdf96bfc2b40a34bbf42dc9b10ed7871c5205
+
+        * dds/DCPS/NetworkResource.cpp:
+
+          Add logs
+
+Tue May 31 16:16:11 UTC 2022  Adam Mitz  <mitza@objectcomputing.com>
+        commit 8e1c143b9d9f8590555f06c97cec84b9e07e67d0
+
+        * dds/DCPS/transport/rtps_udp/OpenDDS_Rtps_Udp.mpc:
+
+          OpenDDS_Rtps_Udp: use msvc_bigobj
+
+Tue May 31 14:31:27 UTC 2022  Adam Mitz  <mitza@objectcomputing.com>
+        commit 74969d160dec91e52a582f392fa25255f5e15734
+
+          Merge pull request #3528 from jrw972/required-acknack-count
+
+          Required acknack flag not reset
+
+Mon May 30 02:21:08 UTC 2022  jardiamj  <1088732+jardiamj@users.noreply.github.com>
+        commit 2f37cb80b4f62978e6a3a307ca27acdcc8c48629
+
+        * dds/DCPS/transport/rtps_udp/RtpsUdpReceiveStrategy.cpp:
+
+          Fixed error related to replacement of GuidConverter
+
+Sun May 29 01:37:53 UTC 2022  jardiamj  <1088732+jardiamj@users.noreply.github.com>
+        commit 75422bf18741c0cb9babb973655c1b9cc0322c0f
+
+        * tools/monitor/MonitorDataStorage.cpp:
+        * tools/monitor/MonitorTask.cpp:
+
+          Fixed scope issue with LogGuid
+
+Sun May 29 00:03:30 UTC 2022  jatruong  <jatruong@uw.edu>
+        commit 0df8d46ffa1a7a6095ceb09ef153be8047d0c91e
+
+        * dds/DCPS/RTPS/Sedp.cpp:
+        * dds/DCPS/RTPS/Spdp.cpp:
+        * tests/transport/rtps_directed_write/subscriber.cpp:
+
+          Changed GuidConverter to LogGuid for logging purposes.
+
+Wed May 25 05:35:56 UTC 2022  jatruong  <jatruong@uw.edu>
+        commit 57ed181508290fad05c41e1a6e394ee477b54dc4
+
+        * dds/DCPS/InfoRepoDiscovery/DataReaderRemoteImpl.cpp:
+        * dds/DCPS/InfoRepoDiscovery/DataWriterRemoteImpl.cpp:
+        * dds/DCPS/transport/framework/DataLink.cpp:
+        * dds/DCPS/transport/framework/DataLink.inl:
+        * dds/DCPS/transport/framework/DataLinkSet.inl:
+        * dds/DCPS/transport/framework/ReceiveListenerSet.cpp:
+        * dds/DCPS/transport/framework/ReceiveListenerSetMap.cpp:
+        * dds/DCPS/transport/framework/TransportClient.cpp:
+        * dds/DCPS/transport/framework/TransportReassembly.cpp:
+        * dds/DCPS/transport/framework/TransportSendBuffer.cpp:
+        * dds/DCPS/transport/multicast/ReliableSession.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpReceiveStrategy.cpp:
+        * dds/DCPS/transport/tcp/TcpDataLink.cpp:
+        * dds/DCPS/transport/tcp/TcpTransport.cpp:
+        * dds/InfoRepo/DCPS_IR_Domain.cpp:
+        * performance-tests/DCPS/Priority/Subscriber.cpp:
+        * tests/DCPS/RtpsDiscovery/RtpsDiscoveryTest.cpp:
+        * tests/transport/best_effort_reader/AppConfig.cpp:
+        * tests/transport/best_effort_reader/SimpleDataReader.cpp:
+        * tests/transport/best_effort_reader/SocketWriter.cpp:
+        * tests/transport/rtps_directed_write/subscriber.cpp:
+        * tools/dissector/giop_base.cpp:
+        * tools/dissector/packet-opendds.cpp:
+        * tools/monitor/MonitorDataStorage.cpp:
+        * tools/monitor/MonitorDataStorage.inl:
+        * tools/monitor/MonitorTask.cpp:
+
+          Changed GuidConverter to LogGuid in various files.
+
+Fri May 20 06:47:48 UTC 2022  jardiamj  <1088732+jardiamj@users.noreply.github.com>
+        commit ed451a0d81a1eeef96817c515122e53c9761de6a
+
+        * dds/DCPS/BitPubListenerImpl.cpp:
+        * dds/DCPS/CoherentChangeControl.cpp:
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataReaderImpl_T.h:
+        * dds/DCPS/DataSampleHeader.cpp:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/DomainParticipantFactoryImpl.cpp:
+        * dds/DCPS/DomainParticipantImpl.cpp:
+        * dds/DCPS/InstanceState.cpp:
+        * dds/DCPS/OwnershipManager.cpp:
+        * dds/DCPS/PublisherImpl.cpp:
+        * dds/DCPS/RecorderImpl.cpp:
+        * dds/DCPS/ReplayerImpl.cpp:
+        * dds/DCPS/Service_Participant.cpp:
+        * dds/DCPS/StaticDiscovery.cpp:
+        * dds/DCPS/SubscriberImpl.cpp:
+        * dds/DCPS/WriteDataContainer.cpp:
+
+          Replaced GuidConverter with inline calls to LogGuid
+
+Fri May 27 20:53:47 UTC 2022  Son Dinh  <dinhs@objectcomputing.com>
+        commit cbe0cb06fd8c2cfc70409cac5bc4d0c5956bd69e
+
+        * dds/DCPS/NetworkResource.cpp:
+
+          Wrong parameter name
+
+Fri May 27 20:23:09 UTC 2022  Son Dinh  <dinhs@objectcomputing.com>
+        commit 37441040be388d0fee761dd7a76e3e351f8efc78
+
+        * dds/DCPS/NetworkResource.cpp:
+        * dds/DCPS/NetworkResource.h:
+
+          Use helper to check the returned address
+
+Fri May 27 18:41:04 UTC 2022  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 05be2575c253efaaf779bdee123311dfb0f4b488
+
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.h:
+
+          Required acknack flag not reset
+
+          Problem
+          -------
+
+          The required acknack count flag is not reset. The logic for
+          updating
+          the required acknack count can be simplified.
+
+          Solution
+          --------
+
+          * Reset the flag when adding the submessage.
+          * Any submessage with the flag should update the count.
+
+Fri May 27 05:30:46 UTC 2022  Timothy Simpson  <simpsont@objectcomputing.com>
+        commit 70a58212e3c9733895209e40fde55111db3f9b8f
+
+          Merge pull request #3525 from
+          simpsont-oci/address_set_and_send_queue_hashing
+
+          Add or Improve HashMap Behavior Surrounding AddrSet and SendQueue
+          in RTPS
+
+Fri May 27 02:42:30 UTC 2022  Son Dinh  <dinhs@objectcomputing.com>
+        commit 73087d8c36710243abb11dcc9ab9f510133910f9
+
+        * dds/DCPS/NetworkResource.cpp:
+
+          Fix compile errors
+
+Thu May 26 22:34:02 UTC 2022  Son Dinh  <dinhs@objectcomputing.com>
+        commit 24504353908871b0f0ac1f019dee69fbcba6d076
+
+        * .github/workflows/build_and_test.yml:
+        * dds/DCPS/NetworkResource.cpp:
+
+          Enable cmake tests
+
+Thu May 26 22:22:36 UTC 2022  Son Dinh  <dinhs@objectcomputing.com>
+        commit 619dfd2e627b35272f407b70c396d6e0c957dcaf
+
+        * dds/DCPS/NetworkResource.cpp:
+
+          Validate address before return
+
+Thu May 26 20:12:01 UTC 2022  Timothy Simpson  <simpsont@objectcomputing.com>
+        commit 4dd1d14f0aac444c000b35e5b280eb8fde2dec67
+
+          Merge pull request #3526 from jrw972/opendds-557
+
+          StaticDiscovery test logging is inadequate
+
+Thu May 26 20:11:46 UTC 2022  Timothy Simpson  <simpsont@objectcomputing.com>
+        commit be593bf8b41f4eeb1df8e3e803bd195e22efb0ea
+
+          Merge pull request #3524 from
+          simpsont-oci/consistent_virtual_inheritance
+
+          Consistency In Use Of Virtual Inheritance
+
+Thu May 26 19:47:02 UTC 2022  Timothy Simpson  <simpsont@objectcomputing.com>
+        commit 0de693a56f758ed959461d5c57e2db45308ab6fe
+
+        * dds/DCPS/transport/rtps_udp/RoutedGuidPair.h:
+
+          Add note for operator assumptions
+
+Wed May 25 20:51:44 UTC 2022  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 42b12a0410a1d52a4a36e972d29bfc51e6b1a3b3
+
+        * tests/DCPS/StaticDiscovery/DataReaderListenerImpl.cpp:
+        * tests/DCPS/StaticDiscovery/DataReaderListenerImpl.h:
+        * tests/DCPS/StaticDiscovery/StaticDiscoveryTest.cpp:
+        * tests/DCPS/StaticDiscovery/run_test.pl:
+
+          StaticDiscovery test logging is inadequate
+
+          Problem
+          -------
+
+          The StaticDiscovery test is hanging.
+
+          Solution
+          --------
+
+          Make the logging more specific.
+
+Wed May 25 20:08:24 UTC 2022  Timothy Simpson  <simpsont@objectcomputing.com>
+        commit c30ad9d37014a354573178413afcb79eccd6832c
+
+        * dds/DCPS/RequestedDeadlineWatchdog.h:
+
+          Update dds/DCPS/RequestedDeadlineWatchdog.h
+
+          Co-authored-by: Adam Mitz <mitza@objectcomputing.com>
+
+Wed May 25 19:43:16 UTC 2022  Timothy Simpson  <simpsont@objectcomputing.com>
+        commit e2c12f637d0776f5f0238120f5d71d8062d16742
+
+        * dds/DCPS/AddressCache.h:
+
+          fix c++03 build issue
+
+Wed May 25 18:04:08 UTC 2022  Timothy Simpson  <simpsont@objectcomputing.com>
+        commit a9b254aa91c8ba932c8b567497ccbe62d3983488
+
+        * dds/DCPS/transport/rtps_udp/RoutedGuidPair.h:
+
+          fix c++03 build issue
+
+Wed May 25 17:15:28 UTC 2022  Timothy Simpson  <simpsont@objectcomputing.com>
+        commit a5a324f44e7589da538cf044285d92a1b0e7f9fe
+
+        * dds/DCPS/NetworkAddress.cpp:
+        * dds/DCPS/NetworkAddress.h:
+
+          fix c++03 build issue
+
+Wed May 25 15:27:30 UTC 2022  Timothy Simpson  <simpsont@objectcomputing.com>
+        commit ba6257790cd6ecb6832934ac07dc754c8cc38a6c
+
+        * dds/DCPS/AddressCache.h:
+        * dds/DCPS/NetworkAddress.cpp:
+        * dds/DCPS/NetworkAddress.h:
+        * dds/DCPS/transport/rtps_udp/ConstSharedRepoIdSet.h:
+        * dds/DCPS/transport/rtps_udp/RoutedGuidPair.h:
+        * dds/DCPS/transport/rtps_udp/RtpsSendQueue.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsSendQueue.h:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.h:
+
+          Add or Improve HashMap Behavior Surrounding AddrSet and SendQueue
+          in RTPS
+
+Wed May 25 14:18:59 UTC 2022  Timothy Simpson  <simpsont@objectcomputing.com>
+        commit b744ad40e37c41ab7cff396514163d463fa1654b
+
+        * dds/DCPS/Comparator_T.h:
+        * dds/DCPS/DataDurabilityCache.cpp:
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DataReaderImpl_T.h:
+        * dds/DCPS/DataWriterImpl.h:
+        * dds/DCPS/Discovery.h:
+        * dds/DCPS/DomainParticipantImpl.h:
+        * dds/DCPS/FileSystemStorage.h:
+        * dds/DCPS/FilterEvaluator.h:
+        * dds/DCPS/InternalDataReader.h:
+        * dds/DCPS/InternalTopic.h:
+        * dds/DCPS/LocalObject.h:
+        * dds/DCPS/MultiTask.h:
+        * dds/DCPS/PeriodicTask.h:
+        * dds/DCPS/PublicationInstance.h:
+        * dds/DCPS/RTPS/ICE/AgentImpl.cpp:
+        * dds/DCPS/RTPS/ICE/AgentImpl.h:
+        * dds/DCPS/RTPS/Sedp.h:
+        * dds/DCPS/RcEventHandler.h:
+        * dds/DCPS/ReactorInterceptor.h:
+        * dds/DCPS/Recorder.h:
+        * dds/DCPS/Replayer.h:
+        * dds/DCPS/RequestedDeadlineWatchdog.cpp:
+        * dds/DCPS/RequestedDeadlineWatchdog.h:
+        * dds/DCPS/SporadicTask.h:
+        * dds/DCPS/StaticDiscovery.h:
+        * dds/DCPS/SubscriptionInstance.h:
+        * dds/DCPS/WaitSet.h:
+        * dds/DCPS/WriteDataContainer.h:
+        * dds/DCPS/WriterInfo.h:
+        * dds/DCPS/transport/framework/DataLink.h:
+        * dds/DCPS/transport/framework/DataLinkSet.h:
+        * dds/DCPS/transport/framework/ReceiveListenerSet.h:
+        * dds/DCPS/transport/framework/ScheduleOutputHandler.h:
+        * dds/DCPS/transport/framework/ThreadSynchStrategy.h:
+        * dds/DCPS/transport/framework/ThreadSynchWorker.h:
+        * dds/DCPS/transport/framework/TransportConfig.h:
+        * dds/DCPS/transport/framework/TransportImpl.h:
+        * dds/DCPS/transport/framework/TransportInst.h:
+        * dds/DCPS/transport/framework/TransportReassembly.h:
+        * dds/DCPS/transport/framework/TransportSendBuffer.h:
+        * dds/DCPS/transport/framework/TransportType.h:
+        * dds/DCPS/transport/multicast/MulticastReceiveStrategy.h:
+        * dds/DCPS/transport/multicast/MulticastSession.h:
+        * dds/DCPS/transport/multicast/MulticastSessionFactory.h:
+        * dds/DCPS/transport/rtps_udp/BundlingCacheKey.h:
+        * dds/DCPS/transport/rtps_udp/ConstSharedRepoIdSet.h:
+        * dds/DCPS/transport/rtps_udp/LocatorCacheKey.h:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.h:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpReceiveStrategy.h:
+        * dds/DCPS/transport/tcp/TcpConnection.h:
+        * dds/DCPS/transport/tcp/TcpReceiveStrategy.h:
+        * dds/DCPS/transport/udp/UdpReceiveStrategy.h:
+        * dds/FACE/FaceTSS.h:
+        * dds/InfoRepo/DCPSInfoRepoServ.h:
+        * dds/InfoRepo/DCPSInfo_i.h:
+        * dds/InfoRepo/InfoRepoMulticastResponder.h:
+        * performance-tests/bench/node_controller/main.cpp:
+        * tests/stress-tests/dds/DCPS/MultiTask.cpp:
+        * tests/stress-tests/dds/DCPS/SporadicTask.cpp:
+        * tests/unit-tests/dds/DCPS/AddressCache.cpp:
+        * tests/unit-tests/dds/DCPS/SporadicTask.cpp:
+
+          Consistency In Use Of Virtual Inheritance
+
+Wed May 25 13:09:19 UTC 2022  Adam Mitz  <mitza@objectcomputing.com>
+        commit 2eee6128a01097c807ce18b6c5067282652a296e
+
+          Merge pull request #3522 from
+          simpsont-oci/stress_test_timing_updates
+
+          Update Stress Test Timings
+
+Tue May 24 16:20:10 UTC 2022  Timothy Simpson  <simpsont@objectcomputing.com>
+        commit d5ee2fca535b38495b3120ac5b53ce6fc081ebc9
+
+        * tests/stress-tests/dds/DCPS/MultiTask.cpp:
+        * tests/stress-tests/dds/DCPS/SporadicTask.cpp:
+
+          Update Stress Test Timings
+
+Tue May 24 15:15:31 UTC 2022  Adam Mitz  <mitza@objectcomputing.com>
+        commit b7b917eb96411e8405c9d7a183b1f21c17f55e63
+
+          Merge pull request #3521 from jrw972/coverity
+
+          Fix Coverity 1517954
+
+Mon May 23 19:56:57 UTC 2022  Adam Mitz  <mitza@objectcomputing.com>
+        commit 3fb4e0bf2ec0c2f3561c08bb45917d3bfe9797a3
+
+          Merge pull request #3520 from iguessthislldo/igtd/broken-dlclose
+
+          Avoid Tests with Broken dlclose in Glibc
+
+Mon May 23 19:56:44 UTC 2022  Adam Mitz  <mitza@objectcomputing.com>
+        commit b7e7a7246bafff42a3d046bcd8d45129b257357e
+
+          Merge pull request #3519 from jwillemsen/patch-21
+
+          configure: use ACE/TAO 7.0.7/3.0.7 for --doc-group3
+
+Mon May 23 19:56:34 UTC 2022  Adam Mitz  <mitza@objectcomputing.com>
+        commit 8ee3d225b529cc12f10908cf642477de69b4bdbf
+
+          Merge pull request #3518 from simpsont-oci/fix_federation_test
+
+          Fixes For Federation Test
+
+Mon May 23 19:56:21 UTC 2022  Adam Mitz  <mitza@objectcomputing.com>
+        commit aea73447fb5492d60c59481c2654be8a27b6c430
+
+          Merge pull request #3517 from jrw972/opendds-557
+
+          StaticDiscovery test uses publication handles
+
+Mon May 23 19:37:13 UTC 2022  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit f0b5a4952e891b4fd679e63aff16c285b8d51d7c
+
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.cpp:
+
+          Fix Coverity 1517954
+
+Mon May 23 17:57:46 UTC 2022  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit 2cbfae4696a850227894b52af29dff4d21edca4d
+
+        * tests/dcps_tests.lst:
+
+          Avoid Test with Broken dlclose in Glibc [skipci]
+
+          This particilar test has this issue on firefly. Ignore it for
+          now.
+
+          https://sourceware.org/bugzilla/show_bug.cgi?id=11941
+
+Mon May 23 16:05:48 UTC 2022  Adam Mitz  <mitza@objectcomputing.com>
+        commit fe2feb798bf22ef0569cc9df48a753a640dcd33b
+
+        * tests/DCPS/StaticDiscovery/DataReaderListenerImpl.cpp:
+
+          Update tests/DCPS/StaticDiscovery/DataReaderListenerImpl.cpp
+
+Mon May 23 15:03:53 UTC 2022  Timothy Simpson  <simpsont@objectcomputing.com>
+        commit d4fe9b2dfbcdff1eb4c8d32e389d487079b82f26
+
+        * dds/InfoRepo/FederatorManagerImpl_updates.cpp:
+
+          c++03 support
+
+Fri May 20 19:27:27 UTC 2022  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 44d2acdc0bf0ac9bcb5eb3e7fd8ce11bbad69303
+
+        * tests/DCPS/StaticDiscovery/DataReaderListenerImpl.cpp:
+        * tests/DCPS/StaticDiscovery/DataReaderListenerImpl.h:
+        * tests/DCPS/StaticDiscovery/StaticDiscoveryTest.cpp:
+        * tests/DCPS/StaticDiscovery/TestMsg.idl:
+
+          StaticDiscovery test uses publication handles
+
+          Problem
+          -------
+
+          The StaticDiscovery test uses publication handles to track
+          writers.
+          Publication handles can get reused which confuses the tracking.
+
+          Solution
+          --------
+
+          Track by GUID.
+
+Sat May 21 06:55:20 UTC 2022  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit 21fe647f09877588e5d923f65c994fa21555fe27
+
+        * configure:
+
+          Upgrade to ACE/TAO x.0.7
+
+Sat May 21 01:53:03 UTC 2022  Timothy Simpson  <simpsont@objectcomputing.com>
+        commit cd07c5c8662738ca3faee223ba010f26bff393e7
+
+        * dds/InfoRepo/FederatorManagerImpl_updates.cpp:
+        * tests/DCPS/Federation/DataReaderListener.cpp:
+
+          Fixes For Federation Test
+
+Wed May 18 20:11:57 UTC 2022  Adam Mitz  <mitza@objectcomputing.com>
+        commit a86a13f8c364be941c3bc73c74a832c5e66fbaed
+
+          Merge pull request #3515 from jrw972/chatty-connection-record
+
+          ConnectionRecord writes when no change
+
+Wed May 18 20:11:50 UTC 2022  Adam Mitz  <mitza@objectcomputing.com>
+        commit 73d375883cb29d20eed2de5c947da8b5a819d93a
+
+          Merge pull request #3514 from
+          simpsont-oci/fix_thread_status_manager_conversion_warning
+
+          Fix ThreadStatusManager Conversion Warning
+
+Wed May 18 20:11:43 UTC 2022  Adam Mitz  <mitza@objectcomputing.com>
+        commit b7fd77da39cf414b6247c8127db560b0b892596a
+
+          Merge pull request #3513 from
+          simpsont-oci/fix_rtps_send_queue_face_compliance
+
+          Fix RtpsSendQueue FACE Compliance
+
+Wed May 18 20:11:35 UTC 2022  Adam Mitz  <mitza@objectcomputing.com>
+        commit 555b466a8474e3514551e4fcd99fc8e2421b06fb
+
+          Merge pull request #3512 from jrw972/opendds-449
+
+          Fix compiler warning
+
+Wed May 18 16:23:15 UTC 2022  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 6f1ee3e467a25374ae60d1806cbcf08e27587760
+
+        * dds/DCPS/RTPS/ICE/Ice.cpp:
+        * dds/DCPS/RTPS/ICE/Ice.h:
+        * dds/DCPS/RTPS/Spdp.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpTransport.cpp:
+
+          ConnectionRecord writes when no change
+
+          Problem
+          -------
+
+          The ConnectionRecords for tracking the RtpsRelay write when there
+          is
+          no change.  This was added to track changes in latency.
+
+          Solution
+          --------
+
+          Track when a new latency measurement is available.
+
+Wed May 18 14:33:07 UTC 2022  Timothy Simpson  <simpsont@objectcomputing.com>
+        commit 3581f6e5fddddef3376caad9a97d43173b82db23
+
+        * dds/DCPS/ThreadStatusManager.h:
+
+          Fix ThreadStatusManager Conversion Warning
+
+Wed May 18 13:58:23 UTC 2022  Timothy Simpson  <simpsont@objectcomputing.com>
+        commit 7fe4fcb14a2c8b746f1ee0d2f5c1e7454084d5ff
+
+        * dds/DCPS/transport/rtps_udp/RtpsSendQueue.cpp:
+
+          Fix RtpsSendQueue FACE Compliance
+
+Wed May 18 03:28:52 UTC 2022  Timothy Simpson  <simpsont@objectcomputing.com>
+        commit 55fbf718e2d0058bcf076b4eb54cbab38f52e853
+
+          Merge pull request #3502 from simpsont-oci/rtps_send_queue
+
+          Refactor and Enhance RTPS Send Queue
+
+Tue May 17 22:45:03 UTC 2022  Timothy Simpson  <simpsont@objectcomputing.com>
+        commit eb2ff38dad15480cfe2466f51b3906ec2fbf3f18
+
+        * dds/DCPS/transport/rtps_udp/BundlingCacheKey.h:
+
+          fix non-c++11 builds
+
+Tue May 17 21:38:15 UTC 2022  Timothy Simpson  <simpsont@objectcomputing.com>
+        commit 8e9e34c5326ee50a86aee26e526e3f0994a3c72b
+
+        * dds/DCPS/transport/rtps_udp/BundlingCacheKey.h:
+
+          fix hash calculation, add check for early exit
+
+Tue May 17 20:52:54 UTC 2022  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 73dee65d2b906066aa2ff07de528228988eed93e
+
+        * tests/unit-tests/dds/DCPS/PrinterValueWriter.cpp:
+
+          Fix compiler warning
+
+Tue May 17 20:25:51 UTC 2022  Timothy Simpson  <simpsont@objectcomputing.com>
+        commit 8567e69f3cb5dd1743cc1497b2c6140a523f95f5
+
+        * dds/DCPS/AddressCache.h:
+        * dds/DCPS/transport/rtps_udp/BundlingCacheKey.h:
+        * dds/DCPS/transport/rtps_udp/ConstSharedRepoIdSet.h:
+        * dds/DCPS/transport/rtps_udp/MetaSubmessage.h:
+        * dds/DCPS/transport/rtps_udp/RtpsSendQueue.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsSendQueue.h:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.cpp:
+        * dds/DCPS/transport/rtps_udp/ThreadedRtpsSendQueue.cpp:
+        * dds/DCPS/transport/rtps_udp/ThreadedRtpsSendQueue.h:
+        * tests/unit-tests/dds/DCPS/transport/rtps_udp/RtpsSendQueue.cpp:
+        * tests/unit-tests/dds/DCPS/transport/rtps_udp/ThreadedRtpsSendQueue.cpp:
+
+          resolving review comments, rename from_guid_ and to_guids_ to
+          match intended meaning, small caching optimization for
+          calculating addr_guid hash values
+
+Tue May 17 15:55:23 UTC 2022  Timothy Simpson  <simpsont@objectcomputing.com>
+        commit 5462e03966545d530c2efe62051d04c179e0ac40
+
+        * dds/DCPS/transport/rtps_udp/RtpsSendQueue.cpp:
+
+          revert cbegin cend changes
+
+Tue May 17 15:35:12 UTC 2022  Timothy Simpson  <simpsont@objectcomputing.com>
+        commit ec7b12c76f91fbfe4213c30afe4d8ef36c9e9883
+
+        * dds/DCPS/transport/rtps_udp/RtpsSendQueue.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.h:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpTransport.cpp:
+        * dds/DCPS/transport/rtps_udp/ThreadedRtpsSendQueue.cpp:
+
+          use limit iterators to reduce total number of debug checks,
+          various cleanup
+
+Tue May 17 03:39:19 UTC 2022  Timothy Simpson  <simpsont@objectcomputing.com>
+        commit 455fd56627e5dfe71c609553131400c2368a61a3
+
+        * dds/DCPS/transport/rtps_udp/RtpsSendQueue.h:
+        * dds/DCPS/transport/rtps_udp/ThreadedRtpsSendQueue.cpp:
+        * dds/DCPS/transport/rtps_udp/ThreadedRtpsSendQueue.h:
+        * tests/unit-tests/dds/DCPS/transport/rtps_udp/RtpsSendQueue.cpp:
+        * tests/unit-tests/dds/DCPS/transport/rtps_udp/ThreadedRtpsSendQueue.cpp:
+
+          a bit of documentation, finish method coverage in unit tests
+
+Mon May 16 23:54:55 UTC 2022  Timothy Simpson  <simpsont@objectcomputing.com>
+        commit 62bb02f6e9d6bf2e0c3ea24d99959b45928f22b1
+
+        * tests/unit-tests/dds/DCPS/transport/rtps_udp/RtpsSendQueue.cpp:
+        * tests/unit-tests/dds/DCPS/transport/rtps_udp/ThreadedRtpsSendQueue.cpp:
+
+          fix build issue for older compilers
+
+Mon May 16 22:45:44 UTC 2022  Timothy Simpson  <simpsont@objectcomputing.com>
+        commit 83cba4cf3899e0216e63f12444f4990922097ab1
+
+        * dds/DCPS/transport/rtps_udp/MetaSubmessage.h:
+        * dds/DCPS/transport/rtps_udp/RtpsSendQueue.cpp:
+        * dds/DCPS/transport/rtps_udp/ThreadedRtpsSendQueue.h:
+        * tests/unit-tests/dds/DCPS/transport/rtps_udp/ThreadedRtpsSendQueue.cpp:
+
+          adding unit test for ThreadedRtpsSendQueue
+
+Mon May 16 19:47:58 UTC 2022  Timothy Simpson  <simpsont@objectcomputing.com>
+        commit 3cb665f6968e964e26ffe282c6210f5b7ae98780
+
+        * dds/DCPS/transport/rtps_udp/RtpsSendQueue.cpp:
+        * tests/unit-tests/dds/DCPS/transport/rtps_udp/RtpsSendQueue.cpp:
+
+          adding unit test for RtpsSendQueue
+
+Thu May 12 22:37:25 UTC 2022  Timothy Simpson  <simpsont@objectcomputing.com>
+        commit 6557143df4dee7f6c5879a53975aa648b59c5086
+
+        * dds/DCPS/transport/rtps_udp/RtpsSendQueue.cpp:
+
+          ensure undirected heartbeat counts are lowest (by writer) in a
+          bundle
+
+Wed May 11 19:29:10 UTC 2022  Timothy Simpson  <simpsont@objectcomputing.com>
+        commit a96b9224facf67a9a0a6b441130021d05492fa0f
+
+        * dds/DCPS/transport/rtps_udp/ConstSharedRepoIdSet.h:
+
+          fix whitespace
+
+Wed May 11 19:26:39 UTC 2022  Timothy Simpson  <simpsont@objectcomputing.com>
+        commit fd6b0285681448f0dfa72b7dc19520c521f382f3
+
+        * dds/DCPS/transport/rtps_udp/ConstSharedRepoIdSet.h:
+        * dds/DCPS/transport/rtps_udp/RtpsSendQueue.cpp:
+
+          fix build errors
+
+Wed May 11 18:03:38 UTC 2022  Timothy Simpson  <simpsont@objectcomputing.com>
+        commit b01a5d4bce402f0f01d32ea564ff3c903bd4ca5d
+
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.cpp:
+
+          revert const for security builds
+
+Wed May 11 17:04:43 UTC 2022  Timothy Simpson  <simpsont@objectcomputing.com>
+        commit da5b7ef84b713136eb48697dd7b4a7f0792a85e2
+
+        * dds/DCPS/transport/rtps_udp/RtpsSendQueue.cpp:
+        * dds/DCPS/transport/rtps_udp/ThreadedRtpsSendQueue.cpp:
+
+          fix whitespace
+
+Wed May 11 16:34:35 UTC 2022  Timothy Simpson  <simpsont@objectcomputing.com>
+        commit 6f07340fb645ac14cfead7a67f0be6bfa993acea
+
+        * dds/DCPS/AddressCache.h:
+        * dds/DCPS/transport/rtps_udp/BundlingCacheKey.h:
+        * dds/DCPS/transport/rtps_udp/ConstSharedRepoIdSet.h:
+        * dds/DCPS/transport/rtps_udp/MetaSubmessage.h:
+        * dds/DCPS/transport/rtps_udp/RtpsSendQueue.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsSendQueue.h:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.h:
+        * dds/DCPS/transport/rtps_udp/ThreadedRtpsSendQueue.cpp:
+        * dds/DCPS/transport/rtps_udp/ThreadedRtpsSendQueue.h:
+
+          Initial RTPS Send Queue Changes
+
+Mon May 16 18:05:59 UTC 2022  Adam Mitz  <mitza@objectcomputing.com>
+        commit 01da5c6baa70640c9416c864ffa95730a752e753
+
+          Merge pull request #3510 from
+          simpsont-oci/fix_count_map_pair_coverity
+
+          Fix Coverity Warning For CountMapPair Value Initialization
+
+Mon May 16 18:05:45 UTC 2022  Adam Mitz  <mitza@objectcomputing.com>
+        commit ab923d2abc336c569bf8c52415d84a9a7ef066af
+
+          Merge pull request #3509 from
+          simpsont-oci/fix_update_required_acknack_signedness
+
+          Fix Compile Warning Around update_required_acknack_count
+          Signedness
+
+Mon May 16 18:05:34 UTC 2022  Adam Mitz  <mitza@objectcomputing.com>
+        commit 493cf2dbb6b56a6ef539dcc3e4e0a3077670f72b
+
+          Merge pull request #3508 from jrw972/rtps-improvements
+
+          RTPS transport sends too many heartbeats
+
+Mon May 16 14:08:01 UTC 2022  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 08a861b4f08328afbf0a774e273945ce1f7d9fae
+
+        * dds/DCPS/RTPS/Spdp.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpTransport.cpp:
+
+          Initialize connection record latency
+
+Mon May 16 14:02:27 UTC 2022  Timothy Simpson  <simpsont@objectcomputing.com>
+        commit 650ac4f83b36170abce0851d5a2a85323c899187
+
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.h:
+
+          Fix Coverity Warning For CountMapPair Value Initialization
+
+Mon May 16 14:00:46 UTC 2022  Timothy Simpson  <simpsont@objectcomputing.com>
+        commit ab30085d46b27d2d9448e88a0f1d35f45afe46c0
+
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.h:
+
+          Fix Compile Warning Around update_required_acknack_count
+          Signedness
+
+Fri May 13 21:21:25 UTC 2022  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 25d39c866b5c85aab187e83234ea1b7fb172d622
+
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.cpp:
+
+          RTPS transport sends too many heartbeats
+
+          Problem
+          -------
+
+          Logs in high latency scenarios with responsive mode and heartbeat
+          reflection show a number of acks being dropped due to heartbeat
+          reflection.  Theses nacks are only generated when a heartbeat is
+          received.
+
+          Solution
+          --------
+
+          * Send a heartbeat when adding a reader or on end historic
+          samples (not both).
+          * Always send a preassociation acknack when adding a writer.
+          * Don't send a heartbeat in process_acknack. The nack response is
+          sufficient.
+          * Don't remove a reader that expects data if fragments have been
+          requested.
+          * Clean up acknowledged fragments.
+          * Send a heartbeat when data is requested.
+
+Fri May 13 19:38:48 UTC 2022  Timothy Simpson  <simpsont@objectcomputing.com>
+        commit e39a91f68c4e31783ce6d331ebb2df71164c5f33
+
+          Merge pull request #3507 from
+          simpsont-oci/heartbeat_count_mapping
+
+          Updates for Heartbeat Count Mapping
+
+Fri May 13 15:46:20 UTC 2022  Timothy Simpson  <simpsont@objectcomputing.com>
+        commit 7a57283e74c05e0604c27b18781e6dc5161155d0
+
+        * dds/DCPS/RTPS/RtpsCore.idl:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.h:
+
+          Update expected acknack counts when they get remapped by bundling
+
+Fri May 13 13:34:01 UTC 2022  Timothy Simpson  <simpsont@objectcomputing.com>
+        commit debc76bdda61b0cbf1f3ed614212309189954783
+
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.h:
+
+          better support for multiple undirected per writer across messages
+
+Fri May 13 01:23:20 UTC 2022  Timothy Simpson  <simpsont@objectcomputing.com>
+        commit 4e5c8f1a18e9bde6db64e296b500893061228a73
+
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.h:
+
+          give lowest counts to undirected (by writer)
+
+Thu May 12 22:42:26 UTC 2022  Timothy Simpson  <simpsont@objectcomputing.com>
+        commit e2643194800e5c5c3e70f8d490acdc16abd97d4b
+
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.h:
+
+          Updates for Heartbeat Count Mapping
+
+Thu May 12 18:12:45 UTC 2022  Adam Mitz  <mitza@objectcomputing.com>
+        commit cebb3be30cf4fd24d3099ce992314a473e15ea89
+
+          Merge pull request #3506 from jrw972/rtps-relay-latency
+
+          Latency is not reported in ConnectionRecord
+
+Thu May 12 14:17:09 UTC 2022  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 4cf33eaf796dbacd001d0fbaeeb600b492d8f175
+
+        * dds/DCPS/RTPS/ICE/Ice.cpp:
+        * dds/DCPS/RTPS/ICE/Ice.h:
+        * dds/DCPS/RTPS/Spdp.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpTransport.cpp:
+        * dds/OpenddsDcpsExt.idl:
+
+          Latency is not reported in ConnectionRecord
+
+          Problem
+          -------
+
+          Measuring the latency of a connection can provide valuable
+          information
+          for debugging and tuning.
+
+          Solution
+          --------
+
+          Measure the latency and report it via ConnectionRecord.
+
+Thu May 12 03:51:24 UTC 2022  Adam Mitz  <mitza@objectcomputing.com>
+        commit 25f1fd085d673e90df899f431554ab4f5c7574f8
+
+          Merge pull request #3504 from simpsont-oci/log_nonfinal_messages
+
+          Add Debug Logging For Non-Final RTPS Messages
+
+Thu May 12 03:51:16 UTC 2022  Adam Mitz  <mitza@objectcomputing.com>
+        commit 63a61d69ed4b91b98b9c9f61185616dc4ce65aef
+
+          Merge pull request #3503 from
+          simpsont-oci/add_iiop_acceptor_hostname_tsan_suppression
+
+          Add TAO_IIOP_Acceptor::hostname() suppression for TSAN
+
+Thu May 12 03:51:07 UTC 2022  Adam Mitz  <mitza@objectcomputing.com>
+        commit 96c15438179ace3d4b24929168e2a047fcdb8604
+
+          Merge pull request #3501 from sonndinh/get_hostname
+
+          Update extracting hostname to handle more general cases
+
+Thu May 12 03:50:58 UTC 2022  Adam Mitz  <mitza@objectcomputing.com>
+        commit bbc79642d522112f538178faf4d67113fd9d630c
+
+          Merge pull request #3500 from jrw972/reflect-no-duplicate-samples
+
+          Duplicate samples are received in reflective mode
+
+Thu May 12 03:50:49 UTC 2022  Adam Mitz  <mitza@objectcomputing.com>
+        commit b49a5e1c64e1f43db9853b7803831b2c3a94bb18
+
+          Merge pull request #3498 from
+          simpsont-oci/avoid_non_id_timer_cancel
+
+          Avoid non-id version of canceling reactor timers where possible
+
+Wed May 11 22:29:06 UTC 2022  Son Dinh  <dinhs@objectcomputing.com>
+        commit a725e192cf67bc4a675ea93d559ecdf5a53d4975
+
+        * tests/unit-tests/dds/DCPS/NetworkResource.cpp:
+
+          Update unit test
+
+Wed May 11 21:39:56 UTC 2022  Timothy Simpson  <simpsont@objectcomputing.com>
+        commit a7b212bc6e3dff504442ce5fa9eebf63be52f2fe
+
+        * dds/DCPS/transport/framework/TransportDebug.cpp:
+        * dds/DCPS/transport/framework/TransportDebug.h:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.cpp:
+        * tests/DCPS/Messenger/publisher.cpp:
+
+          Add Debug Logging For Non-Final RTPS Messages
+
+Wed May 11 20:15:55 UTC 2022  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit dc96bead3de8a466d3ca48ef873199ca9c57738b
+
+        * dds/DCPS/transport/rtps_udp/RtpsUdpInst.cpp:
+
+          SedpAdvertisedLocalAddress is not used
+
+          Problem
+          -------
+
+          SedpAdvertisedLocalAddress is not used.
+
+          Solution
+          --------
+
+          Fix a bug in the transport inst where the advertised address was
+          never
+          added to a locator.
+
+Wed May 11 19:17:08 UTC 2022  Timothy Simpson  <simpsont@objectcomputing.com>
+        commit d7c3923f41330089d2456bb34f3762175c6b6efd
+
+        * etc/tsan-suppr.txt:
+
+          Add TAO_IIOP_Acceptor::hostname() suppression for TSAN
+
+Wed May 11 15:31:20 UTC 2022  Son Dinh  <dinhs@objectcomputing.com>
+        commit ee1b8be3b7d362cf7b1e0ba30d73f381a2198707
+
+        * dds/DCPS/NetworkResource.cpp:
+
+          Update extracting hostname
+
+Wed May 11 14:30:48 UTC 2022  Timothy Simpson  <simpsont@objectcomputing.com>
+        commit 1dff290eeacc62414c802a406689979acf084a5a
+
+        * dds/DCPS/SporadicTask.h:
+        * dds/DCPS/transport/framework/TransportClient.h:
+        * tests/unit-tests/dds/DCPS/SporadicTask.cpp:
+
+          unit test updates, responding to review comments
+
+Wed May 11 13:23:39 UTC 2022  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 532afef6bf3239cb207e0869021f9a8743754270
+
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.cpp:
+
+          Duplicate samples are received in reflective mode
+
+          Problem
+          -------
+
+          In reflective mode, the RTPS UDP transport attempts to ignore
+          nacks
+          that are pipelined due to latency.  This is done by sampling the
+          heartbeat count to determine a minimum for the count member of an
+          acknack. In the current code, this limit was updated every time a
+          new
+          enough acknack was received.
+
+          In this scheme, there is the opportunity to send a heartbeat
+          immediately after an acknack is received but before the nack
+          response. This means the acknack that reflects this heartbeat
+          would
+          be processed. Most likely, it would be a duplicate of the acknack
+          that caused the nack response.
+
+          Solution
+          --------
+
+          Adjust the limit in the nack response. This will cause the writer
+          to
+          ignore acknacks until the reader has had an opportunity to
+          receive any
+          requested data.
+
+Tue May 10 20:39:43 UTC 2022  Adam Mitz  <mitza@objectcomputing.com>
+        commit 144758705dd7554c01ed12d566e5c0175a13efc0
+
+          Merge pull request #3499 from
+          simpsont-oci/minor_cleanup_in_transport_client
+
+          Minor Cleanup In TransportClient::initiate_connect()
+
+Tue May 10 20:39:34 UTC 2022  Adam Mitz  <mitza@objectcomputing.com>
+        commit 29feda01dcfb39cb76ee88db0bfcb262b1c09b24
+
+          Merge pull request #3497 from sonndinh/NetworkResource_unittest
+
+          Update NetworkResource's unit test
+
+Tue May 10 20:39:23 UTC 2022  Adam Mitz  <mitza@objectcomputing.com>
+        commit bf19921ee45a8efc25787926834bfaf88a17ab4b
+
+          Merge pull request #3496 from jrw972/opendds-449
+
+          OpenDDS lacks a way to print IDL defined types (in a default
+          build)
+
+Tue May 10 14:40:10 UTC 2022  Timothy Simpson  <simpsont@objectcomputing.com>
+        commit e67c236eff473bec1b4cd9af302eada01ae50cf0
+
+        * dds/DCPS/transport/framework/TransportClient.cpp:
+
+          Minor Cleanup In TransportClient::initiate_connect()
+
+Tue May 10 14:14:00 UTC 2022  Timothy Simpson  <simpsont@objectcomputing.com>
+        commit a1b28de690d0b4bae0fa5cbcc902098579d8a4a7
+
+        * dds/DCPS/SporadicTask.h:
+        * dds/DCPS/transport/framework/TransportClient.h:
+
+          Avoid non-id version of canceling timers where possible for
+          performance
+
+Mon May 09 20:19:32 UTC 2022  Son Dinh  <dinhs@objectcomputing.com>
+        commit 26806032df6d92ea60de7261dc27d638f536bffa
+
+        * tests/transport/network_resource/NetworkResource.cpp:
+
+          Update unit test
+
+Wed May 04 18:43:20 UTC 2022  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 7eafd36d9199e67c09b0306626ad426636ce7843
+
+        * dds/DCPS/Printer.cpp:
+        * dds/DCPS/Printer.h:
+        * dds/DCPS/PrinterValueWriter.h:
+        * dds/DCPS/Service_Participant.cpp:
+        * dds/DCPS/Service_Participant.h:
+        * dds/DCPS/ValueHelper.h:
+        * dds/idl/be_global.cpp:
+        * dds/idl/be_global.h:
+        * dds/idl/dds_generator.h:
+        * dds/idl/langmap_generator.cpp:
+        * dds/idl/marshal_generator.cpp:
+        * dds/idl/metaclass_generator.cpp:
+        * dds/idl/v8_generator.cpp:
+        * dds/idl/value_reader_generator.cpp:
+        * dds/idl/value_writer_generator.cpp:
+        * tests/unit-tests/dds/DCPS/InternalDataReader.cpp:
+        * tests/unit-tests/dds/DCPS/InternalDataWriter.cpp:
+        * tests/unit-tests/dds/DCPS/InternalTopic.cpp:
+        * tests/unit-tests/dds/DCPS/PrinterValueWriter.cpp:
+
+          OpenDDS lacks a way to print IDL defined types (in a default
+          build)
+
+          Problem
+          -------
+
+          Occassionally, it is useful to print out an IDL defined type.
+          Currently, OpenDDS only supports this when built with rapidjson.
+
+          Solution
+          --------
+
+          Define PrinterValueWriter.
+
+Mon May 09 14:49:38 UTC 2022  Adam Mitz  <mitza@objectcomputing.com>
+        commit 45ba7bbabadb3d7176bf4c654665e134917cf964
+
+          Merge pull request #3493 from
+          iguessthislldo/igtd/inspect-use-xtypes
+
+          Fix `UseXTypes` Deadlock and Added `inspect` Example
+
+Fri May 06 20:38:55 UTC 2022  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit 5b076156cfa11681afe9d1f3fd71ae1c4d7717ea
+
+        * tools/inspect/README.rst:
+
+          Fix Typo in inspect README
+
+          Co-authored-by: Son Dinh <technology789@gmail.com>
+
+Fri May 06 18:21:59 UTC 2022  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit addb40f450ed10176bfce652f3cbe7dbb8f7f4da
+
+        * dds/DCPS/RTPS/RtpsDiscovery.cpp:
+        * dds/DCPS/RTPS/RtpsDiscovery.h:
+
+          Respond to PR Review, Fix C++03
+
+          https://github.com/objectcomputing/OpenDDS/pull/3493/files?short_path=ef050cb#r866944053
+
+Fri May 06 16:47:10 UTC 2022  Adam Mitz  <mitza@objectcomputing.com>
+        commit 4f99decd8f7931c775ab368c35dbab1c8b4f26a0
+
+          Merge pull request #3488 from simpsont-oci/thrasher_tsan
+
+          Add Thrasher Test to TSAN Coverage
+
+Fri May 06 16:47:00 UTC 2022  Adam Mitz  <mitza@objectcomputing.com>
+        commit 38a705eeecb26d7ef39c0de1e4fa0c7c7c23f1af
+
+          Merge pull request #3471 from sonndinh/task_526
+
+          Print stack trace in PerlDDS
+
+Fri May 06 02:52:15 UTC 2022  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit 5a57f0ba7a59b94cd8b364c575a38bcaa7d5d3e0
+
+        * tools/inspect/Inspect.cpp:
+        * tools/inspect/README:
+        * tools/inspect/README.rst:
+
+          Add Example to ``inspect`` README, Minor Imp.s
+
+Fri May 06 01:00:52 UTC 2022  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit 6567c0b45435a242db8b124c318cb102058ce71c
+
+        * dds/DCPS/RTPS/RtpsDiscovery.cpp:
+        * dds/DCPS/RTPS/RtpsDiscovery.h:
+
+          Fix UseXTypes Deadlock and Make Errors Consistent
+
+          - `UseXTypes` would deadlock if trying to use the string values
+          `no`,
+          `minimal`, or `complete` because the underlying string setter was
+          trying to use the enum setter. Changed to avoid calling the other
+          setter.
+          - Reaction to invalid `UseXTypes` values would depend on if the
+          value
+          was a string or integer. Changed it to also get feedback from
+          string
+          setter.
+
+Wed May 04 20:28:51 UTC 2022  Son Dinh  <dinhs@objectcomputing.com>
+        commit 5b65f0f79665bc73e2c3c7a2676f3716b5d7079c
+
+        * tools/scripts/autobuild_brief_html_to_text.pl:
+
+          Latest commit doesn't show up in PR
+
+Wed May 04 20:06:36 UTC 2022  Son Dinh  <dinhs@objectcomputing.com>
+        commit 5db06d81412e5b47f6e985bf8a4b6f1b12005694
+
+        * tools/scripts/autobuild_brief_html_to_text.pl:
+
+          Allow print multiple stack traces from a single test
+
+Wed May 04 18:35:09 UTC 2022  Timothy Simpson  <simpsont@objectcomputing.com>
+        commit 41fe276e4941919d9df32cd2f684448eb24d415c
+
+        * etc/tsan-suppr.txt:
+
+          add suppression for TAO_Transport
+
+Wed May 04 15:59:41 UTC 2022  Son Dinh  <dinhs@objectcomputing.com>
+        commit 4cd35cb2a9024472942237a27819d0ca83df35e6
+
+        * .github/workflows/build_and_test.yml:
+
+          From review
+
+Wed May 04 13:22:39 UTC 2022  Adam Mitz  <mitza@objectcomputing.com>
+        commit 469e395dc64e785009ce22d2b7760dbb39e7dec6
+
+          Merge pull request #3487 from
+          simpsont-oci/always_deliver_held_historic_samples
+
+          Always Deliver Held Historic Samples
+
+Wed May 04 02:47:03 UTC 2022  Son Dinh  <dinhs@objectcomputing.com>
+        commit 1c5ca7f7c746c28b7f4c8b1ff1416a27db02b126
+
+        * .github/workflows/build_and_test.yml:
+
+          Update workflow for macOS
+
+Wed May 04 02:39:28 UTC 2022  Son Dinh  <dinhs@objectcomputing.com>
+        commit 11c8666096a02b37a27a7f62a62db1a5605882e6
+
+          Merge branch 'master' of
+          https://github.com/objectcomputing/OpenDDS into task_526
+
+Wed May 04 02:38:40 UTC 2022  Son Dinh  <dinhs@objectcomputing.com>
+        commit db083a254ec36c9fb30906da0603f430686616d4
+
+        * tools/scripts/autobuild_brief_html_to_text.pl:
+
+          Make output log an optional argument
+
+Wed May 04 02:31:26 UTC 2022  Son Dinh  <dinhs@objectcomputing.com>
+        commit d1ce49f29aab5456e5b8765b2e4ae7742eb65c67
+
+        * .github/workflows/build_and_test.yml:
+
+          Install lldb for asan & tsan build. Update check results step
+
+Tue May 03 22:56:28 UTC 2022  Son Dinh  <dinhs@objectcomputing.com>
+        commit 3f8d3d910e5573cba0d1fb183e934b11117b6aec
+
+        * tools/scripts/autobuild_brief_html_to_text.pl:
+        * tools/scripts/autobuild_print_stack_traces.pl:
+
+          Cleanup
+
+Tue May 03 22:45:47 UTC 2022  Son Dinh  <dinhs@objectcomputing.com>
+        commit f81eb2fc5bea63ad6a8880b0afc5ca4e44e388e8
+
+        * tools/scripts/autobuild_brief_html_to_text.pl:
+
+          Working script with debugging logs
+
+Tue May 03 18:19:07 UTC 2022  Timothy Simpson  <simpsont@objectcomputing.com>
+        commit 9c1d23191a9a7f95114f7b9fbe0a13c397ee02c8
+
+        * etc/tsan-suppr.txt:
+        * tests/tsan_tests.lst:
+
+          Add Thrasher Test to TSAN Coverage
+
+Tue May 03 17:50:32 UTC 2022  Son Dinh  <dinhs@objectcomputing.com>
+        commit 63a3f108248fcca8735d9785b820a5e7366eff60
+
+        * tools/scripts/autobuild_print_stack_traces.pl:
+
+          Add script to print stack trace
+
+Tue May 03 16:33:16 UTC 2022  Adam Mitz  <mitza@objectcomputing.com>
+        commit e285095e5eab63f565d67973cf3275c152b09f34
+
+          Merge pull request #3486 from mitza-oci/warnings
+
+          WaitForAckRace: fixed signed/unsigned mismatch warnings
+
+Tue May 03 16:33:08 UTC 2022  Adam Mitz  <mitza@objectcomputing.com>
+        commit 0ed8efee012a1faca3ce4d9c72a658e33b0ad397
+
+          Merge pull request #3485 from
+          simpsont-oci/ownership_datareaderlistener_tsan_fix
+
+          TSAN Fix and Minor Cleanup for Ownership Test DataReaderListener
+
+Tue May 03 02:33:36 UTC 2022  Timothy Simpson  <simpsont@objectcomputing.com>
+        commit 6270186a9bbc758d227719a037dc71066c900381
+
+        * dds/DCPS/DataReaderImpl.cpp:
+
+          Update dds/DCPS/DataReaderImpl.cpp
+
+Mon May 02 22:16:46 UTC 2022  Timothy Simpson  <simpsont@objectcomputing.com>
+        commit 611eec68eb47d7f1c2f3888b62c58aa49eb87751
+
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/WriterInfo.cpp:
+        * dds/DCPS/WriterInfo.h:
+
+          Always Deliver Held Historic Samples
+
+Mon May 02 21:58:33 UTC 2022  Adam Mitz  <mitza@objectcomputing.com>
+        commit 4bf73a00dc6a9afb8be19978a049da31e3fc87ad
+
+        * tests/DCPS/WaitForAckRace/publisher.cpp:
+
+          WaitForAckRace: fixed signed/unsigned mismatch warnings
+
+Mon May 02 21:55:16 UTC 2022  Adam Mitz  <mitza@objectcomputing.com>
+        commit 5f7e82c460607af7ddd580d67d9cf1786d8af1fb
+
+          Merge pull request #3484 from mitza-oci/config-transports
+
+          ConfigTransports test: fixed undefined behavior
+
+Mon May 02 21:55:08 UTC 2022  Adam Mitz  <mitza@objectcomputing.com>
+        commit a583508ba926b7428b8b43992acb9083a462802a
+
+          Merge pull request #3483 from
+          simpsont-oci/write_data_container_coverity_issue
+
+          Fix WriteDataContainer Coverity Issue And Minor Cleanup
+
+Mon May 02 21:54:55 UTC 2022  Adam Mitz  <mitza@objectcomputing.com>
+        commit 92244582b114f65c689b013a2012b129a9ae782f
+
+          Merge pull request #3475 from tmayoff/qos_helper_logs
+
+          Add logging for invalid Qos
+
+Mon May 02 21:47:13 UTC 2022  Timothy Simpson  <simpsont@objectcomputing.com>
+        commit b0438c25e4e90421624bdff4b88cc16d01898a50
+
+        * tests/DCPS/Ownership/DataReaderListener.cpp:
+
+          move num_reads_ increment (and mutex lock) inside check for valid
+          data to avoid tsan lock order issue
+
+Mon May 02 17:29:39 UTC 2022  Timothy Simpson  <simpsont@objectcomputing.com>
+        commit afb9d00d764fc2aea7a879697a28820dc4efe5d4
+
+        * tests/DCPS/Ownership/DataReaderListener.cpp:
+        * tests/DCPS/Ownership/DataReaderListener.h:
+
+          TSAN Fix and Minor Cleanup for Ownership Test DataReaderListener
+
+Mon May 02 14:46:29 UTC 2022  Adam Mitz  <mitza@objectcomputing.com>
+        commit e9542bce8442255769f82cba5c9c04be35652c36
+
+        * tests/DCPS/ConfigTransports/DDSTEST.cpp:
+
+          ConfigTransports test: fixed undefined behavior
+
+          accessing TransportClient's internals requires locking
+
+Mon May 02 02:36:57 UTC 2022  Timothy Simpson  <simpsont@objectcomputing.com>
+        commit 32b693fb6ef2c0bdbf898e1b0d31e7491abb2bbb
+
+        * dds/DCPS/WriteDataContainer.cpp:
+
+          Fix WriteDataContainer Coverity Issue And Minor Cleanup
+
+Fri Apr 29 23:33:39 UTC 2022  Tyler Mayoff  <tyler@tylermayoff.com>
+        commit 0731c70d5589fe1d217db4ee90b8e21f3d8d61c8
+
+        * dds/DCPS/Qos_Helper.cpp:
+
+          Added namespace + changed log message to notice
+
+Fri Apr 29 21:03:18 UTC 2022  Adam Mitz  <mitza@objectcomputing.com>
+        commit 14a5b92c35e5e5f854666d9dca62466cc5b89388
+
+          Merge pull request #3481 from
+          ClaytonCalabrese/messenger_test_followup2
+
+          Messenger Test: Java and UDP Fixes
+
+Fri Apr 29 21:03:05 UTC 2022  Adam Mitz  <mitza@objectcomputing.com>
+        commit 1b07bc76e8a83cac1922464665bdc0048cf3d460
+
+          Merge pull request #3472 from
+          simpsont-oci/attempt_fix_inforepo_leak
+
+          Fix Shutdown Leak In DCPSInfoRepo Under Load
+
+Fri Apr 29 15:47:23 UTC 2022  Adam Mitz  <mitza@objectcomputing.com>
+        commit 008aec24122f655ee8b9f6bc3d43d9c27cb11fbe
+
+        * java/tests/messenger/publisher/run_test.pl:
+        * java/tests/messenger/run_test.pl:
+        * java/tests/messenger/subscriber/run_test.pl:
+
+          Fixed Perl syntax
+
+Fri Apr 29 13:44:18 UTC 2022  Timothy Simpson  <simpsont@objectcomputing.com>
+        commit e801bf187f45a3da77166ed8264506f9d6b709b2
+
+        * dds/DCPS/transport/tcp/TcpConnection.cpp:
+
+          Update dds/DCPS/transport/tcp/TcpConnection.cpp
+
+Fri Apr 29 00:51:28 UTC 2022  Son Dinh  <dinhs@objectcomputing.com>
+        commit 5ceaa180961a6b97a844fa9b91b4f941998a39be
+
+        * .github/workflows/build_and_test.yml:
+
+          Install gdb/lldb on ubuntu runners
+
+Fri Apr 29 00:38:36 UTC 2022  Tyler Mayoff  <tyler@tylermayoff.com>
+        commit fddc6cf28a870a9b3127a60006edf57e01f5272b
+
+        * dds/DCPS/Qos_Helper.cpp:
+
+          added some loglevel if statements
+
+Fri Apr 29 00:36:14 UTC 2022  Tyler Mayoff  <tyler@tylermayoff.com>
+        commit eb0a715fe833190649b951f01cc1424c4d973995
+
+        * dds/DCPS/Qos_Helper.cpp:
+        * dds/DCPS/Qos_Helper.inl:
+
+          Moved functions to .cpp file
+
+Thu Apr 28 23:08:10 UTC 2022  Son Dinh  <dinhs@objectcomputing.com>
+        commit e78af5c44198e9ee080ff47f8ee70bb7e702caed
+
+        * bin/PerlDDS/Run_Test.pm:
+
+          Move changes to PerlACE
+
+Thu Apr 28 21:46:04 UTC 2022  Timothy Simpson  <simpsont@objectcomputing.com>
+        commit 63766ab98c4ab1762d7e496c4dac5506a5823e4d
+
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/WriteDataContainer.cpp:
+
+          stronger measures to prevent unwanted enqueueing
+
+Thu Apr 28 21:36:47 UTC 2022  Son Dinh  <dinhs@objectcomputing.com>
+        commit 5660b2f45801bce268e66c19660e244f1a6e0d2b
+
+        * bin/PerlDDS/Run_Test.pm:
+
+          Simplify wait_kill
+
+Thu Apr 28 21:03:29 UTC 2022  Clayton Calabrese  <calabresec@objectcomputing.com>
+        commit 8540a665d7ad4b38b6c68f4dddfd8e69409fed38
+
+        * java/tests/messenger/publisher/run_test.pl:
+        * java/tests/messenger/run_test.pl:
+        * java/tests/messenger/subscriber/run_test.pl:
+
+          Move Java Messenger DCPSPendingTimeout out of conditional so
+          scoreboard uses it.
+
+Thu Apr 28 21:02:51 UTC 2022  Clayton Calabrese  <calabresec@objectcomputing.com>
+        commit 2dc7cc2fea15fb1928bf0906782dd09368dbdbcd
+
+        * tests/DCPS/Messenger/publisher.cpp:
+
+          spread out unreliable messenger test messages.
+
+Wed Apr 27 22:29:34 UTC 2022  Timothy Simpson  <simpsont@objectcomputing.com>
+        commit 779d751180b4fe585ce953dc0e71cf4046c621be
+
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/WriteDataContainer.cpp:
+        * dds/DCPS/transport/framework/DataLink.inl:
+        * dds/DCPS/transport/tcp/TcpDataLink.cpp:
+        * dds/InfoRepo/DCPS_IR_Domain.cpp:
+
+          try to avoid wait_for_acknowledgments in DCPS_IR_Domain
+
+Wed Apr 27 13:23:16 UTC 2022  Adam Mitz  <mitza@objectcomputing.com>
+        commit eba3661e705994915f7ca8486d2182509029d9b4
+
+          Merge pull request #3480 from
+          iguessthislldo/igtd/serializer-indent
+
+          Fix an indent in `Serializer.cpp`
+
+Wed Apr 27 13:23:08 UTC 2022  Adam Mitz  <mitza@objectcomputing.com>
+        commit f3681c1dd0c42e0981a3f3413fceac7191554fa3
+
+          Merge pull request #3478 from
+          simpsont-oci/bench_repo_support_updates
+
+          Minor Bench Updates for DCPSInfoRepo and RtpsRelay Scenarios
+
+Wed Apr 27 13:22:57 UTC 2022  Adam Mitz  <mitza@objectcomputing.com>
+        commit d7086af8045d37b79baa88b373f884bcd4fb1df6
+
+          Merge pull request #3477 from mitza-oci/gh-actions
+
+          GitHub Actions: updates to shapes demo; build dds-rtps test
+
+Tue Apr 26 22:10:06 UTC 2022  Tyler Mayoff  <tyler@tylermayoff.com>
+        commit 8879d34264f958c409bb7fb9a8cf09f0eb351482
+
+        * OpenDDS:
+
+          Don't know how I managed this
+
+Tue Apr 26 22:03:46 UTC 2022  Tyler Mayoff  <tyler@tylermayoff.com>
+        commit a2cb8b51997e5917a65f91b564fb4dbe6413fc98
+
+        * OpenDDS:
+        * dds/DCPS/Qos_Helper.inl:
+
+          Changed to a notice not an error
+
+Tue Apr 26 19:32:42 UTC 2022  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit 599bea8f372d92ce9c00c8daeb804a5a58a9d241
+
+        * dds/DCPS/Serializer.cpp:
+
+          Fix a Indent in `Serializer.cpp`
+
+Tue Apr 26 16:24:39 UTC 2022  Adam Mitz  <mitza@objectcomputing.com>
+        commit d4e1e2ba30c2e4eea368ea8b1169c8c836f20591
+
+          Merge pull request #3476 from
+          ClaytonCalabrese/messenger_test_java_ordering
+
+          Java Messenger Test Fixes
+
+Tue Apr 26 16:24:29 UTC 2022  Adam Mitz  <mitza@objectcomputing.com>
+        commit 7cf54596676f2a7391f69ea881765f2043825bbf
+
+          Merge pull request #3468 from jrw972/opendds-534
+
+          Use openssl3 on one Windows build
+
+Tue Apr 26 16:24:18 UTC 2022  Adam Mitz  <mitza@objectcomputing.com>
+        commit 9c6c633ca18bb869c4edefd84956bdc8b4fe8f0e
+
+          Merge pull request #3457 from ClaytonCalabrese/reenable_macos_ci
+
+          GitHub Actions: Re-enable MacOS testing
+
+Tue Apr 26 15:41:55 UTC 2022  Timothy Simpson  <simpsont@objectcomputing.com>
+        commit e1035a0b945a7a59cc976a996bc0b10e6e659995
+
+        * performance-tests/bench/dashboard_summarizer/main.cpp:
+        * performance-tests/bench/example/config/scenario/ci_disco_repo.json:
+        * performance-tests/bench/example/config/worker/ci_disco_repo.json:
+        * performance-tests/bench/run_test.pl:
+
+          Minor Bench Updates for DCPSInfoRepo and RtpsRelay Scenarios
+
+Tue Apr 26 15:37:34 UTC 2022  Son Dinh  <dinhs@objectcomputing.com>
+        commit 5db89a439f6bd7bee6c506eec8cb682ed214fb76
+
+        * bin/PerlDDS/Run_Test.pm:
+
+          From review & refactor
+
+Mon Apr 25 22:21:55 UTC 2022  Clayton Calabrese  <calabresec@objectcomputing.com>
+        commit 7f2f3314d1c00969a0c20bf323767f21e08e91f9
+
+        * java/tests/messenger/publisher/run_test.pl:
+        * java/tests/messenger/run_test.pl:
+        * java/tests/messenger/subscriber/TestSubscriber.java:
+        * java/tests/messenger/subscriber/run_test.pl:
+
+          fix ordering of guard cond in java messenger. Set
+          DCPSPendingTimeout in java messenger.
+
+Mon Apr 25 22:14:39 UTC 2022  Adam Mitz  <mitza@objectcomputing.com>
+        commit 8e99d82a46888853e430bc7f41dd8d2079137a5c
+
+        * .github/workflows/dds-rtps.yml:
+
+          GitHub Actions: new workflow for dds-rtps
+
+          The dds-rtps repository in the omg-dds GitHub org has a
+          command-line
+          interface version of the shapes demo.  This workflow builds that
+          application using OpenDDS on Ubuntu 18.04.
+
+Mon Apr 25 22:09:31 UTC 2022  Tyler Mayoff  <tyler@tylermayoff.com>
+        commit d84eaf0677a63e334cd34c5357bd6de4efc3abbd
+
+        * dds/DCPS/Qos_Helper.inl:
+
+          Removed ACE_TEXT and replace  ACE_ERROR_RETURN with ACE_ERROR
+
+Mon Apr 25 21:47:32 UTC 2022  Adam Mitz  <mitza@objectcomputing.com>
+        commit 76fdfa17385903bf5fd8a9cc67f44735e912fec4
+
+        * .github/workflows/ishapes.yml:
+
+          GitHub Actions for shapes demo: use newer vcpkg
+
+Mon Apr 25 21:20:41 UTC 2022  Timothy Simpson  <simpsont@objectcomputing.com>
+        commit a50ba7a77aaaf23fe89bbc14bde344338ed8cdfa
+
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/transport/framework/DataLink.inl:
+        * dds/DCPS/transport/tcp/TcpConnection.cpp:
+        * dds/DCPS/transport/tcp/TcpDataLink.cpp:
+
+          transport fixes
+
+Mon Apr 25 21:09:16 UTC 2022  Tyler Mayoff  <tyler@tylermayoff.com>
+        commit bc068c2ad407a1f84a841bc9ede08f6c0b532da5
+
+        * dds/DCPS/Qos_Helper.inl:
+
+          Removed whitespaces
+
+Wed Apr 20 20:08:19 UTC 2022  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 44f915dc0aef4f9bbae9a4d1e05051f77c889c95
+
+        * .github/workflows/build_and_test.yml:
+
+          Use openssl3 on one Windows build
+
+Mon Apr 25 17:30:35 UTC 2022  Clayton Calabrese  <calabresec@objectcomputing.com>
+        commit 050a6007229d0e5259927d3db4bf94f26263c897
+
+        * .github/workflows/build_and_test.yml:
+
+          add back accidentally removed --java
+
+Mon Apr 25 17:29:21 UTC 2022  Clayton Calabrese  <calabresec@objectcomputing.com>
+        commit 0ea3165b71ccb06ac8c1f46b64786b7b4bded71b
+
+        * .github/workflows/build_and_test.yml:
+
+          consolidate cmake and modeling testing for macos ci.
+
+Sun Apr 24 17:37:12 UTC 2022  Clayton Calabrese  <calabresec@objectcomputing.com>
+        commit 35b20530b91de3202edbcb70bf93cbc7b5369c2f
+
+        * .github/workflows/build_and_test.yml:
+
+          comment out other ci m11 test run because now it is also failing
+
+Sat Apr 23 18:58:50 UTC 2022  Clayton Calabrese  <calabresec@objectcomputing.com>
+        commit 576f75e0e57237f6b6ff78c8481c8ee9879af1ef
+
+        * .github/workflows/build_and_test.yml:
+
+          run modeling tests in macos ci
+
+Sat Apr 23 03:42:12 UTC 2022  Son Dinh  <dinhs@objectcomputing.com>
+        commit e1f049ab65bd93e8a721243e04dee31b5746faf9
+
+        * bin/PerlDDS/Run_Test.pm:
+
+          Fixed error
+
+Sat Apr 23 00:39:01 UTC 2022  Clayton Calabrese  <calabresec@objectcomputing.com>
+        commit 3939ff51580aca46bdc9fc7f354d981bfb73118d
+
+        * .github/workflows/build_and_test.yml:
+
+          remove TAO Hello test from CI as it was never being run.
+
+Fri Apr 22 21:25:13 UTC 2022  Tyler Mayoff  <tyler@tylermayoff.com>
+        commit 0441e29ddbee63fec646dc1b80209a30f92e6e79
+
+        * dds/DCPS/Qos_Helper.inl:
+
+          Added Qos invalid logging
+          Topic, Publisher, Subscriber, DataReader and
+          DomainParticipantFactory
+
+Fri Apr 22 19:38:57 UTC 2022  Adam Mitz  <mitza@objectcomputing.com>
+        commit 5f0bc9544e27df4715bd48cc403c357de9f90759
+
+          Merge pull request #3474 from
+          ClaytonCalabrese/gha_update_makeinstall
+
+          GitHub Actions: Fix Make Install and Improve Coverage
+
+Fri Apr 22 19:38:43 UTC 2022  Adam Mitz  <mitza@objectcomputing.com>
+        commit 5c0feb800206f1c19d825905bf18c2775236cb8c
+
+          Merge pull request #3467 from
+          simpsont-oci/fix_another_ownership_segv_issue
+
+          Fix Another Potential Ownership SEGV Issue
+
+Fri Apr 22 19:20:33 UTC 2022  Clayton Calabrese  <calabresec@objectcomputing.com>
+        commit 6413329367c5426dac7877ae008b5f3d838e02b6
+
+        * .github/workflows/build_and_test.yml:
+
+          remove disable ntp step from macos ci.
+
+Fri Apr 22 18:30:09 UTC 2022  Clayton Calabrese  <calabresec@objectcomputing.com>
+        commit cfabcae84e24974d62008effba92f342628b0e14
+
+        * tests/DCPS/TopicExpression/TopicExpression.cpp:
+
+          fix for m11 warning about concatonation of strings
+
+Fri Apr 22 17:35:47 UTC 2022  Son Dinh  <dinhs@objectcomputing.com>
+        commit 3c828314503e3429d1e117a1ddc509cc16e44528
+
+        * bin/PerlDDS/Run_Test.pm:
+
+          Choose core file and print stack trace
+
+Fri Apr 22 15:58:41 UTC 2022  Clayton Calabrese  <calabresec@objectcomputing.com>
+        commit 45f7d12d402b336073f67baecf9e20d80a4e6874
+
+        * .github/workflows/build_and_test.yml:
+
+          remove unnessecary .
+
+Fri Apr 22 15:56:16 UTC 2022  Clayton Calabrese  <calabresec@objectcomputing.com>
+        commit 6e2c0e6db31ece1e2f6530e00879afb786bbac6d
+
+        * .github/workflows/build_and_test.yml:
+        * tests/cmake/Messenger/Messenger_2/CMakeLists.txt:
+        * tests/cmake/Messenger/Messenger_Space/CMakeLists.txt:
+        * tests/cmake/generated_global/cpp/CMakeLists.txt:
+
+          update cmake to handle makeinstall. Update workflow for make
+          install to match scoreboard coverage.
+
+Fri Apr 22 15:51:21 UTC 2022  Clayton Calabrese  <calabresec@objectcomputing.com>
+        commit c35e36d1ca576ab9db30135c758d48ba88280c5c
+
+        * .github/workflows/build_and_test.yml:
+        * tests/cmake/Messenger/Messenger_2/CMakeLists.txt:
+        * tests/cmake/Messenger/Messenger_Space/CMakeLists.txt:
+        * tests/cmake/generated_global/cpp/CMakeLists.txt:
+
+          Revert "update cmake tests to properly make install. Update CI
+          for make install to match scoreboard coverage."
+
+          This reverts commit 3c7783c966913f36874149921c96e016ac2c9bb2.
+
+Fri Apr 22 15:49:54 UTC 2022  Clayton Calabrese  <calabresec@objectcomputing.com>
+        commit 3c7783c966913f36874149921c96e016ac2c9bb2
+
+        * .github/workflows/build_and_test.yml:
+        * tests/cmake/Messenger/Messenger_2/CMakeLists.txt:
+        * tests/cmake/Messenger/Messenger_Space/CMakeLists.txt:
+        * tests/cmake/generated_global/cpp/CMakeLists.txt:
+
+          update cmake tests to properly make install. Update CI for make
+          install to match scoreboard coverage.
+
+Thu Apr 21 20:02:01 UTC 2022  Timothy Simpson  <simpsont@objectcomputing.com>
+        commit 364f16f0110cbe4414bf16268c5e86b5ce745a7f
+
+        * dds/InfoRepo/DCPS_IR_Domain.cpp:
+        * dds/InfoRepo/DCPS_IR_Domain.h:
+
+          Fix Shutdown Leak In DCPSInfoRepo Under Load
+
+Thu Apr 21 17:31:59 UTC 2022  Son Dinh  <dinhs@objectcomputing.com>
+        commit 9d7a7ec0e2437f4b330d30cef4d23571f4a94ff2
+
+        * bin/PerlDDS/Run_Test.pm:
+
+          Get core file
+
+Thu Apr 21 17:03:18 UTC 2022  Clayton Calabrese  <calabresec@objectcomputing.com>
+        commit f4f61be42858ad6140597ca433e0c372e5d72384
+
+        * .github/workflows/build_and_test.yml:
+
+          comment out m11_sec test and cmake in ci due to failures.
+
+Thu Apr 21 14:27:03 UTC 2022  Timothy Simpson  <simpsont@objectcomputing.com>
+        commit 3e5150e0d28c93943e5d0fcf72ac999c0bf03b99
+
+        * dds/DCPS/DataReaderImpl.cpp:
+
+          Update dds/DCPS/DataReaderImpl.cpp
+
+Thu Apr 21 13:44:07 UTC 2022  Adam Mitz  <mitza@objectcomputing.com>
+        commit 428eadc9b301f19c1f56a66edee37bbdcccc56c0
+
+          Merge pull request #3440 from simpsont-oci/more_thrasher_cleanup
+
+          More Thrasher Cleanup, CI Coverage Expansion
+
+Thu Apr 21 01:56:30 UTC 2022  Clayton Calabrese  <calabresec@objectcomputing.com>
+        commit 7d3fac0ebb34d15e70c434085de5501719be6063
+
+        * .github/workflows/build_and_test.yml:
+        * docs/internal/github_actions.rst:
+        * tests/static_ci_tests.lst  tests/core_ci_tests.lst:
+
+          rename static_ci_tests.lst to better fit its role.
+
+Wed Apr 20 20:54:05 UTC 2022  Timothy Simpson  <simpsont@objectcomputing.com>
+        commit 8d38f4b50679765d0ce9c53c7360ce26373647da
+
+        * dds/DCPS/DataReaderImpl.cpp:
+
+          Update dds/DCPS/DataReaderImpl.cpp
+
+Wed Apr 20 20:43:25 UTC 2022  Clayton Calabrese  <calabresec@objectcomputing.com>
+        commit 179f9200930d516a298321cc10b96c43813b9903
+
+        * .github/workflows/build_and_test.yml:
+        * docs/internal/github_actions.rst:
+
+          add cmake testing to MacOS CI. Fix test targeting for MacOS CI.
+          Update CI docs.
+
+Wed Apr 20 16:36:30 UTC 2022  Timothy Simpson  <simpsont@objectcomputing.com>
+        commit b9349d6db171dc3a2e7fec38a25adf86890d9070
+
+        * dds/DCPS/DataReaderImpl.cpp:
+
+          Fix Another Potential Ownership SEGV Issue
+
+Wed Apr 20 15:30:30 UTC 2022  Timothy Simpson  <simpsont@objectcomputing.com>
+        commit 52ef6c3049b52837d5f17b617fa4410bebd6afd7
+
+        * tests/DCPS/Thrasher/DataReaderListenerImpl.cpp:
+        * tests/DCPS/Thrasher/Subscriber.cpp:
+
+          resolve review comments
+
+Wed Apr 20 15:28:01 UTC 2022  Timothy Simpson  <simpsont@objectcomputing.com>
+        commit 4dd0f3946ddce7ae3cb667cacce07449fc046683
+
+        * tests/DCPS/Thrasher/Subscriber.h:
+
+          Update tests/DCPS/Thrasher/Subscriber.h
+
+          Co-authored-by: Adam Mitz <mitza@objectcomputing.com>
+
+Tue Apr 19 22:37:59 UTC 2022  Timothy Simpson  <simpsont@objectcomputing.com>
+        commit 2fa9f3d10c71923eb605dab8349bae656c332695
+
+        * tests/DCPS/Thrasher/DataReaderListenerImpl.cpp:
+
+          fix datareaderimpl::received_all() loop logic
+
+Tue Apr 19 21:44:09 UTC 2022  Adam Mitz  <mitza@objectcomputing.com>
+        commit 30d7a8657e8384f35396b9d5a503571e0ac32b70
+
+          Merge pull request #3466 from
+          simpsont-oci/waitforackrace_coverity_issue
+
+          Fix Coverity Issue In WaitForAckRace Test
+
+Tue Apr 19 21:43:56 UTC 2022  Adam Mitz  <mitza@objectcomputing.com>
+        commit 4edbb23af90d2a7972a5c66d0e7f33f36792f717
+
+          Merge pull request #3465 from simpsont-oci/conditionimpl_tsan_fix
+
+          Fix TSAN Issue In ConditionImpl.cpp
+
+Tue Apr 19 16:37:25 UTC 2022  Timothy Simpson  <simpsont@objectcomputing.com>
+        commit 49d6a78a7a5def4467bead7bf59dff7e0f8895ee
+
+        * dds/DCPS/ConditionImpl.cpp:
+
+          Update dds/DCPS/ConditionImpl.cpp
+
+          Co-authored-by: Adam Mitz <mitza@objectcomputing.com>
+
+Tue Apr 19 16:07:14 UTC 2022  Timothy Simpson  <simpsont@objectcomputing.com>
+        commit 712bb41cdc9161df446c1a68196cb48a422f0641
+
+        * tests/DCPS/Thrasher/DataReaderListenerImpl.cpp:
+        * tests/DCPS/Thrasher/DataReaderListenerImpl.h:
+        * tests/DCPS/Thrasher/ProgressIndicator.cpp:
+        * tests/DCPS/Thrasher/ProgressIndicator.h:
+        * tests/DCPS/Thrasher/Subscriber.cpp:
+        * tests/DCPS/Thrasher/Subscriber.h:
+
+          add thrasher test support for no_ownership_profile builds (no
+          history)
+
+Tue Apr 19 15:06:26 UTC 2022  Timothy Simpson  <simpsont@objectcomputing.com>
+        commit 2bc77ae8736e218075e57adb1e8c2ce4791d465d
+
+        * tests/DCPS/Thrasher/DataReaderListenerImpl.cpp:
+
+          change expectations for no_ownership_profile builds (no history)
+
+Tue Apr 19 13:36:05 UTC 2022  Adam Mitz  <mitza@objectcomputing.com>
+        commit b0aa6a23fdc0dec2e717ecb53fd71fc5d642036e
+
+          Merge pull request #3464 from mitza-oci/master
+
+          gov_gen: fixed warning
+
+Tue Apr 19 13:35:56 UTC 2022  Adam Mitz  <mitza@objectcomputing.com>
+        commit 7b992a10888f97c82129c0c2c7417a88cb5596b4
+
+          Merge pull request #3463 from
+          iguessthislldo/igtd/cmake-escape-semicolon
+
+          Fix One of the Install Test Configure Commands
+
+Tue Apr 19 13:35:46 UTC 2022  Adam Mitz  <mitza@objectcomputing.com>
+        commit 3076da299423be96e1f2e1ac958f25a5a4877d06
+
+          Merge pull request #3424 from
+          ClaytonCalabrese/messenger_test_update
+
+          Modernize Messenger Test
+
+Tue Apr 19 01:29:35 UTC 2022  Timothy Simpson  <simpsont@objectcomputing.com>
+        commit ed206b9ff973c67417bd6afa08842567baf6a26e
+
+        * tests/DCPS/WaitForAckRace/publisher.cpp:
+
+          Fix Coverity Issue In WaitForAckRace Test
+
+Tue Apr 19 01:13:38 UTC 2022  Clayton Calabrese  <calabresec@objectcomputing.com>
+        commit f124252d4524b11b6872b6c1b74a423c43cf430d
+
+        * .github/workflows/build_and_test.yml:
+
+          tick up safety cache key again
+
+Tue Apr 19 01:10:52 UTC 2022  Timothy Simpson  <simpsont@objectcomputing.com>
+        commit e6a73d01136d704216eb705c6249d29e8b99d252
+
+        * dds/DCPS/ConditionImpl.cpp:
+
+          Fix TSAN Issue In ConditionImpl.cpp
+
+Mon Apr 18 21:37:05 UTC 2022  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit fde23ebddd85d8dd2c76c4f16c44d879c46ac3de
+
+        * tests/cmake/install/CMakeLists.txt:
+
+          Fix One of the Install Test Configure Commands
+
+          A warning added in CMake 3.23 warns when there's an unused
+          argument to
+          CMake. This is the case here where this argument is supposed to
+          be a
+          list being passed to a child CMake command. It's getting
+          interpreted as
+          a separate argument instead. The solution is, apparently, to
+          replace it
+          with this generator expression.
+
+Mon Apr 18 20:23:56 UTC 2022  Adam Mitz  <mitza@objectcomputing.com>
+        commit c93e940e310cdb0c1a3db47426808cfde062844b
+
+        * tests/security/attributes/gov_gen.cpp:
+
+          gov_gen: fixed warning
+
+Mon Apr 18 19:37:58 UTC 2022  Clayton Calabrese  <calabresec@objectcomputing.com>
+        commit a949fe2823acdb999c6788bf17bfae1d8b6444a9
+
+        * .github/workflows/build_and_test.yml:
+
+          show_build_config needs VERSION.txt
+
+Mon Apr 18 17:08:48 UTC 2022  Clayton Calabrese  <calabresec@objectcomputing.com>
+        commit 41a407bee91ea1fb0ddfcbf344f12707a59c986b
+
+        * .github/workflows/build_and_test.yml:
+
+          Fix attempt of taring nonexistant file
+
+Mon Apr 18 15:32:26 UTC 2022  Clayton Calabrese  <calabresec@objectcomputing.com>
+        commit 57e698859bb021b8aa804fd5730607c5ce7379c0
+
+        * .github/workflows/build_and_test.yml:
+
+          expand scope of mac testing in github actions
+
+Fri Apr 15 23:07:35 UTC 2022  Adam Mitz  <mitza@objectcomputing.com>
+        commit 9a603f3c29e0ea5fb4898e7c8bea664a49c636a1
+
+          Merge pull request #3459 from jrw972/key-begin-struct-member
+
+          key information not passed to `begin_struct_member`
+
+Fri Apr 15 20:53:39 UTC 2022  Clayton Calabrese  <calabresec@objectcomputing.com>
+        commit 44ee507cea9c33f0fe955fc7bf8d2268d90a037e
+
+        * .github/workflows/build_and_test.yml:
+
+          bring over host setenv on safety. Tick up cache key.
+
+Fri Apr 15 19:51:16 UTC 2022  Clayton Calabrese  <calabresec@objectcomputing.com>
+        commit 04f366dd7b8ca7683ab7a701a7c95d9aaa150ca1
+
+        * .github/workflows/build_and_test.yml:
+
+          align indentation on m11
+
+Fri Apr 15 19:40:12 UTC 2022  Clayton Calabrese  <calabresec@objectcomputing.com>
+        commit 5568e72e55e1f2f1c7dda74cd47f091c8fc9974b
+
+        * .github/workflows/build_and_test.yml:
+
+          rename m11 github actions builds. Fix m11 and m10
+          auto_run_tests.pl path.
+
+Fri Apr 15 18:50:05 UTC 2022  Clayton Calabrese  <calabresec@objectcomputing.com>
+        commit 6b84f9acb7d07bf2436a4aa8cdf3d5bd49fa1213
+
+        * .github/workflows/build_and_test.yml:
+
+          only take ACE_TAO from build/host and build/target in safety
+          profile GHA
+
+Thu Mar 31 13:40:51 UTC 2022  Timothy Simpson  <simpsont@objectcomputing.com>
+        commit 21e7f28bf3e867a96a475701a3401c1fb5cea52f
+
+        * tests/DCPS/Thrasher/Publisher.cpp:
+        * tests/DCPS/Thrasher/Subscriber.cpp:
+        * tests/dcps_tests.lst:
+
+          try to fix ownership profile complaints
+
+Thu Mar 31 02:42:46 UTC 2022  Timothy Simpson  <simpsont@objectcomputing.com>
+        commit 9bc39c50c093f3934a90ce93e6aed87bac2b84d5
+
+        * tests/DCPS/Thrasher/Publisher.cpp:
+        * tests/DCPS/Thrasher/Subscriber.cpp:
+
+          try to fix ownership profile complaints
+
+Thu Mar 31 01:14:20 UTC 2022  Timothy Simpson  <simpsont@objectcomputing.com>
+        commit b2a5b5dc923b37dfdb7247c60ede33f67f4b505a
+
+        * tests/DCPS/Thrasher/Publisher.cpp:
+        * tests/DCPS/Thrasher/Subscriber.cpp:
+        * tests/DCPS/Thrasher/thrasher_rtps.ini:
+        * tests/dcps_tests.lst:
+
+          Initial commit, expanding CI test coverage
+
+Fri Apr 15 13:29:48 UTC 2022  Adam Mitz  <mitza@objectcomputing.com>
+        commit d872c28c4da40c10cefe3f3472e46db2d5d4dd52
+
+          Merge pull request #3458 from simpsont-oci/wait_for_ack_durable
+
+          Test & Fixes For Durable WaitForAck
+
+Fri Apr 15 13:29:34 UTC 2022  Adam Mitz  <mitza@objectcomputing.com>
+        commit 3a53efa43358637a31d941fe5141f4ca6600d260
+
+          Merge pull request #3456 from jrw972/serialized-type-object
+
+          TypeObjects bloat TypeSupportImpl
+
+Thu Apr 14 02:57:19 UTC 2022  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit fb8a1528c72c6df92162d2d566b1ef363eecfd9c
+
+        * dds/DCPS/JsonValueWriter.h:
+        * dds/DCPS/Observer.cpp:
+        * dds/DCPS/RTPS/Logging.cpp:
+        * dds/DCPS/ValueWriter.h:
+        * dds/DCPS/XTypes/MemberDescriptor.h:
+        * dds/idl/value_writer_generator.cpp:
+        * tests/unit-tests/dds/DCPS/JsonValueWriter.cpp:
+
+          key information not passed to `begin_struct_member`
+
+          Problem
+          -------
+
+          ValueWriter implementations may treat members that are keys
+          differently.  As a concrete example, consider a ValueWriter that
+          prepares a SQL INSERT statement for a received sample. Most
+          likely,
+          this will be an UPSERT which often requires a list of keys and a
+          list
+          of non-keys.
+
+          Solution
+          --------
+
+          Change `begin_struct_member` to take an XTypes::MemberDescriptor
+          which
+          contains the member name and a bool for key status. This PR only
+          sets
+          these two members.
+
+Thu Apr 14 22:58:35 UTC 2022  Clayton Calabrese  <calabresec@objectcomputing.com>
+        commit d49e2118ffac5ce916c48aa38f659f27519bc356
+
+        * .github/workflows/build_and_test.yml:
+        * tests/DCPS/Messenger/Args.h:
+        * tests/DCPS/Messenger/DataReaderListener.cpp:
+        * tests/DCPS/Messenger/publisher.cpp:
+        * tests/DCPS/Messenger/stack_subscriber.cpp:
+        * tests/DCPS/Messenger/subscriber.cpp:
+
+          tick up workflow cache for safety. Remove blocking on test
+          comments.
+
+Thu Apr 14 22:40:23 UTC 2022  Timothy Simpson  <simpsont@objectcomputing.com>
+        commit 8110dd109fc61ac29d34ef5be2d43debaafbdc21
+
+        * dds/DCPS/DataSampleElement.h:
+        * dds/DCPS/DataSampleElement.inl:
+        * dds/DCPS/WriteDataContainer.cpp:
+        * tests/DCPS/WaitForAckRace/publisher.cpp:
+
+          resolving more review comments
+
+Thu Apr 14 18:22:40 UTC 2022  Timothy Simpson  <simpsont@objectcomputing.com>
+        commit 84e3f99b88c0d98ffffb9e20b2244e2ed6f9f3f0
+
+        * tests/DCPS/WaitForAck/rtps.ini:
+
+          increase safety profile pool slightly
+
+Thu Apr 14 18:22:23 UTC 2022  Timothy Simpson  <simpsont@objectcomputing.com>
+        commit d3710e429f5119fb799b3bcb4b99c8205491ef97
+
+        * dds/DCPS/WriteDataContainer.cpp:
+        * dds/DCPS/WriteDataContainer.h:
+
+          minor optimization and cleanup
+
+Wed Apr 13 13:31:20 UTC 2022  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 71df25691e38e69c643a43e84a68fe6713f7b976
+
+        * dds/DCPS/XTypes/TypeObject.cpp:
+        * dds/DCPS/XTypes/TypeObject.h:
+        * dds/idl/typeobject_generator.cpp:
+
+          TypeObjects bloat TypeSupportImpl
+
+          Problem
+          -------
+
+          The code to construct TypeObjects can be large and has a
+          non-negligible impact on compiled TypeSupportImpls.
+
+          Solution
+          --------
+
+          Store the TypeObject in serialized form and deserialize as
+          needed.
+
+Thu Apr 14 14:53:32 UTC 2022  Timothy Simpson  <simpsont@objectcomputing.com>
+        commit 58dd009ce387dc13d980d6da173ade1006202522
+
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/WriteDataContainer.cpp:
+        * dds/DCPS/WriteDataContainer.h:
+
+          fixes
+
+Thu Apr 14 00:40:27 UTC 2022  Timothy Simpson  <simpsont@objectcomputing.com>
+        commit 61993de7cc3647ae60eaebcfb9da51e414094a05
+
+        * dds/DCPS/transport/framework/TransportQueueElement.inl:
+
+          resolving older compiler build issue for OPENDDS_ASSERT against
+          ACE_Atomic_Op
+
+Thu Apr 14 00:09:34 UTC 2022  Timothy Simpson  <simpsont@objectcomputing.com>
+        commit 8cb29e84a4a738010eaf5d53629e62caf9a666f7
+
+        * dds/DCPS/WriteDataContainer.cpp:
+        * dds/DCPS/WriteDataContainer.h:
+        * tests/DCPS/WaitForAckRace/publisher.cpp:
+        * tests/DCPS/WaitForAckRace/subscriber.cpp:
+
+          resolving warnings and review comments
+
+Wed Apr 13 23:08:52 UTC 2022  Clayton Calabrese  <calabresec@objectcomputing.com>
+        commit 7b4f69bdcb531d5aff88a5bfdec7142a92e82000
+
+        * .github/workflows/build_and_test.yml:
+
+          fix workflow order bug
+
+Wed Apr 13 23:07:02 UTC 2022  Clayton Calabrese  <calabresec@objectcomputing.com>
+        commit 07c040f6a1448e16204577427bfbde8446ab8e47
+
+        * tests/DCPS/Messenger/DataReaderListener.h:
+
+          remove unnessecary include
+
+Wed Apr 13 22:47:13 UTC 2022  Adam Mitz  <mitza@objectcomputing.com>
+        commit 08fe072a0c2e823d5397f5edb5437299f2dcbbc2
+
+          Merge pull request #3446 from sonndinh/task_525
+
+          Get signal information in PerlDDS
+
+Wed Apr 13 22:47:03 UTC 2022  Adam Mitz  <mitza@objectcomputing.com>
+        commit 33e5411e1551a5577c891b4c141c5095b56a1967
+
+          Merge pull request #3407 from jrw972/opendds-534
+
+          Use openssl 3 for one Linux build
+
+Wed Apr 13 22:03:35 UTC 2022  Timothy Simpson  <simpsont@objectcomputing.com>
+        commit 55c0fd0e10fbe027cf1a53c4de368c589a37c9d4
+
+        * tests/tsan_tests.lst:
+
+          add tsan coverage
+
+Wed Apr 13 21:56:04 UTC 2022  Timothy Simpson  <simpsont@objectcomputing.com>
+        commit 89c210196f64fb1d6858f1a6200540d28be1a404
+
+        * tests/DCPS/ContentFilteredTopic/ContentFilteredTopicTest.cpp:
+        * tests/DCPS/ManualAssertLiveliness/Writer.cpp:
+
+          Fix Typos (API uses US spelling)
+
+Wed Apr 13 21:55:28 UTC 2022  Timothy Simpson  <simpsont@objectcomputing.com>
+        commit c77ac3a48fef550f3b914d78a9da6f85e4d41e49
+
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/WriteDataContainer.cpp:
+        * dds/DCPS/WriteDataContainer.h:
+        * dds/DCPS/transport/framework/TransportQueueElement.inl:
+
+          Fixes For Durable wait_for_acknowledgments
+
+Wed Apr 13 21:14:45 UTC 2022  Timothy Simpson  <simpsont@objectcomputing.com>
+        commit d9873912853e1c73dd03467fc9f0c6416f2d5cda
+
+        * tests/DCPS/WaitForAckRace/.gitignore:
+        * tests/DCPS/WaitForAckRace/WaitForAckRace.mpc:
+        * tests/DCPS/WaitForAckRace/publisher.cpp:
+        * tests/DCPS/WaitForAckRace/rtps.ini:
+        * tests/DCPS/WaitForAckRace/rtps_disc.ini:
+        * tests/DCPS/WaitForAckRace/rtps_disc_tcp.ini:
+        * tests/DCPS/WaitForAckRace/run_test.pl:
+        * tests/DCPS/WaitForAckRace/subscriber.cpp:
+        * tests/dcps_tests.lst:
+
+          Add WaitForAckRace Tests
+
+Wed Apr 13 21:09:42 UTC 2022  Clayton Calabrese  <calabresec@objectcomputing.com>
+        commit 368da1bf0021afbbea0469b9ced1f74ba03c7753
+
+        * .github/workflows/build_and_test.yml:
+
+          fix indententation
+
+Wed Apr 13 19:09:21 UTC 2022  Clayton Calabrese  <calabresec@objectcomputing.com>
+        commit c34af07ccc0b6b7db105db6f33f75fbab9e5c42f
+
+        * .github/workflows/build_and_test.yml:
+
+          narrow m10 testing. Reenable m11
+
+Wed Apr 13 18:08:47 UTC 2022  Clayton Calabrese  <calabresec@objectcomputing.com>
+        commit 9c5f72f57d7a872306a053c1a42b109e57dd3347
+
+        * .github/workflows/build_and_test.yml:
+
+          don't put build/target in artifact except ACE_TAO for safety
+          profile
+
+Tue Apr 12 21:55:29 UTC 2022  Adam Mitz  <mitza@objectcomputing.com>
+        commit 1684e360cbec484b5f239e5d2bff2d1b773dcbe4
+
+          Merge pull request #3455 from
+          iguessthislldo/igtd/sphinx-gha-links
+
+          Ignore 403 Links in Sphinx
+
+Tue Apr 12 21:55:21 UTC 2022  Adam Mitz  <mitza@objectcomputing.com>
+        commit 1e2fe4e69b7d3b020a059b90f84e512c56181df3
+
+          Merge pull request #3454 from
+          simpsont-oci/bit_subscriber_access_cleanup
+
+          Improve Access Behavior Surrounding
+          DomainParticipantImpl::bit_subscriber_
+
+Tue Apr 12 21:55:10 UTC 2022  Adam Mitz  <mitza@objectcomputing.com>
+        commit 772fc3a3a3895062f8915d51f4f8776509a2ee69
+
+          Merge pull request #3423 from simpsont-oci/try_infinite_waits
+
+          Use Infinite Waits In StatusMatching
+
+Tue Apr 12 21:29:30 UTC 2022  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit 5c2da36f586367fc6ff7bc892f099bc593b51da7
+
+        * docs/conf.py:
+        * docs/internal/dev_guidelines.rst:
+        * docs/internal/unit_tests.rst:
+
+          Ignore 403 Links in Sphinx
+
+          Also correct some links that are being redirected.
+
+Wed Mar 16 14:43:16 UTC 2022  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit fe546b00c7bbb4312ae2072a7f4ec3292b9979d3
+
+        * .github/workflows/build_and_test.yml:
+        * .github/workflows/lint_build_and_test.pl:
+        * configure:
+
+          Use openssl 3 for one Linux build
+
+Tue Apr 12 21:01:42 UTC 2022  Clayton Calabrese  <calabresec@objectcomputing.com>
+        commit c3fdeb51760d52ff4e0f03f1e7350126ab5698f8
+
+        * .github/workflows/build_and_test.yml:
+        * java/tests/messenger/subscriber/DataReaderListenerImpl.java:
+        * tests/Utils/TestUtils.mpc:
+        * tests/cmake/Messenger/Messenger_1/CMakeLists.txt:
+
+          change how make install depedency is fixed to be done in
+          cmakelist and workflow.
+
+Tue Apr 12 18:17:46 UTC 2022  Clayton Calabrese  <calabresec@objectcomputing.com>
+        commit 5c51f44feee52cb9e69009f372ca461c98842818
+
+        * java/tests/messenger/subscriber/DataReaderListenerImpl.java:
+        * tests/DCPS/Messenger/DataReaderListener.cpp:
+        * tests/DCPS/Messenger/publisher.cpp:
+
+          clean up debug messaging for messenger tests.
+
+Mon Apr 11 22:10:34 UTC 2022  Timothy Simpson  <simpsont@objectcomputing.com>
+        commit 95048be5ccffa41388190daa25977fe4729e62a8
+
+        * dds/DCPS/DomainParticipantImpl.cpp:
+
+          Improve Access Behavior Surrounding
+          DomainParticipantImpl::bit_subscriber_
+
+Fri Apr 08 19:39:12 UTC 2022  Clayton Calabrese  <calabresec@objectcomputing.com>
+        commit a5641bbf89002f2cb5753d708dca55682ec8a062
+
+        * tests/Utils/TestUtils.mpc:
+
+          make install StatusMatching.h
+
+Fri Apr 08 17:50:38 UTC 2022  Clayton Calabrese  <calabresec@objectcomputing.com>
+        commit 3ec2f1dbf2ebe1ef629702432550fdf99193675d
+
+        * tests/DCPS/Messenger/DataReaderListener.cpp:
+
+          fix unreliable test expectations.
+
+Thu Apr 07 23:44:48 UTC 2022  Clayton Calabrese  <calabresec@objectcomputing.com>
+        commit 6da899d95ed139750eaf6e0e2c6a574b9434cec7
+
+        * tests/DCPS/Messenger/Args.h:
+        * tests/DCPS/Messenger/DataReaderListener.cpp:
+        * tests/DCPS/Messenger/publisher.cpp:
+        * tests/DCPS/Messenger/stack_subscriber.cpp:
+        * tests/DCPS/Messenger/subscriber.cpp:
+
+          update messenger test debug/error messages to meet current
+          guidelines
+
+Thu Apr 07 21:35:28 UTC 2022  Clayton Calabrese  <calabresec@objectcomputing.com>
+        commit a2626ab30d46fd82f39c63b493a7d9c1e81b6e8b
+
+        * java/tests/messenger/publisher/TestPublisher.java:
+
+          remove development debug message
+
+Thu Apr 07 21:27:34 UTC 2022  Clayton Calabrese  <calabresec@objectcomputing.com>
+        commit 1f95920f31394e38121233849c4469f10d055fd5
+
+        * docs/cmake.md:
+        * tests/cmake/Messenger/Messenger_1/CMakeLists.txt:
+        * tests/cmake/Messenger/Messenger_2/CMakeLists.txt:
+        * tests/cmake/Messenger/Messenger_Space/CMakeLists.txt:
+        * tests/cmake/generated_global/cpp/CMakeLists.txt:
+
+          update cmake messenger tests to no longer reference Writer.h and
+          .cpp
+
+Thu Apr 07 20:23:11 UTC 2022  Clayton Calabrese  <calabresec@objectcomputing.com>
+        commit 290dcdfff6cd1bc7b81250862c0c2b61ec88a620
+
+        * tests/DCPS/Messenger/Messenger.mpc:
+        * tests/DCPS/Messenger/Writer.cpp:
+        * tests/DCPS/Messenger/Writer.h:
+        * tests/DCPS/Messenger/publisher.cpp:
+        * tests/DCPS/Messenger/subscriber.cpp:
+
+          make messenger publisher single threaded to resolve default_udp
+          issue.
+
+Thu Apr 07 19:49:26 UTC 2022  Adam Mitz  <mitza@objectcomputing.com>
+        commit 9c284b4c8c8ae5a10d14f5824306cad12dcb4040
+
+          Merge pull request #3442 from
+          jonesc-oci/opendds-542-detect-response
+
+          PerlDDS additions to detect unresponsive VMs
+
+Thu Apr 07 19:49:11 UTC 2022  Adam Mitz  <mitza@objectcomputing.com>
+        commit c4c8aa8b460a7f9a516390ce54940703caf3b673
+
+          Merge pull request #3449 from mitza-oci/vcpkg-update
+
+          GitHub Actions: use a newer vcpkg commit
+
+Wed Apr 06 13:29:39 UTC 2022  Adam Mitz  <mitza@objectcomputing.com>
+        commit 4053fbb076ce04c5e8d12de979848cb53dddf907
+
+        * .github/workflows/build_and_test.yml:
+
+          GitHub Actions: use a newer vcpkg commit
+
+          for openssl and xerces-c packages
+
+Tue Apr 05 18:21:15 UTC 2022  Chip Jones  <jonesc@objectcomputing.com>
+        commit ba8250b35a8ba2493fa4cafcc41fca897ecaa4d9
+
+        * bin/PerlDDS/Response_Monitor.pm:
+
+          Suggested changes from review.
+
+Mon Apr 04 22:01:41 UTC 2022  Son Dinh  <dinhs@objectcomputing.com>
+        commit 0ef6293389294f4af0419dd607d112571111b305
+
+        * tests/DCPS/Reconnect/run_test.pl:
+
+          Update calls to WaitKill
+
+Mon Apr 04 17:36:35 UTC 2022  Son Dinh  <dinhs@objectcomputing.com>
+        commit c440cd9c3dac663d6f23fc4c6d739339c67ba9b9
+
+        * bin/PerlDDS/Process.pm:
+        * bin/PerlDDS/Run_Test.pm:
+        * tests/DCPS/DynamicTypes/run_test.pl:
+
+          Handle signal information returned from PerlACE
+
+Fri Apr 01 21:15:03 UTC 2022  Adam Mitz  <mitza@objectcomputing.com>
+        commit e3e3fa01033085bb7f95e282165ae0d9d06bfdb0
+
+          Merge pull request #3433 from jwillemsen/jwi-restartdp
+
+          Restart test extensions
+
+Thu Mar 31 22:31:22 UTC 2022  Adam Mitz  <mitza@objectcomputing.com>
+        commit 3f6f03f1fbb06ed6ef8c302e2175989b54a3afe0
+
+          Merge pull request #3444 from
+          objectcomputing/revert-3416-task_525
+
+          Revert "Return signal number in PerlDDS"
+
+Thu Mar 31 22:00:33 UTC 2022  Adam Mitz  <mitza@objectcomputing.com>
+        commit a468c82ac7bf68ba25e2fa50416a379adf0e4d63
+
+          Merge pull request #3441 from
+          simpsont-oci/waitset_unittest_updates
+
+          WaitSet Unit Test Warnings & Coverage Improvements
+
+Thu Mar 31 22:00:22 UTC 2022  Adam Mitz  <mitza@objectcomputing.com>
+        commit c00b0bd737c05c9925d3685b21f82c2849473d33
+
+          Merge pull request #3439 from simpsont-oci/remove_spdp_debug
+
+          Remove Unnecessary SPDP Debug Message
+
+Thu Mar 31 19:23:16 UTC 2022  Son Dinh  <technology789@gmail.com>
+        commit e602ed959199a69e04dda89cf8ed4f61822ee645
+
+        * bin/PerlDDS/Process.pm:
+        * bin/PerlDDS/Run_Test.pm:
+        * tests/DCPS/DynamicTypes/run_test.pl:
+
+          Revert "Return signal number in PerlDDS"
+
+Thu Mar 31 15:18:24 UTC 2022  Chip Jones  <jonesc@objectcomputing.com>
+        commit 7b7156388dd950275acc1174bfe1f8bb5e3d4fe5
+
+        * tests/DCPS/RtpsRelay/Smoke/run_test.pl:
+
+          Update Smoke test script to use Repsonse Monitor.
+
+Thu Mar 31 14:56:27 UTC 2022  Timothy Simpson  <simpsont@objectcomputing.com>
+        commit b772c14b888cf4f516b6128494b946f462a2cb23
+
+        * tests/unit-tests/dds/DCPS/WaitSet.cpp:
+
+          WaitSet Unit Test Warnings & Coverage Improvements
+
+Thu Mar 31 03:17:22 UTC 2022  Chip Jones  <jonesc@objectcomputing.com>
+        commit 85d29fec903769e0bc8eceb863e5a19b3e60151c
+
+        * bin/PerlDDS/Response_Monitor.pm:
+
+          PerlDDS module to detect unresponsive VMs.
+
+Thu Mar 31 00:16:25 UTC 2022  Timothy Simpson  <simpsont@objectcomputing.com>
+        commit e98010a5f91d0a1c17832056c9b5387529f0131c
+
+        * dds/DCPS/RTPS/Spdp.cpp:
+
+          Remove unnecessary SPDP debug message
+
+Wed Mar 30 22:10:39 UTC 2022  Adam Mitz  <mitza@objectcomputing.com>
+        commit 21cf02c6ba82a0324c0d2a0a8bb574e5516d116f
+
+          Merge pull request #3434 from simpsont-oci/spdp_locking
+
+          Lock SPDP During Shutdown Checks To Avoid NULL Transport SEGV in
+          process_participant_ice()
+
+Wed Mar 30 14:44:26 UTC 2022  Timothy Simpson  <simpsont@objectcomputing.com>
+        commit 0ada56f79356dd74d4a21d079301a629b3df6a46
+
+        * dds/DCPS/RTPS/Spdp.cpp:
+
+          release for safety profile
+
+Wed Mar 30 13:23:22 UTC 2022  Adam Mitz  <mitza@objectcomputing.com>
+        commit d8a649de461c0fcb93e128c7367667b5eb6cc75d
+
+          Merge pull request #3438 from
+          simpsont-oci/fix_safety_profile_issue
+
+          Fix RtpsUdpDataLink Safety Profile Compile Issue
+
+Wed Mar 30 13:23:10 UTC 2022  Adam Mitz  <mitza@objectcomputing.com>
+        commit 67555cb4886dd89ae3916d7f4b34d948d010e046
+
+          Merge pull request #3419 from
+          simpsont-oci/ownership_test_tsan_fixes
+
+          Add Ownership Tests to TSAN, Fix TSAN Lock Order Issues
+
+Wed Mar 30 13:17:51 UTC 2022  Timothy Simpson  <simpsont@objectcomputing.com>
+        commit 4319846cc324e24af64e18c475f4e15848c315e1
+
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.cpp:
+
+          use value
+
+Wed Mar 30 02:24:09 UTC 2022  Timothy Simpson  <simpsont@objectcomputing.com>
+        commit f26673de93402a407f4e89181e6dadb5f995420c
+
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DataReaderImpl_T.h:
+
+          back off std::sort for scopedaccess, it causes early release
+
+Wed Mar 30 01:48:56 UTC 2022  Timothy Simpson  <simpsont@objectcomputing.com>
+        commit 56637424bc1e19633ed0ffd1b9e8f3fcdaf1364c
+
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.cpp:
+
+          Fix RtpsUdpDataLink Safety Profile Compile Issue
+
+Tue Mar 29 22:17:28 UTC 2022  Timothy Simpson  <simpsont@objectcomputing.com>
+        commit 4931ab8cf49c4f7b5d1d84585dfa6d33d6ef3785
+
+        * dds/DCPS/RTPS/Spdp.cpp:
+
+          fix non-security / non-safety-profile mutex issue
+
+Tue Mar 29 21:10:53 UTC 2022  Adam Mitz  <mitza@objectcomputing.com>
+        commit c0b5f53072139e65aa128789198fb9183a254f51
+
+          Merge pull request #3437 from
+          simpsont-oci/windows_thrasher_cleanup
+
+          Windows Thrasher Test Cleanup
+
+Tue Mar 29 21:10:28 UTC 2022  Adam Mitz  <mitza@objectcomputing.com>
+        commit ffeaa47156c48bf0f98b5816951b3622154e2a8a
+
+          Merge pull request #3436 from
+          simpsont-oci/rtpsudpdatalink_reserves
+
+          Attempt To Use std::vector::reserve() To Avoid Copying Of
+          MetaSubmessages
+
+Tue Mar 29 21:10:00 UTC 2022  Adam Mitz  <mitza@objectcomputing.com>
+        commit 569302ca1c044146c42b1e11092d101829176006
+
+          Merge pull request #3435 from simpsont-oci/spdp_max_seq
+
+          Modify SPDP Sequence Reset Counting To Track Max SN
+
+Tue Mar 29 21:09:17 UTC 2022  Adam Mitz  <mitza@objectcomputing.com>
+        commit 608e673f17bd932c994a27c6af3ec64f26cd5d7b
+
+          Merge pull request #3416 from sonndinh/task_525
+
+          Return signal number in PerlDDS
+
+Tue Mar 29 20:42:06 UTC 2022  Clayton Calabrese  <calabresec@objectcomputing.com>
+        commit 486d2ed533a612c5b0549548c1951dd9571ab6a6
+
+          Merge branch 'messenger_test_update' of
+          https://github.com/ClaytonCalabrese/OpenDDS into
+          messenger_test_update
+
+Tue Mar 29 20:42:01 UTC 2022  Clayton Calabrese  <calabresec@objectcomputing.com>
+        commit d499f581817668a6fedec95635a3bc29d90b7189
+
+        * tests/DCPS/Messenger/subscriber.cpp:
+
+          fix default_udp test for messenger
+
+Tue Mar 29 20:18:59 UTC 2022  Clayton Calabrese  <calabresec@objectcomputing.com>
+        commit 03518867eca3e43d53df67b4c8000e115eab0bca
+
+        * java/tests/messenger/publisher/TestPublisher.java:
+        * java/tests/messenger/subscriber/DataReaderListenerImpl.java:
+        * java/tests/messenger/subscriber/TestSubscriber.java:
+
+          Fix java messenger tests to be like the new messenger tests.
+
+Tue Mar 29 18:01:57 UTC 2022  Timothy Simpson  <simpsont@objectcomputing.com>
+        commit 014cec71812e4bd557613d9ebbe3bfe9fa609e14
+
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.cpp:
+
+          fix safety profile compile issue
+
+Tue Mar 29 16:40:51 UTC 2022  Timothy Simpson  <simpsont@objectcomputing.com>
+        commit b81fc6e6c47cc6c8879a900f92d94def47762dc8
+
+        * tests/DCPS/Thrasher/Publisher.cpp:
+        * tests/DCPS/Thrasher/thrasher_rtps.ini:
+
+          Windows Thrasher Test Cleanup
+
+Tue Mar 29 16:34:09 UTC 2022  Timothy Simpson  <simpsont@objectcomputing.com>
+        commit ff26c75357c1e7c50dbc1d46fed968644ccb2727
+
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.cpp:
+
+          Attempt To Use std::vector::reserve() To Avoid Copying Of
+          MetaSubmessages
+
+Tue Mar 29 16:11:14 UTC 2022  Timothy Simpson  <simpsont@objectcomputing.com>
+        commit fcbdc0e73522e899292b0220a9f10f6879a83287
+
+        * dds/DCPS/RTPS/Sedp.h:
+        * dds/DCPS/RTPS/Spdp.cpp:
+        * dds/DCPS/StaticDiscovery.h:
+
+          Modify SPDP sequence reset count to track max SN
+
+Tue Mar 29 15:47:49 UTC 2022  Timothy Simpson  <simpsont@objectcomputing.com>
+        commit b97a6f9fac22a566af4b199128bf7fc972cb6985
+
+        * dds/DCPS/RTPS/Spdp.cpp:
+
+          Lock SPDP During Shutdown Checks To Avoid NULL Transport SEGV in
+          process_participant_ice()
+
+Tue Mar 29 08:46:33 UTC 2022  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit 8f672df7422f496ed5c1f7aded6f073f5c57ddfe
+
+        * dds/DCPS/DomainParticipantFactoryImpl.cpp:
+        * dds/DCPS/Service_Participant.cpp:
+        * dds/DCPS/transport/framework/TransportRegistry.cpp:
+        * tests/DCPS/Restart/RestartTest.cpp:
+
+          Extend logging in core and restart test
+
+          * dds/DCPS/DomainParticipantFactoryImpl.cpp:
+          * dds/DCPS/Service_Participant.cpp:
+          * dds/DCPS/transport/framework/TransportRegistry.cpp:
+          * tests/DCPS/Restart/RestartTest.cpp:
+
+Tue Mar 29 08:00:24 UTC 2022  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit 27fdf3c60de59ddd0e5518e848880e0452fb7fd6
+
+          Merge branch 'master' into jwi-restartdp
+
+Tue Mar 29 08:00:05 UTC 2022  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit 8f824a0e44137ca06a4ebc27545a61da0b8e3c10
+
+        * dds/DCPS/DomainParticipantFactoryImpl.cpp:
+        * dds/DCPS/RcHandle_T.h:
+        * dds/DCPS/Service_Participant.cpp:
+        * tests/DCPS/Restart/RestartTest.cpp:
+
+          Restart test extensions
+
+          * dds/DCPS/DomainParticipantFactoryImpl.cpp:
+          * dds/DCPS/RcHandle_T.h:
+          * dds/DCPS/Service_Participant.cpp:
+          * tests/DCPS/Restart/RestartTest.cpp:
+
+Tue Mar 29 00:19:24 UTC 2022  Adam Mitz  <mitza@objectcomputing.com>
+        commit b754c2c4490d92687fd311ba14cffcbfd0a62ef0
+
+          Merge pull request #3432 from mitza-oci/rtps-bad-propseq
+
+          PropertySeq: check for invalid length
+
+Tue Mar 29 00:19:15 UTC 2022  Adam Mitz  <mitza@objectcomputing.com>
+        commit 087b2381e6fddfbe28ef219a7778f92fe242a333
+
+          Merge pull request #3431 from jrw972/network-config-modifier
+
+          New NetworkConfigModifier interface breaks existing clients
+
+Tue Mar 29 00:18:55 UTC 2022  Adam Mitz  <mitza@objectcomputing.com>
+        commit 994418bd815a46273582fd852be97522cd3bbeaa
+
+          Merge pull request #3430 from jwillemsen/jwi-parse_domain_range
+
+          Make variable in parse_domain_range const
+
+Tue Mar 29 00:18:42 UTC 2022  Adam Mitz  <mitza@objectcomputing.com>
+        commit 978de5f5a9e64974def882e4feeeaee8e2abdcc5
+
+          Merge pull request #3427 from
+          objectcomputing/dependabot/github_actions/actions/cache-3
+
+          Bump actions/cache from 2 to 3
+
+Tue Mar 29 00:18:32 UTC 2022  Adam Mitz  <mitza@objectcomputing.com>
+        commit 074de03edd76b8ce6c9fae32bda0c4a29b31d2ad
+
+          Merge pull request #3426 from jwillemsen/jwi-configurationheap
+
+          Moved ACE_Configuration_Heap into the load_configuration call, it
+          is …
+
+Mon Mar 28 20:39:32 UTC 2022  Adam Mitz  <mitza@objectcomputing.com>
+        commit 36e5c5adadd4a1c596511b9e4c7fc20e49aa15f4
+
+        * tests/unit-tests/dds/DdsDcpsCoreTypeSupportImpl.cpp:
+
+          Use correct name for test module in gtest
+
+          Co-authored-by: Justin Wilson <wilsonj@objectcomputing.com>
+
+Mon Mar 28 19:42:57 UTC 2022  Adam Mitz  <mitza@objectcomputing.com>
+        commit 1395dd96c00d8fae01ea857959888eda1de8344d
+
+        * dds/idl/marshal_generator.cpp:
+        * tests/unit-tests/dds/DdsDcpsCoreTypeSupportImpl.cpp:
+
+          PropertySeq: check for invalid length
+
+          Similar to PR #3405 but in a different RTPS special-case encoding
+
+Fri Mar 25 13:16:12 UTC 2022  Timothy Simpson  <simpsont@objectcomputing.com>
+        commit a62b632feb42a23d8da92c8cb5d5f7b4f7c65c22
+
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DataReaderImpl_T.h:
+
+          resolving review comments
+
+Thu Mar 24 19:23:15 UTC 2022  Timothy Simpson  <simpsont@objectcomputing.com>
+        commit 51b12e2843294d740eb99070af4474e1db9b2579
+
+        * dds/DCPS/InstanceState.cpp:
+        * dds/DCPS/InstanceState.h:
+        * tests/DCPS/Ownership/run_test.pl:
+
+          more TSAN fixes
+
+Wed Mar 23 18:37:05 UTC 2022  Timothy Simpson  <simpsont@objectcomputing.com>
+        commit 340cbe39a2bdfe1c9abd6d882f06ad4cce147f9e
+
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DataReaderImpl_T.h:
+        * tests/DCPS/Ownership/run_test.pl:
+        * tests/dcps_tests.lst:
+        * tests/tsan_tests.lst:
+
+          Add Ownership Tests to TSAN, Fix TSAN Lock Order Issues
+
+Mon Mar 28 14:54:59 UTC 2022  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 52d40408b50c3e0c2731527662ec3401288b2f51
+
+        * dds/DCPS/DefaultNetworkConfigMonitor.h:
+        * dds/DCPS/LinuxNetworkConfigMonitor.cpp:
+        * dds/DCPS/NetworkConfigModifier.cpp:
+        * dds/DCPS/NetworkConfigModifier.h:
+        * dds/DCPS/NetworkConfigMonitor.cpp:
+        * dds/DCPS/NetworkConfigMonitor.h:
+
+          New NetworkConfigModifier interface breaks existing clients
+
+          Problem
+          -------
+
+          Recent changes to the NetworkConfigModifier break existing
+          clients.
+
+          Solution
+          --------
+
+          Restore the old interface as much as possible. The only remaining
+          incompatibility is that `add_address` now takes a flag indicating
+          if
+          the interface can multicast.
+
+          Notes
+          -----
+
+          The `index` member of NetworkInterfaceAddress was removed.
+          Implementations must use names.
+
+Mon Mar 28 10:31:13 UTC 2022  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit bb971564b66d94beb5ab8faf92f893e62c993872
+
+        * dds/DCPS/Service_Participant.cpp:
+
+          Make variable in parse_domain_range const
+
+          * dds/DCPS/Service_Participant.cpp:
+
+Mon Mar 28 07:03:22 UTC 2022  dependabot[bot]  <49699333+dependabot[bot]@users.noreply.github.com>
+        commit d96426121982d05257509dc9cc6f794527f39f5c
+
+        * .github/workflows/build_and_test.yml:
+
+          Bump actions/cache from 2 to 3
+
+          Bumps [actions/cache](https://github.com/actions/cache) from 2 to
+          3.
+          - [Release notes](https://github.com/actions/cache/releases)
+          - [Commits](https://github.com/actions/cache/compare/v2...v3)
+
+          ---
+          updated-dependencies:
+          - dependency-name: actions/cache
+          dependency-type: direct:production
+          update-type: version-update:semver-major
+          ...
+
+          Signed-off-by: dependabot[bot] <support@github.com>
+
+Fri Mar 25 22:35:55 UTC 2022  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit 64d55b4aba7675990f560b514db65653055fb833
+
+        * NEWS.md:
+        * PROBLEM-REPORT-FORM:
+        * VERSION.txt:
+        * dds/Version.h:
+
+          OpenDDS Post Release 3.20.0
+
+Fri Mar 25 19:47:07 UTC 2022  Clayton Calabrese  <calabresec@objectcomputing.com>
+        commit 6afdd20dafacacfcdf79db116849879c6f1badc8
+
+        * tests/DCPS/Messenger/DataReaderListener.cpp:
+        * tests/DCPS/Messenger/DataReaderListener.h:
+        * tests/DCPS/Messenger/stack_subscriber.cpp:
+        * tests/DCPS/Messenger/subscriber.cpp:
+
+          fix some warnings with messenger test update.
+
+Fri Mar 25 17:22:16 UTC 2022  Son Dinh  <dinhs@objectcomputing.com>
+        commit 5f6a2c2c6cef17c0698718796cfb42752aff3468
+
+        * bin/PerlDDS/Process.pm:
+        * bin/PerlDDS/Run_Test.pm:
+
+          Use hashref
+
+Fri Mar 25 13:44:26 UTC 2022  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit 09c07c3fa99b18ba19a09db1287a27ea929d85f6
+
+        * dds/DCPS/Service_Participant.cpp:
+        * dds/DCPS/Service_Participant.h:
+
+          Moved ACE_Configuration_Heap into the load_configuration call, it
+          is only used there
+
+          * dds/DCPS/Service_Participant.cpp:
+          * dds/DCPS/Service_Participant.h:
+
+Fri Mar 25 06:04:36 UTC 2022  Clayton Calabrese  <calabresec@objectcomputing.com>
+        commit 50f2b1bf7252f7b09fffe3a9c8618f9c2112a36b
+
+        * tests/DCPS/Messenger/publisher.cpp:
+
+          make wait_match debug more descriptive. Remove old code.
+
+Fri Mar 25 05:55:24 UTC 2022  Clayton Calabrese  <calabresec@objectcomputing.com>
+        commit 78de65eb7ccde5b4e6924567f45c90cd3fd90d6a
+
+        * tests/DCPS/Messenger/DataReaderListener.cpp:
+        * tests/DCPS/Messenger/DataReaderListener.h:
+        * tests/DCPS/Messenger/Writer.cpp:
+        * tests/DCPS/Messenger/publisher.cpp:
+        * tests/DCPS/Messenger/subscriber.cpp:
+
+          update messenger test for subscriber to shut down first. Update
+          unreliable reader to only expect 1 message.
+
+Thu Mar 24 21:01:41 UTC 2022  Timothy Simpson  <simpsont@objectcomputing.com>
+        commit 543216e9158947ee561b85016689fab595577393
+
+        * tests/Utils/StatusMatching.h:
+
+          Trial Infinite Waits In StatusMatching
+
+Wed Mar 23 19:42:16 UTC 2022  Son Dinh  <dinhs@objectcomputing.com>
+        commit 253708aacd198771c479e73000bd42d03b884485
+
+        * bin/PerlDDS/Process.pm:
+
+          Update function prototypes
+
+Wed Mar 23 18:14:49 UTC 2022  Son Dinh  <dinhs@objectcomputing.com>
+        commit 4c9108a2a0ac672c59d125ae9c7ac51ce5e37ca6
+
+        * bin/PerlDDS/Process.pm:
+        * bin/PerlDDS/Run_Test.pm:
+
+          Use optional parameter
+
+Tue Mar 22 17:53:36 UTC 2022  Son Dinh  <dinhs@objectcomputing.com>
+        commit 82c3e058c61afccc7fd4488e1383085c533e123c
+
+        * bin/PerlDDS/Process.pm:
+        * bin/PerlDDS/Run_Test.pm:
+        * tests/DCPS/DynamicTypes/run_test.pl:
+
+          User can get array or scalar
+
+Tue Mar 22 04:26:38 UTC 2022  Son Dinh  <dinhs@objectcomputing.com>
+
+        * bin/PerlDDS/Process.pm:
+        * bin/PerlDDS/Run_Test.pm:
+
+          Get signal number if any
+
+Local Variables:
+mode: change-log
+add-log-time-format: (lambda () (progn (setq tz (getenv "TZ")) (set-time-zone-rule "UTC") (setq time (format-time-string "%a %b %e %H:%M:%S %Z %Y" (current-time))) (set-time-zone-rule tz) time))
+indent-tabs-mode: nil
+End:

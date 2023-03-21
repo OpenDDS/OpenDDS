@@ -7,7 +7,6 @@
 #include "dds/DCPS/TypeSupportImpl.h"
 #include "dds/DCPS/WaitSet.h"
 #include "dds/DCPS/SafetyProfileStreams.h"
-#include "dds/DCPS/RepoIdTypes.h"
 #include "ace/Singleton.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
@@ -86,7 +85,7 @@ OpenDDS_FACE_Export void populate_header_received(const FACE::CONNECTION_ID_TYPE
                                                   const DDS::SampleInfo& sinfo,
                                                   FACE::RETURN_CODE_TYPE& return_code);
 
-OpenDDS_FACE_Export FACE::MESSAGE_INSTANCE_GUID create_message_instance_guid(const OpenDDS::DCPS::RepoId& pub,
+OpenDDS_FACE_Export FACE::MESSAGE_INSTANCE_GUID create_message_instance_guid(const OpenDDS::DCPS::GUID_t& pub,
                                                                              const CORBA::LongLong& seq);
 
 OpenDDS_FACE_Export FACE::RETURN_CODE_TYPE update_status(FACE::CONNECTION_ID_TYPE connection_id,
@@ -273,7 +272,7 @@ void send_message(FACE::CONNECTION_ID_TYPE connection_id,
 }
 
 template <typename Msg>
-class Listener : public DCPS::LocalObject<DDS::DataReaderListener> {
+class Listener : public virtual DCPS::LocalObject<DDS::DataReaderListener> {
 public:
   typedef void (*Callback)(FACE::TRANSACTION_ID_TYPE, Msg&,
                            FACE::MESSAGE_TYPE_GUID,

@@ -17,18 +17,51 @@
 #include "ICE/Ice.h"
 
 #include "dds/DCPS/XTypes/TypeObject.h"
+#include "dds/DCPS/BuiltInTopicUtils.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
 namespace RTPS {
+namespace ParameterListConverter {
 
 #ifdef OPENDDS_SECURITY
-struct DiscoveredPublication_SecurityWrapper;
-struct DiscoveredSubscription_SecurityWrapper;
-#endif
+struct DiscoveredPublication_SecurityWrapper {
+  DCPS::DiscoveredWriterData data;
+  DDS::Security::EndpointSecurityInfo security_info;
+  DDS::Security::DataTags data_tags;
+  bool have_ice_agent_info;
+  ICE::AgentInfo ice_agent_info;
+  XTypes::TypeInformation type_info;
 
-namespace ParameterListConverter {
+  DiscoveredPublication_SecurityWrapper()
+    : have_ice_agent_info(false)
+  {
+    data.ddsPublicationData.key = DCPS::BUILTIN_TOPIC_KEY_UNKNOWN;
+    data.ddsPublicationData.participant_key = DCPS::BUILTIN_TOPIC_KEY_UNKNOWN;
+    security_info.endpoint_security_attributes = 0;
+    security_info.plugin_endpoint_security_attributes = 0;
+  }
+};
+
+struct DiscoveredSubscription_SecurityWrapper {
+  DCPS::DiscoveredReaderData data;
+  DDS::Security::EndpointSecurityInfo security_info;
+  DDS::Security::DataTags data_tags;
+  bool have_ice_agent_info;
+  ICE::AgentInfo ice_agent_info;
+  XTypes::TypeInformation type_info;
+
+  DiscoveredSubscription_SecurityWrapper()
+    : have_ice_agent_info(false)
+  {
+    data.ddsSubscriptionData.key = DCPS::BUILTIN_TOPIC_KEY_UNKNOWN;
+    data.ddsSubscriptionData.participant_key = DCPS::BUILTIN_TOPIC_KEY_UNKNOWN;
+    security_info.endpoint_security_attributes = 0;
+    security_info.plugin_endpoint_security_attributes = 0;
+  }
+};
+#endif
 
 // DDS::ParticipantBuiltinTopicData
 
@@ -107,7 +140,7 @@ bool from_param_list(const ParameterList& param_list,
 // OpenDDS::DCPS::DiscoveredWriterData
 
 OpenDDS_Rtps_Export
-void add_DataRepresentationQos(ParameterList& param_list, const DDS::DataRepresentationIdSeq& ids, bool reader = false);
+void add_DataRepresentationQos(ParameterList& param_list, const DDS::DataRepresentationIdSeq& ids);
 
 OpenDDS_Rtps_Export
 bool to_param_list(const DCPS::DiscoveredWriterData& writer_data,

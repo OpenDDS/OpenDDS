@@ -337,7 +337,7 @@ template <typename MessageType>
 struct Writer {
   Writer(const Publisher_var& pub, const char* topic_name,
          const DomainParticipant_var& other_participant)
-    : ts_(new typename ::OpenDDS::DCPS::DDSTraits<MessageType>::TypeSupportTypeImpl())
+    : ts_(new typename ::OpenDDS::DCPS::DDSTraits<MessageType>::TypeSupportImplType())
   {
     DomainParticipant_var dp = pub->get_participant();
     check_rc(ts_->register_type(dp, ""), "register type", DDSTraits<MessageType>::type_name());
@@ -579,7 +579,7 @@ bool run_multitopic_test(const Publisher_var& pub, const Subscriber_var& sub)
     }
 
     // Check return get_key_value
-    // Regression Test for https://github.com/objectcomputing/OpenDDS/issues/592
+    // Regression Test for https://github.com/OpenDDS/OpenDDS/issues/592
     {
       Resulting resulting_value;
       ReturnCode_t rc = res_dr->get_key_value(resulting_value, HANDLE_NIL);

@@ -110,7 +110,7 @@ public:
   static Sample_T* allocbuf(CORBA::ULong nelems);
   static void freebuf(Sample_T* buffer);
 
-  void increment_references(void);
+  void increment_references();
 
   ///Only used by the FooDataReaderImpl and tests
   class PrivateMemberAccess {
@@ -141,6 +141,8 @@ public:
     void assign_sample(CORBA::ULong ii, const Sample_T& sample) {
       seq_.assign_sample(ii, sample);
     }
+
+    void increment_references() { seq_.increment_references(); }
 
   private:
     ZeroCopyDataSeq& seq_;

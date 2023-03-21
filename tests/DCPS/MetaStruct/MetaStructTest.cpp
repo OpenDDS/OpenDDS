@@ -2,6 +2,7 @@
 
 #include <dds/DCPS/FilterEvaluator.h>
 #include <dds/DCPS/Serializer.h>
+#include <dds/DCPS/Util.h>
 
 #include <tao/SystemException.h>
 
@@ -67,9 +68,27 @@ bool checkVal(const T& lhs, const T& rhs, const char* name)
   return true;
 }
 
+bool checkVal(const ACE_CDR::WChar& lhs, const ACE_CDR::WChar& rhs, const char* name)
+{
+  if (lhs != rhs) {
+    std::cout << "ERROR: target's " << name << " " << int(lhs) << " != "
+              << int(rhs) << std::endl;
+    return false;
+  }
+  return true;
+}
+
+template<typename T>
+T enumToString(const T& t) { return t; }
+
+const char* enumToString(MyEnum e)
+{
+  return OpenDDS::DCPS::gen_MyEnum_names[e];
+}
+
 template<typename T, typename T2>
 bool check(const T& lhs, const T& rhs, const char* name, ACE_Message_Block* amb, Value::Type type,
-          const MetaStruct& ms, T2 Value::*ptrmbr, Encoding::Kind e)
+           const MetaStruct& ms, T2 Value::* ptrmbr, Encoding::Kind e)
 {
   if (!checkVal(lhs, rhs, name)) return false;
 
@@ -79,7 +98,7 @@ bool check(const T& lhs, const T& rhs, const char* name, ACE_Message_Block* amb,
   Value val = ms.getValue(ser, name);
   if (val.type_ == type) {
     std::string ser_name = std::string("Serialized ") + name;
-    if (!checkVal(T2(rhs), val.*ptrmbr, ser_name.c_str())) return false;
+    if (!checkVal(T2(enumToString(rhs)), val.*ptrmbr, ser_name.c_str())) return false;
   } else {
     std::cout << "ERROR: Serialized type of " << name
               << " does not match. expected " << type
@@ -161,7 +180,7 @@ bool run_test_i(Encoding::Kind e)
     && checkVal(tgt.ss[0].l, src.ss[0].l, "ss[0].l")
     && checkVal(tgt.ss[1].s, src.ss[1].s, "ss[1].s")
     && checkVal(tgt.ss[1].l, src.ss[1].l, "ss[1].l")
-    && check(tgt.e, src.e, "e", data.get(), Value::VAL_UINT, meta, &Value::u_, e)
+    && check(tgt.e, src.e, "e", data.get(), Value::VAL_STRING, meta, &Value::s_, e)
     && checkVal(tgt.u._d(), src.u._d(), "u._d()")
     && checkVal(tgt.u.u_f(), src.u.u_f(), "u.u_f()")
     && checkVal(tgt.mu._d(), src.mu._d(), "mu._d()")
@@ -186,17 +205,11 @@ Encoding::Kind encodings[] = {
   Encoding::KIND_XCDR2,
 };
 
-template <typename Type, size_t length>
-size_t array_length(Type(&)[length])
-{
-  return length;
-}
-
 template<typename Type>
 bool run_test()
 {
   bool success = true;
-  for (size_t i = 0; i < array_length(encodings); i++) {
+  for (size_t i = 0; i < array_count(encodings); i++) {
     const Encoding::Kind e = encodings[i];
     std::cout << "run_test_i<" << DDSTraits<Type>::type_name()
       << ">(" << Encoding::kind_to_string(e) << ")" << std::endl;

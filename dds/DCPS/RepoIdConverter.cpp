@@ -14,7 +14,7 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-RepoIdConverter::RepoIdConverter(const RepoId& repoId)
+RepoIdConverter::RepoIdConverter(const GUID_t& repoId)
   : GuidConverter(repoId)
 {}
 

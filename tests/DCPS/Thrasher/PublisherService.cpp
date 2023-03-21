@@ -52,6 +52,16 @@ int PublisherService::svc()
 // Note: With std::unique_ptr, this method should return Publisher::Ptr.
 Publisher* PublisherService::createPublisher()
 {
-  Lock lock(mutex_);
-  return new Publisher(domain_id_, samples_per_thread_, durable_, thread_index_++);
+  long domain_id;
+  size_t samples_per_thread;
+  bool durable;
+  int thread_index;
+  {
+    Lock lock(mutex_);
+    domain_id = domain_id_;
+    samples_per_thread = samples_per_thread_;
+    durable = durable_;
+    thread_index = thread_index_++;
+  }
+  return new Publisher(domain_id, samples_per_thread, durable, thread_index);
 }

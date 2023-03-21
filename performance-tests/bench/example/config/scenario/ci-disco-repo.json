@@ -1,0 +1,40 @@
+{
+  "name": "Continuous Integration Discovery Test",
+  "desc": "This is a small quick test for (quiet) discovery capability via the inforepo with many participant processes",
+  "scenario_parameters": [
+    {
+      "name": "Base",
+      "desc": "Scenario Base",
+      "value": { "$discriminator": "PK_STRING", "string_param": "disco" }
+    },
+    {
+      "name": "Config",
+      "desc": "Discovery Configuration",
+      "value": { "$discriminator": "PK_STRING", "string_param": "InfoRepo" }
+    },
+    {
+      "name": "Time",
+      "desc": "Allowed Discovery Time In Seconds",
+      "value": { "$discriminator": "PK_NUMBER", "number_param": 30 }
+    },
+    {
+      "name": "Participants",
+      "desc": "Domain Participants",
+      "value": { "$discriminator": "PK_NUMBER", "number_param": 20 }
+    }
+  ],
+  "any_node": [
+    {
+      "executable": "DCPSInfoRepo",
+      "command" : "%executable% -ORBDebugLevel 1 -ORBLogFile DCPSInfoRepo.log -ORBListenEndpoints iiop://:12345 -DCPSPendingTimeout 3",
+      "no_report": true,
+      "ignore_errors": true,
+      "count": 1
+    },
+    {
+      "config": "ci-disco-repo.json",
+      "count": 20
+    }
+  ],
+  "timeout": 60
+}

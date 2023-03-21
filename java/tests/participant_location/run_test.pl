@@ -11,6 +11,8 @@ use PerlDDS::Run_Test;
 use PerlDDS::Process_Java;
 use strict;
 
+PerlDDS::add_lib_path ("$DDS_ROOT/java/tests/messenger/messenger_idl");
+
 my $status = 0;
 my $debug = '1';
 my $vmargs = "-ea";
@@ -62,40 +64,27 @@ my $debug_opt = ($debug eq '0') ? ''
 
 my $test_opts = "$opt $debug_opt -ORBLogFile partLocTest.log -DCPSConfigFile $pub_sub_ini";
 
-PerlACE::add_lib_path ("$DDS_ROOT/java/tests/messenger/messenger_idl");
-
-my $relay;
+my $test = new PerlDDS::TestFramework();
+$test->{'report_errors_in_log_file'} = 1;
 
 if ($use_relay) {
-  $relay = new PerlDDS::TestFramework();
   if ($ipv6) {
-    $relay->process("relay", "$ENV{DDS_ROOT}/bin/RtpsRelay", "-DCPSConfigFile relay_ipv6.ini -ApplicationDomain 42 -VerticalAddress [::]:4444 -HorizontalAddress [::1]:11444 $relay_security_opts");
+    $test->process("relay", "$ENV{DDS_ROOT}/bin/RtpsRelay", "-DCPSConfigFile relay_ipv6.ini -ApplicationDomain 42 -VerticalAddress [::]:4444 -HorizontalAddress [::1]:11444 $relay_security_opts");
   } else {
-    $relay->process("relay", "$ENV{DDS_ROOT}/bin/RtpsRelay", "-DCPSConfigFile relay.ini -ApplicationDomain 42 -VerticalAddress 4444 -HorizontalAddress 127.0.0.1:11444 $relay_security_opts");
+    $test->process("relay", "$ENV{DDS_ROOT}/bin/RtpsRelay", "-DCPSConfigFile relay.ini -ApplicationDomain 42 -VerticalAddress 4444 -HorizontalAddress 127.0.0.1:11444 $relay_security_opts");
   }
 
-  $relay->start_process("relay");
+  $test->start_process("relay");
   sleep(1);
 }
 
-my $psTest = new PerlDDS::Process_Java ("ParticipantLocationTest", $test_opts,
-    ["$DDS_ROOT/java/tests/messenger/messenger_idl/messenger_idl_test.jar"], $vmargs);
+$test->java_process("pubsub", "ParticipantLocationTest", $test_opts, ["$DDS_ROOT/java/tests/messenger/messenger_idl/messenger_idl_test.jar"], $vmargs);
 
-my $psTestResult = $psTest->SpawnWaitKill(30);
-
-if ($psTestResult != 0) {
-    print STDERR "ERROR: test publisher returned $psTestResult\n";
-    $status = 1;
-}
+$test->start_process("pubsub");
+$test->stop_process(30, "pubsub");
 
 if ($use_relay) {
-  $relay->kill_process(5, "relay");
+  $test->kill_process(5, "relay");
 }
 
-if ($status == 0) {
-  print "test PASSED.\n";
-} else {
-  print STDERR "test FAILED.\n";
-}
-
-exit $status;
+exit $test->finish();

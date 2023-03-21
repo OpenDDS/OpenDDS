@@ -1,6 +1,4 @@
 /*
- *
- *
  * Distributed under the OpenDDS License.
  * See: http://www.opendds.org/license.html
  */
@@ -9,13 +7,16 @@
 #ifndef OPENDDS_DCPS_RTPS_ICE_ICE_H
 #define OPENDDS_DCPS_RTPS_ICE_ICE_H
 
-#include "dds/DCPS/Ice.h"
 #include "Stun.h"
-#include "dds/DCPS/TimeTypes.h"
 
-#if !defined (ACE_LACKS_PRAGMA_ONCE)
-#pragma once
-#endif /* ACE_LACKS_PRAGMA_ONCE */
+#include <dds/DCPS/Ice.h>
+#include <dds/DCPS/TimeTypes.h>
+#include <dds/DCPS/RcObject.h>
+#include <dds/DCPS/GuidUtils.h>
+
+#ifndef ACE_LACKS_PRAGMA_ONCE
+#  pragma once
+#endif
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -34,29 +35,10 @@ Candidate make_server_reflexive_candidate(const ACE_INET_Addr& address, const AC
 Candidate make_peer_reflexive_candidate(const ACE_INET_Addr& address, const ACE_INET_Addr& base, const ACE_INET_Addr& server_address, ACE_UINT32 priority);
 Candidate make_peer_reflexive_candidate(const ACE_INET_Addr& address, ACE_UINT32 priority, size_t q);
 
-struct OpenDDS_Rtps_Export GuidPair {
-  DCPS::RepoId local;
-  DCPS::RepoId remote;
-
-  GuidPair(const DCPS::RepoId& a_local, const DCPS::RepoId& a_remote) : local(a_local), remote(a_remote) {}
-
-  bool operator<(const GuidPair& a_other) const
-  {
-    if (DCPS::GUID_tKeyLessThan()(this->local, a_other.local)) return true;
-
-    if (DCPS::GUID_tKeyLessThan()(a_other.local, this->local)) return false;
-
-    if (DCPS::GUID_tKeyLessThan()(this->remote, a_other.remote)) return true;
-
-    if (DCPS::GUID_tKeyLessThan()(a_other.remote, this->remote)) return false;
-
-    return false;
-  }
-};
-
+using DCPS::GuidPair;
 typedef std::set<GuidPair> GuidSetType;
 
-class OpenDDS_Rtps_Export Endpoint {
+class OpenDDS_Rtps_Export Endpoint : public virtual DCPS::RcObject {
 public:
   virtual ~Endpoint() {}
   virtual AddressListType host_addresses() const = 0;
@@ -66,12 +48,12 @@ public:
   virtual void ice_disconnect(const GuidSetType&, const ACE_INET_Addr&) {}
 };
 
-class OpenDDS_Rtps_Export AgentInfoListener {
+class OpenDDS_Rtps_Export AgentInfoListener : public virtual DCPS::RcObject {
 public:
   virtual ~AgentInfoListener() {}
-  virtual void update_agent_info(const DCPS::RepoId& a_local_guid,
+  virtual void update_agent_info(const DCPS::GUID_t& a_local_guid,
                                  const AgentInfo& a_agent_info) = 0;
-  virtual void remove_agent_info(const DCPS::RepoId& a_local_guid) = 0;
+  virtual void remove_agent_info(const DCPS::GUID_t& a_local_guid) = 0;
 };
 
 class OpenDDS_Rtps_Export Configuration {
@@ -193,37 +175,37 @@ private:
   DCPS::TimeDuration change_password_period_;
 };
 
-class OpenDDS_Rtps_Export Agent {
+class OpenDDS_Rtps_Export Agent : public virtual DCPS::RcObject {
 public:
   virtual ~Agent() {}
-  virtual void add_endpoint(Endpoint* a_endpoint) = 0;
-  virtual void remove_endpoint(Endpoint* a_endpoint) = 0;
-  virtual AgentInfo get_local_agent_info(Endpoint* a_endpoint) const = 0;
-  virtual void add_local_agent_info_listener(Endpoint* a_endpoint,
-                                             const DCPS::RepoId& a_local_guid,
-                                             AgentInfoListener* a_agent_info_listener) = 0;
-  virtual void remove_local_agent_info_listener(Endpoint* a_endpoint,
-                                                const DCPS::RepoId& a_local_guid) = 0;
-  virtual void start_ice(Endpoint* a_endpoint,
-                         const DCPS::RepoId& a_local_guid,
-                         const DCPS::RepoId& a_remote_guid,
+  virtual void add_endpoint(DCPS::WeakRcHandle<Endpoint> a_endpoint) = 0;
+  virtual void remove_endpoint(DCPS::WeakRcHandle<Endpoint> a_endpoint) = 0;
+  virtual AgentInfo get_local_agent_info(DCPS::WeakRcHandle<Endpoint> a_endpoint) const = 0;
+  virtual void add_local_agent_info_listener(DCPS::WeakRcHandle<Endpoint> a_endpoint,
+                                             const DCPS::GUID_t& a_local_guid,
+                                             DCPS::WeakRcHandle<AgentInfoListener> a_agent_info_listener) = 0;
+  virtual void remove_local_agent_info_listener(DCPS::WeakRcHandle<Endpoint> a_endpoint,
+                                                const DCPS::GUID_t& a_local_guid) = 0;
+  virtual void start_ice(DCPS::WeakRcHandle<Endpoint> a_endpoint,
+                         const DCPS::GUID_t& a_local_guid,
+                         const DCPS::GUID_t& a_remote_guid,
                          const AgentInfo& a_remote_agent_info) = 0;
-  virtual void stop_ice(Endpoint* a_endpoint,
-                        const DCPS::RepoId& a_local_guid,
-                        const DCPS::RepoId& a_remote_guid) = 0;
-  virtual ACE_INET_Addr get_address(Endpoint* a_endpoint,
-                                    const DCPS::RepoId& a_local_guid,
-                                    const DCPS::RepoId& a_remote_guid) const = 0;
+  virtual void stop_ice(DCPS::WeakRcHandle<Endpoint> a_endpoint,
+                        const DCPS::GUID_t& a_local_guid,
+                        const DCPS::GUID_t& a_remote_guid) = 0;
+  virtual ACE_INET_Addr get_address(DCPS::WeakRcHandle<Endpoint> a_endpoint,
+                                    const DCPS::GUID_t& a_local_guid,
+                                    const DCPS::GUID_t& a_remote_guid) const = 0;
 
   // Receive a STUN message.
-  virtual void receive(Endpoint* a_endpoint,
+  virtual void receive(DCPS::WeakRcHandle<Endpoint> a_endpoint,
                        const ACE_INET_Addr& a_local_address,
                        const ACE_INET_Addr& a_remote_address,
                        const STUN::Message& a_message) = 0;
 
   virtual void shutdown() = 0;
 
-  static Agent* instance();
+  static DCPS::RcHandle<Agent> instance();
 };
 
 class OpenDDS_Rtps_Export ServerReflexiveStateMachine {
@@ -238,6 +220,7 @@ public:
   ServerReflexiveStateMachine()
     : message_class_(STUN::REQUEST)
     , send_count_(0)
+    , latency_available_(false)
   {}
 
   // Return Unset if transitioning from a determined SRA to an undetermined SRA.
@@ -260,6 +243,26 @@ public:
     return message.transaction_id == message_.transaction_id;
   }
 
+  DCPS::TimeDuration latency() const
+  {
+    return latency_;
+  }
+
+  bool latency_available() const
+  {
+    return latency_available_;
+  }
+
+  void latency_available(bool flag)
+  {
+    latency_available_ = flag;
+  }
+
+  bool connected() const
+  {
+    return server_reflexive_address_ != ACE_INET_Addr();
+  }
+
 private:
   StateChange start(const ACE_INET_Addr& address, size_t indication_count_limit, const DCPS::GuidPrefix_t& guid_prefix);
   StateChange stop();
@@ -273,6 +276,9 @@ private:
   ACE_INET_Addr stun_server_address_;
   ACE_INET_Addr server_reflexive_address_;
   size_t send_count_;
+  DCPS::MonotonicTimePoint timestamp_;
+  DCPS::TimeDuration latency_;
+  bool latency_available_;
  };
 
 } // namespace ICE

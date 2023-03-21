@@ -25,39 +25,16 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-class OpenDDS_Dcps_Export ReactorInterceptor : public RcEventHandler {
+class OpenDDS_Dcps_Export ReactorInterceptor : public virtual RcEventHandler {
 public:
 
-  class Command
-  : public RcObject {
+  class OpenDDS_Dcps_Export Command
+  : public virtual RcObject {
   public:
-    Command() : executed_(false), condition_(mutex_), reactor_(0) {}
+    Command();
     virtual ~Command() { }
-    virtual bool should_execute() const { return true; }
-    virtual void will_execute() {}
+
     virtual void execute() = 0;
-    virtual void queue_flushed() {}
-
-    void reset()
-    {
-      ACE_GUARD(ACE_Thread_Mutex, guard, mutex_);
-      executed_ = false;
-    }
-
-    void wait() const
-    {
-      ACE_GUARD(ACE_Thread_Mutex, guard, mutex_);
-      while (!executed_) {
-        condition_.wait();
-      }
-    }
-
-    void executed()
-    {
-      ACE_GUARD(ACE_Thread_Mutex, guard, mutex_);
-      executed_ = true;
-      condition_.notify_all();
-    }
 
   protected:
     const ACE_Reactor* reactor() const { return reactor_; }
@@ -67,82 +44,34 @@ public:
     friend class OpenDDS::DCPS::ReactorInterceptor;
     void set_reactor(ACE_Reactor* reactor) { reactor_ = reactor; }
 
-    bool executed_;
-    mutable ACE_Thread_Mutex mutex_;
-    mutable ConditionVariable<ACE_Thread_Mutex> condition_;
     ACE_Reactor* reactor_;
   };
   typedef RcHandle<Command> CommandPtr;
 
-  template <typename T>
-  class ResultCommand : public Command {
-  public:
-    ResultCommand() : result_() {}
-    T result() const { return result_; }
-    T wait_result() const { wait(); return result(); }
-    static T wait_result(const CommandPtr& cmd) { return static_rchandle_cast<ReactorInterceptor::ResultCommand<T> >(cmd)->wait_result();}
-  protected:
-    void result(T result) { result_ = result; }
-  private:
-    T result_;
-  };
-
-  bool should_execute_immediately();
-
-  CommandPtr execute_or_enqueue(Command* c)
-  {
-    OPENDDS_ASSERT(c);
-    const bool immediate = should_execute_immediately();
-    CommandPtr command = enqueue_i(c, immediate);
-    if (immediate) {
-      process_command_queue_i();
-    }
-    return command;
-  }
+  CommandPtr execute_or_enqueue(CommandPtr command);
 
   virtual bool reactor_is_shut_down() const = 0;
+
+  virtual void reactor(ACE_Reactor *reactor);
+  virtual ACE_Reactor* reactor() const;
 
 protected:
 
   enum ReactorState {
-    NONE,
-    NOTIFIED,
-    PROCESSING
+    RS_NONE,
+    RS_NOTIFIED,
+    RS_PROCESSING
   };
-
-  CommandPtr enqueue_i(Command* c, bool immediate)
-  {
-    c->reset();
-    c->set_reactor(reactor());
-    bool do_notify = false;
-    const CommandPtr command(c, keep_count());
-    {
-      ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
-      if (!command->should_execute()) {
-        return CommandPtr();
-      }
-      command_queue_.push_back(command);
-      command->will_execute();
-      if (state_ == NONE) {
-        state_ = NOTIFIED;
-        do_notify = true;
-      }
-    }
-    if (!immediate && do_notify) {
-      reactor()->notify(this);
-    }
-    return command;
-  }
 
   ReactorInterceptor(ACE_Reactor* reactor,
                      ACE_thread_t owner);
 
   virtual ~ReactorInterceptor();
   int handle_exception(ACE_HANDLE /*fd*/);
-  void process_command_queue_i();
+  void process_command_queue_i(ACE_Guard<ACE_Thread_Mutex>& guard);
 
   ACE_thread_t owner_;
-  ACE_Thread_Mutex mutex_;
+  mutable ACE_Thread_Mutex mutex_;
   typedef OPENDDS_VECTOR(CommandPtr) Queue;
   Queue command_queue_;
   ReactorState state_;
@@ -150,6 +79,39 @@ protected:
 
 typedef RcHandle<ReactorInterceptor> ReactorInterceptor_rch;
 typedef WeakRcHandle<ReactorInterceptor> ReactorInterceptor_wrch;
+
+class OpenDDS_Dcps_Export RegisterHandler : public ReactorInterceptor::Command {
+public:
+  RegisterHandler(ACE_HANDLE io_handle,
+                  ACE_Event_Handler* event_handler,
+                  ACE_Reactor_Mask mask)
+    : io_handle_(io_handle)
+    , event_handler_(event_handler)
+    , mask_(mask)
+  {}
+
+private:
+  ACE_HANDLE io_handle_;
+  ACE_Event_Handler* event_handler_;
+  ACE_Reactor_Mask mask_;
+
+  void execute();
+};
+
+class OpenDDS_Dcps_Export RemoveHandler : public ReactorInterceptor::Command {
+public:
+  RemoveHandler(ACE_HANDLE io_handle,
+                ACE_Reactor_Mask mask)
+    : io_handle_(io_handle)
+    , mask_(mask)
+  {}
+
+private:
+  ACE_HANDLE io_handle_;
+  ACE_Reactor_Mask mask_;
+
+  void execute();
+};
 
 } // namespace DCPS
 } // namespace OpenDDS

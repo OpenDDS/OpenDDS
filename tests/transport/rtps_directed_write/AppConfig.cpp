@@ -1,4 +1,5 @@
 #include "AppConfig.h"
+#include "dds/DCPS/NetworkAddress.h"
 #include "dds/DCPS/transport/framework/TransportExceptions.h"
 #include <ace/Get_Opt.h>
 
@@ -41,7 +42,7 @@ AppConfig::AppConfig(int argc, ACE_TCHAR* argv[], bool setLocalAddress) :
     rtpsInst->datalink_release_delay_ = 0;
     if (setLocalAddress) {
       ACE_INET_Addr addr(port, ACE_TEXT_ALWAYS_CHAR(host.c_str()));
-      rtpsInst->local_address(addr);
+      rtpsInst->local_address(OpenDDS::DCPS::NetworkAddress(addr));
     }
 
     OpenDDS::DCPS::TransportConfig_rch cfg = TheTransportRegistry->create_config("cfg");
@@ -81,7 +82,7 @@ void AppConfig::setHeartbeatPeriod(const ACE_UINT64& ms) {
   rtpsInst->heartbeat_period_ = OpenDDS::DCPS::TimeDuration::from_msec(ms);
 }
 
-OpenDDS::DCPS::RepoId AppConfig::createID(long participantId, long key, CORBA::Octet kind) {
+OpenDDS::DCPS::GUID_t AppConfig::createID(long participantId, long key, CORBA::Octet kind) {
   OpenDDS::DCPS::RepoIdBuilder idBd;
   idBd.federationId(0x01234567); // guidPrefix1
   idBd.participantId(participantId); // guidPrefix2

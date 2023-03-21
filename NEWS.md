@@ -1,7 +1,7 @@
 # OpenDDS Releases
 
-## Version 3.19.0 of OpenDDS
-OpenDDS 3.19.0 is currently in development, so this list might change.
+## Version 3.24.0 of OpenDDS
+OpenDDS 3.24.0 is currently in development, so this list might change.
 
 ### Additions:
 - TODO: Add your features here
@@ -11,6 +11,181 @@ OpenDDS 3.19.0 is currently in development, so this list might change.
 
 ### Notes:
 - TODO: Add your notes here
+
+## Version 3.23.0 of OpenDDS
+OpenDDS 3.23.0 was released on Dec 21 2022.
+
+### Additions:
+- DataRepresentationQosPolicy and TypeConsistencyEnforcementQosPolicy can be set through XML (#3763)
+- RTPS send queue performance improvements (#3794)
+- Cross-compiling improvements (#3853)
+- New support for DynamicDataWriter and enhanced support for DynamicDataReader (#3827, #3727, #3871, #3718, #3830, #3893, #3904, #3885, #3933, #3935)
+- New config option for RtpsDiscovery `SpdpRequestRandomPort` (#3903)
+- New `opendds_mwc.pl` Wrapper Script (#3821, #3913)
+- Improve support for loading signed documents (#3864)
+
+### Fixes:
+- Unauthenticated participant leads to invalid iterator (#3748)
+- Shmem Association race (#3549)
+- Shmem and tcp null pointer (#3779)
+- Submodule checkout on Windows (#3812)
+
+### Notes:
+- Docker images are built for release tags https://github.com/objectcomputing/OpenDDS/pkgs/container/opendds (#3776)
+
+## Version 3.22.0 of OpenDDS
+OpenDDS 3.22.0 was released on Sep 16 2022.
+
+### Additions:
+- Sequences in FACE mapping: support == for any type (#3604)
+- Implement instance security methods from DDS Security Spec (#3557)
+- Added meta-discovery server to RtpsRelay (#3655)
+- Support building for VxWorks 21.03 (#3723, #3740)
+- Alive and active flags now have timestamps in RtpsRelay (#3579)
+- Static initializers for registration of TypeSupport objects (#3736)
+
+### Fixes:
+- Fixed bug where partitions for RtpsRelay client were not updated (#3583)
+- Fixed data race on status flag which causes missing listener invocation for BIT readers (#3584)
+- Fixed bug where SEDP removes crypto handles before dissassociating (#3597)
+- Fixed null BIT subscriber in ConnectionRecord (#3610)
+- Fixed bug where user data reverts to original for RtpsRelay clients (#3613)
+- Removed warning about unexpected register in MulticastManager (#3608)
+- Fixed reference counting issue that blocks SPDP shutdown (#3619)
+- Fixed dds_suppress_anys=0 (#3656)
+- Ignore interfaces with no FQDN in AddressLookup (#3660)
+- Fixed memory leak where DataWriter doesn't remove unregistered instances (#3684)
+- Update TransportClient's use of PendingAssoc's lock (#3652)
+- Clone Google Test and RapidJSON if not found (#3691)
+- Set extensibility on enums (#3686)
+- Do not use fixed-size buffer for partition parsing (#3704)
+- Prevent Use Of IPv4-mapped IPv6 'Any' Addresses In RTPS Locators (#3713)
+- Fix SEGV in shutdown when using monitor (#3732)
+- Crash from missing BIT reader in shutdown (#3741)
+
+### Notes:
+- Removed wait param in TransportRegistry::create_inst (#3644)
+- Changed Multicast Group Join Errors to Warnings (#3558)
+- Remove Leading `::` from `TypeObject` Names (#3679)
+- Updates to the ValueReader/ValueWriter/ValueDispatcher framework (#3719)
+- Updates to Dockerfile (#3737)
+
+## Version 3.21.0 of OpenDDS
+OpenDDS 3.21.0 was released on Jun 24 2022.
+
+### Additions:
+- Reduced code generation for XTypes (#3456)
+- `ValueWriter::begin_struct_member` now takes a member descriptor for identifying key fields (#3459)
+- Added detailed logging for invalid QoS (#3475)
+- Added example usage for `inspect` (#3493)
+- RTPS:
+  - Added debug logging for non-final RTPS messages (#3504)
+  - `ConnectionRecord` now reports the round-trip latency to the RtpsRelay (#3506)
+
+### Fixes:
+- Add locking to `RecorderImpl` (#3531)
+- Fixed minor issues with choosing addresses and hostnames in `NetworkResource` (#3527)
+- RTPS:
+  - `PropertySeq` now checks for invalid length (#3432)
+  - `UseXTypes` RTPS discovery option now accepts descriptive values (#3493)
+    - This was added in OpenDDS 3.20.0, but wasn't functional.
+  - Performance improvements for RTPS (#3500, #3508)
+  - Fixed a bug where heartbeats were being sent to readers that didn't exist anymore (#3540)
+
+## Version 3.20.0 of OpenDDS
+OpenDDS 3.20.0 was released on Mar 25 2022.
+
+### Additions:
+- Added the `host_name` shared memory transport config option (#3386)
+- Added an example test for demonstrating issues (#3322)
+- Added the `--old-typeobject-encoding` option to `opendds_idl` for compatibility with `TypeObject` before OpenDDS 3.18.0 (#3263)
+- Added return code to `ServiceParticipant::shutdown()` (#3159, #3270)
+- CMake Module:
+  - Improved support for installing CMake projects that use OpenDDS (#3315, #3354, #3367, #3368, #3393)
+    - OpenDDS, ACE, and TAO libraries can now be installed using `install(IMPORTED_RUNTIME_ARTIFACTS)` if using CMake 3.21 or later
+      - To help facilitate this, a new function called `opendds_get_library_dependencies` has been added.
+    - To help install generated files, `OPENDDS_TARGET_SOURCES` now adds lists of the files that where passed in and generated that are part of the `PUBLIC` and `INTERFACE` scopes as properties on the target
+    - See `docs/cmake.md` for details on all of these new features
+  - Added an `OPENDDS_DEFAULT_SCOPE` option that allows changing the default scope of `OPENDDS_TARGET_SOURCES` (#3315)
+  - Support `INSTALL_LIB` being used with `make install` to change the name of the `lib` directory (#2879)
+    - NOTE: This required changing the CMake module installation destination from `lib` to `share`.
+
+### Platform Support and Dependencies:
+- Support for Visual Studio 2022 (#3267)
+- Updated to work with the C++20 standard library (#3288)
+- Support for OpenSSL 3.0.1 and later (#3358, #3404)
+- Updated Wireshark dissector to work with GLib 2.68 and later (#2918)
+- Removed Boost as an optional dependency (#3323)
+- Updated the RapidJSON submodule (#3284)
+
+### Fixes:
+- Fixed issue preventing 2 `sequence<string>` anonymous types in the same struct (#3415)
+- Fixed issues with entity association when using the multicast transport (#3377)
+- Fixed issue #3268, a segfault in `opendds_idl` (#3374)
+- Fixed thread safety of `DataReaderImpl_T`'s allocator (#3335, #3403)
+- Improvements to how data representation is handled (#3233)
+- Fixed instance lifetime issue with `assert_liveliness` (#3241)
+- RTPS:
+  - Improved internal handling of remote addresses to reduce initial traffic (#3375)
+  - General ICE improvements (#3298, #3218)
+  - Improvements to RtpsRelay (#3257, #3240, #3237)
+  - Check for invalid RTPS Parameter length (#3405)
+- CMake Module:
+  - Fixed issue when using `install(EXPORT)` on a target used with `OPENDDS_TARGET_SOURCES` (#3315)
+  - Fixed issue #1297 where `opendds_idl` generates an incorrect include path (#3315)
+
+## Version 3.19.0 of OpenDDS
+OpenDDS 3.19.0 was released on Dec 10 2021.
+
+### Additions:
+- XTypes: Dynamic Language Binding (#2976)
+  - Read support only in this version
+  - New `inspect` tool that prints data samples read from a topic in text form
+  - See section 16.7 of the Developer's Guide for details
+- CDR Encapsulation support for non-rtps_udp transports (#3135)
+  - When XCDR2 is enabled in DataRepresentationQosPolicy, these transports can use mutable and extensible extensibility
+- Enhanced RtpsRelay support (#3208, #3116, #3094)
+- RTPS transport-level statistics (#3166)
+- Made the allocators in TransportReceiveStrategy configurable (#3170)
+- Option to simulate lossy network (#3138)
+- Configurable maximum participants in discovery (#3145)
+- Extend ValueWriter/ValueReader with array based operations (#3140)
+- Extend RawDataSample with the header to support XCDR2 streams (#3028)
+- DCPSLogLevel config option, see section 7.6 of the Developer's Guide for details (#3113, #3158)
+
+### Fixes:
+- Source IP check override configuration (#3195)
+- Update use of receive address in RtpsUdpDataLink::accumulate_addresses (#3191)
+- Updated Node.js/V8 support (#3188, #3177)
+- Better support for DDS Security static library builds (#3122)
+- TransportReceiveStrategy: fixed issue with response queue (#3136)
+- Remove broken fragment resend early return check (#3095)
+- Added special-case handling for PID_PROPERTY_LIST interop (#3057)
+- SEDP sequencing (#3068, #3116)
+- MultiTopic robustness (#2988)
+- Fixed issue with `find_package(Threads)` on recent CMake releases when calling `find_package(OpenDDS)` before a C/C++ project has been declared (#3093)
+
+### Notes:
+- configure: Add vs2022 as a compiler option (#3169)
+- MSVC++ 12.0 updates (#3075)
+- Fixed dependency cycle when `OPENDDS_TARGET_SOURCES` is used on a CMake target that also has Qt MOC source files (#3093)
+
+## Version 3.18.1 of OpenDDS
+OpenDDS 3.18.1 was released on Sep 24 2021.
+
+### Fixes:
+- Improve RTPS messaging behaviors under IPv6 (#2923)
+- Fixed a few rtps_udp transport issues (#2954, #2997, #2998, #3009, #3013, #3027)
+- Configurable parameters for RTPS Discovery lease durations (#2999)
+- Auth resend backs off (more delay over time) (#2937, #2984)
+- Input validity check for RTPS Parameters (#2917), sequences (#2944), addresses (#2981, #3016), locators (#3000)
+- Fragment reassembly fixes (#2960)
+- Type lookup service fixes (#2941)
+- Fixed generation of unreachable code in operator<< (#2962)
+- RtpsRelay logging and related changes (#2936, #2980, #2979, #2978, 2987, #2996, #2832)
+- XML QoS loader can now use custom error handlers (#2961)
+- CMake: Prevent Duplicate BUILD_DLL creation (#2977)
+- CMake: Assign runtime library tao_idl on MSVC (#2990)
 
 ## Version 3.18.0 of OpenDDS
 OpenDDS 3.18.0 was released on Aug 24 2021.

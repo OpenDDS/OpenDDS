@@ -1,29 +1,32 @@
 /*
- *
- *
  * Distributed under the OpenDDS License.
  * See: http://www.opendds.org/license.html
  */
 
 #include "DcpsInfo_pch.h"
-#include "tao/ORB_Core.h"
+
 #include "FederatorManagerImpl.h"
+
 #include "DCPSInfo_i.h"
 #include "DefaultValues.h"
-#include "dds/DCPS/InfoRepoDiscovery/InfoRepoDiscovery.h"
-#include "dds/DCPS/SubscriberImpl.h"
-#include "dds/DCPS/Service_Participant.h"
-#include "dds/DCPS/Marked_Default_Qos.h"
-#include "dds/DCPS/RepoIdConverter.h"
-#include "dds/DCPS/transport/framework/TransportRegistry.h"
-#include "dds/DCPS/transport/framework/TransportExceptions.h"
-#include "dds/DCPS/transport/tcp/TcpInst.h"
-#include "dds/DCPS/transport/tcp/Tcp.h"
-#include "ace/Log_Priority.h"
-#include "ace/Log_Msg.h"
-
 #include "FederatorTypeSupportC.h"
 #include "FederatorTypeSupportImpl.h"
+
+#include <dds/DCPS/InfoRepoDiscovery/InfoRepoDiscovery.h>
+#include <dds/DCPS/SubscriberImpl.h>
+#include <dds/DCPS/Service_Participant.h>
+#include <dds/DCPS/Marked_Default_Qos.h>
+#include <dds/DCPS/RepoIdConverter.h>
+#include <dds/DCPS/DCPS_Utils.h>
+#include <dds/DCPS/transport/framework/TransportRegistry.h>
+#include <dds/DCPS/transport/framework/TransportExceptions.h>
+#include <dds/DCPS/transport/tcp/TcpInst.h>
+#include <dds/DCPS/transport/tcp/Tcp.h>
+
+#include <tao/ORB_Core.h>
+
+#include <ace/Log_Priority.h>
+#include <ace/Log_Msg.h>
 
 #include <sstream>
 
@@ -92,14 +95,12 @@ ManagerImpl::initialize()
 
   // Add participant for Federation domain
   DDS::DomainParticipantFactory_var dpf = TheParticipantFactory;
-  this->federationParticipant_
-  = dpf->create_participant(
+  federationParticipant_ = dpf->create_participant(
       this->config_.federationDomain(),
       PARTICIPANT_QOS_DEFAULT,
       DDS::DomainParticipantListener::_nil(),
       OpenDDS::DCPS::DEFAULT_STATUS_MASK);
-
-  if (CORBA::is_nil(this->federationParticipant_.in())) {
+  if (!federationParticipant_) {
     ACE_ERROR((LM_ERROR,
                ACE_TEXT("(%P|%t) ERROR: create_participant failed for ")
                ACE_TEXT("repository %d in federation domain %d.\n"),
@@ -107,6 +108,7 @@ ManagerImpl::initialize()
                this->config_.federationDomain()));
     throw Incomplete();
   }
+
   //
   // Add type support for update topics
   //
@@ -338,7 +340,7 @@ ManagerImpl::initialize()
                  ACE_TEXT("unable to extract typed OwnerUpdate writer.\n")));
 
     } else {
-      OpenDDS::DCPS::RepoIdConverter converter(servant->get_repo_id());
+      OpenDDS::DCPS::RepoIdConverter converter(servant->get_guid());
       ACE_DEBUG((LM_DEBUG,
                  ACE_TEXT("(%P|%t) Federator::ManagerImpl::initialize() - ")
                  ACE_TEXT("created federation OwnerUpdate writer %C for repository %d\n"),
@@ -371,7 +373,7 @@ ManagerImpl::initialize()
                  ACE_TEXT("unable to extract typed OwnerUpdate reader.\n")));
 
     } else {
-      OpenDDS::DCPS::RepoIdConverter converter(servant->get_repo_id());
+      OpenDDS::DCPS::RepoIdConverter converter(servant->get_guid());
       ACE_DEBUG((LM_DEBUG,
                  ACE_TEXT("(%P|%t) Federator::ManagerImpl::initialize() - ")
                  ACE_TEXT("created federation OwnerUpdate reader %C for repository %d\n"),
@@ -419,7 +421,7 @@ ManagerImpl::initialize()
                  ACE_TEXT("unable to extract typed TopicUpdate writer.\n")));
 
     } else {
-      OpenDDS::DCPS::RepoIdConverter converter(servant->get_repo_id());
+      OpenDDS::DCPS::RepoIdConverter converter(servant->get_guid());
       ACE_DEBUG((LM_DEBUG,
                  ACE_TEXT("(%P|%t) Federator::ManagerImpl::initialize() - ")
                  ACE_TEXT("created federation TopicUpdate writer %C for repository %d\n"),
@@ -452,7 +454,7 @@ ManagerImpl::initialize()
                  ACE_TEXT("unable to extract typed TopicUpdate reader.\n")));
 
     } else {
-      OpenDDS::DCPS::RepoIdConverter converter(servant->get_repo_id());
+      OpenDDS::DCPS::RepoIdConverter converter(servant->get_guid());
       ACE_DEBUG((LM_DEBUG,
                  ACE_TEXT("(%P|%t) Federator::ManagerImpl::initialize() - ")
                  ACE_TEXT("created federation TopicUpdate reader %C for repository %d\n"),
@@ -500,7 +502,7 @@ ManagerImpl::initialize()
                  ACE_TEXT("unable to extract typed ParticipantUpdate writer.\n")));
 
     } else {
-      OpenDDS::DCPS::RepoIdConverter converter(servant->get_repo_id());
+      OpenDDS::DCPS::RepoIdConverter converter(servant->get_guid());
       ACE_DEBUG((LM_DEBUG,
                  ACE_TEXT("(%P|%t) Federator::ManagerImpl::initialize() - ")
                  ACE_TEXT("created federation ParticipantUpdate writer %C for repository %d\n"),
@@ -533,7 +535,7 @@ ManagerImpl::initialize()
                  ACE_TEXT("unable to extract typed ParticipantUpdate reader.\n")));
 
     } else {
-      OpenDDS::DCPS::RepoIdConverter converter(servant->get_repo_id());
+      OpenDDS::DCPS::RepoIdConverter converter(servant->get_guid());
       ACE_DEBUG((LM_DEBUG,
                  ACE_TEXT("(%P|%t) Federator::ManagerImpl::initialize() - ")
                  ACE_TEXT("created federation ParticipantUpdate reader %C for repository %d\n"),
@@ -581,7 +583,7 @@ ManagerImpl::initialize()
                  ACE_TEXT("unable to extract typed PublicationUpdate writer.\n")));
 
     } else {
-      OpenDDS::DCPS::RepoIdConverter converter(servant->get_repo_id());
+      OpenDDS::DCPS::RepoIdConverter converter(servant->get_guid());
       ACE_DEBUG((LM_DEBUG,
                  ACE_TEXT("(%P|%t) Federator::ManagerImpl::initialize() - ")
                  ACE_TEXT("created federation PublicationUpdate writer %C for repository %d\n"),
@@ -614,7 +616,7 @@ ManagerImpl::initialize()
                  ACE_TEXT("unable to extract typed PublicationUpdate reader.\n")));
 
     } else {
-      OpenDDS::DCPS::RepoIdConverter converter(servant->get_repo_id());
+      OpenDDS::DCPS::RepoIdConverter converter(servant->get_guid());
       ACE_DEBUG((LM_DEBUG,
                  ACE_TEXT("(%P|%t) Federator::ManagerImpl::initialize() - ")
                  ACE_TEXT("created federation PublicationUpdate reader %C for repository %d\n"),
@@ -662,7 +664,7 @@ ManagerImpl::initialize()
                  ACE_TEXT("unable to extract typed SubscriptionUpdate writer.\n")));
 
     } else {
-      OpenDDS::DCPS::RepoIdConverter converter(servant->get_repo_id());
+      OpenDDS::DCPS::RepoIdConverter converter(servant->get_guid());
       ACE_DEBUG((LM_DEBUG,
                  ACE_TEXT("(%P|%t) Federator::ManagerImpl::initialize() - ")
                  ACE_TEXT("created federation SubscriptionUpdate writer %C for repository %d\n"),
@@ -695,7 +697,7 @@ ManagerImpl::initialize()
                  ACE_TEXT("unable to extract typed SubscriptionUpdate reader.\n")));
 
     } else {
-      OpenDDS::DCPS::RepoIdConverter converter(servant->get_repo_id());
+      OpenDDS::DCPS::RepoIdConverter converter(servant->get_guid());
       ACE_DEBUG((LM_DEBUG,
                  ACE_TEXT("(%P|%t) Federator::ManagerImpl::initialize() - ")
                  ACE_TEXT("created federation SubscriptionUpdate reader %C for repository %d\n"),
@@ -842,21 +844,22 @@ ManagerImpl::finalize()
   }
 
   // Remove our local participant and contained entities.
-  if (0 == CORBA::is_nil(this->federationParticipant_.in())) {
-    DDS::DomainParticipantFactory_var dpf = TheParticipantFactory;
-    if (DDS::RETCODE_PRECONDITION_NOT_MET
-        == this->federationParticipant_->delete_contained_entities()) {
-      ACE_ERROR((LM_ERROR,
-                 ACE_TEXT("(%P|%t) ERROR: Federator::Manager ")
-                 ACE_TEXT("unable to release resources for repository %d.\n"),
-                 this->id().id()));
+  if (federationParticipant_) {
+    const DDS::ReturnCode_t entities_error =
+      federationParticipant_->delete_contained_entities();
+    if (entities_error) {
+      ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: Federator::Manager: "
+                 "unable to release resources for repository %d: %C\n",
+                 id().id(), DCPS::retcode_to_string(entities_error)));
+      return;
+    }
 
-    } else if (DDS::RETCODE_PRECONDITION_NOT_MET
-               == dpf->delete_participant(this->federationParticipant_.in())) {
-      ACE_ERROR((LM_ERROR,
-                 ACE_TEXT("(%P|%t) ERROR: Federator::Manager ")
-                 ACE_TEXT("unable to release the participant for repository %d.\n"),
-                 this->id().id()));
+    DDS::DomainParticipantFactory_var dpf = TheParticipantFactory;
+    const DDS::ReturnCode_t part_error = dpf->delete_participant(federationParticipant_);
+    if (part_error) {
+      ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: Federator::Manager: "
+                 "unable to release the participant for repository %d: %C\n",
+                 id().id(), DCPS::retcode_to_string(part_error)));
     }
   }
 }
@@ -1094,8 +1097,7 @@ ManagerImpl::leave_federation(
   }
 
   // Remove all the internal Entities owned by the leaving repository.
-  if (false
-      == this->info_->remove_by_owner(this->config_.federationDomain(), id)) {
+  if (!info_->remove_by_owner(config_.federationDomain(), id)) {
     throw Incomplete();
   }
 

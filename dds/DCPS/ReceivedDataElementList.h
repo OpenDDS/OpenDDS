@@ -8,13 +8,7 @@
 #ifndef OPENDDS_DCPS_RECEIVEDDATAELEMENTLIST_H
 #define OPENDDS_DCPS_RECEIVEDDATAELEMENTLIST_H
 
-#ifdef ACE_HAS_CPP11
-#  include <atomic>
-#else
-#  include <ace/Atomic_Op_T.h>
-#endif
-#include "ace/Thread_Mutex.h"
-
+#include "Atomic.h"
 #include "dcps_export.h"
 #include "DataSampleHeader.h"
 #include "Definitions.h"
@@ -23,7 +17,9 @@
 #include "Time_Helper.h"
 #include "unique_ptr.h"
 
-#include "dds/DdsDcpsInfrastructureC.h"
+#include <dds/DdsDcpsInfrastructureC.h>
+
+#include "ace/Thread_Mutex.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
@@ -73,26 +69,22 @@ public:
 
   void dec_ref()
   {
-    if (0 == --this->ref_count_) {
+    if (0 == --ref_count_) {
       delete this;
     }
   }
 
   void inc_ref()
   {
-    ++this->ref_count_;
+    ++ref_count_;
   }
 
   long ref_count()
   {
-#ifdef ACE_HAS_CPP11
-    return this->ref_count_;
-#else
-    return this->ref_count_.value();
-#endif
+    return ref_count_;
   }
 
-  PublicationId pub_;
+  GUID_t pub_;
 
   /**
    * Data sample received, could only be the key fields in case we received
@@ -118,7 +110,7 @@ public:
   bool group_coherent_;
 
   /// Publisher id represent group identifier.
-  RepoId publisher_id_;
+  GUID_t publisher_id_;
 #endif
 
   /// Do we contain valid data
@@ -134,11 +126,7 @@ public:
 
   /// This is needed to know if delete DataReader should fail with
   /// PRECONDITION_NOT_MET because there are outstanding loans.
-#ifdef ACE_HAS_CPP11
-  std::atomic<long> zero_copy_cnt_;
-#else
-  ACE_Atomic_Op<ACE_Thread_Mutex, long> zero_copy_cnt_;
-#endif
+  Atomic<long> zero_copy_cnt_;
 
   /// The data sample's sequence number
   SequenceNumber sequence_;
@@ -154,11 +142,7 @@ public:
   void operator delete(void* memory, ACE_New_Allocator& pool);
 
 private:
-#ifdef ACE_HAS_CPP11
-  std::atomic<long> ref_count_;
-#else
-  ACE_Atomic_Op<ACE_Thread_Mutex, long> ref_count_;
-#endif
+  Atomic<long> ref_count_;
 protected:
   ACE_Recursive_Thread_Mutex* mx_;
 }; // class ReceivedDataElement
@@ -182,7 +166,7 @@ public:
   ~ReceivedDataElementWithType() {
     ACE_GUARD(ACE_Recursive_Thread_Mutex,
               guard,
-              *this->mx_)
+              *mx_)
     delete static_cast<DataTypeWithAllocator*> (registered_data_);
   }
 };
@@ -205,7 +189,7 @@ public:
 
 class OpenDDS_Dcps_Export ReceivedDataElementList {
 public:
-  explicit ReceivedDataElementList(InstanceState_rch instance_state = InstanceState_rch());
+  explicit ReceivedDataElementList(const DataReaderImpl_rch& reader, const InstanceState_rch& instance_state = InstanceState_rch());
 
   ~ReceivedDataElementList();
 
@@ -213,6 +197,7 @@ public:
 
   // adds a data sample to the end of the list
   void add(ReceivedDataElement* data_sample);
+  void add_by_timestamp(ReceivedDataElement* data_sample);
 
   // returns true if the instance was released
   bool remove(ReceivedDataElement* data_sample);
@@ -220,8 +205,24 @@ public:
   // returns true if the instance was released
   bool remove(ReceivedDataFilter& match, bool eval_all);
 
+  const ReceivedDataElement* peek_tail() { return tail_; }
+
   ReceivedDataElement* remove_head();
   ReceivedDataElement* remove_tail();
+
+  size_t size() const { return size_; }
+
+  bool has_zero_copies() const;
+  bool matches(CORBA::ULong sample_states) const;
+  ReceivedDataElement* get_next_match(CORBA::ULong sample_states, ReceivedDataElement* prev);
+
+  void mark_read(ReceivedDataElement* item);
+#ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
+  void accept_coherent_change(ReceivedDataElement* item);
+#endif
+
+private:
+  DataReaderImpl_wrch reader_;
 
   /// The first element of the list.
   ReceivedDataElement* head_;
@@ -230,10 +231,20 @@ public:
   ReceivedDataElement* tail_;
 
   /// Number of elements in the list.
-  ssize_t size_;
+  size_t size_;
 
-private:
+  CORBA::ULong read_sample_count_;
+  CORBA::ULong not_read_sample_count_;
+  CORBA::ULong sample_states_;
+
+  void increment_read_count();
+  void decrement_read_count();
+  void increment_not_read_count();
+  void decrement_not_read_count();
   InstanceState_rch instance_state_;
+
+  bool sanity_check();
+  bool sanity_check(ReceivedDataElement* item);
 }; // ReceivedDataElementList
 
 } // namespace DCPS

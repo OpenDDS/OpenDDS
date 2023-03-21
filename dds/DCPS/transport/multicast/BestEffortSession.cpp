@@ -12,14 +12,12 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-BestEffortSession::BestEffortSession(ACE_Reactor* reactor,
-                                     ACE_thread_t owner,
+BestEffortSession::BestEffortSession(RcHandle<ReactorInterceptor> interceptor,
                                      MulticastDataLink* link,
                                      MulticastPeer remote_peer)
-  : MulticastSession(reactor, owner, link, remote_peer)
+  : MulticastSession(interceptor, link, remote_peer)
   , expected_(SequenceNumber::SEQUENCENUMBER_UNKNOWN())
-{
-}
+{}
 
 bool
 BestEffortSession::check_header(const TransportHeader& header)
@@ -31,7 +29,7 @@ BestEffortSession::check_header(const TransportHeader& header)
                ACE_TEXT("expected %q received %q\n"),
                this->expected_.getValue(), header.sequence_.getValue()), 2);
     if (header.sequence_ > this->expected_) {
-      SequenceRange range(this->expected_, header.sequence_.previous());
+      FragmentRange range(this->expected_.getValue(), header.sequence_.previous().getValue());
       this->reassembly_.data_unavailable(range);
     }
   }
@@ -75,14 +73,6 @@ BestEffortSession::start(bool active, bool /*acked*/)
 
   this->active_ = active;
   set_acked();
-
-  if (active && !this->start_syn()) {
-    ACE_ERROR_RETURN((LM_ERROR,
-                      ACE_TEXT("(%P|%t) ERROR: ")
-                      ACE_TEXT("BestEffortSession::start: ")
-                      ACE_TEXT("failed to schedule SYN watchdog!\n")),
-                     false);
-  }
 
   return this->started_ = true;
 }

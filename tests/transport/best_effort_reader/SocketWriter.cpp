@@ -2,8 +2,7 @@
 
 #include "../RtpsUtils.h"
 
-#include <dds/DCPS/RTPS/BaseMessageTypes.h>
-#include <dds/DCPS/RTPS/BaseMessageUtils.h>
+#include <dds/DCPS/RTPS/MessageUtils.h>
 #include <dds/DCPS/RTPS/MessageTypes.h>
 #include <dds/DCPS/RTPS/RtpsCoreC.h>
 #include <dds/DCPS/RTPS/RtpsCoreTypeSupportImpl.h>
@@ -12,9 +11,9 @@
 #include <dds/DCPS/GuidConverter.h>
 #include <dds/DCPS/LogAddr.h>
 #include <dds/DCPS/Message_Block_Ptr.h>
+#include <dds/DCPS/NetworkResource.h>
 #include <dds/DCPS/Serializer.h>
 #include <dds/DCPS/SendStateDataSampleList.h>
-#include <dds/DCPS/transport/framework/NetworkAddress.h>
 
 #include <dds/DdsDcpsGuidC.h>
 
@@ -37,7 +36,7 @@ const Encoding SocketWriter::encoding(Encoding::KIND_XCDR1, ENDIAN_LITTLE);
 const EncapsulationHeader SocketWriter::encap(SocketWriter::encoding, FINAL);
 const double SocketWriter::NTP_FRACTIONAL = 4294.967296; // NTP fractional (2^-32) sec per microsec
 
-Header SocketWriter::header(RepoId id)
+Header SocketWriter::header(GUID_t id)
 {
   const GuidPrefix_t& px = id.guidPrefix;
   Header hdr = {{'R', 'T', 'P', 'S'}, PROTOCOLVERSION, VENDORID_OPENDDS,
@@ -45,7 +44,7 @@ Header SocketWriter::header(RepoId id)
   return hdr;
 }
 
-SocketWriter::SocketWriter(const RepoId& id, const ACE_INET_Addr& destination)
+SocketWriter::SocketWriter(const GUID_t& id, const ACE_INET_Addr& destination)
   : id_(id), hdr_(header(id))
 {
   if (!open_appropriate_socket_type(socket_, local_addr_)) {
@@ -70,7 +69,7 @@ bool SocketWriter::write(CORBA::ULong seqN, const TestMsg& msg) const
   return false;
 }
 
-bool SocketWriter::write(CORBA::ULong seqN, const TestMsg& msg, const RepoId& directedWrite) const
+bool SocketWriter::write(CORBA::ULong seqN, const TestMsg& msg, const GUID_t& directedWrite) const
 {
   const InfoTimestampSubmessage it = timeSubMsg();
   CORBA::UShort sz = static_cast<CORBA::UShort>(20 + 24 + 12 + ACE_OS::strlen(msg.value) + 1);
@@ -86,7 +85,7 @@ bool SocketWriter::write(CORBA::ULong seqN, const TestMsg& msg, const RepoId& di
 }
 
 bool SocketWriter::writeHeartbeat(CORBA::ULong seqN, CORBA::Long heartbeatCount,
-                                  const OpenDDS::DCPS::RepoId& reader) const
+                                  const OpenDDS::DCPS::GUID_t& reader) const
 {
   static const unsigned int STARTING_SEQ = 2;
   OpenDDS::DCPS::Message_Block_Ptr mb(buildHeartbeat(id_.entityId, hdr_,
@@ -151,16 +150,14 @@ bool SocketWriter::send(const ACE_Message_Block& mb) const
 {
   for (std::set<ACE_INET_Addr>::const_iterator i = dest_addr_.begin(); i != dest_addr_.end(); ++i) {
     Locator_t locator;
-    locator.kind = address_to_kind(*i);
-    locator.port = i->get_port_number();
-    address_to_bytes(locator.address, *i);
+    address_to_locator(locator, *i);
     ACE_INET_Addr dest;
     locator_to_address(dest, locator, local_addr_.get_type() != AF_INET);
 
     ssize_t res = socket_.send(mb.rd_ptr(), mb.length(), dest);
     if (res >= 0) {
       ACE_DEBUG((LM_INFO, "SocketWriter %C sent %C (%d bytes)\n",
-                 OPENDDS_STRING(GuidConverter(id_)).c_str(), LogAddr::ip(*i).c_str(), res));
+                 LogGuid(id_).c_str(), LogAddr::ip(*i).c_str(), res));
     } else {
       ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: in socket_.send()%m\n")), false);
     }

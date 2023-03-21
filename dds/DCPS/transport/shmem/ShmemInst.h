@@ -1,6 +1,4 @@
 /*
- *
- *
  * Distributed under the OpenDDS License.
  * See: http://www.opendds.org/license.html
  */
@@ -11,7 +9,8 @@
 #include "Shmem_Export.h"
 #include "ShmemTransport.h"
 
-#include "dds/DCPS/transport/framework/TransportInst.h"
+#include <dds/DCPS/transport/framework/TransportInst.h>
+#include <dds/DCPS/TimeDuration.h>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -20,6 +19,7 @@ namespace DCPS {
 
 class OpenDDS_Shmem_Export ShmemInst : public TransportInst {
 public:
+  static const TimeDuration default_association_resend_period;
 
   virtual int load(ACE_Configuration_Heap& cf,
                    ACE_Configuration_Section_Key& sect);
@@ -42,6 +42,11 @@ public:
   const std::string& hostname() const { return hostname_; }
   const std::string& poolname() const { return poolname_; }
 
+  TimeDuration association_resend_period() const
+  {
+    return association_resend_period_;
+  }
+
 private:
   friend class ShmemType;
   template <typename T, typename U>
@@ -51,6 +56,7 @@ private:
   TransportImpl_rch new_impl();
   std::string hostname_;
   std::string poolname_;
+  TimeDuration association_resend_period_;
 };
 
 } // namespace DCPS

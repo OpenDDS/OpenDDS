@@ -38,11 +38,7 @@ Puller::pull(const ACE_Time_Value& /*duration*/)
 {
   // Block until Publisher completes
   DDS::StatusCondition_var condition = reader_->get_statuscondition();
-  condition->set_enabled_statuses(
-                                  DDS::SUBSCRIPTION_MATCHED_STATUS
-                                  | DDS::PUBLICATION_MATCHED_STATUS
-                                  );
-  //| DDS::DATA_AVAILABLE_STATUS);
+  condition->set_enabled_statuses(DDS::SUBSCRIPTION_MATCHED_STATUS);
 
   DDS::WaitSet_var ws = new DDS::WaitSet;
   ws->attach_condition(condition);

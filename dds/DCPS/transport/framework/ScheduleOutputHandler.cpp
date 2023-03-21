@@ -9,6 +9,7 @@
 #include "ScheduleOutputHandler.h"
 
 #include "TransportSendStrategy.h"
+#include "DCPS/Service_Participant.h"
 
 #if !defined (__ACE_INLINE__)
 #include "ScheduleOutputHandler.inl"
@@ -37,6 +38,8 @@ int
 OpenDDS::DCPS::ScheduleOutputHandler::handle_exception(ACE_HANDLE)
 {
   DBG_ENTRY_LVL("ScheduleOutputHandler","handle_exception",6);
+
+  ThreadStatusManager::Event ev(TheServiceParticipant->get_thread_status_manager());
 
   if( reference_count_ == 1) {
     // The containing TransportSendStrategy has unregistered, so we are

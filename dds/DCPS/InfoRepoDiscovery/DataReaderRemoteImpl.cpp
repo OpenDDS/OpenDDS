@@ -6,7 +6,9 @@
  */
 
 #include "DataReaderRemoteImpl.h"
+
 #include "dds/DCPS/DataReaderCallbacks.h"
+#include "dds/DCPS/debug.h"
 #include "dds/DCPS/GuidConverter.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
@@ -31,22 +33,22 @@ DataReaderRemoteImpl::detach_parent()
 }
 
 void
-DataReaderRemoteImpl::add_association(const RepoId& yourId,
+DataReaderRemoteImpl::add_association(const GUID_t& yourId,
                                       const WriterAssociation& writer,
                                       bool active)
 {
   if (DCPS_debug_level) {
-    GuidConverter writer_converter(yourId);
-    GuidConverter reader_converter(writer.writerId);
+    LogGuid writer_log(yourId);
+    LogGuid reader_log(writer.writerId);
     ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) DataReaderRemoteImpl::add_association - ")
                ACE_TEXT("local %C remote %C\n"),
-               std::string(writer_converter).c_str(),
-               std::string(reader_converter).c_str()));
+               writer_log.c_str(),
+               reader_log.c_str()));
   }
 
   // the local copy of parent_ is necessary to prevent race condition
   RcHandle<DataReaderCallbacks> parent = parent_.lock();
-  if (parent.in()) {
+  if (parent) {
     parent->add_association(yourId, writer, active);
   }
 }
@@ -57,7 +59,7 @@ DataReaderRemoteImpl::remove_associations(const WriterIdSeq& writers,
 {
   // the local copy of parent_ is necessary to prevent race condition
   RcHandle<DataReaderCallbacks> parent = parent_.lock();
-  if (parent.in()) {
+  if (parent) {
     parent->remove_associations(writers, notify_lost);
   }
 }
@@ -68,7 +70,7 @@ DataReaderRemoteImpl::update_incompatible_qos(
 {
   // the local copy of parent_ is necessary to prevent race condition
   RcHandle<DataReaderCallbacks> parent = parent_.lock();
-  if (parent.in()) {
+  if (parent) {
     parent->update_incompatible_qos(status);
   }
 }

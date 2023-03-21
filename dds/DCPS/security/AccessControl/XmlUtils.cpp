@@ -434,7 +434,7 @@ namespace {
     // NOTE: DomainId_t is a signed type, but a domain id actually can't be a negative value.
     unsigned int i = 0;
     const bool success = xercesc::XMLString::textToBin(node->getTextContent(), i) &&
-      i <= domain_id_max;
+      i <= static_cast<unsigned>(domain_id_max);
     if (success) {
       value = static_cast<DomainId_t>(i);
     }

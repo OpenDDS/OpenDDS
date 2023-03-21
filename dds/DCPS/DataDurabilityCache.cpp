@@ -60,7 +60,7 @@ void cleanup_directory(const OPENDDS_VECTOR(OPENDDS_STRING) & path,
  * @brief Event handler that is called when @c service_cleanup_delay
  *        period expires.
  */
-class Cleanup_Handler : public OpenDDS::DCPS::RcEventHandler {
+class Cleanup_Handler : public virtual OpenDDS::DCPS::RcEventHandler {
 public:
 
   typedef
@@ -85,7 +85,10 @@ public:
   }
 
   virtual int handle_timeout(const ACE_Time_Value& /* current_time */,
-                             const void* /* act */) {
+                             const void* /* act */)
+  {
+    OpenDDS::DCPS::ThreadStatusManager::Event ev(TheServiceParticipant->get_thread_status_manager());
+
     if (OpenDDS::DCPS::DCPS_debug_level >= 4) {
       ACE_DEBUG((LM_DEBUG,
                  ACE_TEXT("(%P|%t) OpenDDS - Cleaning up ")

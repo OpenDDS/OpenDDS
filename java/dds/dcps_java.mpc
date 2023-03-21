@@ -24,6 +24,7 @@ project: idl2jni, javah, dcpslib, optional_jni_check, dcps_java_optional, dcps_t
 
   Idl2Jni_Files {
     $(DDS_ROOT)/dds/DdsDcpsCore.idl
+    $(DDS_ROOT)/dds/OpenddsDcpsExt.idl
     $(DDS_ROOT)/dds/DdsDcpsInfrastructure.idl << DdsDcpsConditionSeqJC.h
     $(DDS_ROOT)/dds/DdsDcpsDomain.idl << DdsDcpsTopicJC.h DdsDcpsSubscriptionJC.h DdsDcpsPublicationJC.h
     $(DDS_ROOT)/dds/DdsDcpsGuid.idl

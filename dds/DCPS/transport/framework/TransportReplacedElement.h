@@ -28,7 +28,7 @@ public:
   virtual ~TransportReplacedElement();
 
   /// Accessor for the publisher id.
-  virtual RepoId publication_id() const;
+  virtual GUID_t publication_id() const;
 
   virtual ACE_Message_Block* duplicate_msg() const;
 
@@ -52,7 +52,7 @@ private:
   DataBlockAllocator* db_allocator_;
 
   /// The publication_id() from the original TransportQueueElement
-  RepoId publisher_id_;
+  GUID_t publisher_id_;
 
   /// A deep-copy of the msg() from the original TransportQueueElement.
   Message_Block_Ptr msg_;

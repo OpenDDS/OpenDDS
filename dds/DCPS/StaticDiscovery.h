@@ -52,7 +52,7 @@ public:
   typedef OPENDDS_MAP(OPENDDS_STRING, DDS::PublisherQos) PublisherQosMapType;
   PublisherQosMapType publisherqos_map;
 
-  typedef OPENDDS_SET_CMP(RepoId, GUID_tKeyLessThan) RepoIdSetType;
+  typedef OPENDDS_SET_CMP(GUID_t, GUID_tKeyLessThan) RepoIdSetType;
   struct Reader {
     OPENDDS_STRING topic_name;
     DDS::DataReaderQos qos;
@@ -73,7 +73,7 @@ public:
       , trans_info(ti)
     {}
   };
-  typedef OPENDDS_MAP_CMP(RepoId, Reader, GUID_tKeyLessThan) ReaderMapType;
+  typedef OPENDDS_MAP_CMP(GUID_t, Reader, GUID_tKeyLessThan) ReaderMapType;
   ReaderMapType reader_map;
 
   struct Writer {
@@ -96,7 +96,7 @@ public:
       , trans_info(ti)
     {}
   };
-  typedef OPENDDS_MAP_CMP(RepoId, Writer, GUID_tKeyLessThan) WriterMapType;
+  typedef OPENDDS_MAP_CMP(GUID_t, Writer, GUID_tKeyLessThan) WriterMapType;
   WriterMapType writer_map;
 
   struct StaticDiscGuidDomainEqual {
@@ -121,14 +121,14 @@ public:
   static EntityId_t build_id(const unsigned char* entity_key /* length of 3 */,
                              const unsigned char entity_kind);
 
-  static RepoId build_id(DDS::DomainId_t domain,
+  static GUID_t build_id(DDS::DomainId_t domain,
                          const unsigned char* participant_id /* length of 6 */,
                          const EntityId_t& entity_id);
 };
 
 class StaticParticipant;
 class StaticEndpointManager
-  : public RcEventHandler
+  : public virtual RcEventHandler
   , public DiscoveryListener
 {
 protected:
@@ -290,7 +290,7 @@ protected:
   }
 
 public:
-  StaticEndpointManager(const RepoId& participant_id,
+  StaticEndpointManager(const GUID_t& participant_id,
                         ACE_Thread_Mutex& lock,
                         const EndpointRegistry& registry,
                         StaticParticipant& participant);
@@ -299,39 +299,39 @@ public:
 
   void init_bit();
 
-  virtual void assign_publication_key(RepoId& rid,
-                                      const RepoId& topicId,
+  virtual void assign_publication_key(GUID_t& rid,
+                                      const GUID_t& topicId,
                                       const DDS::DataWriterQos& qos);
-  virtual void assign_subscription_key(RepoId& rid,
-                                       const RepoId& topicId,
+  virtual void assign_subscription_key(GUID_t& rid,
+                                       const GUID_t& topicId,
                                        const DDS::DataReaderQos& qos);
 
-  virtual bool update_topic_qos(const RepoId& /*topicId*/,
+  virtual bool update_topic_qos(const GUID_t& /*topicId*/,
                                 const DDS::TopicQos& /*qos*/);
 
-  virtual bool update_publication_qos(const RepoId& /*publicationId*/,
+  virtual bool update_publication_qos(const GUID_t& /*publicationId*/,
                                       const DDS::DataWriterQos& /*qos*/,
                                       const DDS::PublisherQos& /*publisherQos*/);
 
-  virtual bool update_subscription_qos(const RepoId& /*subscriptionId*/,
+  virtual bool update_subscription_qos(const GUID_t& /*subscriptionId*/,
                                        const DDS::DataReaderQos& /*qos*/,
                                        const DDS::SubscriberQos& /*subscriberQos*/);
 
-  virtual bool update_subscription_params(const RepoId& /*subId*/,
+  virtual bool update_subscription_params(const GUID_t& /*subId*/,
                                           const DDS::StringSeq& /*params*/);
 
   virtual bool disassociate();
 
-  virtual DDS::ReturnCode_t add_publication_i(const RepoId& /*rid*/,
+  virtual DDS::ReturnCode_t add_publication_i(const GUID_t& /*rid*/,
                                               LocalPublication& /*pub*/);
 
-  virtual DDS::ReturnCode_t remove_publication_i(const RepoId& /*publicationId*/,
+  virtual DDS::ReturnCode_t remove_publication_i(const GUID_t& /*publicationId*/,
                                                  LocalPublication& /*pub*/);
 
-  virtual DDS::ReturnCode_t add_subscription_i(const RepoId& /*rid*/,
+  virtual DDS::ReturnCode_t add_subscription_i(const GUID_t& /*rid*/,
                                                LocalSubscription& /*pub*/);
 
-  virtual DDS::ReturnCode_t remove_subscription_i(const RepoId& /*subscriptionId*/,
+  virtual DDS::ReturnCode_t remove_subscription_i(const GUID_t& /*subscriptionId*/,
                                                   LocalSubscription& /*sub*/);
 
   virtual bool is_expectant_opendds(const GUID_t& endpoint) const;
@@ -340,16 +340,16 @@ public:
 
   virtual void populate_transport_locator_sequence(TransportLocatorSeq*& /*tls*/,
                                                    DiscoveredSubscriptionIter& /*iter*/,
-                                                   const RepoId& /*reader*/);
+                                                   const GUID_t& /*reader*/);
 
   virtual void populate_transport_locator_sequence(TransportLocatorSeq*& /*tls*/,
                                                    DiscoveredPublicationIter& /*iter*/,
-                                                   const RepoId& /*reader*/);
+                                                   const GUID_t& /*reader*/);
 
-  virtual void reader_exists(const RepoId& readerid, const RepoId& writerid);
-  virtual void reader_does_not_exist(const RepoId& readerid, const RepoId& writerid);
-  virtual void writer_exists(const RepoId& writerid, const RepoId& readerid);
-  virtual void writer_does_not_exist(const RepoId& writerid, const RepoId& readerid);
+  virtual void reader_exists(const GUID_t& readerid, const GUID_t& writerid);
+  virtual void reader_does_not_exist(const GUID_t& readerid, const GUID_t& writerid);
+  virtual void writer_exists(const GUID_t& writerid, const GUID_t& readerid);
+  virtual void writer_does_not_exist(const GUID_t& writerid, const GUID_t& readerid);
   void cleanup_type_lookup_data(const GuidPrefix_t& prefix,
                                 const XTypes::TypeIdentifier& ti,
                                 bool secure);
@@ -417,45 +417,12 @@ public:
                               const GUID_t& /* remote_guid */) {}
 
 private:
-  struct MatchingData {
-    GUID_t writer;
-    GUID_t reader;
-    SequenceNumber rpc_sequence_number;
-    MonotonicTimePoint time_added_to_map;
-  };
-
-  struct MatchingPair {
-    MatchingPair(GUID_t writer, GUID_t reader)
-      : writer_(writer), reader_(reader) {}
-
-    GUID_t writer_;
-    GUID_t reader_;
-
-    bool operator<(const MatchingPair& a_other) const
-    {
-      if (GUID_tKeyLessThan()(writer_, a_other.writer_)) return true;
-
-      if (GUID_tKeyLessThan()(a_other.writer_, writer_)) return false;
-
-      if (GUID_tKeyLessThan()(reader_, a_other.reader_)) return true;
-
-      if (GUID_tKeyLessThan()(a_other.reader_, reader_)) return false;
-
-      return false;
-    }
-  };
-  typedef OPENDDS_MAP(MatchingPair, MatchingData) MatchingDataMap;
-  typedef MatchingDataMap::iterator MatchingDataIter;
-
   void match(const GUID_t& writer, const GUID_t& reader);
+  void need_minimal_and_or_complete_types(const XTypes::TypeInformation* type_info,
+                                          bool& need_minimal,
+                                          bool& need_complete) const;
   void remove_expired_endpoints(const MonotonicTimePoint& /*now*/);
-  /// This assumes that lock_ is being held
-  void match_continue(SequenceNumber rpc_sequence_number);
   void match_continue(const GUID_t& writer, const GUID_t& reader);
-  void save_matching_data_and_get_typeobjects(const XTypes::TypeInformation* type_info,
-                                              MatchingData& md, const MatchingPair& mp,
-                                              const GUID_t& remote_id,
-                                              bool is_discovery_protected);
 
   void remove_from_bit(const DiscoveredPublication& pub)
   {
@@ -489,7 +456,6 @@ private:
 #endif
 
   XTypes::TypeLookupService_rch type_lookup_service_;
-  MatchingDataMap matching_data_buffer_;
   typedef PmfSporadicTask<StaticEndpointManager> StaticEndpointManagerSporadic;
   RcHandle<StaticEndpointManagerSporadic> type_lookup_reply_deadline_processor_;
   TimeDuration max_type_lookup_service_reply_period_;
@@ -510,9 +476,9 @@ private:
   OrigSeqNumberMap orig_seq_numbers_;
 };
 
-class StaticParticipant : public RcObject {
+class StaticParticipant : public virtual RcObject {
 public:
-  StaticParticipant(RepoId& guid,
+  StaticParticipant(GUID_t& guid,
                     const DDS::DomainParticipantQos& qos,
                     const EndpointRegistry& registry)
     : qos_(qos)
@@ -826,7 +792,7 @@ private:
     MonotonicTimePoint discovered_at_;
     MonotonicTimePoint lease_expiration_;
     DDS::InstanceHandle_t bit_ih_;
-    SequenceNumber last_seq_;
+    SequenceNumber max_seq_;
     ACE_UINT16 seq_reset_count_;
   };
 
@@ -923,7 +889,7 @@ public:
 
   static StaticDiscovery_rch instance() { return instance_; }
 
-  DDS::Subscriber_ptr init_bit(DCPS::DomainParticipantImpl* participant);
+  RcHandle<BitSubscriber> init_bit(DCPS::DomainParticipantImpl* participant);
 
   void fini_bit(DCPS::DomainParticipantImpl* participant);
 

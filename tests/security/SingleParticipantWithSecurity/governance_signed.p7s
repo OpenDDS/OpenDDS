@@ -1,9 +1,9 @@
 MIME-Version: 1.0
-Content-Type: multipart/signed; protocol="application/x-pkcs7-signature"; micalg="sha-256"; boundary="----5C5C1122A1B899FDE49493C0205B2C31"
+Content-Type: multipart/signed; protocol="application/x-pkcs7-signature"; micalg="sha-256"; boundary="----3004E4678350193BE6C073BBC4925DCB"
 
 This is an S/MIME signed message
 
-------5C5C1122A1B899FDE49493C0205B2C31
+------3004E4678350193BE6C073BBC4925DCB
 Content-Type: text/plain
 
 <?xml version="1.0" encoding="UTF-8"?>
@@ -11,39 +11,47 @@ Content-Type: text/plain
   Illustrates DDS Security is an extension of DDS. It is still possible to
   run applications without any protection.
 -->
-<dds xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../schema/omg_shared_ca_governance.xsd">
+<dds xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.omg.org/spec/DDS-SECURITY/20170901/omg_shared_ca_permissions.xsd">
   <domain_access_rules>
-    <!-- Domain 4 is an "open domain" -->
     <domain_rule>
       <domains>
         <id>4</id>
       </domains>
-      <allow_unauthenticated_participants>true</allow_unauthenticated_participants>
-      <enable_join_access_control>false</enable_join_access_control>
-      <discovery_protection_kind>NONE</discovery_protection_kind>
-      <liveliness_protection_kind>NONE</liveliness_protection_kind>
-      <rtps_protection_kind>NONE</rtps_protection_kind>
+      <allow_unauthenticated_participants>false</allow_unauthenticated_participants>
+      <enable_join_access_control>true</enable_join_access_control>
+      <discovery_protection_kind>ENCRYPT</discovery_protection_kind>
+      <liveliness_protection_kind>ENCRYPT</liveliness_protection_kind>
+      <rtps_protection_kind>ENCRYPT</rtps_protection_kind>
       <topic_access_rules>
         <topic_rule>
           <topic_expression>*</topic_expression>
-          <enable_discovery_protection>false</enable_discovery_protection>
-          <enable_liveliness_protection>false</enable_liveliness_protection>
+          <enable_discovery_protection>true</enable_discovery_protection>
+          <enable_liveliness_protection>true</enable_liveliness_protection>
+          <enable_read_access_control>true</enable_read_access_control>
+          <enable_write_access_control>true</enable_write_access_control>
+          <metadata_protection_kind>ENCRYPT</metadata_protection_kind>
+          <data_protection_kind>ENCRYPT</data_protection_kind>
+        </topic_rule>
+        <topic_rule>
+          <topic_expression>Work Around for check_create_participant_bug</topic_expression>
+          <enable_discovery_protection>true</enable_discovery_protection>
+          <enable_liveliness_protection>true</enable_liveliness_protection>
           <enable_read_access_control>false</enable_read_access_control>
           <enable_write_access_control>false</enable_write_access_control>
-          <metadata_protection_kind>NONE</metadata_protection_kind>
-          <data_protection_kind>NONE</data_protection_kind>
+          <metadata_protection_kind>ENCRYPT</metadata_protection_kind>
+          <data_protection_kind>ENCRYPT</data_protection_kind>
         </topic_rule>
       </topic_access_rules>
     </domain_rule>
   </domain_access_rules>
 </dds>
 
-------5C5C1122A1B899FDE49493C0205B2C31
+------3004E4678350193BE6C073BBC4925DCB
 Content-Type: application/x-pkcs7-signature; name="smime.p7s"
 Content-Transfer-Encoding: base64
 Content-Disposition: attachment; filename="smime.p7s"
 
-MIIHEAYJKoZIhvcNAQcCoIIHATCCBv0CAQExDzANBglghkgBZQMEAgEFADALBgkq
+MIIHQAYJKoZIhvcNAQcCoIIHMTCCBy0CAQExDzANBglghkgBZQMEAgEFADALBgkq
 hkiG9w0BBwGgggP4MIID9DCCAtwCCQCkjopvwK438jANBgkqhkiG9w0BAQsFADCB
 uzELMAkGA1UEBhMCVVMxCzAJBgNVBAgMAk1PMRQwEgYDVQQHDAtTYWludCBMb3Vp
 czEvMC0GA1UECgwmT2JqZWN0IENvbXB1dGluZyAoVGVzdCBQZXJtaXNzaW9ucyBD
@@ -65,22 +73,23 @@ ggEBAE9QWa1xNjxLWIw88eVrQxOBCIlqCkAiTx2pAurEdiDtz8ZQdDMQQmoAuppT
 WhUFLfQfnjE8hRL5oKPkhk2gRC6K5x+10cZMclgEmZONANtAuSJurMhwgqLxwgGw
 51aIpL6LTxtdZ33LIPM8AN51Tgj5t2VM/49iNq9HdqAl7VQuyHEc/eCAIp7p69nq
 cpS9VBJAJoHN8lmDDHYxM+pYtQAgmBKLBxTyDrgJZ+3j3FVOp0orRxarE3XjJ+0b
-IVnO6yhjunPOpgsyEcxH9/7Enm8xggLcMIIC2AIBATCByTCBuzELMAkGA1UEBhMC
+IVnO6yhjunPOpgsyEcxH9/7Enm8xggMMMIIDCAIBATCByTCBuzELMAkGA1UEBhMC
 VVMxCzAJBgNVBAgMAk1PMRQwEgYDVQQHDAtTYWludCBMb3VpczEvMC0GA1UECgwm
 T2JqZWN0IENvbXB1dGluZyAoVGVzdCBQZXJtaXNzaW9ucyBDQSkxLzAtBgNVBAMM
 Jk9iamVjdCBDb21wdXRpbmcgKFRlc3QgUGVybWlzc2lvbnMgQ0EpMScwJQYJKoZI
 hvcNAQkBFhhpbmZvQG9iamVjdGNvbXB1dGluZy5jb20CCQCkjopvwK438jANBglg
-hkgBZQMEAgEFAKCB5DAYBgkqhkiG9w0BCQMxCwYJKoZIhvcNAQcBMBwGCSqGSIb3
-DQEJBTEPFw0xODA2MTMwNTE2NTJaMC8GCSqGSIb3DQEJBDEiBCAWYH+zuWWYtcrt
-ccLvtLL3Nk3xCHh/nXx0eOyJpPO5NzB5BgkqhkiG9w0BCQ8xbDBqMAsGCWCGSAFl
-AwQBKjALBglghkgBZQMEARYwCwYJYIZIAWUDBAECMAoGCCqGSIb3DQMHMA4GCCqG
+hkgBZQMEAgEFAKCCARMwGAYJKoZIhvcNAQkDMQsGCSqGSIb3DQEHATAcBgkqhkiG
+9w0BCQUxDxcNMjMwMjE0MDQwMzUzWjAvBgkqhkiG9w0BCQQxIgQgbHXL4/ElrR4g
+jhAxdVc8j17Q7z1ZNjXgtrtTevXIfKAwgacGCSqGSIb3DQEJDzGBmTCBljALBglg
+hkgBZQMEASowCAYGKoUDAgIJMAoGCCqFAwcBAQICMAoGCCqFAwcBAQIDMAgGBiqF
+AwICFTALBglghkgBZQMEARYwCwYJYIZIAWUDBAECMAoGCCqGSIb3DQMHMA4GCCqG
 SIb3DQMCAgIAgDANBggqhkiG9w0DAgIBQDAHBgUrDgMCBzANBggqhkiG9w0DAgIB
-KDANBgkqhkiG9w0BAQEFAASCAQCHTuJtQP3hkhqQEYH1/yyqwa6Oiy80KugalKYn
-4eaeuVoL1T+8T59vEmv99R8BdxJAVfjMnKTfPbRxjXh7jRKLkAI4uYq0I9b+vXo+
-IUzf7jYpM/9bvkZTkR+/M7cypqGLSPIoNdoU4FuBXvIEon9Kf7ZYVHvMrCd/7HDl
-JB8AEtMJDf6l+VYkkE7yjFrLWkQA2oLEDAFq8yrRnq440+tcYIwfs49xZKA47ctp
-bbwsrGzfA402Je/r/CGD4i5OPrkSiQBOgXLta5soKxXZphgDwwMIOGVyCsfIkNU/
-eF7udRr7Q2j8MtPb7mznNnmpINRHc35eQrNJh5WIbjRM3FpE
+KDANBgkqhkiG9w0BAQEFAASCAQAMBUKLd5hNp/lf4ZrXCP6ScqLudCgem+/Z2rH+
+XVK7PdphBl8BYv+n2eQOezPXSLjkI0bE3edu0uueFZdpD9RfK1BDYIpelNtjSHgS
+YZ0Qlekp156EZRSMwqjudYB22pA4ld5wPo0gh5s6HBi4B5qzYGTKqE7mjrBtitVD
+JR6NenHqSs31IkTEHSPRO2IvBDSqNR/j78/2cKVkVtdeKnNTjmurg4Oyl2JSRNlC
+cJU4EaVMQVGsqsLNwRperudkR/htR9yt33RIEuAuoufbxbR26Wf3yW6P6Zhb+e86
+oR9/b7MrgiPrVdi2pf0rFszGYNL6jioGq1llqFSTR1UfYNCX
 
-------5C5C1122A1B899FDE49493C0205B2C31--
+------3004E4678350193BE6C073BBC4925DCB--
 

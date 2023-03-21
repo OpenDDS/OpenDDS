@@ -8,6 +8,8 @@
 
 #include "Recorder.h"
 
+#include "GuidConverter.h"
+
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {

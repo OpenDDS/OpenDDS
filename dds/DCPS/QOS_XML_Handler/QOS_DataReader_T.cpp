@@ -99,6 +99,87 @@ QOS_DataReader_T<XML_QOS_TYPE, DDS_QOS_TYPE>::read_qos(DDS_QOS_TYPE& dds_qos, co
             }
         }
     }
+  if (xml_qos->type_consistency_p())
+    {
+      if (xml_qos->type_consistency().kind_p())
+        {
+          QosCommon::get_type_consistency_kind(xml_qos->type_consistency().kind(),
+                                               dds_qos.type_consistency.kind);
+
+          if (OpenDDS::DCPS::DCPS_debug_level > 9)
+            {
+              ACE_DEBUG((LM_TRACE,
+                ACE_TEXT("QOS_DataReader_T<XML_QOS_TYPE, DDS_QOS_TYPE>::read_qos - ")
+                ACE_TEXT("set type_consistency kind to <%d>\n"),
+                dds_qos.type_consistency.kind));
+            }
+        }
+      if (xml_qos->type_consistency().ignore_sequence_bounds_p())
+        {
+          dds_qos.type_consistency.ignore_sequence_bounds =
+            xml_qos->type_consistency().ignore_sequence_bounds();
+
+          if (OpenDDS::DCPS::DCPS_debug_level > 9)
+            {
+              ACE_DEBUG((LM_TRACE,
+                ACE_TEXT("QOS_DataReader_T<XML_QOS_TYPE, DDS_QOS_TYPE>::read_qos - ")
+                ACE_TEXT("Set ignore_sequence_bounds to <%d>\n"),
+                dds_qos.type_consistency.ignore_sequence_bounds));
+            }
+        }
+      if (xml_qos->type_consistency().ignore_string_bounds_p())
+        {
+          dds_qos.type_consistency.ignore_string_bounds =
+            xml_qos->type_consistency().ignore_string_bounds();
+
+          if (OpenDDS::DCPS::DCPS_debug_level > 9)
+            {
+              ACE_DEBUG((LM_TRACE,
+                ACE_TEXT("QOS_DataReader_T<XML_QOS_TYPE, DDS_QOS_TYPE>::read_qos - ")
+                ACE_TEXT("Set ignore_string_bounds to <%d>\n"),
+                dds_qos.type_consistency.ignore_string_bounds));
+            }
+        }
+      if (xml_qos->type_consistency().ignore_member_names_p())
+        {
+          dds_qos.type_consistency.ignore_member_names =
+            xml_qos->type_consistency().ignore_member_names();
+
+          if (OpenDDS::DCPS::DCPS_debug_level > 9)
+            {
+              ACE_DEBUG((LM_TRACE,
+                ACE_TEXT("QOS_DataReader_T<XML_QOS_TYPE, DDS_QOS_TYPE>::read_qos - ")
+                ACE_TEXT("Set ignore_member_names to <%d>\n"),
+                dds_qos.type_consistency.ignore_member_names));
+            }
+        }
+      if (xml_qos->type_consistency().prevent_type_widening_p())
+        {
+          dds_qos.type_consistency.prevent_type_widening =
+            xml_qos->type_consistency().prevent_type_widening();
+
+          if (OpenDDS::DCPS::DCPS_debug_level > 9)
+            {
+              ACE_DEBUG((LM_TRACE,
+                ACE_TEXT("QOS_DataReader_T<XML_QOS_TYPE, DDS_QOS_TYPE>::read_qos - ")
+                ACE_TEXT("Set prevent_type_widening to <%d>\n"),
+                dds_qos.type_consistency.prevent_type_widening));
+            }
+        }
+      if (xml_qos->type_consistency().force_type_validation_p())
+        {
+          dds_qos.type_consistency.force_type_validation =
+            xml_qos->type_consistency().force_type_validation();
+
+          if (OpenDDS::DCPS::DCPS_debug_level > 9)
+            {
+              ACE_DEBUG((LM_TRACE,
+                ACE_TEXT("QOS_DataReader_T<XML_QOS_TYPE, DDS_QOS_TYPE>::read_qos - ")
+                ACE_TEXT("Set force_type_validation to <%d>\n"),
+                dds_qos.type_consistency.force_type_validation));
+            }
+        }
+    }
 }
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL

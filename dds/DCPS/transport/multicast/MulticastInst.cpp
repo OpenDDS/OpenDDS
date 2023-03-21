@@ -10,11 +10,10 @@
 #include "MulticastTransport.h"
 
 #include <dds/DCPS/LogAddr.h>
+#include <dds/DCPS/NetworkResource.h>
+#include <dds/DCPS/transport/framework/TransportDefs.h>
 
-#include "dds/DCPS/transport/framework/TransportDefs.h"
-#include "dds/DCPS/transport/framework/NetworkAddress.h"
-
-#include "ace/Configuration.h"
+#include <ace/Configuration.h>
 
 #include <iostream>
 #include <sstream>
@@ -33,12 +32,6 @@ const bool DEFAULT_RELIABLE(true);
 const double DEFAULT_SYN_BACKOFF(2.0);
 const long DEFAULT_SYN_INTERVAL(250);
 const long DEFAULT_SYN_TIMEOUT(30000);
-
-const size_t DEFAULT_NAK_DEPTH(32);
-const long DEFAULT_NAK_INTERVAL(500);
-const long DEFAULT_NAK_DELAY_INTERVALS(4);
-const long DEFAULT_NAK_MAX(3);
-const long DEFAULT_NAK_TIMEOUT(30000);
 
 const unsigned char DEFAULT_TTL(1);
 const bool DEFAULT_ASYNC_SEND(false);
@@ -89,7 +82,8 @@ MulticastInst::load(ACE_Configuration_Heap& cf,
   GET_CONFIG_VALUE(cf, sect, ACE_TEXT("port_offset"),
                    this->port_offset_, u_short)
 
-  ACE_TString group_address_s;
+  // Explicitly initialize this string to stop gcc 11 from issuing a warning.
+  ACE_TString group_address_s(ACE_TEXT(""));
   GET_CONFIG_TSTRING_VALUE(cf, sect, ACE_TEXT("group_address"),
                            group_address_s)
   if (group_address_s.is_empty()) {
@@ -148,14 +142,14 @@ MulticastInst::default_group_address(ACE_INET_Addr& group_address)
 TransportImpl_rch
 MulticastInst::new_impl()
 {
-  return make_rch<MulticastTransport>(ref(*this));
+  return make_rch<MulticastTransport>(rchandle_from(this));
 }
 
 OPENDDS_STRING
 MulticastInst::dump_to_str() const
 {
   std::ostringstream os;
-  os << TransportInst::dump_to_str() << std::endl;
+  os << TransportInst::dump_to_str();
 
   os << formatNameForDump("group_address")       << LogAddr(group_address_).str() << std::endl;
   os << formatNameForDump("local_address")       << this->local_address_ << std::endl;
@@ -163,13 +157,13 @@ MulticastInst::dump_to_str() const
   os << formatNameForDump("port_offset")         << this->port_offset_ << std::endl;
   os << formatNameForDump("reliable")            << (this->reliable_ ? "true" : "false") << std::endl;
   os << formatNameForDump("syn_backoff")         << this->syn_backoff_ << std::endl;
-  os << formatNameForDump("syn_interval")        << this->syn_interval_.value().msec() << std::endl;
-  os << formatNameForDump("syn_timeout")         << this->syn_timeout_.value().msec() << std::endl;
+  os << formatNameForDump("syn_interval")        << this->syn_interval_.str() << std::endl;
+  os << formatNameForDump("syn_timeout")         << this->syn_timeout_.str() << std::endl;
   os << formatNameForDump("nak_depth")           << this->nak_depth_ << std::endl;
-  os << formatNameForDump("nak_interval")        << this->nak_interval_.value().msec() << std::endl;
+  os << formatNameForDump("nak_interval")        << this->nak_interval_.str() << std::endl;
   os << formatNameForDump("nak_delay_intervals") << this->nak_delay_intervals_ << std::endl;
   os << formatNameForDump("nak_max")             << this->nak_max_ << std::endl;
-  os << formatNameForDump("nak_timeout")         << this->nak_timeout_.value().msec() << std::endl;
+  os << formatNameForDump("nak_timeout")         << this->nak_timeout_.str() << std::endl;
   os << formatNameForDump("ttl")                 << int(this->ttl_) << std::endl;
   os << formatNameForDump("rcv_buffer_size");
 
@@ -192,12 +186,12 @@ MulticastInst::dump_to_str() const
 size_t
 MulticastInst::populate_locator(OpenDDS::DCPS::TransportLocator& info, ConnectionInfoFlags) const
 {
-  if (this->group_address_ != ACE_INET_Addr()) {
-    NetworkAddress network_address(this->group_address_);
+  if (group_address_ != ACE_INET_Addr()) {
+    NetworkResource network_resource(group_address_);
 
     ACE_OutputCDR cdr;
-    cdr << network_address;
-    cdr << ACE_OutputCDR::from_boolean (ACE_CDR::Boolean (this->is_reliable ()));
+    cdr << network_resource;
+    cdr << ACE_OutputCDR::from_boolean (ACE_CDR::Boolean (is_reliable()));
 
     const CORBA::ULong len = static_cast<CORBA::ULong>(cdr.total_length());
     char* buffer = const_cast<char*>(cdr.buffer()); // safe

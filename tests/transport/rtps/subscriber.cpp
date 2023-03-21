@@ -10,13 +10,15 @@
 #include <dds/DCPS/transport/framework/TransportExceptions.h>
 #include <dds/DCPS/transport/framework/ReceivedDataSample.h>
 
-#include <dds/DCPS/RTPS/BaseMessageUtils.h>
+#include <dds/DCPS/RTPS/MessageUtils.h>
 
 #include <dds/DCPS/RepoIdBuilder.h>
 #include <dds/DCPS/GuidConverter.h>
 #include <dds/DCPS/AssociationData.h>
 #include <dds/DCPS/Service_Participant.h>
+#include <dds/DCPS/NetworkAddress.h>
 #include <dds/DCPS/Qos_Helper.h>
+#include <dds/OpenddsDcpsExtTypeSupportImpl.h>
 
 #include <ace/OS_main.h>
 #include <ace/String_Base.h>
@@ -38,7 +40,7 @@ class SimpleDataReader : public TransportReceiveListener, public TransportClient
 {
 public:
 
-  explicit SimpleDataReader(const RepoId& sub_id)
+  explicit SimpleDataReader(const GUID_t& sub_id)
     : done_(false)
     , sub_id_(sub_id)
     , pub_id_(GUID_UNKNOWN)
@@ -70,7 +72,8 @@ public:
 
     switch (sample.header_.message_id_) {
     case SAMPLE_DATA: {
-      Serializer ser(sample.sample_.get(), encoding);
+      Message_Block_Ptr payload(sample.data());
+      Serializer ser(payload.get(), encoding);
 
       OpenDDS::DCPS::EncapsulationHeader encap;
       if (!(ser >> encap)) {
@@ -128,7 +131,8 @@ public:
     case DISPOSE_INSTANCE:
     case UNREGISTER_INSTANCE:
     case DISPOSE_UNREGISTER_INSTANCE: {
-      Serializer ser(sample.sample_.get(), encoding);
+      Message_Block_Ptr payload(sample.data());
+      Serializer ser(payload.get(), encoding);
 
       OpenDDS::DCPS::EncapsulationHeader encap;
       if (!(ser >> encap)) {
@@ -187,7 +191,7 @@ public:
   // Implementing TransportClient
   bool check_transport_qos(const TransportInst&)
     { return true; }
-  const RepoId& get_repo_id() const
+  GUID_t get_guid() const
     { return sub_id_; }
   DDS::DomainId_t domain_id() const
     { return 0; }
@@ -198,8 +202,8 @@ public:
   using TransportClient::disassociate;
 
   bool done_;
-  const RepoId sub_id_;
-  RepoId pub_id_;
+  const GUID_t sub_id_;
+  GUID_t pub_id_;
   SequenceNumber seq_;
   int control_msg_count_;
 };
@@ -245,7 +249,7 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     }
 #endif
     ACE_INET_Addr addr(port, ACE_TEXT_ALWAYS_CHAR(host.c_str()));
-    rtps_inst->local_address(addr);
+    rtps_inst->local_address(OpenDDS::DCPS::NetworkAddress(addr));
     rtps_inst->datalink_release_delay_ = 0;
 
     TransportConfig_rch cfg = TheTransportRegistry->create_config("cfg");
@@ -274,16 +278,12 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 
     std::cerr << "***Ready written to subready.txt\n";
 
-    using OpenDDS::RTPS::address_to_kind;
-    using OpenDDS::RTPS::address_to_bytes;
     using OpenDDS::RTPS::message_block_to_sequence;
 
     ACE_INET_Addr remote_addr("127.0.0.1:12345");
     LocatorSeq locators;
     locators.length(1);
-    locators[0].kind = address_to_kind(remote_addr);
-    locators[0].port = remote_addr.get_port_number();
-    address_to_bytes(locators[0].address, remote_addr);
+    address_to_locator(locators[0], remote_addr);
 
     const Encoding& locators_encoding = OpenDDS::RTPS::get_locators_encoding();
     size_t size_locator = 0;

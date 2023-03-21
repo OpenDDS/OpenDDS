@@ -5,13 +5,13 @@
  * See: http://www.opendds.org/license.html
  */
 
-#include <ace/Arg_Shifter.h>
-#include <ace/OS_NS_string.h>
-#include <ace/OS_main.h>
-#include <iostream>
-#include <ace/OS_NS_unistd.h>
+#include "TestCase.h"
 
-#include "dds/DCPS/StaticIncludes.h"
+#include <tests/Utils/ExceptionStreams.h>
+
+#include <dds/DCPS/StaticIncludes.h>
+#include <dds/DCPS/TimePoint_T.h>
+#include <dds/DCPS/WaitSet.h>
 #if defined ACE_AS_STATIC_LIBS && !defined OPENDDS_SAFETY_PROFILE
 #include <dds/DCPS/transport/udp/Udp.h>
 #include <dds/DCPS/transport/rtps_udp/RtpsUdp.h>
@@ -20,14 +20,17 @@
 #include <dds/DCPS/transport/shmem/Shmem.h>
 #endif
 
-#include "TestCase.h"
-#include "tests/Utils/ExceptionStreams.h"
-#include <dds/DCPS/WaitSet.h>
+#include <ace/Arg_Shifter.h>
+#include <ace/OS_NS_string.h>
+#include <ace/OS_main.h>
+#include <ace/OS_NS_unistd.h>
 
+#include <iostream>
 
 namespace {
 
 const int num_messages = 100;
+const bool best_effort = ACE_OS::getenv("OPENDDS_TEST_BEST_EFFORT") != 0 && std::strtol(ACE_OS::getenv("OPENDDS_TEST_BEST_EFFORT"), 0, 10) != 0;
 
 } // namespace
 
@@ -58,6 +61,9 @@ TestCase::init_datareader(
 {
   ACE_DEBUG((LM_DEBUG, ACE_TEXT("%N:%l: INFO: TestCase::init_datareader\n")));
 
+  if (!best_effort) {
+    qos.reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
+  }
   qos.liveliness.lease_duration.sec = 1;
   qos.liveliness.lease_duration.nanosec = 0;
   return DDS::RETCODE_OK;
@@ -106,9 +112,10 @@ TestCase::test()
                                      DDS::NEW_VIEW_STATE,
                                      DDS::ALIVE_INSTANCE_STATE);
     ws->attach_condition(rc);
-    DDS::Duration_t finite = {30, 0};
+    const OpenDDS::DCPS::MonotonicTimePoint start = OpenDDS::DCPS::MonotonicTimePoint::now();
+    const OpenDDS::DCPS::TimeDuration timeout(30, 0);
+    const DDS::Duration_t one_sec = {1, 0};
     const size_t num_expected = num_messages * publishers_.size();
-
     do {
       TestMessageSeq data_values;
       DDS::SampleInfoSeq sample_infos;
@@ -117,17 +124,23 @@ TestCase::test()
       read += data_values.length();
       if (read != num_expected) {
         DDS::ConditionSeq active;
-        DDS::ReturnCode_t ret = ws->wait(active, finite);
-        if (ret != DDS::RETCODE_OK) {
+        DDS::ReturnCode_t ret = ws->wait(active, one_sec);
+        if (ret != DDS::RETCODE_OK && ret != DDS::RETCODE_TIMEOUT) {
           ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("%N:%l: wait()")
                       ACE_TEXT(" ERROR: wait for samples failed: %d\n"),
                       ret), -1);
         }
       }
-    } while (read != num_expected);
+    } while (read != num_expected && (OpenDDS::DCPS::MonotonicTimePoint::now() - start < timeout));
 
     ws->detach_condition(rc);
+
+    // Only check the number read if the transport is reliable
+    if (!best_effort && read < num_expected) {
+      ACE_ERROR_RETURN((LM_ERROR, "ERROR: timeout exceeded\n"), -1);
+    }
+
   }
 
   // This test verifies associations formed between subscribers and
@@ -170,7 +183,8 @@ TestCase::test()
                         ACE_TEXT(" ERROR: unknown instance state: %d\n"),
                         si.instance_state), -1);
           }
-        } else {
+        } else if (!best_effort) {
+          // We can only be sure there will be something to read if the transport is reliable
           ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("%N:%l: take_next_sample()")
                       ACE_TEXT(" ERROR: unexpected status: %d\n"),

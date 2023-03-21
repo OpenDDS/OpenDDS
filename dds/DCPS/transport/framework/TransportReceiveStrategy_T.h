@@ -13,6 +13,7 @@
 #include "TransportStrategy.h"
 #include "TransportDefs.h"
 #include "TransportHeader.h"
+#include "TransportInst_rch.h"
 
 #include "ace/INET_Addr.h"
 #include "ace/Lock_Adapter_T.h"
@@ -23,26 +24,37 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
+struct OpenDDS_Dcps_Export TransportReceiveConstants { // non-template base for constants only
+  //
+  // The total available space in the receive buffers must have enough to hold
+  // a max sized message.  The max message is about 64K and the low water for
+  // a buffer is 4096.  Therefore, 16 receive buffers is appropriate.
+  //
+  static const size_t RECEIVE_BUFFERS = DEFAULT_TRANSPORT_RECEIVE_BUFFERS;
+  static const size_t BUFFER_LOW_WATER = 4096;
+
+  //
+  // Message Block Allocators are more plentiful since they hold samples
+  // as well as data read from the handle(s).
+  //
+  static const size_t MESSAGE_BLOCKS = 1000;
+  static const size_t DATA_BLOCKS = 100;
+};
+
+
 /**
  * This class provides buffer for data received by transports, de-assemble
  * the data to individual samples and deliver them.
  */
 template<typename TH = TransportHeader, typename DSH = DataSampleHeader>
 class TransportReceiveStrategy
-  : public TransportStrategy {
+  : public TransportStrategy, public TransportReceiveConstants {
 public:
 
   virtual ~TransportReceiveStrategy();
 
   int start();
   void stop();
-
-  /// Useful as a simpler altnernative to handle_dds_input
-  /// when dealing with UDP protocols with maximum packet size.
-  /// Behaves the same as handle_dds_input, but only makes use
-  /// of a single receive buffer and doesn't require message block
-  /// chains that need to be updated / maintained
-  int handle_simple_dds_input(ACE_HANDLE fd);
 
   int handle_dds_input(ACE_HANDLE fd);
 
@@ -61,8 +73,13 @@ public:
   const DSH& received_sample_header() const;
   DSH& received_sample_header();
 
+  /// Use the receive strategy's Message Block Allocator to convert
+  /// the ReceivedDataSample's payload to an ACE_Message_Block chain
+  ACE_Message_Block* to_msgblock(const ReceivedDataSample& sample);
+
 protected:
-  TransportReceiveStrategy();
+  explicit TransportReceiveStrategy(const TransportInst_rch& config,
+                                    size_t receive_buffers_count = RECEIVE_BUFFERS);
 
   /// Only our subclass knows how to do this.
   virtual ssize_t receive_bytes(iovec          iov[],
@@ -115,8 +132,6 @@ protected:
   /// Flag indicates if the GRACEFUL_DISCONNECT message is received.
   bool gracefully_disconnected_;
 
-private:
-
   /// Manage an index into the receive buffer array.
   size_t successor_index(size_t index) const;
 
@@ -130,21 +145,6 @@ private:
   /// Current receive TransportHeader.
   TH receive_transport_header_;
 
-  //
-  // The total available space in the receive buffers must have enough to hold
-  // a max sized message.  The max message is about 64K and the low water for
-  // a buffer is 4096.  Therefore, 16 receive buffers is appropriate.
-  //
-  enum { RECEIVE_BUFFERS  =   16 };
-  enum { BUFFER_LOW_WATER = 4096 };
-
-  //
-  // Message Block Allocators are more plentiful since they hold samples
-  // as well as data read from the handle(s).
-  //
-  enum { MESSAGE_BLOCKS   = 1000 };
-  enum { DATA_BLOCKS      =  100 };
-
 //MJM: We should probably bring the allocator typedefs down into this
 //MJM: class since they are limited to this scope.
   TransportMessageBlockAllocator mb_allocator_;
@@ -155,7 +155,7 @@ private:
   ACE_Lock_Adapter<ACE_SYNCH_MUTEX> receive_lock_;
 
   /// Set of receive buffers in use.
-  ACE_Message_Block* receive_buffers_[RECEIVE_BUFFERS];
+  OPENDDS_VECTOR(ACE_Message_Block*) receive_buffers_;
 
   /// Current receive buffer index in use.
   size_t buffer_index_;

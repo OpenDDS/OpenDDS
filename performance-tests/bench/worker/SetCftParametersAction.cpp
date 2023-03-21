@@ -5,9 +5,16 @@
 
 namespace Bench {
 
- SetCftParametersAction::SetCftParametersAction(ACE_Proactor& proactor)
- : proactor_(proactor), started_(false), stopped_(false)
- , set_period_(1, 0), max_count_(0), random_order_(false), set_call_count_(0)
+SetCftParametersAction::SetCftParametersAction(ACE_Proactor& proactor)
+: proactor_(proactor)
+, started_(false)
+, stopped_(false)
+, set_period_(1, 0)
+, max_count_(0)
+, param_count_(0)
+, random_order_(false)
+, instance_(0)
+, set_call_count_(0)
 {
 }
 

@@ -17,7 +17,7 @@
 
 const int num_instances_per_writer = 1;
 extern int num_messages;
-static ACE_Atomic_Op<ACE_SYNCH_MUTEX, int> count;
+static OpenDDS::DCPS::Atomic<int> count;
 
 
 Writer::Writer(DDS::Publisher_ptr publisher, DDS::DataWriter_ptr writer)
@@ -96,7 +96,7 @@ Writer::svc()
         ACE_OS::exit(-1);
     }
 
-    ::DDS::ReturnCode_t ret = this->publisher_->begin_coherent_changes ();
+    ::DDS::ReturnCode_t ret = publisher_->begin_coherent_changes();
     if (ret != ::DDS::RETCODE_OK) {
       ACE_ERROR((LM_ERROR,
                    ACE_TEXT("%N:%l: svc()")
@@ -114,7 +114,7 @@ Writer::svc()
     message.text       = CORBA::string_dup("Worst. Movie. Ever.");
 
     for (int i = 0; i < num_messages; i++) {
-      message.count      = this->next_count ();
+      message.count      = next_count();
       DDS::ReturnCode_t error = message_dw->write(message, handle);
 
       if (error != DDS::RETCODE_OK) {
@@ -127,10 +127,10 @@ Writer::svc()
         }
       }
 
-      ACE_OS::sleep (1);
+      ACE_OS::sleep(1);
     }
 
-    ret = this->publisher_->end_coherent_changes ();
+    ret = publisher_->end_coherent_changes();
     if (ret != ::DDS::RETCODE_OK) {
       ACE_ERROR((LM_ERROR,
                    ACE_TEXT("%N:%l: svc()")
@@ -155,13 +155,12 @@ Writer::is_finished() const
 int
 Writer::get_timeout_writes() const
 {
-  return timeout_writes_.value();
+  return timeout_writes_;
 }
 
 
 int
-Writer::next_count ()
+Writer::next_count()
 {
-  ++ count;
-  return count.value ();
+  return ++count;
 }

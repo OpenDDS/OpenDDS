@@ -1,0 +1,27 @@
+{
+  "name": "Continuous Integration Rapid-Fire Echo Test",
+  "desc": "This is a small quick test for rapid-fire data send / receive capability",
+  "scenario_parameters": [
+    {
+      "name": "Base",
+      "desc": "Scenario Base",
+      "value": { "$discriminator": "PK_STRING", "string_param": "echo" }
+    },
+    {
+      "name": "Bytes",
+      "desc": "Payload Bytes",
+      "value": { "$discriminator": "PK_NUMBER", "number_param": 100 }
+    }
+  ],
+  "any_node": [
+    {
+      "config": "ci-echo_client.json",
+      "count": 1
+    },
+    {
+      "config": "ci-echo_server.json",
+      "count": 1
+    }
+  ],
+  "timeout": 120
+}

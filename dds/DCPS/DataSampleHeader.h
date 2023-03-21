@@ -8,12 +8,16 @@
 #ifndef OPENDDS_DCPS_DATASAMPLEHEADER_H
 #define OPENDDS_DCPS_DATASAMPLEHEADER_H
 
+#include "Cached_Allocator_With_Overflow_T.h"
 #include "Definitions.h"
 #include "GuidUtils.h"
+#include "Message_Block_Ptr.h"
 #include "PoolAllocationBase.h"
 #include "SequenceNumber.h"
-#include "RepoIdTypes.h"
-#include "Message_Block_Ptr.h"
+
+#include <ace/Guard_T.h>
+#include <ace/Lock.h>
+
 #include <iosfwd>
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
@@ -170,11 +174,11 @@ struct OpenDDS_Dcps_Export DataSampleHeader : public PoolAllocationBase {
 
   /// Identify the DataWriter that produced the sample data being
   /// sent.
-  PublicationId publication_id_;
+  GUID_t publication_id_;
 
   /// Id representing the coherent group.  Optional field that's only present if
   /// the flag for group_coherent_ is set.
-  RepoId publisher_id_;
+  GUID_t publisher_id_;
 
   /// Optional field present if the content_filter_ flag bit is set.
   /// Indicates which readers should not receive the data.
@@ -263,7 +267,30 @@ struct OpenDDS_Dcps_Export DataSampleHeader : public PoolAllocationBase {
 private:
   /// Keep track of the amount of data read from a buffer.
   size_t serialized_size_;
+
+  // If the constructor argument is null this object does nothing.
+  // Otherwise it is an ACE_Guard for the lock constructor argument.
+  struct MaybeGuard {
+    explicit MaybeGuard(ACE_Lock* a) : guard_(a ? *a : non_lock) {}
+
+    ACE_Guard<ACE_Lock> guard_;
+
+    struct NoOpLock : ACE_Lock {
+      int remove() { return 0; }
+      int acquire() { return 0; }
+      int tryacquire() { return 0; }
+      int release() { return 0; }
+      int acquire_read() { return 0; }
+      int acquire_write() { return 0; }
+      int tryacquire_read() { return 0; }
+      int tryacquire_write() { return 0; }
+      int tryacquire_write_upgrade() { return 0; }
+    };
+    static NoOpLock non_lock;
+  };
 };
+
+typedef Cached_Allocator_With_Overflow<DataSampleHeader, ACE_Null_Mutex> DataSampleHeaderAllocator;
 
 OpenDDS_Dcps_Export
 const char* to_string(MessageId value);

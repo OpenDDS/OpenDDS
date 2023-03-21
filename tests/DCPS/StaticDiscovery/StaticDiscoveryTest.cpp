@@ -1,27 +1,30 @@
 #include "TestMsgTypeSupportImpl.h"
 #include "DataReaderListenerImpl.h"
 
-#include "dds/DCPS/Service_Participant.h"
-#include "dds/DCPS/Marked_Default_Qos.h"
-#include "dds/DCPS/BuiltInTopicUtils.h"
-#include "dds/DCPS/WaitSet.h"
+#include <tests/Utils/StatusMatching.h>
 
-#include "dds/DCPS/transport/framework/TransportExceptions.h"
-#include "dds/DCPS/transport/framework/TransportRegistry.h"
+#include <dds/DCPS/Service_Participant.h>
+#include <dds/DCPS/Marked_Default_Qos.h>
+#include <dds/DCPS/BuiltInTopicUtils.h>
+#include <dds/DCPS/WaitSet.h>
+#include <dds/DCPS/SafetyProfileStreams.h>
+#include <dds/DCPS/GuidConverter.h>
+#include <dds/DCPS/DataReaderImpl.h>
+#include <dds/DCPS/DataWriterImpl.h>
+#include <dds/DCPS/transport/framework/TransportExceptions.h>
+#include <dds/DCPS/transport/framework/TransportRegistry.h>
 
-#include "dds/DdsDcpsInfrastructureC.h"
-#include "dds/DdsDcpsCoreTypeSupportImpl.h"
-#include "dds/DCPS/GuidConverter.h"
-#include "tests/Utils/StatusMatching.h"
+#include <dds/DdsDcpsInfrastructureC.h>
+#include <dds/DdsDcpsCoreTypeSupportImpl.h>
 
-#include "dds/DCPS/StaticIncludes.h"
+#include <dds/DCPS/StaticIncludes.h>
 #ifdef ACE_AS_STATIC_LIBS
-#include "dds/DCPS/transport/rtps_udp/RtpsUdp.h"
+#  include <dds/DCPS/transport/rtps_udp/RtpsUdp.h>
 #endif
 
-#include "ace/Arg_Shifter.h"
-#include "ace/OS_NS_stdlib.h"
-#include "ace/OS_NS_unistd.h"
+#include <ace/Arg_Shifter.h>
+#include <ace/OS_NS_stdlib.h>
+#include <ace/OS_NS_unistd.h>
 
 /*
   NOTE:  The messages may not be processed by the reader in this test.
@@ -86,14 +89,11 @@ public:
 
     writers_[thread_id].resize(6);
 
-    ACE_DEBUG((LM_DEBUG, "(%P|%t) Starting DataWriter %C\n", writers_[thread_id].c_str()));
-
     unsigned long binary_id = static_cast<unsigned long>(fromhex(writers_[thread_id], 2))
                             + (256 * static_cast<unsigned long>(fromhex(writers_[thread_id], 1)))
                             + (256 * 256 * static_cast<unsigned long>(fromhex(writers_[thread_id], 0)));
-    char config_name_buffer[16];
-    sprintf(config_name_buffer, "Config%lu", binary_id);
-    OpenDDS::DCPS::TransportRegistry::instance()->bind_config(config_name_buffer, publisher);
+    const OpenDDS::DCPS::String config_name = "Config" + OpenDDS::DCPS::to_dds_string(binary_id);
+    OpenDDS::DCPS::TransportRegistry::instance()->bind_config(config_name.c_str(), publisher);
 
     DDS::DataWriterQos qos;
     publisher->get_default_datawriter_qos(qos);
@@ -124,6 +124,17 @@ public:
                        -1);
     }
 
+    OpenDDS::DCPS::DataWriterImpl* writer_impl = dynamic_cast<OpenDDS::DCPS::DataWriterImpl*>(writer.in());
+    if (!writer_impl) {
+      ACE_ERROR_RETURN((LM_ERROR,
+                        ACE_TEXT("ERROR: %N:%l: main() -")
+                        ACE_TEXT(" casting datawriter failed!\n")),
+                       -1);
+    }
+    const OpenDDS::DCPS::GUID_t writer_guid = writer_impl->get_guid();
+
+    ACE_DEBUG((LM_INFO, "(%P|%t) DataWriter %C created\n", OpenDDS::DCPS::LogGuid(writer_guid).c_str()));
+
     TestMsgDataWriter_var message_writer =
       TestMsgDataWriter::_narrow(writer);
 
@@ -135,11 +146,13 @@ public:
     }
 
     // Block until Subscriber is available
+    ACE_DEBUG((LM_INFO, "(%P|%t) DataWriter %C waiting for %d readers to match\n", OpenDDS::DCPS::LogGuid(writer_guid).c_str(), total_readers_));
     Utils::wait_match(writer, total_readers_, Utils::GTE);
+
+    ACE_DEBUG((LM_INFO, "(%P|%t) DataWriter %C started\n", OpenDDS::DCPS::LogGuid(writer_guid).c_str()));
 
     // Write samples
     TestMsg message;
-    message.src = thread_id;
     message.value = 1;
     for (int i = 0; i < MSGS_PER_WRITER; ++i) {
       DDS::ReturnCode_t error = message_writer->write(message, DDS::HANDLE_NIL);
@@ -156,7 +169,10 @@ public:
     writer->wait_for_acknowledgments(duration);
 
     // Block until Subscriber is gone
+    ACE_DEBUG((LM_INFO, "(%P|%t) DataWriter %C waiting for %d readers to unmatch\n", OpenDDS::DCPS::LogGuid(writer_guid).c_str(), total_readers_));
     Utils::wait_match(writer, 0);
+
+    ACE_DEBUG((LM_INFO, "(%P|%t) DataWriter %C done\n", OpenDDS::DCPS::LogGuid(writer_guid).c_str()));
 
     publisher->delete_datawriter(writer);
 
@@ -165,26 +181,26 @@ public:
 
 private:
   std::vector<std::string>& writers_;
-  static ACE_Atomic_Op<ACE_SYNCH_MUTEX, int> thread_counter_;
+  static OpenDDS::DCPS::Atomic<int> thread_counter_;
   DDS::DomainParticipant_var participant_;
   DDS::Topic_var topic_;
   const bool& reliable_;
   int total_readers_;
 };
 
-ACE_Atomic_Op<ACE_SYNCH_MUTEX, int> WriterTask::thread_counter_;
+OpenDDS::DCPS::Atomic<int> WriterTask::thread_counter_;
 
 ACE_Thread_Mutex readers_done_lock;
 ACE_Condition_Thread_Mutex readers_done_cond(readers_done_lock);
 int readers_done = 0;
 bool built_in_read_errors = false;
 
-void reader_done_callback(bool bit_read_errors)
+void reader_done_callback(bool bit_read_errors, const OpenDDS::DCPS::GUID_t& guid)
 {
   ACE_Guard<ACE_Thread_Mutex> g(readers_done_lock);
   if (bit_read_errors) built_in_read_errors = true;
   ++readers_done;
-  ACE_DEBUG((LM_INFO, "(%P|%t) Reader %d done\n", readers_done));
+  ACE_DEBUG((LM_INFO, "(%P|%t) Reader %C is complete\n", OpenDDS::DCPS::LogGuid(guid).c_str()));
   readers_done_cond.signal();
 }
 
@@ -312,7 +328,8 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
          pos != limit;
          ++pos) {
       pos->resize(6);
-      DDS::DataReaderListener_var listener(new DataReaderListenerImpl(*pos, reliable, true, writers, total_writers, n_msgs, reader_done_callback, subscriber.in(), check_bits));
+      DataReaderListenerImpl* drl_impl = new DataReaderListenerImpl(*pos, reliable, true, total_writers, n_msgs, reader_done_callback, check_bits);
+      DDS::DataReaderListener_var listener(drl_impl);
 
 #ifndef DDS_HAS_MINIMUM_BIT
       DataReaderListenerImpl* listener_servant =
@@ -333,9 +350,8 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       unsigned long binary_id = static_cast<unsigned long>(fromhex(*pos, 2))
                               + (256 * static_cast<unsigned long>(fromhex(*pos, 1)))
                               + (256 * 256 * static_cast<unsigned long>(fromhex(*pos, 0)));
-      char config_name_buffer[16];
-      sprintf(config_name_buffer, "Config%lu", binary_id);
-      OpenDDS::DCPS::TransportRegistry::instance()->bind_config(config_name_buffer, subscriber);
+      const OpenDDS::DCPS::String config_name = "Config" + OpenDDS::DCPS::to_dds_string(binary_id);
+      OpenDDS::DCPS::TransportRegistry::instance()->bind_config(config_name.c_str(), subscriber);
 
       DDS::DataReaderQos qos;
       subscriber->get_default_datareader_qos(qos);
@@ -357,6 +373,14 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
                           ACE_TEXT("ERROR: %N:%l: main() -")
                           ACE_TEXT(" create_datareader failed!\n")), -1);
       }
+
+      OpenDDS::DCPS::DataReaderImpl* reader_impl = dynamic_cast<OpenDDS::DCPS::DataReaderImpl*>(reader.in());
+      if (!reader_impl) {
+        ACE_ERROR_RETURN((LM_ERROR,
+                          ACE_TEXT("ERROR: %N:%l: main() -")
+                          ACE_TEXT(" casting datareader failed!\n")), -1);
+      }
+      drl_impl->set_guid(reader_impl->get_guid());
 
       datareaders.push_back(reader);
 

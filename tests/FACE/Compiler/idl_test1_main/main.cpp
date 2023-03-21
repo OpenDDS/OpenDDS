@@ -29,10 +29,63 @@ namespace {
   }
 }
 
+void test_seq_cmp(bool& failed)
+{
+  Xyz::AStringSeq s1, s2;
+  s1.length(1);
+  s2.length(1);
+  s1[0] = "hi";
+  s2[0] = "hi";
+  if (s1 != s2) {
+    failed = true;
+    ACE_ERROR((LM_ERROR, "test_seq_cmp: AStringSeq inequality failed\n"));
+  }
+  s2[0] = "there";
+  if (s1 == s2) {
+    failed = true;
+    ACE_ERROR((LM_ERROR, "test_seq_cmp: AStringSeq equality failed\n"));
+  }
+
+  Xyz::TwoDimArrayOfShorts2Seq tdas2s1;
+  tdas2s1.length(1);
+  FACE::Short s = 0;
+  for (int j = 0; j < 3; ++j)
+    for (int k = 0; k < 4; ++k)
+      tdas2s1[0][j][k] = ++s;
+  Xyz::TwoDimArrayOfShorts2Seq tdas2s2(tdas2s1);
+  if (tdas2s1 != tdas2s2) {
+    failed = true;
+    ACE_ERROR((LM_ERROR, "test_seq_cmp: TwoDimArrayOfShorts2Seq inequality failed\n"));
+  }
+  tdas2s1[0][0][0] = 99;
+  if (tdas2s1 == tdas2s2) {
+    failed = true;
+    ACE_ERROR((LM_ERROR, "test_seq_cmp: TwoDimArrayOfShorts2Seq equality failed\n"));
+  }
+
+  Xyz::MultiDimArraySeq mdas1;
+  mdas1.length(1);
+  for (int i = 0; i < 2; ++i)
+    for (int j = 0; j < 3; ++j)
+      for (int k = 0; k < 4; ++k)
+        for (int m = 0; m < 5; ++m)
+          mdas1[0][i][j][k][m] = "test";
+  Xyz::MultiDimArraySeq mdas2(mdas1);
+  if (mdas1 != mdas2) {
+    failed = true;
+    ACE_ERROR((LM_ERROR, "test_seq_cmp: MultiDimArraySeq inequality failed\n"));
+  }
+  mdas2[0][0][0][0][0] = "there";
+  if (mdas1 == mdas2) {
+    failed = true;
+    ACE_ERROR((LM_ERROR, "test_seq_cmp: MultiDimArraySeq equality failed\n"));
+  }
+}
+
 // this test tests the opendds_idl generated code for type XyZ::Foo from idl_test1_lib.
 int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 {
-  int failed = false;
+  bool failed = false;
   bool dump_buffer = false;
 
   const unsigned int vers = convert_version(DDS_MAJOR_VERSION,
@@ -214,13 +267,13 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     }
   }
 
-  if (!OpenDDS::DCPS::DDSTraits<Xyz::AStruct>::gen_has_key()) {
+  if (!OpenDDS::DCPS::DDSTraits<Xyz::AStruct>::key_count()) {
     ACE_ERROR((LM_ERROR,
       ACE_TEXT("_dcps_has_key(Xyz::AStruct) returned false when expecting true.\n")
       ));
   }
 
-  if (OpenDDS::DCPS::DDSTraits<Xyz::StructContainingArrayOfAStructSeq>::gen_has_key()) {
+  if (OpenDDS::DCPS::DDSTraits<Xyz::StructContainingArrayOfAStructSeq>::key_count()) {
     ACE_ERROR((LM_ERROR,
       ACE_TEXT("_dcps_has_key(Xyz::StructContainingArrayOfAStructSeq) returned true when expecting false.\n")
       ));
@@ -266,7 +319,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
   std::map<Xyz::Foo, Xyz::Foo*, Xyz::Foo_OpenDDS_KeyLessThan> foomap;
 
-  if (OpenDDS::DCPS::DDSTraits<Xyz::Foo>::gen_has_key()) {
+  if (OpenDDS::DCPS::DDSTraits<Xyz::Foo>::key_count()) {
     foomap[my_foo] = &my_foo;
     foomap[foo2] = &foo2;
     // foo2 and my_foo should have mapped to the same place
@@ -432,10 +485,12 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     return -1;
   }
 
+  test_seq_cmp(failed);
+
   if (failed)
     ACE_ERROR((LM_ERROR, "%s FAILED!\n", argv[0]));
   else
     ACE_ERROR((LM_ERROR, "%s PASSED\n", argv[0]));
 
-  return failed; // let the test framework know it failed
+  return failed ? EXIT_FAILURE : EXIT_SUCCESS; // let the test framework know it failed
 }

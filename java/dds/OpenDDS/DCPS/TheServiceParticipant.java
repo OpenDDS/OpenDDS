@@ -13,7 +13,7 @@ public final class TheServiceParticipant {
 
     private TheServiceParticipant() {}
 
-    public static native void shutdown();
+    public static native int shutdown();
 
     public static native String domain_to_repo(int domain);
 

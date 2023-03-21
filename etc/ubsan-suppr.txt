@@ -1,0 +1,5 @@
+# Undefined behavior sanitizer suppressions
+# See here for how this works:
+#   https://clang.llvm.org/docs/UndefinedBehaviorSanitizer.html
+
+pointer-overflow:be_visitor_operation_upcall_command_ss::gen_upcall

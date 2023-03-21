@@ -1,4 +1,4 @@
-project: dcpsexe, dcps_test, content_subscription {
+project: dcpsexe, dcps_test, content_subscription, msvc_bigobj {
   requires += multi_topic
   idlflags += -I..
   TypeSupport_Files {

@@ -1,0 +1,103 @@
+#include <tao/LongSeq.pidl>
+#include <tao/BooleanSeq.pidl>
+#include <tao/OctetSeq.pidl>
+
+@mutable
+struct NestedStruct {
+  @hashid("short_member") @must_understand short a_short;
+  @hashid("long_member") long a_long;
+  @hashid("float_member") float a_float;
+};
+
+enum UnionDisc { SEQUENCE_MEMBER, STRUCT_MEMBER, PRIMITIVE_MEMBER };
+
+typedef sequence<long, 10> Long10Seq;
+
+@final
+union SomeUnion switch(@key UnionDisc) {
+case SEQUENCE_MEMBER:
+  Long10Seq a_seq;
+case STRUCT_MEMBER:
+  NestedStruct a_struct;
+case PRIMITIVE_MEMBER:
+default:
+  double a_double;
+};
+
+// Structs F, G, H, I and their corresponding sequence types form a SCC.
+struct G;
+typedef sequence<G> GSeq;
+struct H;
+typedef sequence<H> HSeq;
+
+@appendable
+struct F {
+  GSeq a_gseq;
+  HSeq a_hseq;
+  double a_double;
+};
+
+struct I;
+typedef sequence<I> ISeq;
+
+@mutable
+struct G {
+  ISeq a_iseq;
+  string a_string;
+};
+
+@final
+struct H {
+  ISeq a_iseq;
+};
+
+typedef sequence<F> FSeq;
+
+@appendable
+struct I {
+  FSeq a_fseq;
+};
+
+// Structs A, B, C, D, E and their corresponding sequence types form another SCC.
+struct B;
+typedef sequence<B> BSeq;
+
+@topic
+@appendable
+struct A {
+  BSeq a_bseq;
+  sequence<boolean> a_boolseq;
+};
+
+struct C;
+typedef sequence<C> CSeq;
+struct E;
+typedef sequence<E> ESeq;
+
+@final
+struct B {
+  CSeq a_cseq;
+  ESeq a_eseq;
+  SomeUnion a_union;
+};
+
+struct D;
+typedef sequence<D> DSeq;
+// Avoid name conflict with a sequence type defined in *TypeSupport.idl.
+typedef sequence<A> ASequence;
+
+struct C {
+  DSeq a_dseq;
+  ASequence a_aseq;
+};
+
+struct D {
+  ESeq a_eseq;
+  sequence<octet> a_octetseq;
+};
+
+@mutable
+struct E {
+  @try_construct(TRIM) ASequence a_aseq;
+  F a_f;
+};

@@ -1,6 +1,7 @@
 #include "LocalDiscovery.h"
 
 #include <dds/DCPS/GuidUtils.h>
+#include <dds/DCPS/BuiltInTopicUtils.h>
 
 LocalDiscovery::LocalDiscovery()
   : Discovery("LocalDiscovery")
@@ -19,9 +20,9 @@ GUID_t LocalDiscovery::make_guid(EntityId_t eid)
   return guid;
 }
 
-DDS::Subscriber* LocalDiscovery::init_bit(DomainParticipantImpl*)
+RcHandle<BitSubscriber> LocalDiscovery::init_bit(DomainParticipantImpl*)
 {
-  return 0;
+  return RcHandle<BitSubscriber>();
 }
 
 void LocalDiscovery::fini_bit(DomainParticipantImpl*)
@@ -29,12 +30,12 @@ void LocalDiscovery::fini_bit(DomainParticipantImpl*)
 
 bool LocalDiscovery::attach_participant(
   DDS::DomainId_t,
-  const RepoId&)
+  const GUID_t&)
 {
   return true;
 }
 
-RepoId LocalDiscovery::generate_participant_guid()
+GUID_t LocalDiscovery::generate_participant_guid()
 {
   return GUID_UNKNOWN;
 }
@@ -53,7 +54,7 @@ AddDomainStatus LocalDiscovery::add_domain_participant_secure(
   DDS::DomainId_t,
   const DDS::DomainParticipantQos&,
   OpenDDS::XTypes::TypeLookupService_rch,
-  const RepoId&,
+  const GUID_t&,
   DDS::Security::IdentityHandle,
   DDS::Security::PermissionsHandle,
   DDS::Security::ParticipantCryptoHandle)
@@ -65,31 +66,31 @@ AddDomainStatus LocalDiscovery::add_domain_participant_secure(
 
 bool LocalDiscovery::remove_domain_participant(
   DDS::DomainId_t,
-  const RepoId&)
+  const GUID_t&)
 {
   return true;
 }
 
 bool LocalDiscovery::ignore_domain_participant(
   DDS::DomainId_t,
-  const RepoId&,
-  const RepoId&)
+  const GUID_t&,
+  const GUID_t&)
 {
   return true;
 }
 
 bool LocalDiscovery::update_domain_participant_qos(
   DDS::DomainId_t,
-  const RepoId&,
+  const GUID_t&,
   const DDS::DomainParticipantQos&)
 {
   return true;
 }
 
 TopicStatus LocalDiscovery::assert_topic(
-  RepoId_out guid,
+  GUID_t_out guid,
   DDS::DomainId_t,
-  const RepoId&,
+  const GUID_t&,
   const char* topicName,
   const char* typeName,
   const DDS::TopicQos&,
@@ -111,11 +112,11 @@ TopicStatus LocalDiscovery::assert_topic(
 
 TopicStatus LocalDiscovery::find_topic(
   DDS::DomainId_t,
-  const RepoId&,
+  const GUID_t&,
   const char* topicName,
   CORBA::String_out dataTypeName,
   DDS::TopicQos_out qos,
-  RepoId_out topicId)
+  GUID_t_out topicId)
 {
   dataTypeName = "";
   qos = new DDS::TopicQos();
@@ -132,8 +133,8 @@ TopicStatus LocalDiscovery::find_topic(
 
 TopicStatus LocalDiscovery::remove_topic(
   DDS::DomainId_t,
-  const RepoId&,
-  const RepoId& topicId)
+  const GUID_t&,
+  const GUID_t& topicId)
 {
   typedef std::map<std::string, TopicDetails>::iterator iter_t;
   for (iter_t iter = topics_.begin(); iter != topics_.end(); ++iter) {
@@ -149,25 +150,25 @@ TopicStatus LocalDiscovery::remove_topic(
 
 bool LocalDiscovery::ignore_topic(
   DDS::DomainId_t,
-  const RepoId&,
-  const RepoId&)
+  const GUID_t&,
+  const GUID_t&)
 {
   return true;
 }
 
 bool LocalDiscovery::update_topic_qos(
-  const RepoId&,
+  const GUID_t&,
   DDS::DomainId_t,
-  const RepoId&,
+  const GUID_t&,
   const DDS::TopicQos&)
 {
   return true;
 }
 
-RepoId LocalDiscovery::add_publication(
+GUID_t LocalDiscovery::add_publication(
   DDS::DomainId_t,
-  const RepoId&,
-  const RepoId&,
+  const GUID_t&,
+  const GUID_t&,
   DataWriterCallbacks_rch,
   const DDS::DataWriterQos&,
   const TransportLocatorSeq&,
@@ -182,34 +183,34 @@ RepoId LocalDiscovery::add_publication(
 
 bool LocalDiscovery::remove_publication(
   DDS::DomainId_t,
-  const RepoId&,
-  const RepoId&)
+  const GUID_t&,
+  const GUID_t&)
 {
   return true;
 }
 
 bool LocalDiscovery::ignore_publication(
   DDS::DomainId_t,
-  const RepoId&,
-  const RepoId&)
+  const GUID_t&,
+  const GUID_t&)
 {
   return true;
 }
 
 bool LocalDiscovery::update_publication_qos(
   DDS::DomainId_t,
-  const RepoId&,
-  const RepoId&,
+  const GUID_t&,
+  const GUID_t&,
   const DDS::DataWriterQos&,
   const DDS::PublisherQos&)
 {
   return true;
 }
 
-RepoId LocalDiscovery::add_subscription(
+GUID_t LocalDiscovery::add_subscription(
   DDS::DomainId_t,
-  const RepoId&,
-  const RepoId&,
+  const GUID_t&,
+  const GUID_t&,
   DataReaderCallbacks_rch,
   const DDS::DataReaderQos&,
   const TransportLocatorSeq&,
@@ -224,24 +225,24 @@ RepoId LocalDiscovery::add_subscription(
 
 bool LocalDiscovery::remove_subscription(
   DDS::DomainId_t,
-  const RepoId&,
-  const RepoId&)
+  const GUID_t&,
+  const GUID_t&)
 {
   return true;
 }
 
 bool LocalDiscovery::ignore_subscription(
   DDS::DomainId_t,
-  const RepoId&,
-  const RepoId&)
+  const GUID_t&,
+  const GUID_t&)
 {
   return true;
 }
 
 bool LocalDiscovery::update_subscription_qos(
   DDS::DomainId_t,
-  const RepoId&,
-  const RepoId&,
+  const GUID_t&,
+  const GUID_t&,
   const DDS::DataReaderQos&,
   const DDS::SubscriberQos&)
 {
@@ -250,8 +251,8 @@ bool LocalDiscovery::update_subscription_qos(
 
 bool LocalDiscovery::update_subscription_params(
   DDS::DomainId_t,
-  const RepoId&,
-  const RepoId&,
+  const GUID_t&,
+  const GUID_t&,
   const DDS::StringSeq&)
 {
   return true;

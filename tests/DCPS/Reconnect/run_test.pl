@@ -185,7 +185,7 @@ if ($num_reads_before_crash > 0)
   #get time at crash
   my $crash_at = time();
 
-  $SubscriberResult = $Subscriber->WaitKill (60);
+  $SubscriberResult = $Subscriber->WaitKill (60, {self_crash => 1});
 
   # We will not check the status returned from WaitKill() since it returns
   # different status on windows and linux.
@@ -207,14 +207,14 @@ if ($num_reads_before_crash > 0)
          . " -r $num_reads_deviation"
          . " $client_args -ORBLogFile $sub2_log");
 
-  print "\n\n!!! Restart subscriber !!!\n\n";;
+  print "\n\n!!! Restart subscriber !!!\n\n";
   print $Subscriber->CommandLine () . "\n";
   $Subscriber->Spawn ();
 }
 
 # The publisher crashes and we need restart the publisher.
 if ($num_writes_before_crash > 0) {
-  $PublisherResult = $Publisher->WaitKill (60);
+  $PublisherResult = $Publisher->WaitKill (60, {self_crash => 1});
 
   # We will not check the status returned from WaitKill() since it returns
   # different status on windows and linux.
@@ -227,7 +227,7 @@ if ($num_writes_before_crash > 0) {
 
   sleep($restart_delay);
 
-  print "\n\n!!! Restart publisher !!!\n\n";;
+  print "\n\n!!! Restart publisher !!!\n\n";
   print $Publisher->CommandLine () . "\n";
   $Publisher->Spawn ();
 }
@@ -254,13 +254,13 @@ if ($sub_init_crash) {
   $Publisher->Kill(0);
 
 } else {
-  my $SubscriberResult = $Subscriber->WaitKill (300);
+  my $SubscriberResult = $Subscriber->WaitKill (300, {self_crash => 1});
   if ($SubscriberResult != 0) {
     print STDERR "ERROR: subscriber returned $SubscriberResult\n";
     $status = 1;
   }
 
-  if ($Publisher->WaitKill (60)) {
+  if ($Publisher->WaitKill (60, {self_crash => 1})) {
     print STDERR "ERROR: publisher returned $PublisherResult\n";
     $status = 1;
   }

@@ -7,7 +7,9 @@
 
 #include "UdpReceiveStrategy.h"
 #include "UdpDataLink.h"
+
 #include <dds/DCPS/LogAddr.h>
+#include <dds/DCPS/transport/framework/TransportImpl.h>
 
 #include "ace/Reactor.h"
 
@@ -17,7 +19,8 @@ namespace OpenDDS {
 namespace DCPS {
 
 UdpReceiveStrategy::UdpReceiveStrategy(UdpDataLink* link)
-  : link_(link)
+  : TransportReceiveStrategy<>(link->impl()->config())
+  , link_(link)
   , expected_(SequenceNumber::SEQUENCENUMBER_UNKNOWN())
 {
 }
@@ -32,6 +35,8 @@ UdpReceiveStrategy::get_handle() const
 int
 UdpReceiveStrategy::handle_input(ACE_HANDLE fd)
 {
+  ThreadStatusManager::Event ev(TheServiceParticipant->get_thread_status_manager());
+
   return this->handle_dds_input(fd);
 }
 
@@ -121,7 +126,7 @@ UdpReceiveStrategy::check_header(const TransportHeader& header)
                ACE_TEXT("(%P|%t) WARNING: UdpReceiveStrategy::check_header ")
                ACE_TEXT("expected %q received %q\n"),
                info.second.getValue(), header.sequence_.getValue()), 2);
-    SequenceRange range(info.second, header.sequence_.previous());
+    FragmentRange range(info.second.getValue(), header.sequence_.previous().getValue());
     info.first->data_unavailable(range);
   }
 

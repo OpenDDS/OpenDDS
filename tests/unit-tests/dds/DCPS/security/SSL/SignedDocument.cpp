@@ -49,8 +49,13 @@ public:
       "DHYxM+pYtQAgmBKLBxTyDrgJZ+3j3FVOp0orRxarE3XjJ+0bIVnO6yhjunPOpgsy\n"
       "EcxH9/7Enm8=\n"
       "-----END CERTIFICATE-----"),
-    doc_("file:../security/governance/governance_SC1_ProtectedDomain1_signed.p7s")
+    doc_()
   {
+    DDS::Security::SecurityException ex;
+    if (!doc_.load("file:../security/governance/governance_SC1_ProtectedDomain1_signed.p7s", ex)) {
+      throw std::runtime_error("Could not load governance file");
+    }
+
   }
 
   ~dds_DCPS_security_SSL_SignedDocument()
@@ -66,19 +71,18 @@ public:
 
 TEST_F(dds_DCPS_security_SSL_SignedDocument, GetContent_Success)
 {
-  std::string content;
-  doc_.get_original(content);
+  const DDS::OctetSeq& content =  doc_.original();
   ASSERT_TRUE(0 < content.length());
 }
 
 TEST_F(dds_DCPS_security_SSL_SignedDocument, VerifySignature_Success)
 {
-  ASSERT_EQ(0, doc_.verify_signature(ca_));
+  ASSERT_TRUE(doc_.verify(ca_));
 }
 
 TEST_F(dds_DCPS_security_SSL_SignedDocument, VerifySignature_Data_Success)
 {
-  ASSERT_EQ(0, doc_.verify_signature(ca_data_));
+  ASSERT_TRUE(doc_.verify(ca_data_));
 }
 
 TEST_F(dds_DCPS_security_SSL_SignedDocument, LoadFromMemory)

@@ -26,26 +26,30 @@ ACE_INLINE
 ReceiveListenerSet::ReceiveListenerSet(const ReceiveListenerSet& rhs)
   : RcObject()
   , lock_()
-  , map_(rhs.map_)
+  , map_()
 {
   DBG_ENTRY_LVL("ReceiveListenerSet", "ReceiveListenerSet(rhs)", 6);
+  *this = rhs;
 }
 
 ACE_INLINE ReceiveListenerSet&
 ReceiveListenerSet::operator=(const ReceiveListenerSet& rhs)
 {
   DBG_ENTRY_LVL("ReceiveListenerSet", "operator=", 6);
-  map_ = rhs.map_;
+  if (&rhs != this) {
+    GuardType guard_lt(&lock_ < &rhs.lock_ ? lock_ : rhs.lock_);
+    GuardType guard_gt(&lock_ < &rhs.lock_ ? rhs.lock_ : lock_);
+    map_ = rhs.map_;
+  }
   return *this;
 }
 
-
 ACE_INLINE int
-ReceiveListenerSet::insert(RepoId subscriber_id,
+ReceiveListenerSet::insert(GUID_t subscriber_id,
                            const TransportReceiveListener_wrch& listener)
 {
   DBG_ENTRY_LVL("ReceiveListenerSet", "insert", 6);
-  GuardType guard(this->lock_);
+  GuardType guard(lock_);
 
   std::pair<MapType::iterator,bool> r = map_.insert(std::make_pair(subscriber_id,listener));
   if (!r.second) {
@@ -59,12 +63,11 @@ ReceiveListenerSet::insert(RepoId subscriber_id,
   return 0;
 }
 
-
 ACE_INLINE int
-ReceiveListenerSet::remove(RepoId subscriber_id)
+ReceiveListenerSet::remove(GUID_t subscriber_id)
 {
   DBG_ENTRY_LVL("ReceiveListenerSet", "remove", 6);
-  GuardType guard(this->lock_);
+  GuardType guard(lock_);
 
   if (unbind(map_, subscriber_id) != 0) {
     ACE_ERROR_RETURN((LM_ERROR,
@@ -80,7 +83,7 @@ ACE_INLINE void
 ReceiveListenerSet::remove_all(const GUIDSeq& to_remove)
 {
   DBG_ENTRY_LVL("ReceiveListenerSet", "remove_all", 6);
-  GuardType guard(this->lock_);
+  GuardType guard(lock_);
   const CORBA::ULong len = to_remove.length();
   for (CORBA::ULong i(0); i < len; ++i) {
     unbind(map_, to_remove[i]);
@@ -91,20 +94,20 @@ ACE_INLINE ssize_t
 ReceiveListenerSet::size() const
 {
   DBG_ENTRY_LVL("ReceiveListenerSet", "size", 6);
-  GuardType guard(this->lock_);
+  GuardType guard(lock_);
   return map_.size();
 }
 
 ACE_INLINE ReceiveListenerSet::MapType&
 ReceiveListenerSet::map()
 {
-  return this->map_;
+  return map_;
 }
 
 ACE_INLINE const ReceiveListenerSet::MapType&
 ReceiveListenerSet::map() const
 {
-  return this->map_;
+  return map_;
 }
 
 } // namespace DCPS

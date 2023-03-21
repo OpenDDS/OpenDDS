@@ -22,28 +22,6 @@ namespace {
   void generate_read(const std::string& expression, const std::string& accessor,
                      AST_Type* type, const std::string& idx, int level = 1);
 
-  void array_helper(const std::string& expression, AST_Array* array,
-                    size_t dim_idx, const std::string& idx, int level)
-  {
-    const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
-    const std::string indent(level * 2, ' ');
-    if (dim_idx < array->n_dims()) {
-      const size_t dim = array->dims()[dim_idx]->ev()->u.ulval;
-      be_global->impl_ <<
-        indent << "if (!value_reader.begin_array()) return false;\n" <<
-        indent << "for (" << (use_cxx11 ? "size_t " : "unsigned int ") << idx << " = 0; "
-          << idx << " != " << dim << "; ++" << idx << ") {\n" <<
-        indent << "  if (!value_reader.begin_element()) return false;\n";
-      array_helper(expression + "[" + idx + "]", array, dim_idx + 1, idx + "i", level + 1);
-      be_global->impl_ <<
-        indent << "  if (!value_reader.end_element()) return false;\n" <<
-        indent << "}\n" <<
-        indent << "if (!value_reader.end_array()) return false;\n";
-    } else {
-      generate_read(expression, "", array->base_type(), idx + "i", level);
-    }
-  }
-
   std::string primitive_type(AST_PredefinedType::PredefinedType pt)
   {
     switch (pt) {
@@ -84,6 +62,47 @@ namespace {
     }
   }
 
+  void array_helper(const std::string& expression, AST_Array* array,
+                    size_t dim_idx, const std::string& idx, int level)
+  {
+    const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
+    const std::string indent(level * 2, ' ');
+    const Classification c = classify(array->base_type());
+    const bool primitive = c & CL_PRIMITIVE;
+    // When we have a primitive type the last dimension is read using the read_*_array
+    // operation, when we have a not primitive type the last dimension is read element by element
+    // in a loop in the generated code
+    if ((primitive && (dim_idx < array->n_dims() - 1)) || (!primitive && (dim_idx < array->n_dims()))) {
+      const size_t dim = array->dims()[dim_idx]->ev()->u.ulval;
+      be_global->impl_ <<
+        indent << "if (!value_reader.begin_array()) return false;\n" <<
+        indent << "for (" << (use_cxx11 ? "size_t " : "unsigned int ") << idx << " = 0; "
+          << idx << " != " << dim << "; ++" << idx << ") {\n" <<
+        indent << "  if (!value_reader.begin_element()) return false;\n";
+      array_helper(expression + "[" + idx + "]", array, dim_idx + 1, idx + "i", level + 1);
+      be_global->impl_ <<
+        indent << "  if (!value_reader.end_element()) return false;\n" <<
+        indent << "}\n" <<
+        indent << "if (!value_reader.end_array()) return false;\n";
+    } else {
+      if (primitive) {
+        const size_t dim = array->dims()[dim_idx]->ev()->u.ulval;
+        AST_Type* const actual = resolveActualType(array->base_type());
+        const AST_PredefinedType::PredefinedType pt =
+          dynamic_cast<AST_PredefinedType*>(actual)->pt();
+        be_global->impl_ <<
+          indent << "if (!value_reader.begin_array()) return false;\n";
+        be_global->impl_ << indent <<
+          "if (!value_reader.read_" << primitive_type(pt) << "_array (" << expression << (use_cxx11 ? ".data()" : "") << ", " << dim << ")) return false;\n";
+        be_global->impl_ <<
+          indent << "if (!value_reader.end_array()) return false;\n";
+
+      } else {
+        generate_read(expression, "", array->base_type(), idx + "i", level);
+      }
+    }
+  }
+
   void sequence_helper(const std::string& expression, AST_Sequence* sequence,
                        const std::string& idx, int level)
   {
@@ -97,7 +116,7 @@ namespace {
     if (use_cxx11) {
       be_global->impl_ << indent << "  " << expression << ".resize(" << expression << ".size() + 1);\n";
     } else {
-      be_global->impl_ << indent << "  " << expression << ".length(" << expression << ".length() + 1);\n";
+      be_global->impl_ << indent << "  OpenDDS::DCPS::grow(" << expression << ");\n";
     }
     be_global->impl_ <<
       indent << "  if (!value_reader.begin_element()) return false;\n";
@@ -163,14 +182,13 @@ namespace {
     }
   }
 
-  std::string branch_helper(const std::string&,
+  std::string branch_helper(const std::string&, AST_Decl*,
                             const std::string& field_name,
                             AST_Type* type,
                             const std::string&,
                             bool,
                             Intro&,
-                            const std::string&,
-                            bool)
+                            const std::string&)
   {
     AST_Type* const actual = resolveActualType(type);
     std::string decl = scoped(type->name());
@@ -196,6 +214,7 @@ bool value_reader_generator::gen_enum(AST_Enum*,
                                       const std::vector<AST_EnumVal*>& contents,
                                       const char*)
 {
+  be_global->add_include("dds/DCPS/Util.h", BE_GlobalData::STREAM_H);
   be_global->add_include("dds/DCPS/ValueReader.h", BE_GlobalData::STREAM_H);
 
   const std::string type_name = scoped(name);
@@ -215,8 +234,9 @@ bool value_reader_generator::gen_enum(AST_Enum*,
       if (i) {
         be_global->impl_ << ',';
       }
+      const std::string idl_name = canonical_name(contents[i]);
       be_global->impl_ <<
-        '{' << '"' << contents[i]->local_name()->get_string() << '"' << ',' << contents[i]->constant_value()->ev()->u.eval << '}';
+        '{' << '"' << idl_name << '"' << ',' << contents[i]->constant_value()->ev()->u.eval << '}';
     }
 
     be_global->impl_ <<
@@ -242,6 +262,7 @@ bool value_reader_generator::gen_struct(AST_Structure*,
                                         AST_Type::SIZE_TYPE,
                                         const char*)
 {
+  be_global->add_include("dds/DCPS/Util.h", BE_GlobalData::STREAM_H);
   be_global->add_include("dds/DCPS/ValueReader.h", BE_GlobalData::STREAM_H);
 
   const std::string type_name = scoped(name);
@@ -263,8 +284,9 @@ bool value_reader_generator::gen_struct(AST_Structure*,
       if (i) {
         be_global->impl_ << ',';
       }
+      const std::string idl_name = canonical_name(fields[i]);
       be_global->impl_ <<
-        '{' << '"' << fields[i]->local_name()->get_string() << '"' << ',' << be_global->get_id(fields[i]) << '}';
+        '{' << '"' << idl_name << '"' << ',' << be_global->get_id(fields[i]) << '}';
     }
 
     be_global->impl_ <<
@@ -307,6 +329,7 @@ bool value_reader_generator::gen_union(AST_Union* u,
                                        AST_Type* discriminator,
                                        const char*)
 {
+  be_global->add_include("dds/DCPS/Util.h", BE_GlobalData::STREAM_H);
   be_global->add_include("dds/DCPS/ValueReader.h", BE_GlobalData::STREAM_H);
 
   const std::string type_name = scoped(name);

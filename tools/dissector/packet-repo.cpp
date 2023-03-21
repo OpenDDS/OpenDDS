@@ -1,22 +1,24 @@
 /*
- *
- *
  * Distributed under the OpenDDS License.
  * See: http://www.opendds.org/license.html
  */
 
 #include "packet-repo.h"
-#include "dds/DdsDcpsInfoUtilsC.h"
 
-#include "ace/Basic_Types.h"
-#include "ace/CDR_Base.h"
-#include "ace/Message_Block.h"
-#include "ace/Log_Msg.h"
-#include "ace/OS_NS_string.h"
-#include "ace/ACE.h"
+#include "ws-wrapper-headers/packet-giop.h"
+
+#include <dds/DCPS/GuidUtils.h>
+
+#include <dds/DdsDcpsInfoUtilsC.h>
+
+#include <ace/Basic_Types.h>
+#include <ace/CDR_Base.h>
+#include <ace/Message_Block.h>
+#include <ace/Log_Msg.h>
+#include <ace/OS_NS_string.h>
+#include <ace/ACE.h>
 
 #include <cstring>
-
 #include <algorithm>
 #include <iomanip>
 #include <sstream>
@@ -224,18 +226,36 @@ namespace OpenDDS
     }
 
     const char *
-    InfoRepo_Dissector::topic_for_pub (const RepoId *pub)
+    InfoRepo_Dissector::topic_for_pub (const GUID_t *pub)
     {
+      if (pub->entityId.entityKind == 0xc2) {
+        // These are place holders, I don't actually know if the format of these
+        // samples match these IDL structs.
+        static const EntityId_t part_bit = {{0, 0, 1}, 0xc2};
+        static const EntityId_t topic_bit = {{0, 0, 2}, 0xc2};
+        static const EntityId_t sub_bit = {{0, 0, 3}, 0xc2};
+        static const EntityId_t pub_bit = {{0, 0, 4}, 0xc2};
+        if (pub->entityId == part_bit) {
+          return "DDS::ParticipantBuiltinTopicData";
+        } else if (pub->entityId == topic_bit) {
+          return "DDS::PublicationBuiltinTopicData";
+        } else if (pub->entityId == sub_bit) {
+          return "DDS::SubscriptionBuiltinTopicData";
+        } else if (pub->entityId == pub_bit) {
+          return "DDS::TopicBuiltinTopicData";
+        }
+      }
+
       gulong key = ACE::hash_pjw(reinterpret_cast<const char *>(pub),
-                                 sizeof (RepoId));
-      const RepoId *topicId = 0;
+                                 sizeof (GUID_t));
+      const GUID_t *topicId = 0;
       if (publications_.find (key,topicId) != 0)
         {
           return 0;
         }
       const char *data_name = 0;
       key = ACE::hash_pjw(reinterpret_cast<const char *>(topicId),
-                          sizeof (RepoId));
+                          sizeof (GUID_t));
       topics_.find (key, data_name);
       return data_name;
     }
@@ -263,15 +283,15 @@ namespace OpenDDS
     }
 
     void
-    InfoRepo_Dissector::add_pending (int request_id, const RepoId *topic)
+    InfoRepo_Dissector::add_pending (int request_id, const GUID_t *topic)
     {
       Pending *pt = new Pending;
       pt->conv_ = this->find_conversation ();
       pt->request_ = request_id;
-      pt->topic_id_ = new RepoId;
+      pt->topic_id_ = new GUID_t;
       pt->next_ = 0;
 
-      ACE_OS::memcpy (pt->topic_id_, topic, sizeof(RepoId));
+      ACE_OS::memcpy (pt->topic_id_, topic, sizeof(GUID_t));
 
       if (this->pending_ == 0)
         {
@@ -285,7 +305,7 @@ namespace OpenDDS
     }
 
     void
-    InfoRepo_Dissector::map_pending (Pending &pt, const RepoId *rid)
+    InfoRepo_Dissector::map_pending (Pending &pt, const GUID_t *rid)
     {
       Pending *prev_node = 0;
       for (Pending *node = this->pending_;
@@ -295,7 +315,7 @@ namespace OpenDDS
           if (pt.conv_->WS_CONV_IDX == node->conv_->WS_CONV_IDX &&
               pt.request_ == node->request_)
             {
-              gulong hash_rid = ACE::hash_pjw(reinterpret_cast<const char *>(rid), sizeof (RepoId));
+              gulong hash_rid = ACE::hash_pjw(reinterpret_cast<const char *>(rid), sizeof (GUID_t));
               if (node->data_name_ != 0)
                 {
                   this->topics_.bind (hash_rid, node->data_name_);
@@ -349,9 +369,9 @@ namespace OpenDDS
 
     /*
       // Domain participant calls to notify of a new topic
-      TopicStatus assert_topic (out RepoId topicId,
+      TopicStatus assert_topic (out GUID_t topicId,
                                 in ::DDS::DomainId_t domainId,
-                                in RepoId participantId,
+                                in GUID_t participantId,
                                 in string topicName,
                                 in string DataTypeName,
                                 in ::DDS::TopicQos qos)
@@ -373,7 +393,7 @@ namespace OpenDDS
           case NO_EXCEPTION:
             {
               TopicStatus status = instance().add_topic_status (hf_topicStatus);
-              const RepoId *rid = instance().add_repo_id (hf_topicId);
+              const GUID_t *rid = instance().add_repo_id (hf_topicId);
 
               frame_data* fd = instance().pinfo_->fd;
               bool visited;
@@ -443,9 +463,9 @@ namespace OpenDDS
     // publisher calls to create new publication
     // returns the id of the added publication
     // 0 is an invalid id
-    RepoId add_publication (in ::DDS::DomainId_t domainId,
-                            in RepoId participantId,
-                            in RepoId topicId,
+    GUID_t add_publication (in ::DDS::DomainId_t domainId,
+                            in GUID_t participantId,
+                            in GUID_t topicId,
                             in DataWriterRemote publication,
                             in ::DDS::DataWriterQos qos,
                             in TransportInterfaceInfo transInfo,
@@ -465,7 +485,7 @@ namespace OpenDDS
           Pending pp;
           pp.conv_ = instance().find_conversation();
           pp.request_ = header->req_id;
-          const RepoId *rid = instance().add_repo_id (hf_addEntityRetn);
+          const GUID_t *rid = instance().add_repo_id (hf_addEntityRetn);
           instance().map_pending (pp, rid);
           break;
         }
@@ -473,7 +493,7 @@ namespace OpenDDS
         {
           instance().add_ulong (hf_domainId);
           instance().add_repo_id (hf_participantId);
-          const RepoId *topic_id = instance().add_repo_id (hf_topicId);
+          const GUID_t *topic_id = instance().add_repo_id (hf_topicId);
           // this is necessary to get the objectId registered
           ::get_CDR_object(instance().tvb_,
                            instance().pinfo_,

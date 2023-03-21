@@ -22,7 +22,7 @@ RepoIdBuilder::RepoIdBuilder()
 {
 }
 
-RepoIdBuilder::RepoIdBuilder(RepoId& repoId)
+RepoIdBuilder::RepoIdBuilder(GUID_t& repoId)
   : GuidBuilder(repoId)
 {
 }

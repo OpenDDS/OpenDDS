@@ -1,4 +1,4 @@
-ARG BASIS=ubuntu:bionic
+ARG BASIS=ubuntu:focal
 FROM $BASIS
 
 ENV DEBIAN_FRONTEND=noninteractive
@@ -28,10 +28,6 @@ RUN cd /opt/OpenDDS && \
 ENV ACE_ROOT=/usr/local/share/ace \
     TAO_ROOT=/usr/local/share/tao \
     DDS_ROOT=/usr/local/share/dds \
-    MPC_ROOT=/usr/local/share/MPC \
-    PATH=".:/usr/local/share/ace/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
-
-WORKDIR /opt/OpenDDS/tests/DCPS/Messenger
-RUN mwc.pl -type gnuace && make
+    MPC_ROOT=/usr/local/share/MPC
 
 WORKDIR /opt/workspace

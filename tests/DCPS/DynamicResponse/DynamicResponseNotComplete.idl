@@ -1,0 +1,4 @@
+@topic
+struct SimpleStructNotComplete {
+  string string_value;
+};

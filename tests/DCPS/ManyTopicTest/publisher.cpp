@@ -120,7 +120,7 @@ create_writer(const DDS::Publisher_var& pub, const char* topicName,
   const DDS::DataWriterListener_var& listener = 0,
   const DDS::StatusMask& mask = OpenDDS::DCPS::DEFAULT_STATUS_MASK)
 {
-  const DDS::TypeSupport_var ts = new typename ::OpenDDS::DCPS::DDSTraits<MessageType>::TypeSupportTypeImpl();
+  const DDS::TypeSupport_var ts = new typename ::OpenDDS::DCPS::DDSTraits<MessageType>::TypeSupportImplType();
   const DDS::DomainParticipant_var dp = pub->get_participant();
   const CORBA::String_var typeName = ts->get_type_name();
   (void) ts->register_type(dp, typeName); // may have been registered before
@@ -134,7 +134,7 @@ create_writer(const DDS::Publisher_var& pub, const char* topicName,
   return OpenDDS::DCPS::DDSTraits<MessageType>::DataWriterType::_narrow(dw);
 }
 
-ACE_Atomic_Op<ACE_SYNCH_MUTEX, CORBA::Long> key(0);
+OpenDDS::DCPS::Atomic<CORBA::Long> key(0);
 
 void t1_init(T1::Foo1& foo, int)
 {
@@ -156,7 +156,7 @@ void t2_init(T2::Foo2& foo, int)
 
 void t2_next(T2::Foo2& foo, int i)
 {
-  static char buff[20];
+  char buff[32];
   ACE_OS::snprintf(buff, sizeof buff, "message %d", i + 1);
   foo.text = (const char*) buff;
 }
@@ -168,7 +168,7 @@ void t3_init(T3::Foo3& foo, int)
 
 void t3_next(T3::Foo3& foo, int i)
 {
-  static char buff[20];
+  char buff[32];
   ACE_OS::snprintf(buff, sizeof buff, "message %d", i + 1);
   foo.c = 'A' + (i % 26);
   foo.text = (const char*) buff;

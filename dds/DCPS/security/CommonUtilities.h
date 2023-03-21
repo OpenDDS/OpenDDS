@@ -1,11 +1,12 @@
 #ifndef OPENDDS_DCPS_SECURITY_COMMONUTILITIES_H
 #define OPENDDS_DCPS_SECURITY_COMMONUTILITIES_H
 
-#include "dds/DdsSecurityCoreC.h"
-#include "dds/Versioned_Namespace.h"
+#include "CryptoBuiltInC.h"
+#include "OpenDDS_Security_Export.h"
 
 #include "dds/DCPS/PoolAllocator.h"
-#include "CryptoBuiltInC.h"
+#include "dds/DdsSecurityCoreC.h"
+#include "dds/Versioned_Namespace.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
@@ -41,11 +42,13 @@ struct URI {
 
 int increment_handle(int& next);
 
+OpenDDS_Security_Export
 bool set_security_error(DDS::Security::SecurityException& ex,
                         int code,
                         int minor_code,
                         const char* message);
 
+OpenDDS_Security_Export
 bool set_security_error(DDS::Security::SecurityException& ex,
                         int code,
                         int minor_code,

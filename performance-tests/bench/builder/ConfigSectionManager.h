@@ -6,7 +6,7 @@ namespace Builder {
 
 class ConfigSectionManager {
 public:
-  explicit ConfigSectionManager(const ConfigSectionSeq& seq);
+  ConfigSectionManager(const std::string& name, const ConfigSectionSeq& seq);
 };
 
 }

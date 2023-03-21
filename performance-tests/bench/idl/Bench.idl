@@ -76,47 +76,6 @@ module Bench {
     // Discovery Stats
     unsigned long undermatched_readers;
     unsigned long undermatched_writers;
-    Builder::TimeStamp max_discovery_time_delta;
-
-    // Latency Stats
-    unsigned long long latency_sample_count;
-    double latency_min;
-    double latency_max;
-    double latency_mean;
-    double latency_var_x_sample_count;
-    double latency_stdev;
-    double latency_weighted_median;
-    unsigned long long latency_weighted_median_overflow;
-
-    // Jitter Stats
-    unsigned long long jitter_sample_count;
-    double jitter_min;
-    double jitter_max;
-    double jitter_mean;
-    double jitter_var_x_sample_count;
-    double jitter_stdev;
-    double jitter_weighted_median;
-    unsigned long long jitter_weighted_median_overflow;
-
-    // Round-Trip Latency Stats
-    unsigned long long round_trip_latency_sample_count;
-    double round_trip_latency_min;
-    double round_trip_latency_max;
-    double round_trip_latency_mean;
-    double round_trip_latency_var_x_sample_count;
-    double round_trip_latency_stdev;
-    double round_trip_latency_weighted_median;
-    unsigned long long round_trip_latency_weighted_median_overflow;
-
-    // Round-Trip Jitter Stats
-    unsigned long long round_trip_jitter_sample_count;
-    double round_trip_jitter_min;
-    double round_trip_jitter_max;
-    double round_trip_jitter_mean;
-    double round_trip_jitter_var_x_sample_count;
-    double round_trip_jitter_stdev;
-    double round_trip_jitter_weighted_median;
-    unsigned long long round_trip_jitter_weighted_median_overflow;
   };
 
   typedef sequence<WorkerReport> WorkerReportSeq;
@@ -149,6 +108,8 @@ module Bench {
       string executable;
       // Command to invoke worker
       string command;
+      // Name of the originating configuration file
+      string config_name;
       // JSON Serialized Bench::WorkerConfig
       string config;
       // Number of workers to spawn using this config (Must be >=1)
@@ -157,6 +118,8 @@ module Bench {
       SpawnedProcessId spawned_process_id;
       // Whether we expect a WorkerReport from this process
       boolean expect_worker_report;
+      // Whether we ignore exit errors from this process
+      boolean ignore_errors;
     };
     typedef sequence<SpawnedProcessConfig> SpawnedProcessConfigs;
 
@@ -174,6 +137,7 @@ module Bench {
 
     struct SpawnedProcessReport {
       SpawnedProcessId spawned_process_id;
+      long pid;
       boolean failed;
       // JSON Serialized Bench::WorkerReport
       string details;
@@ -202,6 +166,8 @@ module Bench {
       string command;
       // Whether the test controller should not expect a report from this worker instance. Defaults to false.
       boolean no_report;
+      // Whether the test controller should ignore exit errors from this worker instance. Defaults to false.
+      boolean ignore_errors;
       // Filename of the JSON Serialized Bench::WorkerConfig. Required. Config is modified
       // and transferred to node_controllers as dictated by the scenario.
       string config;
@@ -221,11 +187,30 @@ module Bench {
     };
     typedef sequence<NodePrototype> NodePrototypes;
 
+    enum ParameterKind { PK_NUMBER, PK_STRING, PK_TIME };
+    union ParameterValue switch (ParameterKind) {
+      case PK_NUMBER:
+        double number_param;
+      case PK_STRING:
+        string string_param;
+      case PK_TIME:
+        Builder::TimeStamp time_param;
+    };
+
+    struct Parameter {
+      string name;
+      string desc;
+      ParameterValue value;
+    };
+    typedef sequence<Parameter> ParameterSeq;
+
     // This is the type of the scenario configuration
     struct ScenarioPrototype {
       // Unused Metadata
       string name;
       string desc;
+      // Scenario parameters (for comparison with other scenarios)
+      ParameterSeq scenario_parameters;
       // Workers that must be deployed in sets
       NodePrototypes nodes;
       // Workers that can be assigned to any node
@@ -249,12 +234,14 @@ module Bench {
     };
 
     typedef sequence<NodeController::SpawnedProcessId> SpawnedProcessIdSeq;
+    typedef sequence<long> LocalProcessIdSeq;
     struct NodeReport {
       string node_name;
       NodeController::NodeId node_id;
       WorkerReportSeq worker_reports;
       Builder::StringSeq spawned_process_logs;
       SpawnedProcessIdSeq spawned_process_ids;
+      LocalProcessIdSeq local_process_ids;
       Builder::PropertySeq properties;
     };
 
@@ -262,8 +249,11 @@ module Bench {
 
     struct Report {
       string scenario_name;
+      ParameterSeq run_parameters;
+      ParameterSeq scenario_parameters;
       Builder::TimeStamp time;
       NodeReportSeq node_reports;
+      unsigned long missing_reports;
       Builder::PropertySeq properties;
     };
   };

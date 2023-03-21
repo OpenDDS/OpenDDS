@@ -4,6 +4,8 @@
 #include "Common.h"
 #include "BenchTypeSupportImpl.h"
 
+#include <dds/DCPS/RapidJsonWrapper.h>
+
 #include <vector>
 
 namespace Bench {

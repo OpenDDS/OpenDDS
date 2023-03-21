@@ -5,6 +5,8 @@
 #include <dds/DCPS/GuidUtils.h>
 #include <dds/DdsDcpsInfrastructureC.h>
 
+#include <list>
+
 namespace RtpsRelay {
 
 class Config {
@@ -12,8 +14,7 @@ public:
   Config()
     : application_participant_guid_(OpenDDS::DCPS::GUID_UNKNOWN)
     , lifespan_(60) // 1 minute
-    , max_pending_(0)
-    , pending_timeout_(60) // 1 minute
+    , inactive_period_(60) // 1 minute
 #ifdef ACE_DEFAULT_MAX_SOCKET_BUFSIZ
     , buffer_size_(ACE_DEFAULT_MAX_SOCKET_BUFSIZ)
 #else
@@ -22,10 +23,28 @@ public:
     , application_domain_(1)
     , allow_empty_partition_(true)
     , log_warnings_(false)
-    , log_entries_(false)
     , log_discovery_(false)
     , log_activity_(false)
+    , log_http_(false)
+    , log_thread_status_(false)
+    , thread_status_safety_factor_(3)
+    , utilization_limit_(.95)
+    , log_participant_statistics_(false)
+    , publish_participant_statistics_(false)
+    , restart_detection_(false)
+    , admission_control_queue_size_(0)
+    , max_addr_set_size_(0)
   {}
+
+  void relay_id(const std::string& value)
+  {
+    relay_id_ = value;
+  }
+
+  const std::string& relay_id() const
+  {
+    return relay_id_;
+  }
 
   void application_participant_guid(const OpenDDS::DCPS::GUID_t& value)
   {
@@ -47,24 +66,14 @@ public:
     return lifespan_;
   }
 
-  void max_pending(size_t value)
+  void inactive_period(const OpenDDS::DCPS::TimeDuration& value)
   {
-    max_pending_ = value;
+    inactive_period_ = value;
   }
 
-  size_t max_pending() const
+  const OpenDDS::DCPS::TimeDuration& inactive_period() const
   {
-    return max_pending_;
-  }
-
-  void pending_timeout(const OpenDDS::DCPS::TimeDuration& value)
-  {
-    pending_timeout_ = value;
-  }
-
-  const OpenDDS::DCPS::TimeDuration& pending_timeout() const
-  {
-    return pending_timeout_;
+    return inactive_period_;
   }
 
   void buffer_size(int value)
@@ -107,16 +116,6 @@ public:
     return log_warnings_;
   }
 
-  void log_entries(bool flag)
-  {
-    log_entries_ = flag;
-  }
-
-  bool log_entries() const
-  {
-    return log_entries_;
-  }
-
   void log_discovery(bool flag)
   {
     log_discovery_ = flag;
@@ -135,6 +134,46 @@ public:
   bool log_activity() const
   {
     return log_activity_;
+  }
+
+  void log_http(bool flag)
+  {
+    log_http_ = flag;
+  }
+
+  bool log_http() const
+  {
+    return log_http_;
+  }
+
+  void log_thread_status(bool flag)
+  {
+    log_thread_status_ = flag;
+  }
+
+  bool log_thread_status() const
+  {
+    return log_thread_status_;
+  }
+
+  void thread_status_safety_factor(int value)
+  {
+    thread_status_safety_factor_ = value;
+  }
+
+  int thread_status_safety_factor() const
+  {
+    return thread_status_safety_factor_;
+  }
+
+  void utilization_limit(double value)
+  {
+    utilization_limit_ = value;
+  }
+
+  double utilization_limit() const
+  {
+    return utilization_limit_;
   }
 
   void log_relay_statistics(OpenDDS::DCPS::TimeDuration value)
@@ -157,12 +196,12 @@ public:
     return log_handler_statistics_;
   }
 
-  void log_participant_statistics(OpenDDS::DCPS::TimeDuration value)
+  void log_participant_statistics(bool value)
   {
     log_participant_statistics_ = value;
   }
 
-  OpenDDS::DCPS::TimeDuration log_participant_statistics() const
+  bool log_participant_statistics() const
   {
     return log_participant_statistics_;
   }
@@ -187,34 +226,125 @@ public:
     return publish_handler_statistics_;
   }
 
-  void publish_participant_statistics(OpenDDS::DCPS::TimeDuration value)
+  void publish_participant_statistics(bool value)
   {
     publish_participant_statistics_ = value;
   }
 
-  OpenDDS::DCPS::TimeDuration publish_participant_statistics() const
+  bool publish_participant_statistics() const
   {
     return publish_participant_statistics_;
   }
 
+  void publish_relay_status(OpenDDS::DCPS::TimeDuration value)
+  {
+    publish_relay_status_ = value;
+  }
+
+  OpenDDS::DCPS::TimeDuration publish_relay_status() const
+  {
+    return publish_relay_status_;
+  }
+
+  void publish_relay_status_liveliness(OpenDDS::DCPS::TimeDuration value)
+  {
+    publish_relay_status_liveliness_ = value;
+  }
+
+  OpenDDS::DCPS::TimeDuration publish_relay_status_liveliness() const
+  {
+    return publish_relay_status_liveliness_;
+  }
+
+  void restart_detection(bool flag)
+  {
+    restart_detection_ = flag;
+  }
+
+  bool restart_detection() const
+  {
+    return restart_detection_;
+  }
+
+  void admission_control_queue_size(size_t value)
+  {
+    admission_control_queue_size_ = value;
+  }
+
+  size_t admission_control_queue_size() const
+  {
+    return admission_control_queue_size_;
+  }
+
+  void admission_control_queue_duration(OpenDDS::DCPS::TimeDuration value)
+  {
+    admission_control_queue_duration_ = value;
+  }
+
+  OpenDDS::DCPS::TimeDuration admission_control_queue_duration() const
+  {
+    return admission_control_queue_duration_;
+  }
+
+  void run_time(OpenDDS::DCPS::TimeDuration value)
+  {
+    run_time_ = value;
+  }
+
+  OpenDDS::DCPS::TimeDuration run_time() const
+  {
+    return run_time_;
+  }
+
+  void max_addr_set_size(size_t value)
+  {
+    max_addr_set_size_ = value;
+  }
+
+  size_t max_addr_set_size() const
+  {
+    return max_addr_set_size_;
+  }
+
+  OpenDDS::DCPS::TimeDuration rejected_address_duration() const
+  {
+    return rejected_address_duration_;
+  }
+
+  void rejected_address_duration(OpenDDS::DCPS::TimeDuration value)
+  {
+    rejected_address_duration_ = value;
+  }
+
 private:
+  std::string relay_id_;
   OpenDDS::DCPS::GUID_t application_participant_guid_;
   OpenDDS::DCPS::TimeDuration lifespan_;
-  size_t max_pending_;
-  OpenDDS::DCPS::TimeDuration pending_timeout_;
+  OpenDDS::DCPS::TimeDuration inactive_period_;
   int buffer_size_;
   DDS::DomainId_t application_domain_;
   bool allow_empty_partition_;
   bool log_warnings_;
-  bool log_entries_;
   bool log_discovery_;
   bool log_activity_;
+  bool log_http_;
+  bool log_thread_status_;
+  int thread_status_safety_factor_;
+  double utilization_limit_;
   OpenDDS::DCPS::TimeDuration log_relay_statistics_;
   OpenDDS::DCPS::TimeDuration log_handler_statistics_;
-  OpenDDS::DCPS::TimeDuration log_participant_statistics_;
+  bool log_participant_statistics_;
   OpenDDS::DCPS::TimeDuration publish_relay_statistics_;
   OpenDDS::DCPS::TimeDuration publish_handler_statistics_;
-  OpenDDS::DCPS::TimeDuration publish_participant_statistics_;
+  bool publish_participant_statistics_;
+  OpenDDS::DCPS::TimeDuration publish_relay_status_;
+  OpenDDS::DCPS::TimeDuration publish_relay_status_liveliness_;
+  bool restart_detection_;
+  size_t admission_control_queue_size_;
+  OpenDDS::DCPS::TimeDuration admission_control_queue_duration_;
+  OpenDDS::DCPS::TimeDuration run_time_;
+  size_t max_addr_set_size_;
+  OpenDDS::DCPS::TimeDuration rejected_address_duration_;
 };
 
 }

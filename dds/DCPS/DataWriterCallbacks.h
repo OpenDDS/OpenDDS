@@ -39,7 +39,7 @@ public:
 
   virtual ~DataWriterCallbacks() {}
 
-  virtual void add_association(const RepoId& yourId,
+  virtual void add_association(const GUID_t& yourId,
                                const ReaderAssociation& reader,
                                bool active) = 0;
 
@@ -48,23 +48,23 @@ public:
 
   virtual void update_incompatible_qos(const IncompatibleQosStatus& status) = 0;
 
-  virtual void update_subscription_params(const RepoId& readerId,
+  virtual void update_subscription_params(const GUID_t& readerId,
                                           const DDS::StringSeq& exprParams) = 0;
 
-  virtual void register_for_reader(const RepoId& /*participant*/,
-                                   const RepoId& /*writerid*/,
-                                   const RepoId& /*readerid*/,
+  virtual void register_for_reader(const GUID_t& /*participant*/,
+                                   const GUID_t& /*writerid*/,
+                                   const GUID_t& /*readerid*/,
                                    const TransportLocatorSeq& /*locators*/,
                                    DiscoveryListener* /*listener*/) { }
 
-  virtual void unregister_for_reader(const RepoId& /*participant*/,
-                                     const RepoId& /*writerid*/,
-                                     const RepoId& /*readerid*/) { }
+  virtual void unregister_for_reader(const GUID_t& /*participant*/,
+                                     const GUID_t& /*writerid*/,
+                                     const GUID_t& /*readerid*/) { }
 
-  virtual void update_locators(const RepoId& /*remote*/,
+  virtual void update_locators(const GUID_t& /*remote*/,
                                const TransportLocatorSeq& /*locators*/) { }
 
-  virtual ICE::Endpoint* get_ice_endpoint() = 0;
+  virtual WeakRcHandle<ICE::Endpoint> get_ice_endpoint() = 0;
 };
 
 typedef RcHandle<DataWriterCallbacks> DataWriterCallbacks_rch;

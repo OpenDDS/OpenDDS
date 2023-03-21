@@ -7,7 +7,6 @@
 #include <ace/Lib_Find.h> // For ACE::get_temp_dir
 #include <ace/OS_NS_string.h> // For ACE_OS::strcpy
 #include <ace/OS_NS_sys_stat.h> // For ACE_OS::mkdir and ACE_OS::stat
-#include <ace/OS_NS_stdlib.h> // For ACE_OS::mktemp
 
 #include <iostream>
 #include <exception>
@@ -62,21 +61,20 @@ std::string& string_replace(std::string& input, const std::string& oldstr, const
 
 std::string create_temp_dir(const std::string& prefix)
 {
-  // Create Template for mktemp
-  ACE_TCHAR buffer[PATH_MAX];
+  // Create the buffer for the path
+  ACE_TCHAR buffer[PATH_MAX] = ACE_TEXT("");
   if (ACE::get_temp_dir(&buffer[0], PATH_MAX) == -1) {
     return "";
   }
   ACE_OS::strcpy(
     &buffer[0],
     ACE_TEXT_CHAR_TO_TCHAR(join_path(
-      ACE_TEXT_ALWAYS_CHAR(&buffer[0]),
-      (prefix + "_XXXXXX")).c_str()));
+      ACE_TEXT_ALWAYS_CHAR(&buffer[0]), prefix).c_str()));
 
-  // Fill the template and create the directory
-  if (!ACE_OS::mktemp(buffer)) {
-    return "";
-  }
+  // Append the process id and create the directory
+  const size_t len = ACE_OS::strlen(buffer);
+  ACE_OS::snprintf(buffer + len, PATH_MAX - len - 1,
+                   ACE_TEXT("_%d"), ACE_OS::getpid());
   if (ACE_OS::mkdir(buffer, S_IRWXU) == -1) {
     return "";
   }
@@ -87,12 +85,10 @@ std::string create_temp_dir(const std::string& prefix)
 std::string iso8601(const std::chrono::system_clock::time_point& tp)
 {
   using namespace std::chrono;
-  std::stringstream ss;
   const std::time_t now = system_clock::to_time_t(tp);
   char buf[sizeof "2011-10-08T07:07:09Z"]; // longest possible for UTC times (other zones add offset suffix)
   std::strftime(buf, sizeof buf, "%FT%TZ", std::gmtime(&now));
-  ss << buf;
-  return ss.str();
+  return buf;
 }
 
 std::vector<std::string> get_dir_contents(const std::string& path)

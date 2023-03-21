@@ -1,4 +1,5 @@
 {
+  "create_time": { "sec": -1, "nsec": 0 },
   "enable_time": { "sec": -1, "nsec": 0 },
   "start_time": { "sec": -3, "nsec": 0 },
   "stop_time": { "sec": -30, "nsec": 0 },
@@ -8,35 +9,57 @@
     "config_sections": [
       { "name": "common",
         "properties": [
-          { "name": "DCPSSecurity",
-            "value": "0"
+          { "name": "DCPSDefaultDiscovery",
+            "value": "rtps_discovery"
           },
           { "name": "DCPSDebugLevel",
             "value": "0"
+          },
+          { "name": "DCPSPendingTimeout",
+            "value": "3"
           }
         ]
-      }
-    ],
-    "discoveries": [
-      { "name": "bench_test_rtps",
-        "type": "rtps",
-        "domain": 7
-      }
-    ],
-    "instances": [
-      { "name": "rtps_instance_01",
-        "type": "rtps_udp",
-        "domain": 7
       },
-      { "name": "rtps_instance_02",
-        "type": "rtps_udp",
-        "domain": 17
+      { "name": "rtps_discovery/rtps_discovery",
+        "properties": [
+          { "name": "ResendPeriod",
+            "value": "2"
+          }
+        ]
+      },
+      { "name": "config/config_01",
+        "properties": [
+          { "name": "transports",
+            "value": "rtps_transport_01"
+          }
+        ]
+      },
+      { "name": "config/config_02",
+        "properties": [
+          { "name": "transports",
+            "value": "rtps_transport_02"
+          }
+        ]
+      },
+      { "name": "transport/rtps_transport_01",
+        "properties": [
+          { "name": "transport_type",
+            "value": "rtps_udp"
+          }
+        ]
+      },
+      { "name": "transport/rtps_transport_02",
+        "properties": [
+          { "name": "transport_type",
+            "value": "rtps_udp"
+          }
+        ]
       }
     ],
     "participants": [
       { "name": "participant_01",
         "domain": 7,
-        "transport_config_name": "rtps_instance_01",
+        "transport_config_name": "config_01",
 
         "qos": { "entity_factory": { "autoenable_created_entities": false } },
         "qos_mask": { "entity_factory": { "has_autoenable_created_entities": false } },
@@ -124,7 +147,7 @@
       },
       { "name": "participant_02",
         "domain": 7,
-        "transport_config_name": "rtps_instance_02",
+        "transport_config_name": "config_02",
 
         "qos": { "entity_factory": { "autoenable_created_entities": false } },
         "qos_mask": { "entity_factory": { "has_autoenable_created_entities": false } },
@@ -219,10 +242,10 @@
       "writers": [ "datawriter_01_01_01" ],
       "params": [
         { "name": "data_buffer_bytes",
-          "value": { "_d": "PVK_ULL", "ull_prop": 190 }
+          "value": { "$discriminator": "PVK_ULL", "ull_prop": 190 }
         },
         { "name": "write_period",
-          "value": { "_d": "PVK_TIME", "time_prop": { "sec": 0, "nsec": 20000000 } }
+          "value": { "$discriminator": "PVK_TIME", "time_prop": { "sec": 0, "nsec": 20000000 } }
         }
       ]
     },
@@ -232,10 +255,10 @@
       "writers": [ "datawriter_01_01_02" ],
       "params": [
         { "name": "data_buffer_bytes",
-          "value": { "_d": "PVK_ULL", "ull_prop": 170 }
+          "value": { "$discriminator": "PVK_ULL", "ull_prop": 170 }
         },
         { "name": "write_period",
-          "value": { "_d": "PVK_TIME", "time_prop": { "sec": 0, "nsec": 30000000 } }
+          "value": { "$discriminator": "PVK_TIME", "time_prop": { "sec": 0, "nsec": 30000000 } }
         }
       ]
     },
@@ -245,10 +268,10 @@
       "writers": [ "datawriter_01_02_01" ],
       "params": [
         { "name": "data_buffer_bytes",
-          "value": { "_d": "PVK_ULL", "ull_prop": 130 }
+          "value": { "$discriminator": "PVK_ULL", "ull_prop": 130 }
         },
         { "name": "write_period",
-          "value": { "_d": "PVK_TIME", "time_prop": { "sec": 0, "nsec": 50000000 } }
+          "value": { "$discriminator": "PVK_TIME", "time_prop": { "sec": 0, "nsec": 50000000 } }
         }
       ]
     },
@@ -258,10 +281,10 @@
       "writers": [ "datawriter_01_02_02" ],
       "params": [
         { "name": "data_buffer_bytes",
-          "value": { "_d": "PVK_ULL", "ull_prop": 110 }
+          "value": { "$discriminator": "PVK_ULL", "ull_prop": 110 }
         },
         { "name": "write_period",
-          "value": { "_d": "PVK_TIME", "time_prop": { "sec": 0, "nsec": 70000000 } }
+          "value": { "$discriminator": "PVK_TIME", "time_prop": { "sec": 0, "nsec": 70000000 } }
         }
       ]
     },
@@ -271,10 +294,10 @@
       "writers": [ "datawriter_02_01_01" ],
       "params": [
         { "name": "data_buffer_bytes",
-          "value": { "_d": "PVK_ULL", "ull_prop": 70 }
+          "value": { "$discriminator": "PVK_ULL", "ull_prop": 70 }
         },
         { "name": "write_period",
-          "value": { "_d": "PVK_TIME", "time_prop": { "sec": 0, "nsec": 110000000 } }
+          "value": { "$discriminator": "PVK_TIME", "time_prop": { "sec": 0, "nsec": 110000000 } }
         }
       ]
     },
@@ -284,10 +307,10 @@
       "writers": [ "datawriter_02_01_02" ],
       "params": [
         { "name": "data_buffer_bytes",
-          "value": { "_d": "PVK_ULL", "ull_prop": 50 }
+          "value": { "$discriminator": "PVK_ULL", "ull_prop": 50 }
         },
         { "name": "write_period",
-          "value": { "_d": "PVK_TIME", "time_prop": { "sec": 0, "nsec": 130000000 } }
+          "value": { "$discriminator": "PVK_TIME", "time_prop": { "sec": 0, "nsec": 130000000 } }
         }
       ]
     },
@@ -297,10 +320,10 @@
       "writers": [ "datawriter_02_02_01" ],
       "params": [
         { "name": "data_buffer_bytes",
-          "value": { "_d": "PVK_ULL", "ull_prop": 30 }
+          "value": { "$discriminator": "PVK_ULL", "ull_prop": 30 }
         },
         { "name": "write_period",
-          "value": { "_d": "PVK_TIME", "time_prop": { "sec": 0, "nsec": 170000000 } }
+          "value": { "$discriminator": "PVK_TIME", "time_prop": { "sec": 0, "nsec": 170000000 } }
         }
       ]
     },
@@ -310,10 +333,10 @@
       "writers": [ "datawriter_02_02_02" ],
       "params": [
         { "name": "data_buffer_bytes",
-          "value": { "_d": "PVK_ULL", "ull_prop": 20 }
+          "value": { "$discriminator": "PVK_ULL", "ull_prop": 20 }
         },
         { "name": "write_period",
-          "value": { "_d": "PVK_TIME", "time_prop": { "sec": 0, "nsec": 190000000 } }
+          "value": { "$discriminator": "PVK_TIME", "time_prop": { "sec": 0, "nsec": 190000000 } }
         }
       ]
     }

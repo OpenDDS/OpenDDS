@@ -145,7 +145,9 @@ public class MessageConsumerImpl implements MessageConsumer {
         if (messageListener == null) {
             messagePayloadDataReader.set_listener(null, 0);
         } else {
-            messagePayloadDataReader.set_listener(new ConsumerDataReaderListener(this, sessionImpl), DATA_AVAILABLE_STATUS.value);
+            ConsumerDataReaderListener listener = new ConsumerDataReaderListener(this, sessionImpl);
+            messagePayloadDataReader.set_listener(listener, DATA_AVAILABLE_STATUS.value);
+            listener.on_data_available(messagePayloadDataReader);
         }
         this.messageListener = messageListener;
     }

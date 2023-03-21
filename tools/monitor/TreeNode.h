@@ -8,11 +8,22 @@
 #ifndef TREENODE_H
 #define TREENODE_H
 
+// Tell GCC to ignore implicitly declared copy methods as long as
+// Qt is not compliant.
+#ifdef __GNUC__
+#  pragma GCC diagnostic push
+#  pragma GCC diagnostic ignored "-Wdeprecated-copy"
+#endif
+
 #include <QtCore/QList>
 #include <QtCore/QVariant>
 #include <QtCore/QtAlgorithms>
 #include <QtGui/QColor>
 #include <QtWidgets/QCheckBox>
+
+#ifdef __GNUC__
+#  pragma GCC diagnostic pop
+#endif
 
 namespace Monitor {
 

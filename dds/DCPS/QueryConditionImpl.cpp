@@ -93,6 +93,14 @@ QueryConditionImpl::get_trigger_value()
   }
 }
 
+TypeSupportImpl* QueryConditionImpl::get_type_support() const
+{
+  DDS::TopicDescription_var td = parent_->get_topicdescription();
+  TopicDescriptionImpl* const tdi = dynamic_cast<TopicDescriptionImpl*>(td.in());
+  TypeSupport* const ts = tdi ? tdi->get_type_support() : 0;
+  return dynamic_cast<TypeSupportImpl*>(ts);
+}
+
 } // namespace DCPS
 } // namespace OpenDDS
 

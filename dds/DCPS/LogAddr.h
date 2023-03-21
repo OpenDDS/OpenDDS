@@ -3,6 +3,7 @@
 
 #include "dcps_export.h"
 #include "PoolAllocator.h"
+#include "NetworkAddress.h"
 
 #include <dds/Versioned_Namespace.h>
 
@@ -25,10 +26,14 @@ public:
   static const String host(const ACE_INET_Addr& addr);
 
   explicit LogAddr(const ACE_INET_Addr& addr, Option opt = IpPort);
+  explicit LogAddr(const NetworkAddress& addr, Option opt = IpPort);
 
   const String& str() const { return addr_; }
   const char* c_str() const { return addr_.c_str(); }
+
 private:
+  void init_addr(const ACE_INET_Addr& addr, Option opt);
+
   String addr_;
 };
 

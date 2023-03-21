@@ -7,6 +7,7 @@
 
 #include "RtpsUdpLoader.h"
 #include "RtpsUdpInst.h"
+#include "RtpsUdpDataLink.h"
 
 #include "dds/DCPS/transport/framework/TransportRegistry.h"
 #include "dds/DCPS/transport/framework/TransportType.h"
@@ -41,11 +42,10 @@ void RtpsUdpLoader::load()
 {
   TransportRegistry* registry = TheTransportRegistry;
   TransportType_rch type = make_rch<RtpsUdpType>();
-  if (registry->has_type(type)) {
+  if (!registry->register_type(type)) {
     return;
   }
 
-  registry->register_type(type);
   // Don't create a default for RTPS.  At least for the initial implementation,
   // the user needs to explicitly configure it...
 #ifdef OPENDDS_SAFETY_PROFILE
@@ -53,7 +53,7 @@ void RtpsUdpLoader::load()
   TransportInst_rch default_inst =
     registry->create_inst(TransportRegistry::DEFAULT_INST_PREFIX +
                           OPENDDS_STRING("0600_RTPS_UDP"),
-                          RTPS_UDP_NAME, false);
+                          RTPS_UDP_NAME);
   registry->get_config(TransportRegistry::DEFAULT_CONFIG_NAME)
     ->sorted_insert(default_inst);
 #endif

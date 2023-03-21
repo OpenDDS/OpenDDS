@@ -19,7 +19,7 @@ Test::DataReaderListener::DataReaderListener (long expected_matches)
 
 Test::DataReaderListener::~DataReaderListener ()
 {
-  long const matches = this->subscription_matches_.value ();
+  long const matches = this->subscription_matches_;
   if (matches != this->expected_matches_)
     {
       ACE_ERROR ((LM_ERROR,

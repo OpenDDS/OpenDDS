@@ -24,7 +24,7 @@ ACE_INLINE
 void
 DataSampleElement::set_next_send_sample(DataSampleElement* next_send_sample)
 {
-  this->next_send_sample_ = next_send_sample;
+  next_send_sample_ = next_send_sample;
 }
 
 ACE_INLINE
@@ -60,11 +60,11 @@ ACE_INLINE
 void
 DataSampleElement::set_sample(Message_Block_Ptr sample)
 {
-  this->sample_.reset(sample.release());
+  sample_.reset(sample.release());
 }
 
 ACE_INLINE
-PublicationId
+GUID_t
 DataSampleElement::get_pub_id() const
 {
   return publication_id_;
@@ -79,30 +79,30 @@ DataSampleElement::get_num_subs() const
 
 ACE_INLINE
 void
-DataSampleElement::set_num_subs(int num_subs)
+DataSampleElement::set_num_subs(CORBA::ULong num_subs)
 {
-  this->num_subs_ = num_subs;
+  num_subs_ = num_subs;
 }
 
 ACE_INLINE
-const OpenDDS::DCPS::RepoId*
+const OpenDDS::DCPS::GUID_t*
 DataSampleElement::get_sub_ids() const
 {
   return subscription_ids_;
 }
 
 ACE_INLINE
-OpenDDS::DCPS::RepoId
-DataSampleElement::get_sub_id(int index) const
+OpenDDS::DCPS::GUID_t
+DataSampleElement::get_sub_id(CORBA::ULong index) const
 {
   return subscription_ids_[index];
 }
 
 ACE_INLINE
 void
-DataSampleElement::set_sub_id(int index, OpenDDS::DCPS::RepoId id)
+DataSampleElement::set_sub_id(CORBA::ULong index, OpenDDS::DCPS::GUID_t id)
 {
-  this->subscription_ids_[index] = id;
+  subscription_ids_[index] = id;
 }
 
 ACE_INLINE

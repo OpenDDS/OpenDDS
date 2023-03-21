@@ -107,13 +107,13 @@ public:
   virtual bool check_local_datawriter_register_instance(
     DDS::Security::PermissionsHandle permissions_handle,
     DDS::DataWriter_ptr writer,
-    DDS::Security::DynamicData_ptr key,
+    DDS::DynamicData_ptr key,
     DDS::Security::SecurityException& ex);
 
   virtual bool check_local_datawriter_dispose_instance(
     DDS::Security::PermissionsHandle permissions_handle,
     DDS::DataWriter_ptr writer,
-    DDS::Security::DynamicData_ptr key,
+    DDS::DynamicData_ptr key,
     DDS::Security::SecurityException& ex);
 
   virtual bool check_remote_participant(
@@ -159,15 +159,14 @@ public:
     DDS::Security::PermissionsHandle permissions_handle,
     DDS::DataReader_ptr reader,
     DDS::InstanceHandle_t publication_handle,
-    DDS::Security::DynamicData_ptr key,
-    DDS::InstanceHandle_t instance_handle,
+    DDS::DynamicData_ptr key,
     DDS::Security::SecurityException& ex);
 
   virtual bool check_remote_datawriter_dispose_instance(
     DDS::Security::PermissionsHandle permissions_handle,
     DDS::DataReader_ptr reader,
     DDS::InstanceHandle_t publication_handle,
-    DDS::Security::DynamicData_ptr key,
+    DDS::DynamicData_ptr key,
     DDS::Security::SecurityException& ex);
 
   virtual bool get_permissions_token(
@@ -237,6 +236,8 @@ public:
 
   static bool pattern_match(const char* string, const char* pattern);
 
+  SSL::SubjectName get_subject_name(DDS::Security::PermissionsHandle permissions_handle) const;
+
 private:
 
   AccessControlBuiltInImpl(const AccessControlBuiltInImpl&);
@@ -259,7 +260,8 @@ private:
 
   class RevokePermissionsTask : public DCPS::SporadicTask {
   public:
-    RevokePermissionsTask(DCPS::ReactorInterceptor_rch interceptor,
+    RevokePermissionsTask(const DCPS::TimeSource& time_source,
+                          DCPS::ReactorInterceptor_rch interceptor,
                           AccessControlBuiltInImpl& impl);
     virtual ~RevokePermissionsTask();
     void insert(DDS::Security::PermissionsHandle pm_handle, const time_t& expiration);

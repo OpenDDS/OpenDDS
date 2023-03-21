@@ -12,18 +12,24 @@
 ACE_INLINE
 OpenDDS::DCPS::TransportInst::TransportInst(const char* type,
                                             const OPENDDS_STRING& name)
-  : transport_type_(type),
-    queue_messages_per_pool_(DEFAULT_CONFIG_QUEUE_MESSAGES_PER_POOL),
-    queue_initial_pools_(DEFAULT_CONFIG_QUEUE_INITIAL_POOLS),
-    max_packet_size_(DEFAULT_CONFIG_MAX_PACKET_SIZE),
-    max_samples_per_packet_(DEFAULT_CONFIG_MAX_SAMPLES_PER_PACKET),
-    optimum_packet_size_(DEFAULT_CONFIG_OPTIMUM_PACKET_SIZE),
-    thread_per_connection_(0),
-    datalink_release_delay_(10000),
-    datalink_control_chunks_(32),
-    fragment_reassembly_timeout_(300),
-    shutting_down_(false),
-    name_(name)
+  : transport_type_(type)
+  , queue_messages_per_pool_(DEFAULT_CONFIG_QUEUE_MESSAGES_PER_POOL)
+  , queue_initial_pools_(DEFAULT_CONFIG_QUEUE_INITIAL_POOLS)
+  , max_packet_size_(DEFAULT_CONFIG_MAX_PACKET_SIZE)
+  , max_samples_per_packet_(DEFAULT_CONFIG_MAX_SAMPLES_PER_PACKET)
+  , optimum_packet_size_(DEFAULT_CONFIG_OPTIMUM_PACKET_SIZE)
+  , thread_per_connection_(0)
+  , datalink_release_delay_(DEFAULT_DATALINK_RELEASE_DELAY)
+  , datalink_control_chunks_(DEFAULT_DATALINK_CONTROL_CHUNKS)
+  , fragment_reassembly_timeout_(300)
+  , receive_preallocated_message_blocks_(0)
+  , receive_preallocated_data_blocks_(0)
+  , shutting_down_(false)
+  , name_(name)
+  , drop_messages_(false)
+  , drop_messages_m_(0)
+  , drop_messages_b_(0)
+  , count_messages_(false)
 {
   DBG_ENTRY_LVL("TransportInst", "TransportInst", 6);
   adjust_config_value();

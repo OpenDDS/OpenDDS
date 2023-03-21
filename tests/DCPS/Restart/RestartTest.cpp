@@ -2,6 +2,7 @@
 
 #include <MessengerTypeSupportImpl.h>
 
+#include <dds/DCPS/debug.h>
 #include <dds/DCPS/Marked_Default_Qos.h>
 #include <dds/DCPS/Service_Participant.h>
 #include <dds/DCPS/transport/framework/TransportRegistry.h>
@@ -68,6 +69,8 @@ struct Application {
     DDS::DomainParticipantFactory_var dpf = TheServiceParticipant->get_domain_participant_factory();
     if (!dpf) {
       throw std::runtime_error("Failed to get participant factory");
+    } else {
+      std::cout << "Application " << id_ << " retrieved domain participant factory\n";
     }
     DDS::DomainParticipantFactoryQos factory_qos;
     dpf->get_qos(factory_qos);
@@ -90,10 +93,15 @@ struct Application {
 #endif
     participant_ = dpf->create_participant(4, participant_qos, 0, 0);
     if (!participant_) {
+      std::cout << "Application " << id_ << " failed to create participant\n";
       throw std::runtime_error("Failed to create participant");
+    } else {
+      std::cout << "Application " << id_ << " created domain participant\n";
     }
     TheTransportRegistry->bind_config(cfg, participant_);
-    participant_->enable();
+    if (participant_->enable()) {
+      throw std::runtime_error("Failed to enable participant");
+    }
 
     DDS::TypeSupport_var ts = new Messenger::MessageTypeSupportImpl;
     CORBA::String_var tn = ts->get_type_name();
@@ -116,8 +124,18 @@ struct Application {
     std::cout << "Application " << id_ << " Ending\n";
     {
       DDS::DomainParticipantFactory_var dpf = TheParticipantFactory;
-      participant_->delete_contained_entities();
-      dpf->delete_participant(participant_);
+      DDS::ReturnCode_t retval = participant_->delete_contained_entities();
+      if (retval != DDS::RETCODE_OK) {
+        std::cout << "Failed to deleted contained entities\n";
+      } else {
+        std::cout << "Application " << id_ << " did delete contained_entities\n";
+      }
+      retval = dpf->delete_participant(participant_);
+      if (retval != DDS::RETCODE_OK) {
+        std::cout << "Failed to deleted domain participant\n";
+      } else {
+        std::cout << "Application " << id_ << " did delete domain participant\n";
+      }
       participant_ = 0;
     }
 
@@ -126,7 +144,12 @@ struct Application {
     TheTransportRegistry->remove_inst(cfg->instances_[0]);
 
     if (--instances_ == 0) {
-      TheServiceParticipant->shutdown();
+      const DDS::ReturnCode_t retval = TheServiceParticipant->shutdown();
+      if (retval != DDS::RETCODE_OK) {
+        std::cout << "Failed to shutdown the service participant\n";
+      } else {
+        std::cout << "Application " << id_ << " shutdown service participant\n";
+      }
     }
     ACE::fini();
     std::cout << "Application " << id_ << " Ended\n";
@@ -158,6 +181,10 @@ int main(int argc, char* argv[])
 #endif
     }
   }
+
+#ifdef OPENDDS_SECURITY
+  OpenDDS::DCPS::security_debug.new_entity_error = true;
+#endif
 
   int status = EXIT_SUCCESS;
 

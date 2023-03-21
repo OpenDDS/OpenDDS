@@ -95,7 +95,7 @@ using OpenDDS::DCPS::RcHandle;
 
 class File;
 
-class OpenDDS_Dcps_Export Directory : public RcObject {
+class OpenDDS_Dcps_Export Directory : public virtual RcObject {
 public:
   typedef RcHandle<Directory> Ptr;
 
@@ -109,9 +109,14 @@ private:
   typedef OPENDDS_MAP(ACE_TString, ACE_TString) Map;
 
   template <typename Item>
-  class Iterator
-        : public std::iterator<std::input_iterator_tag, typename Item::Ptr> {
+  class Iterator {
   public:
+    typedef std::input_iterator_tag iterator_category;
+    typedef typename Item::Ptr value_type;
+    typedef std::ptrdiff_t difference_type;
+    typedef value_type* pointer;
+    typedef value_type& reference;
+
     typename Item::Ptr operator*() const {
       return deref();
     }
@@ -216,7 +221,7 @@ private:
   // phys. prefix (before '.') -> next available counter #
 };
 
-class OpenDDS_Dcps_Export File : public RcObject {
+class OpenDDS_Dcps_Export File : public virtual RcObject {
 public:
   typedef RcHandle<File> Ptr;
 

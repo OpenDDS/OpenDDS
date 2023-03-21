@@ -2,9 +2,13 @@
 
 #include <dds/DCPS/Service_Participant.h>
 #include <dds/DCPS/Marked_Default_Qos.h>
-
 #include <dds/DCPS/security/framework/Properties.h>
 #include <dds/DCPS/security/framework/SecurityRegistry.h>
+#ifdef ACE_AS_STATIC_LIBS
+#  include <dds/DCPS/RTPS/RtpsDiscovery.h>
+#  include <dds/DCPS/transport/rtps_udp/RtpsUdp.h>
+#  include <dds/DCPS/security/BuiltInPlugins.h>
+#endif
 
 int QUOTER_DOMAIN_ID = 0;
 
@@ -17,7 +21,7 @@ const std::string identity_ca_file = file + "../certs/identity/identity_ca_cert.
 const std::string permissions_ca_file = file + "../certs/permissions/permissions_ca_cert.pem";
 const std::string identity_certificate_file = file + "../certs/identity/test_participant_01_cert.pem";
 const std::string identity_key_file = file + "../certs/identity/identity_ca_private_key.pem";
-const std::string governance_file = file + "../attributes/governance/governance_PU_PA_ED_EL_EOR_signed.p7s";
+const std::string governance_file = file + "./governance.xml.p7s";
 const std::string permissions_file = file + "../attributes/permissions/permissions_test_participant_01_read_signed.p7s";
 
 ///

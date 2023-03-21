@@ -20,7 +20,7 @@
 #include <sstream>
 
 const int default_key = 101010;
-ACE_Atomic_Op<ACE_SYNCH_MUTEX, CORBA::Long> key(0);
+OpenDDS::DCPS::Atomic<CORBA::Long> key(0);
 
 template<typename MessageType>
 class Writer : public ACE_Task_Base
@@ -180,8 +180,8 @@ public:
       ACE_DEBUG((LM_DEBUG,
                  ACE_TEXT("(%P|%t) Writer::svc data_delivered_count=%d ")
                  ACE_TEXT("data_dropped_count=%d\n"),
-                 writer_servant_->data_delivered_count_,
-                 writer_servant_->data_dropped_count_));
+                 writer_servant_->data_delivered_count_.load(),
+                 writer_servant_->data_dropped_count_.load()));
     }
 
     finished_ = true;

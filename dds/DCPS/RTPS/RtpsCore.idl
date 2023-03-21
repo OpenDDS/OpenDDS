@@ -8,6 +8,7 @@
 #ifndef OPENDDS_DCPS_RTPS_RTPSCORE_IDL
 #define OPENDDS_DCPS_RTPS_RTPSCORE_IDL
 
+#include "dds/OpenddsDcpsExt.idl"
 #include "dds/DdsDcpsInfoUtils.idl"
 #include "dds/DdsDcpsInfrastructure.idl"
 
@@ -63,7 +64,7 @@ module OpenDDS {
       long high;
       unsigned long low;
     };
-    // see SEQUENCENUMBER_UNKNOWN constant in BaseMessageTypes.h
+    // see SEQUENCENUMBER_UNKNOWN constant in MessageTypes.h
 
     typedef sequence<long, 8> LongSeq8;
 
@@ -91,7 +92,7 @@ module OpenDDS {
       unsigned long fraction;
     };
 
-    // see TIME_* constants in BaseMessageTypes.h
+    // see TIME_* constants in MessageTypes.h
     typedef Time_t Timestamp_t;
 
     /* Duration_t wasn't defined in the PSM prior to RTPS 2.4. The updated struct
@@ -104,12 +105,12 @@ module OpenDDS {
       unsigned long fraction;
     };
 
-    const long LOCATOR_KIND_INVALID = -1;
-    const long LOCATOR_KIND_RESERVED = 0;
-    const long LOCATOR_KIND_UDPv4 = 1;
-    const long LOCATOR_KIND_UDPv6 = 2;
-    const unsigned long LOCATOR_PORT_INVALID = 0;
-    // see LOCATOR_* constants in BaseMessageTypes.h
+    const long LOCATOR_KIND_INVALID = DCPS::LOCATOR_KIND_INVALID;
+    const long LOCATOR_KIND_RESERVED = DCPS::LOCATOR_KIND_RESERVED;
+    const long LOCATOR_KIND_UDPv4 = DCPS::LOCATOR_KIND_UDPv4;
+    const long LOCATOR_KIND_UDPv6 = DCPS::LOCATOR_KIND_UDPv6;
+    const unsigned long LOCATOR_PORT_INVALID = DCPS::LOCATOR_PORT_INVALID;
+    // see LOCATOR_* constants in MessageTypes.h
 
     /* Specialization of Locator_t used to hold UDP IPv4 locators using a more
        compact representation. */
@@ -117,7 +118,7 @@ module OpenDDS {
       unsigned long address;
       unsigned long _port;
     };
-    // see LOCATORUDPv4_INVALID constant in BaseMessageTypes.h
+    // see LOCATORUDPv4_INVALID constant in MessageTypes.h
 
     /* Enumeration used to distinguish whether a Topic has defined some fields
        within to be used as the 'key' that identifies data-instances within the
@@ -146,7 +147,7 @@ module OpenDDS {
     };
 
     struct KeyHash_t {
-      DCPS::OctetArray16 value;
+      DDS::OctetArray16 value;
     };
 
     struct StatusInfo_t {
@@ -158,14 +159,14 @@ module OpenDDS {
       octet major;
       octet minor;
     };
-    // see PROTOCOLVERSION* constants in BaseMessageTypes.h
+    // see PROTOCOLVERSION* constants in MessageTypes.h
 
     /* Type used to represent the vendor of the service
        implementing the RTPS protocol. */
     struct VendorId_t {
       OctetArray2 vendorId;
     };
-    // see VENDORID_* constants in BaseMessageTypes.h
+    // see VENDORID_* constants in MessageTypes.h
 
     typedef unsigned long IceAgentType_t;
     const IceAgentType_t ICE_FULL = 0x0;
@@ -522,6 +523,7 @@ module OpenDDS {
     const octet FLAG_D = 4; // Data: sample Data present
     const octet FLAG_L = 4; // Heartbeat: Liveliness
     const octet FLAG_K_IN_FRAG = 4;  // DataFrag: Key present
+    const octet OPENDDS_FLAG_R = 8; // Heartbeat: Reflective - Send-Side Internal Use Only - For Remapping Counts
     const octet FLAG_K_IN_DATA = 8;  // Data: Key present
     const octet FLAG_N_IN_FRAG = 8;  // DataFrag:  indicates that the SerializedPayload has non-standard encoding
     const octet FLAG_N_IN_DATA = 16; // Data: indicates that the SerializedPayload has non-standard encoding

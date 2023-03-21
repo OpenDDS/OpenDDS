@@ -13,7 +13,7 @@ TAO_DDS_DCPSDataWriter_i::~TAO_DDS_DCPSDataWriter_i (void)
   }
 
 void TAO_DDS_DCPSDataWriter_i::add_association (
-    const ::OpenDDS::DCPS::RepoId& yourId,
+    const ::OpenDDS::DCPS::GUID_t& yourId,
     const OpenDDS::DCPS::ReaderAssociation& reader,
     bool /*active*/
   )
@@ -94,7 +94,7 @@ void TAO_DDS_DCPSDataWriter_i::update_incompatible_qos (
 
 void
 TAO_DDS_DCPSDataWriter_i::update_subscription_params(
-  const OpenDDS::DCPS::RepoId& id, const DDS::StringSeq& params)
+  const OpenDDS::DCPS::GUID_t& id, const DDS::StringSeq& params)
 {
   OpenDDS::DCPS::RepoIdConverter readerConv(id);
   ACE_DEBUG((LM_INFO,

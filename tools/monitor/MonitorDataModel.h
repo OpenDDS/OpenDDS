@@ -8,7 +8,19 @@
 #ifndef MONITORDATAMODEL_H
 #define MONITORDATAMODEL_H
 
+// Tell GCC to ignore implicitly declared copy methods as long as
+// Qt is not compliant.
+#ifdef __GNUC__
+#  pragma GCC diagnostic push
+#  pragma GCC diagnostic ignored "-Wdeprecated-copy"
+#endif
+
 #include <QtCore/QAbstractItemModel>
+
+#ifdef __GNUC__
+#  pragma GCC diagnostic pop
+#endif
+
 #include <vector>
 
 namespace Monitor {

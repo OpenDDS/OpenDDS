@@ -14,6 +14,8 @@
 #include <dds/DCPS/WaitSet.h>
 
 #include <dds/DCPS/RTPS/RtpsDiscovery.h>
+#include <dds/DCPS/RTPS/RtpsDiscoveryConfig.h>
+
 #include <dds/DCPS/transport/framework/TransportRegistry.h>
 
 #include "dds/DCPS/StaticIncludes.h"
@@ -141,7 +143,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[]) {
         qosConfig.xcdr1_ = true;
         std::cout << "XCDR1 encoding" << std::endl;
       } else if ((ACE_OS::strcmp(ACE_TEXT("-no-xtypes"), argv[curr]) == 0)) {
-        disc->use_xtypes(false);
+        disc->use_xtypes(RtpsDiscoveryConfig::XTYPES_NONE);
         std::cout << "XTypes disabled in discovery" << std::endl;
       } else {
         std::cout << "Ignoring unknown param: " <<

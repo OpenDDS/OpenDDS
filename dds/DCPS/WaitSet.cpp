@@ -12,6 +12,7 @@
 #include "ConditionImpl.h"
 #include "Time_Helper.h"
 #include "TimeTypes.h"
+#include "Service_Participant.h"
 
 namespace {
 
@@ -113,10 +114,6 @@ ReturnCode_t WaitSet::wait(ConditionSeq& active_conditions,
 {
   using namespace OpenDDS::DCPS;
 
-  if (waiting_ != false) {
-    return RETCODE_PRECONDITION_NOT_MET;
-  }
-
   if (!non_negative_duration(timeout)) {
     return DDS::RETCODE_BAD_PARAMETER;
   }
@@ -129,6 +126,11 @@ ReturnCode_t WaitSet::wait(ConditionSeq& active_conditions,
 
   ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, g, lock_,
                    RETCODE_OUT_OF_RESOURCES);
+
+  if (waiting_) {
+    return RETCODE_PRECONDITION_NOT_MET;
+  }
+
   waiting_ = true;
   signaled_conditions_.clear();
 
@@ -140,9 +142,10 @@ ReturnCode_t WaitSet::wait(ConditionSeq& active_conditions,
   }
 
   CvStatus status = CvStatus_NoTimeout;
+  ThreadStatusManager& thread_status_manager = TheServiceParticipant->get_thread_status_manager();
   while ((attached_conditions_.empty() || signaled_conditions_.empty()) &&
       status == CvStatus_NoTimeout) {
-    status = use_deadline ? cond_.wait_until(deadline) : cond_.wait();
+    status = use_deadline ? cond_.wait_until(deadline, thread_status_manager) : cond_.wait(thread_status_manager);
   }
 
   copyInto(active_conditions, signaled_conditions_);

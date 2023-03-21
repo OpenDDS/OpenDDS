@@ -8,8 +8,19 @@
 #include "MonitorDataModel.h"
 #include "TreeNode.h"
 
+// Tell GCC to ignore implicitly declared copy methods as long as
+// Qt is not compliant.
+#ifdef __GNUC__
+#  pragma GCC diagnostic push
+#  pragma GCC diagnostic ignored "-Wdeprecated-copy"
+#endif
+
 #include <QtCore/QStringList>
 #include <QtWidgets/QTreeView>
+
+#ifdef __GNUC__
+#  pragma GCC diagnostic pop
+#endif
 
 namespace Monitor {
 
@@ -179,7 +190,7 @@ Qt::ItemFlags
 MonitorDataModel::flags( const QModelIndex& index) const
 {
   if( false == index.isValid()) {
-    return 0;
+    return Qt::ItemFlags();
   }
 
   return this->QAbstractItemModel::flags( index)

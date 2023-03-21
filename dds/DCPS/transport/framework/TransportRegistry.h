@@ -58,8 +58,7 @@ public:
   void release();
 
   TransportInst_rch create_inst(const OPENDDS_STRING& name,
-                                const OPENDDS_STRING& transport_type,
-                                bool wait_for_pending_load = true);
+                                const OPENDDS_STRING& transport_type);
   TransportInst_rch get_inst(const OPENDDS_STRING& name) const;
 
   /// Removing a TransportInst from the registry shuts down the underlying
@@ -89,14 +88,11 @@ public:
   void bind_config(const TransportConfig_rch& cfg, DDS::Entity_ptr entity);
 
   /// SPI (Service Provider Interface) for specific transport types:
-  /// This function is called as the concrete transport library is loaded.
-  /// The concrete transport library creates a concrete transport type object
-  /// and registers it with TransportRegistry singleton.
-  void register_type(const TransportType_rch& type);
-
-  /// SPI (Service Provider Interface) for specific transport types:
-  /// Check if a type with this type's name has been registered
-  bool has_type(const TransportType_rch& type) const;
+  /// This function is called as the concrete transport library is
+  /// loaded.  The concrete transport library creates a concrete
+  /// transport type object and registers it with TransportRegistry
+  /// singleton.  Returns true for success.
+  bool register_type(const TransportType_rch& type);
 
   /// For internal use by OpenDDS DCPS layer:
   /// Transfer the configuration in ACE_Configuration_Heap object to
@@ -158,15 +154,12 @@ private:
   InstMap inst_map_;
   LibDirectiveMap lib_directive_map_;
   DomainConfigMap domain_default_config_map_;
-  ConfigTemplateToInstanceMap config_template_to_instance_map;
+  ConfigTemplateToInstanceMap config_template_to_instance_map_;
 
   TransportConfig_rch global_config_;
   bool released_;
 
   mutable LockType lock_;
-
-  bool load_pending_;
-  mutable ConditionVariable<LockType> load_condition_;
 
   // transport template support
   static const OPENDDS_STRING CUSTOM_ADD_DOMAIN_TO_IP;
@@ -181,7 +174,7 @@ private:
     ValueMap transport_info;
   };
 
-  void load_transport_lib_i(const OPENDDS_STRING& transport_type);
+  TransportType_rch load_transport_lib_i(const OPENDDS_STRING& transport_type);
 
   OPENDDS_VECTOR(TransportTemplate) transport_templates_;
 

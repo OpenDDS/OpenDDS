@@ -7,13 +7,17 @@
 #define OPENDDS_DCPS_VALUE_WRITER_H
 
 #include "Definitions.h"
+#include "XTypes/MemberDescriptorImpl.h"
 
 #include <dds/Versioned_Namespace.h>
 #include <FACE/Fixed.h>
 
 #include <ace/CDR_Base.h>
+#include <tao/String_Manager_T.h>
 
 #include <cstddef>
+#include <cstring>
+#include <cwchar>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -31,12 +35,14 @@ namespace DCPS {
 ///
 /// The vwrite function should invoke the appropriate methods of the
 /// ValueWriter and dispatch for other vwrite functions.
-struct ValueWriter {
+class OpenDDS_Dcps_Export ValueWriter {
+public:
+  ValueWriter()  {}
   virtual ~ValueWriter() {}
 
   virtual void begin_struct() {}
   virtual void end_struct() {}
-  virtual void begin_struct_member(const char* /*name*/) {}
+  virtual void begin_struct_member(const DDS::MemberDescriptor& /*descriptor*/) {}
   virtual void end_struct_member() {}
 
   virtual void begin_union() {}
@@ -70,21 +76,32 @@ struct ValueWriter {
   virtual void write_float128(ACE_CDR::LongDouble /*value*/) = 0;
 
 #ifdef NONNATIVE_LONGDOUBLE
-  void write_float128(long double value)
-  {
-    ACE_CDR::LongDouble ld;
-    ACE_CDR_LONG_DOUBLE_ASSIGNMENT(ld, value);
-    write_float128(ld);
-  }
+  void write_float128(long double value);
 #endif
 
   virtual void write_fixed(const OpenDDS::FaceTypes::Fixed& /*value*/) = 0;
   virtual void write_char8(ACE_CDR::Char /*value*/) = 0;
   virtual void write_char16(ACE_CDR::WChar /*value*/) = 0;
-  virtual void write_string(const ACE_CDR::Char* /*value*/) = 0;
-  void write_string(const std::string& value) { write_string(value.c_str()); }
-  virtual void write_wstring(const ACE_CDR::WChar* /*value*/) = 0;
-  void write_wstring(const std::wstring& value) { write_wstring(value.c_str()); }
+  virtual void write_string(const ACE_CDR::Char* /*value*/, size_t /*length*/) = 0;
+  void write_string(const ACE_CDR::Char* value) { write_string(value, std::strlen(value)); }
+  void write_string(const std::string& value) { write_string(value.c_str(), value.length()); }
+  virtual void write_wstring(const ACE_CDR::WChar* /*value*/, size_t /*length*/) = 0;
+  void write_wstring(const ACE_CDR::WChar* value)
+  {
+#ifdef DDS_HAS_WCHAR
+    write_wstring(value, std::wcslen(value));
+#else
+    ACE_UNUSED_ARG(value);
+#endif
+  }
+  void write_wstring(const std::wstring& value)
+  {
+#ifdef DDS_HAS_WCHAR
+    write_wstring(value.c_str(), value.length());
+#else
+    ACE_UNUSED_ARG(value);
+#endif
+  }
 
   virtual void write_enum(const char* /*name*/, ACE_CDR::Long /*value*/) = 0;
   template <typename T>
@@ -93,17 +110,28 @@ struct ValueWriter {
     write_enum(name, static_cast<ACE_CDR::Long>(value));
   }
 
-};
-
-template <typename T>
-void vwrite(ValueWriter& value_writer, const T& value);
-
-// Implementations of this interface will call vwrite(value_writer, v)
-// where v is the resulting of casting data to the appropriate type.
-struct ValueWriterDispatcher {
-  virtual ~ValueWriterDispatcher() {}
-
-  virtual void write(ValueWriter& value_writer, const void* data) const = 0;
+  /// Array write operations
+  /// Note: the portion written starts at x and ends
+  ///    at x + length.
+  ///@{
+  virtual void write_boolean_array(const ACE_CDR::Boolean* x, size_t length);
+  virtual void write_byte_array(const ACE_CDR::Octet* x, size_t length);
+#if OPENDDS_HAS_EXPLICIT_INTS
+  virtual void write_int8_array(const ACE_CDR::Int8* x, size_t length);
+  virtual void write_uint8_array(const ACE_CDR::UInt8* x, size_t length);
+#endif
+  virtual void write_int16_array(const ACE_CDR::Short* x, size_t length);
+  virtual void write_uint16_array(const ACE_CDR::UShort* x, size_t length);
+  virtual void write_int32_array(const ACE_CDR::Long* x, size_t length);
+  virtual void write_uint32_array(const ACE_CDR::ULong* x, size_t length);
+  virtual void write_int64_array(const ACE_CDR::LongLong* x, size_t length);
+  virtual void write_uint64_array(const ACE_CDR::ULongLong* x, size_t length);
+  virtual void write_float32_array(const ACE_CDR::Float* x, size_t length);
+  virtual void write_float64_array(const ACE_CDR::Double* x, size_t length);
+  virtual void write_float128_array(const ACE_CDR::LongDouble* x, size_t length);
+  virtual void write_char8_array(const ACE_CDR::Char* x, size_t length);
+  virtual void write_char16_array(const ACE_CDR::WChar* x, size_t length);
+  ///@}
 };
 
 } // namespace DCPS

@@ -20,7 +20,6 @@ const unsigned long TransportConfig::DEFAULT_PASSIVE_CONNECT_DURATION;
 
 TransportConfig::TransportConfig(const OPENDDS_STRING& name)
   : swap_bytes_(false)
-  , cdr_encapsulation_(false)
   , passive_connect_duration_(DEFAULT_PASSIVE_CONNECT_DURATION)
   , name_(name)
 {}
@@ -45,8 +44,7 @@ TransportConfig::populate_locators(TransportLocatorSeq& trans_info) const
   for (InstancesType::const_iterator pos = instances_.begin(), limit = instances_.end();
        pos != limit;
        ++pos) {
-    const CORBA::ULong idx = trans_info.length();
-    trans_info.length(idx + 1);
+    const CORBA::ULong idx = DCPS::grow(trans_info) - 1;
     if ((*pos)->populate_locator(trans_info[idx], CONNINFO_ALL) == 0) {
       trans_info.length(idx);
     }

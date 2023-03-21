@@ -1,6 +1,19 @@
 #include "config.hpp"
 #include "ShapesDialog.hpp"
+
+// Tell GCC to ignore implicitly declared copy methods as long as
+// Qt is not compliant.
+#ifdef __GNUC__
+#  pragma GCC diagnostic push
+#  pragma GCC diagnostic ignored "-Wdeprecated-copy"
+#endif
+
 #include <QtGui/QtGui>
+
+#ifdef __GNUC__
+#  pragma GCC diagnostic pop
+#endif
+
 #include <iostream>
 #include <sstream>
 #include <Circle.hpp>
@@ -14,12 +27,10 @@
 #include "ace/config-all.h"
 #include "ShapeTypeTypeSupportImpl.h"
 
-#ifdef ACE_HAS_CPP11
-# include <string>
-# define TO_STRING std::to_string
-#else
-# include <boost/lexical_cast.hpp>
-# define TO_STRING boost::lexical_cast<std::string>
+#include <string>
+
+#ifndef ACE_HAS_CPP11
+#error ishapes requires C++11 or newer
 #endif
 
 using org::omg::dds::demo::ShapeType;
@@ -227,10 +238,10 @@ ShapesDialog::onPublishButtonClicked() {
     ShapeTypeDataWriter_var dw =
       ShapeTypeDataWriter::_narrow(writer);
 
-    shared_ptr<BouncingShapeDynamics>
+    std::shared_ptr<BouncingShapeDynamics>
       dynamics(new BouncingShapeDynamics(x, y, rect, constr, PI/6, speed,
            shape, dw));
-    shared_ptr<Shape>
+    std::shared_ptr<Shape>
       circle(new Circle(rect, dynamics, pen, brush));
     shapesWidget->addShape(circle);
 
@@ -256,10 +267,10 @@ ShapesDialog::onPublishButtonClicked() {
     ShapeTypeDataWriter_var dw =
       ShapeTypeDataWriter::_narrow(writer);
 
-    shared_ptr<BouncingShapeDynamics>
+    std::shared_ptr<BouncingShapeDynamics>
       dynamics(new BouncingShapeDynamics(x, y, rect, constr, PI/6, speed,
            shape, dw));
-    shared_ptr<Shape>
+    std::shared_ptr<Shape>
       square(new Square(rect, dynamics, pen, brush));
     shapesWidget->addShape(square);
     // std::cout << "CREATE SQUARE" << std::endl;
@@ -285,10 +296,10 @@ ShapesDialog::onPublishButtonClicked() {
     ShapeTypeDataWriter_var dw =
       ShapeTypeDataWriter::_narrow(writer);
 
-    shared_ptr<BouncingShapeDynamics>
+    std::shared_ptr<BouncingShapeDynamics>
       dynamics(new BouncingShapeDynamics(x, y, rect, constr, PI/6, speed,
            shape, dw));
-    shared_ptr<Shape>
+    std::shared_ptr<Shape>
       triangle(new Triangle(rect, dynamics, pen, brush));
     shapesWidget->addShape(triangle);
     // std::cout << "CREATE TRIANGLE" << std::endl;
@@ -320,11 +331,11 @@ ShapesDialog::onSubscribeButtonClicked() {
   filterParams_ = DDS::StringSeq();
   if (filterDialog_->isEnabled()) {
     QRect rect =  filterDialog_->getFilterBounds();
-    std::string x0 = TO_STRING(rect.x());
-    std::string x1 = TO_STRING(rect.x() + rect.width());
+    std::string x0 = std::to_string(rect.x());
+    std::string x1 = std::to_string(rect.x() + rect.width());
 
-    std::string y0 = TO_STRING(rect.y());
-    std::string y1 = TO_STRING(rect.y() + rect.height());
+    std::string y0 = std::to_string(rect.y());
+    std::string y1 = std::to_string(rect.y() + rect.height());
     filterParams_.length(4);
     filterParams_[0] = x0.c_str();
     filterParams_[1] = x1.c_str();
@@ -412,9 +423,9 @@ ShapesDialog::onSubscribeButtonClicked() {
   case CIRCLE: {
     for (int i = 0; i < CN; ++i) {
       std::string colorStr(colorString_[i]);
-      shared_ptr<DDSShapeDynamics>
+      std::shared_ptr<DDSShapeDynamics>
         dynamics(new DDSShapeDynamics(x, y, dr, colorStr, i));
-      shared_ptr<Shape>
+      std::shared_ptr<Shape>
         circle(new Circle(rect, dynamics, pen, brush, true));
       dynamics->setShape(circle);
       shapesWidget->addShape(circle);
@@ -425,9 +436,9 @@ ShapesDialog::onSubscribeButtonClicked() {
   case SQUARE: {
     for (int i = 0; i < CN; ++i) {
       std::string colorStr(colorString_[i]);
-      shared_ptr<DDSShapeDynamics>
+      std::shared_ptr<DDSShapeDynamics>
         dynamics(new DDSShapeDynamics(x, y, dr, colorStr, i));
-      shared_ptr<Shape>
+      std::shared_ptr<Shape>
         square(new Square(rect, dynamics, pen, brush, true));
       dynamics->setShape(square);
       shapesWidget->addShape(square);
@@ -437,9 +448,9 @@ ShapesDialog::onSubscribeButtonClicked() {
   case TRIANGLE: {
     for (int i = 0; i < CN; ++i) {
       std::string colorStr(colorString_[i]);
-      shared_ptr<DDSShapeDynamics>
+      std::shared_ptr<DDSShapeDynamics>
         dynamics(new DDSShapeDynamics(x, y, dr, colorStr, i));
-      shared_ptr<Shape>
+      std::shared_ptr<Shape>
         triangle(new Triangle(rect, dynamics, pen, brush, true));
       dynamics->setShape(triangle);
       shapesWidget->addShape(triangle);

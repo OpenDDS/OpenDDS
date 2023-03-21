@@ -1,8 +1,20 @@
 #ifndef _SHAPEDYNAMICS_HPP
 #define _SHAPEDYNAMICS_HPP
 
+// Tell GCC to ignore implicitly declared copy methods as long as
+// Qt is not compliant.
+#ifdef __GNUC__
+#  pragma GCC diagnostic push
+#  pragma GCC diagnostic ignored "-Wdeprecated-copy"
+#endif
+
 #include <QtCore/QRect>
 #include <QtCore/QPoint>
+
+#ifdef __GNUC__
+#  pragma GCC diagnostic pop
+#endif
+
 #include <vector>
 
 class ShapeDynamics {

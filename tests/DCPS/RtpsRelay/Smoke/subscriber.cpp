@@ -1,45 +1,35 @@
 /*
- *
- *
  * Distributed under the OpenDDS License.
  * See: http://www.opendds.org/license.html
  */
 
-
-#include <dds/DdsDcpsInfrastructureC.h>
-#include <dds/DCPS/Marked_Default_Qos.h>
-#include <dds/DCPS/Service_Participant.h>
-#include <dds/DCPS/SubscriberImpl.h>
-#include <dds/DCPS/WaitSet.h>
-
-#include "dds/DCPS/StaticIncludes.h"
-#ifdef ACE_AS_STATIC_LIBS
-# ifndef OPENDDS_SAFETY_PROFILE
-#include <dds/DCPS/transport/udp/Udp.h>
-#include <dds/DCPS/transport/multicast/Multicast.h>
-#include <dds/DCPS/RTPS/RtpsDiscovery.h>
-#include <dds/DCPS/transport/shmem/Shmem.h>
-#  ifdef OPENDDS_SECURITY
-#  include "dds/DCPS/security/BuiltInPlugins.h"
-#  endif
-# endif
-#include <dds/DCPS/transport/rtps_udp/RtpsUdp.h>
-#endif
-
-#include <dds/DCPS/transport/framework/TransportRegistry.h>
-#include <dds/DCPS/transport/framework/TransportConfig.h>
-#include <dds/DCPS/transport/framework/TransportInst.h>
-
 #include "Args.h"
 #include "DataReaderListener.h"
 #include "MessengerTypeSupportImpl.h"
-#include "../../common/ConnectionRecordLogger.h"
+
+#include <dds/DCPS/JsonValueWriter.h>
+#include <dds/DCPS/Marked_Default_Qos.h>
+#include <dds/DCPS/RTPS/RtpsDiscovery.h>
+#include <dds/DCPS/Service_Participant.h>
+#include <dds/DCPS/SubscriberImpl.h>
+#include <dds/DCPS/WaitSet.h>
+#include <dds/DCPS/transport/framework/TransportRegistry.h>
+#include <dds/OpenddsDcpsExtTypeSupportImpl.h>
+
+#ifdef ACE_AS_STATIC_LIBS
+#  include <dds/DCPS/RTPS/RtpsDiscovery.h>
+#  include <dds/DCPS/transport/rtps_udp/RtpsUdp.h>
+#  ifdef OPENDDS_SECURITY
+#    include <dds/DCPS/security/BuiltInPlugins.h>
+#  endif
+#endif
+#ifdef OPENDDS_SECURITY
+#  include <dds/DCPS/security/framework/Properties.h>
+#endif
 
 #include <iostream>
 
 #ifdef OPENDDS_SECURITY
-#include <dds/DCPS/security/framework/Properties.h>
-
 const char auth_ca_file[] = "file:../../../security/certs/identity/identity_ca_cert.pem";
 const char perm_ca_file[] = "file:../../../security/certs/permissions/permissions_ca_cert.pem";
 const char id_cert_file[] = "file:../../../security/certs/identity/test_participant_03_cert.pem";
@@ -62,6 +52,8 @@ bool expect_unmatch = false;
 bool reliable = false;
 bool wait_for_acks = false;
 
+const char USER_DATA[] = "The Subscriber";
+
 int
 ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 {
@@ -76,8 +68,15 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       return status;
     }
 
+    OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::TransportInst> transport_inst = TheTransportRegistry->get_inst("sub_rtps");
+    if (transport_inst) {
+      transport_inst->count_messages(true);
+    }
+
     DDS::DomainParticipantQos part_qos;
     dpf->get_default_participant_qos(part_qos);
+    part_qos.user_data.value.length(static_cast<unsigned int>(std::strlen(USER_DATA)));
+    std::memcpy(part_qos.user_data.value.get_buffer(), USER_DATA, std::strlen(USER_DATA));
 
 #if defined(OPENDDS_SECURITY)
     if (TheServiceParticipant->get_security()) {
@@ -101,10 +100,16 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     if (CORBA::is_nil(participant.in())) {
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("%N:%l main()")
-                        ACE_TEXT(" ERROR: create_participant() failed!\n")), -1);
+                        ACE_TEXT(" ERROR: create_participant() failed!\n")), 1);
     }
 
-    OpenDDS::Test::install_connection_record_logger(participant);
+      OpenDDS::DCPS::DomainParticipantImpl* dp_impl =
+        dynamic_cast<OpenDDS::DCPS::DomainParticipantImpl*>(participant.in());
+
+      OpenDDS::DCPS::RcHandle<OpenDDS::RTPS::RtpsDiscovery> disc = OpenDDS::DCPS::static_rchandle_cast<OpenDDS::RTPS::RtpsDiscovery>(TheServiceParticipant->get_discovery(42));
+      const OpenDDS::DCPS::GUID_t guid = dp_impl->get_id();
+      OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::TransportInst> discovery_inst = disc->sedp_transport_inst(42, guid);
+      discovery_inst->count_messages(true);
 
     // Register Type (Messenger::Message)
     Messenger::MessageTypeSupport_var ts =
@@ -113,7 +118,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     if (ts->register_type(participant.in(), "") != DDS::RETCODE_OK) {
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("%N:%l main()")
-                        ACE_TEXT(" ERROR: register_type() failed!\n")), -1);
+                        ACE_TEXT(" ERROR: register_type() failed!\n")), 1);
     }
 
     // Create Topic (Movie Discussion List)
@@ -128,7 +133,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     if (CORBA::is_nil(topic.in())) {
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("%N:%l main()")
-                        ACE_TEXT(" ERROR: create_topic() failed!\n")), -1);
+                        ACE_TEXT(" ERROR: create_topic() failed!\n")), 1);
     }
 
     // Create Subscriber
@@ -145,7 +150,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     if (CORBA::is_nil(sub.in())) {
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("%N:%l main()")
-                        ACE_TEXT(" ERROR: create_subscriber() failed!\n")), -1);
+                        ACE_TEXT(" ERROR: create_subscriber() failed!\n")), 1);
     }
 
     // Create DataReader
@@ -166,7 +171,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     if (CORBA::is_nil(reader.in())) {
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("%N:%l main()")
-                        ACE_TEXT(" ERROR: create_datareader() failed!\n")), -1);
+                        ACE_TEXT(" ERROR: create_datareader() failed!\n")), 1);
     }
 
     // Block until Publisher completes
@@ -186,7 +191,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       if (reader->get_subscription_matched_status(matches) != DDS::RETCODE_OK) {
         ACE_ERROR_RETURN((LM_ERROR,
                           ACE_TEXT("%N:%l main()")
-                          ACE_TEXT(" ERROR: get_subscription_matched_status() failed!\n")), -1);
+                          ACE_TEXT(" ERROR: get_subscription_matched_status() failed!\n")), 1);
       }
       if (!expect_unmatch) {
         if (matches.current_count == 0 && matches.total_count > 0) {
@@ -203,13 +208,26 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       if (ws->wait(conditions, timeout) != DDS::RETCODE_OK) {
         ACE_ERROR_RETURN((LM_ERROR,
                           ACE_TEXT("%N:%l main()")
-                          ACE_TEXT(" ERROR: wait() failed!\n")), -1);
+                          ACE_TEXT(" ERROR: wait() failed!\n")), 1);
       }
     }
 
     status = listener_servant->is_valid(check_lease_recovery, expect_unmatch) ? EXIT_SUCCESS : EXIT_FAILURE;
 
     ws->detach_condition(condition);
+
+#if OPENDDS_HAS_JSON_VALUE_WRITER
+    std::cout << "Subscriber Guid: " << OpenDDS::DCPS::LogGuid(guid).c_str() << std::endl;
+    OpenDDS::DCPS::TransportStatisticsSequence stats;
+    disc->append_transport_statistics(42, guid, stats);
+    if (transport_inst) {
+      transport_inst->append_transport_statistics(stats);
+    }
+
+    for (unsigned int i = 0; i != stats.length(); ++i) {
+      std::cout << "Subscriber Transport Statistics: " << OpenDDS::DCPS::to_json(stats[i]) << std::endl;
+    }
+#endif
 
     // Clean-up!
     participant->delete_contained_entities();
@@ -218,7 +236,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
   } catch (const CORBA::Exception& e) {
     e._tao_print_exception("Exception caught in main():");
-    status = -1;
+    status = 1;
   }
 
   return status;

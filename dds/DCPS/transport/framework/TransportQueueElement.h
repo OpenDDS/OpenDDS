@@ -9,16 +9,15 @@
 #define OPENDDS_DCPS_TRANSPORT_FRAMEWORK_TRANSPORTQUEUEELEMENT_H
 
 #include "dds/DCPS/dcps_export.h"
-#include "dds/DCPS/Definitions.h"
-#include "dds/DCPS/GuidUtils.h"
-#include "dds/DCPS/PoolAllocationBase.h"
-#include "dds/DCPS/SequenceNumber.h"
+
+#include <dds/DCPS/Atomic.h>
+#include <dds/DCPS/Cached_Allocator_With_Overflow_T.h>
+#include <dds/DCPS/Definitions.h>
+#include <dds/DCPS/GuidUtils.h>
+#include <dds/DCPS/PoolAllocationBase.h>
+#include <dds/DCPS/SequenceNumber.h>
+
 #include <utility>
-#ifdef ACE_HAS_CPP11
-#  include <atomic>
-#else
-#  include <ace/Atomic_Op.h>
-#endif
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 class ACE_Message_Block;
@@ -70,12 +69,12 @@ public:
 
   class OpenDDS_Dcps_Export MatchOnPubId : public MatchCriteria {
   public:
-    explicit MatchOnPubId(const RepoId& id) : pub_id_(id) {}
+    explicit MatchOnPubId(const GUID_t& id) : pub_id_(id) {}
     virtual ~MatchOnPubId();
     virtual bool matches(const TransportQueueElement& candidate) const;
     virtual bool unique() const { return false; }
   private:
-    RepoId pub_id_;
+    GUID_t pub_id_;
   };
 
   class OpenDDS_Dcps_Export MatchOnDataPayload : public MatchCriteria {
@@ -86,6 +85,16 @@ public:
     virtual bool unique() const { return true; }
   private:
     const char* data_;
+  };
+
+  class OpenDDS_Dcps_Export MatchOnElement : public MatchCriteria {
+  public:
+    explicit MatchOnElement(const TransportQueueElement* element) : element_(element) {}
+    virtual ~MatchOnElement();
+    virtual bool matches(const TransportQueueElement& candidate) const;
+    virtual bool unique() const { return true; }
+  private:
+    const TransportQueueElement* element_;
   };
 
   /// Invoked when the sample is dropped from a DataLink due to a
@@ -109,10 +118,10 @@ public:
   virtual bool requires_exclusive_packet() const;
 
   /// Accessor for the publication id that sent the sample.
-  virtual RepoId publication_id() const = 0;
+  virtual GUID_t publication_id() const = 0;
 
   /// Accessor for the subscription id, if sent the sample is sent to 1 sub
-  virtual RepoId subscription_id() const {
+  virtual GUID_t subscription_id() const {
     return GUID_UNKNOWN;
   }
 
@@ -130,7 +139,7 @@ public:
   virtual const ACE_Message_Block* msg_payload() const = 0;
 
   /// Is the element a "control" sample from the specified pub_id?
-  virtual bool is_control(RepoId pub_id) const;
+  virtual bool is_control(GUID_t pub_id) const;
 
   /// Is the listener get called ?
   bool released() const;
@@ -158,6 +167,9 @@ public:
 
   /// Is this QueueElement the result of fragmentation?
   virtual bool is_fragment() const { return false; }
+
+  /// Is this QueueElement the last result of fragmentation?
+  virtual bool is_last_fragment() const { return false; }
 
   virtual bool is_request_ack() const { return false; }
 
@@ -191,11 +203,7 @@ private:
   friend class TransportCustomizedElement;
 
   /// Counts the number of outstanding sub-loans.
-#ifdef ACE_HAS_CPP11
-  std::atomic<unsigned long> sub_loan_count_;
-#else
-  ACE_Atomic_Op<ACE_Thread_Mutex, unsigned long> sub_loan_count_;
-#endif
+  Atomic<unsigned long> sub_loan_count_;
 
   /// Flag flipped to true if any DataLink dropped the sample.
   bool dropped_;

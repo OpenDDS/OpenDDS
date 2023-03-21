@@ -23,7 +23,7 @@ set(dst ${CMAKE_CURRENT_BINARY_DIR})
 set(all_targets ${publisher} ${subscriber})
 
 foreach(file
-  Messenger.idl subscriber.cpp publisher.cpp Writer.cpp Writer.h Args.h
+  Messenger.idl subscriber.cpp publisher.cpp Args.h
   DataReaderListener.cpp DataReaderListener.h pub.ini sub.ini)
   configure_file(${src}/${file} ${dst}/${file} COPYONLY)
 endforeach()
@@ -31,12 +31,11 @@ endforeach()
 # Publisher
 add_executable(${publisher}
   "${dst}/publisher.cpp"
-  "${dst}/Writer.h"
-  "${dst}/Writer.cpp"
 )
 set_target_properties(${publisher}
   PROPERTIES OUTPUT_NAME publisher
 )
+target_include_directories(${publisher} PRIVATE "${src}/../../../")
 OPENDDS_TARGET_SOURCES(${publisher} "${dst}/Messenger.idl")
 
 # Subscriber
@@ -52,7 +51,7 @@ OPENDDS_TARGET_SOURCES(${subscriber} "${dst}/Messenger.idl")
 
 foreach(t ${all_targets})
   # Using explicit scope here is a regression test for
-  # https://github.com/objectcomputing/OpenDDS/issues/1336
+  # https://github.com/OpenDDS/OpenDDS/issues/1336
   # See https://cmake.org/cmake/help/latest/policy/CMP0023.html
   target_link_libraries(${t} PUBLIC OpenDDS::OpenDDS)
 

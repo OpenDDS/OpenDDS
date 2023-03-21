@@ -8,18 +8,41 @@
 #include "field_info.h"
 
 #include <sstream>
+#include <cstring>
 
 using namespace AstTypeClassification;
 
-FieldInfo::EleLen::EleLen(const FieldInfo& af)
-  : ele_(af.as_base_)
-  , len_(af.n_elems_)
+FieldInfo::EleLen::EleLen(AST_Type* type)
+  : cls_(classify(type))
+  , len_(container_element_limit(type))
 {
+  AST_Type* const base = resolveActualType(container_base_type(type));
+  const Classification base_cls = classify(base);
+  base_cls_ = base_cls;
+  base_name_ = base->full_name();
+  if (base_cls & (CL_ARRAY | CL_SEQUENCE)) {
+    base_container_ = Container(new EleLen(base));
+  }
 }
 
 bool FieldInfo::EleLen::operator<(const EleLen& o) const
 {
-  return ele_ < o.ele_ || (ele_ == o.ele_ && len_ < o.len_);
+  if (cls_ != o.cls_) {
+    return cls_ < o.cls_;
+  }
+  if (len_ != o.len_) {
+    return len_ < o.len_;
+  }
+  if (bool(base_container_.get()) != bool(o.base_container_.get())) {
+    return bool(base_container_.get()) < bool(o.base_container_.get());
+  }
+  if (base_container_.get()) {
+    return *base_container_ < *o.base_container_;
+  }
+  if (base_cls_ != o.base_cls_) {
+    return base_cls_ < o.base_cls_;
+  }
+  return std::strcmp(base_name_, o.base_name_) < 0;
 }
 
 const std::string FieldInfo::scope_op = "::";
@@ -72,25 +95,21 @@ FieldInfo::FieldInfo(AST_Field& field)
   , cls_(classify(act_))
   , arr_(dynamic_cast<AST_Array*>(type_))
   , seq_(dynamic_cast<AST_Sequence*>(type_))
-  , as_base_(arr_ ? arr_->base_type() : (seq_ ? seq_->base_type() : 0))
+  , as_base_(container_base_type(type_))
   , as_act_(as_base_ ? resolveActualType(as_base_) : 0)
   , as_cls_(as_act_ ? classify(as_act_) : CL_UNKNOWN)
   , scoped_elem_(as_base_ ? scoped(as_base_->name()) : "")
   , underscored_elem_(as_base_ ? underscore(scoped_elem_) : "")
   , elem_ref_(as_base_ ? ref(scoped_elem_, "") : "")
   , elem_const_ref_(as_base_ ? ref(scoped_elem_) : "")
+  , n_elems_(container_element_limit(type_))
 {
-  n_elems_ = 1;
   if (arr_) {
-    for (size_t i = 0; i < arr_->n_dims(); ++i) {
-      n_elems_ *= arr_->dims()[i]->ev()->u.ulval;
-    }
     std::ostringstream os;
     os << n_elems_;
     length_ = os.str();
     arg_ = "arr";
   } else if (seq_) {
-    n_elems_ = !seq_->unbounded() ? seq_->max_size()->ev()->u.ulval : 0;
     length_ = "length";
     arg_ = "seq";
   }
@@ -112,7 +131,7 @@ FieldInfo::FieldInfo(AST_Field& field)
 
 bool FieldInfo::is_new(EleLenSet& el_set) const
 {
-  return cxx11() || el_set.insert(EleLen(*this)).second;
+  return cxx11() || el_set.insert(EleLen(type_)).second;
 }
 
 bool FieldInfo::anonymous() const

@@ -40,7 +40,6 @@ class OpenDDS_Dcps_Export TopicImpl
     public virtual TopicCallbacks,
     public virtual TopicDescriptionImpl {
 public:
-
   TopicImpl(const char*                    topic_name,
             const char*                    type_name,
             OpenDDS::DCPS::TypeSupport_ptr type_support,
@@ -71,7 +70,7 @@ public:
   *  internal use.
   *  Return the id given by discovery.
   */
-  RepoId get_id() const;
+  GUID_t get_id() const;
 
   // OpenDDS extension which doesn't duplicate the string to prevent
   // the runtime costs of making a copy
@@ -104,8 +103,10 @@ private:
   DDS::TopicListener_var       listener_;
 
   /// The id given by discovery.
-  RepoId                       id_;
+  GUID_t                       id_;
 
+  /// Mutex to protect status info
+  ACE_Thread_Mutex             status_mutex_;
   /// Count of discovered (readers/writers using) topics with the same
   /// topic name but different characteristics (typename)
   DDS::InconsistentTopicStatus inconsistent_topic_status_;

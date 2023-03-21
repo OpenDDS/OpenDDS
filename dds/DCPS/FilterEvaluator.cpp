@@ -14,6 +14,7 @@
 #include "AstNodeWrapper.h"
 #include "Definitions.h"
 #include "SafetyProfileStreams.h"
+#include "TypeSupportImpl.h"
 
 #include <ace/ACE.h>
 
@@ -67,6 +68,7 @@ FilterEvaluator::FilterEvaluator(const char* filter, bool allowOrderBy)
 FilterEvaluator::FilterEvaluator(const AstNodeWrapper& yardNode)
   : extended_grammar_(false)
   , filter_root_(walkAst(yardNode))
+  , number_parameters_(0)
 {
 }
 
@@ -82,11 +84,11 @@ public:
     std::for_each(children_.begin(), children_.end(), deleteChild);
   }
 
-  virtual bool has_non_key_fields(const MetaStruct& meta) const
+  virtual bool has_non_key_fields(const TypeSupportImpl& ts) const
   {
     for (OPENDDS_VECTOR(EvalNode*)::const_iterator i = children_.begin(); i != children_.end(); ++i) {
       EvalNode* child = *i;
-      if (child->has_non_key_fields(meta)) {
+      if (child->has_non_key_fields(ts)) {
         return true;
       }
     }
@@ -116,6 +118,17 @@ FilterEvaluator::DeserializedForEval::lookup(const char* field) const
   return meta_.getValue(deserialized_, field);
 }
 
+FilterEvaluator::SerializedForEval::SerializedForEval(ACE_Message_Block* data,
+                                                      const TypeSupportImpl& type_support,
+                                                      const DDS::StringSeq& params,
+                                                      Encoding encoding)
+  : DataForEval(type_support.getMetaStructForType(), params)
+  , serialized_(data)
+  , encoding_(encoding)
+  , type_support_(type_support)
+  , exten_(type_support.base_extensibility())
+{}
+
 Value
 FilterEvaluator::SerializedForEval::lookup(const char* field) const
 {
@@ -124,8 +137,8 @@ FilterEvaluator::SerializedForEval::lookup(const char* field) const
     return iter->second;
   }
   Message_Block_Ptr mb(serialized_->duplicate());
-  Serializer ser(mb.get(), Encoding::KIND_UNALIGNED_CDR, swap_);
-  if (cdr_) {
+  Serializer ser(mb.get(), encoding_);
+  if (encoding_.is_encapsulated()) {
     EncapsulationHeader encap;
     if (!(ser >> encap)) {
       ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR ")
@@ -144,7 +157,7 @@ FilterEvaluator::SerializedForEval::lookup(const char* field) const
     }
     ser.encoding(encoding);
   }
-  const Value v = meta_.getValue(ser, field);
+  const Value v = meta_.getValue(ser, field, &type_support_);
   cache_.insert(std::make_pair(OPENDDS_STRING(field), v));
   return v;
 }
@@ -154,15 +167,15 @@ FilterEvaluator::~FilterEvaluator()
   delete filter_root_;
 }
 
-bool FilterEvaluator::has_non_key_fields(const MetaStruct& meta) const
+bool FilterEvaluator::has_non_key_fields(const TypeSupportImpl& ts) const
 {
   for (OPENDDS_VECTOR(OPENDDS_STRING)::const_iterator i = order_bys_.begin(); i != order_bys_.end(); ++i) {
-    if (!meta.isDcpsKey(i->c_str())) {
+    if (!ts.is_dcps_key(i->c_str())) {
       return true;
     }
   }
 
-  return filter_root_->has_non_key_fields(meta);
+  return filter_root_->has_non_key_fields(ts);
 }
 
 namespace {
@@ -179,9 +192,9 @@ namespace {
       return data.lookup(fieldName_.c_str());
     }
 
-    bool has_non_key_fields(const MetaStruct& meta) const
+    bool has_non_key_fields(const TypeSupportImpl& ts) const
     {
-      return !meta.isDcpsKey(fieldName_.c_str());
+      return !ts.is_dcps_key(fieldName_.c_str());
     }
 
     OPENDDS_STRING fieldName_;

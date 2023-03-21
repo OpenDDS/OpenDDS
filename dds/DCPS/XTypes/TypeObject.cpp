@@ -6,9 +6,15 @@
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
 #include "TypeObject.h"
 
-#include "dds/DCPS/Message_Block_Ptr.h"
-#include "dds/DCPS/Hash.h"
 
+#include "dds/DCPS/debug.h"
+#include "dds/DCPS/Hash.h"
+#include "dds/DCPS/Message_Block_Ptr.h"
+#include "dds/DCPS/SafetyProfileStreams.h"
+
+#include <ace/OS_NS_string.h>
+
+#include <cstring>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -24,6 +30,11 @@ const Encoding& get_typeobject_encoding()
   return encoding;
 }
 
+DCPS::String equivalence_hash_to_string(const EquivalenceHash& equivalence_hash)
+{
+  return DCPS::to_dds_string(&equivalence_hash[0], sizeof equivalence_hash);
+}
+
 MinimalMemberDetail::MinimalMemberDetail(const OPENDDS_STRING& name)
 {
   unsigned char result[16];
@@ -31,6 +42,24 @@ MinimalMemberDetail::MinimalMemberDetail(const OPENDDS_STRING& name)
 
   std::memcpy(name_hash, result, sizeof name_hash);
 }
+
+#ifdef min
+#undef min
+#endif
+
+#ifdef max
+#undef max
+#endif
+
+AppliedBuiltinMemberAnnotations::AppliedBuiltinMemberAnnotations(const Optional<DCPS::String>& a_unit,
+                                                                 const Optional<AnnotationParameterValue>& a_min,
+                                                                 const Optional<AnnotationParameterValue>& a_max,
+                                                                 const Optional<DCPS::String>& a_hash_id)
+  : unit(a_unit)
+  , min(a_min)
+  , max(a_max)
+  , hash_id(a_hash_id)
+{}
 
 TypeIdentifier::TypeIdentifier(ACE_CDR::Octet kind)
   : kind_(kind)
@@ -42,7 +71,7 @@ TypeIdentifier::TypeIdentifier(ACE_CDR::Octet kind)
 void TypeIdentifier::activate(const TypeIdentifier* other)
 {
 #define OPENDDS_BRANCH_ACTIVATE(T, N) \
-  active_ = new(N ## _) T;            \
+  active_ = new(N ## _) T();          \
   if (other) N() = other->N();        \
   break
 
@@ -243,6 +272,120 @@ TypeIdentifier makeTypeIdentifier(const TypeObject& type_object, const DCPS::Enc
   return ti;
 }
 
+AnnotationParameterValue::AnnotationParameterValue(ACE_CDR::Octet kind)
+  : kind_(kind)
+  , active_(0)
+{
+  activate();
+}
+
+AnnotationParameterValue::AnnotationParameterValue(const AnnotationParameterValue& other)
+  : kind_(other.kind_)
+  , active_(0)
+{
+  activate(&other);
+}
+
+AnnotationParameterValue& AnnotationParameterValue::operator=(const AnnotationParameterValue& other)
+{
+  if (&other == this) {
+    return *this;
+  }
+  reset();
+  kind_ = other.kind_;
+  activate(&other);
+  return *this;
+}
+
+void AnnotationParameterValue::activate(const AnnotationParameterValue* other)
+{
+#define OPENDDS_BRANCH_ACTIVATE(T, N) \
+  active_ = new(N ## _) T();          \
+  if (other) N() = other->N();        \
+  break
+
+  switch (kind_) {
+  case TK_NONE:
+    break; // no-op, no member selected
+  case TK_BOOLEAN:
+    OPENDDS_BRANCH_ACTIVATE(ACE_CDR::Boolean, boolean_value);
+  case TK_BYTE:
+    OPENDDS_BRANCH_ACTIVATE(ACE_CDR::Octet, byte_value);
+  case TK_INT8:
+    OPENDDS_BRANCH_ACTIVATE(ACE_CDR::Char, int8_value);
+  case TK_UINT8:
+    OPENDDS_BRANCH_ACTIVATE(ACE_CDR::Octet, uint8_value);
+  case TK_INT16:
+    OPENDDS_BRANCH_ACTIVATE(ACE_CDR::Short, int16_value);
+  case TK_UINT16:
+    OPENDDS_BRANCH_ACTIVATE(ACE_CDR::UShort, uint16_value);
+  case TK_INT32:
+    OPENDDS_BRANCH_ACTIVATE(ACE_CDR::Long, int32_value);
+  case TK_UINT32:
+    OPENDDS_BRANCH_ACTIVATE(ACE_CDR::ULong, uint32_value);
+  case TK_INT64:
+    OPENDDS_BRANCH_ACTIVATE(ACE_CDR::LongLong, int64_value);
+  case TK_UINT64:
+    OPENDDS_BRANCH_ACTIVATE(ACE_CDR::ULongLong, uint64_value);
+  case TK_FLOAT32:
+    OPENDDS_BRANCH_ACTIVATE(ACE_CDR::Float, float32_value);
+  case TK_FLOAT64:
+    OPENDDS_BRANCH_ACTIVATE(ACE_CDR::Double, float64_value);
+  case TK_FLOAT128:
+    OPENDDS_BRANCH_ACTIVATE(ACE_CDR::LongDouble, float128_value);
+  case TK_CHAR8:
+    OPENDDS_BRANCH_ACTIVATE(ACE_CDR::Char, char_value);
+  case TK_CHAR16:
+    OPENDDS_BRANCH_ACTIVATE(ACE_CDR::WChar, wchar_value);
+  case TK_ENUM:
+    OPENDDS_BRANCH_ACTIVATE(ACE_CDR::Long, enumerated_value);
+  case TK_STRING8:
+    OPENDDS_BRANCH_ACTIVATE(OPENDDS_STRING, string8_value);
+  case TK_STRING16:
+    OPENDDS_BRANCH_ACTIVATE(OPENDDS_WSTRING, string16_value);
+  default:
+    OPENDDS_BRANCH_ACTIVATE(ExtendedAnnotationParameterValue, extended_value);
+  }
+}
+
+void AnnotationParameterValue::reset()
+{
+  using DCPS::String;
+  using DCPS::WString;
+
+  if (!active_) {
+    return;
+  }
+  #define OPENDDS_BRANCH_RESET(T) static_cast<T*>(active_)->~T(); break
+  switch (kind_) {
+  case TK_NONE:
+    break; // no-op, no member selected
+  case TK_BOOLEAN:
+  case TK_BYTE:
+  case TK_INT8:
+  case TK_UINT8:
+  case TK_INT16:
+  case TK_UINT16:
+  case TK_INT32:
+  case TK_UINT32:
+  case TK_INT64:
+  case TK_UINT64:
+  case TK_FLOAT32:
+  case TK_FLOAT64:
+  case TK_FLOAT128:
+  case TK_CHAR8:
+  case TK_CHAR16:
+  case TK_ENUM:
+    break; // primitive type, no destructor.
+  case TK_STRING8:
+    OPENDDS_BRANCH_RESET(String);
+  case TK_STRING16:
+    OPENDDS_BRANCH_RESET(WString);
+  default:
+    OPENDDS_BRANCH_RESET(ExtendedAnnotationParameterValue);
+  }
+}
+
 ACE_CDR::ULong hash_member_name_to_id(const OPENDDS_STRING& name)
 {
   ACE_CDR::ULong name_hash;
@@ -251,7 +394,7 @@ ACE_CDR::ULong hash_member_name_to_id(const OPENDDS_STRING& name)
   DCPS::MD5Hash(result, name.c_str(), name.size());
 
   std::memcpy(&name_hash, result, sizeof name_hash);
-  return name_hash & 0x0FFFFFFF;
+  return name_hash & DCPS::Serializer::MEMBER_ID_MASK;
 }
 
 void hash_member_name(NameHash& name_hash, const OPENDDS_STRING& name)
@@ -322,31 +465,10 @@ bool has_type_object(const TypeIdentifier& ti)
 }
 
 namespace {
-
+template <typename T>
 void compute_dependencies(const TypeMap& type_map,
-                          const MinimalStructMember& type,
+                          const Sequence<T>& type,
                           OPENDDS_SET(TypeIdentifier)& dependencies);
-
-void compute_dependencies(const TypeMap& type_map,
-                          const MinimalUnionMember& type,
-                          OPENDDS_SET(TypeIdentifier)& dependencies);
-
-void compute_dependencies(const TypeMap& type_map,
-                          const MinimalEnumeratedLiteral& type,
-                          OPENDDS_SET(TypeIdentifier)& dependencies);
-
-void compute_dependencies(const TypeMap&,
-                          const CompleteTypeObject&,
-                          OPENDDS_SET(TypeIdentifier)&)
-{
-  // TODO: Implement this.
-}
-void compute_dependencies(const TypeMap&,
-                          const MinimalAliasHeader&,
-                          OPENDDS_SET(TypeIdentifier)&)
-{
-  // Do nothing.
-}
 
 void compute_dependencies(const TypeMap& type_map,
                           const CommonAliasBody& type,
@@ -366,22 +488,88 @@ void compute_dependencies(const TypeMap& type_map,
                           const MinimalAliasType& type,
                           OPENDDS_SET(TypeIdentifier)& dependencies)
 {
+  compute_dependencies(type_map, type.body, dependencies);
+}
+
+void compute_dependencies(const TypeMap& type_map,
+                          const AppliedAnnotation& ann,
+                          OPENDDS_SET(TypeIdentifier)& dependencies)
+{
+  compute_dependencies(type_map, ann.annotation_typeid, dependencies);
+}
+
+void compute_dependencies(const TypeMap& type_map,
+                          const Optional<AppliedAnnotationSeq>& ann_seq,
+                          OPENDDS_SET(TypeIdentifier)& dependencies)
+{
+  if (ann_seq) {
+    compute_dependencies(type_map, ann_seq.value(), dependencies);
+  }
+}
+
+void compute_dependencies(const TypeMap& type_map,
+                          const CompleteTypeDetail& type_detail,
+                          OPENDDS_SET(TypeIdentifier)& dependencies)
+{
+  compute_dependencies(type_map, type_detail.ann_custom, dependencies);
+}
+
+void compute_dependencies(const TypeMap& type_map,
+                          const CompleteAliasHeader& header,
+                          OPENDDS_SET(TypeIdentifier)& dependencies)
+{
+  compute_dependencies(type_map, header.detail, dependencies);
+}
+
+void compute_dependencies(const TypeMap& type_map,
+                          const CompleteAliasBody& body,
+                          OPENDDS_SET(TypeIdentifier)& dependencies)
+{
+  compute_dependencies(type_map, body.common, dependencies);
+  compute_dependencies(type_map, body.ann_custom, dependencies);
+}
+
+void compute_dependencies(const TypeMap& type_map,
+                          const CompleteAliasType& type,
+                          OPENDDS_SET(TypeIdentifier)& dependencies)
+{
   compute_dependencies(type_map, type.header, dependencies);
   compute_dependencies(type_map, type.body, dependencies);
 }
 
-void compute_dependencies(const TypeMap&,
-                          const MinimalAnnotationType&,
-                          OPENDDS_SET(TypeIdentifier)&)
+void compute_dependencies(const TypeMap& type_map,
+                          const CommonAnnotationParameter& type,
+                          OPENDDS_SET(TypeIdentifier)& dependencies)
 {
-  // TODO: Implement this.
+  compute_dependencies(type_map, type.member_type_id, dependencies);
 }
 
-void compute_dependencies(const TypeMap&,
-                          const MinimalTypeDetail&,
-                          OPENDDS_SET(TypeIdentifier)&)
+void compute_dependencies(const TypeMap& type_map,
+                          const MinimalAnnotationParameter& type,
+                          OPENDDS_SET(TypeIdentifier)& dependencies)
 {
-  // Do nothing.
+  compute_dependencies(type_map, type.common, dependencies);
+}
+
+void compute_dependencies(const TypeMap& type_map,
+                          const MinimalAnnotationType& type,
+                          OPENDDS_SET(TypeIdentifier)& dependencies)
+{
+  compute_dependencies(type_map, type.member_seq, dependencies);
+}
+
+void compute_dependencies(const TypeMap& type_map,
+                          const CompleteAnnotationParameter& type,
+                          OPENDDS_SET(TypeIdentifier)& dependencies)
+{
+  compute_dependencies(type_map, type.common, dependencies);
+}
+
+void compute_dependencies(const TypeMap& type_map,
+                          const CompleteAnnotationType& type,
+                          OPENDDS_SET(TypeIdentifier)& dependencies)
+{
+  compute_dependencies(type_map, type.member_seq, dependencies);
 }
 
 void compute_dependencies(const TypeMap& type_map,
@@ -389,7 +577,6 @@ void compute_dependencies(const TypeMap& type_map,
                           OPENDDS_SET(TypeIdentifier)& dependencies)
 {
   compute_dependencies(type_map, type.base_type, dependencies);
-  compute_dependencies(type_map, type.detail, dependencies);
 }
 
 void compute_dependencies(const TypeMap& type_map,
@@ -399,29 +586,11 @@ void compute_dependencies(const TypeMap& type_map,
   compute_dependencies(type_map, type.member_type_id, dependencies);
 }
 
-void compute_dependencies(const TypeMap&,
-                          const MinimalMemberDetail&,
-                          OPENDDS_SET(TypeIdentifier)&)
-{
-  // Do nothing.
-}
-
 void compute_dependencies(const TypeMap& type_map,
                           const MinimalStructMember& type,
                           OPENDDS_SET(TypeIdentifier)& dependencies)
 {
   compute_dependencies(type_map, type.common, dependencies);
-  compute_dependencies(type_map, type.detail, dependencies);
-}
-
-template <typename T>
-void compute_dependencies(const TypeMap& type_map,
-                          const Sequence<T>& type,
-                          OPENDDS_SET(TypeIdentifier)& dependencies)
-{
-  for (typename Sequence<T>::const_iterator pos = type.begin(), limit = type.end(); pos != limit; ++pos) {
-    compute_dependencies(type_map, *pos, dependencies);
-  }
 }
 
 void compute_dependencies(const TypeMap& type_map,
@@ -433,10 +602,34 @@ void compute_dependencies(const TypeMap& type_map,
 }
 
 void compute_dependencies(const TypeMap& type_map,
-                          const MinimalUnionHeader& type,
+                          const CompleteStructHeader& header,
                           OPENDDS_SET(TypeIdentifier)& dependencies)
 {
-  compute_dependencies(type_map, type.detail, dependencies);
+  compute_dependencies(type_map, header.base_type, dependencies);
+  compute_dependencies(type_map, header.detail, dependencies);
+}
+
+void compute_dependencies(const TypeMap& type_map,
+                          const CompleteMemberDetail& detail,
+                          OPENDDS_SET(TypeIdentifier)& dependencies)
+{
+  compute_dependencies(type_map, detail.ann_custom, dependencies);
+}
+
+void compute_dependencies(const TypeMap& type_map,
+                          const CompleteStructMember& member,
+                          OPENDDS_SET(TypeIdentifier)& dependencies)
+{
+  compute_dependencies(type_map, member.common, dependencies);
+  compute_dependencies(type_map, member.detail, dependencies);
+}
+
+void compute_dependencies(const TypeMap& type_map,
+                          const CompleteStructType& type,
+                          OPENDDS_SET(TypeIdentifier)& dependencies)
+{
+  compute_dependencies(type_map, type.header, dependencies);
+  compute_dependencies(type_map, type.member_seq, dependencies);
 }
 
 void compute_dependencies(const TypeMap& type_map,
@@ -465,11 +658,41 @@ void compute_dependencies(const TypeMap& type_map,
                           OPENDDS_SET(TypeIdentifier)& dependencies)
 {
   compute_dependencies(type_map, type.common, dependencies);
-  compute_dependencies(type_map, type.detail, dependencies);
 }
 
 void compute_dependencies(const TypeMap& type_map,
                           const MinimalUnionType& type,
+                          OPENDDS_SET(TypeIdentifier)& dependencies)
+{
+  compute_dependencies(type_map, type.discriminator, dependencies);
+  compute_dependencies(type_map, type.member_seq, dependencies);
+}
+
+void compute_dependencies(const TypeMap& type_map,
+                          const CompleteUnionHeader& header,
+                          OPENDDS_SET(TypeIdentifier)& dependencies)
+{
+  compute_dependencies(type_map, header.detail, dependencies);
+}
+
+void compute_dependencies(const TypeMap& type_map,
+                          const CompleteDiscriminatorMember& type,
+                          OPENDDS_SET(TypeIdentifier)& dependencies)
+{
+  compute_dependencies(type_map, type.common, dependencies);
+  compute_dependencies(type_map, type.ann_custom, dependencies);
+}
+
+void compute_dependencies(const TypeMap& type_map,
+                          const CompleteUnionMember& type,
+                          OPENDDS_SET(TypeIdentifier)& dependencies)
+{
+  compute_dependencies(type_map, type.common, dependencies);
+  compute_dependencies(type_map, type.detail, dependencies);
+}
+
+void compute_dependencies(const TypeMap& type_map,
+                          const CompleteUnionType& type,
                           OPENDDS_SET(TypeIdentifier)& dependencies)
 {
   compute_dependencies(type_map, type.header, dependencies);
@@ -481,21 +704,29 @@ void compute_dependencies(const TypeMap&,
                           const MinimalBitsetType&,
                           OPENDDS_SET(TypeIdentifier)&)
 {
-  // TODO: Implement this.
-}
-
-void compute_dependencies(const TypeMap&,
-                          const CommonCollectionHeader&,
-                          OPENDDS_SET(TypeIdentifier)&)
-{
-  // Do nothing.
+  // Doesn't have any dependencies.
 }
 
 void compute_dependencies(const TypeMap& type_map,
-                          const MinimalCollectionHeader& type,
+                          const CompleteBitsetHeader& header,
                           OPENDDS_SET(TypeIdentifier)& dependencies)
 {
-  compute_dependencies(type_map, type.common, dependencies);
+  compute_dependencies(type_map, header.detail, dependencies);
+}
+
+void compute_dependencies(const TypeMap& type_map,
+                          const CompleteBitfield& field,
+                          OPENDDS_SET(TypeIdentifier)& dependencies)
+{
+  compute_dependencies(type_map, field.detail, dependencies);
+}
+
+void compute_dependencies(const TypeMap& type_map,
+                          const CompleteBitsetType& type,
+                          OPENDDS_SET(TypeIdentifier)& dependencies)
+{
+  compute_dependencies(type_map, type.header, dependencies);
+  compute_dependencies(type_map, type.field_seq, dependencies);
 }
 
 void compute_dependencies(const TypeMap& type_map,
@@ -516,70 +747,103 @@ void compute_dependencies(const TypeMap& type_map,
                           const MinimalSequenceType& type,
                           OPENDDS_SET(TypeIdentifier)& dependencies)
 {
-  compute_dependencies(type_map, type.header, dependencies);
   compute_dependencies(type_map, type.element, dependencies);
 }
 
-void compute_dependencies(const TypeMap&,
-                          const CommonArrayHeader&,
-                          OPENDDS_SET(TypeIdentifier)&)
+void compute_dependencies(const TypeMap& type_map,
+                          const CompleteCollectionHeader& header,
+                          OPENDDS_SET(TypeIdentifier)& dependencies)
 {
-  // Do nothing.
+  if (header.detail) {
+    compute_dependencies(type_map, header.detail.value(), dependencies);
+  }
 }
 
 void compute_dependencies(const TypeMap& type_map,
-                          const MinimalArrayHeader& type,
+                          const CompleteElementDetail& detail,
                           OPENDDS_SET(TypeIdentifier)& dependencies)
 {
-  compute_dependencies(type_map, type.common, dependencies);
+  compute_dependencies(type_map, detail.ann_custom, dependencies);
+}
+
+void compute_dependencies(const TypeMap& type_map,
+                          const CompleteCollectionElement& element,
+                          OPENDDS_SET(TypeIdentifier)& dependencies)
+{
+  compute_dependencies(type_map, element.common, dependencies);
+  compute_dependencies(type_map, element.detail, dependencies);
+}
+
+void compute_dependencies(const TypeMap& type_map,
+                          const CompleteSequenceType& type,
+                          OPENDDS_SET(TypeIdentifier)& dependencies)
+{
+  compute_dependencies(type_map, type.header, dependencies);
+  compute_dependencies(type_map, type.element, dependencies);
 }
 
 void compute_dependencies(const TypeMap& type_map,
                           const MinimalArrayType& type,
                           OPENDDS_SET(TypeIdentifier)& dependencies)
 {
+  compute_dependencies(type_map, type.element, dependencies);
+}
+
+void compute_dependencies(const TypeMap& type_map,
+                          const CompleteArrayHeader& header,
+                          OPENDDS_SET(TypeIdentifier)& dependencies)
+{
+  compute_dependencies(type_map, header.detail, dependencies);
+}
+
+void compute_dependencies(const TypeMap& type_map,
+                          const CompleteArrayType& type,
+                          OPENDDS_SET(TypeIdentifier)& dependencies)
+{
   compute_dependencies(type_map, type.header, dependencies);
   compute_dependencies(type_map, type.element, dependencies);
 }
 
-void compute_dependencies(const TypeMap&,
-                          const MinimalMapType&,
-                          OPENDDS_SET(TypeIdentifier)&)
-{
-  // TODO: Implement this.
-}
-
-void compute_dependencies(const TypeMap&,
-                          const CommonEnumeratedHeader&,
-                          OPENDDS_SET(TypeIdentifier)&)
-{
-  // Do nothing.
-}
-
 void compute_dependencies(const TypeMap& type_map,
-                          const MinimalEnumeratedHeader& type,
+                          const MinimalMapType& type,
                           OPENDDS_SET(TypeIdentifier)& dependencies)
 {
-  compute_dependencies(type_map, type.common, dependencies);
+  compute_dependencies(type_map, type.key, dependencies);
+  compute_dependencies(type_map, type.element, dependencies);
+}
+
+void compute_dependencies(const TypeMap& type_map,
+                          const CompleteMapType& type,
+                          OPENDDS_SET(TypeIdentifier)& dependencies)
+{
+  compute_dependencies(type_map, type.header, dependencies);
+  compute_dependencies(type_map, type.key, dependencies);
+  compute_dependencies(type_map, type.element, dependencies);
 }
 
 void compute_dependencies(const TypeMap&,
-                          const CommonEnumeratedLiteral&,
+                          const MinimalEnumeratedType&,
                           OPENDDS_SET(TypeIdentifier)&)
 {
-  // Do nothing.
+  // Doesn't have any dependencies.
 }
 
 void compute_dependencies(const TypeMap& type_map,
-                          const MinimalEnumeratedLiteral& type,
+                          const CompleteEnumeratedHeader& header,
                           OPENDDS_SET(TypeIdentifier)& dependencies)
 {
-  compute_dependencies(type_map, type.common, dependencies);
-  compute_dependencies(type_map, type.detail, dependencies);
+  compute_dependencies(type_map, header.detail, dependencies);
 }
 
 void compute_dependencies(const TypeMap& type_map,
-                          const MinimalEnumeratedType& type,
+                          const CompleteEnumeratedLiteral& literal,
+                          OPENDDS_SET(TypeIdentifier)& dependencies)
+{
+  compute_dependencies(type_map, literal.detail, dependencies);
+}
+
+void compute_dependencies(const TypeMap& type_map,
+                          const CompleteEnumeratedType& type,
                           OPENDDS_SET(TypeIdentifier)& dependencies)
 {
   compute_dependencies(type_map, type.header, dependencies);
@@ -590,11 +854,64 @@ void compute_dependencies(const TypeMap&,
                           const MinimalBitmaskType&,
                           OPENDDS_SET(TypeIdentifier)&)
 {
-  // TODO: Implement this.
+  // Doesn't have any dependencies.
+}
+
+void compute_dependencies(const TypeMap& type_map,
+                          const CompleteBitflag& bitflag,
+                          OPENDDS_SET(TypeIdentifier)& dependencies)
+{
+  compute_dependencies(type_map, bitflag.detail, dependencies);
+}
+
+void compute_dependencies(const TypeMap& type_map,
+                          const CompleteBitmaskType& type,
+                          OPENDDS_SET(TypeIdentifier)& dependencies)
+{
+  compute_dependencies(type_map, type.header, dependencies);
+  compute_dependencies(type_map, type.flag_seq, dependencies);
 }
 
 void compute_dependencies(const TypeMap& type_map,
                           const MinimalTypeObject& type_object,
+                          OPENDDS_SET(TypeIdentifier)& dependencies)
+{
+  switch (type_object.kind) {
+  case TK_ALIAS:
+    compute_dependencies(type_map, type_object.alias_type, dependencies);
+    break;
+  case TK_ANNOTATION:
+    compute_dependencies(type_map, type_object.annotation_type, dependencies);
+    break;
+  case TK_STRUCTURE:
+    compute_dependencies(type_map, type_object.struct_type, dependencies);
+    break;
+  case TK_UNION:
+    compute_dependencies(type_map, type_object.union_type, dependencies);
+    break;
+  case TK_BITSET:
+    compute_dependencies(type_map, type_object.bitset_type, dependencies);
+    break;
+  case TK_SEQUENCE:
+    compute_dependencies(type_map, type_object.sequence_type, dependencies);
+    break;
+  case TK_ARRAY:
+    compute_dependencies(type_map, type_object.array_type, dependencies);
+    break;
+  case TK_MAP:
+    compute_dependencies(type_map, type_object.map_type, dependencies);
+    break;
+  case TK_ENUM:
+    compute_dependencies(type_map, type_object.enumerated_type, dependencies);
+    break;
+  case TK_BITMASK:
+    compute_dependencies(type_map, type_object.bitmask_type, dependencies);
+    break;
+  }
+}
+
+void compute_dependencies(const TypeMap& type_map,
+                          const CompleteTypeObject& type_object,
                           OPENDDS_SET(TypeIdentifier)& dependencies)
 {
   switch (type_object.kind) {
@@ -723,6 +1040,16 @@ void compute_dependencies(const TypeMap&,
   // Do nothing.
 }
 
+template <typename T>
+void compute_dependencies(const TypeMap& type_map,
+                          const Sequence<T>& type,
+                          OPENDDS_SET(TypeIdentifier)& dependencies)
+{
+  for (typename Sequence<T>::const_iterator pos = type.begin(), limit = type.end(); pos != limit; ++pos) {
+    compute_dependencies(type_map, *pos, dependencies);
+  }
+}
+
 }
 
 void compute_dependencies(const TypeMap& type_map,
@@ -793,11 +1120,82 @@ bool read_empty_xcdr2_nonfinal(DCPS::Serializer& strm)
   return strm.skip(total_size);
 }
 
+const char* typekind_to_string(TypeKind tk)
+{
+  switch (tk) {
+  case TK_NONE:
+    return "none";
+  case TK_BOOLEAN:
+    return "boolean";
+  case TK_BYTE:
+    return "byte";
+  case TK_INT16:
+    return "int16";
+  case TK_INT32:
+    return "int32";
+  case TK_INT64:
+    return "int64";
+  case TK_UINT16:
+    return "uint16";
+  case TK_UINT32:
+    return "uint32";
+  case TK_UINT64:
+    return "uint64";
+  case TK_FLOAT32:
+    return "float32";
+  case TK_FLOAT64:
+    return "float64";
+  case TK_FLOAT128:
+    return "float128";
+  case TK_INT8:
+    return "int8";
+  case TK_UINT8:
+    return "uint8";
+  case TK_CHAR8:
+    return "char8";
+  case TK_CHAR16:
+    return "char16";
+  case TK_STRING8:
+    return "string";
+  case TK_STRING16:
+    return "wstring";
+  case TK_ALIAS:
+    return "alias";
+  case TK_ENUM:
+    return "enum";
+  case TK_BITMASK:
+    return "bitmask";
+  case TK_ANNOTATION:
+    return "annotation";
+  case TK_STRUCTURE:
+    return "structure";
+  case TK_UNION:
+    return "union";
+  case TK_BITSET:
+    return "bitset";
+  case TK_SEQUENCE:
+    return "sequence";
+  case TK_ARRAY:
+    return "array";
+  case TK_MAP:
+    return "map";
+  default:
+    if (DCPS::log_level >= DCPS::LogLevel::Warning) {
+      ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: typekind_to_string: "
+        "passed unknown TypeKind %u\n", tk));
+    }
+    return "unknown";
+  }
+}
+
 } // namespace XTypes
 
 namespace DCPS {
 
 // Serialization support for TypeObject and its components
+
+using XTypes::TYPE_NAME_MAX_LENGTH;
+using XTypes::MEMBER_NAME_MAX_LENGTH;
 
 void serialized_size(const Encoding& encoding, size_t& size,
   const XTypes::TypeIdentifier& uni)
@@ -863,6 +1261,12 @@ void serialized_size(const Encoding& encoding, size_t& size,
   }
 }
 
+void serialized_size(const Encoding& encoding, size_t& size,
+  const NestedKeyOnly<const XTypes::TypeIdentifier>& uni)
+{
+  serialized_size(encoding, size, uni.value);
+}
+
 bool operator<<(Serializer& strm, const XTypes::TypeIdentifier& uni)
 {
   if (!(strm << ACE_OutputCDR::from_octet(uni.kind()))) {
@@ -916,6 +1320,11 @@ bool operator<<(Serializer& strm, const XTypes::TypeIdentifier& uni)
   default:
     return (strm << uni.extended_defn());
   }
+}
+
+bool operator<<(Serializer& strm, const NestedKeyOnly<const XTypes::TypeIdentifier>& uni)
+{
+  return (strm << uni.value);
 }
 
 bool operator>>(Serializer& strm, XTypes::TypeIdentifier& uni)
@@ -975,6 +1384,10 @@ bool operator>>(Serializer& strm, XTypes::TypeIdentifier& uni)
   }
 }
 
+bool operator>>(Serializer& strm, NestedKeyOnly<XTypes::TypeIdentifier>& uni)
+{
+  return (strm >> uni.value);
+}
 
 void serialized_size(const Encoding& encoding, size_t& size,
   const XTypes::LBoundSeq& seq)
@@ -1148,14 +1561,14 @@ bool operator<<(Serializer& strm, const XTypes::CompleteTypeDetail& stru)
 {
   return (strm << stru.ann_builtin)
     && (strm << stru.ann_custom)
-    && (strm << Serializer::FromBoundedString<char>(stru.type_name, 256));
+    && (strm << Serializer::FromBoundedString<char>(stru.type_name, TYPE_NAME_MAX_LENGTH));
 }
 
 bool operator>>(Serializer& strm, XTypes::CompleteTypeDetail& stru)
 {
   return (strm >> stru.ann_builtin)
     && (strm >> stru.ann_custom)
-    && (strm >> Serializer::ToBoundedString<char>(stru.type_name, 256));
+    && (strm >> Serializer::ToBoundedString<char>(stru.type_name, TYPE_NAME_MAX_LENGTH));
 }
 
 
@@ -1902,6 +2315,12 @@ void serialized_size(const Encoding& encoding, size_t& size,
   primitive_serialized_size(encoding, size, stru.typeobject_serialized_size);
 }
 
+void serialized_size(const Encoding& encoding, size_t& size,
+                     const NestedKeyOnly<const XTypes::TypeIdentifierWithSize>& stru)
+{
+  serialized_size(encoding, size, stru.value);
+}
+
 bool operator<<(Serializer& strm, const XTypes::TypeIdentifierWithSize& stru)
 {
   size_t total_size = 0;
@@ -1912,6 +2331,11 @@ bool operator<<(Serializer& strm, const XTypes::TypeIdentifierWithSize& stru)
 
   return (strm << stru.type_id)
     && (strm << stru.typeobject_serialized_size);
+}
+
+bool operator<<(Serializer& strm, const NestedKeyOnly<const XTypes::TypeIdentifierWithSize>& stru)
+{
+  return (strm << stru.value);
 }
 
 bool operator>>(Serializer& strm, XTypes::TypeIdentifierWithSize& stru)
@@ -1932,6 +2356,10 @@ bool operator>>(Serializer& strm, XTypes::TypeIdentifierWithSize& stru)
   return ret;
 }
 
+bool operator>>(Serializer& strm, NestedKeyOnly<XTypes::TypeIdentifierWithSize>& stru)
+{
+  return (strm >> stru.value);
+}
 
 void serialized_size(const Encoding& encoding, size_t& size,
   const XTypes::TypeIdentifierWithDependencies& stru)
@@ -2143,7 +2571,7 @@ bool operator<<(Serializer& strm, const XTypes::CompleteAnnotationHeader& stru)
     return false;
   }
 
-  return (strm << Serializer::FromBoundedString<char>(stru.annotation_name, 256));
+  return (strm << Serializer::FromBoundedString<char>(stru.annotation_name, TYPE_NAME_MAX_LENGTH));
 }
 
 bool operator>>(Serializer& strm, XTypes::CompleteAnnotationHeader& stru)
@@ -2155,7 +2583,7 @@ bool operator>>(Serializer& strm, XTypes::CompleteAnnotationHeader& stru)
 
   const size_t start_pos = strm.rpos();
 
-  const bool ret = (strm >> Serializer::ToBoundedString<char>(stru.annotation_name, 256));
+  const bool ret = (strm >> Serializer::ToBoundedString<char>(stru.annotation_name, TYPE_NAME_MAX_LENGTH));
 
   if (ret && strm.rpos() - start_pos < total_size) {
     strm.skip(total_size - strm.rpos() + start_pos);
@@ -2183,7 +2611,7 @@ bool operator<<(Serializer& strm, const XTypes::CompleteAnnotationParameter& str
   }
 
   return (strm << stru.common)
-    && (strm << Serializer::FromBoundedString<char>(stru.name, 256))
+    && (strm << Serializer::FromBoundedString<char>(stru.name, MEMBER_NAME_MAX_LENGTH))
     && (strm << stru.default_value);
 }
 
@@ -2197,7 +2625,7 @@ bool operator>>(Serializer& strm, XTypes::CompleteAnnotationParameter& stru)
   const size_t start_pos = strm.rpos();
 
   const bool ret = (strm >> stru.common)
-    && (strm >> Serializer::ToBoundedString<char>(stru.name, 256))
+    && (strm >> Serializer::ToBoundedString<char>(stru.name, MEMBER_NAME_MAX_LENGTH))
     && (strm >> stru.default_value);
 
   if (ret && strm.rpos() - start_pos < total_size) {
@@ -3147,78 +3575,78 @@ bool operator>>(Serializer& strm, XTypes::MinimalUnionMember& stru)
 void serialized_size(const Encoding& encoding, size_t& size,
   const XTypes::AnnotationParameterValue& uni)
 {
-  primitive_serialized_size(encoding, size, ACE_OutputCDR::from_octet(uni.kind));
-  switch (uni.kind) {
+  primitive_serialized_size(encoding, size, ACE_OutputCDR::from_octet(uni.kind()));
+  switch (uni.kind()) {
   case XTypes::TK_BOOLEAN: {
-    primitive_serialized_size(encoding, size, ACE_OutputCDR::from_boolean(uni.boolean_value));
+    primitive_serialized_size(encoding, size, ACE_OutputCDR::from_boolean(uni.boolean_value()));
     break;
   }
   case XTypes::TK_BYTE: {
-    primitive_serialized_size(encoding, size, ACE_OutputCDR::from_octet(uni.byte_value));
+    primitive_serialized_size(encoding, size, ACE_OutputCDR::from_octet(uni.byte_value()));
     break;
   }
   case XTypes::TK_INT16: {
-    primitive_serialized_size(encoding, size, uni.int16_value);
+    primitive_serialized_size(encoding, size, uni.int16_value());
     break;
   }
   case XTypes::TK_UINT16: {
-    primitive_serialized_size(encoding, size, uni.uint_16_value);
+    primitive_serialized_size(encoding, size, uni.uint16_value());
     break;
   }
   case XTypes::TK_INT32: {
-    primitive_serialized_size(encoding, size, uni.int32_value);
+    primitive_serialized_size(encoding, size, uni.int32_value());
     break;
   }
   case XTypes::TK_UINT32: {
-    primitive_serialized_size(encoding, size, uni.uint32_value);
+    primitive_serialized_size(encoding, size, uni.uint32_value());
     break;
   }
   case XTypes::TK_INT64: {
-    primitive_serialized_size(encoding, size, uni.int64_value);
+    primitive_serialized_size(encoding, size, uni.int64_value());
     break;
   }
   case XTypes::TK_UINT64: {
-    primitive_serialized_size(encoding, size, uni.uint64_value);
+    primitive_serialized_size(encoding, size, uni.uint64_value());
     break;
   }
   case XTypes::TK_FLOAT32: {
-    primitive_serialized_size(encoding, size, uni.float32_value);
+    primitive_serialized_size(encoding, size, uni.float32_value());
     break;
   }
   case XTypes::TK_FLOAT64: {
-    primitive_serialized_size(encoding, size, uni.float64_value);
+    primitive_serialized_size(encoding, size, uni.float64_value());
     break;
   }
   case XTypes::TK_FLOAT128: {
-    primitive_serialized_size(encoding, size, ACE_CDR::LongDouble());
+    primitive_serialized_size(encoding, size, uni.float128_value());
     break;
   }
   case XTypes::TK_CHAR8: {
-    primitive_serialized_size(encoding, size, ACE_OutputCDR::from_char(uni.char_value));
+    primitive_serialized_size(encoding, size, ACE_OutputCDR::from_char(uni.char_value()));
     break;
   }
   case XTypes::TK_CHAR16: {
-    primitive_serialized_size(encoding, size, ACE_OutputCDR::from_wchar(uni.wchar_value));
+    primitive_serialized_size(encoding, size, ACE_OutputCDR::from_wchar(uni.wchar_value()));
     break;
   }
   case XTypes::TK_ENUM: {
-    primitive_serialized_size(encoding, size, uni.enumerated_value);
+    primitive_serialized_size(encoding, size, uni.enumerated_value());
     break;
   }
   case XTypes::TK_STRING8: {
     DCPS::primitive_serialized_size_ulong(encoding, size);
-    size += ACE_OS::strlen(uni.string8_value.c_str()) + 1;
+    size += ACE_OS::strlen(uni.string8_value().c_str()) + 1;
     break;
   }
   case XTypes::TK_STRING16: {
 #ifdef DDS_HAS_WCHAR
     DCPS::primitive_serialized_size_ulong(encoding, size);
-    size += ACE_OS::strlen(uni.string16_value.c_str()) * DCPS::char16_cdr_size;
+    size += ACE_OS::strlen(uni.string16_value().c_str()) * DCPS::char16_cdr_size;
 #endif
     break;
   }
   default: {
-    serialized_size(encoding, size, uni.extended_value);
+    serialized_size(encoding, size, uni.extended_value());
     break;
   }
   }
@@ -3226,64 +3654,64 @@ void serialized_size(const Encoding& encoding, size_t& size,
 
 bool operator<<(Serializer& strm, const XTypes::AnnotationParameterValue& uni)
 {
-  if (!(strm << ACE_OutputCDR::from_octet(uni.kind))) {
+  if (!(strm << ACE_OutputCDR::from_octet(uni.kind()))) {
     return false;
   }
-  switch (uni.kind) {
+  switch (uni.kind()) {
   case XTypes::TK_BOOLEAN: {
-    return (strm << ACE_OutputCDR::from_boolean(uni.boolean_value));
+    return (strm << ACE_OutputCDR::from_boolean(uni.boolean_value()));
   }
   case XTypes::TK_BYTE: {
-    return (strm << ACE_OutputCDR::from_octet(uni.byte_value));
+    return (strm << ACE_OutputCDR::from_octet(uni.byte_value()));
   }
   case XTypes::TK_INT16: {
-    return (strm << uni.int16_value);
+    return (strm << uni.int16_value());
   }
   case XTypes::TK_UINT16: {
-    return (strm << uni.uint_16_value);
+    return (strm << uni.uint16_value());
   }
   case XTypes::TK_INT32: {
-    return (strm << uni.int32_value);
+    return (strm << uni.int32_value());
   }
   case XTypes::TK_UINT32: {
-    return (strm << uni.uint32_value);
+    return (strm << uni.uint32_value());
   }
   case XTypes::TK_INT64: {
-    return (strm << uni.int64_value);
+    return (strm << uni.int64_value());
   }
   case XTypes::TK_UINT64: {
-    return (strm << uni.uint64_value);
+    return (strm << uni.uint64_value());
   }
   case XTypes::TK_FLOAT32: {
-    return (strm << uni.float32_value);
+    return (strm << uni.float32_value());
   }
   case XTypes::TK_FLOAT64: {
-    return (strm << uni.float64_value);
+    return (strm << uni.float64_value());
   }
   case XTypes::TK_FLOAT128: {
-    return (strm << uni.float128_value);
+    return (strm << uni.float128_value());
   }
   case XTypes::TK_CHAR8: {
-    return (strm << ACE_OutputCDR::from_char(uni.char_value));
+    return (strm << ACE_OutputCDR::from_char(uni.char_value()));
   }
   case XTypes::TK_CHAR16: {
-    return (strm << ACE_OutputCDR::from_wchar(uni.wchar_value));
+    return (strm << ACE_OutputCDR::from_wchar(uni.wchar_value()));
   }
   case XTypes::TK_ENUM: {
-    return (strm << uni.enumerated_value);
+    return (strm << uni.enumerated_value());
   }
   case XTypes::TK_STRING8: {
-    return (strm << Serializer::FromBoundedString<char>(uni.string8_value, 128));
+    return (strm << Serializer::FromBoundedString<char>(uni.string8_value(), 128));
   }
   case XTypes::TK_STRING16: {
 #ifdef DDS_HAS_WCHAR
-    return (strm << Serializer::FromBoundedString<wchar_t>(uni.string16_value, 128));
+    return (strm << Serializer::FromBoundedString<wchar_t>(uni.string16_value(), 128));
 #else
     return false;
 #endif
   }
   default: {
-    return (strm << uni.extended_value);
+    return (strm << uni.extended_value());
   }
   }
 }
@@ -3294,162 +3722,46 @@ bool operator>>(Serializer& strm, XTypes::AnnotationParameterValue& uni)
   if (!(strm >> ACE_InputCDR::to_octet(kind))) {
     return false;
   }
+  uni = XTypes::AnnotationParameterValue(kind);
+
   switch (kind) {
-  case XTypes::TK_BOOLEAN: {
-    ACE_CDR::Boolean tmp;
-    if (strm >> ACE_InputCDR::to_boolean(tmp)) {
-      uni.boolean_value = tmp;
-      uni.kind = kind;
-      return true;
-    }
-    return false;
-  }
-  case XTypes::TK_BYTE: {
-    ACE_CDR::Octet tmp;
-    if (strm >> ACE_InputCDR::to_octet(tmp)) {
-      uni.byte_value = tmp;
-      uni.kind = kind;
-      return true;
-    }
-    return false;
-  }
-  case XTypes::TK_INT16: {
-    ACE_CDR::Short tmp;
-    if (strm >> tmp) {
-      uni.int16_value = tmp;
-      uni.kind = kind;
-      return true;
-    }
-    return false;
-  }
-  case XTypes::TK_UINT16: {
-    ACE_CDR::UShort tmp;
-    if (strm >> tmp) {
-      uni.uint_16_value = tmp;
-      uni.kind = kind;
-      return true;
-    }
-    return false;
-  }
-  case XTypes::TK_INT32: {
-    ACE_CDR::Long tmp;
-    if (strm >> tmp) {
-      uni.int32_value = tmp;
-      uni.kind = kind;
-      return true;
-    }
-    return false;
-  }
-  case XTypes::TK_UINT32: {
-    ACE_CDR::ULong tmp;
-    if (strm >> tmp) {
-      uni.uint32_value = tmp;
-      uni.kind = kind;
-      return true;
-    }
-    return false;
-  }
-  case XTypes::TK_INT64: {
-    ACE_CDR::LongLong tmp;
-    if (strm >> tmp) {
-      uni.int64_value = tmp;
-      uni.kind = kind;
-      return true;
-    }
-    return false;
-  }
-  case XTypes::TK_UINT64: {
-    ACE_CDR::ULongLong tmp;
-    if (strm >> tmp) {
-      uni.uint64_value = tmp;
-      uni.kind = kind;
-      return true;
-    }
-    return false;
-  }
-  case XTypes::TK_FLOAT32: {
-    ACE_CDR::Float tmp;
-    if (strm >> tmp) {
-      uni.float32_value = tmp;
-      uni.kind = kind;
-      return true;
-    }
-    return false;
-  }
-  case XTypes::TK_FLOAT64: {
-    ACE_CDR::Double tmp;
-    if (strm >> tmp) {
-      uni.float64_value = tmp;
-      uni.kind = kind;
-      return true;
-    }
-    return false;
-  }
-  case XTypes::TK_FLOAT128: {
-    ACE_CDR::LongDouble tmp;
-    if (strm >> tmp) {
-      uni.float128_value = tmp;
-      uni.kind = kind;
-      return true;
-    }
-    return false;
-  }
-  case XTypes::TK_CHAR8: {
-    ACE_CDR::Char tmp;
-    if (strm >> ACE_InputCDR::to_char(tmp)) {
-      uni.char_value = tmp;
-      uni.kind = kind;
-      return true;
-    }
-    return false;
-  }
-  case XTypes::TK_CHAR16: {
-    ACE_CDR::WChar tmp;
-    if (strm >> ACE_InputCDR::to_wchar(tmp)) {
-      uni.wchar_value = tmp;
-      uni.kind = kind;
-      return true;
-    }
-    return false;
-  }
-  case XTypes::TK_ENUM: {
-    ACE_CDR::Long tmp;
-    if (strm >> tmp) {
-      uni.enumerated_value = tmp;
-      uni.kind = kind;
-      return true;
-    }
-    return false;
-  }
-  case XTypes::TK_STRING8: {
-    OPENDDS_STRING tmp;
-    if (strm >> Serializer::ToBoundedString<char>(tmp, 128)) {
-      uni.string8_value = tmp;
-      uni.kind = kind;
-      return true;
-    }
-    return false;
-  }
-  case XTypes::TK_STRING16: {
+  case XTypes::TK_BOOLEAN:
+    return (strm >> ACE_InputCDR::to_boolean(uni.boolean_value()));
+  case XTypes::TK_BYTE:
+    return (strm >> ACE_InputCDR::to_octet(uni.byte_value()));
+  case XTypes::TK_INT16:
+    return (strm >> uni.int16_value());
+  case XTypes::TK_UINT16:
+    return (strm >> uni.uint16_value());
+  case XTypes::TK_INT32:
+    return (strm >> uni.int32_value());
+  case XTypes::TK_UINT32:
+    return (strm >> uni.uint32_value());
+  case XTypes::TK_INT64:
+    return (strm >> uni.int64_value());
+  case XTypes::TK_UINT64:
+    return (strm >> uni.uint64_value());
+  case XTypes::TK_FLOAT32:
+    return (strm >> uni.float32_value());
+  case XTypes::TK_FLOAT64:
+    return (strm >> uni.float64_value());
+  case XTypes::TK_FLOAT128:
+    return (strm >> uni.float128_value());
+  case XTypes::TK_CHAR8:
+    return (strm >> ACE_InputCDR::to_char(uni.char_value()));
+  case XTypes::TK_CHAR16:
+    return (strm >> ACE_InputCDR::to_wchar(uni.wchar_value()));
+  case XTypes::TK_ENUM:
+    return (strm >> uni.enumerated_value());
+  case XTypes::TK_STRING8:
+    return (strm >> Serializer::ToBoundedString<char>(uni.string8_value(), 128));
+  case XTypes::TK_STRING16:
 #ifdef DDS_HAS_WCHAR
-    OPENDDS_WSTRING tmp;
-    if (strm >> Serializer::ToBoundedString<wchar_t>(tmp, 128)) {
-      uni.string16_value = tmp;
-      uni.kind = kind;
-      return true;
-    }
+    return (strm >> Serializer::ToBoundedString<wchar_t>(uni.string16_value(), 128));
 #endif
     return false;
-  }
-  default: {
-    XTypes::ExtendedAnnotationParameterValue tmp;
-    if (strm >> tmp) {
-      uni.extended_value = tmp;
-      uni.kind = kind;
-      return true;
-    }
-    return false;
-  }
+  default:
+    return (strm >> uni.extended_value());
   }
 }
 
@@ -3502,18 +3814,18 @@ void serialized_size(const Encoding& encoding, size_t& size,
   serialized_size_delimiter(encoding, size);
 
   size += DCPS::boolean_cdr_size;
-  if (stru.unit.present) {
+  if (stru.unit) {
     DCPS::primitive_serialized_size_ulong(encoding, size);
-    size += ACE_OS::strlen(stru.unit.value.c_str()) + 1;
+    size += ACE_OS::strlen(stru.unit.value().c_str()) + 1;
   }
 
   serialized_size(encoding, size, stru.min);
   serialized_size(encoding, size, stru.max);
 
   size += DCPS::boolean_cdr_size;
-  if (stru.hash_id.present) {
+  if (stru.hash_id) {
     DCPS::primitive_serialized_size_ulong(encoding, size);
-    size += ACE_OS::strlen(stru.hash_id.value.c_str()) + 1;
+    size += ACE_OS::strlen(stru.hash_id.value().c_str()) + 1;
   }
 }
 
@@ -3874,14 +4186,14 @@ void serialized_size(const Encoding& encoding, size_t& size,
 
 bool operator<<(Serializer& strm, const XTypes::CompleteMemberDetail& stru)
 {
-  return (strm << Serializer::FromBoundedString<char>(stru.name, 256))
+  return (strm << Serializer::FromBoundedString<char>(stru.name, MEMBER_NAME_MAX_LENGTH))
     && (strm << stru.ann_builtin)
     && (strm << stru.ann_custom);
 }
 
 bool operator>>(Serializer& strm, XTypes::CompleteMemberDetail& stru)
 {
-  return (strm >> Serializer::ToBoundedString<char>(stru.name, 256))
+  return (strm >> Serializer::ToBoundedString<char>(stru.name, MEMBER_NAME_MAX_LENGTH))
     && (strm >> stru.ann_builtin)
     && (strm >> stru.ann_custom);
 }
@@ -4613,10 +4925,21 @@ void serialized_size(const Encoding& encoding, size_t& size,
   serialized_size(encoding, size, stru.type_object);
 }
 
+void serialized_size(const Encoding& encoding, size_t& size,
+                     const NestedKeyOnly<const XTypes::TypeIdentifierTypeObjectPair>& stru)
+{
+  serialized_size(encoding, size, stru.value);
+}
+
 bool operator<<(Serializer& strm, const XTypes::TypeIdentifierTypeObjectPair& stru)
 {
   return (strm << stru.type_identifier)
     && (strm << stru.type_object);
+}
+
+bool operator<<(Serializer& strm, const NestedKeyOnly<const XTypes::TypeIdentifierTypeObjectPair>& stru)
+{
+  return (strm << stru.value);
 }
 
 bool operator>>(Serializer& strm, XTypes::TypeIdentifierTypeObjectPair& stru)
@@ -4625,6 +4948,10 @@ bool operator>>(Serializer& strm, XTypes::TypeIdentifierTypeObjectPair& stru)
     && (strm >> stru.type_object);
 }
 
+bool operator>>(Serializer& strm, NestedKeyOnly<XTypes::TypeIdentifierTypeObjectPair>& stru)
+{
+  return (strm >> stru.value);
+}
 
 void serialized_size(const Encoding& encoding, size_t& size,
   const XTypes::TypeIdentifierPair& stru)
@@ -4633,10 +4960,21 @@ void serialized_size(const Encoding& encoding, size_t& size,
   serialized_size(encoding, size, stru.type_identifier2);
 }
 
+void serialized_size(const Encoding& encoding, size_t& size,
+                     const NestedKeyOnly<const XTypes::TypeIdentifierPair>& stru)
+{
+  serialized_size(encoding, size, stru.value);
+}
+
 bool operator<<(Serializer& strm, const XTypes::TypeIdentifierPair& stru)
 {
   return (strm << stru.type_identifier1)
     && (strm << stru.type_identifier2);
+}
+
+bool operator<<(Serializer& strm, const NestedKeyOnly<const XTypes::TypeIdentifierPair>& stru)
+{
+  return (strm << stru.value);
 }
 
 bool operator>>(Serializer& strm, XTypes::TypeIdentifierPair& stru)
@@ -4645,6 +4983,18 @@ bool operator>>(Serializer& strm, XTypes::TypeIdentifierPair& stru)
     && (strm >> stru.type_identifier2);
 }
 
+bool operator>>(Serializer& strm, NestedKeyOnly<XTypes::TypeIdentifierPair>& stru)
+{
+  return (strm >> stru.value);
+}
+
+bool to_type_object(const unsigned char* buffer, size_t size, XTypes::TypeObject& to)
+{
+  ACE_Message_Block message_block(reinterpret_cast<const char*>(buffer), size);
+  message_block.length(size);
+  DCPS::Serializer ser(&message_block, XTypes::get_typeobject_encoding());
+  return ser >> to;
+}
 
 } // namespace DCPS
 } // namespace OpenDDS

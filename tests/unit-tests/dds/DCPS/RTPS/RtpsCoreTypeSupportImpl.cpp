@@ -4,7 +4,10 @@
  * See: http://www.opendds.org/license.html
  */
 
+#include <dds/DdsDcpsCoreTypeSupportImpl.h>
+
 #include <dds/DCPS/Serializer.h>
+
 #include <dds/DCPS/RTPS/RtpsCoreC.h>
 #include <dds/DCPS/RTPS/RtpsCoreTypeSupportImpl.h>
 
@@ -15,6 +18,77 @@
 
 using namespace OpenDDS::DCPS;
 using namespace OpenDDS::RTPS;
+
+TEST(RtpsCoreTypeSupportImpl, PropertyQosPolicy)
+{
+  DDS::PropertySeq pseq(1);
+  pseq.length(1);
+  pseq[0].name = "test";
+  pseq[0].value = "test";
+  pseq[0].propagate = true;
+
+  DDS::BinaryPropertySeq bseq(1);
+  bseq.length(1);
+  bseq[0].name = "test";
+  bseq[0].value.length(1);
+  bseq[0].value[0] = 99;
+  bseq[0].propagate = true;
+
+  const DDS::PropertyQosPolicy pqos = {pseq, bseq};
+  Parameter param;
+  param.property(pqos);
+
+  static const Encoding enc(Encoding::KIND_XCDR1);
+  const size_t size = serialized_size(enc, param) + 3 /*serializer may add padding*/;
+
+  {
+    ACE_Message_Block mb_property_qos_security(size);
+    Serializer ser_in(&mb_property_qos_security, enc);
+    ASSERT_TRUE(ser_in << param);
+
+    Serializer ser_out(&mb_property_qos_security, enc);
+    Parameter out_param;
+    ASSERT_TRUE(ser_out >> out_param);
+    ASSERT_EQ(out_param._d(), PID_PROPERTY_LIST);
+    const DDS::PropertyQosPolicy& out_qos = out_param.property();
+    ASSERT_EQ(out_qos.value.length(), 1u);
+    ASSERT_STREQ(out_qos.value[0].name, "test");
+    ASSERT_STREQ(out_qos.value[0].value, "test");
+    ASSERT_EQ(out_qos.binary_value.length(), 1u);
+    ASSERT_STREQ(out_qos.binary_value[0].name, "test");
+    ASSERT_EQ(out_qos.binary_value[0].value.length(), 1u);
+    ASSERT_EQ(out_qos.binary_value[0].value[0], 99);
+  }
+
+  // In the RTPS spec, PropertyQosPolicy has just the PropertySeq
+  // (doesn't have the BinaryPropertySeq), so serializing the PropertySeq
+  // is equivalent to that definition of the PropertyQosPolicy
+  {
+    ACE_Message_Block mb_property_qos_rtps(size);
+    Serializer ser(&mb_property_qos_rtps, enc);
+    ASSERT_TRUE(ser << param._d());
+    const size_t size_in_param = serialized_size(enc, pseq);
+    const size_t post_pad = 4 - (size_in_param % 4);
+    const size_t total_size = size_in_param + ((post_pad < 4) ? post_pad : 0);
+    ASSERT_TRUE(ser << ACE_CDR::UShort(total_size));
+    ASSERT_TRUE(ser << pseq);
+    if (post_pad < 4) {
+      static const ACE_CDR::Octet padding[3] = {0};
+      ASSERT_TRUE(ser.write_octet_array(padding, ACE_CDR::ULong(post_pad)));
+    }
+
+    Serializer ser_out(&mb_property_qos_rtps, enc);
+    Parameter out_param;
+    ASSERT_TRUE(ser_out >> out_param);
+    ASSERT_EQ(out_param._d(), PID_PROPERTY_LIST);
+    const DDS::PropertyQosPolicy& out_qos = out_param.property();
+    ASSERT_EQ(out_qos.value.length(), 1u);
+    ASSERT_STREQ(out_qos.value[0].name, "test");
+    ASSERT_STREQ(out_qos.value[0].value, "test");
+    ASSERT_EQ(out_qos.binary_value.length(), 0u);
+  }
+}
+
 
 // ---------- ---------- ---------- ---------- ----------
 void set_Parameter_user_data(Parameter& p, const std::string& user_data)
@@ -140,4 +214,46 @@ TEST(RtpsCoreTypeSupportImpl, ExtractSequenceWithUnverifiedLength)
 {
   EXPECT_TRUE(extract_sequence_with_unverified_length<FilterResult_t>());
   EXPECT_FALSE(extract_sequence_with_unverified_length<FilterResult_t>(10));
+}
+
+TEST(RtpsCoreTypeSupportImpl, Serializer_test_issue4105)
+{
+  static const ACE_CDR::Octet x[] = {
+    0x59,0x00,0x1c,0x00, // PID, length
+    0x01,0x00,0x00,0x00, // # of Properties
+    0x02,0x00,0x00,0x00, // prop[0].name.length
+    0x69,0x6e,0x00,0x00, // prop[0].name characters + padding (invalid)
+    0x00,0x00,0x00,0x00, // prop[0].value.length (invalid, treat as "")
+    0x00,0x00,0x00,0x00, // # of Binary Properties
+    0x00,0x00,0x00,0x00, // skipped
+    0x00,0x00,0x00,0x00, // skipped
+    0x01,0x4c,0x00,0x00, // PID, length
+  };
+  Message_Block_Ptr amb(new ACE_Message_Block(sizeof x));
+  const Encoding enc(Encoding::KIND_XCDR1, ENDIAN_LITTLE);
+  Serializer ser_w(amb.get(), enc);
+  ASSERT_TRUE(ser_w.write_octet_array(x, sizeof x));
+
+  Serializer ser(amb.get(), enc);
+  ParameterList plist;
+  ASSERT_FALSE(ser >> plist);
+}
+
+TEST(RtpsCoreTypeSupportImpl, Serializer_test_parameterlist)
+{
+  static const ACE_CDR::Octet x[] = {
+    0x14,0x40,0x0c,0x00, // PID, length
+    0x0d,0x00,0x00,0x00, // string length (invalid)
+    0x00,0x00,0x00,0x00, // string contents (invalid)
+    0x00,0x00,0x00,0x00,
+    0x01,0xa7,0x00,0x00, // PID, length
+  };
+  Message_Block_Ptr amb(new ACE_Message_Block(sizeof x));
+  const Encoding enc(Encoding::KIND_XCDR1, ENDIAN_LITTLE);
+  Serializer ser_w(amb.get(), enc);
+  ASSERT_TRUE(ser_w.write_octet_array(x, sizeof x));
+
+  Serializer ser(amb.get(), enc);
+  ParameterList plist;
+  ASSERT_FALSE(ser >> plist);
 }

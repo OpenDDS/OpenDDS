@@ -47,16 +47,13 @@ EntityImpl::set_enabled()
 bool
 EntityImpl::is_enabled() const
 {
-#ifdef ACE_HAS_CPP11
-  return this->enabled_;
-#else
-  return this->enabled_.value();
-#endif
+  return enabled_;
 }
 
 DDS::StatusCondition_ptr
 EntityImpl::get_statuscondition()
 {
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, 0);
   return DDS::StatusCondition::_duplicate(status_condition_);
 }
 
@@ -91,15 +88,12 @@ EntityImpl::set_deleted(bool state)
 bool
 EntityImpl::get_deleted() const
 {
-#ifdef ACE_HAS_CPP11
-  return this->entity_deleted_;
-#else
-  return this->entity_deleted_.value();
-#endif
+  return entity_deleted_;
 }
 
 Observer_rch EntityImpl::get_observer(Observer::Event e)
 {
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, Observer_rch());
   return (observer_ && (events_ & e)) ? observer_ :
          parent() ? parent()->get_observer(e) : Observer_rch();
 }
@@ -107,8 +101,14 @@ Observer_rch EntityImpl::get_observer(Observer::Event e)
 void
 EntityImpl::notify_status_condition()
 {
-  StatusConditionImpl* sci =
-    dynamic_cast<StatusConditionImpl*>(status_condition_.in());
+  DDS::StatusCondition_var sc_var;
+  {
+    ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+
+    sc_var = DDS::StatusCondition::_duplicate(status_condition_);
+  }
+
+  StatusConditionImpl* sci = dynamic_cast<StatusConditionImpl*>(sc_var.in());
   if (sci) {
     sci->signal_all();
   } else {
@@ -134,12 +134,13 @@ EntityImpl::transport_config() const
 
 void EntityImpl::set_observer(Observer_rch observer, Observer::Event e)
 {
+  ACE_GUARD(ACE_Thread_Mutex, g, lock_);
   observer_ = observer;
   events_ = e;
 }
 
 DDS::InstanceHandle_t EntityImpl::get_entity_instance_handle(const GUID_t& id,
-                                                             DomainParticipantImpl* participant)
+                                                             const RcHandle<DomainParticipantImpl>& participant)
 {
   ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, DDS::HANDLE_NIL);
 
@@ -151,7 +152,7 @@ DDS::InstanceHandle_t EntityImpl::get_entity_instance_handle(const GUID_t& id,
     return DDS::HANDLE_NIL;
   }
 
-  participant_for_instance_handle_ = *participant;
+  participant_for_instance_handle_ = participant;
   return instance_handle_ = participant->assign_handle(id);
 }
 

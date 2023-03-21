@@ -5,11 +5,24 @@
 * See: http://www.opendds.org/license.html
 */
 
+#define QT_NO_DEPRECATED_WARNINGS
+
+// Tell GCC to ignore implicitly declared copy methods as long as
+// Qt is not compliant.
+#ifdef __GNUC__
+#  pragma GCC diagnostic push
+#  pragma GCC diagnostic ignored "-Wdeprecated-copy"
+#endif
+
 #include <QtGui/QtGui>
 #include <QtGui/QPixmap>
 #include <QtWidgets/QScrollBar>
 #include <QtWidgets/QGraphicsScene>
 #include <QtWidgets/QFileDialog>
+
+#ifdef __GNUC__
+#  pragma GCC diagnostic pop
+#endif
 
 #include <sstream>
 #include "Viewer.h"

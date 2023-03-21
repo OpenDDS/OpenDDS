@@ -7,6 +7,7 @@
 #define DATAREADER_LISTENER_IMPL
 
 #include <dds/DCPS/LocalObject.h>
+#include <dds/DCPS/GuardCondition.h>
 
 #include <dds/DdsDcpsSubscriptionC.h>
 
@@ -59,14 +60,20 @@ public:
 
   bool is_valid() const;
 
+  void set_expected_reads(size_t expected);
+
+  void set_guard_condition(DDS::GuardCondition_var gc);
+
 private:
   typedef std::set<CORBA::ULong> Counts;
 
   DDS::DataReader_var reader_;
+  size_t expected_reads_;
   long num_reads_;
   Counts counts_;
   bool valid_;
   const bool reliable_;
+  DDS::GuardCondition_var gc_;
 };
 
 #endif /* DATAREADER_LISTENER_IMPL  */

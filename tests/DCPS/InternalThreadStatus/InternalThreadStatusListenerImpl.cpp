@@ -9,14 +9,15 @@
 
 #include <dds/DCPS/ReactorTask.h>
 
-#include <dds/DdsDcpsCoreTypeSupportImpl.h>
+#include <dds/OpenddsDcpsExtTypeSupportImpl.h>
 
 #include <ace/streams.h>
 
 // Implementation skeleton constructor
-InternalThreadStatusListenerImpl::InternalThreadStatusListenerImpl(
-  const OpenDDS::DCPS::String& id)
+InternalThreadStatusListenerImpl::InternalThreadStatusListenerImpl(const OpenDDS::DCPS::String& id,
+                                                                   DistributedConditionSet_rch dcs)
 : id_(id)
+, dcs_(dcs)
 , count_(0)
 , disposes_(0)
 {
@@ -47,17 +48,16 @@ void InternalThreadStatusListenerImpl::on_data_available(DDS::DataReader_ptr rea
     std::cout << "== " << id_ << " Thread Info ==" << std::endl;
 
     if (si.valid_data) {
-      OpenDDS::DCPS::RepoId guid;
-      std::memcpy(&guid, &thread_info.participant_guid, sizeof(guid));
-      std::cout << " guid: " << guid << std::endl;
+      std::cout << " util: " << thread_info.utilization << std::endl;
       ++count_;
     } else if (si.instance_state & DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE) {
       std::cout << " DISPOSE" << std::endl;
       ++disposes_;
+      dcs_->post(id_, DISPOSE_RECEIVED);
     }
 
     std::cout
-      << "  tid: " << thread_info.thread_id << std::endl
+      << "  tid: " << thread_info.thread_id << "\n"
       << " time: " << si.source_timestamp.sec << std::endl;
   }
 }

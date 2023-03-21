@@ -56,7 +56,9 @@ sender (void *arg)
     ACE_OS::sleep(sleep_time);
   }
 
-  cli_dgram.send (&data, 0, server_addr);
+  if (cli_dgram.send (&data, 0, server_addr) == -1) {
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) %p\n"), ACE_TEXT("cli_dgram.send")));
+  }
 
   return 0;
 }
@@ -203,36 +205,40 @@ int parse_args(int argc, ACE_TCHAR ** argv)
 
 int ACE_TMAIN (int argc, ACE_TCHAR ** argv)
 {
+  try {
 
-  if (parse_args(argc, argv) == 0) {
+    if (parse_args(argc, argv) == 0) {
 
-    if (server_port) {
-      echo_server(server_port);
-    }
-    else {
-
-      ACE_SOCK_Dgram cli_dgram;
-
-      if (cli_dgram.open (ACE_Addr::sap_any, server_addr.get_type ()) == -1) {
-        ACE_ERROR((LM_ERROR,
-                   ACE_TEXT("(%P|%t) %p\n"),
-                   ACE_TEXT("cli_dgram.open")));
+      if (server_port) {
+        echo_server(server_port);
       }
+      else {
 
-        if (ACE_Thread_Manager::instance ()->spawn
-            (ACE_THR_FUNC (sender),
-            (void *) &cli_dgram,
-            THR_NEW_LWP | THR_DETACHED) == -1) {
-          ACE_ERROR_RETURN ((LM_ERROR,
-                             ACE_TEXT("(%P|%t) %p\n"),
-                             ACE_TEXT("thread create failed")),
-                             1);
+        ACE_SOCK_Dgram cli_dgram;
+
+        if (cli_dgram.open (ACE_Addr::sap_any, server_addr.get_type ()) == -1) {
+          ACE_ERROR((LM_ERROR,
+                     ACE_TEXT("(%P|%t) %p\n"),
+                     ACE_TEXT("cli_dgram.open")));
         }
 
-      receiver(cli_dgram);
-      cli_dgram.close();
+          if (ACE_Thread_Manager::instance ()->spawn
+              (ACE_THR_FUNC (sender),
+              (void *) &cli_dgram,
+              THR_NEW_LWP | THR_DETACHED) == -1) {
+            ACE_ERROR_RETURN ((LM_ERROR,
+                               ACE_TEXT("(%P|%t) %p\n"),
+                               ACE_TEXT("thread create failed")),
+                               1);
+          }
+
+        receiver(cli_dgram);
+        cli_dgram.close();
+      }
+      return 0;
     }
-    return 0;
+  } catch (...) {
+    ACE_ERROR((LM_ERROR, "Unknown Exception Caught"));
   }
 
   return 1;

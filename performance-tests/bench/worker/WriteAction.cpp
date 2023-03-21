@@ -6,16 +6,20 @@
 namespace Bench {
 
 WriteAction::WriteAction(ACE_Proactor& proactor)
- : proactor_(proactor)
- , started_(false)
- , stopped_(false)
- , manual_rescheduling_(false)
- , write_period_(1, 0)
- , last_scheduled_time_(0, 0)
- , max_count_(0)
- , new_key_count_(0)
- , new_key_probability_(0)
- , final_wait_for_ack_{DDS::DURATION_INFINITE_SEC, DDS::DURATION_INFINITE_NSEC}
+: proactor_(proactor)
+, started_(false)
+, stopped_(false)
+, manual_rescheduling_(false)
+, write_period_(1, 0)
+, last_scheduled_time_(0, 0)
+, max_count_(0)
+, new_key_count_(0)
+, new_key_probability_(0)
+, instance_(0)
+, filter_class_start_value_(0)
+, filter_class_stop_value_(0)
+, filter_class_increment_(0)
+, final_wait_for_ack_{DDS::DURATION_INFINITE_SEC, DDS::DURATION_INFINITE_NSEC}
 {
 }
 

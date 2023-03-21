@@ -4,6 +4,8 @@
 #define WRITER_H
 
 #include <dds/DdsDcpsPublicationC.h>
+#include <dds/DCPS/Atomic.h>
+
 #include <ace/Task.h>
 
 namespace Test {
@@ -51,7 +53,7 @@ class Writer : public ACE_Task_Base {
     bool verbose_;
 
     /// Completion indicator.
-    bool done_;
+    OpenDDS::DCPS::Atomic<bool> done_;
 
     /// Count of messages sent by this publication.
     int messages_;

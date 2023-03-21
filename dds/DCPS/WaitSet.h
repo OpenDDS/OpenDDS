@@ -50,7 +50,7 @@ typedef WaitSet* WaitSet_ptr;
 typedef TAO_Objref_Var_T<WaitSet> WaitSet_var;
 
 class OpenDDS_Dcps_Export WaitSet
-  : public OpenDDS::DCPS::LocalObject<WaitSetInterf> {
+  : public virtual OpenDDS::DCPS::LocalObject<WaitSetInterf> {
 public:
   typedef WaitSet_ptr _ptr_type;
   typedef WaitSet_var _var_type;
@@ -89,12 +89,7 @@ private:
   typedef OpenDDS::DCPS::ConditionVariable<ACE_Recursive_Thread_Mutex> ConditionVariableType;
   ConditionVariableType cond_;
 
-#ifdef ACE_HAS_CPP11
-  std::atomic<bool> waiting_;
-#else
-  ACE_Atomic_Op<ACE_Thread_Mutex, bool> waiting_;
-#endif
-
+  bool waiting_;
   ConditionSet attached_conditions_;
   ConditionSet signaled_conditions_;
 };

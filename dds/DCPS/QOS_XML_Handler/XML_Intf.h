@@ -97,7 +97,12 @@ namespace DCPS {
     * Get profile by name
     */
     ::dds::qosProfile getProfile(const ACE_TCHAR * profileName) {
-      return *get_profile (profileName);
+      ::dds::qosProfile* profile = get_profile (profileName);
+      if (profile) {
+        return *profile;
+      } else {
+        return ::dds::qosProfile(ACE_TEXT(""));
+      }
     }
 
     /**

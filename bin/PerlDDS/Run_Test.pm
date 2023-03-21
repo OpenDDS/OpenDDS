@@ -5,14 +5,13 @@
 use strict;
 use warnings;
 
+package PerlDDS;
+
 use PerlACE::Run_Test;
 use PerlDDS::Process;
 use PerlDDS::ProcessFactory;
 use Cwd;
 use POSIX qw(strftime);
-
-package PerlDDS;
-
 use File::Spec::Functions qw(catfile catdir);
 
 sub is_executable {
@@ -93,25 +92,35 @@ sub formatted_time {
 sub wait_kill {
   my $process = shift;
   my $wait_time = shift;
-  my $desc = shift;
+  my $name = shift;
   my $verbose = shift;
   $verbose = 0 if !defined($verbose);
+  my $opts = shift;
 
   my $ret_status = 0;
   my $start_time = formatted_time();
   if ($verbose) {
-    print STDERR "$start_time: waiting $wait_time seconds for $desc before "
+    print STDERR "$start_time: waiting $wait_time seconds for $name before "
       . "calling kill\n";
   }
-  my $result = $process->WaitKill($wait_time);
+
+  my $result = $process->WaitKill($wait_time, $opts);
+
   my $time_str = formatted_time();
   if ($result != 0) {
-      my $ext = ($verbose ? "" : "(started at $start_time)");
-      print STDERR "$time_str: ERROR: $desc returned $result $ext\n";
-      $ret_status = 1;
+    my $ext = ($verbose ? "(started waiting for termination at $start_time)" : "");
+    if ($result == -1) {
+      print STDERR "$time_str: ERROR: $name timedout $ext\n";
+    } elsif ($result == 255) {
+      print STDERR "$time_str: ERROR: $name terminated with a signal $ext\n";
+    } else {
+      print STDERR "$time_str: ERROR: $name finished and returned $result $ext\n";
+    }
+    $ret_status = 1;
   } elsif ($verbose) {
-    print STDERR "$time_str: shut down $desc\n";
+    print STDERR "$time_str: shut down $name\n";
   }
+
   return $ret_status;
 }
 
@@ -173,13 +182,6 @@ sub report_errors_in_file {
               if ($report) {
                   $error = 1;
               }
-          }
-
-          if (!$report && $line =~ /wait_(?:messages_)?pending /) {  # REMOVE LATER
-              if ($line =~ s/ERROR/ERR0R/g) {
-                  $line .= "(TestFramework ignored this as a problem)";
-              }
-              print STDERR "$file: $line";
           }
       }
       close FILE;
@@ -366,7 +368,7 @@ sub new {
   my $self = bless {}, $class;
 
   $self->{processes} = {};
-  $self->{flags} = {};
+  $self->{_flags} = {};
   $self->{status} = 0;
   $self->{log_files} = [];
   $self->{temp_files} = [];
@@ -384,12 +386,11 @@ sub new {
   $self->{transport} = "";
   $self->{ini} = "";
   $self->{report_errors_in_log_file} = 1;
+  $self->{dcps_log_level} = $ENV{DCPSLogLevel} // "";
   $self->{dcps_debug_level} = 1;
   $self->{dcps_transport_debug_level} = 1;
-  $self->{dcps_security_debug} = defined $ENV{DCPSSecurityDebug} ?
-    $ENV{DCPSSecurityDebug} : "";
-  $self->{dcps_security_debug_level} = defined $ENV{DCPSSecurityDebugLevel} ?
-    $ENV{DCPSSecurityDebugLevel} : "";
+  $self->{dcps_security_debug} = $ENV{DCPSSecurityDebug} // "";
+  $self->{dcps_security_debug_level} = $ENV{DCPSSecurityDebugLevel} // "";
   $self->{add_orb_log_file} = 1;
   $self->{wait_after_first_proc} = 25;
   $self->{finished} = 0;
@@ -406,15 +407,10 @@ sub new {
         " pair with an empty name.\n";
       $flag_name = "<No Name Provided>";
     }
-    my $flag_value;
-    if (defined($3)) {
-      $flag_value = $3;
-    }
-    else {
-      $flag_value = "<FLAG>";
-    }
-    $self->_info("TestFramework storing \"$flag_name\"=\"$flag_value\"\n");
-    $self->{flags}->{$flag_name} = $flag_value;
+    my $flag_value = $3;
+    my $flag_value_str = defined($flag_value) ? "\"$flag_value\"" : 'undef';
+    $self->_info("TestFramework storing \"$flag_name\"=$flag_value_str\n");
+    $self->{_flags}->{$flag_name} = $flag_value;
     my $transport = _is_transport($arg);
     if ($transport && $self->{transport} eq "") {
       $self->{transport} = $arg;
@@ -432,7 +428,7 @@ sub new {
       $self->_time_info("Test starting ($left arguments remaining)\n");
     } elsif (lc($arg) eq "nobits") {
       $self->{nobits} = 1;
-    } elsif ($flag_name eq "ini") {
+    } elsif ($flag_name eq "ini" && defined($flag_value)) {
       $flag_value =~ /^([^_]+)_([^_]+).ini/;
       if ($1 eq "inforepo") {
         $self->{discovery} = "info_repo";
@@ -444,7 +440,7 @@ sub new {
     } elsif (!$transport) {
       # also keep a copy to delete so we can see which parameters
       # are unused (above args are already "used")
-      $self->{flags}->{unused}->{$flag_name} = $flag_value;
+      $self->{_flags}->{unused}->{$flag_name} = $flag_value;
     }
     ++$index;
   }
@@ -457,10 +453,11 @@ sub wait_kill {
   my $name = shift;
   my $wait_time = shift;
   my $verbose = shift;
+  my $opts = shift;
 
   my $process = $self->{processes}->{process}->{$name}->{process};
 
-  return PerlDDS::wait_kill($process, $wait_time, $name, $verbose);
+  return PerlDDS::wait_kill($process, $wait_time, $name, $verbose, $opts);
 }
 
 sub default_transport {
@@ -534,54 +531,21 @@ sub finish {
 
 sub flag {
   my $self = shift;
-  my $flag_passed = shift;
+  my $flag_name = shift;
+  my $flag_value_ref = shift;
 
-  my $present = defined($self->{flags}->{$flag_passed});
-  $self->_info("TestFramework::flag $flag_passed present=$present\n");
+  my $present = exists($self->{_flags}->{$flag_name});
+  $self->_info("TestFramework::flag $flag_name present=$present\n");
   if ($present) {
-    if ($self->{flags}->{$flag_passed} ne "<FLAG>") {
-      print STDERR "WARNING: you are treating a name-value pair as a flag, should call value_flag. \"$flag_passed=" .
-        $self->{flags}->{$flag_passed} . "\"\n";
+    my $flag_value = $self->{_flags}->{$flag_name};
+    if (defined($flag_value_ref)) {
+      die("Flag \"$flag_name\" is missing required value!") if (!defined($flag_value));
+      ${$flag_value_ref} = $flag_value;
     }
-    delete($self->{flags}->{unused}->{$flag_passed});
-  }
-  return $present;
-}
-
-sub value_flag {
-  my $self = shift;
-  my $flag_passed = shift;
-
-  my $present = defined($self->{flags}->{$flag_passed});
-  $self->_info("TestFramework::value_flag $flag_passed present=$present\n");
-  if ($present) {
-    if ($self->{flags}->{$flag_passed} eq "<FLAG>") {
-      # this is indicating if a flag with a value is present, but this is just a flag
-      return 0;
+    else {
+      die("Flag \"$flag_name\" was passed a value, but it isn't used") if (defined($flag_value));
     }
-    delete($self->{flags}->{unused}->{$flag_passed});
-  }
-  return $present;
-}
-
-sub get_value_flag {
-  my $self = shift;
-  my $flag_passed = shift;
-
-  my $present = defined($self->{flags}->{$flag_passed});
-  $self->_info("TestFramework::get_value_flag $flag_passed present=$present\n");
-  if ($present) {
-    if ($self->{flags}->{$flag_passed} eq "<FLAG>") {
-      print STDERR "ERROR: $flag_passed does not have a value, should not call get_value_flag\n";
-    }
-    if (defined($self->{flags}->{unused}->{$flag_passed})) {
-      print STDERR "WARNING: calling get_value_flag($flag_passed) without first verifying that "
-        . "it is present with value_flag($flag_passed)\n";
-      delete($self->{flags}->{unused}->{$flag_passed});
-    }
-  }
-  else {
-    print STDERR "ERROR: $flag_passed is not present, should have called value_flag before calling get_value_flag\n";
+    delete($self->{_flags}->{unused}->{$flag_name});
   }
   return $present;
 }
@@ -592,7 +556,7 @@ sub report_unused_flags {
   $exit_if_unidentified = 0 if !defined($exit_if_unidentified);
 
   $self->_info("TestFramework::report_unused_flags\n");
-  my @unused = keys(%{$self->{flags}->{unused}});
+  my @unused = keys(%{$self->{_flags}->{unused}});
   if (scalar(@unused) == 0) {
     return;
   }
@@ -615,7 +579,74 @@ sub report_unused_flags {
 sub unused_flags {
   my $self = shift;
 
-  return keys(%{$self->{flags}->{unused}});
+  return keys(%{$self->{_flags}->{unused}});
+}
+
+sub _process_common {
+  my $self = shift;
+  my $name = shift;
+  my $params = shift;
+  my $debug_logging = 1;
+
+  if ($$params !~ /-DCPSLogLevel / && $self->{dcps_log_level}) {
+    $$params .= " -DCPSLogLevel $self->{dcps_log_level}";
+    $debug_logging = $self->{dcps_log_level} eq "debug";
+  }
+
+  if ($debug_logging) {
+    if (defined $ENV{DCPSDebugLevel}) {
+      $self->{dcps_debug_level} = $ENV{DCPSDebugLevel};
+    }
+    if ($$params !~ /-DCPSDebugLevel / && $self->{dcps_debug_level}) {
+      my $debug = " -DCPSDebugLevel $self->{dcps_debug_level}";
+      if ($$params !~ /-ORBVerboseLogging /) {
+        $debug .= " -ORBVerboseLogging 1";
+      }
+      $$params .= $debug;
+    }
+
+    if (defined $ENV{DCPSTransportDebugLevel}) {
+      $self->{dcps_transport_debug_level} = $ENV{DCPSTransportDebugLevel};
+    }
+    if ($$params !~ /-DCPSTransportDebugLevel / &&
+        $self->{dcps_transport_debug_level}) {
+      $$params .= " -DCPSTransportDebugLevel $self->{dcps_transport_debug_level}";
+    }
+
+    if ($$params !~ /-DCPSSecurityDebug(?:Level)? /) {
+      if ($self->{dcps_security_debug}) {
+        $$params .=  " -DCPSSecurityDebug $self->{dcps_security_debug}";
+      }
+      elsif ($self->{dcps_security_debug_level}) {
+        $$params .=  " -DCPSSecurityDebugLevel $self->{dcps_security_debug_level}";
+      }
+    }
+  }
+
+  if ($self->{add_orb_log_file} && $$params !~ /-ORBLogFile ([^ ]+)/) {
+    my $file_name = "$name";
+
+    # account for "blah #2"
+    $file_name =~ s/ /_/g;
+    $file_name =~ s/#//g;
+
+    $$params .= " -ORBLogFile $file_name.log";
+  }
+
+  if ($self->{add_transport_config} &&
+      $self->{transport} ne "" &&
+      $$params !~ /-DCPSConfigFile /) {
+    $self->_info("TestFramework::process appending "
+      . "\"-DCPSConfigFile <transport>.ini\" to process's parameters. Set "
+      . "<TestFramework>->{add_transport_config} = 0 to prevent this.\n");
+    my $ini_file = $self->_ini_file($name);
+    $$params .= " -DCPSConfigFile $ini_file " if $ini_file ne "";
+  }
+
+  if ($self->{nobits}) {
+    my $no_bits = " -DCPSBit 0 ";
+    $$params .= $no_bits;
+  }
 }
 
 sub process {
@@ -638,65 +669,30 @@ sub process {
     return;
   }
 
-  if (defined $ENV{DCPSDebugLevel}) {
-    $self->{dcps_debug_level} = $ENV{DCPSDebugLevel};
-  }
-
-  if ($params !~ /-DCPSDebugLevel / && $self->{dcps_debug_level}) {
-    my $debug = " -DCPSDebugLevel $self->{dcps_debug_level}";
-    if ($params !~ /-ORBVerboseLogging /) {
-      $debug .= " -ORBVerboseLogging 1";
-    }
-    $params .= $debug;
-  }
-
-  if (defined $ENV{DCPSTransportDebugLevel}) {
-    $self->{dcps_transport_debug_level} = $ENV{DCPSTransportDebugLevel};
-  }
-
-  if ($params !~ /-DCPSTransportDebugLevel / &&
-      $self->{dcps_transport_debug_level}) {
-    my $debug = " -DCPSTransportDebugLevel $self->{dcps_transport_debug_level}";
-    $params .= $debug;
-  }
-
-  if ($params !~ /-DCPSSecurityDebug(?:Level)? /) {
-    if ($self->{dcps_security_debug}) {
-      $params .=  " -DCPSSecurityDebug $self->{dcps_security_debug}";
-    }
-    elsif ($self->{dcps_security_debug_level}) {
-      $params .=  " -DCPSSecurityDebugLevel $self->{dcps_security_debug_level}";
-    }
-  }
-
-  if ($self->{add_orb_log_file} && $params !~ /-ORBLogFile ([^ ]+)/) {
-    my $file_name = "$name";
-
-    # account for "blah #2"
-    $file_name =~ s/ /_/g;
-    $file_name =~ s/#//g;
-
-    my $debug = " -ORBLogFile $file_name.log";
-    $params .= $debug;
-  }
-
-  if ($self->{add_transport_config} &&
-      $self->{transport} ne "" &&
-      $params !~ /-DCPSConfigFile /) {
-    $self->_info("TestFramework::process appending "
-      . "\"-DCPSConfigFile <transport>.ini\" to process's parameters. Set "
-      . "<TestFramework>->{add_transport_config} = 0 to prevent this.\n");
-    my $ini_file = $self->_ini_file($name);
-    $params .= " -DCPSConfigFile $ini_file " if $ini_file ne "";
-  }
-
-  if ($self->{nobits}) {
-    my $no_bits = " -DCPSBit 0 ";
-    $params .= $no_bits;
-  }
+  $self->_process_common($name, \$params);
 
   $self->{processes}->{process}->{$name}->{process} =
     $self->_create_process($executable, $params);
+}
+
+sub java_process {
+  my $self = shift;
+  my $name = shift;
+  my $main_class = shift;
+  my $params = shift;
+  my $jars = shift;
+  my $vmargs = shift;
+
+  if (defined($self->{processes}->{process}->{$name})) {
+    print STDERR "ERROR: already created process named \"$name\"\n";
+    $self->{status} = -1;
+    return;
+  }
+
+  $self->_process_common($name, \$params);
+
+  $self->{processes}->{process}->{$name}->{process} =
+    $self->_create_java_process($main_class, $params, $jars, $vmargs);
 }
 
 sub _getpid {
@@ -807,13 +803,15 @@ sub start_process {
 
   print $process->CommandLine() . "\n";
   $process->Spawn();
-  print "$name PID: " . _getpid($process) . "\n";
+  my $start_time = PerlDDS::formatted_time();
+  print "$name PID: " . _getpid($process) . " started at $start_time\n";
 }
 
 sub stop_process {
   my $self = shift;
   my $timed_wait = shift;
   my $name = shift;
+  my $opts = shift;
 
   if (!defined($self->{processes}->{process}->{$name})) {
     print STDERR "ERROR: no process with name=$name\n";
@@ -830,11 +828,11 @@ sub stop_process {
     }
   }
 
-  my $kill_status =
-    PerlDDS::wait_kill($self->{processes}->{process}->{$name}->{process},
-                       $timed_wait,
-                       $name,
-                       $self->{test_verbose});
+  my $kill_status = PerlDDS::wait_kill($self->{processes}->{process}->{$name}->{process},
+                                       $timed_wait,
+                                       $name,
+                                       $self->{test_verbose},
+                                       $opts);
   $self->{status} |= $kill_status;
   delete($self->{processes}->{process}->{$name});
   return !$kill_status;
@@ -1054,6 +1052,30 @@ sub _create_process {
   return $proc;
 }
 
+sub _create_java_process {
+  my $self = shift;
+  my $main_class = shift;
+  my $params = shift;
+  my $jars = shift;
+  my $vmargs = shift;
+
+  $self->_info("TestFramework::_create_java_process creating executable="
+    . "w/ params=$params jars=" . join(':', @{$jars}) . " vmargs=$vmargs\n");
+  if ($params !~ /-DCPSPendingTimeout /) {
+    my $flag = " -DCPSPendingTimeout 3 ";
+    my $possible_would_be = ($self->{add_pending_timeout} ? "" : "would be ");
+    my $prevent_or_allow = ($self->{add_pending_timeout} ? "prevent" : "allow");
+    $self->_info("TestFramework::_create_process " . $possible_would_be
+      . "adding \"$flag\" to parameters. To " . $prevent_or_allow
+      . " this set " . "<TestFramework>->{add_pending_timeout} = "
+      . ($self->{add_pending_timeout} ? "0" : "1") . "\n");
+    $params .= $flag if $self->{add_pending_timeout};
+  }
+  my $proc = PerlDDS::create_java_process($main_class, $params, $jars, $vmargs);
+  $self->_track_log_files($params, $proc);
+  return $proc;
+}
+
 sub _alternate_transport {
   my $transport = shift;
   if ($transport =~ s/multicast/mcast/ ||
@@ -1136,6 +1158,17 @@ sub _info {
 }
 
 sub _write_tcp_ini {
+}
+
+sub generate_governance {
+    my $self = shift;
+    my $key = shift;
+    my @parts = split /_/, $key;
+    my $output = shift;
+
+    my $process = PerlACE::Process->new("$ENV{DDS_ROOT}/tests/security/attributes/gov_gen", "-aup $parts[0] -ejac $parts[1] -dpk $parts[2] -lpk $parts[3] -rpk $parts[4] -o $output -cert $ENV{DDS_ROOT}/tests/security/certs/permissions/permissions_ca_cert.pem -key $ENV{DDS_ROOT}/tests/security/certs/permissions/permissions_ca_private_key.pem");
+    $process->Spawn();
+    $process->WaitKill(5);
 }
 
 1;

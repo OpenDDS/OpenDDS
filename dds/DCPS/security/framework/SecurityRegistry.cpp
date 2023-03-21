@@ -189,7 +189,7 @@ SecurityRegistry::create_config(const OPENDDS_STRING& config_name)
                                    crypto_plugin_inst->create_crypto_key_exchange(),
                                    crypto_plugin_inst->create_crypto_key_factory(),
                                    crypto_plugin_inst->create_crypto_transform(),
-                                   static_cast<Utility*>(0),
+                                   DCPS::RcHandle<Utility>(),
 #endif
                                    entry->get_properties());
 
@@ -260,7 +260,7 @@ SecurityRegistry::default_config() const
     CryptoKeyFactory_var d;
     CryptoTransform_var e;
     default_config_ = DCPS::make_rch<SecurityConfig>("NoPlugins", a, b, c, d, e,
-                                                     static_cast<Utility*>(0),
+                                                     DCPS::RcHandle<Utility>(),
                                                      ConfigPropertyList());
   }
 #endif
@@ -299,32 +299,6 @@ SecurityRegistry::builtin_config(const SecurityConfig_rch& config)
 {
   GuardType guard(lock_);
   builtin_config_ = config;
-}
-
-void
-SecurityRegistry::bind_config(const OPENDDS_STRING& name,
-                              DDS::DomainParticipant_ptr domain_participant)
-{
-  bind_config(get_config(name), domain_participant);
-}
-
-void
-SecurityRegistry::bind_config(const SecurityConfig_rch& config,
-                              DDS::DomainParticipant_ptr domain_participant)
-{
-
-#if defined(OPENDDS_SECURITY)
-  DCPS::DomainParticipantImpl* const dpi =
-    dynamic_cast<DCPS::DomainParticipantImpl*>(domain_participant);
-  if (dpi) {
-    dpi->set_security_config(config);
-  }
-
-#else
-  ACE_UNUSED_ARG(config);
-  ACE_UNUSED_ARG(domain_participant);
-#endif
-
 }
 
 int

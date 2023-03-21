@@ -1,7 +1,9 @@
 #include <gtest/gtest.h>
 
-#include "dds/DCPS/MemoryPool.h"
-#include "ace/Log_Msg.h"
+#include <dds/DCPS/MemoryPool.h>
+#include <dds/DCPS/SafetyProfileStreams.h>
+
+#include <ace/Log_Msg.h>
 
 #include <string.h>
 #include <iostream>
@@ -989,17 +991,15 @@ private:
     if (log) {
       printf("Pool ptr %zx end %zx\n", (size_t)pool.pool_ptr_,
              (size_t)pool_end);
-     }
+    }
 
     // Check all allocs in positional order and not overlapping
     alloc = reinterpret_cast<AllocHeader*>(pool.pool_ptr_);
     while (pool.includes(alloc)) {
       if (log) {
 
-        int smlr_index = -1;
-        int lrgr_index = -1;
-        char lrgr_buff[32];
-        char smlr_buff[32];
+        String smaller = "[  ]";
+        String larger = "[  ]";
 
         FreeHeader* free_header = alloc->is_free() ?
               reinterpret_cast<FreeHeader*>(alloc) : NULL;
@@ -1007,13 +1007,11 @@ private:
           FreeMap::const_iterator found;
           found = free_map.find(free_header->smaller_free(pool.pool_ptr_));
           if (found != free_map.end()) {
-            smlr_index = found->second;
-            sprintf(smlr_buff, "[%2d]", smlr_index);
+            smaller = "[" + to_dds_string(found->second) + "]";
           }
           found = free_map.find(free_header->larger_free(pool.pool_ptr_));
           if (found != free_map.end()) {
-            lrgr_index = found->second;
-            sprintf(lrgr_buff, "[%2d]", lrgr_index);
+            larger = "[" + to_dds_string(found->second) + "]";
           }
         }
         printf(
@@ -1023,8 +1021,8 @@ private:
             (alloc == pool.largest_free_ ? "FREE!" : "free ")  : "     ",
           (size_t)alloc,
           (size_t)alloc->ptr(),
-          lrgr_index >= 0 ? lrgr_buff : "[  ]",
-          smlr_index >= 0 ? smlr_buff : "[  ]",
+          larger.c_str(),
+          smaller.c_str(),
           alloc->size(),
           alloc->prev_size()
           );
@@ -1305,12 +1303,15 @@ private:
   // Helpers
   void setup(FreeIndex& index, size_t free_size = 1024) {
     memset(pool_ptr_, 0, sizeof(pool_ptr_));
-    next_alloc_ = pool_ptr_;
+    next_alloc_ = pool_ptr_ + (sizeof(AllocHeader*) - reinterpret_cast<size_t>(pool_ptr_) % sizeof(AllocHeader*));
+    EXPECT_EQ(reinterpret_cast<size_t>(next_alloc_) % sizeof (AllocHeader*), 0u);
     largest_free_ = reinterpret_cast<FreeHeader*>(pool_ptr_);
     if (free_size) {
       largest_free_->init_free_block(static_cast<unsigned int>(free_size + sizeof(AllocHeader)));
       index.init(largest_free_);
+      EXPECT_EQ(free_size % sizeof (AllocHeader*), 0u);
       next_alloc_ += free_size + (sizeof(AllocHeader)*2) + 32;
+      EXPECT_EQ(reinterpret_cast<size_t>(next_alloc_) % sizeof (AllocHeader*), 0u);
     }
   }
 
@@ -1318,7 +1319,8 @@ private:
     FreeHeader* block = reinterpret_cast<FreeHeader*>(next_alloc_);
     block->set_size(size);
     block->set_free();
-    next_alloc_ += size + (sizeof(AllocHeader)*2) + 32;
+    next_alloc_ += size + (sizeof(AllocHeader*) - static_cast<size_t>(size) % sizeof(AllocHeader*));
+    EXPECT_EQ(reinterpret_cast<size_t>(next_alloc_) % sizeof (AllocHeader*), 0u);
     list_add(block);
     return block;
   }

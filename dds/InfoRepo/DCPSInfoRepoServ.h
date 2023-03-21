@@ -23,7 +23,7 @@
 #include "ace/Condition_Thread_Mutex.h"
 
 class OpenDDS_DCPSInfoRepoServ_Export InfoRepo
-  : public ShutdownInterface, public ACE_Event_Handler {
+  : public ShutdownInterface, public virtual ACE_Event_Handler {
 public:
   struct InitError {
     InitError(const char* msg)
@@ -69,8 +69,8 @@ private:
   bool servant_finalized_;
 
   /// Repository Federation behaviors
-  OpenDDS::Federator::ManagerImpl federator_;
   OpenDDS::Federator::Config      federatorConfig_;
+  OpenDDS::Federator::ManagerImpl federator_;
 
   PortableServer::Servant_var<TAO_DDS_DCPSInfo_i> info_servant_;
 

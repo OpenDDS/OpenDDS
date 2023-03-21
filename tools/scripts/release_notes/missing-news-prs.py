@@ -30,7 +30,7 @@ with open(sys.argv[1]) as f:
     next(rows) # Skip Row
     for row in rows:
         # print(' '.join(['[{}]'.format(c) for c in row]))
-        if row[4] in ('yes', 'maybe'):
+        if any([x in row[4].lower() for x in ('yes', 'maybe')]):
             m = pr_re.search(row[1])
             if not m:
               sys.exit('Could not find PR number in ' + repr(row[1]))
@@ -38,7 +38,7 @@ with open(sys.argv[1]) as f:
             prs.append((m.group(1), row[2], row[8]))
 
 # Print Missing PRs
-for pr in reversed(prs):
+for pr in prs:
     num = pr[0]
     if num not in news_prs:
         what = pr[1]

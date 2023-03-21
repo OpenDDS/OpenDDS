@@ -4,6 +4,7 @@
 #include "DataReaderImpl_T.h"
 
 #include <dds/DdsDcpsCoreTypeSupportImpl.h>
+#include <dds/OpenddsDcpsExtTypeSupportImpl.h>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 

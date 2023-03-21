@@ -14,6 +14,7 @@
 #include "TcpConnection.h"
 #include "TcpConnection_rch.h"
 
+#include <dds/DCPS/Atomic.h>
 #include <dds/DCPS/ReactorTask_rch.h>
 #include <dds/DCPS/transport/framework/PriorityKey.h>
 #include <dds/DCPS/transport/framework/TransportImpl.h>
@@ -49,13 +50,13 @@ class OpenDDS_Tcp_Export TcpTransport
 {
 public:
 
-  explicit TcpTransport(TcpInst& inst);
+  explicit TcpTransport(const TcpInst_rch& inst);
   virtual ~TcpTransport();
 
   int fresh_link(TcpConnection_rch connection);
 
   virtual void unbind_link(DataLink* link);
-  TcpInst& config() const;
+  TcpInst_rch config() const;
 
 private:
   virtual AcceptConnectResult connect_datalink(const RemoteTransport& remote,
@@ -67,11 +68,13 @@ private:
                                               const TransportClient_rch& client);
 
   virtual void stop_accepting_or_connecting(const TransportClient_wrch& client,
-                                            const RepoId& remote_id,
+                                            const GUID_t& remote_id,
                                             bool disassociate,
                                             bool association_failed);
 
-  virtual bool configure_i(TcpInst& config);
+  virtual bool configure_i(const TcpInst_rch& config);
+
+  virtual void client_stop(const GUID_t& local_id);
 
   virtual void shutdown_i();
 
@@ -162,6 +165,7 @@ private:
   /// This protects the connections_ and the pending_connections_
   /// data members.
   LockType connections_lock_;
+  Atomic<size_t> last_link_;
 };
 
 } // namespace DCPS

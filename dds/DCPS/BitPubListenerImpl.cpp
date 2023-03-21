@@ -54,15 +54,14 @@ void BitPubListenerImpl::on_data_available(DDS::DataReader_ptr reader)
       if (status == DDS::RETCODE_OK) {
         if (si.valid_data) {
 #ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
-          const PublicationId pub_id = bit_key_to_repo_id(data.key);
+          const GUID_t pub_id = bit_key_to_guid(data.key);
           CORBA::Long const ownership_strength = data.ownership_strength.value;
           this->partipant_->update_ownership_strength(pub_id, ownership_strength);
           if (DCPS_debug_level > 4) {
-            GuidConverter writer_converter(pub_id);
             ACE_DEBUG((LM_DEBUG,
               ACE_TEXT("(%P|%t) BitPubListenerImpl::on_data_available: %X ")
               ACE_TEXT("reset ownership strength %d for writer %C.\n"),
-              this, ownership_strength, OPENDDS_STRING(writer_converter).c_str()));
+              this, ownership_strength, LogGuid(pub_id).c_str()));
           }
 #endif
         }

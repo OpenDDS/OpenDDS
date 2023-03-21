@@ -141,7 +141,7 @@ On UNIX-like systems it will be named `OpenDDS_Dissector.so`.
 See [Wireshark User's Guide Page on Plugins Folders](
 https://www.wireshark.org/docs/wsug_html_chunked/ChPluginFolders.html)
 for details on where Wireshark looks for plugins. This page, if working,
-will be accurate for the latest stable version, but maybe not previous
+will be accurate for the latest stable version, but maybe not for previous
 versions.
 
 <a name="usage"></a>
@@ -306,8 +306,8 @@ To create an ITL file from your IDL files:
 
 Type information is exported using Intermediate Type Language (ITL).
 For more information, see
-  [https://github.com/objectcomputing/OpenDDS/tree/master/tools/IntermediateTypeLang](
-  https://github.com/objectcomputing/OpenDDS/tree/master/tools/IntermediateTypeLang)
+  [https://github.com/OpenDDS/OpenDDS/tree/master/tools/IntermediateTypeLang](
+  https://github.com/OpenDDS/OpenDDS/tree/master/tools/IntermediateTypeLang)
 
 <a name="sample-dissection-filtering"></a>
 ### Using Display Filters with Samples

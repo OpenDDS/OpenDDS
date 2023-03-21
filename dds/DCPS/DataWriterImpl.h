@@ -1,6 +1,4 @@
 /*
- *
- *
  * Distributed under the OpenDDS License.
  * See: http://www.opendds.org/license.html
  */
@@ -8,8 +6,8 @@
 #ifndef OPENDDS_DCPS_DATAWRITERIMPL_H
 #define OPENDDS_DCPS_DATAWRITERIMPL_H
 
-#include "dds/DdsDcpsDomainC.h"
-#include "dds/DdsDcpsTopicC.h"
+#include "Atomic.h"
+#include "Sample.h"
 #include "DataWriterCallbacks.h"
 #include "transport/framework/TransportSendListener.h"
 #include "transport/framework/TransportClient.h"
@@ -27,18 +25,20 @@
 #include "unique_ptr.h"
 #include "Message_Block_Ptr.h"
 #include "TimeTypes.h"
-
 #ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
-#include "FilterEvaluator.h"
+#  include "FilterEvaluator.h"
 #endif
 
-#include "ace/Event_Handler.h"
-#include "ace/OS_NS_sys_time.h"
+#include <dds/DdsDcpsDomainC.h>
+#include <dds/DdsDcpsTopicC.h>
+
+#include <ace/Event_Handler.h>
+#include <ace/OS_NS_sys_time.h>
 
 #include <memory>
 
-#if !defined (ACE_LACKS_PRAGMA_ONCE)
-#pragma once
+#ifndef ACE_LACKS_PRAGMA_ONCE
+#  pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
 class DDS_TEST;
@@ -57,37 +57,39 @@ struct AssociationData;
 class LivenessTimer;
 
 /**
-* @class DataWriterImpl
-*
-* @brief Implements the OpenDDS::DCPS::DataWriterRemote interfaces and
-*        DDS::DataWriter interfaces.
-*
-* See the DDS specification, OMG formal/2015-04-10, for a description of
-* the interface this class is implementing.
-*
-* This class must be inherited by the type-specific datawriter which
-* is specific to the data-type associated with the topic.
-*
-* @note: This class is responsible for allocating memory for the
-*        header message block
-*        (MessageBlock + DataBlock + DataSampleHeader) and the
-*        DataSampleElement.
-*        The data-type datawriter is responsible for allocating
-*        memory for the sample data message block.
-*        (e.g. MessageBlock + DataBlock + Foo data). But it gives
-*        up ownership to this WriteDataContainer.
-*/
+ * @class DataWriterImpl
+ *
+ * @brief Implements the OpenDDS::DCPS::DataWriterRemote interfaces and
+ *        DDS::DataWriter interfaces.
+ *
+ * See the DDS specification, OMG formal/2015-04-10, for a description of
+ * the interface this class is implementing.
+ *
+ * This class must be inherited by the type-specific datawriter which
+ * is specific to the data-type associated with the topic.
+ *
+ * @note: This class is responsible for allocating memory for the
+ *        header message block
+ *        (MessageBlock + DataBlock + DataSampleHeader) and the
+ *        DataSampleElement.
+ *        The data-type datawriter is responsible for allocating
+ *        memory for the sample data message block.
+ *        (e.g. MessageBlock + DataBlock + Foo data). But it gives
+ *        up ownership to this WriteDataContainer.
+ */
 class OpenDDS_Dcps_Export DataWriterImpl
-  : public virtual LocalObject<DDS::DataWriter>,
-    public virtual DataWriterCallbacks,
-    public virtual EntityImpl,
-    public virtual TransportClient,
-    public virtual TransportSendListener {
+  : public virtual LocalObject<DDS::DataWriter>
+  , public virtual DataWriterCallbacks
+  , public virtual EntityImpl
+  , public virtual TransportClient
+  , public virtual TransportSendListener
+{
 public:
   friend class WriteDataContainer;
   friend class PublisherImpl;
 
-  typedef OPENDDS_MAP_CMP(RepoId, SequenceNumber, GUID_tKeyLessThan) RepoIdToSequenceMap;
+  typedef OPENDDS_MAP_CMP(GUID_t, SequenceNumber, GUID_tKeyLessThan) RepoIdToSequenceMap;
+  typedef Dynamic_Cached_Allocator_With_Overflow<ACE_Thread_Mutex> DataAllocator;
 
   struct AckToken {
     MonotonicTimePoint tstamp_;
@@ -104,11 +106,13 @@ public:
 
     ~AckToken() {}
 
-    MonotonicTimePoint deadline() const {
+    MonotonicTimePoint deadline() const
+    {
       return tstamp_ + TimeDuration(max_wait_);
     }
 
-    bool deadline_is_infinite() const {
+    bool deadline_is_infinite() const
+    {
       return max_wait_.sec == DDS::DURATION_INFINITE_SEC && max_wait_.nanosec == DDS::DURATION_INFINITE_NSEC;
     }
   };
@@ -116,6 +120,21 @@ public:
   DataWriterImpl();
 
   virtual ~DataWriterImpl();
+
+  void set_marshal_skip_serialize(bool value)
+  {
+    skip_serialize_ = value;
+  }
+
+  bool get_marshal_skip_serialize() const
+  {
+    return skip_serialize_;
+  }
+
+  DataAllocator* data_allocator() const
+  {
+    return data_allocator_.get();
+  }
 
   virtual DDS::InstanceHandle_t get_instance_handle();
 
@@ -172,22 +191,21 @@ public:
 
   virtual DDS::ReturnCode_t enable();
 
-  virtual void add_association(const RepoId& yourId,
+  virtual void add_association(const GUID_t& yourId,
                                const ReaderAssociation& reader,
                                bool active);
 
-  virtual void transport_assoc_done(int flags, const RepoId& remote_id);
+  virtual void transport_assoc_done(int flags, const GUID_t& remote_id);
 
   virtual void remove_associations(const ReaderIdSeq & readers,
                                    bool callback);
 
-  virtual void replay_durable_data_for(const RepoId& remote_sub_id);
+  virtual void replay_durable_data_for(const GUID_t& remote_sub_id);
 
   virtual void update_incompatible_qos(const IncompatibleQosStatus& status);
 
-  virtual void update_subscription_params(const RepoId& readerId,
+  virtual void update_subscription_params(const GUID_t& readerId,
                                           const DDS::StringSeq& params);
-
 
   /**
    * cleanup the DataWriter.
@@ -198,12 +216,12 @@ public:
    * Initialize the data members.
    */
   void init(
-    TopicImpl*                            topic_servant,
-    const DDS::DataWriterQos &            qos,
-    DDS::DataWriterListener_ptr           a_listener,
-    const DDS::StatusMask &               mask,
-    WeakRcHandle<OpenDDS::DCPS::DomainParticipantImpl> participant_servant,
-    OpenDDS::DCPS::PublisherImpl*         publisher_servant);
+    TopicImpl* topic_servant,
+    const DDS::DataWriterQos& qos,
+    DDS::DataWriterListener_ptr a_listener,
+    const DDS::StatusMask& mask,
+    WeakRcHandle<DomainParticipantImpl> participant_servant,
+    PublisherImpl* publisher_servant);
 
   void send_all_to_flush_control(ACE_Guard<ACE_Recursive_Thread_Mutex>& guard);
 
@@ -248,7 +266,7 @@ public:
    * sample and finally tell the transport to send the sample.
    * \param filter_out can either be null (if the writer can't
    *        or won't evaluate the filters), or a list of
-   *        associated reader RepoIds that should NOT get the
+   *        associated reader GUID_ts that should NOT get the
    *        data sample due to content filtering.
    */
   DDS::ReturnCode_t write(Message_Block_Ptr sample,
@@ -256,6 +274,12 @@ public:
                           const DDS::Time_t& source_timestamp,
                           GUIDSeq* filter_out,
                           const void* real_data);
+
+  DDS::ReturnCode_t write_sample(
+    const Sample& sample,
+    DDS::InstanceHandle_t handle,
+    const DDS::Time_t& source_timestamp,
+    GUIDSeq* filter_out);
 
   /**
    * Delegate to the WriteDataContainer to dispose all data
@@ -274,18 +298,20 @@ public:
   /**
    * Retrieve the unsent data from the WriteDataContainer.
    */
-   ACE_UINT64 get_unsent_data(SendStateDataSampleList& list) {
+  ACE_UINT64 get_unsent_data(SendStateDataSampleList& list)
+  {
     return data_container_->get_unsent_data(list);
   }
 
-  SendStateDataSampleList get_resend_data() {
+  SendStateDataSampleList get_resend_data()
+  {
     return data_container_->get_resend_data();
   }
 
   /**
    * Accessor of the repository id of the domain participant.
    */
-  RepoId get_dp_id();
+  GUID_t get_dp_id();
 
   /**
    * Delegate to WriteDataContainer to unregister all instances.
@@ -353,10 +379,8 @@ public:
   /**
    * Accessor of the WriterDataContainer's lock.
    */
-  // ciju: Seems this is no longer being used.
-  // Was wrong. Still required.
-  ACE_INLINE
-  ACE_Recursive_Thread_Mutex& get_lock() const {
+  ACE_Recursive_Thread_Mutex& get_lock() const
+  {
     return data_container_->lock_;
   }
 
@@ -381,17 +405,17 @@ public:
 
   void remove_all_associations();
 
-  virtual void register_for_reader(const RepoId& participant,
-                                   const RepoId& writerid,
-                                   const RepoId& readerid,
+  virtual void register_for_reader(const GUID_t& participant,
+                                   const GUID_t& writerid,
+                                   const GUID_t& readerid,
                                    const TransportLocatorSeq& locators,
                                    DiscoveryListener* listener);
 
-  virtual void unregister_for_reader(const RepoId& participant,
-                                     const RepoId& writerid,
-                                     const RepoId& readerid);
+  virtual void unregister_for_reader(const GUID_t& participant,
+                                     const GUID_t& writerid,
+                                     const GUID_t& readerid);
 
-  virtual void update_locators(const RepoId& remote,
+  virtual void update_locators(const GUID_t& remote,
                                const TransportLocatorSeq& locators);
 
   void notify_publication_disconnected(const ReaderIdSeq& subids);
@@ -399,8 +423,8 @@ public:
   void notify_publication_lost(const ReaderIdSeq& subids);
 
   /// Statistics counter.
-  int         data_dropped_count_;
-  int         data_delivered_count_;
+  Atomic<int> data_dropped_count_;
+  Atomic<int> data_delivered_count_;
 
   MessageTracker controlTracker;
 
@@ -448,7 +472,8 @@ public:
                   const DDS::StringSeq& expression_params) const;
 #endif
 
-  DataBlockLockPool::DataBlockLock* get_db_lock() {
+  DataBlockLockPool::DataBlockLock* get_db_lock()
+  {
     return db_lock_pool_->get_lock();
   }
 
@@ -458,19 +483,63 @@ public:
   PublicationInstance_rch get_handle_instance(
     DDS::InstanceHandle_t handle);
 
-  virtual ICE::Endpoint* get_ice_endpoint();
+  virtual WeakRcHandle<ICE::Endpoint> get_ice_endpoint();
 
-  const RepoId& get_repo_id() const {
-    ACE_Guard<ACE_Recursive_Thread_Mutex> guard(get_lock());
+  GUID_t get_guid() const
+  {
+    ACE_Guard<ACE_Recursive_Thread_Mutex> guard(lock_);
     return publication_id_;
   }
 
-  SequenceNumber get_max_sn() const {
-    ACE_Guard<ACE_Recursive_Thread_Mutex> guard(get_lock());
+  SequenceNumber get_max_sn() const
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(sn_lock_);
     return sequence_number_;
   }
 
+  const ValueDispatcher* get_value_dispatcher() const
+  {
+    return dynamic_cast<const ValueDispatcher*>(type_support_);
+  }
+
+  DDS::ReturnCode_t get_key_value(Sample_rch& sample, DDS::InstanceHandle_t handle);
+  DDS::InstanceHandle_t lookup_instance(const Sample& sample);
+  DDS::InstanceHandle_t register_instance_w_timestamp(
+    const Sample& sample, const DDS::Time_t& timestamp);
+  DDS::ReturnCode_t unregister_instance_w_timestamp(
+    const Sample& sample,
+    DDS::InstanceHandle_t instance_handle,
+    const DDS::Time_t& timestamp);
+  DDS::ReturnCode_t dispose_w_timestamp(
+    const Sample& sample,
+    DDS::InstanceHandle_t instance_handle,
+    const DDS::Time_t& source_timestamp);
+
 protected:
+
+  void check_and_set_repo_id(const GUID_t& id)
+  {
+    ACE_Guard<ACE_Recursive_Thread_Mutex> guard(lock_);
+    if (GUID_UNKNOWN == publication_id_) {
+      publication_id_ = id;
+    }
+  }
+
+  SequenceNumber get_next_sn()
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(sn_lock_);
+    return get_next_sn_i();
+  }
+
+  SequenceNumber get_next_sn_i()
+  {
+    if (sequence_number_ == SequenceNumber::SEQUENCENUMBER_UNKNOWN()) {
+      sequence_number_ = SequenceNumber();
+    } else {
+      ++sequence_number_;
+    }
+    return sequence_number_;
+  }
 
   // Perform cast to get extended version of listener (otherwise nil)
   DataWriterListener_ptr get_ext_listener();
@@ -479,32 +548,32 @@ protected:
 
   void prepare_to_delete();
 
-  // type specific DataWriter's part of enable.
-  virtual DDS::ReturnCode_t enable_specific() = 0;
-
-  virtual const ValueWriterDispatcher* get_value_writer_dispatcher() const { return 0; }
-
   /**
-   * Setup CDR serialization options in type-specific DataWrtier.
+   * Setup CDR serialization options.
    */
-  virtual DDS::ReturnCode_t setup_serialization() = 0;
+  DDS::ReturnCode_t setup_serialization();
+
+  ACE_Message_Block* serialize_sample(const Sample& sample);
 
   /// The number of chunks for the cached allocator.
-  size_t                     n_chunks_;
+  size_t n_chunks_;
 
   /// The multiplier for allocators affected by associations
-  size_t                     association_chunk_multiplier_;
+  size_t association_chunk_multiplier_;
 
 
   /// The type name of associated topic.
-  CORBA::String_var               type_name_;
+  CORBA::String_var type_name_;
 
   /// The qos policy list of this datawriter.
-  DDS::DataWriterQos              qos_;
+  DDS::DataWriterQos qos_;
+  /// The qos policy passed in by the user.
+  /// Differs from qos_ because representation has been interpreted.
+  DDS::DataWriterQos passed_qos_;
 
   /// The participant servant which creats the publisher that
   /// creates this datawriter.
-  WeakRcHandle<DomainParticipantImpl>          participant_servant_;
+  WeakRcHandle<DomainParticipantImpl> participant_servant_;
 
   //This lock should be used to protect access to reader_info_
   ACE_Thread_Mutex reader_info_lock_;
@@ -524,7 +593,7 @@ protected:
     ~ReaderInfo();
   };
 
-  typedef OPENDDS_MAP_CMP(RepoId, ReaderInfo, GUID_tKeyLessThan) RepoIdToReaderInfoMap;
+  typedef OPENDDS_MAP_CMP(GUID_t, ReaderInfo, GUID_tKeyLessThan) RepoIdToReaderInfoMap;
   RepoIdToReaderInfoMap reader_info_;
 
   struct AckCustomization {
@@ -535,6 +604,84 @@ protected:
 
   virtual SendControlStatus send_control(const DataSampleHeader& header,
                                          Message_Block_Ptr msg);
+
+  bool skip_serialize_;
+
+  /**
+   * Used to hold the encoding and get the buffer sizes needed to store the
+   * results of the encoding.
+   */
+  class EncodingMode {
+  public:
+    EncodingMode()
+    : valid_(false)
+    , header_size_(0)
+    {
+    }
+
+    EncodingMode(const TypeSupportImpl* ts, Encoding::Kind kind, bool swap_the_bytes)
+    : valid_(true)
+    , encoding_(kind, swap_the_bytes)
+    , header_size_(encoding_.is_encapsulated() ? EncapsulationHeader::serialized_size : 0)
+    , bound_(ts->serialized_size_bound(encoding_))
+    , key_only_bound_(ts->key_only_serialized_size_bound(encoding_))
+    {
+    }
+
+    bool valid() const
+    {
+      return valid_;
+    }
+
+    const Encoding& encoding() const
+    {
+      return encoding_;
+    }
+
+    bool bound() const
+    {
+      return bound_;
+    }
+
+    SerializedSizeBound buffer_size_bound() const
+    {
+      return bound_ ? SerializedSizeBound(header_size_ + bound_.get()) : SerializedSizeBound();
+    }
+
+    size_t buffer_size(const Sample& sample) const
+    {
+      const SerializedSizeBound bound = sample.key_only() ? key_only_bound_ : bound_;
+      return header_size_ + (bound ? bound.get() : sample.serialized_size(encoding_));
+    }
+
+  private:
+    bool valid_;
+    Encoding encoding_;
+    size_t header_size_;
+    SerializedSizeBound bound_;
+    SerializedSizeBound key_only_bound_;
+  } encoding_mode_;
+
+  TypeSupportImpl* get_type_support() const
+  {
+    return type_support_;
+  }
+
+  DDS::ReturnCode_t instance_must_exist(
+    const char* method_name,
+    const Sample& sample,
+    DDS::InstanceHandle_t& instance_handle,
+    bool remove = false);
+
+  DDS::ReturnCode_t get_or_create_instance_handle(
+    DDS::InstanceHandle_t& handle,
+    const Sample& sample,
+    const DDS::Time_t& source_timestamp);
+
+  DDS::ReturnCode_t write_w_timestamp(
+    const Sample& sample,
+    DDS::InstanceHandle_t handle,
+    const DDS::Time_t& source_timestamp);
 
 private:
 
@@ -564,21 +711,23 @@ private:
   void lookup_instance_handles(const ReaderIdSeq& ids,
                                DDS::InstanceHandleSeq& hdls);
 
-  DDS::Subscriber_var get_builtin_subscriber() const;
+  RcHandle<BitSubscriber> get_builtin_subscriber_proxy() const;
 
-  DDS::DomainId_t domain_id() const {
+  DDS::DomainId_t domain_id() const
+  {
     return this->domain_id_;
   }
 
-  CORBA::Long get_priority_value(const AssociationData&) const {
+  CORBA::Long get_priority_value(const AssociationData&) const
+  {
     return this->qos_.transport_priority.value;
   }
 
-#if defined(OPENDDS_SECURITY)
+#ifdef OPENDDS_SECURITY
   DDS::Security::ParticipantCryptoHandle get_crypto_handle() const;
 #endif
 
-  void association_complete_i(const RepoId& remote_id);
+  void association_complete_i(const GUID_t& remote_id);
 
   void return_handle(DDS::InstanceHandle_t handle);
 
@@ -586,54 +735,56 @@ private:
 
 
   // Data block local pool for this data writer.
-  unique_ptr<DataBlockLockPool>  db_lock_pool_;
+  unique_ptr<DataBlockLockPool> db_lock_pool_;
 
   /// The name of associated topic.
-  CORBA::String_var               topic_name_;
+  CORBA::String_var topic_name_;
   /// The associated topic repository id.
-  RepoId                          topic_id_;
+  GUID_t topic_id_;
   /// The topic servant.
-  TopicDescriptionPtr<TopicImpl>                 topic_servant_;
+  TopicDescriptionPtr<TopicImpl> topic_servant_;
+  TypeSupportImpl* type_support_;
 
   /// Mutex to protect listener info
-  ACE_Thread_Mutex                listener_mutex_;
+  ACE_Thread_Mutex listener_mutex_;
   /// The StatusKind bit mask indicates which status condition change
   /// can be notified by the listener of this entity.
-  DDS::StatusMask                 listener_mask_;
+  DDS::StatusMask listener_mask_;
   /// Used to notify the entity for relevant events.
-  DDS::DataWriterListener_var     listener_;
+  DDS::DataWriterListener_var listener_;
   /// The domain id.
-  DDS::DomainId_t                 domain_id_;
-  RepoId                          dp_id_;
+  DDS::DomainId_t domain_id_;
+  GUID_t dp_id_;
   /// The publisher servant which creates this datawriter.
-  WeakRcHandle<PublisherImpl>     publisher_servant_;
+  WeakRcHandle<PublisherImpl> publisher_servant_;
   /// The repository id of this datawriter/publication.
-  PublicationId                   publication_id_;
+  GUID_t publication_id_;
   /// The sequence number unique in DataWriter scope.
-  SequenceNumber                  sequence_number_;
+  SequenceNumber sequence_number_;
+  /// Mutex for sequence_number_
+  mutable ACE_Thread_Mutex sn_lock_;
   /// Flag indicating DataWriter current belongs to
   /// a coherent change set.
-  bool                            coherent_;
+  bool coherent_;
   /// The number of samples belonging to the current
   /// coherent change set.
-  ACE_UINT32                      coherent_samples_;
+  ACE_UINT32 coherent_samples_;
   /// The sample data container.
-  RcHandle<WriteDataContainer>    data_container_;
+  RcHandle<WriteDataContainer> data_container_;
   /// The lock to protect the activate subscriptions
   /// and status changes.
   mutable ACE_Recursive_Thread_Mutex lock_;
 
-  typedef OPENDDS_MAP_CMP(RepoId, DDS::InstanceHandle_t, GUID_tKeyLessThan) RepoIdToHandleMap;
-
-  RepoIdToHandleMap               id_to_handle_map_;
+  typedef OPENDDS_MAP_CMP(GUID_t, DDS::InstanceHandle_t, GUID_tKeyLessThan) RepoIdToHandleMap;
+  RepoIdToHandleMap id_to_handle_map_;
 
   RepoIdSet readers_;
 
   /// Status conditions.
-  DDS::LivelinessLostStatus           liveliness_lost_status_ ;
-  DDS::OfferedDeadlineMissedStatus    offered_deadline_missed_status_ ;
-  DDS::OfferedIncompatibleQosStatus   offered_incompatible_qos_status_ ;
-  DDS::PublicationMatchedStatus       publication_match_status_ ;
+  DDS::LivelinessLostStatus liveliness_lost_status_ ;
+  DDS::OfferedDeadlineMissedStatus offered_deadline_missed_status_ ;
+  DDS::OfferedIncompatibleQosStatus offered_incompatible_qos_status_ ;
+  DDS::PublicationMatchedStatus publication_match_status_ ;
 
   /// True if the writer failed to actively signal its liveliness within
   /// its offered liveliness period.
@@ -646,17 +797,18 @@ private:
    *       and get_publication_reconnecting_status() methods.
    */
   // Statistics of the lost publications due to lost connection.
-  // PublicationLostStatus               publication_lost_status_;
+  // PublicationLostStatus publication_lost_status_;
   // Statistics of the publications that associates with a
   // reconnecting datalink.
-  // PublicationReconnectingStatus       publication_reconnecting_status_;
+  // PublicationReconnectingStatus publication_reconnecting_status_;
 
   /// The message block allocator.
-  unique_ptr<MessageBlockAllocator>     mb_allocator_;
+  unique_ptr<MessageBlockAllocator> mb_allocator_;
   /// The data block allocator.
-  unique_ptr<DataBlockAllocator>        db_allocator_;
+  unique_ptr<DataBlockAllocator> db_allocator_;
   /// The header data allocator.
   unique_ptr<DataSampleHeaderAllocator> header_allocator_;
+  unique_ptr<DataAllocator> data_allocator_;
 
   /// The orb's reactor to be used to register the liveliness
   /// timer.
@@ -676,7 +828,7 @@ private:
   /// The cached available data while suspending and associated transaction ids.
   ACE_UINT64 min_suspended_transaction_id_;
   ACE_UINT64 max_suspended_transaction_id_;
-  SendStateDataSampleList             available_data_list_;
+  SendStateDataSampleList available_data_list_;
 
   /// Monitor object for this entity
   unique_ptr<Monitor> monitor_;
@@ -690,7 +842,7 @@ private:
   bool need_sequence_repair();
   bool need_sequence_repair_i() const;
 
-  DDS::ReturnCode_t send_end_historic_samples(const RepoId& readerId);
+  DDS::ReturnCode_t send_end_historic_samples(const GUID_t& readerId);
   DDS::ReturnCode_t send_request_ack();
 
   bool liveliness_asserted_;
@@ -701,12 +853,27 @@ private:
   RcHandle<LivenessTimer> liveness_timer_;
 
   MonotonicTimePoint wait_pending_deadline_;
+
+  typedef OPENDDS_MAP(DDS::InstanceHandle_t, Sample_rch) InstanceHandlesToValues;
+  InstanceHandlesToValues instance_handles_to_values_;
+  typedef OPENDDS_MAP_CMP(Sample_rch, DDS::InstanceHandle_t, SampleRchCmp) InstanceValuesToHandles;
+  InstanceValuesToHandles instance_values_to_handles_;
+
+  bool insert_instance(DDS::InstanceHandle_t handle, Sample_rch& sample);
+  InstanceValuesToHandles::iterator find_instance(const Sample& sample);
+
+#ifdef OPENDDS_SECURITY
+protected:
+  Security::SecurityConfig_rch security_config_;
+  DDS::Security::PermissionsHandle participant_permissions_handle_;
+  DDS::DynamicType_var dynamic_type_;
+#endif
 };
 
 typedef RcHandle<DataWriterImpl> DataWriterImpl_rch;
 
 
-class LivenessTimer : public RcEventHandler
+class LivenessTimer : public virtual RcEventHandler
 {
 public:
   LivenessTimer(DataWriterImpl& writer)

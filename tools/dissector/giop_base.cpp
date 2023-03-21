@@ -1,25 +1,22 @@
 /*
- *
- *
  * Distributed under the OpenDDS License.
  * See: http://www.opendds.org/license.html
  */
 
 #include "giop_base.h"
+
 #include "ws_common.h"
 
+#include <dds/DCPS/GuidConverter.h>
 
-#include "dds/DCPS/GuidConverter.h"
-
-#include "ace/Basic_Types.h"
-#include "ace/CDR_Base.h"
-#include "ace/Message_Block.h"
-#include "ace/Log_Msg.h"
-#include "ace/OS_NS_string.h"
-#include "ace/ACE.h"
+#include <ace/Basic_Types.h>
+#include <ace/CDR_Base.h>
+#include <ace/Message_Block.h>
+#include <ace/Log_Msg.h>
+#include <ace/OS_NS_string.h>
+#include <ace/ACE.h>
 
 #include <cstring>
-
 #include <algorithm>
 #include <iomanip>
 #include <sstream>
@@ -154,18 +151,17 @@ namespace OpenDDS
       proto_tree_add_uint (tree, fieldId, tvb_, ofs, len, domain_id);
     }
 
-    const RepoId *
+    const GUID_t *
     GIOP_Base::add_repo_id (int fieldId, proto_tree *subtree)
     {
       proto_tree *tree = subtree != 0 ? subtree : this->tree_;
-      guint len = 16; // size of RepoId
-      const RepoId *rid =
-        reinterpret_cast<const RepoId *>(tvb_get_ptr(tvb_, *offset_, len));
-      GuidConverter converter (*rid);
+      guint len = 16; // size of GUID_t
+      const GUID_t *rid =
+        reinterpret_cast<const GUID_t *>(tvb_get_ptr(tvb_, *offset_, len));
       proto_tree_add_bytes_format_value
         ( tree, fieldId, tvb_, *offset_, len,
           reinterpret_cast<const guint8*>(rid),
-          "%s", std::string(converter).c_str() );
+          "%s", LogGuid(*rid).c_str() );
       *offset_ += len;
       return rid;
     }

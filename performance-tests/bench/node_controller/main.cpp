@@ -17,6 +17,9 @@
 #include <ace/Process_Manager.h>
 #include <ace/OS_NS_stdlib.h>
 #include <ace/OS_NS_fcntl.h>
+#ifdef ACE_WIN32
+#include <ace/WFMO_Reactor.h>
+#endif
 
 #include <dds/DdsDcpsInfrastructureC.h>
 #include <dds/DdsDcpsPublicationC.h>
@@ -46,13 +49,15 @@ using Bench::create_temp_dir;
 using Bench::TestController::AllocatedScenarioDataReader;
 using Bench::TestController::AllocatedScenarioDataReader_var;
 
+using ProcessManagerPtr = std::shared_ptr<ACE_Process_Manager>;
+
 std::string bench_root;
 std::string temp_dir;
 std::string output_dir;
 
 int run_cycle(
   const std::string& name,
-  ACE_Process_Manager& process_manager,
+  ProcessManagerPtr process_manager,
   DDS::DomainParticipant_var participant,
   StatusDataWriter_var status_writer_impl,
   AllocatedScenarioDataReader_var allocated_scenario_reader_impl,
@@ -70,6 +75,23 @@ std::string create_config(const std::string& file_base_name, const char* content
   return filename;
 }
 
+void read_file(std::ifstream& ifs, ::TAO::String_Manager& str)
+{
+  ifs.seekg(0, ios::end);
+  const std::ifstream::pos_type end_pos = ifs.tellg();
+  ifs.seekg(0, ios::beg);
+  const std::ifstream::pos_type beg_pos = ifs.tellg();
+
+  const auto file_length = end_pos - beg_pos;
+
+  std::vector<char> temp(static_cast<std::vector<char>::size_type>(file_length + 1));
+  ifs.read(temp.data(), file_length);
+  temp[static_cast<std::vector<char>::size_type>(file_length)] = '\0';
+
+  const char* ptr = temp.data();
+  str = ptr;
+}
+
 class SpawnedProcess {
 public:
   SpawnedProcess() = delete;
@@ -81,6 +103,8 @@ public:
   SpawnedProcess(const std::string& node_name, const NodeId& node_id, const SpawnedProcessConfig& config)
   : node_name_(node_name), node_id_(node_id)
   , spawned_process_id_(config.spawned_process_id)
+  , original_config_name_(config.config_name.in())
+  , start_time_({0, 0})
   {
     std::stringstream ss;
     ss << 'n' << node_id_ << 'w' << spawned_process_id_;
@@ -90,6 +114,7 @@ public:
     log_filename_ = join_path(output_dir, file_base_name_ + "_log.txt");
     executable_name_ = config.executable.in();
     spawned_process_command_ = config.command.in();
+    ignore_errors_ = config.ignore_errors;
   }
 
   ~SpawnedProcess()
@@ -120,22 +145,21 @@ public:
     report.failed = (pid_ == ACE_INVALID_PID || exit_status_ != 0);
     report.details = "";
     report.log = "";
+    report.pid = static_cast<CORBA::Long>(pid_);
 
     if (!report.failed) {
       std::ifstream report_file(report_filename_);
       if (report_file.good()) {
-        std::string str((std::istreambuf_iterator<char>(report_file)), std::istreambuf_iterator<char>());
-        report.details = str.c_str();
+        read_file(report_file, report.details);
       }
     }
     std::ifstream log_file(log_filename_);
     if (log_file.good()) {
-      std::string str((std::istreambuf_iterator<char>(log_file)), std::istreambuf_iterator<char>());
-      report.log = str.c_str();
+      read_file(log_file, report.log);
     }
   }
 
-  std::shared_ptr<ACE_Process_Options> get_proc_opts() const
+  std::shared_ptr<ACE_Process_Options> get_proc_opts(ACE_HANDLE& log_handle) const
   {
     std::shared_ptr<ACE_Process_Options> proc_opts = std::make_shared<ACE_Process_Options>();
     std::stringstream ss;
@@ -159,21 +183,32 @@ public:
       if (command.find("%log%") != std::string::npos) {
         string_replace(command, "%log%", log_filename_);
       } else {
-        ACE_HANDLE log_handle = ACE_OS::open(log_filename_.c_str(), O_WRONLY | O_CREAT);
-        proc_opts->set_handles(ACE_INVALID_HANDLE, log_handle, log_handle);
+        log_handle = ACE_OS::open(log_filename_.c_str(), O_WRONLY | O_CREAT);
+        if (log_handle != ACE_INVALID_HANDLE) {
+          proc_opts->set_handles(ACE_STDIN, log_handle, log_handle);
+        }
       }
       ss << command << std::flush;
     }
-    const std::string command = ss.str();
-    std::cerr << command + "\n" << std::flush;
-    proc_opts->command_line("%s", command.c_str());
+    command_line_ = ss.str();
+    proc_opts->command_line("%s", command_line_.c_str());
     return proc_opts;
   }
 
   void set_pid(pid_t pid) noexcept
   {
+    start_time_ = Builder::get_sys_time();
     pid_ = pid;
     running_ = true;
+  }
+
+  void log_process_creation()
+  {
+    std::stringstream ss;
+    ss << Bench::iso8601() << ": Node " << node_id_ << " (" << node_name_ << ") starting process " << pid_ << ":\n";
+    ss << " - original config: " << original_config_name_ << "\n";
+    ss << " - command line: " << command_line_ << "\n\n" << std::flush;
+    std::cerr << ss.str() << std::flush;
   }
 
   pid_t get_pid() noexcept
@@ -187,9 +222,9 @@ public:
 // It's possible we need to do something similar on other platforms and we will
 // probably want to expand this to do the correct thing on windows / android / macos
 #ifdef ACE_LINUX
-    exit_status_ = exit_code ? exit_code : return_code;
+    exit_status_ = ignore_errors_ ? 0 : (exit_code ? exit_code : return_code);
 #else
-    exit_status_ = return_code;
+    exit_status_ = ignore_errors_ ? 0 : return_code;
     ACE_UNUSED_ARG(exit_code);
 #endif
     running_ = false;
@@ -213,19 +248,23 @@ private:
   std::string log_filename_;
   std::string executable_name_;
   std::string spawned_process_command_;
+  std::string original_config_name_;
+  mutable std::string command_line_;
+  Builder::TimeStamp start_time_;
+  bool ignore_errors_;
 };
 
 using SpawnedProcessPtr = std::shared_ptr<SpawnedProcess>;
 using ProcessStatsCollectorPtr = std::shared_ptr<ProcessStatsCollector>;
 
-class SpawnedProcessManager : public ACE_Event_Handler {
+class SpawnedProcessManager : public virtual ACE_Event_Handler {
 public:
 
-  explicit SpawnedProcessManager(const std::string& node_name, const NodeId& node_id, ACE_Process_Manager& process_manager)
+  explicit SpawnedProcessManager(const std::string& node_name, const NodeId& node_id, ProcessManagerPtr process_manager)
   : node_name_(node_name), node_id_(node_id)
   , process_manager_(process_manager)
   {
-    process_manager.register_handler(this);
+    process_manager->register_handler(this);
     ACE_Reactor::instance()->register_handler(SIGINT, this);
   }
 
@@ -239,7 +278,7 @@ public:
   {
     try {
       ACE_Reactor::instance()->remove_handler(SIGINT, nullptr);
-      process_manager_.register_handler(nullptr);
+      process_manager_->register_handler(nullptr);
     }
     catch (...) {
     }
@@ -253,6 +292,12 @@ public:
   bool add_spawned_process(const SpawnedProcessConfig& config)
   {
     std::lock_guard<std::mutex> guard(mutex_);
+#ifdef ACE_WIN32
+    if (all_spawned_processes_.size() >= ACE_WFMO_Reactor::DEFAULT_SIZE) {
+      std::cerr << "ACE_WFMO_Reactor can't handle waiting (for signals) from more than " << ACE_WFMO_Reactor::DEFAULT_SIZE << " objects" << std::endl;
+      return true;
+    }
+#endif
     if (all_spawned_processes_.count(config.spawned_process_id)) {
       std::cerr << "Received the same spawned process id twice: " << config.spawned_process_id << std::endl;
       return true;
@@ -273,18 +318,27 @@ public:
   // Must hold lock_
   void kill_all_the_spawned_processes()
   {
-    for (auto spawned_process_i : all_spawned_processes_) {
+    ProcessManagerPtr process_manager;
+    std::map<SpawnedProcessId, SpawnedProcessPtr> all_spawned_processes;
+
+    {
+      std::lock_guard<std::mutex> guard(mutex_);
+      process_manager = process_manager_;
+      all_spawned_processes = all_spawned_processes_;
+    }
+
+    for (auto& spawned_process_i : all_spawned_processes) {
       auto& spawned_process = spawned_process_i.second;
       if (spawned_process->running()) {
 #ifndef ACE_WIN32
-        if (process_manager_.terminate(spawned_process->get_pid(), SIGABRT)) {
-          if (process_manager_.wait(spawned_process->get_pid(), ACE_Time_Value(0, ACE_ONE_SECOND_IN_USECS / 10))) {
+        if (process_manager->terminate(spawned_process->get_pid(), SIGABRT)) {
+          if (process_manager->wait(spawned_process->get_pid(), ACE_Time_Value(0, ACE_ONE_SECOND_IN_USECS / 10))) {
             continue;
           }
         }
 #endif
-        if (process_manager_.terminate(spawned_process->get_pid())) {
-          process_manager_.wait(spawned_process->get_pid(), ACE_Time_Value(0, ACE_ONE_SECOND_IN_USECS / 10));
+        if (process_manager->terminate(spawned_process->get_pid())) {
+          process_manager->wait(spawned_process->get_pid(), ACE_Time_Value(0, ACE_ONE_SECOND_IN_USECS / 10));
         }
       }
     }
@@ -296,18 +350,32 @@ public:
     // Spawn Processes
     {
       std::lock_guard<std::mutex> guard(mutex_);
+      std::vector<std::shared_ptr<ACE_Process_Options>> spawned_proc_opts;
+      spawned_proc_opts.reserve(all_spawned_processes_.size());
+      std::vector<ACE_HANDLE> log_handles;
+      log_handles.reserve(all_spawned_processes_.size());
+      for (auto& spawned_process_i : all_spawned_processes_) {
+        auto& spawned_process = spawned_process_i.second;
+        log_handles.push_back(ACE_INVALID_HANDLE);
+        spawned_proc_opts.push_back(spawned_process->get_proc_opts(log_handles.back()));
+      }
+      int index = 0;
       for (auto spawned_process_i : all_spawned_processes_) {
         auto& spawned_process = spawned_process_i.second;
-        std::shared_ptr<ACE_Process_Options> proc_opts = spawned_process->get_proc_opts();
-        pid_t pid = process_manager_.spawn(*proc_opts);
+        const pid_t pid = process_manager_->spawn(*spawned_proc_opts[index]);
+        if (log_handles[index] != ACE_INVALID_HANDLE) {
+          ACE_OS::close(log_handles[index]);
+        }
         if (pid != ACE_INVALID_PID) {
           spawned_process->set_pid(pid);
           pid_to_spawned_process_id_[pid] = spawned_process->id();
           spawned_process_process_stat_collectors_[pid] = std::make_shared<ProcessStatsCollector>(pid);
+          spawned_process->log_process_creation();
         } else {
           std::cerr << "Failed to run spawned process " << spawned_process->id() << std::endl;
           spawned_process_is_finished(spawned_process);
         }
+        ++index;
       }
     }
 
@@ -322,7 +390,7 @@ public:
     report.node_name = node_name_.c_str();
     report.node_id = node_id_;
 
-    bool running = true;
+    std::atomic<bool> running(true);
 
     std::thread stat_collector([&](){
 
@@ -333,7 +401,7 @@ public:
         double mem_sum = 0.0;
         double virtual_mem_sum = 0.0;
 
-        for (auto it = spawned_process_process_stat_collectors_.begin(); it != spawned_process_process_stat_collectors_.end(); it++) {
+        for (auto it = spawned_process_process_stat_collectors_.cbegin(); it != spawned_process_process_stat_collectors_.cend(); it++) {
           cpu_sum += it->second->get_cpu_usage();
           mem_sum += it->second->get_mem_usage();
           virtual_mem_sum += it->second->get_virtual_mem_usage();
@@ -348,6 +416,37 @@ public:
     bool spawned_processes_killed = false;
     while (running) {
       // Check to see if any spawned_processs are done and write their reports
+      std::list<exited_process> exited_processes;
+      {
+        std::lock_guard<std::mutex> guard(exited_processes_mutex_);
+        exited_processes.swap(exited_processes_);
+      }
+
+      for (auto& ep : exited_processes) {
+        std::stringstream ss_out, ss_err;
+        {
+          std::lock_guard<std::mutex> guard(mutex_);
+          const auto i = pid_to_spawned_process_id_.find(ep.pid);
+          if (i != pid_to_spawned_process_id_.end()) {
+            auto& spawned_process = all_spawned_processes_[i->second];
+            ss_out << Bench::iso8601() << ": SpawnedProcessManager::handle_exit() - Handling exit of process " << ep.pid << " with exit code " << ep.exit_code << std::endl;
+            spawned_process->set_exit_status(ep.return_value, ep.exit_code);
+            remaining_spawned_process_count_--;
+            finished_spawned_processes_.push_back(spawned_process);
+            cv_.notify_all();
+          } else {
+            ss_err << Bench::iso8601() << ": SpawnedProcessManager::handle_exit() received an unknown PID: " << ep.pid << std::endl;
+          }
+        }
+
+        if (!ss_out.str().empty()) {
+          std::cout << ss_out.str() << std::flush;
+        }
+        if (!ss_err.str().empty()) {
+          std::cerr << ss_err.str() << std::flush;
+        }
+      }
+
       std::list<SpawnedProcessPtr> finished_spawned_processes;
       {
         std::lock_guard<std::mutex> guard(mutex_);
@@ -363,18 +462,17 @@ public:
       bool kill_spawned_processes = false;
       if (!spawned_processes_killed && scenario_timedout_.load()) {
         std::stringstream ss;
-        ss << "Scenario timed out at " << Bench::iso8601() << ", Killing Spawned Processes..." << std::endl;
+        ss << Bench::iso8601() << ": Scenario timed out, Killing Spawned Processes..." << std::endl;
         std::cerr << ss.str() << std::flush;
         kill_spawned_processes = true;
       }
       if (!spawned_processes_killed && sigint_.load()) {
         std::stringstream ss;
-        ss << "Interrupted, Killing Spawned Processes..." << std::endl;
+        ss << Bench::iso8601() << ": Interrupted, Killing Spawned Processes..." << std::endl;
         std::cerr << ss.str() << std::flush;
         kill_spawned_processes = true;
       }
       if (!spawned_processes_killed && kill_spawned_processes) {
-        std::lock_guard<std::mutex> guard(mutex_);
         kill_all_the_spawned_processes(); // Bwahahaha
         spawned_processes_killed = true;
       }
@@ -387,9 +485,15 @@ public:
     ACE_Reactor::instance()->cancel_timer(this);
 
     stat_collector.join();
-    cpu_block->finalize();
-    mem_block->finalize();
-    virtual_mem_block->finalize();
+
+    try {
+      cpu_block->finalize();
+      mem_block->finalize();
+      virtual_mem_block->finalize();
+    } catch (const std::exception& e) {
+      std::cerr << Bench::iso8601() << ": Exception caught trying to finalize statistic blocks: " << e.what() << std::endl;
+      return false;
+    }
 
     if (sigint_.load()) {
       return false;
@@ -418,22 +522,13 @@ public:
   {
     assert(process != nullptr);
 
-    const pid_t pid = process->getpid();
-
-    std::lock_guard<std::mutex> guard(mutex_);
-
-    const auto i = pid_to_spawned_process_id_.find(pid);
-    if (i != pid_to_spawned_process_id_.end()) {
-      auto& spawned_process = all_spawned_processes_[i->second];
-      std::cout << "SpawnedProcessManager::handle_exit() - Handling exit of process " << pid << " at " << Bench::iso8601() << " with exit code " << process->exit_code() << std::endl;
-      spawned_process->set_exit_status(process->return_value(), process->exit_code());
-      remaining_spawned_process_count_--;
-      finished_spawned_processes_.push_back(spawned_process);
-      cv_.notify_all();
-    } else {
-      std::cerr << "SpawnedProcessManager::handle_exit() received an unknown PID: " << pid << std::endl;
+    const exited_process ep = { process->getpid(), process->return_value(), process->exit_code() };
+    {
+      std::lock_guard<std::mutex> guard(exited_processes_mutex_);
+      exited_processes_.push_back(ep);
     }
 
+    cv_.notify_all();
     return 0;
   }
 
@@ -456,6 +551,15 @@ public:
   }
 
 private:
+
+  struct exited_process {
+    pid_t pid;
+    int return_value;
+    ACE_exitcode exit_code;
+  };
+  std::mutex exited_processes_mutex_;
+  std::list<exited_process> exited_processes_;
+
   unsigned timeout_ = 0;
   std::mutex mutex_;
   std::condition_variable cv_;
@@ -466,7 +570,7 @@ private:
   std::list<SpawnedProcessPtr> finished_spawned_processes_;
   std::string node_name_;
   NodeId node_id_;
-  ACE_Process_Manager& process_manager_;
+  ProcessManagerPtr process_manager_;
   std::atomic_bool scenario_timedout_{false};
   std::atomic_bool sigint_{false};
 };
@@ -652,17 +756,20 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     return 1;
   }
 
+  ACE_Reactor* reactor = ACE_Reactor::instance();
+  ACE_Thread_Manager* thread_manager = ACE_Thread_Manager::instance();
+
   // Wait For and Run Node Configurations
-  std::thread reactor_thread([]() {
-    if (ACE_Reactor::instance()->owner(ACE_Thread_Manager::instance()->thr_self())) {
+  std::thread reactor_thread([&]() {
+    if (reactor->owner(thread_manager->thr_self())) {
       std::cerr << "Error setting Reactor Thread" << std::endl;
     }
-    ACE_Reactor::instance()->run_reactor_event_loop();
+    reactor->run_reactor_event_loop();
   });
 
   int exit_status = 0;
   {
-    ACE_Process_Manager process_manager(ACE_Process_Manager::DEFAULT_SIZE, ACE_Reactor::instance());
+    ProcessManagerPtr process_manager = std::make_shared<ACE_Process_Manager>(ACE_Process_Manager::DEFAULT_SIZE, reactor);
     while (true) {
       exit_status = run_cycle(name, process_manager, participant,
         status_writer_impl, allocated_scenario_reader_impl, report_writer_impl);
@@ -674,7 +781,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   }
 
   // Clean up
-  ACE_Reactor::instance()->end_reactor_event_loop();
+  reactor->end_reactor_event_loop();
   reactor_thread.join();
 
   participant->delete_contained_entities();
@@ -798,13 +905,19 @@ void wait_for_full_scenario(
 
 int run_cycle(
   const std::string& name,
-  ACE_Process_Manager& process_manager,
+  ProcessManagerPtr process_manager,
   DDS::DomainParticipant_var participant,
   StatusDataWriter_var status_writer_impl,
   AllocatedScenarioDataReader_var allocated_scenario_reader_impl,
   ReportDataWriter_var report_writer_impl)
 {
-  const NodeId this_node_id = dynamic_cast<OpenDDS::DCPS::DomainParticipantImpl*>(participant.in())->get_id();
+  OpenDDS::DCPS::DomainParticipantImpl* part_impl = dynamic_cast<OpenDDS::DCPS::DomainParticipantImpl*>(participant.in());
+  if (!part_impl) {
+    std::cerr << "Invalid Participant\n" << std::flush;
+    return 1;
+  }
+
+  const NodeId this_node_id = part_impl->get_id();
 
   // Wait for Status Publication with Test Controller and Write Status
   if (!write_status(name, this_node_id, AVAILABLE, *status_writer_impl)) {

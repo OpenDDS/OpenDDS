@@ -61,12 +61,13 @@ public:
     return num_reads_;
   }
 
-  bool verify_result ();
+  bool verify_result();
 
 private:
 
-  bool verify (const Messenger::Message& msg);
+  bool verify(const Messenger::Message& msg);
 
+  ACE_Thread_Mutex     mutex_;
   DDS::DataReader_var  reader_;
   long                 num_reads_;
   const char*          reader_id_;

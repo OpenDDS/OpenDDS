@@ -1074,7 +1074,9 @@ bool TypeAssignability::assignable_enum(const MinimalTypeObject& ta,
   const TypeFlag extensibility_mask = IS_FINAL | IS_APPENDABLE | IS_MUTABLE;
   TypeFlag ta_ext = ta.enumerated_type.enum_flags & extensibility_mask;
   TypeFlag tb_ext = tb.enumerated_type.enum_flags & extensibility_mask;
-  if (ta_ext != tb_ext) {
+  if (ta_ext != tb_ext  &&
+      // Backwards compatibility.
+      ta_ext != 0 && tb_ext != 0) {
     return false;
   }
 

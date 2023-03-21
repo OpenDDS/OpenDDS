@@ -28,7 +28,7 @@ public:
       { received_.received(DiscReceivedCalls::ENABLE_SPECIFIC); return ::DDS::RETCODE_OK;};
 
   virtual void add_association (
-      const ::OpenDDS::DCPS::RepoId& yourId,
+      const ::OpenDDS::DCPS::GUID_t& yourId,
       const OpenDDS::DCPS::ReaderAssociation& reader,
       bool active);
 
@@ -40,14 +40,14 @@ public:
       const OpenDDS::DCPS::IncompatibleQosStatus & status);
 
   virtual void update_subscription_params(
-    const OpenDDS::DCPS::RepoId&, const DDS::StringSeq &);
+    const OpenDDS::DCPS::GUID_t&, const DDS::StringSeq &);
 
   DiscReceivedCalls& received()
     {
       return received_;
     }
 
-  OpenDDS::ICE::Endpoint* get_ice_endpoint() { return 0; }
+  OpenDDS::DCPS::WeakRcHandle<OpenDDS::ICE::Endpoint> get_ice_endpoint() { return OpenDDS::DCPS::WeakRcHandle<OpenDDS::ICE::Endpoint>(); }
 
 private:
   DiscReceivedCalls received_;

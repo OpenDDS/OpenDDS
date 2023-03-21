@@ -1,0 +1,3 @@
+feature (!no_opendds_testing_features) {
+  macros   += OPENDDS_TESTING_FEATURES
+}

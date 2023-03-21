@@ -1,25 +1,18 @@
 /*
- *
- *
  * Distributed under the OpenDDS License.
  * See: http://www.opendds.org/license.html
  */
 
-extern "C" {
-
-#include "ws_config.h"
-
-#include <glib.h>
-#include <gmodule.h>
-
-} // extern "C"
-
-#include <dds/Version.h>
+#include "ws-wrapper-headers/config.h"
 #include "dissector_export.h"
-
 #include "packet-opendds.h"
 #include "packet-repo.h"
 #include "packet-datawriter.h"
+
+#include <dds/Version.h>
+
+#include <glib.h>
+#include <gmodule.h>
 
 #include <fstream>
 
@@ -73,7 +66,8 @@ plugin_reg_handoff()
 }
 
 #if WIRESHARK_VERSION >= WIRESHARK_VERSION_NUMBER(2, 5, 0)
-extern "C" dissector_Export void plugin_register() {
+extern "C" dissector_Export void plugin_register()
+{
   static proto_plugin opendds_plugin;
   opendds_plugin.register_protoinfo = register_opendds;
   opendds_plugin.register_handoff = reg_handoff_opendds;

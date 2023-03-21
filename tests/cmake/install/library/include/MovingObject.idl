@@ -1,0 +1,13 @@
+#ifndef OPENDDS_INSTALL_LIBRARY_MOVING_OBJECT_IDL
+#define OPENDDS_INSTALL_LIBRARY_MOVING_OBJECT_IDL
+
+#include <Vector.idl>
+
+@topic
+struct MovingObject {
+  Vector acc;
+  Vector vel;
+  Vector pos;
+};
+
+#endif

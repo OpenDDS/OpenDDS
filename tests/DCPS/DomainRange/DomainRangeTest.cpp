@@ -184,7 +184,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
             TransportInst_rch inst = TheTransportRegistry->get_inst(inst_name);
             RtpsUdpInst_rch rtps_inst = dynamic_rchandle_cast<RtpsUdpInst>(inst);
 
-            ACE_INET_Addr mcga = rtps_inst->multicast_group_address();
+            ACE_INET_Addr mcga = rtps_inst->multicast_group_address().to_addr();
             if (LogAddr::ip(mcga).compare("239.255.20.0") != 0) {
               ACE_ERROR_RETURN((LM_ERROR,
                                 ACE_TEXT("ERROR: %N:%l: main() -")

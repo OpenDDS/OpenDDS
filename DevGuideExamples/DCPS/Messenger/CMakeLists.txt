@@ -14,17 +14,22 @@ if(header_count GREATER 0)
   file(REMOVE ${headers})
 endif()
 
+# IDL TypeSupport Library
+add_library(messenger_idl)
+OPENDDS_TARGET_SOURCES(messenger_idl PUBLIC "Messenger.idl")
+target_link_libraries(messenger_idl PUBLIC OpenDDS::Dcps)
+
 set(opendds_libs
   OpenDDS::Dcps # Core OpenDDS Library
   OpenDDS::InfoRepoDiscovery OpenDDS::Tcp # For run_test.pl
   OpenDDS::Rtps OpenDDS::Rtps_Udp # For run_test.pl --rtps
+  messenger_idl
 )
 
 # Publisher
 add_executable(publisher
   Publisher.cpp
 )
-OPENDDS_TARGET_SOURCES(publisher Messenger.idl)
 target_link_libraries(publisher ${opendds_libs})
 
 # Subscriber
@@ -32,7 +37,6 @@ add_executable(subscriber
   Subscriber.cpp
   DataReaderListenerImpl.cpp
 )
-OPENDDS_TARGET_SOURCES(subscriber Messenger.idl)
 target_link_libraries(subscriber ${opendds_libs})
 
 # Testing

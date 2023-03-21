@@ -1,33 +1,22 @@
-// -*- C++ -*-
 /*
- *
- *
  * Distributed under the OpenDDS License.
  * See: http://www.opendds.org/license.html
  */
 
+#ifndef OPENDDS_DISSECTOR_PACKET_REPO_H_
+#define OPENDDS_DISSECTOR_PACKET_REPO_H_
 
-#ifndef _PACKET_REPO_H_
-#define _PACKET_REPO_H_
+#include "ws_common.h"
+#include "dissector_export.h"
+#include "giop_base.h"
 
-extern "C" {
+#include <dds/DCPS/Definitions.h>
 
-#include "ws_config.h"
+#include <ace/Synch.h>
+#include <ace/Hash_Map_Manager.h>
 
 #include <glib.h>
 #include <gmodule.h>
-
-#include <epan/packet.h>
-#include <epan/dissectors/packet-giop.h>
-} // extern "C"
-
-#include "dds/DCPS/Definitions.h"
-#include "dissector_export.h"
-#include "giop_base.h"
-#include "ws_common.h"
-
-#include "ace/Synch.h"
-#include "ace/Hash_Map_Manager.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -41,7 +30,7 @@ namespace OpenDDS
       conversation_t *conv_;
       gulong          request_;
       char           *data_name_; // for pending topics
-      RepoId         *topic_id_; // for pending publications
+      GUID_t         *topic_id_; // for pending publications
       Pending  *next_;
 
       Pending ()
@@ -55,7 +44,7 @@ namespace OpenDDS
     };
 
     typedef ACE_Hash_Map_Manager <gulong, const char *, ACE_Null_Mutex> Known_Topics;
-    typedef ACE_Hash_Map_Manager <gulong, const RepoId *, ACE_Null_Mutex> Known_Publications;
+    typedef ACE_Hash_Map_Manager <gulong, const GUID_t *, ACE_Null_Mutex> Known_Publications;
 
     extern "C" {
       gboolean explicit_inforepo_callback (tvbuff_t *, packet_info *,
@@ -71,7 +60,7 @@ namespace OpenDDS
     class dissector_Export InfoRepo_Dissector : public GIOP_Base
     {
     public:
-      const char *topic_for_pub (const RepoId *);
+      const char *topic_for_pub (const GUID_t *);
 
       static InfoRepo_Dissector& instance ();
 
@@ -107,8 +96,8 @@ namespace OpenDDS
 #endif
     private:
       void add_pending (int request_id, const char *dataName);
-      void add_pending (int request_id, const RepoId *topic_id);
-      void map_pending (Pending &, const RepoId *);
+      void add_pending (int request_id, const GUID_t *topic_id);
+      void map_pending (Pending &, const GUID_t *);
       void discard_pending (Pending &);
 
       Pending           *pending_;
@@ -149,4 +138,4 @@ namespace OpenDDS
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
-#endif //  _PACKET_REPO_H_
+#endif

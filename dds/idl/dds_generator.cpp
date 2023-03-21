@@ -14,7 +14,9 @@ using namespace AstTypeClassification;
 
 dds_generator::~dds_generator() {}
 
-const std::string cxx_escape = "_cxx_";
+namespace {
+  const std::string cxx_escape = "_cxx_";
+}
 
 bool dds_generator::cxx_escaped(const std::string& s)
 {
@@ -59,6 +61,11 @@ std::string dds_generator::valid_var_name(const std::string& str)
 std::string dds_generator::get_tag_name(const std::string& base_name, bool nested_key_only)
 {
   return valid_var_name(base_name) + (nested_key_only ? "_nested_key_only" : "") + "_tag";
+}
+
+std::string dds_generator::get_xtag_name(UTL_ScopedName* name)
+{
+  return scoped_helper(name, "_") + "_xtag";
 }
 
 string dds_generator::to_string(Identifier* id, EscapeContext ec)
@@ -341,9 +348,9 @@ string type_to_default_array(const std::string& indent, AST_Type* type, const st
     val = indent + n + "_forany " + temp + "(const_cast<"
       + n + "_slice*>(" + (is_union ? "tmp": name) + "));\n";
     val += indent + "set_default(" + temp + ");\n";
-    if (is_union) {
-      val += indent + name + "(tmp);\n";
-    }
+  }
+  if (is_union) {
+    val += indent + name + "(tmp);\n";
   }
   return val;
 }

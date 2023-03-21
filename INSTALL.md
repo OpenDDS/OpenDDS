@@ -170,7 +170,7 @@ See the [OpenDDS Developer's Guide](
     http://download.ociweb.com/OpenDDS/OpenDDS-latest.pdf)
 and run the Developer's Guide Example program:
 
-**For Unixes (Linux, macOS, Solaris, BSDs, etc):**
+**For Unixes (Linux, macOS, BSDs, etc):**
 
 ```
 cd $DDS_ROOT/DevGuideExamples/DCPS/Messenger

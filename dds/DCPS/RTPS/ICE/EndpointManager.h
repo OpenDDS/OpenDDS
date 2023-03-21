@@ -50,9 +50,9 @@ struct DeferredTriggeredCheck {
 
 struct EndpointManager : public DCPS::RcObject {
   AgentImpl* const agent_impl;
-  Endpoint* const endpoint;
+  DCPS::WeakRcHandle<Endpoint> const endpoint;
 
-  EndpointManager(AgentImpl* a_agent_impl, Endpoint* a_endpoint);
+  EndpointManager(AgentImpl* a_agent_impl, DCPS::WeakRcHandle<Endpoint> a_endpoint);
 
   const AgentInfo& agent_info() const
   {
@@ -65,26 +65,26 @@ struct EndpointManager : public DCPS::RcObject {
     return foundations_;
   }
 
-  void add_agent_info_listener(const DCPS::RepoId& a_local_guid,
-                               AgentInfoListener* a_agent_info_listener)
+  void add_agent_info_listener(const DCPS::GUID_t& a_local_guid,
+                               DCPS::WeakRcHandle<AgentInfoListener> a_agent_info_listener)
   {
     agent_info_listeners_[a_local_guid] = a_agent_info_listener;
   }
 
-  void remove_agent_info_listener(const DCPS::RepoId& a_local_guid)
+  void remove_agent_info_listener(const DCPS::GUID_t& a_local_guid)
   {
     agent_info_listeners_.erase(a_local_guid);
   }
 
-  void start_ice(const DCPS::RepoId& a_local_guid,
-                 const DCPS::RepoId& a_remote_guid,
+  void start_ice(const DCPS::GUID_t& a_local_guid,
+                 const DCPS::GUID_t& a_remote_guid,
                  const AgentInfo& a_remote_agent_info);
 
-  void stop_ice(const DCPS::RepoId& local_guid,
-                const DCPS::RepoId& remote_guid);
+  void stop_ice(const DCPS::GUID_t& local_guid,
+                const DCPS::GUID_t& remote_guid);
 
-  ACE_INET_Addr get_address(const DCPS::RepoId& a_local_guid,
-                            const DCPS::RepoId& a_remote_guid) const;
+  ACE_INET_Addr get_address(const DCPS::GUID_t& a_local_guid,
+                            const DCPS::GUID_t& a_remote_guid) const;
 
   void receive(const ACE_INET_Addr& a_local_address,
                const ACE_INET_Addr& a_remote_address,
@@ -145,12 +145,18 @@ struct EndpointManager : public DCPS::RcObject {
 
   void ice_connect(const GuidSetType& guids, const ACE_INET_Addr& addr)
   {
-    endpoint->ice_connect(guids, addr);
+    DCPS::RcHandle<Endpoint> e = endpoint.lock();
+    if (e) {
+      e->ice_connect(guids, addr);
+    }
   }
 
   void ice_disconnect(const GuidSetType& guids, const ACE_INET_Addr& addr)
   {
-    endpoint->ice_disconnect(guids, addr);
+    DCPS::RcHandle<Endpoint> e = endpoint.lock();
+    if (e) {
+      e->ice_disconnect(guids, addr);
+    }
   }
 
   void network_change();
@@ -189,7 +195,7 @@ private:
   typedef std::map<GuidPair, ChecklistPtr> GuidPairToChecklistType;
   GuidPairToChecklistType guid_pair_to_checklist_;
 
-  typedef std::map<DCPS::RepoId, AgentInfoListener*, DCPS::GUID_tKeyLessThan> AgentInfoListenersType;
+  typedef std::map<DCPS::GUID_t, DCPS::WeakRcHandle<AgentInfoListener>, DCPS::GUID_tKeyLessThan> AgentInfoListenersType;
   AgentInfoListenersType agent_info_listeners_;
 
   void change_username();

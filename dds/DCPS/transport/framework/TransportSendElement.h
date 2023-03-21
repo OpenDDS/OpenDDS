@@ -26,9 +26,9 @@ public:
   virtual ~TransportSendElement();
 
   /// Accessor for the publisher id.
-  virtual RepoId publication_id() const;
+  virtual GUID_t publication_id() const;
 
-  virtual RepoId subscription_id() const;
+  virtual GUID_t subscription_id() const;
 
   virtual ACE_Message_Block* duplicate_msg() const;
 
@@ -43,6 +43,8 @@ public:
   const DataSampleElement* sample() const;
 
   virtual bool owned_by_transport();
+
+  virtual bool is_last_fragment() const { return !element_->get_header().more_fragments(); }
 
 protected:
 

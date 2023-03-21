@@ -75,7 +75,7 @@ namespace Test
     long const expected_matches_;
 
     /// The actual number of subscription matches.
-    ACE_Atomic_Op<ACE_Thread_Mutex, long> subscription_matches_;
+    OpenDDS::DCPS::Atomic<long> subscription_matches_;
 
   };
 }

@@ -9,6 +9,7 @@
 #define OPENDDS_DCPS_TIME_HELPER_H
 
 #include <dds/DdsDcpsCoreC.h>
+#include <dds/DdsDcpsInfoUtilsC.h>
 
 #include <ace/OS_NS_sys_time.h>
 
@@ -100,10 +101,18 @@ ACE_INLINE OpenDDS_Dcps_Export
 DDS::Duration_t operator-(const DDS::Time_t& t1, const DDS::Time_t& t2);
 
 ACE_INLINE OpenDDS_Dcps_Export
+DDS::Time_t operator-(const DDS::Time_t& t1, const DDS::Duration_t& t2);
+
+ACE_INLINE OpenDDS_Dcps_Export
 DDS::Duration_t operator-(const MonotonicTime_t& t1, const MonotonicTime_t& t2);
 
 ACE_INLINE OpenDDS_Dcps_Export
 bool operator<(const MonotonicTime_t& t1, const MonotonicTime_t& t2);
+
+#ifndef OPENDDS_SAFETY_PROFILE
+ACE_INLINE OpenDDS_Dcps_Export
+bool operator==(const MonotonicTime_t& t1, const MonotonicTime_t& t2);
+#endif
 
 ACE_INLINE OpenDDS_Dcps_Export
 ACE_UINT32 uint32_fractional_seconds_to_nanoseconds(ACE_UINT32 fraction);
@@ -122,6 +131,9 @@ bool is_infinite(const DDS::Duration_t& value);
 
 ACE_INLINE OpenDDS_Dcps_Export
 const MonotonicTime_t& monotonic_time_zero();
+
+ACE_INLINE OpenDDS_Dcps_Export
+DDS::Duration_t make_duration(int sec, unsigned long nanosec);
 
 } // namespace DCPS
 } // namespace OpenDDS

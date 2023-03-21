@@ -64,22 +64,91 @@ namespace XTypes {
   const DCPS::Encoding& get_typeobject_encoding();
 
   template <typename T>
-  struct Optional {
-    bool present;
-    T value;
-
+  class Optional {
+  public:
     Optional()
-      : present(false)
+      : present_(false)
+      , value_()
     {}
 
     Optional(const T& v)
-      : present(true)
-      , value(v)
-    {}
+      : present_(true)
+    {
+      new(value_) T(v);
+    }
+
+    ~Optional() {
+      if (present_) {
+        value().~T();
+      }
+    }
+
+    Optional(const Optional& rhs)
+      : present_(false)
+      , value_()
+    {
+      *this = rhs;
+    }
+
+    Optional& operator=(const Optional& rhs) {
+      if (this != &rhs) {
+        if (present_) {
+          if (rhs.present_) {
+            value() = rhs.value();
+          } else {
+            value().~T();
+          }
+        } else {
+          if (rhs.present_) {
+            new(value_) T(rhs.value());
+          }
+        }
+        present_ = rhs.present_;
+      }
+      return *this;
+    }
+
+    bool operator==(const Optional& other) const
+    {
+      if (present_) {
+        return present_ == other.present_ && value() == other.value();
+      }
+
+      return present_ == other.present_;
+    }
+
+    bool operator!=(const Optional& other) const
+    {
+      return !(*this == other);
+    }
+
+    operator bool() const {
+      return present_;
+    }
+
+    bool has_value() const {
+      return present_;
+    }
+
+    T& value() {
+      return reinterpret_cast<T&>(value_);
+    }
+
+    const T& value() const {
+      return reinterpret_cast<const T&>(value_);
+    }
+
+  private:
+    bool present_;
+    union {
+      ACE_CDR::LongDouble max_alignment;
+      unsigned char value_[sizeof(T)];
+    };
   };
 
   template <typename T>
   struct Sequence {
+    typedef ACE_CDR::ULong size_type;
     typedef OPENDDS_VECTOR(T) Members;
     Members members;
 
@@ -116,6 +185,8 @@ namespace XTypes {
     }
 
     bool operator<(const Sequence& other) const { return members < other.members; }
+    bool operator==(const Sequence& other) const { return members == other.members; }
+    bool operator!=(const Sequence& other) const { return members != other.members; }
 
     T* get_buffer() { return &members[0]; }
     const T* get_buffer() const { return &members[0]; }
@@ -217,6 +288,7 @@ namespace XTypes {
   struct EquivalenceHash_tag {};
   typedef ACE_CDR::Octet EquivalenceHash_slice;
   typedef Fake_TAO_Array_Forany_T<EquivalenceHash, EquivalenceHash_slice, EquivalenceHash_tag> EquivalenceHash_forany;
+  OpenDDS_Dcps_Export DCPS::String equivalence_hash_to_string(const EquivalenceHash& hash);
 
   // First 4 bytes of MD5 of of a member name converted to bytes
   // using UTF-8 encoding and without a 'nul' terminator.
@@ -225,6 +297,16 @@ namespace XTypes {
   struct NameHash_tag {};
   typedef ACE_CDR::Octet NameHash_slice;
   typedef Fake_TAO_Array_Forany_T<NameHash, NameHash_slice, NameHash_tag> NameHash_forany;
+
+  inline bool name_hash_equal(const NameHash& x, const NameHash& y)
+  {
+    return x[0] == y[0] && x[1] == y[1] && x[2] == y[2] && x[3] == y[3];
+  }
+
+  inline bool name_hash_not_equal(const NameHash& x, const NameHash& y)
+  {
+    return !name_hash_equal(x, y);
+  }
 
   // Long Bound of a collection type
   typedef ACE_CDR::ULong LBound;
@@ -727,7 +809,7 @@ namespace XTypes {
     void* active_;
     union {
       ACE_CDR::ULongLong max_alignment;
-#define OPENDDS_UNION_MEMBER(T, N) char N ## _[sizeof(T)]
+#define OPENDDS_UNION_MEMBER(T, N) unsigned char N ## _[sizeof(T)]
       OPENDDS_UNION_MEMBER(StringSTypeDefn, string_sdefn);
       OPENDDS_UNION_MEMBER(StringLTypeDefn, string_ldefn);
       OPENDDS_UNION_MEMBER(PlainSequenceSElemDefn, seq_sdefn);
@@ -826,11 +908,23 @@ namespace XTypes {
 
   // ID of a type member
   typedef ACE_CDR::ULong MemberId;
+  const ACE_CDR::ULong MEMBER_ID_INVALID = ACE_UINT32_MAX;
+  /// Implementation specific sentinel for a union discriminator used in DynamicData
+  const ACE_CDR::ULong DISCRIMINATOR_ID = MEMBER_ID_INVALID - 1;
   const ACE_CDR::ULong ANNOTATION_STR_VALUE_MAX_LEN = 128;
   const ACE_CDR::ULong ANNOTATION_OCTETSEC_VALUE_MAX_LEN = 128;
 
   struct ExtendedAnnotationParameterValue {
     // Empty. Available for future extension
+    bool operator==(const ExtendedAnnotationParameterValue&) const
+    {
+      return true;
+    }
+
+    bool operator!=(const ExtendedAnnotationParameterValue& other) const
+    {
+      return !(*this == other);
+    }
   };
 
   /* Literal value of an annotation member: either the default value in its
@@ -842,6 +936,10 @@ namespace XTypes {
   //   boolean             boolean_value;
   // case TK_BYTE:
   //   octet               byte_value;
+  // case TK_INT8:
+  //   int8                int8_value;
+  // case TK_UINT8:
+  //   uint8               uint8_value;
   // case TK_INT16:
   //   short               int16_value;
   // case TK_UINT16:
@@ -874,31 +972,164 @@ namespace XTypes {
   //   ExtendedAnnotationParameterValue      extended_value;
   // };
 
-  struct AnnotationParameterValue {
-    ACE_CDR::Octet kind;
-    ACE_CDR::Boolean boolean_value;
-    ACE_CDR::Octet byte_value;
-    ACE_CDR::Short int16_value;
-    ACE_CDR::UShort uint_16_value;
-    ACE_CDR::Long int32_value;
-    ACE_CDR::ULong uint32_value;
-    ACE_CDR::LongLong int64_value;
-    ACE_CDR::ULongLong uint64_value;
-    ACE_CDR::Float float32_value;
-    ACE_CDR::Double float64_value;
-    ACE_CDR::LongDouble float128_value;
-    ACE_CDR::Char char_value;
-    ACE_CDR::WChar wchar_value;
-    ACE_CDR::Long enumerated_value;
-    OPENDDS_STRING string8_value;
-    OPENDDS_WSTRING string16_value;
-    ExtendedAnnotationParameterValue extended_value;
+  class OpenDDS_Dcps_Export AnnotationParameterValue {
+  public:
+
+    explicit AnnotationParameterValue(ACE_CDR::Octet kind = TK_NONE);
+    AnnotationParameterValue(const AnnotationParameterValue& other);
+    AnnotationParameterValue& operator=(const AnnotationParameterValue& other);
+    ~AnnotationParameterValue() { reset(); }
+
+    ACE_CDR::Octet kind() const { return kind_; }
+
+#define OPENDDS_UNION_ACCESSORS(T, N)                         \
+    const T& N() const { return *static_cast<T*>(active_); }  \
+    T& N() { return *static_cast<T*>(active_); }
+    OPENDDS_UNION_ACCESSORS(ACE_CDR::Boolean, boolean_value);
+    OPENDDS_UNION_ACCESSORS(ACE_CDR::Octet, byte_value);
+    OPENDDS_UNION_ACCESSORS(ACE_CDR::Char, int8_value);
+    OPENDDS_UNION_ACCESSORS(ACE_CDR::Octet, uint8_value);
+    OPENDDS_UNION_ACCESSORS(ACE_CDR::Short, int16_value);
+    OPENDDS_UNION_ACCESSORS(ACE_CDR::UShort, uint16_value); // OMG Issue DDSXTY14-46.
+    OPENDDS_UNION_ACCESSORS(ACE_CDR::Long, int32_value);
+    OPENDDS_UNION_ACCESSORS(ACE_CDR::ULong, uint32_value);
+    OPENDDS_UNION_ACCESSORS(ACE_CDR::LongLong, int64_value);
+    OPENDDS_UNION_ACCESSORS(ACE_CDR::ULongLong, uint64_value);
+    OPENDDS_UNION_ACCESSORS(ACE_CDR::Float, float32_value);
+    OPENDDS_UNION_ACCESSORS(ACE_CDR::Double, float64_value);
+    OPENDDS_UNION_ACCESSORS(ACE_CDR::LongDouble, float128_value);
+    OPENDDS_UNION_ACCESSORS(ACE_CDR::Char, char_value);
+    OPENDDS_UNION_ACCESSORS(ACE_CDR::WChar, wchar_value);
+    OPENDDS_UNION_ACCESSORS(ACE_CDR::Long, enumerated_value);
+    OPENDDS_UNION_ACCESSORS(OPENDDS_STRING, string8_value);
+    OPENDDS_UNION_ACCESSORS(OPENDDS_WSTRING, string16_value);
+    OPENDDS_UNION_ACCESSORS(ExtendedAnnotationParameterValue, extended_value);
+#undef OPENDDS_UNION_ACCESSORS
+
+    bool operator==(const AnnotationParameterValue& other) const
+    {
+      if (kind_ != other.kind_) return false;
+
+      switch (kind_) {
+      case TK_NONE:
+        return true;
+      case TK_BOOLEAN:
+        return boolean_value() == other.boolean_value();
+      case TK_BYTE:
+        return byte_value() == other.byte_value();
+      case TK_INT8:
+        return int8_value() == other.int8_value();
+      case TK_UINT8:
+        return uint8_value() == other.uint8_value();
+      case TK_INT16:
+        return int16_value() == other.int16_value();
+      case TK_UINT16:
+        return uint16_value() == other.uint16_value();
+      case TK_INT32:
+        return int32_value() == other.int32_value();
+      case TK_UINT32:
+        return uint32_value() == other.uint32_value();
+      case TK_INT64:
+        return int64_value() == other.int64_value();
+      case TK_UINT64:
+        return uint64_value() == other.uint64_value();
+      case TK_FLOAT32:
+        return float32_value() == other.float32_value();
+      case TK_FLOAT64:
+        return float64_value() == other.float64_value();
+      case TK_FLOAT128:
+        return float128_value() == other.float128_value();
+      case TK_CHAR8:
+        return char_value() == other.char_value();
+      case TK_CHAR16:
+        return wchar_value() == other.wchar_value();
+      case TK_ENUM:
+        return enumerated_value() == other.enumerated_value();
+      case TK_STRING8:
+        return string8_value() == other.string8_value();
+      case TK_STRING16:
+        return string16_value() == other.string16_value();
+      default:
+        return extended_value() == other.extended_value();
+      }
+    }
+
+    bool operator!=(const AnnotationParameterValue& other) const
+    {
+      return !(*this == other);
+    }
+
+  private:
+    ACE_CDR::Octet kind_;
+    void* active_;
+    union {
+      ACE_CDR::LongDouble max_alignment;
+#define OPENDDS_UNION_MEMBER(T, N) unsigned char N ## _[sizeof(T)]
+      OPENDDS_UNION_MEMBER(ACE_CDR::Boolean, boolean_value);
+      OPENDDS_UNION_MEMBER(ACE_CDR::Octet, byte_value);
+      OPENDDS_UNION_MEMBER(ACE_CDR::Char, int8_value);
+      OPENDDS_UNION_MEMBER(ACE_CDR::Octet, uint8_value);
+      OPENDDS_UNION_MEMBER(ACE_CDR::Short, int16_value);
+      OPENDDS_UNION_MEMBER(ACE_CDR::UShort, uint16_value); // OMG Issue DDSXTY14-46.
+      OPENDDS_UNION_MEMBER(ACE_CDR::Long, int32_value);
+      OPENDDS_UNION_MEMBER(ACE_CDR::ULong, uint32_value);
+      OPENDDS_UNION_MEMBER(ACE_CDR::LongLong, int64_value);
+      OPENDDS_UNION_MEMBER(ACE_CDR::ULongLong, uint64_value);
+      OPENDDS_UNION_MEMBER(ACE_CDR::Float, float32_value);
+      OPENDDS_UNION_MEMBER(ACE_CDR::Double, float64_value);
+      OPENDDS_UNION_MEMBER(ACE_CDR::LongDouble, float128_value);
+      OPENDDS_UNION_MEMBER(ACE_CDR::Char, char_value);
+      OPENDDS_UNION_MEMBER(ACE_CDR::WChar, wchar_value);
+      OPENDDS_UNION_MEMBER(ACE_CDR::Long, enumerated_value);
+      OPENDDS_UNION_MEMBER(DCPS::String, string8_value);
+      OPENDDS_UNION_MEMBER(DCPS::WString, string16_value);
+      OPENDDS_UNION_MEMBER(ExtendedAnnotationParameterValue, extended_value);
+#undef OPENDDS_UNION_MEMBER
+    };
+    void activate(const AnnotationParameterValue* other = 0);
+    void reset();
   };
 
   // The application of an annotation to some type or type member
   struct AppliedAnnotationParameter {
     NameHash paramname_hash;
     AnnotationParameterValue value;
+
+    AppliedAnnotationParameter()
+    {
+      paramname_hash[0] = paramname_hash[1] = paramname_hash[2] = paramname_hash[3] = 0;
+    }
+
+    AppliedAnnotationParameter(ACE_CDR::Octet a, ACE_CDR::Octet b, ACE_CDR::Octet c, ACE_CDR::Octet d, const AnnotationParameterValue& a_value)
+      : value(a_value)
+    {
+      paramname_hash[0] = a;
+      paramname_hash[1] = b;
+      paramname_hash[2] = c;
+      paramname_hash[3] = d;
+    }
+
+    AppliedAnnotationParameter(const NameHash& a_name_hash,
+                               const AnnotationParameterValue& a_value)
+      : value(a_value)
+    {
+      std::memcpy(&paramname_hash, a_name_hash, sizeof paramname_hash);
+    }
+
+    bool operator<(const AppliedAnnotationParameter& other) const
+    {
+      return std::memcmp(paramname_hash, other.paramname_hash, sizeof paramname_hash) < 0;
+    }
+
+    bool operator==(const AppliedAnnotationParameter& other) const
+    {
+      return name_hash_equal(paramname_hash, other.paramname_hash) && value == other.value;
+    }
+
+    bool operator!=(const AppliedAnnotationParameter& other) const
+    {
+      return !(*this == other);
+    }
   };
   // Sorted by AppliedAnnotationParameter.paramname_hash
   typedef Sequence<AppliedAnnotationParameter> AppliedAnnotationParameterSeq;
@@ -906,6 +1137,29 @@ namespace XTypes {
   struct AppliedAnnotation {
     TypeIdentifier annotation_typeid;
     Optional<AppliedAnnotationParameterSeq> param_seq;
+
+    AppliedAnnotation() {}
+
+    AppliedAnnotation(const TypeIdentifier& ann_typeid,
+                      const Optional<AppliedAnnotationParameterSeq>& a_param_seq)
+      : annotation_typeid(ann_typeid)
+      , param_seq(a_param_seq)
+    {}
+
+    bool operator<(const AppliedAnnotation& other) const
+    {
+      return annotation_typeid < other.annotation_typeid;
+    }
+
+    bool operator==(const AppliedAnnotation& other) const
+    {
+      return annotation_typeid == other.annotation_typeid && param_seq == other.param_seq;
+    }
+
+    bool operator!=(const AppliedAnnotation& other) const
+    {
+      return !(*this == other);
+    }
   };
   // Sorted by AppliedAnnotation.annotation_typeid
   typedef Sequence<AppliedAnnotation> AppliedAnnotationSeq;
@@ -915,15 +1169,51 @@ namespace XTypes {
     OPENDDS_STRING placement;
     OPENDDS_STRING language;
     OPENDDS_STRING text;
+
+    AppliedVerbatimAnnotation() {}
+
+    AppliedVerbatimAnnotation(const OPENDDS_STRING& a_placement,
+                              const OPENDDS_STRING& a_language,
+                              const OPENDDS_STRING& a_text)
+      : placement(a_placement)
+      , language(a_language)
+      , text(a_text)
+    {}
+
+    bool operator==(const AppliedVerbatimAnnotation& other) const
+    {
+      return placement == other.placement && language == other.language && text == other.text;
+    }
+
+    bool operator!=(const AppliedVerbatimAnnotation& other) const
+    {
+      return !(*this == other);
+    }
   };
 
-
   // --- Aggregate types: ------------------------------------------------
-  struct AppliedBuiltinMemberAnnotations {
-    Optional<OPENDDS_STRING> unit; // @unit("<unit>")
+  struct OpenDDS_Dcps_Export AppliedBuiltinMemberAnnotations {
+    Optional<DCPS::String> unit; // @unit("<unit>")
     Optional<AnnotationParameterValue> min; // @min , @range
     Optional<AnnotationParameterValue> max; // @max , @range
-    Optional<OPENDDS_STRING> hash_id; // @hash_id("<membername>")
+    Optional<DCPS::String> hash_id; // @hash_id("<membername>")
+
+    AppliedBuiltinMemberAnnotations() {}
+
+    AppliedBuiltinMemberAnnotations(const Optional<DCPS::String>& a_unit,
+                                    const Optional<AnnotationParameterValue>& a_min,
+                                    const Optional<AnnotationParameterValue>& a_max,
+                                    const Optional<DCPS::String>& a_hash_id);
+
+    bool operator==(const AppliedBuiltinMemberAnnotations& other) const
+    {
+      return unit == other.unit && min == other.min && max == other.max && hash_id == other.hash_id;
+    }
+
+    bool operator!=(const AppliedBuiltinMemberAnnotations& other) const
+    {
+      return !(*this == other);
+    }
   };
 
   struct CommonStructMember {
@@ -935,6 +1225,7 @@ namespace XTypes {
       : member_id(0)
       , member_flags(0)
     {}
+
     CommonStructMember (const MemberId& a_member_id,
                         const StructMemberFlag& a_member_flags,
                         const TypeIdentifier& a_member_type_id)
@@ -942,6 +1233,16 @@ namespace XTypes {
       , member_flags(a_member_flags)
       , member_type_id(a_member_type_id)
     {}
+
+    bool operator==(const CommonStructMember& other) const
+    {
+      return member_id == other.member_id && member_flags == other.member_flags && member_type_id == other.member_type_id;
+    }
+
+    bool operator!=(const CommonStructMember& other) const
+    {
+      return !(*this == other);
+    }
   };
 
   // COMPLETE Details for a member of an aggregate type
@@ -949,28 +1250,87 @@ namespace XTypes {
     MemberName name;
     Optional<AppliedBuiltinMemberAnnotations> ann_builtin;
     Optional<AppliedAnnotationSeq> ann_custom;
+
+    CompleteMemberDetail() {}
+
+    CompleteMemberDetail(const MemberName& a_name,
+                         const Optional<AppliedBuiltinMemberAnnotations>& an_ann_builtin,
+                         const Optional<AppliedAnnotationSeq>& an_ann_custom)
+      : name(a_name)
+      , ann_builtin(an_ann_builtin)
+      , ann_custom(an_ann_custom)
+    {}
+
+    bool operator==(const CompleteMemberDetail& other) const
+    {
+      return name == other.name && ann_builtin == other.ann_builtin && ann_custom == other.ann_custom;
+    }
+
+    bool operator!=(const CompleteMemberDetail& other) const
+    {
+      return !(*this == other);
+    }
   };
 
   // MINIMAL Details for a member of an aggregate type
   struct OpenDDS_Dcps_Export MinimalMemberDetail {
     NameHash name_hash;
 
-    MinimalMemberDetail() {}
+    MinimalMemberDetail()
+    {
+      name_hash[0] = name_hash[1] = name_hash[2] = name_hash[3] = 0;
+    }
+
     MinimalMemberDetail(ACE_CDR::Octet a, ACE_CDR::Octet b, ACE_CDR::Octet c, ACE_CDR::Octet d)
     {
       name_hash[0] = a; name_hash[1] = b; name_hash[2] = c; name_hash[3] = d;
     }
+
     explicit MinimalMemberDetail(const NameHash& a_name_hash)
     {
       std::memcpy(&name_hash, &a_name_hash, sizeof name_hash);
     }
+
     explicit MinimalMemberDetail(const OPENDDS_STRING& name);
+
+    bool operator==(const MinimalMemberDetail& other) const
+    {
+      return name_hash_equal(name_hash, other.name_hash);
+    }
+
+    bool operator!=(const MinimalMemberDetail& other) const
+    {
+      return !(*this == other);
+    }
   };
 
   // Member of an aggregate type
   struct CompleteStructMember {
     CommonStructMember common;
     CompleteMemberDetail detail;
+
+    CompleteStructMember() {}
+
+    CompleteStructMember(const CommonStructMember& a_common,
+                         const CompleteMemberDetail& a_detail)
+      : common(a_common)
+      , detail(a_detail)
+    {}
+
+    bool operator<(const CompleteStructMember& other) const
+    {
+      return common.member_id < other.common.member_id;
+    }
+
+    bool operator==(const CompleteStructMember& other) const
+    {
+      return common == other.common && detail == other.detail;
+    }
+
+    bool operator!=(const CompleteStructMember& other) const
+    {
+      return !(*this == other);
+    }
   };
   // Ordered by the member_index
   typedef Sequence<CompleteStructMember> CompleteStructMemberSeq;
@@ -992,27 +1352,100 @@ namespace XTypes {
     {
       return common.member_id < other.common.member_id;
     }
+
+    bool operator==(const MinimalStructMember& other) const
+    {
+      return common == other.common && detail == other.detail;
+    }
+
+    bool operator!=(const MinimalStructMember& other) const
+    {
+      return !(*this == other);
+    }
   };
   // Ordered by common.member_id
   typedef Sequence<MinimalStructMember> MinimalStructMemberSeq;
 
   struct AppliedBuiltinTypeAnnotations {
     Optional<AppliedVerbatimAnnotation> verbatim;  // @verbatim(...)
+
+    AppliedBuiltinTypeAnnotations() {}
+
+    explicit AppliedBuiltinTypeAnnotations(const Optional<AppliedVerbatimAnnotation>& a_verbatim)
+      : verbatim(a_verbatim)
+    {}
+
+    bool operator==(const AppliedBuiltinTypeAnnotations& other) const
+    {
+      return verbatim == other.verbatim;
+    }
+
+    bool operator!=(const AppliedBuiltinTypeAnnotations& other) const
+    {
+      return !(*this == other);
+    }
   };
 
   struct MinimalTypeDetail {
     // Empty. Available for future extension
+    bool operator==(const MinimalTypeDetail&) const
+    {
+      return true;
+    }
+
+    bool operator!=(const MinimalTypeDetail& other) const
+    {
+      return !(*this == other);
+    }
   };
 
   struct CompleteTypeDetail {
     Optional<AppliedBuiltinTypeAnnotations> ann_builtin;
     Optional<AppliedAnnotationSeq> ann_custom;
     QualifiedTypeName type_name;
+
+    CompleteTypeDetail() {}
+
+    CompleteTypeDetail(const Optional<AppliedBuiltinTypeAnnotations>& an_ann_builtin,
+                       const Optional<AppliedAnnotationSeq>& an_ann_custom,
+                       const QualifiedTypeName& a_type_name)
+      : ann_builtin(an_ann_builtin)
+      , ann_custom(an_ann_custom)
+      , type_name(a_type_name)
+    {}
+
+    bool operator==(const CompleteTypeDetail& other) const
+    {
+      return ann_builtin == other.ann_builtin && ann_custom == other.ann_custom && type_name == other.type_name;
+    }
+
+    bool operator!=(const CompleteTypeDetail& other) const
+    {
+      return !(*this == other);
+    }
   };
 
   struct CompleteStructHeader {
     TypeIdentifier base_type;
     CompleteTypeDetail detail;
+
+    CompleteStructHeader() {}
+
+    CompleteStructHeader(const TypeIdentifier& a_base_type,
+                         const CompleteTypeDetail& a_detail)
+      : base_type(a_base_type)
+      , detail(a_detail)
+    {}
+
+    bool operator==(const CompleteStructHeader& other) const
+    {
+      return base_type == other.base_type && detail == other.detail;
+    }
+
+    bool operator!=(const CompleteStructHeader& other) const
+    {
+      return !(*this == other);
+    }
   };
 
   struct MinimalStructHeader {
@@ -1026,12 +1459,44 @@ namespace XTypes {
       : base_type(a_base_type)
       , detail(a_detail)
     {}
+
+    bool operator==(const MinimalStructHeader& other) const
+    {
+      return base_type == other.base_type && detail == other.detail;
+    }
+
+    bool operator!=(const MinimalStructHeader& other) const
+    {
+      return !(*this == other);
+    }
   };
 
   struct CompleteStructType {
     StructTypeFlag struct_flags;
     CompleteStructHeader header;
     CompleteStructMemberSeq member_seq;
+
+    CompleteStructType()
+      : struct_flags(0)
+    {}
+
+    CompleteStructType(const StructTypeFlag& a_struct_flags,
+                       const CompleteStructHeader& a_header,
+                       const CompleteStructMemberSeq& a_member_seq)
+      : struct_flags(a_struct_flags)
+      , header(a_header)
+      , member_seq(a_member_seq)
+    {}
+
+    bool operator==(const CompleteStructType& other) const
+    {
+      return struct_flags == other.struct_flags && header == other.header && member_seq == other.member_seq;
+    }
+
+    bool operator!=(const CompleteStructType& other) const
+    {
+      return !(*this == other);
+    }
   };
 
   struct MinimalStructType {
@@ -1050,6 +1515,16 @@ namespace XTypes {
       , header(a_header)
       , member_seq(a_member_seq)
     {}
+
+    bool operator==(const MinimalStructType& other) const
+    {
+      return struct_flags == other.struct_flags && header == other.header && member_seq == other.member_seq;
+    }
+
+    bool operator!=(const MinimalStructType& other) const
+    {
+      return !(*this == other);
+    }
   };
 
   // --- Union: ----------------------------------------------------------
@@ -1078,12 +1553,45 @@ namespace XTypes {
       , type_id(a_type_id)
       , label_seq(a_label_seq)
     {}
+
+    bool operator==(const CommonUnionMember& other) const
+    {
+      return member_id == other.member_id && member_flags == other.member_flags && type_id == other.type_id && label_seq == other.label_seq;
+    }
+
+    bool operator!=(const CommonUnionMember& other) const
+    {
+      return !(*this == other);
+    }
   };
 
   // Member of a union type
   struct CompleteUnionMember {
     CommonUnionMember common;
     CompleteMemberDetail detail;
+
+    CompleteUnionMember() {}
+
+    CompleteUnionMember(const CommonUnionMember& a_common,
+                        const CompleteMemberDetail& a_detail)
+      : common(a_common)
+      , detail(a_detail)
+    {}
+
+    bool operator<(const CompleteUnionMember& other) const
+    {
+      return common.member_id < other.common.member_id;
+    }
+
+    bool operator==(const CompleteUnionMember& other) const
+    {
+      return common == other.common && detail == other.detail;
+    }
+
+    bool operator!=(const CompleteUnionMember& other) const
+    {
+      return !(*this == other);
+    }
   };
   // Ordered by member_index
   typedef Sequence<CompleteUnionMember> CompleteUnionMemberSeq;
@@ -1105,6 +1613,16 @@ namespace XTypes {
     {
       return common.member_id < other.common.member_id;
     }
+
+    bool operator==(const MinimalUnionMember& other) const
+    {
+      return common == other.common && detail == other.detail;
+    }
+
+    bool operator!=(const MinimalUnionMember& other) const
+    {
+      return !(*this == other);
+    }
   };
   // Ordered by MinimalUnionMember.common.member_id
   typedef Sequence<MinimalUnionMember> MinimalUnionMemberSeq;
@@ -1122,6 +1640,16 @@ namespace XTypes {
       : member_flags(a_member_flags)
       , type_id(a_type_id)
     {}
+
+    bool operator==(const CommonDiscriminatorMember& other) const
+    {
+      return member_flags == other.member_flags && type_id == other.type_id;
+    }
+
+    bool operator!=(const CommonDiscriminatorMember& other) const
+    {
+      return !(*this == other);
+    }
   };
 
   // Member of a union type
@@ -1129,6 +1657,26 @@ namespace XTypes {
     CommonDiscriminatorMember common;
     Optional<AppliedBuiltinTypeAnnotations> ann_builtin;
     Optional<AppliedAnnotationSeq> ann_custom;
+
+    CompleteDiscriminatorMember() {}
+
+    CompleteDiscriminatorMember(const CommonDiscriminatorMember& a_common,
+                                const Optional<AppliedBuiltinTypeAnnotations>& an_ann_builtin,
+                                const Optional<AppliedAnnotationSeq>& an_ann_custom)
+      : common(a_common)
+      , ann_builtin(an_ann_builtin)
+      , ann_custom(an_ann_custom)
+    {}
+
+    bool operator==(const CompleteDiscriminatorMember& other) const
+    {
+      return common == other.common && ann_builtin == other.ann_builtin && ann_custom == other.ann_custom;
+    }
+
+    bool operator!=(const CompleteDiscriminatorMember& other) const
+    {
+      return !(*this == other);
+    }
   };
 
   // Member of a union type
@@ -1140,10 +1688,36 @@ namespace XTypes {
     explicit MinimalDiscriminatorMember(const CommonDiscriminatorMember& a_common)
       : common(a_common)
     {}
+
+    bool operator==(const MinimalDiscriminatorMember& other) const
+    {
+      return common == other.common;
+    }
+
+    bool operator!=(const MinimalDiscriminatorMember& other) const
+    {
+      return !(*this == other);
+    }
   };
 
   struct CompleteUnionHeader {
     CompleteTypeDetail detail;
+
+    CompleteUnionHeader() {}
+
+    explicit CompleteUnionHeader(const CompleteTypeDetail& a_detail)
+      : detail(a_detail)
+    {}
+
+    bool operator==(const CompleteUnionHeader& other) const
+    {
+      return detail == other.detail;
+    }
+
+    bool operator!=(const CompleteUnionHeader& other) const
+    {
+      return !(*this == other);
+    }
   };
 
   struct MinimalUnionHeader {
@@ -1154,6 +1728,16 @@ namespace XTypes {
     explicit MinimalUnionHeader(const MinimalTypeDetail& a_detail)
       : detail(a_detail)
     {}
+
+    bool operator==(const MinimalUnionHeader& other) const
+    {
+      return detail == other.detail;
+    }
+
+    bool operator!=(const MinimalUnionHeader& other) const
+    {
+      return !(*this == other);
+    }
   };
 
   struct CompleteUnionType {
@@ -1161,6 +1745,30 @@ namespace XTypes {
     CompleteUnionHeader header;
     CompleteDiscriminatorMember discriminator;
     CompleteUnionMemberSeq member_seq;
+
+    CompleteUnionType()
+      : union_flags(0)
+    {}
+
+    CompleteUnionType(const UnionTypeFlag& a_union_flags,
+                      const CompleteUnionHeader& a_header,
+                      const CompleteDiscriminatorMember& a_discriminator,
+                      const CompleteUnionMemberSeq& a_member_seq)
+      : union_flags(a_union_flags)
+      , header(a_header)
+      , discriminator(a_discriminator)
+      , member_seq(a_member_seq)
+    {}
+
+    bool operator==(const CompleteUnionType& other) const
+    {
+      return union_flags == other.union_flags && header == other.header && discriminator == other.discriminator && member_seq == other.member_seq;
+    }
+
+    bool operator!=(const CompleteUnionType& other) const
+    {
+      return !(*this == other);
+    }
   };
 
   struct MinimalUnionType {
@@ -1182,12 +1790,36 @@ namespace XTypes {
       , discriminator(a_discriminator)
       , member_seq(a_member_seq)
     {}
+
+    bool operator==(const MinimalUnionType& other) const
+    {
+      return union_flags == other.union_flags && header == other.header && discriminator == other.discriminator && member_seq == other.member_seq;
+    }
+
+    bool operator!=(const MinimalUnionType& other) const
+    {
+      return !(*this == other);
+    }
   };
 
   // --- Annotation: ----------------------------------------------------
   struct CommonAnnotationParameter {
     AnnotationParameterFlag member_flags;
     TypeIdentifier member_type_id;
+
+    CommonAnnotationParameter()
+      : member_flags(0)
+    {}
+
+    bool operator==(const CommonAnnotationParameter& other) const
+    {
+      return member_flags == other.member_flags && member_type_id == other.member_type_id;
+    }
+
+    bool operator!=(const CommonAnnotationParameter& other) const
+    {
+      return !(*this == other);
+    }
   };
 
   // Member of an annotation type
@@ -1195,6 +1827,16 @@ namespace XTypes {
     CommonAnnotationParameter common;
     MemberName name;
     AnnotationParameterValue default_value;
+
+    bool operator==(const CompleteAnnotationParameter& other) const
+    {
+      return common == other.common && name == other.name && default_value == other.default_value;
+    }
+
+    bool operator!=(const CompleteAnnotationParameter& other) const
+    {
+      return !(*this == other);
+    }
   };
   // Ordered by CompleteAnnotationParameter.name
   typedef Sequence<CompleteAnnotationParameter> CompleteAnnotationParameterSeq;
@@ -1203,28 +1845,91 @@ namespace XTypes {
     CommonAnnotationParameter common;
     NameHash name_hash;
     AnnotationParameterValue default_value;
+
+    MinimalAnnotationParameter()
+    {
+      name_hash[0] = name_hash[1] = name_hash[2] = name_hash[3] = 0;
+    }
+
+    bool operator==(const MinimalAnnotationParameter& other) const
+    {
+      return common == other.common && name_hash_equal(name_hash, other.name_hash) && default_value == other.default_value;
+    }
+
+    bool operator!=(const MinimalAnnotationParameter& other) const
+    {
+      return !(*this == other);
+    }
   };
   // Ordered by MinimalAnnotationParameter.name_hash
   typedef Sequence<MinimalAnnotationParameter> MinimalAnnotationParameterSeq;
 
   struct CompleteAnnotationHeader {
     QualifiedTypeName annotation_name;
+
+    bool operator==(const CompleteAnnotationHeader& other) const
+    {
+      return annotation_name == other.annotation_name;
+    }
+
+    bool operator!=(const CompleteAnnotationHeader& other) const
+    {
+      return !(*this == other);
+    }
   };
 
   struct MinimalAnnotationHeader {
     // Empty. Available for future extension
+
+    bool operator==(const MinimalAnnotationHeader&) const
+    {
+      return true;
+    }
+
+    bool operator!=(const MinimalAnnotationHeader& other) const
+    {
+      return !(*this == other);
+    }
   };
 
   struct CompleteAnnotationType {
     AnnotationTypeFlag annotation_flag;
     CompleteAnnotationHeader header;
     CompleteAnnotationParameterSeq member_seq;
+
+    CompleteAnnotationType()
+      : annotation_flag(0)
+    {}
+
+    bool operator==(const CompleteAnnotationType& other) const
+    {
+      return annotation_flag == other.annotation_flag && header == other.header && member_seq == other.member_seq;
+    }
+
+    bool operator!=(const CompleteAnnotationType& other) const
+    {
+      return !(*this == other);
+    }
   };
 
   struct MinimalAnnotationType {
     AnnotationTypeFlag annotation_flag;
     MinimalAnnotationHeader header;
     MinimalAnnotationParameterSeq member_seq;
+
+    MinimalAnnotationType()
+      : annotation_flag(0)
+    {}
+
+    bool operator==(const MinimalAnnotationType& other) const
+    {
+      return annotation_flag == other.annotation_flag && header == other.header && member_seq == other.member_seq;
+    }
+
+    bool operator!=(const MinimalAnnotationType& other) const
+    {
+      return !(*this == other);
+    }
   };
 
   // --- Alias: ----------------------------------------------------------
@@ -1241,12 +1946,42 @@ namespace XTypes {
       : related_flags(a_related_flags)
       , related_type(a_related_type)
     {}
+
+    bool operator==(const CommonAliasBody& other) const
+    {
+      return related_flags == other.related_flags && related_type == other.related_type;
+    }
+
+    bool operator!=(const CommonAliasBody& other) const
+    {
+      return !(*this == other);
+    }
   };
 
   struct CompleteAliasBody {
     CommonAliasBody common;
     Optional<AppliedBuiltinMemberAnnotations> ann_builtin;
     Optional<AppliedAnnotationSeq> ann_custom;
+
+    CompleteAliasBody() {}
+
+    CompleteAliasBody(const CommonAliasBody& a_common,
+                      const Optional<AppliedBuiltinMemberAnnotations>& an_ann_builtin,
+                      const Optional<AppliedAnnotationSeq>& an_ann_custom)
+      : common(a_common)
+      , ann_builtin(an_ann_builtin)
+      , ann_custom(an_ann_custom)
+    {}
+
+    bool operator==(const CompleteAliasBody& other) const
+    {
+      return common == other.common && ann_builtin == other.ann_builtin && ann_custom == other.ann_custom;
+    }
+
+    bool operator!=(const CompleteAliasBody& other) const
+    {
+      return !(*this == other);
+    }
   };
 
   struct MinimalAliasBody {
@@ -1257,20 +1992,78 @@ namespace XTypes {
     explicit MinimalAliasBody(const CommonAliasBody& a_common)
       : common(a_common)
     {}
+
+    bool operator==(const MinimalAliasBody& other) const
+    {
+      return common == other.common;
+    }
+
+    bool operator!=(const MinimalAliasBody& other) const
+    {
+      return !(*this == other);
+    }
   };
 
   struct CompleteAliasHeader {
     CompleteTypeDetail detail;
+
+    CompleteAliasHeader() {}
+
+    explicit CompleteAliasHeader(const CompleteTypeDetail& a_detail)
+      : detail(a_detail)
+    {}
+
+    bool operator==(const CompleteAliasHeader& other) const
+    {
+      return detail == other.detail;
+    }
+
+    bool operator!=(const CompleteAliasHeader& other) const
+    {
+      return !(*this == other);
+    }
   };
 
   struct MinimalAliasHeader {
     // Empty. Available for future extension
+
+    bool operator==(const MinimalAliasHeader&) const
+    {
+      return true;
+    }
+
+    bool operator!=(const MinimalAliasHeader& other) const
+    {
+      return !(*this == other);
+    }
   };
 
   struct CompleteAliasType {
     AliasTypeFlag alias_flags;
     CompleteAliasHeader header;
     CompleteAliasBody body;
+
+    CompleteAliasType()
+      : alias_flags(0)
+    {}
+
+    CompleteAliasType(const AliasTypeFlag& a_alias_flags,
+                      const CompleteAliasHeader& a_header,
+                      const CompleteAliasBody& a_body)
+      : alias_flags(a_alias_flags)
+      , header(a_header)
+      , body(a_body)
+    {}
+
+    bool operator==(const CompleteAliasType& other) const
+    {
+      return alias_flags == other.alias_flags && header == other.header && body == other.body;
+    }
+
+    bool operator!=(const CompleteAliasType& other) const
+    {
+      return !(*this == other);
+    }
   };
 
   struct MinimalAliasType {
@@ -1289,12 +2082,40 @@ namespace XTypes {
       , header(a_header)
       , body(a_body)
     {}
+
+    bool operator==(const MinimalAliasType& other) const
+    {
+      return alias_flags == other.alias_flags && header == other.header && body == other.body;
+    }
+
+    bool operator!=(const MinimalAliasType& other) const
+    {
+      return !(*this == other);
+    }
   };
 
   // --- Collections: ----------------------------------------------------
   struct CompleteElementDetail {
     Optional<AppliedBuiltinMemberAnnotations> ann_builtin;
     Optional<AppliedAnnotationSeq> ann_custom;
+
+    CompleteElementDetail() {}
+
+    CompleteElementDetail(const Optional<AppliedBuiltinMemberAnnotations>& an_ann_builtin,
+                          const Optional<AppliedAnnotationSeq>& an_ann_custom)
+      : ann_builtin(an_ann_builtin)
+      , ann_custom(an_ann_custom)
+    {}
+
+    bool operator==(const CompleteElementDetail& other) const
+    {
+      return ann_builtin == other.ann_builtin && ann_custom == other.ann_custom;
+    }
+
+    bool operator!=(const CompleteElementDetail& other) const
+    {
+      return !(*this == other);
+    }
   };
 
   struct CommonCollectionElement {
@@ -1310,18 +2131,58 @@ namespace XTypes {
       : element_flags(a_element_flags)
       , type(a_type)
     {}
+
+    bool operator==(const CommonCollectionElement& other) const
+    {
+      return element_flags == other.element_flags && type == other.type;
+    }
+
+    bool operator!=(const CommonCollectionElement& other) const
+    {
+      return !(*this == other);
+    }
   };
 
   struct CompleteCollectionElement {
     CommonCollectionElement common;
     CompleteElementDetail detail;
+
+    CompleteCollectionElement() {}
+
+    CompleteCollectionElement(const CommonCollectionElement& a_common,
+                              const CompleteElementDetail& a_detail)
+      : common(a_common)
+      , detail(a_detail)
+    {}
+
+    bool operator==(const CompleteCollectionElement& other) const
+    {
+      return common == other.common && detail == other.detail;
+    }
+
+    bool operator!=(const CompleteCollectionElement& other) const
+    {
+      return !(*this == other);
+    }
   };
 
   struct MinimalCollectionElement {
     CommonCollectionElement common;
 
     MinimalCollectionElement() {}
-    MinimalCollectionElement(const CommonCollectionElement& a_common) : common(a_common) {}
+
+    explicit MinimalCollectionElement(const CommonCollectionElement& a_common)
+      : common(a_common) {}
+
+    bool operator==(const MinimalCollectionElement& other) const
+    {
+      return common == other.common;
+    }
+
+    bool operator!=(const MinimalCollectionElement& other) const
+    {
+      return !(*this == other);
+    }
   };
 
   struct CommonCollectionHeader {
@@ -1332,18 +2193,58 @@ namespace XTypes {
     {}
 
     explicit CommonCollectionHeader(LBound a_bound) : bound(a_bound) {}
+
+    bool operator==(const CommonCollectionHeader& other) const
+    {
+      return bound == other.bound;
+    }
+
+    bool operator!=(const CommonCollectionHeader& other) const
+    {
+      return !(*this == other);
+    }
   };
 
   struct CompleteCollectionHeader {
     CommonCollectionHeader common;
     Optional<CompleteTypeDetail> detail; // not present for anonymous
+
+    CompleteCollectionHeader() {}
+
+    CompleteCollectionHeader(const CommonCollectionHeader& a_common,
+                             const Optional<CompleteTypeDetail>& a_detail)
+      : common(a_common)
+      , detail(a_detail)
+    {}
+
+    bool operator==(const CompleteCollectionHeader& other) const
+    {
+      return common == other.common && detail == other.detail;
+    }
+
+    bool operator!=(const CompleteCollectionHeader& other) const
+    {
+      return !(*this == other);
+    }
   };
 
   struct MinimalCollectionHeader {
     CommonCollectionHeader common;
 
     MinimalCollectionHeader() {}
-    MinimalCollectionHeader(const CommonCollectionHeader& a_common) : common(a_common) {}
+
+    explicit MinimalCollectionHeader(const CommonCollectionHeader& a_common)
+      : common(a_common) {}
+
+    bool operator==(const MinimalCollectionHeader& other) const
+    {
+      return common == other.common;
+    }
+
+    bool operator!=(const MinimalCollectionHeader& other) const
+    {
+      return !(*this == other);
+    }
   };
 
   // --- Sequence: ------------------------------------------------------
@@ -1357,6 +2258,24 @@ namespace XTypes {
       , header()
       , element()
     {}
+
+    CompleteSequenceType(CollectionTypeFlag a_collection_flag,
+                         const CompleteCollectionHeader& a_header,
+                         const CompleteCollectionElement& an_element)
+      : collection_flag(a_collection_flag)
+      , header(a_header)
+      , element(an_element)
+    {}
+
+    bool operator==(const CompleteSequenceType& other) const
+    {
+      return collection_flag == other.collection_flag && header == other.header && element == other.element;
+    }
+
+    bool operator!=(const CompleteSequenceType& other) const
+    {
+      return !(*this == other);
+    }
   };
 
   struct MinimalSequenceType {
@@ -1377,6 +2296,16 @@ namespace XTypes {
       , header(a_header)
       , element(a_element)
     {}
+
+    bool operator==(const MinimalSequenceType& other) const
+    {
+      return collection_flag == other.collection_flag && header == other.header && element == other.element;
+    }
+
+    bool operator!=(const MinimalSequenceType& other) const
+    {
+      return !(*this == other);
+    }
   };
 
   // --- Array: ------------------------------------------------------
@@ -1384,12 +2313,42 @@ namespace XTypes {
     LBoundSeq bound_seq;
 
     CommonArrayHeader() {}
-    explicit CommonArrayHeader(const LBoundSeq& a_bound_seq) : bound_seq(a_bound_seq) {}
+
+    explicit CommonArrayHeader(const LBoundSeq& a_bound_seq)
+      : bound_seq(a_bound_seq) {}
+
+    bool operator==(const CommonArrayHeader& other) const
+    {
+      return bound_seq == other.bound_seq;
+    }
+
+    bool operator!=(const CommonArrayHeader& other) const
+    {
+      return !(*this == other);
+    }
   };
 
   struct CompleteArrayHeader {
     CommonArrayHeader common;
     CompleteTypeDetail detail;
+
+    CompleteArrayHeader() {}
+
+    CompleteArrayHeader(const CommonArrayHeader& a_common,
+                        const CompleteTypeDetail& a_detail)
+      : common(a_common)
+      , detail(a_detail)
+    {}
+
+    bool operator==(const CompleteArrayHeader& other) const
+    {
+      return common == other.common && detail == other.detail;
+    }
+
+    bool operator!=(const CompleteArrayHeader& other) const
+    {
+      return !(*this == other);
+    }
   };
 
   struct MinimalArrayHeader {
@@ -1397,9 +2356,19 @@ namespace XTypes {
 
     MinimalArrayHeader() {}
 
-    MinimalArrayHeader(const CommonArrayHeader& a_common)
+    explicit MinimalArrayHeader(const CommonArrayHeader& a_common)
       : common(a_common)
     {}
+
+    bool operator==(const MinimalArrayHeader& other) const
+    {
+      return common == other.common;
+    }
+
+    bool operator!=(const MinimalArrayHeader& other) const
+    {
+      return !(*this == other);
+    }
   };
 
   struct CompleteArrayType  {
@@ -1413,6 +2382,23 @@ namespace XTypes {
       , element()
     {}
 
+    CompleteArrayType(CollectionTypeFlag a_collection_flag,
+                      const CompleteArrayHeader& a_header,
+                      const CompleteCollectionElement& an_element)
+      : collection_flag(a_collection_flag)
+      , header(a_header)
+      , element(an_element)
+    {}
+
+    bool operator==(const CompleteArrayType& other) const
+    {
+      return collection_flag == other.collection_flag && header == other.header && element == other.element;
+    }
+
+    bool operator!=(const CompleteArrayType& other) const
+    {
+      return !(*this == other);
+    }
   };
 
   struct MinimalArrayType  {
@@ -1433,6 +2419,16 @@ namespace XTypes {
       , header(a_header)
       , element(a_element)
     {}
+
+    bool operator==(const MinimalArrayType& other) const
+    {
+      return collection_flag == other.collection_flag && header == other.header && element == other.element;
+    }
+
+    bool operator!=(const MinimalArrayType& other) const
+    {
+      return !(*this == other);
+    }
   };
 
   // --- Map: ------------------------------------------------------
@@ -1441,6 +2437,20 @@ namespace XTypes {
     CompleteCollectionHeader header;
     CompleteCollectionElement key;
     CompleteCollectionElement element;
+
+    CompleteMapType()
+      : collection_flag(0)
+    {}
+
+    bool operator==(const CompleteMapType& other) const
+    {
+      return collection_flag == other.collection_flag && header == other.header && key == other.key && element == other.element;
+    }
+
+    bool operator!=(const CompleteMapType& other) const
+    {
+      return !(*this == other);
+    }
   };
 
   struct MinimalMapType {
@@ -1448,6 +2458,20 @@ namespace XTypes {
     MinimalCollectionHeader header;
     MinimalCollectionElement key;
     MinimalCollectionElement element;
+
+    MinimalMapType()
+      : collection_flag(0)
+    {}
+
+    bool operator==(const MinimalMapType& other) const
+    {
+      return collection_flag == other.collection_flag && header == other.header && key == other.key && element == other.element;
+    }
+
+    bool operator!=(const MinimalMapType& other) const
+    {
+      return !(*this == other);
+    }
   };
 
   // --- Enumeration: ----------------------------------------------------
@@ -1463,17 +2487,50 @@ namespace XTypes {
       , flags(0)
     {}
 
-    CommonEnumeratedLiteral(const ACE_CDR::Long& a_value,
-                            const EnumeratedLiteralFlag a_flags)
+    CommonEnumeratedLiteral(ACE_CDR::Long a_value,
+                            EnumeratedLiteralFlag a_flags)
       : value(a_value)
       , flags(a_flags)
     {}
+
+    bool operator==(const CommonEnumeratedLiteral& other) const
+    {
+      return value == other.value && flags == other.flags;
+    }
+
+    bool operator!=(const CommonEnumeratedLiteral& other) const
+    {
+      return !(*this == other);
+    }
   };
 
   // Constant in an enumerated type
   struct CompleteEnumeratedLiteral {
     CommonEnumeratedLiteral common;
     CompleteMemberDetail detail;
+
+    CompleteEnumeratedLiteral() {}
+
+    CompleteEnumeratedLiteral(const CommonEnumeratedLiteral& a_common,
+                              const CompleteMemberDetail& a_detail)
+      : common(a_common)
+      , detail(a_detail)
+    {}
+
+    bool operator<(const CompleteEnumeratedLiteral& other) const
+    {
+      return common.value < other.common.value;
+    }
+
+    bool operator==(const CompleteEnumeratedLiteral& other) const
+    {
+      return common == other.common && detail == other.detail;
+    }
+
+    bool operator!=(const CompleteEnumeratedLiteral& other) const
+    {
+      return !(*this == other);
+    }
   };
   // Ordered by EnumeratedLiteral.common.value
   typedef Sequence<CompleteEnumeratedLiteral> CompleteEnumeratedLiteralSeq;
@@ -1491,8 +2548,19 @@ namespace XTypes {
       , detail(a_detail)
     {}
 
-    bool operator<(const MinimalEnumeratedLiteral& other) const {
+    bool operator<(const MinimalEnumeratedLiteral& other) const
+    {
       return common.value < other.common.value;
+    }
+
+    bool operator==(const MinimalEnumeratedLiteral& other) const
+    {
+      return common == other.common && detail == other.detail;
+    }
+
+    bool operator!=(const MinimalEnumeratedLiteral& other) const
+    {
+      return !(*this == other);
     }
   };
   // Ordered by EnumeratedLiteral.common.value
@@ -1505,14 +2573,42 @@ namespace XTypes {
       : bit_bound(0)
     {}
 
-    explicit CommonEnumeratedHeader(const BitBound& a_bit_bound)
+    explicit CommonEnumeratedHeader(BitBound a_bit_bound)
       : bit_bound(a_bit_bound)
     {}
+
+    bool operator==(const CommonEnumeratedHeader& other) const
+    {
+      return bit_bound == other.bit_bound;
+    }
+
+    bool operator!=(const CommonEnumeratedHeader& other) const
+    {
+      return !(*this == other);
+    }
   };
 
   struct CompleteEnumeratedHeader {
     CommonEnumeratedHeader common;
     CompleteTypeDetail detail;
+
+    CompleteEnumeratedHeader() {}
+
+    CompleteEnumeratedHeader(const CommonEnumeratedHeader& a_common,
+                             const CompleteTypeDetail& a_detail)
+      : common(a_common)
+      , detail(a_detail)
+    {}
+
+    bool operator==(const CompleteEnumeratedHeader& other) const
+    {
+      return common == other.common && detail == other.detail;
+    }
+
+    bool operator!=(const CompleteEnumeratedHeader& other) const
+    {
+      return !(*this == other);
+    }
   };
 
   struct MinimalEnumeratedHeader {
@@ -1523,18 +2619,50 @@ namespace XTypes {
     explicit MinimalEnumeratedHeader(const CommonEnumeratedHeader& a_common)
       : common(a_common)
     {}
+
+    bool operator==(const MinimalEnumeratedHeader& other) const
+    {
+      return common == other.common;
+    }
+
+    bool operator!=(const MinimalEnumeratedHeader& other) const
+    {
+      return !(*this == other);
+    }
   };
 
   // Enumerated type
   struct CompleteEnumeratedType  {
-    EnumTypeFlag enum_flags; // unused
+    EnumTypeFlag enum_flags;
     CompleteEnumeratedHeader header;
     CompleteEnumeratedLiteralSeq literal_seq;
+
+    CompleteEnumeratedType()
+      : enum_flags(0)
+    {}
+
+    CompleteEnumeratedType(const EnumTypeFlag& a_enum_flags,
+                           const CompleteEnumeratedHeader& a_header,
+                           const CompleteEnumeratedLiteralSeq& a_literal_seq)
+      : enum_flags(a_enum_flags)
+      , header(a_header)
+      , literal_seq(a_literal_seq)
+    {}
+
+    bool operator==(const CompleteEnumeratedType& other) const
+    {
+      return enum_flags == other.enum_flags && header == other.header && literal_seq == other.literal_seq;
+    }
+
+    bool operator!=(const CompleteEnumeratedType& other) const
+    {
+      return !(*this == other);
+    }
   };
 
   // Enumerated type
   struct MinimalEnumeratedType  {
-    EnumTypeFlag enum_flags; // unused
+    EnumTypeFlag enum_flags;
     MinimalEnumeratedHeader header;
     MinimalEnumeratedLiteralSeq literal_seq;
 
@@ -1549,6 +2677,16 @@ namespace XTypes {
       , header(a_header)
       , literal_seq(a_literal_seq)
     {}
+
+    bool operator==(const MinimalEnumeratedType& other) const
+    {
+      return enum_flags == other.enum_flags && header == other.header && literal_seq == other.literal_seq;
+    }
+
+    bool operator!=(const MinimalEnumeratedType& other) const
+    {
+      return !(*this == other);
+    }
   };
 
   // --- Bitmask: --------------------------------------------------------
@@ -1556,11 +2694,36 @@ namespace XTypes {
   struct CommonBitflag {
     ACE_CDR::UShort position;
     BitflagFlag flags;
+
+    CommonBitflag()
+      : position(0)
+      , flags(0)
+    {}
+
+    bool operator==(const CommonBitflag& other) const
+    {
+      return position == other.position && flags == other.flags;
+    }
+
+    bool operator!=(const CommonBitflag& other) const
+    {
+      return !(*this == other);
+    }
   };
 
   struct CompleteBitflag {
     CommonBitflag common;
     CompleteMemberDetail detail;
+
+    bool operator==(const CompleteBitflag& other) const
+    {
+      return common == other.common && detail == other.detail;
+    }
+
+    bool operator!=(const CompleteBitflag& other) const
+    {
+      return !(*this == other);
+    }
   };
   // Ordered by Bitflag.position
   typedef Sequence<CompleteBitflag> CompleteBitflagSeq;
@@ -1568,13 +2731,24 @@ namespace XTypes {
   struct MinimalBitflag {
     CommonBitflag common;
     MinimalMemberDetail detail;
+
+    bool operator==(const MinimalBitflag& other) const
+    {
+      return common == other.common && detail == other.detail;
+    }
+
+    bool operator!=(const MinimalBitflag& other) const
+    {
+      return !(*this == other);
+    }
   };
   // Ordered by Bitflag.position
   typedef Sequence<MinimalBitflag> MinimalBitflagSeq;
 
-  struct CommonBitmaskHeader {
-    BitBound bit_bound;
-  };
+  // This type is defined in the IDL but not used.
+  // struct CommonBitmaskHeader {
+  //   BitBound bit_bound;
+  // };
 
   typedef CompleteEnumeratedHeader CompleteBitmaskHeader;
 
@@ -1584,12 +2758,40 @@ namespace XTypes {
     BitmaskTypeFlag bitmask_flags; // unused
     CompleteBitmaskHeader header;
     CompleteBitflagSeq flag_seq;
+
+    CompleteBitmaskType()
+      : bitmask_flags(0)
+    {}
+
+    bool operator==(const CompleteBitmaskType& other) const
+    {
+      return bitmask_flags == other.bitmask_flags && header == other.header && flag_seq == other.flag_seq;
+    }
+
+    bool operator!=(const CompleteBitmaskType& other) const
+    {
+      return !(*this == other);
+    }
   };
 
   struct MinimalBitmaskType {
     BitmaskTypeFlag bitmask_flags; // unused
     MinimalBitmaskHeader header;
     MinimalBitflagSeq flag_seq;
+
+    MinimalBitmaskType()
+      : bitmask_flags(0)
+    {}
+
+    bool operator==(const MinimalBitmaskType& other) const
+    {
+      return bitmask_flags == other.bitmask_flags && header == other.header && flag_seq == other.flag_seq;
+    }
+
+    bool operator!=(const MinimalBitmaskType& other) const
+    {
+      return !(*this == other);
+    }
   };
 
   // --- Bitset: ----------------------------------------------------------
@@ -1598,11 +2800,38 @@ namespace XTypes {
     BitsetMemberFlag flags;
     ACE_CDR::Octet bitcount;
     TypeKind holder_type; // Must be primitive integer type
+
+    CommonBitfield()
+      : position(0)
+      , flags(0)
+      , bitcount(0)
+      , holder_type(TK_NONE)
+    {}
+
+    bool operator==(const CommonBitfield& other) const
+    {
+      return position == other.position && flags == other.flags && bitcount == other.bitcount && holder_type == other.holder_type;
+    }
+
+    bool operator!=(const CommonBitfield& other) const
+    {
+      return !(*this == other);
+    }
   };
 
   struct CompleteBitfield {
     CommonBitfield common;
     CompleteMemberDetail detail;
+
+    bool operator==(const CompleteBitfield& other) const
+    {
+      return common == other.common && detail == other.detail;
+    }
+
+    bool operator!=(const CompleteBitfield& other) const
+    {
+      return !(*this == other);
+    }
   };
   // Ordered by Bitfield.position
   typedef Sequence<CompleteBitfield> CompleteBitfieldSeq;
@@ -1610,28 +2839,91 @@ namespace XTypes {
   struct MinimalBitfield {
     CommonBitfield common;
     NameHash name_hash;
+
+    MinimalBitfield()
+    {
+      name_hash[0] = name_hash[1] = name_hash[2] = name_hash[3] = 0;
+    }
+
+    bool operator==(const MinimalBitfield& other) const
+    {
+      return common == other.common && name_hash_equal(name_hash, other.name_hash);
+    }
+
+    bool operator!=(const MinimalBitfield& other) const
+    {
+      return !(*this == other);
+    }
   };
   // Ordered by Bitfield.position
   typedef Sequence<MinimalBitfield> MinimalBitfieldSeq;
 
   struct CompleteBitsetHeader {
     CompleteTypeDetail detail;
+
+    bool operator==(const CompleteBitsetHeader& other) const
+    {
+      return detail == other.detail;
+    }
+
+    bool operator!=(const CompleteBitsetHeader& other) const
+    {
+      return !(*this == other);
+    }
   };
 
   struct MinimalBitsetHeader {
     // Empty. Available for future extension
+
+    bool operator==(const MinimalBitsetHeader&) const
+    {
+      return true;
+    }
+
+    bool operator!=(const MinimalBitsetHeader& other) const
+    {
+      return !(*this == other);
+    }
   };
 
   struct CompleteBitsetType  {
     BitsetTypeFlag bitset_flags; // unused
     CompleteBitsetHeader header;
     CompleteBitfieldSeq field_seq;
+
+    CompleteBitsetType()
+      : bitset_flags(0)
+    {}
+
+    bool operator==(const CompleteBitsetType& other) const
+    {
+      return bitset_flags == other.bitset_flags && header == other.header && field_seq == other.field_seq;
+    }
+
+    bool operator!=(const CompleteBitsetType& other) const
+    {
+      return !(*this == other);
+    }
   };
 
   struct MinimalBitsetType  {
     BitsetTypeFlag bitset_flags; // unused
     MinimalBitsetHeader header;
     MinimalBitfieldSeq field_seq;
+
+    MinimalBitsetType()
+      : bitset_flags(0)
+    {}
+
+    bool operator==(const MinimalBitsetType& other) const
+    {
+      return bitset_flags == other.bitset_flags && header == other.header && field_seq == other.field_seq;
+    }
+
+    bool operator!=(const MinimalBitsetType& other) const
+    {
+      return !(*this == other);
+    }
   };
 
   // --- Type Object: ---------------------------------------------------
@@ -1640,6 +2932,16 @@ namespace XTypes {
 
   struct CompleteExtendedType {
     // Empty. Available for future extension
+
+    bool operator==(const CompleteExtendedType&) const
+    {
+      return true;
+    }
+
+    bool operator!=(const CompleteExtendedType& other) const
+    {
+      return !(*this == other);
+    }
   };
 
   // @extensibility(FINAL)     @nested
@@ -1685,10 +2987,111 @@ namespace XTypes {
 
     // ===================  Future extensibility  ============
     CompleteExtendedType extended_type;
+
+    CompleteTypeObject()
+      : kind(TK_NONE)
+    {}
+
+    explicit CompleteTypeObject(const CompleteAliasType& alias)
+      : kind(TK_ALIAS)
+      , alias_type(alias)
+    {}
+
+    explicit CompleteTypeObject(const CompleteAnnotationType& annotation)
+      : kind(TK_ANNOTATION)
+      , annotation_type(annotation)
+    {}
+
+    explicit CompleteTypeObject(const CompleteStructType& struct_)
+      : kind(TK_STRUCTURE)
+      , struct_type(struct_)
+    {}
+
+    explicit CompleteTypeObject(const CompleteUnionType& union_)
+      : kind(TK_UNION)
+      , union_type(union_)
+    {}
+
+    explicit CompleteTypeObject(const CompleteBitsetType& bitset)
+      : kind(TK_BITSET)
+      , bitset_type(bitset)
+    {}
+
+    explicit CompleteTypeObject(const CompleteSequenceType& sequence)
+      : kind(TK_SEQUENCE)
+      , sequence_type(sequence)
+    {}
+
+    explicit CompleteTypeObject(const CompleteArrayType& array)
+      : kind(TK_ARRAY)
+      , array_type(array)
+    {}
+
+    explicit CompleteTypeObject(const CompleteMapType& map)
+      : kind(TK_MAP)
+      , map_type(map)
+    {}
+
+    explicit CompleteTypeObject(const CompleteEnumeratedType& enum_)
+      : kind(TK_ENUM)
+      , enumerated_type(enum_)
+    {}
+
+    explicit CompleteTypeObject(const CompleteBitmaskType& bitmask)
+      : kind(TK_BITMASK)
+      , bitmask_type(bitmask)
+    {}
+
+    bool operator==(const CompleteTypeObject& other) const
+    {
+      if (kind != other.kind) return false;
+
+      switch (kind) {
+      case TK_NONE:
+        return true;
+      case TK_ALIAS:
+        return alias_type == other.alias_type;
+      case TK_ANNOTATION:
+        return annotation_type == other.annotation_type;
+      case TK_STRUCTURE:
+        return struct_type == other.struct_type;
+      case TK_UNION:
+        return union_type == other.union_type;
+      case TK_BITSET:
+        return bitset_type == other.bitset_type;
+      case TK_SEQUENCE:
+        return sequence_type == other.sequence_type;
+      case TK_ARRAY:
+        return array_type == other.array_type;
+      case TK_MAP:
+        return map_type == other.map_type;
+      case TK_ENUM:
+        return enumerated_type == other.enumerated_type;
+      case TK_BITMASK:
+        return bitmask_type == other.bitmask_type;
+      default:
+        return extended_type == other.extended_type;
+      }
+    }
+
+    bool operator!=(const CompleteTypeObject& other) const
+    {
+      return !(*this == other);
+    }
   };
 
   struct MinimalExtendedType {
     // Empty. Available for future extension
+
+    bool operator==(const MinimalExtendedType&) const
+    {
+      return true;
+    }
+
+    bool operator!=(const MinimalExtendedType& other) const
+    {
+      return !(*this == other);
+    }
   };
 
   // @extensibility(FINAL)     @nested
@@ -1788,6 +3191,43 @@ namespace XTypes {
       : kind(TK_BITMASK)
       , bitmask_type(bitmask)
     {}
+
+    bool operator==(const MinimalTypeObject& other) const
+    {
+      if (kind != other.kind) return false;
+
+      switch (kind) {
+      case TK_NONE:
+        return true;
+      case TK_ALIAS:
+        return alias_type == other.alias_type;
+      case TK_ANNOTATION:
+        return annotation_type == other.annotation_type;
+      case TK_STRUCTURE:
+        return struct_type == other.struct_type;
+      case TK_UNION:
+        return union_type == other.union_type;
+      case TK_BITSET:
+        return bitset_type == other.bitset_type;
+      case TK_SEQUENCE:
+        return sequence_type == other.sequence_type;
+      case TK_ARRAY:
+        return array_type == other.array_type;
+      case TK_MAP:
+        return map_type == other.map_type;
+      case TK_ENUM:
+        return enumerated_type == other.enumerated_type;
+      case TK_BITMASK:
+        return bitmask_type == other.bitmask_type;
+      default:
+        return extended_type == other.extended_type;
+      }
+    }
+
+    bool operator!=(const MinimalTypeObject& other) const
+    {
+      return !(*this == other);
+    }
   };
 
   // @extensibility(APPENDABLE)  @nested
@@ -1816,6 +3256,22 @@ namespace XTypes {
       : kind(EK_MINIMAL)
       , minimal(a_minimal)
     {}
+
+    bool operator==(const TypeObject& other) const
+    {
+      if (kind != other.kind) return false;
+
+      if (kind == EK_COMPLETE) {
+        return complete == other.complete;
+      }
+
+      return minimal == other.minimal;
+    }
+
+    bool operator!=(const TypeObject& other) const
+    {
+      return !(*this == other);
+    }
   };
 
   typedef Sequence<TypeObject> TypeObjectSeq;
@@ -1836,6 +3292,16 @@ namespace XTypes {
       : type_identifier(ti)
       , type_object(to)
     {}
+
+    bool operator==(const TypeIdentifierTypeObjectPair& other) const
+    {
+      return type_identifier == other.type_identifier && type_object == other.type_object;
+    }
+
+    bool operator!=(const TypeIdentifierTypeObjectPair& other) const
+    {
+      return !(*this == other);
+    }
   };
   typedef Sequence<TypeIdentifierTypeObjectPair> TypeIdentifierTypeObjectPairSeq;
 
@@ -1849,12 +3315,41 @@ namespace XTypes {
       : type_identifier1(t1)
       , type_identifier2(t2)
     {}
+
+    bool operator==(const TypeIdentifierPair& other) const
+    {
+      return type_identifier1 == other.type_identifier1 && type_identifier2 == other.type_identifier2;
+    }
+
+    bool operator!=(const TypeIdentifierPair& other) const
+    {
+      return !(*this == other);
+    }
   };
   typedef Sequence<TypeIdentifierPair> TypeIdentifierPairSeq;
 
   struct TypeIdentifierWithSize {
     TypeIdentifier type_id;
     ACE_CDR::ULong typeobject_serialized_size;
+
+    TypeIdentifierWithSize()
+      : typeobject_serialized_size()
+    {}
+
+    TypeIdentifierWithSize(const TypeIdentifier& ti, ACE_CDR::ULong to_size)
+      : type_id(ti)
+      , typeobject_serialized_size(to_size)
+    {}
+
+    bool operator==(const TypeIdentifierWithSize& other) const
+    {
+      return type_id == other.type_id && typeobject_serialized_size == other.typeobject_serialized_size;
+    }
+
+    bool operator!=(const TypeIdentifierWithSize& other) const
+    {
+      return !(*this == other);
+    }
   };
   typedef Sequence<TypeIdentifierWithSize> TypeIdentifierWithSizeSeq;
 
@@ -1863,6 +3358,10 @@ namespace XTypes {
     // The total additional types related to minimal_type
     ACE_CDR::Long dependent_typeid_count;
     TypeIdentifierWithSizeSeq dependent_typeids;
+
+    TypeIdentifierWithDependencies()
+      : dependent_typeid_count(0)
+    {}
   };
 
   typedef Sequence<TypeIdentifierWithDependencies> TypeIdentifierWithDependenciesSeq;
@@ -1940,6 +3439,9 @@ namespace XTypes {
                             const TypeIdentifier& type_identifier,
                             OPENDDS_SET(TypeIdentifier)& dependencies);
 
+  OpenDDS_Dcps_Export
+  const char* typekind_to_string(TypeKind tk);
+
 } // namespace XTypes
 
 namespace DCPS {
@@ -1951,31 +3453,45 @@ template<typename T>
 const XTypes::TypeMap& getMinimalTypeMap();
 
 template<typename T>
+const XTypes::TypeIdentifier& getCompleteTypeIdentifier();
+
+template<typename T>
+const XTypes::TypeMap& getCompleteTypeMap();
+
+template<typename T>
 void serialized_size(const Encoding& encoding, size_t& size,
                      const XTypes::Optional<T>& opt)
 {
   size += DCPS::boolean_cdr_size;
-  if (opt.present) {
-    serialized_size(encoding, size, opt.value);
+  if (opt) {
+    serialized_size(encoding, size, opt.value());
   }
 }
 
 template<typename T>
 bool operator<<(Serializer& strm, const XTypes::Optional<T>& opt)
 {
-  if (!(strm << ACE_OutputCDR::from_boolean(opt.present))) {
+  if (!(strm << ACE_OutputCDR::from_boolean(opt.has_value()))) {
     return false;
   }
-  return !opt.present || strm << opt.value;
+  return !opt.has_value() || strm << opt.value();
 }
 
 template<typename T>
 bool operator>>(Serializer& strm, XTypes::Optional<T>& opt)
 {
-  if (!(strm >> ACE_InputCDR::to_boolean(opt.present))) {
+  bool present;
+  if (!(strm >> ACE_InputCDR::to_boolean(present))) {
     return false;
   }
-  return !opt.present || strm >> opt.value;
+  if (present) {
+    T value;
+    const bool status = strm >> value;
+    opt = XTypes::Optional<T>(value);
+    return status;
+  }
+
+  return true;
 }
 
 
@@ -1995,6 +3511,19 @@ void serialized_size(const Encoding& encoding, size_t& size,
 }
 
 template<typename T>
+void serialized_size(const Encoding& encoding, size_t& size,
+                     const NestedKeyOnly<const XTypes::Sequence<T> >& seq)
+{
+  if (!encoding.skip_sequence_dheader()) {
+    serialized_size_delimiter(encoding, size);
+  }
+  primitive_serialized_size_ulong(encoding, size);
+  for (ACE_CDR::ULong i = 0; i < seq.value.length(); ++i) {
+    serialized_size(encoding, size, NestedKeyOnly<const T>(seq.value[i]));
+  }
+}
+
+template<typename T>
 bool operator<<(Serializer& strm, const XTypes::Sequence<T>& seq)
 {
   if (!strm.encoding().skip_sequence_dheader()) {
@@ -2010,6 +3539,28 @@ bool operator<<(Serializer& strm, const XTypes::Sequence<T>& seq)
   }
   for (ACE_CDR::ULong i = 0; i < length; ++i) {
     if (!(strm << seq[i])) {
+      return false;
+    }
+  }
+  return true;
+}
+
+template<typename T>
+bool operator<<(Serializer& strm, const NestedKeyOnly<const XTypes::Sequence<T> >& seq)
+{
+  if (!strm.encoding().skip_sequence_dheader()) {
+    size_t total_size = 0;
+    serialized_size(strm.encoding(), total_size, seq);
+    if (!strm.write_delimiter(total_size)) {
+      return false;
+    }
+  }
+  const ACE_CDR::ULong length = seq.value.length();
+  if (!(strm << length)) {
+    return false;
+  }
+  for (ACE_CDR::ULong i = 0; i < length; ++i) {
+    if (!(strm << NestedKeyOnly<const T>(seq.value[i]))) {
       return false;
     }
   }
@@ -2058,6 +3609,55 @@ bool operator>>(Serializer& strm, XTypes::Sequence<T>& seq)
   return strm.skip(end_of_seq - strm.rpos());
 }
 
+template<typename T>
+bool operator>>(Serializer& strm, NestedKeyOnly<XTypes::Sequence<T> >& seq)
+{
+  size_t total_size = 0;
+  if (!strm.read_delimiter(total_size)) {
+    return false;
+  }
+
+  // special cases for compatibility with older versions that encoded this
+  // sequence incorrectly - if the DHeader was read as a 0, it's an empty
+  // sequence although it should have been encoded as DHeader (4) + Length (0)
+  if (total_size == 0) {
+    seq.value.length(0);
+    return true;
+  }
+
+  if (total_size < 4) {
+    return false;
+  }
+
+  const size_t end_of_seq = strm.rpos() + total_size;
+  ACE_CDR::ULong length;
+  if (!(strm >> length)) {
+    return false;
+  }
+
+  if (length > strm.length()) {
+    // if encoded incorrectly, the first 4 bytes of the elements were read
+    // as if they were the length - this may end up being larger than the
+    // number of bytes remaining in the Serializer
+    return false;
+  }
+
+  seq.value.length(length);
+  for (ACE_CDR::ULong i = 0; i < length; ++i) {
+    NestedKeyOnly<T> tmp(seq.value[i]);
+    if (!(strm >> tmp)) {
+      return false;
+    }
+  }
+  return strm.skip(end_of_seq - strm.rpos());
+}
+
+template <typename T>
+bool gen_skip_over(Serializer&, XTypes::Sequence<T>*)
+{
+  // No-op;
+  return true;
+}
 
 // non-template overloads for sequences of basic types:
 // XCDR2 encoding rule 11 - Sequences of primitive element type
@@ -2272,17 +3872,31 @@ OpenDDS_Dcps_Export
 void serialized_size(const Encoding& encoding, size_t& size,
   const XTypes::TypeIdentifier& stru);
 OpenDDS_Dcps_Export
+void serialized_size(const Encoding& encoding, size_t& size,
+  const NestedKeyOnly<const XTypes::TypeIdentifier>& stru);
+OpenDDS_Dcps_Export
 bool operator<<(Serializer& ser, const XTypes::TypeIdentifier& stru);
 OpenDDS_Dcps_Export
+bool operator<<(Serializer& ser, const NestedKeyOnly<const XTypes::TypeIdentifier>& stru);
+OpenDDS_Dcps_Export
 bool operator>>(Serializer& ser, XTypes::TypeIdentifier& stru);
+OpenDDS_Dcps_Export
+bool operator>>(Serializer& ser, NestedKeyOnly<XTypes::TypeIdentifier>& stru);
 
 OpenDDS_Dcps_Export
 void serialized_size(const Encoding& encoding, size_t& size,
   const XTypes::TypeIdentifierWithSize& stru);
 OpenDDS_Dcps_Export
+void serialized_size(const Encoding& encoding, size_t& size,
+  const NestedKeyOnly<const XTypes::TypeIdentifierWithSize>& stru);
+OpenDDS_Dcps_Export
 bool operator<<(Serializer& ser, const XTypes::TypeIdentifierWithSize& stru);
 OpenDDS_Dcps_Export
+bool operator<<(Serializer& ser, const NestedKeyOnly<const XTypes::TypeIdentifierWithSize>& stru);
+OpenDDS_Dcps_Export
 bool operator>>(Serializer& ser, XTypes::TypeIdentifierWithSize& stru);
+OpenDDS_Dcps_Export
+bool operator>>(Serializer& ser, NestedKeyOnly<XTypes::TypeIdentifierWithSize>& stru);
 
 void serialized_size(const Encoding& encoding, size_t& size,
   const XTypes::TypeIdentifierWithDependencies& stru);
@@ -2608,17 +4222,34 @@ OpenDDS_Dcps_Export
 void serialized_size(const Encoding& encoding, size_t& size,
   const XTypes::TypeIdentifierTypeObjectPair& stru);
 OpenDDS_Dcps_Export
+void serialized_size(const Encoding& encoding, size_t& size,
+  const NestedKeyOnly<const XTypes::TypeIdentifierTypeObjectPair>& stru);
+OpenDDS_Dcps_Export
 bool operator<<(Serializer& strm, const XTypes::TypeIdentifierTypeObjectPair& stru);
 OpenDDS_Dcps_Export
+bool operator<<(Serializer& ser, const NestedKeyOnly<const XTypes::TypeIdentifierTypeObjectPair>& stru);
+OpenDDS_Dcps_Export
 bool operator>>(Serializer& strm, XTypes::TypeIdentifierTypeObjectPair& stru);
+OpenDDS_Dcps_Export
+bool operator>>(Serializer& ser, NestedKeyOnly<XTypes::TypeIdentifierTypeObjectPair>& stru);
 
 OpenDDS_Dcps_Export
 void serialized_size(const Encoding& encoding, size_t& size,
   const XTypes::TypeIdentifierPair& stru);
 OpenDDS_Dcps_Export
+void serialized_size(const Encoding& encoding, size_t& size,
+  const NestedKeyOnly<const XTypes::TypeIdentifierPair>& stru);
+OpenDDS_Dcps_Export
 bool operator<<(Serializer& strm, const XTypes::TypeIdentifierPair& stru);
 OpenDDS_Dcps_Export
+bool operator<<(Serializer& ser, const NestedKeyOnly<const XTypes::TypeIdentifierPair>& stru);
+OpenDDS_Dcps_Export
 bool operator>>(Serializer& strm, XTypes::TypeIdentifierPair& stru);
+OpenDDS_Dcps_Export
+bool operator>>(Serializer& ser, NestedKeyOnly<XTypes::TypeIdentifierPair>& stru);
+
+OpenDDS_Dcps_Export
+bool to_type_object(const unsigned char* buffer, size_t size, XTypes::TypeObject& to);
 
 } // namespace DCPS
 } // namespace OpenDDS

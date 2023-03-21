@@ -20,7 +20,6 @@ project(DDS*Publisher): dcpsexe, dcps_test, dcps_transports_for_test, opendds_op
 
   Source_Files {
     publisher.cpp
-    Writer.cpp
   }
 }
 

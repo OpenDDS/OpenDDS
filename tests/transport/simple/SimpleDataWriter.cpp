@@ -18,7 +18,7 @@
 
 #include <sstream>
 
-SimpleDataWriter::SimpleDataWriter(const OpenDDS::DCPS::RepoId& pub_id)
+SimpleDataWriter::SimpleDataWriter(const OpenDDS::DCPS::GUID_t& pub_id)
   : pub_id_(pub_id)
   , num_messages_sent_(0)
   , num_messages_delivered_(0)
@@ -103,6 +103,7 @@ SimpleDataWriter::data_delivered(const OpenDDS::DCPS::DataSampleElement* sample)
   // Delete the element
   //delete sample;
 
+  ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
   ++this->num_messages_delivered_;
 }
 
@@ -127,6 +128,7 @@ SimpleDataWriter::data_dropped(const OpenDDS::DCPS::DataSampleElement* sample,
   // Delete the element
   //delete sample;
 
+  ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
   ++this->num_messages_delivered_;
 }
 
@@ -134,11 +136,12 @@ SimpleDataWriter::data_dropped(const OpenDDS::DCPS::DataSampleElement* sample,
 int
 SimpleDataWriter::delivered_test_message()
 {
+  ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
   return (this->num_messages_delivered_ == this->num_messages_sent_) ? 1 : 0;
 }
 
 
-DDS_TEST::DDS_TEST(const OpenDDS::DCPS::RepoId& pub_id)
+DDS_TEST::DDS_TEST(const OpenDDS::DCPS::GUID_t& pub_id)
   : SimpleDataWriter(pub_id)
 {
 }
@@ -256,9 +259,10 @@ DDS_TEST::run(int num_messages, int msg_size)
 }
 
 void
-SimpleDataWriter::transport_assoc_done(int flags, const OpenDDS::DCPS::RepoId& remote)
+SimpleDataWriter::transport_assoc_done(int flags, const OpenDDS::DCPS::GUID_t& remote)
 {
   ACE_DEBUG((LM_INFO,
              "(%P|%t) DataWriter association with %C is done flags=%d.\n", OpenDDS::DCPS::LogGuid(remote).c_str(), flags));
+  ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
   associated_ = true;
 }

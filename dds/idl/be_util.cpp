@@ -42,8 +42,6 @@ be_util::prep_be_arg(char* arg)
   static const size_t SZ_WB_JAVA = sizeof(WB_JAVA) - 1;
   static const char WB_TAO_INC_PRE[] = "tao_include_prefix=";
   static const size_t SZ_WB_TAO_INC_PRE = sizeof(WB_TAO_INC_PRE) - 1;
-  static const char WB_V8[] = "v8";
-  static const size_t SZ_WB_V8 = sizeof(WB_V8) - 1;
   static const char WB_TS_CPP_INCLUDE[] = "ts_cpp_include=";
   static const size_t SZ_WB_TS_CPP_INCLUDE = sizeof(WB_TS_CPP_INCLUDE) - 1;
   static const char WB_DDS_SEQ_SUFFIX[] = "opendds_sequence_suffix=";
@@ -83,9 +81,6 @@ be_util::prep_be_arg(char* arg)
   } else if (0 == ACE_OS::strncasecmp(arg, WB_TAO_INC_PRE, SZ_WB_TAO_INC_PRE)) {
     be_global->tao_inc_pre_ = arg + SZ_WB_TAO_INC_PRE;
 
-  } else if (0 == ACE_OS::strncasecmp(arg, WB_V8, SZ_WB_V8)) {
-    be_global->v8(true);
-
   } else if (0 == ACE_OS::strncasecmp(arg, WB_TS_CPP_INCLUDE, SZ_WB_TS_CPP_INCLUDE)) {
     be_global->add_include(arg + SZ_WB_TS_CPP_INCLUDE, BE_GlobalData::STREAM_CPP);
 
@@ -111,15 +106,14 @@ be_util::usage()
     ACE_TEXT(" -SI\t\t\tsuppress generation of *TypeSupport.idl\n")
     ACE_TEXT(" -Sa\t\t\tsuppress IDL any (ignored, for tao_idl compatibility)\n")
     ACE_TEXT(" -St\t\t\tsuppress IDL typecode when -L* option is present\n")
+    ACE_TEXT(" -Sv\t\t\tsuppress ValueReader and ValueWriter generation\n")
     ACE_TEXT(" -Sx\t\t\tsuppress XTypes TypeObject and TypeIdentifier generation\n")
     ACE_TEXT(" -Sdefault\t\texclude default TypeSupport generators from output\n")
     ACE_TEXT(" -Gitl\t\t\tgenerate ITL\n")
     ACE_TEXT(" -GfaceTS\t\tgenerate FACE TS API for DCPS data types\n")
-    ACE_TEXT(" -Gv8\t\t\tgenerate TypeSupport for converting data samples ")
-    ACE_TEXT("to v8 JavaScript objects\n")
-    ACE_TEXT("\t\t\t\t-Wb,v8 is an alternative form for this option\n")
     ACE_TEXT(" -Grapidjson\t\tgenerate TypeSupport for converting data samples ")
     ACE_TEXT("to RapidJSON JavaScript objects\n")
+    ACE_TEXT(" -Gxtypes-complete\t\t\tgenerate XTypes complete TypeObject and TypeIdentifier\n")
     ACE_TEXT(" --filename-only-includes\tStrip leading directories from generated #include lines\n")
     ACE_TEXT(" --[no-]default-nested\ttopic types must be declared, true by default\n")
     ACE_TEXT(" --no-dcps-data-type-warnings\t\tdon't warn about #pragma DCPS_DATA_TYPE\n")
@@ -129,6 +123,7 @@ be_util::usage()
     ACE_TEXT("\t\t\t\t\t(sequential if not set)\n")
     ACE_TEXT(" --default-try-construct\t\tset default XTypes try-construct behavior to ")
     ACE_TEXT("discard, use-default, or trim\n\t\t\t\t\t(discard if not set)\n")
+    ACE_TEXT(" --old-typeobject-encoding\t\tuse the pre-3.18 encoding of TypeObjects when deriving TypeIdentifiers\n")
     ACE_TEXT(" -Wb,export_macro=<macro name>\t\tset export macro ")
     ACE_TEXT("for all files\n")
     ACE_TEXT("\t\t\t\t\t\t--export=<macro name> is an alternative form for this option\n")

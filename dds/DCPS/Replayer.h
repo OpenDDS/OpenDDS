@@ -31,7 +31,7 @@ class Replayer;
  *
  * This class is for handling callbacks from the Replayer object.
  */
-class OpenDDS_Dcps_Export ReplayerListener : public RcObject {
+class OpenDDS_Dcps_Export ReplayerListener : public virtual RcObject {
 public:
   ~ReplayerListener();
   /**

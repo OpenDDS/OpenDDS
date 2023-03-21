@@ -1,13 +1,10 @@
 /*
- *
- *
  * Distributed under the OpenDDS License.
  * See: http://www.opendds.org/license.html
  */
 
 #include "MonitorFactoryImpl.h"
-#include "monitorC.h"
-#include "monitorTypeSupportImpl.h"
+
 #include "SPMonitorImpl.h"
 #include "DPMonitorImpl.h"
 #include "TopicMonitorImpl.h"
@@ -18,12 +15,18 @@
 #include "DRMonitorImpl.h"
 #include "DRPeriodicMonitorImpl.h"
 #include "TransportMonitorImpl.h"
-#include "dds/DCPS/Service_Participant.h"
-#include "dds/DCPS/DomainParticipantImpl.h"
+
+#include "monitorC.h"
+#include "monitorTypeSupportImpl.h"
+
+#include <dds/DCPS/Service_Participant.h>
+#include <dds/DCPS/DomainParticipantImpl.h>
+#include <dds/DCPS/Marked_Default_Qos.h>
+#include <dds/DCPS/DCPS_Utils.h>
+#include <dds/DCPS/transport/framework/TransportRegistry.h>
+
 #include <dds/DdsDcpsInfrastructureC.h>
 #include <dds/DdsDcpsPublicationC.h>
-#include <dds/DCPS/Marked_Default_Qos.h>
-#include <dds/DCPS/transport/framework/TransportRegistry.h>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -36,6 +39,7 @@ MonitorFactoryImpl::MonitorFactoryImpl()
 
 MonitorFactoryImpl::~MonitorFactoryImpl()
 {
+  deinitialize();
 }
 
 OpenDDS::DCPS::Monitor*
@@ -145,6 +149,7 @@ MonitorFactoryImpl::initialize()
                             PARTICIPANT_QOS_DEFAULT,
                             DDS::DomainParticipantListener::_nil(),
                             OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+  participant_ = participant;
   if (CORBA::is_nil(participant.in())) {
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("ERROR: %N:%l: MonitorFactoryImpl::initialize() -")
@@ -366,6 +371,29 @@ MonitorFactoryImpl::initialize()
     }
   } else {
     ACE_DEBUG((LM_DEBUG, "MonitorFactoryImpl::initialize(): Failed to register transport_ts\n"));
+  }
+}
+
+void MonitorFactoryImpl::deinitialize()
+{
+  if (participant_) {
+    DDS::ReturnCode_t tmp = participant_->delete_contained_entities();
+    if (tmp && log_level >= LogLevel::Error) {
+      ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: MonitorFactoryImpl::deinitialize: "
+        "delete_contained_entities returned %C\n",
+        retcode_to_string(tmp)));
+    }
+
+    DDS::DomainParticipantFactory_var dpf =
+      TheServiceParticipant->get_domain_participant_factory();
+    tmp = dpf->delete_participant(participant_);
+    if (tmp && log_level >= LogLevel::Error) {
+      ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: MonitorFactoryImpl::deinitialize: "
+        "delete_participant returned %C\n",
+        retcode_to_string(tmp)));
+    }
+
+    participant_ = 0;
   }
 }
 

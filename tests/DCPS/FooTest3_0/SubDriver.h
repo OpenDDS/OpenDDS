@@ -17,7 +17,7 @@ class SubDriver
 {
   public:
 
-    typedef std::vector < ::OpenDDS::DCPS::PublicationId > PublicationIds;
+    typedef std::vector < ::OpenDDS::DCPS::GUID_t > PublicationIds;
 
     SubDriver();
     virtual ~SubDriver();

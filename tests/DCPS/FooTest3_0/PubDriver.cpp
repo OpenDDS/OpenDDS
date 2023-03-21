@@ -156,8 +156,6 @@ PubDriver::initialize(int& argc, ACE_TCHAR *argv[])
   ::DDS::TopicQos new_topic_qos = default_topic_qos;
   new_topic_qos.reliability.kind  = ::DDS::RELIABLE_RELIABILITY_QOS;
 
-  //The SunOS compiler had problem resolving operator in a namespace.
-  //To resolve the compilation errors, the operator is called explicitly.
   TEST_CHECK (! (new_topic_qos == default_topic_qos));
 
   participant_->set_default_topic_qos(new_topic_qos);
@@ -364,7 +362,7 @@ PubDriver::end()
 void
 PubDriver::run()
 {
-  OpenDDS::DCPS::PublicationId pub_id = datawriter_servant_->get_repo_id ();
+  OpenDDS::DCPS::GUID_t pub_id = datawriter_servant_->get_guid ();
   std::stringstream buffer;
 
   buffer << to_string(pub_id);
@@ -489,7 +487,7 @@ PubDriver::register_test ()
   TEST_CHECK(key_holder.sample_sequence == foo1.sample_sequence);
   TEST_CHECK(key_holder.writer_id == foo1.writer_id);
 
-  // Regression Test for https://github.com/objectcomputing/OpenDDS/issues/592
+  // Regression Test for https://github.com/OpenDDS/OpenDDS/issues/592
   ret = foo_datawriter_->get_key_value(key_holder, ::DDS::HANDLE_NIL);
   TEST_CHECK(ret == ::DDS::RETCODE_BAD_PARAMETER);
 
@@ -580,12 +578,17 @@ PubDriver::unregister_test ()
 
   TEST_CHECK (ret == ::DDS::RETCODE_OK);
 
+  TEST_CHECK(DDS::HANDLE_NIL == foo_datawriter_->lookup_instance(foo1));
+
   foo2.sample_sequence = 2;
 
   ret = foo_datawriter_->write(foo2,
                                ::DDS::HANDLE_NIL);
 
   TEST_CHECK (ret == ::DDS::RETCODE_OK);
+
+  handle = foo_datawriter_->lookup_instance(foo2);
+  TEST_CHECK (handle != ::DDS::HANDLE_NIL);
 
   foo2.sample_sequence = 3;
 

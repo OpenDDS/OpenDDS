@@ -50,6 +50,44 @@ int ACE_TMAIN (int, ACE_TCHAR *[])
               ++retval;
             }
 
+          if (dr_qos.type_consistency.ignore_sequence_bounds != true)
+          {
+            ACE_ERROR ((LM_ERROR, "PARSEXML - "
+                  "get_datareader_qos returned an invalid type type_consistency ignore_sequence_bounds.\n"));
+            ++retval;
+          }
+          if (dr_qos.type_consistency.ignore_string_bounds != true)
+          {
+            ACE_ERROR ((LM_ERROR, "PARSEXML - "
+                  "get_datareader_qos return an invalid type type_consistency ignore_string_bounds.\n"));
+            ++retval;
+          }
+          if (dr_qos.type_consistency.ignore_member_names != true)
+          {
+            ACE_ERROR ((LM_ERROR, "PARSEXML - "
+                  "get_datareader_qos return an invalid type type_consistency ignore_member_names.\n"));
+            ++retval;
+          }
+          if (dr_qos.type_consistency.prevent_type_widening != true)
+          {
+            ACE_ERROR ((LM_ERROR, "PARSEXML - "
+                  "get_datareader_qos return an invalid type type_consistency prevent_type_widening.\n"));
+            ++retval;
+          }
+          if (dr_qos.type_consistency.force_type_validation != true)
+          {
+            ACE_ERROR ((LM_ERROR, "PARSEXML - "
+                  "get_datareader_qos return an invalid type type_consistency force_type_validation.\n"));
+            ++retval;
+          }
+          if (dr_qos.representation.value.length() != 2)
+          {
+            ACE_ERROR ((LM_ERROR, "PARSEXML - "
+                  "get_datareader_qos return an invalid length %d for data_representation.\n",
+                  dr_qos.representation.value.length()));
+            ++retval;
+          }
+
           ::DDS::TopicQos tp_qos;
           retcode_qos = xml_loader.get_topic_qos (
                                 tp_qos,

@@ -1,4 +1,5 @@
 #include <dds/DCPS/Serializer.h>
+#include <dds/DCPS/debug.h>
 
 #include <gtest/gtest.h>
 
@@ -131,6 +132,8 @@ TEST(dds_DCPS_Serializer, EncapsulationHeader_EncapsulationHeader_Encoding_Valid
 
 TEST(dds_DCPS_Serializer, EncapsulationHeader_EncapsulationHeader_Encoding_Invalid)
 {
+  OpenDDS::DCPS::LogRestore restore;
+  OpenDDS::DCPS::log_level.set(OpenDDS::DCPS::LogLevel::None);
   Encoding initenc(Encoding::KIND_UNALIGNED_CDR, ENDIAN_LITTLE);
   EncapsulationHeader eh(initenc, FINAL);
   EXPECT_FALSE(eh.is_good());
@@ -187,6 +190,8 @@ TEST(dds_DCPS_Serializer, EncapsulationHeader_from_encoding_XCDR2_LITTLE_MUTABLE
 
 TEST(dds_DCPS_Serializer, EncapsulationHeader_from_encoding_UNALIGNED_CDR_LITTLE_MUTABLE)
 {
+  OpenDDS::DCPS::LogRestore restore;
+  OpenDDS::DCPS::log_level.set(OpenDDS::DCPS::LogLevel::None);
   EncapsulationHeader eh;
   Encoding enc(Encoding::KIND_UNALIGNED_CDR, ENDIAN_LITTLE);
   EXPECT_FALSE(eh.from_encoding(enc, MUTABLE));
@@ -195,6 +200,8 @@ TEST(dds_DCPS_Serializer, EncapsulationHeader_from_encoding_UNALIGNED_CDR_LITTLE
 
 TEST(dds_DCPS_Serializer, EncapsulationHeader_to_encoding_MUTABLE)
 {
+  OpenDDS::DCPS::LogRestore restore;
+  OpenDDS::DCPS::log_level.set(OpenDDS::DCPS::LogLevel::None);
   EncapsulationHeader eh;
   Encoding enc;
   EXPECT_FALSE(eh.to_encoding(enc, MUTABLE));
@@ -211,6 +218,8 @@ TEST(dds_DCPS_Serializer, EncapsulationHeader_to_encoding_NOT_MUTABLE)
 
 TEST(dds_DCPS_Serializer, EncapsulationHeader_to_encoding_CDR_LE_MUTABLE)
 {
+  OpenDDS::DCPS::LogRestore restore;
+  OpenDDS::DCPS::log_level.set(OpenDDS::DCPS::LogLevel::None);
   EncapsulationHeader eh;
   eh.kind(EncapsulationHeader::KIND_CDR_LE);
   Encoding enc;
@@ -301,6 +310,8 @@ TEST(dds_DCPS_Serializer, EncapsulationHeader_to_encoding_PL_CDR2_LE_MUTABLE)
 
 TEST(dds_DCPS_Serializer, EncapsulationHeader_to_encoding_XML)
 {
+  OpenDDS::DCPS::LogRestore restore;
+  OpenDDS::DCPS::log_level.set(OpenDDS::DCPS::LogLevel::None);
   EncapsulationHeader eh;
   eh.kind(EncapsulationHeader::KIND_XML);
   Encoding enc;
@@ -310,6 +321,8 @@ TEST(dds_DCPS_Serializer, EncapsulationHeader_to_encoding_XML)
 
 TEST(dds_DCPS_Serializer, EncapsulationHeader_to_encoding_INVALID)
 {
+  OpenDDS::DCPS::LogRestore restore;
+  OpenDDS::DCPS::log_level.set(OpenDDS::DCPS::LogLevel::None);
   Encoding initenc(Encoding::KIND_UNALIGNED_CDR, ENDIAN_LITTLE);
   EncapsulationHeader eh(initenc, FINAL);
   Encoding enc;
@@ -676,3 +689,74 @@ TEST(serializer_test, Serializer_test_peek_depth)
   ASSERT_TRUE(res == c);
 }
 
+TEST(serializer_test, Serializer_test_trim)
+{
+  OpenDDS::DCPS::Message_Block_Ptr amb(new ACE_Message_Block(1));
+  ACE_Message_Block* cont = amb.get();
+  for (size_t i = 0; i < 9; ++i) {
+    cont->cont(new ACE_Message_Block(1));
+    cont = cont->cont();
+  }
+
+  const Encoding enc;
+  Serializer ser_w(amb.get(), enc);
+  ACE_CDR::Octet x[] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
+  ASSERT_TRUE(ser_w.write_octet_array(x, sizeof x));
+
+  Serializer ser(amb.get(), enc);
+  ASSERT_FALSE(ser.trim(11));
+
+  ASSERT_TRUE(ser.read_octet_array(x, 3));
+  OpenDDS::DCPS::Message_Block_Ptr subset(ser.trim(3));
+  ASSERT_EQ(subset->total_length(), 3u);
+  ASSERT_EQ(subset->length(), 1u);
+  ASSERT_EQ(subset->rd_ptr()[0], 3);
+  ASSERT_TRUE(subset->cont());
+  ASSERT_TRUE(subset->cont()->cont());
+  ASSERT_FALSE(subset->cont()->cont()->cont());
+}
+
+TEST(serializer_test, Serializer_test_bad_string)
+{
+  Message_Block_Ptr amb(new ACE_Message_Block(4));
+  const Encoding enc(Encoding::KIND_XCDR1, ENDIAN_LITTLE);
+  Serializer ser_w(amb.get(), enc);
+  ACE_CDR::Octet x[] = {1, 0, 0, 0};
+  ASSERT_TRUE(ser_w.write_octet_array(x, sizeof x));
+
+  Serializer ser(amb.get(), enc);
+  ACE_CDR::Char* str = 0; // since read_string fails, no need to deallocate
+  ASSERT_EQ(0u, ser.read_string(str));
+  ASSERT_FALSE(ser.good_bit());
+  ASSERT_EQ(0, str);
+}
+
+TEST(serializer_test, Serializer_test_bad_wstring)
+{
+  Message_Block_Ptr amb(new ACE_Message_Block(4));
+  const Encoding enc(Encoding::KIND_XCDR1, ENDIAN_LITTLE);
+  Serializer ser_w(amb.get(), enc);
+  ACE_CDR::Octet x[] = {1, 0, 0, 0};
+  ASSERT_TRUE(ser_w.write_octet_array(x, sizeof x));
+
+  Serializer ser(amb.get(), enc);
+  ACE_CDR::WChar* str = 0; // since read_string fails, no need to deallocate
+  ASSERT_EQ(0u, ser.read_string(str));
+  ASSERT_FALSE(ser.good_bit());
+  ASSERT_EQ(0, str);
+}
+
+TEST(serializer_test, Serializer_test_bad_string2)
+{
+  static const ACE_CDR::Octet x[] = {1, 0, 0, 0, 1};
+  Message_Block_Ptr amb(new ACE_Message_Block(sizeof x));
+  const Encoding enc(Encoding::KIND_XCDR1, ENDIAN_LITTLE);
+  Serializer ser_w(amb.get(), enc);
+  ASSERT_TRUE(ser_w.write_octet_array(x, sizeof x));
+
+  Serializer ser(amb.get(), enc);
+  ACE_CDR::Char* str = 0; // since read_string fails, no need to deallocate
+  ASSERT_EQ(0u, ser.read_string(str));
+  ASSERT_FALSE(ser.good_bit());
+  ASSERT_EQ(0, str);
+}

@@ -26,7 +26,11 @@ OpenDDS::DCPS::InstanceState::accessed()
   // Manage the view state due to data access here.
   //
   if (view_state_ & DDS::ANY_VIEW_STATE) {
+    const bool updated = (view_state_ != DDS::NOT_NEW_VIEW_STATE);
     view_state_ = DDS::NOT_NEW_VIEW_STATE;
+    if (updated) {
+      state_updated();
+    }
   }
 }
 
@@ -64,7 +68,7 @@ size_t OpenDDS::DCPS::InstanceState::no_writers_generation_count() const
 
 ACE_INLINE
 void
-OpenDDS::DCPS::InstanceState::data_was_received(const PublicationId& writer_id)
+OpenDDS::DCPS::InstanceState::data_was_received(const GUID_t& writer_id)
 {
   ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, lock_);
   cancel_release();
@@ -75,6 +79,9 @@ OpenDDS::DCPS::InstanceState::data_was_received(const PublicationId& writer_id)
   // here.  Let the lively() method manage the other transitions.
   //
   writers_.insert(writer_id);
+
+  const CORBA::ULong old_view_state = view_state_;
+  const CORBA::ULong old_instance_state = instance_state_;
 
   switch (view_state_) {
   case DDS::NEW_VIEW_STATE:
@@ -105,11 +112,15 @@ OpenDDS::DCPS::InstanceState::data_was_received(const PublicationId& writer_id)
   }
 
   instance_state_ = DDS::ALIVE_INSTANCE_STATE;
+
+  if (view_state_ != old_view_state || instance_state_ != old_instance_state) {
+    state_updated();
+  }
 }
 
 ACE_INLINE
 void
-OpenDDS::DCPS::InstanceState::lively(const PublicationId& writer_id)
+OpenDDS::DCPS::InstanceState::lively(const GUID_t& writer_id)
 {
   ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, lock_);
 
@@ -123,7 +134,11 @@ OpenDDS::DCPS::InstanceState::lively(const PublicationId& writer_id)
     cancel_release(); // cancel unregister
 
     ++no_writers_generation_count_;
+    const bool updated = (instance_state_ != DDS::ALIVE_INSTANCE_STATE);
     instance_state_ = DDS::ALIVE_INSTANCE_STATE;
+    if (updated) {
+      state_updated();
+    }
   }
 }
 
@@ -145,7 +160,7 @@ OpenDDS::DCPS::InstanceState::empty(bool value)
 
 ACE_INLINE
 bool
-OpenDDS::DCPS::InstanceState::is_last (const PublicationId& pub)
+OpenDDS::DCPS::InstanceState::is_last (const GUID_t& pub)
 {
   ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, lock_, false);
 

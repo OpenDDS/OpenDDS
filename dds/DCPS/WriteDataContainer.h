@@ -119,7 +119,7 @@ typedef OPENDDS_MAP(DDS::InstanceHandle_t, PublicationInstance_rch)
  *           we do not deadlock; and, 2) we incur the cost of
  *           obtaining the lock only once.
  */
-class OpenDDS_Dcps_Export WriteDataContainer : public RcObject {
+class OpenDDS_Dcps_Export WriteDataContainer : public virtual RcObject {
 public:
 
   friend class DataWriterImpl;
@@ -180,7 +180,7 @@ public:
    * and "sent" samples. The samples will be sent to the
    *  subscriber specified.
    */
-  DDS::ReturnCode_t reenqueue_all(const RepoId& reader_id,
+  DDS::ReturnCode_t reenqueue_all(const GUID_t& reader_id,
                                   const DDS::LifespanQosPolicy& lifespan
 #ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
                                   ,
@@ -343,9 +343,13 @@ public:
                                     bool deadline_is_infinite,
                                     const SequenceNumber& sequence);
 
-  bool sequence_acknowledged(const SequenceNumber sequence);
+  bool sequence_acknowledged(const SequenceNumber& sequence);
 
 private:
+
+  DDS::ReturnCode_t remove_instance(PublicationInstance_rch instance,
+                                    Message_Block_Ptr& registered_sample,
+                                    bool dup_registered_sample);
 
   // A class, normally provided by an unit test, that needs access to
   // private methods/members.
@@ -366,7 +370,7 @@ private:
 
   void copy_and_prepend(SendStateDataSampleList& list,
                         const SendStateDataSampleList& appended,
-                        const RepoId& reader_id,
+                        const GUID_t& reader_id,
                         const DDS::LifespanQosPolicy& lifespan,
 #ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
                         const OPENDDS_STRING& filterClassName,
@@ -407,11 +411,26 @@ private:
    */
   void wakeup_blocking_writers (DataSampleElement* stale);
 
+  void add_reader_acks(const GUID_t& reader, const SequenceNumber& base);
+  void remove_reader_acks(const GUID_t& reader);
+
 private:
 
   void log_send_state_lists (OPENDDS_STRING description);
 
-  DisjointSequence acked_sequences_;
+#ifdef ACE_HAS_CPP11
+  typedef OPENDDS_UNORDERED_MAP(GUID_t, DisjointSequence) AckedSequenceMap;
+#else
+  typedef OPENDDS_MAP_CMP(GUID_t, DisjointSequence, GUID_tKeyLessThan) AckedSequenceMap;
+#endif
+  AckedSequenceMap acked_sequences_;
+  SequenceNumber cached_cumulative_ack_;
+  bool cached_cumulative_ack_valid_;
+
+  SequenceNumber get_cumulative_ack();
+  SequenceNumber get_last_ack();
+  void update_acked(const SequenceNumber& seq, const GUID_t& id = GUID_UNKNOWN);
+  bool sequence_acknowledged_i(const SequenceNumber& sequence);
 
   /// List of data that has not been sent yet.
   SendStateDataSampleList   unsent_data_;
@@ -444,7 +463,7 @@ private:
   PublicationInstanceMapType instances_;
 
   /// The publication Id from repo.
-  PublicationId    publication_id_;
+  GUID_t    publication_id_;
 
   /// The writer that owns this container.
   DataWriterImpl*  writer_;
@@ -557,8 +576,8 @@ private:
   void cancel_deadline(const PublicationInstance_rch& instance);
 };
 
-} /// namespace OpenDDS
 } /// namespace DCPS
+} /// namespace OpenDDS
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
 

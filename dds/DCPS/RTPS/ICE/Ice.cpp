@@ -111,9 +111,17 @@ Configuration* Configuration::instance()
   return ACE_Singleton<Configuration, ACE_Thread_Mutex>::instance();
 }
 
-Agent* Agent::instance()
+struct AgentHolder {
+  AgentHolder()
+    : agent_impl(DCPS::make_rch<AgentImpl>())
+  {}
+
+  DCPS::RcHandle<AgentImpl> agent_impl;
+};
+
+DCPS::RcHandle<Agent> Agent::instance()
 {
-  return ACE_Singleton<AgentImpl, ACE_Thread_Mutex>::instance();
+  return DCPS::static_rchandle_cast<Agent>(ACE_Singleton<AgentHolder, ACE_Thread_Mutex>::instance()->agent_impl);
 }
 
 ServerReflexiveStateMachine::StateChange
@@ -121,6 +129,8 @@ ServerReflexiveStateMachine::send(const ACE_INET_Addr& address,
                                   size_t indication_count_limit,
                                   const DCPS::GuidPrefix_t& guid_prefix)
 {
+  timestamp_ = DCPS::MonotonicTimePoint::now();
+
   if (stun_server_address_ == ACE_INET_Addr() &&
       address == ACE_INET_Addr()) {
     // Do nothing.
@@ -145,6 +155,9 @@ ServerReflexiveStateMachine::send(const ACE_INET_Addr& address,
 ServerReflexiveStateMachine::StateChange
 ServerReflexiveStateMachine::receive(const STUN::Message& message)
 {
+  latency_ = DCPS::MonotonicTimePoint::now() - timestamp_;
+  latency_available_ = true;
+
   switch (message.class_) {
   case STUN::SUCCESS_RESPONSE:
     return success_response(message);
@@ -200,15 +213,16 @@ ServerReflexiveStateMachine::next_send(size_t indication_count_limit,
 
   if (message_class_ == STUN::REQUEST &&
       server_reflexive_address_ != ACE_INET_Addr() &&
-      send_count_ == 3) {
+      send_count_ == indication_count_limit) {
     // Reset.
     retval = SRSM_Unset;
     server_reflexive_address_ = ACE_INET_Addr();
     unset_stun_server_address_ = stun_server_address_;
   }
 
+  // indication_count_limit is offset by 1 to account for sending the request.
   if ((server_reflexive_address_ == ACE_INET_Addr()) ||
-      (message_class_ == STUN::INDICATION && send_count_ >= indication_count_limit)) {
+      (message_class_ == STUN::INDICATION && send_count_ >= indication_count_limit + 1)) {
     message_class_ = STUN::REQUEST;
     send_count_ = 0;
   }

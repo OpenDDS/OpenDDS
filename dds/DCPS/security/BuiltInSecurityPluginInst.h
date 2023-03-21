@@ -33,7 +33,7 @@ public:
   virtual CryptoKeyFactory_var create_crypto_key_factory();
   virtual CryptoKeyExchange_var create_crypto_key_exchange();
   virtual CryptoTransform_var create_crypto_transform();
-  virtual Utility* create_utility();
+  virtual DCPS::RcHandle<Utility> create_utility();
 #endif
 
   virtual void shutdown();
@@ -45,7 +45,7 @@ private:
   CryptoKeyFactory_var key_factory_;
   CryptoKeyExchange_var key_exchange_;
   CryptoTransform_var transform_;
-  Utility* utility_;
+  DCPS::RcHandle<Utility> utility_;
 #endif
 
   BuiltInSecurityPluginInst(const BuiltInSecurityPluginInst&);

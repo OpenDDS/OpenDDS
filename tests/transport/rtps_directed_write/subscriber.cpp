@@ -7,12 +7,13 @@
 #include <dds/DCPS/transport/framework/TransportExceptions.h>
 #include <dds/DCPS/transport/framework/ReceivedDataSample.h>
 
-#include <dds/DCPS/RTPS/BaseMessageUtils.h>
+#include <dds/DCPS/RTPS/MessageUtils.h>
 
 #include <dds/DCPS/GuidConverter.h>
 #include <dds/DCPS/AssociationData.h>
 #include <dds/DCPS/Service_Participant.h>
 #include <dds/DCPS/Qos_Helper.h>
+#include <dds/OpenddsDcpsExtTypeSupportImpl.h>
 
 #include <ace/OS_main.h>
 #include <ace/String_Base.h>
@@ -46,7 +47,7 @@ public:
     if (!associate(publication, false)) {
       throw std::string("subscriber TransportClient::associate() failed");
     }
-    std::cerr << "Reader " << OPENDDS_STRING(GuidConverter(get_repo_id())) << " called associate()\n";
+    std::cerr << "Reader " << LogGuid(get_guid()).conv_ << " called associate()\n";
   }
 
   virtual ~SimpleDataReader() { disassociate(config.getPubWtrId()); }
@@ -63,7 +64,7 @@ public:
 
   // Implementing TransportClient
   bool check_transport_qos(const TransportInst&) { return true; }
-  const RepoId& get_repo_id() const { return config.getSubRdrId(index); }
+  GUID_t get_guid() const { return config.getSubRdrId(index); }
   DDS::DomainId_t domain_id() const { return 0; }
   CORBA::Long get_priority_value(const AssociationData&) const { return 0; }
 
@@ -107,7 +108,8 @@ void SimpleDataReader::data_received(const ReceivedDataSample& sample)
     return;
   }
 
-  Serializer ser(sample.sample_.get(), encoding);
+  Message_Block_Ptr payload(sample.data());
+  Serializer ser(payload.get(), encoding);
   TestMsg data;
   if (!deserializeData(data, ser)) {
     return;
@@ -115,7 +117,7 @@ void SimpleDataReader::data_received(const ReceivedDataSample& sample)
 
   if (data.key == 99) {
     ACE_DEBUG((LM_INFO, ACE_TEXT("%C received terminating sample\n"),
-      OPENDDS_STRING(GuidConverter(get_repo_id())).c_str()));
+      LogGuid(get_guid()).c_str()));
     done_ = true;
     return;
   }
@@ -128,7 +130,7 @@ void SimpleDataReader::data_received(const ReceivedDataSample& sample)
   ACE_TCHAR buffer[32];
   std::string timestr(ACE_TEXT_ALWAYS_CHAR(ACE_OS::ctime_r(&seconds, buffer, 32)));
   std::ostringstream oss;
-  oss << "data_received() by " << OPENDDS_STRING(GuidConverter(get_repo_id())).c_str() << "\n\t"
+  oss << "data_received() by " << LogGuid(get_guid()).c_str() << "\n\t"
     "id = "          << int(sample.header_.message_id_) << "\n\t"
     "timestamp = "   << atv.usec() << " usec " << timestr << "\t"
     "seq# = "        << sample.header_.sequence_.getValue() << "\n\t"
@@ -153,16 +155,12 @@ class DDS_TEST {
 public:
   DDS_TEST(int argc, ACE_TCHAR* argv[]) : config(argc, argv, true) {
 
-    using OpenDDS::RTPS::address_to_kind;
-    using OpenDDS::RTPS::address_to_bytes;
     using OpenDDS::RTPS::message_block_to_sequence;
 
     ACE_INET_Addr remote_addr("127.0.0.1:12345");
     LocatorSeq locators;
     locators.length(1);
-    locators[0].kind = address_to_kind(remote_addr);
-    locators[0].port = remote_addr.get_port_number();
-    address_to_bytes(locators[0].address, remote_addr);
+    address_to_locator(locators[0], remote_addr);
 
     const Encoding& locators_encoding = OpenDDS::RTPS::get_locators_encoding();
     size_t size_locator = 0;

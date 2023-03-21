@@ -44,7 +44,7 @@ ManagerImpl::create(const Update::UTopic& topic)
     return;
   }
 
-  TopicUpdate sample;
+  TopicUpdate sample = TopicUpdate();
   sample.sender      = this->id().id();
   sample.action      = CreateEntity;
 
@@ -78,7 +78,7 @@ ManagerImpl::create(const Update::UParticipant& participant)
     return;
   }
 
-  ParticipantUpdate sample;
+  ParticipantUpdate sample = ParticipantUpdate();
   sample.sender = this->id().id();
   sample.action = CreateEntity;
 
@@ -108,7 +108,7 @@ ManagerImpl::create(const Update::URActor& reader)
     return;
   }
 
-  SubscriptionUpdate sample;
+  SubscriptionUpdate sample = SubscriptionUpdate();
   sample.sender         = this->id().id();
   sample.action         = CreateEntity;
 
@@ -148,7 +148,7 @@ ManagerImpl::create(const Update::UWActor& writer)
     return;
   }
 
-  PublicationUpdate sample;
+  PublicationUpdate sample = PublicationUpdate();
   sample.sender         = this->id().id();
   sample.action         = CreateEntity;
 
@@ -185,7 +185,7 @@ ManagerImpl::create(const Update::OwnershipData& data)
     return;
   }
 
-  OwnerUpdate sample;
+  OwnerUpdate sample = OwnerUpdate();
   sample.sender      = this->id().id();
   sample.action      = CreateEntity;
 
@@ -229,7 +229,7 @@ ManagerImpl::destroy(
       return;
     }
 
-    TopicUpdate sample;
+    TopicUpdate sample = TopicUpdate();
     sample.sender      = this->id().id();
     sample.action      = DestroyEntity;
 
@@ -259,7 +259,7 @@ ManagerImpl::destroy(
       return;
     }
 
-    ParticipantUpdate sample;
+    ParticipantUpdate sample = ParticipantUpdate();
     sample.sender = this->id().id();
     sample.action = DestroyEntity;
 
@@ -290,7 +290,7 @@ ManagerImpl::destroy(
         return;
       }
 
-      PublicationUpdate sample;
+      PublicationUpdate sample = PublicationUpdate();
       sample.sender         = this->id().id();
       sample.action         = DestroyEntity;
 
@@ -320,7 +320,7 @@ ManagerImpl::destroy(
         return;
       }
 
-      SubscriptionUpdate sample;
+      SubscriptionUpdate sample = SubscriptionUpdate();
       sample.sender         = this->id().id();
       sample.action         = DestroyEntity;
 
@@ -357,7 +357,7 @@ ManagerImpl::update(const Update::IdPath& id, const DDS::DomainParticipantQos& q
     return;
   }
 
-  ParticipantUpdate sample;
+  ParticipantUpdate sample = ParticipantUpdate();
   sample.sender = this->id().id();
   sample.action = UpdateQosValue1;
 
@@ -386,7 +386,7 @@ ManagerImpl::update(const Update::IdPath& id, const DDS::TopicQos& qos)
     return;
   }
 
-  TopicUpdate sample;
+  TopicUpdate sample = TopicUpdate();
   sample.sender      = this->id().id();
   sample.action      = UpdateQosValue1;
 
@@ -418,7 +418,7 @@ ManagerImpl::update(const Update::IdPath& id, const DDS::DataWriterQos& qos)
     return;
   }
 
-  PublicationUpdate sample;
+  PublicationUpdate sample = PublicationUpdate();
   sample.sender         = this->id().id();
   sample.action         = UpdateQosValue1;
 
@@ -450,7 +450,7 @@ ManagerImpl::update(const Update::IdPath& id, const DDS::PublisherQos& qos)
     return;
   }
 
-  PublicationUpdate sample;
+  PublicationUpdate sample = PublicationUpdate();
   sample.sender         = this->id().id();
   sample.action         = UpdateQosValue2;
 
@@ -482,7 +482,7 @@ ManagerImpl::update(const Update::IdPath& id, const DDS::DataReaderQos& qos)
     return;
   }
 
-  SubscriptionUpdate sample;
+  SubscriptionUpdate sample = SubscriptionUpdate();
   sample.sender         = this->id().id();
   sample.action         = UpdateQosValue1;
 
@@ -514,7 +514,7 @@ ManagerImpl::update(const Update::IdPath& id, const DDS::StringSeq& params)
     return;
   }
 
-  SubscriptionUpdate sample;
+  SubscriptionUpdate sample = SubscriptionUpdate();
   sample.sender            = this->id().id();
   sample.action            = UpdateFilterExpressionParams;
   sample.domain            = id.domain;
@@ -545,7 +545,7 @@ ManagerImpl::update(const Update::IdPath& id, const DDS::SubscriberQos& qos)
     return;
   }
 
-  SubscriptionUpdate sample;
+  SubscriptionUpdate sample = SubscriptionUpdate();
   sample.sender         = this->id().id();
   sample.action         = UpdateQosValue2;
 

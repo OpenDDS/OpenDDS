@@ -28,18 +28,24 @@ class LocalObjectBase
   , public virtual RcObject
 {
 public:
-  virtual void _add_ref() {
+  virtual void _add_ref()
+  {
     RcObject::_add_ref();
   }
-  virtual void _remove_ref() {
+  virtual void _remove_ref()
+  {
     RcObject::_remove_ref();
+  }
+  virtual CORBA::ULong _refcount_value() const
+  {
+    return static_cast<CORBA::ULong>(RcObject::ref_count());
   }
 };
 
 /// OpenDDS::DCPS::LocalObject resolves ambiguously-inherited members like
 /// _narrow and _ptr_type.  It is used from client code like so:
 /// class MyReaderListener
-///   : public OpenDDS::DCPS::LocalObject<OpenDDS::DCPS::DataReaderListener> {...};
+///   : public virtual OpenDDS::DCPS::LocalObject<OpenDDS::DCPS::DataReaderListener> {...};
 template <class Stub>
 class LocalObject
   : public virtual Stub

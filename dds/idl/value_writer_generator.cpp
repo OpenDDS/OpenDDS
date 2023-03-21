@@ -20,28 +20,6 @@ namespace {
 
   void generate_write(const std::string& expression, AST_Type* type, const std::string& idx, int level = 1);
 
-  void array_helper(const std::string& expression, AST_Array* array,
-                    size_t dim_idx, const std::string& idx, int level)
-  {
-    const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
-    const std::string indent(level * 2, ' ');
-    if (dim_idx < array->n_dims()) {
-      const size_t dim = array->dims()[dim_idx]->ev()->u.ulval;
-      be_global->impl_ <<
-        indent << "value_writer.begin_array();\n" <<
-        indent << "for (" << (use_cxx11 ? "size_t " : "unsigned int ") << idx << " = 0; "
-        << idx << " != " << dim << "; ++" << idx << ") {\n" <<
-        indent << "  value_writer.begin_element(" << idx << ");\n";
-      array_helper(expression + "[" + idx + "]", array, dim_idx + 1, idx + "i", level + 1);
-      be_global->impl_ <<
-        indent << "  value_writer.end_element();\n" <<
-        indent << "}\n" <<
-        indent << "value_writer.end_array();\n";
-    } else {
-      generate_write(expression, array->base_type(), idx + "i", level);
-    }
-  }
-
   std::string primitive_type(AST_PredefinedType::PredefinedType pt)
   {
     switch (pt) {
@@ -82,21 +60,85 @@ namespace {
     }
   }
 
+  void array_helper(const std::string& expression, AST_Array* array,
+                    size_t dim_idx, const std::string& idx, int level)
+  {
+    const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
+    const std::string indent(level * 2, ' ');
+    const Classification c = classify(array->base_type());
+    const bool primitive = c & CL_PRIMITIVE;
+    // When we have a primitive type the last dimension is written using the write_*_array
+    // operation, when we have a not primitive type the last dimension is written element by element
+    // in a loop in the generated code
+    if ((primitive && (dim_idx < array->n_dims() - 1)) || (!primitive && (dim_idx < array->n_dims()))) {
+      const size_t dim = array->dims()[dim_idx]->ev()->u.ulval;
+      be_global->impl_ <<
+        indent << "value_writer.begin_array();\n";
+      be_global->impl_ <<
+        indent << "for (" << (use_cxx11 ? "size_t " : "::CORBA::ULong ") << idx << " = 0; "
+        << idx << " != " << dim << "; ++" << idx << ") {\n" <<
+        indent << "  value_writer.begin_element(" << idx << ");\n";
+      array_helper(expression + "[" + idx + "]", array, dim_idx + 1, idx + "i", level + 1);
+      be_global->impl_ <<
+        indent << "  value_writer.end_element();\n" <<
+        indent << "}\n" <<
+        indent << "value_writer.end_array();\n";
+    } else {
+      if (primitive) {
+        const size_t dim = array->dims()[dim_idx]->ev()->u.ulval;
+        AST_Type* const actual = resolveActualType(array->base_type());
+        const AST_PredefinedType::PredefinedType pt =
+          dynamic_cast<AST_PredefinedType*>(actual)->pt();
+        be_global->impl_ <<
+          indent << "value_writer.begin_array();\n";
+        be_global->impl_ << indent <<
+          "value_writer.write_" << primitive_type(pt) << "_array (" << expression << (use_cxx11 ? ".data()" : "") << ", " << dim << ");\n";
+        be_global->impl_ <<
+          indent << "value_writer.end_array();\n";
+
+      } else {
+        generate_write(expression, array->base_type(), idx + "i", level);
+      }
+    }
+  }
+
   void sequence_helper(const std::string& expression, AST_Sequence* sequence,
                        const std::string& idx, int level)
   {
     const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
     const char* const length_func = use_cxx11 ? "size" : "length";
     const std::string indent(level * 2, ' ');
+    be_global->impl_ << indent << "value_writer.begin_sequence();\n";
+
+    const Classification c = classify(sequence->base_type());
+    AST_Type* const actual = resolveActualType(sequence->base_type());
+    bool use_optimized_write_ = false;
+    if (c & CL_PRIMITIVE) {
+      if (use_cxx11) {
+        const AST_PredefinedType::PredefinedType pt = dynamic_cast<AST_PredefinedType*>(actual)->pt();
+        use_optimized_write_ = !(pt == AST_PredefinedType::PT_boolean);
+      } else {
+        use_optimized_write_ = true;
+      }
+    }
+
+    if (use_optimized_write_) {
+      const AST_PredefinedType::PredefinedType pt =
+        dynamic_cast<AST_PredefinedType*>(actual)->pt();
+      be_global->impl_ << indent <<
+        "value_writer.write_" << primitive_type(pt) << "_array (" << expression << (use_cxx11 ? ".data()" : ".get_buffer()") << ", " << expression << "." << length_func << "());\n";
+    } else {
+      be_global->impl_ <<
+        indent << "for (" << (use_cxx11 ? "size_t " : "::CORBA::ULong ") << idx << " = 0; "
+        << idx << " != " << expression << "." << length_func << "(); ++" << idx << ") {\n" <<
+        indent << "  value_writer.begin_element(" << idx << ");\n";
+      generate_write(expression + "[" + idx + "]", sequence->base_type(), idx + "i", level + 1);
+      be_global->impl_ <<
+        indent << "  value_writer.end_element();\n" <<
+        indent << "}\n";
+    }
+
     be_global->impl_ <<
-      indent << "value_writer.begin_sequence();\n" <<
-      indent << "for (" << (use_cxx11 ? "size_t " : "unsigned int ") << idx << " = 0; "
-      << idx << " != " << expression << "." << length_func << "(); ++" << idx << ") {\n" <<
-      indent << "  value_writer.begin_element(" << idx << ");\n";
-    generate_write(expression + "[" + idx + "]", sequence->base_type(), idx + "i", level + 1);
-    be_global->impl_ <<
-      indent << "  value_writer.end_element();\n" <<
-      indent << "}\n" <<
       indent << "value_writer.end_sequence();\n";
   }
 
@@ -139,16 +181,16 @@ namespace {
   }
 
   std::string branch_helper(const std::string&,
+                            AST_Decl* branch,
                             const std::string& field_name,
                             AST_Type* type,
                             const std::string&,
                             bool,
                             Intro&,
-                            const std::string&,
-                            bool)
+                            const std::string&)
   {
     be_global->impl_ <<
-      "    value_writer.begin_union_member(\"" << field_name << "\");\n";
+      "    value_writer.begin_union_member(\"" << canonical_name(branch) << "\");\n";
     generate_write("value." + field_name + "()", type, "i", 2);
     be_global->impl_ <<
       "    value_writer.end_union_member();\n";
@@ -183,7 +225,7 @@ bool value_writer_generator::gen_enum(AST_Enum*,
         + val->local_name()->get_string();
       be_global->impl_ <<
         "  case " << value_name << ":\n"
-        "    value_writer.write_enum(\"" << val->local_name()->get_string() << "\", " << value_name << ");\n"
+        "    value_writer.write_enum(\"" << canonical_name(val) << "\", " << value_name << ");\n"
         "    break;\n";
     }
     be_global->impl_ << "  }\n";
@@ -226,8 +268,10 @@ bool value_writer_generator::gen_struct(AST_Structure*,
          pos != limit; ++pos) {
       AST_Field* const field = *pos;
       const std::string field_name = field->local_name()->get_string();
+      const std::string idl_name = canonical_name(field);
       be_global->impl_ <<
-        "  value_writer.begin_struct_member(\"" << field_name << "\");\n";
+        "  value_writer.begin_struct_member(XTypes::MemberDescriptorImpl(\"" << idl_name << "\", "
+        << (be_global->is_key(field) ? "true" : "false") <<  "));\n";
       generate_write("value." + field_name + accessor_suffix, field->field_type(), "i");
       be_global->impl_ <<
         "  value_writer.end_struct_member();\n";

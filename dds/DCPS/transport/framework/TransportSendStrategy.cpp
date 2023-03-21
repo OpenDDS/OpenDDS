@@ -60,14 +60,14 @@ namespace {
 // just increases the ref count.
 TransportSendStrategy::TransportSendStrategy(
   std::size_t id,
-  TransportImpl& transport,
+  const TransportImpl_rch& transport,
   ThreadSynchResource* synch_resource,
   Priority priority,
   const ThreadSynchStrategy_rch& thread_sync_strategy)
   : ThreadSynchWorker(id),
-    max_samples_(transport.config().max_samples_per_packet_),
-    optimum_size_(transport.config().optimum_packet_size_),
-    max_size_(transport.config().max_packet_size_),
+    max_samples_(DEFAULT_CONFIG_MAX_SAMPLES_PER_PACKET),
+    optimum_size_(DEFAULT_CONFIG_OPTIMUM_PACKET_SIZE),
+    max_size_(DEFAULT_CONFIG_MAX_PACKET_SIZE),
     max_header_size_(0),
     header_block_(0),
     pkt_chain_(0),
@@ -84,6 +84,13 @@ TransportSendStrategy::TransportSendStrategy(
     send_buffer_(0)
 {
   DBG_ENTRY_LVL("TransportSendStrategy","TransportSendStrategy",6);
+
+  TransportInst_rch cfg = transport->config();
+  if (cfg) {
+    max_samples_ = cfg->max_samples_per_packet_;
+    optimum_size_ = cfg->optimum_packet_size_;
+    max_size_ = cfg->max_packet_size_;
+  }
 
   // Create a ThreadSynch object just for us.
   DirectPriorityMapper mapper(priority);
@@ -693,10 +700,15 @@ TransportSendStrategy::send_delayed_notifications(const TransportQueueElement::M
     }
   }
 
-  if (!found_element)
+  if (!found_element) {
     return false;
+  }
 
-  bool transport_shutdown = transport_.is_shut_down();
+  bool transport_shutdown = true;
+  TransportImpl_rch transport = transport_.lock();
+  if (transport) {
+    transport_shutdown = transport->is_shut_down();
+  }
 
   if (num_delayed_notifications == 1) {
     // optimization for the common case
@@ -841,6 +853,8 @@ TransportSendStrategy::start()
 
   header_db_allocator_.reset( new TransportDataBlockAllocator(header_chunks));
   header_mb_allocator_.reset( new TransportMessageBlockAllocator(header_chunks));
+  header_db_lock_pool_.reset(new DataBlockLockPool(static_cast<unsigned long>(TheServiceParticipant->n_chunks())));
+  header_data_allocator_.reset(new DataAllocator(TheServiceParticipant->association_chunk_multiplier(), max_header_size_));
 
   // Since we (the TransportSendStrategy object) are a reference-counted
   // object, but the synch_ object doesn't necessarily know this, we need
@@ -885,6 +899,7 @@ TransportSendStrategy::stop()
                    ACE_TEXT("terminating with %d unsent bytes.\n"),
                    size));
       }
+      pkt_chain_ = 0;
     }
 
     if (elems_.size()) {
@@ -939,6 +954,7 @@ TransportSendStrategy::send(TransportQueueElement* element, bool relink)
         VDBG((LM_DEBUG, "(%P|%t) DBG:   "
               "TransportSendStrategy::send: mode is MODE_TERMINATED and not in "
               "graceful disconnecting, so discard message.\n"));
+        guard.release();
         element->data_dropped(true);
         return;
       }
@@ -1205,7 +1221,7 @@ TransportSendStrategy::send(TransportQueueElement* element, bool relink)
 }
 
 void
-TransportSendStrategy::send_stop(RepoId /*repoId*/)
+TransportSendStrategy::send_stop(GUID_t /*repoId*/)
 {
   DBG_ENTRY_LVL("TransportSendStrategy","send_stop",6);
   {
@@ -1296,7 +1312,7 @@ TransportSendStrategy::send_stop(RepoId /*repoId*/)
 }
 
 void
-TransportSendStrategy::remove_all_msgs(const RepoId& pub_id)
+TransportSendStrategy::remove_all_msgs(const GUID_t& pub_id)
 {
   DBG_ENTRY_LVL("TransportSendStrategy","remove_all_msgs",6);
 
@@ -1332,7 +1348,7 @@ TransportSendStrategy::remove_sample(const DataSampleElement* sample)
   // can stop calling rest datalinks to remove this sample if it's already released..
 
   const char* const payload = sample->get_sample()->cont()->rd_ptr();
-  RepoId pub_id = sample->get_pub_id();
+  GUID_t pub_id = sample->get_pub_id();
   const TransportQueueElement::MatchOnDataPayload modp(payload);
   if (send_delayed_notifications(&modp)) {
     return REMOVE_RELEASED;
@@ -1343,7 +1359,7 @@ TransportSendStrategy::remove_sample(const DataSampleElement* sample)
 }
 
 RemoveResult
-TransportSendStrategy::do_remove_sample(const RepoId&,
+TransportSendStrategy::do_remove_sample(const GUID_t&,
   const TransportQueueElement::MatchCriteria& criteria, bool remove_all)
 {
   DBG_ENTRY_LVL("TransportSendStrategy", "do_remove_sample", 6);
@@ -1489,7 +1505,10 @@ TransportSendStrategy::direct_send(bool do_relink)
                   "send_bytes"), 1);
 
         if (Transport_debug_level > 0) {
-          transport_.config().dump();
+          TransportImpl_rch transport = transport_.lock();
+          if (transport) {
+            transport->dump();
+          }
         }
       } else {
         VDBG((LM_DEBUG, "(%P|%t) DBG:   "
@@ -1654,10 +1673,10 @@ TransportSendStrategy::prepare_packet()
     static_cast<ACE_Message_Block*>(header_mb_allocator_->malloc()),
     ACE_Message_Block(max_header_size_,
                       ACE_Message_Block::MB_DATA,
-                      0,
-                      0,
-                      0,
-                      0,
+                      0, // cont
+                      0, // data
+                      header_data_allocator_.get(),
+                      header_db_lock_pool_->get_lock(),
                       ACE_DEFAULT_MESSAGE_BLOCK_PRIORITY,
                       ACE_Time_Value::zero,
                       ACE_Time_Value::max_time,
@@ -1915,12 +1934,17 @@ TransportSendStrategy::add_delayed_notification(TransportQueueElement* element)
     }
   }
 
-  delayed_delivered_notification_queue_.push_back(std::make_pair(element, mode_));
+  delayed_delivered_notification_queue_.push_back(std::make_pair(element, mode_.load()));
 }
 
 void TransportSendStrategy::deliver_ack_request(TransportQueueElement* element)
 {
-  GuardType guard(lock_);
+  const TransportQueueElement::MatchOnElement moe(element);
+  {
+    GuardType guard(lock_);
+    do_remove_sample(GUID_UNKNOWN, moe);
+  }
+
   element->data_delivered();
 }
 

@@ -17,7 +17,7 @@ PerlDDS::add_lib_path('../ConsolidatedMessengerIdl');
 
 my $test = new PerlDDS::TestFramework();
 
-if ($test->{'flags'}->{'all'}) {
+if ($test->flag('all')) {
     @original_ARGV = grep { $_ ne 'all' } @original_ARGV;
     my @tests = ('', qw/udp multicast default_tcp default_udp default_multicast
                         nobits stack shmem
@@ -36,17 +36,17 @@ $test->{'dcps_transport_debug_level'} = 2;
 my $dbg_lvl = '-ORBDebugLevel 1';
 my $pending_timeout = '-DCPSPendingTimeout 2';
 
-my $thread_per_connection = $test->{'flags'}->{'thread_per'} ? '-p' : '';
+my $thread_per_connection = $test->flag('thread_per') ? '-p' : '';
 
-my $default_tport = ($test->{'flags'}->{'default_tcp'} ||
-                     $test->{'flags'}->{'stack'}) ? '-t tcp' :
-    $test->{'flags'}->{'default_udp'} ? '-t udp' :
-    $test->{'flags'}->{'default_multicast'} ? '-t multicast' : '';
+my $default_tport = ($test->flag('default_tcp') ||
+                     $test->flag('stack')) ? '-t tcp' :
+    $test->flag('default_udp') ? '-t udp' :
+    $test->flag('default_multicast') ? '-t multicast' : '';
 
 $test->{'transport'} = ($PerlDDS::SafetyProfile ? 'rtps_disc' : 'tcp')
     if $default_tport eq '' && $test->{'transport'} eq '';
 
-my $stack_based = $test->{'flags'}->{'stack'} ? 1 : 0;
+my $stack_based = $test->flag('stack') ? 1 : 0;
 
 $test->process('sub', ($stack_based ? 'stack_' : '') . 'subscriber',
                "$dbg_lvl $default_tport $pending_timeout");

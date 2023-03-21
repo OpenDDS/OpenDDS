@@ -5,7 +5,6 @@
  * See: http://www.opendds.org/license.html
  */
 
-#include "Tcp_pch.h"
 #include "Tcp.h"
 #include "TcpLoader.h"
 #include "tao/debug.h"

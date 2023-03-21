@@ -274,12 +274,9 @@ TopicKeys::Iterator& TopicKeys::Iterator::operator++()
     if (pos_ == 0) { // Only Allow One Iteration
       pos_ = 1;
       AST_Union* union_node = dynamic_cast<AST_Union*>(root_);
-      if (be_global->union_discriminator_is_key(union_node)) {
+      if (level_ > 0 || be_global->union_discriminator_is_key(union_node)) {
         current_value_ = root_;
         return *this;
-      } else if (level_ > 0) {
-        throw Error(union_node, "union type is marked as key, "
-          "but its discriminator isn't");
       }
     }
 
@@ -342,7 +339,14 @@ std::string TopicKeys::Iterator::path()
   return ss.str();
 }
 
-void TopicKeys::Iterator::path_i(std::stringstream& ss)
+std::string TopicKeys::Iterator::canonical_path()
+{
+  std::stringstream ss;
+  path_i(ss, true);
+  return ss.str();
+}
+
+void TopicKeys::Iterator::path_i(std::stringstream& ss, bool canonical)
 {
   const char* error_msg = "Can't get path for invalid topic key iterator!";
   if (root_type_ == StructureType) {
@@ -351,7 +355,12 @@ void TopicKeys::Iterator::path_i(std::stringstream& ss)
       throw Error(root_, error_msg);
     }
     AST_Field* field = *Fields(struct_root)[child_ ? pos_ : pos_ - 1];
-    ss << (level_ ? "." : "") << field->local_name()->get_string();
+    ss << (level_ ? "." : "");
+    if (canonical) {
+      ss << canonical_name(field);
+    } else {
+      ss << field->local_name()->get_string();
+    }
   } else if (root_type_ == UnionType) {
     // Nothing
   } else if (root_type_ == ArrayType) {
@@ -376,7 +385,7 @@ void TopicKeys::Iterator::path_i(std::stringstream& ss)
     throw Error(root_, error_msg);
   }
   if (child_ && recursive_) {
-    child_->path_i(ss);
+    child_->path_i(ss, canonical);
   }
 }
 

@@ -34,7 +34,7 @@ TransportSendBuffer::~TransportSendBuffer()
 }
 
 void
-TransportSendBuffer::retain_all(const RepoId&)
+TransportSendBuffer::retain_all(const GUID_t&)
 {
 }
 
@@ -114,7 +114,7 @@ SingleSendBuffer::release_i(BufferMap::iterator buffer_iter)
     buffer.first->accept_remove_visitor(visitor);
     delete buffer.first;
 
-    buffer.second->release();
+    Message_Block_Ptr to_release(buffer.second);
     buffer.second = 0;
 
   } else {
@@ -127,7 +127,7 @@ SingleSendBuffer::release_i(BufferMap::iterator buffer_iter)
         bm_it->second.first->accept_remove_visitor(visitor);
         delete bm_it->second.first;
 
-        bm_it->second.second->release();
+        Message_Block_Ptr to_release(bm_it->second.second);
         bm_it->second.second = 0;
       }
       fragments_.erase(fm_it);
@@ -170,14 +170,14 @@ SingleSendBuffer::remove_i(BufferMap::iterator buffer_iter, BufferVec& removed)
 }
 
 void
-SingleSendBuffer::retain_all(const RepoId& pub_id)
+SingleSendBuffer::retain_all(const GUID_t& pub_id)
 {
   if (Transport_debug_level > 5) {
-    GuidConverter converter(pub_id);
+    LogGuid logger(pub_id);
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) SingleSendBuffer::retain_all() - ")
       ACE_TEXT("copying out blocks for publication: %C\n"),
-      OPENDDS_STRING(converter).c_str()
+      logger.c_str()
     ));
   }
   ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
@@ -185,12 +185,12 @@ SingleSendBuffer::retain_all(const RepoId& pub_id)
        it != buffers_.end();) {
     if (it->second.first && it->second.second) {
       if (retain_buffer(pub_id, it->second) == REMOVE_ERROR) {
-        GuidConverter converter(pub_id);
+        LogGuid logger(pub_id);
         ACE_ERROR((LM_WARNING,
                    ACE_TEXT("(%P|%t) WARNING: ")
                    ACE_TEXT("SingleSendBuffer::retain_all: ")
                    ACE_TEXT("failed to retain data from publication: %C!\n"),
-                   OPENDDS_STRING(converter).c_str()));
+                   logger.c_str()));
         release_i(it++);
       } else {
         ++it;
@@ -202,12 +202,12 @@ SingleSendBuffer::retain_all(const RepoId& pub_id)
         for (BufferMap::iterator bm_it = fm_it->second.begin();
              bm_it != fm_it->second.end();) {
           if (retain_buffer(pub_id, bm_it->second) == REMOVE_ERROR) {
-            GuidConverter converter(pub_id);
+            LogGuid logger(pub_id);
             ACE_ERROR((LM_WARNING,
                        ACE_TEXT("(%P|%t) WARNING: ")
                        ACE_TEXT("SingleSendBuffer::retain_all: failed to ")
                        ACE_TEXT("retain fragment data from publication: %C!\n"),
-                       OPENDDS_STRING(converter).c_str()));
+                       logger.c_str()));
             release_i(bm_it++);
           } else {
             ++bm_it;
@@ -220,7 +220,7 @@ SingleSendBuffer::retain_all(const RepoId& pub_id)
 }
 
 RemoveResult
-SingleSendBuffer::retain_buffer(const RepoId& pub_id, BufferType& buffer)
+SingleSendBuffer::retain_buffer(const GUID_t& pub_id, BufferType& buffer)
 {
   TransportQueueElement::MatchOnPubId match(pub_id);
   PacketRemoveVisitor visitor(match,
@@ -268,7 +268,7 @@ SingleSendBuffer::insert(SequenceNumber sequence,
 
   if (queue && queue->size() == 1) {
     const TransportQueueElement* elt = queue->peek();
-    const RepoId subId = elt->subscription_id();
+    const GUID_t subId = elt->subscription_id();
     const ACE_Message_Block* msg = elt->msg();
     if (msg && subId != GUID_UNKNOWN &&
         !DataSampleHeader::test_flag(HISTORIC_SAMPLE_FLAG, msg)) {
@@ -280,7 +280,7 @@ SingleSendBuffer::insert(SequenceNumber sequence,
     RemoveAllVisitor visitor;
     removed[i].first->accept_remove_visitor(visitor);
     delete removed[i].first;
-    removed[i].second->release();
+    Message_Block_Ptr to_release(removed[i].second);
   }
 }
 
@@ -305,6 +305,7 @@ SingleSendBuffer::insert_buffer(BufferType& buffer,
 void
 SingleSendBuffer::insert_fragment(SequenceNumber sequence,
                                   SequenceNumber fragment,
+                                  bool is_last_fragment,
                                   TransportSendStrategy::QueueType* queue,
                                   ACE_Message_Block* chain)
 {
@@ -322,7 +323,9 @@ SingleSendBuffer::insert_fragment(SequenceNumber sequence,
                                       static_cast<ACE_Message_Block*>(0));
 
   BufferType& buffer = fragments_[sequence][fragment];
-  pre_seq_.erase(sequence);
+  if (is_last_fragment) {
+    pre_seq_.erase(sequence);
+  }
   insert_buffer(buffer, queue, chain);
 
   if (Transport_debug_level > 5) {
@@ -338,7 +341,7 @@ SingleSendBuffer::insert_fragment(SequenceNumber sequence,
     RemoveAllVisitor visitor;
     removed[i].first->accept_remove_visitor(visitor);
     delete removed[i].first;
-    removed[i].second->release();
+    Message_Block_Ptr to_release(removed[i].second);
   }
 }
 
@@ -362,9 +365,14 @@ SingleSendBuffer::check_capacity_i(BufferVec& removed)
       ));
     }
 
-    destinations_.erase(it->first);
     remove_i(it, removed);
   }
+}
+
+bool
+SingleSendBuffer::has_frags(const SequenceNumber& seq) const
+{
+  return fragments_.find(seq) != fragments_.end();
 }
 
 bool
@@ -383,7 +391,7 @@ SingleSendBuffer::resend_i(const SequenceRange& range, DisjointSequence* gaps)
 
 bool
 SingleSendBuffer::resend_i(const SequenceRange& range, DisjointSequence* gaps,
-                           const RepoId& destination)
+                           const GUID_t& destination)
 {
   //Special case, nak to make sure it has all history
   if (buffers_.empty()) throw std::exception();
@@ -432,7 +440,8 @@ SingleSendBuffer::resend_i(const SequenceRange& range, DisjointSequence* gaps,
 
 void
 SingleSendBuffer::resend_fragments_i(SequenceNumber seq,
-                                     const DisjointSequence& requested_frags)
+                                     const DisjointSequence& requested_frags,
+                                     size_t& cumulative_send_count)
 {
   if (fragments_.empty() || requested_frags.empty()) {
     return;
@@ -446,9 +455,6 @@ SingleSendBuffer::resend_fragments_i(SequenceNumber seq,
 
   BufferMap::const_iterator it = buffers.lower_bound(psr.front().first);
   BufferMap::const_iterator end = buffers.lower_bound(psr.back().second);
-  if (psr.back().second < end->first) {
-    return;
-  }
   if (end != buffers.end()) {
     ++end;
   }
@@ -466,6 +472,7 @@ SingleSendBuffer::resend_fragments_i(SequenceNumber seq,
       // Either way, we will increment the fragment now to avoid duplicate resends
       if (it->first >= psr[i].first) {
         resend_one(it->second); // overlap - resend fragment buffer
+        ++cumulative_send_count;
       }
       frag_min = it->first + 1; // increment fragment buffer
       ++it;

@@ -17,20 +17,31 @@ unlink $dcpsrepo_ior;
 
 my $is_rtps_disc = 0;
 my $opts = '';
+my $dynamic = 0;
+my $nopub = 0;
 while (scalar @ARGV) {
   if ($ARGV[0] =~ /^-d/i) {
     shift;
     $opts .= " -DCPSTransportDebugLevel 6 -DCPSDebugLevel 10";
   }
   elsif ($ARGV[0] eq 'nopub') {
-    shift;
+    $nopub = 1;
     $opts .= " -DCPSPublisherContentFilter 0";
+    shift;
   }
-  elsif ($ARGV[0] == 'rtps_disc') {
+  elsif ($ARGV[0] eq 'rtps_disc') {
     $is_rtps_disc = 1;
     $DCPScfg = "rtps_disc.ini";
     shift;
   }
+  elsif ($ARGV[0] eq 'dynamic') {
+    $dynamic = 1;
+    shift;
+  }
+}
+
+if ($dynamic) {
+  $opts .= ' -dynamic-' . ($nopub ? 'reader' : 'writer');
 }
 
 unless($is_rtps_disc) {

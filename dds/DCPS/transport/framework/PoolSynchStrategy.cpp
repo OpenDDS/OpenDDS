@@ -22,7 +22,7 @@ OpenDDS::DCPS::ThreadSynch*
 OpenDDS::DCPS::PoolSynchStrategy::create_synch_object(
   ThreadSynchResource* synch_resource,
   long                 /* priority */,
-  int                  /* scheduler */)
+  long                 /* scheduler */)
 {
   DBG_ENTRY_LVL("PoolSynchStrategy","create_synch_object",6);
   PoolSynch* synch_object = new PoolSynch(this,synch_resource);
@@ -47,6 +47,7 @@ OpenDDS::DCPS::PoolSynchStrategy::open(void*)
 int
 OpenDDS::DCPS::PoolSynchStrategy::svc()
 {
+  // Future: ThreadStatus.
   DBG_ENTRY_LVL("PoolSynchStrategy","svc",6);
   // TBD
   return 0;

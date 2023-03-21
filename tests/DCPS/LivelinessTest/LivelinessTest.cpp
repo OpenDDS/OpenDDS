@@ -365,12 +365,15 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
                ACE_TEXT("expected %d\n"), local_manual_drl_servant->no_writers_generation_count(), num_unlively_periods - 1
                ));
   }
-  local_sub->delete_contained_entities();
-  remote_sub->delete_contained_entities();
+  local_sub->delete_datareader(local_manual_dr);
+  remote_sub->delete_datareader(automatic_dr);
+  remote_sub->delete_datareader(remote_manual_dr);
   dp->delete_subscriber(local_sub);
-  dp->delete_subscriber(remote_sub);
+  dp2->delete_subscriber(remote_sub);
   dp->delete_topic(automatic_topic);
   dp->delete_topic(manual_topic);
+  dp2->delete_topic(automatic_topic2);
+  dp2->delete_topic(manual_topic2);
   dpf->delete_participant(dp);
   dpf->delete_participant(dp2);
   TheServiceParticipant->shutdown();

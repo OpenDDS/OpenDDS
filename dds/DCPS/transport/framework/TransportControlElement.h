@@ -41,7 +41,7 @@ protected:
 
   virtual bool requires_exclusive_packet() const;
 
-  virtual RepoId publication_id() const;
+  virtual GUID_t publication_id() const;
 
   virtual ACE_Message_Block* duplicate_msg() const;
 

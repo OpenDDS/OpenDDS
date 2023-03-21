@@ -14,6 +14,11 @@
 #include "dds/DCPS/RepoIdBuilder.h"
 #include "dds/DCPS/ConfigUtils.h"
 #include "dds/DCPS/DCPS_Utils.h"
+#include "dds/DCPS/BuiltInTopicUtils.h"
+
+#include "dds/DCPS/transport/framework/TransportRegistry.h"
+#include "dds/DCPS/transport/framework/TransportType.h"
+#include "dds/DCPS/transport/framework/TransportType_rch.h"
 
 #include "tao/ORB_Core.h"
 #include "tao/BiDir_GIOP/BiDirGIOP.h"
@@ -24,7 +29,6 @@
 #include "dds/DCPS/BuiltInTopicUtils.h"
 #include "dds/DCPS/Marked_Default_Qos.h"
 
-#include "dds/DCPS/transport/framework/TransportRegistry.h"
 #include "dds/DCPS/transport/framework/TransportExceptions.h"
 
 #include "dds/DCPS/transport/tcp/TcpInst.h"
@@ -206,6 +210,7 @@ namespace
 DCPSInfo_var
 InfoRepoDiscovery::get_dcps_info()
 {
+  ACE_Guard<ACE_Thread_Mutex> guard(lock_);
   if (CORBA::is_nil(this->info_.in())) {
 
     if (!orb_) {
@@ -254,6 +259,7 @@ InfoRepoDiscovery::get_dcps_info()
 std::string
 InfoRepoDiscovery::get_stringified_dcps_info_ior()
 {
+  ACE_Guard<ACE_Thread_Mutex> guard(lock_);
   return this->ior_;
 }
 
@@ -261,6 +267,7 @@ TransportConfig_rch
 InfoRepoDiscovery::bit_config()
 {
 #if !defined (DDS_HAS_MINIMUM_BIT)
+  ACE_Guard<ACE_Thread_Mutex> guard(lock_);
   if (bit_config_.is_nil()) {
     const std::string cfg_name = TransportRegistry::DEFAULT_INST_PREFIX +
                                  std::string("_BITTransportConfig_") + key();
@@ -299,19 +306,19 @@ InfoRepoDiscovery::bit_config()
 #endif
 }
 
-DDS::Subscriber_ptr
+RcHandle<BitSubscriber>
 InfoRepoDiscovery::init_bit(DomainParticipantImpl* participant)
 {
 #if defined (DDS_HAS_MINIMUM_BIT)
   ACE_UNUSED_ARG(participant);
-  return 0;
+  return RcHandle<BitSubscriber>();
 #else
   if (!TheServiceParticipant->get_BIT()) {
-    return 0;
+    return RcHandle<BitSubscriber>();
   }
 
   if (create_bit_topics(participant) != DDS::RETCODE_OK) {
-    return 0;
+    return RcHandle<BitSubscriber>();
   }
 
   DDS::Subscriber_var bit_subscriber =
@@ -325,7 +332,7 @@ InfoRepoDiscovery::init_bit(DomainParticipantImpl* participant)
   } catch (const Transport::Exception&) {
     ACE_ERROR((LM_ERROR, "(%P|%t) InfoRepoDiscovery::init_bit, "
                          "exception during transport initialization\n"));
-    return 0;
+    return RcHandle<BitSubscriber>();
   }
 
   // DataReaders
@@ -355,6 +362,7 @@ InfoRepoDiscovery::init_bit(DomainParticipantImpl* participant)
 
       DataReaderListener_var failover = new FailoverListener(key());
       pbit_dr->set_listener(failover, DEFAULT_STATUS_MASK);
+      // No need to invoke the listener.
     }
 
     DDS::DataReaderQos dr_qos;
@@ -391,15 +399,15 @@ InfoRepoDiscovery::init_bit(DomainParticipantImpl* participant)
         ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) InfoRepoDiscovery::init_bit")
                    ACE_TEXT(" - Error <%C> enabling subscriber\n"), retcode_to_string(ret)));
       }
-      return 0;
+      return RcHandle<BitSubscriber>();
     }
 
   } catch (const CORBA::Exception&) {
     ACE_ERROR((LM_ERROR, "(%P|%t) InfoRepoDiscovery::init_bit, "
                          "exception during DataReader initialization\n"));
-    return 0;
+    return RcHandle<BitSubscriber>();
   }
-  return bit_subscriber._retn();
+  return make_rch<BitSubscriber>(bit_subscriber);
 #endif
 }
 
@@ -425,7 +433,7 @@ InfoRepoDiscovery::active()
 
 bool
 InfoRepoDiscovery::attach_participant(DDS::DomainId_t domainId,
-                                      const RepoId& participantId)
+                                      const GUID_t& participantId)
 {
   try {
     return get_dcps_info()->attach_participant(domainId, participantId);
@@ -435,7 +443,7 @@ InfoRepoDiscovery::attach_participant(DDS::DomainId_t domainId,
   }
 }
 
-OpenDDS::DCPS::RepoId
+OpenDDS::DCPS::GUID_t
 InfoRepoDiscovery::generate_participant_guid()
 {
   return GUID_UNKNOWN;
@@ -464,7 +472,7 @@ InfoRepoDiscovery::add_domain_participant_secure(
   DDS::DomainId_t /*domain*/,
   const DDS::DomainParticipantQos& /*qos*/,
   XTypes::TypeLookupService_rch /*tls*/,
-  const OpenDDS::DCPS::RepoId& /*guid*/,
+  const OpenDDS::DCPS::GUID_t& /*guid*/,
   DDS::Security::IdentityHandle /*id*/,
   DDS::Security::PermissionsHandle /*perm*/,
   DDS::Security::ParticipantCryptoHandle /*part_crypto*/)
@@ -476,7 +484,7 @@ InfoRepoDiscovery::add_domain_participant_secure(
 
 bool
 InfoRepoDiscovery::remove_domain_participant(DDS::DomainId_t domainId,
-                                             const RepoId& participantId)
+                                             const GUID_t& participantId)
 {
   try {
     get_dcps_info()->remove_domain_participant(domainId, participantId);
@@ -489,8 +497,8 @@ InfoRepoDiscovery::remove_domain_participant(DDS::DomainId_t domainId,
 
 bool
 InfoRepoDiscovery::ignore_domain_participant(DDS::DomainId_t domainId,
-                                             const RepoId& myParticipantId,
-                                             const RepoId& ignoreId)
+                                             const GUID_t& myParticipantId,
+                                             const GUID_t& ignoreId)
 {
   try {
     get_dcps_info()->ignore_domain_participant(domainId, myParticipantId, ignoreId);
@@ -503,7 +511,7 @@ InfoRepoDiscovery::ignore_domain_participant(DDS::DomainId_t domainId,
 
 bool
 InfoRepoDiscovery::update_domain_participant_qos(DDS::DomainId_t domainId,
-                                                 const RepoId& participant,
+                                                 const GUID_t& participant,
                                                  const DDS::DomainParticipantQos& qos)
 {
   try {
@@ -517,8 +525,8 @@ InfoRepoDiscovery::update_domain_participant_qos(DDS::DomainId_t domainId,
 // Topic operations:
 
 DCPS::TopicStatus
-InfoRepoDiscovery::assert_topic(DCPS::RepoId_out topicId, DDS::DomainId_t domainId,
-                                const RepoId& participantId, const char* topicName,
+InfoRepoDiscovery::assert_topic(DCPS::GUID_t_out topicId, DDS::DomainId_t domainId,
+                                const GUID_t& participantId, const char* topicName,
                                 const char* dataTypeName, const DDS::TopicQos& qos,
                                 bool hasDcpsKey, TopicCallbacks* /*topic_callbacks*/)
 {
@@ -533,11 +541,11 @@ InfoRepoDiscovery::assert_topic(DCPS::RepoId_out topicId, DDS::DomainId_t domain
 
 DCPS::TopicStatus
 InfoRepoDiscovery::find_topic(DDS::DomainId_t domainId,
-                              const DCPS::RepoId& /*participantId*/,
+                              const DCPS::GUID_t& /*participantId*/,
                               const char* topicName,
                               CORBA::String_out dataTypeName,
                               DDS::TopicQos_out qos,
-                              DCPS::RepoId_out topicId)
+                              DCPS::GUID_t_out topicId)
 {
   try {
     return get_dcps_info()->find_topic(domainId, topicName, dataTypeName, qos, topicId);
@@ -548,8 +556,8 @@ InfoRepoDiscovery::find_topic(DDS::DomainId_t domainId,
 }
 
 DCPS::TopicStatus
-InfoRepoDiscovery::remove_topic(DDS::DomainId_t domainId, const RepoId& participantId,
-                                const RepoId& topicId)
+InfoRepoDiscovery::remove_topic(DDS::DomainId_t domainId, const GUID_t& participantId,
+                                const GUID_t& topicId)
 {
   try {
     return get_dcps_info()->remove_topic(domainId, participantId, topicId);
@@ -560,8 +568,8 @@ InfoRepoDiscovery::remove_topic(DDS::DomainId_t domainId, const RepoId& particip
 }
 
 bool
-InfoRepoDiscovery::ignore_topic(DDS::DomainId_t domainId, const RepoId& myParticipantId,
-                                const RepoId& ignoreId)
+InfoRepoDiscovery::ignore_topic(DDS::DomainId_t domainId, const GUID_t& myParticipantId,
+                                const GUID_t& ignoreId)
 {
   try {
     get_dcps_info()->ignore_topic(domainId, myParticipantId, ignoreId);
@@ -573,8 +581,8 @@ InfoRepoDiscovery::ignore_topic(DDS::DomainId_t domainId, const RepoId& myPartic
 }
 
 bool
-InfoRepoDiscovery::update_topic_qos(const RepoId& topicId, DDS::DomainId_t domainId,
-                                    const RepoId& participantId, const DDS::TopicQos& qos)
+InfoRepoDiscovery::update_topic_qos(const GUID_t& topicId, DDS::DomainId_t domainId,
+                                    const GUID_t& participantId, const DDS::TopicQos& qos)
 {
   try {
     return get_dcps_info()->update_topic_qos(topicId, domainId, participantId, qos);
@@ -587,17 +595,17 @@ InfoRepoDiscovery::update_topic_qos(const RepoId& topicId, DDS::DomainId_t domai
 
 // Publication operations:
 
-RepoId
+GUID_t
 InfoRepoDiscovery::add_publication(DDS::DomainId_t domainId,
-                                   const RepoId& participantId,
-                                   const RepoId& topicId,
+                                   const GUID_t& participantId,
+                                   const GUID_t& topicId,
                                    DCPS::DataWriterCallbacks_rch publication,
                                    const DDS::DataWriterQos& qos,
                                    const DCPS::TransportLocatorSeq& transInfo,
                                    const DDS::PublisherQos& publisherQos,
                                    const XTypes::TypeInformation& type_info)
 {
-  RepoId pubId;
+  GUID_t pubId;
 
   try {
     DCPS::DataWriterRemoteImpl* writer_remote_impl = 0;
@@ -632,8 +640,8 @@ InfoRepoDiscovery::add_publication(DDS::DomainId_t domainId,
 
 bool
 InfoRepoDiscovery::remove_publication(DDS::DomainId_t domainId,
-                                      const RepoId& participantId,
-                                      const RepoId& publicationId)
+                                      const GUID_t& participantId,
+                                      const GUID_t& publicationId)
 {
   {
     ACE_GUARD_RETURN(ACE_Thread_Mutex, g, this->lock_, false);
@@ -652,8 +660,8 @@ InfoRepoDiscovery::remove_publication(DDS::DomainId_t domainId,
 
 bool
 InfoRepoDiscovery::ignore_publication(DDS::DomainId_t domainId,
-                                      const RepoId& participantId,
-                                      const RepoId& ignoreId)
+                                      const GUID_t& participantId,
+                                      const GUID_t& ignoreId)
 {
   try {
     get_dcps_info()->ignore_publication(domainId, participantId, ignoreId);
@@ -666,8 +674,8 @@ InfoRepoDiscovery::ignore_publication(DDS::DomainId_t domainId,
 
 bool
 InfoRepoDiscovery::update_publication_qos(DDS::DomainId_t domainId,
-                                          const RepoId& participantId,
-                                          const RepoId& dwId,
+                                          const GUID_t& participantId,
+                                          const GUID_t& dwId,
                                           const DDS::DataWriterQos& qos,
                                           const DDS::PublisherQos& publisherQos)
 {
@@ -683,10 +691,10 @@ InfoRepoDiscovery::update_publication_qos(DDS::DomainId_t domainId,
 
 // Subscription operations:
 
-RepoId
+GUID_t
 InfoRepoDiscovery::add_subscription(DDS::DomainId_t domainId,
-                                    const RepoId& participantId,
-                                    const RepoId& topicId,
+                                    const GUID_t& participantId,
+                                    const GUID_t& topicId,
                                     DCPS::DataReaderCallbacks_rch subscription,
                                     const DDS::DataReaderQos& qos,
                                     const DCPS::TransportLocatorSeq& transInfo,
@@ -696,7 +704,7 @@ InfoRepoDiscovery::add_subscription(DDS::DomainId_t domainId,
                                     const DDS::StringSeq& params,
                                     const XTypes::TypeInformation& type_info)
 {
-  RepoId subId;
+  GUID_t subId;
 
   try {
     DCPS::DataReaderRemoteImpl* reader_remote_impl = 0;
@@ -732,8 +740,8 @@ InfoRepoDiscovery::add_subscription(DDS::DomainId_t domainId,
 
 bool
 InfoRepoDiscovery::remove_subscription(DDS::DomainId_t domainId,
-                                       const RepoId& participantId,
-                                       const RepoId& subscriptionId)
+                                       const GUID_t& participantId,
+                                       const GUID_t& subscriptionId)
 {
   {
     ACE_GUARD_RETURN(ACE_Thread_Mutex, g, this->lock_, false);
@@ -752,8 +760,8 @@ InfoRepoDiscovery::remove_subscription(DDS::DomainId_t domainId,
 
 bool
 InfoRepoDiscovery::ignore_subscription(DDS::DomainId_t domainId,
-                                       const RepoId& participantId,
-                                       const RepoId& ignoreId)
+                                       const GUID_t& participantId,
+                                       const GUID_t& ignoreId)
 {
   try {
     get_dcps_info()->ignore_subscription(domainId, participantId, ignoreId);
@@ -766,8 +774,8 @@ InfoRepoDiscovery::ignore_subscription(DDS::DomainId_t domainId,
 
 bool
 InfoRepoDiscovery::update_subscription_qos(DDS::DomainId_t domainId,
-                                           const RepoId& participantId,
-                                           const RepoId& drId,
+                                           const GUID_t& participantId,
+                                           const GUID_t& drId,
                                            const DDS::DataReaderQos& qos,
                                            const DDS::SubscriberQos& subQos)
 {
@@ -782,8 +790,8 @@ InfoRepoDiscovery::update_subscription_qos(DDS::DomainId_t domainId,
 
 bool
 InfoRepoDiscovery::update_subscription_params(DDS::DomainId_t domainId,
-                                              const RepoId& participantId,
-                                              const RepoId& subId,
+                                              const GUID_t& participantId,
+                                              const GUID_t& subId,
                                               const DDS::StringSeq& params)
 
 {
@@ -800,7 +808,7 @@ InfoRepoDiscovery::update_subscription_params(DDS::DomainId_t domainId,
 // Managing reader/writer associations:
 
 void
-InfoRepoDiscovery::removeDataReaderRemote(const RepoId& subscriptionId)
+InfoRepoDiscovery::removeDataReaderRemote(const GUID_t& subscriptionId)
 {
   DataReaderMap::iterator drr = dataReaderMap_.find(subscriptionId);
   if (drr == dataReaderMap_.end()) {
@@ -815,17 +823,18 @@ InfoRepoDiscovery::removeDataReaderRemote(const RepoId& subscriptionId)
       remote_reference_to_servant<DataReaderRemoteImpl>(drr->second.in(), orb_);
     impl->detach_parent();
     deactivate_remote_object(drr->second.in(), orb_);
-  }
-  catch (::CORBA::BAD_INV_ORDER&){
+  } catch (const CORBA::BAD_INV_ORDER&) {
     // The orb may throw ::CORBA::BAD_INV_ORDER when is has been shutdown.
     // Ignore it anyway.
+  } catch (const CORBA::OBJECT_NOT_EXIST&) {
+    // Same for CORBA::OBJECT_NOT_EXIST
   }
 
   dataReaderMap_.erase(drr);
 }
 
 void
-InfoRepoDiscovery::removeDataWriterRemote(const RepoId& publicationId)
+InfoRepoDiscovery::removeDataWriterRemote(const GUID_t& publicationId)
 {
   DataWriterMap::iterator dwr = dataWriterMap_.find(publicationId);
   if (dwr == dataWriterMap_.end()) {
@@ -840,10 +849,11 @@ InfoRepoDiscovery::removeDataWriterRemote(const RepoId& publicationId)
       remote_reference_to_servant<DataWriterRemoteImpl>(dwr->second.in(), orb_);
     impl->detach_parent();
     deactivate_remote_object(dwr->second.in(), orb_);
-  }
-  catch (::CORBA::BAD_INV_ORDER&){
+  } catch (const CORBA::BAD_INV_ORDER&) {
     // The orb may throw ::CORBA::BAD_INV_ORDER when is has been shutdown.
     // Ignore it anyway.
+  } catch (const CORBA::OBJECT_NOT_EXIST&) {
+    // Same for CORBA::OBJECT_NOT_EXIST
   }
 
   dataWriterMap_.erase(dwr);
@@ -984,7 +994,11 @@ void
 InfoRepoDiscovery::OrbRunner::shutdown()
 {
   orb_->shutdown();
-  wait();
+  ThreadStatusManager& thread_status_manager = TheServiceParticipant->get_thread_status_manager();
+  {
+    ThreadStatusManager::Sleeper s(thread_status_manager);
+    wait();
+  }
   orb_->destroy();
 }
 
@@ -994,6 +1008,8 @@ ACE_Thread_Mutex InfoRepoDiscovery::mtx_orb_runner_;
 int
 InfoRepoDiscovery::OrbRunner::svc()
 {
+  ThreadStatusManager::Start s(TheServiceParticipant->get_thread_status_manager(), "OrbRunner");
+
   // this method was originally Service_Participant::svc()
   bool done = false;
 
@@ -1036,9 +1052,22 @@ InfoRepoDiscovery::OrbRunner::svc()
   return 0;
 }
 
+class InfoRepoType : public TransportType {
+public:
+  const char* name() { return "repository"; }
+
+  TransportInst_rch new_inst(const std::string&)
+  {
+    return TransportInst_rch();
+  }
+};
 
 InfoRepoDiscovery::StaticInitializer::StaticInitializer()
 {
+  TransportRegistry* registry = TheTransportRegistry;
+  if (!registry->register_type(make_rch<InfoRepoType>())) {
+    return;
+  }
   TheServiceParticipant->register_discovery_type("repository", new Config);
 }
 

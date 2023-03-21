@@ -88,7 +88,7 @@ Writer::svc()
     for (int i = 0; i < num_messages; i++) {
       DDS::ReturnCode_t error;
 
-      message.phase_number = writer_phase_.value();
+      message.phase_number = writer_phase_;
       do {
         error = message_dw->write(message, handle);
       } while (error == DDS::RETCODE_TIMEOUT);

@@ -116,7 +116,7 @@ OwnershipManager::unregister_reader(const char* type_name,
 }
 
 void
-OwnershipManager::remove_writer(const PublicationId& pub_id)
+OwnershipManager::remove_writer(const GUID_t& pub_id)
 {
   ACE_GUARD(ACE_Thread_Mutex, guard, instance_lock_);
 
@@ -185,7 +185,7 @@ OwnershipManager::remove_writers(const DDS::InstanceHandle_t& instance_handle)
 
 bool
 OwnershipManager::is_owner(const DDS::InstanceHandle_t& instance_handle,
-                           const PublicationId& pub_id)
+                           const GUID_t& pub_id)
 {
   ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, instance_lock_, false);
 
@@ -201,7 +201,7 @@ OwnershipManager::is_owner(const DDS::InstanceHandle_t& instance_handle,
 
 bool // owner unregister instance
 OwnershipManager::remove_writer(const DDS::InstanceHandle_t& instance_handle,
-                                const PublicationId& pub_id)
+                                const GUID_t& pub_id)
 {
   ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, instance_lock_, false);
 
@@ -217,7 +217,7 @@ OwnershipManager::remove_writer(const DDS::InstanceHandle_t& instance_handle,
 bool
 OwnershipManager::remove_writer(const DDS::InstanceHandle_t& instance_handle,
                                 OwnershipWriterInfos& infos,
-                                const PublicationId& pub_id)
+                                const GUID_t& pub_id)
 {
   if (infos.owner_.pub_id_ == pub_id) {
     remove_owner(instance_handle, infos, false);
@@ -236,7 +236,7 @@ OwnershipManager::remove_owner(const DDS::InstanceHandle_t& instance_handle,
                                bool sort)
 {
   //change owner
-  PublicationId new_owner(GUID_UNKNOWN);
+  GUID_t new_owner(GUID_UNKNOWN);
   if (infos.candidates_.empty()) {
     infos.owner_ = WriterInfo();
 
@@ -258,7 +258,7 @@ OwnershipManager::remove_owner(const DDS::InstanceHandle_t& instance_handle,
 
 void
 OwnershipManager::remove_candidate(OwnershipWriterInfos& infos,
-                                   const PublicationId& pub_id)
+                                   const GUID_t& pub_id)
 {
   if (!infos.candidates_.empty()) {
     WriterInfos::iterator const the_end = infos.candidates_.end();
@@ -282,7 +282,7 @@ OwnershipManager::remove_candidate(OwnershipWriterInfos& infos,
 
 bool
 OwnershipManager::select_owner(const DDS::InstanceHandle_t& instance_handle,
-                               const PublicationId& pub_id,
+                               const GUID_t& pub_id,
                                const CORBA::Long& ownership_strength,
                                InstanceState_rch instance_state)
 {
@@ -384,18 +384,17 @@ OwnershipManager::select_owner(const DDS::InstanceHandle_t& instance_handle,
 void
 OwnershipManager::broadcast_new_owner(const DDS::InstanceHandle_t& instance_handle,
                                       OwnershipWriterInfos& infos,
-                                      const PublicationId& owner)
+                                      const GUID_t& owner)
 {
   if (DCPS_debug_level >= 1) {
     // This may not be an error since it could happen that the sample
     // is delivered to the datareader after the write is dis-associated
     // with this datareader.
-    GuidConverter writer_converter(owner);
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("(%P|%t) OwnershipManager::broadcast_new_owner: ")
                ACE_TEXT("owner writer %C, instance handle %d strength %d num ")
                ACE_TEXT("of candidates %d\n"),
-               OPENDDS_STRING(writer_converter).c_str(), instance_handle,
+               LogGuid(owner).c_str(), instance_handle,
                infos.owner_.ownership_strength_,
                (int)infos.candidates_.size()));
   }

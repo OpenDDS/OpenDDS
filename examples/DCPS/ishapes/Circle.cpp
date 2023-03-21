@@ -1,10 +1,22 @@
+// Tell GCC to ignore implicitly declared copy methods as long as
+// Qt is not compliant.
+#ifdef __GNUC__
+#  pragma GCC diagnostic push
+#  pragma GCC diagnostic ignored "-Wdeprecated-copy"
+#endif
+
 #include <QtGui/qpainter.h>
+
+#ifdef __GNUC__
+#  pragma GCC diagnostic pop
+#endif
+
 #include <vector>
 #include "Circle.hpp"
 
 
 Circle::Circle(const QRect& bounds,
-               shared_ptr<ShapeDynamics> dynamics,
+               std::shared_ptr<ShapeDynamics> dynamics,
                const QPen& pen,
                const QBrush& brush,
                bool targeted)

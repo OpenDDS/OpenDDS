@@ -55,7 +55,7 @@ bool assert_key_only_size(const T& data, size_t expected)
   if (size != expected) {
     const char* type_name = get_type_name<T>();
     ACE_ERROR((LM_ERROR, ACE_TEXT("ERROR: ")
-      ACE_TEXT("For gen_find_size(OpenDDS::DCPS::KeyOnly<%C>), expected %u ")
+      ACE_TEXT("For serialized_size(OpenDDS::DCPS::KeyOnly<%C>), expected %u ")
       ACE_TEXT("but got %u!\n"),
       type_name, expected, size));
     return true;
@@ -84,17 +84,15 @@ public:
 
   bool failed()
   {
-#ifndef OPENDDS_NO_MULTI_TOPIC
     for (Keys::const_iterator i = keys_.begin(); i != keys_.end(); ++i) {
-      if (!OpenDDS::DCPS::getMetaStruct<T>().isDcpsKey(i->c_str())) {
+      if (!OpenDDS::DCPS::DDSTraits<T>::is_key(i->c_str())) {
         const char* type_name = get_type_name<T>();
         ACE_ERROR((LM_ERROR, ACE_TEXT("ERROR: ")
-          ACE_TEXT("For getMetaStruct<%C>().isDcpsKey(), expected %C to be a key, but it wasn't"),
+          ACE_TEXT("For DDSTraits<%C>::is_key(), expected %C to be a key, but it wasn't"),
           type_name, i->c_str()));
         failed_ = true;
       }
     }
-#endif
     failed_ |= assert_key_count<T>(keys_.size());
     return failed_;
   }
@@ -147,6 +145,7 @@ int ACE_TMAIN(int, ACE_TCHAR**)
   {
     KeyCheck<KeyedUnionStruct> c;
     c.add_key("value");
+    c.add_key("keyed_unkeyed_union");
     c.add_key("another_key");
     failed |= c.failed();
   }
@@ -213,7 +212,7 @@ int ACE_TMAIN(int, ACE_TCHAR**)
   // Check KeyOnly for Unions
   failed |= assert_key_only_size(UnkeyedUnion(), 0);
   failed |= assert_key_only_size(KeyedUnion(), 4);
-  failed |= assert_key_only_size(KeyedUnionStruct(), 8);
+  failed |= assert_key_only_size(KeyedUnionStruct(), 12);
 
   return failed;
 }

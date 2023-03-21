@@ -16,6 +16,7 @@
 
 #include "dds/DCPS/RcObject.h"
 #include "dds/DCPS/RcHandle_T.h"
+#include "dds/DCPS/ReactorInterceptor.h"
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 class ACE_Reactor;
@@ -31,14 +32,13 @@ class MulticastSession;
 typedef RcHandle<MulticastSession> MulticastSession_rch;
 
 class OpenDDS_Multicast_Export MulticastSessionFactory
-  : public RcObject {
+  : public virtual RcObject {
 public:
   virtual ~MulticastSessionFactory();
 
   virtual int requires_send_buffer() const = 0;
 
-  virtual MulticastSession_rch create(ACE_Reactor* reactor,
-                                      ACE_thread_t owner,
+  virtual MulticastSession_rch create(RcHandle<ReactorInterceptor> interceptor,
                                       MulticastDataLink* link,
                                       MulticastPeer remote_peer) = 0;
 };

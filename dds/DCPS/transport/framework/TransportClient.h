@@ -20,6 +20,7 @@
 #include <dds/DCPS/PoolAllocationBase.h>
 #include <dds/DCPS/DiscoveryListener.h>
 #include <dds/DCPS/RcEventHandler.h>
+#include <dds/DCPS/BuiltInTopicUtils.h>
 
 #include <ace/Time_Value.h>
 #include <ace/Event_Handler.h>
@@ -48,7 +49,7 @@ class OpenDDS_Dcps_Export TransportClient
 {
 public:
   // Used by TransportImpl to complete associate() processing:
-  void use_datalink(const RepoId& remote_id, const DataLink_rch& link);
+  void use_datalink(const GUID_t& remote_id, const DataLink_rch& link);
 
   // values for flags parameter of transport_assoc_done():
   enum { ASSOC_OK = 1, ASSOC_ACTIVE = 2 };
@@ -71,41 +72,41 @@ public:
   // Managing associations to remote peers:
 
   bool associate(const AssociationData& peer, bool active);
-  void disassociate(const RepoId& peerId);
+  void disassociate(const GUID_t& peerId);
   void stop_associating();
   void stop_associating(const GUID_t* repos, CORBA::ULong length);
   void send_final_acks();
   void transport_stop();
 
   // Discovery:
-  void register_for_reader(const RepoId& participant,
-                           const RepoId& writerid,
-                           const RepoId& readerid,
+  void register_for_reader(const GUID_t& participant,
+                           const GUID_t& writerid,
+                           const GUID_t& readerid,
                            const TransportLocatorSeq& locators,
                            OpenDDS::DCPS::DiscoveryListener* listener);
 
-  void unregister_for_reader(const RepoId& participant,
-                             const RepoId& writerid,
-                             const RepoId& readerid);
+  void unregister_for_reader(const GUID_t& participant,
+                             const GUID_t& writerid,
+                             const GUID_t& readerid);
 
-  void register_for_writer(const RepoId& participant,
-                           const RepoId& readerid,
-                           const RepoId& writerid,
+  void register_for_writer(const GUID_t& participant,
+                           const GUID_t& readerid,
+                           const GUID_t& writerid,
                            const TransportLocatorSeq& locators,
                            DiscoveryListener* listener);
 
-  void unregister_for_writer(const RepoId& participant,
-                             const RepoId& readerid,
-                             const RepoId& writerid);
+  void unregister_for_writer(const GUID_t& participant,
+                             const GUID_t& readerid,
+                             const GUID_t& writerid);
 
-  void update_locators(const RepoId& remote,
+  void update_locators(const GUID_t& remote,
                        const TransportLocatorSeq& locators);
 
-  ICE::Endpoint* get_ice_endpoint();
+  WeakRcHandle<ICE::Endpoint> get_ice_endpoint();
 
   // Data transfer:
 
-  bool send_response(const RepoId& peer,
+  bool send_response(const GUID_t& peer,
                      const DataSampleHeader& header,
                      Message_Block_Ptr payload); // [DR]
 
@@ -114,28 +115,28 @@ public:
   SendControlStatus send_w_control(SendStateDataSampleList send_list,
                                    const DataSampleHeader& header,
                                    Message_Block_Ptr msg,
-                                   const RepoId& destination);
+                                   const GUID_t& destination);
 
   SendControlStatus send_control(const DataSampleHeader& header,
                                  Message_Block_Ptr msg);
 
   SendControlStatus send_control_to(const DataSampleHeader& header,
                                     Message_Block_Ptr msg,
-                                    const RepoId& destination);
+                                    const GUID_t& destination);
 
   bool remove_sample(const DataSampleElement* sample);
   bool remove_all_msgs();
 
-  virtual void add_link(const DataLink_rch& link, const RepoId& peer);
-  virtual const RepoId& get_repo_id() const = 0;
-  virtual DDS::Subscriber_var get_builtin_subscriber() const { return DDS::Subscriber_var(); }
+  virtual void add_link(const DataLink_rch& link, const GUID_t& peer);
+  virtual GUID_t get_guid() const = 0;
+  virtual RcHandle<BitSubscriber> get_builtin_subscriber_proxy() const { return RcHandle<BitSubscriber>(); }
 
   void terminate_send_if_suspended();
 
   bool associated_with(const GUID_t& remote) const;
   bool pending_association_with(const GUID_t& remote) const;
 
-  RepoId repo_id() const
+  GUID_t repo_id() const
   {
     ACE_Guard<ACE_Thread_Mutex> guard(lock_);
     return repo_id_;
@@ -145,13 +146,19 @@ public:
 
   bool is_leading(const GUID_t& reader_id) const;
 
- private:
+protected:
+  void cdr_encapsulation(bool encap)
+  {
+    cdr_encapsulation_ = encap;
+  }
+
+private:
 
   // Implemented by derived classes (DataReaderImpl/DataWriterImpl)
   virtual bool check_transport_qos(const TransportInst& inst) = 0;
   virtual DDS::DomainId_t domain_id() const = 0;
   virtual Priority get_priority_value(const AssociationData& data) const = 0;
-  virtual void transport_assoc_done(int /*flags*/, const RepoId& /*remote*/) {}
+  virtual void transport_assoc_done(int /*flags*/, const GUID_t& /*remote*/) {}
   virtual SequenceNumber get_max_sn() const { return SequenceNumber::SEQUENCENUMBER_UNKNOWN(); };
 
 
@@ -165,7 +172,7 @@ public:
 
   // helpers
   typedef ACE_Guard<ACE_Thread_Mutex> Guard;
-  void use_datalink_i(const RepoId& remote_id,
+  void use_datalink_i(const GUID_t& remote_id,
                       const DataLink_rch& link,
                       Guard& guard);
   TransportSendListener_rch get_send_listener();
@@ -186,9 +193,10 @@ public:
   // privates.
   friend class ::DDS_TEST;
 
-  typedef OPENDDS_MAP_CMP(RepoId, DataLink_rch, GUID_tKeyLessThan) DataLinkIndex;
+  typedef OPENDDS_MAP_CMP(GUID_t, DataLink_rch, GUID_tKeyLessThan) DataLinkIndex;
   typedef OPENDDS_VECTOR(WeakRcHandle<TransportImpl>) ImplsType;
 
+  typedef ACE_Reverse_Lock<ACE_Thread_Mutex> Reverse_Lock_t;
   struct PendingAssoc : RcEventHandler {
     ACE_Thread_Mutex mutex_;
     bool active_, scheduled_;
@@ -198,11 +206,11 @@ public:
     TransportImpl::ConnectionAttribs attribs_;
     WeakRcHandle<TransportClient> client_;
 
-    explicit PendingAssoc(TransportClient* tc)
+    explicit PendingAssoc(RcHandle<TransportClient> tc_rch)
       : active_(false)
       , scheduled_(false)
       , blob_index_(0)
-      , client_(RcHandle<TransportClient>(tc, inc_count()))
+      , client_(tc_rch)
     {}
 
     void reset_client();
@@ -213,8 +221,8 @@ public:
 
   typedef RcHandle<PendingAssoc> PendingAssoc_rch;
 
-  typedef OPENDDS_MAP_CMP(RepoId, PendingAssoc_rch, GUID_tKeyLessThan) PendingMap;
-  typedef OPENDDS_MULTIMAP_CMP(RepoId, PendingAssoc_rch, GUID_tKeyLessThan) PrevPendingMap;
+  typedef OPENDDS_MAP_CMP(GUID_t, PendingAssoc_rch, GUID_tKeyLessThan) PendingMap;
+  typedef OPENDDS_MULTIMAP_CMP(GUID_t, PendingAssoc_rch, GUID_tKeyLessThan) PrevPendingMap;
 
   void clean_prev_pending();
 
@@ -223,17 +231,21 @@ public:
     PendingAssocTimer(ACE_Reactor* reactor,
                       ACE_thread_t owner)
       : ReactorInterceptor(reactor, owner)
+      , timer_id_(-1)
     { }
 
     void schedule_timer(TransportClient_rch transport_client, const PendingAssoc_rch& pend)
     {
-      execute_or_enqueue(new ScheduleCommand(this, transport_client, pend));
+      execute_or_enqueue(make_rch<ScheduleCommand>(this, transport_client, pend));
     }
 
     ReactorInterceptor::CommandPtr cancel_timer(const PendingAssoc_rch& pend)
     {
-      return execute_or_enqueue(new CancelCommand(this, pend));
+      return execute_or_enqueue(make_rch<CancelCommand>(this, pend));
     }
+
+    void set_id(long id) { timer_id_ = id; }
+    long get_id() const { return timer_id_; }
 
     virtual bool reactor_is_shut_down() const
     {
@@ -269,9 +281,12 @@ public:
           if (client) {
             ACE_Guard<ACE_Thread_Mutex> guard(assoc_->mutex_);
             assoc_->scheduled_ = true;
-            timer_->reactor()->schedule_timer(assoc_.in(),
-                                              client.in(),
-                                              client->passive_connect_duration_.value());
+            long id = timer_->reactor()->schedule_timer(assoc_.in(),
+                                                        client.in(),
+                                                        client->passive_connect_duration_.value());
+            if (id != -1) {
+              timer_->set_id(id);
+            }
           }
         }
       }
@@ -284,13 +299,15 @@ public:
       { }
       virtual void execute()
       {
-        if (timer_->reactor()) {
+        if (timer_->reactor() && timer_->get_id()) {
           ACE_Guard<ACE_Thread_Mutex> guard(assoc_->mutex_);
-          timer_->reactor()->cancel_timer(assoc_.in());
+          timer_->reactor()->cancel_timer(timer_->get_id());
+          timer_->set_id(-1);
           assoc_->scheduled_ = false;
         }
       }
     };
+    long timer_id_;
   };
   RcHandle<PendingAssocTimer> pending_assoc_timer_;
 
@@ -329,10 +346,9 @@ public:
   /// Seems to protect accesses to impls_, pending_, links_, data_link_index_
   mutable ACE_Thread_Mutex lock_;
 
-  typedef ACE_Reverse_Lock<ACE_Thread_Mutex> Reverse_Lock_t;
   Reverse_Lock_t reverse_lock_;
 
-  RepoId repo_id_;
+  GUID_t repo_id_;
 };
 
 typedef RcHandle<TransportClient> TransportClient_rch;

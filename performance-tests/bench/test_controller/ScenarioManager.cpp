@@ -264,7 +264,7 @@ void ScenarioManager::execute(const Bench::TestController::AllocatedScenario& al
   temp.configs.length(0);
   temp.launch_time = Builder::get_sys_time() + Builder::from_seconds(3);
   std::cout << "Setting scenario launch_time to be 3 seconds from now: "
-            << iso8601(system_clock::now() + seconds(3)) << std::endl;
+            << iso8601(system_clock::now() + seconds(3)) << std::endl << std::endl;
 
   // Write Configs
   if (dds_entities_.scenario_writer_impl_->write(temp, DDS::HANDLE_NIL) != DDS::RETCODE_OK) {
@@ -285,6 +285,7 @@ void ScenarioManager::execute(const Bench::TestController::AllocatedScenario& al
 
   // Timeout Thread
   size_t reports_left = allocated_scenario.expected_process_reports;
+  report.missing_reports = static_cast<CORBA::ULong>(reports_left);
   std::mutex reports_left_mutex;
   std::condition_variable timeout_cv;
   const std::chrono::seconds timeout(allocated_scenario.timeout + SCENARIO_TIMEOUT_GRACE_PERIOD);
@@ -340,13 +341,17 @@ void ScenarioManager::execute(const Bench::TestController::AllocatedScenario& al
 
     for (CORBA::ULong r = 0; r < reports.length(); r++) {
       if (info[r].valid_data) {
-        report.node_reports.length(report.node_reports.length() + 1);
-        Bench::TestController::NodeReport& node_report = report.node_reports[report.node_reports.length() - 1];
+        const CORBA::ULong nr_idx = OpenDDS::DCPS::grow(report.node_reports) - 1;
+        Bench::TestController::NodeReport& node_report = report.node_reports[nr_idx];
         const NodeController::SpawnedProcessReports& spawned_process_reports = reports[r].spawned_process_reports;
         for (CORBA::ULong wr = 0; wr < spawned_process_reports.length(); wr++) {
           ++process_report_count;
-          node_report.spawned_process_ids.length(node_report.spawned_process_ids.length() + 1);
-          node_report.spawned_process_ids[node_report.spawned_process_ids.length() - 1] = spawned_process_reports[wr].spawned_process_id;
+          const CORBA::ULong spi_idx = OpenDDS::DCPS::grow(node_report.spawned_process_ids) - 1;
+          const CORBA::ULong lpi_idx = OpenDDS::DCPS::grow(node_report.local_process_ids) - 1;
+          ACE_UNUSED_ARG(lpi_idx);
+          OPENDDS_ASSERT(spi_idx == lpi_idx);
+          node_report.spawned_process_ids[spi_idx] = spawned_process_reports[wr].spawned_process_id;
+          node_report.local_process_ids[spi_idx] = spawned_process_reports[wr].pid;
           if (spawned_process_reports[wr].failed) {
             ++worker_failures;
             std::stringstream ss;
@@ -360,8 +365,8 @@ void ScenarioManager::execute(const Bench::TestController::AllocatedScenario& al
             ss << spawned_process_reports[wr].details << std::flush;
             if (!ss.str().empty()) {
               if (json_2_idl(ss, worker_report)) {
-                node_report.worker_reports.length(node_report.worker_reports.length() + 1);
-                node_report.worker_reports[node_report.worker_reports.length() - 1] = worker_report;
+                const CORBA::ULong wr_idx = OpenDDS::DCPS::grow(node_report.worker_reports) - 1;
+                node_report.worker_reports[wr_idx] = worker_report;
                 ++parsed_worker_report_count;
               } else {
                 ++parse_failures;
@@ -372,13 +377,13 @@ void ScenarioManager::execute(const Bench::TestController::AllocatedScenario& al
               }
             }
             if (spawned_process_reports[wr].log.in() && spawned_process_reports[wr].log.in()[0]) {
-              node_report.spawned_process_logs.length(node_report.spawned_process_logs.length() + 1);
-              node_report.spawned_process_logs[node_report.spawned_process_logs.length() - 1] = spawned_process_reports[wr].log;
+              const CORBA::ULong spl_idx = OpenDDS::DCPS::grow(node_report.spawned_process_logs) - 1;
+              node_report.spawned_process_logs[spl_idx] = spawned_process_reports[wr].log;
             }
           }
           std::stringstream ss;
           ss << "Got " << process_report_count << " out of "
-            << allocated_scenario.expected_process_reports << " expected reports";
+            << allocated_scenario.expected_process_reports << " expected process reports";
           if (worker_failures != 0 || parse_failures != 0) {
             ss << " (with " << worker_failures << " worker failures and "
               << parse_failures << " parse failures)";
@@ -394,6 +399,7 @@ void ScenarioManager::execute(const Bench::TestController::AllocatedScenario& al
     {
       std::lock_guard<std::mutex> guard(reports_left_mutex);
       reports_left = static_cast<size_t>(allocated_scenario.expected_process_reports) - process_report_count;
+      report.missing_reports = static_cast<CORBA::ULong>(reports_left + worker_failures + parse_failures);
       if (reports_left == 0) {
         break;
       }

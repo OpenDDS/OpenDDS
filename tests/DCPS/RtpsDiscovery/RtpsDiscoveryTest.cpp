@@ -120,7 +120,7 @@ void set_qos(OctetSeq& qos, CORBA::Octet value)
 
 bool read_participant_bit(const Subscriber_var& bit_sub,
                           const DomainParticipant_var& dp,
-                          const OpenDDS::DCPS::RepoId& other_dp_repo_id,
+                          const OpenDDS::DCPS::GUID_t& other_dp_repo_id,
                           int user_data)
 {
   OpenDDS::DCPS::Discovery_rch disc =
@@ -165,13 +165,12 @@ bool read_participant_bit(const Subscriber_var& bit_sub,
   for (CORBA::ULong i = 0; i < data.length(); ++i) {
     if (infos[i].valid_data) {
       ++num_valid;
-      OpenDDS::DCPS::RepoId repo_id = OpenDDS::DCPS::bit_key_to_repo_id(data[i].key);
+      OpenDDS::DCPS::GUID_t repo_id = OpenDDS::DCPS::bit_key_to_guid(data[i].key);
 
-      OpenDDS::DCPS::GuidConverter converter(repo_id);
       ACE_DEBUG((LM_DEBUG,
                  ACE_TEXT("%P ")
                  ACE_TEXT("Read Participant BIT GUID=%C handle=%d\n"),
-                 OPENDDS_STRING(converter).c_str(), infos[i].instance_handle));
+                 OpenDDS::DCPS::LogGuid(repo_id).c_str(), infos[i].instance_handle));
 
       if (repo_id == other_dp_repo_id) {
         if (data[i].user_data.value.length() != 1) {
@@ -346,7 +345,7 @@ DataReader_var create_data_reader(const DomainParticipant_var& dp)
 
 bool read_publication_bit(const Subscriber_var& bit_sub,
                           const DomainParticipant_var& subscriber,
-                          const OpenDDS::DCPS::RepoId& publisher_repo_id,
+                          const OpenDDS::DCPS::GUID_t& publisher_repo_id,
                           InstanceHandle_t& handle,
                           int user_data,
                           int topic_data,
@@ -409,17 +408,15 @@ bool read_publication_bit(const Subscriber_var& bit_sub,
     if (infos[i].valid_data) {
       ++num_valid;
 
-      OpenDDS::DCPS::RepoId publication_repo_id = OpenDDS::DCPS::bit_key_to_repo_id(data[i].key);
-      OpenDDS::DCPS::RepoId repo_id = OpenDDS::DCPS::bit_key_to_repo_id(data[i].participant_key);
-
-      OpenDDS::DCPS::GuidConverter converter(repo_id);
+      OpenDDS::DCPS::GUID_t publication_repo_id = OpenDDS::DCPS::bit_key_to_guid(data[i].key);
+      OpenDDS::DCPS::GUID_t repo_id = OpenDDS::DCPS::bit_key_to_guid(data[i].participant_key);
 
       ACE_DEBUG((LM_DEBUG,
                  "%P Read Publication BIT with key: %C and handle %d\n"
                  "\tParticipant's GUID=%C\n\tTopic: %C\tType: %C\n",
-                 OPENDDS_STRING(OpenDDS::DCPS::GuidConverter(publication_repo_id)).c_str(),
+                 OpenDDS::DCPS::LogGuid(publication_repo_id).c_str(),
                  infos[i].instance_handle,
-                 OPENDDS_STRING(converter).c_str (), data[i].topic_name.in(),
+                 OpenDDS::DCPS::LogGuid(repo_id).c_str(), data[i].topic_name.in(),
                  data[i].type_name.in()));
 
       if (repo_id == publisher_repo_id) {
@@ -477,7 +474,7 @@ bool read_publication_bit(const Subscriber_var& bit_sub,
 
 bool read_subscription_bit(const Subscriber_var& bit_sub,
                            const DomainParticipant_var& publisher,
-                           const OpenDDS::DCPS::RepoId& subscriber_repo_id,
+                           const OpenDDS::DCPS::GUID_t& subscriber_repo_id,
                            InstanceHandle_t& handle,
                            int user_data,
                            int topic_data,
@@ -537,17 +534,15 @@ bool read_subscription_bit(const Subscriber_var& bit_sub,
     if (infos[i].valid_data) {
       ++num_valid;
 
-      OpenDDS::DCPS::RepoId subscription_repo_id = OpenDDS::DCPS::bit_key_to_repo_id(data[i].key);
-      OpenDDS::DCPS::RepoId repo_id = OpenDDS::DCPS::bit_key_to_repo_id(data[i].participant_key);
-
-      OpenDDS::DCPS::GuidConverter converter(repo_id);
+      OpenDDS::DCPS::GUID_t subscription_repo_id = OpenDDS::DCPS::bit_key_to_guid(data[i].key);
+      OpenDDS::DCPS::GUID_t repo_id = OpenDDS::DCPS::bit_key_to_guid(data[i].participant_key);
 
       ACE_DEBUG((LM_DEBUG,
                  "%P Read Subscription BIT with key: %C and handle %d\n"
                  "\tParticipant's GUID=%C\n\tTopic: %C\tType: %C\n",
-                 OPENDDS_STRING(OpenDDS::DCPS::GuidConverter(subscription_repo_id)).c_str(),
+                 OpenDDS::DCPS::LogGuid(subscription_repo_id).c_str(),
                  infos[i].instance_handle,
-                 OPENDDS_STRING(converter).c_str (), data[i].topic_name.in(),
+                 OpenDDS::DCPS::LogGuid(repo_id).c_str(), data[i].topic_name.in(),
                  data[i].type_name.in()));
       if (repo_id == subscriber_repo_id) {
         found_subscriber = true;
@@ -645,7 +640,7 @@ bool check_discovered_participants(DomainParticipant_var& dp,
           false);
       }
 
-      OpenDDS::DCPS::RepoId repo_id = OpenDDS::DCPS::bit_key_to_repo_id(data.key);
+      OpenDDS::DCPS::GUID_t repo_id = OpenDDS::DCPS::bit_key_to_guid(data.key);
       if (dp_impl->lookup_handle(repo_id) != part_handles[0]) {
         ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("ERROR: %P discovered participant ")
                                     ACE_TEXT("BIT key could not be converted ")
@@ -654,13 +649,11 @@ bool check_discovered_participants(DomainParticipant_var& dp,
       }
       handle = part_handles[0];
       {
-        OpenDDS::DCPS::GuidConverter converter1(dp_impl->get_id ());
-        OpenDDS::DCPS::GuidConverter converter2(repo_id);
         ACE_DEBUG ((LM_DEBUG,
                     ACE_TEXT("%P ")
                     ACE_TEXT("%C discovered %C\n"),
-                    OPENDDS_STRING(converter1).c_str(),
-                    OPENDDS_STRING(converter2).c_str()));
+                    OpenDDS::DCPS::LogGuid(dp_impl->get_id()).c_str(),
+                    OpenDDS::DCPS::LogGuid(repo_id).c_str()));
       }
     }
   }
@@ -670,7 +663,7 @@ bool check_discovered_participants(DomainParticipant_var& dp,
 bool run_test(DomainParticipant_var& dp_sub,
               DomainParticipant_var& dp_pub)
 {
-  OpenDDS::DCPS::RepoId sub_repo_id, pub_repo_id;
+  OpenDDS::DCPS::GUID_t sub_repo_id, pub_repo_id;
 
   {
     OpenDDS::DCPS::DomainParticipantImpl* dp_impl =
@@ -683,11 +676,10 @@ bool run_test(DomainParticipant_var& dp_sub,
     }
 
     sub_repo_id = dp_impl->get_id ();
-    OpenDDS::DCPS::GuidConverter converter(sub_repo_id);
     ACE_DEBUG ((LM_DEBUG,
                 ACE_TEXT("%P ")
                 ACE_TEXT("Sub Domain Participant GUID=%C\n"),
-                OPENDDS_STRING(converter).c_str()));
+                OpenDDS::DCPS::LogGuid(sub_repo_id).c_str()));
   }
 
   {
@@ -701,11 +693,10 @@ bool run_test(DomainParticipant_var& dp_sub,
     }
 
     pub_repo_id = dp_impl->get_id ();
-    OpenDDS::DCPS::GuidConverter converter(pub_repo_id);
     ACE_DEBUG ((LM_DEBUG,
                 ACE_TEXT("%P ")
                 ACE_TEXT("Pub Domain Participant GUID=%C\n"),
-                OPENDDS_STRING(converter).c_str()));
+                OpenDDS::DCPS::LogGuid(pub_repo_id).c_str()));
   }
 
   // If we are running with an rtps_udp transport, it can't be shared between

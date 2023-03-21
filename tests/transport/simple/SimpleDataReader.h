@@ -14,7 +14,7 @@ class SimpleDataReader
 {
   public:
 
-    explicit SimpleDataReader(const OpenDDS::DCPS::RepoId& sub_id);
+    explicit SimpleDataReader(const OpenDDS::DCPS::GUID_t& sub_id);
     virtual ~SimpleDataReader();
 
     void init(const OpenDDS::DCPS::AssociationData& publication, int num_msgs);
@@ -31,13 +31,13 @@ class SimpleDataReader
     // Implementing TransportClient
     bool check_transport_qos(const OpenDDS::DCPS::TransportInst&)
       { return true; }
-    const OpenDDS::DCPS::RepoId& get_repo_id() const
+    OpenDDS::DCPS::GUID_t get_guid() const
       { return sub_id_; }
     DDS::DomainId_t domain_id() const
       { return 0; }
     CORBA::Long get_priority_value(const OpenDDS::DCPS::AssociationData&) const
       { return 0; }
-    void transport_assoc_done(int flags, const OpenDDS::DCPS::RepoId& remote);
+    void transport_assoc_done(int flags, const OpenDDS::DCPS::GUID_t& remote);
 
 
     void transport_lost();
@@ -54,7 +54,8 @@ class SimpleDataReader
 
   private:
 
-    const OpenDDS::DCPS::RepoId& sub_id_;
+    mutable ACE_Thread_Mutex mutex_;
+    const OpenDDS::DCPS::GUID_t& sub_id_;
     int num_messages_expected_;
     int num_messages_received_;
     ACE_Time_Value begin_recvd_;

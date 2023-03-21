@@ -1,0 +1,50 @@
+project(*Subscriber): dcps_test, dcps_rtps_udp, msvc_bigobj, dcps_transports_for_test, opendds_optional_security {
+
+  exename = subscriber
+
+  IDL_Files {
+    Common.idl
+    Subscriber.idl
+    CommonTypeSupport.idl
+    SubscriberTypeSupport.idl
+  }
+
+  TypeSupport_Files {
+    dcps_ts_flags += -Gxtypes-complete
+    Common.idl
+    Subscriber.idl
+  }
+
+  Source_Files {
+    Subscriber.cpp
+  }
+}
+
+project(*Publisher): dcps_test, dcps_rtps_udp, msvc_bigobj, dcps_transports_for_test, opendds_optional_security {
+
+  exename = publisher
+  after += *Subscriber
+
+  IDL_Files {
+    Common.idl
+    PublisherNonMutableStructs.idl
+    PublisherMutableStructs.idl
+    PublisherUnions.idl
+    CommonTypeSupport.idl
+    PublisherNonMutableStructsTypeSupport.idl
+    PublisherMutableStructsTypeSupport.idl
+    PublisherUnionsTypeSupport.idl
+  }
+
+  TypeSupport_Files {
+    dcps_ts_flags += -Gxtypes-complete
+    Common.idl
+    PublisherNonMutableStructs.idl
+    PublisherMutableStructs.idl
+    PublisherUnions.idl
+  }
+
+  Source_Files {
+    Publisher.cpp
+  }
+}

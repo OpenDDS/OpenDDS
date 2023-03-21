@@ -1,46 +1,44 @@
 /*
- *
- *
  * Distributed under the OpenDDS License.
  * See: http://www.opendds.org/license.html
  */
 
 #include "GuidGenerator.h"
 
-#include "dds/DCPS/GuidUtils.h"
-#include "dds/DCPS/TimeTypes.h"
+#include <dds/DCPS/GuidUtils.h>
+#include <dds/DCPS/TimeTypes.h>
+#include <dds/DCPS/debug.h>
 
-#include "dds/DdsDcpsGuidTypeSupportImpl.h"
+#include <dds/DdsDcpsGuidTypeSupportImpl.h>
 
-#include "ace/OS_NS_unistd.h"
-#include "ace/OS_NS_stdlib.h"
-#include "ace/OS_NS_netdb.h"
-#include "ace/OS_NS_sys_socket.h"
-#include "ace/OS_NS_sys_time.h"
-#include "ace/Log_Msg.h"
-
-#include "ace/os_include/net/os_if.h"
+#include <ace/OS_NS_unistd.h>
+#include <ace/OS_NS_stdlib.h>
+#include <ace/OS_NS_netdb.h>
+#include <ace/OS_NS_sys_socket.h>
+#include <ace/OS_NS_sys_time.h>
+#include <ace/Log_Msg.h>
+#include <ace/os_include/net/os_if.h>
 
 #include <cstring>
 
 #ifdef ACE_HAS_CPP11
-#include <random>
+#  include <random>
 #endif
 
 #ifdef ACE_LINUX
-# include <sys/types.h>
-# include <ifaddrs.h>
+#  include <sys/types.h>
+#  include <ifaddrs.h>
 #endif
 
 #if defined ACE_WIN32 && !defined ACE_HAS_WINCE
-# include <winsock2.h>
-# include <iphlpapi.h>
-# include "ace/Version.h"
+#  include <winsock2.h>
+#  include <iphlpapi.h>
+#  include <ace/Version.h>
 #endif
 
 #ifdef ACE_VXWORKS
-# include "ace/os_include/sys/os_sysctl.h"
-# include <net/route.h>
+#  include <ace/os_include/sys/os_sysctl.h>
+#  include <net/route.h>
 #endif
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
@@ -79,7 +77,7 @@ GuidGenerator::GuidGenerator()
     }
   }
 #else
-// iOS has non-unique MAC addresses
+  // iOS has non-unique MAC addresses
   ACE_UNUSED_ARG(result);
 
   for (int i = 0; i < NODE_ID_SIZE; ++i) {
@@ -89,19 +87,24 @@ GuidGenerator::GuidGenerator()
 }
 
 ACE_UINT16
-GuidGenerator::getCount()
+GuidGenerator::getCount(bool doIncrement)
 {
   ACE_Guard<ACE_Thread_Mutex> guard(counter_lock_);
-  return counter_++;
+  if (doIncrement) {
+    ++counter_;
+  }
+  return counter_;
 }
 
 int
 GuidGenerator::interfaceName(const char* iface)
 {
+  // A shortcut to determine if a *valid* interface was already checked.
+  // The shortcut value (interface_name_) is stored IFF the method returns 0.
   if (interface_name_ == iface) {
     return 0;
   }
-  interface_name_ = iface;
+
   // See ace/OS_NS_netdb.cpp ACE_OS::getmacaddress()
 #if defined ACE_WIN32 && !defined ACE_HAS_WINCE
   ULONG size;
@@ -122,7 +125,7 @@ GuidGenerator::interfaceName(const char* iface)
 
   bool found = false;
   for (IP_ADAPTER_ADDRESSES* iter = addrs; iter && !found; iter = iter->Next) {
-    if (ACE_Wide_To_Ascii(iter->FriendlyName).char_rep() == interface_name_) {
+    if (ACE_Wide_To_Ascii(iter->FriendlyName).char_rep() == iface) {
       std::memcpy(node_id_, iter->PhysicalAddress,
                   std::min(static_cast<size_t>(iter->PhysicalAddressLength),
                            sizeof node_id_));
@@ -131,15 +134,23 @@ GuidGenerator::interfaceName(const char* iface)
   }
 
   alloc->free(addrs);
-  return found ? 0 : -1;
+  if (found) {
+    interface_name_ = iface;
+    return 0;
+  } else {
+    return -1;
+  }
+
 #elif defined ACE_LINUX || defined ACE_ANDROID
   ifreq ifr;
   // Guarantee that iface will fit in ifr.ifr_name and still be null terminated
   // ifr.ifr_name is sized to IFNAMSIZ
   if (std::strlen(iface) >= sizeof(ifr.ifr_name)) {
-    ACE_ERROR((LM_ERROR,
-      ACE_TEXT("Interface name %C exceeds max allowable length, must be < %d."),
-      iface, IFNAMSIZ));
+    if (DCPS::log_level >= DCPS::LogLevel::Error) {
+      ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: GuidGenerator::interfaceName: "
+        "Interface name %C exceeds max allowable length, must be < %d.\n",
+        iface, IFNAMSIZ));
+    }
     return -1;
   }
   std::strncpy(ifr.ifr_name, iface, sizeof(ifr.ifr_name));
@@ -153,6 +164,8 @@ GuidGenerator::interfaceName(const char* iface)
   }
   ACE_OS::close(h);
   std::memcpy(node_id_, ifr.ifr_addr.sa_data, sizeof node_id_);
+
+  interface_name_ = iface;
   return 0;
 #elif defined ACE_HAS_SIOCGIFCONF || defined ACE_HAS_MAC_OSX
   const ACE_HANDLE h = ACE_OS::socket(AF_INET, SOCK_DGRAM, 0);
@@ -186,7 +199,13 @@ GuidGenerator::interfaceName(const char* iface)
   }
 
   ACE_OS::close(h);
-  return found ? 0 : -1;
+
+  if (found) {
+    interface_name_ = iface;
+    return 0;
+  } else {
+    return -1;
+  }
 #elif defined ACE_VXWORKS
   int name[] = {CTL_NET, AF_ROUTE, 0, 0, NET_RT_IFLIST, 0};
   static const size_t name_elts = sizeof name / sizeof name[0];
@@ -215,6 +234,8 @@ GuidGenerator::interfaceName(const char* iface)
         && addr->sdl_alen >= sizeof node_id_) {
       std::memcpy(node_id_, LLADDR(addr), sizeof node_id_);
       alloc->free(result);
+
+      interface_name_ = iface;
       return 0;
     }
 

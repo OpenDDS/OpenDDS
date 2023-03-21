@@ -528,7 +528,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
                 ACE_DEBUG((LM_DEBUG,
                            ACE_TEXT ("(%P|%t) received %d of expected %d\n"),
-                           num_reads.value(), expected));
+                           num_reads.load(), expected));
 
             }
           ACE_OS::sleep (1);

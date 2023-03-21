@@ -6,7 +6,7 @@
  */
 
 #include "ParticipantLocationListenerImpl.h"
-#include <dds/DdsDcpsCoreTypeSupportImpl.h>
+#include <dds/OpenddsDcpsExtTypeSupportImpl.h>
 #include <ace/streams.h>
 #include <string>
 
@@ -30,6 +30,8 @@ ParticipantLocationListenerImpl::~ParticipantLocationListenerImpl()
 
 void ParticipantLocationListenerImpl::on_data_available(DDS::DataReader_ptr reader)
 {
+  ACE_Guard<ACE_Thread_Mutex> g(mutex_);
+
   // 1.  Narrow the DataReader to an ParticipantLocationBuiltinTopicDataDataReader
   // 2.  Read the samples from the data reader
   // 3.  Print out the contents of the samples
@@ -50,7 +52,7 @@ void ParticipantLocationListenerImpl::on_data_available(DDS::DataReader_ptr read
        status = builtin_dr->read_next_sample(participant, si)) {
 
     // copy octet[] to guid
-    OpenDDS::DCPS::RepoId guid;
+    OpenDDS::DCPS::GUID_t guid;
     std::memcpy(&guid, &participant.guid, sizeof(guid));
 
     std::cout << "== " << id_ << " Participant Location ==" << std::endl;

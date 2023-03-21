@@ -2,6 +2,5 @@
 #pragma DCPS_DATA_TYPE "TestMsg"
 
 struct TestMsg {
-  short src;
   short value;
 };
