@@ -36,13 +36,10 @@ namespace {
     return set ? "set" : "get";
   }
 
-  void generate_op(unsigned indent, bool set, AST_Decl* node, AST_Type* type,
-    const std::string& type_name, const std::string& value, const char* rc_dest = "return")
+  bool access_details(bool set, AST_Decl* node, AST_Type* type, std::string& op_type,
+    std::string& extra_access, bool& is_complex)
   {
     const bool cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
-    std::string extra;
-    bool is_complex = false;
-    const char* op_type = 0;
     AST_Type* const t = resolveActualType(type);
     AST_Type* const node_as_type = dynamic_cast<AST_Type*>(node);
     switch (t->node_type()) {
@@ -55,36 +52,36 @@ namespace {
       } else {
         op_type = "simple";
       }
-      break;
+      return true;
     case AST_Decl::NT_enum:
       op_type = "enum";
-      break;
+      return true;
     case AST_Decl::NT_string:
       if (cxx11) {
         op_type = "cpp11_s8";
       } else {
         if (set) {
-          extra = ".inout()";
+          extra_access = ".inout()";
         }
         op_type = "s8";
       }
-      break;
+      return true;
     case AST_Decl::NT_wstring:
       if (cxx11) {
         op_type = "cpp11_s16";
       } else {
         if (set) {
-          extra = ".inout()";
+          extra_access = ".inout()";
         }
         op_type = "s16";
       }
-      break;
+      return true;
     case AST_Decl::NT_struct:
     case AST_Decl::NT_union:
     case AST_Decl::NT_sequence:
       is_complex = true;
       op_type = set ? "direct_complex" : "complex";
-      break;
+      return true;
     case AST_Decl::NT_array:
       is_complex = true;
       if (set) {
@@ -92,12 +89,16 @@ namespace {
       } else {
         op_type = "complex";
       }
-      break;
+      return true;
     default:
-      be_util::misc_error_and_abort(
-        "Unsupported type in dynamic_data_adapter_op_type", node);
+      return false;
     }
+  }
 
+  void generate_op(unsigned indent, bool set, AST_Type* type, const std::string& type_name,
+    const std::string& op_type, bool is_complex, const std::string& value,
+    const char* rc_dest = "return")
+  {
     RefWrapper type_wrapper(type, type_name, "");
     type_wrapper.dynamic_data_adapter_ = true;
     type_wrapper.done();
@@ -109,12 +110,12 @@ namespace {
     }
 
     be_global->impl_ <<
-      std::string(indent * 2, ' ') << "  " << rc_dest << " " <<
+      std::string(indent * 2, ' ') << rc_dest << " " <<
       op(set) << "_" << op_type << "_raw_value" << template_params << "(method, ";
     if (set) {
-      be_global->impl_ << value << extra << ", id, source, tk";
+      be_global->impl_ << value << ", id, source, tk";
     } else {
-      be_global->impl_ << "dest, tk, " << value << extra << ", id";
+      be_global->impl_ << "dest, tk, " << value << ", id";
     }
     be_global->impl_ << ");\n";
   }
@@ -137,7 +138,11 @@ namespace {
     be_global->impl_ << ": // " << (disc ? "discriminator" : canonical_name(field)) << "\n"
       "      {\n";
 
-    if (field && !be_global->dynamic_data_adapter(field->field_type())) {
+    std::string op_type;
+    std::string extra_access;
+    bool is_complex = false;
+    if ((field && !be_global->dynamic_data_adapter(field->field_type())) ||
+        !access_details(set, field, field_type, op_type, extra_access, is_complex)) {
       be_global->impl_ <<
         "        ACE_UNUSED_ARG(" << (set ? "source" : "dest") << ");\n"
         "        ACE_UNUSED_ARG(tk);\n"
@@ -164,7 +169,8 @@ namespace {
       } else {
         value += (use_cxx11 ? "_" : "") + cpp_field_name;
       }
-      generate_op(3, set, field, field_type, type_name, value, rc_dest);
+      generate_op(3, set, field_type, type_name, op_type, is_complex,
+        value + extra_access, rc_dest);
       if (union_node && set) {
         be_global->impl_ <<
           "        if (rc == DDS::RETCODE_OK) {\n"
@@ -242,21 +248,6 @@ namespace {
         "      return invalid_id(method, id);\n"
         "    }\n";
     } else if (seq_node || array_node) {
-      be_global->impl_ << "    ";
-      if (!set) {
-        be_global->impl_ << "const DDS::ReturnCode_t ";
-      }
-      be_global->impl_ << "rc = check_index(method, id, ";
-      if (seq_node) {
-        be_global->impl_ << wrapper.seq_get_length();
-      } else {
-        be_global->impl_ << array_element_count(array_node);
-      }
-      be_global->impl_ << ");\n"
-        "    if (rc != DDS::RETCODE_OK) {\n"
-        "      return rc;\n"
-        "    }\n";
-
       AST_Type* const base_type = seq_node ? seq_node->base_type() : array_node->base_type();
       // For the type name we need the deepest named type, not the actual type.
       // This will be the name of the deepest typedef if it's an array or
@@ -267,7 +258,32 @@ namespace {
         named_type = consider;
         consider = dynamic_cast<AST_Typedef*>(named_type)->base_type();
       }
-      generate_op(2, set, node, base_type, scoped(named_type->name()), wrapper.flat_collection_access("id"));
+      std::string op_type;
+      std::string extra_access;
+      bool is_complex = false;
+      if (access_details(set, node, base_type, op_type, extra_access, is_complex)) {
+        be_global->impl_ << "    ";
+        if (!set) {
+          be_global->impl_ << "const DDS::ReturnCode_t ";
+        }
+        be_global->impl_ << "rc = check_index(method, id, ";
+        if (seq_node) {
+          be_global->impl_ << wrapper.seq_get_length();
+        } else {
+          be_global->impl_ << array_element_count(array_node);
+        }
+        be_global->impl_ << ");\n"
+          "    if (rc != DDS::RETCODE_OK) {\n"
+          "      return rc;\n"
+          "    }\n";
+        generate_op(2, set, base_type, scoped(named_type->name()), op_type, is_complex,
+          wrapper.flat_collection_access("id") + extra_access);
+      } else {
+        be_global->impl_ <<
+          "    ACE_UNUSED_ARG(" << (set ? "source" : "dest") << ");\n"
+          "    ACE_UNUSED_ARG(tk);\n"
+          "    return missing_dda(method, id);\n";
+      }
     } else {
       return false;
     }
@@ -314,6 +330,13 @@ namespace {
       "\n";
   }
 
+  template <typename Type>
+  bool is_collection_of_interface_or_value_type(Type* type)
+  {
+    const AST_Decl::NodeType kind = resolveActualType(type->base_type())->node_type();
+    return kind == AST_Decl::NT_interface || kind == AST_Decl::NT_valuetype;
+  }
+
   bool generate_dynamic_data_adapter(
     AST_Decl* node, const std::string* use_scoped_name = 0, AST_Typedef* typedef_node = 0)
   {
@@ -333,9 +356,15 @@ namespace {
       break;
     case AST_Decl::NT_sequence:
       seq_node = dynamic_cast<AST_Sequence*>(node);
+      if (is_collection_of_interface_or_value_type(seq_node)) {
+        return true;
+      }
       break;
     case AST_Decl::NT_array:
       array_node = dynamic_cast<AST_Array*>(node);
+      if (is_collection_of_interface_or_value_type(array_node)) {
+        return true;
+      }
       break;
     default:
       return true;

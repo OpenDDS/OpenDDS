@@ -3450,6 +3450,15 @@ namespace XTypes {
 
   OpenDDS_Dcps_Export
   bool is_complex(TypeKind tk);
+
+  OpenDDS_Dcps_Export
+  bool is_int(TypeKind tk);
+
+  OpenDDS_Dcps_Export
+  bool is_uint(TypeKind tk);
+
+  OpenDDS_Dcps_Export
+  bool is_sequence_like(TypeKind tk);
 } // namespace XTypes
 
 namespace DCPS {

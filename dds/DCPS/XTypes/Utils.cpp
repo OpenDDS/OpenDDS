@@ -507,11 +507,6 @@ namespace {
     }
   }
 
-  bool sequence_like(DDS::TypeKind tk)
-  {
-    return tk == TK_ARRAY || tk == TK_SEQUENCE;
-  }
-
   DDS::ReturnCode_t member_compare(int& result,
     DDS::DynamicData_ptr a_data, DDS::MemberId a_id,
     DDS::DynamicData_ptr b_data, DDS::MemberId b_id)
@@ -875,7 +870,7 @@ DDS::ReturnCode_t compare_members(int& result, DDS::DynamicData_ptr a, DDS::Dyna
 DDS::ReturnCode_t get_member_type(DDS::DynamicType_var& member_type,
   DDS::DynamicType_ptr container_type, DDS::MemberId id)
 {
-  if (sequence_like(container_type->get_kind())) {
+  if (is_sequence_like(container_type->get_kind())) {
     DDS::TypeDescriptor_var td;
     DDS::ReturnCode_t rc = container_type->get_descriptor(td);
     if (rc != DDS::RETCODE_OK) {
@@ -896,32 +891,6 @@ DDS::ReturnCode_t get_member_type(DDS::DynamicType_var& member_type,
     member_type = get_base_type(md->type());
   }
   return DDS::RETCODE_OK;
-}
-
-bool is_int(DDS::TypeKind tk)
-{
-  switch (tk) {
-  case TK_INT8:
-  case TK_INT16:
-  case TK_INT32:
-  case TK_INT64:
-    return true;
-  default:
-    return false;
-  }
-}
-
-bool is_uint(DDS::TypeKind tk)
-{
-  switch (tk) {
-  case TK_UINT8:
-  case TK_UINT16:
-  case TK_UINT32:
-  case TK_UINT64:
-    return true;
-  default:
-    return false;
-  }
 }
 
 DDS::ReturnCode_t get_uint_value(

@@ -61,6 +61,7 @@ class DynamicDataAdapterImpl;
  *   DynamicData.
  *   - Part of this is accessing all types as complex value.
  * - Implement equals, clear_value, clear_all_values, and clear_nonkey_values
+ * - Respect bounds of strings and sequences.
  */
 class OpenDDS_Dcps_Export DynamicDataAdapter : public DynamicDataBase {
 public:

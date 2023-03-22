@@ -152,9 +152,6 @@ inline DDS::ReturnCode_t get_member_type(
   return get_member_type(member_type, container_type, id);
 }
 
-OpenDDS_Dcps_Export bool is_int(DDS::TypeKind tk);
-OpenDDS_Dcps_Export bool is_uint(DDS::TypeKind tk);
-
 OpenDDS_Dcps_Export DDS::ReturnCode_t get_uint_value(
   DDS::UInt64& value, DDS::DynamicData_ptr src, DDS::MemberId id, DDS::TypeKind kind);
 OpenDDS_Dcps_Export DDS::ReturnCode_t set_uint_value(
