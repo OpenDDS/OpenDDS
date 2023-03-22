@@ -2026,7 +2026,7 @@ DDS::ReturnCode_t DynamicDataImpl::get_simple_value_string(DCPS::Value& value,
   if (complex_it != container_.complex_map_.end()) {
     // The string member has its own DynamicData object.
     const DynamicDataImpl* str_dd = dynamic_cast<DynamicDataImpl*>(complex_it->second.in());
-    char* str;
+    char* str = 0;
     if (!str_dd || !str_dd->read_basic_value(str)) {
       return DDS::RETCODE_ERROR;
     }
@@ -2660,13 +2660,13 @@ bool DynamicDataImpl::read_basic_value(char*& value) const
       return false;
     }
     const CORBA::ULong length = largest_index + 2;
-    char* str = CORBA::string_alloc(length);
-    ACE_OS::memset(str, 0, length);
-    if (!container_.reconstruct_string_value(str)) {
+    CORBA::String_var str_var = CORBA::string_alloc(length);
+    ACE_OS::memset(str_var.inout(), 0, length);
+    if (!container_.reconstruct_string_value(str_var.inout())) {
       return false;
     }
     CORBA::string_free(value);
-    value = str;
+    value = str_var._retn();
   } else {
     CORBA::string_free(value);
     value = CORBA::string_dup("");
@@ -2684,13 +2684,13 @@ bool DynamicDataImpl::read_basic_value(CORBA::WChar*& value) const
       return false;
     }
     const CORBA::ULong length = largest_index + 2;
-    CORBA::WChar* wstr = CORBA::wstring_alloc(length);
-    ACE_OS::memset(wstr, 0, length * sizeof(CORBA::WChar));
-    if (!container_.reconstruct_wstring_value(wstr)) {
+    CORBA::WString_var wstr_var = CORBA::wstring_alloc(length);
+    ACE_OS::memset(wstr_var.inout(), 0, length * sizeof(CORBA::WChar));
+    if (!container_.reconstruct_wstring_value(wstr_var.inout())) {
       return false;
     }
     CORBA::wstring_free(value);
-    value = wstr;
+    value = wstr_var._retn();
   } else {
     CORBA::wstring_free(value);
     value = CORBA::wstring_dup(L"");
@@ -4342,7 +4342,7 @@ bool DynamicDataImpl::DataContainer::serialized_size_string(const DCPS::Encoding
 
 bool DynamicDataImpl::DataContainer::serialize_string_value(DCPS::Serializer& ser) const
 {
-  char* str;
+  char* str = 0;
   return data_->read_basic_value(str) && (ser << str);
 }
 
@@ -4402,7 +4402,7 @@ bool DynamicDataImpl::DataContainer::serialized_size_wstring(const DCPS::Encodin
 
 bool DynamicDataImpl::DataContainer::serialize_wstring_value(DCPS::Serializer& ser) const
 {
-  CORBA::WChar* wstr;
+  CORBA::WChar* wstr = 0;
   return data_->read_basic_value(wstr) && (ser << wstr);
 }
 #endif
@@ -8211,7 +8211,7 @@ bool DynamicDataImpl::DataContainer::get_discriminator_value(
     if (it != dd_impl->container_.single_map_.end()) {
       data_->read_discriminator(value, disc_type, it);
     } else {
-      set_default_discriminator_value(value, disc_type);
+      return set_default_discriminator_value(value, disc_type);
     }
   }
   return true;
