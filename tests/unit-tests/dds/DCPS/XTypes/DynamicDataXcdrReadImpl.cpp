@@ -120,7 +120,6 @@ void verify_single_value_struct(DDS::DynamicData_ptr data)
   EXPECT_EQ(ret, DDS::RETCODE_OK);
   EXPECT_EQ(expected.int_32, int_32);
 
-  nested_dd = 0;
   ret = data->get_complex_value(nested_dd, id);
   EXPECT_EQ(ret, DDS::RETCODE_OK);
   ret = nested_dd->get_int32_value(int_32, random_id);
@@ -134,7 +133,6 @@ void verify_single_value_struct(DDS::DynamicData_ptr data)
   EXPECT_EQ(ret, DDS::RETCODE_OK);
   EXPECT_EQ(expected.uint_32, uint_32);
 
-  nested_dd = 0;
   ret = data->get_complex_value(nested_dd, id);
   EXPECT_EQ(ret, DDS::RETCODE_OK);
   ret = nested_dd->get_uint32_value(uint_32, random_id);
@@ -148,7 +146,6 @@ void verify_single_value_struct(DDS::DynamicData_ptr data)
   EXPECT_EQ(ret, DDS::RETCODE_OK);
   EXPECT_EQ(expected.int_8, int_8);
 
-  nested_dd = 0;
   ret = data->get_complex_value(nested_dd, id);
   EXPECT_EQ(ret, DDS::RETCODE_OK);
   ret = nested_dd->get_int8_value(int_8, random_id);
@@ -162,7 +159,6 @@ void verify_single_value_struct(DDS::DynamicData_ptr data)
   EXPECT_EQ(ret, DDS::RETCODE_OK);
   EXPECT_EQ(expected.uint_8, uint_8);
 
-  nested_dd = 0;
   ret = data->get_complex_value(nested_dd, id);
   EXPECT_EQ(ret, DDS::RETCODE_OK);
   ret = nested_dd->get_uint8_value(uint_8, random_id);
@@ -176,7 +172,6 @@ void verify_single_value_struct(DDS::DynamicData_ptr data)
   EXPECT_EQ(ret, DDS::RETCODE_OK);
   EXPECT_EQ(expected.int_16, int_16);
 
-  nested_dd = 0;
   ret = data->get_complex_value(nested_dd, id);
   EXPECT_EQ(ret, DDS::RETCODE_OK);
   ret = nested_dd->get_int16_value(int_16, random_id);
@@ -190,7 +185,6 @@ void verify_single_value_struct(DDS::DynamicData_ptr data)
   EXPECT_EQ(ret, DDS::RETCODE_OK);
   EXPECT_EQ(expected.uint_16, uint_16);
 
-  nested_dd = 0;
   ret = data->get_complex_value(nested_dd, id);
   EXPECT_EQ(ret, DDS::RETCODE_OK);
   ret = nested_dd->get_uint16_value(uint_16, random_id);
@@ -204,7 +198,6 @@ void verify_single_value_struct(DDS::DynamicData_ptr data)
   EXPECT_EQ(ret, DDS::RETCODE_OK);
   EXPECT_EQ(expected.int_64, int_64);
 
-  nested_dd = 0;
   ret = data->get_complex_value(nested_dd, id);
   EXPECT_EQ(ret, DDS::RETCODE_OK);
   ret = nested_dd->get_int64_value(int_64, random_id);
@@ -218,7 +211,6 @@ void verify_single_value_struct(DDS::DynamicData_ptr data)
   EXPECT_EQ(ret, DDS::RETCODE_OK);
   EXPECT_EQ(expected.uint_64, uint_64);
 
-  nested_dd = 0;
   ret = data->get_complex_value(nested_dd, id);
   EXPECT_EQ(ret, DDS::RETCODE_OK);
   ret = nested_dd->get_uint64_value(uint_64, random_id);
@@ -232,7 +224,6 @@ void verify_single_value_struct(DDS::DynamicData_ptr data)
   EXPECT_EQ(ret, DDS::RETCODE_OK);
   EXPECT_EQ(expected.float_32, float_32);
 
-  nested_dd = 0;
   ret = data->get_complex_value(nested_dd, id);
   EXPECT_EQ(ret, DDS::RETCODE_OK);
   ret = nested_dd->get_float32_value(float_32, random_id);
@@ -246,7 +237,6 @@ void verify_single_value_struct(DDS::DynamicData_ptr data)
   EXPECT_EQ(ret, DDS::RETCODE_OK);
   EXPECT_EQ(expected.float_64, float_64);
 
-  nested_dd = 0;
   ret = data->get_complex_value(nested_dd, id);
   EXPECT_EQ(ret, DDS::RETCODE_OK);
   ret = nested_dd->get_float64_value(float_64, random_id);
@@ -260,7 +250,6 @@ void verify_single_value_struct(DDS::DynamicData_ptr data)
   EXPECT_EQ(ret, DDS::RETCODE_OK);
   check_float128(expected.float_128, float_128);
 
-  nested_dd = 0;
   ret = data->get_complex_value(nested_dd, id);
   EXPECT_EQ(ret, DDS::RETCODE_OK);
   ret = nested_dd->get_float128_value(float_128, random_id);
@@ -274,7 +263,6 @@ void verify_single_value_struct(DDS::DynamicData_ptr data)
   EXPECT_EQ(ret, DDS::RETCODE_OK);
   EXPECT_EQ(expected.char_8, char_8);
 
-  nested_dd = 0;
   ret = data->get_complex_value(nested_dd, id);
   EXPECT_EQ(ret, DDS::RETCODE_OK);
   ret = nested_dd->get_char8_value(char_8, random_id);
@@ -289,7 +277,6 @@ void verify_single_value_struct(DDS::DynamicData_ptr data)
   EXPECT_EQ(ret, DDS::RETCODE_OK);
   EXPECT_EQ(expected.char_16, char_16);
 
-  nested_dd = 0;
   ret = data->get_complex_value(nested_dd, id);
   EXPECT_EQ(ret, DDS::RETCODE_OK);
   ret = nested_dd->get_char16_value(char_16, random_id);
@@ -304,7 +291,6 @@ void verify_single_value_struct(DDS::DynamicData_ptr data)
   EXPECT_EQ(ret, DDS::RETCODE_OK);
   EXPECT_EQ(expected.byte, byte);
 
-  nested_dd = 0;
   ret = data->get_complex_value(nested_dd, id);
   EXPECT_EQ(ret, DDS::RETCODE_OK);
   ret = nested_dd->get_byte_value(byte, random_id);
@@ -318,7 +304,6 @@ void verify_single_value_struct(DDS::DynamicData_ptr data)
   EXPECT_EQ(ret, DDS::RETCODE_OK);
   EXPECT_EQ(expected._cxx_bool, bool_);
 
-  nested_dd = 0;
   ret = data->get_complex_value(nested_dd, id);
   EXPECT_EQ(ret, DDS::RETCODE_OK);
   ret = nested_dd->get_boolean_value(bool_, random_id);
@@ -328,7 +313,6 @@ void verify_single_value_struct(DDS::DynamicData_ptr data)
   ACE_CDR::Long l;
   id = data->get_member_id_at_index(16);
   EXPECT_EQ(id, ACE_CDR::ULong(16));
-  nested_dd = 0;
   ret = data->get_complex_value(nested_dd, id);
   EXPECT_EQ(ret, DDS::RETCODE_OK);
   count = nested_dd->get_item_count();
@@ -350,10 +334,7 @@ void verify_single_value_struct(DDS::DynamicData_ptr data)
   ret = data->get_string_value(str, id);
   EXPECT_EQ(ret, DDS::RETCODE_OK);
   EXPECT_STREQ(expected.str.in(), str);
-  CORBA::string_free(str);
 
-  str = 0;
-  nested_dd = 0;
   ret = data->get_complex_value(nested_dd, id);
   EXPECT_EQ(ret, DDS::RETCODE_OK);
   ret = nested_dd->get_string_value(str, random_id);
@@ -369,7 +350,6 @@ void verify_single_value_struct(DDS::DynamicData_ptr data)
   CORBA::wstring_free(wstr);
 
   wstr = 0;
-  nested_dd = 0;
   ret = data->get_complex_value(nested_dd, id);
   EXPECT_EQ(ret, DDS::RETCODE_OK);
   ret = nested_dd->get_wstring_value(wstr, random_id);
@@ -381,7 +361,6 @@ void verify_single_value_struct(DDS::DynamicData_ptr data)
   EXPECT_EQ(ret, DDS::RETCODE_OK);
   EXPECT_EQ(expected.int_32, int_32);
 
-  nested_dd = 0;
   ret = data->get_complex_value(nested_dd, 1);
   EXPECT_EQ(ret, DDS::RETCODE_OK);
   ret = nested_dd->get_int32_value(int_32, random_id);
@@ -392,7 +371,6 @@ void verify_single_value_struct(DDS::DynamicData_ptr data)
   EXPECT_EQ(ret, DDS::RETCODE_OK);
   EXPECT_EQ(expected.my_enum, my_enum);
 
-  nested_dd = 0;
   ret = data->get_complex_value(nested_dd, 0);
   EXPECT_EQ(ret, DDS::RETCODE_OK);
   ret = nested_dd->get_int32_value(my_enum, random_id);
@@ -492,7 +470,6 @@ void verify_sequence_value_struct(DDS::DynamicData_ptr data)
   EXPECT_EQ(DDS::RETCODE_OK, ret);
   check_primitive_sequences(expected.int_32s, int_32s);
 
-  complex = 0;
   ret = data->get_complex_value(complex, 1);
   EXPECT_EQ(DDS::RETCODE_OK, ret);
   count = complex->get_item_count();
@@ -588,7 +565,6 @@ void verify_sequence_value_struct(DDS::DynamicData_ptr data)
   EXPECT_EQ(DDS::RETCODE_OK, ret);
   check_string_sequences(expected.wstr_s, wstr_s);
 
-  complex = 0;
   ret = data->get_complex_value(complex, 17);
   EXPECT_EQ(DDS::RETCODE_OK, ret);
   count = complex->get_item_count();
@@ -772,9 +748,7 @@ void verify_string_union(DDS::DynamicData_ptr data)
   DDS::ReturnCode_t ret = data->get_string_value(str, 16);
   EXPECT_EQ(ret, DDS::RETCODE_OK);
   EXPECT_STREQ("abc", str);
-  CORBA::string_free(str);
 
-  str = 0;
   ret = data->get_string_value(str, 10);
   EXPECT_EQ(ret, DDS::RETCODE_ERROR);
 }
@@ -839,7 +813,6 @@ void verify_array_struct(DDS::DynamicData_ptr data)
   EXPECT_EQ(DDS::RETCODE_OK, ret);
   EXPECT_EQ(ACE_CDR::Long(0x34), l);
 
-  array = 0;
   ret = data->get_complex_value(array, 1);
   EXPECT_EQ(DDS::RETCODE_OK, ret);
   ACE_CDR::ULong ul;
@@ -852,7 +825,6 @@ void verify_array_struct(DDS::DynamicData_ptr data)
   EXPECT_EQ(DDS::RETCODE_OK, ret);
   EXPECT_EQ(ACE_CDR::ULong(0xff), ul);
 
-  array = 0;
   ret = data->get_complex_value(array, 2);
   EXPECT_EQ(DDS::RETCODE_OK, ret);
   ACE_CDR::Int8 i;
@@ -1338,7 +1310,6 @@ TEST(dds_DCPS_XTypes_DynamicDataXcdrReadImpl, Mutable_SkipNestedMembers)
   EXPECT_EQ(DDS::RETCODE_OK, ret);
   EXPECT_EQ(expected.s, s);
 
-  nested_level1 = 0;
   ret = data.get_complex_value(nested_level1, 3);
   EXPECT_EQ(DDS::RETCODE_OK, ret);
   ACE_CDR::ULong ul;
@@ -1446,7 +1417,6 @@ TEST(dds_DCPS_XTypes_DynamicDataXcdrReadImpl, Mutable_ReadRecursiveStruct)
   EXPECT_EQ(val, ACE_CDR::Long(0x000000dd));
   id = child2_dd->get_member_id_at_index(1);
   EXPECT_EQ(id, XTypes::MemberId(1));
-  nested_children_dd = 0;
   EXPECT_EQ(DDS::RETCODE_OK, child2_dd->get_complex_value(nested_children_dd, id));
   EXPECT_EQ(ACE_CDR::ULong(0), nested_children_dd->get_item_count());
 }
@@ -2245,7 +2215,6 @@ TEST(dds_DCPS_XTypes_DynamicDataXcdrReadImpl, Appendable_SkipNestedMembers)
   EXPECT_EQ(DDS::RETCODE_OK, ret);
   EXPECT_EQ(expected.s, s);
 
-  nested_level1 = 0;
   ret = data.get_complex_value(nested_level1, 3);
   EXPECT_EQ(DDS::RETCODE_OK, ret);
   ACE_CDR::ULong ul;
@@ -2322,7 +2291,6 @@ TEST(dds_DCPS_XTypes_DynamicDataXcdrReadImpl, Appendable_SkipNestedMembersXCDR1)
   EXPECT_EQ(DDS::RETCODE_OK, ret);
   EXPECT_EQ(expected.s, s);
 
-  nested_level1 = 0;
   ret = data.get_complex_value(nested_level1, 3);
   EXPECT_EQ(DDS::RETCODE_OK, ret);
   ret = nested_level1->get_uint32_value(ul, 1);
@@ -3104,7 +3072,6 @@ TEST(dds_DCPS_XTypes_DynamicDataXcdrReadImpl, Final_SkipNestedMembers)
   EXPECT_EQ(DDS::RETCODE_OK, ret);
   EXPECT_EQ(expected.s, s);
 
-  nested_level1 = 0;
   ret = data.get_complex_value(nested_level1, 3);
   EXPECT_EQ(DDS::RETCODE_OK, ret);
   ret = nested_level1->get_uint32_value(ul, 1);
@@ -3180,7 +3147,6 @@ TEST(dds_DCPS_XTypes_DynamicDataXcdrReadImpl, Final_SkipNestedMembersXCDR1)
   EXPECT_EQ(DDS::RETCODE_OK, ret);
   EXPECT_EQ(expected.s, s);
 
-  nested_level1 = 0;
   ret = data.get_complex_value(nested_level1, 3);
   EXPECT_EQ(DDS::RETCODE_OK, ret);
   ret = nested_level1->get_uint32_value(ul, 1);
