@@ -12,7 +12,7 @@ At one point an automated re-formatter was run on the codebase, migrating from t
 Repository
 **********
 
-The repository is hosted on Github at `objectcomputing/OpenDDS <https://github.com/objectcomputing/OpenDDS>`_ and is open for pull requests.
+The repository is hosted on Github at `OpenDDS/OpenDDS <https://github.com/OpenDDS/OpenDDS>`_ and is open for pull requests.
 
 ***********************
 Automated Build Systems
@@ -161,11 +161,14 @@ Whitespace
 * Namespace scopes that span most or all of a file do not cause indentation of their contents.
 * Otherwise lines ending in ``{`` indicate that subsequent lines should be indented one more level until ``}``.
 * Continuation lines (when a statement spans more than one line) can either be indented one more level, or indented to nest "under" an ``(`` or similar punctuation.
-* Add space around binary operators and after commas: ``a + b``
+* Add space around binary operators and after commas: ``a + b, c``
 * Do not add space around parentheses for function calls, a properly formatted function call looks like ``func(arg1, arg2, arg3);``
 * Do not add space around brackets for indexing, instead it should look like: ``mymap[key]``
-* In general, do not add space :) Do not add extra spaces to make syntax elements (that span lines/statements) line up.
-  This only causes unnecessary changes in adjacent lines as the code evolves.
+* For code that includes multiple braces appearing together in the same expression (such as initializer lists), there are two approved styles:
+  * spaces between braces and their enclosed (non-empty) sub-expression: ``const GUID_t GUID_UNKNOWN = { { 0 }, { { 0 }, 0 } };`` or ``{ a + b, {} }``
+  * no such spaces: ``const GUID_t GUID_UNKNOWN = {{0}, {{0}, 0}};`` or ``{a + b, {}}``
+* Do not add extra spaces to make syntax elements (that span lines/statements) line up; this only causes unnecessary changes in adjacent lines as the code evolves.
+* In general, do not add extra spaces unless doing so is covered by the rules above.
 
 Language Usage
 ==============
@@ -497,9 +500,9 @@ Message Content
 - Log messages should take the form:
   ::
 
-    (%P|%t) [ERROR:|WARNING:|NOTICE:] FUNCTION_NAME: MESSAGE\n
+    (%P|%t) [ERROR:|WARNING:|NOTICE:|INFO:] FUNCTION_NAME: MESSAGE\n
 
-  - Use ``ERROR:``, ``WARNING:``, and ``NOTICE:`` if using the corresponding log priorities.
+  - Use ``ERROR:``, ``WARNING:``, ``NOTICE:``, and ``INFO:`` if using the corresponding log priorities.
   - ``CLASS_NAME::METHOD_NAME`` should be used instead of just the function name if it's part of a class.
     It's at the developer's discretion to come up with a meaningful name for members of overload sets, templates, and other more complex cases.
   - ``security_debug`` and ``transport_debug`` log messages should indicate the category name, for example:
@@ -536,7 +539,7 @@ Examples
   }
 
   if (log_level >= LogLevel::Info) {
-    ACE_DEBUG((LM_INFO, "(%P|%t) example_function: Hello, World!\n"));
+    ACE_DEBUG((LM_INFO, "(%P|%t) INFO: example_function: Hello, World!\n"));
   }
 
   if (DCPS_debug_level >= 1) {

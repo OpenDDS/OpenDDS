@@ -2,6 +2,7 @@ project: dcpsexe, dcps_test, dcps_tcp, dcps_rtps_udp, content_subscription {
   exename = QueryConditionTest
   requires += query_condition
   TypeSupport_Files {
+    dcps_ts_flags += -Gxtypes-complete
     Messenger.idl
   }
 }

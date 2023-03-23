@@ -28,6 +28,7 @@ if(NOT ${CMAKE_VERSION} VERSION_LESS "3.8.2")
       add_subdirectory(C++11_typecode)
   endif()
   add_subdirectory(Nested_IDL)
+  add_subdirectory(idl_compiler_tests)
 endif()
 
 add_subdirectory(include_subdir)

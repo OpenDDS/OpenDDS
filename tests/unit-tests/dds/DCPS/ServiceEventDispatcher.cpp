@@ -74,7 +74,7 @@ struct RecursiveTestEventTwo : public TestEventBase {
   void handle_event()
   {
     increment_call_count();
-    const size_t scale = dispatch_scale_.value();
+    const size_t scale = dispatch_scale_;
     OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::EventDispatcher> dispatcher = dispatcher_.lock();
     if (dispatcher) {
       for (size_t i = 0; i < scale; ++i) {
@@ -84,7 +84,7 @@ struct RecursiveTestEventTwo : public TestEventBase {
   }
 
   OpenDDS::DCPS::WeakRcHandle<OpenDDS::DCPS::EventDispatcher> dispatcher_;
-  ACE_Atomic_Op<ACE_Thread_Mutex, size_t> dispatch_scale_;
+  OpenDDS::DCPS::Atomic<size_t> dispatch_scale_;
 };
 
 } // (anonymous) namespace
@@ -158,7 +158,7 @@ TEST(dds_DCPS_ServiceEventDispatcher, RecursiveDispatchAlpha)
   EXPECT_GE(test_event->call_count(), 6u);
 }
 
-TEST(dds_DCPS_ServiceEventDispatcher, RecursiveDispatchAlpha_IS)
+TEST(dds_DCPS_ServiceEventDispatcher, RecursiveDispatchAlpha_ImmediateShutdown)
 {
   OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::EventDispatcher> dispatcher = OpenDDS::DCPS::make_rch<OpenDDS::DCPS::ServiceEventDispatcher>();
   OpenDDS::DCPS::RcHandle<RecursiveTestEventOne> test_event = OpenDDS::DCPS::make_rch<RecursiveTestEventOne>(dispatcher);
@@ -190,7 +190,7 @@ TEST(dds_DCPS_ServiceEventDispatcher, RecursiveDispatchBeta)
   EXPECT_GE(test_event->call_count(), 10u);
 }
 
-TEST(dds_DCPS_ServiceEventDispatcher, RecursiveDispatchBeta_IS)
+TEST(dds_DCPS_ServiceEventDispatcher, RecursiveDispatchBeta_ImmediateShutdown)
 {
   OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::EventDispatcher> dispatcher = OpenDDS::DCPS::make_rch<OpenDDS::DCPS::ServiceEventDispatcher>(8);
   OpenDDS::DCPS::RcHandle<RecursiveTestEventOne> test_event = OpenDDS::DCPS::make_rch<RecursiveTestEventOne>(dispatcher);
@@ -221,7 +221,7 @@ TEST(dds_DCPS_ServiceEventDispatcher, RecursiveDispatchGamma)
   EXPECT_GE(test_event->call_count(), 1000u);
 }
 
-TEST(dds_DCPS_ServiceEventDispatcher, RecursiveDispatchGamma_IS)
+TEST(dds_DCPS_ServiceEventDispatcher, RecursiveDispatchGamma_ImmediateShutdown)
 {
   OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::EventDispatcher> dispatcher = OpenDDS::DCPS::make_rch<OpenDDS::DCPS::ServiceEventDispatcher>();
   OpenDDS::DCPS::RcHandle<RecursiveTestEventTwo> test_event = OpenDDS::DCPS::make_rch<RecursiveTestEventTwo>(dispatcher, 1);
@@ -233,34 +233,6 @@ TEST(dds_DCPS_ServiceEventDispatcher, RecursiveDispatchGamma_IS)
   dispatcher->shutdown(true);
 
   EXPECT_GE(test_event->call_count(), 1000u);
-}
-
-TEST(dds_DCPS_ServiceEventDispatcher, RecursiveDispatchDelta)
-{
-  OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::EventDispatcher> dispatcher = OpenDDS::DCPS::make_rch<OpenDDS::DCPS::ServiceEventDispatcher>(8);
-  OpenDDS::DCPS::RcHandle<RecursiveTestEventTwo> test_event = OpenDDS::DCPS::make_rch<RecursiveTestEventTwo>(dispatcher, 2);
-
-  dispatcher->dispatch(test_event);
-
-  test_event->wait(100000u);
-  test_event->dispatch_scale_ = 0;
-  dispatcher->shutdown();
-
-  EXPECT_GE(test_event->call_count(), 100000u);
-}
-
-TEST(dds_DCPS_ServiceEventDispatcher, RecursiveDispatchDelta_IS)
-{
-  OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::EventDispatcher> dispatcher = OpenDDS::DCPS::make_rch<OpenDDS::DCPS::ServiceEventDispatcher>(8);
-  OpenDDS::DCPS::RcHandle<RecursiveTestEventTwo> test_event = OpenDDS::DCPS::make_rch<RecursiveTestEventTwo>(dispatcher, 2);
-
-  dispatcher->dispatch(test_event);
-
-  test_event->wait(100000u);
-  test_event->dispatch_scale_ = 0;
-  dispatcher->shutdown(true);
-
-  EXPECT_GE(test_event->call_count(), 100000u);
 }
 
 TEST(dds_DCPS_ServiceEventDispatcher, TestShutdown)
@@ -287,17 +259,17 @@ TEST(dds_DCPS_ServiceEventDispatcher, TimedDispatch)
 
   const OpenDDS::DCPS::MonotonicTimePoint now = OpenDDS::DCPS::MonotonicTimePoint::now();
 
-  dispatcher->schedule(test_event, now + OpenDDS::DCPS::TimeDuration::from_double(0.9));
+  dispatcher->schedule(test_event, now + OpenDDS::DCPS::TimeDuration::from_double(0.09));
   dispatcher->dispatch(test_event);
-  dispatcher->schedule(test_event, now + OpenDDS::DCPS::TimeDuration::from_double(0.5));
+  dispatcher->schedule(test_event, now + OpenDDS::DCPS::TimeDuration::from_double(0.05));
   dispatcher->dispatch(test_event);
-  dispatcher->schedule(test_event, now + OpenDDS::DCPS::TimeDuration::from_double(0.8));
+  dispatcher->schedule(test_event, now + OpenDDS::DCPS::TimeDuration::from_double(0.08));
   dispatcher->dispatch(test_event);
-  dispatcher->schedule(test_event, now + OpenDDS::DCPS::TimeDuration::from_double(0.7));
+  dispatcher->schedule(test_event, now + OpenDDS::DCPS::TimeDuration::from_double(0.07));
   dispatcher->dispatch(test_event);
-  dispatcher->schedule(test_event, now + OpenDDS::DCPS::TimeDuration::from_double(0.6));
+  dispatcher->schedule(test_event, now + OpenDDS::DCPS::TimeDuration::from_double(0.06));
   dispatcher->dispatch(test_event);
-  dispatcher->schedule(test_event, now + OpenDDS::DCPS::TimeDuration::from_double(0.4));
+  dispatcher->schedule(test_event, now + OpenDDS::DCPS::TimeDuration::from_double(0.04));
   dispatcher->dispatch(test_event);
 
   test_event->wait(6u);
@@ -324,14 +296,14 @@ TEST(dds_DCPS_ServiceEventDispatcher, TimedDispatch)
   dispatcher->shutdown();
 
   EXPECT_LT(now, after6);
-  EXPECT_LT(after6, now + OpenDDS::DCPS::TimeDuration::from_double(0.4));
+  EXPECT_LT(after6, now + OpenDDS::DCPS::TimeDuration::from_double(0.04));
 
-  EXPECT_GE(after7, now + OpenDDS::DCPS::TimeDuration::from_double(0.4));
-  EXPECT_GE(after8, now + OpenDDS::DCPS::TimeDuration::from_double(0.5));
-  EXPECT_GE(after9, now + OpenDDS::DCPS::TimeDuration::from_double(0.6));
-  EXPECT_GE(after10, now + OpenDDS::DCPS::TimeDuration::from_double(0.7));
-  EXPECT_GE(after11, now + OpenDDS::DCPS::TimeDuration::from_double(0.8));
-  EXPECT_GE(after12, now + OpenDDS::DCPS::TimeDuration::from_double(0.9));
+  EXPECT_GE(after7, now + OpenDDS::DCPS::TimeDuration::from_double(0.04));
+  EXPECT_GE(after8, now + OpenDDS::DCPS::TimeDuration::from_double(0.05));
+  EXPECT_GE(after9, now + OpenDDS::DCPS::TimeDuration::from_double(0.06));
+  EXPECT_GE(after10, now + OpenDDS::DCPS::TimeDuration::from_double(0.07));
+  EXPECT_GE(after11, now + OpenDDS::DCPS::TimeDuration::from_double(0.08));
+  EXPECT_GE(after12, now + OpenDDS::DCPS::TimeDuration::from_double(0.09));
 }
 
 TEST(dds_DCPS_ServiceEventDispatcher, TimedDispatchSingleThreaded)
@@ -341,17 +313,17 @@ TEST(dds_DCPS_ServiceEventDispatcher, TimedDispatchSingleThreaded)
 
   const OpenDDS::DCPS::MonotonicTimePoint now = OpenDDS::DCPS::MonotonicTimePoint::now();
 
-  dispatcher->schedule(test_event, now + OpenDDS::DCPS::TimeDuration::from_double(0.9));
+  dispatcher->schedule(test_event, now + OpenDDS::DCPS::TimeDuration::from_double(0.09));
   dispatcher->dispatch(test_event);
-  dispatcher->schedule(test_event, now + OpenDDS::DCPS::TimeDuration::from_double(0.5));
+  dispatcher->schedule(test_event, now + OpenDDS::DCPS::TimeDuration::from_double(0.05));
   dispatcher->dispatch(test_event);
-  dispatcher->schedule(test_event, now + OpenDDS::DCPS::TimeDuration::from_double(0.8));
+  dispatcher->schedule(test_event, now + OpenDDS::DCPS::TimeDuration::from_double(0.08));
   dispatcher->dispatch(test_event);
-  dispatcher->schedule(test_event, now + OpenDDS::DCPS::TimeDuration::from_double(0.7));
+  dispatcher->schedule(test_event, now + OpenDDS::DCPS::TimeDuration::from_double(0.07));
   dispatcher->dispatch(test_event);
-  dispatcher->schedule(test_event, now + OpenDDS::DCPS::TimeDuration::from_double(0.6));
+  dispatcher->schedule(test_event, now + OpenDDS::DCPS::TimeDuration::from_double(0.06));
   dispatcher->dispatch(test_event);
-  dispatcher->schedule(test_event, now + OpenDDS::DCPS::TimeDuration::from_double(0.4));
+  dispatcher->schedule(test_event, now + OpenDDS::DCPS::TimeDuration::from_double(0.04));
   dispatcher->dispatch(test_event);
 
   test_event->wait(6u);
@@ -378,14 +350,14 @@ TEST(dds_DCPS_ServiceEventDispatcher, TimedDispatchSingleThreaded)
   dispatcher->shutdown();
 
   EXPECT_LT(now, after6);
-  EXPECT_LT(after6, now + OpenDDS::DCPS::TimeDuration::from_double(0.4));
+  EXPECT_LT(after6, now + OpenDDS::DCPS::TimeDuration::from_double(0.04));
 
-  EXPECT_GE(after7, now + OpenDDS::DCPS::TimeDuration::from_double(0.4));
-  EXPECT_GE(after8, now + OpenDDS::DCPS::TimeDuration::from_double(0.5));
-  EXPECT_GE(after9, now + OpenDDS::DCPS::TimeDuration::from_double(0.6));
-  EXPECT_GE(after10, now + OpenDDS::DCPS::TimeDuration::from_double(0.7));
-  EXPECT_GE(after11, now + OpenDDS::DCPS::TimeDuration::from_double(0.8));
-  EXPECT_GE(after12, now + OpenDDS::DCPS::TimeDuration::from_double(0.9));
+  EXPECT_GE(after7, now + OpenDDS::DCPS::TimeDuration::from_double(0.04));
+  EXPECT_GE(after8, now + OpenDDS::DCPS::TimeDuration::from_double(0.05));
+  EXPECT_GE(after9, now + OpenDDS::DCPS::TimeDuration::from_double(0.06));
+  EXPECT_GE(after10, now + OpenDDS::DCPS::TimeDuration::from_double(0.07));
+  EXPECT_GE(after11, now + OpenDDS::DCPS::TimeDuration::from_double(0.08));
+  EXPECT_GE(after12, now + OpenDDS::DCPS::TimeDuration::from_double(0.09));
 }
 
 TEST(dds_DCPS_ServiceEventDispatcher, CancelDispatch)
@@ -395,12 +367,12 @@ TEST(dds_DCPS_ServiceEventDispatcher, CancelDispatch)
 
   const OpenDDS::DCPS::MonotonicTimePoint now = OpenDDS::DCPS::MonotonicTimePoint::now();
 
-  long t1 = dispatcher->schedule(test_event, now + OpenDDS::DCPS::TimeDuration::from_double(0.9));
-  long t2 = dispatcher->schedule(test_event, now + OpenDDS::DCPS::TimeDuration::from_double(0.5));
-  long t3 = dispatcher->schedule(test_event, now + OpenDDS::DCPS::TimeDuration::from_double(0.8));
-  /*long t4 =*/ dispatcher->schedule(test_event, now + OpenDDS::DCPS::TimeDuration::from_double(0.7));
-  /*long t5 =*/ dispatcher->schedule(test_event, now + OpenDDS::DCPS::TimeDuration::from_double(0.6));
-  long t6 = dispatcher->schedule(test_event, now + OpenDDS::DCPS::TimeDuration::from_double(0.4));
+  long t1 = dispatcher->schedule(test_event, now + OpenDDS::DCPS::TimeDuration::from_double(0.09));
+  long t2 = dispatcher->schedule(test_event, now + OpenDDS::DCPS::TimeDuration::from_double(0.05));
+  long t3 = dispatcher->schedule(test_event, now + OpenDDS::DCPS::TimeDuration::from_double(0.08));
+  /*long t4 =*/ dispatcher->schedule(test_event, now + OpenDDS::DCPS::TimeDuration::from_double(0.07));
+  /*long t5 =*/ dispatcher->schedule(test_event, now + OpenDDS::DCPS::TimeDuration::from_double(0.06));
+  long t6 = dispatcher->schedule(test_event, now + OpenDDS::DCPS::TimeDuration::from_double(0.04));
 
   EXPECT_EQ(dispatcher->cancel(t6), 1u);
   EXPECT_EQ(dispatcher->cancel(t1), 1u);
@@ -410,7 +382,7 @@ TEST(dds_DCPS_ServiceEventDispatcher, CancelDispatch)
   test_event->wait(2u);
   const OpenDDS::DCPS::MonotonicTimePoint after2 = OpenDDS::DCPS::MonotonicTimePoint::now();
 
-  EXPECT_GE(after2, now + OpenDDS::DCPS::TimeDuration::from_double(0.7));
+  EXPECT_GE(after2, now + OpenDDS::DCPS::TimeDuration::from_double(0.07));
   EXPECT_EQ(test_event->call_count(), 2u);
 }
 
@@ -421,12 +393,12 @@ TEST(dds_DCPS_ServiceEventDispatcher, CancelDispatchSingleThreaded)
 
   const OpenDDS::DCPS::MonotonicTimePoint now = OpenDDS::DCPS::MonotonicTimePoint::now();
 
-  long t1 = dispatcher->schedule(test_event, now + OpenDDS::DCPS::TimeDuration::from_double(0.9));
-  long t2 = dispatcher->schedule(test_event, now + OpenDDS::DCPS::TimeDuration::from_double(0.5));
-  long t3 = dispatcher->schedule(test_event, now + OpenDDS::DCPS::TimeDuration::from_double(0.8));
-  /*long t4 =*/ dispatcher->schedule(test_event, now + OpenDDS::DCPS::TimeDuration::from_double(0.7));
-  /*long t5 =*/ dispatcher->schedule(test_event, now + OpenDDS::DCPS::TimeDuration::from_double(0.6));
-  long t6 = dispatcher->schedule(test_event, now + OpenDDS::DCPS::TimeDuration::from_double(0.4));
+  long t1 = dispatcher->schedule(test_event, now + OpenDDS::DCPS::TimeDuration::from_double(0.09));
+  long t2 = dispatcher->schedule(test_event, now + OpenDDS::DCPS::TimeDuration::from_double(0.05));
+  long t3 = dispatcher->schedule(test_event, now + OpenDDS::DCPS::TimeDuration::from_double(0.08));
+  /*long t4 =*/ dispatcher->schedule(test_event, now + OpenDDS::DCPS::TimeDuration::from_double(0.07));
+  /*long t5 =*/ dispatcher->schedule(test_event, now + OpenDDS::DCPS::TimeDuration::from_double(0.06));
+  long t6 = dispatcher->schedule(test_event, now + OpenDDS::DCPS::TimeDuration::from_double(0.04));
 
   EXPECT_EQ(dispatcher->cancel(t6), 1u);
   EXPECT_EQ(dispatcher->cancel(t1), 1u);
@@ -438,6 +410,6 @@ TEST(dds_DCPS_ServiceEventDispatcher, CancelDispatchSingleThreaded)
 
   dispatcher->shutdown();
 
-  EXPECT_GE(after2, now + OpenDDS::DCPS::TimeDuration::from_double(0.7));
+  EXPECT_GE(after2, now + OpenDDS::DCPS::TimeDuration::from_double(0.07));
   EXPECT_EQ(test_event->call_count(), 2u);
 }

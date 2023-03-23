@@ -16,6 +16,11 @@ module MyModCompleteToDynamic {
 
   typedef MyOuterStruct MyAliasStruct;
 
+  @topic
+  struct StructWithTypedefMember {
+    MyAliasStruct value;
+  };
+
   enum PrimitiveKind {
     TK_INT32,
     TK_CHAR8

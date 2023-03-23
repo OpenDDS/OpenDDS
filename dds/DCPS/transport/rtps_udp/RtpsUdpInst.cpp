@@ -5,15 +5,17 @@
  * See: http://www.opendds.org/license.html
  */
 
+#include "RtpsSampleHeader.h"
 #include "RtpsUdpInst.h"
 #include "RtpsUdpLoader.h"
 #include "RtpsUdpTransport.h"
+#include "RtpsUdpSendStrategy.h"
 
 #include <dds/DCPS/LogAddr.h>
 #include <dds/DCPS/NetworkResource.h>
 #include <dds/DCPS/Service_Participant.h>
 #include <dds/DCPS/transport/framework/TransportDefs.h>
-#include <dds/DCPS/RTPS/BaseMessageUtils.h>
+#include <dds/DCPS/RTPS/MessageUtils.h>
 
 #include <ace/Configuration.h>
 
@@ -38,8 +40,8 @@ RtpsUdpInst::RtpsUdpInst(const OPENDDS_STRING& name)
   , anticipated_fragments_(RtpsUdpSendStrategy::UDP_MAX_MESSAGE_SIZE / RtpsSampleHeader::FRAG_SIZE)
   , max_message_size_(RtpsUdpSendStrategy::UDP_MAX_MESSAGE_SIZE)
   , nak_depth_(0)
-  , nak_response_delay_(0, 200*1000 /*microseconds*/) // default from RTPS
-  , heartbeat_period_(1) // no default in RTPS spec
+  , nak_response_delay_(0, DEFAULT_NAK_RESPONSE_DELAY_USEC)
+  , heartbeat_period_(DEFAULT_HEARTBEAT_PERIOD_SEC)
   , receive_address_duration_(5)
   , responsive_mode_(false)
   , send_delay_(0, 10 * 1000)
@@ -58,7 +60,7 @@ RtpsUdpInst::RtpsUdpInst(const OPENDDS_STRING& name)
 TransportImpl_rch
 RtpsUdpInst::new_impl()
 {
-  return make_rch<RtpsUdpTransport>(ref(*this));
+  return make_rch<RtpsUdpTransport>(rchandle_from(this));
 }
 
 int
@@ -282,10 +284,10 @@ RtpsUdpInst::get_blob(const TransportLocatorSeq& trans_info) const
 }
 
 void
-RtpsUdpInst::update_locators(const RepoId& remote_id,
+RtpsUdpInst::update_locators(const GUID_t& remote_id,
                              const TransportLocatorSeq& locators)
 {
-  TransportImpl_rch imp = impl();
+  TransportImpl_rch imp = get_or_create_impl();
   if (imp) {
     RtpsUdpTransport_rch rtps_impl = static_rchandle_cast<RtpsUdpTransport>(imp);
     rtps_impl->update_locators(remote_id, locators);
@@ -293,10 +295,10 @@ RtpsUdpInst::update_locators(const RepoId& remote_id,
 }
 
 void
-RtpsUdpInst::get_last_recv_locator(const RepoId& remote_id,
+RtpsUdpInst::get_last_recv_locator(const GUID_t& remote_id,
                                    TransportLocator& locator)
 {
-  TransportImpl_rch imp = impl();
+  TransportImpl_rch imp = get_or_create_impl();
   if (imp) {
     RtpsUdpTransport_rch rtps_impl = static_rchandle_cast<RtpsUdpTransport>(imp);
     rtps_impl->get_last_recv_locator(remote_id, locator);
@@ -306,7 +308,7 @@ RtpsUdpInst::get_last_recv_locator(const RepoId& remote_id,
 void
 RtpsUdpInst::rtps_relay_address_change()
 {
-  TransportImpl_rch imp = impl();
+  TransportImpl_rch imp = get_impl();
   if (imp) {
     RtpsUdpTransport_rch rtps_impl = static_rchandle_cast<RtpsUdpTransport>(imp);
     rtps_impl->rtps_relay_address_change();
@@ -316,7 +318,7 @@ RtpsUdpInst::rtps_relay_address_change()
 void
 RtpsUdpInst::append_transport_statistics(TransportStatisticsSequence& seq)
 {
-  TransportImpl_rch imp = impl();
+  TransportImpl_rch imp = get_or_create_impl();
   if (imp) {
     RtpsUdpTransport_rch rtps_impl = static_rchandle_cast<RtpsUdpTransport>(imp);
     rtps_impl->append_transport_statistics(seq);

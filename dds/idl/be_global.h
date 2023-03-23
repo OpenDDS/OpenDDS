@@ -81,7 +81,8 @@ public:
   enum stream_enum_t {
     STREAM_H, STREAM_CPP, STREAM_IDL, STREAM_ITL,
     STREAM_FACETS_H, STREAM_FACETS_CPP,
-    STREAM_LANG_H
+    STREAM_LANG_H,
+    STREAM_COUNT
   };
 
   void reset_includes();
@@ -233,7 +234,8 @@ public:
 
   OpenDDS::DataRepresentation data_representations(AST_Decl* node) const;
 
-  OpenDDS::XTypes::MemberId compute_id(AST_Field* field, AutoidKind auto_id, OpenDDS::XTypes::MemberId& member_id);
+  OpenDDS::XTypes::MemberId compute_id(AST_Structure* stru, AST_Field* field, AutoidKind auto_id,
+    OpenDDS::XTypes::MemberId& member_id);
   OpenDDS::XTypes::MemberId get_id(AST_Field* field);
 
   bool is_nested(AST_Decl* node);
@@ -271,6 +273,9 @@ private:
   std::set<std::string> platforms_;
   typedef std::map<AST_Field*, OpenDDS::XTypes::MemberId> MemberIdMap;
   MemberIdMap member_id_map_;
+  typedef std::map<OpenDDS::XTypes::MemberId, AST_Field*> MemberIdCollisionMap;
+  typedef std::map<AST_Structure*, MemberIdCollisionMap> GlobalMemberIdCollisionMap;
+  GlobalMemberIdCollisionMap member_id_collision_map_;
   bool old_typeobject_encoding_;
 
   bool is_default_nested(UTL_Scope* scope);

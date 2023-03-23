@@ -25,7 +25,8 @@ class RcHandle {
 public:
   RcHandle()
     : ptr_(0)
-  {}
+  {
+  }
 
   RcHandle(T* p, keep_count)
     : ptr_(p)
@@ -150,7 +151,6 @@ public:
     return retval;
   }
 
-
   operator bool() const
   {
     return in() != 0;
@@ -174,16 +174,16 @@ public:
 private:
   void bump_up()
   {
-    if (this->ptr_ != 0) {
-      this->ptr_->_add_ref();
+    if (ptr_ != 0) {
+      ptr_->_add_ref();
     }
   }
 
   void bump_down()
   {
-    if (this->ptr_ != 0) {
-      this->ptr_->_remove_ref();
-      this->ptr_ = 0;
+    if (ptr_ != 0) {
+      ptr_->_remove_ref();
+      ptr_ = 0;
     }
   }
 

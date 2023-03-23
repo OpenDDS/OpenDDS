@@ -65,6 +65,32 @@ ts_generator::ts_generator()
 {
 }
 
+namespace {
+  void gen_isDcpsKey_i(const char* key)
+  {
+    be_global->impl_ <<
+      "  if (!ACE_OS::strcmp(field, \"" << key << "\")) {\n"
+      "    return true;\n"
+      "  }\n";
+  }
+
+  void gen_isDcpsKey(IDL_GlobalData::DCPS_Data_Type_Info* info)
+  {
+    IDL_GlobalData::DCPS_Key_List::CONST_ITERATOR i(info->key_list_);
+    for (ACE_TString* key = 0; i.next(key); i.advance()) {
+      gen_isDcpsKey_i(ACE_TEXT_ALWAYS_CHAR(key->c_str()));
+    }
+  }
+
+  void gen_isDcpsKey(TopicKeys& keys)
+  {
+    TopicKeys::Iterator finished = keys.end();
+    for (TopicKeys::Iterator i = keys.begin(); i != finished; ++i) {
+      gen_isDcpsKey_i(i.canonical_path().c_str());
+    }
+  }
+}
+
 bool ts_generator::generate_ts(AST_Decl* node, UTL_ScopedName* name)
 {
   if (idl_template_.empty()) {
@@ -92,10 +118,13 @@ bool ts_generator::generate_ts(AST_Decl* node, UTL_ScopedName* name)
   }
 
   size_t key_count = 0;
+  IDL_GlobalData::DCPS_Data_Type_Info* info = 0;
+  TopicKeys keys;
   if (struct_node) {
-    IDL_GlobalData::DCPS_Data_Type_Info* info = idl_global->is_dcps_type(name);
+    info = idl_global->is_dcps_type(name);
     if (be_global->is_topic_type(struct_node)) {
-      key_count = TopicKeys(struct_node).count();
+      keys = TopicKeys(struct_node);
+      key_count = keys.count();
     } else if (info) {
       key_count = info->key_list_.size();
     } else {
@@ -115,6 +144,8 @@ bool ts_generator::generate_ts(AST_Decl* node, UTL_ScopedName* name)
   const std::string unescaped_name =
     dds_generator::scoped_helper(name, "::", EscapeContext_StripEscapes);
   const std::string name_underscores = dds_generator::scoped_helper(name, "_");
+  static const std::string ns("OpenDDS::DCPS::");
+  const std::string xtag = ns + get_xtag_name(name);
 
   static const char* idl_includes[] = {
     "dds/DdsDcpsInfrastructure.idl", "dds/DdsDcpsTopic.idl",
@@ -177,17 +208,40 @@ bool ts_generator::generate_ts(AST_Decl* node, UTL_ScopedName* name)
     "struct DDSTraits<" << cxx_name << "> {\n"
     "  typedef " << cxx_name << " MessageType;\n"
     "  typedef " << ts_name << be_global->sequence_suffix() << " MessageSequenceType;\n"
+    "  typedef " << ts_name << be_global->sequence_suffix() << "::PrivateMemberAccess MessageSequenceAdapterType;\n"
     "  typedef " << ts_name << "TypeSupport TypeSupportType;\n"
     "  typedef " << ts_name << "TypeSupportImpl TypeSupportImplType;\n"
     "  typedef " << ts_name << "DataWriter DataWriterType;\n"
     "  typedef " << ts_name << "DataReader DataReaderType;\n"
     "  typedef " << cxx_name << "_OpenDDS_KeyLessThan LessThanType;\n"
     "  typedef OpenDDS::DCPS::KeyOnly<const " << cxx_name << "> KeyOnlyType;\n"
+    "  typedef " << xtag << " XtagType;\n"
     "\n"
     "  static const char* type_name() { return \"" << unescaped_name << "\"; }\n"
-    "  static bool gen_has_key() { return " << (key_count ? "true" : "false") << "; }\n"
     "  static size_t key_count() { return " << key_count << "; }\n"
+    "  static bool is_key(const char*);\n"
     "};\n"
+    "} // namespace DCPS\n"
+    "} // namespace OpenDDS\n"
+    "OPENDDS_END_VERSIONED_NAMESPACE_DECL\n\n";
+
+  be_global->impl_ <<
+    "OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL\n"
+    "namespace OpenDDS {\n"
+    "namespace DCPS {\n"
+    "bool DDSTraits<" << cxx_name << ">::is_key(const char* field)\n"
+    "{\n"
+    "  ACE_UNUSED_ARG(field);\n";
+  if (struct_node && key_count) {
+    if (info) {
+      gen_isDcpsKey(info);
+    } else {
+      gen_isDcpsKey(keys);
+    }
+  }
+  be_global->impl_ <<
+    "  return false;\n"
+    "}\n"
     "} // namespace DCPS\n"
     "} // namespace OpenDDS\n"
     "OPENDDS_END_VERSIONED_NAMESPACE_DECL\n\n";
@@ -199,12 +253,10 @@ bool ts_generator::generate_ts(AST_Decl* node, UTL_ScopedName* name)
     be_global->header_ <<
       "class " << be_global->export_macro() << " " << ts_short_name << "TypeSupportImpl\n"
       "  : public virtual OpenDDS::DCPS::LocalObject<" << ts_short_name << "TypeSupport>\n"
-      "  , public virtual OpenDDS::DCPS::TypeSupportImpl\n"
+      "  , public virtual OpenDDS::DCPS::TypeSupportImpl_T<" << short_name << ">\n"
       "  , public virtual OpenDDS::DCPS::ValueDispatcher_T<" << short_name << ">\n"
       "{\n"
       "public:\n"
-      "  typedef OpenDDS::DCPS::DDSTraits<" << short_name << "> TraitsType;\n"
-      "  typedef OpenDDS::DCPS::MarshalTraits<" << short_name << "> MarshalTraitsType;\n"
       "  typedef " << ts_short_name << "TypeSupport TypeSupportType;\n"
       "  typedef " << ts_short_name << "TypeSupport::_var_type _var_type;\n"
       "  typedef " << ts_short_name << "TypeSupport::_ptr_type _ptr_type;\n"
@@ -218,12 +270,8 @@ bool ts_generator::generate_ts(AST_Decl* node, UTL_ScopedName* name)
       "  virtual " << be_global->versioning_name() << "::DDS::DataReader_ptr create_multitopic_datareader();\n"
       "#endif /* !OPENDDS_NO_MULTI_TOPIC */\n"
       "#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE\n"
-      "  virtual const OpenDDS::DCPS::MetaStruct& getMetaStructForType();\n"
+      "  virtual const OpenDDS::DCPS::MetaStruct& getMetaStructForType() const;\n"
       "#endif /* !OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE */\n"
-      "  virtual bool has_dcps_key();\n"
-      "  const char* default_type_name() const;\n"
-      "\n"
-      "  void representations_allowed_by_type(::DDS::DataRepresentationIdSeq& seq);\n"
       "\n"
       "  virtual const OpenDDS::XTypes::TypeIdentifier& getMinimalTypeIdentifier() const;\n"
       "  virtual const OpenDDS::XTypes::TypeMap& getMinimalTypeMap() const;\n"
@@ -231,19 +279,8 @@ bool ts_generator::generate_ts(AST_Decl* node, UTL_ScopedName* name)
       "  virtual const OpenDDS::XTypes::TypeIdentifier& getCompleteTypeIdentifier() const;\n"
       "  virtual const OpenDDS::XTypes::TypeMap& getCompleteTypeMap() const;\n"
       "\n"
-      "  virtual OpenDDS::DCPS::Extensibility getExtensibility() const;\n"
-      "\n"
       "  static " << ts_short_name << "TypeSupport::_ptr_type _narrow(CORBA::Object_ptr obj);\n"
-      "};\n\n"
-      "namespace {\n"
-      "struct " << name_underscores << "_Initializer {\n"
-      "  " << name_underscores << "_Initializer()\n"
-      "  {\n"
-      "    " << ts_name << "TypeSupport_var ts = new " << ts_short_name << "TypeSupportImpl;\n"
-      "    ts->register_type(0, \"\");\n"
-      "  }\n"
-      "} init_" << name_underscores << ";\n"
-      "}\n\n";
+      "};\n\n";
   }
   be_global->header_ << be_global->versioning_end() << "\n";
 
@@ -279,24 +316,13 @@ bool ts_generator::generate_ts(AST_Decl* node, UTL_ScopedName* name)
       "}\n"
       "#endif /* !OPENDDS_NO_MULTI_TOPIC */\n\n"
       "#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE\n"
-      "const OpenDDS::DCPS::MetaStruct& " << ts_short_name << "TypeSupportImpl::getMetaStructForType()\n"
+      "const OpenDDS::DCPS::MetaStruct& " << ts_short_name << "TypeSupportImpl::getMetaStructForType() const\n"
       "{\n"
       "  return OpenDDS::DCPS::getMetaStruct<" << short_name << ">();\n"
       "}\n"
       "#endif /* !OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE */\n\n"
-      "bool " << ts_short_name << "TypeSupportImpl::has_dcps_key()\n"
-      "{\n"
-      "  return TraitsType::gen_has_key();\n"
-      "}\n\n"
-      "const char* " << ts_short_name << "TypeSupportImpl::default_type_name() const\n"
-      "{\n"
-      "  return TraitsType::type_name();\n"
-      "}\n"
-      "\n"
-      "void " << ts_short_name << "TypeSupportImpl::representations_allowed_by_type(\n"
-      "  ::DDS::DataRepresentationIdSeq& seq)\n"
-      "{\n"
-      "  MarshalTraitsType::representations_allowed_by_type(seq);\n"
+      "namespace {\n"
+      "  OpenDDS::DCPS::TypeSupportInitializer<" << ts_short_name << "TypeSupportImpl> ts_init_" << name_underscores << ";\n"
       "}\n"
       "\n"
       "const OpenDDS::XTypes::TypeIdentifier& " << ts_short_name << "TypeSupportImpl::getMinimalTypeIdentifier() const\n"
@@ -306,7 +332,7 @@ bool ts_generator::generate_ts(AST_Decl* node, UTL_ScopedName* name)
     const bool generate_xtypes = !be_global->suppress_xtypes() && !java_ts_only;
     if (generate_xtypes) {
       be_global->impl_ <<
-        "  return OpenDDS::DCPS::getMinimalTypeIdentifier<OpenDDS::DCPS::" << typeobject_generator::tag_type(name) << ">();\n";
+        "  return OpenDDS::DCPS::getMinimalTypeIdentifier<" << xtag << ">();\n";
     } else {
       be_global->impl_ <<
         "  static OpenDDS::XTypes::TypeIdentifier ti;\n"
@@ -319,7 +345,7 @@ bool ts_generator::generate_ts(AST_Decl* node, UTL_ScopedName* name)
 
     if (generate_xtypes) {
       be_global->impl_ <<
-        "  return OpenDDS::DCPS::getMinimalTypeMap<OpenDDS::DCPS::" << typeobject_generator::tag_type(name) << ">();\n";
+        "  return OpenDDS::DCPS::getMinimalTypeMap<" << xtag << ">();\n";
     } else {
       be_global->impl_ <<
         "  static OpenDDS::XTypes::TypeMap tm;\n"
@@ -333,7 +359,7 @@ bool ts_generator::generate_ts(AST_Decl* node, UTL_ScopedName* name)
     const bool generate_xtypes_complete = generate_xtypes && be_global->xtypes_complete();
     if (generate_xtypes_complete) {
       be_global->impl_ <<
-        "  return OpenDDS::DCPS::getCompleteTypeIdentifier<OpenDDS::DCPS::" << typeobject_generator::tag_type(name) << ">();\n";
+        "  return OpenDDS::DCPS::getCompleteTypeIdentifier<" << xtag << ">();\n";
     } else {
       be_global->impl_ <<
         "  static OpenDDS::XTypes::TypeIdentifier ti;\n"
@@ -346,17 +372,13 @@ bool ts_generator::generate_ts(AST_Decl* node, UTL_ScopedName* name)
 
     if (generate_xtypes_complete) {
       be_global->impl_ <<
-        "  return OpenDDS::DCPS::getCompleteTypeMap<OpenDDS::DCPS::" << typeobject_generator::tag_type(name) << ">();\n";
+        "  return OpenDDS::DCPS::getCompleteTypeMap<" << xtag << ">();\n";
     } else {
       be_global->impl_ <<
         "  static OpenDDS::XTypes::TypeMap tm;\n"
         "  return tm;\n";
     }
     be_global->impl_ <<
-      "}\n\n"
-      "OpenDDS::DCPS::Extensibility " << ts_short_name << "TypeSupportImpl::getExtensibility() const\n"
-      "{\n"
-      "  return MarshalTraitsType::extensibility();\n"
       "}\n\n"
       << ts_short_name << "TypeSupport::_ptr_type " << ts_short_name << "TypeSupportImpl::_narrow(CORBA::Object_ptr obj)\n"
       "{\n"
@@ -466,7 +488,6 @@ namespace face_ts_generator {
       name_underscores = dds_generator::scoped_helper(name, "_"),
       exportMacro = be_global->export_macro().c_str(),
       exporter = exportMacro.empty() ? "" : ("    " + exportMacro + '\n');
-    const std::string ts_name = scoped(name, EscapeContext_FromGenIdl);
     be_global->add_include("FACE/TS.hpp", BE_GlobalData::STREAM_FACETS_H);
     be_global->facets_header_ <<
       "namespace FACE\n"
@@ -536,6 +557,9 @@ namespace face_ts_generator {
       "  OpenDDS::FaceTSS::register_callback(connection_id, waitset,\n"
       "                                      data_callback,\n"
       "                                      max_message_size, return_code);\n"
+      "}\n\n"
+      "namespace {\n"
+      "  OpenDDS::DCPS::TypeSupportInitializer<" << cxx_name << "TypeSupportImpl> ts_init_" << name_underscores << ";\n"
       "}\n\n";
   }
 }

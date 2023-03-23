@@ -54,6 +54,7 @@ class ParticipantLocationSubscriber implements Callable<Boolean> {
 
     int ret = dr.set_listener(locationListener, OpenDDS.DCPS.DEFAULT_STATUS_MASK.value);
     assert (ret == DDS.RETCODE_OK.value);
+    locationListener.on_data_available(dr);
 
     Subscriber sub = participant.create_subscriber(SUBSCRIBER_QOS_DEFAULT.get(), null, DEFAULT_STATUS_MASK.value);
     if (sub == null) {

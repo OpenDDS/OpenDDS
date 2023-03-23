@@ -51,6 +51,8 @@ public:
 
   static std::string get_tag_name(const std::string& base_name, bool nested_key_only = false);
 
+  static std::string get_xtag_name(UTL_ScopedName* name);
+
   static bool cxx_escaped(const std::string& s);
 
   static std::string valid_var_name(const std::string& str);
@@ -113,6 +115,22 @@ public:
   static std::string module_scope_helper(
     UTL_ScopedName* sn, const char* sep, EscapeContext cxt = EscapeContext_Normal);
 };
+
+inline std::string canonical_name(UTL_ScopedName* sn)
+{
+  // NOTE: Names should not have leading "::" according to the XTypes spec.
+  return dds_generator::scoped_helper(sn, "::", EscapeContext_StripEscapes);
+}
+
+inline std::string canonical_name(Identifier* id)
+{
+  return dds_generator::to_string(id, EscapeContext_StripEscapes);
+}
+
+inline std::string canonical_name(AST_Decl* node)
+{
+  return canonical_name(node->local_name());
+}
 
 class composite_generator : public dds_generator {
 public:
@@ -755,7 +773,7 @@ struct Intro {
 };
 
 typedef std::string (*CommonFn)(
-  const std::string& indent,
+  const std::string& indent, AST_Decl* node,
   const std::string& name, AST_Type* type,
   const std::string& prefix, bool wrap_nested_key_only, Intro& intro,
   const std::string&);
@@ -834,7 +852,7 @@ void generateCaseBody(
         be_global->impl_ <<
           "        if (strm.get_construction_status() == Serializer::BoundConstructionFailure && " << check_not_empty << " && ("
                     << bounded_arg(br) << " < " << get_length << ")) {\n"
-          "          " << strtype << " s = tmp;\n"
+          "          " << strtype << " s = tmp.c_str();\n"
           "          s.resize(" << bounded_arg(br) << ");\n"
           "          uni." << name << "(s.c_str());\n"
           "          strm.set_construction_status(Serializer::ConstructionSuccessful);\n"
@@ -867,12 +885,12 @@ void generateCaseBody(
     if (commonFn2) {
       const OpenDDS::XTypes::MemberId id = be_global->get_id(branch);
       contents
-        << commonFn2(indent, name + (parens ? "()" : ""), branch->field_type(), "uni", false, intro, "")
+        << commonFn2(indent, branch, name + (parens ? "()" : ""), branch->field_type(), "uni", false, intro, "")
         << indent << "if (!strm.write_parameter_id(" << id << ", size)) {\n"
         << indent << "  return false;\n"
         << indent << "}\n";
     }
-    const std::string expr = commonFn(indent,
+    const std::string expr = commonFn(indent, branch,
       name + (parens ? "()" : ""), branch->field_type(),
       std::string(namePrefix) + "uni", false, intro, uni);
     if (*statementPrefix) {

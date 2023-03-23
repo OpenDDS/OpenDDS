@@ -89,7 +89,7 @@ def ghfile_role(name, rawtext, text, lineno, inliner, options={}, content=[]):
 
 
 # Turns :ghissue:`213` into the equivalent of:
-#   `Issue #213 on GitHub <https://github.com/objectcomputing/OpenDDS/issues/213>`_
+#   `Issue #213 on GitHub <https://github.com/OpenDDS/OpenDDS/issues/213>`_
 def ghissue_role(name, rawtext, text, lineno, inliner, options={}, content=[]):
     app = inliner.document.settings.env.app
     repo = app.config.github_links_repo
@@ -102,7 +102,7 @@ def ghissue_role(name, rawtext, text, lineno, inliner, options={}, content=[]):
 
 
 # Turns :ghpr:`1` into the equivalent of:
-#   `Pull Request #1 on GitHub <https://github.com/objectcomputing/OpenDDS/pull/1>`_
+#   `Pull Request #1 on GitHub <https://github.com/OpenDDS/OpenDDS/pull/1>`_
 def ghpr_role(name, rawtext, text, lineno, inliner, options={}, content=[]):
     app = inliner.document.settings.env.app
     repo = app.config.github_links_repo

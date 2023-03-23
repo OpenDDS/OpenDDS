@@ -24,7 +24,7 @@
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 DCPS_IR_Participant::DCPS_IR_Participant(const TAO_DDS_DCPSFederationId& federationId,
-                                         OpenDDS::DCPS::RepoId id,
+                                         OpenDDS::DCPS::GUID_t id,
                                          DCPS_IR_Domain* domain,
                                          DDS::DomainParticipantQos qos,
                                          Update::Manager* um,
@@ -149,7 +149,7 @@ DCPS_IR_Participant::isBitPublisher() const
 
 int DCPS_IR_Participant::add_publication(OpenDDS::DCPS::unique_ptr<DCPS_IR_Publication> pub)
 {
-  OpenDDS::DCPS::RepoId pubId = pub->get_id();
+  OpenDDS::DCPS::GUID_t pubId = pub->get_id();
   DCPS_IR_Publication_Map::iterator where = this->publications_.find(pubId);
 
   if (where == this->publications_.end()) {
@@ -189,7 +189,7 @@ int DCPS_IR_Participant::add_publication(OpenDDS::DCPS::unique_ptr<DCPS_IR_Publi
   }
 }
 
-int DCPS_IR_Participant::find_publication_reference(OpenDDS::DCPS::RepoId pubId,
+int DCPS_IR_Participant::find_publication_reference(OpenDDS::DCPS::GUID_t pubId,
                                                     DCPS_IR_Publication* & pub)
 {
   DCPS_IR_Publication_Map::iterator where = this->publications_.find(pubId);
@@ -225,7 +225,7 @@ int DCPS_IR_Participant::find_publication_reference(OpenDDS::DCPS::RepoId pubId,
   }
 }
 
-int DCPS_IR_Participant::remove_publication(OpenDDS::DCPS::RepoId pubId)
+int DCPS_IR_Participant::remove_publication(OpenDDS::DCPS::GUID_t pubId)
 {
   DCPS_IR_Publication_Map::iterator where = this->publications_.find(pubId);
 
@@ -275,7 +275,7 @@ int DCPS_IR_Participant::remove_publication(OpenDDS::DCPS::RepoId pubId)
 
 int DCPS_IR_Participant::add_subscription(OpenDDS::DCPS::unique_ptr<DCPS_IR_Subscription> sub)
 {
-  OpenDDS::DCPS::RepoId subId = sub->get_id();
+  OpenDDS::DCPS::GUID_t subId = sub->get_id();
   DCPS_IR_Subscription_Map::iterator where = this->subscriptions_.find(subId);
 
   if (where == this->subscriptions_.end()) {
@@ -316,7 +316,7 @@ int DCPS_IR_Participant::add_subscription(OpenDDS::DCPS::unique_ptr<DCPS_IR_Subs
   }
 }
 
-int DCPS_IR_Participant::find_subscription_reference(OpenDDS::DCPS::RepoId subId,
+int DCPS_IR_Participant::find_subscription_reference(OpenDDS::DCPS::GUID_t subId,
                                                      DCPS_IR_Subscription*& sub)
 {
   DCPS_IR_Subscription_Map::iterator where = this->subscriptions_.find(subId);
@@ -352,7 +352,7 @@ int DCPS_IR_Participant::find_subscription_reference(OpenDDS::DCPS::RepoId subId
   }
 }
 
-int DCPS_IR_Participant::remove_subscription(OpenDDS::DCPS::RepoId subId)
+int DCPS_IR_Participant::remove_subscription(OpenDDS::DCPS::GUID_t subId)
 {
   DCPS_IR_Subscription_Map::iterator where = this->subscriptions_.find(subId);
 
@@ -402,7 +402,7 @@ int DCPS_IR_Participant::remove_subscription(OpenDDS::DCPS::RepoId subId)
 
 int DCPS_IR_Participant::add_topic_reference(DCPS_IR_Topic* topic)
 {
-  OpenDDS::DCPS::RepoId topicId = topic->get_id();
+  OpenDDS::DCPS::GUID_t topicId = topic->get_id();
   DCPS_IR_Topic_Map::iterator where = this->topicRefs_.find(topicId);
 
   if (where == this->topicRefs_.end()) {
@@ -441,7 +441,7 @@ int DCPS_IR_Participant::add_topic_reference(DCPS_IR_Topic* topic)
   }
 }
 
-int DCPS_IR_Participant::remove_topic_reference(OpenDDS::DCPS::RepoId topicId,
+int DCPS_IR_Participant::remove_topic_reference(OpenDDS::DCPS::GUID_t topicId,
                                                 DCPS_IR_Topic*& topic)
 {
   DCPS_IR_Topic_Map::iterator where = this->topicRefs_.find(topicId);
@@ -478,7 +478,7 @@ int DCPS_IR_Participant::remove_topic_reference(OpenDDS::DCPS::RepoId topicId,
   }
 }
 
-int DCPS_IR_Participant::find_topic_reference(OpenDDS::DCPS::RepoId topicId,
+int DCPS_IR_Participant::find_topic_reference(OpenDDS::DCPS::GUID_t topicId,
                                               DCPS_IR_Topic*& topic)
 {
   DCPS_IR_Topic_Map::iterator where = this->topicRefs_.find(topicId);
@@ -565,7 +565,7 @@ void DCPS_IR_Participant::remove_all_dependents(CORBA::Boolean notify_lost)
         this->um_->destroy(path, Update::Topic);
 
         if (OpenDDS::DCPS::DCPS_debug_level > 4) {
-          OpenDDS::DCPS::RepoId id = current->second->get_id();
+          OpenDDS::DCPS::GUID_t id = current->second->get_id();
           OpenDDS::DCPS::RepoIdConverter converter(id);
           ACE_DEBUG((LM_DEBUG,
                      ACE_TEXT("(%P|%t) DCPS_IR_Participant::remove_all_dependents: ")
@@ -580,7 +580,7 @@ void DCPS_IR_Participant::remove_all_dependents(CORBA::Boolean notify_lost)
 
         // Get the topic id and topic point before remove_topic since it
         // invalidates the iterator. Accessing after removal got SEGV.
-        OpenDDS::DCPS::RepoId id = current->first;
+        OpenDDS::DCPS::GUID_t id = current->first;
         DCPS_IR_Topic* topic = current->second;
 
         this->domain_->remove_topic(this, topic);
@@ -620,7 +620,7 @@ void DCPS_IR_Participant::remove_all_dependents(CORBA::Boolean notify_lost)
       this->um_->destroy(path, Update::Actor, Update::DataWriter);
 
       if (OpenDDS::DCPS::DCPS_debug_level > 4) {
-        OpenDDS::DCPS::RepoId id = current->second->get_id();
+        OpenDDS::DCPS::GUID_t id = current->second->get_id();
         OpenDDS::DCPS::RepoIdConverter converter(id);
         ACE_DEBUG((LM_DEBUG,
                    ACE_TEXT("(%P|%t) DCPS_IR_Participant::remove_all_dependents: ")
@@ -648,7 +648,7 @@ void DCPS_IR_Participant::remove_all_dependents(CORBA::Boolean notify_lost)
       this->um_->destroy(path, Update::Actor, Update::DataReader);
 
       if (OpenDDS::DCPS::DCPS_debug_level > 4) {
-        OpenDDS::DCPS::RepoId id = current->second->get_id();
+        OpenDDS::DCPS::GUID_t id = current->second->get_id();
         OpenDDS::DCPS::RepoIdConverter converter(id);
         ACE_DEBUG((LM_DEBUG,
                    ACE_TEXT("(%P|%t) DCPS_IR_Participant::remove_all_dependents: ")
@@ -669,7 +669,7 @@ void DCPS_IR_Participant::mark_dead()
   domain_->add_dead_participant(OpenDDS::DCPS::rchandle_from(this));
 }
 
-OpenDDS::DCPS::RepoId DCPS_IR_Participant::get_id()
+OpenDDS::DCPS::GUID_t DCPS_IR_Participant::get_id()
 {
   return id_;
 }
@@ -684,7 +684,7 @@ void DCPS_IR_Participant::set_alive(CORBA::Boolean alive)
   aliveStatus_ = alive;
 }
 
-void DCPS_IR_Participant::ignore_participant(OpenDDS::DCPS::RepoId id)
+void DCPS_IR_Participant::ignore_participant(OpenDDS::DCPS::GUID_t id)
 {
   if (OpenDDS::DCPS::DCPS_debug_level > 0) {
     OpenDDS::DCPS::RepoIdConverter part_converter(id_);
@@ -713,7 +713,7 @@ void DCPS_IR_Participant::ignore_participant(OpenDDS::DCPS::RepoId id)
   }
 }
 
-void DCPS_IR_Participant::ignore_topic(OpenDDS::DCPS::RepoId id)
+void DCPS_IR_Participant::ignore_topic(OpenDDS::DCPS::GUID_t id)
 {
   if (OpenDDS::DCPS::DCPS_debug_level > 0) {
     OpenDDS::DCPS::RepoIdConverter part_converter(id_);
@@ -742,7 +742,7 @@ void DCPS_IR_Participant::ignore_topic(OpenDDS::DCPS::RepoId id)
   }
 }
 
-void DCPS_IR_Participant::ignore_publication(OpenDDS::DCPS::RepoId id)
+void DCPS_IR_Participant::ignore_publication(OpenDDS::DCPS::GUID_t id)
 {
   if (OpenDDS::DCPS::DCPS_debug_level > 0) {
     OpenDDS::DCPS::RepoIdConverter part_converter(id_);
@@ -764,7 +764,7 @@ void DCPS_IR_Participant::ignore_publication(OpenDDS::DCPS::RepoId id)
   }
 }
 
-void DCPS_IR_Participant::ignore_subscription(OpenDDS::DCPS::RepoId id)
+void DCPS_IR_Participant::ignore_subscription(OpenDDS::DCPS::GUID_t id)
 {
   if (OpenDDS::DCPS::DCPS_debug_level > 0) {
     OpenDDS::DCPS::RepoIdConverter part_converter(id_);
@@ -786,22 +786,22 @@ void DCPS_IR_Participant::ignore_subscription(OpenDDS::DCPS::RepoId id)
   }
 }
 
-CORBA::Boolean DCPS_IR_Participant::is_participant_ignored(OpenDDS::DCPS::RepoId id)
+CORBA::Boolean DCPS_IR_Participant::is_participant_ignored(OpenDDS::DCPS::GUID_t id)
 {
   return (0 == ignoredParticipants_.find(id));
 }
 
-CORBA::Boolean DCPS_IR_Participant::is_topic_ignored(OpenDDS::DCPS::RepoId id)
+CORBA::Boolean DCPS_IR_Participant::is_topic_ignored(OpenDDS::DCPS::GUID_t id)
 {
   return (0 == ignoredTopics_.find(id));
 }
 
-CORBA::Boolean DCPS_IR_Participant::is_publication_ignored(OpenDDS::DCPS::RepoId id)
+CORBA::Boolean DCPS_IR_Participant::is_publication_ignored(OpenDDS::DCPS::GUID_t id)
 {
   return (0 == ignoredPublications_.find(id));
 }
 
-CORBA::Boolean DCPS_IR_Participant::is_subscription_ignored(OpenDDS::DCPS::RepoId id)
+CORBA::Boolean DCPS_IR_Participant::is_subscription_ignored(OpenDDS::DCPS::GUID_t id)
 {
   return (0 == ignoredSubscriptions_.find(id));
 }
@@ -840,19 +840,19 @@ DCPS_IR_Domain* DCPS_IR_Participant::get_domain_reference() const
   return domain_;
 }
 
-OpenDDS::DCPS::RepoId
+OpenDDS::DCPS::GUID_t
 DCPS_IR_Participant::get_next_topic_id(bool builtin)
 {
   return this->topicIdGenerator_.next(builtin);
 }
 
-OpenDDS::DCPS::RepoId
+OpenDDS::DCPS::GUID_t
 DCPS_IR_Participant::get_next_publication_id(bool builtin)
 {
   return this->publicationIdGenerator_.next(builtin);
 }
 
-OpenDDS::DCPS::RepoId
+OpenDDS::DCPS::GUID_t
 DCPS_IR_Participant::get_next_subscription_id(bool builtin)
 {
   return this->subscriptionIdGenerator_.next(builtin);

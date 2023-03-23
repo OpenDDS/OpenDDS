@@ -66,8 +66,6 @@ public:
 
   bool more_fragments() const;
 
-  bool expect_hold() const;
-
   RTPS::Submessage submessage_;
 
 private:

@@ -56,7 +56,7 @@ public:
   /// Active side constructor (connector)
   TcpConnection(const ACE_INET_Addr& remote_address,
                 Priority priority,
-                const TcpInst& config);
+                const TcpInst_rch& config);
 
   virtual ~TcpConnection();
 
@@ -92,7 +92,7 @@ public:
   virtual int close(u_long);
   virtual int handle_close(ACE_HANDLE, ACE_Reactor_Mask);
 
-  void set_sock_options(const TcpInst* tcp_config);
+  void set_sock_options(const TcpInst_rch& tcp_config);
 
   /// Return true if the object represents the connector side, otherwise
   /// it's the acceptor side. The acceptor/connector role is not changed
@@ -120,7 +120,7 @@ public:
   /// Called by the reconnect task to inform us that the
   /// link & any associated data can be torn down.
   /// This call is done with no DCPS/transport locks held.
-  bool tear_link();
+  void tear_link();
 
   void shutdown();
 
@@ -168,7 +168,7 @@ private:
   ACE_INET_Addr local_address_;
 
   /// The configuration used by this connection.
-  const TcpInst* tcp_config_;
+  WeakRcHandle<TcpInst> tcp_config_;
 
   /// Datalink object which is needed for connection lost callback.
   TcpDataLink_rch link_;

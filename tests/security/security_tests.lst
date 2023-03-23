@@ -58,7 +58,7 @@ tests/DCPS/RtpsRelay/Smoke/run_lease_duration_test.pl reverse secure: !DCPS_MIN 
 tests/DCPS/RtpsRelay/STUN/run_test.pl: !DCPS_MIN CXX11 RTPS !NO_BUILT_IN_TOPICS !OPENDDS_SAFETY_PROFILE RAPIDJSON
 tests/DCPS/RtpsRelay/STUN/run_test.pl ipv6: !DCPS_MIN CXX11 RTPS !NO_BUILT_IN_TOPICS !OPENDDS_SAFETY_PROFILE IPV6 RAPIDJSON
 
-performance-tests/bench/run_test.pl disco_relay show-logs: !DCPS_MIN !NO_MCAST RTPS !DDS_NO_OWNERSHIP_PROFILE !OPENDDS_SAFETY_PROFILE CXX11 RAPIDJSON
+performance-tests/bench/run_test.pl ci-disco-relay --show-worker-logs: !DCPS_MIN !NO_MCAST RTPS !DDS_NO_OWNERSHIP_PROFILE !OPENDDS_SAFETY_PROFILE CXX11 RAPIDJSON
 
 tests/DCPS/ParticipantLocationTopic/run_test.pl:            !DCPS_MIN CXX11 RTPS !NO_BUILT_IN_TOPICS !OPENDDS_SAFETY_PROFILE !IPV6 RAPIDJSON
 tests/DCPS/ParticipantLocationTopic/run_test.pl ipv6:       !DCPS_MIN CXX11 RTPS !NO_BUILT_IN_TOPICS !OPENDDS_SAFETY_PROFILE IPV6 RAPIDJSON !GH_ACTIONS

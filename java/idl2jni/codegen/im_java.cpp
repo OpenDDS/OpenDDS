@@ -758,6 +758,10 @@ bool idl_mapping_java::gen_interf(UTL_ScopedName *name, bool local,
 
   for (size_t i = 0; i < ops.size(); ++i) {
     string signature = op_signature(ops[i]);
+    if (is_hidden_op_in_java(ops[i])) {
+      continue;
+    }
+
     body_ops +=
       "  " + signature + ";\n";
     body_stub +=
@@ -788,6 +792,9 @@ bool idl_mapping_java::gen_interf(UTL_ScopedName *name, bool local,
 
       } else if (item->node_type() == AST_Decl::NT_op) {
         AST_Operation *op = dynamic_cast<AST_Operation*>(item);
+        if (is_hidden_op_in_java(op)) {
+          continue;
+        }
         body_stub +=
           "  public native " + op_signature(op) + ";\n\n";
       }

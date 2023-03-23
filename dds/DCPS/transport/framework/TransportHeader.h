@@ -93,11 +93,6 @@ struct OpenDDS_Dcps_Export TransportHeader {
   const SequenceNumber& sequence() { return this->sequence_; }
 
   static ACE_UINT32 get_length(const char* marshaled_transport_header);
-
-private:
-  struct no_init_t {};
-  static const no_init_t no_init;
-  explicit TransportHeader(const no_init_t&);
 };
 
 OpenDDS_Dcps_Export

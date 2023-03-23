@@ -245,6 +245,7 @@ namespace {
   }
 
   std::string branch_helper(const std::string&,
+                            AST_Decl* branch,
                             const std::string& field_name,
                             AST_Type* type,
                             const std::string&,
@@ -253,7 +254,7 @@ namespace {
                             const std::string&)
   {
     be_global->impl_ <<
-      "    value_writer.begin_union_member(\"" << field_name << "\");\n";
+      "    value_writer.begin_union_member(\"" << canonical_name(branch) << "\");\n";
     generate_write("value." + field_name + "()", type, "i", 2);
     be_global->impl_ <<
       "    value_writer.end_union_member();\n";
@@ -288,7 +289,7 @@ bool value_writer_generator::gen_enum(AST_Enum*,
         + val->local_name()->get_string();
       be_global->impl_ <<
         "  case " << value_name << ":\n"
-        "    value_writer.write_enum(\"" << val->local_name()->get_string() << "\", " << value_name << ");\n"
+        "    value_writer.write_enum(\"" << canonical_name(val) << "\", " << value_name << ");\n"
         "    break;\n";
     }
     be_global->impl_ << "  }\n";
@@ -331,9 +332,10 @@ bool value_writer_generator::gen_struct(AST_Structure*,
          pos != limit; ++pos) {
       AST_Field* const field = *pos;
       const std::string field_name = field->local_name()->get_string();
+      const std::string idl_name = canonical_name(field);
       be_global->impl_ <<
-        "  value_writer.begin_struct_member(XTypes::MemberDescriptorImpl(\"" << field_name << "\", "
-                                                                             << (be_global->is_key(field) ? "true" : "false") <<  "));\n";
+        "  value_writer.begin_struct_member(XTypes::MemberDescriptorImpl(\"" << idl_name << "\", "
+        << (be_global->is_key(field) ? "true" : "false") <<  "));\n";
       generate_write("value." + field_name + accessor_suffix, field->field_type(), "i");
       be_global->impl_ <<
         "  value_writer.end_struct_member();\n";

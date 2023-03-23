@@ -4,7 +4,6 @@
 
 #include <dds/DCPS/LogAddr.h>
 #include <dds/DCPS/Message_Block_Ptr.h>
-#include <dds/DCPS/RTPS/BaseMessageTypes.h>
 #include <dds/DCPS/RTPS/MessageTypes.h>
 #include <dds/DCPS/RTPS/RtpsCoreTypeSupportImpl.h>
 #include <dds/DCPS/TimeTypes.h>
@@ -159,7 +158,7 @@ int RelayHandler::handle_input(ACE_HANDLE handle)
   }
 
   buffer->length(bytes);
-  MessageType type;
+  MessageType type = MessageType::Unknown;
   const CORBA::ULong generated_messages = process_message(remote, now, buffer, type);
   stats_reporter_.max_gain(generated_messages, now);
   stats_reporter_.input_message(static_cast<size_t>(bytes),
@@ -289,14 +288,18 @@ CORBA::ULong VerticalHandler::process_message(const ACE_INET_Addr& remote_addres
                                               const OpenDDS::DCPS::Message_Block_Shared_Ptr& msg,
                                               MessageType& type)
 {
+  const auto msg_len = msg->length();
   {
     GuidAddrSet::Proxy proxy(guid_addr_set_);
     proxy.process_expirations(now);
+    if (!proxy.check_address(remote_address)) {
+      stats_reporter_.ignored_message(msg_len, now, type);
+      return 0;
+    }
   }
 
   AddrPort addr_port(remote_address, port());
 
-  const auto msg_len = msg->length();
   if (msg_len >= 4 && ACE_OS::memcmp(msg->rd_ptr(), "RTPS", 4) == 0) {
     type = MessageType::Rtps;
 
@@ -607,7 +610,7 @@ CORBA::ULong VerticalHandler::send(GuidAddrSet::Proxy& proxy,
           }
           auto p = proxy.find(guid);
           if (p != proxy.end()) {
-            for (const auto& addr : *p->second.select_addr_set(port())) {
+            for (const auto& addr : *p->second.select_addr_set(port(), now)) {
               venqueue_message(addr.first.addr,
                 *p->second.select_stats_reporter(port()), msg, now, type);
               ++sent;
@@ -623,7 +626,7 @@ CORBA::ULong VerticalHandler::send(GuidAddrSet::Proxy& proxy,
           }
           auto p = proxy.find(guid);
           if (p != proxy.end()) {
-            for (const auto& addr : *p->second.select_addr_set(port())) {
+            for (const auto& addr : *p->second.select_addr_set(port(), now)) {
               venqueue_message(addr.first.addr,
                 *p->second.select_stats_reporter(port()), msg, now, type);
               ++sent;
@@ -744,7 +747,7 @@ CORBA::ULong HorizontalHandler::process_message(const ACE_INET_Addr& from,
     for (const auto& guid : relay_header.to_guids()) {
       const auto p = proxy.find(relay_guid_to_rtps_guid(guid));
       if (p != proxy.end()) {
-        for (const auto& addr : *p->second.select_addr_set(port())) {
+        for (const auto& addr : *p->second.select_addr_set(port(), now)) {
           vertical_handler_->venqueue_message(
             addr.first.addr, *p->second.select_stats_reporter(port()), msg, now, type);
           ++sent;
@@ -757,7 +760,7 @@ CORBA::ULong HorizontalHandler::process_message(const ACE_INET_Addr& from,
     for (const auto& guid : guids) {
       const auto p = proxy.find(guid);
       if (p != proxy.end()) {
-        for (const auto& addr : *p->second.select_addr_set(port())) {
+        for (const auto& addr : *p->second.select_addr_set(port(), now)) {
           vertical_handler_->venqueue_message(
             addr.first.addr, *p->second.select_stats_reporter(port()), msg, now, type);
           ++sent;
@@ -919,6 +922,7 @@ bool SpdpHandler::do_normal_processing(GuidAddrSet::Proxy& proxy,
                      OpenDDS::DCPS::LogAddr(application_participant_addr_).c_str(),
                      guid_to_string(src_guid).c_str(),
                      OpenDDS::DCPS::LogAddr(remote).c_str()));
+      proxy.reject_address(remote, now);
       return false;
     }
 
@@ -928,7 +932,7 @@ bool SpdpHandler::do_normal_processing(GuidAddrSet::Proxy& proxy,
       for (const auto& guid : to) {
         const auto pos = proxy.find(guid);
         if (pos != proxy.end()) {
-          for (const auto& addr : *pos->second.select_addr_set(port())) {
+          for (const auto& addr : *pos->second.select_addr_set(port(), now)) {
             venqueue_message(addr.first.addr, *pos->second.select_stats_reporter(port()),
               msg, now, MessageType::Rtps);
             ++sent;
@@ -1070,6 +1074,7 @@ bool SedpHandler::do_normal_processing(GuidAddrSet::Proxy& proxy,
                      OpenDDS::DCPS::LogAddr(application_participant_addr_).c_str(),
                      guid_to_string(src_guid).c_str(),
                      OpenDDS::DCPS::LogAddr(remote).c_str()));
+      proxy.reject_address(remote, now);
       return false;
     }
 
@@ -1079,7 +1084,7 @@ bool SedpHandler::do_normal_processing(GuidAddrSet::Proxy& proxy,
       for (const auto& guid : to) {
         const auto pos = proxy.find(guid);
         if (pos != proxy.end()) {
-          for (const auto& addr : *pos->second.select_addr_set(port())) {
+          for (const auto& addr : *pos->second.select_addr_set(port(), now)) {
             venqueue_message(addr.first.addr, *pos->second.select_stats_reporter(port()),
               msg, now, MessageType::Rtps);
             ++sent;

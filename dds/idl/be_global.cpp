@@ -509,28 +509,26 @@ BE_GlobalData::writeFile(const char* fileName, const string& content)
 //include file management (assumes a singleton BE_GlobalData object)
 
 namespace {
-  typedef set<pair<string, string> > Includes_t;
-  Includes_t inc_h_, inc_c_, inc_idl_, inc_facets_h_, inc_lang_h_;
-  set<string> referenced_idl_, inc_path_;
-  vector<string> inc_path_vector_;
+  typedef set<pair<string, string> > Includes;
+  Includes all_includes[BE_GlobalData::STREAM_COUNT];
+  set<string> referenced_idl, inc_path;
+  vector<string> inc_path_vector;
 }
 
 void
 BE_GlobalData::reset_includes()
 {
-  inc_h_.clear();
-  inc_c_.clear();
-  inc_idl_.clear();
-  inc_facets_h_.clear();
-  inc_lang_h_.clear();
-  referenced_idl_.clear();
+  inc_path_vector.clear();
+  for (int i = 0; i < BE_GlobalData::STREAM_COUNT; ++i) {
+    all_includes[i].clear();
+  }
 }
 
 void
 BE_GlobalData::add_inc_path(const char* path)
 {
-  if (inc_path_.insert(path).second) {
-    inc_path_vector_.push_back(path);
+  if (inc_path.insert(path).second) {
+    inc_path_vector.push_back(path);
   }
 }
 
@@ -559,35 +557,13 @@ BE_GlobalData::conditional_include(const char* file,
                                    stream_enum_t which,
                                    const char* condition)
 {
-  Includes_t* inc = 0;
-
-  switch (which) {
-  case STREAM_H:
-    inc = &inc_h_;
-    break;
-  case STREAM_CPP:
-    inc = &inc_c_;
-    break;
-  case STREAM_IDL:
-    inc = &inc_idl_;
-    break;
-  case STREAM_FACETS_H:
-    inc = &inc_facets_h_;
-    break;
-  case STREAM_LANG_H:
-    inc = &inc_lang_h_;
-    break;
-  default:
-    return;
-  }
-
-  inc->insert(make_pair(file, condition));
+  all_includes[which].insert(make_pair(file, condition));
 }
 
 void
 BE_GlobalData::add_referenced(const char* file)
 {
-  referenced_idl_.insert(file);
+  referenced_idl.insert(file);
 }
 
 namespace {
@@ -614,8 +590,8 @@ namespace {
 
   string make_relative(const string& absolute, bool filename_only_includes)
   {
-    for (vector<string>::reverse_iterator iter = inc_path_vector_.rbegin(),
-        end = inc_path_vector_.rend(); iter != end; ++iter) {
+    for (vector<string>::reverse_iterator iter = inc_path_vector.rbegin(),
+        end = inc_path_vector.rend(); iter != end; ++iter) {
       if (absolute.find(*iter) == 0) {
         string rel = absolute.substr(iter->size());
 
@@ -684,35 +660,14 @@ namespace {
 string
 BE_GlobalData::get_include_block(BE_GlobalData::stream_enum_t which)
 {
-  const Includes_t* inc = 0;
-
-  switch (which) {
-  case STREAM_H:
-    inc = &inc_h_;
-    break;
-  case STREAM_CPP:
-    inc = &inc_c_;
-    break;
-  case STREAM_IDL:
-    inc = &inc_idl_;
-    break;
-  case STREAM_FACETS_H:
-    inc = &inc_facets_h_;
-    break;
-  case STREAM_LANG_H:
-    inc = &inc_lang_h_;
-    break;
-  default:
-    return "";
-  }
-
+  Includes& inc = all_includes[which];
   ostringstream ret;
 
-  for_each(inc->begin(), inc->end(), InsertIncludes(ret));
+  for_each(inc.begin(), inc.end(), InsertIncludes(ret));
 
   switch (which) {
   case STREAM_LANG_H:
-    for_each(referenced_idl_.begin(), referenced_idl_.end(),
+    for_each(referenced_idl.begin(), referenced_idl.end(),
              InsertRefIncludes(ret, "C.h", filename_only_includes_));
     // fall through
   case STREAM_H:
@@ -721,7 +676,7 @@ BE_GlobalData::get_include_block(BE_GlobalData::stream_enum_t which)
     break;
   case STREAM_CPP:
     for_each(cpp_includes().begin(), cpp_includes().end(), InsertIncludes(ret));
-    for_each(referenced_idl_.begin(), referenced_idl_.end(),
+    for_each(referenced_idl.begin(), referenced_idl.end(),
              InsertRefIncludes(ret, "TypeSupportImpl.h", filename_only_includes_));
     break;
   default:
@@ -1027,7 +982,8 @@ OpenDDS::DataRepresentation BE_GlobalData::data_representations(
   return value;
 }
 
-OpenDDS::XTypes::MemberId BE_GlobalData::compute_id(AST_Field* field, AutoidKind auto_id, OpenDDS::XTypes::MemberId& member_id)
+OpenDDS::XTypes::MemberId BE_GlobalData::compute_id(
+  AST_Structure* stru, AST_Field* field, AutoidKind auto_id, OpenDDS::XTypes::MemberId& member_id)
 {
   const MemberIdMap::const_iterator pos = member_id_map_.find(field);
   if (pos != member_id_map_.end()) {
@@ -1035,9 +991,10 @@ OpenDDS::XTypes::MemberId BE_GlobalData::compute_id(AST_Field* field, AutoidKind
   }
 
   using OpenDDS::XTypes::hash_member_name_to_id;
+  using OpenDDS::XTypes::MemberId;
   const string field_name = field->local_name()->get_string();
   string hash_id;
-  OpenDDS::XTypes::MemberId mid;
+  MemberId mid;
   if (id(field, member_id)) {
     // @id
     mid = member_id++;
@@ -1051,8 +1008,26 @@ OpenDDS::XTypes::MemberId BE_GlobalData::compute_id(AST_Field* field, AutoidKind
     mid = member_id++;
   }
 
+  // Check for collision with ids in the same type
+  GlobalMemberIdCollisionMap::iterator git = member_id_collision_map_.find(stru);
+  if (git == member_id_collision_map_.end()) {
+    git = member_id_collision_map_.insert(
+      std::pair<AST_Structure*, MemberIdCollisionMap>(stru, MemberIdCollisionMap())).first;
+  }
+  MemberIdCollisionMap::iterator lit = git->second.find(mid);
+  if (lit != git->second.end()) {
+    std::ostringstream msg;
+    msg << "Member id " << mid << " is the same as on field "
+      << lit->second->local_name()->get_string();
+    be_util::misc_error_and_abort(msg.str(), field);
+  }
+  git->second.insert(std::pair<MemberId, AST_Field*>(mid, field));
+
   if (mid > OpenDDS::DCPS::Serializer::MEMBER_ID_MAX) {
-    be_util::misc_error_and_abort("Member id exceeds the maximum allowed value", field);
+    std::ostringstream msg;
+    msg << "Member id " << mid << " exceeds the maximum allowed value (" <<
+      OpenDDS::DCPS::Serializer::MEMBER_ID_MAX << ")";
+    be_util::misc_error_and_abort(msg.str(), field);
   }
   member_id_map_[field] = mid;
   return mid;

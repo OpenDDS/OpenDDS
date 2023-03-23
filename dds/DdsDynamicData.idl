@@ -21,7 +21,7 @@ module DDS {
   typedef sequence<string> IncludePathSeq;
   typedef string<256> ObjectName;
 
-  // FUTURE: Define TypeOjbect.
+  // FUTURE: Define TypeObject.
   local interface TypeObject;
   // FUTURE: Use correct definition of BoundSeq once defined by spec.
   typedef sequence<unsigned long> BoundSeq;
@@ -160,6 +160,16 @@ module DDS {
   };
 
   local interface DynamicData;
+
+  local interface DynamicDataFactoryInterf {
+    // Implemented in C++
+    //static DynamicDataFactory get_instance();
+    // Not Implemented
+    //static DDS::ReturnCode_t delete_instance();
+    DynamicData create_data(in DynamicType type);
+    /// This is a NOP in OpenDDS
+    DDS::ReturnCode_t delete_data(in DynamicData data);
+  };
 
   local interface DynamicData {
     readonly attribute DynamicType type;

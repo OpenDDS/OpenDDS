@@ -1,4 +1,5 @@
 {
+  "create_time": { "sec": -1, "nsec": 0 },
   "enable_time": { "sec": -1, "nsec": 0 },
   "start_time": { "sec": -10, "nsec": 0 },
   "stop_time": { "sec": -1, "nsec": 0 },
@@ -11,31 +12,38 @@
     "config_sections": [
       { "name": "common",
         "properties": [
-          { "name": "DCPSSecurity",
-            "value": "0"
+          { "name": "DCPSDefaultDiscovery",
+            "value":"rtps_disc"
+          },
+          { "name": "DCPSGlobalTransportConfig",
+            "value":"$file"
           },
           { "name": "DCPSDebugLevel",
             "value": "0"
+          },
+          { "name": "DCPSPendingTimeout",
+            "value": "3"
           }
         ]
-      }
-    ],
-    "discoveries": [
-      { "name": "bench_test_rtps",
-        "type": "rtps",
-        "domain": 7
-      }
-    ],
-    "instances": [
-      { "name": "rtps_instance_01",
-        "type": "rtps_udp",
-        "domain": 7
+      },
+      { "name": "rtps_discovery/rtps_disc",
+        "properties": [
+          { "name": "ResendPeriod",
+            "value": "2"
+          }
+        ]
+      },
+      { "name": "transport/rtps_transport",
+        "properties": [
+          { "name": "transport_type",
+            "value": "rtps_udp"
+          }
+        ]
       }
     ],
     "participants": [
       { "name": "participant_01",
         "domain": 7,
-        "transport_config_name": "rtps_instance_01",
 
         "qos": { "entity_factory": { "autoenable_created_entities": false } },
         "qos_mask": { "entity_factory": { "has_autoenable_created_entities": false } },
@@ -50,6 +58,10 @@
         ],
         "subscribers": [
           { "name": "subscriber_01",
+
+            "qos": { "partition": { "name": [ "bench_partition" ] } },
+            "qos_mask": { "partition": { "has_name": true } },
+
             "datareaders": [
               { "name": "datareader_01",
                 "topic_name": "topic_01",
@@ -82,6 +94,10 @@
         ],
         "publishers": [
           { "name": "publisher_01",
+
+            "qos": { "partition": { "name": [ "bench_partition" ] } },
+            "qos_mask": { "partition": { "has_name": true } },
+
             "datawriters": [
               { "name": "datawriter_01",
                 "topic_name": "topic_01",

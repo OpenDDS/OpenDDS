@@ -40,7 +40,7 @@ public:
   size_t capacity() const;
   void bind(TransportSendStrategy* strategy);
 
-  virtual void retain_all(const RepoId& pub_id);
+  virtual void retain_all(const GUID_t& pub_id);
   virtual void insert(SequenceNumber sequence,
                       TransportSendStrategy::QueueType* queue,
                       ACE_Message_Block* chain) = 0;
@@ -87,7 +87,7 @@ public:
 
   bool resend(const SequenceRange& range, DisjointSequence* gaps = 0);
 
-  void retain_all(const RepoId& pub_id);
+  void retain_all(const GUID_t& pub_id);
   void insert(SequenceNumber sequence,
               TransportSendStrategy::QueueType* queue,
               ACE_Message_Block* chain);
@@ -134,7 +134,7 @@ public:
       return ssb_.buffers_.count(seq);
     }
 
-    bool contains(SequenceNumber seq, RepoId& destination) const
+    bool contains(SequenceNumber seq, GUID_t& destination) const
     {
       if (ssb_.buffers_.count(seq)) {
         DestinationMap::const_iterator pos = ssb_.destinations_.find(seq);
@@ -173,7 +173,7 @@ public:
     }
 
     bool resend_i(const SequenceRange& range, DisjointSequence* gaps,
-                  const RepoId& destination)
+                  const GUID_t& destination)
     {
       return ssb_.resend_i(range, gaps, destination);
     }
@@ -185,6 +185,12 @@ public:
       ssb_.resend_fragments_i(sequence, fragments, cumulative_send_count);
     }
 
+    bool has_frags(const SequenceNumber& seq) const
+    {
+      return ssb_.has_frags(seq);
+    }
+
+
   private:
     SingleSendBuffer& ssb_;
     OPENDDS_DELETED_COPY_MOVE_CTOR_ASSIGN(Proxy)
@@ -195,12 +201,14 @@ public:
     pre_seq_.clear();
   }
 
+  bool has_frags(const SequenceNumber& seq) const;
+
 private:
   void check_capacity_i(BufferVec& removed);
   void release_i(BufferMap::iterator buffer_iter);
   void remove_i(BufferMap::iterator buffer_iter, BufferVec& removed);
 
-  RemoveResult retain_buffer(const RepoId& pub_id, BufferType& buffer);
+  RemoveResult retain_buffer(const GUID_t& pub_id, BufferType& buffer);
   void insert_buffer(BufferType& buffer,
                      TransportSendStrategy::QueueType* queue,
                      ACE_Message_Block* chain);
@@ -208,7 +216,7 @@ private:
   // caller must already have the send strategy lock
   bool resend_i(const SequenceRange& range, DisjointSequence* gaps = 0);
   bool resend_i(const SequenceRange& range, DisjointSequence* gaps,
-                const RepoId& destination);
+                const GUID_t& destination);
   void resend_fragments_i(SequenceNumber sequence,
                           const DisjointSequence& fragments,
                           size_t& cumulative_send_count);
@@ -225,7 +233,7 @@ private:
   typedef OPENDDS_MAP(SequenceNumber, BufferMap) FragmentMap;
   FragmentMap fragments_;
 
-  typedef OPENDDS_MAP(SequenceNumber, RepoId) DestinationMap;
+  typedef OPENDDS_MAP(SequenceNumber, GUID_t) DestinationMap;
   DestinationMap destinations_;
 
   typedef OPENDDS_SET(SequenceNumber) SequenceNumberSet;

@@ -372,7 +372,7 @@ ACE_INLINE
 bool
 Service_Participant::is_shut_down() const
 {
-  return shut_down_.value();
+  return shut_down_;
 }
 
 ACE_INLINE

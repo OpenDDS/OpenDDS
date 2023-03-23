@@ -199,6 +199,58 @@ namespace dds
   {
   }
 
+  // dataRepresentationIdKind
+
+  dataRepresentationIdKind::Value dataRepresentationIdKind::
+  integral () const
+  {
+    return v_;
+  }
+
+  bool
+  operator== (::dds::dataRepresentationIdKind const& a, ::dds::dataRepresentationIdKind const& b)
+  {
+    return a.v_ == b.v_;
+  }
+
+  bool
+  operator!= (::dds::dataRepresentationIdKind const& a, ::dds::dataRepresentationIdKind const& b)
+  {
+    return a.v_ != b.v_;
+  }
+
+  dataRepresentationIdKind::
+  dataRepresentationIdKind (dataRepresentationIdKind::Value v)
+  : v_ (v)
+  {
+  }
+
+  // typeConsistencyKind
+
+  typeConsistencyKind::Value typeConsistencyKind::
+  integral () const
+  {
+    return v_;
+  }
+
+  bool
+  operator== (::dds::typeConsistencyKind const& a, ::dds::typeConsistencyKind const& b)
+  {
+    return a.v_ == b.v_;
+  }
+
+  bool
+  operator!= (::dds::typeConsistencyKind const& a, ::dds::typeConsistencyKind const& b)
+  {
+    return a.v_ != b.v_;
+  }
+
+  typeConsistencyKind::
+  typeConsistencyKind (typeConsistencyKind::Value v)
+  : v_ (v)
+  {
+  }
+
   // duration
 
   duration::duration ()
@@ -349,7 +401,70 @@ namespace dds
   }
 
   size_t stringSeq::
-  count_element(void) const
+  count_element() const
+  {
+    return element_.size ();
+  }
+
+
+  // dataRepresentationIdSeq
+
+  dataRepresentationIdSeq::dataRepresentationIdSeq ()
+  : ::XSCRT::Type ()
+  {
+  }
+
+  dataRepresentationIdSeq::dataRepresentationIdSeq (dataRepresentationIdSeq const& s) :
+  ::XSCRT::Type (s)
+  , element_ (s.element_)
+  {
+  }
+
+  dataRepresentationIdSeq&
+  dataRepresentationIdSeq::operator= (dataRepresentationIdSeq const& s)
+  {
+    if (&s != this)
+    {
+      element_ = s.element_;
+    }
+
+    return *this;
+  }
+
+
+  // dataRepresentationIdSeq
+  dataRepresentationIdSeq::element_iterator dataRepresentationIdSeq::
+  begin_element ()
+  {
+    return element_.begin ();
+  }
+
+  dataRepresentationIdSeq::element_iterator dataRepresentationIdSeq::
+  end_element ()
+  {
+    return element_.end ();
+  }
+
+  dataRepresentationIdSeq::element_const_iterator dataRepresentationIdSeq::
+  begin_element () const
+  {
+    return element_.begin ();
+  }
+
+  dataRepresentationIdSeq::element_const_iterator dataRepresentationIdSeq::
+  end_element () const
+  {
+    return element_.end ();
+  }
+
+  void dataRepresentationIdSeq::
+  add_element (dataRepresentationIdSeq::element_value_type const& e)
+  {
+    element_.push_back (e);
+  }
+
+  size_t dataRepresentationIdSeq::
+  count_element() const
   {
     return element_.size ();
   }
@@ -2156,6 +2271,297 @@ namespace dds
   }
 
 
+  // dataRepresentationQosPolicy
+
+  dataRepresentationQosPolicy::dataRepresentationQosPolicy ()
+  : ::XSCRT::Type ()
+  {
+  }
+
+  dataRepresentationQosPolicy::dataRepresentationQosPolicy (dataRepresentationQosPolicy const& s) :
+  ::XSCRT::Type (s)
+  , value_ (s.value_.get () ? new ::dds::dataRepresentationIdSeq (*s.value_) : 0)
+  {
+    if (value_.get ()) value_->container (this);
+  }
+
+  dataRepresentationQosPolicy&
+  dataRepresentationQosPolicy::operator= (dataRepresentationQosPolicy const& s)
+  {
+    if (&s != this)
+    {
+      if (s.value_.get ())
+        value (*(s.value_));
+      else
+        value_.reset (0);
+    }
+
+    return *this;
+  }
+
+
+  // dataRepresentationQosPolicy
+  bool dataRepresentationQosPolicy::
+  value_p () const
+  {
+    return value_.get () != 0;
+  }
+
+  ::dds::dataRepresentationIdSeq const& dataRepresentationQosPolicy::
+  value () const
+  {
+    return *value_;
+  }
+
+  void dataRepresentationQosPolicy::
+  value (::dds::dataRepresentationIdSeq const& e)
+  {
+    if (value_.get ())
+    {
+      *value_ = e;
+    }
+
+    else
+    {
+      value_ = dataRepresentationQosPolicy::value_auto_ptr_type (new ::dds::dataRepresentationIdSeq (e));
+      value_->container (this);
+    }
+  }
+
+
+  // typeConsistencyEnforcementQosPolicy
+
+  typeConsistencyEnforcementQosPolicy::typeConsistencyEnforcementQosPolicy ()
+  : ::XSCRT::Type ()
+  {
+  }
+
+  typeConsistencyEnforcementQosPolicy::typeConsistencyEnforcementQosPolicy (typeConsistencyEnforcementQosPolicy const& s) :
+  ::XSCRT::Type (s)
+  , kind_ (s.kind_.get () ? new ::dds::typeConsistencyKind (*s.kind_) : 0)
+  , ignore_sequence_bounds_ (s.ignore_sequence_bounds_.get () ? new ::XMLSchema::boolean (*s.ignore_sequence_bounds_) : 0)
+  , ignore_string_bounds_ (s.ignore_string_bounds_.get () ? new ::XMLSchema::boolean (*s.ignore_string_bounds_) : 0)
+  , ignore_member_names_ (s.ignore_member_names_.get () ? new ::XMLSchema::boolean (*s.ignore_member_names_) : 0)
+  , prevent_type_widening_ (s.prevent_type_widening_.get () ? new ::XMLSchema::boolean (*s.prevent_type_widening_) : 0)
+  , force_type_validation_ (s.force_type_validation_.get () ? new ::XMLSchema::boolean (*s.force_type_validation_) : 0)
+  {
+    if (kind_.get ()) kind_->container (this);
+    if (ignore_sequence_bounds_.get ()) ignore_sequence_bounds_->container (this);
+    if (ignore_string_bounds_.get ()) ignore_string_bounds_->container (this);
+    if (ignore_member_names_.get ()) ignore_member_names_->container (this);
+    if (prevent_type_widening_.get ()) prevent_type_widening_->container (this);
+    if (force_type_validation_.get ()) force_type_validation_->container (this);
+  }
+
+  typeConsistencyEnforcementQosPolicy&
+  typeConsistencyEnforcementQosPolicy::operator= (typeConsistencyEnforcementQosPolicy const& s)
+  {
+    if (&s != this)
+    {
+      if (s.kind_.get ())
+        kind (*(s.kind_));
+      else
+        kind_.reset (0);
+
+      if (s.ignore_sequence_bounds_.get ())
+        ignore_sequence_bounds (*(s.ignore_sequence_bounds_));
+      else
+        ignore_sequence_bounds_.reset (0);
+
+      if (s.ignore_string_bounds_.get ())
+        ignore_string_bounds (*(s.ignore_string_bounds_));
+      else
+        ignore_string_bounds_.reset (0);
+
+      if (s.ignore_member_names_.get ())
+        ignore_member_names (*(s.ignore_member_names_));
+      else
+        ignore_member_names_.reset (0);
+
+      if (s.prevent_type_widening_.get ())
+        prevent_type_widening (*(s.prevent_type_widening_));
+      else
+        prevent_type_widening_.reset (0);
+
+      if (s.force_type_validation_.get ())
+        force_type_validation (*(s.force_type_validation_));
+      else
+        force_type_validation_.reset (0);
+    }
+
+    return *this;
+  }
+
+
+  // typeConsistencyEnforcementQosPolicy
+  bool typeConsistencyEnforcementQosPolicy::
+  kind_p () const
+  {
+    return kind_.get () != 0;
+  }
+
+  ::dds::typeConsistencyKind const& typeConsistencyEnforcementQosPolicy::
+  kind () const
+  {
+    return *kind_;
+  }
+
+  void typeConsistencyEnforcementQosPolicy::
+  kind (::dds::typeConsistencyKind const& e)
+  {
+    if (kind_.get ())
+    {
+      *kind_ = e;
+    }
+
+    else
+    {
+      kind_ = typeConsistencyEnforcementQosPolicy::kind_auto_ptr_type (new ::dds::typeConsistencyKind (e));
+      kind_->container (this);
+    }
+  }
+
+  // typeConsistencyEnforcementQosPolicy
+  bool typeConsistencyEnforcementQosPolicy::
+  ignore_sequence_bounds_p () const
+  {
+    return ignore_sequence_bounds_.get () != 0;
+  }
+
+  ::XMLSchema::boolean const& typeConsistencyEnforcementQosPolicy::
+  ignore_sequence_bounds () const
+  {
+    return *ignore_sequence_bounds_;
+  }
+
+  void typeConsistencyEnforcementQosPolicy::
+  ignore_sequence_bounds (::XMLSchema::boolean const& e)
+  {
+    if (ignore_sequence_bounds_.get ())
+    {
+      *ignore_sequence_bounds_ = e;
+    }
+
+    else
+    {
+      ignore_sequence_bounds_ = typeConsistencyEnforcementQosPolicy::ignore_sequence_bounds_auto_ptr_type (new ::XMLSchema::boolean (e));
+      ignore_sequence_bounds_->container (this);
+    }
+  }
+
+  // typeConsistencyEnforcementQosPolicy
+  bool typeConsistencyEnforcementQosPolicy::
+  ignore_string_bounds_p () const
+  {
+    return ignore_string_bounds_.get () != 0;
+  }
+
+  ::XMLSchema::boolean const& typeConsistencyEnforcementQosPolicy::
+  ignore_string_bounds () const
+  {
+    return *ignore_string_bounds_;
+  }
+
+  void typeConsistencyEnforcementQosPolicy::
+  ignore_string_bounds (::XMLSchema::boolean const& e)
+  {
+    if (ignore_string_bounds_.get ())
+    {
+      *ignore_string_bounds_ = e;
+    }
+
+    else
+    {
+      ignore_string_bounds_ = typeConsistencyEnforcementQosPolicy::ignore_string_bounds_auto_ptr_type (new ::XMLSchema::boolean (e));
+      ignore_string_bounds_->container (this);
+    }
+  }
+
+  // typeConsistencyEnforcementQosPolicy
+  bool typeConsistencyEnforcementQosPolicy::
+  ignore_member_names_p () const
+  {
+    return ignore_member_names_.get () != 0;
+  }
+
+  ::XMLSchema::boolean const& typeConsistencyEnforcementQosPolicy::
+  ignore_member_names () const
+  {
+    return *ignore_member_names_;
+  }
+
+  void typeConsistencyEnforcementQosPolicy::
+  ignore_member_names (::XMLSchema::boolean const& e)
+  {
+    if (ignore_member_names_.get ())
+    {
+      *ignore_member_names_ = e;
+    }
+
+    else
+    {
+      ignore_member_names_ = typeConsistencyEnforcementQosPolicy::ignore_member_names_auto_ptr_type (new ::XMLSchema::boolean (e));
+      ignore_member_names_->container (this);
+    }
+  }
+
+  // typeConsistencyEnforcementQosPolicy
+  bool typeConsistencyEnforcementQosPolicy::
+  prevent_type_widening_p () const
+  {
+    return prevent_type_widening_.get () != 0;
+  }
+
+  ::XMLSchema::boolean const& typeConsistencyEnforcementQosPolicy::
+  prevent_type_widening () const
+  {
+    return *prevent_type_widening_;
+  }
+
+  void typeConsistencyEnforcementQosPolicy::
+  prevent_type_widening (::XMLSchema::boolean const& e)
+  {
+    if (prevent_type_widening_.get ())
+    {
+      *prevent_type_widening_ = e;
+    }
+
+    else
+    {
+      prevent_type_widening_ = typeConsistencyEnforcementQosPolicy::prevent_type_widening_auto_ptr_type (new ::XMLSchema::boolean (e));
+      prevent_type_widening_->container (this);
+    }
+  }
+
+  // typeConsistencyEnforcementQosPolicy
+  bool typeConsistencyEnforcementQosPolicy::
+  force_type_validation_p () const
+  {
+    return force_type_validation_.get () != 0;
+  }
+
+  ::XMLSchema::boolean const& typeConsistencyEnforcementQosPolicy::
+  force_type_validation () const
+  {
+    return *force_type_validation_;
+  }
+
+  void typeConsistencyEnforcementQosPolicy::
+  force_type_validation (::XMLSchema::boolean const& e)
+  {
+    if (force_type_validation_.get ())
+    {
+      *force_type_validation_ = e;
+    }
+
+    else
+    {
+      force_type_validation_ = typeConsistencyEnforcementQosPolicy::force_type_validation_auto_ptr_type (new ::XMLSchema::boolean (e));
+      force_type_validation_->container (this);
+    }
+  }
+
+
   // domainparticipantQos
 
   domainparticipantQos::domainparticipantQos ()
@@ -2831,6 +3237,7 @@ namespace dds
   , transport_priority_ (s.transport_priority_.get () ? new ::dds::transportPriorityQosPolicy (*s.transport_priority_) : 0)
   , lifespan_ (s.lifespan_.get () ? new ::dds::lifespanQosPolicy (*s.lifespan_) : 0)
   , ownership_ (s.ownership_.get () ? new ::dds::ownershipQosPolicy (*s.ownership_) : 0)
+  , representation_ (s.representation_.get () ? new ::dds::dataRepresentationQosPolicy (*s.representation_) : 0)
   , name_ (s.name_.get () ? new ::XMLSchema::string<ACE_TCHAR> (*s.name_) : 0)
   , base_name_ (s.base_name_.get () ? new ::XMLSchema::string<ACE_TCHAR> (*s.base_name_) : 0)
   , topic_filter_ (s.topic_filter_.get () ? new ::XMLSchema::string<ACE_TCHAR> (*s.topic_filter_) : 0)
@@ -2848,6 +3255,7 @@ namespace dds
     if (transport_priority_.get ()) transport_priority_->container (this);
     if (lifespan_.get ()) lifespan_->container (this);
     if (ownership_.get ()) ownership_->container (this);
+    if (representation_.get ()) representation_->container (this);
     if (name_.get ()) name_->container (this);
     if (base_name_.get ()) base_name_->container (this);
     if (topic_filter_.get ()) topic_filter_->container (this);
@@ -2922,6 +3330,11 @@ namespace dds
         ownership (*(s.ownership_));
       else
         ownership_.reset (0);
+
+      if (s.representation_.get ())
+        representation (*(s.representation_));
+      else
+        representation_.reset (0);
 
       if (s.name_.get ()) name (*(s.name_));
       else name_.reset (0);
@@ -3303,6 +3716,34 @@ namespace dds
 
   // topicQos
   bool topicQos::
+  representation_p () const
+  {
+    return representation_.get () != 0;
+  }
+
+  ::dds::dataRepresentationQosPolicy const& topicQos::
+  representation () const
+  {
+    return *representation_;
+  }
+
+  void topicQos::
+  representation (::dds::dataRepresentationQosPolicy const& e)
+  {
+    if (representation_.get ())
+    {
+      *representation_ = e;
+    }
+
+    else
+    {
+      representation_ = topicQos::representation_auto_ptr_type (new ::dds::dataRepresentationQosPolicy (e));
+      representation_->container (this);
+    }
+  }
+
+  // topicQos
+  bool topicQos::
   name_p () const
   {
     return name_.get () != 0;
@@ -3425,6 +3866,8 @@ namespace dds
   , ownership_ (s.ownership_.get () ? new ::dds::ownershipQosPolicy (*s.ownership_) : 0)
   , time_based_filter_ (s.time_based_filter_.get () ? new ::dds::timeBasedFilterQosPolicy (*s.time_based_filter_) : 0)
   , reader_data_lifecycle_ (s.reader_data_lifecycle_.get () ? new ::dds::readerDataLifecycleQosPolicy (*s.reader_data_lifecycle_) : 0)
+  , representation_ (s.representation_.get () ? new ::dds::dataRepresentationQosPolicy (*s.representation_) : 0)
+  , type_consistency_ (s.type_consistency_.get () ? new ::dds::typeConsistencyEnforcementQosPolicy (*s.type_consistency_) : 0)
   , name_ (s.name_.get () ? new ::XMLSchema::string<ACE_TCHAR> (*s.name_) : 0)
   , base_name_ (s.base_name_.get () ? new ::XMLSchema::string<ACE_TCHAR> (*s.base_name_) : 0)
   , topic_filter_ (s.topic_filter_.get () ? new ::XMLSchema::string<ACE_TCHAR> (*s.topic_filter_) : 0)
@@ -3441,6 +3884,8 @@ namespace dds
     if (ownership_.get ()) ownership_->container (this);
     if (time_based_filter_.get ()) time_based_filter_->container (this);
     if (reader_data_lifecycle_.get ()) reader_data_lifecycle_->container (this);
+    if (representation_.get ()) representation_->container (this);
+    if (type_consistency_.get ()) type_consistency_->container (this);
     if (name_.get ()) name_->container (this);
     if (base_name_.get ()) base_name_->container (this);
     if (topic_filter_.get ()) topic_filter_->container (this);
@@ -3510,6 +3955,16 @@ namespace dds
         reader_data_lifecycle (*(s.reader_data_lifecycle_));
       else
         reader_data_lifecycle_.reset (0);
+
+      if (s.representation_.get ())
+        representation (*(s.representation_));
+      else
+        representation_.reset (0);
+
+      if (s.type_consistency_.get ())
+        type_consistency (*(s.type_consistency_));
+      else
+        type_consistency_.reset (0);
 
       if (s.name_.get ()) name (*(s.name_));
       else name_.reset (0);
@@ -3863,6 +4318,62 @@ namespace dds
 
   // datareaderQos
   bool datareaderQos::
+  representation_p () const
+  {
+    return representation_.get () != 0;
+  }
+
+  ::dds::dataRepresentationQosPolicy const& datareaderQos::
+  representation () const
+  {
+    return *representation_;
+  }
+
+  void datareaderQos::
+  representation (::dds::dataRepresentationQosPolicy const& e)
+  {
+    if (representation_.get ())
+    {
+      *representation_ = e;
+    }
+
+    else
+    {
+      representation_ = datareaderQos::representation_auto_ptr_type (new ::dds::dataRepresentationQosPolicy (e));
+      representation_->container (this);
+    }
+  }
+
+  // datareaderQos
+  bool datareaderQos::
+  type_consistency_p () const
+  {
+    return type_consistency_.get () != 0;
+  }
+
+  ::dds::typeConsistencyEnforcementQosPolicy const& datareaderQos::
+  type_consistency () const
+  {
+    return *type_consistency_;
+  }
+
+  void datareaderQos::
+  type_consistency (::dds::typeConsistencyEnforcementQosPolicy const& e)
+  {
+    if (type_consistency_.get ())
+    {
+      *type_consistency_ = e;
+    }
+
+    else
+    {
+      type_consistency_ = datareaderQos::type_consistency_auto_ptr_type (new ::dds::typeConsistencyEnforcementQosPolicy (e));
+      type_consistency_->container (this);
+    }
+  }
+
+  // datareaderQos
+  bool datareaderQos::
   name_p () const
   {
     return name_.get () != 0;
@@ -3988,6 +4499,7 @@ namespace dds
   , ownership_ (s.ownership_.get () ? new ::dds::ownershipQosPolicy (*s.ownership_) : 0)
   , ownership_strength_ (s.ownership_strength_.get () ? new ::dds::ownershipStrengthQosPolicy (*s.ownership_strength_) : 0)
   , writer_data_lifecycle_ (s.writer_data_lifecycle_.get () ? new ::dds::writerDataLifecycleQosPolicy (*s.writer_data_lifecycle_) : 0)
+  , representation_ (s.representation_.get () ? new ::dds::dataRepresentationQosPolicy (*s.representation_) : 0)
   , name_ (s.name_.get () ? new ::XMLSchema::string<ACE_TCHAR> (*s.name_) : 0)
   , base_name_ (s.base_name_.get () ? new ::XMLSchema::string<ACE_TCHAR> (*s.base_name_) : 0)
   , topic_filter_ (s.topic_filter_.get () ? new ::XMLSchema::string<ACE_TCHAR> (*s.topic_filter_) : 0)
@@ -4007,6 +4519,7 @@ namespace dds
     if (ownership_.get ()) ownership_->container (this);
     if (ownership_strength_.get ()) ownership_strength_->container (this);
     if (writer_data_lifecycle_.get ()) writer_data_lifecycle_->container (this);
+    if (representation_.get ()) representation_->container (this);
     if (name_.get ()) name_->container (this);
     if (base_name_.get ()) base_name_->container (this);
     if (topic_filter_.get ()) topic_filter_->container (this);
@@ -4091,6 +4604,11 @@ namespace dds
         writer_data_lifecycle (*(s.writer_data_lifecycle_));
       else
         writer_data_lifecycle_.reset (0);
+
+      if (s.representation_.get ())
+        representation (*(s.representation_));
+      else
+        representation_.reset (0);
 
       if (s.name_.get ()) name (*(s.name_));
       else name_.reset (0);
@@ -4528,6 +5046,34 @@ namespace dds
 
   // datawriterQos
   bool datawriterQos::
+  representation_p () const
+  {
+    return representation_.get () != 0;
+  }
+
+  ::dds::dataRepresentationQosPolicy const& datawriterQos::
+  representation () const
+  {
+    return *representation_;
+  }
+
+  void datawriterQos::
+  representation (::dds::dataRepresentationQosPolicy const& e)
+  {
+    if (representation_.get ())
+    {
+      *representation_ = e;
+    }
+
+    else
+    {
+      representation_ = datawriterQos::representation_auto_ptr_type (new ::dds::dataRepresentationQosPolicy (e));
+      representation_->container (this);
+    }
+  }
+
+  // datawriterQos
+  bool datawriterQos::
   name_p () const
   {
     return name_.get () != 0;
@@ -4712,7 +5258,7 @@ namespace dds
   }
 
   size_t qosProfile::
-  count_datareader_qos(void) const
+  count_datareader_qos() const
   {
     return datareader_qos_.size ();
   }
@@ -4749,7 +5295,7 @@ namespace dds
   }
 
   size_t qosProfile::
-  count_datawriter_qos(void) const
+  count_datawriter_qos() const
   {
     return datawriter_qos_.size ();
   }
@@ -4786,7 +5332,7 @@ namespace dds
   }
 
   size_t qosProfile::
-  count_topic_qos(void) const
+  count_topic_qos() const
   {
     return topic_qos_.size ();
   }
@@ -4823,7 +5369,7 @@ namespace dds
   }
 
   size_t qosProfile::
-  count_domainparticipant_qos(void) const
+  count_domainparticipant_qos() const
   {
     return domainparticipant_qos_.size ();
   }
@@ -4860,7 +5406,7 @@ namespace dds
   }
 
   size_t qosProfile::
-  count_publisher_qos(void) const
+  count_publisher_qos() const
   {
     return publisher_qos_.size ();
   }
@@ -4897,7 +5443,7 @@ namespace dds
   }
 
   size_t qosProfile::
-  count_subscriber_qos(void) const
+  count_subscriber_qos() const
   {
     return subscriber_qos_.size ();
   }
@@ -5019,7 +5565,7 @@ namespace dds
   }
 
   size_t qosProfile_seq::
-  count_qos_profile(void) const
+  count_qos_profile() const
   {
     return qos_profile_.size ();
   }
@@ -5256,6 +5802,74 @@ namespace dds
   ownershipKind const ownershipKind::SHARED_OWNERSHIP_QOS (ownershipKind::SHARED_OWNERSHIP_QOS_l);
   ownershipKind const ownershipKind::EXCLUSIVE_OWNERSHIP_QOS (ownershipKind::EXCLUSIVE_OWNERSHIP_QOS_l);
 
+  // dataRepresentationIdKind
+
+  dataRepresentationIdKind::
+  dataRepresentationIdKind (::XSCRT::XML::Element<ACE_TCHAR> const& e)
+  : ::XSCRT::Type (e)
+  {
+    std::basic_string<ACE_TCHAR> v (e.value ());
+
+    if (v == ACE_TEXT ("XCDR_DATA_REPRESENTATION")) v_ = XCDR_DATA_REPRESENTATION_l;
+    else if (v == ACE_TEXT ("XML_DATA_REPRESENTATION")) v_ = XML_DATA_REPRESENTATION_l;
+    else if (v == ACE_TEXT ("XCDR2_DATA_REPRESENTATION")) v_ = XCDR2_DATA_REPRESENTATION_l;
+    else if (v == ACE_TEXT ("UNALIGNED_CDR_DATA_REPRESENTATION")) v_ = UNALIGNED_CDR_DATA_REPRESENTATION_l;
+    else
+    {
+    }
+  }
+
+  dataRepresentationIdKind::
+  dataRepresentationIdKind (::XSCRT::XML::Attribute<ACE_TCHAR> const& a)
+  : ::XSCRT::Type (a)
+  {
+    std::basic_string<ACE_TCHAR> v (a.value ());
+
+    if (v == ACE_TEXT ("XCDR_DATA_REPRESENTATION")) v_ = XCDR_DATA_REPRESENTATION_l;
+    else if (v == ACE_TEXT ("XML_DATA_REPRESENTATION")) v_ = XML_DATA_REPRESENTATION_l;
+    else if (v == ACE_TEXT ("XCDR2_DATA_REPRESENTATION")) v_ = XCDR2_DATA_REPRESENTATION_l;
+    else if (v == ACE_TEXT ("UNALIGNED_CDR_DATA_REPRESENTATION")) v_ = UNALIGNED_CDR_DATA_REPRESENTATION_l;
+    else
+    {
+    }
+  }
+
+  dataRepresentationIdKind const dataRepresentationIdKind::XCDR_DATA_REPRESENTATION (dataRepresentationIdKind::XCDR_DATA_REPRESENTATION_l);
+  dataRepresentationIdKind const dataRepresentationIdKind::XML_DATA_REPRESENTATION (dataRepresentationIdKind::XML_DATA_REPRESENTATION_l);
+  dataRepresentationIdKind const dataRepresentationIdKind::XCDR2_DATA_REPRESENTATION (dataRepresentationIdKind::XCDR2_DATA_REPRESENTATION_l);
+  dataRepresentationIdKind const dataRepresentationIdKind::UNALIGNED_CDR_DATA_REPRESENTATION (dataRepresentationIdKind::UNALIGNED_CDR_DATA_REPRESENTATION_l);
+
+  // typeConsistencyKind
+
+  typeConsistencyKind::
+  typeConsistencyKind (::XSCRT::XML::Element<ACE_TCHAR> const& e)
+  : ::XSCRT::Type (e)
+  {
+    std::basic_string<ACE_TCHAR> v (e.value ());
+
+    if (v == ACE_TEXT ("DISALLOW_TYPE_COERCION")) v_ = DISALLOW_TYPE_COERCION_l;
+    else if (v == ACE_TEXT ("ALLOW_TYPE_COERCION")) v_ = ALLOW_TYPE_COERCION_l;
+    else
+    {
+    }
+  }
+
+  typeConsistencyKind::
+  typeConsistencyKind (::XSCRT::XML::Attribute<ACE_TCHAR> const& a)
+  : ::XSCRT::Type (a)
+  {
+    std::basic_string<ACE_TCHAR> v (a.value ());
+
+    if (v == ACE_TEXT ("DISALLOW_TYPE_COERCION")) v_ = DISALLOW_TYPE_COERCION_l;
+    else if (v == ACE_TEXT ("ALLOW_TYPE_COERCION")) v_ = ALLOW_TYPE_COERCION_l;
+    else
+    {
+    }
+  }
+
+  typeConsistencyKind const typeConsistencyKind::DISALLOW_TYPE_COERCION (typeConsistencyKind::DISALLOW_TYPE_COERCION_l);
+  typeConsistencyKind const typeConsistencyKind::ALLOW_TYPE_COERCION (typeConsistencyKind::ALLOW_TYPE_COERCION_l);
+
   // duration
 
   duration::
@@ -5305,6 +5919,32 @@ namespace dds
       if (n == ACE_TEXT("element"))
       {
         element_value_type t (new ::XMLSchema::string<ACE_TCHAR> (e));
+        add_element (t);
+      }
+
+      else
+      {
+      }
+    }
+  }
+
+  // dataRepresentationIdSeq
+
+  dataRepresentationIdSeq::
+  dataRepresentationIdSeq (::XSCRT::XML::Element<ACE_TCHAR> const& e)
+  :Base (e)
+  {
+
+    ::XSCRT::Parser<ACE_TCHAR> p (e);
+
+    while (p.more_elements ())
+    {
+      ::XSCRT::XML::Element<ACE_TCHAR> e (p.next_element ());
+      std::basic_string<ACE_TCHAR> n (::XSCRT::XML::uq_name (e.name ()));
+
+      if (n == ACE_TEXT("element"))
+      {
+        element_value_type t (new ::dds::dataRepresentationIdKind (e));
         add_element (t);
       }
 
@@ -5976,6 +6616,88 @@ namespace dds
     }
   }
 
+  // dataRepresentationQosPolicy
+
+  dataRepresentationQosPolicy::
+  dataRepresentationQosPolicy (::XSCRT::XML::Element<ACE_TCHAR> const& e)
+  :Base (e)
+  {
+
+    ::XSCRT::Parser<ACE_TCHAR> p (e);
+
+    while (p.more_elements ())
+    {
+      ::XSCRT::XML::Element<ACE_TCHAR> e (p.next_element ());
+      std::basic_string<ACE_TCHAR> n (::XSCRT::XML::uq_name (e.name ()));
+
+      if (n == ACE_TEXT("value"))
+      {
+        ::dds::dataRepresentationIdSeq t (e);
+        value (t);
+      }
+
+      else
+      {
+      }
+    }
+  }
+
+  // typeConsistencyEnforcementQosPolicy
+
+  typeConsistencyEnforcementQosPolicy::
+  typeConsistencyEnforcementQosPolicy (::XSCRT::XML::Element<ACE_TCHAR> const& e)
+  :Base (e)
+  {
+
+    ::XSCRT::Parser<ACE_TCHAR> p (e);
+
+    while (p.more_elements ())
+    {
+      ::XSCRT::XML::Element<ACE_TCHAR> e (p.next_element ());
+      std::basic_string<ACE_TCHAR> n (::XSCRT::XML::uq_name (e.name ()));
+
+      if (n == ACE_TEXT("kind"))
+      {
+        ::dds::typeConsistencyKind t (e);
+        kind (t);
+      }
+
+      else if (n == ACE_TEXT("ignore_sequence_bounds"))
+      {
+        ::XMLSchema::boolean t (e);
+        ignore_sequence_bounds (t);
+      }
+
+      else if (n == ACE_TEXT("ignore_string_bounds"))
+      {
+        ::XMLSchema::boolean t (e);
+        ignore_string_bounds (t);
+      }
+
+      else if (n == ACE_TEXT("ignore_member_names"))
+      {
+        ::XMLSchema::boolean t (e);
+        ignore_member_names (t);
+      }
+
+      else if (n == ACE_TEXT("prevent_type_widening"))
+      {
+        ::XMLSchema::boolean t (e);
+        prevent_type_widening (t);
+      }
+
+      else if (n == ACE_TEXT("force_type_validation"))
+      {
+        ::XMLSchema::boolean t (e);
+        force_type_validation (t);
+      }
+
+      else
+      {
+      }
+    }
+  }
+
   // domainparticipantQos
 
   domainparticipantQos::
@@ -6251,6 +6973,12 @@ namespace dds
         ownership (t);
       }
 
+      else if (n == ACE_TEXT("representation"))
+      {
+        ::dds::dataRepresentationQosPolicy t (e);
+        representation (t);
+      }
+
       else
       {
       }
@@ -6368,6 +7096,18 @@ namespace dds
       {
         ::dds::readerDataLifecycleQosPolicy t (e);
         reader_data_lifecycle (t);
+      }
+
+      else if (n == ACE_TEXT("representation"))
+      {
+        ::dds::dataRepresentationQosPolicy t (e);
+        representation (t);
+      }
+
+      else if (n == ACE_TEXT("type_consistency"))
+      {
+        ::dds::typeConsistencyEnforcementQosPolicy t (e);
+        type_consistency (t);
       }
 
       else
@@ -6505,6 +7245,12 @@ namespace dds
       {
         ::dds::writerDataLifecycleQosPolicy t (e);
         writer_data_lifecycle (t);
+      }
+
+      else if (n == ACE_TEXT("representation"))
+      {
+        ::dds::dataRepresentationQosPolicy t (e);
+        representation (t);
       }
 
       else
@@ -6677,3 +7423,4 @@ namespace dds
     }
   }
 }
+

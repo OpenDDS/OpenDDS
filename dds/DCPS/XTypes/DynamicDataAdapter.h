@@ -6,11 +6,19 @@
 #ifndef OPENDDS_DCPS_XTYPES_DYNAMIC_DATA_ADAPTER_H
 #define OPENDDS_DCPS_XTYPES_DYNAMIC_DATA_ADAPTER_H
 
-#ifndef OPENDDS_SAFETY_PROFILE
-#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+#if !defined OPENDDS_SAFETY_PROFILE && !defined OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+#  define OPENDDS_HAS_DYNAMIC_DATA_ADAPTER 1
+#else
+#  define OPENDDS_HAS_DYNAMIC_DATA_ADAPTER 0
+#endif
 
-#include <dds/DdsDynamicDataC.h>
-#include <dds/DCPS/FilterEvaluator.h>
+#if OPENDDS_HAS_DYNAMIC_DATA_ADAPTER
+
+#  include "DynamicTypeImpl.h"
+
+#  include <dds/DCPS/FilterEvaluator.h>
+
+#  include <dds/DdsDynamicDataC.h>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -21,16 +29,16 @@ template <typename T>
 class DynamicDataAdapter : public DDS::DynamicData {
 public:
   DynamicDataAdapter(DDS::DynamicType_ptr type,
-                    const DCPS::MetaStruct& meta_struct,
-                    const T& value)
-    : type_(DDS::DynamicType::_duplicate(type))
+                     const DCPS::MetaStruct& meta_struct,
+                     const T& value)
+    : type_(get_base_type(type))
     , meta_struct_(meta_struct)
     , value_(value)
   {}
 
   DDS::DynamicType_ptr type()
   {
-    return type_;
+    return DDS::DynamicType::_duplicate(type_);
   }
 
   DDS::ReturnCode_t get_descriptor(DDS::MemberDescriptor*& value,
@@ -806,7 +814,6 @@ private:
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
-#endif // OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
-#endif // OPENDDS_SAFETY_PROFILE
+#endif // OPENDDS_HAS_DYNAMIC_DATA_ADAPTER
 
 #endif // OPENDDS_DCPS_XTYPES_DYNAMIC_DATA_ADAPTER_H

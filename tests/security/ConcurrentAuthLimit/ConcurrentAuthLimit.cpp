@@ -1,7 +1,6 @@
 #include <dds/DCPS/LogAddr.h>
-#include <dds/DCPS/RTPS/BaseMessageTypes.h>
-#include <dds/DCPS/RTPS/GuidGenerator.h>
 #include <dds/DCPS/RTPS/MessageTypes.h>
+#include <dds/DCPS/RTPS/GuidGenerator.h>
 #include <dds/DCPS/RTPS/ParameterListConverter.h>
 #include <dds/DCPS/RTPS/RtpsDiscovery.h>
 #include <dds/DCPS/security/framework/Properties.h>

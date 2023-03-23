@@ -30,6 +30,41 @@ int SummaryJsonDashboardFormatter::format(const Bench::TestController::Report& r
   rapidjson::Document document;
   document.SetObject();
 
+  rapidjson::Value& run_parameters_val = document.AddMember("run_parameters", rapidjson::Value(0).Move(), document.GetAllocator())["run_parameters"].SetObject();
+
+  for (CORBA::ULong rp_idx = 0; rp_idx != report.run_parameters.length(); ++rp_idx) {
+    auto& rp = report.run_parameters[rp_idx];
+    run_parameters_val.AddMember(rapidjson::StringRef(rp.name.in()), rapidjson::Value(rapidjson::StringRef(rp.value.string_param())).Move(), document.GetAllocator());
+  }
+
+  rapidjson::Value& scenario_parameters_val = document.AddMember("scenario_parameters", rapidjson::Value(0).Move(), document.GetAllocator())["scenario_parameters"].SetObject();
+
+  for (CORBA::ULong sp_idx = 0; sp_idx != report.scenario_parameters.length(); ++sp_idx) {
+    auto& sp = report.scenario_parameters[sp_idx];
+    switch (sp.value._d()) {
+      case Bench::TestController::PK_NUMBER: {
+        scenario_parameters_val.AddMember(rapidjson::StringRef(sp.name.in()), rapidjson::Value(sp.value.number_param()).Move(), document.GetAllocator());
+        break;
+      }
+      case Bench::TestController::PK_STRING: {
+        scenario_parameters_val.AddMember(rapidjson::StringRef(sp.name.in()), rapidjson::StringRef(sp.value.string_param()), document.GetAllocator());
+        break;
+      }
+      case Bench::TestController::PK_TIME:
+      {
+        std::ostringstream oss;
+        oss << sp.value.time_param();
+        scenario_parameters_val.AddMember(rapidjson::StringRef(sp.name.in()), rapidjson::StringRef(oss.str().c_str()), document.GetAllocator());
+        break;
+      }
+      default:
+      {
+        OPENDDS_ASSERT(false); // Should not happen
+        break;
+      }
+    }
+  }
+
   rapidjson::Value& errors_val = document.AddMember("errors", rapidjson::Value(0).Move(), document.GetAllocator())["errors"].SetObject();
   errors_val.AddMember("total", rapidjson::Value(report.missing_reports + untagged_error_counts.total_).Move(), document.GetAllocator());
   errors_val.AddMember("discovery", rapidjson::Value(untagged_error_counts.discovery_).Move(), document.GetAllocator());

@@ -10,7 +10,7 @@
 #include <dds/DCPS/transport/framework/TransportExceptions.h>
 #include <dds/DCPS/transport/framework/ReceivedDataSample.h>
 
-#include <dds/DCPS/RTPS/BaseMessageUtils.h>
+#include <dds/DCPS/RTPS/MessageUtils.h>
 
 #include <dds/DCPS/RepoIdBuilder.h>
 #include <dds/DCPS/GuidConverter.h>
@@ -40,7 +40,7 @@ class SimpleDataReader : public TransportReceiveListener, public TransportClient
 {
 public:
 
-  explicit SimpleDataReader(const RepoId& sub_id)
+  explicit SimpleDataReader(const GUID_t& sub_id)
     : done_(false)
     , sub_id_(sub_id)
     , pub_id_(GUID_UNKNOWN)
@@ -72,7 +72,8 @@ public:
 
     switch (sample.header_.message_id_) {
     case SAMPLE_DATA: {
-      Serializer ser(sample.sample_.get(), encoding);
+      Message_Block_Ptr payload(sample.data());
+      Serializer ser(payload.get(), encoding);
 
       OpenDDS::DCPS::EncapsulationHeader encap;
       if (!(ser >> encap)) {
@@ -130,7 +131,8 @@ public:
     case DISPOSE_INSTANCE:
     case UNREGISTER_INSTANCE:
     case DISPOSE_UNREGISTER_INSTANCE: {
-      Serializer ser(sample.sample_.get(), encoding);
+      Message_Block_Ptr payload(sample.data());
+      Serializer ser(payload.get(), encoding);
 
       OpenDDS::DCPS::EncapsulationHeader encap;
       if (!(ser >> encap)) {
@@ -189,7 +191,7 @@ public:
   // Implementing TransportClient
   bool check_transport_qos(const TransportInst&)
     { return true; }
-  RepoId get_repo_id() const
+  GUID_t get_guid() const
     { return sub_id_; }
   DDS::DomainId_t domain_id() const
     { return 0; }
@@ -200,8 +202,8 @@ public:
   using TransportClient::disassociate;
 
   bool done_;
-  const RepoId sub_id_;
-  RepoId pub_id_;
+  const GUID_t sub_id_;
+  GUID_t pub_id_;
   SequenceNumber seq_;
   int control_msg_count_;
 };

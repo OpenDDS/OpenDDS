@@ -140,9 +140,9 @@ bool EncapsulationHeader::from_encoding(
     }
     break;
   default:
-    if (DCPS_debug_level > 0) {
-      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR EncapsulationHeader::from_encoding: ")
-        ACE_TEXT("Got Encoding With Unsupported Kind: %C\n"),
+    if (log_level >= LogLevel::Error) {
+      ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: EncapsulationHeader::from_encoding: "
+        "Got Encoding With Unsupported Kind: %C\n",
         Encoding::kind_to_string(encoding.kind()).c_str()));
     }
     return false;
@@ -229,18 +229,18 @@ bool EncapsulationHeader::to_encoding_i(
     break;
 
   default:
-    if (DCPS_debug_level > 0) {
-      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR EncapsulationHeader::to_encoding: ")
-        ACE_TEXT("Unsupported Encoding: %C\n"), to_string().c_str()));
+    if (log_level >= LogLevel::Error) {
+      ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: EncapsulationHeader::to_encoding: "
+        "Unsupported Encoding: %C\n", to_string().c_str()));
     }
     return false;
   }
 
   if (expected_extensibility_ptr && wrong_extensibility) {
-    if (DCPS_debug_level > 0) {
-      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR EncapsulationHeader::to_encoding: ")
-        ACE_TEXT("Unexpected Extensibility Encoding: %C\n"),
-        to_string().c_str()));
+    if (log_level >= LogLevel::Error) {
+      ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: EncapsulationHeader::to_encoding: "
+        "expected %C extensibility, but got %C\n",
+        ext_to_string(*expected_extensibility_ptr), to_string().c_str()));
     }
     return false;
   }
@@ -251,9 +251,9 @@ bool EncapsulationHeader::to_encoding_i(
 bool EncapsulationHeader::set_encapsulation_options(Message_Block_Ptr& mb)
 {
   if (mb->length() < padding_marker_byte_index + 1) {
-    if (DCPS_debug_level > 0) {
-      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR EncapsulationHeader::set_encapsulation_options: ")
-        ACE_TEXT("Insufficient buffer size %d\n"), mb->length()));
+    if (log_level >= LogLevel::Error) {
+      ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: EncapsulationHeader::set_encapsulation_options: "
+        "Insufficient buffer size %B\n", mb->length()));
     }
     return false;
   }
@@ -554,7 +554,7 @@ Serializer::read_string(ACE_CDR::Char*& dest,
   //       done here before the allocation even though it will be
   //       checked during the actual read as well.
   //
-  if (length <= current_->total_length()) {
+  if (current_ && length <= current_->total_length()) {
 
     dest = str_alloc(length - 1);
 
@@ -566,6 +566,11 @@ Serializer::read_string(ACE_CDR::Char*& dest,
       // Extract the string.
       //
       read_char_array(dest, length);
+
+      if (good_bit_ && dest[length - 1]) {
+        // If the last byte was not a 0 it's not a valid CDR string
+        good_bit_ = false;
+      }
     }
 
     if (!good_bit_) {
@@ -627,7 +632,7 @@ Serializer::read_string(ACE_CDR::WChar*& dest,
   //       checked during the actual read as well.
   //
   ACE_CDR::ULong length = 0;
-  if (bytecount <= current_->total_length()) {
+  if (current_ && bytecount <= current_->total_length()) {
     length = bytecount / char16_cdr_size;
     dest = str_alloc(length);
 

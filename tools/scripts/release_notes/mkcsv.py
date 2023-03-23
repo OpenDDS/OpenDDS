@@ -10,7 +10,7 @@ if len(sys.argv) != 2:
 with open(sys.argv[1]) as f:
   prs = json.load(f)
 
-pr_link_template = '=HYPERLINK("https://github.com/objectcomputing/OpenDDS/pull/{0}","#{0}")'
+pr_link_template = '=HYPERLINK("https://github.com/OpenDDS/OpenDDS/pull/{0}","#{0}")'
 writer = csv.writer(sys.stdout)
 for pr in prs:
   writer.writerow([

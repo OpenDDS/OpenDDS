@@ -27,6 +27,7 @@ namespace OpenDDS {
 namespace DCPS {
 
 class DataReaderImpl;
+class TypeSupportImpl;
 
 class OpenDDS_Dcps_Export QueryConditionImpl
   : public virtual OpenDDS::DCPS::LocalObject<DDS::QueryCondition>
@@ -58,12 +59,12 @@ public:
   bool filter(const Sample& s, bool sample_only_has_key_fields) const
   {
     ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, lock_, false);
-    const MetaStruct& meta = getMetaStruct<Sample>();
     /*
      * Omit the sample from results if the query references non-key fields
      * and the sample only has key fields.
      */
-    if (sample_only_has_key_fields && evaluator_.has_non_key_fields(meta)) {
+    TypeSupportImpl* const ts = get_type_support();
+    if (!ts || (sample_only_has_key_fields && evaluator_.has_non_key_fields(*ts))) {
       if (DCPS_debug_level > 8) {
         ACE_DEBUG((LM_DEBUG,
           ACE_TEXT("(%P|%t) QueryConditionImpl::filter: ")
@@ -77,6 +78,8 @@ public:
   }
 
 private:
+  TypeSupportImpl* get_type_support() const;
+
   CORBA::String_var query_expression_;
   DDS::StringSeq query_parameters_;
   FilterEvaluator evaluator_;

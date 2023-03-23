@@ -62,7 +62,7 @@ DDS::ReturnCode_t TopicImpl::set_qos(const DDS::TopicQos& qos_arg)
       return DDS::RETCODE_OK;
 
     // for the not changeable qos, it can be changed before enable
-    if (!Qos_Helper::changeable(qos_, qos) && enabled_ == true) {
+    if (!Qos_Helper::changeable(qos_, qos) && enabled_) {
       return DDS::RETCODE_IMMUTABLE_POLICY;
 
     } else {
@@ -168,7 +168,7 @@ TopicImpl::enable()
   return this->set_enabled();
 }
 
-RepoId
+GUID_t
 TopicImpl::get_id() const
 {
   return id_;
@@ -177,7 +177,7 @@ TopicImpl::get_id() const
 DDS::InstanceHandle_t
 TopicImpl::get_instance_handle()
 {
-  return get_entity_instance_handle(id_, participant_);
+  return get_entity_instance_handle(id_, rchandle_from(participant_));
 }
 
 const char*

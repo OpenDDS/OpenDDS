@@ -185,7 +185,7 @@ ACE_TMAIN (int argc, ACE_TCHAR *argv[])
           int attempts;
           for (attempts = 1;
                attempts != max_attempts
-                 && listener->publication_matched_.value () == false;
+                 && listener->publication_matched_;
                ++attempts)
           {
             ACE_OS::sleep (5);

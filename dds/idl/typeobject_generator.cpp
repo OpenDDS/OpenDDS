@@ -542,12 +542,6 @@ void dump_bytes(const OpenDDS::XTypes::TypeObject& to)
   }
 }
 
-OpenDDS::DCPS::String canonical_name(UTL_ScopedName* sn)
-{
-  // NOTE: Names should not have leading "::" according to the XTypes IDL.
-  return dds_generator::scoped_helper(sn, "::", EscapeContext_StripEscapes);
-}
-
 }
 
 void
@@ -685,7 +679,7 @@ typeobject_generator::gen_epilogue()
 string
 typeobject_generator::tag_type(UTL_ScopedName* name)
 {
-  return dds_generator::scoped_helper(name, "_") + "_xtag";
+  return dds_generator::get_xtag_name(name);
 }
 
 bool
@@ -773,6 +767,8 @@ typeobject_generator::strong_connect(AST_Type* type, const std::string& anonymou
   stack_.push_back(type);
   v.on_stack = true;
 
+  using OpenDDS::XTypes::MemberId;
+  AST_Structure* const stru = dynamic_cast<AST_Structure*>(type);
   switch (type->node_type()) {
 
   case AST_ConcreteType::NT_union:
@@ -786,11 +782,11 @@ typeobject_generator::strong_connect(AST_Type* type, const std::string& anonymou
       consider(v, discriminator, v.name + ".d");
 
       const AutoidKind auto_id = be_global->autoid(n);
-      OpenDDS::XTypes::MemberId member_id = 0;
+      MemberId member_id = 0;
 
       for (Fields::Iterator i = fields.begin(); i != fields.end(); ++i) {
         AST_UnionBranch* ub = dynamic_cast<AST_UnionBranch*>(*i);
-        const OpenDDS::XTypes::MemberId id = be_global->compute_id(ub, auto_id, member_id);
+        const MemberId id = be_global->compute_id(stru, ub, auto_id, member_id);
         consider(v, ub->field_type(), v.name + "." + OpenDDS::DCPS::to_dds_string(id));
       }
 
@@ -806,11 +802,11 @@ typeobject_generator::strong_connect(AST_Type* type, const std::string& anonymou
 
       const Fields fields(n);
       const AutoidKind auto_id = be_global->autoid(n);
-      OpenDDS::XTypes::MemberId member_id = 0;
+      MemberId member_id = 0;
 
       for (Fields::Iterator i = fields.begin(); i != fields.end(); ++i) {
         AST_Field* field = *i;
-        const OpenDDS::XTypes::MemberId id = be_global->compute_id(field, auto_id, member_id);
+        const MemberId id = be_global->compute_id(stru, field, auto_id, member_id);
         consider(v, field->field_type(), v.name + "." + OpenDDS::DCPS::to_dds_string(id));
       }
 
@@ -1032,9 +1028,12 @@ void typeobject_generator::set_builtin_member_annotations(AST_Decl* member,
   const HashidAnnotation* hashid_ann = dynamic_cast<const HashidAnnotation*>(be_global->builtin_annotations_["::@hashid"]);
   std::string hash_name;
   if (hashid_ann->node_value_exists(member, hash_name)) {
-    annotations.present = true;
-    annotations.value.hash_id.present = true;
-    annotations.value.hash_id.value = hash_name;
+    OpenDDS::XTypes::Optional<std::string> hash_id(hash_name);
+    if (!annotations) {
+      OpenDDS::XTypes::AppliedBuiltinMemberAnnotations value;
+      annotations = OpenDDS::XTypes::Optional<OpenDDS::XTypes::AppliedBuiltinMemberAnnotations>(value);
+    }
+    annotations.value().hash_id = hash_id;
   }
 }
 
@@ -1097,7 +1096,8 @@ typeobject_generator::generate_struct_type_identifier(AST_Type* type)
     }
 
     minimal_member.common.member_type_id = get_minimal_type_identifier(field->field_type());
-    OpenDDS::XTypes::hash_member_name(minimal_member.detail.name_hash, field->local_name()->get_string());
+    const std::string name = canonical_name(field->local_name());
+    OpenDDS::XTypes::hash_member_name(minimal_member.detail.name_hash, name);
     minimal_to.minimal.struct_type.member_seq.append(minimal_member);
 
     OpenDDS::XTypes::CompleteStructMember complete_member;
@@ -1105,7 +1105,7 @@ typeobject_generator::generate_struct_type_identifier(AST_Type* type)
     complete_member.common.member_flags = minimal_member.common.member_flags;
     complete_member.common.member_type_id = get_complete_type_identifier(field->field_type());
 
-    complete_member.detail.name = field->local_name()->get_string();
+    complete_member.detail.name = name;
     set_builtin_member_annotations(field, complete_member.detail.ann_builtin);
 
     complete_to.complete.struct_type.member_seq.append(complete_member);
@@ -1192,7 +1192,8 @@ typeobject_generator::generate_union_type_identifier(AST_Type* type)
     }
     minimal_member.common.label_seq.sort();
 
-    OpenDDS::XTypes::hash_member_name(minimal_member.detail.name_hash, branch->local_name()->get_string());
+    const std::string name = canonical_name(branch->local_name());
+    OpenDDS::XTypes::hash_member_name(minimal_member.detail.name_hash, name);
     minimal_to.minimal.union_type.member_seq.append(minimal_member);
 
     OpenDDS::XTypes::CompleteUnionMember complete_member;
@@ -1201,7 +1202,7 @@ typeobject_generator::generate_union_type_identifier(AST_Type* type)
     complete_member.common.type_id = get_complete_type_identifier(branch->field_type());
     complete_member.common.label_seq = minimal_member.common.label_seq;
 
-    complete_member.detail.name = branch->local_name()->get_string();
+    complete_member.detail.name = name;
     set_builtin_member_annotations(branch, complete_member.detail.ann_builtin);
 
     complete_to.complete.union_type.member_seq.append(complete_member);
@@ -1254,12 +1255,13 @@ typeobject_generator::generate_enum_type_identifier(AST_Type* type)
     OpenDDS::XTypes::MinimalEnumeratedLiteral minimal_lit;
     minimal_lit.common.value = contents[i]->constant_value()->ev()->u.eval;
     minimal_lit.common.flags = (i == default_literal_idx ? OpenDDS::XTypes::IS_DEFAULT : 0);
-    OpenDDS::XTypes::hash_member_name(minimal_lit.detail.name_hash, contents[i]->local_name()->get_string());
+    const std::string name = canonical_name(contents[i]->local_name());
+    OpenDDS::XTypes::hash_member_name(minimal_lit.detail.name_hash, name);
     minimal_to.minimal.enumerated_type.literal_seq.append(minimal_lit);
 
     OpenDDS::XTypes::CompleteEnumeratedLiteral complete_lit;
     complete_lit.common = minimal_lit.common;
-    complete_lit.detail.name = contents[i]->local_name()->get_string();
+    complete_lit.detail.name = name;
 
     complete_to.complete.enumerated_type.literal_seq.append(complete_lit);
   }

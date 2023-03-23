@@ -1,0 +1,53 @@
+/*
+ * Distributed under the OpenDDS License.
+ * See: http://www.opendds.org/license.html
+ */
+
+#ifndef OPENDDS_DCPS_XTYPES_TYPEOBJECT_IDL
+#define OPENDDS_DCPS_XTYPES_TYPEOBJECT_IDL
+
+module OpenDDS {
+  module XTypes {
+    typedef short EquivalenceKind;
+    typedef short TypeKind;
+
+    @extensibility(FINAL) @nested
+    union TypeIdentifier switch (TypeKind) {
+      // =================== Future extensibility ============
+      // Future extensions
+      default:
+        char dummy;
+    };
+
+    typedef sequence<TypeIdentifier> TypeIdentifierSeq;
+
+    struct TypeIdentifierPair {
+      TypeIdentifier type_identifier1;
+      TypeIdentifier type_identifier2;
+    };
+
+    typedef sequence<TypeIdentifierPair> TypeIdentifierPairSeq;
+
+    @extensibility(APPENDABLE) @nested
+    union TypeObject switch (EquivalenceKind) {
+      default:
+        char dummy;
+    };
+
+    struct TypeIdentifierTypeObjectPair {
+      TypeIdentifier type_identifier;
+      TypeObject type_object;
+    };
+
+    typedef sequence<TypeIdentifierTypeObjectPair> TypeIdentifierTypeObjectPairSeq;
+
+    struct TypeIdentifierWithSize {
+      TypeIdentifier type_id;
+      long typeobject_serialized_size;
+    };
+
+    typedef sequence<TypeIdentifierWithSize> TypeIdentifierWithSizeSeq;
+  }; // namespace XTypes
+}; // namespace OpenDDS
+
+#endif /* OPENDDS_DCPS_XTYPES_TYPEOBJECT_IDL */

@@ -1,6 +1,4 @@
 /*
- *
- *
  * Distributed under the OpenDDS License.
  * See: http://www.opendds.org/license.html
  */
@@ -12,6 +10,7 @@
 #include "PoolAllocator.h"
 #include "Serializer.h"
 #include "Hash.h"
+#include "Util.h"
 
 #include <dds/DdsDcpsGuidC.h>
 #include <dds/DdsDcpsInfoUtilsC.h>
@@ -27,90 +26,78 @@ namespace OpenDDS {
 namespace DCPS {
 
 /// Vendor Id value specified for OCI is used for OpenDDS.
-const GuidVendorId_t VENDORID_OCI = { 0x01, 0x03 };
+const GuidVendorId_t VENDORID_OCI = {0x01, 0x03};
 
 /// Nil value for the GUID prefix (participant identifier).
-const GuidPrefix_t GUIDPREFIX_UNKNOWN = { 0 };
+const GuidPrefix_t GUIDPREFIX_UNKNOWN = {0};
 
 ///@{
 /// Entity Id values specified in Version 2.1 of RTPS specification.
-const EntityId_t ENTITYID_UNKNOWN                                = { {0x00,0x00,0x00}, 0x00};
-const EntityId_t ENTITYID_PARTICIPANT                            = { {0x00,0x00,0x01}, 0xc1};
-const EntityId_t ENTITYID_SEDP_BUILTIN_TOPIC_WRITER              = { {0x00,0x00,0x02}, 0xc2};
-const EntityId_t ENTITYID_SEDP_BUILTIN_TOPIC_READER              = { {0x00,0x00,0x02}, 0xc7};
-const EntityId_t ENTITYID_SEDP_BUILTIN_PUBLICATIONS_WRITER       = { {0x00,0x00,0x03}, 0xc2};
-const EntityId_t ENTITYID_SEDP_BUILTIN_PUBLICATIONS_READER       = { {0x00,0x00,0x03}, 0xc7};
-const EntityId_t ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_WRITER      = { {0x00,0x00,0x04}, 0xc2};
-const EntityId_t ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_READER      = { {0x00,0x00,0x04}, 0xc7};
-const EntityId_t ENTITYID_SPDP_BUILTIN_PARTICIPANT_WRITER        = { {0x00,0x01,0x00}, 0xc2};
-const EntityId_t ENTITYID_SPDP_BUILTIN_PARTICIPANT_READER        = { {0x00,0x01,0x00}, 0xc7};
-const EntityId_t ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_WRITER = { {0x00,0x02,0x00}, 0xc2};
-const EntityId_t ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_READER = { {0x00,0x02,0x00}, 0xc7};
+const EntityId_t ENTITYID_UNKNOWN = {{0x00, 0x00, 0x00}, 0x00};
+const EntityId_t ENTITYID_PARTICIPANT = {{0x00, 0x00, 0x01}, 0xc1};
+const EntityId_t ENTITYID_SEDP_BUILTIN_TOPIC_WRITER = {{0x00, 0x00, 0x02}, 0xc2};
+const EntityId_t ENTITYID_SEDP_BUILTIN_TOPIC_READER = {{0x00, 0x00, 0x02}, 0xc7};
+const EntityId_t ENTITYID_SEDP_BUILTIN_PUBLICATIONS_WRITER = {{0x00, 0x00, 0x03}, 0xc2};
+const EntityId_t ENTITYID_SEDP_BUILTIN_PUBLICATIONS_READER = {{0x00, 0x00, 0x03}, 0xc7};
+const EntityId_t ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_WRITER = {{0x00, 0x00, 0x04}, 0xc2};
+const EntityId_t ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_READER = {{0x00, 0x00, 0x04}, 0xc7};
+const EntityId_t ENTITYID_SPDP_BUILTIN_PARTICIPANT_WRITER = {{0x00, 0x01, 0x00}, 0xc2};
+const EntityId_t ENTITYID_SPDP_BUILTIN_PARTICIPANT_READER = {{0x00, 0x01, 0x00}, 0xc7};
+const EntityId_t ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_WRITER = {{0x00, 0x02, 0x00}, 0xc2};
+const EntityId_t ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_READER = {{0x00, 0x02, 0x00}, 0xc7};
 ///@}
 
 ///@{
 /// XTypes Type Lookup Service
-const EntityId_t ENTITYID_TL_SVC_REQ_WRITER = { {0x00,0x03,0x00}, 0xc3};
-const EntityId_t ENTITYID_TL_SVC_REQ_READER = { {0x00,0x03,0x00}, 0xc4};
-const EntityId_t ENTITYID_TL_SVC_REPLY_WRITER = { {0x00,0x03,0x01}, 0xc3};
-const EntityId_t ENTITYID_TL_SVC_REPLY_READER = { {0x00,0x03,0x01}, 0xc4};
+const EntityId_t ENTITYID_TL_SVC_REQ_WRITER = {{0x00, 0x03, 0x00}, 0xc3};
+const EntityId_t ENTITYID_TL_SVC_REQ_READER = {{0x00, 0x03, 0x00}, 0xc4};
+const EntityId_t ENTITYID_TL_SVC_REPLY_WRITER = {{0x00, 0x03, 0x01}, 0xc3};
+const EntityId_t ENTITYID_TL_SVC_REPLY_READER = {{0x00, 0x03, 0x01}, 0xc4};
 ///@}
 
 /// Nil value for GUID.
 const GUID_t GUID_UNKNOWN = { { 0 }, { { 0 }, 0 } };
 
 /**
- * Summary kinds of entities within the service.
+ * Identifies the kinds of entities used in a GUID.
  *
  * See dds/DdsDcpsGuid.idl for the values these map to.
  */
-enum EntityKind {     // EntityId_t.entityKind value(s)
-
-  /// Represents ENTITYKIND_USER_UNKNOWN and ENTITYKIND_BUILTIN_UNKNOWN
-  KIND_UNKNOWN,
-
-  /// Represents ENTITYKIND_BUILTIN_PARTICIPANT
-  KIND_PARTICIPANT,
-
-  /// Represents ENTITYKIND_USER_WRITER_WITH_KEY and ENTITYKIND_USER_WRITER_NO_KEY
-  KIND_USER_WRITER,
-  /// Represents ENTITYKIND_USER_READER_WITH_KEY and ENTITYKIND_USER_READER_NO_KEY
-  KIND_USER_READER,
-
-  /// Represents ENTITYKIND_OPENDDS_TOPIC
-  KIND_USER_TOPIC,
-
-  /// Represents ENTITYKIND_BUILTIN_WRITER_WITH_KEY and ENTITYKIND_USER_WRITER_NO_KEY
-  KIND_BUILTIN_WRITER,
-  /// Represents ENTITYKIND_BUILTIN_READER_WITH_KEY and ENTITYKIND_USER_READER_NO_KEY
-  KIND_BUILTIN_READER,
-  /// Represents ENTITYKIND_BUILTIN_TOPIC
-  KIND_BUILTIN_TOPIC,
-
-  /// OpenDDS specific Publisher Guid values
-  KIND_PUBLISHER,
-  /// OpenDDS specific Subscriber Guid values
-  KIND_SUBSCRIBER,
-  /// OpenDDS specific other Guid values
-  KIND_USER
+enum EntityKind {
+  KIND_UNKNOWN, ///< ENTITYKIND_USER_UNKNOWN and ENTITYKIND_BUILTIN_UNKNOWN
+  KIND_PARTICIPANT, ///< ENTITYKIND_BUILTIN_PARTICIPANT
+  KIND_USER_WRITER, ///< ENTITYKIND_USER_WRITER_WITH_KEY and ENTITYKIND_USER_WRITER_NO_KEY
+  KIND_USER_READER, ///< ENTITYKIND_USER_READER_WITH_KEY and ENTITYKIND_USER_READER_NO_KEY
+  KIND_USER_TOPIC, ///< ENTITYKIND_OPENDDS_TOPIC
+  KIND_BUILTIN_WRITER, ///< ENTITYKIND_BUILTIN_WRITER_WITH_KEY and ENTITYKIND_USER_WRITER_NO_KEY
+  KIND_BUILTIN_READER, ///< ENTITYKIND_BUILTIN_READER_WITH_KEY and ENTITYKIND_USER_READER_NO_KEY
+  KIND_BUILTIN_TOPIC, ///< ENTITYKIND_BUILTIN_TOPIC
+  KIND_PUBLISHER, ///< Publisher (OpenDDS-specific)
+  KIND_SUBSCRIBER, ///< Subscriber (OpenDDS-specific)
+  KIND_USER ///< For creating custom GUIDs for things that are not DDS entities (OpenDDS-specific)
 };
+
+inline bool operator<(const GUID_t& lhs, const GUID_t& rhs)
+{
+  return mem_cmp(lhs, rhs) < 0;
+}
 
 struct OpenDDS_Dcps_Export GUID_tKeyLessThan {
   static bool entity_less(const EntityId_t& v1, const EntityId_t& v2)
   {
-    return std::memcmp(&v1, &v2, sizeof(EntityId_t)) < 0;
+    return mem_cmp(v1, v2) < 0;
   }
 
   bool operator()(const GUID_t& v1, const GUID_t& v2) const
   {
-    return std::memcmp(&v1, &v2, sizeof(GUID_t)) < 0;
+    return v1 < v2;
   }
 };
 
 struct OpenDDS_Dcps_Export EntityId_tKeyLessThan {
   bool operator()(const EntityId_t& v1, const EntityId_t& v2) const
   {
-    return std::memcmp(&v1, &v2, sizeof(EntityId_t)) < 0;
+    return mem_cmp(v1, v2) < 0;
   }
 };
 
@@ -118,7 +105,7 @@ struct OpenDDS_Dcps_Export BuiltinTopicKey_tKeyLessThan {
   bool operator()(const DDS::BuiltinTopicKey_t& v1,
                   const DDS::BuiltinTopicKey_t& v2) const
   {
-    return std::memcmp(&v1, &v2, sizeof(DDS::BuiltinTopicKey_t)) < 0;
+    return mem_cmp(v1, v2) < 0;
   }
 };
 
@@ -131,7 +118,7 @@ const size_t guid_cdr_size = 16;
 inline bool
 operator==(const GUID_t& lhs, const GUID_t& rhs)
 {
-  return memcmp(&lhs, &rhs, sizeof(GUID_t)) == 0;
+  return mem_cmp(lhs, rhs) == 0;
 }
 
 inline bool
@@ -141,16 +128,10 @@ operator!=(const GUID_t& lhs, const GUID_t& rhs)
 }
 #endif
 
-inline bool
-operator<(const GUID_t& lhs, const GUID_t& rhs)
-{
-  return GUID_tKeyLessThan()(lhs, rhs);
-}
-
 OpenDDS_Dcps_Export inline
 bool equal_guid_prefixes(const GuidPrefix_t& lhs, const GuidPrefix_t& rhs)
 {
-  return std::memcmp(&lhs, &rhs, sizeof(GuidPrefix_t)) == 0;
+  return mem_cmp(lhs, rhs) == 0;
 }
 
 OpenDDS_Dcps_Export inline
@@ -163,7 +144,7 @@ bool equal_guid_prefixes(const GUID_t& lhs, const GUID_t& rhs)
 inline bool
 operator==(const EntityId_t& lhs, const EntityId_t& rhs)
 {
-  return memcmp(&lhs, &rhs, sizeof(EntityId_t)) == 0;
+  return mem_cmp(lhs, rhs) == 0;
 }
 
 inline bool
@@ -259,7 +240,7 @@ OpenDDS_Dcps_Export
 void intersect(const GuidSet& a, const GuidSet& b, GuidSet& result);
 
 OpenDDS_Dcps_Export inline
-DDS::BuiltinTopicKey_t repo_id_to_bit_key(const GUID_t& guid)
+DDS::BuiltinTopicKey_t guid_to_bit_key(const GUID_t& guid)
 {
   DDS::BuiltinTopicKey_t key;
   std::memcpy(key.value, &guid, sizeof(key.value));
@@ -267,12 +248,34 @@ DDS::BuiltinTopicKey_t repo_id_to_bit_key(const GUID_t& guid)
 }
 
 OpenDDS_Dcps_Export inline
-GUID_t bit_key_to_repo_id(const DDS::BuiltinTopicKey_t& key)
+GUID_t bit_key_to_guid(const DDS::BuiltinTopicKey_t& key)
 {
   GUID_t id;
   std::memcpy(&id, key.value, sizeof(id));
   return id;
 }
+
+struct OpenDDS_Dcps_Export GuidPair {
+  GUID_t local;
+  GUID_t remote;
+
+  GuidPair(const GUID_t& local, const GUID_t& remote)
+  : local(local)
+  , remote(remote)
+  {
+  }
+
+  int cmp(const GuidPair& other) const
+  {
+    const int local_cmp = mem_cmp(local, other.local);
+    return local_cmp == 0 ? mem_cmp(remote, other.remote) : local_cmp;
+  }
+
+  bool operator<(const GuidPair& other) const
+  {
+    return cmp(other) < 0;
+  }
+};
 
 } // namespace DCPS
 } // namespace OpenDDS

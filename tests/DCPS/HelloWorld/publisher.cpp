@@ -1,14 +1,15 @@
 // -*- C++ -*-
 #include "HelloWorldTypeSupportImpl.h"
-#include <dds/DCPS/Service_Participant.h>
-#include <dds/DCPS/Marked_Default_Qos.h>
-#include "dds/DCPS/StaticIncludes.h"
-#ifdef ACE_AS_STATIC_LIBS
-#include <dds/DCPS/RTPS/RtpsDiscovery.h>
-#include <dds/DCPS/transport/rtps_udp/RtpsUdp.h>
-#endif
 
 #include <tests/Utils/DistributedConditionSet.h>
+
+#include <dds/DCPS/Service_Participant.h>
+#include <dds/DCPS/Marked_Default_Qos.h>
+#include <dds/DCPS/StaticIncludes.h>
+#ifdef ACE_AS_STATIC_LIBS
+#  include <dds/DCPS/RTPS/RtpsDiscovery.h>
+#  include <dds/DCPS/transport/rtps_udp/RtpsUdp.h>
+#endif
 
 int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 {
@@ -28,7 +29,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
   HelloWorld::MessageTypeSupport_var type_support = new HelloWorld::MessageTypeSupportImpl();
   type_support->register_type(participant, "");
-  CORBA::String_var type_name = type_support->get_type_name ();
+  CORBA::String_var type_name = type_support->get_type_name();
 
   DDS::Topic_var topic = participant->create_topic(HelloWorld::MESSAGE_TOPIC_NAME,
                                                    type_name,

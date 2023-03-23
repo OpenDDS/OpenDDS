@@ -108,6 +108,8 @@ module Bench {
       string executable;
       // Command to invoke worker
       string command;
+      // Name of the originating configuration file
+      string config_name;
       // JSON Serialized Bench::WorkerConfig
       string config;
       // Number of workers to spawn using this config (Must be >=1)
@@ -135,6 +137,7 @@ module Bench {
 
     struct SpawnedProcessReport {
       SpawnedProcessId spawned_process_id;
+      long pid;
       boolean failed;
       // JSON Serialized Bench::WorkerReport
       string details;
@@ -184,11 +187,30 @@ module Bench {
     };
     typedef sequence<NodePrototype> NodePrototypes;
 
+    enum ParameterKind { PK_NUMBER, PK_STRING, PK_TIME };
+    union ParameterValue switch (ParameterKind) {
+      case PK_NUMBER:
+        double number_param;
+      case PK_STRING:
+        string string_param;
+      case PK_TIME:
+        Builder::TimeStamp time_param;
+    };
+
+    struct Parameter {
+      string name;
+      string desc;
+      ParameterValue value;
+    };
+    typedef sequence<Parameter> ParameterSeq;
+
     // This is the type of the scenario configuration
     struct ScenarioPrototype {
       // Unused Metadata
       string name;
       string desc;
+      // Scenario parameters (for comparison with other scenarios)
+      ParameterSeq scenario_parameters;
       // Workers that must be deployed in sets
       NodePrototypes nodes;
       // Workers that can be assigned to any node
@@ -212,12 +234,14 @@ module Bench {
     };
 
     typedef sequence<NodeController::SpawnedProcessId> SpawnedProcessIdSeq;
+    typedef sequence<long> LocalProcessIdSeq;
     struct NodeReport {
       string node_name;
       NodeController::NodeId node_id;
       WorkerReportSeq worker_reports;
       Builder::StringSeq spawned_process_logs;
       SpawnedProcessIdSeq spawned_process_ids;
+      LocalProcessIdSeq local_process_ids;
       Builder::PropertySeq properties;
     };
 
@@ -225,6 +249,8 @@ module Bench {
 
     struct Report {
       string scenario_name;
+      ParameterSeq run_parameters;
+      ParameterSeq scenario_parameters;
       Builder::TimeStamp time;
       NodeReportSeq node_reports;
       unsigned long missing_reports;

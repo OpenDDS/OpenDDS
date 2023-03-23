@@ -25,7 +25,7 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-InstanceState::InstanceState(DataReaderImpl* reader,
+InstanceState::InstanceState(const DataReaderImpl_rch& reader,
                              ACE_Recursive_Thread_Mutex& lock,
                              DDS::InstanceHandle_t handle)
   : ReactorInterceptor(TheServiceParticipant->reactor(),
@@ -38,7 +38,7 @@ InstanceState::InstanceState(DataReaderImpl* reader,
     empty_(true),
     release_pending_(false),
     release_timer_id_(-1),
-    reader_(*reader),
+    reader_(reader),
     handle_(handle),
     owner_(GUID_UNKNOWN),
 #ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
@@ -116,7 +116,7 @@ int InstanceState::handle_timeout(const ACE_Time_Value&, const void*)
   return 0;
 }
 
-bool InstanceState::dispose_was_received(const PublicationId& writer_id)
+bool InstanceState::dispose_was_received(const GUID_t& writer_id)
 {
   ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, lock_, false);
   writers_.erase(writer_id);
@@ -147,7 +147,7 @@ bool InstanceState::dispose_was_received(const PublicationId& writer_id)
   return false;
 }
 
-bool InstanceState::unregister_was_received(const PublicationId& writer_id)
+bool InstanceState::unregister_was_received(const GUID_t& writer_id)
 {
   if (DCPS_debug_level > 1) {
     ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) InstanceState::unregister_was_received on %C\n"),
@@ -263,13 +263,13 @@ void InstanceState::release()
   }
 }
 
-void InstanceState::set_owner(const PublicationId& owner)
+void InstanceState::set_owner(const GUID_t& owner)
 {
   ACE_Guard<ACE_Thread_Mutex> guard(owner_lock_);
   owner_ = owner;
 }
 
-PublicationId InstanceState::get_owner()
+GUID_t InstanceState::get_owner()
 {
   ACE_Guard<ACE_Thread_Mutex> guard(owner_lock_);
   return owner_;

@@ -10,6 +10,7 @@ project(*Subscriber): dcps_test, dcps_rtps_udp, msvc_bigobj, dcps_transports_for
   }
 
   TypeSupport_Files {
+    dcps_ts_flags += -Gxtypes-complete
     Common.idl
     Subscriber.idl
   }
@@ -26,14 +27,21 @@ project(*Publisher): dcps_test, dcps_rtps_udp, msvc_bigobj, dcps_transports_for_
 
   IDL_Files {
     Common.idl
-    Publisher.idl
+    PublisherNonMutableStructs.idl
+    PublisherMutableStructs.idl
+    PublisherUnions.idl
     CommonTypeSupport.idl
-    PublisherTypeSupport.idl
+    PublisherNonMutableStructsTypeSupport.idl
+    PublisherMutableStructsTypeSupport.idl
+    PublisherUnionsTypeSupport.idl
   }
 
   TypeSupport_Files {
+    dcps_ts_flags += -Gxtypes-complete
     Common.idl
-    Publisher.idl
+    PublisherNonMutableStructs.idl
+    PublisherMutableStructs.idl
+    PublisherUnions.idl
   }
 
   Source_Files {

@@ -1,4 +1,5 @@
 {
+  "create_time": { "sec": -1, "nsec": 0 },
   "enable_time": { "sec": -1, "nsec": 0 },
   "start_time": { "sec": -3, "nsec": 0 },
   "stop_time": { "sec": -30, "nsec": 0 },
@@ -8,39 +9,39 @@
     "config_sections": [
       { "name": "common",
         "properties": [
-          { "name": "DCPSSecurity",
-            "value": "1"
+          { "name": "DCPSDefaultDiscovery",
+            "value":"rtps_disc"
+          },
+          { "name": "DCPSGlobalTransportConfig",
+            "value":"$file"
+          },
+          { "name": "DCPSDebugLevel",
+            "value": "0"
+          },
+          { "name": "DCPSPendingTimeout",
+            "value": "3"
           }
         ]
       },
-      { "name": "transport/rtps_instance_02",
+      { "name": "rtps_discovery/rtps_disc",
         "properties": [
-          { "name": "use_multicast",
-            "value": "0"
-          },
+          { "name": "ResendPeriod",
+            "value": "2"
+          }
+        ]
+      },
+      { "name": "transport/rtps_transport",
+        "properties": [
           { "name": "transport_type",
             "value": "rtps_udp"
           }
         ]
       }
     ],
-    "discoveries": [
-      { "name": "bench_test_rtps",
-        "type": "rtps",
-        "domain": 0
-      }
-    ],
-    "instances": [
-      { "name": "rtps_instance_02",
-        "type": "rtps_udp",
-        "domain": 0
-      }
-    ],
     "participants": [
       { "name": "participant_02",
         "domain": 0,
         "listener_status_mask": 4294967295,
-        "transport_config_name": "rtps_instance_02",
 
         "qos": {
             "entity_factory": { "autoenable_created_entities": false },

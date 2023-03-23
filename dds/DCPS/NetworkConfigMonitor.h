@@ -80,6 +80,7 @@ public:
   typedef OPENDDS_LIST(NetworkInterfaceAddress) List;
 
   NetworkConfigMonitor();
+  virtual ~NetworkConfigMonitor();
 
   void connect(RcHandle<InternalTopic<NetworkInterfaceAddress> > topic);
   virtual bool open() = 0;

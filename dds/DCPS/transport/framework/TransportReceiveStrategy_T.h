@@ -13,6 +13,7 @@
 #include "TransportStrategy.h"
 #include "TransportDefs.h"
 #include "TransportHeader.h"
+#include "TransportInst_rch.h"
 
 #include "ace/INET_Addr.h"
 #include "ace/Lock_Adapter_T.h"
@@ -23,15 +24,13 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-class TransportInst;
-
 struct OpenDDS_Dcps_Export TransportReceiveConstants { // non-template base for constants only
   //
   // The total available space in the receive buffers must have enough to hold
   // a max sized message.  The max message is about 64K and the low water for
   // a buffer is 4096.  Therefore, 16 receive buffers is appropriate.
   //
-  static const size_t RECEIVE_BUFFERS = 16;
+  static const size_t RECEIVE_BUFFERS = DEFAULT_TRANSPORT_RECEIVE_BUFFERS;
   static const size_t BUFFER_LOW_WATER = 4096;
 
   //
@@ -74,8 +73,12 @@ public:
   const DSH& received_sample_header() const;
   DSH& received_sample_header();
 
+  /// Use the receive strategy's Message Block Allocator to convert
+  /// the ReceivedDataSample's payload to an ACE_Message_Block chain
+  ACE_Message_Block* to_msgblock(const ReceivedDataSample& sample);
+
 protected:
-  explicit TransportReceiveStrategy(const TransportInst& config,
+  explicit TransportReceiveStrategy(const TransportInst_rch& config,
                                     size_t receive_buffers_count = RECEIVE_BUFFERS);
 
   /// Only our subclass knows how to do this.
@@ -128,8 +131,6 @@ protected:
 
   /// Flag indicates if the GRACEFUL_DISCONNECT message is received.
   bool gracefully_disconnected_;
-
-protected:
 
   /// Manage an index into the receive buffer array.
   size_t successor_index(size_t index) const;

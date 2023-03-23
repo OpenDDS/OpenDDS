@@ -15,9 +15,14 @@ Welcome to the documentation for OpenDDS |release|!
         This copy of OpenDDS isn’t a release copy, so this documentation may not be finalized.
         It may be missing documentation on new features or the existing documentation may be incorrect.
 
-.. toctree::
-  :maxdepth: 2
+*****************
+Developer's Guide
+*****************
 
+.. toctree::
+  :maxdepth: 3
+
+  devguide/index
   Common Terms <devguide/common_terms>
 
 **********************
@@ -34,7 +39,7 @@ This documentation are for those who want to contribute to OpenDDS and those who
   Unit Testing Guidelines <internal/unit_tests>
   Github Actions <internal/github_actions>
   Running Tests <internal/running_tests>
-  Bench 2 <internal/bench2>
+  Bench <internal/bench>
 
 ******************
 Indices and tables

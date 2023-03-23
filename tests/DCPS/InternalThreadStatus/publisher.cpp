@@ -160,6 +160,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       std::cerr << "set_listener for " << OpenDDS::DCPS::BUILT_IN_INTERNAL_THREAD_TOPIC << " failed." << std::endl;
       return EXIT_FAILURE;
     }
+    // Don't invoke on_data_available as samples are forthcoming.
 
     // wait for subscriber
     ACE_DEBUG((LM_DEBUG, "(%P|%t) DataWriter is waiting for subscriber\n"));
@@ -232,6 +233,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
         << " failed." << std::endl;
       return EXIT_FAILURE;
     }
+    // Don't invoke on_data_available as samples are forthcoming.
 
     // Wait for valid thread status to come into the 2nd thread reader
     if (!wait_for_samples(thread_reader2, false)) {

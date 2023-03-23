@@ -12,7 +12,7 @@
 
 #include "TestException.h"
 
-SimpleDataReader::SimpleDataReader(const OpenDDS::DCPS::RepoId& sub_id)
+SimpleDataReader::SimpleDataReader(const OpenDDS::DCPS::GUID_t& sub_id)
   : sub_id_(sub_id)
   , num_messages_expected_(0)
   , num_messages_received_(0)
@@ -56,8 +56,9 @@ SimpleDataReader::data_received(const OpenDDS::DCPS::ReceivedDataSample& sample)
 
   ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
 
-  if (sample.sample_->length() < 25) {
-    ACE_DEBUG((LM_DEBUG, "(%P|%t) Message: [%C]\n", sample.sample_->rd_ptr()));
+  if (sample.data_length() < 25) {
+    OpenDDS::DCPS::Message_Block_Ptr payload(sample.data());
+    ACE_DEBUG((LM_DEBUG, "(%P|%t) Message: [%C]\n", payload->rd_ptr()));
   }
 
   if (0 == num_messages_received_) {
@@ -101,7 +102,7 @@ SimpleDataReader::print_time()
 }
 
 void
-SimpleDataReader::transport_assoc_done(int flags, const OpenDDS::DCPS::RepoId& remote)
+SimpleDataReader::transport_assoc_done(int flags, const OpenDDS::DCPS::GUID_t& remote)
 {
   ACE_DEBUG((LM_INFO,
              "(%P|%t) DataReader association with %C is done flags=%d.\n", OpenDDS::DCPS::LogGuid(remote).c_str(), flags));

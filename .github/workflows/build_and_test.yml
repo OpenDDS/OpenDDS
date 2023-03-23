@@ -62,6 +62,7 @@ concurrency:
 
 env:
   TRIGGERING_COMMIT: ${{ github.event.pull_request.head.sha || github.sha }}
+  VCPKG_INSTALLED_DIR: ${{ github.workspace }}\vcpkg\installed
 
 jobs:
 
@@ -92,12 +93,17 @@ jobs:
       run: |
         export COMPILER_VERSION=$(c++ --version 2>&1 | head -n 1)
         echo "COMPILER_VERSION=$COMPILER_VERSION" >> $GITHUB_ENV
+    - name: get jdk version
+      shell: bash
+      run: |
+        export JDK_VERSION=$(java -version 2>&1 | grep -i version)
+        echo "JDK_VERSION=$JDK_VERSION" >> $GITHUB_ENV
     - name: Cache Artifact
       id: cache-artifact
       uses: actions/cache@v3
       with:
         path: ${{ github.job }}.tar.xz
-        key: c01_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}
+        key: c01_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}_${{ env.JDK_VERSION }}
     - name: checkout MPC
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       uses: actions/checkout@v3
@@ -177,7 +183,7 @@ jobs:
         cd OpenDDS
         . setenv.sh
         tools/scripts/show_build_config.pl
-    - uses: ammaraskar/gcc-problem-matcher@0.1
+    - uses: ammaraskar/gcc-problem-matcher@0.2.0
     - name: build OpenDDS
       shell: bash
       run: |
@@ -347,7 +353,7 @@ jobs:
           --no-debug \
           --features=versioned_namespace=1 \
           --tests
-    - uses: ammaraskar/gcc-problem-matcher@0.1
+    - uses: ammaraskar/gcc-problem-matcher@0.2.0
     - name: make OpenDDS
       run: |
         cd OpenDDS
@@ -643,7 +649,7 @@ jobs:
       run: |
         cd OpenDDS
         tar xvfJ ACE_TAO_u22_esafe_js0.tar.xz
-    - uses: ammaraskar/gcc-problem-matcher@0.1
+    - uses: ammaraskar/gcc-problem-matcher@0.2.0
     - name: build OpenDDS_Util lib and opendds_idl in host
       shell: bash
       run: |
@@ -953,7 +959,7 @@ jobs:
       run: |
         cd OpenDDS
         tar xvfJ ACE_TAO_u22_bsafe_js0_FM-1f.tar.xz
-    - uses: ammaraskar/gcc-problem-matcher@0.1
+    - uses: ammaraskar/gcc-problem-matcher@0.2.0
     - name: build OpenDDS_Util lib and opendds_idl in host
       shell: bash
       run: |
@@ -1228,7 +1234,7 @@ jobs:
         cd OpenDDS
         . setenv.sh
         tools/scripts/show_build_config.pl
-    - uses: ammaraskar/gcc-problem-matcher@0.1
+    - uses: ammaraskar/gcc-problem-matcher@0.2.0
     - name: build OpenDDS
       shell: bash
       run: |
@@ -1508,7 +1514,7 @@ jobs:
         cd OpenDDS
         . setenv.sh
         tools/scripts/show_build_config.pl
-    - uses: ammaraskar/gcc-problem-matcher@0.1
+    - uses: ammaraskar/gcc-problem-matcher@0.2.0
     - name: build OpenDDS
       shell: bash
       run: |
@@ -1787,7 +1793,7 @@ jobs:
         cd OpenDDS
         . setenv.sh
         tools/scripts/show_build_config.pl
-    - uses: ammaraskar/gcc-problem-matcher@0.1
+    - uses: ammaraskar/gcc-problem-matcher@0.2.0
     - name: build OpenDDS
       shell: bash
       run: |
@@ -2066,7 +2072,7 @@ jobs:
         cd OpenDDS
         . setenv.sh
         tools/scripts/show_build_config.pl
-    - uses: ammaraskar/gcc-problem-matcher@0.1
+    - uses: ammaraskar/gcc-problem-matcher@0.2.0
     - name: build OpenDDS
       shell: bash
       run: |
@@ -2238,12 +2244,17 @@ jobs:
       run: |
         export COMPILER_VERSION=$(g++-8 --version 2>&1 | head -n 1)
         echo "COMPILER_VERSION=$COMPILER_VERSION" >> $GITHUB_ENV
+    - name: get jdk version
+      shell: bash
+      run: |
+        export JDK_VERSION=$(java -version 2>&1 | grep -i version)
+        echo "JDK_VERSION=$JDK_VERSION" >> $GITHUB_ENV
     - name: Cache Artifact
       id: cache-artifact
       uses: actions/cache@v3
       with:
         path: ${{ github.job }}.tar.xz
-        key: c01_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}
+        key: c01_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}_${{ env.JDK_VERSION }}
     - name: install xerces
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: sudo apt-get -y install libxerces-c-dev
@@ -2331,7 +2342,7 @@ jobs:
         cd OpenDDS
         . setenv.sh
         tools/scripts/show_build_config.pl
-    - uses: ammaraskar/gcc-problem-matcher@0.1
+    - uses: ammaraskar/gcc-problem-matcher@0.2.0
     - name: build OpenDDS
       shell: bash
       run: |
@@ -2591,7 +2602,7 @@ jobs:
         cd OpenDDS
         . setenv.sh
         tools/scripts/show_build_config.pl
-    - uses: ammaraskar/gcc-problem-matcher@0.1
+    - uses: ammaraskar/gcc-problem-matcher@0.2.0
     - name: build OpenDDS
       shell: bash
       run: |
@@ -2893,7 +2904,7 @@ jobs:
       run: |
         cd OpenDDS
         tar xvfJ ACE_TAO_u20_gcc10_bsafe_js0_FM-2c.tar.xz
-    - uses: ammaraskar/gcc-problem-matcher@0.1
+    - uses: ammaraskar/gcc-problem-matcher@0.2.0
     - name: build OpenDDS_Util lib and opendds_idl in host
       shell: bash
       run: |
@@ -2963,12 +2974,17 @@ jobs:
       run: |
         export COMPILER_VERSION=$(c++ --version 2>&1 | head -n 1)
         echo "COMPILER_VERSION=$COMPILER_VERSION" >> $GITHUB_ENV
+    - name: get jdk version
+      shell: bash
+      run: |
+        export JDK_VERSION=$(java -version 2>&1 | grep -i version)
+        echo "JDK_VERSION=$JDK_VERSION" >> $GITHUB_ENV
     - name: Cache Artifact
       id: cache-artifact
       uses: actions/cache@v3
       with:
         path: ${{ github.job }}.tar.xz
-        key: c01_${{ github.job }}_master_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}
+        key: c01_${{ github.job }}_master_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}_${{ env.JDK_VERSION }}
     - name: install xerces
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: sudo apt-get -y install libxerces-c-dev
@@ -3058,7 +3074,7 @@ jobs:
         cd OpenDDS
         . setenv.sh
         tools/scripts/show_build_config.pl
-    - uses: ammaraskar/gcc-problem-matcher@0.1
+    - uses: ammaraskar/gcc-problem-matcher@0.2.0
     - name: build OpenDDS
       shell: bash
       run: |
@@ -3254,7 +3270,7 @@ jobs:
       uses: actions/cache@v3
       with:
         path: ${{ github.job }}.tar.xz
-        key: c10_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}
+        key: c11_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}
     - name: install xerces
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: sudo apt-get -y install libxerces-c-dev
@@ -3359,7 +3375,7 @@ jobs:
         cd OpenDDS
         . setenv.sh
         tools/scripts/show_build_config.pl
-    - uses: ammaraskar/gcc-problem-matcher@0.1
+    - uses: ammaraskar/gcc-problem-matcher@0.2.0
     - name: build OpenDDS
       shell: bash
       run: |
@@ -3536,7 +3552,7 @@ jobs:
       uses: actions/cache@v3
       with:
         path: ${{ github.job }}.tar.xz
-        key: c10_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}
+        key: c11_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}
     - name: install xerces
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: sudo apt-get -y install libxerces-c-dev
@@ -3638,7 +3654,7 @@ jobs:
         cd OpenDDS
         . setenv.sh
         tools/scripts/show_build_config.pl
-    - uses: ammaraskar/gcc-problem-matcher@0.1
+    - uses: ammaraskar/gcc-problem-matcher@0.2.0
     - name: build OpenDDS
       shell: bash
       run: |
@@ -3808,7 +3824,7 @@ jobs:
       uses: actions/cache@v3
       with:
         path: ${{ github.job }}.tar.xz
-        key: c10_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}
+        key: c11_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}
     - name: install xerces
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: sudo apt-get -y install libxerces-c-dev
@@ -3915,7 +3931,7 @@ jobs:
         cd OpenDDS
         . setenv.sh
         tools/scripts/show_build_config.pl
-    - uses: ammaraskar/gcc-problem-matcher@0.1
+    - uses: ammaraskar/gcc-problem-matcher@0.2.0
     - name: build OpenDDS
       shell: bash
       run: |
@@ -4067,7 +4083,7 @@ jobs:
 
     steps:
     - name: download openssl artifact
-      uses: actions/download-artifact@v2
+      uses: actions/download-artifact@v3
       with:
         name: openssl3_u20_artifact
     - name: extract openssl artifact
@@ -4097,12 +4113,17 @@ jobs:
       run: |
         export COMPILER_VERSION=$(c++ --version 2>&1 | head -n 1)
         echo "COMPILER_VERSION=$COMPILER_VERSION" >> $GITHUB_ENV
+    - name: get jdk version
+      shell: bash
+      run: |
+        export JDK_VERSION=$(java -version 2>&1 | grep -i version)
+        echo "JDK_VERSION=$JDK_VERSION" >> $GITHUB_ENV
     - name: Cache Artifact
       id: cache-artifact
       uses: actions/cache@v3
       with:
         path: ${{ github.job }}.tar.xz
-        key: c06_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}
+        key: c06_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}_${{ env.JDK_VERSION }}
     - name: install xerces
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: sudo apt-get -y install libxerces-c-dev
@@ -4151,7 +4172,7 @@ jobs:
 
     steps:
     - name: download openssl artifact
-      uses: actions/download-artifact@v2
+      uses: actions/download-artifact@v3
       with:
         name: openssl3_u20_artifact
     - name: extract openssl artifact
@@ -4200,7 +4221,7 @@ jobs:
         cd OpenDDS
         . setenv.sh
         tools/scripts/show_build_config.pl
-    - uses: ammaraskar/gcc-problem-matcher@0.1
+    - uses: ammaraskar/gcc-problem-matcher@0.2.0
     - name: build OpenDDS
       shell: bash
       run: |
@@ -4237,7 +4258,7 @@ jobs:
 
     steps:
     - name: download openssl artifact
-      uses: actions/download-artifact@v2
+      uses: actions/download-artifact@v3
       with:
         name: openssl3_u20_artifact
     - name: extract openssl artifact
@@ -4361,7 +4382,7 @@ jobs:
 
     steps:
     - name: download openssl artifact
-      uses: actions/download-artifact@v2
+      uses: actions/download-artifact@v3
       with:
         name: openssl3_u20_artifact
     - name: extract openssl artifact
@@ -4513,7 +4534,7 @@ jobs:
         cd OpenDDS
         . setenv.sh
         tools/scripts/show_build_config.pl
-    - uses: ammaraskar/gcc-problem-matcher@0.1
+    - uses: ammaraskar/gcc-problem-matcher@0.2.0
     - name: build OpenDDS
       shell: bash
       run: |
@@ -4699,12 +4720,17 @@ jobs:
       run: |
         export COMPILER_VERSION=$(c++ --version 2>&1 | head -n 1)
         echo "COMPILER_VERSION=$COMPILER_VERSION" >> $GITHUB_ENV
+    - name: get jdk version
+      shell: bash
+      run: |
+        export JDK_VERSION=$(java -version 2>&1 | grep -i version)
+        echo "JDK_VERSION=$JDK_VERSION" >> $GITHUB_ENV
     - name: Cache Artifact
       id: cache-artifact
       uses: actions/cache@v3
       with:
         path: ${{ github.job }}.tar.xz
-        key: c01_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}
+        key: c01_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}_${{ env.JDK_VERSION }}
     - name: install xerces
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: sudo apt-get -y install libxerces-c-dev
@@ -4789,7 +4815,7 @@ jobs:
         cd OpenDDS
         . setenv.sh
         tools/scripts/show_build_config.pl
-    - uses: ammaraskar/gcc-problem-matcher@0.1
+    - uses: ammaraskar/gcc-problem-matcher@0.2.0
     - name: build OpenDDS
       shell: bash
       run: |
@@ -4978,7 +5004,7 @@ jobs:
         cd OpenDDS
         . setenv.sh
         tools/scripts/show_build_config.pl
-    - uses: ammaraskar/gcc-problem-matcher@0.1
+    - uses: ammaraskar/gcc-problem-matcher@0.2.0
     - name: build OpenDDS
       shell: bash
       run: |
@@ -5270,7 +5296,7 @@ jobs:
         cd OpenDDS
         . setenv.sh
         tools/scripts/show_build_config.pl
-    - uses: ammaraskar/gcc-problem-matcher@0.1
+    - uses: ammaraskar/gcc-problem-matcher@0.2.0
     - name: build OpenDDS
       shell: bash
       run: |
@@ -6018,12 +6044,17 @@ jobs:
       run: |
         export COMPILER_VERSION=$(c++ --version 2>&1 | head -n 1)
         echo "COMPILER_VERSION=$COMPILER_VERSION" >> $GITHUB_ENV
+    - name: get jdk version
+      shell: bash
+      run: |
+        export JDK_VERSION=$(java -version 2>&1 | grep -i version)
+        echo "JDK_VERSION=$JDK_VERSION" >> $GITHUB_ENV
     - name: Cache Artifact
       id: cache-artifact
       uses: actions/cache@v3
       with:
         path: ${{ github.job }}.tar.xz
-        key: c01_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}
+        key: c01_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}_${{ env.JDK_VERSION }}
     - name: install xerces
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: sudo apt-get -y install libxerces-c-dev
@@ -6108,7 +6139,7 @@ jobs:
         cd OpenDDS
         . setenv.sh
         tools/scripts/show_build_config.pl
-    - uses: ammaraskar/gcc-problem-matcher@0.1
+    - uses: ammaraskar/gcc-problem-matcher@0.2.0
     - name: build OpenDDS
       shell: bash
       run: |
@@ -6300,13 +6331,17 @@ jobs:
       with:
         path: ${{ github.job }}.tar.xz
         key: c01_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}
+    - name: setup for run-vcpkg
+      if: steps.cache-artifact.outputs.cache-hit != 'true'
+      shell: bash
+      run: |
+        echo '{ "name": "opendds", "version-string": "github-actions", "dependencies": [ "openssl", "xerces-c" ] }' > vcpkg.json
     - name: install openssl & xerces-c
       if: steps.cache-artifact.outputs.cache-hit != 'true'
-      uses: lukka/run-vcpkg@v7
+      uses: lukka/run-vcpkg@v10
       with:
-        vcpkgGitCommitId: b86c0c35b88e2bf3557ff49dc831689c2f085090
-        vcpkgArguments: --recurse openssl xerces-c
-        vcpkgTriplet: x64-windows
+        vcpkgGitCommitId: f14984af3738e69f197bf0e647a8dca12de92996
+        runVcpkgInstall: true
     - name: checkout MPC
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       uses: actions/checkout@v3
@@ -6321,7 +6356,7 @@ jobs:
       shell: cmd
       run: |
         cd OpenDDS
-        configure --ipv6 --static --no-rapidjson --ace=%GITHUB_WORKSPACE%/OpenDDS/ACE_TAO/ACE --tao=%GITHUB_WORKSPACE%/OpenDDS/ACE_TAO/TAO --mpc=%GITHUB_WORKSPACE%/MPC --xerces3=%VCPKG_ROOT%/installed/x64-windows --openssl=%VCPKG_ROOT%/installed/x64-windows --mpcopts=-hierarchy
+        configure --ipv6 --static --no-rapidjson --ace=${{ github.workspace }}/OpenDDS/ACE_TAO/ACE --tao=${{ github.workspace }}/OpenDDS/ACE_TAO/TAO --mpc=${{ github.workspace }}/MPC --xerces3=${{ env.VCPKG_INSTALLED_DIR }}/x64-windows --openssl=${{ env.VCPKG_INSTALLED_DIR }}/x64-windows --mpcopts=-hierarchy
     - name: build ACE & TAO
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       shell: cmd
@@ -6355,12 +6390,15 @@ jobs:
     needs: ACE_TAO_w19_p1_stat_js0
 
     steps:
+    - name: setup for run-vcpkg
+      shell: bash
+      run: |
+        echo '{ "name": "opendds", "version-string": "github-actions", "dependencies": [ "openssl", "xerces-c" ] }' > vcpkg.json
     - name: install openssl & xerces-c
-      uses: lukka/run-vcpkg@v7
+      uses: lukka/run-vcpkg@v10
       with:
-        vcpkgGitCommitId: b86c0c35b88e2bf3557ff49dc831689c2f085090
-        vcpkgArguments: --recurse openssl xerces-c
-        vcpkgTriplet: x64-windows
+        vcpkgGitCommitId: f14984af3738e69f197bf0e647a8dca12de92996
+        runVcpkgInstall: true
     - name: checkout MPC
       uses: actions/checkout@v3
       with:
@@ -6405,14 +6443,14 @@ jobs:
       shell: cmd
       run: |
         cd OpenDDS
-        configure --ipv6 --static --no-rapidjson --gtest=%GITHUB_WORKSPACE%/OpenDDS/tests/googletest/build/install --ace=%GITHUB_WORKSPACE%/OpenDDS/ACE_TAO/ACE --tao=%GITHUB_WORKSPACE%/OpenDDS/ACE_TAO/TAO --mpc=%GITHUB_WORKSPACE%/MPC --xerces3=%VCPKG_ROOT%/installed/x64-windows --openssl=%VCPKG_ROOT%/installed/x64-windows
+        configure --ipv6 --static --no-rapidjson --gtest=${{ github.workspace }}/OpenDDS/tests/googletest/build/install --ace=${{ github.workspace }}/OpenDDS/ACE_TAO/ACE --tao=${{ github.workspace }}/OpenDDS/ACE_TAO/TAO --mpc=${{ github.workspace }}/MPC --xerces3=${{ env.VCPKG_INSTALLED_DIR }}/x64-windows --openssl=${{ env.VCPKG_INSTALLED_DIR }}/x64-windows
     - name: check build configuration
       shell: cmd
       run: |
         cd OpenDDS
         call setenv.cmd
         perl tools\scripts\show_build_config.pl
-    - uses: ammaraskar/msvc-problem-matcher@0.1
+    - uses: ammaraskar/msvc-problem-matcher@0.2.0
     - name: build OpenDDS
       shell: cmd
       run: |
@@ -6441,12 +6479,15 @@ jobs:
     needs: build_w19_p1_stat_js0
 
     steps:
+    - name: setup for run-vcpkg
+      shell: bash
+      run: |
+        echo '{ "name": "opendds", "version-string": "github-actions", "dependencies": [ "openssl", "xerces-c" ] }' > vcpkg.json
     - name: install openssl & xerces-c
-      uses: lukka/run-vcpkg@v7
+      uses: lukka/run-vcpkg@v10
       with:
-        vcpkgGitCommitId: b86c0c35b88e2bf3557ff49dc831689c2f085090
-        vcpkgArguments: --recurse openssl xerces-c
-        vcpkgTriplet: x64-windows
+        vcpkgGitCommitId: f14984af3738e69f197bf0e647a8dca12de92996
+        runVcpkgInstall: true
     - name: checkout MPC
       uses: actions/checkout@v3
       with:
@@ -6491,8 +6532,8 @@ jobs:
         tar xvfJ build_w19_p1_stat_js0.tar.xz
         rm -f build_w19_p1_stat_js0.tar.xz
     - name: set up msvc env
-      uses: ilammy/msvc-dev-cmd@v1.9.0
-    - uses: ammaraskar/msvc-problem-matcher@0.1
+      uses: ilammy/msvc-dev-cmd@v1
+    - uses: ammaraskar/msvc-problem-matcher@0.2.0
     - name: Build CMake Tests
       shell: cmd
       run: |
@@ -6547,7 +6588,7 @@ jobs:
         cd OpenDDS
         call setenv.cmd
         cd ${{ github.job }}_autobuild_workspace
-        perl "%GITHUB_WORKSPACE%\autobuild\autobuild.pl" "%GITHUB_WORKSPACE%\OpenDDS\${{ github.job }}_autobuild_workspace\config.xml"
+        perl "${{ github.workspace }}\autobuild\autobuild.pl" "${{ github.workspace }}\OpenDDS\${{ github.job }}_autobuild_workspace\config.xml"
     - name: upload autobuild output
       uses: actions/upload-artifact@v3
       with:
@@ -6567,12 +6608,15 @@ jobs:
     needs: build_w19_p1_stat_js0
 
     steps:
+    - name: setup for run-vcpkg
+      shell: bash
+      run: |
+        echo '{ "name": "opendds", "version-string": "github-actions", "dependencies": [ "openssl", "xerces-c" ] }' > vcpkg.json
     - name: install openssl & xerces-c
-      uses: lukka/run-vcpkg@v7
+      uses: lukka/run-vcpkg@v10
       with:
-        vcpkgGitCommitId: b86c0c35b88e2bf3557ff49dc831689c2f085090
-        vcpkgArguments: --recurse openssl xerces-c
-        vcpkgTriplet: x64-windows
+        vcpkgGitCommitId: f14984af3738e69f197bf0e647a8dca12de92996
+        runVcpkgInstall: true
     - name: checkout MPC
       uses: actions/checkout@v3
       with:
@@ -6642,7 +6686,7 @@ jobs:
         call setenv.cmd
         cd tests\DCPS\Messenger
         perl %ACE_ROOT%\bin\mwc.pl -type vs2019 -static -features no_rapidjson=1 -features ipv6=1 -features ssl=1 -features no_cxx11=0
-    - uses: ammaraskar/msvc-problem-matcher@0.1
+    - uses: ammaraskar/msvc-problem-matcher@0.2.0
     - name: make messenger tests
       shell: cmd
       run: |
@@ -6702,7 +6746,7 @@ jobs:
         cd OpenDDS
         call setenv.cmd
         cd ${{ github.job }}_autobuild_workspace
-        perl "%GITHUB_WORKSPACE%\autobuild\autobuild.pl" "%GITHUB_WORKSPACE%\OpenDDS\${{ github.job }}_autobuild_workspace\config.xml"
+        perl "${{ github.workspace }}\autobuild\autobuild.pl" "${{ github.workspace }}\OpenDDS\${{ github.job }}_autobuild_workspace\config.xml"
     - name: upload autobuild output
       uses: actions/upload-artifact@v3
       with:
@@ -6802,7 +6846,7 @@ jobs:
         rm -rf xcdr
         rm -rf XTypesExtensibility
         perl %ACE_ROOT%\bin\mwc.pl -type vs2019 -static -features no_rapidjson=1 -features ipv6=1 -features no_cxx11=0
-    - uses: ammaraskar/msvc-problem-matcher@0.1
+    - uses: ammaraskar/msvc-problem-matcher@0.2.0
     - name: make compiler tests
       shell: cmd
       run: |
@@ -6849,7 +6893,7 @@ jobs:
         cd OpenDDS
         call setenv.cmd
         cd ${{ github.job }}_autobuild_workspace
-        perl "%GITHUB_WORKSPACE%\autobuild\autobuild.pl" "%GITHUB_WORKSPACE%\OpenDDS\${{ github.job }}_autobuild_workspace\config.xml"
+        perl "${{ github.workspace }}\autobuild\autobuild.pl" "${{ github.workspace }}\OpenDDS\${{ github.job }}_autobuild_workspace\config.xml"
     - name: upload autobuild output
       uses: actions/upload-artifact@v3
       with:
@@ -6951,7 +6995,7 @@ jobs:
         rm -rf isolated_types
         rm -rf is_topic_type
         perl %ACE_ROOT%\bin\mwc.pl -type vs2019 -static -features no_rapidjson=1 -features ipv6=1 -features no_cxx11=0
-    - uses: ammaraskar/msvc-problem-matcher@0.1
+    - uses: ammaraskar/msvc-problem-matcher@0.2.0
     - name: make compiler tests
       shell: cmd
       run: |
@@ -6998,7 +7042,7 @@ jobs:
         cd OpenDDS
         call setenv.cmd
         cd ${{ github.job }}_autobuild_workspace
-        perl "%GITHUB_WORKSPACE%\autobuild\autobuild.pl" "%GITHUB_WORKSPACE%\OpenDDS\${{ github.job }}_autobuild_workspace\config.xml"
+        perl "${{ github.workspace }}\autobuild\autobuild.pl" "${{ github.workspace }}\OpenDDS\${{ github.job }}_autobuild_workspace\config.xml"
     - name: upload autobuild output
       uses: actions/upload-artifact@v3
       with:
@@ -7018,12 +7062,15 @@ jobs:
     needs: build_w19_p1_stat_js0
 
     steps:
+    - name: setup for run-vcpkg
+      shell: bash
+      run: |
+        echo '{ "name": "opendds", "version-string": "github-actions", "dependencies": [ "openssl", "xerces-c" ] }' > vcpkg.json
     - name: install openssl & xerces-c
-      uses: lukka/run-vcpkg@v7
+      uses: lukka/run-vcpkg@v10
       with:
-        vcpkgGitCommitId: b86c0c35b88e2bf3557ff49dc831689c2f085090
-        vcpkgArguments: --recurse openssl xerces-c
-        vcpkgTriplet: x64-windows
+        vcpkgGitCommitId: f14984af3738e69f197bf0e647a8dca12de92996
+        runVcpkgInstall: true
     - name: checkout MPC
       uses: actions/checkout@v3
       with:
@@ -7093,7 +7140,7 @@ jobs:
         call setenv.cmd
         cd tests\unit-tests
         perl %ACE_ROOT%\bin\mwc.pl -type vs2019 -static -features no_rapidjson=1 -features ipv6=1 -features ssl=1 -features no_cxx11=0
-    - uses: ammaraskar/msvc-problem-matcher@0.1
+    - uses: ammaraskar/msvc-problem-matcher@0.2.0
     - name: make unit tests
       shell: cmd
       run: |
@@ -7139,7 +7186,7 @@ jobs:
         cd OpenDDS
         call setenv.cmd
         cd ${{ github.job }}_autobuild_workspace
-        perl "%GITHUB_WORKSPACE%\autobuild\autobuild.pl" "%GITHUB_WORKSPACE%\OpenDDS\${{ github.job }}_autobuild_workspace\config.xml"
+        perl "${{ github.workspace }}\autobuild\autobuild.pl" "${{ github.workspace }}\OpenDDS\${{ github.job }}_autobuild_workspace\config.xml"
     - name: upload autobuild output
       uses: actions/upload-artifact@v3
       with:
@@ -7185,13 +7232,17 @@ jobs:
       with:
         path: ${{ github.job }}.tar.xz
         key: c01_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}
+    - name: setup for run-vcpkg
+      if: steps.cache-artifact.outputs.cache-hit != 'true'
+      shell: bash
+      run: |
+        echo '{ "name": "opendds", "version-string": "github-actions", "dependencies": [ "openssl", "xerces-c" ] }' > vcpkg.json
     - name: install openssl & xerces-c
       if: steps.cache-artifact.outputs.cache-hit != 'true'
-      uses: lukka/run-vcpkg@v7
+      uses: lukka/run-vcpkg@v10
       with:
-        vcpkgGitCommitId: b86c0c35b88e2bf3557ff49dc831689c2f085090
-        vcpkgArguments: --recurse openssl xerces-c
-        vcpkgTriplet: x64-windows
+        vcpkgGitCommitId: f14984af3738e69f197bf0e647a8dca12de92996
+        runVcpkgInstall: true
     - name: checkout MPC
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       uses: actions/checkout@v3
@@ -7206,7 +7257,7 @@ jobs:
       shell: cmd
       run: |
         cd OpenDDS
-        configure --ipv6 --static --rapidjson --no-built-in-topics --no-content-subscription --no-ownership-profile --no-object-model-profile --no-persistence-profile --ace=%GITHUB_WORKSPACE%/OpenDDS/ACE_TAO/ACE --tao=%GITHUB_WORKSPACE%/OpenDDS/ACE_TAO/TAO --mpc=%GITHUB_WORKSPACE%/MPC --xerces3=%VCPKG_ROOT%/installed/x64-windows --openssl=%VCPKG_ROOT%/installed/x64-windows --mpcopts=-hierarchy
+        configure --ipv6 --static --rapidjson --no-built-in-topics --no-content-subscription --no-ownership-profile --no-object-model-profile --no-persistence-profile --ace=${{ github.workspace }}/OpenDDS/ACE_TAO/ACE --tao=${{ github.workspace }}/OpenDDS/ACE_TAO/TAO --mpc=${{ github.workspace }}/MPC --xerces3=${{ env.VCPKG_INSTALLED_DIR }}/x64-windows --openssl=${{ env.VCPKG_INSTALLED_DIR }}/x64-windows --mpcopts=-hierarchy
     - name: build ACE & TAO
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       shell: cmd
@@ -7240,12 +7291,15 @@ jobs:
     needs: ACE_TAO_w19_re_p1_stat_FM-08
 
     steps:
+    - name: setup for run-vcpkg
+      shell: bash
+      run: |
+        echo '{ "name": "opendds", "version-string": "github-actions", "dependencies": [ "openssl", "xerces-c" ] }' > vcpkg.json
     - name: install openssl & xerces-c
-      uses: lukka/run-vcpkg@v7
+      uses: lukka/run-vcpkg@v10
       with:
-        vcpkgGitCommitId: b86c0c35b88e2bf3557ff49dc831689c2f085090
-        vcpkgArguments: --recurse openssl xerces-c
-        vcpkgTriplet: x64-windows
+        vcpkgGitCommitId: f14984af3738e69f197bf0e647a8dca12de92996
+        runVcpkgInstall: true
     - name: checkout MPC
       uses: actions/checkout@v3
       with:
@@ -7290,14 +7344,14 @@ jobs:
       shell: cmd
       run: |
         cd OpenDDS
-        configure --ipv6 --static --rapidjson --gtest=%GITHUB_WORKSPACE%/OpenDDS/tests/googletest/build/install --no-built-in-topics --no-content-subscription --no-ownership-profile --no-object-model-profile --no-persistence-profile --ace=%GITHUB_WORKSPACE%/OpenDDS/ACE_TAO/ACE --tao=%GITHUB_WORKSPACE%/OpenDDS/ACE_TAO/TAO --mpc=%GITHUB_WORKSPACE%/MPC --xerces3=%VCPKG_ROOT%/installed/x64-windows --openssl=%VCPKG_ROOT%/installed/x64-windows
+        configure --ipv6 --static --rapidjson --gtest=${{ github.workspace }}/OpenDDS/tests/googletest/build/install --no-built-in-topics --no-content-subscription --no-ownership-profile --no-object-model-profile --no-persistence-profile --ace=${{ github.workspace }}/OpenDDS/ACE_TAO/ACE --tao=${{ github.workspace }}/OpenDDS/ACE_TAO/TAO --mpc=${{ github.workspace }}/MPC --xerces3=${{ env.VCPKG_INSTALLED_DIR }}/x64-windows --openssl=${{ env.VCPKG_INSTALLED_DIR }}/x64-windows
     - name: check build configuration
       shell: cmd
       run: |
         cd OpenDDS
         call setenv.cmd
         perl tools\scripts\show_build_config.pl
-    - uses: ammaraskar/msvc-problem-matcher@0.1
+    - uses: ammaraskar/msvc-problem-matcher@0.2.0
     - name: build OpenDDS
       shell: cmd
       run: |
@@ -7326,12 +7380,15 @@ jobs:
     needs: build_w19_re_p1_stat_FM-08
 
     steps:
+    - name: setup for run-vcpkg
+      shell: bash
+      run: |
+        echo '{ "name": "opendds", "version-string": "github-actions", "dependencies": [ "openssl", "xerces-c" ] }' > vcpkg.json
     - name: install openssl & xerces-c
-      uses: lukka/run-vcpkg@v7
+      uses: lukka/run-vcpkg@v10
       with:
-        vcpkgGitCommitId: b86c0c35b88e2bf3557ff49dc831689c2f085090
-        vcpkgArguments: --recurse openssl xerces-c
-        vcpkgTriplet: x64-windows
+        vcpkgGitCommitId: f14984af3738e69f197bf0e647a8dca12de92996
+        runVcpkgInstall: true
     - name: checkout MPC
       uses: actions/checkout@v3
       with:
@@ -7376,8 +7433,8 @@ jobs:
         tar xvfJ build_w19_re_p1_stat_FM-08.tar.xz
         rm -f build_w19_re_p1_stat_FM-08.tar.xz
     - name: set up msvc env
-      uses: ilammy/msvc-dev-cmd@v1.9.0
-    - uses: ammaraskar/msvc-problem-matcher@0.1
+      uses: ilammy/msvc-dev-cmd@v1
+    - uses: ammaraskar/msvc-problem-matcher@0.2.0
     - name: Build CMake Tests
       shell: cmd
       run: |
@@ -7432,7 +7489,7 @@ jobs:
         cd OpenDDS
         call setenv.cmd
         cd ${{ github.job }}_autobuild_workspace
-        perl "%GITHUB_WORKSPACE%\autobuild\autobuild.pl" "%GITHUB_WORKSPACE%\OpenDDS\${{ github.job }}_autobuild_workspace\config.xml"
+        perl "${{ github.workspace }}\autobuild\autobuild.pl" "${{ github.workspace }}\OpenDDS\${{ github.job }}_autobuild_workspace\config.xml"
     - name: upload autobuild output
       uses: actions/upload-artifact@v3
       with:
@@ -7452,12 +7509,15 @@ jobs:
     needs: build_w19_re_p1_stat_FM-08
 
     steps:
+    - name: setup for run-vcpkg
+      shell: bash
+      run: |
+        echo '{ "name": "opendds", "version-string": "github-actions", "dependencies": [ "openssl", "xerces-c" ] }' > vcpkg.json
     - name: install openssl & xerces-c
-      uses: lukka/run-vcpkg@v7
+      uses: lukka/run-vcpkg@v10
       with:
-        vcpkgGitCommitId: b86c0c35b88e2bf3557ff49dc831689c2f085090
-        vcpkgArguments: --recurse openssl xerces-c
-        vcpkgTriplet: x64-windows
+        vcpkgGitCommitId: f14984af3738e69f197bf0e647a8dca12de92996
+        runVcpkgInstall: true
     - name: checkout MPC
       uses: actions/checkout@v3
       with:
@@ -7527,7 +7587,7 @@ jobs:
         call setenv.cmd
         cd tests\DCPS\Messenger
         perl %ACE_ROOT%\bin\mwc.pl -type vs2019 -static -features ipv6=1 -features no_cxx11=0 -features xerces3=1 -features no_rapidjson=0 -features ssl=1 -features openssl11=1 -features built_in_topics=0 -features ownership_profile=0 -features content_subscription=0 -features object_model_profile=0 -features persistence_profile=0
-    - uses: ammaraskar/msvc-problem-matcher@0.1
+    - uses: ammaraskar/msvc-problem-matcher@0.2.0
     - name: make messenger tests
       shell: cmd
       run: |
@@ -7587,7 +7647,7 @@ jobs:
         cd OpenDDS
         call setenv.cmd
         cd ${{ github.job }}_autobuild_workspace
-        perl "%GITHUB_WORKSPACE%\autobuild\autobuild.pl" "%GITHUB_WORKSPACE%\OpenDDS\${{ github.job }}_autobuild_workspace\config.xml"
+        perl "${{ github.workspace }}\autobuild\autobuild.pl" "${{ github.workspace }}\OpenDDS\${{ github.job }}_autobuild_workspace\config.xml"
     - name: upload autobuild output
       uses: actions/upload-artifact@v3
       with:
@@ -7687,7 +7747,7 @@ jobs:
         rm -rf xcdr
         rm -rf XTypesExtensibility
         perl %ACE_ROOT%\bin\mwc.pl -type vs2019 -static -features ipv6=1 -features no_cxx11=0 -features no_rapidjson=0 -features openssl11=1 -features built_in_topics=0 -features ownership_profile=0 -features content_subscription=0 -features object_model_profile=0 -features persistence_profile=0
-    - uses: ammaraskar/msvc-problem-matcher@0.1
+    - uses: ammaraskar/msvc-problem-matcher@0.2.0
     - name: make compiler tests
       shell: cmd
       run: |
@@ -7733,7 +7793,7 @@ jobs:
         cd OpenDDS
         call setenv.cmd
         cd ${{ github.job }}_autobuild_workspace
-        perl "%GITHUB_WORKSPACE%\autobuild\autobuild.pl" "%GITHUB_WORKSPACE%\OpenDDS\${{ github.job }}_autobuild_workspace\config.xml"
+        perl "${{ github.workspace }}\autobuild\autobuild.pl" "${{ github.workspace }}\OpenDDS\${{ github.job }}_autobuild_workspace\config.xml"
     - name: upload autobuild output
       uses: actions/upload-artifact@v3
       with:
@@ -7835,7 +7895,7 @@ jobs:
         rm -rf isolated_types
         rm -rf is_topic_type
         perl %ACE_ROOT%\bin\mwc.pl -type vs2019 -static -features ipv6=1 -features no_cxx11=0 -features no_rapidjson=0 -features openssl11=1 -features built_in_topics=0 -features ownership_profile=0 -features content_subscription=0 -features object_model_profile=0 -features persistence_profile=0
-    - uses: ammaraskar/msvc-problem-matcher@0.1
+    - uses: ammaraskar/msvc-problem-matcher@0.2.0
     - name: make compiler tests
       shell: cmd
       run: |
@@ -7881,7 +7941,7 @@ jobs:
         cd OpenDDS
         call setenv.cmd
         cd ${{ github.job }}_autobuild_workspace
-        perl "%GITHUB_WORKSPACE%\autobuild\autobuild.pl" "%GITHUB_WORKSPACE%\OpenDDS\${{ github.job }}_autobuild_workspace\config.xml"
+        perl "${{ github.workspace }}\autobuild\autobuild.pl" "${{ github.workspace }}\OpenDDS\${{ github.job }}_autobuild_workspace\config.xml"
     - name: upload autobuild output
       uses: actions/upload-artifact@v3
       with:
@@ -7901,12 +7961,15 @@ jobs:
     needs: build_w19_re_p1_stat_FM-08
 
     steps:
+    - name: setup for run-vcpkg
+      shell: bash
+      run: |
+        echo '{ "name": "opendds", "version-string": "github-actions", "dependencies": [ "openssl", "xerces-c" ] }' > vcpkg.json
     - name: install openssl & xerces-c
-      uses: lukka/run-vcpkg@v7
+      uses: lukka/run-vcpkg@v10
       with:
-        vcpkgGitCommitId: b86c0c35b88e2bf3557ff49dc831689c2f085090
-        vcpkgArguments: --recurse openssl xerces-c
-        vcpkgTriplet: x64-windows
+        vcpkgGitCommitId: f14984af3738e69f197bf0e647a8dca12de92996
+        runVcpkgInstall: true
     - name: checkout MPC
       uses: actions/checkout@v3
       with:
@@ -7976,7 +8039,7 @@ jobs:
         call setenv.cmd
         cd tests\unit-tests
         perl %ACE_ROOT%\bin\mwc.pl -type vs2019 -static -features ipv6=1 -features no_cxx11=0 -features xerces3=1 -features no_rapidjson=0 -features ssl=1 -features openssl11=1 -features built_in_topics=0 -features ownership_profile=0 -features content_subscription=0 -features object_model_profile=0 -features persistence_profile=0
-    - uses: ammaraskar/msvc-problem-matcher@0.1
+    - uses: ammaraskar/msvc-problem-matcher@0.2.0
     - name: make unit tests
       shell: cmd
       run: |
@@ -8022,7 +8085,7 @@ jobs:
         cd OpenDDS
         call setenv.cmd
         cd ${{ github.job }}_autobuild_workspace
-        perl "%GITHUB_WORKSPACE%\autobuild\autobuild.pl" "%GITHUB_WORKSPACE%\OpenDDS\${{ github.job }}_autobuild_workspace\config.xml"
+        perl "${{ github.workspace }}\autobuild\autobuild.pl" "${{ github.workspace }}\OpenDDS\${{ github.job }}_autobuild_workspace\config.xml"
     - name: upload autobuild output
       uses: actions/upload-artifact@v3
       with:
@@ -8043,7 +8106,7 @@ jobs:
 
     steps:
     - name: download openssl artifact
-      uses: actions/download-artifact@v2
+      uses: actions/download-artifact@v3
       with:
         name: openssl3_w19_artifact
     - name: extract openssl artifact
@@ -8079,13 +8142,16 @@ jobs:
       with:
         path: ${{ github.job }}.tar.xz
         key: c02_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}
+    - name: setup for run-vcpkg
+      shell: bash
+      run: |
+        echo '{ "name": "opendds", "version-string": "github-actions", "dependencies": [ "xerces-c" ] }' > vcpkg.json
     - name: install xerces-c
       if: steps.cache-artifact.outputs.cache-hit != 'true'
-      uses: lukka/run-vcpkg@v7
+      uses: lukka/run-vcpkg@v10
       with:
-        vcpkgGitCommitId: b86c0c35b88e2bf3557ff49dc831689c2f085090
-        vcpkgArguments: --recurse xerces-c
-        vcpkgTriplet: x64-windows
+        vcpkgGitCommitId: f14984af3738e69f197bf0e647a8dca12de92996
+        runVcpkgInstall: true
     - name: checkout MPC
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       uses: actions/checkout@v3
@@ -8101,7 +8167,7 @@ jobs:
       run: |
         set SSL_DIR=%CD%/openssl3
         cd OpenDDS
-        call configure -v --optimize --ipv6 --security --ace=%GITHUB_WORKSPACE%/OpenDDS/ACE_TAO/ACE --tao=%GITHUB_WORKSPACE%/OpenDDS/ACE_TAO/TAO --mpc=%GITHUB_WORKSPACE%/MPC --xerces3=%VCPKG_ROOT%/installed/x64-windows --openssl=%SSL_DIR% --mpcopts=-hierarchy
+        call configure -v --optimize --ipv6 --security --ace=${{ github.workspace }}/OpenDDS/ACE_TAO/ACE --tao=${{ github.workspace }}/OpenDDS/ACE_TAO/TAO --mpc=${{ github.workspace }}/MPC --xerces3=${{ env.VCPKG_INSTALLED_DIR }}/x64-windows --openssl=%SSL_DIR% --mpcopts=-hierarchy
         echo "SSL_DIR=%SSL_DIR%" >> setenv.cmd
         perl tools\scripts\show_build_config.pl
     - name: build ACE & TAO
@@ -8138,7 +8204,7 @@ jobs:
 
     steps:
     - name: download openssl artifact
-      uses: actions/download-artifact@v2
+      uses: actions/download-artifact@v3
       with:
         name: openssl3_w19_artifact
     - name: extract openssl artifact
@@ -8146,12 +8212,15 @@ jobs:
       run: |
         tar xvJf openssl3_w19.tar.xz
         rm -f openssl3_w19.tar.xz
+    - name: setup for run-vcpkg
+      shell: bash
+      run: |
+        echo '{ "name": "opendds", "version-string": "github-actions", "dependencies": [ "xerces-c" ] }' > vcpkg.json
     - name: install xerces-c
-      uses: lukka/run-vcpkg@v7
+      uses: lukka/run-vcpkg@v10
       with:
-        vcpkgGitCommitId: b86c0c35b88e2bf3557ff49dc831689c2f085090
-        vcpkgArguments: --recurse xerces-c
-        vcpkgTriplet: x64-windows
+        vcpkgGitCommitId: f14984af3738e69f197bf0e647a8dca12de92996
+        runVcpkgInstall: true
     - name: checkout MPC
       uses: actions/checkout@v3
       with:
@@ -8197,7 +8266,7 @@ jobs:
       run: |
         set SSL_DIR=%CD%/openssl3
         cd OpenDDS
-        configure --optimize --ipv6 --rapidjson --security --gtest=%GITHUB_WORKSPACE%/OpenDDS/tests/googletest/build/install --ace=%GITHUB_WORKSPACE%/OpenDDS/ACE_TAO/ACE --tao=%GITHUB_WORKSPACE%/OpenDDS/ACE_TAO/TAO --mpc=%GITHUB_WORKSPACE%/MPC --xerces3=%VCPKG_ROOT%/installed/x64-windows --openssl=%SSL_DIR%
+        configure --optimize --ipv6 --rapidjson --security --gtest=${{ github.workspace }}/OpenDDS/tests/googletest/build/install --ace=${{ github.workspace }}/OpenDDS/ACE_TAO/ACE --tao=${{ github.workspace }}/OpenDDS/ACE_TAO/TAO --mpc=${{ github.workspace }}/MPC --xerces3=${{ env.VCPKG_INSTALLED_DIR }}/x64-windows --openssl=%SSL_DIR%
         echo "SSL_DIR=%SSL_DIR%" >> setenv.cmd
     - name: check build configuration
       shell: cmd
@@ -8205,7 +8274,7 @@ jobs:
         cd OpenDDS
         call setenv.cmd
         perl tools\scripts\show_build_config.pl
-    - uses: ammaraskar/msvc-problem-matcher@0.1
+    - uses: ammaraskar/msvc-problem-matcher@0.2.0
     - name: build OpenDDS
       shell: cmd
       run: |
@@ -8294,7 +8363,7 @@ jobs:
         tar xvfJ build_w19_re_o1p1_sec.tar.xz
         rm -f build_w19_re_o1p1_sec.tar.xz
     - name: set up msvc env
-      uses: ilammy/msvc-dev-cmd@v1.9.0
+      uses: ilammy/msvc-dev-cmd@v1
     - name: setup gtest
       shell: cmd
       run: |
@@ -8351,7 +8420,7 @@ jobs:
         cd OpenDDS
         call setenv.cmd
         cd ${{ github.job }}_autobuild_workspace
-        perl "%GITHUB_WORKSPACE%\autobuild\autobuild.pl" "%GITHUB_WORKSPACE%\OpenDDS\${{ github.job }}_autobuild_workspace\config.xml"
+        perl "${{ github.workspace }}\autobuild\autobuild.pl" "${{ github.workspace }}\OpenDDS\${{ github.job }}_autobuild_workspace\config.xml"
     - name: upload autobuild output
       uses: actions/upload-artifact@v3
       with:
@@ -8372,7 +8441,7 @@ jobs:
 
     steps:
     - name: download openssl artifact
-      uses: actions/download-artifact@v2
+      uses: actions/download-artifact@v3
       with:
         name: openssl3_w19_artifact
     - name: extract openssl artifact
@@ -8380,12 +8449,15 @@ jobs:
       run: |
         tar xvJf openssl3_w19.tar.xz
         rm -f openssl3_w19.tar.xz
+    - name: setup for run-vcpkg
+      shell: bash
+      run: |
+        echo '{ "name": "opendds", "version-string": "github-actions", "dependencies": [ "xerces-c" ] }' > vcpkg.json
     - name: install xerces-c
-      uses: lukka/run-vcpkg@v7
+      uses: lukka/run-vcpkg@v10
       with:
-        vcpkgGitCommitId: b86c0c35b88e2bf3557ff49dc831689c2f085090
-        vcpkgArguments: --recurse xerces-c
-        vcpkgTriplet: x64-windows
+        vcpkgGitCommitId: f14984af3738e69f197bf0e647a8dca12de92996
+        runVcpkgInstall: true
     - name: checkout MPC
       uses: actions/checkout@v3
       with:
@@ -8455,7 +8527,7 @@ jobs:
         call setenv.cmd
         cd tests\DCPS\Messenger
         perl %ACE_ROOT%\bin\mwc.pl -type vs2019 -features ipv6=1 -features no_cxx11=0 -features xerces3=1 -features no_rapidjson=0 -features ssl=1 -features openssl11=1 -features no_opendds_security=0
-    - uses: ammaraskar/msvc-problem-matcher@0.1
+    - uses: ammaraskar/msvc-problem-matcher@0.2.0
     - name: make messenger tests
       shell: cmd
       run: |
@@ -8515,7 +8587,7 @@ jobs:
         cd OpenDDS
         call setenv.cmd
         cd ${{ github.job }}_autobuild_workspace
-        perl "%GITHUB_WORKSPACE%\autobuild\autobuild.pl" "%GITHUB_WORKSPACE%\OpenDDS\${{ github.job }}_autobuild_workspace\config.xml"
+        perl "${{ github.workspace }}\autobuild\autobuild.pl" "${{ github.workspace }}\OpenDDS\${{ github.job }}_autobuild_workspace\config.xml"
     - name: upload autobuild output
       uses: actions/upload-artifact@v3
       with:
@@ -8535,12 +8607,15 @@ jobs:
     needs: build_w19_re_o1p1_sec
 
     steps:
+    - name: setup for run-vcpkg
+      shell: bash
+      run: |
+        echo '{ "name": "opendds", "version-string": "github-actions", "dependencies": [ "openssl", "xerces-c" ] }' > vcpkg.json
     - name: install openssl & xerces-c
-      uses: lukka/run-vcpkg@v7
+      uses: lukka/run-vcpkg@v10
       with:
-        vcpkgGitCommitId: b86c0c35b88e2bf3557ff49dc831689c2f085090
-        vcpkgArguments: --recurse openssl xerces-c
-        vcpkgTriplet: x64-windows
+        vcpkgGitCommitId: f14984af3738e69f197bf0e647a8dca12de92996
+        runVcpkgInstall: true
     - name: checkout MPC
       uses: actions/checkout@v3
       with:
@@ -8610,7 +8685,7 @@ jobs:
         call setenv.cmd
         cd tests\DCPS\Compiler
         perl %ACE_ROOT%\bin\mwc.pl -type vs2019 -features ipv6=1 -features no_cxx11=0 -features xerces3=1 -features no_rapidjson=0 -features ssl=1 -features openssl11=1 -features no_opendds_security=0
-    - uses: ammaraskar/msvc-problem-matcher@0.1
+    - uses: ammaraskar/msvc-problem-matcher@0.2.0
     - name: make compiler tests
       shell: cmd
       run: |
@@ -8656,7 +8731,7 @@ jobs:
         cd OpenDDS
         call setenv.cmd
         cd ${{ github.job }}_autobuild_workspace
-        perl "%GITHUB_WORKSPACE%\autobuild\autobuild.pl" "%GITHUB_WORKSPACE%\OpenDDS\${{ github.job }}_autobuild_workspace\config.xml"
+        perl "${{ github.workspace }}\autobuild\autobuild.pl" "${{ github.workspace }}\OpenDDS\${{ github.job }}_autobuild_workspace\config.xml"
     - name: upload autobuild output
       uses: actions/upload-artifact@v3
       with:
@@ -8677,7 +8752,7 @@ jobs:
 
     steps:
     - name: download openssl artifact
-      uses: actions/download-artifact@v2
+      uses: actions/download-artifact@v3
       with:
         name: openssl3_w19_artifact
     - name: extract openssl artifact
@@ -8685,12 +8760,15 @@ jobs:
       run: |
         tar xvJf openssl3_w19.tar.xz
         rm -f openssl3_w19.tar.xz
+    - name: setup for run-vcpkg
+      shell: bash
+      run: |
+        echo '{ "name": "opendds", "version-string": "github-actions", "dependencies": [ "xerces-c" ] }' > vcpkg.json
     - name: install xerces-c
-      uses: lukka/run-vcpkg@v7
+      uses: lukka/run-vcpkg@v10
       with:
-        vcpkgGitCommitId: b86c0c35b88e2bf3557ff49dc831689c2f085090
-        vcpkgArguments: --recurse xerces-c
-        vcpkgTriplet: x64-windows
+        vcpkgGitCommitId: f14984af3738e69f197bf0e647a8dca12de92996
+        runVcpkgInstall: true
     - name: checkout MPC
       uses: actions/checkout@v3
       with:
@@ -8760,7 +8838,7 @@ jobs:
         call setenv.cmd
         cd tests\unit-tests
         perl %ACE_ROOT%\bin\mwc.pl -type vs2019 -features ipv6=1 -features no_cxx11=0 -features xerces3=1 -features no_rapidjson=0 -features ssl=1 -features openssl11=1 -features no_opendds_security=0 -value_project macros+=GTEST_LINKED_AS_SHARED_LIBRARY
-    - uses: ammaraskar/msvc-problem-matcher@0.1
+    - uses: ammaraskar/msvc-problem-matcher@0.2.0
     - name: make unit tests
       shell: cmd
       run: |
@@ -8806,7 +8884,7 @@ jobs:
         cd OpenDDS
         call setenv.cmd
         cd ${{ github.job }}_autobuild_workspace
-        perl "%GITHUB_WORKSPACE%\autobuild\autobuild.pl" "%GITHUB_WORKSPACE%\OpenDDS\${{ github.job }}_autobuild_workspace\config.xml"
+        perl "${{ github.workspace }}\autobuild\autobuild.pl" "${{ github.workspace }}\OpenDDS\${{ github.job }}_autobuild_workspace\config.xml"
     - name: upload autobuild output
       uses: actions/upload-artifact@v3
       with:
@@ -8841,15 +8919,17 @@ jobs:
       with:
         path: ${{ github.job }}.tar.xz
         key: c01_${{ github.job }}_${{ env.WIRESHARK_COMMIT }}_${{ env.COMPILER_VERSION }}
+    - name: setup for run-vcpkg
+      shell: bash
+      run: |
+        echo '{ "name": "opendds", "version-string": "github-actions", "dependencies": [ "qt5-winextras", "qt5-tools", "qt5-svg", "qt5-multimedia", "qt5-declarative" ] }' > vcpkg.json
     - name: install vcpkg packages
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       id: runvcpkg
-      uses: lukka/run-vcpkg@v7
+      uses: lukka/run-vcpkg@v10
       with:
-        vcpkgDirectory: '${{ github.workspace }}/vcpkg-qt'
-        vcpkgGitCommitId: b86c0c35b88e2bf3557ff49dc831689c2f085090
-        vcpkgArguments: --recurse qt5-winextras qt5-tools qt5-svg qt5-multimedia qt5-declarative
-        vcpkgTriplet: x64-windows
+        vcpkgGitCommitId: 688ece714204fb5e9ad790ad9ad6d9f571d2b032
+        runVcpkgInstall: true
     - name: checkout WinFlexBison
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       uses: actions/checkout@v3
@@ -8921,19 +9001,28 @@ jobs:
       run: |
         export COMPILER_VERSION=$("C:\Program Files (x86)\Microsoft Visual Studio\Installer\vswhere.exe" -property catalog_productDisplayVersion)
         echo "COMPILER_VERSION=$COMPILER_VERSION" >> $GITHUB_ENV
+    - name: get jdk version
+      shell: bash
+      run: |
+        export JDK_VERSION=$(java -version 2>&1 | grep -i version)
+        echo "JDK_VERSION=$JDK_VERSION" >> $GITHUB_ENV
     - name: Cache Artifact
       id: cache-artifact
       uses: actions/cache@v3
       with:
         path: ${{ github.job }}.tar.xz
-        key: c01_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}
+        key: c01_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}_${{ env.JDK_VERSION }}
+    - name: setup for run-vcpkg
+      if: steps.cache-artifact.outputs.cache-hit != 'true'
+      shell: bash
+      run: |
+        echo '{ "name": "opendds", "version-string": "github-actions", "dependencies": [ "openssl", "xerces-c" ] }' > vcpkg.json
     - name: install openssl & xerces-c
       if: steps.cache-artifact.outputs.cache-hit != 'true'
-      uses: lukka/run-vcpkg@v7
+      uses: lukka/run-vcpkg@v10
       with:
-        vcpkgGitCommitId: b86c0c35b88e2bf3557ff49dc831689c2f085090
-        vcpkgArguments: --recurse openssl xerces-c
-        vcpkgTriplet: x64-windows
+        vcpkgGitCommitId: f14984af3738e69f197bf0e647a8dca12de92996
+        runVcpkgInstall: true
     - name: checkout MPC
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       uses: actions/checkout@v3
@@ -8948,7 +9037,7 @@ jobs:
       shell: cmd
       run: |
         cd OpenDDS
-        configure --optimize --java --no-built-in-topics --rapidjson --ace=%GITHUB_WORKSPACE%/OpenDDS/ACE_TAO/ACE --tao=%GITHUB_WORKSPACE%/OpenDDS/ACE_TAO/TAO --mpc=%GITHUB_WORKSPACE%/MPC --xerces3=%VCPKG_ROOT%/installed/x64-windows --openssl=%VCPKG_ROOT%/installed/x64-windows --mpcopts=-hierarchy
+        configure --optimize --java --no-built-in-topics --rapidjson --ace=${{ github.workspace }}/OpenDDS/ACE_TAO/ACE --tao=${{ github.workspace }}/OpenDDS/ACE_TAO/TAO --mpc=${{ github.workspace }}/MPC --xerces3=${{ env.VCPKG_INSTALLED_DIR }}/x64-windows --openssl=${{ env.VCPKG_INSTALLED_DIR }}/x64-windows --mpcopts=-hierarchy
     - name: build ACE & TAO
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       shell: cmd
@@ -8991,13 +9080,15 @@ jobs:
       run: |
         tar xvJf wireshark_w19-release.tar.xz
         rm -f wireshark_w19-release.tar.xz
+    - name: setup for run-vcpkg
+      shell: bash
+      run: |
+        echo '{ "name": "opendds", "version-string": "github-actions", "dependencies": [ "openssl", "xerces-c" ] }' > vcpkg.json
     - name: install openssl & xerces-c
-      if: steps.cache-artifact.outputs.cache-hit != 'true'
-      uses: lukka/run-vcpkg@v7
+      uses: lukka/run-vcpkg@v10
       with:
-        vcpkgGitCommitId: b86c0c35b88e2bf3557ff49dc831689c2f085090
-        vcpkgArguments: --recurse openssl xerces-c
-        vcpkgTriplet: x64-windows
+        vcpkgGitCommitId: f14984af3738e69f197bf0e647a8dca12de92996
+        runVcpkgInstall: true
     - name: checkout MPC
       uses: actions/checkout@v3
       with:
@@ -9042,14 +9133,14 @@ jobs:
       shell: cmd
       run: |
         cd OpenDDS
-        configure --optimize --java --no-built-in-topics --rapidjson --gtest=%GITHUB_WORKSPACE%/OpenDDS/tests/googletest/build/install --ace=%GITHUB_WORKSPACE%/OpenDDS/ACE_TAO/ACE --tao=%GITHUB_WORKSPACE%/OpenDDS/ACE_TAO/TAO --mpc=%GITHUB_WORKSPACE%/MPC --xerces3=%VCPKG_ROOT%/installed/x64-windows --wireshark-cmake=%GITHUB_WORKSPACE%\wireshark --wireshark-build=%GITHUB_WORKSPACE%\wsbuild --wireshark-lib=run --glib=%GITHUB_WORKSPACE%\wireshark-win64-libs-3.6\vcpkg-export-20210609-1-win64ws\installed\x64-windows --openssl=%VCPKG_ROOT%/installed/x64-windows --mpcopts=-hierarchy
+        configure --optimize --java --no-built-in-topics --rapidjson --gtest=${{ github.workspace }}/OpenDDS/tests/googletest/build/install --ace=${{ github.workspace }}/OpenDDS/ACE_TAO/ACE --tao=${{ github.workspace }}/OpenDDS/ACE_TAO/TAO --mpc=${{ github.workspace }}/MPC --xerces3=${{ env.VCPKG_INSTALLED_DIR }}/x64-windows --wireshark-cmake=${{ github.workspace }}\wireshark --wireshark-build=${{ github.workspace }}\wsbuild --wireshark-lib=run --glib=${{ github.workspace }}\wireshark-win64-libs-3.6\vcpkg-export-20210609-1-win64ws\installed\x64-windows --openssl=${{ env.VCPKG_INSTALLED_DIR }}/x64-windows --mpcopts=-hierarchy
     - name: check build configuration
       shell: cmd
       run: |
         cd OpenDDS
         call setenv.cmd
         perl tools\scripts\show_build_config.pl
-    - uses: ammaraskar/msvc-problem-matcher@0.1
+    - uses: ammaraskar/msvc-problem-matcher@0.2.0
     - name: build OpenDDS
       shell: cmd
       run: |
@@ -9131,7 +9222,7 @@ jobs:
         tar xvfJ build_w19_re_j_ws_FM-1f.tar.xz
         rm -f build_w19_re_j_ws_FM-1f.tar.xz
     - name: set up msvc env
-      uses: ilammy/msvc-dev-cmd@v1.9.0
+      uses: ilammy/msvc-dev-cmd@v1
     - name: check build configuration
       shell: cmd
       run: |
@@ -9177,7 +9268,7 @@ jobs:
         cd OpenDDS
         call setenv.cmd
         cd ${{ github.job }}_autobuild_workspace
-        perl "%GITHUB_WORKSPACE%\autobuild\autobuild.pl" "%GITHUB_WORKSPACE%\OpenDDS\${{ github.job }}_autobuild_workspace\config.xml"
+        perl "${{ github.workspace }}\autobuild\autobuild.pl" "${{ github.workspace }}\OpenDDS\${{ github.job }}_autobuild_workspace\config.xml"
     - name: upload autobuild output
       uses: actions/upload-artifact@v3
       with:
@@ -9197,12 +9288,15 @@ jobs:
     needs: build_w19_re_j_ws_FM-1f
 
     steps:
+    - name: setup for run-vcpkg
+      shell: bash
+      run: |
+        echo '{ "name": "opendds", "version-string": "github-actions", "dependencies": [ "xerces-c" ] }' > vcpkg.json
     - name: install xerces-c
-      uses: lukka/run-vcpkg@v7
+      uses: lukka/run-vcpkg@v10
       with:
-        vcpkgGitCommitId: b86c0c35b88e2bf3557ff49dc831689c2f085090
-        vcpkgArguments: --recurse xerces-c
-        vcpkgTriplet: x64-windows
+        vcpkgGitCommitId: f14984af3738e69f197bf0e647a8dca12de92996
+        runVcpkgInstall: true
     - name: checkout MPC
       uses: actions/checkout@v3
       with:
@@ -9272,7 +9366,7 @@ jobs:
         call setenv.cmd
         cd tests\DCPS\Messenger
         perl %ACE_ROOT%\bin\mwc.pl -type vs2019 -features no_cxx11=0 -features java=1 -features xerces3=1 -features no_rapidjson=0 -features ssl=1 -features openssl11=1 -features built_in_topics=0
-    - uses: ammaraskar/msvc-problem-matcher@0.1
+    - uses: ammaraskar/msvc-problem-matcher@0.2.0
     - name: make messenger tests
       shell: cmd
       run: |
@@ -9332,7 +9426,7 @@ jobs:
         cd OpenDDS
         call setenv.cmd
         cd ${{ github.job }}_autobuild_workspace
-        perl "%GITHUB_WORKSPACE%\autobuild\autobuild.pl" "%GITHUB_WORKSPACE%\OpenDDS\${{ github.job }}_autobuild_workspace\config.xml"
+        perl "${{ github.workspace }}\autobuild\autobuild.pl" "${{ github.workspace }}\OpenDDS\${{ github.job }}_autobuild_workspace\config.xml"
     - name: upload autobuild output
       uses: actions/upload-artifact@v3
       with:
@@ -9352,12 +9446,15 @@ jobs:
     needs: build_w19_re_j_ws_FM-1f
 
     steps:
+    - name: setup for run-vcpkg
+      shell: bash
+      run: |
+        echo '{ "name": "opendds", "version-string": "github-actions", "dependencies": [ "xerces-c" ] }' > vcpkg.json
     - name: install xerces-c
-      uses: lukka/run-vcpkg@v7
+      uses: lukka/run-vcpkg@v10
       with:
-        vcpkgGitCommitId: b86c0c35b88e2bf3557ff49dc831689c2f085090
-        vcpkgArguments: --recurse xerces-c
-        vcpkgTriplet: x64-windows
+        vcpkgGitCommitId: f14984af3738e69f197bf0e647a8dca12de92996
+        runVcpkgInstall: true
     - name: checkout MPC
       uses: actions/checkout@v3
       with:
@@ -9427,7 +9524,7 @@ jobs:
         call setenv.cmd
         cd tests\DCPS\Compiler
         perl %ACE_ROOT%\bin\mwc.pl -type vs2019 -features no_cxx11=0 -features java=1 -features xerces3=1 -features no_rapidjson=0 -features ssl=1 -features openssl11=1 -features built_in_topics=0
-    - uses: ammaraskar/msvc-problem-matcher@0.1
+    - uses: ammaraskar/msvc-problem-matcher@0.2.0
     - name: make compiler tests
       shell: cmd
       run: |
@@ -9473,7 +9570,7 @@ jobs:
         cd OpenDDS
         call setenv.cmd
         cd ${{ github.job }}_autobuild_workspace
-        perl "%GITHUB_WORKSPACE%\autobuild\autobuild.pl" "%GITHUB_WORKSPACE%\OpenDDS\${{ github.job }}_autobuild_workspace\config.xml"
+        perl "${{ github.workspace }}\autobuild\autobuild.pl" "${{ github.workspace }}\OpenDDS\${{ github.job }}_autobuild_workspace\config.xml"
     - name: upload autobuild output
       uses: actions/upload-artifact@v3
       with:
@@ -9493,12 +9590,15 @@ jobs:
     needs: build_w19_re_j_ws_FM-1f
 
     steps:
+    - name: setup for run-vcpkg
+      shell: bash
+      run: |
+        echo '{ "name": "opendds", "version-string": "github-actions", "dependencies": [ "xerces-c" ] }' > vcpkg.json
     - name: install xerces-c
-      uses: lukka/run-vcpkg@v7
+      uses: lukka/run-vcpkg@v10
       with:
-        vcpkgGitCommitId: b86c0c35b88e2bf3557ff49dc831689c2f085090
-        vcpkgArguments: --recurse xerces-c
-        vcpkgTriplet: x64-windows
+        vcpkgGitCommitId: f14984af3738e69f197bf0e647a8dca12de92996
+        runVcpkgInstall: true
     - name: checkout MPC
       uses: actions/checkout@v3
       with:
@@ -9575,7 +9675,7 @@ jobs:
         call setenv.cmd
         cd tests\unit-tests
         perl %ACE_ROOT%\bin\mwc.pl -type vs2019 -features no_cxx11=0 -features java=1 -features xerces3=1 -features no_rapidjson=0 -features ssl=1 -features openssl11=1 -features built_in_topics=0 -value_project macros+=GTEST_LINKED_AS_SHARED_LIBRARY
-    - uses: ammaraskar/msvc-problem-matcher@0.1
+    - uses: ammaraskar/msvc-problem-matcher@0.2.0
     - name: make unit tests
       shell: cmd
       run: |
@@ -9621,7 +9721,7 @@ jobs:
         cd OpenDDS
         call setenv.cmd
         cd ${{ github.job }}_autobuild_workspace
-        perl "%GITHUB_WORKSPACE%\autobuild\autobuild.pl" "%GITHUB_WORKSPACE%\OpenDDS\${{ github.job }}_autobuild_workspace\config.xml"
+        perl "${{ github.workspace }}\autobuild\autobuild.pl" "${{ github.workspace }}\OpenDDS\${{ github.job }}_autobuild_workspace\config.xml"
     - name: upload autobuild output
       uses: actions/upload-artifact@v3
       with:
@@ -9661,19 +9761,29 @@ jobs:
       run: |
         export COMPILER_VERSION=$("C:\Program Files (x86)\Microsoft Visual Studio\Installer\vswhere.exe" -property catalog_productDisplayVersion)
         echo "COMPILER_VERSION=$COMPILER_VERSION" >> $GITHUB_ENV
+    - name: get jdk version
+      shell: bash
+      run: |
+        export JDK_VERSION=$(java -version 2>&1 | grep -i version)
+        echo "JDK_VERSION=$JDK_VERSION" >> $GITHUB_ENV
     - name: Cache Artifact
       id: cache-artifact
       uses: actions/cache@v3
       with:
         path: ${{ github.job }}.tar.xz
-        key: c02_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}
+        key: c02_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}_${{ env.JDK_VERSION }}
+    - name: setup for run-vcpkg
+      if: steps.cache-artifact.outputs.cache-hit != 'true'
+      shell: bash
+      run: |
+        echo '{ "name": "opendds", "version-string": "github-actions", "dependencies": [ "openssl", "xerces-c" ] }' > vcpkg.json
+        echo "VCPKG_DEFAULT_TRIPLET=x86-windows" >> $GITHUB_ENV
     - name: install openssl & xerces-c
       if: steps.cache-artifact.outputs.cache-hit != 'true'
-      uses: lukka/run-vcpkg@v7
+      uses: lukka/run-vcpkg@v10
       with:
-        vcpkgGitCommitId: b86c0c35b88e2bf3557ff49dc831689c2f085090
-        vcpkgArguments: --recurse openssl xerces-c
-        vcpkgTriplet: x86-windows
+        vcpkgGitCommitId: f14984af3738e69f197bf0e647a8dca12de92996
+        runVcpkgInstall: true
     - name: checkout MPC
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       uses: actions/checkout@v3
@@ -9690,7 +9800,7 @@ jobs:
       shell: cmd
       run: |
         cd OpenDDS
-        call configure -v --no-inline --tests --security --ace=%GITHUB_WORKSPACE%/OpenDDS/ACE_TAO/ACE --tao=%GITHUB_WORKSPACE%/OpenDDS/ACE_TAO/TAO --mpc=%GITHUB_WORKSPACE%/MPC --xerces3=%VCPKG_ROOT%/installed/x86-windows --openssl=%VCPKG_ROOT%/installed/x86-windows --mpcopts=-hierarchy
+        call configure -v --no-inline --tests --security --ace=${{ github.workspace }}/OpenDDS/ACE_TAO/ACE --tao=${{ github.workspace }}/OpenDDS/ACE_TAO/TAO --mpc=${{ github.workspace }}/MPC --xerces3=${{ env.VCPKG_INSTALLED_DIR }}/x86-windows --openssl=${{ env.VCPKG_INSTALLED_DIR }}/x86-windows --mpcopts=-hierarchy
         perl tools\scripts\show_build_config.pl
     - name: build ACE & TAO
       if: steps.cache-artifact.outputs.cache-hit != 'true'
@@ -9725,12 +9835,16 @@ jobs:
     needs: ACE_TAO_w22_x86_i0
 
     steps:
+    - name: setup for run-vcpkg
+      shell: bash
+      run: |
+        echo '{ "name": "opendds", "version-string": "github-actions", "dependencies": [ "openssl", "xerces-c" ] }' > vcpkg.json
+        echo "VCPKG_DEFAULT_TRIPLET=x86-windows" >> $GITHUB_ENV
     - name: install openssl & xerces-c
-      uses: lukka/run-vcpkg@v7
+      uses: lukka/run-vcpkg@v10
       with:
-        vcpkgGitCommitId: b86c0c35b88e2bf3557ff49dc831689c2f085090
-        vcpkgArguments: --recurse openssl xerces-c
-        vcpkgTriplet: x86-windows
+        vcpkgGitCommitId: f14984af3738e69f197bf0e647a8dca12de92996
+        runVcpkgInstall: true
     - name: remove unused files
       shell: bash
       run: |
@@ -9775,14 +9889,14 @@ jobs:
       shell: cmd
       run: |
         cd /d C:\OpenDDS
-        configure --tests --rapidjson --security --ace=%GITHUB_WORKSPACE%\ACE_TAO\ACE --tao=%GITHUB_WORKSPACE%\ACE_TAO\TAO --mpc=%GITHUB_WORKSPACE%\MPC --xerces3=%VCPKG_ROOT%\installed\x86-windows --openssl=%VCPKG_ROOT%\installed\x86-windows
+        configure --tests --rapidjson --security --ace=${{ github.workspace }}\ACE_TAO\ACE --tao=${{ github.workspace }}\ACE_TAO\TAO --mpc=${{ github.workspace }}\MPC --xerces3=%VCPKG_ROOT%\installed\x86-windows --openssl=%VCPKG_ROOT%\installed\x86-windows
     - name: check build configuration
       shell: cmd
       run: |
         cd /d C:\OpenDDS
         call setenv.cmd
         perl tools\scripts\show_build_config.pl
-    - uses: ammaraskar/msvc-problem-matcher@0.1
+    - uses: ammaraskar/msvc-problem-matcher@0.2.0
     - name: build OpenDDS
       shell: cmd
       run: |
@@ -9811,12 +9925,16 @@ jobs:
     needs: build_w22_x86_i0_sec
 
     steps:
+    - name: setup for run-vcpkg
+      shell: bash
+      run: |
+        echo '{ "name": "opendds", "version-string": "github-actions", "dependencies": [ "openssl", "xerces-c" ] }' > vcpkg.json
+        echo "VCPKG_DEFAULT_TRIPLET=x86-windows" >> $GITHUB_ENV
     - name: install openssl & xerces-c
-      uses: lukka/run-vcpkg@v7
+      uses: lukka/run-vcpkg@v10
       with:
-        vcpkgGitCommitId: b86c0c35b88e2bf3557ff49dc831689c2f085090
-        vcpkgArguments: --recurse openssl xerces-c
-        vcpkgTriplet: x86-windows
+        vcpkgGitCommitId: f14984af3738e69f197bf0e647a8dca12de92996
+        runVcpkgInstall: true
     - name: checkout MPC
       uses: actions/checkout@v3
       with:
@@ -9865,8 +9983,8 @@ jobs:
       run: |
         mv OpenDDS /c/
     - name: set up msvc env
-      uses: ilammy/msvc-dev-cmd@v1.9.0
-    - uses: ammaraskar/msvc-problem-matcher@0.1
+      uses: ilammy/msvc-dev-cmd@v1
+    - uses: ammaraskar/msvc-problem-matcher@0.2.0
     - name: Build CMake Tests
       shell: cmd
       run: |
@@ -9919,7 +10037,7 @@ jobs:
         cd /d C:\OpenDDS
         call setenv.cmd
         cd ${{ github.job }}_autobuild_workspace
-        perl "%GITHUB_WORKSPACE%\autobuild\autobuild.pl" "C:\OpenDDS\${{ github.job }}_autobuild_workspace\config.xml"
+        perl "${{ github.workspace }}\autobuild\autobuild.pl" "C:\OpenDDS\${{ github.job }}_autobuild_workspace\config.xml"
     - name: upload autobuild output
       uses: actions/upload-artifact@v3
       with:
@@ -9939,12 +10057,16 @@ jobs:
     needs: build_w22_x86_i0_sec
 
     steps:
+    - name: setup for run-vcpkg
+      shell: bash
+      run: |
+        echo '{ "name": "opendds", "version-string": "github-actions", "dependencies": [ "openssl", "xerces-c" ] }' > vcpkg.json
+        echo "VCPKG_DEFAULT_TRIPLET=x86-windows" >> $GITHUB_ENV
     - name: install openssl & xerces-c
-      uses: lukka/run-vcpkg@v7
+      uses: lukka/run-vcpkg@v10
       with:
-        vcpkgGitCommitId: b86c0c35b88e2bf3557ff49dc831689c2f085090
-        vcpkgArguments: --recurse openssl xerces-c
-        vcpkgTriplet: x86-windows
+        vcpkgGitCommitId: f14984af3738e69f197bf0e647a8dca12de92996
+        runVcpkgInstall: true
     - name: checkout MPC
       uses: actions/checkout@v3
       with:
@@ -10048,7 +10170,7 @@ jobs:
         cd /d C:\OpenDDS
         call setenv.cmd
         cd ${{ github.job }}_autobuild_workspace
-        perl "%GITHUB_WORKSPACE%\autobuild\autobuild.pl" "C:\OpenDDS\${{ github.job }}_autobuild_workspace\config.xml"
+        perl "${{ github.workspace }}\autobuild\autobuild.pl" "C:\OpenDDS\${{ github.job }}_autobuild_workspace\config.xml"
     - name: upload autobuild output
       uses: actions/upload-artifact@v3
       with:
@@ -10068,12 +10190,16 @@ jobs:
     needs: ACE_TAO_w22_x86_i0
 
     steps:
+    - name: setup for run-vcpkg
+      shell: bash
+      run: |
+        echo '{ "name": "opendds", "version-string": "github-actions", "dependencies": [ "xerces-c" ] }' > vcpkg.json
+        echo "VCPKG_DEFAULT_TRIPLET=x86-windows" >> $GITHUB_ENV
     - name: install xerces-c
-      uses: lukka/run-vcpkg@v7
+      uses: lukka/run-vcpkg@v10
       with:
-        vcpkgGitCommitId: b86c0c35b88e2bf3557ff49dc831689c2f085090
-        vcpkgArguments: --recurse xerces-c
-        vcpkgTriplet: x86-windows
+        vcpkgGitCommitId: f14984af3738e69f197bf0e647a8dca12de92996
+        runVcpkgInstall: true
     - name: checkout MPC
       uses: actions/checkout@v3
       with:
@@ -10101,12 +10227,11 @@ jobs:
         cd OpenDDS/ACE_TAO
         tar xvfJ ACE_TAO_w22_x86_i0.tar.xz
         rm -f ACE_TAO_w22_x86_i0.tar.xz
-    - name: Move ACE and MPC to C Drive
+    - name: Move OpenDDS to C Drive
       shell: bash
       run: |
-        mv OpenDDS/ACE_TAO /c/
-        mv MPC /c/
-    - uses: ammaraskar/msvc-problem-matcher@0.1
+        mv OpenDDS /c/
+    - uses: ammaraskar/msvc-problem-matcher@0.2.0
     - name: set up msvc env
       uses: ilammy/msvc-dev-cmd@v1
       with:
@@ -10114,38 +10239,29 @@ jobs:
     - name: configure OpenDDS
       shell: cmd
       run: |
-        cd OpenDDS
-        configure --tests --java --no-built-in-topics --rapidjson --ace="C:\ACE_TAO\ACE" --tao="C:\ACE_TAO\TAO" --mpc="C:\MPC" --xerces3="%VCPKG_ROOT%\installed\x86-windows" --mpcopts="-features no_opendds_testing_features=0"
+        cd /d C:\OpenDDS
+        configure --tests --java --no-built-in-topics --rapidjson --mpc=${{ github.workspace }}\MPC --xerces3="%VCPKG_ROOT%\installed\x86-windows" --mpcopts="-features no_opendds_testing_features=0"
     - name: check build configuration
       shell: cmd
       run: |
-        cd OpenDDS
+        cd /d C:\OpenDDS
         call setenv.cmd
         perl tools\scripts\show_build_config.pl
     - name: build OpenDDS
       shell: cmd
       run: |
-        cd OpenDDS
+        cd /d C:\OpenDDS
         call setenv.cmd
         msbuild -p:Configuration=Debug,Platform=Win32 -m DDS.sln
-    - name: Build CMake Tests
-      shell: cmd
-      run: |
-        cd OpenDDS
-        call setenv.cmd
-        mkdir tests\cmake\build
-        cd tests\cmake\build
-        cmake -A Win32 ..
-        cmake --build .
     - name: create OpenDDS tar.xz artifact
       shell: bash
       run: |
-        cd OpenDDS
-        rm -rf ACE_TAO
+        cd /c/OpenDDS
         find . -iname "*\.obj" -o -iname "*\.pdb" -o -iname "*\.idb" -o -type f -iname "*\.tlog" | xargs rm
         tar cvf ../${{ github.job }}.tar setenv.cmd
         git clean -xdfn | cut -d ' ' -f 3- | xargs tar uvf ../${{ github.job }}.tar
         xz -3 ../${{ github.job }}.tar
+        mv ../${{ github.job }}.tar.xz $GITHUB_WORKSPACE
     - name: upload OpenDDS artifact
       uses: actions/upload-artifact@v3
       with:
@@ -10159,12 +10275,16 @@ jobs:
     needs: build_w22_x86_i0_j_FM-1f
 
     steps:
+    - name: setup for run-vcpkg
+      shell: bash
+      run: |
+        echo '{ "name": "opendds", "version-string": "github-actions", "dependencies": [ "openssl", "xerces-c" ] }' > vcpkg.json
+        echo "VCPKG_DEFAULT_TRIPLET=x86-windows" >> $GITHUB_ENV
     - name: install openssl & xerces-c
-      uses: lukka/run-vcpkg@v7
+      uses: lukka/run-vcpkg@v10
       with:
-        vcpkgGitCommitId: b86c0c35b88e2bf3557ff49dc831689c2f085090
-        vcpkgArguments: --recurse openssl xerces-c
-        vcpkgTriplet: x86-windows
+        vcpkgGitCommitId: f14984af3738e69f197bf0e647a8dca12de92996
+        runVcpkgInstall: true
     - name: checkout MPC
       uses: actions/checkout@v3
       with:
@@ -10197,11 +10317,6 @@ jobs:
         cd OpenDDS/ACE_TAO
         tar xvfJ ACE_TAO_w22_x86_i0.tar.xz
         rm -f ACE_TAO_w22_x86_i0.tar.xz
-    - name: Move ACE and MPC to C Drive
-      shell: bash
-      run: |
-        mv OpenDDS/ACE_TAO /c/
-        mv MPC /c/
     - name: download OpenDDS artifact
       uses: actions/download-artifact@v3
       with:
@@ -10213,18 +10328,32 @@ jobs:
         cd OpenDDS
         tar xvfJ build_w22_x86_i0_j_FM-1f.tar.xz
         rm -f build_w22_x86_i0_j_FM-1f.tar.xz
+    - name: Move OpenDDS to C Drive
+      shell: bash
+      run: |
+        mv OpenDDS /c/
     - name: set up msvc env
-      uses: ilammy/msvc-dev-cmd@v1.9.0
+      uses: ilammy/msvc-dev-cmd@v1
+    - uses: ammaraskar/msvc-problem-matcher@0.2.0
     - name: check build configuration
       shell: cmd
       run: |
-        cd OpenDDS
+        cd /d C:\OpenDDS
         call setenv.cmd
         perl tools\scripts\show_build_config.pl
+    - name: Build CMake Tests
+      shell: cmd
+      run: |
+        cd /d C:\OpenDDS
+        call setenv.cmd
+        mkdir C:\tests\cmake\build
+        cd /d C:\tests\cmake\build
+        cmake -A Win32 %DDS_ROOT%\tests\cmake
+        cmake --build .
     - name: create autobuild config
       shell: bash
       run: |
-        cd OpenDDS
+        cd /c/OpenDDS
         mkdir ${{ github.job }}_autobuild_workspace
         cd ${{ github.job }}_autobuild_workspace
         export FS_GHW=$(echo $GITHUB_WORKSPACE | sed 's/\\/\//g')
@@ -10248,7 +10377,7 @@ jobs:
         <command name="check_compiler" options="msvc"/>
         <command name="print_perl_version"/>
         <command name="print_autobuild_config"/>
-        <command name="auto_run_tests" options="script_path=tests dir=$FS_GHW/OpenDDS --no-dcps --cmake -Config OPENDDS_TESTING_FEATURES"/>
+        <command name="auto_run_tests" options="script_path=tests dir=$FS_GHW/OpenDDS --no-dcps --cmake --cmake-build-dir=c:/tests/cmake/build -Config OPENDDS_TESTING_FEATURES"/>
         <command name="log" options="off"/>
         <command name="process_logs" options="prettify"/>
         </autobuild>
@@ -10257,10 +10386,10 @@ jobs:
     - name: run OpenDDS tests
       shell: cmd
       run: |
-        cd OpenDDS
+        cd /d C:\OpenDDS
         call setenv.cmd
         cd ${{ github.job }}_autobuild_workspace
-        perl "%GITHUB_WORKSPACE%\autobuild\autobuild.pl" "%GITHUB_WORKSPACE%\OpenDDS\${{ github.job }}_autobuild_workspace\config.xml"
+        perl "${{ github.workspace }}\autobuild\autobuild.pl" "C:\OpenDDS\${{ github.job }}_autobuild_workspace\config.xml"
     - name: upload autobuild output
       uses: actions/upload-artifact@v3
       with:
@@ -10269,9 +10398,9 @@ jobs:
     - name: check results
       shell: bash
       run: |
-        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/output.log_Brief.html"
-        cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
-        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
+        /c/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "/c/OpenDDS/${{ github.job }}_autobuild_workspace/output.log_Brief.html"
+        cat "/c/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
+        grep -q 'Failures: 0' "/c/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
 
   ACE_TAO_w22_p1:
 
@@ -10306,13 +10435,17 @@ jobs:
       with:
         path: ${{ github.job }}.tar.xz
         key: c01_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}
+    - name: setup for run-vcpkg
+      if: steps.cache-artifact.outputs.cache-hit != 'true'
+      shell: bash
+      run: |
+        echo '{ "name": "opendds", "version-string": "github-actions", "dependencies": [ "openssl", "xerces-c" ] }' > vcpkg.json
     - name: install openssl & xerces-c
       if: steps.cache-artifact.outputs.cache-hit != 'true'
-      uses: lukka/run-vcpkg@v7
+      uses: lukka/run-vcpkg@v10
       with:
-        vcpkgGitCommitId: b86c0c35b88e2bf3557ff49dc831689c2f085090
-        vcpkgArguments: --recurse openssl xerces-c
-        vcpkgTriplet: x64-windows
+        vcpkgGitCommitId: f14984af3738e69f197bf0e647a8dca12de92996
+        runVcpkgInstall: true
     - name: checkout MPC
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       uses: actions/checkout@v3
@@ -10327,7 +10460,7 @@ jobs:
       shell: cmd
       run: |
         cd OpenDDS
-        configure --tests --ipv6 --rapidjson --ace=%GITHUB_WORKSPACE%/OpenDDS/ACE_TAO/ACE --tao=%GITHUB_WORKSPACE%/OpenDDS/ACE_TAO/TAO --mpc=%GITHUB_WORKSPACE%/MPC --xerces3=%VCPKG_ROOT%/installed/x64-windows --openssl=%VCPKG_ROOT%/installed/x64-windows --mpcopts=-hierarchy
+        configure --tests --ipv6 --rapidjson --ace=${{ github.workspace }}/OpenDDS/ACE_TAO/ACE --tao=${{ github.workspace }}/OpenDDS/ACE_TAO/TAO --mpc=${{ github.workspace }}/MPC --xerces3=${{ env.VCPKG_INSTALLED_DIR }}/x64-windows --openssl=${{ env.VCPKG_INSTALLED_DIR }}/x64-windows --mpcopts=-hierarchy
     - name: build ACE & TAO
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       shell: cmd
@@ -10361,12 +10494,15 @@ jobs:
     needs: ACE_TAO_w22_p1
 
     steps:
+    - name: setup for run-vcpkg
+      shell: bash
+      run: |
+        echo '{ "name": "opendds", "version-string": "github-actions", "dependencies": [ "openssl", "xerces-c" ] }' > vcpkg.json
     - name: install openssl & xerces-c
-      uses: lukka/run-vcpkg@v7
+      uses: lukka/run-vcpkg@v10
       with:
-        vcpkgGitCommitId: b86c0c35b88e2bf3557ff49dc831689c2f085090
-        vcpkgArguments: --recurse openssl xerces-c
-        vcpkgTriplet: x64-windows
+        vcpkgGitCommitId: f14984af3738e69f197bf0e647a8dca12de92996
+        runVcpkgInstall: true
     - name: checkout MPC
       uses: actions/checkout@v3
       with:
@@ -10411,14 +10547,14 @@ jobs:
       shell: cmd
       run: |
         cd OpenDDS
-        configure --ipv6 --rapidjson --gtest=%GITHUB_WORKSPACE%/OpenDDS/tests/googletest/build/install --ace=%GITHUB_WORKSPACE%/OpenDDS/ACE_TAO/ACE --tao=%GITHUB_WORKSPACE%/OpenDDS/ACE_TAO/TAO --mpc=%GITHUB_WORKSPACE%/MPC --xerces3=%VCPKG_ROOT%/installed/x64-windows --openssl=%VCPKG_ROOT%/installed/x64-windows
+        configure --ipv6 --rapidjson --gtest=${{ github.workspace }}/OpenDDS/tests/googletest/build/install --ace=${{ github.workspace }}/OpenDDS/ACE_TAO/ACE --tao=${{ github.workspace }}/OpenDDS/ACE_TAO/TAO --mpc=${{ github.workspace }}/MPC --xerces3=${{ env.VCPKG_INSTALLED_DIR }}/x64-windows --openssl=${{ env.VCPKG_INSTALLED_DIR }}/x64-windows
     - name: check build configuration
       shell: cmd
       run: |
         cd OpenDDS
         call setenv.cmd
         perl tools\scripts\show_build_config.pl
-    - uses: ammaraskar/msvc-problem-matcher@0.1
+    - uses: ammaraskar/msvc-problem-matcher@0.2.0
     - name: build OpenDDS
       shell: cmd
       run: |
@@ -10447,12 +10583,15 @@ jobs:
     needs: build_w22_p1
 
     steps:
+    - name: setup for run-vcpkg
+      shell: bash
+      run: |
+        echo '{ "name": "opendds", "version-string": "github-actions", "dependencies": [ "openssl", "xerces-c" ] }' > vcpkg.json
     - name: install openssl & xerces-c
-      uses: lukka/run-vcpkg@v7
+      uses: lukka/run-vcpkg@v10
       with:
-        vcpkgGitCommitId: b86c0c35b88e2bf3557ff49dc831689c2f085090
-        vcpkgArguments: --recurse openssl xerces-c
-        vcpkgTriplet: x64-windows
+        vcpkgGitCommitId: f14984af3738e69f197bf0e647a8dca12de92996
+        runVcpkgInstall: true
     - name: checkout MPC
       uses: actions/checkout@v3
       with:
@@ -10498,7 +10637,7 @@ jobs:
         rm -f build_w22_p1.tar.xz
     - name: set up msvc env
       uses: ilammy/msvc-dev-cmd@v1
-    - uses: ammaraskar/msvc-problem-matcher@0.1
+    - uses: ammaraskar/msvc-problem-matcher@0.2.0
     - name: Build CMake Tests
       shell: cmd
       run: |
@@ -10553,7 +10692,7 @@ jobs:
         cd OpenDDS
         call setenv.cmd
         cd ${{ github.job }}_autobuild_workspace
-        perl "%GITHUB_WORKSPACE%\autobuild\autobuild.pl" "%GITHUB_WORKSPACE%\OpenDDS\${{ github.job }}_autobuild_workspace\config.xml"
+        perl "${{ github.workspace }}\autobuild\autobuild.pl" "${{ github.workspace }}\OpenDDS\${{ github.job }}_autobuild_workspace\config.xml"
     - name: upload autobuild output
       uses: actions/upload-artifact@v3
       with:
@@ -10573,12 +10712,15 @@ jobs:
     needs: build_w22_p1
 
     steps:
+    - name: setup for run-vcpkg
+      shell: bash
+      run: |
+        echo '{ "name": "opendds", "version-string": "github-actions", "dependencies": [ "openssl", "xerces-c" ] }' > vcpkg.json
     - name: install openssl & xerces-c
-      uses: lukka/run-vcpkg@v7
+      uses: lukka/run-vcpkg@v10
       with:
-        vcpkgGitCommitId: b86c0c35b88e2bf3557ff49dc831689c2f085090
-        vcpkgArguments: --recurse openssl xerces-c
-        vcpkgTriplet: x64-windows
+        vcpkgGitCommitId: f14984af3738e69f197bf0e647a8dca12de92996
+        runVcpkgInstall: true
     - name: checkout MPC
       uses: actions/checkout@v3
       with:
@@ -10637,7 +10779,7 @@ jobs:
         call setenv.cmd
         cd tests\DCPS\Messenger
         perl %ACE_ROOT%\bin\mwc.pl -type vs2022 -features no_rapidjson=0 -features ipv6=1 -features ssl=1 -features no_cxx11=0
-    - uses: ammaraskar/msvc-problem-matcher@0.1
+    - uses: ammaraskar/msvc-problem-matcher@0.2.0
     - name: make messenger tests
       shell: cmd
       run: |
@@ -10697,7 +10839,7 @@ jobs:
         cd OpenDDS
         call setenv.cmd
         cd ${{ github.job }}_autobuild_workspace
-        perl "%GITHUB_WORKSPACE%\autobuild\autobuild.pl" "%GITHUB_WORKSPACE%\OpenDDS\${{ github.job }}_autobuild_workspace\config.xml"
+        perl "${{ github.workspace }}\autobuild\autobuild.pl" "${{ github.workspace }}\OpenDDS\${{ github.job }}_autobuild_workspace\config.xml"
     - name: upload autobuild output
       uses: actions/upload-artifact@v3
       with:
@@ -10717,12 +10859,15 @@ jobs:
     needs: build_w22_p1
 
     steps:
+    - name: setup for run-vcpkg
+      shell: bash
+      run: |
+        echo '{ "name": "opendds", "version-string": "github-actions", "dependencies": [ "openssl", "xerces-c" ] }' > vcpkg.json
     - name: install openssl & xerces-c
-      uses: lukka/run-vcpkg@v7
+      uses: lukka/run-vcpkg@v10
       with:
-        vcpkgGitCommitId: b86c0c35b88e2bf3557ff49dc831689c2f085090
-        vcpkgArguments: --recurse openssl xerces-c
-        vcpkgTriplet: x64-windows
+        vcpkgGitCommitId: f14984af3738e69f197bf0e647a8dca12de92996
+        runVcpkgInstall: true
     - name: checkout MPC
       uses: actions/checkout@v3
       with:
@@ -10792,7 +10937,7 @@ jobs:
         call setenv.cmd
         cd tests\DCPS\Compiler
         perl %ACE_ROOT%\bin\mwc.pl -type vs2022 -features ipv6=1 -features no_cxx11=0 -features no_rapidjson=0 -features ssl=1 -value_project macros+=GTEST_LINKED_AS_SHARED_LIBRARY
-    - uses: ammaraskar/msvc-problem-matcher@0.1
+    - uses: ammaraskar/msvc-problem-matcher@0.2.0
     - name: make compiler tests
       shell: cmd
       run: |
@@ -10838,7 +10983,7 @@ jobs:
         cd OpenDDS
         call setenv.cmd
         cd ${{ github.job }}_autobuild_workspace
-        perl "%GITHUB_WORKSPACE%\autobuild\autobuild.pl" "%GITHUB_WORKSPACE%\OpenDDS\${{ github.job }}_autobuild_workspace\config.xml"
+        perl "${{ github.workspace }}\autobuild\autobuild.pl" "${{ github.workspace }}\OpenDDS\${{ github.job }}_autobuild_workspace\config.xml"
     - name: upload autobuild output
       uses: actions/upload-artifact@v3
       with:
@@ -10858,12 +11003,15 @@ jobs:
     needs: build_w22_p1
 
     steps:
+    - name: setup for run-vcpkg
+      shell: bash
+      run: |
+        echo '{ "name": "opendds", "version-string": "github-actions", "dependencies": [ "openssl", "xerces-c" ] }' > vcpkg.json
     - name: install openssl & xerces-c
-      uses: lukka/run-vcpkg@v7
+      uses: lukka/run-vcpkg@v10
       with:
-        vcpkgGitCommitId: b86c0c35b88e2bf3557ff49dc831689c2f085090
-        vcpkgArguments: --recurse openssl xerces-c
-        vcpkgTriplet: x64-windows
+        vcpkgGitCommitId: f14984af3738e69f197bf0e647a8dca12de92996
+        runVcpkgInstall: true
     - name: checkout MPC
       uses: actions/checkout@v3
       with:
@@ -10933,7 +11081,7 @@ jobs:
         call setenv.cmd
         cd tests\unit-tests
         perl %ACE_ROOT%\bin\mwc.pl -type vs2022 -features ipv6=1 -features no_cxx11=0 -features no_rapidjson=0 -features ssl=1 -value_project macros+=GTEST_LINKED_AS_SHARED_LIBRARY
-    - uses: ammaraskar/msvc-problem-matcher@0.1
+    - uses: ammaraskar/msvc-problem-matcher@0.2.0
     - name: make unit tests
       shell: cmd
       run: |
@@ -10979,7 +11127,7 @@ jobs:
         cd OpenDDS
         call setenv.cmd
         cd ${{ github.job }}_autobuild_workspace
-        perl "%GITHUB_WORKSPACE%\autobuild\autobuild.pl" "%GITHUB_WORKSPACE%\OpenDDS\${{ github.job }}_autobuild_workspace\config.xml"
+        perl "${{ github.workspace }}\autobuild\autobuild.pl" "${{ github.workspace }}\OpenDDS\${{ github.job }}_autobuild_workspace\config.xml"
     - name: upload autobuild output
       uses: actions/upload-artifact@v3
       with:
@@ -11021,12 +11169,17 @@ jobs:
         cd OpenDDS/ACE_TAO
         export ACE_COMMIT=$(git rev-parse HEAD)
         echo "ACE_COMMIT=$ACE_COMMIT" >> $GITHUB_ENV
+    - name: get jdk version
+      shell: bash
+      run: |
+        export JDK_VERSION=$(java -version 2>&1 | grep -i version)
+        echo "JDK_VERSION=$JDK_VERSION" >> $GITHUB_ENV
     - name: Cache Artifact
       id: cache-artifact
       uses: actions/cache@v3
       with:
         path: ${{ github.job }}.tar.xz
-        key: c01_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}
+        key: c01_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}_${{ env.JDK_VERSION }}
     - name: install xerces-c
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: |
@@ -11041,7 +11194,8 @@ jobs:
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: |
         cd OpenDDS
-        ./configure --std=c++11 --tests --security --ace=$GITHUB_WORKSPACE/OpenDDS/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC --xerces3=/usr/local/Cellar/xerces-c/3.2.3 --openssl=/usr/local/opt/openssl@1.1
+        XERCESC_ROOT=$(find /usr/local/Cellar/xerces-c -iname "3\.*\.*" -type d | sort -r | head -n 1)
+        ./configure --std=c++11 --tests --security --ace=$GITHUB_WORKSPACE/OpenDDS/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC --xerces3=$XERCESC_ROOT --openssl=/usr/local/opt/openssl@1.1
     - name: build ACE and TAO
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: |
@@ -11106,14 +11260,15 @@ jobs:
     - name: configure OpenDDS
       run: |
         cd OpenDDS
-        ./configure --std=c++11 --tests --rapidjson --security --ace=$GITHUB_WORKSPACE/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC --xerces3=/usr/local/Cellar/xerces-c/3.2.3 --openssl=/usr/local/opt/openssl@1.1
+        XERCESC_ROOT=$(find /usr/local/Cellar/xerces-c -iname "3\.*\.*" -type d | sort -r | head -n 1)
+        ./configure --std=c++11 --tests --rapidjson --security --ace=$GITHUB_WORKSPACE/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC --xerces3=$XERCESC_ROOT --openssl=/usr/local/opt/openssl@1.1
     - name: check build configuration
       shell: bash
       run: |
         cd OpenDDS
         . setenv.sh
         tools/scripts/show_build_config.pl
-    - uses: ammaraskar/gcc-problem-matcher@0.1
+    - uses: ammaraskar/gcc-problem-matcher@0.2.0
     - name: build OpenDDS
       shell: bash
       run: |
@@ -11226,7 +11381,7 @@ jobs:
         <command name="check_compiler" options="gcc"/>
         <command name="print_perl_version"/>
         <command name="print_autobuild_config"/>
-        <command name="auto_run_tests" options="script_path=$ACE_ROOT/bin dir=$GITHUB_WORKSPACE/OpenDDS -l tests/core_ci_tests.lst -Config STATIC_MESSENGER -Config STATIC_COMPILER -Config STATIC_COMPILER2 -Config STATIC_UNIT_TESTS -Config XERCES3 -Config OPENDDS_SECURITY -Config CXX11 -Config RAPIDJSON -Config NO_SHMEM -Config DDS_NO_ORBSVCS"/>
+        <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS -Config STATIC_MESSENGER -Config STATIC_COMPILER -Config STATIC_COMPILER2 -Config STATIC_UNIT_TESTS -Config XERCES3 -Config OPENDDS_SECURITY -Config CXX11 -Config RAPIDJSON -Config NO_SHMEM -Config DDS_NO_ORBSVCS --no-dcps tests/core_ci_tests.lst"/>
         <command name="log" options="off"/>
         <command name="process_logs" options="prettify"/>
         </autobuild>
@@ -11392,7 +11547,7 @@ jobs:
         cd OpenDDS
         . setenv.sh
         tools/scripts/show_build_config.pl
-    - uses: ammaraskar/gcc-problem-matcher@0.1
+    - uses: ammaraskar/gcc-problem-matcher@0.2.0
     - name: build OpenDDS
       shell: bash
       run: |
@@ -11520,7 +11675,7 @@ jobs:
         <command name="check_compiler" options="gcc"/>
         <command name="print_perl_version"/>
         <command name="print_autobuild_config"/>
-        <command name="auto_run_tests" options="script_path=$ACE_ROOT/bin dir=$GITHUB_WORKSPACE/OpenDDS -l tests/core_ci_tests.lst -Config STATIC_MESSENGER -Config STATIC_COMPILER -Config STATIC_COMPILER2 -Config STATIC_UNIT_TESTS -Config CXX11 -Config RAPIDJSON -Config NO_SHMEM -Config DDS_NO_ORBSVCS -Config NO_BUILT_IN_TOPICS"/>
+        <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS -Config STATIC_MESSENGER -Config STATIC_COMPILER -Config STATIC_COMPILER2 -Config STATIC_UNIT_TESTS -Config CXX11 -Config RAPIDJSON -Config NO_SHMEM -Config DDS_NO_ORBSVCS -Config NO_BUILT_IN_TOPICS --no-dcps tests/core_ci_tests.lst"/>
         <command name="log" options="off"/>
         <command name="process_logs" options="prettify"/>
         </autobuild>
@@ -11642,7 +11797,7 @@ jobs:
 
   # macOS 12.5
 
-  ACE_TAO_m12_p1o1d0_sec:
+  ACE_TAO_m12_o1d0_sec:
 
     runs-on: macos-12
 
@@ -11674,7 +11829,7 @@ jobs:
       uses: actions/cache@v3
       with:
         path: ${{ github.job }}.tar.xz
-        key: c01_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}
+        key: c03_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}
     - name: install xerces-c
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: |
@@ -11689,7 +11844,8 @@ jobs:
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: |
         cd OpenDDS
-        ./configure --ipv6 --optimize --no-debug --std=c++11 --tests --security --ace=$GITHUB_WORKSPACE/OpenDDS/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC --xerces3=/usr/local/Cellar/xerces-c/3.2.3 --openssl=/usr/local/opt/openssl@1.1
+        XERCESC_ROOT=$(find /usr/local/Cellar/xerces-c -iname "3\.*\.*" -type d | sort -r | head -n 1)
+        ./configure --optimize --no-debug --std=c++11 --tests --security --ace=$GITHUB_WORKSPACE/OpenDDS/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC --xerces3=$XERCESC_ROOT --openssl=/usr/local/opt/openssl@1.1
     - name: build ACE and TAO
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: |
@@ -11715,11 +11871,11 @@ jobs:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
 
-  build_m12_p1o1d0_sec:
+  build_m12_o1d0_sec:
 
     runs-on: macos-12
 
-    needs: ACE_TAO_m12_p1o1d0_sec
+    needs: ACE_TAO_m12_o1d0_sec
 
     steps:
     - name: checkout OpenDDS
@@ -11744,25 +11900,26 @@ jobs:
     - name: download ACE_TAO artifact
       uses: actions/download-artifact@v3
       with:
-        name: ACE_TAO_m12_p1o1d0_sec_artifact
+        name: ACE_TAO_m12_o1d0_sec_artifact
         path: OpenDDS/ACE_TAO
     - name: extract ACE_TAO artifact
       shell: bash
       run: |
         cd OpenDDS/ACE_TAO
-        gtar xvfJ ACE_TAO_m12_p1o1d0_sec.tar.xz
+        gtar xvfJ ACE_TAO_m12_o1d0_sec.tar.xz
     - name: configure OpenDDS
       run: |
         cd OpenDDS
         clang++ --version
-        ./configure --ipv6 --optimize --no-debug --std=c++11 --tests --rapidjson --security --ace=$GITHUB_WORKSPACE/OpenDDS/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC --xerces3=/usr/local/Cellar/xerces-c/3.2.3 --openssl=/usr/local/opt/openssl@1.1
+        XERCESC_ROOT=$(find /usr/local/Cellar/xerces-c -iname "3\.*\.*" -type d | sort -r | head -n 1)
+        ./configure --optimize --no-debug --std=c++11 --tests --rapidjson --security --ace=$GITHUB_WORKSPACE/OpenDDS/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC --xerces3=$XERCESC_ROOT --openssl=/usr/local/opt/openssl@1.1
     - name: check build configuration
       shell: bash
       run: |
         cd OpenDDS
         . setenv.sh
         tools/scripts/show_build_config.pl
-    - uses: ammaraskar/gcc-problem-matcher@0.1
+    - uses: ammaraskar/gcc-problem-matcher@0.2.0
     - name: build OpenDDS
       shell: bash
       run: |
@@ -11792,11 +11949,11 @@ jobs:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
 
-  test_m12_p1o1d0_sec:
+  test_m12_o1d0_sec:
 
     runs-on: macos-12
 
-    needs: build_m12_p1o1d0_sec
+    needs: build_m12_o1d0_sec
 
     steps:
     - name: checkout OpenDDS
@@ -11826,23 +11983,23 @@ jobs:
     - name: download ACE_TAO artifact
       uses: actions/download-artifact@v3
       with:
-        name: ACE_TAO_m12_p1o1d0_sec_artifact
+        name: ACE_TAO_m12_o1d0_sec_artifact
         path: OpenDDS/ACE_TAO
     - name: extract ACE_TAO artifact
       shell: bash
       run: |
         cd OpenDDS/ACE_TAO
-        gtar xvfJ ACE_TAO_m12_p1o1d0_sec.tar.xz
+        gtar xvfJ ACE_TAO_m12_o1d0_sec.tar.xz
     - name: download OpenDDS artifact
       uses: actions/download-artifact@v3
       with:
-        name: build_m12_p1o1d0_sec_artifact
+        name: build_m12_o1d0_sec_artifact
         path: OpenDDS
     - name: extract OpenDDS artifact
       shell: bash
       run: |
         cd OpenDDS
-        gtar xvfJ build_m12_p1o1d0_sec.tar.xz
+        gtar xvfJ build_m12_o1d0_sec.tar.xz
     - name: check build configuration
       shell: bash
       run: |
@@ -11879,7 +12036,7 @@ jobs:
         <command name="check_compiler" options="gcc"/>
         <command name="print_perl_version"/>
         <command name="print_autobuild_config"/>
-        <command name="auto_run_tests" options="script_path=$ACE_ROOT/bin dir=$GITHUB_WORKSPACE/OpenDDS -l tests/core_ci_tests.lst -Config IPV6 -Config STATIC_MESSENGER -Config STATIC_COMPILER -Config STATIC_COMPILER2 -Config STATIC_UNIT_TESTS -Config XERCES3 -Config OPENDDS_SECURITY -Config CXX11 -Config RAPIDJSON -Config NO_SHMEM -Config DDS_NO_ORBSVCS -Config GH_ACTIONS_M12"/>
+        <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS -Config STATIC_MESSENGER -Config STATIC_COMPILER -Config STATIC_COMPILER2 -Config STATIC_UNIT_TESTS -Config XERCES3 -Config OPENDDS_SECURITY -Config CXX11 -Config RAPIDJSON -Config NO_SHMEM -Config DDS_NO_ORBSVCS -Config GH_ACTIONS_M12 --no-dcps tests/core_ci_tests.lst"/>
         <command name="log" options="off"/>
         <command name="process_logs" options="prettify"/>
         </autobuild>
@@ -11897,11 +12054,11 @@ jobs:
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
         grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
 
-  cmake_m12_p1o1d0_sec:
+  cmake_m12_o1d0_sec:
 
     runs-on: macos-12
 
-    needs: build_m12_p1o1d0_sec
+    needs: build_m12_o1d0_sec
 
     steps:
     - name: checkout OpenDDS
@@ -11931,23 +12088,23 @@ jobs:
     - name: download ACE_TAO artifact
       uses: actions/download-artifact@v3
       with:
-        name: ACE_TAO_m12_p1o1d0_sec_artifact
+        name: ACE_TAO_m12_o1d0_sec_artifact
         path: OpenDDS/ACE_TAO
     - name: extract ACE_TAO artifact
       shell: bash
       run: |
         cd OpenDDS/ACE_TAO
-        gtar xvfJ ACE_TAO_m12_p1o1d0_sec.tar.xz
+        gtar xvfJ ACE_TAO_m12_o1d0_sec.tar.xz
     - name: download OpenDDS artifact
       uses: actions/download-artifact@v3
       with:
-        name: build_m12_p1o1d0_sec_artifact
+        name: build_m12_o1d0_sec_artifact
         path: OpenDDS
     - name: extract OpenDDS artifact
       shell: bash
       run: |
         cd OpenDDS
-        gtar xvfJ build_m12_p1o1d0_sec.tar.xz
+        gtar xvfJ build_m12_o1d0_sec.tar.xz
     - name: check build configuration
       shell: bash
       run: |
@@ -12029,12 +12186,17 @@ jobs:
       run: |
         export COMPILER_VERSION=$(c++ --version 2>&1 | head -n 1)
         echo "COMPILER_VERSION=$COMPILER_VERSION" >> $GITHUB_ENV
+    - name: get jdk version
+      shell: bash
+      run: |
+        export JDK_VERSION=$(java -version 2>&1 | grep -i version)
+        echo "JDK_VERSION=$JDK_VERSION" >> $GITHUB_ENV
     - name: Cache Artifact
       id: cache-artifact
       uses: actions/cache@v3
       with:
         path: ${{ github.job }}.tar.xz
-        key: c01_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}
+        key: c01_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}_${{ env.JDK_VERSION }}
     - name: install xerces-c
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: |
@@ -12049,7 +12211,8 @@ jobs:
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: |
         cd OpenDDS
-        ./configure  --no-inline --std=c++11 --tests --security --ace=$GITHUB_WORKSPACE/OpenDDS/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC --xerces3=/usr/local/Cellar/xerces-c/3.2.3 --openssl=/usr/local/opt/openssl@1.1
+        XERCESC_ROOT=$(find /usr/local/Cellar/xerces-c -iname "3\.*\.*" -type d | sort -r | head -n 1)
+        ./configure  --no-inline --std=c++11 --tests --security --ace=$GITHUB_WORKSPACE/OpenDDS/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC --xerces3=$XERCESC_ROOT --openssl=/usr/local/opt/openssl@1.1
     - name: build ACE and TAO
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: |
@@ -12123,7 +12286,7 @@ jobs:
         cd OpenDDS
         . setenv.sh
         tools/scripts/show_build_config.pl
-    - uses: ammaraskar/gcc-problem-matcher@0.1
+    - uses: ammaraskar/gcc-problem-matcher@0.2.0
     - name: build OpenDDS
       shell: bash
       run: |
@@ -12255,7 +12418,7 @@ jobs:
         <command name="check_compiler" options="gcc"/>
         <command name="print_perl_version"/>
         <command name="print_autobuild_config"/>
-        <command name="auto_run_tests" options="script_path=$ACE_ROOT/bin dir=$GITHUB_WORKSPACE/OpenDDS -l tests/core_ci_tests.lst -Config STATIC_MESSENGER -Config STATIC_COMPILER -Config STATIC_COMPILER2 -Config STATIC_UNIT_TESTS -Config CXX11 -Config RAPIDJSON -Config NO_SHMEM -Config DDS_NO_ORBSVCS -Config NO_BUILT_IN_TOPICS -Config NO_UNIT_TESTS -Config GH_ACTIONS_M12"/>
+        <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS -Config STATIC_MESSENGER -Config STATIC_COMPILER -Config STATIC_COMPILER2 -Config STATIC_UNIT_TESTS -Config CXX11 -Config RAPIDJSON -Config NO_SHMEM -Config DDS_NO_ORBSVCS -Config NO_BUILT_IN_TOPICS -Config NO_UNIT_TESTS -Config GH_ACTIONS_M12 --no-dcps tests/core_ci_tests.lst"/>
         <command name="log" options="off"/>
         <command name="process_logs" options="prettify"/>
         </autobuild>
@@ -12388,7 +12551,7 @@ jobs:
       with:
         path: OpenDDS
         submodules: true
-    - uses: ammaraskar/gcc-problem-matcher@0.1
+    - uses: ammaraskar/gcc-problem-matcher@0.2.0
     - name: Build
       run: cd OpenDDS && docker build -f .github/workflows/build_u14_gcc4.Dockerfile .
 
@@ -12404,7 +12567,7 @@ jobs:
         echo "OPENSSL_COMMIT=$(git rev-parse HEAD)" >> $GITHUB_ENV
     - name: Cache Artifact
       id: cache-artifact
-      uses: actions/cache@v2
+      uses: actions/cache@v3
       with:
         path: ${{ github.job }}.tar.xz
         key: c02_${{ github.job }}_${{ env.OPENSSL_COMMIT }}

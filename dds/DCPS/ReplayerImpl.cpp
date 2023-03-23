@@ -192,7 +192,7 @@ DDS::ReturnCode_t ReplayerImpl::set_qos (const DDS::PublisherQos &  publisher_qo
       return DDS::RETCODE_OK;
 
     // for the not changeable qos, it can be changed before enable
-    if (!Qos_Helper::changeable(publisher_qos_, publisher_qos) && enabled_ == true) {
+    if (!Qos_Helper::changeable(publisher_qos_, publisher_qos) && enabled_) {
       return DDS::RETCODE_IMMUTABLE_POLICY;
 
     } else {
@@ -212,7 +212,7 @@ DDS::ReturnCode_t ReplayerImpl::set_qos (const DDS::PublisherQos &  publisher_qo
     if (qos_ == qos)
       return DDS::RETCODE_OK;
 
-    if (!Qos_Helper::changeable(qos_, qos) && enabled_ == true) {
+    if (!Qos_Helper::changeable(qos_, qos) && enabled_) {
       return DDS::RETCODE_IMMUTABLE_POLICY;
 
     } else {
@@ -307,7 +307,7 @@ ReplayerImpl::enable()
     return DDS::RETCODE_OK;
   }
 
-  // if (this->publisher_servant_->is_enabled() == false) {
+  // if (!this->publisher_servant_->is_enabled()) {
   //   return DDS::RETCODE_PRECONDITION_NOT_MET;
   // }
   //
@@ -398,7 +398,7 @@ ReplayerImpl::enable()
 
 
 void
-ReplayerImpl::add_association(const RepoId&            yourId,
+ReplayerImpl::add_association(const GUID_t&            yourId,
                               const ReaderAssociation& reader,
                               bool                     active)
 {
@@ -413,7 +413,7 @@ ReplayerImpl::add_association(const RepoId&            yourId,
                LogGuid(reader.readerId).c_str()));
   }
 
-  // if (entity_deleted_ == true) {
+  // if (entity_deleted_) {
   //   if (DCPS_debug_level >= 1)
   //     ACE_DEBUG((LM_DEBUG,
   //                ACE_TEXT("(%P|%t) ReplayerImpl::add_association")
@@ -488,7 +488,7 @@ ReplayerImpl::ReaderInfo::~ReaderInfo()
 }
 
 void
-ReplayerImpl::association_complete_i(const RepoId& remote_id)
+ReplayerImpl::association_complete_i(const GUID_t& remote_id)
 {
   DBG_ENTRY_LVL("ReplayerImpl", "association_complete_i", 6);
   // bool reader_durable = false;
@@ -718,9 +718,9 @@ void ReplayerImpl::remove_all_associations()
 }
 
 void
-ReplayerImpl::register_for_reader(const RepoId& participant,
-                                  const RepoId& writerid,
-                                  const RepoId& readerid,
+ReplayerImpl::register_for_reader(const GUID_t& participant,
+                                  const GUID_t& writerid,
+                                  const GUID_t& readerid,
                                   const TransportLocatorSeq& locators,
                                   DiscoveryListener* listener)
 {
@@ -728,9 +728,9 @@ ReplayerImpl::register_for_reader(const RepoId& participant,
 }
 
 void
-ReplayerImpl::unregister_for_reader(const RepoId& participant,
-                                    const RepoId& writerid,
-                                    const RepoId& readerid)
+ReplayerImpl::unregister_for_reader(const GUID_t& participant,
+                                    const GUID_t& writerid,
+                                    const GUID_t& readerid)
 {
   TransportClient::unregister_for_reader(participant, writerid, readerid);
 }
@@ -752,7 +752,7 @@ ReplayerImpl::update_incompatible_qos(const IncompatibleQosStatus& status)
 }
 
 void
-ReplayerImpl::update_subscription_params(const RepoId&         readerId,
+ReplayerImpl::update_subscription_params(const GUID_t&         readerId,
                                          const DDS::StringSeq& params)
 {
   ACE_UNUSED_ARG(readerId);
@@ -767,7 +767,7 @@ ReplayerImpl::check_transport_qos(const TransportInst&)
   return true;
 }
 
-RepoId ReplayerImpl::get_repo_id() const
+GUID_t ReplayerImpl::get_guid() const
 {
   return this->publication_id_;
 }
@@ -875,7 +875,7 @@ ReplayerImpl::write (const RawDataSample*   samples,
 {
   DBG_ENTRY_LVL("ReplayerImpl","write",6);
 
-  OpenDDS::DCPS::RepoId repo_id;
+  OpenDDS::DCPS::GUID_t repo_id;
   if (reader_ih_ptr) {
     repo_id = this->participant_servant_->get_repoid(*reader_ih_ptr);
     if (repo_id == GUID_UNKNOWN) {
@@ -1044,7 +1044,7 @@ ReplayerImpl::need_sequence_repair() const
 DDS::InstanceHandle_t
 ReplayerImpl::get_instance_handle()
 {
-  return get_entity_instance_handle(publication_id_, participant_servant_);
+  return get_entity_instance_handle(publication_id_, rchandle_from(participant_servant_));
 }
 
 DDS::ReturnCode_t

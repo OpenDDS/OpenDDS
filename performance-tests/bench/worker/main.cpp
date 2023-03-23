@@ -46,11 +46,13 @@
 #include <dds/DCPS/Service_Participant.h>
 #include <dds/DCPS/transport/framework/TransportRegistry.h>
 #ifdef ACE_AS_STATIC_LIBS
+#  include <dds/DCPS/InfoRepoDiscovery/InfoRepoDiscovery.h>
 #  include <dds/DCPS/RTPS/RtpsDiscovery.h>
 #  include <dds/DCPS/transport/rtps_udp/RtpsUdp.h>
 #  include <dds/DCPS/transport/udp/Udp.h>
 #  include <dds/DCPS/transport/tcp/Tcp.h>
 #  include <dds/DCPS/transport/multicast/Multicast.h>
+#  include <dds/DCPS/transport/shmem/Shmem.h>
 #  ifdef OPENDDS_SECURITY
 #    include <dds/DCPS/security/BuiltInPlugins.h>
 #  endif
@@ -103,26 +105,28 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
   Builder::NullStream null_stream_i;
   std::ostream null_stream(&null_stream_i);
 
-  std::string log_file_path;
-  std::string report_file_path;
-  std::string config_file_path;
+  std::string log_file_fullname;
+  std::string report_file_fullname;
+  std::string config_file_fullname;
+  std::string config_file_basename;
 
   try {
     for (int i = 1; i < argc; i++) {
       const ACE_TCHAR* argument = argv[i];
       if (!ACE_OS::strcmp(argv[i], ACE_TEXT("--log"))) {
-        log_file_path = get_option_argument(i, argc, argv);
+        log_file_fullname = get_option_argument(i, argc, argv);
       } else if (!ACE_OS::strcmp(argv[i], ACE_TEXT("--report"))) {
-        report_file_path = get_option_argument(i, argc, argv);
-      } else if (config_file_path.empty()) {
-        config_file_path = ACE_TEXT_ALWAYS_CHAR(argument);
+        report_file_fullname = get_option_argument(i, argc, argv);
+      } else if (config_file_fullname.empty()) {
+        config_file_fullname = ACE_TEXT_ALWAYS_CHAR(argument);
+        config_file_basename = ACE_TEXT_ALWAYS_CHAR(ACE::basename(argument));
       } else {
         std::cerr << "Invalid option: " << argument << std::endl;
         return 1;
       }
     }
 
-    if (config_file_path.empty()) {
+    if (config_file_fullname.empty()) {
       std::cerr << "Must pass a configuration file" << std::endl;
       throw 1;
     }
@@ -131,17 +135,17 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
     return value;
   }
 
-  std::ifstream config_file(config_file_path);
+  std::ifstream config_file(config_file_fullname);
   if (!config_file.is_open()) {
-    std::cerr << "Unable to open configuration file: '" << config_file_path << "'" << std::endl;
+    std::cerr << "Unable to open configuration file: '" << config_file_fullname << "'" << std::endl;
     return 2;
   }
 
   std::ofstream log_file;
-  if (!log_file_path.empty()) {
-    log_file.open(log_file_path, ios::app);
+  if (!log_file_fullname.empty()) {
+    log_file.open(log_file_fullname, ios::app);
     if (!log_file.good()) {
-      std::cerr << "Unable to open log file: '" << log_file_path << "'" << std::endl;
+      std::cerr << "Unable to open log file: '" << log_file_fullname << "'" << std::endl;
       return 2;
     }
     Log::stream = &log_file;
@@ -150,10 +154,10 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
   }
 
   std::ofstream report_file;
-  if (!report_file_path.empty()) {
-    report_file.open(report_file_path);
+  if (!report_file_fullname.empty()) {
+    report_file.open(report_file_fullname);
     if (!report_file.good()) {
-      std::cerr << "Unable to open report file: '" << report_file_path << "'" << std::endl;
+      std::cerr << "Unable to open report file: '" << report_file_fullname << "'" << std::endl;
       return 2;
     }
   }
@@ -166,12 +170,39 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
   config.enable_time = ZERO;
   config.start_time = ZERO;
   config.stop_time = ZERO;
+  config.destruction_time = ZERO;
   config.wait_for_discovery = false;
   config.wait_for_discovery_seconds = 0;
 
   if (!json_2_idl(config_file, config)) {
     std::cerr << "Unable to parse configuration" << std::endl;
     return 3;
+  }
+
+  config.process.name = config_file_basename.c_str();
+
+  if (config.create_time == ZERO) {
+    config.create_time = Builder::get_sys_time();
+  }
+
+  if (ZERO < config.create_time && config.enable_time < ZERO) {
+    const Builder::TimeStamp temp = { -config.enable_time.sec, config.enable_time.nsec };
+    config.enable_time = config.create_time + temp;
+  }
+
+  if (ZERO < config.enable_time && config.start_time < ZERO) {
+    const Builder::TimeStamp temp = { -config.start_time.sec, config.start_time.nsec };
+    config.start_time = config.enable_time + temp;
+  }
+
+  if (ZERO < config.start_time && config.stop_time < ZERO) {
+    const Builder::TimeStamp temp = { -config.stop_time.sec, config.stop_time.nsec };
+    config.stop_time = config.start_time + temp;
+  }
+
+  if (ZERO < config.stop_time && config.destruction_time < ZERO) {
+    const Builder::TimeStamp temp = { -config.destruction_time.sec, config.destruction_time.nsec };
+    config.destruction_time = config.stop_time + temp;
   }
 
   // Bad-actor test & debugging options for node & test controllers
@@ -277,8 +308,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
     redirect_ace_log = static_cast<size_t>(redirect_ace_log_prop->value.ull_prop());
   }
 
-  if (redirect_ace_log && !log_file_path.empty()) {
-    std::ofstream* output_stream = new std::ofstream(log_file_path.c_str(), ios::app);
+  if (redirect_ace_log && !log_file_fullname.empty()) {
+    std::ofstream* output_stream = new std::ofstream(log_file_fullname.c_str(), ios::app);
     if (output_stream->bad()) {
       delete output_stream;
     } else {
@@ -330,33 +361,35 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
 
     do_wait(config.create_time, "create", false);
 
-    Log::log() << "Beginning process construction / entity creation." << std::endl;
+    Log::log() << std::endl;
+
+    Log::log() << Bench::iso8601() << ": Beginning process construction / entity creation." << std::endl;
 
     process_construction_begin_time = Builder::get_hr_time();
     Builder::BuilderProcess process(config.process);
     process_construction_end_time = Builder::get_hr_time();
 
-    Log::log() << std::endl << "Process construction / entity creation complete." << std::endl << std::endl;
+    Log::log() << Bench::iso8601() << ": Process construction / entity creation complete." << std::endl << std::endl;
 
-    Log::log() << "Beginning action construction / initialization." << std::endl;
+    Log::log() << Bench::iso8601() << ": Beginning action construction / initialization." << std::endl;
 
     Bench::ActionManager am(config.actions, config.action_reports, process.get_reader_map(), process.get_writer_map(), process.get_cft_map());
 
-    Log::log() << "Action construction / initialization complete." << std::endl << std::endl;
+    Log::log() << Bench::iso8601() << ": Action construction / initialization complete." << std::endl << std::endl;
 
     do_wait(config.enable_time, "enable");
 
-    Log::log() << "Enabling DDS entities (if not already enabled)." << std::endl;
+    Log::log() << Bench::iso8601() << ": Enabling DDS entities (if not already enabled)." << std::endl;
 
     process_enable_begin_time = Builder::get_hr_time();
     process.enable_dds_entities(true);
     process_enable_end_time = Builder::get_hr_time();
 
-    Log::log() << "DDS entities enabled." << std::endl << std::endl;
+    Log::log() << Bench::iso8601() << ": DDS entities enabled." << std::endl << std::endl;
 
     if (config.wait_for_discovery) {
 
-      Log::log() << "Starting Discovery Check." << std::endl;
+      Log::log() << Bench::iso8601() << ": Starting Discovery Check." << std::endl;
 
       process_start_discovery_time = Builder::get_sys_time();
 
@@ -375,7 +408,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
             Bench::WorkerDataReaderListener* wdrl = dynamic_cast<Bench::WorkerDataReaderListener*>(dtRdrPtr->get_dds_datareaderlistener().in());
 
             if (!wdrl->wait_for_expected_match(timeout_time)) {
-              Log::log() << "Error: " << it->first << " Expected writers not found." << std::endl << std::endl;
+              Log::log() << Bench::iso8601() << ": Error: " << it->first << " Expected writers not found." << std::endl << std::endl;
             }
           }
         }
@@ -390,7 +423,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
             Bench::WorkerDataWriterListener* wdwl = dynamic_cast<Bench::WorkerDataWriterListener*>(dtWtrPtr->get_dds_datawriterlistener().in());
 
             if (!wdwl->wait_for_expected_match(timeout_time)) {
-              Log::log() << "Error: " << it->first << " Expected readers not found." << std::endl << std::endl;
+              Log::log() << Bench::iso8601() << ": Error: " << it->first << " Expected readers not found." << std::endl << std::endl;
             }
           }
         }
@@ -398,36 +431,36 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
 
       process_stop_discovery_time = Builder::get_sys_time();
 
-      Log::log() << "Discovery of expected entities took " << process_stop_discovery_time - process_start_discovery_time << " seconds." << std::endl << std::endl;
+      Log::log() << Bench::iso8601() << ": Discovery of expected entities took " << process_stop_discovery_time - process_start_discovery_time << " seconds." << std::endl << std::endl;
     }
 
-    Log::log() << "Initializing process actions." << std::endl;
+    Log::log() << Bench::iso8601() << ": Initializing process actions." << std::endl;
 
     am.action_start();
 
     do_wait(config.start_time, "start");
 
-    Log::log() << "Starting process actions." << std::endl;
+    Log::log() << Bench::iso8601() << ": Starting process actions." << std::endl;
 
     process_start_begin_time = Builder::get_hr_time();
     am.test_start();
     process_start_end_time = Builder::get_hr_time();
 
-    Log::log() << "Process tests started." << std::endl << std::endl;
+    Log::log() << Bench::iso8601() << ": Process tests started." << std::endl << std::endl;
 
     do_wait(config.stop_time, "stop");
 
-    Log::log() << "Stopping process tests." << std::endl;
+    Log::log() << Bench::iso8601() << ": Stopping process tests." << std::endl;
 
     process_stop_begin_time = Builder::get_hr_time();
     am.test_stop();
     process_stop_end_time = Builder::get_hr_time();
 
-    Log::log() << "Process tests stopped." << std::endl << std::endl;
+    Log::log() << Bench::iso8601() << ": Process tests stopped." << std::endl << std::endl;
 
     do_wait(config.destruction_time, "destruction");
 
-    Log::log() << "Stopping process actions." << std::endl;
+    Log::log() << Bench::iso8601() << ": Stopping process actions." << std::endl;
 
     am.action_stop();
 
@@ -437,13 +470,13 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
     }
     thread_pool.clear();
 
-    Log::log() << "Detaching Listeners." << std::endl;
+    Log::log() << Bench::iso8601() << ": Detaching Listeners." << std::endl;
 
     process.detach_listeners();
 
     process_report = process.get_report();
 
-    Log::log() << "Beginning process destruction / entity deletion." << std::endl;
+    Log::log() << Bench::iso8601() << ": Beginning process destruction / entity deletion." << std::endl;
 
     process_destruction_begin_time = Builder::get_hr_time();
   } catch (const std::exception& e) {
@@ -467,7 +500,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
   }
   process_destruction_end_time = Builder::get_hr_time();
 
-  Log::log() << "Process destruction / entity deletion complete." << std::endl << std::endl;
+  Log::log() << Bench::iso8601() << ": Process destruction / entity deletion complete." << std::endl << std::endl;
 
   // Some preliminary measurements and reporting (eventually will shift to another process?)
   worker_report.construction_time = process_construction_end_time - process_construction_begin_time;
@@ -517,7 +550,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
 
   // If requested, write out worker report to file
 
-  if (!report_file_path.empty()) {
+  if (!report_file_fullname.empty()) {
     idl_2_json(worker_report, report_file, max_decimal_places);
   }
 

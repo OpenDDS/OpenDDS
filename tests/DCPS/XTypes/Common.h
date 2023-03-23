@@ -1,6 +1,8 @@
 #ifndef COMMON_H
 #define COMMON_H
 
+#include "CommonTypeSupportImpl.h"
+
 #include <dds/DCPS/Marked_Default_Qos.h>
 #include <dds/DCPS/Service_Participant.h>
 #include <dds/DCPS/WaitSet.h>
@@ -16,6 +18,10 @@
 #    include <dds/DCPS/security/BuiltInPlugins.h>
 #  endif
 #endif
+#include <dds/DCPS/XTypes/DynamicTypeSupport.h>
+#include <dds/DCPS/XTypes/Utils.h>
+
+#include <string>
 
 using namespace DDS;
 using OpenDDS::DCPS::DEFAULT_STATUS_MASK;
@@ -37,12 +43,37 @@ const std::string STRING_26 = "abcdefghijklmnopqrstuvwxyz";
 const std::string STRING_20 = "abcdefghijklmnopqrst";
 
 template<typename T>
-bool get_topic(T ts, const DomainParticipant_var dp, const std::string& topic_name,
-  Topic_var& topic, const std::string& registered_type_name)
+void get_topic(bool& success, TypeSupport_var& ts, const DomainParticipant_var dp, const std::string& topic_name,
+  Topic_var& topic, const std::string& registered_type_name, bool dynamic = false)
 {
-  if (ts->register_type(dp, registered_type_name.empty() ? "" : registered_type_name.c_str()) != RETCODE_OK) {
+  TypeSupport_var native_ts = new typename OpenDDS::DCPS::DDSTraits<T>::TypeSupportImplType;
+  if (dynamic) {
+#ifdef OPENDDS_SAFETY_PROFILE
+    ACE_ERROR((LM_ERROR, "ERROR: Can't create dynamic type support on safety profile\n"));
+    success = false;
+    return;
+#else
+    if (native_ts->register_type(dp, "native type") != RETCODE_OK) {
+      ACE_ERROR((LM_ERROR, "ERROR: native register_type failed\n"));
+      success = false;
+      return;
+    }
+    DDS::DynamicType_var dt = native_ts->get_type();
+    if (!OpenDDS::XTypes::dynamic_type_is_valid(dt)) {
+      ACE_ERROR((LM_ERROR, "ERROR: Got invalid DynamicType from native TypeSupport!\n"));
+      success = false;
+      return;
+    }
+    ts = new DDS::DynamicTypeSupport(dt);
+#endif
+  } else {
+    ts = TypeSupport::_duplicate(native_ts);
+  }
+
+  if (ts->register_type(dp, registered_type_name.c_str()) != RETCODE_OK) {
     ACE_ERROR((LM_ERROR, "ERROR: register_type failed\n"));
-    return false;
+    success = false;
+    return;
   }
 
   CORBA::String_var type_name;
@@ -56,13 +87,15 @@ bool get_topic(T ts, const DomainParticipant_var dp, const std::string& topic_na
     TOPIC_QOS_DEFAULT, 0, DEFAULT_STATUS_MASK);
   if (!topic) {
     ACE_ERROR((LM_ERROR, "ERROR: create_topic failed\n"));
-    return false;
+    success = false;
+    return;
   }
 
-  return true;
+  return;
 }
 
-bool wait_for_reader(bool tojoin, DataWriter_var &dw) {
+bool wait_for_reader(bool tojoin, DataWriter_var &dw)
+{
   WaitSet_var ws = new DDS::WaitSet;
   StatusCondition_var condition = dw->get_statuscondition();
   condition->set_enabled_statuses(DDS::PUBLICATION_MATCHED_STATUS);
@@ -277,7 +310,8 @@ void append(PropertySeq& props, const char* name, const char* value)
   props[len] = prop;
 }
 
-void create_participant(const DomainParticipantFactory_var& dpf, DomainParticipant_var& dp) {
+void create_participant(const DomainParticipantFactory_var& dpf, DomainParticipant_var& dp)
+{
   DomainParticipantQos part_qos;
   dpf->get_default_participant_qos(part_qos);
 
@@ -298,8 +332,20 @@ void create_participant(const DomainParticipantFactory_var& dpf, DomainParticipa
   dp = dpf->create_participant(0, part_qos, 0, DEFAULT_STATUS_MASK);
 }
 
-template<typename T1, typename T2>
-ReturnCode_t read_i(const DataReader_var& dr, const T1& pdr, T2& data, bool ignore_no_data = false)
+bool check_rc(DDS::ReturnCode_t rc, const std::string& what, bool ignore_no_data = false)
+{
+  if (ignore_no_data && rc == DDS::RETCODE_NO_DATA) {
+    return true;
+  }
+  if (rc != DDS::RETCODE_OK) {
+    ACE_ERROR((LM_ERROR, "ERROR: %C: %C\n", what.c_str(), OpenDDS::DCPS::retcode_to_string(rc)));
+    return false;
+  }
+  return true;
+}
+
+template <typename DataReaderType, typename SeqType>
+bool read_i(DataReader* dr, SeqType& data, bool ignore_no_data = false)
 {
   ReadCondition_var dr_rc = dr->create_readcondition(NOT_READ_SAMPLE_STATE,
     ANY_VIEW_STATE,
@@ -309,29 +355,22 @@ ReturnCode_t read_i(const DataReader_var& dr, const T1& pdr, T2& data, bool igno
 
   ConditionSeq active;
   const Duration_t max_wait = { 10, 0 };
-  ReturnCode_t ret = ws->wait(active, max_wait);
-
-  if (ret == RETCODE_TIMEOUT) {
-    ACE_ERROR((LM_ERROR, "ERROR: reader timedout\n"));
-  } else if (ret != RETCODE_OK) {
-    ACE_ERROR((LM_ERROR, "ERROR: Reader: wait returned %C\n",
-               OpenDDS::DCPS::retcode_to_string(ret)));
-  } else {
-    SampleInfoSeq info;
-    ret = pdr->take_w_condition(data, info, LENGTH_UNLIMITED, dr_rc);
-    if (ignore_no_data && ret == RETCODE_NO_DATA) {
-        ret = RETCODE_OK;
-    }
-    if (ret != RETCODE_OK) {
-      ACE_ERROR((LM_ERROR, "ERROR: Reader: take_w_condition returned %C\n",
-        OpenDDS::DCPS::retcode_to_string(ret)));
-    }
+  if (!check_rc(ws->wait(active, max_wait), "read_i: wait failed")) {
+    return false;
   }
 
+  SampleInfoSeq info;
+  typename DataReaderType::_var_type typed_dr = DataReaderType::_narrow(dr);
+  const ReturnCode_t rc = typed_dr->take_w_condition(data, info, LENGTH_UNLIMITED, dr_rc);
   ws->detach_condition(dr_rc);
   dr->delete_readcondition(dr_rc);
+  return check_rc(rc, "read_i: take_w_condition failed", ignore_no_data);
+}
 
-  return ret;
+bool read_control(DDS::DataReader* dr, bool ignore_no_data = false)
+{
+  ControlStructSeq control_data;
+  return read_i<ControlStructDataReader>(dr, control_data, ignore_no_data);
 }
 
 #endif

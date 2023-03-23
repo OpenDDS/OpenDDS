@@ -21,26 +21,32 @@ use File::Temp ();
 use FileHandle;
 use Cwd;
 use POSIX qw(strftime);
+use B qw/perlstring/;
 
 use FindBin;
 use lib "$FindBin::RealBin/tools/scripts/modules";
 use command_utils;
 use ChangeDir;
 
-## Version of OCI's TAO to download
-my $oci_tao_version = '2.2a';
 ## Version of DOC Group ACE/TAO to download, uses the ACE version number
-my $doc_tao2_version = '6.5.18';
-my $doc_tao3_version = '7.0.9';
+my $doc_tao2_version = '6.5.19';
+my $doc_tao3_version = '7.1.0';
 
 my $backup_timestamp = strftime "%Y-%m-%d-%H-%M-%S", localtime time;
 
 # save args before Getopt modifies them
 my @ARGS = @ARGV;
 
+my @default_configh = (
+  '#define ACE_DISABLE_MKTEMP',
+  '#define ACE_DISABLE_READDIR_R',
+  '#define ACE_DISABLE_TEMPNAM',
+  '#define TAO_HAS_UIOP 0',
+);
+
 sub perlOS_to_host {
   return 'win32' if $^O eq 'MSWin32';
-  return 'macosx' if $^O eq 'darwin';
+  return 'macos' if $^O eq 'darwin';
   return $^O;
 }
 
@@ -61,16 +67,22 @@ my %platforminfo =
                                  19.2 => 'vs2019', 19.3 => 'vs2022'},
                'cl_archs' => {'x64' => 1, 'Win32' => 1, 'ARM64' => 0, 'ARM' => 0}, # 1 if supported
               },
-   'macosx' => {
-                'compilers' => ['clang++'],
-                'libpath' => 'DYLD_LIBRARY_PATH',
-               },
-   'solaris' => {
-                 'compilers' => ['CC', 'g++'],
-                 'libpath' => 'LD_LIBRARY_PATH',
-                 'aceplatform' => 'sunos5_$COMP', # $COMP = sunc++ or g++
-                 'aceconfig' => 'sunos$UNAMER', # $UNAMER = `uname -r`
-                },
+   'macos' => {
+               'compilers' => ['clang++'],
+               'libpath' => 'DYLD_LIBRARY_PATH',
+               'aceconfig' => 'macosx',
+               'aceplatform' => 'macosx',
+              },
+   'macos-cross' => {
+                     'compilers' => ['clang++'],
+                     'libpath' => 'DYLD_LIBRARY_PATH',
+                     'aceconfig' => 'macosx',
+                     'aceplatform' => 'macosx',
+                     'no_host' => 1,
+                     'java_platform' => 'darwin',
+                     'usage' => ['Use --target-arch or --target-compiler to ' .
+                                 'specify how the target', 'build should work'],
+                    },
    'linux' => {
                'compilers' => ['g++', 'clang', 'clang++'],
                'libpath' => 'LD_LIBRARY_PATH',
@@ -174,10 +186,11 @@ my @specs = # Array of array-refs, each inner array is an option group which
     '<hidden>force-clone-submodules', 'Get submodules as if this wasn\'t a git repo',
    ],
    ['Build platform and compiler:',
-    'host=s', 'Host (auto detect: linux, win32, solaris, macosx)',
+    'host=s', 'Host (auto detect: linux, win32, macosx)',
     'compiler=s', 'Compiler (auto detect / guess by searching PATH)',
     'std=s', 'C++ standard version (for compilers that use -std)',
     'target=s', 'Cross-compile target (none): see --target-help',
+    'target-arch=s', 'Architecture for target (none): see --target-help',
     'target-compiler=s', 'Compiler for target (if req\'d): see --target-help',
     'host-tools=s', 'DDS_ROOT of host tools for cross compile (build)',
     'host-ace=s', 'Define host ACE_ROOT (uses relative path from' .
@@ -205,10 +218,12 @@ my @specs = # Array of array-refs, each inner array is an option group which
     'ace=s', 'ACE (use ACE_ROOT, ACE_wrappers, or download)',
     'tao=s', 'TAO (use TAO_ROOT, ACE_ROOT/TAO, or download)',
     'mpc=s', 'MPC (use MPC_ROOT, ACE_ROOT/MPC, or download)',
-    'doc-group|doc_group!', 'Use the DOC Group release of TAO 2.5.x (no)',
+    'doc-group|doc_group!', 'Use the DOC Group release of TAO 2.5.x (yes)',
     'doc-group3|doc_group3!', 'Use the DOC Group release of TAO 3.x (no)',
     'ace-github-latest!', 'Clone latest ACE/TAO/MPC from GitHub (no)',
     'force-ace-tao', 'Force configuration of ACE/TAO (no)',
+    'no-disable-deprecated', 'Turn off disabling deprecated interfaces when' .
+                             $argIndent . 'configuring ACE/TAO (no)',
    ],
    ['Advanced configuration:',
     'configh=s@', 'Extra text for config.h',
@@ -383,6 +398,7 @@ my %opts = %{parseArgs()};
 my $debug = exists $opts{'debug'} ? $opts{'debug'} : 1;
 my $backup = exists $opts{'backup'} ? $opts{'backup'} : 1;
 my $force_ace_tao = exists $opts{'force-ace-tao'} ? $opts{'force-ace-tao'} : 0;
+my $no_disable_deprecated = exists $opts{'no-disable-deprecated'} ? $opts{'no-disable-deprecated'} : 0;
 
 $opts{'host'} = perlOS_to_host() unless $opts{'host'};
 
@@ -398,15 +414,24 @@ my %specific =
     'refpost' => '}', 'comment' => '#')
   );
 
+sub might_be_executable {
+  my $path = shift;
+  return -x $path && -f $path; # On Windows -x can return true for directories
+}
+
 sub which {
   my $file = shift;
   for my $p (File::Spec->path()) {
     next if $p eq '.';
-    if (-x "$p/$file") {
-      return "$p/$file";
+    my $path = "$p/$file";
+    if (might_be_executable($path)) {
+      return $path;
     }
-    elsif ($exeext ne '' && -x "$p/$file$exeext") {
-      return "$p/$file$exeext";
+    elsif ($exeext ne '') {
+      $path .= $exeext;
+      if (might_be_executable($path)) {
+        return $path;
+      }
     }
   }
   return undef;
@@ -470,7 +495,7 @@ sub git_submodule_prop {
     or die("git_submodule_prop open failed: $!\nStopped");
   my $prop_value = <$fd>;
   close($fd);
-  chomp($prop_value);
+  chomp($prop_value) if (defined($prop_value));
   if (!$prop_value) {
     die("Couldn't get $full_prop_name from .gitmodules\nStopped");
   }
@@ -844,15 +869,7 @@ if (!$ace_src || !$tao_src) {
   else {
     my($urlbase, $file, $download_message);
 
-    if ($opts{'doc-group'}) {
-      my $github_url_tao_version = $doc_tao2_version;
-      $github_url_tao_version =~ s/\./_/g;
-      $urlbase = 'https://github.com/DOCGroup/ACE_TAO/releases/download/ACE%2BTAO-' . $github_url_tao_version . '/';
-      $file = 'ACE+TAO-src-' . $doc_tao2_version . '.'
-        . ($is_windows ? 'zip' : 'tar.gz');
-      $download_message = "Downloading $file";
-    }
-    elsif ($opts{'doc-group3'}) {
+    if ($opts{'doc-group3'}) {
       my $github_url_tao_version = $doc_tao3_version;
       $github_url_tao_version =~ s/\./_/g;
       $urlbase = 'https://github.com/DOCGroup/ACE_TAO/releases/download/ACE%2BTAO-' . $github_url_tao_version . '/';
@@ -861,11 +878,12 @@ if (!$ace_src || !$tao_src) {
       $download_message = "Downloading $file";
     }
     else {
-      $urlbase = 'http://download.ociweb.com/TAO-' . $oci_tao_version . '/';
-      $file = 'ACE+TAO-' . $oci_tao_version . '_with_latest_patches_NO_makefiles.'
+      my $github_url_tao_version = $doc_tao2_version;
+      $github_url_tao_version =~ s/\./_/g;
+      $urlbase = 'https://github.com/DOCGroup/ACE_TAO/releases/download/ACE%2BTAO-' . $github_url_tao_version . '/';
+      $file = 'ACE+TAO-src-' . $doc_tao2_version . '.'
         . ($is_windows ? 'zip' : 'tar.gz');
-      $download_message =
-        "Downloading ACE+TAO $oci_tao_version with latest patches";
+      $download_message = "Downloading $file";
     }
     if (-r $file) {
       print "Using ACE+TAO source package $file\n" if $opts{'verbose'};
@@ -916,7 +934,7 @@ if (!$ace_src || !$tao_src) {
       my $err = 1;
       my $ddsroot = getcwd;
       if (!$is_windows) {
-        $err = run_command([($^O eq 'solaris' ? 'g' : '') . 'tar', 'xzf', "$ddsroot/$file"]);
+        $err = run_command(['tar', 'xzf', "$ddsroot/$file"]);
       }
       else {
         # Try Archive::Zip
@@ -1032,9 +1050,14 @@ sub write_config_h {
   my %buildEnv = %{shift()};
   my $platform = $opts{$buildEnv{'build'}};
   my $pi = $platforminfo{$platform};
-  $opts{'optimize'} = 0 if (!exists $opts{'optimize'} || exists $opts{'sanitize'});
+  $opts{'optimize'} = 0 if (!exists $opts{'optimize'} && !exists $opts{'sanitize'});
 
   my $CFGH = backup_and_open("$buildEnv{'ACE_ROOT'}/ace/config.h");
+  if (!$no_disable_deprecated) {
+    for my $line (@default_configh) {
+      print $CFGH "$line\n";
+    }
+  }
   if ($buildEnv{'build'} eq 'target') {
     for my $line (@{$opts{'configh'}}) {
       print $CFGH "$line\n";
@@ -1156,6 +1179,12 @@ if (scalar(@fsanitize)) {
   @sanitizer_linker_args = (@common, @sanitizer_linker_args);
 }
 
+sub compiler {
+  my %buildEnv = %{shift()};
+  return ($buildEnv{'build'} eq 'target' && $opts{'target-compiler'}) ?
+    $opts{'target-compiler'} : $opts{'compiler'};
+}
+
 my @ace_macros = ('debug',
                   'optimize',
                   'inline',
@@ -1182,6 +1211,7 @@ sub write_platform_macros {
         }
       }
       if ($cross_compile) {
+        print $PMG "CROSS-COMPILE = 1\n";
         print $PMG 'TAO_IDL = $(HOST_ACE)/bin/tao_idl', "\n";
         if ($is_windows) {
           print $PMG "HOST_EXE_EXT = .exe\n";
@@ -1213,6 +1243,10 @@ sub write_platform_macros {
             print $PMG 'LDFLAGS += -Wl,-rpath-link,$(ACE_ROOT)/lib', "\n";
           }
         }
+        if ($opts{'target-arch'}) {
+          print $PMG "FLAGS_C_CC += -target $opts{'target-arch'}\n";
+          print $PMG "LDFLAGS += -target $opts{'target-arch'}\n";
+        }
         if ($opts{'target'} eq 'android') {
           print $PMG 'ifeq (,$(findstring -isystem$(ACE_ROOT),$(INCLDIRS)))', "\n";
           print $PMG '  INCLDIRS += -isystem $(ACE_ROOT)', "\n";
@@ -1238,15 +1272,16 @@ sub write_platform_macros {
     my $plat = $opts{$buildEnv{'build'}};
     if ($pi->{'aceplatform'}) {
       $plat = $pi->{'aceplatform'};
-      $plat =~ s/\$COMP/($opts{'compiler'} =~ m!CC!) ? 'sunc++' : 'g++'/e;
+      $plat =~ s/\$COMP/'g++'/e;
       $plat =~ s/\$NONSTDCOMP/($opts{'compiler'} =~ m!clang!) ? 'clang' : ''/e;
       $plat =~ s/_$//;
     }
     $plat .= '_' . $opts{'host_version'} if $opts{'host_version'};
     print $PMG "include \$(ACE_ROOT)/include/makeinclude/platform_$plat.GNU\n";
     if ($opts{'nonstdcompiler'} && !$macro_cross_compile) {
+      my $comp = compiler(\%buildEnv);
       for my $var ('CC', 'CXX', 'LD') {
-        print $PMG "$var = $opts{'compiler'}\n";
+        print $PMG "$var = $comp\n";
       }
     }
     if ($opts{'prefix'} && $opts{'install-origin-relative'}) {
@@ -2047,6 +2082,29 @@ sub get_features {
   return %features;
 }
 
+sub write_opendds_mwc {
+  my $root = shift;
+  my $args = shift;
+
+  $args = join(', ', (map {perlstring($_)} @{$args}));
+
+  my $path = "$root/bin/opendds_mwc.pl";
+  my $fd = backup_and_open($path);
+  print $fd <<"EOF";
+#!/usr/bin/env perl
+if (!defined(\$ENV{ACE_ROOT}) || !defined(\$ENV{MPC_ROOT})) {
+  die("The enviroment needs to be setup.");
+}
+exec('perl', "\$ENV{ACE_ROOT}/bin/mwc.pl", $args, \@ARGV)
+  or die("Failed to exec mwc: \$!");
+EOF
+  $fd->close();
+  print "Wrote $path\n" if $opts{'verbose'};
+  dump_and_unlink($fd) if $opts{'dry-run'};
+
+  chmod(0775, $path);
+}
+
 my $buildtao;
 sub generate_workspace {
   my $buildEnv = shift;
@@ -2121,7 +2179,6 @@ OPENDDS_IDL = $(HOST_DDS)/bin/opendds_idl
 OPENDDS_IDL_DEP = $(OPENDDS_IDL)$(HOST_EXE_EXT)
 IDL2JNI = $(HOST_DDS)/bin/idl2jni
 IDL2JNI_DEP = $(IDL2JNI)$(HOST_EXE_EXT)
-CROSS-COMPILE = 1
 EOT
       }
     }
@@ -2263,13 +2320,6 @@ EOT
   my $static = (($opts{'static'} && $is_windows) ||
     ($cross_compile && $buildEnv->{'build'} eq 'host' && $mpctype ne 'gnuace'));
 
-  my @mpcopts = ();
-  if (defined $opts{'mpcopts'}) {
-    for my $i (@{$opts{'mpcopts'}}) {
-      push(@mpcopts, split(/ /, $i));
-    }
-  }
-
   # We are not using CIAO or DAnCE, but MPC.cfg expands $CIAO_ROOT and
   # $DANCE_ROOT so leaving them empty/undefined would cause /MPC/config
   # to be on the include path for .mpb files.
@@ -2281,21 +2331,28 @@ EOT
   print "ENV: saving current environment\n" if $opts{'verbose'};
   mergeToEnv($buildEnv);
 
-  my @mwccmd = ('perl', "$ENV{'ACE_ROOT'}/bin/mwc.pl", '-type', "$mpctype");
+  my @mwc_common_args = ('-type', "$mpctype");
   if ($static) {
-    push(@mwccmd, '-static');
+    push(@mwc_common_args, '-static');
   }
-
-  my @mwcargs = ("$buildEnv->{'DDS_ROOT'}$slash$ws", @mpcopts);
-  if (!$buildtao && @features) {
-    for my $feature (@features) {
-      push(@mwcargs, '-features', ($feature =~ /=/ ? $feature : "$feature=1"));
+  if (defined $opts{'mpcopts'}) {
+    for my $i (@{$opts{'mpcopts'}}) {
+      push(@mwc_common_args, split(/ /, $i));
     }
   }
 
+  my @feature_opts = ();
+  if (!$buildtao && @features) {
+    push(@feature_opts, '-features', join(',', map {/=/ ? $_: "$_=1"} @features));
+  }
+
+  # Generate our own mwc wrapper script
+  write_opendds_mwc($buildEnv->{'DDS_ROOT'}, [@mwc_common_args, @feature_opts]);
+
+  my @mwc = ('perl', "$ENV{ACE_ROOT}/bin/mwc.pl");
   print 'Running MPC to generate ', ($mpctype eq 'gnuace' ? 'makefiles' :
                                      'project files'), ".\n";
-  if (run_command([@mwccmd, @mwcargs])) {
+  if (run_command([@mwc, @mwc_common_args, @feature_opts, "$buildEnv->{'DDS_ROOT'}$slash$ws"])) {
     die "ERROR: Error from MPC, stopped";
   }
   $buildEnv->{'mpctype'} = $mpctype;
@@ -2303,7 +2360,7 @@ EOT
   # If this is a target safety profile build
   if (defined $opts{'no-opendds-safety-profile'}) {
     # Generate ACE workspace separately, to exclude TAO
-    if (run_command([@mwccmd, "$buildEnv->{'ACE_ROOT'}/ace", @mpcopts])) {
+    if (run_command([@mwc, @mwc_common_args, "$buildEnv->{'ACE_ROOT'}/ace"])) {
       die "ERROR: Error from MPC, stopped";
     }
   }
@@ -2558,7 +2615,7 @@ else { # does not require cloned builds
 
 print "Completed configuring OpenDDS, next ";
 if (!$is_windows || ($cross_compile && !$cloned_build)) {
-  print "run '", (($^O eq 'solaris' || $^O eq 'freebsd') ? 'g' : ''), "make'";
+  print "run '", (($^O eq 'freebsd') ? 'g' : ''), "make'";
 }
 elsif ($cloned_build) {
   print "compile build\\host\\host_tools.sln\n",

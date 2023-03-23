@@ -76,8 +76,13 @@ endif()
 
 include(${CMAKE_CURRENT_LIST_DIR}/init.cmake)
 
+## Adding ${TAO_BIN_DIR} to the ace bin hints allows users of
+## VxWorks layer builds to set TAO_BIN_DIR to the location of
+## the partner host tools directory, but keep ACE_BIN_DIR the
+## value of $ACE_ROOT so that other ACE related scripts can
+## be located.
 set(_dds_bin_hints ${OPENDDS_BIN_DIR})
-set(_ace_bin_hints ${ACE_BIN_DIR})
+set(_ace_bin_hints ${ACE_BIN_DIR} ${TAO_BIN_DIR})
 set(_tao_bin_hints ${TAO_BIN_DIR})
 
 find_program(PERL perl)
@@ -133,9 +138,12 @@ if(OPENDDS_XERCES3)
 endif()
 
 set(_ace_libs
-  ACE_XML_Utils
   ACE
 )
+
+if(OPENDDS_XERCES3)
+  list(APPEND _ace_libs ACE_XML_Utils)
+endif()
 
 set(_tao_libs
   TAO_IORManip
@@ -162,14 +170,16 @@ set(_opendds_libs
   OpenDDS_Model
   OpenDDS_monitor
   OpenDDS_Multicast
-  OpenDDS_QOS_XML_XSC_Handler
   OpenDDS_Rtps
   OpenDDS_Rtps_Udp
-  OpenDDS_Security
   OpenDDS_Shmem
   OpenDDS_Tcp
   OpenDDS_Udp
 )
+
+if(OPENDDS_SECURITY)
+  list(APPEND _opendds_libs OpenDDS_QOS_XML_XSC_Handler OpenDDS_Security)
+endif()
 
 list(APPEND _all_libs ${_opendds_libs} ${_ace_libs} ${_tao_libs})
 
@@ -522,6 +532,15 @@ if(OPENDDS_FOUND)
       get_target_property(_target_location ${_target} LOCATION)
       message(STATUS "${_target} -> ${_target_location}")
     endforeach()
+  endif()
+
+  ## ACE provides (or uses) many deprecated functions.
+  ## For now, we'll silence the warnings.
+  if(MSVC)
+    target_compile_options(ACE::ACE INTERFACE /wd4996)
+    target_compile_definitions(ACE::ACE INTERFACE
+                               _CRT_SECURE_NO_WARNINGS
+                               _WINSOCK_DEPRECATED_NO_WARNINGS)
   endif()
 endif()
 

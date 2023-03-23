@@ -1,32 +1,35 @@
-feature (!content_subscription): idl2jni {
+project: idl2jni {
+}
+
+feature (!content_subscription) {
   idl2jniflags += -DOPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE -DOPENDDS_NO_QUERY_CONDITION -DOPENDDS_NO_CONTENT_FILTERED_TOPIC -DOPENDDS_NO_MULTI_TOPIC
 }
 
-feature (!query_condition): idl2jni {
+feature (!query_condition) {
   idl2jniflags += -DOPENDDS_NO_QUERY_CONDITION
 }
 
-feature (!content_filtered_topic): idl2jni {
+feature (!content_filtered_topic) {
   idl2jniflags += -DOPENDDS_NO_CONTENT_FILTERED_TOPIC
 }
 
-feature (!multi_topic): idl2jni {
+feature (!multi_topic) {
   idl2jniflags += -DOPENDDS_NO_MULTI_TOPIC
 }
 
-feature (!ownership_profile): idl2jni {
+feature (!ownership_profile) {
   idl2jniflags += -DOPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE -DOPENDDS_NO_OWNERSHIP_PROFILE
 }
 
-feature (!ownership_kind_exclusive): idl2jni {
+feature (!ownership_kind_exclusive) {
   idl2jniflags += -DOPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
 }
 
-feature (!object_model_profile): idl2jni {
+feature (!object_model_profile) {
   idl2jniflags += -DOPENDDS_NO_OBJECT_MODEL_PROFILE
 }
 
-feature (!persistence_profile): idl2jni {
+feature (!persistence_profile) {
   idl2jniflags += -DOPENDDS_NO_PERSISTENCE_PROFILE
 }
 
@@ -77,6 +80,6 @@ feature (built_in_topics): dcps_ts_defaults, idl2jni {
   }
 }
 
-feature (!built_in_topics): idl2jni {
+feature (!built_in_topics) {
   idl2jniflags += -DDDS_HAS_MINIMUM_BIT
 }

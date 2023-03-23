@@ -35,13 +35,13 @@ class DataReaderImpl;
   */
 class OpenDDS_Dcps_Export SubscriptionInstance : public virtual RcObject {
 public:
-  SubscriptionInstance(DataReaderImpl* reader,
+  SubscriptionInstance(const DataReaderImpl_rch& reader,
                        const DDS::DataReaderQos& qos,
                        ACE_Recursive_Thread_Mutex& lock,
                        DDS::InstanceHandle_t handle,
                        bool owns_handle);
 
-  ~SubscriptionInstance();
+  virtual ~SubscriptionInstance();
 
   bool matches(CORBA::ULong sample_states, CORBA::ULong view_states, CORBA::ULong instance_states) const;
 

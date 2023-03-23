@@ -8,6 +8,8 @@
 
 #include <ace/CDR_Base.h>
 
+#include <cstring>
+
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
@@ -219,6 +221,12 @@ template <typename Type, size_t count>
 size_t array_count(Type(&)[count])
 {
   return count;
+}
+
+template <typename T>
+inline int mem_cmp(const T& a, const T& b)
+{
+  return std::memcmp(&a, &b, sizeof(T));
 }
 
 } // namespace DCPS

@@ -1,7 +1,6 @@
 #include <dds/DCPS/InternalDataReader.h>
 
-#include <gtest/gtest.h>
-#include <gmock/gmock.h>
+#include <gtestWrapper.h>
 
 using namespace OpenDDS::DCPS;
 

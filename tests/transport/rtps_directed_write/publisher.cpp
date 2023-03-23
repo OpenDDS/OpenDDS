@@ -6,8 +6,8 @@
 #include <dds/DCPS/transport/framework/TransportSendListener.h>
 #include <dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.h>
 #include <dds/DCPS/RTPS/RtpsCoreTypeSupportImpl.h>
-#include <dds/DCPS/RTPS/BaseMessageTypes.h>
-#include <dds/DCPS/RTPS/BaseMessageUtils.h>
+#include <dds/DCPS/RTPS/MessageTypes.h>
+#include <dds/DCPS/RTPS/MessageUtils.h>
 #include <dds/DCPS/RTPS/RtpsCoreC.h>
 #include <dds/DCPS/Serializer.h>
 #include <dds/DCPS/DataSampleElement.h>
@@ -70,7 +70,7 @@ private:
     ACE_DEBUG((LM_INFO, ACE_TEXT("Sending with timestamp %C %q usec\n"), ts.c_str(), ACE_INT64(t.usec())));
   }
 
-  bool writeHeartbeat(const OpenDDS::DCPS::RepoId& reader = GUID_UNKNOWN) const;
+  bool writeHeartbeat(const OpenDDS::DCPS::GUID_t& reader = GUID_UNKNOWN) const;
   bool writeToSocket(const TestMsg& msg, const CORBA::Octet flags = DE) const;
 
   AppConfig config;
@@ -83,7 +83,7 @@ using namespace OpenDDS::RTPS;
 
 const EncapsulationHeader DDS_TEST::encap(encoding, FINAL);
 
-bool DDS_TEST::writeHeartbeat(const OpenDDS::DCPS::RepoId& reader) const
+bool DDS_TEST::writeHeartbeat(const OpenDDS::DCPS::GUID_t& reader) const
 {
   const OpenDDS::RTPS::GuidPrefix_t& local_prefix = config.getPubWtrId().guidPrefix;
   const Header hdr = { {'R', 'T', 'P', 'S'}, PROTOCOLVERSION, VENDORID_OPENDDS,

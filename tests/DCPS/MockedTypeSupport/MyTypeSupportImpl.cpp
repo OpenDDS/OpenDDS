@@ -9,6 +9,8 @@
 
 #include <stdexcept>
 
+using namespace OpenDDS::DCPS;
+
 MyTypeSupportImpl::MyTypeSupportImpl()
 {
 }
@@ -53,7 +55,7 @@ char* MyTypeSupportImpl::get_type_name()
 ::DDS::DataWriter_ptr MyTypeSupportImpl::create_datawriter()
 {
   MyDataWriterImpl* writer_impl;
-  ACE_NEW_RETURN(writer_impl, MyDataWriterImpl(), ::DDS::DataWriter::_nil());
+  ACE_NEW_RETURN(writer_impl, MyDataWriterImpl, ::DDS::DataWriter::_nil());
 
   return writer_impl;
 }
@@ -82,7 +84,7 @@ void MyTypeSupportImpl::representations_allowed_by_type(
 #ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
 
 const OpenDDS::DCPS::MetaStruct&
-MyTypeSupportImpl::getMetaStructForType()
+MyTypeSupportImpl::getMetaStructForType() const
 {
   throw std::runtime_error("unimplemented");
 }

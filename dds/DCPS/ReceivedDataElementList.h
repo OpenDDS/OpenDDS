@@ -8,13 +8,7 @@
 #ifndef OPENDDS_DCPS_RECEIVEDDATAELEMENTLIST_H
 #define OPENDDS_DCPS_RECEIVEDDATAELEMENTLIST_H
 
-#ifdef ACE_HAS_CPP11
-#  include <atomic>
-#else
-#  include <ace/Atomic_Op_T.h>
-#endif
-#include "ace/Thread_Mutex.h"
-
+#include "Atomic.h"
 #include "dcps_export.h"
 #include "DataSampleHeader.h"
 #include "Definitions.h"
@@ -23,7 +17,9 @@
 #include "Time_Helper.h"
 #include "unique_ptr.h"
 
-#include "dds/DdsDcpsInfrastructureC.h"
+#include <dds/DdsDcpsInfrastructureC.h>
+
+#include "ace/Thread_Mutex.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
@@ -73,26 +69,22 @@ public:
 
   void dec_ref()
   {
-    if (0 == --this->ref_count_) {
+    if (0 == --ref_count_) {
       delete this;
     }
   }
 
   void inc_ref()
   {
-    ++this->ref_count_;
+    ++ref_count_;
   }
 
   long ref_count()
   {
-#ifdef ACE_HAS_CPP11
-    return this->ref_count_;
-#else
-    return this->ref_count_.value();
-#endif
+    return ref_count_;
   }
 
-  PublicationId pub_;
+  GUID_t pub_;
 
   /**
    * Data sample received, could only be the key fields in case we received
@@ -118,7 +110,7 @@ public:
   bool group_coherent_;
 
   /// Publisher id represent group identifier.
-  RepoId publisher_id_;
+  GUID_t publisher_id_;
 #endif
 
   /// Do we contain valid data
@@ -134,11 +126,7 @@ public:
 
   /// This is needed to know if delete DataReader should fail with
   /// PRECONDITION_NOT_MET because there are outstanding loans.
-#ifdef ACE_HAS_CPP11
-  std::atomic<long> zero_copy_cnt_;
-#else
-  ACE_Atomic_Op<ACE_Thread_Mutex, long> zero_copy_cnt_;
-#endif
+  Atomic<long> zero_copy_cnt_;
 
   /// The data sample's sequence number
   SequenceNumber sequence_;
@@ -154,11 +142,7 @@ public:
   void operator delete(void* memory, ACE_New_Allocator& pool);
 
 private:
-#ifdef ACE_HAS_CPP11
-  std::atomic<long> ref_count_;
-#else
-  ACE_Atomic_Op<ACE_Thread_Mutex, long> ref_count_;
-#endif
+  Atomic<long> ref_count_;
 protected:
   ACE_Recursive_Thread_Mutex* mx_;
 }; // class ReceivedDataElement
@@ -182,7 +166,7 @@ public:
   ~ReceivedDataElementWithType() {
     ACE_GUARD(ACE_Recursive_Thread_Mutex,
               guard,
-              *this->mx_)
+              *mx_)
     delete static_cast<DataTypeWithAllocator*> (registered_data_);
   }
 };
@@ -205,7 +189,7 @@ public:
 
 class OpenDDS_Dcps_Export ReceivedDataElementList {
 public:
-  explicit ReceivedDataElementList(DataReaderImpl*, InstanceState_rch instance_state = InstanceState_rch());
+  explicit ReceivedDataElementList(const DataReaderImpl_rch& reader, const InstanceState_rch& instance_state = InstanceState_rch());
 
   ~ReceivedDataElementList();
 
@@ -238,7 +222,7 @@ public:
 #endif
 
 private:
-  DataReaderImpl* reader_;
+  DataReaderImpl_wrch reader_;
 
   /// The first element of the list.
   ReceivedDataElement* head_;

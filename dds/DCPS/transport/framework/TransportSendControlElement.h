@@ -35,7 +35,7 @@ class OpenDDS_Dcps_Export TransportSendControlElement : public TransportQueueEle
 public:
 
   TransportSendControlElement(int initial_count,
-                              const RepoId& publisher_id,
+                              const GUID_t& publisher_id,
                               TransportSendListener* listener,
                               const DataSampleHeader& header,
                               Message_Block_Ptr msg_block);
@@ -49,7 +49,7 @@ public:
   virtual bool requires_exclusive_packet() const;
 
   /// Accessor for the publisher id.
-  virtual RepoId publication_id() const;
+  virtual GUID_t publication_id() const;
 
   virtual ACE_Message_Block* duplicate_msg() const;
 
@@ -68,7 +68,7 @@ public:
   virtual SequenceNumber sequence() const;
 
   /// Is the element a "control" sample from the specified pub_id?
-  virtual bool is_control(RepoId pub_id) const;
+  virtual bool is_control(GUID_t pub_id) const;
   virtual bool owned_by_transport ();
 
   virtual bool is_request_ack() const { return header_.message_id_ == REQUEST_ACK; }
@@ -82,7 +82,7 @@ protected:
 private:
 
   /// The publisher of the control message
-  RepoId publisher_id_;
+  GUID_t publisher_id_;
 
   /// The TransportSendListener object to call back upon.
   TransportSendListener* listener_;

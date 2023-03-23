@@ -5,8 +5,20 @@
 * See: http://www.opendds.org/license.html
 */
 
+// Tell GCC to ignore implicitly declared copy methods as long as
+// Qt is not compliant.
+#ifdef __GNUC__
+#  pragma GCC diagnostic push
+#  pragma GCC diagnostic ignored "-Wdeprecated-copy"
+#endif
+
 #include <QtWidgets/QMenu>
 #include <QtWidgets/QGraphicsSceneContextMenuEvent>
+
+#ifdef __GNUC__
+#  pragma GCC diagnostic pop
+#endif
+
 #include <vector>
 
 #include "Node.h"

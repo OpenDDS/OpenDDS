@@ -80,6 +80,39 @@ protected:
 typedef RcHandle<ReactorInterceptor> ReactorInterceptor_rch;
 typedef WeakRcHandle<ReactorInterceptor> ReactorInterceptor_wrch;
 
+class OpenDDS_Dcps_Export RegisterHandler : public ReactorInterceptor::Command {
+public:
+  RegisterHandler(ACE_HANDLE io_handle,
+                  ACE_Event_Handler* event_handler,
+                  ACE_Reactor_Mask mask)
+    : io_handle_(io_handle)
+    , event_handler_(event_handler)
+    , mask_(mask)
+  {}
+
+private:
+  ACE_HANDLE io_handle_;
+  ACE_Event_Handler* event_handler_;
+  ACE_Reactor_Mask mask_;
+
+  void execute();
+};
+
+class OpenDDS_Dcps_Export RemoveHandler : public ReactorInterceptor::Command {
+public:
+  RemoveHandler(ACE_HANDLE io_handle,
+                ACE_Reactor_Mask mask)
+    : io_handle_(io_handle)
+    , mask_(mask)
+  {}
+
+private:
+  ACE_HANDLE io_handle_;
+  ACE_Reactor_Mask mask_;
+
+  void execute();
+};
+
 } // namespace DCPS
 } // namespace OpenDDS
 

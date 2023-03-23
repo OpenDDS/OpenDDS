@@ -39,7 +39,7 @@ public:
 
   virtual ~DataReaderRemoteImpl();
 
-  virtual void add_association(const RepoId& yourId,
+  virtual void add_association(const GUID_t& yourId,
                                const WriterAssociation& writer,
                                bool active);
 

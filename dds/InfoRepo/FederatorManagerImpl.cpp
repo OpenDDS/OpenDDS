@@ -340,7 +340,7 @@ ManagerImpl::initialize()
                  ACE_TEXT("unable to extract typed OwnerUpdate writer.\n")));
 
     } else {
-      OpenDDS::DCPS::RepoIdConverter converter(servant->get_repo_id());
+      OpenDDS::DCPS::RepoIdConverter converter(servant->get_guid());
       ACE_DEBUG((LM_DEBUG,
                  ACE_TEXT("(%P|%t) Federator::ManagerImpl::initialize() - ")
                  ACE_TEXT("created federation OwnerUpdate writer %C for repository %d\n"),
@@ -373,7 +373,7 @@ ManagerImpl::initialize()
                  ACE_TEXT("unable to extract typed OwnerUpdate reader.\n")));
 
     } else {
-      OpenDDS::DCPS::RepoIdConverter converter(servant->get_repo_id());
+      OpenDDS::DCPS::RepoIdConverter converter(servant->get_guid());
       ACE_DEBUG((LM_DEBUG,
                  ACE_TEXT("(%P|%t) Federator::ManagerImpl::initialize() - ")
                  ACE_TEXT("created federation OwnerUpdate reader %C for repository %d\n"),
@@ -421,7 +421,7 @@ ManagerImpl::initialize()
                  ACE_TEXT("unable to extract typed TopicUpdate writer.\n")));
 
     } else {
-      OpenDDS::DCPS::RepoIdConverter converter(servant->get_repo_id());
+      OpenDDS::DCPS::RepoIdConverter converter(servant->get_guid());
       ACE_DEBUG((LM_DEBUG,
                  ACE_TEXT("(%P|%t) Federator::ManagerImpl::initialize() - ")
                  ACE_TEXT("created federation TopicUpdate writer %C for repository %d\n"),
@@ -454,7 +454,7 @@ ManagerImpl::initialize()
                  ACE_TEXT("unable to extract typed TopicUpdate reader.\n")));
 
     } else {
-      OpenDDS::DCPS::RepoIdConverter converter(servant->get_repo_id());
+      OpenDDS::DCPS::RepoIdConverter converter(servant->get_guid());
       ACE_DEBUG((LM_DEBUG,
                  ACE_TEXT("(%P|%t) Federator::ManagerImpl::initialize() - ")
                  ACE_TEXT("created federation TopicUpdate reader %C for repository %d\n"),
@@ -502,7 +502,7 @@ ManagerImpl::initialize()
                  ACE_TEXT("unable to extract typed ParticipantUpdate writer.\n")));
 
     } else {
-      OpenDDS::DCPS::RepoIdConverter converter(servant->get_repo_id());
+      OpenDDS::DCPS::RepoIdConverter converter(servant->get_guid());
       ACE_DEBUG((LM_DEBUG,
                  ACE_TEXT("(%P|%t) Federator::ManagerImpl::initialize() - ")
                  ACE_TEXT("created federation ParticipantUpdate writer %C for repository %d\n"),
@@ -535,7 +535,7 @@ ManagerImpl::initialize()
                  ACE_TEXT("unable to extract typed ParticipantUpdate reader.\n")));
 
     } else {
-      OpenDDS::DCPS::RepoIdConverter converter(servant->get_repo_id());
+      OpenDDS::DCPS::RepoIdConverter converter(servant->get_guid());
       ACE_DEBUG((LM_DEBUG,
                  ACE_TEXT("(%P|%t) Federator::ManagerImpl::initialize() - ")
                  ACE_TEXT("created federation ParticipantUpdate reader %C for repository %d\n"),
@@ -583,7 +583,7 @@ ManagerImpl::initialize()
                  ACE_TEXT("unable to extract typed PublicationUpdate writer.\n")));
 
     } else {
-      OpenDDS::DCPS::RepoIdConverter converter(servant->get_repo_id());
+      OpenDDS::DCPS::RepoIdConverter converter(servant->get_guid());
       ACE_DEBUG((LM_DEBUG,
                  ACE_TEXT("(%P|%t) Federator::ManagerImpl::initialize() - ")
                  ACE_TEXT("created federation PublicationUpdate writer %C for repository %d\n"),
@@ -616,7 +616,7 @@ ManagerImpl::initialize()
                  ACE_TEXT("unable to extract typed PublicationUpdate reader.\n")));
 
     } else {
-      OpenDDS::DCPS::RepoIdConverter converter(servant->get_repo_id());
+      OpenDDS::DCPS::RepoIdConverter converter(servant->get_guid());
       ACE_DEBUG((LM_DEBUG,
                  ACE_TEXT("(%P|%t) Federator::ManagerImpl::initialize() - ")
                  ACE_TEXT("created federation PublicationUpdate reader %C for repository %d\n"),
@@ -664,7 +664,7 @@ ManagerImpl::initialize()
                  ACE_TEXT("unable to extract typed SubscriptionUpdate writer.\n")));
 
     } else {
-      OpenDDS::DCPS::RepoIdConverter converter(servant->get_repo_id());
+      OpenDDS::DCPS::RepoIdConverter converter(servant->get_guid());
       ACE_DEBUG((LM_DEBUG,
                  ACE_TEXT("(%P|%t) Federator::ManagerImpl::initialize() - ")
                  ACE_TEXT("created federation SubscriptionUpdate writer %C for repository %d\n"),
@@ -697,7 +697,7 @@ ManagerImpl::initialize()
                  ACE_TEXT("unable to extract typed SubscriptionUpdate reader.\n")));
 
     } else {
-      OpenDDS::DCPS::RepoIdConverter converter(servant->get_repo_id());
+      OpenDDS::DCPS::RepoIdConverter converter(servant->get_guid());
       ACE_DEBUG((LM_DEBUG,
                  ACE_TEXT("(%P|%t) Federator::ManagerImpl::initialize() - ")
                  ACE_TEXT("created federation SubscriptionUpdate reader %C for repository %d\n"),

@@ -1,13 +1,13 @@
 #ifndef RTPSRELAY_RELAY_ADDRESS_LISTENER_H_
 #define RTPSRELAY_RELAY_ADDRESS_LISTENER_H_
 
-#include "ListenerBase.h"
+#include "ReaderListenerBase.h"
 #include "RelayPartitionTable.h"
 #include "RelayStatisticsReporter.h"
 
 namespace RtpsRelay {
 
-class RelayAddressListener : public ListenerBase {
+class RelayAddressListener : public ReaderListenerBase {
 public:
   RelayAddressListener(RelayPartitionTable& relay_partition_table,
     RelayStatisticsReporter& relay_statistics_reporter);

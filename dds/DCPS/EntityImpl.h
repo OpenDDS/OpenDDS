@@ -9,17 +9,10 @@
 #include "Observer.h"
 #include "LocalObject.h"
 #include "Definitions.h"
+#include "AtomicBool.h"
 #include "transport/framework/TransportConfig_rch.h"
 
 #include <dds/DdsDcpsInfrastructureC.h>
-
-#ifndef ACE_HAS_CPP11
-#  include <ace/Atomic_Op_T.h>
-#endif
-
-#ifdef ACE_HAS_CPP11
-#  include <atomic>
-#endif
 
 #ifndef ACE_LACKS_PRAGMA_ONCE
 #  pragma once
@@ -58,7 +51,7 @@ public:
 
   virtual DDS::DomainId_t get_domain_id() { return DOMAIN_UNKNOWN; }
 
-  virtual RepoId get_id() const { return GUID_UNKNOWN; }
+  virtual GUID_t get_id() const { return GUID_UNKNOWN; }
 
   void set_status_changed_flag(DDS::StatusKind status,
                                bool status_changed_flag);
@@ -83,15 +76,7 @@ protected:
 
   bool get_deleted() const;
 
-  DDS::InstanceHandle_t get_entity_instance_handle(const GUID_t& id, DomainParticipantImpl* participant);
-
-  typedef
-#ifdef ACE_HAS_CPP11
-    std::atomic<bool>
-#else
-    ACE_Atomic_Op<TAO_SYNCH_MUTEX, bool>
-#endif
-    AtomicBool;
+  DDS::InstanceHandle_t get_entity_instance_handle(const GUID_t& id, const RcHandle<DomainParticipantImpl>& participant);
 
   /// The flag indicates the entity is enabled.
   AtomicBool enabled_;

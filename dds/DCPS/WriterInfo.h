@@ -9,23 +9,18 @@
 #ifndef OPENDDS_DCPS_WRITERINFO_H
 #define OPENDDS_DCPS_WRITERINFO_H
 
+#include "Atomic.h"
+#include "CoherentChangeControl.h"
+#include "ConditionVariable.h"
+#include "Definitions.h"
+#include "DisjointSequence.h"
 #include "PoolAllocator.h"
 #include "RcObject.h"
-#include "Definitions.h"
-#include "ConditionVariable.h"
-#include "CoherentChangeControl.h"
-#include "DisjointSequence.h"
 #include "TimeTypes.h"
 #include "transport/framework/ReceivedDataSample.h"
 
 #include <dds/DdsDcpsInfoUtilsC.h>
 #include <dds/DdsDcpsCoreC.h>
-
-#ifdef ACE_HAS_CPP11
-#  include <atomic>
-#else
-#  include <ace/Atomic_Op.h>
-#endif
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 class ACE_Reactor;
@@ -40,13 +35,13 @@ namespace DCPS {
 class WriterInfo;
 class EndHistoricSamplesMissedSweeper;
 
-class OpenDDS_Dcps_Export WriterInfoListener
+class OpenDDS_Dcps_Export WriterInfoListener: public virtual RcObject
 {
 public:
   WriterInfoListener();
   virtual ~WriterInfoListener();
 
-  RepoId subscription_id_;
+  GUID_t subscription_id_;
 
   /// The time interval for checking liveliness.
   /// TBD: Should this be initialized with
@@ -72,6 +67,8 @@ public:
   virtual void writer_removed(WriterInfo& info);
 };
 
+typedef RcHandle<WriterInfoListener> WriterInfoListener_rch;
+
 #ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
 enum Coherent_State {
   NOT_COMPLETED_YET,
@@ -88,8 +85,8 @@ public:
   enum WriterState { NOT_SET, ALIVE, DEAD };
   enum TimerState { NO_TIMER = -1 };
 
-  WriterInfo(WriterInfoListener* reader,
-             const PublicationId& writer_id,
+  WriterInfo(const WriterInfoListener_rch& reader,
+             const GUID_t& writer_id,
              const DDS::DataWriterQos& writer_qos);
 
   /// check to see if this writer is alive (called by handle_timeout).
@@ -127,7 +124,7 @@ public:
     handle_ = handle;
   };
 
-  PublicationId writer_id() const
+  GUID_t writer_id() const
   {
     ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
     return writer_id_;
@@ -179,14 +176,14 @@ public:
   void reset_coherent_info();
   void set_group_info(const CoherentChangeControl& info);
   void add_coherent_samples(const SequenceNumber& seq);
-  void coherent_change(bool group_coherent, const RepoId& publisher_id);
+  void coherent_change(bool group_coherent, const GUID_t& publisher_id);
 
   bool group_coherent() const {
     ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
     return group_coherent_;
   }
 
-  RepoId publisher_id() const {
+  GUID_t publisher_id() const {
     ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
     return publisher_id_;
   }
@@ -229,10 +226,10 @@ private:
   WriterState state_;
 
   /// The DataReader owning this WriterInfo
-  WriterInfoListener* reader_;
+  WeakRcHandle<WriterInfoListener> reader_;
 
   /// DCPSInfoRepo ID of the DataWriter
-  PublicationId writer_id_;
+  GUID_t writer_id_;
 
   /// Writer qos
   DDS::DataWriterQos writer_qos_;
@@ -241,11 +238,7 @@ private:
   DDS::InstanceHandle_t handle_;
 
   /// Number of received coherent changes in active change set.
-#ifdef ACE_HAS_CPP11
-  std::atomic<uint32_t> coherent_samples_;
-#else
-  ACE_Atomic_Op<ACE_Thread_Mutex, ACE_UINT32> coherent_samples_;
-#endif
+  Atomic<ACE_UINT32> coherent_samples_;
 
   /// Is this writer evaluated for owner ?
   typedef OPENDDS_MAP(DDS::InstanceHandle_t, bool) OwnerEvaluateFlags;
@@ -254,7 +247,7 @@ private:
   /// Data to support GROUP access scope.
 #ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
   bool group_coherent_;
-  RepoId publisher_id_;
+  GUID_t publisher_id_;
   DisjointSequence coherent_sample_sequence_;
   WriterCoherentSample writer_coherent_samples_;
   GroupCoherentSamples group_coherent_samples_;
@@ -271,9 +264,11 @@ WriterInfo::received_activity(const MonotonicTimePoint& when)
   last_liveliness_activity_time_ = when;
 
   if (state_ != ALIVE) { // NOT_SET || DEAD
-    WriterInfoListener* reader = reader_;
+    RcHandle<WriterInfoListener> reader = reader_.lock();
     guard.release();
-    reader->writer_became_alive(*this, when);
+    if (reader) {
+      reader->writer_became_alive(*this, when);
+    }
   }
 }
 

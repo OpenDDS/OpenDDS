@@ -27,11 +27,11 @@ public:
   virtual void add(ReceivedDataElement* data_sample);
 
 #ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
-  virtual void accept_coherent(const PublicationId& writer,
-                               const RepoId& publisher);
+  virtual void accept_coherent(const GUID_t& writer,
+                               const GUID_t& publisher);
 
-  virtual void reject_coherent(const PublicationId& writer,
-                               const RepoId& publisher);
+  virtual void reject_coherent(const GUID_t& writer,
+                               const GUID_t& publisher);
 #endif
 
 protected:

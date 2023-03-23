@@ -20,8 +20,7 @@
 #include <ace/Null_Mutex.h>
 #endif
 // These are just used to meet signature requirements for a test
-#include <gtest/gtest.h>
-#include <gmock/gmock.h>
+#include <gtestWrapper.h>
 
 #include <sstream>
 #include <fstream>

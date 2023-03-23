@@ -10,7 +10,7 @@ Test::DataWriterListener::DataWriterListener (long expected_matches)
 
 Test::DataWriterListener::~DataWriterListener ()
 {
-  long const matches = this->publication_matches_.value ();
+  long const matches = this->publication_matches_;
   if (matches != this->expected_matches_)
     {
       ACE_ERROR ((LM_ERROR,

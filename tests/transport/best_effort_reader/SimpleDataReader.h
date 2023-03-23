@@ -32,14 +32,14 @@ public:
   void _remove_ref() {}
 
   // Implementing TransportClient
-  OpenDDS::DCPS::RepoId get_repo_id() const { return AppConfig::readerId[index]; }
+  OpenDDS::DCPS::GUID_t get_guid() const { return AppConfig::readerId[index]; }
   bool check_transport_qos(const OpenDDS::DCPS::TransportInst&) { return true; }
   DDS::DomainId_t domain_id() const { return 0; }
   CORBA::Long get_priority_value(const OpenDDS::DCPS::AssociationData&) const { return 0; }
 
 private:
   typedef std::map<
-    OpenDDS::DCPS::RepoId, ACE_INT64, OpenDDS::DCPS::GUID_tKeyLessThan>
+    OpenDDS::DCPS::GUID_t, ACE_INT64, OpenDDS::DCPS::GUID_tKeyLessThan>
     RepoIdSeqNMap;
   bool deserializeEncapsulationHeader(OpenDDS::DCPS::Serializer& s);
   bool deserializeData(TestMsg& data, OpenDDS::DCPS::Serializer& s);

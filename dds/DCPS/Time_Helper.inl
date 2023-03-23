@@ -166,6 +166,14 @@ operator<(const MonotonicTime_t& t1, const MonotonicTime_t& t2)
   return t1.sec < t2.sec || (t1.sec == t2.sec && t1.nanosec < t2.nanosec);
 }
 
+#ifndef OPENDDS_SAFETY_PROFILE
+ACE_INLINE bool
+operator==(const MonotonicTime_t& t1, const MonotonicTime_t& t2)
+{
+  return t1.sec == t2.sec && t1.nanosec == t2.nanosec;
+}
+#endif
+
 ACE_INLINE
 ACE_Time_Value time_to_time_value(const DDS::Time_t& t)
 {
@@ -297,6 +305,15 @@ const MonotonicTime_t& monotonic_time_zero()
 {
   static const MonotonicTime_t zero = { 0, 0 };
   return zero;
+}
+
+ACE_INLINE OpenDDS_Dcps_Export
+DDS::Duration_t make_duration(int sec, unsigned long nanosec)
+{
+  DDS::Duration_t x;
+  x.sec = sec;
+  x.nanosec = nanosec;
+  return x;
 }
 
 } // namespace DCPS

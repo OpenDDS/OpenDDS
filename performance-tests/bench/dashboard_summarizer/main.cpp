@@ -18,7 +18,9 @@ Value& find_or_create(Value& parent, const std::string& name, Type type, Documen
     pos = parent.FindMember(Value(name.c_str(), length));
     assert(pos != parent.MemberEnd());
   }
-  assert(pos->value.GetType() == type);
+  if (type != kNullType) {
+    assert(pos->value.GetType() == type);
+  }
   return pos->value;
 }
 
@@ -92,18 +94,18 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   known_scenario_names.insert("disco");
   known_scenario_names.insert("disco-relay");
   known_scenario_names.insert("disco-repo");
-  known_scenario_names.insert("echo_tcp");
-  known_scenario_names.insert("echo_rtps");
-  known_scenario_names.insert("fan_tcp");
-  known_scenario_names.insert("fan_rtps");
-  known_scenario_names.insert("showtime_mixed");
-  known_scenario_names.insert("b1_latency_raw-tcp");
-  known_scenario_names.insert("b1_latency_raw-udp");
-  known_scenario_names.insert("b1_latency_tcp");
-  known_scenario_names.insert("b1_latency_udp");
-  known_scenario_names.insert("b1_latency_multicast-be");
-  known_scenario_names.insert("b1_latency_multicast-rel");
-  known_scenario_names.insert("b1_latency_rtps");
+  known_scenario_names.insert("echo-tcp");
+  known_scenario_names.insert("echo-rtps");
+  known_scenario_names.insert("fan-tcp");
+  known_scenario_names.insert("fan-rtps");
+  known_scenario_names.insert("showtime-mixed");
+  known_scenario_names.insert("b1-latency-raw-tcp");
+  known_scenario_names.insert("b1-latency-raw-udp");
+  known_scenario_names.insert("b1-latency-tcp");
+  known_scenario_names.insert("b1-latency-udp");
+  known_scenario_names.insert("b1-latency-multicast-be");
+  known_scenario_names.insert("b1-latency-multicast-rel");
+  known_scenario_names.insert("b1-latency-rtps");
 
   typedef std::map<std::string, std::string> StatNameMap;
   StatNameMap known_stat_names;
@@ -129,25 +131,38 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
       return 1;
     }
 
-    // Determine Scenario Name
-    std::string scn;
-    for (auto it = known_scenario_names.begin(); scn.empty() && it != known_scenario_names.end(); ++it) {
-      const std::string with_underscore = *it + '_';
-      if (file_names[i].find(with_underscore) == 0) {
-        scn = *it;
+    // Parse Run Parameters
+    const auto rp_it = doc_in.FindMember("run_parameters");
+    if (rp_it != doc_in.MemberEnd()) {
+      const Value& rp_value_in = rp_it->value;
+      Value& rp_value_out = find_or_create(doc_out, "run_parameters", kObjectType, doc_out.GetAllocator());
+      for (Value::ConstMemberIterator rpi = rp_value_in.MemberBegin(); rpi != rp_value_in.MemberEnd(); ++rpi) {
+        Value& rpi_value_out = find_or_create(rp_value_out, rpi->name.GetString(), kNullType, doc_out.GetAllocator());
+        if (rpi_value_out.IsNull()) {
+          rpi_value_out = rapidjson::Value(rpi->value, doc_out.GetAllocator());
+        } else if (rpi_value_out != rpi->value) {
+          std::cerr << "Run Parameter '" << rpi->name.GetString() << "' is not consistent across input files ('" << rpi_value_out.GetString() << "' vs '" << rpi->value.GetString() <<"'). Exiting" << std::endl;
+          return 1;
+        }
       }
     }
-    if (scn.empty()) {
-      scn = file_names[i].substr(0, file_names[i].find_last_of('_'));
-      std::cerr << "Found Unknown Scenario: " << scn << std::endl;
-    }
-    const std::string scenario_name = scn;
-    const size_t offset = scenario_name.size() + 1;
-    const std::string variety_name = file_names[i].substr(offset, file_names[i].find_first_of('.') - offset);
 
-    // Find or Create Values For Scenario and 'Variety'
-    Value& scenario_value = find_or_create(doc_out, scenario_name, kObjectType, doc_out.GetAllocator());
-    Value& variety_value = find_or_create(scenario_value, variety_name, kObjectType, doc_out.GetAllocator());
+    // Determine Full Scenario Name
+    const std::string full_scenario_name = file_names[i].substr(0, file_names[i].find_first_of('.'));
+
+    // Find or Create Values For Scenario
+    Value& full_scenario_value = find_or_create(doc_out, full_scenario_name, kObjectType, doc_out.GetAllocator());
+
+    // Parse Scenario Parameters
+    const auto sp_it = doc_in.FindMember("scenario_parameters");
+    if (sp_it != doc_in.MemberEnd()) {
+      const Value& sp_value_in = sp_it->value;
+      Value& sp_value_out = find_or_create(full_scenario_value, "scenario_parameters", kObjectType, doc_out.GetAllocator());
+      for (Value::ConstMemberIterator spi = sp_value_in.MemberBegin(); spi != sp_value_in.MemberEnd(); ++spi) {
+        Value& spi_value_out = find_or_create(sp_value_out, spi->name.GetString(), kObjectType, doc_out.GetAllocator());
+        spi_value_out = rapidjson::Value(spi->value, doc_out.GetAllocator());
+      }
+    }
 
     // Write Errors Value
     uint64_t errors = 0;
@@ -159,7 +174,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
       }
     }
 
-    Value& errors_value = find_or_create(variety_value, "Errors", kNumberType, doc_out.GetAllocator());
+    Value& errors_value = find_or_create(full_scenario_value, "Errors", kNumberType, doc_out.GetAllocator());
     errors_value.SetUint64(errors);
 
     // Write Max Discovery Time Delta Value
@@ -175,7 +190,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
       }
     }
 
-    Value& mdtd_value = find_or_create(variety_value, "Max Discovery Time Delta", kNumberType, doc_out.GetAllocator());
+    Value& mdtd_value = find_or_create(full_scenario_value, "Max Discovery Time Delta", kNumberType, doc_out.GetAllocator());
     mdtd_value.SetDouble(discovery_delta_max);
 
     if (stats_it != doc_in.MemberEnd()) {
@@ -183,7 +198,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
       for (Value::ConstMemberIterator ssi = stats_value.MemberBegin(); ssi != stats_value.MemberEnd(); ++ssi) {
         const auto pos = known_stat_names.find(ssi->name.GetString());
         const std::string display_name = pos != known_stat_names.end() ? pos->second : ssi->name.GetString();
-        write_statistic(variety_value, doc_out.GetAllocator(), display_name, ssi->value);
+        write_statistic(full_scenario_value, doc_out.GetAllocator(), display_name, ssi->value);
       }
     }
   }

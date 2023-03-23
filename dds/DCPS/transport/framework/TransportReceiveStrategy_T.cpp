@@ -22,13 +22,13 @@ namespace OpenDDS {
 namespace DCPS {
 
 template<typename TH, typename DSH>
-TransportReceiveStrategy<TH, DSH>::TransportReceiveStrategy(const TransportInst& config,
+TransportReceiveStrategy<TH, DSH>::TransportReceiveStrategy(const TransportInst_rch& config,
                                                             size_t receive_buffers_count)
   : gracefully_disconnected_(false),
     receive_sample_remaining_(0),
-    mb_allocator_(config.receive_preallocated_message_blocks_ ? config.receive_preallocated_message_blocks_ : MESSAGE_BLOCKS),
-    db_allocator_(config.receive_preallocated_data_blocks_ ? config.receive_preallocated_data_blocks_ : DATA_BLOCKS),
-    data_allocator_(config.receive_preallocated_data_blocks_ ? config.receive_preallocated_data_blocks_ : receive_buffers_count * 2),
+    mb_allocator_((config && config->receive_preallocated_message_blocks_) ? config->receive_preallocated_message_blocks_ : MESSAGE_BLOCKS),
+    db_allocator_((config && config->receive_preallocated_data_blocks_) ? config->receive_preallocated_data_blocks_ : DATA_BLOCKS),
+    data_allocator_((config && config->receive_preallocated_data_blocks_) ? config->receive_preallocated_data_blocks_ : receive_buffers_count * 2),
     receive_buffers_(receive_buffers_count, 0),
     buffer_index_(0),
     payload_(0),
@@ -822,8 +822,11 @@ TransportReceiveStrategy<TH, DSH>::handle_dds_input(ACE_HANDLE fd)
         VDBG((LM_DEBUG,"(%P|%t) DBG:   "
               "Now dispatch the sample to the DataLink\n"));
 
-        ReceivedDataSample rds(this->payload_);
-        this->payload_ = 0;  // rds takes ownership of payload_
+        ReceivedDataSample rds = payload_ ? ReceivedDataSample(*payload_) : ReceivedDataSample();
+        if (payload_) {
+          payload_->release();
+          payload_ = 0;
+        }
         if (this->data_sample_header_.into_received_data_sample(rds)) {
 
           if (this->data_sample_header_.more_fragments()
@@ -958,6 +961,13 @@ TransportReceiveStrategy<TH, DSH>::skip_bad_pdus()
   bool done = false;
   update_buffer_index(done);
   return done ? 0 : 1;
+}
+
+template<typename TH, typename DSH>
+ACE_Message_Block*
+TransportReceiveStrategy<TH, DSH>::to_msgblock(const ReceivedDataSample& sample)
+{
+  return sample.data(&mb_allocator_);
 }
 
 }

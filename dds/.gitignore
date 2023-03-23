@@ -11,6 +11,7 @@
 /CharSeqS.h
 /CharSeqS.inl
 /DdsDcps.mpc.orig
+/DdsDcps_lem_stub_export.h
 /DdsDcpsC.cpp
 /DdsDcpsC.h
 /DdsDcpsC.inl
@@ -196,7 +197,6 @@
 /DdsDcpsTypeSupportExtS.cpp
 /DdsDcpsTypeSupportExtS.h
 /DdsDcpsTypeSupportExtS.inl
-/DdsDcps_lem_stub_export.h
 /DdsDynamicDataC.cpp
 /DdsDynamicDataC.h
 /DdsDynamicDataC.inl
@@ -208,6 +208,10 @@
 /DdsDynamicDataSeqTypeSupport.idl
 /DdsDynamicDataSeqTypeSupportImpl.cpp
 /DdsDynamicDataSeqTypeSupportImpl.h
+/DdsDynamicTypeSupportC.cpp
+/DdsDynamicTypeSupportC.h
+/DdsDynamicTypeSupportC.inl
+/DdsDynamicTypeSupportS.h
 /DdsSecurityCoreC.cpp
 /DdsSecurityCoreC.h
 /DdsSecurityCoreC.inl

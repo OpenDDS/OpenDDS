@@ -18,6 +18,7 @@ github_links_root_path = str(opendds_root_path)
 
 def setup(app):
     app.add_config_value('is_release', False, True)
+    app.add_lexer('mpc', MpcLexer)
 
 
 # -- Project information -----------------------------------------------------
@@ -29,9 +30,9 @@ pygments_style = 'manni'
 nitpicky = True
 
 project = 'OpenDDS'
-copyright = '2021, Object Computing, Inc.'
+copyright = '2023, Object Computing, Inc.'
 author = 'Object Computing, Inc.'
-github_links_repo = 'objectcomputing/OpenDDS'
+github_links_repo = 'OpenDDS/OpenDDS'
 
 # Get Version Info
 with (opendds_root_path / 'dds/Version.h').open() as f:
@@ -76,6 +77,7 @@ extensions = [
     'sphinx.ext.ifconfig',
     'github_links',
 ]
+from mpc_lexer import MpcLexer
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']

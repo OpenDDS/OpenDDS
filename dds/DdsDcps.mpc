@@ -33,6 +33,7 @@ project(OpenDDS_Dcps): core, coverage_optional, \
     // -Scdr requires -Sa whether or not the dds_suppress_anys feature is on
     idlflags += -Scdr -Sa
     DdsDynamicData.idl
+    DdsDynamicTypeSupport.idl
   }
 
   TypeSupport_Files {
@@ -70,6 +71,7 @@ project(OpenDDS_Dcps): core, coverage_optional, \
     DdsDcpsTopicS.h
     DdsDcpsTypeSupportExtS.h
     DdsDynamicDataS.h
+    DdsDynamicTypeSupportS.h
   }
 
   // Should this be removed?

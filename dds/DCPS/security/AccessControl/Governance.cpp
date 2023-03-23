@@ -111,8 +111,7 @@ namespace {
 
 int Governance::load(const SSL::SignedDocument& doc)
 {
-  std::string xml;
-  doc.get_original_minus_smime(xml);
+  const std::string& xml = doc.content();
   ParserPtr parser;
   if (!get_parser(parser, doc.filename(), xml)) {
     if (security_debug.access_error) {

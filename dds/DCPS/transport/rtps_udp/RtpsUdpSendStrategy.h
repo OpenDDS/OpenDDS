@@ -1,6 +1,4 @@
 /*
- *
- *
  * Distributed under the OpenDDS License.
  * See: http://www.opendds.org/license.html
  */
@@ -9,26 +7,25 @@
 #define OPENDDS_DCPS_TRANSPORT_RTPS_UDP_RTPSUDPSENDSTRATEGY_H
 
 #include "Rtps_Udp_Export.h"
+#include "RtpsUdpDataLink_rch.h"
 
-#if defined(OPENDDS_SECURITY)
-#include "dds/DdsSecurityCoreC.h"
+#include <dds/DCPS/NetworkAddress.h>
+#include <dds/DCPS/AtomicBool.h>
+#include <dds/DCPS/transport/framework/TransportSendStrategy.h>
+#include <dds/DCPS/RTPS/MessageTypes.h>
+
+#ifdef OPENDDS_SECURITY
+#  include <dds/DdsSecurityCoreC.h>
 #endif
 
-#include "dds/DCPS/NetworkAddress.h"
-#include "dds/DCPS/transport/framework/TransportSendStrategy.h"
-
-#include "dds/DCPS/RTPS/MessageTypes.h"
-
-#include "ace/SOCK_Dgram.h"
+#include <ace/SOCK_Dgram.h>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
 namespace DCPS {
 
-class RtpsUdpDataLink;
 class RtpsUdpInst;
-typedef RcHandle<RtpsUdpDataLink> RtpsUdpDataLink_rch;
 
 class OpenDDS_Rtps_Udp_Export RtpsUdpSendStrategy
   : public TransportSendStrategy {
@@ -58,7 +55,7 @@ public:
   void append_submessages(const RTPS::SubmessageSeq& submessages);
 
 #if defined(OPENDDS_SECURITY)
-  void encode_payload(const RepoId& pub_id, Message_Block_Ptr& payload,
+  void encode_payload(const GUID_t& pub_id, Message_Block_Ptr& payload,
                       RTPS::SubmessageSeq& submessages);
 #endif
 
@@ -146,7 +143,7 @@ private:
   ACE_Data_Block rtps_header_db_;
   ACE_Message_Block rtps_header_mb_;
   ACE_Thread_Mutex rtps_header_mb_lock_;
-  ACE_Atomic_Op<ACE_Thread_Mutex, bool> network_is_unreachable_;
+  AtomicBool network_is_unreachable_;
 };
 
 } // namespace DCPS

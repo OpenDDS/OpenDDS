@@ -281,7 +281,7 @@ sub run_command {
 
   my $name = $args{name} // $command_list[0];
   my @capture_directives = process_capture_arguments($args{capture});
-  my $verbose = $args{verbose} // $args{dry_run};
+  my $verbose = $args{verbose};
   my $verbose_fh = $args{verbose_fh};
   my $dry_run = $args{dry_run};
   my $script_name = $args{script_name} ? "$args{script_name}: " : "";
@@ -300,8 +300,8 @@ sub run_command {
     else {
       print $verbose_fh ("(string): \"$command_str\"\n");
     }
-    return 0 if ($dry_run);
   }
+  return 0 if ($dry_run);
 
   # Start captures
   for my $capture_directive (@capture_directives) {

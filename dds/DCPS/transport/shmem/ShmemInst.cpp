@@ -19,13 +19,14 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
+const TimeDuration ShmemInst::default_association_resend_period(0, 250000);
+
 ShmemInst::ShmemInst(const std::string& name)
   : TransportInst("shmem", name)
   , pool_size_(16 * 1024 * 1024)
   , datalink_control_size_(4 * 1024)
   , hostname_(get_fully_qualified_hostname())
-  , association_resend_period_(0, 250000)
-  , association_resend_max_count_(10)
+  , association_resend_period_(default_association_resend_period)
 {
   std::ostringstream pool;
   pool << "OpenDDS-" << ACE_OS::getpid() << '-' << this->name();
@@ -35,7 +36,7 @@ ShmemInst::ShmemInst(const std::string& name)
 TransportImpl_rch
 ShmemInst::new_impl()
 {
-  return make_rch<ShmemTransport>(ref(*this));
+  return make_rch<ShmemTransport>(rchandle_from(this));
 }
 
 int
@@ -56,8 +57,6 @@ ShmemInst::load(ACE_Configuration_Heap& cf,
                    datalink_control_size_, size_t)
   GET_CONFIG_TIME_VALUE(cf, sect,
     ACE_TEXT("association_resend_period"), association_resend_period_);
-  GET_CONFIG_VALUE(cf, sect,
-    ACE_TEXT("association_resend_max_count"), association_resend_max_count_, size_t);
 
   return 0;
 }
@@ -71,8 +70,7 @@ ShmemInst::dump_to_str() const
      << formatNameForDump("datalink_control_size") << datalink_control_size_ << "\n"
      << formatNameForDump("pool_name") << this->poolname_ << "\n"
      << formatNameForDump("host_name") << this->hostname_ << "\n"
-     << formatNameForDump("association_resend_period") << association_resend_period_.str() << "\n"
-     << formatNameForDump("association_resend_max_count") << association_resend_max_count_ << "\n";
+     << formatNameForDump("association_resend_period") << association_resend_period_.str() << "\n";
   return OPENDDS_STRING(os.str());
 }
 

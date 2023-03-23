@@ -31,7 +31,7 @@ RepoIdGenerator::~RepoIdGenerator()
 {
 }
 
-RepoId
+GUID_t
 RepoIdGenerator::next(bool builtin)
 {
   // Generate a new key value.
@@ -75,7 +75,7 @@ RepoIdGenerator::next(bool builtin)
     builder.entityKind(kind_, builtin);
   }
 
-  return RepoId(builder);
+  return GUID_t(builder);
 }
 
 void

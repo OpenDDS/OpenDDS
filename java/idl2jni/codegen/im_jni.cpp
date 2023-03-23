@@ -668,6 +668,7 @@ bool idl_mapping_jni::gen_jarray_copies(UTL_ScopedName *name,
                                         const string &jniArrayType, const string &taoTypeName, bool sequence,
                                         const string &length, bool elementIsObjref /* = false */)
 {
+  const bool lengthIsConstant = !sequence;
   commonSetup c(name, jniArrayType.c_str(), false, !sequence);
   string preLoop, postLoopCxx, postLoopJava, preNewArray, newArrayExtra,
   postNewArray, loopCxx, loopJava, actualJniType = jniType,
@@ -809,12 +810,21 @@ bool idl_mapping_jni::gen_jarray_copies(UTL_ScopedName *name,
   "  target = arr;\n";
 
   ostringstream toCxxBody;
+  if (lengthIsConstant) {
+    toCxxBody <<
+      "  const CORBA::ULong target_len = " << length << ";\n";
+  }
   toCxxBody <<
   "  " << actualJniType << "Array arr = source;\n"
   "  jsize len = jni->GetArrayLength (arr);\n"
   << resizeCxx
   << preLoop <<
-  "  for (CORBA::ULong i = 0; i < static_cast<CORBA::ULong> (len); ++i)\n"
+  "  for (CORBA::ULong i = 0; ";
+  if (lengthIsConstant) {
+    toCxxBody << "i < target_len && ";
+  }
+  toCxxBody <<
+  "i < static_cast<CORBA::ULong> (len); ++i)\n"
   "    {\n"
   << loopCxx <<
   "    }\n"
@@ -1388,25 +1398,31 @@ void write_native_operation(UTL_ScopedName *name, const char *javaStub,
     //FUTURE: support user exceptions
     be_global->stub_header_ <<
       "  " << tao_ret << ' ' << opname_cxx << " (" << tao_args << ");\n\n";
-    be_global->stub_impl_ <<
-    tao_ret << ' ' << idl_mapping_jni::scoped_helper(name, "_")
-            << "JavaPeer::" << opname_cxx << " (" << tao_args << ")\n"
-    "{\n"
-    "  JNIThreadAttacher _jta (jvm_, cl_);\n"
-    "  JNIEnv *_jni = _jta.getJNI ();\n"
-    << tao_argconv_in <<
-    "  jclass _clazz = _jni->GetObjectClass (globalCallback_);\n"
-    "  jmethodID _mid = _jni->GetMethodID (_clazz, \"" << opname
-    << "\", \"(" << args_jsig << ")" << ret_jsig << "\");\n"
-    "  " << tao_retval << array_cast << "_jni->Call" << jniFn
-    << "Method (globalCallback_, _mid" << java_args
-    << ((array_cast == "") ? "" : ")") << ");\n"
-    "  _jni->DeleteLocalRef (_clazz);\n"
-    "  jthrowable _excep = _jni->ExceptionOccurred ();\n"
-    "  if (_excep) throw_cxx_exception (_jni, _excep);\n"
-    << tao_argconv_out
-    << tao_retconv <<
-    "}\n\n";
+    be_global->stub_impl_ << tao_ret << ' ' <<
+      idl_mapping_jni::scoped_helper(name, "_") << "JavaPeer::" << opname_cxx <<
+      " (" << tao_args << ")\n"
+      "{\n";
+    std::string hidden_impl;
+    if (is_hidden_op_in_java(op, &hidden_impl)) {
+      be_global->stub_impl_ << "  " << hidden_impl << "\n";
+    } else {
+      be_global->stub_impl_ <<
+        "  JNIThreadAttacher _jta (jvm_, cl_);\n"
+        "  JNIEnv *_jni = _jta.getJNI ();\n"
+        << tao_argconv_in <<
+        "  jclass _clazz = _jni->GetObjectClass (globalCallback_);\n"
+        "  jmethodID _mid = _jni->GetMethodID (_clazz, \"" << opname
+        << "\", \"(" << args_jsig << ")" << ret_jsig << "\");\n"
+        "  " << tao_retval << array_cast << "_jni->Call" << jniFn
+        << "Method (globalCallback_, _mid" << java_args
+        << ((array_cast == "") ? "" : ")") << ");\n"
+        "  _jni->DeleteLocalRef (_clazz);\n"
+        "  jthrowable _excep = _jni->ExceptionOccurred ();\n"
+        "  if (_excep) throw_cxx_exception (_jni, _excep);\n"
+        << tao_argconv_out
+        << tao_retconv;
+    }
+    be_global->stub_impl_ << "}\n\n";
   }
 
   be_global->stub_impl_ <<

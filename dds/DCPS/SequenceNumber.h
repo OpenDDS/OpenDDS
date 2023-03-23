@@ -203,6 +203,9 @@ void serialized_size(const Encoding& encoding, size_t& size,
 typedef std::pair<SequenceNumber, SequenceNumber> SequenceRange;
 extern OpenDDS_Dcps_Export const SequenceRange unknown_sequence_range;
 
+typedef SequenceNumber::Value FragmentNumber;
+static const FragmentNumber INVALID_FRAGMENT = -1;
+
 } // namespace DCPS
 } // namespace OpenDDS
 

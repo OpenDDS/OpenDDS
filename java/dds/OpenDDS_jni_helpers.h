@@ -1,6 +1,4 @@
 /*
- *
- *
  * Distributed under the OpenDDS License.
  * See: http://www.opendds.org/license.html
  */
@@ -8,13 +6,15 @@
 #ifndef OpenDDS_jni_helpers_H
 #define OpenDDS_jni_helpers_H
 
-#include "idl2jni_jni.h"
+#include <idl2jni_jni.h>
+#include <idl2jni_runtime.h>
 
 #include <dds/DCPS/LogAddr.h>
 
-#include "ace/Basic_Types.h"
-#include "ace/INET_Addr.h"
-#include "ace/SString.h"
+#include <ace/Basic_Types.h>
+#include <ace/INET_Addr.h>
+#include <ace/SString.h>
+
 #include <string>
 
 namespace jvmSig {

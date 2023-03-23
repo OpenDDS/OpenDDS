@@ -1,6 +1,4 @@
 /*
- *
- *
  * Distributed under the OpenDDS License.
  * See: http://www.opendds.org/license.html
  */
@@ -14,20 +12,18 @@
 #include "Serializer.h"
 #include "SafetyProfileStreams.h"
 #include "XTypes/TypeObject.h"
+#include "XTypes/TypeLookupService.h"
 
+#include <dds/DdsDynamicDataC.h>
 #include <dds/DdsDcpsTypeSupportExtC.h>
 
-#if !defined (ACE_LACKS_PRAGMA_ONCE)
-#pragma once
-#endif /* ACE_LACKS_PRAGMA_ONCE */
+#ifndef ACE_LACKS_PRAGMA_ONCE
+#  pragma once
+#endif
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
-namespace XTypes {
-class TypeLookupService;
-}
-
 namespace DCPS {
 
 class MetaStruct;
@@ -76,10 +72,17 @@ class OpenDDS_Dcps_Export TypeSupportImpl
 public:
   TypeSupportImpl() {}
 
+#ifndef OPENDDS_SAFETY_PROFILE
+  explicit TypeSupportImpl(DDS::DynamicType_ptr type)
+  : type_(DDS::DynamicType::_duplicate(type))
+  {
+  }
+#endif
+
   virtual ~TypeSupportImpl();
 
 #ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
-  virtual const MetaStruct& getMetaStructForType() = 0;
+  virtual const MetaStruct& getMetaStructForType() const = 0;
 #endif
 
   virtual DDS::ReturnCode_t register_type(DDS::DomainParticipant_ptr participant,
@@ -88,41 +91,150 @@ public:
   virtual DDS::ReturnCode_t unregister_type(DDS::DomainParticipant_ptr participant,
                                             const char* type_name);
 
+  virtual const char* name() const = 0;
+
+  /// NOTE: This one implements the IDL TypeSupport method so it returns a CORBA String
+  /// that the caller must take ownership of.
   virtual char* get_type_name();
 
-  /// Get allowed representations defined by IDL annotations
-  virtual void representations_allowed_by_type(
-    DDS::DataRepresentationIdSeq& seq) = 0;
+#ifndef OPENDDS_SAFETY_PROFILE
+  virtual DDS::DynamicType_ptr get_type() const
+  {
+    return DDS::DynamicType::_duplicate(type_);
+  }
+
+  // IDL local interface uses non-const memebers
+  DDS::DynamicType_ptr get_type()
+  {
+    return DDS::DynamicType::_duplicate(type_);
+  }
+#endif
+
+  virtual size_t key_count() const = 0;
+  virtual bool is_dcps_key(const char* fieldname) const = 0;
+
+  bool has_dcps_key()
+  {
+    return key_count();
+  }
+
+  virtual SerializedSizeBound serialized_size_bound(const Encoding& encoding) const = 0;
+  virtual SerializedSizeBound key_only_serialized_size_bound(const Encoding& encoding) const = 0;
+
+  /// Returns the extensibility of just the topic type.
+  virtual Extensibility base_extensibility() const = 0;
+  /// Between the topic type and its nested types, return the extensibility
+  /// that is furthest right in (final, appenable, mutable).
+  virtual Extensibility max_extensibility() const = 0;
 
   virtual const XTypes::TypeIdentifier& getMinimalTypeIdentifier() const = 0;
   virtual const XTypes::TypeMap& getMinimalTypeMap() const = 0;
   virtual const XTypes::TypeIdentifier& getCompleteTypeIdentifier() const = 0;
   virtual const XTypes::TypeMap& getCompleteTypeMap() const = 0;
 
-  virtual Extensibility getExtensibility() const = 0;
-
   void to_type_info(XTypes::TypeInformation& type_info) const;
+  virtual const XTypes::TypeInformation* preset_type_info() const
+  {
+    return 0;
+  }
 
-  void add_types(const RcHandle<XTypes::TypeLookupService>& tls) const;
-  void populate_dependencies(const RcHandle<XTypes::TypeLookupService>& tls) const;
+  void add_types(const XTypes::TypeLookupService_rch& tls) const;
+
+protected:
+#ifndef OPENDDS_SAFETY_PROFILE
+  void get_type_from_type_lookup_service();
+
+  DDS::DynamicType_var type_;
+#endif
 
 private:
   static const ACE_CDR::Long TYPE_INFO_DEPENDENT_COUNT_NOT_PROVIDED;
-
-  virtual const char* default_type_name() const = 0;
 
   void to_type_info_i(XTypes::TypeIdentifierWithDependencies& ti_with_deps,
                       const XTypes::TypeIdentifier& ti,
                       const XTypes::TypeMap& type_map) const;
 
-  void populate_dependencies_i(const RcHandle<XTypes::TypeLookupService>& tls,
+  void populate_dependencies_i(const XTypes::TypeLookupService_rch& tls,
                                XTypes::EquivalenceKind ek) const;
 
-  OPENDDS_DELETED_COPY_MOVE_CTOR_ASSIGN(TypeSupportImpl)
+#ifndef OPENDDS_SAFETY_PROFILE
+  XTypes::TypeLookupService_rch type_lookup_service_;
+#endif
 
+  OPENDDS_DELETED_COPY_MOVE_CTOR_ASSIGN(TypeSupportImpl)
 };
 
-const char* kind_to_string(const XTypes::EquivalenceKind ek);
+template <typename NativeType>
+class TypeSupportImpl_T : public TypeSupportImpl {
+public:
+  typedef DDSTraits<NativeType> TraitsType;
+  typedef MarshalTraits<NativeType> MarshalTraitsType;
+
+  const char* name() const
+  {
+    return TraitsType::type_name();
+  }
+
+  size_t key_count() const
+  {
+    return TraitsType::key_count();
+  }
+
+  bool is_dcps_key(const char* fieldname) const
+  {
+    return TraitsType::is_key(fieldname);
+  }
+
+  void representations_allowed_by_type(DDS::DataRepresentationIdSeq& seq)
+  {
+    MarshalTraitsType::representations_allowed_by_type(seq);
+  }
+
+  Extensibility base_extensibility() const
+  {
+    return MarshalTraitsType::extensibility();
+  }
+
+  Extensibility max_extensibility() const
+  {
+    return MarshalTraitsType::max_extensibility_level();
+  }
+
+  SerializedSizeBound serialized_size_bound(const Encoding& encoding) const
+  {
+    return MarshalTraitsType::serialized_size_bound(encoding);
+  }
+
+  SerializedSizeBound key_only_serialized_size_bound(const Encoding& encoding) const
+  {
+    return MarshalTraitsType::key_only_serialized_size_bound(encoding);
+  }
+
+#ifndef OPENDDS_SAFETY_PROFILE
+  DDS::DynamicType_ptr get_type()
+  {
+    get_type_from_type_lookup_service();
+    return TypeSupportImpl::get_type();
+  }
+#endif
+};
+
+template <typename T>
+struct TypeSupportInitializer {
+  TypeSupportInitializer()
+    : ts_(new T)
+  {
+    ts_->register_type(0, "");
+  }
+
+  ~TypeSupportInitializer()
+  {
+    T* const t = dynamic_cast<T*>(ts_.in());
+    ts_->unregister_type(0, t ? t->name() : 0);
+  }
+
+  typename T::_var_type ts_;
+};
 
 } // namespace DCPS
 } // namespace OpenDDS

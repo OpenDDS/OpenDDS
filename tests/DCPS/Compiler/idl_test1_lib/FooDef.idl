@@ -114,7 +114,7 @@ module Xyz {
   typedef char MyChar;
   typedef sequence<MyChar, 5> AMyCharSeq;
 
-  // Test for https://github.com/objectcomputing/OpenDDS/issues/3268
+  // Test for https://github.com/OpenDDS/OpenDDS/issues/3268
   @topic
   struct OnlyAMyCharSeq {
     AMyCharSeq only_member;

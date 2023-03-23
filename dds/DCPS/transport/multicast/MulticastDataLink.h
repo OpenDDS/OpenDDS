@@ -9,48 +9,40 @@
 #define OPENDDS_DCPS_TRANSPORT_MULTICAST_MULTICASTDATALINK_H
 
 #include "Multicast_Export.h"
-
 #include "MulticastInst.h"
-#include "MulticastSendStrategy.h"
 #include "MulticastSendStrategy_rch.h"
-#include "MulticastReceiveStrategy.h"
 #include "MulticastReceiveStrategy_rch.h"
+#include "MulticastTransport_rch.h"
 #include "MulticastSession_rch.h"
-#include "MulticastSessionFactory.h"
 #include "MulticastSessionFactory_rch.h"
-#include "MulticastTransport.h"
 #include "MulticastTypes.h"
 
-#include "dds/DCPS/DisjointSequence.h"
-#include "dds/DCPS/PoolAllocator.h"
+#include <dds/DCPS/DisjointSequence.h>
+#include <dds/DCPS/PoolAllocator.h>
+#include <dds/DCPS/transport/framework/DataLink.h>
+#include <dds/DCPS/ReactorTask.h>
+#include <dds/DCPS/transport/framework/TransportSendBuffer.h>
 
-#include "dds/DCPS/transport/framework/DataLink.h"
-#include "dds/DCPS/ReactorTask.h"
-#include "dds/DCPS/transport/framework/TransportSendBuffer.h"
-
-#include "ace/SOCK_Dgram_Mcast.h"
-#include "ace/Synch_Traits.h"
+#include <ace/SOCK_Dgram_Mcast.h>
+#include <ace/Synch_Traits.h>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
 namespace DCPS {
 
-class MulticastTransport;
-typedef RcHandle<MulticastTransport> MulticastTransport_rch;
-
 class OpenDDS_Multicast_Export MulticastDataLink
   : public DataLink {
 public:
-  MulticastDataLink(MulticastTransport& transport,
+  MulticastDataLink(const MulticastTransport_rch& transport,
                     const MulticastSessionFactory_rch& session_factory,
                     MulticastPeer local_peer,
-                    MulticastInst& config,
+                    const MulticastInst_rch& config,
                     const ReactorTask_rch& reactor_task,
                     bool is_active);
   virtual ~MulticastDataLink();
 
-  MulticastTransport& transport();
+  MulticastTransport_rch transport();
 
   MulticastPeer local_peer() const;
 
@@ -60,7 +52,7 @@ public:
 
   SingleSendBuffer* send_buffer();
 
-  MulticastInst& config();
+  MulticastInst_rch config();
 
   ReactorTask_rch reactor_task();
   ACE_Reactor* get_reactor();
@@ -79,14 +71,14 @@ public:
 
   bool reassemble(ReceivedDataSample& data, const TransportHeader& header);
 
-  int make_reservation(const RepoId& remote_publication_id,
-                       const RepoId& local_subscription_id,
+  int make_reservation(const GUID_t& remote_publication_id,
+                       const GUID_t& local_subscription_id,
                        const TransportReceiveListener_wrch& receive_listener,
                        bool reliable);
-  void release_reservations_i(const RepoId& remote_id,
-                              const RepoId& local_id);
+  void release_reservations_i(const GUID_t& remote_id,
+                              const GUID_t& local_id);
 
-  void client_stop(const RepoId& localId);
+  void client_stop(const GUID_t& localId);
 
 private:
 
@@ -113,7 +105,7 @@ private:
   void syn_received_no_session(MulticastPeer source, const Message_Block_Ptr& data,
                                bool swap_bytes);
 
-  void release_remote_i(const RepoId& remote);
+  void release_remote_i(const GUID_t& remote);
   RepoIdSet readers_selected_, readers_withheld_;
   bool ready_to_deliver(const ReceivedDataSample& data);
 };

@@ -30,10 +30,9 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-TransportImpl::TransportImpl(TransportInst& config)
+TransportImpl::TransportImpl(TransportInst_rch config)
   : config_(config)
   , event_dispatcher_(make_rch<ServiceEventDispatcher>(1))
-  , last_link_(0)
   , is_shut_down_(false)
 {
   DBG_ENTRY_LVL("TransportImpl", "TransportImpl", 6);
@@ -51,7 +50,7 @@ TransportImpl::~TransportImpl()
 bool
 TransportImpl::is_shut_down() const
 {
-  return is_shut_down_.value();
+  return is_shut_down_;
 }
 
 void
@@ -100,7 +99,7 @@ TransportImpl::add_pending_connection(const TransportClient_rch& client, DataLin
 void
 TransportImpl::create_reactor_task(bool useAsyncSend, const OPENDDS_STRING& name)
 {
-  if (is_shut_down_.value() || this->reactor_task_.in()) {
+  if (is_shut_down_ || this->reactor_task_.in()) {
     return;
   }
 
@@ -151,7 +150,8 @@ TransportImpl::dump()
 OPENDDS_STRING
 TransportImpl::dump_to_str()
 {
-  return config_.dump_to_str();
+  TransportInst_rch cfg = config_.lock();
+  return cfg ? cfg->dump_to_str() : OPENDDS_STRING();
 }
 
 }

@@ -200,6 +200,7 @@ void AllocationHelper::add_single_worker_to_node(const WorkerPrototype& protowor
   process.command = protoworker.command.in();
   auto config_iter = worker_configs.find(protoworker.config.in());
   if (config_iter != worker_configs.end()) {
+    process.config_name = config_iter->first.c_str();
     process.config = config_iter->second.c_str();
   }
   process.count = 1;
@@ -233,6 +234,7 @@ void AllocationHelper::add_protoworkers_to_node(const WorkerPrototypes& protowor
     process.command = protoworker.command.in();
     auto config_iter = worker_configs.find(protoworker.config.in());
     if (config_iter != worker_configs.end()) {
+      process.config_name = config_iter->first.c_str();
       process.config = config_iter->second.c_str();
     }
     process.count = protoworker.count;

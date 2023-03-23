@@ -19,6 +19,13 @@ RtpsUdpDataLink::get_reactor()
   return reactor_task_->get_reactor();
 }
 
+ACE_INLINE ReactorInterceptor_rch
+RtpsUdpDataLink::get_reactor_interceptor() const
+{
+  if (!reactor_task_) return ReactorInterceptor_rch();
+  return reactor_task_->interceptor();
+}
+
 ACE_INLINE bool
 RtpsUdpDataLink::reactor_is_shut_down()
 {

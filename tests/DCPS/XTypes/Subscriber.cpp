@@ -4,169 +4,217 @@
 
 #include <dds/DCPS/DCPS_Utils.h>
 
-template<typename T1>
-ReturnCode_t check_additional_field_value(const T1& data,
-  AdditionalFieldValue expected_additional_field_value)
-{
-  ReturnCode_t ret = RETCODE_OK;
-  if (data[0].additional_field != expected_additional_field_value) {
-    ACE_DEBUG((LM_DEBUG, "reader: expected additional field value: %d, received: %d\n",
-               expected_additional_field_value, data[0].additional_field));
-    ret = RETCODE_ERROR;
+struct ReadTest {
+  DDS::TypeSupport* ts;
+  DDS::DataReader* dr;
+  const std::string& topic_name;
+  bool dynamic;
+#ifndef OPENDDS_SAFETY_PROFILE
+  DDS::DynamicData_var dd;
+#endif
+  CORBA::String_var type_name;
+  bool success;
+
+  ReadTest(DDS::TypeSupport* ts, DDS::DataReader* dr, const std::string& topic_name, bool dynamic)
+    : ts(ts)
+    , dr(dr)
+    , topic_name(topic_name)
+    , dynamic(dynamic)
+#ifndef OPENDDS_SAFETY_PROFILE
+    , dd(0)
+#endif
+    , type_name(ts->get_type_name())
+    , success(true)
+  {
   }
 
-  return ret;
-}
-
-template<typename T1, typename T2>
-ReturnCode_t read_tryconstruct_struct(const DataReader_var& dr, const T1& pdr, T2& data,
-                                      const std::string& expected_value)
-{
-  ReturnCode_t ret = RETCODE_OK;
-  if ((ret = read_i(dr, pdr, data)) == RETCODE_OK) {
-    if (data.length() != 1) {
-      ACE_ERROR((LM_ERROR, "ERROR: reader: unexpected data length: %d\n", data.length()));
-      ret = RETCODE_ERROR;
-    } else if (ACE_OS::strcmp(data[0].trim_string, expected_value.c_str()) != 0) {
-      ACE_ERROR((LM_ERROR, "ERROR: reader: expected key value: %C, received: %C\n",
-                 expected_value.c_str(), data[0].trim_string.in()));
-      ret = RETCODE_ERROR;
-    } else if (verbose) {
-      ACE_ERROR((LM_DEBUG, "reader: %C\n", data[0].trim_string.in()));
+  void check_int32(const std::string& path, CORBA::Int32 expected, CORBA::Int32 actual)
+  {
+    if (expected != actual) {
+      ACE_ERROR((LM_ERROR, "ERROR: check_int32 for %C.%C: expected %d, received %d\n",
+        type_name.in(), path.c_str(), expected, actual));
+      success = false;
     }
-  } else {
-    ACE_ERROR((LM_ERROR, "ERROR: Reader: read_i returned %C\n",
-               OpenDDS::DCPS::retcode_to_string(ret)));
   }
 
-  return ret;
-}
-
-template<typename T1, typename T2>
-ReturnCode_t read_struct(const DataReader_var& dr, const T1& pdr, T2& data)
-{
-  ReturnCode_t ret = RETCODE_OK;
-  if ((ret = read_i(dr, pdr, data)) == RETCODE_OK) {
-    if (data.length() != 1) {
-      ACE_ERROR((LM_ERROR, "reader: unexpected data length: %d\n", data.length()));
-      ret = RETCODE_ERROR;
-    } else if (data[0].key_field != key_value) {
-      ACE_ERROR((LM_ERROR, "reader: expected key value: %d, received: %d\n", key_value, data[0].key_field));
-      ret = RETCODE_ERROR;
-    } else if (verbose) {
-      ACE_DEBUG((LM_DEBUG, "reader: %d\n", data[0].key_field));
+  void check_int32(const std::string& path, CORBA::Int32 expected)
+  {
+#ifdef OPENDDS_SAFETY_PROFILE
+    ACE_UNUSED_ARG(path);
+    ACE_UNUSED_ARG(expected);
+    success = false;
+#else
+    DDS::DynamicData_var use_dd;
+    DDS::MemberId use_id;
+    CORBA::Int32 actual;
+    OpenDDS::XTypes::MemberPath member_path;
+    DDS::DynamicType_var dt = ts->get_type();
+    if (!(dd && check_rc(member_path.resolve_string_path(dt, path), "check_int32: resolve_string_path") &&
+        check_rc(member_path.get_member_from_data(dd, use_dd, use_id), "check_int32: get_member_from_data") &&
+        check_rc(use_dd->get_int32_value(actual, use_id), "check_int32: get_int32_value"))) {
+      ACE_ERROR((LM_ERROR, "ERROR: check_int32 for %C.%C failed\n", type_name.in(), path.c_str()));
+      success = false;
+      return;
     }
-  } else {
-    ACE_ERROR((LM_ERROR, "ERROR: Reader: read_i returned %C\n",
-               OpenDDS::DCPS::retcode_to_string(ret)));
+    check_int32(path, expected, actual);
+#endif
   }
 
-  return ret;
-}
+  void check_string(const std::string& path, const std::string& expected, const char* actual)
+  {
+    if (expected != actual) {
+      ACE_ERROR((LM_ERROR, "ERROR: check_string for %C.%C: expected \"%C\", received \"%C\"\n",
+        type_name.in(), path.c_str(), expected.c_str(), actual));
+      success = false;
+    }
+  }
 
-template<typename T1, typename T2>
-ReturnCode_t read_union(const DataReader_var& dr, const T1& pdr, T2& data)
-{
-  ReturnCode_t ret = RETCODE_OK;
-  if ((ret = read_i(dr, pdr, data)) == RETCODE_OK) {
-    if (data.length() != 1) {
-      ACE_ERROR((LM_ERROR, "reader: unexpected data length: %d\n", data.length()));
-      ret = RETCODE_ERROR;
+  void check_string(const std::string& path, const std::string& expected)
+  {
+#ifdef OPENDDS_SAFETY_PROFILE
+    ACE_UNUSED_ARG(path);
+    ACE_UNUSED_ARG(expected);
+    success = false;
+#else
+    DDS::DynamicData_var use_dd;
+    DDS::MemberId use_id;
+    CORBA::String_var actual;
+    OpenDDS::XTypes::MemberPath member_path;
+    DDS::DynamicType_var dt = ts->get_type();
+    if (!(dd && check_rc(member_path.resolve_string_path(dt, path), "check_string: resolve_string_path") &&
+        check_rc(member_path.get_member_from_data(dd, use_dd, use_id), "check_string: get_member_from_data") &&
+        check_rc(use_dd->get_string_value(actual, use_id), "check_int32: get_int32_value"))) {
+      ACE_ERROR((LM_ERROR, "ERROR: check_string for %C.%C failed\n", type_name.in(), path.c_str()));
+      success = false;
+      return;
+    }
+    check_string(path, expected, actual);
+#endif
+  }
+
+  template <typename DataReaderType, typename SeqType>
+  bool read_single(SeqType& seq)
+  {
+    if (!read_i<DataReaderType>(dr, seq)) {
+      ACE_ERROR((LM_ERROR, "ERROR: read_single %C failed\n", type_name.in()));
+      return false;
+    }
+    if (seq.length() != 1) {
+      ACE_ERROR((LM_ERROR, "ERROR: read_single %C expected one, but sample got %u\n",
+        type_name.in(), seq.length()));
+      return false;
+    }
+    return true;
+  }
+
+  template <typename SampleType>
+  bool read(SampleType& sample)
+  {
+    typedef typename OpenDDS::DCPS::DDSTraits<SampleType> Traits;
+    typedef typename Traits::MessageSequenceType SeqType;
+    SeqType seq;
+    if (!read_single<typename Traits::DataReaderType, SeqType>(seq)) {
+      return false;
+    }
+    sample = seq[0];
+    return true;
+  }
+
+  bool read_dynamic()
+  {
+#ifdef OPENDDS_SAFETY_PROFILE
+    success = false;
+    return false;
+#else
+    DDS::DynamicDataSeq seq;
+    if (!read_single<DDS::DynamicDataReader, DDS::DynamicDataSeq>(seq)) {
+      return false;
+    }
+    // TODO: the duplicate shouldn't be required, but a direct assignment isn't
+    // incrementing the reference count.
+    // https://github.com/DOCGroup/ACE_TAO/issues/2037
+    dd = DDS::DynamicData::_duplicate(seq[0]);
+    return true;
+#endif
+  }
+
+  template <typename TopicType>
+  void read_kf_struct()
+  {
+    if (dynamic) {
+      if (read_dynamic()) {
+        check_int32("key_field", key_value);
+      }
     } else {
-      switch (data[0]._d()) {
-      case E_KEY:
-        if (data[0].key_field() != key_value) {
-          ACE_ERROR((LM_ERROR, "reader: expected union key value: %d, received: %d\n",
-            key_value, data[0].key_field()));
-          ret = RETCODE_ERROR;
-        }
-        if (verbose) {
-          ACE_DEBUG((LM_DEBUG, "reader: union key %d\n", data[0].key_field()));
-        }
-        break;
-      case E_ADDITIONAL_FIELD:
-        if (data[0].additional_field() != key_value) {
-          ACE_ERROR((LM_ERROR, "reader: expected additional_field value: %d, received: %d\n",
-            key_value, data[0].additional_field()));
-          ret = RETCODE_ERROR;
-        }
-        if (verbose) {
-          ACE_DEBUG((LM_DEBUG, "reader: union additional_field %d\n", data[0].additional_field()));
-        }
-        break;
-      default:
-        break;
+      TopicType data;
+      if (read(data)) {
+        check_int32("key_field", key_value, data.key_field);
       }
     }
-  } else {
-    ACE_ERROR((LM_ERROR, "ERROR: Reader: read_i returned %C\n",
-               OpenDDS::DCPS::retcode_to_string(ret)));
   }
 
-  return ret;
-}
-
-ReturnCode_t read_plain_cdr_struct(const DataReader_var& dr)
-{
-  PlainCdrStructDataReader_var pdr = PlainCdrStructDataReader::_narrow(dr);
-  ::PlainCdrStructSeq data;
-  return read_struct(dr, pdr, data);
-}
-
-
-ReturnCode_t read_final_struct(const DataReader_var& dr)
-{
-  FinalStructSubDataReader_var pdr = FinalStructSubDataReader::_narrow(dr);
-  ::FinalStructSubSeq data;
-  return read_struct(dr, pdr, data);
-}
-
-ReturnCode_t read_appendable_struct(const DataReader_var& dr)
-{
-  AppendableStructDataReader_var pdr = AppendableStructDataReader::_narrow(dr);
-  ::AppendableStructSeq data;
-  return read_struct(dr, pdr, data);
-}
-
-ReturnCode_t read_appendable_struct_no_xtypes(const DataReader_var& dr)
-{
-  AppendableStructNoXTypesDataReader_var pdr = AppendableStructNoXTypesDataReader::_narrow(dr);
-  ::AppendableStructNoXTypesSeq data;
-  return read_struct(dr, pdr, data);
-}
-
-ReturnCode_t read_mutable_struct(const DataReader_var& dr, const AdditionalFieldValue& afv)
-{
-  MutableStructDataReader_var pdr = MutableStructDataReader::_narrow(dr);
-  ::MutableStructSeq data;
-  ReturnCode_t ret;
-  ret = read_struct(dr, pdr, data);
-  if (ret == RETCODE_OK) {
-    ret = check_additional_field_value(data, afv);
+  template <typename TopicType>
+  void read_kf_af_struct(AdditionalFieldValue afv)
+  {
+    if (dynamic) {
+      if (read_dynamic()) {
+        check_int32("key_field", key_value);
+        check_int32("additional_field", afv);
+      }
+    } else {
+      TopicType data;
+      if (read(data)) {
+        check_int32("key_field", key_value, data.key_field);
+        check_int32("additional_field", afv, data.additional_field);
+      }
+    }
   }
-  return ret;
-}
 
-ReturnCode_t read_mutable_union(const DataReader_var& dr)
-{
-  MutableUnionDataReader_var pdr = MutableUnionDataReader::_narrow(dr);
-  ::MutableUnionSeq data;
-  return read_union(dr, pdr, data);
-}
+  template <typename TopicType>
+  void read_trim_struct()
+  {
+    if (dynamic) {
+      if (read_dynamic()) {
+        check_string("trim_string", STRING_20);
+      }
+    } else {
+      TopicType data;
+      if (read(data)) {
+        check_string("trim_string", STRING_20, data.trim_string);
+      }
+    }
+  }
 
-ReturnCode_t read_trim20_struct(const DataReader_var& dr)
-{
-  Trim20StructDataReader_var pdr = Trim20StructDataReader::_narrow(dr);
-  ::Trim20StructSeq data;
-  return read_tryconstruct_struct(dr, pdr, data, STRING_20);
-}
-
+  template <typename TopicType>
+  void read_union()
+  {
+    const UnionDisc expected = E_KEY;
+    TopicType cpp_data;
+    if (dynamic) {
+      if (read_dynamic()) {
+        check_int32("discriminator", expected);
+      }
+    } else if (read(cpp_data)) {
+      check_int32("discriminator", expected, cpp_data._d());
+    }
+    if (!success) {
+      return;
+    }
+    if (dynamic) {
+      check_int32("key_field", key_value);
+    } else {
+      check_int32("key_field", key_value, cpp_data.key_field());
+    }
+  }
+};
 
 int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 {
   std::string type;
   std::string topic_name = "";
   std::string registered_type_name = "";
+  bool dynamic = false;
+  bool skip_read = false;
 
   // Default properties of type consistency enforcement Qos currently supported
   bool disallow_type_coercion = false;
@@ -194,30 +242,34 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
         ACE_ERROR((LM_ERROR, "ERROR: Invalid topic name argument\n"));
         return 1;
       }
-    } else if (arg == ACE_TEXT("--reg_type")) {
+    } else if (arg == ACE_TEXT("--reg-type")) {
       if (i + 1 < argc) {
         registered_type_name = ACE_TEXT_ALWAYS_CHAR(argv[++i]);
       } else {
         ACE_ERROR((LM_ERROR, "ERROR: Invalid registered type argument\n"));
         return 1;
       }
-    } else if (arg == ACE_TEXT("--key_val")) {
+    } else if (arg == ACE_TEXT("--key-val")) {
       if (i + 1 < argc) {
         key_value = ACE_OS::atoi(argv[++i]);
       } else {
         ACE_ERROR((LM_ERROR, "ERROR: Invalid key value argument\n"));
         return 1;
       }
-    } else if (arg == ACE_TEXT("--expect_inconsistent_topic")) {
+    } else if (arg == ACE_TEXT("--expect-inconsistent-topic")) {
       expect_inconsistent_topic = true;
-    } else if (arg == ACE_TEXT("--expect_incompatible_qos")) {
+    } else if (arg == ACE_TEXT("--expect-incompatible-qos")) {
       expect_incompatible_qos = true;
-    } else if (arg == ACE_TEXT("--disallow_type_coercion")) {
+    } else if (arg == ACE_TEXT("--disallow-type-coercion")) {
       disallow_type_coercion =  true;
-    } else if (arg == ACE_TEXT("--ignore_member_names")) {
+    } else if (arg == ACE_TEXT("--ignore-member-names")) {
       ignore_member_names = true;
-    } else if (arg == ACE_TEXT("--force_type_validation")) {
+    } else if (arg == ACE_TEXT("--force-type-validation")) {
       force_type_validation = true;
+    } else if (arg == ACE_TEXT("--dynamic-ts")) {
+      dynamic = true;
+    } else if (arg == ACE_TEXT("--skip-read")) {
+      skip_read = true;
     } else {
       ACE_ERROR((LM_ERROR, "ERROR: Invalid argument: %s\n", argv[i]));
       return 1;
@@ -231,37 +283,31 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     return 1;
   }
 
-  bool failed = false;
-
-  Topic_var topic;
-
   if (topic_name.empty()) {
     topic_name = !registered_type_name.empty() ? registered_type_name : type;
   } else if (registered_type_name.empty()) {
     registered_type_name = topic_name;
   }
 
+  Topic_var topic;
+  TypeSupport_var ts;
+  bool success = true;
   if (type == "PlainCdrStruct") {
-    PlainCdrStructTypeSupport_var ts = new PlainCdrStructTypeSupportImpl;
-    failed = !get_topic(ts, dp, topic_name, topic, registered_type_name);
+    get_topic<PlainCdrStruct>(success, ts, dp, topic_name, topic, registered_type_name, dynamic);
   } else if (type == "FinalStructSub") {
-    FinalStructSubTypeSupport_var ts = new FinalStructSubTypeSupportImpl;
-    failed = !get_topic(ts, dp, topic_name, topic, registered_type_name);
+    get_topic<FinalStructSub>(success, ts, dp, topic_name, topic, registered_type_name, dynamic);
   } else if (type == "AppendableStruct") {
-    AppendableStructTypeSupport_var ts = new AppendableStructTypeSupportImpl;
-    failed = !get_topic(ts, dp, topic_name, topic, registered_type_name);
+    get_topic<AppendableStruct>(success, ts, dp, topic_name, topic, registered_type_name, dynamic);
+  } else if (type == "ExtendedAppendableStruct") {
+    get_topic<ExtendedAppendableStruct>(success, ts, dp, topic_name, topic, registered_type_name, dynamic);
   } else if (type == "AppendableStructNoXTypes") {
-    AppendableStructNoXTypesTypeSupport_var ts = new AppendableStructNoXTypesTypeSupportImpl;
-    failed = !get_topic(ts, dp, topic_name, topic, registered_type_name);
+    get_topic<AppendableStructNoXTypes>(success, ts, dp, topic_name, topic, registered_type_name, dynamic);
   } else if (type == "MutableStruct") {
-    MutableStructTypeSupport_var ts = new MutableStructTypeSupportImpl;
-    failed = !get_topic(ts, dp, topic_name, topic, registered_type_name);
+    get_topic<MutableStruct>(success, ts, dp, topic_name, topic, registered_type_name, dynamic);
   } else if (type == "MutableUnion") {
-    MutableUnionTypeSupport_var ts = new MutableUnionTypeSupportImpl;
-    failed = !get_topic(ts, dp, topic_name, topic, registered_type_name);
+    get_topic<MutableUnion>(success, ts, dp, topic_name, topic, registered_type_name, dynamic);
   } else if (type == "Trim20Struct") {
-    Trim20StructTypeSupport_var ts = new Trim20StructTypeSupportImpl;
-    failed = !get_topic(ts, dp, topic_name, topic, registered_type_name);
+    get_topic<Trim20Struct>(success, ts, dp, topic_name, topic, registered_type_name, dynamic);
   } else if (type.empty()) {
     ACE_ERROR((LM_ERROR, "ERROR: Must specify a type name\n"));
     return 1;
@@ -270,17 +316,20 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     return 1;
   }
 
-  if (failed) {
+  Topic_var ack_control_topic;
+  Topic_var echo_control_topic;
+  TypeSupport_var ack_control_ts;
+  TypeSupport_var echo_control_ts;
+  get_topic<ControlStruct>(success,
+    ack_control_ts, dp, "SET_PD_OL_OA_OM_OD_Ack", ack_control_topic, "ControlStruct");
+  get_topic<ControlStruct>(success,
+    echo_control_ts, dp, "SET_PD_OL_OA_OM_OD_Echo", echo_control_topic, "ControlStruct");
+
+  if (!success) {
     return 1;
   }
 
   ACE_DEBUG((LM_DEBUG, "Reader starting at %T\n"));
-  Topic_var ack_control_topic;
-  Topic_var echo_control_topic;
-  ControlStructTypeSupport_var ack_control_ts = new ControlStructTypeSupportImpl;
-  ControlStructTypeSupport_var echo_control_ts = new ControlStructTypeSupportImpl;
-  get_topic(ack_control_ts, dp, "SET_PD_OL_OA_OM_OD_Ack", ack_control_topic, "ControlStruct");
-  get_topic(echo_control_ts, dp, "SET_PD_OL_OA_OM_OD_Echo", echo_control_topic, "ControlStruct");
 
   // For publishing ack control topic.
   Publisher_var control_pub = dp->create_publisher(PUBLISHER_QOS_DEFAULT, 0,
@@ -324,12 +373,6 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
                                                              DEFAULT_STATUS_MASK);
   if (!control_dr) {
     ACE_ERROR((LM_ERROR, "ERROR: create_datareader failed\n"));
-    return 1;
-  }
-
-  ControlStructDataReader_var control_pdr = ControlStructDataReader::_narrow(control_dr);
-  if (!control_pdr) {
-    ACE_ERROR((LM_ERROR, "ERROR: _narrow echo datareader failed\n"));
     return 1;
   }
 
@@ -379,15 +422,14 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   }
 
   if (status_mask == DDS::INCONSISTENT_TOPIC_STATUS) {
-    failed = !wait_inconsistent_topic(ws, topic);
+    success = wait_inconsistent_topic(ws, topic);
   } else if (status_mask == DDS::REQUESTED_INCOMPATIBLE_QOS_STATUS) {
-    failed = !wait_requested_incompatible_qos(ws, dr);
+    success = wait_requested_incompatible_qos(ws, dr);
   } else {
-    failed = !wait_subscription_matched(ws, dr);
+    success = wait_subscription_matched(ws, dr);
   }
   ws->detach_condition(condition);
-
-  if (failed) {
+  if (!success) {
     ACE_ERROR((LM_ERROR, "ERROR: Reader failed for type %C\n", type.c_str()));
     return 1;
   }
@@ -397,28 +439,28 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     return 1;
   }
 
-  if (!expect_inconsistent_topic && !expect_incompatible_qos) {
+  ReadTest rt(ts, dr, topic_name, dynamic);
+  if (!expect_inconsistent_topic && !expect_incompatible_qos && !skip_read) {
     if (type == "PlainCdrStruct") {
-      failed = (read_plain_cdr_struct(dr) != RETCODE_OK);
+      rt.read_kf_struct<PlainCdrStruct>();
     } else if (type == "AppendableStruct") {
-      failed = (read_appendable_struct(dr) != RETCODE_OK);
+      rt.read_kf_struct<AppendableStruct>();
+    } else if (type == "ExtendedAppendableStruct") {
+      rt.read_kf_af_struct<ExtendedAppendableStruct>(FINAL_STRUCT_AF);
     } else if (type == "AppendableStructNoXTypes") {
-      failed = (read_appendable_struct_no_xtypes(dr) != RETCODE_OK);
+      rt.read_kf_struct<AppendableStructNoXTypes>();
     } else if (type == "FinalStructSub") {
-      failed = (read_final_struct(dr) != RETCODE_OK);
+      rt.read_kf_struct<FinalStructSub>();
     } else if (type == "MutableStruct") {
-      AdditionalFieldValue afv = MUTABLE_STRUCT_AF;
-      if (topic_name == "MutableBaseStructT") {
-        afv = FINAL_STRUCT_AF;
-      }
-      failed = (read_mutable_struct(dr, afv) != RETCODE_OK);
+      rt.read_kf_af_struct<MutableStruct>(
+        topic_name == "MutableBaseStructT" ? FINAL_STRUCT_AF : MUTABLE_STRUCT_AF);
     } else if (type == "MutableUnion") {
-      failed = (read_mutable_union(dr) != RETCODE_OK);
+      rt.read_union<MutableUnion>();
     } else if (type == "Trim20Struct") {
-      failed = (read_trim20_struct(dr) != RETCODE_OK);
+      rt.read_trim_struct<Trim20Struct>();
     }
   }
-  if (failed) {
+  if (!rt.success) {
     return 1;
   }
 
@@ -441,11 +483,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 
   ACE_DEBUG((LM_DEBUG, "Reader waiting for echo at %T\n"));
 
-  ::ControlStructSeq control_data;
-  ret = read_i(control_dr, control_pdr, control_data, true);
-  if (ret != RETCODE_OK) {
-    ACE_ERROR((LM_ERROR, "ERROR: control read returned %C\n",
-      OpenDDS::DCPS::retcode_to_string(ret)));
+  if (!read_control(control_dr, true)) {
+    ACE_ERROR((LM_ERROR, "ERROR: control read failed\n"));
     return 1;
   }
 

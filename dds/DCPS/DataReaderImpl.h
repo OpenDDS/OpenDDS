@@ -35,6 +35,7 @@
 #include "TopicImpl.h"
 #include "WriterInfo.h"
 #include "ZeroCopyInfoSeq_T.h"
+#include "AtomicBool.h"
 #include "transport/framework/ReceivedDataSample.h"
 #include "transport/framework/TransportClient.h"
 #include "transport/framework/TransportReceiveListener.h"
@@ -47,7 +48,6 @@
 
 #include <ace/String_Base.h>
 #include <ace/Reverse_Lock_T.h>
-#include <ace/Atomic_Op.h>
 #include <ace/Reactor.h>
 
 #include <memory>
@@ -220,7 +220,7 @@ public:
   typedef OPENDDS_SET(DDS::InstanceHandle_t) InstanceSet;
   typedef OPENDDS_SET(SubscriptionInstance_rch) SubscriptionInstanceSet;
   /// Type of collection of statistics for writers to this reader.
-  typedef OPENDDS_MAP_CMP(PublicationId, WriterStats, GUID_tKeyLessThan) StatsMapType;
+  typedef OPENDDS_MAP_CMP(GUID_t, WriterStats, GUID_tKeyLessThan) StatsMapType;
 
   DataReaderImpl();
 
@@ -228,17 +228,17 @@ public:
 
   virtual DDS::InstanceHandle_t get_instance_handle();
 
-  virtual void add_association(const RepoId& yourId,
+  virtual void add_association(const GUID_t& yourId,
                                const WriterAssociation& writer,
                                bool active);
 
-  virtual void transport_assoc_done(int flags, const RepoId& remote_id);
+  virtual void transport_assoc_done(int flags, const GUID_t& remote_id);
 
   virtual void remove_associations(const WriterIdSeq& writers, bool callback);
 
   virtual void update_incompatible_qos(const IncompatibleQosStatus& status);
 
-  virtual void signal_liveliness(const RepoId& remote_participant);
+  virtual void signal_liveliness(const GUID_t& remote_participant);
 
   /**
   * This is used to retrieve the listener for a certain status change.
@@ -405,7 +405,7 @@ public:
                                   SubscriptionInstance_rch& instance);
 
   void process_latency(const ReceivedDataSample& sample);
-  void notify_latency(PublicationId writer);
+  void notify_latency(GUID_t writer);
 
   size_t get_depth() const
   {
@@ -446,18 +446,18 @@ public:
 
   ACE_Reactor_Timer_Interface* get_reactor();
 
-  RepoId get_topic_id();
-  RepoId get_dp_id();
+  GUID_t get_topic_id();
+  GUID_t get_dp_id();
 
   typedef OPENDDS_VECTOR(DDS::InstanceHandle_t) InstanceHandleVec;
   void get_instance_handles(InstanceHandleVec& instance_handles);
 
-  typedef std::pair<PublicationId, WriterInfo::WriterState> WriterStatePair;
+  typedef std::pair<GUID_t, WriterInfo::WriterState> WriterStatePair;
   typedef OPENDDS_VECTOR(WriterStatePair) WriterStatePairVec;
   void get_writer_states(WriterStatePairVec& writer_states);
 
 #ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
-  void update_ownership_strength (const PublicationId& pub_id,
+  void update_ownership_strength (const GUID_t& pub_id,
                                   const CORBA::Long& ownership_strength);
 
   // Access to OwnershipManager is only valid when the domain participant is valid;
@@ -588,16 +588,16 @@ public:
                         DDS::ViewStateMask view_states,
                         DDS::InstanceStateMask instance_states);
 
-  void accept_coherent (const PublicationId& writer_id,
-                        const RepoId& publisher_id);
-  void reject_coherent (const PublicationId& writer_id,
-                        const RepoId& publisher_id);
-  void coherent_change_received (const RepoId& publisher_id, Coherent_State& result);
+  void accept_coherent (const GUID_t& writer_id,
+                        const GUID_t& publisher_id);
+  void reject_coherent (const GUID_t& writer_id,
+                        const GUID_t& publisher_id);
+  void coherent_change_received (const GUID_t& publisher_id, Coherent_State& result);
 
   void coherent_changes_completed (DataReaderImpl* reader);
 
-  void reset_coherent_info (const PublicationId& writer_id,
-                            const RepoId& publisher_id);
+  void reset_coherent_info (const GUID_t& writer_id,
+                            const GUID_t& publisher_id);
 #endif
 
   // Called upon subscriber qos change to update the local cache.
@@ -610,22 +610,22 @@ public:
 
   void disable_transport();
 
-  virtual void register_for_writer(const RepoId& /*participant*/,
-                                   const RepoId& /*readerid*/,
-                                   const RepoId& /*writerid*/,
+  virtual void register_for_writer(const GUID_t& /*participant*/,
+                                   const GUID_t& /*readerid*/,
+                                   const GUID_t& /*writerid*/,
                                    const TransportLocatorSeq& /*locators*/,
                                    DiscoveryListener* /*listener*/);
 
-  virtual void unregister_for_writer(const RepoId& /*participant*/,
-                                     const RepoId& /*readerid*/,
-                                     const RepoId& /*writerid*/);
+  virtual void unregister_for_writer(const GUID_t& /*participant*/,
+                                     const GUID_t& /*readerid*/,
+                                     const GUID_t& /*writerid*/);
 
-  virtual void update_locators(const RepoId& remote,
+  virtual void update_locators(const GUID_t& remote,
                                const TransportLocatorSeq& locators);
 
   virtual DCPS::WeakRcHandle<ICE::Endpoint> get_ice_endpoint();
 
-  RepoId get_repo_id() const
+  GUID_t get_guid() const
   {
     ACE_Guard<ACE_Thread_Mutex> guard(subscription_id_mutex_);
     ThreadStatusManager& thread_status_manager = TheServiceParticipant->get_thread_status_manager();
@@ -639,7 +639,8 @@ public:
 
   const ValueDispatcher* get_value_dispatcher() const
   {
-    return topic_servant_ ? dynamic_cast<const ValueDispatcher*>(topic_servant_->get_type_support()) : 0;
+    TopicDescriptionPtr<TopicImpl> temp(topic_servant_);
+    return temp ? dynamic_cast<const ValueDispatcher*>(temp->get_type_support()) : 0;
   }
 
 protected:
@@ -702,8 +703,6 @@ protected:
   /// Setup deserialization options
   DDS::ReturnCode_t setup_deserialization();
 
-  virtual Extensibility get_max_extensibility() = 0;
-
   RcHandle<SubscriberImpl> get_subscriber_servant();
 
   void post_read_or_take();
@@ -753,7 +752,7 @@ protected:
   bool filter_sample(const DataSampleHeader& header);
 
   bool ownership_filter_instance(const SubscriptionInstance_rch& instance,
-                                 const PublicationId& pubid);
+                                 const GUID_t& pubid);
   bool time_based_filter_instance(const SubscriptionInstance_rch& instance,
                                   MonotonicTimePoint& now,
                                   MonotonicTimePoint& deadline);
@@ -785,7 +784,8 @@ protected:
 
   WeakRcHandle<DomainParticipantImpl> participant_servant_;
   TopicDescriptionPtr<TopicImpl> topic_servant_;
-  RepoId topic_id_;
+  TypeSupportImpl* type_support_;
+  GUID_t topic_id_;
 
 #ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
   bool is_exclusive_ownership_;
@@ -809,10 +809,10 @@ protected:
 
   DDS::SubscriberQos subqos_;
 
-protected:
-  virtual void add_link(const DataLink_rch& link, const RepoId& peer);
+  virtual void add_link(const DataLink_rch& link, const GUID_t& peer);
 
 private:
+  virtual void install_type_support(TypeSupportImpl*) {}
 
   virtual void set_instance_state_i(DDS::InstanceHandle_t instance,
                                     DDS::InstanceHandle_t publication_handle,
@@ -826,7 +826,7 @@ private:
   void lookup_instance_handles(const WriterIdSeq& ids,
                                DDS::InstanceHandleSeq& hdls);
 
-  void instances_liveliness_update(const PublicationId& writer,
+  void instances_liveliness_update(const GUID_t& writer,
                                    DDS::InstanceHandle_t publication_handle);
 
 #ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
@@ -855,7 +855,7 @@ private:
 #endif
 
   /// when done handling historic samples, resume
-  void resume_sample_processing(const PublicationId& pub_id);
+  void resume_sample_processing(const GUID_t& pub_id);
 
   /// collect samples received before END_HISTORIC_SAMPLES
   /// returns false if normal processing of this sample should be skipped
@@ -874,7 +874,7 @@ private:
   DDS::StatusMask              listener_mask_;
   DDS::DataReaderListener_var  listener_;
   DDS::DomainId_t              domain_id_;
-  RepoId                       dp_id_;
+  GUID_t                       dp_id_;
   // subscriber_servant_ has to be a weak pinter because it may be used from the
   // transport reactor thread and that thread doesn't have the owenership of the
   // the subscriber_servant_ object.
@@ -887,7 +887,7 @@ private:
   //Used to protect access to id_to_handle_map_
   ACE_Recursive_Thread_Mutex   publication_handle_lock_;
 
-  typedef OPENDDS_MAP_CMP(RepoId, DDS::InstanceHandle_t, GUID_tKeyLessThan) RepoIdToHandleMap;
+  typedef OPENDDS_MAP_CMP(GUID_t, DDS::InstanceHandle_t, GUID_tKeyLessThan) RepoIdToHandleMap;
   RepoIdToHandleMap            publication_id_to_handle_map_;
 
   // Status conditions.
@@ -1013,10 +1013,10 @@ private:
   bool always_get_history_;
 
   /// Flag indicating status of statistics gathering.
-  ACE_Atomic_Op<ACE_Thread_Mutex, bool> statistics_enabled_;
+  AtomicBool statistics_enabled_;
 
   /// publications writing to this reader.
-  typedef OPENDDS_MAP_CMP(PublicationId, WriterInfo_rch,
+  typedef OPENDDS_MAP_CMP(GUID_t, WriterInfo_rch,
                    GUID_tKeyLessThan) WriterMapType;
 
   WriterMapType writers_;
@@ -1051,7 +1051,7 @@ protected:
   EncodingKinds decoding_modes_;
 
 public:
-  class OpenDDS_Dcps_Export OnDataOnReaders : public JobQueue::Job {
+  class OpenDDS_Dcps_Export OnDataOnReaders : public Job {
   public:
     OnDataOnReaders(WeakRcHandle<SubscriberImpl> subscriber,
                     DDS::SubscriberListener_var sub_listener,
@@ -1075,7 +1075,7 @@ public:
     const bool set_reader_status_;
   };
 
-  class OpenDDS_Dcps_Export OnDataAvailable : public JobQueue::Job {
+  class OpenDDS_Dcps_Export OnDataAvailable : public Job {
   public:
     OnDataAvailable(DDS::DataReaderListener_var listener,
                     WeakRcHandle<DataReaderImpl> data_reader,
@@ -1099,11 +1099,13 @@ public:
     const bool set_subscriber_status_;
   };
 
-#if defined(OPENDDS_SECURITY)
 protected:
+#ifdef OPENDDS_SECURITY
   Security::SecurityConfig_rch security_config_;
   DDS::DynamicType_var dynamic_type_;
 #endif
+
+  TransportMessageBlockAllocator mb_alloc_;
 };
 
 typedef RcHandle<DataReaderImpl> DataReaderImpl_rch;

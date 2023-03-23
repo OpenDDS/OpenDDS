@@ -7,22 +7,21 @@
 #define OPENDDS_DCPS_TRANSPORT_RTPS_UDP_RTPSUDPDATALINK_H
 
 #include "Rtps_Udp_Export.h"
-
-#include "RtpsUdpSendStrategy.h"
-#include "RtpsUdpSendStrategy_rch.h"
-#include "RtpsUdpReceiveStrategy.h"
-#include "RtpsUdpReceiveStrategy_rch.h"
-#include "RtpsCustomizedElement.h"
-#include "LocatorCacheKey.h"
 #include "BundlingCacheKey.h"
-#include "ThreadedRtpsSendQueue.h"
+#include "LocatorCacheKey.h"
+#include "RtpsCustomizedElement.h"
+#include "RtpsUdpDataLink_rch.h"
+#include "RtpsUdpReceiveStrategy_rch.h"
+#include "RtpsUdpSendStrategy_rch.h"
+#include "RtpsUdpTransport_rch.h"
+#include "TransactionalRtpsSendQueue.h"
 
 #include <dds/DCPS/transport/framework/DataLink.h>
 #include <dds/DCPS/ReactorTask.h>
 #include <dds/DCPS/ReactorTask_rch.h>
+#include <dds/DCPS/transport/framework/ReceivedDataSample.h>
 #include <dds/DCPS/transport/framework/TransportSendBuffer.h>
 #include <dds/DCPS/transport/framework/TransportStatistics.h>
-#include <dds/DCPS/NetworkConfigMonitor.h>
 #include <dds/DCPS/DataSampleElement.h>
 #include <dds/DCPS/DisjointSequence.h>
 #include <dds/DCPS/GuidConverter.h>
@@ -71,22 +70,20 @@ namespace ICE {
 namespace DCPS {
 
 class RtpsUdpInst;
-class RtpsUdpTransport;
 class ReceivedDataSample;
 typedef RcHandle<RtpsUdpInst> RtpsUdpInst_rch;
-typedef RcHandle<RtpsUdpTransport> RtpsUdpTransport_rch;
 typedef RcHandle<TransportClient> TransportClient_rch;
 
 struct SeqReaders {
   SequenceNumber seq;
   RepoIdSet readers;
-  SeqReaders(const RepoId& id) : seq(0) { readers.insert(id); }
+  SeqReaders(const GUID_t& id) : seq(0) { readers.insert(id); }
 };
 
 typedef AddressCache<LocatorCacheKey> LocatorCache;
 typedef AddressCache<BundlingCacheKey> BundlingCache;
 
-typedef OPENDDS_MAP_CMP(RepoId, SeqReaders, GUID_tKeyLessThan) WriterToSeqReadersMap;
+typedef OPENDDS_MAP_CMP(GUID_t, SeqReaders, GUID_tKeyLessThan) WriterToSeqReadersMap;
 
 const size_t initial_bundle_size = 32;
 
@@ -95,9 +92,9 @@ class OpenDDS_Rtps_Udp_Export RtpsUdpDataLink
   , public virtual InternalDataReaderListener<NetworkInterfaceAddress>
 {
 public:
-  RtpsUdpDataLink(RtpsUdpTransport& transport,
+  RtpsUdpDataLink(const RtpsUdpTransport_rch& transport,
                   const GuidPrefix_t& local_prefix,
-                  const RtpsUdpInst& config,
+                  const RtpsUdpInst_rch& config,
                   const ReactorTask_rch& reactor_task,
                   InternalTransportStatistics& transport_statistics,
                   ACE_Thread_Mutex& transport_statistics_mutex);
@@ -107,11 +104,12 @@ public:
   bool add_delayed_notification(TransportQueueElement* element);
 
   RemoveResult remove_sample(const DataSampleElement* sample);
-  void remove_all_msgs(const RepoId& pub_id);
+  void remove_all_msgs(const GUID_t& pub_id);
 
-  RtpsUdpInst& config() const;
+  RtpsUdpInst_rch config() const;
 
   ACE_Reactor* get_reactor();
+  ReactorInterceptor_rch get_reactor_interceptor() const;
   bool reactor_is_shut_down();
 
   ACE_SOCK_Dgram& unicast_socket();
@@ -156,11 +154,11 @@ public:
 
   const GuidPrefix_t& local_prefix() const { return local_prefix_; }
 
-  void remove_locator_and_bundling_cache(const RepoId& remote_id);
+  void remove_locator_and_bundling_cache(const GUID_t& remote_id);
 
-  NetworkAddress get_last_recv_address(const RepoId& remote_id);
+  NetworkAddress get_last_recv_address(const GUID_t& remote_id);
 
-  void update_locators(const RepoId& remote_id,
+  void update_locators(const GUID_t& remote_id,
                        AddrSet& unicast_addresses,
                        AddrSet& multicast_addresses,
                        bool requires_inline_qos,
@@ -168,18 +166,18 @@ public:
 
   /// Given a 'local' id and a 'remote' id of a publication or
   /// subscription, return the set of addresses of the remote peers.
-  AddrSet get_addresses(const RepoId& local, const RepoId& remote) const;
+  AddrSet get_addresses(const GUID_t& local, const GUID_t& remote) const;
   /// Given a 'local' id, return the set of address for all remote peers.
-  AddrSet get_addresses(const RepoId& local) const;
+  AddrSet get_addresses(const GUID_t& local) const;
 
   void filterBestEffortReaders(const ReceivedDataSample& ds, RepoIdSet& selected, RepoIdSet& withheld);
 
-  int make_reservation(const RepoId& remote_publication_id,
-                       const RepoId& local_subscription_id,
+  int make_reservation(const GUID_t& remote_publication_id,
+                       const GUID_t& local_subscription_id,
                        const TransportReceiveListener_wrch& receive_listener,
                        bool reliable);
 
-  bool associated(const RepoId& local, const RepoId& remote,
+  bool associated(const GUID_t& local, const GUID_t& remote,
                   bool local_reliable, bool remote_reliable,
                   bool local_durable, bool remote_durable,
                   const MonotonicTime_t& participant_discovered_at,
@@ -191,25 +189,25 @@ public:
                   const NetworkAddress& last_addr_hint,
                   bool requires_inline_qos);
 
-  void disassociated(const RepoId& local, const RepoId& remote);
+  void disassociated(const GUID_t& local, const GUID_t& remote);
 
-  void register_for_reader(const RepoId& writerid,
-                           const RepoId& readerid,
+  void register_for_reader(const GUID_t& writerid,
+                           const GUID_t& readerid,
                            const AddrSet& addresses,
                            DiscoveryListener* listener);
 
-  void unregister_for_reader(const RepoId& writerid,
-                             const RepoId& readerid);
+  void unregister_for_reader(const GUID_t& writerid,
+                             const GUID_t& readerid);
 
-  void register_for_writer(const RepoId& readerid,
-                           const RepoId& writerid,
+  void register_for_writer(const GUID_t& readerid,
+                           const GUID_t& writerid,
                            const AddrSet& addresses,
                            DiscoveryListener* listener);
 
-  void unregister_for_writer(const RepoId& readerid,
-                             const RepoId& writerid);
+  void unregister_for_writer(const GUID_t& readerid,
+                             const GUID_t& writerid);
 
-  void client_stop(const RepoId& localId);
+  void client_stop(const GUID_t& localId);
 
   virtual void pre_stop_i();
 
@@ -240,29 +238,30 @@ public:
   static bool separate_message(EntityId_t entity);
 #endif
 
-  RtpsUdpTransport& transport();
+  RtpsUdpTransport_rch transport();
 
   void enable_response_queue();
-  void disable_response_queue();
+  void disable_response_queue(bool send_immediately);
 
   bool requires_inline_qos(const GUIDSeq_var& peers);
 
   EventDispatcher_rch event_dispatcher() { return event_dispatcher_; }
+  RcHandle<JobQueue> get_job_queue() const { return job_queue_; }
 
 private:
   void on_data_available(RcHandle<InternalDataReader<NetworkInterfaceAddress> > reader);
 
   // Internal non-locking versions of the above
-  AddrSet get_addresses_i(const RepoId& local, const RepoId& remote) const;
-  AddrSet get_addresses_i(const RepoId& local) const;
+  AddrSet get_addresses_i(const GUID_t& local, const GUID_t& remote) const;
+  AddrSet get_addresses_i(const GUID_t& local) const;
 
   virtual void stop_i();
 
   virtual TransportQueueElement* customize_queue_element(
     TransportQueueElement* element);
 
-  virtual void release_reservations_i(const RepoId& remote_id,
-                                      const RepoId& local_id);
+  virtual void release_reservations_i(const GUID_t& remote_id,
+                                      const GUID_t& local_id);
 
   friend class ::DDS_TEST;
   /// static member used by testing code to force inline qos
@@ -291,13 +290,13 @@ private:
   };
 
 #ifdef ACE_HAS_CPP11
-  typedef OPENDDS_UNORDERED_MAP(RepoId, RemoteInfo) RemoteInfoMap;
+  typedef OPENDDS_UNORDERED_MAP(GUID_t, RemoteInfo) RemoteInfoMap;
 #else
-  typedef OPENDDS_MAP_CMP(RepoId, RemoteInfo, GUID_tKeyLessThan) RemoteInfoMap;
+  typedef OPENDDS_MAP_CMP(GUID_t, RemoteInfo, GUID_tKeyLessThan) RemoteInfoMap;
 #endif
   RemoteInfoMap locators_;
 
-  void update_last_recv_addr(const RepoId& src, const NetworkAddress& addr, const MonotonicTimePoint& now = MonotonicTimePoint::now());
+  void update_last_recv_addr(const GUID_t& src, const NetworkAddress& addr, const MonotonicTimePoint& now = MonotonicTimePoint::now());
 
   mutable LocatorCache locator_cache_;
   mutable BundlingCache bundling_cache_;
@@ -318,7 +317,7 @@ private:
   ACE_Message_Block* alloc_msgblock(size_t size, ACE_Allocator* data_allocator);
   ACE_Message_Block* submsgs_to_msgblock(const RTPS::SubmessageSeq& subm);
 
-  RcHandle<SingleSendBuffer> get_writer_send_buffer(const RepoId& pub_id);
+  RcHandle<SingleSendBuffer> get_writer_send_buffer(const GUID_t& pub_id);
 
   struct MultiSendBuffer : TransportSendBuffer {
 
@@ -342,7 +341,7 @@ private:
   typedef OPENDDS_MAP(SequenceNumber, RequestedFragMap) RequestedFragSeqMap;
 
   struct ReaderInfo : public virtual RcObject {
-    const RepoId id_;
+    const GUID_t id_;
     const MonotonicTime_t participant_discovered_at_;
     CORBA::Long acknack_recvd_count_, nackfrag_recvd_count_;
     DisjointSequence requests_;
@@ -359,7 +358,7 @@ private:
     DisjointSequence pvs_outstanding_;
 #endif
 
-    ReaderInfo(const RepoId& id,
+    ReaderInfo(const GUID_t& id,
                bool durable,
                const MonotonicTime_t& participant_discovered_at,
                ACE_CDR::ULong participant_flags,
@@ -387,9 +386,9 @@ private:
 
   typedef RcHandle<ReaderInfo> ReaderInfo_rch;
 #ifdef ACE_HAS_CPP11
-  typedef OPENDDS_UNORDERED_MAP(RepoId, ReaderInfo_rch) ReaderInfoMap;
+  typedef OPENDDS_UNORDERED_MAP(GUID_t, ReaderInfo_rch) ReaderInfoMap;
 #else
-  typedef OPENDDS_MAP_CMP(RepoId, ReaderInfo_rch, GUID_tKeyLessThan) ReaderInfoMap;
+  typedef OPENDDS_MAP_CMP(GUID_t, ReaderInfo_rch, GUID_tKeyLessThan) ReaderInfoMap;
 #endif
   typedef OPENDDS_SET(ReaderInfo_rch) ReaderInfoSet;
   struct ReaderInfoSetHolder : RcObject {
@@ -400,7 +399,7 @@ private:
 
   class ReplayDurableData : public EventBase {
   public:
-    ReplayDurableData(WeakRcHandle<RtpsUdpDataLink> link, const RepoId& local_pub_id, const RepoId& remote_sub_id)
+    ReplayDurableData(WeakRcHandle<RtpsUdpDataLink> link, const GUID_t& local_pub_id, const GUID_t& remote_sub_id)
       : link_(link)
       , local_pub_id_(local_pub_id)
       , remote_sub_id_(remote_sub_id)
@@ -408,8 +407,8 @@ private:
 
   private:
     WeakRcHandle<RtpsUdpDataLink> link_;
-    const RepoId local_pub_id_;
-    const RepoId remote_sub_id_;
+    const GUID_t local_pub_id_;
+    const GUID_t remote_sub_id_;
 
     void handle_event() {
       RtpsUdpDataLink_rch link = link_.lock();
@@ -446,7 +445,7 @@ private:
     SnToTqeMap elems_not_acked_;
     WeakRcHandle<TransportClient> client_;
     WeakRcHandle<RtpsUdpDataLink> link_;
-    const RepoId id_;
+    const GUID_t id_;
     const bool durable_;
     bool stopping_;
     CORBA::Long heartbeat_count_;
@@ -463,6 +462,7 @@ private:
     RcHandle<SporadicEvent> heartbeat_;
     RcHandle<SporadicEvent> nack_response_;
 
+    const TimeDuration initial_fallback_;
     FibonacciSequence<TimeDuration> fallback_;
 
     void send_heartbeats(const MonotonicTimePoint& now);
@@ -483,13 +483,13 @@ private:
     SequenceNumber expected_max_sn(const ReaderInfo_rch& reader) const;
     static void snris_insert(RtpsUdpDataLink::SNRIS& snris, const ReaderInfo_rch& reader);
     static void snris_erase(RtpsUdpDataLink::SNRIS& snris, const SequenceNumber sn, const ReaderInfo_rch& reader);
-    void make_leader_lagger(const RepoId& reader, SequenceNumber previous_max_sn);
+    void make_leader_lagger(const GUID_t& reader, SequenceNumber previous_max_sn);
     void make_lagger_leader(const ReaderInfo_rch& reader, const SequenceNumber previous_acked_sn);
     bool is_lagging(const ReaderInfo_rch& reader) const;
     bool is_leading(const ReaderInfo_rch& reader) const;
     void check_leader_lagger() const;
-    void record_directed(const RepoId& reader, SequenceNumber seq);
-    void update_remote_guids_cache_i(bool add, const RepoId& guid);
+    void record_directed(const GUID_t& reader, SequenceNumber seq);
+    void update_remote_guids_cache_i(bool add, const GUID_t& guid);
 
 #ifdef OPENDDS_SECURITY
     bool is_pvs_writer() const { return is_pvs_writer_; }
@@ -527,22 +527,23 @@ private:
     void log_remote_counts(const char* funcname);
 
   public:
-    RtpsWriter(TransportClient_rch client, RcHandle<RtpsUdpDataLink> link,
-               const RepoId& id, bool durable,
+    RtpsWriter(const TransportClient_rch& client, const RtpsUdpDataLink_rch& link,
+               const GUID_t& id, bool durable,
                SequenceNumber max_sn, CORBA::Long heartbeat_count, size_t capacity);
-    ~RtpsWriter();
+    virtual ~RtpsWriter();
+
     SequenceNumber max_data_seq(const SingleSendBuffer::Proxy& proxy,
                                 const ReaderInfo_rch&) const;
-    SequenceNumber update_max_sn(const RepoId& reader, SequenceNumber seq);
+    SequenceNumber update_max_sn(const GUID_t& reader, SequenceNumber seq);
     void add_elem_awaiting_ack(TransportQueueElement* element);
 
     RemoveResult remove_sample(const DataSampleElement* sample);
     void remove_all_msgs();
 
     bool add_reader(const ReaderInfo_rch& reader);
-    bool has_reader(const RepoId& id) const;
-    bool is_leading(const RepoId& id) const;
-    bool remove_reader(const RepoId& id);
+    bool has_reader(const GUID_t& id) const;
+    bool is_leading(const GUID_t& id) const;
+    bool remove_reader(const GUID_t& id);
     size_t reader_count() const;
     CORBA::Long inc_heartbeat_count();
 
@@ -553,17 +554,17 @@ private:
                                                           bool& deliver_after_send);
 
     void process_acknack(const RTPS::AckNackSubmessage& acknack,
-                         const RepoId& src,
+                         const GUID_t& src,
                          MetaSubmessageVec& meta_submessages);
     void process_nackfrag(const RTPS::NackFragSubmessage& nackfrag,
-                          const RepoId& src,
+                          const GUID_t& src,
                           MetaSubmessageVec& meta_submessages);
     void process_acked_by_all();
     void gather_nack_replies_i(MetaSubmessageVec& meta_submessages);
     void gather_heartbeats_i(MetaSubmessageVec& meta_submessages);
     void gather_heartbeats(RcHandle<ConstSharedRepoIdSet> additional_guids,
                            MetaSubmessageVec& meta_submessages);
-    void update_required_acknack_count(const RepoId& id, CORBA::Long current);
+    void update_required_acknack_count(const GUID_t& id, CORBA::Long current);
 
     RcHandle<SingleSendBuffer> get_send_buff() { return send_buff_; }
     RcHandle<ConstSharedRepoIdSet> get_remote_reader_guids()
@@ -575,9 +576,9 @@ private:
   typedef RcHandle<RtpsWriter> RtpsWriter_rch;
 
 #ifdef ACE_HAS_CPP11
-  typedef OPENDDS_UNORDERED_MAP(RepoId, RtpsWriter_rch) RtpsWriterMap;
+  typedef OPENDDS_UNORDERED_MAP(GUID_t, RtpsWriter_rch) RtpsWriterMap;
 #else
-  typedef OPENDDS_MAP_CMP(RepoId, RtpsWriter_rch, GUID_tKeyLessThan) RtpsWriterMap;
+  typedef OPENDDS_MAP_CMP(GUID_t, RtpsWriter_rch, GUID_tKeyLessThan) RtpsWriterMap;
 #endif
   RtpsWriterMap writers_;
 
@@ -585,7 +586,7 @@ private:
   // RTPS reliability support for local readers:
 
   struct WriterInfo : RcObject {
-    const RepoId id_;
+    const GUID_t id_;
     const MonotonicTime_t participant_discovered_at_;
     DisjointSequence recvd_;
     typedef OPENDDS_MAP(SequenceNumber, ReceivedDataSample) HeldMap;
@@ -595,7 +596,7 @@ private:
     CORBA::Long heartbeat_recvd_count_, hb_frag_recvd_count_;
     const ACE_CDR::ULong participant_flags_;
 
-    WriterInfo(const RepoId& id,
+    WriterInfo(const GUID_t& id,
                const MonotonicTime_t& participant_discovered_at,
                ACE_CDR::ULong participant_flags)
       : id_(id)
@@ -611,27 +612,20 @@ private:
   };
   typedef RcHandle<WriterInfo> WriterInfo_rch;
 #ifdef ACE_HAS_CPP11
-  typedef OPENDDS_UNORDERED_MAP(RepoId, WriterInfo_rch) WriterInfoMap;
+  typedef OPENDDS_UNORDERED_MAP(GUID_t, WriterInfo_rch) WriterInfoMap;
 #else
-  typedef OPENDDS_MAP_CMP(RepoId, WriterInfo_rch, GUID_tKeyLessThan) WriterInfoMap;
+  typedef OPENDDS_MAP_CMP(GUID_t, WriterInfo_rch, GUID_tKeyLessThan) WriterInfoMap;
 #endif
   typedef OPENDDS_SET(WriterInfo_rch) WriterInfoSet;
 
   class RtpsReader : public virtual RcObject {
   public:
-    RtpsReader(RcHandle<RtpsUdpDataLink> link, const RepoId& id)
-      : link_(link)
-      , id_(id)
-      , stopping_(false)
-      , nackfrag_count_(0)
-      , preassociation_task_(make_rch<SporadicEvent>(link->event_dispatcher(), make_rch<PmfNowEvent<RtpsReader> >(rchandle_from(this), &RtpsReader::send_preassociation_acknacks)))
-    {}
-
-    ~RtpsReader();
+    RtpsReader(const RtpsUdpDataLink_rch& link, const GUID_t& id);
+    virtual ~RtpsReader();
 
     bool add_writer(const WriterInfo_rch& info);
-    bool has_writer(const RepoId& id) const;
-    bool remove_writer(const RepoId& id);
+    bool has_writer(const GUID_t& id) const;
+    bool remove_writer(const GUID_t& id);
     size_t writer_count() const;
 
     bool should_nack_fragments(const RcHandle<RtpsUdpDataLink>& link,
@@ -640,21 +634,21 @@ private:
     void pre_stop_helper();
 
     void process_heartbeat_i(const RTPS::HeartBeatSubmessage& heartbeat,
-                             const RepoId& src,
+                             const GUID_t& src,
                              bool directed,
                              MetaSubmessageVec& meta_submessages);
-    bool process_data_i(const RTPS::DataSubmessage& data, const RepoId& src, MetaSubmessageVec& meta_submessages);
+    bool process_data_i(const RTPS::DataSubmessage& data, const GUID_t& src, MetaSubmessageVec& meta_submessages);
     void process_gap_i(const RTPS::GapSubmessage& gap,
-                       const RepoId& src,
+                       const GUID_t& src,
                        bool directed,
                        MetaSubmessageVec& meta_submessages);
     void process_heartbeat_frag_i(const RTPS::HeartBeatFragSubmessage& hb_frag,
-                                  const RepoId& src,
+                                  const GUID_t& src,
                                   bool directed,
                                   MetaSubmessageVec& meta_submessages);
-    void deliver_held_data(const RepoId& src);
+    void deliver_held_data(const GUID_t& src);
 
-    const RepoId& id() const { return id_; }
+    const GUID_t& id() const { return id_; }
 
     void log_remote_counts(const char* funcname);
 
@@ -676,17 +670,18 @@ private:
 
     mutable ACE_Thread_Mutex mutex_;
     WeakRcHandle<RtpsUdpDataLink> link_;
-    const RepoId id_;
+    const GUID_t id_;
     WriterInfoMap remote_writers_;
     WriterInfoSet preassociation_writers_;
     bool stopping_;
     CORBA::Long nackfrag_count_;
     RcHandle<SporadicEvent> preassociation_task_;
+    TimeDuration heartbeat_period_;
   };
   typedef RcHandle<RtpsReader> RtpsReader_rch;
 
   typedef OPENDDS_VECTOR(MetaSubmessageVec::iterator) MetaSubmessageIterVec;
-  typedef OPENDDS_MAP_CMP(RepoId, MetaSubmessageIterVec, GUID_tKeyLessThan) DestMetaSubmessageMap;
+  typedef OPENDDS_MAP_CMP(GUID_t, MetaSubmessageIterVec, GUID_tKeyLessThan) DestMetaSubmessageMap;
 #ifdef ACE_HAS_CPP11
   typedef OPENDDS_UNORDERED_MAP(AddressCacheEntryProxy, DestMetaSubmessageMap) AddrDestMetaSubmessageMap;
 #else
@@ -732,28 +727,31 @@ private:
     BundleVec& bundles,
     CountKeeper& counts);
 
-  void queue_submessages(MetaSubmessageVec& meta_submessages, double scale = 1.0);
-  void update_required_acknack_count(const RepoId& local_id, const RepoId& remote_id, CORBA::Long current);
+  void queue_submessages(MetaSubmessageVec& meta_submessages);
+  void update_required_acknack_count(const GUID_t& local_id, const GUID_t& remote_id, CORBA::Long current);
   void bundle_and_send_submessages(MetaSubmessageVec& meta_submessages);
 
-  ThreadedRtpsSendQueue sq_;
-  ACE_Thread_Mutex fsq_mutex_;
-  MetaSubmessageVec fsq_vec_;
+  TransactionalRtpsSendQueue sq_;
+  mutable ACE_Thread_Mutex fsq_mutex_;
+  OPENDDS_VECTOR(MetaSubmessageVec) fsq_vec_;
+  size_t fsq_vec_size_;
 
+  void harvest_send_queue(const MonotonicTimePoint& now);
+  RcHandle<SporadicEvent> harvest_send_queue_sporadic_;
   void flush_send_queue(const MonotonicTimePoint& now);
-
+  void flush_send_queue_i();
   RcHandle<SporadicEvent> flush_send_queue_sporadic_;
 
   RepoIdSet pending_reliable_readers_;
 
 #ifdef ACE_HAS_CPP11
-  typedef OPENDDS_UNORDERED_MAP(RepoId, RtpsReader_rch) RtpsReaderMap;
+  typedef OPENDDS_UNORDERED_MAP(GUID_t, RtpsReader_rch) RtpsReaderMap;
 #else
-  typedef OPENDDS_MAP_CMP(RepoId, RtpsReader_rch, GUID_tKeyLessThan) RtpsReaderMap;
+  typedef OPENDDS_MAP_CMP(GUID_t, RtpsReader_rch, GUID_tKeyLessThan) RtpsReaderMap;
 #endif
   RtpsReaderMap readers_;
 
-  typedef OPENDDS_MULTIMAP_CMP(RepoId, RtpsReader_rch, GUID_tKeyLessThan) RtpsReaderMultiMap;
+  typedef OPENDDS_MULTIMAP_CMP(GUID_t, RtpsReader_rch, GUID_tKeyLessThan) RtpsReaderMultiMap;
   RtpsReaderMultiMap readers_of_writer_; // keys are remote data writer GUIDs
 
   WriterToSeqReadersMap writer_to_seq_best_effort_readers_;
@@ -769,7 +767,6 @@ private:
   mutable ACE_Thread_Mutex readers_lock_;
   mutable ACE_Thread_Mutex writers_lock_;
   mutable ACE_Thread_Mutex locators_lock_;
-  mutable ACE_Thread_Mutex send_queues_lock_;
 
   /// Extend the FragmentNumberSet to cover the fragments that are
   /// missing from our last known fragment to the extent
@@ -792,8 +789,8 @@ private:
   void datawriter_dispatch(const T& submessage, const GuidPrefix_t& src_prefix,
                            const FN& func)
   {
-    const RepoId local = make_id(local_prefix_, submessage.writerId);
-    const RepoId src = make_id(src_prefix, submessage.readerId);
+    const GUID_t local = make_id(local_prefix_, submessage.writerId);
+    const GUID_t src = make_id(src_prefix, submessage.readerId);
 
     OPENDDS_VECTOR(RtpsWriter_rch) to_call;
     {
@@ -821,8 +818,8 @@ private:
                            bool directed,
                            const FN& func)
   {
-    const RepoId local = make_id(local_prefix_, submessage.readerId);
-    const RepoId src = make_id(src_prefix, submessage.writerId);
+    const GUID_t local = make_id(local_prefix_, submessage.readerId);
+    const GUID_t src = make_id(src_prefix, submessage.writerId);
 
     OPENDDS_VECTOR(RtpsReader_rch) to_call;
     {
@@ -868,7 +865,7 @@ private:
   /// Data structure representing an "interesting" remote entity for static discovery.
   struct InterestingRemote {
     /// id of local entity that is interested in this remote.
-    RepoId localid;
+    GUID_t localid;
     /// addresses of this entity
     AddrSet addresses;
     /// Callback to invoke.
@@ -882,18 +879,18 @@ private:
     enum { DOES_NOT_EXIST, EXISTS } status;
 
     InterestingRemote() { }
-    InterestingRemote(const RepoId& w, const AddrSet& a, DiscoveryListener* l)
+    InterestingRemote(const GUID_t& w, const AddrSet& a, DiscoveryListener* l)
       : localid(w)
       , addresses(a)
       , listener(l)
       , status(DOES_NOT_EXIST)
     { }
   };
-  typedef OPENDDS_MULTIMAP_CMP(RepoId, InterestingRemote, GUID_tKeyLessThan) InterestingRemoteMapType;
+  typedef OPENDDS_MULTIMAP_CMP(GUID_t, InterestingRemote, GUID_tKeyLessThan) InterestingRemoteMapType;
   InterestingRemoteMapType interesting_readers_;
   InterestingRemoteMapType interesting_writers_;
 
-  typedef std::pair<RepoId, InterestingRemote> CallbackType;
+  typedef std::pair<GUID_t, InterestingRemote> CallbackType;
 
   TransportQueueElement* customize_queue_element_non_reliable_i(TransportQueueElement* element,
                                                                 bool requires_inline_qos,
@@ -918,7 +915,7 @@ private:
     {}
 
     DeliverHeldData(RtpsReader_rch reader,
-                    const RepoId& writer_id)
+                    const GUID_t& writer_id)
       : reader_(reader)
       , writer_id_(writer_id)
     {}
@@ -927,7 +924,7 @@ private:
 
   private:
     RtpsReader_rch reader_;
-    RepoId writer_id_;
+    GUID_t writer_id_;
   };
 
 #ifdef OPENDDS_SECURITY
@@ -938,7 +935,7 @@ private:
   RcHandle<ICE::Agent> ice_agent_;
 #endif
 
-  void accumulate_addresses(const RepoId& local, const RepoId& remote, AddrSet& addresses, bool prefer_unicast = false) const;
+  void accumulate_addresses(const GUID_t& local, const GUID_t& remote, AddrSet& addresses, bool prefer_unicast = false) const;
 
   RcHandle<InternalDataReader<NetworkInterfaceAddress> > network_interface_address_reader_;
   MulticastManager multicast_manager_;
@@ -968,4 +965,4 @@ namespace std
 # include "RtpsUdpDataLink.inl"
 #endif  /* __ACE_INLINE__ */
 
-#endif  /* DCPS_RTPSUDPDATALINK_H */
+#endif /* OPENDDS_DCPS_TRANSPORT_RTPS_UDP_RTPSUDPDATALINK_H */

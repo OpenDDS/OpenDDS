@@ -80,6 +80,8 @@ namespace Test {
     virtual ~DataReaderListener (void);
 
     private:
+      ACE_Thread_Mutex mutex_;
+
       /// Verbosity flag.
       bool verbose_;
 

@@ -13,20 +13,22 @@
 #pragma once
 #endif
 
-#include "dds/DCPS/dcps_export.h"
-#include "dds/DCPS/RcObject.h"
-#include "dds/DCPS/PoolAllocator.h"
-#include "dds/DCPS/ReactorTask_rch.h"
-#include "dds/DCPS/EventDispatcher.h"
-#include "dds/DCPS/NetworkAddress.h"
-#include "dds/DCPS/TimeDuration.h"
-
-#include <dds/DdsDcpsInfoUtilsC.h>
-
 #include "TransportDefs.h"
 #include "TransportImpl_rch.h"
 #include "TransportImpl.h"
-#include "ace/Synch_Traits.h"
+
+#include <dds/DCPS/dcps_export.h>
+#include <dds/DCPS/RcObject.h>
+#include <dds/DCPS/PoolAllocator.h>
+#include <dds/DCPS/ReactorTask_rch.h>
+#include <dds/DCPS/EventDispatcher.h>
+#include <dds/DCPS/NetworkAddress.h>
+#include <dds/DCPS/TimeDuration.h>
+
+#include <dds/DdsDcpsInfoUtilsC.h>
+#include <dds/OpenddsDcpsExtC.h>
+
+#include <ace/Synch_Traits.h>
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 class ACE_Configuration_Heap;
@@ -61,6 +63,9 @@ namespace DCPS {
  */
 class OpenDDS_Dcps_Export TransportInst : public virtual RcObject {
 public:
+
+  static const long DEFAULT_DATALINK_RELEASE_DELAY = 10000;
+  static const size_t DEFAULT_DATALINK_CONTROL_CHUNKS = 32u;
 
   const OPENDDS_STRING& name() const { return name_; }
 
@@ -134,10 +139,10 @@ public:
   void use_rtps_relay_now(bool flag);
   void use_ice_now(bool flag);
 
-  virtual void update_locators(const RepoId& /*remote_id*/,
+  virtual void update_locators(const GUID_t& /*remote_id*/,
                                const TransportLocatorSeq& /*locators*/) {}
 
-  virtual void get_last_recv_locator(const RepoId& /*remote_id*/,
+  virtual void get_last_recv_locator(const GUID_t& /*remote_id*/,
                                      TransportLocator& /*locators*/) {}
 
   virtual void rtps_relay_address_change() {}
@@ -236,7 +241,8 @@ private:
 
   friend class TransportClient;
  protected:
-  TransportImpl_rch impl();
+  TransportImpl_rch get_or_create_impl();
+  TransportImpl_rch get_impl();
  private:
   virtual TransportImpl_rch new_impl() = 0;
 

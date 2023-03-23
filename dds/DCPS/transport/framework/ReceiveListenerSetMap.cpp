@@ -21,8 +21,8 @@ OpenDDS::DCPS::ReceiveListenerSetMap::~ReceiveListenerSetMap()
 
 int
 OpenDDS::DCPS::ReceiveListenerSetMap::insert
-(RepoId                    publisher_id,
- RepoId                    subscriber_id,
+(GUID_t                    publisher_id,
+ GUID_t                    subscriber_id,
  const TransportReceiveListener_wrch& receive_listener)
 {
   DBG_ENTRY_LVL("ReceiveListenerSetMap","insert",6);
@@ -72,8 +72,8 @@ OpenDDS::DCPS::ReceiveListenerSetMap::insert
 }
 
 int
-OpenDDS::DCPS::ReceiveListenerSetMap::remove(RepoId publisher_id,
-                                             RepoId subscriber_id)
+OpenDDS::DCPS::ReceiveListenerSetMap::remove(GUID_t publisher_id,
+                                             GUID_t subscriber_id)
 {
   DBG_ENTRY_LVL("ReceiveListenerSetMap","remove",6);
   ReceiveListenerSet_rch listener_set;
@@ -116,8 +116,8 @@ OpenDDS::DCPS::ReceiveListenerSetMap::remove(RepoId publisher_id,
 /// publisher_id is no longer associated with any subscribers (which
 /// also means it's element was removed from our map_).
 int
-OpenDDS::DCPS::ReceiveListenerSetMap::release_subscriber(RepoId publisher_id,
-                                                         RepoId subscriber_id)
+OpenDDS::DCPS::ReceiveListenerSetMap::release_subscriber(GUID_t publisher_id,
+                                                         GUID_t subscriber_id)
 {
   DBG_ENTRY_LVL("ReceiveListenerSetMap","release_subscriber",6);
   ReceiveListenerSet_rch listener_set;

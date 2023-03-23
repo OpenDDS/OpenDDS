@@ -14,12 +14,12 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-SubscriptionInstance::SubscriptionInstance(DataReaderImpl* reader,
+SubscriptionInstance::SubscriptionInstance(const DataReaderImpl_rch& reader,
                                            const DDS::DataReaderQos& qos,
                                            ACE_Recursive_Thread_Mutex& lock,
                                            DDS::InstanceHandle_t handle,
                                            bool owns_handle)
-  : instance_state_(make_rch<InstanceState>(reader, ref(lock), handle))
+  : instance_state_(make_rch<InstanceState>(ref(reader), ref(lock), handle))
   , rcvd_samples_(reader, instance_state_)
   , read_sample_count_(0)
   , not_read_sample_count_(0)

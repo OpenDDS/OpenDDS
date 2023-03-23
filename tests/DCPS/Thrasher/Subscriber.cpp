@@ -68,7 +68,7 @@ Subscriber::Subscriber(DDS::DomainId_t domainId, size_t n_pub_threads, size_t ex
     }
     OpenDDS::DCPS::DataReaderImpl* impl = dynamic_cast<OpenDDS::DCPS::DataReaderImpl*>(reader_.in());
     if (impl) {
-      ACE_DEBUG((LM_INFO, "(%P|%t)    Subscriber reader id: %C\n", OpenDDS::DCPS::LogGuid(impl->get_repo_id()).c_str()));
+      ACE_DEBUG((LM_INFO, "(%P|%t)    Subscriber reader id: %C\n", OpenDDS::DCPS::LogGuid(impl->get_guid()).c_str()));
     } else {
       throw std::runtime_error("dynamic_cast<OpenDDS::DCPS::DataReaderImpl*>(reader_.in()) failed.");
     }

@@ -1,6 +1,4 @@
 /*
- *
- *
  * Distributed under the OpenDDS License.
  * See: http://www.opendds.org/license.html
  */
@@ -15,19 +13,23 @@
 module DDS {
     local interface DomainParticipant;
     local interface Topic;
+#if !defined OPENDDS_SAFETY_PROFILE && !defined __OPENDDS_MPC
+    // MPC will make invalid rules in a Java build based on this forward
+    // declaration.
+    local interface DynamicType;
+#endif
 
-    // ----------------------------------------------------------------------
     local interface TopicDescription {
-                string get_type_name();
-                string get_name();
-                DomainParticipant get_participant();
-                };
+        string get_type_name();
+        string get_name();
+        DomainParticipant get_participant();
+    };
 
     local interface TopicListener : Listener {
-                void on_inconsistent_topic(
-                        in Topic the_topic,
-                        in InconsistentTopicStatus status);
-                };
+        void on_inconsistent_topic(
+            in Topic the_topic,
+            in InconsistentTopicStatus status);
+    };
 
     local interface Topic : Entity, TopicDescription {
         ReturnCode_t set_qos(
@@ -45,7 +47,6 @@ module DDS {
 
 
 #ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
-
     local interface ContentFilteredTopic : TopicDescription {
         string get_filter_expression();
         ReturnCode_t get_expression_parameters(inout StringSeq params);
@@ -53,27 +54,30 @@ module DDS {
             in StringSeq expression_parameters);
         Topic get_related_topic();
     };
-
 #endif
 
 #ifndef OPENDDS_NO_MULTI_TOPIC
-
     local interface MultiTopic : TopicDescription {
         string get_subscription_expression();
         ReturnCode_t get_expression_parameters(inout StringSeq params);
         ReturnCode_t set_expression_parameters(
             in StringSeq expression_parameters);
     };
-
 #endif
 
     local interface TypeSupport {
-                         ReturnCode_t register_type(
-                                 in DomainParticipant domain,
-                                 in string type_name);
-
-                         string get_type_name ();
-                };
+        ReturnCode_t register_type(
+            in DomainParticipant domain,
+            in string type_name);
+        string get_type_name();
+#ifndef OPENDDS_SAFETY_PROFILE
+        // valuetype isn't supported in Java. This will exclude this operation
+        // from the generated Java code and return null in get_type method of
+        // the TAOPeer generated C++ class so it isn't a pure virtual function.
+        @OpenDDS::hidden_op_in_java("return 0;")
+        DynamicType get_type();
+#endif
+    };
 };
 
 #endif /* OPENDDS_DCPS_TOPIC_IDL */

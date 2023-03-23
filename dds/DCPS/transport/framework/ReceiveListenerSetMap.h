@@ -24,18 +24,18 @@ class ReceivedDataSample;
 class OpenDDS_Dcps_Export ReceiveListenerSetMap {
 public:
 
-  typedef OPENDDS_MAP_CMP(RepoId, ReceiveListenerSet_rch, GUID_tKeyLessThan) MapType;
+  typedef OPENDDS_MAP_CMP(GUID_t, ReceiveListenerSet_rch, GUID_tKeyLessThan) MapType;
 
   ReceiveListenerSetMap();
   virtual ~ReceiveListenerSetMap();
 
-  int insert(RepoId                              publisher_id,
-             RepoId                              subscriber_id,
+  int insert(GUID_t                              publisher_id,
+             GUID_t                              subscriber_id,
              const TransportReceiveListener_wrch& receive_listener);
 
-  ReceiveListenerSet_rch find(RepoId publisher_id) const;
+  ReceiveListenerSet_rch find(GUID_t publisher_id) const;
 
-  int remove(RepoId publisher_id, RepoId subscriber_id);
+  int remove(GUID_t publisher_id, GUID_t subscriber_id);
 
   /// This method is called when the (remote) subscriber is being
   /// released.  This method will return a 0 if the subscriber_id is
@@ -44,9 +44,9 @@ public:
   /// This method will return 1 if, after the disassociation, the
   /// publisher_id is no longer associated with any subscribers (which
   /// also means it's element was removed from our map_).
-  int release_subscriber(RepoId publisher_id, RepoId subscriber_id);
+  int release_subscriber(GUID_t publisher_id, GUID_t subscriber_id);
 
-  ReceiveListenerSet_rch remove_set(RepoId publisher_id);
+  ReceiveListenerSet_rch remove_set(GUID_t publisher_id);
 
   ssize_t size() const;
 
@@ -60,7 +60,7 @@ public:
 
 private:
 
-  ReceiveListenerSet_rch find_or_create(RepoId publisher_id);
+  ReceiveListenerSet_rch find_or_create(GUID_t publisher_id);
 
   MapType map_;
 };

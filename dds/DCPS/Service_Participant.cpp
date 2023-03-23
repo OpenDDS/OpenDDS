@@ -21,6 +21,7 @@
 #include "DefaultNetworkConfigMonitor.h"
 #include "StaticDiscovery.h"
 #include "ThreadStatusManager.h"
+#include "Qos_Helper.h"
 #include "../Version.h"
 #ifdef OPENDDS_SECURITY
 #  include "security/framework/SecurityRegistry.h"
@@ -312,7 +313,7 @@ DDS::ReturnCode_t Service_Participant::shutdown()
     ACE_DEBUG((LM_DEBUG, "(%P|%t) Service_Participant::shutdown\n"));
   }
 
-  if (shut_down_.value()) {
+  if (shut_down_) {
     return DDS::RETCODE_ALREADY_DELETED;
   }
 
@@ -511,8 +512,7 @@ Service_Participant::get_domain_participant_factory(int &argc,
           "log_level: %C DCPS_debug_level: %u\n", log_level.get_as_string(), DCPS_debug_level));
 
         ACE_utsname uname;
-        int const result = ACE_OS::uname(&uname);
-        if (result != -1) {
+        if (ACE_OS::uname(&uname) != -1) {
           ACE_DEBUG((LM_INFO, "(%P|%t) Service_Participant::get_domain_participant_factory: "
             "machine: %C, %C platform: %C, %C, %C\n",
             uname.nodename, uname.machine, uname.sysname, uname.release, uname.version));
@@ -520,7 +520,7 @@ Service_Participant::get_domain_participant_factory(int &argc,
 
         ACE_DEBUG((LM_INFO, "(%P|%t) Service_Participant::get_domain_participant_factory: "
           "compiler: %C version %d.%d.%d\n",
-          ACE::compiler_name(), ACE::compiler_major_version(), ACE::compiler_minor_version (), ACE::compiler_beta_version ()));
+          ACE::compiler_name(), ACE::compiler_major_version(), ACE::compiler_minor_version(), ACE::compiler_beta_version()));
       }
 
       // Establish the default scheduling mechanism and
@@ -832,60 +832,34 @@ int Service_Participant::parse_args(int& argc, ACE_TCHAR* argv[])
 void
 Service_Participant::initialize()
 {
-  //NOTE: in the future these initial values may be configurable
-  //      (to override the Specification's default values
-  //       hmm - I guess that would be OK since the user
-  //       is overriding them.)
-  initial_TransportPriorityQosPolicy_.value = 0;
-  initial_LifespanQosPolicy_.duration.sec = DDS::DURATION_INFINITE_SEC;
-  initial_LifespanQosPolicy_.duration.nanosec = DDS::DURATION_INFINITE_NSEC;
+  initial_TransportPriorityQosPolicy_ = TransportPriorityQosPolicyBuilder();
+  initial_LifespanQosPolicy_ = LifespanQosPolicyBuilder();
 
-  initial_DurabilityQosPolicy_.kind = DDS::VOLATILE_DURABILITY_QOS;
+  initial_DurabilityQosPolicy_ = DurabilityQosPolicyBuilder();
 
-  initial_DurabilityServiceQosPolicy_.service_cleanup_delay.sec =
-    DDS::DURATION_ZERO_SEC;
-  initial_DurabilityServiceQosPolicy_.service_cleanup_delay.nanosec =
-    DDS::DURATION_ZERO_NSEC;
-  initial_DurabilityServiceQosPolicy_.history_kind =
-    DDS::KEEP_LAST_HISTORY_QOS;
-  initial_DurabilityServiceQosPolicy_.history_depth = 1;
-  initial_DurabilityServiceQosPolicy_.max_samples =
-    DDS::LENGTH_UNLIMITED;
-  initial_DurabilityServiceQosPolicy_.max_instances =
-    DDS::LENGTH_UNLIMITED;
-  initial_DurabilityServiceQosPolicy_.max_samples_per_instance =
-    DDS::LENGTH_UNLIMITED;
+  initial_DurabilityServiceQosPolicy_ = DurabilityServiceQosPolicyBuilder();
 
   initial_PresentationQosPolicy_.access_scope = DDS::INSTANCE_PRESENTATION_QOS;
   initial_PresentationQosPolicy_.coherent_access = false;
   initial_PresentationQosPolicy_.ordered_access = false;
 
-  initial_DeadlineQosPolicy_.period.sec = DDS::DURATION_INFINITE_SEC;
-  initial_DeadlineQosPolicy_.period.nanosec = DDS::DURATION_INFINITE_NSEC;
+  initial_DeadlineQosPolicy_ = DeadlineQosPolicyBuilder();
 
-  initial_LatencyBudgetQosPolicy_.duration.sec = DDS::DURATION_ZERO_SEC;
-  initial_LatencyBudgetQosPolicy_.duration.nanosec = DDS::DURATION_ZERO_NSEC;
+  initial_LatencyBudgetQosPolicy_ = LatencyBudgetQosPolicyBuilder();
 
-  initial_OwnershipQosPolicy_.kind = DDS::SHARED_OWNERSHIP_QOS;
-#ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
-  initial_OwnershipStrengthQosPolicy_.value = 0;
-#endif
+  initial_OwnershipQosPolicy_ = OwnershipQosPolicyBuilder();
+  initial_OwnershipStrengthQosPolicy_ = OwnershipStrengthQosPolicyBuilder();
 
-  initial_LivelinessQosPolicy_.kind = DDS::AUTOMATIC_LIVELINESS_QOS;
-  initial_LivelinessQosPolicy_.lease_duration.sec = DDS::DURATION_INFINITE_SEC;
-  initial_LivelinessQosPolicy_.lease_duration.nanosec = DDS::DURATION_INFINITE_NSEC;
+  initial_LivelinessQosPolicy_ = LivelinessQosPolicyBuilder();
 
   initial_TimeBasedFilterQosPolicy_.minimum_separation.sec = DDS::DURATION_ZERO_SEC;
   initial_TimeBasedFilterQosPolicy_.minimum_separation.nanosec = DDS::DURATION_ZERO_NSEC;
 
-  initial_ReliabilityQosPolicy_.kind = DDS::BEST_EFFORT_RELIABILITY_QOS;
-  initial_ReliabilityQosPolicy_.max_blocking_time.sec = DDS::DURATION_INFINITE_SEC;
-  initial_ReliabilityQosPolicy_.max_blocking_time.nanosec = DDS::DURATION_INFINITE_NSEC;
+  initial_ReliabilityQosPolicy_ = ReliabilityQosPolicyBuilder();
 
-  initial_DestinationOrderQosPolicy_.kind = DDS::BY_RECEPTION_TIMESTAMP_DESTINATIONORDER_QOS;
+  initial_DestinationOrderQosPolicy_ = DestinationOrderQosPolicyBuilder();
 
-  initial_HistoryQosPolicy_.kind = DDS::KEEP_LAST_HISTORY_QOS;
-  initial_HistoryQosPolicy_.depth = 1;
+  initial_HistoryQosPolicy_ = HistoryQosPolicyBuilder();
 
   initial_ResourceLimitsQosPolicy_.max_samples = DDS::LENGTH_UNLIMITED;
   initial_ResourceLimitsQosPolicy_.max_instances = DDS::LENGTH_UNLIMITED;
@@ -893,7 +867,7 @@ Service_Participant::initialize()
 
   initial_EntityFactoryQosPolicy_.autoenable_created_entities = true;
 
-  initial_WriterDataLifecycleQosPolicy_.autodispose_unregistered_instances = true;
+  initial_WriterDataLifecycleQosPolicy_ = WriterDataLifecycleQosPolicyBuilder();
 
   // Will get interpreted based on how the type was annotated.
   initial_DataRepresentationQosPolicy_.value.length(0);
@@ -914,44 +888,9 @@ Service_Participant::initialize()
   initial_DomainParticipantQos_.entity_factory = initial_EntityFactoryQosPolicy_;
   initial_DomainParticipantFactoryQos_.entity_factory = initial_EntityFactoryQosPolicy_;
 
-  initial_TopicQos_.topic_data = initial_TopicDataQosPolicy_;
-  initial_TopicQos_.durability = initial_DurabilityQosPolicy_;
-  initial_TopicQos_.durability_service = initial_DurabilityServiceQosPolicy_;
-  initial_TopicQos_.deadline = initial_DeadlineQosPolicy_;
-  initial_TopicQos_.latency_budget = initial_LatencyBudgetQosPolicy_;
-  initial_TopicQos_.liveliness = initial_LivelinessQosPolicy_;
-  initial_TopicQos_.reliability = initial_ReliabilityQosPolicy_;
-  initial_TopicQos_.destination_order = initial_DestinationOrderQosPolicy_;
-  initial_TopicQos_.history = initial_HistoryQosPolicy_;
-  initial_TopicQos_.resource_limits = initial_ResourceLimitsQosPolicy_;
-  initial_TopicQos_.transport_priority = initial_TransportPriorityQosPolicy_;
-  initial_TopicQos_.lifespan = initial_LifespanQosPolicy_;
-  initial_TopicQos_.ownership = initial_OwnershipQosPolicy_;
-  initial_TopicQos_.representation = initial_DataRepresentationQosPolicy_;
+  initial_TopicQos_ = TopicQosBuilder();
 
-  initial_DataWriterQos_.durability = initial_DurabilityQosPolicy_;
-  initial_DataWriterQos_.durability_service = initial_DurabilityServiceQosPolicy_;
-  initial_DataWriterQos_.deadline = initial_DeadlineQosPolicy_;
-  initial_DataWriterQos_.latency_budget = initial_LatencyBudgetQosPolicy_;
-  initial_DataWriterQos_.liveliness = initial_LivelinessQosPolicy_;
-  initial_DataWriterQos_.reliability = initial_ReliabilityQosPolicy_;
-  initial_DataWriterQos_.reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
-  initial_DataWriterQos_.reliability.max_blocking_time.sec = 0;
-  initial_DataWriterQos_.reliability.max_blocking_time.nanosec = 100000000;
-  initial_DataWriterQos_.destination_order = initial_DestinationOrderQosPolicy_;
-  initial_DataWriterQos_.history = initial_HistoryQosPolicy_;
-  initial_DataWriterQos_.resource_limits = initial_ResourceLimitsQosPolicy_;
-  initial_DataWriterQos_.transport_priority = initial_TransportPriorityQosPolicy_;
-  initial_DataWriterQos_.lifespan = initial_LifespanQosPolicy_;
-  initial_DataWriterQos_.user_data = initial_UserDataQosPolicy_;
-  initial_DataWriterQos_.ownership = initial_OwnershipQosPolicy_;
-#ifdef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
-  initial_DataWriterQos_.ownership_strength.value = 0;
-#else
-  initial_DataWriterQos_.ownership_strength = initial_OwnershipStrengthQosPolicy_;
-#endif
-  initial_DataWriterQos_.writer_data_lifecycle = initial_WriterDataLifecycleQosPolicy_;
-  initial_DataWriterQos_.representation = initial_DataRepresentationQosPolicy_;
+  initial_DataWriterQos_ = DataWriterQosBuilder();
 
   initial_PublisherQos_.presentation = initial_PresentationQosPolicy_;
   initial_PublisherQos_.partition = initial_PartitionQosPolicy_;
@@ -1162,7 +1101,7 @@ Service_Participant::set_repo_domain(const DDS::DomainId_t domain,
                                      Discovery::RepoKey key,
                                      bool attach_participant)
 {
-  typedef std::pair<Discovery_rch, RepoId> DiscRepoPair;
+  typedef std::pair<Discovery_rch, GUID_t> DiscRepoPair;
   OPENDDS_VECTOR(DiscRepoPair) repoList;
   {
     ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, this->maps_lock_);
@@ -1217,7 +1156,7 @@ Service_Participant::set_repo_domain(const DDS::DomainId_t domain,
             try {
               // Attach each DomainParticipant in this domain to this
               // repository.
-              RepoId id = (*current)->get_id();
+              GUID_t id = (*current)->get_id();
               repoList.push_back(std::make_pair(disc_iter->second, id));
 
               if (DCPS_debug_level > 0) {
@@ -2917,7 +2856,6 @@ Service_Participant::create_replayer(DDS::DomainParticipant_ptr participant,
                                      const DDS::DataWriterQos& datawriter_qos,
                                      const ReplayerListener_rch& a_listener)
 {
-  ACE_DEBUG((LM_DEBUG, "Service_Participant::create_replayer\n"));
   DomainParticipantImpl* participant_servant = dynamic_cast<DomainParticipantImpl*>(participant);
   if (participant_servant)
     return participant_servant->create_replayer(a_topic, publisher_qos, datawriter_qos, a_listener, 0);
@@ -3012,6 +2950,14 @@ Service_Participant::get_type_information(DDS::DomainParticipant_ptr participant
 
   return XTypes::TypeInformation();
 }
+
+#ifndef OPENDDS_SAFETY_PROFILE
+DDS::ReturnCode_t Service_Participant::get_dynamic_type(DDS::DynamicType_var& type,
+  DDS::DomainParticipant_ptr participant, const DDS::BuiltinTopicKey_t& key) const
+{
+  return dynamic_cast<DomainParticipantImpl*>(participant)->get_dynamic_type(type, key);
+}
+#endif
 
 XTypes::TypeObject
 Service_Participant::get_type_object(DDS::DomainParticipant_ptr participant,

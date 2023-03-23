@@ -215,3 +215,45 @@ TEST(RtpsCoreTypeSupportImpl, ExtractSequenceWithUnverifiedLength)
   EXPECT_TRUE(extract_sequence_with_unverified_length<FilterResult_t>());
   EXPECT_FALSE(extract_sequence_with_unverified_length<FilterResult_t>(10));
 }
+
+TEST(RtpsCoreTypeSupportImpl, Serializer_test_issue4105)
+{
+  static const ACE_CDR::Octet x[] = {
+    0x59,0x00,0x1c,0x00, // PID, length
+    0x01,0x00,0x00,0x00, // # of Properties
+    0x02,0x00,0x00,0x00, // prop[0].name.length
+    0x69,0x6e,0x00,0x00, // prop[0].name characters + padding (invalid)
+    0x00,0x00,0x00,0x00, // prop[0].value.length (invalid, treat as "")
+    0x00,0x00,0x00,0x00, // # of Binary Properties
+    0x00,0x00,0x00,0x00, // skipped
+    0x00,0x00,0x00,0x00, // skipped
+    0x01,0x4c,0x00,0x00, // PID, length
+  };
+  Message_Block_Ptr amb(new ACE_Message_Block(sizeof x));
+  const Encoding enc(Encoding::KIND_XCDR1, ENDIAN_LITTLE);
+  Serializer ser_w(amb.get(), enc);
+  ASSERT_TRUE(ser_w.write_octet_array(x, sizeof x));
+
+  Serializer ser(amb.get(), enc);
+  ParameterList plist;
+  ASSERT_FALSE(ser >> plist);
+}
+
+TEST(RtpsCoreTypeSupportImpl, Serializer_test_parameterlist)
+{
+  static const ACE_CDR::Octet x[] = {
+    0x14,0x40,0x0c,0x00, // PID, length
+    0x0d,0x00,0x00,0x00, // string length (invalid)
+    0x00,0x00,0x00,0x00, // string contents (invalid)
+    0x00,0x00,0x00,0x00,
+    0x01,0xa7,0x00,0x00, // PID, length
+  };
+  Message_Block_Ptr amb(new ACE_Message_Block(sizeof x));
+  const Encoding enc(Encoding::KIND_XCDR1, ENDIAN_LITTLE);
+  Serializer ser_w(amb.get(), enc);
+  ASSERT_TRUE(ser_w.write_octet_array(x, sizeof x));
+
+  Serializer ser(amb.get(), enc);
+  ParameterList plist;
+  ASSERT_FALSE(ser >> plist);
+}

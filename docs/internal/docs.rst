@@ -32,22 +32,25 @@ If you do, then follow the directions it gives, remove the ``docs/.venv`` direct
 HTML
 ====
 
-HTML documentation can be built and viewed using ``docs/build.py -o html``.
-If it was built successfully, then the front page will be at ``docs/_build/html/index.html``.
+HTML documentation can be built and viewed using ``./docs/build.py -o html``.
+If it was built successfully, then the front page will be at ``./docs/_build/html/index.html``.
+
+A single page variant is also available using ``./docs/build.py -o singlehtml``
+If it was built successfully, then the page will be at ``./docs/_build/singlehtml/index.html``.
 
 PDF
 ===
 
 .. note:: This has additional dependencies on LaTeX that are documented `here <https://www.sphinx-doc.org/en/master/usage/builders/index.html#sphinx.builders.latex.LaTeXBuilder>`__.
 
-PDF documentation can be built and viewed using ``docs/build.py -o pdf``.
-If it was built successfully, then the PDF file will be at ``docs/_build/latex/opendds.pdf``.
+PDF documentation can be built and viewed using ``./docs/build.py -o pdf``.
+If it was built successfully, then the PDF file will be at ``./docs/_build/latex/opendds.pdf``.
 
 Dash
 ====
 
 Documentation can be built for `Dash <https://kapeli.com/dash>`_, `Zeal <https://zealdocs.org/>`_, and other Dash-compatible applications using `doc2dash <https://github.com/hynek/doc2dash>`_.
-The command for this is ``docs/build.py dash``.
+The command for this is ``./docs/build.py dash``.
 This will create a ``docs/_build/OpenDDS.docset`` directory that must be manually moved to where other docsets are stored.
 
 Strict Checks
@@ -57,7 +60,7 @@ Strict Checks
 
 .. note::
 
-  The documenation includes dynamic links to files in the GitHub repo created by :ref:`docs-ghfile`.
+  The documentation includes dynamic links to files in the GitHub repo created by :ref:`docs-ghfile`.
   These links will be invalid until the git commit they were built under is pushed to a Github fork of OpenDDS.
   This also means running will cause those links to marked as broken.
   A workaround for this is to pass ``-c master`` or another commit, branch, or tag that is desired.
@@ -88,7 +91,7 @@ RST/Sphinx Usage
 * `One sentence per line should be perfered. <https://rhodesmill.org/brandon/2012/one-sentence-per-line/>`__
   This makes it easier to see what changed in a ``git diff`` or GitHub PR and easier to move sentences around in editors like Vim.
   It also avoids inconsistencies involving what the maximum line length is.
-  This might make it more annoying to read the documentation raw, but that's not the indented way to do so anyway.
+  This might make it more annoying to read the documentation raw, but that's not the intended way to do so anyway.
 
 GitHub Links
 ============
