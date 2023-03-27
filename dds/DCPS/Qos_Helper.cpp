@@ -524,6 +524,44 @@ DataWriterQosBuilder::DataWriterQosBuilder(DDS::Topic_var topic,
   }
 }
 
+DataReaderQosBuilder::DataReaderQosBuilder(DDS::Subscriber_var subscriber)
+{
+  const DDS::ReturnCode_t ret = subscriber->get_default_datareader_qos(qos_);
+  if (ret != DDS::RETCODE_OK && log_level >= LogLevel::Warning) {
+    ACE_ERROR((LM_WARNING,
+               ACE_TEXT("(%P|%t) WARNING: DataReaderQosBuilder: ")
+               ACE_TEXT("could not get_default_datareader_qos: %C\n"),
+               retcode_to_string(ret)));
+  }
+}
+
+DataReaderQosBuilder::DataReaderQosBuilder(DDS::Topic_var topic,
+                                           DDS::Subscriber_var subscriber)
+{
+  DDS::TopicQos tqos;
+  DDS::ReturnCode_t ret = topic->get_qos(tqos);
+  if (ret != DDS::RETCODE_OK && log_level >= LogLevel::Warning) {
+    ACE_ERROR((LM_WARNING,
+               ACE_TEXT("(%P|%t) WARNING: DataReaderQosBuilder: ")
+               ACE_TEXT("could not get_qos on topic: %C\n"),
+               retcode_to_string(ret)));
+  }
+  ret = subscriber->get_default_datareader_qos(qos_);
+  if (ret != DDS::RETCODE_OK && log_level >= LogLevel::Warning) {
+    ACE_ERROR((LM_WARNING,
+               ACE_TEXT("(%P|%t) WARNING: DataReaderQosBuilder: ")
+               ACE_TEXT("could not get_default_datareader_qos: %C\n"),
+               retcode_to_string(ret)));
+  }
+  ret = subscriber->copy_from_topic_qos(qos_, tqos);
+  if (ret != DDS::RETCODE_OK && log_level >= LogLevel::Warning) {
+    ACE_ERROR((LM_WARNING,
+               ACE_TEXT("(%P|%t) WARNING: DataReaderQosBuilder: ")
+               ACE_TEXT("could not copy_from_topic: %C\n"),
+               retcode_to_string(ret)));
+  }
+}
+
 } // namespace DCPS
 } // namespace OpenDDS
 
