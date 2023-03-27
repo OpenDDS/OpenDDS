@@ -5,7 +5,8 @@ import subprocess
 from pathlib import Path
 import re
 
-url_base = 'https://github.com'
+gh_url_base = 'https://github.com'
+omg_url_base = 'https://issues.omg.org'
 
 
 def get_commitish(app):
@@ -47,12 +48,25 @@ def parse_rst(parent, text, lineno, inliner):
     return messages
 
 
+def text_node(rawtext, lineno, text, options):
+    return ([nodes.inline(rawtext, text, **options)], [])
+
+
 def link_node(rawtext, lineno, inliner, title, parse_title, url, options):
     node = nodes.reference(rawtext, '' if parse_title else title, refuri=url, **options)
     messages = []
     if parse_title:
         messages = parse_rst(node, title, lineno, inliner)
     return ([node], messages)
+
+
+def append(all_values, values):
+    if all_values:
+        all_values[0].extend(values[0])
+        all_values[1].extend(values[1])
+    else:
+        all_values.append(values[0])
+        all_values.append(values[1])
 
 
 ghfile_arg_re = re.compile(r'^([^#]+)(#[^#]+)?$')
@@ -80,7 +94,7 @@ def ghfile_role(name, rawtext, text, lineno, inliner, options={}, content=[]):
                 path, str(local_path)),
 
     kind = 'tree' if local_path.is_dir() else 'blob'
-    url = '/'.join([url_base, repo, kind, get_commitish(app), path]) + fragment
+    url = '/'.join([gh_url_base, repo, kind, get_commitish(app), path]) + fragment
     if explicit_title:
         options['classes'] = [c for c in options['classes'] if c != 'custom_literal']
     else:
@@ -97,7 +111,7 @@ def ghissue_role(name, rawtext, text, lineno, inliner, options={}, content=[]):
         text, 'Issue #{} on GitHub'.format(text))
     return link_node(rawtext, lineno, inliner,
         title, explicit_title,
-        '{}/{}/issues/{}'.format(url_base, repo, target),
+        '{}/{}/issues/{}'.format(gh_url_base, repo, target),
         options)
 
 
@@ -110,7 +124,7 @@ def ghpr_role(name, rawtext, text, lineno, inliner, options={}, content=[]):
         text, 'Pull Request #{} on GitHub'.format(text))
     return link_node(rawtext, lineno, inliner,
         title, explicit_title,
-        '{}/{}/pull/{}'.format(url_base, repo, target),
+        '{}/{}/pull/{}'.format(gh_url_base, repo, target),
         options)
 
 
@@ -126,9 +140,27 @@ def ghrelease_role(name, rawtext, text, lineno, inliner, options={}, content=[])
         text = '(Invalid Release Link)'
     else:
         url = '{}/{}/releases/tag/{}'.format(
-            url_base, repo, app.config.github_links_release_tag)
+            gh_url_base, repo, app.config.github_links_release_tag)
     node = nodes.reference(rawtext, text, refuri=url, **options)
     return ([node], [])
+
+
+def omgissue_role(name, rawtext, text, lineno, inliner, options={}, content=[]):
+    app = inliner.document.settings.env.app
+    repo = app.config.github_links_repo
+    explicit_title, title, target = process_title_target(
+        text, 'OMG Issue {}'.format(text))
+    rv = []
+    append(rv, link_node(rawtext, lineno, inliner,
+        title, explicit_title,
+        '{}/issues/{}'.format(omg_url_base, target),
+        options))
+    append(rv, text_node(rawtext, lineno, ' ', options))
+    append(rv, link_node(rawtext, lineno, inliner,
+        ' (Member Link)', False,
+        '{}/browse/{}'.format(omg_url_base, target),
+        options))
+    return rv
 
 
 def setup(app):
@@ -141,5 +173,7 @@ def setup(app):
     app.add_role('ghissue', ghissue_role)
     app.add_role('ghpr', ghpr_role)
     app.add_role('ghrelease', ghrelease_role)
+
+    app.add_role('omgissue', omgissue_role)
 
 # vim: expandtab:ts=4:sw=4

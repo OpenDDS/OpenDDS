@@ -24,10 +24,10 @@ This assumption is not practical as systems must be able to evolve while remaini
 The DDS XTypes (Extensible and Dynamic Topic Types) specification loosens the requirement on applications to have a common notion of data types.
 Using XTypes, the application developer adds IDL annotations that indicate where the types may vary between publisher and subscriber and how those variations are handled by the middleware.
 
-This release of OpenDDS implements the XTypes specification version 1.3 at the Basic Conformance level, with a partial implementation of the Dynamic Language Binding.
-Some features described by the specification are not yet implemented in OpenDDS — those are noted below in section :ref:`xtypes--unimplemented-features`.
-This includes IDL annotations that are not yet implemented.
-The “Specification Differences” section (:ref:`xtypes--differences-from-the-specification`) describes situations where the implementation of XTypes in OpenDDS departs from or infers something about the specification.
+OpenDDS implements the XTypes specification version 1.3 at the Basic Conformance level, with a partial implementation of the Dynamic Language Binding.
+Some features described by the specification are not yet implemented in OpenDDS — those are noted in :ref:`xtypes--unimplemented-features`.
+This includes IDL annotations that are not yet implemented, see :ref:`xtypes--annotations`.
+:ref:`xtypes--differences-from-the-specification` describes situations where the implementation of XTypes in OpenDDS departs from or infers something about the specification.
 Specification issues have been raised for these situations.
 
 .. _xtypes--features:
@@ -47,7 +47,7 @@ Extensibility
 ..
     Sect<16.2.1>
 
-There are 3 kinds of extensibility for types: Appendable, Mutable, and Final
+There are 3 kinds of extensibility for types: appendable, mutable, and final
 
 * *Appendable* denotes a constructed type which may have additional members added onto or removed from the end.
 
@@ -60,11 +60,11 @@ There are 3 kinds of extensibility for types: Appendable, Mutable, and Final
 Extensibility is set by the user in the IDL with the annotations: ``@appendable``, ``@mutable``, ``@final``
 
 The default extensibility is Appendable.
-This default extensibility can be changed with the IDL compiler command line option --default-extensibility EXTENSIBILITY Where EXTENSIBILITY is "final", "appendable" or "mutable".
+This default extensibility can be changed with the IDL compiler command line option ``--default-extensibility EXTENSIBILITY`` where ``EXTENSIBILITY` must be ``final``, ``appendable`` or ``mutable``.
 
 Structs, unions, and enums are the only types which can use any of the extensibilities.
 
-The default extensibility for enums is “appendable” and is not governed by --default-extensibility.
+The default extensibility for enums is “appendable” and is not governed by ``--default-extensibility``.
 TypeObjects for received enums that do not set any flags are treated as a wildcard.
 
 .. _xtypes--assignability:
@@ -78,7 +78,7 @@ Assignability
 Assignability describes the ability of values of one type to be coerced to values of a possibility different type.
 
 Assignability between the type of a writer and reader is checked as part of discovery.
-If the types are assignable but not identical, then the “Try Construct” mechanism will be used to coerce values of the writer’s type to values of the reader’s type.
+If the types are assignable but not identical, then the :ref:`“try construct” <xtypes--try-construct>` mechanism will be used to coerce values of the writer's type to values of the reader's type.
 
 In order for two constructed types to be assignable they must
 
@@ -106,13 +106,13 @@ Compatible IDL types means that the types are structurally equivalent and serial
 
 Additionally, the XTypes-enabled participant needs to be set up as follows:
 
-* Types cannot use Mutable extensibility
+* Types cannot use mutable extensibility
 
-* Data Writers must have their Data Representation QoS policy set to DDS::XCDR_DATA_REPRESENTATION
+* Data Writers must have their Data Representation QoS policy set to ``DDS::XCDR_DATA_REPRESENTATION``
 
-* Data Readers must include DDS::XCDR_DATA_REPRESENTATION in the list of data representations in their Data Representation QoS (This is true by default)
+* Data Readers must include ``DDS::XCDR_DATA_REPRESENTATION`` in the list of data representations in their Data Representation QoS (This is true by default)
 
-The “Data Representation" section below shows how to change the data representation.
+:ref:`xtypes--data-representation` shows how to change the data representation.
 
 .. _xtypes--dynamic-language-binding:
 
@@ -130,7 +130,7 @@ Advantages to this design include efficiency and static type safety, however, th
 The XTypes Dynamic Language Binding defines a generic data container DynamicData and the interfaces DynamicDataWriter and DynamicDataReader.
 Applications can create instances of DynamicDataWriter and DynamicDataReader that work with various topics in the domain without needing to incorporate the generated code for those topics' data types.
 The system is still type safe but the type checks occur at runtime instead of at compile time.
-The Dynamic Language Binding is described in detail in section :ref:`xtypes--dynamic-language-binding-1`.
+The Dynamic Language Binding is described in detail in :ref:`xtypes--dynamic-language-binding-1`.
 
 .. _xtypes--examples-and-explanation:
 
@@ -234,12 +234,12 @@ A policy for a type can be set with either ``@autoid(SEQUENTIAL)`` or ``@autoid(
       double humidity;
     };
 
-SEQUENTIAL causes ids to be assigned based on the position in the type.
-HASH causes ids to be computed by hashing the name of the member.
-If no @autoid annotation is specified, the policy is SEQUENTIAL.
+``SEQUENTIAL`` causes ids to be assigned based on the position in the type.
+``HASH`` causes ids to be computed by hashing the name of the member.
+If no ``@autoid`` annotation is specified, the policy is ``SEQUENTIAL``.
 
-Suppose that Version 3 was used in the initial deployment of the weather stations and the decision was made to switch to @autoid(HASH) when adding the new fields for wind speed and direction.
-In this case, the ids of the pre-existing members can be set with @id:
+Suppose that Version 3 was used in the initial deployment of the weather stations and the decision was made to switch to ``@autoid(HASH)`` when adding the new fields for wind speed and direction.
+In this case, the ids of the pre-existing members can be set with ``@id``:
 
 .. code-block:: omg-idl
 
@@ -257,7 +257,7 @@ In this case, the ids of the pre-existing members can be set with @id:
       WindDir wind_direction;
     };
 
-See the “Member ID Annotations” section for more details.
+See the :ref:`xtypes--member-id-assignment` for more details.
 
 .. _xtypes--appendable-extensibility:
 
@@ -268,9 +268,9 @@ Appendable Extensibility
     Sect<16.3.4>
 
 Mutable extensibility requires a certain amount of overhead both in terms of processing and network traffic.
-A more efficient but less flexible form of extensibility is @appendable.
-Extensibility with @appendable is limited in that members can only be added to or removed from the end of the type.
-With @appendable, the initial version of the weather station IDL would be:
+A more efficient but less flexible form of extensibility is appendable
+Appendable is limited in that members can only be added to or removed from the end of the type.
+With appendable, the initial version of the weather station IDL would be:
 
 .. code-block:: omg-idl
 
@@ -300,7 +300,7 @@ And the subsequent addition of the wind speed and direction members would be:
       WindDir wind_direction;
     };
 
-As with @mutable, when a Version 7 Writer interacts with a Version 6 Reader, the additional fields will be ignored by the reader.
+As with mutable, when a Version 7 Writer interacts with a Version 6 Reader, the additional fields will be ignored by the reader.
 When a Version 6 Writer interacts with a Version 7 Reader, the additional fields will be initialized to default values based on Table 9 of the XTypes specification.
 
 Appendable is the default extensibility.
@@ -313,9 +313,9 @@ Final Extensibility
 ..
     Sect<16.3.5>
 
-The third kind of extensibility is @final.
-Annotating a type with @final means that it will not be compatible with (assignable to/from) a type that's structurally different.
-The @final annotation can be used to define types for pre-XTypes compatibility or in situations where the overhead of @mutable or @appendable is unacceptable.
+The third kind of extensibility is final.
+Annotating a type with ``@final`` means that it will not be compatible with (assignable to/from) a type that's structurally different.
+The ``@final`` annotation can be used to define types for pre-XTypes compatibility or in situations where the overhead of mutable or appendable is unacceptable.
 
 .. _xtypes--try-construct:
 
@@ -325,7 +325,7 @@ Try Construct
 ..
     Sect<16.3.6>
 
-From a reader’s perspective, there are three possible scenarios when attempting to initialize a member.
+From a reader's perspective, there are three possible scenarios when attempting to initialize a member.
 First, the member type is identical to the member type of the reader.
 This is the trivial case the value from the writer is copied to the value for the reader.
 Second, the writer does not have the member.
@@ -367,11 +367,11 @@ If a Version 2 writer interacts with a Version 1 reader, the station ID will be 
 While perhaps not ideal, it will still allow the systems to interoperate.
 
 There are two other forms of try-construct behavior.
-Fields marked as @try_construct(USE_DEFAULT) will receive a default value if value construction fails.
+Fields marked as ``@try_construct(USE_DEFAULT)`` will receive a default value if value construction fails.
 In the previous example, this means the reader would receive an empty string for the station ID if it exceeds 8 characters.
-Fields marked as @try_construct(DISCARD) cause the entire sample to be discarded.
+Fields marked as ``@try_construct(DISCARD)`` cause the entire sample to be discarded.
 In the previous example, the Version 1 reader will never see a sample from a Version 2 writer where the original station ID contains more than 8 characters.
-@try_construct(DISCARD) is the default behavior.
+``@try_construct(DISCARD)`` is the default behavior.
 
 .. _xtypes--data-representation:
 
@@ -383,23 +383,51 @@ Data Representation
     Sect<16.4>
 
 Data representation is the way a data sample can be encoded for transmission.
-Data representation can be XML, XCDR1, or XCDR2.
+Writers can only encode samples using one data representations, but readers can accept multiple data representations.
+Data representation can be XML, XCDR1, XCDR2, or unaligned CDR.
 
-* XML is unsupported and should not be used
+XML
+    This isn't currently supported and will be ignored.
 
-* XCDR1 with appendable extensibility should not be used
+    The ``DataRepresentationQoS`` value is ``DDS::XML_DATA_REPRESENTATION``
 
-* XCDR2 is completely supported and preferred
+    The annotation is :ref:`xtypes--opendds-data-representation-xml`.
 
-XCDR2 is a more robust version of XCDR1 and should be used in preference to XCDR1 unless there is a reason to do otherwise.
+XCDR1
+    This is the pre-XTypes standard CDR extended with XTypes features.
+    Pre-XTypes standard CDR is fully supported, but the XTypes-specific features are not fully supported and should be avoided.
+    Types can be marked as final or appendable, but all types should be treated as if they were final.
+    Nothing should be marked as mutable.
+    Readers and writers of topic types that are mutable or contain nested types that are mutable will fail to initialize.
+
+    The ``DataRepresentationQoS`` value is ``DDS::XCDR_DATA_REPRESENTATION``
+
+    The annotation is :ref:`xtypes--opendds-data-representation-xcdr1`.
+
+XCDR2
+    This is default for writers when using the RTPS-UDP transport and should be preferred in most cases.
+    It is a more robust and efficient version of XCDR1.
+
+    The ``DataRepresentationQoS`` value is ``DDS::XCDR2_DATA_REPRESENTATION``
+
+    The annotation is :ref:`xtypes--opendds-data-representation-xcdr2`.
+
+Unaligned CDR
+    This is a OpenDDS-specific encoding that is the default for writers using only non-RTPS-UDP transports.
+    It can't be used by a DataWriter using the RTPS-UDP transport.
+
+    The ``DataRepresentationQoS`` value is ``OpenDDS::DCPS::UNALIGNED_CDR_DATA_REPRESENTATION``
+
+    The annotation is :ref:`xtypes--opendds-data-representation-unaligned-cdr`.
 
 Data representation is a QoS policy alongside the other QoS options.
 Its listed values represent allowed serialized forms of the data sample.
 The DataWriter and DataReader need to have at least one matching data representation for communication between them to be possible.
 
-The default value of the DataRepresentationQoS policy is an empty sequence.
-This is interpreted by the middleware as XCDR2 for DataWriters and the alternatives XCDR1 | XCDR2 for DataReaders.
-A writer or reader without an explicitly-set DataRepresentationQoS will therefore be able to communicate with another reader or writer which is compatible with XCDR2.
+The default value of the ``DataRepresentationQoS`` policy is an empty sequence.
+For RTPS-UDP this is interpreted as XCDR2 for DataWriters and accepting XCDR1 and XCDR2 for DataReaders.
+For other transports it's interpreted as Unaligned CDR for DataWriters and accepting XCDR1, XCDR2, and Unaligned CDR for DataReaders.
+A writer or reader without an explicitly-set ``DataRepresentationQoS`` will therefore be able to communicate with another reader or writer which is compatible with XCDR2.
 The example below shows a possible configuration for an XCDR1 DataWriter.
 
 .. code-block:: cpp
@@ -429,15 +457,49 @@ Type Consistency Enforcement
 ..
     Sect<16.5>
 
+.. _xtypes--typeconsistencyenforcementqospolicy:
+
+TypeConsistencyEnforcementQosPolicy
+===================================
+
 The Type Consistency Enforcement QoS policy lets the application fine-tune details of how types may differ between writers and readers.
-The policy is only applies to data readers.
+The policy only applies to data readers.
 This means that each reader can set its own policy for how its type may vary from the types of the writers that it may match.
 
 There are six members of the ``TypeConsistencyEnforcementQosPolicy`` struct defined by XTypes, but OpenDDS only supports setting one of them: ``ignore_member_names``.
 All other members should be kept at their default values.
 
-``ignore_member_names`` defaults to ``FALSE`` so member names (along with Member IDs, see :ref:`xtypes--member-id-assignment`) are significant for type compatibility.
-Changing this to TRUE means that only Member IDs are used for type compatibility.
+``ignore_member_names`` defaults to ``FALSE`` so member names (along with member IDs, see :ref:`xtypes--member-id-assignment`) are significant for type compatibility.
+Changing this to ``TRUE`` means that only member IDs are used for type compatibility.
+
+.. _xtypes--type-compatibility:
+
+Type Compatibility
+==================
+
+When a reader/writer match is happening, type consistency enforcement checks that the two types are compatible according to the type objects if they are available.
+This check will not happen if OpenDDS has been :ref:`configured not to generate or use type objects <xtypes--representing-types-with-typeobject-and-dynamictype>` or if the remote DDS doesn't support type objects.
+The full type object compatibility check is too detailed to reproduce here.
+It can be found in section 7.2.4 of the XTypes 1.3 specification.
+In general though two topic types and their nested types are compatible if:
+
+  * Extensibilities of shared types match
+  * Extensibility rules haven't been broken, for example:
+
+    * Changing a ``@final`` struct
+    * Adding a member in the middle of an ``@appendable`` struct
+
+  * Length bounds of strings and sequences are the same or greater
+  * Lengths of arrays are exactly the same
+  * The keys of the types match exactly
+  * Shared member IDs match when required, like when they are final or are being used as keys
+
+If the type objects are compatible then the match goes ahead.
+If one or both type objects are not available, then OpenDDS falls back to checking if the topic type names match.
+This is the name passed to the ``register_type`` method of a ``TypeSupport`` object or if that string is empty then the name of the topic type in IDL.
+
+An interesting side effect of these rules is when type objects are always available, then the topic type names passed to ``register_type`` are only used within that process.
+This means they can be changed and remote readers and writers will still match, assuming the new name is used consistently within the process and the types are still compatible.
 
 .. _xtypes--idl-annotations:
 
@@ -450,7 +512,7 @@ IDL Annotations
 
 .. _xtypes--indicating-which-types-can-be-topic-types:
 
-Indicating which Types can be topic types
+Indicating Which Types Can Be Topic Types
 =========================================
 
 ..
@@ -468,7 +530,7 @@ Applies To: struct or union type declarations
 
 The topic annotation marks a topic type for samples to be transmitted from a publisher or received by a subscriber.
 A topic type may contain other topic and non-topic types.
-See section :ref:`getting_started--defining-data-types-with-idl` for more details.
+See :ref:`getting_started--defining-data-types-with-idl` for more details.
 
 .. _xtypes--nested:
 
@@ -480,8 +542,8 @@ See section :ref:`getting_started--defining-data-types-with-idl` for more detail
 
 Applies To: struct or union type declarations
 
-The ``@`` nested annotation marks a type that will always be contained within another.
-This can be used to prevent a type from being used as a topic.
+The ``@nested`` annotation marks a type that will always be contained within another.
+This can be used to prevent a type from being used as in a topic.
 One reason to do so is to reduce the amount of code generated for that type.
 
 .. _xtypes--default-nested:
@@ -505,11 +567,9 @@ Specifying allowed Data Representations
 ..
     Sect<16.6.2>
 
-Data Representation annotations mark the formats in which data samples of this type can be represented in a serialized form.
-The Data Representation annotations listed on the type will be compared to those in the QoS policies of the reader or writer that is trying to use the type.
-If a data representation is shared between the type and entity, then they can be used together.
-OpenDDS’s default data representation for entities is XCDR2.
-If no data representation is specified for a type, there are no restrictions on which data representations that a QoS can use with the type.
+If there are ``@OpenDDS::data_representation`` annotations are on the topic type, then the representations are limited to ones the specified in the annotations, otherwise all representations are allowed.
+Trying to create a reader or writer with the disallowed representations will result in an error.
+See :ref:`xtypes--data-representation` for more information.
 
 .. _xtypes--opendds-data-representation-xml:
 
@@ -533,8 +593,8 @@ Limitations: XML is not currently supported
 
 Applies To: topic types
 
-Limitations: XCDR1 is not recommended.
-See section :ref:`xtypes--data-representation` for details
+Limitations: XCDR1 doesn't support XTypes features
+See :ref:`xtypes--data-representation` for details
 
 .. _xtypes--opendds-data-representation-xcdr2:
 
@@ -546,7 +606,17 @@ See section :ref:`xtypes--data-representation` for details
 
 Applies To: topic types
 
-XCDR2 is currently the recommended data representation.
+XCDR2 is currently the recommended data representation for most cases.
+
+.. _xtypes--opendds-data-representation-unaligned-cdr:
+
+@OpenDDS::data_representation(UNALIGNED_CDR)
+--------------------------------------------
+
+Applies To: topic types
+
+Limitations: OpenDDS specific, can't be used with RTPS-UDP, and doesn't support XTypes features
+See :ref:`xtypes--data-representation` for details
 
 .. _xtypes--standard-data-representation:
 
@@ -556,9 +626,14 @@ Standard @data_representation
 ..
     Sect<16.6.2.4>
 
-``tao_idl`` doesn’t support bitset, which the standard ``@data_representation`` requires.
-Instead use ``@OpenDDS::data_representation`` which is similar, but doesn’t support bitmask value chaining like ``@data_representation(XCDR|XCDR2)``.
-The equivalent would require two separate annotations: ``@OpenDDS::data_representation(XCDR1) @OpenDDS::data_representation(XCDR2).``
+``tao_idl`` doesn't support bitset, which the standard ``@data_representation`` requires.
+Instead use ``@OpenDDS::data_representation`` which is similar, but doesn't support bitmask value chaining like ``@data_representation(XCDR|XCDR2)``.
+The equivalent would require two separate annotations:
+
+.. code-block:: omg-idl
+
+  @OpenDDS::data_representation(XCDR1)
+  @OpenDDS::data_representation(XCDR2)
 
 .. _xtypes--determining-extensibility:
 
@@ -570,7 +645,7 @@ Determining Extensibility
 
 The extensibility annotations determine how a type may be changed and still be compatible.
 If no extensibility annotation is set, the type will default to appendable.
-The default can be changed with the command line option --default-extensibility *type*, where *type* can be final, appendable, or mutable.
+The default can be changed with the command line option ``--default-extensibility TYPE``, where ``TYPE`` can be ``final``, ``appendable``, or ``mutable``.
 
 .. _xtypes--mutable:
 
@@ -656,7 +731,7 @@ Enums will be set to the first enumerator defined.
 
 Applies to: structure and union members, sequence and array elements
 
-The trim try construct annotation will, if possible, shorten a received value to one fitting the receiver’s bound.
+The trim try construct annotation will, if possible, shorten a received value to one fitting the receiver's bound.
 As such, trim only makes logical sense on bounded strings and bounded sequences.
 
 .. _xtypes--try-construct-discard:
@@ -679,7 +754,7 @@ Member ID assignment
 ..
     Sect<16.6.5>
 
-If no explicit id annotation is used, then Member IDs will automatically be assigned sequentially.
+If no explicit id annotation is used, then member IDs will automatically be assigned sequentially.
 
 .. _xtypes--id-value:
 
@@ -691,7 +766,7 @@ If no explicit id annotation is used, then Member IDs will automatically be assi
 
 Applies to: structure and union members
 
-The *value* is a 32-bit integer which assigns that member’s ID.
+``value`` is an unsigned 32-bit integer which assigns that member's ID.
 
 .. _xtypes--autoid-value:
 
@@ -705,7 +780,7 @@ Applies to: module declarations, structure declarations, union declarations
 
 The autoid annotation can take two values, ``HASH`` or ``SEQUENTIAL``\.
 ``SEQUENTIAL`` states that the identifier shall be computed by incrementing the preceding one.
-``HASH`` states that the identifier should be calculated with a hashing algorithm – the input to this hash is the member’s name.
+``HASH`` states that the identifier should be calculated with a hashing algorithm – the input to this hash is the member's name.
 ``HASH`` is the default value of ``@autoid``.
 
 .. _xtypes--hashid-value:
@@ -719,7 +794,7 @@ The autoid annotation can take two values, ``HASH`` or ``SEQUENTIAL``\.
 Applies to: structure and union members
 
 The ``@hashid`` sets the identifier to the hash of the ``value`` parameter, if one is specified.
-If the**``value`` parameter is omitted or is the empty string, the member’s name is used as if it was the ``value``.
+If the ``value`` parameter is omitted or is the empty string, the member's name is used as if it was the ``value``.
 
 .. _xtypes--determining-the-key-fields-of-a-type:
 
@@ -740,7 +815,7 @@ Determining the Key Fields of a Type
 Applies to: structure members, union discriminator
 
 The ``@key`` annotation marks a member used to determine the Instances of a topic type.
-See section :ref:`getting_started--keys` for more details on the general concept of a Key.
+See :ref:`getting_started--keys` for more details on the general concept of a Key.
 For XTypes specifically, two types can only be compatible if each contains the members that are keys within the other.
 
 .. _xtypes--dynamic-language-binding-1:
@@ -752,17 +827,17 @@ Dynamic Language Binding
 ..
     Sect<16.7>
 
-For an overview of the Dynamic Language Binding, see section :ref:`xtypes--dynamic-language-binding`.
+For an overview of the Dynamic Language Binding, see :ref:`xtypes--dynamic-language-binding`.
 This section describes the features of the Dynamic Language Binding that OpenDDS supports.
 
 There are two main usage patterns supported:
 
-* Applications can receive DynamicData from a Recorder object (see section :ref:`alternate_interfaces_to_data--recorder-and-replayer`)
+* Applications can receive DynamicData from a Recorder object (see :ref:`alternate_interfaces_to_data--recorder-and-replayer`)
 
-* Applications can use XTypes DynamicDataWriter and/or DynamicDataReader (see section :ref:`xtypes--dynamicdatawriters-and-dynamicdatareaders`)
+* Applications can use XTypes DynamicDataWriter and/or DynamicDataReader (see :ref:`xtypes--dynamicdatawriters-and-dynamicdatareaders`)
 
 To use DynamicDataWriter and/or DynamicDataReader for a given topic, the data type definition for that topic must be available to the local DomainParticipant.
-There are a few ways this can be achieved, see section :ref:`xtypes--obtaining-dynamictype-and-registering-typesupport` for details.
+There are a few ways this can be achieved, see :ref:`xtypes--obtaining-dynamictype-and-registering-typesupport` for details.
 
 .. _xtypes--representing-types-with-typeobject-and-dynamictype:
 
@@ -773,8 +848,8 @@ Representing Types with TypeObject and DynamicType
     Sect<16.7.1>
 
 In XTypes, the types of the peers may not be identical, as in the case of appendable or mutable extensibility.
-In order for a peer to be aware of its remote peer’s type, there must be a way for the remote peer to communicate its type.
-TypeObject is an alternative to IDL for representing types, and one of the purposes of TypeObject is to communicate the peers’ types.
+In order for a peer to be aware of its remote peer's type, there must be a way for the remote peer to communicate its type.
+TypeObject is an alternative to IDL for representing types, and one of the purposes of TypeObject is to communicate the peers' types.
 
 There are two classes of TypeObject: MinimalTypeObject and CompleteTypeObject.
 A MinimalTypeObject object contains minimal information about the type that is sufficient for a peer to perform type compatibility checking.
@@ -796,10 +871,10 @@ Enabling Use of CompleteTypeObjects
     Sect<16.7.1.1>
 
 To enable use of ``CompleteTypeObject`` s needed for the dynamic binding, they must be generated and OpenDDS must be configured to use them.
-To generate them, :ref:`-Gxtypes-complete <opendds_idl--gxtypes-complete>` must be passed to ``opendds_idl`` (Table :ref:`opendds_idl--opendds-idl-command-line-options`).
+To generate them, :ref:`-Gxtypes-complete <opendds_idl--gxtypes-complete>` must be passed to ``opendds_idl`` (:ref:`opendds_idl--opendds-idl-command-line-options`).
 For MPC, this can be done by adding this to the opendds_idl arguments for idl files in the project, like this:
 
-::
+.. code-block:: mpc
 
     TypeSupport_Files {
       dcps_ts_flags += -Gxtypes-complete
@@ -808,7 +883,7 @@ For MPC, this can be done by adding this to the opendds_idl arguments for idl fi
 
 To do the same for CMake:
 
-::
+.. code-block:: cmake
 
     OPENDDS_TARGET_SOURCES(target
       Messenger.idl
@@ -816,7 +891,7 @@ To do the same for CMake:
     )
 
 Once set up to be generated, OpenDDS has to be configured to send and receive the ``CompleteTypeObject`` s.
-This can be done by setting the :ref:`UseXTypes <run_time_configuration--usextypes>` RTPS discovery configuration option (Table :ref:`run_time_configuration--configuring-for-ddsi-rtps-discovery`) or programmatically using the ``OpenDDS::RTPS::RtpsDiscovery::use_xtypes()`` setter methods.
+This can be done by setting the :ref:`UseXTypes <run_time_configuration--usextypes>` RTPS discovery configuration option (:ref:`run_time_configuration--configuring-for-ddsi-rtps-discovery`) or programmatically using the ``OpenDDS::RTPS::RtpsDiscovery::use_xtypes()`` setter methods.
 
 .. _xtypes--interpreting-data-samples-with-dynamicdata:
 
@@ -828,7 +903,7 @@ Interpreting Data Samples with DynamicData
 
 Together with DynamicType, DynamicData allows users to interpret a received data sample and read individual fields from it.
 Each DynamicData object is associated with a type, represented by a DynamicType object, and the data corresponding to an instance of that type.
-Let’s take a look at an example with the following type, described below in IDL:
+Let's take a look at an example with the following type, described below in IDL:
 
 .. code-block:: omg-idl
 
@@ -850,13 +925,13 @@ Let’s take a look at an example with the following type, described below in ID
 
 The samples for MyStruct are written by a normal, statically-typed DataWriter.
 The writer application needs to have the IDL-generated code including the “complete” form of TypeObjects.
-Use a command-line option to opendds_idl to enable CompleteTypeObjects since the default is to generate MinimalTypeObjects (see section :ref:`opendds_idl--opendds-idl-command-line-options`).
+Use a command-line option to opendds_idl to enable CompleteTypeObjects since the default is to generate MinimalTypeObjects (see :ref:`opendds_idl--opendds-idl-command-line-options`).
 
-One way to obtain a DynamicData object representing a data sample received by the participant is using the Recorder and RecorderListener classes (see section :ref:`alternate_interfaces_to_data--recorder-and-replayer`).
-Recorder’s get_dynamic_data can be used to construct a DynamicData object for each received sample from the writer.
+One way to obtain a DynamicData object representing a data sample received by the participant is using the Recorder and RecorderListener classes (see :ref:`alternate_interfaces_to_data--recorder-and-replayer`).
+Recorder's get_dynamic_data can be used to construct a DynamicData object for each received sample from the writer.
 Internally, the CompleteTypeObjects received from discovering that writer are converted to DynamicTypes and they are then used to construct the DynamicData objects.
 Once a DynamicData object for a MyStruct sample is constructed, its members can be read as described in the following sections.
-Another way to obtain a DynamicData object is from a DynamicDataReader (section :ref:`xtypes--creating-and-using-a-dynamicdatareader`).
+Another way to obtain a DynamicData object is from a DynamicDataReader (:ref:`xtypes--creating-and-using-a-dynamicdatareader`).
 
 .. _xtypes--reading-basic-types:
 
@@ -872,45 +947,43 @@ To call a correct method for reading a member, we need to know the type of the m
 For our example, we first want to get the number of members that the sample contains.
 In these examples, the “data” object is an instance of DynamicData.
 
-::
+.. code-block:: cpp
 
-    ACE_CDR::ULong count = data.get_item_count();
+    DDS::UInt32 count = data.get_item_count();
 
-Then, each member’s id can be read with get_member_id_at_index.
-The input for this function is the index of the member in the sample, which can take a value from 0 to count - 1.
+Then, each member's id can be read with ``get_member_id_at_index``.
+The input for this function is the index of the member in the sample, which can take a value from ``0`` to ``count - 1``.
 
-::
+.. code-block:: cpp
 
     XTypes::MemberId id = data.get_member_id_at_index(0);
 
-The MemberDescriptor for the corresponding member then can be obtained as follows.
+The ``MemberDescriptor`` for the corresponding member then can be obtained as follows.
 
-::
+.. code-block:: cpp
 
     XTypes::MemberDescriptor md;
     DDS::ReturnCode_t ret = data.get_descriptor(md, id);
 
-The returned MemberDescriptor allows us to know the type of the member.
-Suppose id is 1, meaning that the member at index 0 is l_field, we now can get its value.
+The returned ``MemberDescriptor`` allows us to know the type of the member.
+Suppose id is 1, meaning that the member at index 0 is ``l_field``, we now can get its value.
 
-::
+.. code-block:: cpp
 
-    ACE_CDR::Long my_long;
-    ret = data.get_int32_value(my_long, id);
+    DDS::Int32 int32_value;
+    ret = data.get_int32_value(int32_value, id);
 
-After the call, my_long contains the value of the member l_field from the sample.
-The method returns ``DDS::RETCODE_OK`` if successful and ``DDS::RETCODE_ERROR`` in case of failure.
-Note that the method called on the DynamicData object must match the type of the requested member; in this example, the member has type long (from its IDL) and thus ``get_int32_value`` is called.
-If the method called doesn’t match the type of the member, it will return ``DDS::RETCODE_ERROR``.
+After the call, ``int32_value`` contains the value of the member ``l_field`` from the sample.
+The method returns ``DDS::RETCODE_OK`` if successful.
 
-Similarly, suppose we have already found out the types and ids of the members us_field and f_field, their values can be read as follows.
+Similarly, suppose we have already found out the types and ids of the members ``us_field`` and ``f_field``, their values can be read as follows.
 
-::
+.. code-block:: cpp
 
-    ACE_CDR::UShort my_ushort;
-    ret = data.get_get_uint16_value(my_ushort, 2); // Get the value of us_field
-    ACE_CDR::Float my_float;
-    ret = data.get_float32_value(my_float, 3); // Get the value of f_field
+    DDS::UInt16 uint16_value;
+    ret = data.get_uint16_value(uint16_value, 2); // Get the value of us_field
+    DDS::Float32 float32_value;
+    ret = data.get_float32_value(float32_value, 3); // Get the value of f_field
 
 .. _xtypes--reading-collections-of-basic-types:
 
@@ -922,38 +995,38 @@ Reading Collections of Basic Types
 
 Besides a list of methods for getting values of members of basic types, DynamicData also defines methods for reading sequence members.
 In particular, for each method that reads value from a basic type, there is a counterpart that reads a sequence of the same basic type.
-For instance, get_int32_value reads the value from a member of type long, and get_int32_values reads the value from a member of type sequence<long>.
-For the member ul_seq_field in our example, its value can be read as follows.
+For instance, ``get_int32_value`` reads the value from a member of type ``int32``/``long``, and ``get_int32_values`` reads the value from a member of type ``sequence<int32>``.
+For the member ``ul_seq_field`` in our example, its value can be read as follows.
 
-::
+.. code-block:: cpp
 
-    CORBA::ULongSeq my_ul_seq;
+    DDS::UInt32Seq my_ul_seq;
     ret = data.get_uint32_values(my_ul_seq, id); // id is 5
 
-Because ul_seq_field is a sequence of unsigned 32-bit integers, the get_uint32_values method is used.
-Again, the second argument is the id of the requested member, which is 5 for ul_seq_field.
-When successful, my_ul_seq contains values of all elements of the member ul_seq_field in the sample.
+Because ``ul_seq_field`` is a sequence of unsigned 32-bit integers, the ``get_uint32_values`` method is used.
+Again, the second argument is the id of the requested member, which is 5 for ``ul_seq_field``.
+When successful, ``my_ul_seq`` contains values of all elements of the member ``ul_seq_field`` in the sample.
 
-To get the values of the array member d_field, we first need to create a separate DynamicData object for it, and then read individual elements of the array using the new DynamicData object.
+To get the values of the array member ``d_field``, we first need to create a separate DynamicData object for it, and then read individual elements of the array using the new DynamicData object.
 
-::
+.. code-block:: cpp
 
     XTypes::DynamicData array_data;
     DDS::ReturnCode_t ret = data.get_complex_value(array_data, id); // id is 6
 
-    const ACE_CDR::ULong num_items = array_data.get_item_count();
-    for (ACE_CDR::ULong i = 0; i < num_items; ++i) {
+    const DDS::UInt32 num_items = array_data.get_item_count();
+    for (DDS::UInt32 i = 0; i < num_items; ++i) {
       const XTypes::MemberId my_id = array_data.get_member_id_at_index(i);
-      ACE_CDR::Double my_double;
+      DDS::Float64 my_double;
       ret = array_data.get_float64_value(my_double, my_id);
     }
 
-In the example code above, get_item_count returns the number of elements of the array.
-Inside the for loop, the index of each element is converted to an id within the array using get_member_id_at_index.
-Then, this id is used to read the element’s value into my_double.
+In the example code above, ``get_item_count`` returns the number of elements of the array.
+Inside the for loop, the index of each element is converted to an id within the array using ``get_member_id_at_index``.
+Then, this id is used to read the element's value into ``my_double``.
 Note that the second parameter of the interfaces provided by DynamicData must be the id of the requested member.
 In case of collection, elements are considered members of the collection.
-However, the collection element doesn’t have a member id.
+However, the collection element doesn't have a member id.
 And thus, we need to convert its index into an id before calling a get_*_value (or get_*_values) method.
 
 .. _xtypes--reading-members-of-more-complex-types:
@@ -969,7 +1042,7 @@ And thus, users first need to get a new DynamicData object that represents the s
 This new DynamicData object can then be used to get the values of the inner members of the nested member.
 For example, a DynamicData object for the nested_field member of the MyStruct sample can be obtained as follows.
 
-::
+.. code-block:: cpp
 
     XTypes::DynamicData nested_data;
     DDS::ReturnCode_t ret = data.get_complex_value(nested_data, id); // id is 4
@@ -977,9 +1050,9 @@ For example, a DynamicData object for the nested_field member of the MyStruct sa
 Recall that nested_field has type NestedStruct which has one member s_field with id 1.
 Now the value of s_field can be read from nested_data using get_int16_value, since s_field has type short.
 
-::
+.. code-block:: cpp
 
-    ACE_CDR::Short my_short;
+    DDS::Int16 my_short;
     ret = nested_data.get_int16_value(my_short, id); // id is 1
 
 The get_complex_value method is also suitable for any other cases where the value of a member cannot be read directly using the get_*_value or get_*_values methods.
@@ -995,21 +1068,21 @@ As an example, suppose we have a struct MyStruct2 defined as follows.
 And suppose we already have a DynamicData object, called data, that represents a sample of MyStruct2.
 To read the individual elements of seq_field, we first get a new DynamicData object for the seq_field member.
 
-::
+.. code-block:: cpp
 
     XTypes::DynamicData seq_data;
     DDS::ReturnCode_t ret = data.get_complex_value(seq_data, id); // id is 1
 
 Since the elements of seq_field are structures, for each of them we create another new DynamicData object to represent it, which can be used to read its member.
 
-::
+.. code-block:: cpp
 
-    const ACE_CDR::ULong num_elems = seq_data.get_item_count();
-    for (ACE_CDR::ULong i = 0; i < num_elems; ++i) {
+    const DDS::UInt32 num_elems = seq_data.get_item_count();
+    for (DDS::UInt32 i = 0; i < num_elems; ++i) {
       const XTypes::MemberId my_id = seq_data.get_member_id_at_index(i);
       XTypes::DynamicData elem_data; // Represent each element.
       ret = seq_data.get_complex_value(elem_data, my_id);
-      ACE_CDR::Short my_short;
+      DDS::Int16 my_short;
       ret = elem_data.get_int16_value(my_short, 1);
     }
 
@@ -1021,7 +1094,7 @@ Populating Data Samples With DynamicData
 ..
     Sect<16.7.3>
 
-DynamicData objects can be created by the application and populated with data so that they can be used as data samples which are written to a DynamicDataWriter (section :ref:`xtypes--creating-and-using-a-dynamicdatawriter`).
+DynamicData objects can be created by the application and populated with data so that they can be used as data samples which are written to a DynamicDataWriter (:ref:`xtypes--creating-and-using-a-dynamicdatawriter-or-dynamicdatareader`).
 
 To create a DynamicData object, use the DynamicDataFactory API defined by the XTypes spec:
 
@@ -1030,16 +1103,16 @@ To create a DynamicData object, use the DynamicDataFactory API defined by the XT
     DDS::DynamicData_var dynamic =
       DDS::DynamicDataFactory::get_instance()->create_data(type);
 
-Like other data types defined by IDL interfaces (for example, the DataWriter types), the "dynamic" object's lifetime is managed with a smart pointer – in this case DDS::DynamicData_var.
+Like other data types defined by IDL interfaces (for example, the ``*TypeSupportImpl`` types), the "dynamic" object's lifetime is managed with a smart pointer – in this case ``DDS::DynamicData_var``.
 
-The "type" input parameter to create_data() is an object that implements the DDS::DynamicType interface.
-The DynamicType representation of any type that's supported as a topic data type is available from its corresponding TypeSupport object (see section :ref:`xtypes--obtaining-dynamictype-and-registering-typesupport`) using the get_type() operation.
+The "type" input parameter to ``create_data()`` is an object that implements the ``DDS::DynamicType`` interface.
+The DynamicType representation of any type that's supported as a topic data type is available from its corresponding TypeSupport object (see :ref:`xtypes--obtaining-dynamictype-and-registering-typesupport`) using the ``get_type()`` operation.
 Once the application has access to that top-level type, the DynamicType interface can be used to obtain complete information about the type including nested and referenced data types.
 See the file :ghfile:`dds/DdsDynamicData.idl` in OpenDDS for the definition of the DynamicType and related interfaces.
 
 Once the application has created the DynamicData object, it can be populated with data members of any type.
 The operations used for this include the DynamicData operations named "set_*" for the various data types.
-They work similarly to the "get_*" operations that are described in section :ref:`xtypes--interpreting-data-samples-with-dynamicdata`.
+They work similarly to the "get_*" operations that are described in :ref:`xtypes--interpreting-data-samples-with-dynamicdata`.
 When populating the DynamicData of complex data types, use get_complex_value() (see :ref:`xtypes--reading-members-of-more-complex-types`) to navigate from DynamicData representing containing types to DynamicData representing contained types.
 
 .. _xtypes--dynamicdatawriters-and-dynamicdatareaders:
@@ -1083,7 +1156,7 @@ Once the shared library is loaded, an internal singleton class in OpenDDS called
 
     DDS::TypeSupport_var ts_static = Registered_Data_Types->lookup(0, "TypeName");
 
-This TypeSupport object "ts_static" is not registered with the DomainParticipant and is not set up for the Dynamic Language Binding.
+This TypeSupport object ``ts_static`` is not registered with the DomainParticipant and is not set up for the Dynamic Language Binding.
 But, crucially, it does have the DynamicType object that we'll need to set up a second TypeSupport object which is registered with the DomainParticipant.
 
 .. code-block:: cpp
@@ -1092,75 +1165,54 @@ But, crucially, it does have the DynamicType object that we'll need to set up a 
     DDS::DynamicTypeSupport_var ts_dynamic = new DynamicTypeSupport(type);
     DDS::ReturnCode_t ret = ts_dynamic->register_type(participant, "");
 
-Now the type support object ts_dynamic can be used in the usual DataWriter/DataReader setup sequence (creating a Topic first, etc.)
-but the created DataWriters will be DynamicDataWriters (see section :ref:`xtypes--creating-and-using-a-dynamicdatawriter`) and the created DataReaders will be DynamicDataReaders (see section :ref:`xtypes--creating-and-using-a-dynamicdatareader`).
+Now the type support object ``ts_dynamic`` can be used in the usual DataWriter/DataReader setup sequence (creating a Topic first, etc.) but the created DataWriters and DataReaders will be DynamicDataWriters and DynamicDataReaders (see :ref:`xtypes--creating-and-using-a-dynamicdatawriter-or-dynamicdatareader`).
 
 The other approach to obtaining TypeSupport objects for use with the Dynamic Language Binding is to have DDS discovery's built-in endpoints get TypeObjects from remote domain participants.
-To do this, use the get_dynamic_type method on the singleton Service_Participant object.
+To do this, use the ``get_dynamic_type`` method on the singleton ``Service_Participant`` object.
 
 .. code-block:: cpp
 
     DDS::DynamicType_var type; // NOTE: passed by reference below
     DDS::ReturnCode_t ret = TheServiceParticipant->get_dynamic_type(type, participant, key);
 
-The two input parameters to get_dynamic_type are the 'participant' (an object reference to the DomainParticipant that will be used to register our TypeSupport and create Topics, DataWriters, and/or DataReders) and the 'key' which is the DDS::BuiltinTopicKey_t that identifies the remote entity which has the data type that we'll use.
+The two input parameters to ``get_dynamic_type`` are the ``participant`` (an object reference to the DomainParticipant that will be used to register our TypeSupport and create Topics, DataWriters, and/or DataReders) and the ``key`` which is the ``DDS::BuiltinTopicKey_t`` that identifies the remote entity which has the data type that we'll use.
 This key can be obtained from the Built-In Publications topic (which identifies remote DataWriters) or the Built-In Subscriptions topic (which identifies remote DataReaders).
 See :ref:`built_in_topics--built-in-topics` for details on using the Built-In Topics.
 
-The type obtained from get_dynamic_type can be used to create and register a TypeSupport object.
+The type obtained from ``get_dynamic_type`` can be used to create and register a TypeSupport object.
 
 .. code-block:: cpp
 
     DDS::DynamicTypeSupport_var ts_dynamic = new DynamicTypeSupport(type);
     DDS::ReturnCode_t ret = ts_dynamic->register_type(participant, "");
 
+.. _xtypes--creating-and-using-a-dynamicdatawriter-or-dynamicdatareader:
 .. _xtypes--creating-and-using-a-dynamicdatawriter:
+.. _xtypes--creating-and-using-a-dynamicdatareader:
 
-Creating and Using a DynamicDataWriter
---------------------------------------
+Creating and Using a DynamicDataWriter or DynamicDataReader
+-----------------------------------------------------------
 
 ..
-    Sect<16.7.4.2>
+    This used to be section 16.7.4.2 and 16.7.4.3
 
-Following the steps in section :ref:`xtypes--obtaining-dynamictype-and-registering-typesupport`, a DynamicTypeSupport object is registered with the domain participant.
-The type name used to register with the participant may be the default type name (used when an empty string is passed to the register_type operation), or some other type name.
-If the default type name was used, the application can access that name by invoking the get_type_name operation on the TypeSupport object.
+Following the steps in :ref:`xtypes--obtaining-dynamictype-and-registering-typesupport`, a DynamicTypeSupport object is registered with the domain participant.
+The type name used to register with the participant may be the default type name (used when an empty string is passed to the ``register_type`` operation), or some other type name.
+If the default type name was used, the application can access that name by invoking the ``get_type_name`` operation on the TypeSupport object.
 
-The registered type name is then used as one of the input parameters to create_topic, just like when creating a topic for the Plain (non-Dynamic) Language Binding.
-Once a Topic object exists, create a DataWriter using this Topic.
-The DataWriter object can be narrowed to the DynamicDataWriter IDL interface:
+The registered type name is then used as one of the input parameters to ``create_topic``, just like when creating a topic for the Plain (non-Dynamic) Language Binding.
+Once a Topic object exists, create a DataWriter or DataReader using this Topic.
+They can be narrowed to the DynamicDataWriter or DynamicDataReader IDL interface:
 
 .. code-block:: cpp
 
     DDS::DynamicDataWriter_var w = DDS::DynamicDataWriter::_narrow(writer);
-
-The DynamicDataWriter IDL interface is defined in ``dds/DdsDynamicTypeSupport.idl`` in OpenDDS.
-It provides the same operations as any other DataWriter, but with DynamicData as its data type.
-See section :ref:`xtypes--populating-data-samples-with-dynamicdata` for details on creating DynamicData objects for use with the DynamicDataWriter interface.
-
-.. _xtypes--creating-and-using-a-dynamicdatareader:
-
-Creating and Using a DynamicDataReader
---------------------------------------
-
-..
-    Sect<16.7.4.3>
-
-Following the steps in section :ref:`xtypes--obtaining-dynamictype-and-registering-typesupport`, a DynamicTypeSupport object is registered with the domain participant.
-The type name used to register with the participant may be the default type name (used when an empty string is passed to the register_type operation), or some other type name.
-If the default type name was used, the application can access that name by invoking the get_type_name operation on the TypeSupport object.
-
-The registered type name is then used as one of the input parameters to create_topic, just like when creating a topic for the Plain (non-Dynamic) Language Binding.
-Once a Topic object exists, create a DataReader using this Topic.
-The DataReader object can be narrowed to the DynamicDataReader IDL interface:
-
-.. code-block:: cpp
-
     DDS::DynamicDataReader_var r = DDS::DynamicDataReader::_narrow(reader);
 
-The DynamicDataReader IDL interface is defined in :ghfile:`dds/DdsDynamicTypeSupport.idl` in OpenDDS.
-It provides the same operations as any other DataReader, but with DynamicData as its data type.
-See section :ref:`xtypes--interpreting-data-samples-with-dynamicdata` for details on using DynamicData objects obtained from the DynamicDataReader interface.
+The IDL interfaces are defined in :ghfile:`dds/DdsDynamicTypeSupport.idl` in OpenDDS.
+They provides the same operations as any other DataWriter or DataReader, but with DynamicData as their data type.
+See :ref:`xtypes--populating-data-samples-with-dynamicdata` for details on creating DynamicData objects for use with the DynamicDataWriter interface.
+See :ref:`xtypes--interpreting-data-samples-with-dynamicdata` for details on using DynamicData objects obtained from the DynamicDataReader interface.
 
 .. _xtypes--limitations-of-the-dynamic-language-binding:
 
@@ -1189,7 +1241,7 @@ Unimplemented Features
 ..
     Sect<16.8>
 
-OpenDDS implements the XTypes specification version 1.3 at the Basic Conformance level, with a partial implementation of the Dynamic Language Binding (supported features of which are described in section :ref:`xtypes--dynamic-language-binding-1`).
+OpenDDS implements the XTypes specification version 1.3 at the Basic Conformance level, with a partial implementation of the Dynamic Language Binding (supported features of which are described in :ref:`xtypes--dynamic-language-binding-1`).
 Specific unimplemented features listed below.
 The two optional profiles, XTypes 1.1 Interoperability (XCDR1) and XML, are not implemented.
 
@@ -1258,19 +1310,16 @@ Differences from the specification
 ..
     Sect<16.9>
 
-Spec issues tracked in OMG's Jira database can be viewed at https://issues.omg.org/issues/lists/dds-xtypes-rtf
+* Inconsistent topic status isn't set for reader/reader or writer/writer in non-XTypes use cases
 
-* Inconsistent topic status isn’t set for reader/reader or writer/writer in non-XTypes use cases
+* :omgissue:`Define the encoding and extensibility used by Type Lookup Service <DDSXTY14-29>`
 
-* DDSXTY14-29: Define the encoding and extensibility used by Type Lookup Service
+* :omgissue:`Enums must have the same "bit bound" to be assignable <DDSXTY14-33>`
 
-* DDSXTY14-33: Enums must have the same "bit bound" to be assignable
+* :omgissue:`Default data representation is XCDR2 <DDSXTY14-27>`
 
-* DDSXTY14-27: Default data representation is XCDR2
+* :omgissue:`Type Lookup Service when using DDS Security <DDSSEC12-86>`
 
-* DDSSEC12-86: Type Lookup Service when using DDS Security
+* :omgissue:`Anonymous types in Strongly Connected Components <DDSXTY14-35>`
 
-* DDSXTY14-35: Anonymous types in Strongly Connected Components
-
-* DDSXTY14-40: Meaning of ignore_member_names in TypeConsistencyEnforcement
-
+* :omgissue:`Meaning of ignore_member_names in TypeConsistencyEnforcement <DDSXTY14-40>`

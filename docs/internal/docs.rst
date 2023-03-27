@@ -93,11 +93,11 @@ RST/Sphinx Usage
   It also avoids inconsistencies involving what the maximum line length is.
   This might make it more annoying to read the documentation raw, but that's not the intended way to do so anyway.
 
-GitHub Links
-============
+Special Links
+=============
 
-There are a few shortcuts for linking to the GitHub repository that are custom to OpenDDS.
-These come of the form of `RST roles <https://docutils.sourceforge.io/docs/ref/rst/roles.html>`__ and are implemented in :ghfile:`docs/sphinx_extensions/github_links.py`.
+There are a few shortcuts for linking to GitHub and OMG that are custom to OpenDDS.
+These come in the form of `RST roles <https://docutils.sourceforge.io/docs/ref/rst/roles.html>`__ and are implemented in :ghfile:`docs/sphinx_extensions/links.py`.
 
 .. _docs-ghfile:
 
@@ -173,3 +173,22 @@ Turns into:
 :ghpr:`this is the PR <1>`
 
 :ghpr:`this is **the PR** <1>`
+
+omgissue
+--------
+
+.. code-block:: rst
+
+  :omgissue:`DDSXTY14-29`
+
+  :omgissue:`this is the issue <DDSXTY14-29>`
+
+  :omgissue:`this is **the issue** <DDSXTY14-29>`
+
+Turns into:
+
+:omgissue:`DDSXTY14-29`
+
+:omgissue:`this is the issue <DDSXTY14-29>`
+
+:omgissue:`this is **the issue** <DDSXTY14-29>`

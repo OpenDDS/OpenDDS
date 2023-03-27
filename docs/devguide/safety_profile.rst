@@ -146,10 +146,10 @@ When the Memory Pool is enabled at build time, all dynamic allocations made by c
 Since the pool is a general purpose dynamic allocator, it may be desirable for application code to use the pool too.
 Since these APIs are internal to OpenDDS, they may change in future releases.
 
-The class OpenDDS::DCPS::MemoryPool (dds/DCPS/MemoryPool.h) contains the pool implementation.
+The class ``OpenDDS::DCPS::MemoryPool`` (:ghfile:`dds/DCPS/MemoryPool.h`) contains the pool implementation.
 However, most client code shouldn't interact directly with it.
-The class SafetyProfilePool (dds/DCPS/SafetyProfilePool.h) adapts the pool to the ACE_Allocator interface.
-PoolAllocator<T> (PoolAllocator.h) adapts the pool to the C++ Allocator concept (C++03).
+The class ``OpenDDS::DCPS::SafetyProfilePool`` (:ghfile:`dds/DCPS/SafetyProfilePool.h`) adapts the pool to the ACE_Allocator interface.
+``OpenDDS::DCPS::PoolAllocator<T>`` (:ghfile:`dds/DCPS/PoolAllocator.h`) adapts the pool to the C++ Allocator concept (C++03).
 Since the PoolAllocator is stateless, it depends on the ACE_Allocator's singleton.
 When OpenDDS is configured with the memory pool, ACE_Allocator's singleton instance will point to an object of class SafetyProfilePool.
 

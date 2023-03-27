@@ -97,8 +97,8 @@ Each predicate is a logical expression taking one of two forms:
 
   * At least one of the arguments must be a field reference, which is the name of an IDL struct field, optionally followed by any number of ‘.’ and another field name to represent nested structures.
 
-  * ``RelOp`` is a relational operator from the list: ``=``, ``>``, ``>=``, ``<``, ``<=``, ``<>``, and ‘``like``’.
-    ‘l ``ike``’ is a wildcard match using ``%`` to match any number of characters and _ to match a single character.
+  * ``RelOp`` is a relational operator from the list: ``=``, ``>``, ``>=``, ``<``, ``<=``, ``<>``, and ``like``.
+    ``like`` is a wildcard match using ``%`` to match any number of characters and _ to match a single character.
 
   * Examples of this form of predicate include: ``a = 'z'``, ``b <> 'str'``, ``c < d``, ``e = 'enumerator'``, ``f >= 3.14e3``, ``27 > g``, ``h <> i``, ``j.k.l like %0``
 
@@ -336,7 +336,7 @@ Topic expressions use a syntax that is very similar to a complete SQL query:
 
     SELECT <aggregation> FROM <selection> [WHERE <condition>]
 
-* The aggregation can be either a “``*``” or a comma separated list of field specifiers.
+* The aggregation can be either a ``*`` or a comma separated list of field specifiers.
   Each field specifier has the following syntax:
 
 * * <constituent_field> [[AS] <resulting_field>]]
@@ -346,9 +346,9 @@ Topic expressions use a syntax that is very similar to a complete SQL query:
   * The optional resulting_field is a field reference to a field in the resulting type.
     If present, the ``resulting_field`` is the destination for the constituent_field in the constructed sample.
     If absent, the ``constituent_field`` data is assigned to a field with the same name in the resulting type.
-    The optional “``AS``” has no effect.
+    The optional ``AS`` has no effect.
 
-  * If a “``*``” is used as the aggregation, each field in the resulting type is assigned the value from a same-named field in one of the constituent topic types.
+  * If a ``*`` is used as the aggregation, each field in the resulting type is assigned the value from a same-named field in one of the constituent topic types.
 
 * The selection lists one or more constituent topic names.
   Topic names are separated by a “join” keyword (all 3 join keywords are equivalent):
@@ -416,7 +416,7 @@ Specifically, the arrival of a sample on constituent topic “``A``” with type
 
 #. A sample of the resulting type is constructed, and fields from ``TA`` which exist in the resulting type and are in the aggregation (or are join keys) are copied from the incoming sample to the constructed sample.
 
-#. Each topic “``B``” which has at least one join key in common with ``A`` is considered for a join operation.
+#. Each topic ``B`` which has at least one join key in common with ``A`` is considered for a join operation.
    The join reads ``READ_SAMPLE_STATE`` samples on topic ``B`` with key values matching those in the constructed sample.
    The result of the join may be zero, one, or many samples.
    Fields from ``TB`` are copied to the resulting sample as described in step 1.
