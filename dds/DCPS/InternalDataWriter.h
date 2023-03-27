@@ -62,11 +62,7 @@ public:
     if (qos_.durability.kind == DDS::TRANSIENT_LOCAL_DURABILITY_QOS && reader->durable()) {
       for (typename InstanceMap::iterator pos = instance_map_.begin(), limit = instance_map_.end();
            pos != limit; ++pos) {
-        if (pos->second.empty()) {
-          reader->register_instance(static_rchandle_cast<InternalEntity>(rchandle_from(this)), pos->first);
-        } else {
-          pos->second.add_reader(reader, static_rchandle_cast<InternalEntity>(rchandle_from(this)));
-        }
+        pos->second.add_reader(reader, static_rchandle_cast<InternalEntity>(rchandle_from(this)));
       }
     }
   }
@@ -93,22 +89,6 @@ public:
 
   /// @name User Interface
   /// @{
-  void register_instance(const T& sample)
-  {
-    ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
-
-    if (qos_.durability.kind == DDS::TRANSIENT_LOCAL_DURABILITY_QOS) {
-      instance_map_.insert(std::make_pair(sample, SampleHolder()));
-    }
-
-    for (typename ReaderSet::const_iterator pos = readers_.begin(), limit = readers_.end(); pos != limit; ++pos) {
-      InternalDataReader_rch reader = pos->lock();
-      if (reader) {
-        reader->register_instance(static_rchandle_cast<InternalEntity>(rchandle_from(this)), sample);
-      }
-    }
-  }
-
   void write(const T& sample)
   {
     ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
@@ -187,7 +167,7 @@ private:
     {
       samples_.push_back(sample);
       if (qos.history.kind == DDS::KEEP_LAST_HISTORY_QOS) {
-        while (samples_.size() > qos.history.depth) {
+        while (samples_.size() > static_cast<std::size_t>(qos.history.depth)) {
           samples_.pop_front();
         }
       }

@@ -98,7 +98,7 @@ TEST(dds_DCPS_Time_Helper, MonotonicTime_t_equal)
 
 TEST(dds_DCPS_Time_Helper, make_duration)
 {
-  const DDS::Duration_t d = make_duration(1, 2);
+  const DDS::Duration_t d = make_duration_t(1, 2);
   EXPECT_EQ(d.sec, 1);
   EXPECT_EQ(d.nanosec, 2u);
 }

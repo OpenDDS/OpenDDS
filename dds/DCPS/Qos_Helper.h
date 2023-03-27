@@ -1337,7 +1337,7 @@ public:
     qos_.deadline = DeadlineQosPolicyBuilder();
     qos_.latency_budget = LatencyBudgetQosPolicyBuilder();
     qos_.liveliness = LivelinessQosPolicyBuilder();
-    qos_.reliability = ReliabilityQosPolicyBuilder().reliable().max_blocking_time(make_duration(0, 100000000));
+    qos_.reliability = ReliabilityQosPolicyBuilder().reliable().max_blocking_time(make_duration_t(0, 100000000));
     qos_.destination_order = DestinationOrderQosPolicyBuilder();
     qos_.history = HistoryQosPolicyBuilder();
     qos_.resource_limits = ResourceLimitsQosPolicyBuilder();

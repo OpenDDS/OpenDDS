@@ -17,8 +17,10 @@
 #include "RcObject.h"
 #include "PoolAllocator.h"
 #include "InternalDataReaderListener.h"
+#include "Time_Helper.h"
 
 #include <dds/DdsDcpsCoreC.h>
+#include <dds/DdsDcpsInfrastructureC.h>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -28,31 +30,65 @@ namespace DCPS {
 class InternalEntity : public virtual RcObject {};
 typedef WeakRcHandle<InternalEntity> InternalEntity_wrch;
 
-enum InternalSampleInfoKind {
-  ISIK_REGISTER,
-  ISIK_SAMPLE,
-  ISIK_UNREGISTER,
-  ISIK_DISPOSE
-};
+typedef OPENDDS_VECTOR(DDS::SampleInfo) InternalSampleInfoSequence;
 
-struct InternalSampleInfo {
-  InternalSampleInfoKind kind;
-  InternalEntity_wrch publication_handle;
+inline DDS::SampleInfo make_sample_info(DDS::SampleStateKind sample_state,
+                                        DDS::ViewStateKind view_state,
+                                        DDS::InstanceStateKind instance_state,
+                                        size_t disposed_generation_count,
+                                        size_t no_writers_generation_count,
+                                        size_t sample_rank,
+                                        size_t generation_rank,
+                                        size_t absolute_generation_rank,
+                                        bool valid_data)
+{
+  DDS::SampleInfo si;
+  si.sample_state = sample_state;
+  si.view_state = view_state;
+  si.instance_state = instance_state;
+  si.source_timestamp = make_time_t(0, 0); // TODO
+  si.instance_handle = DDS::HANDLE_NIL; // TODO
+  si.publication_handle = DDS::HANDLE_NIL; // TODO
+  si.disposed_generation_count = disposed_generation_count;
+  si.no_writers_generation_count = no_writers_generation_count;
+  si.sample_rank = sample_rank;
+  si.generation_rank = generation_rank;
+  si.absolute_generation_rank = absolute_generation_rank;
+  si.valid_data = valid_data;
+  return si;
+}
 
-  InternalSampleInfo(InternalSampleInfoKind a_kind,
-                     InternalEntity_wrch a_publication_handle)
-    : kind(a_kind)
-    , publication_handle(a_publication_handle)
+#ifndef OPENDDS_SAFETY_PROFILE
+inline bool operator==(const DDS::SampleInfo& x, const DDS::SampleInfo& y)
+{
+  return x.sample_state == y.sample_state &&
+    x.view_state == y.view_state &&
+    x.instance_state == y.instance_state &&
+    x.source_timestamp == y.source_timestamp &&
+    x.instance_handle == y.instance_handle &&
+    x.publication_handle == y.publication_handle &&
+    x.disposed_generation_count == y.disposed_generation_count &&
+    x.no_writers_generation_count == y.no_writers_generation_count &&
+    x.sample_rank == y.sample_rank &&
+    x.generation_rank == y.generation_rank &&
+    x.absolute_generation_rank == y.absolute_generation_rank &&
+    x.valid_data == y.valid_data;
+}
+#endif
+
+class SIW {
+public:
+  SIW(const DDS::SampleInfo& sample_info)
+    : si(sample_info)
   {}
 
-  bool operator==(const InternalSampleInfo& other) const
+  bool operator==(const SIW& other) const
   {
-    return kind == other.kind &&
-      publication_handle == other.publication_handle;
+    return si == other.si;
   }
-};
 
-typedef OPENDDS_VECTOR(InternalSampleInfo) InternalSampleInfoSequence;
+  DDS::SampleInfo si;
+};
 
 template <typename T>
 class InternalDataReader : public InternalEntity {
@@ -78,42 +114,20 @@ public:
     // FUTURE: Index by publication_handle to avoid the loop.
     bool schedule = false;
     for (typename InstanceMap::iterator pos = instance_map_.begin(), limit = instance_map_.end(); pos != limit; ++pos) {
-      if (pos->second.is_publisher(publication_handle)) {
-        if (autodispose_unregistered_instances) {
-          pos->second.dispose(pos->first, publication_handle);
-        }
-        pos->second.unregister_instance(pos->first, publication_handle);
+      if (autodispose_unregistered_instances && pos->second.dispose(publication_handle, pos->first)) {
+        schedule = true;
+      }
+      if (pos->second.unregister_instance(publication_handle, pos->first)) {
         schedule = true;
       }
     }
 
-    const Listener_rch listener = listener_.lock();
-    if (schedule && listener) {
-      listener->schedule(rchandle_from(this));
-    }
-  }
-
-  void register_instance(InternalEntity_wrch publication_handle, const T& sample)
-  {
-    ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
-
-    const std::pair<typename InstanceMap::iterator, bool> p = instance_map_.insert(std::make_pair(sample, Instance()));
-    const std::pair<PublicationSet::iterator, bool> q = p.first->second.publication_set.insert(publication_handle);
-    if (q.second) {
-      // New publication.
-      p.first->second.samples.push_back(sample);
-      p.first->second.infos.push_back(InternalSampleInfo(ISIK_REGISTER, publication_handle));
-
+    if (schedule) {
       const Listener_rch listener = listener_.lock();
       if (listener) {
         listener->schedule(rchandle_from(this));
       }
     }
-
-    if (p.second) {
-      p.first->second.view_state = DDS::NEW_VIEW_STATE;
-    }
-    p.first->second.instance_state = DDS::ALIVE_INSTANCE_STATE;
   }
 
   void write(InternalEntity_wrch publication_handle, const T& sample)
@@ -121,22 +135,12 @@ public:
     ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
 
     const std::pair<typename InstanceMap::iterator, bool> p = instance_map_.insert(std::make_pair(sample, Instance()));
-    p.first->second.publication_set.insert(publication_handle);
-    p.first->second.samples.push_back(sample);
-    p.first->second.infos.push_back(InternalSampleInfo(ISIK_SAMPLE, publication_handle));
+    p.first->second.write(publication_handle, sample);
 
     const Listener_rch listener = listener_.lock();
     if (listener) {
       listener->schedule(rchandle_from(this));
     }
-
-    if (p.second ||
-        (p.first->second.view_state == DDS::NOT_NEW_VIEW_STATE &&
-         p.first->second.instance_state != DDS::ALIVE_INSTANCE_STATE)) {
-      p.first->second.view_state = DDS::NEW_VIEW_STATE;
-    }
-
-    p.first->second.instance_state = DDS::ALIVE_INSTANCE_STATE;
   }
 
   void dispose(InternalEntity_wrch publication_handle, const T& sample)
@@ -148,11 +152,11 @@ public:
       return;
     }
 
-    pos->second.dispose(sample, publication_handle);
-
-    const Listener_rch listener = listener_.lock();
-    if (listener) {
-      listener->schedule(rchandle_from(this));
+    if (pos->second.dispose(publication_handle, pos->first)) {
+      const Listener_rch listener = listener_.lock();
+      if (listener) {
+        listener->schedule(rchandle_from(this));
+      }
     }
   }
 
@@ -165,8 +169,7 @@ public:
       return;
     }
 
-    if (pos->second.is_publisher(publication_handle)) {
-      pos->second.unregister_instance(sample, publication_handle);
+    if (pos->second.unregister_instance(publication_handle, pos->first)) {
       const Listener_rch listener = listener_.lock();
       if (listener) {
         listener->schedule(rchandle_from(this));
@@ -196,14 +199,8 @@ public:
 
     ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
     for (typename InstanceMap::iterator pos = instance_map_.begin(), limit = instance_map_.end(); pos != limit; ) {
-      samples.insert(samples.end(), pos->second.samples.begin(), pos->second.samples.end());
-      pos->second.samples.clear();
-      infos.insert(infos.end(), pos->second.infos.begin(), pos->second.infos.end());
-      pos->second.infos.clear();
-
-      pos->second.view_state = DDS::NOT_NEW_VIEW_STATE;
-
-      if (pos->second.instance_state != DDS::ALIVE_INSTANCE_STATE) {
+      pos->second.take(samples, infos);
+      if (pos->second.instance_state() != DDS::ALIVE_INSTANCE_STATE) {
         instance_map_.erase(pos++);
       } else {
         ++pos;
@@ -221,35 +218,146 @@ private:
 
   typedef OPENDDS_SET(InternalEntity_wrch) PublicationSet;
 
-  struct Instance {
-    OPENDDS_LIST(T) samples;
-    OPENDDS_LIST(InternalSampleInfo) infos;
+  class Instance {
+  public:
 
-    PublicationSet publication_set;
+    Instance()
+      : view_state_(DDS::NEW_VIEW_STATE)
+      , instance_state_(DDS::ALIVE_INSTANCE_STATE)
+      , disposed_generation_count_(0)
+      , no_writers_generation_count_(0)
+    {}
 
-    DDS::ViewStateKind view_state;
-    DDS::InstanceStateKind instance_state;
+    DDS::ViewStateKind view_state() const { return view_state_; }
 
-    bool is_publisher(InternalEntity_wrch publication_handle) const
+    DDS::InstanceStateKind instance_state() const { return instance_state_; }
+
+    void take(SampleSequence& samples, InternalSampleInfoSequence& infos)
     {
-      return publication_set.count(publication_handle);
+      size_t sample_count = 0;
+
+      for (typename SampleList::const_iterator pos = read_samples_.begin(), limit = read_samples_.end();
+           pos != limit; ++pos) {
+        samples.push_back(pos->sample);
+        infos.push_back(make_sample_info(DDS::READ_SAMPLE_STATE, view_state_, instance_state_, pos->disposed_generation_count, pos->no_writers_generation_count, 0, 0, 0, pos->valid_data));
+        ++sample_count;
+      }
+      read_samples_.clear();
+      for (typename SampleList::const_iterator pos = not_read_samples_.begin(), limit = not_read_samples_.end();
+           pos != limit; ++pos) {
+        samples.push_back(pos->sample);
+        infos.push_back(make_sample_info(DDS::NOT_READ_SAMPLE_STATE, view_state_, instance_state_, pos->disposed_generation_count, pos->no_writers_generation_count, 0, 0, 0, pos->valid_data));
+        ++sample_count;
+      }
+      not_read_samples_.clear();
+
+      compute_ranks(sample_count, infos);
+
+      view_state_ = DDS::NOT_NEW_VIEW_STATE;
     }
 
-    void dispose(const T& sample, InternalEntity_wrch publication_handle)
+    void write(InternalEntity_wrch publication_handle,
+               const T& sample)
     {
-      samples.push_back(sample);
-      infos.push_back(InternalSampleInfo(ISIK_DISPOSE, publication_handle));
-      instance_state = DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE;
+      publication_set_.insert(publication_handle);
+
+      if (view_state_ == DDS::NOT_NEW_VIEW_STATE && instance_state_ != DDS::ALIVE_INSTANCE_STATE) {
+        view_state_ = DDS::NEW_VIEW_STATE;
+      }
+
+      switch (instance_state_) {
+      case DDS::ALIVE_INSTANCE_STATE:
+        break;
+      case DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE:
+        ++disposed_generation_count_;
+        break;
+      case DDS::NOT_ALIVE_NO_WRITERS_INSTANCE_STATE:
+        ++no_writers_generation_count_;
+        break;
+      }
+
+      instance_state_ = DDS::ALIVE_INSTANCE_STATE;
+
+      not_read_samples_.push_back(SampleHolder(sample, disposed_generation_count_, no_writers_generation_count_, true));
     }
 
-    void unregister_instance(const T& sample, InternalEntity_wrch publication_handle)
+    bool dispose(InternalEntity_wrch publication_handle,
+                 const T& key)
     {
-      publication_set.erase(publication_handle);
-      samples.push_back(sample);
-      infos.push_back(InternalSampleInfo(ISIK_UNREGISTER, publication_handle));
+      publication_set_.insert(publication_handle);
 
-      if (publication_set.empty() && instance_state != DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE) {
-        instance_state = DDS::NOT_ALIVE_NO_WRITERS_INSTANCE_STATE;
+      if (instance_state_ != DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE) {
+        not_read_samples_.push_back(SampleHolder(key, disposed_generation_count_, no_writers_generation_count_, false));
+        instance_state_ = DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE;
+        return true;
+      }
+
+      return false;
+    }
+
+    bool unregister_instance(InternalEntity_wrch publication_handle,
+                             const T& key)
+    {
+      publication_set_.erase(publication_handle);
+
+      if (publication_set_.empty() && instance_state_ == DDS::ALIVE_INSTANCE_STATE) {
+        not_read_samples_.push_back(SampleHolder(key, disposed_generation_count_, no_writers_generation_count_, false));
+        instance_state_ = DDS::NOT_ALIVE_NO_WRITERS_INSTANCE_STATE;
+        return true;
+      }
+
+      return false;
+    }
+
+  private:
+    struct SampleHolder {
+      T sample;
+      size_t disposed_generation_count;
+      size_t no_writers_generation_count;
+      bool valid_data;
+
+      SampleHolder(const T& s,
+                   size_t dgc,
+                   size_t nwgc,
+                   bool vd)
+        : sample(s)
+        , disposed_generation_count(dgc)
+        , no_writers_generation_count(nwgc)
+        , valid_data(vd)
+      {}
+    };
+
+    typedef OPENDDS_LIST(SampleHolder) SampleList;
+    SampleList read_samples_;
+    SampleList not_read_samples_;
+
+    PublicationSet publication_set_;
+
+    DDS::ViewStateKind view_state_;
+    DDS::InstanceStateKind instance_state_;
+    size_t disposed_generation_count_;
+    size_t no_writers_generation_count_;
+
+    void compute_ranks(size_t sample_count, InternalSampleInfoSequence& infos)
+    {
+      if (sample_count == 0) {
+        return;
+      }
+
+      typename InternalSampleInfoSequence::reverse_iterator pos = infos.rbegin();
+      const size_t mrsic = pos->disposed_generation_count + pos->no_writers_generation_count;
+      size_t mrs = mrsic;
+      if (!read_samples_.empty()) {
+        mrs = read_samples_.back().disposed_generation_count + read_samples_.back().no_writers_generation_count;
+      }
+      if (!not_read_samples_.empty()) {
+        mrs = not_read_samples_.back().disposed_generation_count + not_read_samples_.back().no_writers_generation_count;
+      }
+
+      for (size_t rank = 0; rank != sample_count; ++rank, ++pos) {
+        pos->sample_rank = rank;
+        pos->generation_rank = mrsic - (pos->disposed_generation_count + pos->no_writers_generation_count);
+        pos->absolute_generation_rank = mrs - (pos->disposed_generation_count + pos->no_writers_generation_count);
       }
     }
   };

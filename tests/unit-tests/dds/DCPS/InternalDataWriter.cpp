@@ -53,7 +53,7 @@ TEST(dds_DCPS_InternalDataWriter, add_reader_durable)
   RcHandle<WriterType> writer = make_rch<WriterType>(DataWriterQosBuilder().durability_transient_local().history_depth(2));
   RcHandle<ReaderType> reader = make_rch<ReaderType>(true);
 
-  writer->register_instance(sample1);
+  writer->write(sample1);
   writer->write(sample2);
   writer->write(sample2);
 
@@ -64,13 +64,13 @@ TEST(dds_DCPS_InternalDataWriter, add_reader_durable)
   ASSERT_EQ(infos.size(), 3U);
 
   EXPECT_EQ(samples[0], sample1);
-  EXPECT_EQ(infos[0], InternalSampleInfo(ISIK_REGISTER, writer->publication_handle()));
+  EXPECT_EQ(SIW(infos[0]), SIW(make_sample_info(DDS::NOT_READ_SAMPLE_STATE, DDS::NEW_VIEW_STATE, DDS::ALIVE_INSTANCE_STATE, 0, 0, 0, 0, 0, true)));
 
   EXPECT_EQ(samples[1], sample2);
-  EXPECT_EQ(infos[1], InternalSampleInfo(ISIK_SAMPLE, writer->publication_handle()));
+  EXPECT_EQ(SIW(infos[1]), SIW(make_sample_info(DDS::NOT_READ_SAMPLE_STATE, DDS::NEW_VIEW_STATE, DDS::ALIVE_INSTANCE_STATE, 0, 0, 1, 0, 0, true)));
 
   EXPECT_EQ(samples[2], sample2);
-  EXPECT_EQ(infos[2], InternalSampleInfo(ISIK_SAMPLE, writer->publication_handle()));
+  EXPECT_EQ(SIW(infos[2]), SIW(make_sample_info(DDS::NOT_READ_SAMPLE_STATE, DDS::NEW_VIEW_STATE, DDS::ALIVE_INSTANCE_STATE, 0, 0, 0, 0, 0, true)));
 }
 
 TEST(dds_DCPS_InternalDataWriter, add_reader_durable_history1)
@@ -85,7 +85,7 @@ TEST(dds_DCPS_InternalDataWriter, add_reader_durable_history1)
   RcHandle<WriterType> writer = make_rch<WriterType>(DataWriterQosBuilder().durability_transient_local());
   RcHandle<ReaderType> reader = make_rch<ReaderType>(true);
 
-  writer->register_instance(sample1);
+  writer->write(sample1);
   writer->write(sample2);
   writer->write(sample2);
 
@@ -96,10 +96,10 @@ TEST(dds_DCPS_InternalDataWriter, add_reader_durable_history1)
   ASSERT_EQ(infos.size(), 2U);
 
   EXPECT_EQ(samples[0], sample1);
-  EXPECT_EQ(infos[0], InternalSampleInfo(ISIK_REGISTER, writer->publication_handle()));
+  EXPECT_EQ(SIW(infos[0]), SIW(make_sample_info(DDS::NOT_READ_SAMPLE_STATE, DDS::NEW_VIEW_STATE, DDS::ALIVE_INSTANCE_STATE, 0, 0, 0, 0, 0, true)));
 
   EXPECT_EQ(samples[1], sample2);
-  EXPECT_EQ(infos[1], InternalSampleInfo(ISIK_SAMPLE, writer->publication_handle()));
+  EXPECT_EQ(SIW(infos[1]), SIW(make_sample_info(DDS::NOT_READ_SAMPLE_STATE, DDS::NEW_VIEW_STATE, DDS::ALIVE_INSTANCE_STATE, 0, 0, 0, 0, 0, true)));
 }
 
 TEST(dds_DCPS_InternalDataWriter, remove_reader)
@@ -111,43 +111,20 @@ TEST(dds_DCPS_InternalDataWriter, remove_reader)
   RcHandle<WriterType> writer = make_rch<WriterType>(DataWriterQosBuilder());
   RcHandle<ReaderType> reader = make_rch<ReaderType>(false);
   writer->add_reader(reader);
-  writer->register_instance(sample);
+  writer->write(sample);
   writer->remove_reader(reader);
   reader->take(samples, infos);
 
   EXPECT_FALSE(writer->has_reader(reader));
 
-  ASSERT_EQ(samples.size(), 3U);
-  ASSERT_EQ(infos.size(), 3U);
+  ASSERT_EQ(samples.size(), 2U);
+  ASSERT_EQ(infos.size(), 2U);
 
   EXPECT_EQ(samples[0], sample);
-  EXPECT_EQ(infos[0], InternalSampleInfo(ISIK_REGISTER, writer->publication_handle()));
+  EXPECT_EQ(SIW(infos[0]), SIW(make_sample_info(DDS::NOT_READ_SAMPLE_STATE, DDS::NEW_VIEW_STATE, DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE, 0, 0, 1, 0, 0, true)));
 
   EXPECT_EQ(samples[1], sample);
-  EXPECT_EQ(infos[1], InternalSampleInfo(ISIK_DISPOSE, writer->publication_handle()));
-
-  EXPECT_EQ(samples[2], sample);
-  EXPECT_EQ(infos[2], InternalSampleInfo(ISIK_UNREGISTER, writer->publication_handle()));
-}
-
-TEST(dds_DCPS_InternalDataWriter, register_instance)
-{
-  Sample sample("key");
-  ReaderType::SampleSequence samples;
-  InternalSampleInfoSequence infos;
-
-  RcHandle<WriterType> writer = make_rch<WriterType>(DataWriterQosBuilder());
-  RcHandle<ReaderType> reader = make_rch<ReaderType>(false);
-  writer->add_reader(reader);
-
-  writer->register_instance(sample);
-  reader->take(samples, infos);
-
-  ASSERT_EQ(samples.size(), 1U);
-  ASSERT_EQ(infos.size(), 1U);
-
-  EXPECT_EQ(samples[0], sample);
-  EXPECT_EQ(infos[0], InternalSampleInfo(ISIK_REGISTER, writer->publication_handle()));
+  EXPECT_EQ(SIW(infos[1]), SIW(make_sample_info(DDS::NOT_READ_SAMPLE_STATE, DDS::NEW_VIEW_STATE, DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE, 0, 0, 0, 0, 0, false)));
 }
 
 TEST(dds_DCPS_InternalDataWriter, write)
@@ -167,7 +144,7 @@ TEST(dds_DCPS_InternalDataWriter, write)
   ASSERT_EQ(infos.size(), 1U);
 
   EXPECT_EQ(samples[0], sample);
-  EXPECT_EQ(infos[0], InternalSampleInfo(ISIK_SAMPLE, writer->publication_handle()));
+  EXPECT_EQ(SIW(infos[0]), SIW(make_sample_info(DDS::NOT_READ_SAMPLE_STATE, DDS::NEW_VIEW_STATE, DDS::ALIVE_INSTANCE_STATE, 0, 0, 0, 0, 0, true)));
 }
 
 TEST(dds_DCPS_InternalDataWriter, unregister_instance)
@@ -180,21 +157,42 @@ TEST(dds_DCPS_InternalDataWriter, unregister_instance)
   RcHandle<ReaderType> reader = make_rch<ReaderType>(false);
   writer->add_reader(reader);
 
-  writer->register_instance(sample);
+  writer->write(sample);
   writer->unregister_instance(sample);
   reader->take(samples, infos);
 
-  ASSERT_EQ(samples.size(), 3U);
-  ASSERT_EQ(infos.size(), 3U);
+  ASSERT_EQ(samples.size(), 2U);
+  ASSERT_EQ(infos.size(), 2U);
 
   EXPECT_EQ(samples[0], sample);
-  EXPECT_EQ(infos[0], InternalSampleInfo(ISIK_REGISTER, writer->publication_handle()));
+  EXPECT_EQ(SIW(infos[0]), SIW(make_sample_info(DDS::NOT_READ_SAMPLE_STATE, DDS::NEW_VIEW_STATE, DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE, 0, 0, 1, 0, 0, true)));
 
   EXPECT_EQ(samples[1], sample);
-  EXPECT_EQ(infos[1], InternalSampleInfo(ISIK_DISPOSE, writer->publication_handle()));
+  EXPECT_EQ(SIW(infos[1]), SIW(make_sample_info(DDS::NOT_READ_SAMPLE_STATE, DDS::NEW_VIEW_STATE, DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE, 0, 0, 0, 0, 0, false)));
+}
 
-  EXPECT_EQ(samples[2], sample);
-  EXPECT_EQ(infos[2], InternalSampleInfo(ISIK_UNREGISTER, writer->publication_handle()));
+TEST(dds_DCPS_InternalDataWriter, unregister_instance_no_dispose)
+{
+  Sample sample("key");
+  ReaderType::SampleSequence samples;
+  InternalSampleInfoSequence infos;
+
+  RcHandle<WriterType> writer = make_rch<WriterType>(DataWriterQosBuilder().writer_data_lifecycle_autodispose_unregistered_instances(false));
+  RcHandle<ReaderType> reader = make_rch<ReaderType>(false);
+  writer->add_reader(reader);
+
+  writer->write(sample);
+  writer->unregister_instance(sample);
+  reader->take(samples, infos);
+
+  ASSERT_EQ(samples.size(), 2U);
+  ASSERT_EQ(infos.size(), 2U);
+
+  EXPECT_EQ(samples[0], sample);
+  EXPECT_EQ(SIW(infos[0]), SIW(make_sample_info(DDS::NOT_READ_SAMPLE_STATE, DDS::NEW_VIEW_STATE, DDS::NOT_ALIVE_NO_WRITERS_INSTANCE_STATE, 0, 0, 1, 0, 0, true)));
+
+  EXPECT_EQ(samples[1], sample);
+  EXPECT_EQ(SIW(infos[1]), SIW(make_sample_info(DDS::NOT_READ_SAMPLE_STATE, DDS::NEW_VIEW_STATE, DDS::NOT_ALIVE_NO_WRITERS_INSTANCE_STATE, 0, 0, 0, 0, 0, false)));
 }
 
 TEST(dds_DCPS_InternalDataWriter, dispose)
@@ -207,7 +205,7 @@ TEST(dds_DCPS_InternalDataWriter, dispose)
   RcHandle<ReaderType> reader = make_rch<ReaderType>(false);
   writer->add_reader(reader);
 
-  writer->register_instance(sample);
+  writer->write(sample);
   writer->dispose(sample);
   reader->take(samples, infos);
 
@@ -215,8 +213,8 @@ TEST(dds_DCPS_InternalDataWriter, dispose)
   ASSERT_EQ(infos.size(), 2U);
 
   EXPECT_EQ(samples[0], sample);
-  EXPECT_EQ(infos[0], InternalSampleInfo(ISIK_REGISTER, writer->publication_handle()));
+  EXPECT_EQ(SIW(infos[0]), SIW(make_sample_info(DDS::NOT_READ_SAMPLE_STATE, DDS::NEW_VIEW_STATE, DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE, 0, 0, 1, 0, 0, true)));
 
   EXPECT_EQ(samples[1], sample);
-  EXPECT_EQ(infos[1], InternalSampleInfo(ISIK_DISPOSE, writer->publication_handle()));
+  EXPECT_EQ(SIW(infos[1]), SIW(make_sample_info(DDS::NOT_READ_SAMPLE_STATE, DDS::NEW_VIEW_STATE, DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE, 0, 0, 0, 0, 0, false)));
 }
