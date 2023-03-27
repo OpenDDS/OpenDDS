@@ -4,19 +4,13 @@
 
 [![Coverity Scan Build Status](https://scan.coverity.com/projects/opendds/badge.svg)](https://scan.coverity.com/projects/opendds)
 
-OpenDDS is an open-source C++ implementation of the Object Management Group's
-specification "Data Distribution Service for Real-time Systems" (DDS), as well
-as some other related specifications. These standards define a set of
-interfaces and protocols for developing distributed applications based on the
-publish-subscribe and distributed cache models. Although OpenDDS is itself
-developed in C++, Java and JMS bindings are provided so that Java applications
-can use OpenDDS.  OpenDDS also includes support for the DDS Security and XTypes
-specifications.
+OpenDDS is an open-source C++ implementation of the Object Management Group's specification "Data Distribution Service for Real-time Systems" (DDS), as well as some other related specifications.
+These standards define a set of interfaces and protocols for developing distributed applications based on the publish-subscribe and distributed cache models.
+Although OpenDDS is itself developed in C++, Java bindings are provided so that Java applications can use OpenDDS.
+OpenDDS also includes support for the DDS Security and XTypes specifications.
 
-OpenDDS is built on the [ACE](docs/dependencies.md#ace) abstraction layer to
-provide platform portability.  OpenDDS also leverages capabilities of
-[TAO](docs/dependencies.md#tao), such as its IDL compiler and as the basis of
-the OpenDDS DCPS Information Repository (DCPSInfoRepo).
+OpenDDS is built on the [ACE](docs/dependencies.md#ace) abstraction layer to provide platform portability.
+OpenDDS also leverages the capabilities of [TAO](docs/dependencies.md#tao) for IDL compilation and the OpenDDS DCPS Information Repository (DCPSInfoRepo).
 
 The primary development of OpenDDS was done by
 [Object Computing, Incorporated](http://www.objectcomputing.com) in
@@ -41,14 +35,12 @@ details.
 
 ## Documentation
 
-- The OpenDDS Developer's Guide is freely downloadable at:
-http://download.objectcomputing.com/OpenDDS/
+- The OpenDDS Developer's Guide is available at https://opendds.readthedocs.io/.
+  It can also be downloaded from http://download.objectcomputing.com/OpenDDS/.
 
-- A Doxygen for the latest release is available at
-http://download.opendds.org/doxygen/.
+- Doxygen for the latest release is available at http://download.opendds.org/doxygen/.
 
-- For developers wanting to contribute to OpenDDS, please take the time to read
-[the development guidelines](https://opendds.readthedocs.io/en/master/internal/dev_guidelines.html).
+- For developers wanting to contribute to OpenDDS, please read [the development guidelines](https://opendds.readthedocs.io/en/master/internal/dev_guidelines.html).
 
 Other documentation can be found in [`docs` directory](docs).
 
