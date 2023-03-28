@@ -47,20 +47,23 @@ Extensibility
 ..
     Sect<16.2.1>
 
-There are 3 kinds of extensibility for types: appendable, mutable, and final
+There are 3 kinds of extensibility for types:
 
-* *Appendable* denotes a constructed type which may have additional members added onto or removed from the end.
+*Appendable*
+  It denotes a constructed type which may have additional members added onto or removed from the end, but not both at the same time.
+  It's used by default, but a type can be explicitly marked as appendable with the :ref:`@appendable <xtypes--appendable>` annotation.
 
-* *Mutable* denotes a constructed type that allows for members to be added, removed, and reordered so long as the keys and the required members of the sender and receiver remain.
+*Mutable*
+  It denotes a constructed type that allows for members to be added, removed, and reordered so long as the keys and the required members of the sender and receiver remain.
   Mutable extensibility is accomplished by assigning a stable identifier to each member.
+  A type can be marked as mutable with the :ref:`@mutable <xtypes--mutable>` annotation.
 
-* *Final* denotes a constructed type that can not add, remove, or reorder members,.
+*Final*
+  It denotes a constructed type that can not add, remove, or reorder members.
   This can be considered a non-extensible constructed type, with behavior similar to that of a type created before XTypes.
+  A type can be marked as final with the :ref:`@final <xtypes--final>` annotation.
 
-Extensibility is set by the user in the IDL with the annotations: ``@appendable``, ``@mutable``, ``@final``
-
-The default extensibility is Appendable.
-This default extensibility can be changed with the IDL compiler command line option ``--default-extensibility EXTENSIBILITY`` where ``EXTENSIBILITY` must be ``final``, ``appendable`` or ``mutable``.
+The default extensibility can be changed with the :ref:`--default-extensibility <opendds_idl--default-extensibility>` opendds_idl option.
 
 Structs, unions, and enums are the only types which can use any of the extensibilities.
 
@@ -643,9 +646,9 @@ Determining Extensibility
 ..
     Sect<16.6.3>
 
-The extensibility annotations determine how a type may be changed and still be compatible.
+The extensibility annotations can explicitly define the :ref:`extensibility <xtypes--extensibility>` of a type.
 If no extensibility annotation is set, the type will default to appendable.
-The default can be changed with the command line option ``--default-extensibility TYPE``, where ``TYPE`` can be ``final``, ``appendable``, or ``mutable``.
+This default can be changed with the :ref:`--default-extensibility <opendds_idl--default-extensibility>` opendds_idl option.
 
 .. _xtypes--mutable:
 

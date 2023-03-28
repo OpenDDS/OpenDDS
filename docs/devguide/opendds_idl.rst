@@ -222,9 +222,13 @@ The following table summarizes the options supported by ``opendds_idl``.
 
      - Types are nested by default.
 
-   * - ``--default-extensibility VAL``
+   * - .. _opendds_idl--default-extensibility:
 
-     - Set the default XTypes Extensibility – see section :ref:`xtypes--determining-extensibility`
+       ``--default-extensibility``
+
+     - Set the default XTypes extensibility.
+       Can be ``final``, ``appendable`` or ``mutable``.
+       See :ref:`xtypes--extensibility` for details.
 
      - ``appendable``
 
