@@ -35,7 +35,7 @@ typedef InternalDataReader<Sample> ReaderType;
 TEST(dds_DCPS_InternalDataWriter, add_reader)
 {
   RcHandle<WriterType> writer = make_rch<WriterType>(DataWriterQosBuilder());
-  RcHandle<ReaderType> reader = make_rch<ReaderType>(false);
+  RcHandle<ReaderType> reader = make_rch<ReaderType>(DataReaderQosBuilder().reliability_reliable());
   writer->add_reader(reader);
 
   EXPECT_TRUE(writer->has_reader(reader));
@@ -51,7 +51,7 @@ TEST(dds_DCPS_InternalDataWriter, add_reader_durable)
   InternalSampleInfoSequence infos;
 
   RcHandle<WriterType> writer = make_rch<WriterType>(DataWriterQosBuilder().durability_transient_local().history_depth(2));
-  RcHandle<ReaderType> reader = make_rch<ReaderType>(true);
+  RcHandle<ReaderType> reader = make_rch<ReaderType>(DataReaderQosBuilder().reliability_reliable().durability_transient_local());
 
   writer->write(sample1);
   writer->write(sample2);
@@ -83,7 +83,7 @@ TEST(dds_DCPS_InternalDataWriter, add_reader_durable_history1)
   InternalSampleInfoSequence infos;
 
   RcHandle<WriterType> writer = make_rch<WriterType>(DataWriterQosBuilder().durability_transient_local());
-  RcHandle<ReaderType> reader = make_rch<ReaderType>(true);
+  RcHandle<ReaderType> reader = make_rch<ReaderType>(DataReaderQosBuilder().reliability_reliable().durability_transient_local());
 
   writer->write(sample1);
   writer->write(sample2);
@@ -109,7 +109,7 @@ TEST(dds_DCPS_InternalDataWriter, remove_reader)
   InternalSampleInfoSequence infos;
 
   RcHandle<WriterType> writer = make_rch<WriterType>(DataWriterQosBuilder());
-  RcHandle<ReaderType> reader = make_rch<ReaderType>(false);
+  RcHandle<ReaderType> reader = make_rch<ReaderType>(DataReaderQosBuilder().reliability_reliable());
   writer->add_reader(reader);
   writer->write(sample);
   writer->remove_reader(reader);
@@ -134,7 +134,7 @@ TEST(dds_DCPS_InternalDataWriter, write)
   InternalSampleInfoSequence infos;
 
   RcHandle<WriterType> writer = make_rch<WriterType>(DataWriterQosBuilder());
-  RcHandle<ReaderType> reader = make_rch<ReaderType>(false);
+  RcHandle<ReaderType> reader = make_rch<ReaderType>(DataReaderQosBuilder().reliability_reliable());
   writer->add_reader(reader);
 
   writer->write(sample);
@@ -154,7 +154,7 @@ TEST(dds_DCPS_InternalDataWriter, unregister_instance)
   InternalSampleInfoSequence infos;
 
   RcHandle<WriterType> writer = make_rch<WriterType>(DataWriterQosBuilder());
-  RcHandle<ReaderType> reader = make_rch<ReaderType>(false);
+  RcHandle<ReaderType> reader = make_rch<ReaderType>(DataReaderQosBuilder().reliability_reliable());
   writer->add_reader(reader);
 
   writer->write(sample);
@@ -178,7 +178,7 @@ TEST(dds_DCPS_InternalDataWriter, unregister_instance_no_dispose)
   InternalSampleInfoSequence infos;
 
   RcHandle<WriterType> writer = make_rch<WriterType>(DataWriterQosBuilder().writer_data_lifecycle_autodispose_unregistered_instances(false));
-  RcHandle<ReaderType> reader = make_rch<ReaderType>(false);
+  RcHandle<ReaderType> reader = make_rch<ReaderType>(DataReaderQosBuilder().reliability_reliable());
   writer->add_reader(reader);
 
   writer->write(sample);
@@ -202,7 +202,7 @@ TEST(dds_DCPS_InternalDataWriter, dispose)
   InternalSampleInfoSequence infos;
 
   RcHandle<WriterType> writer = make_rch<WriterType>(DataWriterQosBuilder());
-  RcHandle<ReaderType> reader = make_rch<ReaderType>(false);
+  RcHandle<ReaderType> reader = make_rch<ReaderType>(DataReaderQosBuilder().reliability_reliable());
   writer->add_reader(reader);
 
   writer->write(sample);

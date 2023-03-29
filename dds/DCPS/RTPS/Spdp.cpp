@@ -2458,7 +2458,7 @@ Spdp::SpdpTransport::open(const DCPS::ReactorTask_rch& reactor_task,
 #endif /* DDS_HAS_MINIMUM_BIT */
 
   this->job_queue(job_queue);
-  network_interface_address_reader_ = DCPS::make_rch<DCPS::InternalDataReader<DCPS::NetworkInterfaceAddress> >(true, rchandle_from(this));
+  network_interface_address_reader_ = DCPS::make_rch<DCPS::InternalDataReader<DCPS::NetworkInterfaceAddress> >(DCPS::DataReaderQosBuilder().reliability_reliable().durability_transient_local(), rchandle_from(this));
   TheServiceParticipant->network_interface_address_topic()->connect(network_interface_address_reader_);
 }
 

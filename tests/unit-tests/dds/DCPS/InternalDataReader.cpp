@@ -1,5 +1,7 @@
 #include <dds/DCPS/InternalDataReader.h>
 
+#include <dds/DCPS/Qos_Helper.h>
+
 #include <gtestWrapper.h>
 
 using namespace OpenDDS::DCPS;
@@ -63,11 +65,11 @@ public:
 TEST(dds_DCPS_InternalDataReader, durable)
 {
   {
-    RcHandle<ReaderType> reader = make_rch<ReaderType>(false);
+    RcHandle<ReaderType> reader = make_rch<ReaderType>(DataReaderQosBuilder().reliability_reliable());
     EXPECT_FALSE(reader->durable());
   }
   {
-    RcHandle<ReaderType> reader = make_rch<ReaderType>(true);
+    RcHandle<ReaderType> reader = make_rch<ReaderType>(DataReaderQosBuilder().reliability_reliable().durability_transient_local());
     EXPECT_TRUE(reader->durable());
   }
 }
@@ -79,7 +81,7 @@ TEST(dds_DCPS_InternalDataReader, write)
   InternalSampleInfoSequence infos;
 
   RcHandle<InternalEntity> writer = make_rch<InternalEntity>();
-  RcHandle<ReaderType> reader = make_rch<ReaderType>(false);
+  RcHandle<ReaderType> reader = make_rch<ReaderType>(DataReaderQosBuilder().reliability_reliable());
 
   reader->write(writer, sample);
   reader->take(samples, infos);
@@ -98,7 +100,7 @@ TEST(dds_DCPS_InternalDataReader, unregister_instance)
   InternalSampleInfoSequence infos;
 
   RcHandle<InternalEntity> writer = make_rch<InternalEntity>();
-  RcHandle<ReaderType> reader = make_rch<ReaderType>(false);
+  RcHandle<ReaderType> reader = make_rch<ReaderType>(DataReaderQosBuilder().reliability_reliable());
 
   reader->write(writer, sample);
   reader->unregister_instance(writer, sample);
@@ -121,7 +123,7 @@ TEST(dds_DCPS_InternalDataReader, dispose)
   InternalSampleInfoSequence infos;
 
   RcHandle<InternalEntity> writer = make_rch<InternalEntity>();
-  RcHandle<ReaderType> reader = make_rch<ReaderType>(false);
+  RcHandle<ReaderType> reader = make_rch<ReaderType>(DataReaderQosBuilder().reliability_reliable());
 
   reader->write(writer, sample);
   reader->dispose(writer, sample);
@@ -144,7 +146,7 @@ TEST(dds_DCPS_InternalDataReader, remove_publication_autodispose)
   InternalSampleInfoSequence infos;
 
   RcHandle<InternalEntity> writer = make_rch<InternalEntity>();
-  RcHandle<ReaderType> reader = make_rch<ReaderType>(false);
+  RcHandle<ReaderType> reader = make_rch<ReaderType>(DataReaderQosBuilder().reliability_reliable());
 
   reader->write(writer, sample);
   reader->remove_publication(writer, true);
@@ -167,7 +169,7 @@ TEST(dds_DCPS_InternalDataReader, remove_publication)
   InternalSampleInfoSequence infos;
 
   RcHandle<InternalEntity> writer = make_rch<InternalEntity>();
-  RcHandle<ReaderType> reader = make_rch<ReaderType>(false);
+  RcHandle<ReaderType> reader = make_rch<ReaderType>(DataReaderQosBuilder().reliability_reliable());
 
   reader->write(writer, sample);
   reader->remove_publication(writer, false);
@@ -190,7 +192,7 @@ TEST(dds_DCPS_InternalDataReader, listener)
   JobQueue_rch job_queue = make_rch<JobQueue>(ACE_Reactor::instance());
   RcHandle<Listener> listener = make_rch<Listener>(job_queue);
   RcHandle<InternalEntity> writer = make_rch<InternalEntity>();
-  RcHandle<ReaderType> reader = make_rch<ReaderType>(false,
+  RcHandle<ReaderType> reader = make_rch<ReaderType>(DataReaderQosBuilder().reliability_reliable(),
                                                      listener);
 
   EXPECT_EQ(reader->get_listener(), listener);

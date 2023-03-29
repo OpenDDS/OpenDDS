@@ -97,15 +97,15 @@ public:
   typedef RcHandle<InternalDataReaderListener<T> > Listener_rch;
   typedef WeakRcHandle<InternalDataReaderListener<T> > Listener_wrch;
 
-  explicit InternalDataReader(bool durable = false,
+  explicit InternalDataReader(const DDS::DataReaderQos qos,
                               Listener_rch listener = Listener_rch())
-    : durable_(durable)
+    : qos_(qos)
     , listener_(listener)
   {}
 
   /// @name InternalTopic and InternalWriter Interface
   /// @{
-  bool durable() const { return durable_; }
+  bool durable() const { return qos_.durability.kind == DDS::TRANSIENT_LOCAL_DURABILITY_QOS; }
 
   void remove_publication(InternalEntity_wrch publication_handle, bool autodispose_unregistered_instances)
   {
@@ -210,7 +210,7 @@ public:
   /// @}
 
 private:
-  const bool durable_;
+  const DDS::DataReaderQos qos_;
   // Often, the listener will have the reader as a member.  Use a weak
   // pointer to prevent a cycle that prevents the listener from being
   // destroyed.
