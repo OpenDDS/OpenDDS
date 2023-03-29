@@ -51,7 +51,7 @@ TEST(dds_DCPS_InternalDataWriter, add_reader_durable)
   InternalSampleInfoSequence infos;
 
   RcHandle<WriterType> writer = make_rch<WriterType>(DataWriterQosBuilder().durability_transient_local().history_depth(2));
-  RcHandle<ReaderType> reader = make_rch<ReaderType>(DataReaderQosBuilder().reliability_reliable().durability_transient_local());
+  RcHandle<ReaderType> reader = make_rch<ReaderType>(DataReaderQosBuilder().reliability_reliable().durability_transient_local().history_keep_all());
 
   writer->write(sample1);
   writer->write(sample2);

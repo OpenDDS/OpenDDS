@@ -135,7 +135,7 @@ public:
     ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
 
     const std::pair<typename InstanceMap::iterator, bool> p = instance_map_.insert(std::make_pair(sample, Instance()));
-    p.first->second.write(publication_handle, sample);
+    p.first->second.write(publication_handle, sample, qos_);
 
     const Listener_rch listener = listener_.lock();
     if (listener) {
@@ -257,7 +257,8 @@ private:
     }
 
     void write(InternalEntity_wrch publication_handle,
-               const T& sample)
+               const T& sample,
+               const DDS::DataReaderQos& qos)
     {
       publication_set_.insert(publication_handle);
 
@@ -277,6 +278,16 @@ private:
       }
 
       instance_state_ = DDS::ALIVE_INSTANCE_STATE;
+
+      if (qos.history.kind == DDS::KEEP_LAST_HISTORY_QOS) {
+        while (read_samples_.size() + not_read_samples_.size() >= qos.history.depth) {
+          if (!read_samples_.empty()) {
+            read_samples_.pop_front();
+          } else {
+            not_read_samples_.pop_front();
+          }
+        }
+      }
 
       not_read_samples_.push_back(SampleHolder(sample, disposed_generation_count_, no_writers_generation_count_, true));
     }

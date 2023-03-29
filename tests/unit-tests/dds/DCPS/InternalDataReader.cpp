@@ -84,6 +84,8 @@ TEST(dds_DCPS_InternalDataReader, write)
   RcHandle<ReaderType> reader = make_rch<ReaderType>(DataReaderQosBuilder().reliability_reliable());
 
   reader->write(writer, sample);
+  // Twice to exercise history.
+  reader->write(writer, sample);
   reader->take(samples, infos);
 
   ASSERT_EQ(samples.size(), 1U);
@@ -91,6 +93,29 @@ TEST(dds_DCPS_InternalDataReader, write)
 
   EXPECT_EQ(samples[0], sample);
   EXPECT_EQ(SIW(infos[0]), SIW(make_sample_info(DDS::NOT_READ_SAMPLE_STATE, DDS::NEW_VIEW_STATE, DDS::ALIVE_INSTANCE_STATE, 0, 0, 0, 0, 0, true)));
+}
+
+TEST(dds_DCPS_InternalDataReader, write_keep_all)
+{
+  Sample sample("key");
+  ReaderType::SampleSequence samples;
+  InternalSampleInfoSequence infos;
+
+  RcHandle<InternalEntity> writer = make_rch<InternalEntity>();
+  RcHandle<ReaderType> reader = make_rch<ReaderType>(DataReaderQosBuilder().reliability_reliable().history_keep_all());
+
+  reader->write(writer, sample);
+  reader->write(writer, sample);
+  reader->take(samples, infos);
+
+  ASSERT_EQ(samples.size(), 2U);
+  ASSERT_EQ(infos.size(), 2U);
+
+  EXPECT_EQ(samples[0], sample);
+  EXPECT_EQ(SIW(infos[0]), SIW(make_sample_info(DDS::NOT_READ_SAMPLE_STATE, DDS::NEW_VIEW_STATE, DDS::ALIVE_INSTANCE_STATE, 0, 0, 1, 0, 0, true)));
+
+  EXPECT_EQ(samples[1], sample);
+  EXPECT_EQ(SIW(infos[1]), SIW(make_sample_info(DDS::NOT_READ_SAMPLE_STATE, DDS::NEW_VIEW_STATE, DDS::ALIVE_INSTANCE_STATE, 0, 0, 0, 0, 0, true)));
 }
 
 TEST(dds_DCPS_InternalDataReader, unregister_instance)
