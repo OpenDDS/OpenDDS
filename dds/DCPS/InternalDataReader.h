@@ -223,7 +223,37 @@ public:
       }
     }
   }
-  /// @}
+
+  void read_instance(SampleSequence& samples, InternalSampleInfoSequence& infos, const T& key)
+  {
+    samples.clear();
+    infos.clear();
+
+    ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
+    typename InstanceMap::iterator pos = instance_map_.find(key);
+    if (pos != instance_map_.end()) {
+      pos->second.read(samples, infos);
+      if (pos->second.instance_state() != DDS::ALIVE_INSTANCE_STATE) {
+        instance_map_.erase(pos);
+      }
+    }
+  }
+
+  void take_instance(SampleSequence& samples, InternalSampleInfoSequence& infos, const T& key)
+  {
+    samples.clear();
+    infos.clear();
+
+    ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
+    typename InstanceMap::iterator pos = instance_map_.find(key);
+    if (pos != instance_map_.end()) {
+      pos->second.take(samples, infos);
+      if (pos->second.instance_state() != DDS::ALIVE_INSTANCE_STATE) {
+        instance_map_.erase(pos);
+      }
+    }
+  }
+/// @}
 
 private:
   const DDS::DataReaderQos qos_;

@@ -259,3 +259,57 @@ TEST(dds_DCPS_InternalDataReader, read)
   EXPECT_EQ(samples[0], sample);
   EXPECT_EQ(SIW(infos[0]), SIW(make_sample_info(DDS::READ_SAMPLE_STATE, DDS::NOT_NEW_VIEW_STATE, DDS::ALIVE_INSTANCE_STATE, 0, 0, 0, 0, 0, true)));
 }
+
+TEST(dds_DCPS_InternalDataReader, read_instance)
+{
+  Sample sample1("a");
+  Sample sample2("b");
+  Sample sample3("c");
+  ReaderType::SampleSequence samples;
+  InternalSampleInfoSequence infos;
+
+  RcHandle<InternalEntity> writer = make_rch<InternalEntity>();
+  RcHandle<ReaderType> reader = make_rch<ReaderType>(DataReaderQosBuilder().reliability_reliable());
+
+  reader->write(writer, sample1);
+  reader->write(writer, sample2);
+  reader->read_instance(samples, infos, sample1);
+
+  ASSERT_EQ(samples.size(), 1U);
+  ASSERT_EQ(infos.size(), 1U);
+
+  EXPECT_EQ(samples[0], sample1);
+  EXPECT_EQ(SIW(infos[0]), SIW(make_sample_info(DDS::NOT_READ_SAMPLE_STATE, DDS::NEW_VIEW_STATE, DDS::ALIVE_INSTANCE_STATE, 0, 0, 0, 0, 0, true)));
+
+  reader->read_instance(samples, infos, sample3);
+
+  ASSERT_EQ(samples.size(), 0U);
+  ASSERT_EQ(infos.size(), 0U);
+}
+
+TEST(dds_DCPS_InternalDataReader, take_instance)
+{
+  Sample sample1("a");
+  Sample sample2("b");
+  Sample sample3("c");
+  ReaderType::SampleSequence samples;
+  InternalSampleInfoSequence infos;
+
+  RcHandle<InternalEntity> writer = make_rch<InternalEntity>();
+  RcHandle<ReaderType> reader = make_rch<ReaderType>(DataReaderQosBuilder().reliability_reliable());
+
+  reader->write(writer, sample1);
+  reader->write(writer, sample2);
+  reader->take_instance(samples, infos, sample2);
+
+  ASSERT_EQ(samples.size(), 1U);
+  ASSERT_EQ(infos.size(), 1U);
+
+  EXPECT_EQ(samples[0], sample2);
+  EXPECT_EQ(SIW(infos[0]), SIW(make_sample_info(DDS::NOT_READ_SAMPLE_STATE, DDS::NEW_VIEW_STATE, DDS::ALIVE_INSTANCE_STATE, 0, 0, 0, 0, 0, true)));
+
+  reader->take_instance(samples, infos, sample3);
+
+  ASSERT_EQ(samples.size(), 0U);
+  ASSERT_EQ(infos.size(), 0U);
+}
