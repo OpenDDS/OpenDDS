@@ -4,7 +4,6 @@ OpenDDS Developer's Guide
 
 .. toctree::
 
-   preface.rst
    introduction.rst
    getting_started.rst
    quality_of_service.rst
