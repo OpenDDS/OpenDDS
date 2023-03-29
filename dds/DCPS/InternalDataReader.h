@@ -192,6 +192,22 @@ public:
     return listener_.lock();
   }
 
+  void read(SampleSequence& samples, InternalSampleInfoSequence& infos)
+  {
+    samples.clear();
+    infos.clear();
+
+    ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
+    for (typename InstanceMap::iterator pos = instance_map_.begin(), limit = instance_map_.end(); pos != limit; ) {
+      pos->second.read(samples, infos);
+      if (pos->second.instance_state() != DDS::ALIVE_INSTANCE_STATE) {
+        instance_map_.erase(pos++);
+      } else {
+        ++pos;
+      }
+    }
+  }
+
   void take(SampleSequence& samples, InternalSampleInfoSequence& infos)
   {
     samples.clear();
@@ -232,6 +248,31 @@ private:
 
     DDS::InstanceStateKind instance_state() const { return instance_state_; }
 
+    void read(SampleSequence& samples, InternalSampleInfoSequence& infos)
+    {
+      size_t sample_count = 0;
+
+      for (typename SampleList::const_iterator pos = not_read_samples_.begin(), limit = not_read_samples_.end();
+           pos != limit; ++pos) {
+        samples.push_back(pos->sample);
+        infos.push_back(make_sample_info(DDS::NOT_READ_SAMPLE_STATE, view_state_, instance_state_, pos->disposed_generation_count, pos->no_writers_generation_count, 0, 0, 0, pos->valid_data));
+        ++sample_count;
+      }
+
+      for (typename SampleList::const_iterator pos = read_samples_.begin(), limit = read_samples_.end();
+           pos != limit; ++pos) {
+        samples.push_back(pos->sample);
+        infos.push_back(make_sample_info(DDS::READ_SAMPLE_STATE, view_state_, instance_state_, pos->disposed_generation_count, pos->no_writers_generation_count, 0, 0, 0, pos->valid_data));
+        ++sample_count;
+      }
+
+      read_samples_.splice(read_samples_.end(), not_read_samples_);
+
+      compute_ranks(sample_count, infos);
+
+      view_state_ = DDS::NOT_NEW_VIEW_STATE;
+    }
+
     void take(SampleSequence& samples, InternalSampleInfoSequence& infos)
     {
       size_t sample_count = 0;
@@ -243,6 +284,7 @@ private:
         ++sample_count;
       }
       read_samples_.clear();
+
       for (typename SampleList::const_iterator pos = not_read_samples_.begin(), limit = not_read_samples_.end();
            pos != limit; ++pos) {
         samples.push_back(pos->sample);

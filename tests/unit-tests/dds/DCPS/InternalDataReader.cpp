@@ -232,3 +232,30 @@ TEST(dds_DCPS_InternalDataReader, listener)
 
   reader->set_listener(RcHandle<Listener>());
 }
+
+TEST(dds_DCPS_InternalDataReader, read)
+{
+  Sample sample("key");
+  ReaderType::SampleSequence samples;
+  InternalSampleInfoSequence infos;
+
+  RcHandle<InternalEntity> writer = make_rch<InternalEntity>();
+  RcHandle<ReaderType> reader = make_rch<ReaderType>(DataReaderQosBuilder().reliability_reliable());
+
+  reader->write(writer, sample);
+  reader->read(samples, infos);
+
+  ASSERT_EQ(samples.size(), 1U);
+  ASSERT_EQ(infos.size(), 1U);
+
+  EXPECT_EQ(samples[0], sample);
+  EXPECT_EQ(SIW(infos[0]), SIW(make_sample_info(DDS::NOT_READ_SAMPLE_STATE, DDS::NEW_VIEW_STATE, DDS::ALIVE_INSTANCE_STATE, 0, 0, 0, 0, 0, true)));
+
+  reader->read(samples, infos);
+
+  ASSERT_EQ(samples.size(), 1U);
+  ASSERT_EQ(infos.size(), 1U);
+
+  EXPECT_EQ(samples[0], sample);
+  EXPECT_EQ(SIW(infos[0]), SIW(make_sample_info(DDS::READ_SAMPLE_STATE, DDS::NOT_NEW_VIEW_STATE, DDS::ALIVE_INSTANCE_STATE, 0, 0, 0, 0, 0, true)));
+}
