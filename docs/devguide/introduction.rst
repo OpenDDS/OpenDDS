@@ -31,7 +31,7 @@ OpenDDS is an open source implementation of a group of related Object Management
 OpenDDS is implemented in C++ and contains support for Java.
 Users in the OpenDDS community have contributed and maintain bindings for other languages include C#, nodejs, and Python.
 
-OpenDDS is sponsored by the OpenDDS Foundation and is available via `https://opendds.org <https://opendds.org/>`__ and `https://github.com/OpenDDS/OpenDDS <https://github.com/OpenDDS/OpenDDS>`__.
+OpenDDS is sponsored by the OpenDDS Foundation and is available via https://opendds.org and https://github.com/OpenDDS/OpenDDS.
 
 ***************
 Licensing Terms
@@ -47,7 +47,7 @@ There is no charge for development or run-time licenses.
 The source code is designed to be compiled, and used, across a wide variety of hardware and operating systems architectures.
 You may modify it for your own needs, within the terms of the license agreements.
 You must not copyright OpenDDS software.
-For details of the licensing terms, see the file named ``LICENSE`` that is included in the OpenDDS source code distribution or visit `https://opendds.org/about/license.html <https://opendds.org/about/license.html>`__.
+For details of the licensing terms, see the file named :ghfile:`LICENSE` that is included in the OpenDDS source code distribution or visit https://opendds.org/about/license.html.
 
 OpenDDS also utilizes other open source software products including MPC (Make Project Creator), ACE (the ADAPTIVE Communication Environment), and TAO (The ACE ORB).
 
@@ -68,7 +68,7 @@ This guide is primarily focused on the specifics of using and configuring OpenDD
 While it does give a general overview of the OMG Data Distribution Service, this guide is not intended to provide comprehensive coverage of the specification.
 The intent of this guide is to help you become proficient with OpenDDS as quickly as possible.
 Readers are encouraged to submit corrections to this guide using a GitHub pull request.
-The source for this guide can be found at `https://github.com/OpenDDS/OpenDDS/tree/master/docs/devguide <https://github.com/OpenDDS/OpenDDS/tree/master/docs/devguide>`__.
+The source for this guide can be found at :ghfile:`docs/devguide` and :doc:`/internal/docs` contains guidance for editing and building it.
 
 ******************************
 Highlights of the 3.23 Release
@@ -127,11 +127,7 @@ Conventions
 This guide uses the following conventions:
 
 .. list-table::
-   :header-rows: 1
-
-   * - ``Bold fixed pitch text``
-
-     - Indicates example code that has been modified from a previous example or text appearing in a menu or dialog box.
+   :header-rows: 0
 
    * - ``Fixed pitch text``
 
@@ -143,15 +139,7 @@ This guide uses the following conventions:
 
    * - ...
 
-     - A horizontal ellipsis indicates that the statement is omitting text.
-
-   * - .
-
-       .
-
-       .
-
-     - A vertical ellipsis indicates that a segment of code is omitted from the example.
+     - An ellipsis indicates a section of omitted text.
 
 ********
 Examples
@@ -179,10 +167,10 @@ OMG references take the form *group/number* where *group* represents the OMG wor
 For example, the OMG DDS version 1.4 specification is referenced as ``formal/2015-04-10``.
 
 OMG specifications can be downloaded directly from the OMG web site by prepending ``http://www.omg.org/cgi-bin/doc?`` to the specification’s reference.
-Thus, the specification ``formal/07-01-01`` can be downloaded from ``http://www.omg.org/cgi-bin/doc?formal/07-01-01 <http://www.omg.org/cgi-bin/doc?formal/07-01-01>``__.
+Thus, the specification ``formal/07-01-01`` can be downloaded from http://www.omg.org/cgi-bin/doc?formal/07-01-01.
 Providing this destination to a web browser should take you to a site from which you can download the referenced specification document.
 
-Additional documentation for OpenDDS is produced and maintained by the OpenDDS Foundation and is available from the OpenDDS Website at  `https://opendds.org <https://opendds.org/>`__.
+Additional documentation for OpenDDS is produced and maintained by the OpenDDS Foundation and is available from the OpenDDS Website at https://opendds.org.
 
 Here are some documents of interest and their locations:
 
@@ -195,23 +183,23 @@ Here are some documents of interest and their locations:
 
    * - Data Distribution Service (DDS) for Real-Time Systems v1.4 (OMG Document formal/2015-04-10)
 
-     - ``http://www.omg.org/spec/DDS/1.4/PDF <http://www.omg.org/spec/DDS/1.4/PDF>``__
+     - http://www.omg.org/spec/DDS/1.4/PDF
 
    * - The Real-time Publish-Subscribe Wire Protocol DDS Interoperability Wire Protocol Specification (DDSI-RTPS) v2.3 (OMG Document formal/2019-04-03)
 
-     - ``https://www.omg.org/spec/DDSI-RTPS/2.3/PDF <https://www.omg.org/spec/DDSI-RTPS/2.3/PDF>``__
+     - https://www.omg.org/spec/DDSI-RTPS/2.3/PDF
 
    * - OMG Data Distribution Portal
 
-     - ``http://portals.omg.org/dds/ <http://portals.omg.org/dds/>``__
+     - http://portals.omg.org/dds/
 
    * - OpenDDS Build Instructions, Architecture, and Doxygen Documentation
 
-     - ``http://opendds.org/documentation.html <http://opendds.org/documentation.html>``__
+     - https://opendds.org/documentation.html
 
    * - OpenDDS Frequently Asked Questions
 
-     - ``http://opendds.org/faq.html <http://opendds.org/faq.html>``__
+     - https://opendds.org/faq.html
 
 *******************
 Supported Platforms
@@ -805,7 +793,7 @@ For a feature named *feature*, the following steps are used to disable the featu
 
 #. Use the command line ``features`` argument to MPC:
 
-   ``mwc.pl -type <type> -featuresfeature=0 DDS.mwc``
+   ``mwc.pl -type type -features feature=0 DDS.mwc``
 
    Or alternatively, add the line ``feature=0`` to the file ``$ACE_ROOT/bin/MakeProjectCreator/config/default.features`` and regenerate the project files using MPC.
 
@@ -893,7 +881,7 @@ Persistence Profile
 
 Feature Name: ``persistence_profile``
 
-This profile adds the QoS policy ``DURABILITY_SERVICE`` and the settings ‘``TRANSIENT``’ and ‘``PERSISTENT``’ of the ``DURABILITY`` QoS policy ``kind``.
+This profile adds the QoS policy ``DURABILITY_SERVICE`` and the settings ``TRANSIENT`` and ``PERSISTENT`` of the ``DURABILITY`` QoS policy ``kind``.
 
 .. _introduction--ownership-profile:
 
@@ -907,7 +895,7 @@ Feature Name: ``ownership_profile``
 
 This profile adds:
 
-* the setting ‘``EXCLUSIVE``’ of the ``OWNERSHIP`` ``kind``
+* the setting ``EXCLUSIVE`` of the ``OWNERSHIP`` ``kind``
 
 * support for the ``OWNERSHIP_STRENGTH`` policy
 
@@ -926,9 +914,9 @@ Object Model Profile
 
 Feature Name: ``object_model_profile``
 
-This profile includes support for the ``PRESENTATION`` access_scope setting of ‘``GROUP``’.
+This profile includes support for the ``PRESENTATION`` access_scope setting of ``GROUP``.
 
-.. note:: Currently, the ``PRESENTATION`` access_scope of ‘``TOPIC``’ is also excluded when ``object_model_profile`` is disabled.
+.. note:: Currently, the ``PRESENTATION`` access_scope of ``TOPIC`` is also excluded when ``object_model_profile`` is disabled.
 
 .. _introduction--building-applications-that-use-opendds:
 
