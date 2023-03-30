@@ -50,8 +50,10 @@ void append(DDS::PropertySeq& props, const char* name, const char* value, bool p
 }
 #endif
 
+// see Args.h
 bool check_lease_recovery = false;
 bool expect_unmatch = false;
+ACE_TCHAR* override_partition = 0;
 
 const char USER_DATA[] = "The Publisher";
 
@@ -144,7 +146,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       DDS::PublisherQos publisher_qos;
       participant->get_default_publisher_qos(publisher_qos);
       publisher_qos.partition.name.length(1);
-      publisher_qos.partition.name[0] = "OCI";
+      publisher_qos.partition.name[0] = override_partition ? ACE_TEXT_ALWAYS_CHAR(override_partition) : "OCI";
 
       DDS::Publisher_var pub =
         participant->create_publisher(publisher_qos,

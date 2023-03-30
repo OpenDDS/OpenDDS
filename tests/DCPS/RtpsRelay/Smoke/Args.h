@@ -18,11 +18,12 @@
 
 extern bool check_lease_recovery;
 extern bool expect_unmatch;
+extern ACE_TCHAR* override_partition;
 
 inline int
 parse_args(int argc, ACE_TCHAR *argv[])
 {
-  ACE_Get_Opt get_opts(argc, argv, ACE_TEXT("le"));
+  ACE_Get_Opt get_opts(argc, argv, ACE_TEXT("lep:"));
 
   int c;
   while ((c = get_opts()) != -1) {
@@ -33,8 +34,11 @@ parse_args(int argc, ACE_TCHAR *argv[])
     case 'e':
       expect_unmatch = true;
       break;
+    case 'p':
+      override_partition = get_opts.opt_arg();
+      break;
     case '?':
-      ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("usage: %s [-le]\n"), argv[0]), EXIT_FAILURE);
+      ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("usage: %s [-le] [-p partition]\n"), argv[0]), EXIT_FAILURE);
     }
   }
 

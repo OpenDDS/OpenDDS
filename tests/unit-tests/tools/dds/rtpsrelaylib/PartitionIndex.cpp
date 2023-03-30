@@ -151,9 +151,18 @@ TEST(tools_dds_rtpsrelaylib_PartitionIndex, maintest)
     pi.lookup("apple", actual);
     test_equal("general find 'apple'", actual, expected);
 
-    // Again to hit chache.
+    // Again to hit cache.
     pi.lookup("apple", actual);
     test_equal("general find 'apple'", actual, expected);
+
+    expected.erase(guid1);
+    GuidSet limits;
+    limits.insert(guid2);
+    limits.insert(guid3);
+    limits.insert(guid4);
+    actual.clear();
+    pi.lookup("apple", actual, &limits);
+    test_equal("limited find 'apple'", actual, expected);
 
     expected.clear();
     expected.insert(guid2);

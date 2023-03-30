@@ -46,8 +46,10 @@ void append(DDS::PropertySeq& props, const char* name, const char* value, bool p
 }
 #endif
 
+// see Args.h
 bool check_lease_recovery = false;
 bool expect_unmatch = false;
+ACE_TCHAR* override_partition = 0;
 
 bool reliable = false;
 bool wait_for_acks = false;
@@ -103,13 +105,13 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
                         ACE_TEXT(" ERROR: create_participant() failed!\n")), 1);
     }
 
-      OpenDDS::DCPS::DomainParticipantImpl* dp_impl =
-        dynamic_cast<OpenDDS::DCPS::DomainParticipantImpl*>(participant.in());
+    OpenDDS::DCPS::DomainParticipantImpl* dp_impl =
+      dynamic_cast<OpenDDS::DCPS::DomainParticipantImpl*>(participant.in());
 
-      OpenDDS::DCPS::RcHandle<OpenDDS::RTPS::RtpsDiscovery> disc = OpenDDS::DCPS::static_rchandle_cast<OpenDDS::RTPS::RtpsDiscovery>(TheServiceParticipant->get_discovery(42));
-      const OpenDDS::DCPS::GUID_t guid = dp_impl->get_id();
-      OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::TransportInst> discovery_inst = disc->sedp_transport_inst(42, guid);
-      discovery_inst->count_messages(true);
+    OpenDDS::DCPS::RcHandle<OpenDDS::RTPS::RtpsDiscovery> disc = OpenDDS::DCPS::static_rchandle_cast<OpenDDS::RTPS::RtpsDiscovery>(TheServiceParticipant->get_discovery(42));
+    const OpenDDS::DCPS::GUID_t guid = dp_impl->get_id();
+    OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::TransportInst> discovery_inst = disc->sedp_transport_inst(42, guid);
+    discovery_inst->count_messages(true);
 
     // Register Type (Messenger::Message)
     Messenger::MessageTypeSupport_var ts =
@@ -140,7 +142,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     DDS::SubscriberQos subscriber_qos;
     participant->get_default_subscriber_qos(subscriber_qos);
     subscriber_qos.partition.name.length(1);
-    subscriber_qos.partition.name[0] = "?CI";
+    subscriber_qos.partition.name[0] = override_partition ? ACE_TEXT_ALWAYS_CHAR(override_partition) : "?CI";
 
     DDS::Subscriber_var sub =
       participant->create_subscriber(subscriber_qos,

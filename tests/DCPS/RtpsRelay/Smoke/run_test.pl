@@ -39,6 +39,16 @@ my $sub_ini = " sub_rtps.ini";
 if ($test->flag('single')) {
     $sub_ini = $pub_ini;
 }
+elsif ($test->flag('partition_same_relay')) {
+    # Use with the 'secure' flag.
+    # This puts the subscriber in a partition that doesn't match the publisher.
+    # The config files are set up to allow the participants to exchange SPDP
+    # without the help of the relay. The SEDP port, however, is not set up for
+    # local (non-relayed) communication. Since the relay should not forward
+    # when no partitions are in common, secure discovery cannot complete.
+    $pub_ini = ' pub_same_relay.ini';
+    $sub_ini = ' sub_same_relay.ini -p OCJ';
+}
 
 sub get_relay_args {
   my $n = shift;
@@ -86,7 +96,7 @@ if ($test->flag('join')) {
     $test->start_process("publisher");
 } else {
     $test->start_process("relay1");
-    $test->start_process("relay2");
+    $test->start_process("relay2") unless $test->flag('partition_same_relay');
     sleep 10;
     $test->start_process("publisher");
     sleep 1;
@@ -99,7 +109,7 @@ $test->stop_process(20, "subscriber");
 $test->stop_process(5, "publisher");
 
 $test->kill_process(5, "relay1");
-$test->kill_process(5, "relay2");
+$test->kill_process(5, "relay2") unless $test->flag('partition_same_relay');
 $test->kill_process(5, "monitor");
 
 exit $test->finish();
