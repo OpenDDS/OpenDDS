@@ -1,10 +1,13 @@
-project {
+project: test_root {
   expand(GTEST_ROOT) {
     $GTEST_ROOT
     $(DDS_ROOT)/tests/googletest/build/install
   }
   includes += $(GTEST_ROOT)/include
   libpaths += $(GTEST_ROOT)/lib
+
+  // For Header-only Google Test Util Headers
+  includes += $(TEST_ROOT)
 
   specific(prop:windows) {
     // Avoid adding "s" suffix in static builds

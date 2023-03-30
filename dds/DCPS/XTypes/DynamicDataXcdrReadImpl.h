@@ -102,16 +102,14 @@ public:
     return DDS::RETCODE_UNSUPPORTED;
   }
 
-  DDS::ReturnCode_t get_int64_value(CORBA::LongLong& value,
-                                    DDS::MemberId id);
+  DDS::ReturnCode_t get_int64_value_impl(CORBA::LongLong& value, DDS::MemberId id);
   DDS::ReturnCode_t set_int64_value(DDS::MemberId,
                                     CORBA::LongLong)
   {
     return DDS::RETCODE_UNSUPPORTED;
   }
 
-  DDS::ReturnCode_t get_uint64_value(CORBA::ULongLong& value,
-                                     DDS::MemberId id);
+  DDS::ReturnCode_t get_uint64_value_impl(CORBA::ULongLong& value, DDS::MemberId id);
   DDS::ReturnCode_t set_uint64_value(DDS::MemberId,
                                      CORBA::ULongLong)
   {
@@ -399,16 +397,14 @@ private:
    *  and @a lower and @a upper to form a corresponding range for the bitmask's bit bound.
    */
   template<TypeKind MemberTypeKind, typename MemberType>
-  bool get_value_from_struct(MemberType& value, MemberId id,
-                             TypeKind enum_or_bitmask = TK_NONE,
-                             LBound lower = 0,
-                             LBound upper = 0);
+  DDS::ReturnCode_t get_value_from_struct(
+    MemberType& value, MemberId id, TypeKind enum_or_bitmask = TK_NONE,
+    LBound lower = 0, LBound upper = 0);
 
   template<TypeKind MemberTypeKind, typename MemberType>
-  bool get_value_from_union(MemberType& value, MemberId id,
-                            TypeKind enum_or_bitmask = TK_NONE,
-                            LBound lower = 0,
-                            LBound upper = 0);
+  DDS::ReturnCode_t get_value_from_union(
+    MemberType& value, MemberId id, TypeKind enum_or_bitmask = TK_NONE,
+    LBound lower = 0, LBound upper = 0);
 
   template<TypeKind ElementTypeKind, typename ElementType>
   bool get_value_from_collection(ElementType& value, MemberId id, TypeKind collection_tk,
@@ -434,7 +430,7 @@ private:
 
   /// Skip to a member with a given ID in a struct.
   ///
-  bool skip_to_struct_member(DDS::MemberDescriptor* member_desc, MemberId id);
+  DDS::ReturnCode_t skip_to_struct_member(DDS::MemberDescriptor* member_desc, MemberId id);
 
   bool get_from_struct_common_checks(const DDS::MemberDescriptor_var& md, MemberId id,
                                      TypeKind kind, bool is_sequence = false);
@@ -467,8 +463,8 @@ private:
    *  and the similar methods for the use of @a enum_or_bitmask, @a lower, @a upper.
    */
   template<TypeKind ElementTypeKind, typename SequenceType>
-  bool get_values_from_struct(SequenceType& value, MemberId id,
-                              TypeKind enum_or_bitmask, LBound lower, LBound upper);
+  DDS::ReturnCode_t get_values_from_struct(
+    SequenceType& value, MemberId id, TypeKind enum_or_bitmask, LBound lower, LBound upper);
 
   template<TypeKind ElementTypeKind, typename SequenceType>
   bool get_values_from_union(SequenceType& value, MemberId id,

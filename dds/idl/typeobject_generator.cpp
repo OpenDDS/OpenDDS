@@ -1102,9 +1102,6 @@ typeobject_generator::generate_struct_type_identifier(AST_Type* type)
     complete_to.complete.struct_type.member_seq.append(complete_member);
   }
 
-  minimal_to.minimal.struct_type.member_seq.sort();
-  complete_to.complete.struct_type.member_seq.sort();
-
   update_maps(type, minimal_to, complete_to);
 }
 
@@ -1198,8 +1195,6 @@ typeobject_generator::generate_union_type_identifier(AST_Type* type)
 
     complete_to.complete.union_type.member_seq.append(complete_member);
   }
-  minimal_to.minimal.union_type.member_seq.sort();
-  complete_to.complete.union_type.member_seq.sort();
 
   update_maps(type, minimal_to, complete_to);
 }

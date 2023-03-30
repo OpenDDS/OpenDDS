@@ -904,6 +904,11 @@ struct KeyOnly {
   {
   }
 
+  operator Type&() const
+  {
+    return value;
+  }
+
   Type& value;
 };
 
@@ -912,6 +917,11 @@ struct NestedKeyOnly {
   explicit NestedKeyOnly(Type& value)
     : value(value)
   {
+  }
+
+  operator Type&() const
+  {
+    return value;
   }
 
   Type& value;

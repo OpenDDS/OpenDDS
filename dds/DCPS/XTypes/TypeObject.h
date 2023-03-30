@@ -3446,6 +3446,9 @@ namespace XTypes {
   bool is_primitive(TypeKind tk);
 
   OpenDDS_Dcps_Export
+  bool is_scalar(TypeKind tk);
+
+  OpenDDS_Dcps_Export
   bool is_basic(TypeKind tk);
 
   OpenDDS_Dcps_Export
@@ -3456,6 +3459,12 @@ namespace XTypes {
 
   OpenDDS_Dcps_Export
   bool is_uint(TypeKind tk);
+
+  OpenDDS_Dcps_Export
+  bool is_int_like(TypeKind tk);
+
+  OpenDDS_Dcps_Export
+  bool is_uint_like(TypeKind tk);
 
   OpenDDS_Dcps_Export
   bool is_sequence_like(TypeKind tk);

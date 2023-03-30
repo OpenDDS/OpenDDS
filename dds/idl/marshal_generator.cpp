@@ -2749,15 +2749,14 @@ namespace {
         for (Fields::Iterator i = fields.begin(); i != fields_end; ++i) {
           AST_Field* const field = *i;
           const OpenDDS::XTypes::MemberId id = be_global->get_id(field);
-          const string field_name = field->local_name()->get_string();
-          const bool is_key = be_global->is_key(field);
+          const bool must_understand = be_global->is_must_understand(field);
 
           mutable_fields
             << generate_field_serialized_size(
               mutable_indent, field, "stru" + value_access, wrap_nested_key_only, intro)
             << "\n"
             "    if (!strm.write_parameter_id("
-              << id << ", size" << (is_key ? ", true" : "") << ")) {\n"
+              << id << ", size" << (must_understand ? ", true" : "") << ")) {\n"
             "      return false;\n"
             "    }\n"
             "    size = 0;\n"

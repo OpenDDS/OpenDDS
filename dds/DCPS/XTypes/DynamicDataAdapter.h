@@ -71,6 +71,7 @@ public:
   {
   }
 
+  DDS::UInt32 get_item_count();
   DDS::MemberId get_member_id_by_name(const char* name);
   virtual DDS::MemberId get_member_id_at_index_impl(DDS::UInt32);
   DDS::MemberId get_member_id_at_index(DDS::UInt32 index);
@@ -152,8 +153,7 @@ public:
     return set_raw_value("set_uint32_value", id, &value, TK_UINT32);
   }
 
-  DDS::ReturnCode_t get_int64_value(CORBA::LongLong& value,
-                                    DDS::MemberId id)
+  DDS::ReturnCode_t get_int64_value_impl(DDS::Int64& value, DDS::MemberId id)
   {
     return get_raw_value("get_int64_value", &value, TK_INT64, id);
   }
@@ -164,8 +164,7 @@ public:
     return set_raw_value("set_int64_value", id, &value, TK_INT64);
   }
 
-  DDS::ReturnCode_t get_uint64_value(CORBA::ULongLong& value,
-                                     DDS::MemberId id)
+  DDS::ReturnCode_t get_uint64_value_impl(DDS::UInt64& value, DDS::MemberId id)
   {
     return get_raw_value("get_uint64_value", &value, TK_UINT64, id);
   }

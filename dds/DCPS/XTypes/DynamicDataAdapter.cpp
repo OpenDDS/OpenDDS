@@ -8,6 +8,7 @@
 #include "DynamicDataAdapter.h"
 
 #include <dds/DCPS/debug.h>
+#include <dds/DCPS/DCPS_Utils.h>
 
 #if OPENDDS_HAS_DYNAMIC_DATA_ADAPTER
 
@@ -15,6 +16,75 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
 namespace XTypes {
+
+using DCPS::LogLevel;
+using DCPS::log_level;
+using DCPS::retcode_to_string;
+
+DDS::UInt32 DynamicDataAdapter::get_item_count()
+{
+  const TypeKind tk = type_->get_kind();
+  switch (tk) {
+  case TK_BOOLEAN:
+  case TK_BYTE:
+  case TK_UINT8:
+  case TK_UINT16:
+  case TK_UINT32:
+  case TK_UINT64:
+  case TK_INT8:
+  case TK_INT16:
+  case TK_INT32:
+  case TK_INT64:
+  case TK_FLOAT32:
+  case TK_FLOAT64:
+  case TK_FLOAT128:
+  case TK_CHAR8:
+  case TK_CHAR16:
+  case TK_ENUM:
+    return 1;
+  case TK_UNION:
+    {
+      bool branch_active;
+      DDS::MemberDescriptor_var active_branch;
+      DDS::ReturnCode_t rc = get_union_branch(branch_active, active_branch);
+      if (rc != DDS::RETCODE_OK) {
+        if (DCPS::log_level >= DCPS::LogLevel::Warning) {
+          const CORBA::String_var type_name = type_->get_name();
+          ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: DynamicDataAdapterImpl<%C>::item: "
+            "get_union_branch returned %C\n",
+            type_name.in(), retcode_to_string(rc)));
+        }
+        return MEMBER_ID_INVALID;
+      }
+      return branch_active ? 2 : 1;
+    }
+    break;
+  case TK_STRING8:
+  case TK_STRING16:
+  case TK_SEQUENCE:
+  case TK_BITMASK:
+  case TK_ARRAY:
+  case TK_STRUCTURE:
+  case TK_MAP:
+  case TK_BITSET:
+    if (log_level >= LogLevel::Error) {
+      const CORBA::String_var type_name = type_->get_name();
+      ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: DynamicDataAdapterImpl<%C>::get_item_count: "
+        "this %C should have implemented get_item_count\n",
+        type_name.in(), typekind_to_string(tk)));
+    }
+    return 0;
+  case TK_ALIAS:
+  case TK_ANNOTATION:
+  default:
+    if (log_level >= LogLevel::Warning) {
+      const CORBA::String_var type_name = type_->get_name();
+      ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: DynamicDataAdapterImpl<%C>::get_item_count: "
+        "unexpected type %C\n", type_name.in(), typekind_to_string(tk)));
+    }
+    return 0;
+  }
+}
 
 DDS::MemberId DynamicDataAdapter::get_member_id_by_name(const char* name)
 {
@@ -33,34 +103,77 @@ DDS::MemberId DynamicDataAdapter::get_member_id_at_index_impl(DDS::UInt32)
 
 DDS::MemberId DynamicDataAdapter::get_member_id_at_index(DDS::UInt32 index)
 {
+  DDS::ReturnCode_t rc;
   const TypeKind tk = type_->get_kind();
   switch (tk) {
   case TK_STRUCTURE:
-  case TK_UNION:
     {
       DDS::DynamicTypeMember_var dtm;
-      if (type_->get_member_by_index(dtm, index) != DDS::RETCODE_OK) {
+      rc = type_->get_member_by_index(dtm, index);
+      if (rc != DDS::RETCODE_OK) {
+        if (DCPS::log_level >= DCPS::LogLevel::Warning) {
+          const CORBA::String_var type_name = type_->get_name();
+          ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: DynamicDataAdapterImpl<%C>::get_member_id_at_index: "
+            "get_member_by_index returned %C\n",
+            type_name.in(), retcode_to_string(rc)));
+        }
         return MEMBER_ID_INVALID;
       }
       return dtm->get_id();
+    }
+  case TK_UNION:
+    {
+      if (index == 0) {
+        return DISCRIMINATOR_ID;
+      } else if (index == 1) {
+        bool branch_active;
+        DDS::MemberDescriptor_var active_branch;
+        DDS::ReturnCode_t rc = get_union_branch(branch_active, active_branch);
+        if (rc != DDS::RETCODE_OK) {
+          if (DCPS::log_level >= DCPS::LogLevel::Warning) {
+            const CORBA::String_var type_name = type_->get_name();
+            ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: DynamicDataAdapterImpl<%C>::get_member_id_at_index: "
+              "get_union_branch returned %C\n",
+              type_name.in(), retcode_to_string(rc)));
+          }
+          return MEMBER_ID_INVALID;
+        }
+        if (branch_active) {
+          return active_branch->id();
+        } else if (DCPS::log_level >= DCPS::LogLevel::Warning) {
+          const CORBA::String_var type_name = type_->get_name();
+          ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: DynamicDataAdapterImpl<%C>::get_member_id_at_index: "
+            "union doesn't have an active branch, so index 1 is invalid\n",
+            type_name.in()));
+        }
+      } else if (DCPS::log_level >= DCPS::LogLevel::Warning) {
+        const CORBA::String_var type_name = type_->get_name();
+        ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: DynamicDataAdapterImpl<%C>::get_member_id_at_index: "
+          "index %u is invalid for unions\n",
+          type_name.in(), index));
+      }
+      return MEMBER_ID_INVALID;
     }
   case TK_SEQUENCE:
     return get_member_id_at_index_impl(index);
   case TK_ARRAY:
     {
-      DDS::TypeDescriptor_var td;
-      if (type_->get_descriptor(td) != DDS::RETCODE_OK) {
-        return MEMBER_ID_INVALID;
-      }
-      if (check_index("get_member_id_at_index", index, bound_total(td)) != DDS::RETCODE_OK) {
+      DDS::ReturnCode_t rc = check_index("get_member_id_at_index", index, bound_total(type_desc_));
+      if (rc != DDS::RETCODE_OK) {
+        if (DCPS::log_level >= DCPS::LogLevel::Warning) {
+          const CORBA::String_var type_name = type_->get_name();
+          ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: DynamicDataAdapterImpl<%C>::get_member_id_at_index: "
+            "check_index returned %C\n",
+            type_name.in(), retcode_to_string(rc)));
+        }
         return MEMBER_ID_INVALID;
       }
       return index;
     }
   default:
-    if (DCPS::log_level >= DCPS::LogLevel::Notice) {
+    if (DCPS::log_level >= DCPS::LogLevel::Warning) {
       const CORBA::String_var type_name = type_->get_name();
-      ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicDataAdapterImpl<%C>::get_member_id_at_index: "
+      ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: DynamicDataAdapterImpl<%C>::get_member_id_at_index: "
         "not supported for %C\n",
         type_name.in(), typekind_to_string(tk)));
     }

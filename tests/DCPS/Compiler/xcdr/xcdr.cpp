@@ -1,12 +1,25 @@
+// TODO: Add deserialization only tests that have unknown parameters with
+// must understand that cause an expected failure.
+// This should for generated deserialzation code, but probably doesn't work with
+// DynamicData.
+
 #include "xcdrbasetypesTypeSupportImpl.h"
 #include "appendable_mixedTypeSupportImpl.h"
 #include "mutable_typesTypeSupportImpl.h"
 #include "mutable_types2TypeSupportImpl.h"
 #include "keyonlyTypeSupportImpl.h"
-#include "../../../Utils/DataView.h"
+
+#include <tests/Utils/DataView.h>
+#include <tests/Utils/GtestRc.h>
 
 #include <dds/DCPS/Serializer.h>
 #include <dds/DCPS/SafetyProfileStreams.h>
+#include <dds/DCPS/XTypes/Utils.h>
+#include <dds/DCPS/XTypes/TypeLookupService.h>
+#include <dds/DCPS/XTypes/DynamicDataAdapter.h>
+#include <dds/DCPS/XTypes/DynamicDataFactory.h>
+#include <dds/DCPS/XTypes/DynamicDataImpl.h>
+#include <dds/DCPS/XTypes/DynamicDataXcdrReadImpl.h>
 
 #include <gtest/gtest.h>
 
@@ -16,10 +29,53 @@
 #include <sstream>
 
 using namespace OpenDDS::DCPS;
+using namespace OpenDDS::XTypes;
 
 const Encoding xcdr1(Encoding::KIND_XCDR1, ENDIAN_BIG);
 const Encoding xcdr2(Encoding::KIND_XCDR2, ENDIAN_BIG);
 const Encoding xcdr2_le(Encoding::KIND_XCDR2, ENDIAN_LITTLE);
+
+enum FieldFilter {
+  FieldFilter_All,
+  FieldFilter_NestedKeyOnly,
+  FieldFilter_KeyOnly
+};
+
+bool dynamic = false;
+
+#ifndef OPENDDS_SAFETY_PROFILE
+TypeLookupService_rch tls;
+
+template<typename TopicType>
+void add_type()
+{
+  if (!tls) {
+    tls = make_rch<TypeLookupService>();
+  }
+  TypeIdentifierPairSeq tid_pairs;
+  TypeIdentifierPair tid_pair;
+  typedef typename DDSTraits<TopicType>::XtagType Xtag;
+  tid_pair.type_identifier1 = getCompleteTypeIdentifier<Xtag>();
+  tid_pair.type_identifier2 = getMinimalTypeIdentifier<Xtag>();
+  tid_pairs.append(tid_pair);
+  tls->update_type_identifier_map(tid_pairs);
+
+  typename DDSTraits<TopicType>::TypeSupportImplType tsi;
+  tsi.add_types(tls);
+}
+
+template<typename TopicType>
+DDS::DynamicType_var get_dynamic_type()
+{
+  typedef typename DDSTraits<TopicType>::XtagType Xtag;
+  const TypeIdentifier& com_ti = getCompleteTypeIdentifier<Xtag>();
+  const TypeMap& com_map = getCompleteTypeMap<Xtag>();
+  TypeMap::const_iterator pos = com_map.find(com_ti);
+  EXPECT_TRUE(pos != com_map.end());
+  const TypeObject& com_to = pos->second;
+  return tls->complete_to_dynamic(com_to.complete, GUID_UNKNOWN);
+}
+#endif
 
 template <typename Type>
 void set_base_values(Type& value)
@@ -149,23 +205,62 @@ void deserialize_compare(
   EXPECT_PRED_FORMAT2(assert_values, expected, result);
 }
 
-template<typename TypeA, typename TypeB>
+template<typename TypeA, typename RealTypeA, typename TypeB, typename RealTypeB>
 void amalgam_serializer_test_base(
-  const Encoding& encoding, const DataView& expected_cdr, const TypeA& value, TypeB& result)
+  const Encoding& encoding, const DataView& expected_cdr,
+  const TypeA& value, TypeB& result, FieldFilter field_filter = FieldFilter_All)
 {
+#if OPENDDS_HAS_DYNAMIC_DATA_ADAPTER
+  const bool key_only = field_filter == FieldFilter_KeyOnly;
+#endif
   ACE_Message_Block buffer(1024);
 
   // Serialize and Compare CDR
   {
     Serializer serializer(&buffer, encoding);
-    ASSERT_TRUE(serializer << value);
+    if (dynamic) {
+#if OPENDDS_HAS_DYNAMIC_DATA_ADAPTER
+      add_type<RealTypeA>();
+      DDS::DynamicType_var type = get_dynamic_type<RealTypeA>();
+      DDS::DynamicData_var dda = get_dynamic_data_adapter<RealTypeA>(type, value);
+      DDS::DynamicData_var dd = DDS::DynamicDataFactory::get_instance()->create_data(type);
+      ASSERT_RC_OK(copy(dd, dda));
+
+      DynamicDataImpl& ddi = *dynamic_cast<DynamicDataImpl*>(dd.in());
+      if (key_only) {
+        const KeyOnly<const DynamicDataImpl> key_only(ddi);
+        EXPECT_EQ(serialized_size(encoding, key_only), expected_cdr.size);
+        ASSERT_TRUE(serializer << key_only);
+      } else {
+        EXPECT_EQ(serialized_size(encoding, ddi), expected_cdr.size);
+        ASSERT_TRUE(serializer << ddi);
+      }
+#else
+      ASSERT_TRUE(false);
+#endif
+    } else {
+      ASSERT_TRUE(serializer << value);
+    }
     EXPECT_PRED_FORMAT2(assert_DataView, expected_cdr, buffer);
   }
 
   // Deserialize
   {
     Serializer serializer(&buffer, encoding);
-    ASSERT_TRUE(serializer >> result);
+    if (dynamic) {
+#if OPENDDS_HAS_DYNAMIC_DATA_ADAPTER
+      add_type<RealTypeB>();
+      DDS::DynamicType_var type = get_dynamic_type<RealTypeB>();
+      DDS::DynamicData_var dda = get_dynamic_data_adapter<RealTypeB>(type, result);
+      DDS::DynamicData_var ddi = new DynamicDataXcdrReadImpl(serializer, type,
+        key_only ? Sample::KeyOnly: Sample::Full);
+      ASSERT_RC_OK(copy(dda, ddi));
+#else
+      ASSERT_TRUE(false);
+#endif
+    } else {
+      ASSERT_TRUE(serializer >> result);
+    }
   }
 }
 
@@ -173,7 +268,7 @@ template<typename TypeA, typename TypeB>
 void amalgam_serializer_test(
   const Encoding& encoding, const DataView& expected_cdr, TypeA& value, TypeB& result)
 {
-  amalgam_serializer_test_base(encoding, expected_cdr, value, result);
+  amalgam_serializer_test_base<TypeA, TypeA, TypeB, TypeB>(encoding, expected_cdr, value, result);
   EXPECT_PRED_FORMAT2(assert_values, value, result);
 }
 
@@ -1576,8 +1671,8 @@ const unsigned char MixedMutableStructXcdr2BE::expected[] = {
   0x00,0,0,8,            0x01,(0),(0),(0),     // +8 octet_field = 40
   0x30,0,0,10,           0x7f,0xff,0xff,0xff,0xff,0xff,0xff,0xff, // +12 long_long_field = 52
   // End struct_nested >>>>>>
-  0x40,0,0,2,  0,0,0,10, 0,0,0,3,0x7f,0xff,0x7f,0xff,0x7f,0xff,(0),(0), // +20 sequence_field = 72
-  0x40,0,0,3,  0,0,0,34, // +8 EMHEADER1 + NEXTINT of union_nested = 80
+  0x40,0,0,2,  0,0,0,0xa, 0,0,0,3,0x7f,0xff,0x7f,0xff,0x7f,0xff,(0),(0), // +20 sequence_field = 72
+  0x40,0,0,3,  0,0,0,0x22, // +8 EMHEADER1 + NEXTINT of union_nested = 80
   // <<<<<< Begin union_nested
   0x00, 0x00, 0x00, 0x1e, // +4 DHEADER of union_nested = 84
   0x10,0,0,0,            0x00,0x03,(0),(0),     // +8 discriminator = 92
@@ -1820,13 +1915,36 @@ TEST(MixedExtenTests, NestingMutableStructLE)
   test_little_endian<NestingMutableStruct, NestingMutableStructXcdr2BE>();
 }
 
-// KeyOnly Serialization ======================================================
+// IdVsDeclOrder ==============================================================
 
-enum FieldFilter {
-  FieldFilter_All,
-  FieldFilter_NestedKeyOnly,
-  FieldFilter_KeyOnly
+template <>
+void expect_values_equal<IdVsDeclOrder, IdVsDeclOrder>(
+  const IdVsDeclOrder& a, const IdVsDeclOrder& b)
+{
+  EXPECT_EQ(a.first_id2, b.first_id2);
+  EXPECT_EQ(a.second_id1, b.second_id1);
+}
+
+template <>
+void set_values<IdVsDeclOrder>(IdVsDeclOrder& value)
+{
+  value.first_id2 = 0x12345678;
+  value.second_id1 = 0x9abc;
+}
+
+const unsigned char id_vs_decl_order_expected[] = {
+  // first_id2
+  0x12, 0x34, 0x56, 0x78, // +4 = 4
+  // second_id1
+  0x9a, 0xbc, // +2 = 6
 };
+
+TEST(IdVsDeclOrder, test)
+{
+  serializer_test<IdVsDeclOrder>(xcdr2, id_vs_decl_order_expected);
+}
+
+// KeyOnly Serialization ======================================================
 
 template <typename Type>
 void build_expected(DataVec& /*expected*/, FieldFilter /*field_filter*/)
@@ -1845,18 +1963,22 @@ void not_key_only_test()
 template <typename Type, typename Wrapper, typename ConstWrapper>
 void key_only_test(bool topic_type)
 {
+  if (!topic_type && dynamic) {
+    // Can't do nested key only with DynamicData
+    return;
+  }
   Type default_value;
   set_default(default_value);
+  const FieldFilter field_filter = topic_type ? FieldFilter_KeyOnly : FieldFilter_NestedKeyOnly;
   DataVec expected;
-  build_expected<Type>(expected,
-    topic_type ? FieldFilter_KeyOnly : FieldFilter_NestedKeyOnly);
+  build_expected<Type>(expected, field_filter);
   Type value = default_value;
   set_values<Type, Wrapper>(value);
   ConstWrapper wrapped_value(value);
   Type result = default_value;
   Wrapper wrapped_result(result);
-  amalgam_serializer_test_base<ConstWrapper, Wrapper>(
-    xcdr2, expected, wrapped_value, wrapped_result);
+  amalgam_serializer_test_base<ConstWrapper, Type, Wrapper, Type>(
+    xcdr2, expected, wrapped_value, wrapped_result, field_filter);
   EXPECT_PRED_FORMAT2(assert_values, wrapped_value, wrapped_result);
 }
 
@@ -2575,6 +2697,11 @@ TEST(KeyTests, KeyOnly_KeyedUnion)
 
 int main(int argc, char* argv[])
 {
+  for (int i = 0; i < argc; ++i) {
+    if (!std::strcmp(argv[i], "--dynamic")) {
+      dynamic = true;
+    }
+  }
   ::testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
 }

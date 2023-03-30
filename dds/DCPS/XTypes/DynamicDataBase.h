@@ -36,6 +36,11 @@ public:
   DDS::ReturnCode_t return_loaned_value(DDS::DynamicData_ptr other);
   DDS::DynamicData_ptr clone();
 
+  DDS::ReturnCode_t get_int64_value(DDS::Int64& value, DDS::MemberId id);
+  virtual DDS::ReturnCode_t get_int64_value_impl(DDS::Int64& value, DDS::MemberId id) = 0;
+  DDS::ReturnCode_t get_uint64_value(DDS::UInt64& value, DDS::MemberId id);
+  virtual DDS::ReturnCode_t get_uint64_value_impl(DDS::UInt64& value, DDS::MemberId id) = 0;
+
   static bool has_explicit_keys(DDS::DynamicType* dt);
   static bool exclude_member(DCPS::Sample::Extent ext, bool is_key, bool has_explicit_keys);
   static DCPS::Sample::Extent nested(DCPS::Sample::Extent ext);
@@ -65,7 +70,11 @@ protected:
 
   static CORBA::ULong bound_total(DDS::TypeDescriptor_var descriptor);
   static DDS::MemberId get_union_default_member(DDS::DynamicType* type);
-  static bool discriminator_selects_no_member(DDS::DynamicType* type, ACE_CDR::Long disc);
+  DDS::ReturnCode_t get_union_branch(
+    DDS::Int32 disc, bool& found_selected_member, DDS::MemberDescriptor_var& selected_md) const;
+  DDS::ReturnCode_t get_union_branch(
+    bool& found_selected_member, DDS::MemberDescriptor_var& selected_md);
+  bool discriminator_selects_no_member(DDS::Int32 disc) const;
 
   /// Similar idea to std::shared_from_this(), provide a type compatible with parameter
   /// passing rules for IDL interfaces that are arguments to operations.
@@ -76,6 +85,7 @@ protected:
 
   /// The actual (i.e., non-alias) DynamicType of the associated type.
   DDS::DynamicType_var type_;
+  DDS::TypeDescriptor_var type_desc_;
 };
 
 inline bool DynamicDataBase::exclude_member(DCPS::Sample::Extent ext, bool is_key, bool has_explicit_keys)

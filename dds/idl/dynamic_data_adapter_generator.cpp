@@ -423,22 +423,23 @@ namespace {
         "    : DynamicDataAdapter_T<" << cpp_name << ">(type, value)\n"
         "  {\n"
         "  }\n"
-        "\n"
-        "  DDS::UInt32 get_item_count()\n"
-        "  {\n"
-        "    return ";
-      if (struct_node) {
-        be_global->impl_ << struct_node->nfields();
-      } else if (union_node) {
-        be_global->impl_ << union_node->nfields() + 1;
-      } else if (seq_node) {
-        be_global->impl_ << wrapper.seq_get_length();
-      } else if (array_node) {
-        be_global->impl_ << array_element_count(array_node);
-      }
-      be_global->impl_ << ";\n"
-        "  }\n"
         "\n";
+      if (struct_node || seq_node || array_node) {
+        be_global->impl_ <<
+          "  DDS::UInt32 get_item_count()\n"
+          "  {\n"
+          "    return ";
+        if (struct_node) {
+          be_global->impl_ << struct_node->nfields();
+        } else if (seq_node) {
+          be_global->impl_ << wrapper.seq_get_length();
+        } else if (array_node) {
+          be_global->impl_ << array_element_count(array_node);
+        }
+        be_global->impl_ << ";\n"
+          "  }\n"
+          "\n";
+      }
 
       if (seq_node) {
         // TODO: Set new elements to default values?
