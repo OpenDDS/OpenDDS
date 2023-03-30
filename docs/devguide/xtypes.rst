@@ -25,7 +25,7 @@ The DDS XTypes (Extensible and Dynamic Topic Types) specification loosens the re
 Using XTypes, the application developer adds IDL annotations that indicate where the types may vary between publisher and subscriber and how those variations are handled by the middleware.
 
 OpenDDS implements the XTypes specification version 1.3 at the Basic Conformance level, with a partial implementation of the Dynamic Language Binding.
-Some features described by the specification are not yet implemented in OpenDDS — those are noted in :ref:`xtypes--unimplemented-features`.
+Some features described by the specification are not yet implemented in OpenDDS - those are noted in :ref:`xtypes--unimplemented-features`.
 This includes IDL annotations that are not yet implemented, see :ref:`xtypes--annotations`.
 :ref:`xtypes--differences-from-the-specification` describes situations where the implementation of XTypes in OpenDDS departs from or infers something about the specification.
 Specification issues have been raised for these situations.
@@ -50,16 +50,17 @@ Extensibility
 There are 3 kinds of extensibility for types:
 
 *Appendable*
-  It denotes a constructed type which may have additional members added onto or removed from the end, but not both at the same time.
-  It's used by default, but a type can be explicitly marked as appendable with the :ref:`@appendable <xtypes--appendable>` annotation.
+  Appendable denotes a constructed type which may have additional members added onto or removed from the end, but not both at the same time.
+  Appendable is the default extensibility.
+  A type can be explicitly marked as appendable with the :ref:`@appendable <xtypes--appendable>` annotation.
 
 *Mutable*
-  It denotes a constructed type that allows for members to be added, removed, and reordered so long as the keys and the required members of the sender and receiver remain.
+  Mutable denotes a constructed type that allows for members to be added, removed, and reordered so long as the keys and the required members of the sender and receiver remain.
   Mutable extensibility is accomplished by assigning a stable identifier to each member.
   A type can be marked as mutable with the :ref:`@mutable <xtypes--mutable>` annotation.
 
 *Final*
-  It denotes a constructed type that can not add, remove, or reorder members.
+  Final denotes a constructed type that can not add, remove, or reorder members.
   This can be considered a non-extensible constructed type, with behavior similar to that of a type created before XTypes.
   A type can be marked as final with the :ref:`@final <xtypes--final>` annotation.
 
@@ -67,7 +68,7 @@ The default extensibility can be changed with the :ref:`--default-extensibility 
 
 Structs, unions, and enums are the only types which can use any of the extensibilities.
 
-The default extensibility for enums is “appendable” and is not governed by ``--default-extensibility``.
+The default extensibility for enums is "appendable" and is not governed by ``--default-extensibility``.
 TypeObjects for received enums that do not set any flags are treated as a wildcard.
 
 .. _xtypes--assignability:
@@ -81,7 +82,7 @@ Assignability
 Assignability describes the ability of values of one type to be coerced to values of a possibility different type.
 
 Assignability between the type of a writer and reader is checked as part of discovery.
-If the types are assignable but not identical, then the :ref:`“try construct” <xtypes--try-construct>` mechanism will be used to coerce values of the writer's type to values of the reader's type.
+If the types are assignable but not identical, then the :ref:`"try construct" <xtypes--try-construct>` mechanism will be used to coerce values of the writer's type to values of the reader's type.
 
 In order for two constructed types to be assignable they must
 
@@ -113,9 +114,10 @@ Additionally, the XTypes-enabled participant needs to be set up as follows:
 
 * Data Writers must have their Data Representation QoS policy set to ``DDS::XCDR_DATA_REPRESENTATION``
 
-* Data Readers must include ``DDS::XCDR_DATA_REPRESENTATION`` in the list of data representations in their Data Representation QoS (This is true by default)
+* Data Readers must include ``DDS::XCDR_DATA_REPRESENTATION`` in the list of data representations in their Data Representation QoS (true by default)
 
 :ref:`xtypes--data-representation` shows how to change the data representation.
+:ref:`xtypes--xcdr1-support` details XCDR1 support.
 
 .. _xtypes--dynamic-language-binding:
 
@@ -165,9 +167,9 @@ The type published by the weather stations can be made extensible with the ``@mu
     @topic
     @mutable
     struct StationData {
-      short temperature;
-      double pressure;
-      double humidity;
+      short temperature;
+      double pressure;
+      double humidity;
     };
 
 Suppose that some time in the future, a subset of the weather stations are upgraded to monitor wind speed and direction:
@@ -179,11 +181,11 @@ Suppose that some time in the future, a subset of the weather stations are upgra
     @topic
     @mutable
     struct StationData {
-      short temperature;
-      double pressure;
-      double humidity;
-      short wind_speed;
-      WindDir wind_direction;
+      short temperature;
+      double pressure;
+      double humidity;
+      short wind_speed;
+      WindDir wind_direction;
     };
 
 When a Version 2 writer interacts with a Version 1 reader, the additional fields will be ignored by the reader.
@@ -222,9 +224,9 @@ A policy for a type can be set with either ``@autoid(SEQUENTIAL)`` or ``@autoid(
     @mutable
     @autoid(SEQUENTIAL)
     struct StationData {
-      short temperature;
-      double pressure;
-      double humidity;
+      short temperature;
+      double pressure;
+      double humidity;
     };
 
     // Version 4
@@ -232,9 +234,9 @@ A policy for a type can be set with either ``@autoid(SEQUENTIAL)`` or ``@autoid(
     @mutable
     @autoid(HASH)
     struct StationData {
-      short temperature;
-      double pressure;
-      double humidity;
+      short temperature;
+      double pressure;
+      double humidity;
     };
 
 ``SEQUENTIAL`` causes ids to be assigned based on the position in the type.
@@ -253,11 +255,11 @@ In this case, the ids of the pre-existing members can be set with ``@id``:
     @mutable
     @autoid(HASH)
     struct StationData {
-      @id(0) short temperature;
-      @id(1) double pressure;
-      @id(2) double humidity;
-      short wind_speed;
-      WindDir wind_direction;
+      @id(0) short temperature;
+      @id(1) double pressure;
+      @id(2) double humidity;
+      short wind_speed;
+      WindDir wind_direction;
     };
 
 See the :ref:`xtypes--member-id-assignment` for more details.
@@ -281,9 +283,9 @@ With appendable, the initial version of the weather station IDL would be:
     @topic
     @appendable
     struct StationData {
-      short temperature;
-      double pressure;
-      double humidity;
+      short temperature;
+      double pressure;
+      double humidity;
     };
 
 And the subsequent addition of the wind speed and direction members would be:
@@ -296,11 +298,11 @@ And the subsequent addition of the wind speed and direction members would be:
     @topic
     @appendable
     struct StationData {
-      short temperature;
-      double pressure;
-      double humidity;
-      short wind_speed;
-      WindDir wind_direction;
+      short temperature;
+      double pressure;
+      double humidity;
+      short wind_speed;
+      WindDir wind_direction;
     };
 
 As with mutable, when a Version 7 Writer interacts with a Version 6 Reader, the additional fields will be ignored by the reader.
@@ -317,7 +319,7 @@ Final Extensibility
     Sect<16.3.5>
 
 The third kind of extensibility is final.
-Annotating a type with ``@final`` means that it will not be compatible with (assignable to/from) a type that's structurally different.
+Annotating a type with ``@final`` means that it will not be compatible with (assignable to/from) a type that is structurally different.
 The ``@final`` annotation can be used to define types for pre-XTypes compatibility or in situations where the overhead of mutable or appendable is unacceptable.
 
 .. _xtypes--try-construct:
@@ -347,8 +349,8 @@ Suppose that the weather stations also publish a topic containing station inform
     @topic
     @mutable
     struct StationInfo {
-      @try_construct(TRIM) StationID station_id;
-      StationName station_name;
+      @try_construct(TRIM) StationID station_id;
+      StationName station_name;
     };
 
 Eventually, the pool of station IDs is exhausted so the IDL must be refined as follows:
@@ -362,8 +364,8 @@ Eventually, the pool of station IDs is exhausted so the IDL must be refined as f
     @topic
     @mutable
     struct StationInfo {
-      @try_construct(TRIM) StationID station_id;
-      StationName station_name;
+      @try_construct(TRIM) StationID station_id;
+      StationName station_name;
     };
 
 If a Version 2 writer interacts with a Version 1 reader, the station ID will be truncated to 8 characters.
@@ -386,24 +388,21 @@ Data Representation
     Sect<16.4>
 
 Data representation is the way a data sample can be encoded for transmission.
-Writers can only encode samples using one data representations, but readers can accept multiple data representations.
+Writers can only encode samples using one data representation, but readers can accept multiple data representations.
 Data representation can be XML, XCDR1, XCDR2, or unaligned CDR.
 
 XML
     This isn't currently supported and will be ignored.
 
-    The ``DataRepresentationQoS`` value is ``DDS::XML_DATA_REPRESENTATION``
+    The ``DataRepresentationId_t`` value is ``DDS::XML_DATA_REPRESENTATION``
 
     The annotation is :ref:`xtypes--opendds-data-representation-xml`.
 
 XCDR1
     This is the pre-XTypes standard CDR extended with XTypes features.
-    Pre-XTypes standard CDR is fully supported, but the XTypes-specific features are not fully supported and should be avoided.
-    Types can be marked as final or appendable, but all types should be treated as if they were final.
-    Nothing should be marked as mutable.
-    Readers and writers of topic types that are mutable or contain nested types that are mutable will fail to initialize.
+    Support is limited to non-XTypes features, see :ref:`xtypes--xcdr1-support` for details.
 
-    The ``DataRepresentationQoS`` value is ``DDS::XCDR_DATA_REPRESENTATION``
+    The ``DataRepresentationId_t`` value is ``DDS::XCDR_DATA_REPRESENTATION``
 
     The annotation is :ref:`xtypes--opendds-data-representation-xcdr1`.
 
@@ -411,7 +410,7 @@ XCDR2
     This is default for writers when using the RTPS-UDP transport and should be preferred in most cases.
     It is a more robust and efficient version of XCDR1.
 
-    The ``DataRepresentationQoS`` value is ``DDS::XCDR2_DATA_REPRESENTATION``
+    The ``DataRepresentationId_t`` value is ``DDS::XCDR2_DATA_REPRESENTATION``
 
     The annotation is :ref:`xtypes--opendds-data-representation-xcdr2`.
 
@@ -419,7 +418,7 @@ Unaligned CDR
     This is a OpenDDS-specific encoding that is the default for writers using only non-RTPS-UDP transports.
     It can't be used by a DataWriter using the RTPS-UDP transport.
 
-    The ``DataRepresentationQoS`` value is ``OpenDDS::DCPS::UNALIGNED_CDR_DATA_REPRESENTATION``
+    The ``DataRepresentationId_t`` value is ``OpenDDS::DCPS::UNALIGNED_CDR_DATA_REPRESENTATION``
 
     The annotation is :ref:`xtypes--opendds-data-representation-unaligned-cdr`.
 
@@ -427,10 +426,10 @@ Data representation is a QoS policy alongside the other QoS options.
 Its listed values represent allowed serialized forms of the data sample.
 The DataWriter and DataReader need to have at least one matching data representation for communication between them to be possible.
 
-The default value of the ``DataRepresentationQoS`` policy is an empty sequence.
+The default value of the ``DataRepresentationQosPolicy`` is an empty sequence.
 For RTPS-UDP this is interpreted as XCDR2 for DataWriters and accepting XCDR1 and XCDR2 for DataReaders.
 For other transports it's interpreted as Unaligned CDR for DataWriters and accepting XCDR1, XCDR2, and Unaligned CDR for DataReaders.
-A writer or reader without an explicitly-set ``DataRepresentationQoS`` will therefore be able to communicate with another reader or writer which is compatible with XCDR2.
+A writer or reader without an explicitly-set ``DataRepresentationQosPolicy`` will therefore be able to communicate with another reader or writer which is compatible with XCDR2.
 The example below shows a possible configuration for an XCDR1 DataWriter.
 
 .. code-block:: cpp
@@ -498,7 +497,7 @@ In general though two topic types and their nested types are compatible if:
   * Shared member IDs match when required, like when they are final or are being used as keys
 
 If the type objects are compatible then the match goes ahead.
-If one or both type objects are not available, then OpenDDS falls back to checking if the topic type names match.
+If one or both type objects are not available, then OpenDDS falls back to checking the names each entity's ``TypeSupport`` was given.
 This is the name passed to the ``register_type`` method of a ``TypeSupport`` object or if that string is empty then the name of the topic type in IDL.
 
 An interesting side effect of these rules is when type objects are always available, then the topic type names passed to ``register_type`` are only used within that process.
@@ -647,8 +646,8 @@ Determining Extensibility
     Sect<16.6.3>
 
 The extensibility annotations can explicitly define the :ref:`extensibility <xtypes--extensibility>` of a type.
-If no extensibility annotation is set, the type will default to appendable.
-This default can be changed with the :ref:`--default-extensibility <opendds_idl--default-extensibility>` opendds_idl option.
+If no extensibility annotation is used, then the type will have the default extensibility.
+This will be `appendable` unless the :ref:`--default-extensibility <opendds_idl--default-extensibility>` `opendds_idl` option is to override the default.
 
 .. _xtypes--mutable:
 
@@ -747,7 +746,7 @@ As such, trim only makes logical sense on bounded strings and bounded sequences.
 
 Applies to: structure and union members, sequence and array elements
 
-The discard try construct annotation will “throw away” the sample if an element fails to deserialize.
+The discard try construct annotation will "throw away" the sample if an element fails to deserialize.
 
 .. _xtypes--member-id-assignment:
 
@@ -783,7 +782,7 @@ Applies to: module declarations, structure declarations, union declarations
 
 The autoid annotation can take two values, ``HASH`` or ``SEQUENTIAL``\.
 ``SEQUENTIAL`` states that the identifier shall be computed by incrementing the preceding one.
-``HASH`` states that the identifier should be calculated with a hashing algorithm – the input to this hash is the member's name.
+``HASH`` states that the identifier should be calculated with a hashing algorithm - the input to this hash is the member's name.
 ``HASH`` is the default value of ``@autoid``.
 
 .. _xtypes--hashid-value:
@@ -906,7 +905,7 @@ Interpreting Data Samples with DynamicData
 
 Together with DynamicType, DynamicData allows users to interpret a received data sample and read individual fields from it.
 Each DynamicData object is associated with a type, represented by a DynamicType object, and the data corresponding to an instance of that type.
-Let's take a look at an example with the following type, described below in IDL:
+Consider the following example:
 
 .. code-block:: omg-idl
 
@@ -927,7 +926,7 @@ Let's take a look at an example with the following type, described below in IDL:
     };
 
 The samples for MyStruct are written by a normal, statically-typed DataWriter.
-The writer application needs to have the IDL-generated code including the “complete” form of TypeObjects.
+The writer application needs to have the IDL-generated code including the "complete" form of TypeObjects.
 Use a command-line option to opendds_idl to enable CompleteTypeObjects since the default is to generate MinimalTypeObjects (see :ref:`opendds_idl--opendds-idl-command-line-options`).
 
 One way to obtain a DynamicData object representing a data sample received by the participant is using the Recorder and RecorderListener classes (see :ref:`alternate_interfaces_to_data--recorder-and-replayer`).
@@ -948,7 +947,7 @@ DynamicData provides methods for reading members whose types are basic such as i
 For a complete list of basic types for which DynamicData provides an interface, please refer to the XTypes specification.
 To call a correct method for reading a member, we need to know the type of the member as well as its id.
 For our example, we first want to get the number of members that the sample contains.
-In these examples, the “data” object is an instance of DynamicData.
+In these examples, the ``data`` object is an instance of DynamicData.
 
 .. code-block:: cpp
 
@@ -1106,7 +1105,7 @@ To create a DynamicData object, use the DynamicDataFactory API defined by the XT
     DDS::DynamicData_var dynamic =
       DDS::DynamicDataFactory::get_instance()->create_data(type);
 
-Like other data types defined by IDL interfaces (for example, the ``*TypeSupportImpl`` types), the "dynamic" object's lifetime is managed with a smart pointer – in this case ``DDS::DynamicData_var``.
+Like other data types defined by IDL interfaces (for example, the ``*TypeSupportImpl`` types), the "dynamic" object's lifetime is managed with a smart pointer - in this case ``DDS::DynamicData_var``.
 
 The "type" input parameter to ``create_data()`` is an object that implements the ``DDS::DynamicType`` interface.
 The DynamicType representation of any type that's supported as a topic data type is available from its corresponding TypeSupport object (see :ref:`xtypes--obtaining-dynamictype-and-registering-typesupport`) using the ``get_type()`` operation.
@@ -1115,7 +1114,7 @@ See the file :ghfile:`dds/DdsDynamicData.idl` in OpenDDS for the definition of t
 
 Once the application has created the DynamicData object, it can be populated with data members of any type.
 The operations used for this include the DynamicData operations named "set_*" for the various data types.
-They work similarly to the "get_*" operations that are described in :ref:`xtypes--interpreting-data-samples-with-dynamicdata`.
+They are analogous to the "get_*" operations that are described in :ref:`xtypes--interpreting-data-samples-with-dynamicdata`.
 When populating the DynamicData of complex data types, use get_complex_value() (see :ref:`xtypes--reading-members-of-more-complex-types`) to navigate from DynamicData representing containing types to DynamicData representing contained types.
 
 .. _xtypes--dynamicdatawriters-and-dynamicdatareaders:
@@ -1247,6 +1246,16 @@ Unimplemented Features
 OpenDDS implements the XTypes specification version 1.3 at the Basic Conformance level, with a partial implementation of the Dynamic Language Binding (supported features of which are described in :ref:`xtypes--dynamic-language-binding-1`).
 Specific unimplemented features listed below.
 The two optional profiles, XTypes 1.1 Interoperability (XCDR1) and XML, are not implemented.
+
+.. _xtypes--xcdr1-support:
+
+XCDR1 Support
+=============
+
+Pre-XTypes standard CDR is fully supported, but the XTypes-specific features are not fully supported and should be avoided.
+Types can be marked as final or appendable, but all types should be treated as if they were final.
+Nothing should be marked as mutable.
+Readers and writers of topic types that are mutable or contain nested types that are mutable will fail to initialize.
 
 .. _xtypes--type-system:
 

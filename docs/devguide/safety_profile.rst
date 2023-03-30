@@ -18,7 +18,7 @@ Overview
 
 The Safety Profile configuration allows OpenDDS to be used in environments that have a restricted set of operating system and standard library functions available and that require dynamic memory allocation to occur only at system start-up.
 
-OpenDDS Safety Profile (and the corresponding features in ACE) were developed for the Open Group's FACE specification, edition 2.1 (http://www.opengroup.org/face/tech-standard-2.1).
+OpenDDS Safety Profile (and the corresponding features in ACE) were developed for the `Open Group's FACE specification, edition 2.1 <https://www.opengroup.org/face/tech-standard-2.1>`__.
 It can be used along with the support for FACE Transport Services to create FACE-conformant DDS applications, or it can be used by general DDS applications that are not written to the FACE Transport Services APIs.
 This latter use-case is described by this section of the developer's guide.
 For more information on the former use-case see the file FACE/README.txt in the source distribution or contact us at `sales@objectcomputing.com <mailto:sales@ociweb.com>`__ (commercial support) or `opendds-main@lists.sourceforge.net <mailto:opendds-main@lists.sourceforge.net>`__ (community support).

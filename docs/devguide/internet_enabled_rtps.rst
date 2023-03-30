@@ -374,7 +374,7 @@ Understand the Weaknesses of (Secure) RTPS Discovery
 ..
     Sect<15.4.2>
 
-Secure RTPS Discovery has a behavior that can be exploited to launch a denial of service attack (see https://us-cert.cisa.gov/ics/advisories/icsa-21-315-02).
+Secure RTPS Discovery has a behavior that can be exploited to launch a denial of service attack (see https://www.cisa.gov/news-events/ics-advisories/icsa-21-315-02).
 Basically, an attacker can send a fake SPDP message to a secure participant which will cause it to begin authentication with a non-existent participant.
 The authentication messages are repeated resulting in amplification.
 An attacker could manipulate a group of secure participants to launch a denial of service attack against a specific host or group of hosts.

@@ -318,13 +318,8 @@ Unlike when using the classic mapping, ``Foo.idl`` is not processed by ``tao_idl
     In cases where there are multiple possible values for the discriminator, a 2-argument modifier method is provided.
     Using this is preferred to using ``_d()``.
 
-  * .. compound::
-
-      If you chose to use the ``_d()`` method of the generated union types, note the following requirement from the specification:
-
-        The ``_d`` discriminator modifier can only be used to set the discriminant to a value within the same union member.
-
-      OpenDDS treats this as a precondition (it is not checked within the implementation).
+  * If you chose to use the ``_d()`` method of the generated union types, take note that it can only be used to set a value that selects the same union member as the one that's currently selected.
+    OpenDDS treats this as a precondition (it is not checked within the implementation).
 
 * strings (narrow and wide), sequences, and arrays
 

@@ -651,7 +651,7 @@ Java Message Service (JMS) Support
 ..
     Sect<10.10>
 
-OpenDDS provides partial support for JMS version 1.1 <http://docs.oracle.com/javaee/6/tutorial/doc/bncdq.html>.
+OpenDDS provides partial support for `JMS version 1.1 <https://docs.oracle.com/javaee/6/tutorial/doc/bncdq.html>`__.
 Enterprise Java applications can make use of the complete OpenDDS middleware just like standard Java and C++ applications.
 
 See the ``INSTALL`` file in the :ghfile:`java/jms/` directory for information on getting started with the OpenDDS JMS support, including the prerequisites and dependencies.

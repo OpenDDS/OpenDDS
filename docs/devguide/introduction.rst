@@ -9,7 +9,7 @@ Introduction
 
 OpenDDS is an open source implementation of the OMG Data Distribution Service (DDS) for Real-Time Systems Specification v1.4 (OMG Document ``formal/2015-04-10``) and the Real-time Publish-Subscribe Wire Protocol DDS Interoperability Wire Protocol Specification (DDSI-RTPS) v2.3 (OMG Document ``formal/2019-04-03``).
 OpenDDS also implements the DDS Security Specification v1.1 (OMG Document ``formal/2018-04-01``) and DDS XTypes v1.3 (OMG Document ``formal/2020-02-04``).
-OpenDDS is sponsored by Object Computing, Inc. (OCI) and is available at https://www.opendds.org/.
+OpenDDS is sponsored by Object Computing, Inc. (OCI) and is available at https://opendds.org/.
 This Developer’s Guide is based on the version 3.23 release of OpenDDS.
 
 DDS defines a service for efficiently distributing application data between participants in a distributed application.
@@ -19,10 +19,10 @@ The specification provides a Platform Independent Model (PIM) as well as a Platf
 For additional details about DDS, developers should refer to the DDS specification (OMG Document ``formal/2015-04-10``) as it contains in-depth coverage of all the service’s features.
 
 OpenDDS is the open-source C++ implementation of OMG’s DDS specification developed and commercially supported by Object Computing, Inc. (OCI).
-It is available for download from https://www.opendds.org/downloads.html and is compatible with the latest patch level of OCI TAO version 2.2a (includes ACE), and the latest DOC Group release of ACE+TAO in the ACE 6.x / TAO 2.x series.
+It is available for download from https://opendds.org/downloads.html and is compatible with the latest patch level of OCI TAO version 2.2a (includes ACE), and the latest DOC Group release of ACE+TAO in the ACE 6.x / TAO 2.x series.
 
 .. note:: OpenDDS currently implements the OMG DDS version 1.4 specification.
-  See the compliance information in or at https://www.opendds.org/ for more information.
+  See the compliance information in or at https://opendds.org/ for more information.
 
 .. _introduction--dcps-overview:
 
