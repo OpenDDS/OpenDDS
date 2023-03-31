@@ -24,7 +24,6 @@ Developer's Guide
 .. toctree::
   :maxdepth: 2
 
-  devguide/preface
   devguide/introduction
   devguide/getting_started
   devguide/quality_of_service
