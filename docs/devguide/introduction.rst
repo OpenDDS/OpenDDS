@@ -4,36 +4,228 @@
 Introduction
 ############
 
+****************
+What is OpenDDS?
+****************
+
+..
+    Sect<0.1>
+
+OpenDDS is an open source implementation of a group of related Object Management Group (OMG) specifications.
+
+#. **Data Distribution Service (DDS) for Real-Time Systems v1.4** (OMG document ``formal/2015-04-10``).
+   DDS defines a service for efficiently distributing application data between participants in a distributed application.
+   This specification details the core functionality implemented by OpenDDS for real-time publish and subscribe applications and is described throughout this document.
+   Users are encouraged to read the DDS Specification as it contains in-depth coverage of all the service’s features.
+
+#. **The Real-time Publish-Subscribe Wire Protocol DDS Interoperability Wire Protocol Specification (DDSI-RTPS) v2.3** (OMG document ``formal/2019-04-03``).
+   Although the document number is v2.3, it specifies protocol version 2.4.
+   This specification describes the requirements for interoperability between DDS implementations.
+
+#. **DDS Security v1.1** (OMG document ``formal/2018-04-01``) extends DDS with capabilities for authentication and encryption.
+   OpenDDS’s support for the DDS Security specification is described below in Chapter :ref:`dds_security--dds-security`.
+
+#. **Extensible and Dynamic Topic Types for DDS (XTypes) v1.3** (OMG document ``formal/2020-02-04``) defines details of the type system used for the data exchanged on DDS Topics, including how schema and data are encoded for network transmission.
+   Details of DDS-XTypes are below in Chapter :ref:`xtypes--xtypes`.
+
+OpenDDS is implemented in C++ and contains support for Java.
+Users in the OpenDDS community have contributed and maintain bindings for other languages include C#, nodejs, and Python.
+
+OpenDDS is sponsored by the OpenDDS Foundation and is available via https://opendds.org and https://github.com/OpenDDS/OpenDDS.
+
+***************
+Licensing Terms
+***************
+
+..
+    Sect<0.2>
+
+OpenDDS is *open source software*.
+The source code may be freely downloaded and is open for inspection, review, comment, and improvement.
+Copies may be freely installed across all your systems and those of your customers.
+There is no charge for development or run-time licenses.
+The source code is designed to be compiled, and used, across a wide variety of hardware and operating systems architectures.
+You may modify it for your own needs, within the terms of the license agreements.
+You must not copyright OpenDDS software.
+For details of the licensing terms, see the file named :ghfile:`LICENSE` that is included in the OpenDDS source code distribution or visit https://opendds.org/about/license.html.
+
+OpenDDS also utilizes other open source software products including MPC (Make Project Creator), ACE (the ADAPTIVE Communication Environment), and TAO (The ACE ORB).
+
+OpenDDS is open source and the development team welcomes contributions of code, tests, documentation, and ideas.
+Active participation by users ensures a robust implementation.
+Contact the OpenDDS Foundation if you are interested in contributing to the development of OpenDDS.
+Please note that any code or documentation that is contributed to and becomes part of the OpenDDS open source code base is subject to the same licensing terms as the rest of the OpenDDS code base.
+
+****************
+About This Guide
+****************
+
+..
+    Sect<0.3>
+
+This Developer’s Guide corresponds to OpenDDS version 3.23.
+This guide is primarily focused on the specifics of using and configuring OpenDDS to build distributed publish-subscribe applications.
+While it does give a general overview of the OMG Data Distribution Service, this guide is not intended to provide comprehensive coverage of the specification.
+The intent of this guide is to help you become proficient with OpenDDS as quickly as possible.
+Readers are encouraged to submit corrections to this guide using a GitHub pull request.
+The source for this guide can be found at :ghfile:`docs/devguide` and :doc:`/internal/docs` contains guidance for editing and building it.
+
+******************************
+Highlights of the 3.23 Release
+******************************
+
+..
+    Sect<0.4>
+
+*NOTE: Numbers in parenthesis are GitHub pull requests*
+
+Additions:
+
+* DataRepresentationQosPolicy and TypeConsistencyEnforcementQosPolicy can be set through XML (`#3763 <https://github.com/OpenDDS/OpenDDS/pull/3763>`__)
+
+* RTPS send queue performance improvements (`#3794 <https://github.com/OpenDDS/OpenDDS/pull/3794>`__)
+
+* Cross-compiling improvements (`#3853 <https://github.com/OpenDDS/OpenDDS/pull/3853>`__)
+
+* New support for DynamicDataWriter and enhanced support for DynamicDataReader (`#3827 <https://github.com/OpenDDS/OpenDDS/pull/3827>`__, `#3727 <https://github.com/OpenDDS/OpenDDS/pull/3727>`__, `#3871 <https://github.com/OpenDDS/OpenDDS/pull/3871>`__, `#3718 <https://github.com/OpenDDS/OpenDDS/pull/3718>`__, `#3830 <https://github.com/OpenDDS/OpenDDS/pull/3830>`__, `#3893 <https://github.com/OpenDDS/OpenDDS/pull/3893>`__, `#3904 <https://github.com/OpenDDS/OpenDDS/pull/3904>`__, `#3885 <https://github.com/OpenDDS/OpenDDS/pull/3885>`__, `#3933 <https://github.com/OpenDDS/OpenDDS/pull/3933>`__, `#3935 <https://github.com/OpenDDS/OpenDDS/pull/3935>`__)
+
+* New config option for RtpsDiscovery ``SpdpRequestRandomPort`` (`#3903 <https://github.com/OpenDDS/OpenDDS/pull/3903>`__)
+
+* New ``opendds_mwc.pl`` Wrapper Script (`#3821 <https://github.com/OpenDDS/OpenDDS/pull/3821>`__, `#3913 <https://github.com/OpenDDS/OpenDDS/pull/3913>`__)
+
+* Improve support for loading signed documents (`#3864 <https://github.com/OpenDDS/OpenDDS/pull/3864>`__)
+
+Fixes:
+
+* Unauthenticated participant leads to invalid iterator (`#3748 <https://github.com/OpenDDS/OpenDDS/pull/3748>`__)
+
+* Shmem Association race (`#3549 <https://github.com/OpenDDS/OpenDDS/pull/3549>`__)
+
+* Shmem and tcp null pointer (`#3779 <https://github.com/OpenDDS/OpenDDS/pull/3779>`__)
+
+* Submodule checkout on Windows (`#3812 <https://github.com/OpenDDS/OpenDDS/pull/3812>`__)
+
+Notes:
+
+* Docker images are built for release tags https://github.com/OpenDDS/OpenDDS/pkgs/container/opendds (`#3776 <https://github.com/OpenDDS/OpenDDS/pull/3776>`__)
+
+ACE/TAO Version Compatibility
+=============================
+
+..
+    Sect<0.4.1>
+
+OpenDDS 3.23 is compatible with the current DOC Group micro release in the ACE 6.x / TAO 2.x series.
+See the :ghfile:`README.md` file for details.
+
+Conventions
+===========
+
+..
+    Sect<0.4.2>
+
+This guide uses the following conventions:
+
+.. list-table::
+   :header-rows: 0
+
+   * - ``Fixed pitch text``
+
+     - Indicates example code or information a user would enter using a keyboard.
+
+   * - *Italic text*
+
+     - Indicates a point of emphasis.
+
+   * - ...
+
+     - An ellipsis indicates a section of omitted text.
+
+********
+Examples
+********
+
+..
+    Sect<0.5>
+
+The examples in this guide are intended for the learning of the reader and should not be considered to be "production-ready" code.
+In particular, error handling is sometimes kept to a minimum to help the reader focus on the particular feature or technique that is being presented in the example.
+The source code for all these examples is available as part of the OpenDDS source code distribution in the :ghfile:`DevGuideExamples` directory.
+MPC files are provided with the examples for generating build-tool specific files, such as GNU Makefiles or Visual C++ project and solution files.
+To run an example, execute the ``run_test.pl`` Perl script.
+
+*****************
+Related Documents
+*****************
+
+..
+    Sect<0.6>
+
+This guide refers to various specifications published by the Object Management Group (OMG) and from other sources.
+
+OMG references take the form *group/number* where *group* represents the OMG working group responsible for developing the specification, or the keyword ``formal`` if the specification has been formally adopted, and *number* represents the year, month, and serial number within the month the specification was released.
+For example, the OMG DDS version 1.4 specification is referenced as ``formal/2015-04-10``.
+
+OMG specifications can be downloaded directly from the OMG web site by prepending ``http://www.omg.org/cgi-bin/doc?`` to the specification’s reference.
+Thus, the specification ``formal/07-01-01`` can be downloaded from http://www.omg.org/cgi-bin/doc?formal/07-01-01.
+Providing this destination to a web browser should take you to a site from which you can download the referenced specification document.
+
+Additional documentation for OpenDDS is produced and maintained by the OpenDDS Foundation and is available from the OpenDDS Website at https://opendds.org.
+
+Here are some documents of interest and their locations:
+
+.. list-table::
+   :header-rows: 1
+
+   * - Document
+
+     - Location
+
+   * - Data Distribution Service (DDS) for Real-Time Systems v1.4 (OMG Document formal/2015-04-10)
+
+     - http://www.omg.org/spec/DDS/1.4/PDF
+
+   * - The Real-time Publish-Subscribe Wire Protocol DDS Interoperability Wire Protocol Specification (DDSI-RTPS) v2.3 (OMG Document formal/2019-04-03)
+
+     - https://www.omg.org/spec/DDSI-RTPS/2.3/PDF
+
+   * - OMG Data Distribution Portal
+
+     - http://portals.omg.org/dds/
+
+   * - OpenDDS Build Instructions, Architecture, and Doxygen Documentation
+
+     - https://opendds.org/documentation.html
+
+   * - OpenDDS Frequently Asked Questions
+
+     - https://opendds.org/faq.html
+
+*******************
+Supported Platforms
+*******************
+
+..
+    Sect<0.7>
+
+The OpenDDS Foundation regularly builds and tests OpenDDS on a wide variety of platforms, operating systems, and compilers.
+The OpenDDS Foundation continually updates OpenDDS to support additional platforms.
+See the :ghfile:`README.md` file in the distribution for the most recent platform support information.
+
 ..
     Sect<1>
 
-OpenDDS is an open source implementation of the OMG Data Distribution Service (DDS) for Real-Time Systems Specification v1.4 (OMG Document ``formal/2015-04-10``) and the Real-time Publish-Subscribe Wire Protocol DDS Interoperability Wire Protocol Specification (DDSI-RTPS) v2.3 (OMG Document ``formal/2019-04-03``).
-OpenDDS also implements the DDS Security Specification v1.1 (OMG Document ``formal/2018-04-01``) and DDS XTypes v1.3 (OMG Document ``formal/2020-02-04``).
-OpenDDS is sponsored by Object Computing, Inc. (OCI) and is available at https://www.opendds.org/.
-This Developer’s Guide is based on the version 3.23 release of OpenDDS.
-
-DDS defines a service for efficiently distributing application data between participants in a distributed application.
-This service is not tied to CORBA.
-The specification provides a Platform Independent Model (PIM) as well as a Platform Specific Model (PSM) that maps the PIM onto an OMG IDL implementation.
-
-For additional details about DDS, developers should refer to the DDS specification (OMG Document ``formal/2015-04-10``) as it contains in-depth coverage of all the service’s features.
-
-OpenDDS is the open-source C++ implementation of OMG’s DDS specification developed and commercially supported by Object Computing, Inc. (OCI).
-It is available for download from https://www.opendds.org/downloads.html and is compatible with the latest patch level of OCI TAO version 2.2a (includes ACE), and the latest DOC Group release of ACE+TAO in the ACE 6.x / TAO 2.x series.
-
-.. note:: OpenDDS currently implements the OMG DDS version 1.4 specification.
-  See the compliance information in or at https://www.opendds.org/ for more information.
-
 .. _introduction--dcps-overview:
 
-*************
-DCPS Overview
-*************
+**********************************************
+Data-Centric Publish-Subscribe (DCPS) Overview
+**********************************************
 
 ..
     Sect<1.1>
 
-In this section we introduce the main concepts and entities of the DCPS layer and discuss how they interact and work together.
+Data-Centric Publish-Subscribe (DCPS) is the application model defined by the DDS specification.
+This section describes the main concepts and entities of the DCPS API and discuss how they interact and work together.
 
 .. _introduction--basic-concepts:
 
@@ -212,7 +404,7 @@ Listeners
 ..
     Sect<1.1.4>
 
-The DCPS layer defines a callback interface for each entity that allows an application processes to “listen” for certain state changes or events pertaining to that entity.
+The DCPS layer defines a callback interface for each entity that allows an application processes to listen for certain state changes or events pertaining to that entity.
 For example, a Data Reader Listener is notified when there are data values available for reading.
 
 .. _introduction--conditions:
@@ -353,12 +545,12 @@ OMG IDL is used in a few different ways in the OpenDDS code base and downstream 
 
 This section only describes the latter use.
 
-The IDL specification (version 4.2) uses the term “building block” to define subsets of the overall IDL grammar that may be supported by certain tools.
+The IDL specification (version 4.2) uses the term "building block" to define subsets of the overall IDL grammar that may be supported by certain tools.
 OpenDDS supports the following building blocks, with notes/caveats listed below each:
 
 * Core Data Types
 
-  * Support for the “fixed” data type (fixed point decimal) is incomplete.
+  * Support for the "fixed" data type (fixed point decimal) is incomplete.
 
 * Anonymous Types
 
@@ -599,13 +791,13 @@ If you are not using the ``configure`` script, continue reading below for instru
 For the features described below, MPC is used for enabling (the default) a feature or disabling the feature.
 For a feature named *feature*, the following steps are used to disable the feature from the build:
 
-#. Use the command line “features” argument to MPC:
+#. Use the command line ``features`` argument to MPC:
 
-   ``mwc.pl -type <type> -featuresfeature=0 DDS.mwc``
+   ``mwc.pl -type type -features feature=0 DDS.mwc``
 
    Or alternatively, add the line ``feature=0`` to the file ``$ACE_ROOT/bin/MakeProjectCreator/config/default.features`` and regenerate the project files using MPC.
 
-#. If you are using the ``gnuace`` MPC project type (which is the case if you will be using GNU make as your build system), add line “``feature=0``” to the file ``$ACE_ROOT/include/makeinclude/platform_macros.GNU``.
+#. If you are using the ``gnuace`` MPC project type (which is the case if you will be using GNU make as your build system), add line ``feature=0`` to the file ``$ACE_ROOT/include/makeinclude/platform_macros.GNU``.
 
 To explicitly enable the feature, use ``feature=1`` above.
 
@@ -689,7 +881,7 @@ Persistence Profile
 
 Feature Name: ``persistence_profile``
 
-This profile adds the QoS policy ``DURABILITY_SERVICE`` and the settings ‘``TRANSIENT``’ and ‘``PERSISTENT``’ of the ``DURABILITY`` QoS policy ``kind``.
+This profile adds the QoS policy ``DURABILITY_SERVICE`` and the settings ``TRANSIENT`` and ``PERSISTENT`` of the ``DURABILITY`` QoS policy ``kind``.
 
 .. _introduction--ownership-profile:
 
@@ -703,7 +895,7 @@ Feature Name: ``ownership_profile``
 
 This profile adds:
 
-* the setting ‘``EXCLUSIVE``’ of the ``OWNERSHIP`` ``kind``
+* the setting ``EXCLUSIVE`` of the ``OWNERSHIP`` ``kind``
 
 * support for the ``OWNERSHIP_STRENGTH`` policy
 
@@ -722,9 +914,9 @@ Object Model Profile
 
 Feature Name: ``object_model_profile``
 
-This profile includes support for the ``PRESENTATION`` access_scope setting of ‘``GROUP``’.
+This profile includes support for the ``PRESENTATION`` access_scope setting of ``GROUP``.
 
-.. note:: Currently, the ``PRESENTATION`` access_scope of ‘``TOPIC``’ is also excluded when ``object_model_profile`` is disabled.
+.. note:: Currently, the ``PRESENTATION`` access_scope of ``TOPIC`` is also excluded when ``object_model_profile`` is disabled.
 
 .. _introduction--building-applications-that-use-opendds:
 
@@ -749,10 +941,10 @@ MPC: The Makefile, Project, and Workspace Creator
     Sect<1.4.1>
 
 OpenDDS is itself built with MPC, so development systems that are set up to use OpenDDS already have MPC available.
-The OpenDDS configure script creates a “setenv” script with environment settings (``setenv.cmd`` on Windows; ``setenv.sh`` on Linux/macOS).
+The OpenDDS configure script creates a "setenv" script with environment settings (``setenv.cmd`` on Windows; ``setenv.sh`` on Linux/macOS).
 This environment contains the ``PATH`` and ``MPC_ROOT`` settings necessary to use MPC.
 
-MPC’s source tree (in ``MPC_ROOT``) contains a “docs” directory with both HTML and plain text documentation (``USAGE`` and ``README`` files).
+MPC’s source tree (in ``MPC_ROOT``) contains a "docs" directory with both HTML and plain text documentation (``USAGE`` and ``README`` files).
 
 The example walk-through in section :ref:`getting_started--using-dcps` uses MPC as its build system.
 The OpenDDS source tree contains many tests and examples that are built with MPC.
@@ -784,5 +976,3 @@ Users of OpenDDS are strongly encouraged to select one of the two options listed
 If this is not possible, users of OpenDDS must make sure that all code generator, compiler, and linker settings in the custom build setup result in API- and ABI-compatible code.
 To do this, start with an MPC or CMake-generated project file (makefile or Visual Studio project file) and make sure all relevant settings are represented in the custom build system.
 This is often done through a combination of inspecting the project file and running the build with verbose output to see how the toolchain (code generators, compiler, linker) is invoked.
-Contact Object Computing, Inc. (OCI) via https://objectcomputing.com/products/opendds/opendds-consulting-and-support to have our expert software engineers work on this for you.
-
