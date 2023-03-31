@@ -181,7 +181,7 @@ void MulticastManager::leave(const NetworkInterfaceAddress& nia,
 #endif
 )
 {
-  if (joined_interfaces_.count(nia.name) != 0 && !nia.is_ipv4()) {
+  if (joined_interfaces_.count(nia.name) != 0 && nia.is_ipv4()) {
     if (0 == multicast_socket.leave(multicast_group_address.to_addr(), nia.name.empty() ? 0 : ACE_TEXT_CHAR_TO_TCHAR(nia.name.c_str()))) {
       joined_interfaces_.erase(nia.name);
       if (log_level >= LogLevel::Info) {
@@ -207,7 +207,7 @@ void MulticastManager::leave(const NetworkInterfaceAddress& nia,
   }
 
 #ifdef ACE_HAS_IPV6
-  if (ipv6_joined_interfaces_.count(nia.name) != 0 && !nia.is_ipv6()) {
+  if (ipv6_joined_interfaces_.count(nia.name) != 0 && nia.is_ipv6()) {
     if (0 == ipv6_multicast_socket.leave(ipv6_multicast_group_address.to_addr(), nia.name.empty() ? 0 : ACE_TEXT_CHAR_TO_TCHAR(nia.name.c_str()))) {
       ipv6_joined_interfaces_.erase(nia.name);
       if (log_level >= LogLevel::Info) {

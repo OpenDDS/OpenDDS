@@ -35,11 +35,11 @@ typedef OPENDDS_VECTOR(DDS::SampleInfo) InternalSampleInfoSequence;
 inline DDS::SampleInfo make_sample_info(DDS::SampleStateKind sample_state,
                                         DDS::ViewStateKind view_state,
                                         DDS::InstanceStateKind instance_state,
-                                        size_t disposed_generation_count,
-                                        size_t no_writers_generation_count,
-                                        size_t sample_rank,
-                                        size_t generation_rank,
-                                        size_t absolute_generation_rank,
+                                        CORBA::Long disposed_generation_count,
+                                        CORBA::Long no_writers_generation_count,
+                                        CORBA::Long sample_rank,
+                                        CORBA::Long generation_rank,
+                                        CORBA::Long absolute_generation_rank,
                                         bool valid_data)
 {
   DDS::SampleInfo si;
@@ -76,13 +76,13 @@ inline bool operator==(const DDS::SampleInfo& x, const DDS::SampleInfo& y)
 }
 #endif
 
-class SIW {
+class SampleInfoWrapper {
 public:
-  SIW(const DDS::SampleInfo& sample_info)
+  SampleInfoWrapper(const DDS::SampleInfo& sample_info)
     : si(sample_info)
   {}
 
-  bool operator==(const SIW& other) const
+  bool operator==(const SampleInfoWrapper& other) const
   {
     return si == other.si;
   }
@@ -280,7 +280,7 @@ private:
 
     void read(SampleSequence& samples, InternalSampleInfoSequence& infos)
     {
-      size_t sample_count = 0;
+      CORBA::Long sample_count = 0;
 
       for (typename SampleList::const_iterator pos = not_read_samples_.begin(), limit = not_read_samples_.end();
            pos != limit; ++pos) {
@@ -305,7 +305,7 @@ private:
 
     void take(SampleSequence& samples, InternalSampleInfoSequence& infos)
     {
-      size_t sample_count = 0;
+      CORBA::Long sample_count = 0;
 
       for (typename SampleList::const_iterator pos = read_samples_.begin(), limit = read_samples_.end();
            pos != limit; ++pos) {
@@ -352,7 +352,7 @@ private:
       instance_state_ = DDS::ALIVE_INSTANCE_STATE;
 
       if (qos.history.kind == DDS::KEEP_LAST_HISTORY_QOS) {
-        while (read_samples_.size() + not_read_samples_.size() >= qos.history.depth) {
+        while (read_samples_.size() + not_read_samples_.size() >= static_cast<size_t>(qos.history.depth)) {
           if (!read_samples_.empty()) {
             read_samples_.pop_front();
           } else {
@@ -395,13 +395,13 @@ private:
   private:
     struct SampleHolder {
       T sample;
-      size_t disposed_generation_count;
-      size_t no_writers_generation_count;
+      CORBA::Long disposed_generation_count;
+      CORBA::Long no_writers_generation_count;
       bool valid_data;
 
       SampleHolder(const T& s,
-                   size_t dgc,
-                   size_t nwgc,
+                   CORBA::Long dgc,
+                   CORBA::Long nwgc,
                    bool vd)
         : sample(s)
         , disposed_generation_count(dgc)
@@ -418,18 +418,18 @@ private:
 
     DDS::ViewStateKind view_state_;
     DDS::InstanceStateKind instance_state_;
-    size_t disposed_generation_count_;
-    size_t no_writers_generation_count_;
+    CORBA::Long disposed_generation_count_;
+    CORBA::Long no_writers_generation_count_;
 
-    void compute_ranks(size_t sample_count, InternalSampleInfoSequence& infos)
+    void compute_ranks(CORBA::Long sample_count, InternalSampleInfoSequence& infos)
     {
       if (sample_count == 0) {
         return;
       }
 
       typename InternalSampleInfoSequence::reverse_iterator pos = infos.rbegin();
-      const size_t mrsic = pos->disposed_generation_count + pos->no_writers_generation_count;
-      size_t mrs = mrsic;
+      const CORBA::Long mrsic = pos->disposed_generation_count + pos->no_writers_generation_count;
+      CORBA::Long mrs = mrsic;
       if (!read_samples_.empty()) {
         mrs = read_samples_.back().disposed_generation_count + read_samples_.back().no_writers_generation_count;
       }
@@ -437,7 +437,7 @@ private:
         mrs = not_read_samples_.back().disposed_generation_count + not_read_samples_.back().no_writers_generation_count;
       }
 
-      for (size_t rank = 0; rank != sample_count; ++rank, ++pos) {
+      for (CORBA::Long rank = 0; rank != sample_count; ++rank, ++pos) {
         pos->sample_rank = rank;
         pos->generation_rank = mrsic - (pos->disposed_generation_count + pos->no_writers_generation_count);
         pos->absolute_generation_rank = mrs - (pos->disposed_generation_count + pos->no_writers_generation_count);

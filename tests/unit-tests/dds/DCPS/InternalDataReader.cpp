@@ -5,6 +5,7 @@
 #include <gtestWrapper.h>
 
 using namespace OpenDDS::DCPS;
+typedef SampleInfoWrapper SIW;
 
 namespace {
   struct Sample {
@@ -27,8 +28,7 @@ namespace {
 
 }
 
-namespace OpenDDS {
-namespace DCPS {
+namespace {
 
 std::ostream& operator<<(std::ostream& out, const SIW& siw)
 {
@@ -48,7 +48,6 @@ std::ostream& operator<<(std::ostream& out, const SIW& siw)
   return out;
 }
 
-}
 }
 
 typedef InternalDataReader<Sample> ReaderType;

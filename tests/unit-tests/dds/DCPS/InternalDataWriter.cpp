@@ -5,6 +5,7 @@
 #include <gtest/gtest.h>
 
 using namespace OpenDDS::DCPS;
+typedef SampleInfoWrapper SIW;
 
 namespace {
   struct Sample {
