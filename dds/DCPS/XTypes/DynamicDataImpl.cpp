@@ -8485,24 +8485,6 @@ bool DynamicDataImpl::DataContainer::serialized_size_union_xcdr2(const DCPS::Enc
     return true;
   }
 
-  if (!has_disc) {
-    DDS::DynamicTypeMember_var selected_dtm;
-    if (type_->get_member(selected_dtm, selected_id) != DDS::RETCODE_OK) {
-      return false;
-    }
-    DDS::MemberDescriptor_var selected_md;
-    if (selected_dtm->get_descriptor(selected_md) != DDS::RETCODE_OK) {
-      return false;
-    }
-    if (!data_->validate_discriminator(disc_value, selected_md)) {
-      if (DCPS::log_level >= DCPS::LogLevel::Notice) {
-        ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicDataImpl::DataContainer::serialized_size_union_xcdr2:"
-                   " Default discriminator value does not select the existing selected member\n"));
-      }
-      return false;
-    }
-  }
-
   if (!serialized_size_discriminator_member_xcdr2(encoding, size, disc_type,
                                                   extensibility, mutable_running_total) ||
       !serialized_size_selected_member_xcdr2(encoding, size, selected_id,
@@ -8576,28 +8558,6 @@ bool DynamicDataImpl::DataContainer::serialize_union_xcdr2(DCPS::Serializer& ser
                                                                DCPS::Sample::Full);
     }
     return true;
-  }
-
-  if (!has_disc) {
-    // If the default value of the discriminator doesn't select the member written
-    // by user, return an error. Otherwise, serialize both as normal.
-    DDS::DynamicTypeMember_var selected_dtm;
-    if (type_->get_member(selected_dtm, selected_id) != DDS::RETCODE_OK) {
-      return false;
-    }
-    DDS::MemberDescriptor_var selected_md;
-    if (selected_dtm->get_descriptor(selected_md) != DDS::RETCODE_OK) {
-      return false;
-    }
-    if (!data_->validate_discriminator(disc_value, selected_md)) {
-      if (DCPS::log_level >= DCPS::LogLevel::Notice) {
-        ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicDataImpl::DataContainer::serialize_union_xcdr2:"
-                   " Default discriminator value does not select the existing selected member\n"));
-      }
-      return false;
-    }
-    return serialize_discriminator_member_xcdr2(ser, disc_value, disc_type, extensibility) &&
-      serialize_selected_member_xcdr2(ser, selected_id, extensibility);
   }
 
   // Both discriminator and a selected member exist in the data container.
