@@ -71,10 +71,10 @@ jobs:
         echo VCPKG_INSTALLED_DIR=${{ github.workspace }}\vcpkg-qt\installed>> %GITHUB_ENV%
     - name: install vcpkg packages
       id: runvcpkg
-      uses: lukka/run-vcpkg@v10
+      uses: lukka/run-vcpkg@v11
       with:
         vcpkgDirectory: '${{ github.workspace }}/vcpkg-qt'
-        vcpkgGitCommitId: 71d3fa60b67540e9bf5fde2bf2188f579ff09433
+        vcpkgGitCommitId: 5b1214315250939257ef5d62ecdcbca18cf4fb1c
         runVcpkgInstall: true
     - name: checkout MPC
       uses: actions/checkout@v3
