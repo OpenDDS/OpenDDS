@@ -2150,7 +2150,9 @@ DDS::ReturnCode_t DynamicDataXcdrReadImpl::skip_to_struct_member(DDS::MemberDesc
   const DDS::ExtensibilityKind ek = descriptor->extensibility_kind();
   if (ek == DDS::FINAL || ek == DDS::APPENDABLE) {
     size_t dheader = 0;
-    if (ek == DDS::APPENDABLE && !strm_.read_delimiter(dheader)) {
+    const bool xcdr2_appendable = encoding_.xcdr_version() == DCPS::Encoding::XCDR_VERSION_2 &&
+      ek == DDS::APPENDABLE;
+    if (xcdr2_appendable && !strm_.read_delimiter(dheader)) {
       if (DCPS::DCPS_debug_level >= 1) {
         ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) DynamicDataXcdrReadImpl::skip_to_struct_member -")
                    ACE_TEXT(" Failed to read DHEADER for member ID %d\n"), id));
@@ -2191,7 +2193,7 @@ DDS::ReturnCode_t DynamicDataXcdrReadImpl::skip_to_struct_member(DDS::MemberDesc
         }
         return DDS::RETCODE_ERROR;
       }
-      if (ek == DDS::APPENDABLE && strm_.rpos() >= end_of_struct) {
+      if (xcdr2_appendable && strm_.rpos() >= end_of_struct) {
         return DDS::RETCODE_NO_DATA;
       }
     }

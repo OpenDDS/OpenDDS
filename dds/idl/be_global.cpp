@@ -894,7 +894,12 @@ bool BE_GlobalData::is_must_understand(AST_Decl* node) const
       builtin_annotations_["::@must_understand"]);
   bool value = must_understand_annotation->absent_value;
   must_understand_annotation->node_value_exists(node, value);
-  return value || is_key(node);
+  return value;
+}
+
+bool BE_GlobalData::is_effectively_must_understand(AST_Decl* node) const
+{
+  return is_must_understand(node) || is_key(node);
 }
 
 bool BE_GlobalData::is_key(AST_Decl* node) const

@@ -2749,7 +2749,7 @@ namespace {
         for (Fields::Iterator i = fields.begin(); i != fields_end; ++i) {
           AST_Field* const field = *i;
           const OpenDDS::XTypes::MemberId id = be_global->get_id(field);
-          const bool must_understand = be_global->is_must_understand(field);
+          const bool must_understand = be_global->is_effectively_must_understand(field);
 
           mutable_fields
             << generate_field_serialized_size(

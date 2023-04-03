@@ -223,6 +223,7 @@ public:
   bool hashid(AST_Decl* node, std::string& value) const;
   bool is_optional(AST_Decl* node) const;
   bool is_must_understand(AST_Decl* node) const;
+  bool is_effectively_must_understand(AST_Decl* node) const;
   bool is_key(AST_Decl* node) const;
   bool is_external(AST_Decl* node) const;
   bool is_plain(AST_Decl* node) const;

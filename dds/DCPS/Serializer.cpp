@@ -760,12 +760,19 @@ bool Serializer::read_parameter_id(unsigned& id, size_t& size, bool& must_unders
       if (lc == 4 ? !(*this >> next_int) : !peek(next_int)) {
         return false;
       }
-      if (lc == 6) {
-        size = next_int * 4;
-      } else if (lc == 7) {
-        size = next_int * 8;
-      } else { // 4 or 5
+      switch (lc) {
+      case 4:
         size = next_int;
+        break;
+      case 5:
+        size = uint32_cdr_size + next_int;
+        break;
+      case 6:
+        size = uint32_cdr_size + next_int * 4;
+        break;
+      case 7:
+        size = uint32_cdr_size + next_int * 8;
+        break;
       }
     }
     id = emheader & 0xfffffff;

@@ -57,12 +57,12 @@ struct DataView {
   size_t size;
 };
 
-bool operator==(const DataView& a, const DataView& b)
+inline bool operator==(const DataView& a, const DataView& b)
 {
   return a.size == b.size ? !std::memcmp(a.data, b.data, a.size) : false;
 }
 
-::testing::AssertionResult assert_DataView(const char* a_expr, const char* b_expr,
+inline ::testing::AssertionResult assert_DataView(const char* a_expr, const char* b_expr,
   const DataView& a, const DataView& b)
 {
   using namespace OpenDDS::DCPS;

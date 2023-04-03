@@ -7877,7 +7877,7 @@ bool DynamicDataImpl::DataContainer::serialize_structure_xcdr2(DCPS::Serializer&
 
     const DDS::MemberId id = md->id();
     const CORBA::Boolean optional = md->is_optional();
-    const CORBA::Boolean must_understand = md->is_must_understand();
+    const CORBA::Boolean must_understand = md->is_must_understand() || md->is_key();
     const DDS::DynamicType_var member_type = get_base_type(md->type());
     const TypeKind member_tk = member_type->get_kind();
 
