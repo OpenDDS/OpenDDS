@@ -222,9 +222,13 @@ The following table summarizes the options supported by ``opendds_idl``.
 
      - Types are nested by default.
 
-   * - ``--default-extensibility VAL``
+   * - .. _opendds_idl--default-extensibility:
 
-     - Set the default XTypes Extensibility – see section :ref:`xtypes--determining-extensibility`
+       ``--default-extensibility``
+
+     - Set the default XTypes extensibility.
+       Can be ``final``, ``appendable`` or ``mutable``.
+       See :ref:`xtypes--extensibility` for details.
 
      - ``appendable``
 
@@ -254,8 +258,7 @@ The following table summarizes the options supported by ``opendds_idl``.
      - Use standard encoding
 
 The code generation options allow the application developer to use the generated code in a wide variety of environments.
-Since IDL may contain preprocessing directives (``#include``, ``#define``, etc.
-), the C++ preprocessor is invoked by ``opendds_idl``.
+Since IDL may contain preprocessing directives (``#include``, ``#define``, etc.), the C++ preprocessor is invoked by ``opendds_idl``.
 The ``-I`` and ``-D`` options allow customization of the preprocessing step.
 The ``-Wb,export_macro`` option lets you add an export macro to your class definitions.
 This is required if the generated code is going to reside in a shared library and the compiler (such as Visual C++ or GCC) uses the export macro (``dllexport`` on Visual C++ / overriding hidden visibility on GCC).
@@ -313,9 +316,10 @@ Unlike when using the classic mapping, ``Foo.idl`` is not processed by ``tao_idl
 
   * Note that setting a union value through a modifier method automatically sets the discriminator.
     In cases where there are multiple possible values for the discriminator, a 2-argument modifier method is provided.
-    Using this is preferred to using _d().
+    Using this is preferred to using ``_d()``.
 
-  * If you chose to use the _d() method of the generated union types, note the following requirement from the specification: “The _d discriminator modifier can only be used to set the discriminant to a value within the same union member.”  OpenDDS treats this as a precondition (it is not checked within the implementation).
+  * If you chose to use the ``_d()`` method of the generated union types, take note that it can only be used to set a value that selects the same union member as the one that's currently selected.
+    OpenDDS treats this as a precondition (it is not checked within the implementation).
 
 * strings (narrow and wide), sequences, and arrays
 

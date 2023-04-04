@@ -297,7 +297,7 @@ Each data writer is bound to a particular topic.
 The application uses the data writer’s type-specific interface to publish samples on that topic.
 The data writer is responsible for marshaling the data and passing it to the publisher for transmission.
 
-Dynamic data writers (see section :ref:`xtypes--creating-and-using-a-dynamicdatawriter`) can be used when code generated from IDL is not available or desired.
+Dynamic data writers (see section :ref:`xtypes--creating-and-using-a-dynamicdatawriter-or-dynamicdatareader`) can be used when code generated from IDL is not available or desired.
 Dynamic data writers are also type-safe, but type checking happens at runtime.
 
 .. _introduction--publisher:
@@ -333,7 +333,7 @@ The *data reader* takes data from the subscriber, demarshals it into the appropr
 Each data reader is bound to a particular topic.
 The application uses the data reader’s type-specific interfaces to receive the samples.
 
-Dynamic data readers (see section :ref:`xtypes--creating-and-using-a-dynamicdatareader`) can be used when code generated from IDL is not available or desired.
+Dynamic data readers (see section :ref:`xtypes--creating-and-using-a-dynamicdatawriter-or-dynamicdatareader`) can be used when code generated from IDL is not available or desired.
 Dynamic data readers are also type-safe, but type checking happens at runtime.
 
 .. _introduction--built-in-topics:
