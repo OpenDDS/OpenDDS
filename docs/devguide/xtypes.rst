@@ -1117,6 +1117,19 @@ The operations used for this include the DynamicData operations named "set_*" fo
 They are analogous to the "get_*" operations that are described in :ref:`xtypes--interpreting-data-samples-with-dynamicdata`.
 When populating the DynamicData of complex data types, use get_complex_value() (see :ref:`xtypes--reading-members-of-more-complex-types`) to navigate from DynamicData representing containing types to DynamicData representing contained types.
 
+Setting the value of a member of a DynamicData union using a ``set_*`` method implicitly 1) activates the branch corresponding to the member and 2) sets the discriminator to a value corresponding to the active branch.
+After a branch has been activated, the value of the discriminator can be changed using a ``set_*`` method.
+However, the new value of the discriminator must correspond to the active branch.
+To set the discriminator, use ``DISCRIMINATOR_ID`` as the member id for the call to ``set_*`` (see :ghfile:`dds/DCPS/XTypes/TypeObject.h`).
+
+Unions start in an "empty" state meaning that no branch is active.
+At the point of serialization, the middleware will treat an empty union according to the following procedure.
+The discriminator is assumed to have the default value for the discriminator type and all members are assumed to have the default value for their type.
+There are three possibilities.
+First, the discriminator selects a non-default branch in which case the serialized union will have the default discriminator value and the default value for the implicitly selected member;
+Second, the discriminator selects a default branch in which case the serialized union will have the default discriminator value and the default value for the default branch member.
+Third, the discriminator selects no branch (and a default branch is not defined) in which case the serialized union will have the default discriminator only.
+
 .. _xtypes--dynamicdatawriters-and-dynamicdatareaders:
 
 DynamicDataWriters and DynamicDataReaders
