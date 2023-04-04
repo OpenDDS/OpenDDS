@@ -13,6 +13,8 @@ opendds_root_path = docs_path.parent
 sys.path.append(str((docs_path / 'sphinx_extensions').resolve()))
 github_links_root_path = str(opendds_root_path)
 
+from mpc_lexer import MpcLexer
+
 
 # Custom Values ---------------------------------------------------------------
 
@@ -75,9 +77,8 @@ if is_release:
 # ones.
 extensions = [
     'sphinx.ext.ifconfig',
-    'github_links',
+    'links',
 ]
-from mpc_lexer import MpcLexer
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -133,9 +134,9 @@ html_theme_options = {
         'Main Website': 'https://opendds.org',
         'GitHub Repo': 'https://github.com/' + github_links_repo,
     },
-    'fixed_sidebar': True,
-    'page_width': '1000px',
-    'body_max_width': '1000px',
+    'fixed_sidebar': False,
+    'page_width': '1100px',
+    'body_max_width': '1100px',
 }
 
 html_favicon = 'logo_32_32.ico'

@@ -1558,6 +1558,7 @@ DDS::ReturnCode_t DynamicDataXcdrReadImpl::get_complex_value(DDS::DynamicData_pt
         if (!member_type) {
           good = false;
         } else {
+          CORBA::release(value);
           value = new DynamicDataXcdrReadImpl(strm_, member_type, nested(extent_));
         }
       } else {
@@ -1595,6 +1596,7 @@ DDS::ReturnCode_t DynamicDataXcdrReadImpl::get_complex_value(DDS::DynamicData_pt
             break;
           }
         }
+        CORBA::release(value);
         value = new DynamicDataXcdrReadImpl(strm_, disc_type, nested(extent_));
         break;
       }
@@ -1618,6 +1620,7 @@ DDS::ReturnCode_t DynamicDataXcdrReadImpl::get_complex_value(DDS::DynamicData_pt
       if (!member_type) {
         good = false;
       } else {
+        CORBA::release(value);
         value = new DynamicDataXcdrReadImpl(strm_, member_type, nested(extent_));
       }
       break;
@@ -1631,6 +1634,7 @@ DDS::ReturnCode_t DynamicDataXcdrReadImpl::get_complex_value(DDS::DynamicData_pt
           (tk == TK_MAP && !skip_to_map_element(id))) {
         good = false;
       } else {
+        CORBA::release(value);
         value = new DynamicDataXcdrReadImpl(strm_, descriptor->element_type(), nested(extent_));
       }
       break;
