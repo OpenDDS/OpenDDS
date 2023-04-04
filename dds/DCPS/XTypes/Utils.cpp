@@ -1221,7 +1221,7 @@ namespace {
     if (DCPS::DCPS_debug_level >= 8) {
       const CORBA::String_var src_type_name = src_type->get_name();
       const CORBA::String_var dest_type_name = dest_type->get_name();
-      ACE_DEBUG((LM_DEBUG, "copy_member: "
+      ACE_DEBUG((LM_DEBUG, "(%P|%t) copy_member(DynamicData): "
         "type %C from %C id %u to %C id %u\n",
         typekind_to_string(src_tk), src_type_name.in(), src_id, dest_type_name.in(), dest_id));
     }

@@ -289,13 +289,17 @@ case TypeEnum:
   EnumType enum_type;
 case TypeStruct:
   SimpleStruct simple_struct;
+/* TODO: This casues a segfault. DynamicDataAdapter needs a way to intialize
+ branchs with default values.
 case TypeUnion:
   SimpleUnion simple_union;
+*/
 };
 
+@topic
 union ColUnion switch (EnumType) {
 case TypeInt16:
-  UInt8Sequ i16_seq;
+  Int16Sequ i16_seq;
 case TypeUint16:
   sequence<uint16> anon_u16_seq;
 case TypeInt32:

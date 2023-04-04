@@ -475,7 +475,6 @@ TEST_F(dds_DCPS_XTypes_Utils, less_than)
 
   // nested_union
   ++id;
-  /* TODO
   DDS::DynamicData_var a_nested_union;
   ASSERT_RC_OK(a->get_complex_value(a_nested_union, id));
   DDS::DynamicData_var b_nested_union;
@@ -486,7 +485,6 @@ TEST_F(dds_DCPS_XTypes_Utils, less_than)
   ASSERT_RC_OK(a_nested_union->set_char8_value(1, 'x'));
   ASSERT_RC_OK(less_than(is_less_than, a, b, Filter_All));
   ASSERT_FALSE(is_less_than);
-  */
 
   // uint32_array
   ++id;

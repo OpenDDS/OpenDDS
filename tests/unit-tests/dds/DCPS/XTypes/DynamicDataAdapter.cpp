@@ -277,4 +277,78 @@ TEST_F(dds_DCPS_XTypes_DynamicDataAdapter, test_struct)
   }
 }
 
+TEST_F(dds_DCPS_XTypes_DynamicDataAdapter, test_union)
+{
+  add_type<TestUnion>();
+  DDS::DynamicType_var dt = get_dynamic_type<TestUnion>();
+
+  {
+    DDS::DynamicData_var ddi = DDS::DynamicDataFactory::get_instance()->create_data(dt);
+    {
+      TestUnion tu;
+      tu.i32(100);
+      DDS::DynamicData_var dda = get_dynamic_data_adapter(dt, tu);
+      ASSERT_RC_OK(copy(ddi, dda));
+    }
+    {
+      TestUnion tu;
+      DDS::DynamicData_var dda = get_dynamic_data_adapter(dt, tu);
+      ASSERT_RC_OK(copy(dda, ddi));
+      ASSERT_EQ(tu.i32(), 100);
+    }
+  }
+  {
+    DDS::DynamicData_var ddi = DDS::DynamicDataFactory::get_instance()->create_data(dt);
+    const char* const s = "A string";
+    {
+      TestUnion tu;
+      tu.s8(s);
+      DDS::DynamicData_var dda = get_dynamic_data_adapter(dt, tu);
+      ASSERT_RC_OK(copy(ddi, dda));
+    }
+    {
+      TestUnion tu;
+      DDS::DynamicData_var dda = get_dynamic_data_adapter(dt, tu);
+      ASSERT_RC_OK(copy(dda, ddi));
+      ASSERT_STREQ(tu.s8(), s);
+    }
+  }
+  {
+    DDS::DynamicData_var ddi = DDS::DynamicDataFactory::get_instance()->create_data(dt);
+    {
+      SimpleStruct ss;
+      ss.value = 1;
+      TestUnion tu;
+      tu.simple_struct(ss);
+      DDS::DynamicData_var dda = get_dynamic_data_adapter(dt, tu);
+      ASSERT_RC_OK(copy(ddi, dda));
+    }
+    {
+      TestUnion tu;
+      DDS::DynamicData_var dda = get_dynamic_data_adapter(dt, tu);
+      ASSERT_RC_OK(copy(dda, ddi));
+      ASSERT_EQ(tu.simple_struct().value, 1u);
+    }
+  }
+  /* TODO: TestUnion::simple_union in IDL
+  {
+    DDS::DynamicData_var ddi = DDS::DynamicDataFactory::get_instance()->create_data(dt);
+    {
+      SimpleUnion su;
+      su.value(1);
+      TestUnion tu;
+      tu.simple_struct(su);
+      DDS::DynamicData_var dda = get_dynamic_data_adapter(dt, tu);
+      ASSERT_RC_OK(copy(ddi, dda));
+    }
+    {
+      TestUnion tu;
+      DDS::DynamicData_var dda = get_dynamic_data_adapter(dt, tu);
+      ASSERT_RC_OK(copy(dda, ddi));
+      ASSERT_EQ(tu.simple_union().value(), 1u);
+    }
+  }
+  */
+}
+
 #endif // OPENDDS_SAFETY_PROFILE
