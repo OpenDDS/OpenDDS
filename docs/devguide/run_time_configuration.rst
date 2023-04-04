@@ -2499,7 +2499,7 @@ When you configure inter-host communication, the local_address can not be localh
 
 FQDN resolution is dependent upon system configuration.
 In the absence of a FQDN (e.g.
-``example.objectcomputing.com``), OpenDDS will use any discovered short names (e.g.
+``example.opendds.org``), OpenDDS will use any discovered short names (e.g.
 example).
 If that fails, it will use the name resolved from the loopback address (e.g.
 localhost).
