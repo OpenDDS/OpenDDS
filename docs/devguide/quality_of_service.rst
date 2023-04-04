@@ -1201,7 +1201,7 @@ To use the extended listener callback you will need to derive the listener imple
 Then you must provide a non-null implementation for the ``on_budget_exceeded()`` operation.
 Note that you will need to provide empty implementations for the following extended operations as well:
 
-::
+.. code-block:: cpp
 
       on_subscription_disconnected()
       on_subscription_reconnected()

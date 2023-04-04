@@ -477,7 +477,7 @@ What remains is to narrow the ``DataWriter`` to a type-specific data writer, and
 .. code-block:: cpp
 
         data1::MessageDataWriter_var msg_writer =
-            data1::MessageDataWriter::_narrow(writer);
+          data1::MessageDataWriter::_narrow(writer);
         data1::Message message;
         // Populate message and send
         message.text = "Worst. Movie. Ever.";
@@ -506,7 +506,7 @@ In total our publishing application, ``MinimalPublisher.cpp``, looks like this:
         DDS::DataWriter_var writer = model.writer(Elements::DataWriters::writer);
 
         data1::MessageDataWriter_var msg_writer =
-            data1::MessageDataWriter::_narrow(writer);
+          data1::MessageDataWriter::_narrow(writer);
         data1::Message message;
         // Populate message and send
         message.text = "Worst. Movie. Ever.";
@@ -550,7 +550,7 @@ Subscribers can create a listener by deriving a class from ``NullReaderListener`
     class ReaderListener : public OpenDDS::Model::NullReaderListener {
     public:
       virtual void on_data_available(DDS::DataReader_ptr reader)
-                            ACE_THROW_SPEC((CORBA::SystemException)) {
+      ACE_THROW_SPEC((CORBA::SystemException)) {
         data1::MessageDataReader_var reader_i =
           data1::MessageDataReader::_narrow(reader);
 
@@ -608,7 +608,7 @@ An example subscribing application, ``MinimalSubscriber.cpp``, follows.
     class ReaderListener : public OpenDDS::Model::NullReaderListener {
     public:
       virtual void on_data_available(DDS::DataReader_ptr reader)
-                            ACE_THROW_SPEC((CORBA::SystemException)) {
+      ACE_THROW_SPEC((CORBA::SystemException)) {
         data1::MessageDataReader_var reader_i =
           data1::MessageDataReader::_narrow(reader);
 
@@ -718,7 +718,7 @@ This setting based upon what was provided to the Target Folder setting in the Co
 
 Finally, like any other MPC project, its source files must be included:
 
-::
+.. code-block:: mpc
 
       Source_Files {
         MinimalPublisher.cpp

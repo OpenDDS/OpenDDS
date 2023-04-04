@@ -72,19 +72,23 @@ As of this writing, vcpkg is only supported on Visual Studio 2015 Update 3 and l
 
        * Fetch and build the dependencies; by default, vcpkg targets x86 so be sure to specify the x64 target if required by specifying it when invoking vcpkg install, as shown here:
 
-         ``vcpkg install openssl:x64-windows xerces-c:x64-windows``
+.. code-block:: doscon
+
+         vcpkg install openssl:x64-windows xerces-c:x64-windows
 
        * Configure OpenDDS by passing the openssl and xerces3 switches.
          As a convenience, it can be helpful to set an environment variable to store the path since it is the same location for both dependencies.
-         ``set VCPKG_INSTALL=c:\path\to\vcpkg\installed\x64-windows``
 
-         ``configure --security --openssl=%VCPKG_INSTALL% --xerces3=%VCPKG_INSTALL%``
+.. code-block:: doscon
+
+         set VCPKG_INSTALL=c:\path\to\vcpkg\installed\x64-windows
+         configure --security --openssl=%VCPKG_INSTALL% --xerces3=%VCPKG_INSTALL%
 
        * Compile with msbuild or by launching Visual Studio from this command prompt so it inherits the correct environment variables and building from there.
 
-``msbuild /m DDS_TAOv2_all.sln``
+.. code-block:: doscon
 
-::
+    msbuild /m DDS_TAOv2_all.sln
 
 **Manual Build**
 
@@ -122,7 +126,7 @@ Official Xerces instructions can be found `here <https://xerces.apache.org/xerce
 
 #. Create a cmake build directory and change into it (from within the Xerces source tree).
 
-::
+.. code-block:: bash
 
     mkdir build
     cd build
@@ -130,13 +134,13 @@ Official Xerces instructions can be found `here <https://xerces.apache.org/xerce
 #. Run cmake with the appropriate generator.
    In this case Visual Studio 2017 with 64-bit is being used so:
 
-::
+.. code-block:: bash
 
     cmake -G "Visual Studio 15 2017 Win64" ..
 
 #. Run cmake again with the build switch and install target (this should be done in an administrator command-prompt to install in the default location as mentioned above).
 
-::
+.. code-block:: bash
 
     cmake --build . --target install
 
@@ -146,19 +150,22 @@ Official Xerces instructions can be found `here <https://xerces.apache.org/xerce
 
    * If the default location was used for OpenSSL and Xerces, configure should automatically find the dependencies:
 
-::
+.. code-block:: bash
 
     configure --security
 
 #. * If a different location was used (assuming environment variables ``NEW_SSL_ROOT`` and ``NEW_XERCES_ROOT`` point to their respective library directories):
 
-``configure --security --openssl=%NEW_SSL_ROOT%``
+.. code-block:: doscon
 
-``--xerces3=%NEW_XERCES_ROOT%``
+    configure --security --openssl=%NEW_SSL_ROOT% \
+      --xerces3=%NEW_XERCES_ROOT%
 
 #. Compile with msbuild (or by opening the solution file in Visual Studio and building from there).
 
-``msbuild /m DDS_TAOv2_all.sln``
+.. code-block:: doscon
+
+    msbuild /m DDS_TAOv2_all.sln
 
 .. _dds_security--building-opendds-with-security-on-linux:
 
@@ -538,7 +545,7 @@ Creating Self-Signed Certificate Authorities
 
 Generate a self-signed 2048-bit RSA CA:
 
-::
+.. code-block:: bash
 
     openssl genrsa -out ca_key.pem 2048
     openssl req -config openssl.cnf -new -key ca_key.pem -out ca.csr
@@ -546,7 +553,7 @@ Generate a self-signed 2048-bit RSA CA:
 
 Generate self-signed 256-bit Elliptic Curve CA:
 
-::
+.. code-block:: bash
 
     openssl ecparam -name prime256v1 -genkey -out ca_key.pem
     openssl req -config openssl.cnf -new -key ca_key.pem -out ca.csr
@@ -562,7 +569,7 @@ Creating Signed Certificates with an Existing CA
 
 Generate a signed 2048-bit RSA certificate:
 
-::
+.. code-block:: bash
 
     openssl genrsa -out cert_1_key.pem 2048
     openssl req -new -key cert_1_key.pem -out cert_1.csr
@@ -570,7 +577,7 @@ Generate a signed 2048-bit RSA certificate:
 
 Generate a signed 256-bit Elliptic Curve certificate:
 
-::
+.. code-block:: bash
 
     openssl ecparam -name prime256v1 -genkey -out cert_2_key.pem
     openssl req -new -key cert_2_key.pem -out cert_2.csr
@@ -586,7 +593,7 @@ Signing Documents with SMIME
 
 Sign a document using existing CA & CA private key:
 
-::
+.. code-block:: bash
 
     openssl smime -sign -in doc.xml -text -out doc_signed.p7s -signer ca_cert.pem -inkey ca_private_key.pem
 
@@ -634,7 +641,7 @@ If the <max> tag is omitted then the set includes all valid domain ids starting 
 
 If the domain rule or permissions grant should to apply to all domains, use the following:
 
-::
+.. code-block:: xml
 
     <domains>
       <id_range><min>0</min></id_range>
@@ -642,7 +649,7 @@ If the domain rule or permissions grant should to apply to all domains, use the 
 
 If there’s a need to be selective about what domains are chosen, here’s an annotated example:
 
-::
+.. code-block:: xml
 
     <domains>
       <id>2</id>

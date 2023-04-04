@@ -17,7 +17,7 @@ For each IDL file processed, such as ``xyz.idl``, it generates three files: ``xy
 In the typical usage, ``opendds_idl`` is passed a number of options and the IDL file name as a parameter.
 For example,
 
-::
+.. code-block:: bash
 
     opendds_idl [options...] Foo.idl
 

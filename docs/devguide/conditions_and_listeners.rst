@@ -414,7 +414,7 @@ Each status operation takes the general form of ``on_<status_name>(<entity>, <st
 Read statuses omit the second parameter.
 For example, here is the operation for the Sample Lost status:
 
-::
+.. code-block:: cpp
 
       void on_sample_lost(in DataReader the_reader, in SampleLostStatus status);
 
@@ -462,7 +462,7 @@ Here is an example showing how to change the listener using ``set_listener()``:
 .. code-block:: cpp
 
       dr->set_listener(listener,
-      DDS::DATA_AVAILABLE_STATUS |       DDS::LIVELINESS_CHANGED_STATUS);
+                       DDS::DATA_AVAILABLE_STATUS | DDS::LIVELINESS_CHANGED_STATUS);
 
 When a plain communication status changes, OpenDDS invokes the most specific relevant listener operation.
 This means, for example, that a data reader’s listener would take precedence over the subscriber’s listener for statuses related to the data reader.

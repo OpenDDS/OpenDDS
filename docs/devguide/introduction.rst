@@ -793,7 +793,9 @@ For a feature named *feature*, the following steps are used to disable the featu
 
 #. Use the command line ``features`` argument to MPC:
 
-   ``mwc.pl -type type -features feature=0 DDS.mwc``
+.. code-block:: bash
+
+   mwc.pl -type type -features feature=0 DDS.mwc
 
    Or alternatively, add the line ``feature=0`` to the file ``$ACE_ROOT/bin/MakeProjectCreator/config/default.features`` and regenerate the project files using MPC.
 
