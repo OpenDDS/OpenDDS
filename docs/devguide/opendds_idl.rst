@@ -9,7 +9,7 @@ opendds_idl
 
 opendds_idl is one of the code generators used in the process of building OpenDDS and OpenDDS applications.
 It can be used in a number of different ways to customize how source code is generated from IDL files.
-See section :ref:`getting_started--processing-the-idl` for an overview of the default usage pattern.
+See :ref:`getting_started--processing-the-idl` for an overview of the default usage pattern.
 
 The OpenDDS IDL compiler is invoked using the ``opendds_idl`` executable, located in :ghfile:`bin/` (on the ``PATH``).
 It parses a single IDL file and generates the serialization and key support code that OpenDDS requires to marshal and demarshal the types described in the IDL file, as well as the type support code for the data readers and writers.
@@ -21,7 +21,7 @@ For example,
 
     opendds_idl [options...] Foo.idl
 
-The remaining sections of this chapter describe all of the command-line options and the ways that ``opendds_idl`` can be used to generate alternate mappings.
+Subsequent sections describe all of the command-line options and the ways that ``opendds_idl`` can be used to generate alternate mappings.
 
 .. _opendds_idl--opendds-idl-command-line-options:
 
@@ -160,7 +160,7 @@ The following table summarizes the options supported by ``opendds_idl``.
        ``-Gxtypes-complete``
 
      - Generate complete XTypes TypeObjects which can be used to provide type information to applications that don’t have compile-time knowledge of the IDL.
-       See section :ref:`xtypes--dynamic-language-binding-1`.
+       See :ref:`xtypes--dynamic-language-binding-1`.
 
      - Only minimal TypeObjects are generated
 
@@ -218,7 +218,7 @@ The following table summarizes the options supported by ``opendds_idl``.
    * - ``--[no-]default-nested``
 
      - Un-annotated types/modules are treated as nested.
-       See section :ref:`getting_started--topic-types-vs-nested-types` for details.
+       See :ref:`getting_started--topic-types-vs-nested-types` for details.
 
      - Types are nested by default.
 
@@ -241,13 +241,13 @@ The following table summarizes the options supported by ``opendds_idl``.
 
    * - ``--default-autoid VAL``
 
-     - Set the default XTypes auto member-id assignment strategy: sequential or hash – see section :ref:`xtypes--autoid-value`
+     - Set the default XTypes auto member-id assignment strategy: sequential or hash – see :ref:`xtypes--autoid-value`
 
      - ``sequential``
 
    * - ``--default-try-construct VAL``
 
-     - Set the default XTypes try-construct strategy: ``discard``, ``use-default``, or ``trim`` – see section :ref:`xtypes--customizing-xtypes-per-member`
+     - Set the default XTypes try-construct strategy: ``discard``, ``use-default``, or ``trim`` – see :ref:`xtypes--customizing-xtypes-per-member`
 
      - ``discard``
 
@@ -280,7 +280,7 @@ Since the IDL-to-C++11 Mapping assumes a C++11 (or higher) compiler and standard
 For example, IDL strings, arrays, and sequences map to their equivalents in the ``std`` namespace: ``string``, ``array``, and ``vector``.
 All of the details of the mapping are spelled out in the specification document (available at https://www.omg.org/spec/CPP11), however the easiest way to get started with the mapping is to generate code from IDL and examine the generated header file.
 
-In ``opendds_idl``’s default mode (as described in section :ref:`getting_started--processing-the-idl`), responsibility for generating the language mapping is delegated to ``tao_idl`` (using the IDL-to-C++ classic mapping).
+In the default mode of ``opendds_idl`` (as described in :ref:`getting_started--processing-the-idl`), responsibility for generating the language mapping is delegated to ``tao_idl`` (using the IDL-to-C++ classic mapping).
 In this case, ``opendds_idl`` is only responsible for generating the OpenDDS-specific additions such as ``TypeSupport.idl`` and the marshal/demarshal functions.
 
 Contrast this with using ``opendds_idl`` for IDL-to-C++11.
@@ -326,7 +326,7 @@ Unlike when using the classic mapping, ``Foo.idl`` is not processed by ``tao_idl
   * Bounded strings and sequences are supported, but bounds checks are not currently enforced.
     Due to this limitation, distinct types are not used for bounded instantiations.
 
-* annotations – see section :ref:`getting_started--defining-data-types-with-idl`
+* annotations – see :ref:`getting_started--defining-data-types-with-idl`
 
 * #includes of IDL files that are also used with the IDL-to-C++11 mapping
 

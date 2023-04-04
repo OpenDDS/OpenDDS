@@ -170,7 +170,7 @@ The default domain used for federation is defined by the constant ``Federator::D
 
 Currently only static specification of federation topology is available.
 This means that each DCPS Information Repository, as well as each application using a federated DDS service, needs to include federation configuration as part of its configuration data.
-This is done by specifying each available repository within the federation to each participating process and assigning each repository to a different key value in the configuration files as described in Section :ref:`run_time_configuration--configuring-for-multiple-dcpsinforepo-instances`.
+This is done by specifying each available repository within the federation to each participating process and assigning each repository to a different key value in the configuration files as described in :ref:`run_time_configuration--configuring-for-multiple-dcpsinforepo-instances`.
 
 Each application and repository must include the same set of repositories in its configuration information.
 Failover sequencing will attempt to reach the next repository in numeric sequence (wrapping from the last to the first) of the repository key values.
@@ -188,7 +188,7 @@ Only repositories which are started with a federation identification number may 
 The first repository started should not be given a ``-FederateWith`` command line directive.
 All others are required to have this directive in order to establish the initial federation.
 There is a command line tool (``federation``) supplied that can be used to establish federation associations if this is not done at startup.
-See Section :ref:`the_dcps_information_repository--federation-management` for a description.
+See :ref:`the_dcps_information_repository--federation-management` for a description.
 It is possible, with the current static-only implementation, that the failure of a repository before a federation topology is entirely established could result in a partially unusable service.
 Due to this current limitation, it is highly recommended to always establish the federation topology of repositories prior to starting the applications.
 
@@ -307,7 +307,7 @@ Federation Example
 ..
     Sect<9.2.2>
 
-In order to illustrate the setup and use of a federation, this section walks through a simple example that establishes a federation and a working service that uses it.
+To illustrate the setup and use of a federation, this section walks through a simple example that establishes a federation and a working service that uses it.
 
 This example is based on a two repository federation, with the simple Message publisher and subscriber from :ref:`getting_started--using-dcps` configured to use the federated repositories.
 
@@ -341,7 +341,6 @@ The Message Publisher configuration ``pub.ini`` for this example is as follows:
         RepositoryIor=file://repo.ior
 
 Note that the ``DCPSInfo`` attribute/value pair has been omitted from the ``[common]`` section.
-This has been replaced by the ``[domain/user]`` section as described in 7.5.
 The user domain is 42, so that domain is configured to use the primary repository for service metadata and events.
 
 The ``[repository/primary]`` and ``[repository/secondary]`` sections define the primary and secondary repositories to use within the federation (of two repositories) for this application.
@@ -384,7 +383,7 @@ Running the Federation Example
 ..
     Sect<9.2.2.2>
 
-The example is executed by first starting the repositories and federating them, then starting the application publisher and subscriber processes the same way as was done in the example of  Section :ref:`getting_started--running-the-example`.
+The example is executed by first starting the repositories and federating them, then starting the application publisher and subscriber processes the same way as was done in the example of :ref:`getting_started--running-the-example`.
 
 Start the first repository as:
 
@@ -408,5 +407,4 @@ The ``-ORBListenEndpoints iiop://localhost:2112`` option ensures that the reposi
 The ``-FederationId 2048`` option assigns the value 2048 as the repositories unique id within the federation.
 The ``-FederateWith file://repo.ior`` option initiates federation with the repository located at the IOR contained within the named file - which was written by the previously started repository.
 
-Once the repositories have been started and federation has been established (this will be done automatically after the second repository has initialized), the application publisher and subscriber processes can be started and should execute as they did for the previous example in Section :ref:`getting_started--running-the-example`.
-
+Once the repositories have been started and federation has been established (this will be done automatically after the second repository has initialized), the application publisher and subscriber processes can be started and should execute as they did for the previous example in :ref:`getting_started--running-the-example`.

@@ -23,7 +23,7 @@ Multicast is not supported on the public Internet which precludes the use of RTP
 Second, SPDP and SEDP advertise locators (IP and port pairs) for endpoints (DDS readers and writer).
 If the participant is behind a firewall that performs network address translation, then the locators advertised by the participant are useless to participants on the public side of the firewall.
 
-This chapter describes different tools and techniques for getting around these limitations.
+This section describes different tools and techniques for getting around these limitations.
 First, we introduce the *RtpsRelay* as a service for forwarding RTPS messages according to application-defined groups.
 The RtpsRelay can be used to connect participants that are deployed in environments that don't support multicast and whose packets are subject to NAT.
 Second, we introduce Interactive Connection Establishment (ICE) for RTPS.
@@ -113,7 +113,7 @@ Usage
 The RtpsRelay itself is an OpenDDS application.
 The source code is located in ``tools/rtpsrelay``.
 Security must be enabled to build the RtpsRelay.
-See section :ref:`dds_security--building-opendds-with-security-enabled`.
+See :ref:`dds_security--building-opendds-with-security-enabled`.
 Each RtpsRelay process has a set of ports for exchanging RTPS messages with the participants called the "vertical" ports and a set of ports for exchanging RTPS messages with other relays called the “horizontal” ports.
 
 The RtpsRelay contains an embedded webserver called the meta discovery server.
@@ -363,7 +363,7 @@ Most applications have common objectives with respect to data security:
 
 * Privacy - The content of a sample cannot be read by an unauthorized third party.
 
-If an application is subject to any of these security objectives, then it should use the DDS Security features described in Chapter :ref:`dds_security--dds-security`.
+If an application is subject to any of these security objectives, then it should use the DDS Security features described in :ref:`dds_security--dds-security`.
 Using a non-secure discovery mechanism or a non-secure transport leaves the application exposed to data security breaches.
 
 .. _internet_enabled_rtps--understand-the-weaknesses-of-secure-rtps-discovery:
