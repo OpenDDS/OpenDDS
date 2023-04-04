@@ -12,6 +12,7 @@ use Env (ACE_ROOT);
 use lib "$ACE_ROOT/bin";
 use PerlDDS::Run_Test;
 use PerlDDS::Response_Monitor;
+use File::Path;
 use strict;
 
 PerlDDS::add_lib_path('../../ConsolidatedMessengerIdl');
@@ -33,6 +34,10 @@ if ($test->flag('secure')) {
     $pub_sub_security_opts = " -DCPSSecurity 1";
 }
 
+sub uses_one_relay {
+    return $test->flag('partition_same_relay') || $test->flag('single');
+}
+
 my $pub_ini = " pub_rtps.ini";
 my $sub_ini = " sub_rtps.ini";
 
@@ -40,14 +45,16 @@ if ($test->flag('single')) {
     $sub_ini = $pub_ini;
 }
 elsif ($test->flag('partition_same_relay')) {
+    rmtree 'DCS';
+    END { rmtree 'DCS'; }
     # Use with the 'secure' flag.
     # This puts the subscriber in a partition that doesn't match the publisher.
     # The config files are set up to allow the participants to exchange SPDP
     # without the help of the relay. The SEDP port, however, is not set up for
     # local (non-relayed) communication. Since the relay should not forward
     # when no partitions are in common, secure discovery cannot complete.
-    $pub_ini = ' pub_same_relay.ini';
-    $sub_ini = ' sub_same_relay.ini -p OCJ';
+    $pub_ini = ' pub_same_relay.ini -b 1';
+    $sub_ini = ' sub_same_relay.ini -b 1 -p OCJ';
 }
 
 sub get_relay_args {
@@ -74,7 +81,7 @@ sub get_relay_args {
 
 $test->process("monitor", "monitor", "-DCPSConfigFile monitor.ini");
 $test->process("relay1", "$ENV{DDS_ROOT}/bin/RtpsRelay", get_relay_args(1) . $relay_security_opts);
-$test->process("relay2", "$ENV{DDS_ROOT}/bin/RtpsRelay", get_relay_args(2) . $relay_security_opts);
+$test->process("relay2", "$ENV{DDS_ROOT}/bin/RtpsRelay", get_relay_args(2) . $relay_security_opts) unless uses_one_relay();
 $test->process("publisher", "publisher", "-ORBDebugLevel 1 -DCPSConfigFile". $pub_ini . $pub_sub_security_opts);
 $test->process("subscriber", "subscriber", "-ORBDebugLevel 1 -DCPSConfigFile" . $sub_ini . $pub_sub_security_opts);
 $test->process("metachecker", "metachecker", "127.0.0.1:8081");
@@ -96,7 +103,7 @@ if ($test->flag('join')) {
     $test->start_process("publisher");
 } else {
     $test->start_process("relay1");
-    $test->start_process("relay2") unless $test->flag('partition_same_relay');
+    $test->start_process("relay2") unless uses_one_relay();
     sleep 10;
     $test->start_process("publisher");
     sleep 1;
@@ -109,7 +116,7 @@ $test->stop_process(20, "subscriber");
 $test->stop_process(5, "publisher");
 
 $test->kill_process(5, "relay1");
-$test->kill_process(5, "relay2") unless $test->flag('partition_same_relay');
+$test->kill_process(5, "relay2") unless uses_one_relay();
 $test->kill_process(5, "monitor");
 
 exit $test->finish();

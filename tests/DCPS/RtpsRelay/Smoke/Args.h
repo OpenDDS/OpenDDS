@@ -16,14 +16,19 @@
 #include <iostream>
 #include <cstdlib>
 
-extern bool check_lease_recovery;
-extern bool expect_unmatch;
-extern ACE_TCHAR* override_partition;
+struct Args {
+  bool check_lease_recovery = false;
+  bool expect_unmatch = false;
+  ACE_TCHAR* override_partition = 0;
+  int participant_bit_expected_instances = -1;
+
+  int parse(int argc, ACE_TCHAR* argv[]);
+};
 
 inline int
-parse_args(int argc, ACE_TCHAR *argv[])
+Args::parse(int argc, ACE_TCHAR* argv[])
 {
-  ACE_Get_Opt get_opts(argc, argv, ACE_TEXT("lep:"));
+  ACE_Get_Opt get_opts(argc, argv, ACE_TEXT("lep:b:"));
 
   int c;
   while ((c = get_opts()) != -1) {
@@ -36,6 +41,9 @@ parse_args(int argc, ACE_TCHAR *argv[])
       break;
     case 'p':
       override_partition = get_opts.opt_arg();
+      break;
+    case 'b':
+      participant_bit_expected_instances = ACE_OS::atoi(get_opts.opt_arg());
       break;
     case '?':
       ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("usage: %s [-le] [-p partition]\n"), argv[0]), EXIT_FAILURE);
