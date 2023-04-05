@@ -26,8 +26,8 @@ Using XTypes, the application developer adds IDL annotations that indicate where
 
 OpenDDS implements the XTypes specification version 1.3 at the Basic Conformance level, with a partial implementation of the Dynamic Language Binding.
 Some features described by the specification are not yet implemented in OpenDDS - those are noted in :ref:`xtypes--unimplemented-features`.
-This includes IDL annotations that are not yet implemented, see :ref:`xtypes--annotations`.
-:ref:`xtypes--differences-from-the-specification` describes situations where the implementation of XTypes in OpenDDS departs from or infers something about the specification.
+This includes IDL annotations that are not yet implemented (:ref:`xtypes--annotations`).
+See :ref:`xtypes--differences-from-the-specification` for situations where the implementation of XTypes in OpenDDS departs from or infers something about the specification.
 Specification issues have been raised for these situations.
 
 .. _xtypes--features:
@@ -834,9 +834,9 @@ This section describes the features of the Dynamic Language Binding that OpenDDS
 
 There are two main usage patterns supported:
 
-* Applications can receive DynamicData from a Recorder object (see :ref:`alternate_interfaces_to_data--recorder-and-replayer`)
+* Applications can receive DynamicData from a Recorder object (:ref:`alternate_interfaces_to_data--recorder-and-replayer`)
 
-* Applications can use XTypes DynamicDataWriter and/or DynamicDataReader (see :ref:`xtypes--dynamicdatawriters-and-dynamicdatareaders`)
+* Applications can use XTypes DynamicDataWriter and/or DynamicDataReader (:ref:`xtypes--dynamicdatawriters-and-dynamicdatareaders`)
 
 To use DynamicDataWriter and/or DynamicDataReader for a given topic, the data type definition for that topic must be available to the local DomainParticipant.
 There are a few ways this can be achieved, see :ref:`xtypes--obtaining-dynamictype-and-registering-typesupport` for details.
@@ -927,9 +927,9 @@ Consider the following example:
 
 The samples for MyStruct are written by a normal, statically-typed DataWriter.
 The writer application needs to have the IDL-generated code including the "complete" form of TypeObjects.
-Use a command-line option to opendds_idl to enable CompleteTypeObjects since the default is to generate MinimalTypeObjects (see :ref:`opendds_idl--opendds-idl-command-line-options`).
+Use a command-line option to opendds_idl to enable CompleteTypeObjects since the default is to generate MinimalTypeObjects (:ref:`opendds_idl--opendds-idl-command-line-options`).
 
-One way to obtain a DynamicData object representing a data sample received by the participant is using the Recorder and RecorderListener classes (see :ref:`alternate_interfaces_to_data--recorder-and-replayer`).
+One way to obtain a DynamicData object representing a data sample received by the participant is using the Recorder and RecorderListener classes (:ref:`alternate_interfaces_to_data--recorder-and-replayer`).
 Recorder's get_dynamic_data can be used to construct a DynamicData object for each received sample from the writer.
 Internally, the CompleteTypeObjects received from discovering that writer are converted to DynamicTypes and they are then used to construct the DynamicData objects.
 Once a DynamicData object for a MyStruct sample is constructed, its members can be read as described in the following sections.
@@ -944,7 +944,7 @@ Reading Basic Types
     Sect<16.7.2.1>
 
 DynamicData provides methods for reading members whose types are basic such as integers, floating point numbers, characters, boolean.
-For a complete list of basic types for which DynamicData provides an interface, please refer to the XTypes specification.
+See the XTypes specification for a complete list of basic types for which DynamicData provides an interface.
 To call a correct method for reading a member, we need to know the type of the member as well as its id.
 For our example, we first want to get the number of members that the sample contains.
 In these examples, the ``data`` object is an instance of DynamicData.
@@ -1108,14 +1108,14 @@ To create a DynamicData object, use the DynamicDataFactory API defined by the XT
 Like other data types defined by IDL interfaces (for example, the ``*TypeSupportImpl`` types), the "dynamic" object's lifetime is managed with a smart pointer - in this case ``DDS::DynamicData_var``.
 
 The "type" input parameter to ``create_data()`` is an object that implements the ``DDS::DynamicType`` interface.
-The DynamicType representation of any type that's supported as a topic data type is available from its corresponding TypeSupport object (see :ref:`xtypes--obtaining-dynamictype-and-registering-typesupport`) using the ``get_type()`` operation.
+The DynamicType representation of any type that's supported as a topic data type is available from its corresponding TypeSupport object (:ref:`xtypes--obtaining-dynamictype-and-registering-typesupport`) using the ``get_type()`` operation.
 Once the application has access to that top-level type, the DynamicType interface can be used to obtain complete information about the type including nested and referenced data types.
 See the file :ghfile:`dds/DdsDynamicData.idl` in OpenDDS for the definition of the DynamicType and related interfaces.
 
 Once the application has created the DynamicData object, it can be populated with data members of any type.
 The operations used for this include the DynamicData operations named "set_*" for the various data types.
 They are analogous to the "get_*" operations that are described in :ref:`xtypes--interpreting-data-samples-with-dynamicdata`.
-When populating the DynamicData of complex data types, use get_complex_value() (see :ref:`xtypes--reading-members-of-more-complex-types`) to navigate from DynamicData representing containing types to DynamicData representing contained types.
+When populating the DynamicData of complex data types, use get_complex_value() (:ref:`xtypes--reading-members-of-more-complex-types`) to navigate from DynamicData representing containing types to DynamicData representing contained types.
 
 Setting the value of a member of a DynamicData union using a ``set_*`` method implicitly 1) activates the branch corresponding to the member and 2) sets the discriminator to a value corresponding to the active branch.
 After a branch has been activated, the value of the discriminator can be changed using a ``set_*`` method.
@@ -1141,7 +1141,7 @@ DynamicDataWriters and DynamicDataReaders
 DynamicDataWriters and DataReaders are designed to work like any other DataWriter and DataReader except that their APIs are defined in terms of the DynamicData type instead of a type generated from IDL.
 Each DataWriter and DataReader has an associated Topic and that Topic has a data type (represented by a TypeSupport object).
 Behavior related to keys, QoS policies, discovery and built-in topics, DDS Security, and transport is not any different for a DynamicDataWriter or DataReader.
-One exception is that in the current implementation, Content-Subscription features (Chapter :ref:`content_subscription_profile--content-subscription-profile`) are not supported for DynamicDataWriters and DataReaders.
+One exception is that in the current implementation, Content-Subscription features (:ref:`content_subscription_profile--content-subscription-profile`) are not supported for DynamicDataWriters and DataReaders.
 
 .. _xtypes--obtaining-dynamictype-and-registering-typesupport:
 
@@ -1180,7 +1180,7 @@ But, crucially, it does have the DynamicType object that we'll need to set up a 
     DDS::DynamicTypeSupport_var ts_dynamic = new DynamicTypeSupport(type);
     DDS::ReturnCode_t ret = ts_dynamic->register_type(participant, "");
 
-Now the type support object ``ts_dynamic`` can be used in the usual DataWriter/DataReader setup sequence (creating a Topic first, etc.) but the created DataWriters and DataReaders will be DynamicDataWriters and DynamicDataReaders (see :ref:`xtypes--creating-and-using-a-dynamicdatawriter-or-dynamicdatareader`).
+Now the type support object ``ts_dynamic`` can be used in the usual DataWriter/DataReader setup sequence (creating a Topic first, etc.) but the created DataWriters and DataReaders will be DynamicDataWriters and DynamicDataReaders (:ref:`xtypes--creating-and-using-a-dynamicdatawriter-or-dynamicdatareader`).
 
 The other approach to obtaining TypeSupport objects for use with the Dynamic Language Binding is to have DDS discovery's built-in endpoints get TypeObjects from remote domain participants.
 To do this, use the ``get_dynamic_type`` method on the singleton ``Service_Participant`` object.
@@ -1298,7 +1298,7 @@ IDL4 defines many standardized annotations and XTypes uses some of them.
 The Annotations recognized by XTypes are in Table 21 in XTypes 1.3.
 Of those listed in that table, the following are not supported in OpenDDS.
 They are listed in groups defined by the rows of that table.
-Some annotations in that table, and not listed here, can only be used with new capabilities of the Type System (see :ref:`xtypes--type-system`).
+Some annotations in that table, and not listed here, can only be used with new capabilities of the Type System (:ref:`xtypes--type-system`).
 
 * Struct members
 

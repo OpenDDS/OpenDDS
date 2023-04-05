@@ -17,8 +17,8 @@ Introduction
     Sect<3.1>
 
 The previous examples use default QoS policies for the various entities.
-This chapter discusses the QoS policies which are implemented in OpenDDS and the details of their usage.
-See the DDS specification for further information about the policies discussed in this chapter.
+This section discusses the QoS policies which are implemented in OpenDDS and the details of their usage.
+See the DDS specification for further information about the policies discussed in this section.
 
 .. _quality_of_service--qos-policies:
 
@@ -46,7 +46,7 @@ For example, the Publisher’s QoS structure is defined in the specification’s
     };
 
 Setting policies is as simple as obtaining a structure with the default values already set, modifying the individual policy structures as necessary, and then applying the QoS structure to an entity (usually when it is created).
-We show examples of how to obtain the default QoS policies for various entity types in Section :ref:`quality_of_service--default-qos-policy-values`.
+See :ref:`quality_of_service--default-qos-policy-values` for examples of how to obtain the default QoS policies for various entity types.
 
 Applications can change the QoS of any entity by calling the set_qos() operation on the entity.
 If the QoS is changeable, existing associations are removed if they are no longer compatible and new associations are added if they become compatible.

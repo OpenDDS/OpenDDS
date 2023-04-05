@@ -908,7 +908,7 @@ The default rule is the rule applied if none of the grant’s allow rules or den
 
 Every allow or deny rule must contain a set of domain ids to which it applies.
 The syntax is the same as the domain id set found in the governance document.
-See section :ref:`dds_security--key-governance-elements` for details.
+See :ref:`dds_security--key-governance-elements` for details.
 
 **Publish / Subscribe / Relay Rules (PSR rules)**
 
@@ -916,7 +916,8 @@ Every allow or deny rule may optionally contain a list of publish, subscribe, or
 Each rule applies to a collection of topics in a set of partitions with a particular set of data tags.
 As such, each rule must then meet these three conditions (topics, partitions, and (when implemented) data tags) in order to apply to a given operation.
 These conditions are governed by their relevant subsection, but the exact meaning and default values will vary depending on the both the PSR type (publish, subscribe, relay) as well as whether this is an allow rule or a deny rule.
-Each condition is summarized below, but please refer to the OMG DDS Security specification for full details.
+Each condition is summarized below.
+See the DDS Security specification for full details.
 OpenDDS does not currently support relay-only behavior and consequently ignores allow and deny relay rules for both local and remote entities.
 Additionally, OpenDDS does not currently support data tags, and so the data tag condition applied is always the “default” behavior described below.
 

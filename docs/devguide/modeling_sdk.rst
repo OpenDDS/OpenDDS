@@ -68,8 +68,7 @@ Code generation is performed on a single model at a time and includes the abilit
 
 It is possible to generate model variations (distinct customizations of the same model) that can then be created within the same application or different applications.
 It is also possible to specify locations to search for header files and link libraries at build time.
-
-See section :ref:`modeling_sdk--generated-code`, “Generated Code” for details.
+See :ref:`modeling_sdk--generated-code` for details.
 
 .. _modeling_sdk--programming:
 
@@ -82,8 +81,7 @@ Programming
 In order to use the middleware defined by models, applications need to link in the generated code.
 This is done through header files and link libraries.
 Support for building applications using the MPC portable build tool is included in the generated files for a model.
-
-See section :ref:`modeling_sdk--developing-applications`, “Developing Applications” for details.
+See :ref:`modeling_sdk--developing-applications` for details.
 
 .. _modeling_sdk--installation-and-getting-started:
 
@@ -270,7 +268,7 @@ The process of generating code is documented in the Eclipse help.
 
    * - ``<ModelName>_paths.mpb``
 
-     - MPC base project with paths, see section :ref:`modeling_sdk--dependencies-between-models`
+     - MPC base project with paths, see :ref:`modeling_sdk--dependencies-between-models`
 
    * - ``<ModelName>Traits.h``
 
@@ -413,7 +411,7 @@ It is recommended that Modeling SDK applications catch both ``CORBA::Exception``
     int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     {
       try {
-        // Create and use OpenDDS Modeling SDK (see sections below)
+        // Create and use OpenDDS Modeling SDK (see below)
       } catch (const CORBA::Exception& e) {
         // Handle exception and return non-zero
       } catch (const OpenDDS::DCPS::Transport::Exception& te) {
