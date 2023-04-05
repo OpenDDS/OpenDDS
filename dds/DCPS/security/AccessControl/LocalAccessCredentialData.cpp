@@ -77,7 +77,7 @@ bool LocalAccessCredentialData::verify(DDS::Security::SecurityException& ex)
     CommonUtilities::set_security_error(ex, -1, 0, "LocalAccessCredentialData::verify: Permissions signature not verified");
     return false;
   } else if (DCPS::DCPS_debug_level) {
-    ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) AccessControlBuiltInImpl::validate_local_permissions: Permissions signatuve verified\n")));
+    ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) AccessControlBuiltInImpl::validate_local_permissions: Permissions signature verified\n")));
   }
 
   return true;
