@@ -123,11 +123,11 @@ DDS::MemberId DynamicDataImpl::get_member_id_at_index(ACE_CDR::ULong index)
     }
     bool select_a_member;
     DDS::MemberDescriptor_var selected_md;
-    const DDS::ReturnCode_t rc = get_union_branch(select_a_member, selected_md);
+    const DDS::ReturnCode_t rc = get_selected_union_branch(select_a_member, selected_md);
     if (rc != DDS::RETCODE_OK) {
       if (log_level >= LogLevel::Warning) {
         ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: DynamicDataImpl::get_member_id_at_index:"
-                   " get_union_branch failed: %C\n", retcode_to_string(rc)));
+                   " get_selected_union_branch failed: %C\n", retcode_to_string(rc)));
       }
       return MEMBER_ID_INVALID;
     }
@@ -275,11 +275,11 @@ ACE_CDR::ULong DynamicDataImpl::get_item_count()
     }
     bool select_a_member;
     DDS::MemberDescriptor_var selected_md;
-    const DDS::ReturnCode_t rc = get_union_branch(disc_val, select_a_member, selected_md);
+    const DDS::ReturnCode_t rc = get_selected_union_branch(disc_val, select_a_member, selected_md);
     if (rc != DDS::RETCODE_OK) {
       if (log_level >= LogLevel::Warning) {
         ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: DynamicDataImpl::get_item_count:"
-                   " get_union_branch failed: %C\n", retcode_to_string(rc)));
+                   " get_selected_union_branch failed: %C\n", retcode_to_string(rc)));
       }
       return 0;
     }
@@ -2804,11 +2804,12 @@ bool DynamicDataImpl::get_value_from_union(ValueType& value, DDS::MemberId id)
     }
     bool found_selected_member = false;
     DDS::MemberDescriptor_var selected_md;
-    const DDS::ReturnCode_t rc = get_union_branch(disc_value, found_selected_member, selected_md);
+    const DDS::ReturnCode_t rc =
+      get_selected_union_branch(disc_value, found_selected_member, selected_md);
     if (rc) {
       if (log_level >= LogLevel::Notice) {
         ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicDataImpl::get_value_from_union:"
-                   " get_union_branch failed: %C\n", retcode_to_string(rc)));
+                   " get_selected_union_branch failed: %C\n", retcode_to_string(rc)));
       }
       return false;
     }
@@ -3679,11 +3680,12 @@ bool DynamicDataImpl::get_complex_from_union(DDS::DynamicData_ptr& value, DDS::M
     }
     bool found_selected_member = false;
     DDS::MemberDescriptor_var selected_md;
-    const DDS::ReturnCode_t rc = get_union_branch(disc_value, found_selected_member, selected_md);
+    const DDS::ReturnCode_t rc =
+      get_selected_union_branch(disc_value, found_selected_member, selected_md);
     if (rc) {
       if (log_level >= LogLevel::Notice) {
         ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicDataImpl::get_complex_from_union:"
-                   " get_union_branch failed: %C\n", retcode_to_string(rc)));
+                   " get_selected_union_branch failed: %C\n", retcode_to_string(rc)));
       }
       return false;
     }
@@ -8264,11 +8266,11 @@ bool DynamicDataImpl::DataContainer::serialized_size_union_xcdr2(const DCPS::Enc
     bool found_selected_member = false;
     DDS::MemberDescriptor_var selected_md;
     const DDS::ReturnCode_t rc =
-      data_->get_union_branch(disc_value, found_selected_member, selected_md);
-    if (rc) {
+      data_->get_selected_union_branch(disc_value, found_selected_member, selected_md);
+    if (rc != DDS::RETCODE_OK) {
       if (log_level >= LogLevel::Notice) {
         ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicDataImpl::serialized_size_union_xcdr2:"
-                   " get_union_branch failed: %C\n", retcode_to_string(rc)));
+                   " get_selected_union_branch failed: %C\n", retcode_to_string(rc)));
       }
       return false;
     }
@@ -8297,7 +8299,7 @@ bool DynamicDataImpl::DataContainer::serialized_size_union_xcdr2(const DCPS::Enc
     return false;
   }
   if (ext != DCPS::Sample::KeyOnly) {
-    if(!serialized_size_selected_member_xcdr2(
+    if (!serialized_size_selected_member_xcdr2(
         encoding, size, selected_id, extensibility, mutable_running_total)) {
       return false;
     }
@@ -8348,11 +8350,11 @@ bool DynamicDataImpl::DataContainer::serialize_union_xcdr2(DCPS::Serializer& ser
     bool found_selected_member = false;
     DDS::MemberDescriptor_var selected_md;
     const DDS::ReturnCode_t rc =
-      data_->get_union_branch(disc_value, found_selected_member, selected_md);
-    if (rc) {
+      data_->get_selected_union_branch(disc_value, found_selected_member, selected_md);
+    if (rc != DDS::RETCODE_OK) {
       if (log_level >= LogLevel::Notice) {
         ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicDataImpl::serialize_union_xcdr2:"
-                   " get_union_branch failed: %C\n", retcode_to_string(rc)));
+                   " get_selected_union_branch failed: %C\n", retcode_to_string(rc)));
       }
       return false;
     }

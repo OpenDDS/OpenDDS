@@ -6,14 +6,16 @@
 #ifndef OPENDDS_DCPS_XTYPES_DYNAMIC_DATA_ADAPTER_H
 #define OPENDDS_DCPS_XTYPES_DYNAMIC_DATA_ADAPTER_H
 
-#include <dds/DCPS/Definitions.h>
-#if OPENDDS_HAS_DYNAMIC_DATA_ADAPTER
-#  include "DynamicDataBase.h"
-#  include "Utils.h"
+#ifndef OPENDDS_SAFETY_PROFILE
+#  include <dds/DCPS/Definitions.h>
+#  if OPENDDS_HAS_DYNAMIC_DATA_ADAPTER
+#    include "DynamicDataBase.h"
+#    include "Utils.h"
 
-#  include <dds/DdsDynamicDataC.h>
-
-#  include <vector>
+#    include <vector>
+#  else
+#    include <dds/DdsDynamicDataC.h>
+#  endif
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -42,6 +44,8 @@ DDS::DynamicData_ptr get_dynamic_data_adapter(DDS::DynamicType_ptr type, const T
 template <typename T, typename Tag>
 const T* get_dynamic_data_adapter_value(DDS::DynamicData_ptr dda);
 
+#  if OPENDDS_HAS_DYNAMIC_DATA_ADAPTER
+
 template <typename T, typename Tag = void>
 class DynamicDataAdapterImpl;
 
@@ -51,17 +55,13 @@ class DynamicDataAdapterImpl;
  *
  * TODO:
  * - Support direct array methods, like get_int32_values
- * - Support casting, like using get_int32_value on a int16 member. Right now
- *   the method must match the members type. This could be possible by replacing
- *   get_simple_value with, among other methods, a get_i16_raw_value that
- *   changes what it interprets the void* dest as depending on the type kind.
- *   This could also be possible by implementing the access methods in
- *   DynamicDataBase and having those handle the cast. This would enable casting
- *   in both DynamicDataAdapter and DynamicDataImpl, as well as any other future
- *   DynamicData.
  *   - Part of this is accessing all types as complex value.
  * - Implement equals, clear_value, clear_all_values, and clear_nonkey_values
  * - Respect bounds of strings and sequences.
+ * - Implement way for unions branch to initialized with a default value so
+ *   get_complex_value works like DynamicDataImpl if there is no selected
+ *   branch. This might be able to be done in either code generation of
+ *   DynamicDataAdapterImpl or maybe purely in terms of DynamicDataAdapter.
  */
 class OpenDDS_Dcps_Export DynamicDataAdapter : public DynamicDataBase {
 public:
@@ -540,6 +540,8 @@ protected:
     return rc;
   }
 
+  // A reference to a std::vector<bool> element isn't a bool&, so it's a special
+  // case.
   DDS::ReturnCode_t set_bool_vector_elem_raw_value(
     const char* method, std::vector<bool>::reference dest, DDS::MemberId id,
     const void* source, DDS::TypeKind tk)
@@ -696,11 +698,13 @@ protected:
   T& value_;
 };
 
+#  endif // OPENDDS_HAS_DYNAMIC_DATA_ADAPTER
+
 } // namespace XTypes
 } // namespace OpenDDS
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
-#endif // OPENDDS_HAS_DYNAMIC_DATA_ADAPTER
+#endif // OPENDDS_SAFETY_PROFILE
 
 #endif // OPENDDS_DCPS_XTYPES_DYNAMIC_DATA_ADAPTER_H

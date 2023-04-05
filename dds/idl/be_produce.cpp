@@ -64,18 +64,20 @@ trademarks or registered trademarks of Sun Microsystems, Inc.
 
 // be_produce.cpp - Produce the work of the BE
 
+#include "global_extern.h"
+
 #include "be_extern.h"
 #include "dds_visitor.h"
+
+#include "ast_root.h"
+#include "utl_string.h"
+
+#include "ace/OS_NS_strings.h"
+#include "ace/OS_NS_sys_time.h"
+#include "ace/OS_NS_unistd.h"
+
 #include "../Version.h"
-
-#include <ast_root.h>
-#include <utl_string.h>
-#include <global_extern.h>
-
-#include <ace/OS_NS_strings.h>
-#include <ace/OS_NS_sys_time.h>
-#include <ace/OS_NS_unistd.h>
-#include <ace/Version.h>
+#include "ace/Version.h"
 
 #include <iostream>
 #include <fstream>
@@ -241,10 +243,9 @@ void postprocess(const char* fn, ostringstream& content,
     if (pch.length()) {
       out << "#include \"" << pch << "\"\n";
     }
-    out <<
-      "#include \"" << be_global->facets_header_name_.c_str() << "\"\n"
+    out << "#include \"" << be_global->facets_header_name_.c_str() << "\"\n"
       "#include \"" << be_global->header_name_.c_str() << "\"\n"
-      "#include <dds/FACE/FaceTSS.h>\n\n"
+      "#include \"dds/FACE/FaceTSS.h\"\n\n"
       "namespace FACE { namespace TS {\n\n";
   }
   break;

@@ -9,6 +9,7 @@
 #  include "DynamicDataXcdrReadImpl.h"
 
 #  include "DynamicTypeMemberImpl.h"
+#  include "Utils.h"
 
 #  include <dds/DCPS/debug.h>
 #  include <dds/DCPS/FilterEvaluator.h>
@@ -2157,9 +2158,9 @@ DDS::ReturnCode_t DynamicDataXcdrReadImpl::skip_to_struct_member(DDS::MemberDesc
     const bool xcdr2_appendable = encoding_.xcdr_version() == DCPS::Encoding::XCDR_VERSION_2 &&
       ek == DDS::APPENDABLE;
     if (xcdr2_appendable && !strm_.read_delimiter(dheader)) {
-      if (DCPS::DCPS_debug_level >= 1) {
-        ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) DynamicDataXcdrReadImpl::skip_to_struct_member -")
-                   ACE_TEXT(" Failed to read DHEADER for member ID %d\n"), id));
+      if (log_level >= LogLevel::Notice) {
+        ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicDataXcdrReadImpl::skip_to_struct_member: "
+                   "Failed to read DHEADER for member ID %d\n", id));
       }
       return DDS::RETCODE_ERROR;
     }
@@ -2901,18 +2902,6 @@ namespace {
     return ret;
   }
 
-  template <typename T>
-  DDS::ReturnCode_t get_some_value(DCPS::Value& value, DDS::MemberId id, DynamicDataBase& dyn,
-                                   DDS::ReturnCode_t (DynamicDataBase::* pmf)(T&, DDS::MemberId))
-  {
-    T v;
-    const DDS::ReturnCode_t ret = (dyn.*pmf)(v, id);
-    if (ret == DDS::RETCODE_OK) {
-      value = v;
-    }
-    return ret;
-  }
-
   DDS::ReturnCode_t get_some_value(DCPS::Value& value, DDS::MemberId id, DynamicDataXcdrReadImpl& dyn,
                                    DDS::ReturnCode_t (DynamicDataXcdrReadImpl::* pmf)(char*&, DDS::MemberId))
   {
@@ -2960,7 +2949,7 @@ DDS::ReturnCode_t DynamicDataXcdrReadImpl::get_simple_value(DCPS::Value& value, 
   case TK_INT32:
     return get_some_value(value, id, *this, &DynamicDataXcdrReadImpl::get_int32_value);
   case TK_INT64:
-    return get_some_value(value, id, *this, &DynamicDataBase::get_int64_value);
+    return get_some_value(value, id, *this, &DynamicDataXcdrReadImpl::get_int64_value_impl);
   case TK_UINT8:
     return get_some_value(value, id, *this, &DynamicDataXcdrReadImpl::get_uint8_value);
   case TK_UINT16:
@@ -2968,7 +2957,7 @@ DDS::ReturnCode_t DynamicDataXcdrReadImpl::get_simple_value(DCPS::Value& value, 
   case TK_UINT32:
     return get_some_value(value, id, *this, &DynamicDataXcdrReadImpl::get_uint32_value);
   case TK_UINT64:
-    return get_some_value(value, id, *this, &DynamicDataBase::get_uint64_value);
+    return get_some_value(value, id, *this, &DynamicDataXcdrReadImpl::get_uint64_value_impl);
   case TK_FLOAT32:
     return get_some_value(value, id, *this, &DynamicDataXcdrReadImpl::get_float32_value);
   case TK_FLOAT64:
@@ -3008,10 +2997,11 @@ bool print_struct(DDS::DynamicData_ptr dd, DCPS::String& type_string, DCPS::Stri
     // Translate the item number into a MemberId.
     const MemberId member_id = dd->get_member_id_at_index(idx);
     if (member_id == MEMBER_ID_INVALID) {
-      if (DCPS::log_level >= DCPS::LogLevel::Notice) {
-        ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: print_struct: failed to read struct member at index %u\n", idx));
-        return false;
+      if (log_level >= LogLevel::Notice) {
+        ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: print_struct: "
+          "failed to get struct member at index %u\n", idx));
       }
+      return false;
     }
 
     DDS::MemberDescriptor_var member_descriptor;
@@ -3038,8 +3028,9 @@ bool print_struct(DDS::DynamicData_ptr dd, DCPS::String& type_string, DCPS::Stri
     }
 
     if (!print_member(dd, type_string, indent, member_base_type, member_id)) {
-      if (DCPS::log_level >= DCPS::LogLevel::Notice) {
-        ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: print_member: failed to read struct member\n"));
+      if (log_level >= LogLevel::Notice) {
+        ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: print_struct: "
+          "failed to print struct member with id %u\n", member_id));
       }
       return false;
     }

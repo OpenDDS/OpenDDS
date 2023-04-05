@@ -70,9 +70,9 @@ protected:
 
   static CORBA::ULong bound_total(DDS::TypeDescriptor_var descriptor);
   static DDS::MemberId get_union_default_member(DDS::DynamicType* type);
-  DDS::ReturnCode_t get_union_branch(
+  DDS::ReturnCode_t get_selected_union_branch(
     DDS::Int32 disc, bool& found_selected_member, DDS::MemberDescriptor_var& selected_md) const;
-  DDS::ReturnCode_t get_union_branch(
+  DDS::ReturnCode_t get_selected_union_branch(
     bool& found_selected_member, DDS::MemberDescriptor_var& selected_md);
   bool discriminator_selects_no_member(DDS::Int32 disc) const;
 

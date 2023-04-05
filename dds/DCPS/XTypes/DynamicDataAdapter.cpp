@@ -46,12 +46,12 @@ DDS::UInt32 DynamicDataAdapter::get_item_count()
     {
       bool branch_active;
       DDS::MemberDescriptor_var active_branch;
-      DDS::ReturnCode_t rc = get_union_branch(branch_active, active_branch);
+      DDS::ReturnCode_t rc = get_selected_union_branch(branch_active, active_branch);
       if (rc != DDS::RETCODE_OK) {
         if (DCPS::log_level >= DCPS::LogLevel::Warning) {
           const CORBA::String_var type_name = type_->get_name();
           ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: DynamicDataAdapterImpl<%C>::item: "
-            "get_union_branch returned %C\n",
+            "get_selected_union_branch returned %C\n",
             type_name.in(), retcode_to_string(rc)));
         }
         return MEMBER_ID_INVALID;
@@ -128,12 +128,12 @@ DDS::MemberId DynamicDataAdapter::get_member_id_at_index(DDS::UInt32 index)
       } else if (index == 1) {
         bool branch_active;
         DDS::MemberDescriptor_var active_branch;
-        DDS::ReturnCode_t rc = get_union_branch(branch_active, active_branch);
+        DDS::ReturnCode_t rc = get_selected_union_branch(branch_active, active_branch);
         if (rc != DDS::RETCODE_OK) {
           if (DCPS::log_level >= DCPS::LogLevel::Warning) {
             const CORBA::String_var type_name = type_->get_name();
             ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: DynamicDataAdapterImpl<%C>::get_member_id_at_index: "
-              "get_union_branch returned %C\n",
+              "get_selected_union_branch returned %C\n",
               type_name.in(), retcode_to_string(rc)));
           }
           return MEMBER_ID_INVALID;

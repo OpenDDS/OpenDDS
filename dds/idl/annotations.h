@@ -424,8 +424,7 @@ namespace OpenDDS {
      * get_dynamic_data_adapter for these types will be generated, but will
      * return nullptr.
      */
-    class NoDynamicDataAdapterAnnotation : public Annotation {
-    public:
+    struct NoDynamicDataAdapterAnnotation : public Annotation {
       std::string definition() const
       {
         return

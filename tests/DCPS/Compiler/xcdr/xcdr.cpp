@@ -2697,7 +2697,7 @@ TEST(KeyTests, KeyOnly_KeyedUnion)
 
 int main(int argc, char* argv[])
 {
-  for (int i = 0; i < argc; ++i) {
+  for (int i = 1; i < argc; ++i) {
     if (!std::strcmp(argv[i], "--dynamic")) {
       dynamic = true;
     }

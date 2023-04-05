@@ -135,7 +135,7 @@ namespace {
     } else {
       be_global->impl_ << field_id;
     }
-    be_global->impl_ << ": // " << (disc ? "discriminator" : canonical_name(field)) << "\n"
+    be_global->impl_ << ":\n"
       "      {\n";
 
     std::string op_type;
@@ -169,7 +169,7 @@ namespace {
       } else {
         value += (use_cxx11 ? "_" : "") + cpp_field_name;
       }
-      generate_op(3, set, field_type, type_name, op_type, is_complex,
+      generate_op(4, set, field_type, type_name, op_type, is_complex,
         value + extra_access, rc_dest);
       if (union_node && set) {
         be_global->impl_ <<
@@ -249,6 +249,7 @@ namespace {
         "    }\n";
     } else if (seq_node || array_node) {
       AST_Type* const base_type = seq_node ? seq_node->base_type() : array_node->base_type();
+
       // For the type name we need the deepest named type, not the actual type.
       // This will be the name of the deepest typedef if it's an array or
       // sequence, otherwise the name of the type.
@@ -258,6 +259,7 @@ namespace {
         named_type = consider;
         consider = dynamic_cast<AST_Typedef*>(named_type)->base_type();
       }
+
       std::string op_type;
       std::string extra_access;
       bool is_complex = false;

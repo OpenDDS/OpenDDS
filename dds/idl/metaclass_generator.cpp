@@ -489,7 +489,6 @@ void generate_anon_fields(AST_Structure* node)
       }
     }
   }
-
 }
 
 bool

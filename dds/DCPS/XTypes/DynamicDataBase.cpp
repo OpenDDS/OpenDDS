@@ -309,7 +309,7 @@ DDS::MemberId DynamicDataBase::get_union_default_member(DDS::DynamicType* type)
   return default_branch;
 }
 
-DDS::ReturnCode_t DynamicDataBase::get_union_branch(DDS::Int32 disc,
+DDS::ReturnCode_t DynamicDataBase::get_selected_union_branch(DDS::Int32 disc,
   bool& found_selected_member, DDS::MemberDescriptor_var& selected_md) const
 {
   found_selected_member = false;
@@ -354,7 +354,7 @@ DDS::ReturnCode_t DynamicDataBase::get_union_branch(DDS::Int32 disc,
   return rc;
 }
 
-DDS::ReturnCode_t DynamicDataBase::get_union_branch(
+DDS::ReturnCode_t DynamicDataBase::get_selected_union_branch(
   bool& found_selected_member, DDS::MemberDescriptor_var& selected_md)
 {
   // TODO: Support UInt64 and Int64
@@ -365,19 +365,19 @@ DDS::ReturnCode_t DynamicDataBase::get_union_branch(
   }
   if (i64_disc < ACE_INT32_MIN || i64_disc > ACE_INT32_MAX) {
     if (log_level >= LogLevel::Notice) {
-      ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicDataBase::get_union_branch: "
+      ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicDataBase::get_selected_union_branch: "
         "union discriminator can't fit in int32: %q\n", i64_disc));
     }
     return DDS::RETCODE_ERROR;
   }
-  return get_union_branch(static_cast<DDS::Int32>(i64_disc), found_selected_member, selected_md);
+  return get_selected_union_branch(static_cast<DDS::Int32>(i64_disc), found_selected_member, selected_md);
 }
 
 bool DynamicDataBase::discriminator_selects_no_member(DDS::Int32 disc) const
 {
   bool found_selected_member;
   DDS::MemberDescriptor_var selected_md;
-  DDS::ReturnCode_t rc = get_union_branch(disc, found_selected_member, selected_md);
+  DDS::ReturnCode_t rc = get_selected_union_branch(disc, found_selected_member, selected_md);
   if (rc != DDS::RETCODE_OK) {
     if (log_level >= LogLevel::Warning) {
       ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: DynamicDataBase::discriminator_selects_no_member: "
@@ -492,7 +492,7 @@ DDS::ReturnCode_t DynamicDataBase::get_int64_value(DDS::Int64& value, DDS::Membe
   case TK_BOOLEAN:
     {
       DDS::Boolean tmp;
-      rc = get_boolean_value(tmp, value);
+      rc = get_boolean_value(tmp, id);
       if (rc == DDS::RETCODE_OK) {
         value = static_cast<DDS::Int64>(tmp);
       }
@@ -501,7 +501,7 @@ DDS::ReturnCode_t DynamicDataBase::get_int64_value(DDS::Int64& value, DDS::Membe
   case TK_BYTE:
     {
       DDS::Byte tmp;
-      rc = get_byte_value(tmp, value);
+      rc = get_byte_value(tmp, id);
       if (rc == DDS::RETCODE_OK) {
         value = static_cast<DDS::Int64>(tmp);
       }
@@ -569,21 +569,19 @@ DDS::ReturnCode_t DynamicDataBase::get_uint64_value(DDS::UInt64& value, DDS::Mem
   case TK_BOOLEAN:
     {
       DDS::Boolean tmp;
-      rc = get_boolean_value(tmp, value);
-      if (rc != DDS::RETCODE_OK) {
-        return rc;
+      rc = get_boolean_value(tmp, id);
+      if (rc == DDS::RETCODE_OK) {
+        value = tmp ? 1 : 0;
       }
-      value = static_cast<DDS::UInt64>(tmp);
       return rc;
     }
   case TK_BYTE:
     {
       DDS::Byte tmp;
-      rc = get_byte_value(tmp, value);
-      if (rc != DDS::RETCODE_OK) {
-        return rc;
+      rc = get_byte_value(tmp, id);
+      if (rc == DDS::RETCODE_OK) {
+        value = static_cast<DDS::UInt64>(tmp);
       }
-      value = static_cast<DDS::UInt64>(tmp);
       return rc;
     }
   case TK_INT8:
@@ -592,10 +590,9 @@ DDS::ReturnCode_t DynamicDataBase::get_uint64_value(DDS::UInt64& value, DDS::Mem
     {
       DDS::Int64 tmp;
       rc = get_int_value(tmp, this, id, tk);
-      if (rc != DDS::RETCODE_OK) {
-        return rc;
+      if (rc == DDS::RETCODE_OK) {
+        value = static_cast<DDS::UInt64>(tmp);
       }
-      value = static_cast<DDS::UInt64>(tmp);
       return rc;
     }
   case TK_UINT8:
@@ -608,24 +605,22 @@ DDS::ReturnCode_t DynamicDataBase::get_uint64_value(DDS::UInt64& value, DDS::Mem
     {
       DDS::Char8 tmp;
       rc = get_char8_value(tmp, id);
-      if (rc != DDS::RETCODE_OK) {
-        return rc;
+      if (rc == DDS::RETCODE_OK) {
+        value = DCPS::char_value(tmp);
       }
-      value = DCPS::char_value(tmp);
       return rc;
     }
   case TK_CHAR16:
     {
       DDS::Char16 tmp;
       rc = get_char16_value(tmp, id);
-      if (rc != DDS::RETCODE_OK) {
-        return rc;
+      if (rc == DDS::RETCODE_OK) {
+        value = DCPS::char_value(tmp);
       }
-      value = DCPS::char_value(tmp);
       return rc;
     }
   default:
-    return invalid_cast("get_int64_value", TK_INT64, tk);
+    return invalid_cast("get_uint64_value", TK_UINT64, tk);
   }
 }
 

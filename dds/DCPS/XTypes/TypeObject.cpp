@@ -1237,32 +1237,6 @@ bool is_complex(TypeKind tk)
   }
 }
 
-bool is_int(TypeKind tk)
-{
-  switch (tk) {
-  case TK_INT8:
-  case TK_INT16:
-  case TK_INT32:
-  case TK_INT64:
-    return true;
-  default:
-    return false;
-  }
-}
-
-bool is_uint(TypeKind tk)
-{
-  switch (tk) {
-  case TK_UINT8:
-  case TK_UINT16:
-  case TK_UINT32:
-  case TK_UINT64:
-    return true;
-  default:
-    return false;
-  }
-}
-
 bool is_sequence_like(TypeKind tk)
 {
   switch (tk) {
