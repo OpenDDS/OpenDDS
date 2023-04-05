@@ -2498,11 +2498,8 @@ When you configure inter-host communication, the local_address can not be localh
 192.168.0.2), or you can leave it unspecified in which case the FQDN and an ephemeral port will be used.
 
 FQDN resolution is dependent upon system configuration.
-In the absence of a FQDN (e.g.
-``example.objectcomputing.com``), OpenDDS will use any discovered short names (e.g.
-example).
-If that fails, it will use the name resolved from the loopback address (e.g.
-localhost).
+In the absence of a FQDN (e.g. ``example.opendds.org``), OpenDDS will use any discovered short names (e.g. example).
+If that fails, it will use the name resolved from the loopback address (e.g. localhost).
 
 .. note:: OpenDDS IPv6 support requires that the underlying ACE/TAO components be built with IPv6 support enabled.
   The local_address needs to be an IPv6 decimal address or a FQDN with port number.
