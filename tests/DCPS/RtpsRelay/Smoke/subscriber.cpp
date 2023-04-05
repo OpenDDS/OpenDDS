@@ -6,6 +6,7 @@
 #include "Args.h"
 #include "DataReaderListener.h"
 #include "MessengerTypeSupportImpl.h"
+#include "ParticipantBit.h"
 
 #include <dds/DCPS/JsonValueWriter.h>
 #include <dds/DCPS/Marked_Default_Qos.h>
@@ -28,6 +29,7 @@
 #endif
 
 #include <iostream>
+#include <cstdlib>
 
 #ifdef OPENDDS_SECURITY
 const char auth_ca_file[] = "file:../../../security/certs/identity/identity_ca_cert.pem";
@@ -46,25 +48,69 @@ void append(DDS::PropertySeq& props, const char* name, const char* value, bool p
 }
 #endif
 
-bool check_lease_recovery = false;
-bool expect_unmatch = false;
+Args args;
 
 bool reliable = false;
 bool wait_for_acks = false;
 
 const char USER_DATA[] = "The Subscriber";
+const char OTHER_USER_DATA[] = "The Publisher";
+
+int reader_test(const DDS::DataReader_var& reader, DataReaderListenerImpl* listener)
+{
+  // Block until Publisher completes
+  DDS::StatusCondition_var condition = reader->get_statuscondition();
+  condition->set_enabled_statuses(DDS::SUBSCRIPTION_MATCHED_STATUS);
+
+  DDS::WaitSet_var ws = new DDS::WaitSet;
+  ws->attach_condition(condition);
+
+  DDS::Duration_t timeout =
+    { DDS::DURATION_INFINITE_SEC, DDS::DURATION_INFINITE_NSEC };
+
+  DDS::ConditionSeq conditions;
+  DDS::SubscriptionMatchedStatus matches = { 0, 0, 0, 0, 0 };
+
+  while (true) {
+    if (reader->get_subscription_matched_status(matches) != DDS::RETCODE_OK) {
+      ACE_ERROR_RETURN((LM_ERROR,
+                        ACE_TEXT("%N:%l main()")
+                        ACE_TEXT(" ERROR: get_subscription_matched_status() failed!\n")), EXIT_FAILURE);
+    }
+    if (!args.expect_unmatch) {
+      if (matches.current_count == 0 && matches.total_count > 0) {
+        break;
+      }
+    } else {
+      if (matches.current_count == 1 && matches.total_count > 1) {
+        listener->mark_rediscovered();
+      }
+      if (matches.current_count == 0 && matches.total_count > 1) {
+        break;
+      }
+    }
+    if (ws->wait(conditions, timeout) != DDS::RETCODE_OK) {
+      ACE_ERROR_RETURN((LM_ERROR,
+                        ACE_TEXT("%N:%l main()")
+                        ACE_TEXT(" ERROR: wait() failed!\n")), EXIT_FAILURE);
+    }
+  }
+
+  const auto status = listener->is_valid(args.check_lease_recovery, args.expect_unmatch) ? EXIT_SUCCESS : EXIT_FAILURE;
+  ws->detach_condition(condition);
+  return status;
+}
 
 int
 ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 {
-  int status = 0;
+  int status = EXIT_SUCCESS;
   try {
     // Initialize DomainParticipantFactory
     DDS::DomainParticipantFactory_var dpf =
       TheParticipantFactoryWithArgs(argc, argv);
 
-    int status = EXIT_SUCCESS;
-    if ((status = parse_args(argc, argv)) != EXIT_SUCCESS) {
+    if ((status = args.parse(argc, argv)) != EXIT_SUCCESS) {
       return status;
     }
 
@@ -103,13 +149,13 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
                         ACE_TEXT(" ERROR: create_participant() failed!\n")), 1);
     }
 
-      OpenDDS::DCPS::DomainParticipantImpl* dp_impl =
-        dynamic_cast<OpenDDS::DCPS::DomainParticipantImpl*>(participant.in());
+    OpenDDS::DCPS::DomainParticipantImpl* dp_impl =
+      dynamic_cast<OpenDDS::DCPS::DomainParticipantImpl*>(participant.in());
 
-      OpenDDS::DCPS::RcHandle<OpenDDS::RTPS::RtpsDiscovery> disc = OpenDDS::DCPS::static_rchandle_cast<OpenDDS::RTPS::RtpsDiscovery>(TheServiceParticipant->get_discovery(42));
-      const OpenDDS::DCPS::GUID_t guid = dp_impl->get_id();
-      OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::TransportInst> discovery_inst = disc->sedp_transport_inst(42, guid);
-      discovery_inst->count_messages(true);
+    OpenDDS::DCPS::RcHandle<OpenDDS::RTPS::RtpsDiscovery> disc = OpenDDS::DCPS::static_rchandle_cast<OpenDDS::RTPS::RtpsDiscovery>(TheServiceParticipant->get_discovery(42));
+    const OpenDDS::DCPS::GUID_t guid = dp_impl->get_id();
+    OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::TransportInst> discovery_inst = disc->sedp_transport_inst(42, guid);
+    discovery_inst->count_messages(true);
 
     // Register Type (Messenger::Message)
     Messenger::MessageTypeSupport_var ts =
@@ -140,7 +186,8 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     DDS::SubscriberQos subscriber_qos;
     participant->get_default_subscriber_qos(subscriber_qos);
     subscriber_qos.partition.name.length(1);
-    subscriber_qos.partition.name[0] = "?CI";
+    subscriber_qos.partition.name[0] = args.override_partition
+      ? ACE_TEXT_ALWAYS_CHAR(args.override_partition) : "?CI";
 
     DDS::Subscriber_var sub =
       participant->create_subscriber(subscriber_qos,
@@ -174,60 +221,25 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
                         ACE_TEXT(" ERROR: create_datareader() failed!\n")), 1);
     }
 
-    // Block until Publisher completes
-    DDS::StatusCondition_var condition = reader->get_statuscondition();
-    condition->set_enabled_statuses(DDS::SUBSCRIPTION_MATCHED_STATUS);
-
-    DDS::WaitSet_var ws = new DDS::WaitSet;
-    ws->attach_condition(condition);
-
-    DDS::Duration_t timeout =
-      { DDS::DURATION_INFINITE_SEC, DDS::DURATION_INFINITE_NSEC };
-
-    DDS::ConditionSeq conditions;
-    DDS::SubscriptionMatchedStatus matches = { 0, 0, 0, 0, 0 };
-
-    while (true) {
-      if (reader->get_subscription_matched_status(matches) != DDS::RETCODE_OK) {
-        ACE_ERROR_RETURN((LM_ERROR,
-                          ACE_TEXT("%N:%l main()")
-                          ACE_TEXT(" ERROR: get_subscription_matched_status() failed!\n")), 1);
-      }
-      if (!expect_unmatch) {
-        if (matches.current_count == 0 && matches.total_count > 0) {
-          break;
-        }
-      } else {
-        if (matches.current_count == 1 && matches.total_count > 1) {
-          listener_servant->mark_rediscovered();
-        }
-        if (matches.current_count == 0 && matches.total_count > 1) {
-          break;
-        }
-      }
-      if (ws->wait(conditions, timeout) != DDS::RETCODE_OK) {
-        ACE_ERROR_RETURN((LM_ERROR,
-                          ACE_TEXT("%N:%l main()")
-                          ACE_TEXT(" ERROR: wait() failed!\n")), 1);
-      }
-    }
-
-    status = listener_servant->is_valid(check_lease_recovery, expect_unmatch) ? EXIT_SUCCESS : EXIT_FAILURE;
-
-    ws->detach_condition(condition);
+    if (args.participant_bit_expected_instances > 0) {
+      status = test_participant_discovery(participant, args.participant_bit_expected_instances,
+                                          USER_DATA, OTHER_USER_DATA, disc->config()->resend_period());
+    } else {
+      status = reader_test(reader, listener_servant);
 
 #if OPENDDS_HAS_JSON_VALUE_WRITER
-    std::cout << "Subscriber Guid: " << OpenDDS::DCPS::LogGuid(guid).c_str() << std::endl;
-    OpenDDS::DCPS::TransportStatisticsSequence stats;
-    disc->append_transport_statistics(42, guid, stats);
-    if (transport_inst) {
-      transport_inst->append_transport_statistics(stats);
-    }
+      std::cout << "Subscriber Guid: " << OpenDDS::DCPS::LogGuid(guid).c_str() << std::endl;
+      OpenDDS::DCPS::TransportStatisticsSequence stats;
+      disc->append_transport_statistics(42, guid, stats);
+      if (transport_inst) {
+        transport_inst->append_transport_statistics(stats);
+      }
 
-    for (unsigned int i = 0; i != stats.length(); ++i) {
-      std::cout << "Subscriber Transport Statistics: " << OpenDDS::DCPS::to_json(stats[i]) << std::endl;
-    }
+      for (unsigned int i = 0; i != stats.length(); ++i) {
+        std::cout << "Subscriber Transport Statistics: " << OpenDDS::DCPS::to_json(stats[i]) << std::endl;
+      }
 #endif
+    }
 
     // Clean-up!
     participant->delete_contained_entities();
@@ -236,7 +248,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
   } catch (const CORBA::Exception& e) {
     e._tao_print_exception("Exception caught in main():");
-    status = 1;
+    status = EXIT_FAILURE;
   }
 
   return status;
