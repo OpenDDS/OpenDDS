@@ -353,13 +353,14 @@ TEST_F(dds_DCPS_XTypes_DynamicDataAdapter, test_union)
 }
 
 #  else // (No DynamicDataAdapter)
-TEST(dds_DCPS_XTypes_DynamicDataAdapter, null_get_dynamic_data_adapter)
+TEST_F(dds_DCPS_XTypes_DynamicDataAdapter, null_get_dynamic_data_adapter)
 {
   add_type<SimpleStruct>();
   DDS::DynamicType_var dt = get_dynamic_type<SimpleStruct>();
   SimpleStruct ss;
   DDS::DynamicData_var dd = get_dynamic_data_adapter<SimpleStruct, SimpleStruct>(dt, ss);
-  ASSERT_EQ(dd.in(), 0);
+  DDS::DynamicData* const null = 0;
+  ASSERT_EQ(dd.in(), null);
 }
 #  endif
 
