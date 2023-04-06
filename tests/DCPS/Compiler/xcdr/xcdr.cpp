@@ -212,6 +212,8 @@ void amalgam_serializer_test_base(
 {
 #if OPENDDS_HAS_DYNAMIC_DATA_ADAPTER
   const bool key_only = field_filter == FieldFilter_KeyOnly;
+#else
+  ACE_UNUSED_ARG(field_filter);
 #endif
   ACE_Message_Block buffer(1024);
 

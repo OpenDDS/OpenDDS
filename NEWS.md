@@ -10,8 +10,8 @@ OpenDDS 3.24.0 is currently in development, so this list might change.
 ### Fixes:
 - XTypes (#4078):
   - `TypeObject`s struct and union members used to be sorted by member ID, but they are now sorted by declaration order as the XTypes spec calls for.
-    These orders will not be different by default since default member ID are incrementing.
-    If using `@autoid(hash)`, `--default-autoid hash`, or `@id(ID)` then the order could be different.
+    By default member IDs increment starting at 0, and in that case the `TypeObject`s will be the same.
+    If `@autoid(hash)`, `--default-autoid hash`, or `@id(ID)` are being used then the order could be different.
     This could cause some reader/writer matching incompatibility with older versions of OpenDDS:
     - Topics with final and appendable structs will no longer match.
     - If `DISALLOW_TYPE_COERCION` QoS is being used, then all topics where the order differ will not longer match.
