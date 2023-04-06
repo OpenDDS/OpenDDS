@@ -147,6 +147,9 @@ public:
   bool old_typeobject_encoding() const { return old_typeobject_encoding_; }
   void old_typeobject_encoding(bool b) { old_typeobject_encoding_ = b; }
 
+  bool old_typeobject_member_order() const { return old_typeobject_member_order_; }
+  void old_typeobject_member_order(bool b) { old_typeobject_member_order_ = b; }
+
   ACE_CString java_arg() const;
   void java_arg(const ACE_CString& str);
 
@@ -282,6 +285,7 @@ private:
   typedef std::map<AST_Structure*, MemberIdCollisionMap> GlobalMemberIdCollisionMap;
   GlobalMemberIdCollisionMap member_id_collision_map_;
   bool old_typeobject_encoding_;
+  bool old_typeobject_member_order_;
 
   bool is_default_nested(UTL_Scope* scope);
   AutoidKind scoped_autoid(UTL_Scope* scope) const;

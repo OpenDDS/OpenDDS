@@ -51,6 +51,7 @@ public:
   }
 };
 
+#  if OPENDDS_HAS_DYNAMIC_DATA_ADAPTER
 TEST_F(dds_DCPS_XTypes_DynamicDataAdapter, simple_struct)
 {
   add_type<SimpleStruct>();
@@ -350,5 +351,16 @@ TEST_F(dds_DCPS_XTypes_DynamicDataAdapter, test_union)
   }
   */
 }
+
+#  else // (No DynamicDataAdapter)
+TEST(dds_DCPS_XTypes_DynamicDataAdapter, null_get_dynamic_data_adapter)
+{
+  add_type<SimpleStruct>();
+  DDS::DynamicType_var dt = get_dynamic_type<SimpleStruct>();
+  SimpleStruct ss;
+  DDS::DynamicData_var dd = get_dynamic_data_adapter<SimpleStruct, SimpleStruct>(dt, ss);
+  ASSERT_EQ(dd.in(), 0);
+}
+#  endif
 
 #endif // OPENDDS_SAFETY_PROFILE

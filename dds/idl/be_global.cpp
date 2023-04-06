@@ -64,6 +64,7 @@ BE_GlobalData::BE_GlobalData()
   , root_default_autoid_(autoidkind_sequential)
   , default_try_construct_(tryconstructfailaction_discard)
   , old_typeobject_encoding_(false)
+  , old_typeobject_member_order_(false)
 {
   default_data_representation_.set_all(true);
 
@@ -480,6 +481,8 @@ BE_GlobalData::parse_args(long& i, char** av)
       }
     } else if (!strcmp(av[i], "--old-typeobject-encoding")) {
       old_typeobject_encoding_ = true;
+    } else if (!strcmp(av[i], "--old-typeobject-member-order")) {
+      old_typeobject_member_order_ = true;
     } else {
       invalid_option(av[i]);
     }

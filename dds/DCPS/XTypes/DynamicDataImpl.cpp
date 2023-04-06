@@ -3934,7 +3934,7 @@ void DynamicDataImpl::DataContainer::clear()
 bool DynamicDataImpl::DataContainer::get_largest_single_index(CORBA::ULong& largest_index) const
 {
   OPENDDS_ASSERT(is_sequence_like(type_->get_kind()));
-  const CORBA::ULong bound = type_desc_->bound()[0];
+  const DDS::UInt32 bound = bound_total(type_desc_);
 
   // Since ID is used as index in this implementation, the last element has largest index.
   // A different implementation (ID-to-index mapping) may need to iterate through all
@@ -3954,7 +3954,7 @@ bool DynamicDataImpl::DataContainer::get_largest_sequence_index(CORBA::ULong& la
 bool DynamicDataImpl::DataContainer::get_largest_complex_index(CORBA::ULong& largest_index) const
 {
   OPENDDS_ASSERT(is_sequence_like(type_->get_kind()));
-  const CORBA::ULong bound = type_desc_->bound()[0];
+  const DDS::UInt32 bound = bound_total(type_desc_);
   return data_->get_index_from_id(complex_map_.rbegin()->first, largest_index, bound);
 }
 
