@@ -7250,11 +7250,19 @@ void Sedp::match_continue(const GUID_t& writer, const GUID_t& reader)
       } else {
         // The two types must be equivalent for DISALLOW_TYPE_COERCION
         consistent = reader_type_id == writer_type_id;
+        if (!consistent && DCPS::DCPS_debug_level >= 4) {
+          ACE_DEBUG((LM_WARNING, "(%P|%t) Sedp::match_continue: will not match because type "
+            "ids must be the same when using DISALLOW_TYPE_COERCION\n"));
+        }
       }
     } else {
       if (drQos->type_consistency.force_type_validation) {
         // Cannot do type validation since not both TypeObjects are available
         consistent = false;
+        if (DCPS::DCPS_debug_level >= 4) {
+          ACE_DEBUG((LM_WARNING, "(%P|%t) Sedp::match_continue: will not match because "
+            "force_type_validation is true, but TypeObjects are not available\n"));
+        }
       } else {
         // Fall back to matching type names
         String writer_type_name;

@@ -1,6 +1,6 @@
 // TODO: Add deserialization only tests that have unknown parameters with
 // must understand that cause an expected failure.
-// This should for generated deserialzation code, but probably doesn't work with
+// This should for generated deserialization code, but probably doesn't work with
 // DynamicData.
 
 #include "xcdrbasetypesTypeSupportImpl.h"

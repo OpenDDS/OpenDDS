@@ -2981,16 +2981,20 @@ DDS::ReturnCode_t DynamicDataXcdrReadImpl::get_simple_value(DCPS::Value& value, 
 
 #ifndef OPENDDS_SAFETY_PROFILE
 bool print_member(DDS::DynamicData_ptr dd, DCPS::String& type_string, DCPS::String& indent,
-                  DDS::DynamicType_ptr member_base_type, MemberId member_id);
+                  MemberId member_id);
 
-bool print_struct(DDS::DynamicData_ptr dd, DCPS::String& type_string, DCPS::String& indent)
+bool print_members(DDS::DynamicData_ptr dd, DCPS::String& type_string, DCPS::String& indent, bool print_name)
 {
   DCPS::String temp_indent = indent;
   indent += "  ";
   const DDS::DynamicType_var type = dd->type();
   const DDS::DynamicType_var base_type = get_base_type(type);
-  CORBA::String_var type_name = type->get_name();
-  type_string += "struct " + DCPS::String(type_name) + "\n";
+  const char* const kind = base_type->get_kind() == TK_STRUCTURE ? "struct" : "union";
+  if (print_name) {
+    CORBA::String_var type_name = type->get_name();
+    type_string += DCPS::String(kind) + " " + DCPS::String(type_name);
+  }
+  type_string += "\n";
 
   const ACE_CDR::ULong item_count = dd->get_item_count();
   for (ACE_CDR::ULong idx = 0; idx != item_count; ++idx) {
@@ -2998,115 +3002,18 @@ bool print_struct(DDS::DynamicData_ptr dd, DCPS::String& type_string, DCPS::Stri
     const MemberId member_id = dd->get_member_id_at_index(idx);
     if (member_id == MEMBER_ID_INVALID) {
       if (log_level >= LogLevel::Notice) {
-        ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: print_struct: "
-          "failed to get struct member at index %u\n", idx));
+        ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: print_members: "
+          "failed to get %C member at index %u\n", kind, idx));
       }
       return false;
     }
 
-    DDS::MemberDescriptor_var member_descriptor;
-    if (dd->get_descriptor(member_descriptor, member_id) != DDS::RETCODE_OK) {
-      return false;
-    }
-    const DCPS::String member_name = member_descriptor->name();
-    const DDS::DynamicType_ptr member_type = member_descriptor->type();
-    const DDS::DynamicType_var member_base_type = get_base_type(member_descriptor->type());
-    DDS::TypeDescriptor_var member_base_type_descriptor;
-    if (member_base_type->get_descriptor(member_base_type_descriptor) != DDS::RETCODE_OK) {
-      return false;
-    }
-    const CORBA::String_var member_type_name = member_type->get_name();
-    type_string += indent + DCPS::String(member_type_name.in()) + " " + member_name;
-    if (member_base_type_descriptor->kind() == TK_SEQUENCE ||
-        member_base_type_descriptor->kind() == TK_ARRAY) {
-      DDS::TypeDescriptor_var td;
-      if (get_base_type(member_base_type_descriptor->element_type())->get_descriptor(td) != DDS::RETCODE_OK) {
-        return false;
-      }
-      DCPS::String ele_type_name = td->name();
-      type_string += " " + ele_type_name;
-    }
-
-    if (!print_member(dd, type_string, indent, member_base_type, member_id)) {
+    if (!print_member(dd, type_string, indent, member_id)) {
       if (log_level >= LogLevel::Notice) {
-        ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: print_struct: "
-          "failed to print struct member with id %u\n", member_id));
+        ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: print_members: "
+          "failed to print %C member with id %u\n", kind, member_id));
       }
       return false;
-    }
-  }
-
-  indent = temp_indent;
-  return true;
-}
-
-bool print_union(DDS::DynamicData_ptr dd, DCPS::String& type_string, DCPS::String& indent)
-{
-  DCPS::String temp_indent = indent;
-  indent += "  ";
-  const DDS::DynamicType_var type = dd->type();
-  const DDS::DynamicType_var base_type = get_base_type(type);
-  DDS::TypeDescriptor_var type_descriptor;
-  if (base_type->get_descriptor(type_descriptor) != DDS::RETCODE_OK) {
-    return false;
-  }
-  CORBA::String_var type_name = type->get_name();
-  type_string += "union " + DCPS::String(type_name) + "\n";
-  const ACE_CDR::ULong item_count = dd->get_item_count();
-  for (ACE_CDR::ULong idx = 0; idx != item_count; ++idx) {
-    // Translate the item number into a MemberId.
-    const MemberId member_id = dd->get_member_id_at_index(idx);
-
-    if (member_id == DISCRIMINATOR_ID) {
-      const DDS::DynamicType_ptr discriminator_type = type_descriptor->discriminator_type();
-      const DDS::DynamicType_var discriminator_base_type = get_base_type(discriminator_type);
-      DDS::TypeDescriptor_var discriminator_descriptor;
-      if (discriminator_base_type->get_descriptor(discriminator_descriptor) != DDS::RETCODE_OK) {
-        return false;
-      }
-      const DCPS::String member_name = discriminator_descriptor->name();
-      type_string += indent + member_name + " discriminator";
-      if (!print_member(dd, type_string, indent, discriminator_base_type, DISCRIMINATOR_ID)) {
-        return false;
-      }
-    } else {
-
-      DDS::MemberDescriptor_var member_descriptor;
-      if (dd->get_descriptor(member_descriptor, member_id) != DDS::RETCODE_OK) {
-        return false;
-      }
-
-      const DCPS::String member_name = member_descriptor->name();
-      const DDS::DynamicType_ptr member_type = member_descriptor->type();
-      const DDS::DynamicType_var member_base_type = get_base_type(member_type);
-      DDS::TypeDescriptor_var member_base_type_descriptor;
-      if (member_base_type->get_descriptor(member_base_type_descriptor) != DDS::RETCODE_OK) {
-        return false;
-      }
-
-      const CORBA::String_var member_type_name = member_type->get_name();
-      if (member_base_type->get_kind() == TK_STRUCTURE ||
-          member_base_type->get_kind() == TK_UNION) {
-        type_string += indent;
-      } else {
-        type_string += indent + DCPS::String(member_type_name.in()) + " " + member_name;
-      }
-      if (member_base_type_descriptor->kind() == TK_SEQUENCE ||
-          member_base_type_descriptor->kind() == TK_ARRAY) {
-        DDS::TypeDescriptor_var td;
-        if (get_base_type(member_base_type_descriptor->element_type())->get_descriptor(td) != DDS::RETCODE_OK) {
-          return false;
-        }
-        DCPS::String ele_type_name = td->name();
-        type_string += " " + ele_type_name;
-      }
-
-      if (!print_member(dd, type_string, indent, member_base_type, member_id)) {
-        if (DCPS::log_level >= DCPS::LogLevel::Notice) {
-          ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: print_member: failed to read union branch\n"));
-        }
-        return false;
-      }
     }
   }
 
@@ -3115,14 +3022,64 @@ bool print_union(DDS::DynamicData_ptr dd, DCPS::String& type_string, DCPS::Strin
 }
 
 bool print_member(DDS::DynamicData_ptr dd, DCPS::String& type_string, DCPS::String& indent,
-                  DDS::DynamicType_ptr member_base_type, MemberId member_id)
+                  MemberId member_id)
 {
+  DDS::DynamicType_ptr member_type;
+  DDS::MemberDescriptor_var member_descriptor;
+  const DDS::DynamicType_ptr container_type = dd->type();
+  const DDS::TypeKind container_kind = container_type->get_kind();
+  const bool sequence_like = is_sequence_like(container_kind);
+  if (sequence_like) {
+    DDS::TypeDescriptor_var td;
+    if (container_type->get_descriptor(td) != DDS::RETCODE_OK) {
+      return false;
+    }
+    member_type = td->element_type();
+
+  } else {
+    DDS::DynamicTypeMember_var dtm;
+    if (container_type->get_member(dtm, member_id) != DDS::RETCODE_OK) {
+      return false;
+    }
+    if (dtm->get_descriptor(member_descriptor) != DDS::RETCODE_OK) {
+      return false;
+    }
+    member_type = member_descriptor->type();
+  }
+
+  const DDS::DynamicType_var member_base_type = get_base_type(member_type);
+  const DDS::TypeKind tk = member_base_type->get_kind();
   DDS::TypeDescriptor_var member_type_descriptor;
   if (member_base_type->get_descriptor(member_type_descriptor) != DDS::RETCODE_OK) {
     return false;
   }
 
-  const DDS::TypeKind tk = member_type_descriptor->kind();
+  if (member_descriptor) {
+    type_string += indent;
+    const bool struct_or_union = tk == TK_STRUCTURE || tk == TK_UNION;
+    if (struct_or_union) {
+      type_string += (tk == TK_STRUCTURE ? "struct " : "union ");
+    }
+    const CORBA::String_var member_type_name = member_type->get_name();
+    const DCPS::String member_name = member_descriptor->name();
+    type_string += DCPS::String(member_type_name.in()) + " " + member_name;
+    if (!struct_or_union) {
+      type_string += " ";
+    }
+    if (tk == TK_ARRAY || tk == TK_SEQUENCE) {
+      DDS::TypeDescriptor_var td;
+      if (get_base_type(member_type_descriptor->element_type())->get_descriptor(td) != DDS::RETCODE_OK) {
+        return false;
+      }
+      DCPS::String ele_type_name = td->name();
+      type_string += ele_type_name;
+    }
+  }
+
+  if (!is_complex(tk)) {
+    type_string += "= ";
+  }
+
   switch (tk) {
   case TK_ENUM: {
     DDS::Int32 value;
@@ -3130,7 +3087,6 @@ bool print_member(DDS::DynamicData_ptr dd, DCPS::String& type_string, DCPS::Stri
       return false;
     }
     DDS::String8_var name;
-    type_string += " = ";
     if (get_enumerator_name(name, value, member_base_type) == DDS::RETCODE_OK) {
        type_string += name.in();
     } else {
@@ -3147,7 +3103,7 @@ bool print_member(DDS::DynamicData_ptr dd, DCPS::String& type_string, DCPS::Stri
     if (get_int_value(value, dd, member_id, tk) != DDS::RETCODE_OK) {
       return false;
     }
-    type_string += " = " + DCPS::to_dds_string(value) + "\n";
+    type_string += DCPS::to_dds_string(value) + "\n";
     break;
   }
   case TK_UINT8:
@@ -3158,7 +3114,7 @@ bool print_member(DDS::DynamicData_ptr dd, DCPS::String& type_string, DCPS::Stri
     if (get_uint_value(value, dd, member_id, tk) != DDS::RETCODE_OK) {
       return false;
     }
-    type_string += " = " + DCPS::to_dds_string(value) + "\n";
+    type_string += DCPS::to_dds_string(value) + "\n";
     break;
   }
   case TK_BOOLEAN: {
@@ -3170,7 +3126,7 @@ bool print_member(DDS::DynamicData_ptr dd, DCPS::String& type_string, DCPS::Stri
       return false;
     }
     DCPS::String bool_string = my_bool ? "true" : "false";
-    type_string += " = " + bool_string + "\n";
+    type_string += bool_string + "\n";
     break;
   }
   case TK_BYTE: {
@@ -3183,7 +3139,7 @@ bool print_member(DDS::DynamicData_ptr dd, DCPS::String& type_string, DCPS::Stri
     }
     std::stringstream os;
     os << std::hex << std::setfill('0') << std::setw(2) << int(my_byte);
-    type_string += " = 0x" + os.str() + "\n";
+    type_string += "0x" + os.str() + "\n";
     break;
   }
   case TK_CHAR8: {
@@ -3196,7 +3152,7 @@ bool print_member(DDS::DynamicData_ptr dd, DCPS::String& type_string, DCPS::Stri
     }
     std::stringstream os;
     DCPS::char_helper<ACE_CDR::Char>(os, my_char);
-    type_string += " = '" + os.str() + "'\n";
+    type_string += "'" + os.str() + "'\n";
     break;
   }
 #ifdef DDS_HAS_WCHAR
@@ -3210,7 +3166,7 @@ bool print_member(DDS::DynamicData_ptr dd, DCPS::String& type_string, DCPS::Stri
     }
     std::stringstream os;
     DCPS::char_helper<ACE_CDR::WChar>(os, my_wchar);
-    type_string += " = L'" + os.str() + "'\n";
+    type_string += "L'" + os.str() + "'\n";
     break;
   }
 #endif
@@ -3224,7 +3180,7 @@ bool print_member(DDS::DynamicData_ptr dd, DCPS::String& type_string, DCPS::Stri
     }
     std::stringstream os;
     os << my_float;
-    type_string += " = " + os.str() + "\n";
+    type_string += os.str() + "\n";
     break;
   }
   case TK_FLOAT64: {
@@ -3237,7 +3193,7 @@ bool print_member(DDS::DynamicData_ptr dd, DCPS::String& type_string, DCPS::Stri
     }
     std::stringstream os;
     os << my_double;
-    type_string += " = " + os.str() + "\n";
+    type_string += os.str() + "\n";
     break;
   }
   case TK_FLOAT128: {
@@ -3250,7 +3206,7 @@ bool print_member(DDS::DynamicData_ptr dd, DCPS::String& type_string, DCPS::Stri
     }
     std::stringstream os;
     os << my_longdouble;
-    type_string += " = " + os.str() + "\n";
+    type_string += os.str() + "\n";
     break;
   }
   case TK_STRING8: {
@@ -3263,7 +3219,7 @@ bool print_member(DDS::DynamicData_ptr dd, DCPS::String& type_string, DCPS::Stri
     }
     std::stringstream os;
     DCPS::string_helper(os, my_string.inout());
-    type_string += DCPS::String(" = \"") + os.str() + "\"\n";
+    type_string += DCPS::String("\"") + os.str() + "\"\n";
     break;
   }
 #ifdef DDS_HAS_WCHAR
@@ -3277,7 +3233,7 @@ bool print_member(DDS::DynamicData_ptr dd, DCPS::String& type_string, DCPS::Stri
     }
     std::stringstream os;
     DCPS::string_helper(os, my_wstring.inout());
-    type_string += " = L\"" + os.str() + "\"\n";
+    type_string += "L\"" + os.str() + "\"\n";
     break;
   }
 #endif
@@ -3291,6 +3247,7 @@ bool print_member(DDS::DynamicData_ptr dd, DCPS::String& type_string, DCPS::Stri
       ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: print_member: Bitset is an unsupported type in OpenDDS\n"));
     }
     break;
+  case TK_ARRAY:
   case TK_SEQUENCE: {
     DCPS::String temp_indent = indent;
     indent += "  ";
@@ -3298,14 +3255,14 @@ bool print_member(DDS::DynamicData_ptr dd, DCPS::String& type_string, DCPS::Stri
     if (dd->get_complex_value(temp_dd, member_id) != DDS::RETCODE_OK) {
       return false;
     }
-    const ACE_CDR::ULong seq_length = temp_dd->get_item_count();
-    type_string += "[" + DCPS::to_dds_string(seq_length) + "] =\n";
-    for (ACE_CDR::ULong i = 0; i < seq_length; ++i) {
-      type_string += indent + "[" + DCPS::to_dds_string(i) + "]";
-      if (!print_member(temp_dd, type_string, indent,
-                        get_base_type(member_type_descriptor->element_type()), i)) {
-        if (DCPS::log_level >= DCPS::LogLevel::Notice) {
-          ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: print_member: failed to read sequence member\n"));
+    const ACE_CDR::ULong count = temp_dd->get_item_count();
+    type_string += "[" + DCPS::to_dds_string(count) + "] =\n";
+    for (ACE_CDR::ULong i = 0; i < count; ++i) {
+      type_string += indent + "[" + DCPS::to_dds_string(i) + "] ";
+      if (!print_member(temp_dd, type_string, indent, temp_dd->get_member_id_at_index(i))) {
+        if (log_level >= LogLevel::Notice) {
+          ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: print_member: "
+            "failed to read array/sequence member\n"));
         }
         return false;
       }
@@ -3313,44 +3270,13 @@ bool print_member(DDS::DynamicData_ptr dd, DCPS::String& type_string, DCPS::Stri
     indent = temp_indent;
     break;
   }
-  case TK_ARRAY: {
-    DCPS::String temp_indent = indent;
-    indent += "  ";
-    DDS::DynamicData_var temp_dd;
-    if (dd->get_complex_value(temp_dd, member_id) != DDS::RETCODE_OK) {
-      return false;
-    }
-    const LBound bound = member_type_descriptor->bound()[0];
-    type_string += "[" + DCPS::to_dds_string(bound) + "] =\n";
-    for (ACE_CDR::ULong i = 0; i < bound; ++i) {
-      type_string += indent + "[" + DCPS::to_dds_string(i) + "]";
-      if (!print_member(temp_dd, type_string, indent,
-                        get_base_type(member_type_descriptor->element_type()), i)) {
-        if (DCPS::log_level >= DCPS::LogLevel::Notice) {
-          ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: print_member: failed to read array member\n"));
-        }
-        return false;
-      }
-    }
-    indent = temp_indent;
-    break;
-  }
+  case TK_UNION:
   case TK_STRUCTURE: {
     DDS::DynamicData_var temp_dd;
     if (dd->get_complex_value(temp_dd, member_id) != DDS::RETCODE_OK) {
       return false;
     }
-    if (!print_struct(temp_dd, type_string, indent)) {
-      return false;
-    }
-    break;
-  }
-  case TK_UNION: {
-    DDS::DynamicData_var temp_dd;
-    if (dd->get_complex_value(temp_dd, member_id) != DDS::RETCODE_OK) {
-      return false;
-    }
-    if (!print_union(temp_dd, type_string, indent)) {
+    if (!print_members(temp_dd, type_string, indent, sequence_like)) {
       return false;
     }
     break;
@@ -3368,10 +3294,8 @@ bool print_dynamic_data(DDS::DynamicData_ptr dd, DCPS::String& type_string, DCPS
   bool result;
   switch (base_type->get_kind()) {
   case TK_STRUCTURE:
-    result = print_struct(dd, type_string, indent);
-    break;
   case TK_UNION:
-    result = print_union(dd, type_string, indent);
+    result = print_members(dd, type_string, indent, true);
     break;
   default:
     result = false;

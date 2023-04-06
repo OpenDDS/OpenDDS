@@ -261,16 +261,6 @@ DDS::ReturnCode_t DynamicDataBase::check_member(
   return DDS::RETCODE_OK;
 }
 
-CORBA::ULong DynamicDataBase::bound_total(DDS::TypeDescriptor_var descriptor)
-{
-  CORBA::ULong total = 1;
-  const DDS::BoundSeq& bounds = descriptor->bound();
-  for (CORBA::ULong i = 0; i < bounds.length(); ++i) {
-    total *= bounds[i];
-  }
-  return total;
-}
-
 DDS::MemberId DynamicDataBase::get_union_default_member(DDS::DynamicType* type)
 {
   //FUTURE: non-zero defaults for union discriminators are not currently represented

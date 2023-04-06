@@ -142,8 +142,8 @@ void set_collection_struct(T& col_struct)
   col_struct.f32[1] = 0.11f;
   col_struct.f64[0] = 0.20;
   col_struct.f64[1] = 0.22;
-  col_struct.f128[0] = 0.30;
-  col_struct.f128[1] = 0.33;
+  ACE_CDR_LONG_DOUBLE_ASSIGNMENT(col_struct.f128[0], 0.30);
+  ACE_CDR_LONG_DOUBLE_ASSIGNMENT(col_struct.f128[1], 0.33);
   col_struct.c8[0] = '1';
   col_struct.c8[1] = '2';
   col_struct.c16[0] = L'1';

@@ -1012,6 +1012,16 @@ DDS::ReturnCode_t set_int_value(
   return DDS::RETCODE_BAD_PARAMETER;
 }
 
+DDS::UInt32 bound_total(DDS::TypeDescriptor_var descriptor)
+{
+  DDS::UInt32 total = 1;
+  const DDS::BoundSeq& bounds = descriptor->bound();
+  for (DDS::UInt32 i = 0; i < bounds.length(); ++i) {
+    total *= bounds[i];
+  }
+  return total;
+}
+
 DDS::ReturnCode_t bitmask_bound(DDS::DynamicType_ptr type, DDS::TypeKind& bound_kind)
 {
   const DDS::TypeKind kind = type->get_kind();
@@ -1389,7 +1399,7 @@ DDS::ReturnCode_t copy_member(
       ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: copy(DynamicData): "
         "member has unexpected TypeKind %C\n", typekind_to_string(src_tk)));
     }
-    get_rc = DDS::RETCODE_BAD_PARAMETER;
+    get_rc = DDS::RETCODE_UNSUPPORTED;
   }
 
   if (get_rc == DDS::RETCODE_NO_DATA) {
@@ -1565,7 +1575,7 @@ DDS::ReturnCode_t copy(DDS::DynamicData_ptr dest, DDS::DynamicData_ptr src)
       ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: copy(DynamicData): "
         "member has unexpected TypeKind %C\n", typekind_to_string(src_tk)));
     }
-    rc = DDS::RETCODE_BAD_PARAMETER;
+    rc = DDS::RETCODE_UNSUPPORTED;
   }
 
   return rc;

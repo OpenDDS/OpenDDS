@@ -68,7 +68,6 @@ protected:
     return check_member(md, member_type, method, action, id, tk);
   }
 
-  static CORBA::ULong bound_total(DDS::TypeDescriptor_var descriptor);
   static DDS::MemberId get_union_default_member(DDS::DynamicType* type);
   DDS::ReturnCode_t get_selected_union_branch(
     DDS::Int32 disc, bool& found_selected_member, DDS::MemberDescriptor_var& selected_md) const;
