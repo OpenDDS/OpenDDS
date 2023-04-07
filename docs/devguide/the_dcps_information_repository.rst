@@ -124,7 +124,7 @@ Currently available configuration options are:
 
 The following directive:
 
-::
+.. code-block:: cpp
 
     static PersistenceUpdater_Static_Service "-file info.pr -reset 1"
 
@@ -134,7 +134,7 @@ Used with the command-line option ``-r``, the ``DCPSInfoRepo`` can be reincarnat
 When using persistence, start the ``DCPSInfoRepo`` process using a TCP fixed port number with the following command line option.
 This allows existing clients to reconnect to a restarted InfoRepo.
 
-::
+.. code-block:: bash
 
     -ORBListenEndpoints iiop://:<port>
 
@@ -207,7 +207,7 @@ Since the operation of the federated repositories and failover sequencing depend
 The command is named ``repoctl`` and is located in the :ghfile:`bin/` directory.
 It has a command format syntax of:
 
-::
+.. code-block:: bash
 
        repoctl <cmd> <arguments>
 
@@ -263,7 +263,7 @@ This endpoint information is used to create a CORBA object reference using the c
 
 A join command specifies two repository servers (by endpoint) and asks the second to join the first in a federation:
 
-::
+.. code-block:: bash
 
        repoctl join 2112 otherhost:1812
 
@@ -325,20 +325,20 @@ The Message Publisher configuration ``pub.ini`` for this example is as follows:
 
 .. code-block:: ini
 
-        [common]
-        DCPSDebugLevel=0
+    [common]
+    DCPSDebugLevel=0
 
-        [domain/information]
-        DomainId=42
-        DomainRepoKey=1
+    [domain/information]
+    DomainId=42
+    DomainRepoKey=1
 
-        [repository/primary]
-        RepositoryKey=1
-        RepositoryIor=corbaloc::localhost:2112/InfoRepo
+    [repository/primary]
+    RepositoryKey=1
+    RepositoryIor=corbaloc::localhost:2112/InfoRepo
 
-        [repository/secondary]
-        RepositoryKey=2
-        RepositoryIor=file://repo.ior
+    [repository/secondary]
+    RepositoryKey=2
+    RepositoryIor=file://repo.ior
 
 Note that the ``DCPSInfo`` attribute/value pair has been omitted from the ``[common]`` section.
 The user domain is 42, so that domain is configured to use the primary repository for service metadata and events.
@@ -353,20 +353,20 @@ The subscriber process is configured with the ``sub.ini`` file as follows:
 
 .. code-block:: ini
 
-        [common]
-        DCPSDebugLevel=0
+    [common]
+    DCPSDebugLevel=0
 
-        [domain/information]
-        DomainId=42
-        DomainRepoKey=1
+    [domain/information]
+    DomainId=42
+    DomainRepoKey=1
 
-        [repository/primary]
-        RepositoryKey=1
-        RepositoryIor=file://repo.ior
+    [repository/primary]
+    RepositoryKey=1
+    RepositoryIor=file://repo.ior
 
-        [repository/secondary]
-        RepositoryKey=2
-        RepositoryIor=corbaloc::localhost:2112/InfoRepo
+    [repository/secondary]
+    RepositoryKey=2
+    RepositoryIor=corbaloc::localhost:2112/InfoRepo
 
 Note that this is the same as the ``pub.ini`` file except the subscriber has specified that the repository located at port 2112 of the ``localhost`` is the secondary and the repository located by the ``repo.ior`` file is the primary.
 This is opposite of the assignment for the publisher.
@@ -389,7 +389,7 @@ Start the first repository as:
 
 .. code-block:: bash
 
-        $DDS/bin/DCPSInfoRepo -o repo.ior -FederationId 1024
+    $DDS/bin/DCPSInfoRepo -o repo.ior -FederationId 1024
 
 The ``-o repo.ior`` option ensures that the repository IOR will be placed into the file as expected by the configuration files.
 The ``-FederationId 1024`` option assigns the value 1024 to this repository as its unique id within the federation.
@@ -398,9 +398,9 @@ Start the second repository as:
 
 .. code-block:: bash
 
-        $DDS/bin/DCPSInfoRepo \
-          -ORBListenEndpoints iiop://localhost:2112 \
-          -FederationId 2048 -FederateWith file://repo.ior
+    $DDS/bin/DCPSInfoRepo \
+      -ORBListenEndpoints iiop://localhost:2112 \
+      -FederationId 2048 -FederateWith file://repo.ior
 
 Note that this is all intended to be on a single command line.
 The ``-ORBListenEndpoints iiop://localhost:2112`` option ensures that the repository will be listening on the port that the previous configuration files are expecting.

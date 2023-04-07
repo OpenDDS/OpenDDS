@@ -74,12 +74,12 @@ Here is the code needed to create a recorder:
 
 .. code-block:: cpp
 
-     OpenDDS::DCPS::Recorder_var recorder =
-          service_participant->create_recorder(domain_participant,
-                                               topic.in(),
-                                               sub_qos,
-                                               dr_qos,
-                                               recorder_listener);
+    OpenDDS::DCPS::Recorder_var recorder =
+         service_participant->create_recorder(domain_participant,
+                                              topic.in(),
+                                              sub_qos,
+                                              dr_qos,
+                                              recorder_listener);
 
 Data samples are made available to the application via the ``RecorderListener`` using a simple “one callback per sample” model.
 The sample is delivered as an ``OpenDDS::DCPS::RawDataSample`` object.
@@ -248,7 +248,7 @@ These methods are not part of the IDL interfaces, so invoking them the requires 
 
 .. code-block:: cpp
 
-      DDS::DataWriter_var dw = /* ... */;
+     DDS::DataWriter_var dw = /* ... */;
      EntityImpl* entity = dynamic_cast<EntityImpl*>(dw.in());
      Observer_rch observer = make_rch<MyObserver>();
      entity->set_observer(observer, Observer::e_SAMPLE_SENT);

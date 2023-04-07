@@ -121,11 +121,11 @@ The webserver has the following endpoints:
 
 * ``/config``
 
-  ``Responds with configured content and content type.``
-  ``See -MetaDiscovery options below.``
-  ``Potential client participants can download the necessary configuration from this endpoint.``
+  Responds with configured content and content type.
+  See -MetaDiscovery options below.
+  Potential client participants can download the necessary configuration from this endpoint.
 
-* /``healthcheck``
+* ``/healthcheck``
 
   Responds with HTTP 200 (OK) or 503 (Service Unavailable) if thread monitoring is enabled and the RtpsRelay is not admitting new client participants.
   Load balancers can use this endpoint to route new client participants to an available RtpsRelay instance.
@@ -134,7 +134,7 @@ The command-line options for the RtpsRelay:
 
 * ``-Id STRING``
 
-  ``The Id option is mandatory and is a unique id associated with all topics published by the relay.``
+  The Id option is mandatory and is a unique id associated with all topics published by the relay.
 
 * ``-HorizontalAddress ADDRESS``
 
@@ -158,11 +158,11 @@ The command-line options for the RtpsRelay:
 
 * ``-UserData STRING``
 
-  ``Set the contents of the Application Participant’s UserData QoS policy to the provided string.``
+  Set the contents of the Application Participant’s UserData QoS policy to the provided string.
 
 * ``-BufferSize INTEGER``
 
-  ``Send of send and receive buffers in bytes``
+  Send of send and receive buffers in bytes
 
 * ``-Lifespan SECONDS``
 
@@ -177,8 +177,8 @@ The command-line options for the RtpsRelay:
 
 * ``-AllowEmptyPartitions 0|1``
 
-  ``Allow client participants with no partitions.``
-  ``Defaults to 1 (true).``
+  Allow client participants with no partitions.
+  Defaults to 1 (true).
 
 * ``-IdentityCA PATH``
 
@@ -197,8 +197,8 @@ The command-line options for the RtpsRelay:
 
 * ``-RestartDetection 0|1``
 
-  ``Setting RestartDetction to 1 causes the relay to track clients by the first 6 bytes of their RTPS GUID and source IP address and clean up older sessions with the same key.``
-  ``The default is 0 (false).``
+  Setting RestartDetction to 1 causes the relay to track clients by the first 6 bytes of their RTPS GUID and source IP address and clean up older sessions with the same key.
+  The default is 0 (false).
 
 * ``-LogWarnings0|1``
 

@@ -89,13 +89,13 @@ For example:
 
 Windows:
 
-::
+.. code-block:: doscon
 
         publisher -DCPSConfigFile pub.ini
 
 Unix:
 
-::
+.. code-block:: bash
 
         ./publisher -DCPSConfigFile pub.ini
 
@@ -149,14 +149,14 @@ A sample ``[common]`` section follows:
 
 .. code-block:: ini
 
-        [common]
-        DCPSDebugLevel=0
-        DCPSInfoRepo=localhost:12345
-        DCPSLivelinessFactor=80
-        DCPSChunks=20
-        DCPSChunksAssociationMultiplier=10
-        DCPSBitLookupDurationMsec=2000
-        DCPSPendingTimeout=30
+    [common]
+    DCPSDebugLevel=0
+    DCPSInfoRepo=localhost:12345
+    DCPSLivelinessFactor=80
+    DCPSChunks=20
+    DCPSChunksAssociationMultiplier=10
+    DCPSBitLookupDurationMsec=2000
+    DCPSPendingTimeout=30
 
 It is not necessary to specify every option.
 
@@ -164,7 +164,7 @@ Option values in the ``[common]`` section with names that begin with “``DCPS``
 The command-line argument has the same name as the configuration option with a “``-``” prepended to it.
 For example:
 
-::
+.. code-block:: bash
 
         subscriber -DCPSInfoRepo localhost:12345
 
@@ -522,7 +522,7 @@ The first is to simply make the instance value the integer value assigned to the
 
     [domain/1]
     DiscoveryConfig=DiscoveryConfig1
-        (more properties...)
+    (more properties...)
 
 Our example configures a single domain identified by the domain keyword and followed by an instance value of ``/1``.
 The instance value after the slash in this case is the integer value assigned to the domain.
@@ -651,7 +651,7 @@ Applications can make their OpenDDS participants aware of how to find this servi
 
 In our Getting Started example from 2.1.7, “Running the Example” the executables were given a command line parameter to find the ``DCPSInfoRepo`` service like so:
 
-::
+.. code-block:: bash
 
     publisher -DCPSInfoRepo file://repo.ior
 
@@ -672,7 +672,7 @@ Unix:
 The ``DCPSInfoRepo`` service generates its location object information in this file and participants need to read this file to ultimately connect.
 The use of file based IORs to find a discovery service, however, is not practical in most production environments, so applications instead can use a command line option like the following to simply point to the host and port where the ``DCPSInfoRepo`` is running.
 
-::
+.. code-block:: bash
 
     publisher -DCPSInfoRepo myhost.mydomain.com:12345
 
@@ -701,7 +701,7 @@ The above example can easily be moved to the ``[common]`` section of a configura
 
 The command line to start our executable would now change to the following:
 
-::
+.. code-block:: bash
 
     publisher -DCSPConfigFile pub.ini
 
@@ -746,7 +746,7 @@ Consider the following configuration file as an example:
 In this case any participant in domain 2 would be instructed to refer to the discovery property of ``DCPSInfoRepo``, which is defined in the ``[common]`` section of our example.
 If the ``DCPSInfoRepo`` value is not supplied in the ``[common]`` section, it could alternatively be supplied as a parameter to the command line like so:
 
-::
+.. code-block:: bash
 
     publisher -DCPSInfoRepo localhost:12345 -DCPSConfigFile pub.ini
 
@@ -874,7 +874,6 @@ A simple configuration is achieved by specifying a property in the ``[common]`` 
 
 .. code-block:: ini
 
-    configE.ini (for RTPS)
     [common]
     DCPSDefaultDiscovery=DEFAULT_RTPS
 
@@ -899,7 +898,6 @@ It might look like this:
 
 .. code-block:: ini
 
-    configE.ini
     [common]
     DCPSDebugLevel=0
 
@@ -3295,8 +3293,7 @@ For example, for a global config setting
 .. code-block:: ini
 
     [common]
-
-``DCPSGlobalTransportConfig=primary_config``
+    DCPSGlobalTransportConfig=primary_config
 
 a corresponding config could be
 
@@ -3460,7 +3457,7 @@ The highest level logging is controlled by the general log levels listed in the 
 The log level can be set a number of ways.
 To do it with command line arguments, pass:
 
-::
+.. code-block:: bash
 
     -DCPSLogLevel notice
 
@@ -3519,7 +3516,7 @@ Transport Layer Debug Logging
 OpenDDS transport debug layer logging is controlled via the ``DCPSTransportDebugLevel`` configuration option.
 For example, to add transport layer logging to any OpenDDS application that uses ``TheParticipantFactoryWithArgs``, add the following option to the command line:
 
-::
+.. code-block:: bash
 
     -DCPSTransportDebugLevel level
 
@@ -3583,7 +3580,7 @@ Security Debug Logging
 ..
     Sect<7.6.3>
 
-When OpenDDS is compiled with security enabled, debug logging for security can be enabled using ``DCPSecurityDebug``(:ref:`Table 7-2 Common Configuration Options <run_time_configuration--reftable9>`).
+When OpenDDS is compiled with security enabled, debug logging for security can be enabled using ``DCPSecurityDebug`` (:ref:`Table 7-2 Common Configuration Options <run_time_configuration--reftable9>`).
 Security logging is divided into categories, although ``DCPSSecurityDebugLevel`` is also provided, which controls the categories in a similar manner and using the same scale as ``DCPSDebugLevel``.
 
 .. _run_time_configuration--reftable28:
@@ -3693,7 +3690,7 @@ Security logging is divided into categories, although ``DCPSSecurityDebugLevel``
 
 Categories are passed to ``DCPSecurityDebug`` using a comma limited list:
 
-::
+.. code-block:: bash
 
     -DCPSSecurityDebug=access_warn,showkeys
 

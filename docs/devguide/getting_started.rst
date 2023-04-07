@@ -127,7 +127,7 @@ That isn’t strictly necessary though, as the next section shows.
     @topic
     struct OuterStruct {
       @key InnerStruct value;
-    // value.a, value.b, and value.c are all keys
+      // value.a, value.b, and value.c are all keys
     };
 
 If none of the fields in a struct are marked with ``@key`` or ``@key(TRUE)``, then when the struct is used in another struct and marked as a key, all the fields in the struct are assumed to keys.
@@ -228,7 +228,7 @@ OpenDDS also supports the OMG IDL-to-C++11 mapping, see :ref:`opendds_idl--using
 
 The OpenDDS IDL is first processed by the TAO IDL compiler.
 
-::
+.. code-block:: bash
 
     tao_idl Messenger.idl
 
@@ -244,7 +244,7 @@ The three files all begin with the original IDL file name and would appear as fo
 
 For example, running ``opendds_idl`` as follows
 
-::
+.. code-block:: bash
 
     opendds_idl Messenger.idl
 
@@ -290,7 +290,7 @@ Here is the publisher section:
 .. code-block:: mpc
 
     project(*Publisher): dcpsexe_with_tcp {
-      exename  = publisher
+      exename = publisher
       after  += *idl
 
       TypeSupport_Files {
@@ -310,7 +310,7 @@ For completeness, here is the subscriber section of the MPC file:
 
     project(*Subscriber): dcpsexe_with_tcp {
 
-      exename  = subscriber
+      exename = subscriber
       after  += *idl
 
       TypeSupport_Files {
@@ -406,16 +406,16 @@ Next, we obtain the registered type name from the type support object and create
 
       CORBA::String_var type_name = mts->get_type_name ();
 
-        DDS::Topic_var topic =
-          participant->create_topic ("Movie Discussion List",
-                                     type_name,
-                                     TOPIC_QOS_DEFAULT,
-                                     0,  // No listener required
-                                     OpenDDS::DCPS::DEFAULT_STATUS_MASK);
-        if (!topic) {
-          std::cerr << "create_topic failed." << std::endl;
-          return 1;
-        }
+      DDS::Topic_var topic =
+        participant->create_topic ("Movie Discussion List",
+                                   type_name,
+                                   TOPIC_QOS_DEFAULT,
+                                   0,  // No listener required
+                                   OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+      if (!topic) {
+        std::cerr << "create_topic failed." << std::endl;
+        return 1;
+      }
 
 We have created a topic named “*Movie Discussion List*” with the registered type and the default QoS policies.
 
@@ -501,18 +501,15 @@ Here is the corresponding code:
 .. code-block:: cpp
 
         // Block until Subscriber is available
-        DDS::StatusCondition_var condition =
-    writer->get_statuscondition();
-        condition->set_enabled_statuses(
-            DDS::PUBLICATION_MATCHED_STATUS);
+        DDS::StatusCondition_var condition = writer->get_statuscondition();
+        condition->set_enabled_statuses(DDS::PUBLICATION_MATCHED_STATUS);
 
         DDS::WaitSet_var ws = new DDS::WaitSet;
         ws->attach_condition(condition);
 
         while (true) {
           DDS::PublicationMatchedStatus matches;
-          if (writer->get_publication_matched_status(matches)
-              != DDS::RETCODE_OK) {
+          if (writer->get_publication_matched_status(matches) != DDS::RETCODE_OK) {
             std::cerr << "get_publication_matched_status failed!"
                       << std::endl;
             return 1;
@@ -550,12 +547,12 @@ The message publication is quite straightforward:
         // Write samples
         Messenger::Message message;
         message.subject_id = 99;
-        message.from  = "Comic Book Guy";
-        message.subject  = "Review";
-        message.text  = "Worst. Movie. Ever.";
-        message.count  = 0;
+        message.from = "Comic Book Guy";
+        message.subject = "Review";
+        message.text = "Worst. Movie. Ever.";
+        message.count = 0;
         for (int i = 0; i < 10; ++i) {
-          DDS::ReturnCode_t error = message_writer->write(message,    DDS::HANDLE_NIL);
+          DDS::ReturnCode_t error = message_writer->write(message, DDS::HANDLE_NIL);
           ++message.count;
           ++message.subject_id;
           if (error != DDS::RETCODE_OK) {
@@ -636,7 +633,7 @@ There is also a ``find_topic()`` operation our subscriber could use to simply re
 
         DDS::Topic_var topic =
           participant->create_topic("Movie Discussion List",
-     type_name,
+                                    type_name,
                                     TOPIC_QOS_DEFAULT,
                                     0,  // No listener required
                                     OpenDDS::DCPS::DEFAULT_STATUS_MASK);
@@ -749,7 +746,7 @@ The only operation that is really needed for this example is ``on_data_available
 
       try {
         Messenger::MessageDataReader_var reader_i =
-              Messenger::MessageDataReader::_narrow(reader);
+          Messenger::MessageDataReader::_narrow(reader);
         if (!reader_i) {
           std::cerr << "read: _narrow failed." << std::endl;
           return;
@@ -768,12 +765,11 @@ If the take is successful and returns valid data, we print out each of the messa
         if (status == DDS::RETCODE_OK) {
 
           if (si.valid_data == 1) {
-
-              std::cout << "Message: subject  = " << message.subject.in() << std::endl
+              std::cout << "Message: subject = " << message.subject.in() << std::endl
                 << "  subject_id = " << message.subject_id  << std::endl
-                << "  from  = " << message.from.in()  << std::endl
-                << "  count  = " << message.count  << std::endl
-                << "  text  = " << message.text.in()  << std::endl;
+                << "  from = " << message.from.in()  << std::endl
+                << "  count = " << message.count  << std::endl
+                << "  text = " << message.text.in()  << std::endl;
           }
           else if (si.instance_state == DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE)
           {
@@ -820,7 +816,7 @@ After we are finished in the publisher and subscriber, we can use the following 
 
         participant->delete_contained_entities();
         dpf->delete_participant(participant);
-        TheServiceParticipant->shutdown ();
+        TheServiceParticipant->shutdown();
 
 The domain participant’s ``delete_contained_entities()`` operation deletes all the topics, subscribers, and publishers created with that participant.
 Once this is done, we can use the domain participant factory to delete our domain participant.
@@ -883,13 +879,13 @@ In a separate window navigate to the same directory that contains the ``simple.i
 
 Windows:
 
-::
+.. code-block:: doscon
 
     subscriber -DCPSInfoRepo file://simple.ior
 
 Unix:
 
-::
+.. code-block:: bash
 
     ./subscriber -DCPSInfoRepo file://simple.ior
 
@@ -898,13 +894,13 @@ Our subscriber is now waiting for messages to be sent, so we will now start the 
 
 Windows:
 
-::
+.. code-block:: doscon
 
     publisher -DCPSInfoRepo file://simple.ior
 
 Unix
 
-::
+.. code-block:: bash
 
     ./publisher -DCPSInfoRepo file://simple.ior
 
@@ -953,13 +949,13 @@ Start the subscriber with the ``-DCPSConfigFile`` command line parameter to poin
 
 Windows:
 
-::
+.. code-block:: bash
 
     subscriber -DCPSConfigFile rtps.ini
 
 Unix:
 
-::
+.. code-block:: doscon
 
     ./subscriber -DCPSConfigFile rtps.ini
 
@@ -967,13 +963,13 @@ Now start the publisher with the same parameter...
 
 Windows:
 
-::
+.. code-block:: doscon
 
     publisher -DCPSConfigFile rtps.ini
 
 Unix:
 
-::
+.. code-block:: bash
 
     ./publisher -DCPSConfigFile rtps.ini
 
@@ -1054,12 +1050,12 @@ Here is a sample call to ``take()`` that reads up to 5 samples at a time.
 
         MessageSeq messages(5);
         DDS::SampleInfoSeq sampleInfos(5);
-        DDS::ReturnCode_t status =
-                                                    message_dr->take(messages,      sampleInfos,
-                             5,
-                             DDS::ANY_SAMPLE_STATE,
-                             DDS::ANY_VIEW_STATE,
-                             DDS::ANY_INSTANCE_STATE);
+        DDS::ReturnCode_t status = message_dr->take(messages,
+                                                    sampleInfos,
+                                                    5,
+                                                    DDS::ANY_SAMPLE_STATE,
+                                                    DDS::ANY_VIEW_STATE,
+                                                    DDS::ANY_INSTANCE_STATE);
 
 The three state parameters potentially specialize which samples are returned from the reader.
 See the DDS specification for details on their usage.
@@ -1085,7 +1081,7 @@ The following example code is taken from ``DevGuideExamples/DCPS/Messenger_ZeroC
           Messenger::MessageSeq messages;
           DDS::SampleInfoSeq info;
 
-          // get references to the samples  (zero-copy read of the samples)
+          // get references to the samples (zero-copy read of the samples)
           DDS::ReturnCode_t status = dr->take(messages,
                                               info,
                                               DDS::LENGTH_UNLIMITED,
