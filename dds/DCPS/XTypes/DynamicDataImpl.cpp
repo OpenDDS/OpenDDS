@@ -2806,7 +2806,7 @@ bool DynamicDataImpl::get_value_from_union(ValueType& value, DDS::MemberId id)
     DDS::MemberDescriptor_var selected_md;
     const DDS::ReturnCode_t rc =
       get_selected_union_branch(disc_value, found_selected_member, selected_md);
-    if (rc) {
+    if (rc != DDS::RETCODE_OK) {
       if (log_level >= LogLevel::Notice) {
         ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicDataImpl::get_value_from_union:"
                    " get_selected_union_branch failed: %C\n", retcode_to_string(rc)));
@@ -3682,7 +3682,7 @@ bool DynamicDataImpl::get_complex_from_union(DDS::DynamicData_ptr& value, DDS::M
     DDS::MemberDescriptor_var selected_md;
     const DDS::ReturnCode_t rc =
       get_selected_union_branch(disc_value, found_selected_member, selected_md);
-    if (rc) {
+    if (rc != DDS::RETCODE_OK) {
       if (log_level >= LogLevel::Notice) {
         ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicDataImpl::get_complex_from_union:"
                    " get_selected_union_branch failed: %C\n", retcode_to_string(rc)));
@@ -5562,8 +5562,7 @@ bool DynamicDataImpl::DataContainer::serialize_sequence_value(DCPS::Serializer& 
   }
 }
 
-// Helper function for serializing sequence or array where element type is sequence
-// of basic or enumerated type.
+// Helper function for serializing sequences and arrays
 bool DynamicDataImpl::DataContainer::get_index_to_id_map(IndexToIdMap& index_to_id,
                                                          CORBA::ULong bound) const
 {

@@ -49,7 +49,7 @@ class dds_generator {
 public:
   virtual ~dds_generator() = 0;
 
-  static std::string get_tag_name(const std::string& base_name, std::string qualifier = "");
+  static std::string get_tag_name(const std::string& base_name, const std::string& qualifier = "");
 
   static std::string get_xtag_name(UTL_ScopedName* name);
 

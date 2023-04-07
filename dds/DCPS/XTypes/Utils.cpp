@@ -1115,7 +1115,7 @@ DDS::ReturnCode_t get_enum_value(
   if (rc != DDS::RETCODE_OK) {
     return rc;
   }
-  DDS::Int64 v;
+  DDS::Int64 v = 0;
   rc = get_int_value(v, src, id, bound_kind);
   if (rc != DDS::RETCODE_OK) {
     return rc;

@@ -58,7 +58,7 @@ std::string dds_generator::valid_var_name(const std::string& str)
   return s;
 }
 
-std::string dds_generator::get_tag_name(const std::string& base_name, std::string qualifier)
+std::string dds_generator::get_tag_name(const std::string& base_name, const std::string& qualifier)
 {
   return valid_var_name(base_name) + qualifier + "_tag";
 }

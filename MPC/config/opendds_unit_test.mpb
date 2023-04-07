@@ -1,0 +1,4 @@
+project: dcps_test, googletest {
+  // For Header-only Google Test Util Headers
+  includes += $(TEST_ROOT)
+}

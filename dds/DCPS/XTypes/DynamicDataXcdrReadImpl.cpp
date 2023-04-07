@@ -584,13 +584,7 @@ ACE_CDR::ULong DynamicDataXcdrReadImpl::get_item_count()
       return length;
     }
   case TK_ARRAY:
-    {
-      ACE_CDR::ULong length = 1;
-      for (ACE_CDR::ULong i = 0; i < descriptor->bound().length(); ++i) {
-        length *= descriptor->bound()[i];
-      }
-      return length;
-    }
+    return bound_total(type_desc_);
   case TK_MAP:
     {
       const DDS::DynamicType_var key_type = get_base_type(descriptor->key_element_type());
@@ -1040,10 +1034,7 @@ bool DynamicDataXcdrReadImpl::skip_to_array_element(MemberId id, DDS::DynamicTyp
     skip_all = true;
   }
 
-  ACE_CDR::ULong length = 1;
-  for (ACE_CDR::ULong i = 0; i < coll_descriptor->bound().length(); ++i) {
-    length *= coll_descriptor->bound()[i];
-  }
+  const ACE_CDR::ULong length = bound_total(coll_descriptor);
 
   ACE_CDR::ULong size;
   if (get_primitive_size(elem_type, size)) {
@@ -1210,9 +1201,8 @@ DDS::ReturnCode_t DynamicDataXcdrReadImpl::get_single_value(ValueType& value, Me
           get_value_from_struct<ValueTypeKind>(value, id, enum_or_bitmask, lower, upper);
         if (rc == DDS::RETCODE_NO_DATA) {
           return rc;
-        } else {
-          good = rc == DDS::RETCODE_OK;
         }
+        good = rc == DDS::RETCODE_OK;
       }
       break;
     case TK_UNION:
@@ -1221,9 +1211,8 @@ DDS::ReturnCode_t DynamicDataXcdrReadImpl::get_single_value(ValueType& value, Me
           get_value_from_union<ValueTypeKind>(value, id, enum_or_bitmask, lower, upper);
         if (rc == DDS::RETCODE_NO_DATA) {
           return rc;
-        } else {
-          good = rc == DDS::RETCODE_OK;
         }
+        good = rc == DDS::RETCODE_OK;
       }
       break;
     case TK_SEQUENCE:
@@ -1350,9 +1339,8 @@ DDS::ReturnCode_t DynamicDataXcdrReadImpl::get_char_common(CharT& value, MemberI
       const DDS::ReturnCode_t rc = get_value_from_struct<CharKind>(wrap, id, extent_);
       if (rc == DDS::RETCODE_NO_DATA) {
         return rc;
-      } else {
-        good = rc == DDS::RETCODE_OK;
       }
+      good = rc == DDS::RETCODE_OK;
       break;
     }
   case TK_UNION:
@@ -1361,9 +1349,8 @@ DDS::ReturnCode_t DynamicDataXcdrReadImpl::get_char_common(CharT& value, MemberI
       const DDS::ReturnCode_t rc = get_value_from_union<CharKind>(wrap, id);
       if (rc == DDS::RETCODE_NO_DATA) {
         return rc;
-      } else {
-        good = rc == DDS::RETCODE_OK;
       }
+      good = rc == DDS::RETCODE_OK;
       break;
     }
   case TK_SEQUENCE:
@@ -1471,9 +1458,8 @@ DDS::ReturnCode_t DynamicDataXcdrReadImpl::get_boolean_value(ACE_CDR::Boolean& v
       const DDS::ReturnCode_t rc = get_value_from_struct<TK_BOOLEAN>(to_bool, id, extent_);
       if (rc == DDS::RETCODE_NO_DATA) {
         return rc;
-      } else {
-        good = rc == DDS::RETCODE_OK;
       }
+      good = rc == DDS::RETCODE_OK;
       break;
     }
   case TK_UNION:
@@ -1482,9 +1468,8 @@ DDS::ReturnCode_t DynamicDataXcdrReadImpl::get_boolean_value(ACE_CDR::Boolean& v
       const DDS::ReturnCode_t rc = get_value_from_union<TK_BOOLEAN>(to_bool, id);
       if (rc == DDS::RETCODE_NO_DATA) {
         return rc;
-      } else {
-        good = rc == DDS::RETCODE_OK;
       }
+      good = rc == DDS::RETCODE_OK;
       break;
     }
   case TK_SEQUENCE:
@@ -1999,9 +1984,8 @@ DDS::ReturnCode_t DynamicDataXcdrReadImpl::get_sequence_values(SequenceType& val
         get_values_from_struct<ElementTypeKind>(value, id, enum_or_bitmask, lower, upper);
       if (rc == DDS::RETCODE_NO_DATA) {
         return rc;
-      } else {
-        good = rc == DDS::RETCODE_OK;
       }
+      good = rc == DDS::RETCODE_OK;
     }
     break;
   case TK_UNION:
@@ -2485,14 +2469,8 @@ bool DynamicDataXcdrReadImpl::skip_array_member(DDS::DynamicType_ptr array_type)
 
   ACE_CDR::ULong primitive_size = 0;
   if (get_primitive_size(elem_type, primitive_size)) {
-    const DDS::BoundSeq& bounds = descriptor->bound();
-    ACE_CDR::ULong num_elems = 1;
-    for (unsigned i = 0; i < bounds.length(); ++i) {
-      num_elems *= bounds[i];
-    }
-
     return skip("skip_array_member", "Failed to skip a primitive array member",
-                num_elems, primitive_size);
+                bound_total(descriptor), primitive_size);
   } else {
     return skip_collection_member(array_type);
   }
@@ -3026,7 +3004,7 @@ bool print_member(DDS::DynamicData_ptr dd, DCPS::String& type_string, DCPS::Stri
 {
   DDS::DynamicType_ptr member_type;
   DDS::MemberDescriptor_var member_descriptor;
-  const DDS::DynamicType_ptr container_type = dd->type();
+  const DDS::DynamicType_var container_type = dd->type();
   const DDS::TypeKind container_kind = container_type->get_kind();
   const bool sequence_like = is_sequence_like(container_kind);
   if (sequence_like) {
@@ -3068,7 +3046,8 @@ bool print_member(DDS::DynamicData_ptr dd, DCPS::String& type_string, DCPS::Stri
     }
     if (tk == TK_ARRAY || tk == TK_SEQUENCE) {
       DDS::TypeDescriptor_var td;
-      if (get_base_type(member_type_descriptor->element_type())->get_descriptor(td) != DDS::RETCODE_OK) {
+      const DDS::DynamicType_var elem_type = get_base_type(member_type_descriptor->element_type());
+      if (elem_type->get_descriptor(td) != DDS::RETCODE_OK) {
         return false;
       }
       DCPS::String ele_type_name = td->name();

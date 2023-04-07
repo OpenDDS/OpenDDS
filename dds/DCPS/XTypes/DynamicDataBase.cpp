@@ -216,7 +216,7 @@ DDS::ReturnCode_t DynamicDataBase::check_member(
     }
     type = get_base_type(md->type());
     if (!type) {
-      return DDS::RETCODE_BAD_PARAMETER;
+      return DDS::RETCODE_ERROR;
     }
     break;
   default:
@@ -347,7 +347,7 @@ DDS::ReturnCode_t DynamicDataBase::get_selected_union_branch(DDS::Int32 disc,
 DDS::ReturnCode_t DynamicDataBase::get_selected_union_branch(
   bool& found_selected_member, DDS::MemberDescriptor_var& selected_md)
 {
-  // TODO: Support UInt64 and Int64
+  // TODO: Support UInt64 and Int64 (https://issues.omg.org/issues/DDSXTY14-36)
   DDS::Int64 i64_disc;
   DDS::ReturnCode_t rc = get_int64_value(i64_disc, DISCRIMINATOR_ID);
   if (rc != DDS::RETCODE_OK) {
@@ -367,11 +367,11 @@ bool DynamicDataBase::discriminator_selects_no_member(DDS::Int32 disc) const
 {
   bool found_selected_member;
   DDS::MemberDescriptor_var selected_md;
-  DDS::ReturnCode_t rc = get_selected_union_branch(disc, found_selected_member, selected_md);
+  const DDS::ReturnCode_t rc = get_selected_union_branch(disc, found_selected_member, selected_md);
   if (rc != DDS::RETCODE_OK) {
     if (log_level >= LogLevel::Warning) {
       ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: DynamicDataBase::discriminator_selects_no_member: "
-        "get_union_member_for_disc failed: %C\n", retcode_to_string(rc)));
+        "get_selected_union_branch failed: %C\n", retcode_to_string(rc)));
     }
     return false;
   }
@@ -412,7 +412,7 @@ bool DynamicDataBase::has_explicit_keys(DDS::DynamicType* dt)
 DDS::ReturnCode_t DynamicDataBase::unsupported_method(const char* method_name, bool warning) const
 {
   if (log_level >= (warning ? LogLevel::Warning : LogLevel::Notice)) {
-    ACE_ERROR((LM_NOTICE, "(%P|%t) %C: %C: not implemented\n",
+    ACE_ERROR((warning ? LM_WARNING : LM_NOTICE, "(%P|%t) %C: %C: not implemented\n",
       warning ? "WARNING" : "NOTICE", method_name));
   }
   return DDS::RETCODE_UNSUPPORTED;
@@ -421,7 +421,7 @@ DDS::ReturnCode_t DynamicDataBase::unsupported_method(const char* method_name, b
 #ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
 DDS::ReturnCode_t DynamicDataBase::get_simple_value(DCPS::Value& /*value*/, DDS::MemberId /*id*/)
 {
-  return unsupported_method("DynamicData::get_simple_value");
+  return unsupported_method("DynamicDataBase::get_simple_value");
 }
 #endif
 
@@ -432,19 +432,19 @@ DDS::DynamicType_ptr DynamicDataBase::type()
 
 DDS::Boolean DynamicDataBase::equals(DDS::DynamicData_ptr /*other*/)
 {
-  unsupported_method("DynamicData::equals", true);
+  unsupported_method("DynamicDataBase::equals", true);
   return false;
 }
 
 DDS::DynamicData_ptr DynamicDataBase::loan_value(DDS::MemberId /*id*/)
 {
-  unsupported_method("DynamicData::loan_value");
+  unsupported_method("DynamicDataBase::loan_value");
   return 0;
 }
 
 DDS::ReturnCode_t DynamicDataBase::return_loaned_value(DDS::DynamicData_ptr /*other*/)
 {
-  return unsupported_method("DynamicData::return_loaned_value");
+  return unsupported_method("DynamicDataBase::return_loaned_value");
 }
 
 DDS::DynamicData_ptr DynamicDataBase::clone()
@@ -518,10 +518,9 @@ DDS::ReturnCode_t DynamicDataBase::get_int64_value(DDS::Int64& value, DDS::Membe
     {
       DDS::Char8 tmp;
       rc = get_char8_value(tmp, id);
-      if (rc != DDS::RETCODE_OK) {
-        return rc;
+      if (rc == DDS::RETCODE_OK) {
+        value = static_cast<DDS::Int64>(tmp);
       }
-      value = static_cast<DDS::Int64>(tmp);
       return rc;
     }
   case TK_CHAR16:
