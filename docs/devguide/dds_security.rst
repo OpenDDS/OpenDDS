@@ -41,7 +41,7 @@ Building OpenDDS with security enabled requires the following dependencies:
 
 #. CMake (required if building OpenDDS tests and building Google Test and other dependencies from source).
 
-.. note:: General Notes on Using OpenDDS Configure Script with DDS Security
+General Notes on Using OpenDDS Configure Script with DDS Security:
 
 #. DDS Security is disabled by default, enable it with ``--security``
 
@@ -66,33 +66,35 @@ Although it is cross-platform, this guide only discusses vcpkg on Windows.
 
 As of this writing, vcpkg is only supported on Visual Studio 2015 Update 3 and later versions; if using an earlier version of Visual Studio, skip down to the manual setup instructions later in this section.
 
-#. * * * If OpenDDS tests will be built, install CMake or put the one that comes with Visual Studio on the PATH (see Common7\IDE\CommonExtensions\Microsoft\CMake).
+* If OpenDDS tests will be built, install CMake or put the one that comes with Visual Studio on the ``PATH`` (see ``Common7\IDE\CommonExtensions\Microsoft\CMake``).
 
-       * If you need to obtain and install vcpkg, navigate to `https://github.com/Microsoft/vcpkg <#https://github.com/Microsoft/vcpkg>`__ and follow the instructions to obtain vcpkg by cloning the repository and bootstrapping it.
+* If you need to obtain and install vcpkg, navigate to `https://github.com/Microsoft/vcpkg <#https://github.com/Microsoft/vcpkg>`__ and follow the instructions to obtain vcpkg by cloning the repository and bootstrapping it.
 
-       * Fetch and build the dependencies; by default, vcpkg targets x86 so be sure to specify the x64 target if required by specifying it when invoking vcpkg install, as shown here:
+* Fetch and build the dependencies; by default, vcpkg targets x86 so be sure to specify the x64 target if required by specifying it when invoking vcpkg install, as shown here:
 
-.. code-block:: doscon
+  .. code-block:: doscon
 
-         vcpkg install openssl:x64-windows xerces-c:x64-windows
+      vcpkg install openssl:x64-windows xerces-c:x64-windows
 
-       * Configure OpenDDS by passing the openssl and xerces3 switches.
-         As a convenience, it can be helpful to set an environment variable to store the path since it is the same location for both dependencies.
+* Configure OpenDDS by passing the openssl and xerces3 switches.
+  As a convenience, it can be helpful to set an environment variable to store the path since it is the same location for both dependencies.
 
-.. code-block:: doscon
+  .. code-block:: doscon
 
-         set VCPKG_INSTALL=c:\path\to\vcpkg\installed\x64-windows
-         configure --security --openssl=%VCPKG_INSTALL% --xerces3=%VCPKG_INSTALL%
+      set VCPKG_INSTALL=c:\path\to\vcpkg\installed\x64-windows
+      configure --security --openssl=%VCPKG_INSTALL% --xerces3=%VCPKG_INSTALL%
 
-       * Compile with msbuild or by launching Visual Studio from this command prompt so it inherits the correct environment variables and building from there.
+* Compile with msbuild or by launching Visual Studio from this command prompt so it inherits the correct environment variables and building from there.
 
-.. code-block:: doscon
+  .. code-block:: doscon
 
-    msbuild /m DDS_TAOv2_all.sln
+      msbuild /m DDS_TAOv2_all.sln
 
 **Manual Build**
 
-Note: for all of the build steps listed here, check that each package targets the same architecture (either 32-bit or 64-bit) by compiling all dependencies within the same type of Developer Command Prompt.
+.. note::
+
+   For all of the build steps listed here, check that each package targets the same architecture (either 32-bit or 64-bit) by compiling all dependencies within the same type of Developer Command Prompt.
 
 **Compiling OpenSSL**
 
@@ -103,20 +105,22 @@ Official OpenSSL instructions can be found `here <https://wiki.openssl.org/index
 
 #. Install Netwide Assembler (NASM).
    Click through the latest stable release and there is a win32 and win64 directory containing executable installers.
-   The installer does not update the Path environment variable, so a manual entry ``(%LOCALAPPDATA%\bin\NASM)`` is necessary.
+   The installer does not update the Path environment variable, so a manual entry (``%LOCALAPPDATA%\bin\NASM``) is necessary.
 
 #. Download the required version of OpenSSL by cloning the repository.
 
 #. Open a Developer Command Prompt (32-bit or 64-bit depending on the desired target architecture) and change into the freshly cloned openssl directory.
 
-#. Run the configure script and specify a required architecture (``perl Configure VC-WIN32 or perl Configure VC-WIN64A``).
+#. Run the configure script and specify a required architecture (``perl Configure VC-WIN32`` or ``perl Configure VC-WIN64A``).
 
-#. Run ``nmake``.
+#. Run ``nmake``
 
-#. Run ``nmake install``.
+#. Run ``nmake install``
 
-Note: if the default OpenSSL location is desired, which will be searched by OpenDDS, open the Developer Command Prompt as an administrator before running the install.
-It will write to “C:\Program Files” or “C:\Program Files (x86)” depending on the architecture.
+.. note::
+
+   If the default OpenSSL location is desired, which will be searched by OpenDDS, open the "Developer Command Prompt" as an administrator before running the install.
+   It will write to ``C:\Program Files`` or ``C:\Program Files (x86)`` depending on the architecture.
 
 **Compiling Xerces-C++ 3**
 
@@ -126,23 +130,23 @@ Official Xerces instructions can be found `here <https://xerces.apache.org/xerce
 
 #. Create a cmake build directory and change into it (from within the Xerces source tree).
 
-.. code-block:: bash
+   .. code-block:: bash
 
-    mkdir build
-    cd build
+       mkdir build
+       cd build
 
 #. Run cmake with the appropriate generator.
    In this case Visual Studio 2017 with 64-bit is being used so:
 
-.. code-block:: bash
+   .. code-block:: bash
 
-    cmake -G "Visual Studio 15 2017 Win64" ..
+       cmake -G "Visual Studio 15 2017 Win64" ..
 
 #. Run cmake again with the build switch and install target (this should be done in an administrator command-prompt to install in the default location as mentioned above).
 
-.. code-block:: bash
+   .. code-block:: bash
 
-    cmake --build . --target install
+       cmake --build . --target install
 
 **Configuring and Building OpenDDS**:
 
@@ -150,22 +154,22 @@ Official Xerces instructions can be found `here <https://xerces.apache.org/xerce
 
    * If the default location was used for OpenSSL and Xerces, configure should automatically find the dependencies:
 
-.. code-block:: bash
+     .. code-block:: bash
 
-    configure --security
+         configure --security
 
-#. * If a different location was used (assuming environment variables ``NEW_SSL_ROOT`` and ``NEW_XERCES_ROOT`` point to their respective library directories):
+#. If a different location was used (assuming environment variables ``NEW_SSL_ROOT`` and ``NEW_XERCES_ROOT`` point to their respective library directories):
 
-.. code-block:: doscon
+   .. code-block:: doscon
 
-    configure --security --openssl=%NEW_SSL_ROOT% \
-      --xerces3=%NEW_XERCES_ROOT%
+       configure --security --openssl=%NEW_SSL_ROOT% \
+         --xerces3=%NEW_XERCES_ROOT%
 
 #. Compile with msbuild (or by opening the solution file in Visual Studio and building from there).
 
-.. code-block:: doscon
+   .. code-block:: doscon
 
-    msbuild /m DDS_TAOv2_all.sln
+       msbuild /m DDS_TAOv2_all.sln
 
 .. _dds_security--building-opendds-with-security-on-linux:
 
@@ -176,7 +180,7 @@ Building OpenDDS with Security on Linux
     Sect<14.1.3>
 
 Xerces-C++ and OpenSSL may be installed using the system package manager, or built from source.
-If using the system package manager (that is, headers can be found under /usr/include), invoke the configure script with the --security option.
+If using the system package manager (that is, headers can be found under ``/usr/include``), invoke the configure script with the --security option.
 If Xerces-C++ and/or OpenSSL are built from source or installed in a custom location, also provide the ``--xerces3=/foo`` and ``--openssl=/bar`` command line options.
 
 .. _dds_security--building-opendds-with-security-on-macos:
@@ -772,7 +776,7 @@ Enables the use of access control protections for matching user topic DataWriter
 
 Specifies the protection kind used for the RTPS SubMessages sent by any DataWriter and DataReader whose associated Topic name matches the rule’s topic expression.
 
-<data_protection_kind> : **BasicProtectionKind**
+``<data_protection_kind>`` : **BasicProtectionKind**
 
 Specifies the basic protection kind used for the RTPS SerializedPayload SubMessage element sent by any DataWriter whose associated Topic name matches the rule’s topic expression.
 
@@ -876,21 +880,21 @@ Each grant’s validity section contains a start date and time (``<not_before>``
 
 The format of the date and time, which is like ISO-8601, must take one of the following forms:
 
-#. * * * * ``YYYY-MM-DDThh:mm:ss``
+* ``YYYY-MM-DDThh:mm:ss``
 
-* * * * * Example: ``2020-10-26T22:45:30``
+  * Example: ``2020-10-26T22:45:30``
 
-#. * * * * ``YYYY-MM-DDThh:mm:ssZ``
+* ``YYYY-MM-DDThh:mm:ssZ``
 
-* * * * * Example:``2020-10-26T22:45:30Z``
+  * Example:``2020-10-26T22:45:30Z``
 
-#. * * * * ``YYYY-MM-DDThh:mm:ss+hh:mm``
+* ``YYYY-MM-DDThh:mm:ss+hh:mm``
 
-* * * * * Example:``2020-10-26T23:45:30+01:00``
+  * Example:``2020-10-26T23:45:30+01:00``
 
-#. * * * * ``YYYY-MM-DDThh:mm:ss-hh:mm``
+* ``YYYY-MM-DDThh:mm:ss-hh:mm``
 
-* * * * * Example:``2020-10-26T16:45:30-06:00``
+  * Example:``2020-10-26T16:45:30-06:00``
 
 All fields shown must include leading zeros to fill out their full width, as shown in the examples.
 YYYY-MM-DD is the date and hh:mm:ss is the time in 24-hour format.
@@ -1037,11 +1041,11 @@ The following DDS Security features are not implemented in OpenDDS.
 
    * OpenDDS doesn't use KeyHash, so it meets the spec requirements of not leaking secured data through KeyHash
 
-#. Immutability of Publisher’s Partition QoS (see OMG Issue DDSSEC12-49)
+#. Immutability of Publisher’s Partition QoS, see :omgissue:`DDSSEC12-49`
 
 #. Use of multiple plugin configurations (with different Domain Participants)
 
-#. CRL (RFC 5280) and OCSP (RFC 2560) support
+#. CRL (:RFC:`5280`) and OCSP (:RFC:`2560`) support
 
 #. Certain plugin operations not used by built-in plugins may not be invoked by middleware
 
@@ -1057,5 +1061,5 @@ The following DDS Security features are not implemented in OpenDDS.
 
 #. Configuration of Built-In Crypto’s key reuse (within the DataWriter) and blocks-per-session
 
-#. Signing (without encrypting) at the payload level, see OMG Issue DDSSEC12-59
+#. Signing (without encrypting) at the payload level, see :omgissue:`DDSSEC12-59`
 

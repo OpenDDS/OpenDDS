@@ -3583,7 +3583,7 @@ Security Debug Logging
 ..
     Sect<7.6.3>
 
-When OpenDDS is compiled with security enabled, debug logging for security can be enabled using ``DCPSecurityDebug``(See :ref:`Table 7-2 Common Configuration Options <run_time_configuration--reftable9>`).
+When OpenDDS is compiled with security enabled, debug logging for security can be enabled using ``DCPSecurityDebug`` (See :ref:`Table 7-2 Common Configuration Options <run_time_configuration--reftable9>`).
 Security logging is divided into categories, although ``DCPSSecurityDebugLevel`` is also provided, which controls the categories in a similar manner and using the same scale as ``DCPSDebugLevel``.
 
 .. _run_time_configuration--reftable28:
