@@ -228,17 +228,44 @@ public:
     cache_.clear();
   }
 
-  void lookup(const std::string& name, T& guids) const
+  /// If 'allowed' is not nullptr, entries inserted into 'guids' must be in 'allowed'
+  void lookup(const std::string& name, T& guids, const T* allowed = nullptr) const
   {
+    LimitedInserter inserter(guids, allowed);
     const auto pos = cache_.find(name);
     if (pos != cache_.end()) {
-      guids.insert(pos->second.begin(), pos->second.end());
+      inserter.insert(pos->second.begin(), pos->second.end());
       return;
     }
     T& cache_temp = cache_[name];
     TrieNodeT::lookup(root_, Name(name), cache_temp);
-    guids.insert(cache_temp.begin(), cache_temp.end());
+    inserter.insert(cache_temp.begin(), cache_temp.end());
   }
+
+  class LimitedInserter {
+  public:
+    LimitedInserter(T& output, const T* limits)
+      : output_(output)
+      , limits_(limits)
+    {}
+
+    void insert(const typename T::const_iterator& begin, const typename T::const_iterator& end)
+    {
+      if (limits_) {
+        for (auto iter = begin; iter != end; ++iter) {
+          if (limits_->count(*iter)) {
+            output_.insert(*iter);
+          }
+        }
+      } else {
+        output_.insert(begin, end);
+      }
+    }
+
+  private:
+    T& output_;
+    const T* limits_;
+  };
 
 private:
   typename TrieNodeT::NodePtr root_;

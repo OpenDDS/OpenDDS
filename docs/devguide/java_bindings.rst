@@ -619,7 +619,7 @@ The ``[transport/1]`` section contains configuration information for the transpo
 It is defined to be of type ``tcp``.
 The global transport configuration setting above causes this transport instance to be used by all readers and writers in the process.
 
-See Chapter :ref:`run_time_configuration--run-time-configuration` for a complete description of all OpenDDS configuration parameters.
+See :ref:`run_time_configuration--run-time-configuration` for a complete description of all OpenDDS configuration parameters.
 
 .. _java_bindings--running-the-example:
 

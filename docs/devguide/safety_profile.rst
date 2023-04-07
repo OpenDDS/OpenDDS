@@ -21,7 +21,7 @@ The Safety Profile configuration allows OpenDDS to be used in environments that 
 OpenDDS Safety Profile (and the corresponding features in ACE) were developed for the `Open Group's FACE specification, edition 2.1 <https://www.opengroup.org/face/tech-standard-2.1>`__.
 It can be used along with the support for FACE Transport Services to create FACE-conformant DDS applications, or it can be used by general DDS applications that are not written to the FACE Transport Services APIs.
 This latter use-case is described by this section of the developer's guide.
-For more information on the former use-case see the file FACE/README.txt in the source distribution or contact us at `sales@objectcomputing.com <mailto:sales@ociweb.com>`__ (commercial support) or `opendds-main@lists.sourceforge.net <mailto:opendds-main@lists.sourceforge.net>`__ (community support).
+For more information on the former use-case see the file FACE/README.txt in the source distribution.
 
 .. _safety_profile--safety-profile-subset-of-opendds:
 
@@ -52,12 +52,12 @@ When developing the Safety Profile, the following DDS Compliance Profiles were d
 
 * persistence_profile
 
-See Section :ref:`introduction--disabling-the-building-of-compliance-profile-features` for more details on compliance profiles.
+See :ref:`introduction--disabling-the-building-of-compliance-profile-features` for more details on compliance profiles.
 It is possible that enabling any of these compliance profiles in a Safety Profile build will result in a compile-time or run-time error.
 
 To build OpenDDS Safety Profile, pass the command line argument “--safety-profile” to the configure script along with any other arguments needed for your platform or configuration.
 When safety profile is enabled in the configure script, the four compliance profiles listed above default to disabled.
-See section :ref:`introduction--installation` and the ``INSTALL.md`` file in the source distribution for more information about the configure script.
+See :ref:`introduction--installation` and the ``INSTALL.md`` file in the source distribution for more information about the configure script.
 
 .. _safety_profile--safety-profile-configurations-of-ace:
 
@@ -96,7 +96,7 @@ Run-time Configurable Options
     Sect<13.4>
 
 The memory pool used by OpenDDS can be configured by setting values in the [common] section of the configuration file.
-See section :ref:`run_time_configuration--common-configuration-options` and the pool_size and pool_granularity rows of table :ref:`Table 7-2 <run_time_configuration--reftable9>`.
+See :ref:`run_time_configuration--common-configuration-options` and the pool_size and pool_granularity rows of table :ref:`Table 7-2 <run_time_configuration--reftable9>`.
 
 .. _safety_profile--running-ace-and-opendds-tests:
 

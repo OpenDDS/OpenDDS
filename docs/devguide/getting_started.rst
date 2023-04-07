@@ -16,11 +16,11 @@ Using DCPS
 ..
     Sect<2.1>
 
-This chapter focuses on an example application using DCPS to distribute data from a single publisher process to a single subscriber process.
+This section focuses on an example application using DCPS to distribute data from a single publisher process to a single subscriber process.
 It is based on a simple messenger application where a single publisher publishes messages and a single subscriber subscribes to them.
 We use the default QoS properties and the default TCP/IP transport.
 Full source code for this example may be found under the :ghfile:`DevGuideExamples/DCPS/Messenger/` directory.
-Additional DDS and DCPS features are discussed in later chapters.
+Additional DDS and DCPS features are discussed in later sections.
 
 .. _getting_started--defining-data-types-with-idl:
 
@@ -31,7 +31,7 @@ Defining Data Types with IDL
     Sect<2.1.1>
 
 In this example, data types for topics will be defined using the OMG Interface Definition Language (IDL).
-For details on how to build OpenDDS applications that don't use IDL for topic data types, see section :ref:`xtypes--dynamicdatawriters-and-dynamicdatareaders`.
+For details on how to build OpenDDS applications that don't use IDL for topic data types, see :ref:`xtypes--dynamicdatawriters-and-dynamicdatareaders`.
 
 .. _getting_started--identifying-topic-types:
 
@@ -64,7 +64,7 @@ The ``@topic`` annotation marks a data type that can be used as a topic’s type
 This must be a structure or a union.
 The structure or union may contain basic types (short, long, float, etc.
 ), enumerations, strings, sequences, arrays, structures, and unions.
-See section :ref:`introduction--idl-compliance` for more details on the use of IDL for OpenDDS topic types.
+See :ref:`introduction--idl-compliance` for more details on the use of IDL for OpenDDS topic types.
 The IDL above defines the structure Message in the Messenger module for use in this example.
 
 .. _getting_started--keys:
@@ -200,7 +200,7 @@ In addition to ``@topic``, the set of IDL types OpenDDS can use can also be cont
 Types that are “nested” are the opposite of topic types; they can’t be used for the top-level type of a topic, but they can be nested inside the top-level type (at any level of nesting).
 All types are nested by default in OpenDDS to reduce the code generated for type support, but there a number of ways to change this:
 
-* The type can be annotated with ``@topic`` (see section :ref:`getting_started--identifying-topic-types`), or with ``@nested(FALSE)``, which is equivalent to ``@topic``.
+* The type can be annotated with ``@topic`` (see :ref:`getting_started--identifying-topic-types`), or with ``@nested(FALSE)``, which is equivalent to ``@topic``.
 
 * The enclosing module can be annotated with ``@default_nested(FALSE)``.
 
@@ -224,7 +224,7 @@ Processing the IDL
     Sect<2.1.2>
 
 This section uses the OMG IDL-to-C++ mapping (“C++ classic”) as part of the walk-through.
-OpenDDS also supports the OMG IDL-to-C++11 mapping, see section :ref:`opendds_idl--using-the-idl-to-c-11-mapping` for details.
+OpenDDS also supports the OMG IDL-to-C++11 mapping, see :ref:`opendds_idl--using-the-idl-to-c-11-mapping` for details.
 
 The OpenDDS IDL is first processed by the TAO IDL compiler.
 
@@ -255,7 +255,7 @@ The implementation files contain implementations for these interfaces.
 The generated IDL file should itself be compiled with the TAO IDL compiler to generate stubs and skeletons.
 These and the implementation file should be linked with your OpenDDS applications that use the Message type.
 The OpenDDS IDL compiler has a number of options that specialize the generated code.
-These options are described in Chapter :ref:`opendds_idl--opendds-idl`.
+These options are described in :ref:`opendds_idl--opendds-idl`.
 
 Typically, you do not directly invoke the TAO or OpenDDS IDL compilers as above, but let your build system do it for you.
 Two different build systems are supported for projects that use OpenDDS:
@@ -368,7 +368,7 @@ The first section of ``main()`` initializes the current process as an OpenDDS pa
 The ``TheParticipantFactoryWithArgs`` macro is defined in ``Service_Participant.h`` and initializes the Domain Participant Factory with the command line arguments.
 These command line arguments are used to initialize the ORB that the OpenDDS service uses as well as the service itself.
 This allows us to pass ``ORB_init()`` options on the command line as well as OpenDDS configuration options of the form ``-DCPS*``.
-Available OpenDDS options are fully described in Chapter :ref:`run_time_configuration--run-time-configuration`.
+Available OpenDDS options are fully described in :ref:`run_time_configuration--run-time-configuration`.
 
 The ``create_participant()`` operation uses the domain participant factory to register this process as a participant in the domain specified by the ID of 42.
 The participant uses the default QoS policies and no listeners.
@@ -530,7 +530,7 @@ Here is the corresponding code:
 
         ws->detach_condition(condition);
 
-For more details about status, conditions, and wait sets, see Chapter :ref:`conditions_and_listeners--conditions-and-listeners`.
+For more details about status, conditions, and wait sets, see :ref:`conditions_and_listeners--conditions-and-listeners`.
 
 .. _getting_started--sample-publication:
 
@@ -566,7 +566,7 @@ Since the subject_id is the key for Message, each time subject_id is incremented
 The second argument to ``write()`` specifies the instance on which we are publishing the sample.
 It should be passed either a handle returned by ``register_instance()`` or ``DDS::HANDLE_NIL``.
 Passing a ``DDS::HANDLE_NIL`` value indicates that the data writer should determine the instance by inspecting the key of the sample.
-See Section :ref:`getting_started--registering-and-using-instances-in-the-publisher` for details on using instance handles during publication.
+See :ref:`getting_started--registering-and-using-instances-in-the-publisher` for details on using instance handles during publication.
 
 .. _getting_started--setting-up-the-subscriber:
 
@@ -800,7 +800,7 @@ The dispose notification is delivered with the instance state set to ``NOT_ALIVE
 If additional samples are available, the service calls this function again.
 However, reading values a single sample at a time is not the most efficient way to process incoming data.
 The Data Reader interface provides a number of different options for processing data in a more efficient manner.
-We discuss some of these operations in Section :ref:`getting_started--data-handling-optimizations`.
+We discuss some of these operations in :ref:`getting_started--data-handling-optimizations`.
 
 .. _getting_started--cleaning-up-in-opendds-clients:
 
@@ -907,9 +907,9 @@ Unix
 The publisher connects to the ``DCPSInfoRepo`` to find the location of any subscribers and begins to publish messages as well as write them to the console.
 In the subscriber window, you should also now be seeing console output from the subscriber that is reading messages from the topic demonstrating a simple publish and subscribe application.
 
-You can read more about configuring your application for RTPS and other more advanced configuration options in Section :ref:`run_time_configuration--configuring-for-ddsi-rtps-discovery` and Section :ref:`run_time_configuration--rtps-udp-transport-configuration-options` .
-To read more about configuring and using the ``DCPSInfoRepo`` go to Section :ref:`run_time_configuration--discovery-configuration` and Chapter :ref:`the_dcps_information_repository--the-dcps-information-repository`.
-To find more about setting and using QoS features that modify the behavior of your application read Chapter :ref:`quality_of_service--quality-of-service`.
+You can read more about configuring your application for RTPS and other more advanced configuration options in :ref:`run_time_configuration--configuring-for-ddsi-rtps-discovery` and :ref:`run_time_configuration--rtps-udp-transport-configuration-options` .
+See :ref:`run_time_configuration--discovery-configuration` and :ref:`the_dcps_information_repository--the-dcps-information-repository` for configuring and using the ``DCPSInfoRepo`` .
+See :ref:`quality_of_service--quality-of-service` for setting and using QoS features that modify the behavior of your application.
 
 .. _getting_started--running-our-example-with-rtps:
 
@@ -924,8 +924,9 @@ The following details what is needed to run the same example using RTPS for disc
 This is important in scenarios when your OpenDDS application needs to interoperate with a non-OpenDDS implementation of the DDS specification or if you do not want to use centralized discovery in your deployment of OpenDDS.
 
 The coding and building of the Messenger example above is not changed for using RTPS, so you will not need to modify or rebuild your publisher and subscriber services.
-This is a strength of the OpenDDS architecture in that to enable the RTPS capabilities, it is an exercise of configuration.
-Chapter :ref:`run_time_configuration--run-time-configuration` will cover more details concerning the configuration of all the available transports including RTPS, however, for this exercise we will enable RTPS for the Messenger example using a configuration file that the publisher and subscriber will share.
+This is a strength of the OpenDDS architecture in that to enable the RTPS capabilities, it is an exercise in configuration.
+For this exercise, we will enable RTPS for the Messenger example using a configuration file that the publisher and subscriber will share.
+More details concerning the configuration of all the available transports including RTPS are described in :ref:`run_time_configuration--run-time-configuration`.
 
 Navigate to the directory where your publisher and subscriber have been built.
 Create a new text file named ``rtps.ini`` and populate it with the following content:
@@ -939,7 +940,7 @@ Create a new text file named ``rtps.ini`` and populate it with the following con
     [transport/the_rtps_transport]
     transport_type=rtps_udp
 
-More details of configuration files are specified in upcoming chapters, but the two lines of interest are called out for setting the discovery method  and the data transport protocol to RTPS.
+The two lines of interest are the one that sets the discovery method and the one that sets the data transport protocol to RTPS.
 
 Now lets re-run our example with RTPS enabled by starting the subscriber process first and then the publisher to begin sending data.
 It is best to start them in separate windows to see the two working separately.
@@ -975,7 +976,7 @@ Unix:
 Since there is no centralized discovery in the RTPS specification, there are provisions to allow for wait times to allow discovery to occur.
 The specification sets the default to 30 seconds.
 When the two above processes are started there may be up to a 30 second delay depending on how far apart they are started from each other.
-This time can be adjusted in OpenDDS configuration files discussed later Section :ref:`run_time_configuration--configuring-for-ddsi-rtps-discovery`.
+This time can be adjusted in OpenDDS configuration files and is discussed in :ref:`run_time_configuration--configuring-for-ddsi-rtps-discovery`.
 
 Because the architecture of OpenDDS allows for pluggable discovery and pluggable transports the two configuration entries called out in the ``rtps.ini`` file above can be changed independently with one using RTPS and the other not using RTPS (e.g.
 centralized discovery using ``DCPSInfoRepo``).

@@ -23,10 +23,10 @@ OpenDDS is an open source implementation of a group of related Object Management
    This specification describes the requirements for interoperability between DDS implementations.
 
 #. **DDS Security v1.1** (OMG document ``formal/2018-04-01``) extends DDS with capabilities for authentication and encryption.
-   OpenDDS’s support for the DDS Security specification is described below in Chapter :ref:`dds_security--dds-security`.
+   OpenDDS’s support for the DDS Security specification is described in :ref:`dds_security--dds-security`.
 
 #. **Extensible and Dynamic Topic Types for DDS (XTypes) v1.3** (OMG document ``formal/2020-02-04``) defines details of the type system used for the data exchanged on DDS Topics, including how schema and data are encoded for network transmission.
-   Details of DDS-XTypes are below in Chapter :ref:`xtypes--xtypes`.
+   OpenDDS's support for DDS-XTypes is described in :ref:`xtypes--xtypes`.
 
 OpenDDS is implemented in C++ and contains support for Java.
 Users in the OpenDDS community have contributed and maintain bindings for other languages include C#, nodejs, and Python.
@@ -297,7 +297,7 @@ Each data writer is bound to a particular topic.
 The application uses the data writer’s type-specific interface to publish samples on that topic.
 The data writer is responsible for marshaling the data and passing it to the publisher for transmission.
 
-Dynamic data writers (see section :ref:`xtypes--creating-and-using-a-dynamicdatawriter-or-dynamicdatareader`) can be used when code generated from IDL is not available or desired.
+Dynamic data writers (:ref:`xtypes--creating-and-using-a-dynamicdatawriter-or-dynamicdatareader`) can be used when code generated from IDL is not available or desired.
 Dynamic data writers are also type-safe, but type checking happens at runtime.
 
 .. _introduction--publisher:
@@ -333,7 +333,7 @@ The *data reader* takes data from the subscriber, demarshals it into the appropr
 Each data reader is bound to a particular topic.
 The application uses the data reader’s type-specific interfaces to receive the samples.
 
-Dynamic data readers (see section :ref:`xtypes--creating-and-using-a-dynamicdatawriter-or-dynamicdatareader`) can be used when code generated from IDL is not available or desired.
+Dynamic data readers (:ref:`xtypes--creating-and-using-a-dynamicdatawriter-or-dynamicdatareader`) can be used when code generated from IDL is not available or desired.
 Dynamic data readers are also type-safe, but type checking happens at runtime.
 
 .. _introduction--built-in-topics:
@@ -394,7 +394,7 @@ Subscribers *request* a set of policies that are minimally required.
 Publishers *offer* a set of QoS policies to potential subscribers.
 The DDS implementation then attempts to match the requested policies with the offered policies; if these policies are compatible then the association is formed.
 
-The QoS policies currently implemented by OpenDDS are discussed in detail in Chapter :ref:`quality_of_service--quality-of-service`.
+The QoS policies currently implemented by OpenDDS are discussed in detail in :ref:`quality_of_service--quality-of-service`.
 
 .. _introduction--listeners:
 
@@ -449,8 +449,8 @@ Compliance
 OpenDDS complies with the OMG DDS and the OMG DDSI-RTPS specifications.
 Details of that compliance follows here.
 OpenDDS also implements the OMG DDS Security specification.
-Details of compliance to that specification are in section :ref:`dds_security--dds-security-implementation-status`.
-Details of XTypes compliance are in sections :ref:`xtypes--unimplemented-features` and :ref:`xtypes--differences-from-the-specification`.
+Details of compliance to that specification are in :ref:`dds_security--dds-security-implementation-status`.
+Details of XTypes compliance are in :ref:`xtypes--unimplemented-features` and :ref:`xtypes--differences-from-the-specification`.
 
 .. _introduction--dds-compliance:
 
@@ -559,7 +559,7 @@ OpenDDS supports the following building blocks, with notes/caveats listed below 
 
 * Annotations
 
-  * See sections :ref:`getting_started--defining-data-types-with-idl` and :ref:`xtypes--idl-annotations` for details on which built-in annotations are supported.
+  * See :ref:`getting_started--defining-data-types-with-idl` and :ref:`xtypes--idl-annotations` for details on which built-in annotations are supported.
 
   * User-defined annotation types are also supported.
 
@@ -584,7 +584,7 @@ Data types, interfaces, and constants in the **DDS** IDL module (C++ namespace, 
 * Type-specific DataReaders (including those for Built-in Topics) have additional operations ``read_instance_w_condition()`` and ``take_instance_w_condition()``.
 
 Additional extended behavior is provided by various classes and interfaces in the OpenDDS module/namespace/package.
-Those include features like Recorder and Replayer (see chapter :ref:`alternate_interfaces_to_data--alternate-interfaces-to-data`) and also:
+Those include features like Recorder and Replayer (:ref:`alternate_interfaces_to_data--alternate-interfaces-to-data`) and also:
 
 * ``OpenDDS::DCPS::TypeSupport`` adds the ``unregister_type()`` operation not found in the DDS spec.
 
@@ -631,7 +631,7 @@ Data transmission is accomplished via an OpenDDS-specific transport framework th
 This is referred to as *pluggable transports* and makes the extensibility of OpenDDS an important part of its architecture.
 OpenDDS currently supports TCP/IP, UDP/IP, IP multicast, shared-memory, and RTPS_UDP transport protocols as shown in :ref:`Figure 1-2 <introduction--reffigure1>`.
 Transports are typically specified via configuration files and are attached to various entities in the publisher and subscriber processes.
-Refer to Section :ref:`run_time_configuration--transport-configuration-options` for details on configuring ETF components.
+See :ref:`run_time_configuration--transport-configuration-options` for details on configuring ETF components.
 
 .. _introduction--reffigure1:
 
@@ -706,7 +706,7 @@ This style of discovery is accomplished only through the use of the RTPS protoco
 This simple form of discovery is accomplished through simple configuration of DDS application data readers and data writers running in application processes as shown in :ref:`Figure 1-4 <introduction--reffigure3>`.
 As each participating process activates the DDSI-RTPS discovery mechanisms in OpenDDS for their data readers and writers, network endpoints are created with either default or configured network ports such that DDS participants can begin advertising the availability of their data readers and data writers.
 After a period of time, those seeking one another based on criteria will find each other and establish a connection based on the configured pluggable transport as discussed in Extensible Transport Framework (ETF).
-A more detailed description of this flexible configuration approach is discussed in Section :ref:`run_time_configuration--transport-concepts` and Section :ref:`run_time_configuration--rtps-udp-transport-configuration-options`.
+A more detailed description of this flexible configuration approach is discussed in :ref:`run_time_configuration--transport-concepts` and :ref:`run_time_configuration--rtps-udp-transport-configuration-options`.
 
 .. _introduction--reffigure3:
 
@@ -740,7 +740,7 @@ Your application may get called back from these threads via the Listener mechani
 
 When publishing a sample via DDS, OpenDDS normally attempts to send the sample to any connected subscribers using the calling thread.
 If the send call blocks, then the sample may be queued for sending on a separate service thread.
-This behavior depends on the QoS policies described in Chapter :ref:`quality_of_service--quality-of-service`.
+This behavior depends on the QoS policies described in :ref:`quality_of_service--quality-of-service`.
 
 All incoming data in the subscriber is read by a service thread and queued for reading by the application.
 DataReader listeners are called from the service thread.
@@ -755,7 +755,7 @@ Configuration
 
 OpenDDS includes a file-based configuration framework for configuring both global items such as debug level, memory allocation, and discovery, as well as transport implementation details for publishers and subscribers.
 Configuration can also be achieved directly in code, however, it is recommended that configuration be externalized for ease of maintenance and reduction in runtime errors.
-The complete set of configuration options are described in Chapter :ref:`run_time_configuration--run-time-configuration`.
+The complete set of configuration options are described in :ref:`run_time_configuration--run-time-configuration`.
 
 .. _introduction--installation:
 
@@ -768,12 +768,12 @@ Installation
 
 The steps on how to build OpenDDS can be found in :ghfile:`INSTALL.md`.
 
-To build OpenDDS with DDS Security, see section :ref:`dds_security--building-opendds-with-security-enabled` below.
+To build OpenDDS with DDS Security, see :ref:`dds_security--building-opendds-with-security-enabled`.
 
 To avoid compiling OpenDDS code that you will not be using, there are certain features than can be excluded from being built.
 The features are discussed below.
 
-Users requiring a small-footprint configuration or compatibility with safety-oriented platforms should consider using the OpenDDS Safety Profile, which is described in chapter :ref:`safety_profile--safety-profile` of this guide.
+Users requiring a small-footprint configuration or compatibility with safety-oriented platforms should consider using the OpenDDS Safety Profile, which is described in :ref:`safety_profile--safety-profile` of this guide.
 
 .. _introduction--building-with-a-feature-enabled-or-disabled:
 
@@ -819,7 +819,7 @@ Disabling the Building of Built-In Topic Support
 Feature Name: ``built_in_topics``
 
 You can reduce the footprint of the core DDS library by up to 30% by disabling Built-in Topic Support.
-See Chapter :ref:`built_in_topics--built-in-topics` for a description of Built-In Topics.
+See :ref:`built_in_topics--built-in-topics` for a description of Built-In Topics.
 
 .. _introduction--disabling-the-building-of-compliance-profile-features:
 
@@ -846,7 +846,7 @@ Content-Subscription Profile
 
 Feature Name: ``content_subscription``
 
-This profile adds the classes ``ContentFilteredTopic``, ``QueryCondition``, and ``MultiTopic`` discussed in Chapter :ref:`content_subscription_profile--content-subscription-profile`.
+This profile adds the classes ``ContentFilteredTopic``, ``QueryCondition``, and ``MultiTopic`` discussed in :ref:`content_subscription_profile--content-subscription-profile`.
 
 In addition, individual classes can be excluded by using the features given in the table below.
 
@@ -930,7 +930,7 @@ Building Applications that use OpenDDS
     Sect<1.4>
 
 This section applies to any C++ code that directly or indirectly includes OpenDDS headers.
-For Java applications, see Chapter :ref:`java_bindings--java-bindings` below.
+For Java applications, see :ref:`java_bindings--java-bindings`.
 
 C++ source code that includes OpenDDS headers can be built using either build system: MPC or CMake.
 
@@ -948,7 +948,7 @@ This environment contains the ``PATH`` and ``MPC_ROOT`` settings necessary to us
 
 MPC’s source tree (in ``MPC_ROOT``) contains a "docs" directory with both HTML and plain text documentation (``USAGE`` and ``README`` files).
 
-The example walk-through in section :ref:`getting_started--using-dcps` uses MPC as its build system.
+The example walk-through in :ref:`getting_started--using-dcps` uses MPC as its build system.
 The OpenDDS source tree contains many tests and examples that are built with MPC.
 These can be used as starting points for application MPC files.
 

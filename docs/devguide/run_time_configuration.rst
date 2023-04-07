@@ -18,7 +18,7 @@ Configuration Approach
 
 OpenDDS includes a file-based configuration framework for configuring global options and options related to specific publishers and subscribers such as discovery and transport configuration.
 OpenDDS also allows configuration via the command line for a limited number of options and via a configuration API.
-This chapter summarizes the configuration options supported by OpenDDS.
+This section summarizes the configuration options supported by OpenDDS.
 
 OpenDDS configuration is concerned with three main areas:
 
@@ -27,7 +27,7 @@ OpenDDS configuration is concerned with three main areas:
    all readers and writers should use RTPS discovery).
 
 #. **Discovery Configuration Options** – configure the behavior of the discovery mechanism(s).
-   OpenDDS supports multiple approaches for discovering and associating writers and readers as detailed in Section :ref:`run_time_configuration--discovery-configuration`.
+   OpenDDS supports multiple approaches for discovering and associating writers and readers as detailed in :ref:`run_time_configuration--discovery-configuration`.
 
 #. **Transport Configuration Options** – configure the Extensible Transport Framework (ETF) which abstracts the transport layer from the DCPS layer of OpenDDS.
    Each pluggable transport can be configured separately.
@@ -82,7 +82,7 @@ For each of the section types with the exception of ``[common]``, the syntax of 
 For example, a ``[repository]`` section type would always be used in a configuration file like so:
 
 ``[repository/repo_1]`` where ``repository`` is the section type and ``repo_1`` is an instance name of a repository configuration.
-How to use instances to configure discovery and transports is explained further in Sections :ref:`run_time_configuration--discovery-configuration` and :ref:`run_time_configuration--transport-configuration`.
+How to use instances to configure discovery and transports is explained further in :ref:`run_time_configuration--discovery-configuration` and :ref:`run_time_configuration--transport-configuration`.
 
 The ``-DCPSConfigFile`` command-line argument can be used to pass the location of a configuration file to OpenDDS.
 For example:
@@ -279,7 +279,7 @@ The following table summarizes the ``[common]`` configuration options:
        ``DEFAULT_REPO`` translates to using the ``DCPSInfoRepo``.
        ``DEFAULT_RTPS`` specifies the use of RTPS for discovery.
        ``DEFAULT_STATIC`` specifies the use of static discovery.
-       See Section :ref:`run_time_configuration--discovery-configuration` for details about configuring discovery.
+       See :ref:`run_time_configuration--discovery-configuration` for details about configuring discovery.
 
      - ``DEFAULT_REPO``
 
@@ -320,7 +320,7 @@ The following table summarizes the ``[common]`` configuration options:
        ``debug``
 
      - General logging control.
-       See section :ref:`run_time_configuration--logging` for details.
+       See :ref:`run_time_configuration--logging` for details.
 
      - ``warning``
 
@@ -356,7 +356,7 @@ The following table summarizes the ``[common]`` configuration options:
      - This setting is only available when OpenDDS is compiled with DDS Security enabled.
        If set to 1, enable DDS Security framework and built-in plugins.
        Each Domain Participant using security must be created with certain QoS policy values.
-       See chapter :ref:`dds_security--dds-security`: DDS Security for more information.
+       See :ref:`dds_security--dds-security`: DDS Security for more information.
 
      - ``0``
 
@@ -364,7 +364,7 @@ The following table summarizes the ``[common]`` configuration options:
 
      - This setting is only available when OpenDDS is compiled with DDS Security enabled.
        This controls the security debug logging granularity by category.
-       See Section :ref:`run_time_configuration--security-debug-logging` for details.
+       See :ref:`run_time_configuration--security-debug-logging` for details.
 
      - ``0``
 
@@ -372,7 +372,7 @@ The following table summarizes the ``[common]`` configuration options:
 
      - This setting is only available when OpenDDS is compiled with DDS Security enabled.
        This controls the security debug logging granularity by debug level.
-       See section :ref:`run_time_configuration--security-debug-logging` for details.
+       See :ref:`run_time_configuration--security-debug-logging` for details.
 
      - ``N/A``
 
@@ -387,7 +387,7 @@ The following table summarizes the ``[common]`` configuration options:
    * - ``DCPSTransportDebugLevel=n``
 
      - Integer value that controls the amount of debug information the transport layer prints.
-       See section :ref:`run_time_configuration--transport-layer-debug-logging` for details.
+       See :ref:`run_time_configuration--transport-layer-debug-logging` for details.
 
      - ``0``
 
@@ -435,7 +435,7 @@ The following table summarizes the ``[common]`` configuration options:
 
    * - ``DCPSThreadStatusInterval=sec``
 
-     - Enable internal thread status reporting (see section :ref:`built_in_topics--openddsinternalthread-topic`) using the specified reporting interval, in seconds.
+     - Enable internal thread status reporting (:ref:`built_in_topics--openddsinternalthread-topic`) using the specified reporting interval, in seconds.
 
      - ``0 (disabled)``
 
@@ -513,7 +513,7 @@ The static discovery mechanism does not have a dedicated section.
 Instead, users are expected to refer to the ``DEFAULT_STATIC`` instance.
 A single domain can refer to only one type of discovery section.
 
-See Sections :ref:`run_time_configuration--configuring-applications-for-dcpsinforepo` for configuring ``[repository]`` sections, :ref:`run_time_configuration--configuring-for-ddsi-rtps-discovery` for configuring ``[rtps_discovery]``, and :ref:`run_time_configuration--configuring-for-static-discovery` for configuring static discovery.
+See :ref:`run_time_configuration--configuring-applications-for-dcpsinforepo` for configuring InfoRepo Discovery, :ref:`run_time_configuration--configuring-for-ddsi-rtps-discovery` for configuring RTPS Discovery, and :ref:`run_time_configuration--configuring-for-static-discovery` for configuring Static Discovery.
 
 Ultimately a domain is assigned an integer value and a configuration file can support this in two ways.
 The first is to simply make the instance value the integer value assigned to the domain as shown here:
@@ -556,7 +556,7 @@ Here is an extension of our example:
     RepositoryIor=host1.mydomain.com:12345
 
 In this case our domain points to a ``[repository]`` section which is used for an OpenDDS ``DCPSInfoRepo`` service.
-See Section :ref:`run_time_configuration--configuring-applications-for-dcpsinforepo` for more details.
+See :ref:`run_time_configuration--configuring-applications-for-dcpsinforepo` for more details.
 
 There are going to be occasions when specific domains are not identified in the configuration file.
 For example, if an OpenDDS application assigns a domain ID of 3 to its participants and the above example does not supply a configuration for domain id of 3 then the following can be used:
@@ -600,7 +600,7 @@ Here is an example:
     RepositoryIor=host2.mydomain.com:12345
 
 By adding the ``DCPSDefaultDiscovery`` property to the ``[common]`` section, any participant that hasn’t been assigned to a domain id of ``1`` or ``2`` will use the configuration of ``DiscoveryConfig2``.
-For more explanation of a similar configuration for RTPS discovery see Section :ref:`run_time_configuration--configuring-for-ddsi-rtps-discovery`.
+For more explanation of a similar configuration for RTPS discovery see :ref:`run_time_configuration--configuring-for-ddsi-rtps-discovery`.
 
 Here are the available properties for the [domain] section.
 
@@ -634,7 +634,7 @@ Here are the available properties for the [domain] section.
    * - ``DefaultTransportConfig=config``
 
      - A user-defined string that refers to the instance name of a ``[config]`` section.
-       See Section :ref:`run_time_configuration--transport-configuration`.
+       See :ref:`run_time_configuration--transport-configuration`.
 
 .. _run_time_configuration--configuring-applications-for-dcpsinforepo:
 
@@ -767,7 +767,7 @@ The DDS entities in a single OpenDDS process can be associated with multiple DCP
 The repository information and domain associations can be configured using a configuration file, or via application API.
 Internal defaults, command line arguments, and configuration file options will work as-is for existing applications that do not want to use multiple ``DCPSInfoRepo`` associations.
 
-Refer to :ref:`Figure 7-1 <run_time_configuration--reffigure4>` as an example of a process that uses multiple ``DCPSInfoRepo`` repositories.
+See :ref:`Figure 7-1 <run_time_configuration--reffigure4>` for an example of a process that uses multiple ``DCPSInfoRepo`` repositories.
 Processes ``A`` and ``B`` are typical application processes that have been configured to communicate with one another and discover one another in ``InfoRepo_1``.
 This is a simple use of basic discovery.
 However, an additional layer of context has been applied with the use of a specified domain (Domain ``1``).
@@ -868,7 +868,7 @@ Apart from this causality relationship, both protocols can be considered indepen
 
 The configuration options discussed in this section allow a user to specify property values to change the behavior of the Simple Participant Discovery Protocol (SPDP) and/or the Simple Endpoint Discovery Protocol (SEDP) default settings.
 
-DDSI-RTPS can be configured for a single domain or for multiple domains as was done in Section :ref:`run_time_configuration--configuring-for-multiple-dcpsinforepo-instances`.
+DDSI-RTPS can be configured for a single domain or for multiple domains as was done in :ref:`run_time_configuration--configuring-for-multiple-dcpsinforepo-instances`.
 
 A simple configuration is achieved by specifying a property in the ``[common]`` section of our example configuration file.
 
@@ -1156,28 +1156,28 @@ Those properties, along with options specific to OpenDDS’s RTPS Discovery impl
    * - ``SpdpRtpsRelayAddress=host:port``
 
      - Specifies the address of the RtpsRelay for SPDP messages.
-       See section :ref:`internet_enabled_rtps--the-rtpsrelay`.
+       See :ref:`internet_enabled_rtps--the-rtpsrelay`.
 
      -
 
    * - ``SpdpRtpsRelaySendPeriod=period``
 
      - Specifies the interval between SPDP announcements sent to the RtpsRelay.
-       See section :ref:`internet_enabled_rtps--the-rtpsrelay`.
+       See :ref:`internet_enabled_rtps--the-rtpsrelay`.
 
      - 30 seconds
 
    * - ``SedpRtpsRelayAddress=host:port``
 
      - Specifies the address of the RtpsRelay for SEDP messages.
-       See section :ref:`internet_enabled_rtps--the-rtpsrelay`.
+       See :ref:`internet_enabled_rtps--the-rtpsrelay`.
 
      -
 
    * - ``RtpsRelayOnly=[0|1]``
 
      - Only send RTPS message to the RtpsRelay (for debugging).
-       See section :ref:`internet_enabled_rtps--the-rtpsrelay`.
+       See :ref:`internet_enabled_rtps--the-rtpsrelay`.
 
      - 0
 
@@ -1185,91 +1185,91 @@ Those properties, along with options specific to OpenDDS’s RTPS Discovery impl
 
      - Send messages to the RtpsRelay.
        Messages will only be sent if SpdpRtpsRelayAddress and/or SedpRtpsRelayAddress is set.
-       See section :ref:`internet_enabled_rtps--the-rtpsrelay`.
+       See :ref:`internet_enabled_rtps--the-rtpsrelay`.
 
      - 0
 
    * - ``SpdpStunServerAddress=host:port``
 
      - Specifies the address of the STUN server to use for SPDP when using ICE.
-       See section :ref:`internet_enabled_rtps--interactive-connectivity-establishment-ice-for-rtps`
+       See :ref:`internet_enabled_rtps--interactive-connectivity-establishment-ice-for-rtps`
 
      -
 
    * - ``SedpStunServerAddress=host:port``
 
      - Specifies the address of the STUN server to use for SEDP when using ICE.
-       See section :ref:`internet_enabled_rtps--interactive-connectivity-establishment-ice-for-rtps`.
+       See :ref:`internet_enabled_rtps--interactive-connectivity-establishment-ice-for-rtps`.
 
      -
 
    * - ``UseIce=[0|1]``
 
      - Enable or disable ICE for both SPDP and SEDP.
-       See section :ref:`internet_enabled_rtps--interactive-connectivity-establishment-ice-for-rtps`.
+       See :ref:`internet_enabled_rtps--interactive-connectivity-establishment-ice-for-rtps`.
 
      - 0
 
    * - ``IceTa=msec``
 
      - Minimum interval between ICE sends.
-       See section :ref:`internet_enabled_rtps--interactive-connectivity-establishment-ice-for-rtps`.
+       See :ref:`internet_enabled_rtps--interactive-connectivity-establishment-ice-for-rtps`.
 
      - 50
 
    * - ``IceConnectivityCheckTTL=sec``
 
      - Maximum duration of connectivity check.
-       See section :ref:`internet_enabled_rtps--interactive-connectivity-establishment-ice-for-rtps`.
+       See :ref:`internet_enabled_rtps--interactive-connectivity-establishment-ice-for-rtps`.
 
      - 300
 
    * - ``IceChecklistPeriod=sec``
 
      - Attempt to cycle through all of the connectivity checks for a candidate in this amount of time.
-       See section :ref:`internet_enabled_rtps--interactive-connectivity-establishment-ice-for-rtps`.
+       See :ref:`internet_enabled_rtps--interactive-connectivity-establishment-ice-for-rtps`.
 
      - 10
 
    * - ``IceIndicationPeriod=sec``
 
      - Send STUN indications to peers to maintain NAT bindings at this period.
-       See section :ref:`internet_enabled_rtps--interactive-connectivity-establishment-ice-for-rtps`.
+       See :ref:`internet_enabled_rtps--interactive-connectivity-establishment-ice-for-rtps`.
 
      - 15
 
    * - ``IceNominatedTTL=sec``
 
      - Forget a valid candidate if an indication is not received in this amount of time.
-       See section :ref:`internet_enabled_rtps--interactive-connectivity-establishment-ice-for-rtps`.
+       See :ref:`internet_enabled_rtps--interactive-connectivity-establishment-ice-for-rtps`.
 
      - 300
 
    * - ``IceServerReflexiveAddressPeriod=sec``
 
      - Send a messages to the STUN server at this period.
-       See section :ref:`internet_enabled_rtps--interactive-connectivity-establishment-ice-for-rtps`.
+       See :ref:`internet_enabled_rtps--interactive-connectivity-establishment-ice-for-rtps`.
 
      - 30
 
    * - ``IceServerReflexiveIndicationCount=integer``
 
      - Send this many indications before sending a new binding request to the STUN server.
-       See section :ref:`internet_enabled_rtps--interactive-connectivity-establishment-ice-for-rtps`.
+       See :ref:`internet_enabled_rtps--interactive-connectivity-establishment-ice-for-rtps`.
 
      - 10
 
    * - ``IceDeferredTriggeredCheckTTL=sec``
 
      - Purge deferred checks after this amount of time.
-       See section :ref:`internet_enabled_rtps--interactive-connectivity-establishment-ice-for-rtps`.
+       See :ref:`internet_enabled_rtps--interactive-connectivity-establishment-ice-for-rtps`.
 
      - 300
 
    * - ``IceChangePasswordPeriod=sec``
 
      - Change the ICE password after this amount of time.
-       See section :ref:`internet_enabled_rtps--interactive-connectivity-establishment-ice-for-rtps`.
+       See :ref:`internet_enabled_rtps--interactive-connectivity-establishment-ice-for-rtps`.
 
      - 300
 
@@ -1393,7 +1393,7 @@ Additional DDSI-RTPS Discovery Features
     Sect<7.3.3.1>
 
 The DDSI_RTPS discovery implementation creates and manages a transport instance –  specifically an object of class ``RtpsUdpInst``.
-In order for applications to access this object and enable advanced features (see :ref:`Additional RTPS_UDP Features <run_time_configuration--additional-rtps-udp-features>`), the ``RtpsDiscovery`` class provides the method ``sedp_transport_inst(domainId, participant)``.
+In order for applications to access this object and enable advanced features (:ref:`Additional RTPS_UDP Features <run_time_configuration--additional-rtps-udp-features>`), the ``RtpsDiscovery`` class provides the method ``sedp_transport_inst(domainId, participant)``.
 
 .. _run_time_configuration--configuring-for-static-discovery:
 
@@ -1471,7 +1471,7 @@ The code to configure the DataReaderQos is similar:
 The domain id, which is 34 in the example, should be passed to the call to ``create_participant``.
 
 In the example, the endpoint configuration for ``MyReader`` references ``MyConfig`` which in turn references ``MyTransport``.
-Transport configuration is described in Section :ref:`run_time_configuration--transport-configuration`.
+Transport configuration is described in :ref:`run_time_configuration--transport-configuration`.
 The important detail for static discovery is that at least one of the transports contains a known network address (``1.2.3.4:30000``).
 An error will be issued if an address cannot be determined for an endpoint.
 The static discovery implementation also checks that the QoS of a data reader or data writer object matches the QoS specified in the configuration file.
@@ -1519,7 +1519,7 @@ The static discovery implementation also checks that the QoS of a data reader or
 
        ``VOLATILE|TRANSIENT_LOCAL]``
 
-     - See Section :ref:`quality_of_service--durability`.
+     - See :ref:`quality_of_service--durability`.
 
      - See :ref:`Table 3-5 <quality_of_service--reftable6>`.
 
@@ -1527,7 +1527,7 @@ The static discovery implementation also checks that the QoS of a data reader or
 
        ``numeric|DURATION_INFINITE_SEC]``
 
-     - See Section :ref:`quality_of_service--deadline`.
+     - See :ref:`quality_of_service--deadline`.
 
      - See :ref:`Table 3-5 <quality_of_service--reftable6>`.
 
@@ -1535,7 +1535,7 @@ The static discovery implementation also checks that the QoS of a data reader or
 
        ``numeric|DURATION_INFINITE_NANOSEC]``
 
-     - See Section :ref:`quality_of_service--deadline`.
+     - See :ref:`quality_of_service--deadline`.
 
      - See :ref:`Table 3-5 <quality_of_service--reftable6>`.
 
@@ -1543,7 +1543,7 @@ The static discovery implementation also checks that the QoS of a data reader or
 
        ``numeric|DURATION_INFINITE_SEC]``
 
-     - See Section :ref:`quality_of_service--latency-budget`.
+     - See :ref:`quality_of_service--latency-budget`.
 
      - See :ref:`Table 3-5 <quality_of_service--reftable6>`.
 
@@ -1551,7 +1551,7 @@ The static discovery implementation also checks that the QoS of a data reader or
 
        ``numeric|DURATION_INFINITE_NANOSEC]``
 
-     - See Section :ref:`quality_of_service--latency-budget`.
+     - See :ref:`quality_of_service--latency-budget`.
 
      - See :ref:`Table 3-5 <quality_of_service--reftable6>`.
 
@@ -1563,7 +1563,7 @@ The static discovery implementation also checks that the QoS of a data reader or
 
        ``MANUAL_BY_PARTICIPANT]``
 
-     - See Section :ref:`quality_of_service--liveliness`.
+     - See :ref:`quality_of_service--liveliness`.
 
      - See :ref:`Table 3-5 <quality_of_service--reftable6>`.
 
@@ -1571,7 +1571,7 @@ The static discovery implementation also checks that the QoS of a data reader or
 
        ``numeric|DURATION_INFINITE_SEC]``
 
-     - See Section :ref:`quality_of_service--liveliness`.
+     - See :ref:`quality_of_service--liveliness`.
 
      - See :ref:`Table 3-5 <quality_of_service--reftable6>`.
 
@@ -1579,13 +1579,13 @@ The static discovery implementation also checks that the QoS of a data reader or
 
        ``numeric|DURATION_INFINITE_NANOSEC]``
 
-     - See Section :ref:`quality_of_service--liveliness`.
+     - See :ref:`quality_of_service--liveliness`.
 
      - See :ref:`Table 3-5 <quality_of_service--reftable6>`.
 
    * - ``reliability.kind=[BEST_EFFORT|RELIABILE]``
 
-     - See Section :ref:`quality_of_service--reliability`.
+     - See :ref:`quality_of_service--reliability`.
 
      - See :ref:`Table 3-5 <quality_of_service--reftable6>`.
 
@@ -1593,7 +1593,7 @@ The static discovery implementation also checks that the QoS of a data reader or
 
        ``numeric|DURATION_INFINITE_SEC]``
 
-     - See Section :ref:`quality_of_service--reliability`.
+     - See :ref:`quality_of_service--reliability`.
 
      - See :ref:`Table 3-5 <quality_of_service--reftable6>`.
 
@@ -1601,7 +1601,7 @@ The static discovery implementation also checks that the QoS of a data reader or
 
        ``numeric|DURATION_INFINITE_NANOSEC]``
 
-     - See Section :ref:`quality_of_service--reliability`.
+     - See :ref:`quality_of_service--reliability`.
 
      - See :ref:`Table 3-5 <quality_of_service--reftable6>`.
 
@@ -1611,31 +1611,31 @@ The static discovery implementation also checks that the QoS of a data reader or
 
        ``BY_RECEPTION_TIMESTAMP]``
 
-     - See Section :ref:`quality_of_service--destination-order`.
+     - See :ref:`quality_of_service--destination-order`.
 
      - See :ref:`Table 3-5 <quality_of_service--reftable6>`.
 
    * - ``history.kind=[KEEP_LAST|KEEP_ALL]``
 
-     - See Section :ref:`quality_of_service--history`.
+     - See :ref:`quality_of_service--history`.
 
      - See :ref:`Table 3-5 <quality_of_service--reftable6>`.
 
    * - ``history.depth=numeric``
 
-     - See Section :ref:`quality_of_service--history`.
+     - See :ref:`quality_of_service--history`.
 
      - See :ref:`Table 3-5 <quality_of_service--reftable6>`.
 
    * - ``resource_limits.max_samples=numeric``
 
-     - See Section :ref:`quality_of_service--resource-limits`.
+     - See :ref:`quality_of_service--resource-limits`.
 
      - See :ref:`Table 3-5 <quality_of_service--reftable6>`.
 
    * - ``resource_limits.max_instances=numeric``
 
-     - See Section :ref:`quality_of_service--resource-limits`.
+     - See :ref:`quality_of_service--resource-limits`.
 
      - See :ref:`Table 3-5 <quality_of_service--reftable6>`.
 
@@ -1643,13 +1643,13 @@ The static discovery implementation also checks that the QoS of a data reader or
 
        ``numeric``
 
-     - See Section :ref:`quality_of_service--resource-limits`.
+     - See :ref:`quality_of_service--resource-limits`.
 
      - See :ref:`Table 3-5 <quality_of_service--reftable6>`.
 
    * - ``transport_priority.value=numeric``
 
-     - See Section :ref:`quality_of_service--transport-priority`.
+     - See :ref:`quality_of_service--transport-priority`.
 
      - See :ref:`Table 3-5 <quality_of_service--reftable6>`.
 
@@ -1657,7 +1657,7 @@ The static discovery implementation also checks that the QoS of a data reader or
 
        ``numeric|DURATION_INFINITE_SEC]``
 
-     - See Section :ref:`quality_of_service--lifespan`.
+     - See :ref:`quality_of_service--lifespan`.
 
      - See :ref:`Table 3-5 <quality_of_service--reftable6>`.
 
@@ -1665,19 +1665,19 @@ The static discovery implementation also checks that the QoS of a data reader or
 
        ``numeric|DURATION_INFINITE_NANOSEC]``
 
-     - See Section :ref:`quality_of_service--lifespan`.
+     - See :ref:`quality_of_service--lifespan`.
 
      - See :ref:`Table 3-5 <quality_of_service--reftable6>`.
 
    * - ``ownership.kind=[SHARED|EXCLUSIVE]``
 
-     - See Section :ref:`quality_of_service--ownership`.
+     - See :ref:`quality_of_service--ownership`.
 
      - See :ref:`Table 3-5 <quality_of_service--reftable6>`.
 
    * - ``ownership_strength.value=numeric``
 
-     - See Section :ref:`quality_of_service--ownership-strength`.
+     - See :ref:`quality_of_service--ownership-strength`.
 
      - See :ref:`Table 3-5 <quality_of_service--reftable6>`.
 
@@ -1698,7 +1698,7 @@ The static discovery implementation also checks that the QoS of a data reader or
 
        ``VOLATILE|TRANSIENT_LOCAL]``
 
-     - See Section :ref:`quality_of_service--durability`.
+     - See :ref:`quality_of_service--durability`.
 
      - See :ref:`Table 3-6 <quality_of_service--reftable7>`.
 
@@ -1706,7 +1706,7 @@ The static discovery implementation also checks that the QoS of a data reader or
 
        ``numeric|DURATION_INFINITE_SEC]``
 
-     - See Section :ref:`quality_of_service--deadline`.
+     - See :ref:`quality_of_service--deadline`.
 
      - See :ref:`Table 3-6 <quality_of_service--reftable7>`.
 
@@ -1714,7 +1714,7 @@ The static discovery implementation also checks that the QoS of a data reader or
 
        ``numeric|DURATION_INFINITE_NANOSEC]``
 
-     - See Section :ref:`quality_of_service--deadline`.
+     - See :ref:`quality_of_service--deadline`.
 
      - See :ref:`Table 3-6 <quality_of_service--reftable7>`.
 
@@ -1722,7 +1722,7 @@ The static discovery implementation also checks that the QoS of a data reader or
 
        ``numeric|DURATION_INFINITE_SEC]``
 
-     - See Section :ref:`quality_of_service--latency-budget`.
+     - See :ref:`quality_of_service--latency-budget`.
 
      - See :ref:`Table 3-6 <quality_of_service--reftable7>`.
 
@@ -1730,7 +1730,7 @@ The static discovery implementation also checks that the QoS of a data reader or
 
        ``numeric|DURATION_INFINITE_NANOSEC]``
 
-     - See Section :ref:`quality_of_service--latency-budget`.
+     - See :ref:`quality_of_service--latency-budget`.
 
      - See :ref:`Table 3-6 <quality_of_service--reftable7>`.
 
@@ -1742,7 +1742,7 @@ The static discovery implementation also checks that the QoS of a data reader or
 
        ``MANUAL_BY_PARTICIPANT]``
 
-     - See Section :ref:`quality_of_service--liveliness`.
+     - See :ref:`quality_of_service--liveliness`.
 
      - See :ref:`Table 3-6 <quality_of_service--reftable7>`.
 
@@ -1750,7 +1750,7 @@ The static discovery implementation also checks that the QoS of a data reader or
 
        ``numeric|DURATION_INFINITE_SEC]``
 
-     - See Section :ref:`quality_of_service--liveliness`.
+     - See :ref:`quality_of_service--liveliness`.
 
      - See :ref:`Table 3-6 <quality_of_service--reftable7>`.
 
@@ -1758,13 +1758,13 @@ The static discovery implementation also checks that the QoS of a data reader or
 
        ``numeric|DURATION_INFINITE_NANOSEC]``
 
-     - See Section :ref:`quality_of_service--liveliness`.
+     - See :ref:`quality_of_service--liveliness`.
 
      - See :ref:`Table 3-6 <quality_of_service--reftable7>`.
 
    * - ``reliability.kind=[BEST_EFFORT|RELIABILE]``
 
-     - See Section :ref:`quality_of_service--reliability`.
+     - See :ref:`quality_of_service--reliability`.
 
      - See :ref:`Table 3-6 <quality_of_service--reftable7>`.
 
@@ -1772,7 +1772,7 @@ The static discovery implementation also checks that the QoS of a data reader or
 
        ``numeric|DURATION_INFINITE_SEC]``
 
-     - See Section :ref:`quality_of_service--reliability`.
+     - See :ref:`quality_of_service--reliability`.
 
      - See :ref:`Table 3-6 <quality_of_service--reftable7>`.
 
@@ -1780,7 +1780,7 @@ The static discovery implementation also checks that the QoS of a data reader or
 
        ``numeric|DURATION_INFINITE_NANOSEC]``
 
-     - See Section :ref:`quality_of_service--reliability`.
+     - See :ref:`quality_of_service--reliability`.
 
      - See :ref:`Table 3-6 <quality_of_service--reftable7>`.
 
@@ -1790,31 +1790,31 @@ The static discovery implementation also checks that the QoS of a data reader or
 
        ``BY_RECEPTION_TIMESTAMP]``
 
-     - See Section :ref:`quality_of_service--destination-order`.
+     - See :ref:`quality_of_service--destination-order`.
 
      - See :ref:`Table 3-6 <quality_of_service--reftable7>`.
 
    * - ``history.kind=[KEEP_LAST|KEEP_ALL]``
 
-     - See Section :ref:`quality_of_service--history`.
+     - See :ref:`quality_of_service--history`.
 
      - See :ref:`Table 3-6 <quality_of_service--reftable7>`.
 
    * - ``history.depth=numeric``
 
-     - See Section :ref:`quality_of_service--history`.
+     - See :ref:`quality_of_service--history`.
 
      - See :ref:`Table 3-6 <quality_of_service--reftable7>`.
 
    * - ``resource_limits.max_samples=numeric``
 
-     - See Section :ref:`quality_of_service--resource-limits`.
+     - See :ref:`quality_of_service--resource-limits`.
 
      - See :ref:`Table 3-6 <quality_of_service--reftable7>`.
 
    * - ``resource_limits.max_instances=numeric``
 
-     - See Section :ref:`quality_of_service--resource-limits`.
+     - See :ref:`quality_of_service--resource-limits`.
 
      - See :ref:`Table 3-6 <quality_of_service--reftable7>`.
 
@@ -1822,7 +1822,7 @@ The static discovery implementation also checks that the QoS of a data reader or
 
        ``numeric``
 
-     - See Section :ref:`quality_of_service--resource-limits`.
+     - See :ref:`quality_of_service--resource-limits`.
 
      - See :ref:`Table 3-6 <quality_of_service--reftable7>`.
 
@@ -1830,7 +1830,7 @@ The static discovery implementation also checks that the QoS of a data reader or
 
        ``numeric|DURATION_INFINITE_SEC]``
 
-     - See Section :ref:`quality_of_service--time-based-filter`.
+     - See :ref:`quality_of_service--time-based-filter`.
 
      - See :ref:`Table 3-6 <quality_of_service--reftable7>`.
 
@@ -1838,7 +1838,7 @@ The static discovery implementation also checks that the QoS of a data reader or
 
        ``numeric|DURATION_INFINITE_NANOSEC]``
 
-     - See Section :ref:`quality_of_service--time-based-filter`.
+     - See :ref:`quality_of_service--time-based-filter`.
 
      - See :ref:`Table 3-6 <quality_of_service--reftable7>`.
 
@@ -1847,7 +1847,7 @@ The static discovery implementation also checks that the QoS of a data reader or
 
        ``numeric|DURATION_INFINITE_SEC]``
 
-     - See Section :ref:`quality_of_service--reader-data-lifecycle`.
+     - See :ref:`quality_of_service--reader-data-lifecycle`.
 
      - See :ref:`Table 3-6 <quality_of_service--reftable7>`.
 
@@ -1856,7 +1856,7 @@ The static discovery implementation also checks that the QoS of a data reader or
 
        ``numeric|DURATION_INFINITE_NANOSEC]``
 
-     - See Section :ref:`quality_of_service--reader-data-lifecycle`.
+     - See :ref:`quality_of_service--reader-data-lifecycle`.
 
      - See :ref:`Table 3-6 <quality_of_service--reftable7>`.
 
@@ -1865,7 +1865,7 @@ The static discovery implementation also checks that the QoS of a data reader or
 
        ``numeric|DURATION_INFINITE_SEC]``
 
-     - See Section :ref:`quality_of_service--reader-data-lifecycle`.
+     - See :ref:`quality_of_service--reader-data-lifecycle`.
 
      - See :ref:`Table 3-6 <quality_of_service--reftable7>`.
 
@@ -1874,7 +1874,7 @@ The static discovery implementation also checks that the QoS of a data reader or
 
        ``numeric|DURATION_INFINITE_NANOSEC]``
 
-     - See Section :ref:`quality_of_service--reader-data-lifecycle`.
+     - See :ref:`quality_of_service--reader-data-lifecycle`.
 
      - See :ref:`Table 3-6 <quality_of_service--reftable7>`.
 
@@ -1893,25 +1893,25 @@ The static discovery implementation also checks that the QoS of a data reader or
 
    * - ``presentation.access_scope=[INSTANCE|TOPIC|GROUP]``
 
-     - See Section :ref:`quality_of_service--presentation`.
+     - See :ref:`quality_of_service--presentation`.
 
      - See :ref:`Table 3-3 <quality_of_service--reftable4>`.
 
    * - ``presentation.coherent_access=[true|false]``
 
-     - See Section :ref:`quality_of_service--presentation`.
+     - See :ref:`quality_of_service--presentation`.
 
      - See :ref:`Table 3-3 <quality_of_service--reftable4>`.
 
    * - ``presentation.ordered_access=[true|false]``
 
-     - See Section :ref:`quality_of_service--presentation`.
+     - See :ref:`quality_of_service--presentation`.
 
      - See :ref:`Table 3-3 <quality_of_service--reftable4>`.
 
    * - ``partition.name=name0,name1,...``
 
-     - See Section :ref:`quality_of_service--partition`.
+     - See :ref:`quality_of_service--partition`.
 
      - See :ref:`Table 3-3 <quality_of_service--reftable4>`.
 
@@ -1930,25 +1930,25 @@ The static discovery implementation also checks that the QoS of a data reader or
 
    * - ``presentation.access_scope=[INSTANCE|TOPIC|GROUP]``
 
-     - See Section :ref:`quality_of_service--presentation`.
+     - See :ref:`quality_of_service--presentation`.
 
      - See :ref:`Table 3-4 <quality_of_service--reftable5>`.
 
    * - ``presentation.coherent_access=[true|false]``
 
-     - See Section :ref:`quality_of_service--presentation`.
+     - See :ref:`quality_of_service--presentation`.
 
      - See :ref:`Table 3-4 <quality_of_service--reftable5>`.
 
    * - ``presentation.ordered_access=[true|false]``
 
-     - See Section :ref:`quality_of_service--presentation`.
+     - See :ref:`quality_of_service--presentation`.
 
      - See :ref:`Table 3-4 <quality_of_service--reftable5>`.
 
    * - ``partition.name=name0,name1,...``
 
-     - See Section :ref:`quality_of_service--partition`.
+     - See :ref:`quality_of_service--partition`.
 
      - See :ref:`Table 3-4 <quality_of_service--reftable5>`.
 
@@ -2250,7 +2250,7 @@ Any Data Writers or Readers owned by this Domain Participant should now use the 
 
 .. note:: When directly binding a configuration to a data writer or reader, the ``bind_config`` call must occur before the reader or writer is enabled.
   This is not an issue when binding configurations to Domain Participants, Publishers, or Subscribers.
-  See Section :ref:`quality_of_service--entity-factory` for details on how to create entities that are not enabled.
+  See :ref:`quality_of_service--entity-factory` for details on how to create entities that are not enabled.
 
 .. _run_time_configuration--transport-registry-example:
 
@@ -2496,11 +2496,8 @@ When you configure inter-host communication, the local_address can not be localh
 192.168.0.2), or you can leave it unspecified in which case the FQDN and an ephemeral port will be used.
 
 FQDN resolution is dependent upon system configuration.
-In the absence of a FQDN (e.g.
-``example.objectcomputing.com``), OpenDDS will use any discovered short names (e.g.
-example).
-If that fails, it will use the name resolved from the loopback address (e.g.
-localhost).
+In the absence of a FQDN (e.g. ``example.opendds.org``), OpenDDS will use any discovered short names (e.g. example).
+If that fails, it will use the name resolved from the loopback address (e.g. localhost).
 
 .. note:: OpenDDS IPv6 support requires that the underlying ACE/TAO components be built with IPv6 support enabled.
   The local_address needs to be an IPv6 decimal address or a FQDN with port number.
@@ -2872,7 +2869,7 @@ The OpenDDS implementation of the OMG DDSI-RTPS (``formal/2014-09-01``) specific
 The ``rtps_udp`` transport is one of the pluggable transports available to a developer and is necessary for interoperable communication between implementations.
 This section will discuss the options available to the developer for configuring OpenDDS to use this transport.
 
-To provide an RTPS variant of the single configuration example from Section :ref:`run_time_configuration--single-transport-configuration`, the configuration file below simply introduces the ``myrtps`` transport and modifies the ``transport_type`` property to the value ``rtps_udp``.
+To provide an RTPS variant of the single configuration example from :ref:`run_time_configuration--single-transport-configuration`, the configuration file below simply introduces the ``myrtps`` transport and modifies the ``transport_type`` property to the value ``rtps_udp``.
 All other items remain the same.
 
 .. code-block:: ini
@@ -2887,7 +2884,7 @@ All other items remain the same.
     transport_type=rtps_udp
     local_address=myhost
 
-To extend our examples to a mixed transport configuration as shown in Section :ref:`run_time_configuration--using-mixed-transports`, below shows the use of an ``rtps_udp`` transport mixed with a ``tcp`` transport.
+To extend our examples to a mixed transport configuration as shown in :ref:`run_time_configuration--using-mixed-transports`, below shows the use of an ``rtps_udp`` transport mixed with a ``tcp`` transport.
 The interesting pattern that this allows for is a deployed OpenDDS application that can be, for example, communicating using ``tcp`` with other OpenDDS participants while communicating in an interoperability configuration with a non-OpenDDS participant using ``rtps_udp``.
 
 .. code-block:: ini
@@ -3040,14 +3037,14 @@ Some implementation notes related to using the ``rtps_udp`` transport protocol a
    * - ``DataRtpsRelayAddress=host:port``
 
      - Specifies the address of the RtpsRelay for RTPS messages.
-       See section :ref:`internet_enabled_rtps--the-rtpsrelay`.
+       See :ref:`internet_enabled_rtps--the-rtpsrelay`.
 
      -
 
    * - ``RtpsRelayOnly=[0|1]``
 
      - Only send RTPS message to the RtpsRelay (for debugging).
-       See section :ref:`internet_enabled_rtps--the-rtpsrelay`.
+       See :ref:`internet_enabled_rtps--the-rtpsrelay`.
 
      - 0
 
@@ -3055,21 +3052,21 @@ Some implementation notes related to using the ``rtps_udp`` transport protocol a
 
      - Send messages to the RtpsRelay.
        Messages will only be sent if DataRtpsRelayAddress is set.
-       See section :ref:`internet_enabled_rtps--the-rtpsrelay`.
+       See :ref:`internet_enabled_rtps--the-rtpsrelay`.
 
      - 0
 
    * - ``DataStunServerAddress=host:port``
 
      - Specifies the address of the STUN server to use for RTPS when using ICE.
-       See section :ref:`internet_enabled_rtps--interactive-connectivity-establishment-ice-for-rtps`.
+       See :ref:`internet_enabled_rtps--interactive-connectivity-establishment-ice-for-rtps`.
 
      -
 
    * - ``UseIce=[0|1]``
 
      - Enable or disable ICE for this transport instance.
-       See section :ref:`internet_enabled_rtps--interactive-connectivity-establishment-ice-for-rtps`.
+       See :ref:`internet_enabled_rtps--interactive-connectivity-establishment-ice-for-rtps`.
 
      - ``0``
 
@@ -3202,7 +3199,7 @@ Shared-Memory Transport Configuration Options
 The following table summarizes the transport configuration options that are unique to the ``shmem`` transport.
 This transport type is supported Unix-like platforms with POSIX/XSI shared memory and on Windows platforms.
 The shared memory transport type can only provide communication between transport instances on the same host.
-As part of transport negotiation (see :ref:`run_time_configuration--using-mixed-transports`), if there are multiple transport instances available for communication between hosts, the shared memory transport instances will be skipped so that other types can be used.
+As part of transport negotiation (:ref:`run_time_configuration--using-mixed-transports`), if there are multiple transport instances available for communication between hosts, the shared memory transport instances will be skipped so that other types can be used.
 
 .. _run_time_configuration--reftable25:
 
@@ -3278,7 +3275,7 @@ Domain range sections are similar to domain sections and use the same configurat
 
 * Domain ranges can have an optional ``Customization`` property that maps to a named ``[Customization]`` section
 
-See section :ref:`run_time_configuration--example-config-ini` for a ``[DomainRange]`` example.
+See :ref:`run_time_configuration--example-config-ini` for a ``[DomainRange]`` example.
 
 .. _run_time_configuration--configuring-a-set-of-similar-transports:
 
@@ -3313,11 +3310,11 @@ and the partial transport template would be
     transport_type=rtps_udp
 
 Domain participants that belong to a domain that is configured by a template can bind to non-global transport configurations using the ``bind_config`` function.
-See section :ref:`run_time_configuration--using-multiple-configurations` for a discussion of ``bind_config``.
+See :ref:`run_time_configuration--using-multiple-configurations` for a discussion of ``bind_config``.
 
 If the ``[transport_template]`` sets the property ``instantiation_rule=per_participant``, a separate transport instance will be created for each participant in the domain.
 
-See section :ref:`run_time_configuration--example-config-ini` for a ``[transport_template]`` example.
+See :ref:`run_time_configuration--example-config-ini` for a ``[transport_template]`` example.
 
 .. _run_time_configuration--adding-customizations:
 
@@ -3583,7 +3580,7 @@ Security Debug Logging
 ..
     Sect<7.6.3>
 
-When OpenDDS is compiled with security enabled, debug logging for security can be enabled using ``DCPSecurityDebug`` (See :ref:`Table 7-2 Common Configuration Options <run_time_configuration--reftable9>`).
+When OpenDDS is compiled with security enabled, debug logging for security can be enabled using ``DCPSecurityDebug`` (:ref:`Table 7-2 Common Configuration Options <run_time_configuration--reftable9>`).
 Security logging is divided into categories, although ``DCPSSecurityDebugLevel`` is also provided, which controls the categories in a similar manner and using the same scale as ``DCPSDebugLevel``.
 
 .. _run_time_configuration--reftable28:

@@ -8,7 +8,7 @@ Alternate Interfaces to Data
     Sect<12>
 
 The DDS-DCPS approach to data transfer using synchronization of strongly-typed caches (DataWriter and DataReader) is not appropriate for all applications.
-Therefore OpenDDS provides two different alternate interface approaches which are described in this chapter.
+Therefore OpenDDS provides two different alternate interface approaches which are described in this section.
 These are not defined by OMG specifications and may change in future releases of OpenDDS, including minor updates.
 The two approaches are:
 
@@ -16,14 +16,14 @@ The two approaches are:
 
   * These interfaces allow the application to create untyped stand-ins for DataReaders and/or DataWriters
 
-  * Recorder can be used with the Dynamic Language Binding XTypes features (see section :ref:`xtypes--dynamic-language-binding-1` and below) to access typed data samples through a reflection-based API
+  * Recorder can be used with the Dynamic Language Binding XTypes features (:ref:`xtypes--dynamic-language-binding-1`) to access typed data samples through a reflection-based API
 
 * Observer
 
   * Observers play a role similar to the spec-defined Listeners (attached to DataReaders and/or DataWriters).
     Unlike the Listeners, Observers don’t need to interact with the DataReader/Writer caches to access the data samples.
 
-The XTypes Dynamic Language Binding (see section :ref:`xtypes--dynamic-language-binding`) provides a set of related features that can be used to create DataWriters and DataReaders that work with a generic data container (DynamicData) instead of a specific IDL-generated data type.
+The XTypes Dynamic Language Binding (:ref:`xtypes--dynamic-language-binding`) provides a set of related features that can be used to create DataWriters and DataReaders that work with a generic data container (DynamicData) instead of a specific IDL-generated data type.
 
 .. _alternate_interfaces_to_data--recorder-and-replayer:
 
@@ -186,7 +186,7 @@ Recorder With XTypes Dynamic Language Binding
 ..
     Sect<12.1.4>
 
-The Recorder class includes support for the Dynamic Language Binding from XTypes (see section :ref:`xtypes--dynamic-language-binding-1`).
+The Recorder class includes support for the Dynamic Language Binding from XTypes (:ref:`xtypes--dynamic-language-binding-1`).
 Type information for each matched DataWriter (that supports XTypes complete TypeObjects) is stored in the Recorder.
 Users can call Recorder::get_dynamic_data, passing a RawDataSample to get back a DynamicData object which includes type information – see DynamicData::type().
 

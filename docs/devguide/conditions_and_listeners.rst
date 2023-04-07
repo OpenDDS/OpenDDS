@@ -687,7 +687,7 @@ Query Conditions
 
 Query conditions are a specialized form of read conditions that are created with a limited form of an SQL-like query.
 This allows applications to filter the data samples that trigger the condition and then are read use the normal read condition mechanisms.
-See Section :ref:`content_subscription_profile--query-condition` for more information about query conditions.
+See :ref:`content_subscription_profile--query-condition` for more information about query conditions.
 
 .. _conditions_and_listeners--guard-conditions:
 

@@ -2,6 +2,22 @@
   width: 100%;
 }
 
+div.sphinxsidebar ul {
+  /* Top-level navigation side bar links are a little hard to distinguish from
+   * one another because some of them will overflow into multiple lines. A ul
+   * tag would have bullets, but that's disabled in the theme's CSS. This
+   * overrides that and readds the bullets.
+   */
+  list-style: square;
+  /* Without this Chrome might draw the bullets out of sight if the window is
+   * too narrow. They do appear in Firefox, but they are right at the edge.
+   */
+  margin-left: 10px;
+}
+
+/* Allows custom elements that aren't code or pre tags to looks like code and
+ * pre tags.
+ */
 .custom_literal {
   font-family: 'Consolas', 'Menlo', 'DejaVu Sans Mono', 'Bitstream Vera Sans Mono', monospace;
   font-size: 0.9em;
