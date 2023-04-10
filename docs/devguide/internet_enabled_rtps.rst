@@ -170,7 +170,7 @@ The command-line options for the RtpsRelay:
   Otherwise, participant is marked as not alive.
   The default is 60 seconds.
 
-* ``-InactivePeriodSECONDS``
+* ``-InactivePeriod SECONDS``
 
   RtpsRelay will mark participant as not active if does not receive a datagram from the client in this amount of time.
   The default is 60 seconds.
@@ -208,7 +208,7 @@ The command-line options for the RtpsRelay:
 
   Enable/disable logging of the various event types.
 
-* ``-LogRelayStatisticsSECONDS``
+* ``-LogRelayStatistics SECONDS``
 
   ``-LogHandlerStatistics SECONDS``
 
@@ -216,7 +216,7 @@ The command-line options for the RtpsRelay:
 
   Write statistics for the various event types to the log at the given interval, defaults to 0 (disabled).
 
-* ``-PublishRelayStatisticsSECONDS``
+* ``-PublishRelayStatistics SECONDS``
 
   ``-PublishHandlerStatistics SECONDS``
 
@@ -236,27 +236,35 @@ The command-line options for the RtpsRelay:
 
   If thread monitoring is enabled, the RtpsRelay will not accept to new client participants if the CPU utilization of any thread is above this limit, default .95.
 
-* ``-PublishRelayStatusSECONDS``
+* ``-PublishRelayStatus SECONDS``
 
-  ``-PublishRelayStatusLivelinessSECONDS``
+  ``-PublishRelayStatusLiveliness SECONDS``
 
   Setting PublishRelayStatus to a positive integer causes the relay to publish its status at that interval.
   Setting PublishRelayStatusLiveliness to a positive integer causes the relay to set the liveliness QoS on the relay status topic.
 
-* ``-MetaDiscoveryAddress``
+* ``-MetaDiscoveryAddress ADDRESS``
 
   Listening address for the meta discovery server, default 0.0.0.0:8080.
 
-* ``-MetaDiscoveryContentType``
+* ``-MetaDiscoveryContentType CONTENT-TYPE``
 
   The HTTP content type to report for the meta discovery config endpoint, default application/json.
 
-* ``-MetaDiscoveryContentPathPATH``
+* ``-MetaDiscoveryContentPath PATH``
 
-  ``-MetaDiscoveryContentCONTENT``
+  ``-MetaDiscoveryContent CONTENT``
 
   The content returned by the meta discovery config endpoint, default {}.
   If a path is specified, the content of the file will be used.
+
+* ``-MaxAddrSetSize INTEGER``
+
+  The maximum number addresses that the RtpsRelay will maintain for a client participant, defaults to 0 (infinite).
+
+* ``-RejectedAddressDuration SECONDS``
+
+  Amount of time to reject messages from client participants that show suspicious behavior, e.g., those that send messages from the RtpsRelay back to the RtpsRelay.  The default is 0 (disabled).
 
 .. _internet_enabled_rtps--deployment-considerations:
 
