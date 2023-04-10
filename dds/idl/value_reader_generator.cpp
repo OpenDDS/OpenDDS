@@ -182,7 +182,7 @@ namespace {
     }
   }
 
-  std::string branch_helper(const std::string&, AST_Decl*,
+  std::string branch_helper(const std::string&, AST_Decl* branch,
                             const std::string& field_name,
                             AST_Type* type,
                             const std::string&,
@@ -191,7 +191,7 @@ namespace {
                             const std::string&)
   {
     AST_Type* const actual = resolveActualType(type);
-    std::string decl = scoped(type->name());
+    std::string decl = field_type_name(dynamic_cast<AST_Field*>(branch), type);
 
     const Classification c = classify(actual);
     if (c & CL_STRING) {

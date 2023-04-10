@@ -78,6 +78,7 @@ tests/DCPS/Compiler/TryConstruct/run_test.pl: !DCPS_MIN
 tests/DCPS/Compiler/TryConstruct/C++11/run_test.pl: !DCPS_MIN CXX11 !OPENDDS_SAFETY_PROFILE
 tests/DCPS/Compiler/typeobject_hash_consistency/run_test.pl: !DCPS_MIN !OPENDDS_SAFETY_PROFILE
 tests/DCPS/Compiler/xcdr/run_test.pl
+tests/DCPS/Compiler/xcdr/run_test.pl --dynamic: !OPENDDS_SAFETY_PROFILE !DDS_NO_CONTENT_SUBSCRIPTION
 tests/DCPS/Compiler/XtypesExtensibility/run_test.pl: !DCPS_MIN
 tests/DCPS/Compiler/typeobject_generator/run_test.pl
 tests/DCPS/Compiler/keywords/run_test.pl classic: !DCPS_MIN
@@ -241,12 +242,6 @@ tests/DCPS/RecorderReplayer/run_test.pl rtps_disc: !DCPS_MIN !NO_MCAST RTPS
 
 tests/DCPS/RecorderLogging/run_test.pl: !DCPS_MIN !OPENDDS_SAFETY_PROFILE
 tests/DCPS/RecorderLogging/run_test.pl rtps_disc: !DCPS_MIN !NO_MCAST RTPS
-
-##tests/DCPS/BidirMessenger/run_test.pl: !DCPS_MIN
-##tests/DCPS/BidirMessenger/run_test.pl udp: !DCPS_MIN
-##tests/DCPS/BidirMessenger/run_test.pl multicast: !DCPS_MIN !NO_MCAST
-##tests/DCPS/BidirMessenger/run_test.pl nobits: !DCPS_MIN
-##tests/DCPS/BidirMessenger/run_test.pl ipv6: IPV6 !DCPS_MIN
 
 examples/DCPS/Messenger_Imr/run_test.pl: !DCPS_MIN !MIN_CORBA !CORBA_E_COMPACT !CORBA_E_MICRO !DDS_NO_ORBSVCS !OPENDDS_SAFETY_PROFILE
 

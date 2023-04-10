@@ -63,3 +63,14 @@
 /DynamicDataXcdrReadImplS.h
 /DynamicDataXcdrReadImplTypeSupportImpl.cpp
 /DynamicDataXcdrReadImplTypeSupportImpl.h
+/DynamicDataAdapterC.cpp
+/DynamicDataAdapterC.h
+/DynamicDataAdapterC.inl
+/DynamicDataAdapterS.h
+/DynamicDataAdapterTypeSupport.idl
+/DynamicDataAdapterTypeSupportC.cpp
+/DynamicDataAdapterTypeSupportC.h
+/DynamicDataAdapterTypeSupportC.inl
+/DynamicDataAdapterTypeSupportImpl.cpp
+/DynamicDataAdapterTypeSupportImpl.h
+/DynamicDataAdapterTypeSupportS.h

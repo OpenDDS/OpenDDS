@@ -38,11 +38,7 @@ public:
   explicit DynamicDataImpl(DDS::DynamicType_ptr type);
   DynamicDataImpl(const DynamicDataImpl& other);
 
-  DDS::DynamicType_ptr type();
-
   DDS::ReturnCode_t set_descriptor(MemberId id, DDS::MemberDescriptor* value);
-
-  CORBA::Boolean equals(DDS::DynamicData_ptr other);
 
   MemberId get_member_id_at_index(ACE_CDR::ULong index);
   ACE_CDR::ULong get_item_count();
@@ -50,8 +46,6 @@ public:
   DDS::ReturnCode_t clear_all_values();
   DDS::ReturnCode_t clear_nonkey_values();
   DDS::ReturnCode_t clear_value(DDS::MemberId id);
-  DDS::DynamicData_ptr loan_value(DDS::MemberId id);
-  DDS::ReturnCode_t return_loaned_value(DDS::DynamicData_ptr value);
 
   DDS::DynamicData_ptr clone();
 
@@ -85,13 +79,11 @@ public:
   DDS::ReturnCode_t set_uint32_value(DDS::MemberId id,
                                      CORBA::ULong value);
 
-  DDS::ReturnCode_t get_int64_value(CORBA::LongLong& value,
-                                    DDS::MemberId id);
+  DDS::ReturnCode_t get_int64_value_impl(CORBA::LongLong& value, DDS::MemberId id);
   DDS::ReturnCode_t set_int64_value(DDS::MemberId id,
                                     CORBA::LongLong value);
 
-  DDS::ReturnCode_t get_uint64_value(CORBA::ULongLong& value,
-                                     DDS::MemberId id);
+  DDS::ReturnCode_t get_uint64_value_impl(CORBA::ULongLong& value, DDS::MemberId id);
   DDS::ReturnCode_t set_uint64_value(DDS::MemberId id,
                                      CORBA::ULongLong value);
 
@@ -353,11 +345,9 @@ private:
   bool validate_discriminator(CORBA::Long disc_val, const DDS::MemberDescriptor_var& md) const;
 
   bool set_complex_to_struct(DDS::MemberId id, DDS::DynamicData_var value);
-  bool set_complex_to_union(DDS::MemberId id, DDS::DynamicData_var value,
-                            const DDS::TypeDescriptor_var& descriptor);
+  bool set_complex_to_union(DDS::MemberId id, DDS::DynamicData_var value);
   bool set_complex_to_collection(DDS::MemberId id, DDS::DynamicData_var value, TypeKind tk);
-  bool validate_member_id_collection(const DDS::TypeDescriptor_var& descriptor,
-                                     DDS::MemberId id, TypeKind collection_tk) const;
+  bool validate_member_id_collection(DDS::MemberId id, TypeKind collection_tk) const;
 
   DDS::ReturnCode_t clear_value_i(DDS::MemberId id, const DDS::DynamicType_var& member_type);
 
@@ -538,13 +528,17 @@ private:
     typedef OPENDDS_MAP(DDS::MemberId, DDS::DynamicData_var)::const_iterator const_complex_iterator;
 
     DataContainer(const DDS::DynamicType_var& type, const DynamicDataImpl* data)
-      : type_(type), data_(data) {}
+      : type_(type)
+      , type_desc_(data->type_desc_)
+      , data_(data)
+    {}
 
     DataContainer(const DataContainer& other, const DynamicDataImpl* data)
       : single_map_(other.single_map_)
       , sequence_map_(other.sequence_map_)
       , complex_map_(other.complex_map_)
       , type_(data->type_)
+      , type_desc_(data->type_desc_)
       , data_(data)
     {}
 
@@ -958,8 +952,6 @@ private:
       size_t& mutable_running_total) const;
     bool serialize_selected_member_xcdr2(DCPS::Serializer& ser, DDS::MemberId selected_id,
                                          DDS::ExtensibilityKind extensibility) const;
-    bool select_union_member(CORBA::Long disc_value, bool& found_selected_member,
-                             DDS::MemberDescriptor_var& selected_md) const;
     bool serialized_size_union_xcdr2(const DCPS::Encoding& encoding, size_t& size, DCPS::Sample::Extent ext) const;
     bool serialize_union_xcdr2(DCPS::Serializer& ser, DCPS::Sample::Extent ext) const;
     bool serialized_size_union_xcdr1(const DCPS::Encoding& encoding, size_t& size, DCPS::Sample::Extent ext) const;
@@ -974,6 +966,7 @@ private:
     OPENDDS_MAP(DDS::MemberId, DDS::DynamicData_var) complex_map_;
 
     const DDS::DynamicType_var& type_;
+    const DDS::TypeDescriptor_var& type_desc_;
     const DynamicDataImpl* data_;
   };
 

@@ -253,9 +253,16 @@ The following table summarizes the options supported by ``opendds_idl``.
 
    * - ``--old-typeobject-encoding``
 
-     - Use the pre-3.18 encoding of ``TypeObject`` s when deriving ``TypeIdentifier`` s
+     - Use the pre-3.18 encoding of ``TypeObject``\s when deriving ``TypeIdentifier``\s
 
      - Use standard encoding
+
+   * - ``--old-typeobject-member-order``
+
+     - Use the pre-3.24 struct and union member order for ``TypeObject``\s, which is ordered by member id instead of declared order.
+       See 3.24.0 news entry for more info.
+
+     - Use standard declared order
 
 The code generation options allow the application developer to use the generated code in a wide variety of environments.
 Since IDL may contain preprocessing directives (``#include``, ``#define``, etc.), the C++ preprocessor is invoked by ``opendds_idl``.

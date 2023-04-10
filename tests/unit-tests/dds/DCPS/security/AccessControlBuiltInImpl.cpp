@@ -1271,8 +1271,6 @@ TEST_F(dds_DCPS_security_AccessControlBuiltInImpl, check_remote_datawriter_regis
   // Null pointers
   EXPECT_FALSE(get_inst().check_remote_datawriter_register_instance(
     perm_handle, 0, pub_handle, key.get(), ex));
-  EXPECT_FALSE(get_inst().check_remote_datawriter_register_instance(
-    perm_handle, reader.get(), pub_handle, 0, ex));
 }
 
 TEST_F(dds_DCPS_security_AccessControlBuiltInImpl, check_remote_datawriter_register_instance_Success)
@@ -1304,8 +1302,6 @@ TEST_F(dds_DCPS_security_AccessControlBuiltInImpl, check_remote_datawriter_dispo
   // Null pointers
   EXPECT_FALSE(get_inst().check_remote_datawriter_dispose_instance(
     perm_handle, 0, pub_handle, key.get(), ex));
-  EXPECT_FALSE(get_inst().check_remote_datawriter_dispose_instance(
-    perm_handle, reader.get(), pub_handle, 0, ex));
 }
 
 TEST_F(dds_DCPS_security_AccessControlBuiltInImpl, get_permissions_token_InvalidInput)

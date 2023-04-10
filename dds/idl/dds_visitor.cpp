@@ -1,6 +1,4 @@
 /*
- *
- *
  * Distributed under the OpenDDS License.
  * See: http://www.opendds.org/license.html
  */
@@ -17,6 +15,7 @@
 #include "value_writer_generator.h"
 #include "topic_keys.h"
 #include "typeobject_generator.h"
+#include "dynamic_data_adapter_generator.h"
 
 #include <ast_argument.h>
 #include <ast_attribute.h>
@@ -54,7 +53,6 @@
 using namespace std;
 
 namespace {
-
   marshal_generator mar_gen_;
   keys_generator key_gen_;
   ts_generator ts_gen_;
@@ -64,7 +62,7 @@ namespace {
   typeobject_generator to_gen_;
   value_reader_generator value_reader_generator_;
   value_writer_generator value_writer_generator_;
-
+  dynamic_data_adapter_generator dynamic_data_adapter_generator_;
 } // namespace
 
 dds_visitor::dds_visitor(AST_Decl* scope, bool java_ts_only)
@@ -88,6 +86,7 @@ dds_visitor::dds_visitor(AST_Decl* scope, bool java_ts_only)
     gen_target_.add_generator(&key_gen_);
     gen_target_.add_generator(&ts_gen_);
     gen_target_.add_generator(&mc_gen_);
+    gen_target_.add_generator(&dynamic_data_adapter_generator_);
   }
   if (be_global->itl()) {
     gen_target_.add_generator(&itl_gen_);
@@ -157,6 +156,11 @@ dds_visitor::visit_scope(UTL_Scope* node)
 int
 dds_visitor::visit_module(AST_Module* node)
 {
+  // Modules for builtin annotations seem to be showing up here. Ignore them.
+  if (node->builtin()) {
+    return 0;
+  }
+
   const char* name = node->local_name()->get_string();
 
   BE_Comment_Guard g("MODULE", name);
