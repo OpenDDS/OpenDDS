@@ -5,7 +5,7 @@ OpenDDS 3.24.0 is currently in development, so this list might change.
 
 ### Additions:
 - The OpenDDS Developer's Guide is now available at https://opendds.readthedocs.io/ (#4051, #4094, #4092, #4100, #4101, #4095, #4103, #4102, #4104, #4105)
-  - The Sphinx/reStructuredText source for this new format is located in the repo at `docs/devguide`
+  - The Sphinx/reStructuredText source for this new format is now located in the repo at `docs/devguide`
 - DOCGroup ACE6/TAO2 is now the default ACE/TAO for OpenDDS (#4069)
 - Dynamic content subscription (#3988)
   - This allows `DynamicDataReader`s to use `QueryCondition` and `ContentFilteredTopic` and allows `DynamicDataWriter`s to do filtering on behalf of matched `DataReader`s that use `ContentFilteredTopic`.
@@ -16,9 +16,10 @@ OpenDDS 3.24.0 is currently in development, so this list might change.
 - Added primitive aliases for IDL types from XTypes spec such as `DDS::UInt32` (#3994)
   - See `DdsDcpsCore.idl` for all of them.
 - Added PublicationMatchedStatus Current Count To RtpsRelay Statistics (#4006)
-- Allow reassembly of overlapping fragment ranges (#4035)
+- Allow reassembly of overlapping fragment ranges in RTPS (#4035, #4047)
 - Can now cross-compile on macOS (#4048)
 - Add Hardening Features To RtpsRelay (#4045)
+  - These are configured with the new options `-MaxAddrSetSize` and `-RejectedAddressDuration`.
 - Expanded support for using C++ keywords in IDL (#4073)
 - Improved support for anonymous types in unions branches (#4078)
 - Support IDL file and generated TypeSupport.idl being in different directories (#4077)
@@ -50,6 +51,7 @@ OpenDDS 3.24.0 is currently in development, so this list might change.
     - Fixed errors from serializing some cases of arrays and sequences.
 
 ### Notes:
+- Release files will only be uploaded to GitHub from now on
 - `OpenDDS::DCPS::RepoId` has been removed (#3972)
 
 ## Version 3.23.1 of OpenDDS
