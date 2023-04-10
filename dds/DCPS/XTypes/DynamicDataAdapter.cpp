@@ -309,10 +309,9 @@ DDS::ReturnCode_t DynamicDataAdapter::set_cpp11_s8_raw_value(
   const void* source, DDS::TypeKind tk)
 {
   const DDS::ReturnCode_t rc = check_member(method, tk, id);
-  if (rc != DDS::RETCODE_OK) {
-    return rc;
+  if (rc == DDS::RETCODE_OK) {
+    dest = static_cast<const char*>(source);
   }
-  dest = static_cast<const char*>(source);
   return rc;
 }
 
@@ -362,10 +361,9 @@ DDS::ReturnCode_t DynamicDataAdapter::set_cpp11_s16_raw_value(
   const void* source, DDS::TypeKind tk)
 {
   const DDS::ReturnCode_t rc = check_member(method, tk, id);
-  if (rc != DDS::RETCODE_OK) {
-    return rc;
+  if (rc == DDS::RETCODE_OK) {
+    dest = static_cast<const DDS::Char16*>(source);
   }
-  dest = static_cast<const DDS::Char16*>(source);
   return rc;
 }
 

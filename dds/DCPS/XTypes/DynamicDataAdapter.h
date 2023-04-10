@@ -521,10 +521,9 @@ protected:
     const char* method, void* dest, DDS::TypeKind tk, T source, DDS::MemberId id)
   {
     const DDS::ReturnCode_t rc = check_member(method, tk, id);
-    if (rc != DDS::RETCODE_OK) {
-      return rc;
+    if (rc == DDS::RETCODE_OK) {
+      *static_cast<T*>(dest) = source;
     }
-    *static_cast<T*>(dest) = source;
     return rc;
   }
 
@@ -533,10 +532,9 @@ protected:
     const char* method, T& dest, DDS::MemberId id, const void* source, DDS::TypeKind tk)
   {
     const DDS::ReturnCode_t rc = check_member(method, tk, id);
-    if (rc != DDS::RETCODE_OK) {
-      return rc;
+    if (rc == DDS::RETCODE_OK) {
+      dest = *static_cast<const T*>(source);
     }
-    dest = *static_cast<const T*>(source);
     return rc;
   }
 
@@ -547,10 +545,9 @@ protected:
     const void* source, DDS::TypeKind tk)
   {
     const DDS::ReturnCode_t rc = check_member(method, tk, id);
-    if (rc != DDS::RETCODE_OK) {
-      return rc;
+    if (rc == DDS::RETCODE_OK) {
+      dest = *static_cast<const bool*>(source);
     }
-    dest = *static_cast<const bool*>(source);
     return rc;
   }
 
@@ -560,10 +557,9 @@ protected:
     const char* method, void* dest, DDS::TypeKind tk, Enum source, DDS::MemberId id)
   {
     const DDS::ReturnCode_t rc = check_member(method, tk, id);
-    if (rc != DDS::RETCODE_OK) {
-      return rc;
+    if (rc == DDS::RETCODE_OK) {
+      *static_cast<DDS::Int32*>(dest) = static_cast<DDS::Int32>(source);
     }
-    *static_cast<DDS::Int32*>(dest) = static_cast<DDS::Int32>(source);
     return rc;
   }
 
@@ -573,10 +569,9 @@ protected:
     const char* method, Enum& dest, DDS::MemberId id, const void* source, DDS::TypeKind tk)
   {
     const DDS::ReturnCode_t rc = check_member(method, tk, id);
-    if (rc != DDS::RETCODE_OK) {
-      return rc;
+    if (rc == DDS::RETCODE_OK) {
+      dest = static_cast<Enum>(*static_cast<const DDS::Int32*>(source));
     }
-    dest = static_cast<Enum>(*static_cast<const DDS::Int32*>(source));
     return rc;
   }
 
