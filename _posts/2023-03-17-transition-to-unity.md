@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "The OpenDDS Foundation is joing Unity"
+title: "The OpenDDS Foundation is joining Unity"
 categories: news
 author: OpenDDS
 ---
