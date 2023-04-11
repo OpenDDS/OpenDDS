@@ -6,23 +6,23 @@ OpenDDS 3.24.0 is currently in development, so this list might change.
 ### Additions:
 - The OpenDDS Developer's Guide is now available at https://opendds.readthedocs.io/ (#4051, #4094, #4092, #4100, #4101, #4095, #4103, #4102, #4104, #4105)
   - The Sphinx/reStructuredText source for this new format is now located in the repo at `docs/devguide`
-- DOCGroup ACE6/TAO2 is now the default ACE/TAO for OpenDDS (#4069)
+- DOCGroup ACE6/TAO2 is now the default ACE/TAO for OpenDDS, OCI ACE/TAO is no longer supported (#4069)
 - Dynamic content subscription (#3988)
   - This allows `DynamicDataReader`s to use `QueryCondition` and `ContentFilteredTopic` and allows `DynamicDataWriter`s to do filtering on behalf of matched `DataReader`s that use `ContentFilteredTopic`.
 - `DynamicData`:
   - Can now read and write enum members as strings (#4022)
-  - The `get_int64_value` and `get_uint64_value` methods of `DynamicData` can now cast from different types (#4078)
+  - `get_int64_value` and `get_uint64_value` can now cast from different types (#4078)
   - `DynamicDataImpl` now uses lazy initialization to reduce memory usage (#4024)
-- Added primitive aliases for IDL types from XTypes spec such as `DDS::UInt32` (#3994)
+- Added aliases for IDL types from XTypes spec such as `DDS::UInt32` (#3994)
   - See `DdsDcpsCore.idl` for all of them.
 - Added PublicationMatchedStatus Current Count To RtpsRelay Statistics (#4006)
 - Allow reassembly of overlapping fragment ranges in RTPS (#4035, #4047)
 - Can now cross-compile on macOS (#4048)
-- Add Hardening Features To RtpsRelay (#4045)
+- Added hardening features to RtpsRelay (#4045)
   - These are configured with the new options `-MaxAddrSetSize` and `-RejectedAddressDuration`.
 - Expanded support for using C++ keywords in IDL (#4073)
 - Improved support for anonymous types in unions branches (#4078)
-- Support IDL file and generated TypeSupport.idl being in different directories (#4077)
+- IDL file and generated TypeSupport.idl can now be in different directories (#4077)
 
 ### Fixes:
 - Fixed `rtps_relay_address_change` deadlocks (#3989)
@@ -52,7 +52,7 @@ OpenDDS 3.24.0 is currently in development, so this list might change.
 
 ### Notes:
 - Release files will only be uploaded to GitHub from now on
-- `OpenDDS::DCPS::RepoId` has been removed (#3972)
+- `OpenDDS::DCPS::RepoId` has been removed, if needed use `OpenDDS::DCPS::GUID_t` instead (#3972)
 
 ## Version 3.23.1 of OpenDDS
 OpenDDS 3.23.1 was released on Feb 1 2023.
