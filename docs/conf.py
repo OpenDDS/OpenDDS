@@ -32,8 +32,8 @@ pygments_style = 'manni'
 nitpicky = True
 
 project = 'OpenDDS'
-copyright = '2023, Object Computing, Inc.'
-author = 'Object Computing, Inc.'
+copyright = '2023, OpenDDS Foundation'
+author = 'OpenDDS Foundation'
 github_links_repo = 'OpenDDS/OpenDDS'
 
 # Get Version Info
