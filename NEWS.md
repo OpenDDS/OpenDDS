@@ -4,10 +4,36 @@
 OpenDDS 3.24.0 is currently in development, so this list might change.
 
 ### Additions:
+- The OpenDDS Developer's Guide is now available at https://opendds.readthedocs.io/ (#4051, #4094, #4092, #4100, #4101, #4095, #4103, #4102, #4104, #4105)
+  - The Sphinx/reStructuredText source for this new format is now located in the repo at `docs/devguide`
+- DOCGroup ACE6/TAO2 is now the default ACE/TAO for OpenDDS, OCI ACE/TAO is no longer supported (#4069)
+- Dynamic content subscription (#3988)
+  - This allows `DynamicDataReader`s to use `QueryCondition` and `ContentFilteredTopic` and allows `DynamicDataWriter`s to do filtering on behalf of matched `DataReader`s that use `ContentFilteredTopic`.
+- `DynamicData`:
+  - Can now read and write enum members as strings (#4022)
+  - `get_int64_value` and `get_uint64_value` can now cast from different types (#4078)
+  - `DynamicDataImpl` now uses lazy initialization to reduce memory usage (#4024)
+- Added aliases for IDL types from XTypes spec such as `DDS::UInt32` (#3994)
+  - See `DdsDcpsCore.idl` for all of them.
+- Added PublicationMatchedStatus Current Count To RtpsRelay Statistics (#4006)
+- Allow reassembly of overlapping fragment ranges in RTPS (#4035, #4047)
+- Can now cross-compile on macOS (#4048)
+- Added hardening features to RtpsRelay (#4045)
+  - These are configured with the new options `-MaxAddrSetSize` and `-RejectedAddressDuration`.
+- Expanded support for using C++ keywords in IDL (#4073)
 - Improved support for anonymous types in unions branches (#4078)
-- The `get_int64_value` and `get_uint64_value` methods of `DynamicData` can now cast from different types (#4078)
+- IDL file and generated TypeSupport.idl can now be in different directories (#4077)
 
 ### Fixes:
+- Fixed `rtps_relay_address_change` deadlocks (#3989)
+- Fixed RtpsUdpTransport data race from `relay_stun_mutex_` (#3990)
+- Fixed invalid socket handles in RtpsUdpTransport (#4002)
+- Fixed index increment in `GuidPartitionTable::prepare_relay_partitions` (#4005)
+- Fixed a bug in content filtering with enum comparisons on serialized samples (#4038)
+- Fixed transport config and transport instance derived from template conflicting (#4058)
+- Improved reliability of the shared memory transport (#4028)
+- Secure writers and readers in same participant can now associate (#4041)
+- Fixed issue with using `-o` in `tao_idl`/`opendds_idl` options in `OPENDDS_TARGET_SOURCES` and those directories are now automatically included (#4071)
 - XTypes (#4078):
   - `TypeObject`s struct and union members used to be sorted by member ID, but they are now sorted by declaration order as the XTypes spec calls for.
     By default member IDs increment starting at 0, and in that case the `TypeObject`s will be the same.
@@ -25,7 +51,20 @@ OpenDDS 3.24.0 is currently in development, so this list might change.
     - Fixed errors from serializing some cases of arrays and sequences.
 
 ### Notes:
-- TODO: Add your notes here
+- Release files will only be uploaded to GitHub from now on
+- `OpenDDS::DCPS::RepoId` has been removed, if needed use `OpenDDS::DCPS::GUID_t` instead (#3972)
+
+## Version 3.23.1 of OpenDDS
+OpenDDS 3.23.1 was released on Feb 1 2023.
+
+### Fixes:
+
+- Addressed a DDS Security issue where participants can sign their own permissions file if the same CA is used for both identity and permissions (#3992)
+- Addressed CVE-2023-23932, where untrusted sources can use invalid CDR strings in RTPS messages to crash OpenDDS applications (#4010, #4016, #4018)
+  - Thanks to Seulbae Kim (@squizz617) for discovering this.
+- Fixed an issue in `DynamicData::get_*_values` and `print_dynamic_data` (#3952)
+- Fixed a bug where `DynamicDataReader` wouldn't be able to read a topic type with final or mutable extensibility (#3993)
+- Fixed race conditions involving reference counted objects (#3999)
 
 ## Version 3.23.0 of OpenDDS
 OpenDDS 3.23.0 was released on Dec 21 2022.
