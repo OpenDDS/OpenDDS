@@ -35,7 +35,7 @@ details.
 
 ## Documentation
 
-- The OpenDDS Developer's Guide is available at https://opendds.readthedocs.io/.
+- The OpenDDS Developer's Guide is available at https://opendds.readthedocs.io/en/dds-3.24.
   It can also be downloaded from http://download.objectcomputing.com/OpenDDS/.
 
 - Doxygen for the latest release is available at http://download.opendds.org/doxygen/.

@@ -1,7 +1,7 @@
 # OpenDDS Releases
 
 ## Version 3.24.0 of OpenDDS
-OpenDDS 3.24.0 is currently in development, so this list might change.
+OpenDDS 3.24.0 was released on Apr 11 2023.
 
 ### Additions:
 - The OpenDDS Developer's Guide is now available at https://opendds.readthedocs.io/ (#4051, #4094, #4092, #4100, #4101, #4095, #4103, #4102, #4104, #4105)
