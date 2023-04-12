@@ -63,51 +63,12 @@ About This Guide
 ..
     Sect<0.3>
 
-This Developer’s Guide corresponds to OpenDDS version 3.23.
+This Developer’s Guide corresponds to OpenDDS version |release|.
 This guide is primarily focused on the specifics of using and configuring OpenDDS to build distributed publish-subscribe applications.
 While it does give a general overview of the OMG Data Distribution Service, this guide is not intended to provide comprehensive coverage of the specification.
 The intent of this guide is to help you become proficient with OpenDDS as quickly as possible.
 Readers are encouraged to submit corrections to this guide using a GitHub pull request.
 The source for this guide can be found at :ghfile:`docs/devguide` and :doc:`/internal/docs` contains guidance for editing and building it.
-
-******************************
-Highlights of the 3.23 Release
-******************************
-
-..
-    Sect<0.4>
-
-*NOTE: Numbers in parenthesis are GitHub pull requests*
-
-Additions:
-
-* DataRepresentationQosPolicy and TypeConsistencyEnforcementQosPolicy can be set through XML (`#3763 <https://github.com/OpenDDS/OpenDDS/pull/3763>`__)
-
-* RTPS send queue performance improvements (`#3794 <https://github.com/OpenDDS/OpenDDS/pull/3794>`__)
-
-* Cross-compiling improvements (`#3853 <https://github.com/OpenDDS/OpenDDS/pull/3853>`__)
-
-* New support for DynamicDataWriter and enhanced support for DynamicDataReader (`#3827 <https://github.com/OpenDDS/OpenDDS/pull/3827>`__, `#3727 <https://github.com/OpenDDS/OpenDDS/pull/3727>`__, `#3871 <https://github.com/OpenDDS/OpenDDS/pull/3871>`__, `#3718 <https://github.com/OpenDDS/OpenDDS/pull/3718>`__, `#3830 <https://github.com/OpenDDS/OpenDDS/pull/3830>`__, `#3893 <https://github.com/OpenDDS/OpenDDS/pull/3893>`__, `#3904 <https://github.com/OpenDDS/OpenDDS/pull/3904>`__, `#3885 <https://github.com/OpenDDS/OpenDDS/pull/3885>`__, `#3933 <https://github.com/OpenDDS/OpenDDS/pull/3933>`__, `#3935 <https://github.com/OpenDDS/OpenDDS/pull/3935>`__)
-
-* New config option for RtpsDiscovery ``SpdpRequestRandomPort`` (`#3903 <https://github.com/OpenDDS/OpenDDS/pull/3903>`__)
-
-* New ``opendds_mwc.pl`` Wrapper Script (`#3821 <https://github.com/OpenDDS/OpenDDS/pull/3821>`__, `#3913 <https://github.com/OpenDDS/OpenDDS/pull/3913>`__)
-
-* Improve support for loading signed documents (`#3864 <https://github.com/OpenDDS/OpenDDS/pull/3864>`__)
-
-Fixes:
-
-* Unauthenticated participant leads to invalid iterator (`#3748 <https://github.com/OpenDDS/OpenDDS/pull/3748>`__)
-
-* Shmem Association race (`#3549 <https://github.com/OpenDDS/OpenDDS/pull/3549>`__)
-
-* Shmem and tcp null pointer (`#3779 <https://github.com/OpenDDS/OpenDDS/pull/3779>`__)
-
-* Submodule checkout on Windows (`#3812 <https://github.com/OpenDDS/OpenDDS/pull/3812>`__)
-
-Notes:
-
-* Docker images are built for release tags https://github.com/OpenDDS/OpenDDS/pkgs/container/opendds (`#3776 <https://github.com/OpenDDS/OpenDDS/pull/3776>`__)
 
 ACE/TAO Version Compatibility
 =============================
@@ -115,7 +76,7 @@ ACE/TAO Version Compatibility
 ..
     Sect<0.4.1>
 
-OpenDDS 3.23 is compatible with the current DOC Group micro release in the ACE 6.x / TAO 2.x series.
+OpenDDS is compatible with the current DOC Group micro release in the ACE 6.x / TAO 2.x series.
 See the :ghfile:`README.md` file for details.
 
 Conventions
