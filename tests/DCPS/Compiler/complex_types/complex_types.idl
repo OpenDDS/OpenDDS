@@ -284,23 +284,24 @@ module DDS_Native
       SequenceTest::myLong myl;
       SequenceTest::myLongSeq mylseq;
     };
-//     @nested(FALSE)
-//     @appendable
-//     struct My_msg2 {
-//       long myl;
-//     };
-//     typedef sequence<SequenceTest::My_msg2> My_msg2Seq;
-//     @nested(FALSE)
-//     @appendable
-//     union My_msg3 switch (long) {
-//       case 2:
-//         long myl;
-//     };
+    @nested(FALSE)
+    @appendable
+    struct My_msg2 {
+      long myl;
+    };
+//    typedef sequence<SequenceTest::My_msg2> My_msg2Seq;
+    @nested(FALSE)
+    @appendable
+    union My_msg3 switch (long) {
+      case 2:
+        long myl;
+    };
 //     typedef sequence<SequenceTest::My_msg3> My_msg3Seq;
 //     @nested(FALSE)
 //     @appendable
 //     struct My_msg4 {
 //       long myl;
+//       My_msg3Seq my_3seql;
 //     };
 //     typedef sequence<SequenceTest::My_msg4, 12> My_msg4Bounded;
 //     @nested(FALSE)
@@ -309,9 +310,9 @@ module DDS_Native
 //       case 2:
 //         SequenceTest::My_msg4Bounded myl;
 //     };
-//    typedef sequence<SequenceTest::My_msg5> My_msg5Seq;
-//    typedef sequence<SequenceTest::My_msg5, 12> My_msg5_b12;
-//    typedef sequence<SequenceTest::My_msg5, 11> My_msg5_b11;
+//   typedef sequence<SequenceTest::My_msg5> My_msg5Seq;
+//   typedef sequence<SequenceTest::My_msg5, 12> My_msg5_b12;
+//   typedef sequence<SequenceTest::My_msg5, 11> My_msg5_b11;
   }; // module SequenceTest
 
 }; // module DDS_Native
