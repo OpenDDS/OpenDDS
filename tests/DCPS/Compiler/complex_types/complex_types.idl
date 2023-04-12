@@ -1,0 +1,318 @@
+// The includes below are needed to deal with compilers that
+// have ACE_HAS_EXPLICIT_TEMPLATE_INSTANTIATION_EXPORT
+#include "tao/BooleanSeq.pidl"
+#include "tao/CharSeq.pidl"
+#include "tao/DoubleSeq.pidl"
+#include "tao/FloatSeq.pidl"
+#include "tao/LongDoubleSeq.pidl"
+#include "tao/LongLongSeq.pidl"
+#include "tao/LongSeq.pidl"
+#include "tao/OctetSeq.pidl"
+#include "tao/ShortSeq.pidl"
+#include "tao/StringSeq.pidl"
+#include "tao/ULongLongSeq.pidl"
+#include "tao/ULongSeq.pidl"
+#include "tao/UShortSeq.pidl"
+#include "tao/WCharSeq.pidl"
+#include "tao/WStringSeq.pidl"
+
+module DDS_Native
+{
+  module Example
+  {
+    @nested(TRUE)
+    @appendable
+    struct B02 {
+      long B02_1;
+    };
+
+    typedef sequence<Example::B02> B10;
+    typedef sequence<Example::B02, 15> B11;
+    typedef sequence<octet> B12;
+    typedef sequence<octet, 15> B13;
+    typedef sequence<octet> B14;
+    typedef sequence<long> B15;
+    typedef double B16[4][5];
+    typedef sequence<boolean> B17;
+    typedef sequence<boolean, 15> B18;
+    typedef unsigned long long ULL_T;
+    typedef sequence<Example::ULL_T> B19_1;
+    typedef sequence<Example::ULL_T, 10> B19_2;
+    typedef sequence<long long> B19_3;
+    typedef sequence<long long, 10> B19_4;
+    typedef double B20_1;
+    typedef Example::B20_1 B20_2;
+    typedef sequence<Example::B20_1, 100> B20_3;
+    typedef sequence<double, 1> B20_0;
+    typedef sequence<Example::B20_1, 1> B20_4;
+    typedef sequence<Example::B20_2, 1> B21_5;
+    typedef Example::B21_5 B21_6;
+    @nested(TRUE)
+    @appendable
+    struct B31 {
+      /// @copydoc idl_conversion.idl::Example::B31::B31_1
+      long B31_1;
+    };
+    typedef Example::B31 B32[2];
+    typedef Example::B31 B33[4][5];
+    typedef Example::B31 B34[6][7][8];
+    typedef long B40[2];
+    typedef long B41[2][3];
+    typedef long B42[2];
+    typedef long B43[4];
+    typedef string B_50;
+    typedef string<5> B51;
+    typedef double B52;
+    typedef Example::B32 B53;
+    typedef Example::B_50 B_54;
+    typedef Example::B51 B55;
+    typedef string B56[6][5];
+    typedef sequence<string> B57;
+    typedef string<512> B58;
+    typedef sequence<Example::B58> B59;
+    typedef Example::B59 B60;
+    enum B70 {
+      B70_1,
+      B70_2,
+      B70_3
+    };
+    @nested(TRUE)
+    @appendable
+    union B80 switch (Example::B70) {
+      case Example::B70_1:
+        Example::B70 b_80_1;
+      case Example::B70_2:
+        Example::B70 b_80_2;
+      case Example::B70_3:
+        Example::B70 b_80_3;
+    };
+    @nested(TRUE)
+    @appendable
+    struct B81 {
+      long a;
+      string b;
+      Example::B58 c;
+    };
+    typedef sequence<Example::B81> B82;
+    @nested(TRUE)
+    @appendable
+    struct B83 {
+      string a;
+      long b;
+      string c;
+      string d;
+      long e;
+      Example::B82 f;
+      unsigned long long g;
+      long long h;
+    };
+
+    @nested(TRUE)
+    @appendable
+    union B85 switch (long) {
+      case 1:
+        Example::B42 b_85_1;
+      case 2:
+        Example::B43 b_85_2;
+      case 3:
+        Example::B41 b_85_3;
+    };
+    @nested(FALSE)
+    @appendable
+    struct IDLConversionMessage {
+      char a_01;
+      wchar a_02;
+      octet a_03;
+      short a_04;
+      unsigned short a_05;
+      long a_06;
+      unsigned long a_07;
+      long long a_08;
+      unsigned long long a_09;
+      float a_10;
+      double a_11;
+      long double a_12;
+      boolean a_13;
+      Example::B10 b_10;
+      Example::B11 b_11;
+      Example::B12 b_12;
+      Example::B13 b_13;
+      Example::B14 b_14;
+      Example::B15 b_15;
+      Example::B16 b_16;
+      Example::B17 b_17;
+      Example::B18 b_18;
+      Example::B19_1 b_19_1;
+      Example::B19_2 b_19_2;
+      Example::B19_3 b_19_3;
+      Example::B19_4 b_19_4;
+      Example::B20_4 b_20;
+      Example::B21_6 b_21;
+      Example::B32 b_32;
+      Example::B33 b_33;
+      Example::B34 b_34;
+      Example::B40 b_40;
+      Example::B41 b_41;
+      Example::B42 b_42;
+      Example::B43 b_43;
+      Example::B_50 b__50;
+      Example::B51 b_51;
+      Example::B52 b_52;
+      Example::B53 b_53;
+      Example::B_54 b__54;
+      Example::B55 b_55;
+      Example::B56 b_56;
+      Example::B57 b_57;
+      Example::B59 b_59;
+      Example::B60 b_60;
+      Example::B70 b_70;
+      Example::B80 b_80;
+      Example::B83 b_83;
+      Example::B85 b_85;
+      string key;
+      short iteration;
+    };
+    struct ColorStruct;
+    typedef sequence<Example::ColorStruct> ColorList;
+    @nested(TRUE)
+    @appendable
+    struct ColorStruct {
+      string colorString;
+      long colorNum;
+    };
+    struct Color2Struct;
+    typedef sequence<Example::Color2Struct> Color2List;
+    typedef sequence<Example::Color2Struct> Color2Seq;
+    @nested(TRUE)
+    @appendable
+    struct Color2Struct {
+      string colorString;
+      long colorNum;
+    };
+    struct Color3Struct;
+    typedef sequence<Example::Color3Struct> Color3List;
+    @nested(FALSE)
+    @appendable
+    struct Color3Struct {
+      string colorString;
+      long colorNum;
+    };
+    typedef sequence<Example::Color3Struct> Color3Seq;
+    struct Color4Struct;
+    typedef sequence<Example::Color4Struct> Color4List;
+    typedef sequence<Example::Color4Struct> Color4Seq;
+    @nested(FALSE)
+    @appendable
+    struct Color4Struct {
+      string colorString;
+      long colorNum;
+      Example::Color3Seq color2seq;
+    };
+    union B03;
+    typedef sequence<Example::B03> B03List;
+    @nested(TRUE)
+    @appendable
+    union B03 switch (long) {
+      case 2:
+        short b_03_3;
+    };
+  }; // module Example
+  module Foo
+  {
+    typedef long _module;
+    struct ColorStruct;
+    typedef sequence<Foo::ColorStruct> ColorList;
+    typedef sequence<Foo::ColorStruct> ColorSeq;
+    @nested(TRUE)
+    @appendable
+    struct ColorStruct {
+      string colorString;
+      long colorNum;
+      Foo::_module moduleNum;
+    };
+  }; // module Foo
+  module UnionTest
+  {
+    typedef long _module;
+    union B03;
+    typedef sequence<UnionTest::B03> B03List;
+    typedef sequence<UnionTest::B03> B03Seq;
+    @nested(TRUE)
+    @appendable
+    union B03 switch (long) {
+      case 2:
+        short b_03_3;
+      case 3:
+        UnionTest::_module b_03_4;
+    };
+  }; // module UnionTest
+  module Escaping
+  {
+    union _private;
+    @nested(FALSE)
+    @appendable
+    union _private switch (long) {
+      case 2:
+        short b_03_3;
+    };
+    struct _public;
+    @nested(FALSE)
+    @appendable
+    struct _public {
+      string bar;
+    };
+  }; // module Escaping
+  module Foo
+  {
+    module _ATTRIBUTE
+    {
+      @nested(FALSE)
+      @appendable
+      struct TopicA {
+        string a;
+      };
+    }; // module _ATTRIBUTE
+  }; // module Foo
+  module SequenceTest
+  {
+    typedef long myLong;
+    typedef sequence<SequenceTest::myLong> myLongSeq;
+    typedef sequence<SequenceTest::myLong, 16> myLongSeq_b16;
+    @nested(FALSE)
+    @appendable
+    struct My_msg {
+      SequenceTest::myLong myl;
+      SequenceTest::myLongSeq mylseq;
+    };
+//     @nested(FALSE)
+//     @appendable
+//     struct My_msg2 {
+//       long myl;
+//     };
+//     typedef sequence<SequenceTest::My_msg2> My_msg2Seq;
+//     @nested(FALSE)
+//     @appendable
+//     union My_msg3 switch (long) {
+//       case 2:
+//         long myl;
+//     };
+//     typedef sequence<SequenceTest::My_msg3> My_msg3Seq;
+//     @nested(FALSE)
+//     @appendable
+//     struct My_msg4 {
+//       long myl;
+//     };
+//     typedef sequence<SequenceTest::My_msg4, 12> My_msg4Bounded;
+//     @nested(FALSE)
+//     @appendable
+//     union My_msg5 switch (long) {
+//       case 2:
+//         SequenceTest::My_msg4Bounded myl;
+//     };
+//    typedef sequence<SequenceTest::My_msg5> My_msg5Seq;
+//    typedef sequence<SequenceTest::My_msg5, 12> My_msg5_b12;
+//    typedef sequence<SequenceTest::My_msg5, 11> My_msg5_b11;
+  }; // module SequenceTest
+
+}; // module DDS_Native
+
