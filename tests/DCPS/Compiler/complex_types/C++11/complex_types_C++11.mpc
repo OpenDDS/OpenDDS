@@ -4,5 +4,6 @@ project: dcps_test, opendds_cxx11 {
 
   TypeSupport_Files {
     ../complex_types.idl
+    ../array_subscript.idl
   }
 }

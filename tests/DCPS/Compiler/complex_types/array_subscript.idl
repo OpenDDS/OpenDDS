@@ -1,0 +1,11 @@
+module DDS_Native
+{
+  module Test
+  {
+    @nested(FALSE)
+    @final
+    struct LatencyData {
+      long seq_num;
+    };
+  }; // module Test
+}; // module DDS_Native

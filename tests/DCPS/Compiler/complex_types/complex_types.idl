@@ -1,3 +1,60 @@
+module Unions {
+  struct dummy {
+    long foo;
+  };
+
+  union Z switch(boolean) {
+    case TRUE: short val;
+  };
+
+  union Y switch(char) {
+    case 0: string val;
+  };
+
+  union X switch(short) {
+    case 78: short val;
+    case 0: Z zz;
+  };
+
+  union V switch(unsigned short) {
+    case 0: dummy val;
+  };
+
+  typedef sequence<dummy> dummy_sequence;
+  union U switch(long) {
+    case 0: dummy_sequence dsequence;
+  };
+
+  typedef dummy dummy_array[10];
+  union T switch(unsigned long) {
+    case 0: dummy_array darray;
+  };
+
+#ifndef OPENDDS_SAFETY_PROFILE
+  union S switch(long) {
+    case 0: wstring val;
+  };
+
+  union R switch(unsigned long) {
+    case 0: wchar val;
+  };
+#endif
+
+  union Q switch(unsigned long) {
+    case 0: long double val;
+  };
+
+  union P switch(unsigned long) {
+    case 0: boolean val;
+  };
+
+  enum Dog { Mastiff, St_Bernard };
+  union O switch(Dog) {
+    case Mastiff: float mval;
+    case St_Bernard: long long val;
+  };
+};
+
 // The includes below are needed to deal with compilers that
 // have ACE_HAS_EXPLICIT_TEMPLATE_INSTANTIATION_EXPORT
 #include "tao/BooleanSeq.pidl"
@@ -284,35 +341,34 @@ module DDS_Native
       SequenceTest::myLong myl;
       SequenceTest::myLongSeq mylseq;
     };
-    @nested(FALSE)
-    @appendable
-    struct My_msg2 {
-      long myl;
-    };
-//    typedef sequence<SequenceTest::My_msg2> My_msg2Seq;
-    @nested(FALSE)
-    @appendable
-    union My_msg3 switch (long) {
-      case 2:
-        long myl;
-    };
-//     typedef sequence<SequenceTest::My_msg3> My_msg3Seq;
 //     @nested(FALSE)
 //     @appendable
-//     struct My_msg4 {
+//     struct My_msg2 {
 //       long myl;
-//       My_msg3Seq my_3seql;
 //     };
-//     typedef sequence<SequenceTest::My_msg4, 12> My_msg4Bounded;
+//     typedef sequence<SequenceTest::My_msg2> My_msg2Seq;
+//     @nested(FALSE)
+//     @appendable
+//     union My_msg3 switch (long) {
+//       case 2:
+//         long myl;
+//     };
+//     typedef sequence<SequenceTest::My_msg3> My_msg3Seq;
+    @nested(FALSE)
+    @appendable
+    struct My_msg4 {
+      long myl;
+    };
+    typedef sequence<SequenceTest::My_msg4, 12> My_msg4Bounded;
 //     @nested(FALSE)
 //     @appendable
 //     union My_msg5 switch (long) {
 //       case 2:
 //         SequenceTest::My_msg4Bounded myl;
 //     };
-//   typedef sequence<SequenceTest::My_msg5> My_msg5Seq;
-//   typedef sequence<SequenceTest::My_msg5, 12> My_msg5_b12;
-//   typedef sequence<SequenceTest::My_msg5, 11> My_msg5_b11;
+//    typedef sequence<SequenceTest::My_msg5> My_msg5Seq;
+//    typedef sequence<SequenceTest::My_msg5, 12> My_msg5_b12;
+//    typedef sequence<SequenceTest::My_msg5, 11> My_msg5_b11;
   }; // module SequenceTest
 
 }; // module DDS_Native
