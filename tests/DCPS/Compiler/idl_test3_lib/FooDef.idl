@@ -72,7 +72,6 @@ module Xyz {
     ArrayOfTypedefOfSeqOfArrayOfLong array_of_typedef_of_seq_of_array_of_long;
   };
 
-  @topic
   union UnionOfTypedefsOfTypedefs switch (int32) {
   case 0:
     TypedefOfArrayOfLong typedef_of_array_of_long;
