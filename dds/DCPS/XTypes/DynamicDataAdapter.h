@@ -533,7 +533,20 @@ protected:
   {
     const DDS::ReturnCode_t rc = check_member(method, tk, id);
     if (rc == DDS::RETCODE_OK) {
+      /**
+       * It's possible to call this function with incorrectly matched types and
+       * GCC could warn about this when the source value from set_*_value is
+       * smaller than T in get_raw_value. This isn't actually a problem because
+       * check_member requires tk to match the member's type.
+       */
+#  ifdef __GNUC__
+#    pragma GCC diagnostic push
+#    pragma GCC diagnostic ignored "-Warray-bounds"
+#  endif
       dest = *static_cast<const T*>(source);
+#  ifdef __GNUC__
+#    pragma GCC diagnostic pop
+#  endif
     }
     return rc;
   }
