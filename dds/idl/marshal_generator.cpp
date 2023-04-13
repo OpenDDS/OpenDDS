@@ -453,7 +453,7 @@ namespace {
       }
     } else {
       Intro intro;
-      RefWrapper wrapper(seq->base_type(), scoped(seq->base_type()->name()),
+      RefWrapper wrapper(seq->base_type(), scoped(deepest_named_type(seq->base_type())->name()),
         classic_array_copy ? tempvar : stream_to, false);
       wrapper.classic_array_copy_ = classic_array_copy;
       wrapper.done(&intro);
@@ -523,7 +523,7 @@ namespace {
     }
 
     const std::string cxx_elem =
-      anonymous ? anonymous->scoped_elem_ : scoped(seq->base_type()->name());
+      anonymous ? anonymous->scoped_elem_ : scoped(deepest_named_type(seq->base_type())->name());
     const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
 
     RefWrapper(base_wrapper).done().generate_tag();
@@ -804,7 +804,7 @@ namespace {
         std::string classic_array_copy;
         if (!use_cxx11 && (elem_cls & CL_ARRAY)) {
           RefWrapper classic_array_wrapper(
-            seq->base_type(), scoped(seq->base_type()->name()), elem_access);
+            seq->base_type(), scoped(deepest_named_type(seq->base_type())->name()), elem_access);
           classic_array_wrapper.classic_array_copy_ = true;
           classic_array_wrapper.done(&intro);
           classic_array_copy = classic_array_wrapper.classic_array_copy();
@@ -932,7 +932,7 @@ namespace {
       be_global->add_referenced(elem->file_name().c_str());
     }
     const std::string cxx_elem =
-      anonymous ? anonymous->scoped_elem_ : scoped(arr->base_type()->name());
+      anonymous ? anonymous->scoped_elem_ : scoped(deepest_named_type(arr->base_type())->name());
     const ACE_CDR::ULong n_elems = array_element_count(arr);
 
     RefWrapper(base_wrapper).done().generate_tag();
@@ -1077,7 +1077,8 @@ namespace {
           std::string classic_array_copy;
           if (!use_cxx11 && (elem_cls & CL_ARRAY)) {
             RefWrapper classic_array_wrapper(
-              arr->base_type(), scoped(arr->base_type()->name()), wrapper.value_access() + nfl.index_);
+              arr->base_type(), scoped(deepest_named_type(arr->base_type())->name()),
+              wrapper.value_access() + nfl.index_);
             classic_array_wrapper.classic_array_copy_ = true;
             classic_array_wrapper.done(&intro);
             classic_array_copy = classic_array_wrapper.classic_array_copy();
@@ -3130,7 +3131,6 @@ marshal_generator::gen_field_getValueFromSerialized(AST_Structure* node, const s
   for (Fields::Iterator i = fields.begin(); i != fields_end; ++i) {
     AST_Field* const field = *i;
     size_t size = 0;
-    const std::string field_name = field->local_name()->get_string();
     const std::string idl_name = canonical_name(field);
     AST_Type* const field_type = resolveActualType(field->field_type());
     Classification fld_cls = classify(field_type);
@@ -3183,7 +3183,7 @@ marshal_generator::gen_field_getValueFromSerialized(AST_Structure* node, const s
           "      return getMetaStruct<" + scoped(field_type->name()) + ">().getValue(strm, subfield.c_str());\n"
           "    } else {\n"
           "      if (!gen_skip_over(strm, static_cast<" + scoped(field_type->name()) + "*>(0))) {\n"
-          "        throw std::runtime_error(\"Field '" + field_name + "' could not be skipped\");\n"
+          "        throw std::runtime_error(\"Field '" + idl_name + "' could not be skipped\");\n"
           "      }\n"
           "    }\n";
     } else { // array, sequence, union:
@@ -3192,10 +3192,10 @@ marshal_generator::gen_field_getValueFromSerialized(AST_Structure* node, const s
         post = "_forany";
       } else if (use_cxx11 && (fld_cls & (CL_ARRAY | CL_SEQUENCE))) {
         pre = "IDL::DistinctType<";
-        post = ", " + dds_generator::get_tag_name(scoped(field->field_type()->name())) + ">";
+        post = ", " + dds_generator::get_tag_name(scoped(deepest_named_type(field->field_type())->name())) + ">";
       }
       const std::string ptr = field->field_type()->anonymous() ?
-        FieldInfo(*field).ptr_ : (pre + scoped(field->field_type()->name()) + post + '*');
+        FieldInfo(*field).ptr_ : (pre + field_type_name(field) + post + '*');
       expr +=
         "    if (!gen_skip_over(strm, static_cast<" + ptr + ">(0))) {\n"
         "      throw std::runtime_error(\"Field \" + OPENDDS_STRING(field) + \" could not be skipped\");\n"
@@ -3733,7 +3733,6 @@ bool marshal_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
       be_global->impl_ <<
         "  " << scoped(discriminator->name()) << " disc;\n" <<
         streamAndCheck(">> " + getWrapper("disc", discriminator, WD_INPUT));
-      be_global->impl_ << "/* HERE */\n";
       if (generateSwitchForUnion(node, "disc", streamCommon, branches,
           discriminator, "", ">> ", cxx.c_str())) {
         be_global->impl_ <<

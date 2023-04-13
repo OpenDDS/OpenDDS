@@ -240,6 +240,11 @@ TEST_F(dds_DCPS_XTypes_DynamicDataAdapter, test_struct)
     set_collection_struct(x.anon_seqs);
     set_collection_struct(x.arrays);
     set_collection_struct(x.anon_arrays);
+    x.typedef_of_seq_typedef.length(2);
+    x.typedef_of_seq_typedef[0] = 1;
+    x.typedef_of_seq_typedef[1] = 2;
+    x.typedef_of_array_typedef[0] = 1;
+    x.typedef_of_array_typedef[1] = 2;
 
     DDS::DynamicData_var dda = get_dynamic_data_adapter<TestStruct>(dt, x);
     ASSERT_RC_OK(copy(ddi, dda));
@@ -275,6 +280,11 @@ TEST_F(dds_DCPS_XTypes_DynamicDataAdapter, test_struct)
     test_collection_struct(y.anon_seqs);
     test_collection_struct(y.arrays);
     test_collection_struct(y.anon_arrays);
+    ASSERT_EQ(y.typedef_of_seq_typedef.length(), 2u);
+    EXPECT_EQ(y.typedef_of_seq_typedef[0], 1);
+    EXPECT_EQ(y.typedef_of_seq_typedef[1], 2);
+    EXPECT_EQ(y.typedef_of_array_typedef[0], 1);
+    EXPECT_EQ(y.typedef_of_array_typedef[1], 2);
   }
 }
 

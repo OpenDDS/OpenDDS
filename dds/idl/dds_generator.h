@@ -786,7 +786,15 @@ struct Intro {
   }
 };
 
-std::string field_type_name(AST_Field* field, AST_Type* field_type);
+std::string field_type_name(AST_Field* field, AST_Type* field_type = 0);
+
+/**
+ * For the some situations, like a tag name, the type name we need is the
+ * deepest named type, not the actual type. This will be the name of the
+ * deepest typedef if it's an array or sequence, otherwise the name of the
+ * type.
+ */
+AST_Type* deepest_named_type(AST_Type* type);
 
 typedef std::string (*CommonFn)(
   const std::string& indent, AST_Decl* node,
@@ -834,7 +842,7 @@ void generateCaseBody(
       rhs = use_cxx11 ? "tmp" : "tmp.out()";
     } else if (use_cxx11 && (br_cls & (CL_ARRAY | CL_SEQUENCE))) {  //array or seq C++11
       rhs = "IDL::DistinctType<" + brType + ", "
-        + dds_generator::get_tag_name(dds_generator::scoped_helper(branch->field_type()->name(), "::"))
+        + dds_generator::get_tag_name(brType)
         + ">(tmp)";
     } else if (br_cls & CL_ARRAY) { //array classic
       forany = "    " + brType + "_forany fa = tmp;\n";

@@ -475,7 +475,7 @@ void generate_anon_fields(AST_Structure* node)
               post = "_forany";
             } else if (use_cxx11 && (elem_cls & (CL_ARRAY | CL_SEQUENCE))) {
               pre = "IDL::DistinctType<";
-              post = ", " + dds_generator::get_tag_name(dds_generator::scoped_helper(elem_orig->name(), "_")) + ">";
+              post = ", " + dds_generator::get_tag_name(dds_generator::scoped_helper(deepest_named_type(elem_orig)->name(), "_")) + ">";
             }
             be_global->impl_ <<
               "    if (!gen_skip_over(ser, static_cast<" << pre << cxx_elem << post
@@ -597,7 +597,7 @@ metaclass_generator::gen_typedef(AST_Typedef*, UTL_ScopedName* name,
         post = "_forany";
       } else if (use_cxx11 && (elem_cls & (CL_ARRAY | CL_SEQUENCE))) {
         pre = "IDL::DistinctType<";
-        post = ", " + dds_generator::get_tag_name(scoped_helper(elem_orig->name(), "::")) + ">";
+        post = ", " + dds_generator::get_tag_name(scoped_helper(deepest_named_type(elem_orig)->name(), "::")) + ">";
       }
       be_global->impl_ <<
         "    if (!gen_skip_over(ser, static_cast<" << pre << cxx_elem << post
@@ -637,7 +637,7 @@ std::string gen_union_branch(const std::string&, AST_Decl* branch, const std::st
       post = "_forany";
     } else if (use_cxx11 && (br_cls & (CL_ARRAY | CL_SEQUENCE))) {
       pre = "IDL::DistinctType<";
-      post = ", " + dds_generator::get_tag_name(dds_generator::scoped_helper(br_type->name(), "::")) + ">";
+      post = ", " + dds_generator::get_tag_name(dds_generator::scoped_helper(deepest_named_type(br_type)->name(), "::")) + ">";
     }
     ss <<
       "    if (!gen_skip_over(ser, static_cast<" << pre
