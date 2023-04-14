@@ -114,6 +114,8 @@ ghfile
 
   :ghfile:`check out the available support <README.md#support>`
 
+  :ghfile:`java/docs/overview.html`
+
 Turns into:
 
 :ghfile:`README.md#support`
@@ -126,6 +128,8 @@ Turns into:
 
 :ghfile:`check out the available support <README.md#support>`
 
+:ghfile:`java/docs/overview.html`
+
 The path passed must exist, be relative to the root of the repository, and will have to be committed, if it's not already.
 If there is a URL fragment in the path, like ``README.md#support``, then it will appear in the link URL.
 
@@ -135,6 +139,8 @@ It will try to point to the most specific version of the file:
 * Else if the OpenDDS is a release it will calculate the release tag and use that.
 * Else if the OpenDDS is in a git repository it will use the commit hash.
 * Else it will use ``master``.
+
+If the file ends in ``.html``, there will be an additional link to the file that uses https://htmlpreview.github.io/ so the file can be viewed directly in a web browser.
 
 ghissue
 -------

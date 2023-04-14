@@ -97,19 +97,29 @@ def ghfile_role(name, rawtext, text, lineno, inliner, options={}, content=[]):
 
     kind = 'tree' if local_path.is_dir() else 'blob'
     url = '/'.join([gh_url_base, config.github_links_repo, kind, get_commitish(config), path]) + fragment
-    if explicit_title:
-        options['classes'] = [c for c in options['classes'] if c != 'custom_literal']
-    else:
-        options['classes'] = ['custom_literal']
-    return link_node(rawtext, lineno, inliner, title, explicit_title, url, options)
+    normal_options = options.copy()
+    if 'classes' in normal_options:
+        normal_options['classes'] = [c for c in normal_options['classes'] if c != 'custom_literal']
+    literal_options = normal_options.copy()
+    literal_options['classes'] = ['custom_literal']
+    rv = []
+    append(rv, link_node(rawtext, lineno, inliner, title, explicit_title, url,
+        normal_options if explicit_title else literal_options))
+    if path.endswith('.html'):
+        append(rv, text_node(rawtext, lineno, ' ', normal_options))
+        append(rv, link_node(rawtext, lineno, inliner,
+            '(View as HTML)', False,
+            'https://htmlpreview.github.io/?' + url,
+            normal_options))
+    return rv
 
 
 # Turns :ghissue:`213` into the equivalent of:
-#   `Issue #213 on GitHub <https://github.com/OpenDDS/OpenDDS/issues/213>`_
+#   `Issue #213 <https://github.com/OpenDDS/OpenDDS/issues/213>`_
 def ghissue_role(name, rawtext, text, lineno, inliner, options={}, content=[]):
     config = get_config(inliner)
     explicit_title, title, target = process_title_target(
-        text, 'Issue #{} on GitHub'.format(text))
+        text, 'Issue #{}'.format(text))
     return link_node(rawtext, lineno, inliner,
         title, explicit_title,
         '{}/{}/issues/{}'.format(gh_url_base, config.github_links_repo, target),
@@ -117,11 +127,11 @@ def ghissue_role(name, rawtext, text, lineno, inliner, options={}, content=[]):
 
 
 # Turns :ghpr:`1` into the equivalent of:
-#   `Pull Request #1 on GitHub <https://github.com/OpenDDS/OpenDDS/pull/1>`_
+#   `PR #1 <https://github.com/OpenDDS/OpenDDS/pull/1>`_
 def ghpr_role(name, rawtext, text, lineno, inliner, options={}, content=[]):
     config = get_config(inliner)
     explicit_title, title, target = process_title_target(
-        text, 'Pull Request #{} on GitHub'.format(text))
+        text, 'PR #{}'.format(text))
     return link_node(rawtext, lineno, inliner,
         title, explicit_title,
         '{}/{}/pull/{}'.format(gh_url_base, config.github_links_repo, target),
@@ -154,7 +164,7 @@ def omgissue_role(name, rawtext, text, lineno, inliner, options={}, content=[]):
         options))
     append(rv, text_node(rawtext, lineno, ' ', options))
     append(rv, link_node(rawtext, lineno, inliner,
-        ' (Member Link)', False,
+        '(Member Link)', False,
         '{}/browse/{}'.format(omg_url_base, target),
         options))
     return rv
