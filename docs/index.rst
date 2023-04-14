@@ -40,23 +40,24 @@ Developer's Guide
   devguide/dds_security
   devguide/internet_enabled_rtps
   devguide/xtypes
-  Common Terms <devguide/common_terms>
+  devguide/common_terms
 
 **********************
 Internal Documentation
 **********************
 
-This documentation are for those who want to contribute to OpenDDS and those who are just curious!
+This documentation is for those who want to contribute to OpenDDS and those who are just curious!
 
 .. toctree::
   :maxdepth: 2
 
-  Development Guidelines <internal/dev_guidelines>
-  Documentation Guidelines <internal/docs>
-  Unit Testing Guidelines <internal/unit_tests>
-  Github Actions <internal/github_actions>
-  Running Tests <internal/running_tests>
-  Bench <internal/bench>
+  internal/dev_guidelines
+  internal/docs
+  internal/unit_tests
+  internal/github_actions
+  internal/running_tests
+  internal/bench
+  internal/release
 
 ******************
 Indices and tables
