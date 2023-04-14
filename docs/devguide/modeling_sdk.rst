@@ -38,7 +38,7 @@ Zero or one DCPS elements definition can be included in any given model.
 .. _modeling_sdk--reffigure5:
 
 .. image:: images/10000001000003BA000005345220EFBC3B2965C5.png
-   :scale: 5%
+   :scale: 50%
 
 **Figure  Graphical modeling of the data definitions**
 
