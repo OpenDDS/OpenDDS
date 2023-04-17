@@ -135,7 +135,12 @@ string idl_mapping_jni::taoParam(AST_Type *decl, AST_Argument::Direction dir,
     addConst = false;
     break;
   case AST_Decl::NT_string:
-    param = "char *";
+    if (dir == AST_Argument::dir_OUT) {
+      param = "CORBA::String_out";
+      addRef = false;
+    } else {
+      param = "char *";
+    }
     break;
   case AST_Decl::NT_wstring:
     param = "CORBA::WChar *";

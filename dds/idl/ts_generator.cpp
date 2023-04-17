@@ -97,21 +97,20 @@ bool ts_generator::generate_ts(AST_Decl* node, UTL_ScopedName* name)
     // error reported in read_template
     return false;
   }
-
-  AST_Structure* struct_node = 0;
-  AST_Union* union_node = 0;
   if (!node || !name) {
     return false;
   }
+
+  AST_Structure* struct_node = 0;
+  AST_Union* union_node = 0;
+  AST_Type::SIZE_TYPE size_type;
   if (node->node_type() == AST_Decl::NT_struct) {
     struct_node = dynamic_cast<AST_Structure*>(node);
+    size_type = struct_node->size_type();
   } else if (node->node_type() == AST_Decl::NT_union) {
     union_node = dynamic_cast<AST_Union*>(node);
+    size_type = union_node->size_type();
   } else {
-    return false;
-  }
-
-  if (!struct_node && !union_node) {
     idl_global->err()->misc_error(
       "Could not cast AST Nodes to valid types", node);
     return false;
@@ -279,6 +278,11 @@ bool ts_generator::generate_ts(AST_Decl* node, UTL_ScopedName* name)
       "  virtual const OpenDDS::XTypes::TypeIdentifier& getCompleteTypeIdentifier() const;\n"
       "  virtual const OpenDDS::XTypes::TypeMap& getCompleteTypeMap() const;\n"
       "\n"
+      "  ::DDS::ReturnCode_t encode_to_string(const " << short_name << "& in, CORBA::String_out out, OpenDDS::DCPS::RepresentationFormat* format);\n"
+      "  ::DDS::ReturnCode_t encode_to_bytes(const " << short_name << "& in, ::DDS::OctetSeq_out out, OpenDDS::DCPS::RepresentationFormat* format);\n"
+      "  ::DDS::ReturnCode_t decode_from_string(const char* in, " << short_name << "_out out, OpenDDS::DCPS::RepresentationFormat* format);\n"
+      "  ::DDS::ReturnCode_t decode_from_bytes(const ::DDS::OctetSeq& in, " << short_name << "_out out, OpenDDS::DCPS::RepresentationFormat* format);\n"
+      "\n"
       "  static " << ts_short_name << "TypeSupport::_ptr_type _narrow(CORBA::Object_ptr obj);\n"
       "};\n\n";
   }
@@ -378,7 +382,48 @@ bool ts_generator::generate_ts(AST_Decl* node, UTL_ScopedName* name)
         "  static OpenDDS::XTypes::TypeMap tm;\n"
         "  return tm;\n";
     }
+    be_global->add_cpp_include("dds/DCPS/JsonValueReader.h");
+    be_global->add_cpp_include("dds/DCPS/JsonValueWriter.h");
+    const bool alloc_out = be_global->language_mapping() != BE_GlobalData::LANGMAP_CXX11 && size_type == AST_Type::VARIABLE;
     be_global->impl_ <<
+      "}\n\n"
+      "::DDS::ReturnCode_t " << ts_short_name << "TypeSupportImpl::encode_to_string(const " << short_name << "& in, CORBA::String_out out, OpenDDS::DCPS::RepresentationFormat* format)\n"
+      "{\n"
+      "#if OPENDDS_HAS_JSON_VALUE_WRITER\n"
+      "  OpenDDS::DCPS::JsonRepresentationFormat_var jrf = OpenDDS::DCPS::JsonRepresentationFormat::_narrow(format);\n"
+      "  if (jrf) {\n"
+      "    rapidjson::StringBuffer buffer;\n"
+      "    rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);\n"
+      "    OpenDDS::DCPS::JsonValueWriter<rapidjson::Writer<rapidjson::StringBuffer> > jvw(writer);\n"
+      "    vwrite(jvw, in);\n"
+      "    out = buffer.GetString();\n"
+      "    return ::DDS::RETCODE_OK;\n"
+      "  }\n"
+      "#endif\n"
+      "  return ::DDS::RETCODE_UNSUPPORTED;\n"
+      "}\n\n"
+      "::DDS::ReturnCode_t " << ts_short_name << "TypeSupportImpl::encode_to_bytes(const " << short_name << "& in, ::DDS::OctetSeq_out out, OpenDDS::DCPS::RepresentationFormat* format)\n"
+      "{\n"
+      "  return ::DDS::RETCODE_UNSUPPORTED;\n"
+      "}\n\n"
+      "::DDS::ReturnCode_t " << ts_short_name << "TypeSupportImpl::decode_from_string(const char* in, " << short_name << "_out " <<
+      (alloc_out ? "out" : "param") << ", OpenDDS::DCPS::RepresentationFormat* format)\n"
+      "{\n"
+      "#if OPENDDS_HAS_JSON_VALUE_READER\n"
+      "  OpenDDS::DCPS::JsonRepresentationFormat_var jrf = OpenDDS::DCPS::JsonRepresentationFormat::_narrow(format);\n"
+      "  if (jrf) {\n"
+      "    rapidjson::StringStream buffer(in);\n"
+      "    OpenDDS::DCPS::JsonValueReader<> jvr(buffer);\n" <<
+      (alloc_out ? "    out = new " + short_name + ";\n" : "    " + short_name + "* out = &param;\n") <<
+      "    OpenDDS::DCPS::set_default(*out);\n"
+      "    return vread(jvr, *out) ? ::DDS::RETCODE_OK : ::DDS::RETCODE_ERROR;\n"
+      "  }\n"
+      "#endif\n"
+      "  return ::DDS::RETCODE_UNSUPPORTED;\n"
+      "}\n\n"
+      "::DDS::ReturnCode_t " << ts_short_name << "TypeSupportImpl::decode_from_bytes(const ::DDS::OctetSeq& in, " << short_name << "_out out, OpenDDS::DCPS::RepresentationFormat* format)\n"
+      "{\n"
+      "  return ::DDS::RETCODE_UNSUPPORTED;\n"
       "}\n\n"
       << ts_short_name << "TypeSupport::_ptr_type " << ts_short_name << "TypeSupportImpl::_narrow(CORBA::Object_ptr obj)\n"
       "{\n"

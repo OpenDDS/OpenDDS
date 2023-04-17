@@ -32,8 +32,7 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-/// Convert values to JSON.
-/// Currently, this class does not produce value JSON nor does it adhere to the DDS JSON spec.
+/// Convert JSON to values.
 template <typename InputStream = rapidjson::StringStream>
 class JsonValueReader
   : public ValueReader,
