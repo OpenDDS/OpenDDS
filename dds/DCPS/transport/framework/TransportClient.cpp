@@ -203,6 +203,7 @@ TransportClient::associate(const AssociationData& data, bool active)
   ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, lock_, false);
 
   repo_id_ = repo_id;
+  OPENDDS_ASSERT(repo_id_ != GUID_UNKNOWN);
 
   if (impls_.empty()) {
     if (DCPS_debug_level) {
@@ -248,6 +249,7 @@ TransportClient::associate(const AssociationData& data, bool active)
     pa->impls_.clear();
     pa->blob_index_ = 0;
     pa->data_ = data;
+    OPENDDS_ASSERT(repo_id_ != GUID_UNKNOWN);
     pa->attribs_.local_id_ = repo_id_;
     pa->attribs_.priority_ = get_priority_value(data);
     pa->attribs_.local_reliable_ = reliable_;
@@ -621,9 +623,9 @@ TransportClient::add_link(const DataLink_rch& link, const GUID_t& peer)
 
   TransportReceiveListener_rch trl = get_receive_listener();
 
+  OPENDDS_ASSERT(repo_id_ != GUID_UNKNOWN);
   if (trl) {
     link->make_reservation(peer, repo_id_, trl, reliable_);
-
   } else {
     link->make_reservation(peer, repo_id_, get_send_listener(), reliable_);
   }
@@ -745,6 +747,7 @@ TransportClient::disassociate(const GUID_t& peerId)
                link.in()));
   }
 
+  OPENDDS_ASSERT(repo_id_ != GUID_UNKNOWN);
   link->release_reservations(peerId, repo_id_, released);
 
   if (!released.empty()) {
@@ -776,6 +779,11 @@ void TransportClient::transport_stop()
   const ImplsType impls = impls_;
   const GUID_t repo_id = repo_id_;
   guard.release();
+
+  if (repo_id == GUID_UNKNOWN) {
+    // Not associated so nothing to stop.
+    return;
+  }
 
   for (size_t i = 0; i < impls.size(); ++i) {
     const TransportImpl_rch impl = impls[i].lock();
@@ -1112,6 +1120,9 @@ SendControlStatus
 TransportClient::send_control(const DataSampleHeader& header,
                               Message_Block_Ptr msg)
 {
+  if (repo_id_ == GUID_UNKNOWN) {
+    return SEND_CONTROL_OK;
+  }
   return links_.send_control(repo_id_, get_send_listener(), header, move(msg));
 }
 
@@ -1120,6 +1131,10 @@ TransportClient::send_control_to(const DataSampleHeader& header,
                                  Message_Block_Ptr msg,
                                  const GUID_t& destination)
 {
+  if (repo_id_ == GUID_UNKNOWN) {
+    return SEND_CONTROL_OK;
+  }
+
   DataLinkSet singular;
   {
     ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, lock_, SEND_CONTROL_ERROR);
@@ -1143,6 +1158,9 @@ TransportClient::remove_sample(const DataSampleElement* sample)
 bool
 TransportClient::remove_all_msgs()
 {
+  if (repo_id_ == GUID_UNKNOWN) {
+    return true;
+  }
   return links_.remove_all_msgs(repo_id_);
 }
 

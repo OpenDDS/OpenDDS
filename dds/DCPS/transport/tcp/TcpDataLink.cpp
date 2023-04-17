@@ -554,7 +554,7 @@ OpenDDS::DCPS::TcpDataLink::send_association_msg(const GUID_t& local, const GUID
   Serializer ser(message.get(), encoding_unaligned_native);
   ser << remote;
 
-  TransportControlElement* send_element = new TransportControlElement(move(message));
+  TransportControlElement* send_element = new TransportControlElement(move(message), local);
 
   this->send_i(send_element, false);
 }
