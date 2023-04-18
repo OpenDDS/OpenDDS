@@ -20,7 +20,7 @@ Temporary Notes
 List of current problems with the release process and their workarounds.
 If there's nothing to note then the list should just consist of ``- N/A``.
 
-- Read the docs version needs to be activated manually after the tag has been pushed.
+- The readthedocs.org version needs to be activated manually after the tag has been pushed.
   There's a part of the script to do this automatically, but it's only partially working.
 
 ********************
@@ -299,7 +299,7 @@ Upload the Shapes Demo Binaries
   This should only be done for the latest release.
   This is any release that's not a micro release of the non-latest minor release.
 
-During the release script there’s a step called “Trigger Shapes Demo Build” that triggers a workflow on GitHub to build the shapes demo for the new release.
+During the release script there’s a step called "Trigger Shapes Demo Build" that triggers a workflow on GitHub to build the shapes demo for the new release.
 If it was successful it will print out the link to the run so it can be monitored.
 After it’s done run the release script with the version and workspace arguments and the ``--upload-shapes-demo`` option.
 If the workflow is still in progress it will say so and give the link again.
