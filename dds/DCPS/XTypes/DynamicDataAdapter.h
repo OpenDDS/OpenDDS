@@ -533,7 +533,7 @@ protected:
    * smaller than T in get_raw_value. This isn't actually a problem because
    * check_member requires tk to match the member's type.
    */
-#  ifdef __GNUC__
+#  if OPENDDS_GCC_HAS_DIAG_PUSHPOP
 #    pragma GCC diagnostic push
 #    pragma GCC diagnostic ignored "-Warray-bounds"
 #  endif
@@ -547,7 +547,7 @@ protected:
     }
     return rc;
   }
-#  ifdef __GNUC__
+#  if OPENDDS_GCC_HAS_DIAG_PUSHPOP
 #    pragma GCC diagnostic pop
 #  endif
 
