@@ -188,8 +188,8 @@ void test_collection_struct(T& col_struct)
   EXPECT_EQ(col_struct.f32[1], 0.11f);
   EXPECT_EQ(col_struct.f64[0], 0.20);
   EXPECT_EQ(col_struct.f64[1], 0.22);
-  EXPECT_EQ(col_struct.f128[0], 0.30);
-  EXPECT_EQ(col_struct.f128[1], 0.33);
+  EXPECT_EQ(static_cast<double>(col_struct.f128[0]), 0.30);
+  EXPECT_EQ(static_cast<double>(col_struct.f128[1]), 0.33);
   EXPECT_EQ(col_struct.c8[0], '1');
   EXPECT_EQ(col_struct.c8[1], '2');
   EXPECT_EQ(col_struct.c16[0], L'1');
@@ -266,7 +266,7 @@ TEST_F(dds_DCPS_XTypes_DynamicDataAdapter, test_struct)
     EXPECT_EQ(y.u64, 8u);
     EXPECT_EQ(y.f32, 0.1f);
     EXPECT_EQ(y.f64, 0.2);
-    EXPECT_EQ(y.f128, 0.3);
+    EXPECT_EQ(static_cast<double>(y.f128), 0.3);
     EXPECT_EQ(y.c8, '!');
     EXPECT_EQ(y.c16, L'@');
     EXPECT_STREQ(y.s8, "Hello");
