@@ -110,6 +110,8 @@ linkcheck_ignore = [
     r'^https?://github\.com/.*#.+$',
     # Returns 403 for some reason
     r'^https?://docs\.github\.com/.*$',
+    # TODO: This needs to be fixed
+    r'^http://download\.opendds\.org/modeling/eclipse_44/',
 ]
 
 
