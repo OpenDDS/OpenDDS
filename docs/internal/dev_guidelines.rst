@@ -23,26 +23,6 @@ Pull requests will be tested automatically and full CI builds of the master bran
 See :doc:`running_tests` for how tests are run in general.
 See :doc:`github_actions` for how building and testing is done with GitHub Actions.
 
-*******
-Doxygen
-*******
-
-Doxygen is run on OpenDDS regularly.
-There are two hosted versions of this:
-
-* `Latest Release <http://download.opendds.org/doxygen>`_
-
-  * Based on the current release of OpenDDS.
-
-* Master
-
-  * Based on the master branch in the repository.
-    To access it, go to the `scoreboard <http://scoreboard.ociweb.com/oci-dds.html>`_ and click the green "Doxygen" link near the top.
-  * Depending on the activity in the repository this might be unstable because of the time it takes to get the updated Doxygen on to the web sever.
-    Prefer latest release unless working with newer code.
-
-See :ref:`dev_guidelines-documenting_code_for_doxygen` to see how to take advantage of Doxygen when writing code in OpenDDS.
-
 ************
 Dependencies
 ************

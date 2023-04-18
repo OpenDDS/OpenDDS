@@ -38,7 +38,7 @@ Zero or one DCPS elements definition can be included in any given model.
 .. _modeling_sdk--reffigure5:
 
 .. image:: images/10000001000003BA000005345220EFBC3B2965C5.png
-   :scale: 5%
+   :scale: 50%
 
 **Figure  Graphical modeling of the data definitions**
 
@@ -116,8 +116,6 @@ Installation
 ..
     Sect<11.2.2>
 
-#. From Eclipse, open the Help menu and select Install New Software.
-
 .. _modeling_sdk--reffigure7:
 
 .. image:: images/100000000000018A000001582B13D316CA761B88.png
@@ -125,27 +123,29 @@ Installation
 
 **Figure  Eclipse Software Installation Dialog**
 
-* Click the hyperlink for Available Software Sites.
+#. From Eclipse, open the "Help" menu and select "Install New Software".
 
-* The standard ``eclipse.org`` sites (Eclipse Project Updates and Galileo) should be enabled.
-  If they are disabled, enable them now.
+#. Click the hyperlink for "Available Software Sites".
 
-* Add a new Site entry named OpenDDS with URL http://download.opendds.org/modeling/eclipse_44/
+#. The standard ``eclipse.org`` sites (Eclipse Project Updates and Galileo) should be enabled.
+   If they are disabled, enable them now.
 
-* Click OK to close the Preferences dialog and return to the Install dialog.
+#. Add a new Site entry named OpenDDS with URL http://download.opendds.org/modeling/eclipse_44/
 
-* In the “Work with” combo box, select the new entry for OpenDDS.
+#. Click OK to close the Preferences dialog and return to the Install dialog.
 
-* Select the “OpenDDS Modeling SDK” and click Next.
+#. In the “Work with” combo box, select the new entry for OpenDDS.
 
-* Review the “Install Details” list and click Next.
-  Review the license, select Accept (if you do accept it), and click Finish.
+#. Select the “OpenDDS Modeling SDK” and click Next.
 
-* Eclipse will download the OpenDDS plug-ins and various plug-ins from ``eclipse.org`` that they depend on.
-  There will be a security warning because the OpenDDS plug-ins are not signed.
-  There also may be a prompt to accept a certificate from ``eclipse.org``.
+#. Review the “Install Details” list and click Next.
+   Review the license, select Accept (if you do accept it), and click Finish.
 
-* Eclipse will prompt the user to restart in order to use the newly installed software.
+#. Eclipse will download the OpenDDS plug-ins and various plug-ins from ``eclipse.org`` that they depend on.
+   There will be a security warning because the OpenDDS plug-ins are not signed.
+   There also may be a prompt to accept a certificate from ``eclipse.org``.
+
+#. Eclipse will prompt the user to restart in order to use the newly installed software.
 
 .. _modeling_sdk--getting-started:
 
