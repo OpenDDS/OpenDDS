@@ -44,6 +44,9 @@ using DCPS::Serializer;
 using DCPS::Encoding;
 using DCPS::ENDIAN_BIG;
 using DCPS::ENDIAN_LITTLE;
+using DCPS::LogLevel;
+using DCPS::log_level;
+using DCPS::LogAddr;
 
 namespace {
   const Encoding encoding_plain_big(Encoding::KIND_XCDR1, ENDIAN_BIG);
@@ -2370,7 +2373,16 @@ Spdp::SpdpTransport::SpdpTransport(DCPS::RcHandle<Spdp> outer)
   const u_short startingParticipantId = participantId;
 #endif
 
+  const u_short max_part_id = 119; // RTPS 2.5 9.6.2.3
   while (!open_unicast_socket(port_common, participantId)) {
+    if (participantId == max_part_id && log_level >= LogLevel::Warning) {
+      ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: Spdp::SpdpTransport: "
+        "participant id is going above max %u allowed by RTPS spec\n", max_part_id));
+      // As long as it doesn't result in an invalid port, going past this
+      // shouldn't cause a problem, but it could be a sign that OpenDDS has a
+      // limited number of ports at its disposal. Also another implementation
+      // could use this as a hard limit, but that's much less of a concern.
+    }
     ++participantId;
   }
 #ifdef ACE_HAS_IPV6
@@ -3389,7 +3401,9 @@ Spdp::SpdpTransport::open_unicast_socket(u_short port_common,
                                          u_short participant_id)
 {
   DCPS::RcHandle<Spdp> outer = outer_.lock();
-  if (!outer) return false;
+  if (!outer) {
+    throw std::runtime_error("couldn't get Spdp");
+  }
 
   ACE_INET_Addr local_addr = outer->config_->spdp_local_address();
   const bool fixed_port = local_addr.get_port_number();
@@ -3397,17 +3411,25 @@ Spdp::SpdpTransport::open_unicast_socket(u_short port_common,
   if (fixed_port) {
     uni_port_ = local_addr.get_port_number();
   } else if (!outer->config_->spdp_request_random_port()) {
-    uni_port_ = port_common + outer->config_->d1() + (outer->config_->pg() * participant_id);
+    const ACE_UINT32 port = static_cast<ACE_UINT32>(port_common) + outer->config_->d1() +
+      outer->config_->pg() * participant_id;
+    if (port > 65535) {
+      if (log_level >= LogLevel::Error) {
+        ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: Spdp::SpdpTransport::open_unicast_socket: "
+                   "port %u is too high\n", port));
+      }
+      throw std::runtime_error("failed to open unicast port for SPDP (port too high)");
+    }
+    uni_port_ = static_cast<unsigned short>(port);
     local_addr.set_port_number(uni_port_);
   }
 
   if (unicast_socket_.open(local_addr, PF_INET) != 0) {
     if (fixed_port) {
-      if (DCPS::DCPS_debug_level > 0) {
-        ACE_ERROR((LM_ERROR,
-                  ACE_TEXT("(%P|%t) Spdp::SpdpTransport::open_unicast_socket() - ")
-                  ACE_TEXT("failed to open %C %p.\n"),
-                  DCPS::LogAddr(local_addr).c_str(), ACE_TEXT("ACE_SOCK_Dgram::open")));
+      if (log_level >= LogLevel::Error) {
+        ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: Spdp::SpdpTransport::open_unicast_socket: "
+                   "failed to open %C %p.\n",
+                   LogAddr(local_addr).c_str(), ACE_TEXT("ACE_SOCK_Dgram::open")));
       }
       throw std::runtime_error("failed to open unicast port for SPDP");
     }
