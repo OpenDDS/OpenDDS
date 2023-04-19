@@ -322,6 +322,7 @@ NestedForLoops::~NestedForLoops()
 string type_to_default_array(const std::string& indent, AST_Type* type, const string& name,
   bool is_anonymous, bool is_union, bool use_cxx11, Classification fld_cls)
 {
+  // TODO: Most of what's in here looks like it could be replaced with RefWrapper
   string val;
   string temp = name;
   if (temp.size() > 2 && temp.substr(temp.size() - 2, 2) == "()") {
@@ -332,7 +333,7 @@ string type_to_default_array(const std::string& indent, AST_Type* type, const st
   replace(temp.begin(), temp.end(), '[', '_');
   replace(temp.begin(), temp.end(), ']', '_');
   if (use_cxx11) {
-    string n = scoped(type->name());
+    string n = scoped(deepest_named_type(type)->name());
     if (is_anonymous) {
       n = n.substr(0, n.rfind("::") + 2) + "AnonymousType_" + type->local_name()->get_string();
       n = (fld_cls == AST_Decl::NT_sequence) ? (n + "_seq") : n;
@@ -423,14 +424,28 @@ string type_to_default(const std::string& indent, AST_Type* type, const string& 
 
 std::string field_type_name(AST_Field* field, AST_Type* field_type)
 {
-  std::string name;
+  if (!field_type) {
+    field_type = field->field_type();
+  }
   const Classification cls = classify(field_type);
-  name = (cls & CL_STRING) ? string_type(cls) : scoped(field_type->name());
+  const std::string name = (cls & CL_STRING) ?
+    string_type(cls) : scoped(deepest_named_type(field_type)->name());
   if (field) {
     FieldInfo af(*field);
     if (af.as_base_ && af.type_->anonymous()) {
-      name = af.scoped_type_;
+      return af.scoped_type_;
     }
   }
   return name;
+}
+
+AST_Type* deepest_named_type(AST_Type* type)
+{
+  AST_Type* consider = type;
+  AST_Type* named_type = type;
+  while (consider->node_type() == AST_Decl::NT_typedef) {
+    named_type = consider;
+    consider = dynamic_cast<AST_Typedef*>(named_type)->base_type();
+  }
+  return named_type;
 }

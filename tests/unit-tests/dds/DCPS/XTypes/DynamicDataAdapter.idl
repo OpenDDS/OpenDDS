@@ -220,6 +220,9 @@ struct AnonArrayStruct {
   SimpleUnion simple_union[2];
 };
 
+typedef Int32Sequ TypedefOfSeqTypedef;
+typedef Int32Array TypedefOfArrayTypedef;
+
 @topic
 struct TestStruct {
   octet byte;
@@ -247,6 +250,9 @@ struct TestStruct {
   AnonSeqStruct anon_seqs;
   ArrayStruct arrays;
   AnonArrayStruct anon_arrays;
+
+  TypedefOfSeqTypedef typedef_of_seq_typedef;
+  TypedefOfArrayTypedef typedef_of_array_typedef;
 };
 
 @topic

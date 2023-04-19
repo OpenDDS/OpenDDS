@@ -58,6 +58,31 @@ module Xyz {
   typedef sequence<SeqOfLong,4>    SeqOfSeqOfLong;
   typedef sequence<SeqOfAnEnum,4>  SeqOfSeqOfAnEnum;
 
+  // typedefs of typedefs
+  typedef ArrayOfLong TypedefOfArrayOfLong;
+  typedef SeqOfArrayOfLong TypedefOfSeqOfArrayOfLong;
+  typedef sequence<TypedefOfArrayOfLong, 3> SeqOfTypedefOfArrayOfLong;
+  typedef TypedefOfSeqOfArrayOfLong ArrayOfTypedefOfSeqOfArrayOfLong[2];
+
+  @topic
+  struct StructOfTypedefsOfTypedefs {
+    TypedefOfArrayOfLong typedef_of_array_of_long;
+    TypedefOfSeqOfArrayOfLong typedef_of_seq_of_array_of_long;
+    SeqOfTypedefOfArrayOfLong seq_of_typedef_of_array_of_long;
+    ArrayOfTypedefOfSeqOfArrayOfLong array_of_typedef_of_seq_of_array_of_long;
+  };
+
+  union UnionOfTypedefsOfTypedefs switch (int32) {
+  case 0:
+    TypedefOfArrayOfLong typedef_of_array_of_long;
+  case 1:
+    TypedefOfSeqOfArrayOfLong typedef_of_seq_of_array_of_long;
+  case 2:
+    SeqOfTypedefOfArrayOfLong seq_of_typedef_of_array_of_long;
+  default:
+    ArrayOfTypedefOfSeqOfArrayOfLong array_of_typedef_of_seq_of_array_of_long;
+  };
+
   // typedef of a "special" scalar type
   typedef octet OctetTypedef;
 

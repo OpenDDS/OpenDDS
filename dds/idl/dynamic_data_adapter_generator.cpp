@@ -249,16 +249,7 @@ namespace {
         "    }\n";
     } else if (seq_node || array_node) {
       AST_Type* const base_type = seq_node ? seq_node->base_type() : array_node->base_type();
-
-      // For the type name we need the deepest named type, not the actual type.
-      // This will be the name of the deepest typedef if it's an array or
-      // sequence, otherwise the name of the type.
-      AST_Type* consider = base_type;
-      AST_Type* named_type = base_type;
-      while (consider->node_type() == AST_Decl::NT_typedef) {
-        named_type = consider;
-        consider = dynamic_cast<AST_Typedef*>(named_type)->base_type();
-      }
+      AST_Type* const named_type = deepest_named_type(base_type);
 
       std::string op_type;
       std::string extra_access;
