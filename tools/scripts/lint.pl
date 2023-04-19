@@ -218,17 +218,23 @@ print("OpenDDS is $root\n") if ($debug);
 
 $ace = 0 if ($no_ace_arg && !$ace_arg);
 my $ace_root = $ENV{'ACE_ROOT'};
-if ($ace and not $listing_checks and !defined $ace_root) {
-  my @possible_ace_roots = (
-    catfile($root, 'ACE_TAO', 'ACE'),
-    catfile($root, 'ACE_wrappers'),
-  );
+if ($ace and not $listing_checks) {
+  my @possible_ace_roots;
+  if ($ace_root) {
+    push(@possible_ace_roots, $ace_root);
+  }
+  else {
+    @possible_ace_roots = (
+      catfile($root, 'ACE_TAO', 'ACE'),
+      catfile($root, 'ACE_wrappers'),
+    );
+  }
   foreach my $possible_ace_root (@possible_ace_roots) {
     if (-d $possible_ace_root) {
       $ace_root = $possible_ace_root;
     }
   }
-  if ($ace and !defined $ace_root) {
+  if ($ace and !$ace_root) {
     my $common = "ACE_ROOT wasn't defined and we couldn't find ACE on our own.";
     if ($ace_arg) {
       die("${\error()} $common This is a fatal error since --ace was passed.");
@@ -237,7 +243,8 @@ if ($ace and not $listing_checks and !defined $ace_root) {
       "Pass --no-ace to silence this warning.");
     $ace = 0;
   }
-} else {
+}
+else {
   $ace = 0;
 }
 if ($ace) {
@@ -696,7 +703,8 @@ my %all_checks = (
       if ($fix) {
         if ($fixed) {
           write_for_fix($filename, $full_filename, 'missing_include_guard', \@lines);
-        } else {
+        }
+        else {
           print_warning("Tried to fix include guard for $filename, but it " .
             "doesn't have an existing include guard to modify");
         }
@@ -937,7 +945,8 @@ sub process_path_condition {
 
   if ($invert) {
     return !$val;
-  } else {
+  }
+  else {
     return $val;
   }
 }
@@ -1177,7 +1186,8 @@ sub process_path {
       $line_numbers{$check} = [];
       if ($all_checks{$check}->{file_matches}->($filename, $full_filename, \$line_numbers{$check})) {
         $failed = 1;
-      } else {
+      }
+      else {
         delete $line_numbers{$check};
       }
       $checked = 1;
@@ -1234,7 +1244,8 @@ sub process_path {
             my @line_numbers = @{$line_numbers{$check}};
             push(@line_numbers, $.);
             $line_numbers{$check} = \@line_numbers;
-          } else {
+          }
+          else {
             $line_numbers{$check} = [$.];
           }
           if (length $marked_line) {
@@ -1338,7 +1349,8 @@ sub process_path {
               print STDERR (", $last");
             }
             print STDERR ("\n");
-          } else {
+          }
+          else {
             print STDERR ("    - (Applies to the whole file)\n") if $debug;
           }
         }
@@ -1366,6 +1378,7 @@ if ($ace) {
     my $tests = join(',', qw/
       check_for_inline_in_cpp
       check_for_push_and_pop
+      check_for_pre_and_post
       check_for_ORB_init
       check_for_refcountservantbase
       /);
