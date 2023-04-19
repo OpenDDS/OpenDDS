@@ -521,6 +521,8 @@ bool idl_mapping_jni::gen_struct(UTL_ScopedName *name,
   for (size_t i = 0; i < fields.size(); ++i) {
     string fname = fields[i]->local_name()->get_string();
     string jvmSig = jvmSignature(fields[i]->field_type()); // "I"
+    const string getPrefix = jvmSig == "C" ? "static_cast<char> (" : "",
+      getSuffix = jvmSig == "C" ? ")" : "";
     string jniFn = jniFnName(fields[i]->field_type()); // "Int"
     string fieldID =
       "    jfieldID fid = jni->GetFieldID (clazz, \"" + fname + "\", \""
@@ -530,8 +532,8 @@ bool idl_mapping_jni::gen_struct(UTL_ScopedName *name,
 
     if (isPrimitive(fields[i]->field_type())) {
       fieldsToCxx +=
-        "    target." + fname + " = jni->Get" + jniFn
-        + "Field (source, fid);\n";
+        "    target." + fname + " = " + getPrefix + "jni->Get" + jniFn
+        + "Field (source, fid)" + getSuffix + ";\n";
       fieldsToJava +=
         "    jni->Set" + jniFn + "Field (target, fid, source." + fname
         + ");\n";
