@@ -1,6 +1,4 @@
 /*
- *
- *
  * Distributed under the OpenDDS License.
  * See: http://www.opendds.org/license.html
  */
@@ -8,17 +6,16 @@
 #ifndef OPENDDS_DCPS_COMPARATOR_T_H
 #define OPENDDS_DCPS_COMPARATOR_T_H
 
-#include /**/ "ace/pre.h"
-
-#if !defined (ACE_LACKS_PRAGMA_ONCE)
-# pragma once
-#endif /* ACE_LACKS_PRAGMA_ONCE */
-
-#include "ace/OS_NS_string.h"
+#include <ace/config-macros.h>
+#ifndef ACE_LACKS_PRAGMA_ONCE
+#  pragma once
+#endif
 
 #include "RcHandle_T.h"
 #include "RcObject.h"
 #include "RakeData.h"
+
+#include <ace/OS_NS_string.h>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
