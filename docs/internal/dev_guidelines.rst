@@ -18,10 +18,13 @@ The repository is hosted on Github at `OpenDDS/OpenDDS <https://github.com/OpenD
 Automated Build Systems
 ***********************
 
-Pull requests will be tested automatically and full CI builds of the master branch can be found at `http://scoreboard.ociweb.com/oci-dds.html <http://scoreboard.ociweb.com/oci-dds.html>`_.
+Pull requests will be tested automatically using `GitHub Actions <https://github.com/OpenDDS/OpenDDS/actions>`__ and full CI builds of the master branch can be found at http://scoreboard.ociweb.com/oci-dds.html.
 
-See :doc:`running_tests` for how tests are run in general.
-See :doc:`github_actions` for how building and testing is done with GitHub Actions.
+.. seealso::
+
+  :doc:`running_tests` for how tests are run in general.
+
+  :doc:`github_actions` for how building and testing is done with GitHub Actions.
 
 ************
 Dependencies
@@ -41,7 +44,11 @@ Dependencies
   By default, CMake will be used to build a specific version of Google Test that we have as a submodule.
   An appropriate prebuilt or system Google Test can also be used.
 
-See :ghfile:`docs/dependencies.md` for all dependencies and details on how these are used in OpenDDS.
+.. seealso::
+
+  :ghfile:`docs/dependencies.md` for all dependencies and details on how these are used in OpenDDS.
+
+.. _dev_guidelines-text_file_formating:
 
 ********************
 Text File Formatting
@@ -50,18 +57,29 @@ Text File Formatting
 All text files in the source code repository follow a few basic rules.
 These apply to C++ source code, Perl scripts, MPC files, and any other plaintext file.
 
-
 * A text file is a sequence of lines, each ending in the "end-of-line" character (AKA Unix line endings).
 * Based on this rule, all files end with the end-of-line character.
 * The character before end-of-line is a non-whitespace character (no trailing whitespace).
 * Tabs are not used.
 
   * One exception, MPC files may contain literal text that's inserted into Makefiles which could require tabs.
-  * In place of a tab, use a set number of spaces (depending on what type of file it is, C++ uses 2 spaces).
+  * In place of a tab, use a set number of spaces, depending on what type of file it is:
+
+    * C++ and everywhere else unless otherwise noted should always be 2 spaces.
+    * Perl is usually 2 spaces, but some files are defiant and use 4 spaces.
+      See :ref:`dev_guidelines-perl_coding_style` for details.
+    * Python should always be 4 spaces.
+      See :ref:`dev_guidelines-python_coding_style` for details.
 
 * Keep line length reasonable.
   I don't think it makes sense to strictly enforce an 80-column limit, but overly long lines are harder to read.
   Try to keep lines to roughly 80 characters.
+
+*************
+Documentation
+*************
+
+Guidelines for building and editing documentation like the Developer's Guide and this document are covered in :doc:`docs`.
 
 .. _dev_guidelines-cxx_standard:
 
@@ -70,14 +88,17 @@ C++ Standard
 ************
 
 The base C++ standard used in OpenDDS is C++03.
-There are some optional features that are only built when a newer C++ standard level is used.  See uses of the MPC feature no_cxx11 and the base project opendds_cxx11.mpb.
+There are some optional features that are only built when a newer C++ standard level is used.
+See uses of the MPC feature ``no_cxx11`` and the base project :ghfile:`MPC/config/opendds_cxx11.mpb`.
+
 Avoid using implementation-defined extensions (including ``#pragma``). Exceptions are:
+
 * ``#pragma once`` which only impacts preprocessing and is understood across all supported compilers, or harmlessly ignored if not understood
 * ``#pragma pack`` can only be used on POD structs to influence alignment/padding
 
 Use the C++ standard library as much as possible.
-The standard library should be preferred over ACE, which in turn should be preferred over system-specific
-libraries.
+The standard library should be preferred over ACE, which in turn should be preferred over system-specific libraries.
+
 The C++ standard library includes the C standard library by reference, making those identifiers available in namespace std.
 Using C's standard library identifiers in namespace std is preferred over the global namespace -- ``#include <cstring>`` instead of ``#include <string.h>``.
 Not all supported platforms have standard library support for wide characters (``wchar_t``) but this is rarely needed.
@@ -89,7 +110,7 @@ C++ Coding Style
 
 * C++ code in OpenDDS must compile under the :ghfile:`compilers listed in the \`\`README.md\`\` file <README.md#compilers>`.
 * Commit code in the proper style from the start, so follow-on commits to adjust style don't clutter history.
-* C++ source code is a plaintext file, so the guidelines in "Text File Formatting" apply.
+* C++ source code is a plaintext file, so the guidelines in :ref:`dev_guidelines-text_file_formating` apply.
 * A modified Stroustrup style is used (see :ghfile:`tools/scripts/style`).
 
   * Warning: not everything in :ghfile:`tools/scripts/style` represents the current guidelines.
@@ -145,8 +166,10 @@ Whitespace
 * Do not add space around parentheses for function calls, a properly formatted function call looks like ``func(arg1, arg2, arg3);``
 * Do not add space around brackets for indexing, instead it should look like: ``mymap[key]``
 * For code that includes multiple braces appearing together in the same expression (such as initializer lists), there are two approved styles:
+
   * spaces between braces and their enclosed (non-empty) sub-expression: ``const GUID_t GUID_UNKNOWN = { { 0 }, { { 0 }, 0 } };`` or ``{ a + b, {} }``
   * no such spaces: ``const GUID_t GUID_UNKNOWN = {{0}, {{0}, 0}};`` or ``{a + b, {}}``
+
 * Do not add extra spaces to make syntax elements (that span lines/statements) line up; this only causes unnecessary changes in adjacent lines as the code evolves.
 * In general, do not add extra spaces unless doing so is covered by the rules above.
 
@@ -229,8 +252,9 @@ Comments
 Documenting Code for Doxygen
 ============================
 
-Doxygen is run on the codebase with each change in master and each release.
-This is a simple guide showing the way of documenting in OpenDDS.
+This is a simple guide that shows how to use Doxygen in OpenDDS.
+
+.. seealso:: `The Doxygen manual <https://www.doxygen.nl/manual/>`_ for a complete guide to using Doxygen.
 
 Doxygen supports multiple styles of documenting comments but this style should be used in non-trivial situations:
 
@@ -257,8 +281,6 @@ They inform Doxygen that comment is the documentation for the following declarat
 
 If referring to something that happens to be a namespace or other global object (like DDS, OpenDDS, or RTPS), you should precede it with a ``%``.
 If not it will turn into a link to that object.
-
-For more information, see `the Doxygen manual <https://www.doxygen.nl/manual/>`_.
 
 Preprocessor
 ============
@@ -346,9 +368,8 @@ For a ``Doodad.cpp`` file in :ghfile:`dds/DCPS`, the includes could look like:
   #include <unistd.h>
   #include <stdlib.h>
 
-**************
 Initialization
-**************
+==============
 
 Note that OpenDDS applications require ACE to be initialized to work correctly. For many OpenDDS applications, ``ACE::init()`` and ``ACE::fini()`` will be called
 automatically, either by interaction with the ACE or TAO libraries, or due to ACE's redefinition of executable entry points (e.g. ``main``) which wrap normal execution
@@ -356,9 +377,8 @@ with calls to those functions. However, be advised that on some platforms, the h
 for Visual C++ builds on Windows with wide-character support enabled, the helper macro changes from ``main`` to ``wmain``. Applications either need to handle these differences
 in order to correctly ensure initialization or they need to use an entrypoint helper macro such as ``ACE_TMAIN`` which isn't vulnerable to this issue.
 
-****
 Time
-****
+====
 
 Measurements of time can be broken down into two basic classes: A specific point in time (Ex: 00:00 January 1, 1970) and a length or duration of time without context (Ex: 134 Seconds).
 In addition, a computer can change its clock while a program is running, which could mess up any time lapses being measured.
@@ -379,30 +399,29 @@ More information on using monotonic time with ACE can be found `here <http://www
 
 ``SystemTimePoint`` should be used when dealing with the DDS API and timestamps on incoming and outgoing messages.
 
-*******
 Logging
-*******
+=======
 
 ACE Logging
-===========
+-----------
 
 Logging is done via ACE's logging macro functions, ``ACE_DEBUG`` and ``ACE_ERROR``, defined in ``ace/Log_Msg.h``.
 The logging macros arguments to both are:
 
-  - A ``ACE_Log_Priority`` value
+- A ``ACE_Log_Priority`` value
 
-    - This is an enum defined in ``ace/Log_Priority.h`` to say what the priority or severity of the message is.
+  - This is an enum defined in ``ace/Log_Priority.h`` to say what the priority or severity of the message is.
 
-  - The format string
+- The format string
 
-    - This is similar to the format string for the standard ``printf``, where it substitutes sequences starting with ``%``, but the format of theses sequences is different.
-      For example ``char*`` values are substituted using ``%C`` instead of ``%s``.
-      See the documenting comment for ``ACE_Log_Msg::log`` in ``ace/Log_Msg.h`` for what the format of the string is.
+  - This is similar to the format string for the standard ``printf``, where it substitutes sequences starting with ``%``, but the format of theses sequences is different.
+    For example ``char*`` values are substituted using ``%C`` instead of ``%s``.
+    See the documenting comment for ``ACE_Log_Msg::log`` in ``ace/Log_Msg.h`` for what the format of the string is.
 
-  - The variable number of arguments
+- The variable number of arguments
 
-    - Like ``printf`` the variable arguments can't be whole objects, like a ``std::string`` value.
-      In the case of ``std::string``, the format and arguments would look like: ``"%C", a_string.c_str()``.
+  - Like ``printf`` the variable arguments can't be whole objects, like a ``std::string`` value.
+    In the case of ``std::string``, the format and arguments would look like: ``"%C", a_string.c_str()``.
 
 Note that all the ``ACE_DEBUG`` and ``ACE_ERROR`` arguments must be surrounded by two sets of parentheses.
 
@@ -413,14 +432,15 @@ Note that all the ``ACE_DEBUG`` and ``ACE_ERROR`` arguments must be surrounded b
 ACE logs to ``stderr`` by default on conventional platforms, but can log to other places.
 
 Usage in OpenDDS
-================
+----------------
 
 Logging Conditions and Priority
--------------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 In OpenDDS ``ACE_DEBUG`` and ``ACE_ERROR`` are used directly most of the time, but sometimes they are used indirectly, like with the transport framework's ``VDBG`` and ``VDBG_LVL``.
 They also should be conditional on one of the logging control systems in OpenDDS.
-See section 7.6 of the OpenDDS Developer's Guide for user perspective.
+
+.. seealso:: See :ref:`run_time_configuration--logging` for the user perspective.
 
 The logging conditions are as follows:
 
@@ -472,13 +492,12 @@ For example for ``DCPS_debug_level >= 6`` should be used instead of ``DCPS_debug
 
 .. [#lldbg] Debug messages don't rely on both `LogLevel::Debug` and a debug control system.
   The reason is that it results in a simpler check and the log level already loosely controls all the debug control systems.
-  See the `LogLevel::set` function in :ghfile:`dds/DCPS/debug.cpp` for exactly what it does.
+  See the ``LogLevel::set`` function in :ghfile:`dds/DCPS/debug.cpp` for exactly what it does.
 
 Message Content
----------------
+^^^^^^^^^^^^^^^
 
-- Log messages should take the form:
-  ::
+- Log messages should take the form::
 
     (%P|%t) [ERROR:|WARNING:|NOTICE:|INFO:] FUNCTION_NAME: MESSAGE\n
 
@@ -502,7 +521,7 @@ Message Content
 - Avoid new usage of ``ACE_ERROR_RETURN`` in order to not hide the return statement within a macro.
 
 Examples
---------
+^^^^^^^^
 
 .. code-block:: C++
 
@@ -525,3 +544,63 @@ Examples
   if (DCPS_debug_level >= 1) {
     ACE_DEBUG((LM_DEBUG, "(%P|%t) example_function: Hello, World!\n"));
   }
+
+.. _dev_guidelines-perl_coding_style:
+
+*****************
+Perl Coding Style
+*****************
+
+`The Perl style guide <https://perldoc.perl.org/perlstyle>`_ should be generally followed, as long as it doesn't conflict with :ref:`dev_guidelines-text_file_formating`.
+Some additional nodes and exceptions:
+
+- New files should use 2 space indents, while existing 4 space indent files should stay that way for the most part.
+
+- The style of ``if``/``elsif``/``else`` should be this:
+
+  .. code-block:: perl
+
+    if (x) {
+    }
+    elsif (y) {
+    {
+    else {
+    }
+
+  This is most likely what the Perl style guide refers to when it says "Uncuddled elses".
+
+- Prefer calling functions with parentheses around the arguments where possible.
+
+- The Perl style guide says to add spaces to line things up across multiple lines, but do not do this.
+  The reason is the same as in C++ and that is that it reduces the flexibility of the code.
+
+- Put the following at the start of a Perl file as soon as possible:
+
+  .. code-block:: perl
+
+    use strict;
+    use warnings;
+
+  They should go before the imports, so that they can help reveal as many problems as possible.
+
+.. _dev_guidelines-python_coding_style:
+
+*******************
+Python Coding Style
+*******************
+
+In the world of Python usage of some form of :pep:`8` is basically universal.
+It should be generally followed, including indents being 4 spaces, as long as it doesn't conflict with :ref:`dev_guidelines-text_file_formating`.
+
+******************
+CMake Coding Style
+******************
+
+`The vcpkg CMake style guide <https://learn.microsoft.com/en-us/vcpkg/contributing/cmake-guidelines>`_ should be generally followed, as long as it doesn't conflict with :ref:`dev_guidelines-text_file_formating`.
+Some additional nodes and exceptions:
+
+- vcpkg-specific things can be ignored.
+- Indents are 2 spaces.
+- Prefix public global variables with ``OPENDDS_`` and they should be the only thing using all caps names.
+- Don't use undefined global variables as a false value, try to make sure they are defined.
+- Avoid creating new macros.

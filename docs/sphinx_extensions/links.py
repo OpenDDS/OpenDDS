@@ -95,22 +95,23 @@ def ghfile_role(name, rawtext, text, lineno, inliner, options={}, content=[]):
             '"{}" doesn\'t exist. Checked for existence of "{}"',
                 path, str(local_path)),
 
+    # Create the main link
     kind = 'tree' if local_path.is_dir() else 'blob'
     url = '/'.join([gh_url_base, config.github_links_repo, kind, get_commitish(config), path]) + fragment
-    normal_options = options.copy()
-    if 'classes' in normal_options:
-        normal_options['classes'] = [c for c in normal_options['classes'] if c != 'custom_literal']
-    literal_options = normal_options.copy()
-    literal_options['classes'] = ['custom_literal']
     rv = []
-    append(rv, link_node(rawtext, lineno, inliner, title, explicit_title, url,
-        normal_options if explicit_title else literal_options))
+    main_link = link_node(rawtext, lineno, inliner,
+        title if explicit_title else '', explicit_title, url, options)
+    if not explicit_title:
+        main_link[0][0].append(nodes.literal(rawtext, text, **options))
+    append(rv, main_link)
+
+    # Create a secondary link to preview HTML files
     if path.endswith('.html'):
-        append(rv, text_node(rawtext, lineno, ' ', normal_options))
+        append(rv, text_node(rawtext, lineno, ' ', options))
         append(rv, link_node(rawtext, lineno, inliner,
             '(View as HTML)', False,
             'https://htmlpreview.github.io/?' + url,
-            normal_options))
+            options))
     return rv
 
 
