@@ -37,8 +37,6 @@ details.
 
 - The OpenDDS Developer's Guide is available at https://opendds.readthedocs.io/.
 
-- Doxygen for the latest release is available at http://download.opendds.org/doxygen/.
-
 - For developers wanting to contribute to OpenDDS, please read [the development guidelines](https://opendds.readthedocs.io/en/master/internal/dev_guidelines.html).
 
 Other documentation can be found in [`docs` directory](docs).
