@@ -1,3 +1,5 @@
 Pygments>=2.9 # For OMG IDL Support
 Sphinx>=2.4
 doc2dash
+furo
+sphinx-copybutton
