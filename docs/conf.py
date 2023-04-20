@@ -14,7 +14,8 @@ sys.path.append(str((docs_path / 'sphinx_extensions').resolve()))
 github_links_root_path = str(opendds_root_path)
 
 from mpc_lexer import MpcLexer
-
+from newsd import parse_newsd
+from version_info import VersionInfo
 
 # Custom Values ---------------------------------------------------------------
 
@@ -37,37 +38,18 @@ author = 'OpenDDS Foundation'
 github_links_repo = 'OpenDDS/OpenDDS'
 
 # Get Version Info
-with (opendds_root_path / 'dds/Version.h').open() as f:
-    version_file = f.read()
-
-def get_version_prop(kind, macro):
-    macro = 'OPENDDS_' + macro.upper()
-    if kind is bool:
-        regex = r'([01])'
-        cast = lambda v: bool(int(v))
-    elif kind is int:
-        regex = r'(\d+)'
-        cast = int
-    elif kind is str:
-        regex = r'"(.*)"'
-        cast = lambda v: v
-    else:
-        raise RuntimeError('Unexpected kind: ' + repr(kind))
-    m = re.search(r'#define {} {}'.format(macro, regex), version_file)
-    if m:
-        return cast(m[1])
-    raise RuntimeError('Could not find ' + macro)
-
-version = get_version_prop(str, 'version')
-release = version
-is_release = get_version_prop(bool, 'is_release')
+version_info = VersionInfo()
+release = version_info.version
+is_release = version_info.is_release
 if is_release:
-    vparts = {p: get_version_prop(int, p + '_version') for p in
-        ('major', 'minor', 'micro')}
-    fmt_str = 'DDS-{major}.{minor}'
-    if vparts['micro'] > 0:
-        fmt_str += '.{micro}'
-    github_links_release_tag = fmt_str.format(**vparts)
+    github_links_release_tag = version_info.tag
+
+# Generate WIP News if this isn't a release
+wip_news = 'wip_news.rst'
+if not is_release:
+    newsd = parse_newsd()
+    with (docs_path / wip_news).open('w') as f:
+        newsd.print_all(file=f)
 
 
 # -- General configuration ---------------------------------------------------
@@ -95,6 +77,8 @@ exclude_patterns = [
     'OpenDDS.docset/**',
     '.venv',
     'sphinx_extensions/**',
+    'news.d/**',
+    wip_news,
 ]
 
 source_suffix = {

@@ -17,6 +17,11 @@ Welcome to the documentation for OpenDDS |release|!
 
         You can find the documentation for the latest release `here <https://opendds.readthedocs.io/en/latest-release/>`_.
 
+.. toctree::
+  :maxdepth: 1
+
+  news
+
 *****************
 Developer's Guide
 *****************

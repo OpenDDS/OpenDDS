@@ -180,6 +180,28 @@ Turns into:
 
 :ghpr:`this is **the PR** <1>`
 
+ghrelease
+---------
+
+``ghrelease`` links to a release on Github using the git tag.
+Note that this behaves differently than the other roles here.
+Without the syntax ```Link text <TARGET>``` syntax, it uses the contents as link text and link to the release tag for the current version, assuming there is one.
+This syntax should only be used in a ``.. ifconfig:: is_release`` directive.
+Also it never parses the contents as inline markup.
+
+.. code-block:: rst
+
+  :ghrelease:`This is the release`
+
+  :ghrelease:`This is the release <DDS-3.24>`
+
+Turns into:
+
+:ghrelease:`This is the release`
+
+:ghrelease:`This is the release <DDS-3.24>`
+
+
 omgissue
 --------
 
