@@ -14,11 +14,15 @@ TEST(VreadVwriteTest, ParseTest)
 {
   std::ifstream ifs("VreadVwriteTest.json", std::ios_base::in | std::ios_base::binary);
 
+  std::stringstream stream;
+  stream << ifs.rdbuf();
   ASSERT_EQ(ifs.good(), true);
 
-  rapidjson::IStreamWrapper isw(ifs);
-  Mod::Sample sample;
-  OpenDDS::DCPS::from_json(sample, isw);
+  Mod::SampleTypeSupport_var ts = new Mod::SampleTypeSupportImpl;
+  OpenDDS::DCPS::RepresentationFormat_var format = ts->make_format(OpenDDS::DCPS::JSON_DATA_REPRESENTATION);
+  Mod::Sample_var samplev;
+  ASSERT_EQ(ts->decode_from_string(stream.str().c_str(), samplev, format), DDS::RETCODE_OK);
+  Mod::Sample& sample = *samplev;
 
   ASSERT_EQ(sample.id, 5);
   ASSERT_EQ(std::string(sample.data.in()), "The most rapid of JSONs");
@@ -157,14 +161,14 @@ TEST(VreadVwriteTest, SerializeTest)
   sample.sa[3] = "west";
 
   // Serialize to JSON string.
-  rapidjson::StringBuffer buffer;
-  rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
-  OpenDDS::DCPS::JsonValueWriter<rapidjson::Writer<rapidjson::StringBuffer>> jvw(writer);
-  vwrite(jvw, sample);
+  Mod::SampleTypeSupport_var ts = new Mod::SampleTypeSupportImpl;
+  OpenDDS::DCPS::RepresentationFormat_var format = ts->make_format(OpenDDS::DCPS::JSON_DATA_REPRESENTATION);
+  CORBA::String_var buffer;
+  ASSERT_EQ(DDS::RETCODE_OK, ts->encode_to_string(sample, buffer, format));
 
   // Then parse.
   rapidjson::Document document;
-  document.Parse(buffer.GetString());
+  document.Parse(buffer.in());
   rapidjson::Value& val = document;
 
   ASSERT_EQ(val.IsObject(), true);

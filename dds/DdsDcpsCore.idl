@@ -590,6 +590,7 @@ module DDS {
 module OpenDDS {
   module DCPS {
     const DDS::DataRepresentationId_t UNALIGNED_CDR_DATA_REPRESENTATION = -12140;
+    const DDS::DataRepresentationId_t JSON_DATA_REPRESENTATION = -12141;
   };
 };
 

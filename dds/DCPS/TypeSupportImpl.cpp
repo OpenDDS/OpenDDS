@@ -209,6 +209,29 @@ void TypeSupportImpl::get_type_from_type_lookup_service()
 }
 #endif
 
+struct JsonRepresentationFormatImpl : JsonRepresentationFormat {
+};
+
+struct CdrRepresentationFormatImpl : CdrRepresentationFormat {
+  CdrRepresentationFormatImpl(DDS::DataRepresentationId_t)
+  {}
+};
+
+RepresentationFormat* TypeSupportImpl::make_format(DDS::DataRepresentationId_t representation)
+{
+  switch (representation) {
+  case JSON_DATA_REPRESENTATION:
+    return new JsonRepresentationFormatImpl;
+  case DDS::XCDR_DATA_REPRESENTATION:
+  case DDS::XCDR2_DATA_REPRESENTATION:
+  case UNALIGNED_CDR_DATA_REPRESENTATION:
+    return new CdrRepresentationFormatImpl(representation);
+  default:
+    return 0;
+  }
+}
+
+
 }
 }
 
