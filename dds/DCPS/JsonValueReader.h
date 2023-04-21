@@ -180,6 +180,8 @@ private:
       case kEndObject:
         --skip_level;
         break;
+      default:
+        break;
       }
       consume(token_type_);
     }

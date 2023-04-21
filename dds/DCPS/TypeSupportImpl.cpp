@@ -213,7 +213,8 @@ struct JsonRepresentationFormatImpl : JsonRepresentationFormat {
 };
 
 struct CdrRepresentationFormatImpl : CdrRepresentationFormat {
-  CdrRepresentationFormatImpl(DDS::DataRepresentationId_t representation){}
+  CdrRepresentationFormatImpl(DDS::DataRepresentationId_t)
+  {}
 };
 
 RepresentationFormat* TypeSupportImpl::make_format(DDS::DataRepresentationId_t representation)
