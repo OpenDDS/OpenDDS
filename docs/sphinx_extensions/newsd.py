@@ -1,7 +1,10 @@
+#!/usr/bin/env python3
+
 import re
 import sys
 from pathlib import Path
 import io
+from datetime import datetime, timezone
 
 from version_info import VersionInfo
 
@@ -160,15 +163,17 @@ class Section(Node):
     def print_all(self, file=sys.stdout):
         version_info = VersionInfo()
 
-        title = 'Version ' + version_info.version + ' of OpenDDS'
+        title = version_info.v_ver
         astrisks = '*' * len(title)
         print(astrisks, title, astrisks, sep='\n', file=file)
         print(file=file)
         if version_info.is_release:
+            today = datetime.now(timezone.utc).date()
             print((
-                'Download :ghrelease:`this release on GitHub <{}>`.\n' +
+                'Released {}\n\n' +
+                'Download :ghrelease:`this release on GitHub <{}>`.\n\n' +
                 'Read `the documenation for this release on Read the Docs <https://opendds.readthedocs.io/en/{}>`__.'
-            ).format(version_info.tag, version_info.tag.lower()), file=file)
+            ).format(today.isoformat(), version_info.tag, version_info.tag.lower()), file=file)
         else:
             print('This version is currently still in development, so this list might change.', file=file)
 

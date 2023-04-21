@@ -9,11 +9,14 @@ OpenDDS Releases
 ..
     NEW NEWS GOES BELOW HERE
 
-*************************
-Version 3.24.0 of OpenDDS
-*************************
+*******
+v3.24.0
+*******
+
+Released 2023-04-11
 
 Download :ghrelease:`this release on GitHub <DDS-3.24>`.
+
 Read `the documenation for this release on Read the Docs <https://opendds.readthedocs.io/en/dds-3.24>`__.
 
 Additions
