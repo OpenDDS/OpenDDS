@@ -1,0 +1,312 @@
+Thu Apr 20 23:35:20 UTC 2023  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit 60a99b76f28009b24feb97794c1214423d3a003d
+
+        * docs/conf.py:
+
+          Try to Fix Logo on RTD
+
+Thu Apr 20 23:05:22 UTC 2023  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit 2ea0000730e7e3c5a4eeba08ba77e99c90ac2e47
+
+        * docs/conf.py:
+        * docs/custom.css:
+        * docs/internal/dev_guidelines.rst:
+        * docs/requirements.txt:
+        * docs/sphinx_extensions/links.py:
+        * docs/sphinx_extensions/templates/.gitignore:
+
+          Expand and Fix Dev Guidelines, Change Sphinx Theme
+
+          - The developer's guidelines had several formatting issues that
+          needed
+          fixed. It also could use some guidance on style of languages
+          other
+          than C++. Added sections for Perl, Python, and CMake. Also made
+          some
+          smaller tweaks and additions.
+
+          - Changed theme to https://pradyunsg.me/furo/. The default Sphinx
+          theme
+          we were using, called alabaster, is clean and pleasant for the
+          most
+          part, but navigation was so problematic that I was trying to
+          tweak
+          over time to be better. furo has better navigation because it has
+          two
+          sidebars, one for all content and one for the headers on the
+          current
+          page. They also scroll independently of the page's content, which
+          fixes a problem in alabaster where links were too long for a
+          floating
+          sidebar.
+
+          - Added https://sphinx-copybutton.readthedocs.io/en/latest/ to
+          put a
+          copy button on code blocks.
+
+          - Removed custom CSS file. This was no longer needed with the new
+          theme
+          and changes to the `ghfile` RST role to allowing it to use a
+          literal
+          node instead of just copying the CSS for one.
+
+          - Removed rule to ignore Modeling SDK URL since that was fixed.
+
+Fri Apr 21 18:23:02 UTC 2023  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit 300b2a9641f5ebff1349623349f065643be13d7e
+
+          Merge pull request #4128 from iguessthislldo/igtd/3.24.1-news
+
+          Add NEWS for 3.24.1
+
+Fri Apr 21 00:47:28 UTC 2023  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit 2e2016a552240b99f9e7dd877dbe3d9d3695e77c
+
+        * NEWS.md:
+
+          Add NEWS for 3.24.1
+
+Thu Apr 20 07:25:06 UTC 2023  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit 932ffdb7d27ca8a735eff95305167f9b1f80aee7
+
+        * README.md:
+
+          Removed link to not available Doxygen
+
+Wed Apr 12 10:28:19 UTC 2023  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit 844c33c4a8484d8d741d63c1b41825572137b47b
+
+        * README.md:
+
+          Update README.md
+
+          DevGuide seems only to be available at
+          https://opendds.readthedocs.io/
+
+Wed Apr 19 08:32:15 UTC 2023  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit 57f137d5f4e2ccf28917f690be48c75e2acc25a4
+
+        * dds/DCPS/RTPS/Spdp.cpp:
+
+          Add Checks for RTPS Unicast Ports
+
+          The loop for opening RTPS ports for a participant could
+          theoretically go
+          on forever. This stops it once it goes past the max UDP port.
+          Also add a
+          warning for going past the max participant id allowed in the RTPS
+          spec
+          (119, in section 9.6.2.3). As long as it doesn't result in an
+          invalid
+          port, going past that shouldn't cause a problem, but it could be
+          a sign
+          that OpenDDS has a limited number of ports at its disposal. Also
+          another
+          implementation could use this as a hard limit, but that's much
+          less of a
+          concern.
+
+Wed Apr 19 00:49:26 UTC 2023  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit 4fd119d1a8ba8a139abb78e1eb2a0d934a18793a
+
+        * dds/DCPS/Comparator_T.h:
+        * dds/DCPS/DataCollector_T.h:
+        * dds/DCPS/GroupRakeData.h:
+        * dds/DCPS/RakeData.h:
+        * dds/DCPS/RakeResults_T.h:
+        * dds/DCPS/ZeroCopyAllocator_T.h:
+        * dds/DCPS/ZeroCopySeq_T.h:
+        * dds/DCPS/transport/framework/DataLinkCleanupTask.h:
+        * dds/DCPS/transport/tcp/Tcp.h:
+        * dds/DCPS/transport/tcp/TcpLoader.h:
+        * performance-tests/DCPS/Priority/Options.h:
+        * tests/DCPS/Priority/Options.h:
+        * tools/modeling/codegen/model/Config.h:
+        * tools/modeling/codegen/model/Entities.h:
+        * tools/modeling/codegen/model/TransportDirectives.h:
+        * tools/monitor/Options.h:
+        * tools/scripts/lint.pl:
+
+          Remove Most Uses of ace/pre.h and ace/post.h
+
+          Some headers used `pre.h` without `post.h` which [leaks `pragma
+          pack (push, 8)`](
+          https://github.com/DOCGroup/ACE_TAO/blob/ab3b192fcda5715a0c92e5627acdeb4e8f71911c/ACE/ace/pre.h#L17)
+          into the code using those headers. Even if this was fixed, it's
+          not
+          clear what is gained by using these headers, except maybe
+          [improved ABI compatibility](
+          https://github.com/DOCGroup/ACE_TAO/blob/ab3b192fcda5715a0c92e5627acdeb4e8f71911c/ACE/ChangeLogs/ChangeLog-2000a#L9726-L9762),
+          if the alignment changed somehow. OpenDDS doesn't guarantee ABI
+          compatibility at all though, so this seems like this doesn't do
+          anything
+          for us. Instead of using these headers inconsistently, remove
+          them
+          everywhere except for the libraries that consistently use them,
+          the
+          modeling and the QoS XML libraries.
+
+          Also made some tweaks to the lint script:
+          - Enable the `check_for_pre_and_post` ACE check for the remaining
+          cases
+          of `pre.h` and `post.h`.
+          - Improve logic for finding ACE using `$ACE_ROOT` by treating it
+          as a
+          candidate instead of automatically accepting it.
+          - Fix else brackets.
+
+Mon Apr 17 20:46:26 UTC 2023  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 4ec04ff0d7352a59ceffafed45d2edf334bcc865
+
+        * dds/DCPS/transport/framework/TransportClient.cpp:
+        * dds/DCPS/transport/framework/TransportControlElement.cpp:
+        * dds/DCPS/transport/framework/TransportControlElement.h:
+        * dds/DCPS/transport/framework/TransportControlElement.inl:
+        * dds/DCPS/transport/tcp/TcpDataLink.cpp:
+
+          TcpDataLink fails to send association message
+
+          Problem
+          -------
+
+          The `send_association_msg` method creates a special `REQUEST_ACK`
+          control message to signal that the local reader is ready to
+          receive
+          data. On receipt of the message, the remote writer completes the
+          association and can start sending data. `send_association_msg`
+          calls
+          `send_i` which checks if the publication id of the
+          `TransportControlElement` is for a stopped (local) client.  The
+          publication id returned by the `TransportControlElement` is
+          always
+          GUID_UNKNOWN. Thus, if GUID_UNKNOWN gets put into the stopped
+          client
+          set then the `TcpDataLink` will never send the association
+          message and
+          association will stall on the writer side.
+
+          `TransportClient` caches its guid when an association is made.
+          Suppose the `TransportClient` is stopped before an association.
+          In
+          this case the guid is `GUID_UNNOWN` and this guid is put in the
+          stopped client set of the `TcpDataLink`.
+
+          Solution
+          --------
+
+          1. Implement support for the publisher id.
+          2. Guard against usages of an uninitialized `repo_id_` in
+          `TransportClient`.
+
+Tue Apr 18 06:51:49 UTC 2023  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit f0b87e6af8f0d190cad32134674ac23f412df06f
+
+        * dds/DCPS/Definitions.h:
+        * dds/DCPS/DirentWrapper.h:
+        * dds/DCPS/XTypes/DynamicDataAdapter.h:
+        * tests/unit-tests/dds/DCPS/XTypes/DynamicDataAdapter.cpp:
+
+          Try to Fix Warnings
+
+Thu Apr 13 05:05:38 UTC 2023  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit 2662c0d4008b00bb5025ffb7371d821c65e0ec52
+
+        * dds/DCPS/XTypes/DynamicDataAdapter.h:
+        * tests/DCPS/Compiler/idl_test3_lib/FooDef.idl:
+
+          Fixes for CI
+
+Thu Apr 13 03:06:52 UTC 2023  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit f59889b4255f17ab3b7ea5a6bb6ca2f63289ea18
+
+        * dds/DCPS/XTypes/DynamicDataAdapter.h:
+        * dds/idl/dds_generator.cpp:
+        * dds/idl/dds_generator.h:
+        * dds/idl/dynamic_data_adapter_generator.cpp:
+        * dds/idl/marshal_generator.cpp:
+        * dds/idl/metaclass_generator.cpp:
+        * tests/DCPS/Compiler/idl_test3_lib/FooDef.idl:
+        * tests/unit-tests/dds/DCPS/XTypes/DynamicDataAdapter.cpp:
+        * tests/unit-tests/dds/DCPS/XTypes/DynamicDataAdapter.idl:
+
+          Fix Warnings and Typedef of Typedef Build Issues
+
+          Follow up to https://github.com/OpenDDS/OpenDDS/pull/4078
+
+          Fixes https://github.com/OpenDDS/OpenDDS/issues/4112 and
+          https://github.com/OpenDDS/OpenDDS/issues/4109
+
+Tue Apr 18 05:28:02 UTC 2023  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit 33dc638ccf3d07c770a993a23c497b397cbb2036
+
+        * docs/conf.py:
+
+          Ignore Modeling SDK for Right Now
+
+Mon Apr 17 19:16:49 UTC 2023  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit aff9bb5f4c0830491aa829996afc9431dc04e018
+
+        * docs/internal/release.rst:
+
+          Apply suggestions from code review
+
+          Co-authored-by: Justin Wilson <wilsonj@unityfoundation.io>
+
+Fri Apr 14 20:46:44 UTC 2023  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit 47fb150161dc177eb779af8fc87f26aa81dc1877
+
+        * docs/devguide/modeling_sdk.rst:
+
+          Fix List in Modeling SDK Installation
+
+Fri Apr 14 20:23:40 UTC 2023  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit db1040030e46debdd659ba623be8a1e1d11f35e6
+
+        * docs/devguide/modeling_sdk.rst:
+        * docs/internal/dev_guidelines.rst:
+
+          Fix Image and Remove Doxygen from Dev Guidelines
+
+Fri Apr 14 19:09:00 UTC 2023  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit 6b89416a2934fc3e8193edddf8e3f646b2b3a805
+
+        * docs/index.rst:
+        * docs/internal/docs.rst:
+        * docs/internal/release.rst:
+        * docs/sphinx_extensions/links.py:
+
+          Add Release Guide to Sphinx Documentation
+
+          This has all OCI-internal parts removed (I hope) and SFTP and
+          Doxygen
+          parts removed as we don't know if and how that's going to be
+          involved
+          for now. Announcement section was also removed.
+
+          There are other more minor changes throughout the document,
+          particularly
+          merging and tweaking the parts that are now in the "Update Files
+          in the
+          Repo as Needed".
+
+Wed Apr 12 19:12:02 UTC 2023  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit f76d67288415b542dc845e11ee61f6c93ffc938e
+
+        * docs/devguide/introduction.rst:
+
+          Remove/Replace References to 3.23 in DevGuide
+
+Wed Apr 12 10:28:19 UTC 2023  Johnny Willemsen  <jwillemsen@remedy.nl>
+
+        * README.md:
+
+          Update README.md
+
+          DevGuide seems only to be available at
+          https://opendds.readthedocs.io/
+
+Local Variables:
+mode: change-log
+add-log-time-format: (lambda () (progn (setq tz (getenv "TZ")) (set-time-zone-rule "UTC") (setq time (format-time-string "%a %b %e %H:%M:%S %Z %Y" (current-time))) (set-time-zone-rule tz) time))
+indent-tabs-mode: nil
+End:

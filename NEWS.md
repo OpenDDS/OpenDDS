@@ -1,7 +1,7 @@
 # OpenDDS Releases
 
 ## Version 3.24.1 of OpenDDS
-OpenDDS 3.24.1 is currently in development, so this list might change.
+OpenDDS 3.24.1 was released on Apr 21 2023.
 
 ### Fixes:
 - Fixed compile warnings in TypeSupport that can happen with GCC and `-O2` or higher (#4117)

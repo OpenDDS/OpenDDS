@@ -35,7 +35,7 @@ details.
 
 ## Documentation
 
-- The OpenDDS Developer's Guide is available at https://opendds.readthedocs.io/.
+- The OpenDDS Developer's Guide is available at https://opendds.readthedocs.io/en/dds-3.24.1.
 
 - For developers wanting to contribute to OpenDDS, please read [the development guidelines](https://opendds.readthedocs.io/en/master/internal/dev_guidelines.html).
 
