@@ -10,7 +10,8 @@ from pathlib import Path
 
 docs_path = Path(__file__).parent
 opendds_root_path = docs_path.parent
-sys.path.append(str((docs_path / 'sphinx_extensions').resolve()))
+ext = (docs_path / 'sphinx_extensions').resolve()
+sys.path.append(str(ext))
 github_links_root_path = str(opendds_root_path)
 
 from mpc_lexer import MpcLexer
@@ -36,6 +37,7 @@ project = 'OpenDDS'
 copyright = '2023, OpenDDS Foundation'
 author = 'OpenDDS Foundation'
 github_links_repo = 'OpenDDS/OpenDDS'
+github_repo = 'https://github.com/' + github_links_repo
 
 # Get Version Info
 version_info = VersionInfo()
@@ -58,8 +60,14 @@ if not is_release:
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
-    'sphinx.ext.ifconfig',
+    # Custom ones
     'links',
+
+    # Official ones
+    'sphinx.ext.ifconfig',
+
+    # Other ones
+    'sphinx_copybutton',
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -94,35 +102,53 @@ linkcheck_ignore = [
     r'^https?://github\.com/.*#.+$',
     # Returns 403 for some reason
     r'^https?://docs\.github\.com/.*$',
-    # TODO: This needs to be fixed
-    r'^http://download\.opendds\.org/modeling/eclipse_44/',
 ]
 
 
 # -- Options for HTML output -------------------------------------------------
 
-# The theme to use for HTML and HTML Help pages.  See the documentation for
-# a list of builtin themes.
-#
-html_theme = 'alabaster'
-# See documentation for alabaster here:
-#   https://alabaster.readthedocs.io/en/latest/customization.html
-
-# Add any paths that contain custom static files (such as style sheets) here,
-# relative to this directory. They are copied after the builtin static files,
-# so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ['.']
 
+html_theme = 'furo'
+# See documentation for the theme here:
+#   https://pradyunsg.me/furo/
+
+html_title = project + ' ' + version
+
 html_theme_options = {
-    'logo': 'logo_with_name.svg',
-    'logo_name': False,
-    'extra_nav_links': {
-        'Main Website': 'https://opendds.org',
-        'GitHub Repo': 'https://github.com/' + github_links_repo,
-    },
-    'fixed_sidebar': False,
-    'page_width': '1100px',
-    'body_max_width': '1100px',
+    'light_logo': 'logo_with_name.svg',
+    'dark_logo': 'logo_with_name.svg',
+    'sidebar_hide_name': True, # Logo has the name in it
+    # furo doesn't support a veiw source link for some reason, force edit
+    # button to do that.
+    'source_edit_link': github_repo + '/blob/master/docs/{filename}?plain=1',
+}
+
+# Change the sidebar to include fixed links
+#   https://pradyunsg.me/furo/customisation/sidebar/#making-changes
+sidebar_links = {
+    'Main Website': 'https://opendds.org',
+    'GitHub Repo': github_repo,
+}
+our_template_path = ext / 'templates'
+sidebar_links_template_name = 'sidebar-links.html'
+with (our_template_path / sidebar_links_template_name).open('w') as f:
+    print('<div class="sidebar-tree" style="margin-top: 0px;"><ul>', file=f)
+    for name, url in sidebar_links.items():
+        print('  <li><a class="reference" href="{}">{}</a></li>'.format(url, name), file=f)
+    print('</ul></div>', file=f)
+templates_path = [str(our_template_path)]
+html_sidebars = {
+    '**': [
+        'sidebar/brand.html',
+        sidebar_links_template_name,
+        'sidebar/search.html',
+        'sidebar/scroll-start.html',
+        'sidebar/navigation.html',
+        'sidebar/ethical-ads.html',
+        'sidebar/scroll-end.html',
+        'sidebar/variant-selector.html',
+    ]
 }
 
 html_favicon = 'logo_32_32.ico'
