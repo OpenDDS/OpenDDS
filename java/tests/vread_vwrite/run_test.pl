@@ -13,8 +13,6 @@ use strict;
 
 my $status = 0;
 
-#PerlACE::add_lib_path ("$DDS_ROOT/java/tests/complex_idl");
-
 my $TEST = new PerlDDS::Process_Java("VreadVwrite");
 
 my $TestResult = $TEST->SpawnWaitKill(60);
