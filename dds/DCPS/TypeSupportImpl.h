@@ -103,6 +103,8 @@ public:
 
   void to_type_info(XTypes::TypeInformation& type_info) const;
 
+  RepresentationFormat* make_format(DDS::DataRepresentationId_t representation);
+
   void add_types(const RcHandle<XTypes::TypeLookupService>& tls) const;
   void populate_dependencies(const RcHandle<XTypes::TypeLookupService>& tls) const;
 

@@ -1472,6 +1472,7 @@ struct Cxx11Generator : GeneratorBase
   {
     be_global->lang_header_ <<
       "};\n\n"
+      "using " << nm << "_out = " << nm << "&; // for tao_idl compatibility\n\n"
       << exporter() << "void swap(" << nm << "& lhs, " << nm << "& rhs);\n\n";
   }
 

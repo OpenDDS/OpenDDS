@@ -1,0 +1,9 @@
+project(java*): dcps_java {
+  idlflags += -SS -Wb,export_macro=JNIEXPORT -Wb,export_include=idl2jni_jni.h
+  idl2jniflags += -Wb,export_macro=JNIEXPORT -Wb,export_include=idl2jni_jni.h
+  dcps_ts_flags += -Wb,export_macro=JNIEXPORT
+
+  TypeSupport_Files {
+    VreadVwriteTest.idl
+  }
+}
