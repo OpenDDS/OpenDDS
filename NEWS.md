@@ -1,5 +1,20 @@
 # OpenDDS Releases
 
+## Version 3.24.1 of OpenDDS
+OpenDDS 3.24.1 is currently in development, so this list might change.
+
+### Fixes:
+- Fixed compile warnings in TypeSupport that can happen with GCC and `-O2` or higher (#4117)
+- Fixed compile error in TypeSupport for IDL that contains a typedef of a typedef (#4117)
+- Fixed bug in the tcp transport where readers and writers can fail to associate (#4120)
+- Fixed issue in some headers that could leak `#pragma pack (push, 8)` into user code on Visual Studio (#4123)
+- Fixed theoretical infinite loop in rtps_udp transport code (#4124)
+
+### Documentation:
+- Removed invalid links and references in README and the Developer's Guide and fixed other minor issues (#4115, #4116, #4121, #4126)
+- Changed theme used by the Sphinx documentation to make the Developer's Guide easier to navigate (#4127)
+- Added copy buttons to embedded code and code-like examples (#4127)
+
 ## Version 3.24.0 of OpenDDS
 OpenDDS 3.24.0 was released on Apr 11 2023.
 
