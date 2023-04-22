@@ -102,3 +102,12 @@ TEST(dds_DCPS_Time_Helper, make_duration)
   EXPECT_EQ(d.sec, 1);
   EXPECT_EQ(d.nanosec, 2u);
 }
+
+TEST(dds_DCPS_Time_Helper, add_time_duration)
+{
+  const DDS::Time_t t = {1, 500000000};
+  const DDS::Duration_t d = make_duration_t(1, 500000000);
+  const DDS::Time_t r = t + d;
+  EXPECT_EQ(r.sec, 3);
+  EXPECT_EQ(r.nanosec, 0u);
+}

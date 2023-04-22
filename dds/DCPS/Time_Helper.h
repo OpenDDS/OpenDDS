@@ -98,6 +98,9 @@ ACE_INLINE OpenDDS_Dcps_Export
 bool operator>=(const DDS::Time_t& t1, const DDS::Time_t& t2);
 
 ACE_INLINE OpenDDS_Dcps_Export
+DDS::Time_t operator+(const DDS::Time_t& t1, const DDS::Duration_t& d1);
+
+ACE_INLINE OpenDDS_Dcps_Export
 DDS::Duration_t operator-(const DDS::Time_t& t1, const DDS::Time_t& t2);
 
 ACE_INLINE OpenDDS_Dcps_Export

@@ -121,6 +121,21 @@ operator>=(const DDS::Time_t& t1, const DDS::Time_t& t2)
   return t2 <= t1;
 }
 
+ACE_INLINE DDS::Time_t
+operator+(const DDS::Time_t& t1, const DDS::Duration_t& d1)
+{
+  CORBA::Long sec = static_cast<CORBA::Long>(static_cast<CORBA::ULong>(t1.sec) + static_cast<CORBA::ULong>(d1.sec));
+  CORBA::ULong nanosec = t1.nanosec + d1.nanosec;
+
+  while (nanosec >= ACE_ONE_SECOND_IN_NSECS) {
+    ++sec;
+    nanosec -= ACE_ONE_SECOND_IN_NSECS;
+  }
+
+  const DDS::Time_t t = { sec, nanosec };
+  return t;
+}
+
 ACE_INLINE DDS::Duration_t
 operator-(const DDS::Time_t& t1, const DDS::Time_t& t2)
 {

@@ -430,7 +430,7 @@ void RtpsUdpDataLink::on_data_available(RcHandle<InternalDataReader<NetworkInter
   InternalDataReader<NetworkInterfaceAddress>::SampleSequence samples;
   InternalSampleInfoSequence infos;
 
-  network_interface_address_reader_->take(samples, infos);
+  network_interface_address_reader_->take(samples, infos, DDS::LENGTH_UNLIMITED, DDS::ANY_SAMPLE_STATE, DDS::ANY_VIEW_STATE, DDS::ANY_INSTANCE_STATE);
 
   RtpsUdpInst_rch cfg = config();
   if (!cfg || !cfg->use_multicast_) {

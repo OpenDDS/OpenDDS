@@ -18,6 +18,7 @@
 #include "PoolAllocator.h"
 #include "InternalDataReaderListener.h"
 #include "Time_Helper.h"
+#include "TimeTypes.h"
 
 #include <dds/DdsDcpsCoreC.h>
 #include <dds/DdsDcpsInfrastructureC.h>
@@ -114,10 +115,10 @@ public:
     // FUTURE: Index by publication_handle to avoid the loop.
     bool schedule = false;
     for (typename InstanceMap::iterator pos = instance_map_.begin(), limit = instance_map_.end(); pos != limit; ++pos) {
-      if (autodispose_unregistered_instances && pos->second.dispose(publication_handle, pos->first)) {
+      if (autodispose_unregistered_instances && pos->second.dispose(publication_handle, qos_)) {
         schedule = true;
       }
-      if (pos->second.unregister_instance(publication_handle, pos->first)) {
+      if (pos->second.unregister_instance(publication_handle, qos_)) {
         schedule = true;
       }
     }
@@ -126,6 +127,7 @@ public:
       const Listener_rch listener = listener_.lock();
       if (listener) {
         listener->schedule(rchandle_from(this));
+        // TODO: If the listener doesn't do anything, then clean up then possibly clean up the instance.
       }
     }
   }
@@ -152,7 +154,7 @@ public:
       return;
     }
 
-    if (pos->second.dispose(publication_handle, pos->first)) {
+    if (pos->second.dispose(publication_handle, qos_)) {
       const Listener_rch listener = listener_.lock();
       if (listener) {
         listener->schedule(rchandle_from(this));
@@ -169,7 +171,7 @@ public:
       return;
     }
 
-    if (pos->second.unregister_instance(publication_handle, pos->first)) {
+    if (pos->second.unregister_instance(publication_handle, qos_)) {
       const Listener_rch listener = listener_.lock();
       if (listener) {
         listener->schedule(rchandle_from(this));
@@ -192,15 +194,22 @@ public:
     return listener_.lock();
   }
 
-  void read(SampleSequence& samples, InternalSampleInfoSequence& infos)
+  void read(SampleSequence& samples,
+            InternalSampleInfoSequence& infos,
+            CORBA::Long max_samples,
+            DDS::SampleStateMask sample_states,
+            DDS::ViewStateMask view_states,
+            DDS::InstanceStateMask instance_states)
   {
     samples.clear();
     infos.clear();
 
+    // TODO: Index to avoid the loop.
     ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
     for (typename InstanceMap::iterator pos = instance_map_.begin(), limit = instance_map_.end(); pos != limit; ) {
-      pos->second.read(samples, infos);
-      if (pos->second.instance_state() != DDS::ALIVE_INSTANCE_STATE) {
+      pos->second.read(pos->first, samples, infos, max_samples, sample_states, view_states, instance_states);
+      pos->second.purge_samples(qos_);
+      if (pos->second.can_purge_instance(qos_)) {
         instance_map_.erase(pos++);
       } else {
         ++pos;
@@ -208,15 +217,22 @@ public:
     }
   }
 
-  void take(SampleSequence& samples, InternalSampleInfoSequence& infos)
+  void take(SampleSequence& samples,
+            InternalSampleInfoSequence& infos,
+            CORBA::Long max_samples,
+            DDS::SampleStateMask sample_states,
+            DDS::ViewStateMask view_states,
+            DDS::InstanceStateMask instance_states)
   {
     samples.clear();
     infos.clear();
 
+    // TODO: Index to avoid the loop.
     ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
     for (typename InstanceMap::iterator pos = instance_map_.begin(), limit = instance_map_.end(); pos != limit; ) {
-      pos->second.take(samples, infos);
-      if (pos->second.instance_state() != DDS::ALIVE_INSTANCE_STATE) {
+      pos->second.take(pos->first, samples, infos, max_samples, sample_states, view_states, instance_states);
+      pos->second.purge_samples(qos_);
+      if (pos->second.can_purge_instance(qos_)) {
         instance_map_.erase(pos++);
       } else {
         ++pos;
@@ -224,7 +240,13 @@ public:
     }
   }
 
-  void read_instance(SampleSequence& samples, InternalSampleInfoSequence& infos, const T& key)
+  void read_instance(SampleSequence& samples,
+                     InternalSampleInfoSequence& infos,
+                     CORBA::Long max_samples,
+                     const T& key,
+                     DDS::SampleStateMask sample_states,
+                     DDS::ViewStateMask view_states,
+                     DDS::InstanceStateMask instance_states)
   {
     samples.clear();
     infos.clear();
@@ -232,14 +254,21 @@ public:
     ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
     typename InstanceMap::iterator pos = instance_map_.find(key);
     if (pos != instance_map_.end()) {
-      pos->second.read(samples, infos);
-      if (pos->second.instance_state() != DDS::ALIVE_INSTANCE_STATE) {
+      pos->second.read(pos->first, samples, infos, max_samples, sample_states, view_states, instance_states);
+      pos->second.purge_samples(qos_);
+      if (pos->second.can_purge_instance(qos_)) {
         instance_map_.erase(pos);
       }
     }
   }
 
-  void take_instance(SampleSequence& samples, InternalSampleInfoSequence& infos, const T& key)
+  void take_instance(SampleSequence& samples,
+                     InternalSampleInfoSequence& infos,
+                     CORBA::Long max_samples,
+                     const T& key,
+                     DDS::SampleStateMask sample_states,
+                     DDS::ViewStateMask view_states,
+                     DDS::InstanceStateMask instance_states)
   {
     samples.clear();
     infos.clear();
@@ -247,8 +276,9 @@ public:
     ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
     typename InstanceMap::iterator pos = instance_map_.find(key);
     if (pos != instance_map_.end()) {
-      pos->second.take(samples, infos);
-      if (pos->second.instance_state() != DDS::ALIVE_INSTANCE_STATE) {
+      pos->second.take(pos->first, samples, infos, max_samples, sample_states, view_states, instance_states);
+      pos->second.purge_samples(qos_);
+      if (pos->second.can_purge_instance(qos_)) {
         instance_map_.erase(pos);
       }
     }
@@ -272,60 +302,148 @@ private:
       , instance_state_(DDS::ALIVE_INSTANCE_STATE)
       , disposed_generation_count_(0)
       , no_writers_generation_count_(0)
-    {}
+      , informed_of_not_alive_(false)
+    {
+      disposed_expiration_date_.sec = 0;
+      disposed_expiration_date_.nanosec = 0;
+      no_writers_expiration_date_.sec = 0;
+      no_writers_expiration_date_.nanosec = 0;
+    }
 
     DDS::ViewStateKind view_state() const { return view_state_; }
 
     DDS::InstanceStateKind instance_state() const { return instance_state_; }
 
-    void read(SampleSequence& samples, InternalSampleInfoSequence& infos)
+    void purge_samples(const DDS::DataReaderQos& qos)
     {
-      CORBA::Long sample_count = 0;
-
-      for (typename SampleList::const_iterator pos = not_read_samples_.begin(), limit = not_read_samples_.end();
-           pos != limit; ++pos) {
-        samples.push_back(pos->sample);
-        infos.push_back(make_sample_info(DDS::NOT_READ_SAMPLE_STATE, view_state_, instance_state_, pos->disposed_generation_count, pos->no_writers_generation_count, 0, 0, 0, pos->valid_data));
-        ++sample_count;
+      if (instance_state_ == DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE &&
+          !is_infinite(qos.reader_data_lifecycle.autopurge_disposed_samples_delay) &&
+          SystemTimePoint::now().to_dds_time() > disposed_expiration_date_) {
+        not_read_samples_.clear();
+        read_samples_.clear();
       }
-
-      for (typename SampleList::const_iterator pos = read_samples_.begin(), limit = read_samples_.end();
-           pos != limit; ++pos) {
-        samples.push_back(pos->sample);
-        infos.push_back(make_sample_info(DDS::READ_SAMPLE_STATE, view_state_, instance_state_, pos->disposed_generation_count, pos->no_writers_generation_count, 0, 0, 0, pos->valid_data));
-        ++sample_count;
-      }
-
-      read_samples_.splice(read_samples_.end(), not_read_samples_);
-
-      compute_ranks(sample_count, infos);
-
-      view_state_ = DDS::NOT_NEW_VIEW_STATE;
     }
 
-    void take(SampleSequence& samples, InternalSampleInfoSequence& infos)
+    bool can_purge_instance(const DDS::DataReaderQos& qos) const
     {
+      if (instance_state_ != DDS::ALIVE_INSTANCE_STATE &&
+          not_read_samples_.empty() &&
+          read_samples_.empty() &&
+          publication_set_.empty()) {
+        return true;
+      }
+
+      if (instance_state_ == DDS::NOT_ALIVE_NO_WRITERS_INSTANCE_STATE &&
+          !is_infinite(qos.reader_data_lifecycle.autopurge_nowriter_samples_delay) &&
+          SystemTimePoint::now().to_dds_time() > no_writers_expiration_date_) {
+        return true;
+      }
+
+      return false;
+    }
+
+    void read(const T& key,
+              SampleSequence& samples,
+              InternalSampleInfoSequence& infos,
+              CORBA::Long max_samples,
+              DDS::SampleStateMask sample_states,
+              DDS::ViewStateMask view_states,
+              DDS::InstanceStateMask instance_states)
+    {
+      if (!((view_states & view_state_) && (instance_states & instance_state_))) {
+        return;
+      }
+
       CORBA::Long sample_count = 0;
 
-      for (typename SampleList::const_iterator pos = read_samples_.begin(), limit = read_samples_.end();
-           pos != limit; ++pos) {
-        samples.push_back(pos->sample);
-        infos.push_back(make_sample_info(DDS::READ_SAMPLE_STATE, view_state_, instance_state_, pos->disposed_generation_count, pos->no_writers_generation_count, 0, 0, 0, pos->valid_data));
-        ++sample_count;
+      if (sample_states & DDS::READ_SAMPLE_STATE) {
+        for (typename SampleList::const_iterator pos = read_samples_.begin(), limit = read_samples_.end();
+             pos != limit && (max_samples == DDS::LENGTH_UNLIMITED || sample_count < max_samples); ++pos) {
+          samples.push_back(pos->sample);
+          infos.push_back(make_sample_info(DDS::READ_SAMPLE_STATE, view_state_, instance_state_, pos->disposed_generation_count, pos->no_writers_generation_count, 0, 0, 0, true));
+          ++sample_count;
+        }
       }
-      read_samples_.clear();
 
-      for (typename SampleList::const_iterator pos = not_read_samples_.begin(), limit = not_read_samples_.end();
-           pos != limit; ++pos) {
-        samples.push_back(pos->sample);
-        infos.push_back(make_sample_info(DDS::NOT_READ_SAMPLE_STATE, view_state_, instance_state_, pos->disposed_generation_count, pos->no_writers_generation_count, 0, 0, 0, pos->valid_data));
-        ++sample_count;
+      if (sample_states & DDS::NOT_READ_SAMPLE_STATE) {
+        typename SampleList::iterator pos = not_read_samples_.begin();
+        for (typename SampleList::iterator limit = not_read_samples_.end();
+             pos != limit && (max_samples == DDS::LENGTH_UNLIMITED || sample_count < max_samples); ++pos) {
+          samples.push_back(pos->sample);
+          infos.push_back(make_sample_info(DDS::NOT_READ_SAMPLE_STATE, view_state_, instance_state_, pos->disposed_generation_count, pos->no_writers_generation_count, 0, 0, 0, true));
+          ++sample_count;
+        }
+        read_samples_.splice(read_samples_.end(), not_read_samples_, not_read_samples_.begin(), pos);
+
+        // Generate a synthetic sample for not alive states.
+        if (sample_count == 0 &&
+            instance_state_ != DDS::ALIVE_INSTANCE_STATE &&
+            !informed_of_not_alive_) {
+          samples.push_back(key);
+          infos.push_back(make_sample_info(DDS::NOT_READ_SAMPLE_STATE, view_state_, instance_state_, disposed_generation_count_, no_writers_generation_count_, 0, 0, 0, false));
+          ++sample_count;
+        }
       }
-      not_read_samples_.clear();
 
       compute_ranks(sample_count, infos);
 
-      view_state_ = DDS::NOT_NEW_VIEW_STATE;
+      if (sample_count) {
+        view_state_ = DDS::NOT_NEW_VIEW_STATE;
+        informed_of_not_alive_ = true;
+      }
+    }
+
+    void take(const T& key,
+              SampleSequence& samples,
+              InternalSampleInfoSequence& infos,
+              CORBA::Long max_samples,
+              DDS::SampleStateMask sample_states,
+              DDS::ViewStateMask view_states,
+              DDS::InstanceStateMask instance_states)
+    {
+      if (!((view_states & view_state_) && (instance_states & instance_state_))) {
+        return;
+      }
+
+      CORBA::Long sample_count = 0;
+
+      if (sample_states & DDS::READ_SAMPLE_STATE) {
+        typename SampleList::iterator pos = read_samples_.begin();
+        for (typename SampleList::iterator limit = read_samples_.end();
+             pos != limit && (max_samples == DDS::LENGTH_UNLIMITED || sample_count < max_samples); ++pos) {
+          samples.push_back(pos->sample);
+          infos.push_back(make_sample_info(DDS::READ_SAMPLE_STATE, view_state_, instance_state_, pos->disposed_generation_count, pos->no_writers_generation_count, 0, 0, 0, true));
+          ++sample_count;
+        }
+        read_samples_.erase(read_samples_.begin(), pos);
+      }
+
+      if (sample_states & DDS::NOT_READ_SAMPLE_STATE) {
+        typename SampleList::iterator pos = not_read_samples_.begin();
+        for (typename SampleList::iterator limit = not_read_samples_.end();
+             pos != limit && (max_samples == DDS::LENGTH_UNLIMITED || sample_count < max_samples); ++pos) {
+          samples.push_back(pos->sample);
+          infos.push_back(make_sample_info(DDS::NOT_READ_SAMPLE_STATE, view_state_, instance_state_, pos->disposed_generation_count, pos->no_writers_generation_count, 0, 0, 0, true));
+          ++sample_count;
+        }
+        not_read_samples_.erase(not_read_samples_.begin(), pos);
+
+        // Generate a synthetic sample for not alive states.
+        if (sample_count == 0 &&
+            instance_state_ != DDS::ALIVE_INSTANCE_STATE &&
+            !informed_of_not_alive_) {
+          samples.push_back(key);
+          infos.push_back(make_sample_info(DDS::NOT_READ_SAMPLE_STATE, view_state_, instance_state_, disposed_generation_count_, no_writers_generation_count_, 0, 0, 0, false));
+          ++sample_count;
+        }
+      }
+
+      compute_ranks(sample_count, infos);
+
+      if (sample_count) {
+        view_state_ = DDS::NOT_NEW_VIEW_STATE;
+        informed_of_not_alive_ = true;
+      }
     }
 
     void write(InternalEntity_wrch publication_handle,
@@ -361,17 +479,18 @@ private:
         }
       }
 
-      not_read_samples_.push_back(SampleHolder(sample, disposed_generation_count_, no_writers_generation_count_, true));
+      not_read_samples_.push_back(SampleHolder(sample, disposed_generation_count_, no_writers_generation_count_));
     }
 
     bool dispose(InternalEntity_wrch publication_handle,
-                 const T& key)
+                 const DDS::DataReaderQos& qos)
     {
       publication_set_.insert(publication_handle);
 
       if (instance_state_ != DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE) {
-        not_read_samples_.push_back(SampleHolder(key, disposed_generation_count_, no_writers_generation_count_, false));
         instance_state_ = DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE;
+        disposed_expiration_date_ = SystemTimePoint::now().to_dds_time() + qos.reader_data_lifecycle.autopurge_disposed_samples_delay;
+        informed_of_not_alive_ = false;
         return true;
       }
 
@@ -379,13 +498,14 @@ private:
     }
 
     bool unregister_instance(InternalEntity_wrch publication_handle,
-                             const T& key)
+                             const DDS::DataReaderQos& qos)
     {
       publication_set_.erase(publication_handle);
 
       if (publication_set_.empty() && instance_state_ == DDS::ALIVE_INSTANCE_STATE) {
-        not_read_samples_.push_back(SampleHolder(key, disposed_generation_count_, no_writers_generation_count_, false));
         instance_state_ = DDS::NOT_ALIVE_NO_WRITERS_INSTANCE_STATE;
+        no_writers_expiration_date_ = SystemTimePoint::now().to_dds_time() + qos.reader_data_lifecycle.autopurge_nowriter_samples_delay;
+        informed_of_not_alive_ = false;
         return true;
       }
 
@@ -397,16 +517,13 @@ private:
       T sample;
       CORBA::Long disposed_generation_count;
       CORBA::Long no_writers_generation_count;
-      bool valid_data;
 
       SampleHolder(const T& s,
                    CORBA::Long dgc,
-                   CORBA::Long nwgc,
-                   bool vd)
+                   CORBA::Long nwgc)
         : sample(s)
         , disposed_generation_count(dgc)
         , no_writers_generation_count(nwgc)
-        , valid_data(vd)
       {}
     };
 
@@ -418,8 +535,11 @@ private:
 
     DDS::ViewStateKind view_state_;
     DDS::InstanceStateKind instance_state_;
+    DDS::Time_t disposed_expiration_date_;
+    DDS::Time_t no_writers_expiration_date_;
     CORBA::Long disposed_generation_count_;
     CORBA::Long no_writers_generation_count_;
+    bool informed_of_not_alive_;
 
     void compute_ranks(CORBA::Long sample_count, InternalSampleInfoSequence& infos)
     {
@@ -429,13 +549,7 @@ private:
 
       typename InternalSampleInfoSequence::reverse_iterator pos = infos.rbegin();
       const CORBA::Long mrsic = pos->disposed_generation_count + pos->no_writers_generation_count;
-      CORBA::Long mrs = mrsic;
-      if (!read_samples_.empty()) {
-        mrs = read_samples_.back().disposed_generation_count + read_samples_.back().no_writers_generation_count;
-      }
-      if (!not_read_samples_.empty()) {
-        mrs = not_read_samples_.back().disposed_generation_count + not_read_samples_.back().no_writers_generation_count;
-      }
+      const CORBA::Long mrs = disposed_generation_count_ + no_writers_generation_count_;
 
       for (CORBA::Long rank = 0; rank != sample_count; ++rank, ++pos) {
         pos->sample_rank = rank;
