@@ -1,5 +1,5 @@
 .. news-prs: 4048
-.. news-push: Additions
+.. news-start-section: Additions
 - Can now cross-compile on macOS
-.. news-pop
+.. news-end-section
 

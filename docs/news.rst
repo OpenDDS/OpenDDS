@@ -1,13 +1,46 @@
-################
-OpenDDS Releases
-################
+..
+  The following means don't show subsections like "Additions" in local table of contents
+
+:tocdepth: 2
+
+########
+Releases
+########
+
+These are all the recent releases of OpenDDS.
 
 .. ifconfig:: not is_release
 
   .. include:: wip_news.rst
 
 ..
-    NEW NEWS GOES BELOW HERE
+  NEW NEWS GOES BELOW HERE
+
+*******
+v3.24.1
+*******
+
+Released 2023-04-22
+
+Download :ghrelease:`this release on GitHub <DDS-3.24.1>`.
+
+Read `the documenation for this release on Read the Docs <https://opendds.readthedocs.io/en/dds-3.24.1>`__.
+
+Fixes
+=====
+
+- Fixed compile warnings in TypeSupport that can happen with GCC and ``-O2`` or higher (:ghpr:`4117`)
+- Fixed compile error in TypeSupport for IDL that contains a typedef of a typedef (:ghpr:`4117`)
+- Fixed bug in the tcp transport where readers and writers can fail to associate (:ghpr:`4120`)
+- Fixed issue in some headers that could leak ``#pragma pack (push, 8)`` into user code on Visual Studio (:ghpr:`4123`)
+- Fixed theoretical infinite loop in rtps_udp transport code (:ghpr:`4124`)
+
+Documentation
+=============
+
+- Removed invalid links and references in README and the Developer's Guide and fixed other minor issues (:ghpr:`4115`, :ghpr:`4116`, :ghpr:`4121`, :ghpr:`4126`)
+- Changed theme used by the Sphinx documentation to make the Developer's Guide easier to navigate (:ghpr:`4127`)
+- Added copy buttons to embedded code and code-like examples (:ghpr:`4127`)
 
 *******
 v3.24.0
@@ -31,7 +64,7 @@ Additions
 
   - This allows ``DynamicDataReader``\s to use ``QueryCondition`` and ``ContentFilteredTopic`` and allows ``DynamicDataWriter``\s to do filtering on behalf of matched ``DataReader``\s that use ``ContentFilteredTopic``.
 
-- ``DynamicData``:
+- ``DynamicData``
 
   - Can now read and write enum members as strings (:ghpr:`4022`)
   - ``DynamicDataImpl`` now uses lazy initialization to reduce memory usage (:ghpr:`4024`)

@@ -1,5 +1,5 @@
 .. news-prs: 4002
-.. news-push: Fixes
+.. news-start-section: Fixes
 - Fixed invalid socket handles in RtpsUdpTransport
-.. news-pop
+.. news-end-section
 

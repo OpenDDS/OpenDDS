@@ -1,5 +1,5 @@
 .. news-prs: 4028
-.. news-push: Fixes
+.. news-start-section: Fixes
 - Improved reliability of the shared memory transport
-.. news-pop
+.. news-end-section
 

@@ -1,12 +1,12 @@
 .. news-prs: 4078
-.. news-push: Additions
-.. news-push: ``DynamicData``:
+.. news-start-section: Additions
+.. news-start-section: ``DynamicData``
 - ``get_int64_value`` and ``get_uint64_value`` can now cast from different types
-.. news-pop
+.. news-end-section
 - Improved support for anonymous types in unions branches
-.. news-pop
+.. news-end-section
 
-.. news-push: Fixes
+.. news-start-section: Fixes
 - XTypes
 
   - ``TypeObject``\s struct and union members used to be sorted by member ID, but they are now sorted by declaration order as the XTypes spec calls for.
@@ -30,5 +30,5 @@
     - Fixed incorrect serialization of keyed unions for instance registration, disposal, and unregistration samples.
     - Fixed errors from serializing some cases of arrays and sequences.
 
-.. news-pop
+.. news-end-section
 

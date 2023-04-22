@@ -9,8 +9,27 @@ from datetime import datetime, timezone
 from version_info import VersionInfo
 
 
-news_directive_re = re.compile(r'\s*.. news-(\w+)(: (.*))?')
+main_sections = {
+    'Additions': 100,
+    'Deprecations': 90,
+    'Removals': 80,
+    'Security': 60,
+    'Fixes': 40,
+    'Documentation': 20,
+    'Notes': 0,
+}
+
+news_directive_re = re.compile(r'\s*.. news-([\w-]+)(: (.*))?')
 ghfile_re = re.compile(r':ghfile:')
+
+
+def loc_str(loc):
+    if loc is None:
+        path = 'unknown'
+        lineno = 0
+    else:
+        path, lineno = loc
+    return str(path) + ':' + str(lineno)
 
 
 class PrintHelper:
@@ -20,20 +39,8 @@ class PrintHelper:
         self.avoid_rst = False
         self.show_rank = False
 
-    def pr_list(self, prs):
-        if prs:
-            if self.avoid_rst:
-                pre = '#'
-                post = ''
-            else:
-                pre = ':ghpr:`'
-                post = '`'
-            return ' (' + ', '.join([pre + str(pr) + post for pr in prs]) + ')'
-        return ''
-
-    def put(self, level, *args, sep=' ', after_first_line='', **kw):
+    def put(self, level, *args, sep=' ', decorate='', **kw):
         indent = '  ' * (level - 1)
-        first = True
         combined = sep.join(args)
         if combined.endswith('\n'):
             combined = combined[:-1]
@@ -41,10 +48,9 @@ class PrintHelper:
             blank = not bool(line)
             if blank and self.printed_blank_line:
                 continue
+            if len(line) and not line.startswith(' ') and decorate:
+                line += decorate
             line = indent + line
-            if after_first_line and first:
-                line += after_first_line
-                first = False
             if self.avoid_rst:
                 ghfile_re.sub('')
             print(line, file=self.file, **kw)
@@ -57,7 +63,10 @@ class PrintHelper:
 
     def test(self, expected):
         assert isinstance(self.file, io.StringIO)
-        assert self.file.getvalue() == expected
+        got = self.file.getvalue()
+        if got != expected:
+            print('ERROR: internal test failed, expected:', expected, 'but got:', got, sep='\n', file=sys.stderr)
+            raise AssertionError()
 
 
 class Node:
@@ -77,6 +86,26 @@ class Node:
     def print(self, h):
         raise NotImplementedError()
 
+    def prs_str(self, h):
+        if not self.prs:
+            return ''
+        elif h.avoid_rst:
+            pre = '#'
+            post = ''
+        else:
+            pre = ':ghpr:`'
+            post = '`'
+        return ' (' + ', '.join([pre + str(pr) + post for pr in self.prs]) + ')'
+
+    def rank_str(self, h):
+        if not h.show_rank:
+            return ''
+        rv = '[Rank {}]'.format(self.rank)
+        if self.level == 1:
+            return '\n' + rv + '\n'
+        else:
+            return ' ' + rv
+
 
 class Text(Node):
     def __init__(self, rank, prs, level, lines):
@@ -87,34 +116,29 @@ class Text(Node):
         return len(self.lines) == 0
 
     def print(self, h):
-        first = True
+        decorate = self.prs_str(h) + self.rank_str(h)
         for line in self.lines:
-            if first:
-                append = h.pr_list(self.prs)
-                if h.show_rank:
-                    append += ' [Rank {}]'.format(self.rank)
-                h.put(self.level - 1, line, after_first_line=append)
-                first = False
-            else:
-                h.put(self.level - 1, line.rstrip())
+            h.put(self.level - 1, line, decorate=decorate)
 
 
 def test_text():
     ph = PrintHelper(None)
-    Text(0, set([1, 2]), 3, ['- Item\n  - SubItem\n']).print(ph)
+    Text(0, set([1, 2]), 3, ['- Item\n  - SubItem\n- Additional Item']).print(ph)
     ph.test('''\
   - Item (:ghpr:`1`, :ghpr:`2`)
     - SubItem
+  - Additional Item (:ghpr:`1`, :ghpr:`2`)
 ''')
 
 
 class Section(Node):
-    def __init__(self, rank=0, parent=None, name=None):
+    def __init__(self, rank=0, parent=None, name=None, last_start_loc=None):
         super().__init__(rank, set(), parent.level + 1 if parent is not None else 0)
         self.parent = parent
         self.name = name
         self.children = []
         self.sections = {}
+        self.last_start_loc = last_start_loc
 
     def empty(self):
         for child in self.children:
@@ -122,13 +146,19 @@ class Section(Node):
                 return False
         return True
 
-    def get_section(self, name, rank=0):
+    def get_section(self, name, rank=0, loc=None, restricted=False):
+        fixed_main_sections = restricted and self.level == 0
         if name in self.sections:
             child = self.sections[name]
-            if rank > child.rank:
+            if not fixed_main_sections and rank > child.rank:
                 child.rank = rank
+            child.last_start_loc = loc
             return child
-        child = Section(rank, self, name)
+        if fixed_main_sections:
+            raise KeyError(
+                "Can't define a new main section named {} at {}".format(
+                    repr(name), loc_str(loc)))
+        child = Section(rank, self, name, last_start_loc=loc)
         self.children.append(child)
         self.sections[name] = child
         return child
@@ -144,16 +174,12 @@ class Section(Node):
             return
         h.put_level_seperator()
         if self.level:
-            if self.level > 1:
-                end = ''
-                if h.show_rank:
-                    end = '[Rank {}]'.format(self.rank)
-                h.put(self.level - 1, '- ', end='')
-            h.put(0, self.name)
             if self.level == 1:
+                h.put(0, self.name)
                 h.put(0, '=' * len(self.name))
-                if h.show_rank:
-                    h.put(0, '\n[Rank {}]'.format(self.rank))
+                h.put(0, self.rank_str(h))
+            elif self.level > 1:
+                h.put(self.level - 1, '-', self.name, decorate=self.rank_str(h))
             h.put_level_seperator()
         for child in sorted(self.children):
             child.print(h)
@@ -187,8 +213,8 @@ class Section(Node):
 
 def test_section():
     root = Section()
-    root.get_section('Section A').add_text(set([0]), ['- This is some text\n'])
     a = root.get_section('Section A')
+    a.add_text(set([0]), ['- This is some text\n', '- This is a seperate item\n'])
     aa = a.get_section('Section AA')
     aa.add_text(set([3]), ['- This is some text\n  - This is some more\n'])
     aa.add_text(set([1]), ['- This is some text\n  - This is some more\n'])
@@ -209,53 +235,59 @@ def test_section():
         .get_section('This should be hidden')
 
     ph = PrintHelper(None)
+    ph.show_rank = True
     root.print(ph)
     ph.test('''\
 
 Section A
 =========
 
-- This is some text (:ghpr:`0`)
+[Rank 0]
 
-- Section AA
+- This is some text (:ghpr:`0`) [Rank 0]
+- This is a seperate item (:ghpr:`0`) [Rank 0]
 
-  - Section AAA (Should be first in Section AA)
+- Section AA [Rank 0]
 
-    - This is some text (:ghpr:`4`)
+  - Section AAA (Should be first in Section AA) [Rank 10]
+
+    - This is some text (:ghpr:`4`) [Rank 0]
       - This is some more
 
-  - (Should be second in Section AA) (:ghpr:`50`)
-  - This is some text (:ghpr:`1`)
+  - (Should be second in Section AA) (:ghpr:`50`) [Rank 9]
+  - This is some text (:ghpr:`1`) [Rank 0]
     - This is some more
 
-  - Section AAC
+  - Section AAC [Rank 0]
 
-    - This is some text (:ghpr:`1`)
+    - This is some text (:ghpr:`1`) [Rank 0]
 
-  - This is some text (:ghpr:`3`)
+  - This is some text (:ghpr:`3`) [Rank 0]
     - This is some more
-  - This is some text (:ghpr:`5`)
+  - This is some text (:ghpr:`5`) [Rank 0]
     - This is some more
 
-  - Section AAB
+  - Section AAB [Rank 0]
 
-    - Section AABA
+    - Section AABA [Rank 0]
 
-      - This is some text (:ghpr:`9`)
+      - This is some text (:ghpr:`9`) [Rank 0]
 
-    - This is some text (:ghpr:`10`)
+    - This is some text (:ghpr:`10`) [Rank 0]
 
 Section B
 =========
 
-- This is some text (:ghpr:`12`)
+[Rank 0]
+
+- This is some text (:ghpr:`12`) [Rank 0]
 
 ''')
 
 
 class ParseError(RuntimeError):
-    def __init__(self, path, lineno, *args):
-        super().__init__('Parse error on {}:{}:'.format(str(path), lineno, ' '.join(args)))
+    def __init__(self, loc, *args):
+        super().__init__('Parse error at {}: {}'.format(loc_str(loc), ' '.join(args)))
 
 
 def parse(root, path):
@@ -264,27 +296,40 @@ def parse(root, path):
     stack = []
     rank = 0
     prs = set()
+    seen_prs = False
     lines = []
     with path.open() as f:
         for line in f:
             lineno += 1
             if line.startswith('#'):
                 continue
+            loc = (path, lineno)
             m = news_directive_re.match(line)
             if m:
                 name = m.group(1)
                 arg = m.group(3)
                 if name == 'prs':
-                    if prs:
-                        raise ParseError(path, lineno, 'prs was already set')
-                    prs = set([int(pr) for pr in arg.split(' ')])
-                elif name == 'push':
+                    if seen_prs:
+                        raise ParseError(loc, 'Can only have one news-prs in a fragment file')
+                    try:
+                        if arg != 'none':
+                            prs = set([int(pr) for pr in arg.split(' ')])
+                    except ValueError:
+                        raise ParseError(loc,
+                            'news-prs must be space seperated PR numbers or just "none"')
+                    seen_prs = True
+                elif name == 'start-section':
+                    if not seen_prs:
+                        raise ParseError(loc, 'Must have news-prs before any sections')
+                    if lines:
+                        section.add_text(prs, lines, rank)
                     stack.append((rank, section))
-                    section = section.get_section(arg, rank)
+                    rank = 0
                     lines = []
-                elif name == 'pop':
+                    section = section.get_section(arg, rank, loc=loc, restricted=True)
+                elif name == 'end-section':
                     if len(stack) == 0:
-                        raise ParseError(path, lineno, 'news-pop is missing a news-push')
+                        raise ParseError(loc, 'news-end-section is missing a news-start-section')
                     if lines:
                         section.add_text(prs, lines, rank)
                     rank, section = stack.pop()
@@ -292,13 +337,14 @@ def parse(root, path):
                 elif name == 'rank':
                     rank = int(arg)
                 else:
-                    raise ParseError(path, lineno, 'Invalid directive:', name)
+                    raise ParseError(loc, 'Invalid directive:', name)
             elif section.level:
                 lines.append(line)
             elif line.rstrip():
-                raise ParseError(path, lineno, 'Text outside a section')
+                raise ParseError(loc, 'Text outside a section')
     if len(stack) > 0:
-        raise ParseError(path, lineno, 'news-push is missing a news-pop')
+        raise ParseError(section.last_start_loc, 'news-start-section', section.name,
+            'is missing a news-end-section')
 
 
 def get_fragments():
@@ -312,15 +358,8 @@ def get_fragments():
 def parse_newsd():
     root = Section()
 
-    # Set ranks of sections, so they go the expected order, at least by
-    # default.
-    root.get_section('Additions', rank=100)
-    root.get_section('Deprecations', rank=90)
-    root.get_section('Removals', rank=80)
-    root.get_section('Security', rank=60)
-    root.get_section('Fixes', rank=40)
-    root.get_section('Documentation', rank=20)
-    root.get_section('Notes', rank=0)
+    for name, rank in main_sections.items():
+        root.get_section(name, rank=rank)
 
     for fragment in get_fragments():
         parse(root, fragment)

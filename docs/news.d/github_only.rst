@@ -1,4 +1,5 @@
-.. news-push: Notes
+.. news-prs: none
+.. news-start-section: Notes
 - Release files will only be uploaded to GitHub from now on
-.. news-pop
+.. news-end-section
 

@@ -1,5 +1,5 @@
 .. news-prs: 3989
-.. news-push: Fixes
+.. news-start-section: Fixes
 - Fixed ``rtps_relay_address_change`` deadlocks
-.. news-pop
+.. news-end-section
 

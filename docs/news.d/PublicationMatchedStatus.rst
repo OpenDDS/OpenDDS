@@ -1,5 +1,5 @@
 .. news-prs: 4006
-.. news-push: Additions
+.. news-start-section: Additions
 - Added PublicationMatchedStatus Current Count To RtpsRelay Statistics
-.. news-pop
+.. news-end-section
 

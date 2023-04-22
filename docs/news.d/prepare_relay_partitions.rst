@@ -1,5 +1,5 @@
 .. news-prs: 4005
-.. news-push: Fixes
+.. news-start-section: Fixes
 - Fixed index increment in ``GuidPartitionTable::prepare_relay_partitions``
-.. news-pop
+.. news-end-section
 

@@ -1,5 +1,5 @@
 .. news-prs: 4073
-.. news-push: Additions
+.. news-start-section: Additions
 - Expanded support for using C++ keywords in IDL
-.. news-pop
+.. news-end-section
 

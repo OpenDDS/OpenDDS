@@ -48,10 +48,11 @@ if is_release:
 
 # Generate WIP News if this isn't a release
 wip_news = 'wip_news.rst'
-if not is_release:
-    newsd = parse_newsd()
-    with (docs_path / wip_news).open('w') as f:
-        newsd.print_all(file=f)
+with (docs_path / wip_news).open('w') as f:
+    if is_release:
+        print('', file=f)
+    else:
+        parse_newsd().print_all(file=f)
 
 
 # -- General configuration ---------------------------------------------------
@@ -113,7 +114,7 @@ html_theme = 'furo'
 # See documentation for the theme here:
 #   https://pradyunsg.me/furo/
 
-html_title = project + ' ' + version
+html_title = project + ' ' + release
 
 html_theme_options = {
     'light_logo': 'logo_with_name.svg',

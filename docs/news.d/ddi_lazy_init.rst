@@ -1,7 +1,7 @@
 .. news-prs: 4024
-.. news-push: Additions
-.. news-push: ``DynamicData``:
+.. news-start-section: Additions
+.. news-start-section: ``DynamicData``
 - ``DynamicDataImpl`` now uses lazy initialization to reduce memory usage
-.. news-pop
-.. news-pop
+.. news-end-section
+.. news-end-section
 
