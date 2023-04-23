@@ -3,3 +3,4 @@ Sphinx>=2.4
 doc2dash
 furo
 sphinx-copybutton
+sphinx-markdown-builder @ git+https://github.com/iguessthislldo/sphinx-markdown-builder

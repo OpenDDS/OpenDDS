@@ -323,18 +323,21 @@ def parse(root, path):
                         raise ParseError(loc, 'Must have news-prs before any sections')
                     if lines:
                         section.add_text(prs, lines, rank)
+                        lines = []
                     stack.append((rank, section))
-                    rank = 0
-                    lines = []
                     section = section.get_section(arg, rank, loc=loc, restricted=True)
+                    rank = 0
                 elif name == 'end-section':
                     if len(stack) == 0:
                         raise ParseError(loc, 'news-end-section is missing a news-start-section')
                     if lines:
                         section.add_text(prs, lines, rank)
+                        lines = []
                     rank, section = stack.pop()
-                    lines = []
                 elif name == 'rank':
+                    if lines:
+                        section.add_text(prs, lines, rank)
+                        lines = []
                     rank = int(arg)
                 else:
                     raise ParseError(loc, 'Invalid directive:', name)

@@ -37,7 +37,9 @@ project = 'OpenDDS'
 copyright = '2023, OpenDDS Foundation'
 author = 'OpenDDS Foundation'
 github_links_repo = 'OpenDDS/OpenDDS'
+github_main_branch = 'master'
 github_repo = 'https://github.com/' + github_links_repo
+rtd_base = 'https://opendds.readthedocs.io/en/'
 
 # Get Version Info
 version_info = VersionInfo()
@@ -47,8 +49,8 @@ if is_release:
     github_links_release_tag = version_info.tag
 
 # Generate WIP News if this isn't a release
-wip_news = 'wip_news.rst'
-with (docs_path / wip_news).open('w') as f:
+wip_release = 'wip_release.rst'
+with (docs_path / wip_release).open('w') as f:
     if is_release:
         print('', file=f)
     else:
@@ -56,6 +58,16 @@ with (docs_path / wip_news).open('w') as f:
 
 
 # -- General configuration ---------------------------------------------------
+
+# TODO: This messes up metafile data
+# if not is_release:
+#     rst_prolog = '''\
+# .. warning::
+#     This copy of OpenDDS isn't a release, so this documentation may not be finalized.
+#     It may be missing documentation on new features or the existing documentation may be incorrect.
+
+#     You can find the documentation for the latest release `here <''' + rtd_base + '''latest-release/>`__.
+# '''
 
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
@@ -66,9 +78,11 @@ extensions = [
 
     # Official ones
     'sphinx.ext.ifconfig',
+    'sphinx.ext.todo',
 
     # Other ones
     'sphinx_copybutton',
+    'sphinx_markdown_builder',
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -87,7 +101,7 @@ exclude_patterns = [
     '.venv',
     'sphinx_extensions/**',
     'news.d/**',
-    wip_news,
+    wip_release,
 ]
 
 source_suffix = {
@@ -106,6 +120,20 @@ linkcheck_ignore = [
 ]
 
 
+# -- Options for Markdown output ---------------------------------------------
+# This builder is just used to generate the release notes for GitHub
+
+# These options point the markdown to the Sphinx on RTD. This way we can refer
+# to things in the Sphinx in the news and it will work in RTD and in the GitHub
+# release notes.
+markdown_http_base = rtd_base
+if not is_release:
+    markdown_http_base += version_info.tag
+else:
+    markdown_http_base += github_main_branch
+markdown_target_ext = '.html'
+
+
 # -- Options for HTML output -------------------------------------------------
 
 html_static_path = ['.']
@@ -120,9 +148,9 @@ html_theme_options = {
     'light_logo': 'logo_with_name.svg',
     'dark_logo': 'logo_with_name.svg',
     'sidebar_hide_name': True, # Logo has the name in it
-    # furo doesn't support a veiw source link for some reason, force edit
+    # furo doesn't support a view source link for some reason, force edit
     # button to do that.
-    'source_edit_link': github_repo + '/blob/master/docs/{filename}?plain=1',
+    'source_edit_link': github_repo + '/blob/' + github_main_branch + '/docs/{filename}?plain=1',
 }
 
 # Change the sidebar to include fixed links
