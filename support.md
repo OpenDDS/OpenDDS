@@ -42,6 +42,5 @@ View the [online documentation](documentation.html) for the OpenDDS project.
 
 ### The Code
 
-The code is commented. Take a look in the header and class files; also see the [doxygen](doxygen/index.html).
-
-Some documentation is included with the code in the `DDS_ROOT/docs` directory. Code examples are also included in the OpenDDS distribution in the `DDS_ROOT/examples` directory.
+Documentation is included with the code in the `DDS_ROOT/docs` directory.
+Code examples are also included in the `DDS_ROOT/examples` directory.
