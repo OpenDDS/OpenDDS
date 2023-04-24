@@ -260,7 +260,16 @@ news-prs
 
 ``news-prs`` should declare all the PRs that make up the changes to OpenDDS described in the fragment.
 It's an error to omit ``news-prs`` from a fragment or have more than one.
-Do not add ``#`` at the start of the PR numbers.
+Add ``this`` to have it replaced with the PR number automatically by GitHub Actions when the commits are pushed to the PR:
+
+.. code-block:: rst
+
+  .. news-prs: this
+  .. news-prs: 1000 this
+
+Remember to do a ``git pull`` to get the new commit in the local repo.
+
+If adding them manually, do not add ``#`` at the start of the PR numbers.
 Please add follow-on PRs separated by spaces as they are created.
 
 .. code-block:: rst
