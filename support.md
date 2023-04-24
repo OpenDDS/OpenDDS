@@ -38,10 +38,8 @@ View the [GitHub issues list]({{ site.github.issues_url }}) for the OpenDDS proj
 
 ### Online Documentation
 
-View the [online documentation](documentation.html) for the OpenDDS project.
+The documentation for OpenDDS is available on [Read the Docs]({{ site.latest_docs_url }}).
 
 ### The Code
 
-The code is commented. Take a look in the header and class files; also see the [doxygen](doxygen/index.html).
-
-Some documentation is included with the code in the `DDS_ROOT/docs` directory. Code examples are also included in the OpenDDS distribution in the `DDS_ROOT/examples` directory.
+Code examples are included in the OpenDDS distribution in the `DDS_ROOT/examples` directory.
