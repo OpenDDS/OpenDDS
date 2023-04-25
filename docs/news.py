@@ -15,7 +15,7 @@ import re
 docs_path = Path(__file__).parent
 sys.path.append(str((docs_path / 'sphinx_extensions').resolve()))
 
-from newsd import parse_newsd, get_fragments
+from newsd import parse_newsd, get_fragments, news_directive_re
 from version_info import VersionInfo
 
 
@@ -77,9 +77,6 @@ def release(args):
         fragment.unlink()
 
 
-insert_pr_num_re = re.compile(r'(.*\.\. news-prs: )(.*)')
-
-
 def insert_pr_num(args):
     if 'GITHUB_ACTIONS' not in os.environ:
         sys.exit('ERROR: Can only run on GitHub Actions')
@@ -94,20 +91,27 @@ def insert_pr_num(args):
         with fragment.open('w') as f:
             for lineno, line in enumerate(lines):
                 line = line.rstrip()
-                m = insert_pr_num_re.match(line)
-                if m:
-                    print('  Found on line ', lineno)
-                    print(m.group(1) + m.group(2).replace('this', str(pr_num)), file=f)
-                    inserted = True
+                m = news_directive_re.match(line)
+                if m and m.group(1) == 'prs':
+                    print('  Found news-prs on line ', lineno)
+                    if 'this' in m.group(2):
+                        print('  Found "this", replacing with', pr_num)
+                        print(m.group(0).replace('this', str(pr_num)), file=f)
+                        inserted = True
+                    else:
+                        print(line, file=f)
                 else:
                     print(line, file=f)
 
     if inserted:
+        print('Pushing changes...')
         run('git', 'config', 'user.name', 'github-actions[bot]')
         run('git', 'config', 'user.email', 'github-actions[bot]@users.noreply.github.com')
         run('git', 'commit', '--all', '--message',
             'Insert PR Number into News Fragment(s) [skip actions]')
         run('git', 'push')
+    else:
+        print('No changes to push')
 
 
 def preview(args):
