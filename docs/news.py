@@ -76,14 +76,34 @@ def release(args):
         print(fragment)
         fragment.unlink()
 
+    return 0
+
+
+def get_pr_num(fragment):
+    # Get the last commit hash
+    sha = subprocess.check_output(
+        ['git', 'log', '-n', '1', '--pretty=format:%H', '--', str(fragment)],
+        cwd=str(docs_path)).decode('utf-8')
+    print('  sha', repr(sha))
+
+    # Then try to use that to ask GitHub for the PR with that commit
+    pr_num = subprocess.check_output(
+        [
+            'gh', 'pr', 'list', '--search', sha, '--state', 'merged',
+            '--json', 'number', '--jq', '.[0].number'
+        ],
+        cwd=str(docs_path)).decode('utf-8').strip()
+    print('  pr_num', repr(pr_num))
+
+    return pr_num if pr_num else None
+
 
 def insert_pr_num(args):
     if 'GITHUB_ACTIONS' not in os.environ:
         sys.exit('ERROR: Can only run on GitHub Actions')
 
-    pr_num = args.pr_num
-
     inserted = False
+    exit_status = 0
     for fragment in get_fragments():
         print('Looking in', fragment, '...')
         with fragment.open('r') as f:
@@ -95,15 +115,23 @@ def insert_pr_num(args):
                 if m and m.group(1) == 'prs':
                     print('  Found news-prs on line ', lineno)
                     if 'this' in m.group(2):
-                        print('  Found "this", replacing with', pr_num)
-                        print(m.group(0).replace('this', str(pr_num)), file=f)
-                        inserted = True
-                    else:
-                        print(line, file=f)
-                else:
-                    print(line, file=f)
+                        pr_num = get_pr_num(fragment)
+                        if pr_num is None:
+                            print('ERROR: could not get PR from last commit of ' + str(fragment) +
+                                ', not just merged in a PR?', file=sys.stderr)
+                            exit_status = 1
+                        else:
+                            print('  Found "this", replacing with', pr_num)
+                            inserted = True
+                            line = m.group(0).replace('this', pr_num)
+                print(line, file=f)
+        if exit_status != 0:
+            break
 
-    if inserted:
+    if exit_status != 0:
+        print('ERROR: coudn\'t get a PR number, will not push any changes if there are any',
+            file=sys.stderr)
+    elif inserted:
         print('Pushing changes...')
         run('git', 'config', 'user.name', 'github-actions[bot]')
         run('git', 'config', 'user.email', 'github-actions[bot]@users.noreply.github.com')
@@ -113,9 +141,12 @@ def insert_pr_num(args):
     else:
         print('No changes to push')
 
+    return exit_status
+
 
 def preview(args):
     parse_newsd().print_all()
+    return 0
 
 
 if __name__ == '__main__':
@@ -123,7 +154,6 @@ if __name__ == '__main__':
     subparsers = arg_parser.add_subparsers(required=True)
 
     arg_parser_insert_pr_num = subparsers.add_parser('insert-pr-num')
-    arg_parser_insert_pr_num.add_argument('pr_num', type=int, metavar='PR_NUM')
     arg_parser_insert_pr_num.set_defaults(func=insert_pr_num)
 
     arg_parser_release = subparsers.add_parser('release')
@@ -133,6 +163,6 @@ if __name__ == '__main__':
     arg_parser_preview.set_defaults(func=preview)
 
     args = arg_parser.parse_args()
-    args.func(args)
+    sys.exit(args.func(args))
 
 # vim: expandtab:ts=4:sw=4
