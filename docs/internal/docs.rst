@@ -243,7 +243,7 @@ The following is a simple news fragment example:
 
 Fragments contain RST content for the news along with some RST directive-like metadata.
 Lines starting with ``#`` are ignored as comments.
-Content for the news must be formatted as a `single list item <https://docutils.sourceforge.io/docs/ref/rst/restructuredtext>`__, but can have additional details within them.
+Content for the news must be formatted as a `list <https://docutils.sourceforge.io/docs/ref/doctree.html#bullet-list>`__.
 
 .. note::
 
@@ -363,7 +363,7 @@ Rank is used to help sort entries and sections.
 Setting the rank higher can be used to to headline a change within a section.
 Rank has the following behavior:
 
-- The rank is always 0 after ``news-start-section`` and ``news-rank`` has to be used to set it.
+- The rank of content is always 0 after ``news-start-section`` unless ``news-rank`` is used to set it.
 - Rank is persistent between ``news-start-section`` and ``news-end-section``, even if there are subsections.
   Rank is saved on a stack along with the section so they act like local variables in a function.
 - When sections have different ranks across fragments (or even in the same fragment), then the largest of ranks is used.
@@ -422,7 +422,7 @@ These will result in:
   - Improved logging in some cases. (:ghpr:`1111`) [Rank 0]
   - Unoptimized all code that's not related to pigeons (:ghpr:`2222`) [Rank 0]
 
-The ranks of items are included in :doc:`/news` and printed out by :ghfile:`docs/sphinx_extensions/newsd.py` when OpenDDS isn't a release.
+The ranks of everything in all news fragments can be viewed in :doc:`/news` or alternatively by running ``./docs/news.py preview``.
 They are there to help someone deciding what the rank of new news item should be.
 
 One final thing to note is that top level sections, like "Additions", have a fixed rank that can't be changed so they always appear in the same order.
@@ -430,7 +430,6 @@ One final thing to note is that top level sections, like "Additions", have a fix
 Generating the News
 ===================
 
-Before a release, a preview of the whole news entry will always be available for preview in :doc:`/news`.
-It's also available to see the source by running :ghfile:`docs/sphinx_extensions/newsd.py`.
-This script is used by Sphinx, but doesn't require Sphinx.
+Before a release, a preview of the whole news for the next release will always be available for preview in :doc:`/news`.
+It's also possible to see the source of that preview by running ``./docs/news.py preview``.
 During a release the fragments are permanently committed to :doc:`/news`, :doc:`/this_release`, and :ghfile:`NEWS.md` and the fragment files in :ghfile:`docs/news.d` are removed.

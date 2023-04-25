@@ -86,6 +86,7 @@ def insert_pr_num(args):
 
     pr_num = args.pr_num
 
+    inserted = False
     for fragment in get_fragments():
         print('Looking in', fragment, '...')
         with fragment.open('r') as f:
@@ -97,13 +98,20 @@ def insert_pr_num(args):
                 if m:
                     print('  Found on line ', lineno)
                     print(m.group(1) + m.group(2).replace('this', str(pr_num)), file=f)
+                    inserted = True
                 else:
                     print(line, file=f)
 
-    run('git', 'config', 'user.name', 'github-actions[bot]')
-    run('git', 'config', 'user.email', 'github-actions[bot]@users.noreply.github.com')
-    run('git', 'commit', '--all', '--message', 'Insert PR Number into News')
-    run('git', 'push')
+    if inserted:
+        run('git', 'config', 'user.name', 'github-actions[bot]')
+        run('git', 'config', 'user.email', 'github-actions[bot]@users.noreply.github.com')
+        run('git', 'commit', '--all', '--message',
+            'Insert PR Number into News Fragment(s) [skip actions]')
+        run('git', 'push')
+
+
+def preview(args):
+    parse_newsd().print_all()
 
 
 if __name__ == '__main__':
@@ -116,6 +124,9 @@ if __name__ == '__main__':
 
     arg_parser_release = subparsers.add_parser('release')
     arg_parser_release.set_defaults(func=release)
+
+    arg_parser_preview = subparsers.add_parser('preview')
+    arg_parser_preview.set_defaults(func=preview)
 
     args = arg_parser.parse_args()
     args.func(args)

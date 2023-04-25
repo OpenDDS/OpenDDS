@@ -9,6 +9,7 @@ from datetime import datetime, timezone
 from version_info import VersionInfo
 
 
+# These sections are builtin and must appear in this order
 main_sections = {
     'Additions': 100,
     'Deprecations': 90,
@@ -98,6 +99,7 @@ class Node:
         return ' (' + ', '.join([pre + str(pr) + post for pr in self.prs]) + ')'
 
     def rank_str(self, h):
+        # This doesn't appear in the actual release notes, only previews
         if not h.show_rank:
             return ''
         rv = '[Rank {}]'.format(self.rank)
@@ -147,8 +149,10 @@ class Section(Node):
         return True
 
     def get_section(self, name, rank=0, loc=None, restricted=False):
+        # Don't let fragments reorder main sections or create new ones.
         fixed_main_sections = restricted and self.level == 0
         if name in self.sections:
+            # Already exists, adjust rank and return it
             child = self.sections[name]
             if not fixed_main_sections and rank > child.rank:
                 child.rank = rank
@@ -292,15 +296,16 @@ class ParseError(RuntimeError):
 
 def get_pr(string):
     if string == 'this':
-        return 0
+        return 1
     return int(string)
 
 
 def parse(root, path):
     lineno = 0
-    section = root
-    stack = []
     rank = 0
+    section = root
+    # Stack are tuples of rank and section to return to as sections end.
+    stack = []
     prs = set()
     seen_prs = False
     lines = []
