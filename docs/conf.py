@@ -48,13 +48,9 @@ is_release = version_info.is_release
 if is_release:
     github_links_release_tag = version_info.tag
 
-# Generate WIP News if this isn't a release
-wip_release = 'wip_release.rst'
-with (docs_path / wip_release).open('w') as f:
-    if is_release:
-        print('', file=f)
-    else:
-        parse_newsd().print_all(file=f)
+# Generate preview news or news used for Markdown release notes for GitHub
+with (docs_path / 'temp_news.rst').open('w') as f:
+    parse_newsd().print_all(file=f)
 
 
 # -- General configuration ---------------------------------------------------
@@ -101,7 +97,6 @@ exclude_patterns = [
     '.venv',
     'sphinx_extensions/**',
     'news.d/**',
-    wip_release,
 ]
 
 source_suffix = {

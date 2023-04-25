@@ -60,12 +60,8 @@ def release(args):
     insert_into_file(docs_path / 'news.rst', 'NEW NEWS GOES BELOW HERE', new_news)
 
     print('Generating Markdown news...')
-    this_release_file = docs_path / 'this_release.rst'
-    with this_release_file.open('w') as f:
-        print(':orphan:\n', file=f)
-        print(new_news, end='', file=f)
     run('./build.py', 'markdown')
-    with (docs_path / '_build/markdown/this_release.md').open('r') as f:
+    with (docs_path / '_build/markdown/temp_news.md').open('r') as f:
         this_release_md = f.read()
     print(this_release_md)
 

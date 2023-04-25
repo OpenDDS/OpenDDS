@@ -225,15 +225,17 @@ Turns into:
 News
 ****
 
-The :doc:`news or release notes for a release </news>` is created from separate reStructuredText files called *fragments*.
-Managing the news fragments is handled as part of the Sphinx documentation to make it easy to link to relevant documentation and files in the source code and to make it possible to preview the news before a release.
+The :doc:`news for a release (aka release notes) </news>` is created from separate reStructuredText files called *fragments*.
+This makes it possible to change the news without everyone editing one file.
+Managing the news fragments is handled as part of the Sphinx documentation to make it easy to link to other relevant documents and files in the source code.
+It also makes it possible to easily preview the news before a release.
 
 News Fragments
 ==============
 
 To add content to the news for a release, a fragment file with the content must be created in :ghfile:`docs/news.d`.
 It can be named anything as long as it's reasonably unique, doesn't start with an underscore, and has an ``.rst`` file extension.
-The branch name of the PR for this change might probably be a good name, for example: ``fix_rtps_segfault.rst``.
+The branch name of the PR for this change might be a good name, for example: ``fix_rtps_segfault.rst``.
 
 The following is a simple news fragment example:
 
@@ -243,7 +245,9 @@ The following is a simple news fragment example:
 
 Fragments contain RST content for the news along with some RST directive-like metadata.
 Lines starting with ``#`` are ignored as comments.
-Content for the news must be formatted as a `list <https://docutils.sourceforge.io/docs/ref/doctree.html#bullet-list>`__.
+`RST comments <https://www.sphinx-doc.org/en/master/usage/restructuredtext/basics.html#comments>`__ can be used, but they will be inserted into the news.
+Content for the news must be formatted as a `list <https://www.sphinx-doc.org/en/master/usage/restructuredtext/basics.html#lists-and-quote-like-blocks>`__.
+It will usually be one list item, but can be multiple items if they are separate changes from a user perspective.
 
 .. note::
 
@@ -260,14 +264,19 @@ news-prs
 
 ``news-prs`` should declare all the PRs that make up the changes to OpenDDS described in the fragment.
 It's an error to omit ``news-prs`` from a fragment or have more than one.
-Add ``this`` to have it replaced with the PR number automatically by GitHub Actions when the commits are pushed to the PR:
+
+``this`` will replaced with the PR number automatically by GitHub Actions after the PR is merged.
+If it is a new fragment, then:
 
 .. code-block:: rst
 
   .. news-prs: this
-  .. news-prs: 1000 this
 
-Remember to do a ``git pull`` to get the new commit in the local repo.
+If building on a previous PR, then add ``this`` to the end:
+
+.. code-block:: rst
+
+  .. news-prs: 1000 this
 
 If adding them manually, do not add ``#`` at the start of the PR numbers.
 Please add follow-on PRs separated by spaces as they are created.
@@ -276,7 +285,7 @@ Please add follow-on PRs separated by spaces as they are created.
 
   .. news-prs: 1002 1003 1008
 
-If the changes don't have a PR associated with them, such as a policy change, then put ``none`` instead.
+If the changes don't have a PR associated with them, such as a policy change, then put ``none`` instead:
 
 .. code-block:: rst
 
@@ -285,7 +294,7 @@ If the changes don't have a PR associated with them, such as a policy change, th
 news-start-section and news-end-section
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-``news-start-section`` and ``news-end-section`` directives contain the news content and define how it's grouped.
+``news-start-section`` and ``news-end-section`` directives contain the news content and define how they're grouped.
 All sections with the same name across all the fragments are merged together in the final result.
 The top-level sections must be one of the following:
 
@@ -294,7 +303,6 @@ The top-level sections must be one of the following:
 
 ``Platform Support and Dependencies``
   Additional support or changes to support for OS, C++ standards, compilers, and dependencies.
-  This includes a known hard requirements for a new version of ACE/TAO.
 
 ``Deprecations``
   User-relevant features that are being planned on being removed, but removing now would break a significant number of user's use cases.
@@ -312,16 +320,16 @@ The top-level sections must be one of the following:
 
 ``Documentation``
   Signifiant changes to documentation, either in the primary Sphinx documentation or in secondary documentation.
-  This can be documenting an existing feature or major fixes to existing documentation.
+  This can be documenting an existing feature or major changes to existing documentation.
   Documentation for a new feature should be linked in the news item for it, not here.
-  Minor corrections like spelling and changes to internal documentation probably shouldn't be mentioned in the news.
+  Minor corrections like spelling and changes to internal documentation probably don't need to be mentioned in the news.
 
 ``Notes``
   Changes that might be relevant to users, but might not fit in any of the other sections.
   This could be a change in policy or change outside the OpenDDS source code that doesn't have a PR associated with it.
 
 Sections can be nested as subsections.
-There is no restrictions on the names of subsections, but it's suggested to group otherwise separate changes if they are all impact the same part of OpenDDS.
+There is no requirement for subsections or restrictions on their names, but it's suggested to group otherwise separate changes if they are all impact the same part of OpenDDS.
 For example:
 
 .. code-block:: rst
@@ -356,18 +364,21 @@ Will result in:
 
   - Another Non-RTPS Fix (:ghpr:`1000`)
 
+This will allow other fragments to add to "RTPS" or "RTPS Relay".
+
 news-rank
 ^^^^^^^^^
 
 Rank is used to help sort entries and sections.
-Setting the rank higher can be used to to headline a change within a section.
+Setting the rank higher using ``news-rank`` can headline a change within a section.
+This is optional and by default items are ranked by oldest PR number.
+
 Rank has the following behavior:
 
 - The rank of content is always 0 after ``news-start-section`` unless ``news-rank`` is used to set it.
 - Rank is persistent between ``news-start-section`` and ``news-end-section``, even if there are subsections.
   Rank is saved on a stack along with the section so they act like local variables in a function.
 - When sections have different ranks across fragments (or even in the same fragment), then the largest of ranks is used.
-- When the rank of two things are the same, the one that contains the lower PR number is listed first.
 
 For an example of all that, let us say we had the following fragments:
 
@@ -422,14 +433,15 @@ These will result in:
   - Improved logging in some cases. (:ghpr:`1111`) [Rank 0]
   - Unoptimized all code that's not related to pigeons (:ghpr:`2222`) [Rank 0]
 
-The ranks of everything in all news fragments can be viewed in :doc:`/news` or alternatively by running ``./docs/news.py preview``.
-They are there to help someone deciding what the rank of new news item should be.
+The ranks are included in previews of the news as an aid to deciding what the rank of new news content should be.
+The preview can be viewed in :doc:`/news` or alternatively by running ``./docs/news.py preview``.
+The ranks are not included in the final news for a release.
 
-One final thing to note is that top level sections, like "Additions", have a fixed rank that can't be changed so they always appear in the same order.
+One final thing to note is that top-level sections, like "Additions", have a fixed rank that can't be changed so they always appear in the same order.
 
 Generating the News
 ===================
 
 Before a release, a preview of the whole news for the next release will always be available for preview in :doc:`/news`.
 It's also possible to see the source of that preview by running ``./docs/news.py preview``.
-During a release the fragments are permanently committed to :doc:`/news`, :doc:`/this_release`, and :ghfile:`NEWS.md` and the fragment files in :ghfile:`docs/news.d` are removed.
+During a release the fragments are permanently committed to :doc:`/news` and :ghfile:`NEWS.md` and the fragment files in :ghfile:`docs/news.d` are removed.

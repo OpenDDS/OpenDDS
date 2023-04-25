@@ -11,7 +11,7 @@ These are all the recent releases of OpenDDS.
 
 .. ifconfig:: not is_release
 
-  .. include:: wip_release.rst
+  .. include:: temp_news.rst
 
 ..
   NEW NEWS GOES BELOW HERE
