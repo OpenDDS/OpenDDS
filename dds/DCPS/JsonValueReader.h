@@ -32,8 +32,7 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-/// Convert values to JSON.
-/// Currently, this class does not produce value JSON nor does it adhere to the DDS JSON spec.
+/// Convert JSON to values.
 template <typename InputStream = rapidjson::StringStream>
 class JsonValueReader
   : public ValueReader,
@@ -162,6 +161,34 @@ private:
     return false;
   }
 
+  // consume tokens until peek() would return 'expected'
+  // skips over objects and arrays atomically
+  bool skip_to(TokenType expected)
+  {
+    int skip_level = 0;
+
+    while (peek() != kEnd) {
+      if (skip_level == 0 && token_type_ == expected) {
+        return true;
+      }
+      switch (token_type_) {
+      case kStartArray:
+      case kStartObject:
+        ++skip_level;
+        break;
+      case kEndArray:
+      case kEndObject:
+        --skip_level;
+        break;
+      default:
+        break;
+      }
+      consume(token_type_);
+    }
+
+    return false;
+  }
+
   TokenType token_type_;
   InputStream& input_stream_;
   rapidjson::Reader reader_;
@@ -185,15 +212,25 @@ bool JsonValueReader<InputStream>::begin_struct()
 template <typename InputStream>
 bool JsonValueReader<InputStream>::end_struct()
 {
-  peek();
+  if (peek() == kKey) { // skip any unknown members at the end
+    if (!skip_to(kEndObject)) {
+      return false;
+    }
+  }
   return consume(kEndObject);
 }
 
 template <typename InputStream>
 bool JsonValueReader<InputStream>::begin_struct_member(XTypes::MemberId& member_id, const MemberHelper& helper)
 {
-  if (peek() == kKey && helper.get_value(member_id, key_value_.c_str())) {
-    return consume(kKey);
+  while (peek() == kKey) {
+    consume(kKey);
+    if (helper.get_value(member_id, key_value_.c_str())) {
+      return true;
+    }
+    if (!skip_to(kKey)) { // skip unknown members when expecting a known member
+      return false;
+    }
   }
   return false;
 }

@@ -9,6 +9,12 @@ typedef sequence<<%SCOPED%>> <%TYPE%><%SEQ%>;
  * this interface.
  */
 local interface <%TYPE%>TypeSupport : OpenDDS::DCPS::TypeSupport {
+
+    ::DDS::ReturnCode_t encode_to_string(in <%SCOPED%> sample, out string encoded, in OpenDDS::DCPS::RepresentationFormat format);
+    ::DDS::ReturnCode_t encode_to_bytes(in <%SCOPED%> sample, out ::DDS::OctetSeq encoded, in OpenDDS::DCPS::RepresentationFormat format);
+
+    ::DDS::ReturnCode_t decode_from_string(in string encoded, out <%SCOPED%> sample, in OpenDDS::DCPS::RepresentationFormat format);
+    ::DDS::ReturnCode_t decode_from_bytes(in ::DDS::OctetSeq encoded, out <%SCOPED%> sample, in OpenDDS::DCPS::RepresentationFormat format);
 };
 
 /** DataWriter interface for <%TYPE%> data type.
