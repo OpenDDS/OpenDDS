@@ -15,6 +15,7 @@
 #include <dds/DCPS/Util.h>
 #include <dds/DCPS/Logging.h>
 #include <dds/DCPS/NetworkResource.h>
+#include <dds/DCPS/Qos_Helper.h>
 #include <dds/DCPS/transport/framework/TransportCustomizedElement.h>
 #include <dds/DCPS/transport/framework/TransportSendElement.h>
 #include <dds/DCPS/transport/framework/TransportSendControlElement.h>
@@ -97,7 +98,7 @@ RtpsUdpDataLink::RtpsUdpDataLink(const RtpsUdpTransport_rch& transport,
   , local_crypto_handle_(DDS::HANDLE_NIL)
   , ice_agent_(ICE::Agent::instance())
 #endif
-  , network_interface_address_reader_(make_rch<InternalDataReader<NetworkInterfaceAddress> >(true, rchandle_from(this)))
+  , network_interface_address_reader_(make_rch<InternalDataReader<NetworkInterfaceAddress> >(DCPS::DataReaderQosBuilder().reliability_reliable().durability_transient_local(), rchandle_from(this)))
 {
 #ifdef OPENDDS_SECURITY
   const GUID_t guid = make_id(local_prefix, ENTITYID_PARTICIPANT);
@@ -429,7 +430,7 @@ void RtpsUdpDataLink::on_data_available(RcHandle<InternalDataReader<NetworkInter
   InternalDataReader<NetworkInterfaceAddress>::SampleSequence samples;
   InternalSampleInfoSequence infos;
 
-  network_interface_address_reader_->take(samples, infos);
+  network_interface_address_reader_->take(samples, infos, DDS::LENGTH_UNLIMITED, DDS::ANY_SAMPLE_STATE, DDS::ANY_VIEW_STATE, DDS::ANY_INSTANCE_STATE);
 
   RtpsUdpInst_rch cfg = config();
   if (!cfg || !cfg->use_multicast_) {

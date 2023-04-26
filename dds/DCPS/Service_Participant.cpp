@@ -852,8 +852,7 @@ Service_Participant::initialize()
 
   initial_LivelinessQosPolicy_ = LivelinessQosPolicyBuilder();
 
-  initial_TimeBasedFilterQosPolicy_.minimum_separation.sec = DDS::DURATION_ZERO_SEC;
-  initial_TimeBasedFilterQosPolicy_.minimum_separation.nanosec = DDS::DURATION_ZERO_NSEC;
+  initial_TimeBasedFilterQosPolicy_ = TimeBasedFilterQosPolicyBuilder();
 
   initial_ReliabilityQosPolicy_ = ReliabilityQosPolicyBuilder();
 
@@ -861,9 +860,7 @@ Service_Participant::initialize()
 
   initial_HistoryQosPolicy_ = HistoryQosPolicyBuilder();
 
-  initial_ResourceLimitsQosPolicy_.max_samples = DDS::LENGTH_UNLIMITED;
-  initial_ResourceLimitsQosPolicy_.max_instances = DDS::LENGTH_UNLIMITED;
-  initial_ResourceLimitsQosPolicy_.max_samples_per_instance = DDS::LENGTH_UNLIMITED;
+  initial_ResourceLimitsQosPolicy_ = ResourceLimitsQosPolicyBuilder();
 
   initial_EntityFactoryQosPolicy_.autoenable_created_entities = true;
 
@@ -872,17 +869,9 @@ Service_Participant::initialize()
   // Will get interpreted based on how the type was annotated.
   initial_DataRepresentationQosPolicy_.value.length(0);
 
-  initial_ReaderDataLifecycleQosPolicy_.autopurge_nowriter_samples_delay.sec = DDS::DURATION_INFINITE_SEC;
-  initial_ReaderDataLifecycleQosPolicy_.autopurge_nowriter_samples_delay.nanosec = DDS::DURATION_INFINITE_NSEC;
-  initial_ReaderDataLifecycleQosPolicy_.autopurge_disposed_samples_delay.sec = DDS::DURATION_INFINITE_SEC;
-  initial_ReaderDataLifecycleQosPolicy_.autopurge_disposed_samples_delay.nanosec = DDS::DURATION_INFINITE_NSEC;
+  initial_ReaderDataLifecycleQosPolicy_ = ReaderDataLifecycleQosPolicyBuilder();
 
-  initial_TypeConsistencyEnforcementQosPolicy_.kind = DDS::ALLOW_TYPE_COERCION;
-  initial_TypeConsistencyEnforcementQosPolicy_.prevent_type_widening = false;
-  initial_TypeConsistencyEnforcementQosPolicy_.ignore_sequence_bounds = true;
-  initial_TypeConsistencyEnforcementQosPolicy_.ignore_string_bounds = true;
-  initial_TypeConsistencyEnforcementQosPolicy_.ignore_member_names = false;
-  initial_TypeConsistencyEnforcementQosPolicy_.force_type_validation = false;
+  initial_TypeConsistencyEnforcementQosPolicy_ = TypeConsistencyEnforcementQosPolicyBuilder();
 
   initial_DomainParticipantQos_.user_data = initial_UserDataQosPolicy_;
   initial_DomainParticipantQos_.entity_factory = initial_EntityFactoryQosPolicy_;
@@ -897,20 +886,7 @@ Service_Participant::initialize()
   initial_PublisherQos_.group_data = initial_GroupDataQosPolicy_;
   initial_PublisherQos_.entity_factory = initial_EntityFactoryQosPolicy_;
 
-  initial_DataReaderQos_.durability = initial_DurabilityQosPolicy_;
-  initial_DataReaderQos_.deadline = initial_DeadlineQosPolicy_;
-  initial_DataReaderQos_.latency_budget = initial_LatencyBudgetQosPolicy_;
-  initial_DataReaderQos_.liveliness = initial_LivelinessQosPolicy_;
-  initial_DataReaderQos_.reliability = initial_ReliabilityQosPolicy_;
-  initial_DataReaderQos_.destination_order = initial_DestinationOrderQosPolicy_;
-  initial_DataReaderQos_.history = initial_HistoryQosPolicy_;
-  initial_DataReaderQos_.resource_limits = initial_ResourceLimitsQosPolicy_;
-  initial_DataReaderQos_.user_data = initial_UserDataQosPolicy_;
-  initial_DataReaderQos_.time_based_filter = initial_TimeBasedFilterQosPolicy_;
-  initial_DataReaderQos_.ownership = initial_OwnershipQosPolicy_;
-  initial_DataReaderQos_.reader_data_lifecycle = initial_ReaderDataLifecycleQosPolicy_;
-  initial_DataReaderQos_.representation = initial_DataRepresentationQosPolicy_;
-  initial_DataReaderQos_.type_consistency = initial_TypeConsistencyEnforcementQosPolicy_;
+  initial_DataReaderQos_ = DataReaderQosBuilder();
 
   initial_SubscriberQos_.presentation = initial_PresentationQosPolicy_;
   initial_SubscriberQos_.partition = initial_PartitionQosPolicy_;

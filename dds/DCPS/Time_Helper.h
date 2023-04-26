@@ -98,6 +98,9 @@ ACE_INLINE OpenDDS_Dcps_Export
 bool operator>=(const DDS::Time_t& t1, const DDS::Time_t& t2);
 
 ACE_INLINE OpenDDS_Dcps_Export
+DDS::Time_t operator+(const DDS::Time_t& t1, const DDS::Duration_t& d1);
+
+ACE_INLINE OpenDDS_Dcps_Export
 DDS::Duration_t operator-(const DDS::Time_t& t1, const DDS::Time_t& t2);
 
 ACE_INLINE OpenDDS_Dcps_Export
@@ -133,7 +136,10 @@ ACE_INLINE OpenDDS_Dcps_Export
 const MonotonicTime_t& monotonic_time_zero();
 
 ACE_INLINE OpenDDS_Dcps_Export
-DDS::Duration_t make_duration(int sec, unsigned long nanosec);
+DDS::Duration_t make_duration_t(int sec, unsigned long nanosec);
+
+ACE_INLINE OpenDDS_Dcps_Export
+DDS::Time_t make_time_t(int sec, unsigned long nanosec);
 
 } // namespace DCPS
 } // namespace OpenDDS
