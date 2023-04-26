@@ -209,10 +209,12 @@ void TypeSupportImpl::get_type_from_type_lookup_service()
 }
 #endif
 
-struct JsonRepresentationFormatImpl : JsonRepresentationFormat {
+struct JsonRepresentationFormatImpl
+  : JsonRepresentationFormat, PoolAllocationBase {
 };
 
-struct CdrRepresentationFormatImpl : CdrRepresentationFormat {
+struct CdrRepresentationFormatImpl
+  : CdrRepresentationFormat, PoolAllocationBase {
   CdrRepresentationFormatImpl(DDS::DataRepresentationId_t)
   {}
 };
