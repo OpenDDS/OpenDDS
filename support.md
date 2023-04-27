@@ -42,4 +42,5 @@ The documentation for OpenDDS is available on [Read the Docs]({{ site.latest_doc
 
 ### The Code
 
-Code examples are included in the OpenDDS distribution in the `DDS_ROOT/examples` directory.
+Documentation is included with the code in the `DDS_ROOT/docs` directory.
+Code examples are also included in the `DDS_ROOT/examples` directory.

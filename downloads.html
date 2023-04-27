@@ -9,10 +9,11 @@ order: 91
 <div id="contenttext">
   <div class="bodytext" align="justify">
     <span class="headertext">Latest Release</span>
-    <p>The latest release is available from <a href="{{site.github.releases_url}}/latest">GitHub</a>:</p>
+    <p>The latest release is available from <a href="{{site.github.releases_url}}">GitHub</a>:
+    </p>
       {{ latest_release_downloads }}
     <span class="headertext">Previous Releases</span>
-    <p style="text-align: left;">Previous releases are available in the previous releases section of the OpenDDS download site: <a href="https://download.objectcomputing.com/OpenDDS/previous-releases/">https://download.objectcomputing.com/OpenDDS/previous-releases/</a> or on the <a href="{{site.github.releases_url}}">GitHub releases page</a>. </p>
+    <p style="text-align: left;">Previous releases are available on the <a href="{{site.github.releases_url}}">GitHub releases page</a> and on the OpenDDS download site <a href="{{ site.data.opendds.old_downloads_url }}">{{ site.data.opendds.old_downloads_url }}</a>. </p>
 
     <span class="headertext">Support</span>
     <p>See <a href="support.html">the OpenDDS support page</a> for support options.</p>
