@@ -136,10 +136,12 @@ const char* kind_to_string(const XTypes::EquivalenceKind ek)
   return ek == XTypes::EK_MINIMAL ? "minimal" : "complete";
 }
 
-struct JsonRepresentationFormatImpl : JsonRepresentationFormat {
+struct JsonRepresentationFormatImpl
+  : JsonRepresentationFormat, PoolAllocationBase {
 };
 
-struct CdrRepresentationFormatImpl : CdrRepresentationFormat {
+struct CdrRepresentationFormatImpl
+  : CdrRepresentationFormat, PoolAllocationBase {
   CdrRepresentationFormatImpl(DDS::DataRepresentationId_t)
   {}
 };
