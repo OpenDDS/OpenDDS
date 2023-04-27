@@ -10,6 +10,7 @@
 
 #include <dds/DdsDcpsCoreC.h>
 #include <dds/DdsDcpsInfoUtilsC.h>
+#include "PoolAllocator.h"
 
 #include <ace/OS_NS_sys_time.h>
 
@@ -137,6 +138,12 @@ const MonotonicTime_t& monotonic_time_zero();
 
 ACE_INLINE OpenDDS_Dcps_Export
 DDS::Duration_t make_duration_t(int sec, unsigned long nanosec);
+
+ACE_INLINE OpenDDS_Dcps_Export
+String to_dds_string(const DDS::Duration_t& duration);
+
+ACE_INLINE OpenDDS_Dcps_Export
+bool from_dds_string(const String& str, DDS::Duration_t& duration);
 
 ACE_INLINE OpenDDS_Dcps_Export
 DDS::Time_t make_time_t(int sec, unsigned long nanosec);
