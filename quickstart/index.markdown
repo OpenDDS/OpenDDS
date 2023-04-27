@@ -13,4 +13,4 @@ categories: [opendds]
 - <a class="page-link" href="{{p.url | prepend: site.baseurl}}">{{p.title}}</a>
   {% endif %}
 {% endfor %}
-- [Detailed build instructions](../documents/building.html)
+- [Detailed build instructions](../documentation/building.html)
