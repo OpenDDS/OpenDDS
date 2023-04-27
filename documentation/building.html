@@ -1,0 +1,100 @@
+---
+layout: page
+title: Building
+categories: [opendds]
+tags: []
+order: 103
+sitemap: false
+redirect_from: /documents/building.html
+---
+<div id="contenttext">
+  <div class="bodytext" align="justify">
+    <a name="Note"><span class="headertext">Note</span></a>
+    Details on this page correspond to the current release of OpenDDS, not to
+    the latest state of the GitHub repository's master branch.
+  </div>
+  <div class="bodytext" align="justify">
+    <a name="Dependencies"><span class="headertext">Dependencies</span></a>
+    <ul>
+      <li>
+        TAO
+        <p>OpenDDS requires TAO. If you will be using the <code>configure</code> script for OpenDDS (see the <code>INSTALL.md</code> file for details), you do not need to download TAO first -- the <code>configure</code> script will download it for you.</p><p>
+          OpenDDS has been tested against the
+          versions of TAO given below. Note that the _._a releases are from OCI and can
+          be obtained from <a href="https://www.theaceorb.com/">https://www.theaceorb.com/</a>.
+          The DOC Group releases can be obtained from <a href="https://github.com/DOCGroup/ACE_TAO/releases">
+            https://github.com/DOCGroup/ACE_TAO/releases</a>. For responsive support from OCI it
+          is recommended that the latest version of the OCI release of TAO used for OpenDDS
+          development and testing be used.
+        </p>
+          <ul>
+            <li>
+              OCI TAO 2.2a patch 26</li>
+            <li>
+              DOC Group TAO 2.5.19</li>
+          </ul>
+        <br />
+      </li>
+      <li>
+        GNU Make
+        <p>GNU Make 3.80 or higher is used for automating the compiling and linking of OpenDDS on Unix and Linux systems.</p>
+      </li>
+      <li>
+        Perl
+        <p>Perl is used for running the automated tests and examples
+           included in this source tree and for generating Makefiles or
+           Visual Studio project files.</p>
+        <p>The "configure" script also uses Perl.</p>
+        <p>On Windows platforms, we recommend the use of Strawberry Perl.</p>
+      </li>
+    </ul>
+  </div>
+
+  <div class="bodytext" align="justify">
+    <a name="OperatingSystems"><span class="headertext">Operating Systems</span></a>
+    <p>This release of OpenDDS has been tested under the following platforms:</p>
+    <ul>
+      <li>Windows 7 (32-bit, 64-bit), Windows Server 2012 R2 (64-bit), Windows 10 (64-bit)</li>
+      <li>Red Hat EL and CentOS 6.6, 6.8 and 6.9 (x86_64), Red Hat EL and CentOS 7.2, 7.3, and 7.4 (x86_64), Red Hat EL 8.0 (x86_64), Fedora 24 and 31 (x86_64), Debian 9.4 (i686),
+        Ubuntu 22.04 LTS (x86_64), openSUSE 42.1 (x86_64)</li>
+      <li>macOS 10.15.2 (Catalina)</li>
+      <li>Android NDK r18b (ARM)</li>
+      <li>Linux on Raspberry Pi</li>
+      <li>We have also built OpenDDS for VxWorks 6.9, 7, and 21.03 and have run basic
+        system and performance tests (but not the entire regression test suite).
+        Please contact sales@objectcomputing.com or opendds-main@lists.sourceforge.net for
+        more information on support for ACE, TAO, and OpenDDS on VxWorks.<br/>
+        OCI's packages for ACE, TAO, and OpenDDS are available from
+        <a href="https://objectcomputing.com/products/opendds/vxworks">our website</a>
+      </li>
+    </ul>
+  </div>
+
+  <div class="bodytext" align="justify">
+    <a name="Compilers"><span class="headertext">Compilers</span></a>
+    <p>This release of OpenDDS has been tested using the following compilers:</p>
+    <ul>
+      <li>Microsoft Visual C++ 10 with SP1 (Visual Studio 2010)</li>
+      <li>Microsoft Visual C++ 11 (Visual Studio 2012) - Update 4</li>
+      <li>Microsoft Visual C++ 12 (Visual Studio 2013) - Update 5</li>
+      <li>Microsoft Visual C++ 14 (Visual Studio 2015) - Update 3</li>
+      <li>Microsoft Visual C++ 14.1 (Visual Studio 2017) cl 19.16.27044</li>
+      <li>Microsoft Visual C++ 14.2 (Visual Studio 2019) cl 19.24.29335</li>
+      <li>gcc 4.4.7, 4.8.5</li>
+      <li>gcc 6.2.1, 6.3.0</li>
+      <li>gcc 7.2.0, 7.5.0</li>
+      <li>gcc 8.2.0, 8.2.1</li>
+      <li>gcc 9.3.1</li>
+      <li>gcc 12.2.0</li>
+      <li>Ubuntu clang 14.0.6</li>
+      <li>Ubuntu clang 15.0.0</li>
+    </ul>
+  </div>
+
+  <div class="bodytext" align="justify">
+    <a name="DetailedInstructions"><span class="headertext">Detailed Instructions</span></a>
+    <p>Please see the file <a href="{{ site.github.repository_url }}/blob/latest-release/INSTALL.md"><code>INSTALL.md</code></a> for detailed instructions
+      on building OpenDDS on a number of platforms.</p>
+  </div>
+
+</div>
