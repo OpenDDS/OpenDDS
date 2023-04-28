@@ -27,36 +27,57 @@
         The Following is useful for assessing the menu structure 
         un-comment it to get an overview of the current page ordering
       -->
-      <!-- {% assign sorted_pages = site.pages | sort: "order"  %}
+      {% assign sorted_pages = site.pages | sort: "order"  %}
       {% for p in sorted_pages %}
       {% assign slash = p.url | split: '/' %}
+      {% if p.redirect and p.external_override != true%}
+        {% assign redirect = true %}
+      {% else %}
+        {% assign redirect = false %}
+      {% endif %}
+      {% if p.sitemap == false and p.external_override != true %}
+        {% assign omit_from_sitemap = true %}
+      {% else %}
+        {% assign omit_from_sitemap = false %}
+      {% endif %}
       {% unless slash == empty
-                  or p.redirect
+                  or redirect
                   or p.url == '/'
                   or p.url contains '.css'
-                  or p.sitemap == false
+                  or omit_from_sitemap
                   or p.url == '/redirects.json' %}
         <div>--- {{p.order}} : {{p.url}} | {{p.redirect}}</div>
       {% endunless %}
-      {% endfor %} -->
+      {% endfor %}
 {% endcomment %}
       <ul class="trigger">
-        {% assign sorted_pages = site.pages | where_exp:"item", "item.sitemap != false" | sort: "order" %}
+        {% assign sorted_pages = site.pages | sort: "order" %}
         {% assign start_level = 2 %}
         {% assign level = start_level %}
         {% assign counter = 0 %}
         {% for p in sorted_pages %}
           {% assign slash = p.url | split: '/' %}
+          {% if p.redirect and p.external_override != true%}
+            {% assign redirect = true %}
+          {% else %}
+            {% assign redirect = false %}
+          {% endif %}
+          {% if p.sitemap == false and p.external_override != true %}
+            {% assign omit_from_sitemap = true %}
+          {% else %}
+            {% assign omit_from_sitemap = false %}
+          {% endif %}
           {% unless slash == empty
-                      or p.redirect
+                      or redirect
                       or p.url == '/'
                       or p.url contains '.css'
+                      or omit_from_sitemap
                       or p.url == '/redirects.json' %}
             {% assign indent = slash.size %}
             {% assign level_m1 = level | minus: 1 %}
             {% assign last = p.url | slice: -1, 1 %}
             {% for i in (indent..level_m1) %}</ul></li>{% endfor %}
-            {% if last == '/' %}
+            {% if last == '/' and p.external_override != true %}
                 <li>
                   {% if p.hide_submenu != true %}
                   <input type="checkbox" id="drop-{{counter}}"/>
@@ -85,10 +106,6 @@
 
               {% assign counter = counter | plus: 1 %}
                   <ul class="sub-menu">
-                {% if p.title == 'Documentation' %}
-                    <li><a class="page-link" href="/documents/">All Documentation</a></li>
-                    <li><a class="page-link" href="{{ site.data.opendds.latest_devguide_url }}">Developer's Guide [PDF]</a></li>
-                {% else %}
                     <li class="mobile">
                       <a class="page-link" href="{{p.url | prepend: site.baseurl}}">                      
                         {% if p.menu_title %}
@@ -98,7 +115,6 @@
                       {% endif %}
                       </a>
                     </li>
-                {% endif %}
             {% else %}
                 <li><a class="page-link" href="{{p.url | prepend: site.baseurl}}">
                   {% if p.menu_title %}

@@ -38,7 +38,7 @@ View the [GitHub issues list]({{ site.github.issues_url }}) for the OpenDDS proj
 
 ### Online Documentation
 
-View the [online documentation](documentation.html) for the OpenDDS project.
+The documentation for OpenDDS is available on [Read the Docs]({{ site.latest_docs_url }}).
 
 ### The Code
 
