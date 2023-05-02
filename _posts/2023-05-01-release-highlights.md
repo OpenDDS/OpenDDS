@@ -8,7 +8,7 @@ author: OpenDDS
 # Transition to Unity Foundation
 
 [OpenDDS 3.24](https://github.com/OpenDDS/OpenDDS/releases/tag/DDS-3.24) marks the first release of OpenDDS not performed by [Object Computing, Inc. (OCI)](https://objectcomputing.com)!
-As announced in {% post_url 2023-03-17-transition-to-unity %}, the administration of the OpenDDS Foundation passed from OCI to Unity Foundation in March 2023.
+As announced in {% post_url 2023-03-17-transition-to-unity %}, the administration of the OpenDDS Foundation passed from OCI to [Unity Foundation](https://unityfoundation.io) in March 2023.
 The relevant points from the transition are:
 
 * OpenDDS will remain open-source software.
@@ -18,7 +18,7 @@ The relevant points from the transition are:
 * OpenDDS Foundation has gained not-for-profit status.
 * Unity Foundation will dedicate one engineer to the maintenance, development, and release of OpenDDS.
 * Systems and processes administered by OCI on behalf of the OpenDDS Foundation will no longer be maintained.
-  Unity Foundation will take over some of these systems and processes while others will be deprecated and eliminated to reduce financial and mental overhead.
+  Unity Foundation will take over some of these systems and processes while others will be deprecated and eliminated to reduce overhead.
 
 For more on OCI's role, see {% link foundation/minutes/2023-04-12.html %}.
 
@@ -39,32 +39,36 @@ As part of the transition, OpenDDS Foundation has adopted the following (tentati
 | November  | Release Article         |
 | December  | Year in Review Webinar  |
 
-The general plan is to have one release and [Technical Advisory Board (TAB) Meeting]({% link foundation/index.html }%) every quarter.
+The general plan is to have one release and [Technical Advisory Board (TAB) Meeting]({% link foundation/index.html %}) every quarter.
 This will be followed by a news article (like this one) that goes over the highlights of current release.
 In June and December, there will be webinars to get feedback from the community and reflect on progress.
 In March and September, there will an article or webinar on some aspect of OpenDDS.
 
 # OpenDDS Developer's Guide
 
-A major accomplishment in OpenDDS 3.24 was the migration of the Developer's Guide from an Open Office Document that was held hostage on a private SVN server to [ReStructured Text in the repository](https://github.com/OpenDDS/OpenDDS/tree/master/docs/devguide).
-The Developer's Guide corresponding to the master branch is hosted at https://opendds.readthedocs.io/en/latest-release/.
-Versions for releases will also be available, e.g., https://opendds.readthedocs.io/en/dds-3.24/.
+A major accomplishment in OpenDDS 3.24 was the migration of the Developer's Guide from an Open Office Document that was hosted on a private server to [reStructuredText in the repository](https://github.com/OpenDDS/OpenDDS/tree/master/docs/devguide).
+The Developer's Guide corresponding to the latest release is hosted at https://opendds.readthedocs.io/en/latest-release/.
+There is also a version that follows the master branch at https://opendds.readthedocs.io/en/master.
+Versions of the Developer's Guide corresponding to specific releases, e.g., https://opendds.readthedocs.io/en/dds-3.24/, can be viewed by using the Read the Docs version switcher (the book icon always at the bottom of the viewable part of the page), or by choosing from the versions on [the OpenDDS Read the Docs project page](https://readthedocs.org/projects/opendds/).
+
 We believe this is a significant improvement for two reasons:
 1. It makes it that much easier to write the documentation along side the code which increases the chance that the relevant documentation gets created.
 2. The community can now edit the Developer's Guide.
-   If you have a correction, find submit a pull request!
+   If you have a correction, please submit a pull request!
 
 The conversion was performed by an automated process and certain elements did not translate well.
 We will continue to correct errors as we find them.
-However, if you find them before we done, please submit an issue or pull request.
+However, if you find them before we do, please submit an issue or pull request.
 
 Have we mentioned that you can now submit pull requests to change the OpenDDS Developer's Guide?
 
-# TAO 2.2a and Release Tarballs
+# TAO 2.2a
 
-OCI maintained a derivative of ACE/TAO called TAO 2.2a which was the default ACE/TAO used by OpenDDS when using the `configure` script.
+OCI's distribution of ACE/TAO, called TAO 2.2a, was previously the default version used by the `configure` script.
 Performing a release of OpenDDS sometimes involved creating a release of TAO 2.2a which involves assets internal to OCI.
-As OpenDDS Foundation no longer has access to these assets and since it is unclear if OCI will maintain TAO 2.2a in the future, we decided to make DOCGroup ACE6/TAO2 the default ACE/TAO moving forward.
+As OpenDDS Foundation no longer has access to these assets, we decided to decouple the release process from TAO 2.2a and make DOCGroup ACE6/TAO2 the default ACE/TAO moving forward.
+
+# Release Tarballs
 
 Another change related to the transition from OCI is the availability of release tarballs.
 Posting release tarballs to http://download.ociweb.com was a practice that was established before OpenDDS was hosted on GitHub.
