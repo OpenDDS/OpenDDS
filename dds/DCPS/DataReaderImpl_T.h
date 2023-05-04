@@ -1064,17 +1064,15 @@ namespace OpenDDS {
 
 protected:
 
-  virtual RcHandle<MessageHolder> dds_demarshal(const OpenDDS::DCPS::ReceivedDataSample& sample,
-                                                DDS::InstanceHandle_t publication_handle,
-                                                OpenDDS::DCPS::SubscriptionInstance_rch& instance,
-                                                bool& just_registered,
-                                                bool& filtered,
-                                                OpenDDS::DCPS::MarshalingType marshaling_type,
-                                                bool full_copy)
+  virtual void dds_demarshal(const OpenDDS::DCPS::ReceivedDataSample& sample,
+                             DDS::InstanceHandle_t publication_handle,
+                             OpenDDS::DCPS::SubscriptionInstance_rch& instance,
+                             bool& just_registered,
+                             bool& filtered,
+                             OpenDDS::DCPS::MarshalingType marshaling_type)
   {
     unique_ptr<MessageTypeWithAllocator> data(new (*data_allocator()) MessageTypeWithAllocator);
     dynamic_hook(*data);
-    RcHandle<MessageHolder> message_holder;
 
     Message_Block_Ptr payload(sample.data(&mb_alloc_));
     if (marshal_skip_serialize_) {
@@ -1083,10 +1081,10 @@ protected:
           ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: DataReaderImpl::dds_demarshal: ")
                     ACE_TEXT("attempting to skip serialize but bad from_message_block. Returning from demarshal.\n")));
         }
-        return message_holder;
+        return;
       }
       store_instance_data(move(data), publication_handle, sample.header_, instance, just_registered, filtered);
-      return message_holder;
+      return;
     }
     const bool encapsulated = sample.header_.cdr_encapsulation_;
 
@@ -1104,11 +1102,11 @@ protected:
             ACE_TEXT("deserialization of encapsulation header failed.\n"),
             TraitsType::type_name()));
         }
-        return message_holder;
+        return;
       }
       Encoding encoding;
       if (!encap.to_encoding(encoding, type_support_->base_extensibility())) {
-        return message_holder;
+        return;
       }
 
       if (decoding_modes_.find(encoding.kind()) == decoding_modes_.end()) {
@@ -1120,7 +1118,7 @@ protected:
             TraitsType::type_name(),
             Encoding::kind_to_string(encoding.kind()).c_str()));
         }
-        return message_holder;
+        return;
       }
       if (DCPS_debug_level >= 8) {
         ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) ")
@@ -1141,9 +1139,6 @@ protected:
       ser_ret = ser >> OpenDDS::DCPS::KeyOnly<MessageType>(*data);
     } else {
       ser_ret = ser >> *data;
-      if (full_copy) {
-        message_holder = make_rch<MessageHolder_T<MessageType> >(*data);
-      }
     }
     if (!ser_ret) {
       if (ser.get_construction_status() != Serializer::ConstructionSuccessful) {
@@ -1159,7 +1154,7 @@ protected:
                     TraitsType::type_name()));
         }
       }
-      return message_holder;
+      return;
     }
 
 #ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
@@ -1181,21 +1176,18 @@ protected:
               to_string(static_cast<MessageId>(sample.header_.message_id_))));
           }
           filtered = true;
-          message_holder.reset();
-          return message_holder;
+          return;
         }
         const MessageType& type = static_cast<MessageType&>(*data);
         if (!content_filtered_topic_->filter(type, sample_only_has_key_fields)) {
           filtered = true;
-          message_holder.reset();
-          return message_holder;
+          return;
         }
       }
     }
 #endif
 
     store_instance_data(move(data), publication_handle, sample.header_, instance, just_registered, filtered);
-    return message_holder;
   }
 
   virtual void dispose_unregister(const OpenDDS::DCPS::ReceivedDataSample& sample,
@@ -1214,7 +1206,7 @@ protected:
     if (sample.header_.key_fields_only_) {
       marshaling = OpenDDS::DCPS::KEY_ONLY_MARSHALING;
     }
-    dds_demarshal(sample, publication_handle, instance, just_registered, filtered, marshaling, false);
+    dds_demarshal(sample, publication_handle, instance, just_registered, filtered, marshaling);
   }
 
   virtual void purge_data(OpenDDS::DCPS::SubscriptionInstance_rch instance)
@@ -2042,21 +2034,46 @@ void finish_store_instance_data(unique_ptr<MessageTypeWithAllocator> instance_da
     }
   }
 
+  const ValueDispatcher* vd = get_value_dispatcher();
+  const DDS::Time_t timestamp = {
+    header.source_timestamp_sec_,
+    header.source_timestamp_nanosec_
+  };
+
   bool event_notify = false;
 
   if (is_dispose_msg) {
     event_notify = instance_ptr->instance_state_->dispose_was_received(header.publication_id_);
+
+    const Observer_rch disposed_observer = get_observer(Observer::e_DISPOSED);
+    if (disposed_observer && instance_data && vd) {
+      Observer::Sample s(instance_ptr->instance_handle_, instance_ptr->instance_state_->instance_state(), timestamp, header.sequence_, instance_data->message(), *vd);
+      disposed_observer->on_disposed(this, s);
+    }
   }
 
   if (is_unregister_msg) {
     if (instance_ptr->instance_state_->unregister_was_received(header.publication_id_)) {
       event_notify = true;
     }
+
+    const Observer_rch unregistered_observer = get_observer(Observer::e_UNREGISTERED);
+    if (unregistered_observer && instance_data && vd) {
+      Observer::Sample s(instance_ptr->instance_handle_, instance_ptr->instance_state_->instance_state(), timestamp, header.sequence_, instance_data->message(), *vd);
+      unregistered_observer->on_unregistered(this, s);
+    }
+
   }
 
   if (!is_dispose_msg && !is_unregister_msg) {
     event_notify = true;
     instance_ptr->instance_state_->data_was_received(header.publication_id_);
+
+    const Observer_rch sample_received_observer = get_observer(Observer::e_SAMPLE_RECEIVED);
+    if (sample_received_observer && instance_data && vd) {
+      Observer::Sample s(instance_ptr->instance_handle_, instance_ptr->instance_state_->instance_state(), timestamp, header.sequence_, instance_data->message(), *vd);
+      sample_received_observer->on_sample_received(this, s);
+    }
   }
 
   if (!event_notify) {

@@ -253,6 +253,7 @@ public:
   DDS::ReturnCode_t
   unregister_instance_i(
     DDS::InstanceHandle_t handle,
+    const Sample* sample,
     const DDS::Time_t & source_timestamp);
 
   /**
@@ -287,6 +288,7 @@ public:
    * broadcast the disposed instance.
    */
   DDS::ReturnCode_t dispose(DDS::InstanceHandle_t handle,
+                            const Sample& sample,
                             const DDS::Time_t & source_timestamp);
 
   /**
@@ -690,6 +692,7 @@ private:
   void notify_publication_lost(const DDS::InstanceHandleSeq& handles);
 
   DDS::ReturnCode_t dispose_and_unregister(DDS::InstanceHandle_t handle,
+                                           const Sample* sample,
                                            const DDS::Time_t& timestamp);
 
   /**
