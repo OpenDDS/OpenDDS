@@ -6,12 +6,11 @@
 #ifndef OPENDDS_DCPS_CONFIG_STORE_IMPL_H
 #define OPENDDS_DCPS_CONFIG_STORE_IMPL_H
 
-#include "dcps_export.h"
-
-#include "SafetyProfileStreams.h"
 #include "InternalTopic.h"
 #include "NetworkAddress.h"
+#include "SafetyProfileStreams.h"
 #include "TimeDuration.h"
+#include "dcps_export.h"
 
 #include "dds/DdsDcpsInfrastructureC.h"
 
@@ -73,27 +72,27 @@ public:
   ConfigStoreImpl();
   ~ConfigStoreImpl();
 
-  CORBA::Boolean has(const char* key);
+  DDS::Boolean has(const char* key);
 
   void set_boolean(const char* key,
-                   CORBA::Boolean value);
-  CORBA::Boolean get_boolean(const char* key,
-                             CORBA::Boolean value);
+                   DDS::Boolean value);
+  DDS::Boolean get_boolean(const char* key,
+                           DDS::Boolean value);
 
   void set_int32(const char* key,
-                 CORBA::Long value);
-  CORBA::Long get_int32(const char* key,
-                        CORBA::Long value);
+                 DDS::Int32 value);
+  DDS::Int32 get_int32(const char* key,
+                        DDS::Int32 value);
 
   void set_uint32(const char* key,
-                  CORBA::ULong value);
-  CORBA::ULong get_uint32(const char* key,
-                          CORBA::ULong value);
+                  DDS::UInt32 value);
+  DDS::UInt32 get_uint32(const char* key,
+                          DDS::UInt32 value);
 
   void set_float64(const char* key,
-                   CORBA::Double value);
-  CORBA::Double get_float64(const char* key,
-                            CORBA::Double value);
+                   DDS::Float64 value);
+  DDS::Float64 get_float64(const char* key,
+                            DDS::Float64 value);
 
   void set_string(const char* key,
                   const char* value);

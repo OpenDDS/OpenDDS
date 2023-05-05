@@ -8,9 +8,10 @@
 #ifndef OPENDDS_DCPS_TIME_HELPER_H
 #define OPENDDS_DCPS_TIME_HELPER_H
 
+#include "PoolAllocator.h"
+
 #include <dds/DdsDcpsCoreC.h>
 #include <dds/DdsDcpsInfoUtilsC.h>
-#include "PoolAllocator.h"
 
 #include <ace/OS_NS_sys_time.h>
 

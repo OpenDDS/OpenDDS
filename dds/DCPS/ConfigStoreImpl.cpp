@@ -12,28 +12,45 @@
 #include "Qos_Helper.h"
 #include "debug.h"
 
-#include "ace/SString.h"
-
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
 namespace DCPS {
 
+namespace {
+
+DDS::DataWriterQos datawriter_qos()
+{
+  return DataWriterQosBuilder().durability_transient_local();
+}
+
+DDS::DataReaderQos datareader_qos()
+{
+  return DataReaderQosBuilder()
+    .reliability_reliable()
+    .durability_transient_local()
+    .reader_data_lifecycle_autopurge_nowriter_samples_delay(make_duration_t(0, 0))
+    .reader_data_lifecycle_autopurge_disposed_samples_delay(make_duration_t(0, 0));
+}
+
+}
+
 ConfigStoreImpl::ConfigStoreImpl()
   : config_topic_(make_rch<InternalTopic<ConfigPair> >())
-  , config_writer_(make_rch<InternalDataWriter<ConfigPair> >(DataWriterQosBuilder().durability_transient_local()))
-  , config_reader_(make_rch<InternalDataReader<ConfigPair> >(DataReaderQosBuilder().reliability_reliable().durability_transient_local().reader_data_lifecycle_autopurge_nowriter_samples_delay(make_duration_t(0, 0)).reader_data_lifecycle_autopurge_disposed_samples_delay(make_duration_t(0, 0))))
+  , config_writer_(make_rch<InternalDataWriter<ConfigPair> >(datawriter_qos()))
+  , config_reader_(make_rch<InternalDataReader<ConfigPair> >(datareader_qos()))
 {
   config_topic_->connect(config_writer_);
   config_topic_->connect(config_reader_);
 }
 
-ConfigStoreImpl::~ConfigStoreImpl() {
+ConfigStoreImpl::~ConfigStoreImpl()
+{
   config_topic_->disconnect(config_reader_);
   config_topic_->disconnect(config_writer_);
 }
 
-CORBA::Boolean
+DDS::Boolean
 ConfigStoreImpl::has(const char* key)
 {
   DCPS::InternalDataReader<ConfigPair>::SampleSequence samples;
@@ -52,14 +69,14 @@ ConfigStoreImpl::has(const char* key)
 
 void
 ConfigStoreImpl::set_boolean(const char* key,
-                             CORBA::Boolean value)
+                             DDS::Boolean value)
 {
-  set_string(key, value ? "1" : "0");
+  set_string(key, value ? "true" : "false");
 }
 
-CORBA::Boolean
+DDS::Boolean
 ConfigStoreImpl::get_boolean(const char* key,
-                             CORBA::Boolean value)
+                             DDS::Boolean value)
 {
   DCPS::InternalDataReader<ConfigPair>::SampleSequence samples;
   DCPS::InternalSampleInfoSequence infos;
@@ -69,9 +86,12 @@ ConfigStoreImpl::get_boolean(const char* key,
     const ConfigPair& sample = samples[idx];
     const DDS::SampleInfo& info = infos[idx];
     if (info.valid_data) {
-      // We could support "true" and "false".
-      CORBA::Boolean x = 0;
-      if (DCPS::convertToInteger(sample.value(), x)) {
+      DDS::Boolean x = 0;
+      if (sample.value() == "true") {
+        value = true;
+      } else if (sample.value() == "false") {
+        value = false;
+      } else if (DCPS::convertToInteger(sample.value(), x)) {
         value = x;
       } else if (log_level >= LogLevel::Warning) {
         ACE_ERROR((LM_WARNING,
@@ -87,14 +107,14 @@ ConfigStoreImpl::get_boolean(const char* key,
 
 void
 ConfigStoreImpl::set_int32(const char* key,
-                           CORBA::Long value)
+                           DDS::Int32 value)
 {
   set_string(key, to_dds_string(value).c_str());
 }
 
-CORBA::Long
+DDS::Int32
 ConfigStoreImpl::get_int32(const char* key,
-                           CORBA::Long value)
+                           DDS::Int32 value)
 {
   DCPS::InternalDataReader<ConfigPair>::SampleSequence samples;
   DCPS::InternalSampleInfoSequence infos;
@@ -104,7 +124,7 @@ ConfigStoreImpl::get_int32(const char* key,
     const ConfigPair& sample = samples[idx];
     const DDS::SampleInfo& info = infos[idx];
     if (info.valid_data) {
-      CORBA::Long x = 0;
+      DDS::Int32 x = 0;
       if (DCPS::convertToInteger(sample.value(), x)) {
         value = x;
       } else if (log_level >= LogLevel::Warning) {
@@ -121,14 +141,14 @@ ConfigStoreImpl::get_int32(const char* key,
 
 void
 ConfigStoreImpl::set_uint32(const char* key,
-                            CORBA::ULong value)
+                            DDS::UInt32 value)
 {
   set_string(key, to_dds_string(value).c_str());
 }
 
-CORBA::ULong
+DDS::UInt32
 ConfigStoreImpl::get_uint32(const char* key,
-                            CORBA::ULong value)
+                            DDS::UInt32 value)
 {
   DCPS::InternalDataReader<ConfigPair>::SampleSequence samples;
   DCPS::InternalSampleInfoSequence infos;
@@ -138,7 +158,7 @@ ConfigStoreImpl::get_uint32(const char* key,
     const ConfigPair& sample = samples[idx];
     const DDS::SampleInfo& info = infos[idx];
     if (info.valid_data) {
-      CORBA::ULong x = 0;
+      DDS::UInt32 x = 0;
       if (DCPS::convertToInteger(sample.value(), x)) {
         value = x;
       } else if (log_level >= LogLevel::Warning) {
@@ -155,14 +175,14 @@ ConfigStoreImpl::get_uint32(const char* key,
 
 void
 ConfigStoreImpl::set_float64(const char* key,
-                             CORBA::Double value)
+                             DDS::Float64 value)
 {
   set_string(key, to_dds_string(value).c_str());
 }
 
-CORBA::Double
+DDS::Float64
 ConfigStoreImpl::get_float64(const char* key,
-                             CORBA::Double value)
+                             DDS::Float64 value)
 {
   DCPS::InternalDataReader<ConfigPair>::SampleSequence samples;
   DCPS::InternalSampleInfoSequence infos;
@@ -172,7 +192,7 @@ ConfigStoreImpl::get_float64(const char* key,
     const ConfigPair& sample = samples[idx];
     const DDS::SampleInfo& info = infos[idx];
     if (info.valid_data) {
-      CORBA::Double x = 0;
+      DDS::Float64 x = 0;
       if (DCPS::convertToDouble(sample.value(), x)) {
         value = x;
       } else if (log_level >= LogLevel::Warning) {
@@ -304,7 +324,7 @@ ConfigStoreImpl::set(const char* key,
     set_int32(key, value.value().msec());
     break;
   case Format_IntegerSeconds:
-    set_int32(key, value.value().sec());
+    set_int32(key, static_cast<DDS::Int32>(value.value().sec()));
     break;
   }
 }
