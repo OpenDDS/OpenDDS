@@ -245,7 +245,6 @@ The following is a simple news fragment example:
 
 Fragments contain RST content for the news along with some RST directive-like metadata.
 Lines starting with ``#`` are ignored as comments.
-`RST comments <https://www.sphinx-doc.org/en/master/usage/restructuredtext/basics.html#comments>`__ can be used, but they will be inserted into the news.
 Content for the news must be formatted as a `list <https://www.sphinx-doc.org/en/master/usage/restructuredtext/basics.html#lists-and-quote-like-blocks>`__.
 It will usually be one list item, but can be multiple items if they are separate changes from a user perspective.
 
@@ -253,8 +252,16 @@ It will usually be one list item, but can be multiple items if they are separate
 
   If using nested lists, reStructuredText requires these to have empty lines before and after as shown in the example above.
 
-The lists of news content must be contained somewhere within a section, indicated by ``news-start-section`` and ``news-end-section``.
+Content must be contained somewhere within a section, indicated by ``news-start-section`` and ``news-end-section``.
 Having text outside sections that isn't a comment or a special news directive is an error.
+
+Content should provide a reasonable amount of context to users so they can figure out if and how a change will impact or benefit them.
+Some of this can be achieved through :ref:`subsections <docs-news-subsections>`.
+Content should link to the rest of the Sphinx documentation and to source files using ``:ghfile:`` if relevant.
+
+PRs will usually have just have one fragment file, but can have more then one.
+For example, say there is a PR that is making changes associated with an existing fragment file, but also has changes that are separate from the PRs in that fragment.
+This might indicate a new PR should be made for those changes, but if that's impractical, a new separate fragment file for those changes can be made.
 
 Directives
 ----------
@@ -263,22 +270,8 @@ news-prs
 ^^^^^^^^
 
 ``news-prs`` should declare all the PRs that make up the changes to OpenDDS described in the fragment.
-It's an error to omit ``news-prs`` from a fragment or have more than one.
-
-``this`` will replaced with the PR number automatically by GitHub Actions after the PR is merged.
-If it is a new fragment, then:
-
-.. code-block:: rst
-
-  .. news-prs: this
-
-If building on a previous PR, then add ``this`` to the end:
-
-.. code-block:: rst
-
-  .. news-prs: 1000 this
-
-If adding them manually, do not add ``#`` at the start of the PR numbers.
+It's an error to omit ``news-prs`` from a fragment or to have more than one ``news-prs`` directive.
+Do not add ``#`` at the start of the PR numbers.
 Please add follow-on PRs separated by spaces as they are created.
 
 .. code-block:: rst
@@ -328,6 +321,8 @@ The top-level sections must be one of the following:
   Changes that might be relevant to users, but might not fit in any of the other sections.
   This could be a change in policy or change outside the OpenDDS source code that doesn't have a PR associated with it.
 
+.. _docs-news-subsections:
+
 Sections can be nested as subsections.
 There is no requirement for subsections or restrictions on their names, but it's suggested to group otherwise separate changes if they are all impact the same part of OpenDDS.
 For example:
@@ -369,16 +364,13 @@ This will allow other fragments to add to "RTPS" or "RTPS Relay".
 news-rank
 ^^^^^^^^^
 
-Rank is used to help sort entries and sections.
+Rank is an integer used to help sort content and sections.
 Setting the rank higher using ``news-rank`` can headline a change within a section.
-This is optional and by default items are ranked by oldest PR number.
+This is optional and if omitted or if rank is the same, then items are ranked by the oldest PR number.
 
-Rank has the following behavior:
-
-- The rank of content is always 0 after ``news-start-section`` unless ``news-rank`` is used to set it.
-- Rank is persistent between ``news-start-section`` and ``news-end-section``, even if there are subsections.
-  Rank is saved on a stack along with the section so they act like local variables in a function.
-- When sections have different ranks across fragments (or even in the same fragment), then the largest of ranks is used.
+Once used, ``news-rank`` applies to both subsections and content directly in the section between the ``news-start-section`` and the ``news-end-section``.
+Content in subsections will need a separate ``news-rank`` to change the order, as sorting of subsections is separate.
+When sections have different ranks across fragments (or even in the same fragment), then the largest of ranks is used.
 
 For an example of all that, let us say we had the following fragments:
 
@@ -442,6 +434,8 @@ One final thing to note is that top-level sections, like "Additions", have a fix
 Generating the News
 ===================
 
-Before a release, a preview of the whole news for the next release will always be available for preview in :doc:`/news`.
+Before a release, a preview of the whole news for the next release will always be available in :doc:`/news`.
 It's also possible to see the source of that preview by running ``./docs/news.py preview``.
 During a release the fragments are permanently committed to :doc:`/news` and :ghfile:`NEWS.md` and the fragment files in :ghfile:`docs/news.d` are removed.
+
+.. seealso:: :doc:`release`

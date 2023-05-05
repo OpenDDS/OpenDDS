@@ -3,9 +3,9 @@
 
 :tocdepth: 2
 
-########
-Releases
-########
+#############
+Release Notes
+#############
 
 These are all the recent releases of OpenDDS.
 
@@ -125,3 +125,9 @@ Notes
 
 - Release files will only be uploaded to GitHub from now on
 - ``OpenDDS::DCPS::RepoId`` has been removed, if needed use ``OpenDDS::DCPS::GUID_t`` instead (:ghpr:`3972`)
+
+**************
+Older Releases
+**************
+
+Older releases can be found in :ghfile:`NEWS.md`
