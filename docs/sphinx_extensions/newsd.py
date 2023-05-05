@@ -294,12 +294,6 @@ class ParseError(RuntimeError):
         super().__init__('Parse error at {}: {}'.format(loc_str(loc), ' '.join(args)))
 
 
-def get_pr(string):
-    if string == 'this':
-        return 1
-    return int(string)
-
-
 def parse(root, path):
     lineno = 0
     rank = 0
@@ -324,7 +318,7 @@ def parse(root, path):
                         raise ParseError(loc, 'Can only have one news-prs in a fragment file')
                     try:
                         if arg != 'none':
-                            prs = set([get_pr(pr) for pr in arg.split(' ')])
+                            prs = set([int(pr) for pr in arg.split(' ')])
                     except ValueError:
                         raise ParseError(loc,
                             'news-prs must be space seperated PR numbers or just "none"')
