@@ -28,8 +28,6 @@ namespace {
 
 }
 
-namespace {
-
 std::ostream& operator<<(std::ostream& out, const SIW& siw)
 {
   out << '('
@@ -46,8 +44,6 @@ std::ostream& operator<<(std::ostream& out, const SIW& siw)
       << "agr=" << siw.si.absolute_generation_rank << ','
       << "vd=" << siw.si.valid_data << ')';
   return out;
-}
-
 }
 
 typedef InternalDataReader<Sample> ReaderType;

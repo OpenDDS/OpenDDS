@@ -103,6 +103,29 @@ TEST(dds_DCPS_Time_Helper, make_duration)
   EXPECT_EQ(d.nanosec, 2u);
 }
 
+TEST(dds_DCPS_Time_Helper, duration_to_dds_string)
+{
+  const DDS::Duration_t d = { 1, 2 };
+  const String s = to_dds_string(d);
+  EXPECT_EQ(s, "1.000000002");
+}
+
+TEST(dds_DCPS_Time_Helper, duration_from_dds_string)
+{
+  DDS::Duration_t x;
+  EXPECT_TRUE(from_dds_string("1.000000002", x));
+  EXPECT_TRUE(x == make_duration_t(1,2));
+
+  EXPECT_TRUE(from_dds_string("1", x));
+  EXPECT_TRUE(x == make_duration_t(1,0));
+
+  EXPECT_TRUE(from_dds_string(".1", x));
+  EXPECT_TRUE(x == make_duration_t(0, 100000000));
+
+  EXPECT_FALSE(from_dds_string(".", x));
+  EXPECT_FALSE(from_dds_string("not a duration", x));
+}
+
 TEST(dds_DCPS_Time_Helper, add_time_duration)
 {
   const DDS::Time_t t = {1, 500000000};

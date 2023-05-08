@@ -116,6 +116,15 @@ String to_dds_string(const unsigned char* array, size_t length)
   return ret;
 }
 
+OpenDDS_Dcps_Export String to_dds_string(double to_convert)
+{
+  const char* fmt = "%g";
+  const int buff_size = 20 + 1; // note +1 for null terminator
+  char buf[buff_size];
+  ACE_OS::snprintf(&buf[0], buff_size, fmt, to_convert);
+  return String(buf);
+}
+
 String to_hex_dds_string(
   const unsigned char* data, const size_t size, const char delim, const size_t delim_every)
 {
