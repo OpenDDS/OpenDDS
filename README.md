@@ -90,15 +90,17 @@ the Support section above for contact information.
 
 ## Dependencies
 
-For a complete detailed list of dependencies, see
-[`docs/dependencies.md`](docs/dependencies.md).
+These are just the required dependencies. For a complete detailed list of
+dependencies, including optional ones, see
+https://opendds.readthedocs.io/en/latest-release/building/dependencies.html.
 
 ### ACE/TAO
 
 OpenDDS requires TAO for both IDL compilation as well as interaction with the
 DCPSInfoRepo. ACE is also required, but it is always included with TAO. If you
-will be using the `configure` script for OpenDDS (see the
-[`INSTALL.md`](INSTALL.md) file for details), you do not need to download TAO
+will be using the `configure` script for OpenDDS (see
+https://opendds.readthedocs.io/en/latest-release/building/dependencies.html
+for details), you do not need to download TAO
 first -- the `configure` script will download it for you.
 
 There are two distributions of ACE/TAO that can be used with OpenDDS:
@@ -130,21 +132,6 @@ included in this source tree, and generating Makefiles or Visual Studio project
 files.
 
 On Windows we recommend the use of [Strawberry Perl](https://strawberryperl.com).
-
-### Optional Dependencies
-
-* [Google Test](docs/dependencies.md#google-test), for various tests.
-  * Google Test is required for OpenDDS tests. If tests are not built, Google Test is not needed.
-* [CMake](docs/dependencies.md#cmake), for building Google Test and the OpenDDS
-  CMake module.
-* [Java](docs/dependencies.md#java), for Java bindings.
-* [Qt](docs/dependencies.md#qt), for Monitor application and ishapes demo.
-* [Wireshark](docs/dependencies.md#wireshark), for the OpenDDS DCPS Wireshark
-  dissector.
-* [RapidJSON](docs/dependencies.md#rapidjson), for optional dissector sample
-  dissection support and JSON typesupport.
-* [Xerces-C++](docs/dependencies.md#xerces), for XML QoS and DDS Security.
-* [OpenSSL](docs/dependencies.md#openssl), for DDS Security.
 
 ## Supported Platforms
 
@@ -200,8 +187,8 @@ This release of OpenDDS has been tested using the following compilers:
 
 ## Building and Installing
 
-For building and installation instructions see the [`INSTALL.md`](INSTALL.md)
-file in this directory.
+For building and installation instructions see
+https://opendds.readthedocs.io/en/latest-release/building/index.html
 
 ## Quick Start with Docker
 

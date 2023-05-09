@@ -1,6 +1,16 @@
+:hide-toc: true
+
 #######
 OpenDDS
 #######
+
+.. toctree::
+  :hidden:
+
+  building/index
+  devguide/index
+  internal/index
+  glossary
 
 Welcome to the documentation for OpenDDS |release|!
 
@@ -17,52 +27,33 @@ Welcome to the documentation for OpenDDS |release|!
 
         You can find the documentation for the latest release `here <https://opendds.readthedocs.io/en/latest-release/>`_.
 
-*****************
-Developer's Guide
-*****************
+OpenDDS is an open-source C++ framework for exchanging data in distributed systems.
+It is an implementation of `Object Management Group's <https://omg.org>`__ specification "Data Distribution Service for Real-time Systems" (DDS) as well as some other related specifications.
+OpenDDS comes with a C++ and Java API.
 
-.. toctree::
-  :maxdepth: 2
+*************
+Using OpenDDS
+*************
 
-  devguide/introduction
-  devguide/getting_started
-  devguide/quality_of_service
-  devguide/conditions_and_listeners
-  devguide/content_subscription_profile
-  devguide/built_in_topics
-  devguide/run_time_configuration
-  devguide/opendds_idl
-  devguide/the_dcps_information_repository
-  devguide/java_bindings
-  devguide/modeling_sdk
-  devguide/alternate_interfaces_to_data
-  devguide/safety_profile
-  devguide/dds_security
-  devguide/internet_enabled_rtps
-  devguide/xtypes
-  devguide/common_terms
+:doc:`building/index`
+  How to build and install OpenDDS
 
-**********************
-Internal Documentation
-**********************
+:ref:`introduction--dcps-overview`
+  A conceptual overview of how DDS works
 
-This documentation is for those who want to contribute to OpenDDS and those who are just curious!
+:doc:`devguide/getting_started`
+  A tutorial on making basic OpenDDS applications
 
-.. toctree::
-  :maxdepth: 2
+Much more information can be found in the :doc:`devguide/index`
 
-  internal/dev_guidelines
-  internal/docs
-  internal/unit_tests
-  internal/github_actions
-  internal/running_tests
-  internal/bench
-  internal/release
+*******************
+Other Documentation
+*******************
 
-******************
-Indices and tables
-******************
+:doc:`internal/index`
+  Documentation for OpenDDS contributors
 
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
+:doc:`glossary`
+  A dictionary of common terms
+
+:ref:`genindex`

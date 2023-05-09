@@ -86,6 +86,7 @@ extensions = [
 
     # Other ones
     'sphinx_copybutton',
+    'sphinx_inline_tabs',
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -146,18 +147,17 @@ sidebar_links = {
     'Main Website': 'https://opendds.org',
     'GitHub Repo': github_repo,
 }
-our_template_path = ext / 'templates'
-sidebar_links_template_name = 'sidebar-links.html'
-with (our_template_path / sidebar_links_template_name).open('w') as f:
-    print('<div class="sidebar-tree" style="margin-top: 0px;"><ul>', file=f)
-    for name, url in sidebar_links.items():
-        print('  <li><a class="reference" href="{}">{}</a></li>'.format(url, name), file=f)
-    print('</ul></div>', file=f)
-templates_path = [str(our_template_path)]
+html_context = {
+    'sidebar_links': {
+        'Main Website': 'https://opendds.org',
+        'GitHub Repo': github_repo,
+    }
+}
+templates_path = [str(ext / 'templates')]
 html_sidebars = {
     '**': [
         'sidebar/brand.html',
-        sidebar_links_template_name,
+        'sidebar-links.html',
         'sidebar/search.html',
         'sidebar/scroll-start.html',
         'sidebar/navigation.html',

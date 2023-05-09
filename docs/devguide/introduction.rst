@@ -727,7 +727,7 @@ Installation
 ..
     Sect<1.3>
 
-The steps on how to build OpenDDS can be found in :ghfile:`INSTALL.md`.
+The steps on how to build OpenDDS can be found in :doc:`/building/index`.
 
 To build OpenDDS with DDS Security, see :ref:`dds_security--building-opendds-with-security-enabled`.
 
