@@ -622,7 +622,7 @@ TransportRegistry::bind_config(const TransportConfig_rch& cfg,
 
     if (found)
     {
-      ACE_TString cfg_name = ACE_TEXT_CHAR_TO_TCHAR(cfg->name().c_str());
+      const String cfg_name = cfg->name();
       // create if not already created
       int ret = create_transport_template_instance(domain_id, cfg_name);
 
@@ -639,7 +639,7 @@ TransportRegistry::bind_config(const TransportConfig_rch& cfg,
         OPENDDS_STRING transport_config_name;
 
         if (cfg_name.c_str() != 0) {
-          transport_config_name = ACE_TEXT_ALWAYS_CHAR(cfg_name.c_str());
+          transport_config_name = cfg_name;
         } else {
           ACE_ERROR((LM_ERROR,
                      ACE_TEXT("(%P|%t) TransportRegistry::bind_config: ")
@@ -739,7 +739,7 @@ TransportRegistry::create_new_transport_instance_for_participant(DDS::DomainId_t
 {
   // check per_participant
   TransportTemplate templ;
-  if (get_transport_template_info(ACE_TEXT_CHAR_TO_TCHAR(transport_config_name.c_str()), templ)) {
+  if (get_transport_template_info(transport_config_name, templ)) {
     if (!templ.instantiate_per_participant) {
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("(%P|%t) ERROR: TransportRegistry::")
@@ -768,10 +768,10 @@ TransportRegistry::create_new_transport_instance_for_participant(DDS::DomainId_t
   ach.open_section(ach.root_section(), ACE_TEXT("the_transport_setup"), true, sect_key);
 
   if (TheServiceParticipant->belongs_to_domain_range(id) ||
-      config_has_transport_template(ACE_TEXT_CHAR_TO_TCHAR(transport_config_name.c_str()))) {
+      config_has_transport_template(transport_config_name)) {
     TransportTemplate tr_inst;
 
-    if (get_transport_template_info(ACE_TEXT_CHAR_TO_TCHAR(cfg->name().c_str()), tr_inst)) {
+    if (get_transport_template_info(cfg->name(), tr_inst)) {
       ValueMap customs;
 
       if (!process_customizations(id, tr_inst, customs)) {
@@ -867,7 +867,7 @@ TransportRegistry::get_config_instance_name(const DDS::DomainId_t id)
 }
 
 int
-TransportRegistry::create_transport_template_instance(DDS::DomainId_t domain, const ACE_TString& config_name)
+TransportRegistry::create_transport_template_instance(DDS::DomainId_t domain, const String& config_name)
 {
   OPENDDS_STRING transport_inst_name = get_transport_template_instance_name(domain);
   OPENDDS_STRING config_inst_name = get_config_instance_name(domain);
@@ -940,10 +940,10 @@ TransportRegistry::create_transport_template_instance(DDS::DomainId_t domain, co
 }
 
 bool
-TransportRegistry::config_has_transport_template(const ACE_TString& config_name) const
+TransportRegistry::config_has_transport_template(const String& config_name) const
 {
   for (OPENDDS_VECTOR(TransportTemplate)::const_iterator i = transport_templates_.begin(); i != transport_templates_.end(); ++i) {
-    if (!ACE_OS::strcmp(ACE_TEXT_ALWAYS_CHAR(config_name.c_str()), i->config_name.c_str())) {
+    if (config_name == i->config_name) {
       return true;
     }
   }
@@ -952,12 +952,12 @@ TransportRegistry::config_has_transport_template(const ACE_TString& config_name)
 }
 
 bool
-TransportRegistry::get_transport_template_info(const ACE_TString& config_name, TransportTemplate& inst)
+TransportRegistry::get_transport_template_info(const String& config_name, TransportTemplate& inst)
 {
   bool ret = false;
   if (has_transport_templates()) {
     for (OPENDDS_VECTOR(TransportTemplate)::const_iterator i = transport_templates_.begin(); i != transport_templates_.end(); ++i) {
-      if (!ACE_OS::strcmp(ACE_TEXT_ALWAYS_CHAR(config_name.c_str()), i->config_name.c_str())) {
+      if (config_name == i->config_name) {
         inst.transport_template_name = i->transport_template_name;
         inst.config_name = i->config_name;
         inst.instantiate_per_participant = i->instantiate_per_participant;

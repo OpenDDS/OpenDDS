@@ -190,7 +190,7 @@ public:
   DataDurabilityCache(DDS::DurabilityQosPolicyKind kind);
 
   DataDurabilityCache(DDS::DurabilityQosPolicyKind kind,
-                      ACE_CString & data_dir);
+                      const String& data_dir);
 
   ~DataDurabilityCache();
 
@@ -228,7 +228,7 @@ private:
 
   DDS::DurabilityQosPolicyKind kind_;
 
-  ACE_CString data_dir_;
+  String data_dir_;
 
   /// Map of all data samples.
   sample_map_type * samples_;
