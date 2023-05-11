@@ -13,6 +13,8 @@ Building
 Run :ghfile:`docs/build.py`, passing the kinds of documentation desired.
 Multiple kinds can be passed, and they are documented in the following sections.
 
+.. _docs-requirements:
+
 Requirements
 ============
 
@@ -437,7 +439,7 @@ Generating the News
 ===================
 
 Before a release, a preview of the whole news for the next release will always be available in :doc:`/news`.
-It's also possible to see the source of that preview by running ``./docs/news.py preview``.
-During a release the fragments are permanently committed to :doc:`/news` and :ghfile:`NEWS.md` and the fragment files in :ghfile:`docs/news.d` are removed.
+It's also possible to see the source of that preview by running ``./docs/news.py preview`` or ``./docs/news.py preview-all``.
+During a release the fragments are permanently committed to :ghfile:`docs/news.d/_releases` and :ghfile:`NEWS.md` and the fragment files in :ghfile:`docs/news.d` are removed.
 
 .. seealso:: :doc:`release`

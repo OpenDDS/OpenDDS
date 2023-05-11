@@ -127,7 +127,7 @@ linkcheck_ignore = [
 # to things in the Sphinx in the news and it will work in RTD and in the GitHub
 # release notes.
 markdown_http_base = rtd_base
-if not is_release:
+if is_release:
     markdown_http_base += version_info.tag
 else:
     markdown_http_base += github_main_branch

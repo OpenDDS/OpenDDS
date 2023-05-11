@@ -377,6 +377,9 @@ def rst_title(title):
     return '\n'.join((astrisks, title, astrisks)) + '\n'
 
 
+def version_ref(version):
+    return '.. _' + version.replace('.', '_') + ':\n'
+
 def existing_release_notes():
     releases = []
     for p in releases_path.iterdir():
@@ -404,11 +407,12 @@ def print_all_news(file=sys.stdout):
 
     version_info = VersionInfo()
     if not version_info.is_release:
+        print(version_ref(version_info.v_ver), file=file)
         print(rst_title(version_info.v_ver), file=file)
         parse_newsd().print_all(file=file)
 
     for f in existing_release_notes():
-        print(rst_title(f.stem), f.read_text(), sep='\n', file=file)
+        print(version_ref(f.stem), rst_title(f.stem), f.read_text(), sep='\n', file=file)
 
     print(textwrap.dedent('''\
     **************
