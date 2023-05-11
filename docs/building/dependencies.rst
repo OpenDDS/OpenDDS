@@ -79,9 +79,7 @@ TAO is a C++ CORBA Implementation built on ACE.
 
   - This is the only library which depends on ``TAO_PortableServer``.
 
-The OCI page for TAO is https://objectcomputing.com/products/tao.
-
-The upstream DOC Group repository is hosted on Github at `DOCGroup/ACE_TAO <https://github.com/DOCGroup/ACE_TAO>`__, which it shares with ACE.
+The DOC Group repository is hosted on Github at `DOCGroup/ACE_TAO <https://github.com/DOCGroup/ACE_TAO>`__, which it shares with ACE.
 
 *********************
 Optional Dependencies
