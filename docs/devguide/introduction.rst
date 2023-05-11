@@ -4,34 +4,77 @@
 Introduction
 ############
 
+.. _introduction--what-is-opendds:
+
 ****************
 What is OpenDDS?
 ****************
 
 ..
     Sect<0.1>
+    Sect<0.6>
 
-OpenDDS is an open source implementation of a group of related Object Management Group (OMG) specifications.
-
-#. **Data Distribution Service (DDS) for Real-Time Systems v1.4** (OMG document ``formal/2015-04-10``).
-   DDS defines a service for efficiently distributing application data between participants in a distributed application.
-   This specification details the core functionality implemented by OpenDDS for real-time publish and subscribe applications and is described throughout this document.
-   Users are encouraged to read the DDS Specification as it contains in-depth coverage of all the service’s features.
-
-#. **The Real-time Publish-Subscribe Wire Protocol DDS Interoperability Wire Protocol Specification (DDSI-RTPS) v2.3** (OMG document ``formal/2019-04-03``).
-   Although the document number is v2.3, it specifies protocol version 2.4.
-   This specification describes the requirements for interoperability between DDS implementations.
-
-#. **DDS Security v1.1** (OMG document ``formal/2018-04-01``) extends DDS with capabilities for authentication and encryption.
-   OpenDDS’s support for the DDS Security specification is described in :ref:`dds_security--dds-security`.
-
-#. **Extensible and Dynamic Topic Types for DDS (XTypes) v1.3** (OMG document ``formal/2020-02-04``) defines details of the type system used for the data exchanged on DDS Topics, including how schema and data are encoded for network transmission.
-   OpenDDS's support for DDS-XTypes is described in :ref:`xtypes--xtypes`.
-
-OpenDDS is implemented in C++ and contains support for Java.
-Users in the OpenDDS community have contributed and maintain bindings for other languages include C#, nodejs, and Python.
-
+OpenDDS is an open-source C++ framework for exchanging data in distributed systems.
+It is an implementation of :ref:`a group of related OMG specifications <specs>`.
+OpenDDS is implemented in C++ and contains support for :doc:`Java <java_bindings>`.
+Users in the OpenDDS community have contributed and maintain bindings for other languages include `C# <https://www.openddsharp.com/>`__, `Node.js <https://github.com/OpenDDS/node-opendds>`__, and `Python <https://github.com/OpenDDS/pyopendds>`__.
 OpenDDS is sponsored by the OpenDDS Foundation and is available via https://opendds.org and https://github.com/OpenDDS/OpenDDS.
+
+There is an FAQ available at https://opendds.org/faq.html.
+
+.. _specs:
+
+**************
+Specifications
+**************
+
+OpenDDS is an open source implementation of a group of related :term:`OMG` specifications.
+
+.. _spec-dds:
+
+Data Distribution Service (DDS) for Real-Time Systems
+=====================================================
+
+This specification defines a service for efficiently distributing application data between participants in a distributed application.
+This is the core functionality implemented by OpenDDS for real-time publish and subscribe applications and is described throughout this document.
+
+The version OpenDDS uses is v1.4 (OMG document ``formal/2015-04-10``), which can be found at https://www.omg.org/spec/DDS/1.4.
+Compliance with the specification is documented in :ref:`introduction--dds-compliance`.
+More information about the DDS itself can be found on the `DDS Foundation website <https://www.dds-foundation.org/>`__.
+
+.. _spec-rtps:
+
+The Real-time Publish-Subscribe DDS Interoperability Wire Protocol Specification (DDSI-RTPS)
+============================================================================================
+
+Usually just called *RTPS*, this specification describes the requirements for interoperability between DDS implementations.
+See :ref:`introduction--peer-to-peer-discovery-with-rtps` for more information.
+
+The version OpenDDS uses is v2.3 (OMG document ``formal/2019-04-03``), which can be found at https://www.omg.org/spec/DDSI-RTPS/2.3.
+Although the document number is v2.3, it specifies protocol version 2.4.
+Compliance with the specification is documented in :ref:`introduction--ddsi-rtps-compliance`.
+
+.. _spec-dds-security:
+
+DDS Security
+============
+
+This specification extends DDS with capabilities for authentication and encryption.
+OpenDDS’s support for the DDS Security specification is described in :doc:`dds_security`.
+
+The version OpenDDS uses is v1.1 (OMG document ``formal/2018-04-01``), which can be found at https://www.omg.org/spec/DDS-SECURITY/1.1.
+Compliance with the specification is documented in :ref:`dds_security--dds-security-implementation-status`.
+
+.. _spec-xtypes:
+
+Extensible and Dynamic Topic Types for DDS (XTypes)
+===================================================
+
+This specification defines details of the type system used for the data exchanged on DDS Topics, including how schema and data are encoded for network transmission.
+OpenDDS's support for XTypes is described in :doc:`xtypes`.
+
+The version OpenDDS uses is v1.3 (OMG document ``formal/2020-02-04``), which can be found at https://www.omg.org/spec/DDS-XTypes/1.3.
+Compliance with the specification is documented in :ref:`xtypes--unimplemented-features` and :ref:`xtypes--differences-from-the-specification`.
 
 ***************
 Licensing Terms
@@ -114,53 +157,6 @@ In particular, error handling is sometimes kept to a minimum to help the reader 
 The source code for all these examples is available as part of the OpenDDS source code distribution in the :ghfile:`DevGuideExamples` directory.
 MPC files are provided with the examples for generating build-tool specific files, such as GNU Makefiles or Visual C++ project and solution files.
 To run an example, execute the ``run_test.pl`` Perl script.
-
-*****************
-Related Documents
-*****************
-
-..
-    Sect<0.6>
-
-This guide refers to various specifications published by the Object Management Group (OMG) and from other sources.
-
-OMG references take the form *group/number* where *group* represents the OMG working group responsible for developing the specification, or the keyword ``formal`` if the specification has been formally adopted, and *number* represents the year, month, and serial number within the month the specification was released.
-For example, the OMG DDS version 1.4 specification is referenced as ``formal/2015-04-10``.
-
-OMG specifications can be downloaded directly from the OMG web site by prepending ``http://www.omg.org/cgi-bin/doc?`` to the specification’s reference.
-Thus, the specification ``formal/07-01-01`` can be downloaded from http://www.omg.org/cgi-bin/doc?formal/07-01-01.
-Providing this destination to a web browser should take you to a site from which you can download the referenced specification document.
-
-Additional documentation for OpenDDS is produced and maintained by the OpenDDS Foundation and is available from the OpenDDS Website at https://opendds.org.
-
-Here are some documents of interest and their locations:
-
-.. list-table::
-   :header-rows: 1
-
-   * - Document
-
-     - Location
-
-   * - Data Distribution Service (DDS) for Real-Time Systems v1.4 (OMG Document formal/2015-04-10)
-
-     - http://www.omg.org/spec/DDS/1.4/PDF
-
-   * - The Real-time Publish-Subscribe Wire Protocol DDS Interoperability Wire Protocol Specification (DDSI-RTPS) v2.3 (OMG Document formal/2019-04-03)
-
-     - https://www.omg.org/spec/DDSI-RTPS/2.3/PDF
-
-   * - OMG Data Distribution Portal
-
-     - http://portals.omg.org/dds/
-
-   * - OpenDDS Build Instructions, Architecture, and Doxygen Documentation
-
-     - https://opendds.org/documentation.html
-
-   * - OpenDDS Frequently Asked Questions
-
-     - https://opendds.org/faq.html
 
 *******************
 Supported Platforms
@@ -462,7 +458,7 @@ OpenDDS RTPS Implementation Notes
 ..
     Sect<1.2.1.2.1>
 
-The OMG DDSI-RTPS specification (formal/2019-04-03) supplies statements for implementation, but not required for compliance.
+The :ref:`OMG DDSI-RTPS specification <spec-rtps>` supplies statements for implementation, but not required for compliance.
 The following items should be taken into consideration when utilizing the OpenDDS RTPS functionality for transport and/or discovery.
 Section numbers of the DDSI-RTPS specification are supplied with each item for further reference.
 

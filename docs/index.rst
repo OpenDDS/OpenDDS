@@ -28,8 +28,7 @@ Welcome to the documentation for OpenDDS |release|!
         You can find the documentation for the latest release `here <https://opendds.readthedocs.io/en/latest-release/>`_.
 
 OpenDDS is an open-source C++ framework for exchanging data in distributed systems.
-It is an implementation of `Object Management Group's <https://omg.org>`__ specification "Data Distribution Service for Real-time Systems" (DDS) as well as some other related specifications.
-OpenDDS comes with a C++ and Java API.
+See :ref:`introduction--what-is-opendds` for more information.
 
 *************
 Using OpenDDS

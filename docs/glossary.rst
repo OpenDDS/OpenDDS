@@ -60,7 +60,9 @@ Common Terms
   Data Distribution Service
   DDS
     DDS is a specification for exchanging strongly-typed data across a distributed system.
-    It is essentially synonymous with :term:`DCPS`, but can also refer to the main DDS specification or the family of specifications that build on the main specification.
+    It is essentially synonymous with :term:`DCPS`, but can specially refer to the main DDS specification.
+
+    See :ref:`spec-dds` for more information.
 
   ``DataReader``
     A ``DataReader`` is an :term:`Entity` that is used to read :term:`samples <Sample>` from a :term:`topic`.
@@ -88,7 +90,7 @@ Common Terms
 
   Interface Definition Language
   IDL
-    IDL, specifically OMG IDL, is a C-like language for describing data-structures and interfaces.
+    IDL, specifically :term:`OMG` IDL, is a C-like language for describing data-structures and interfaces.
     In OpenDDS :term:`opendds_idl` and :term:`tao_idl` are used to generate code from IDL.
 
   Listener
@@ -107,7 +109,7 @@ Common Terms
 
   Object Management Group
   OMG
-    A standards organization which publishes :term:`DDS` and the other standards used by OpenDDS.
+    A standards organization which publishes :ref:`DDS and the other specifications used by OpenDDS <specs>`.
 
     See https://www.omg.org/ for more information.
 
@@ -126,6 +128,8 @@ Common Terms
   Real-time Publish-Subscribe
   RTPS
     RTPS, sometimes also called *DDSI-RTPS*, is a specification that defines how different DDS implementations can interact with one another.
+
+    See :ref:`spec-rtps` for more information.
 
   Sample
     Samples are the messages sent from :term:`DataWriter`\s and received by :term:`DataReader`\s.
@@ -156,7 +160,7 @@ Common Terms
   DDS Extensible and Dynamic Topic Types for DDS
     XTypes is an :term:`OMG` specification that defines how DDS systems can have :term:`topic type`\s that can evolve over time and be used without defining IDL.
 
-    See :doc:`devguide/xtypes` for more information.
+    See :ref:`spec-xtypes` and :doc:`devguide/xtypes` for more information.
 
 *********************
 Environment Variables

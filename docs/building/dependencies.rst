@@ -54,13 +54,13 @@ Some other features OpenDDS relies on ACE for:
   - This is used through the ``ACE_DEBUG`` and ``ACE_ERROR`` macros.
   - ACE logging uses a formatting string that works like ``std::printf()`` but not all of the formatting specifiers are the same as ``printf()``.
     Please read the ``ACE_Log_Msg`` documentation before using.
-  - The most commonly misused formating specifier is ``%s``.
+  - The most commonly misused formatting specifier is ``%s``.
     In ``printf`` this is for ``char*`` C strings, but in ``ACE_Log_Msg`` this is for ``ACE_TCHAR*`` C strings.
     ``ACE_TCHAR`` can be ``char`` or a wide character depending on how ACE was built (see next point).
     ``%C`` should be used for strings that are always ``char*``, like ``std::string::c_str()``.
 
 - ACE has classes and macros for wide/narrow string conversion.
-  See ``docs/design/WCHAR`` in the OpenDDS repository for details.
+  See :ghfile:`docs/design/WCHAR` for details.
 - ACE provides support for platforms that have a non-standard program entry point (``main``).
   All of our ``main`` functions are ``int ACE_TMAIN(int argc, ACE_TCHAR* argv[])``.
 
@@ -94,7 +94,7 @@ OpenDDS has a :ghfile:`CMake FindPackage module included <cmake>`.
 See :ghfile:`docs/cmake.md` for how to make OpenDDS applications with CMake and without the need to use MPC in your application.
 
 CMake is required to build Google Test for OpenDDS tests if a prebuilt Google Test is not found or provided.
-See ghfile:`tests/gtest_setup.txt` for details.
+See :ghfile:`tests/gtest_setup.txt` for details.
 
 A recent release of CMake from the 3.x series should be used.
 

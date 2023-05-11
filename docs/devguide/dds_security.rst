@@ -27,7 +27,7 @@ Prerequisites
 ..
     Sect<14.1.1>
 
-OpenDDS includes an implementation of the OMG DDS Security 1.1 specification.
+OpenDDS includes an implementation of the :ref:`DDS Security specification <spec-dds-security>`.
 Building OpenDDS with security enabled requires the following dependencies:
 
 #. Xerces-C++ v3.x

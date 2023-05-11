@@ -46,14 +46,46 @@ The configure script will download ACE/TAO and configure it for your platform.
 To use an existing ACE/TAO installation, either set the :envvar:`ACE_ROOT` and :envvar:`TAO_ROOT` environment variables or pass the ``--ace`` and ``--tao`` (if TAO is not at ``$ACE_ROOT/TAO``) options to configure.
 If configure runs successfully it will end with a message about the next steps for compiling OpenDDS.
 
-OpenDDS supports parallel builds to speed up the build when using Make.
-To use this pass ``-j N`` where ``N`` the max number of parallel jobs to run.
-If not sure what ``N`` should be, use the number of cores on the machine.
+.. tab:: Linux, macOS, BSDs, etc.
 
-The configure script creates an environment setup file called ``setenv`` (actually named ``setenv.sh`` or ``setenv.cmd`` depending on platform) that restores all the environment variables the build and test steps rely on.
-The main makefile for non-Windows builds temporarily sets the environment as well, so ``setenv.sh`` is not needed when running ``make`` from the top level.
-On Windows, the configure script modifies the environment of the command prompt that ran it.
-If using a new environment, use ``setenv.cmd`` to set the required environment variables before running Visual Studio.
+  OpenDDS on these platforms must be built using GNU Make:
+
+  .. code-block::
+
+    make -j 4
+
+  OpenDDS supports parallel builds to speed up the build when using Make.
+  Above 4 is used as an example.
+  If unsure what ``N`` should be, use the number of CPU cores on the machine.
+
+  The configure script creates an environment setup file called ``setenv.sh`` that sets all the environment variables the build and test steps rely on.
+  The main makefile sets these itself, so ``setenv.sh`` is not needed when running ``make`` from the top level.
+  It needs to be sourced before building other projects and running tests:
+
+  .. code-block:: shell
+
+    source setenv.sh
+
+.. tab:: Windows
+
+  For Windows the configure script will say how to open the solution file for OpenDDS in Visual Studio using ``devenv``.
+
+  It can also be built directly from the command prompt by using MSBuild.
+  For example, if the configure script was ran without any arguments, to do a Debug x64 build:
+
+  .. code-block:: batch
+
+    msbuild -p:Configuration=Debug,Platform=x64 -m DDS_TAOv2.sln
+
+  .. seealso:: `Microsoft MSBuild Documentation <https://learn.microsoft.com/en-us/visualstudio/msbuild/msbuild>`__
+
+  The configure script creates an environment setup file called ``setenv.sh`` that sets all the environment variables the build and test steps rely on.
+  For the command prompt that ran the configure script, these variables were set automatically.
+  If running in another command prompt, the variables need to be set again before building other projects and running tests:
+
+  .. code-block::
+
+    setenv.cmd
 
 Java
 ====
@@ -123,4 +155,4 @@ Tests
 
 Tests are not built by default, ``--tests`` must be passed to the configure script.
 All tests can be run using :ghfile:`tests/auto_run_tests.pl`.
-See :doc:`/internal/running_tests` for running all tests or inividual tests.
+See :doc:`/internal/running_tests` for running all tests or individual tests.
