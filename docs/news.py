@@ -7,7 +7,6 @@ This script helps with managing the news.
 import os
 import sys
 from pathlib import Path
-import io
 import subprocess
 from argparse import ArgumentParser
 import re
@@ -15,28 +14,8 @@ import re
 docs_path = Path(__file__).parent
 sys.path.append(str((docs_path / 'sphinx_extensions').resolve()))
 
-from newsd import parse_newsd, get_fragments
+from newsd import parse_newsd, get_fragments, print_all_news, releases_path
 from version_info import VersionInfo
-
-
-def insert_into_file(path, marker, to_insert):
-    print('Inserting into', path.name, '...')
-    with path.open('r') as f:
-        lines = f.readlines()
-    inserted = False
-    with path.open('w') as f:
-        insert = False
-        for lineno, line in enumerate(lines):
-            print(line, end='', file=f)
-            if insert:
-                print(to_insert, end='', file=f)
-            insert = marker in line
-            if insert:
-                if inserted:
-                    raise ValueError('Already inserted into ' + str(path))
-                inserted = True
-    if not inserted:
-        raise ValueError(repr(marker) + ' not found in ' + str(path))
 
 
 def run(*argv):
@@ -47,36 +26,88 @@ def release(args):
     version_info = VersionInfo()
     if not version_info.is_release:
         sys.exit('ERROR: Not a release')
+    version_entry = '## Version '
+    news_md_title = version_entry + version_info.ver + ' of OpenDDS'
 
-    print('Generating news...')
-    strio = io.StringIO()
+    news_md_path = docs_path / '../NEWS.md'
+    news_rst_path = releases_path / (version_info.v_ver + '.rst')
+    release_notes_path = docs_path / 'gh-release-notes.md'
+
     news = parse_newsd()
     if news.empty():
-        sys.exit('ERROR: News is empty!')
-    news.print_all(strio)
-    new_news = strio.getvalue()
-    print(new_news)
+        print('No news fragments, checking for files...')
+        if not news_rst_path.is_file():
+            sys.exit('ERROR: news.d is empty and missing ' + news_rst_path.name + '!')
+        if not release_notes_path.is_file():
+            sys.exit('ERROR: news.d is empty and missing ' + release_notes_path.name + '!')
 
-    insert_into_file(docs_path / 'news.rst', 'NEW NEWS GOES BELOW HERE', new_news)
+        print('No news fragments, checking for NEWS.md entry...')
+        with news_md_path.open('r') as f:
+            for line in f.readlines():
+                line = line.rstrip()
+                if line.startswith(version_entry):
+                    if line == news_md_title:
+                        break
+                    else:
+                        sys.exit('ERROR: news.d is empty and missing NEWS.md entry!')
+    else:
+        news.print_all()
+        with news_rst_path.open('w') as f:
+            news.print_all(file=f)
 
-    print('Generating Markdown news...')
-    run('./build.py', 'markdown')
-    with (docs_path / '_build/markdown/temp_news.md').open('r') as f:
-        this_release_md = f.read()
-    print(this_release_md)
+        print('Generating Markdown news...')
+        run('./build.py', 'markdown')
+        with (docs_path / '_build/markdown/this-release.md').open('r') as f:
+            this_release_md = f.read()
+        this_release_md = re.sub(r'\n\n+', r'\n\n', this_release_md)
+        this_release_md = re.sub(r'^#', r'###', this_release_md, flags=re.MULTILINE)
+        this_release_md = news_md_title + '\n\n' + this_release_md
+        print(this_release_md)
+        # That was for NEWS.md, now generate GitHub release notes
+        release_notes, dl_count = re.subn(r'^Download \[this release.*$', '', this_release_md, flags=re.MULTILINE)
+        if dl_count != 1:
+            sys.exit('ERROR: Expected 1 download lines in release notes, got ' + str(dl_count))
+        release_notes = re.sub(r'\n\n+', r'\n\n', release_notes)
+        with (docs_path / 'gh-release-notes.md').open('w') as f:
+            print(release_notes, file=f)
 
-    insert_into_file(docs_path / '../NEWS.md', '# OpenDDS Releases', this_release_md)
+        print('Inserting Markdown news...')
+        omit = False
+        with news_md_path.open('r') as f:
+            lines = []
+            for line in f.readlines():
+                line = line.rstrip()
+                if line.startswith(version_entry):
+                    if line == news_md_title:
+                        print('Removing existing entry')
+                        omit = True
+                    elif omit:
+                        omit = False
+                if not omit:
+                    lines.append(line)
+        with news_md_path.open('w') as f:
+            inserted = False
+            for line in lines:
+                if line.startswith(version_entry) and not inserted:
+                    print(this_release_md, file=f)
+                    inserted = True
+                print(line, file=f)
 
-    print('Removing fragments...')
-    for fragment in get_fragments():
-        print(fragment)
-        fragment.unlink()
+        print('Removing fragments...')
+        for fragment in get_fragments():
+            print(fragment)
+            fragment.unlink()
 
     return 0
 
 
 def preview(args):
     parse_newsd().print_all()
+    return 0
+
+
+def preview_all(args):
+    print_all_news()
     return 0
 
 
@@ -89,6 +120,9 @@ if __name__ == '__main__':
 
     arg_parser_preview = subparsers.add_parser('preview')
     arg_parser_preview.set_defaults(func=preview)
+
+    arg_parser_preview = subparsers.add_parser('preview-all')
+    arg_parser_preview.set_defaults(func=preview_all)
 
     args = arg_parser.parse_args()
     sys.exit(args.func(args))

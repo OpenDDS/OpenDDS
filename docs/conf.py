@@ -15,7 +15,7 @@ sys.path.append(str(ext))
 github_links_root_path = str(opendds_root_path)
 
 from mpc_lexer import MpcLexer
-from newsd import parse_newsd
+from newsd import print_all_news, parse_newsd
 from version_info import VersionInfo
 
 # Custom Values ---------------------------------------------------------------
@@ -48,8 +48,13 @@ is_release = version_info.is_release
 if is_release:
     github_links_release_tag = version_info.tag
 
-# Generate preview news or news used for Markdown release notes for GitHub
-with (docs_path / 'temp_news.rst').open('w') as f:
+# Generate news for all releases
+with (docs_path / 'news.rst').open('w') as f:
+    print_all_news(file=f)
+
+# Generate news used for NEWS.md and Markdown release notes for GitHub
+with (docs_path / 'this-release.rst').open('w') as f:
+    print(':orphan:\n', file=f)
     parse_newsd().print_all(file=f)
 
 

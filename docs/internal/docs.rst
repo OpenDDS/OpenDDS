@@ -221,6 +221,8 @@ Turns into:
 
   :omgissue:`this is **the issue** <DDSXTY14-29>`
 
+.. _docs-news:
+
 ****
 News
 ****

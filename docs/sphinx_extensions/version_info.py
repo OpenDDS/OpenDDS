@@ -36,7 +36,8 @@ class VersionInfo:
         self.is_release = self.get(bool, 'is_release')
         self.tag = None
         vparts = {p: self.get(int, p + '_version') for p in ('major', 'minor', 'micro')}
-        self.v_ver = 'v{major}.{minor}.{micro}'.format(**vparts)
+        self.ver = '{major}.{minor}.{micro}'.format(**vparts)
+        self.v_ver = 'v' + self.ver
         if vparts['major'] >= 4:
             self.tag = self.v_ver
         else:
