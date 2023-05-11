@@ -60,16 +60,6 @@ with (docs_path / 'this-release.rst').open('w') as f:
 
 # -- General configuration ---------------------------------------------------
 
-# TODO: This messes up metafile data
-# if not is_release:
-#     rst_prolog = '''\
-# .. warning::
-#     This copy of OpenDDS isn't a release, so this documentation may not be finalized.
-#     It may be missing documentation on new features or the existing documentation may be incorrect.
-
-#     You can find the documentation for the latest release `here <''' + rtd_base + '''latest-release/>`__.
-# '''
-
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
