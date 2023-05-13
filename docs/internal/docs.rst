@@ -316,7 +316,7 @@ The top-level sections must be one of the following:
   User-relevant fixes not related to security or documentation.
 
 ``Documentation``
-  Signifiant changes to documentation, either in the primary Sphinx documentation or in secondary documentation.
+  Significant changes to documentation, either in the primary Sphinx documentation or in secondary documentation.
   This can be documenting an existing feature or major changes to existing documentation.
   Documentation for a new feature should be linked in the news item for it, not here.
   Minor corrections like spelling and changes to internal documentation probably don't need to be mentioned in the news.

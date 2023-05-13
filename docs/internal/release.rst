@@ -11,7 +11,7 @@ Notes About OpenDDS Releases
 - A micro (aka patch) (X.Y.Z) release is somewhat different from a minor (X.Y.0) release.
   The steps where this is the case will be marked as such.
 - All authoritative references to versions in the source code (like :ghfile:`VERSION.txt` or :ghfile:`dds/Version.h`) will be automatically updated by the release script, so there’s no need to do it manually.
-  Other files such as :ghfile:`NEWS.md` and some parts of :ghfile:`README.md` also shouldn't be updated manually.
+  Other files such as :ghfile:`NEWS.md` and some parts of :ghfile:`README.md` shouldn't be updated manually.
   This guide will document what should be updated manually.
 
 Temporary Notes
