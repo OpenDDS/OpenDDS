@@ -40,7 +40,7 @@ set_target_properties(${publisher}
   PROPERTIES OUTPUT_NAME publisher
 )
 target_include_directories(${publisher} PRIVATE "${src}/../../../")
-OPENDDS_TARGET_SOURCES(${publisher} "${dst}/Messenger.idl")
+opendds_target_sources(${publisher} "${dst}/Messenger.idl")
 
 foreach(t ${all_targets})
   # Using explicit scope here is a regression test for

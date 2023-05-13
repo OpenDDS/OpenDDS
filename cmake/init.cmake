@@ -3,6 +3,7 @@
 
 include(${CMAKE_CURRENT_LIST_DIR}/config.cmake)
 
+# ACE Features
 if(NOT DEFINED OPENDDS_DEBUG)
   set(OPENDDS_DEBUG ON)
 endif()
@@ -11,6 +12,16 @@ if(NOT DEFINED OPENDDS_INLINE)
   set(OPENDDS_INLINE ON)
 endif()
 
+# TAO Features
+if(NOT DEFINED OPENDDS_TAO_IIOP)
+  set(OPENDDS_TAO_IIOP ON)
+endif()
+
+if(NOT DEFINED OPENDDS_TAO_OPTIMIZE_COLLOCATED_INVOCATIONS)
+  set(OPENDDS_TAO_OPTIMIZE_COLLOCATED_INVOCATIONS ON)
+endif()
+
+# OpenDDS Features
 if(NOT DEFINED OPENDDS_BUILT_IN_TOPICS)
   set(OPENDDS_BUILT_IN_TOPICS ON)
 endif()
@@ -47,6 +58,18 @@ if(NOT DEFINED OPENDDS_SUPPRESS_ANYS)
   set(OPENDDS_SUPPRESS_ANYS ON)
 endif()
 
+if(NOT DEFINED OPENDDS_SECURITY)
+  set(OPENDDS_SECURITY OFF)
+endif()
+
+if(NOT DEFINED OPENDDS_XERCES3)
+  if(OPENDDS_SECURITY)
+    set(OPENDDS_XERCES3 ON)
+  else()
+    set(OPENDDS_XERCES3 OFF)
+  endif()
+endif()
+
 # Make Sure CMake can use the Paths
 file(TO_CMAKE_PATH "${OPENDDS_ACE}" OPENDDS_ACE)
 file(TO_CMAKE_PATH "${OPENDDS_MPC}" OPENDDS_MPC)
@@ -55,7 +78,7 @@ file(TO_CMAKE_PATH "${OPENDDS_TAO}" OPENDDS_TAO)
 option(OPENDDS_CMAKE_VERBOSE "Print verbose output when loading the OpenDDS Config Package" OFF)
 option(OPENDDS_DEFAULT_NESTED "Require topic types to be declared explicitly" ON)
 option(OPENDDS_FILENAME_ONLY_INCLUDES "No directory info in generated #includes." OFF)
-set(OPENDDS_DEFAULT_SCOPE "PRIVATE" CACHE STRING "Default scope for OPENDDS_TARGET_SOURCES")
+set(OPENDDS_DEFAULT_SCOPE "PRIVATE" CACHE STRING "Default scope for opendds_target_sources")
 set_property(CACHE OPENDDS_DEFAULT_SCOPE PROPERTY STRINGS "PUBLIC" "PRIVATE" "INTERFACE")
 option(OPENDDS_ALWAYS_GENERATE_LIB_EXPORT_HEADER "Always generate an export header for libraries" OFF)
 # This is off because it's not compatible with a possible existing usage of
@@ -63,26 +86,20 @@ option(OPENDDS_ALWAYS_GENERATE_LIB_EXPORT_HEADER "Always generate an export head
 # "All uses of target_link_libraries with a target must be either all-keyword
 # or all-plain."
 # TODO: Make this default ON in v4.0
-option(OPENDDS_AUTO_LINK_DCPS "Automatically link OpenDDS::Dcps to the target of OPENDDS_TARGET_SOURCES" OFF)
+option(OPENDDS_AUTO_LINK_DCPS "Automatically link OpenDDS::Dcps to the target of opendds_target_sources" OFF)
 # This is off by default because it could cause "Cannot find source file"
 # errors on `TypeSupport.idl` files generated in a another directory.
 # TODO: Make this default ON in v4.0
-option(OPENDDS_USE_CORRECT_INCLUDE_SCOPE "Include using SCOPE specified in OPENDDS_TARGET_SOURCES" OFF)
+option(OPENDDS_USE_CORRECT_INCLUDE_SCOPE "Include using SCOPE specified in opendds_target_sources" OFF)
 
-macro(_OPENDDS_RETURN_ERR msg)
-  message(SEND_ERROR "${msg}")
-  set(OPENDDS_FOUND FALSE)
-  return()
-endmacro()
-
-macro(OPENDDS_SAVE_CACHE name type value)
+macro(_opendds_save_cache name type value)
   list(APPEND _opendds_save_cache_vars ${name})
   set(_opendds_save_cache_${name}_type ${type})
   set(_opendds_save_cache_${name}_value "${${name}}")
   set(${name} "${value}" CACHE ${type} "" FORCE)
 endmacro()
 
-macro(OPENDDS_RESTORE_CACHE)
+macro(_opendds_restore_cache)
   foreach(name ${_opendds_save_cache_vars})
     set(${name} "${_opendds_save_cache_${name}_value}" CACHE
       "${_opendds_save_cache_${name}_type}" "" FORCE)
@@ -129,7 +146,8 @@ if(NOT DEFINED ACE_ROOT)
     set(ACE_LIB_DIR "${ACE_ROOT}/lib")
 
   else()
-    _OPENDDS_RETURN_ERR("Failed to locate ACE_ROOT")
+    message(SEND_ERROR "Failed to locate ACE")
+    return()
   endif()
 
   set(ACE_BIN_DIR "${ACE_ROOT}/bin")
@@ -145,7 +163,8 @@ if(NOT DEFINED TAO_ROOT)
     set(TAO_INCLUDE_DIR "${OPENDDS_TAO}")
 
   else()
-    _OPENDDS_RETURN_ERR("Failed to locate TAO_ROOT")
+    message(SEND_ERROR "Failed to locate TAO")
+    return()
   endif()
 
   set(TAO_BIN_DIR "${ACE_BIN_DIR}")

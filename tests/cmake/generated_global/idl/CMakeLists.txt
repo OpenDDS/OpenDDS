@@ -34,5 +34,5 @@ set_target_properties(${messenger}
 )
 # TODO: This should be PUBLIC, but this is broken because of the unrecognized
 # GENERATED property on IDL compiler-generated files for this test.
-OPENDDS_TARGET_SOURCES(${messenger} "${dst}/Messenger.idl")
+opendds_target_sources(${messenger} "${dst}/Messenger.idl")
 target_link_libraries(${messenger} OpenDDS::Dcps)
