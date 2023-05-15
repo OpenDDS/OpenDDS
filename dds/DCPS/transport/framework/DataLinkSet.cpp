@@ -43,7 +43,7 @@ OpenDDS::DCPS::DataLinkSet::insert_link(const DataLink_rch& link)
 {
   DBG_ENTRY_LVL("DataLinkSet","insert_link",6);
   GuardType guard(this->lock_);
-  int const retval = OpenDDS::DCPS::bind(map_, link->id(), link);
+  const int retval = OpenDDS::DCPS::bind(map_, link->id(), link);
   VDBG((LM_DEBUG,
         ACE_TEXT("(%P|%t) DataLinkSet::insert_link: ")
         ACE_TEXT("added link [%@] id %d %C to map\n"),
