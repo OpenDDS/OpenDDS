@@ -222,6 +222,8 @@ ShmemDataLink::control_received(ReceivedDataSample& /*sample*/)
 void
 ShmemDataLink::stop_i()
 {
+  DBG_ENTRY_LVL("ShmemDataLink","stop_i",6);
+
   {
     ACE_GUARD(ACE_Thread_Mutex, g, assoc_resends_mutex_);
     assoc_resends_.clear();
@@ -232,9 +234,9 @@ ShmemDataLink::stop_i()
     ACE_GUARD(ACE_Thread_Mutex, g, peer_alloc_mutex_);
     if (peer_alloc_) {
       peer_alloc_->release(0 /*don't close*/);
+      delete peer_alloc_;
+      peer_alloc_ = 0;
     }
-    delete peer_alloc_;
-    peer_alloc_ = 0;
   }
 }
 

@@ -55,8 +55,8 @@ OpenDDS::DCPS::DataLinkSet::remove_link(const DataLink_rch& link)
     // Just report to the log that we tried.
     VDBG((LM_DEBUG,
           ACE_TEXT("(%P|%t) DataLinkSet::remove_links: ")
-          ACE_TEXT("link_id %d not found in map.\n"),
-          link->id()));
+          ACE_TEXT("link [%@] id %d not found in map.\n"),
+          link.in(), link->id()));
   }
 }
 
