@@ -56,7 +56,7 @@ OpenDDS::DCPS::DataLinkSet::remove_link(const DataLink_rch& link)
 {
   DBG_ENTRY_LVL("DataLinkSet", "remove_link", 6);
   GuardType guard1(this->lock_);
-  int const retval = unbind(map_, link->id());
+  const int retval = unbind(map_, link->id());
   VDBG((LM_DEBUG,
         ACE_TEXT("(%P|%t) DataLinkSet::remove_link: ")
         ACE_TEXT("link [%@] id %d %Cfound in map.\n"),
