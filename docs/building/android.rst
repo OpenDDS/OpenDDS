@@ -71,7 +71,7 @@ To build the core OpenDDS native libraries for Android you will need:
 
 - `Android Native Development Kit (NDK) <https://developer.android.com/ndk/>`__ r18 or higher.
   `Building with the NDK directly <#using-the-ndk-directly>`__ requires NDK r19 or higher.
-  You can download it separately from https://android.com or using the SDK Manager that comes with Android Studio.
+  You can download it separately from https://www.android.com or using the SDK Manager that comes with Android Studio.
   If you downloaded the NDK using the SDK Manager, then it is located at ``$SDK/ndk-bundle``.
 - Some knowledge about OpenDDS and Android development will be assumed, but more OpenDDS knowledge will be assumed than Android knowledge.
 - Windows users should see :ref:`android-building-on-windows` for additional requirements they might need.
@@ -117,7 +117,7 @@ Building OpenDDS for Android
 ****************************
 
 As Android targets multiple architectures and has many versions, an architecture and minimum API version to use will have to be decided.
-As of writing `this page <https://source.android.com/setup/start/build-numbers>`__ lists Android version numbers and their corresponding API versions.
+As of writing `this page <https://source.android.com/docs/setup/about/build-numbers>`__ lists Android version numbers and their corresponding API versions.
 You will have to do a separate build for each architecture if you want to build OpenDDS for multiple architectures.
 
 OpenDDS for Android can be built in two ways: :ref:`android-using-the-ndk-directly` or :ref:`android-using-a-standalone-toolchain`.
@@ -387,8 +387,8 @@ GNU libiconv
 Xerces
 """"""
 
-A modified version of Xerces C++ hosted on `OpenDDS GitHub organization <https://github.com/oci-labs/xerces-c/tree/android>`__ has support for an external GNU libiconv.
-Download this version using git (``android`` branch) or the via `ZIP archive <https://github.com/oci-labs/xerces-c/archive/android.zip>`__.
+A modified version of Xerces C++ hosted on `OpenDDS GitHub organization <https://github.com/OpenDDS/xerces-c/tree/android>`__ has support for an external GNU libiconv.
+Download this version using git (``android`` branch) or the via `ZIP archive <https://github.com/OpenDDS/xerces-c/archive/android.zip>`__.
 
 Start the Microsoft Visual Studio command prompt for C++ development (for example "x64 Native Tools Command Prompt for VS 2019").
 
@@ -470,7 +470,7 @@ The exact list of libraries to include depend on what features you're using but 
 
     - Standalone toolchain: ``$TOOLCHAIN/sysroot/usr/lib/$ABI_PREFIX/libc++_shared.so``
     - NDK: ``$NDK/toolchains/llvm/prebuilt/$HOST_PLATFORM/sysroot/usr/lib/$ABI_PREFIX/libc++_shared.so``
-    - ``$ABI_PREFIX`` is an identifier for the architecture whose possible values can be found in the `ABI/architecture table <android_abi>`__.
+    - ``$ABI_PREFIX`` is an identifier for the architecture whose possible values can be found in the :ref:`ABI/architecture table <android_abi>`.
 
   - ``$ACE_ROOT/lib/libACE.so``
   - ``$ACE_ROOT/lib/libTAO.so``

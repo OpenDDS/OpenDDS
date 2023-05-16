@@ -44,6 +44,12 @@ class DocEnv:
         env = os.environ.copy()
         env['VIRUTAL_ENV'] = str(self.abs_venv_path)
         env['PATH'] = str(self.bin_path) + os.pathsep + env['PATH']
+        if os.environ.get('GITHUB_ACTIONS', 'false') == 'true':
+            # Github actions doesn't act as a TTY:
+            # https://github.com/actions/runner/issues/241
+            # This should force at least sphinx-builder to use color for the
+            # link check so it's easier to see errors.
+            env['FORCE_COLOR'] = 'true'
         log('Running', repr(' '.join(cmd)), 'in', repr(str(cwd)))
         check_call(cmd, env=env, cwd=cwd)
 

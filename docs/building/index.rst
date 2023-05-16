@@ -27,7 +27,7 @@ Configuring and Building
 
 Use the :ghfile:`configure` script to prepare to build OpenDDS.
 This script requires Perl 5.18 or newer to be installed and available on the system ``PATH``.
-`Strawberry Perl <https://www.strawberryperl.com>`__ is recommended on Windows.
+`Strawberry Perl <https://strawberryperl.com>`__ is recommended on Windows.
 Older versions of Perl will probably work, but are not tested.
 To start the script simply change to the root of the OpenDDS source directory and run:
 
@@ -114,7 +114,7 @@ Any testing has to be done manually.
 Raspberry Pi
 ------------
 
-The instructions for building for the Raspberry Pi are on `opendds.org <http://opendds.org/quickstart/GettingStartedPi.html>`__.
+The instructions for building for the Raspberry Pi are on `opendds.org <https://opendds.org/quickstart/GettingStartedPi.html>`__.
 
 Android
 -------
