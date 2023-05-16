@@ -178,20 +178,6 @@ private:
   };
 };
 
-class MessageHolder : public virtual RcObject {
-public:
-  virtual const void* get() const = 0;
-};
-
-template <typename T>
-class MessageHolder_T : public MessageHolder {
-public:
-  MessageHolder_T(const T& v) : v_(v) {}
-  const void* get() const { return &v_; }
-private:
-  T v_;
-};
-
 /**
 * @class DataReaderImpl
 *
@@ -392,13 +378,12 @@ public:
                                         const DDS::StringSeq& params) = 0;
 #endif
 
-  virtual RcHandle<MessageHolder> dds_demarshal(const ReceivedDataSample& sample,
-                                                DDS::InstanceHandle_t publication_handle,
-                                                SubscriptionInstance_rch& instance,
-                                                bool& is_new_instance,
-                                                bool& filtered,
-                                                MarshalingType marshaling_type,
-                                                bool full_copy) = 0;
+  virtual void dds_demarshal(const ReceivedDataSample& sample,
+                             DDS::InstanceHandle_t publication_handle,
+                             SubscriptionInstance_rch& instance,
+                             bool& is_new_instance,
+                             bool& filtered,
+                             MarshalingType marshaling_type) = 0;
 
   virtual void dispose_unregister(const ReceivedDataSample& sample,
                                   DDS::InstanceHandle_t publication_handle,
