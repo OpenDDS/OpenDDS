@@ -154,10 +154,6 @@ Here are some documents of interest and their locations:
 
      - http://portals.omg.org/dds/
 
-   * - OpenDDS Build Instructions, Architecture, and Doxygen Documentation
-
-     - https://opendds.org/documentation.html
-
    * - OpenDDS Frequently Asked Questions
 
      - https://opendds.org/faq.html

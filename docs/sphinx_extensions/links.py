@@ -145,13 +145,15 @@ def ghpr_role(name, rawtext, text, lineno, inliner, options={}, content=[]):
 # this is part of should be conditional.
 def ghrelease_role(name, rawtext, text, lineno, inliner, options={}, content=[]):
     config = get_config(inliner)
-    if config.github_links_release_tag is None:
+    explicit_title, title, target = process_title_target(text)
+    if not explicit_title and config.github_links_release_tag is None:
         url = ''
-        text = '(Invalid Release Link)'
+        title = '(Invalid Release Link)'
     else:
         url = '{}/{}/releases/tag/{}'.format(
-            gh_url_base, config.github_links_repo, config.github_links_release_tag)
-    node = nodes.reference(rawtext, text, refuri=url, **options)
+            gh_url_base, config.github_links_repo,
+            target if explicit_title else config.github_links_release_tag)
+    node = nodes.reference(rawtext, title, refuri=url, **options)
     return ([node], [])
 
 

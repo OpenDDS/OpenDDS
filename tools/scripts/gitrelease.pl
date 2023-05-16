@@ -58,65 +58,6 @@ my $timefmt = "%a %b %d %H:%M:%S %Z %Y";
 
 my $release_timestamp_fmt = "%b %e %Y";
 
-# Number of lines after start of file to insert news_template
-my $news_header_lines = 2;
-
-my $news_template = "## Version %s of OpenDDS\n" . <<"ENDOUT";
-%s
-
-### Additions:
-- TODO: Add your features here
-
-### Fixes:
-- TODO: Add your fixes here
-
-### Notes:
-- TODO: Add your notes here
-
-ENDOUT
-
-sub get_news_post_release_msg {
-  my $settings = shift();
-  my $ver = $settings->{parsed_next_version}->{release_string};
-  return "OpenDDS $ver is currently in development, so this list might change.";
-}
-my $news_post_release_msg_re =
-  qr/^OpenDDS .* is currently in development, so this list might change\.$/;
-
-sub get_news_release_msg {
-  my $settings = shift();
-  return "OpenDDS $settings->{version} was released on $settings->{timestamp}.";
-}
-
-my $insert_news_template_after_line = 1;
-sub insert_news_template($$) {
-  my $settings = shift();
-  my $post_release = shift();
-
-  my $version = ($post_release ?
-    $settings->{parsed_next_version} : $settings->{parsed_version})->{release_string};
-  my $release_msg = $post_release ?
-    get_news_post_release_msg($settings) : get_news_release_msg($settings);
-
-  # Read News File
-  open my $news_file, '<', "NEWS.md";
-  my @lines = <$news_file>;
-  close $news_file;
-
-  # Insert Template
-  my @new_lines = ();
-  push(@new_lines, @lines[0..$insert_news_template_after_line]);
-  push(@new_lines, sprintf($news_template, $version, $release_msg));
-  push(@new_lines, @lines[$insert_news_template_after_line+1..scalar(@lines)-1]);
-
-  # Write News File with Template
-  open $news_file, '>', "NEWS.md";
-  foreach my $line (@new_lines) {
-    print $news_file $line;
-  }
-  close $news_file;
-}
-
 sub get_version_line {
   my $settings = shift();
   my $post_release = shift() // 0;
@@ -271,47 +212,6 @@ sub normalizePath {
     $val = Cwd::abs_path($val);
   }
   return remove_end_slash($val);
-}
-
-sub news_contents_excerpt($) {
-  my $settings = shift();
-
-  my $version = quotemeta($settings->{version});
-  my @lines;
-  open(my $news, "NEWS.md") or die "Can't read NEWS.md file";
-  my $saw_version = 0;
-  while (<$news>) {
-    if (/^## Version $version of OpenDDS/) {
-      $saw_version = 1;
-      next;
-    }
-    elsif (/^##[^#]/ && $saw_version) { # Until we come to the next h2
-      last;
-    }
-    if ($saw_version) {
-      if ($saw_version < 2) { # Skip Timestamp Line
-        $saw_version++;
-        next;
-      }
-      push (@lines, $_);
-    }
-  }
-  close $news;
-
-  return
-    "The OpenDDS Developer's Guide for this version is available at " . get_rtd_link($settings, 0) . "\n" .
-    "\n" .
-    "Updates in this version:\n" .
-    join("", @lines);
-}
-
-sub email_announce_contents {
-  my $settings = shift();
-
-  return
-    "OpenDDS version $settings->{version} is now available for download at $settings->{download_url}/\n" .
-    "\n" .
-    news_contents_excerpt($settings);
 }
 
 sub run_command {
@@ -1231,8 +1131,7 @@ sub remedy_git_status_clean {
   }
   return 0 if (!yes_no("Would you like to add and commit these changes?"));
   if (!$post_release && $changelog) {
-    system("git add $settings->{changelog}") == 0
-      or die "Could not execute: git add $settings->{changelog}";
+    run_command("git add $settings->{changelog} $settings->{news}", autodie => 1);
   }
   system("git add -u") == 0 or die "Could not execute: git add -u";
   my $message;
@@ -1625,113 +1524,28 @@ sub remedy_authors {
 
 ############################################################################
 
-sub verify_news_file_section {
+sub news_cmd {
   my $settings = shift();
-  my $version = $settings->{version};
-  my $status = open(NEWS, 'NEWS.md');
-  my $metaversion = quotemeta($version);
-  my $has_version = 0;
-  while (<NEWS>) {
-    if ($_ =~ /^## Version $metaversion of OpenDDS/) {
-      $has_version = 1;
-    }
-  }
-  close(NEWS);
 
-  return $has_version;
+  my @cmd = ('python3', 'docs/news.py', 'release');
+  push(@cmd, '--mock') if ($settings->{mock});
+  push(@cmd, @_);
+  return run_command(\@cmd);
 }
 
-sub message_news_file_section {
+sub verify_news {
   my $settings = shift();
-  my $version = $settings->{version};
-  return "NEWS.md file release $version section needs updating";
+  return news_cmd($settings);
 }
 
-sub remedy_news_file_section {
+sub message_news {
   my $settings = shift();
-  my $version = $settings->{version};
-  print "  >> Adding $version section template to NEWS.md\n";
-  # If doing a mock release, the template is okay.
-  my $ok = $settings->{mock};
-  if (!$ok) {
-    print "  !! Manual update to NEWS.md needed\n";
-  }
-  insert_news_template($settings, 0);
-  return $ok;
+  return "News needs to be processed";
 }
 
-############################################################################
-
-sub verify_update_news_file {
+sub remedy_news {
   my $settings = shift();
-  my $version = $settings->{version};
-  my $status = open(NEWS, 'NEWS.md');
-  my $metaversion = quotemeta($version);
-  my $has_version = 0;
-  my $corrected_features = 1;
-  my $corrected_fixes = 1;
-  my $real_release = !$settings->{mock};
-  while (<NEWS>) {
-    if ($_ =~ /^## Version $metaversion of OpenDDS/) {
-      $has_version = 1;
-    }
-    elsif ($real_release && $_ =~ /TODO: Add your features here/) {
-      $corrected_features = 0;
-    }
-    elsif ($real_release && $_ =~ /TODO: Add your fixes here/) {
-      $corrected_fixes = 0;
-    }
-  }
-  close(NEWS);
-
-  return $has_version && $corrected_features && $corrected_fixes;
-}
-
-sub message_update_news_file {
-  return "NEWS.md file needs updating with current version release notes";
-}
-
-############################################################################
-
-sub verify_news_timestamp {
-  my $settings = shift();
-  my $has_post_release_msg = 0;
-  open(my $news_file, 'NEWS.md');
-  while (<$news_file>) {
-    if ($_ =~ $news_post_release_msg_re) {
-      $has_post_release_msg = 1;
-      last;
-    }
-  }
-  close($news_file);
-  return !$has_post_release_msg;
-}
-
-sub message_news_timestamp {
-  return "The NEWS.md section for this release needs its timestamp inserted";
-}
-
-sub remedy_news_timestamp {
-  my $settings = shift();
-  my $release_msg = get_news_release_msg($settings);
-
-  # Read News File
-  open(my $news_file, '<', "NEWS.md");
-  my @lines = <$news_file>;
-  close $news_file;
-
-  # Insert Template
-  foreach my $line (@lines) {
-    last if $line =~ s/$news_post_release_msg_re/$release_msg/;
-  }
-
-  # Write News File
-  open($news_file, '>', "NEWS.md");
-  foreach my $line (@lines) {
-    print $news_file ($line);
-  }
-  close($news_file);
-  return 1;
+  return news_cmd($settings, '--remedy');
 }
 
 ############################################################################
@@ -1932,16 +1746,21 @@ sub verify_update_readme_file {
   my $step_options = shift() // {};
   my $post_release = $step_options->{post_release} // 0;
 
-  my $link = quotemeta(get_rtd_link($settings, $post_release) . '.');
+  my $link = get_rtd_link($settings, $post_release);
+  my $link_re = quotemeta("$link.");
   my $found_link = 0;
   open(my $fh, $readme_file) or die("Can't open \"$readme_file\": $?");
   while (<$fh>) {
-    if ($_ =~ /$link/) {
+    if ($_ =~ /$link_re/) {
       $found_link = 1;
       last;
     }
   }
   close($fh);
+
+  if (!$found_link) {
+    print("Didn't find $link\n");
+  }
 
   return $found_link;
 }
@@ -2685,15 +2504,17 @@ sub remedy_github_upload {
   get_assets($settings, \@assets, \%asset_details);
 
   my $releases = $settings->{pithub}->repos->releases;
-  my $text =
-    "**Download $settings->{zip_src} (Windows) or $settings->{tgz_src} (Linux/macOS) " .
-      "instead of \"Source code (zip)\" or \"Source code (tar.gz)\".**\n\n" .
-    news_contents_excerpt($settings);
+  my $release_notes_path = 'docs/gh-release-notes.md';
+  open(my $fh, '<', $release_notes_path) or die("Failed to read $release_notes_path: $!");
+  my $release_notes = do { local $/; <$fh> };
   my $release = $releases->create(
     data => {
       name => "OpenDDS $settings->{version}",
       tag_name => $settings->{git_tag},
-      body => $text,
+      body =>
+        "**Download $settings->{zip_src} (Windows) or $settings->{tgz_src} (Linux/macOS) " .
+          "instead of \"Source code (zip)\" or \"Source code (tar.gz)\".**\n\n" .
+        $release_notes,
     },
   );
   check_pithub_result($release);
@@ -2953,53 +2774,6 @@ sub remedy_trigger_shapes_demo_build {
 
 ############################################################################
 
-sub verify_email_list {
-  # Can't verify
-  my $settings = shift;
-  print 'Email this text to announce the release' . "\n\n" .
-    email_announce_contents($settings);
-  return 1;
-}
-
-sub message_email_dds_release_announce {
-  return 'Emails are needed to announce the release';
-}
-
-sub remedy_email_dds_release_announce {
-  return 1;
-}
-
-############################################################################
-
-sub verify_news_template_file_section {
-  my $settings = shift();
-  my $next_version = quotemeta($settings->{parsed_next_version}->{release_string});
-
-  my $status = open(NEWS, 'NEWS.md');
-  my $has_news_template = 0;
-  while (<NEWS>) {
-    if ($_ =~ /^## Version $next_version of OpenDDS/) {
-      $has_news_template = 1;
-      last;
-    }
-  }
-  close(NEWS);
-
-  return $has_news_template;
-}
-
-sub message_news_template_file_section {
-  return "Template for next release in NEWS.md is missing";
-}
-
-sub remedy_news_template_file_section {
-  my $settings = shift();
-  insert_news_template($settings, 1);
-  return 1;
-}
-
-############################################################################
-
 sub verify_release_occurred_flag {
   my $settings = shift();
 
@@ -3164,6 +2938,7 @@ $release_timestamp =~ s/  / /g; # Single digit days of the month result in an ex
 my $doxygen_dir = "$workspace/doxygen";
 my $doxygen_inner_dir = "$doxygen_dir/html/dds";
 my $this_changelog = "docs/history/ChangeLog-$version";
+my $this_news = "docs/news.d/_releases/v$version.rst";
 my %global_settings = (
     list => $print_list,
     list_all => $print_list_all,
@@ -3199,6 +2974,7 @@ my %global_settings = (
     sftp_host => $ENV{SFTP_HOST},
     sftp_base_dir => $sftp_base_dir,
     changelog => $this_changelog,
+    news => $this_news,
     modified => {
         $readme_file => 1,
         "NEWS.md" => 1,
@@ -3206,6 +2982,7 @@ my %global_settings = (
         "VERSION.txt" => 1,
         "dds/Version.h" => 1,
         $this_changelog => 1,
+        $this_news => 1,
     },
     skip_sftp => $skip_sftp,
     skip_doxygen => $skip_doxygen,
@@ -3286,24 +3063,10 @@ my @release_steps = (
     can_force => 1,
   },
   {
-    name => 'Add NEWS File Section',
-    verify => sub{verify_news_file_section(@_)},
-    message => sub{message_news_file_section(@_)},
-    remedy => sub{remedy_news_file_section(@_)},
-    can_force => 1,
-  },
-  {
-    name => 'Update NEWS File Section',
-    verify => sub{verify_update_news_file(@_)},
-    message => sub{message_update_news_file(@_)},
-    can_force => 1,
-  },
-  {
-    name => 'Update NEWS File Section Timestamp',
-    verify => sub{verify_news_timestamp(@_)},
-    message => sub{message_news_timestamp(@_)},
-    remedy => sub{remedy_news_timestamp(@_)},
-    can_force => 1,
+    name => 'Process News',
+    verify => sub{verify_news(@_)},
+    message => sub{message_news(@_)},
+    remedy => sub{remedy_news(@_)},
   },
   {
     name => 'Commit Release Changes',
@@ -3457,13 +3220,6 @@ my @release_steps = (
     remedy => sub{remedy_release_occurred_flag(@_)},
   },
   {
-    name => 'Update NEWS for Post-Release',
-    verify => sub{verify_news_template_file_section(@_)},
-    message => sub{message_news_template_file_section(@_)},
-    remedy => sub{remedy_news_template_file_section(@_)},
-    post_release => 1,
-  },
-  {
     name => 'Update VERSION.txt for Post-Release',
     verify => sub{
       my $settings = shift();
@@ -3547,13 +3303,6 @@ my @release_steps = (
     remedy => sub{remedy_trigger_shapes_demo_build(@_)},
     post_release => 1,
     skip => $global_settings{skip_github} || !$global_settings{is_highest_version},
-  },
-  {
-    name => 'Email DDS-Release-Announce list',
-    verify => sub{verify_email_list(@_)},
-    message => sub{message_email_dds_release_announce(@_)},
-    remedy => sub{remedy_email_dds_release_announce(@_)},
-    post_release => 1,
   },
 );
 

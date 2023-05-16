@@ -128,6 +128,10 @@ class DocEnv:
         )
         return None
 
+    def do_markdown(self):
+        self.sphinx_build('markdown')
+        return None
+
 
 if __name__ == '__main__':
     arg_parser = ArgumentParser(description=__doc__)

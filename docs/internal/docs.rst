@@ -13,6 +13,8 @@ Building
 Run :ghfile:`docs/build.py`, passing the kinds of documentation desired.
 Multiple kinds can be passed, and they are documented in the following sections.
 
+.. _docs-requirements:
+
 Requirements
 ============
 
@@ -118,17 +120,17 @@ ghfile
 
 Turns into:
 
-:ghfile:`README.md#support`
+  :ghfile:`README.md#support`
 
-:ghfile:`README.md`
+  :ghfile:`README.md`
 
-:ghfile:`the \`\`README.md\`\` File <README.md>`
+  :ghfile:`the \`\`README.md\`\` File <README.md>`
 
-:ghfile:`the support section of the \`\`README.md\`\` File <README.md#support>`
+  :ghfile:`the support section of the \`\`README.md\`\` File <README.md#support>`
 
-:ghfile:`check out the available support <README.md#support>`
+  :ghfile:`check out the available support <README.md#support>`
 
-:ghfile:`java/docs/overview.html`
+  :ghfile:`java/docs/overview.html`
 
 The path passed must exist, be relative to the root of the repository, and will have to be committed, if it's not already.
 If there is a URL fragment in the path, like ``README.md#support``, then it will appear in the link URL.
@@ -155,11 +157,11 @@ ghissue
 
 Turns into:
 
-:ghissue:`213`
+  :ghissue:`213`
 
-:ghissue:`this is the issue <213>`
+  :ghissue:`this is the issue <213>`
 
-:ghissue:`this is **the issue** <213>`
+  :ghissue:`this is **the issue** <213>`
 
 ghpr
 ----
@@ -174,11 +176,33 @@ ghpr
 
 Turns into:
 
-:ghpr:`1`
+  :ghpr:`1`
 
-:ghpr:`this is the PR <1>`
+  :ghpr:`this is the PR <1>`
 
-:ghpr:`this is **the PR** <1>`
+  :ghpr:`this is **the PR** <1>`
+
+ghrelease
+---------
+
+``ghrelease`` links to a release on Github using the git tag.
+Note that this behaves differently than the other roles here.
+Without the syntax ```Link text <TARGET>``` syntax, it uses the contents as link text and link to the release tag for the current version, assuming there is one.
+This syntax should only be used in a ``.. ifconfig:: is_release`` directive.
+Also it never parses the contents as inline markup.
+
+.. code-block:: rst
+
+  :ghrelease:`This is the release`
+
+  :ghrelease:`This is the release <DDS-3.24>`
+
+Turns into:
+
+  :ghrelease:`This is the release`
+
+  :ghrelease:`This is the release <DDS-3.24>`
+
 
 omgissue
 --------
@@ -193,8 +217,229 @@ omgissue
 
 Turns into:
 
-:omgissue:`DDSXTY14-29`
+  :omgissue:`DDSXTY14-29`
 
-:omgissue:`this is the issue <DDSXTY14-29>`
+  :omgissue:`this is the issue <DDSXTY14-29>`
 
-:omgissue:`this is **the issue** <DDSXTY14-29>`
+  :omgissue:`this is **the issue** <DDSXTY14-29>`
+
+.. _docs-news:
+
+****
+News
+****
+
+The :doc:`news for a release (aka release notes) </news>` is created from separate reStructuredText files called *fragments*.
+This makes it possible to change the news without everyone editing one file.
+Managing the news fragments is handled as part of the Sphinx documentation to make it easy to link to other relevant documents and files in the source code.
+It also makes it possible to easily preview the news before a release.
+
+News Fragments
+==============
+
+To add content to the news for a release, a fragment file with the content must be created in :ghfile:`docs/news.d`.
+It can be named anything as long as it's reasonably unique, doesn't start with an underscore, and has an ``.rst`` file extension.
+The branch name of the PR for this change might be a good name, for example: ``fix_rtps_segfault.rst``.
+
+The following is a simple news fragment example:
+
+.. literalinclude:: /news.d/_example.rst
+  :caption: :ghfile:`docs/news.d/_example.rst`
+  :language: rst
+
+Fragments contain RST content for the news along with some RST directive-like metadata.
+Lines starting with ``#`` are ignored as comments.
+Content for the news must be formatted as a `list <https://www.sphinx-doc.org/en/master/usage/restructuredtext/basics.html#lists-and-quote-like-blocks>`__.
+It will usually be one list item, but can be multiple items if they are separate changes from a user perspective.
+
+.. note::
+
+  If using nested lists, reStructuredText requires these to have empty lines before and after as shown in the example above.
+
+Content must be contained somewhere within a section, indicated by ``news-start-section`` and ``news-end-section``.
+Having text outside sections that isn't a comment or a special news directive is an error.
+
+Content should provide a reasonable amount of context to users so they can figure out if and how a change will impact or benefit them.
+Some of this can be achieved through :ref:`subsections <docs-news-subsections>`.
+Content should link to the rest of the Sphinx documentation and to source files using ``:ghfile:`` if relevant.
+
+PRs will usually have just have one fragment file, but can have more then one.
+For example, say there is a PR that is making changes associated with an existing fragment file, but also has changes that are separate from the PRs in that fragment.
+This might indicate a new PR should be made for those changes, but if that's impractical, a new separate fragment file for those changes can be made.
+
+Directives
+----------
+
+news-prs
+^^^^^^^^
+
+``news-prs`` should declare all the PRs that make up the changes to OpenDDS described in the fragment.
+It's an error to omit ``news-prs`` from a fragment or to have more than one ``news-prs`` directive.
+Do not add ``#`` at the start of the PR numbers.
+Please add follow-on PRs separated by spaces as they are created.
+
+.. code-block:: rst
+
+  .. news-prs: 1002 1003 1008
+
+If the changes don't have a PR associated with them, such as a policy change, then put ``none`` instead:
+
+.. code-block:: rst
+
+  .. news-prs: none
+
+news-start-section and news-end-section
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+``news-start-section`` and ``news-end-section`` directives contain the news content and define how they're grouped.
+All sections with the same name across all the fragments are merged together in the final result.
+The top-level sections must be one of the following:
+
+``Additions``
+  New user-relevant features
+
+``Platform Support and Dependencies``
+  Additional support or changes to support for OS, C++ standards, compilers, and dependencies.
+
+``Deprecations``
+  User-relevant features that are being planned on being removed, but removing now would break a significant number of user's use cases.
+  This marks them for removal in the next major version.
+
+``Removals``
+  User-relevant features removed that were either deprecated, "experimental", or "internal" that users might be relying on anyways.
+
+``Security``
+  Fixes for issues that might compromise the security of a system using OpenDDS.
+  This doesn't need to be related to :doc:`DDS Security </devguide/dds_security>`.
+
+``Fixes``
+  User-relevant fixes not related to security or documentation.
+
+``Documentation``
+  Significant changes to documentation, either in the primary Sphinx documentation or in secondary documentation.
+  This can be documenting an existing feature or major changes to existing documentation.
+  Documentation for a new feature should be linked in the news item for it, not here.
+  Minor corrections like spelling and changes to internal documentation probably don't need to be mentioned in the news.
+
+``Notes``
+  Changes that might be relevant to users, but might not fit in any of the other sections.
+  This could be a change in policy or change outside the OpenDDS source code that doesn't have a PR associated with it.
+
+.. _docs-news-subsections:
+
+Sections can be nested as subsections.
+There is no requirement for subsections or restrictions on their names, but it's suggested to group otherwise separate changes if they are all impact the same part of OpenDDS.
+For example:
+
+.. code-block:: rst
+
+  .. news-start-section: Fixes
+  - Non-RTPS Fix
+  .. news-start-section: RTPS
+  - RTPS Fix
+  .. news-start-section: RTPS Relay
+  - RTPS Relay Fix
+  - Another RTPS Relay Fix
+  .. news-end-section
+  - Another RTPS Fix
+  .. news-end-section
+  - Another Non-RTPS Fix
+  .. news-end-section
+
+Will result in:
+
+  - Non-RTPS Fix (:ghpr:`1000`)
+
+  - RTPS
+
+    - RTPS Fix (:ghpr:`1000`)
+
+    - RTPS Relay
+
+      - RTPS Relay Fix (:ghpr:`1000`)
+      - Another RTPS Relay Fix (:ghpr:`1000`)
+
+    - Another RTPS Fix (:ghpr:`1000`)
+
+  - Another Non-RTPS Fix (:ghpr:`1000`)
+
+This will allow other fragments to add to "RTPS" or "RTPS Relay".
+
+news-rank
+^^^^^^^^^
+
+Rank is an integer used to help sort content and sections.
+Setting the rank higher using ``news-rank`` can headline a change within a section.
+This is optional and if omitted or if rank is the same, then items are ranked by the oldest PR number.
+
+Once used, ``news-rank`` applies to both subsections and content directly in the section between the ``news-start-section`` and the ``news-end-section``.
+Content in subsections will need a separate ``news-rank`` to change the order, as sorting of subsections is separate.
+When sections have different ranks across fragments (or even in the same fragment), then the largest of ranks is used.
+
+For an example of all that, let us say we had the following fragments:
+
+.. code-block:: rst
+  :caption: These are the older changes
+
+  .. news-prs: 1111
+  .. news-start-section: Additions
+  # Rank 0 because it's a new section
+  - Improved logging in some cases.
+  # Lets give XTypes as a section some priority
+  .. news-rank: 20
+  .. news-start-section: XTypes
+  # Rank 0 because it's a new section
+  - Added ability to randomize ``DynamicData``
+  .. news-rank: 10
+  - Added lossless casting from any type to any other type in ``DynamicData``.
+  .. news-end-section
+  # This gets the same rank 20 as the XTypes section
+  - Made logging worse in some cases.
+  .. news-end-section
+
+.. code-block:: rst
+  :caption: These are the newer changes
+
+  .. news-prs: 2222
+  .. news-start-section: Additions
+  # Rank 0, the rank 0 older item in the other fragment will get priority
+  - Unoptimized all code that's not related to pigeons
+  # Let's say we want to give this highest priority
+  .. news-rank: 50
+  - Added a new transport for IP over messenger pigeon (:rfc:`1149`)
+  # This will be overruled by the rank 20 XTypes in the other fragment
+  .. news-rank: 10
+  .. news-start-section: XTypes
+  .. news-rank: 100
+  - New pigeon-based ``DynamicData``
+  .. news-end-section
+  .. news-end-section
+
+These will result in:
+
+  - Added a new transport for IP over messenger pigeon (:rfc:`1149`) (:ghpr:`2222`) [Rank 50]
+  - Made logging worse in some cases. (:ghpr:`1111`) [Rank 20]
+
+  - XTypes [Rank 20]
+
+    - New pigeon-based ``DynamicData`` (:ghpr:`2222`) [Rank 100]
+    - Added lossless casting from any type to any other type in ``DynamicData``. (:ghpr:`1111`) [Rank 10]
+    - Added ability to randomize ``DynamicData`` (:ghpr:`1111`) [Rank 0]
+
+  - Improved logging in some cases. (:ghpr:`1111`) [Rank 0]
+  - Unoptimized all code that's not related to pigeons (:ghpr:`2222`) [Rank 0]
+
+The ranks are included in previews of the news as an aid to deciding what the rank of new news content should be.
+The preview can be viewed in :doc:`/news` or alternatively by running ``./docs/news.py preview``.
+The ranks are not included in the final news for a release.
+
+One final thing to note is that top-level sections, like "Additions", have a fixed rank that can't be changed so they always appear in the same order.
+
+Generating the News
+===================
+
+Before a release, a preview of the whole news for the next release will always be available in :doc:`/news`.
+It's also possible to see the source of that preview by running ``./docs/news.py preview`` or ``./docs/news.py preview-all``.
+During a release the fragments are permanently committed to :ghfile:`docs/news.d/_releases` and :ghfile:`NEWS.md` and the fragment files in :ghfile:`docs/news.d` are removed.
+
+.. seealso:: :doc:`release`
