@@ -6,6 +6,7 @@ Building and Installing
   :hidden:
 
   dependencies
+  android
 
 Except for an `example Docker container <https://github.com/OpenDDS/OpenDDS/pkgs/container/opendds>`__, there are no official prebuilt packages of OpenDDS, so it to be built from source.
 
@@ -27,6 +28,7 @@ Configuring and Building
 Use the :ghfile:`configure` script to prepare to build OpenDDS.
 This script requires Perl 5.18 or newer to be installed and available on the system ``PATH``.
 `Strawberry Perl <https://www.strawberryperl.com>`__ is recommended on Windows.
+Older versions of Perl will probably work, but are not tested.
 To start the script simply change to the root of the OpenDDS source directory and run:
 
 .. tab:: Linux, macOS, BSDs, etc.
@@ -117,7 +119,7 @@ The instructions for building for the Raspberry Pi are on `opendds.org <http://o
 Android
 -------
 
-Android support is documented in :ghfile:`docs/android.md`.
+Android support is documented in :doc:`android`.
 
 Apple iOS
 ---------

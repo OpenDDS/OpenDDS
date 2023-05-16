@@ -1,0 +1,14 @@
+.. news-prs: 4139
+.. news-start-section: Documentation
+.. news-rank: 10
+- Moved various markdown files into the Sphinx documentation so that they are now included along with the Developer's Guide:
+
+  - Build and install instructions that were in ``INSTALL.md`` are now :doc:`/building/index`.
+  - The list of dependencies was that was in ``docs/dependencies.md`` is now :doc:`/building/dependencies`.
+  - Documentation for building and using OpenDDS for Android that was in ``docs/android.md`` is now :doc:`/building/android`.
+
+.. news-rank: 5
+- Restructured how the documentation is presented to cleanly separate the Developer's Guide and internal documentation.
+- Added a :doc:`proper main page </index>`.
+- Added :doc:`/glossary`.
+.. news-end-section

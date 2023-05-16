@@ -158,7 +158,7 @@ Embedded/Mobile/IoT:
 * LynxOS-178 (OpenDDS Safety Profile)
 * VxWorks 6.9, 7, 21.03 (see below)
 * [Linux on Raspberry Pi](https://opendds.org/quickstart/GettingStartedPi.html)
-* [Android 9.0 "Pie" (API Level 28) NDK r18b](docs/android.md)
+* [Android 9.0 "Pie" (API Level 28) NDK r18b](https://opendds.readthedocs.io/en/latest-release/building/android.html)
 
 We have built OpenDDS for VxWorks 6.9, 7, and 21.03 and have run basic
 system and performance tests (but not the entire regression test suite).

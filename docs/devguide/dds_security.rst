@@ -202,7 +202,7 @@ Building OpenDDS with Security for Android
 ..
     Sect<14.1.5>
 
-See the ``docs/android.md`` file included in the OpenDDS source code.
+See :doc:`/building/android`
 
 .. _dds_security--architecture-of-the-dds-security-specification:
 
