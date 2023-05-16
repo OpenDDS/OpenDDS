@@ -14,15 +14,20 @@ Repository
 
 The repository is hosted on Github at `OpenDDS/OpenDDS <https://github.com/OpenDDS/OpenDDS>`_ and is open for pull requests.
 
-***********************
-Automated Build Systems
-***********************
+*******
+Testing
+*******
 
-Pull requests will be tested automatically using `GitHub Actions <https://github.com/OpenDDS/OpenDDS/actions>`__ and full CI builds of the master branch can be found at http://scoreboard.ociweb.com/oci-dds.html.
+If a pull request fixes a bug that's not covered in an existing test it should be added to the tests.
+This should be in an existing test if possible.
+If a new integration test is required, see :ghfile:`tests/DCPS/HelloWorld` for a template.
+Pull requests will be tested automatically using `GitHub Actions <https://github.com/OpenDDS/OpenDDS/actions>`__.
 
 .. seealso::
 
   :doc:`running_tests` for how tests are run in general.
+
+  :doc:`unit_tests` for guidance on the unit tests.
 
   :doc:`github_actions` for how building and testing is done with GitHub Actions.
 
@@ -80,6 +85,8 @@ Documentation
 *************
 
 Guidelines for building and editing documentation like the Developer's Guide and this document are covered in :doc:`docs`.
+
+If a pull request makes a change that should be included in the release notes, the entry should be specified using the method described in :ref:`docs-news`.
 
 .. _dev_guidelines-cxx_standard:
 

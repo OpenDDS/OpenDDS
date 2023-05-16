@@ -85,7 +85,7 @@ public:
                 const OpenDDS::DCPS::String& posting_actor,
                 const OpenDDS::DCPS::String& condition) const
   {
-    ACE_DEBUG((LM_INFO, "(%P|%t) InMemoryDistributedConditionSet %C waiting_for %C %C\n",
+    ACE_DEBUG((LM_INFO, "(%P|%t) InMemoryDistributedConditionSet %C wait_for %C %C\n",
                waiting_actor.c_str(), posting_actor.c_str(), condition.c_str()));
 
     const PairType key(posting_actor, condition);
@@ -99,7 +99,7 @@ public:
       condition_.wait();
     }
 
-    ACE_DEBUG((LM_INFO, "(%P|%t) InMemoryDistributedConditionSet %C waiting_for %C %C done\n",
+    ACE_DEBUG((LM_INFO, "(%P|%t) InMemoryDistributedConditionSet %C wait_for %C %C done\n",
                waiting_actor.c_str(), posting_actor.c_str(), condition.c_str()));
   }
 
@@ -143,7 +143,7 @@ public:
                 const OpenDDS::DCPS::String& posting_actor,
                 const OpenDDS::DCPS::String& condition) const
   {
-    ACE_DEBUG((LM_INFO, "(%P|%t) FileBasedDistributedConditionSet %C waiting_for %C %C\n",
+    ACE_DEBUG((LM_INFO, "(%P|%t) FileBasedDistributedConditionSet %C wait_for %C %C\n",
                waiting_actor.c_str(), posting_actor.c_str(), condition.c_str()));
 
     const OpenDDS::DCPS::String path = OpenDDS::DCPS::String(DCS_DIR) + "/" + posting_actor + "/" + condition;
@@ -153,7 +153,7 @@ public:
     }
     ACE_OS::close(fd);
 
-    ACE_DEBUG((LM_INFO, "(%P|%t) FileBasedDistributedConditionSet %C waiting_for %C %C done\n",
+    ACE_DEBUG((LM_INFO, "(%P|%t) FileBasedDistributedConditionSet %C wait_for %C %C done\n",
                waiting_actor.c_str(), posting_actor.c_str(), condition.c_str()));
   }
 

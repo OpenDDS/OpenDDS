@@ -43,7 +43,12 @@ OpenDDS::DCPS::DataLinkSet::insert_link(const DataLink_rch& link)
 {
   DBG_ENTRY_LVL("DataLinkSet","insert_link",6);
   GuardType guard(this->lock_);
-  return OpenDDS::DCPS::bind(map_, link->id(), link);
+  const int retval = OpenDDS::DCPS::bind(map_, link->id(), link);
+  VDBG((LM_DEBUG,
+        ACE_TEXT("(%P|%t) DataLinkSet::insert_link: ")
+        ACE_TEXT("added link [%@] id %d %C to map\n"),
+        link.in(), link->id(), retval == 0 ? "successfully" : "NOT"));
+  return retval;
 }
 
 void
@@ -51,13 +56,11 @@ OpenDDS::DCPS::DataLinkSet::remove_link(const DataLink_rch& link)
 {
   DBG_ENTRY_LVL("DataLinkSet", "remove_link", 6);
   GuardType guard1(this->lock_);
-  if (unbind(map_, link->id()) != 0) {
-    // Just report to the log that we tried.
-    VDBG((LM_DEBUG,
-          ACE_TEXT("(%P|%t) DataLinkSet::remove_links: ")
-          ACE_TEXT("link_id %d not found in map.\n"),
-          link->id()));
-  }
+  const int retval = unbind(map_, link->id());
+  VDBG((LM_DEBUG,
+        ACE_TEXT("(%P|%t) DataLinkSet::remove_link: ")
+        ACE_TEXT("link [%@] id %d %Cfound in map.\n"),
+        link.in(), link->id(), retval == 0 ? "" : "NOT "));
 }
 
 OpenDDS::DCPS::DataLinkSet_rch

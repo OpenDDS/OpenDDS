@@ -204,7 +204,7 @@ Observer
 ..
     Sect<12.2>
 
-To observe the most important events happening within OpenDDS, applications can create classes that derive from the Observer abstract base class (in :ghfile:`dds/DCPS/Observer.h`).
+To observe the most important events happening within OpenDDS, applications can create classes that derive from the Observer base class (in :ghfile:`dds/DCPS/Observer.h`).
 The design of Observer is intended to allow applications to have a single Observer object observing many Entities, however this is flexible to allow many different use cases.
 The following events can be observed:
 
@@ -214,9 +214,9 @@ The following events can be observed:
 
 * DataWriter/Reader peer associated, disassociated
 
-* DataWriter sample sent
+* DataWriter sample sent, instance disposed, instance unregistered
 
-* DataReader sample received (enters the cache), read, taken
+* DataReader sample received (enters the cache), read, taken, instance disposed, instance unregistered
 
 .. _alternate_interfaces_to_data--attaching-observers-to-entities:
 
@@ -282,7 +282,7 @@ The virtual methods in the Observer class are divided into 3 groups based on the
 
 #. Events relating to data samples moving through the system
 
-   * on_sample_sent, on_sample_received, on_sample_read, on_sample_taken
+   * on_sample_sent, on_sample_received, on_sample_read, on_sample_taken, on_disposed, on_unregistered
 
 #. * In addition to the Entity, the Observer implementation receives an instance of the Sample structure.
      The definition of this structure is nested within Observer.

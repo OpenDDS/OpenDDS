@@ -166,6 +166,9 @@ DataReaderImpl::cleanup()
   }
 #endif
 
+  // Acquire the sample lock since these pointers are read under it.
+  ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, sample_lock_);
+
   topic_servant_ = 0;
 
 #ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
@@ -1395,10 +1398,6 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
         to_string(sample.header_).c_str()));
   }
 
-  const ValueDispatcher* vd = get_value_dispatcher();
-  const Observer_rch observer = get_observer(Observer::e_SAMPLE_RECEIVED);
-
-  RcHandle<MessageHolder> real_data;
   SubscriptionInstance_rch instance;
   switch (sample.header_.message_id_) {
   case SAMPLE_DATA:
@@ -1428,11 +1427,8 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
 
     bool is_new_instance = false;
     bool filtered = false;
-    if (sample.header_.key_fields_only_) {
-      dds_demarshal(sample, publication_handle, instance, is_new_instance, filtered, KEY_ONLY_MARSHALING, false);
-    } else {
-      real_data = dds_demarshal(sample, publication_handle, instance, is_new_instance, filtered, FULL_MARSHALING, observer && vd);
-    }
+    dds_demarshal(sample, publication_handle, instance, is_new_instance, filtered,
+                  sample.header_.key_fields_only_ ? KEY_ONLY_MARSHALING : FULL_MARSHALING);
 
     // Per sample logging
     if (DCPS_debug_level >= 8) {
@@ -1662,15 +1658,6 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
         "unexpected message_id = %d\n",
         sample.header_.message_id_));
     break;
-  }
-
-  if (observer && real_data && vd) {
-    const DDS::Time_t timestamp = {
-      sample.header_.source_timestamp_sec_,
-      sample.header_.source_timestamp_nanosec_
-    };
-    Observer::Sample s(instance ? instance->instance_handle_ : DDS::HANDLE_NIL, sample.header_.instance_state(), timestamp, sample.header_.sequence_, real_data->get(), *vd);
-    observer->on_sample_received(this, s);
   }
 }
 

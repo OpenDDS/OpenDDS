@@ -15,7 +15,8 @@ sys.path.append(str(ext))
 github_links_root_path = str(opendds_root_path)
 
 from mpc_lexer import MpcLexer
-
+from newsd import print_all_news, parse_newsd
+from version_info import VersionInfo
 
 # Custom Values ---------------------------------------------------------------
 
@@ -36,40 +37,25 @@ project = 'OpenDDS'
 copyright = '2023, OpenDDS Foundation'
 author = 'OpenDDS Foundation'
 github_links_repo = 'OpenDDS/OpenDDS'
+github_main_branch = 'master'
 github_repo = 'https://github.com/' + github_links_repo
+rtd_base = 'https://opendds.readthedocs.io/en/'
 
 # Get Version Info
-with (opendds_root_path / 'dds/Version.h').open() as f:
-    version_file = f.read()
-
-def get_version_prop(kind, macro):
-    macro = 'OPENDDS_' + macro.upper()
-    if kind is bool:
-        regex = r'([01])'
-        cast = lambda v: bool(int(v))
-    elif kind is int:
-        regex = r'(\d+)'
-        cast = int
-    elif kind is str:
-        regex = r'"(.*)"'
-        cast = lambda v: v
-    else:
-        raise RuntimeError('Unexpected kind: ' + repr(kind))
-    m = re.search(r'#define {} {}'.format(macro, regex), version_file)
-    if m:
-        return cast(m[1])
-    raise RuntimeError('Could not find ' + macro)
-
-version = get_version_prop(str, 'version')
-release = version
-is_release = get_version_prop(bool, 'is_release')
+version_info = VersionInfo()
+release = version_info.version
+is_release = version_info.is_release
 if is_release:
-    vparts = {p: get_version_prop(int, p + '_version') for p in
-        ('major', 'minor', 'micro')}
-    fmt_str = 'DDS-{major}.{minor}'
-    if vparts['micro'] > 0:
-        fmt_str += '.{micro}'
-    github_links_release_tag = fmt_str.format(**vparts)
+    github_links_release_tag = version_info.tag
+
+# Generate news for all releases
+with (docs_path / 'news.rst').open('w') as f:
+    print_all_news(file=f)
+
+# Generate news used for NEWS.md and Markdown release notes for GitHub
+with (docs_path / 'this-release.rst').open('w') as f:
+    print(':orphan:\n', file=f)
+    parse_newsd().print_all(file=f)
 
 
 # -- General configuration ---------------------------------------------------
@@ -83,9 +69,11 @@ extensions = [
 
     # Official ones
     'sphinx.ext.ifconfig',
+    'sphinx.ext.todo',
 
     # Other ones
     'sphinx_copybutton',
+    'sphinx_markdown_builder',
     'sphinx_inline_tabs',
 ]
 
@@ -104,6 +92,7 @@ exclude_patterns = [
     'OpenDDS.docset/**',
     '.venv',
     'sphinx_extensions/**',
+    'news.d/**',
 ]
 
 source_suffix = {
@@ -122,6 +111,20 @@ linkcheck_ignore = [
 ]
 
 
+# -- Options for Markdown output ---------------------------------------------
+# This builder is just used to generate the release notes for GitHub
+
+# These options point the markdown to the Sphinx on RTD. This way we can refer
+# to things in the Sphinx in the news and it will work in RTD and in the GitHub
+# release notes.
+markdown_http_base = rtd_base
+if is_release:
+    markdown_http_base += version_info.tag
+else:
+    markdown_http_base += github_main_branch
+markdown_target_ext = '.html'
+
+
 # -- Options for HTML output -------------------------------------------------
 
 html_static_path = ['.']
@@ -130,15 +133,15 @@ html_theme = 'furo'
 # See documentation for the theme here:
 #   https://pradyunsg.me/furo/
 
-html_title = project + ' ' + version
+html_title = project + ' ' + release
 
 html_theme_options = {
     'light_logo': 'logo_with_name.svg',
     'dark_logo': 'logo_with_name.svg',
     'sidebar_hide_name': True, # Logo has the name in it
-    # furo doesn't support a veiw source link for some reason, force edit
+    # furo doesn't support a view source link for some reason, force edit
     # button to do that.
-    'source_edit_link': github_repo + '/blob/master/docs/{filename}?plain=1',
+    'source_edit_link': github_repo + '/blob/' + github_main_branch + '/docs/{filename}?plain=1',
 }
 
 # Change the sidebar to include fixed links

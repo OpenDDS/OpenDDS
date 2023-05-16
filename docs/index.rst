@@ -7,6 +7,7 @@ OpenDDS
 .. toctree::
   :hidden:
 
+  news
   building/index
   devguide/index
   internal/index
@@ -48,6 +49,9 @@ Much more information can be found in the :doc:`devguide/index`
 *******************
 Other Documentation
 *******************
+
+:doc:`news`
+  What are the latest changes in OpenDDS?
 
 :doc:`internal/index`
   Documentation for OpenDDS contributors

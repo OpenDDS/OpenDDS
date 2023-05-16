@@ -136,17 +136,12 @@ public:
   virtual void release_instance_i(DDS::InstanceHandle_t) {}
   virtual void state_updated_i(DDS::InstanceHandle_t) {}
   void release_all_instances() {}
-  virtual OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::MessageHolder>
-  dds_demarshal(const OpenDDS::DCPS::ReceivedDataSample&,
-                DDS::InstanceHandle_t,
-                OpenDDS::DCPS::SubscriptionInstance_rch &,
-                bool&,
-                bool&,
-                OpenDDS::DCPS::MarshalingType,
-                bool)
-  {
-    return OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::MessageHolder>();
-  }
+  virtual void dds_demarshal(const OpenDDS::DCPS::ReceivedDataSample&,
+                             DDS::InstanceHandle_t,
+                             OpenDDS::DCPS::SubscriptionInstance_rch &,
+                             bool&,
+                             bool&,
+                             OpenDDS::DCPS::MarshalingType) {}
   bool contains_sample_filtered(DDS::SampleStateMask, DDS::ViewStateMask,
     DDS::InstanceStateMask, const OpenDDS::DCPS::FilterEvaluator&,
     const DDS::StringSeq&) { return true; }

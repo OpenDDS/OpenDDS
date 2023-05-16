@@ -1683,6 +1683,7 @@ DataWriterImpl::register_instance_from_durable_data(
 
 DDS::ReturnCode_t
 DataWriterImpl::unregister_instance_i(DDS::InstanceHandle_t handle,
+                                      const Sample* samp,
                                       const DDS::Time_t& source_timestamp)
 {
   DBG_ENTRY_LVL("DataWriterImpl","unregister_instance_i",6);
@@ -1697,7 +1698,7 @@ DataWriterImpl::unregister_instance_i(DDS::InstanceHandle_t handle,
   // According to spec 1.2, autodispose_unregistered_instances true causes
   // dispose on the instance prior to calling unregister operation.
   if (this->qos_.writer_data_lifecycle.autodispose_unregistered_instances) {
-    return this->dispose_and_unregister(handle, source_timestamp);
+    return this->dispose_and_unregister(handle, samp, source_timestamp);
   }
 
   DDS::ReturnCode_t ret = DDS::RETCODE_ERROR;
@@ -1743,11 +1744,20 @@ DataWriterImpl::unregister_instance_i(DDS::InstanceHandle_t handle,
   }
 
   send_all_to_flush_control(guard);
+
+  const ValueDispatcher* vd = get_value_dispatcher();
+  const Observer_rch observer = get_observer(Observer::e_UNREGISTERED);
+  if (observer && samp && samp->native_data() && vd) {
+    Observer::Sample s(handle, element->get_header().instance_state(), source_timestamp, element->get_header().sequence_, samp->native_data(), *vd);
+    observer->on_unregistered(this, s);
+  }
+
   return DDS::RETCODE_OK;
 }
 
 DDS::ReturnCode_t
 DataWriterImpl::dispose_and_unregister(DDS::InstanceHandle_t handle,
+                                       const Sample* samp,
                                        const DDS::Time_t& source_timestamp)
 {
   DBG_ENTRY_LVL("DataWriterImpl", "dispose_and_unregister", 6);
@@ -1806,6 +1816,23 @@ DataWriterImpl::dispose_and_unregister(DDS::InstanceHandle_t handle,
   }
 
   send_all_to_flush_control(guard);
+
+  const ValueDispatcher* vd = get_value_dispatcher();
+  {
+    const Observer_rch observer = get_observer(Observer::e_DISPOSED);
+    if (observer && samp && samp->native_data() && vd) {
+      Observer::Sample s(handle, element->get_header().instance_state(), source_timestamp, element->get_header().sequence_, samp->native_data(), *vd);
+      observer->on_disposed(this, s);
+    }
+  }
+  {
+    const Observer_rch observer = get_observer(Observer::e_UNREGISTERED);
+    if (observer && samp && samp->native_data() && vd) {
+      Observer::Sample s(handle, element->get_header().instance_state(), source_timestamp, element->get_header().sequence_, samp->native_data(), *vd);
+      observer->on_unregistered(this, s);
+    }
+  }
+
   return DDS::RETCODE_OK;
 }
 
@@ -1815,7 +1842,14 @@ DataWriterImpl::unregister_instances(const DDS::Time_t& source_timestamp)
   ACE_GUARD(ACE_Thread_Mutex, guard, sync_unreg_rem_assocs_lock_);
 
   while (!this->data_container_->instances_.empty()) {
-    this->unregister_instance_i(this->data_container_->instances_.begin()->first, source_timestamp);
+    const DDS::InstanceHandle_t handle = data_container_->instances_.begin()->first;
+    InstanceHandlesToValues::const_iterator pos = instance_handles_to_values_.find(handle);
+    if (pos != instance_handles_to_values_.end()) {
+      const Sample& s = *pos->second;
+      unregister_instance_i(handle, &s, source_timestamp);
+    } else {
+      unregister_instance_i(handle, 0, source_timestamp);
+    }
   }
 }
 
@@ -1981,6 +2015,7 @@ DataWriterImpl::send_suspended_data()
 
 DDS::ReturnCode_t
 DataWriterImpl::dispose(DDS::InstanceHandle_t handle,
+                        const Sample& samp,
                         const DDS::Time_t & source_timestamp)
 {
   DBG_ENTRY_LVL("DataWriterImpl","dispose",6);
@@ -2037,6 +2072,13 @@ DataWriterImpl::dispose(DDS::InstanceHandle_t handle,
   }
 
   send_all_to_flush_control(guard);
+
+  const ValueDispatcher* vd = get_value_dispatcher();
+  const Observer_rch observer = get_observer(Observer::e_DISPOSED);
+  if (observer && samp.native_data() && vd) {
+    Observer::Sample s(handle, element->get_header().instance_state(), source_timestamp, element->get_header().sequence_, samp.native_data(), *vd);
+    observer->on_disposed(this, s);
+  }
 
   return DDS::RETCODE_OK;
 }
@@ -2535,11 +2577,6 @@ DataWriterImpl::send_liveliness(const MonotonicTimePoint& now)
 void
 DataWriterImpl::prepare_to_delete()
 {
-  const Observer_rch observer = get_observer(Observer::e_DELETED);
-  if (observer) {
-    observer->on_deleted(this);
-  }
-
   this->set_deleted(true);
   this->stop_associating();
   this->terminate_send_if_suspended();
@@ -2556,6 +2593,11 @@ DataWriterImpl::prepare_to_delete()
 
   // Unregister all registered instances prior to deletion.
   unregister_instances(SystemTimePoint::now().to_dds_time());
+
+  const Observer_rch observer = get_observer(Observer::e_DELETED);
+  if (observer) {
+    observer->on_deleted(this);
+  }
 }
 
 PublicationInstance_rch
@@ -2936,7 +2978,7 @@ DDS::ReturnCode_t DataWriterImpl::unregister_instance_w_timestamp(
   if (rc != DDS::RETCODE_OK) {
     return rc;
   }
-  return unregister_instance_i(instance_handle, timestamp);
+  return unregister_instance_i(instance_handle, &sample, timestamp);
 }
 
 DDS::ReturnCode_t DataWriterImpl::dispose_w_timestamp(
@@ -2964,7 +3006,7 @@ DDS::ReturnCode_t DataWriterImpl::dispose_w_timestamp(
   if (rc != DDS::RETCODE_OK) {
     return rc;
   }
-  return dispose(instance_handle, source_timestamp);
+  return dispose(instance_handle, sample, source_timestamp);
 }
 
 ACE_Message_Block* DataWriterImpl::serialize_sample(const Sample& sample)
