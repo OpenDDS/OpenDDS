@@ -226,7 +226,7 @@ function(_opendds_target_idl_sources target)
 
     _opendds_get_generated_idl_output(
       ${target} ${input} "${opendds_idl_opt_-o}" output_prefix output_dir)
-    _opendds_get_generated_output_dir(${target} file_auto_includes)
+    set(file_auto_includes "${output_dir}")
 
     set(type_support_idl_file)
     set(idl_files)
