@@ -257,6 +257,10 @@ macro(OPENDDS_TARGET_SOURCES target)
   opendds_get_generated_output_dir(${target} _generated_directory)
   set_target_properties(${target} PROPERTIES OPENDDS_GENERATED_DIRECTORY ${_generated_directory})
 
+  if (DEFINED OPENDDS_RAPIDJSON)
+    target_include_directories(${target} PUBLIC "${OPENDDS_ROOT}/tools/rapidjson/include")
+  endif()
+
   set(_is_include_arg FALSE)
   foreach(_opendds_idl_arg ${_opendds_options})
     if(_is_include_arg)
