@@ -62,8 +62,9 @@ set(TAO_VALUETYPE_DEPS TAO::TAO TAO::AnyTypeCode)
 
 set(TAO_IDL_FE_INCLUDE_DIRS
   "${TAO_INCLUDE_DIRS}"
-  "${TAO_ROOT}/TAO_IDL/include" # TODO
-  "${TAO_ROOT}/TAO_IDL/be_include" # TODO
+  # These only work with source tree right now
+  "${TAO_ROOT}/TAO_IDL/include"
+  "${TAO_ROOT}/TAO_IDL/be_include"
 )
 
 _opendds_find_our_libraries("TAO" "${_opendds_tao_libs}")
@@ -72,5 +73,5 @@ if(OpenDDS-TAO_FOUND)
   _opendds_add_target_binary(tao_idl "${TAO_IDL}")
   _opendds_add_library_group("TAO" "${_opendds_tao_libs}" TRUE)
 
-  # TODO tao_idl
+  include("${CMAKE_CURRENT_LIST_DIR}/opendds_target_sources.cmake")
 endif()

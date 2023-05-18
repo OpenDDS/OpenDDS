@@ -132,7 +132,7 @@ function(_opendds_get_target_export_header target export_header_var)
 
   if(NOT EXISTS ${output_file})
     execute_process(COMMAND ${CMAKE_COMMAND} -E env "DDS_ROOT=${DDS_ROOT}" "TAO_ROOT=${TAO_ROOT}"
-      perl ${gen_script} ${target} OUTPUT_FILE ${export_header} RESULT_VARIABLE export_script_exit_status)
+      ${PERL_EXECUTABLE} ${gen_script} ${target} OUTPUT_FILE ${export_header} RESULT_VARIABLE export_script_exit_status)
     if(NOT export_script_exit_status EQUAL "0")
       message(FATAL_ERROR "Export header script for ${target} exited with ${export_script_status}")
     endif()

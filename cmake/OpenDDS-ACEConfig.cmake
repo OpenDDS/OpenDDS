@@ -15,9 +15,7 @@ if(NOT DEFINED ACE_ROOT)
   return()
 endif()
 
-set(_opendds_ace_required_deps ACE_LIBRARY ACE_GPERF PERL)
-
-find_program(PERL perl)
+set(_opendds_ace_required_deps ACE_LIBRARY ACE_GPERF)
 
 find_program(ACE_GPERF
   NAMES
@@ -109,6 +107,5 @@ _opendds_find_our_libraries("ACE" "${_opendds_ace_libs}")
 _opendds_found_required_deps(OpenDDS-ACE_FOUND "${_opendds_ace_required_deps}")
 if(OpenDDS-ACE_FOUND)
   _opendds_add_target_binary(ace_gperf "${ACE_GPERF}")
-  _opendds_add_target_binary(perl "${PERL}")
   _opendds_add_library_group("ACE" "${_opendds_ace_libs}" TRUE)
 endif()

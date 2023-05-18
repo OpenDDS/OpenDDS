@@ -51,6 +51,7 @@ set(OPENDDS_DCPS_DEPS
   # TODO: These are omitted with safety profile
   TAO::Valuetype
   TAO::PortableServer
+  TAO::BiDirGIOP
 )
 
 if(NOT OPENDDS_BUILT_IN_TOPICS)

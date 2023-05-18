@@ -1,7 +1,14 @@
 # Distributed under the OpenDDS License. See accompanying LICENSE
 # file or http://www.opendds.org/license.html for details.
 
-include(${CMAKE_CURRENT_LIST_DIR}/config.cmake)
+if(_OPENDDS_INIT_CMAKE)
+  return()
+endif()
+set(_OPENDDS_INIT_CMAKE TRUE)
+
+find_package(Perl REQUIRED)
+
+include("${CMAKE_CURRENT_LIST_DIR}/config.cmake")
 
 # ACE Features
 if(NOT DEFINED OPENDDS_DEBUG)
