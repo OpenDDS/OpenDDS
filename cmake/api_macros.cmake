@@ -276,6 +276,11 @@ macro(OPENDDS_TARGET_SOURCES target)
     endif()
     list(APPEND _includes "${_raw_include}")
   endforeach()
+
+  if (DEFINED OPENDDS_RAPIDJSON)
+    list(APPEND _includes "${OPENDDS_ROOT}/tools/rapidjson/include")
+  endif()
+
   list(REMOVE_DUPLICATES _includes)
 
   if(OPENDDS_USE_CORRECT_INCLUDE_SCOPE)

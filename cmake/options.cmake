@@ -72,6 +72,10 @@ if (OPENDDS_SECURITY)
   _OPENDDS_APPEND_DEF(OPENDDS_SECURITY)
 endif()
 
+if (OPENDDS_RAPIDJSON)
+  _OPENDDS_APPEND_DEF(OPENDDS_RAPIDJSON)
+endif()
+
 # ACE defines.
 
 # TODO(iguessthislldo): Separate ACE and TAO (maybe more) definitions lists

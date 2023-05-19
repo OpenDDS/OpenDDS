@@ -55,26 +55,32 @@ endfunction()
 
 set(opendds_gen "${CMAKE_CURRENT_BINARY_DIR}/opendds_generated")
 
+if (DEFINED OPENDDS_RAPIDJSON)
+  set(rapidjson_include "${OPENDDS_ROOT}/tools/rapidjson/include")
+else ()
+  set(rapidjson_include "")
+endif()
+
 subtest(no_scope)
 OPENDDS_TARGET_SOURCES(${target} ${idl_file})
-assert_includes(${target} "" "${opendds_gen}")
+assert_includes(${target} "" "${opendds_gen};${rapidjson_include}")
 
 subtest(public)
 OPENDDS_TARGET_SOURCES(${target} PUBLIC ${idl_file})
-assert_includes(${target} "${opendds_gen}" "${opendds_gen}")
+assert_includes(${target} "${opendds_gen};${rapidjson_include}" "${opendds_gen};${rapidjson_include}")
 
 subtest(interface)
 OPENDDS_TARGET_SOURCES(${target} INTERFACE ${idl_file})
-assert_includes(${target} "${opendds_gen}" "${opendds_gen}")
+assert_includes(${target} "${opendds_gen};${rapidjson_include}" "${opendds_gen};${rapidjson_include}")
 
 subtest(private)
 OPENDDS_TARGET_SOURCES(${target} PRIVATE ${idl_file})
-assert_includes(${target} "" "${opendds_gen}")
+assert_includes(${target} "" "${opendds_gen};${rapidjson_include}")
 
 subtest(o_opt)
 OPENDDS_TARGET_SOURCES(${target} ${idl_file}
   OPENDDS_IDL_OPTIONS -o opendds-idl-output
   TAO_IDL_OPTIONS -o tao-idl-output)
-assert_includes(${target} "" "${opendds_gen}/opendds-idl-output;${opendds_gen}/tao-idl-output")
+assert_includes(${target} "" "${opendds_gen}/opendds-idl-output;${opendds_gen}/tao-idl-output;${rapidjson_include}")
 
 OPENDDS_RESTORE_CACHE()
