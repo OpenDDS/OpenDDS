@@ -1,12 +1,12 @@
 version: '2'
 services:
   subscriber:
-    image: ghcr.io/objectcomputing/opendds:latest-release
+    image: ghcr.io/opendds/opendds:latest-release
     command: ["./subscriber", "-DCPSConfigFile",  "rtps.ini" ]
     volumes:
       - $PWD:/opt/workspace
   publisher:
-    image: ghcr.io/objectcomputing/opendds:latest-release
+    image: ghcr.io/opendds/opendds:latest-release
     command: ["./publisher", "-DCPSConfigFile",  "rtps.ini" ]
     volumes:
       - $PWD:/opt/workspace
