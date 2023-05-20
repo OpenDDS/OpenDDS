@@ -36,7 +36,7 @@ module Mod {
     wstring wstr;
   };
 
-  typedef sequence<short> MySeq;
+  typedef sequence<short, 7> MySeq;
   typedef sequence<CORBA::StringSeq> NestedSeq;
 
   union MyUnion switch (MyEnum) {
