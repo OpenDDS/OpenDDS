@@ -116,8 +116,12 @@ namespace {
     if (use_cxx11) {
       be_global->impl_ << indent << "  " << expression << ".resize(" << expression << ".size() + 1);\n";
     } else {
-      be_global->impl_ << indent << "  const ACE_CDR::ULong len = " << expression << ".length();\n";
-      be_global->impl_ << indent << "  " << expression << ".length(len + 1);\n";
+      if (sequence->unbounded()) {
+        be_global->impl_ << indent << " OpenDDS::DCPS::grow(" << expression << ");\n";
+      } else {
+        be_global->impl_ << indent << "  const ACE_CDR::ULong len = " << expression << ".length();\n";
+        be_global->impl_ << indent << "  " << expression << ".length(len + 1);\n";
+      }
     }
     be_global->impl_ <<
       indent << "  if (!value_reader.begin_element()) return false;\n";
