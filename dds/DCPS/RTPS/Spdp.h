@@ -30,6 +30,7 @@
 #include <dds/DCPS/PoolAllocationBase.h>
 #include <dds/DCPS/TimeTypes.h>
 #include <dds/DCPS/transport/framework/TransportStatistics.h>
+#include <dds/DCPS/transport/framework/MessageDropper.h>
 #include <dds/DCPS/AtomicBool.h>
 #include <dds/DCPS/Discovery.h>
 
@@ -425,6 +426,7 @@ private:
   struct SpdpTransport
     : public virtual DCPS::RcEventHandler
     , public virtual DCPS::InternalDataReaderListener<DCPS::NetworkInterfaceAddress>
+    , public virtual DCPS::ConfigListener
 #ifdef OPENDDS_SECURITY
     , public virtual ICE::Endpoint
 #endif
@@ -551,6 +553,9 @@ private:
 
     DCPS::InternalTransportStatistics transport_statistics_;
     DCPS::MonotonicTimePoint last_harvest;
+    DCPS::ConfigReader_rch config_reader_;
+    void on_data_available(DCPS::ConfigReader_rch reader);
+    DCPS::MessageDropper message_dropper_;
   };
 
   DCPS::RcHandle<SpdpTransport> tport_;

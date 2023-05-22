@@ -691,6 +691,10 @@ RtpsUdpTransport::configure_i(const RtpsUdpInst_rch& config)
   ACE_Reactor* reactor = reactor_task_->get_reactor();
   job_queue_ = DCPS::make_rch<DCPS::JobQueue>(reactor);
 
+  ConfigListener::job_queue(job_queue_);
+  config_reader_ = make_rch<ConfigReader>(ConfigStoreImpl::datareader_qos(), rchandle_from(this));
+  TheServiceParticipant->config_store()->connect(config_reader_);
+
 #ifdef OPENDDS_SECURITY
   if (config->use_ice()) {
     start_ice();
@@ -739,6 +743,11 @@ RtpsUdpTransport::shutdown_i()
   relay_stun_task_->cancel();
 #endif
 
+  if (config_reader_) {
+    TheServiceParticipant->config_store()->disconnect(config_reader_);
+    config_reader_.reset();
+  }
+
   job_queue_.reset();
 
   GuardThreadType guard_links(links_lock_);
@@ -754,7 +763,15 @@ RtpsUdpTransport::release_datalink(DataLink* /*link*/)
   // No-op for rtps_udp: keep the link_ around until the transport is shut down.
 }
 
-
+void
+RtpsUdpTransport::on_data_available(ConfigReader_rch)
+{
+  const String& config_prefix = config()->config_prefix();
+  if (ConfigStoreImpl::contains_prefix(config_reader_, config_prefix)) {
+    message_dropper_.reload(TheServiceParticipant->config_store(), config_prefix);
+    transport_statistics_.reload(TheServiceParticipant->config_store(), config_prefix);
+  }
+}
 
 #ifdef OPENDDS_SECURITY
 
@@ -798,17 +815,20 @@ namespace {
   }
 
   ssize_t
-  send_single_i(RtpsUdpInst_rch config, ACE_SOCK_Dgram& socket, const iovec iov[], int n, const ACE_INET_Addr& addr, bool& network_is_unreachable)
+  send_single_i(const MessageDropper& message_dropper,
+                ACE_SOCK_Dgram& socket,
+                const iovec iov[],
+                int n,
+                const ACE_INET_Addr& addr,
+                bool& network_is_unreachable)
   {
-    OPENDDS_ASSERT(addr != ACE_INET_Addr());
+    ACE_UNUSED_ARG(message_dropper);
 
-    if (!config) {
-      return -1;
-    }
+    OPENDDS_ASSERT(addr != ACE_INET_Addr());
 
 #ifdef OPENDDS_TESTING_FEATURES
     ssize_t total_length;
-    if (config->should_drop(iov, n, total_length)) {
+    if (message_dropper.should_drop(iov, n, total_length)) {
       return total_length;
     }
 #endif
@@ -921,11 +941,11 @@ RtpsUdpTransport::IceEndpoint::send(const ACE_INET_Addr& destination, const STUN
 
   iovec iov[MAX_SEND_BLOCKS];
   const int num_blocks = RtpsUdpSendStrategy::mb_to_iov(block, iov);
-  const ssize_t result = send_single_i(transport.config(), socket, iov, num_blocks, destination, network_is_unreachable_);
+  const ssize_t result = send_single_i(transport.message_dropper(), socket, iov, num_blocks, destination, network_is_unreachable_);
 
   RtpsUdpInst_rch cfg = transport.config();
   if (result < 0) {
-    if (cfg && cfg->count_messages()) {
+    if (cfg && transport.transport_statistics_.count_messages()) {
       ssize_t bytes = 0;
       for (int i = 0; i < num_blocks; ++i) {
         bytes += iov[i].iov_len;
@@ -940,7 +960,7 @@ RtpsUdpTransport::IceEndpoint::send(const ACE_INET_Addr& destination, const STUN
       ACE_ERROR((prio, "(%P|%t) RtpsUdpTransport::send() - "
                  "failed to send STUN message\n"));
     }
-  } else if (cfg && cfg->count_messages()) {
+  } else if (cfg && transport.transport_statistics_.count_messages()) {
     const NetworkAddress da(destination);
     const InternalMessageCountKey key(da, MCK_STUN, da == cfg->rtps_relay_address());
     ACE_GUARD(ACE_Thread_Mutex, g, transport.transport_statistics_mutex_);

@@ -72,7 +72,7 @@ bool AppConfig::configureTransport(){
     if (!rtpsUdp) {
       ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Failed to cast to RtpsUdpInst*%m\n")), false);
     }
-    rtpsUdp->datalink_release_delay_ = 0;
+    rtpsUdp->datalink_release_delay(0);
     ACE_INET_Addr addr(port, ACE_TEXT_ALWAYS_CHAR(host.c_str()));
     rtpsUdp->local_address(OpenDDS::DCPS::NetworkAddress(addr));
 

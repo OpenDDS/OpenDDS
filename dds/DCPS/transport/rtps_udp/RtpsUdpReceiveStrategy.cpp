@@ -37,7 +37,7 @@ RtpsUdpReceiveStrategy::RtpsUdpReceiveStrategy(RtpsUdpDataLink* link,
   , recvd_sample_(0)
   , fragment_size_(0)
   , total_frags_(0)
-  , reassembly_(link->config()->fragment_reassembly_timeout_)
+  , reassembly_(link->config()->fragment_reassembly_timeout())
   , receiver_(local_prefix)
   , thread_status_manager_(thread_status_manager)
 #ifdef OPENDDS_SECURITY
@@ -242,7 +242,7 @@ RtpsUdpReceiveStrategy::receive_bytes_helper(iovec iov[],
 
   if (n > 0 && ret > 0 && iov[0].iov_len >= 4 && std::memcmp(iov[0].iov_base, "RTPS", 4) == 0) {
     RtpsUdpInst_rch cfg = tport.config();
-    if (cfg && cfg->count_messages()) {
+    if (tport.transport_statistics_.count_messages()) {
       const NetworkAddress ra(remote_address);
       const InternalMessageCountKey key(ra, MCK_RTPS, ra == cfg->rtps_relay_address());
       ACE_GUARD_RETURN(ACE_Thread_Mutex, g, tport.transport_statistics_mutex_, -1);
@@ -283,7 +283,7 @@ RtpsUdpReceiveStrategy::receive_bytes_helper(iovec iov[],
   message.block = head;
   if (serializer >> message) {
     RtpsUdpInst_rch cfg = tport.config();
-    if (cfg && cfg->count_messages()) {
+    if (cfg && tport.transport_statistics_.count_messages()) {
       const NetworkAddress ra(remote_address);
       const InternalMessageCountKey key(ra, MCK_STUN, ra == cfg->rtps_relay_address());
       ACE_GUARD_RETURN(ACE_Thread_Mutex, g, tport.transport_statistics_mutex_, -1);

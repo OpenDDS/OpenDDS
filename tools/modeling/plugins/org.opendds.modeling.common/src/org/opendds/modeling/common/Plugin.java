@@ -82,8 +82,6 @@ public class Plugin extends EMFPlugin {
 		imageMappings.put("PassiveConnectDuration",     NUMBER_IMAGE_NAME);
 		imageMappings.put("PassiveReconnectDuration",   NUMBER_IMAGE_NAME);
 		imageMappings.put("PortOffset",                 NUMBER_IMAGE_NAME);
-		imageMappings.put("QueueInitialPool",           NUMBER_IMAGE_NAME);
-		imageMappings.put("QueueMessagesPerPool",       NUMBER_IMAGE_NAME);
 		imageMappings.put("RcvBufferSize",              NUMBER_IMAGE_NAME);
 		imageMappings.put("Reliable",                   BOOLEAN_IMAGE_NAME);
 		imageMappings.put("SwapBytes",                  BOOLEAN_IMAGE_NAME);

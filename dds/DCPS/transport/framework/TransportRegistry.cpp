@@ -828,16 +828,22 @@ TransportRegistry::release()
   DBG_ENTRY_LVL("TransportRegistry", "release", 6);
   GuardType guard(lock_);
   released_ = true;
+  InstMap inst_map_copy_;
+  std::swap(inst_map_copy_, inst_map_);
 
-  for (InstMap::iterator iter = inst_map_.begin(); iter != inst_map_.end(); ++iter) {
-    iter->second->shutdown();
+
+  {
+    ACE_Reverse_Lock<LockType> rev_lock(lock_);
+    ACE_Guard<ACE_Reverse_Lock<LockType> > guard(rev_lock);
+    for (InstMap::iterator iter = inst_map_copy_.begin(); iter != inst_map_copy_.end(); ++iter) {
+      iter->second->shutdown();
+    }
   }
 
   config_template_to_instance_map_.clear();
   transport_templates_.clear();
   transports_.clear();
   type_map_.clear();
-  inst_map_.clear();
   config_map_.clear();
   domain_default_config_map_.clear();
   global_config_.reset();

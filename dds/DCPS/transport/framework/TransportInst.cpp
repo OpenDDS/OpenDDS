@@ -10,21 +10,14 @@
 #include "TransportImpl.h"
 #include "TransportExceptions.h"
 #include "EntryExit.h"
+
 #include "DCPS/SafetyProfileStreams.h"
+#include "DCPS/Service_Participant.h"
 
 #include "ace/Configuration.h"
 
 #include <cstring>
 #include <algorithm>
-
-#ifdef OPENDDS_TESTING_FEATURES
-#include <cstdlib>
-#ifdef _MSC_VER
-#define OPENDDS_DRAND48() (rand()*(1./RAND_MAX))
-#else
-#define OPENDDS_DRAND48 drand48
-#endif
-#endif
 
 #if !defined (__ACE_INLINE__)
 # include "TransportInst.inl"
@@ -32,32 +25,24 @@
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
-OpenDDS::DCPS::TransportInst::~TransportInst()
+namespace OpenDDS {
+namespace DCPS {
+
+TransportInst::~TransportInst()
 {
   DBG_ENTRY_LVL("TransportInst","~TransportInst",6);
 }
 
-int
-OpenDDS::DCPS::TransportInst::load(ACE_Configuration_Heap& cf,
-                                   ACE_Configuration_Section_Key& sect)
+String
+TransportInst::config_key(const String& key) const
 {
-  GET_CONFIG_VALUE(cf, sect, ACE_TEXT("queue_messages_per_pool"), queue_messages_per_pool_, size_t)
-  GET_CONFIG_VALUE(cf, sect, ACE_TEXT("queue_initial_pools"), queue_initial_pools_, size_t)
-  GET_CONFIG_VALUE(cf, sect, ACE_TEXT("max_packet_size"), max_packet_size_, ACE_UINT32)
-  GET_CONFIG_VALUE(cf, sect, ACE_TEXT("max_samples_per_packet"), max_samples_per_packet_, size_t)
-  GET_CONFIG_VALUE(cf, sect, ACE_TEXT("optimum_packet_size"), optimum_packet_size_, ACE_UINT32)
-  GET_CONFIG_VALUE(cf, sect, ACE_TEXT("thread_per_connection"), thread_per_connection_, bool)
-  GET_CONFIG_VALUE(cf, sect, ACE_TEXT("datalink_release_delay"), datalink_release_delay_, int)
-  GET_CONFIG_TIME_VALUE(cf, sect, ACE_TEXT("fragment_reassembly_timeout"), fragment_reassembly_timeout_);
+  return ConfigPair::canonicalize(config_prefix_ + "_" + key);
+}
 
-  // Undocumented - this option is not in the Developer's Guide
-  // Controls the number of chunks in the allocators used by the datalink
-  // for control messages.
-  GET_CONFIG_VALUE(cf, sect, ACE_TEXT("datalink_control_chunks"), datalink_control_chunks_, size_t)
-
-  GET_CONFIG_VALUE(cf, sect, ACE_TEXT("receive_preallocated_message_blocks"), receive_preallocated_message_blocks_, size_t)
-  GET_CONFIG_VALUE(cf, sect, ACE_TEXT("receive_preallocated_data_blocks"), receive_preallocated_data_blocks_, size_t)
-
+int
+TransportInst::load(ACE_Configuration_Heap& cf,
+                    ACE_Configuration_Section_Key& sect)
+{
   ACE_TString stringvalue;
   if (cf.get_string_value (sect, ACE_TEXT("passive_connect_duration"), stringvalue) == 0) {
     ACE_DEBUG ((LM_WARNING,
@@ -66,12 +51,11 @@ OpenDDS::DCPS::TransportInst::load(ACE_Configuration_Heap& cf,
                 ACE_TEXT ("defined in transport config.\n")));
   }
 
-  adjust_config_value();
   return 0;
 }
 
 void
-OpenDDS::DCPS::TransportInst::dump() const
+TransportInst::dump() const
 {
   ACE_DEBUG((LM_DEBUG,
              ACE_TEXT("\n(%P|%t) TransportInst::dump() -\n%C"),
@@ -84,7 +68,7 @@ namespace {
 }
 
 OPENDDS_STRING
-OpenDDS::DCPS::TransportInst::formatNameForDump(const char* name)
+TransportInst::formatNameForDump(const char* name)
 {
   OPENDDS_STRING formatted_name;
   formatted_name.reserve(NAME_INDENT + NAME_WIDTH);
@@ -98,27 +82,197 @@ OpenDDS::DCPS::TransportInst::formatNameForDump(const char* name)
 }
 
 OPENDDS_STRING
-OpenDDS::DCPS::TransportInst::dump_to_str() const
+TransportInst::dump_to_str() const
 {
   OPENDDS_STRING ret;
   ret += formatNameForDump("transport_type")          + transport_type_ + '\n';
   ret += formatNameForDump("name")                    + name_ + '\n';
-  ret += formatNameForDump("queue_messages_per_pool") + to_dds_string(unsigned(queue_messages_per_pool_)) + '\n';
-  ret += formatNameForDump("queue_initial_pools")     + to_dds_string(unsigned(queue_initial_pools_)) + '\n';
-  ret += formatNameForDump("max_packet_size")         + to_dds_string(unsigned(max_packet_size_)) + '\n';
-  ret += formatNameForDump("max_samples_per_packet")  + to_dds_string(unsigned(max_samples_per_packet_)) + '\n';
-  ret += formatNameForDump("optimum_packet_size")     + to_dds_string(unsigned(optimum_packet_size_)) + '\n';
-  ret += formatNameForDump("thread_per_connection")   + (thread_per_connection_ ? "true" : "false") + '\n';
-  ret += formatNameForDump("datalink_release_delay")  + to_dds_string(datalink_release_delay_) + '\n';
-  ret += formatNameForDump("datalink_control_chunks") + to_dds_string(unsigned(datalink_control_chunks_)) + '\n';
-  ret += formatNameForDump("fragment_reassembly_timeout") + fragment_reassembly_timeout_.str() + '\n';
-  ret += formatNameForDump("receive_preallocated_message_blocks") + to_dds_string(unsigned(receive_preallocated_message_blocks_)) + '\n';
-  ret += formatNameForDump("receive_preallocated_data_blocks") + to_dds_string(unsigned(receive_preallocated_data_blocks_)) + '\n';
+  ret += formatNameForDump("config_prefix")           + config_prefix_ + '\n';
+  ret += formatNameForDump("max_packet_size")         + to_dds_string(unsigned(max_packet_size())) + '\n';
+  ret += formatNameForDump("max_samples_per_packet")  + to_dds_string(unsigned(max_samples_per_packet())) + '\n';
+  ret += formatNameForDump("optimum_packet_size")     + to_dds_string(unsigned(optimum_packet_size())) + '\n';
+  ret += formatNameForDump("thread_per_connection")   + (thread_per_connection() ? "true" : "false") + '\n';
+  ret += formatNameForDump("datalink_release_delay")  + to_dds_string(datalink_release_delay()) + '\n';
+  ret += formatNameForDump("datalink_control_chunks") + to_dds_string(unsigned(datalink_control_chunks())) + '\n';
+  ret += formatNameForDump("fragment_reassembly_timeout") + fragment_reassembly_timeout().str() + '\n';
+  ret += formatNameForDump("receive_preallocated_message_blocks") + to_dds_string(unsigned(receive_preallocated_message_blocks())) + '\n';
+  ret += formatNameForDump("receive_preallocated_data_blocks") + to_dds_string(unsigned(receive_preallocated_data_blocks())) + '\n';
   return ret;
 }
 
 void
-OpenDDS::DCPS::TransportInst::shutdown()
+TransportInst::max_packet_size(ACE_UINT32 mps)
+{
+  TheServiceParticipant->config_store()->set_uint32(config_key("MAX_PACKET_SIZE").c_str(), mps);
+}
+
+ACE_UINT32
+TransportInst::max_packet_size() const
+{
+  return TheServiceParticipant->config_store()->get_uint32(config_key("MAX_PACKET_SIZE").c_str(), DEFAULT_CONFIG_MAX_PACKET_SIZE);
+}
+
+void
+TransportInst::max_samples_per_packet(size_t mspp)
+{
+  TheServiceParticipant->config_store()->set_uint32(config_key("MAX_SAMPLES_PER_PACKET").c_str(), static_cast<DDS::UInt32>(mspp));
+}
+
+size_t
+TransportInst::max_samples_per_packet() const
+{
+  // Ensure that the number of samples put into the packet does
+  // not exceed the allowed number of io vectors to be sent by the OS.
+  const size_t configured = TheServiceParticipant->config_store()->get_uint32(config_key("MAX_SAMPLES_PER_PACKET").c_str(), DEFAULT_CONFIG_MAX_SAMPLES_PER_PACKET);
+  size_t retval = configured;
+
+  if ((2 * retval + 1) > MAX_SEND_BLOCKS) {
+    retval = (MAX_SEND_BLOCKS + 1) / 2 - 1;
+    if (log_level >= LogLevel::Notice) {
+      ACE_DEBUG((LM_NOTICE,
+                 "(%P|%t) NOTICE: TransportInst::max_samples_per_packet: "
+                 "max_samples_per_packet adjusted from %B to %B\n",
+                 configured, retval));
+    }
+  }
+
+  return retval;
+}
+
+void
+TransportInst::optimum_packet_size(ACE_UINT32 ops)
+{
+  TheServiceParticipant->config_store()->set_uint32(config_key("OPTIMUM_PACKET_SIZE").c_str(), ops);
+}
+
+ACE_UINT32
+TransportInst::optimum_packet_size() const
+{
+  return TheServiceParticipant->config_store()->get_uint32(config_key("OPTIMUM_PACKET_SIZE").c_str(), DEFAULT_CONFIG_OPTIMUM_PACKET_SIZE);
+}
+
+void
+TransportInst::thread_per_connection(bool tpc)
+{
+  TheServiceParticipant->config_store()->set_boolean(config_key("THREAD_PER_CONNECTION").c_str(), tpc);
+}
+
+bool
+TransportInst::thread_per_connection() const
+{
+  return TheServiceParticipant->config_store()->get_boolean(config_key("THREAD_PER_CONNECTION").c_str(), false);
+}
+
+void
+TransportInst::datalink_release_delay(long drd)
+{
+  TheServiceParticipant->config_store()->set_int32(config_key("DATALINK_RELEASE_DELAY").c_str(), drd);
+}
+
+long
+TransportInst::datalink_release_delay() const
+{
+  return TheServiceParticipant->config_store()->get_int32(config_key("DATALINK_RELEASE_DELAY").c_str(), DEFAULT_DATALINK_RELEASE_DELAY);
+}
+
+void
+TransportInst::datalink_control_chunks(size_t dcc)
+{
+  TheServiceParticipant->config_store()->set_uint32(config_key("DATALINK_CONTROL_CHUNKS").c_str(), static_cast<DDS::UInt32>(dcc));
+}
+
+size_t
+TransportInst::datalink_control_chunks() const
+{
+  return TheServiceParticipant->config_store()->get_uint32(config_key("DATALINK_CONTROL_CHUNKS").c_str(), DEFAULT_DATALINK_CONTROL_CHUNKS);
+}
+
+void
+TransportInst::fragment_reassembly_timeout(const TimeDuration& frt)
+{
+  TheServiceParticipant->config_store()->set(config_key("FRAGMENT_REASSEMBLY_TIMEOUT").c_str(), frt, ConfigStoreImpl::Format_IntegerMilliseconds);
+}
+
+TimeDuration
+TransportInst::fragment_reassembly_timeout() const
+{
+  return TheServiceParticipant->config_store()->get(config_key("FRAGMENT_REASSEMBLY_TIMEOUT").c_str(), TimeDuration(300), ConfigStoreImpl::Format_IntegerMilliseconds);
+}
+
+void
+TransportInst::receive_preallocated_message_blocks(size_t rpmb)
+{
+  TheServiceParticipant->config_store()->set_uint32(config_key("RECEIVE_PREALLOCATED_MESSAGE_BLOCKS").c_str(), static_cast<DDS::UInt32>(rpmb));
+}
+
+size_t
+TransportInst::receive_preallocated_message_blocks() const
+{
+  return TheServiceParticipant->config_store()->get_uint32(config_key("RECEIVE_PREALLOCATED_MESSAGE_BLOCKS").c_str(), 0);
+}
+
+void
+TransportInst::receive_preallocated_data_blocks(size_t rpdb)
+{
+  TheServiceParticipant->config_store()->set_uint32(config_key("RECEIVE_PREALLOCATED_DATA_BLOCKS").c_str(), static_cast<DDS::UInt32>(rpdb));
+}
+
+size_t
+TransportInst::receive_preallocated_data_blocks() const
+{
+  return TheServiceParticipant->config_store()->get_uint32(config_key("RECEIVE_PREALLOCATED_DATA_BLOCKS").c_str(), 0);
+}
+
+void
+TransportInst::drop_messages(bool flag)
+{
+  TheServiceParticipant->config_store()->set_boolean(config_key("DROP_MESSAGES").c_str(), flag);
+}
+
+bool
+TransportInst::drop_messages() const
+{
+  return TheServiceParticipant->config_store()->get_boolean(config_key("DROP_MESSAGES").c_str(), false);
+}
+
+void
+TransportInst::drop_messages_m(double m)
+{
+  TheServiceParticipant->config_store()->set_float64(config_key("DROP_MESSAGES_M").c_str(), m);
+}
+
+double
+TransportInst::drop_messages_m() const
+{
+  return TheServiceParticipant->config_store()->get_float64(config_key("DROP_MESSAGES_M").c_str(), 0);
+}
+
+void
+TransportInst::drop_messages_b(double b)
+{
+  TheServiceParticipant->config_store()->set_float64(config_key("DROP_MESSAGES_B").c_str(), b);
+}
+
+double
+TransportInst::drop_messages_b() const
+{
+  return TheServiceParticipant->config_store()->get_float64(config_key("DROP_MESSAGES_B").c_str(), 0);
+}
+
+void
+TransportInst::count_messages(bool flag)
+{
+  TheServiceParticipant->config_store()->set_boolean(config_key("COUNT_MESSAGES").c_str(), flag);
+}
+
+bool
+TransportInst::count_messages() const
+{
+  return TheServiceParticipant->config_store()->get_boolean(config_key("COUNT_MESSAGES").c_str(), false);
+}
+
+void
+TransportInst::shutdown()
 {
   TransportImpl_rch impl;
   {
@@ -131,29 +285,29 @@ OpenDDS::DCPS::TransportInst::shutdown()
   }
 }
 
-OpenDDS::DCPS::TransportImpl_rch
-OpenDDS::DCPS::TransportInst::get_or_create_impl()
+TransportImpl_rch
+TransportInst::get_or_create_impl()
 {
   ACE_GUARD_RETURN(ACE_SYNCH_MUTEX, g, lock_, TransportImpl_rch());
   if (!impl_ && !shutting_down_) {
     try {
       impl_ = new_impl();
-    } catch (const OpenDDS::DCPS::Transport::UnableToCreate&) {
+    } catch (const Transport::UnableToCreate&) {
       return TransportImpl_rch();
     }
   }
   return impl_;
 }
 
-OpenDDS::DCPS::TransportImpl_rch
-OpenDDS::DCPS::TransportInst::get_impl()
+TransportImpl_rch
+TransportInst::get_impl()
 {
   ACE_GUARD_RETURN(ACE_SYNCH_MUTEX, g, lock_, TransportImpl_rch());
   return impl_;
 }
 
 void
-OpenDDS::DCPS::TransportInst::set_port_in_addr_string(OPENDDS_STRING& addr_str, u_short port_number)
+TransportInst::set_port_in_addr_string(OPENDDS_STRING& addr_str, u_short port_number)
 {
 #ifdef BUFSIZE
 #undef BUFSIZE
@@ -178,67 +332,55 @@ OpenDDS::DCPS::TransportInst::set_port_in_addr_string(OPENDDS_STRING& addr_str, 
   addr_str = result;
 }
 
-OpenDDS::DCPS::WeakRcHandle<OpenDDS::ICE::Endpoint>
-OpenDDS::DCPS::TransportInst::get_ice_endpoint()
+WeakRcHandle<OpenDDS::ICE::Endpoint>
+TransportInst::get_ice_endpoint()
 {
-  const OpenDDS::DCPS::TransportImpl_rch temp = get_or_create_impl();
-  return temp ? temp->get_ice_endpoint() : OpenDDS::DCPS::WeakRcHandle<OpenDDS::ICE::Endpoint>();
+  const TransportImpl_rch temp = get_or_create_impl();
+  return temp ? temp->get_ice_endpoint() : WeakRcHandle<OpenDDS::ICE::Endpoint>();
 }
 
 void
-OpenDDS::DCPS::TransportInst::rtps_relay_only_now(bool flag)
+TransportInst::rtps_relay_only_now(bool flag)
 {
-  const OpenDDS::DCPS::TransportImpl_rch temp = get_or_create_impl();
+  const TransportImpl_rch temp = get_or_create_impl();
   if (temp) {
     temp->rtps_relay_only_now(flag);
   }
 }
 
 void
-OpenDDS::DCPS::TransportInst::use_rtps_relay_now(bool flag)
+TransportInst::use_rtps_relay_now(bool flag)
 {
-  const OpenDDS::DCPS::TransportImpl_rch temp = get_or_create_impl();
+  const TransportImpl_rch temp = get_or_create_impl();
   if (temp) {
     temp->use_rtps_relay_now(flag);
   }
 }
 
 void
-OpenDDS::DCPS::TransportInst::use_ice_now(bool flag)
+TransportInst::use_ice_now(bool flag)
 {
-  const OpenDDS::DCPS::TransportImpl_rch temp = get_or_create_impl();
+  const TransportImpl_rch temp = get_or_create_impl();
   if (temp) {
     temp->use_ice_now(flag);
   }
 }
 
-OpenDDS::DCPS::ReactorTask_rch
-OpenDDS::DCPS::TransportInst::reactor_task()
+ReactorTask_rch
+TransportInst::reactor_task()
 {
-  const OpenDDS::DCPS::TransportImpl_rch temp = get_or_create_impl();
-  return temp ? temp->reactor_task() : OpenDDS::DCPS::ReactorTask_rch();
+  const TransportImpl_rch temp = get_or_create_impl();
+  return temp ? temp->reactor_task() : ReactorTask_rch();
 }
 
-OpenDDS::DCPS::EventDispatcher_rch
-OpenDDS::DCPS::TransportInst::event_dispatcher()
+EventDispatcher_rch
+TransportInst::event_dispatcher()
 {
   const TransportImpl_rch temp = get_or_create_impl();
   return temp ? temp->event_dispatcher() : EventDispatcher_rch();
 }
 
-bool
-OpenDDS::DCPS::TransportInst::should_drop(ssize_t length) const
-{
-#ifdef OPENDDS_TESTING_FEATURES
-  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, config_lock_, false);
-  return drop_messages_ && (OPENDDS_DRAND48() < (length * drop_messages_m_ + drop_messages_b_));
-#else
-  ACE_UNUSED_ARG(length);
-  ACE_ERROR((LM_ERROR,
-             "(%P|%t) ERROR: TransportInst::should_drop: "
-             "caller not conditioned on OPENDDS_TESTING_FEATURES\n"));
-  return false;
-#endif
-}
+} // DCPS
+} // OpenDDS
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL

@@ -404,8 +404,8 @@ Sedp::init(const GUID_t& guid,
   rtps_inst->send_delay_ = disco.config()->sedp_send_delay();
   rtps_inst->send_buffer_size_ = disco.config()->send_buffer_size();
   rtps_inst->rcv_buffer_size_ = disco.config()->recv_buffer_size();
-  rtps_inst->receive_preallocated_message_blocks_ = disco.config()->sedp_receive_preallocated_message_blocks();
-  rtps_inst->receive_preallocated_data_blocks_ = disco.config()->sedp_receive_preallocated_data_blocks();
+  rtps_inst->receive_preallocated_message_blocks(disco.config()->sedp_receive_preallocated_message_blocks());
+  rtps_inst->receive_preallocated_data_blocks(disco.config()->sedp_receive_preallocated_data_blocks());
 
   if (disco.sedp_multicast()) {
     // Bind to a specific multicast group
@@ -430,7 +430,7 @@ Sedp::init(const GUID_t& guid,
 #endif
 
   if (!disco.config()->sedp_fragment_reassembly_timeout().is_zero()) {
-    rtps_inst->fragment_reassembly_timeout_ = disco.config()->sedp_fragment_reassembly_timeout();
+    rtps_inst->fragment_reassembly_timeout(disco.config()->sedp_fragment_reassembly_timeout());
   }
 
   {
@@ -876,36 +876,6 @@ DDS::ReturnCode_t Sedp::init_security(DDS::Security::IdentityHandle /* id_handle
 
 Sedp::~Sedp()
 {
-  type_lookup_fini();
-
-#ifdef OPENDDS_SECURITY
-  using namespace OpenDDS::Security;
-  using namespace DDS::Security;
-
-  SecurityException ex = {"", 0, 0};
-
-  cleanup_secure_writer(participant_volatile_message_secure_writer_->get_guid());
-  cleanup_secure_reader(participant_volatile_message_secure_reader_->get_guid());
-  cleanup_secure_writer(participant_message_secure_writer_->get_guid());
-  cleanup_secure_reader(participant_message_secure_reader_->get_guid());
-  cleanup_secure_writer(publications_secure_writer_->get_guid());
-  cleanup_secure_reader(publications_secure_reader_->get_guid());
-  cleanup_secure_writer(subscriptions_secure_writer_->get_guid());
-  cleanup_secure_reader(subscriptions_secure_reader_->get_guid());
-  cleanup_secure_writer(dcps_participant_secure_writer_->get_guid());
-  cleanup_secure_reader(dcps_participant_secure_reader_->get_guid());
-  if (spdp_.get_security_config()) {
-    spdp_.get_security_config()->erase_handle_registry(participant_id_);
-  }
-#endif
-
-  job_queue_.reset();
-  reactor_task_.reset();
-  DCPS::RtpsUdpInst_rch rtps_inst =
-    DCPS::static_rchandle_cast<DCPS::RtpsUdpInst>(transport_inst_);
-  rtps_inst->opendds_discovery_default_listener_.reset();
-  TheTransportRegistry->remove_config(transport_cfg_);
-  TheTransportRegistry->remove_inst(transport_inst_);
 }
 
 DCPS::LocatorSeq
@@ -2037,6 +2007,37 @@ Sedp::shutdown()
   type_lookup_request_secure_writer_->shutting_down();
   type_lookup_reply_secure_writer_->shutting_down();
 #endif
+
+  type_lookup_fini();
+
+#ifdef OPENDDS_SECURITY
+  using namespace OpenDDS::Security;
+  using namespace DDS::Security;
+
+  SecurityException ex = {"", 0, 0};
+
+  cleanup_secure_writer(participant_volatile_message_secure_writer_->get_guid());
+  cleanup_secure_reader(participant_volatile_message_secure_reader_->get_guid());
+  cleanup_secure_writer(participant_message_secure_writer_->get_guid());
+  cleanup_secure_reader(participant_message_secure_reader_->get_guid());
+  cleanup_secure_writer(publications_secure_writer_->get_guid());
+  cleanup_secure_reader(publications_secure_reader_->get_guid());
+  cleanup_secure_writer(subscriptions_secure_writer_->get_guid());
+  cleanup_secure_reader(subscriptions_secure_reader_->get_guid());
+  cleanup_secure_writer(dcps_participant_secure_writer_->get_guid());
+  cleanup_secure_reader(dcps_participant_secure_reader_->get_guid());
+  if (spdp_.get_security_config()) {
+    spdp_.get_security_config()->erase_handle_registry(participant_id_);
+  }
+#endif
+
+  job_queue_.reset();
+  reactor_task_.reset();
+  DCPS::RtpsUdpInst_rch rtps_inst =
+    DCPS::static_rchandle_cast<DCPS::RtpsUdpInst>(transport_inst_);
+  rtps_inst->opendds_discovery_default_listener_.reset();
+  TheTransportRegistry->remove_config(transport_cfg_);
+  TheTransportRegistry->remove_inst(transport_inst_);
 }
 
 void Sedp::process_discovered_writer_data(DCPS::MessageId message_id,

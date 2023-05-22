@@ -12,27 +12,52 @@
 #include "Qos_Helper.h"
 #include "debug.h"
 
+#include <ace/OS_NS_ctype.h>
+
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
 namespace DCPS {
 
-namespace {
-
-DDS::DataWriterQos datawriter_qos()
+String ConfigPair::canonicalize(const String& key)
 {
-  return DataWriterQosBuilder().durability_transient_local();
-}
+  String retval;
+  size_t idx = 0;
 
-DDS::DataReaderQos datareader_qos()
-{
-  return DataReaderQosBuilder()
-    .reliability_reliable()
-    .durability_transient_local()
-    .reader_data_lifecycle_autopurge_nowriter_samples_delay(make_duration_t(0, 0))
-    .reader_data_lifecycle_autopurge_disposed_samples_delay(make_duration_t(0, 0));
-}
+  // Skip leading punctuation.
+  while (idx < key.size() && !ACE_OS::ace_isalnum(key[idx])) {
+    ++idx;
+  }
 
+  while (idx < key.size()) {
+    const char x = key[idx];
+
+    if (idx + 1 < key.size()) {
+      // Deal with camelcase;
+      const char y = key[idx + 1];
+
+      if (ACE_OS::ace_isupper(x) && ACE_OS::ace_islower(y) && !retval.empty() && retval[retval.size() - 1] != '_') {
+        retval += '_';
+      }
+    }
+
+    // Deal with non-punctuation.
+    if (ACE_OS::ace_isalnum(x)) {
+      retval += ACE_OS::ace_toupper(x);
+      ++idx;
+      continue;
+    }
+
+    while (idx < key.size() && !ACE_OS::ace_isalnum(key[idx])) {
+      ++idx;
+    }
+
+    if (idx < key.size() && !retval.empty() && retval[retval.size() - 1] != '_') {
+      retval += '_';
+    }
+  }
+
+  return retval;
 }
 
 ConfigStoreImpl::ConfigStoreImpl()
@@ -211,12 +236,13 @@ void
 ConfigStoreImpl::set_string(const char* key,
                             const char* value)
 {
+  const ConfigPair cp(key, value);
   if (log_level >= LogLevel::Info) {
     ACE_DEBUG((LM_INFO,
                "(%P|%t) INFO: ConfigStoreImpl::set_string: %C=%C\n",
-               key, value));
+               cp.key().c_str(), cp.value().c_str()));
   }
-  config_writer_->write(ConfigPair(key, value));
+  config_writer_->write(cp);
 }
 
 char*
@@ -285,12 +311,14 @@ void
 ConfigStoreImpl::set(const char* key,
                      const String& value)
 {
+  ConfigPair cp(key, value);
+
   if (log_level >= LogLevel::Info) {
     ACE_DEBUG((LM_INFO,
                "(%P|%t) INFO: ConfigStoreImpl::set: %C=%C\n",
-               key, value.c_str()));
+               cp.key().c_str(), cp.value().c_str()));
   }
-  config_writer_->write(ConfigPair(key, value));
+  config_writer_->write(cp);
 }
 
 String
@@ -396,6 +424,38 @@ ConfigStoreImpl::get(const char* key,
 
   return retval;
 }
+
+DDS::DataWriterQos ConfigStoreImpl::datawriter_qos()
+{
+  return DataWriterQosBuilder().durability_transient_local();
+}
+
+DDS::DataReaderQos ConfigStoreImpl::datareader_qos()
+{
+  return DataReaderQosBuilder()
+    .reliability_reliable()
+    .durability_transient_local()
+    .reader_data_lifecycle_autopurge_nowriter_samples_delay(make_duration_t(0, 0))
+    .reader_data_lifecycle_autopurge_disposed_samples_delay(make_duration_t(0, 0));
+}
+
+bool
+ConfigStoreImpl::contains_prefix(ConfigReader_rch reader,
+                                 const String& prefix)
+{
+  DCPS::InternalDataReader<ConfigPair>::SampleSequence samples;
+  DCPS::InternalSampleInfoSequence infos;
+  reader->take(samples, infos, DDS::LENGTH_UNLIMITED,
+               DDS::ANY_SAMPLE_STATE, DDS::ANY_VIEW_STATE, DDS::ALIVE_INSTANCE_STATE);
+  for (size_t idx = 0; idx != samples.size(); ++idx) {
+    if (samples[idx].key_has_prefix(prefix)) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
 
 }
 }

@@ -95,8 +95,6 @@ public class TransportInstItemProvider extends ItemProviderAdapter implements IE
 	public Collection<? extends EStructuralFeature> getChildrenFeatures(Object object) {
 		if (childrenFeatures == null) {
 			super.getChildrenFeatures(object);
-			childrenFeatures.add(GeneratorPackage.Literals.TRANSPORT_INST__QUEUE_MESSAGES_PER_POOL);
-			childrenFeatures.add(GeneratorPackage.Literals.TRANSPORT_INST__QUEUE_INITIAL_POOLS);
 			childrenFeatures.add(GeneratorPackage.Literals.TRANSPORT_INST__MAX_PACKET_SIZE);
 			childrenFeatures.add(GeneratorPackage.Literals.TRANSPORT_INST__MAX_SAMPLES_PER_PACKET);
 			childrenFeatures.add(GeneratorPackage.Literals.TRANSPORT_INST__OPTIMUM_PACKET_SIZE);
@@ -164,8 +162,6 @@ public class TransportInstItemProvider extends ItemProviderAdapter implements IE
 		case GeneratorPackage.TRANSPORT_INST__NAME:
 			fireNotifyChanged(new ViewerNotification(notification, notification.getNotifier(), false, true));
 			return;
-		case GeneratorPackage.TRANSPORT_INST__QUEUE_MESSAGES_PER_POOL:
-		case GeneratorPackage.TRANSPORT_INST__QUEUE_INITIAL_POOLS:
 		case GeneratorPackage.TRANSPORT_INST__MAX_PACKET_SIZE:
 		case GeneratorPackage.TRANSPORT_INST__MAX_SAMPLES_PER_PACKET:
 		case GeneratorPackage.TRANSPORT_INST__OPTIMUM_PACKET_SIZE:
@@ -188,12 +184,6 @@ public class TransportInstItemProvider extends ItemProviderAdapter implements IE
 	@Override
 	protected void collectNewChildDescriptors(Collection<Object> newChildDescriptors, Object object) {
 		super.collectNewChildDescriptors(newChildDescriptors, object);
-
-		newChildDescriptors.add(createChildParameter(GeneratorPackage.Literals.TRANSPORT_INST__QUEUE_MESSAGES_PER_POOL,
-				GeneratorFactory.eINSTANCE.createQueueMessagesPerPool()));
-
-		newChildDescriptors.add(createChildParameter(GeneratorPackage.Literals.TRANSPORT_INST__QUEUE_INITIAL_POOLS,
-				GeneratorFactory.eINSTANCE.createQueueInitialPool()));
 
 		newChildDescriptors.add(createChildParameter(GeneratorPackage.Literals.TRANSPORT_INST__MAX_PACKET_SIZE,
 				GeneratorFactory.eINSTANCE.createMaxPacketSize()));

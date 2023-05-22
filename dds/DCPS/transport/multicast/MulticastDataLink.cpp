@@ -56,7 +56,7 @@ MulticastDataLink::MulticastDataLink(const MulticastTransport_rch& transport,
   if (session_factory_->requires_send_buffer()) {
     const size_t nak_depth = config ? config->nak_depth_ : MulticastInst::DEFAULT_NAK_DEPTH;
     const size_t default_max_samples = DEFAULT_CONFIG_MAX_SAMPLES_PER_PACKET;
-    const size_t max_samples_per_packet = config ? config->max_samples_per_packet_ : default_max_samples;
+    const size_t max_samples_per_packet = config ? config->max_samples_per_packet() : default_max_samples;
     send_buffer_.reset(new SingleSendBuffer(nak_depth, max_samples_per_packet));
     send_strategy_->send_buffer(send_buffer_.get());
   }

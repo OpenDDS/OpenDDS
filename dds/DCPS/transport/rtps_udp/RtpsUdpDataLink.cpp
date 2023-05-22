@@ -1990,7 +1990,7 @@ RtpsUdpDataLink::RtpsReader::process_heartbeat_i(const RTPS::HeartBeatSubmessage
     }
     if (cumulative_bits_added) {
       RtpsUdpInst_rch cfg = link->config();
-      if (cfg && cfg->count_messages()) {
+      if (cfg && link->transport_statistics_.count_messages()) {
         ACE_Guard<ACE_Thread_Mutex> tsg(link->transport_statistics_mutex_);
         link->transport_statistics_.reader_nack_count[id_] += cumulative_bits_added;
       }
@@ -3046,7 +3046,7 @@ RtpsUdpDataLink::RtpsReader::process_heartbeat_frag_i(const RTPS::HeartBeatFragS
     gather_ack_nacks_i(writer, link, !(hb_frag.smHeader.flags & RTPS::FLAG_F), meta_submessages, cumulative_bits_added);
     if (cumulative_bits_added) {
       RtpsUdpInst_rch cfg = link->config();
-      if (cfg && cfg->count_messages()) {
+      if (cfg && link->transport_statistics_.count_messages()) {
         ACE_GUARD(ACE_Thread_Mutex, g, link->transport_statistics_mutex_);
         link->transport_statistics_.reader_nack_count[id_] += cumulative_bits_added;
       }
@@ -3706,7 +3706,7 @@ RtpsUdpDataLink::RtpsWriter::gather_nack_replies_i(MetaSubmessageVec& meta_subme
 
   if (cumulative_send_count) {
     RtpsUdpInst_rch cfg = link->config();
-    if (cfg && cfg->count_messages()) {
+    if (cfg && link->transport_statistics_.count_messages()) {
       ACE_GUARD(ACE_Thread_Mutex, g, link->transport_statistics_mutex_);
       link->transport_statistics_.writer_resend_count[id_] += static_cast<ACE_CDR::ULong>(cumulative_send_count);
     }
