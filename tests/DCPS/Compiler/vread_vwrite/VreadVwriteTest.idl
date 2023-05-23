@@ -36,7 +36,8 @@ module Mod {
     wstring wstr;
   };
 
-  typedef sequence<short> MySeq;
+  typedef sequence<short, 7> MyBoundedSeq;
+  typedef sequence<short> MyUnboundedSeq;
   typedef sequence<CORBA::StringSeq> NestedSeq;
 
   union MyUnion switch (MyEnum) {
@@ -63,8 +64,9 @@ module Mod {
     MyEnum enu;
     MyEnum enu2;
     BasicTypes bt;
-    MySeq seq1;
+    MyBoundedSeq seq1;
     CORBA::LongSeq seq2;
+    MyUnboundedSeq seq3;
     NestedSeq ns;
     MyUnion mu;
     CharArray ca;
