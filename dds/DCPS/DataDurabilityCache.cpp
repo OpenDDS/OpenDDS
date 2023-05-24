@@ -35,7 +35,7 @@
 namespace {
 
 void cleanup_directory(const OPENDDS_VECTOR(OPENDDS_STRING) & path,
-                       const ACE_CString & data_dir)
+                       const OpenDDS::DCPS::String& data_dir)
 {
   if (path.empty()) return;
 
@@ -73,7 +73,7 @@ public:
                   list_difference_type index,
                   ACE_Allocator * allocator,
                   const OPENDDS_VECTOR(OPENDDS_STRING) & path,
-                  const ACE_CString & data_dir)
+                  const OpenDDS::DCPS::String& data_dir)
   : sample_list_(sample_list)
   , index_(index)
   , allocator_(allocator)
@@ -162,7 +162,7 @@ private:
 
   OPENDDS_VECTOR(OPENDDS_STRING) path_;
 
-  ACE_CString data_dir_;
+  OpenDDS::DCPS::String data_dir_;
 };
 
 } // namespace
@@ -296,9 +296,8 @@ OpenDDS::DCPS::DataDurabilityCache::DataDurabilityCache(
   init();
 }
 
-OpenDDS::DCPS::DataDurabilityCache::DataDurabilityCache(
-  DDS::DurabilityQosPolicyKind kind,
-  ACE_CString & data_dir)
+OpenDDS::DCPS::DataDurabilityCache::DataDurabilityCache(DDS::DurabilityQosPolicyKind kind,
+                                                        const String& data_dir)
   : allocator_(new ACE_New_Allocator)
   , kind_(kind)
   , data_dir_(data_dir)

@@ -67,7 +67,7 @@ Version 2.3 of OpenDDS.
   then be compiled and linked with the application to provide seamless
   middleware support to the application.  UML models are manipulated using
   a graphical editor based on Eclipse.  See the OpenDDS Developer's Guide
-  <http://download.ociweb.com/OpenDDS/OpenDDS-latest.pdf> for
+  <https://opendds.readthedocs.io/en/latest-release/devguide/modeling_sdk.html> for
   installation instructions.
 
 - DCPSInfoRepo no longer requires an -ORBSvcConf argument when using

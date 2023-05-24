@@ -131,9 +131,9 @@ void SecurityDebug::set_all_flags_to(bool value)
   chlookup = value;
 }
 
-void SecurityDebug::parse_flags(const ACE_TCHAR* flags)
+void SecurityDebug::parse_flags(const char* flags)
 {
-  String s(ACE_TEXT_ALWAYS_CHAR(flags));
+  String s(flags);
   const String delim(",");
   while (true) {
     const size_t pos = s.find(delim);
