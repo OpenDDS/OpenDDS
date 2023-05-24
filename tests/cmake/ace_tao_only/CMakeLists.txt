@@ -11,7 +11,14 @@ set(idl "${target_prefix}idl")
 set(server "${target_prefix}server")
 set(client "${target_prefix}client")
 
-set(src "${OPENDDS_TAO}/DevGuideExamples/GettingStarted")
+set(path "DevGuideExamples/GettingStarted")
+set(src "${OPENDDS_TAO}/${path}")
+if(NOT EXISTS "${src}")
+  set(src "$ENV{TAO_SOURCE_ROOT}/${path}")
+  if(NOT EXISTS "${src}")
+    message(FATAL_ERROR "This test requires $TAO_SOURCE_ROOT to be set!")
+  endif()
+endif()
 set(dst ${CMAKE_CURRENT_BINARY_DIR})
 set(all_targets ${server} ${client})
 
@@ -36,7 +43,6 @@ endforeach()
 add_library(${idl})
 opendds_target_sources(${idl}
   PUBLIC "${dst}/${idl_file}"
-  INCLUDE_BASE "${dst}"
   GENERATE_SERVER_SKELETONS TRUE
 )
 

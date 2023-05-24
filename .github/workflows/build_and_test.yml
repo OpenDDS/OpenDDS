@@ -391,6 +391,8 @@ jobs:
         export MPC_ROOT=$ACE_ROOT/MPC
         export LD_LIBRARY_PATH="\$OPENDDS_INSTALL_PREFIX/$INSTALL_LIB:\$LD_LIBRARY_PATH"
         export PERL5LIB=$(realpath bin):$(realpath $ACE_ROOT/bin)
+        export ACE_SOURCE_ROOT=$ACE_ROOT
+        export TAO_SOURCE_ROOT=$TAO_ROOT
         EOF
     - name: delete host directories
       shell: bash

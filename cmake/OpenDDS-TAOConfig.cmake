@@ -10,7 +10,7 @@ if(OpenDDS-TAO_FOUND)
 endif()
 set(OpenDDS-TAO_FOUND FALSE)
 
-find_package(OpenDDS-ACE REQUIRED)
+find_package(OpenDDS-ACE REQUIRED PATHS "${CMAKE_CURRENT_LIST_DIR}")
 
 set(_opendds_tao_required_deps TAO_LIBRARY TAO_IDL)
 

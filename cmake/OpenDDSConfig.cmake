@@ -8,8 +8,8 @@ if(OpenDDS_FOUND)
 endif()
 set(OpenDDS_FOUND FALSE)
 
-find_package(OpenDDS-TAO REQUIRED)
-find_package(OpenDDS-opendds_idl REQUIRED)
+find_package(OpenDDS-TAO REQUIRED PATHS "${CMAKE_CURRENT_LIST_DIR}")
+find_package(OpenDDS-opendds_idl REQUIRED PATHS "${CMAKE_CURRENT_LIST_DIR}")
 
 if(OPENDDS_SECURITY)
   find_package(OpenSSL PATHS "${OPENDDS_OPENSSL}" NO_DEFAULT_PATH)
