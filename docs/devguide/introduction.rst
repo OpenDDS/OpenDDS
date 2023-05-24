@@ -17,7 +17,7 @@ What is OpenDDS?
 OpenDDS is an open-source C++ framework for exchanging data in distributed systems.
 It is an implementation of :ref:`a group of related OMG specifications <specs>`.
 OpenDDS is implemented in C++ and contains support for :doc:`Java <java_bindings>`.
-Users in the OpenDDS community have contributed and maintain bindings for other languages include `C# <https://www.openddsharp.com/>`__, `Node.js <https://github.com/OpenDDS/node-opendds>`__, and `Python <https://github.com/OpenDDS/pyopendds>`__.
+Users in the OpenDDS community have contributed and maintain bindings for other languages that include `C# <https://www.openddsharp.com/>`__, `Node.js <https://github.com/OpenDDS/node-opendds>`__, and `Python <https://github.com/OpenDDS/pyopendds>`__.
 OpenDDS is sponsored by the OpenDDS Foundation and is available via https://opendds.org and https://github.com/OpenDDS/OpenDDS.
 
 There is an FAQ available at https://opendds.org/faq.html.
@@ -44,10 +44,11 @@ More information about the DDS itself can be found on the `DDS Foundation websit
 
 .. _spec-rtps:
 
-The Real-time Publish-Subscribe DDS Interoperability Wire Protocol Specification (DDSI-RTPS)
-============================================================================================
+Real-time Publish-Subscribe (RTPS)
+==================================
 
-Usually just called *RTPS*, this specification describes the requirements for interoperability between DDS implementations.
+The full name of this specification is the *Real-time Publish-Subscribe Protocol DDS Interoperability Wire Protocol* (DDSI-RTPS), but can also be just called RTPS.
+This specification describes the requirements for interoperability between DDS implementations.
 See :ref:`introduction--peer-to-peer-discovery-with-rtps` for more information.
 
 The version OpenDDS uses is v2.3 (OMG document ``formal/2019-04-03``), which can be found at https://www.omg.org/spec/DDSI-RTPS/2.3.
@@ -75,6 +76,16 @@ OpenDDS's support for XTypes is described in :doc:`xtypes`.
 
 The version OpenDDS uses is v1.3 (OMG document ``formal/2020-02-04``), which can be found at https://www.omg.org/spec/DDS-XTypes/1.3.
 Compliance with the specification is documented in :ref:`xtypes--unimplemented-features` and :ref:`xtypes--differences-from-the-specification`.
+
+.. _spec-idl-to-cpp11:
+
+IDL to C++11 Language Mapping
+=============================
+
+This specification defines an :term:`IDL` to C++ mapping that takes advantage of C++11 language features and standard library types.
+OpenDDS's support for IDL to C++11 is described in :ref:`opendds_idl--using-the-idl-to-c-11-mapping`.
+
+The version OpenDDS uses is v1.5 (OMG document ``formal/2021-05-01``), which can be found at https://www.omg.org/spec/CPP11/1.5.
 
 ***************
 Licensing Terms
@@ -406,8 +417,7 @@ Compliance
 OpenDDS complies with the OMG DDS and the OMG DDSI-RTPS specifications.
 Details of that compliance follows here.
 OpenDDS also implements the OMG DDS Security specification.
-Details of compliance to that specification are in :ref:`dds_security--dds-security-implementation-status`.
-Details of XTypes compliance are in :ref:`xtypes--unimplemented-features` and :ref:`xtypes--differences-from-the-specification`.
+See :ref:`specs` for how much OpenDDS complies with other specifications it implements.
 
 .. _introduction--dds-compliance:
 

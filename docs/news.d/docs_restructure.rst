@@ -6,6 +6,7 @@
   - ``INSTALL.md`` is now :doc:`/building/index`.
   - ``docs/dependencies.md`` is now :doc:`/building/dependencies`.
   - ``docs/android.md`` is now :doc:`/building/android`.
+  - ``docs/ios.md`` is now :doc:`/building/ios`.
 
 .. news-rank: 5
 - Restructured how the documentation is presented to cleanly separate the Developer's Guide and internal documentation.

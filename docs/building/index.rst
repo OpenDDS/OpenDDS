@@ -7,8 +7,9 @@ Building and Installing
 
   dependencies
   android
+  ios
 
-Except for an `example Docker container <https://github.com/OpenDDS/OpenDDS/pkgs/container/opendds>`__, there are no official prebuilt packages of OpenDDS, so it to be built from source.
+Except for an `example Docker container <https://github.com/OpenDDS/OpenDDS/pkgs/container/opendds>`__, there are no official prebuilt packages of OpenDDS, so it will have to be built from source.
 
 .. ifconfig:: is_release
 
@@ -57,8 +58,8 @@ If configure runs successfully it will end with a message about the next steps f
     make -j 4
 
   OpenDDS supports parallel builds to speed up the build when using Make.
-  Above 4 is used as an example.
-  If unsure what ``N`` should be, use the number of CPU cores on the machine.
+  Above 4 is used as an example for the max number of parallel jobs.
+  If unsure what this number should be, use the number of CPU cores on the machine.
 
   The configure script creates an environment setup file called ``setenv.sh`` that sets all the environment variables the build and test steps rely on.
   The main makefile sets these itself, so ``setenv.sh`` is not needed when running ``make`` from the top level.
@@ -124,7 +125,7 @@ Android support is documented in :doc:`android`.
 Apple iOS
 ---------
 
-Apple iOS support is documented in :ghfile:`docs/ios.md`.
+Apple iOS support is documented in :doc:`ios`.
 
 ************
 Installation

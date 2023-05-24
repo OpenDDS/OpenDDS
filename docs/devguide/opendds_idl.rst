@@ -280,9 +280,8 @@ Using the IDL-to-C++11 Mapping
 ..
     Sect<8.2>
 
-The IDL-to-C++11 Mapping is a separate specification from the OMG.
-Like the “classic” IDL-to-C++ Mapping, IDL-to-C++11 describes how IDL constructs (structs, sequences, unions, etc.)
-should appear in C++.
+The :ref:`IDL-to-C++11 Mapping <spec-idl-to-cpp11>` is a separate specification from the OMG.
+Like the “classic” IDL-to-C++ Mapping, IDL-to-C++11 describes how IDL constructs (structs, sequences, unions, etc.) should appear in C++.
 Since the IDL-to-C++11 Mapping assumes a C++11 (or higher) compiler and standard library, the code generated is easier to use and looks more natural to C++ developers who are not familiar with the classic mapping.
 For example, IDL strings, arrays, and sequences map to their equivalents in the ``std`` namespace: ``string``, ``array``, and ``vector``.
 All of the details of the mapping are spelled out in the specification document (available at https://www.omg.org/spec/CPP11), however the easiest way to get started with the mapping is to generate code from IDL and examine the generated header file.
@@ -294,7 +293,7 @@ Contrast this with using ``opendds_idl`` for IDL-to-C++11.
 In this case, ``opendds_idl`` takes over responsibility for generating the language mapping.
 This is indicated by the ``-Lc++11`` command-line option.
 
-Starting with a user-written file ``Foo.idl``, running “``opendds_idl -Lc++11<other options> Foo.idl``” generates these output files:
+Starting with a user-written file ``Foo.idl``, running ``opendds_idl -Lc++11 <other options> Foo.idl`` generates these output files:
 
 * ``FooTypeSupport.idl``
 
@@ -335,7 +334,7 @@ Unlike when using the classic mapping, ``Foo.idl`` is not processed by ``tao_idl
 
 * annotations – see :ref:`getting_started--defining-data-types-with-idl`
 
-* #includes of IDL files that are also used with the IDL-to-C++11 mapping
+* ``#include``\s of IDL files that are also used with the IDL-to-C++11 mapping
 
 When using MPC to generate projects, the ``opendds_cxx11`` base project should be used to inherit the correct settings for code generation.
 If the generated code will be part of a shared library, use the ``-Wb,export_include`` option (in addition to ``-Wb,export_macro``) so that the generated headers have an ``#include`` for the export header.
