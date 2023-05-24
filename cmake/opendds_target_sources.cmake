@@ -10,13 +10,19 @@ function(_opendds_get_sources_and_options
     opendds_options
     suppress_anys
     always_generate_lib_export_header
-    skip_tao_idl)
+    generate_server_skeletons
+    auto_link
+    skip_tao_idl
+    skip_opendds_idl)
   set(no_value_options
     SKIP_TAO_IDL
+    SKIP_OPENDDS_IDL
   )
   set(single_value_options
     SUPPRESS_ANYS
     ALWAYS_GENERATE_LIB_EXPORT_HEADER
+    GENERATE_SERVER_SKELETONS
+    AUTO_LINK
   )
   set(multi_value_options
     PUBLIC PRIVATE INTERFACE
@@ -60,10 +66,28 @@ function(_opendds_get_sources_and_options
   endif()
   set(${always_generate_lib_export_header} ${arg_ALWAYS_GENERATE_LIB_EXPORT_HEADER} PARENT_SCOPE)
 
-  if(NOT DEFINED arg_SKIP_TAO_IDL)
-    set(arg_SKIP_TAO_IDL FALSE)
-  endif()
   set(${skip_tao_idl} ${arg_SKIP_TAO_IDL} PARENT_SCOPE)
+  if(arg_SKIP_OPENDDS_IDL OR NOT ${OpenDDS-opendds_idl_FOUND})
+    set(${skip_opendds_idl} FALSE PARENT_SCOPE)
+  else()
+    set(${skip_opendds_idl} TRUE PARENT_SCOPE)
+  endif()
+
+  if(arg_SKIP_OPENDDS_IDL OR NOT ${OpenDDS-opendds_idl_FOUND})
+    set(${skip_opendds_idl} TRUE PARENT_SCOPE)
+  else()
+    set(${skip_opendds_idl} FALSE PARENT_SCOPE)
+  endif()
+
+  if(NOT DEFINED arg_GENERATE_SERVER_SKELETONS)
+    set(arg_GENERATE_SERVER_SKELETONS FALSE)
+  endif()
+  set(${generate_server_skeletons} ${arg_GENERATE_SERVER_SKELETONS} PARENT_SCOPE)
+
+  if(NOT DEFINED arg_AUTO_LINK)
+    set(arg_AUTO_LINK ${OPENDDS_AUTO_LINK_DCPS})
+  endif()
+  set(${auto_link} ${arg_AUTO_LINK} PARENT_SCOPE)
 
   handle_files("${arg_UNPARSED_ARGUMENTS}" ${OPENDDS_DEFAULT_SCOPE})
 
@@ -164,7 +188,10 @@ function(opendds_target_sources target)
     opendds_options
     suppress_anys
     always_generate_lib_export_header
+    generate_server_skeletons
+    auto_link
     skip_tao_idl
+    skip_opendds_idl
     ${ARGN})
 
   if(NOT opendds_options MATCHES "--(no-)?default-nested")
@@ -197,7 +224,7 @@ function(opendds_target_sources target)
     endif()
   endif()
 
-  if(NOT "${tao_options}" MATCHES "-SS")
+  if(NOT "${tao_options}" MATCHES "-SS" AND NOT generate_server_skeletons)
     list(APPEND tao_options "-SS")
   endif()
 
@@ -228,6 +255,7 @@ function(opendds_target_sources target)
         TAO_IDL_FLAGS ${tao_options}
         DDS_IDL_FLAGS ${opendds_options}
         SKIP_TAO_IDL ${skip_tao_idl}
+        SKIP_OPENDDS_IDL ${skip_opendds_idl}
         IDL_FILES ${idl_sources_${scope}}
         SCOPE ${scope}
         AUTO_INCLUDES auto_includes)
@@ -246,8 +274,13 @@ function(opendds_target_sources target)
     set(max_scope PRIVATE)
   endif()
 
-  if(OPENDDS_AUTO_LINK_DCPS)
-    target_link_libraries(${target} ${max_scope} OpenDDS::Dcps)
+  if(auto_link)
+    if(NOT skip_opendds_idl)
+      target_link_libraries(${target} ${max_scope} OpenDDS::Dcps)
+    endif()
+    if(NOT skip_tao_idl)
+      target_link_libraries(${target} ${max_scope} TAO::TAO)
+    endif()
   endif()
 
   _opendds_get_generated_output_dir(${target} generated_directory)

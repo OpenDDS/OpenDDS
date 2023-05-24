@@ -111,7 +111,7 @@ function(_opendds_export_target_property target property_name)
 endfunction()
 
 function(_opendds_target_idl_sources target)
-  set(one_value_args SCOPE SKIP_TAO_IDL AUTO_INCLUDES)
+  set(one_value_args SCOPE SKIP_TAO_IDL SKIP_OPENDDS_IDL AUTO_INCLUDES)
   set(multi_value_args TAO_IDL_FLAGS DDS_IDL_FLAGS IDL_FILES)
   cmake_parse_arguments(arg "" "${one_value_args}" "${multi_value_args}" ${ARGN})
 
@@ -219,88 +219,93 @@ function(_opendds_target_idl_sources target)
   )
 
   foreach(input ${non_generated_idl_files})
-    get_filename_component(noext_name ${input} NAME_WE)
     get_filename_component(abs_filename ${input} ABSOLUTE)
     get_filename_component(file_ext ${input} EXT)
     get_filename_component(idl_file_dir ${abs_filename} DIRECTORY)
 
-    _opendds_get_generated_idl_output(
-      ${target} ${input} "${opendds_idl_opt_-o}" output_prefix output_dir)
-    set(file_auto_includes "${output_dir}")
-
-    set(type_support_idl_file)
     set(idl_files)
-    set(generated_files)
+    set(h_files)
+    set(cpp_files)
+    set(run_tao_idl_on_input FALSE)
+    set(file_auto_includes)
     set(file_mappings)
+    set(tao_idl_opts ${arg_TAO_IDL_FLAGS})
+    set(generated_files)
     set(extra_options)
-    set(type_support_idl_file)
 
-    if(NOT opendds_idl_opt_-SI)
-      set(type_support_idl_file "${output_prefix}TypeSupport.idl")
-      list(APPEND idl_files ${type_support_idl_file})
-      list(APPEND generated_files ${type_support_idl_file})
-    endif()
-    set_property(SOURCE ${abs_filename} APPEND PROPERTY
-      OPENDDS_TYPESUPPORT_IDLS "${type_support_idl_file}")
-
-    set(cpp_header_files "${output_prefix}TypeSupportImpl.h")
-    set(cpp_source_files "${output_prefix}TypeSupportImpl.cpp")
-
-    if(opendds_idl_opt_-GfaceTS)
-      list(APPEND cpp_header_files "${output_prefix}_TS.hpp")
-      list(APPEND cpp_source_files "${output_prefix}_TS.cpp")
-    endif()
-
-    if(opendds_idl_opt_-Lface)
-      list(APPEND cpp_header_files "${output_prefix}C.h")
-      list(APPEND file_mappings "FACE")
-    elseif(opendds_idl_opt_-Lc++11)
-      list(APPEND cpp_header_files "${output_prefix}C.h")
-      list(APPEND file_mappings "C++11")
+    if(arg_SKIP_OPENDDS_IDL)
+      set(run_tao_idl_on_input TRUE)
     else()
-      list(APPEND idl_files ${input})
-      list(APPEND file_mappings "C++03")
+      _opendds_get_generated_idl_output(
+        ${target} "${input}" "${opendds_idl_opt_-o}" output_prefix output_dir)
+      list(APPEND file_auto_includes "${output_dir}")
+
+      if(NOT opendds_idl_opt_-SI)
+        set(type_support_idl_file "${output_prefix}TypeSupport.idl")
+        list(APPEND idl_files ${type_support_idl_file})
+        list(APPEND generated_files ${type_support_idl_file})
+        set_property(SOURCE ${abs_filename} APPEND PROPERTY
+          OPENDDS_TYPESUPPORT_IDLS "${type_support_idl_file}")
+      endif()
+
+      list(APPEND h_files "${output_prefix}TypeSupportImpl.h")
+      list(APPEND cpp_files "${output_prefix}TypeSupportImpl.cpp")
+
+      if(opendds_idl_opt_-GfaceTS)
+        list(APPEND h_files "${output_prefix}_TS.hpp")
+        list(APPEND cpp_files "${output_prefix}_TS.cpp")
+      endif()
+
+      if(opendds_idl_opt_-Lface)
+        list(APPEND h_files "${output_prefix}C.h")
+        list(APPEND file_mappings "FACE")
+      elseif(opendds_idl_opt_-Lc++11)
+        list(APPEND h_files "${output_prefix}C.h")
+        list(APPEND file_mappings "C++11")
+      else()
+        set(run_tao_idl_on_input TRUE)
+      endif()
+
+      if(opendds_idl_opt_-Wb,java)
+        set(java_list "${output_prefix}${file_ext}.TypeSupportImpl.java.list")
+        set_property(SOURCE ${abs_filename} APPEND PROPERTY
+          OPENDDS_JAVA_OUTPUTS "@${java_list}")
+        list(APPEND generated_files ${java_list})
+        list(APPEND extra_options "-j")
+        list(APPEND file_mappings "Java")
+      endif()
+
+      list(APPEND generated_files ${h_files} ${cpp_files})
+
+      _opendds_tao_append_runtime_lib_dir_to_path(extra_lib_dirs)
+
+      add_custom_command(
+        OUTPUT ${generated_files}
+        DEPENDS opendds_idl "${DDS_ROOT}/dds/idl/IDLTemplate.txt"
+        MAIN_DEPENDENCY ${abs_filename}
+        COMMAND
+          ${CMAKE_COMMAND} -E env "DDS_ROOT=${DDS_ROOT}" "TAO_ROOT=${TAO_INCLUDE_DIR}"
+          "${extra_lib_dirs}"
+          $<TARGET_FILE:opendds_idl> "-I${idl_file_dir}"
+          ${opendds_idl_opts} ${extra_options} ${abs_filename} -o "${output_dir}"
+      )
+
+      list(APPEND tao_idl_opts
+        "-I${DDS_ROOT}"
+        "-I${idl_file_dir}" # The type-support IDL will include the primary IDL file
+      )
+
+      set_property(SOURCE ${abs_filename} APPEND PROPERTY OPENDDS_CPP_FILES ${cpp_files})
+      set_property(SOURCE ${abs_filename} APPEND PROPERTY OPENDDS_HEADER_FILES ${h_files})
     endif()
-
-    if(opendds_idl_opt_-Wb,java)
-      set(java_list "${output_prefix}${file_ext}.TypeSupportImpl.java.list")
-      set_property(SOURCE ${abs_filename} APPEND PROPERTY
-        OPENDDS_JAVA_OUTPUTS "@${java_list}")
-      list(APPEND generated_files ${java_list})
-      list(APPEND extra_options "-j")
-      list(APPEND file_mappings "Java")
-    endif()
-
-    list(APPEND generated_files ${cpp_header_files} ${cpp_source_files})
-
-    _opendds_tao_append_runtime_lib_dir_to_path(extra_lib_dirs)
-
-    add_custom_command(
-      OUTPUT ${generated_files}
-      DEPENDS opendds_idl "${DDS_ROOT}/dds/idl/IDLTemplate.txt"
-      MAIN_DEPENDENCY ${abs_filename}
-      COMMAND
-        ${CMAKE_COMMAND} -E env "DDS_ROOT=${DDS_ROOT}" "TAO_ROOT=${TAO_INCLUDE_DIR}"
-        "${extra_lib_dirs}"
-        $<TARGET_FILE:opendds_idl> "-I${idl_file_dir}"
-        ${opendds_idl_opts} ${extra_options} ${abs_filename} -o "${output_dir}"
-    )
-
-    set_property(SOURCE ${abs_filename} APPEND PROPERTY
-      OPENDDS_CPP_FILES ${cpp_source_files})
-
-    set_property(SOURCE ${abs_filename} APPEND PROPERTY
-      OPENDDS_HEADER_FILES ${cpp_header_files})
-
-    set_property(SOURCE ${abs_filename} APPEND PROPERTY
-      OPENDDS_LANGUAGE_MAPPINGS ${file_mappings})
 
     if(NOT arg_SKIP_TAO_IDL)
+      if(run_tao_idl_on_input)
+        list(APPEND idl_files ${input})
+        list(APPEND file_mappings "C++03")
+      endif()
       _opendds_tao_idl(${target}
-        IDL_FLAGS
-          "-I${DDS_ROOT}"
-          "-I${idl_file_dir}" # The type-support IDL will include the primary IDL file
-          ${arg_TAO_IDL_FLAGS}
+        IDL_FLAGS ${tao_idl_opts}
         IDL_FILES ${idl_files}
         AUTO_INCLUDES tao_idl_auto_includes
       )
@@ -316,6 +321,9 @@ function(_opendds_target_idl_sources target)
     list(APPEND all_auto_includes "${file_auto_includes}")
 
     _opendds_target_generated_dependencies(${target} ${abs_filename} ${arg_SCOPE})
+
+    set_property(SOURCE ${abs_filename} APPEND PROPERTY
+      OPENDDS_LANGUAGE_MAPPINGS ${file_mappings})
 
     list(APPEND all_mappings ${file_mappings})
     list(REMOVE_DUPLICATES all_mappings)

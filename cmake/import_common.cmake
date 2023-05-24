@@ -38,32 +38,6 @@ if(NOT DEFINED ACE_ROOT OR NOT DEFINED TAO_ROOT)
   return()
 endif()
 
-if(OPENDDS_XERCES3)
-  find_package(XercesC PATHS "${OPENDDS_XERCES3}" NO_DEFAULT_PATH)
-  if(NOT XercesC_FOUND)
-    find_package(XercesC)
-  endif()
-  if(NOT XercesC_FOUND)
-    message(FATAL_ERROR "Could not find XercesC")
-  endif()
-endif()
-
-function(_opendds_vs_force_static)
-  # See https://gitlab.kitware.com/cmake/community/wikis/FAQ#dynamic-replace
-  foreach(flag_var
-          CMAKE_CXX_FLAGS CMAKE_CXX_FLAGS_DEBUG CMAKE_CXX_FLAGS_RELEASE
-          CMAKE_CXX_FLAGS_MINSIZEREL CMAKE_CXX_FLAGS_RELWITHDEBINFO)
-    if(${flag_var} MATCHES "/MD")
-      string(REGEX REPLACE "/MD" "/MT" ${flag_var} "${${flag_var}}")
-      set(${flag_var} "${${flag_var}}" PARENT_SCOPE)
-    endif()
-  endforeach()
-endfunction()
-
-if(MSVC AND OPENDDS_STATIC)
-  _opendds_vs_force_static()
-endif()
-
 function(_opendds_find_our_libraries_for_config lib_group_name libs config suffix)
   if(MSVC AND OPENDDS_STATIC)
     set(suffix "s${suffix}")

@@ -17,7 +17,7 @@
 
 .. news-start-section: Notes
 .. news-start-section: CMake Config Package
-- ``OPENDDS_TARGET_SOURCES`` is now called ``opendds_target_sources`` as part of an internal style refactor.
+- ``OPENDDS_TARGET_SOURCES`` is now called ``opendds_target_sources``.
 
   - CMake macros and functions names are case insensitive, so this should have no effect on CMake code.
 .. news-end-section

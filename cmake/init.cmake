@@ -93,7 +93,8 @@ option(OPENDDS_ALWAYS_GENERATE_LIB_EXPORT_HEADER "Always generate an export head
 # "All uses of target_link_libraries with a target must be either all-keyword
 # or all-plain."
 # TODO: Make this default ON in v4.0
-option(OPENDDS_AUTO_LINK_DCPS "Automatically link OpenDDS::Dcps to the target of opendds_target_sources" OFF)
+option(OPENDDS_AUTO_LINK_DCPS
+  "Automatically link dependencies to the target of opendds_target_sources" OFF)
 # This is off by default because it could cause "Cannot find source file"
 # errors on `TypeSupport.idl` files generated in a another directory.
 # TODO: Make this default ON in v4.0
