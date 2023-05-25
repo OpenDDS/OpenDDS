@@ -1,19 +1,18 @@
 # Distributed under the OpenDDS License. See accompanying LICENSE
 # file or http://www.opendds.org/license.html for details.
-#
-# find_package for TAO. See OpenDDSConfig.cmake for OpenDDS.
 
 cmake_minimum_required(VERSION 3.3.2)
 
-if(OpenDDS-TAO_FOUND)
+if(_OPENDDS_TAO_GROUP_CMAKE)
   return()
 endif()
-set(OpenDDS-TAO_FOUND FALSE)
+set(_OPENDDS_TAO_GROUP_CMAKE TRUE)
 
-find_package(OpenDDS-ACE REQUIRED PATHS "${CMAKE_CURRENT_LIST_DIR}")
+include("${CMAKE_CURRENT_LIST_DIR}/import_common.cmake")
 
-set(_opendds_tao_required_deps TAO_LIBRARY TAO_IDL)
+set(_opendds_tao_required_deps TAO::TAO tao_idl)
 
+set(_opendds_tao_executables tao_idl)
 find_program(TAO_IDL NAMES tao_idl HINTS "${TAO_BIN_DIR}")
 
 set(_opendds_tao_libs
@@ -66,12 +65,3 @@ set(TAO_IDL_FE_INCLUDE_DIRS
   "${TAO_ROOT}/TAO_IDL/include"
   "${TAO_ROOT}/TAO_IDL/be_include"
 )
-
-_opendds_find_our_libraries("TAO" "${_opendds_tao_libs}")
-_opendds_found_required_deps(OpenDDS-TAO_FOUND "${_opendds_tao_required_deps}")
-if(OpenDDS-TAO_FOUND)
-  _opendds_add_target_binary(tao_idl "${TAO_IDL}")
-  _opendds_add_library_group("TAO" "${_opendds_tao_libs}" TRUE)
-
-  include("${CMAKE_CURRENT_LIST_DIR}/opendds_target_sources.cmake")
-endif()

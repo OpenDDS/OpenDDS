@@ -1,23 +1,18 @@
 # Distributed under the OpenDDS License. See accompanying LICENSE
 # file or http://www.opendds.org/license.html for details.
-#
-# find_package for ACE. See OpenDDSConfig.cmake for OpenDDS.
 
 cmake_minimum_required(VERSION 3.3.2)
 
-if(OpenDDS-ACE_FOUND)
+if(_OPENDDS_ACE_GROUP_CMAKE)
   return()
 endif()
-set(OpenDDS-ACE_FOUND FALSE)
+set(_OPENDDS_ACE_GROUP_CMAKE TRUE)
 
 include("${CMAKE_CURRENT_LIST_DIR}/import_common.cmake")
-if(NOT DEFINED ACE_ROOT)
-  return()
-endif()
 
-set(_opendds_ace_required_deps ACE_LIBRARY ACE_GPERF)
+set(_opendds_ace_required_deps ACE::ACE ace_gperf)
 
-if(OPENDDS_XERCES3)
+if(OPENDDS_XERCES3 AND NOT XercesC_FOUND)
   find_package(XercesC PATHS "${OPENDDS_XERCES3}" NO_DEFAULT_PATH)
   if(NOT XercesC_FOUND)
     find_package(XercesC)
@@ -43,6 +38,7 @@ if(MSVC AND OPENDDS_STATIC)
   _opendds_vs_force_static()
 endif()
 
+set(_opendds_ace_executables ace_gperf)
 find_program(ACE_GPERF
   NAMES
     ace_gperf
@@ -128,10 +124,3 @@ if(OPENDDS_VERSIONED_NAMESPACE)
 endif()
 
 set(ACE_XML_UTILS_DEPS ACE::ACE XercesC::XercesC)
-
-_opendds_find_our_libraries("ACE" "${_opendds_ace_libs}")
-_opendds_found_required_deps(OpenDDS-ACE_FOUND "${_opendds_ace_required_deps}")
-if(OpenDDS-ACE_FOUND)
-  _opendds_add_target_binary(ace_gperf "${ACE_GPERF}")
-  _opendds_add_library_group("ACE" "${_opendds_ace_libs}" TRUE)
-endif()

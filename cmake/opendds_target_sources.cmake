@@ -1,7 +1,13 @@
 # Distributed under the OpenDDS License. See accompanying LICENSE
 # file or http://www.opendds.org/license.html for details.
 
-include(${CMAKE_CURRENT_LIST_DIR}/dds_idl_sources.cmake)
+if(_OPENDDS_TARGET_SOURCES_CMAKE)
+  return()
+endif()
+set(_OPENDDS_TARGET_SOURCES_CMAKE TRUE)
+
+include("${CMAKE_CURRENT_LIST_DIR}/opendds_group.cmake")
+include("${CMAKE_CURRENT_LIST_DIR}/dds_idl_sources.cmake")
 
 function(_opendds_get_sources_and_options
     idl_prefix
@@ -247,6 +253,11 @@ function(opendds_target_sources target)
     list(APPEND opendds_options -Sa -St)
     list(APPEND tao_options -Sa -St)
   endif()
+
+  foreach(def ${OPENDDS_DCPS_COMPILE_DEFINITIONS})
+    list(APPEND tao_options "-D${def}")
+    list(APPEND opendds_options "-D${def}")
+  endforeach()
 
   set(includes)
   foreach(scope PUBLIC PRIVATE INTERFACE)

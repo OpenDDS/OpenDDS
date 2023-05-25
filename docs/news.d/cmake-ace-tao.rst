@@ -2,16 +2,24 @@
 
 .. news-start-section: Additions
 .. news-start-section: CMake Config Package
-- Added two new config packages called ``OpenDDS-ACE`` and ``OpenDDS-TAO`` that allow using ACE/TAO without OpenDDS being built.
-- Added ``SKIP_TAO_IDL`` option to ``opendds_target_sources``.
+- Libraries and features can now be passed to ``find_package(OpenDDS REQUIRED COMPONENTS [components]...)`` to change what the Config package requires and loads.
+
+  - Libraries such as ``OpenDDS::Security`` can be passed to require them.
+  - Features such as ``built_in_topics`` or ``safety_profile=FALSE`` can be passed as a convenient way to require those features.
+  - ``NO_OPENDDS`` skips loading OpenDDS libraries, which allows using ACE/TAO without OpenDDS being built.
+    ``NO_TAO`` also skips loading TAO libraries, leaving just ACE libraries.
+
+.. news-start-section: ``opendds_target_sources``:
+- Added option ``SKIP_TAO_IDL`` to disable ``tao_idl``.
+- Added option ``SKIP_OPENDDS_IDL`` to disable ``opendds_idl``.
+.. news-end-section
 .. news-end-section
 .. news-end-section
 
 .. news-start-section: Fixes
 .. news-start-section: CMake Config Package
 - Made linking dependencies and macro definitions closer match using MPC with OpenDDS and TAO.
-- Fixed configure issues from passing to ``OPENDDS_IDL_OPTIONS -SI`` in ``opendds_target_sources``.
-- Reduced unnecessary error logging in cases the packages fail to find dependencies.
+- Fixed issues with passing ``OPENDDS_IDL_OPTIONS -SI`` to ``opendds_target_sources``.
 .. news-end-section
 .. news-end-section
 

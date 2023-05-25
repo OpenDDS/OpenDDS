@@ -3,13 +3,174 @@
 
 cmake_minimum_required(VERSION 3.3.2)
 
-if(OpenDDS_FOUND)
+include("${CMAKE_CURRENT_LIST_DIR}/ace_group.cmake")
+include("${CMAKE_CURRENT_LIST_DIR}/tao_group.cmake")
+include("${CMAKE_CURRENT_LIST_DIR}/opendds_group.cmake")
+
+function(_opendds_target_to_var_name var_name_var all_libraries target_name)
+  if(target_name IN_LIST all_libraries)
+    _opendds_get_library_var_prefix("${target_name}" var_name)
+    set(var_name "${var_name}_LIBRARY")
+  else()
+    string(TOUPPER "${target_name}" var_name)
+  endif()
+  set("${var_name_var}" "${var_name}" PARENT_SCOPE)
+endfunction()
+
+# The COMPONENTS options of find_pacakge optionally define what libraries,
+# executables, and features that are required.
+function(_opendds_process_components)
+  # Define all the valid components
+  set(all_components)
+  set(all_libraries)
+  macro(add_group components group libraries executables)
+    set("${components}")
+    foreach(lib ${libraries})
+      _opendds_library_filename_to_target_name(target "${group}" "${lib}")
+      list(APPEND "${components}" ${target})
+      list(APPEND all_components ${target})
+      list(APPEND all_libraries ${target})
+    endforeach()
+    foreach(exe ${executables})
+      list(APPEND "${components}" ${exe})
+      list(APPEND all_components ${exe})
+    endforeach()
+  endmacro()
+  add_group(all_ace_components ACE "${_opendds_ace_libs}" "${_opendds_ace_executables}")
+  add_group(all_tao_components TAO "${_opendds_tao_libs}" "${_opendds_tao_executables}")
+  add_group(all_opendds_components OpenDDS "${_opendds_libs}" "${_opendds_executables}")
+
+  # Process components that were passed
+  set(request_failed FALSE)
+  set(tao_default TRUE)
+  set(opendds_default TRUE)
+  if(OPENDDS_IS_BEING_BUILT)
+    set(opendds_default FALSE)
+  endif()
+  set(required_targets)
+  function(normalize_bool dest value)
+    if(value)
+      set("${dest}" TRUE PARENT_SCOPE)
+    else()
+      set("${dest}" FALSE PARENT_SCOPE)
+    endif()
+  endfunction()
+  macro(check_feature name value)
+    if(OPENDDS_CMAKE_VERBOSE)
+      message(STATUS "Feature was requested: ${name}=${value}, required: ${required}")
+    endif()
+    if(required)
+      string(TOUPPER "${name}" feature_name)
+      set(feature_name "OPENDDS_${feature_name}")
+      normalize_bool(requested_value "${value}")
+      normalize_bool(actual_value "${${feature_name}}")
+      if(NOT actual_value STREQUAL requested_value)
+        message(SEND_ERROR "Requires feature ${name}=${requested_value}, but it's ${actual_value}")
+        set(request_failed FALSE)
+      endif()
+    endif()
+  endmacro()
+  foreach(component ${OpenDDS_FIND_COMPONENTS})
+    set(required "${OpenDDS_FIND_REQUIRED_${component}}")
+    if(component STREQUAL "NO_TAO")
+      set(tao_default FALSE)
+    elseif(component STREQUAL "NO_OPENDDS")
+      set(opendds_default FALSE)
+    elseif(component IN_LIST _OPENDDS_ALL_FEATURES)
+      check_feature("${component}" TRUE)
+    elseif(component MATCHES "^([^=]+)=(.*)$")
+      set(name "${CMAKE_MATCH_1}")
+      set(value "${CMAKE_MATCH_2}")
+      if(name IN_LIST _OPENDDS_ALL_FEATURES)
+        check_feature("${name}" "${value}")
+      elseif(required)
+        message(SEND_ERROR "Unknown required feature ${name}")
+        set(request_failed TRUE)
+      endif()
+    elseif(required AND NOT component IN_LIST all_components)
+      message(SEND_ERROR "Unknown required component ${component}")
+      set(request_failed TRUE)
+    elseif(NOT TARGET "${${component}}")
+      if(OPENDDS_CMAKE_VERBOSE)
+        message(STATUS "Missing component was requested: ${component}, required: ${required}")
+      endif()
+      if(required)
+        list(APPEND required_targets "${component}")
+      endif()
+    endif()
+  endforeach()
+
+  # Set defaults
+  list(APPEND required_targets "${_opendds_ace_required_deps}")
+  if(tao_default)
+    list(APPEND required_targets "${_opendds_tao_required_deps}")
+  endif()
+  if(opendds_default)
+    list(APPEND required_targets "${_opendds_required_deps}")
+  endif()
+  list(REMOVE_DUPLICATES required_targets)
+
+  # Expand dependencies and convert to var names that can be passed to
+  # _opendds_found_required_deps
+  opendds_get_library_dependencies(all_required_targets ${required_targets} PASSTHROUGH)
+  set(ace_required)
+  set(tao_required)
+  set(opendds_required)
+  foreach(target ${all_required_targets})
+    _opendds_target_to_var_name(component_var "${all_libraries}" "${target}")
+    if(target IN_LIST all_ace_components)
+      list(APPEND ace_required "${component_var}")
+    elseif(target IN_LIST all_tao_components)
+      list(APPEND tao_required "${component_var}")
+    elseif(target IN_LIST all_opendds_components)
+      list(APPEND opendds_required "${component_var}")
+    endif()
+  endforeach()
+
+  set(_opendds_request_failed "${request_failed}" PARENT_SCOPE)
+  list(REMOVE_DUPLICATES ace_required)
+  set(_opendds_ace_required "${ace_required}" PARENT_SCOPE)
+  list(REMOVE_DUPLICATES tao_required)
+  set(_opendds_tao_required "${tao_required}" PARENT_SCOPE)
+  list(REMOVE_DUPLICATES opendds_required)
+  set(_opendds_required "${opendds_required}" PARENT_SCOPE)
+endfunction()
+
+_opendds_process_components()
+if(_opendds_request_failed)
+  set(OpenDDS_FOUND FALSE)
   return()
 endif()
-set(OpenDDS_FOUND FALSE)
 
-find_package(OpenDDS-TAO REQUIRED PATHS "${CMAKE_CURRENT_LIST_DIR}")
-find_package(OpenDDS-opendds_idl REQUIRED PATHS "${CMAKE_CURRENT_LIST_DIR}")
+if(_opendds_ace_required)
+  _opendds_find_our_libraries("ACE" "${_opendds_ace_libs}")
+  _opendds_found_required_deps(OpenDDS_FOUND "${_opendds_ace_required}")
+  if(OpenDDS_FOUND)
+    _opendds_add_target_binary(ace_gperf "${ACE_GPERF}")
+    _opendds_add_library_group("ACE" "${_opendds_ace_libs}")
+  else()
+    return()
+  endif()
+endif()
+
+if(_opendds_tao_required)
+  _opendds_find_our_libraries("TAO" "${_opendds_tao_libs}")
+  _opendds_found_required_deps(OpenDDS_FOUND "${_opendds_tao_required}")
+  if(OpenDDS_FOUND)
+    _opendds_add_target_binary(tao_idl "${TAO_IDL}")
+    _opendds_add_library_group("TAO" "${_opendds_tao_libs}")
+
+    if(TAO_IDL IN_LIST _opendds_tao_required)
+      include("${CMAKE_CURRENT_LIST_DIR}/opendds_target_sources.cmake")
+    endif()
+  else()
+    return()
+  endif()
+endif()
+
+if(NOT _opendds_required)
+  return()
+endif()
 
 if(OPENDDS_SECURITY)
   find_package(OpenSSL PATHS "${OPENDDS_OPENSSL}" NO_DEFAULT_PATH)
@@ -26,167 +187,21 @@ if(OPENDDS_SECURITY)
   endif()
 endif()
 
-set(_opendds_libs
-  OpenDDS_Dcps
-  OpenDDS_FACE
-  OpenDDS_Federator
-  OpenDDS_InfoRepoDiscovery
-  OpenDDS_InfoRepoLib
-  OpenDDS_InfoRepoServ
-  OpenDDS_Model
-  OpenDDS_monitor
-  OpenDDS_Multicast
-  OpenDDS_Rtps
-  OpenDDS_Rtps_Udp
-  OpenDDS_Shmem
-  OpenDDS_Tcp
-  OpenDDS_Udp
-  OpenDDS_QOS_XML_XSC_Handler
-  OpenDDS_Security
-)
-
-set(OPENDDS_DCPS_DEPS
-  ACE::ACE
-  TAO::TAO
-  # TODO: These are omitted with safety profile
-  TAO::Valuetype
-  TAO::PortableServer
-  TAO::BiDirGIOP
-)
-
-set(OPENDDS_DCPS_INCLUDE_DIRS ${OPENDDS_INCLUDE_DIRS})
-set(OPENDDS_DCPS_COMPILE_DEFINITIONS)
-if(OPENDDS_RAPIDJSON)
-  list(APPEND OPENDDS_DCPS_INCLUDE_DIRS "${OPENDDS_RAPIDJSON}/include")
-  list(APPEND OPENDDS_DCPS_COMPILE_DEFINITIONS OPENDDS_RAPIDJSON)
+if(OPENDDS_IS_BEING_BUILT AND TARGET opendds_idl)
+  set(_opendds_idl_is_being_built TRUE)
+  set(OPENDDS_IDL TRUE)
+else()
+  find_program(OPENDDS_IDL NAMES opendds_idl HINTS "${OPENDDS_BIN_DIR}")
 endif()
-
-if(NOT OPENDDS_BUILT_IN_TOPICS)
-  list(APPEND OPENDDS_DCPS_COMPILE_DEFINITIONS DDS_HAS_MINIMUM_BIT)
-endif()
-
-if(NOT OPENDDS_CONTENT_SUBSCRIPTION)
-  list(APPEND OPENDDS_DCPS_COMPILE_DEFINITIONS
-    OPENDDS_NO_QUERY_CONDITION
-    OPENDDS_NO_CONTENT_FILTERED_TOPIC
-    OPENDDS_NO_MULTI_TOPIC
-  )
-endif()
-
-if(NOT OPENDDS_QUERY_CONDITION)
-  list(APPEND OPENDDS_DCPS_COMPILE_DEFINITIONS OPENDDS_NO_QUERY_CONDITION)
-endif()
-
-if(NOT OPENDDS_CONTENT_FILTERED_TOPIC)
-  list(APPEND OPENDDS_DCPS_COMPILE_DEFINITIONS OPENDDS_NO_CONTENT_FILTERED_TOPIC)
-endif()
-
-if(NOT OPENDDS_MULTI_TOPIC)
-  list(APPEND OPENDDS_DCPS_COMPILE_DEFINITIONS OPENDDS_NO_MULTI_TOPIC)
-endif()
-
-if(NOT OPENDDS_OWNERSHIP_PROFILE)
-  list(APPEND OPENDDS_DCPS_COMPILE_DEFINITIONS
-    OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
-    OPENDDS_NO_OWNERSHIP_PROFILE
-  )
-endif()
-
-if(NOT OPENDDS_OWNERSHIP_KIND_EXCLUSIVE)
-  list(APPEND OPENDDS_DCPS_COMPILE_DEFINITIONS OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE)
-endif()
-
-if(NOT OPENDDS_OBJECT_MODEL_PROFILE)
-  list(APPEND OPENDDS_DCPS_COMPILE_DEFINITIONS OPENDDS_NO_OBJECT_MODEL_PROFILE)
-endif()
-
-if(NOT OPENDDS_PERSISTENCE_PROFILE)
-  list(APPEND OPENDDS_DCPS_COMPILE_DEFINITIONS OPENDDS_NO_PERSISTENCE_PROFILE)
-endif()
-
-if(OPENDDS_SECURITY)
-  list(APPEND OPENDDS_DCPS_COMPILE_DEFINITIONS OPENDDS_SECURITY)
-endif()
-
-set(OPENDDS_FACE_DEPS
-  OpenDDS::Dcps
-)
-
-set(OPENDDS_FEDERATOR_DEPS
-  OpenDDS::InfoRepoLib
-)
-
-set(OPENDDS_INFOREPODISCOVERY_DEPS
-  OpenDDS::Dcps
-  TAO::PortableServer
-  TAO::BiDirGIOP
-  TAO::PI
-  TAO::CodecFactory
-  TAO::Valuetype
-  TAO::AnyTypeCode
-)
-
-set(OPENDDS_INFOREPOLIB_DEPS
-  OpenDDS::InfoRepoDiscovery
-  TAO::Svc_Utils
-  TAO::ImR_Client
-  TAO::IORManip
-  TAO::IORTable
-)
-
-set(OPENDDS_INFOREPOSERV_DEPS
-  OpenDDS::Federator
-)
-
-set(OPENDDS_MODEL_DEPS
-  OpenDDS::Dcps
-)
-
-set(OPENDDS_MONITOR_DEPS
-  OpenDDS::Dcps
-)
-
-set(OPENDDS_MULTICAST_DEPS
-  OpenDDS::Dcps
-)
-
-set(OPENDDS_QOS_XML_XSC_HANDLER_DEPS
-  OpenDDS::Dcps
-  ACE::XML_Utils
-)
-
-set(OPENDDS_RTPS_DEPS
-  OpenDDS::Dcps
-)
-
-set(OPENDDS_RTPS_UDP_DEPS
-  OpenDDS::Rtps
-)
-
-set(OPENDDS_SECURITY_DEPS
-  OpenDDS::Rtps
-  ACE::XML_Utils
-  OpenSSL::SSL
-  OpenSSL::Crypto
-)
-
-set(OPENDDS_SHMEM_DEPS
-  OpenDDS::Dcps
-)
-
-set(OPENDDS_TCP_DEPS
-  OpenDDS::Dcps
-)
-
-set(OPENDDS_UDP_DEPS
-  OpenDDS::Dcps
-)
 
 _opendds_find_our_libraries("OPENDDS" "${_opendds_libs}")
-_opendds_found_required_deps(OpenDDS_FOUND OPENDDS_DCPS_LIBRARY)
+_opendds_found_required_deps(OpenDDS_FOUND "${_opendds_required}")
 
 if(OpenDDS_FOUND)
-  _opendds_add_library_group("OpenDDS" "${_opendds_libs}" FALSE)
+  if(NOT _opendds_idl_is_being_built)
+    _opendds_add_target_binary(opendds_idl "${OPENDDS_IDL}")
+  endif()
+  _opendds_add_library_group("OpenDDS" "${_opendds_libs}")
 
   if(NOT TARGET OpenDDS::OpenDDS)
     add_library(OpenDDS::OpenDDS INTERFACE IMPORTED)
@@ -208,5 +223,9 @@ if(OpenDDS_FOUND)
     set_target_properties(OpenDDS::OpenDDS
       PROPERTIES
         INTERFACE_LINK_LIBRARIES "${_opendds_core_libs}")
+  endif()
+
+  if(OPENDDS_IDL)
+    include("${CMAKE_CURRENT_LIST_DIR}/opendds_target_sources.cmake")
   endif()
 endif()
