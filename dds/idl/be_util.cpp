@@ -114,6 +114,7 @@ be_util::usage()
     " -Grapidjson            generate TypeSupport for converting data samples to\n"
     "                        RapidJSON JavaScript objects\n"
     " -Gxtypes-complete      generate XTypes complete TypeObject and TypeIdentifier\n"
+    " -Gequality             generate == and != for structs and unions\n"
     " --filename-only-includes                strip leading directories from generated\n"
     "                                         #include lines\n"
     " --[no-]default-nested                   topic types must be declared\n"

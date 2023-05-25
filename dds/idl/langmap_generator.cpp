@@ -370,7 +370,7 @@ struct GeneratorBase
           "    return *this->_u." << field_name << ";\n"
           "  }\n";
       } else {
-        std::cerr << "Unsupported type for union element\n";
+        idl_global->err()->misc_warning("Unsupported type for union element", field_type);
       }
     }
   };
@@ -430,7 +430,7 @@ struct GeneratorBase
       be_global->lang_header_ <<
         "    " << lang_field_type << "* " << branch->local_name()->get_string() << ";\n";
     } else {
-      std::cerr << "Unsupported type for union element\n";
+      idl_global->err()->misc_warning("Unsupported type for union element", field_type);
     }
   }
 
@@ -455,7 +455,7 @@ struct GeneratorBase
       ss <<
         "    this->_u." << name << " = (other._u." << name << ") ? new " << lang_field_type << "(*other._u." << name << ") : 0;\n";
     } else {
-      std::cerr << "Unsupported type for union element\n";
+      idl_global->err()->misc_warning("Unsupported type for union element", field_type);
     }
 
     return ss.str();
@@ -482,7 +482,7 @@ struct GeneratorBase
       ss <<
         "    this->_u." << name << " = (other._u." << name << ") ? new " << lang_field_type << "(*other._u." << name << ") : 0;\n";
     } else {
-      std::cerr << "Unsupported type for union element\n";
+      idl_global->err()->misc_warning("Unsupported type for union element", field_type);
     }
 
     return ss.str();
@@ -510,7 +510,25 @@ struct GeneratorBase
       ss <<
         "    return *this->_u." << name << " == *rhs._u." << name << ";\n";
     } else {
-      std::cerr << "Unsupported type for union element\n";
+      idl_global->err()->misc_warning("Unsupported type for union element", field_type);
+    }
+
+    return ss.str();
+  }
+
+  static std::string generateEqualCxx11(const std::string&, AST_Decl*, const std::string& name, AST_Type* field_type,
+                                        const std::string&, bool, Intro&,
+                                        const std::string&)
+  {
+    std::stringstream ss;
+
+    AST_Type* actual_field_type = resolveActualType(field_type);
+    const Classification cls = classify(actual_field_type);
+    if (cls & (CL_PRIMITIVE | CL_ENUM | CL_STRING | CL_ARRAY | CL_STRUCTURE | CL_UNION | CL_SEQUENCE | CL_FIXED)) {
+      ss <<
+        "    return this->_" << name << " == rhs._" << name << ";\n";
+    } else {
+      idl_global->err()->misc_warning("Unsupported type for union element", field_type);
     }
 
     return ss.str();
@@ -539,7 +557,7 @@ struct GeneratorBase
         "    delete this->_u." << name << ";\n"
         "    this->_u." << name << " = 0;\n";
     } else {
-      std::cerr << "Unsupported type for union element\n";
+      idl_global->err()->misc_warning("Unsupported type for union element", field_type);
     }
 
     return ss.str();
@@ -1576,12 +1594,44 @@ struct Cxx11Generator : GeneratorBase
     be_global->lang_header_ << ";\n\n";
     be_global->impl_ << "\n  : " << init_list << "\n{}\n\n";
 
+    if (be_global->generate_equality()) {
+      be_global->lang_header_ << "\n"
+        "  bool operator==(const " << nm << "& rhs) const;\n"
+        "  bool operator!=(const " << nm << "& rhs) const { return !(*this == rhs); }\n";
+
+      be_global->impl_ <<
+        "bool " << nm << "::operator==(const " << nm << "& rhs) const\n"
+        "{\n";
+      for (size_t i = 0; i < fields.size(); ++i) {
+        const std::string field_name = fields[i]->local_name()->get_string();
+        AST_Type* field_type = resolveActualType(fields[i]->field_type());
+        const Classification cls = classify(field_type);
+        if (cls & CL_ARRAY) {
+          std::string indent("  ");
+          NestedForLoops nfl("int", "i",
+                             dynamic_cast<AST_Array*>(field_type), indent, true);
+          be_global->impl_ <<
+            indent << "if (_" << field_name << nfl.index_ << " != rhs._"
+                   << field_name << nfl.index_ << ") {\n" <<
+            indent << "  return false;\n" <<
+            indent << "}\n";
+        } else {
+          be_global->impl_ <<
+            "  if (_" << field_name << " != rhs._" << field_name << ") {\n"
+            "    return false;\n"
+            "  }\n";
+        }
+      }
+      be_global->impl_ << "  return true;\n}\n\n";
+    }
+
     gen_common_strunion_post(nm);
     be_global->impl_ <<
       "void swap(" << nm << "& lhs, " << nm << "& rhs)\n"
       "{\n"
       "  using std::swap;\n"
       << swaps << "}\n\n";
+
     gen_typecode_ptrs(nm);
     return true;
   }
@@ -1733,6 +1783,23 @@ struct Cxx11Generator : GeneratorBase
     if (needsDefault(branches, discriminator)) {
       be_global->lang_header_ <<
         "  void _default() { _reset(); _activate(" << defVal << "); }\n\n";
+    }
+
+    if (be_global->generate_equality()) {
+      be_global->lang_header_ << "\n"
+        "  bool operator==(const " << nm << "& rhs) const;\n"
+        "  bool operator!=(const " << nm << "& rhs) const { return !(*this == rhs); }\n";
+
+      be_global->impl_ <<
+        "bool " << nm << "::operator==(const " << nm << "& rhs) const\n"
+        "{\n"
+        "  if (this->_disc != rhs._disc) return false;\n";
+      if (generateSwitchForUnion(u, "this->_disc", generateEqualCxx11, branches, discriminator, "", "", "", false, false)) {
+        be_global->impl_ <<
+          "  return false;\n";
+      }
+      be_global->impl_ <<
+        "}\n\n";
     }
 
     be_global->lang_header_ <<
