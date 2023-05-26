@@ -3219,20 +3219,18 @@ RtpsUdpDataLink::RtpsWriter::process_acknack(const RTPS::AckNackSubmessage& ackn
   const bool is_final = acknack.smHeader.flags & RTPS::FLAG_F;
   const bool is_postassociation = count_is_not_zero && (is_final || bitmapNonEmpty(acknack.readerSNState) || ack != 1);
 
-  if (preassociation_readers_.count(reader)) {
-    if (is_postassociation) {
-      remove_preassociation_reader(reader);
-      if (transport_debug.log_progress) {
-        log_progress("RTPS writer/reader association complete", id_, reader->id_, reader->participant_discovered_at_);
-      }
-      log_remote_counts("process_acknack");
-
-      const SequenceNumber max_sn = expected_max_sn(reader);
-      const SequenceNumber acked_sn = reader->acked_sn();
-      snris_insert(acked_sn == max_sn ? leading_readers_ : lagging_readers_, reader);
-      check_leader_lagger();
-      // Heartbeat is already scheduled.
+  if (preassociation_readers_.count(reader) && is_postassociation) {
+    remove_preassociation_reader(reader);
+    if (transport_debug.log_progress) {
+      log_progress("RTPS writer/reader association complete", id_, reader->id_, reader->participant_discovered_at_);
     }
+    log_remote_counts("process_acknack");
+
+    const SequenceNumber max_sn = expected_max_sn(reader);
+    const SequenceNumber acked_sn = reader->acked_sn();
+    snris_insert(acked_sn == max_sn ? leading_readers_ : lagging_readers_, reader);
+    check_leader_lagger();
+    // Heartbeat is already scheduled.
   }
 
   OPENDDS_MAP(SequenceNumber, TransportQueueElement*) pendingCallbacks;
@@ -3256,6 +3254,12 @@ RtpsUdpDataLink::RtpsWriter::process_acknack(const RTPS::AckNackSubmessage& ackn
                  LogGuid(id_).c_str(), LogGuid(reader->id_).c_str(),
                  acknack.count.value, previous_count, ack.getValue(), reader->cur_cumulative_ack_.getValue()));
       const SequenceNumber max_sn = expected_max_sn(reader);
+      if (ack > max_sn) {
+        ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: RtpsUdpDataLink::RtpsWriter::process_acknack: "
+                   "Received sequence number (%q) > expected max sequence number (%q)",
+                   ack.getValue(), max_sn.getValue()));
+        return;
+      }
       snris_erase(previous_acked_sn == max_sn ? leading_readers_ : lagging_readers_, previous_acked_sn, reader);
       reader->cur_cumulative_ack_ = ack;
       const SequenceNumber acked_sn = reader->acked_sn();
