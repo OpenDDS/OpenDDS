@@ -89,7 +89,9 @@ SimpleStatBlock consolidate(const SimpleStatBlock& sb1, const SimpleStatBlock& s
   if (result.sample_count_ > 0) {
     result.mean_ = (sb1.mean_ * static_cast<double>(sb1.sample_count_) + sb2.mean_ * static_cast<double>(sb2.sample_count_)) / result.sample_count_;
   }
-  result.var_x_sample_count_ = sb1.var_x_sample_count_ + sb2.var_x_sample_count_;
+  const double delta = sb1.mean_ - sb2.mean_;
+  const double delta_scale_factor = static_cast<double>(sb1.sample_count_) * static_cast<double>(sb2.sample_count_) / static_cast<double>(result.sample_count_);
+  result.var_x_sample_count_ = sb1.var_x_sample_count_ + sb2.var_x_sample_count_ + delta * delta * delta_scale_factor;
 
   OPENDDS_ASSERT(sb1.median_sample_count_ <= sb1.median_buffer_.size());
   OPENDDS_ASSERT(sb1.timestamp_buffer_.size() == 0 || sb1.median_sample_count_ <= sb1.timestamp_buffer_.size());
@@ -173,10 +175,12 @@ SimpleStatBlock consolidate(const std::vector<SimpleStatBlock>& vec)
     } else {
       result.min_ = std::min(result.min_, it->min_);
       result.max_ = std::max(result.max_, it->max_);
+      const double delta = result.mean_ - it->mean_;
+      const double delta_scale_factor = static_cast<double>(old_sample_count) * static_cast<double>(it->sample_count_) / static_cast<double>(result.sample_count_);
       if (result.sample_count_ > 0) {
         result.mean_ = (result.mean_ * static_cast<double>(old_sample_count) + it->mean_ * static_cast<double>(it->sample_count_)) / result.sample_count_;
       }
-      result.var_x_sample_count_ += it->var_x_sample_count_;
+      result.var_x_sample_count_ += it->var_x_sample_count_ + delta * delta * delta_scale_factor;
       result.median_sample_count_ += it->median_sample_count_;
     }
   }
@@ -334,7 +338,7 @@ void PropertyStatBlock::finalize()
 
   if (count) {
     // calculate median
-    std::sort(&median_buffer_[0], &median_buffer_[count - 1]);
+    std::sort(&median_buffer_[0], &median_buffer_[count - 1] + 1);
     if (count % 2 == 0) {
       median_result = (median_buffer_[(count / 2) - 1] + median_buffer_[count / 2]) / 2.0;
     } else {
@@ -345,7 +349,7 @@ void PropertyStatBlock::finalize()
     for (size_t i = 0; i < count; ++i) {
       mad_buffer[i] = fabs(median_buffer_[i] - median_result);
     }
-    std::sort(&median_buffer_[0], &median_buffer_[count - 1]);
+    std::sort(&mad_buffer[0], &mad_buffer[count - 1] + 1);
     if (count % 2 == 0) {
       mad_result = (mad_buffer[(count / 2) - 1] + mad_buffer[count / 2]) / 2.0;
     } else {

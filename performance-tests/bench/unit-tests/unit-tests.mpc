@@ -1,0 +1,18 @@
+project (Bench_Unit_Tests): ../bench_exe, googletest {
+
+  after += Bench_Common Bench_test_controller
+  libs += Bench_Common
+
+  Source_Files {
+    *.cpp
+    ../test_controller/ScenarioManager.cpp
+    ../test_controller/DdsEntities.cpp
+    ../test_controller/StatusListener.cpp
+    ../test_controller/AllocationHelper.cpp
+    test_controller
+    common
+  }
+
+  libpaths += $(BENCH_ROOT)/lib
+  includes += $(BENCH_ROOT)/builder_idl $(BENCH_ROOT)/builder $(BENCH_ROOT)/common $(BENCH_ROOT)/test_controller
+}
