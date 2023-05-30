@@ -7,7 +7,7 @@ if(OPENDDS_SAFETY_PROFILE)
   message(FATAL_ERROR "This test cannot be built with Safety Profile enabled")
 endif()
 
-if (NOT OPENDDS_CXX11)
+if(NOT OPENDDS_CXX11)
   message(FATAL_ERROR "This test requires OpenDDS to be built with C++11 Support")
 endif()
 

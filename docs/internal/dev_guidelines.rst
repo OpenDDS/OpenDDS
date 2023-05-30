@@ -607,14 +607,21 @@ CMake Coding Style
 Some additional nodes and exceptions:
 
 - vcpkg-specific things can be ignored.
-- Indents are 2 spaces.
+- Whitespace:
+
+  - Indents are 2 spaces.
+  - There should not be spaces before parentheses in flow control and function declarations and calls.
+    For example use ``if(value)``, not ``if (value)``.
+
 - Naming:
+
   - Global variables and properties should be the only names in all caps.
   - Prefix public global variables with ``OPENDDS_``.
   - Prefix private global variables with ``_OPENDDS_``.
   - Prefix public functions and macros with ``opendds_``.
   - Prefix private functions and macros with ``_opendds_``.
-- Don't use undefined global variables as a false value, try to make sure they are defined.
+
+- Prefer defining or clearing a variable before use instead of assuming that it will always be undefined.
 - Don't create new macros if a function will also work.
   Functions can use ``set(name value PARENT_SCOPRE)`` to set a value in the caller's scope.
-  Helper macros inside functions are okay.
+  Helper macros inside of functions are okay.

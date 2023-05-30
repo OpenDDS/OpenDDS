@@ -10,7 +10,7 @@ enable_testing()
 
 find_package(OpenDDS REQUIRED)
 
-if (NOT OPENDDS_OWNERSHIP_PROFILE)
+if(NOT OPENDDS_OWNERSHIP_PROFILE)
   message(FATAL_ERROR "This test requires OpenDDS to be built with Ownership Profile enabled")
 endif()
 

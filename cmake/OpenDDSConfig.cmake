@@ -174,11 +174,11 @@ endif()
 
 if(OPENDDS_SECURITY)
   find_package(OpenSSL PATHS "${OPENDDS_OPENSSL}" NO_DEFAULT_PATH)
-  if (NOT OpenSSL_FOUND)
+  if(NOT OpenSSL_FOUND)
     set(OPENSSL_ROOT_DIR "${OPENDDS_OPENSSL}")
     find_package(OpenSSL)
   endif()
-  if (NOT OpenSSL_FOUND)
+  if(NOT OpenSSL_FOUND)
     message(FATAL_ERROR "Could not find OpenSSL")
   endif()
 

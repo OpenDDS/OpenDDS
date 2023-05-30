@@ -2,15 +2,15 @@
 # file or http://www.opendds.org/license.html for details.
 
 function(_opendds_tao_append_runtime_lib_dir_to_path dst)
-  if (MSVC)
+  if(MSVC)
     set(val "PATH=")
-    if (DEFINED ENV{PATH})
+    if(DEFINED ENV{PATH})
       set(val "${val}$ENV{PATH};")
     endif()
     set(val "${val}${TAO_BIN_DIR}")
   else()
     set(val "LD_LIBRARY_PATH=")
-    if (DEFINED ENV{LD_LIBRARY_PATH})
+    if(DEFINED ENV{LD_LIBRARY_PATH})
       string(REPLACE "\\" "/" tmp "$ENV{LD_LIBRARY_PATH}")
       set(val "${val}${tmp}:")
     endif()
@@ -57,7 +57,7 @@ function(_opendds_tao_idl target)
   set(multi_value_args IDL_FLAGS IDL_FILES)
   cmake_parse_arguments(arg "" "AUTO_INCLUDES" "${multi_value_args}" ${ARGN})
 
-  if (NOT arg_IDL_FILES)
+  if(NOT arg_IDL_FILES)
     message(FATAL_ERROR "called _opendds_tao_idl(${target}) without specifying IDL_FILES")
   endif()
 
@@ -128,44 +128,44 @@ function(_opendds_tao_idl target)
 
     unset(stub_header_files)
     unset(skel_header_files)
-    if (NOT idl_cmd_arg_-Sch)
+    if(NOT idl_cmd_arg_-Sch)
       set(stub_header_files "${output_prefix}C.h")
     endif()
 
-    if (NOT idl_cmd_arg_-Sci)
+    if(NOT idl_cmd_arg_-Sci)
       list(APPEND stub_header_files "${output_prefix}C.inl")
     endif()
 
-    if (NOT idl_cmd_arg_-Scc)
+    if(NOT idl_cmd_arg_-Scc)
       set(stub_cpp_files "${output_prefix}C.cpp")
     endif()
 
-    if (NOT idl_cmd_arg_-Ssh)
+    if(NOT idl_cmd_arg_-Ssh)
       set(skel_header_files "${skel_output_prefix}S.h")
     endif()
 
-    if (NOT idl_cmd_arg_-SS)
+    if(NOT idl_cmd_arg_-SS)
       set(skel_cpp_files "${skel_output_prefix}S.cpp")
     endif()
 
-    if (idl_cmd_arg_-GA)
+    if(idl_cmd_arg_-GA)
       set(anyop_header_files "${anyop_output_prefix}A.h")
       set(anyop_cpp_files "${anyop_output_prefix}A.cpp")
-    elseif (idl_cmd_arg_-GX)
+    elseif(idl_cmd_arg_-GX)
       set(anyop_header_files "${anyop_output_prefix}A.h")
     endif()
 
-    if (idl_cmd_arg_-GT)
+    if(idl_cmd_arg_-GT)
       list(APPEND skel_header_files
         "${skel_output_prefix}S_T.h"
         "${skel_output_prefix}S_T.cpp")
     endif()
 
-    if (idl_cmd_arg_-Gxhst)
+    if(idl_cmd_arg_-Gxhst)
       list(APPEND stub_header_files "${CMAKE_CURRENT_BINARY_DIR}/${idl_cmd_arg-wb-stub_export_file}")
     endif()
 
-    if (idl_cmd_arg_-Gxhsk)
+    if(idl_cmd_arg_-Gxhsk)
       list(APPEND skel_header_files "${CMAKE_CURRENT_BINARY_DIR}/${idl_cmd_arg-wb-skel_export_file}")
     endif()
 
@@ -174,12 +174,12 @@ function(_opendds_tao_idl target)
     set(gperf_location $<TARGET_FILE:ace_gperf>)
     if(CMAKE_CONFIGURATION_TYPES)
       get_target_property(is_gperf_imported ace_gperf IMPORTED)
-      if (is_gperf_imported)
+      if(is_gperf_imported)
         set(gperf_location $<TARGET_PROPERTY:ace_gperf,LOCATION>)
       endif(is_gperf_imported)
     endif()
 
-    if (BUILD_SHARED_LIB AND TARGET TAO_IDL_BE)
+    if(BUILD_SHARED_LIB AND TARGET TAO_IDL_BE)
       set(tao_idl_shared_libs TAO_IDL_BE TAO_IDL_FE)
     endif()
 

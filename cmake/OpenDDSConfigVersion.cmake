@@ -7,7 +7,7 @@ set(version_file "${DDS_ROOT}/VERSION.txt")
 file(READ ${version_file} version_file_contents)
 string(REGEX MATCH "OpenDDS version ([0-9]+.[0-9]+.[0-9]+)" _ ${version_file_contents})
 set(PACKAGE_VERSION ${CMAKE_MATCH_1})
-if (NOT PACKAGE_VERSION)
+if(NOT PACKAGE_VERSION)
   message(FATAL_ERROR "Couldn't get OpenDDS version from ${version_file}")
 endif()
 
