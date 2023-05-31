@@ -1,4 +1,4 @@
-project (Bench_Unit_Tests): ../bench_exe, googletest {
+project (Bench_Unit_Tests): ../bench_exe, opendds_unit_test, googlemock, opendds_optional_security {
 
   after += Bench_Common Bench_test_controller
   libs += Bench_Common
