@@ -77,9 +77,6 @@ extensions = [
     'sphinx_inline_tabs',
 ]
 
-# Add any paths that contain templates here, relative to this directory.
-templates_path = ['_templates']
-
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 # This pattern also affects html_static_path and html_extra_path.
@@ -99,7 +96,7 @@ source_suffix = {
     '.rst': 'restructuredtext',
 }
 
-numfig = True
+numfig = False
 
 highlight_language = 'none'
 
@@ -146,10 +143,6 @@ html_theme_options = {
 
 # Change the sidebar to include fixed links
 #   https://pradyunsg.me/furo/customisation/sidebar/#making-changes
-sidebar_links = {
-    'Main Website': 'https://opendds.org',
-    'GitHub Repo': github_repo,
-}
 html_context = {
     'sidebar_links': {
         'Main Website': 'https://opendds.org',

@@ -157,7 +157,7 @@ Common Terms
     Transports are the configurable methods that :term:`DataWriter`\s and :term:`DataReader`\s use to communicate.
 
   XTypes
-  DDS Extensible and Dynamic Topic Types for DDS
+  Extensible and Dynamic Topic Types for DDS
     XTypes is an :term:`OMG` specification that defines how DDS systems can have :term:`topic type`\s that can evolve over time and be used without defining IDL.
 
     See :ref:`spec-xtypes` and :doc:`devguide/xtypes` for more information.
