@@ -80,6 +80,25 @@ These apply to C++ source code, Perl scripts, MPC files, and any other plaintext
   I don't think it makes sense to strictly enforce an 80-column limit, but overly long lines are harder to read.
   Try to keep lines to roughly 80 characters.
 
+The :ref:`lint script <dev_guidelines-lint-script>` will help check for most of these in a PR.
+
+There is also a :ghfile:`.editorconfig` file that allows contributors to follow most of these rules automatically.
+`EditorConfig <https://editorconfig.org/>`__ support is `built-in to some editors (including Visual Studio) <https://editorconfig.org/#pre-installed>`__ with `plugins available for others <https://editorconfig.org/#download>`__.
+
+.. _dev_guidelines-lint-script:
+
+***********
+Lint Script
+***********
+
+The :ghfile:`lint script <tools/scripts/lint.pl>` is a Perl script that is run on every PR.
+It checks for some mistakes both in coding and style.
+See the default checks by running ``./tools/scripts/lint.pl --list``.
+It can also be run locally to check for issues before committing.
+``./tools/scripts/lint.pl --try-fix`` will try to fix some of those issues.
+The script also has ways to skip some or all checks for single lines or whole files.
+See ``./tools/scripts/lint.pl --help`` for more information.
+
 *************
 Documentation
 *************
@@ -395,12 +414,12 @@ ACE can provide monotonic clock time and has a class for handling time measureme
 It can differentiate between the system clock and the monotonic clock, but it does so poorly.
 OpenDDS provides three classes that wrap ``ACE_Time_Value`` to fill these roles: ``TimeDuration``, ``MonotonicTimePoint``, and ``SystemTimePoint``.
 All three can be included using :ghfile:`dds/DCPS/TimeTypes.h`.
-Using ``ACE_Time_Value`` is discouraged unless directly dealing with ACE code which requires it and using ``ACE_OS::gettimeofday()`` or ``ACE_Time_Value().now()`` in C++ code in :ghfile:`dds/DCPS` treated as an error by the ``lint.pl`` linter script.
+Using ``ACE_Time_Value`` is discouraged unless directly dealing with ACE code which requires it and using ``ACE_OS::gettimeofday()`` or ``ACE_Time_Value().now()`` in C++ code in :ghfile:`dds/DCPS` treated as an error by the :ref:`lint script <dev_guidelines-lint-script>`.
 
 ``MonotonicTimePoint`` should be used when tracking time elapsed internally and when dealing with ``ACE_Time_Value``\s being given by the ``ACE_Reactor`` in OpenDDS.
 ``ACE_Condition``\s, like all ACE code, will default to using system time.
 Therefore the ``Condition`` class wraps it and makes it so it always uses monotonic time like it should.
-Like ``ACE_OS::gettimeofday()``, referencing ``ACE_Condition`` in :ghfile:`dds/DCPS` will be treated as an error by ``lint.pl``.
+Like ``ACE_OS::gettimeofday()``, referencing ``ACE_Condition`` in :ghfile:`dds/DCPS` will be treated as an error by the :ref:`lint script <dev_guidelines-lint-script>`.
 
 More information on using monotonic time with ACE can be found `here <http://www.dre.vanderbilt.edu/~schmidt/DOC_ROOT/ACE/docs/ACE-monotonic-timer.html>`_.
 
