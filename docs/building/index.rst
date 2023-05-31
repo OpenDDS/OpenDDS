@@ -6,6 +6,7 @@ Building and Installing
   :hidden:
 
   dependencies
+  cmake
   android
   ios
 
@@ -127,6 +128,8 @@ Apple iOS
 
 Apple iOS support is documented in :doc:`ios`.
 
+.. _install:
+
 ************
 Installation
 ************
@@ -150,7 +153,7 @@ The analogous files for ACE and TAO are ``<prefix>/share/ace/ace-devel.sh`` and 
 
 The ``<prefix>`` tree does not contain a tool for makefile generation.
 To use MPC to generate application makefiles, the ``MPC_ROOT`` subdirectory from the OpenDDS source tree can be used either in-place or copied elsewhere.
-To use CMake to generate application makefiles, see :ghfile:`docs/cmake.md`.
+To use CMake to generate application makefiles, see :doc:`cmake`.
 
 *****
 Tests

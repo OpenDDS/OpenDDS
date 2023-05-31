@@ -66,6 +66,7 @@ with (docs_path / 'this-release.rst').open('w') as f:
 extensions = [
     # Custom ones
     'links',
+    'cmake',
 
     # Official ones
     'sphinx.ext.ifconfig',

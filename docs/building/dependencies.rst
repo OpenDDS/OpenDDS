@@ -88,8 +88,8 @@ Optional Dependencies
 CMake
 =====
 
-OpenDDS has a :ghfile:`CMake FindPackage module included <cmake>`.
-See :ghfile:`docs/cmake.md` for how to make OpenDDS applications with CMake and without the need to use MPC in your application.
+OpenDDS has a :ghfile:`CMake package included <cmake>`.
+See :doc:`cmake` for how to build OpenDDS applications with CMake and without the need to use MPC in your application.
 
 CMake is required to build Google Test for OpenDDS tests if a prebuilt Google Test is not found or provided.
 See :ghfile:`tests/gtest_setup.txt` for details.

@@ -928,10 +928,7 @@ CMake
     Sect<1.4.2>
 
 Applications can also be built with `CMake <https://cmake.org/>`__.
-See the included documentation in the OpenDDS source tree: :ghfile:`docs/cmake.md`
-
-The OpenDDS source tree also includes examples of using CMake.
-They are listed in the ``cmake.md`` file.
+See :doc:`/building/cmake` for more information.
 
 .. _introduction--custom-build-systems:
 

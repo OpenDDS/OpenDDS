@@ -62,7 +62,7 @@ Strict Checks
 
 .. note::
 
-  The documentation includes dynamic links to files in the GitHub repo created by :ref:`docs-ghfile`.
+  The documentation includes dynamic links to files in the GitHub repo created by :rst:role:`ghfile`.
   These links will be invalid until the git commit they were built under is pushed to a Github fork of OpenDDS.
   This also means running will cause those links to marked as broken.
   A workaround for this is to pass ``-c master`` or another commit, branch, or tag that is desired.
@@ -101,127 +101,167 @@ Special Links
 There are a few shortcuts for linking to GitHub and OMG that are custom to OpenDDS.
 These come in the form of `RST roles <https://docutils.sourceforge.io/docs/ref/rst/roles.html>`__ and are implemented in :ghfile:`docs/sphinx_extensions/links.py`.
 
-.. _docs-ghfile:
+.. rst:role:: ghfile
 
-ghfile
-------
+  .. code-block:: rst
 
-.. code-block:: rst
+    :ghfile:`README.md`
 
-  :ghfile:`README.md`
+    :ghfile:`the \`\`README.md\`\` File <README.md>`
 
-  :ghfile:`the \`\`README.md\`\` File <README.md>`
+    :ghfile:`the support section of the \`\`README.md\`\` File <README.md#support>`
 
-  :ghfile:`the support section of the \`\`README.md\`\` File <README.md#support>`
+    :ghfile:`check out the available support <README.md#support>`
 
-  :ghfile:`check out the available support <README.md#support>`
+    :ghfile:`java/docs/overview.html`
 
-  :ghfile:`java/docs/overview.html`
+  Turns into:
 
-Turns into:
+    :ghfile:`README.md#support`
 
-  :ghfile:`README.md#support`
+    :ghfile:`README.md`
 
-  :ghfile:`README.md`
+    :ghfile:`the \`\`README.md\`\` File <README.md>`
 
-  :ghfile:`the \`\`README.md\`\` File <README.md>`
+    :ghfile:`the support section of the \`\`README.md\`\` File <README.md#support>`
 
-  :ghfile:`the support section of the \`\`README.md\`\` File <README.md#support>`
+    :ghfile:`check out the available support <README.md#support>`
 
-  :ghfile:`check out the available support <README.md#support>`
+    :ghfile:`java/docs/overview.html`
 
-  :ghfile:`java/docs/overview.html`
+  The path passed must exist, be relative to the root of the repository, and will have to be committed, if it's not already.
+  If there is a URL fragment in the path, like ``README.md#support``, then it will appear in the link URL.
 
-The path passed must exist, be relative to the root of the repository, and will have to be committed, if it's not already.
-If there is a URL fragment in the path, like ``README.md#support``, then it will appear in the link URL.
+  It will try to point to the most specific version of the file:
 
-It will try to point to the most specific version of the file:
+  * If ``-c`` or ``--gh-links-commit`` was passed to ``build.py``, then it will use the commit, branch, or tag that was passed along with it.
+  * Else if the OpenDDS is a release it will calculate the release tag and use that.
+  * Else if the OpenDDS is in a git repository it will use the commit hash.
+  * Else it will use ``master``.
 
-* If ``-c`` or ``--gh-links-commit`` was passed to ``build.py``, then it will use the commit, branch, or tag that was passed along with it.
-* Else if the OpenDDS is a release it will calculate the release tag and use that.
-* Else if the OpenDDS is in a git repository it will use the commit hash.
-* Else it will use ``master``.
+  If the file ends in ``.html``, there will be an additional link to the file that uses https://htmlpreview.github.io/ so the file can be viewed directly in a web browser.
 
-If the file ends in ``.html``, there will be an additional link to the file that uses https://htmlpreview.github.io/ so the file can be viewed directly in a web browser.
+.. rst:role:: ghissue
 
-ghissue
--------
+  .. code-block:: rst
 
-.. code-block:: rst
+    :ghissue:`213`
 
-  :ghissue:`213`
+    :ghissue:`this is the issue <213>`
 
-  :ghissue:`this is the issue <213>`
+    :ghissue:`this is **the issue** <213>`
 
-  :ghissue:`this is **the issue** <213>`
+  Turns into:
 
-Turns into:
+    :ghissue:`213`
 
-  :ghissue:`213`
+    :ghissue:`this is the issue <213>`
 
-  :ghissue:`this is the issue <213>`
+    :ghissue:`this is **the issue** <213>`
 
-  :ghissue:`this is **the issue** <213>`
+.. rst:role:: ghpr
 
-ghpr
-----
+  .. code-block:: rst
 
-.. code-block:: rst
+    :ghpr:`1`
 
-  :ghpr:`1`
+    :ghpr:`this is the PR <1>`
 
-  :ghpr:`this is the PR <1>`
+    :ghpr:`this is **the PR** <1>`
 
-  :ghpr:`this is **the PR** <1>`
+  Turns into:
 
-Turns into:
+    :ghpr:`1`
 
-  :ghpr:`1`
+    :ghpr:`this is the PR <1>`
 
-  :ghpr:`this is the PR <1>`
+    :ghpr:`this is **the PR** <1>`
 
-  :ghpr:`this is **the PR** <1>`
+.. rst:role:: ghrelease
 
-ghrelease
----------
+  ``ghrelease`` links to a release on Github using the git tag.
+  Note that this behaves differently than the other roles here.
+  Without the syntax ```Link text <TARGET>``` syntax, it uses the contents as link text and link to the release tag for the current version, assuming there is one.
+  This syntax should only be used in a ``.. ifconfig:: is_release`` directive.
+  Also it never parses the contents as inline markup.
 
-``ghrelease`` links to a release on Github using the git tag.
-Note that this behaves differently than the other roles here.
-Without the syntax ```Link text <TARGET>``` syntax, it uses the contents as link text and link to the release tag for the current version, assuming there is one.
-This syntax should only be used in a ``.. ifconfig:: is_release`` directive.
-Also it never parses the contents as inline markup.
+  .. code-block:: rst
 
-.. code-block:: rst
+    :ghrelease:`This is the release`
 
-  :ghrelease:`This is the release`
+    :ghrelease:`This is the release <DDS-3.24>`
 
-  :ghrelease:`This is the release <DDS-3.24>`
+  Turns into:
 
-Turns into:
+    :ghrelease:`This is the release`
 
-  :ghrelease:`This is the release`
+    :ghrelease:`This is the release <DDS-3.24>`
 
-  :ghrelease:`This is the release <DDS-3.24>`
+.. rst:role:: omgissue
 
+  .. code-block:: rst
 
-omgissue
---------
+    :omgissue:`DDSXTY14-29`
 
-.. code-block:: rst
+    :omgissue:`this is the issue <DDSXTY14-29>`
 
-  :omgissue:`DDSXTY14-29`
+    :omgissue:`this is **the issue** <DDSXTY14-29>`
 
-  :omgissue:`this is the issue <DDSXTY14-29>`
+  Turns into:
 
-  :omgissue:`this is **the issue** <DDSXTY14-29>`
+    :omgissue:`DDSXTY14-29`
 
-Turns into:
+    :omgissue:`this is the issue <DDSXTY14-29>`
 
-  :omgissue:`DDSXTY14-29`
+    :omgissue:`this is **the issue** <DDSXTY14-29>`
 
-  :omgissue:`this is the issue <DDSXTY14-29>`
+CMake Domain
+============
 
-  :omgissue:`this is **the issue** <DDSXTY14-29>`
+For :doc:`/building/cmake` there's a custom CMake `Sphinx domain <https://www.sphinx-doc.org/en/master/usage/restructuredtext/domains.html>`__ in :ghfile:`docs/sphinx_extensions/cmake.py`.
+All of the directives can and should have RST content nested in them.
+
+.. rst:directive:: .. cmake:func:: NAME
+
+  For public CMake functions.
+
+.. rst:directive:: .. cmake:func:arg:: NAME [SIGNATURE]
+
+  For arguments and options for public CMake functions.
+  Should be nested in :rst:dir:`cmake:func` of the function the argument belongs to.
+
+.. rst:role:: cmake:func
+
+  Reference a :rst:dir:`cmake:func` by name or reference a :rst:dir:`cmake:func:arg` by function name followed by argument name in parentheses.
+  For example:
+
+  .. code-block:: rst
+
+    :cmake:func:`opendds_target_sources`
+
+    :cmake:func:`opendds_target_sources(OPENDDS_IDL_OPTIONS)`
+
+  Turns into:
+
+    :cmake:func:`opendds_target_sources`
+
+    :cmake:func:`opendds_target_sources(OPENDDS_IDL_OPTIONS)`
+
+.. rst:directive:: .. cmake:var:: NAME
+
+  For public variables
+
+.. rst:role:: cmake:var
+
+  Reference a :rst:dir:`cmake:var` by name
+
+.. rst:directive:: .. cmake:prop:: NAME
+
+  For properties on CMake targets, or possibly other kinds of properties, that we're looking for or creating for the user.
+
+.. rst:role:: cmake:prop
+
+  Reference a :rst:dir:`cmake:prop` by name
 
 .. _docs-news:
 

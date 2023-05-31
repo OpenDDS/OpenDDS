@@ -5,6 +5,7 @@
 
   - ``INSTALL.md`` is now :doc:`/building/index`.
   - ``docs/dependencies.md`` is now :doc:`/building/dependencies`.
+  - ``docs/cmake.md`` is now :doc:`/building/cmake`.
   - ``docs/android.md`` is now :doc:`/building/android`.
   - ``docs/ios.md`` is now :doc:`/building/ios`.
 
