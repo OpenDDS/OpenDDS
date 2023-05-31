@@ -10,7 +10,7 @@ enable_testing()
 
 find_package(OpenDDS REQUIRED)
 
-if (NOT OPENDDS_OWNERSHIP_PROFILE)
+if(NOT OPENDDS_OWNERSHIP_PROFILE)
   message(FATAL_ERROR "This test requires OpenDDS to be built with Ownership Profile enabled")
 endif()
 
@@ -34,7 +34,7 @@ add_library(${messenger})
 set_target_properties(${messenger}
   PROPERTIES OUTPUT_NAME messenger
 )
-OPENDDS_TARGET_SOURCES(${messenger} PUBLIC "${dst}/Messenger.idl")
+opendds_target_sources(${messenger} PUBLIC "${dst}/Messenger.idl")
 target_link_libraries(${messenger} PUBLIC OpenDDS::Dcps)
 
 # Publisher

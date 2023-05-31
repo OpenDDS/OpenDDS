@@ -3,8 +3,8 @@ cmake_minimum_required(VERSION 3.8.2)
 
 find_package(OpenDDS REQUIRED)
 
-OPENDDS_SAVE_CACHE(OPENDDS_AUTO_LINK_DCPS BOOL ON)
-OPENDDS_SAVE_CACHE(OPENDDS_USE_CORRECT_INCLUDE_SCOPE BOOL ON)
+_opendds_save_cache(OPENDDS_AUTO_LINK_DCPS BOOL ON)
+_opendds_save_cache(OPENDDS_USE_CORRECT_INCLUDE_SCOPE BOOL ON)
 
 macro(subtest name)
   set(target "${PROJECT_NAME}_${name}")
@@ -55,32 +55,26 @@ endfunction()
 
 set(opendds_gen "${CMAKE_CURRENT_BINARY_DIR}/opendds_generated")
 
-if (DEFINED OPENDDS_RAPIDJSON)
-  set(rapidjson_include "${OPENDDS_ROOT}/tools/rapidjson/include")
-else ()
-  set(rapidjson_include "")
-endif()
-
 subtest(no_scope)
-OPENDDS_TARGET_SOURCES(${target} ${idl_file})
-assert_includes(${target} "" "${opendds_gen};${rapidjson_include}")
+opendds_target_sources(${target} ${idl_file})
+assert_includes(${target} "" "${opendds_gen}")
 
 subtest(public)
-OPENDDS_TARGET_SOURCES(${target} PUBLIC ${idl_file})
-assert_includes(${target} "${opendds_gen};${rapidjson_include}" "${opendds_gen};${rapidjson_include}")
+opendds_target_sources(${target} PUBLIC ${idl_file})
+assert_includes(${target} "${opendds_gen}" "${opendds_gen}")
 
 subtest(interface)
-OPENDDS_TARGET_SOURCES(${target} INTERFACE ${idl_file})
-assert_includes(${target} "${opendds_gen};${rapidjson_include}" "${opendds_gen};${rapidjson_include}")
+opendds_target_sources(${target} INTERFACE ${idl_file})
+assert_includes(${target} "${opendds_gen}" "${opendds_gen}")
 
 subtest(private)
-OPENDDS_TARGET_SOURCES(${target} PRIVATE ${idl_file})
-assert_includes(${target} "" "${opendds_gen};${rapidjson_include}")
+opendds_target_sources(${target} PRIVATE ${idl_file})
+assert_includes(${target} "" "${opendds_gen}")
 
 subtest(o_opt)
-OPENDDS_TARGET_SOURCES(${target} ${idl_file}
+opendds_target_sources(${target} ${idl_file}
   OPENDDS_IDL_OPTIONS -o opendds-idl-output
   TAO_IDL_OPTIONS -o tao-idl-output)
-assert_includes(${target} "" "${opendds_gen}/opendds-idl-output;${opendds_gen}/tao-idl-output;${rapidjson_include}")
+assert_includes(${target} "" "${opendds_gen}/opendds-idl-output;${opendds_gen}/tao-idl-output")
 
-OPENDDS_RESTORE_CACHE()
+_opendds_restore_cache()

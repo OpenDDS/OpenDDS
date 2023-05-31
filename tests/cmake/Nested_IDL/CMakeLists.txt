@@ -9,14 +9,14 @@ find_package(OpenDDS REQUIRED)
 
 set(target_prefix "${PROJECT_NAME}_")
 
-OPENDDS_SAVE_CACHE(OPENDDS_FILENAME_ONLY_INCLUDES BOOL ON)
+_opendds_save_cache(OPENDDS_FILENAME_ONLY_INCLUDES BOOL ON)
 
 set(ecu_lib "${target_prefix}lib")
 add_library(${ecu_lib})
 set_target_properties(${ecu_lib}
   PROPERTIES OUTPUT_NAME ecu_lib
 )
-OPENDDS_TARGET_SOURCES(${ecu_lib}
+opendds_target_sources(${ecu_lib}
   PUBLIC
     ecu.idl ./engine/engine_specs.idl
     ./engine/engine_stats/fuel_stats.idl
@@ -37,4 +37,4 @@ add_test(NAME "${target_prefix}test"
   COMMAND perl run_test.pl $<$<BOOL:$<CONFIG>>:-ExeSubDir> $<CONFIG>
 )
 
-OPENDDS_RESTORE_CACHE()
+_opendds_restore_cache()

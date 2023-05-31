@@ -209,7 +209,7 @@ All types are nested by default in OpenDDS to reduce the code generated for type
 
   * When using MPC, add ``dcps_ts_flags += --no-default-nested`` to the project.
 
-  * When using CMake, this can be done by setting either the ``OPENDDS_DEFAULT_NESTED`` global variable to ``FALSE`` or adding ``--no-default-nested`` to the ``OPENDDS_IDL_OPTIONS`` parameter for ``OPENDDS_TARGET_SOURCES``.
+  * When using CMake, this can be done by setting either the ``OPENDDS_DEFAULT_NESTED`` global variable to ``FALSE`` or adding ``--no-default-nested`` to the ``OPENDDS_IDL_OPTIONS`` parameter for ``opendds_target_sources``.
     See ``$DDS_ROOT/docs/cmake.md`` in the source for more information about using OpenDDS with CMake.
 
 In cases where the module default is not nested, you can reverse this by using ``@nested`` or ``@nested(TRUE)`` for structures/unions and ``@default_nested`` or ``@default_nested(TRUE)`` for modules.

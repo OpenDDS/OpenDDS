@@ -771,6 +771,18 @@ my %all_checks = (
       return $failed;
     },
   },
+
+  cmake_spaced_parens => {
+    path_matches_all_of => [
+      'cmake_file',
+    ],
+    strip_fix => 1,
+    line_matches => qr/^\s*(?:function|macro|if|elseif|foreach|while|set)(\s)\(/,
+    message => [
+      'CMake should not have spaces before parentheses in flow control ' .
+      'and function declarations and calls'
+    ],
+  },
 );
 
 sub match_line {
