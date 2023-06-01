@@ -3192,7 +3192,7 @@ RtpsUdpDataLink::RtpsWriter::process_acknack(const RTPS::AckNackSubmessage& ackn
       ACE_DEBUG((LM_DEBUG, "(%P|%t) {transport_debug.log_dropped_messages} "
                  "RtpsUdpDataLink::RtpsWriter::process_acknack: %C -> %C "
                  "Received sequence number (%q) > expected max sequence number (%q)\n",
-                 LogGuid(src).c_str(), LogGuid(id_).c_str(), ack.getValue(), max_sn.getValue())));
+                 LogGuid(src).c_str(), LogGuid(id_).c_str(), ack.getValue(), max_sn.getValue()));
     }
     return;
   }
