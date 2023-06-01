@@ -35,6 +35,7 @@ OpenDDS 3.24.0 was released on Apr 11 2023.
 - Can now cross-compile on macOS (#4048)
 - Added hardening features to RtpsRelay (#4045)
   - These are configured with the new options `-MaxAddrSetSize` and `-RejectedAddressDuration`.
+- Added `OPENDDS_AUTO_LINK_DCPS` and `OPENDDS_USE_CORRECT_INCLUDE_SCOPE` global options to the CMake package (#4071)
 - Expanded support for using C++ keywords in IDL (#4073)
 - Improved support for anonymous types in unions branches (#4078)
 - IDL file and generated TypeSupport.idl can now be in different directories (#4077)
