@@ -21,7 +21,7 @@ target_include_directories(${PROJECT_NAME}
 )
 set(opendds_libs OpenDDS::Dcps)
 target_link_libraries(${PROJECT_NAME} PUBLIC ${opendds_libs})
-OPENDDS_TARGET_SOURCES(${PROJECT_NAME}
+opendds_target_sources(${PROJECT_NAME}
   PUBLIC
     "include/MovingObject.idl"
     "include/Vector.idl"

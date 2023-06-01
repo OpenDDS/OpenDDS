@@ -9,11 +9,11 @@ cmake_minimum_required(VERSION 3.8.2)
 
 find_package(OpenDDS REQUIRED)
 
-if (OPENDDS_STATIC)
+if(OPENDDS_STATIC)
   message(FATAL_ERROR "This test cannot be run on static builds.")
 endif()
 
-if (NOT OPENDDS_OWNERSHIP_PROFILE)
+if(NOT OPENDDS_OWNERSHIP_PROFILE)
   message(FATAL_ERROR "These tests require OpenDDS to be built with Ownership Profile enabled")
 endif()
 

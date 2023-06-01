@@ -88,11 +88,11 @@ DomainParticipantFactoryImpl::create_participant(
 
   // if the specified transport is a transport template then create a new transport
   // instance for the new participant if per_participant is set (checked before creating instance).
-  ACE_TString transport_base_config_name;
+  String transport_base_config_name;
   TheServiceParticipant->get_transport_base_config_name(domainId, transport_base_config_name);
 
   if (TheTransportRegistry->config_has_transport_template(transport_base_config_name)) {
-    OPENDDS_STRING transport_config_name = ACE_TEXT_ALWAYS_CHAR(transport_base_config_name.c_str());
+    OPENDDS_STRING transport_config_name = transport_base_config_name;
     OPENDDS_STRING transport_instance_name = dp->get_unique_id();
 
     // unique config and instance names are returned in transport_config_name and transport_instance_name

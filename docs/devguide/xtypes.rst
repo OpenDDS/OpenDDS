@@ -887,7 +887,7 @@ To do the same for CMake:
 
 .. code-block:: cmake
 
-    OPENDDS_TARGET_SOURCES(target
+    opendds_target_sources(target
       Messenger.idl
       OPENDDS_IDL_OPTIONS -Gxtypes-complete
     )
