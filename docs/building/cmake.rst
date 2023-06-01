@@ -98,46 +98,42 @@ This can be done a number of ways, which includes adding the OpenDDS source tree
 Consult the ``find_package`` documentation for your CMake version for all the details on how CMake could find OpenDDS.
 `Here <https://cmake.org/cmake/help/latest/command/find_package.html#config-mode-search-procedure>`__ is the documentation for the latest version of CMake
 
-Libraries
-=========
+.. _cmake-components:
 
-The CMake package provides the following library targets that can be linked using `target_link_libraries <https://cmake.org/cmake/help/latest/command/target_link_libraries.html>`__:
+Components
+----------
 
--  ``OpenDDS::Dcps``
+.. versionadded:: 3.25
 
-   -  Core OpenDDS Library
+Arguments can be passed to ``find_package(OpenDDS COMPONENTS <argument>...)`` (or alternatively ``find_package(OpenDDS REQUIRED [COMPONENTS] <argument>...)``) to change what is loaded and considered required.
+These can be:
 
--  ``OpenDDS::Rtps``
+- :ref:`Libraries <cmake-libraries>`
 
-   -  RTPS Discovery
+  - The ``OpenDDS::`` prefix is optional, but ``ACE::`` and ``TAO::`` libraries are not.
+  - Ex:
 
--  ``OpenDDS::InfoRepoDiscovery``
+    .. code-block:: cmake
 
-   -  InfoRepo Discovery
+      find_package(OpenDDS REQUIRED Security OpenDDS::Shmem ACE::XML_Utils)
 
--  ``OpenDDS::Rtps_Udp``
+- :ref:`Features <cmake-feature-vars>`
 
-   -  RTPS Transport
+  - Feature names should be the same as the variable, but without the leading ``OPENDDS_`` and all lowercase.
+  - Feature names by themselves will be required to be enabled.
+  - If the name is followed by ``=``, then the `CMake boolean value <https://cmake.org/cmake/help/latest/command/if.html#basic-expressions>`__ following that determines if the feature must be enabled or disabled.
+  - Ex:
 
--  ``OpenDDS::Multicast``
+    .. code-block:: cmake
 
-   -  Multicast Transport
+      find_package(OpenDDS REQUIRED built_in_topics safety_profile=OFF)
 
--  ``OpenDDS::Shmem``
+- ``NO_OPENDDS`` skips loading OpenDDS libraries, which allows using ACE/TAO without OpenDDS being built.
+  ``NO_TAO`` also skips loading TAO libraries, leaving just ACE libraries.
 
-   -  Shared Memory Transport
+  - ``NO_OPENDDS`` will imply :cmake:func:`opendds_target_sources(SKIP_OPENDDS_IDL)`.
 
--  ``OpenDDS::Tcp``
-
-   -  TCP Transport
-
--  ``OpenDDS::Udp``
-
-   -  UDP Transport
-
--  ``OpenDDS::Security``
-
-   - :doc:`/devguide/dds_security`
+Currently all arguments passed to ``OPTIONAL_COMPONENTS`` are ignored as all libraries are treated as optional.
 
 Adding IDL Sources with opendds_target_sources
 ==============================================
@@ -201,6 +197,66 @@ See :ref:`cmake-config-vars` for all the possible values to set.
 Reference
 *********
 
+.. _cmake-libraries:
+
+Libraries
+=========
+
+The CMake package provides the following library targets for OpenDDS that can be linked using `target_link_libraries <https://cmake.org/cmake/help/latest/command/target_link_libraries.html>`__:
+
+- ``OpenDDS::Dcps``
+
+  - Core OpenDDS Library
+
+- ``OpenDDS::Rtps``
+
+  - RTPS Discovery
+
+- ``OpenDDS::InfoRepoDiscovery``
+
+  - InfoRepo Discovery
+
+- ``OpenDDS::Rtps_Udp``
+
+  - RTPS Transport
+
+- ``OpenDDS::Multicast``
+
+  - Multicast Transport
+
+- ``OpenDDS::Shmem``
+
+  - Shared Memory Transport
+
+- ``OpenDDS::Tcp``
+
+  - TCP Transport
+
+- ``OpenDDS::Udp``
+
+  - UDP Transport
+
+- ``OpenDDS::Security``
+
+  - :doc:`/devguide/dds_security`
+
+It also provides libraries from ACE/TAO:
+
+- ``ACE::ACE``
+- ``ACE::XML_Utils``
+- ``TAO::TAO``
+- ``TAO::IDL_FE``
+- ``TAO::AnyTypeCode``
+- ``TAO::BiDirGIOP``
+- ``TAO::CodecFactory``
+- ``TAO::IORManip``
+- ``TAO::IORTable``
+- ``TAO::ImR_Client``
+- ``TAO::PI``
+- ``TAO::PortableServer``
+- ``TAO::Svc_Utils``
+- ``TAO::Valuetype``
+
 Functions
 =========
 
@@ -215,6 +271,10 @@ Functions
       [OPENDDS_IDL_OPTIONS <option>...]
       [SUPPRESS_ANYS TRUE|FALSE]
       [ALWAYS_GENERATE_LIB_EXPORT_HEADER TRUE|FALSE]
+      [GENERATE_SERVER_SKELETONS TRUE|FALSE]
+      [AUTO_LINK TRUE|FALSE]
+      [SKIP_TAO_IDL]
+      [SKIP_OPENDDS_IDL]
     )
 
   A function that acts like `target_sources <https://cmake.org/cmake/help/latest/command/target_sources.html>`__, but it adds IDL files and the resulting generated code to a target.
@@ -238,14 +298,14 @@ Functions
     Pass options to :doc:`/devguide/opendds_idl`.
     Add ``OPENDDS_IDL_OPTIONS -Lc++11`` to use the :ref:`C++11 IDL Mapping <opendds_idl--using-the-idl-to-c-11-mapping>`.
 
-  .. cmake:func:arg:: SUPPRESS_ANYS <boolean>
+  .. cmake:func:arg:: SUPPRESS_ANYS TRUE|FALSE
 
     If ``FALSE``, TAO TypeCode for ``any`` will be generated.
     The default is set by :cmake:var:`OPENDDS_SUPPRESS_ANYS`.
 
     .. versionadded:: 3.17
 
-  .. cmake:func:arg:: ALWAYS_GENERATE_LIB_EXPORT_HEADER <boolean>
+  .. cmake:func:arg:: ALWAYS_GENERATE_LIB_EXPORT_HEADER TRUE|FALSE
 
     If ``TRUE``, an header for exporting symbols in a shared library will be always generated as long the target is `some sort of library <https://cmake.org/cmake/help/latest/prop_tgt/TYPE.html>`__.
     This is only really useful if the target is a library that uses the export header itself and also needs to be built as a static library as well.
@@ -253,6 +313,33 @@ Functions
     The default is set by :cmake:var:`OPENDDS_ALWAYS_GENERATE_LIB_EXPORT_HEADER`.
 
     .. versionadded:: 3.20
+
+  .. cmake:func:arg:: GENERATE_SERVER_SKELETONS TRUE|FALSE
+
+    ``tao_idl`` generate code for CORBA servers.
+    The default is ``FALSE``.
+    ``tao_idl`` by itself does this by default, but by default ``opendds_target_sources`` passes ``-SS`` to suppress this as it's not normally useful to an OpenDDS application.
+
+    .. versionadded:: 3.25
+
+  .. cmake:func:arg:: AUTO_LINK TRUE|FALSE
+
+    Automatically link ``OpenDDS::Dcps`` or other dependencies to the target using the "max" scope.
+    The default is set by :cmake:var:`OPENDDS_AUTO_LINK_DCPS`.
+
+    .. versionadded:: 3.25
+
+  .. cmake:func:arg:: SKIP_TAO_IDL
+
+    Skip invoking ``tao_idl`` on the IDL files.
+
+    .. versionadded:: 3.25
+
+  .. cmake:func:arg:: SKIP_OPENDDS_IDL
+
+    Skip invoking ``opendds_idl`` on the IDL files.
+
+    .. versionadded:: 3.25
 
   After ``opendds_target_sources`` is run on a target, it will have these target properties set on it:
 
@@ -262,21 +349,21 @@ Functions
 
     It will be a list that can contain one or more of the following:
 
-    -  ``"C++03"``
+    - ``"C++03"``
 
-       -  IDL-to-C++ mapping generated by default.
+      - IDL-to-C++ mapping generated by default.
 
-    -  ``"C++11"``
+    - ``"C++11"``
 
-       -  IDL-to-C++11 mapping available when passing ``-Lc++11``.
+      - IDL-to-C++11 mapping available when passing ``-Lc++11``.
 
-    -  ``"FACE"``
+    - ``"FACE"``
 
-       -  Will appear if ``-Lface`` is passed.
+      - Will appear if ``-Lface`` is passed.
 
-    -  ``"Java"``
+    - ``"Java"``
 
-       -  Currently unsupported.
+      - Currently unsupported.
 
     If the CMake version is at least 3.12, then this property will be exported with the target.
 
@@ -476,6 +563,8 @@ Dependencies
 .. cmake:var:: OPENDDS_XERCES3
 
   Path to Xerces
+
+.. _cmake-feature-vars:
 
 Features
 ^^^^^^^^
