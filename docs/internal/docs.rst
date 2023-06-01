@@ -253,7 +253,7 @@ All of the directives can and should have RST content nested in them.
 
 .. rst:role:: cmake:var
 
-  Reference a :rst:dir:`cmake:var` by name
+  Reference a :rst:dir:`cmake:var` by name.
 
 .. rst:directive:: .. cmake:prop:: NAME
 
@@ -261,7 +261,15 @@ All of the directives can and should have RST content nested in them.
 
 .. rst:role:: cmake:prop
 
-  Reference a :rst:dir:`cmake:prop` by name
+  Reference a :rst:dir:`cmake:prop` by name.
+
+.. rst:directive:: .. cmake:tgt:: NAME
+
+  A target meant for users that be a library or executable that is imported or exported.
+
+.. rst:role:: cmake:tgt
+
+  Reference a :rst:dir:`cmake:tgt` by name.
 
 .. _docs-news:
 

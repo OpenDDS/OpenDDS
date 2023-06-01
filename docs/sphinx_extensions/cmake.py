@@ -59,11 +59,9 @@ class CMakeMarkup(ObjectDescription[str]):
     def _object_hierarchy_parts(self, sig_node: desc_signature) -> tuple[str, ...]:
         if 'fullname' not in sig_node:
             return ()
-        function_names = []
-        for parent in self.env.ref_context.get('cmake:functions', ()):
-            function_names += parent.split(':')
-        name = sig_node['fullname']
-        return tuple(function_names + name.split(':'))
+        parts = list(self.env.ref_context.get('cmake:functions', ()))
+        parts.append(sig_node['fullname'])
+        return tuple(parts)
 
     def _toc_entry_name(self, sig_node: desc_signature) -> str:
         if not sig_node.get('_toc_parts'):
@@ -160,6 +158,11 @@ class CMakeProperty(CMakeMarkup):
         return _('%s (CMake property)') % name
 
 
+class CMakeTarget(CMakeMarkup):
+    def get_index_text(self, objectname: str, name: str) -> str:
+        return _('%s (CMake target)') % name
+
+
 class CMakeDomain(Domain):
     name = 'cmake'
     label = 'CMake'
@@ -169,17 +172,20 @@ class CMakeDomain(Domain):
         'func:arg': ObjType(_('func-arg'), 'func'),
         'var': ObjType(_('var'), 'var'),
         'prop': ObjType(_('prop'), 'prop'),
+        'tgt': ObjType(_('tgt'), 'tgt'),
     }
     directives = {
         'func': CMakeFunction,
         'func:arg': CMakeFunctionArgument,
         'var': CMakeVariable,
         'prop': CMakeProperty,
+        'tgt': CMakeTarget,
     }
     roles = {
         'func': XRefRole(),
         'var': XRefRole(),
         'prop': XRefRole(),
+        'tgt': XRefRole(),
     }
     initial_data: dict[str, dict[tuple[str, str], str]] = {
         'objects': {},  # fullname -> docname, objtype

@@ -3,7 +3,7 @@ Using OpenDDS in a CMake Project
 ################################
 
 OpenDDS can be used with `CMake <https://cmake.org>`__\-based projects by using the :ghfile:`OpenDDS CMake config package <cmake>`.
-This package bridges the gap between the MPC build system used by OpenDDS and CMake-based projects by providing imported library targets and the ability to add IDL to a target using :cmake:func:`opendds_target_sources`.
+This package bridges the gap between the MPC build system used by OpenDDS and CMake-based projects by providing :ref:`imported library targets <cmake-libraries>` and the ability to add IDL to a target using :cmake:func:`opendds_target_sources`.
 
 ************
 Requirements
@@ -138,9 +138,8 @@ Currently all arguments passed to ``OPTIONAL_COMPONENTS`` are ignored as all lib
 Adding IDL Sources with opendds_target_sources
 ==============================================
 
-Aside from importing the various OpenDDS targets, the OpenDDS config package provides an easy way to add IDL sources to CMake targets.
-This is achieved by :cmake:func:`opendds_target_sources`.
-For example, from the Developer’s Guide Messenger example:
+The CMake config package provides an easy way to add IDL sources to CMake targets using :cmake:func:`opendds_target_sources`.
+Here is how it's used in the :ghfile:`Developer’s Guide Messenger example <DevGuideExamples/DCPS/Messenger/CMakeLists.txt>`:
 
 .. literalinclude:: ../../DevGuideExamples/DCPS/Messenger/CMakeLists.txt
   :language: cmake
@@ -150,6 +149,22 @@ For example, from the Developer’s Guide Messenger example:
 Here the IDL is added to a library that is shared by the executables, but ``opendds_target_sources`` can also be used on executables directly.
 
 .. note:: CMake version 3.10 and below will issue a harmless warning if ``add_library`` is called without any sources.
+
+See :cmake:func:`opendds_target_sources` for all the options it accepts.
+
+Linking OpenDDS Libraries
+=========================
+
+In addition to C++ types generated from IDL and their type support, OpenDDS applications need discovery and transport to talk to each other.
+`target_link_libraries <https://cmake.org/cmake/help/latest/command/target_link_libraries.html>`__ should be used with all the libraries needed.
+Here is the usage in the :ghfile:`Developer’s Guide Messenger example <DevGuideExamples/DCPS/Messenger/CMakeLists.txt>`:
+
+.. literalinclude:: ../../DevGuideExamples/DCPS/Messenger/CMakeLists.txt
+  :language: cmake
+  :start-at: set(opendds_libs
+  :end-at: target_link_libraries(subscriber ${opendds_libs})
+
+See :ref:`cmake-libraries` for all the libraries the CMake package can provide.
 
 .. _cmake-install-import-runtime-artifacts:
 
@@ -202,60 +217,88 @@ Reference
 Libraries
 =========
 
-The CMake package provides the following library targets for OpenDDS that can be linked using `target_link_libraries <https://cmake.org/cmake/help/latest/command/target_link_libraries.html>`__:
+The CMake package can provide the following library targets from OpenDDS that can be linked using `target_link_libraries <https://cmake.org/cmake/help/latest/command/target_link_libraries.html>`__:
 
-- ``OpenDDS::Dcps``
+.. cmake:tgt:: OpenDDS::Dcps
 
-  - Core OpenDDS Library
+  Core OpenDDS Library
 
-- ``OpenDDS::Rtps``
+.. cmake:tgt:: OpenDDS::Rtps
 
-  - RTPS Discovery
+  :ref:`RTPS Discovery <introduction--peer-to-peer-discovery-with-rtps>`
 
-- ``OpenDDS::InfoRepoDiscovery``
+.. cmake:tgt:: OpenDDS::InfoRepoDiscovery
 
-  - InfoRepo Discovery
+  :ref:`InfoRepo Discovery <introduction--centralized-discovery-with-dcpsinforepo>`
 
-- ``OpenDDS::Rtps_Udp``
+.. cmake:tgt:: OpenDDS::Rtps_Udp
 
-  - RTPS Transport
+  :ref:`RTPS/UDP Transport <run_time_configuration--rtps-udp-transport-configuration-options>`
 
-- ``OpenDDS::Multicast``
+.. cmake:tgt:: OpenDDS::Multicast
 
-  - Multicast Transport
+  :ref:`Multicast Transport <run_time_configuration--ip-multicast-transport-configuration-options>`
 
-- ``OpenDDS::Shmem``
+.. cmake:tgt:: OpenDDS::Shmem
 
-  - Shared Memory Transport
+  :ref:`Shared Memory Transport <run_time_configuration--shared-memory-transport-configuration-options>`
 
-- ``OpenDDS::Tcp``
+.. cmake:tgt:: OpenDDS::Tcp
 
-  - TCP Transport
+  :ref:`TCP Transport <run_time_configuration--tcp-ip-transport-configuration-options>`
 
-- ``OpenDDS::Udp``
+.. cmake:tgt:: OpenDDS::Udp
 
-  - UDP Transport
+  :ref:`UDP Transport <run_time_configuration--udp-ip-transport-configuration-options>`
 
-- ``OpenDDS::Security``
+.. cmake:tgt:: OpenDDS::Security
 
-  - :doc:`/devguide/dds_security`
+  :doc:`/devguide/dds_security`
 
-It also provides libraries from ACE/TAO:
+It also can provide the following libraries from ACE/TAO:
 
-- ``ACE::ACE``
-- ``ACE::XML_Utils``
-- ``TAO::TAO``
-- ``TAO::IDL_FE``
-- ``TAO::AnyTypeCode``
-- ``TAO::BiDirGIOP``
-- ``TAO::CodecFactory``
-- ``TAO::IORManip``
-- ``TAO::IORTable``
-- ``TAO::ImR_Client``
-- ``TAO::PI``
-- ``TAO::PortableServer``
-- ``TAO::Svc_Utils``
-- ``TAO::Valuetype``
+.. cmake:tgt:: ACE::ACE
+  :nocontentsentry:
+
+.. cmake:tgt:: ACE::XML_Utils
+  :nocontentsentry:
+
+.. cmake:tgt:: TAO::TAO
+  :nocontentsentry:
+
+.. cmake:tgt:: TAO::IDL_FE
+  :nocontentsentry:
+
+.. cmake:tgt:: TAO::AnyTypeCode
+  :nocontentsentry:
+
+.. cmake:tgt:: TAO::BiDirGIOP
+  :nocontentsentry:
+
+.. cmake:tgt:: TAO::CodecFactory
+  :nocontentsentry:
+
+.. cmake:tgt:: TAO::IORManip
+  :nocontentsentry:
+
+.. cmake:tgt:: TAO::IORTable
+  :nocontentsentry:
+
+.. cmake:tgt:: TAO::ImR_Client
+  :nocontentsentry:
+
+.. cmake:tgt:: TAO::PI
+  :nocontentsentry:
+
+.. cmake:tgt:: TAO::PortableServer
+  :nocontentsentry:
+
+.. cmake:tgt:: TAO::Svc_Utils
+  :nocontentsentry:
+
+.. cmake:tgt:: TAO::Valuetype
+  :nocontentsentry:
+
 
 Functions
 =========
@@ -324,7 +367,8 @@ Functions
 
   .. cmake:func:arg:: AUTO_LINK TRUE|FALSE
 
-    Automatically link ``OpenDDS::Dcps`` or other dependencies to the target using the "max" scope.
+    Automatically link :cmake:tgt:`OpenDDS::Dcps` or other dependencies to the target using the "max" scope.
+    If ``FALSE`` then dependencies will have to be linked manually.
     The default is set by :cmake:var:`OPENDDS_AUTO_LINK_DCPS`.
 
     .. versionadded:: 3.25
@@ -499,8 +543,8 @@ These variables can be used to override default behavior of the CMake package.
 
 .. cmake:var:: OPENDDS_AUTO_LINK_DCPS
 
-  Automatically link ``OpenDDS::Dcps`` or other dependencies to the target of :cmake:func:`opendds_target_sources` using the "max" scope.
-  The default for this is ``FALSE``, which means dependencies will have to be linked manually.
+  Default value for :cmake:func:`opendds_target_sources(AUTO_LINK)`.
+  The default for this is ``FALSE``.
 
   .. note::
 
