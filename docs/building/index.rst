@@ -10,36 +10,39 @@ Building and Installing
   android
   ios
 
-Except for an `example Docker container <https://github.com/OpenDDS/OpenDDS/pkgs/container/opendds>`__, there are no official prebuilt packages of OpenDDS, so it will have to be built from source.
-
-.. ifconfig:: is_release
-
-  If not done already, download the source from :ghrelease:`GitHub`.
-
 *******************
 Supported Platforms
 *******************
 
 We have built OpenDDS on number of different platforms and compilers.
 See :ghfile:`README.md#supported-platforms` for a complete description of supported platforms.
+See :ref:`cross-compiling` for how to cross compile for other platforms.
 
 ************************
 Configuring and Building
 ************************
 
+.. ifconfig:: is_release
+
+  If not already done, download the source from :ghrelease:`GitHub`.
+
 Use the :ghfile:`configure` script to prepare to build OpenDDS.
 This script requires Perl 5.18 or newer to be installed and available on the system ``PATH``.
-`Strawberry Perl <https://strawberryperl.com>`__ is recommended on Windows.
 Older versions of Perl will probably work, but are not tested.
-To start the script simply change to the root of the OpenDDS source directory and run:
 
 .. tab:: Linux, macOS, BSDs, etc.
+
+  To start the script change to the root of the OpenDDS source directory and run:
 
   .. code-block::
 
     ./configure
 
 .. tab:: Windows
+
+  `Strawberry Perl <https://strawberryperl.com>`__ is recommended for Windows.
+
+  To start the script open a `Visual Studio Developer Command Prompt <https://learn.microsoft.com/en-us/visualstudio/ide/reference/command-prompt-powershell>`__ that has C++ tools available, then change to the root of the OpenDDS source directory and run:
 
   .. code-block::
 
@@ -48,6 +51,9 @@ To start the script simply change to the root of the OpenDDS source directory an
 Optionally add ``--help`` to the command line to see the advanced options available for this script.
 The configure script will download ACE/TAO and configure it for your platform.
 To use an existing ACE/TAO installation, either set the :envvar:`ACE_ROOT` and :envvar:`TAO_ROOT` environment variables or pass the ``--ace`` and ``--tao`` (if TAO is not at ``$ACE_ROOT/TAO``) options to configure.
+
+.. seealso:: :doc:`dependencies` for a full list of dependencies including ones that can be configured with the configure script.
+
 If configure runs successfully it will end with a message about the next steps for compiling OpenDDS.
 
 .. tab:: Linux, macOS, BSDs, etc.
@@ -72,7 +78,7 @@ If configure runs successfully it will end with a message about the next steps f
 
 .. tab:: Windows
 
-  For Windows the configure script will say how to open the solution file for OpenDDS in Visual Studio using ``devenv``.
+  The configure script will say how to open the solution file for OpenDDS in Visual Studio using ``devenv``.
 
   It can also be built directly from the command prompt by using MSBuild.
   For example, if the configure script was ran without any arguments, to do a Debug x64 build:
@@ -95,6 +101,8 @@ Java
 ====
 
 If you're building OpenDDS for use by Java applications, please see the file :ghfile:`java/INSTALL` instead of this one.
+
+.. _cross-compiling:
 
 Cross Compiling
 ===============
