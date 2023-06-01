@@ -31,13 +31,17 @@ def log(*args, **kwargs):
 
 
 class DocEnv:
-    def __init__(self, venv_path, build_path, gh_links_commit=None):
+    def __init__(self, venv_path, build_path, gh_links_commit=None, conf_defines=None):
         self.venv_path = Path(venv_path)
         self.abs_venv_path = self.venv_path.resolve()
         self.bin_path = self.abs_venv_path / 'bin'
         self.build_path = Path(build_path)
         self.abs_build_path = self.build_path.resolve()
-        self.gh_links_commit = gh_links_commit
+        self.conf_defines = []
+        if conf_defines is not None:
+            self.conf_defines.extend(conf_defines)
+        if gh_links_commit is not None:
+            self.conf_defines.append('github_links_commitish=' + gh_links_commit)
         self.done = set()
 
     def run(self, *cmd, cwd=abs_docs_path):
@@ -83,8 +87,8 @@ class DocEnv:
 
     def sphinx_build(self, builder, *args):
         args = list(args)
-        if self.gh_links_commit is not None:
-            args.append('-Dgithub_links_commitish=' + self.gh_links_commit)
+        for define in self.conf_defines:
+            args.append('-D' + define)
         self.run('sphinx-build', '-M', builder, '.', str(self.abs_build_path), *args)
 
     def do(self, actions, because_of=None, open_result=False):
@@ -159,11 +163,18 @@ if __name__ == '__main__':
         metavar='PATH', type=Path, default=default_venv_path,
         help='Where to place the Python virtual environment. Default is %(default)s'
     )
+    arg_parser.add_argument('-D',
+        metavar='NAME=VALUE',
+        dest='conf_defines',
+        action='append',
+        help='Passed to sphinx-build to override conf.py values.'
+    )
     args = arg_parser.parse_args()
 
     doc_env = DocEnv(
         venv_path=args.venv, build_path=args.build,
         gh_links_commit=args.gh_links_commit,
+        conf_defines=args.conf_defines,
     )
     doc_env.setup()
     doc_env.do(args.actions, open_result=args.open)

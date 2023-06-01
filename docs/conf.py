@@ -4,8 +4,9 @@
 # list see the documentation:
 # https://www.sphinx-doc.org/en/master/usage/configuration.html
 
-import re
 import sys
+import os
+import re
 from pathlib import Path
 
 docs_path = Path(__file__).parent
@@ -117,9 +118,9 @@ linkcheck_ignore = [
 # release notes.
 markdown_http_base = rtd_base
 if is_release:
-    markdown_http_base += version_info.tag
+    markdown_http_base += version_info.tag.lower()
 else:
-    markdown_http_base += github_main_branch
+    markdown_http_base += os.getenv('MD_RTD_BRANCH', github_main_branch)
 markdown_target_ext = '.html'
 
 

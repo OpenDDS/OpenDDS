@@ -2,6 +2,8 @@
 # Based on the builtin RST Domain in Sphinx
 # Pass -vv to sphinx-build to get it to log the directives it's getting.
 
+from __future__ import annotations
+
 import sys
 import re
 from typing import Any, Iterator, cast
