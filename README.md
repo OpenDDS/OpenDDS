@@ -83,47 +83,23 @@ formal/2019-04-03 (version 2.3)](https://www.omg.org/spec/DDSI-RTPS/2.3).  See
 the OpenDDS Developer's Guide and the file [docs/design/RTPS](docs/design/RTPS)
 for more details on RTPS.
 
-See the [Developer's Guide](http://download.objectcomputing.com/OpenDDS) for
+See the [Developer's Guide](https://opendds.readthedocs.io/en/latest-release/building/introduction.html) for
 information on OpenDDS compliance with the DDS specification. If you would like
-to contribute a feature or sponsor the developers to add a feature  please see
+to contribute a feature or sponsor the developers to add a feature please see
 the Support section above for contact information.
 
 ## Dependencies
 
 These are just the required dependencies. For a complete detailed list of
 dependencies, including optional ones, see
-https://opendds.readthedocs.io/en/latest-release/building/dependencies.html.
+https://opendds.readthedocs.io/en/master/building/dependencies.html.
 
 ### ACE/TAO
 
 OpenDDS requires TAO for both IDL compilation as well as interaction with the
 DCPSInfoRepo. ACE is also required, but it is always included with TAO. If you
-will be using the `configure` script for OpenDDS (see
-https://opendds.readthedocs.io/en/latest-release/building/dependencies.html
-for details), you do not need to download TAO
+will be using the `configure` script for OpenDDS, you do not need to download TAO
 first -- the `configure` script will download it for you.
-
-There are two distributions of ACE/TAO that can be used with OpenDDS:
-
-* DOC Group ACE 6.5.19 / TAO 2.5.19 or later in the ACE 6.x / TAO 2.x series
-  * When using the configure script, DOC Group ACE/TAO can be downloaded using
-    one of these arguments:
-    * `--doc-group` for the latest release.  This is the default when
-      using the configure script.
-    * `--ace-github-latest` to use the `ace6tao2` branch of ACE/TAO as is. This
-      also downloads the `master` branch of MPC as is.
-  * Can be manually downloaded from:
-    * https://github.com/DOCGroup/ACE_TAO/releases/tag/ACE%2BTAO-6_5_19
-* DOC Group ACE 7.1.0 / TAO 3.1.0 or later in the ACE 7.x / TAO 3.x series.
-  This distribution requires a C++14 capable compiler
-  * When using the configure script, DOC Group ACE/TAO can be downloaded using:
-    * `--doc-group3` for the latest release
-  * Can be manually downloaded from:
-    * https://github.com/DOCGroup/ACE_TAO/releases/tag/ACE%2BTAO-7_1_0
-
-The TAO Developer's Guide book can be requested for free from
-https://objectcomputing.com/products/tao/tao-developers-guide and the CORBA Programmers
-Guide can be downloaded for free from https://www.remedy.nl/opensource/corbapg.html.
 
 ### Perl
 

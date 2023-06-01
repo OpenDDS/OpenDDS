@@ -34,10 +34,30 @@ MPC is the build system used by OpenDDS, used to configure the build and generat
 
 The official repository is hosted on Github at `DOCGroup/MPC <https://github.com/DOCGroup/MPC>`__.
 
+ACE/TAO
+=======
+
+The DOC Group repository for ACE/TAO is hosted on Github at `DOCGroup/ACE_TAO <https://github.com/DOCGroup/ACE_TAO>`__.
+
+There are two release series of ACE/TAO that are officially supported by OpenDDS:
+
+DOC Group ACE 6.5/TAO 2.5
+  The configure script will download this version (|ace6tao2_version|) by default.
+
+  Pass ``--ace-github-latest`` to the configure script to clone the ``ace6tao2`` branch of ACE/TAO as is.
+  This also clones the ``master`` branch of MPC as is.
+
+DOC Group ACE 7.1/TAO 3.1
+  Pass ``--doc-group3`` to the configure script to download this version (|ace7tao3_version|).
+
+  This version requires a C++14 capable compiler.
+
+Both can also be manually downloaded from https://github.com/DOCGroup/ACE_TAO/releases
+
 .. _dependencies-ace:
 
 ACE
-===
+---
 
 ACE is the platform abstraction layer used by OpenDDS.
 It is used both directly and through TAO. Facilities not provided by the C++ 2003 standard library, for example sockets, threads, and dynamic library loading, are provided by ACE.
@@ -64,12 +84,10 @@ Some other features OpenDDS relies on ACE for:
 - ACE provides support for platforms that have a non-standard program entry point (``main``).
   All of our ``main`` functions are ``int ACE_TMAIN(int argc, ACE_TCHAR* argv[])``.
 
-The DOC Group repository is hosted on Github at `DOCGroup/ACE_TAO <https://github.com/DOCGroup/ACE_TAO>`__, which it shares with TAO.
-
 .. _dependencies-tao:
 
 TAO
-===
+---
 
 TAO is a C++ CORBA Implementation built on ACE.
 
@@ -79,7 +97,8 @@ TAO is a C++ CORBA Implementation built on ACE.
 
   - This is the only library which depends on ``TAO_PortableServer``.
 
-The DOC Group repository is hosted on Github at `DOCGroup/ACE_TAO <https://github.com/DOCGroup/ACE_TAO>`__, which it shares with ACE.
+The TAO Developer's Guide book can be requested for free from https://objectcomputing.com/products/tao/tao-developers-guide.
+The CORBA Programmers Guide can be downloaded for free from https://www.remedy.nl/opensource/corbapg.html.
 
 *********************
 Optional Dependencies

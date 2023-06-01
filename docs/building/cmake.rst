@@ -299,7 +299,6 @@ It also can provide the following libraries from ACE/TAO:
 .. cmake:tgt:: TAO::Valuetype
   :nocontentsentry:
 
-
 Functions
 =========
 

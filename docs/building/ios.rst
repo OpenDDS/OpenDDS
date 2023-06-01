@@ -89,9 +89,9 @@ Pass ``--host-tools-only`` to the configure script to generate static host tools
 If you want to just the minimum needed for host OpenDDS tools and get rid of the rest of the source files, you can.
 These are the binaries that make up the OpenDDS host tools:
 
--  ``$HOST_DDS/bin/opendds_idl``
--  ``$HOST_DDS/ACE_TAO/bin/ace_gperf``
--  ``$HOST_DDS/ACE_TAO/bin/tao_idl``
+- ``$HOST_DDS/bin/opendds_idl``
+- ``$HOST_DDS/ACE_TAO/bin/ace_gperf``
+- ``$HOST_DDS/ACE_TAO/bin/tao_idl``
 
 These files can be separated from the rest of the OpenDDS and ACE/TAO source trees, but the directory structure must be kept.
 To use these to build OpenDDS for iOS, pass ``--host-tools $HOST_DDS`` to the configure script.

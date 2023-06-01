@@ -9,6 +9,9 @@ import os
 import re
 from pathlib import Path
 
+from docutils.transforms import Transform
+from docutils import nodes
+
 docs_path = Path(__file__).parent
 opendds_root_path = docs_path.parent
 ext = (docs_path / 'sphinx_extensions').resolve()
@@ -21,9 +24,28 @@ from version_info import VersionInfo
 
 # Custom Values ---------------------------------------------------------------
 
+class GlobalSubstitutions(Transform):
+    default_priority = 200
+
+    def apply(self):
+        config = self.document.settings.env.config
+        global_substitutions = config['global_substitutions']
+        to_handle = set(global_substitutions.keys()) - set(self.document.substitution_defs)
+        for ref in self.document.traverse(nodes.substitution_reference):
+            refname = ref['refname']
+            if refname in to_handle:
+                try:
+                    text = str(global_substitutions[refname])
+                    ref.replace_self(nodes.Text(text, text))
+                except:
+                    pass
+
+
 def setup(app):
+    app.add_config_value('global_substitutions', vars(version_info), True)
     app.add_config_value('is_release', False, True)
     app.add_lexer('mpc', MpcLexer)
+    app.add_transform(GlobalSubstitutions)
 
 
 # -- Project information -----------------------------------------------------
@@ -48,6 +70,8 @@ release = version_info.version
 is_release = version_info.is_release
 if is_release:
     github_links_release_tag = version_info.tag
+ace6tao2_version = version_info.ace6tao2_version
+ace7tao3_version = version_info.ace7tao3_version
 
 # Generate news for all releases
 with (docs_path / 'news.rst').open('w') as f:
@@ -72,6 +96,7 @@ extensions = [
     # Official ones
     'sphinx.ext.ifconfig',
     'sphinx.ext.todo',
+    'sphinx.ext.intersphinx',
 
     # Other ones
     'sphinx_copybutton',
@@ -109,6 +134,10 @@ linkcheck_ignore = [
     r'^https?://docs\.github\.com/.*$',
 ]
 
+intersphinx_mapping = {
+    'sphinx': ('https://www.sphinx-doc.org/en/master', None),
+    'cmake': ('https://cmake.org/cmake/help/latest', None),
+}
 
 # -- Options for Markdown output ---------------------------------------------
 # This builder is just used to generate the release notes for GitHub
