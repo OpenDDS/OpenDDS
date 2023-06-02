@@ -42,6 +42,7 @@ class GlobalSubstitutions(Transform):
 
 
 def setup(app):
+    print('version_info', type(version_info), repr(version_info))
     app.add_config_value('global_substitutions', vars(version_info), True)
     app.add_config_value('is_release', False, True)
     app.add_lexer('mpc', MpcLexer)
