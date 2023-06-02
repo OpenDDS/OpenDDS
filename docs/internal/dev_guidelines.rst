@@ -92,12 +92,13 @@ Lint Script
 ***********
 
 The :ghfile:`lint script <tools/scripts/lint.pl>` is a Perl script that is run on every PR.
-It checks for some mistakes both in coding and style.
-See the default checks by running ``./tools/scripts/lint.pl --list``.
+It checks for mistakes in both coding and style.
 It can also be run locally to check for issues before committing.
-``./tools/scripts/lint.pl --try-fix`` will try to fix some of those issues.
+If it is ran without arguments it does the default set of checks and also runs ACE's ``fuzz.pl`` if available.
+To see a list of the default checks with descriptions, run the script with ``--list``.
+Passing ``--try-fix`` will try to fix some of those issues.
 The script also has ways to skip some or all checks for single lines or whole files.
-See ``./tools/scripts/lint.pl --help`` for more information.
+Pass ``--help`` for more information.
 
 *************
 Documentation
