@@ -1,4 +1,4 @@
-.. news-prs: 4122 4133 4135
+.. news-prs: 4122 4133 4135 4144
 .. news-start-section: Additions
 - Added ``encode_to_string``, ``encode_to_bytes``, ``decode_from_string``, and ``decode_from_bytes`` to ``TypeSupport``.
 
