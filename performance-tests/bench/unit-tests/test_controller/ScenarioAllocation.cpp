@@ -1,6 +1,8 @@
-#include "../ScenarioManager.h"
+#include "ScenarioManager.h"
 
 #include <gtest/gtest.h>
+
+namespace {
 
 DdsEntities dds_entities;
 ScenarioManager scenario_manager("", "", ScenarioOverrides(), dds_entities);
@@ -123,8 +125,4 @@ TEST_F(AllocationTest, NonexclusiveAllocFailure)
                std::runtime_error);
 }
 
-int main(int argc, char* argv[])
-{
-  ::testing::InitGoogleTest(&argc, argv);
-  return RUN_ALL_TESTS();
 }

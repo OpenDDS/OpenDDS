@@ -9,7 +9,9 @@ use lib "$ACE_ROOT/bin";
 use PerlDDS::Run_Test;
 use strict;
 
+PerlDDS::add_lib_path('../lib');
+
 my $test = new PerlDDS::TestFramework();
-$test->process('test', 'Unit_Tests_ScenarioAllocationTest');
+$test->process('test', 'Bench_Unit_Tests');
 $test->start_process('test');
 exit $test->finish(60);
