@@ -42,8 +42,7 @@ class GlobalSubstitutions(Transform):
 
 
 def setup(app):
-    print('version_info', type(version_info), repr(version_info))
-    app.add_config_value('global_substitutions', vars(version_info), True)
+    app.add_config_value('global_substitutions', vars(opendds_version_info), True)
     app.add_config_value('is_release', False, True)
     app.add_lexer('mpc', MpcLexer)
     app.add_transform(GlobalSubstitutions)
@@ -66,13 +65,13 @@ github_repo = 'https://github.com/' + github_links_repo
 rtd_base = 'https://opendds.readthedocs.io/en/'
 
 # Get Version Info
-version_info = VersionInfo()
-release = version_info.version
-is_release = version_info.is_release
+opendds_version_info = VersionInfo()
+release = opendds_version_info.version
+is_release = opendds_version_info.is_release
 if is_release:
-    github_links_release_tag = version_info.tag
-ace6tao2_version = version_info.ace6tao2_version
-ace7tao3_version = version_info.ace7tao3_version
+    github_links_release_tag = opendds_version_info.tag
+ace6tao2_version = opendds_version_info.ace6tao2_version
+ace7tao3_version = opendds_version_info.ace7tao3_version
 
 # Generate news for all releases
 with (docs_path / 'news.rst').open('w') as f:
@@ -148,7 +147,7 @@ intersphinx_mapping = {
 # release notes.
 markdown_http_base = rtd_base
 if is_release:
-    markdown_http_base += version_info.tag.lower()
+    markdown_http_base += opendds_version_info.tag.lower()
 else:
     markdown_http_base += os.getenv('MD_RTD_BRANCH', github_main_branch)
 markdown_target_ext = '.html'
