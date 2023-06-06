@@ -2412,20 +2412,6 @@ The following table summarizes the transport configuration options that are comm
 
      - none
 
-   * - ``queue_messages_per_pool=n``
-
-     - When backpressure is detected, messages to be sent are queued.
-       When the message queue must grow, it grows by this number.
-
-     - ``10``
-
-   * - ``queue_initial_pools=n``
-
-     - The initial number of pools for the backpressure queue.
-       The default settings of the two backpressure queue values preallocate space for 50 messages (5 pools of 10 messages).
-
-     - ``5``
-
    * - ``max_packet_size=n``
 
      - The maximum size of a transport packet, including its transport header, sample header, and sample data.
@@ -2460,6 +2446,12 @@ The following table summarizes the transport configuration options that are comm
      - ``10000``
 
        ``(10 sec)``
+
+   * - ``datalink_control_chunks=n``
+
+     - The number of chunks used to size allocators for transport control samples.
+
+     - ``32``
 
    * - ``receive_preallocated_message_blocks=n``
 

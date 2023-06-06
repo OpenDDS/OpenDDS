@@ -6,6 +6,56 @@
 
 using namespace OpenDDS::DCPS;
 
+TEST(dds_DCPS_ConfigPair, ctor)
+{
+  {
+    ConfigPair cp("", "value");
+    EXPECT_EQ(cp.key(), "");
+    EXPECT_EQ(cp.value(), "value");
+  }
+
+  {
+    ConfigPair cp("^", "value");
+    EXPECT_EQ(cp.key(), "");
+    EXPECT_EQ(cp.value(), "value");
+  }
+
+  {
+    ConfigPair cp("^&*", "value");
+    EXPECT_EQ(cp.key(), "");
+    EXPECT_EQ(cp.value(), "value");
+  }
+
+  {
+    ConfigPair cp("~!abc.123__CamelCase/CAMELCase#$%", "value");
+    EXPECT_EQ(cp.key(), "ABC_123_CAMEL_CASE_CAMEL_CASE");
+    EXPECT_EQ(cp.value(), "value");
+  }
+
+  {
+    ConfigPair cp("CamelCase", "value");
+    EXPECT_EQ(cp.key(), "CAMEL_CASE");
+    EXPECT_EQ(cp.value(), "value");
+  }
+
+  {
+    ConfigPair cp("##CamelCase##", "value");
+    EXPECT_EQ(cp.key(), "CAMEL_CASE");
+    EXPECT_EQ(cp.value(), "value");
+  }
+}
+
+TEST(dds_DCPS_ConfigPair, key_has_prefix)
+{
+  ConfigPair cp("key", "value");
+  EXPECT_TRUE(cp.key_has_prefix(""));
+  EXPECT_TRUE(cp.key_has_prefix("k"));
+  EXPECT_TRUE(cp.key_has_prefix("ke"));
+  EXPECT_TRUE(cp.key_has_prefix("key"));
+  EXPECT_FALSE(cp.key_has_prefix("keya"));
+  EXPECT_FALSE(cp.key_has_prefix("a"));
+}
+
 TEST(dds_DCPS_ConfigStoreImpl, has)
 {
   ConfigStoreImpl store;
@@ -162,4 +212,18 @@ TEST(dds_DCPS_ConfigStoreImpl, connect_disconnect)
     }
   }
   EXPECT_FALSE(found_it);
+}
+
+TEST(dds_DCPS_ConfigStoreImpl, contains_prefix)
+{
+  ConfigStoreImpl store;
+  ConfigReader_rch reader = make_rch<ConfigReader>(store.datareader_qos());
+  store.connect(reader);
+
+  store.set("key", "value");
+  EXPECT_TRUE(ConfigStoreImpl::contains_prefix(reader, "ke"));
+  store.set("key", "value");
+  EXPECT_FALSE(ConfigStoreImpl::contains_prefix(reader, "notkey"));
+
+  store.disconnect(reader);
 }

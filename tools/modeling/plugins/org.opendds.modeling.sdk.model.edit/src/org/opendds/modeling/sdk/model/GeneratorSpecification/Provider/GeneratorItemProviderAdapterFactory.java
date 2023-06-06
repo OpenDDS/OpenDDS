@@ -349,52 +349,6 @@ public class GeneratorItemProviderAdapterFactory extends GeneratorAdapterFactory
 	}
 
 	/**
-	 * This keeps track of the one adapter used for all {@link org.opendds.modeling.sdk.model.GeneratorSpecification.QueueMessagesPerPool} instances.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @generated
-	 */
-	protected QueueMessagesPerPoolItemProvider queueMessagesPerPoolItemProvider;
-
-	/**
-	 * This creates an adapter for a {@link org.opendds.modeling.sdk.model.GeneratorSpecification.QueueMessagesPerPool}.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @generated
-	 */
-	@Override
-	public Adapter createQueueMessagesPerPoolAdapter() {
-		if (queueMessagesPerPoolItemProvider == null) {
-			queueMessagesPerPoolItemProvider = new QueueMessagesPerPoolItemProvider(this);
-		}
-
-		return queueMessagesPerPoolItemProvider;
-	}
-
-	/**
-	 * This keeps track of the one adapter used for all {@link org.opendds.modeling.sdk.model.GeneratorSpecification.QueueInitialPool} instances.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @generated
-	 */
-	protected QueueInitialPoolItemProvider queueInitialPoolItemProvider;
-
-	/**
-	 * This creates an adapter for a {@link org.opendds.modeling.sdk.model.GeneratorSpecification.QueueInitialPool}.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @generated
-	 */
-	@Override
-	public Adapter createQueueInitialPoolAdapter() {
-		if (queueInitialPoolItemProvider == null) {
-			queueInitialPoolItemProvider = new QueueInitialPoolItemProvider(this);
-		}
-
-		return queueInitialPoolItemProvider;
-	}
-
-	/**
 	 * This keeps track of the one adapter used for all {@link org.opendds.modeling.sdk.model.GeneratorSpecification.MaxPacketSize} instances.
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->

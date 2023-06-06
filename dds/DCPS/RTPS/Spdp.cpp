@@ -403,12 +403,13 @@ Spdp::shutdown()
   }
 #endif
 
-  // ensure sedp's task queue is drained before data members are being
-  // deleted
+  // Clean up.
+  tport_->close(sedp_->reactor_task());
+
+  // Reactor task and job queue are gone.
   sedp_->shutdown();
 
   // release lock for reset of event handler, which may delete transport
-  tport_->close(sedp_->reactor_task());
   tport_.reset();
   {
     ACE_GUARD(ACE_Thread_Mutex, g, lock_);
@@ -1829,7 +1830,7 @@ Spdp::process_handshake_resends(const DCPS::MonotonicTimePoint& now)
       if (pit->second.have_auth_req_msg_) {
         // Send the SPDP announcement in case it got lost.
         tport_->write_i(pit->first, pit->second.last_recv_address_, SpdpTransport::SEND_RELAY | SpdpTransport::SEND_DIRECT);
-        if (sedp_->transport_inst()->count_messages()) {
+        if (tport_->transport_statistics_.count_messages()) {
           ++tport_->transport_statistics_.writer_resend_count[make_id(guid_, ENTITYID_P2P_BUILTIN_PARTICIPANT_STATELESS_WRITER)];
         }
         if (sedp_->write_stateless_message(pit->second.auth_req_msg_, reader) != DDS::RETCODE_OK) {
@@ -1846,7 +1847,7 @@ Spdp::process_handshake_resends(const DCPS::MonotonicTimePoint& now)
         }
       }
       if (pit->second.have_handshake_msg_) {
-        if (sedp_->transport_inst()->count_messages()) {
+        if (tport_->transport_statistics_.count_messages()) {
           ++tport_->transport_statistics_.writer_resend_count[make_id(guid_, ENTITYID_P2P_BUILTIN_PARTICIPANT_STATELESS_WRITER)];
         }
         if (sedp_->write_stateless_message(pit->second.handshake_msg_, reader) != DDS::RETCODE_OK) {
@@ -2414,6 +2415,10 @@ Spdp::SpdpTransport::open(const DCPS::ReactorTask_rch& reactor_task,
   DCPS::RcHandle<Spdp> outer = outer_.lock();
   if (!outer) return;
 
+  DCPS::ConfigListener::job_queue(job_queue);
+  config_reader_ = DCPS::make_rch<DCPS::ConfigReader>(DCPS::ConfigStoreImpl::datareader_qos(), rchandle_from(this));
+  TheServiceParticipant->config_store()->connect(config_reader_);
+
 #ifdef OPENDDS_SECURITY
   // Add the endpoint before any sending and receiving occurs.
   DCPS::WeakRcHandle<ICE::Endpoint> endpoint = get_ice_endpoint();
@@ -2469,7 +2474,7 @@ Spdp::SpdpTransport::open(const DCPS::ReactorTask_rch& reactor_task,
   }
 #endif /* DDS_HAS_MINIMUM_BIT */
 
-  this->job_queue(job_queue);
+  DCPS::InternalDataReaderListener<DCPS::NetworkInterfaceAddress>::job_queue(job_queue);
   network_interface_address_reader_ = DCPS::make_rch<DCPS::InternalDataReader<DCPS::NetworkInterfaceAddress> >(DCPS::DataReaderQosBuilder().reliability_reliable().durability_transient_local(), rchandle_from(this));
   TheServiceParticipant->network_interface_address_topic()->connect(network_interface_address_reader_);
 }
@@ -2653,6 +2658,10 @@ Spdp::SpdpTransport::close(const DCPS::ReactorTask_rch& reactor_task)
   reactor->remove_handler(multicast_ipv6_socket_.get_handle(), mask);
   reactor->remove_handler(unicast_ipv6_socket_.get_handle(), mask);
 #endif
+
+  if (config_reader_) {
+    TheServiceParticipant->config_store()->disconnect(config_reader_);
+  }
 }
 
 void
@@ -2924,18 +2933,18 @@ Spdp::SpdpTransport::send(const ACE_INET_Addr& addr, bool relay)
   if (!outer) return -1;
 
 #ifdef OPENDDS_TESTING_FEATURES
-  if (outer->sedp_->transport_inst()->should_drop(wbuff_.length())) {
+  if (message_dropper_.should_drop(wbuff_.length())) {
     return wbuff_.length();
   }
 #endif
 
   const ACE_SOCK_Dgram& socket = choose_send_socket(addr);
   const ssize_t res = socket.send(wbuff_.rd_ptr(), wbuff_.length(), addr);
-  if (outer->sedp_->transport_inst()->count_messages()) {
+  if (transport_statistics_.count_messages()) {
     ++transport_statistics_.writer_resend_count[make_id(outer->guid_, ENTITYID_SPDP_BUILTIN_PARTICIPANT_WRITER)];
   }
   if (res < 0) {
-    if (outer->sedp_->transport_inst()->count_messages()) {
+    if (transport_statistics_.count_messages()) {
       const DCPS::InternalMessageCountKey key(DCPS::NetworkAddress(addr), DCPS::MCK_RTPS, relay);
       transport_statistics_.message_count[key].send_fail(wbuff_.length());
     }
@@ -2952,7 +2961,7 @@ Spdp::SpdpTransport::send(const ACE_INET_Addr& addr, bool relay)
       network_is_unreachable_ = true;
     }
   } else {
-    if (outer->sedp_->transport_inst()->count_messages()) {
+    if (transport_statistics_.count_messages()) {
       const DCPS::InternalMessageCountKey key(DCPS::NetworkAddress(addr), DCPS::MCK_RTPS, relay);
       transport_statistics_.message_count[key].send(wbuff_.length());
     }
@@ -3066,7 +3075,7 @@ Spdp::SpdpTransport::handle_input(ACE_HANDLE h)
       return 0;
     }
 
-    if (outer->sedp_->transport_inst()->count_messages()) {
+    if (transport_statistics_.count_messages()) {
       const DCPS::InternalMessageCountKey key(DCPS::NetworkAddress(remote), DCPS::MCK_RTPS, from_relay);
       ACE_GUARD_RETURN(ACE_Thread_Mutex, g, outer->lock_, -1);
       transport_statistics_.message_count[key].recv(bytes);
@@ -3210,7 +3219,7 @@ Spdp::SpdpTransport::handle_input(ACE_HANDLE h)
   STUN::Message message;
   message.block = &buff_;
   if (serializer >> message) {
-    if (outer->sedp_->transport_inst()->count_messages()) {
+    if (transport_statistics_.count_messages()) {
       const DCPS::InternalMessageCountKey key(DCPS::NetworkAddress(remote), DCPS::MCK_STUN, from_relay);
       ACE_GUARD_RETURN(ACE_Thread_Mutex, g, outer->lock_, -1);
       transport_statistics_.message_count[key].recv(bytes);
@@ -3314,7 +3323,7 @@ Spdp::SendStun::execute()
   serializer << message_;
 
 #ifdef OPENDDS_TESTING_FEATURES
-  if (outer->sedp_->transport_inst()->should_drop(tport->wbuff_.length())) {
+  if (tport->message_dropper_.should_drop(tport->wbuff_.length())) {
     return;
   }
 #endif
@@ -3322,7 +3331,7 @@ Spdp::SendStun::execute()
   const ACE_SOCK_Dgram& socket = tport->choose_send_socket(address_);
   const ssize_t res = socket.send(tport->wbuff_.rd_ptr(), tport->wbuff_.length(), address_);
   if (res < 0) {
-    if (outer->sedp_->transport_inst()->count_messages()) {
+    if (tport->transport_statistics_.count_messages()) {
       // Have the lock.
       const DCPS::InternalMessageCountKey key(DCPS::NetworkAddress(address_), DCPS::MCK_STUN, address_ == outer->config_->spdp_stun_server_address());
       tport->transport_statistics_.message_count[key].send_fail(tport->wbuff_.length());
@@ -3340,7 +3349,7 @@ Spdp::SendStun::execute()
       tport->network_is_unreachable_ = true;
     }
   } else {
-    if (outer->sedp_->transport_inst()->count_messages()) {
+    if (tport->transport_statistics_.count_messages()) {
       // Have the lock.
       const DCPS::InternalMessageCountKey key(DCPS::NetworkAddress(address_), DCPS::MCK_STUN, address_ == outer->config_->spdp_stun_server_address());
       tport->transport_statistics_.message_count[key].send(tport->wbuff_.length());
@@ -3632,6 +3641,27 @@ void Spdp::SpdpTransport::on_data_available(DCPS::RcHandle<DCPS::InternalDataRea
 #endif
                                  )) {
     shorten_local_sender_delay_i();
+  }
+}
+
+void Spdp::SpdpTransport::on_data_available(DCPS::ConfigReader_rch)
+{
+  DCPS::RcHandle<Spdp> outer = outer_.lock();
+  if (!outer) return;
+
+  ACE_GUARD(ACE_Thread_Mutex, g, outer->lock_);
+  if (outer->shutting_down()) {
+    return;
+  }
+
+  if (outer->shutdown_flag_) {
+    return;
+  }
+
+  const String& config_prefix = outer->sedp_->transport_inst()->config_prefix();
+  if (DCPS::ConfigStoreImpl::contains_prefix(config_reader_, config_prefix)) {
+    message_dropper_.reload(TheServiceParticipant->config_store(), config_prefix);
+    transport_statistics_.reload(TheServiceParticipant->config_store(), config_prefix);
   }
 }
 

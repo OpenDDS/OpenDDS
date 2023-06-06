@@ -14,6 +14,8 @@
 
 #include "dds/DdsDcpsInfrastructureC.h"
 
+#include <cstring>
+
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
@@ -31,7 +33,7 @@ public:
 
   ConfigPair(const String& key,
              const String& value)
-    : key_(key)
+    : key_(canonicalize(key))
     , value_(value)
   {}
 
@@ -47,6 +49,18 @@ public:
 
   const String& key() const { return key_; }
   const String& value() const { return value_; }
+
+  bool key_has_prefix(const String& prefix) const
+  {
+    const String p = canonicalize(prefix);
+    if (p.size() <= key_.size()) {
+      return std::strncmp(p.data(), key_.data(), p.size()) == 0;
+    }
+
+    return false;
+  }
+
+  static String canonicalize(const String& key);
 
 private:
   String key_;
@@ -123,6 +137,9 @@ public:
   NetworkAddress get(const char* key,
                      const NetworkAddress& value) const;
 
+  static DDS::DataWriterQos datawriter_qos();
+  static DDS::DataReaderQos datareader_qos();
+
   void connect(ConfigReader_rch config_reader)
   {
     config_topic_->connect(config_reader);
@@ -132,6 +149,10 @@ public:
   {
     config_topic_->disconnect(config_reader);
   }
+
+  // Takes all samples from reader and returns true if any have the given prefix.
+  static bool contains_prefix(ConfigReader_rch reader,
+                              const String& prefix);
 
 private:
   ConfigTopic_rch config_topic_;

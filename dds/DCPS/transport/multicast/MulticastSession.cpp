@@ -36,7 +36,7 @@ MulticastSession::MulticastSession(RcHandle<ReactorInterceptor> interceptor,
   , reverse_start_lock_(start_lock_)
   , started_(false)
   , active_(true)
-  , reassembly_(link->config()->fragment_reassembly_timeout_)
+  , reassembly_(link->config()->fragment_reassembly_timeout())
   , acked_(false)
   , syn_watchdog_(make_rch<Sporadic>(TheServiceParticipant->time_source(),
                                      interceptor,

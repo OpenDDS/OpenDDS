@@ -287,7 +287,7 @@ InfoRepoDiscovery::bit_config()
     // Use a static cast to avoid dependency on the Tcp library
     TcpInst_rch tcp_inst = static_rchandle_cast<TcpInst>(inst);
 
-    tcp_inst->datalink_release_delay_ = 0;
+    tcp_inst->datalink_release_delay(0);
     if (!bit_transport_ip_.empty()) {
       tcp_inst->local_address(bit_transport_port_,
                               bit_transport_ip_.c_str());

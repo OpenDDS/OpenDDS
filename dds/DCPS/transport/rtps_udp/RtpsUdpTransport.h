@@ -19,6 +19,7 @@
 #include <dds/DCPS/transport/framework/TransportClient.h>
 #include <dds/DCPS/transport/framework/TransportImpl.h>
 #include <dds/DCPS/transport/framework/TransportStatistics.h>
+#include <dds/DCPS/transport/framework/MessageDropper.h>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -27,7 +28,7 @@ namespace DCPS {
 
 class RtpsUdpInst;
 
-class OpenDDS_Rtps_Udp_Export RtpsUdpTransport : public TransportImpl {
+class OpenDDS_Rtps_Udp_Export RtpsUdpTransport : public TransportImpl, public ConfigListener {
 public:
   RtpsUdpTransport(const RtpsUdpInst_rch& inst);
   RtpsUdpInst_rch config() const;
@@ -52,6 +53,8 @@ public:
 
   void rtps_relay_address_change();
   void append_transport_statistics(TransportStatisticsSequence& seq);
+
+  const MessageDropper message_dropper() const { return message_dropper_; }
 
 private:
   virtual AcceptConnectResult connect_datalink(const RemoteTransport& remote,
@@ -189,6 +192,11 @@ private:
 
   RcHandle<ICE::Agent> ice_agent_;
 #endif
+
+  MessageDropper message_dropper_;
+
+  ConfigReader_rch config_reader_;
+  void on_data_available(ConfigReader_rch reader);
 
   InternalTransportStatistics transport_statistics_;
   ACE_Thread_Mutex transport_statistics_mutex_;

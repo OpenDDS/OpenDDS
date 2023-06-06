@@ -597,6 +597,11 @@ public:
   unsigned int printer_value_writer_indent() const;
   void printer_value_writer_indent(unsigned int value);
 
+  RcHandle<ConfigStoreImpl> config_store() const
+  {
+    return config_store_;
+  }
+
 private:
 
   /// Initialize default qos.
@@ -803,7 +808,7 @@ private:
 
   RcHandle<InternalTopic<NetworkInterfaceAddress> > network_interface_address_topic_;
 
-  mutable ConfigStoreImpl config_store_;
+  RcHandle<ConfigStoreImpl> config_store_;
   ConfigReader_rch config_reader_;
   ConfigReaderListener_rch config_reader_listener_;
 

@@ -75,7 +75,7 @@ int parse_args(int argc, ACE_TCHAR* argv[])
       ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: parse_args: too many instances on default config, using first\n"));
     }
     OpenDDS::DCPS::TransportInst_rch inst = *(config->instances_.begin());
-    inst->thread_per_connection_ = true;
+    inst->thread_per_connection(true);
   }
 
   return EXIT_SUCCESS;
