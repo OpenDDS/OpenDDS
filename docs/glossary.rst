@@ -103,7 +103,7 @@ Common Terms
   ``mwc.pl``
   ``mpc.pl``
     A build-system that generates GNU Makefiles, Visual Studio projects, and other such files.
-    It serves the same role that CMake, Meson, and Autoconf do in other projects.
+    It serves the same role that CMake, Meson, and Automake do in other projects.
 
     See :ref:`dependencies-mpc` for more information.
 
