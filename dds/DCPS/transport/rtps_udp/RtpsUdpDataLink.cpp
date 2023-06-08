@@ -3187,15 +3187,22 @@ RtpsUdpDataLink::RtpsWriter::process_acknack(const RTPS::AckNackSubmessage& ackn
 
   const ReaderInfo_rch& reader = ri->second;
   const SequenceNumber max_sn = expected_max_sn(reader);
-  if (ack > max_sn) {
-    if (transport_debug.log_dropped_messages) {
-      ACE_DEBUG((LM_DEBUG, "(%P|%t) {transport_debug.log_dropped_messages} "
-                 "RtpsUdpDataLink::RtpsWriter::process_acknack: %C -> %C "
-                 "Received sequence number (%q) > expected max sequence number (%q)\n",
-                 LogGuid(src).c_str(), LogGuid(id_).c_str(), ack.getValue(), max_sn.getValue()));
+
+#ifdef OPENDDS_SECURITY
+  if (!is_pvs_writer_) {
+#endif
+    if (ack > max_sn) {
+      if (transport_debug.log_dropped_messages) {
+        ACE_DEBUG((LM_DEBUG, "(%P|%t) {transport_debug.log_dropped_messages} "
+                   "RtpsUdpDataLink::RtpsWriter::process_acknack: %C -> %C "
+                   "Received sequence number (%q) > expected max sequence number (%q)\n",
+                   LogGuid(src).c_str(), LogGuid(id_).c_str(), ack.getValue(), max_sn.getValue()));
+      }
+      return;
     }
-    return;
+#ifdef OPENDDS_SECURITY
   }
+#endif
 
   SequenceNumber previous_acked_sn = reader->acked_sn();
   const bool count_is_not_zero = acknack.count.value != 0;
@@ -3766,6 +3773,9 @@ SequenceNumber
 RtpsUdpDataLink::RtpsWriter::expected_max_sn(const ReaderInfo_rch& reader) const
 {
   ACE_UNUSED_ARG(reader);
+  ACE_DEBUG((LM_DEBUG, "(%P|%t) RtpsUdpDataLink::RtpsWriter::expected_max_sn: "
+             "reader->max_pvs_sn_=%q, max_sn_=%q\n",
+             reader->max_pvs_sn_.getValue(), max_sn_.getValue()));
 #ifdef OPENDDS_SECURITY
   if (is_pvs_writer_) {
     return reader->max_pvs_sn_;
