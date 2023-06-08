@@ -76,6 +76,11 @@ public:
   bool is_uniquelocal() const; // IPv6 only (only one routing domain)
   bool is_sitelocal() const; // IPv6 only (deprecated)
 
+  static const NetworkAddress default_IPV4;
+#ifdef ACE_HAS_IPV6
+  static const NetworkAddress default_IPV6;
+#endif
+
 private:
   union ip46
   {

@@ -17,13 +17,14 @@
 #include "TransportImpl_rch.h"
 #include "TransportImpl.h"
 
-#include <dds/DCPS/dcps_export.h>
-#include <dds/DCPS/RcObject.h>
-#include <dds/DCPS/PoolAllocator.h>
-#include <dds/DCPS/ReactorTask_rch.h>
+#include <dds/DCPS/ConfigStoreImpl.h>
 #include <dds/DCPS/EventDispatcher.h>
 #include <dds/DCPS/NetworkAddress.h>
+#include <dds/DCPS/PoolAllocator.h>
+#include <dds/DCPS/RcObject.h>
+#include <dds/DCPS/ReactorTask_rch.h>
 #include <dds/DCPS/TimeDuration.h>
+#include <dds/DCPS/dcps_export.h>
 
 #include <dds/DdsDcpsInfoUtilsC.h>
 #include <dds/OpenddsDcpsExtC.h>
@@ -69,7 +70,10 @@ public:
 
   const String& name() const { return name_; }
   const String& config_prefix() const { return config_prefix_; }
-  String config_key(const String& key) const;
+  String config_key(const String& key) const
+  {
+    return ConfigPair::canonicalize(config_prefix_ + "_" + key);
+  }
 
   /// Overwrite the default configurations with the configuration from the
   /// given section in the ACE_Configuration_Heap object.
@@ -148,8 +152,6 @@ public:
   virtual void get_last_recv_locator(const GUID_t& /*remote_id*/,
                                      TransportLocator& /*locators*/) {}
 
-  virtual void rtps_relay_address_change() {}
-
   ReactorTask_rch reactor_task();
   EventDispatcher_rch event_dispatcher();
 
@@ -226,9 +228,5 @@ private:
 } // namespace OpenDDS
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
-
-#if defined(__ACE_INLINE__)
-#include "TransportInst.inl"
-#endif /* __ACE_INLINE__ */
 
 #endif

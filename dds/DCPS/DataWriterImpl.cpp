@@ -59,6 +59,7 @@ DataWriterImpl::DataWriterImpl()
   : data_dropped_count_(0)
   , data_delivered_count_(0)
   , controlTracker("DataWriterImpl")
+  , publisher_content_filter_(TheServiceParticipant->publisher_content_filter())
   , n_chunks_(TheServiceParticipant->n_chunks())
   , association_chunk_multiplier_(TheServiceParticipant->association_chunk_multiplier())
   , qos_(TheServiceParticipant->initial_DataWriterQos())
@@ -244,7 +245,7 @@ DataWriterImpl::add_association(const ReaderAssociation& reader,
     ACE_GUARD(ACE_Thread_Mutex, reader_info_guard, this->reader_info_lock_);
     reader_info_.insert(std::make_pair(reader.readerId,
                                        ReaderInfo(reader.filterClassName,
-                                                  TheServiceParticipant->publisher_content_filter() ? reader.filterExpression : "",
+                                                  publisher_content_filter_ ? reader.filterExpression : "",
                                                   reader.exprParams, participant_servant_,
                                                   reader.readerQos.durability.kind > DDS::VOLATILE_DURABILITY_QOS)));
   }
@@ -911,7 +912,7 @@ DataWriterImpl::update_subscription_params(const GUID_t& readerId,
     iter->second.expression_params_ = params;
 
   } else if (DCPS_debug_level > 4 &&
-             TheServiceParticipant->publisher_content_filter()) {
+             publisher_content_filter_) {
     ACE_DEBUG((LM_WARNING,
                ACE_TEXT("(%P|%t) WARNING: DataWriterImpl::update_subscription_params()")
                ACE_TEXT(" - writer: %C has no info about reader: %C\n"),
@@ -3208,7 +3209,7 @@ DDS::ReturnCode_t DataWriterImpl::write_w_timestamp(
   // list of reader GUID_ts that should not get data
   GUIDSeq_var filter_out;
 #ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
-  if (TheServiceParticipant->publisher_content_filter()) {
+  if (publisher_content_filter_) {
     ACE_GUARD_RETURN(ACE_Thread_Mutex, reader_info_guard, reader_info_lock_, DDS::RETCODE_ERROR);
     for (RepoIdToReaderInfoMap::iterator iter = reader_info_.begin(),
          end = reader_info_.end(); iter != end; ++iter) {

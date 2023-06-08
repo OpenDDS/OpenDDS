@@ -540,6 +540,8 @@ protected:
 
   ACE_Message_Block* serialize_sample(const Sample& sample);
 
+  const bool publisher_content_filter_;
+
   /// The number of chunks for the cached allocator.
   size_t n_chunks_;
 

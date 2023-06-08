@@ -196,8 +196,8 @@ public:
   void rtps_relay_only_now(bool f);
   void use_rtps_relay_now(bool f);
   void use_ice_now(bool f);
-  void sedp_rtps_relay_address(const ACE_INET_Addr& address) { sedp_->rtps_relay_address(address); }
-  void sedp_stun_server_address(const ACE_INET_Addr& address) { sedp_->stun_server_address(address); }
+  void sedp_rtps_relay_address(const DCPS::NetworkAddress& address) { sedp_->rtps_relay_address(address); }
+  void sedp_stun_server_address(const DCPS::NetworkAddress& address) { sedp_->stun_server_address(address); }
 
   BuiltinEndpointSet_t available_builtin_endpoints() const { return available_builtin_endpoints_; }
 #ifdef OPENDDS_SECURITY
