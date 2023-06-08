@@ -282,11 +282,28 @@ namespace {
   const Encoding type_lookup_encoding(Encoding::KIND_XCDR2, DCPS::ENDIAN_NATIVE);
 }
 
+RtpsDiscoveryCore::RtpsDiscoveryCore(RcHandle<RtpsDiscoveryConfig> config,
+                                     const String& transport_statistics_key)
+  : sedp_heartbeat_period_(config->sedp_heartbeat_period())
+  , spdp_rtps_relay_send_period_(config->spdp_rtps_relay_send_period())
+  , rtps_relay_only_(config->rtps_relay_only())
+  , use_rtps_relay_(config->use_rtps_relay())
+#ifdef OPENDDS_SECURITY
+  , use_ice_(config->use_ice())
+#endif
+  , spdp_rtps_relay_address_(config->spdp_rtps_relay_address())
+  , relay_spdp_task_falloff_(config->sedp_heartbeat_period())
+  , spdp_stun_server_address_(config->spdp_stun_server_address())
+  , relay_stun_task_falloff_(config->sedp_heartbeat_period())
+  , transport_statistics_(transport_statistics_key)
+{}
+
 Sedp::Sedp(const GUID_t& participant_id, Spdp& owner, ACE_Thread_Mutex& lock)
   : config_store_(make_rch<ConfigStoreImpl>(TheServiceParticipant->config_topic()))
   , spdp_(owner)
   , lock_(lock)
   , participant_id_(participant_id)
+  , participant_flags_(owner.config()->participant_flags())
   , publication_counter_(0)
   , subscription_counter_(0)
   , topic_counter_(0)
@@ -299,8 +316,6 @@ Sedp::Sedp(const GUID_t& participant_id, Spdp& owner, ACE_Thread_Mutex& lock)
 #ifdef OPENDDS_SECURITY
   , local_participant_automatic_liveliness_sn_secure_(DCPS::SequenceNumber::SEQUENCENUMBER_UNKNOWN())
   , local_participant_manual_liveliness_sn_secure_(DCPS::SequenceNumber::SEQUENCENUMBER_UNKNOWN())
-#endif
-#ifdef OPENDDS_SECURITY
   , permissions_handle_(DDS::HANDLE_NIL)
   , crypto_handle_(DDS::HANDLE_NIL)
 #endif
@@ -375,6 +390,11 @@ Sedp::Sedp(const GUID_t& participant_id, Spdp& owner, ACE_Thread_Mutex& lock)
   , publication_agent_info_listener_(DCPS::make_rch<PublicationAgentInfoListener>(ref(*this)))
   , subscription_agent_info_listener_(DCPS::make_rch<SubscriptionAgentInfoListener>(ref(*this)))
 #endif // OPENDDS_SECURITY
+  , core_(owner.config(),
+          DCPS::TransportRegistry::DEFAULT_INST_PREFIX +
+          OPENDDS_STRING("_SPDPTransportInst_") +
+          DCPS::GuidConverter(owner.guid_).uniqueParticipantId() +
+          DCPS::to_dds_string(owner.domain_))
 {}
 
 DDS::ReturnCode_t
@@ -420,7 +440,7 @@ Sedp::init(const GUID_t& guid,
     // Bind to a specific multicast group
     const u_short mc_port = disco.pb() + disco.dg() * domainId + disco.dx();
 
-    ACE_INET_Addr mc_addr = disco.default_multicast_group();
+    DCPS::NetworkAddress mc_addr = disco.default_multicast_group();
     mc_addr.set_port_number(mc_port);
     config_store_->set(transport_inst_->config_key("MULTICAST_GROUP_ADDRESS").c_str(),
                        NetworkAddress(mc_addr),
@@ -438,7 +458,7 @@ Sedp::init(const GUID_t& guid,
                      ConfigStoreImpl::Format_Required_Port,
                      ConfigStoreImpl::Kind_IPV4);
   config_store_->set(transport_inst_->config_key("ADVERTISED_ADDRESS").c_str(),
-                     NetworkAddress(disco.config()->sedp_advertised_address()),
+                     NetworkAddress(disco.config()->sedp_advertised_local_address()),
                      ConfigStoreImpl::Format_Required_Port,
                      ConfigStoreImpl::Kind_IPV4);
 #ifdef ACE_HAS_IPV6
@@ -447,7 +467,7 @@ Sedp::init(const GUID_t& guid,
                      ConfigStoreImpl::Format_Required_Port,
                      ConfigStoreImpl::Kind_IPV6);
   config_store_->set(transport_inst_->config_key("IPV6_ADVERTISED_ADDRESS").c_str(),
-                     NetworkAddress(disco.config()->ipv6_sedp_advertised_address()),
+                     NetworkAddress(disco.config()->ipv6_sedp_advertised_local_address()),
                      ConfigStoreImpl::Format_Required_Port,
                      ConfigStoreImpl::Kind_IPV6);
 #endif
@@ -466,7 +486,9 @@ Sedp::init(const GUID_t& guid,
                      disco.config()->sedp_stun_server_address(),
                      ConfigStoreImpl::Format_Required_Port,
                      ConfigStoreImpl::Kind_IPV4);
+#ifdef OPENDDS_SECURITY
   config_store_->set_boolean(transport_inst_->config_key("USE_ICE").c_str(), disco.config()->use_ice());
+#endif
 
   // Create a config
   OPENDDS_STRING config_name = DCPS::TransportRegistry::DEFAULT_INST_PREFIX +
@@ -4494,7 +4516,7 @@ Sedp::DiscoveryReader::data_received_i(const DCPS::ReceivedDataSample& sample,
     }
     const GUID_t guid = make_part_guid(sample.header_.publication_id_);
     sedp_.spdp_.process_participant_ice(data, pdata, guid);
-    sedp_.spdp_.handle_participant_data(id, pdata, DCPS::MonotonicTimePoint::now(), DCPS::SequenceNumber::ZERO(), ACE_INET_Addr(), true);
+    sedp_.spdp_.handle_participant_data(id, pdata, DCPS::MonotonicTimePoint::now(), DCPS::SequenceNumber::ZERO(), DCPS::NetworkAddress(), true);
 
 #endif
   }
@@ -4841,7 +4863,7 @@ Sedp::add_publication_i(const DCPS::GUID_t& rid,
                         LocalPublication& pub)
 {
   pub.participant_discovered_at_ = spdp_.get_participant_discovered_at();
-  pub.transport_context_ = spdp_.config()->participant_flags();
+  pub.transport_context_ = participant_flags_;
 #ifdef OPENDDS_SECURITY
   DCPS::DataWriterCallbacks_rch pl = pub.publication_.lock();
   if (pl) {
@@ -4993,7 +5015,7 @@ Sedp::add_subscription_i(const DCPS::GUID_t& rid,
                          LocalSubscription& sub)
 {
   sub.participant_discovered_at_ = spdp_.get_participant_discovered_at();
-  sub.transport_context_ = spdp_.config()->participant_flags();
+  sub.transport_context_ = participant_flags_;
 #ifdef OPENDDS_SECURITY
   DCPS::DataReaderCallbacks_rch sl = sub.subscription_.lock();
   if (sl) {
@@ -5956,8 +5978,6 @@ Sedp::use_ice_now(bool f)
   if (!f) {
     return;
   }
-
-  ACE_GUARD(ACE_Thread_Mutex, g, lock_);
 
   for (LocalPublicationIter pos = local_publications_.begin(), limit = local_publications_.end(); pos != limit; ++pos) {
     LocalPublication& pub = pos->second;

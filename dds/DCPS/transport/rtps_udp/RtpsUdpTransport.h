@@ -234,10 +234,10 @@ public:
 
 private:
   mutable ACE_Thread_Mutex mutex_;
-  TimeDuration send_delay_;
-  TimeDuration heartbeat_period_;
-  TimeDuration nak_response_delay_;
-  TimeDuration receive_address_duration_;
+  const TimeDuration send_delay_;
+  const TimeDuration heartbeat_period_;
+  const TimeDuration nak_response_delay_;
+  const TimeDuration receive_address_duration_;
   bool rtps_relay_only_;
   bool use_rtps_relay_;
   NetworkAddress rtps_relay_address_;
@@ -316,8 +316,8 @@ private:
   virtual bool connection_info_i(TransportLocator& info, ConnectionInfoFlags flags) const;
 
   void get_connection_addrs(const TransportBLOB& data,
-                            AddrSet* uc_addrs,
-                            AddrSet* mc_addrs = 0,
+                            NetworkAddressSet* uc_addrs,
+                            NetworkAddressSet* mc_addrs = 0,
                             bool* requires_inline_qos = 0,
                             unsigned int* blob_bytes_read = 0) const;
 

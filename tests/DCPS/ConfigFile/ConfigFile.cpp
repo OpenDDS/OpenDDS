@@ -201,7 +201,7 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
       TEST_CHECK(rd->d1() == 9);
       TEST_CHECK(rd->dx() == 15);
       TEST_CHECK(rd->spdp_send_addrs().size() == 1);
-      TEST_CHECK(rd->spdp_send_addrs()[0] == "host1:10001");
+      TEST_CHECK(rd->spdp_send_addrs().count(NetworkAddress("10.1.1.1:10001")) == 1);
     }
 
     {
@@ -222,11 +222,11 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
         dynamic_rchandle_cast<OpenDDS::RTPS::RtpsDiscovery>(discovery);
       TEST_CHECK(!rd.is_nil());
       TEST_CHECK(rd->spdp_send_addrs().size() == 5);
-      TEST_CHECK(rd->spdp_send_addrs()[0] == "host1:10001");
-      TEST_CHECK(rd->spdp_send_addrs()[1] == "host2:10002");
-      TEST_CHECK(rd->spdp_send_addrs()[2] == "host3:10003");
-      TEST_CHECK(rd->spdp_send_addrs()[3] == "host4:10004");
-      TEST_CHECK(rd->spdp_send_addrs()[4] == "host5:10005");
+      TEST_CHECK(rd->spdp_send_addrs().count(NetworkAddress("10.1.1.1:10001")) == 1);
+      TEST_CHECK(rd->spdp_send_addrs().count(NetworkAddress("10.2.2.2:10002")) == 1);
+      TEST_CHECK(rd->spdp_send_addrs().count(NetworkAddress("10.3.3.3:10003")) == 1);
+      TEST_CHECK(rd->spdp_send_addrs().count(NetworkAddress("10.4.4.4:10004")) == 1);
+      TEST_CHECK(rd->spdp_send_addrs().count(NetworkAddress("10.5.5.5:10005")) == 1);
     }
     {
       DDS::DomainId_t domain = 97;
