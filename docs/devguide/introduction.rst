@@ -417,7 +417,7 @@ Compliance
 OpenDDS complies with the OMG DDS and the OMG DDSI-RTPS specifications.
 Details of that compliance follows here.
 OpenDDS also implements the OMG DDS Security specification.
-See :ref:`specs` for how much OpenDDS complies with other specifications it implements.
+See :ref:`specs` for how OpenDDS complies with other specifications it implements.
 
 .. _introduction--dds-compliance:
 

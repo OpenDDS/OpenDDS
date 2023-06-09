@@ -10,7 +10,7 @@ Common Terms
   NOTE: This list isn't meant to be an all-encompassing dictionary. It's just
   meant to cover the most common terms a C++ developer who is new to OpenDDS
   might want to be familar with to use it. Parts of the API outside of the most
-  important classes shouldn't be included. Defintitions should be a few
+  important classes shouldn't be included. Definitions should be a few
   sentences at most and should link elsewhere for more information.
 
   TODO: Link to a API reference when available
