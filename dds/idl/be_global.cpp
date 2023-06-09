@@ -54,6 +54,7 @@ BE_GlobalData::BE_GlobalData()
   , generate_value_reader_writer_(true)
   , generate_xtypes_complete_(false)
   , face_ts_(false)
+  , generate_equality_(false)
   , filename_only_includes_(false)
   , sequence_suffix_("Seq")
   , language_mapping_(LANGMAP_NONE)
@@ -376,6 +377,8 @@ BE_GlobalData::parse_args(long& i, char** av)
       face_ts(true);
     } else if (0 == ACE_OS::strcasecmp(av[i], "-Gxtypes-complete")) {
       xtypes_complete(true);
+    } else if (0 == ACE_OS::strcasecmp(av[i], "-Gequality")) {
+      generate_equality(true);
     } else {
       invalid_option(av[i]);
     }

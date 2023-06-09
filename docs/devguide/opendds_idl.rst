@@ -164,6 +164,13 @@ The following table summarizes the options supported by ``opendds_idl``.
 
      - Only minimal TypeObjects are generated
 
+   * - ``-Gequality``
+
+     - Generate ``==`` and ``!=`` for structs and unions.
+       The members of the struct or union must have a type that could appear in a DDS topic and be supported by opendds_idl.
+
+     - Not generated
+
    * - ``-Lface``
 
      - Generates IDL-to-C++ mapping for FACE
