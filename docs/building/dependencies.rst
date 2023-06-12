@@ -34,6 +34,8 @@ MPC is the build system used by OpenDDS, used to configure the build and generat
 
 The official repository is hosted on Github at `DOCGroup/MPC <https://github.com/DOCGroup/MPC>`__.
 
+It is included in the release archive of ACE/TAO, which is downloaded by the configure script by default.
+
 ACE/TAO
 =======
 
@@ -50,7 +52,7 @@ DOC Group ACE 6.5/TAO 2.5
 DOC Group ACE 7.1/TAO 3.1
   Pass ``--doc-group3`` to the configure script to download this version (|ace7tao3_version|).
 
-  This version requires a C++14 capable compiler.
+  This version requires a C++14-capable compiler.
 
 Both can also be manually downloaded from https://github.com/DOCGroup/ACE_TAO/releases
 

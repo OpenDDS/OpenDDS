@@ -40,14 +40,13 @@ The following instructions show how to configure and build it:
 .. tab:: Windows
 
   Make sure the environment is setup by using ``call setenv.cmd``.
-  The following assumes Visual Studio 2017 using 64-bit architecture (adjust the CMake ``-G`` parameter if using something different).
 
   .. code:: bat
 
      cd DevGuideExamples\DCPS\Messenger
      mkdir build
      cd build
-     cmake -G "Visual Studio 15 2017 Win64" ..
+     cmake ..
      cmake --build .
      perl run_test.pl
 
@@ -512,7 +511,7 @@ These variables can be used to override default behavior of the CMake package.
 
 .. cmake:var:: OPENDDS_FILENAME_ONLY_INCLUDES
 
-  Setting this to ``TRUE`` tells OpenDDS’s IDL compiler to strip path information from ``#include`` lines in generated files.
+  Setting this to ``TRUE`` tells ``opendds_idl`` to strip path information from ``#include`` lines in generated files.
   Turning the option on can make it easier to specify build rules for IDL files that include other IDL files.
   The default for this is ``FALSE``.
 
