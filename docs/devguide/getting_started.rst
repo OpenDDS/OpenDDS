@@ -209,8 +209,7 @@ All types are nested by default in OpenDDS to reduce the code generated for type
 
   * When using MPC, add ``dcps_ts_flags += --no-default-nested`` to the project.
 
-  * When using CMake, this can be done by setting either the ``OPENDDS_DEFAULT_NESTED`` global variable to ``FALSE`` or adding ``--no-default-nested`` to the ``OPENDDS_IDL_OPTIONS`` parameter for ``opendds_target_sources``.
-    See ``$DDS_ROOT/docs/cmake.md`` in the source for more information about using OpenDDS with CMake.
+  * When using CMake, this can be done by setting either :cmake:var:`OPENDDS_DEFAULT_NESTED` to ``FALSE`` or passing ``--no-default-nested`` to :cmake:func:`opendds_target_sources(OPENDDS_IDL_OPTIONS)`.
 
 In cases where the module default is not nested, you can reverse this by using ``@nested`` or ``@nested(TRUE)`` for structures/unions and ``@default_nested`` or ``@default_nested(TRUE)`` for modules.
 NOTE: the ``@topic`` annotation doesn’t take a boolean argument, so ``@topic(FALSE)`` would cause an error in the OpenDDS IDL Compiler.
@@ -262,12 +261,12 @@ Two different build systems are supported for projects that use OpenDDS:
 
 * MPC, the “Make Project Creator” which is used to build OpenDDS itself and the majority of its included tests and examples
 
-* CMake, a build system that’s commonly used across the industry (cmake.org)
+* `CMake <https://cmake.org>`__, a build system that’s commonly used across the industry
 
 Even if you will eventually use some custom build system that’s not one of the two listed above, start by building an example OpenDDS application using one of the supported build systems and then migrate the code generator command lines, compiler options, etc., to the custom build system.
 
 The remainder of this section will assume MPC.
-For more details on using CMake, see the included documentation in the OpenDDS repository: ``docs/cmake.md``
+For more details on using CMake, see the :doc:`/building/cmake`.
 
 The code generation process is simplified when using MPC, by inheriting from the dcps base project.
 Here is the MPC file section common to both the publisher and subscriber

@@ -1,12 +1,27 @@
+:hide-toc: true
+
 #######
 OpenDDS
 #######
 
+.. toctree::
+  :hidden:
+
+  news
+  building/index
+  devguide/index
+  internal/index
+  glossary
+  genindex
+
 Welcome to the documentation for OpenDDS |release|!
+
+OpenDDS is an open-source C++ framework for exchanging data in distributed systems.
+See :ref:`introduction--what-is-opendds` for more information.
 
 .. ifconfig:: is_release
 
-    It is available :ghrelease:`for download on GitHub`.
+    OpenDDS |release| is available :ghrelease:`for download on GitHub`.
 
 .. ifconfig:: not is_release
 
@@ -17,57 +32,40 @@ Welcome to the documentation for OpenDDS |release|!
 
         You can find the documentation for the latest release `here <https://opendds.readthedocs.io/en/latest-release/>`_.
 
-.. toctree::
-  :maxdepth: 1
+Looking for the documentation for another version of OpenDDS?
+The documentation for version 3.24.0 onwards is hosted on `Read the Docs <https://readthedocs.org/projects/opendds/>`__.
+The Developer's Guide PDFs for versions before 3.24.0 are available on `GitHub <https://github.com/OpenDDS/OpenDDS/releases>`__.
+They are attached to their corresponding releases as ``OpenDDS-VERSION.pdf``.
 
-  news
+*************
+Using OpenDDS
+*************
 
-*****************
-Developer's Guide
-*****************
+:doc:`building/index`
+  How to build and install OpenDDS
 
-.. toctree::
-  :maxdepth: 2
+:ref:`introduction--what-is-opendds`
+  A brief explanation of what OpenDDS is
 
-  devguide/introduction
-  devguide/getting_started
-  devguide/quality_of_service
-  devguide/conditions_and_listeners
-  devguide/content_subscription_profile
-  devguide/built_in_topics
-  devguide/run_time_configuration
-  devguide/opendds_idl
-  devguide/the_dcps_information_repository
-  devguide/java_bindings
-  devguide/modeling_sdk
-  devguide/alternate_interfaces_to_data
-  devguide/safety_profile
-  devguide/dds_security
-  devguide/internet_enabled_rtps
-  devguide/xtypes
-  devguide/common_terms
+:ref:`introduction--dcps-overview`
+  A conceptual overview of how DDS works
 
-**********************
-Internal Documentation
-**********************
+:doc:`devguide/getting_started`
+  A tutorial on making basic OpenDDS applications
 
-This documentation is for those who want to contribute to OpenDDS and those who are just curious!
+Much more information can be found in the :doc:`devguide/index`
 
-.. toctree::
-  :maxdepth: 2
+*******************
+Other Documentation
+*******************
 
-  internal/dev_guidelines
-  internal/docs
-  internal/unit_tests
-  internal/github_actions
-  internal/running_tests
-  internal/bench
-  internal/release
+:doc:`news`
+  What are the latest changes in OpenDDS?
 
-******************
-Indices and tables
-******************
+:doc:`internal/index`
+  Documentation for OpenDDS contributors
 
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
+:doc:`glossary`
+  A dictionary of common terms
+
+:ref:`genindex`

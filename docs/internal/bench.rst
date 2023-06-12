@@ -1,6 +1,6 @@
-################################################
+##############################################
 Bench Performance & Scalability Test Framework
-################################################
+##############################################
 
 **********
 Motivation
@@ -55,18 +55,18 @@ Required Features
 
 The primary requirements for building OpenDDS such that Bench also gets built:
 
- - C++11 Support, either with a compiler that defaults to C++11 (or later) support or by manually specifying a compatible standard (e.g. ``--std=c++11``)
- - RapidJSON present and enabled (``--rapidjson``)
- - Tests are being built (``--tests``)
+- C++11 Support, either with a compiler that defaults to C++11 (or later) support or by manually specifying a compatible standard (e.g. ``--std=c++11``)
+- RapidJSON present and enabled (``--rapidjson``)
+- Tests are being built (``--tests``)
 
 Required Targets
 ================
 
 If these elements are present, you can either build the entire test suite (slow) or use these 3 targets (faster), which also cover all the required libraries:
 
- - ``Bench_Worker``
- - ``Bench_node_controller``
- - ``Bench_test_controller``
+- ``Bench_Worker``
+- ``Bench_node_controller``
+- ``Bench_test_controller``
 
 *************
 Running Bench
@@ -823,11 +823,11 @@ The worker application is meant to mimic the behavior of a single arbitrary Open
 It uses the Bench builder library along with its JSON configuration file to first configure OpenDDS (including discovery & transports) and then create all required DDS entities using any desired DDS QoS attributes.
 Additionally, it allows the user to configure several test phase timing parameters, using either absolute or relative times:
 
- - DDS entity creation (``create_time``)
- - DDS entity “enabling” (``enable_time``) (only relevant if ``autoenable_created_entities`` QoS setting is false)
- - test actions start time (``start_time``)
- - test actions stop time (``stop_time``)
- - DDS entity destruction (``destruction_time``)
+- DDS entity creation (``create_time``)
+- DDS entity “enabling” (``enable_time``) (only relevant if ``autoenable_created_entities`` QoS setting is false)
+- test actions start time (``start_time``)
+- test actions stop time (``stop_time``)
+- DDS entity destruction (``destruction_time``)
 
 Finally, it also allows for the configuration and execution of test “actions” which take place between the “start” and “stop” times indicated in configuration.These may make use of the created DDS entities in order to simulate application behavior.
 At the time of this writing, the three actions are ``“write”``, which will write to a datawriter using data of a configurable size and frequency (and maximum count), ``“forward”``, which will pass along the data read from one datareader to a datawriter, allowing for more complex test behaviors (including round-trip latency & jitter calculations), and ``"set_cft_parameters"``, which will change the content filtered topic parameter values dynamically.
