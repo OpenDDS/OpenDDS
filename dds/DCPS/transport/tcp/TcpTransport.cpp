@@ -94,7 +94,7 @@ TcpTransport::connect_datalink(const RemoteTransport& remote,
     GuardType guard(links_lock_);
 
     if (find_datalink_i(key, link)) {
-      VDBG_LVL((LM_DEBUG, "(%P|%t) TcpTransport::connect_datalink found datalink link[%@]\n", link.in()), 0);
+      VDBG_LVL((LM_DEBUG, "(%P|%t) TcpTransport::connect_datalink found datalink[%@]\n", link.in()), 0);
       link->add_on_start_callback(client, remote.repo_id_);
       add_pending_connection(client, link);
       link->do_association_actions();
@@ -244,7 +244,7 @@ TcpTransport::accept_datalink(const RemoteTransport& remote,
     GuardType guard(links_lock_);
 
     if (find_datalink_i(key, link)) {
-      VDBG_LVL((LM_DEBUG, "(%P|%t) TcpTransport::accept_datalink found datalink link[%@]\n", link.in()), 0);
+      VDBG_LVL((LM_DEBUG, "(%P|%t) TcpTransport::accept_datalink found datalink[%@]\n", link.in()), 0);
       link->add_on_start_callback(client, remote.repo_id_);
       add_pending_connection(client, link);
       guard.release();
