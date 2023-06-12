@@ -165,7 +165,7 @@ Here is the usage in the :ghfile:`Developer’s Guide Messenger example <DevGuid
 
 See :ref:`cmake-libraries` for all the libraries the CMake package can provide.
 
-.. _cmake-install-import-runtime-artifacts:
+.. _cmake-install-imported-runtime-artifacts:
 
 install(IMPORTED_RUNTIME_ARTIFACTS)
 ===================================
@@ -192,7 +192,7 @@ Installing Generated Interface Files
 
 .. versionadded:: 3.20
 
-It is possible to install files from the ``OPENDDS_*_INTERFACE_FILES`` target properties for downstream projects to use.
+It is possible to install files from the :ref:`OPENDDS_*_INTERFACE_FILES target properties <cmake-files-props>` for downstream projects to use.
 See the :ghfile:`install Test <tests/cmake/install/library/CMakeLists.txt>` for an example of this.
 It uses `install(FILES) <https://cmake.org/cmake/help/latest/command/install.html#files>`__, but there isn't any restriction on what installation method can be used.
 For example, the `PUBLIC_HEADER <https://cmake.org/cmake/help/latest/prop_tgt/PUBLIC_HEADER.html>`__ target property could be set on target to the desired files from the interface lists.
@@ -216,7 +216,7 @@ Reference
 Libraries
 =========
 
-The CMake package can provide the following library targets from OpenDDS that can be linked using `target_link_libraries <https://cmake.org/cmake/help/latest/command/target_link_libraries.html>`__:
+The CMake package can provide library targets that can be linked using `target_link_libraries <https://cmake.org/cmake/help/latest/command/target_link_libraries.html>`__ or installed using :ref:`cmake-install-imported-runtime-artifacts`.
 
 .. cmake:tgt:: OpenDDS::Dcps
 
@@ -253,8 +253,6 @@ The CMake package can provide the following library targets from OpenDDS that ca
 .. cmake:tgt:: OpenDDS::Security
 
   :doc:`/devguide/dds_security`
-
-It also can provide the following libraries from ACE/TAO:
 
 .. cmake:tgt:: ACE::ACE
   :nocontentsentry:
@@ -386,6 +384,7 @@ Functions
   After ``opendds_target_sources`` is run on a target, it will have these target properties set on it:
 
   .. cmake:prop:: OPENDDS_LANGUAGE_MAPPINGS
+    :nocontentsentry:
 
     This holds the IDL language mappings used in the target based on what is passed to :cmake:func:`opendds_target_sources(OPENDDS_IDL_OPTIONS)`.
 
@@ -411,7 +410,10 @@ Functions
 
     .. versionadded:: 3.15
 
+  .. _cmake-files-props:
+
   .. cmake:prop:: OPENDDS_GENERATED_DIRECTORY
+    :nocontentsentry:
 
     The is the directory where generated files have been placed.
     This is an absolute path and is not exported with the target.
@@ -429,40 +431,44 @@ Functions
   - These properties are not exported with the target because the paths may not be valid any more if the build directory has been removed or the export is being used on another machine.
 
   .. cmake:prop:: OPENDDS_PASSED_IDL_INTERFACE_FILES
+    :nocontentsentry:
 
     The ``PUBLIC`` and ``INTERFACE`` scoped IDL files passed.
 
     .. versionadded:: 3.20
 
   .. cmake:prop:: OPENDDS_GENERATED_IDL_INTERFACE_FILES
+    :nocontentsentry:
 
     The IDL files generated from the IDL files in :cmake:prop:`OPENDDS_PASSED_IDL_INTERFACE_FILES`.
 
     .. versionadded:: 3.20
 
   .. cmake:prop:: OPENDDS_ALL_IDL_INTERFACE_FILES
+    :nocontentsentry:
 
     Combination of :cmake:prop:`OPENDDS_PASSED_IDL_INTERFACE_FILES` and :cmake:prop:`OPENDDS_GENERATED_IDL_INTERFACE_FILES`.
 
   .. cmake:prop:: OPENDDS_GENERATED_HEADER_FILES
+    :nocontentsentry:
 
     The ``.h`` and ``.inl`` files generated from :cmake:prop:`OPENDDS_ALL_IDL_INTERFACE_FILES`.
 
     .. versionadded:: 3.20
 
   .. cmake:prop:: OPENDDS_ALL_GENERATED_INTERFACE_FILES
+    :nocontentsentry:
 
     Combination of :cmake:prop:`OPENDDS_GENERATED_IDL_INTERFACE_FILES` and :cmake:prop:`OPENDDS_GENERATED_HEADER_FILES`.
 
     .. versionadded:: 3.20
 
   .. cmake:prop:: OPENDDS_ALL_INTERFACE_FILES
+    :nocontentsentry:
 
     All the ``INTERFACE`` and ``PUBLIC`` scoped files that were passed in or generated.
 
     .. versionadded:: 3.20
-
-  .. versionadded:: 3.14
 
   .. versionchanged:: 3.25
 
@@ -472,10 +478,10 @@ Functions
 
   ::
 
-    opendds_get_library_dependencies(<output-list-var-name> <lib>...)
+    opendds_get_library_dependencies(<output-list-var-name> <target>...)
 
-  A function to help when using :ref:`cmake-install-import-runtime-artifacts`.
-  The variable to create in the caller's scope that will contain the list of all targets passed and their ACE, TAO, and OpenDDS dependencies.
+  If given targets provided by the CMake package, it will return a list of the targets along with their ACE, TAO, and OpenDDS dependencies.
+  This is provided to help use :ref:`cmake-install-imported-runtime-artifacts`.
 
   .. versionadded:: 3.20
 
@@ -575,34 +581,42 @@ Dependencies
 ^^^^^^^^^^^^
 
 .. cmake:var:: OPENDDS_ACE
+  :nocontentsentry:
 
   Path to ACE, usually :envvar:`ACE_ROOT`
 
 .. cmake:var:: OPENDDS_TAO
+  :nocontentsentry:
 
   Path to TAO, usually :envvar:`TAO_ROOT`
 
 .. cmake:var:: OPENDDS_OPENSSL
+  :nocontentsentry:
 
   Path to OpenSSL
 
 .. cmake:var:: OPENDDS_GTEST
+  :nocontentsentry:
 
   Path to Google Test
 
 .. cmake:var:: OPENDDS_JAVA
+  :nocontentsentry:
 
   Path to Java
 
 .. cmake:var:: OPENDDS_QT
+  :nocontentsentry:
 
   Path to QT
 
 .. cmake:var:: OPENDDS_RAPIDJSON
+  :nocontentsentry:
 
   Path to RapidJSON
 
 .. cmake:var:: OPENDDS_XERCES3
+  :nocontentsentry:
 
   Path to Xerces
 
@@ -612,82 +626,101 @@ Features
 ^^^^^^^^
 
 .. cmake:var:: OPENDDS_CXX11
+  :nocontentsentry:
 
   ACE/TAO and OpenDDS were built with C++11 or later.
   Default depends on the compiler being used.
 
 .. cmake:var:: OPENDDS_DEBUG
+  :nocontentsentry:
 
   Default is ``ON``
 
 .. cmake:var:: OPENDDS_INLINE
+  :nocontentsentry:
 
   ``.inl`` files are included in header files.
   Default is ``ON``
 
 .. cmake:var:: OPENDDS_VERSIONED_NAMEPSACE
+  :nocontentsentry:
 
   ACE/TAO and OpenDDS have versioned namespaces.
   Default is ``OFF``
 
 .. cmake:var:: OPENDDS_STATIC
+  :nocontentsentry:
 
   ACE/TAO are built as static libraries.
   Default is ``OFF``
 
 .. cmake:var:: OPENDDS_WCHAR
+  :nocontentsentry:
 
   ACE/TAO prefers using wide characters.
   Default is ``OFF``
 
 .. cmake:var:: OPENDDS_TAO_IIOP
+  :nocontentsentry:
 
   Default is ``ON``
 
 .. cmake:var:: OPENDDS_TAO_OPTIMIZE_COLLOCATED_INVOCATIONS
+  :nocontentsentry:
 
   Default is ``ON``
 
 .. cmake:var:: OPENDDS_BUILT_IN_TOPICS
+  :nocontentsentry:
 
   Default is ``ON``
 
 .. cmake:var:: OPENDDS_OBJECT_MODEL_PROFILE
+  :nocontentsentry:
 
   Default is ``ON``
 
 .. cmake:var:: OPENDDS_PERSISTENCE_PROFILE
+  :nocontentsentry:
 
   Default is ``ON``
 
 .. cmake:var:: OPENDDS_OWNERSHIP_PROFILE
+  :nocontentsentry:
 
   Default is ``ON``
 
 .. cmake:var:: OPENDDS_OWNERSHIP_KIND_EXCLUSIVE
+  :nocontentsentry:
 
   Default is the value of :cmake:var:`OPENDDS_OWNERSHIP_PROFILE`.
 
 .. cmake:var:: OPENDDS_CONTENT_SUBSCRIPTION
+  :nocontentsentry:
 
   Default is ``ON``
 
 .. cmake:var:: OPENDDS_CONTENT_FILTERED_TOPIC
+  :nocontentsentry:
 
   Default is the value of :cmake:var:`OPENDDS_CONTENT_SUBSCRIPTION`.
 
 .. cmake:var:: OPENDDS_MULTI_TOPIC
+  :nocontentsentry:
 
   Default is the value of :cmake:var:`OPENDDS_CONTENT_SUBSCRIPTION`.
 
 .. cmake:var:: OPENDDS_QUERY_CONDITION
+  :nocontentsentry:
 
   Default is the value of :cmake:var:`OPENDDS_CONTENT_SUBSCRIPTION`.
 
 .. cmake:var:: OPENDDS_SECURITY
+  :nocontentsentry:
 
   Default is ``OFF``
 
 .. cmake:var:: OPENDDS_SAFETY_PROFILE
+  :nocontentsentry:
 
   Default is ``OFF``
