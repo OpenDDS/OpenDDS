@@ -112,7 +112,7 @@ TEST(dds_DCPS_Time_Helper, duration_to_dds_string)
 
 TEST(dds_DCPS_Time_Helper, duration_from_dds_string)
 {
-  DDS::Duration_t x;
+  DDS::Duration_t x = { 0, 0 };
   EXPECT_TRUE(from_dds_string("1.000000002", x));
   EXPECT_TRUE(x == make_duration_t(1,2));
 
