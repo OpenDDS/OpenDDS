@@ -253,6 +253,9 @@ public:
 
   bool special_serialization(AST_Decl* node, std::string& template_name) const;
 
+  void generate_equality(bool flag) { generate_equality_ = flag; }
+  bool generate_equality() const { return generate_equality_; }
+
 private:
   /// Name of the IDL file we are processing.
   const char* filename_;
@@ -260,7 +263,7 @@ private:
   bool java_, suppress_idl_, suppress_typecode_, suppress_xtypes_,
     no_default_gen_, generate_itl_,
     generate_value_reader_writer_,
-    generate_xtypes_complete_, face_ts_;
+    generate_xtypes_complete_, face_ts_, generate_equality_;
 
   bool filename_only_includes_;
 
