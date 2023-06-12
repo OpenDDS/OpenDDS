@@ -287,6 +287,10 @@ ShmemTransport::release_datalink(DataLink* link)
       return;
     }
   }
+
+  VDBG_LVL((LM_ERROR,
+            "(%P|%t) ShmemTransport::release_datalink link[%@] not found in ShmemDataLinkMap\n",
+            link), 1);
 }
 
 ShmemTransport::ReadTask::ReadTask(ShmemTransport* outer, ACE_sema_t semaphore)
