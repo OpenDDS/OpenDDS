@@ -19,6 +19,7 @@ function(_opendds_get_sources_and_options
     always_generate_lib_export_header
     generate_server_skeletons
     auto_link
+    include_base
     skip_tao_idl
     skip_opendds_idl)
   set(no_value_options
@@ -30,6 +31,7 @@ function(_opendds_get_sources_and_options
     ALWAYS_GENERATE_LIB_EXPORT_HEADER
     GENERATE_SERVER_SKELETONS
     AUTO_LINK
+    INCLUDE_BASE
   )
   set(multi_value_options
     PUBLIC PRIVATE INTERFACE
@@ -110,6 +112,27 @@ function(_opendds_get_sources_and_options
     set(${non_idl_prefix}_${scope} "${non_idl_sources_${scope}}" PARENT_SCOPE)
   endforeach()
 
+  if(OPENDDS_FILENAME_ONLY_INCLUDES)
+    message(DEPRECATION "OPENDDS_FILENAME_ONLY_INCLUDES is deprecated, use INCLUDE_BASE instead.")
+  else()
+    if(DEFINED arg_INCLUDE_BASE)
+      set("${include_base}" "${arg_INCLUDE_BASE}" PARENT_SCOPE)
+    else()
+      set(dirs)
+      foreach(idl_file ${all_idl_files})
+        get_filename_component(idl_file "${idl_file}" REALPATH)
+        get_filename_component(dir "${idl_file}" DIRECTORY)
+        list(APPEND dirs "${dir}")
+      endforeach()
+      list(REMOVE_DUPLICATES dirs)
+      list(LENGTH dirs dirs_count)
+      if(dirs_count GREATER 1)
+        message(WARNING "Passing IDL files from different directories, "
+          "but isn't using INCLUDE_BASE.")
+      endif()
+    endif()
+  endif()
+
   set(extra_tao_idl_options)
   set(extra_opendds_idl_options)
   if(OPENDDS_FILENAME_ONLY_INCLUDES)
@@ -154,6 +177,7 @@ endfunction()
 function(opendds_export_header target)
   set(no_value_options)
   set(single_value_options
+    INCLUDE_BASE
     USE_EXPORT_VAR
   )
   set(multi_value_options)
@@ -170,7 +194,7 @@ function(opendds_export_header target)
     return()
   endif()
 
-  _opendds_get_generated_file_path(${target} "${target}_export.h" export_header)
+  _opendds_get_generated_file_path(${target} "${arg_INCLUDE_BASE}" "${target}_export.h" export_header)
 
   string(TOUPPER "${target}" uppercase_target)
   if(NOT EXISTS ${output_file})
@@ -214,6 +238,7 @@ function(opendds_target_sources target)
     always_generate_lib_export_header
     generate_server_skeletons
     auto_link
+    include_base
     skip_tao_idl
     skip_opendds_idl
     ${ARGN})
@@ -230,7 +255,7 @@ function(opendds_target_sources target)
   if(target_type STREQUAL "SHARED_LIBRARY"
       OR (always_generate_lib_export_header AND target_type MATCHES "LIBRARY"))
     if(NOT use_export)
-      opendds_export_header(${target} USE_EXPORT_VAR use_export)
+      opendds_export_header(${target} USE_EXPORT_VAR use_export INCLUDE_BASE "${include_base}")
     endif()
     list(GET use_export 0 export_header)
     list(GET use_export 1 export_macro)
@@ -286,6 +311,7 @@ function(opendds_target_sources target)
         SKIP_OPENDDS_IDL ${skip_opendds_idl}
         IDL_FILES ${idl_sources_${scope}}
         SCOPE ${scope}
+        INCLUDE_BASE "${include_base}"
         AUTO_INCLUDES auto_includes)
       list(APPEND includes ${auto_includes})
     endif()

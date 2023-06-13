@@ -34,11 +34,15 @@ sub get_executable {
 sub get_bin_executable {
   my $name = shift;
 
-  my $install_prefix_bin = "";
-  if (defined($ENV{OPENDDS_INSTALL_PREFIX})) {
-    $install_prefix_bin = catdir($ENV{OPENDDS_INSTALL_PREFIX}, "bin");
+  my $bin = catdir($ENV{DDS_ROOT}, "bin");
+  if (defined($ENV{OPENDDS_BUILD_DIR})) {
+    $bin = catdir($ENV{OPENDDS_BUILD_DIR}, "bin");
   }
-  return get_executable($name, catdir($ENV{DDS_ROOT}, "bin"), $install_prefix_bin);
+  elsif (defined($ENV{OPENDDS_INSTALL_PREFIX})) {
+    $bin = catdir($ENV{OPENDDS_INSTALL_PREFIX}, "bin");
+  }
+  print("bin=$bin\n");
+  return get_executable($name, $bin);
 }
 
 sub get_opendds_idl {

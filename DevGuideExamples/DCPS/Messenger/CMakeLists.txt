@@ -1,8 +1,9 @@
 project(opendds_devguide_messenger CXX)
-cmake_minimum_required(VERSION 3.3)
+cmake_minimum_required(VERSION 3.20)
 enable_testing()
 
 find_package(OpenDDS REQUIRED)
+include(opendds_testing)
 
 # Make sure the MPC-generated headers are gone so the CMake build will use the
 # right ones. This is not needed in a real project.
@@ -42,9 +43,5 @@ target_link_libraries(subscriber ${opendds_libs})
 # Testing
 configure_file(run_test.pl . COPYONLY)
 configure_file(rtps.ini . COPYONLY)
-add_test(NAME opendds_devguide_messenger_test_inforepo
-  COMMAND perl run_test.pl $<$<BOOL:$<CONFIG>>:-ExeSubDir> $<CONFIG>
-)
-add_test(NAME opendds_devguide_messenger_test_rtps
-  COMMAND perl run_test.pl $<$<BOOL:$<CONFIG>>:-ExeSubDir> $<CONFIG> --rtps
-)
+_opendds_add_test(NAME info_repo COMMAND perl run_test.pl)
+_opendds_add_test(NAME rtps COMMAND perl run_test.pl --rtps)

@@ -1,29 +1,26 @@
 /*
- *
- *
  * Distributed under the OpenDDS License.
  * See: http://www.opendds.org/license.html
  */
 
-#include <ace/Log_Msg.h>
-
-#include <dds/DdsDcpsInfrastructureC.h>
-#include <dds/DdsDcpsPublicationC.h>
+#include "MessengerTypeSupportImpl.h"
 
 #include <dds/DCPS/Marked_Default_Qos.h>
 #include <dds/DCPS/Service_Participant.h>
 #include <dds/DCPS/WaitSet.h>
-
+#include <dds/DCPS/InitStaticLibs.h>
 #include <dds/DCPS/StaticIncludes.h>
 #ifdef ACE_AS_STATIC_LIBS
 #  include <dds/DCPS/RTPS/RtpsDiscovery.h>
 #  include <dds/DCPS/transport/rtps_udp/RtpsUdp.h>
 #endif
 
-#include "MessengerTypeSupportImpl.h"
+#include <dds/DdsDcpsInfrastructureC.h>
+#include <dds/DdsDcpsPublicationC.h>
 
-int
-ACE_TMAIN(int argc, ACE_TCHAR *argv[])
+#include <ace/Log_Msg.h>
+
+int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 {
   try {
     // Initialize DomainParticipantFactory

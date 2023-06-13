@@ -1,9 +1,15 @@
 #ifndef ECU_IDL
 #define ECU_IDL
 
-#include "engine_specs.idl"
-#include "transmission_specs.idl"
-#include "fuel_stats.idl"
+#ifdef OPENDDS_FILENAME_ONLY_INCLUDES
+#  include "engine_specs.idl"
+#  include "transmission_specs.idl"
+#  include "fuel_stats.idl"
+#else
+#  include "engine/engine_specs.idl"
+#  include "engine/engine_stats/fuel_stats.idl"
+#  include "transmission/transmission_specs.idl"
+#endif
 
 @topic
 struct EcuInfo {

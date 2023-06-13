@@ -3,6 +3,7 @@ project(opendds_ace_tao_only CXX)
 enable_testing()
 
 find_package(OpenDDS REQUIRED COMPONENTS NO_DEFAULTS TAO::tao_idl TAO::PortableServer)
+include(opendds_testing)
 
 _opendds_save_cache(OPENDDS_AUTO_LINK_DCPS BOOL TRUE)
 
@@ -54,9 +55,6 @@ add_executable(${client} ${client_files})
 set_target_properties(${client} PROPERTIES OUTPUT_NAME MessengerClient)
 target_link_libraries(${client} ${idl})
 
-# Testing
-add_test(NAME "${target_prefix}test"
-  COMMAND perl run_test.pl $<$<BOOL:$<CONFIG>>:-ExeSubDir> $<CONFIG>
-)
+_opendds_add_test(COMMAND perl run_test.pl)
 
 _opendds_restore_cache()

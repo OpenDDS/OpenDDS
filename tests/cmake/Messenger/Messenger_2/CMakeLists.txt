@@ -9,6 +9,7 @@ cmake_minimum_required(VERSION 3.8.2)
 enable_testing()
 
 find_package(OpenDDS REQUIRED)
+include(opendds_testing)
 
 if(NOT OPENDDS_OWNERSHIP_PROFILE)
   message(FATAL_ERROR "This test requires OpenDDS to be built with Ownership Profile enabled")
@@ -60,6 +61,4 @@ target_link_libraries(${subscriber} ${messenger} OpenDDS::OpenDDS)
 
 # Testing
 configure_file("${src}/run_test.pl" . COPYONLY)
-add_test(NAME "${target_prefix}test"
-  COMMAND perl run_test.pl $<$<BOOL:$<CONFIG>>:-ExeSubDir> $<CONFIG>
-)
+_opendds_add_test(COMMAND perl run_test.pl)

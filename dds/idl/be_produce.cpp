@@ -226,6 +226,20 @@ void postprocess(const char* fn, ostringstream& content,
   }
   break;
   case BE_GlobalData::STREAM_CPP: {
+    // For Unity builds, names in anonymous namespace can clash, so this is used
+    // to make namespaces with names based on the file instead.
+    std::string prefix = to_macro(fn);
+    for (size_t i = 0; i < prefix.size(); ++i) {
+      prefix[i] = tolower(prefix[i]);
+    }
+    out <<
+      "\n"
+      "#ifdef OPENDDS_IDL_FILE_SPECIFIC\n"
+      "#  undef OPENDDS_IDL_FILE_SPECIFIC\n"
+      "#endif\n"
+      "#define OPENDDS_IDL_FILE_SPECIFIC(base, index) " << prefix << "##_##base##index\n"
+      "\n";
+
     ACE_CString pch = be_global->pch_include();
     if (pch.length()) {
       out << "#include \"" << pch << "\"\n";
