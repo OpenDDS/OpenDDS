@@ -89,7 +89,10 @@ if(NOT OPENDDS_CONFIG_CMAKE AND NOT ACE_IS_BEING_BUILT)
   endif()
   get_filename_component(OPENDDS_TAO "${OPENDDS_TAO}" ABSOLUTE)
 
+  # TODO
+  if(NOT WIN32)
   _opendds_detect_ace()
+  endif()
 endif()
 
 include("${CMAKE_CURRENT_LIST_DIR}/opendds_features.cmake")
