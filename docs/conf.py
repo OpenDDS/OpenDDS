@@ -4,9 +4,13 @@
 # list see the documentation:
 # https://www.sphinx-doc.org/en/master/usage/configuration.html
 
-import re
 import sys
+import os
+import re
 from pathlib import Path
+
+from docutils.transforms import Transform
+from docutils import nodes
 
 docs_path = Path(__file__).parent
 opendds_root_path = docs_path.parent
@@ -20,9 +24,28 @@ from version_info import VersionInfo
 
 # Custom Values ---------------------------------------------------------------
 
+class GlobalSubstitutions(Transform):
+    default_priority = 200
+
+    def apply(self):
+        config = self.document.settings.env.config
+        global_substitutions = config['global_substitutions']
+        to_handle = set(global_substitutions.keys()) - set(self.document.substitution_defs)
+        for ref in self.document.traverse(nodes.substitution_reference):
+            refname = ref['refname']
+            if refname in to_handle:
+                try:
+                    text = str(global_substitutions[refname])
+                    ref.replace_self(nodes.Text(text, text))
+                except:
+                    pass
+
+
 def setup(app):
+    app.add_config_value('global_substitutions', vars(opendds_version_info), True)
     app.add_config_value('is_release', False, True)
     app.add_lexer('mpc', MpcLexer)
+    app.add_transform(GlobalSubstitutions)
 
 
 # -- Project information -----------------------------------------------------
@@ -42,11 +65,13 @@ github_repo = 'https://github.com/' + github_links_repo
 rtd_base = 'https://opendds.readthedocs.io/en/'
 
 # Get Version Info
-version_info = VersionInfo()
-release = version_info.version
-is_release = version_info.is_release
+opendds_version_info = VersionInfo()
+release = opendds_version_info.version
+is_release = opendds_version_info.is_release
 if is_release:
-    github_links_release_tag = version_info.tag
+    github_links_release_tag = opendds_version_info.tag
+ace6tao2_version = opendds_version_info.ace6tao2_version
+ace7tao3_version = opendds_version_info.ace7tao3_version
 
 # Generate news for all releases
 with (docs_path / 'news.rst').open('w') as f:
@@ -66,18 +91,18 @@ with (docs_path / 'this-release.rst').open('w') as f:
 extensions = [
     # Custom ones
     'links',
+    'cmake',
 
     # Official ones
     'sphinx.ext.ifconfig',
     'sphinx.ext.todo',
+    'sphinx.ext.intersphinx',
 
     # Other ones
     'sphinx_copybutton',
     'sphinx_markdown_builder',
+    'sphinx_inline_tabs',
 ]
-
-# Add any paths that contain templates here, relative to this directory.
-templates_path = ['_templates']
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
@@ -98,7 +123,7 @@ source_suffix = {
     '.rst': 'restructuredtext',
 }
 
-numfig = True
+numfig = False
 
 highlight_language = 'none'
 
@@ -109,6 +134,10 @@ linkcheck_ignore = [
     r'^https?://docs\.github\.com/.*$',
 ]
 
+intersphinx_mapping = {
+    'sphinx': ('https://www.sphinx-doc.org/en/master', None),
+    'cmake': ('https://cmake.org/cmake/help/latest', None),
+}
 
 # -- Options for Markdown output ---------------------------------------------
 # This builder is just used to generate the release notes for GitHub
@@ -118,9 +147,9 @@ linkcheck_ignore = [
 # release notes.
 markdown_http_base = rtd_base
 if is_release:
-    markdown_http_base += version_info.tag
+    markdown_http_base += opendds_version_info.tag.lower()
 else:
-    markdown_http_base += github_main_branch
+    markdown_http_base += os.getenv('MD_RTD_BRANCH', github_main_branch)
 markdown_target_ext = '.html'
 
 
@@ -145,22 +174,17 @@ html_theme_options = {
 
 # Change the sidebar to include fixed links
 #   https://pradyunsg.me/furo/customisation/sidebar/#making-changes
-sidebar_links = {
-    'Main Website': 'https://opendds.org',
-    'GitHub Repo': github_repo,
+html_context = {
+    'sidebar_links': {
+        'Main Website': 'https://opendds.org',
+        'GitHub Repo': github_repo,
+    }
 }
-our_template_path = ext / 'templates'
-sidebar_links_template_name = 'sidebar-links.html'
-with (our_template_path / sidebar_links_template_name).open('w') as f:
-    print('<div class="sidebar-tree" style="margin-top: 0px;"><ul>', file=f)
-    for name, url in sidebar_links.items():
-        print('  <li><a class="reference" href="{}">{}</a></li>'.format(url, name), file=f)
-    print('</ul></div>', file=f)
-templates_path = [str(our_template_path)]
+templates_path = [str(ext / 'templates')]
 html_sidebars = {
     '**': [
         'sidebar/brand.html',
-        sidebar_links_template_name,
+        'sidebar-links.html',
         'sidebar/search.html',
         'sidebar/scroll-start.html',
         'sidebar/navigation.html',
