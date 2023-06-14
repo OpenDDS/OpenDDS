@@ -3767,9 +3767,6 @@ SequenceNumber
 RtpsUdpDataLink::RtpsWriter::expected_max_sn(const ReaderInfo_rch& reader) const
 {
   ACE_UNUSED_ARG(reader);
-  ACE_DEBUG((LM_DEBUG, "(%P|%t) RtpsUdpDataLink::RtpsWriter::expected_max_sn: "
-             "reader->max_pvs_sn_=%q, max_sn_=%q\n",
-             reader->max_pvs_sn_.getValue(), max_sn_.getValue()));
 #ifdef OPENDDS_SECURITY
   if (is_pvs_writer_) {
     return reader->max_pvs_sn_;
