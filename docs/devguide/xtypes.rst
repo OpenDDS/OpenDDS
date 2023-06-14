@@ -24,7 +24,7 @@ This assumption is not practical as systems must be able to evolve while remaini
 The DDS XTypes (Extensible and Dynamic Topic Types) specification loosens the requirement on applications to have a common notion of data types.
 Using XTypes, the application developer adds IDL annotations that indicate where the types may vary between publisher and subscriber and how those variations are handled by the middleware.
 
-OpenDDS implements the XTypes specification version 1.3 at the Basic Conformance level, with a partial implementation of the Dynamic Language Binding.
+OpenDDS implements the :ref:`XTypes specification <spec-xtypes>` at the Basic Conformance level, with a partial implementation of the Dynamic Language Binding.
 Some features described by the specification are not yet implemented in OpenDDS - those are noted in :ref:`xtypes--unimplemented-features`.
 This includes IDL annotations that are not yet implemented (:ref:`xtypes--annotations`).
 See :ref:`xtypes--differences-from-the-specification` for situations where the implementation of XTypes in OpenDDS departs from or infers something about the specification.
@@ -887,7 +887,7 @@ To do the same for CMake:
 
 .. code-block:: cmake
 
-    OPENDDS_TARGET_SOURCES(target
+    opendds_target_sources(target
       Messenger.idl
       OPENDDS_IDL_OPTIONS -Gxtypes-complete
     )
@@ -1256,7 +1256,7 @@ Unimplemented Features
 ..
     Sect<16.8>
 
-OpenDDS implements the XTypes specification version 1.3 at the Basic Conformance level, with a partial implementation of the Dynamic Language Binding (supported features of which are described in :ref:`xtypes--dynamic-language-binding-1`).
+OpenDDS implements the :ref:`XTypes specification <spec-xtypes>` at the Basic Conformance level, with a partial implementation of the Dynamic Language Binding (supported features of which are described in :ref:`xtypes--dynamic-language-binding-1`).
 Specific unimplemented features listed below.
 The two optional profiles, XTypes 1.1 Interoperability (XCDR1) and XML, are not implemented.
 

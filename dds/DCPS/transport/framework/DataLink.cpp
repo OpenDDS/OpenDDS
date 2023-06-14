@@ -60,8 +60,8 @@ DataLink::DataLink(const TransportImpl_rch& impl, Priority priority, bool is_loo
 
   TransportInst_rch cfg = impl->config();
   if (cfg) {
-    datalink_release_delay = cfg->datalink_release_delay_;
-    if (cfg->thread_per_connection_) {
+    datalink_release_delay = cfg->datalink_release_delay();
+    if (cfg->thread_per_connection()) {
       thr_per_con_send_task_.reset(new ThreadPerConnectionSendTask(this));
 
       if (thr_per_con_send_task_->open() == -1) {
@@ -75,7 +75,7 @@ DataLink::DataLink(const TransportImpl_rch& impl, Priority priority, bool is_loo
                    ACE_TEXT("started new thread to send data with.\n")));
       }
     }
-    control_chunks = cfg->datalink_control_chunks_;
+    control_chunks = cfg->datalink_control_chunks();
   }
 
   // Initialize transport control sample allocators:

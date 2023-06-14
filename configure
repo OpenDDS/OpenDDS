@@ -129,7 +129,6 @@ my %platforminfo =
                       "Use --macros=android_sdk=<SDK_PATH> and",
                       "--macros=android_target_api=<API_NUMBER> to specify",
                       "where to find android.jar.",
-                      "See docs/android.md for details.",
                     ],
                   'needs_i2jrt_corba' => 1,
                   'java_platform' => 'android',
@@ -2733,6 +2732,33 @@ sub write_cmake_file {
         name => 'COVERAGE',
         feature => 'dds_non_coverage',
         inverted => 1,
+      },
+      {
+        name => 'TAO_CORBA_E_COMPACT',
+        feature => 'corba_e_compact',
+      },
+      {
+        name => 'TAO_CORBA_E_MICRO',
+        feature => 'corba_e_micro',
+      },
+      {
+        name => 'TAO_MINIMUM_CORBA',
+        feature => 'minimum_corba',
+      },
+      {
+        name => 'TAO_IIOP',
+        feature => 'tao_no_iiop',
+        inverted => 1,
+        default => 1,
+      },
+      {
+        name => 'TAO_GEN_OSTREAM',
+        feature => 'gen_ostream',
+      },
+      {
+        name => 'TAO_OPTIMIZE_COLLOCATED_INVOCATIONS',
+        feature => 'optimize_collocated_invocations',
+        default => 1,
       },
     );
     my %features = get_features($buildEnv);

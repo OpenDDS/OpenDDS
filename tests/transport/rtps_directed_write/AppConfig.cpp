@@ -39,7 +39,7 @@ AppConfig::AppConfig(int argc, ACE_TCHAR* argv[], bool setLocalAddress) :
       ACE_DEBUG((LM_INFO, ACE_TEXT("ERROR: Failed to cast to RtpsUdpInst*\n")));
       throw;
     }
-    rtpsInst->datalink_release_delay_ = 0;
+    rtpsInst->datalink_release_delay(0);
     if (setLocalAddress) {
       ACE_INET_Addr addr(port, ACE_TEXT_ALWAYS_CHAR(host.c_str()));
       rtpsInst->local_address(OpenDDS::DCPS::NetworkAddress(addr));

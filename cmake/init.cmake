@@ -1,51 +1,43 @@
 # Distributed under the OpenDDS License. See accompanying LICENSE
 # file or http://www.opendds.org/license.html for details.
 
-include(${CMAKE_CURRENT_LIST_DIR}/config.cmake)
+if(_OPENDDS_INIT_CMAKE)
+  return()
+endif()
+set(_OPENDDS_INIT_CMAKE TRUE)
 
-if(NOT DEFINED OPENDDS_DEBUG)
-  set(OPENDDS_DEBUG ON)
-endif()
+find_package(Perl REQUIRED)
 
-if(NOT DEFINED OPENDDS_INLINE)
-  set(OPENDDS_INLINE ON)
-endif()
+include("${CMAKE_CURRENT_LIST_DIR}/config.cmake")
 
-if(NOT DEFINED OPENDDS_BUILT_IN_TOPICS)
-  set(OPENDDS_BUILT_IN_TOPICS ON)
-endif()
+set(_OPENDDS_ALL_FEATURES)
+function(_opendds_feature name default_value)
+  string(TOLOWER "${name}" lowercase_name)
+  set(_OPENDDS_ALL_FEATURES ${_OPENDDS_ALL_FEATURES} "${lowercase_name}" PARENT_SCOPE)
+  set(name "OPENDDS_${name}")
+  if(NOT DEFINED "${name}")
+    set("${name}" "${default_value}" PARENT_SCOPE)
+  endif()
+endfunction()
 
-if(NOT DEFINED OPENDDS_OBJECT_MODEL_PROFILE)
-  set(OPENDDS_OBJECT_MODEL_PROFILE ON)
-endif()
-
-if(NOT DEFINED OPENDDS_PERSISTENCE_PROFILE)
-  set(OPENDDS_PERSISTENCE_PROFILE ON)
-endif()
-
-if(NOT DEFINED OPENDDS_OWNERSHIP_PROFILE)
-  set(OPENDDS_OWNERSHIP_PROFILE ON)
-endif()
-if(NOT DEFINED OPENDDS_OWNERSHIP_KIND_EXCLUSIVE)
-  set(OPENDDS_OWNERSHIP_KIND_EXCLUSIVE ${OPENDDS_OWNERSHIP_PROFILE})
-endif()
-
-if(NOT DEFINED OPENDDS_CONTENT_SUBSCRIPTION)
-  set(OPENDDS_CONTENT_SUBSCRIPTION ON)
-endif()
-if(NOT DEFINED OPENDDS_CONTENT_FILTERED_TOPIC)
-  set(OPENDDS_CONTENT_FILTERED_TOPIC ${OPENDDS_CONTENT_SUBSCRIPTION})
-endif()
-if(NOT DEFINED OPENDDS_MULTI_TOPIC)
-  set(OPENDDS_MULTI_TOPIC ${OPENDDS_CONTENT_SUBSCRIPTION})
-endif()
-if(NOT DEFINED OPENDDS_QUERY_CONDITION)
-  set(OPENDDS_QUERY_CONDITION ${OPENDDS_CONTENT_SUBSCRIPTION})
-endif()
-
-if(NOT DEFINED OPENDDS_SUPPRESS_ANYS)
-  set(OPENDDS_SUPPRESS_ANYS ON)
-endif()
+_opendds_feature(DEBUG ON)
+_opendds_feature(INLINE ON)
+_opendds_feature(STATIC OFF)
+_opendds_feature(TAO_IIOP ON)
+_opendds_feature(TAO_OPTIMIZE_COLLOCATED_INVOCATIONS ON)
+_opendds_feature(BUILT_IN_TOPICS ON)
+_opendds_feature(OBJECT_MODEL_PROFILE ON)
+_opendds_feature(PERSISTENCE_PROFILE ON)
+_opendds_feature(OWNERSHIP_PROFILE ON)
+_opendds_feature(OWNERSHIP_KIND_EXCLUSIVE ${OPENDDS_OWNERSHIP_PROFILE})
+_opendds_feature(CONTENT_SUBSCRIPTION ON)
+_opendds_feature(CONTENT_FILTERED_TOPIC ${OPENDDS_CONTENT_SUBSCRIPTION})
+_opendds_feature(MULTI_TOPIC ${OPENDDS_CONTENT_SUBSCRIPTION})
+_opendds_feature(QUERY_CONDITION ${OPENDDS_CONTENT_SUBSCRIPTION})
+_opendds_feature(SUPPRESS_ANYS ON)
+_opendds_feature(SECURITY OFF)
+_opendds_feature(XERCES3 ${OPENDDS_SECURITY})
+_opendds_feature(SAFETY_PROFILE OFF)
 
 # Make Sure CMake can use the Paths
 file(TO_CMAKE_PATH "${OPENDDS_ACE}" OPENDDS_ACE)
@@ -55,7 +47,7 @@ file(TO_CMAKE_PATH "${OPENDDS_TAO}" OPENDDS_TAO)
 option(OPENDDS_CMAKE_VERBOSE "Print verbose output when loading the OpenDDS Config Package" OFF)
 option(OPENDDS_DEFAULT_NESTED "Require topic types to be declared explicitly" ON)
 option(OPENDDS_FILENAME_ONLY_INCLUDES "No directory info in generated #includes." OFF)
-set(OPENDDS_DEFAULT_SCOPE "PRIVATE" CACHE STRING "Default scope for OPENDDS_TARGET_SOURCES")
+set(OPENDDS_DEFAULT_SCOPE "PRIVATE" CACHE STRING "Default scope for opendds_target_sources")
 set_property(CACHE OPENDDS_DEFAULT_SCOPE PROPERTY STRINGS "PUBLIC" "PRIVATE" "INTERFACE")
 option(OPENDDS_ALWAYS_GENERATE_LIB_EXPORT_HEADER "Always generate an export header for libraries" OFF)
 # This is off because it's not compatible with a possible existing usage of
@@ -63,26 +55,21 @@ option(OPENDDS_ALWAYS_GENERATE_LIB_EXPORT_HEADER "Always generate an export head
 # "All uses of target_link_libraries with a target must be either all-keyword
 # or all-plain."
 # TODO: Make this default ON in v4.0
-option(OPENDDS_AUTO_LINK_DCPS "Automatically link OpenDDS::Dcps to the target of OPENDDS_TARGET_SOURCES" OFF)
+option(OPENDDS_AUTO_LINK_DCPS
+  "Automatically link dependencies to the target of opendds_target_sources" OFF)
 # This is off by default because it could cause "Cannot find source file"
 # errors on `TypeSupport.idl` files generated in a another directory.
 # TODO: Make this default ON in v4.0
-option(OPENDDS_USE_CORRECT_INCLUDE_SCOPE "Include using SCOPE specified in OPENDDS_TARGET_SOURCES" OFF)
+option(OPENDDS_USE_CORRECT_INCLUDE_SCOPE "Include using SCOPE specified in opendds_target_sources" OFF)
 
-macro(_OPENDDS_RETURN_ERR msg)
-  message(SEND_ERROR "${msg}")
-  set(OPENDDS_FOUND FALSE)
-  return()
-endmacro()
-
-macro(OPENDDS_SAVE_CACHE name type value)
+macro(_opendds_save_cache name type value)
   list(APPEND _opendds_save_cache_vars ${name})
   set(_opendds_save_cache_${name}_type ${type})
   set(_opendds_save_cache_${name}_value "${${name}}")
   set(${name} "${value}" CACHE ${type} "" FORCE)
 endmacro()
 
-macro(OPENDDS_RESTORE_CACHE)
+macro(_opendds_restore_cache)
   foreach(name ${_opendds_save_cache_vars})
     set(${name} "${_opendds_save_cache_${name}_value}" CACHE
       "${_opendds_save_cache_${name}_type}" "" FORCE)
@@ -129,7 +116,8 @@ if(NOT DEFINED ACE_ROOT)
     set(ACE_LIB_DIR "${ACE_ROOT}/lib")
 
   else()
-    _OPENDDS_RETURN_ERR("Failed to locate ACE_ROOT")
+    message(SEND_ERROR "Failed to locate ACE")
+    return()
   endif()
 
   set(ACE_BIN_DIR "${ACE_ROOT}/bin")
@@ -145,7 +133,8 @@ if(NOT DEFINED TAO_ROOT)
     set(TAO_INCLUDE_DIR "${OPENDDS_TAO}")
 
   else()
-    _OPENDDS_RETURN_ERR("Failed to locate TAO_ROOT")
+    message(SEND_ERROR "Failed to locate TAO")
+    return()
   endif()
 
   set(TAO_BIN_DIR "${ACE_BIN_DIR}")
@@ -156,9 +145,6 @@ if(NOT DEFINED TAO_ROOT)
   )
 endif()
 
-if(NOT DEFINED OPENDDS_STATIC)
-  set(OPENDDS_STATIC OFF)
-endif()
 if(OPENDDS_STATIC)
   set(OPENDDS_LIBRARY_TYPE STATIC)
 else()

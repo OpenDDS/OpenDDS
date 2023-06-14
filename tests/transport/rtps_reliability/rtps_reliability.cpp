@@ -625,7 +625,7 @@ void transport_setup()
     return;
   }
   rtps_inst->use_multicast_ = false;
-  rtps_inst->datalink_release_delay_ = 0;
+  rtps_inst->datalink_release_delay(0);
   rtps_inst->heartbeat_period_ = TimeDuration::from_msec(500);
   TransportConfig_rch cfg = TheTransportRegistry->create_config("cfg");
   cfg->instances_.push_back(inst);

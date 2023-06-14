@@ -51,7 +51,7 @@ Dependencies
 
 .. seealso::
 
-  :ghfile:`docs/dependencies.md` for all dependencies and details on how these are used in OpenDDS.
+  :doc:`/building/dependencies` for all dependencies and details on how these are used in OpenDDS.
 
 .. _dev_guidelines-text_file_formating:
 
@@ -79,6 +79,26 @@ These apply to C++ source code, Perl scripts, MPC files, and any other plaintext
 * Keep line length reasonable.
   I don't think it makes sense to strictly enforce an 80-column limit, but overly long lines are harder to read.
   Try to keep lines to roughly 80 characters.
+
+The :ref:`lint script <dev_guidelines-lint-script>` will help check for most of these in a PR.
+
+There is also a :ghfile:`.editorconfig` file that allows contributors to follow most of these rules automatically.
+`EditorConfig <https://editorconfig.org/>`__ support is `built-in to some editors (including Visual Studio) <https://editorconfig.org/#pre-installed>`__ with `plugins available for others <https://editorconfig.org/#download>`__.
+
+.. _dev_guidelines-lint-script:
+
+***********
+Lint Script
+***********
+
+The :ghfile:`lint script <tools/scripts/lint.pl>` is a Perl script that is run on every PR.
+It checks for mistakes in both coding and style.
+It can also be run locally to check for issues before committing.
+If it is ran without arguments it does the default set of checks and also runs ACE's ``fuzz.pl`` if available.
+To see a list of the default checks with descriptions, run the script with ``--list``.
+Passing ``--try-fix`` will try to fix some of those issues.
+The script also has ways to skip some or all checks for single lines or whole files.
+Pass ``--help`` for more information.
 
 *************
 Documentation
@@ -395,12 +415,12 @@ ACE can provide monotonic clock time and has a class for handling time measureme
 It can differentiate between the system clock and the monotonic clock, but it does so poorly.
 OpenDDS provides three classes that wrap ``ACE_Time_Value`` to fill these roles: ``TimeDuration``, ``MonotonicTimePoint``, and ``SystemTimePoint``.
 All three can be included using :ghfile:`dds/DCPS/TimeTypes.h`.
-Using ``ACE_Time_Value`` is discouraged unless directly dealing with ACE code which requires it and using ``ACE_OS::gettimeofday()`` or ``ACE_Time_Value().now()`` in C++ code in :ghfile:`dds/DCPS` treated as an error by the ``lint.pl`` linter script.
+Using ``ACE_Time_Value`` is discouraged unless directly dealing with ACE code which requires it and using ``ACE_OS::gettimeofday()`` or ``ACE_Time_Value().now()`` in C++ code in :ghfile:`dds/DCPS` treated as an error by the :ref:`lint script <dev_guidelines-lint-script>`.
 
 ``MonotonicTimePoint`` should be used when tracking time elapsed internally and when dealing with ``ACE_Time_Value``\s being given by the ``ACE_Reactor`` in OpenDDS.
 ``ACE_Condition``\s, like all ACE code, will default to using system time.
 Therefore the ``Condition`` class wraps it and makes it so it always uses monotonic time like it should.
-Like ``ACE_OS::gettimeofday()``, referencing ``ACE_Condition`` in :ghfile:`dds/DCPS` will be treated as an error by ``lint.pl``.
+Like ``ACE_OS::gettimeofday()``, referencing ``ACE_Condition`` in :ghfile:`dds/DCPS` will be treated as an error by the :ref:`lint script <dev_guidelines-lint-script>`.
 
 More information on using monotonic time with ACE can be found `here <http://www.dre.vanderbilt.edu/~schmidt/DOC_ROOT/ACE/docs/ACE-monotonic-timer.html>`_.
 
@@ -607,7 +627,21 @@ CMake Coding Style
 Some additional nodes and exceptions:
 
 - vcpkg-specific things can be ignored.
-- Indents are 2 spaces.
-- Prefix public global variables with ``OPENDDS_`` and they should be the only thing using all caps names.
-- Don't use undefined global variables as a false value, try to make sure they are defined.
-- Avoid creating new macros.
+- Whitespace:
+
+  - Indents are 2 spaces.
+  - There should not be spaces before parentheses in flow control and function declarations and calls.
+    For example use ``if(value)``, not ``if (value)``.
+
+- Naming:
+
+  - Global variables and properties should be the only names in all caps.
+  - Prefix public global variables with ``OPENDDS_``.
+  - Prefix private global variables with ``_OPENDDS_``.
+  - Prefix public functions and macros with ``opendds_``.
+  - Prefix private functions and macros with ``_opendds_``.
+
+- Prefer defining or clearing a variable before use instead of assuming that it will always be undefined.
+- Don't create new macros if a function will also work.
+  Functions can use ``set(name value PARENT_SCOPRE)`` to set a value in the caller's scope.
+  Helper macros inside of functions are okay.

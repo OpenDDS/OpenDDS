@@ -16,7 +16,7 @@ endif()
 
 # IDL TypeSupport Library
 add_library(messenger_idl)
-OPENDDS_TARGET_SOURCES(messenger_idl PUBLIC "Messenger.idl")
+opendds_target_sources(messenger_idl PUBLIC "Messenger.idl")
 target_link_libraries(messenger_idl PUBLIC OpenDDS::Dcps)
 
 set(opendds_libs

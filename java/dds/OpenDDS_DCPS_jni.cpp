@@ -598,44 +598,12 @@ jstring JNICALL Java_OpenDDS_DCPS_transport_TransportInst_getName
   return retStr;
 }
 
-// TransportInst::getQueueMessagesPerPool
-jint JNICALL Java_OpenDDS_DCPS_transport_TransportInst_getQueueMessagesPerPool
-(JNIEnv * jni, jobject jthis)
-{
-  OpenDDS::DCPS::TransportInst_rch inst = OpenDDS::DCPS::rchandle_from(recoverCppObj<OpenDDS::DCPS:: TransportInst>(jni, jthis));
-  return static_cast<jint>(inst->queue_messages_per_pool_);
-}
-
-// TransportInst::setQueueMessagesPerPool
-void JNICALL Java_OpenDDS_DCPS_transport_TransportInst_setQueueMessagesPerPool
-(JNIEnv * jni, jobject jthis, jint val)
-{
-  OpenDDS::DCPS::TransportInst_rch inst = OpenDDS::DCPS::rchandle_from(recoverCppObj<OpenDDS::DCPS:: TransportInst>(jni, jthis));
-  inst->queue_messages_per_pool_ = val;
-}
-
-// TransportInst::getQueueInitialPools
-jint JNICALL Java_OpenDDS_DCPS_transport_TransportInst_getQueueInitialPools
-(JNIEnv * jni, jobject jthis)
-{
-  OpenDDS::DCPS::TransportInst_rch inst = OpenDDS::DCPS::rchandle_from(recoverCppObj<OpenDDS::DCPS:: TransportInst>(jni, jthis));
-  return static_cast<jint>(inst->queue_initial_pools_);
-}
-
-// TransportInst::setQueueInitialPools
-void JNICALL Java_OpenDDS_DCPS_transport_TransportInst_setQueueInitialPools
-(JNIEnv * jni, jobject jthis, jint val)
-{
-  OpenDDS::DCPS::TransportInst_rch inst = OpenDDS::DCPS::rchandle_from(recoverCppObj<OpenDDS::DCPS:: TransportInst>(jni, jthis));
-  inst->queue_initial_pools_ = val;
-}
-
 // TransportInst::getMaxPacketSize
 jint JNICALL Java_OpenDDS_DCPS_transport_TransportInst_getMaxPacketSize
 (JNIEnv * jni, jobject jthis)
 {
   OpenDDS::DCPS::TransportInst_rch inst = OpenDDS::DCPS::rchandle_from(recoverCppObj<OpenDDS::DCPS:: TransportInst>(jni, jthis));
-  return inst->max_packet_size_;
+  return inst->max_packet_size();
 }
 
 // TransportInst::setMaxPacketSize
@@ -643,7 +611,7 @@ void JNICALL Java_OpenDDS_DCPS_transport_TransportInst_setMaxPacketSize
 (JNIEnv * jni, jobject jthis, jint val)
 {
   OpenDDS::DCPS::TransportInst_rch inst = OpenDDS::DCPS::rchandle_from(recoverCppObj<OpenDDS::DCPS:: TransportInst>(jni, jthis));
-  inst->max_packet_size_ = val;
+  inst->max_packet_size(val);
 }
 
 // TransportInst::getMaxSamplesPerPacket
@@ -651,7 +619,7 @@ jint JNICALL Java_OpenDDS_DCPS_transport_TransportInst_getMaxSamplesPerPacket
 (JNIEnv * jni, jobject jthis)
 {
   OpenDDS::DCPS::TransportInst_rch inst = OpenDDS::DCPS::rchandle_from(recoverCppObj<OpenDDS::DCPS:: TransportInst>(jni, jthis));
-  return static_cast<jint>(inst->max_samples_per_packet_);
+  return static_cast<jint>(inst->max_samples_per_packet());
 }
 
 // TransportInst::setMaxSamplesPerPacket
@@ -659,7 +627,7 @@ void JNICALL Java_OpenDDS_DCPS_transport_TransportInst_setMaxSamplesPerPacket
 (JNIEnv * jni, jobject jthis, jint val)
 {
   OpenDDS::DCPS::TransportInst_rch inst = OpenDDS::DCPS::rchandle_from(recoverCppObj<OpenDDS::DCPS:: TransportInst>(jni, jthis));
-  inst->max_samples_per_packet_ = val;
+  inst->max_samples_per_packet(val);
 }
 
 // TransportInst::getOptimumPacketSize
@@ -667,7 +635,7 @@ jint JNICALL Java_OpenDDS_DCPS_transport_TransportInst_getOptimumPacketSize
 (JNIEnv * jni, jobject jthis)
 {
   OpenDDS::DCPS::TransportInst_rch inst = OpenDDS::DCPS::rchandle_from(recoverCppObj<OpenDDS::DCPS:: TransportInst>(jni, jthis));
-  return inst->optimum_packet_size_;
+  return inst->optimum_packet_size();
 }
 
 // TransportInst::setOptimumPacketSize
@@ -675,7 +643,7 @@ void JNICALL Java_OpenDDS_DCPS_transport_TransportInst_setOptimumPacketSize
 (JNIEnv * jni, jobject jthis, jint val)
 {
   OpenDDS::DCPS::TransportInst_rch inst = OpenDDS::DCPS::rchandle_from(recoverCppObj<OpenDDS::DCPS:: TransportInst>(jni, jthis));
-  inst->optimum_packet_size_ = val;
+  inst->optimum_packet_size(val);
 }
 
 // TransportInst::isThreadPerConnection
@@ -683,7 +651,7 @@ jboolean JNICALL Java_OpenDDS_DCPS_transport_TransportInst_isThreadPerConnection
 (JNIEnv * jni, jobject jthis)
 {
   OpenDDS::DCPS::TransportInst_rch inst = OpenDDS::DCPS::rchandle_from(recoverCppObj<OpenDDS::DCPS:: TransportInst>(jni, jthis));
-  return inst->thread_per_connection_;
+  return inst->thread_per_connection();
 }
 
 // TransportInst::setThreadPerConnection
@@ -691,7 +659,7 @@ void JNICALL Java_OpenDDS_DCPS_transport_TransportInst_setThreadPerConnection
 (JNIEnv * jni, jobject jthis, jboolean val)
 {
   OpenDDS::DCPS::TransportInst_rch inst = OpenDDS::DCPS::rchandle_from(recoverCppObj<OpenDDS::DCPS:: TransportInst>(jni, jthis));
-  inst->thread_per_connection_ = val;
+  inst->thread_per_connection(val);
 }
 
 // TransportInst::getDatalinkReleaseDelay
@@ -699,7 +667,7 @@ jint JNICALL Java_OpenDDS_DCPS_transport_TransportInst_getDatalinkReleaseDelay
 (JNIEnv * jni, jobject jthis)
 {
   OpenDDS::DCPS::TransportInst_rch inst = OpenDDS::DCPS::rchandle_from(recoverCppObj<OpenDDS::DCPS:: TransportInst>(jni, jthis));
-  return inst->datalink_release_delay_;
+  return inst->datalink_release_delay();
 }
 
 // TransportInst::setDatalinkReleaseDelay
@@ -707,7 +675,7 @@ void JNICALL Java_OpenDDS_DCPS_transport_TransportInst_setDatalinkReleaseDelay
 (JNIEnv * jni, jobject jthis, jint val)
 {
   OpenDDS::DCPS::TransportInst_rch inst = OpenDDS::DCPS::rchandle_from(recoverCppObj<OpenDDS::DCPS:: TransportInst>(jni, jthis));
-  inst->datalink_release_delay_ = val;
+  inst->datalink_release_delay(val);
 }
 
 // TransportInst::getDatalinkControlChunks
@@ -715,7 +683,7 @@ jint JNICALL Java_OpenDDS_DCPS_transport_TransportInst_getDatalinkControlChunks
 (JNIEnv * jni, jobject jthis)
 {
   OpenDDS::DCPS::TransportInst_rch inst = OpenDDS::DCPS::rchandle_from(recoverCppObj<OpenDDS::DCPS:: TransportInst>(jni, jthis));
-  return static_cast<jint>(inst->datalink_control_chunks_);
+  return static_cast<jint>(inst->datalink_control_chunks());
 }
 
 // TransportInst::setDatalinkControlChunks
@@ -723,7 +691,7 @@ void JNICALL Java_OpenDDS_DCPS_transport_TransportInst_setDatalinkControlChunks
 (JNIEnv * jni, jobject jthis, jint val)
 {
   OpenDDS::DCPS::TransportInst_rch inst = OpenDDS::DCPS::rchandle_from(recoverCppObj<OpenDDS::DCPS::TransportInst>(jni, jthis));
-  inst->datalink_control_chunks_ = val;
+  inst->datalink_control_chunks(val);
 }
 
 // TcpInst

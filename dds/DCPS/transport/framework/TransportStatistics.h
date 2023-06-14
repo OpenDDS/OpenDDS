@@ -10,6 +10,8 @@
 
 #include "dds/DCPS/NetworkAddress.h"
 #include "dds/DCPS/NetworkResource.h"
+#include "dds/DCPS/ConfigStoreImpl.h"
+#include "dds/DCPS/Util.h"
 
 #include <dds/OpenddsDcpsExtC.h>
 
@@ -84,7 +86,7 @@ private:
   ssize_t recv_bytes_;
 };
 
-struct InternalTransportStatistics {
+struct OpenDDS_Dcps_Export InternalTransportStatistics {
   const OPENDDS_STRING transport;
   typedef OPENDDS_MAP(InternalMessageCountKey, InternalMessageCountValue) MessageCountMap;
   MessageCountMap message_count;
@@ -94,7 +96,13 @@ struct InternalTransportStatistics {
 
   explicit InternalTransportStatistics(const OPENDDS_STRING& a_transport)
     : transport(a_transport)
+    , count_messages_(false)
   {}
+
+  bool count_messages() const { return count_messages_; }
+
+  void reload(RcHandle<ConfigStoreImpl> config_store,
+              const String& config_prefix);
 
   void clear()
   {
@@ -102,6 +110,9 @@ struct InternalTransportStatistics {
     writer_resend_count.clear();
     reader_nack_count.clear();
   }
+
+private:
+  bool count_messages_;
 };
 
 inline void append(TransportStatisticsSequence& seq, const InternalTransportStatistics& istats)

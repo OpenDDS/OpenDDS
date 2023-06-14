@@ -66,14 +66,12 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     // tcp_inst->dump(std::cout);
 
     TEST_CHECK(tcp_inst->name() == "mytcp");
-    TEST_CHECK(tcp_inst->queue_messages_per_pool_ == 9);
-    TEST_CHECK(tcp_inst->queue_initial_pools_ == 2);
-    TEST_CHECK(tcp_inst->max_packet_size_ == 2000000000);
-    TEST_CHECK(tcp_inst->max_samples_per_packet_ == 3);
-    TEST_CHECK(tcp_inst->optimum_packet_size_ == 2048);
-    TEST_CHECK(tcp_inst->thread_per_connection_ == true);
-    TEST_CHECK(tcp_inst->datalink_release_delay_ == 5000);
-    TEST_CHECK(tcp_inst->datalink_control_chunks_ == 16);
+    TEST_CHECK(tcp_inst->max_packet_size() == 2000000000);
+    TEST_CHECK(tcp_inst->max_samples_per_packet() == 3);
+    TEST_CHECK(tcp_inst->optimum_packet_size() == 2048);
+    TEST_CHECK(tcp_inst->thread_per_connection() == true);
+    TEST_CHECK(tcp_inst->datalink_release_delay() == 5000);
+    TEST_CHECK(tcp_inst->datalink_control_chunks() == 16);
     TEST_CHECK(tcp_inst->local_address_string() == "localhost:");
     TEST_CHECK(tcp_inst->enable_nagle_algorithm_ == true);
     TEST_CHECK(tcp_inst->conn_retry_initial_delay_ == 1000);

@@ -29,6 +29,7 @@ if(NOT ${CMAKE_VERSION} VERSION_LESS "3.8.2")
   endif()
   add_subdirectory(Nested_IDL)
   add_subdirectory(idl_compiler_tests)
+  add_subdirectory(ace_tao_only)
 endif()
 
 add_subdirectory(include_subdir)

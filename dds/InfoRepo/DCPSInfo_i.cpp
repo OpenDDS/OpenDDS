@@ -2213,7 +2213,7 @@ int TAO_DDS_DCPSInfo_i::init_transport(int listen_address_given,
 
     OpenDDS::DCPS::TcpInst_rch tcp_inst =
       OpenDDS::DCPS::dynamic_rchandle_cast<OpenDDS::DCPS::TcpInst>(inst);
-    inst->datalink_release_delay_ = 0;
+    inst->datalink_release_delay(0);
 
     tcp_inst->conn_retry_attempts_ = 0;
 
