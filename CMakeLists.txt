@@ -4,7 +4,6 @@ project(opendds)
 enable_testing()
 
 set(OPENDDS_IS_BEING_BUILT TRUE CACHE INTERNAL "")
-set(OPENDDS_CMAKE_V4 TRUE CACHE INTERNAL "")
 # Need global GENERATED source file properties and need to override it for CMake tests
 set(CMAKE_POLICY_DEFAULT_CMP0118 NEW CACHE INTERNAL "")
 set(OPENDDS_BUILD_DIR "${CMAKE_CURRENT_BINARY_DIR}" CACHE INTERNAL "")
@@ -372,7 +371,7 @@ target_include_directories(OpenDDS_Dcps
     "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>"
     "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>"
   PRIVATE
-    "${CMAKE_SOURCE_DIR}/dds"
+    "${CMAKE_CURRENT_SOURCE_DIR}/dds"
 )
 target_link_libraries(OpenDDS_Dcps PUBLIC ${dcps_lib_deps})
 

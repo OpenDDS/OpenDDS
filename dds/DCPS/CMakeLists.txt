@@ -6,14 +6,20 @@ set(deps ACE::ACE)
 find_package(OpenDDS REQUIRED NO_DEFAULTS ${deps})
 include(opendds_build_helpers)
 
-add_library(OpenDDS_Util STATIC
+if(WIN32)
+  set(opendds_library_args EXPORT_SYMBOLS_NAME OpenDDS_Dcps)
+else()
+  set(opendds_util_type STATIC)
+  set(opendds_library_args NO_INSTALL)
+endif()
+add_library(OpenDDS_Util ${opendds_util_type}
   debug.cpp
   Hash.cpp
   SafetyProfileStreams.cpp
   Serializer.cpp
   XTypes/TypeObject.cpp
 )
-_opendds_library(OpenDDS_Util)
+_opendds_library(OpenDDS_Util ${opendds_library_args})
 target_compile_definitions(OpenDDS_Util PUBLIC OPENDDS_UTIL_BUILD)
 target_include_directories(OpenDDS_Util
   PUBLIC ../..
