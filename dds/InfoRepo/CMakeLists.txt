@@ -41,7 +41,7 @@ add_library(OpenDDS_Federator
   FederatorConfig.inl
   FederatorManagerImpl.inl
 )
-_opendds_library(OpenDDS_Federator)
+_opendds_library(OpenDDS_Federator MSVC_BIGOBJ)
 target_link_libraries(OpenDDS_Federator PUBLIC OpenDDS::InfoRepoLib)
 target_compile_definitions(OpenDDS_Federator PRIVATE OPENDDS_FEDERATOR_BUILD_DLL)
 opendds_target_sources(OpenDDS_Federator

@@ -365,7 +365,7 @@ add_library(OpenDDS_Dcps
   dds/DCPS/transport/framework/TransportStrategy.cpp
   dds/DCPS/transport/framework/TransportType.cpp
 )
-_opendds_library(OpenDDS_Dcps)
+_opendds_library(OpenDDS_Dcps MSVC_BIGOBJ)
 target_include_directories(OpenDDS_Dcps
   PUBLIC
     "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>"

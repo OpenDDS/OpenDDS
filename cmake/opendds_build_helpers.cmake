@@ -13,7 +13,7 @@ function(_opendds_alias target)
 endfunction()
 
 function(_opendds_library target)
-  set(no_value_options)
+  set(no_value_options MSVC_BIGOBJ)
   set(single_value_options EXPORT_SYMBOLS_NAME)
   set(multi_value_options)
   cmake_parse_arguments(arg
@@ -42,6 +42,10 @@ function(_opendds_library target)
     target_compile_definitions(${target} PUBLIC "OPENDDS_${short_export_symbols_name}_HAS_DLL=0")
   else()
     message(FATAL_ERROR "Target ${target} has unexpected type ${target_type}")
+  endif()
+
+  if(MSVC AND arg_MSVC_BIGOBJ)
+    target_compile_options(${target} PRIVATE /bigobj)
   endif()
 
   set(exec_perms

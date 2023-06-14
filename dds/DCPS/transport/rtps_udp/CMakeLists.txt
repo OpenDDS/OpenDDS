@@ -23,5 +23,5 @@ add_library(OpenDDS_Rtps_Udp
   RtpsTransportHeader.inl
   RtpsUdpDataLink.inl
 )
-_opendds_library(OpenDDS_Rtps_Udp)
+_opendds_library(OpenDDS_Rtps_Udp MSVC_BIGOBJ)
 target_link_libraries(OpenDDS_Rtps_Udp PUBLIC ${deps})
