@@ -4,8 +4,6 @@ project(opendds)
 enable_testing()
 
 set(OPENDDS_IS_BEING_BUILT TRUE CACHE INTERNAL "")
-# Need global GENERATED source file properties and need to override it for CMake tests
-set(CMAKE_POLICY_DEFAULT_CMP0118 NEW CACHE INTERNAL "")
 set(OPENDDS_BUILD_DIR "${CMAKE_CURRENT_BINARY_DIR}" CACHE INTERNAL "")
 set(OPENDDS_BIN_DIR "${OPENDDS_BUILD_DIR}/bin" CACHE INTERNAL "")
 set(OPENDDS_LIB_DIR "${OPENDDS_BUILD_DIR}/lib" CACHE INTERNAL "")
@@ -458,3 +456,4 @@ add_subdirectory(tests/cmake/ace_tao_only)
 add_subdirectory(tests/cmake/Messenger)
 # add_subdirectory(tests/cmake/idl_compiler_tests)
 add_subdirectory(tests/cmake/include_subdir)
+add_subdirectory(tests/cmake/generated_global)

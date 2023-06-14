@@ -32,7 +32,5 @@ add_library(${messenger} SHARED)
 set_target_properties(${messenger}
   PROPERTIES OUTPUT_NAME messenger
 )
-# TODO: This should be PUBLIC, but this is broken because of the unrecognized
-# GENERATED property on IDL compiler-generated files for this test.
-opendds_target_sources(${messenger} "${dst}/Messenger.idl")
+opendds_target_sources(${messenger} PUBLIC "${dst}/Messenger.idl")
 target_link_libraries(${messenger} OpenDDS::Dcps)
