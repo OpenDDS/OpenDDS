@@ -32,7 +32,7 @@ function(_opendds_library target)
   if(NOT DEFINED arg_EXPORT_SYMBOLS_NAME)
     set(arg_EXPORT_SYMBOLS_NAME "${target}")
   endif()
-  string(TOUPPER "${arg_EXPORT_NAME}" export_symbols_name)
+  string(TOUPPER "${arg_EXPORT_SYMBOLS_NAME}" export_symbols_name)
   if(target_type STREQUAL "SHARED_LIBRARY")
     # Define macro for export header
     target_compile_definitions(${target} PRIVATE "${export_symbols_name}_BUILD_DLL")
