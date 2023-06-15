@@ -61,7 +61,8 @@ _opendds_group_lib(Udp DEPENDS OpenDDS::Dcps)
 _opendds_group_lib(QOS_XML_XSC_Handler DEPENDS OpenDDS::Dcps ACE::XML_Utils)
 _opendds_group_lib(RtpsRelayLib DEPENDS OpenDDS::Dcps)
 
-foreach(_exe DCPSInfoRepo RtpsRelay dcpsinfo_dump inspect opendds_idl repoctl)
+_opendds_group_exe(opendds_idl HOST_TOOL)
+foreach(_exe DCPSInfoRepo RtpsRelay dcpsinfo_dump inspect repoctl)
   _opendds_group_exe("${_exe}")
 endforeach()
 

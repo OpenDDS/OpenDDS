@@ -46,6 +46,7 @@ _opendds_group_lib(Valuetype DEPENDS TAO::TAO TAO::AnyTypeCode)
 _opendds_group_exe(tao_idl
   MPC_NAME TAO_IDL_EXE
   DEPENDS ACE::ace_gperf
+  HOST_TOOL
 )
 
 if(OPENDDS_STATIC)

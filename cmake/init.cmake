@@ -21,31 +21,6 @@ function(_opendds_detect_ace)
   endif()
   set(_OPENDDS_DETECTED_ACE TRUE CACHE INTERNAL "")
 
-  try_run(run_result compile_result
-    SOURCES "${CMAKE_CURRENT_LIST_DIR}/detect_ace.cpp"
-    CMAKE_FLAGS "-DINCLUDE_DIRECTORIES:STRING=${OPENDDS_ACE}"
-    RUN_OUTPUT_STDOUT_VARIABLE detect_ace_output)
-  if(OPENDDS_CMAKE_VERBOSE)
-    message(STATUS "detect_ace_output: ${detect_ace_output}")
-  endif()
-
-  if(detect_ace_output MATCHES "CMAKE_SYSTEM_NAME=([^\n]+)\n")
-    set(ace_system_name "${CMAKE_MATCH_1}")
-    if(NOT "${CMAKE_SYSTEM_NAME}" STREQUAL "${ace_system_name}")
-      message(FATAL_ERROR
-        "ace_system_name is \"${ace_system_name}\" is not the same as "
-        "CMAKE_SYSTEM_NAME \"${CMAKE_SYSTEM_NAME}\"")
-    endif()
-  else()
-    message(FATAL_ERROR "Couldn't get OS name from detect_ace output: ${detect_ace_output}")
-  endif()
-
-  if(detect_ace_output MATCHES "ACE_VERSION=([^\n]+)\n")
-    message("ACE_VERSION: ${CMAKE_MATCH_1}")
-  else()
-    message(FATAL_ERROR "Couldn't get ACE version from detect_ace output: ${detect_ace_output}")
-  endif()
-
   execute_process(
     COMMAND ${PERL_EXECUTABLE} "${CMAKE_CURRENT_LIST_DIR}/detect_ace.pl" "${OPENDDS_ACE}"
     RESULT_VARIABLE run_result

@@ -21,6 +21,7 @@ _opendds_group_lib(XML_Utils
 _opendds_group_exe(ace_gperf
   MPC_NAME gperf
   DEPENDS ACE::ACE
+  HOST_TOOL
   # Adding ${TAO_BIN_DIR} to the ace bin hints allows users of
   # VxWorks layer builds to set TAO_BIN_DIR to the location of
   # the partner host tools directory, but keep ACE_BIN_DIR the

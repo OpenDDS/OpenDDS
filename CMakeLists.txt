@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.22)
 
-project(opendds)
+project(opendds CXX)
 enable_testing()
 
 set(OPENDDS_IS_BEING_BUILT TRUE CACHE INTERNAL "")
@@ -9,109 +9,31 @@ set(OPENDDS_BIN_DIR "${OPENDDS_BUILD_DIR}/bin" CACHE INTERNAL "")
 set(OPENDDS_LIB_DIR "${OPENDDS_BUILD_DIR}/lib" CACHE INTERNAL "")
 set(OPENDDS_SOURCE_ROOT "${CMAKE_CURRENT_LIST_DIR}" CACHE INTERNAL "")
 list(APPEND CMAKE_PREFIX_PATH "${OPENDDS_SOURCE_ROOT}")
+list(APPEND CMAKE_FIND_ROOT_PATH "${OPENDDS_SOURCE_ROOT}")
 set(_OPENDDS_CMAKE_DIR "${OPENDDS_SOURCE_ROOT}/cmake" CACHE INTERNAL "")
 list(APPEND CMAKE_MODULE_PATH "${_OPENDDS_CMAKE_DIR}")
 
 include("${_OPENDDS_CMAKE_DIR}/opendds_features.cmake")
 
 if(NOT DEFINED OPENDDS_ACE)
-  # TODO: Move building ACE/TAO to its own file?
-  include(ExternalProject)
-  include(FetchContent)
-
-  set(ACE_IS_BEING_BUILT MPC CACHE INTERNAL "")
-  set(TAO_IS_BEING_BUILT MPC CACHE INTERNAL "")
-  set(OPENDDS_ACE "${OPENDDS_BUILD_DIR}/ace_tao" CACHE INTERNAL "")
-  set(OPENDDS_MPC "${OPENDDS_ACE}/MPC" CACHE INTERNAL "")
-  set(OPENDDS_TAO "${OPENDDS_ACE}/TAO" CACHE INTERNAL "")
-  set(url_base "https://github.com/DOCGroup/ACE_TAO/releases/download/")
-  set(ace_ver "7.1.0")
-  set(configre_ace_tao_args)
-  if(WIN32)
-    # TODO
-  else()
-    set(ext "tar.bz2")
-    set(md5 "4696c2898de3bda28dd69abf0055b7eb")
-    set(mpc_type gnuace)
-    if(LINUX)
-      set(config_file "config-linux.h")
-      list(APPEND configure_ace_tao_args --platform-macros-file "platform_linux.GNU")
-    elseif(APPLE)
-      # TODO
-    endif()
-  endif()
-  if(NOT DEFINED config_file)
-    message(FATAL_ERROR "Not sure how to build ACE/TAO for this system")
-  endif()
-
-  string(REPLACE "." "_" ace_ver_tag "${ace_ver}")
-  FetchContent_Declare(ace_tao_dl
-    PREFIX "${OPENDDS_BUILD_DIR}/ace_tao_tmp"
-    SOURCE_DIR "${OPENDDS_ACE}"
-    URL "${url_base}ACE+TAO-${ace_ver_tag}/ACE+TAO-src-${ace_ver}.${ext}"
-    URL_MD5 "${md5}"
-  )
-  FetchContent_Populate(ace_tao_dl)
-
-  find_package(Perl REQUIRED)
-  execute_process(
-    COMMAND
-      "${PERL_EXECUTABLE}" "${_OPENDDS_CMAKE_DIR}/configure_ace_tao.pl"
-      --mpc "${OPENDDS_MPC}"
-      --mpc-type "${mpc_type}"
-      --ace "${OPENDDS_ACE}"
-      --tao "${OPENDDS_TAO}"
-      ${configure_ace_tao_args}
-      --config-file "${config_file}"
-      ${_OPENDDS_MPC_FEATURES}
-    COMMAND_ECHO STDOUT
-    COMMAND_ERROR_IS_FATAL ANY
-  )
-
-  execute_process(
-    COMMAND
-      "${PERL_EXECUTABLE}" "${_OPENDDS_CMAKE_DIR}/scrap_gnuace.pl"
-      --workspace "${OPENDDS_ACE}"
-      --loc-base "${OPENDDS_BUILD_DIR}"
-      --ace "${OPENDDS_ACE}"
-      --tao "${OPENDDS_TAO}"
-    COMMAND_ECHO STDOUT
-    COMMAND_ERROR_IS_FATAL ANY
-    OUTPUT_VARIABLE mpc_projects
-  )
-  set(_OPENDDS_ACE_MPC_PROJECTS "${mpc_projects}" CACHE INTERNAL "")
-  set(_OPENDDS_ACE_MPC_EXTERNAL_PROJECT "build_ace_tao" CACHE INTERNAL "")
-  set(_OPENDDS_TAO_MPC_PROJECTS "${mpc_projects}" CACHE INTERNAL "")
-  set(_OPENDDS_TAO_MPC_EXTERNAL_PROJECT "build_ace_tao" CACHE INTERNAL "")
-
-  string(JSON project_count LENGTH "${mpc_projects}")
-  if(project_count EQUAL 0)
-    message(FATAL_ERROR "MPC projects was empty!")
-  endif()
-  set(byproducts)
-  math(EXPR member_index_end "${project_count} - 1")
-  foreach(member_index RANGE ${member_index_end})
-    string(JSON member_name MEMBER "${mpc_projects}" ${member_index})
-    string(JSON mpc_project GET "${mpc_projects}" ${member_name})
-    string(JSON file GET "${mpc_project}" loc)
-    list(APPEND byproducts "${file}")
-  endforeach()
-
-  ExternalProject_Add(build_ace_tao
-    SOURCE_DIR "${OPENDDS_ACE}"
-    CONFIGURE_COMMAND "${CMAKE_COMMAND}" -E echo "Already configured"
-    BUILD_IN_SOURCE TRUE
-    BUILD_COMMAND
-      "${CMAKE_COMMAND}" -E env "ACE_ROOT=${OPENDDS_ACE}" "TAO_ROOT=${OPENDDS_TAO}"
-      make -j8
-    BUILD_BYPRODUCTS ${byproducts}
-    USES_TERMINAL_BUILD TRUE # Needed for Ninja to show the ACE/TAO build
-    INSTALL_COMMAND "${CMAKE_COMMAND}" -E echo "No install step"
-  )
+  include("${_OPENDDS_CMAKE_DIR}/build_ace_tao.cmake")
 endif()
 
-add_subdirectory(dds/DCPS)
-add_subdirectory(dds/idl)
+if(DEFINED OPENDDS_ACE_TAO_HOST_TOOLS)
+  set(_OPENDDS_ACE_HOST_TOOLS "${OPENDDS_ACE_TAO_HOST_TOOLS}/bin" CACHE INTERNAL "")
+  set(_OPENDDS_TAO_HOST_TOOLS "${OPENDDS_ACE_TAO_HOST_TOOLS}/bin" CACHE INTERNAL "")
+endif()
+if(DEFINED OPENDDS_HOST_TOOLS)
+  set(_OPENDDS_OPENDDS_HOST_TOOLS "${OPENDDS_HOST_TOOLS}/bin" CACHE INTERNAL "")
+endif()
+
+if(NOT CMAKE_CROSSCOMPILING)
+  add_subdirectory(dds/DCPS)
+  add_subdirectory(dds/idl)
+  if(BUILD_OPENDDS_HOST_TOOLS)
+    return()
+  endif()
+endif()
 
 # TODO: Move Dcps to dds/CMakeLists.txt?
 
@@ -281,6 +203,7 @@ add_library(OpenDDS_Dcps
   dds/DCPS/transport/framework/DataLinkSet.inl
   dds/DCPS/transport/framework/DirectPriorityMapper.cpp
   dds/DCPS/transport/framework/DirectPriorityMapper.inl
+  dds/DCPS/transport/framework/MessageDropper.cpp
   dds/DCPS/transport/framework/NullSynch.cpp
   dds/DCPS/transport/framework/NullSynch.inl
   dds/DCPS/transport/framework/NullSynchStrategy.cpp
@@ -360,6 +283,7 @@ add_library(OpenDDS_Dcps
   dds/DCPS/transport/framework/TransportSendListener.cpp
   dds/DCPS/transport/framework/TransportSendStrategy.cpp
   dds/DCPS/transport/framework/TransportSendStrategy.inl
+  dds/DCPS/transport/framework/TransportStatistics.cpp
   dds/DCPS/transport/framework/TransportStrategy.cpp
   dds/DCPS/transport/framework/TransportType.cpp
 )
