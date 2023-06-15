@@ -233,9 +233,10 @@ ShmemDataLink::stop_i()
   {
     ACE_GUARD(ACE_Thread_Mutex, g, peer_alloc_mutex_);
     if (peer_alloc_) {
-      // Release the shared memory pool we use from the peer so that the
-      // OS will release that memory when it is not used anymore
-      peer_alloc_->release(1 /*close*/);
+      if (peer_alloc_->release(0 /*close*/) != 0) {
+        VDBG_LVL((LM_ERROR,
+                  "(%P|%t) ShmemDataLink::stop_i Release shared memory failed\n"), 1);
+      }
       delete peer_alloc_;
       peer_alloc_ = 0;
     }

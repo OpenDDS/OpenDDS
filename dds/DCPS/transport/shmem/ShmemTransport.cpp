@@ -240,7 +240,11 @@ ShmemTransport::shutdown_i()
 #  endif /* OPENDDS_SHMEM_WINDOWS */
 #endif /* OPENDDS_SHMEM_UNSUPPORTED */
 
-    alloc_->release(1 /*close*/);
+    if (alloc_->release(1 /*close*/) != 0) {
+      VDBG_LVL((LM_ERROR,
+                "(%P|%t) ShmemTransport::shutdown_i Release shared memory failed\n"), 1);
+    }
+
     alloc_.reset();
   }
 }
