@@ -50,7 +50,6 @@ struct ShmemData {
 class OpenDDS_Shmem_Export ShmemDataLink
   : public DataLink {
 public:
-
   ShmemDataLink(const ShmemTransport_rch& transport);
 
   bool open(const std::string& peer_address);
