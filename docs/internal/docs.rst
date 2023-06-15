@@ -18,7 +18,7 @@ Multiple kinds can be passed, and they are documented in the following sections.
 Requirements
 ============
 
-The script requires Python 3.6 or later and an internet connection if the script needs to download dependencies or check the validity of external links.
+The script requires `Python 3.6 or later <https://www.python.org/downloads/>`__ and an internet connection if the script needs to download dependencies or check the validity of external links.
 
 You might receive a message like this when running for the first time::
 
@@ -34,25 +34,25 @@ If you do, then follow the directions it gives, remove the ``docs/.venv`` direct
 HTML
 ====
 
-HTML documentation can be built and viewed using ``./docs/build.py -o html``.
-If it was built successfully, then the front page will be at ``./docs/_build/html/index.html``.
+HTML documentation can be built and viewed using ``docs/build.py -o html``.
+If it was built successfully, then the front page will be at ``docs/_build/html/index.html``.
 
-A single page variant is also available using ``./docs/build.py -o singlehtml``
-If it was built successfully, then the page will be at ``./docs/_build/singlehtml/index.html``.
+A single page variant is also available using ``docs/build.py -o singlehtml``
+If it was built successfully, then the page will be at ``docs/_build/singlehtml/index.html``.
 
 PDF
 ===
 
 .. note:: This has additional dependencies on LaTeX that are documented `here <https://www.sphinx-doc.org/en/master/usage/builders/index.html#sphinx.builders.latex.LaTeXBuilder>`__.
 
-PDF documentation can be built and viewed using ``./docs/build.py -o pdf``.
-If it was built successfully, then the PDF file will be at ``./docs/_build/latex/opendds.pdf``.
+PDF documentation can be built and viewed using ``docs/build.py -o pdf``.
+If it was built successfully, then the PDF file will be at ``docs/_build/latex/opendds.pdf``.
 
 Dash
 ====
 
 Documentation can be built for `Dash <https://kapeli.com/dash>`_, `Zeal <https://zealdocs.org/>`_, and other Dash-compatible applications using `doc2dash <https://github.com/hynek/doc2dash>`_.
-The command for this is ``./docs/build.py dash``.
+The command for this is ``docs/build.py dash``.
 This will create a ``docs/_build/OpenDDS.docset`` directory that must be manually moved to where other docsets are stored.
 
 Strict Checks
@@ -478,7 +478,7 @@ These will result in:
   - Unoptimized all code that's not related to pigeons (:ghpr:`2222`) [Rank 0]
 
 The ranks are included in previews of the news as an aid to deciding what the rank of new news content should be.
-The preview can be viewed in :doc:`/news` or alternatively by running ``./docs/news.py preview``.
+The preview can be viewed in :doc:`/news` or alternatively by running ``docs/news.py preview``.
 The ranks are not included in the final news for a release.
 
 One final thing to note is that top-level sections, like "Additions", have a fixed rank that can't be changed so they always appear in the same order.
@@ -487,7 +487,7 @@ Generating the News
 ===================
 
 Before a release, a preview of the whole news for the next release will always be available in :doc:`/news`.
-It's also possible to see the source of that preview by running ``./docs/news.py preview`` or ``./docs/news.py preview-all``.
+It's also possible to see the source of that preview by running ``docs/news.py preview`` or ``docs/news.py preview-all``.
 During a release the fragments are permanently committed to :ghfile:`docs/news.d/_releases` and :ghfile:`NEWS.md` and the fragment files in :ghfile:`docs/news.d` are removed.
 
 .. seealso:: :doc:`release`

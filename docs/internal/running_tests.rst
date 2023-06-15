@@ -31,7 +31,7 @@ For Unixes (Linux, macOS, BSDs, etc)
 
 Run this in :envvar:`DDS_ROOT`::
 
-  ./bin/auto_run_tests.pl
+  bin/auto_run_tests.pl
 
 For Windows
 -----------
