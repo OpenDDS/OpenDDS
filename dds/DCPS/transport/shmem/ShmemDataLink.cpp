@@ -233,7 +233,7 @@ ShmemDataLink::stop_i()
   {
     ACE_GUARD(ACE_Thread_Mutex, g, peer_alloc_mutex_);
     if (peer_alloc_) {
-      if (peer_alloc_->release(0 /*close*/) == -1) {
+      if (peer_alloc_->release(1 /*close*/) == -1) {
         VDBG_LVL((LM_ERROR,
                   "(%P|%t) ShmemDataLink::stop_i Release shared memory failed\n"), 1);
       }
