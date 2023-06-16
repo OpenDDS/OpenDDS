@@ -37,6 +37,12 @@ sub get_bin_executable {
   my $bin = catdir($ENV{DDS_ROOT}, "bin");
   if (defined($ENV{OPENDDS_BUILD_DIR})) {
     $bin = catdir($ENV{OPENDDS_BUILD_DIR}, "bin");
+    if (defined($ENV{CMAKE_CONFIG_TYPE})) {
+      my $subdir_bin = catdir($bin, $ENV{CMAKE_CONFIG_TYPE});
+      if (-d $subdir_bin) {
+        $bin = $subdir_bin;
+      }
+    }
   }
   elsif (defined($ENV{OPENDDS_INSTALL_PREFIX})) {
     $bin = catdir($ENV{OPENDDS_INSTALL_PREFIX}, "bin");
@@ -664,6 +670,9 @@ sub process {
   }
 
   my $subdir = $PerlACE::Process::ExeSubDir;
+  if (defined($ENV{CMAKE_CONFIG_TYPE})) {
+    $subdir = $ENV{CMAKE_CONFIG_TYPE};
+  }
   my $basename = File::Basename::basename($executable);
   my $dirname = File::Basename::dirname($executable);
   if (!defined(PerlDDS::get_executable($basename, $dirname, catdir($dirname, $subdir)))) {
