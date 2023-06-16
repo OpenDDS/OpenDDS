@@ -59,7 +59,7 @@ sub get_projects {
   return \%projects;
 }
 
-sub scrap_makefile {
+sub scrape_makefile {
   my $mf = shift();
   my $projects = shift();
   my $project = shift();
@@ -116,11 +116,11 @@ $ENV{TAO_ROOT} = $values{tao};
 
 chdir($values{workspace});
 my $projects = get_projects();
-scrap_makefile($gnumf, $projects);
+scrape_makefile($gnumf, $projects);
 for my $project (values(%{$projects})) {
   die("$project->{name} is missing dir") if (!defined($project->{dir}));
   chdir($project->{dir}) or die("Couldn't cd for $project->{name} to $project->{dir}: $!");
-  scrap_makefile("$project->{mf}", $projects, $project);
+  scrape_makefile("$project->{mf}", $projects, $project);
 }
 
 # Remove deps without a build.local removed above

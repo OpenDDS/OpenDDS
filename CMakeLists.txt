@@ -364,13 +364,12 @@ opendds_target_sources(OpenDDS_Dcps
   ${opendds_target_sources_args}
 )
 
-add_subdirectory(dds/DCPS/InfoRepoDiscovery)
-add_subdirectory(dds/DCPS/RTPS)
-
 add_subdirectory(dds/DCPS/transport/multicast)
+add_subdirectory(dds/DCPS/RTPS)
 add_subdirectory(dds/DCPS/transport/rtps_udp)
 add_subdirectory(dds/DCPS/transport/shmem)
 add_subdirectory(dds/DCPS/transport/tcp)
+add_subdirectory(dds/DCPS/InfoRepoDiscovery)
 add_subdirectory(dds/DCPS/transport/udp)
 
 add_subdirectory(dds/InfoRepo)

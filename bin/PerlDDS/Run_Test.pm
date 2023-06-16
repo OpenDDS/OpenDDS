@@ -41,7 +41,6 @@ sub get_bin_executable {
   elsif (defined($ENV{OPENDDS_INSTALL_PREFIX})) {
     $bin = catdir($ENV{OPENDDS_INSTALL_PREFIX}, "bin");
   }
-  print("bin=$bin\n");
   return get_executable($name, $bin);
 }
 

@@ -1,6 +1,6 @@
 project(opendds_info_repo_discovery CXX)
 
-set(lib_deps OpenDDS::Dcps TAO::TAO TAO::PI)
+set(lib_deps OpenDDS::Dcps OpenDDS::Tcp TAO::TAO TAO::PI)
 find_package(OpenDDS REQUIRED NO_DEFAULTS ${lib_deps} safety_profile=FALSE)
 include(opendds_build_helpers)
 
