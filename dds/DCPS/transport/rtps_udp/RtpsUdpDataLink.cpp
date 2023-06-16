@@ -3191,10 +3191,10 @@ RtpsUdpDataLink::RtpsWriter::process_acknack(const RTPS::AckNackSubmessage& ackn
   const SequenceNumber sn_received_by_reader = ack.previous();
   if (sn_received_by_reader > max_sn) {
     if (transport_debug.log_dropped_messages) {
-    ACE_DEBUG((LM_DEBUG, "(%P|%t) {transport_debug.log_dropped_messages} "
-               "RtpsUdpDataLink::RtpsWriter::process_acknack: %C -> %C "
-               "Received sequence number (%q) > expected max sequence number (%q)\n",
-               LogGuid(src).c_str(), LogGuid(id_).c_str(), sn_received_by_reader.getValue(), max_sn.getValue()));
+      ACE_DEBUG((LM_DEBUG, "(%P|%t) {transport_debug.log_dropped_messages} "
+                 "RtpsUdpDataLink::RtpsWriter::process_acknack: %C -> %C "
+                 "Received sequence number (%q) > expected max sequence number (%q)\n",
+                 LogGuid(src).c_str(), LogGuid(id_).c_str(), sn_received_by_reader.getValue(), max_sn.getValue()));
     }
     return;
   }
