@@ -3187,6 +3187,17 @@ RtpsUdpDataLink::RtpsWriter::process_acknack(const RTPS::AckNackSubmessage& ackn
   }
 
   const ReaderInfo_rch& reader = ri->second;
+  const SequenceNumber max_sn = expected_max_sn(reader);
+  const SequenceNumber sn_received_by_reader = ack.previous();
+  if (sn_received_by_reader > max_sn) {
+    if (transport_debug.log_dropped_messages) {
+      ACE_DEBUG((LM_DEBUG, "(%P|%t) {transport_debug.log_dropped_messages} "
+                 "RtpsUdpDataLink::RtpsWriter::process_acknack: %C -> %C "
+                 "Received sequence number (%q) > expected max sequence number (%q)\n",
+                 LogGuid(src).c_str(), LogGuid(id_).c_str(), sn_received_by_reader.getValue(), max_sn.getValue()));
+    }
+    return;
+  }
 
   SequenceNumber previous_acked_sn = reader->acked_sn();
   const bool count_is_not_zero = acknack.count.value != 0;
@@ -3219,20 +3230,18 @@ RtpsUdpDataLink::RtpsWriter::process_acknack(const RTPS::AckNackSubmessage& ackn
   const bool is_final = acknack.smHeader.flags & RTPS::FLAG_F;
   const bool is_postassociation = count_is_not_zero && (is_final || bitmapNonEmpty(acknack.readerSNState) || ack != 1);
 
-  if (preassociation_readers_.count(reader)) {
-    if (is_postassociation) {
-      remove_preassociation_reader(reader);
-      if (transport_debug.log_progress) {
-        log_progress("RTPS writer/reader association complete", id_, reader->id_, reader->participant_discovered_at_);
-      }
-      log_remote_counts("process_acknack");
-
-      const SequenceNumber max_sn = expected_max_sn(reader);
-      const SequenceNumber acked_sn = reader->acked_sn();
-      snris_insert(acked_sn == max_sn ? leading_readers_ : lagging_readers_, reader);
-      check_leader_lagger();
-      // Heartbeat is already scheduled.
+  if (preassociation_readers_.count(reader) && is_postassociation) {
+    remove_preassociation_reader(reader);
+    if (transport_debug.log_progress) {
+      log_progress("RTPS writer/reader association complete", id_, reader->id_, reader->participant_discovered_at_);
     }
+    log_remote_counts("process_acknack");
+
+    const SequenceNumber max_sn = expected_max_sn(reader);
+    const SequenceNumber acked_sn = reader->acked_sn();
+    snris_insert(acked_sn == max_sn ? leading_readers_ : lagging_readers_, reader);
+    check_leader_lagger();
+    // Heartbeat is already scheduled.
   }
 
   OPENDDS_MAP(SequenceNumber, TransportQueueElement*) pendingCallbacks;
