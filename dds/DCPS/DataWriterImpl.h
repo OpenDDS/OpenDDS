@@ -191,8 +191,9 @@ public:
 
   virtual DDS::ReturnCode_t enable();
 
-  virtual void add_association(const GUID_t& yourId,
-                               const ReaderAssociation& reader,
+  virtual void set_publication_id(const GUID_t& guid);
+
+  virtual void add_association(const ReaderAssociation& reader,
                                bool active);
 
   virtual void transport_assoc_done(int flags, const GUID_t& remote_id);
@@ -485,12 +486,6 @@ public:
 
   virtual WeakRcHandle<ICE::Endpoint> get_ice_endpoint();
 
-  GUID_t get_guid() const
-  {
-    ACE_Guard<ACE_Recursive_Thread_Mutex> guard(lock_);
-    return publication_id_;
-  }
-
   SequenceNumber get_max_sn() const
   {
     ACE_Guard<ACE_Thread_Mutex> guard(sn_lock_);
@@ -516,14 +511,6 @@ public:
     const DDS::Time_t& source_timestamp);
 
 protected:
-
-  void check_and_set_repo_id(const GUID_t& id)
-  {
-    ACE_Guard<ACE_Recursive_Thread_Mutex> guard(lock_);
-    if (GUID_UNKNOWN == publication_id_) {
-      publication_id_ = id;
-    }
-  }
 
   SequenceNumber get_next_sn()
   {

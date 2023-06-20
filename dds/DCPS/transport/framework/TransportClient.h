@@ -21,6 +21,7 @@
 #include <dds/DCPS/DiscoveryListener.h>
 #include <dds/DCPS/RcEventHandler.h>
 #include <dds/DCPS/BuiltInTopicUtils.h>
+#include <dds/DCPS/GuidUtils.h>
 
 #include <ace/Time_Value.h>
 #include <ace/Event_Handler.h>
@@ -128,7 +129,6 @@ public:
   bool remove_all_msgs();
 
   virtual void add_link(const DataLink_rch& link, const GUID_t& peer);
-  virtual GUID_t get_guid() const = 0;
   virtual RcHandle<BitSubscriber> get_builtin_subscriber_proxy() const { return RcHandle<BitSubscriber>(); }
 
   void terminate_send_if_suspended();
@@ -136,10 +136,17 @@ public:
   bool associated_with(const GUID_t& remote) const;
   bool pending_association_with(const GUID_t& remote) const;
 
-  GUID_t repo_id() const
+  void set_guid(const GUID_t& guid)
   {
-    ACE_Guard<ACE_Thread_Mutex> guard(lock_);
-    return repo_id_;
+    OPENDDS_ASSERT(guid_ == GUID_UNKNOWN);
+    OPENDDS_ASSERT(guid != GUID_UNKNOWN);
+    guid_ = guid;
+  }
+
+  GUID_t get_guid() const
+  {
+    OPENDDS_ASSERT(guid_ != GUID_UNKNOWN);
+    return guid_;
   }
 
   void data_acked(const GUID_t& remote);
@@ -348,7 +355,7 @@ private:
 
   Reverse_Lock_t reverse_lock_;
 
-  GUID_t repo_id_;
+  GUID_t guid_;
 };
 
 typedef RcHandle<TransportClient> TransportClient_rch;

@@ -46,7 +46,9 @@ public:
     , pub_id_(GUID_UNKNOWN)
     , seq_(SequenceNumber::ZERO())
     , control_msg_count_(0)
-  {}
+  {
+    TransportClient::set_guid(sub_id_);
+  }
 
   virtual ~SimpleDataReader() {}
 

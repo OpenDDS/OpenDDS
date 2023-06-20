@@ -46,7 +46,10 @@ const Encoding encoding(Encoding::KIND_XCDR1, OpenDDS::DCPS::ENDIAN_LITTLE);
 const Encoding& blob_encoding = get_locators_encoding();
 
 struct SimpleTC: TransportClient {
-  explicit SimpleTC(const GUID_t& local) : local_id_(local), mutex_(), cond_(mutex_) {}
+  explicit SimpleTC(const GUID_t& local) : local_id_(local), mutex_(), cond_(mutex_)
+  {
+    TransportClient::set_guid(local_id_);
+  }
 
   void transport_assoc_done(int flags, const GUID_t& remote) {
     if (!(flags & ASSOC_OK)) {

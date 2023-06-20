@@ -186,15 +186,15 @@ public:
   /// for the publication pointer, so it requires that
   /// the publication pointer remain valid until
   /// remove_publication is called.
-  virtual GUID_t add_publication(
-    DDS::DomainId_t domainId,
-    const GUID_t& participantId,
-    const GUID_t& topicId,
-    DataWriterCallbacks_rch publication,
-    const DDS::DataWriterQos& qos,
-    const TransportLocatorSeq& transInfo,
-    const DDS::PublisherQos& publisherQos,
-    const XTypes::TypeInformation& type_info) = 0;
+  /// Return true on success.
+  virtual bool add_publication(DDS::DomainId_t domainId,
+                               const GUID_t& participantId,
+                               const GUID_t& topicId,
+                               DataWriterCallbacks_rch publication,
+                               const DDS::DataWriterQos& qos,
+                               const TransportLocatorSeq& transInfo,
+                               const DDS::PublisherQos& publisherQos,
+                               const XTypes::TypeInformation& type_info) = 0;
 
   virtual bool remove_publication(
     DDS::DomainId_t domainId,
@@ -228,18 +228,18 @@ public:
   /// for the subscription pointer, so it requires that
   /// the subscription pointer remain valid until
   /// remove_subscription is called.
-  virtual GUID_t add_subscription(
-    DDS::DomainId_t domainId,
-    const GUID_t& participantId,
-    const GUID_t& topicId,
-    DataReaderCallbacks_rch subscription,
-    const DDS::DataReaderQos& qos,
-    const TransportLocatorSeq& transInfo,
-    const DDS::SubscriberQos& subscriberQos,
-    const char* filterClassName,
-    const char* filterExpression,
-    const DDS::StringSeq& exprParams,
-    const XTypes::TypeInformation& type_info) = 0;
+  /// Return true on success.
+  virtual bool add_subscription(DDS::DomainId_t domainId,
+                                const GUID_t& participantId,
+                                const GUID_t& topicId,
+                                DataReaderCallbacks_rch subscription,
+                                const DDS::DataReaderQos& qos,
+                                const TransportLocatorSeq& transInfo,
+                                const DDS::SubscriberQos& subscriberQos,
+                                const char* filterClassName,
+                                const char* filterExpression,
+                                const DDS::StringSeq& exprParams,
+                                const XTypes::TypeInformation& type_info) = 0;
 
   virtual bool remove_subscription(
     DDS::DomainId_t domainId,

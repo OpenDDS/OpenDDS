@@ -40,7 +40,7 @@ int DcpsUpcalls::svc()
   if (!drr) {
     return 0;
   }
-  drr->add_association(reader_, wa_, active_);
+  drr->add_association(wa_, active_);
 
   {
     ACE_GUARD_RETURN(ACE_Thread_Mutex, g, mtx_, -1);

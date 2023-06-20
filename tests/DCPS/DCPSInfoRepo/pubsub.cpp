@@ -91,7 +91,6 @@ bool pubsub(OpenDDS::DCPS::Discovery_rch disc, CORBA::ORB_var orb)
 
   OpenDDS::DCPS::GUID_t pubPartId = OpenDDS::DCPS::GUID_UNKNOWN;
   OpenDDS::DCPS::GUID_t pubTopicId = OpenDDS::DCPS::GUID_UNKNOWN;
-  OpenDDS::DCPS::GUID_t pubId = OpenDDS::DCPS::GUID_UNKNOWN;
   OpenDDS::DCPS::RcHandle<TAO_DDS_DCPSDataWriter_i> dwImpl(OpenDDS::DCPS::make_rch<TAO_DDS_DCPSDataWriter_i>());
 
   DDS::DomainParticipantFactory_var dpf = TheServiceParticipant->get_domain_participant_factory();
@@ -219,15 +218,15 @@ bool pubsub(OpenDDS::DCPS::Discovery_rch disc, CORBA::ORB_var orb)
 
   ::DDS::PublisherQos_var pQos = new ::DDS::PublisherQos;
   *pQos = TheServiceParticipant->initial_PublisherQos();
-  pubId = disc->add_publication(domain,
-                                pubPartId,
-                                pubTopicId,
-                                rchandle_from(dwImpl.in()),
-                                dwQos.in(),
-                                tii,
-                                pQos.in(),
-                                type_info);
-  if (OpenDDS::DCPS::GUID_UNKNOWN == pubId)
+  disc->add_publication(domain,
+                        pubPartId,
+                        pubTopicId,
+                        rchandle_from(dwImpl.in()),
+                        dwQos.in(),
+                        tii,
+                        pQos.in(),
+                        type_info);
+  if (OpenDDS::DCPS::GUID_UNKNOWN == dwImpl->guid())
     {
       failed = true;
       ACE_ERROR((LM_ERROR, ACE_TEXT("ERROR: add_publication failed!\n") ));
@@ -268,7 +267,6 @@ bool pubsub(OpenDDS::DCPS::Discovery_rch disc, CORBA::ORB_var orb)
 
   OpenDDS::DCPS::GUID_t subPartId = OpenDDS::DCPS::GUID_UNKNOWN;
   OpenDDS::DCPS::GUID_t subTopicId = OpenDDS::DCPS::GUID_UNKNOWN;
-  OpenDDS::DCPS::GUID_t subId = OpenDDS::DCPS::GUID_UNKNOWN;
   TAO_DDS_DCPSDataReader_i drImpl;
   if (use_rtps)
     drImpl.disco_ = disc.in();
@@ -337,16 +335,16 @@ bool pubsub(OpenDDS::DCPS::Discovery_rch disc, CORBA::ORB_var orb)
   type_info.minimal.dependent_typeid_count = 0;
   type_info.complete.dependent_typeid_count = 0;
 
-  subId = disc->add_subscription(domain,
-                                 subPartId,
-                                 subTopicId,
-                                 rchandle_from(&drImpl),
-                                 drQos.in(),
-                                 tii,
-                                 subQos.in(),
-                                 "", "", DDS::StringSeq(),
-                                 type_info);
-  if( OpenDDS::DCPS::GUID_UNKNOWN == subId)
+  disc->add_subscription(domain,
+                         subPartId,
+                         subTopicId,
+                         rchandle_from(&drImpl),
+                         drQos.in(),
+                         tii,
+                         subQos.in(),
+                         "", "", DDS::StringSeq(),
+                         type_info);
+  if( OpenDDS::DCPS::GUID_UNKNOWN == drImpl.guid())
     {
       failed = true;
       ACE_ERROR((LM_ERROR, ACE_TEXT("ERROR: add_subscription failed!\n") ));
@@ -371,7 +369,6 @@ bool pubsub(OpenDDS::DCPS::Discovery_rch disc, CORBA::ORB_var orb)
 
 
   // incompatible QOS
-  OpenDDS::DCPS::GUID_t pubIncQosId = OpenDDS::DCPS::GUID_UNKNOWN;
   TAO_DDS_DCPSDataWriter_i dwIncQosImpl;
 
   // Add publication
@@ -393,15 +390,15 @@ bool pubsub(OpenDDS::DCPS::Discovery_rch disc, CORBA::ORB_var orb)
   type_info.minimal.dependent_typeid_count = 0;
   type_info.complete.dependent_typeid_count = 0;
 
-  pubIncQosId = disc->add_publication(domain,
-                                pubPartId,
-                                pubTopicId,
-                                rchandle_from(&dwIncQosImpl),
-                                dwIncQosQos.in(),
-                                tii,
-                                pQos.in(),
-                                type_info);
-  if (OpenDDS::DCPS::GUID_UNKNOWN == pubIncQosId)
+  disc->add_publication(domain,
+                        pubPartId,
+                        pubTopicId,
+                        rchandle_from(&dwIncQosImpl),
+                        dwIncQosQos.in(),
+                        tii,
+                        pQos.in(),
+                        type_info);
+  if (OpenDDS::DCPS::GUID_UNKNOWN == dwIncQosImpl.guid())
     {
       failed = true;
       ACE_ERROR((LM_ERROR, ACE_TEXT("ERROR: add_publication failed!\n") ));
@@ -420,9 +417,9 @@ bool pubsub(OpenDDS::DCPS::Discovery_rch disc, CORBA::ORB_var orb)
       failed = true;
     }
 
-  disc->remove_publication(domain, pubPartId, pubIncQosId);
-  disc->remove_subscription(domain, subPartId, subId);
-  disc->remove_publication(domain, pubPartId, pubId);
+  disc->remove_publication(domain, pubPartId, dwIncQosImpl.guid());
+  disc->remove_subscription(domain, subPartId, drImpl.guid());
+  disc->remove_publication(domain, pubPartId, dwImpl->guid());
   disc->remove_topic(domain, pubPartId, pubTopicId);
   disc->remove_topic(domain, subPartId, subTopicId);
   disc->remove_domain_participant(domain, subPartId);

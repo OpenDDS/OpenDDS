@@ -373,6 +373,8 @@ int run_test(int argc, ACE_TCHAR *argv[])
         dw_qos.resource_limits.max_samples = MAX_SAMPLES;
 
         OpenDDS::DCPS::unique_ptr<Test::SimpleDataWriterImpl> fast_dw(new Test::SimpleDataWriterImpl());
+        GuidBuilder builder;
+        fast_dw->set_publication_id(builder.create());
         fast_dw->set_qos(dw_qos);
         test->setup_serialization(fast_dw.get());
         test->substitute_dw_particpant(fast_dw.get(), tpi);
@@ -492,6 +494,8 @@ int run_test(int argc, ACE_TCHAR *argv[])
         dw_qos.resource_limits.max_samples = 2;
 
         OpenDDS::DCPS::unique_ptr<Test::SimpleDataWriterImpl> fast_dw(new Test::SimpleDataWriterImpl());
+        GuidBuilder builder;
+        fast_dw->set_publication_id(builder.create());
         fast_dw->set_qos(dw_qos);
         test->setup_serialization(fast_dw.get());
         test->substitute_dw_particpant(fast_dw.get(), tpi);
@@ -625,6 +629,8 @@ int run_test(int argc, ACE_TCHAR *argv[])
         dw_qos.reliability.max_blocking_time.nanosec = MAX_BLOCKING_TIME_NANO;
 
         OpenDDS::DCPS::unique_ptr<Test::SimpleDataWriterImpl> fast_dw(new Test::SimpleDataWriterImpl());
+        GuidBuilder builder;
+        fast_dw->set_publication_id(builder.create());
         fast_dw->set_qos(dw_qos);
         test->setup_serialization(fast_dw.get());
         test->substitute_dw_particpant(fast_dw.get(), tpi);
@@ -762,6 +768,8 @@ int run_test(int argc, ACE_TCHAR *argv[])
         dw_qos.resource_limits.max_samples_per_instance = MAX_SAMPLES_PER_INSTANCE;
 
         OpenDDS::DCPS::unique_ptr<Test::SimpleDataWriterImpl> fast_dw(new Test::SimpleDataWriterImpl());
+        GuidBuilder builder;
+        fast_dw->set_publication_id(builder.create());
         fast_dw->set_qos(dw_qos);
         test->setup_serialization(fast_dw.get());
         test->substitute_dw_particpant(fast_dw.get(), tpi);

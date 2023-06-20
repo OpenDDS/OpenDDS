@@ -1278,7 +1278,7 @@ private:
         }
 
         DDS::Security::SecurityException ex;
-        const GUID_t local_participant = make_part_guid(get_guid());
+        const GUID_t local_participant = make_part_guid(subscription_id());
         const GUID_t remote_participant = make_part_guid(header.publication_id_);
         const DDS::Security::ParticipantCryptoHandle remote_participant_permissions_handle = security_config_->get_handle_registry(local_participant)->get_remote_participant_permissions_handle(remote_participant);
         // Construct a DynamicData around the deserialized sample.
@@ -1297,7 +1297,7 @@ private:
       } else if (is_dispose_msg) {
 
         DDS::Security::SecurityException ex;
-        const GUID_t local_participant = make_part_guid(get_guid());
+        const GUID_t local_participant = make_part_guid(subscription_id());
         const GUID_t remote_participant = make_part_guid(header.publication_id_);
         const DDS::Security::ParticipantCryptoHandle remote_participant_permissions_handle = security_config_->get_handle_registry(local_participant)->get_remote_participant_permissions_handle(remote_participant);
         // Construct a DynamicData around the deserialized sample.
@@ -1543,7 +1543,7 @@ DDS::ReturnCode_t read_instance_i(MessageSequenceType& received_data,
     }
     ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) DataReaderImpl_T::read_instance_i: ")
                ACE_TEXT("will return no data reading sub %C because:\n  %C\n"),
-               LogGuid(get_guid()).c_str(), msg.c_str()));
+               LogGuid(subscription_id()).c_str(), msg.c_str()));
   }
 
   results.copy_to_user();

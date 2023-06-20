@@ -161,11 +161,6 @@ bool RecorderImpl::check_transport_qos(const TransportInst& ti)
   return true;
 }
 
-GUID_t RecorderImpl::get_guid() const
-{
-  return subscription_id_;
-}
-
 CORBA::Long RecorderImpl::get_priority_value(const AssociationData& data) const
 {
   return data.publication_transport_priority_;
@@ -245,15 +240,23 @@ RecorderImpl::add_to_dynamic_type_map(const GUID_t& pub_id, const XTypes::TypeId
 #endif
 
 void
-RecorderImpl::add_association(const GUID_t&            yourId,
-                              const WriterAssociation& writer,
+RecorderImpl::set_subscription_id(const GUID_t& guid)
+{
+  OPENDDS_ASSERT(subscription_id_ == GUID_UNKNOWN);
+  OPENDDS_ASSERT(guid != GUID_UNKNOWN);
+  subscription_id_ = guid;
+  TransportClient::set_guid(guid);
+}
+
+void
+RecorderImpl::add_association(const WriterAssociation& writer,
                               bool                     active)
 {
   if (DCPS_debug_level >= 4) {
     ACE_DEBUG((LM_DEBUG, "(%P|%t) RecorderImpl::add_association: "
                "bit %d local %C remote %C\n",
                is_bit_,
-               LogGuid(yourId).c_str(),
+               LogGuid(subscription_id_).c_str(),
                LogGuid(writer.writerId).c_str()));
   }
 
@@ -269,16 +272,6 @@ RecorderImpl::add_association(const GUID_t&            yourId,
   //
   //   return;
   // }
-
-  //
-  // We are being called back from the repository before we are done
-  // processing after our call to the repository that caused this call
-  // (from the repository) to be made.
-  //
-  if (GUID_UNKNOWN == subscription_id_) {
-    // add_associations was invoked before DCSPInfoRepo::add_subscription() returned.
-    subscription_id_ = yourId;
-  }
 
   //
   // We do the following while holding the publication_handle_lock_.
@@ -921,7 +914,7 @@ RecorderImpl::enable()
 
     XTypes::TypeInformation type_info;
 
-    subscription_id_ =
+    const bool success =
       disco->add_subscription(domain_id_,
                               participant_servant_->get_id(),
                               topic_servant_->get_id(),
@@ -934,7 +927,7 @@ RecorderImpl::enable()
                               exprParams,
                               type_info);
 
-    if (subscription_id_ == OpenDDS::DCPS::GUID_UNKNOWN) {
+    if (!success || subscription_id_ == OpenDDS::DCPS::GUID_UNKNOWN) {
       if (log_level >= LogLevel::Warning) {
         ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: RecorderImpl::enable: "
           "add_subscription returned invalid id\n"));

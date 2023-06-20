@@ -94,6 +94,7 @@ public:
     , callbacks_expected_(0)
     , inline_qos_mode_(DEFAULT_QOS)
   {
+    TransportClient::set_guid(pub_id_);
   }
 
   virtual ~SimpleDataWriter() {}
