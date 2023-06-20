@@ -209,8 +209,16 @@ DataWriterImpl::get_builtin_subscriber_proxy() const
 }
 
 void
-DataWriterImpl::add_association(const GUID_t& yourId,
-                                const ReaderAssociation& reader,
+DataWriterImpl::set_publication_id(const GUID_t& guid)
+{
+  OPENDDS_ASSERT(publication_id_ == GUID_UNKNOWN);
+  OPENDDS_ASSERT(guid != GUID_UNKNOWN);
+  publication_id_ = guid;
+  TransportClient::set_guid(guid);
+}
+
+void
+DataWriterImpl::add_association(const ReaderAssociation& reader,
                                 bool active)
 {
   DBG_ENTRY_LVL("DataWriterImpl", "add_association", 6);
@@ -218,7 +226,7 @@ DataWriterImpl::add_association(const GUID_t& yourId,
   if (DCPS_debug_level) {
     ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) DataWriterImpl::add_association - ")
                ACE_TEXT("bit %d local %C remote %C\n"), is_bit_,
-               LogGuid(yourId).c_str(),
+               LogGuid(publication_id_).c_str(),
                LogGuid(reader.readerId).c_str()));
   }
 
@@ -229,8 +237,6 @@ DataWriterImpl::add_association(const GUID_t& yourId,
 
     return;
   }
-
-  check_and_set_repo_id(yourId);
 
   {
     ACE_GUARD(ACE_Thread_Mutex, reader_info_guard, this->reader_info_lock_);
@@ -1496,7 +1502,7 @@ DataWriterImpl::enable()
   XTypes::TypeLookupService_rch type_lookup_service = participant->get_type_lookup_service();
   type_support_->add_types(type_lookup_service);
 
-  const GUID_t publication_id =
+  const bool success =
     disco->add_publication(this->domain_id_,
                            this->dp_id_,
                            this->topic_servant_->get_id(),
@@ -1507,9 +1513,8 @@ DataWriterImpl::enable()
                            type_info);
 
   ACE_Guard<ACE_Recursive_Thread_Mutex> guard(lock_);
-  publication_id_ = publication_id;
 
-  if (publication_id_ == GUID_UNKNOWN) {
+  if (!success || publication_id_ == GUID_UNKNOWN) {
     if (DCPS_debug_level >= 1) {
       ACE_DEBUG((LM_WARNING, "(%P|%t) WARNING: DataWriterImpl::enable: "
         "add_publication failed\n"));

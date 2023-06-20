@@ -23,7 +23,6 @@
 PubDriver::PubDriver()
   : pub_id_(OpenDDS::DCPS::GuidBuilder::create())
   , sub_id_(OpenDDS::DCPS::GuidBuilder::create())
-  , writer_(pub_id_)
   , num_msgs_(1)
   , msg_size_(0)
   , shmem_(false)
@@ -364,6 +363,8 @@ PubDriver::parse_pub_arg(const ACE_TString& arg)
   builder.participantId(1);
   builder.entityKey(ACE_OS::atoi(pub_id_str.c_str()));
   builder.entityKind(OpenDDS::DCPS::ENTITYKIND_USER_WRITER_WITH_KEY);
+
+  writer_.set_guid(pub_id_);
 
   this->pub_addr_ = ACE_INET_Addr(this->pub_addr_str_.c_str());
 

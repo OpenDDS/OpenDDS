@@ -41,17 +41,16 @@ TransportClient::TransportClient()
   , reliable_(false)
   , durable_(false)
   , reverse_lock_(lock_)
-  , repo_id_(GUID_UNKNOWN)
+  , guid_(GUID_UNKNOWN)
 {
 }
 
 TransportClient::~TransportClient()
 {
   if (Transport_debug_level > 5) {
-    LogGuid logger(repo_id_);
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("(%P|%t) TransportClient::~TransportClient: %C\n"),
-               logger.c_str()));
+               LogGuid(guid_).c_str()));
   }
 
   stop_associating();
@@ -198,21 +197,16 @@ TransportClient::populate_connection_info()
 bool
 TransportClient::associate(const AssociationData& data, bool active)
 {
-  GUID_t repo_id = get_guid();
-
   ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, lock_, false);
 
-  repo_id_ = repo_id;
-  OPENDDS_ASSERT(repo_id_ != GUID_UNKNOWN);
+  OPENDDS_ASSERT(guid_ != GUID_UNKNOWN);
 
   if (impls_.empty()) {
     if (DCPS_debug_level) {
-      LogGuid writer_log(repo_id_);
-      LogGuid reader_log(data.remote_id_);
       ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) TransportClient::associate - ")
                  ACE_TEXT("local %C remote %C no available impls\n"),
-                 writer_log.c_str(),
-                 reader_log.c_str()));
+                 LogGuid(guid_).c_str(),
+                 LogGuid(data.remote_id_).c_str()));
     }
     return false;
   }
@@ -228,12 +222,10 @@ TransportClient::associate(const AssociationData& data, bool active)
 
   if (all_impls_shut_down) {
     if (DCPS_debug_level) {
-      LogGuid writer_log(repo_id_);
-      LogGuid reader_log(data.remote_id_);
       ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) TransportClient::associate - ")
                  ACE_TEXT("local %C remote %C all available impls previously shutdown\n"),
-                 writer_log.c_str(),
-                 reader_log.c_str()));
+                 LogGuid(guid_).c_str(),
+                 LogGuid(data.remote_id_).c_str()));
     }
     return false;
   }
@@ -249,20 +241,17 @@ TransportClient::associate(const AssociationData& data, bool active)
     pa->impls_.clear();
     pa->blob_index_ = 0;
     pa->data_ = data;
-    OPENDDS_ASSERT(repo_id_ != GUID_UNKNOWN);
-    pa->attribs_.local_id_ = repo_id_;
+    pa->attribs_.local_id_ = guid_;
     pa->attribs_.priority_ = get_priority_value(data);
     pa->attribs_.local_reliable_ = reliable_;
     pa->attribs_.local_durable_ = durable_;
     pa->attribs_.max_sn_ = get_max_sn();
     iter = pending_.insert(std::make_pair(remote_copy, pa)).first;
 
-    LogGuid tc_assoc_log(repo_id_);
-    LogGuid remote_log(data.remote_id_);
     VDBG_LVL((LM_DEBUG, "(%P|%t) TransportClient::associate added PendingAssoc "
               "between %C and remote %C\n",
-              tc_assoc_log.c_str(),
-              remote_log.c_str()), 0);
+              LogGuid(guid_).c_str(),
+              LogGuid(data.remote_id_).c_str()), 0);
   } else {
 
     ACE_ERROR((LM_ERROR,
@@ -391,24 +380,21 @@ TransportClient::initiate_connect_i(TransportImpl::AcceptConnectResult& result,
 {
   if (!guard.locked()) {
     //don't own the lock_ so can't release it...shouldn't happen
-    LogGuid local_log(repo_id_);
-    LogGuid remote_log(remote.repo_id_);
-    VDBG_LVL((LM_DEBUG, ACE_TEXT("(%P|%t) TransportClient::initiate_connect_i ")
-                        ACE_TEXT("between local %C and remote %C unsuccessful because ")
-                        ACE_TEXT("guard was not locked\n"),
-                        local_log.c_str(),
-                        remote_log.c_str()), 0);
+    VDBG_LVL((LM_DEBUG,
+              ACE_TEXT("(%P|%t) TransportClient::initiate_connect_i ")
+              ACE_TEXT("between local %C and remote %C unsuccessful because ")
+              ACE_TEXT("guard was not locked\n"),
+              LogGuid(guid_).c_str(),
+              LogGuid(remote.repo_id_).c_str()), 0);
     return false;
   }
 
   {
     //can't call connect while holding lock due to possible reactor deadlock
-    LogGuid local_log(repo_id_);
-    LogGuid remote_log(remote.repo_id_);
     VDBG_LVL((LM_DEBUG, "(%P|%t) TransportClient::initiate_connect_i - "
-                        "attempt to connect_datalink between local %C and remote %C\n",
-                        local_log.c_str(),
-                        remote_log.c_str()), 0);
+              "attempt to connect_datalink between local %C and remote %C\n",
+              LogGuid(guid_).c_str(),
+              LogGuid(remote.repo_id_).c_str()), 0);
     {
       TransportImpl::ConnectionAttribs attribs = attribs_;
       RcHandle<TransportClient> client = rchandle_from(this);
@@ -417,23 +403,20 @@ TransportClient::initiate_connect_i(TransportImpl::AcceptConnectResult& result,
     }
     if (!result.success_) {
       if (DCPS_debug_level) {
-        LogGuid writer_log(repo_id_);
-        LogGuid reader_log(remote.repo_id_);
         ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) TransportClient::initiate_connect_i - ")
                    ACE_TEXT("connect_datalink between local %C remote %C not successful\n"),
-                   writer_log.c_str(),
-                   reader_log.c_str()));
+                   LogGuid(guid_).c_str(),
+                   LogGuid(remote.repo_id_).c_str()));
       }
       return false;
     }
   }
 
-  LogGuid local_log(repo_id_);
-  LogGuid remote_log(remote.repo_id_);
-  VDBG_LVL((LM_DEBUG, "(%P|%t) TransportClient::initiate_connect_i - "
-                      "connection between local %C and remote %C initiation successful\n",
-                      local_log.c_str(),
-                      remote_log.c_str()), 0);
+  VDBG_LVL((LM_DEBUG,
+            "(%P|%t) TransportClient::initiate_connect_i - "
+            "connection between local %C and remote %C initiation successful\n",
+            LogGuid(guid_).c_str(),
+            LogGuid(remote.repo_id_).c_str()), 0);
   return true;
 }
 
@@ -441,12 +424,14 @@ bool
 TransportClient::PendingAssoc::initiate_connect(TransportClient* tc,
                                                 Guard& guard)
 {
-  LogGuid local_log(tc->repo_id_);
-  LogGuid remote_log(data_.remote_id_);
-  VDBG_LVL((LM_DEBUG, "(%P|%t) PendingAssoc::initiate_connect - "
-                      "between %C and remote %C\n",
-                      local_log.c_str(),
-                      remote_log.c_str()), 0);
+  const LogGuid local_log(tc->guid_);
+  const LogGuid remote_log(data_.remote_id_);
+
+  VDBG_LVL((LM_DEBUG,
+            "(%P|%t) PendingAssoc::initiate_connect - "
+            "between %C and remote %C\n",
+            local_log.c_str(),
+            remote_log.c_str()), 0);
   // find the next impl / blob entry that have matching types
   while (!impls_.empty()) {
     TransportImpl_rch impl = impls_.back().lock();
@@ -623,11 +608,11 @@ TransportClient::add_link(const DataLink_rch& link, const GUID_t& peer)
 
   TransportReceiveListener_rch trl = get_receive_listener();
 
-  OPENDDS_ASSERT(repo_id_ != GUID_UNKNOWN);
+  OPENDDS_ASSERT(guid_ != GUID_UNKNOWN);
   if (trl) {
-    link->make_reservation(peer, repo_id_, trl, reliable_);
+    link->make_reservation(peer, guid_, trl, reliable_);
   } else {
-    link->make_reservation(peer, repo_id_, get_send_listener(), reliable_);
+    link->make_reservation(peer, guid_, get_send_listener(), reliable_);
   }
 }
 
@@ -686,12 +671,15 @@ TransportClient::stop_associating(const GUID_t* repos, CORBA::ULong length)
 void
 TransportClient::send_final_acks()
 {
-  links_.send_final_acks(get_guid());
+  OPENDDS_ASSERT(guid_ != GUID_UNKNOWN);
+  links_.send_final_acks(guid_);
 }
 
 void
 TransportClient::disassociate(const GUID_t& peerId)
 {
+  OPENDDS_ASSERT(guid_ != GUID_UNKNOWN);
+
   LogGuid peerId_log(peerId);
   VDBG_LVL((LM_DEBUG, "(%P|%t) TransportClient::disassociate "
             "TransportClient(%@) disassociating from %C\n",
@@ -747,8 +735,8 @@ TransportClient::disassociate(const GUID_t& peerId)
                link.in()));
   }
 
-  OPENDDS_ASSERT(repo_id_ != GUID_UNKNOWN);
-  link->release_reservations(peerId, repo_id_, released);
+  OPENDDS_ASSERT(guid_ != GUID_UNKNOWN);
+  link->release_reservations(peerId, guid_, released);
 
   if (!released.empty()) {
 
@@ -761,14 +749,13 @@ TransportClient::disassociate(const GUID_t& peerId)
     links_.remove_link(link);
 
     if (DCPS_debug_level > 4) {
-      LogGuid logger(repo_id_);
       ACE_DEBUG((LM_DEBUG,
                  ACE_TEXT("(%P|%t) TransportClient::disassociate: calling remove_listener %C on link[%@]\n"),
-                 logger.c_str(),
+                 LogGuid(guid_).c_str(),
                  link.in()));
     }
     // Datalink is no longer used for any remote peer by this TransportClient
-    link->remove_listener(repo_id_);
+    link->remove_listener(guid_);
 
   }
 }
@@ -777,18 +764,14 @@ void TransportClient::transport_stop()
 {
   ACE_GUARD(ACE_Thread_Mutex, guard, lock_);
   const ImplsType impls = impls_;
-  const GUID_t repo_id = repo_id_;
   guard.release();
 
-  if (repo_id == GUID_UNKNOWN) {
-    // Not associated so nothing to stop.
-    return;
-  }
+  OPENDDS_ASSERT(guid_ != GUID_UNKNOWN);
 
   for (size_t i = 0; i < impls.size(); ++i) {
     const TransportImpl_rch impl = impls[i].lock();
     if (impl) {
-      impl->client_stop(repo_id);
+      impl->client_stop(guid_);
     }
   }
 }
@@ -950,6 +933,8 @@ TransportClient::send_w_control(SendStateDataSampleList send_list,
 void
 TransportClient::send_i(SendStateDataSampleList send_list, ACE_UINT64 transaction_id)
 {
+  OPENDDS_ASSERT(guid_ != GUID_UNKNOWN);
+
   if (transaction_id != 0 && transaction_id != expected_transaction_id_) {
     if (transaction_id > max_transaction_id_seen_) {
       max_transaction_id_seen_ = transaction_id;
@@ -1095,8 +1080,7 @@ TransportClient::send_i(SendStateDataSampleList send_list, ACE_UINT64 transactio
     // The reason that the send_links_ set is cleared is because we continually
     // reuse the same send_links_ object over and over for each call to this
     // send method.
-    GUID_t pub_id = repo_id();
-    send_links.send_stop(pub_id);
+    send_links.send_stop(guid_);
     if (transaction_id != 0) {
       expected_transaction_id_ = max_transaction_id_seen_ + 1;
     }
@@ -1120,10 +1104,8 @@ SendControlStatus
 TransportClient::send_control(const DataSampleHeader& header,
                               Message_Block_Ptr msg)
 {
-  if (repo_id_ == GUID_UNKNOWN) {
-    return SEND_CONTROL_OK;
-  }
-  return links_.send_control(repo_id_, get_send_listener(), header, move(msg));
+  OPENDDS_ASSERT(guid_ != GUID_UNKNOWN);
+  return links_.send_control(guid_, get_send_listener(), header, move(msg));
 }
 
 SendControlStatus
@@ -1131,9 +1113,7 @@ TransportClient::send_control_to(const DataSampleHeader& header,
                                  Message_Block_Ptr msg,
                                  const GUID_t& destination)
 {
-  if (repo_id_ == GUID_UNKNOWN) {
-    return SEND_CONTROL_OK;
-  }
+  OPENDDS_ASSERT(guid_ != GUID_UNKNOWN);
 
   DataLinkSet singular;
   {
@@ -1146,7 +1126,7 @@ TransportClient::send_control_to(const DataSampleHeader& header,
 
     singular.insert_link(found->second);
   }
-  return singular.send_control(repo_id_, get_send_listener(), header, move(msg));
+  return singular.send_control(guid_, get_send_listener(), header, move(msg));
 }
 
 bool
@@ -1158,10 +1138,8 @@ TransportClient::remove_sample(const DataSampleElement* sample)
 bool
 TransportClient::remove_all_msgs()
 {
-  if (repo_id_ == GUID_UNKNOWN) {
-    return true;
-  }
-  return links_.remove_all_msgs(repo_id_);
+  OPENDDS_ASSERT(guid_ != GUID_UNKNOWN);
+  return links_.remove_all_msgs(guid_);
 }
 
 void TransportClient::terminate_send_if_suspended()
@@ -1208,7 +1186,8 @@ void TransportClient::data_acked(const GUID_t& remote)
 
 bool TransportClient::is_leading(const GUID_t& reader_id) const
 {
-  return links_.is_leading(get_guid(), reader_id);
+  OPENDDS_ASSERT(guid_ != GUID_UNKNOWN);
+  return links_.is_leading(guid_, reader_id);
 }
 
 

@@ -101,7 +101,6 @@ public:
 
   // Implement TransportClient
   virtual bool check_transport_qos(const TransportInst& inst);
-  virtual GUID_t get_guid() const;
   DDS::DomainId_t domain_id() const { return this->domain_id_; }
   virtual CORBA::Long get_priority_value(const AssociationData& data) const;
   SequenceNumber get_max_sn() const { return sequence_number_; }
@@ -128,8 +127,9 @@ public:
   virtual void retrieve_inline_qos_data(InlineQosData& qos_data) const;
 
   // implement DataWriterCallbacks
-  virtual void add_association(const GUID_t&            yourId,
-                               const ReaderAssociation& reader,
+  virtual void set_publication_id(const GUID_t& guid);
+
+  virtual void add_association(const ReaderAssociation& reader,
                                bool                     active);
 
   virtual void remove_associations(const ReaderIdSeq& readers,

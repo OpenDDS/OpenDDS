@@ -22,6 +22,8 @@ using namespace OpenDDS::DCPS;
 SimpleDataReader::SimpleDataReader(const AppConfig& ac, const int readerIndex, AssociationData& ad)
   : config(ac), index(readerIndex), done_(false)
 {
+  TransportClient::set_guid(AppConfig::readerId[index]);
+
   enable_transport((index == 2), false); //(reliable, durable)
 
   for (int i = index; i < 3; ++i) {

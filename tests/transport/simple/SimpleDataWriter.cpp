@@ -18,9 +18,8 @@
 
 #include <sstream>
 
-SimpleDataWriter::SimpleDataWriter(const OpenDDS::DCPS::GUID_t& pub_id)
-  : pub_id_(pub_id)
-  , num_messages_sent_(0)
+SimpleDataWriter::SimpleDataWriter()
+  : num_messages_sent_(0)
   , num_messages_delivered_(0)
   , associated_(false)
 {
@@ -141,8 +140,7 @@ SimpleDataWriter::delivered_test_message()
 }
 
 
-DDS_TEST::DDS_TEST(const OpenDDS::DCPS::GUID_t& pub_id)
-  : SimpleDataWriter(pub_id)
+DDS_TEST::DDS_TEST()
 {
 }
 
@@ -177,7 +175,7 @@ DDS_TEST::run(int num_messages, int msg_size)
 
   // The +1 makes the null terminator ('\0') get placed into the block.
   header.message_id_ = 1;
-  header.publication_id_ = this->pub_id_;
+  header.publication_id_ = this->get_guid();
 
   OpenDDS::DCPS::DataSampleElement* prev_element = 0;
 
@@ -220,8 +218,8 @@ DDS_TEST::run(int num_messages, int msg_size)
     OpenDDS::DCPS::DataSampleElement* element;
 
     ACE_NEW_MALLOC_RETURN(element,
-      static_cast<OpenDDS::DCPS::DataSampleElement*>(allocator.malloc(sizeof (OpenDDS::DCPS::DataSampleElement))),
-      OpenDDS::DCPS::DataSampleElement(this->pub_id_, this, OpenDDS::DCPS::PublicationInstance_rch()), 1);
+                          static_cast<OpenDDS::DCPS::DataSampleElement*>(allocator.malloc(sizeof (OpenDDS::DCPS::DataSampleElement))),
+                          OpenDDS::DCPS::DataSampleElement(this->get_guid(), this, OpenDDS::DCPS::PublicationInstance_rch()), 1);
 
     // The Sample Element will hold on to the chain of blocks (header + data).
     element->sample_.reset(header_block.release());

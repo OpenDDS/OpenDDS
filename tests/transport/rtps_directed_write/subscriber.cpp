@@ -37,6 +37,8 @@ public:
   SimpleDataReader(const AppConfig& ac, const int readerIndex, AssociationData& publication)
     : config(ac), index(readerIndex), done_(false), seq_()
   {
+    TransportClient::set_guid(config.getSubRdrId(index));
+
     enable_transport(config.readersReliable(), false); //(reliable, durable)
 
     if (index == 1) {
