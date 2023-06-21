@@ -97,7 +97,7 @@ ShmemDataLink::open(const std::string& peer_address)
                      false);
   }
 
-  VDBG_LVL((LM_DEBUG, "(%P|%t) ShmemDataLink::open: link %@ open to peer %C\n",
+  VDBG_LVL((LM_DEBUG, "(%P|%t) ShmemDataLink::open: link[%@] open to peer %C\n",
             this, peer_address_.c_str()), 1);
 
   assoc_resends_task_ = make_rch<SmPeriodicTask>(reactor_task_->interceptor(),
@@ -233,7 +233,13 @@ ShmemDataLink::stop_i()
   {
     ACE_GUARD(ACE_Thread_Mutex, g, peer_alloc_mutex_);
     if (peer_alloc_) {
-      peer_alloc_->release(0 /*don't close*/);
+      // Calling release() has to be done with argument 1 (close),
+      // because with 1 ACE_Malloc_T will call release on the underlying
+      // shared memory pool
+      if (peer_alloc_->release(1 /*close*/) == -1) {
+        VDBG_LVL((LM_ERROR,
+                  "(%P|%t) ShmemDataLink::stop_i Release shared memory failed\n"), 1);
+      }
       delete peer_alloc_;
       peer_alloc_ = 0;
     }
