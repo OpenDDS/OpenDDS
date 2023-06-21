@@ -57,7 +57,7 @@ RtpsUdpSendStrategy::RtpsUdpSendStrategy(RtpsUdpDataLink* link,
 }
 
 namespace {
-  bool shouldWarn(int code) {
+  bool ss_shouldWarn(int code) {
     return code == EPERM || code == EACCES || code == EINTR || code == ENOBUFS
       || code == ENOMEM || code == EADDRNOTAVAIL || code == ENETUNREACH;
   }
@@ -68,7 +68,7 @@ RtpsUdpSendStrategy::send_bytes_i(const iovec iov[], int n)
 {
   ssize_t result = send_bytes_i_helper(iov, n);
 
-  if (result == -1 && shouldWarn(errno)) {
+  if (result == -1 && ss_shouldWarn(errno)) {
     // Make the framework think this was a successful send to avoid
     // putting the send strategy in suspended mode. If reliability
     // is enabled, the data may be resent later.
@@ -191,7 +191,7 @@ RtpsUdpSendStrategy::send_rtps_control(RTPS::Message& message,
   const int num_blocks = mb_to_iov(use_mb, iov);
   const ssize_t result = send_single_i(iov, num_blocks, addr);
   if (result < 0 && !network_is_unreachable_) {
-    const ACE_Log_Priority prio = shouldWarn(errno) ? LM_WARNING : LM_ERROR;
+    const ACE_Log_Priority prio = ss_shouldWarn(errno) ? LM_WARNING : LM_ERROR;
     ACE_ERROR((prio, "(%P|%t) RtpsUdpSendStrategy::send_rtps_control() - "
       "failed to send RTPS control message\n"));
   }
@@ -231,7 +231,7 @@ RtpsUdpSendStrategy::send_rtps_control(RTPS::Message& message,
   const int num_blocks = mb_to_iov(use_mb, iov);
   const ssize_t result = send_multi_i(iov, num_blocks, addrs);
   if (result < 0 && !network_is_unreachable_) {
-    const ACE_Log_Priority prio = shouldWarn(errno) ? LM_WARNING : LM_ERROR;
+    const ACE_Log_Priority prio = ss_shouldWarn(errno) ? LM_WARNING : LM_ERROR;
     ACE_ERROR((prio, "(%P|%t) RtpsUdpSendStrategy::send_rtps_control() - "
       "failed to send RTPS control message\n"));
   }
@@ -326,7 +326,7 @@ RtpsUdpSendStrategy::send_single_i(const iovec iov[], int n,
     const int err = errno;
     if (err != ENETUNREACH || !network_is_unreachable_) {
       errno = err;
-      const ACE_Log_Priority prio = shouldWarn(errno) ? LM_WARNING : LM_ERROR;
+      const ACE_Log_Priority prio = ss_shouldWarn(errno) ? LM_WARNING : LM_ERROR;
       ACE_ERROR((prio, "(%P|%t) RtpsUdpSendStrategy::send_single_i() - "
                  "destination %C failed send: %m\n", DCPS::LogAddr(addr).c_str()));
       if (errno == EMSGSIZE) {

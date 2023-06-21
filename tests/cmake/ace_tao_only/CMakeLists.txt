@@ -44,12 +44,14 @@ endforeach()
 add_library(${idl})
 opendds_target_sources(${idl}
   PUBLIC "${dst}/${idl_file}"
+  SKIP_OPENDDS_IDL
   GENERATE_SERVER_SKELETONS TRUE
 )
+target_link_libraries(${idl} PUBLIC TAO::PortableServer)
 
 add_executable(${server} ${server_files})
 set_target_properties(${server} PROPERTIES OUTPUT_NAME MessengerServer)
-target_link_libraries(${server} ${idl} TAO::PortableServer)
+target_link_libraries(${server} ${idl})
 
 add_executable(${client} ${client_files})
 set_target_properties(${client} PROPERTIES OUTPUT_NAME MessengerClient)

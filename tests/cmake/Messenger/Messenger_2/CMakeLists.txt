@@ -25,8 +25,8 @@ set(dst ${CMAKE_CURRENT_BINARY_DIR})
 set(all_targets ${publisher} ${subscriber} ${messenger})
 
 foreach(file
-  Messenger.idl subscriber.cpp publisher.cpp Args.h
-  DataReaderListener.cpp DataReaderListener.h pub.ini sub.ini)
+    Messenger.idl subscriber.cpp publisher.cpp Args.h
+    DataReaderListener.cpp DataReaderListener.h)
   configure_file(${src}/${file} ${dst}/${file} COPYONLY)
 endforeach()
 
@@ -61,4 +61,20 @@ target_link_libraries(${subscriber} ${messenger} OpenDDS::OpenDDS)
 
 # Testing
 configure_file("${src}/run_test.pl" . COPYONLY)
-_opendds_add_test(COMMAND perl run_test.pl)
+set(OPENDDS_TEST_CONFIG_DIR "${src}")
+_opendds_add_test(NAME tcp)
+_opendds_add_test(NAME default_tcp ARGS default_tcp)
+_opendds_add_test(NAME thread_per ARGS thread_per)
+_opendds_add_test(NAME shmem ARGS shmem)
+_opendds_add_test(NAME nobits ARGS nobits)
+# _opendds_add_test(NAME stack ARGS stack)
+# _opendds_add_test(NAME ipv6 ARGS ipv6)
+_opendds_add_test(NAME rtps ARGS rtps)
+_opendds_add_test(NAME rtps_unicast ARGS rtps_unicast)
+_opendds_add_test(NAME rtps_disc ARGS rtps_disc)
+_opendds_add_test(NAME rtps_disc_tcp ARGS rtps_disc_tcp)
+_opendds_add_test(NAME rtps_disc_tcp_thread_per ARGS rtps_disc_tcp thread_per)
+_opendds_add_test(NAME rtps_disc_tcp_udp ARGS rtps_disc_tcp_udp)
+_opendds_add_test(NAME rtps_disc_half_sec_pub ARGS rtps_disc_half_sec_pub)
+_opendds_add_test(NAME rtps_disc_half_sec_sub ARGS rtps_disc_half_sec_sub)
+_opendds_add_test(NAME rtps_disc_sec ARGS rtps_disc_sec)

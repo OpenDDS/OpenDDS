@@ -58,7 +58,6 @@ add_library(OpenDDS_Dcps
   dds/DCPS/ConnectionRecords.cpp
   dds/DCPS/ContentFilteredTopicImpl.cpp
   dds/DCPS/DCPS_Utils.cpp
-  # dds/DCPS/DataCollector_T.cpp
   dds/DCPS/DataCollector_T.inl
   dds/DCPS/DataDurabilityCache.cpp
   dds/DCPS/DataReaderImpl.cpp
@@ -102,7 +101,6 @@ add_library(OpenDDS_Dcps
   dds/DCPS/MessageTracker.cpp
   dds/DCPS/MonitorFactory.cpp
   dds/DCPS/MultiTopicDataReaderBase.cpp
-  # dds/DCPS/MultiTopicDataReader_T.cpp
   dds/DCPS/MultiTopicImpl.cpp
   dds/DCPS/MulticastManager.cpp
   dds/DCPS/NetworkAddress.cpp
@@ -117,7 +115,6 @@ add_library(OpenDDS_Dcps
   dds/DCPS/Qos_Helper.cpp
   dds/DCPS/Qos_Helper.inl
   dds/DCPS/QueryConditionImpl.cpp
-  # dds/DCPS/RakeResults_T.cpp
   dds/DCPS/RawDataSample.cpp
   dds/DCPS/ReactorInterceptor.cpp
   dds/DCPS/ReactorTask.cpp
@@ -155,7 +152,6 @@ add_library(OpenDDS_Dcps
   dds/DCPS/ThreadStatusManager.cpp
   dds/DCPS/TimeDuration.cpp
   dds/DCPS/TimeDuration.inl
-  # dds/DCPS/TimePoint_T.cpp
   dds/DCPS/TimePoint_T.inl
   dds/DCPS/Time_Helper.cpp
   dds/DCPS/Time_Helper.inl
@@ -187,11 +183,13 @@ add_library(OpenDDS_Dcps
   dds/DCPS/XTypes/TypeLookupService.cpp
   dds/DCPS/XTypes/TypeObject.cpp
   dds/DCPS/XTypes/Utils.cpp
-  # dds/DCPS/ZeroCopyAllocator_T.cpp
   dds/DCPS/ZeroCopyAllocator_T.inl
-  # dds/DCPS/ZeroCopySeq_T.cpp
   dds/DCPS/ZeroCopySeq_T.inl
   dds/DCPS/debug.cpp
+  dds/DCPS/security/framework/HandleRegistry.cpp
+  dds/DCPS/security/framework/SecurityConfig.cpp
+  dds/DCPS/security/framework/SecurityPluginInst.cpp
+  dds/DCPS/security/framework/SecurityRegistry.cpp
   dds/DCPS/transport/framework/BuildChainVisitor.cpp
   dds/DCPS/transport/framework/BuildChainVisitor.inl
   dds/DCPS/transport/framework/CopyChainVisitor.cpp
@@ -266,7 +264,6 @@ add_library(OpenDDS_Dcps
   dds/DCPS/transport/framework/TransportReassembly.cpp
   dds/DCPS/transport/framework/TransportReceiveListener.cpp
   dds/DCPS/transport/framework/TransportReceiveStrategy.cpp
-  # dds/DCPS/transport/framework/TransportReceiveStrategy_T.cpp
   dds/DCPS/transport/framework/TransportReceiveStrategy_T.inl
   dds/DCPS/transport/framework/TransportRegistry.cpp
   dds/DCPS/transport/framework/TransportRegistry.inl
@@ -287,6 +284,9 @@ add_library(OpenDDS_Dcps
   dds/DCPS/transport/framework/TransportStrategy.cpp
   dds/DCPS/transport/framework/TransportType.cpp
 )
+if(OPENDDS_SECURITY)
+  target_compile_definitions(OpenDDS_Dcps PUBLIC OPENDDS_SECURITY=1)
+endif()
 _opendds_library(OpenDDS_Dcps MSVC_BIGOBJ)
 target_include_directories(OpenDDS_Dcps
   PUBLIC
@@ -373,6 +373,9 @@ add_subdirectory(dds/DCPS/InfoRepoDiscovery)
 add_subdirectory(dds/DCPS/transport/udp)
 
 add_subdirectory(dds/InfoRepo)
+if(OPENDDS_SECURITY)
+  add_subdirectory(dds/DCPS/security)
+endif()
 
 add_subdirectory(DevGuideExamples/DCPS/Messenger)
 add_subdirectory(tests/cmake/ace_tao_only)

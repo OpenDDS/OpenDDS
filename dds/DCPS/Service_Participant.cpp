@@ -502,6 +502,15 @@ Service_Participant::get_domain_participant_factory(int &argc,
         }
 
       } else {
+        // Convenient way to run tests in a different place from ini files.
+        const char* const config_dir = ACE_OS::getenv("OPENDDS_TEST_CONFIG_DIR");
+        if (config_dir && config_dir[0]) {
+          String new_path = config_dir;
+          new_path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
+          new_path += config_fname;
+          config_fname = new_path;
+        }
+
         // Load configuration only if the configuration
         // file exists.
         FILE* in = ACE_OS::fopen(config_fname.c_str(),
