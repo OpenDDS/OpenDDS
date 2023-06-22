@@ -16,7 +16,7 @@
 #  include <dds/DCPS/security/framework/Properties.h>
 #endif
 #include <dds/DCPS/StaticIncludes.h>
-#ifdef ACE_AS_STATIC_LIBS
+#if OPENDDS_DO_MANNUAL_STATIC_INCLUDES
 #  ifndef OPENDDS_SAFETY_PROFILE
 #    include <dds/DCPS/transport/udp/Udp.h>
 #    include <dds/DCPS/transport/multicast/Multicast.h>

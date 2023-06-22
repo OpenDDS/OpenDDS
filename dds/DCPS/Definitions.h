@@ -6,6 +6,10 @@
 #ifndef OPENDDS_DCPS_DEFINITIONS_H
 #define OPENDDS_DCPS_DEFINITIONS_H
 
+#if defined __has_include && __has_include(<dds/DCPS/config.h>)
+#  include <dds/DCPS/config.h>
+#endif
+
 #include <dds/Versioned_Namespace.h>
 
 #include <ace/Message_Block.h>
@@ -87,6 +91,16 @@
 #  define OPENDDS_GCC_HAS_DIAG_PUSHPOP 1
 #else
 #  define OPENDDS_GCC_HAS_DIAG_PUSHPOP 0
+#endif
+
+#ifndef OPENDDS_USES_AUTO_STATIC_INCLUDES
+#  define OPENDDS_USES_AUTO_STATIC_INCLUDES 0
+#endif
+
+#if !OPENDDS_USES_AUTO_STATIC_INCLUDES && defined(ACE_AS_STATIC_LIBS)
+#  define OPENDDS_DO_MANNUAL_STATIC_INCLUDES 1
+#else
+#  define OPENDDS_DO_MANNUAL_STATIC_INCLUDES 0
 #endif
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL

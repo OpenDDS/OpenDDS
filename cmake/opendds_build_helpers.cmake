@@ -26,6 +26,7 @@ function(_opendds_library target)
     RUNTIME_OUTPUT_DIRECTORY "${OPENDDS_LIB_DIR}"
     LIBRARY_OUTPUT_DIRECTORY "${OPENDDS_LIB_DIR}"
     ARCHIVE_OUTPUT_DIRECTORY "${OPENDDS_LIB_DIR}"
+    POSITION_INDEPENDENT_CODE TRUE
   )
 
   get_target_property(target_type ${target} TYPE)

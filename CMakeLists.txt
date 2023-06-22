@@ -364,6 +364,9 @@ opendds_target_sources(OpenDDS_Dcps
   ${opendds_target_sources_args}
 )
 
+get_target_property(gendir OpenDDS_Dcps OPENDDS_GENERATED_DIRECTORY)
+configure_file("${_OPENDDS_CMAKE_DIR}/config.h.in" "${gendir}/dds/DCPS/config.h")
+
 add_subdirectory(dds/DCPS/transport/multicast)
 add_subdirectory(dds/DCPS/RTPS)
 add_subdirectory(dds/DCPS/transport/rtps_udp)
