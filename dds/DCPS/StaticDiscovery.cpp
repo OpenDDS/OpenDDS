@@ -1380,7 +1380,7 @@ void StaticEndpointManager::match_continue(const GUID_t& writer, const GUID_t& r
         if (call_reader) {
           DataReaderCallbacks_rch drr_lock = drr.lock();
           if (drr_lock) {
-            DcpsUpcalls thr(drr_lock, reader, wa, !writer_active, dwr_lock);
+            DcpsUpcalls thr(drr_lock, wa, !writer_active, dwr_lock);
             thr.activate();
             dwr_lock->add_association(ra, writer_active);
             thr.writer_done();
