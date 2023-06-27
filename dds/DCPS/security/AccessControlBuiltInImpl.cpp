@@ -1502,7 +1502,6 @@ bool AccessControlBuiltInImpl::search_permissions(
   if (grant.default_permission == Permissions::ALLOW) {
     return true;
   } else {
-    ACE_DEBUG((LM_DEBUG, "### badness\n"));
     return CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl: No matching rule for topic, default permission is DENY.");
   }
 }
