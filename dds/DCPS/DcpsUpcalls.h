@@ -24,7 +24,6 @@ namespace DCPS {
 class OpenDDS_Dcps_Export DcpsUpcalls : public ACE_Task_Base {
 public:
   DcpsUpcalls(DataReaderCallbacks_rch drr,
-              const GUID_t& reader,
               const WriterAssociation& wa,
               bool active,
               DataWriterCallbacks_rch dwr);
@@ -35,7 +34,6 @@ public:
 
 private:
   DataReaderCallbacks_wrch drr_;
-  const GUID_t& reader_;
   const WriterAssociation& wa_;
   bool active_;
   DataWriterCallbacks_wrch dwr_;
