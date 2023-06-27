@@ -12,9 +12,8 @@
 
 #include "TestException.h"
 
-SimpleDataReader::SimpleDataReader(const OpenDDS::DCPS::GUID_t& sub_id)
-  : sub_id_(sub_id)
-  , num_messages_expected_(0)
+SimpleDataReader::SimpleDataReader()
+  : num_messages_expected_(0)
   , num_messages_received_(0)
 {
   DBG_ENTRY("SimpleDataReader","SimpleDataReader");

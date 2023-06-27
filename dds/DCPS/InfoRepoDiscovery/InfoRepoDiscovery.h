@@ -152,7 +152,7 @@ public:
 
   // Publication operations:
 
-  virtual OpenDDS::DCPS::GUID_t add_publication(
+  virtual bool add_publication(
     DDS::DomainId_t domainId,
     const OpenDDS::DCPS::GUID_t& participantId,
     const OpenDDS::DCPS::GUID_t& topicId,
@@ -182,7 +182,7 @@ public:
 
   // Subscription operations:
 
-  virtual OpenDDS::DCPS::GUID_t add_subscription(
+  virtual bool add_subscription(
     DDS::DomainId_t domainId,
     const OpenDDS::DCPS::GUID_t& participantId,
     const OpenDDS::DCPS::GUID_t& topicId,

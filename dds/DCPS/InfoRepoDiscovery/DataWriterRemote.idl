@@ -21,7 +21,6 @@ module OpenDDS {
 
       // will tell transport and call on_publication_matched()
       oneway void add_association(
-        in GUID_t yourId,
         in ReaderAssociation reader,
         in boolean active);
 

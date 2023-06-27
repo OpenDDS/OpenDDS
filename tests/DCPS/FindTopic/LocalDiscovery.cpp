@@ -165,11 +165,11 @@ bool LocalDiscovery::update_topic_qos(
   return true;
 }
 
-GUID_t LocalDiscovery::add_publication(
+bool LocalDiscovery::add_publication(
   DDS::DomainId_t,
   const GUID_t&,
   const GUID_t&,
-  DataWriterCallbacks_rch,
+  DataWriterCallbacks_rch writer,
   const DDS::DataWriterQos&,
   const TransportLocatorSeq&,
   const DDS::PublisherQos&,
@@ -178,7 +178,8 @@ GUID_t LocalDiscovery::add_publication(
   GUID_t guid = GUID_UNKNOWN;
   guid.guidPrefix[0] = 1;
   guid.entityId.entityKind = ENTITYKIND_USER_WRITER_WITH_KEY;
-  return guid;
+  writer->set_publication_id(guid);
+  return true;
 }
 
 bool LocalDiscovery::remove_publication(
@@ -207,7 +208,7 @@ bool LocalDiscovery::update_publication_qos(
   return true;
 }
 
-GUID_t LocalDiscovery::add_subscription(
+bool LocalDiscovery::add_subscription(
   DDS::DomainId_t,
   const GUID_t&,
   const GUID_t&,
@@ -220,7 +221,7 @@ GUID_t LocalDiscovery::add_subscription(
   const DDS::StringSeq&,
   const OpenDDS::XTypes::TypeInformation&)
 {
-  return GUID_UNKNOWN;
+  return true;
 }
 
 bool LocalDiscovery::remove_subscription(
