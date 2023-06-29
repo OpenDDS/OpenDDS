@@ -11,12 +11,10 @@ namespace DCPS {
 
 DcpsUpcalls::DcpsUpcalls(
   DataReaderCallbacks_rch drr,
-  const GUID_t& reader,
   const WriterAssociation& wa,
   bool active,
   DataWriterCallbacks_rch dwr)
   : drr_(drr)
-  , reader_(reader)
   , wa_(wa)
   , active_(active)
   , dwr_(dwr)
