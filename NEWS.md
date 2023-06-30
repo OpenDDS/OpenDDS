@@ -5,7 +5,6 @@ OpenDDS 3.24.2 is currently in development, so this list might change.
 
 ### Security:
 - Fixed a vulnerability in the rtps_udp transport where an acknowledgement sequence number beyond the maximum expected by the writer leads to an assert and incorrect state. (#4155)
-
   - Thanks to Seulbae Kim (@squizz617) for discovering this.
 
 ### Fixes:
@@ -17,6 +16,9 @@ OpenDDS 3.24.2 is currently in development, so this list might change.
     One such example is a DataWriter with liveliness configured.
     The DataWriter will send liveliness messages to the transport (which will be dropped) and hang waiting for them to be delivered.
   - The solution was set the guid for a TransportClient before calling any method that uses the guid.
+
+### Notes:
+- #4180 required changes in InfoRepoDiscovery's IDL, so InfoRepo compatibility with older versions has been broken.
 
 ## Version 3.24.1 of OpenDDS
 OpenDDS 3.24.1 was released on Apr 21 2023.
