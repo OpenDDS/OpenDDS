@@ -81,9 +81,9 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
       if (TheServiceParticipant->get_security()) {
         // Determine the path to the keys
         String path_to_tests;
-        const char* const source_root = ACE_OS::getenv("OPENDDS_SOURCE_ROOT");
+        const char* const source_root = ACE_OS::getenv("OPENDDS_SOURCE_DIR");
         if (source_root && source_root[0]) {
-          // Use OPENDDS_SOURCE_ROOT in case we are one of the CMake tests
+          // Use OPENDDS_SOURCE_DIR in case we are one of the CMake tests
           path_to_tests = String("file:") + source_root + "/tests/";
         } else {
           // Else try to do it relative to the traditional location

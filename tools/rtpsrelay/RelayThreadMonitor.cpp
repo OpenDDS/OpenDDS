@@ -3,6 +3,7 @@
 #include <dds/DCPS/Service_Participant.h>
 #include <dds/DCPS/DCPS_Utils.h>
 #include <dds/DCPS/JsonValueWriter.h>
+#include <dds/DCPS/TimeTypes.h>
 
 #include <ace/Thread.h>
 
@@ -67,7 +68,7 @@ int RelayThreadMonitor::svc()
         continue;
       }
 
-      const DDS::Time_t timestamp = SystemTimePoint::now().to_dds_time() - time_value_to_duration((thread_status_interval * safety_factor).value());
+      const SystemTimePoint expire = SystemTimePoint::now() - thread_status_interval * safety_factor;
 
       for (CORBA::ULong idx = 0; idx != infos.length(); ++idx) {
         if (infos[idx].valid_data) {
@@ -82,7 +83,8 @@ int RelayThreadMonitor::svc()
                      to_json(infos[idx]).c_str()));
         }
 
-        if (infos[idx].instance_state == DDS::ALIVE_INSTANCE_STATE && infos[idx].source_timestamp < timestamp) {
+        const SystemTimePoint timestamp(infos[idx].source_timestamp);
+        if (infos[idx].instance_state == DDS::ALIVE_INSTANCE_STATE && timestamp < expire) {
           ACE_ERROR((LM_ERROR,
                      ACE_TEXT("(%P|%t) ERROR: RelayThreadMonitor::svc thread %C failed to update status.  Aborting...\n"),
                      datas[idx].thread_id.in()));

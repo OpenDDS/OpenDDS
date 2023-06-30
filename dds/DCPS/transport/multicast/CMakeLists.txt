@@ -22,5 +22,32 @@ add_library(OpenDDS_Multicast
   MulticastDataLink.inl
   MulticastSession.inl
 )
+target_sources(OpenDDS_Multicast
+  PUBLIC FILE_SET HEADERS BASE_DIRS "${OPENDDS_SOURCE_DIR}" FILES
+    BestEffortSession.h
+    BestEffortSessionFactory.h
+    Multicast.h
+    MulticastDataLink.h
+    MulticastDataLink.inl
+    MulticastDataLink_rch.h
+    MulticastInst.h
+    MulticastInst_rch.h
+    MulticastLoader.h
+    MulticastReceiveStrategy.h
+    MulticastReceiveStrategy_rch.h
+    MulticastSendStrategy.h
+    MulticastSendStrategy_rch.h
+    MulticastSession.h
+    MulticastSession.inl
+    MulticastSessionFactory.h
+    MulticastSessionFactory_rch.h
+    MulticastSession_rch.h
+    MulticastTransport.h
+    MulticastTransport_rch.h
+    MulticastTypes.h
+    Multicast_Export.h
+    ReliableSession.h
+    ReliableSessionFactory.h
+)
 _opendds_library(OpenDDS_Multicast)
 target_link_libraries(OpenDDS_Multicast PUBLIC ${deps})

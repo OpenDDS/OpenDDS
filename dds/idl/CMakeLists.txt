@@ -2,6 +2,8 @@ cmake_minimum_required(VERSION 3.22)
 
 project(opendds_idl CXX)
 
+include(GNUInstallDirs)
+
 set(deps ACE::ACE TAO::IDL_FE)
 find_package(OpenDDS REQUIRED COMPONENTS NO_DEFAULTS ${deps})
 include(opendds_build_helpers)
@@ -36,3 +38,5 @@ set_target_properties(opendds_idl PROPERTIES
   # opendds_idl doesn't play nice with bundling the cpp files together
   UNITY_BUILD FALSE
 )
+
+install(FILES IDLTemplate.txt DESTINATION "${CMAKE_INSTALL_DATAROOTDIR}/dds/dds/idl")

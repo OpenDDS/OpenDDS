@@ -37,9 +37,13 @@ add_library(OpenDDS_Federator
   FederatorManagerImpl.cpp
   FederatorManagerImpl_updates.cpp
   InfoRepoMulticastResponder.cpp
-
-  FederatorConfig.inl
-  FederatorManagerImpl.inl
+)
+target_sources(OpenDDS_Federator
+  PUBLIC FILE_SET HEADERS BASE_DIRS "${OPENDDS_SOURCE_DIR}" FILES
+    federator_export.h
+    UpdateListener_T.h
+    UpdateReceiver_T.h
+    UpdateProcessor_T.h
 )
 _opendds_library(OpenDDS_Federator MSVC_BIGOBJ)
 target_link_libraries(OpenDDS_Federator PUBLIC OpenDDS::InfoRepoLib)
@@ -47,12 +51,17 @@ target_compile_definitions(OpenDDS_Federator PRIVATE OPENDDS_FEDERATOR_BUILD_DLL
 opendds_target_sources(OpenDDS_Federator
   PUBLIC
     Federator.idl
-  INCLUDE_BASE "${OPENDDS_SOURCE_ROOT}"
+  INCLUDE_BASE "${OPENDDS_SOURCE_DIR}"
   GENERATE_SERVER_SKELETONS TRUE
   USE_EXPORT "dds/InfoRepo/federator_export.h" OpenDDS_Federator_Export
 )
+opendds_install_interface_files(OpenDDS_Federator INCLUDE_BASE "${OPENDDS_SOURCE_DIR}")
 
 add_library(OpenDDS_InfoRepoServ DCPSInfoRepoServ.cpp)
+target_sources(OpenDDS_InfoRepoServ
+  PUBLIC FILE_SET HEADERS BASE_DIRS "${OPENDDS_SOURCE_DIR}" FILES
+    DCPSInfoRepoServ.h
+)
 _opendds_library(OpenDDS_InfoRepoServ)
 target_link_libraries(OpenDDS_InfoRepoServ PUBLIC OpenDDS::Federator)
 

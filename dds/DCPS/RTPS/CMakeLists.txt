@@ -19,11 +19,33 @@ add_library(OpenDDS_Rtps
   ICE/Checklist.cpp
   ICE/AgentImpl.cpp
 )
+target_sources(OpenDDS_Rtps
+  PUBLIC FILE_SET HEADERS BASE_DIRS "${OPENDDS_SOURCE_DIR}" FILES
+    AssociationRecord.h
+    DiscoveredEntities.h
+    GuidGenerator.h
+    ICE/AgentImpl.h
+    ICE/Checklist.h
+    ICE/EndpointManager.h
+    ICE/Ice.h
+    ICE/Stun.h
+    ICE/Task.h
+    LocalEntities.h
+    MessageParser.h
+    MessageTypes.h
+    MessageUtils.h
+    ParameterListConverter.h
+    RtpsDiscovery.h
+    RtpsDiscoveryConfig.h
+    Sedp.h
+    Spdp.h
+    rtps_export.h
+)
 _opendds_library(OpenDDS_Rtps)
 target_link_libraries(OpenDDS_Rtps PUBLIC OpenDDS::Dcps)
 
 set(ots_args
-  INCLUDE_BASE "${OPENDDS_SOURCE_ROOT}"
+  INCLUDE_BASE "${OPENDDS_SOURCE_DIR}"
   USE_EXPORT "dds/DCPS/RTPS/rtps_export.h" OpenDDS_Rtps_Export
 )
 opendds_target_sources(OpenDDS_Rtps
@@ -44,3 +66,4 @@ opendds_target_sources(OpenDDS_Rtps
   ${ots_args}
   SKIP_TAO_IDL
 )
+opendds_install_interface_files(OpenDDS_Rtps INCLUDE_BASE "${OPENDDS_SOURCE_DIR}")

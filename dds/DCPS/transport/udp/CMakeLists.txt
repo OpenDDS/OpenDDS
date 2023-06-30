@@ -12,8 +12,23 @@ add_library(OpenDDS_Udp
   UdpReceiveStrategy.cpp
   UdpSendStrategy.cpp
   UdpTransport.cpp
-
-  UdpDataLink.inl
+)
+target_sources(OpenDDS_Udp
+  PUBLIC FILE_SET HEADERS BASE_DIRS "${OPENDDS_SOURCE_DIR}" FILES
+    Udp.h
+    UdpDataLink.h
+    UdpDataLink.inl
+    UdpDataLink_rch.h
+    UdpInst.h
+    UdpInst_rch.h
+    UdpLoader.h
+    UdpReceiveStrategy.h
+    UdpReceiveStrategy_rch.h
+    UdpSendStrategy.h
+    UdpSendStrategy_rch.h
+    UdpTransport.h
+    UdpTransport_rch.h
+    Udp_Export.h
 )
 _opendds_library(OpenDDS_Udp)
 target_link_libraries(OpenDDS_Udp PUBLIC ${deps})

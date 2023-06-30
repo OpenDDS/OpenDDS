@@ -10,6 +10,14 @@ add_library(OpenDDS_InfoRepoDiscovery
   FailoverListener.cpp
   InfoRepoDiscovery.cpp
 )
+target_sources(OpenDDS_InfoRepoDiscovery
+  PUBLIC FILE_SET HEADERS BASE_DIRS "${OPENDDS_SOURCE_DIR}" FILES
+    DataReaderRemoteImpl.h
+    InfoRepoDiscovery_Export.h
+    FailoverListener.h
+    DataWriterRemoteImpl.h
+    InfoRepoDiscovery.h
+)
 _opendds_library(OpenDDS_InfoRepoDiscovery)
 target_link_libraries(OpenDDS_InfoRepoDiscovery PUBLIC ${lib_deps})
 
@@ -18,8 +26,11 @@ opendds_target_sources(OpenDDS_InfoRepoDiscovery
     Info.idl
     DataReaderRemote.idl
     DataWriterRemote.idl
-  INCLUDE_BASE "${OPENDDS_SOURCE_ROOT}"
+  INCLUDE_BASE "${OPENDDS_SOURCE_DIR}"
   SKIP_OPENDDS_IDL
   GENERATE_SERVER_SKELETONS TRUE
-  USE_EXPORT "dds/DCPS/InfoRepoDiscovery/InfoRepoDiscovery_Export.h" OpenDDS_InfoRepoDiscovery_Export
+  USE_EXPORT
+    "dds/DCPS/InfoRepoDiscovery/InfoRepoDiscovery_Export.h"
+    OpenDDS_InfoRepoDiscovery_Export
 )
+opendds_install_interface_files(OpenDDS_InfoRepoDiscovery INCLUDE_BASE "${OPENDDS_SOURCE_DIR}")

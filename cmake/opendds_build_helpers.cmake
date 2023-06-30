@@ -1,3 +1,10 @@
+include(GNUInstallDirs)
+
+set(_opendds_exec_perms
+  OWNER_READ OWNER_WRITE OWNER_EXECUTE
+  GROUP_READ GROUP_WRITE GROUP_EXECUTE
+  WORLD_READ WORLD_EXECUTE)
+
 function(_opendds_alias target)
   # This is the name the target should be exported from CMake-build OpenDDS as
   # or imported in the MPC-built OpenDDS CMake package. For consistency and
@@ -10,10 +17,11 @@ function(_opendds_alias target)
   else()
     add_executable("${name}" ALIAS "${target}")
   endif()
+  set_target_properties(${target} PROPERTIES EXPORT_NAME "${name}")
 endfunction()
 
 function(_opendds_library target)
-  set(no_value_options MSVC_BIGOBJ)
+  set(no_value_options MSVC_BIGOBJ NO_INSTALL)
   set(single_value_options EXPORT_SYMBOLS_NAME)
   set(multi_value_options)
   cmake_parse_arguments(arg
@@ -49,33 +57,38 @@ function(_opendds_library target)
     target_compile_options(${target} PRIVATE /bigobj)
   endif()
 
-  set(exec_perms
-    OWNER_READ OWNER_WRITE OWNER_EXECUTE
-    GROUP_READ GROUP_WRITE GROUP_EXECUTE
-    WORLD_READ WORLD_EXECUTE)
-  # TODO: Export Targets
-  install(TARGETS ${target}
-    LIBRARY
-      DESTINATION lib
-      PERMISSIONS ${exec_perms}
-    RUNTIME
-      DESTINATION lib
-      PERMISSIONS ${exec_perms}
-    ARCHIVE DESTINATION lib
-  )
+  if(NOT arg_NO_INSTALL)
+    install(TARGETS ${target}
+      EXPORT opendds_targets
+      LIBRARY
+        DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        PERMISSIONS ${_opendds_exec_perms}
+      RUNTIME
+        DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        PERMISSIONS ${_opendds_exec_perms}
+      FILE_SET HEADERS
+        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+      ARCHIVE DESTINATION lib
+    )
+  endif()
 endfunction()
 
 function(_opendds_executable target)
+  set(no_value_options NO_INSTALL)
+  set(single_value_options)
+  set(multi_value_options)
+  cmake_parse_arguments(arg
+    "${no_value_options}" "${single_value_options}" "${multi_value_options}" ${ARGN})
+
   _opendds_alias(${target})
   set_target_properties(${target} PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${OPENDDS_BIN_DIR}")
 
-  set(exec_perms
-    OWNER_READ OWNER_WRITE OWNER_EXECUTE
-    GROUP_READ GROUP_WRITE GROUP_EXECUTE
-    WORLD_READ WORLD_EXECUTE)
-  install(TARGETS ${target}
-    RUNTIME
-      DESTINATION bin
-      PERMISSIONS ${exec_perms}
-  )
+  if(NOT arg_NO_INSTALL)
+    install(TARGETS ${target}
+      EXPORT opendds_targets
+      RUNTIME
+        DESTINATION ${CMAKE_INSTALL_BINDIR}
+        PERMISSIONS ${_opendds_exec_perms}
+    )
+  endif()
 endfunction()

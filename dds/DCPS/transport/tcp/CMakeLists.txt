@@ -15,11 +15,30 @@ add_library(OpenDDS_Tcp
   TcpSendStrategy.cpp
   TcpSynchResource.cpp
   TcpTransport.cpp
-
-  TcpConnection.inl
-  TcpDataLink.inl
-  TcpInst.inl
-  TcpReceiveStrategy.inl
+)
+target_sources(OpenDDS_Tcp
+  PUBLIC FILE_SET HEADERS BASE_DIRS "${OPENDDS_SOURCE_DIR}" FILES
+    Tcp.h
+    TcpAcceptor.h
+    TcpConnection.h
+    TcpConnection.inl
+    TcpConnection_rch.h
+    TcpDataLink.h
+    TcpDataLink.inl
+    TcpDataLink_rch.h
+    TcpInst.h
+    TcpInst.inl
+    TcpInst_rch.h
+    TcpLoader.h
+    TcpReceiveStrategy.h
+    TcpReceiveStrategy.inl
+    TcpReceiveStrategy_rch.h
+    TcpSendStrategy.h
+    TcpSendStrategy_rch.h
+    TcpSynchResource.h
+    TcpTransport.h
+    TcpTransport_rch.h
+    Tcp_export.h
 )
 _opendds_library(OpenDDS_Tcp)
 target_link_libraries(OpenDDS_Tcp PUBLIC ${deps})

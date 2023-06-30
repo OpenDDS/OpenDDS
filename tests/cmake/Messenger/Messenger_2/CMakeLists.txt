@@ -8,6 +8,7 @@ project(opendds_messenger_2 CXX)
 cmake_minimum_required(VERSION 3.8.2)
 enable_testing()
 
+set(OPENDDS_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../../../..")
 find_package(OpenDDS REQUIRED)
 include(opendds_testing)
 
@@ -45,8 +46,7 @@ add_executable(${publisher}
 set_target_properties(${publisher}
   PROPERTIES OUTPUT_NAME publisher
 )
-target_include_directories(${publisher} PRIVATE "${src}/../../../")
-target_link_libraries(${publisher} ${messenger} OpenDDS::OpenDDS)
+target_link_libraries(${publisher} ${messenger} OpenDDS::OpenDDS OpenDDS::TestUtils)
 
 # Subscriber
 add_executable(${subscriber}

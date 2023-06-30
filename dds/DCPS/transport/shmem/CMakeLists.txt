@@ -12,8 +12,24 @@ add_library(OpenDDS_Shmem
   ShmemReceiveStrategy.cpp
   ShmemSendStrategy.cpp
   ShmemTransport.cpp
-
-  ShmemDataLink.inl
+)
+target_sources(OpenDDS_Shmem
+  PUBLIC FILE_SET HEADERS BASE_DIRS "${OPENDDS_SOURCE_DIR}" FILES
+    Shmem.h
+    ShmemAllocator.h
+    ShmemDataLink.h
+    ShmemDataLink.inl
+    ShmemDataLink_rch.h
+    ShmemInst.h
+    ShmemInst_rch.h
+    ShmemLoader.h
+    ShmemReceiveStrategy.h
+    ShmemReceiveStrategy_rch.h
+    ShmemSendStrategy.h
+    ShmemSendStrategy_rch.h
+    ShmemTransport.h
+    ShmemTransport_rch.h
+    Shmem_Export.h
 )
 _opendds_library(OpenDDS_Shmem)
 target_link_libraries(OpenDDS_Shmem PUBLIC ${deps})

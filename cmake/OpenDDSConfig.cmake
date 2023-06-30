@@ -219,37 +219,54 @@ if(_opendds_tao_find_libs OR _opendds_tao_find_exes)
   endif()
 endif()
 
-if(_opendds_find_libs OR _opendds_find_exes)
+if(_OPENDDS_CMAKE_BUILT_AND_INSTALLED)
+  include("${CMAKE_CURRENT_LIST_DIR}/opendds_installed_config.cmake")
+  set(OpenDDS_FOUND TRUE)
+elseif(_opendds_find_libs OR _opendds_find_exes)
   _opendds_find_group_targets(OpenDDS "${_opendds_find_libs}" "${_opendds_find_exes}")
   _opendds_found_required_deps(OpenDDS_FOUND "${_opendds_required}")
   if(OpenDDS_FOUND)
     _opendds_import_group_targets(OpenDDS "${_opendds_find_libs}" "${_opendds_find_exes}")
-
-    if(NOT TARGET OpenDDS::OpenDDS)
-      add_library(OpenDDS::OpenDDS INTERFACE IMPORTED)
-
-      set(_opendds_core_libs
-        OpenDDS::Dcps
-        OpenDDS::Multicast
-        OpenDDS::Rtps
-        OpenDDS::Rtps_Udp
-        OpenDDS::InfoRepoDiscovery
-        OpenDDS::Shmem
-        OpenDDS::Tcp
-        OpenDDS::Udp
-      )
-      if(OPENDDS_SECURITY)
-        list(APPEND _opendds_core_libs OpenDDS::Security)
-      endif()
-
-      set_target_properties(OpenDDS::OpenDDS
-        PROPERTIES
-          INTERFACE_LINK_LIBRARIES "${_opendds_core_libs}")
-    endif()
   else()
     set(CMAKE_MESSAGE_INDENT "${_opendds_cmake_message_indent}")
     return()
   endif()
+endif()
+
+if(NOT TARGET OpenDDS::OpenDDS)
+  set(_opendds_core_libs
+    OpenDDS::Dcps
+    OpenDDS::Multicast
+    OpenDDS::Rtps
+    OpenDDS::Rtps_Udp
+    OpenDDS::InfoRepoDiscovery
+    OpenDDS::Shmem
+    OpenDDS::Tcp
+    OpenDDS::Udp
+  )
+  if(OPENDDS_SECURITY)
+    list(APPEND _opendds_core_libs OpenDDS::Security)
+  endif()
+
+  set(_found_all TRUE)
+  foreach(_lib ${_opendds_core_libs})
+    if(NOT TARGET "${_lib}")
+      set(_found_all FALSE)
+      break()
+    endif()
+  endforeach()
+
+  if(_found_all)
+    add_library(OpenDDS::OpenDDS INTERFACE IMPORTED)
+    set_target_properties(OpenDDS::OpenDDS
+      PROPERTIES
+        INTERFACE_LINK_LIBRARIES "${_opendds_core_libs}")
+  endif()
+endif()
+
+if(NOT TARGET OpenDDS::TestUtils AND DEFINED OPENDDS_SOURCE_DIR)
+  add_library(OpenDDS::TestUtils INTERFACE IMPORTED)
+  target_include_directories(OpenDDS::TestUtils INTERFACE "${OPENDDS_SOURCE_DIR}")
 endif()
 
 if(TARGET TAO::tao_idl OR TARGET OpenDDS::opendds_idl)
