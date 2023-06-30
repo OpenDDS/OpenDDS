@@ -418,7 +418,7 @@ public:
   void spdp_send_addrs(const AddrVec& addrs)
   {
     ACE_GUARD(ACE_Thread_Mutex, g, lock_);
-    spdp_send_addrs_ = addrs;
+    spdp_send_addrs_.insert(spdp_send_addrs_.end(), addrs.begin(), addrs.end());
   }
 
   DCPS::TimeDuration max_auth_time() const
