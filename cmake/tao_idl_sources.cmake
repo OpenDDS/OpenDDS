@@ -226,13 +226,19 @@ function(_opendds_tao_idl target)
         message(STATUS "tao_idl: ${generated_file}")
       endforeach()
     endif()
+
+    set(tao_idl "$<TARGET_FILE:TAO::tao_idl>")
+    if(CMAKE_GENERATOR STREQUAL "Ninja" AND TAO_IS_BEING_BUILT)
+      set(tao_idl "$<PATH:ABSOLUTE_PATH,${tao_idl},\${cmake_ninja_workdir}>")
+      set(gperf_location "$<PATH:ABSOLUTE_PATH,${gperf_location},\${cmake_ninja_workdir}>")
+    endif()
     add_custom_command(
       OUTPUT ${generated_files}
       DEPENDS TAO::tao_idl ${tao_idl_shared_libs} ACE::ace_gperf
       MAIN_DEPENDENCY ${idl_file_path}
       COMMAND ${CMAKE_COMMAND} -E env "DDS_ROOT=${DDS_ROOT}" "TAO_ROOT=${TAO_INCLUDE_DIR}"
         "${extra_lib_dirs}"
-        $<TARGET_FILE:TAO::tao_idl> -g ${gperf_location} ${feature_flags} -Sg
+        "${tao_idl}" -g ${gperf_location} ${feature_flags} -Sg
         -Wb,pre_include=ace/pre.h -Wb,post_include=ace/post.h
         --idl-version 4 -as --unknown-annotations ignore
         -I${TAO_INCLUDE_DIR} -I${working_source_dir}
