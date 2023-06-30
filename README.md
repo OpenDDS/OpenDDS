@@ -35,7 +35,7 @@ details.
 
 ## Documentation
 
-- The OpenDDS Developer's Guide is available at https://opendds.readthedocs.io/.
+- The OpenDDS Developer's Guide is available at https://opendds.readthedocs.io/en/dds-3.24.2.
 
 - For developers wanting to contribute to OpenDDS, please read [the development guidelines](https://opendds.readthedocs.io/en/master/internal/dev_guidelines.html).
 
@@ -83,7 +83,7 @@ formal/2019-04-03 (version 2.3)](https://www.omg.org/spec/DDSI-RTPS/2.3).  See
 the OpenDDS Developer's Guide and the file [docs/design/RTPS](docs/design/RTPS)
 for more details on RTPS.
 
-See the [Developer's Guide](http://download.objectcomputing.com/OpenDDS) for
+See the [Developer's Guide](https://opendds.readthedocs.io/en/dds-3.24.2) for
 information on OpenDDS compliance with the DDS specification. If you would like
 to contribute a feature or sponsor the developers to add a feature  please see
 the Support section above for contact information.

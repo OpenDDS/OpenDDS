@@ -1,7 +1,7 @@
 # OpenDDS Releases
 
 ## Version 3.24.2 of OpenDDS
-OpenDDS 3.24.2 is currently in development, so this list might change.
+OpenDDS 3.24.2 was released on Jun 30 2023.
 
 ### Security:
 - Fixed a vulnerability in the rtps_udp transport where an acknowledgement sequence number beyond the maximum expected by the writer leads to an assert and incorrect state. (#4155)

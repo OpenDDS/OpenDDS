@@ -1,0 +1,349 @@
+Fri Jun 30 18:21:22 UTC 2023  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit fa1d3ed3471627fae7e663621799e06ccc775fc8
+
+        * NEWS.md:
+
+          Note Broken InfoRepo Compatibility in NEWS
+
+Fri Jun 30 02:08:11 UTC 2023  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit 79c44f638198a3997f700025700fa987ae16fb2e
+
+        * NEWS.md:
+        * docs/news.d/shmem.rst:
+        * docs/news.d/transport_client_guid.rst:
+
+          News for 3.24.2, Remove News Fragments
+
+          The 3.24 release script won't use or cleanup the fragments.
+
+Wed Jun 28 18:54:48 UTC 2023  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit e2b052aa9dabb2658750b8a7c8ae72793cddb6e8
+
+        * docs/news.d/transport_client_guid.rst:
+
+          Update docs/news.d/transport_client_guid.rst
+
+          Co-authored-by: Fred Hornsey <fred@hornsey.us>
+
+Tue Jun 27 19:02:31 UTC 2023  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit c1dc4bfa064e25eea67dbea59212f5e5f8d18ddc
+
+        * dds/DCPS/DcpsUpcalls.cpp:
+        * dds/DCPS/DcpsUpcalls.h:
+        * dds/DCPS/StaticDiscovery.cpp:
+        * docs/news.d/transport_client_guid.rst:
+
+          Fix warnings and add news for #4180
+
+Tue Jun 20 20:23:35 UTC 2023  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 3e4c936045657f411dfa36c7037e8b1887f5256f
+
+        * dds/DCPS/DataReaderCallbacks.h:
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DataReaderImpl_T.h:
+        * dds/DCPS/DataWriterCallbacks.h:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/DataWriterImpl.h:
+        * dds/DCPS/DcpsUpcalls.cpp:
+        * dds/DCPS/Discovery.h:
+        * dds/DCPS/InfoRepoDiscovery/DataReaderRemote.idl:
+        * dds/DCPS/InfoRepoDiscovery/DataReaderRemoteImpl.cpp:
+        * dds/DCPS/InfoRepoDiscovery/DataReaderRemoteImpl.h:
+        * dds/DCPS/InfoRepoDiscovery/DataWriterRemote.idl:
+        * dds/DCPS/InfoRepoDiscovery/DataWriterRemoteImpl.cpp:
+        * dds/DCPS/InfoRepoDiscovery/DataWriterRemoteImpl.h:
+        * dds/DCPS/InfoRepoDiscovery/Info.idl:
+        * dds/DCPS/InfoRepoDiscovery/InfoRepoDiscovery.cpp:
+        * dds/DCPS/InfoRepoDiscovery/InfoRepoDiscovery.h:
+        * dds/DCPS/RTPS/RtpsDiscovery.cpp:
+        * dds/DCPS/RTPS/RtpsDiscovery.h:
+        * dds/DCPS/RTPS/Sedp.cpp:
+        * dds/DCPS/RTPS/Sedp.h:
+        * dds/DCPS/RTPS/Spdp.h:
+        * dds/DCPS/RecorderImpl.cpp:
+        * dds/DCPS/RecorderImpl.h:
+        * dds/DCPS/ReplayerImpl.cpp:
+        * dds/DCPS/ReplayerImpl.h:
+        * dds/DCPS/StaticDiscovery.cpp:
+        * dds/DCPS/StaticDiscovery.h:
+        * dds/DCPS/SubscriberImpl.cpp:
+        * dds/DCPS/security/AccessControlBuiltInImpl.cpp:
+        * dds/DCPS/transport/framework/TransportClient.cpp:
+        * dds/DCPS/transport/framework/TransportClient.h:
+        * dds/InfoRepo/DCPSInfo_i.cpp:
+        * dds/InfoRepo/DCPSInfo_i.h:
+        * dds/InfoRepo/DCPS_IR_Publication.cpp:
+        * dds/InfoRepo/DCPS_IR_Subscription.cpp:
+        * tests/DCPS/DCPSInfoRepo/DCPSDataReaderI.cpp:
+        * tests/DCPS/DCPSInfoRepo/DCPSDataReaderI.h:
+        * tests/DCPS/DCPSInfoRepo/DCPSDataWriterI.cpp:
+        * tests/DCPS/DCPSInfoRepo/DCPSDataWriterI.h:
+        * tests/DCPS/DCPSInfoRepo/pubsub.cpp:
+        * tests/DCPS/FindTopic/LocalDiscovery.cpp:
+        * tests/DCPS/FindTopic/LocalDiscovery.h:
+        * tests/DCPS/WriteDataContainer/WriteDataContainerTest.cpp:
+        * tests/transport/best_effort_reader/SimpleDataReader.cpp:
+        * tests/transport/rtps/publisher.cpp:
+        * tests/transport/rtps/subscriber.cpp:
+        * tests/transport/rtps_directed_write/subscriber.cpp:
+        * tests/transport/rtps_reliability/rtps_reliability.cpp:
+        * tests/transport/simple/PubDriver.cpp:
+        * tests/transport/simple/SimpleDataReader.cpp:
+        * tests/transport/simple/SimpleDataReader.h:
+        * tests/transport/simple/SimpleDataWriter.cpp:
+        * tests/transport/simple/SimpleDataWriter.h:
+        * tests/transport/simple/SubDriver.cpp:
+        * tests/unit-tests/dds/DCPS/RTPS/AssociationRecord.cpp:
+
+          TransportClient uses uninitialized GUID
+
+          Problem
+          -------
+
+          The TransportClient class does not initialize its guid until an
+          association.  However, the client can and is used before an
+          association.  One example is a DataWriter that sends liveliness
+          messages. The fix introduced by #4120 caused various functions to
+          short-circuit when the guid was not set. However, this introduced
+          a
+          deadlock in the example where the DataWriter was waiting for the
+          liveliness message to be delivered.
+
+          Solution
+          --------
+
+          Three alternatives were considered.
+
+          First, extending the solution in #4120 lacked confidence as it
+          was
+          impossible to explore all of the corner cases.
+
+          Second, the guid was passed in the constructor of the
+          TransportClient.
+          This solution failed as the current design in concert with
+          spec-defined behavior 1) allows DataWriters and DataReaders to be
+          created before enabling them and 2) determines the guid during
+          the
+          call to enable via a call into discovery. While this solution was
+          the
+          best in terms of maintainability, it would require extensive
+          refactoring.
+
+          Third, modifying discovery to set the guid as soon as it is known
+          and
+          before any associations are processed. This solution was close to
+          the
+          second one in terms of the class invariant of an initialized guid
+          while fitting within the current design.
+
+          Discovery implementations now how the responsibility of calling
+          `set_publication_id` and `set_subscription_id` when a publication
+          or
+          subscription is added. DataReaderImpl was modifying to not use
+          the
+          TransportClient when the transport is disableb as it is for
+          built-in
+          topics.
+
+Wed Jun 21 19:26:55 UTC 2023  Justin Wilson  <wilsonj@unityfoundation.io>
+        commit f0b6d4a9541df336e9562d3f4bec5b25cfc7e4c5
+
+        * docs/news.d/shmem.rst:
+
+          Update docs/news.d/shmem.rst
+
+Tue Jun 20 15:34:02 UTC 2023  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit a78817c01f5521e6f96b90e4737451247eb0eaae
+
+        * docs/news.d/shmem.rst:
+
+          Update shmem.rst
+
+Tue Jun 20 06:59:33 UTC 2023  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit bf733dfabde3e3670ce6218e58e5f214241473dd
+
+        * docs/news.d/shmem.rst:
+
+          Add news
+
+          * docs/news.d/shmem.rst:
+          Added.
+
+Mon Jun 19 12:36:10 UTC 2023  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit b744ce224ea50acd3738b6f8252b4ad72a0f1d3e
+
+        * dds/DCPS/transport/shmem/ShmemDataLink.cpp:
+
+          Add some documentation
+
+          * dds/DCPS/transport/shmem/ShmemDataLink.cpp:
+
+Thu Jun 15 11:35:27 UTC 2023  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit 372dd1ea81537eec9f8e61113e979d8dc2596e33
+
+        * dds/DCPS/transport/shmem/ShmemDataLink.cpp:
+        * dds/DCPS/transport/shmem/ShmemDataLink.h:
+
+          SHould release
+
+          * dds/DCPS/transport/shmem/ShmemDataLink.cpp:
+          * dds/DCPS/transport/shmem/ShmemDataLink.h:
+
+Thu Jun 15 07:13:30 UTC 2023  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit 27f4ccc673e9284aa19af6478fbc323d6e84312d
+
+        * dds/DCPS/transport/shmem/ShmemDataLink.cpp:
+        * dds/DCPS/transport/shmem/ShmemTransport.cpp:
+
+          Check for -1 for failure
+
+          * dds/DCPS/transport/shmem/ShmemDataLink.cpp:
+          * dds/DCPS/transport/shmem/ShmemTransport.cpp:
+
+Thu Jun 15 06:49:03 UTC 2023  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit 17070ac89891fcb932ea1797ae8321167a262fea
+
+        * dds/DCPS/transport/shmem/ShmemDataLink.cpp:
+        * dds/DCPS/transport/shmem/ShmemTransport.cpp:
+
+          Add a log message when releasing the shared memory failed
+
+          * dds/DCPS/transport/shmem/ShmemDataLink.cpp:
+          * dds/DCPS/transport/shmem/ShmemTransport.cpp:
+
+Tue Jun 13 06:22:20 UTC 2023  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit ead16354ce779d83f105bedad3195f871cfe8593
+
+        * dds/DCPS/transport/shmem/ShmemDataLink.cpp:
+
+          Close shared memory when we don't need it anymore
+
+          * dds/DCPS/transport/shmem/ShmemDataLink.cpp:
+
+Mon Jun 12 10:08:00 UTC 2023  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit 6f4aa0e7ab45a913443a043db73e1ff6748f1174
+
+        * dds/DCPS/transport/shmem/ShmemTransport.cpp:
+
+          Add debug message when link is not found
+
+Mon Jun 12 10:07:33 UTC 2023  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit bd80435120c9a43ad1cdb83a77bcad412b78be9f
+
+        * dds/DCPS/transport/tcp/TcpTransport.cpp:
+
+          No need to mention link twice
+
+Mon Jun 12 10:07:03 UTC 2023  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit 729c480ac9aabc7b48505df9429a2a5f7b0733ec
+
+        * tests/DCPS/LargeSample/rtps_disc_sec.ini:
+
+          Fixed typo in comment
+
+Mon May 15 18:47:00 UTC 2023  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit a6ba4d68923bdca027a9640673059ad8355d8123
+
+        * dds/DCPS/transport/framework/DataLinkSet.cpp:
+
+          Update dds/DCPS/transport/framework/DataLinkSet.cpp
+
+          Co-authored-by: Justin Wilson <wilsonj@unityfoundation.io>
+
+Mon May 15 18:46:52 UTC 2023  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit 8ba5c5effac751767339717b71a28bf42a397085
+
+        * dds/DCPS/transport/framework/DataLinkSet.cpp:
+
+          Update dds/DCPS/transport/framework/DataLinkSet.cpp
+
+          Co-authored-by: Justin Wilson <wilsonj@unityfoundation.io>
+
+Mon May 15 10:35:56 UTC 2023  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit 81303051dc84ee41a4e87631afea10076f762bfe
+
+        * dds/DCPS/transport/framework/DataLinkSet.cpp:
+
+          Extended logging
+
+          * dds/DCPS/transport/framework/DataLinkSet.cpp:
+
+Mon May 15 10:08:07 UTC 2023  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit 6dcc28bb53d36f218dea7674413a5e3e5d3e2db4
+
+        * dds/DCPS/transport/framework/DataLinkSet.cpp:
+        * dds/DCPS/transport/shmem/ShmemDataLink.cpp:
+        * dds/DCPS/transport/shmem/ShmemTransport.cpp:
+
+          Extended some logging in order to determine what ShMem entities
+          are stopped
+
+          * dds/DCPS/transport/framework/DataLinkSet.cpp:
+          * dds/DCPS/transport/shmem/ShmemDataLink.cpp:
+          * dds/DCPS/transport/shmem/ShmemTransport.cpp:
+
+Fri Jun 16 04:10:13 UTC 2023  Son Dinh  <dinhs@objectcomputing.com>
+        commit c1eebbbe7a6408dbd23195c7ded9c950d728f16f
+
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.cpp:
+
+          Fix indentation
+
+Wed Jun 14 19:51:34 UTC 2023  Son Dinh  <dinhs@objectcomputing.com>
+        commit e7574aad72e273d2603b90ac73048505815bb07c
+
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.cpp:
+
+          Cleanup
+
+Wed Jun 14 19:46:19 UTC 2023  Son Dinh  <dinhs@objectcomputing.com>
+        commit 609cbc97778576691b2d5b21f1eae02c90e152c4
+
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.cpp:
+
+          Update check
+
+Thu Jun 08 17:32:56 UTC 2023  Son Dinh  <dinhs@objectcomputing.com>
+        commit 5b766ebc144294d2b7c9ba674fd8635c7b55de4a
+
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.cpp:
+
+          Ignore check for Volatile Secure Writer
+
+Thu Jun 01 18:17:38 UTC 2023  Son Dinh  <dinhs@objectcomputing.com>
+        commit ca1ff2690121833dfc08552f17721ccf0c4fb6b6
+
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.cpp:
+
+          Remove extra ')'
+
+Fri May 26 21:36:26 UTC 2023  Son Dinh  <dinhs@objectcomputing.com>
+        commit bea3dfe9cd4ceb10c47ce2bceece6616ec19cc00
+
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.cpp:
+
+          From review
+
+Fri May 26 15:23:07 UTC 2023  Son Dinh  <dinhs@objectcomputing.com>
+        commit 511155c00324e7fcabbee01b78b6558ae0522efd
+
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.cpp:
+
+          Avoid invalid acknack
+
+Fri Apr 21 19:06:41 UTC 2023  Fred Hornsey  <hornseyf@unityfoundation.io>
+
+        * NEWS.md:
+        * PROBLEM-REPORT-FORM:
+        * README.md:
+        * VERSION.txt:
+        * dds/Version.h:
+
+          OpenDDS Post Release 3.24.1
+
+Local Variables:
+mode: change-log
+add-log-time-format: (lambda () (progn (setq tz (getenv "TZ")) (set-time-zone-rule "UTC") (setq time (format-time-string "%a %b %e %H:%M:%S %Z %Y" (current-time))) (set-time-zone-rule tz) time))
+indent-tabs-mode: nil
+End:
