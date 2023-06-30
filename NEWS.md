@@ -3,14 +3,20 @@
 ## Version 3.24.2 of OpenDDS
 OpenDDS 3.24.2 is currently in development, so this list might change.
 
-### Additions:
-- TODO: Add your features here
+### Security:
+- Fixed a vulnerability in the rtps_udp transport where an acknowledgement sequence number beyond the maximum expected by the writer leads to an assert and incorrect state. (#4155)
+
+  - Thanks to Seulbae Kim (@squizz617) for discovering this.
 
 ### Fixes:
-- TODO: Add your fixes here
-
-### Notes:
-- TODO: Add your notes here
+- Fixed leaked shared memory by the shared memory transport. (#4171)
+  - For a 100% fix, a new ACE version including https://github.com/DOCGroup/ACE_TAO/pull/2077 must be used.
+- Fixed bug introduced by #4120 (#4180, #4184)
+  - The fix introduced in #4120 causes the TransportClient to silently drop messages when the client's guid is not initialized.
+    This causes issues for TransportClients that send messages to the transport before association.
+    One such example is a DataWriter with liveliness configured.
+    The DataWriter will send liveliness messages to the transport (which will be dropped) and hang waiting for them to be delivered.
+  - The solution was set the guid for a TransportClient before calling any method that uses the guid.
 
 ## Version 3.24.1 of OpenDDS
 OpenDDS 3.24.1 was released on Apr 21 2023.
