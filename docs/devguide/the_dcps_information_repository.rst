@@ -4,7 +4,7 @@
 The DCPS Information Repository
 ###############################
 
-The DCPS Information Repository is a OpenDDS specific way to distribute discovery information where RTPS is the standardized way to distribute discovery information. The DCPS Information Repository is scheduled for deprecation with OpenDDS 4 and scheduled for removal with OpenDDS 5.
+The DCPS Information Repository is a OpenDDS specific service to distribute discovery information where RTPS is the standardized way to distribute discovery information. The DCPS Information Repository is scheduled for deprecation with OpenDDS 4 and scheduled for removal with OpenDDS 5.
 
 There is no interoperability guarantee between multiple OpenDDS releases when you are using the DCPS Information Repository. All applications using a specific DCPS Information Repository must use the same OpenDDS release as that DCPS Information Repository.
 
