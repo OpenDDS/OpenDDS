@@ -9,8 +9,8 @@ These standards define a set of interfaces and protocols for developing distribu
 Although OpenDDS is itself developed in C++, Java bindings are provided so that Java applications can use OpenDDS.
 OpenDDS also includes support for the DDS Security and XTypes specifications.
 
-OpenDDS is built on the [ACE](docs/dependencies.md#ace) abstraction layer to provide platform portability.
-OpenDDS also leverages the capabilities of [TAO](docs/dependencies.md#tao) for IDL compilation and the OpenDDS DCPS Information Repository (DCPSInfoRepo).
+OpenDDS is built on the [ACE](https://opendds.readthedocs.io/en/master/building/dependencies.html#ace-tao) abstraction layer to provide platform portability.
+OpenDDS also leverages the capabilities of [TAO](https://opendds.readthedocs.io/en/master/building/dependencies.html#ace-tao) for IDL compilation and the OpenDDS [DCPS Information Repository](https://opendds.readthedocs.io/en/master/devguide/the_dcps_information_repository.html).
 
 The primary development of OpenDDS was done by
 [Object Computing, Incorporated](http://www.objectcomputing.com) in
