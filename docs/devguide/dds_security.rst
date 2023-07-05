@@ -340,7 +340,7 @@ DDS Security Configuration via PropertyQosPolicy
 
 When the application creates a DomainParticipant object, the DomainParticipantQos passed to the ``create_participant()`` method now contains a PropertyQosPolicy object which has a sequence of name-value pairs.
 The following properties must be included to enable security.
-Except where noted, these values take the form of a URI starting with either the scheme "file:" followed by a filesystem path (absolute or relative) or the scheme "data:" followed by the literal data.
+Except where noted, these values take the form of a URI starting with either the scheme "file:" followed by a filesystem path (absolute or relative) or the scheme "data:," followed by the literal data.
 
 .. list-table::
    :header-rows: 1
