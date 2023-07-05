@@ -70,7 +70,7 @@ This data reader is functionally equivalent to a normal data reader except that 
 Filter expressions are first evaluated at the publisher so that data samples which would be ignored by the subscriber can be dropped before even getting to the transport.
 This feature can be turned off with ``-DCPSPublisherContentFilter 0`` or the equivalent setting in the ``[common]`` section of the configuration file.
 The behavior of non-default ``DEADLINE`` or ``LIVELINESS`` QoS policies may be affected by this policy.
-Special consideration must be given to how the “missing” samples impact the QoS behavior, see the document in ``docs/design/CONTENT_SUBSCRIPTION``.
+Special consideration must be given to how the "missing" samples impact the QoS behavior, see the document in ``docs/design/CONTENT_SUBSCRIPTION``.
 
 .. note:: RTPS_UDP transport does not always do Writer-side filtering.
   It does not currently implement transport level filtering, but may be able to filter above the transport layer.
@@ -288,8 +288,8 @@ Multi Topic
 Multi topic is a more complex feature than the other two Content-Subscription features, therefore describing it requires some new terminology.
 
 The ``MultiTopic`` interface inherits from the ``TopicDescription`` interface, just like ``ContentFilteredTopic`` does.
-A data reader created for the multi topic is known as a “multi topic data reader.” A multi topic data reader receives samples belonging to any number of regular topics.
-These topics are known as its “constituent topics.” The multi topic has a DCPS data type known as the “resulting type.” The multi topic data reader implements the type-specific data reader interface for the resulting type.
+A data reader created for the multi topic is known as a "multi topic data reader." A multi topic data reader receives samples belonging to any number of regular topics.
+These topics are known as its "constituent topics." The multi topic has a DCPS data type known as the "resulting type." The multi topic data reader implements the type-specific data reader interface for the resulting type.
 For example, if the resulting type is Message, then the multi topic data reader can be narrowed to the ``MessageDataReader`` interface.
 
 The multi topic’s topic expression (:ref:`content_subscription_profile--topic-expressions`) describes how the distinct fields of the incoming data (on the constituent topics) are mapped to the fields of the resulting type.
@@ -350,7 +350,7 @@ Topic expressions use a syntax that is very similar to a complete SQL query:
   * If a ``*`` is used as the aggregation, each field in the resulting type is assigned the value from a same-named field in one of the constituent topic types.
 
 * The selection lists one or more constituent topic names.
-  Topic names are separated by a “join” keyword (all 3 join keywords are equivalent):
+  Topic names are separated by a "join" keyword (all 3 join keywords are equivalent):
 
 * * <topic> [{NATURAL INNER | NATURAL | INNER NATURAL}  JOIN <topic>]...
 
@@ -358,7 +358,7 @@ Topic expressions use a syntax that is very similar to a complete SQL query:
 
   * The natural join operation is commutative and associative, thus the order of topics has no impact.
 
-  * The semantics of the natural join are that any fields with the same name are treated as “join keys” for the purpose of combining data from the topics in which those keys appear.
+  * The semantics of the natural join are that any fields with the same name are treated as "join keys" for the purpose of combining data from the topics in which those keys appear.
     The join operation is described in more detail in subsequent sections.
 
 * The condition has the exact same syntax and semantics as the filter expression (:ref:`content_subscription_profile--filter-expressions`).
@@ -411,7 +411,7 @@ How Resulting Samples are Constructed
 Although many concepts in multi topic are borrowed from the domain of relational databases, a real-time middleware such as DDS is not a database.
 Instead of processing a batch of data at a time, each sample arriving at the data reader from one of the constituent topics triggers multi-topic-specific processing that results in the construction of zero, one, or many samples of the resulting type and insertion of those constructed samples into the multi topic data reader.
 
-Specifically, the arrival of a sample on constituent topic “``A``” with type “``TA``”  results in the following steps in the multi topic data reader (this is a simplification of the actual algorithm):
+Specifically, the arrival of a sample on constituent topic "``A``" with type "``TA``"  results in the following steps in the multi topic data reader (this is a simplification of the actual algorithm):
 
 #. A sample of the resulting type is constructed, and fields from ``TA`` which exist in the resulting type and are in the aggregation (or are join keys) are copied from the incoming sample to the constructed sample.
 
@@ -420,9 +420,9 @@ Specifically, the arrival of a sample on constituent topic “``A``” with type
    The result of the join may be zero, one, or many samples.
    Fields from ``TB`` are copied to the resulting sample as described in step 1.
 
-#. Join keys of topic “``B``” (connecting it to other topics) are then processed as described in step 2, and this continues to all other topics that are connected by join keys.
+#. Join keys of topic "``B``" (connecting it to other topics) are then processed as described in step 2, and this continues to all other topics that are connected by join keys.
 
-#. Any constituent topics that were not visited in steps 2 or 3 are processed as “cross joins” (also known as cross-product joins).
+#. Any constituent topics that were not visited in steps 2 or 3 are processed as "cross joins" (also known as cross-product joins).
    These are joins with no key constraints.
 
 #. If any constructed samples result, they are inserted into the multi topic data reader’s internal data structures as if they had arrived via the normal mechanisms.

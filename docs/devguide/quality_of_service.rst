@@ -753,11 +753,11 @@ Below is the IDL related to the liveliness QoS policy:
 The ``LIVELINESS`` policy controls when and how the service determines whether participants are alive, meaning they are still reachable and active.
 The kind member setting indicates whether liveliness is asserted automatically by the service or manually by the specified entity.
 A setting of ``AUTOMATIC_LIVELINESS_QOS`` means that the service will send a liveliness indication if the participant has not sent any network traffic for the lease_duration.
-The ``MANUAL_BY_PARTICIPANT_LIVELINESS_QOS`` or ``MANUAL_BY_TOPIC_LIVELINESS_QOS`` setting means the specified entity (data writer for the “by topic” setting or domain participant for the “by participant” setting) must either write a sample or manually assert its liveliness within a specified heartbeat interval.
+The ``MANUAL_BY_PARTICIPANT_LIVELINESS_QOS`` or ``MANUAL_BY_TOPIC_LIVELINESS_QOS`` setting means the specified entity (data writer for the "by topic" setting or domain participant for the "by participant" setting) must either write a sample or manually assert its liveliness within a specified heartbeat interval.
 The desired heartbeat interval is specified by the lease_duration member.
 The default lease duration is a pre-defined infinite value, which disables any liveliness testing.
 
-To manually assert liveliness without publishing a sample, the application must call the ``assert_liveliness()`` operation on the data writer (for the “by topic” setting) or on the domain participant (for the “by participant” setting) within the specified heartbeat interval.
+To manually assert liveliness without publishing a sample, the application must call the ``assert_liveliness()`` operation on the data writer (for the "by topic" setting) or on the domain participant (for the "by participant" setting) within the specified heartbeat interval.
 
 Data writers specify (*offer*) their own liveliness criteria and data readers specify (*request*) the desired liveliness of their writers.
 Writers that are not heard from within the lease duration (either by writing a sample or by asserting liveliness) cause a change in the ``LIVELINESS_CHANGED_STATUS`` communication status and notification to the application (e.g., by calling the data reader listener’s ``on_liveliness_changed()`` callback operation or by signaling any related wait sets).
@@ -802,12 +802,12 @@ Below is the IDL related to the reliability QoS policy:
     };
 
 This policy controls how data readers and writers treat the data samples they process.
-The “best effort” value (``BEST_EFFORT_RELIABILITY_QOS``) makes no promises as to the reliability of the samples and could be expected to drop samples under some circumstances.
-The “reliable” value (``RELIABLE_RELIABILITY_QOS``) indicates that the service should eventually deliver all values to eligible data readers.
+The "best effort" value (``BEST_EFFORT_RELIABILITY_QOS``) makes no promises as to the reliability of the samples and could be expected to drop samples under some circumstances.
+The "reliable" value (``RELIABLE_RELIABILITY_QOS``) indicates that the service should eventually deliver all values to eligible data readers.
 
-The ``max_blocking_time`` member of this policy is used when the history QoS policy is set to “keep all” and the writer is unable to proceed because of resource limits.
+The ``max_blocking_time`` member of this policy is used when the history QoS policy is set to "keep all" and the writer is unable to proceed because of resource limits.
 When this situation occurs and the writer blocks for more than the specified time, then the write fails with a timeout return code.
-The default for this policy for data readers and topics is “best effort,” while the default value for data writers is “reliable.”
+The default for this policy for data readers and topics is "best effort," while the default value for data writers is "reliable."
 
 This policy is considered during the creation of associations between data writers and data readers.
 The value of both sides of the association must be compatible in order for an association to be created.
@@ -823,7 +823,7 @@ HISTORY
 
 The ``HISTORY`` policy determines how samples are held in the data writer and data reader for a particular instance.
 For data writers these values are held until the publisher retrieves them and successfully sends them to all connected subscribers.
-For data readers these values are held until “taken” by the application.
+For data readers these values are held until "taken" by the application.
 This policy applies to the topic, data reader, and data writer entities via the history member of their respective QoS structures.
 Below is the IDL related to the history QoS policy:
 
@@ -839,14 +839,14 @@ Below is the IDL related to the history QoS policy:
       long depth;
     };
 
-The “keep all” value (``KEEP_ALL_HISTORY_QOS``) specifies that all possible samples for that instance should be kept.
-When “keep all” is specified and the number of unread samples is equal to the “resource limits” field of ``max_samples_per_instance`` then any incoming samples are rejected.
+The "keep all" value (``KEEP_ALL_HISTORY_QOS``) specifies that all possible samples for that instance should be kept.
+When "keep all" is specified and the number of unread samples is equal to the "resource limits" field of ``max_samples_per_instance`` then any incoming samples are rejected.
 
-The “keep last” value (``KEEP_LAST_HISTORY_QOS``) specifies that only the last ``depth`` values should be kept.
+The "keep last" value (``KEEP_LAST_HISTORY_QOS``) specifies that only the last ``depth`` values should be kept.
 When a data writer contains depth samples of a given instance, a write of new samples for that instance are queued for delivery and the oldest unsent samples are discarded.
 When a data reader contains depth samples of a given instance, any incoming samples for that instance are kept and the oldest samples are discarded.
 
-This policy defaults to a “keep last” with a ``depth`` of one.
+This policy defaults to a "keep last" with a ``depth`` of one.
 
 .. _quality_of_service--durability:
 
@@ -1471,7 +1471,7 @@ Below is the IDL related to the Ownership QoS policy:
 If the kind member is set to ``SHARED_OWNERSHIP_QOS``, more than one Data Writer is allowed to update the same data-object instance.
 If the kind member is set to ``EXCLUSIVE_OWNERSHIP_QOS``, only one Data Writer is allowed to update a given data-object instance (i.e., the Data Writer is considered to be the *owner* of the instance) and associated Data Readers will only see samples written by that Data Writer.
 The owner of the instance is determined by value of the ``OWNERSHIP_STRENGTH`` policy; the data writer with the highest value of strength is considered the owner of the data-object instance.
-Other factors may also influence ownership, such as whether the data writer with the highest strength is “alive” (as defined by the ``LIVELINESS`` policy) and has not violated its offered publication deadline constraints (as defined by the ``DEADLINE`` policy).
+Other factors may also influence ownership, such as whether the data writer with the highest strength is "alive" (as defined by the ``LIVELINESS`` policy) and has not violated its offered publication deadline constraints (as defined by the ``DEADLINE`` policy).
 
 .. _quality_of_service--ownership-strength:
 

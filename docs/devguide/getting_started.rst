@@ -197,7 +197,7 @@ Topic Types vs. Nested Types
     Sect<2.1.1.4>
 
 In addition to ``@topic``, the set of IDL types OpenDDS can use can also be controlled using ``@nested`` and ``@default_nested``.
-Types that are “nested” are the opposite of topic types; they can’t be used for the top-level type of a topic, but they can be nested inside the top-level type (at any level of nesting).
+Types that are "nested" are the opposite of topic types; they can’t be used for the top-level type of a topic, but they can be nested inside the top-level type (at any level of nesting).
 All types are nested by default in OpenDDS to reduce the code generated for type support, but there a number of ways to change this:
 
 * The type can be annotated with ``@topic`` (see :ref:`getting_started--identifying-topic-types`), or with ``@nested(FALSE)``, which is equivalent to ``@topic``.
@@ -222,7 +222,7 @@ Processing the IDL
 ..
     Sect<2.1.2>
 
-This section uses the OMG IDL-to-C++ mapping (“C++ classic”) as part of the walk-through.
+This section uses the OMG IDL-to-C++ mapping ("C++ classic") as part of the walk-through.
 OpenDDS also supports the OMG IDL-to-C++11 mapping, see :ref:`opendds_idl--using-the-idl-to-c-11-mapping` for details.
 
 The OpenDDS IDL is first processed by the TAO IDL compiler.
@@ -259,7 +259,7 @@ These options are described in :ref:`opendds_idl--opendds-idl`.
 Typically, you do not directly invoke the TAO or OpenDDS IDL compilers as above, but let your build system do it for you.
 Two different build systems are supported for projects that use OpenDDS:
 
-* MPC, the “Make Project Creator” which is used to build OpenDDS itself and the majority of its included tests and examples
+* MPC, the "Make Project Creator" which is used to build OpenDDS itself and the majority of its included tests and examples
 
 * `CMake <https://cmake.org>`__, a build system that’s commonly used across the industry
 
@@ -388,7 +388,7 @@ Registering the Data Type and Creating a Topic
 
 First, we create a ``MessageTypeSupportImpl`` object, then register the type with a type name using the ``register_type()`` operation.
 In this example, we register the type with a nil string type name, which causes the ``MessageTypeSupport`` interface repository identifier to be used as the type name.
-A specific type name such as “*Message*” can be used as well.
+A specific type name such as "*Message*" can be used as well.
 
 .. code-block:: cpp
 
@@ -416,7 +416,7 @@ Next, we obtain the registered type name from the type support object and create
         return 1;
       }
 
-We have created a topic named “*Movie Discussion List*” with the registered type and the default QoS policies.
+We have created a topic named "*Movie Discussion List*" with the registered type and the default QoS policies.
 
 .. _getting_started--creating-a-publisher:
 
@@ -1031,7 +1031,7 @@ Reading Multiple Samples
     Sect<2.2.2>
 
 The DDS specification provides a number of operations for reading and writing data samples.
-In the examples above we used the ``take_next_sample()`` operation, to read the next sample and “take” ownership of it from the reader.
+In the examples above we used the ``take_next_sample()`` operation, to read the next sample and "take" ownership of it from the reader.
 The Message Data Reader also has the following take operations.
 
 * ``take()``—Take a sequence of up to max_samples values from the reader
@@ -1040,7 +1040,7 @@ The Message Data Reader also has the following take operations.
 
 * ``take_next_instance()``—Take a sequence of samples belonging to the same instance, without specifying the instance.
 
-There are also “read” operations corresponding to each of these “take” operations that obtain the same values, but leave the samples in the reader and simply mark them as read in the ``SampleInfo``.
+There are also "read" operations corresponding to each of these "take" operations that obtain the same values, but leave the samples in the reader and simply mark them as read in the ``SampleInfo``.
 
 Since these other operations read a sequence of values, they are more efficient when samples are arriving quickly.
 Here is a sample call to ``take()`` that reads up to 5 samples at a time.

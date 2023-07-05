@@ -61,7 +61,7 @@ Building OpenDDS with Security on Windows
 
 **Using Microsoft vcpkg**
 
-Microsoft vcpkg is a “C++ Library Manager for Windows, Linux, and macOS” which helps developers build/install dependencies.
+Microsoft vcpkg is a "C++ Library Manager for Windows, Linux, and macOS" which helps developers build/install dependencies.
 Although it is cross-platform, this guide only discusses vcpkg on Windows.
 
 As of this writing, vcpkg is only supported on Visual Studio 2015 Update 3 and later versions; if using an earlier version of Visual Studio, skip down to the manual setup instructions later in this section.
@@ -307,7 +307,7 @@ These are specific to the individual Domain Participants within the DDS Domain:
 
 * Permissions Document
 
-- Contains a “subject name” which matches the participant certificate’s Subject
+- Contains a "subject name" which matches the participant certificate’s Subject
 
 - Signed by Permissions CA using its private key
 
@@ -326,9 +326,9 @@ The following configuration steps are required to enable OpenDDS Security featur
 
 #. Enable OpenDDS security-features, which can be done two ways:
 
-   * Via API: ``“TheServiceParticipant->set_security(true);”`` or
+   * Via API: ``"TheServiceParticipant->set_security(true);"`` or
 
-   * Via config file: ``“DCPSSecurity=1”`` in the ``[common]`` section.
+   * Via config file: ``"DCPSSecurity=1"`` in the ``[common]`` section.
 
 .. _dds_security--dds-security-configuration-via-propertyqospolicy:
 
@@ -340,7 +340,7 @@ DDS Security Configuration via PropertyQosPolicy
 
 When the application creates a DomainParticipant object, the DomainParticipantQos passed to the ``create_participant()`` method now contains a PropertyQosPolicy object which has a sequence of name-value pairs.
 The following properties must be included to enable security.
-Except where noted, these values take the form of a URI starting with either the scheme “file:” followed by a filesystem path (absolute or relative) or the scheme “data:” followed by the literal data.
+Except where noted, these values take the form of a URI starting with either the scheme "file:" followed by a filesystem path (absolute or relative) or the scheme "data:" followed by the literal data.
 
 .. list-table::
    :header-rows: 1
@@ -475,7 +475,7 @@ Identity, Permissions, and Subject Names
 ..
     Sect<14.5.4>
 
-The “subject_name” element for a signed permissions XML document must match the “Subject:” field provided by the accompanying Identity Certificate which is transmitted during participant discovery, authentication, and authorization.
+The "subject_name" element for a signed permissions XML document must match the "Subject:" field provided by the accompanying Identity Certificate which is transmitted during participant discovery, authentication, and authorization.
 This ensures that the permissions granted by the Permissions CA do, in fact, correspond to the identity provided.
 
 .. _dds_security--examples-in-the-opendds-source-code-repository:
@@ -736,7 +736,7 @@ The following XML elements are used to configure domain participant behaviors.
      - ProtectionKind
 
      - Indicate the desired level of protection for the whole RTPS message.
-       Very little RTPS data exists outside the “metadata protection” envelope (see topic rule configuration options), and so for most use cases topic-level “data protection” or “metadata protection” can be combined with discovery protection and/or liveliness protection in order to secure domain data adequately.
+       Very little RTPS data exists outside the "metadata protection" envelope (see topic rule configuration options), and so for most use cases topic-level "data protection" or "metadata protection" can be combined with discovery protection and/or liveliness protection in order to secure domain data adequately.
        One item that is not secured by "metadata protection" is the timestamp, since RTPS uses a separate InfoTimestamp submessage for this.
        The timestamp can be secured by using <rtps_protection_kind>
 
@@ -758,7 +758,7 @@ The following XML elements are used to configure topic endpoint behaviors:
 
 A wildcard-capable string used to match topic names.
 See description above.
-A “default” rule to catch all previously unmatched topics can be made with: ``<topic_expression>*</topic_expression>``
+A "default" rule to catch all previously unmatched topics can be made with: ``<topic_expression>*</topic_expression>``
 
 ``<enable_discovery_protection>`` : **Boolean**
 
@@ -871,7 +871,7 @@ Each grant bestows access control privileges to a single subject name for a limi
 
 **Subject Name**
 
-Each grant’s subject name is intended to match against a corresponding identity certificate’s “subject” field.
+Each grant’s subject name is intended to match against a corresponding identity certificate’s "subject" field.
 In order for permissions checks to successfully validate for both local and remote participants, the supplied identity certificate subject name must match the subject name of one of the grants included in the permissions file.
 
 **Validity**
@@ -930,7 +930,7 @@ These conditions are governed by their relevant subsection, but the exact meanin
 Each condition is summarized below.
 See the DDS Security specification for full details.
 OpenDDS does not currently support relay-only behavior and consequently ignores allow and deny relay rules for both local and remote entities.
-Additionally, OpenDDS does not currently support data tags, and so the data tag condition applied is always the “default” behavior described below.
+Additionally, OpenDDS does not currently support data tags, and so the data tag condition applied is always the "default" behavior described below.
 
 **Topic List**
 
@@ -943,19 +943,19 @@ The topic section must always be present for a PSR rule, so there there is no de
 
 The partitions list contains the set of partition names for which the parent PSR rule applies.
 Similarly to topics, partition names and expressions are matched using POSIX ``fnmatch()`` rules and syntax.
-For “allow” PSR rules, the DDS entity of the associated triggering operation must be using a strict subset of the partitions listed for the rule to apply.
-When no partition list is given for an “allow” PSR rule, the “empty string” partition is used as the default value.
-For “deny” PSR rules, the rule will apply if the associated DDS entity is using any of the partitions listed.
-When no partition list is given for a “deny” PSR rule, the wildcard expression “*” is used as the default value.
+For "allow" PSR rules, the DDS entity of the associated triggering operation must be using a strict subset of the partitions listed for the rule to apply.
+When no partition list is given for an "allow" PSR rule, the "empty string" partition is used as the default value.
+For "deny" PSR rules, the rule will apply if the associated DDS entity is using any of the partitions listed.
+When no partition list is given for a "deny" PSR rule, the wildcard expression "*" is used as the default value.
 
 **Data Tags List**
 
 Data tags are an optional part of the DDS Security specification and are not currently implemented by OpenDDS.
 If they were implemented, the condition criteria for data tags would be similar to partitions.
-For “allow” PSR rules, the DDS entity of the associated triggering operation must be using a strict subset of the data tags listed for the rule to apply.
-When no data tag list is given for an “allow” PSR rule, the empty set of data tags is used as the default value.
-For “deny” PSR rules, the rule will apply if the associated DDS entity is using any of the data tags listed.
-When no data tag list is given for a “deny” PSR rule, the set of “all possible tags” is used as the default value.
+For "allow" PSR rules, the DDS entity of the associated triggering operation must be using a strict subset of the data tags listed for the rule to apply.
+When no data tag list is given for an "allow" PSR rule, the empty set of data tags is used as the default value.
+For "deny" PSR rules, the rule will apply if the associated DDS entity is using any of the data tags listed.
+When no data tag list is given for a "deny" PSR rule, the set of "all possible tags" is used as the default value.
 
 .. _dds_security--permissions-xml-example:
 
@@ -1054,7 +1054,7 @@ The following DDS Security features are not implemented in OpenDDS.
 
 #. PKCS#11 for certificates, keys, passwords
 
-#. Relay as a permissions “action” (Publish and Subscribe are supported)
+#. Relay as a permissions "action" (Publish and Subscribe are supported)
 
 #. Legacy matching behavior of permissions based on Partition QoS (9.4.1.3.2.3.1.4 in spec)
 
