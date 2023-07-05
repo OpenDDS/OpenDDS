@@ -4,12 +4,15 @@
 The DCPS Information Repository
 ###############################
 
-The DCPS Information Repository is a non-interoperable and OpenDDS-specific service to distribute discovery information.  See :ref:`run_time_configuration--configuring-for-ddsi-rtps-discovery` for interoperable discovery. The DCPS Information Repository is scheduled for deprecation with OpenDDS 4 and scheduled for removal with OpenDDS 5.
-
-There is no interoperability guarantee between multiple OpenDDS releases when you are using the DCPS Information Repository. All applications using a specific DCPS Information Repository must use the same OpenDDS release as that DCPS Information Repository.
-
 ..
     Sect<9>
+
+The DCPS Information Repository is a non-interoperable and OpenDDS-specific service to distribute discovery information. 
+See :ref:`run_time_configuration--configuring-for-ddsi-rtps-discovery` for interoperable discovery.
+The DCPS Information Repository is scheduled for deprecation with OpenDDS 4 and scheduled for removal with OpenDDS 5.
+
+There is no interoperability guarantee between multiple OpenDDS releases when you are using the DCPS Information Repository.
+All applications using a specific DCPS Information Repository must use the same OpenDDS release as that DCPS Information Repository.
 
 .. _the_dcps_information_repository--dcps-information-repository-options:
 
