@@ -9891,7 +9891,7 @@ jobs:
       shell: cmd
       run: |
         cd /d C:\OpenDDS
-        configure --tests --rapidjson --security --ace=${{ github.workspace }}\ACE_TAO\ACE --tao=${{ github.workspace }}\ACE_TAO\TAO --mpc=${{ github.workspace }}\MPC --xerces3=%VCPKG_ROOT%\installed\x86-windows --openssl=%VCPKG_ROOT%\installed\x86-windows
+        configure --tests --rapidjson --security --ace=${{ github.workspace }}\ACE_TAO\ACE --tao=${{ github.workspace }}\ACE_TAO\TAO --mpc=${{ github.workspace }}\MPC --xerces3="${{ env.VCPKG_INSTALLED_DIR }}\x86-windows" --openssl="${{ env.VCPKG_INSTALLED_DIR }}\x86-windows"
     - name: check build configuration
       shell: cmd
       run: |
@@ -10242,7 +10242,7 @@ jobs:
       shell: cmd
       run: |
         cd /d C:\OpenDDS
-        configure --tests --java --no-built-in-topics --rapidjson --mpc=${{ github.workspace }}\MPC --xerces3="%VCPKG_ROOT%\installed\x86-windows" --mpcopts="-features no_opendds_testing_features=0"
+        configure --tests --java --no-built-in-topics --rapidjson --mpc=${{ github.workspace }}\MPC --xerces3="${{ env.VCPKG_INSTALLED_DIR }}\x86-windows" --mpcopts="-features no_opendds_testing_features=0"
     - name: check build configuration
       shell: cmd
       run: |
