@@ -198,7 +198,7 @@ Windows:
 
     %ACE_ROOT%\bin\mwc.pl -type [CompilerType]
 
-CompilerType can be any supported MPC type (such as “vs2019”)
+CompilerType can be any supported MPC type (such as "vs2019")
 
 Make sure this is running ActiveState Perl or Strawberry Perl.
 
@@ -337,7 +337,7 @@ Next we create a topic using the type support servant’s registered name.
                                         TOPIC_QOS_DEFAULT.get(), null,
                                         DEFAULT_STATUS_MASK.value);
 
-Now we have a topic named “*Movie Discussion List*” with the registered data type and default QoS policies.
+Now we have a topic named "*Movie Discussion List*" with the registered data type and default QoS policies.
 
 .. _java_bindings--creating-a-publisher:
 
@@ -615,7 +615,7 @@ and a transport instance section with a transport type property:
     [transport/1]
     transport_type=tcp
 
-The ``[transport/1]`` section contains configuration information for the transport instance named “``1``”.
+The ``[transport/1]`` section contains configuration information for the transport instance named ``1``.
 It is defined to be of type ``tcp``.
 The global transport configuration setting above causes this transport instance to be used by all readers and writers in the process.
 

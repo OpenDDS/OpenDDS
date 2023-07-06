@@ -134,11 +134,11 @@ Installation
 
 #. Click OK to close the Preferences dialog and return to the Install dialog.
 
-#. In the “Work with” combo box, select the new entry for OpenDDS.
+#. In the "Work with" combo box, select the new entry for OpenDDS.
 
-#. Select the “OpenDDS Modeling SDK” and click Next.
+#. Select the "OpenDDS Modeling SDK" and click Next.
 
-#. Review the “Install Details” list and click Next.
+#. Review the "Install Details" list and click Next.
    Review the license, select Accept (if you do accept it), and click Finish.
 
 #. Eclipse will download the OpenDDS plug-ins and various plug-ins from ``eclipse.org`` that they depend on.
@@ -160,7 +160,7 @@ Open it by going to the Window menu and selecting Open Perspective -> Other -> O
 
 To get started using the OpenDDS Modeling SDK, see the help content installed in Eclipse.
 Start by going to the Help menu and selecting Help Contents.
-There is a top-level item for “``OpenDDS Modeling SDK Guide``” that contains all of the OpenDDS-specific content describing the modeling and code generation activities.
+There is a top-level item for ``OpenDDS Modeling SDK Guide`` that contains all of the OpenDDS-specific content describing the modeling and code generation activities.
 
 .. _modeling_sdk--developing-applications:
 
@@ -654,7 +654,7 @@ An example subscribing application, ``MinimalSubscriber.cpp``, follows.
         // Call on_data_available in case there are samples which are waiting
         listener->on_data_available(reader);
 
-        // At this point the application can wait for an exteral “stop” indication
+        // At this point the application can wait for an exteral "stop" indication
         // such as blocking until the user terminates the program with Ctrl-C.
 
       } catch (const CORBA::Exception& e) {

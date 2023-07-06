@@ -54,7 +54,7 @@ Listeners may be optionally implemented by the application.
 The ``Recorder`` class acts similarly to a ``DataReader`` and the ``Replayer`` class acts similarly to a ``DataWriter``.
 
 Both ``Recorder`` and ``Replayer`` make use of the underlying OpenDDS discovery and transport libraries as if they were ``DataReader`` and ``DataWriter``, respectively.
-Regular OpenDDS applications in the domain will “see” the ``Recorder`` objects as if they were remote ``DataReader`` s and ``Replayers`` as if they were ``DataWriter`` s.
+Regular OpenDDS applications in the domain will "see" the ``Recorder`` objects as if they were remote ``DataReader`` s and ``Replayers`` as if they were ``DataWriter`` s.
 
 .. _alternate_interfaces_to_data--usage-model:
 
@@ -81,7 +81,7 @@ Here is the code needed to create a recorder:
                                               dr_qos,
                                               recorder_listener);
 
-Data samples are made available to the application via the ``RecorderListener`` using a simple “one callback per sample” model.
+Data samples are made available to the application via the ``RecorderListener`` using a simple "one callback per sample" model.
 The sample is delivered as an ``OpenDDS::DCPS::RawDataSample`` object.
 This object includes the timestamp for that data sample as well as the marshaled sample value.
 Here is a class definition for a user-defined Recorder Listener.
@@ -174,7 +174,7 @@ Durable data is received from matched ``DataWriter`` s.
 On the ``Replayer`` side there are some differences.
 As opposed to the normal DDS ``DataWriter``, ``Replayer`` is not caching/storing any data samples (they are simply sent to the transport).
 Because instances are not known, storing data samples according to the usual History and Resource Limits rules is not possible.
-Instead, transient local durability can be supported with a “pull” model whereby the middleware invokes a method on the ``ReplayerListener`` when a new remote ``DataReader`` is discovered.
+Instead, transient local durability can be supported with a "pull" model whereby the middleware invokes a method on the ``ReplayerListener`` when a new remote ``DataReader`` is discovered.
 The application can then call a method on the ``Replayer`` with any data samples that should be sent to that newly-joined ``DataReader``.
 Determining which samples these are is left to the application.
 
@@ -190,7 +190,7 @@ The Recorder class includes support for the Dynamic Language Binding from XTypes
 Type information for each matched DataWriter (that supports XTypes complete TypeObjects) is stored in the Recorder.
 Users can call Recorder::get_dynamic_data, passing a RawDataSample to get back a DynamicData object which includes type information – see DynamicData::type().
 
-A tool called “inspect,” uses the Recorder and Dynamic Language Binding allow for the printing of any type, so long as the topic name, type name, and domain ID are known.
+A tool called ``inspect``, uses the Recorder and Dynamic Language Binding allow for the printing of any type, so long as the topic name, type name, and domain ID are known.
 The DataWriter must include code generation for complete TypeObjects.
 See tools/inspect/Inspect.cpp for this tool’s source code.
 It can be used as a standalone tool or an example for developing your own applications using these APIs.
@@ -253,7 +253,7 @@ These methods are not part of the IDL interfaces, so invoking them the requires 
      Observer_rch observer = make_rch<MyObserver>();
      entity->set_observer(observer, Observer::e_SAMPLE_SENT);
 
-Note that since the Observer class as an internal (not IDL) interface, it uses the “RCH” (Reference Counted Handle) smart pointer classes.
+Note that since the Observer class as an internal (not IDL) interface, it uses the "RCH" (Reference Counted Handle) smart pointer classes.
 Observer itself inherits from RcObject, and uses of Observer-derived classes should use the RcHandle template and its associated functions, as in the example above.
 See :ghfile:`dds/DCPS/RcHandle_T.h` for details.
 

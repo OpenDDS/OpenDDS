@@ -114,7 +114,7 @@ The RtpsRelay itself is an OpenDDS application.
 The source code is located in ``tools/rtpsrelay``.
 Security must be enabled to build the RtpsRelay.
 See :ref:`dds_security--building-opendds-with-security-enabled`.
-Each RtpsRelay process has a set of ports for exchanging RTPS messages with the participants called the "vertical" ports and a set of ports for exchanging RTPS messages with other relays called the “horizontal” ports.
+Each RtpsRelay process has a set of ports for exchanging RTPS messages with the participants called the "vertical" ports and a set of ports for exchanging RTPS messages with other relays called the "horizontal" ports.
 
 The RtpsRelay contains an embedded webserver called the meta discovery server.
 The webserver has the following endpoints:

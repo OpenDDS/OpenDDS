@@ -227,7 +227,7 @@ OpenDDSParticipantLocation Topic
 ..
     Sect<6.8.1>
 
-The Built-In Topic “OpenDDSParticipantLocation” is published by the DDSI-RTPS discovery implementation to give applications visibility into the details of how each remote participant is connected over the network.
+The Built-In Topic "OpenDDSParticipantLocation" is published by the DDSI-RTPS discovery implementation to give applications visibility into the details of how each remote participant is connected over the network.
 If the RtpsRelay (:ref:`internet_enabled_rtps--the-rtpsrelay`) and/or IETF ICE (:ref:`internet_enabled_rtps--interactive-connectivity-establishment-ice-for-rtps`) are enabled, their usage is reflected in the OpenDDSParticipantLocation topic data.
 The topic type ParticipantLocationBuiltinTopicData is defined in :ghfile:`dds/OpenddsDcpsExt.idl` in the ``OpenDDS::DCPS`` module:
 
@@ -260,7 +260,7 @@ OpenDDSConnectionRecord Topic
 ..
     Sect<6.8.2>
 
-The Built-In Topic “OpenDDSConnectionRecord” is published by the DDSI-RTPS discovery implementation and RTPS_UDP transport implementation to give applications visibility into the details of a participant’s connection to an RtpsRelay instance.
+The Built-In Topic "OpenDDSConnectionRecord" is published by the DDSI-RTPS discovery implementation and RTPS_UDP transport implementation to give applications visibility into the details of a participant’s connection to an RtpsRelay instance.
 Security must be enabled in the build of OpenDDS (:ref:`dds_security--building-opendds-with-security-enabled`) to use this topic.
 
 The topic type ConnectionRecord is defined in :ghfile:`dds/OpenddsDcpsExt.idl` in the ``OpenDDS::DCPS`` module:
@@ -271,7 +271,7 @@ The topic type ConnectionRecord is defined in :ghfile:`dds/OpenddsDcpsExt.idl` i
 * ``address`` (key) – The address of the remote participant.
 
 * ``protocol`` (key) – The method used to determine connectivity.
-  Currently, “RtpsRelay:STUN” is the only supported protocol.
+  Currently, "RtpsRelay:STUN" is the only supported protocol.
 
 * ``latency`` – A measured round-trip latency for protocols that support it.
 
