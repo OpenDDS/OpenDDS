@@ -2,10 +2,6 @@
 
 .. news-start-section: Additions
 .. news-start-section: CMake Config Package
-- Libraries and features can be passed to ``find_package(OpenDDS COMPONENTS)`` to change what is required.
-
-  - See :ref:`cmake-components` for details.
-
 .. news-start-section: :cmake:func:`opendds_target_sources`:
 - Added :cmake:func:`opendds_target_sources(GENERATE_SERVER_SKELETONS)` to allow ``tao_idl`` to generate code for CORBA servers.
 - Added :cmake:func:`opendds_target_sources(AUTO_LINK)` as a fine-grained version of :cmake:var:`OPENDDS_AUTO_LINK_DCPS`.

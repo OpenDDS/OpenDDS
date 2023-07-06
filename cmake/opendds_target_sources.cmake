@@ -14,6 +14,7 @@ function(_opendds_get_sources_and_options
     non_idl_prefix
     tao_options
     opendds_options
+    use_export
     suppress_anys
     always_generate_lib_export_header
     generate_server_skeletons
@@ -33,6 +34,7 @@ function(_opendds_get_sources_and_options
   set(multi_value_options
     PUBLIC PRIVATE INTERFACE
     TAO_IDL_OPTIONS OPENDDS_IDL_OPTIONS
+    USE_EXPORT
   )
   cmake_parse_arguments(arg "${no_value_options}" "${single_value_options}" "${multi_value_options}" ${ARGN})
 
@@ -67,23 +69,26 @@ function(_opendds_get_sources_and_options
   endif()
   set(${suppress_anys} ${arg_SUPPRESS_ANYS} PARENT_SCOPE)
 
-  if(NOT DEFINED arg_ALWAYS_GENERATE_LIB_EXPORT_HEADER)
-    set(arg_ALWAYS_GENERATE_LIB_EXPORT_HEADER ${OPENDDS_ALWAYS_GENERATE_LIB_EXPORT_HEADER})
+  if(arg_USE_EXPORT)
+    list(LENGTH arg_USE_EXPORT use_export_len)
+    if(NOT use_export_len EQUAL 2)
+      message(FATAL_ERROR
+        "The opendds_target_sources USE_EXPORT option takes a header path and macro name, "
+        "but was passed ${use_export_len} values")
+    endif()
+    set(use_export "${arg_USE_EXPORT}" PARENT_SCOPE)
+  else()
+    if(NOT DEFINED arg_ALWAYS_GENERATE_LIB_EXPORT_HEADER)
+      set(arg_ALWAYS_GENERATE_LIB_EXPORT_HEADER ${OPENDDS_ALWAYS_GENERATE_LIB_EXPORT_HEADER})
+    endif()
+    set(${always_generate_lib_export_header} ${arg_ALWAYS_GENERATE_LIB_EXPORT_HEADER} PARENT_SCOPE)
   endif()
-  set(${always_generate_lib_export_header} ${arg_ALWAYS_GENERATE_LIB_EXPORT_HEADER} PARENT_SCOPE)
 
   set(${skip_tao_idl} ${arg_SKIP_TAO_IDL} PARENT_SCOPE)
-  if(arg_SKIP_OPENDDS_IDL OR NOT ${OpenDDS-opendds_idl_FOUND})
-    set(${skip_opendds_idl} FALSE PARENT_SCOPE)
-  else()
-    set(${skip_opendds_idl} TRUE PARENT_SCOPE)
+  if(NOT TARGET OpenDDS::opendds_idl)
+    set(arg_SKIP_OPENDDS_IDL TRUE)
   endif()
-
-  if(arg_SKIP_OPENDDS_IDL OR NOT ${OpenDDS-opendds_idl_FOUND})
-    set(${skip_opendds_idl} TRUE PARENT_SCOPE)
-  else()
-    set(${skip_opendds_idl} FALSE PARENT_SCOPE)
-  endif()
+  set(${skip_opendds_idl} ${arg_SKIP_OPENDDS_IDL} PARENT_SCOPE)
 
   if(NOT DEFINED arg_GENERATE_SERVER_SKELETONS)
     set(arg_GENERATE_SERVER_SKELETONS FALSE)
@@ -146,26 +151,30 @@ function(_opendds_get_sources_and_options
   set(${opendds_options} ${arg_OPENDDS_IDL_OPTIONS} ${extra_opendds_idl_options} PARENT_SCOPE)
 endfunction()
 
-function(_opendds_get_target_export_header target export_header_var)
+function(opendds_export_header target)
+  set(no_value_options)
+  set(single_value_options
+    USE_EXPORT_VAR
+  )
+  set(multi_value_options)
+  cmake_parse_arguments(arg
+    "${no_value_options}" "${single_value_options}" "${multi_value_options}" ${ARGN})
+
+  set(export_macro "${target}_Export")
+
   get_target_property(export_header ${target} OPENDDS_EXPORT_HEADER)
   if(export_header)
-    set(${export_header_var} ${export_header} PARENT_SCOPE)
+    if(DEFINED arg_USE_EXPORT_VAR)
+      set(${arg_USE_EXPORT_VAR} "${export_header};${export_macro}" PARENT_SCOPE)
+    endif()
     return()
   endif()
 
   _opendds_get_generated_file_path(${target} "${target}_export.h" export_header)
 
-  find_file(gen_script "generate_export_file.pl" HINTS ${ACE_BIN_DIR})
-  if(NOT EXISTS ${gen_script})
-    message(FATAL_ERROR "Failed to find required script 'generate_export_file.pl'")
-  endif()
-
+  string(TOUPPER "${target}" uppercase_target)
   if(NOT EXISTS ${output_file})
-    execute_process(COMMAND ${CMAKE_COMMAND} -E env "DDS_ROOT=${DDS_ROOT}" "TAO_ROOT=${TAO_ROOT}"
-      ${PERL_EXECUTABLE} ${gen_script} ${target} OUTPUT_FILE ${export_header} RESULT_VARIABLE export_script_exit_status)
-    if(NOT export_script_exit_status EQUAL "0")
-      message(FATAL_ERROR "Export header script for ${target} exited with ${export_script_status}")
-    endif()
+    configure_file("${_OPENDDS_CMAKE_DIR}/export.h.in" "${export_header}")
   endif()
 
   set_target_properties(${target}
@@ -174,15 +183,23 @@ function(_opendds_get_target_export_header target export_header_var)
 
   _opendds_add_idl_or_header_files(${target} PUBLIC TRUE ${export_header})
 
-  string(TOUPPER "${target}" target_upper)
   target_compile_definitions(${target}
     PRIVATE
-      "${target_upper}_BUILD_DLL")
+      "${uppercase_target}_BUILD_DLL")
 
-  set(${export_header_var} ${export_header} PARENT_SCOPE)
+  if(DEFINED arg_USE_EXPORT_VAR)
+    set(${arg_USE_EXPORT_VAR} "${export_header};${export_macro}" PARENT_SCOPE)
+  endif()
 endfunction()
 
 function(opendds_target_sources target)
+  set(debug FALSE)
+  if(opendds_target_sources IN_LIST OPENDDS_CMAKE_VERBOSE)
+    message(STATUS "opendds_target_sources(${target} ${ARGN}) called from ${PROJECT_NAME}")
+    set(debug TRUE)
+  endif()
+  list(APPEND CMAKE_MESSAGE_INDENT "  ")
+
   if(NOT TARGET ${target})
     message(FATAL_ERROR "Invalid target '${target}' passed into opendds_target_sources")
   endif()
@@ -192,6 +209,7 @@ function(opendds_target_sources target)
     non_idl_sources
     tao_options
     opendds_options
+    use_export
     suppress_anys
     always_generate_lib_export_header
     generate_server_skeletons
@@ -211,22 +229,22 @@ function(opendds_target_sources target)
   get_target_property(target_type ${target} TYPE)
   if(target_type STREQUAL "SHARED_LIBRARY"
       OR (always_generate_lib_export_header AND target_type MATCHES "LIBRARY"))
-    _opendds_get_target_export_header(${target} export_header)
-
+    if(NOT use_export)
+      opendds_export_header(${target} USE_EXPORT_VAR use_export)
+    endif()
+    list(GET use_export 0 export_header)
+    list(GET use_export 1 export_macro)
     if(NOT "${tao_options}" MATCHES "-Wb,stub_export_include")
       list(APPEND tao_options "-Wb,stub_export_include=${export_header}")
     endif()
-
     if(NOT "${tao_options}" MATCHES "-Wb,stub_export_macro")
-      list(APPEND tao_options "-Wb,stub_export_macro=${target}_Export")
+      list(APPEND tao_options "-Wb,stub_export_macro=${export_macro}")
     endif()
-
-    if(NOT "${opendds_options}" MATCHES "-Wb,export_macro")
-      list(APPEND opendds_options "-Wb,export_macro=${target}_Export")
-    endif()
-
     if(NOT "${opendds_options}" MATCHES "-Wb,export_include")
       list(APPEND opendds_options "-Wb,export_include=${export_header}")
+    endif()
+    if(NOT "${opendds_options}" MATCHES "-Wb,export_macro")
+      list(APPEND opendds_options "-Wb,export_macro=${export_macro}")
     endif()
   endif()
 
@@ -235,7 +253,6 @@ function(opendds_target_sources target)
   endif()
 
   list(LENGTH CMAKE_CXX_COMPILER cxx_compiler_length)
-
   if(${cxx_compiler_length} EQUAL 1)
     if(NOT "${opendds_options}" MATCHES "-Yp")
       list(APPEND opendds_options "-Yp,${CMAKE_CXX_COMPILER}")
@@ -289,9 +306,7 @@ function(opendds_target_sources target)
     if(NOT skip_opendds_idl)
       target_link_libraries(${target} ${max_scope} OpenDDS::Dcps)
     endif()
-    if(NOT skip_tao_idl)
-      target_link_libraries(${target} ${max_scope} TAO::TAO)
-    endif()
+    target_link_libraries(${target} ${max_scope} TAO::TAO)
   endif()
 
   _opendds_get_generated_output_dir(${target} generated_directory)
