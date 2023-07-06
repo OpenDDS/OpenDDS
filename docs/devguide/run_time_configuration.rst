@@ -160,8 +160,8 @@ A sample ``[common]`` section follows:
 
 It is not necessary to specify every option.
 
-Option values in the ``[common]`` section with names that begin with "``DCPS``" can be overridden by a command-line argument.
-The command-line argument has the same name as the configuration option with a "``-``" prepended to it.
+Option values in the ``[common]`` section with names that begin with ``DCPS`` can be overridden by a command-line argument.
+The command-line argument has the same name as the configuration option with a ``-`` prepended to it.
 For example:
 
 .. code-block:: bash
@@ -469,7 +469,7 @@ It is equivalent to ``corbaloc::<host>:<port>/DCPSInfoRepo``.
 Certain options that begin with "ORB" instead of "DCPS" are listed in the table above.
 They are named differently since they are inherited from TAO.
 The options starting with "ORB" listed in this table are implemented directly by OpenDDS (not passed to TAO) and are supported either on the command line (using a "-" prefix) or in the configuration file.
-Other command-line options that begin with "-ORB" are passed to TAO’s ``ORB_init`` if DCPSInfoRepo discovery is used.
+Other command-line options that begin with ``-ORB`` are passed to TAO’s ``ORB_init`` if DCPSInfoRepo discovery is used.
 
 The ``DCPSChunks`` option allows application developers to tune the amount of memory preallocated when the ``RESOURCE_LIMITS`` are set to infinite.
 Once the allocated memory is exhausted, additional chunks are allocated/deallocated from the heap.
@@ -2226,7 +2226,7 @@ Here is our configuration file:
     local_address=hostb
 
 Assuming ``hosta`` and ``hostb`` are the host names assigned to the two network interfaces, we now have separate configurations that can use tcp on the respective networks.
-The above file sets the "``A``" side configuration as the default, meaning we must manually bind any entities we want to use the other side to the "``B``" side configuration.
+The above file sets the ``A`` side configuration as the default, meaning we must manually bind any entities we want to use the other side to the ``B`` side configuration.
 
 OpenDDS provides two mechanisms to assign configurations to entities:
 
@@ -2246,7 +2246,7 @@ Here is the source code mechanism (using a domain participant):
 
      OpenDDS::DCPS::TransportRegistry::instance()->bind_config("config_b", dp);
 
-Any Data Writers or Readers owned by this Domain Participant should now use the "``B``" side configuration.
+Any Data Writers or Readers owned by this Domain Participant should now use the ``B`` side configuration.
 
 .. note:: When directly binding a configuration to a data writer or reader, the ``bind_config`` call must occur before the reader or writer is enabled.
   This is not an issue when binding configurations to Domain Participants, Publishers, or Subscribers.
@@ -2679,7 +2679,7 @@ Each of these mechanisms are bounded to ensure deterministic behavior and is con
 ``multicast`` supports a number of configuration options:
 
 The ``default_to_ipv6`` and ``port_offset`` options affect how default multicast group addresses are selected.
-If ``default_to_ipv6`` is set to "``1``" (enabled), then the default IPv6 address will be used (``[FF01::80]``).
+If ``default_to_ipv6`` is set to ``1`` (enabled), then the default IPv6 address will be used (``[FF01::80]``).
 The ``port_offset`` option determines the default port used when the group address is not set and defaults to ``49152``.
 
 The ``group_address`` option may be used to manually define a multicast group to join to exchange data.

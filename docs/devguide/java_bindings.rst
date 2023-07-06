@@ -615,7 +615,7 @@ and a transport instance section with a transport type property:
     [transport/1]
     transport_type=tcp
 
-The ``[transport/1]`` section contains configuration information for the transport instance named "``1``".
+The ``[transport/1]`` section contains configuration information for the transport instance named ``1``.
 It is defined to be of type ``tcp``.
 The global transport configuration setting above causes this transport instance to be used by all readers and writers in the process.
 

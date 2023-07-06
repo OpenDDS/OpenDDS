@@ -411,7 +411,7 @@ How Resulting Samples are Constructed
 Although many concepts in multi topic are borrowed from the domain of relational databases, a real-time middleware such as DDS is not a database.
 Instead of processing a batch of data at a time, each sample arriving at the data reader from one of the constituent topics triggers multi-topic-specific processing that results in the construction of zero, one, or many samples of the resulting type and insertion of those constructed samples into the multi topic data reader.
 
-Specifically, the arrival of a sample on constituent topic "``A``" with type "``TA``"  results in the following steps in the multi topic data reader (this is a simplification of the actual algorithm):
+Specifically, the arrival of a sample on constituent topic ``A`` with type ``TA``  results in the following steps in the multi topic data reader (this is a simplification of the actual algorithm):
 
 #. A sample of the resulting type is constructed, and fields from ``TA`` which exist in the resulting type and are in the aggregation (or are join keys) are copied from the incoming sample to the constructed sample.
 
@@ -420,7 +420,7 @@ Specifically, the arrival of a sample on constituent topic "``A``" with type "``
    The result of the join may be zero, one, or many samples.
    Fields from ``TB`` are copied to the resulting sample as described in step 1.
 
-#. Join keys of topic "``B``" (connecting it to other topics) are then processed as described in step 2, and this continues to all other topics that are connected by join keys.
+#. Join keys of topic ``B`` (connecting it to other topics) are then processed as described in step 2, and this continues to all other topics that are connected by join keys.
 
 #. Any constituent topics that were not visited in steps 2 or 3 are processed as "cross joins" (also known as cross-product joins).
    These are joins with no key constraints.

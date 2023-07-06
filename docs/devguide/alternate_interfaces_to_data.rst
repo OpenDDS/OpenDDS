@@ -190,7 +190,7 @@ The Recorder class includes support for the Dynamic Language Binding from XTypes
 Type information for each matched DataWriter (that supports XTypes complete TypeObjects) is stored in the Recorder.
 Users can call Recorder::get_dynamic_data, passing a RawDataSample to get back a DynamicData object which includes type information – see DynamicData::type().
 
-A tool called "inspect," uses the Recorder and Dynamic Language Binding allow for the printing of any type, so long as the topic name, type name, and domain ID are known.
+A tool called ``inspect``, uses the Recorder and Dynamic Language Binding allow for the printing of any type, so long as the topic name, type name, and domain ID are known.
 The DataWriter must include code generation for complete TypeObjects.
 See tools/inspect/Inspect.cpp for this tool’s source code.
 It can be used as a standalone tool or an example for developing your own applications using these APIs.

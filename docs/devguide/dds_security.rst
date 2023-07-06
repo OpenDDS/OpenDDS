@@ -326,9 +326,9 @@ The following configuration steps are required to enable OpenDDS Security featur
 
 #. Enable OpenDDS security-features, which can be done two ways:
 
-   * Via API: ``"TheServiceParticipant->set_security(true);"`` or
+   * Via API: ``TheServiceParticipant->set_security(true);`` or
 
-   * Via config file: ``"DCPSSecurity=1"`` in the ``[common]`` section.
+   * Via config file: ``DCPSSecurity=1`` in the ``[common]`` section.
 
 .. _dds_security--dds-security-configuration-via-propertyqospolicy:
 
@@ -758,7 +758,7 @@ The following XML elements are used to configure topic endpoint behaviors:
 
 A wildcard-capable string used to match topic names.
 See description above.
-A "default" rule to catch all previously unmatched topics can be made with: ``<topic_expression>*</topic_expression>``
+A default rule to catch all previously unmatched topics can be made with: ``<topic_expression>*</topic_expression>``
 
 ``<enable_discovery_protection>`` : **Boolean**
 

@@ -160,7 +160,7 @@ Open it by going to the Window menu and selecting Open Perspective -> Other -> O
 
 To get started using the OpenDDS Modeling SDK, see the help content installed in Eclipse.
 Start by going to the Help menu and selecting Help Contents.
-There is a top-level item for "``OpenDDS Modeling SDK Guide``" that contains all of the OpenDDS-specific content describing the modeling and code generation activities.
+There is a top-level item for ``OpenDDS Modeling SDK Guide`` that contains all of the OpenDDS-specific content describing the modeling and code generation activities.
 
 .. _modeling_sdk--developing-applications:
 
