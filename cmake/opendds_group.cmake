@@ -11,37 +11,74 @@ set(_OPENDDS_GROUP_CMAKE TRUE)
 
 include("${CMAKE_CURRENT_LIST_DIR}/init.cmake")
 
-set(_opendds_required_deps OpenDDS::Dcps opendds_idl)
+_opendds_group(OpenDDS DEFAULT_REQUIRED OpenDDS::Dcps OpenDDS::opendds_idl)
 
-set(_opendds_executables opendds_idl)
-
-set(_opendds_libs
-  OpenDDS_Dcps
-  OpenDDS_FACE
-  OpenDDS_Federator
-  OpenDDS_InfoRepoDiscovery
-  OpenDDS_InfoRepoLib
-  OpenDDS_InfoRepoServ
-  OpenDDS_Model
-  OpenDDS_monitor
-  OpenDDS_Multicast
-  OpenDDS_Rtps
-  OpenDDS_Rtps_Udp
-  OpenDDS_Shmem
-  OpenDDS_Tcp
-  OpenDDS_Udp
-  OpenDDS_QOS_XML_XSC_Handler
-  OpenDDS_Security
+_opendds_group_lib(Dcps
+  DEPENDS
+    ACE::ACE
+    TAO::TAO
+    # TODO: These are omitted with safety profile
+    TAO::Valuetype
+    TAO::PortableServer
+    TAO::BiDirGIOP
 )
-
-set(OPENDDS_DCPS_DEPS
-  ACE::ACE
-  TAO::TAO
-  # TODO: These are omitted with safety profile
-  TAO::Valuetype
-  TAO::PortableServer
-  TAO::BiDirGIOP
+_opendds_group_lib(FACE DEPENDS OpenDDS::Dcps)
+_opendds_group_lib(Federator DEPENDS OpenDDS::InfoRepoLib)
+_opendds_group_lib(InfoRepoDiscovery
+  DEPENDS
+    OpenDDS::Dcps
+    TAO::PortableServer
+    TAO::BiDirGIOP
+    TAO::PI
+    TAO::CodecFactory
+    TAO::Valuetype
+    TAO::AnyTypeCode
 )
+_opendds_group_lib(InfoRepoLib
+  DEPENDS
+    OpenDDS::InfoRepoDiscovery
+    TAO::Svc_Utils
+    TAO::ImR_Client
+    TAO::IORManip
+    TAO::IORTable
+)
+_opendds_group_lib(InfoRepoServ DEPENDS OpenDDS::Federator)
+_opendds_group_lib(Model DEPENDS OpenDDS::Dcps)
+_opendds_group_lib(monitor DEPENDS OpenDDS::Dcps)
+_opendds_group_lib(Multicast DEPENDS OpenDDS::Dcps)
+_opendds_group_lib(Rtps DEPENDS OpenDDS::Dcps)
+_opendds_group_lib(Rtps_Udp DEPENDS OpenDDS::Rtps)
+_opendds_group_lib(Security
+  DEPENDS
+    OpenDDS::Rtps
+    ACE::XML_Utils
+    OpenSSL::SSL
+    OpenSSL::Crypto
+)
+_opendds_group_lib(Shmem DEPENDS OpenDDS::Dcps)
+_opendds_group_lib(Tcp DEPENDS OpenDDS::Dcps)
+_opendds_group_lib(Udp DEPENDS OpenDDS::Dcps)
+_opendds_group_lib(QOS_XML_XSC_Handler DEPENDS OpenDDS::Dcps ACE::XML_Utils)
+_opendds_group_lib(RtpsRelayLib DEPENDS OpenDDS::Dcps)
+
+foreach(_exe DCPSInfoRepo RtpsRelay dcpsinfo_dump inspect opendds_idl repoctl)
+  _opendds_group_exe("${_exe}")
+endforeach()
+
+if(OPENDDS_SECURITY)
+  find_package(OpenSSL PATHS "${OPENDDS_OPENSSL}" NO_DEFAULT_PATH)
+  if(NOT OpenSSL_FOUND)
+    set(OPENSSL_ROOT_DIR "${OPENDDS_OPENSSL}")
+    find_package(OpenSSL)
+  endif()
+  if(NOT OpenSSL_FOUND)
+    message(FATAL_ERROR "Could not find OpenSSL")
+  endif()
+
+  if(NOT OPENDDS_XERCES3)
+    set(OPENDDS_XERCES3 ON)
+  endif()
+endif()
 
 set(OPENDDS_DCPS_INCLUDE_DIRS ${OPENDDS_INCLUDE_DIRS})
 set(OPENDDS_DCPS_COMPILE_DEFINITIONS)
@@ -96,77 +133,3 @@ endif()
 if(OPENDDS_SECURITY)
   list(APPEND OPENDDS_DCPS_COMPILE_DEFINITIONS OPENDDS_SECURITY)
 endif()
-
-set(OPENDDS_FACE_DEPS
-  OpenDDS::Dcps
-)
-
-set(OPENDDS_FEDERATOR_DEPS
-  OpenDDS::InfoRepoLib
-)
-
-set(OPENDDS_INFOREPODISCOVERY_DEPS
-  OpenDDS::Dcps
-  TAO::PortableServer
-  TAO::BiDirGIOP
-  TAO::PI
-  TAO::CodecFactory
-  TAO::Valuetype
-  TAO::AnyTypeCode
-)
-
-set(OPENDDS_INFOREPOLIB_DEPS
-  OpenDDS::InfoRepoDiscovery
-  TAO::Svc_Utils
-  TAO::ImR_Client
-  TAO::IORManip
-  TAO::IORTable
-)
-
-set(OPENDDS_INFOREPOSERV_DEPS
-  OpenDDS::Federator
-)
-
-set(OPENDDS_MODEL_DEPS
-  OpenDDS::Dcps
-)
-
-set(OPENDDS_MONITOR_DEPS
-  OpenDDS::Dcps
-)
-
-set(OPENDDS_MULTICAST_DEPS
-  OpenDDS::Dcps
-)
-
-set(OPENDDS_QOS_XML_XSC_HANDLER_DEPS
-  OpenDDS::Dcps
-  ACE::XML_Utils
-)
-
-set(OPENDDS_RTPS_DEPS
-  OpenDDS::Dcps
-)
-
-set(OPENDDS_RTPS_UDP_DEPS
-  OpenDDS::Rtps
-)
-
-set(OPENDDS_SECURITY_DEPS
-  OpenDDS::Rtps
-  ACE::XML_Utils
-  OpenSSL::SSL
-  OpenSSL::Crypto
-)
-
-set(OPENDDS_SHMEM_DEPS
-  OpenDDS::Dcps
-)
-
-set(OPENDDS_TCP_DEPS
-  OpenDDS::Dcps
-)
-
-set(OPENDDS_UDP_DEPS
-  OpenDDS::Dcps
-)
