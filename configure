@@ -850,8 +850,12 @@ if (!$ace_src || !$tao_src) {
       if ! which('git');
 
     my $urlbase = 'https://github.com/DOCGroup';
+    my $branch = 'ace6tao2'
+    if ($opts{'doc-group3'}) {
+      $branch = 'master'
+    }
 
-    my $err = git_clone('ACE_TAO', "$urlbase/ACE_TAO", branch => 'ace6tao2');
+    my $err = git_clone('ACE_TAO', "$urlbase/ACE_TAO", branch => $branch);
     die "ERROR: Failed to clone ACE/TAO from GitHub\nStopped"
       if $err ||
         ! -r 'ACE_TAO/ACE/ace/ACE.h' ||
