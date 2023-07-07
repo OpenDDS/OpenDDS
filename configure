@@ -850,9 +850,9 @@ if (!$ace_src || !$tao_src) {
       if ! which('git');
 
     my $urlbase = 'https://github.com/DOCGroup';
-    my $branch = 'ace6tao2'
+    my $branch = 'ace6tao2';
     if ($opts{'doc-group3'}) {
-      $branch = 'master'
+      $branch = 'master';
     }
 
     my $err = git_clone('ACE_TAO', "$urlbase/ACE_TAO", branch => $branch);
