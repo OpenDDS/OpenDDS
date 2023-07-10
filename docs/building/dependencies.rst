@@ -54,6 +54,9 @@ DOC Group ACE 7.1/TAO 3.1
 
   This version requires a C++14-capable compiler.
 
+  Pass ``--ace-github-latest`` to the configure script to clone the ``master`` branch of ACE/TAO as is.
+  This also clones the ``master`` branch of MPC as is.
+
 Both can also be manually downloaded from https://github.com/DOCGroup/ACE_TAO/releases
 
 .. _dependencies-ace:
