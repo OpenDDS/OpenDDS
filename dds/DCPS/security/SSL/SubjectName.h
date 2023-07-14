@@ -10,7 +10,8 @@
 #include <dds/DCPS/security/OpenDDS_Security_Export.h>
 
 #include <string>
-#include <map>
+#include <vector>
+#include <algorithm>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -22,41 +23,37 @@ namespace SSL {
 class Parser {
 public:
   typedef std::pair<std::string, std::string> AttributeValueAssertion;
+  typedef std::vector<AttributeValueAssertion> AVAVec;
 
   Parser(std::string in) : in_(in), pos_(0) {}
 
-  bool parse();
+  // Parse and store the result to the provided vector.
+  bool parse(AVAVec& store);
   void reset(std::string in);
 
-  std::vector<AttributeValueAssertion> attributes() const
-  {
-    return attributes_;
-  }
-
 private:
-  bool accept(char c);
-  bool distinguished_name();
-  bool relative_distinguished_name();
-  bool attribute_type_value();
-  bool attribute_type(std::string& at);
-  bool validate_attribute_type(const std::string& at);
+  bool is_alpha(char c) const;
+  bool accept(char c) const;
+  bool distinguished_name(AVAVec&) const;
+  bool relative_distinguished_name(AVAVec&) const;
+  bool attribute_type_value(AVAVec&) const;
+  bool attribute_type(std::string& at) const;
+  bool validate_attribute_type(const std::string& at) const;
 
-  bool attribute_value(std::string& av);
-  void unescape(std::string& av);
-  void replace_all(std::string& str, const std::string& s, const std::string& t);
-  bool validate_attribute_value(const std::string& av);
+  bool attribute_value(std::string& av) const;
+  void unescape(std::string& av) const;
+  void replace_all(std::string& str, const std::string& s, const std::string& t) const;
+  bool validate_attribute_value(const std::string& av) const;
 
   std::string in_;
 
   // Current position in the input string.
   std::string::size_type pos_;
-
-  std::vector<AttributeValueAssertion> attributes_;
 };
 
 class OpenDDS_Security_Export SubjectName {
 private:
-  typedef std::map<std::string, std::string> AttrMap;
+  typedef std::vector<std::string, std::string> AttrVec;
 
 public:
   SubjectName();
@@ -76,10 +73,10 @@ public:
   bool operator==(const SubjectName&) const;
   bool operator!=(const SubjectName&) const;
 
-  typedef AttrMap::const_iterator const_iterator;
-  const_iterator begin() const { return map_.begin(); }
-  const_iterator end() const { return map_.end(); }
-  const_iterator find(const std::string& key) const { return map_.find(key); }
+  typedef AttrVec::const_iterator const_iterator;
+  const_iterator begin() const { return attr_vec_.begin(); }
+  const_iterator end() const { return attr_vec_.end(); }
+  const_iterator find(const std::string& key) const;
 
 private:
   /**
@@ -101,7 +98,7 @@ private:
                            const char* a_del, const char* s_trim,
                            const char* a_trim, bool push_back);
 
-  AttrMap map_;
+  AttrVec attr_vec_;
 };
 
 }  // namespace SSL

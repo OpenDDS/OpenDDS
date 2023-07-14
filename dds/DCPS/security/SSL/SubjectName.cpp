@@ -49,7 +49,7 @@ namespace SSL {
   {
     std::string input(in);
     size_t input_end = input.size() - 1;
-    map_.clear();
+    attr_vec_.clear();
 
     ACE_UNUSED_ARG(push_back);
 
@@ -75,10 +75,8 @@ namespace SSL {
       size_t st_end_clean = st.find_last_not_of(s_trim);
 
       // If we've found a clean sequence token
-      if (st_begin_clean != std::string::npos &&
-          st_end_clean != std::string::npos) {
-        std::string st_clean =
-          st.substr(st_begin_clean, st_end_clean - st_begin_clean + 1);
+      if (st_begin_clean != std::string::npos && st_end_clean != std::string::npos) {
+        std::string st_clean = st.substr(st_begin_clean, st_end_clean - st_begin_clean + 1);
 
         // We'll use "nt" to mark positions for name tokens
         size_t nt_begin = 0;
@@ -94,10 +92,8 @@ namespace SSL {
           size_t nt_end_clean = nt.find_last_not_of(a_trim);
 
           // If we found a clean name token
-          if (nt_begin_clean != std::string::npos &&
-              nt_end_clean != std::string::npos) {
-            std::string nt_clean =
-              nt.substr(nt_begin_clean, nt_end_clean - nt_begin_clean + 1);
+          if (nt_begin_clean != std::string::npos && nt_end_clean != std::string::npos) {
+            std::string nt_clean = nt.substr(nt_begin_clean, nt_end_clean - nt_begin_clean + 1);
 
             // We'll use "vt" to mark positions for value tokens
             size_t vt_begin = nt_end + 2;  // Skip over the (single) delimiter
@@ -109,13 +105,11 @@ namespace SSL {
             size_t vt_end_clean = vt.find_last_not_of(a_trim);
 
             // If we found a clean value token
-            if (vt_begin_clean != std::string::npos &&
-                vt_end_clean != std::string::npos) {
-              std::string vt_clean =
-                vt.substr(vt_begin_clean, vt_end_clean - vt_begin_clean + 1);
+            if (vt_begin_clean != std::string::npos && vt_end_clean != std::string::npos) {
+              std::string vt_clean = vt.substr(vt_begin_clean, vt_end_clean - vt_begin_clean + 1);
 
-              // Push our clean pair into the map
-              map_[nt_clean] = vt_clean;
+              // Push our clean pair into the vector
+              attr_vec_.push_back(std::make_pair(nt_clean, vt_clean));
             }
           }
         }
@@ -130,7 +124,7 @@ namespace SSL {
       }
     }
 
-    return map_.empty() ? 1 : 0;
+    return attr_vec_.empty() ? 1 : 0;
   }
 
   int SubjectName::parse_permissive(const char* in)
@@ -146,26 +140,36 @@ namespace SSL {
   int SubjectName::parse_ldap_v3(const char* in)
   {
     Parser parser(in);
-    return parser.parse()? 0 : 1;
+    return parser.parse(attr_vec_) ? 0 : 1;
   }
 
   bool SubjectName::operator==(const SubjectName& rhs) const
   {
-    bool result = (map_.size() == rhs.map_.size());
-    for (AttrMap::const_iterator i1 = map_.begin(), i2 = rhs.map_.begin();
-         result == true && i1 != map_.end() && i2 != rhs.map_.end();
-         ++i1, ++i2) {
-      if (i1->first.compare(i2->first) != 0 ||
-          i1->second.compare(i2->second) != 0) {
-        result = false;
+    if (attr_vec_.size() != rhs.attr_vec_.size()) {
+      return false;
+    }
+
+    for (const_iterator i1 = begin(), i2 = rhs.begin(); i1 != end() && i2 != rhs.end(); ++i1, ++i2) {
+      if (i1->first != i2->first || i1->second != i2->second) {
+        return false;
       }
     }
-    return result;
+    return true;
   }
 
   bool SubjectName::operator!=(const SubjectName& rhs) const
   {
     return !(*this == rhs);
+  }
+
+  SubjectName::const_iterator SubjectName::find(const std::string& key) const
+  {
+    for (const_iterator it = begin(); it != end(); ++it) {
+      if (it->first == key) {
+        return it;
+      }
+    }
+    return end();
   }
 
   void Parser::reset(std::string in)
@@ -174,25 +178,25 @@ namespace SSL {
     pos_ = 0;
   }
 
-  bool Parser::parse()
+  bool Parser::parse(AVAVec& store) const
   {
-    return distinguished_name();
+    return distinguished_name(store);
   }
 
-  bool Parser::distinguished_name()
+  bool Parser::distinguished_name(AVAVec& store) const
   {
-    if (!relative_distinguished_name()) {
+    if (!relative_distinguished_name(store)) {
       return false;
     }
-    while (accept(",")) {
-      if (!relative_distinguished_name()) {
+    while (accept(',')) {
+      if (!relative_distinguished_name(store)) {
         return false;
       }
     }
     return true;
   }
 
-  bool Parser::accept(char c)
+  bool Parser::accept(char c) const
   {
     if (pos_ == in_.size()) {
       return false;
@@ -204,29 +208,29 @@ namespace SSL {
     return false;
   }
 
-  bool Parser::relative_distinguished_name()
+  bool Parser::relative_distinguished_name(AVAVec& store) const
   {
-    if (!attribute_type_value()) {
+    if (!attribute_type_value(store)) {
       return false;
     }
-    while (accept("+")) {
-      if (!attribute_type_value()) {
+    while (accept('+')) {
+      if (!attribute_type_value(store)) {
         return false;
       }
     }
     return true;
   }
 
-  bool Parser::attribute_type_value()
+  bool Parser::attribute_type_value(AVAVec& store) const
   {
     std::string at, av;
-    if (!attribute_type(at) || !accept("=") || !attribute_value(av)) {
+    if (!attribute_type(at) || !accept('=') || !attribute_value(av)) {
       return false;
     }
-    attributes_.push_back(std::make_pair(at, av));
+    store.push_back(std::make_pair(at, av));
   }
 
-  bool Parser::attribute_type(std::string& at)
+  bool Parser::attribute_type(std::string& at) const
   {
     size_t equal_pos = in_.find_first_of("=", pos_);
     if (equal_pos == std::string::npos) {
@@ -238,17 +242,32 @@ namespace SSL {
     return validate_attribute_type(at);
   }
 
-  bool Parser::validate_attribute_type(const std::string& at)
+  bool Parser::is_alpha(char c) const
   {
-    // TODO: Make sure there is no prohibited character.
+    return ('A' <= c && c <= 'Z') || ('a' <= c && c <= 'z');
+  }
+
+  bool Parser::validate_attribute_type(const std::string& at) const
+  {
+    // Attibute type must start with a lower-case alphabet and followed by
+    // any number of alphabets (lower or upper-case) or digits or hyphens.
+    if (at.empty() || !is_alpha(at[0])) {
+      return false;
+    }
+    for (std::string::size_type i = 0; i < at.size(); ++i) {
+      const char c = at[i];
+      if (!is_alpha(c) && !('0' <= c && c <= '9') && c != '-') {
+        return false;
+      }
+    }
     return true;
   }
 
-  bool Parser::attribute_value(std::string& av)
+  bool Parser::attribute_value(std::string& av) const
   {
     // The first comma or plus character that is not escaped marks the end
     // of the current value. If not found, the value runs to the end of the input.
-    std::string:size_type start_pos = pos_;
+    std::string::size_type start_pos = pos_;
     bool got_value = false;
     while (start_pos < in_.size() && !got_value) {
       std::string::size_type delimiter_pos = in_.find_first_of(",+", start_pos);
@@ -282,24 +301,22 @@ namespace SSL {
     return validate_attribute_value(av);
   }
 
-  void Parser::unescape(std::string& av)
+  void Parser::unescape(std::string& av) const
   {
-    // pair = ESC ( ESC / special / hexpair )
-    // special = escaped / SPACE / SHARP / EQUALS
-    // escaped = DQUOTE / PLUS / COMMA / SEMI / LANGLE / RANGLE
+    // Unescape the escaped characters from the attribute value.
     replace_all(av, "\\\\", "\\");
     replace_all(av, "\\\"", "\"");
-    replace_all(av, "\+", "+");
-    replace_all(av, "\,", ",");
-    replace_all(av, "\;", ";");
-    replace_all(av, "\<", "<");
-    replace_all(av, "\>", ">");
-    replace_all(av, "\ ", " ");
-    replace_all(av, "\#", "#");
-    replace_all(av, "\=", "=");
+    replace_all(av, "\\+", "+");
+    replace_all(av, "\\,", ",");
+    replace_all(av, "\\;", ";");
+    replace_all(av, "\\<", "<");
+    replace_all(av, "\\>", ">");
+    replace_all(av, "\\ ", " ");
+    replace_all(av, "\\#", "#");
+    replace_all(av, "\\=", "=");
   }
 
-  void Parser::replace_all(std::string& str, const std::string& s, const std::string& t)
+  void Parser::replace_all(std::string& str, const std::string& s, const std::string& t) const
   {
     // Replace all occurrences of substring s in string str with t.
     std::string::size_type n = 0;
@@ -309,7 +326,7 @@ namespace SSL {
     }
   }
 
-  bool Parser::validate_attribute_value(const std::string& av)
+  bool Parser::validate_attribute_value(const std::string& av) const
   {
     // TODO: Check that there is no prohibited character.
     return true;
