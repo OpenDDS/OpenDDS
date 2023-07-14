@@ -27,7 +27,7 @@ namespace SSL {
 
   int SubjectName::parse(const char* in, bool permissive)
   {
-    if (in == NULL) {
+    if (!in) {
       return -1;
     }
 
@@ -145,7 +145,8 @@ namespace SSL {
 
   int SubjectName::parse_ldap_v3(const char* in)
   {
-    return simple_avp_seq_parse(in, ",", "=", " ", " ", false);
+    Parser parser(in);
+    return parser.parse()? 0 : 1;
   }
 
   bool SubjectName::operator==(const SubjectName& rhs) const
@@ -165,6 +166,153 @@ namespace SSL {
   bool SubjectName::operator!=(const SubjectName& rhs) const
   {
     return !(*this == rhs);
+  }
+
+  void Parser::reset(std::string in)
+  {
+    in_ = in;
+    pos_ = 0;
+  }
+
+  bool Parser::parse()
+  {
+    return distinguished_name();
+  }
+
+  bool Parser::distinguished_name()
+  {
+    if (!relative_distinguished_name()) {
+      return false;
+    }
+    while (accept(",")) {
+      if (!relative_distinguished_name()) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  bool Parser::accept(char c)
+  {
+    if (pos_ == in_.size()) {
+      return false;
+    }
+    if (in_[pos_] == c) {
+      ++pos_;
+      return true;
+    }
+    return false;
+  }
+
+  bool Parser::relative_distinguished_name()
+  {
+    if (!attribute_type_value()) {
+      return false;
+    }
+    while (accept("+")) {
+      if (!attribute_type_value()) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  bool Parser::attribute_type_value()
+  {
+    std::string at, av;
+    if (!attribute_type(at) || !accept("=") || !attribute_value(av)) {
+      return false;
+    }
+    attributes_.push_back(std::make_pair(at, av));
+  }
+
+  bool Parser::attribute_type(std::string& at)
+  {
+    size_t equal_pos = in_.find_first_of("=", pos_);
+    if (equal_pos == std::string::npos) {
+      return false;
+    }
+    at = in_.substr(pos_, equal_pos - pos_);
+
+    pos_ = equal_pos;
+    return validate_attribute_type(at);
+  }
+
+  bool Parser::validate_attribute_type(const std::string& at)
+  {
+    // TODO: Make sure there is no prohibited character.
+    return true;
+  }
+
+  bool Parser::attribute_value(std::string& av)
+  {
+    // The first comma or plus character that is not escaped marks the end
+    // of the current value. If not found, the value runs to the end of the input.
+    std::string:size_type start_pos = pos_;
+    bool got_value = false;
+    while (start_pos < in_.size() && !got_value) {
+      std::string::size_type delimiter_pos = in_.find_first_of(",+", start_pos);
+      if (delimiter_pos == std::string::npos) {
+        av = in_.substr(pos_, in_.size() - pos_);
+        pos_ = in_.size();
+        got_value = true;
+      } else {
+        std::string::size_type tmp_pos = delimiter_pos - 1;
+        size_t esc_count = 0;
+        while (tmp_pos >= 0 && in_[tmp_pos--] == '\\') {
+          ++esc_count;
+        }
+        if (esc_count % 2 == 0) {
+          av = in_.substr(pos_, delimiter_pos - pos_);
+          pos_ = delimiter_pos;
+          got_value = true;
+        } else {
+          start_pos = delimiter_pos + 1;
+        }
+      }
+    }
+
+    if (!got_value) {
+      av = in_.substr(pos_, in_.size() - pos_);
+      pos_ = in_.size();
+      got_value = true;
+    }
+
+    av = unescape(av);
+    return validate_attribute_value(av);
+  }
+
+  void Parser::unescape(std::string& av)
+  {
+    // pair = ESC ( ESC / special / hexpair )
+    // special = escaped / SPACE / SHARP / EQUALS
+    // escaped = DQUOTE / PLUS / COMMA / SEMI / LANGLE / RANGLE
+    replace_all(av, "\\\\", "\\");
+    replace_all(av, "\\\"", "\"");
+    replace_all(av, "\+", "+");
+    replace_all(av, "\,", ",");
+    replace_all(av, "\;", ";");
+    replace_all(av, "\<", "<");
+    replace_all(av, "\>", ">");
+    replace_all(av, "\ ", " ");
+    replace_all(av, "\#", "#");
+    replace_all(av, "\=", "=");
+  }
+
+  void Parser::replace_all(std::string& str, const std::string& s, const std::string& t)
+  {
+    // Replace all occurrences of substring s in string str with t.
+    std::string::size_type n = 0;
+    while ((n = str.find(s, n)) != std::string::npos) {
+      str.replace(n, s.size(), t);
+      n += t.size();
+    }
+  }
+
+  bool Parser::validate_attribute_value(const std::string& av)
+  {
+    // TODO: Check that there is no prohibited character.
+    return true;
   }
 
 }  // namespace SSL

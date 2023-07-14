@@ -18,9 +18,45 @@ namespace OpenDDS {
 namespace Security {
 namespace SSL {
 
+// A parser for subject names represented by the string format described in RFC 4514.
+class Parser {
+public:
+  typedef std::pair<std::string, std::string> AttributeValueAssertion;
+
+  Parser(std::string in) : in_(in), pos_(0) {}
+
+  bool parse();
+  void reset(std::string in);
+
+  std::vector<AttributeValueAssertion> attributes() const
+  {
+    return attributes_;
+  }
+
+private:
+  bool accept(char c);
+  bool distinguished_name();
+  bool relative_distinguished_name();
+  bool attribute_type_value();
+  bool attribute_type(std::string& at);
+  bool validate_attribute_type(const std::string& at);
+
+  bool attribute_value(std::string& av);
+  void unescape(std::string& av);
+  void replace_all(std::string& str, const std::string& s, const std::string& t);
+  bool validate_attribute_value(const std::string& av);
+
+  std::string in_;
+
+  // Current position in the input string.
+  std::string::size_type pos_;
+
+  std::vector<AttributeValueAssertion> attributes_;
+};
+
 class OpenDDS_Security_Export SubjectName {
- private:
-    typedef std::map<std::string, std::string> AttrMap;
+private:
+  typedef std::map<std::string, std::string> AttrMap;
 
 public:
   SubjectName();
