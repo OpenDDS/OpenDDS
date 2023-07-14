@@ -7,24 +7,25 @@
 #define OPENDDS_DCPS_DATAWRITERIMPL_H
 
 #include "Atomic.h"
-#include "Sample.h"
-#include "DataWriterCallbacks.h"
-#include "transport/framework/TransportSendListener.h"
-#include "transport/framework/TransportClient.h"
-#include "MessageTracker.h"
-#include "DataBlockLockPool.h"
-#include "PoolAllocator.h"
-#include "WriteDataContainer.h"
-#include "Definitions.h"
-#include "DataSampleHeader.h"
-#include "TopicImpl.h"
-#include "Time_Helper.h"
 #include "CoherentChangeControl.h"
+#include "DataBlockLockPool.h"
+#include "DataSampleHeader.h"
+#include "DataWriterCallbacks.h"
+#include "Definitions.h"
 #include "GuidUtils.h"
-#include "RcEventHandler.h"
-#include "unique_ptr.h"
+#include "MessageTracker.h"
 #include "Message_Block_Ptr.h"
+#include "PoolAllocator.h"
+#include "RcEventHandler.h"
+#include "Sample.h"
+#include "SporadicTask.h"
 #include "TimeTypes.h"
+#include "Time_Helper.h"
+#include "TopicImpl.h"
+#include "WriteDataContainer.h"
+#include "transport/framework/TransportClient.h"
+#include "transport/framework/TransportSendListener.h"
+#include "unique_ptr.h"
 #ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
 #  include "FilterEvaluator.h"
 #endif
@@ -54,7 +55,6 @@ class Monitor;
 class DataSampleElement;
 class SendStateDataSampleList;
 struct AssociationData;
-class LivenessTimer;
 
 /**
  * @class DataWriterImpl
@@ -397,10 +397,6 @@ public:
    * factory/publisher.
    */
   DDS::DataWriterListener_ptr listener_for(DDS::StatusKind kind);
-
-  /// Handle the assert liveliness timeout.
-  virtual int handle_timeout(const ACE_Time_Value &tv,
-                             const void *arg);
 
   /// Called by the PublisherImpl to indicate that the Publisher is now
   /// resumed and any data collected while it was suspended should now be sent.
@@ -776,10 +772,6 @@ private:
   DDS::OfferedIncompatibleQosStatus offered_incompatible_qos_status_ ;
   DDS::PublicationMatchedStatus publication_match_status_ ;
 
-  /// True if the writer failed to actively signal its liveliness within
-  /// its offered liveliness period.
-  bool liveliness_lost_;
-
   /**
    * @todo The publication_lost_status_ and
    *       publication_reconnecting_status_ are left here for
@@ -800,13 +792,6 @@ private:
   unique_ptr<DataSampleHeaderAllocator> header_allocator_;
   unique_ptr<DataAllocator> data_allocator_;
 
-  /// The orb's reactor to be used to register the liveliness
-  /// timer.
-  ACE_Reactor_Timer_Interface* reactor_;
-  /// The time interval for sending liveliness message.
-  TimeDuration liveliness_check_interval_;
-  /// Timestamp of last write/dispose/assert_liveliness.
-  MonotonicTimePoint last_liveliness_activity_time_;
   /// Total number of offered deadlines missed during last offered
   /// deadline status check.
   CORBA::Long last_deadline_missed_total_count_;
@@ -835,12 +820,24 @@ private:
   DDS::ReturnCode_t send_end_historic_samples(const GUID_t& readerId);
   DDS::ReturnCode_t send_request_ack();
 
-  bool liveliness_asserted_;
-
   // Lock used to synchronize remove_associations calls from discovery
   // and unregister_instances during deletion of datawriter from application
   ACE_Thread_Mutex sync_unreg_rem_assocs_lock_;
-  RcHandle<LivenessTimer> liveness_timer_;
+
+  typedef PmfSporadicTask<DataWriterImpl> DWISporadicTask;
+
+  RcHandle<DWISporadicTask> liveliness_send_task_;
+  virtual void liveliness_send_task(const MonotonicTimePoint& now);
+  RcHandle<DWISporadicTask> liveliness_lost_task_;
+  virtual void liveliness_lost_task(const MonotonicTimePoint& now);
+  /// The time interval for sending liveliness message.
+  TimeDuration liveliness_send_interval_;
+  TimeDuration liveliness_lost_interval_;
+  /// True if the writer failed to actively signal its liveliness within
+  /// its offered liveliness period.
+  bool liveliness_lost_;
+  /// Timestamp of last write/dispose/assert_liveliness.
+  MonotonicTimePoint last_liveliness_activity_time_;
 
   MonotonicTimePoint wait_pending_deadline_;
 
@@ -861,22 +858,6 @@ protected:
 };
 
 typedef RcHandle<DataWriterImpl> DataWriterImpl_rch;
-
-
-class LivenessTimer : public virtual RcEventHandler
-{
-public:
-  LivenessTimer(DataWriterImpl& writer)
-    : writer_(writer)
-  {
-  }
-
-  /// Handle the assert liveliness timeout.
-  virtual int handle_timeout(const ACE_Time_Value& tv, const void* arg);
-
-private:
-  WeakRcHandle<DataWriterImpl> writer_;
-};
 
 } // namespace DCPS
 } // namespace OpenDDS
