@@ -247,11 +247,11 @@ public:
     report(guard, now);
   }
 
-  void max_addr_set_size(uint32_t size, const OpenDDS::DCPS::MonotonicTimePoint& now)
+  void max_ips_per_guid(uint32_t size, const OpenDDS::DCPS::MonotonicTimePoint& now)
   {
     ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
-    log_relay_statistics_.max_addr_set_size(std::max(log_relay_statistics_.max_addr_set_size(), size));
-    publish_relay_statistics_.max_addr_set_size(std::max(publish_relay_statistics_.max_addr_set_size(), size));
+    log_relay_statistics_.max_ips_per_guid(std::max(log_relay_statistics_.max_ips_per_guid(), size));
+    publish_relay_statistics_.max_ips_per_guid(std::max(publish_relay_statistics_.max_ips_per_guid(), size));
     report(guard, now);
   }
 
@@ -292,7 +292,7 @@ private:
     log_relay_statistics_.new_address_count(0);
     log_relay_statistics_.expired_address_count(0);
     log_relay_statistics_.admission_deferral_count(0);
-    log_relay_statistics_.max_addr_set_size(0);
+    log_relay_statistics_.max_ips_per_guid(0);
   }
 
   void publish_report(ACE_Guard<ACE_Thread_Mutex>& guard,
@@ -310,7 +310,7 @@ private:
     publish_relay_statistics_.new_address_count(0);
     publish_relay_statistics_.expired_address_count(0);
     publish_relay_statistics_.admission_deferral_count(0);
-    publish_relay_statistics_.max_addr_set_size(0);
+    publish_relay_statistics_.max_ips_per_guid(0);
 
     guard.release();
 

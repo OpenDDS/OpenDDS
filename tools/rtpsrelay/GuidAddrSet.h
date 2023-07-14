@@ -10,15 +10,27 @@
 #include <dds/DCPS/TimeTypes.h>
 #include <dds/DCPS/RTPS/RtpsDiscovery.h>
 
+#include <ace/INET_Addr.h>
+
 namespace RtpsRelay {
 
-typedef std::map<AddrPort, OpenDDS::DCPS::MonotonicTimePoint> AddrSet;
+struct PortSet {
+  std::map<u_short, OpenDDS::DCPS::MonotonicTimePoint> spdp_ports, sedp_ports, data_ports;
+  bool empty() const { return spdp_ports.empty() && sedp_ports.empty() && data_ports.empty(); }
+};
+
+struct InetAddrHash {
+  std::size_t operator()(const ACE_INET_Addr& addr) const noexcept
+  {
+    return addr.hash();
+  }
+};
+
+typedef std::unordered_map<ACE_INET_Addr, PortSet, InetAddrHash> IpToPorts;
 
 struct AddrSetStats {
   bool allow_rtps;
-  AddrSet spdp_addr_set;
-  AddrSet sedp_addr_set;
-  AddrSet data_addr_set;
+  IpToPorts ip_to_ports;
   ParticipantStatisticsReporter spdp_stats_reporter;
   ParticipantStatisticsReporter sedp_stats_reporter;
   ParticipantStatisticsReporter data_stats_reporter;
@@ -41,29 +53,116 @@ struct AddrSetStats {
     , relay_stats_reporter_(relay_stats_reporter)
   {}
 
-  bool empty() const
+  bool upsert_address(const AddrPort& remote_address,
+                      const OpenDDS::DCPS::MonotonicTimePoint& now,
+                      const OpenDDS::DCPS::MonotonicTimePoint& expiration,
+                      size_t max_ip_addresses)
   {
-    return spdp_addr_set.empty() && sedp_addr_set.empty() && data_addr_set.empty();
-  }
+    ACE_INET_Addr addr_only(remote_address.addr);
+    addr_only.set_port_number(0);
+    auto iter = ip_to_ports.find(addr_only);
+    if (iter == ip_to_ports.end()) {
+      if (max_ip_addresses > 0 && ip_to_ports.size() == max_ip_addresses) {
+        return false;
+      }
+      iter = ip_to_ports.insert(std::make_pair(addr_only, PortSet())).first;
+    }
 
-  AddrSet* select_addr_set(Port port, const OpenDDS::DCPS::MonotonicTimePoint& now)
-  {
-    AddrSet* result = 0;
-    switch (port) {
+    relay_stats_reporter_.max_ips_per_guid(static_cast<uint32_t>(ip_to_ports.size()), now);
+
+    std::map<u_short, OpenDDS::DCPS::MonotonicTimePoint>* port_map = nullptr;
+    switch (remote_address.port) {
     case SPDP:
-      result = &spdp_addr_set;
+      port_map = &iter->second.spdp_ports;
       break;
     case SEDP:
-      result = &sedp_addr_set;
+      port_map = &iter->second.sedp_ports;
       break;
     case DATA:
-      result = &data_addr_set;
+      port_map = &iter->second.data_ports;
+      break;
+    }
+    return port_map && port_map->insert(std::make_pair(remote_address.addr.get_port_number(), expiration)).second;
+  }
+
+  template <typename Function>
+  void foreach_addr(Port port, const Function& func) const
+  {
+    for (const auto& ip : ip_to_ports) {
+      ACE_INET_Addr a = ip.first;
+      const std::map<u_short, OpenDDS::DCPS::MonotonicTimePoint>* port_map = nullptr;
+      switch (port) {
+      case SPDP:
+        port_map = &ip.second.spdp_ports;
+        break;
+      case SEDP:
+        port_map = &ip.second.sedp_ports;
+        break;
+      case DATA:
+        port_map = &ip.second.data_ports;
+        break;
+      }
+      if (port_map) {
+        for (const auto& p : *port_map) {
+          a.set_port_number(p.first);
+          func(a);
+        }
+      }
+    }
+  }
+
+  bool remove_if_expired(const AddrPort& remote_address, const OpenDDS::DCPS::MonotonicTimePoint& now,
+                         bool& ip_now_unused, OpenDDS::DCPS::MonotonicTimePoint& updated_expiration)
+  {
+    ACE_INET_Addr addr_only(remote_address.addr);
+    addr_only.set_port_number(0);
+    const auto iter = ip_to_ports.find(addr_only);
+    if (iter == ip_to_ports.end()) {
+      return false;
+    }
+
+    std::map<u_short, OpenDDS::DCPS::MonotonicTimePoint>* port_map = nullptr;
+    switch (remote_address.port) {
+    case SPDP:
+      port_map = &iter->second.spdp_ports;
+      break;
+    case SEDP:
+      port_map = &iter->second.sedp_ports;
+      break;
+    case DATA:
+      port_map = &iter->second.data_ports;
       break;
     }
 
-    relay_stats_reporter_.max_addr_set_size(static_cast<uint32_t>(result->size()), now);
+    if (!port_map) {
+      return false;
+    }
 
-    return result;
+    const auto port_iter = port_map->find(remote_address.addr.get_port_number());
+    if (port_iter == port_map->end()) {
+      return false;
+    }
+
+    if (port_iter->second <= now) {
+      port_map->erase(port_iter);
+      if (iter->second.empty()) {
+        ip_to_ports.erase(addr_only);
+        ip_now_unused = true;
+      }
+      return true;
+    }
+    updated_expiration = port_iter->second;
+    return false;
+  }
+
+  bool has_discovery_addrs() const
+  {
+    for (const auto& ip : ip_to_ports) {
+      if (!ip.second.spdp_ports.empty() && !ip.second.sedp_ports.empty()) {
+        return true;
+      }
+    }
+    return false;
   }
 
   ParticipantStatisticsReporter* select_stats_reporter(Port port)

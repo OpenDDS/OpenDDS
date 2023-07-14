@@ -174,7 +174,7 @@ module RtpsRelay {
     unsigned long spdp_replay_pub_count;
     unsigned long admission_deferral_count;
     unsigned long remote_map_size;
-    unsigned long max_addr_set_size;
+    unsigned long max_ips_per_guid;
     unsigned long rejected_address_map_size;
   };
 };
