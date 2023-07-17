@@ -66,7 +66,7 @@ GuidAddrSet::record_activity(const Proxy& proxy,
   addr_set_stats.deactivation = deactivation;
   relay_participant_status_reporter_.set_alive_active(proxy, src_guid, true, true);
 
-  if (addr_set_stats.upsert_address(remote_address, now, expiration, config_.max_addr_set_size())) {
+  if (addr_set_stats.upsert_address(remote_address, now, expiration, config_.max_ips_per_client())) {
     if (config_.log_activity()) {
       ACE_DEBUG((LM_INFO, "(%P|%t) INFO: GuidAddrSet::record_activity "
                  "%C %C is at %C %C into session ips=%B total=%B remote=%B deactivation=%B expire=%B admit=%B\n",
