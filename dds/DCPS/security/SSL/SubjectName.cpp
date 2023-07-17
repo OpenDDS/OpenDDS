@@ -281,7 +281,7 @@ namespace SSL {
         pos_ = in_.size();
         got_value = true;
       } else {
-        std::string::size_type tmp_pos = delimiter_pos - 1;
+        long long tmp_pos = delimiter_pos - 1;
         size_t esc_count = 0;
         while (tmp_pos >= 0 && in_[tmp_pos--] == '\\') {
           ++esc_count;

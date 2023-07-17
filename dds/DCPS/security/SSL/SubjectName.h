@@ -20,7 +20,7 @@ namespace Security {
 namespace SSL {
 
 // A parser for subject names represented by the string format described in RFC 4514.
-class Parser {
+class OpenDDS_Security_Export Parser {
 public:
   typedef std::pair<std::string, std::string> AttributeValueAssertion;
   typedef std::vector<AttributeValueAssertion> AVAVec;
