@@ -178,13 +178,17 @@ namespace SSL {
     pos_ = 0;
   }
 
-  bool Parser::parse(AVAVec& store) const
+  bool Parser::parse(AVAVec& store)
   {
     return distinguished_name(store);
   }
 
-  bool Parser::distinguished_name(AVAVec& store) const
+  bool Parser::distinguished_name(AVAVec& store)
   {
+    if (in_.empty()) {
+      return true;
+    }
+
     if (!relative_distinguished_name(store)) {
       return false;
     }
@@ -196,7 +200,7 @@ namespace SSL {
     return true;
   }
 
-  bool Parser::accept(char c) const
+  bool Parser::accept(char c)
   {
     if (pos_ == in_.size()) {
       return false;
@@ -208,7 +212,7 @@ namespace SSL {
     return false;
   }
 
-  bool Parser::relative_distinguished_name(AVAVec& store) const
+  bool Parser::relative_distinguished_name(AVAVec& store)
   {
     if (!attribute_type_value(store)) {
       return false;
@@ -221,16 +225,17 @@ namespace SSL {
     return true;
   }
 
-  bool Parser::attribute_type_value(AVAVec& store) const
+  bool Parser::attribute_type_value(AVAVec& store)
   {
     std::string at, av;
     if (!attribute_type(at) || !accept('=') || !attribute_value(av)) {
       return false;
     }
     store.push_back(std::make_pair(at, av));
+    return true;
   }
 
-  bool Parser::attribute_type(std::string& at) const
+  bool Parser::attribute_type(std::string& at)
   {
     size_t equal_pos = in_.find_first_of("=", pos_);
     if (equal_pos == std::string::npos) {
@@ -263,7 +268,7 @@ namespace SSL {
     return true;
   }
 
-  bool Parser::attribute_value(std::string& av) const
+  bool Parser::attribute_value(std::string& av)
   {
     // The first comma or plus character that is not escaped marks the end
     // of the current value. If not found, the value runs to the end of the input.
@@ -297,7 +302,7 @@ namespace SSL {
       got_value = true;
     }
 
-    av = unescape(av);
+    unescape(av);
     return validate_attribute_value(av);
   }
 
@@ -326,7 +331,7 @@ namespace SSL {
     }
   }
 
-  bool Parser::validate_attribute_value(const std::string& av) const
+  bool Parser::validate_attribute_value(const std::string& /*av*/) const
   {
     // TODO: Check that there is no prohibited character.
     return true;

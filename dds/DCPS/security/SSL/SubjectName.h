@@ -33,14 +33,14 @@ public:
 
 private:
   bool is_alpha(char c) const;
-  bool accept(char c) const;
-  bool distinguished_name(AVAVec&) const;
-  bool relative_distinguished_name(AVAVec&) const;
-  bool attribute_type_value(AVAVec&) const;
-  bool attribute_type(std::string& at) const;
+  bool accept(char c);
+  bool distinguished_name(AVAVec&);
+  bool relative_distinguished_name(AVAVec&);
+  bool attribute_type_value(AVAVec&);
+  bool attribute_type(std::string& at);
   bool validate_attribute_type(const std::string& at) const;
 
-  bool attribute_value(std::string& av) const;
+  bool attribute_value(std::string& av);
   void unescape(std::string& av) const;
   void replace_all(std::string& str, const std::string& s, const std::string& t) const;
   bool validate_attribute_value(const std::string& av) const;
@@ -53,7 +53,7 @@ private:
 
 class OpenDDS_Security_Export SubjectName {
 private:
-  typedef std::vector<std::string, std::string> AttrVec;
+  typedef std::vector<std::pair<std::string, std::string> > AttrVec;
 
 public:
   SubjectName();

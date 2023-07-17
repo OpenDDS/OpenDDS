@@ -14,16 +14,101 @@
 
 using namespace OpenDDS::Security::SSL;
 
+TEST(dds_DCPS_security_SSL_SubjectName_Parser, EmptyDistinguishedName)
+{
+  Parser parser("");
+  Parser::AVAVec store;
+  ASSERT_TRUE(parser.parse(store));
+  ASSERT_TRUE(store.empty());
+}
+
+TEST(dds_DCPS_security_SSL_SubjectName_Parser, EmptyRelativeDistinguishedName)
+{
+  Parser parser(",OU=Engineering,ST=MO");
+  Parser::AVAVec store;
+  ASSERT_FALSE(parser.parse(store));
+
+  parser.reset("+CN=David Luis");
+  ASSERT_FALSE(parser.parse(store));
+}
+
+TEST(dds_DCPS_security_SSL_SubjectName_Parser, InvalidAttributeType)
+{
+  // Can't have space
+  Parser parser("CN =David Luis");
+  Parser::AVAVec store;
+  ASSERT_FALSE(parser.parse(store));
+
+  // Must start with an alphabet
+  parser.reset("1CN=David Luis");
+  ASSERT_FALSE(parser.parse(store));
+
+  // Can't have characters other than alphabets, digits, hyphens
+  parser.reset("C_N=David Luis");
+  ASSERT_FALSE(parser.parse(store));
+
+  // Can't be empty
+  parser.reset("=David Luis");
+  ASSERT_FALSE(parser.parse(store));
+}
+
+TEST(dds_DCPS_security_SSL_SubjectName_Parser, SimpleSuccess)
+{
+  Parser parser("CN=David Luis,OU=Engineering Department,O=Awesome Inc.,L=Creve Coeur,ST=MO,C=US");
+  Parser::AVAVec store;
+  ASSERT_TRUE(parser.parse(store));
+  ASSERT_EQ((size_t)6, store.size());
+  ASSERT_STREQ("CN", store[0].first.c_str());
+  ASSERT_STREQ("David Luis", store[0].second.c_str());
+  ASSERT_STREQ("OU", store[1].first.c_str());
+  ASSERT_STREQ("Engineering Department", store[1].second.c_str());
+  ASSERT_STREQ("O", store[2].first.c_str());
+  ASSERT_STREQ("Awesome Inc.", store[2].second.c_str());
+  ASSERT_STREQ("L", store[3].first.c_str());
+  ASSERT_STREQ("Creve Coeur", store[3].second.c_str());
+  ASSERT_STREQ("ST", store[4].first.c_str());
+  ASSERT_STREQ("MO", store[4].second.c_str());
+  ASSERT_STREQ("C", store[5].first.c_str());
+  ASSERT_STREQ("US", store[5].second.c_str());
+}
+
+TEST(dds_DCPS_security_SSL_SubjectName_Parser, SimpleEscapeSuccess)
+{
+  Parser parser("CN= David Luis\\, Fernandez ,OU=Engineering Department\\;,O=Black \\+ White Inc.,ST=MO,C=US");
+  Parser::AVAVec store;
+  ASSERT_TRUE(parser.parse(store));
+  ASSERT_EQ((size_t)5, store.size());
+  ASSERT_STREQ("CN", store[0].first.c_str());
+  ASSERT_STREQ(" David Luis, Fernandez ", store[0].second.c_str());
+  ASSERT_STREQ("OU", store[1].first.c_str());
+  ASSERT_STREQ("Engineering Department;", store[1].second.c_str());
+  ASSERT_STREQ("O", store[2].first.c_str());
+  ASSERT_STREQ("Black + White Inc.", store[2].second.c_str());
+}
+
+TEST(dds_DCPS_security_SSL_SubjectName_Parser, MultiValue)
+{
+  Parser parser("CN=\\ David Luis+OU=Engineering \\+ Managing,O=Apple Inc.");
+  Parser::AVAVec store;
+  ASSERT_TRUE(parser.parse(store));
+  ASSERT_EQ((size_t)3, store.size());
+  ASSERT_STREQ("CN", store[0].first.c_str());
+  ASSERT_STREQ(" David Luis", store[0].second.c_str());
+  ASSERT_STREQ("OU", store[1].first.c_str());
+  ASSERT_STREQ("Engineering + Managing", store[1].second.c_str());
+  ASSERT_STREQ("O", store[2].first.c_str());
+  ASSERT_STREQ("Apple Inc.", store[2].second.c_str());
+}
+
 namespace {
 
-class dds_DCPS_security_SSL_SubjectName : public ::testing::Test
-{
+class dds_DCPS_security_SSL_SubjectName : public ::testing::Test {
 public:
   dds_DCPS_security_SSL_SubjectName()
    : sn_ldap_single_("CN=DDS Shapes Demo")
-   , sn_ldap_nom_("emailAddress=cto@acme.com, CN=DDS Shapes Demo, OU=CTO Office, O=ACME Inc., L=Sunnyvale, ST=CA, C=US")
+   , sn_ldap_nom_("emailAddress=cto@acme.com,CN=DDS Shapes Demo,OU=CTO Office,O=ACME Inc.,L=Sunnyvale,ST=CA,C=US")
    , sn_dce_nom_("/C=US/ST=MO/O=Object Computing/CN=CN_TEST_DDS-SECURITY_OCI_OPENDDS/emailAddress=support@objectcomputing.com")
-   , sn_ldap_cmp_("emailAddress=joe@shmoe.com, CN=Everything Goes, OU=Messy Art Gallery, O=Daytime Productions, L=Ladue, ST=MO, C=US")
+   , sn_ldap_cmp_("emailAddress=joe@shmoe.com,CN=Everything Goes,OU=Messy Art Gallery,O=Daytime Productions,L=Ladue,ST=MO,C=US")
    , sn_dce_cmp_("/C=US/ST=MO/L=Ladue/O=Daytime Productions/OU=Messy Art Gallery/CN=Everything Goes/emailAddress=joe@shmoe.com")
   {
   }
@@ -44,43 +129,21 @@ public:
 TEST_F(dds_DCPS_security_SSL_SubjectName, Parse_LDAPv3_Single_Success)
 {
   SubjectName sn;
-  ASSERT_EQ(0, sn.parse("CN = DDS Shapes Demo"));
+  ASSERT_EQ(0, sn.parse("CN=DDS Shapes Demo"));
   ASSERT_EQ(sn, sn_ldap_single_);
 }
 
-TEST_F(dds_DCPS_security_SSL_SubjectName, Parse_LDAPv3_Single_NoTrim_Success)
+TEST_F(dds_DCPS_security_SSL_SubjectName, Parse_LDAPv3_Single_Failure)
 {
   SubjectName sn;
-  ASSERT_EQ(0, sn.parse("CN=DDS Shapes Demo"));
-  ASSERT_EQ(sn == sn_ldap_single_, true);
-}
-
-TEST_F(dds_DCPS_security_SSL_SubjectName, Parse_LDAPv3_Single_ExtraTrim_Success)
-{
-  SubjectName sn;
-  ASSERT_EQ(0, sn.parse("  CN  =  DDS Shapes Demo "));
-  ASSERT_EQ(sn == sn_ldap_single_, true);
+  ASSERT_EQ(1, sn.parse("CN =DDS Shapes Demos"));
 }
 
 TEST_F(dds_DCPS_security_SSL_SubjectName, Parse_LDAPv3_Nominal_Success)
 {
   SubjectName sn;
-  ASSERT_EQ(0, sn.parse("emailAddress=cto@acme.com, CN=DDS Shapes Demo, OU=CTO Office, O=ACME Inc., L=Sunnyvale, ST=CA, C=US"));
-  ASSERT_EQ(sn, sn_ldap_nom_);
-}
-
-TEST_F(dds_DCPS_security_SSL_SubjectName, Parse_LDAPv3_Nominal_NoTrim_Success)
-{
-  SubjectName sn;
-  ASSERT_EQ(0, sn.parse("emailAddress=cto@acme.com,CN=DDS Shapes Demo,OU=CTO Office,O=ACME Inc.,L=Sunnyvale,ST=CA,C=US"));
-  ASSERT_EQ(sn, sn_ldap_nom_);
-}
-
-TEST_F(dds_DCPS_security_SSL_SubjectName, Parse_LDAPv3_Nominal_ExtraTrim_Success)
-{
-  SubjectName sn;
-  ASSERT_EQ(0, sn.parse("  emailAddress =  cto@acme.com , CN  = DDS Shapes Demo , OU = CTO Office , O = ACME Inc. , L=Sunnyvale  , ST  = CA , C = US  "));
-  ASSERT_EQ(sn, sn_ldap_nom_);
+  ASSERT_EQ(0, sn.parse("emailAddress=cto@acme.com,CN= DDS Shapes Demo,OU= CTO Office,O=ACME Inc.,L=Sunnyvale,ST=CA,C=US"));
+  ASSERT_NE(sn, sn_ldap_nom_);
 }
 
 TEST_F(dds_DCPS_security_SSL_SubjectName, Parse_DCE_Nominal_Success)
@@ -106,21 +169,15 @@ TEST_F(dds_DCPS_security_SSL_SubjectName, Parse_DCE_Nominal_ExtraTrim_Success)
 
 TEST_F(dds_DCPS_security_SSL_SubjectName, LDAP_DCE_CMP)
 {
-  SubjectName sn_ldap_cmp_backwards("C=US, ST=MO, L=Ladue, O=Daytime Productions, OU=Messy Art Gallery, CN=Everything Goes, emailAddress=joe@shmoe.com");
+  SubjectName sn_ldap_cmp_backwards("C=US,ST=MO,L=Ladue,O=Daytime Productions,OU=Messy Art Gallery,CN=Everything Goes,emailAddress=joe@shmoe.com");
   SubjectName sn_dce_cmp_backwards("/emailAddress=joe@shmoe.com/CN=Everything Goes/OU=Messy Art Gallery/O=Daytime Productions/L=Ladue/ST=MO/C=US");
 
-  ASSERT_EQ(sn_ldap_cmp_, sn_dce_cmp_);
-  ASSERT_EQ(sn_ldap_cmp_backwards, sn_dce_cmp_backwards);
-
-  /*
   // The importance of this test is that attribute order matters (so we shouldn't ignore it), but that DCE format intentionally lists attributes backwards
-
-  // Enable these if we get strict about attribute ordering
+  ASSERT_EQ(sn_ldap_cmp_, sn_dce_cmp_backwards);
   ASSERT_NE(sn_ldap_cmp_, sn_ldap_cmp_backwards);
-  ASSERT_NE(sn_ldap_cmp_, sn_dce_cmp_backwards);
-  ASSERT_NE(sn_dce_cmp_, sn_ldap_cmp_backwards);
+  ASSERT_NE(sn_ldap_cmp_, sn_dce_cmp_);
+  ASSERT_EQ(sn_dce_cmp_, sn_ldap_cmp_backwards);
   ASSERT_NE(sn_dce_cmp_, sn_dce_cmp_backwards);
-  */
 }
 
 #endif
