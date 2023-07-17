@@ -74,6 +74,7 @@ open(my $config_file, '>', $config_path) or die("Failed to open $config_path: $!
 print $config_file (
   "#define ACE_DISABLE_MKTEMP\n" .
   "#define ACE_LACKS_READDIR_R\n" .
+  "#define ACE_LACKS_TEMPNAM\n" .
   "#include \"$values{'config-file'}\"\n");
 close($config_file);
 

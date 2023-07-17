@@ -220,7 +220,7 @@ if(_opendds_tao_find_libs OR _opendds_tao_find_exes)
 endif()
 
 if(_OPENDDS_CMAKE_BUILT_AND_INSTALLED)
-  include("${CMAKE_CURRENT_LIST_DIR}/opendds_installed_config.cmake")
+  include("${CMAKE_CURRENT_LIST_DIR}/opendds_targets.cmake")
   set(OpenDDS_FOUND TRUE)
 elseif(_opendds_find_libs OR _opendds_find_exes)
   _opendds_find_group_targets(OpenDDS "${_opendds_find_libs}" "${_opendds_find_exes}")

@@ -263,7 +263,7 @@ function(_opendds_target_idl_sources target)
     else()
       _opendds_get_generated_idl_output(
         ${target} "${arg_INCLUDE_BASE}" "${input}" "${opendds_idl_opt_-o}" output_prefix output_dir)
-      _opendds_get_generated_output_dir(${target} file_auto_includes)
+      _opendds_get_generated_output_dir(${target} file_auto_includes O_OPT "${opendds_idl_opt_-o}")
       if(arg_INCLUDE_BASE)
         list(APPEND file_auto_includes "${arg_INCLUDE_BASE}")
       endif()

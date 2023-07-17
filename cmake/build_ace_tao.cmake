@@ -11,10 +11,17 @@ set(ace_ver "7.1.0")
 set(configre_ace_tao_args)
 if(WIN32)
   set(ext "zip")
-  set(md5 "46f1ca435aa6f22cbafb80f8ac78d8cb")
-  set(mpc_type vs2017)
+  set(md5 "032e0d4c969d675b5e72cce29858ebf8")
+  if(CMAKE_GENERATOR STREQUAL "Visual Studio 17 2022")
+    set(mpc_type vs2022)
+  elseif(CMAKE_GENERATOR STREQUAL "Visual Studio 16 2019")
+    set(mpc_type vs2019)
+  elseif(CMAKE_GENERATOR STREQUAL "Visual Studio 15 2017")
+    set(mpc_type vs2017)
+  else()
+    set(mpc_type vs2022)
+  endif()
   set(config_file "config-win32.h")
-  # TODO: Invoke msbuild
 else()
   set(ext "tar.bz2")
   set(md5 "4696c2898de3bda28dd69abf0055b7eb")
@@ -92,6 +99,46 @@ if(mpc_type STREQUAL gnuace)
     BUILD_COMMAND
       "${CMAKE_COMMAND}" -E env "ACE_ROOT=${OPENDDS_ACE}" "TAO_ROOT=${OPENDDS_TAO}"
       make -j8
+    BUILD_BYPRODUCTS ${byproducts}
+    USES_TERMINAL_BUILD TRUE # Needed for Ninja to show the ACE/TAO build
+    INSTALL_COMMAND "${CMAKE_COMMAND}" -E echo "No install step"
+  )
+elseif(mpc_type MATCHES "^vs")
+  set(sln ACE_TAO_for_OpenDDS.sln)
+  execute_process(
+    COMMAND
+      "${PERL_EXECUTABLE}" "${_OPENDDS_CMAKE_DIR}/scrape_vs.pl"
+      --sln "${OPENDDS_ACE}/${sln}"
+      --ace "${OPENDDS_ACE}"
+    COMMAND_ECHO STDOUT
+    COMMAND_ERROR_IS_FATAL ANY
+    OUTPUT_VARIABLE mpc_projects
+  )
+  set(_OPENDDS_ACE_MPC_PROJECTS "${mpc_projects}" CACHE INTERNAL "")
+  set(_OPENDDS_ACE_MPC_EXTERNAL_PROJECT "build_ace_tao" CACHE INTERNAL "")
+  set(_OPENDDS_TAO_MPC_PROJECTS "${mpc_projects}" CACHE INTERNAL "")
+  set(_OPENDDS_TAO_MPC_EXTERNAL_PROJECT "build_ace_tao" CACHE INTERNAL "")
+
+  string(JSON project_count LENGTH "${mpc_projects}")
+  if(project_count EQUAL 0)
+    message(FATAL_ERROR "MPC projects was empty!")
+  endif()
+  set(byproducts)
+  math(EXPR member_index_end "${project_count} - 1")
+  foreach(member_index RANGE ${member_index_end})
+    string(JSON member_name MEMBER "${mpc_projects}" ${member_index})
+    string(JSON mpc_project GET "${mpc_projects}" ${member_name})
+    string(JSON file GET "${mpc_project}" loc)
+    list(APPEND byproducts "${file}")
+  endforeach()
+
+  ExternalProject_Add(build_ace_tao
+    SOURCE_DIR "${OPENDDS_ACE}"
+    CONFIGURE_COMMAND "${CMAKE_COMMAND}" -E echo "Already configured"
+    BUILD_IN_SOURCE TRUE
+    BUILD_COMMAND
+      "${CMAKE_COMMAND}" -E env "ACE_ROOT=${OPENDDS_ACE}" "TAO_ROOT=${OPENDDS_TAO}"
+      MSBuild "${sln}" -property:Configuration=Debug,Platform=x64
     BUILD_BYPRODUCTS ${byproducts}
     USES_TERMINAL_BUILD TRUE # Needed for Ninja to show the ACE/TAO build
     INSTALL_COMMAND "${CMAKE_COMMAND}" -E echo "No install step"

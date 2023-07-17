@@ -22,7 +22,9 @@ add_library(OpenDDS_Util ${opendds_util_type}
 _opendds_library(OpenDDS_Util ${opendds_library_args})
 target_compile_definitions(OpenDDS_Util PUBLIC OPENDDS_UTIL_BUILD)
 target_include_directories(OpenDDS_Util
-  PUBLIC ../..
+  PUBLIC
+    "$<BUILD_INTERFACE:${OPENDDS_SOURCE_DIR}>"
+    "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>"
   PRIVATE
     .. # For pch
     ${TAO_INCLUDE_DIRS} # Only for orbconf.h and idl_features.h in Definitions.h
