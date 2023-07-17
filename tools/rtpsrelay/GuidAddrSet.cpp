@@ -69,7 +69,7 @@ GuidAddrSet::record_activity(const Proxy& proxy,
   if (addr_set_stats.upsert_address(remote_address, now, expiration, config_.max_addr_set_size())) {
     if (config_.log_activity()) {
       ACE_DEBUG((LM_INFO, "(%P|%t) INFO: GuidAddrSet::record_activity "
-                 "%C %C is at %C %C into session addrs=%B total=%B remote=%B deactivation=%B expire=%B admit=%B\n",
+                 "%C %C is at %C %C into session ips=%B total=%B remote=%B deactivation=%B expire=%B admit=%B\n",
                  handler.name().c_str(),
                  guid_to_string(src_guid).c_str(),
                  OpenDDS::DCPS::LogAddr(remote_address.addr).c_str(),
@@ -167,7 +167,7 @@ void GuidAddrSet::process_expirations(const Proxy& proxy,
     if (config_.log_activity()) {
       const auto ago = now - expiration;
       ACE_DEBUG((LM_INFO, "(%P|%t) INFO: GuidAddrSet::process_expirations "
-                 "%C %C expired %C ago %C into session addrs=%B total=%B remote=%B deactivation=%B expire=%B admit=%B\n",
+                 "%C %C expired %C ago %C into session ips=%B total=%B remote=%B deactivation=%B expire=%B admit=%B\n",
                  guid_to_string(ga.guid).c_str(),
                  OpenDDS::DCPS::LogAddr(ga.address.addr).c_str(),
                  ago.str().c_str(),

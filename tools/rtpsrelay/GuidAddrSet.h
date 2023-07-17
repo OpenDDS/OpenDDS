@@ -82,7 +82,15 @@ struct AddrSetStats {
       port_map = &iter->second.data_ports;
       break;
     }
-    return port_map && port_map->insert(std::make_pair(remote_address.addr.get_port_number(), expiration)).second;
+    if (!port_map) {
+      return false;
+    }
+    const auto pair = port_map->insert(std::make_pair(remote_address.addr.get_port_number(), expiration));
+    if (pair.second) {
+      return true;
+    }
+    pair.first->second = expiration;
+    return false;
   }
 
   template <typename Function>
