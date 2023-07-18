@@ -17,7 +17,7 @@ using namespace OpenDDS::Security::SSL;
 TEST(dds_DCPS_security_SSL_SubjectName_Parser, EmptyDistinguishedName)
 {
   Parser parser("");
-  Parser::AVAVec store;
+  Parser::RDNVec store;
   ASSERT_TRUE(parser.parse(store));
   ASSERT_TRUE(store.empty());
 }
@@ -25,7 +25,7 @@ TEST(dds_DCPS_security_SSL_SubjectName_Parser, EmptyDistinguishedName)
 TEST(dds_DCPS_security_SSL_SubjectName_Parser, EmptyRelativeDistinguishedName)
 {
   Parser parser(",OU=Engineering,ST=MO");
-  Parser::AVAVec store;
+  Parser::RDNVec store;
   ASSERT_FALSE(parser.parse(store));
 
   parser.reset("+CN=David Luis");
@@ -36,7 +36,7 @@ TEST(dds_DCPS_security_SSL_SubjectName_Parser, InvalidAttributeType)
 {
   // Can't have space
   Parser parser("CN =David Luis");
-  Parser::AVAVec store;
+  Parser::RDNVec store;
   ASSERT_FALSE(parser.parse(store));
 
   // Must start with an alphabet
@@ -55,49 +55,49 @@ TEST(dds_DCPS_security_SSL_SubjectName_Parser, InvalidAttributeType)
 TEST(dds_DCPS_security_SSL_SubjectName_Parser, SimpleSuccess)
 {
   Parser parser("CN=David Luis,OU=Engineering Department,O=Awesome Inc.,L=Creve Coeur,ST=MO,C=US");
-  Parser::AVAVec store;
+  Parser::RDNVec store;
   ASSERT_TRUE(parser.parse(store));
   ASSERT_EQ((size_t)6, store.size());
-  ASSERT_STREQ("CN", store[0].first.c_str());
-  ASSERT_STREQ("David Luis", store[0].second.c_str());
-  ASSERT_STREQ("OU", store[1].first.c_str());
-  ASSERT_STREQ("Engineering Department", store[1].second.c_str());
-  ASSERT_STREQ("O", store[2].first.c_str());
-  ASSERT_STREQ("Awesome Inc.", store[2].second.c_str());
-  ASSERT_STREQ("L", store[3].first.c_str());
-  ASSERT_STREQ("Creve Coeur", store[3].second.c_str());
-  ASSERT_STREQ("ST", store[4].first.c_str());
-  ASSERT_STREQ("MO", store[4].second.c_str());
-  ASSERT_STREQ("C", store[5].first.c_str());
-  ASSERT_STREQ("US", store[5].second.c_str());
+  ASSERT_STREQ("CN", store[0].begin()->first.c_str());
+  ASSERT_STREQ("David Luis", store[0].begin()->second.c_str());
+  ASSERT_STREQ("OU", store[1].begin()->first.c_str());
+  ASSERT_STREQ("Engineering Department", store[1].begin()->second.c_str());
+  ASSERT_STREQ("O", store[2].begin()->first.c_str());
+  ASSERT_STREQ("Awesome Inc.", store[2].begin()->second.c_str());
+  ASSERT_STREQ("L", store[3].begin()->first.c_str());
+  ASSERT_STREQ("Creve Coeur", store[3].begin()->second.c_str());
+  ASSERT_STREQ("ST", store[4].begin()->first.c_str());
+  ASSERT_STREQ("MO", store[4].begin()->second.c_str());
+  ASSERT_STREQ("C", store[5].begin()->first.c_str());
+  ASSERT_STREQ("US", store[5].begin()->second.c_str());
 }
 
 TEST(dds_DCPS_security_SSL_SubjectName_Parser, SimpleEscapeSuccess)
 {
   Parser parser("CN= David Luis\\, Fernandez ,OU=Engineering Department\\;,O=Black \\+ White Inc.,ST=MO,C=US");
-  Parser::AVAVec store;
+  Parser::RDNVec store;
   ASSERT_TRUE(parser.parse(store));
   ASSERT_EQ((size_t)5, store.size());
-  ASSERT_STREQ("CN", store[0].first.c_str());
-  ASSERT_STREQ(" David Luis, Fernandez ", store[0].second.c_str());
-  ASSERT_STREQ("OU", store[1].first.c_str());
-  ASSERT_STREQ("Engineering Department;", store[1].second.c_str());
-  ASSERT_STREQ("O", store[2].first.c_str());
-  ASSERT_STREQ("Black + White Inc.", store[2].second.c_str());
+  ASSERT_STREQ("CN", store[0].begin()->first.c_str());
+  ASSERT_STREQ(" David Luis, Fernandez ", store[0].begin()->second.c_str());
+  ASSERT_STREQ("OU", store[1].begin()->first.c_str());
+  ASSERT_STREQ("Engineering Department;", store[1].begin()->second.c_str());
+  ASSERT_STREQ("O", store[2].begin()->first.c_str());
+  ASSERT_STREQ("Black + White Inc.", store[2].begin()->second.c_str());
 }
 
 TEST(dds_DCPS_security_SSL_SubjectName_Parser, MultiValue)
 {
   Parser parser("CN=\\ David Luis+OU=Engineering \\+ Managing,O=Apple Inc.");
-  Parser::AVAVec store;
+  Parser::RDNVec store;
   ASSERT_TRUE(parser.parse(store));
-  ASSERT_EQ((size_t)3, store.size());
-  ASSERT_STREQ("CN", store[0].first.c_str());
-  ASSERT_STREQ(" David Luis", store[0].second.c_str());
-  ASSERT_STREQ("OU", store[1].first.c_str());
-  ASSERT_STREQ("Engineering + Managing", store[1].second.c_str());
-  ASSERT_STREQ("O", store[2].first.c_str());
-  ASSERT_STREQ("Apple Inc.", store[2].second.c_str());
+  ASSERT_EQ((size_t)2, store.size());
+  ASSERT_TRUE(store[0].count("CN") == 1);
+  ASSERT_STREQ(" David Luis", store[0]["CN"].c_str());
+  ASSERT_TRUE(store[0].count("OU") == 1);
+  ASSERT_STREQ("Engineering + Managing", store[0]["OU"].c_str());
+  ASSERT_STREQ("O", store[1].begin()->first.c_str());
+  ASSERT_STREQ("Apple Inc.", store[1].begin()->second.c_str());
 }
 
 namespace {

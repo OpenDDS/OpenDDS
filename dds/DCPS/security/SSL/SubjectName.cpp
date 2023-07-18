@@ -63,6 +63,9 @@ namespace SSL {
     size_t st_begin = 0;
     size_t st_end = input.find_first_of(s_del);
 
+    // All attributes are stored in a single map.
+    std::map<std::string, std::string> attributes;
+
     // Loop over all the sequence tokens
     while (st_begin != std::string::npos) {
       std::string st = input.substr(
@@ -108,8 +111,8 @@ namespace SSL {
             if (vt_begin_clean != std::string::npos && vt_end_clean != std::string::npos) {
               std::string vt_clean = vt.substr(vt_begin_clean, vt_end_clean - vt_begin_clean + 1);
 
-              // Push our clean pair into the vector
-              attr_vec_.push_back(std::make_pair(nt_clean, vt_clean));
+              // Push our clean pair into the map
+              attributes.insert(std::make_pair(nt_clean, vt_clean));
             }
           }
         }
@@ -122,6 +125,10 @@ namespace SSL {
         st_begin = st_end + 1;
         st_end = input.find_first_of(s_del, st_begin);
       }
+    }
+
+    if (!attributes.empty()) {
+      attr_vec_.push_back(attributes);
     }
 
     return attr_vec_.empty() ? 1 : 0;
@@ -145,16 +152,7 @@ namespace SSL {
 
   bool SubjectName::operator==(const SubjectName& rhs) const
   {
-    if (attr_vec_.size() != rhs.attr_vec_.size()) {
-      return false;
-    }
-
-    for (const_iterator i1 = begin(), i2 = rhs.begin(); i1 != end() && i2 != rhs.end(); ++i1, ++i2) {
-      if (i1->first != i2->first || i1->second != i2->second) {
-        return false;
-      }
-    }
-    return true;
+    return attr_vec_ == rhs.attr_vec_;
   }
 
   bool SubjectName::operator!=(const SubjectName& rhs) const
@@ -165,7 +163,7 @@ namespace SSL {
   SubjectName::const_iterator SubjectName::find(const std::string& key) const
   {
     for (const_iterator it = begin(); it != end(); ++it) {
-      if (it->first == key) {
+      if (it->find(key) != it->end()) {
         return it;
       }
     }
@@ -178,24 +176,29 @@ namespace SSL {
     pos_ = 0;
   }
 
-  bool Parser::parse(AVAVec& store)
+  bool Parser::parse(RDNVec& store)
   {
     return distinguished_name(store);
   }
 
-  bool Parser::distinguished_name(AVAVec& store)
+  bool Parser::distinguished_name(RDNVec& store)
   {
     if (in_.empty()) {
       return true;
     }
 
-    if (!relative_distinguished_name(store)) {
+    RelativeDistinguishedName rdn;
+    if (!relative_distinguished_name(rdn)) {
       return false;
     }
+    store.push_back(rdn);
+
     while (accept(',')) {
-      if (!relative_distinguished_name(store)) {
+      rdn.clear();
+      if (!relative_distinguished_name(rdn)) {
         return false;
       }
+      store.push_back(rdn);
     }
     return true;
   }
@@ -212,26 +215,26 @@ namespace SSL {
     return false;
   }
 
-  bool Parser::relative_distinguished_name(AVAVec& store)
+  bool Parser::relative_distinguished_name(RelativeDistinguishedName& rdn)
   {
-    if (!attribute_type_value(store)) {
+    if (!attribute_type_value(rdn)) {
       return false;
     }
     while (accept('+')) {
-      if (!attribute_type_value(store)) {
+      if (!attribute_type_value(rdn)) {
         return false;
       }
     }
     return true;
   }
 
-  bool Parser::attribute_type_value(AVAVec& store)
+  bool Parser::attribute_type_value(RelativeDistinguishedName& rdn)
   {
     std::string at, av;
     if (!attribute_type(at) || !accept('=') || !attribute_value(av)) {
       return false;
     }
-    store.push_back(std::make_pair(at, av));
+    rdn.insert(std::make_pair(at, av));
     return true;
   }
 
@@ -281,9 +284,9 @@ namespace SSL {
         pos_ = in_.size();
         got_value = true;
       } else {
-        long long tmp_pos = delimiter_pos - 1;
+        std::string::size_type tmp_pos = delimiter_pos - 1;
         size_t esc_count = 0;
-        while (tmp_pos >= 0 && in_[tmp_pos--] == '\\') {
+        while (tmp_pos > 0 && in_[tmp_pos--] == '\\') {
           ++esc_count;
         }
         if (esc_count % 2 == 0) {
@@ -309,7 +312,6 @@ namespace SSL {
   void Parser::unescape(std::string& av) const
   {
     // Unescape the escaped characters from the attribute value.
-    replace_all(av, "\\\\", "\\");
     replace_all(av, "\\\"", "\"");
     replace_all(av, "\\+", "+");
     replace_all(av, "\\,", ",");
@@ -319,6 +321,7 @@ namespace SSL {
     replace_all(av, "\\ ", " ");
     replace_all(av, "\\#", "#");
     replace_all(av, "\\=", "=");
+    replace_all(av, "\\\\", "\\");
   }
 
   void Parser::replace_all(std::string& str, const std::string& s, const std::string& t) const

@@ -11,6 +11,7 @@
 
 #include <string>
 #include <vector>
+#include <map>
 #include <algorithm>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
@@ -22,21 +23,21 @@ namespace SSL {
 // A parser for subject names represented by the string format described in RFC 4514.
 class OpenDDS_Security_Export Parser {
 public:
-  typedef std::pair<std::string, std::string> AttributeValueAssertion;
-  typedef std::vector<AttributeValueAssertion> AVAVec;
+  typedef std::map<std::string, std::string> RelativeDistinguishedName;
+  typedef std::vector<RelativeDistinguishedName> RDNVec;
 
   Parser(std::string in) : in_(in), pos_(0) {}
 
   // Parse and store the result to the provided vector.
-  bool parse(AVAVec& store);
+  bool parse(RDNVec& store);
   void reset(std::string in);
 
 private:
   bool is_alpha(char c) const;
   bool accept(char c);
-  bool distinguished_name(AVAVec&);
-  bool relative_distinguished_name(AVAVec&);
-  bool attribute_type_value(AVAVec&);
+  bool distinguished_name(RDNVec&);
+  bool relative_distinguished_name(RelativeDistinguishedName&);
+  bool attribute_type_value(RelativeDistinguishedName&);
   bool attribute_type(std::string& at);
   bool validate_attribute_type(const std::string& at) const;
 
@@ -53,7 +54,8 @@ private:
 
 class OpenDDS_Security_Export SubjectName {
 private:
-  typedef std::vector<std::pair<std::string, std::string> > AttrVec;
+  typedef std::map<std::string, std::string> AttrInRDN;
+  typedef std::vector<AttrInRDN> AttrVec;
 
 public:
   SubjectName();
@@ -76,6 +78,8 @@ public:
   typedef AttrVec::const_iterator const_iterator;
   const_iterator begin() const { return attr_vec_.begin(); }
   const_iterator end() const { return attr_vec_.end(); }
+
+  // Return iterator to the map that contains this key.
   const_iterator find(const std::string& key) const;
 
 private:
