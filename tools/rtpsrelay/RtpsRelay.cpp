@@ -211,8 +211,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     } else if ((arg = args.get_the_parameter("-RunTime"))) {
       config.run_time(OpenDDS::DCPS::TimeDuration(ACE_OS::atoi(arg)));
       args.consume_arg();
-    } else if ((arg = args.get_the_parameter("-MaxAddrSetSize"))) {
-      config.max_addr_set_size(ACE_OS::atoi(arg));
+    } else if ((arg = args.get_the_parameter("-MaxIpsPerClient"))) {
+      config.max_ips_per_client(ACE_OS::atoi(arg));
       args.consume_arg();
     } else if ((arg = args.get_the_parameter("-RejectedAddressDuration"))) {
       config.rejected_address_duration(OpenDDS::DCPS::TimeDuration(ACE_OS::atoi(arg)));
