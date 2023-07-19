@@ -1,3 +1,4 @@
+cmake_minimum_required(VERSION 3.23)
 project(opendds_info_repo_discovery CXX)
 
 set(lib_deps OpenDDS::Dcps OpenDDS::Tcp TAO::TAO TAO::PI)

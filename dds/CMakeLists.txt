@@ -1,5 +1,5 @@
 # CMakeLists for OpenDDS_Dcps
-
+cmake_minimum_required(VERSION 3.23)
 project(opendds_dcps CXX)
 
 set(dcps_lib_deps
@@ -564,6 +564,7 @@ set(opendds_target_sources_args
   AUTO_LINK FALSE
   USE_EXPORT "dds/DCPS/dcps_export.h" OpenDDS_Dcps_Export
   INCLUDE_BASE "${OPENDDS_SOURCE_DIR}"
+  USE_VERSIONED_NAMESPACE "dds/Versioned_Namespace.h" OPENDDS
 )
 
 opendds_target_sources(OpenDDS_Dcps

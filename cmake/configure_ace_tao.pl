@@ -15,12 +15,14 @@ use command_utils;
 my @required_values = qw/
   mpc
   mpc-type
+  src
   ace
   tao
   config-file
 /;
 my @optional_values = qw/
   platform-macros-file
+  static
 /;
 my %is_value_required = map {$_ => 1} @required_values;
 my %values = ();
@@ -93,9 +95,10 @@ $ENV{ACE_ROOT} = File::Spec->rel2abs($values{ace});
 $ENV{TAO_ROOT} = File::Spec->rel2abs($values{tao});
 my $mwc_name = 'ACE_TAO_for_OpenDDS.mwc';
 my $mwc_src = "$FindBin::RealBin/../$mwc_name";
-my $mwc = "$ENV{ACE_ROOT}/$mwc_name";
+my $mwc = "$values{src}/$mwc_name";
 copy($mwc_src, $mwc) or die("Failed to copy $mwc_src to $mwc: $!");
-run_command(
-  [$Config{perlpath}, 'bin/mwc.pl', $mwc, '-type', $values{'mpc-type'}],
-  chdir => $ENV{ACE_ROOT},
-);
+my $cmd = [$Config{perlpath}, "$ENV{ACE_ROOT}/bin/mwc.pl", $mwc, '-type', $values{'mpc-type'}];
+if ($values{static}) {
+  push(@{$cmd}, '-static');
+}
+run_command($cmd, chdir => $values{src});

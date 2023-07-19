@@ -6,8 +6,12 @@
 #ifndef OPENDDS_DCPS_DEFINITIONS_H
 #define OPENDDS_DCPS_DEFINITIONS_H
 
-#if defined __has_include && __has_include(<dds/DCPS/config.h>)
-#  include <dds/DCPS/config.h>
+#include <ace/config-lite.h>
+
+#ifdef __has_include
+#  if __has_include(<dds/DCPS/config.h>)
+#    include <dds/DCPS/config.h>
+#  endif
 #endif
 
 #include <dds/Versioned_Namespace.h>

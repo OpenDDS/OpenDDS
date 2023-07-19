@@ -22,6 +22,8 @@ See :ref:`cross-compiling` for how to cross compile for other platforms.
 Configuring and Building
 ************************
 
+.. seealso:: :ref:`cmake-building` to use CMake instead of a :term:`MPC`-based build,
+
 .. ifconfig:: is_release
 
   If not already done, download the source from :ghrelease:`GitHub`.
@@ -170,3 +172,169 @@ Tests
 Tests are not built by default, ``--tests`` must be passed to the configure script.
 All tests can be run using :ghfile:`tests/auto_run_tests.pl`.
 See :doc:`/internal/running_tests` for running all tests or individual tests.
+
+.. _cmake-building:
+
+****************************
+Building OpenDDS Using CMake
+****************************
+
+.. versionadded:: 3.25
+
+OpenDDS can be built with CMake 3.23 or later.
+
+Configuring and Building
+========================
+
+.. ifconfig:: is_release
+
+  If not already done, download the source from :ghrelease:`GitHub`.
+
+To configure and build:
+
+.. tab:: Linux, macOS, BSDs, etc.
+
+  .. code-block::
+
+    cmake -B build -DCMAKE_UNITY_BUILD=TRUE
+    cmake --build build -- -j 4
+
+  4 was used as an example for the max number of parallel jobs.
+  If unsure what this number should be, use the number of CPU cores on the machine.
+  This can be combined with unity builds.
+
+.. tab:: Windows
+
+  .. code-block::
+
+    cmake -B build -DCMAKE_UNITY_BUILD=TRUE
+    cmake --build build
+
+Variables
+---------
+
+Unless otherwise noted, the build features and behavior can be controlled by the OpenDDS Config Package :ref:`cmake-config-vars`.
+A prebuilt ACE/TAO can be passed using :cmake:var:`OPENDDS_ACE`.
+In that case :ref:`cmake-feature-vars` will be automatically derived from ACE's ``default.features`` file.
+
+These are the variables that are exclusive to building OpenDDS with CMake:
+
+.. cmake:var:: OPENDDS_JUST_BUILD_HOST_TOOLS
+
+  If true, just builds ``opendds_idl``.
+  The build directory for this can be passed to :cmake:var:`OPENDDS_HOST_TOOLS`.
+
+.. cmake:var:: OPENDDS_ACE_TAO_SRC
+
+  If defined, sets the ACE/TAO to build and use.
+  By default, a hardcoded release is downloaded.
+
+.. cmake:var:: OPENDDS_BUILD_TESTS
+
+  Build tests that are currently supported when building OpenDDS with CMake.
+  See :ref:`cmake-running-tests` for how to run them.
+  The default for this is ``BUILD_TESTING`` (usually false).
+
+.. cmake:var:: OPENDDS_BUILD_EXAMPLES
+
+  Build examples that are currently supported when building OpenDDS with CMake.
+  See :ref:`cmake-running-tests` for how to run them.
+  The default for this is :cmake:var:`OPENDDS_BUILD_TESTS`.
+
+Speeding up the build
+---------------------
+
+A major speed up supported by all the CMake generators are `unity builds <https://cmake.org/cmake/help/latest/prop_tgt/UNITY_BUILD.html>`__.
+This makes it so that multiple C++ source files are compiled at the same time by a compiler process.
+This can be enabled by passing ``-DCMAKE_UNITY_BUILD=TRUE`` to the CMake configure command as shown in the example.
+If there are problems with building, e.g. redefinition errors, then pass ``-DCMAKE_UNITY_BUILD=FALSE`` to override the cache variable in an existing build directory and disable unity builds.
+Fresh build directories default to ``CMAKE_UNITY_BUILD=FALSE``.
+
+The `Ninja <https://ninja-build.org/>`__ CMake generator can also be used to speed up builds as Ninja was built from scratch for parallel building and build systems like CMake.
+If Ninja is available, pass ``-G Ninja`` to have CMake use it.
+Building ACE/TAO with Ninja requires CMake 3.24 or later.
+If building ACE/TAO, the CMake build will still use either Visual Studio or GNU Make internally to build ACE/TAO because MPC doesn't support Ninja.
+
+Cross Compiling
+---------------
+
+Once set up properly, OpenDDS can be cross-compiled with CMake using normal `CMake cross compiling <https://cmake.org/cmake/help/book/mastering-cmake/chapter/Cross%20Compiling%20With%20CMake.html>`__.
+A few things to note:
+
+- Native-built host tools, like :term:`opendds_idl`, have to be configured and built separately and provided to the target build using :cmake:var:`OPENDDS_HOST_TOOLS`.
+- The host tools can build its own ACE/TAO for the host system, but it will currently also build all of ACE/TAO.
+  This can be skipped by providing a prebuilt ACE/TAO to the host tools build using :cmake:var:`OPENDDS_ACE`.
+  This also has to be provided to the target build using :cmake:var:`OPENDDS_ACE_TAO_HOST_TOOLS`.
+- ACE/TAO for the target build has to be configured and built separately and provided using :cmake:var:`OPENDDS_ACE`.
+
+  - See https://www.dre.vanderbilt.edu/~schmidt/DOC_ROOT/ACE/ACE-INSTALL.html for how to manually build ACE/TAO.
+
+The following is an example of cross-compiling OpenDDS for Android on Linux using CMake.
+It assumes the NDK has been downloaded and the location is in an environment variables called ``NDK`` and the downloaded ACE/TAO version matches the version being used by host tools.
+
+.. code-block:: shell
+
+  # Build Host Tools
+  cmake -B build-host -DOPENDDS_JUST_BUILD_HOST_TOOLS=TRUE
+  cmake --build build-host -- -j 4
+  export HOST_ROOT=$(realpath build-host/ace_tao)
+
+  # Build ACE/TAO for Android
+  curl -L https://github.com/DOCGroup/ACE_TAO/releases/download/ACE+TAO-7_1_0/ACE+TAO-7.1.0.tar.gz \
+    --output ACE+TAO.tar.gz
+  tar xzf ACE+TAO.tar.gz
+  export ACE_ROOT=$(realpath ACE_wrappers)
+  export TAO_ROOT=$ACE_ROOT/TAO
+  export MPC_ROOT=$ACE_ROOT/MPC
+  echo 'no_cxx11=0' > "$ACE_ROOT/bin/MakeProjectCreator/config/default.features"
+  cat << EOF > "$ACE_ROOT/include/makeinclude/platform_macros.GNU"
+  optimize = 0
+  android_abi := armeabi-v7a
+  android_api := 29
+  android_ndk := \$(NDK)
+  TAO_IDL := \$(HOST_ROOT)/bin/tao_idl
+  TAO_IDLFLAGS += -g \$(HOST_ROOT)/ace_gperf
+  TAO_IDL_DEP := \$(HOST_ROOT)/bin/tao_idl
+  include \$(ACE_ROOT)/include/makeinclude/platform_android.GNU
+  EOF
+  cat << EOF > "$ACE_ROOT/ace/config.h"
+  #define ACE_DISABLE_MKTEMP
+  #define ACE_LACKS_READDIR_R
+  #define ACE_LACKS_TEMPNAM
+  #include "config-android.h"
+  EOF
+  cp ACE_TAO_for_OpenDDS.mwc $ACE_ROOT
+  (cd $ACE_ROOT && bin/mwc.pl -type gnuace ACE_TAO_for_OpenDDS.mwc && make -j 4)
+
+  # Build OpenDDS for Android
+  cmake -B build-target \
+    -DBUILD_SHARED_LIBS=TRUE \
+    -DANDROID_ABI=armeabi-v7a -DANDROID_PLATFORM=android-29 \
+    --toolchain $NDK/build/cmake/android.toolchain.cmake \
+    -DOPENDDS_ACE_TAO_HOST_TOOLS=$(realpath build-host/ace_tao) \
+    -DOPENDDS_HOST_TOOLS=$(realpath build-host) \
+    -DOPENDDS_ACE=$ACE_ROOT
+  cmake --build build-target -- -j 4
+
+Installation
+============
+
+Once built, OpenDDS can be installed using `cmake --install <https://cmake.org/cmake/help/latest/manual/cmake.1.html#install-a-project>`__.
+Currently ACE/TAO has to be installed separately and this is only possible with GNU Make.
+
+.. _cmake-running-tests:
+
+Running Tests
+=============
+
+Tests (:cmake:var:`OPENDDS_BUILD_TESTS`) and examples (:cmake:var:`OPENDDS_BUILD_EXAMPLES`) can be run using the ``test`` target (``cmake --build build -t test``) or directly using `ctest <https://cmake.org/cmake/help/latest/manual/ctest.1.html>`__.
+
+Other Known Limitations
+=======================
+
+- The following features are planned, but not implemented yet:
+  - The ability to use MPC for building user applications.
+  - Safety profile
+  - Java
+- CMake-build OpenDDS libraries and executables will currently be ignored by :ref:`find_package(OpenDDS COMPONENTS ...) <cmake-components>`.
+  Passing feature should work.

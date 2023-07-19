@@ -65,4 +65,4 @@ endforeach()
 
 # Testing
 configure_file("${src}/run_test.pl" . COPYONLY)
-_opendds_add_test(COMMAND perl run_test.pl)
+opendds_add_test(COMMAND perl run_test.pl)

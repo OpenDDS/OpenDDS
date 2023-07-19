@@ -17,6 +17,7 @@ function(_opendds_get_sources_and_options
     tao_options
     opendds_options
     use_export
+    use_versioned_namespace
     suppress_anys
     always_generate_lib_export_header
     generate_server_skeletons
@@ -39,6 +40,7 @@ function(_opendds_get_sources_and_options
     PUBLIC PRIVATE INTERFACE
     TAO_IDL_OPTIONS OPENDDS_IDL_OPTIONS
     USE_EXPORT
+    USE_VERSIONED_NAMESPACE
   )
   cmake_parse_arguments(arg "${no_value_options}" "${single_value_options}" "${multi_value_options}" ${ARGN})
 
@@ -86,6 +88,16 @@ function(_opendds_get_sources_and_options
       set(arg_ALWAYS_GENERATE_LIB_EXPORT_HEADER ${OPENDDS_ALWAYS_GENERATE_LIB_EXPORT_HEADER})
     endif()
     set(${always_generate_lib_export_header} ${arg_ALWAYS_GENERATE_LIB_EXPORT_HEADER} PARENT_SCOPE)
+  endif()
+
+  if(arg_USE_VERSIONED_NAMESPACE)
+    list(LENGTH arg_USE_VERSIONED_NAMESPACE use_versioned_namespace_len)
+    if(NOT use_versioned_namespace_len EQUAL 2)
+      message(FATAL_ERROR
+        "The opendds_target_sources USE_VERSIONED_NAMESPACE option takes a header path and "
+        "macro prefix, but was passed ${use_versioned_namespace_len} values")
+    endif()
+    set(use_versioned_namespace "${arg_USE_VERSIONED_NAMESPACE}" PARENT_SCOPE)
   endif()
 
   set(${skip_tao_idl} ${arg_SKIP_TAO_IDL} PARENT_SCOPE)
@@ -236,6 +248,7 @@ function(opendds_target_sources target)
     tao_options
     opendds_options
     use_export
+    use_versioned_namespace
     suppress_anys
     always_generate_lib_export_header
     generate_server_skeletons
@@ -273,6 +286,20 @@ function(opendds_target_sources target)
     if(NOT "${opendds_options}" MATCHES "-Wb,export_macro")
       list(APPEND opendds_options "-Wb,export_macro=${export_macro}")
     endif()
+  endif()
+
+  if(use_versioned_namespace)
+    list(GET use_versioned_namespace 0 vn_header)
+    list(GET use_versioned_namespace 1 vn_prefix)
+    set(common_vn_opts
+      "-Wb,versioning_include=${vn_header}"
+      "-Wb,versioning_begin=${vn_prefix}_BEGIN_VERSIONED_NAMESPACE_DECL"
+      "-Wb,versioning_end=${vn_prefix}_END_VERSIONED_NAMESPACE_DECL"
+    )
+    list(APPEND tao_options ${common_vn_opts})
+    list(APPEND opendds_options ${common_vn_opts}
+      "-Wb,versioning_name=${vn_prefix}_VERSIONED_NAMESPACE_NAME"
+    )
   endif()
 
   if(NOT "${tao_options}" MATCHES "-SS" AND NOT generate_server_skeletons)

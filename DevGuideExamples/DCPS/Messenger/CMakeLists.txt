@@ -1,5 +1,5 @@
 project(opendds_devguide_messenger CXX)
-cmake_minimum_required(VERSION 3.20)
+cmake_minimum_required(VERSION 3.3)
 enable_testing()
 
 find_package(OpenDDS REQUIRED)
@@ -43,5 +43,5 @@ target_link_libraries(subscriber ${opendds_libs})
 # Testing
 configure_file(run_test.pl . COPYONLY)
 configure_file(rtps.ini . COPYONLY)
-_opendds_add_test(NAME info_repo COMMAND perl run_test.pl)
-_opendds_add_test(NAME rtps COMMAND perl run_test.pl --rtps)
+opendds_add_test(NAME info_repo COMMAND perl run_test.pl)
+opendds_add_test(NAME rtps COMMAND perl run_test.pl --rtps)

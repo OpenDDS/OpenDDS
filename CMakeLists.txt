@@ -1,5 +1,4 @@
-cmake_minimum_required(VERSION 3.22)
-
+cmake_minimum_required(VERSION 3.23)
 project(opendds CXX)
 
 include(CMakePackageConfigHelpers)
@@ -8,11 +7,16 @@ include(FetchContent)
 
 set(OPENDDS_IS_BEING_BUILT TRUE CACHE INTERNAL "")
 set(OPENDDS_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}" CACHE INTERNAL "")
+if(EXISTS "${OPENDDS_SOURCE_DIR}/dds/DdsDcpsC.h")
+  message(FATAL_ERROR "It looks like OpenDDS was already built here using MPC. This could cause "
+    "issues with a CMake build. Please clean this source tree or use a seperate one.")
+endif()
 set(OPENDDS_BUILD_DIR "${CMAKE_CURRENT_BINARY_DIR}" CACHE INTERNAL "")
 get_filename_component(_OPENDDS_SOURCE_DIR_REAL "${OPENDDS_SOURCE_DIR}" REALPATH)
 get_filename_component(_OPENDDS_BUILD_DIR_REAL "${OPENDDS_BUILD_DIR}" REALPATH)
 if("${_OPENDDS_SOURCE_DIR_REAL}" STREQUAL "${_OPENDDS_BUILD_DIR_REAL}")
-  message(FATAL_ERROR "Please build OpenDDS in a different directory from the source")
+  message(FATAL_ERROR "Please build OpenDDS in a different directory from the source tree "
+    "directory. Use something like \"cmake -B build\".")
 endif()
 set(OPENDDS_BIN_DIR "${OPENDDS_BUILD_DIR}/bin" CACHE INTERNAL "")
 set(OPENDDS_LIB_DIR "${OPENDDS_BUILD_DIR}/lib" CACHE INTERNAL "")
@@ -22,7 +26,7 @@ set(_OPENDDS_CMAKE_DIR "${OPENDDS_SOURCE_DIR}/cmake" CACHE INTERNAL "")
 
 include("${_OPENDDS_CMAKE_DIR}/opendds_features.cmake")
 
-if(NOT DEFINED OPENDDS_ACE)
+if(NOT DEFINED OPENDDS_ACE OR (DEFINED ACE_TAO_CONFIGURED AND NOT ACE_TAO_CONFIGURED))
   include("${_OPENDDS_CMAKE_DIR}/build_ace_tao.cmake")
 endif()
 
@@ -41,7 +45,7 @@ endif()
 if(NOT CMAKE_CROSSCOMPILING)
   add_subdirectory(dds/DCPS) # OpenDDS_Util
   add_subdirectory(dds/idl) # opendds_idl
-  if(BUILD_OPENDDS_HOST_TOOLS)
+  if(OPENDDS_JUST_BUILD_HOST_TOOLS)
     return()
   endif()
 endif()
@@ -55,6 +59,9 @@ add_subdirectory(dds/DCPS/transport/tcp)
 add_subdirectory(dds/DCPS/InfoRepoDiscovery)
 add_subdirectory(dds/DCPS/transport/udp)
 add_subdirectory(dds/InfoRepo)
+if(OPENDDS_XERCES3)
+  add_subdirectory(dds/DCPS/QOS_XML_Handler)
+endif()
 if(OPENDDS_SECURITY)
   add_subdirectory(dds/DCPS/security)
   if(OPENDDS_BUILT_IN_TOPICS)
@@ -84,7 +91,6 @@ install(
     cmake/export.h.in
     cmake/import_common.cmake
     cmake/init.cmake
-    cmake/opendds_build_helpers.cmake
     cmake/opendds_features.cmake
     cmake/opendds_group.cmake
     cmake/opendds_target_sources.cmake
@@ -104,6 +110,7 @@ if(NOT DEFINED OPENDDS_BUILD_TESTS AND BUILD_TESTING)
   set(OPENDDS_BUILD_TESTS TRUE)
 endif()
 if(OPENDDS_BUILD_EXAMPLES OR OPENDDS_BUILD_TESTS)
+  enable_testing()
   add_subdirectory(DevGuideExamples/DCPS/Messenger)
 endif()
 if(OPENDDS_BUILD_TESTS)
@@ -111,5 +118,9 @@ if(OPENDDS_BUILD_TESTS)
   add_subdirectory(tests/cmake/Messenger)
   add_subdirectory(tests/cmake/idl_compiler_tests)
   add_subdirectory(tests/cmake/include_subdir)
-  add_subdirectory(tests/cmake/generated_global)
+  # TODO: This shouldn't matter, but linker complains about ACE/TAO libs
+  # lacking -fPIC.
+  if(NOT OPENDDS_STATIC)
+    add_subdirectory(tests/cmake/generated_global)
+  endif()
 endif()

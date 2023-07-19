@@ -1,5 +1,5 @@
-cmake_minimum_required(VERSION 3.22)
-
+# CMakeLists for OpenDDS_Util used by opendds_idl
+cmake_minimum_required(VERSION 3.23)
 project(opendds_util CXX)
 
 set(deps ACE::ACE)

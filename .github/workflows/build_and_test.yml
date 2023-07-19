@@ -12648,3 +12648,46 @@ jobs:
       with:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
+
+  build_cmake_u22:
+
+    runs-on: ubuntu-22.04
+
+    steps:
+    - name: Checkout OpenDDS
+      uses: actions/checkout@v3
+      with:
+        path: OpenDDS
+        submodules: true
+    - name: Checkout MPC
+      uses: actions/checkout@v3
+      with:
+        repository: DOCGroup/MPC
+        path: MPC
+    - name: Checkout ACE/TAO
+      uses: actions/checkout@v3
+      with:
+        repository: DOCGroup/ACE_TAO
+        path: OpenDDS/build/ACE_TAO
+    - name: Install xerces
+      run: sudo apt-get -y install libxerces-c-dev
+    - name: Configure
+      run: |
+        cd OpenDDS
+        cmake -B build \
+          -DCMAKE_UNITY_BUILD=TRUE \
+          -DBUILD_SHARED_LIBS=FALSE \
+          -DCMAKE_BUILD_TYPE=Debug \
+          -DOPENDDS_ACE_TAO_SRC=$GITHUB_WORKSPACE/OpenDDS/build/ACE_TAO \
+          -DOPENDDS_MPC=$GITHUB_WORKSPACE/MPC \
+          -DOPENDDS_BUILD_TESTS=TRUE \
+          -DOPENDDS_CMAKE_VERBOSE=all
+    - uses: ammaraskar/gcc-problem-matcher@0.2.0
+    - name: Build
+      run: |
+        cd OpenDDS
+        cmake --build build -- -j $(getconf _NPROCESSORS_ONLN)
+    - name: Run Tests
+      run: |
+        cd OpenDDS
+        cmake --build build -t test

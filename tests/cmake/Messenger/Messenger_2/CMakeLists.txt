@@ -19,14 +19,15 @@ endif()
 set(target_prefix "${PROJECT_NAME}_")
 set(publisher "${target_prefix}publisher")
 set(subscriber "${target_prefix}subscriber")
+set(stack_subscriber "${target_prefix}stack_subscriber")
 set(messenger "${target_prefix}messenger")
 
 set(src "${CMAKE_CURRENT_SOURCE_DIR}/../../../DCPS/Messenger")
 set(dst ${CMAKE_CURRENT_BINARY_DIR})
-set(all_targets ${publisher} ${subscriber} ${messenger})
+set(all_targets ${publisher} ${subscriber} ${stack_subscriber} ${messenger})
 
 foreach(file
-    Messenger.idl subscriber.cpp publisher.cpp Args.h
+    Messenger.idl subscriber.cpp stack_subscriber.cpp publisher.cpp Args.h
     DataReaderListener.cpp DataReaderListener.h)
   configure_file(${src}/${file} ${dst}/${file} COPYONLY)
 endforeach()
@@ -48,7 +49,7 @@ set_target_properties(${publisher}
 )
 target_link_libraries(${publisher} ${messenger} OpenDDS::OpenDDS OpenDDS::TestUtils)
 
-# Subscriber
+# Subscriber with heap-allocated entities
 add_executable(${subscriber}
   "${dst}/subscriber.cpp"
   "${dst}/DataReaderListener.h"
@@ -59,22 +60,35 @@ set_target_properties(${subscriber}
 )
 target_link_libraries(${subscriber} ${messenger} OpenDDS::OpenDDS)
 
+# Subscriber with stack-allocated entities
+add_executable(${stack_subscriber}
+  "${dst}/stack_subscriber.cpp"
+  "${dst}/DataReaderListener.h"
+  "${dst}/DataReaderListener.cpp"
+)
+set_target_properties(${stack_subscriber}
+  PROPERTIES OUTPUT_NAME stack_subscriber
+)
+target_link_libraries(${stack_subscriber} ${messenger} OpenDDS::OpenDDS)
+
 # Testing
 configure_file("${src}/run_test.pl" . COPYONLY)
 set(OPENDDS_TEST_CONFIG_DIR "${src}")
-_opendds_add_test(NAME tcp)
-_opendds_add_test(NAME default_tcp ARGS default_tcp)
-_opendds_add_test(NAME thread_per ARGS thread_per)
-_opendds_add_test(NAME shmem ARGS shmem)
-_opendds_add_test(NAME nobits ARGS nobits)
-# _opendds_add_test(NAME stack ARGS stack)
-# _opendds_add_test(NAME ipv6 ARGS ipv6)
-_opendds_add_test(NAME rtps ARGS rtps)
-_opendds_add_test(NAME rtps_unicast ARGS rtps_unicast)
-_opendds_add_test(NAME rtps_disc ARGS rtps_disc)
-_opendds_add_test(NAME rtps_disc_tcp ARGS rtps_disc_tcp)
-_opendds_add_test(NAME rtps_disc_tcp_thread_per ARGS rtps_disc_tcp thread_per)
-_opendds_add_test(NAME rtps_disc_tcp_udp ARGS rtps_disc_tcp_udp)
-_opendds_add_test(NAME rtps_disc_half_sec_pub ARGS rtps_disc_half_sec_pub)
-_opendds_add_test(NAME rtps_disc_half_sec_sub ARGS rtps_disc_half_sec_sub)
-_opendds_add_test(NAME rtps_disc_sec ARGS rtps_disc_sec)
+opendds_add_test(NAME tcp)
+opendds_add_test(NAME default_tcp ARGS default_tcp)
+opendds_add_test(NAME thread_per ARGS thread_per)
+if(OPENDDS_SUPPORTS_SHMEM)
+  opendds_add_test(NAME shmem ARGS shmem)
+endif()
+opendds_add_test(NAME nobits ARGS nobits)
+opendds_add_test(NAME stack ARGS stack)
+opendds_add_test(NAME ipv6 ARGS ipv6)
+opendds_add_test(NAME rtps ARGS rtps)
+opendds_add_test(NAME rtps_unicast ARGS rtps_unicast)
+opendds_add_test(NAME rtps_disc ARGS rtps_disc)
+opendds_add_test(NAME rtps_disc_tcp ARGS rtps_disc_tcp)
+opendds_add_test(NAME rtps_disc_tcp_thread_per ARGS rtps_disc_tcp thread_per)
+opendds_add_test(NAME rtps_disc_tcp_udp ARGS rtps_disc_tcp_udp)
+opendds_add_test(NAME rtps_disc_half_sec_pub ARGS rtps_disc_half_sec_pub)
+opendds_add_test(NAME rtps_disc_half_sec_sub ARGS rtps_disc_half_sec_sub)
+opendds_add_test(NAME rtps_disc_sec ARGS rtps_disc_sec)

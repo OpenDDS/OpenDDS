@@ -1,3 +1,4 @@
+cmake_minimum_required(VERSION 3.23)
 project(opendds_shmem CXX)
 
 set(deps OpenDDS::Dcps)

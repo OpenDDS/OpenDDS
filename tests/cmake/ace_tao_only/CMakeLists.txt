@@ -1,4 +1,4 @@
-﻿cmake_minimum_required(VERSION 3.8.2)
+cmake_minimum_required(VERSION 3.8.2)
 project(opendds_ace_tao_only CXX)
 enable_testing()
 
@@ -57,6 +57,6 @@ add_executable(${client} ${client_files})
 set_target_properties(${client} PROPERTIES OUTPUT_NAME MessengerClient)
 target_link_libraries(${client} ${idl})
 
-_opendds_add_test(COMMAND perl run_test.pl)
+opendds_add_test(COMMAND perl run_test.pl)
 
 _opendds_restore_cache()

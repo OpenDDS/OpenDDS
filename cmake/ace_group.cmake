@@ -12,7 +12,15 @@ include("${CMAKE_CURRENT_LIST_DIR}/import_common.cmake")
 
 _opendds_group(ACE DEFAULT_REQUIRED ACE::ACE)
 
-_opendds_group_lib(ACE DEPENDS Threads::Threads)
+if(_OPENDDS_ACE_MPC_NAME_IS_ACE_TARGET)
+  set(_mpc_name ACE-target)
+else()
+  set(_mpc_name ACE)
+endif()
+_opendds_group_lib(ACE
+  MPC_NAME "${_mpc_name}"
+  DEPENDS Threads::Threads
+)
 _opendds_group_lib(XML_Utils
   MPC_NAME ACE_XML_Utils
   DEPENDS ACE::ACE XercesC::XercesC

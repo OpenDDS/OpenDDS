@@ -1,4 +1,4 @@
-function(_opendds_add_test)
+function(opendds_add_test)
   set(no_value_options)
   set(single_value_options NAME)
   set(multi_value_options COMMAND ARGS)

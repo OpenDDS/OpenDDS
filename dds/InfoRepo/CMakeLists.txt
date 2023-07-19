@@ -1,3 +1,4 @@
+cmake_minimum_required(VERSION 3.23)
 project(opendds_info_repo CXX)
 
 set(lib_dep_libs

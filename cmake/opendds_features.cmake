@@ -58,9 +58,19 @@ _opendds_feature(SECURITY OFF)
 _opendds_feature(SAFETY_PROFILE OFF)
 
 # ACE Features
-_opendds_feature(DEBUG ON MPC)
+if(NOT CMAKE_BUILD_TYPE OR CMAKE_BUILD_TYPE STREQUAL "Debug")
+  _opendds_feature(DEBUG ON MPC)
+  _opendds_feature(OPTIMIZE OFF MPC)
+else()
+  _opendds_feature(DEBUG OFF MPC)
+  _opendds_feature(OPTIMIZE ON MPC)
+endif()
 _opendds_feature(INLINE ON MPC)
-_opendds_feature(STATIC OFF MPC)
+if(BUILD_SHARED_LIBS)
+  _opendds_feature(STATIC OFF MPC)
+else()
+  _opendds_feature(STATIC ON MPC)
+endif()
 _opendds_feature(XERCES3 ${OPENDDS_SECURITY} MPC)
 
 # TAO Features
