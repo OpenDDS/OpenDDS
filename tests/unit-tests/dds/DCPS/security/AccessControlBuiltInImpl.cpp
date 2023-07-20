@@ -36,6 +36,7 @@ static const char* Expected_Permissions_Token_Class_Id ="DDS:Access:Permissions:
 static const char* Expected_Permissions_Cred_Token_Class_Id ="DDS:Access:PermissionsCredential";
 //static const char* identity_ca_file = "certs/opendds_identity_ca_cert.pem";
 static const char* mock_1_cert_file = "../security/certs/identity/test_participant_01_cert.pem";
+//static const char* mock_1_cert_file = "../security/certs/identity/test_participant_03_cert.pem";
 static const char* perm_mock_1_join_p7s_file = "../security/permissions/permissions_test_participant_01_JoinDomain_signed.p7s";
 static const char* remote_subject_name = "/C=US/ST=CO/O=Object Computing/CN=CN_TEST_DDS-SECURITY_OCI_OPENDDS/emailAddress=support@objectcomputing.com";
 

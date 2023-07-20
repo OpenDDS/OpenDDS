@@ -247,6 +247,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
 
   std::string remote_identity_sn;
   remote_cert->subject_name_to_str(remote_identity_sn);
+  ACE_DEBUG((LM_DEBUG, "Remote identity subject name: %C\n", remote_identity_sn.c_str()));
 
   SSL::SubjectName sn_id_remote;
 
@@ -259,7 +260,6 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
   // Set and store the permissions credential token while we have the raw content
   remote_permissions->perm_token_ = remote_permissions_token;
   remote_permissions->perm_cred_token_ = remote_credential_token;
-
 
   AccessData cache_this;
   cache_this.identity = remote_identity_handle;

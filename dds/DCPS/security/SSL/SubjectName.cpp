@@ -244,7 +244,11 @@ namespace SSL {
     if (equal_pos == std::string::npos) {
       return false;
     }
+    // Diverse from RFC 4514 to allow extra leading and trailing spaces.
     at = in_.substr(pos_, equal_pos - pos_);
+    const std::string::size_type start = at.find_first_not_of(" ");
+    const std::string::size_type end = at.find_last_not_of(" ");
+    at = at.substr(start, end - start + 1);
 
     pos_ = equal_pos;
     return validate_attribute_type(at);
@@ -304,6 +308,16 @@ namespace SSL {
       pos_ = in_.size();
       got_value = true;
     }
+
+    // Diverse from RFC 4514 to allow extra leading and trailing whitespaces.
+    // Note that the value itself can contain leading and trailing whitespaces.
+    // In that case, the leftmost whitespace and the rightmost whitespace are escaped.
+    const std::string::size_type start = av.find_first_not_of(" ");
+    std::string::size_type end = av.find_last_not_of(" ");
+    if (end != std::string::npos && end < av.size() - 1 && av[end] == '\\') {
+      end += 1;
+    }
+    av = av.substr(start, end - start + 1);
 
     unescape(av);
     return validate_attribute_value(av);
