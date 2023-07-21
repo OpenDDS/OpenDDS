@@ -63,9 +63,6 @@ namespace SSL {
     size_t st_begin = 0;
     size_t st_end = input.find_first_of(s_del);
 
-    // All attributes are stored in a single map.
-    std::map<std::string, std::string> attributes;
-
     // Loop over all the sequence tokens
     while (st_begin != std::string::npos) {
       std::string st = input.substr(
@@ -111,8 +108,10 @@ namespace SSL {
             if (vt_begin_clean != std::string::npos && vt_end_clean != std::string::npos) {
               std::string vt_clean = vt.substr(vt_begin_clean, vt_end_clean - vt_begin_clean + 1);
 
-              // Push our clean pair into the map
-              attributes.insert(std::make_pair(nt_clean, vt_clean));
+              // Push our clean pair into a map
+              std::map<std::string, std::string> rdn;
+              rdn.insert(std::make_pair(nt_clean, vt_clean));
+              attr_vec_.push_back(rdn);
             }
           }
         }
@@ -125,10 +124,6 @@ namespace SSL {
         st_begin = st_end + 1;
         st_end = input.find_first_of(s_del, st_begin);
       }
-    }
-
-    if (!attributes.empty()) {
-      attr_vec_.push_back(attributes);
     }
 
     return attr_vec_.empty() ? 1 : 0;
