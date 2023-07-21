@@ -87,7 +87,11 @@ jobs:
       shell: cmd
       run: |
         cd OpenDDS
-        perl configure --optimize --no-debug --static --tests --qt=%VCPKG_ROOT%/installed/x64-windows "--mpcopts=-value_template platforms=x64" "--mpcopts=-value_template configurations=Release" "--mpcopts=-value_template Release::runtime_library=MultiThreadedDLL"
+        perl configure --optimize --no-debug --static --tests ^
+          "--qt=%VCPKG_ROOT%/installed/x64-windows" ^
+          "--mpcopts=-value_template platforms=x64" ^
+          "--mpcopts=-value_template configurations=Release" ^
+          "--mpcopts=-value_template Release::runtime_library=MultiThreadedDLL"
         tools\scripts\show_build_config.pl
     - name: build
       shell: cmd
