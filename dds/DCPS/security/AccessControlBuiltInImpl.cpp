@@ -247,7 +247,6 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
 
   std::string remote_identity_sn;
   remote_cert->subject_name_to_str(remote_identity_sn);
-  ACE_DEBUG((LM_DEBUG, "Remote identity subject name: %C\n", remote_identity_sn.c_str()));
 
   SSL::SubjectName sn_id_remote;
 
