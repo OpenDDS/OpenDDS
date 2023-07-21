@@ -238,9 +238,10 @@ namespace SSL {
     return true;
   }
 
+#include <iostream>
   bool Parser::attribute_type(std::string& at)
   {
-    size_t equal_pos = in_.find_first_of("=", pos_);
+    const std::string::size_type equal_pos = in_.find_first_of("=", pos_);
     if (equal_pos == std::string::npos) {
       return false;
     }
@@ -248,8 +249,11 @@ namespace SSL {
     at = in_.substr(pos_, equal_pos - pos_);
     const std::string::size_type start = at.find_first_not_of(" ");
     const std::string::size_type end = at.find_last_not_of(" ");
-    at = at.substr(start, end - start + 1);
+    if (start == std::string::npos || end == std::string::npos) {
+      return false;
+    }
 
+    at = at.substr(start, end - start + 1);
     pos_ = equal_pos;
     return validate_attribute_type(at);
   }

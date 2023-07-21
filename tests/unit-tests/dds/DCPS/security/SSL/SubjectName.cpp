@@ -34,13 +34,9 @@ TEST(dds_DCPS_security_SSL_SubjectName_Parser, EmptyRelativeDistinguishedName)
 
 TEST(dds_DCPS_security_SSL_SubjectName_Parser, InvalidAttributeType)
 {
-  // Can't have space
-  Parser parser("CN =David Luis");
-  Parser::RDNVec store;
-  ASSERT_FALSE(parser.parse(store));
-
   // Must start with an alphabet
-  parser.reset("1CN=David Luis");
+  Parser parser("1CN=David Luis");
+  Parser::RDNVec store;
   ASSERT_FALSE(parser.parse(store));
 
   // Can't have characters other than alphabets, digits, hyphens
@@ -52,12 +48,30 @@ TEST(dds_DCPS_security_SSL_SubjectName_Parser, InvalidAttributeType)
   ASSERT_FALSE(parser.parse(store));
 }
 
+TEST(dds_DCPS_security_SSL_SubjectName_Parser, ExtraSpacesAllowed)
+{
+  Parser parser(" CN = David Luis   , ST =  \\ Missouri  +  L = Ladue");
+  Parser::RDNVec store;
+  ASSERT_TRUE(parser.parse(store));
+  ASSERT_EQ((size_t)2, store.size());
+  ASSERT_EQ((size_t)1, store[0].size());
+  ASSERT_STREQ("CN", store[0].begin()->first.c_str());
+  ASSERT_STREQ("David Luis", store[0].begin()->second.c_str());
+  ASSERT_EQ((size_t)2, store[1].size());
+  ASSERT_TRUE(store[1].count("ST") == 1);
+  // Has a leading space.
+  ASSERT_STREQ(" Missouri", store[1]["ST"].c_str());
+  ASSERT_TRUE(store[1].count("L") == 1);
+  ASSERT_STREQ("Ladue", store[1]["L"].c_str());
+}
+
 TEST(dds_DCPS_security_SSL_SubjectName_Parser, SimpleSuccess)
 {
   Parser parser("CN=David Luis,OU=Engineering Department,O=Awesome Inc.,L=Creve Coeur,ST=MO,C=US");
   Parser::RDNVec store;
   ASSERT_TRUE(parser.parse(store));
   ASSERT_EQ((size_t)6, store.size());
+  ASSERT_EQ((size_t)1, store[0].size());
   ASSERT_STREQ("CN", store[0].begin()->first.c_str());
   ASSERT_STREQ("David Luis", store[0].begin()->second.c_str());
   ASSERT_STREQ("OU", store[1].begin()->first.c_str());
@@ -79,7 +93,7 @@ TEST(dds_DCPS_security_SSL_SubjectName_Parser, SimpleEscapeSuccess)
   ASSERT_TRUE(parser.parse(store));
   ASSERT_EQ((size_t)5, store.size());
   ASSERT_STREQ("CN", store[0].begin()->first.c_str());
-  ASSERT_STREQ(" David Luis, Fernandez ", store[0].begin()->second.c_str());
+  ASSERT_STREQ("David Luis, Fernandez", store[0].begin()->second.c_str());
   ASSERT_STREQ("OU", store[1].begin()->first.c_str());
   ASSERT_STREQ("Engineering Department;", store[1].begin()->second.c_str());
   ASSERT_STREQ("O", store[2].begin()->first.c_str());
