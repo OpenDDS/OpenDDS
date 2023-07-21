@@ -38,7 +38,7 @@ Additions
     - Added :cmake:func:`opendds_target_sources(USE_EXPORT)` to allow overriding the generated export header with an existing one. (:ghpr:`4160`)
 
   - Libraries and features can be passed to ``find_package(OpenDDS COMPONENTS)`` to change what is required. (:ghpr:`4160`, :ghpr:`4140`)
-  
+
     - See :ref:`cmake-components` for details.
 
 Security
@@ -83,6 +83,6 @@ Notes
 - CMake Config Package
 
   - ``OPENDDS_TARGET_SOURCES`` is now called ``opendds_target_sources``. (:ghpr:`4140`)
-  
+
     - CMake macros and functions names are case insensitive, so this should have no effect on CMake code.
 

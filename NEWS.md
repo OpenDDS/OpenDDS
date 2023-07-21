@@ -53,20 +53,20 @@ Read [the documenation for this release on Read the Docs](https://opendds.readth
 * Fixed issue deserializing bounded sequences with JSON ([PR #4150](https://github.com/OpenDDS/OpenDDS/pull/4150))
     * The deserialization will fail if the JSON input contains more elements than the bounded sequence can hold.
 
-* Updated the RtpsRelay’s tracking of client IP addresses so they are removed when no longer used. ([PR #4202](https://github.com/OpenDDS/OpenDDS/pull/4202))
+* Updated the RtpsRelay's tracking of client IP addresses so they are removed when no longer used. ([PR #4202](https://github.com/OpenDDS/OpenDDS/pull/4202))
 
     * The RtpsRelay configuration option -MaxAddrSetSize was renamed to -MaxIpsPerClient
 
 ### Documentation
 
-* Moved various markdown files into the Sphinx documentation so that they are now included along with the Developer’s Guide: ([PR #4139](https://github.com/OpenDDS/OpenDDS/pull/4139))
+* Moved various markdown files into the Sphinx documentation so that they are now included along with the Developer's Guide: ([PR #4139](https://github.com/OpenDDS/OpenDDS/pull/4139))
     * `INSTALL.md` is now [Building and Installing](https://opendds.readthedocs.io/en/dds-3.25/building/index.html).
     * `docs/dependencies.md` is now [Dependencies](https://opendds.readthedocs.io/en/dds-3.25/building/dependencies.html).
     * `docs/cmake.md` is now [Using OpenDDS in a CMake Project](https://opendds.readthedocs.io/en/dds-3.25/building/cmake.html).
     * `docs/android.md` is now [Android](https://opendds.readthedocs.io/en/dds-3.25/building/android.html).
     * `docs/ios.md` is now [iOS](https://opendds.readthedocs.io/en/dds-3.25/building/ios.html).
 
-* Restructured how the documentation is presented to cleanly separate the Developer’s Guide and internal documentation. ([PR #4139](https://github.com/OpenDDS/OpenDDS/pull/4139))
+* Restructured how the documentation is presented to cleanly separate the Developer's Guide and internal documentation. ([PR #4139](https://github.com/OpenDDS/OpenDDS/pull/4139))
 * Added a [proper main page](https://opendds.readthedocs.io/en/dds-3.25/index.html). ([PR #4139](https://github.com/OpenDDS/OpenDDS/pull/4139))
 * Added [Glossary](https://opendds.readthedocs.io/en/dds-3.25/glossary.html). ([PR #4139](https://github.com/OpenDDS/OpenDDS/pull/4139))
 * In addition to [`NEWS.md`](https://github.com/OpenDDS/OpenDDS/blob/DDS-3.25/NEWS.md), started adding release notes to [Release Notes](https://opendds.readthedocs.io/en/dds-3.25/news.html). ([PR #4125](https://github.com/OpenDDS/OpenDDS/pull/4125))
