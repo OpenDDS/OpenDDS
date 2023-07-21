@@ -88,11 +88,11 @@ TEST(dds_DCPS_ConfigStoreImpl, set_get_int32)
 TEST(dds_DCPS_ConfigStoreImpl, set_get_uint32)
 {
   ConfigStoreImpl store;
-  EXPECT_EQ(store.get_uint32("key", 37), 37);
+  EXPECT_EQ(store.get_uint32("key", 37), 37u);
   store.set_uint32("key", 38);
-  EXPECT_EQ(store.get_uint32("key", 37), 38);
+  EXPECT_EQ(store.get_uint32("key", 37), 38u);
   store.set_string("key", "not a uint32");
-  EXPECT_EQ(store.get_uint32("key", 37), 37);
+  EXPECT_EQ(store.get_uint32("key", 37), 37u);
 }
 
 TEST(dds_DCPS_ConfigStoreImpl, set_get_float64)

@@ -74,7 +74,7 @@ jobs:
       uses: lukka/run-vcpkg@v11
       with:
         vcpkgDirectory: '${{ github.workspace }}/vcpkg-qt'
-        vcpkgGitCommitId: 5b1214315250939257ef5d62ecdcbca18cf4fb1c
+        vcpkgGitCommitId: f6a5d4e8eb7476b8d7fc12a56dff300c1c986131
         runVcpkgInstall: true
     - name: checkout MPC
       uses: actions/checkout@v3

@@ -240,7 +240,11 @@ ShmemTransport::shutdown_i()
 #  endif /* OPENDDS_SHMEM_WINDOWS */
 #endif /* OPENDDS_SHMEM_UNSUPPORTED */
 
-    alloc_->release(1 /*close*/);
+    if (alloc_->release(1 /*close*/) == -1) {
+      VDBG_LVL((LM_ERROR,
+                "(%P|%t) ShmemTransport::shutdown_i Release shared memory failed\n"), 1);
+    }
+
     alloc_.reset();
   }
 }
@@ -287,6 +291,10 @@ ShmemTransport::release_datalink(DataLink* link)
       return;
     }
   }
+
+  VDBG_LVL((LM_ERROR,
+            "(%P|%t) ShmemTransport::release_datalink link[%@] not found in ShmemDataLinkMap\n",
+            link), 1);
 }
 
 ShmemTransport::ReadTask::ReadTask(ShmemTransport* outer, ACE_sema_t semaphore)

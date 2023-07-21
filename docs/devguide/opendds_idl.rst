@@ -128,7 +128,7 @@ The following table summarizes the options supported by ``opendds_idl``.
 
    * - ``-Gitl``
 
-     - Generates “Intermediate Type Language” descriptions of datatypes.
+     - Generates "Intermediate Type Language" descriptions of datatypes.
        These files are used by the Wireshark dissector or other external applications.
 
      - Not generated

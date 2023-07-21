@@ -332,7 +332,7 @@ StaticEndpointManager::add_publication_i(const GUID_t& writerid,
       {reader.trans_info, TransportLocator(), 0, readerid, reader.subscriber_qos, reader.qos, "", "", 0, 0, {0, 0}};
     DataWriterCallbacks_rch pl = pub.publication_.lock();
     if (pl) {
-      pl->add_association(writerid, ra, true);
+      pl->add_association(ra, true);
     }
   }
 
@@ -404,7 +404,7 @@ StaticEndpointManager::add_subscription_i(const GUID_t& readerid,
     };
     DataReaderCallbacks_rch sl = sub.subscription_.lock();
     if (sl) {
-      sl->add_association(readerid, wa, false);
+      sl->add_association(wa, false);
     }
   }
 
@@ -496,7 +496,7 @@ StaticEndpointManager::reader_exists(const GUID_t& readerid, const GUID_t& write
       const ReaderAssociation ra =
         {reader_pos->second.trans_info, TransportLocator(), 0, readerid, reader_pos->second.subscriber_qos, reader_pos->second.qos,
          "", "", DDS::StringSeq(), DDS::OctetSeq(), {0, 0}};
-      dwr->add_association(writerid, ra, true);
+      dwr->add_association(ra, true);
     }
   }
 }
@@ -531,7 +531,7 @@ StaticEndpointManager::writer_exists(const GUID_t& writerid, const GUID_t& reade
     if (drr) {
       const WriterAssociation wa =
         {writer_pos->second.trans_info, TransportLocator(), 0, writerid, writer_pos->second.publisher_qos, writer_pos->second.qos, DDS::OctetSeq(), {0,0}};
-      drr->add_association(readerid, wa, false);
+      drr->add_association(wa, false);
     }
   }
 }
@@ -757,18 +757,18 @@ TopicStatus StaticEndpointManager::remove_topic(const GUID_t& topicId)
   return REMOVED;
 }
 
-GUID_t StaticEndpointManager::add_publication(
-  const GUID_t& topicId,
-  DataWriterCallbacks_rch publication,
-  const DDS::DataWriterQos& qos,
-  const TransportLocatorSeq& transInfo,
-  const DDS::PublisherQos& publisherQos,
-  const XTypes::TypeInformation& type_info)
+bool StaticEndpointManager::add_publication(const GUID_t& topicId,
+                                            DataWriterCallbacks_rch publication,
+                                            const DDS::DataWriterQos& qos,
+                                            const TransportLocatorSeq& transInfo,
+                                            const DDS::PublisherQos& publisherQos,
+                                            const XTypes::TypeInformation& type_info)
 {
-  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, GUID_t());
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, false);
 
   GUID_t rid = participant_id_;
   assign_publication_key(rid, topicId, qos);
+  publication->set_publication_id(rid);
   LocalPublication& pb = local_publications_[rid];
   pb.topic_id_ = topicId;
   pb.publication_ = publication;
@@ -782,11 +782,11 @@ GUID_t StaticEndpointManager::add_publication(
   td.add_local_publication(rid);
 
   if (DDS::RETCODE_OK != add_publication_i(rid, pb)) {
-    return GUID_t();
+    return false;
   }
 
   if (DDS::RETCODE_OK != write_publication_data(rid, pb)) {
-    return GUID_t();
+    return false;
   }
 
   if (DCPS_debug_level > 3) {
@@ -795,7 +795,7 @@ GUID_t StaticEndpointManager::add_publication(
   }
   match_endpoints(rid, td);
 
-  return rid;
+  return true;
 }
 
 void StaticEndpointManager::remove_publication(const GUID_t& publicationId)
@@ -836,21 +836,21 @@ void StaticEndpointManager::update_publication_locators(
   }
 }
 
-GUID_t StaticEndpointManager::add_subscription(
-  const GUID_t& topicId,
-  DataReaderCallbacks_rch subscription,
-  const DDS::DataReaderQos& qos,
-  const TransportLocatorSeq& transInfo,
-  const DDS::SubscriberQos& subscriberQos,
-  const char* filterClassName,
-  const char* filterExpr,
-  const DDS::StringSeq& params,
-  const XTypes::TypeInformation& type_info)
+bool StaticEndpointManager::add_subscription(const GUID_t& topicId,
+                                             DataReaderCallbacks_rch subscription,
+                                             const DDS::DataReaderQos& qos,
+                                             const TransportLocatorSeq& transInfo,
+                                             const DDS::SubscriberQos& subscriberQos,
+                                             const char* filterClassName,
+                                             const char* filterExpr,
+                                             const DDS::StringSeq& params,
+                                             const XTypes::TypeInformation& type_info)
 {
-  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, GUID_t());
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, false);
 
   GUID_t rid = participant_id_;
   assign_subscription_key(rid, topicId, qos);
+  subscription->set_subscription_id(rid);
   LocalSubscription& sb = local_subscriptions_[rid];
   sb.topic_id_ = topicId;
   sb.subscription_ = subscription;
@@ -867,11 +867,11 @@ GUID_t StaticEndpointManager::add_subscription(
   td.add_local_subscription(rid);
 
   if (DDS::RETCODE_OK != add_subscription_i(rid, sb)) {
-    return GUID_t();
+    return false;
   }
 
   if (DDS::RETCODE_OK != write_subscription_data(rid, sb)) {
-    return GUID_t();
+    return false;
   }
 
   if (DCPS_debug_level > 3) {
@@ -880,7 +880,7 @@ GUID_t StaticEndpointManager::add_subscription(
   }
   match_endpoints(rid, td);
 
-  return rid;
+  return true;
 }
 
 void StaticEndpointManager::remove_subscription(const GUID_t& subscriptionId)
@@ -1380,13 +1380,13 @@ void StaticEndpointManager::match_continue(const GUID_t& writer, const GUID_t& r
         if (call_reader) {
           DataReaderCallbacks_rch drr_lock = drr.lock();
           if (drr_lock) {
-            DcpsUpcalls thr(drr_lock, reader, wa, !writer_active, dwr_lock);
+            DcpsUpcalls thr(drr_lock, wa, !writer_active, dwr_lock);
             thr.activate();
-            dwr_lock->add_association(writer, ra, writer_active);
+            dwr_lock->add_association(ra, writer_active);
             thr.writer_done();
           }
         } else {
-          dwr_lock->add_association(writer, ra, writer_active);
+          dwr_lock->add_association(ra, writer_active);
         }
       }
     } else if (call_reader) {
@@ -1397,7 +1397,7 @@ void StaticEndpointManager::match_continue(const GUID_t& writer, const GUID_t& r
       }
       DataReaderCallbacks_rch drr_lock = drr.lock();
       if (drr_lock) {
-        drr_lock->add_association(reader, wa, !writer_active);
+        drr_lock->add_association(wa, !writer_active);
       }
     }
 
@@ -2957,7 +2957,7 @@ bool StaticDiscovery::update_topic_qos(const GUID_t& topicId, DDS::DomainId_t do
   return participants_[domainId][participantId]->update_topic_qos(topicId, qos);
 }
 
-GUID_t StaticDiscovery::add_publication(
+bool StaticDiscovery::add_publication(
   DDS::DomainId_t domainId,
   const GUID_t& participantId,
   const GUID_t& topicId,
@@ -2967,8 +2967,7 @@ GUID_t StaticDiscovery::add_publication(
   const DDS::PublisherQos& publisherQos,
   const XTypes::TypeInformation& type_info)
 {
-  return get_part(domainId, participantId)->add_publication(
-    topicId, publication, qos, transInfo, publisherQos, type_info);
+  return get_part(domainId, participantId)->add_publication(topicId, publication, qos, transInfo, publisherQos, type_info);
 }
 
 bool StaticDiscovery::remove_publication(
@@ -3003,7 +3002,7 @@ void StaticDiscovery::update_publication_locators(
   get_part(domainId, partId)->update_publication_locators(dwId, transInfo);
 }
 
-GUID_t StaticDiscovery::add_subscription(
+bool StaticDiscovery::add_subscription(
   DDS::DomainId_t domainId,
   const GUID_t& participantId,
   const GUID_t& topicId,
@@ -3016,9 +3015,15 @@ GUID_t StaticDiscovery::add_subscription(
   const DDS::StringSeq& params,
   const XTypes::TypeInformation& type_info)
 {
-  return get_part(domainId, participantId)->add_subscription(
-    topicId, subscription, qos, transInfo, subscriberQos, filterClassName,
-    filterExpr, params, type_info);
+  return get_part(domainId, participantId)->add_subscription(topicId,
+                                                             subscription,
+                                                             qos,
+                                                             transInfo,
+                                                             subscriberQos,
+                                                             filterClassName,
+                                                             filterExpr,
+                                                             params,
+                                                             type_info);
 }
 
 bool StaticDiscovery::remove_subscription(

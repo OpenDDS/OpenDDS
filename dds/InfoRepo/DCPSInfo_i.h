@@ -114,15 +114,19 @@ public:
     const OpenDDS::DCPS::GUID_t& participantId,
     const OpenDDS::DCPS::GUID_t& topicId);
 
-  virtual OpenDDS::DCPS::GUID_t add_publication(
-    DDS::DomainId_t domainId,
-    const OpenDDS::DCPS::GUID_t& participantId,
-    const OpenDDS::DCPS::GUID_t& topicId,
-    OpenDDS::DCPS::DataWriterRemote_ptr publication,
-    const DDS::DataWriterQos & qos,
-    const OpenDDS::DCPS::TransportLocatorSeq & transInfo,
-    const DDS::PublisherQos & publisherQos,
-    const DDS::OctetSeq & serializedTypeInfo);
+  virtual OpenDDS::DCPS::GUID_t reserve_publication_id(DDS::DomainId_t domainId,
+                                                       const OpenDDS::DCPS::GUID_t& participantId,
+                                                       const OpenDDS::DCPS::GUID_t& topicId);
+
+  virtual bool add_publication(DDS::DomainId_t domainId,
+                               const OpenDDS::DCPS::GUID_t& participantId,
+                               const OpenDDS::DCPS::GUID_t& topicId,
+                               const OpenDDS::DCPS::GUID_t& pubId,
+                               OpenDDS::DCPS::DataWriterRemote_ptr publication,
+                               const DDS::DataWriterQos & qos,
+                               const OpenDDS::DCPS::TransportLocatorSeq & transInfo,
+                               const DDS::PublisherQos & publisherQos,
+                               const DDS::OctetSeq & serializedTypeInfo);
 
   /**
    * @brief Add a previously existing publication to the repository.
@@ -162,18 +166,22 @@ public:
     const OpenDDS::DCPS::GUID_t& participantId,
     const OpenDDS::DCPS::GUID_t& publicationId);
 
-  virtual OpenDDS::DCPS::GUID_t add_subscription(
-    DDS::DomainId_t domainId,
-    const OpenDDS::DCPS::GUID_t& participantId,
-    const OpenDDS::DCPS::GUID_t& topicId,
-    OpenDDS::DCPS::DataReaderRemote_ptr subscription,
-    const DDS::DataReaderQos & qos,
-    const OpenDDS::DCPS::TransportLocatorSeq & transInfo,
-    const DDS::SubscriberQos & subscriberQos,
-    const char* filterClassName,
-    const char* filterExpression,
-    const DDS::StringSeq& exprParams,
-    const DDS::OctetSeq & serializedTypeInfo);
+  virtual OpenDDS::DCPS::GUID_t reserve_subscription_id(DDS::DomainId_t domainId,
+                                                        const OpenDDS::DCPS::GUID_t& participantId,
+                                                        const OpenDDS::DCPS::GUID_t& topicId);
+
+  virtual bool add_subscription(DDS::DomainId_t domainId,
+                                const OpenDDS::DCPS::GUID_t& participantId,
+                                const OpenDDS::DCPS::GUID_t& topicId,
+                                const OpenDDS::DCPS::GUID_t& subId,
+                                OpenDDS::DCPS::DataReaderRemote_ptr subscription,
+                                const DDS::DataReaderQos & qos,
+                                const OpenDDS::DCPS::TransportLocatorSeq & transInfo,
+                                const DDS::SubscriberQos & subscriberQos,
+                                const char* filterClassName,
+                                const char* filterExpression,
+                                const DDS::StringSeq& exprParams,
+                                const DDS::OctetSeq & serializedTypeInfo);
 
   /**
    * @brief Add a previously existing subscription to the repository.

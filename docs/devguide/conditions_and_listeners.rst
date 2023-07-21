@@ -444,7 +444,7 @@ Mask bit values for each status are defined in DdsDcpsInfrastructure.idl:
       const StatusKind SUBSCRIPTION_MATCHED_STATUS      = 0x0001 << 14;
     };
 
-Simply do a bit-wise “or” of the desired status bits to construct a mask for your listener.
+Simply do a bit-wise "or" of the desired status bits to construct a mask for your listener.
 Here is an example of attaching a listener to a data reader (for just Data Available statuses):
 
 .. code-block:: cpp
@@ -467,7 +467,7 @@ Here is an example showing how to change the listener using ``set_listener()``:
 When a plain communication status changes, OpenDDS invokes the most specific relevant listener operation.
 This means, for example, that a data reader’s listener would take precedence over the subscriber’s listener for statuses related to the data reader.
 
-A common “gotcha” when using ``set_listener`` is that the listener is not invoked immediately.
+A common "gotcha" when using ``set_listener`` is that the listener is not invoked immediately.
 Instead, the listener will be invoked for the next status change.
 Consequently, usages of ``set_listener`` should 1) invoke the listener manually after calling ``set_listener`` and 2) ensure that the listener methods are thread safe.
 

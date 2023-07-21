@@ -258,7 +258,7 @@ public:
     return endpoint_manager().update_topic_qos(topicId, qos);
   }
 
-  GUID_t add_publication(
+  bool add_publication(
     const GUID_t& topicId,
     DCPS::DataWriterCallbacks_rch publication,
     const DDS::DataWriterQos& qos,
@@ -266,8 +266,7 @@ public:
     const DDS::PublisherQos& publisherQos,
     const XTypes::TypeInformation& type_info)
   {
-    return endpoint_manager().add_publication(topicId, publication, qos,
-                                              transInfo, publisherQos, type_info);
+    return endpoint_manager().add_publication(topicId, publication, qos, transInfo, publisherQos, type_info);
   }
 
   void remove_publication(const GUID_t& publicationId)
@@ -295,7 +294,7 @@ public:
     endpoint_manager().update_publication_locators(publicationId, transInfo);
   }
 
-  GUID_t add_subscription(
+  bool add_subscription(
     const GUID_t& topicId,
     DCPS::DataReaderCallbacks_rch subscription,
     const DDS::DataReaderQos& qos,
@@ -306,8 +305,15 @@ public:
     const DDS::StringSeq& params,
     const XTypes::TypeInformation& type_info)
   {
-    return endpoint_manager().add_subscription(topicId, subscription, qos, transInfo,
-      subscriberQos, filterClassName, filterExpr, params, type_info);
+    return endpoint_manager().add_subscription(topicId,
+                                               subscription,
+                                               qos,
+                                               transInfo,
+                                               subscriberQos,
+                                               filterClassName,
+                                               filterExpr,
+                                               params,
+                                               type_info);
   }
 
   void remove_subscription(const GUID_t& subscriptionId)

@@ -104,7 +104,7 @@ private:
     const GUID_t& participantId,
     const DDS::TopicQos& qos);
 
-  GUID_t add_publication(
+  bool add_publication(
     DDS::DomainId_t domainId,
     const GUID_t& participantId,
     const GUID_t& topicId,
@@ -131,7 +131,7 @@ private:
     const DDS::DataWriterQos& qos,
     const DDS::PublisherQos& publisherQos);
 
-  GUID_t add_subscription(
+  bool add_subscription(
     DDS::DomainId_t domainId,
     const GUID_t& participantId,
     const GUID_t& topicId,

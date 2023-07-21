@@ -370,7 +370,7 @@ SubscriberImpl::delete_datareader(::DDS::DataReader_ptr a_datareader)
     this->monitor_->report();
   }
 
-  const GUID_t subscription_id = dr_servant->get_guid();
+  const GUID_t subscription_id = dr_servant->subscription_id();
   Discovery_rch disco = TheServiceParticipant->get_discovery(this->domain_id_);
   if (!disco->remove_subscription(this->domain_id_,
                                   this->dp_id_,

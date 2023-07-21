@@ -231,7 +231,7 @@ Here is an example of what to run for a version 1.0.0 release command assuming t
 
 .. code-block:: bash
 
-    perl tools/scripts/gitrelease.pl ../1.0.0-release-workspace 1.0.0 --remedy
+    tools/scripts/gitrelease.pl ../1.0.0-release-workspace 1.0.0 --remedy
 
 Micro Releases
 --------------
@@ -255,7 +255,7 @@ Here is an example of what to run for a version 1.0.1 release assuming that the 
 .. code-block:: bash
 
     git checkout branch-DDS-1.0
-    perl tools/scripts/gitrelease.pl ../1.0.1-release-workspace 1.0.1 --micro --branch=branch-DDS-1.0 --remedy
+    tools/scripts/gitrelease.pl ../1.0.1-release-workspace 1.0.1 --micro --branch=branch-DDS-1.0 --remedy
 
 Doing Mock Releases with the Release Script
 -------------------------------------------

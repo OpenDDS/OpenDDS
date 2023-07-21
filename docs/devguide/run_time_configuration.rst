@@ -160,8 +160,8 @@ A sample ``[common]`` section follows:
 
 It is not necessary to specify every option.
 
-Option values in the ``[common]`` section with names that begin with “``DCPS``” can be overridden by a command-line argument.
-The command-line argument has the same name as the configuration option with a “``-``” prepended to it.
+Option values in the ``[common]`` section with names that begin with ``DCPS`` can be overridden by a command-line argument.
+The command-line argument has the same name as the configuration option with a ``-`` prepended to it.
 For example:
 
 .. code-block:: bash
@@ -248,9 +248,9 @@ The following table summarizes the ``[common]`` configuration options:
 
        0 – no prefix
 
-       1 – verbose “lite”: adds timestamp and priority
+       1 – verbose "lite": adds timestamp and priority
 
-       2 – verbose: in addition to “lite” has host name, PID, program name
+       2 – verbose: in addition to "lite" has host name, PID, program name
 
        See the note below this table regarding the ORB prefix.
 
@@ -466,10 +466,10 @@ The ``DCPSInfoRepo`` option’s value is passed to ``CORBA::ORB::string_to_objec
 A simplified endpoint description of the form ``<host>:<port>`` is also accepted.
 It is equivalent to ``corbaloc::<host>:<port>/DCPSInfoRepo``.
 
-Certain options that begin with “ORB” instead of “DCPS” are listed in the table above.
+Certain options that begin with "ORB" instead of "DCPS" are listed in the table above.
 They are named differently since they are inherited from TAO.
-The options starting with “ORB” listed in this table are implemented directly by OpenDDS (not passed to TAO) and are supported either on the command line (using a “-” prefix) or in the configuration file.
-Other command-line options that begin with “-ORB” are passed to TAO’s ``ORB_init`` if DCPSInfoRepo discovery is used.
+The options starting with "ORB" listed in this table are implemented directly by OpenDDS (not passed to TAO) and are supported either on the command line (using a "-" prefix) or in the configuration file.
+Other command-line options that begin with ``-ORB`` are passed to TAO’s ``ORB_init`` if DCPSInfoRepo discovery is used.
 
 The ``DCPSChunks`` option allows application developers to tune the amount of memory preallocated when the ``RESOURCE_LIMITS`` are set to infinite.
 Once the allocated memory is exhausted, additional chunks are allocated/deallocated from the heap.
@@ -573,7 +573,7 @@ For example, if an OpenDDS application assigns a domain ID of 3 to its participa
     [repository/DiscoveryConfig1]
     RepositoryIor=host1.mydomain.com:12345
 
-The ``DCPSDefaultDiscovery`` property tells the application to assign any participant that doesn’t have a domain id found in the configuration file to use a discovery type of ``DEFAULT_REPO`` which means “use a ``DCPSInfoRepo`` service”  and that ``DCPSInfoRepo`` service can be found at ``host3.mydomain.com:12345``.
+The ``DCPSDefaultDiscovery`` property tells the application to assign any participant that doesn’t have a domain id found in the configuration file to use a discovery type of ``DEFAULT_REPO`` which means "use a ``DCPSInfoRepo`` service"  and that ``DCPSInfoRepo`` service can be found at ``host3.mydomain.com:12345``.
 
 As shown in :ref:`Table 7-2 <run_time_configuration--reftable9>` the ``DCPSDefaultDiscovery`` property has three other values that can be used.
 The ``DEFAULT_RTPS`` constant value informs participants that don’t have a domain configuration to use RTPS discovery to find other participants.
@@ -649,7 +649,7 @@ Configuring how participants should find ``DCPSInfoRepo`` is the purpose of this
 Assume for example that the ``DCPSInfoRepo`` service is started on a host and port of ``myhost.mydomain.com:12345``.
 Applications can make their OpenDDS participants aware of how to find this service through command line options or by reading a configuration file.
 
-In our Getting Started example from 2.1.7, “Running the Example” the executables were given a command line parameter to find the ``DCPSInfoRepo`` service like so:
+In our Getting Started example from 2.1.7, "Running the Example" the executables were given a command line parameter to find the ``DCPSInfoRepo`` service like so:
 
 .. code-block:: bash
 
@@ -854,7 +854,7 @@ Configuring for DDSI-RTPS Discovery
 The OMG DDSI-RTPS specification gives the following simple description that forms the basis for the discovery approach used by OpenDDS and the two different protocols used to accomplish the discovery operations.
 The excerpt from the OMG DDSI-RTPS specification Section 8.5.1 is as follows:
 
-“The RTPS specification splits up the discovery protocol into two independent protocols:
+"The RTPS specification splits up the discovery protocol into two independent protocols:
 
 1.
 Participant Discovery Protocol
@@ -864,7 +864,7 @@ Endpoint Discovery Protocol
 
 A Participant Discovery Protocol (PDP) specifies how Participants discover each other in the network.
 Once two Participants have discovered each other, they exchange information on the Endpoints they contain using an Endpoint Discovery Protocol (EDP).
-Apart from this causality relationship, both protocols can be considered independent.”
+Apart from this causality relationship, both protocols can be considered independent."
 
 The configuration options discussed in this section allow a user to specify property values to change the behavior of the Simple Participant Discovery Protocol (SPDP) and/or the Simple Endpoint Discovery Protocol (SEDP) default settings.
 
@@ -958,7 +958,7 @@ Those properties, along with options specific to OpenDDS’s RTPS Discovery impl
    * - ``LeaseDuration=sec``
 
      - Sent as part of the participant announcement.
-       It tells the peer participants that if they don’t hear from this participant for the specified duration, then this participant can be considered “not alive.”
+       It tells the peer participants that if they don’t hear from this participant for the specified duration, then this participant can be considered "not alive."
 
      - ``300``
 
@@ -2102,8 +2102,8 @@ How OpenDDS Selects a Transport
     Sect<7.4.1.2>
 
 Currently, the behavior for OpenDDS is that Data Writers actively connect to Data Readers, which are passively awaiting those connections.
-Data Readers “listen” for connections on each of the Transport Instances that are defined in their Transport Configuration.
-Data Writers use their Transport Instances to “connect” to those of the Data Readers.
+Data Readers "listen" for connections on each of the Transport Instances that are defined in their Transport Configuration.
+Data Writers use their Transport Instances to "connect" to those of the Data Readers.
 Because the logical connections discussed here don’t correspond to the physical connections of the transport, OpenDDS often refers to them as *Data Links*.
 
 When a Data Writer tries to connect to a Data Reader, it first attempts to see if there is an existing data link that it can use to communicate with that Data Reader.
@@ -2111,10 +2111,10 @@ The Data Writer iterates (in definition order) through each of its Transport Ins
 If an existing data link is found it is used for all subsequent communication between the Data Writer and Reader.
 
 If no existing data link is found, the Data Writer attempts to connect using the different Transport Instances in the order they are defined in its Transport Configuration.
-Any Transport Instances not “matched” by the other side are skipped.
+Any Transport Instances not "matched" by the other side are skipped.
 For example, if the writer specifies udp and tcp transport instances and the reader only specifies tcp, the udp transport instance is ignored.
 Matching algorithms may also be affected by QoS parameters, configuration of the instances, and other specifics of the transport implementation.
-The first pair of Transport Instances that successfully “connect” results in a data link that is used for all subsequent data sample publication.
+The first pair of Transport Instances that successfully "connect" results in a data link that is used for all subsequent data sample publication.
 
 .. _run_time_configuration--configuration-file-examples:
 
@@ -2168,7 +2168,7 @@ Using Mixed Transports
 ..
     Sect<7.4.2.2>
 
-This example configures an application to primarily use multicast and to “fall back” to tcp when it is unable to use multicast.
+This example configures an application to primarily use multicast and to "fall back" to tcp when it is unable to use multicast.
 Here is the configuration file:
 
 .. code-block:: ini
@@ -2226,7 +2226,7 @@ Here is our configuration file:
     local_address=hostb
 
 Assuming ``hosta`` and ``hostb`` are the host names assigned to the two network interfaces, we now have separate configurations that can use tcp on the respective networks.
-The above file sets the “``A``” side configuration as the default, meaning we must manually bind any entities we want to use the other side to the “``B``” side configuration.
+The above file sets the ``A`` side configuration as the default, meaning we must manually bind any entities we want to use the other side to the ``B`` side configuration.
 
 OpenDDS provides two mechanisms to assign configurations to entities:
 
@@ -2246,7 +2246,7 @@ Here is the source code mechanism (using a domain participant):
 
      OpenDDS::DCPS::TransportRegistry::instance()->bind_config("config_b", dp);
 
-Any Data Writers or Readers owned by this Domain Participant should now use the “``B``” side configuration.
+Any Data Writers or Readers owned by this Domain Participant should now use the ``B`` side configuration.
 
 .. note:: When directly binding a configuration to a data writer or reader, the ``bind_config`` call must occur before the reader or writer is enabled.
   This is not an issue when binding configurations to Domain Participants, Publishers, or Subscribers.
@@ -2643,7 +2643,7 @@ The following table summarizes the transport configuration options that are uniq
 
      - Hostname and port of the listening socket.
        Defaults to a value picked by the underlying OS.
-       The port can be omitted, in which case the value should end in “:”.
+       The port can be omitted, in which case the value should end in ":".
 
      - ``fqdn:0``
 
@@ -2679,7 +2679,7 @@ Each of these mechanisms are bounded to ensure deterministic behavior and is con
 ``multicast`` supports a number of configuration options:
 
 The ``default_to_ipv6`` and ``port_offset`` options affect how default multicast group addresses are selected.
-If ``default_to_ipv6`` is set to “``1``” (enabled), then the default IPv6 address will be used (``[FF01::80]``).
+If ``default_to_ipv6`` is set to ``1`` (enabled), then the default IPv6 address will be used (``[FF01::80]``).
 The ``port_offset`` option determines the default port used when the group address is not set and defaults to ``49152``.
 
 The ``group_address`` option may be used to manually define a multicast group to join to exchange data.
@@ -2944,7 +2944,7 @@ Some implementation notes related to using the ``rtps_udp`` transport protocol a
    * - ``local_address=addr:[port]``
 
      - Bind the socket to the given address and port.
-       Port can be omitted but the trailing “:” is required.
+       Port can be omitted but the trailing ":" is required.
 
      - System default
 
@@ -2953,7 +2953,7 @@ Some implementation notes related to using the ``rtps_udp`` transport protocol a
        ``addr:[port]``
 
      - Bind the socket to the given address and port.
-       Port can be omitted but the trailing “:” is required.
+       Port can be omitted but the trailing ":" is required.
 
      - System default
 
@@ -2963,7 +2963,7 @@ Some implementation notes related to using the ``rtps_udp`` transport protocol a
 
      - Sets the address advertised by the transport.
        Typically used when the participant is behind a firewall or NAT.
-       Port can be omitted but the trailing “:” is required.
+       Port can be omitted but the trailing ":" is required.
 
      -
 
@@ -2973,7 +2973,7 @@ Some implementation notes related to using the ``rtps_udp`` transport protocol a
 
      - Sets the address advertised by the transport.
        Typically used when the participant is behind a firewall or NAT.
-       Port can be omitted but the trailing “:” is required.
+       Port can be omitted but the trailing ":" is required.
 
      -
 

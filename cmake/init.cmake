@@ -6,7 +6,14 @@ if(_OPENDDS_INIT_CMAKE)
 endif()
 set(_OPENDDS_INIT_CMAKE TRUE)
 
-find_package(Perl REQUIRED)
+if(NOT DEFINED _OPENDDS_CMAKE_DIR)
+  set(_OPENDDS_CMAKE_DIR "${CMAKE_CURRENT_LIST_DIR}" CACHE INTERNAL "")
+endif()
+if(NOT "${_OPENDDS_CMAKE_DIR}" IN_LIST CMAKE_MODULE_PATH)
+  list(APPEND CMAKE_MODULE_PATH "${_OPENDDS_CMAKE_DIR}")
+endif()
+
+find_package(Perl)
 
 include("${CMAKE_CURRENT_LIST_DIR}/config.cmake")
 
@@ -45,6 +52,13 @@ file(TO_CMAKE_PATH "${OPENDDS_MPC}" OPENDDS_MPC)
 file(TO_CMAKE_PATH "${OPENDDS_TAO}" OPENDDS_TAO)
 
 option(OPENDDS_CMAKE_VERBOSE "Print verbose output when loading the OpenDDS Config Package" OFF)
+if("all" IN_LIST OPENDDS_CMAKE_VERBOSE)
+  set(OPENDDS_CMAKE_VERBOSE
+    components
+    imports
+    opendds_target_sources
+    CACHE STRING "" FORCE)
+endif()
 option(OPENDDS_DEFAULT_NESTED "Require topic types to be declared explicitly" ON)
 option(OPENDDS_FILENAME_ONLY_INCLUDES "No directory info in generated #includes." OFF)
 set(OPENDDS_DEFAULT_SCOPE "PRIVATE" CACHE STRING "Default scope for opendds_target_sources")
@@ -78,6 +92,16 @@ macro(_opendds_restore_cache)
   endforeach()
   unset(_opendds_save_cache_vars)
 endmacro()
+
+function(_opendds_pop_list list_var)
+  set(list "${${list_var}}")
+  list(LENGTH list len)
+  if(len GREATER 0)
+    math(EXPR last "${len} - 1")
+    list(REMOVE_AT list "${last}")
+    set("${list_var}" "${list}" PARENT_SCOPE)
+  endif()
+endfunction()
 
 if(NOT DEFINED OPENDDS_INSTALL_LIB)
   set(OPENDDS_INSTALL_LIB "lib")

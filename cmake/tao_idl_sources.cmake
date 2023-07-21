@@ -171,11 +171,11 @@ function(_opendds_tao_idl target)
 
     get_filename_component(idl_file_path "${idl_file}" ABSOLUTE)
 
-    set(gperf_location $<TARGET_FILE:ace_gperf>)
+    set(gperf_location $<TARGET_FILE:ACE::ace_gperf>)
     if(CMAKE_CONFIGURATION_TYPES)
-      get_target_property(is_gperf_imported ace_gperf IMPORTED)
+      get_target_property(is_gperf_imported ACE::ace_gperf IMPORTED)
       if(is_gperf_imported)
-        set(gperf_location $<TARGET_PROPERTY:ace_gperf,LOCATION>)
+        set(gperf_location $<TARGET_PROPERTY:ACE::ace_gperf,LOCATION>)
       endif(is_gperf_imported)
     endif()
 
@@ -185,19 +185,29 @@ function(_opendds_tao_idl target)
 
     _opendds_tao_append_runtime_lib_dir_to_path(extra_lib_dirs)
 
+    set(generated_files
+      ${stub_header_files}
+      ${skel_header_files}
+      ${anyop_header_files}
+      ${stub_cpp_files}
+      ${skel_cpp_files}
+      ${anyop_cpp_files}
+    )
+    if(debug)
+      foreach(generated_file ${generated_files})
+        string(REPLACE "${output_dir}/" "" generated_file "${generated_file}")
+        string(REPLACE "${skel_output_dir}/" "" generated_file "${generated_file}")
+        string(REPLACE "${anyop_output_dir}/" "" generated_file "${generated_file}")
+        message(STATUS "tao_idl: ${generated_file}")
+      endforeach()
+    endif()
     add_custom_command(
-      OUTPUT
-        ${stub_header_files}
-        ${skel_header_files}
-        ${anyop_header_files}
-        ${stub_cpp_files}
-        ${skel_cpp_files}
-        ${anyop_cpp_files}
-      DEPENDS tao_idl ${tao_idl_shared_libs} ace_gperf
+      OUTPUT ${generated_files}
+      DEPENDS TAO::tao_idl ${tao_idl_shared_libs} ACE::ace_gperf
       MAIN_DEPENDENCY ${idl_file_path}
       COMMAND ${CMAKE_COMMAND} -E env "DDS_ROOT=${DDS_ROOT}" "TAO_ROOT=${TAO_INCLUDE_DIR}"
         "${extra_lib_dirs}"
-        $<TARGET_FILE:tao_idl> -g ${gperf_location} ${feature_flags} -Sg
+        $<TARGET_FILE:TAO::tao_idl> -g ${gperf_location} ${feature_flags} -Sg
         -Wb,pre_include=ace/pre.h -Wb,post_include=ace/post.h
         --idl-version 4 -as --unknown-annotations ignore
         -I${TAO_INCLUDE_DIR} -I${working_source_dir}

@@ -1,26 +1,13 @@
-project(DDS*Publisher) : dcpsexe, dcps_test, dcps_cm, dcps_tcp {
-  exename = publisher
+project(DDS*PubSub) : dcpsexe, dcps_test, dcps_cm, dcps_tcp {
+  exename = pubsub
   requires += persistence_profile
 
   Idl_Files {
   }
 
   Source_Files {
-    publisher.cpp
+    pubsub.cpp
     Writer.cpp
-    DataWriterListenerImpl.cpp
-  }
-}
-
-project(DDS*Subscriber) : dcpsexe, dcps_test, dcps_cm, dcps_tcp {
-  exename = subscriber
-  requires += persistence_profile
-
-  Idl_Files {
-  }
-
-  Source_Files {
-    subscriber.cpp
     DataReaderListener.cpp
   }
 }

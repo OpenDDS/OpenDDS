@@ -1,0 +1,32 @@
+Released 2023-06-30
+
+Download :ghrelease:`this release on GitHub <DDS-3.24.2>`.
+
+Read `the documenation for this release on Read the Docs <https://opendds.readthedocs.io/en/dds-3.24.2>`__.
+
+Security
+========
+
+- Fixed a vulnerability in the rtps_udp transport where an acknowledgement sequence number beyond the maximum expected by the writer leads to an assert and incorrect state. (:ghpr:`4155`)
+
+  - Thanks to Seulbae Kim (@squizz617) for discovering this.
+
+Fixes
+=====
+
+- Fixed leaked shared memory by the shared memory transport. (:ghpr:`#4171`)
+
+  - For a 100% fix, a new ACE version including https://github.com/DOCGroup/ACE_TAO/pull/2077 must be used.
+
+- Fixed bug introduced by :ghpr:`4120` (:ghpr:`4180`, :ghpr:`4184`)
+
+  - The fix introduced in #4120 causes the TransportClient to silently drop messages when the client's guid is not initialized.
+    This causes issues for TransportClients that send messages to the transport before association.
+    One such example is a DataWriter with liveliness configured.
+    The DataWriter will send liveliness messages to the transport (which will be dropped) and hang waiting for them to be delivered.
+  - The solution was set the guid for a TransportClient before calling any method that uses the guid.
+
+Notes
+=====
+
+- :ghpr:`4180` required changes in InfoRepoDiscovery's IDL, so InfoRepo compatibility with older versions has been broken.

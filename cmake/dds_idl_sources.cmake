@@ -111,9 +111,19 @@ function(_opendds_export_target_property target property_name)
 endfunction()
 
 function(_opendds_target_idl_sources target)
-  set(one_value_args SCOPE SKIP_TAO_IDL SKIP_OPENDDS_IDL AUTO_INCLUDES)
+  set(one_value_args
+    SCOPE
+    SKIP_TAO_IDL
+    SKIP_OPENDDS_IDL
+    AUTO_INCLUDES
+  )
   set(multi_value_args TAO_IDL_FLAGS DDS_IDL_FLAGS IDL_FILES)
   cmake_parse_arguments(arg "" "${one_value_args}" "${multi_value_args}" ${ARGN})
+
+  set(debug FALSE)
+  if(opendds_target_sources IN_LIST OPENDDS_CMAKE_VERBOSE)
+    set(debug TRUE)
+  endif()
 
   # Language mappings used by the IDL files are mixed together with any
   # existing OPENDDS_LANGUAGE_MAPPINGS value on the target.
@@ -123,10 +133,6 @@ function(_opendds_target_idl_sources target)
 
   set(all_auto_includes)
   foreach(idl_file ${arg_IDL_FILES})
-    if(NOT IS_ABSOLUTE ${idl_file})
-      set(idl_file ${CMAKE_CURRENT_LIST_DIR}/${idl_file})
-    endif()
-
     get_property(generated_dependencies SOURCE ${idl_file}
       PROPERTY OPENDDS_IDL_GENERATED_DEPENDENCIES SET)
 
@@ -218,7 +224,19 @@ function(_opendds_target_idl_sources target)
     "${opendds_idl_opts}"
   )
 
+  _opendds_get_generated_output_dir(${target} gen_out)
+
+  if(debug)
+    message(STATUS "gen out: ${gen_out}")
+    message(STATUS "IDL files:")
+  endif()
+  list(APPEND CMAKE_MESSAGE_INDENT "  ")
   foreach(input ${non_generated_idl_files})
+    if(debug)
+      string(REPLACE "${CMAKE_CURRENT_SOURCE_DIR}/" "" show_idl "${input}")
+      message(STATUS "${show_idl}")
+    endif()
+    list(APPEND CMAKE_MESSAGE_INDENT "  ")
     get_filename_component(abs_filename ${input} ABSOLUTE)
     get_filename_component(file_ext ${input} EXT)
     get_filename_component(idl_file_dir ${abs_filename} DIRECTORY)
@@ -235,6 +253,9 @@ function(_opendds_target_idl_sources target)
 
     if(arg_SKIP_OPENDDS_IDL)
       set(run_tao_idl_on_input TRUE)
+      if(debug)
+        message(STATUS "SKIP_OPENDDS_IDL")
+      endif()
     else()
       _opendds_get_generated_idl_output(
         ${target} "${input}" "${opendds_idl_opt_-o}" output_prefix output_dir)
@@ -279,14 +300,20 @@ function(_opendds_target_idl_sources target)
 
       _opendds_tao_append_runtime_lib_dir_to_path(extra_lib_dirs)
 
+      if(debug)
+        foreach(generated_file ${generated_files})
+          string(REPLACE "${output_dir}/" "" generated_file "${generated_file}")
+          message(STATUS "opendds_idl: ${generated_file}")
+        endforeach()
+      endif()
       add_custom_command(
         OUTPUT ${generated_files}
-        DEPENDS opendds_idl "${DDS_ROOT}/dds/idl/IDLTemplate.txt"
+        DEPENDS OpenDDS::opendds_idl "${DDS_ROOT}/dds/idl/IDLTemplate.txt"
         MAIN_DEPENDENCY ${abs_filename}
         COMMAND
           ${CMAKE_COMMAND} -E env "DDS_ROOT=${DDS_ROOT}" "TAO_ROOT=${TAO_INCLUDE_DIR}"
           "${extra_lib_dirs}"
-          $<TARGET_FILE:opendds_idl> "-I${idl_file_dir}"
+          $<TARGET_FILE:OpenDDS::opendds_idl> "-I${idl_file_dir}"
           ${opendds_idl_opts} ${extra_options} ${abs_filename} -o "${output_dir}"
       )
 
@@ -304,12 +331,22 @@ function(_opendds_target_idl_sources target)
         list(APPEND idl_files ${input})
         list(APPEND file_mappings "C++03")
       endif()
-      _opendds_tao_idl(${target}
-        IDL_FLAGS ${tao_idl_opts}
-        IDL_FILES ${idl_files}
-        AUTO_INCLUDES tao_idl_auto_includes
-      )
-      list(APPEND file_auto_includes "${tao_idl_auto_includes}")
+      if(idl_files)
+        _opendds_tao_idl(${target}
+          IDL_FLAGS ${tao_idl_opts}
+          IDL_FILES ${idl_files}
+          AUTO_INCLUDES tao_idl_auto_includes
+        )
+        list(APPEND file_auto_includes "${tao_idl_auto_includes}")
+      endif()
+    elseif(arg_SKIP_TAO_IDL)
+      if(debug)
+        message(STATUS "SKIP_TAO_IDL")
+      endif()
+    elseif(NOT idl_files)
+      if(debug)
+        message(STATUS "No IDL files for tao_idl")
+      endif()
     endif()
 
     set_property(SOURCE ${abs_filename} PROPERTY
@@ -327,7 +364,10 @@ function(_opendds_target_idl_sources target)
 
     list(APPEND all_mappings ${file_mappings})
     list(REMOVE_DUPLICATES all_mappings)
+
+    _opendds_pop_list(CMAKE_MESSAGE_INDENT)
   endforeach()
+  _opendds_pop_list(CMAKE_MESSAGE_INDENT)
 
   set_property(TARGET ${target}
     PROPERTY "OPENDDS_LANGUAGE_MAPPINGS" ${all_mappings})

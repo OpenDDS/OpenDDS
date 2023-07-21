@@ -63,7 +63,6 @@ class DocEnv:
             rmtree(self.build_path)
 
     def setup(self, force_new=False):
-        sanity_path = self.bin_path / 'sphinx-build'
         install_deps = False
         if force_new or not self.venv_path.is_dir():
             log('Creating venv...')
@@ -72,16 +71,10 @@ class DocEnv:
         elif reqs_path.stat().st_mtime >= self.venv_path.stat().st_mtime:
             log('Requirements file was changed, updating dependencies.')
             install_deps = True
-        elif not sanity_path.is_file():
-            log('sphinx-build not found, need to install dependencies?')
-            install_deps = True
 
         if install_deps:
             log('Install Dependencies...')
             self.run('python', '-m', 'pip', 'install', '-r', str(reqs_path))
-            if not sanity_path.is_file():
-                log('sphinx-build not found after installing dependencies', error=True)
-                sys.exit(1)
             self.venv_path.touch()
             self.rm_build()
 

@@ -13,11 +13,7 @@ Writer::Writer (::DDS::DataWriter_ptr writer)
   : writer_ (::DDS::DataWriter::_duplicate (writer))
   , timeout_writes_ (0)
   , count_ (0)
-  , dwl_servant_ (0)
 {
-  ::DDS::DataWriterListener_var dwl = writer->get_listener ();
-  this->dwl_servant_ =
-    dynamic_cast<DataWriterListenerImpl*> (dwl.in ());
 }
 
 Writer::~Writer ()

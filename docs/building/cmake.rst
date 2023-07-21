@@ -104,35 +104,49 @@ Components
 
 .. versionadded:: 3.25
 
-Arguments can be passed to ``find_package(OpenDDS COMPONENTS <argument>...)`` (or alternatively ``find_package(OpenDDS REQUIRED [COMPONENTS] <argument>...)``) to change what is loaded and considered required.
+By default the package will search for all libraries and executables, but only require the bare minimum for ACE/TAO and OpenDDS.
+Arguments can be passed to ``find_package(OpenDDS COMPONENTS <argument>...)`` (or alternatively ``find_package(OpenDDS REQUIRED [COMPONENTS] <argument>...)``) add to what's required.
 These can be:
 
-- :ref:`Libraries <cmake-libraries>`
+- :ref:`Executables <cmake-executables>` and :ref:`Libraries <cmake-libraries>`
 
-  - The ``OpenDDS::`` prefix is optional, but ``ACE::`` and ``TAO::`` libraries are not.
-  - Ex:
+  Example:
 
-    .. code-block:: cmake
+  .. code-block:: cmake
 
-      find_package(OpenDDS REQUIRED Security OpenDDS::Shmem ACE::XML_Utils)
+    find_package(OpenDDS REQUIRED OpenDDS::Rtps_Udp OpenDDS::RtpsRelay)
 
 - :ref:`Features <cmake-feature-vars>`
 
-  - Feature names should be the same as the variable, but without the leading ``OPENDDS_`` and all lowercase.
-  - Feature names by themselves will be required to be enabled.
-  - If the name is followed by ``=``, then the `CMake boolean value <https://cmake.org/cmake/help/latest/command/if.html#basic-expressions>`__ following that determines if the feature must be enabled or disabled.
-  - Ex:
+  Feature names should be the same as the variable, but without the leading ``OPENDDS_`` and all lowercase.
+  Feature names by themselves will be required to be enabled.
+  If using `CMake 3.9 or higher <https://cmake.org/cmake/help/latest/variable/CMAKE_MATCH_n.html>`__ and the name is followed by ``=``, then the `CMake boolean value <https://cmake.org/cmake/help/latest/command/if.html#basic-expressions>`__ following that determines if the feature must be enabled or disabled.
 
-    .. code-block:: cmake
+  Example:
 
-      find_package(OpenDDS REQUIRED built_in_topics safety_profile=OFF)
+  .. code-block:: cmake
 
-- ``NO_OPENDDS`` skips loading OpenDDS libraries, which allows using ACE/TAO without OpenDDS being built.
-  ``NO_TAO`` also skips loading TAO libraries, leaving just ACE libraries.
+    find_package(OpenDDS REQUIRED built_in_topics safety_profile=OFF)
 
-  - ``NO_OPENDDS`` will imply :cmake:func:`opendds_target_sources(SKIP_OPENDDS_IDL)`.
+  .. note::
 
-Currently all arguments passed to ``OPTIONAL_COMPONENTS`` are ignored as all libraries are treated as optional.
+    Passing features to ``OPTIONAL_COMPONENTS`` is treated as an error.
+    It doesn't make sense to optionally request them because they are fixed.
+
+- ``NO_DEFAULTS``
+
+  Passing ``NO_DEFAULTS`` will only search for and require what is specified.
+  This allows using ACE/TAO without OpenDDS being built, assuming the package is configured correctly.
+  It also allows ``OPTIONAL_COMPONENTS`` to have an effect because normally everything is treated as optional.
+
+  Example:
+
+  .. code-block:: cmake
+
+    find_package(OpenDDS REQUIRED NO_DEFAULTS ACE::ACE OPTIONAL_COMPONENTS TAO::TAO)
+
+  This just makes :cmake:tgt:`ACE::ACE` and optionally :cmake:tgt:`TAO::TAO` available.
+  Normally :cmake:tgt:`ACE::ACE`, :cmake:tgt:`TAO::TAO`, and :cmake:tgt:`OpenDDS::Dcps` are unconditionally searched for and required.
 
 Adding IDL Sources with opendds_target_sources
 ==============================================
@@ -172,11 +186,11 @@ install(IMPORTED_RUNTIME_ARTIFACTS)
 
 .. versionadded:: 3.20
 
-If using CMake 3.21 or later, it’s possible to install shared libraries from OpenDDS, ACE, and TAO in CMake along side the application using `install(IMPORTED_RUNTIME_ARTIFACTS) <https://cmake.org/cmake/help/latest/command/install.html#install-imported-runtime-artifacts>`__.
-This will just install shared libraries, not any development dependencies like ``opendds_idl`` or static libraries.
+If using CMake 3.21 or later, it’s possible to install :ref:`executables <cmake-executables>` and :ref:`shared libraries <cmake-libraries>` from OpenDDS, ACE, and TAO in CMake along side the application using `install(IMPORTED_RUNTIME_ARTIFACTS) <https://cmake.org/cmake/help/latest/command/install.html#install-imported-runtime-artifacts>`__.
+This will just install shared libraries and executables, not static libraries, headers, or anything else required for building applications.
 
 If OpenDDS and ACE/TAO is built with ``clang``, the shared libraries might be missing an ``SONAME`` entry.
-Is is `an issue with ACE/TAO <https://github.com/DOCGroup/ACE_TAO/issues/1790>`__.
+It is `an issue with ACE/TAO <https://github.com/DOCGroup/ACE_TAO/issues/1790>`__.
 If trying to use ``install(IMPORTED_RUNTIME_ARTIFACTS)`` in this case, it causes the dynamic linker to ignore the libraries and report that they could not be found.
 One workaround is to add ``SOFLAGS+=-Wl,-h,$(SONAME)`` to ``$ACE_ROOT/include/makeinclude/platform_macros.GNU`` before building.
 This can be done manually after running the configure script or by passing ``--macros=SOFLAGS+=-Wl,-h,\$\(SONAME\)`` to the configure script.
@@ -184,6 +198,8 @@ This can be done manually after running the configure script or by passing ``--m
 :cmake:func:`opendds_get_library_dependencies` is provided to help find out what libraries need to be installed.
 
 See the :ghfile:`install Test <tests/cmake/install/library/CMakeLists.txt>` for an example of using this.
+
+.. versionchanged:: 3.25 There are now :ref:`executables <cmake-executables>` that can be installed.
 
 .. _cmake-installing-generated-interface-files:
 
@@ -211,16 +227,19 @@ See :ref:`cmake-config-vars` for all the possible values to set.
 Reference
 *********
 
+Targets
+=======
+
 .. _cmake-libraries:
 
 Libraries
-=========
+---------
 
 The CMake package can provide library targets that can be linked using `target_link_libraries <https://cmake.org/cmake/help/latest/command/target_link_libraries.html>`__ or installed using :ref:`cmake-install-imported-runtime-artifacts`.
 
 .. cmake:tgt:: OpenDDS::Dcps
 
-  Core OpenDDS Library
+  Required, the core OpenDDS Library
 
 .. cmake:tgt:: OpenDDS::Rtps
 
@@ -254,14 +273,24 @@ The CMake package can provide library targets that can be linked using `target_l
 
   :doc:`/devguide/dds_security`
 
+.. cmake:tgt:: OpenDDS::RtpsRelayLib
+
+  Support library for :cmake:tgt:`OpenDDS::RtpsRelay`.
+
+  .. versionadded:: 3.25
+
 .. cmake:tgt:: ACE::ACE
   :nocontentsentry:
+
+  Required
 
 .. cmake:tgt:: ACE::XML_Utils
   :nocontentsentry:
 
 .. cmake:tgt:: TAO::TAO
   :nocontentsentry:
+
+  Required
 
 .. cmake:tgt:: TAO::IDL_FE
   :nocontentsentry:
@@ -296,6 +325,37 @@ The CMake package can provide library targets that can be linked using `target_l
 .. cmake:tgt:: TAO::Valuetype
   :nocontentsentry:
 
+.. _cmake-executables:
+
+Executables
+-----------
+
+.. versionadded:: 3.25
+
+The CMake package can provide executable targets that can be called manually from CMake or installed using :ref:`cmake-install-imported-runtime-artifacts`.
+
+.. cmake:tgt:: ACE::ace_gperf
+
+  Required
+
+.. cmake:tgt:: TAO::tao_idl
+
+  Required
+
+.. cmake:tgt:: OpenDDS::opendds_idl
+
+  Required
+
+.. cmake:tgt:: OpenDDS::DCPSInfoRepo
+
+.. cmake:tgt:: OpenDDS::RtpsRelay
+
+.. cmake:tgt:: OpenDDS::dcpsinfo_dump
+
+.. cmake:tgt:: OpenDDS::inspect
+
+.. cmake:tgt:: OpenDDS::repoctl
+
 Functions
 =========
 
@@ -310,6 +370,7 @@ Functions
       [OPENDDS_IDL_OPTIONS <option>...]
       [SUPPRESS_ANYS TRUE|FALSE]
       [ALWAYS_GENERATE_LIB_EXPORT_HEADER TRUE|FALSE]
+      [USE_EXPORT <export-header;export-macro>]
       [GENERATE_SERVER_SKELETONS TRUE|FALSE]
       [AUTO_LINK TRUE|FALSE]
       [SKIP_TAO_IDL]
@@ -353,6 +414,12 @@ Functions
 
     .. versionadded:: 3.20
 
+  .. cmake:func:arg:: USE_EXPORT <export-header;export-macro>
+
+    Pass a CMake list (``;``-delimited) of an existing export header and export macro to use in the generated code.
+
+    .. versionadded:: 3.25
+
   .. cmake:func:arg:: GENERATE_SERVER_SKELETONS TRUE|FALSE
 
     ``tao_idl`` generate code for CORBA servers.
@@ -371,7 +438,8 @@ Functions
 
   .. cmake:func:arg:: SKIP_TAO_IDL
 
-    Skip invoking ``tao_idl`` on the IDL files.
+    Skip invoking ``tao_idl`` on the IDL files that are passed in.
+    This will still run ``tao_idl`` on ``*TypeSupport.idl`` files unless ``SKIP_OPENDDS_IDL`` is passed in or ``-SI`` is passed to :cmake:func:`opendds_target_sources(OPENDDS_IDL_OPTIONS)`.
 
     .. versionadded:: 3.25
 
@@ -485,6 +553,22 @@ Functions
 
   .. versionadded:: 3.20
 
+.. cmake:func:: opendds_export_header
+
+  ::
+
+    opendds_export_header(<target> [USE_EXPORT_VAR <use-export-var-name>])
+
+  Generates a header that is compatible with `ACE's generate_export_file.pl <https://github.com/DOCGroup/ACE_TAO/blob/master/ACE/bin/generate_export_file.pl>`__ for exporting symbols in shared libraries.
+  The header will able to be included as ``<target>_export.h`` and macro will be to use on symbols to will be ``<target>_Export``.
+  It is the same function :cmake:func:`opendds_target_sources` uses so all the same info about :ref:`generated files <cmake-files-props>` applies.
+
+  .. cmake:func:arg:: USE_EXPORT_VAR <use-export-var-name>
+
+    Set a variable with the given name that contains a list with the location of the generated export header and the macro name to export a symbol.
+
+  .. versionadded:: 3.25
+
 Variables
 =========
 
@@ -497,6 +581,20 @@ These variables can be used to override default behavior of the CMake package.
 
   If ``TRUE``, then log detailed status information at configure-time.
   The default for this is ``FALSE``.
+
+  .. versionadded:: 3.25 The variable can also contain a list of categories to log more verbosely:
+
+    ``all``
+      Enables all logging
+
+    ``components``
+      Logs what :ref:`components <cmake-components>` were passed and the exact list of libraries are being searched for and required.
+
+    ``imports``
+      Logs the paths of :ref:`executables <cmake-executables>` and :ref:`libraries <cmake-libraries>` that are going to be imported.
+
+    ``opendds_target_sources``
+      Logs the arguments of :cmake:func:`opendds_target_sources` and what files will be generated.
 
 .. cmake:var:: OPENDDS_DEFAULT_NESTED
 

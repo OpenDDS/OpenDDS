@@ -27,8 +27,12 @@ public:
   virtual ::DDS::ReturnCode_t enable_specific ()
       { received_.received(DiscReceivedCalls::ENABLE_SPECIFIC); return ::DDS::RETCODE_OK;};
 
+  virtual void set_publication_id(const OpenDDS::DCPS::GUID_t& guid)
+  {
+    guid_ = guid;
+  }
+
   virtual void add_association (
-      const ::OpenDDS::DCPS::GUID_t& yourId,
       const OpenDDS::DCPS::ReaderAssociation& reader,
       bool active);
 
@@ -49,8 +53,11 @@ public:
 
   OpenDDS::DCPS::WeakRcHandle<OpenDDS::ICE::Endpoint> get_ice_endpoint() { return OpenDDS::DCPS::WeakRcHandle<OpenDDS::ICE::Endpoint>(); }
 
+  const OpenDDS::DCPS::GUID_t& guid() const { return guid_; }
+
 private:
   DiscReceivedCalls received_;
+  OpenDDS::DCPS::GUID_t guid_;
 };
 
 

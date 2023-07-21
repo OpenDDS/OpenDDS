@@ -178,13 +178,13 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
                                        DDS::SubscriberListener::_nil(),
                                        ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
-  DataWriterListenerImpl* pub1_dwl1_servant = new DataWriterListenerImpl;
+  DataWriterListenerImpl* pub1_dwl1_servant = new DataWriterListenerImpl("Manual_By_Participant_Write");
   ::DDS::DataWriterListener_var pub1_dwl1 (pub1_dwl1_servant);
-  DataWriterListenerImpl* pub2_dwl2_servant = new DataWriterListenerImpl;
-  ::DDS::DataWriterListener_var pub2_dwl2 (pub2_dwl2_servant);
-  DataWriterListenerImpl* pub1_dwl2_servant = new DataWriterListenerImpl;
+  DataWriterListenerImpl* pub2_dwl1_servant = new DataWriterListenerImpl("Manual_By_Participant_Assert");
+  ::DDS::DataWriterListener_var pub2_dwl1 (pub2_dwl1_servant);
+  DataWriterListenerImpl* pub1_dwl2_servant = new DataWriterListenerImpl("Manual_By_Topic_Write");
   ::DDS::DataWriterListener_var pub1_dwl2 (pub1_dwl2_servant);
-  DataWriterListenerImpl* pub1_dwl3_servant = new DataWriterListenerImpl;
+  DataWriterListenerImpl* pub1_dwl3_servant = new DataWriterListenerImpl("Manual_By_Topic_Assert");
   ::DDS::DataWriterListener_var pub1_dwl3 (pub1_dwl3_servant);
 
   DataReaderListenerImpl* sub_drl_servant = new DataReaderListenerImpl(dcs);
@@ -193,15 +193,15 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
   // Create the datawriters
   ::DDS::DataWriterQos pub1_dw_qos;
   pub1_pub->get_default_datawriter_qos (pub1_dw_qos);
-  ::DDS::DataWriterQos pub2_dw2_qos;
-  pub2_pub->get_default_datawriter_qos (pub2_dw2_qos);
+  ::DDS::DataWriterQos pub2_dw1_qos;
+  pub2_pub->get_default_datawriter_qos (pub2_dw1_qos);
 
   pub1_dw_qos.liveliness.kind = ::DDS::MANUAL_BY_PARTICIPANT_LIVELINESS_QOS;
   pub1_dw_qos.liveliness.lease_duration.sec = PUB_LEASE_DURATION_SEC;
   pub1_dw_qos.liveliness.lease_duration.nanosec = 0;
-  pub2_dw2_qos.liveliness.kind = ::DDS::MANUAL_BY_PARTICIPANT_LIVELINESS_QOS;
-  pub2_dw2_qos.liveliness.lease_duration.sec = PUB_LEASE_DURATION_SEC;
-  pub2_dw2_qos.liveliness.lease_duration.nanosec = 0;
+  pub2_dw1_qos.liveliness.kind = ::DDS::MANUAL_BY_PARTICIPANT_LIVELINESS_QOS;
+  pub2_dw1_qos.liveliness.lease_duration.sec = PUB_LEASE_DURATION_SEC;
+  pub2_dw1_qos.liveliness.lease_duration.nanosec = 0;
 
   ::DDS::DataReaderQos sub_dr_qos;
   sub_sub->get_default_datareader_qos (sub_dr_qos);
@@ -218,8 +218,8 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
 
   DDS::DataWriter_var pub2_dw1 =
     pub2_pub->create_datawriter(pub2_topic.in (),
-                                pub2_dw2_qos,
-                                pub2_dwl2.in(),
+                                pub2_dw1_qos,
+                                pub2_dwl1.in(),
                                 ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
   pub1_dw_qos.liveliness.kind = ::DDS::MANUAL_BY_TOPIC_LIVELINESS_QOS;
@@ -248,10 +248,10 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
   Utils::wait_match(pub1_dw3, 1);
 
   {
-    Write_Samples writer1(pub1_dw1, "Manual_By_Participant_Sample_Writer_1");
-    Assert_Participant_Liveliness writer2(pub2_dw1, "Manual_By_Participant_Assert_Writer_2");
-    Write_Samples writer3(pub1_dw2, "Manual_By_Topic_Sample_Writer_1");
-    Assert_Writer_Liveliness writer4(pub1_dw3, "Manual_By_Topic_Assert_Writer_2");
+    Write_Samples writer1(pub1_dw1, "Manual_By_Participant_Write");
+    Assert_Participant_Liveliness writer2(pub2_dw1, "Manual_By_Participant_Assert");
+    Write_Samples writer3(pub1_dw2, "Manual_By_Topic_Write");
+    Assert_Writer_Liveliness writer4(pub1_dw3, "Manual_By_Topic_Assert");
 
     writer1.start();
     writer2.start();
@@ -280,7 +280,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
   }
 
   const unsigned long actual = pub1_dwl1_servant->num_liveliness_lost_callbacks() +
-    pub2_dwl2_servant->num_liveliness_lost_callbacks() +
+    pub2_dwl1_servant->num_liveliness_lost_callbacks() +
     pub1_dwl2_servant->num_liveliness_lost_callbacks() +
     pub1_dwl3_servant->num_liveliness_lost_callbacks();
 

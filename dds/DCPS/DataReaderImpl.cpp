@@ -58,10 +58,7 @@ namespace OpenDDS {
 namespace DCPS {
 
 DataReaderImpl::DataReaderImpl()
-  : has_subscription_id_(false)
-  , subscription_id_mutex_()
-  , subscription_id_condition_(subscription_id_mutex_)
-  , qos_(TheServiceParticipant->initial_DataReaderQos())
+  : qos_(TheServiceParticipant->initial_DataReaderQos())
   , reverse_sample_lock_(sample_lock_)
   , topic_servant_(0)
   , type_support_(0)
@@ -237,14 +234,22 @@ DataReaderImpl::get_instance_handle()
 }
 
 void
-DataReaderImpl::add_association(const GUID_t& yourId,
-    const WriterAssociation& writer,
-    bool active)
+DataReaderImpl::set_subscription_id(const GUID_t& guid)
+{
+  OPENDDS_ASSERT(subscription_id_ == GUID_UNKNOWN);
+  OPENDDS_ASSERT(guid != GUID_UNKNOWN);
+  subscription_id_ = guid;
+  TransportClient::set_guid(guid);
+}
+
+void
+DataReaderImpl::add_association(const WriterAssociation& writer,
+                                bool active)
 {
   if (DCPS_debug_level) {
     ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) DataReaderImpl::add_association - ")
         ACE_TEXT("bit %d local %C remote %C\n"), is_bit_,
-        LogGuid(yourId).c_str(),
+        LogGuid(subscription_id_).c_str(),
         LogGuid(writer.writerId).c_str()));
   }
 
@@ -256,24 +261,11 @@ DataReaderImpl::add_association(const GUID_t& yourId,
     return;
   }
 
-  // We are being called back from the repository before we are done
-  // processing after our call to the repository that caused this call
-  // (from the repository) to be made.
-  {
-    ACE_Guard<ACE_Thread_Mutex> guard(subscription_id_mutex_);
-    if (GUID_UNKNOWN == subscription_id_) {
-      subscription_id_ = yourId;
-      has_subscription_id_ = true;
-      subscription_id_condition_.notify_all();
-    }
-  }
-
   // For each writer in the list of writers to associate with, we
   // create a WriterInfo and a WriterStats object and store them in
   // our internal maps.
   //
   {
-
     ACE_WRITE_GUARD(ACE_RW_Thread_Mutex, write_guard, writers_lock_);
 
     const GUID_t& writer_id = writer.writerId;
@@ -675,7 +667,9 @@ DataReaderImpl::remove_all_associations()
                ACE_TEXT("caught exception from remove_associations.\n")));
   }
 
-  transport_stop();
+  if (!transport_disabled_) {
+    transport_stop();
+  }
 }
 
 void
@@ -1258,18 +1252,18 @@ DataReaderImpl::enable()
 
     install_type_support(typesupport);
 
-    const GUID_t subscription_id =
+    const bool success =
       disco->add_subscription(domain_id_,
-        dp_id_,
-        topic_servant_->get_id(),
-        rchandle_from(this),
-        qos_,
-        trans_conf_info,
-        sub_qos,
-        filterClassName,
-        filterExpression,
-        exprParams,
-        type_info);
+                              dp_id_,
+                              topic_servant_->get_id(),
+                              rchandle_from(this),
+                              qos_,
+                              trans_conf_info,
+                              sub_qos,
+                              filterClassName,
+                              filterExpression,
+                              exprParams,
+                              type_info);
 
 #if defined(OPENDDS_SECURITY)
     {
@@ -1279,14 +1273,7 @@ DataReaderImpl::enable()
     }
 #endif
 
-    {
-      ACE_Guard<ACE_Thread_Mutex> guard(subscription_id_mutex_);
-      subscription_id_ = subscription_id;
-      has_subscription_id_ = true;
-      subscription_id_condition_.notify_all();
-    }
-
-    if (subscription_id == GUID_UNKNOWN) {
+    if (!success || subscription_id_ == GUID_UNKNOWN) {
       if (DCPS_debug_level >= 1) {
         ACE_DEBUG((LM_WARNING, "(%P|%t) WARNING: DataReaderImpl::enable: "
           "add_subscription failed\n"));
@@ -2403,8 +2390,9 @@ DataReaderImpl::prepare_to_delete()
 
   this->set_deleted(true);
   this->stop_associating();
-  this->send_final_acks();
-  subscription_id_condition_.notify_all();
+  if (!transport_disabled_) {
+    this->send_final_acks();
+  }
 }
 
 SubscriptionInstance_rch
