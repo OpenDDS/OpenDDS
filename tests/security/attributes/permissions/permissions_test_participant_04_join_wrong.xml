@@ -3,7 +3,7 @@
   <permissions>
     <grant name="fuppy_grant_join_domain_1">
       <!-- only allow joining domain 0. No explicit permission to read or write any topic -->
-      <subject_name>/emailAddress=fuppy@mail.fuphouse.ca/CN=Fuppy Fuppington III/OU=The Upper Room/O=House of Fuppy/ST=Nunavut/C=CA</subject_name>
+      <subject_name>/C=CA/ST=Nunavut/O=House of Fuppy/OU=The Upper Room/CN=Fuppy Fuppington III/emailAddress=fuppy@mail.fuphouse.ca</subject_name>
       <validity>
         <!-- Format is CCYY-MM-DDThh:mm:ss[Z|(+|-)hh:mm] in GMT -->
         <not_before>2015-09-15T01:00:00</not_before>

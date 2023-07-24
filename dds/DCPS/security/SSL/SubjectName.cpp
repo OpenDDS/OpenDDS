@@ -142,6 +142,7 @@ namespace SSL {
   int SubjectName::parse_ldap_v3(const char* in)
   {
     Parser parser(in);
+    attr_vec_.clear();
     return parser.parse(attr_vec_) ? 0 : 1;
   }
 

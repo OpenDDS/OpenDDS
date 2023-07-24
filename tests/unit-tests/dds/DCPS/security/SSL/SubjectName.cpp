@@ -145,19 +145,23 @@ TEST_F(dds_DCPS_security_SSL_SubjectName, Parse_LDAPv3_Single_Success)
   SubjectName sn;
   ASSERT_EQ(0, sn.parse("CN=DDS Shapes Demo"));
   ASSERT_EQ(sn, sn_ldap_single_);
+  ASSERT_EQ(0, sn.parse("CN = DDS Shapes Demo "));
+  ASSERT_EQ(sn, sn_ldap_single_);
 }
 
 TEST_F(dds_DCPS_security_SSL_SubjectName, Parse_LDAPv3_Single_Failure)
 {
   SubjectName sn;
-  ASSERT_EQ(1, sn.parse("CN =DDS Shapes Demos"));
+  ASSERT_EQ(1, sn.parse("  =DDS Shapes Demos"));
+  ASSERT_EQ(0, sn.parse("CN = DDS Shapes Demosss"));
+  ASSERT_NE(sn, sn_ldap_single_);
 }
 
 TEST_F(dds_DCPS_security_SSL_SubjectName, Parse_LDAPv3_Nominal_Success)
 {
   SubjectName sn;
   ASSERT_EQ(0, sn.parse("emailAddress=cto@acme.com,CN= DDS Shapes Demo,OU= CTO Office,O=ACME Inc.,L=Sunnyvale,ST=CA,C=US"));
-  ASSERT_NE(sn, sn_ldap_nom_);
+  ASSERT_EQ(sn, sn_ldap_nom_);
 }
 
 TEST_F(dds_DCPS_security_SSL_SubjectName, Parse_DCE_Nominal_Success)
