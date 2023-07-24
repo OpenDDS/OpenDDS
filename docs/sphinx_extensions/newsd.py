@@ -49,12 +49,14 @@ class PrintHelper:
         if combined.endswith('\n'):
             combined = combined[:-1]
         for line in combined.split('\n'):
+            line = line.rstrip()
             blank = not bool(line)
             if blank and self.printed_blank_line:
                 continue
-            if len(line) and not line.startswith(' ') and decorate:
-                line += decorate
-            line = indent + line
+            if len(line):
+                if not line.startswith(' ') and decorate:
+                    line += decorate
+                line = indent + line
             if self.avoid_rst:
                 ghfile_re.sub('')
             print(line, file=self.file, **kw)
@@ -219,8 +221,8 @@ def test_section():
     a.add_text(set([0]), ['- This is some text\n', '- This is a seperate item\n'])
     aa = a.get_section('Section AA')
     aa.add_text(set([3]), ['- This is some text\n  - This is some more\n'])
-    aa.add_text(set([1]), ['- This is some text\n  - This is some more\n'])
-    aa.add_text(set([5]), ['- This is some text\n  - This is some more\n'])
+    aa.add_text(set([1]), ['- This is some text  \n  - This is some more\n'])
+    aa.add_text(set([5]), ['- This is some text\n  - This is some more\n    \n'])
     aa.add_text(set([50]), ['- (Should be second in Section AA)\n'], 9)
     aaa = aa.get_section('Section AAA (Should be first in Section AA)', 10)
     aaa.add_text(set([4]), ['- This is some text\n  - This is some more\n'])
