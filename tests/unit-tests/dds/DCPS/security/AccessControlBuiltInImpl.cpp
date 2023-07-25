@@ -384,7 +384,7 @@ public:
 
     DDS::Security::IdentityToken local_id_token;
     OpenDDS::Security::TokenWriter local_tw(local_id_token);
-    local_tw.add_property("dds.cert.sn", "/C=AU/ST=Some-State/O=Internet Widgits Pty Ltd/CN=Ozzie Ozmann");
+    local_tw.add_property("dds.cert.sn", "CN=Ozzie Ozmann,O=Internet Widgits Pty Ltd,ST=Some-State,C=AU");
 
     EXPECT_CALL(*dynamic_cast<MockAuthentication*>(auth_plugin_.get()), get_identity_token(A<DDS::Security::IdentityToken&>(), 1, A<DDS::Security::SecurityException&>())).WillRepeatedly(DoAll(SetArgReferee<0>(local_id_token), Return(true)));
   }
