@@ -50,24 +50,24 @@ policy    = policy_match
 
 # For the CA policy
 [ policy_match ]
-countryName    = optional
-stateOrProvinceName  = optional
-organizationName  = optional
-organizationalUnitName  = optional
-commonName    = supplied
 emailAddress    = optional
+commonName    = supplied
+organizationalUnitName  = optional
+organizationName  = optional
+stateOrProvinceName  = optional
+countryName    = optional
 
 # For the 'anything' policy
 # At this point in time, you must list all acceptable 'object'
 # types.
 [ policy_anything ]
-countryName    = optional
-stateOrProvinceName  = optional
-localityName    = optional
-organizationName  = optional
-organizationalUnitName  = optional
-commonName    = supplied
 emailAddress    = optional
+commonName    = supplied
+organizationalUnitName  = optional
+organizationName  = optional
+localityName    = optional
+stateOrProvinceName  = optional
+countryName    = optional
 
 [ req ]
 prompt                  = no
