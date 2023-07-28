@@ -172,6 +172,12 @@ void TypeLookupService::cache_type_info(const DDS::BuiltinTopicKey_t& key,
   }
 }
 
+void TypeLookupService::clear_type_info(const DDS::BuiltinTopicKey_t& key)
+{
+  ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
+  type_info_map_.erase(key);
+}
+
 const TypeInformation& TypeLookupService::get_type_info(const DDS::BuiltinTopicKey_t& key) const
 {
   ACE_GUARD_RETURN(ACE_Thread_Mutex, g, mutex_, type_info_empty_);
