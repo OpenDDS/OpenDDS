@@ -260,7 +260,6 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
   remote_permissions->perm_token_ = remote_permissions_token;
   remote_permissions->perm_cred_token_ = remote_credential_token;
 
-
   AccessData cache_this;
   cache_this.identity = remote_identity_handle;
   cache_this.subject = sn_id_remote;

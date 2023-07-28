@@ -349,6 +349,7 @@ my %path_conditions = (
   md_file => qr/\.md$/,
   rst_file => qr/\.rst$/,
   p7s_file => qr/\.p7s$/,
+  pem_file => qr/\.pem$/,
   mpc_file => qr/\.(mpc|mpb|mwc)$/,
   make_file => qr/((GNUm|M)akefile|\.make$)/,
   tao_idl_gen_file => qr/^.+(C|S).(h|cpp)$/,
@@ -468,6 +469,7 @@ my %all_checks = (
     path_matches_all_of => [
       'text_file',
       '!p7s_file',
+      '!pem_file',
       '!make_file',
       '!tao_idl_gen_file',
       '!old_design_files',
