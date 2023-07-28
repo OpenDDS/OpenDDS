@@ -1784,6 +1784,7 @@ void Sedp::remove_entities_belonging_to(
                    ACE_TEXT("calling match_endpoints remove\n")));
       }
       match_endpoints(i->first, top_it->second, true /*remove*/);
+      type_lookup_service_->clear_type_info(DCPS::guid_to_bit_key(i->first));
       if (spdp_.shutting_down()) { return; }
       if (top_it->second.is_dead()) {
         purge_dead_topic(topic_name);
@@ -2264,6 +2265,7 @@ void Sedp::process_discovered_writer_data(DCPS::MessageId message_id,
       DiscoveredPublication p = iter->second;
       discovered_publications_.erase(iter);
       remove_from_bit(p);
+      type_lookup_service_->clear_type_info(DCPS::guid_to_bit_key(guid));
       if (DCPS::DCPS_debug_level > 3) {
         ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Sedp::process_discovered_writer_data - ")
                    ACE_TEXT("calling match_endpoints disp/unreg\n")));
@@ -2608,6 +2610,7 @@ void Sedp::process_discovered_reader_data(DCPS::MessageId message_id,
       DiscoveredSubscription s = iter->second;
       discovered_subscriptions_.erase(iter);
       remove_from_bit(s);
+      type_lookup_service_->clear_type_info(DCPS::guid_to_bit_key(guid));
     }
   }
 }
@@ -6005,6 +6008,7 @@ void Sedp::ignore(const GUID_t& to_ignore)
       if (td.is_dead()) {
         purge_dead_topic(topic_name);
       }
+      type_lookup_service_->clear_type_info(DCPS::guid_to_bit_key(to_ignore));
       return;
     }
   }
@@ -6023,6 +6027,7 @@ void Sedp::ignore(const GUID_t& to_ignore)
       if (td.is_dead()) {
         purge_dead_topic(topic_name);
       }
+      type_lookup_service_->clear_type_info(DCPS::guid_to_bit_key(to_ignore));
       return;
     }
   }
@@ -6038,6 +6043,7 @@ void Sedp::ignore(const GUID_t& to_ignore)
         for (RepoIdSet::const_iterator ep = ids.begin(); ep!= ids.end(); ++ep) {
           match_endpoints(*ep, td, true /*remove*/);
           td.remove_discovered_publication(*ep);
+          type_lookup_service_->clear_type_info(DCPS::guid_to_bit_key(*ep));
           // TODO: Do we need to remove from discovered_subscriptions?
           if (shutting_down()) { return; }
         }
@@ -6047,6 +6053,7 @@ void Sedp::ignore(const GUID_t& to_ignore)
         for (RepoIdSet::const_iterator ep = ids.begin(); ep!= ids.end(); ++ep) {
           match_endpoints(*ep, td, true /*remove*/);
           td.remove_discovered_subscription(*ep);
+          type_lookup_service_->clear_type_info(DCPS::guid_to_bit_key(*ep));
           // TODO: Do we need to remove from discovered_publications?
           if (shutting_down()) { return; }
         }
