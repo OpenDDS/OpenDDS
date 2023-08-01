@@ -234,7 +234,6 @@ namespace SSL {
     return true;
   }
 
-#include <iostream>
   bool Parser::attribute_type(std::string& at)
   {
     const std::string::size_type equal_pos = in_.find_first_of("=", pos_);
