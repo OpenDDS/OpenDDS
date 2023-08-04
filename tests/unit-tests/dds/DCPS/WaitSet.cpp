@@ -7,8 +7,11 @@
 
 #include <gtest/gtest.h>
 
+#include <dds/DCPS/Service_Participant.h>
+#include <dds/DCPS/Marked_Default_Qos.h>
+#include <dds/DCPS/RTPS/RtpsDiscovery.h>
 #include <dds/DCPS/GuardCondition.h>
-#include <dds/DCPS/WaitSet.h>
+#include "key_annotationTypeSupportImpl.h"
 
 #ifdef ACE_HAS_CPP11
 #include <thread>
@@ -17,6 +20,7 @@
 #include <condition_variable>
 #endif
 
+using namespace OpenDDS;
 using namespace OpenDDS::DCPS;
 
 TEST(dds_DCPS_WaitSet, DefaultConstructor)
@@ -186,6 +190,57 @@ TEST(dds_DCPS_WaitSet, WaitDeadlineTriggered)
   }
 
   EXPECT_EQ(ws->detach_condition(gc), DDS::RETCODE_OK);
+}
+
+TEST(dds_DCPS_WaitSet, WaitLivelinessLost)
+{
+  DDS::DomainParticipantFactory_var dpf = TheParticipantFactory->get_instance();
+  OpenDDS::RTPS::RtpsDiscovery_rch disc =
+      OpenDDS::DCPS::make_rch<OpenDDS::RTPS::RtpsDiscovery>(OpenDDS::DCPS::Discovery::DEFAULT_RTPS);
+  TheServiceParticipant->add_discovery(disc);
+  TheServiceParticipant->set_default_discovery(disc->key());
+  TheServiceParticipant->set_repo_domain(42, disc->key());
+
+  DDS::DomainParticipant_var dp =
+      dpf->create_participant(42, PARTICIPANT_QOS_DEFAULT, 0, 0);
+  EXPECT_TRUE(!CORBA::is_nil(dp));
+
+  key_annotation::UnkeyedStructTypeSupport_var ts = new key_annotation::UnkeyedStructTypeSupportImpl;
+  CORBA::String_var type_name = ts->get_type_name();
+  EXPECT_EQ(ts->register_type(dp, type_name), DDS::RETCODE_OK);
+
+  DDS::Topic_var topic =
+      dp->create_topic("FooTopic", type_name, TOPIC_QOS_DEFAULT, 0, 0);
+  EXPECT_TRUE(!CORBA::is_nil(topic));
+
+  DDS::Publisher_var publisher = dp->create_publisher(PUBLISHER_QOS_DEFAULT, 0, 0);
+  EXPECT_TRUE(!CORBA::is_nil(publisher));
+
+  DDS::DataWriterQos dw_qos = DATAWRITER_QOS_DEFAULT;
+  dw_qos.liveliness.kind = DDS::MANUAL_BY_TOPIC_LIVELINESS_QOS;
+  dw_qos.liveliness.lease_duration.sec = 1;
+  dw_qos.liveliness.lease_duration.nanosec = 0;
+  DDS::DataWriter_var writer = publisher->create_datawriter(topic, dw_qos, 0, 0);
+  EXPECT_TRUE(!CORBA::is_nil(writer));
+  EXPECT_EQ(writer->assert_liveliness(), DDS::RETCODE_OK);
+
+  DDS::WaitSet_var ws = new DDS::WaitSet;
+  DDS::StatusCondition_var sc = writer->get_statuscondition();
+  sc->set_enabled_statuses(DDS::LIVELINESS_LOST_STATUS);
+  EXPECT_EQ(ws->attach_condition(sc), DDS::RETCODE_OK);
+
+  const ::DDS::Duration_t two_seconds = {2, 0 };
+  {
+    DDS::ConditionSeq active;
+    EXPECT_EQ(ws->wait(active, two_seconds), DDS::RETCODE_OK);
+  }
+
+  EXPECT_EQ(publisher->delete_datawriter(writer), DDS::RETCODE_OK);
+  EXPECT_EQ(dp->delete_publisher(publisher), DDS::RETCODE_OK);
+  EXPECT_EQ(dp->delete_topic(topic), DDS::RETCODE_OK);
+  EXPECT_EQ(dp->delete_contained_entities(), DDS::RETCODE_OK);
+  EXPECT_EQ(dpf->delete_participant(dp), DDS::RETCODE_OK);
+  EXPECT_EQ(ws->detach_condition(sc), DDS::RETCODE_OK);
 }
 
 #ifdef ACE_HAS_CPP11

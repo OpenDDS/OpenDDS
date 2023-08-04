@@ -2521,6 +2521,9 @@ DataWriterImpl::liveliness_lost_task(const MonotonicTimePoint& now)
     ++liveliness_lost_status_.total_count;
     ++liveliness_lost_status_.total_count_change;
 
+    set_status_changed_flag(DDS::LIVELINESS_LOST_STATUS, true);
+    notify_status_condition();
+
     DDS::DataWriterListener_var listener = listener_for(DDS::LIVELINESS_LOST_STATUS);
 
     if (!CORBA::is_nil(listener.in())) {
