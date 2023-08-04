@@ -20,7 +20,6 @@
 #include <condition_variable>
 #endif
 
-using namespace OpenDDS;
 using namespace OpenDDS::DCPS;
 
 TEST(dds_DCPS_WaitSet, DefaultConstructor)
@@ -233,6 +232,9 @@ TEST(dds_DCPS_WaitSet, WaitLivelinessLost)
   {
     DDS::ConditionSeq active;
     EXPECT_EQ(ws->wait(active, two_seconds), DDS::RETCODE_OK);
+    EXPECT_EQ(active.length(), 1u);
+    EXPECT_EQ(active[0], sc);
+    EXPECT_TRUE(active[0]->get_trigger_value());
   }
 
   EXPECT_EQ(publisher->delete_datawriter(writer), DDS::RETCODE_OK);
