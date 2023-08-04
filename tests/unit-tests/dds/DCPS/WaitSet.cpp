@@ -237,12 +237,12 @@ TEST(dds_DCPS_WaitSet, WaitLivelinessLost)
     EXPECT_TRUE(active[0]->get_trigger_value());
   }
 
+  EXPECT_EQ(ws->detach_condition(sc), DDS::RETCODE_OK);
   EXPECT_EQ(publisher->delete_datawriter(writer), DDS::RETCODE_OK);
   EXPECT_EQ(dp->delete_publisher(publisher), DDS::RETCODE_OK);
   EXPECT_EQ(dp->delete_topic(topic), DDS::RETCODE_OK);
   EXPECT_EQ(dp->delete_contained_entities(), DDS::RETCODE_OK);
   EXPECT_EQ(dpf->delete_participant(dp), DDS::RETCODE_OK);
-  EXPECT_EQ(ws->detach_condition(sc), DDS::RETCODE_OK);
 }
 
 #ifdef ACE_HAS_CPP11
