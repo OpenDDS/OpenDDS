@@ -217,7 +217,7 @@ TEST(dds_DCPS_WaitSet, WaitLivelinessLost)
 
   DDS::DataWriterQos dw_qos = DATAWRITER_QOS_DEFAULT;
   dw_qos.liveliness.kind = DDS::MANUAL_BY_TOPIC_LIVELINESS_QOS;
-  dw_qos.liveliness.lease_duration.sec = 1;
+  dw_qos.liveliness.lease_duration.sec = 2;
   dw_qos.liveliness.lease_duration.nanosec = 0;
   DDS::DataWriter_var writer = publisher->create_datawriter(topic, dw_qos, 0, 0);
   EXPECT_TRUE(!CORBA::is_nil(writer));
@@ -228,10 +228,12 @@ TEST(dds_DCPS_WaitSet, WaitLivelinessLost)
   sc->set_enabled_statuses(DDS::LIVELINESS_LOST_STATUS);
   EXPECT_EQ(ws->attach_condition(sc), DDS::RETCODE_OK);
 
-  const ::DDS::Duration_t two_seconds = {2, 0 };
+  EXPECT_EQ(writer->assert_liveliness(), DDS::RETCODE_OK);
+
+  const ::DDS::Duration_t three_seconds = {3, 0 };
   {
     DDS::ConditionSeq active;
-    EXPECT_EQ(ws->wait(active, two_seconds), DDS::RETCODE_OK);
+    EXPECT_EQ(ws->wait(active, three_seconds), DDS::RETCODE_OK);
     EXPECT_EQ(active.length(), 1u);
     EXPECT_EQ(active[0], sc);
     EXPECT_TRUE(active[0]->get_trigger_value());
