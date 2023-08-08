@@ -333,9 +333,7 @@ DDS::ReturnCode_t DynamicDataImpl::clear_all_values()
 
 void DynamicDataImpl::clear_container()
 {
-  container_.single_map_.clear();
-  container_.sequence_map_.clear();
-  container_.complex_map_.clear();
+  container_.clear();
 }
 
 DDS::ReturnCode_t DynamicDataImpl::clear_nonkey_values()
@@ -4150,7 +4148,7 @@ bool DynamicDataImpl::serialized_size_string(const DCPS::Encoding& encoding, siz
   const bool is_empty = container_.single_map_.empty() && container_.complex_map_.empty();
   if (!is_empty) {
     CORBA::ULong largest_index;
-    if (!get_largest_index_basic(largest_index)) {
+    if (!container_.get_largest_index_basic(largest_index)) {
       return false;
     }
     primitive_serialized_size_ulong(encoding, size);
@@ -4206,7 +4204,7 @@ bool DynamicDataImpl::serialized_size_wstring(const DCPS::Encoding& encoding, si
   const bool is_empty = container_.single_map_.empty() && container_.complex_map_.empty();
   if (!is_empty) {
     CORBA::ULong largest_index;
-    if (!get_largest_index_basic(largest_index)) {
+    if (!container_.get_largest_index_basic(largest_index)) {
       return false;
     }
     primitive_serialized_size_ulong(encoding, size);
@@ -5997,7 +5995,7 @@ bool DynamicDataImpl::get_index_to_id_from_complex(IndexToIdMap& index_to_id,
   CORBA::ULong length = 0;
   if (!complex_map_.empty()) {
     CORBA::ULong largest_index;
-    if (!get_largest_complex_index(largest_index)) {
+    if (!container_.get_largest_complex_index(largest_index)) {
       return false;
     }
     length = largest_index + 1;
@@ -6030,7 +6028,7 @@ bool DynamicDataImpl::serialized_size_sequence(const DCPS::Encoding& encoding,
     CORBA::ULong length = 0;
     if (!is_empty) {
       CORBA::ULong largest_index;
-      if (!get_largest_index_basic(largest_index)) {
+      if (!container_.get_largest_index_basic(largest_index)) {
         return false;
       }
       length = largest_index + 1;
@@ -6071,7 +6069,7 @@ bool DynamicDataImpl::serialized_size_sequence(const DCPS::Encoding& encoding,
       CORBA::ULong length = 0;
       if (!is_empty) {
         CORBA::ULong largest_index;
-        if (!get_largest_index_basic_sequence(largest_index)) {
+        if (!container_.get_largest_index_basic_sequence(largest_index)) {
           return false;
         }
         length = largest_index + 1;
@@ -6114,7 +6112,7 @@ bool DynamicDataImpl::serialize_sequence(DCPS::Serializer& ser, DCPS::Sample::Ex
     CORBA::ULong length = 0;
     if (!is_empty) {
       CORBA::ULong largest_index;
-      if (!get_largest_index_basic(largest_index)) {
+      if (!container_.get_largest_index_basic(largest_index)) {
         return false;
       }
       length = largest_index + 1;
@@ -6145,7 +6143,7 @@ bool DynamicDataImpl::serialize_sequence(DCPS::Serializer& ser, DCPS::Sample::Ex
       CORBA::ULong length = 0;
       if (!is_empty) {
         CORBA::ULong largest_index;
-        if (!get_largest_index_basic_sequence(largest_index)) {
+        if (!container_.get_largest_index_basic_sequence(largest_index)) {
           return false;
         }
         length = largest_index + 1;
@@ -6164,7 +6162,7 @@ bool DynamicDataImpl::serialize_sequence(DCPS::Serializer& ser, DCPS::Sample::Ex
   CORBA::ULong length = 0;
   if (!container_.complex_map_.empty()) {
     CORBA::ULong largest_index;
-    if (!get_largest_complex_index(largest_index)) {
+    if (!container_.get_largest_complex_index(largest_index)) {
       return false;
     }
     length = largest_index + 1;
