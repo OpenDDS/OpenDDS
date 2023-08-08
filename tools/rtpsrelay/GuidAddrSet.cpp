@@ -63,31 +63,27 @@ GuidAddrSet::record_activity(const Proxy& proxy,
   addr_set_stats.deactivation = deactivation;
   relay_participant_status_reporter_.set_alive_active(proxy, src_guid, true, true);
 
-  {
-    AddrSet& addr_set = *addr_set_stats.select_addr_set(remote_address.port);
-    const auto res = addr_set.insert(std::make_pair(remote_address, expiration));
-    if (res.second) {
-      if (config_.log_activity()) {
-        ACE_DEBUG((LM_INFO, "(%P|%t) INFO: GuidAddrSet::record_activity "
-                   "%C %C is at %C %C into session addrs=%B total=%B remote=%B deactivation=%B expire=%B admit=%B\n",
-                   handler.name().c_str(),
-                   guid_to_string(src_guid).c_str(),
-                   OpenDDS::DCPS::LogAddr(remote_address.addr).c_str(),
-                   addr_set_stats.get_session_time(now).sec_str().c_str(),
-                   addr_set.size(),
-                   guid_addr_set_map_.size(),
-                   remote_map_.size(),
-                   deactivation_guid_queue_.size(),
-                   expiration_guid_addr_queue_.size(),
-                   admission_control_queue_.size()));
-      }
-      relay_stats_reporter_.new_address(now);
-
-      const GuidAddr ga(src_guid, remote_address);
-      expiration_guid_addr_queue_.push_back(std::make_pair(expiration, ga));
+  if (addr_set_stats.upsert_address(remote_address, now, expiration, config_.max_ips_per_client())) {
+    if (config_.log_activity()) {
+      ACE_DEBUG((LM_INFO, "(%P|%t) INFO: GuidAddrSet::record_activity "
+                 "%C %C is at %C %C into session ips=%B total=%B remote=%B deactivation=%B expire=%B admit=%B\n",
+                 handler.name().c_str(),
+                 guid_to_string(src_guid).c_str(),
+                 OpenDDS::DCPS::LogAddr(remote_address.addr).c_str(),
+                 addr_set_stats.get_session_time(now).sec_str().c_str(),
+                 addr_set_stats.ip_to_ports.size(),
+                 guid_addr_set_map_.size(),
+                 remote_map_.size(),
+                 deactivation_guid_queue_.size(),
+                 expiration_guid_addr_queue_.size(),
+                 admission_control_queue_.size()));
     }
-    res.first->second = expiration;
+    relay_stats_reporter_.new_address(now);
+
+    const GuidAddr ga(src_guid, remote_address);
+    expiration_guid_addr_queue_.push_back(std::make_pair(expiration, ga));
   }
+    res.first->second = expiration;
 
   ParticipantStatisticsReporter& stats_reporter =
     *addr_set_stats.select_stats_reporter(remote_address.port);
@@ -133,17 +129,18 @@ void GuidAddrSet::process_expirations(const Proxy& proxy,
     }
 
     AddrSetStats& addr_stats = pos->second;
-    AddrSet& addr_set = *addr_stats.select_addr_set(ga.address.port);
-    const auto p = addr_set.find(ga.address);
-    if (p == addr_set.end()) {
-      continue;
-    }
-
-    if (p->second <= now) {
-      addr_set.erase(p);
-      remote_map_.erase(Remote(ga.address.addr, ga.guid));
+    bool ip_now_unused = false;
+    OpenDDS::DCPS::MonotonicTimePoint updated_expiration;
+    if (addr_stats.remove_if_expired(ga.address, now, ip_now_unused, updated_expiration)) {
+      if (ip_now_unused) {
+        const auto remote_iter = remote_map_.find(Remote(ga.address.addr, ga.guid));
+        if (remote_iter != remote_map_.end() && OpenDDS::DCPS::equal_guid_prefixes(remote_iter->second, ga.guid)) {
+          remote_map_.erase(remote_iter);
+          relay_stats_reporter_.remote_map_size(static_cast<uint32_t>(remote_map_.size()), now);
+        }
+      }
     } else {
-      expiration_guid_addr_queue_.push_back(std::make_pair(p->second, ga));
+      expiration_guid_addr_queue_.push_back(std::make_pair(updated_expiration, ga));
       continue;
     }
 
@@ -151,12 +148,12 @@ void GuidAddrSet::process_expirations(const Proxy& proxy,
     if (config_.log_activity()) {
       const auto ago = now - expiration;
       ACE_DEBUG((LM_INFO, "(%P|%t) INFO: GuidAddrSet::process_expirations "
-                 "%C %C expired %C ago %C into session addrs=%B total=%B remote=%B deactivation=%B expire=%B admit=%B\n",
+                 "%C %C expired %C ago %C into session ips=%B total=%B remote=%B deactivation=%B expire=%B admit=%B\n",
                  guid_to_string(ga.guid).c_str(),
                  OpenDDS::DCPS::LogAddr(ga.address.addr).c_str(),
                  ago.str().c_str(),
                  get_session_time(ga.guid, now).sec_str().c_str(),
-                 addr_set.size(),
+                 addr_stats.ip_to_ports.size(),
                  guid_addr_set_map_.size(),
                  remote_map_.size(),
                  deactivation_guid_queue_.size(),
@@ -165,7 +162,7 @@ void GuidAddrSet::process_expirations(const Proxy& proxy,
     }
     relay_stats_reporter_.expired_address(now);
 
-    if (addr_stats.empty()) {
+    if (addr_stats.ip_to_ports.empty()) {
       remove(proxy, ga.guid, pos, now, &relay_participant_status_reporter_);
     }
   }
@@ -199,7 +196,7 @@ bool GuidAddrSet::ignore_rtps(bool from_application_participant,
     return false;
   }
 
-  if (pos->second.spdp_addr_set.empty() || pos->second.sedp_addr_set.empty() || !pos->second.spdp_message) {
+  if (!pos->second.has_discovery_addrs() || !pos->second.spdp_message) {
     // Don't have the necessary addresses or message to complete discovery.
     return true;
   }
@@ -251,6 +248,14 @@ void GuidAddrSet::remove(const Proxy& proxy,
   addr_stats.sedp_stats_reporter.unregister();
   addr_stats.data_stats_reporter.report(addr_stats.session_start, now);
   addr_stats.data_stats_reporter.unregister();
+
+  for (const auto& by_ip : addr_stats.ip_to_ports) {
+    const auto remote_iter = remote_map_.find(Remote(by_ip.first, guid));
+    if (remote_iter != remote_map_.end() && OpenDDS::DCPS::equal_guid_prefixes(remote_iter->second, guid)) {
+      remote_map_.erase(remote_iter);
+      relay_stats_reporter_.remote_map_size(static_cast<uint32_t>(remote_map_.size()), now);
+    }
+  }
 
   guid_addr_set_map_.erase(it);
   relay_stats_reporter_.local_active_participants(guid_addr_set_map_.size(), now);

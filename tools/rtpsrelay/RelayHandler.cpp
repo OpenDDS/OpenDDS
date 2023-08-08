@@ -607,11 +607,12 @@ CORBA::ULong VerticalHandler::send(GuidAddrSet::Proxy& proxy,
         }
         auto p = proxy.find(guid);
         if (p != proxy.end()) {
-          for (const auto& addr_set : *p->second.select_addr_set(port())) {
-            venqueue_message(addr_set.first.addr,
-              *p->second.select_stats_reporter(port()), msg, now, type);
-            ++sent;
-          }
+          p->second.foreach_addr(port(),
+                                 [=, &sent, &msg](const ACE_INET_Addr& addr) {
+                                   venqueue_message(addr,
+                                                    *p->second.select_stats_reporter(port()), msg, now, type);
+                                   ++sent;
+          });
         }
       }
     }
@@ -729,11 +730,12 @@ CORBA::ULong HorizontalHandler::process_message(const ACE_INET_Addr& from,
   for (const auto& guid : guids) {
     const auto p = proxy.find(guid);
     if (p != proxy.end()) {
-      for (const auto& addr : *p->second.select_addr_set(port())) {
-        vertical_handler_->venqueue_message(
-          addr.first.addr, *p->second.select_stats_reporter(port()), msg, now, type);
-        ++sent;
-      }
+      p->second.foreach_addr(port(),
+                             [=, &sent, &msg](const ACE_INET_Addr& addr) {
+                               vertical_handler_->venqueue_message(addr,
+                                                                   *p->second.select_stats_reporter(port()), msg, now, type);
+                               ++sent;
+                             });
     }
   }
 
@@ -899,11 +901,12 @@ bool SpdpHandler::do_normal_processing(GuidAddrSet::Proxy& proxy,
       for (const auto& guid : to) {
         const auto pos = proxy.find(guid);
         if (pos != proxy.end()) {
-          for (const auto& addr : *pos->second.select_addr_set(port())) {
-            venqueue_message(addr.first.addr, *pos->second.select_stats_reporter(port()),
-              msg, now, MessageType::Rtps);
-            ++sent;
-          }
+          pos->second.foreach_addr(port(),
+                                   [=, &sent, &msg](const ACE_INET_Addr& addr) {
+                                     venqueue_message(addr,
+                                                      *pos->second.select_stats_reporter(port()), msg, now, MessageType::Rtps);
+                                     ++sent;
+          });
         }
       }
     } else {
@@ -1050,11 +1053,12 @@ bool SedpHandler::do_normal_processing(GuidAddrSet::Proxy& proxy,
       for (const auto& guid : to) {
         const auto pos = proxy.find(guid);
         if (pos != proxy.end()) {
-          for (const auto& addr : *pos->second.select_addr_set(port())) {
-            venqueue_message(addr.first.addr, *pos->second.select_stats_reporter(port()),
-              msg, now, MessageType::Rtps);
-            ++sent;
-          }
+          pos->second.foreach_addr(port(),
+                                   [=, &sent, &msg](const ACE_INET_Addr& addr) {
+                                     venqueue_message(addr,
+                                                      *pos->second.select_stats_reporter(port()), msg, now, MessageType::Rtps);
+                                     ++sent;
+                                   });
         }
       }
     } else {
