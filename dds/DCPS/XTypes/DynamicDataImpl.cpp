@@ -266,7 +266,7 @@ ACE_CDR::ULong DynamicDataImpl::get_item_count()
     }
     DDS::DynamicType_var disc_type = get_base_type(type_desc_->discriminator_type());
     CORBA::Long disc_val;
-    if (!container_.set_default_discriminator_value(disc_val, disc_type)) {
+    if (!set_default_discriminator_value(disc_val, disc_type)) {
       if (log_level >= LogLevel::Warning) {
         ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: DynamicDataImpl::get_item_count:"
                    " set_default_discriminator_value failed\n"));
@@ -378,19 +378,19 @@ DDS::ReturnCode_t DynamicDataImpl::clear_value(DDS::MemberId id)
     erase_member(id);
     for (CORBA::ULong i = id; i < size - 1; ++i) {
       const DDS::MemberId next_id = i + 1;
-      DataContainer::const_single_iterator single_it = container_.single_map_.find(next_id);
+      const_single_iterator single_it = container_.single_map_.find(next_id);
       if (single_it != container_.single_map_.end()) {
         container_.single_map_.insert(std::make_pair(i, single_it->second));
         container_.single_map_.erase(next_id);
         continue;
       }
-      DataContainer::const_sequence_iterator seq_it = container_.sequence_map_.find(next_id);
+      const_sequence_iterator seq_it = container_.sequence_map_.find(next_id);
       if (seq_it != container_.sequence_map_.end()) {
         container_.sequence_map_.insert(std::make_pair(i, seq_it->second));
         container_.sequence_map_.erase(next_id);
         continue;
       }
-      DataContainer::const_complex_iterator complex_it = container_.complex_map_.find(next_id);
+      const_complex_iterator complex_it = container_.complex_map_.find(next_id);
       if (complex_it != container_.complex_map_.end()) {
         container_.complex_map_.insert(std::make_pair(i, complex_it->second));
         container_.complex_map_.erase(next_id);
@@ -436,104 +436,104 @@ DDS::ReturnCode_t DynamicDataImpl::clear_value_i(DDS::MemberId id, const DDS::Dy
   switch (tk) {
   case TK_BOOLEAN: {
     ACE_OutputCDR::from_boolean val(false);
-    container_.set_default_basic_value(val);
+    set_default_basic_value(val);
     insert_single(id, val);
     break;
   }
   case TK_BYTE: {
     ACE_OutputCDR::from_octet val(0);
-    container_.set_default_basic_value(val);
+    set_default_basic_value(val);
     insert_single(id, val);
     break;
   }
   case TK_UINT8: {
     ACE_OutputCDR::from_uint8 val(0);
-    container_.set_default_basic_value(val);
+    set_default_basic_value(val);
     insert_single(id, val);
     break;
   }
   case TK_UINT16: {
     CORBA::UInt16 val(0);
-    container_.set_default_basic_value(val);
+    set_default_basic_value(val);
     insert_single(id, val);
     break;
   }
   case TK_UINT32: {
     CORBA::UInt32 val(0);
-    container_.set_default_basic_value(val);
+    set_default_basic_value(val);
     insert_single(id, val);
     break;
   }
   case TK_UINT64: {
     CORBA::UInt64 val(0);
-    container_.set_default_basic_value(val);
+    set_default_basic_value(val);
     insert_single(id, val);
     break;
   }
   case TK_INT8: {
     ACE_OutputCDR::from_int8 val(0);
-    container_.set_default_basic_value(val);
+    set_default_basic_value(val);
     insert_single(id, val);
     break;
   }
   case TK_INT16: {
     CORBA::Int16 val(0);
-    container_.set_default_basic_value(val);
+    set_default_basic_value(val);
     insert_single(id, val);
     break;
   }
   case TK_INT32: {
     CORBA::Int32 val(0);
-    container_.set_default_basic_value(val);
+    set_default_basic_value(val);
     insert_single(id, val);
     break;
   }
   case TK_INT64: {
     CORBA::Int64 val(0);
-    container_.set_default_basic_value(val);
+    set_default_basic_value(val);
     insert_single(id, val);
     break;
   }
   case TK_FLOAT32: {
     CORBA::Float val(0.0f);
-    container_.set_default_basic_value(val);
+    set_default_basic_value(val);
     insert_single(id, val);
     break;
   }
   case TK_FLOAT64: {
     CORBA::Double val(0.0);
-    container_.set_default_basic_value(val);
+    set_default_basic_value(val);
     insert_single(id, val);
     break;
   }
   case TK_FLOAT128: {
     CORBA::LongDouble val;
-    container_.set_default_basic_value(val);
+    set_default_basic_value(val);
     insert_single(id, val);
     break;
   }
   case TK_CHAR8: {
     ACE_OutputCDR::from_char val('\0');
-    container_.set_default_basic_value(val);
+    set_default_basic_value(val);
     insert_single(id, val);
     break;
   }
   case TK_STRING8: {
     const char* val = 0;
-    container_.set_default_basic_value(val);
+    set_default_basic_value(val);
     insert_single(id, val);
     break;
   }
 #ifdef DDS_HAS_WCHAR
   case TK_CHAR16: {
     ACE_OutputCDR::from_wchar val(L'\0');
-    container_.set_default_basic_value(val);
+    set_default_basic_value(val);
     insert_single(id, val);
     break;
   }
   case TK_STRING16: {
     const CORBA::WChar* val = 0;
-    container_.set_default_basic_value(val);
+    set_default_basic_value(val);
     insert_single(id, val);
     break;
   }
@@ -541,7 +541,7 @@ DDS::ReturnCode_t DynamicDataImpl::clear_value_i(DDS::MemberId id, const DDS::Dy
   case TK_ENUM: {
     // Set to first enumerator
     CORBA::Long value;
-    if (!container_.set_default_enum_value(member_type, value)) {
+    if (!set_default_enum_value(member_type, value)) {
       return DDS::RETCODE_ERROR;
     }
     TypeKind treat_as = tk;
@@ -566,19 +566,19 @@ DDS::ReturnCode_t DynamicDataImpl::clear_value_i(DDS::MemberId id, const DDS::Dy
     }
     if (treat_as == TK_UINT8) {
       ACE_OutputCDR::from_uint8 val(0);
-      container_.set_default_bitmask_value(val);
+      set_default_bitmask_value(val);
       insert_single(id, val);
     } else if (treat_as == TK_UINT16) {
       CORBA::UShort val;
-      container_.set_default_bitmask_value(val);
+      set_default_bitmask_value(val);
       insert_single(id, val);
     } else if (treat_as == TK_UINT32) {
       CORBA::ULong val;
-      container_.set_default_bitmask_value(val);
+      set_default_bitmask_value(val);
       insert_single(id, val);
     } else {
       CORBA::ULongLong val;
-      container_.set_default_bitmask_value(val);
+      set_default_bitmask_value(val);
       insert_single(id, val);
     }
     break;
@@ -1162,7 +1162,7 @@ template<> const DDS::WstringSeq& DynamicDataImpl::SequenceValue::get() const
 #undef SEQUENCE_VALUE_GETTERS
 
 bool DynamicDataImpl::read_discriminator(CORBA::Long& disc_val, const DDS::DynamicType_var& disc_type,
-                                         DataContainer::const_single_iterator it) const
+                                         const_single_iterator it) const
 {
   switch (disc_type->get_kind()) {
   case TK_BOOLEAN: {
@@ -1253,7 +1253,7 @@ bool DynamicDataImpl::read_discriminator(CORBA::Long& disc_val) const
   if (!is_valid_discriminator_type(type_->get_kind())) {
     return false;
   }
-  DataContainer::const_single_iterator it = container_.single_map_.find(MEMBER_ID_INVALID);
+  const_single_iterator it = container_.single_map_.find(MEMBER_ID_INVALID);
   if (it == container_.single_map_.end()) {
     return false;
   }
@@ -1266,7 +1266,7 @@ DDS::MemberId DynamicDataImpl::find_selected_member() const
 {
   // There can be at most 2 entries in total in all three maps,
   // one for the discriminator, one for a selected member.
-  for (DataContainer::const_single_iterator single_it = container_.single_map_.begin();
+  for (const_single_iterator single_it = container_.single_map_.begin();
        single_it != container_.single_map_.end(); ++single_it) {
     if (single_it->first != DISCRIMINATOR_ID) {
       return single_it->first;
@@ -1280,7 +1280,7 @@ DDS::MemberId DynamicDataImpl::find_selected_member() const
     return container_.sequence_map_.begin()->first;
   }
 
-  for (DataContainer::const_complex_iterator cmpl_it = container_.complex_map_.begin();
+  for (const_complex_iterator cmpl_it = container_.complex_map_.begin();
        cmpl_it != container_.complex_map_.end(); ++cmpl_it) {
     if (cmpl_it->first != DISCRIMINATOR_ID) {
       return cmpl_it->first;
@@ -1873,19 +1873,18 @@ DDS::ReturnCode_t DynamicDataImpl::set_wstring_value(DDS::MemberId id, const COR
 DDS::ReturnCode_t DynamicDataImpl::get_simple_value_boolean(DCPS::Value& value,
                                                             DDS::MemberId id) const
 {
-  DataContainer::const_single_iterator single_it = container_.single_map_.find(id);
+  const_single_iterator single_it = container_.single_map_.find(id);
   if (single_it != container_.single_map_.end()) {
     value = single_it->second.get<ACE_OutputCDR::from_boolean>().val_;
     return DDS::RETCODE_OK;
   }
-  DataContainer::const_complex_iterator complex_it = container_.complex_map_.find(id);
+  const_complex_iterator complex_it = container_.complex_map_.find(id);
   if (complex_it != container_.complex_map_.end()) {
     const DynamicDataImpl* inner_dd = dynamic_cast<DynamicDataImpl*>(complex_it->second.in());
     if (!inner_dd) {
       return DDS::RETCODE_ERROR;
     }
-    DataContainer::const_single_iterator inner_it =
-      inner_dd->container_.single_map_.find(MEMBER_ID_INVALID);
+    const_single_iterator inner_it = inner_dd->container_.single_map_.find(MEMBER_ID_INVALID);
     if (inner_it != inner_dd->container_.single_map_.end()) {
       value = inner_it->second.get<ACE_OutputCDR::from_boolean>().val_;
       return DDS::RETCODE_OK;
@@ -1897,19 +1896,18 @@ DDS::ReturnCode_t DynamicDataImpl::get_simple_value_boolean(DCPS::Value& value,
 DDS::ReturnCode_t DynamicDataImpl::get_simple_value_char(DCPS::Value& value,
                                                          DDS::MemberId id) const
 {
-  DataContainer::const_single_iterator single_it = container_.single_map_.find(id);
+  const_single_iterator single_it = container_.single_map_.find(id);
   if (single_it != container_.single_map_.end()) {
     value = single_it->second.get<ACE_OutputCDR::from_char>().val_;
     return DDS::RETCODE_OK;
   }
-  DataContainer::const_complex_iterator complex_it = container_.complex_map_.find(id);
+  const_complex_iterator complex_it = container_.complex_map_.find(id);
   if (complex_it != container_.complex_map_.end()) {
     const DynamicDataImpl* inner_dd = dynamic_cast<DynamicDataImpl*>(complex_it->second.in());
     if (!inner_dd) {
       return DDS::RETCODE_ERROR;
     }
-    DataContainer::const_single_iterator inner_it =
-      inner_dd->container_.single_map_.find(MEMBER_ID_INVALID);
+    const_single_iterator inner_it = inner_dd->container_.single_map_.find(MEMBER_ID_INVALID);
     if (inner_it != inner_dd->container_.single_map_.end()) {
       value = inner_it->second.get<ACE_OutputCDR::from_char>().val_;
       return DDS::RETCODE_OK;
@@ -1922,19 +1920,18 @@ template<typename ValueType>
 DDS::ReturnCode_t DynamicDataImpl::get_simple_value_primitive(DCPS::Value& value,
                                                               DDS::MemberId id) const
 {
-  DataContainer::const_single_iterator single_it = container_.single_map_.find(id);
+  const_single_iterator single_it = container_.single_map_.find(id);
   if (single_it != container_.single_map_.end()) {
     value = single_it->second.get<ValueType>();
     return DDS::RETCODE_OK;
   }
-  DataContainer::const_complex_iterator complex_it = container_.complex_map_.find(id);
+  const_complex_iterator complex_it = container_.complex_map_.find(id);
   if (complex_it != container_.complex_map_.end()) {
     const DynamicDataImpl* inner_dd = dynamic_cast<DynamicDataImpl*>(complex_it->second.in());
     if (!inner_dd) {
       return DDS::RETCODE_ERROR;
     }
-    DataContainer::const_single_iterator inner_it =
-      inner_dd->container_.single_map_.find(MEMBER_ID_INVALID);
+    const_single_iterator inner_it = inner_dd->container_.single_map_.find(MEMBER_ID_INVALID);
     if (inner_it != inner_dd->container_.single_map_.end()) {
       value = inner_it->second.get<ValueType>();
       return DDS::RETCODE_OK;
@@ -1946,13 +1943,13 @@ DDS::ReturnCode_t DynamicDataImpl::get_simple_value_primitive(DCPS::Value& value
 DDS::ReturnCode_t DynamicDataImpl::get_simple_value_string(DCPS::Value& value,
                                                            DDS::MemberId id) const
 {
-  DataContainer::const_single_iterator single_it = container_.single_map_.find(id);
+  const_single_iterator single_it = container_.single_map_.find(id);
   if (single_it != container_.single_map_.end()) {
     value = single_it->second.get<const char*>();
     return DDS::RETCODE_OK;
   }
 
-  DataContainer::const_complex_iterator complex_it = container_.complex_map_.find(id);
+  const_complex_iterator complex_it = container_.complex_map_.find(id);
   if (complex_it != container_.complex_map_.end()) {
     // The string member has its own DynamicData object.
     const DynamicDataImpl* str_dd = dynamic_cast<DynamicDataImpl*>(complex_it->second.in());
@@ -2558,7 +2555,7 @@ bool DynamicDataImpl::read_basic_value(char*& value) const
     const CORBA::ULong length = largest_index + 2;
     CORBA::String_var str_var = CORBA::string_alloc(length);
     ACE_OS::memset(str_var.inout(), 0, length);
-    if (!container_.reconstruct_string_value(str_var.inout())) {
+    if (!reconstruct_string_value(str_var.inout())) {
       return false;
     }
     CORBA::string_free(value);
@@ -2582,7 +2579,7 @@ bool DynamicDataImpl::read_basic_value(CORBA::WChar*& value) const
     const CORBA::ULong length = largest_index + 2;
     CORBA::WString_var wstr_var = CORBA::wstring_alloc(length);
     ACE_OS::memset(wstr_var.inout(), 0, length * sizeof(CORBA::WChar));
-    if (!container_.reconstruct_wstring_value(wstr_var.inout())) {
+    if (!reconstruct_wstring_value(wstr_var.inout())) {
       return false;
     }
     CORBA::wstring_free(value);
@@ -2598,7 +2595,7 @@ bool DynamicDataImpl::read_basic_value(CORBA::WChar*& value) const
 template<typename ValueType>
 bool DynamicDataImpl::read_basic_in_single_map(ValueType& value, DDS::MemberId id)
 {
-  DataContainer::const_single_iterator single_it = container_.single_map_.find(id);
+  const_single_iterator single_it = container_.single_map_.find(id);
   if (single_it != container_.single_map_.end()) {
     value = single_it->second.get<ValueType>();
     return true;
@@ -2609,7 +2606,7 @@ bool DynamicDataImpl::read_basic_in_single_map(ValueType& value, DDS::MemberId i
 template<>
 bool DynamicDataImpl::read_basic_in_single_map(char*& value, DDS::MemberId id)
 {
-  DataContainer::const_single_iterator single_it = container_.single_map_.find(id);
+  const_single_iterator single_it = container_.single_map_.find(id);
   if (single_it != container_.single_map_.end()) {
     CORBA::string_free(value);
     value = single_it->second.get_string();
@@ -2621,7 +2618,7 @@ bool DynamicDataImpl::read_basic_in_single_map(char*& value, DDS::MemberId id)
 template<>
 bool DynamicDataImpl::read_basic_in_single_map(CORBA::WChar*& value, DDS::MemberId id)
 {
-  DataContainer::const_single_iterator single_it = container_.single_map_.find(id);
+  const_single_iterator single_it = container_.single_map_.find(id);
   if (single_it != container_.single_map_.end()) {
     CORBA::wstring_free(value);
     value = single_it->second.get_wstring();
@@ -2633,7 +2630,7 @@ bool DynamicDataImpl::read_basic_in_single_map(CORBA::WChar*& value, DDS::Member
 template<typename ValueType>
 bool DynamicDataImpl::read_basic_in_complex_map(ValueType& value, DDS::MemberId id)
 {
-  DataContainer::const_complex_iterator complex_it = container_.complex_map_.find(id);
+  const_complex_iterator complex_it = container_.complex_map_.find(id);
   if (complex_it != container_.complex_map_.end()) {
     DynamicDataImpl* nested_dd = dynamic_cast<DynamicDataImpl*>(complex_it->second.in());
     return nested_dd && nested_dd->read_basic_value(value);
@@ -2666,11 +2663,11 @@ bool DynamicDataImpl::get_value_from_self(ValueType& value, DDS::MemberId id)
   if (!is_primitive(type_->get_kind()) || id != MEMBER_ID_INVALID) {
     return false;
   }
-  DataContainer::const_single_iterator it = container_.single_map_.find(MEMBER_ID_INVALID);
+  const_single_iterator it = container_.single_map_.find(MEMBER_ID_INVALID);
   if (it != container_.single_map_.end()) {
     value = it->second.get<ValueType>();
   } else {
-    container_.set_default_basic_value(value);
+    set_default_basic_value(value);
   }
   return true;
 }
@@ -2697,12 +2694,12 @@ bool DynamicDataImpl::get_value_from_enum(ValueType& value, DDS::MemberId id)
   if (rc != DDS::RETCODE_OK || treat_as_tk != ValueTypeKind || id != MEMBER_ID_INVALID) {
     return false;
   }
-  DataContainer::const_single_iterator it = container_.single_map_.find(MEMBER_ID_INVALID);
+  const_single_iterator it = container_.single_map_.find(MEMBER_ID_INVALID);
   if (it != container_.single_map_.end()) {
     value = it->second.get<ValueType>();
   } else {
     CORBA::Long enum_default_val;
-    if (!container_.set_default_enum_value(type_, enum_default_val)) {
+    if (!set_default_enum_value(type_, enum_default_val)) {
       return false;
     }
     cast_to_enum_value(value, enum_default_val);
@@ -2730,11 +2727,11 @@ bool DynamicDataImpl::get_value_from_bitmask(ValueType& value, DDS::MemberId id)
   if (rc != DDS::RETCODE_OK || treat_as_tk != ValueTypeKind || id != MEMBER_ID_INVALID) {
     return false;
   }
-  DataContainer::const_single_iterator it = container_.single_map_.find(MEMBER_ID_INVALID);
+  const_single_iterator it = container_.single_map_.find(MEMBER_ID_INVALID);
   if (it != container_.single_map_.end()) {
     value = it->second.get<ValueType>();
   } else {
-    container_.set_default_bitmask_value(value);
+    set_default_bitmask_value(value);
   }
   return true;
 }
@@ -2772,7 +2769,7 @@ bool DynamicDataImpl::get_value_from_struct(ValueType& value, DDS::MemberId id)
     }
     return false;
   }
-  container_.set_default_basic_value(value);
+  set_default_basic_value(value);
   return true;
 }
 
@@ -2795,7 +2792,7 @@ bool DynamicDataImpl::get_value_from_union(ValueType& value, DDS::MemberId id)
   if (id == DISCRIMINATOR_ID) {
     // Set the discriminator to default value.
     // If it selects a branch, set the branch to default value.
-    container_.set_default_basic_value(value);
+    set_default_basic_value(value);
     CORBA::Long disc_value;
     if (!cast_to_discriminator_value(disc_value, value)) {
       return false;
@@ -2819,8 +2816,8 @@ bool DynamicDataImpl::get_value_from_union(ValueType& value, DDS::MemberId id)
       }
     }
   } else {
-    DataContainer::const_single_iterator single_it = container_.single_map_.find(DISCRIMINATOR_ID);
-    DataContainer::const_complex_iterator complex_it = container_.complex_map_.find(DISCRIMINATOR_ID);
+    const_single_iterator single_it = container_.single_map_.find(DISCRIMINATOR_ID);
+    const_complex_iterator complex_it = container_.complex_map_.find(DISCRIMINATOR_ID);
     const bool has_disc = single_it != container_.single_map_.end() ||
       complex_it != container_.complex_map_.end();
     if (has_disc) {
@@ -2899,7 +2896,7 @@ bool DynamicDataImpl::get_value_from_collection(ValueType& value, DDS::MemberId 
   if (read_basic_member(value, id)) {
     return true;
   }
-  container_.set_default_basic_value(value);
+  set_default_basic_value(value);
 
   // Must insert this member in case it's index is larger than the current largest index,
   // so that all new members up to this member are serialized. Otherwise, we would be returning
@@ -3033,13 +3030,13 @@ DDS::ReturnCode_t DynamicDataImpl::get_char_common(CharT& value, DDS::MemberId i
       good = false;
       break;
     }
-    DataContainer::const_single_iterator it = container_.single_map_.find(id);
+    const_single_iterator it = container_.single_map_.find(id);
     if (it != container_.single_map_.end()) {
       FromCharT from_char = it->second.get<FromCharT>();
       value = from_char.val_;
     } else {
       FromCharT from_char('\0');
-      container_.set_default_basic_value(from_char);
+      set_default_basic_value(from_char);
       value = from_char.val_;
     }
     break;
@@ -3153,13 +3150,13 @@ DDS::ReturnCode_t DynamicDataImpl::get_boolean_value(CORBA::Boolean& value, DDS:
       good = false;
       break;
     }
-    DataContainer::const_single_iterator it = container_.single_map_.find(id);
+    const_single_iterator it = container_.single_map_.find(id);
     if (it != container_.single_map_.end()) {
       ACE_OutputCDR::from_boolean from_bool = it->second.get<ACE_OutputCDR::from_boolean>();
       value = from_bool.val_;
     } else {
       ACE_OutputCDR::from_boolean from_bool(false);
-      container_.set_default_basic_value(from_bool);
+      set_default_basic_value(from_bool);
       value = from_bool.val_;
     }
     break;
@@ -3245,8 +3242,7 @@ DDS::ReturnCode_t DynamicDataImpl::get_wstring_value(CORBA::WChar*& value, DDS::
 #endif
 }
 
-bool DynamicDataImpl::move_single_to_complex(const DataContainer::const_single_iterator& it,
-                                             DynamicDataImpl* data)
+bool DynamicDataImpl::move_single_to_complex(const const_single_iterator& it, DynamicDataImpl* data)
 {
   DDS::DynamicType_var member_type = data->type();
   const TypeKind member_tk = member_type->get_kind();
@@ -3259,7 +3255,7 @@ bool DynamicDataImpl::move_single_to_complex(const DataContainer::const_single_i
   return move_single_to_complex_i(it, data, treat_as);
 }
 
-bool DynamicDataImpl::move_single_to_complex_i(const DataContainer::const_single_iterator& it,
+bool DynamicDataImpl::move_single_to_complex_i(const const_single_iterator& it,
                                                DynamicDataImpl* data, const TypeKind treat_as)
 {
   switch (treat_as) {
@@ -3365,8 +3361,7 @@ bool DynamicDataImpl::move_single_to_complex_i(const DataContainer::const_single
 }
 
 template<typename SequenceType>
-void DynamicDataImpl::move_sequence_helper(const DataContainer::const_sequence_iterator& it,
-                                           DynamicDataImpl* data)
+void DynamicDataImpl::move_sequence_helper(const const_sequence_iterator& it, DynamicDataImpl* data)
 {
   const SequenceType& values = it->second.get<SequenceType>();
   for (CORBA::ULong i = 0; i < values.length(); ++i) {
@@ -3376,7 +3371,7 @@ void DynamicDataImpl::move_sequence_helper(const DataContainer::const_sequence_i
 
 // Get the inner C-string explicitly
 template<>
-void DynamicDataImpl::move_sequence_helper<DDS::StringSeq>(const DataContainer::const_sequence_iterator& it,
+void DynamicDataImpl::move_sequence_helper<DDS::StringSeq>(const const_sequence_iterator& it,
                                                            DynamicDataImpl* data)
 {
   const DDS::StringSeq& values = it->second.get<DDS::StringSeq>();
@@ -3387,7 +3382,7 @@ void DynamicDataImpl::move_sequence_helper<DDS::StringSeq>(const DataContainer::
 
 #ifdef DDS_HAS_WCHAR
 template<>
-void DynamicDataImpl::move_sequence_helper<DDS::WstringSeq>(const DataContainer::const_sequence_iterator& it,
+void DynamicDataImpl::move_sequence_helper<DDS::WstringSeq>(const const_sequence_iterator& it,
                                                             DynamicDataImpl* data)
 {
   const DDS::WstringSeq& values = it->second.get<DDS::WstringSeq>();
@@ -3398,7 +3393,7 @@ void DynamicDataImpl::move_sequence_helper<DDS::WstringSeq>(const DataContainer:
 #endif
 
 template<>
-void DynamicDataImpl::move_sequence_helper<DDS::Int8Seq>(const DataContainer::const_sequence_iterator& it,
+void DynamicDataImpl::move_sequence_helper<DDS::Int8Seq>(const const_sequence_iterator& it,
                                                          DynamicDataImpl* data)
 {
   const DDS::Int8Seq& values = it->second.get<DDS::Int8Seq>();
@@ -3408,7 +3403,7 @@ void DynamicDataImpl::move_sequence_helper<DDS::Int8Seq>(const DataContainer::co
 }
 
 template<>
-void DynamicDataImpl::move_sequence_helper<DDS::UInt8Seq>(const DataContainer::const_sequence_iterator& it,
+void DynamicDataImpl::move_sequence_helper<DDS::UInt8Seq>(const const_sequence_iterator& it,
                                                           DynamicDataImpl* data)
 {
   const DDS::UInt8Seq& values = it->second.get<DDS::UInt8Seq>();
@@ -3418,7 +3413,7 @@ void DynamicDataImpl::move_sequence_helper<DDS::UInt8Seq>(const DataContainer::c
 }
 
 template<>
-void DynamicDataImpl::move_sequence_helper<DDS::CharSeq>(const DataContainer::const_sequence_iterator& it,
+void DynamicDataImpl::move_sequence_helper<DDS::CharSeq>(const const_sequence_iterator& it,
                                                          DynamicDataImpl* data)
 {
   const DDS::CharSeq& values = it->second.get<DDS::CharSeq>();
@@ -3428,7 +3423,7 @@ void DynamicDataImpl::move_sequence_helper<DDS::CharSeq>(const DataContainer::co
 }
 
 template<>
-void DynamicDataImpl::move_sequence_helper<DDS::ByteSeq>(const DataContainer::const_sequence_iterator& it,
+void DynamicDataImpl::move_sequence_helper<DDS::ByteSeq>(const const_sequence_iterator& it,
                                                          DynamicDataImpl* data)
 {
   const DDS::ByteSeq& values = it->second.get<DDS::ByteSeq>();
@@ -3438,7 +3433,7 @@ void DynamicDataImpl::move_sequence_helper<DDS::ByteSeq>(const DataContainer::co
 }
 
 template<>
-void DynamicDataImpl::move_sequence_helper<DDS::BooleanSeq>(const DataContainer::const_sequence_iterator& it,
+void DynamicDataImpl::move_sequence_helper<DDS::BooleanSeq>(const const_sequence_iterator& it,
                                                             DynamicDataImpl* data)
 {
   const DDS::BooleanSeq& values = it->second.get<DDS::BooleanSeq>();
@@ -3449,7 +3444,7 @@ void DynamicDataImpl::move_sequence_helper<DDS::BooleanSeq>(const DataContainer:
 
 #ifdef DDS_HAS_WCHAR
 template<>
-void DynamicDataImpl::move_sequence_helper<DDS::WcharSeq>(const DataContainer::const_sequence_iterator& it,
+void DynamicDataImpl::move_sequence_helper<DDS::WcharSeq>(const const_sequence_iterator& it,
                                                           DynamicDataImpl* data)
 {
   const DDS::WcharSeq& values = it->second.get<DDS::WcharSeq>();
@@ -3459,7 +3454,7 @@ void DynamicDataImpl::move_sequence_helper<DDS::WcharSeq>(const DataContainer::c
 }
 #endif
 
-bool DynamicDataImpl::move_sequence_to_complex(const DataContainer::const_sequence_iterator& it,
+bool DynamicDataImpl::move_sequence_to_complex(const const_sequence_iterator& it,
                                                DynamicDataImpl* data)
 {
   DDS::DynamicType_var seq_type = data->type();
@@ -3551,7 +3546,7 @@ bool DynamicDataImpl::move_sequence_to_complex(const DataContainer::const_sequen
 bool DynamicDataImpl::get_complex_from_aggregated(DDS::DynamicData_var& value, DDS::MemberId id,
                                                   FoundStatus& found_status)
 {
-  DataContainer::const_complex_iterator complex_it = container_.complex_map_.find(id);
+  const_complex_iterator complex_it = container_.complex_map_.find(id);
   if (complex_it != container_.complex_map_.end()) {
     value = DDS::DynamicData::_duplicate(complex_it->second);
     found_status = FOUND_IN_COMPLEX_MAP;
@@ -3570,14 +3565,14 @@ bool DynamicDataImpl::get_complex_from_aggregated(DDS::DynamicData_var& value, D
   DynamicDataImpl* dd_impl = new DynamicDataImpl(member_type);
   DDS::DynamicData_var dd_var = dd_impl;
 
-  DataContainer::const_single_iterator single_it = container_.single_map_.find(id);
+  const_single_iterator single_it = container_.single_map_.find(id);
   if (single_it != container_.single_map_.end()) {
     if (!move_single_to_complex(single_it, dd_impl)) {
       return false;
     }
     found_status = FOUND_IN_NON_COMPLEX_MAP;
   } else {
-    DataContainer::const_sequence_iterator sequence_it = container_.sequence_map_.find(id);
+    const_sequence_iterator sequence_it = container_.sequence_map_.find(id);
     if (sequence_it != container_.sequence_map_.end()) {
       if (!move_sequence_to_complex(sequence_it, dd_impl)) {
         return false;
@@ -3673,7 +3668,7 @@ bool DynamicDataImpl::get_complex_from_union(DDS::DynamicData_ptr& value, DDS::M
   if (id == DISCRIMINATOR_ID) {
     DDS::DynamicType_var disc_type = get_base_type(type_desc_->discriminator_type());
     CORBA::Long disc_value;
-    if (!container_.set_default_discriminator_value(disc_value, disc_type)) {
+    if (!set_default_discriminator_value(disc_value, disc_type)) {
       return false;
     }
     bool found_selected_member = false;
@@ -3700,8 +3695,8 @@ bool DynamicDataImpl::get_complex_from_union(DDS::DynamicData_ptr& value, DDS::M
     CORBA::release(value);
     value = DDS::DynamicData::_duplicate(dd_var);
   } else {
-    DataContainer::const_single_iterator single_it = container_.single_map_.find(DISCRIMINATOR_ID);
-    DataContainer::const_complex_iterator complex_it = container_.complex_map_.find(DISCRIMINATOR_ID);
+    const_single_iterator single_it = container_.single_map_.find(DISCRIMINATOR_ID);
+    const_complex_iterator complex_it = container_.complex_map_.find(DISCRIMINATOR_ID);
     const bool has_disc = single_it != container_.single_map_.end() ||
       complex_it != container_.complex_map_.end();
     if (has_disc) {
@@ -3734,7 +3729,7 @@ bool DynamicDataImpl::get_complex_from_union(DDS::DynamicData_ptr& value, DDS::M
 
 bool DynamicDataImpl::get_complex_from_collection(DDS::DynamicData_ptr& value, DDS::MemberId id)
 {
-  DataContainer::const_complex_iterator complex_it = container_.complex_map_.find(id);
+  const_complex_iterator complex_it = container_.complex_map_.find(id);
   if (complex_it != container_.complex_map_.end()) {
     CORBA::release(value);
     value = DDS::DynamicData::_duplicate(complex_it->second);
@@ -3748,13 +3743,13 @@ bool DynamicDataImpl::get_complex_from_collection(DDS::DynamicData_ptr& value, D
   DynamicDataImpl* dd_impl = new DynamicDataImpl(type_desc_->element_type());
   DDS::DynamicData_var dd_var = dd_impl;
 
-  DataContainer::const_single_iterator single_it = container_.single_map_.find(id);
+  const_single_iterator single_it = container_.single_map_.find(id);
   if (single_it != container_.single_map_.end()) {
     if (!move_single_to_complex(single_it, dd_impl)) {
       return false;
     }
   } else {
-    DataContainer::const_sequence_iterator sequence_it = container_.sequence_map_.find(id);
+    const_sequence_iterator sequence_it = container_.sequence_map_.find(id);
     if (sequence_it != container_.sequence_map_.end()) {
       if (!move_sequence_to_complex(sequence_it, dd_impl)) {
         return false;
@@ -4115,14 +4110,14 @@ bool DynamicDataImpl::reconstruct_string_value(CORBA::Char* str) const
   const CORBA::ULong bound = type_desc_->bound()[0];
   for (const_single_iterator it = container_.single_map_.begin(); it != container_.single_map_.end(); ++it) {
     CORBA::ULong index;
-    if (!data_->get_index_from_id(it->first, index, bound)) {
+    if (!get_index_from_id(it->first, index, bound)) {
       return false;
     }
     str[index] = it->second.get<ACE_OutputCDR::from_char>().val_;
   }
   for (const_complex_iterator it = container_.complex_map_.begin(); it != container_.complex_map_.end(); ++it) {
     CORBA::ULong index;
-    if (!data_->get_index_from_id(it->first, index, bound)) {
+    if (!get_index_from_id(it->first, index, bound)) {
       return false;
     }
     // The DynamicData object for this character may not contain any data.
@@ -4164,7 +4159,7 @@ bool DynamicDataImpl::serialized_size_string(const DCPS::Encoding& encoding, siz
 bool DynamicDataImpl::serialize_string_value(DCPS::Serializer& ser) const
 {
   char* str = 0;
-  return data_->read_basic_value(str) && (ser << str);
+  return read_basic_value(str) && (ser << str);
 }
 
 #ifdef DDS_HAS_WCHAR
@@ -4173,14 +4168,14 @@ bool DynamicDataImpl::reconstruct_wstring_value(CORBA::WChar* wstr) const
   const CORBA::ULong bound = type_desc_->bound()[0];
   for (const_single_iterator it = container_.single_map_.begin(); it != container_.single_map_.end(); ++it) {
     CORBA::ULong index;
-    if (!data_->get_index_from_id(it->first, index, bound)) {
+    if (!get_index_from_id(it->first, index, bound)) {
       return false;
     }
     wstr[index] = it->second.get<ACE_OutputCDR::from_wchar>().val_;
   }
   for (const_complex_iterator it = container_.complex_map_.begin(); it != container_.complex_map_.end(); ++it) {
     CORBA::ULong index;
-    if (!data_->get_index_from_id(it->first, index, bound)) {
+    if (!get_index_from_id(it->first, index, bound)) {
       return false;
     }
     const DynamicDataImpl* elem_dd = dynamic_cast<const DynamicDataImpl*>(it->second.in());
@@ -4219,7 +4214,7 @@ bool DynamicDataImpl::serialized_size_wstring(const DCPS::Encoding& encoding, si
 bool DynamicDataImpl::serialize_wstring_value(DCPS::Serializer& ser) const
 {
   CORBA::WChar* wstr = 0;
-  return data_->read_basic_value(wstr) && (ser << wstr);
+  return read_basic_value(wstr) && (ser << wstr);
 }
 #endif
 
@@ -5519,21 +5514,21 @@ bool DynamicDataImpl::get_index_to_id_map(IndexToIdMap& index_to_id,
 {
   for (const_single_iterator it = container_.single_map_.begin(); it != container_.single_map_.end(); ++it) {
     CORBA::ULong index;
-    if (!data_->get_index_from_id(it->first, index, bound)) {
+    if (!get_index_from_id(it->first, index, bound)) {
       return false;
     }
     index_to_id[index] = it->first;
   }
   for (const_sequence_iterator it = container_.sequence_map_.begin(); it != container_.sequence_map_.end(); ++it) {
     CORBA::ULong index;
-    if (!data_->get_index_from_id(it->first, index, bound)) {
+    if (!get_index_from_id(it->first, index, bound)) {
       return false;
     }
     index_to_id[index] = it->first;
   }
   for (const_complex_iterator it = container_.complex_map_.begin(); it != container_.complex_map_.end(); ++it) {
     CORBA::ULong index;
-    if (!data_->get_index_from_id(it->first, index, bound)) {
+    if (!get_index_from_id(it->first, index, bound)) {
       return false;
     }
     index_to_id[index] = it->first;
@@ -5965,7 +5960,7 @@ bool DynamicDataImpl::serialize_complex_sequence(DCPS::Serializer& ser,
   IndexToIdMap index_to_id(size, MEMBER_ID_INVALID);
   for (const_complex_iterator it = container_.complex_map_.begin(); it != container_.complex_map_.end(); ++it) {
     CORBA::ULong index;
-    if (!data_->get_index_from_id(it->first, index, bound)) {
+    if (!get_index_from_id(it->first, index, bound)) {
       return false;
     }
     index_to_id[index] = it->first;
@@ -5993,7 +5988,7 @@ bool DynamicDataImpl::get_index_to_id_from_complex(IndexToIdMap& index_to_id,
                                                    CORBA::ULong bound) const
 {
   CORBA::ULong length = 0;
-  if (!complex_map_.empty()) {
+  if (!container_.complex_map_.empty()) {
     CORBA::ULong largest_index;
     if (!container_.get_largest_complex_index(largest_index)) {
       return false;
@@ -6003,7 +5998,7 @@ bool DynamicDataImpl::get_index_to_id_from_complex(IndexToIdMap& index_to_id,
   index_to_id.resize(length, MEMBER_ID_INVALID);
   for (const_complex_iterator it = container_.complex_map_.begin(); it != container_.complex_map_.end(); ++it) {
     CORBA::ULong index;
-    if (!data_->get_index_from_id(it->first, index, bound)) {
+    if (!get_index_from_id(it->first, index, bound)) {
       return false;
     }
     index_to_id[index] = it->first;
@@ -6789,7 +6784,7 @@ bool DynamicDataImpl::serialize_complex_array(
   IndexToIdMap index_to_id(length, MEMBER_ID_INVALID);
   for (const_complex_iterator it = container_.complex_map_.begin(); it != container_.complex_map_.end(); ++it) {
     CORBA::ULong index;
-    if (!data_->get_index_from_id(it->first, index, length)) {
+    if (!get_index_from_id(it->first, index, length)) {
       return false;
     }
     index_to_id[index] = it->first;
@@ -7254,7 +7249,7 @@ bool DynamicDataImpl::serialized_size_basic_struct_member_xcdr2(
     }
   }
 
-  if (single_it != single_map_.end()) {
+  if (single_it != container_.single_map_.end()) {
     return serialized_size_single_aggregated_member_xcdr2(encoding, size, single_it, member_type,
                                                           optional, extensibility, mutable_running_total);
   }
@@ -7805,7 +7800,7 @@ bool DynamicDataImpl::serialize_structure_xcdr2(DCPS::Serializer& ser, DCPS::Sam
   const DCPS::Encoding& encoding = ser.encoding();
   size_t total_size = 0;
   if (extensibility == DDS::APPENDABLE || extensibility == DDS::MUTABLE) {
-    if (!data_->serialized_size_i(encoding, total_size, ext) || !ser.write_delimiter(total_size)) {
+    if (!serialized_size_i(encoding, total_size, ext) || !ser.write_delimiter(total_size)) {
       return false;
     }
   }
@@ -7995,7 +7990,7 @@ bool DynamicDataImpl::get_discriminator_value(
   const DDS::DynamicType_var& disc_type) const
 {
   if (single_it != container_.single_map_.end()) {
-    data_->read_discriminator(value, disc_type, single_it);
+    read_discriminator(value, disc_type, single_it);
   } else { // Find in complex map
     const DynamicDataImpl* dd_impl = dynamic_cast<const DynamicDataImpl*>(complex_it->second.in());
     if (!dd_impl) {
@@ -8003,7 +7998,7 @@ bool DynamicDataImpl::get_discriminator_value(
     }
     const_single_iterator it = dd_impl->container_.single_map_.find(MEMBER_ID_INVALID);
     if (it != dd_impl->container_.single_map_.end()) {
-      data_->read_discriminator(value, disc_type, it);
+      read_discriminator(value, disc_type, it);
     } else {
       return set_default_discriminator_value(value, disc_type);
     }
@@ -8200,7 +8195,7 @@ bool DynamicDataImpl::serialized_size_union_xcdr2(const DCPS::Encoding& encoding
   const_complex_iterator complex_it = container_.complex_map_.find(DISCRIMINATOR_ID);
   const bool has_disc = single_it != container_.single_map_.end() ||
     complex_it != container_.complex_map_.end();
-  const DDS::MemberId selected_id = data_->find_selected_member();
+  const DDS::MemberId selected_id = find_selected_member();
 
   CORBA::Long disc_value;
   if (has_disc) {
@@ -8215,7 +8210,7 @@ bool DynamicDataImpl::serialized_size_union_xcdr2(const DCPS::Encoding& encoding
     bool found_selected_member = false;
     DDS::MemberDescriptor_var selected_md;
     const DDS::ReturnCode_t rc =
-      data_->get_selected_union_branch(disc_value, found_selected_member, selected_md);
+      get_selected_union_branch(disc_value, found_selected_member, selected_md);
     if (rc != DDS::RETCODE_OK) {
       if (log_level >= LogLevel::Notice) {
         ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicDataImpl::serialized_size_union_xcdr2:"
@@ -8270,7 +8265,7 @@ bool DynamicDataImpl::serialize_union_xcdr2(DCPS::Serializer& ser, DCPS::Sample:
   const DCPS::Encoding& encoding = ser.encoding();
   size_t total_size = 0;
   if (extensibility == DDS::APPENDABLE || extensibility == DDS::MUTABLE) {
-    if (!data_->serialized_size_i(encoding, total_size, ext) || !ser.write_delimiter(total_size)) {
+    if (!serialized_size_i(encoding, total_size, ext) || !ser.write_delimiter(total_size)) {
       return false;
     }
   }
@@ -8279,7 +8274,7 @@ bool DynamicDataImpl::serialize_union_xcdr2(DCPS::Serializer& ser, DCPS::Sample:
   const_complex_iterator complex_it = container_.complex_map_.find(DISCRIMINATOR_ID);
   const bool has_disc = single_it != container_.single_map_.end() ||
     complex_it != container_.complex_map_.end();
-  const DDS::MemberId selected_id = data_->find_selected_member();
+  const DDS::MemberId selected_id = find_selected_member();
   DDS::DynamicType_var disc_type = get_base_type(type_desc_->discriminator_type());
   const TypeKind disc_tk = disc_type->get_kind();
 
@@ -8300,7 +8295,7 @@ bool DynamicDataImpl::serialize_union_xcdr2(DCPS::Serializer& ser, DCPS::Sample:
     bool found_selected_member = false;
     DDS::MemberDescriptor_var selected_md;
     const DDS::ReturnCode_t rc =
-      data_->get_selected_union_branch(disc_value, found_selected_member, selected_md);
+      get_selected_union_branch(disc_value, found_selected_member, selected_md);
     if (rc != DDS::RETCODE_OK) {
       if (log_level >= LogLevel::Notice) {
         ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicDataImpl::serialize_union_xcdr2:"

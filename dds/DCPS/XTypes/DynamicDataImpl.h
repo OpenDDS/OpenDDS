@@ -625,18 +625,15 @@ private:
   };
 
   // Copy a value of a basic member from single map to a DynamicData object.
-  bool move_single_to_complex(const DataContainer::const_single_iterator& it,
-                              DynamicDataImpl* data);
-  bool move_single_to_complex_i(const DataContainer::const_single_iterator& it,
-                                DynamicDataImpl* data, const TypeKind treat_as);
+  bool move_single_to_complex(const const_single_iterator& it, DynamicDataImpl* data);
+  bool move_single_to_complex_i(const const_single_iterator& it, DynamicDataImpl* data,
+                                const TypeKind treat_as);
 
   template<typename SequenceType>
-  void move_sequence_helper(const DataContainer::const_sequence_iterator& it,
-                            DynamicDataImpl* data);
+  void move_sequence_helper(const const_sequence_iterator& it, DynamicDataImpl* data);
 
   // Copy values of a basic sequence member from sequence map to a DynamicData object.
-  bool move_sequence_to_complex(const DataContainer::const_sequence_iterator& it,
-                                DynamicDataImpl* data);
+  bool move_sequence_to_complex(const const_sequence_iterator& it, DynamicDataImpl* data);
 
   // Indicate whether the value of a member is found in the complex map or
   // one of the other two maps or not found from any map in the container.
@@ -651,7 +648,7 @@ private:
   bool get_complex_from_collection(DDS::DynamicData_ptr& value, DDS::MemberId id);
 
   bool read_discriminator(CORBA::Long& disc_val, const DDS::DynamicType_var& disc_type,
-                          DataContainer::const_single_iterator it) const;
+                          const_single_iterator it) const;
 
   // Add a single value for any valid discriminator value that selects the given member
   bool insert_valid_discriminator(DDS::MemberDescriptor* memberSelected);
