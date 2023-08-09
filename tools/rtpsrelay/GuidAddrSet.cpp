@@ -83,7 +83,6 @@ GuidAddrSet::record_activity(const Proxy& proxy,
     const GuidAddr ga(src_guid, remote_address);
     expiration_guid_addr_queue_.push_back(std::make_pair(expiration, ga));
   }
-    res.first->second = expiration;
 
   ParticipantStatisticsReporter& stats_reporter =
     *addr_set_stats.select_stats_reporter(remote_address.port);
@@ -136,7 +135,7 @@ void GuidAddrSet::process_expirations(const Proxy& proxy,
         const auto remote_iter = remote_map_.find(Remote(ga.address.addr, ga.guid));
         if (remote_iter != remote_map_.end() && OpenDDS::DCPS::equal_guid_prefixes(remote_iter->second, ga.guid)) {
           remote_map_.erase(remote_iter);
-          relay_stats_reporter_.remote_map_size(static_cast<uint32_t>(remote_map_.size()), now);
+          relay_stats_reporter_.max_ips_per_client(static_cast<uint32_t>(remote_map_.size()), now);
         }
       }
     } else {
@@ -253,7 +252,7 @@ void GuidAddrSet::remove(const Proxy& proxy,
     const auto remote_iter = remote_map_.find(Remote(by_ip.first, guid));
     if (remote_iter != remote_map_.end() && OpenDDS::DCPS::equal_guid_prefixes(remote_iter->second, guid)) {
       remote_map_.erase(remote_iter);
-      relay_stats_reporter_.remote_map_size(static_cast<uint32_t>(remote_map_.size()), now);
+      relay_stats_reporter_.max_ips_per_client(static_cast<uint32_t>(remote_map_.size()), now);
     }
   }
 

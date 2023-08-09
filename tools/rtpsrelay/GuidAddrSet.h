@@ -37,17 +37,20 @@ struct AddrSetStats {
   OpenDDS::DCPS::Message_Block_Shared_Ptr spdp_message;
   OpenDDS::DCPS::MonotonicTimePoint session_start;
   OpenDDS::DCPS::MonotonicTimePoint deactivation;
+  RelayStatisticsReporter& relay_stats_reporter_;
 #ifdef OPENDDS_SECURITY
   std::string common_name;
 #endif
 
   AddrSetStats(const OpenDDS::DCPS::GUID_t& guid,
-               const OpenDDS::DCPS::MonotonicTimePoint& a_session_start)
+               const OpenDDS::DCPS::MonotonicTimePoint& a_session_start,
+               RelayStatisticsReporter& relay_stats_reporter)
     : allow_rtps(false)
     , spdp_stats_reporter(rtps_guid_to_relay_guid(guid), "SPDP")
     , sedp_stats_reporter(rtps_guid_to_relay_guid(guid), "SEDP")
     , data_stats_reporter(rtps_guid_to_relay_guid(guid), "DATA")
     , session_start(a_session_start)
+    , relay_stats_reporter_(relay_stats_reporter)
   {}
 
   bool upsert_address(const AddrPort& remote_address,
@@ -362,7 +365,7 @@ private:
     const bool create = it == guid_addr_set_map_.end();
     if (create) {
       const auto it_bool_pair =
-        guid_addr_set_map_.insert(std::make_pair(guid, AddrSetStats(guid, now)));
+        guid_addr_set_map_.insert(std::make_pair(guid, AddrSetStats(guid, now, relay_stats_reporter_)));
       it = it_bool_pair.first;
     }
     return CreatedAddrSetStats(create, it->second);

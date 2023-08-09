@@ -178,16 +178,7 @@ public:
   void max_ips_per_client(uint32_t size, const OpenDDS::DCPS::MonotonicTimePoint& now)
   {
     ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
-    log_relay_statistics_.max_ips_per_client(std::max(log_relay_statistics_.max_ips_per_client(), size));
-    publish_relay_statistics_.max_ips_per_client(std::max(publish_relay_statistics_.max_ips_per_client(), size));
-    report(guard, now);
-  }
-
-  void rejected_address_map_size(uint32_t size, const OpenDDS::DCPS::MonotonicTimePoint& now)
-  {
-    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
-    log_relay_statistics_.rejected_address_map_size(std::max(log_relay_statistics_.rejected_address_map_size(), size));
-    publish_relay_statistics_.rejected_address_map_size(std::max(publish_relay_statistics_.rejected_address_map_size(), size));
+    max_ips_per_client_ = std::max(max_ips_per_client_, size);
     report(guard, now);
   }
 
@@ -214,13 +205,13 @@ private:
       return;
     }
 
-    ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) STAT: %C %C\n"), topic_name_.in(), OpenDDS::DCPS::to_json(log_relay_statistics_).c_str()));
+    ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) STAT: %C %C max_ips_per_client: %u\n"), topic_name_.in(), OpenDDS::DCPS::to_json(log_relay_statistics_).c_str(), max_ips_per_client_));
 
     log_helper_.reset(log_relay_statistics_, now);
     log_relay_statistics_.new_address_count(0);
     log_relay_statistics_.expired_address_count(0);
     log_relay_statistics_.admission_deferral_count(0);
-    log_relay_statistics_.max_ips_per_client(0);
+    max_ips_per_client_ = 0;
   }
 
   void publish_report(ACE_Guard<ACE_Thread_Mutex>& guard,
@@ -238,7 +229,7 @@ private:
     publish_relay_statistics_.new_address_count(0);
     publish_relay_statistics_.expired_address_count(0);
     publish_relay_statistics_.admission_deferral_count(0);
-    publish_relay_statistics_.max_ips_per_client(0);
+    max_ips_per_client_ = 0;
 
     guard.release();
 
@@ -254,6 +245,7 @@ private:
 
   typedef CommonIoStatsReportHelper<RelayStatistics> Helper;
 
+  uint32_t max_ips_per_client_;
   RelayStatistics log_relay_statistics_;
   Helper log_helper_;
 
