@@ -512,5 +512,5 @@ tests/DCPS/DynamicData/run_test.pl dyn=dr ini=rtps.ini: RTPS !OPENDDS_SAFETY_PRO
 
 tests/DCPS/DynamicResponse/run_test.pl: RTPS !OPENDDS_SAFETY_PROFILE !DDS_NO_OWNERSHIP_PROFILE !NO_BUILT_IN_TOPICS
 
-tests/DCPS/WaiSetLivelinessLost/run_test.pl: !DCPS_MIN
-tests/DCPS/WaiSetLivelinessLost/run_test.pl rtps_disc: !DCPS_MIN RTPS
+tests/DCPS/WaiSetLivelinessLost/run_test.pl: !DCPS_MIN !OPENDDS_SAFETY_PROFILE
+tests/DCPS/WaiSetLivelinessLost/run_test.pl rtps_disc: !DCPS_MIN !OPENDDS_SAFETY_PROFILE RTPS
