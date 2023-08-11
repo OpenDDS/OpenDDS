@@ -7,11 +7,8 @@
 
 #include <gtest/gtest.h>
 
-#include <dds/DCPS/Service_Participant.h>
-#include <dds/DCPS/Marked_Default_Qos.h>
-#include <dds/DCPS/RTPS/RtpsDiscovery.h>
 #include <dds/DCPS/GuardCondition.h>
-#include "key_annotationTypeSupportImpl.h"
+#include <dds/DCPS/WaitSet.h>
 
 #ifdef ACE_HAS_CPP11
 #include <thread>
