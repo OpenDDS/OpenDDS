@@ -12,6 +12,8 @@
 #    include "DynamicDataBase.h"
 #    include "Utils.h"
 
+#    include <dds/DCPS/Sample.h>
+
 #    include <vector>
 #  else
 #    include <dds/DdsDynamicDataC.h>
@@ -700,6 +702,35 @@ public:
   const T& wrapped() const
   {
     return value_;
+  }
+
+  bool serialized_size(const DCPS::Encoding& enc, size_t& size, DCPS::Sample::Extent ext) const
+  {
+    using namespace DCPS;
+    if (ext == DCPS::Sample::Full) {
+      serialized_size(enc, size, value_);
+    } else if (ext == DCPS::Sample::KeyOnly) {
+      KeyOnly<const T> key_only(value_);
+      serialized_size(enc, size, key_only);
+    } else {
+      NestedKeyOnly<const T> nested_key_only(value_);
+      serialized_size(enc, size, nested_key_only);
+    }
+    return true;
+  }
+
+  bool serialize(DCPS::Serializer& ser, DCPS::Sample::Extent ext) const
+  {
+    using namespace DCPS;
+    if (ext == DCPS::Sample::Full) {
+      return ser << value_;
+    } else if (ext == DCPS::Sample::KeyOnly) {
+      KeyOnly<const T> key_only(value_);
+      return ser << key_only;
+    } else {
+      NestedKeyOnly<const T> nested_key_only(value_);
+      return ser << nested_key_only;
+    }
   }
 
 protected:

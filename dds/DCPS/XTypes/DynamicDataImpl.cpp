@@ -2032,6 +2032,16 @@ DDS::ReturnCode_t DynamicDataImpl::get_simple_value(DCPS::Value& value, DDS::Mem
 }
 #endif
 
+bool DynamicDataImpl::serialized_size(const DCPS::Encoding& enc, size_t& size, DCPS::Sample::Extent ext) const
+{
+  return serialized_size_i(enc, size, ext);
+}
+
+bool DynamicDataImpl::serialize(DCPS::Serializer& ser, DCPS::Sample::Extent ext) const
+{
+  return serialize_i(ser, ext);
+}
+
 bool DynamicDataImpl::set_complex_to_struct(DDS::MemberId id, DDS::DynamicData_var value)
 {
   DDS::DynamicTypeMember_var member;
@@ -5406,56 +5416,56 @@ bool DynamicDataImpl::serialized_size_sequence_value(
 {
   switch (sv.elem_kind_) {
   case TK_INT32:
-    serialized_size(encoding, size, sv.get<DDS::Int32Seq>());
+    DCPS::serialized_size(encoding, size, sv.get<DDS::Int32Seq>());
     return true;
   case TK_UINT32:
-    serialized_size(encoding, size, sv.get<DDS::UInt32Seq>());
+    DCPS::serialized_size(encoding, size, sv.get<DDS::UInt32Seq>());
     return true;
   case TK_INT8:
-    serialized_size(encoding, size, sv.get<DDS::Int8Seq>());
+    DCPS::serialized_size(encoding, size, sv.get<DDS::Int8Seq>());
     return true;
   case TK_UINT8:
-    serialized_size(encoding, size, sv.get<DDS::UInt8Seq>());
+    DCPS::serialized_size(encoding, size, sv.get<DDS::UInt8Seq>());
     return true;
   case TK_INT16:
-    serialized_size(encoding, size, sv.get<DDS::Int16Seq>());
+    DCPS::serialized_size(encoding, size, sv.get<DDS::Int16Seq>());
     return true;
   case TK_UINT16:
-    serialized_size(encoding, size, sv.get<DDS::UInt16Seq>());
+    DCPS::serialized_size(encoding, size, sv.get<DDS::UInt16Seq>());
     return true;
   case TK_INT64:
-    serialized_size(encoding, size, sv.get<DDS::Int64Seq>());
+    DCPS::serialized_size(encoding, size, sv.get<DDS::Int64Seq>());
     return true;
   case TK_UINT64:
-    serialized_size(encoding, size, sv.get<DDS::UInt64Seq>());
+    DCPS::serialized_size(encoding, size, sv.get<DDS::UInt64Seq>());
     return true;
   case TK_FLOAT32:
-    serialized_size(encoding, size, sv.get<DDS::Float32Seq>());
+    DCPS::serialized_size(encoding, size, sv.get<DDS::Float32Seq>());
     return true;
   case TK_FLOAT64:
-    serialized_size(encoding, size, sv.get<DDS::Float64Seq>());
+    DCPS::serialized_size(encoding, size, sv.get<DDS::Float64Seq>());
     return true;
   case TK_FLOAT128:
-    serialized_size(encoding, size, sv.get<DDS::Float128Seq>());
+    DCPS::serialized_size(encoding, size, sv.get<DDS::Float128Seq>());
     return true;
   case TK_CHAR8:
-    serialized_size(encoding, size, sv.get<DDS::CharSeq>());
+    DCPS::serialized_size(encoding, size, sv.get<DDS::CharSeq>());
     return true;
   case TK_BYTE:
-    serialized_size(encoding, size, sv.get<DDS::ByteSeq>());
+    DCPS::serialized_size(encoding, size, sv.get<DDS::ByteSeq>());
     return true;
   case TK_BOOLEAN:
-    serialized_size(encoding, size, sv.get<DDS::BooleanSeq>());
+    DCPS::serialized_size(encoding, size, sv.get<DDS::BooleanSeq>());
     return true;
   case TK_STRING8:
-    serialized_size(encoding, size, sv.get<DDS::StringSeq>());
+    DCPS::serialized_size(encoding, size, sv.get<DDS::StringSeq>());
     return true;
 #ifdef DDS_HAS_WCHAR
   case TK_CHAR16:
-    serialized_size(encoding, size, sv.get<DDS::WcharSeq>());
+    DCPS::serialized_size(encoding, size, sv.get<DDS::WcharSeq>());
     return true;
   case TK_STRING16:
-    serialized_size(encoding, size, sv.get<DDS::WstringSeq>());
+    DCPS::serialized_size(encoding, size, sv.get<DDS::WstringSeq>());
     return true;
 #endif
   default:
@@ -5563,7 +5573,7 @@ bool DynamicDataImpl::serialized_size_nested_basic_sequences(
       }
     } else { // Empty sequence
       protoseq.length(0);
-      serialized_size(encoding, size, protoseq);
+      DCPS::serialized_size(encoding, size, protoseq);
     }
   }
   return true;
@@ -7336,88 +7346,88 @@ bool DynamicDataImpl::serialized_size_basic_sequence(const DCPS::Encoding& encod
   switch (it->second.elem_kind_) {
   case TK_INT32: {
     const DDS::Int32Seq& seq = it->second.get<DDS::Int32Seq>();
-    serialized_size(encoding, size, seq);
+    DCPS::serialized_size(encoding, size, seq);
     return true;
   }
   case TK_UINT32: {
     const DDS::UInt32Seq& seq = it->second.get<DDS::UInt32Seq>();
-    serialized_size(encoding, size, seq);
+    DCPS::serialized_size(encoding, size, seq);
     return true;
   }
   case TK_INT8: {
     const DDS::Int8Seq& seq = it->second.get<DDS::Int8Seq>();
-    serialized_size(encoding, size, seq);
+    DCPS::serialized_size(encoding, size, seq);
     return true;
   }
   case TK_UINT8: {
     const DDS::UInt8Seq& seq = it->second.get<DDS::UInt8Seq>();
-    serialized_size(encoding, size, seq);
+    DCPS::serialized_size(encoding, size, seq);
     return true;
   }
   case TK_INT16: {
     const DDS::Int16Seq& seq = it->second.get<DDS::Int16Seq>();
-    serialized_size(encoding, size, seq);
+    DCPS::serialized_size(encoding, size, seq);
     return true;
   }
   case TK_UINT16: {
     const DDS::UInt16Seq& seq = it->second.get<DDS::UInt16Seq>();
-    serialized_size(encoding, size, seq);
+    DCPS::serialized_size(encoding, size, seq);
     return true;
   }
   case TK_INT64: {
     const DDS::Int64Seq& seq = it->second.get<DDS::Int64Seq>();
-    serialized_size(encoding, size, seq);
+    DCPS::serialized_size(encoding, size, seq);
     return true;
   }
   case TK_UINT64: {
     const DDS::UInt64Seq& seq = it->second.get<DDS::UInt64Seq>();
-    serialized_size(encoding, size, seq);
+    DCPS::serialized_size(encoding, size, seq);
     return true;
   }
   case TK_FLOAT32: {
     const DDS::Float32Seq& seq = it->second.get<DDS::Float32Seq>();
-    serialized_size(encoding, size, seq);
+    DCPS::serialized_size(encoding, size, seq);
     return true;
   }
   case TK_FLOAT64: {
     const DDS::Float64Seq& seq = it->second.get<DDS::Float64Seq>();
-    serialized_size(encoding, size, seq);
+    DCPS::serialized_size(encoding, size, seq);
     return true;
   }
   case TK_FLOAT128: {
     const DDS::Float128Seq& seq = it->second.get<DDS::Float128Seq>();
-    serialized_size(encoding, size, seq);
+    DCPS::serialized_size(encoding, size, seq);
     return true;
   }
   case TK_CHAR8: {
     const DDS::CharSeq& seq = it->second.get<DDS::CharSeq>();
-    serialized_size(encoding, size, seq);
+    DCPS::serialized_size(encoding, size, seq);
     return true;
   }
   case TK_BYTE: {
     const DDS::ByteSeq& seq = it->second.get<DDS::ByteSeq>();
-    serialized_size(encoding, size, seq);
+    DCPS::serialized_size(encoding, size, seq);
     return true;
   }
   case TK_BOOLEAN: {
     const DDS::BooleanSeq& seq = it->second.get<DDS::BooleanSeq>();
-    serialized_size(encoding, size, seq);
+    DCPS::serialized_size(encoding, size, seq);
     return true;
   }
   case TK_STRING8: {
     const DDS::StringSeq& seq = it->second.get<DDS::StringSeq>();
-    serialized_size(encoding, size, seq);
+    DCPS::serialized_size(encoding, size, seq);
     return true;
   }
 #ifdef DDS_HAS_WCHAR
   case TK_CHAR16: {
     const DDS::WcharSeq& seq = it->second.get<DDS::WcharSeq>();
-    serialized_size(encoding, size, seq);
+    DCPS::serialized_size(encoding, size, seq);
     return true;
   }
   case TK_STRING16: {
     const DDS::WstringSeq& seq = it->second.get<DDS::WstringSeq>();
-    serialized_size(encoding, size, seq);
+    DCPS::serialized_size(encoding, size, seq);
     return true;
   }
 #endif
