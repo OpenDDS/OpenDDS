@@ -3033,14 +3033,10 @@ jobs:
     needs: ACE_TAO_u20_ace7_j_qt_ws_sec
 
     steps:
-    - name: install xerces
-      run: sudo apt-get -y install libxerces-c-dev
     - name: update apt
       run: sudo apt-get update
-    - name: install wireshark
-      run: sudo apt-get -y install wireshark-dev
-    - name: install qt
-      run: sudo apt-get -y install qtbase5-dev
+    - name: install dependencies
+      run: sudo apt-get -y install libxerces-c-dev wireshark-dev qtbase5-dev
     - name: checkout MPC
       uses: actions/checkout@v3
       with:
@@ -3127,14 +3123,10 @@ jobs:
     needs: build_u20_ace7_j_qt_ws_sec
 
     steps:
-    - name: install xerces
-      run: sudo apt-get -y install libxerces-c-dev
     - name: update apt
       run: sudo apt-get update
-    - name: install wireshark
-      run: sudo apt-get -y install wireshark-dev tshark
-    - name: install qt
-      run: sudo apt-get -y install qtbase5-dev
+    - name: install dependencies
+      run: sudo apt-get -y install libxerces-c-dev wireshark-dev tshark qtbase5-dev
     - name: checkout MPC
       uses: actions/checkout@v3
       with:
@@ -5243,14 +5235,10 @@ jobs:
     needs: ACE_TAO_u22_stat_qt_ws_sec
 
     steps:
-    - name: install xerces
-      run: sudo apt-get -y install libxerces-c-dev
     - name: update apt
       run: sudo apt-get update
-    - name: install wireshark
-      run: sudo apt-get -y install wireshark-dev
-    - name: install qt
-      run: sudo apt-get -y install qtbase5-dev
+    - name: install dependencies
+      run: sudo apt-get -y install libxerces-c-dev wireshark-dev qtbase5-dev
     - name: checkout MPC
       uses: actions/checkout@v3
       with:
@@ -5305,83 +5293,6 @@ jobs:
         cd OpenDDS
         . setenv.sh
         make -j4
-    - name: Build CMake Tests
-      run: |
-        source OpenDDS/setenv.sh
-        mkdir OpenDDS/tests/cmake/build
-        cd OpenDDS/tests/cmake/build
-        cmake ..
-        cmake --build . -- -j4
-    - name: configure messenger tests
-      shell: bash
-      run: |
-        cd OpenDDS
-        . setenv.sh
-        cd tests/DCPS/Messenger
-        perl $ACE_ROOT/bin/mwc.pl -type gnuace -static
-    - name: make messenger tests
-      shell: bash
-      run: |
-        cd OpenDDS
-        . setenv.sh
-        cd tests/DCPS/Messenger
-        make
-    - name: configure C++11 messenger test
-      shell: bash
-      run: |
-        cd OpenDDS
-        . setenv.sh
-        cd tests/DCPS/C++11
-        perl $ACE_ROOT/bin/mwc.pl -type gnuace -static
-    - name: make C++11 messenger test
-      shell: bash
-      run: |
-        cd OpenDDS
-        . setenv.sh
-        cd tests/DCPS/C++11
-        make
-    - name: configure compiler tests
-      shell: bash
-      run: |
-        cd OpenDDS
-        . setenv.sh
-        cd tests/DCPS/Compiler
-        perl $ACE_ROOT/bin/mwc.pl -type gnuace -static
-    - name: make compiler tests
-      shell: bash
-      run: |
-        cd OpenDDS
-        . setenv.sh
-        cd tests/DCPS/Compiler
-        make
-    - name: configure unit tests
-      shell: bash
-      run: |
-        cd OpenDDS
-        . setenv.sh
-        cd tests/unit-tests
-        perl $ACE_ROOT/bin/mwc.pl -type gnuace -static
-    - name: make unit tests
-      shell: bash
-      run: |
-        cd OpenDDS
-        . setenv.sh
-        cd tests/unit-tests
-        make
-    - name: configure security tests
-      shell: bash
-      run: |
-        cd OpenDDS
-        . setenv.sh
-        cd tests/security/attributes
-        perl $ACE_ROOT/bin/mwc.pl -type gnuace -static
-    - name: build security tests
-      shell: bash
-      run: |
-        cd OpenDDS
-        . setenv.sh
-        cd tests/security/attributes
-        make -j $(getconf _NPROCESSORS_ONLN)
     - name: create OpenDDS tar.xz artifact
       shell: bash
       run: |
@@ -5404,8 +5315,10 @@ jobs:
     needs: build_u22_stat_qt_ws_sec
 
     steps:
-    - name: install xerces
-      run: sudo apt-get -y install libxerces-c-dev
+    - name: update apt
+      run: sudo apt-get update
+    - name: install dependencies
+      run: sudo apt-get -y install libxerces-c-dev wireshark-dev qtbase5-dev
     - name: checkout MPC
       uses: actions/checkout@v3
       with:
@@ -5467,6 +5380,14 @@ jobs:
         sudo sysctl -w kernel.core_pattern=core.%e.%p
         echo Core file pattern set to:
         cat /proc/sys/kernel/core_pattern
+    - uses: ammaraskar/gcc-problem-matcher@0.2.0
+    - name: Build CMake Tests
+      run: |
+        source OpenDDS/setenv.sh
+        mkdir OpenDDS/tests/cmake/build
+        cd OpenDDS/tests/cmake/build
+        cmake ..
+        cmake --build . -- -j4
     - name: run OpenDDS tests
       shell: bash
       run: |
@@ -5598,6 +5519,35 @@ jobs:
         sudo sysctl -w kernel.core_pattern=core.%e.%p
         echo Core file pattern set to:
         cat /proc/sys/kernel/core_pattern
+    - name: configure messenger tests
+      shell: bash
+      run: |
+        cd OpenDDS
+        . setenv.sh
+        cd tests/DCPS/Messenger
+        perl $ACE_ROOT/bin/mwc.pl -type gnuace -static
+    - uses: ammaraskar/gcc-problem-matcher@0.2.0
+    - name: make messenger tests
+      shell: bash
+      run: |
+        cd OpenDDS
+        . setenv.sh
+        cd tests/DCPS/Messenger
+        make
+    - name: configure C++11 messenger test
+      shell: bash
+      run: |
+        cd OpenDDS
+        . setenv.sh
+        cd tests/DCPS/C++11
+        perl $ACE_ROOT/bin/mwc.pl -type gnuace -static
+    - name: make C++11 messenger test
+      shell: bash
+      run: |
+        cd OpenDDS
+        . setenv.sh
+        cd tests/DCPS/C++11
+        make
     - name: run OpenDDS tests
       shell: bash
       run: |
@@ -5728,6 +5678,21 @@ jobs:
         sudo sysctl -w kernel.core_pattern=core.%e.%p
         echo Core file pattern set to:
         cat /proc/sys/kernel/core_pattern
+    - name: configure compiler tests
+      shell: bash
+      run: |
+        cd OpenDDS
+        . setenv.sh
+        cd tests/DCPS/Compiler
+        perl $ACE_ROOT/bin/mwc.pl -type gnuace -static
+    - uses: ammaraskar/gcc-problem-matcher@0.2.0
+    - name: make compiler tests
+      shell: bash
+      run: |
+        cd OpenDDS
+        . setenv.sh
+        cd tests/DCPS/Compiler
+        make
     - name: run OpenDDS tests
       shell: bash
       run: |
@@ -5858,6 +5823,21 @@ jobs:
         sudo sysctl -w kernel.core_pattern=core.%e.%p
         echo Core file pattern set to:
         cat /proc/sys/kernel/core_pattern
+    - name: configure unit tests
+      shell: bash
+      run: |
+        cd OpenDDS
+        . setenv.sh
+        cd tests/unit-tests
+        perl $ACE_ROOT/bin/mwc.pl -type gnuace -static
+    - uses: ammaraskar/gcc-problem-matcher@0.2.0
+    - name: make unit tests
+      shell: bash
+      run: |
+        cd OpenDDS
+        . setenv.sh
+        cd tests/unit-tests
+        make
     - name: run OpenDDS tests
       shell: bash
       run: |
@@ -5918,6 +5898,11 @@ jobs:
       run: sudo apt-get update
     - name: install qt
       run: sudo apt-get -y install qtbase5-dev
+    - name: checkout MPC
+      uses: actions/checkout@v3
+      with:
+        repository: DOCGroup/MPC
+        path: MPC
     - name: checkout autobuild
       uses: actions/checkout@v3
       with:
@@ -5974,6 +5959,21 @@ jobs:
         sudo sysctl -w kernel.core_pattern=core.%e.%p
         echo Core file pattern set to:
         cat /proc/sys/kernel/core_pattern
+    - name: configure security tests
+      shell: bash
+      run: |
+        cd OpenDDS
+        . setenv.sh
+        cd tests/security/attributes
+        perl $ACE_ROOT/bin/mwc.pl -type gnuace -static
+    - uses: ammaraskar/gcc-problem-matcher@0.2.0
+    - name: build security tests
+      shell: bash
+      run: |
+        cd OpenDDS
+        . setenv.sh
+        cd tests/security/attributes
+        make -j $(getconf _NPROCESSORS_ONLN)
     - name: run security tests
       shell: bash
       run: |
