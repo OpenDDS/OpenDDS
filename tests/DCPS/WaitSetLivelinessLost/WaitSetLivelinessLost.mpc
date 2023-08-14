@@ -1,0 +1,12 @@
+project(WaitSetLivelinessLost): dcpsexe, dcps_test, dcps_transports_for_test {
+  exename   = WaitSetLivelinessLost
+  libpaths += ../FooType4
+  libpaths += ../common
+  libs     +=  common DcpsFooType4
+  after    += DcpsFooType4 common
+
+  Source_Files {
+    WaitSetLivelinessLost.cpp
+  }
+}
+
