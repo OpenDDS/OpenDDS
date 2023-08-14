@@ -147,12 +147,6 @@ The following table summarizes the options supported by ``opendds_idl``.
 
      - Not generated
 
-   * - ``-Grapidjson``
-
-     - Generate type support for converting data samples to/from RapidJSON objects
-
-     - Not generated
-
    * - .. _opendds_idl--gxtypes-complete-option:
 
        .. _opendds_idl--gxtypes-complete:
