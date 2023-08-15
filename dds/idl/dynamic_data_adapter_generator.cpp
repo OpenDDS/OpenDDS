@@ -450,6 +450,54 @@ namespace {
           "\n";
       }
 
+      if (struct_node || union_node) {
+        be_global->impl_ <<
+          "  bool serialized_size(const OpenDDS::DCPS::Encoding& enc, size_t& size, OpenDDS::DCPS::Sample::Extent ext) const\n"
+          "  {\n"
+          "    using namespace OpenDDS::DCPS;\n"
+          "    if (ext == Sample::Full) {\n"
+          "      DCPS::serialized_size(enc, size, value_);\n"
+          "    } else if (ext == Sample::NestedKeyOnly) {\n"
+          "      NestedKeyOnly<const " << cpp_name << "> nested_key_only(value_);\n"
+          "      DCPS::serialized_size(enc, size, nested_key_only);\n"
+          "    } else {\n";
+        const bool is_topic_type = be_global->is_topic_type(node);
+        if (is_topic_type) {
+          be_global->impl_ <<
+            "      KeyOnly<const " << cpp_name << "> key_only(value_);\n"
+            "      DCPS::serialized_size(enc, size, key_only);\n";
+        } else {
+          be_global->impl_ <<
+            "      return false; // Non-topic type\n";
+        }
+        be_global->impl_ <<
+          "    }\n"
+          "    return true;\n"
+          "  }\n"
+          "\n"
+          "  bool serialize(OpenDDS::DCPS::Serializer& ser, OpenDDS::DCPS::Sample::Extent ext) const\n"
+          "  {\n"
+          "    using namespace OpenDDS::DCPS;\n"
+          "    if (ext == Sample::Full) {\n"
+          "      return ser << value_;\n"
+          "    } else if (ext == Sample::NestedKeyOnly) {\n"
+          "      NestedKeyOnly<const " << cpp_name << "> nested_key_only(value_);\n"
+          "      return ser << nested_key_only;\n"
+          "    } else {\n";
+          if (is_topic_type) {
+            be_global->impl_ <<
+              "      KeyOnly<const " << cpp_name << "> key_only(value_);\n"
+              "      return ser << key_only;\n";
+          } else {
+            be_global->impl_ <<
+              "      return false; // Non-topic type\n";
+          }
+          be_global->impl_ <<
+          "    }\n"
+          "  }\n"
+          "\n";
+      }
+
       be_global->impl_ <<
         "protected:\n";
 
