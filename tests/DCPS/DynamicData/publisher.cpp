@@ -93,7 +93,15 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     if (check_rc(dd->set_string_value(0, HelloWorld::MESSAGE_EXAMPLE_VALUE), "set_string_value failed")) {
       return 1;
     }
-    if (check_rc(ddw->write(dd, DDS::HANDLE_NIL), "write (dynamic) failed")) {
+    if (check_rc(ddw->write(dd, DDS::HANDLE_NIL), "write (DynamicDataImpl) failed")) {
+      return 1;
+    }
+  } else if (/*adapter*/true) { // TODO(sonndinh): Add "adapter" option.
+    DDS::DynamicDataWriter_var ddw = DDS::DynamicDataWriter::_narrow(data_writer);
+    HelloWorld::Message msg;
+    msg.value = HelloWorld::MESSAGE_EXAMPLE_VALUE;
+    OpenDDS::XTypes::DynamicDataAdapterImpl<HelloWorld::Message, HelloWorld::Message> ddai(dt, msg);
+    if (check_rc(ddw->write(&ddai, DDS::HANDLE_NIL), "write (DynamicDataAdapter) failed")) {
       return 1;
     }
   } else {

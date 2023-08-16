@@ -18,7 +18,7 @@ namespace {
   class DynamicDataAdapterGuard : public PreprocessorIfGuard {
   public:
     DynamicDataAdapterGuard()
-      : PreprocessorIfGuard(" OPENDDS_HAS_DYNAMIC_DATA_ADAPTER", true, false)
+      : PreprocessorIfGuard(" OPENDDS_HAS_DYNAMIC_DATA_ADAPTER", true, true)
     {
     }
   };
@@ -129,14 +129,14 @@ namespace {
     const std::string cpp_field_name = disc ? "_d" : field->local_name()->get_string();
 
     be_global->impl_ <<
-      "    case ";
+      "  case ";
     if (disc) {
       be_global->impl_ << "OpenDDS::XTypes::DISCRIMINATOR_ID";
     } else {
       be_global->impl_ << field_id;
     }
     be_global->impl_ << ":\n"
-      "      {\n";
+      "    {\n";
 
     std::string op_type;
     std::string extra_access;
@@ -144,9 +144,9 @@ namespace {
     if ((field && !be_global->dynamic_data_adapter(field->field_type())) ||
         !access_details(set, field, field_type, op_type, extra_access, is_complex)) {
       be_global->impl_ <<
-        "        ACE_UNUSED_ARG(" << (set ? "source" : "dest") << ");\n"
-        "        ACE_UNUSED_ARG(tk);\n"
-        "        return missing_dda(method, id);\n";
+        "      ACE_UNUSED_ARG(" << (set ? "source" : "dest") << ");\n"
+        "      ACE_UNUSED_ARG(tk);\n"
+        "      return missing_dda(method, id);\n";
 
     } else {
       const std::string type_name = field_type_name(field, field_type);
@@ -156,7 +156,7 @@ namespace {
         if (set) {
           // Setting a union branch or discriminator requires a temporary
           be_global->impl_ <<
-            "        " << type_name << " temp;\n";
+            "      " << type_name << " temp;\n";
           rc_dest = "rc =";
           value = "temp";
         } else {
@@ -169,22 +169,23 @@ namespace {
       } else {
         value += (use_cxx11 ? "_" : "") + cpp_field_name;
       }
-      generate_op(4, set, field_type, type_name, op_type, is_complex,
+      generate_op(3, set, field_type, type_name, op_type, is_complex,
         value + extra_access, rc_dest);
       if (union_node && set) {
         be_global->impl_ <<
-          "        if (rc == DDS::RETCODE_OK) {\n"
-          "          value_." << cpp_field_name << "(temp);\n"
-          "        }\n"
-          "        return rc;\n";
+          "      if (rc == DDS::RETCODE_OK) {\n"
+          "        value_." << cpp_field_name << "(temp);\n"
+          "      }\n"
+          "      return rc;\n";
       }
     }
 
     be_global->impl_ <<
-      "      }\n";
+      "    }\n";
   }
 
-  bool generate_dynamic_data_adapter_access(AST_Decl* node, RefWrapper& wrapper, bool set)
+  bool generate_dynamic_data_adapter_access(
+    AST_Decl* node, RefWrapper& wrapper, bool set, const std::string& classname)
   {
     AST_Structure* struct_node = 0;
     AST_Union* union_node = 0;
@@ -210,26 +211,25 @@ namespace {
       return false;
     }
 
-    be_global->impl_ << "  DDS::ReturnCode_t " << op(set) << "_raw_value(const char* method, ";
-    if (set) {
-      be_global->impl_ << "DDS::MemberId id, const void* source, DDS::TypeKind tk";
-    } else {
-      be_global->impl_ << "void* dest, DDS::TypeKind tk, DDS::MemberId id";
-    }
-    be_global->impl_ << ")\n"
-      "  {\n";
+    const std::string fn_sig = op(set) + "_raw_value(const char* method, " +
+      (set ? "DDS::MemberId id, const void* source, DDS::TypeKind tk"
+       : "void* dest, DDS::TypeKind tk, DDS::MemberId id") + ")";
+    be_global->header_ << "  DDS::ReturnCode_t " << fn_sig << ";\n";
+
+    be_global->impl_ << "DDS::ReturnCode_t " << classname << "::" << fn_sig << "\n" <<
+      "{\n";
 
     if (set) {
       be_global->impl_ <<
-        "    DDS::ReturnCode_t rc = assert_mutable(method);\n"
-        "    if (rc != DDS::RETCODE_OK) {\n"
-        "      return rc;\n"
-        "    }\n";
+        "  DDS::ReturnCode_t rc = assert_mutable(method);\n"
+        "  if (rc != DDS::RETCODE_OK) {\n"
+        "    return rc;\n"
+        "  }\n";
     }
 
     if (struct_node || union_node) {
       be_global->impl_ <<
-        "    switch (id) {\n";
+        "  switch (id) {\n";
 
       if (union_node) {
         generate_dynamic_data_adapter_access_field(
@@ -244,9 +244,9 @@ namespace {
       }
 
       be_global->impl_ <<
-        "    default:\n"
-        "      return invalid_id(method, id);\n"
-        "    }\n";
+        "  default:\n"
+        "    return invalid_id(method, id);\n"
+        "  }\n";
     } else if (seq_node || array_node) {
       AST_Type* const base_type = seq_node ? seq_node->base_type() : array_node->base_type();
       AST_Type* const named_type = deepest_named_type(base_type);
@@ -255,7 +255,7 @@ namespace {
       std::string extra_access;
       bool is_complex = false;
       if (access_details(set, node, base_type, op_type, extra_access, is_complex)) {
-        be_global->impl_ << "    ";
+        be_global->impl_ << "  ";
         if (!set) {
           be_global->impl_ << "const DDS::ReturnCode_t ";
         }
@@ -266,23 +266,23 @@ namespace {
           be_global->impl_ << array_element_count(array_node);
         }
         be_global->impl_ << ");\n"
-          "    if (rc != DDS::RETCODE_OK) {\n"
-          "      return rc;\n"
-          "    }\n";
-        generate_op(2, set, base_type, scoped(named_type->name()), op_type, is_complex,
+          "  if (rc != DDS::RETCODE_OK) {\n"
+          "    return rc;\n"
+          "  }\n";
+        generate_op(1, set, base_type, scoped(named_type->name()), op_type, is_complex,
           wrapper.flat_collection_access("id") + extra_access);
       } else {
         be_global->impl_ <<
-          "    ACE_UNUSED_ARG(" << (set ? "source" : "dest") << ");\n"
-          "    ACE_UNUSED_ARG(tk);\n"
-          "    return missing_dda(method, id);\n";
+          "  ACE_UNUSED_ARG(" << (set ? "source" : "dest") << ");\n"
+          "  ACE_UNUSED_ARG(tk);\n"
+          "  return missing_dda(method, id);\n";
       }
     } else {
       return false;
     }
 
     be_global->impl_ <<
-      "  }\n";
+      "}\n";
 
     return true;
   }
@@ -401,11 +401,11 @@ namespace {
 
     if (generate) {
       DynamicDataAdapterGuard ddag;
+      std::string impl_classname = "DynamicDataAdapterImpl<" + cpp_name + tag + " >";
 
-      be_global->impl_ <<
+      be_global->header_ <<
         "template <>\n"
-        "class DynamicDataAdapterImpl<" << cpp_name << tag << " > : public DynamicDataAdapter_T<"
-          << cpp_name << "> {\n"
+        "class " << impl_classname << " : public DynamicDataAdapter_T<" << cpp_name << "> {\n"
         "public:\n"
         "  DynamicDataAdapterImpl(DDS::DynamicType_ptr type, " << cpp_name << "& value)\n"
         "    : DynamicDataAdapter_T<" << cpp_name << ">(type, value)\n"
@@ -418,25 +418,25 @@ namespace {
         "  }\n"
         "\n";
       if (struct_node || seq_node || array_node) {
-        be_global->impl_ <<
+        be_global->header_ <<
           "  DDS::UInt32 get_item_count()\n"
           "  {\n"
           "    return ";
         if (struct_node) {
-          be_global->impl_ << struct_node->nfields();
+          be_global->header_ << struct_node->nfields();
         } else if (seq_node) {
-          be_global->impl_ << wrapper.seq_get_length();
+          be_global->header_ << wrapper.seq_get_length();
         } else if (array_node) {
-          be_global->impl_ << array_element_count(array_node);
+          be_global->header_ << array_element_count(array_node);
         }
-        be_global->impl_ << ";\n"
+        be_global->header_ << ";\n"
           "  }\n"
           "\n";
       }
 
       if (seq_node) {
         // TODO: Set new elements to default values?
-        be_global->impl_ <<
+        be_global->header_ <<
           "  DDS::MemberId get_member_id_at_index_impl(DDS::UInt32 index)\n"
           "  {\n"
           "    const DDS::UInt32 count = " << wrapper.seq_get_length() << ";\n"
@@ -451,65 +451,72 @@ namespace {
       }
 
       if (struct_node || union_node) {
+        be_global->header_ <<
+          "  bool serialized_size(const OpenDDS::DCPS::Encoding& enc, size_t& size, OpenDDS::DCPS::Sample::Extent ext) const;\n"
+          "  bool serialize(OpenDDS::DCPS::Serializer& ser, OpenDDS::DCPS::Sample::Extent ext) const;\n"
+          "\n";
+
         be_global->impl_ <<
-          "  bool serialized_size(const OpenDDS::DCPS::Encoding& enc, size_t& size, OpenDDS::DCPS::Sample::Extent ext) const\n"
-          "  {\n"
-          "    using namespace OpenDDS::DCPS;\n"
-          "    if (ext == Sample::Full) {\n"
-          "      DCPS::serialized_size(enc, size, value_);\n"
-          "    } else if (ext == Sample::NestedKeyOnly) {\n"
-          "      NestedKeyOnly<const " << cpp_name << "> nested_key_only(value_);\n"
-          "      DCPS::serialized_size(enc, size, nested_key_only);\n"
-          "    } else {\n";
+          "bool " << impl_classname << "::serialized_size(\n"
+          "  const OpenDDS::DCPS::Encoding& enc, size_t& size, OpenDDS::DCPS::Sample::Extent ext) const\n"
+          "{\n"
+          "  using namespace OpenDDS::DCPS;\n"
+          "  if (ext == Sample::Full) {\n"
+          "    DCPS::serialized_size(enc, size, value_);\n"
+          "  } else if (ext == Sample::NestedKeyOnly) {\n"
+          "    NestedKeyOnly<const " << cpp_name << "> nested_key_only(value_);\n"
+          "    DCPS::serialized_size(enc, size, nested_key_only);\n"
+          "  } else {\n";
         const bool is_topic_type = be_global->is_topic_type(node);
         if (is_topic_type) {
           be_global->impl_ <<
-            "      KeyOnly<const " << cpp_name << "> key_only(value_);\n"
-            "      DCPS::serialized_size(enc, size, key_only);\n";
+            "    KeyOnly<const " << cpp_name << "> key_only(value_);\n"
+            "    DCPS::serialized_size(enc, size, key_only);\n";
         } else {
           be_global->impl_ <<
-            "      return false; // Non-topic type\n";
+            "    return false; // Non-topic type\n";
         }
         be_global->impl_ <<
-          "    }\n"
-          "    return true;\n"
           "  }\n"
+          "  return true;\n"
+          "}\n"
           "\n"
-          "  bool serialize(OpenDDS::DCPS::Serializer& ser, OpenDDS::DCPS::Sample::Extent ext) const\n"
-          "  {\n"
-          "    using namespace OpenDDS::DCPS;\n"
-          "    if (ext == Sample::Full) {\n"
-          "      return ser << value_;\n"
-          "    } else if (ext == Sample::NestedKeyOnly) {\n"
-          "      NestedKeyOnly<const " << cpp_name << "> nested_key_only(value_);\n"
-          "      return ser << nested_key_only;\n"
-          "    } else {\n";
+          "bool " << impl_classname << "::serialize(\n"
+          "  OpenDDS::DCPS::Serializer& ser, OpenDDS::DCPS::Sample::Extent ext) const\n"
+          "{\n"
+          "  using namespace OpenDDS::DCPS;\n"
+          "  if (ext == Sample::Full) {\n"
+          "    return ser << value_;\n"
+          "  } else if (ext == Sample::NestedKeyOnly) {\n"
+          "    NestedKeyOnly<const " << cpp_name << "> nested_key_only(value_);\n"
+          "    return ser << nested_key_only;\n"
+          "  } else {\n";
           if (is_topic_type) {
             be_global->impl_ <<
-              "      KeyOnly<const " << cpp_name << "> key_only(value_);\n"
-              "      return ser << key_only;\n";
+              "    KeyOnly<const " << cpp_name << "> key_only(value_);\n"
+              "    return ser << key_only;\n";
           } else {
             be_global->impl_ <<
-              "      return false; // Non-topic type\n";
+              "    return false; // Non-topic type\n";
           }
           be_global->impl_ <<
-          "    }\n"
           "  }\n"
+          "}\n"
           "\n";
       }
 
-      be_global->impl_ <<
+      be_global->header_ <<
         "protected:\n";
 
-      if (!generate_dynamic_data_adapter_access(node, wrapper, false)) {
+      if (!generate_dynamic_data_adapter_access(node, wrapper, false, impl_classname)) {
         return false;
       }
       be_global->impl_ << "\n";
-      if (!generate_dynamic_data_adapter_access(node, wrapper, true)) {
+      if (!generate_dynamic_data_adapter_access(node, wrapper, true, impl_classname)) {
         return false;
       }
 
-      be_global->impl_ <<
+      be_global->header_ <<
         "};\n"
         "\n";
     }
