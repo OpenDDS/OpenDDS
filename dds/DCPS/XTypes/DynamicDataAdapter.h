@@ -12,8 +12,6 @@
 #    include "DynamicDataBase.h"
 #    include "Utils.h"
 
-#    include <dds/DCPS/Sample.h>
-
 #    include <vector>
 #  else
 #    include <dds/DdsDynamicDataC.h>

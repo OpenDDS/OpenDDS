@@ -400,7 +400,11 @@ namespace {
     }
 
     if (generate) {
+      NoSafetyProfileGuard nspg;
+      wrapper.generate_tag();
+
       DynamicDataAdapterGuard ddag;
+
       std::string impl_classname = "DynamicDataAdapterImpl<" + cpp_name + tag + " >";
 
       be_global->header_ <<
@@ -450,16 +454,19 @@ namespace {
           "\n";
       }
 
-      if (struct_node || union_node) {
-        be_global->header_ <<
-          "  bool serialized_size(const OpenDDS::DCPS::Encoding& enc, size_t& size, OpenDDS::DCPS::Sample::Extent ext) const;\n"
-          "  bool serialize(OpenDDS::DCPS::Serializer& ser, OpenDDS::DCPS::Sample::Extent ext) const;\n"
-          "\n";
+      be_global->header_ <<
+        "  bool serialized_size(const OpenDDS::DCPS::Encoding& enc, size_t& size, OpenDDS::DCPS::Sample::Extent ext) const;\n"
+        "  bool serialize(OpenDDS::DCPS::Serializer& ser, OpenDDS::DCPS::Sample::Extent ext) const;\n"
+        "\n";
 
+      const bool is_topic_type = be_global->is_topic_type(node);
+      const bool forany = needs_forany(dynamic_cast<AST_Type*>(node));
+      be_global->impl_ <<
+        "bool " << impl_classname << "::serialized_size(\n"
+        "  const OpenDDS::DCPS::Encoding& enc, size_t& size, OpenDDS::DCPS::Sample::Extent ext) const\n"
+        "{\n";
+      if (struct_node || union_node) {
         be_global->impl_ <<
-          "bool " << impl_classname << "::serialized_size(\n"
-          "  const OpenDDS::DCPS::Encoding& enc, size_t& size, OpenDDS::DCPS::Sample::Extent ext) const\n"
-          "{\n"
           "  using namespace OpenDDS::DCPS;\n"
           "  if (ext == Sample::Full) {\n"
           "    DCPS::serialized_size(enc, size, value_);\n"
@@ -467,7 +474,6 @@ namespace {
           "    NestedKeyOnly<const " << cpp_name << "> nested_key_only(value_);\n"
           "    DCPS::serialized_size(enc, size, nested_key_only);\n"
           "  } else {\n";
-        const bool is_topic_type = be_global->is_topic_type(node);
         if (is_topic_type) {
           be_global->impl_ <<
             "    KeyOnly<const " << cpp_name << "> key_only(value_);\n"
@@ -478,12 +484,27 @@ namespace {
         }
         be_global->impl_ <<
           "  }\n"
-          "  return true;\n"
-          "}\n"
-          "\n"
-          "bool " << impl_classname << "::serialize(\n"
-          "  OpenDDS::DCPS::Serializer& ser, OpenDDS::DCPS::Sample::Extent ext) const\n"
-          "{\n"
+          "  return true;\n";
+      } else if (seq_node) {
+        be_global->impl_ <<
+          "  ACE_UNUSED_ARG(ext);\n"
+          "  OpenDDS::DCPS::serialized_size(enc, size, value_);\n"
+          "  return true;\n";
+      } else { // Array
+        be_global->impl_ <<
+          "  ACE_UNUSED_ARG(ext);\n"
+          "  OpenDDS::DCPS::serialized_size(enc, size, " <<
+          (forany ? cpp_name + "_forany(value_)" : "value_") << ");\n"
+          "  return true;\n";
+      }
+      be_global->impl_ <<
+        "}\n"
+        "\n"
+        "bool " << impl_classname << "::serialize(\n"
+        "  OpenDDS::DCPS::Serializer& ser, OpenDDS::DCPS::Sample::Extent ext) const\n"
+        "{\n";
+      if (struct_node || union_node) {
+        be_global->impl_ <<
           "  using namespace OpenDDS::DCPS;\n"
           "  if (ext == Sample::Full) {\n"
           "    return ser << value_;\n"
@@ -491,19 +512,31 @@ namespace {
           "    NestedKeyOnly<const " << cpp_name << "> nested_key_only(value_);\n"
           "    return ser << nested_key_only;\n"
           "  } else {\n";
-          if (is_topic_type) {
-            be_global->impl_ <<
-              "    KeyOnly<const " << cpp_name << "> key_only(value_);\n"
-              "    return ser << key_only;\n";
-          } else {
-            be_global->impl_ <<
-              "    return false; // Non-topic type\n";
-          }
+        if (is_topic_type) {
           be_global->impl_ <<
-          "  }\n"
-          "}\n"
-          "\n";
+            "    KeyOnly<const " << cpp_name << "> key_only(value_);\n"
+            "    return ser << key_only;\n";
+        } else {
+          be_global->impl_ <<
+            "    return false; // Non-topic type\n";
+        }
+        be_global->impl_ <<
+          "  }\n";
+      } else if (seq_node) {
+        be_global->impl_ <<
+          "  ACE_UNUSED_ARG(ext);\n"
+          "  using namespace OpenDDS::DCPS;\n"
+          "  return ser << value_;\n";
+      } else { // Array
+        be_global->impl_ <<
+          "  ACE_UNUSED_ARG(ext);\n"
+          "  using namespace OpenDDS::DCPS;\n"
+          "  return ser << " <<
+          (forany ? cpp_name + "_forany(value_)" : "value_") << ";\n";
       }
+      be_global->impl_ <<
+        "}\n"
+        "\n";
 
       be_global->header_ <<
         "protected:\n";
@@ -523,8 +556,6 @@ namespace {
 
     {
       NoSafetyProfileGuard nspg;
-
-      wrapper.generate_tag();
 
       std::string export_macro = be_global->export_macro().c_str();
       if (export_macro.size()) {
