@@ -461,6 +461,7 @@ namespace {
 
       const bool is_topic_type = be_global->is_topic_type(node);
       const bool forany = needs_forany(dynamic_cast<AST_Type*>(node));
+      const bool distinct_type = needs_distinct_type(dynamic_cast<AST_Type*>(node));
       be_global->impl_ <<
         "bool " << impl_classname << "::serialized_size(\n"
         "  const OpenDDS::DCPS::Encoding& enc, size_t& size, OpenDDS::DCPS::Sample::Extent ext) const\n"
@@ -485,18 +486,23 @@ namespace {
         be_global->impl_ <<
           "  }\n"
           "  return true;\n";
-      } else if (seq_node) {
+      } else {
         be_global->impl_ <<
           "  ACE_UNUSED_ARG(ext);\n"
-          "  OpenDDS::DCPS::serialized_size(enc, size, value_);\n"
-          "  return true;\n";
-      } else { // Array
+          "  OpenDDS::DCPS::serialized_size(enc, size, ";
+        std::string value = "value_";
+        if (distinct_type) { // sequence or array (C++11 mapping)
+          RefWrapper distinct_type_wrapper(dynamic_cast<AST_Type*>(node), cpp_name, "");
+          distinct_type_wrapper.done();
+          value = distinct_type_wrapper.wrapped_type_name() + "(value_)";
+        } else if (forany) { // array only (classic mapping)
+          value = cpp_name + "_forany(value_)";
+        }
         be_global->impl_ <<
-          "  ACE_UNUSED_ARG(ext);\n"
-          "  OpenDDS::DCPS::serialized_size(enc, size, " <<
-          (forany ? cpp_name + "_forany(value_)" : "value_") << ");\n"
+          value << ");\n"
           "  return true;\n";
       }
+
       be_global->impl_ <<
         "}\n"
         "\n"
@@ -522,17 +528,21 @@ namespace {
         }
         be_global->impl_ <<
           "  }\n";
-      } else if (seq_node) {
+      } else {
         be_global->impl_ <<
           "  ACE_UNUSED_ARG(ext);\n"
           "  using namespace OpenDDS::DCPS;\n"
-          "  return ser << value_;\n";
-      } else { // Array
+          "  return ser << ";
+        std::string value = "value_";
+        if (distinct_type) {
+          RefWrapper distinct_type_wrapper(dynamic_cast<AST_Type*>(node), cpp_name, "");
+          distinct_type_wrapper.done();
+          value = distinct_type_wrapper.wrapped_type_name() + "(value_)";
+        } else if (forany) {
+          value = cpp_name + "_forany(value_)";
+        }
         be_global->impl_ <<
-          "  ACE_UNUSED_ARG(ext);\n"
-          "  using namespace OpenDDS::DCPS;\n"
-          "  return ser << " <<
-          (forany ? cpp_name + "_forany(value_)" : "value_") << ";\n";
+          value << ";\n";
       }
       be_global->impl_ <<
         "}\n"
