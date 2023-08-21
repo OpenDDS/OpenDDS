@@ -30,11 +30,11 @@ Remedy IT also offers [training courses](https://www.remedy.nl/training/overview
 
 Visit [OCI's OpenDDS resources page](https://objectcomputing.com/products/opendds/resources) to subscribe to the OpenDDS mailing list and receive regular updates, invitations to webinars and events, and more.
 
-DDS mailing lists are also available through the [SourceForge project page]({{ site.opendds.mailing_lists_uri }}). Archives of previous messages are searchable.
-
-### GitHub Issues
+### GitHub Issues and Discussions
 
 View the [GitHub issues list]({{ site.github.issues_url }}) for the OpenDDS project. Please search the list to see if your issue has already been reported before submitting a new one.
+
+The [GitHub Discussions]({{ site.opendds.discussions_uri }}) for the OpenDDS project can be used to ask questions and get help.
 
 ### Online Documentation
 
