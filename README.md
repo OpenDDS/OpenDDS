@@ -45,7 +45,7 @@ Other documentation can be found in [`docs` directory](docs).
 
 For commercial support, please see https://opendds.org/support.html.
 
-Questions concerning OpenDDS should be directed to [GitHub Discussions](https://github.com/OpenDDS/OpenDDS/discussions) or the [mailing list](https://opendds.org/support.html).
+Questions concerning OpenDDS should be directed to [GitHub Discussions](https://github.com/OpenDDS/OpenDDS/discussions).
 
 If you wish to file a bug report:
 
