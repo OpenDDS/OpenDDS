@@ -572,6 +572,9 @@ namespace {
 
     {
       NoSafetyProfileGuard nspg;
+      if (!generate) {
+        wrapper.generate_tag();
+      }
 
       std::string export_macro = be_global->export_macro().c_str();
       if (export_macro.size()) {
