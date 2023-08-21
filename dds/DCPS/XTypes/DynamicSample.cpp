@@ -50,7 +50,7 @@ size_t DynamicSample::serialized_size(const Encoding& enc) const
     }
     return false;
   }
-  size_t size;
+  size_t size = 0;
   if (!ddb->serialized_size(enc, size, extent_)) {
     if (log_level >= LogLevel::Notice) {
       ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicSample::serialized_size: "
