@@ -603,35 +603,20 @@ CORBA::ULong VerticalHandler::send(GuidAddrSet::Proxy& proxy,
       ++sent;
     } else {
       // Local recipients.
-      if (!to_guids.empty()) {
-        for (const auto& guid : to_guids) {
-          if (guid == src_guid) {
-            continue;
-          }
-          auto p = proxy.find(guid);
-          if (p != proxy.end()) {
-            for (const auto& addr : *p->second.select_addr_set(port(), now)) {
-              venqueue_message(addr.first.addr,
-                *p->second.select_stats_reporter(port()), msg, now, type);
-              ++sent;
-            }
-          }
+      GuidSet guids;
+      guid_partition_table_.lookup(guids, to_partitions, to_guids);
+      for (const auto& guid : guids) {
+        if (guid == src_guid) {
+          continue;
         }
-      } else {
-        GuidSet guids;
-        guid_partition_table_.lookup(guids, to_partitions);
-        for (const auto& guid : guids) {
-          if (guid == src_guid) {
-            continue;
-          }
-          auto p = proxy.find(guid);
-          if (p != proxy.end()) {
-            for (const auto& addr : *p->second.select_addr_set(port(), now)) {
-              venqueue_message(addr.first.addr,
-                *p->second.select_stats_reporter(port()), msg, now, type);
-              ++sent;
-            }
-          }
+        auto p = proxy.find(guid);
+        if (p != proxy.end()) {
+          p->second.foreach_addr(port(),
+                                 [=, &sent, &msg](const ACE_INET_Addr& addr) {
+                                   venqueue_message(addr,
+                                                    *p->second.select_stats_reporter(port()), msg, now, type);
+                                   ++sent;
+          });
         }
       }
     }
@@ -743,29 +728,18 @@ CORBA::ULong HorizontalHandler::process_message(const ACE_INET_Addr& from,
 
   CORBA::ULong sent = 0;
 
-  if (!relay_header.to_guids().empty()) {
-    for (const auto& guid : relay_header.to_guids()) {
-      const auto p = proxy.find(relay_guid_to_rtps_guid(guid));
-      if (p != proxy.end()) {
-        for (const auto& addr : *p->second.select_addr_set(port(), now)) {
-          vertical_handler_->venqueue_message(
-            addr.first.addr, *p->second.select_stats_reporter(port()), msg, now, type);
-          ++sent;
-        }
-      }
-    }
-  } else {
-    GuidSet guids;
-    guid_partition_table_.lookup(guids, relay_header.to_partitions());
-    for (const auto& guid : guids) {
-      const auto p = proxy.find(guid);
-      if (p != proxy.end()) {
-        for (const auto& addr : *p->second.select_addr_set(port(), now)) {
-          vertical_handler_->venqueue_message(
-            addr.first.addr, *p->second.select_stats_reporter(port()), msg, now, type);
-          ++sent;
-        }
-      }
+  GuidSet guids;
+  const auto to_guids = relay_guids_to_set(relay_header.to_guids());
+  guid_partition_table_.lookup(guids, relay_header.to_partitions(), to_guids);
+  for (const auto& guid : guids) {
+    const auto p = proxy.find(guid);
+    if (p != proxy.end()) {
+      p->second.foreach_addr(port(),
+                             [=, &sent, &msg](const ACE_INET_Addr& addr) {
+                               vertical_handler_->venqueue_message(addr,
+                                                                   *p->second.select_stats_reporter(port()), msg, now, type);
+                               ++sent;
+                             });
     }
   }
 
@@ -932,11 +906,12 @@ bool SpdpHandler::do_normal_processing(GuidAddrSet::Proxy& proxy,
       for (const auto& guid : to) {
         const auto pos = proxy.find(guid);
         if (pos != proxy.end()) {
-          for (const auto& addr : *pos->second.select_addr_set(port(), now)) {
-            venqueue_message(addr.first.addr, *pos->second.select_stats_reporter(port()),
-              msg, now, MessageType::Rtps);
-            ++sent;
-          }
+          pos->second.foreach_addr(port(),
+                                   [=, &sent, &msg](const ACE_INET_Addr& addr) {
+                                     venqueue_message(addr,
+                                                      *pos->second.select_stats_reporter(port()), msg, now, MessageType::Rtps);
+                                     ++sent;
+          });
         }
       }
     } else {
@@ -1010,7 +985,7 @@ int SpdpHandler::handle_exception(ACE_HANDLE /*fd*/)
     fan_in_to_guid_set.insert(fan_in_to_guid);
 
     GuidSet fan_in_from_guids;
-    guid_partition_table_.lookup(fan_in_from_guids, r.partitions());
+    guid_partition_table_.lookup(fan_in_from_guids, r.partitions(), GuidSet());
 
     bool do_fan_out = false;
     for (const auto& fan_in_from_guid : fan_in_from_guids) {
@@ -1084,11 +1059,12 @@ bool SedpHandler::do_normal_processing(GuidAddrSet::Proxy& proxy,
       for (const auto& guid : to) {
         const auto pos = proxy.find(guid);
         if (pos != proxy.end()) {
-          for (const auto& addr : *pos->second.select_addr_set(port(), now)) {
-            venqueue_message(addr.first.addr, *pos->second.select_stats_reporter(port()),
-              msg, now, MessageType::Rtps);
-            ++sent;
-          }
+          pos->second.foreach_addr(port(),
+                                   [=, &sent, &msg](const ACE_INET_Addr& addr) {
+                                     venqueue_message(addr,
+                                                      *pos->second.select_stats_reporter(port()), msg, now, MessageType::Rtps);
+                                     ++sent;
+                                   });
         }
       }
     } else {

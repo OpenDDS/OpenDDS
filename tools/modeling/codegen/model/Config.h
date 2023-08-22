@@ -169,6 +169,7 @@ class OpenDDS_Model_Export Config  {
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
+#include /**/ "ace/post.h"
 
 #if defined (__ACE_INLINE__)
 # include "Config.inl"

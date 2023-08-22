@@ -11,12 +11,10 @@ namespace DCPS {
 
 DcpsUpcalls::DcpsUpcalls(
   DataReaderCallbacks_rch drr,
-  const GUID_t& reader,
   const WriterAssociation& wa,
   bool active,
   DataWriterCallbacks_rch dwr)
   : drr_(drr)
-  , reader_(reader)
   , wa_(wa)
   , active_(active)
   , dwr_(dwr)
@@ -40,7 +38,7 @@ int DcpsUpcalls::svc()
   if (!drr) {
     return 0;
   }
-  drr->add_association(reader_, wa_, active_);
+  drr->add_association(wa_, active_);
 
   {
     ACE_GUARD_RETURN(ACE_Thread_Mutex, g, mtx_, -1);

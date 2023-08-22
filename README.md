@@ -4,19 +4,13 @@
 
 [![Coverity Scan Build Status](https://scan.coverity.com/projects/opendds/badge.svg)](https://scan.coverity.com/projects/opendds)
 
-OpenDDS is an open-source C++ implementation of the Object Management Group's
-specification "Data Distribution Service for Real-time Systems" (DDS), as well
-as some other related specifications. These standards define a set of
-interfaces and protocols for developing distributed applications based on the
-publish-subscribe and distributed cache models. Although OpenDDS is itself
-developed in C++, Java and JMS bindings are provided so that Java applications
-can use OpenDDS.  OpenDDS also includes support for the DDS Security and XTypes
-specifications.
+OpenDDS is an open-source C++ implementation of the Object Management Group's specification "Data Distribution Service for Real-time Systems" (DDS), as well as some other related specifications.
+These standards define a set of interfaces and protocols for developing distributed applications based on the publish-subscribe and distributed cache models.
+Although OpenDDS is itself developed in C++, Java bindings are provided so that Java applications can use OpenDDS.
+OpenDDS also includes support for the DDS Security and XTypes specifications.
 
-OpenDDS is built on the [ACE](docs/dependencies.md#ace) abstraction layer to
-provide platform portability.  OpenDDS also leverages capabilities of
-[TAO](docs/dependencies.md#tao), such as its IDL compiler and as the basis of
-the OpenDDS DCPS Information Repository (DCPSInfoRepo).
+OpenDDS is built on the [ACE](https://opendds.readthedocs.io/en/dds-3.25/building/dependencies.html#ace-tao) abstraction layer to provide platform portability.
+OpenDDS also leverages the capabilities of [TAO](https://opendds.readthedocs.io/en/dds-3.25/building/dependencies.html#ace-tao) for IDL compilation and the OpenDDS [DCPS Information Repository](https://opendds.readthedocs.io/en/latest-release/devguide/the_dcps_information_repository.html).
 
 The primary development of OpenDDS was done by
 [Object Computing, Incorporated](http://www.objectcomputing.com) in
@@ -41,14 +35,9 @@ details.
 
 ## Documentation
 
-- The OpenDDS Developer's Guide is freely downloadable at:
-http://download.objectcomputing.com/OpenDDS/
+- The OpenDDS Developer's Guide is available at https://opendds.readthedocs.io/en/dds-3.25.
 
-- A Doxygen for the latest release is available at
-http://download.opendds.org/doxygen/.
-
-- For developers wanting to contribute to OpenDDS, please take the time to read
-[the development guidelines](https://opendds.readthedocs.io/en/master/internal/dev_guidelines.html).
+- For developers wanting to contribute to OpenDDS, please read [the development guidelines](https://opendds.readthedocs.io/en/master/internal/dev_guidelines.html).
 
 Other documentation can be found in [`docs` directory](docs).
 
@@ -56,7 +45,7 @@ Other documentation can be found in [`docs` directory](docs).
 
 For commercial support, please see https://opendds.org/support.html.
 
-Questions concerning OpenDDS should be directed to [GitHub Discussions](https://github.com/OpenDDS/OpenDDS/discussions) or the [mailing list](https://opendds.org/support.html).
+Questions concerning OpenDDS should be directed to [GitHub Discussions](https://github.com/OpenDDS/OpenDDS/discussions).
 
 If you wish to file a bug report:
 
@@ -94,45 +83,23 @@ formal/2019-04-03 (version 2.3)](https://www.omg.org/spec/DDSI-RTPS/2.3).  See
 the OpenDDS Developer's Guide and the file [docs/design/RTPS](docs/design/RTPS)
 for more details on RTPS.
 
-See the [Developer's Guide](http://download.objectcomputing.com/OpenDDS) for
+See the [Developer's Guide](https://opendds.readthedocs.io/en/dds-3.25/building/introduction.html) for
 information on OpenDDS compliance with the DDS specification. If you would like
-to contribute a feature or sponsor the developers to add a feature  please see
+to contribute a feature or sponsor the developers to add a feature please see
 the Support section above for contact information.
 
 ## Dependencies
 
-For a complete detailed list of dependencies, see
-[`docs/dependencies.md`](docs/dependencies.md).
+These are just the required dependencies. For a complete detailed list of
+dependencies, including optional ones, see
+https://opendds.readthedocs.io/en/dds-3.25/building/dependencies.html.
 
 ### ACE/TAO
 
 OpenDDS requires TAO for both IDL compilation as well as interaction with the
 DCPSInfoRepo. ACE is also required, but it is always included with TAO. If you
-will be using the `configure` script for OpenDDS (see the
-[`INSTALL.md`](INSTALL.md) file for details), you do not need to download TAO
+will be using the `configure` script for OpenDDS, you do not need to download TAO
 first -- the `configure` script will download it for you.
-
-There are two distributions of ACE/TAO that can be used with OpenDDS:
-
-* DOC Group ACE 6.5.19 / TAO 2.5.19 or later in the ACE 6.x / TAO 2.x series
-  * When using the configure script, DOC Group ACE/TAO can be downloaded using
-    one of these arguments:
-    * `--doc-group` for the latest release.  This is the default when
-      using the configure script.
-    * `--ace-github-latest` to use the `ace6tao2` branch of ACE/TAO as is. This
-      also downloads the `master` branch of MPC as is.
-  * Can be manually downloaded from:
-    * https://github.com/DOCGroup/ACE_TAO/releases/tag/ACE%2BTAO-6_5_19
-* DOC Group ACE 7.1.0 / TAO 3.1.0 or later in the ACE 7.x / TAO 3.x series.
-  This distribution requires a C++14 capable compiler
-  * When using the configure script, DOC Group ACE/TAO can be downloaded using:
-    * `--doc-group3` for the latest release
-  * Can be manually downloaded from:
-    * https://github.com/DOCGroup/ACE_TAO/releases/tag/ACE%2BTAO-7_1_0
-
-The TAO Developer's Guide book can be requested for free from
-https://objectcomputing.com/products/tao/tao-developers-guide and the CORBA Programmers
-Guide can be downloaded for free from https://www.remedy.nl/opensource/corbapg.html.
 
 ### Perl
 
@@ -141,21 +108,6 @@ included in this source tree, and generating Makefiles or Visual Studio project
 files.
 
 On Windows we recommend the use of [Strawberry Perl](https://strawberryperl.com).
-
-### Optional Dependencies
-
-* [Google Test](docs/dependencies.md#google-test), for various tests.
-  * Google Test is required for OpenDDS tests. If tests are not built, Google Test is not needed.
-* [CMake](docs/dependencies.md#cmake), for building Google Test and the OpenDDS
-  CMake module.
-* [Java](docs/dependencies.md#java), for Java bindings.
-* [Qt](docs/dependencies.md#qt), for Monitor application and ishapes demo.
-* [Wireshark](docs/dependencies.md#wireshark), for the OpenDDS DCPS Wireshark
-  dissector.
-* [RapidJSON](docs/dependencies.md#rapidjson), for optional dissector sample
-  dissection support and JSON typesupport.
-* [Xerces-C++](docs/dependencies.md#xerces), for XML QoS and DDS Security.
-* [OpenSSL](docs/dependencies.md#openssl), for DDS Security.
 
 ## Supported Platforms
 
@@ -182,7 +134,7 @@ Embedded/Mobile/IoT:
 * LynxOS-178 (OpenDDS Safety Profile)
 * VxWorks 6.9, 7, 21.03 (see below)
 * [Linux on Raspberry Pi](https://opendds.org/quickstart/GettingStartedPi.html)
-* [Android 9.0 "Pie" (API Level 28) NDK r18b](docs/android.md)
+* [Android 9.0 "Pie" (API Level 28) NDK r18b](https://opendds.readthedocs.io/en/dds-3.25/building/android.html)
 
 We have built OpenDDS for VxWorks 6.9, 7, and 21.03 and have run basic
 system and performance tests (but not the entire regression test suite).
@@ -211,8 +163,8 @@ This release of OpenDDS has been tested using the following compilers:
 
 ## Building and Installing
 
-For building and installation instructions see the [`INSTALL.md`](INSTALL.md)
-file in this directory.
+For building and installation instructions see
+https://opendds.readthedocs.io/en/dds-3.25/building/index.html
 
 ## Quick Start with Docker
 

@@ -87,9 +87,9 @@ TransportSendStrategy::TransportSendStrategy(
 
   TransportInst_rch cfg = transport->config();
   if (cfg) {
-    max_samples_ = cfg->max_samples_per_packet_;
-    optimum_size_ = cfg->optimum_packet_size_;
-    max_size_ = cfg->max_packet_size_;
+    max_samples_ = cfg->max_samples_per_packet();
+    optimum_size_ = cfg->optimum_packet_size();
+    max_size_ = cfg->max_packet_size();
   }
 
   // Create a ThreadSynch object just for us.

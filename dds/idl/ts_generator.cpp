@@ -22,6 +22,8 @@
 #include <map>
 #include <iostream>
 
+using namespace AstTypeClassification;
+
 namespace {
   std::string read_template(const char* prefix)
   {
@@ -97,21 +99,20 @@ bool ts_generator::generate_ts(AST_Decl* node, UTL_ScopedName* name)
     // error reported in read_template
     return false;
   }
-
-  AST_Structure* struct_node = 0;
-  AST_Union* union_node = 0;
   if (!node || !name) {
     return false;
   }
+
+  AST_Structure* struct_node = 0;
+  AST_Union* union_node = 0;
+  AST_Type::SIZE_TYPE size_type;
   if (node->node_type() == AST_Decl::NT_struct) {
     struct_node = dynamic_cast<AST_Structure*>(node);
+    size_type = struct_node->size_type();
   } else if (node->node_type() == AST_Decl::NT_union) {
     union_node = dynamic_cast<AST_Union*>(node);
+    size_type = union_node->size_type();
   } else {
-    return false;
-  }
-
-  if (!struct_node && !union_node) {
     idl_global->err()->misc_error(
       "Could not cast AST Nodes to valid types", node);
     return false;
@@ -279,6 +280,11 @@ bool ts_generator::generate_ts(AST_Decl* node, UTL_ScopedName* name)
       "  virtual const OpenDDS::XTypes::TypeIdentifier& getCompleteTypeIdentifier() const;\n"
       "  virtual const OpenDDS::XTypes::TypeMap& getCompleteTypeMap() const;\n"
       "\n"
+      "  ::DDS::ReturnCode_t encode_to_string(const " << short_name << "& in, CORBA::String_out out, OpenDDS::DCPS::RepresentationFormat* format);\n"
+      "  ::DDS::ReturnCode_t encode_to_bytes(const " << short_name << "& in, ::DDS::OctetSeq_out out, OpenDDS::DCPS::RepresentationFormat* format);\n"
+      "  ::DDS::ReturnCode_t decode_from_string(const char* in, " << short_name << "_out out, OpenDDS::DCPS::RepresentationFormat* format);\n"
+      "  ::DDS::ReturnCode_t decode_from_bytes(const ::DDS::OctetSeq& in, " << short_name << "_out out, OpenDDS::DCPS::RepresentationFormat* format);\n"
+      "\n"
       "  static " << ts_short_name << "TypeSupport::_ptr_type _narrow(CORBA::Object_ptr obj);\n"
       "};\n\n";
   }
@@ -378,7 +384,93 @@ bool ts_generator::generate_ts(AST_Decl* node, UTL_ScopedName* name)
         "  static OpenDDS::XTypes::TypeMap tm;\n"
         "  return tm;\n";
     }
+    be_global->add_cpp_include("dds/DCPS/JsonValueReader.h");
+    be_global->add_cpp_include("dds/DCPS/JsonValueWriter.h");
+    const bool alloc_out = be_global->language_mapping() != BE_GlobalData::LANGMAP_CXX11 && size_type == AST_Type::VARIABLE;
     be_global->impl_ <<
+      "}\n\n"
+      "::DDS::ReturnCode_t " << ts_short_name << "TypeSupportImpl::encode_to_string(const " << short_name << "& in, CORBA::String_out out, OpenDDS::DCPS::RepresentationFormat* format)\n"
+      "{\n"
+      "#if OPENDDS_HAS_JSON_VALUE_WRITER\n"
+      "  OpenDDS::DCPS::JsonRepresentationFormat_var jrf = OpenDDS::DCPS::JsonRepresentationFormat::_narrow(format);\n"
+      "  if (jrf) {\n"
+      "    rapidjson::StringBuffer buffer;\n"
+      "    rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);\n"
+      "    OpenDDS::DCPS::JsonValueWriter<rapidjson::Writer<rapidjson::StringBuffer> > jvw(writer);\n"
+      "    vwrite(jvw, in);\n"
+      "    out = buffer.GetString();\n"
+      "    return ::DDS::RETCODE_OK;\n"
+      "  }\n"
+      "#else\n"
+      "  ACE_UNUSED_ARG(in);\n"
+      "  ACE_UNUSED_ARG(format);\n"
+      "#endif\n"
+      "  out = \"\";\n"
+      "  return ::DDS::RETCODE_UNSUPPORTED;\n"
+      "}\n\n"
+      "::DDS::ReturnCode_t " << ts_short_name << "TypeSupportImpl::encode_to_bytes(const " << short_name << "& in, ::DDS::OctetSeq_out out, OpenDDS::DCPS::RepresentationFormat* format)\n"
+      "{\n"
+      "#if OPENDDS_HAS_JSON_VALUE_WRITER\n"
+      "  OpenDDS::DCPS::JsonRepresentationFormat_var jrf = OpenDDS::DCPS::JsonRepresentationFormat::_narrow(format);\n"
+      "  if (jrf) {\n"
+      "    CORBA::String_var buffer;\n"
+      "    const ::DDS::ReturnCode_t ret = encode_to_string(in, buffer, format);\n"
+      "    if (ret == ::DDS::RETCODE_OK) {\n"
+      "      const ::DDS::UInt32 len = static_cast< ::DDS::UInt32>(std::strlen(buffer));\n"
+      "      out = new ::DDS::OctetSeq(len);\n"
+      "      out->length(len);\n"
+      "      std::memcpy(out->get_buffer(), buffer, len);\n"
+      "      return ::DDS::RETCODE_OK;\n"
+      "    } else {\n"
+      "      out = new ::DDS::OctetSeq();\n"
+      "      return ret;\n"
+      "    }\n"
+      "  }\n"
+      "#else\n"
+      "  ACE_UNUSED_ARG(in);\n"
+      "  ACE_UNUSED_ARG(format);\n"
+      "#endif\n"
+      "  out = new ::DDS::OctetSeq();\n"
+      "  return ::DDS::RETCODE_UNSUPPORTED;\n"
+      "}\n\n"
+      "::DDS::ReturnCode_t " << ts_short_name << "TypeSupportImpl::decode_from_string(const char* in, " << short_name << "_out " <<
+      (alloc_out ? "out" : "param") << ", OpenDDS::DCPS::RepresentationFormat* format)\n"
+      "{\n";
+
+    if (alloc_out) {
+      be_global->impl_ << "  out = new " << short_name << ";\n";
+    } else {
+      be_global->impl_ <<  "  " << short_name << "* out = &param;\n";
+    }
+
+    be_global->impl_ <<
+      "  OpenDDS::DCPS::set_default(*out);\n"
+      "#if OPENDDS_HAS_JSON_VALUE_READER\n"
+      "  OpenDDS::DCPS::JsonRepresentationFormat_var jrf = OpenDDS::DCPS::JsonRepresentationFormat::_narrow(format);\n"
+      "  if (jrf) {\n"
+      "    rapidjson::StringStream buffer(in);\n"
+      "    OpenDDS::DCPS::JsonValueReader<> jvr(buffer);\n" <<
+      "    return vread(jvr, *out) ? ::DDS::RETCODE_OK : ::DDS::RETCODE_ERROR;\n"
+      "  }\n"
+      "#else\n"
+      "  ACE_UNUSED_ARG(in);\n"
+      "  ACE_UNUSED_ARG(format);\n"
+      "#endif\n"
+      "  return ::DDS::RETCODE_UNSUPPORTED;\n"
+      "}\n\n"
+      "::DDS::ReturnCode_t " << ts_short_name << "TypeSupportImpl::decode_from_bytes(const ::DDS::OctetSeq& in, " << short_name << "_out out, OpenDDS::DCPS::RepresentationFormat* format)\n"
+      "{\n"
+      "#if OPENDDS_HAS_JSON_VALUE_READER\n"
+      "  OpenDDS::DCPS::JsonRepresentationFormat_var jrf = OpenDDS::DCPS::JsonRepresentationFormat::_narrow(format);\n"
+      "  if (jrf) {\n"
+      "    return decode_from_string(reinterpret_cast<const char*>(in.get_buffer()), out, format);\n"
+      "  }\n"
+      "#else\n"
+      "  ACE_UNUSED_ARG(in);\n"
+      "  ACE_UNUSED_ARG(format);\n"
+      "#endif\n"
+      "  out = " << (alloc_out ? "new " : "") << short_name << "();\n"
+      "  return ::DDS::RETCODE_UNSUPPORTED;\n"
       "}\n\n"
       << ts_short_name << "TypeSupport::_ptr_type " << ts_short_name << "TypeSupportImpl::_narrow(CORBA::Object_ptr obj)\n"
       "{\n"
@@ -401,14 +493,137 @@ bool ts_generator::generate_ts(AST_Decl* node, UTL_ScopedName* name)
 }
 
 bool ts_generator::gen_struct(AST_Structure* node, UTL_ScopedName* name,
-  const std::vector<AST_Field*>&, AST_Type::SIZE_TYPE, const char*)
+  const std::vector<AST_Field*>& fields, AST_Type::SIZE_TYPE, const char*)
 {
+  if (be_global->generate_equality() && be_global->language_mapping() == BE_GlobalData::LANGMAP_NONE) {
+    // == and != are generated as class members in other language mappings.
+
+    const char* const nm = name->last_component()->get_string();
+
+    be_global->header_ << be_global->versioning_begin() << "\n";
+    {
+      ScopedNamespaceGuard hGuard(name, be_global->header_);
+
+      be_global->header_
+        << be_global->export_macro() << " bool operator==(const " << nm << "&, const " << nm << "&);\n"
+        << be_global->export_macro() << " bool operator!=(const " << nm << "&, const " << nm << "&);\n";
+    }
+    be_global->header_ << be_global->versioning_end() << "\n";
+
+    be_global->impl_ << be_global->versioning_begin() << "\n";
+    {
+      ScopedNamespaceGuard cppGuard(name, be_global->impl_);
+
+      be_global->impl_ << "bool operator==(const " << nm << "& lhs, const " << nm << "& rhs)\n"
+                       << "{\n";
+      for (size_t i = 0; i < fields.size(); ++i) {
+        const std::string field_name = fields[i]->local_name()->get_string();
+        AST_Type* field_type = resolveActualType(fields[i]->field_type());
+        const Classification cls = classify(field_type);
+        if (cls & CL_ARRAY) {
+          std::string indent("  ");
+          NestedForLoops nfl("int", "i",
+            dynamic_cast<AST_Array*>(field_type), indent, true);
+          be_global->impl_ <<
+            indent << "if (lhs." << field_name << nfl.index_ << " != rhs."
+            << field_name << nfl.index_ << ") {\n" <<
+            indent << "  return false;\n" <<
+            indent << "}\n";
+        } else if (cls & CL_SEQUENCE) {
+          be_global->impl_ <<
+            "  if (!OpenDDS::DCPS::sequence_equal(lhs." << field_name << ", rhs." << field_name << ")) return false;\n";
+        } else {
+          be_global->impl_ <<
+            "  if (lhs." << field_name << " != rhs." << field_name << ") {\n"
+            "    return false;\n"
+            "  }\n";
+        }
+      }
+      be_global->impl_ << "  return true;\n"
+                       << "}\n";
+      be_global->impl_ << "bool operator!=(const " << nm << "& lhs, const " << nm << "& rhs) { return !(lhs == rhs); }\n";
+    }
+    be_global->impl_ << be_global->versioning_end() << "\n";
+  }
+
   return generate_ts(node, name);
 }
 
+namespace {
+  std::string generateEqual(const std::string&, AST_Decl*, const std::string& name, AST_Type* field_type,
+                            const std::string&, bool, Intro&,
+                            const std::string&)
+  {
+    std::stringstream ss;
+
+    AST_Type* actual_field_type = resolveActualType(field_type);
+    const Classification cls = classify(actual_field_type);
+    if (cls & (CL_PRIMITIVE | CL_ENUM)) {
+      ss <<
+        "    return lhs." << name << "() == rhs." << name << "();\n";
+    } else if (cls & CL_STRING) {
+      ss <<
+        "    return std::strcmp (lhs." << name << "(), rhs." << name << "()) == 0 ;\n";
+    } else if (cls & CL_ARRAY) {
+      std::string indent("  ");
+      NestedForLoops nfl("int", "i",
+                         dynamic_cast<AST_Array*>(field_type), indent, true);
+      ss <<
+        indent << "if (lhs." << name << nfl.index_ << " != rhs."
+               << name << nfl.index_ << ") {\n" <<
+        indent << "  return false;\n" <<
+        indent << "}\n";
+      ss <<
+        "    return true;\n";
+    } else if (cls & CL_SEQUENCE) {
+      ss <<
+        "    return OpenDDS::DCPS::sequence_equal(lhs." << name << "(), rhs." << name << "());\n";
+    } else if (cls & (CL_STRUCTURE | CL_UNION | CL_FIXED)) {
+      ss <<
+        "    return lhs." << name << "() == rhs." << name << "();\n";
+    } else {
+      idl_global->err()->misc_warning("Unsupported type for union element", field_type);
+    }
+
+    return ss.str();
+  }
+}
+
 bool ts_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
-  const std::vector<AST_UnionBranch*>&, AST_Type*, const char*)
+  const std::vector<AST_UnionBranch*>& branches, AST_Type* discriminator, const char*)
 {
+  if (be_global->generate_equality() && be_global->language_mapping() == BE_GlobalData::LANGMAP_NONE) {
+    // == and != are generated as class members in other language mappings.
+
+    const char* const nm = name->last_component()->get_string();
+
+    be_global->header_ << be_global->versioning_begin() << "\n";
+    {
+      ScopedNamespaceGuard hGuard(name, be_global->header_);
+
+      be_global->header_
+        << be_global->export_macro() << " bool operator==(const " << nm << "&, const " << nm << "&);\n"
+        << be_global->export_macro() << " bool operator!=(const " << nm << "&, const " << nm << "&);\n";
+    }
+    be_global->header_ << be_global->versioning_end() << "\n";
+
+    be_global->impl_ << be_global->versioning_begin() << "\n";
+    {
+      ScopedNamespaceGuard cppGuard(name, be_global->impl_);
+
+      be_global->impl_ << "bool operator==(const " << nm << "& lhs, const " << nm << "& rhs)\n"
+                       << "{\n"
+                       << "  if (lhs._d() != rhs._d()) return false;\n";
+      if (generateSwitchForUnion(node, "lhs._d()", generateEqual, branches, discriminator, "", "", "", false, false)) {
+        be_global->impl_ <<
+          "  return false;\n";
+      }
+      be_global->impl_ << "}\n";
+      be_global->impl_ << "bool operator!=(const " << nm << "& lhs, const " << nm << "& rhs) { return !(lhs == rhs); }\n";
+    }
+    be_global->impl_ << be_global->versioning_end() << "\n";
+  }
+
   return generate_ts(node, name);
 }
 

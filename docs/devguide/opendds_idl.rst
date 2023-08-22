@@ -9,7 +9,7 @@ opendds_idl
 
 opendds_idl is one of the code generators used in the process of building OpenDDS and OpenDDS applications.
 It can be used in a number of different ways to customize how source code is generated from IDL files.
-See section :ref:`getting_started--processing-the-idl` for an overview of the default usage pattern.
+See :ref:`getting_started--processing-the-idl` for an overview of the default usage pattern.
 
 The OpenDDS IDL compiler is invoked using the ``opendds_idl`` executable, located in :ghfile:`bin/` (on the ``PATH``).
 It parses a single IDL file and generates the serialization and key support code that OpenDDS requires to marshal and demarshal the types described in the IDL file, as well as the type support code for the data readers and writers.
@@ -17,11 +17,11 @@ For each IDL file processed, such as ``xyz.idl``, it generates three files: ``xy
 In the typical usage, ``opendds_idl`` is passed a number of options and the IDL file name as a parameter.
 For example,
 
-::
+.. code-block:: bash
 
     opendds_idl [options...] Foo.idl
 
-The remaining sections of this chapter describe all of the command-line options and the ways that ``opendds_idl`` can be used to generate alternate mappings.
+Subsequent sections describe all of the command-line options and the ways that ``opendds_idl`` can be used to generate alternate mappings.
 
 .. _opendds_idl--opendds-idl-command-line-options:
 
@@ -128,7 +128,7 @@ The following table summarizes the options supported by ``opendds_idl``.
 
    * - ``-Gitl``
 
-     - Generates “Intermediate Type Language” descriptions of datatypes.
+     - Generates "Intermediate Type Language" descriptions of datatypes.
        These files are used by the Wireshark dissector or other external applications.
 
      - Not generated
@@ -147,12 +147,6 @@ The following table summarizes the options supported by ``opendds_idl``.
 
      - Not generated
 
-   * - ``-Grapidjson``
-
-     - Generate type support for converting data samples to/from RapidJSON objects
-
-     - Not generated
-
    * - .. _opendds_idl--gxtypes-complete-option:
 
        .. _opendds_idl--gxtypes-complete:
@@ -160,9 +154,16 @@ The following table summarizes the options supported by ``opendds_idl``.
        ``-Gxtypes-complete``
 
      - Generate complete XTypes TypeObjects which can be used to provide type information to applications that don’t have compile-time knowledge of the IDL.
-       See section :ref:`xtypes--dynamic-language-binding-1`.
+       See :ref:`xtypes--dynamic-language-binding-1`.
 
      - Only minimal TypeObjects are generated
+
+   * - ``-Gequality``
+
+     - Generate ``==`` and ``!=`` for structs and unions.
+       The members of the struct or union must have a type that could appear in a DDS topic and be supported by opendds_idl.
+
+     - Not generated
 
    * - ``-Lface``
 
@@ -218,13 +219,17 @@ The following table summarizes the options supported by ``opendds_idl``.
    * - ``--[no-]default-nested``
 
      - Un-annotated types/modules are treated as nested.
-       See section :ref:`getting_started--topic-types-vs-nested-types` for details.
+       See :ref:`getting_started--topic-types-vs-nested-types` for details.
 
      - Types are nested by default.
 
-   * - ``--default-extensibility VAL``
+   * - .. _opendds_idl--default-extensibility:
 
-     - Set the default XTypes Extensibility – see section :ref:`xtypes--determining-extensibility`
+       ``--default-extensibility``
+
+     - Set the default XTypes extensibility.
+       Can be ``final``, ``appendable`` or ``mutable``.
+       See :ref:`xtypes--extensibility` for details.
 
      - ``appendable``
 
@@ -237,25 +242,31 @@ The following table summarizes the options supported by ``opendds_idl``.
 
    * - ``--default-autoid VAL``
 
-     - Set the default XTypes auto member-id assignment strategy: sequential or hash – see section :ref:`xtypes--autoid-value`
+     - Set the default XTypes auto member-id assignment strategy: sequential or hash – see :ref:`xtypes--autoid-value`
 
      - ``sequential``
 
    * - ``--default-try-construct VAL``
 
-     - Set the default XTypes try-construct strategy: ``discard``, ``use-default``, or ``trim`` – see section :ref:`xtypes--customizing-xtypes-per-member`
+     - Set the default XTypes try-construct strategy: ``discard``, ``use-default``, or ``trim`` – see :ref:`xtypes--customizing-xtypes-per-member`
 
      - ``discard``
 
    * - ``--old-typeobject-encoding``
 
-     - Use the pre-3.18 encoding of ``TypeObject`` s when deriving ``TypeIdentifier`` s
+     - Use the pre-3.18 encoding of ``TypeObject``\s when deriving ``TypeIdentifier``\s
 
      - Use standard encoding
 
+   * - ``--old-typeobject-member-order``
+
+     - Use the pre-3.24 struct and union member order for ``TypeObject``\s, which is ordered by member id instead of declared order.
+       See 3.24.0 news entry for more info.
+
+     - Use standard declared order
+
 The code generation options allow the application developer to use the generated code in a wide variety of environments.
-Since IDL may contain preprocessing directives (``#include``, ``#define``, etc.
-), the C++ preprocessor is invoked by ``opendds_idl``.
+Since IDL may contain preprocessing directives (``#include``, ``#define``, etc.), the C++ preprocessor is invoked by ``opendds_idl``.
 The ``-I`` and ``-D`` options allow customization of the preprocessing step.
 The ``-Wb,export_macro`` option lets you add an export macro to your class definitions.
 This is required if the generated code is going to reside in a shared library and the compiler (such as Visual C++ or GCC) uses the export macro (``dllexport`` on Visual C++ / overriding hidden visibility on GCC).
@@ -270,21 +281,20 @@ Using the IDL-to-C++11 Mapping
 ..
     Sect<8.2>
 
-The IDL-to-C++11 Mapping is a separate specification from the OMG.
-Like the “classic” IDL-to-C++ Mapping, IDL-to-C++11 describes how IDL constructs (structs, sequences, unions, etc.)
-should appear in C++.
+The :ref:`IDL-to-C++11 Mapping <spec-idl-to-cpp11>` is a separate specification from the OMG.
+Like the "classic" IDL-to-C++ Mapping, IDL-to-C++11 describes how IDL constructs (structs, sequences, unions, etc.) should appear in C++.
 Since the IDL-to-C++11 Mapping assumes a C++11 (or higher) compiler and standard library, the code generated is easier to use and looks more natural to C++ developers who are not familiar with the classic mapping.
 For example, IDL strings, arrays, and sequences map to their equivalents in the ``std`` namespace: ``string``, ``array``, and ``vector``.
 All of the details of the mapping are spelled out in the specification document (available at https://www.omg.org/spec/CPP11), however the easiest way to get started with the mapping is to generate code from IDL and examine the generated header file.
 
-In ``opendds_idl``’s default mode (as described in section :ref:`getting_started--processing-the-idl`), responsibility for generating the language mapping is delegated to ``tao_idl`` (using the IDL-to-C++ classic mapping).
+In the default mode of ``opendds_idl`` (as described in :ref:`getting_started--processing-the-idl`), responsibility for generating the language mapping is delegated to ``tao_idl`` (using the IDL-to-C++ classic mapping).
 In this case, ``opendds_idl`` is only responsible for generating the OpenDDS-specific additions such as ``TypeSupport.idl`` and the marshal/demarshal functions.
 
 Contrast this with using ``opendds_idl`` for IDL-to-C++11.
 In this case, ``opendds_idl`` takes over responsibility for generating the language mapping.
 This is indicated by the ``-Lc++11`` command-line option.
 
-Starting with a user-written file ``Foo.idl``, running “``opendds_idl -Lc++11<other options> Foo.idl``” generates these output files:
+Starting with a user-written file ``Foo.idl``, running ``opendds_idl -Lc++11 <other options> Foo.idl`` generates these output files:
 
 * ``FooTypeSupport.idl``
 
@@ -313,21 +323,21 @@ Unlike when using the classic mapping, ``Foo.idl`` is not processed by ``tao_idl
 
   * Note that setting a union value through a modifier method automatically sets the discriminator.
     In cases where there are multiple possible values for the discriminator, a 2-argument modifier method is provided.
-    Using this is preferred to using _d().
+    Using this is preferred to using ``_d()``.
 
-  * If you chose to use the _d() method of the generated union types, note the following requirement from the specification: “The _d discriminator modifier can only be used to set the discriminant to a value within the same union member.”  OpenDDS treats this as a precondition (it is not checked within the implementation).
+  * If you chose to use the ``_d()`` method of the generated union types, take note that it can only be used to set a value that selects the same union member as the one that's currently selected.
+    OpenDDS treats this as a precondition (it is not checked within the implementation).
 
 * strings (narrow and wide), sequences, and arrays
 
   * Bounded strings and sequences are supported, but bounds checks are not currently enforced.
     Due to this limitation, distinct types are not used for bounded instantiations.
 
-* annotations – see section :ref:`getting_started--defining-data-types-with-idl`
+* annotations – see :ref:`getting_started--defining-data-types-with-idl`
 
-* #includes of IDL files that are also used with the IDL-to-C++11 mapping
+* ``#include``\s of IDL files that are also used with the IDL-to-C++11 mapping
 
 When using MPC to generate projects, the ``opendds_cxx11`` base project should be used to inherit the correct settings for code generation.
 If the generated code will be part of a shared library, use the ``-Wb,export_include`` option (in addition to ``-Wb,export_macro``) so that the generated headers have an ``#include`` for the export header.
 
-When using CMake to generate projects, see the CMake module documentation included in the OpenDDS repository (``docs/cmake.md``).
-
+When using CMake to generate projects, see :doc:`/building/cmake`.

@@ -180,16 +180,14 @@
 </xsl:template>
 
 <!-- Output general configuration settings -->
-<xsl:template match="queue_messages_per_pool
-                   | queue_initial_pools
-                   | max_packet_size
+<xsl:template match="max_packet_size
                    | max_samples_per_packet
                    | optimum_packet_size
                    | thread_per_connection
                    | datalink_release_delay
                    | datalink_control_chunks">
-  <xsl:value-of select="concat('    child_inst->', name(), '_ = ',
-                               @value, ';', $newline)"/>
+  <xsl:value-of select="concat('    child_inst->', name(), '(',
+                               @value, ');', $newline)"/>
 </xsl:template>
 
 <!-- Handle TCP-specific configuration parameters -->

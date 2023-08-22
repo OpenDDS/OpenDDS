@@ -5,6 +5,8 @@
  * See: http://www.opendds.org/license.html
  */
 
+#include "SafetyProfileStreams.h"
+
 #include "ace/OS_NS_string.h"
 #include "ace/Truncate.h"
 
@@ -119,6 +121,21 @@ ACE_INLINE bool
 operator>=(const DDS::Time_t& t1, const DDS::Time_t& t2)
 {
   return t2 <= t1;
+}
+
+ACE_INLINE DDS::Time_t
+operator+(const DDS::Time_t& t1, const DDS::Duration_t& d1)
+{
+  CORBA::Long sec = static_cast<CORBA::Long>(static_cast<CORBA::ULong>(t1.sec) + static_cast<CORBA::ULong>(d1.sec));
+  CORBA::ULong nanosec = t1.nanosec + d1.nanosec;
+
+  while (nanosec >= ACE_ONE_SECOND_IN_NSECS) {
+    ++sec;
+    nanosec -= ACE_ONE_SECOND_IN_NSECS;
+  }
+
+  const DDS::Time_t t = { sec, nanosec };
+  return t;
 }
 
 ACE_INLINE DDS::Duration_t
@@ -308,9 +325,73 @@ const MonotonicTime_t& monotonic_time_zero()
 }
 
 ACE_INLINE OpenDDS_Dcps_Export
-DDS::Duration_t make_duration(int sec, unsigned long nanosec)
+DDS::Duration_t make_duration_t(int sec, unsigned long nanosec)
 {
   DDS::Duration_t x;
+  x.sec = sec;
+  x.nanosec = nanosec;
+  return x;
+}
+
+namespace {
+
+  String left_pad(const String& x, char p, size_t total_length) {
+    return String(total_length - x.size(), p) + x;
+  }
+
+  String right_pad(const String& x, char p, size_t total_length) {
+    return x + String(total_length - x.size(), p);
+  }
+
+}
+
+
+ACE_INLINE OpenDDS_Dcps_Export
+String to_dds_string(const DDS::Duration_t& duration)
+{
+  return to_dds_string(duration.sec) + '.' + left_pad(to_dds_string(duration.nanosec), '0', 9);
+}
+
+ACE_INLINE OpenDDS_Dcps_Export
+bool from_dds_string(const String& str, DDS::Duration_t& duration)
+{
+  DDS::Duration_t temp = { 0, 0 };
+
+  const size_t decimal_pos = str.find_first_of('.');
+  if (decimal_pos == std::string::npos) {
+    // Assume integer seconds.
+    if (!DCPS::convertToInteger(str, temp.sec)) {
+      return false;
+    }
+  } else {
+    // Assume decimal seconds.
+    const String sec_str = str.substr(0, decimal_pos);
+    String nanosec_str = str.substr(decimal_pos + 1);
+    if (sec_str.empty() && nanosec_str.empty()) {
+      return false;
+    }
+    if (nanosec_str.size() > 9) {
+      return false;
+    }
+    // Pad the nanosecs.
+    nanosec_str = right_pad(nanosec_str, '0', 9);
+
+    if (!sec_str.empty() && !DCPS::convertToInteger(sec_str, temp.sec)) {
+      return false;
+    }
+    if (!nanosec_str.empty() && !DCPS::convertToInteger(nanosec_str, temp.nanosec)) {
+      return false;
+    }
+  }
+
+  duration = temp;
+  return true;
+}
+
+ACE_INLINE OpenDDS_Dcps_Export
+DDS::Time_t make_time_t(int sec, unsigned long nanosec)
+{
+  DDS::Time_t x;
   x.sec = sec;
   x.nanosec = nanosec;
   return x;

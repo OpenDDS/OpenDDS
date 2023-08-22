@@ -251,96 +251,6 @@ Service_Participant::initial_TypeConsistencyEnforcementQosPolicy() const
 }
 
 ACE_INLINE
-int&
-Service_Participant::federation_recovery_duration()
-{
-  return federation_recovery_duration_;
-}
-
-ACE_INLINE
-int
-Service_Participant::federation_recovery_duration() const
-{
-  return federation_recovery_duration_;
-}
-
-ACE_INLINE
-int&
-Service_Participant::federation_initial_backoff_seconds()
-{
-  return federation_initial_backoff_seconds_;
-}
-
-ACE_INLINE
-int
-Service_Participant::federation_initial_backoff_seconds() const
-{
-  return federation_initial_backoff_seconds_;
-}
-
-ACE_INLINE
-int&
-Service_Participant::federation_backoff_multiplier()
-{
-  return federation_backoff_multiplier_;
-}
-
-ACE_INLINE
-int
-Service_Participant::federation_backoff_multiplier() const
-{
-  return federation_backoff_multiplier_;
-}
-
-ACE_INLINE
-int&
-Service_Participant::federation_liveliness()
-{
-  return federation_liveliness_;
-}
-
-ACE_INLINE
-int
-Service_Participant::federation_liveliness() const
-{
-  return federation_liveliness_;
-}
-
-ACE_INLINE
-long&
-Service_Participant::scheduler()
-{
-  return scheduler_;
-}
-
-ACE_INLINE
-long
-Service_Participant::scheduler() const
-{
-  return scheduler_;
-}
-
-ACE_INLINE
-TimeDuration
-Service_Participant::pending_timeout() const
-{
-  return pending_timeout_;
-}
-
-ACE_INLINE
-void Service_Participant::pending_timeout(const TimeDuration& value)
-{
-  pending_timeout_ = value;
-}
-
-ACE_INLINE
-MonotonicTimePoint Service_Participant::new_pending_timeout_deadline() const
-{
-  return pending_timeout_.is_zero() ?
-    MonotonicTimePoint() : MonotonicTimePoint::now() + pending_timeout_;
-}
-
-ACE_INLINE
 int
 Service_Participant::priority_min() const
 {
@@ -355,44 +265,10 @@ Service_Participant::priority_max() const
 }
 
 ACE_INLINE
-bool&
-Service_Participant::publisher_content_filter()
-{
-  return publisher_content_filter_;
-}
-
-ACE_INLINE
-bool
-Service_Participant::publisher_content_filter() const
-{
-  return publisher_content_filter_;
-}
-
-ACE_INLINE
 bool
 Service_Participant::is_shut_down() const
 {
   return shut_down_;
-}
-
-ACE_INLINE
-bool
-Service_Participant::use_bidir_giop() const
-{
-  return bidir_giop_;
-}
-
-ACE_INLINE
-Service_Participant::TypeObjectEncoding
-Service_Participant::type_object_encoding() const
-{
-  return type_object_encoding_;
-}
-
-ACE_INLINE
-void Service_Participant::type_object_encoding(TypeObjectEncoding encoding)
-{
-  type_object_encoding_ = encoding;
 }
 
 } // namespace DCPS

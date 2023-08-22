@@ -5,6 +5,7 @@
 #include <dds/DCPS/RepoIdConverter.h>
 
 TAO_DDS_DCPSDataWriter_i::TAO_DDS_DCPSDataWriter_i (void)
+  : guid_(OpenDDS::DCPS::GUID_UNKNOWN)
   {
   }
 
@@ -13,13 +14,12 @@ TAO_DDS_DCPSDataWriter_i::~TAO_DDS_DCPSDataWriter_i (void)
   }
 
 void TAO_DDS_DCPSDataWriter_i::add_association (
-    const ::OpenDDS::DCPS::GUID_t& yourId,
     const OpenDDS::DCPS::ReaderAssociation& reader,
     bool /*active*/
   )
   {
 
-    OpenDDS::DCPS::RepoIdConverter converterY(yourId);
+    OpenDDS::DCPS::RepoIdConverter converterY(guid_);
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("\nTAO_DDS_DCPSDataWriter_i::add_associations () :\n")
                ACE_TEXT("\tWriter %C Adding association to a reader:\n"),

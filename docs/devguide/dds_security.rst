@@ -27,7 +27,7 @@ Prerequisites
 ..
     Sect<14.1.1>
 
-OpenDDS includes an implementation of the OMG DDS Security 1.1 specification.
+OpenDDS includes an implementation of the :ref:`DDS Security specification <spec-dds-security>`.
 Building OpenDDS with security enabled requires the following dependencies:
 
 #. Xerces-C++ v3.x
@@ -41,7 +41,7 @@ Building OpenDDS with security enabled requires the following dependencies:
 
 #. CMake (required if building OpenDDS tests and building Google Test and other dependencies from source).
 
-.. note:: General Notes on Using OpenDDS Configure Script with DDS Security
+General Notes on Using OpenDDS Configure Script with DDS Security:
 
 #. DDS Security is disabled by default, enable it with ``--security``
 
@@ -61,34 +61,40 @@ Building OpenDDS with Security on Windows
 
 **Using Microsoft vcpkg**
 
-Microsoft vcpkg is a “C++ Library Manager for Windows, Linux, and macOS” which helps developers build/install dependencies.
+Microsoft vcpkg is a "C++ Library Manager for Windows, Linux, and macOS" which helps developers build/install dependencies.
 Although it is cross-platform, this guide only discusses vcpkg on Windows.
 
 As of this writing, vcpkg is only supported on Visual Studio 2015 Update 3 and later versions; if using an earlier version of Visual Studio, skip down to the manual setup instructions later in this section.
 
-#. * * * If OpenDDS tests will be built, install CMake or put the one that comes with Visual Studio on the PATH (see Common7\IDE\CommonExtensions\Microsoft\CMake).
+* If OpenDDS tests will be built, install CMake or put the one that comes with Visual Studio on the ``PATH`` (see ``Common7\IDE\CommonExtensions\Microsoft\CMake``).
 
-       * If you need to obtain and install vcpkg, navigate to `https://github.com/Microsoft/vcpkg <#https://github.com/Microsoft/vcpkg>`__ and follow the instructions to obtain vcpkg by cloning the repository and bootstrapping it.
+* If you need to obtain and install vcpkg, navigate to `https://github.com/Microsoft/vcpkg <#https://github.com/Microsoft/vcpkg>`__ and follow the instructions to obtain vcpkg by cloning the repository and bootstrapping it.
 
-       * Fetch and build the dependencies; by default, vcpkg targets x86 so be sure to specify the x64 target if required by specifying it when invoking vcpkg install, as shown here:
+* Fetch and build the dependencies; by default, vcpkg targets x86 so be sure to specify the x64 target if required by specifying it when invoking vcpkg install, as shown here:
 
-         ``vcpkg install openssl:x64-windows xerces-c:x64-windows``
+  .. code-block:: doscon
 
-       * Configure OpenDDS by passing the openssl and xerces3 switches.
-         As a convenience, it can be helpful to set an environment variable to store the path since it is the same location for both dependencies.
-         ``set VCPKG_INSTALL=c:\path\to\vcpkg\installed\x64-windows``
+      vcpkg install openssl:x64-windows xerces-c:x64-windows
 
-         ``configure --security --openssl=%VCPKG_INSTALL% --xerces3=%VCPKG_INSTALL%``
+* Configure OpenDDS by passing the openssl and xerces3 switches.
+  As a convenience, it can be helpful to set an environment variable to store the path since it is the same location for both dependencies.
 
-       * Compile with msbuild or by launching Visual Studio from this command prompt so it inherits the correct environment variables and building from there.
+  .. code-block:: doscon
 
-``msbuild /m DDS_TAOv2_all.sln``
+      set VCPKG_INSTALL=c:\path\to\vcpkg\installed\x64-windows
+      configure --security --openssl=%VCPKG_INSTALL% --xerces3=%VCPKG_INSTALL%
 
-::
+* Compile with msbuild or by launching Visual Studio from this command prompt so it inherits the correct environment variables and building from there.
+
+  .. code-block:: doscon
+
+      msbuild /m DDS_TAOv2_all.sln
 
 **Manual Build**
 
-Note: for all of the build steps listed here, check that each package targets the same architecture (either 32-bit or 64-bit) by compiling all dependencies within the same type of Developer Command Prompt.
+.. note::
+
+   For all of the build steps listed here, check that each package targets the same architecture (either 32-bit or 64-bit) by compiling all dependencies within the same type of Developer Command Prompt.
 
 **Compiling OpenSSL**
 
@@ -99,20 +105,22 @@ Official OpenSSL instructions can be found `here <https://wiki.openssl.org/index
 
 #. Install Netwide Assembler (NASM).
    Click through the latest stable release and there is a win32 and win64 directory containing executable installers.
-   The installer does not update the Path environment variable, so a manual entry ``(%LOCALAPPDATA%\bin\NASM)`` is necessary.
+   The installer does not update the Path environment variable, so a manual entry (``%LOCALAPPDATA%\bin\NASM``) is necessary.
 
 #. Download the required version of OpenSSL by cloning the repository.
 
 #. Open a Developer Command Prompt (32-bit or 64-bit depending on the desired target architecture) and change into the freshly cloned openssl directory.
 
-#. Run the configure script and specify a required architecture (``perl Configure VC-WIN32 or perl Configure VC-WIN64A``).
+#. Run the configure script and specify a required architecture (``perl Configure VC-WIN32`` or ``perl Configure VC-WIN64A``).
 
-#. Run ``nmake``.
+#. Run ``nmake``
 
-#. Run ``nmake install``.
+#. Run ``nmake install``
 
-Note: if the default OpenSSL location is desired, which will be searched by OpenDDS, open the Developer Command Prompt as an administrator before running the install.
-It will write to “C:\Program Files” or “C:\Program Files (x86)” depending on the architecture.
+.. note::
+
+   If the default OpenSSL location is desired, which will be searched by OpenDDS, open the "Developer Command Prompt" as an administrator before running the install.
+   It will write to ``C:\Program Files`` or ``C:\Program Files (x86)`` depending on the architecture.
 
 **Compiling Xerces-C++ 3**
 
@@ -122,23 +130,23 @@ Official Xerces instructions can be found `here <https://xerces.apache.org/xerce
 
 #. Create a cmake build directory and change into it (from within the Xerces source tree).
 
-::
+   .. code-block:: bash
 
-    mkdir build
-    cd build
+       mkdir build
+       cd build
 
 #. Run cmake with the appropriate generator.
    In this case Visual Studio 2017 with 64-bit is being used so:
 
-::
+   .. code-block:: bash
 
-    cmake -G "Visual Studio 15 2017 Win64" ..
+       cmake -G "Visual Studio 15 2017 Win64" ..
 
 #. Run cmake again with the build switch and install target (this should be done in an administrator command-prompt to install in the default location as mentioned above).
 
-::
+   .. code-block:: bash
 
-    cmake --build . --target install
+       cmake --build . --target install
 
 **Configuring and Building OpenDDS**:
 
@@ -146,19 +154,22 @@ Official Xerces instructions can be found `here <https://xerces.apache.org/xerce
 
    * If the default location was used for OpenSSL and Xerces, configure should automatically find the dependencies:
 
-::
+     .. code-block:: bash
 
-    configure --security
+         configure --security
 
-#. * If a different location was used (assuming environment variables ``NEW_SSL_ROOT`` and ``NEW_XERCES_ROOT`` point to their respective library directories):
+#. If a different location was used (assuming environment variables ``NEW_SSL_ROOT`` and ``NEW_XERCES_ROOT`` point to their respective library directories):
 
-``configure --security --openssl=%NEW_SSL_ROOT%``
+   .. code-block:: doscon
 
-``--xerces3=%NEW_XERCES_ROOT%``
+       configure --security --openssl=%NEW_SSL_ROOT% \
+         --xerces3=%NEW_XERCES_ROOT%
 
 #. Compile with msbuild (or by opening the solution file in Visual Studio and building from there).
 
-``msbuild /m DDS_TAOv2_all.sln``
+   .. code-block:: doscon
+
+       msbuild /m DDS_TAOv2_all.sln
 
 .. _dds_security--building-opendds-with-security-on-linux:
 
@@ -169,7 +180,7 @@ Building OpenDDS with Security on Linux
     Sect<14.1.3>
 
 Xerces-C++ and OpenSSL may be installed using the system package manager, or built from source.
-If using the system package manager (that is, headers can be found under /usr/include), invoke the configure script with the --security option.
+If using the system package manager (that is, headers can be found under ``/usr/include``), invoke the configure script with the --security option.
 If Xerces-C++ and/or OpenSSL are built from source or installed in a custom location, also provide the ``--xerces3=/foo`` and ``--openssl=/bar`` command line options.
 
 .. _dds_security--building-opendds-with-security-on-macos:
@@ -191,7 +202,7 @@ Building OpenDDS with Security for Android
 ..
     Sect<14.1.5>
 
-See the ``docs/android.md`` file included in the OpenDDS source code.
+See :doc:`/building/android`
 
 .. _dds_security--architecture-of-the-dds-security-specification:
 
@@ -296,7 +307,7 @@ These are specific to the individual Domain Participants within the DDS Domain:
 
 * Permissions Document
 
-- Contains a “subject name” which matches the participant certificate’s Subject
+- Contains a "subject name" which matches the participant certificate’s Subject
 
 - Signed by Permissions CA using its private key
 
@@ -315,9 +326,9 @@ The following configuration steps are required to enable OpenDDS Security featur
 
 #. Enable OpenDDS security-features, which can be done two ways:
 
-   * Via API: ``“TheServiceParticipant->set_security(true);”`` or
+   * Via API: ``TheServiceParticipant->set_security(true);`` or
 
-   * Via config file: ``“DCPSSecurity=1”`` in the ``[common]`` section.
+   * Via config file: ``DCPSSecurity=1`` in the ``[common]`` section.
 
 .. _dds_security--dds-security-configuration-via-propertyqospolicy:
 
@@ -329,7 +340,7 @@ DDS Security Configuration via PropertyQosPolicy
 
 When the application creates a DomainParticipant object, the DomainParticipantQos passed to the ``create_participant()`` method now contains a PropertyQosPolicy object which has a sequence of name-value pairs.
 The following properties must be included to enable security.
-Except where noted, these values take the form of a URI starting with either the scheme “file:” followed by a filesystem path (absolute or relative) or the scheme “data:” followed by the literal data.
+Except where noted, these values take the form of a URI starting with either the scheme "file:" followed by a filesystem path (absolute or relative) or the scheme "data:," followed by the literal data.
 
 .. list-table::
    :header-rows: 1
@@ -464,7 +475,7 @@ Identity, Permissions, and Subject Names
 ..
     Sect<14.5.4>
 
-The “subject_name” element for a signed permissions XML document must match the “Subject:” field provided by the accompanying Identity Certificate which is transmitted during participant discovery, authentication, and authorization.
+The "subject_name" element for a signed permissions XML document must match the "Subject:" field provided by the accompanying Identity Certificate which is transmitted during participant discovery, authentication, and authorization.
 This ensures that the permissions granted by the Permissions CA do, in fact, correspond to the identity provided.
 
 .. _dds_security--examples-in-the-opendds-source-code-repository:
@@ -538,7 +549,7 @@ Creating Self-Signed Certificate Authorities
 
 Generate a self-signed 2048-bit RSA CA:
 
-::
+.. code-block:: bash
 
     openssl genrsa -out ca_key.pem 2048
     openssl req -config openssl.cnf -new -key ca_key.pem -out ca.csr
@@ -546,7 +557,7 @@ Generate a self-signed 2048-bit RSA CA:
 
 Generate self-signed 256-bit Elliptic Curve CA:
 
-::
+.. code-block:: bash
 
     openssl ecparam -name prime256v1 -genkey -out ca_key.pem
     openssl req -config openssl.cnf -new -key ca_key.pem -out ca.csr
@@ -562,7 +573,7 @@ Creating Signed Certificates with an Existing CA
 
 Generate a signed 2048-bit RSA certificate:
 
-::
+.. code-block:: bash
 
     openssl genrsa -out cert_1_key.pem 2048
     openssl req -new -key cert_1_key.pem -out cert_1.csr
@@ -570,7 +581,7 @@ Generate a signed 2048-bit RSA certificate:
 
 Generate a signed 256-bit Elliptic Curve certificate:
 
-::
+.. code-block:: bash
 
     openssl ecparam -name prime256v1 -genkey -out cert_2_key.pem
     openssl req -new -key cert_2_key.pem -out cert_2.csr
@@ -586,7 +597,7 @@ Signing Documents with SMIME
 
 Sign a document using existing CA & CA private key:
 
-::
+.. code-block:: bash
 
     openssl smime -sign -in doc.xml -text -out doc_signed.p7s -signer ca_cert.pem -inkey ca_private_key.pem
 
@@ -634,7 +645,7 @@ If the <max> tag is omitted then the set includes all valid domain ids starting 
 
 If the domain rule or permissions grant should to apply to all domains, use the following:
 
-::
+.. code-block:: xml
 
     <domains>
       <id_range><min>0</min></id_range>
@@ -642,7 +653,7 @@ If the domain rule or permissions grant should to apply to all domains, use the 
 
 If there’s a need to be selective about what domains are chosen, here’s an annotated example:
 
-::
+.. code-block:: xml
 
     <domains>
       <id>2</id>
@@ -725,7 +736,7 @@ The following XML elements are used to configure domain participant behaviors.
      - ProtectionKind
 
      - Indicate the desired level of protection for the whole RTPS message.
-       Very little RTPS data exists outside the “metadata protection” envelope (see topic rule configuration options), and so for most use cases topic-level “data protection” or “metadata protection” can be combined with discovery protection and/or liveliness protection in order to secure domain data adequately.
+       Very little RTPS data exists outside the "metadata protection" envelope (see topic rule configuration options), and so for most use cases topic-level "data protection" or "metadata protection" can be combined with discovery protection and/or liveliness protection in order to secure domain data adequately.
        One item that is not secured by "metadata protection" is the timestamp, since RTPS uses a separate InfoTimestamp submessage for this.
        The timestamp can be secured by using <rtps_protection_kind>
 
@@ -747,7 +758,7 @@ The following XML elements are used to configure topic endpoint behaviors:
 
 A wildcard-capable string used to match topic names.
 See description above.
-A “default” rule to catch all previously unmatched topics can be made with: ``<topic_expression>*</topic_expression>``
+A default rule to catch all previously unmatched topics can be made with: ``<topic_expression>*</topic_expression>``
 
 ``<enable_discovery_protection>`` : **Boolean**
 
@@ -765,7 +776,7 @@ Enables the use of access control protections for matching user topic DataWriter
 
 Specifies the protection kind used for the RTPS SubMessages sent by any DataWriter and DataReader whose associated Topic name matches the rule’s topic expression.
 
-<data_protection_kind> : **BasicProtectionKind**
+``<data_protection_kind>`` : **BasicProtectionKind**
 
 Specifies the basic protection kind used for the RTPS SerializedPayload SubMessage element sent by any DataWriter whose associated Topic name matches the rule’s topic expression.
 
@@ -860,7 +871,7 @@ Each grant bestows access control privileges to a single subject name for a limi
 
 **Subject Name**
 
-Each grant’s subject name is intended to match against a corresponding identity certificate’s “subject” field.
+Each grant’s subject name is intended to match against a corresponding identity certificate’s "subject" field.
 In order for permissions checks to successfully validate for both local and remote participants, the supplied identity certificate subject name must match the subject name of one of the grants included in the permissions file.
 
 **Validity**
@@ -869,21 +880,21 @@ Each grant’s validity section contains a start date and time (``<not_before>``
 
 The format of the date and time, which is like ISO-8601, must take one of the following forms:
 
-#. * * * * ``YYYY-MM-DDThh:mm:ss``
+* ``YYYY-MM-DDThh:mm:ss``
 
-* * * * * Example: ``2020-10-26T22:45:30``
+  * Example: ``2020-10-26T22:45:30``
 
-#. * * * * ``YYYY-MM-DDThh:mm:ssZ``
+* ``YYYY-MM-DDThh:mm:ssZ``
 
-* * * * * Example:``2020-10-26T22:45:30Z``
+  * Example:``2020-10-26T22:45:30Z``
 
-#. * * * * ``YYYY-MM-DDThh:mm:ss+hh:mm``
+* ``YYYY-MM-DDThh:mm:ss+hh:mm``
 
-* * * * * Example:``2020-10-26T23:45:30+01:00``
+  * Example:``2020-10-26T23:45:30+01:00``
 
-#. * * * * ``YYYY-MM-DDThh:mm:ss-hh:mm``
+* ``YYYY-MM-DDThh:mm:ss-hh:mm``
 
-* * * * * Example:``2020-10-26T16:45:30-06:00``
+  * Example:``2020-10-26T16:45:30-06:00``
 
 All fields shown must include leading zeros to fill out their full width, as shown in the examples.
 YYYY-MM-DD is the date and hh:mm:ss is the time in 24-hour format.
@@ -908,7 +919,7 @@ The default rule is the rule applied if none of the grant’s allow rules or den
 
 Every allow or deny rule must contain a set of domain ids to which it applies.
 The syntax is the same as the domain id set found in the governance document.
-See section :ref:`dds_security--key-governance-elements` for details.
+See :ref:`dds_security--key-governance-elements` for details.
 
 **Publish / Subscribe / Relay Rules (PSR rules)**
 
@@ -916,9 +927,10 @@ Every allow or deny rule may optionally contain a list of publish, subscribe, or
 Each rule applies to a collection of topics in a set of partitions with a particular set of data tags.
 As such, each rule must then meet these three conditions (topics, partitions, and (when implemented) data tags) in order to apply to a given operation.
 These conditions are governed by their relevant subsection, but the exact meaning and default values will vary depending on the both the PSR type (publish, subscribe, relay) as well as whether this is an allow rule or a deny rule.
-Each condition is summarized below, but please refer to the OMG DDS Security specification for full details.
+Each condition is summarized below.
+See the DDS Security specification for full details.
 OpenDDS does not currently support relay-only behavior and consequently ignores allow and deny relay rules for both local and remote entities.
-Additionally, OpenDDS does not currently support data tags, and so the data tag condition applied is always the “default” behavior described below.
+Additionally, OpenDDS does not currently support data tags, and so the data tag condition applied is always the "default" behavior described below.
 
 **Topic List**
 
@@ -931,19 +943,19 @@ The topic section must always be present for a PSR rule, so there there is no de
 
 The partitions list contains the set of partition names for which the parent PSR rule applies.
 Similarly to topics, partition names and expressions are matched using POSIX ``fnmatch()`` rules and syntax.
-For “allow” PSR rules, the DDS entity of the associated triggering operation must be using a strict subset of the partitions listed for the rule to apply.
-When no partition list is given for an “allow” PSR rule, the “empty string” partition is used as the default value.
-For “deny” PSR rules, the rule will apply if the associated DDS entity is using any of the partitions listed.
-When no partition list is given for a “deny” PSR rule, the wildcard expression “*” is used as the default value.
+For "allow" PSR rules, the DDS entity of the associated triggering operation must be using a strict subset of the partitions listed for the rule to apply.
+When no partition list is given for an "allow" PSR rule, the "empty string" partition is used as the default value.
+For "deny" PSR rules, the rule will apply if the associated DDS entity is using any of the partitions listed.
+When no partition list is given for a "deny" PSR rule, the wildcard expression "*" is used as the default value.
 
 **Data Tags List**
 
 Data tags are an optional part of the DDS Security specification and are not currently implemented by OpenDDS.
 If they were implemented, the condition criteria for data tags would be similar to partitions.
-For “allow” PSR rules, the DDS entity of the associated triggering operation must be using a strict subset of the data tags listed for the rule to apply.
-When no data tag list is given for an “allow” PSR rule, the empty set of data tags is used as the default value.
-For “deny” PSR rules, the rule will apply if the associated DDS entity is using any of the data tags listed.
-When no data tag list is given for a “deny” PSR rule, the set of “all possible tags” is used as the default value.
+For "allow" PSR rules, the DDS entity of the associated triggering operation must be using a strict subset of the data tags listed for the rule to apply.
+When no data tag list is given for an "allow" PSR rule, the empty set of data tags is used as the default value.
+For "deny" PSR rules, the rule will apply if the associated DDS entity is using any of the data tags listed.
+When no data tag list is given for a "deny" PSR rule, the set of "all possible tags" is used as the default value.
 
 .. _dds_security--permissions-xml-example:
 
@@ -1030,11 +1042,11 @@ The following DDS Security features are not implemented in OpenDDS.
 
    * OpenDDS doesn't use KeyHash, so it meets the spec requirements of not leaking secured data through KeyHash
 
-#. Immutability of Publisher’s Partition QoS (see OMG Issue DDSSEC12-49)
+#. Immutability of Publisher’s Partition QoS, see :omgissue:`DDSSEC12-49`
 
 #. Use of multiple plugin configurations (with different Domain Participants)
 
-#. CRL (RFC 5280) and OCSP (RFC 2560) support
+#. CRL (:RFC:`5280`) and OCSP (:RFC:`2560`) support
 
 #. Certain plugin operations not used by built-in plugins may not be invoked by middleware
 
@@ -1042,7 +1054,7 @@ The following DDS Security features are not implemented in OpenDDS.
 
 #. PKCS#11 for certificates, keys, passwords
 
-#. Relay as a permissions “action” (Publish and Subscribe are supported)
+#. Relay as a permissions "action" (Publish and Subscribe are supported)
 
 #. Legacy matching behavior of permissions based on Partition QoS (9.4.1.3.2.3.1.4 in spec)
 
@@ -1050,5 +1062,5 @@ The following DDS Security features are not implemented in OpenDDS.
 
 #. Configuration of Built-In Crypto’s key reuse (within the DataWriter) and blocks-per-session
 
-#. Signing (without encrypting) at the payload level, see OMG Issue DDSSEC12-59
+#. Signing (without encrypting) at the payload level, see :omgissue:`DDSSEC12-59`
 

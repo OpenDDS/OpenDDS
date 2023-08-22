@@ -46,7 +46,9 @@ public:
     , pub_id_(GUID_UNKNOWN)
     , seq_(SequenceNumber::ZERO())
     , control_msg_count_(0)
-  {}
+  {
+    TransportClient::set_guid(sub_id_);
+  }
 
   virtual ~SimpleDataReader() {}
 
@@ -250,7 +252,7 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 #endif
     ACE_INET_Addr addr(port, ACE_TEXT_ALWAYS_CHAR(host.c_str()));
     rtps_inst->local_address(OpenDDS::DCPS::NetworkAddress(addr));
-    rtps_inst->datalink_release_delay_ = 0;
+    rtps_inst->datalink_release_delay(0);
 
     TransportConfig_rch cfg = TheTransportRegistry->create_config("cfg");
     cfg->instances_.push_back(inst);

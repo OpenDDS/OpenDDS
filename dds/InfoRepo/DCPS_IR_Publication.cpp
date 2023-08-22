@@ -85,7 +85,7 @@ int DCPS_IR_Publication::add_associated_subscription(DCPS_IR_Subscription* sub,
                      std::string(sub_converter).c_str()));
         }
 
-        writer_->add_association(id_, association, active);
+        writer_->add_association(association, active);
 
         if (OpenDDS::DCPS::DCPS_debug_level > 0) {
           ACE_DEBUG((LM_DEBUG,

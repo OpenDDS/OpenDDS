@@ -23,7 +23,7 @@ Multicast is not supported on the public Internet which precludes the use of RTP
 Second, SPDP and SEDP advertise locators (IP and port pairs) for endpoints (DDS readers and writer).
 If the participant is behind a firewall that performs network address translation, then the locators advertised by the participant are useless to participants on the public side of the firewall.
 
-This chapter describes different tools and techniques for getting around these limitations.
+This section describes different tools and techniques for getting around these limitations.
 First, we introduce the *RtpsRelay* as a service for forwarding RTPS messages according to application-defined groups.
 The RtpsRelay can be used to connect participants that are deployed in environments that don't support multicast and whose packets are subject to NAT.
 Second, we introduce Interactive Connection Establishment (ICE) for RTPS.
@@ -113,19 +113,19 @@ Usage
 The RtpsRelay itself is an OpenDDS application.
 The source code is located in ``tools/rtpsrelay``.
 Security must be enabled to build the RtpsRelay.
-See section :ref:`dds_security--building-opendds-with-security-enabled`.
-Each RtpsRelay process has a set of ports for exchanging RTPS messages with the participants called the "vertical" ports and a set of ports for exchanging RTPS messages with other relays called the “horizontal” ports.
+See :ref:`dds_security--building-opendds-with-security-enabled`.
+Each RtpsRelay process has a set of ports for exchanging RTPS messages with the participants called the "vertical" ports and a set of ports for exchanging RTPS messages with other relays called the "horizontal" ports.
 
 The RtpsRelay contains an embedded webserver called the meta discovery server.
 The webserver has the following endpoints:
 
 * ``/config``
 
-  ``Responds with configured content and content type.``
-  ``See -MetaDiscovery options below.``
-  ``Potential client participants can download the necessary configuration from this endpoint.``
+  Responds with configured content and content type.
+  See -MetaDiscovery options below.
+  Potential client participants can download the necessary configuration from this endpoint.
 
-* /``healthcheck``
+* ``/healthcheck``
 
   Responds with HTTP 200 (OK) or 503 (Service Unavailable) if thread monitoring is enabled and the RtpsRelay is not admitting new client participants.
   Load balancers can use this endpoint to route new client participants to an available RtpsRelay instance.
@@ -134,7 +134,7 @@ The command-line options for the RtpsRelay:
 
 * ``-Id STRING``
 
-  ``The Id option is mandatory and is a unique id associated with all topics published by the relay.``
+  The Id option is mandatory and is a unique id associated with all topics published by the relay.
 
 * ``-HorizontalAddress ADDRESS``
 
@@ -158,11 +158,11 @@ The command-line options for the RtpsRelay:
 
 * ``-UserData STRING``
 
-  ``Set the contents of the Application Participant’s UserData QoS policy to the provided string.``
+  Set the contents of the Application Participant’s UserData QoS policy to the provided string.
 
 * ``-BufferSize INTEGER``
 
-  ``Send of send and receive buffers in bytes``
+  Send of send and receive buffers in bytes
 
 * ``-Lifespan SECONDS``
 
@@ -170,15 +170,15 @@ The command-line options for the RtpsRelay:
   Otherwise, participant is marked as not alive.
   The default is 60 seconds.
 
-* ``-InactivePeriodSECONDS``
+* ``-InactivePeriod SECONDS``
 
   RtpsRelay will mark participant as not active if does not receive a datagram from the client in this amount of time.
   The default is 60 seconds.
 
 * ``-AllowEmptyPartitions 0|1``
 
-  ``Allow client participants with no partitions.``
-  ``Defaults to 1 (true).``
+  Allow client participants with no partitions.
+  Defaults to 1 (true).
 
 * ``-IdentityCA PATH``
 
@@ -197,8 +197,8 @@ The command-line options for the RtpsRelay:
 
 * ``-RestartDetection 0|1``
 
-  ``Setting RestartDetction to 1 causes the relay to track clients by the first 6 bytes of their RTPS GUID and source IP address and clean up older sessions with the same key.``
-  ``The default is 0 (false).``
+  Setting RestartDetction to 1 causes the relay to track clients by the first 6 bytes of their RTPS GUID and source IP address and clean up older sessions with the same key.
+  The default is 0 (false).
 
 * ``-LogWarnings0|1``
 
@@ -208,7 +208,7 @@ The command-line options for the RtpsRelay:
 
   Enable/disable logging of the various event types.
 
-* ``-LogRelayStatisticsSECONDS``
+* ``-LogRelayStatistics SECONDS``
 
   ``-LogHandlerStatistics SECONDS``
 
@@ -216,7 +216,7 @@ The command-line options for the RtpsRelay:
 
   Write statistics for the various event types to the log at the given interval, defaults to 0 (disabled).
 
-* ``-PublishRelayStatisticsSECONDS``
+* ``-PublishRelayStatistics SECONDS``
 
   ``-PublishHandlerStatistics SECONDS``
 
@@ -236,27 +236,35 @@ The command-line options for the RtpsRelay:
 
   If thread monitoring is enabled, the RtpsRelay will not accept to new client participants if the CPU utilization of any thread is above this limit, default .95.
 
-* ``-PublishRelayStatusSECONDS``
+* ``-PublishRelayStatus SECONDS``
 
-  ``-PublishRelayStatusLivelinessSECONDS``
+  ``-PublishRelayStatusLiveliness SECONDS``
 
   Setting PublishRelayStatus to a positive integer causes the relay to publish its status at that interval.
   Setting PublishRelayStatusLiveliness to a positive integer causes the relay to set the liveliness QoS on the relay status topic.
 
-* ``-MetaDiscoveryAddress``
+* ``-MetaDiscoveryAddress ADDRESS``
 
   Listening address for the meta discovery server, default 0.0.0.0:8080.
 
-* ``-MetaDiscoveryContentType``
+* ``-MetaDiscoveryContentType CONTENT-TYPE``
 
   The HTTP content type to report for the meta discovery config endpoint, default application/json.
 
-* ``-MetaDiscoveryContentPathPATH``
+* ``-MetaDiscoveryContentPath PATH``
 
-  ``-MetaDiscoveryContentCONTENT``
+  ``-MetaDiscoveryContent CONTENT``
 
   The content returned by the meta discovery config endpoint, default {}.
   If a path is specified, the content of the file will be used.
+
+* ``-MaxIpsPerClient INTEGER``
+
+  The maximum number of IP addresses that the RtpsRelay will maintain for a client participant, defaults to 0 (infinite).
+
+* ``-RejectedAddressDuration SECONDS``
+
+  Amount of time to reject messages from client participants that show suspicious behavior, e.g., those that send messages from the RtpsRelay back to the RtpsRelay.  The default is 0 (disabled).
 
 .. _internet_enabled_rtps--deployment-considerations:
 
@@ -363,7 +371,7 @@ Most applications have common objectives with respect to data security:
 
 * Privacy - The content of a sample cannot be read by an unauthorized third party.
 
-If an application is subject to any of these security objectives, then it should use the DDS Security features described in Chapter :ref:`dds_security--dds-security`.
+If an application is subject to any of these security objectives, then it should use the DDS Security features described in :ref:`dds_security--dds-security`.
 Using a non-secure discovery mechanism or a non-secure transport leaves the application exposed to data security breaches.
 
 .. _internet_enabled_rtps--understand-the-weaknesses-of-secure-rtps-discovery:
@@ -374,7 +382,7 @@ Understand the Weaknesses of (Secure) RTPS Discovery
 ..
     Sect<15.4.2>
 
-Secure RTPS Discovery has a behavior that can be exploited to launch a denial of service attack (see https://us-cert.cisa.gov/ics/advisories/icsa-21-315-02).
+Secure RTPS Discovery has a behavior that can be exploited to launch a denial of service attack (see https://www.cisa.gov/news-events/ics-advisories/icsa-21-315-02).
 Basically, an attacker can send a fake SPDP message to a secure participant which will cause it to begin authentication with a non-existent participant.
 The authentication messages are repeated resulting in amplification.
 An attacker could manipulate a group of secure participants to launch a denial of service attack against a specific host or group of hosts.

@@ -94,6 +94,7 @@ public:
     , callbacks_expected_(0)
     , inline_qos_mode_(DEFAULT_QOS)
   {
+    TransportClient::set_guid(pub_id_);
   }
 
   virtual ~SimpleDataWriter() {}
@@ -226,7 +227,7 @@ int DDS_TEST::test(ACE_TString host, u_short port)
     std::cerr << "ERROR: Failed to cast to RtpsUdpInst\n";
     return 1;
   }
-  rtps_inst->datalink_release_delay_ = 0;
+  rtps_inst->datalink_release_delay(0);
   rtps_inst->heartbeat_period_ = TimeDuration::from_msec(100);
 
   TransportConfig_rch cfg = TheTransportRegistry->create_config("cfg");

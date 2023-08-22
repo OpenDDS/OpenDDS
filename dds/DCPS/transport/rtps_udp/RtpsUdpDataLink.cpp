@@ -15,6 +15,7 @@
 #include <dds/DCPS/Util.h>
 #include <dds/DCPS/Logging.h>
 #include <dds/DCPS/NetworkResource.h>
+#include <dds/DCPS/Qos_Helper.h>
 #include <dds/DCPS/transport/framework/TransportCustomizedElement.h>
 #include <dds/DCPS/transport/framework/TransportSendElement.h>
 #include <dds/DCPS/transport/framework/TransportSendControlElement.h>
@@ -97,7 +98,7 @@ RtpsUdpDataLink::RtpsUdpDataLink(const RtpsUdpTransport_rch& transport,
   , local_crypto_handle_(DDS::HANDLE_NIL)
   , ice_agent_(ICE::Agent::instance())
 #endif
-  , network_interface_address_reader_(make_rch<InternalDataReader<NetworkInterfaceAddress> >(true, rchandle_from(this)))
+  , network_interface_address_reader_(make_rch<InternalDataReader<NetworkInterfaceAddress> >(DCPS::DataReaderQosBuilder().reliability_reliable().durability_transient_local(), rchandle_from(this)))
 {
 #ifdef OPENDDS_SECURITY
   const GUID_t guid = make_id(local_prefix, ENTITYID_PARTICIPANT);
@@ -429,7 +430,7 @@ void RtpsUdpDataLink::on_data_available(RcHandle<InternalDataReader<NetworkInter
   InternalDataReader<NetworkInterfaceAddress>::SampleSequence samples;
   InternalSampleInfoSequence infos;
 
-  network_interface_address_reader_->take(samples, infos);
+  network_interface_address_reader_->take(samples, infos, DDS::LENGTH_UNLIMITED, DDS::ANY_SAMPLE_STATE, DDS::ANY_VIEW_STATE, DDS::ANY_INSTANCE_STATE);
 
   RtpsUdpInst_rch cfg = config();
   if (!cfg || !cfg->use_multicast_) {
@@ -1989,7 +1990,7 @@ RtpsUdpDataLink::RtpsReader::process_heartbeat_i(const RTPS::HeartBeatSubmessage
     }
     if (cumulative_bits_added) {
       RtpsUdpInst_rch cfg = link->config();
-      if (cfg && cfg->count_messages()) {
+      if (cfg && link->transport_statistics_.count_messages()) {
         ACE_Guard<ACE_Thread_Mutex> tsg(link->transport_statistics_mutex_);
         link->transport_statistics_.reader_nack_count[id_] += cumulative_bits_added;
       }
@@ -3045,7 +3046,7 @@ RtpsUdpDataLink::RtpsReader::process_heartbeat_frag_i(const RTPS::HeartBeatFragS
     gather_ack_nacks_i(writer, link, !(hb_frag.smHeader.flags & RTPS::FLAG_F), meta_submessages, cumulative_bits_added);
     if (cumulative_bits_added) {
       RtpsUdpInst_rch cfg = link->config();
-      if (cfg && cfg->count_messages()) {
+      if (cfg && link->transport_statistics_.count_messages()) {
         ACE_GUARD(ACE_Thread_Mutex, g, link->transport_statistics_mutex_);
         link->transport_statistics_.reader_nack_count[id_] += cumulative_bits_added;
       }
@@ -3186,6 +3187,17 @@ RtpsUdpDataLink::RtpsWriter::process_acknack(const RTPS::AckNackSubmessage& ackn
   }
 
   const ReaderInfo_rch& reader = ri->second;
+  const SequenceNumber max_sn = expected_max_sn(reader);
+  const SequenceNumber sn_received_by_reader = ack.previous();
+  if (sn_received_by_reader > max_sn) {
+    if (transport_debug.log_dropped_messages) {
+      ACE_DEBUG((LM_DEBUG, "(%P|%t) {transport_debug.log_dropped_messages} "
+                 "RtpsUdpDataLink::RtpsWriter::process_acknack: %C -> %C "
+                 "Received sequence number (%q) > expected max sequence number (%q)\n",
+                 LogGuid(src).c_str(), LogGuid(id_).c_str(), sn_received_by_reader.getValue(), max_sn.getValue()));
+    }
+    return;
+  }
 
   SequenceNumber previous_acked_sn = reader->acked_sn();
   const bool count_is_not_zero = acknack.count.value != 0;
@@ -3218,20 +3230,18 @@ RtpsUdpDataLink::RtpsWriter::process_acknack(const RTPS::AckNackSubmessage& ackn
   const bool is_final = acknack.smHeader.flags & RTPS::FLAG_F;
   const bool is_postassociation = count_is_not_zero && (is_final || bitmapNonEmpty(acknack.readerSNState) || ack != 1);
 
-  if (preassociation_readers_.count(reader)) {
-    if (is_postassociation) {
-      remove_preassociation_reader(reader);
-      if (transport_debug.log_progress) {
-        log_progress("RTPS writer/reader association complete", id_, reader->id_, reader->participant_discovered_at_);
-      }
-      log_remote_counts("process_acknack");
-
-      const SequenceNumber max_sn = expected_max_sn(reader);
-      const SequenceNumber acked_sn = reader->acked_sn();
-      snris_insert(acked_sn == max_sn ? leading_readers_ : lagging_readers_, reader);
-      check_leader_lagger();
-      // Heartbeat is already scheduled.
+  if (preassociation_readers_.count(reader) && is_postassociation) {
+    remove_preassociation_reader(reader);
+    if (transport_debug.log_progress) {
+      log_progress("RTPS writer/reader association complete", id_, reader->id_, reader->participant_discovered_at_);
     }
+    log_remote_counts("process_acknack");
+
+    const SequenceNumber max_sn = expected_max_sn(reader);
+    const SequenceNumber acked_sn = reader->acked_sn();
+    snris_insert(acked_sn == max_sn ? leading_readers_ : lagging_readers_, reader);
+    check_leader_lagger();
+    // Heartbeat is already scheduled.
   }
 
   OPENDDS_MAP(SequenceNumber, TransportQueueElement*) pendingCallbacks;
@@ -3705,7 +3715,7 @@ RtpsUdpDataLink::RtpsWriter::gather_nack_replies_i(MetaSubmessageVec& meta_subme
 
   if (cumulative_send_count) {
     RtpsUdpInst_rch cfg = link->config();
-    if (cfg && cfg->count_messages()) {
+    if (cfg && link->transport_statistics_.count_messages()) {
       ACE_GUARD(ACE_Thread_Mutex, g, link->transport_statistics_mutex_);
       link->transport_statistics_.writer_resend_count[id_] += static_cast<ACE_CDR::ULong>(cumulative_send_count);
     }

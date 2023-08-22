@@ -414,7 +414,7 @@ Each status operation takes the general form of ``on_<status_name>(<entity>, <st
 Read statuses omit the second parameter.
 For example, here is the operation for the Sample Lost status:
 
-::
+.. code-block:: cpp
 
       void on_sample_lost(in DataReader the_reader, in SampleLostStatus status);
 
@@ -444,7 +444,7 @@ Mask bit values for each status are defined in DdsDcpsInfrastructure.idl:
       const StatusKind SUBSCRIPTION_MATCHED_STATUS      = 0x0001 << 14;
     };
 
-Simply do a bit-wise “or” of the desired status bits to construct a mask for your listener.
+Simply do a bit-wise "or" of the desired status bits to construct a mask for your listener.
 Here is an example of attaching a listener to a data reader (for just Data Available statuses):
 
 .. code-block:: cpp
@@ -462,12 +462,12 @@ Here is an example showing how to change the listener using ``set_listener()``:
 .. code-block:: cpp
 
       dr->set_listener(listener,
-      DDS::DATA_AVAILABLE_STATUS |       DDS::LIVELINESS_CHANGED_STATUS);
+                       DDS::DATA_AVAILABLE_STATUS | DDS::LIVELINESS_CHANGED_STATUS);
 
 When a plain communication status changes, OpenDDS invokes the most specific relevant listener operation.
 This means, for example, that a data reader’s listener would take precedence over the subscriber’s listener for statuses related to the data reader.
 
-A common “gotcha” when using ``set_listener`` is that the listener is not invoked immediately.
+A common "gotcha" when using ``set_listener`` is that the listener is not invoked immediately.
 Instead, the listener will be invoked for the next status change.
 Consequently, usages of ``set_listener`` should 1) invoke the listener manually after calling ``set_listener`` and 2) ensure that the listener methods are thread safe.
 
@@ -687,7 +687,7 @@ Query Conditions
 
 Query conditions are a specialized form of read conditions that are created with a limited form of an SQL-like query.
 This allows applications to filter the data samples that trigger the condition and then are read use the normal read condition mechanisms.
-See Section :ref:`content_subscription_profile--query-condition` for more information about query conditions.
+See :ref:`content_subscription_profile--query-condition` for more information about query conditions.
 
 .. _conditions_and_listeners--guard-conditions:
 

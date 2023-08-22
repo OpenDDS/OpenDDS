@@ -249,7 +249,7 @@ public:
   bool update_topic_qos(const GUID_t& topicId, DDS::DomainId_t domainId,
     const GUID_t& participantId, const DDS::TopicQos& qos);
 
-  GUID_t add_publication(
+  bool add_publication(
     DDS::DomainId_t domainId,
     const GUID_t& participantId,
     const GUID_t& topicId,
@@ -278,7 +278,7 @@ public:
     const GUID_t& dwId,
     const DCPS::TransportLocatorSeq& transInfo);
 
-  GUID_t add_subscription(
+  bool add_subscription(
     DDS::DomainId_t domainId,
     const GUID_t& participantId,
     const GUID_t& topicId,

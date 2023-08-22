@@ -27,12 +27,6 @@ public abstract class TransportInst implements Serializable {
 
     public native String getName();
 
-    public native int getQueueMessagesPerPool();
-    public native void setQueueMessagesPerPool(int qmpp);
-
-    public native int getQueueInitialPools();
-    public native void setQueueInitialPools(int qip);
-
     public native int getMaxPacketSize();
     public native void setMaxPacketSize(int mps);
 

@@ -187,7 +187,6 @@ class OpenDDS_Dcps_Export MetaStruct {
 public:
   virtual ~MetaStruct();
 
-  virtual Value getValue(const void* stru, DDS::MemberId memberId) const = 0;
   virtual Value getValue(const void* stru, const char* fieldSpec) const = 0;
   virtual Value getValue(Serializer& ser, const char* fieldSpec, const TypeSupportImpl* ts = 0) const = 0;
 

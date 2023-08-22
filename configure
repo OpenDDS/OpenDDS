@@ -29,8 +29,8 @@ use command_utils;
 use ChangeDir;
 
 ## Version of DOC Group ACE/TAO to download, uses the ACE version number
-my $doc_tao2_version = '6.5.19';
-my $doc_tao3_version = '7.1.0';
+my $doc_tao2_version = '6.5.20';
+my $doc_tao3_version = '7.1.1';
 
 my $backup_timestamp = strftime "%Y-%m-%d-%H-%M-%S", localtime time;
 
@@ -129,7 +129,6 @@ my %platforminfo =
                       "Use --macros=android_sdk=<SDK_PATH> and",
                       "--macros=android_target_api=<API_NUMBER> to specify",
                       "where to find android.jar.",
-                      "See docs/android.md for details.",
                     ],
                   'needs_i2jrt_corba' => 1,
                   'java_platform' => 'android',
@@ -851,8 +850,12 @@ if (!$ace_src || !$tao_src) {
       if ! which('git');
 
     my $urlbase = 'https://github.com/DOCGroup';
+    my $branch = 'ace6tao2';
+    if ($opts{'doc-group3'}) {
+      $branch = 'master';
+    }
 
-    my $err = git_clone('ACE_TAO', "$urlbase/ACE_TAO", branch => 'ace6tao2');
+    my $err = git_clone('ACE_TAO', "$urlbase/ACE_TAO", branch => $branch);
     die "ERROR: Failed to clone ACE/TAO from GitHub\nStopped"
       if $err ||
         ! -r 'ACE_TAO/ACE/ace/ACE.h' ||
@@ -2733,6 +2736,33 @@ sub write_cmake_file {
         name => 'COVERAGE',
         feature => 'dds_non_coverage',
         inverted => 1,
+      },
+      {
+        name => 'TAO_CORBA_E_COMPACT',
+        feature => 'corba_e_compact',
+      },
+      {
+        name => 'TAO_CORBA_E_MICRO',
+        feature => 'corba_e_micro',
+      },
+      {
+        name => 'TAO_MINIMUM_CORBA',
+        feature => 'minimum_corba',
+      },
+      {
+        name => 'TAO_IIOP',
+        feature => 'tao_no_iiop',
+        inverted => 1,
+        default => 1,
+      },
+      {
+        name => 'TAO_GEN_OSTREAM',
+        feature => 'gen_ostream',
+      },
+      {
+        name => 'TAO_OPTIMIZE_COLLOCATED_INVOCATIONS',
+        feature => 'optimize_collocated_invocations',
+        default => 1,
       },
     );
     my %features = get_features($buildEnv);

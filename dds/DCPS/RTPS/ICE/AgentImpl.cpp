@@ -10,6 +10,7 @@
 #include "Task.h"
 #include "EndpointManager.h"
 
+#include <dds/DCPS/Qos_Helper.h>
 #include <dds/DCPS/Service_Participant.h>
 #include <dds/DCPS/TimeTypes.h>
 
@@ -90,7 +91,7 @@ AgentImpl::AgentImpl()
   : DCPS::InternalDataReaderListener<DCPS::NetworkInterfaceAddress>(TheServiceParticipant->job_queue())
   , ReactorInterceptor(TheServiceParticipant->reactor(), TheServiceParticipant->reactor_owner())
   , unfreeze_(false)
-  , reader_(DCPS::make_rch<DCPS::InternalDataReader<DCPS::NetworkInterfaceAddress> >(true, DCPS::rchandle_from(this)))
+  , reader_(DCPS::make_rch<DCPS::InternalDataReader<DCPS::NetworkInterfaceAddress> >(DCPS::DataReaderQosBuilder().reliability_reliable().durability_transient_local(), DCPS::rchandle_from(this)))
   , reader_added_(false)
   , remote_peer_reflexive_counter_(0)
 {
@@ -262,7 +263,7 @@ void AgentImpl::on_data_available(DCPS::RcHandle<DCPS::InternalDataReader<DCPS::
 {
   DCPS::InternalDataReader<DCPS::NetworkInterfaceAddress>::SampleSequence samples;
   DCPS::InternalSampleInfoSequence infos;
-  reader_->take(samples, infos);
+  reader_->take(samples, infos, DDS::LENGTH_UNLIMITED, DDS::ANY_SAMPLE_STATE, DDS::ANY_VIEW_STATE, DDS::ANY_INSTANCE_STATE);
 
   // FUTURE: This polls the endpoints.  The endpoints should just publish the change.
   ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, mutex);

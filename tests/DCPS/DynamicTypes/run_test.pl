@@ -13,7 +13,6 @@ sub run_test {
   my $extensibility = shift;
   my $xcdr = shift;
 
-
   my $test_name = "${type}_${extensibility}_XCDR$xcdr";
   my @common_args = (
     "${type}_${extensibility}",

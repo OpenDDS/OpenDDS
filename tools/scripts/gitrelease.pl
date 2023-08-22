@@ -11,6 +11,7 @@ use File::Temp qw/tempdir/;
 use File::Path qw/make_path remove_tree/;
 use File::Copy qw/copy/;
 use File::Find qw/find/;
+use File::Spec;
 use Getopt::Long;
 use JSON::PP;
 use Storable qw/dclone/;
@@ -46,8 +47,9 @@ my $workspace_info_filename = "info.json";
 my $default_sftp_base_dir = "";
 my $sftp_downloads_path = "downloads/OpenDDS";
 my $sftp_previous_releases_path = 'previous-releases/';
-my $rtd_url_base = 'https://readthedocs.org/api/v3/';
-my $rtd_project_url = "${rtd_url_base}projects/opendds/";
+my $rtd_project_name = 'opendds';
+my $rtd_project_url = "https://readthedocs.org/api/v3/projects/$rtd_project_name/";
+my $rtd_url = "https://$rtd_project_name.readthedocs.io";
 my $json_mime = 'application/json';
 
 $ENV{TZ} = "UTC";
@@ -55,65 +57,6 @@ Time::Piece::_tzset;
 my $timefmt = "%a %b %d %H:%M:%S %Z %Y";
 
 my $release_timestamp_fmt = "%b %e %Y";
-
-# Number of lines after start of file to insert news_template
-my $news_header_lines = 2;
-
-my $news_template = "## Version %s of OpenDDS\n" . <<"ENDOUT";
-%s
-
-### Additions:
-- TODO: Add your features here
-
-### Fixes:
-- TODO: Add your fixes here
-
-### Notes:
-- TODO: Add your notes here
-
-ENDOUT
-
-sub get_news_post_release_msg {
-  my $settings = shift();
-  my $ver = $settings->{parsed_next_version}->{release_string};
-  return "OpenDDS $ver is currently in development, so this list might change.";
-}
-my $news_post_release_msg_re =
-  qr/^OpenDDS .* is currently in development, so this list might change\.$/;
-
-sub get_news_release_msg {
-  my $settings = shift();
-  return "OpenDDS $settings->{version} was released on $settings->{timestamp}.";
-}
-
-my $insert_news_template_after_line = 1;
-sub insert_news_template($$) {
-  my $settings = shift();
-  my $post_release = shift();
-
-  my $version = ($post_release ?
-    $settings->{parsed_next_version} : $settings->{parsed_version})->{release_string};
-  my $release_msg = $post_release ?
-    get_news_post_release_msg($settings) : get_news_release_msg($settings);
-
-  # Read News File
-  open my $news_file, '<', "NEWS.md";
-  my @lines = <$news_file>;
-  close $news_file;
-
-  # Insert Template
-  my @new_lines = ();
-  push(@new_lines, @lines[0..$insert_news_template_after_line]);
-  push(@new_lines, sprintf($news_template, $version, $release_msg));
-  push(@new_lines, @lines[$insert_news_template_after_line+1..scalar(@lines)-1]);
-
-  # Write News File with Template
-  open $news_file, '>', "NEWS.md";
-  foreach my $line (@new_lines) {
-    print $news_file $line;
-  }
-  close $news_file;
-}
 
 sub get_version_line {
   my $settings = shift();
@@ -126,6 +69,13 @@ sub get_version_line {
     $line .= "$settings->{version}, released $settings->{timestamp}";
   }
   return $line;
+}
+
+sub get_rtd_link {
+  my $settings = shift();
+  my $post_release = shift() // 0;
+
+  return "$rtd_url/en/" . ($post_release ? 'latest-release' : lc($settings->{git_tag}));
 }
 
 sub usage {
@@ -171,22 +121,20 @@ sub help {
     "  --download-url=URL     URL to verify SFTP uploads\n" .
     "                         (default: ${default_download_url})\n" .
     "  --mock                 Enable mock release-specific checks and fake the\n" .
-    "                         Doxygen and Devguide steps if they're not being\n" .
-    "                         skipped.\n" .
+    "                         Doxygen step if it's not being skipped.\n" .
     "  --mock-with-doxygen    Same as --mock, but with real Doxygen steps if they're\n" .
     "                         not being skipped\n" .
     "  --micro                Do a patch/micro level release. Requires --branch.\n" .
     "                         (default is no)\n" .
     "                         The difference from a regular release is that anything\n" .
-    "                         to do with the the devguide, the doxygen, the website,\n" .
-    "                         or creating or updating a release branch is skipped.\n" .
+    "                         to do with the the the doxygen, the website, or\n" .
+    "                         creating or updating a release branch is skipped.\n" .
     "                         Run gitrelease.pl --list --micro to see the exact steps.\n" .
     "  --next-version=VERSION What to set the verion to after release. Must be the\n" .
     "                         same format as the VERSION positional argument.\n" .
     "                         (default is to increment the minor version field).\n" .
     "  --metadata=ID          What to append to the post-release version string like\n" .
     "                         X.Y.Z-ID (default: ${default_post_release_metadata})\n" .
-    "  --skip-devguide        Skip getting and including the devguide\n" .
     "  --skip-doxygen         Skip getting ACE/TAO and generating and including the\n" .
     "                         doxygen docs\n" .
     "  --skip-website         Skip updating the website\n" .
@@ -201,9 +149,9 @@ sub help {
     "                         micro series.\n" .
     "  --upload-shapes-demo   Check GitHub for a finished shapes demo build workflow\n" .
     "                         run. Then download, repackage, and upload the results\n" .
-    "                         to the download server. This doesn't run any steps,\n" .
-    "                         but still requires the WORKSPACE and VERSION arguments\n" .
-    "                         and accepts and uses other relevant options.\n" .
+    "                         to the download server and Github. This doesn't run any\n" .
+    "                         steps, but still requires the WORKSPACE and VERSION\n" .
+    "                         arguments and accepts and uses other relevant options.\n" .
     "  --update-authors       Just update the AUTHORS files like in a release.\n" .
     "                         This doesn't run any release steps and doesn't require\n" .
     "                         the WORKSPACE or VERSION arguments.\n" .
@@ -262,55 +210,10 @@ sub normalizePath {
   return remove_end_slash($val);
 }
 
-sub news_contents_excerpt($) {
-  my $version = quotemeta(shift);
-  my @lines;
-  open(my $news, "NEWS.md") or die "Can't read NEWS.md file";
-  my $saw_version = 0;
-  while (<$news>) {
-    if (/^## Version $version of OpenDDS/) {
-      $saw_version = 1;
-      next;
-    }
-    elsif (/^##[^#]/ && $saw_version) { # Until we come to the next h2
-      last;
-    }
-    if ($saw_version) {
-      if ($saw_version < 2) { # Skip Timestamp Line
-        $saw_version++;
-        next;
-      }
-      push (@lines, $_);
-    }
-  }
-  close $news;
-  return join("", @lines);
-}
-
-sub email_announce_contents {
-  my $settings = shift();
-
-  my $result =
-    "OpenDDS version $settings->{version} is now available for download at $settings->{download_url}/\n" .
-    "\n";
-
-  if (!$settings->{skip_devguide}) {
-    $result .=
-      "An updated version of the OpenDDS Developer's Guide PDF is available\n" .
-      "from $settings->{download_url}/$settings->{devguide_ver}\n" .
-      "\n";
-  }
-
-  $result .=
-    "Updates in this version:\n" .
-    news_contents_excerpt($settings->{version});
-
-  return $result;
-}
-
 sub run_command {
   return !command_utils::run_command(@_,
     script_name => 'gitrelease.pl',
+    verbose => 1,
   );
 }
 
@@ -401,7 +304,13 @@ sub check_pithub_result {
   my $result = shift();
   my $extra_msg = shift() // '';
 
-  check_pithub_response($result->response, $extra_msg);
+  if ($result->isa('Pithub::Result')) {
+    check_pithub_response($result->response, $extra_msg);
+  } elsif ($result->isa('Pithub::Response')) {
+    check_pithub_response($result, $extra_msg);
+  } else {
+    die_with_stack_trace('Argument is not a Pithub::Result or Pithub::Response');
+  }
 }
 
 sub read_json_file {
@@ -845,7 +754,7 @@ sub trigger_shapes_run {
       ref => $settings->{git_tag},
     },
   );
-  check_pithub_response($response);
+  check_pithub_result($response);
 }
 
 sub get_last_shapes_run {
@@ -858,7 +767,7 @@ sub get_last_shapes_run {
       branch => $settings->{git_tag},
     },
   );
-  check_pithub_response($response);
+  check_pithub_result($response);
   for my $run (@{$response->content->{workflow_runs}}) {
     if (is_shapes_workflow_path($run->{path})) {
       print("Last workflow run for $settings->{git_tag} was $run->{html_url}\n");
@@ -900,7 +809,7 @@ sub upload_shapes_demo {
     method => 'GET',
     path => "$actions_url/runs/$run->{id}/artifacts",
   );
-  check_pithub_response($response);
+  check_pithub_result($response);
   my @artifacts;
   for my $artifact (@{$response->content->{'artifacts'}}) {
     print("FOUND ID: $artifact->{id} NAME: $artifact->{name}\n");
@@ -918,7 +827,7 @@ sub upload_shapes_demo {
       method => 'GET',
       path => "$actions_url/artifacts/$artifact->{id}/zip",
     );
-    check_pithub_response($response);
+    check_pithub_result($response);
     open(my $fd, '>', $artifact->{path}) or die ("Could not open $artifact->{path}: $!");
     binmode($fd);
     print $fd $response->raw_content();
@@ -970,25 +879,35 @@ sub upload_shapes_demo {
     create_archive($dir_path, $arc) or die("Failed to create demo archive $arc");
   }
 
-  my $sftp = new_sftp($settings);
-  my $dest_dir = 'ShapesDemo';
-  $sftp->mkpath($dest_dir);
-  $sftp->setcwd($dest_dir);
+  if (!$settings->{skip_sftp}) {
+    print("Upload via SFTP\n");
+    my $sftp = new_sftp($settings);
+    my $dest_dir = 'ShapesDemo';
+    $sftp->mkpath($dest_dir);
+    $sftp->setcwd($dest_dir);
 
-  # Delete old files
-  foreach my $file (map {$_->{filename}} @{$sftp->ls()}) {
-    if ($file =~ /^ShapesDemo-/) {
-      print("deleting $file\n");
-      $sftp->remove($file);
+    # Delete old files
+    foreach my $file (map {$_->{filename}} @{$sftp->ls()}) {
+      if ($file =~ /^ShapesDemo-/) {
+        print("deleting $file\n");
+        $sftp->remove($file);
+      }
+    }
+
+    # Upload new ones
+    foreach my $upload (@to_upload) {
+      my $name = basename($upload);
+      print("putting $name\n");
+      $sftp->put($upload, $name);
     }
   }
 
-  # Upload new ones
-  foreach my $upload (@to_upload) {
-    my $name = basename($upload);
-    print("putting $name\n");
-    $sftp->put($upload, $name);
-  }
+  print("Upload to Github\n");
+  my %asset_details;
+  get_assets($settings, \@to_upload, \%asset_details);
+  my $release = get_github_releases($settings)->first;
+  github_upload_assets($settings, \@to_upload, \%asset_details, $release->{id},
+    "\nGithub upload failed, try again");
 }
 
 my $step_subexpr_re = qr/(\^?)(\d*)(-?)(\d*)/;
@@ -1081,6 +1000,15 @@ sub parse_release_tag {
   return $parsed;
 }
 
+sub get_github_releases {
+  my $settings = shift();
+
+  my $release_list = $settings->{pithub}->repos->releases->list();
+  check_pithub_result($release_list);
+
+  return $release_list;
+}
+
 sub get_releases {
   my $settings = shift();
 
@@ -1093,8 +1021,7 @@ sub get_releases {
     }];
   }
 
-  my $release_list = $settings->{pithub}->repos->releases->list();
-  check_pithub_result($release_list);
+  my $release_list = get_github_releases($settings);
 
   my @releases = ();
   while (my $release = $release_list->next) {
@@ -1201,8 +1128,7 @@ sub remedy_git_status_clean {
   }
   return 0 if (!yes_no("Would you like to add and commit these changes?"));
   if (!$post_release && $changelog) {
-    system("git add $settings->{changelog}") == 0
-      or die "Could not execute: git add $settings->{changelog}";
+    run_command("git add $settings->{changelog} $settings->{news}", autodie => 1);
   }
   system("git add -u") == 0 or die "Could not execute: git add -u";
   my $message;
@@ -1595,113 +1521,28 @@ sub remedy_authors {
 
 ############################################################################
 
-sub verify_news_file_section {
+sub news_cmd {
   my $settings = shift();
-  my $version = $settings->{version};
-  my $status = open(NEWS, 'NEWS.md');
-  my $metaversion = quotemeta($version);
-  my $has_version = 0;
-  while (<NEWS>) {
-    if ($_ =~ /^## Version $metaversion of OpenDDS/) {
-      $has_version = 1;
-    }
-  }
-  close(NEWS);
 
-  return $has_version;
+  my @cmd = ('python3', 'docs/news.py', 'release');
+  push(@cmd, '--mock') if ($settings->{mock});
+  push(@cmd, @_);
+  return run_command(\@cmd);
 }
 
-sub message_news_file_section {
+sub verify_news {
   my $settings = shift();
-  my $version = $settings->{version};
-  return "NEWS.md file release $version section needs updating";
+  return news_cmd($settings);
 }
 
-sub remedy_news_file_section {
+sub message_news {
   my $settings = shift();
-  my $version = $settings->{version};
-  print "  >> Adding $version section template to NEWS.md\n";
-  # If doing a mock release, the template is okay.
-  my $ok = $settings->{mock};
-  if (!$ok) {
-    print "  !! Manual update to NEWS.md needed\n";
-  }
-  insert_news_template($settings, 0);
-  return $ok;
+  return "News needs to be processed";
 }
 
-############################################################################
-
-sub verify_update_news_file {
+sub remedy_news {
   my $settings = shift();
-  my $version = $settings->{version};
-  my $status = open(NEWS, 'NEWS.md');
-  my $metaversion = quotemeta($version);
-  my $has_version = 0;
-  my $corrected_features = 1;
-  my $corrected_fixes = 1;
-  my $real_release = !$settings->{mock};
-  while (<NEWS>) {
-    if ($_ =~ /^## Version $metaversion of OpenDDS/) {
-      $has_version = 1;
-    }
-    elsif ($real_release && $_ =~ /TODO: Add your features here/) {
-      $corrected_features = 0;
-    }
-    elsif ($real_release && $_ =~ /TODO: Add your fixes here/) {
-      $corrected_fixes = 0;
-    }
-  }
-  close(NEWS);
-
-  return $has_version && $corrected_features && $corrected_fixes;
-}
-
-sub message_update_news_file {
-  return "NEWS.md file needs updating with current version release notes";
-}
-
-############################################################################
-
-sub verify_news_timestamp {
-  my $settings = shift();
-  my $has_post_release_msg = 0;
-  open(my $news_file, 'NEWS.md');
-  while (<$news_file>) {
-    if ($_ =~ $news_post_release_msg_re) {
-      $has_post_release_msg = 1;
-      last;
-    }
-  }
-  close($news_file);
-  return !$has_post_release_msg;
-}
-
-sub message_news_timestamp {
-  return "The NEWS.md section for this release needs its timestamp inserted";
-}
-
-sub remedy_news_timestamp {
-  my $settings = shift();
-  my $release_msg = get_news_release_msg($settings);
-
-  # Read News File
-  open(my $news_file, '<', "NEWS.md");
-  my @lines = <$news_file>;
-  close $news_file;
-
-  # Insert Template
-  foreach my $line (@lines) {
-    last if $line =~ s/$news_post_release_msg_re/$release_msg/;
-  }
-
-  # Write News File
-  open($news_file, '>', "NEWS.md");
-  foreach my $line (@lines) {
-    print $news_file ($line);
-  }
-  close($news_file);
-  return 1;
+  return news_cmd($settings, '--remedy');
 }
 
 ############################################################################
@@ -1891,6 +1732,62 @@ sub remedy_update_prf_file {
   close(PRF) or die("Closing: $!");
 
   return (($corrected_header == 1) && ($corrected_version == 1));
+}
+
+############################################################################
+
+my $readme_file = 'README.md';
+
+sub verify_update_readme_file {
+  my $settings = shift();
+  my $step_options = shift() // {};
+  my $post_release = $step_options->{post_release} // 0;
+
+  my $link = get_rtd_link($settings, $post_release);
+  my $link_re = quotemeta($link);
+  my $found_link = 0;
+  open(my $fh, $readme_file) or die("Can't open \"$readme_file\": $?");
+  while (<$fh>) {
+    if ($_ =~ /$link_re/) {
+      $found_link = 1;
+      last;
+    }
+  }
+  close($fh);
+
+  if (!$found_link) {
+    print("Didn't find $link\n");
+  }
+
+  return $found_link;
+}
+
+sub message_update_readme_file {
+  return "$readme_file file needs updating with current version"
+}
+
+sub remedy_update_readme_file {
+  my $settings = shift();
+  my $post_release = shift() // 0;
+
+  my $link = quotemeta(get_rtd_link($settings, !$post_release));
+  my $replace_with = get_rtd_link($settings, $post_release);
+  my $replaced_link = 0;
+  open(my $fh, "+< $readme_file") or die("Can't open \"$readme_file\": $?");
+  my $out = '';
+  while (<$fh>) {
+    if ($_ =~ s/$link/$replace_with/) {
+      $replaced_link = 1;
+    }
+    $out .= $_;
+  }
+
+  seek($fh, 0, 0) or die("Seeking: $!");
+  print $fh $out or die("Printing: $!");
+  truncate($fh, tell($fh)) or die("Truncating: $!");
+  close($fh) or die("Closing: $!");
+
+  return $replaced_link;
 }
 
 ############################################################################
@@ -2390,38 +2287,6 @@ sub remedy_zip_doxygen {
 
 ############################################################################
 
-sub verify_devguide {
-  my $settings = shift();
-  return (-f "$settings->{workspace}/$settings->{devguide_ver}" &&
-          -f "$settings->{workspace}/$settings->{devguide_lat}");
-}
-
-sub message_devguide {
-  my $settings = shift();
-  return "Devguide missing";
-}
-
-sub remedy_devguide {
-  my $settings = shift();
-
-  my $ver = "$settings->{workspace}/$settings->{devguide_ver}";
-  my $lat = "$settings->{workspace}/$settings->{devguide_lat}";
-
-  if ($settings->{mock}) {
-    create_dummy_release_file($ver);
-    create_dummy_release_file($lat);
-    return 1;
-  }
-
-  my $devguide_url = "svn+ssh://svn.ociweb.com/devguide/opendds/trunk/$settings->{devguide_ver}";
-  print "Downloading devguide\n$devguide_url\n";
-  my $result = system("svn cat $devguide_url > $ver");
-  $result = $result || system("svn cat $devguide_url > $lat");
-  return !$result;
-}
-
-############################################################################
-
 sub get_mime_type {
   my $filename = shift();
 
@@ -2435,7 +2300,7 @@ sub get_mime_type {
   elsif ($filename =~ /\.pdf$/) {
     return 'application/pdf';
   }
-  elsif ($filename =~ /\.(md5|sha256)$/) {
+  elsif ($filename =~ /\.(txt|md5|sha256)$/) {
     return 'text/plain';
   }
   else {
@@ -2456,11 +2321,7 @@ sub get_github_release_files {
   my $settings = shift();
 
   my @files = get_source_release_files($settings);
-
   push(@files, $settings->{md5_src}, $settings->{sha256_src});
-  if (!$settings->{skip_devguide}) {
-    push(@files, $settings->{devguide_ver});
-  }
 
   return @files;
 }
@@ -2469,10 +2330,6 @@ sub get_sftp_release_files {
   my $settings = shift();
 
   my @files = get_github_release_files($settings);
-
-  if (!$settings->{skip_devguide}) {
-    push(@files, $settings->{devguide_lat}) if ($settings->{is_highest_version});
-  }
   if (!$settings->{skip_doxygen}) {
     push(@files, $settings->{zip_dox});
   }
@@ -2559,6 +2416,60 @@ sub remedy_sftp_upload {
 
 ############################################################################
 
+sub get_assets {
+  my $settings = shift();
+  my $assets = shift();
+  my $asset_details = shift();
+
+  for my $file (@{$assets}) {
+    my $path = File::Spec->file_name_is_absolute($file) ? $file : "$settings->{workspace}/$file";
+    open(my $fh, $path) or die("Can't open \"$path\": $?");
+    binmode($fh);
+    my $size = stat($fh)->size;
+    my $data;
+    if ($size == 0 && !exists($dummy_release_files{$file})) {
+      die("$path is empty and is not supposed to be!");
+    }
+    else {
+      read $fh, $data, $size or die("Can't read \"$path\": $?");
+    }
+    close($fh);
+
+    $asset_details->{$file} = {
+      content_type => get_mime_type($file),
+      data => $data,
+    };
+  }
+}
+
+sub github_upload_assets {
+  my $settings = shift();
+  my $assets = shift();
+  my $asset_details = shift();
+  my $release_id = shift();
+  my $fail_msg = shift();
+
+  my $releases = $settings->{pithub}->repos->releases;
+
+  for my $filename (@{$assets}) {
+    print("Upload $filename\n");
+    my $asset;
+    my $asset_detail = $asset_details->{$filename};
+    eval {
+      $asset = $releases->assets->create(
+        release_id => $release_id,
+        name => basename($filename),
+        content_type => $asset_detail->{content_type},
+        data => $asset_detail->{data}
+      );
+    };
+    if ($@) {
+      die("Issue with \$releases->assets->create:", $@, $fail_msg);
+    }
+    check_pithub_result($asset, $fail_msg);
+  }
+}
+
 sub verify_github_upload {
   my $settings = shift();
   my $verified = 0;
@@ -2582,66 +2493,34 @@ sub message_github_upload {
 sub remedy_github_upload {
   my $settings = shift();
 
-  my $rc = 1;
-
   # Try to do as much as possible before creating the release. If there's a
   # fatal issue while uploading the release assets, then the release has to be
   # manually deleted on GitHub before this step can be run again.
   my @assets = get_github_release_files($settings);
   my %asset_details;
-  for my $filename (@assets) {
-    open(my $fh, "$settings->{workspace}/$filename") or die("Can't open \"$filename\": $?");
-    binmode($fh);
-    my $size = stat($fh)->size;
-    my $data;
-    if ($size == 0 && !exists($dummy_release_files{$filename})) {
-      die("$filename is empty and is not supposed to be!");
-    }
-    else {
-      read $fh, $data, $size or die("Can't read \"$filename\": $?");
-    }
-    close($fh);
-
-    $asset_details{$filename} = {
-      content_type => get_mime_type($filename),
-      data => $data,
-    };
-  }
+  get_assets($settings, \@assets, \%asset_details);
 
   my $releases = $settings->{pithub}->repos->releases;
-  my $text =
-    "**Download $settings->{zip_src} (Windows) or $settings->{tgz_src} (Linux/macOS) " .
-      "instead of \"Source code (zip)\" or \"Source code (tar.gz)\".**\n\n" .
-    news_contents_excerpt($settings->{version});
+  my $release_notes_path = 'docs/gh-release-notes.md';
+  open(my $fh, '<', $release_notes_path) or die("Failed to read $release_notes_path: $!");
+  my $release_notes = do { local $/; <$fh> };
   my $release = $releases->create(
     data => {
       name => "OpenDDS $settings->{version}",
       tag_name => $settings->{git_tag},
-      body => $text,
+      body =>
+        "**Download $settings->{zip_src} (Windows) or $settings->{tgz_src} (Linux/macOS) " .
+          "instead of \"Source code (zip)\" or \"Source code (tar.gz)\".**\n\n" .
+        $release_notes,
     },
   );
   check_pithub_result($release);
 
   my $fail_msg = "\nThe release on GitHub has to be deleted manually before trying to verify\n" .
     "or remedy this step again";
-  for my $filename (@assets) {
-    print("Upload $filename\n");
-    my $asset;
-    my $asset_detail = $asset_details{$filename};
-    eval {
-      $asset = $releases->assets->create(
-        release_id => $release->content->{id},
-        name => $filename,
-        content_type => $asset_detail->{content_type},
-        data => $asset_detail->{data}
-      );
-    };
-    if ($@) {
-      die("Issue with \$releases->assets->create:", $@, $fail_msg);
-    }
-    check_pithub_result($asset, $fail_msg);
-  }
-  return $rc;
+  github_upload_assets($settings, \@assets, \%asset_details, $release->content->{id}, $fail_msg);
+
+  return 1;
 }
 
 ############################################################################
@@ -2892,53 +2771,6 @@ sub remedy_trigger_shapes_demo_build {
 
 ############################################################################
 
-sub verify_email_list {
-  # Can't verify
-  my $settings = shift;
-  print 'Email this text to announce the release' . "\n\n" .
-    email_announce_contents($settings);
-  return 1;
-}
-
-sub message_email_dds_release_announce {
-  return 'Emails are needed to announce the release';
-}
-
-sub remedy_email_dds_release_announce {
-  return 1;
-}
-
-############################################################################
-
-sub verify_news_template_file_section {
-  my $settings = shift();
-  my $next_version = quotemeta($settings->{parsed_next_version}->{release_string});
-
-  my $status = open(NEWS, 'NEWS.md');
-  my $has_news_template = 0;
-  while (<NEWS>) {
-    if ($_ =~ /^## Version $next_version of OpenDDS/) {
-      $has_news_template = 1;
-      last;
-    }
-  }
-  close(NEWS);
-
-  return $has_news_template;
-}
-
-sub message_news_template_file_section {
-  return "Template for next release in NEWS.md is missing";
-}
-
-sub remedy_news_template_file_section {
-  my $settings = shift();
-  insert_news_template($settings, 1);
-  return 1;
-}
-
-############################################################################
-
 sub verify_release_occurred_flag {
   my $settings = shift();
 
@@ -2974,10 +2806,9 @@ my $mock_with_doxygen = 0;
 my $micro = 0;
 my $next_version = "";
 my $metadata = $default_post_release_metadata;
-my $skip_devguide = 0;
-my $skip_doxygen = 0;
+my $skip_doxygen = 1; # TODO
 my $skip_website = 0;
-my $skip_sftp = 0;
+my $skip_sftp = 1; # TODO
 my $skip_github = undef;
 my $force_not_highest_version = 0;
 my $sftp_base_dir = $default_sftp_base_dir;
@@ -3000,7 +2831,6 @@ GetOptions(
   'micro' => \$micro,
   'next-version=s' => \$next_version,
   'metadata=s' => \$metadata,
-  'skip-devguide' => \$skip_devguide,
   'skip-doxygen' => \$skip_doxygen ,
   'skip-website' => \$skip_website ,
   'skip-sftp' => \$skip_sftp,
@@ -3047,7 +2877,6 @@ else {
     if ($branch eq $default_branch) {
       arg_error("For micro releases, you must define the branch you want to use with --branch");
     }
-    $skip_devguide = 1;
     $skip_doxygen = 1;
   }
 
@@ -3106,6 +2935,7 @@ $release_timestamp =~ s/  / /g; # Single digit days of the month result in an ex
 my $doxygen_dir = "$workspace/doxygen";
 my $doxygen_inner_dir = "$doxygen_dir/html/dds";
 my $this_changelog = "docs/history/ChangeLog-$version";
+my $this_news = "docs/news.d/_releases/v$version.rst";
 my %global_settings = (
     list => $print_list,
     list_all => $print_list_all,
@@ -3132,8 +2962,6 @@ my %global_settings = (
     md5_src => "${base_name}.md5",
     sha256_src => "${base_name}.sha256",
     zip_dox => "${base_name}-doxygen.zip",
-    devguide_ver => "${base_name_prefix}$parsed_version->{series_string}.pdf",
-    devguide_lat => "${base_name_prefix}latest.pdf",
     timestamp => $release_timestamp,
     git_url => "git\@github.com:${github_user}/${repo_name}.git",
     github_repo => $repo_name,
@@ -3143,15 +2971,17 @@ my %global_settings = (
     sftp_host => $ENV{SFTP_HOST},
     sftp_base_dir => $sftp_base_dir,
     changelog => $this_changelog,
+    news => $this_news,
     modified => {
+        $readme_file => 1,
         "NEWS.md" => 1,
         "PROBLEM-REPORT-FORM" => 1,
         "VERSION.txt" => 1,
         "dds/Version.h" => 1,
         $this_changelog => 1,
+        $this_news => 1,
     },
     skip_sftp => $skip_sftp,
-    skip_devguide => $skip_devguide,
     skip_doxygen => $skip_doxygen,
     skip_website => $skip_website,
     workspace => $workspace,
@@ -3209,6 +3039,13 @@ my @release_steps = (
     can_force => 1,
   },
   {
+    name => 'Update README.md File',
+    verify => sub{verify_update_readme_file(@_)},
+    message => sub{message_update_readme_file(@_)},
+    remedy => sub{remedy_update_readme_file(@_)},
+    can_force => 1,
+  },
+  {
     name => 'Create ChangeLog File',
     verify => sub{verify_changelog(@_)},
     message => sub{message_changelog(@_)},
@@ -3223,24 +3060,10 @@ my @release_steps = (
     can_force => 1,
   },
   {
-    name => 'Add NEWS File Section',
-    verify => sub{verify_news_file_section(@_)},
-    message => sub{message_news_file_section(@_)},
-    remedy => sub{remedy_news_file_section(@_)},
-    can_force => 1,
-  },
-  {
-    name => 'Update NEWS File Section',
-    verify => sub{verify_update_news_file(@_)},
-    message => sub{message_update_news_file(@_)},
-    can_force => 1,
-  },
-  {
-    name => 'Update NEWS File Section Timestamp',
-    verify => sub{verify_news_timestamp(@_)},
-    message => sub{message_news_timestamp(@_)},
-    remedy => sub{remedy_news_timestamp(@_)},
-    can_force => 1,
+    name => 'Process News',
+    verify => sub{verify_news(@_)},
+    message => sub{message_news(@_)},
+    remedy => sub{remedy_news(@_)},
   },
   {
     name => 'Commit Release Changes',
@@ -3367,13 +3190,6 @@ my @release_steps = (
     skip => $global_settings{skip_doxygen},
   },
   {
-    name => 'Download Devguide',
-    verify => sub{verify_devguide(@_)},
-    message => sub{message_devguide(@_)},
-    remedy => sub{remedy_devguide(@_)},
-    skip => $global_settings{skip_devguide},
-  },
-  {
     name => 'Upload to SFTP Site',
     verify => sub{verify_sftp_upload(@_)},
     message => sub{message_sftp_upload(@_)},
@@ -3399,13 +3215,6 @@ my @release_steps = (
     verify => sub{verify_release_occurred_flag(@_)},
     message => sub{return "Release ouccured flag needs to be set"},
     remedy => sub{remedy_release_occurred_flag(@_)},
-  },
-  {
-    name => 'Update NEWS for Post-Release',
-    verify => sub{verify_news_template_file_section(@_)},
-    message => sub{message_news_template_file_section(@_)},
-    remedy => sub{remedy_news_template_file_section(@_)},
-    post_release => 1,
   },
   {
     name => 'Update VERSION.txt for Post-Release',
@@ -3440,6 +3249,18 @@ my @release_steps = (
     },
     message => sub{message_update_prf_file(@_, 1)},
     remedy => sub{remedy_update_prf_file(@_, 1)},
+    can_force => 1,
+    post_release => 1,
+  },
+  {
+    name => 'Update README.md File for Post-Release',
+    verify => sub{
+      my $settings = shift();
+      my $step_options = shift();
+      return verify_update_readme_file($settings, {%{$step_options}, post_release => 1});
+    },
+    message => sub{message_update_readme_file(@_, 1)},
+    remedy => sub{remedy_update_readme_file(@_, 1)},
     can_force => 1,
     post_release => 1,
   },
@@ -3479,13 +3300,6 @@ my @release_steps = (
     remedy => sub{remedy_trigger_shapes_demo_build(@_)},
     post_release => 1,
     skip => $global_settings{skip_github} || !$global_settings{is_highest_version},
-  },
-  {
-    name => 'Email DDS-Release-Announce list',
-    verify => sub{verify_email_list(@_)},
-    message => sub{message_email_dds_release_announce(@_)},
-    remedy => sub{remedy_email_dds_release_announce(@_)},
-    post_release => 1,
   },
 );
 

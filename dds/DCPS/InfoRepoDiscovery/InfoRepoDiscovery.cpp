@@ -287,7 +287,7 @@ InfoRepoDiscovery::bit_config()
     // Use a static cast to avoid dependency on the Tcp library
     TcpInst_rch tcp_inst = static_rchandle_cast<TcpInst>(inst);
 
-    tcp_inst->datalink_release_delay_ = 0;
+    tcp_inst->datalink_release_delay(0);
     if (!bit_transport_ip_.empty()) {
       tcp_inst->local_address(bit_transport_port_,
                               bit_transport_ip_.c_str());
@@ -595,7 +595,7 @@ InfoRepoDiscovery::update_topic_qos(const GUID_t& topicId, DDS::DomainId_t domai
 
 // Publication operations:
 
-GUID_t
+bool
 InfoRepoDiscovery::add_publication(DDS::DomainId_t domainId,
                                    const GUID_t& participantId,
                                    const GUID_t& topicId,
@@ -605,13 +605,13 @@ InfoRepoDiscovery::add_publication(DDS::DomainId_t domainId,
                                    const DDS::PublisherQos& publisherQos,
                                    const XTypes::TypeInformation& type_info)
 {
-  GUID_t pubId;
+
 
   try {
     DCPS::DataWriterRemoteImpl* writer_remote_impl = 0;
     ACE_NEW_RETURN(writer_remote_impl,
                    DataWriterRemoteImpl(*publication),
-                   DCPS::GUID_UNKNOWN);
+                   false);
 
     //this is taking ownership of the DataWriterRemoteImpl (server side) allocated above
     PortableServer::ServantBase_var writer_remote(writer_remote_impl);
@@ -623,19 +623,32 @@ InfoRepoDiscovery::add_publication(DDS::DomainId_t domainId,
     DDS::OctetSeq serializedTypeInfo;
     XTypes::serialize_type_info(type_info, serializedTypeInfo);
 
-    pubId = get_dcps_info()->add_publication(domainId, participantId, topicId,
-      dr_remote_obj, qos, transInfo, publisherQos, serializedTypeInfo);
+    const GUID_t pubId = get_dcps_info()->reserve_publication_id(domainId, participantId, topicId);
+    publication->set_publication_id(pubId);
 
-    ACE_GUARD_RETURN(ACE_Thread_Mutex, g, this->lock_, DCPS::GUID_UNKNOWN);
+    if (!get_dcps_info()->add_publication(domainId,
+                                          participantId,
+                                          topicId,
+                                          pubId,
+                                          dr_remote_obj,
+                                          qos,
+                                          transInfo,
+                                          publisherQos,
+                                          serializedTypeInfo)) {
+      ACE_ERROR((LM_ERROR,
+                 ACE_TEXT("(%P|%t) ERROR: InfoRepoDiscovery::add_publication: ")
+                 ACE_TEXT("failed to add publication\n")));
+      return false;
+    }
+
+    ACE_GUARD_RETURN(ACE_Thread_Mutex, g, this->lock_, false);
     // take ownership of the client allocated above
     dataWriterMap_[pubId] = dr_remote_obj;
-
+    return true;
   } catch (const CORBA::Exception& ex) {
     ex._tao_print_exception("ERROR: InfoRepoDiscovery::add_publication: ");
-    pubId = DCPS::GUID_UNKNOWN;
+    return false;
   }
-
-  return pubId;
 }
 
 bool
@@ -691,7 +704,7 @@ InfoRepoDiscovery::update_publication_qos(DDS::DomainId_t domainId,
 
 // Subscription operations:
 
-GUID_t
+bool
 InfoRepoDiscovery::add_subscription(DDS::DomainId_t domainId,
                                     const GUID_t& participantId,
                                     const GUID_t& topicId,
@@ -704,13 +717,11 @@ InfoRepoDiscovery::add_subscription(DDS::DomainId_t domainId,
                                     const DDS::StringSeq& params,
                                     const XTypes::TypeInformation& type_info)
 {
-  GUID_t subId;
-
   try {
     DCPS::DataReaderRemoteImpl* reader_remote_impl = 0;
     ACE_NEW_RETURN(reader_remote_impl,
                    DataReaderRemoteImpl(*subscription),
-                   DCPS::GUID_UNKNOWN);
+                   false);
 
     //this is taking ownership of the DataReaderRemoteImpl (server side) allocated above
     PortableServer::ServantBase_var reader_remote(reader_remote_impl);
@@ -722,20 +733,35 @@ InfoRepoDiscovery::add_subscription(DDS::DomainId_t domainId,
     DDS::OctetSeq serializedTypeInfo;
     XTypes::serialize_type_info(type_info, serializedTypeInfo);
 
-    subId = get_dcps_info()->add_subscription(domainId, participantId, topicId,
-                                              dr_remote_obj, qos, transInfo, subscriberQos,
-                                              filterClassName, filterExpr, params,
-                                              serializedTypeInfo);
+    const GUID_t subId = get_dcps_info()->reserve_subscription_id(domainId, participantId, topicId);
+    subscription->set_subscription_id(subId);
 
-    ACE_GUARD_RETURN(ACE_Thread_Mutex, g, this->lock_, DCPS::GUID_UNKNOWN);
+    if (!get_dcps_info()->add_subscription(domainId,
+                                           participantId,
+                                           topicId,
+                                           subId,
+                                           dr_remote_obj,
+                                           qos,
+                                           transInfo,
+                                           subscriberQos,
+                                           filterClassName,
+                                           filterExpr,
+                                           params,
+                                           serializedTypeInfo)) {
+      ACE_ERROR((LM_ERROR,
+                 ACE_TEXT("(%P|%t) ERROR: InfoRepoDiscovery::add_subscription: ")
+                 ACE_TEXT("failed to add subscription\n")));
+      return false;
+    }
+
+    ACE_GUARD_RETURN(ACE_Thread_Mutex, g, this->lock_, false);
     // take ownership of the client allocated above
     dataReaderMap_[subId] = dr_remote_obj;
-
+    return true;
   } catch (const CORBA::Exception& ex) {
     ex._tao_print_exception("ERROR: InfoRepoDiscovery::add_subscription: ");
-    subId = DCPS::GUID_UNKNOWN;
+    return false;
   }
-  return subId;
 }
 
 bool

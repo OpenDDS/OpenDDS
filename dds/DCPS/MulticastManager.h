@@ -38,6 +38,24 @@ public:
                );
 private:
   size_t joined_interface_count() const;
+  bool join(const NetworkInterfaceAddress& nia,
+            ACE_Reactor* reactor,
+            ACE_Event_Handler* event_handler,
+            const NetworkAddress& multicast_group_address,
+            ACE_SOCK_Dgram_Mcast& multicast_socket
+#ifdef ACE_HAS_IPV6
+            , const NetworkAddress& ipv6_multicast_group_address,
+            ACE_SOCK_Dgram_Mcast& ipv6_multicast_socket
+#endif
+            );
+  void leave(const NetworkInterfaceAddress& nia,
+             const NetworkAddress& multicast_group_address,
+             ACE_SOCK_Dgram_Mcast& multicast_socket
+#ifdef ACE_HAS_IPV6
+             , const NetworkAddress& ipv6_multicast_group_address,
+             ACE_SOCK_Dgram_Mcast& ipv6_multicast_socket
+#endif
+);
 
   OPENDDS_SET(OPENDDS_STRING) joined_interfaces_;
 #ifdef ACE_HAS_IPV6

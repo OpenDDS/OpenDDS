@@ -404,8 +404,8 @@ Sedp::init(const GUID_t& guid,
   rtps_inst->send_delay_ = disco.config()->sedp_send_delay();
   rtps_inst->send_buffer_size_ = disco.config()->send_buffer_size();
   rtps_inst->rcv_buffer_size_ = disco.config()->recv_buffer_size();
-  rtps_inst->receive_preallocated_message_blocks_ = disco.config()->sedp_receive_preallocated_message_blocks();
-  rtps_inst->receive_preallocated_data_blocks_ = disco.config()->sedp_receive_preallocated_data_blocks();
+  rtps_inst->receive_preallocated_message_blocks(disco.config()->sedp_receive_preallocated_message_blocks());
+  rtps_inst->receive_preallocated_data_blocks(disco.config()->sedp_receive_preallocated_data_blocks());
 
   if (disco.sedp_multicast()) {
     // Bind to a specific multicast group
@@ -430,7 +430,7 @@ Sedp::init(const GUID_t& guid,
 #endif
 
   if (!disco.config()->sedp_fragment_reassembly_timeout().is_zero()) {
-    rtps_inst->fragment_reassembly_timeout_ = disco.config()->sedp_fragment_reassembly_timeout();
+    rtps_inst->fragment_reassembly_timeout(disco.config()->sedp_fragment_reassembly_timeout());
   }
 
   {
@@ -876,36 +876,6 @@ DDS::ReturnCode_t Sedp::init_security(DDS::Security::IdentityHandle /* id_handle
 
 Sedp::~Sedp()
 {
-  type_lookup_fini();
-
-#ifdef OPENDDS_SECURITY
-  using namespace OpenDDS::Security;
-  using namespace DDS::Security;
-
-  SecurityException ex = {"", 0, 0};
-
-  cleanup_secure_writer(participant_volatile_message_secure_writer_->get_guid());
-  cleanup_secure_reader(participant_volatile_message_secure_reader_->get_guid());
-  cleanup_secure_writer(participant_message_secure_writer_->get_guid());
-  cleanup_secure_reader(participant_message_secure_reader_->get_guid());
-  cleanup_secure_writer(publications_secure_writer_->get_guid());
-  cleanup_secure_reader(publications_secure_reader_->get_guid());
-  cleanup_secure_writer(subscriptions_secure_writer_->get_guid());
-  cleanup_secure_reader(subscriptions_secure_reader_->get_guid());
-  cleanup_secure_writer(dcps_participant_secure_writer_->get_guid());
-  cleanup_secure_reader(dcps_participant_secure_reader_->get_guid());
-  if (spdp_.get_security_config()) {
-    spdp_.get_security_config()->erase_handle_registry(participant_id_);
-  }
-#endif
-
-  job_queue_.reset();
-  reactor_task_.reset();
-  DCPS::RtpsUdpInst_rch rtps_inst =
-    DCPS::static_rchandle_cast<DCPS::RtpsUdpInst>(transport_inst_);
-  rtps_inst->opendds_discovery_default_listener_.reset();
-  TheTransportRegistry->remove_config(transport_cfg_);
-  TheTransportRegistry->remove_inst(transport_inst_);
 }
 
 DCPS::LocatorSeq
@@ -1814,6 +1784,7 @@ void Sedp::remove_entities_belonging_to(
                    ACE_TEXT("calling match_endpoints remove\n")));
       }
       match_endpoints(i->first, top_it->second, true /*remove*/);
+      type_lookup_service_->clear_type_info(DCPS::guid_to_bit_key(i->first));
       if (spdp_.shutting_down()) { return; }
       if (top_it->second.is_dead()) {
         purge_dead_topic(topic_name);
@@ -2037,6 +2008,37 @@ Sedp::shutdown()
   type_lookup_request_secure_writer_->shutting_down();
   type_lookup_reply_secure_writer_->shutting_down();
 #endif
+
+  type_lookup_fini();
+
+#ifdef OPENDDS_SECURITY
+  using namespace OpenDDS::Security;
+  using namespace DDS::Security;
+
+  SecurityException ex = {"", 0, 0};
+
+  cleanup_secure_writer(participant_volatile_message_secure_writer_->get_guid());
+  cleanup_secure_reader(participant_volatile_message_secure_reader_->get_guid());
+  cleanup_secure_writer(participant_message_secure_writer_->get_guid());
+  cleanup_secure_reader(participant_message_secure_reader_->get_guid());
+  cleanup_secure_writer(publications_secure_writer_->get_guid());
+  cleanup_secure_reader(publications_secure_reader_->get_guid());
+  cleanup_secure_writer(subscriptions_secure_writer_->get_guid());
+  cleanup_secure_reader(subscriptions_secure_reader_->get_guid());
+  cleanup_secure_writer(dcps_participant_secure_writer_->get_guid());
+  cleanup_secure_reader(dcps_participant_secure_reader_->get_guid());
+  if (spdp_.get_security_config()) {
+    spdp_.get_security_config()->erase_handle_registry(participant_id_);
+  }
+#endif
+
+  job_queue_.reset();
+  reactor_task_.reset();
+  DCPS::RtpsUdpInst_rch rtps_inst =
+    DCPS::static_rchandle_cast<DCPS::RtpsUdpInst>(transport_inst_);
+  rtps_inst->opendds_discovery_default_listener_.reset();
+  TheTransportRegistry->remove_config(transport_cfg_);
+  TheTransportRegistry->remove_inst(transport_inst_);
 }
 
 void Sedp::process_discovered_writer_data(DCPS::MessageId message_id,
@@ -2263,6 +2265,7 @@ void Sedp::process_discovered_writer_data(DCPS::MessageId message_id,
       DiscoveredPublication p = iter->second;
       discovered_publications_.erase(iter);
       remove_from_bit(p);
+      type_lookup_service_->clear_type_info(DCPS::guid_to_bit_key(guid));
       if (DCPS::DCPS_debug_level > 3) {
         ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Sedp::process_discovered_writer_data - ")
                    ACE_TEXT("calling match_endpoints disp/unreg\n")));
@@ -2607,6 +2610,7 @@ void Sedp::process_discovered_reader_data(DCPS::MessageId message_id,
       DiscoveredSubscription s = iter->second;
       discovered_subscriptions_.erase(iter);
       remove_from_bit(s);
+      type_lookup_service_->clear_type_info(DCPS::guid_to_bit_key(guid));
     }
   }
 }
@@ -6004,6 +6008,7 @@ void Sedp::ignore(const GUID_t& to_ignore)
       if (td.is_dead()) {
         purge_dead_topic(topic_name);
       }
+      type_lookup_service_->clear_type_info(DCPS::guid_to_bit_key(to_ignore));
       return;
     }
   }
@@ -6022,6 +6027,7 @@ void Sedp::ignore(const GUID_t& to_ignore)
       if (td.is_dead()) {
         purge_dead_topic(topic_name);
       }
+      type_lookup_service_->clear_type_info(DCPS::guid_to_bit_key(to_ignore));
       return;
     }
   }
@@ -6037,6 +6043,7 @@ void Sedp::ignore(const GUID_t& to_ignore)
         for (RepoIdSet::const_iterator ep = ids.begin(); ep!= ids.end(); ++ep) {
           match_endpoints(*ep, td, true /*remove*/);
           td.remove_discovered_publication(*ep);
+          type_lookup_service_->clear_type_info(DCPS::guid_to_bit_key(*ep));
           // TODO: Do we need to remove from discovered_subscriptions?
           if (shutting_down()) { return; }
         }
@@ -6046,6 +6053,7 @@ void Sedp::ignore(const GUID_t& to_ignore)
         for (RepoIdSet::const_iterator ep = ids.begin(); ep!= ids.end(); ++ep) {
           match_endpoints(*ep, td, true /*remove*/);
           td.remove_discovered_subscription(*ep);
+          type_lookup_service_->clear_type_info(DCPS::guid_to_bit_key(*ep));
           // TODO: Do we need to remove from discovered_publications?
           if (shutting_down()) { return; }
         }
@@ -6119,7 +6127,7 @@ DCPS::TopicStatus Sedp::remove_topic(const GUID_t& topicId)
   return DCPS::REMOVED;
 }
 
-GUID_t Sedp::add_publication(
+bool Sedp::add_publication(
   const GUID_t& topicId,
   DCPS::DataWriterCallbacks_rch publication,
   const DDS::DataWriterQos& qos,
@@ -6127,10 +6135,11 @@ GUID_t Sedp::add_publication(
   const DDS::PublisherQos& publisherQos,
   const XTypes::TypeInformation& type_info)
 {
-  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, GUID_t());
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, false);
 
   GUID_t rid = participant_id_;
   assign_publication_key(rid, topicId, qos);
+  publication->set_publication_id(rid);
   LocalPublication& pb = local_publications_[rid];
   pb.topic_id_ = topicId;
   pb.publication_ = publication;
@@ -6152,7 +6161,7 @@ GUID_t Sedp::add_publication(
         ACE_TEXT("Sedp::add_publication: ")
         ACE_TEXT("Unable to get security attributes for topic '%C'. SecurityException[%d.%d]: %C\n"),
           topic_name.data(), ex.code, ex.minor_code, ex.message.in()));
-      return GUID_t();
+      return false;
     }
 
     if (topic_sec_attr.is_write_protected) {
@@ -6164,7 +6173,7 @@ GUID_t Sedp::add_publication(
           ACE_TEXT("Permissions check failed for local datawriter on topic '%C'. ")
           ACE_TEXT("Security Exception[%d.%d]: %C\n"), topic_name.data(),
             ex.code, ex.minor_code, ex.message.in()));
-        return GUID_t();
+        return false;
       }
     }
 
@@ -6175,7 +6184,7 @@ GUID_t Sedp::add_publication(
                  ACE_TEXT("Unable to get security attributes for local datawriter. ")
                  ACE_TEXT("Security Exception[%d.%d]: %C\n"),
                  ex.code, ex.minor_code, ex.message.in()));
-      return GUID_t();
+      return false;
     }
 
     if (pb.security_attribs_.is_submessage_protected || pb.security_attribs_.is_payload_protected) {
@@ -6199,11 +6208,11 @@ GUID_t Sedp::add_publication(
   td.add_local_publication(rid);
 
   if (DDS::RETCODE_OK != add_publication_i(rid, pb)) {
-    return GUID_t();
+    return false;
   }
 
   if (DDS::RETCODE_OK != write_publication_data(rid, pb)) {
-    return GUID_t();
+    return false;
   }
 
   if (DCPS_debug_level > 3) {
@@ -6212,7 +6221,7 @@ GUID_t Sedp::add_publication(
   }
   match_endpoints(rid, td);
 
-  return rid;
+  return true;
 }
 
 void Sedp::remove_publication(const GUID_t& publicationId)
@@ -6258,7 +6267,7 @@ void Sedp::update_publication_locators(const GUID_t& publicationId,
   }
 }
 
-GUID_t Sedp::add_subscription(
+bool Sedp::add_subscription(
   const GUID_t& topicId,
   DCPS::DataReaderCallbacks_rch subscription,
   const DDS::DataReaderQos& qos,
@@ -6269,10 +6278,11 @@ GUID_t Sedp::add_subscription(
   const DDS::StringSeq& params,
   const XTypes::TypeInformation& type_info)
 {
-  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, GUID_t());
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, false);
 
   GUID_t rid = participant_id_;
   assign_subscription_key(rid, topicId, qos);
+  subscription->set_subscription_id(rid);
   LocalSubscription& sb = local_subscriptions_[rid];
   sb.topic_id_ = topicId;
   sb.subscription_ = subscription;
@@ -6298,7 +6308,7 @@ GUID_t Sedp::add_subscription(
         ACE_TEXT("Unable to get security attributes for topic '%C'. ")
         ACE_TEXT("SecurityException[%d.%d]: %C\n"),
           topic_name.data(), ex.code, ex.minor_code, ex.message.in()));
-      return GUID_t();
+      return false;
     }
 
     if (topic_sec_attr.is_read_protected) {
@@ -6310,7 +6320,7 @@ GUID_t Sedp::add_subscription(
           ACE_TEXT("Permissions check failed for local datareader on topic '%C'. ")
           ACE_TEXT("Security Exception[%d.%d]: %C\n"), topic_name.data(),
             ex.code, ex.minor_code, ex.message.in()));
-        return GUID_t();
+        return false;
       }
     }
 
@@ -6321,7 +6331,7 @@ GUID_t Sedp::add_subscription(
                  ACE_TEXT("Unable to get security attributes for local datareader. ")
                  ACE_TEXT("Security Exception[%d.%d]: %C\n"),
                  ex.code, ex.minor_code, ex.message.in()));
-      return GUID_t();
+      return false;
     }
 
     if (sb.security_attribs_.is_submessage_protected || sb.security_attribs_.is_payload_protected) {
@@ -6345,11 +6355,11 @@ GUID_t Sedp::add_subscription(
   td.add_local_subscription(rid);
 
   if (DDS::RETCODE_OK != add_subscription_i(rid, sb)) {
-    return GUID_t();
+    return false;
   }
 
   if (DDS::RETCODE_OK != write_subscription_data(rid, sb)) {
-    return GUID_t();
+    return false;
   }
 
   if (DCPS_debug_level > 3) {
@@ -6358,7 +6368,7 @@ GUID_t Sedp::add_subscription(
   }
   match_endpoints(rid, td);
 
-  return rid;
+  return true;
 }
 
 void Sedp::remove_subscription(const GUID_t& subscriptionId)
@@ -7250,11 +7260,19 @@ void Sedp::match_continue(const GUID_t& writer, const GUID_t& reader)
       } else {
         // The two types must be equivalent for DISALLOW_TYPE_COERCION
         consistent = reader_type_id == writer_type_id;
+        if (!consistent && DCPS::DCPS_debug_level >= 4) {
+          ACE_DEBUG((LM_WARNING, "(%P|%t) Sedp::match_continue: will not match because type "
+            "ids must be the same when using DISALLOW_TYPE_COERCION\n"));
+        }
       }
     } else {
       if (drQos->type_consistency.force_type_validation) {
         // Cannot do type validation since not both TypeObjects are available
         consistent = false;
+        if (DCPS::DCPS_debug_level >= 4) {
+          ACE_DEBUG((LM_WARNING, "(%P|%t) Sedp::match_continue: will not match because "
+            "force_type_validation is true, but TypeObjects are not available\n"));
+        }
       } else {
         // Fall back to matching type names
         String writer_type_name;
@@ -7635,7 +7653,7 @@ void Sedp::WriterAddAssociation::handle_event()
                  ACE_TEXT("adding writer %C association for reader %C\n"), LogGuid(record_->writer_id()).c_str(),
                  LogGuid(record_->reader_id()).c_str()));
     }
-    lock->add_association(record_->writer_id(), record_->reader_association_, true);
+    lock->add_association(record_->reader_association_, true);
   }
 }
 
@@ -7666,7 +7684,7 @@ void Sedp::ReaderAddAssociation::handle_event()
                  ACE_TEXT("adding reader %C association for writer %C\n"), LogGuid(record_->reader_id()).c_str(),
                  LogGuid(record_->writer_id()).c_str()));
     }
-    lock->add_association(record_->reader_id(), record_->writer_association_, false);
+    lock->add_association(record_->writer_association_, false);
   }
 }
 

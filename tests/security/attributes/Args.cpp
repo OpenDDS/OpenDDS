@@ -168,7 +168,7 @@ int Args::parse_args(int argc, ACE_TCHAR* argv[], Args& args)
                  ACE_TEXT("too many instances on default config, using first\n"), argv[0]));
     }
     OpenDDS::DCPS::TransportInst_rch inst = *(config->instances_.begin());
-    inst->thread_per_connection_ = true;
+    inst->thread_per_connection(true);
   }
 
   if (args.secure_part_user_data_) {

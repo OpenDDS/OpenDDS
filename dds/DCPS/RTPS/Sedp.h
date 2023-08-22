@@ -224,7 +224,7 @@ public:
 
   DCPS::TopicStatus remove_topic(const GUID_t& topicId);
 
-  GUID_t add_publication(
+  bool add_publication(
     const GUID_t& topicId,
     DCPS::DataWriterCallbacks_rch publication,
     const DDS::DataWriterQos& qos,
@@ -237,7 +237,7 @@ public:
   void update_publication_locators(const GUID_t& publicationId,
                                    const DCPS::TransportLocatorSeq& transInfo);
 
-  GUID_t add_subscription(
+  bool add_subscription(
     const GUID_t& topicId,
     DCPS::DataReaderCallbacks_rch subscription,
     const DDS::DataReaderQos& qos,
@@ -351,7 +351,9 @@ private:
       , participant_crypto_handle_(DDS::HANDLE_NIL)
       , endpoint_crypto_handle_(DDS::HANDLE_NIL)
 #endif
-    {}
+    {
+      TransportClient::set_guid(repo_id);
+    }
 
     virtual ~Endpoint();
 

@@ -8,7 +8,7 @@ Alternate Interfaces to Data
     Sect<12>
 
 The DDS-DCPS approach to data transfer using synchronization of strongly-typed caches (DataWriter and DataReader) is not appropriate for all applications.
-Therefore OpenDDS provides two different alternate interface approaches which are described in this chapter.
+Therefore OpenDDS provides two different alternate interface approaches which are described in this section.
 These are not defined by OMG specifications and may change in future releases of OpenDDS, including minor updates.
 The two approaches are:
 
@@ -16,14 +16,14 @@ The two approaches are:
 
   * These interfaces allow the application to create untyped stand-ins for DataReaders and/or DataWriters
 
-  * Recorder can be used with the Dynamic Language Binding XTypes features (see section :ref:`xtypes--dynamic-language-binding-1` and below) to access typed data samples through a reflection-based API
+  * Recorder can be used with the Dynamic Language Binding XTypes features (:ref:`xtypes--dynamic-language-binding-1`) to access typed data samples through a reflection-based API
 
 * Observer
 
   * Observers play a role similar to the spec-defined Listeners (attached to DataReaders and/or DataWriters).
     Unlike the Listeners, Observers don’t need to interact with the DataReader/Writer caches to access the data samples.
 
-The XTypes Dynamic Language Binding (see section :ref:`xtypes--dynamic-language-binding`) provides a set of related features that can be used to create DataWriters and DataReaders that work with a generic data container (DynamicData) instead of a specific IDL-generated data type.
+The XTypes Dynamic Language Binding (:ref:`xtypes--dynamic-language-binding`) provides a set of related features that can be used to create DataWriters and DataReaders that work with a generic data container (DynamicData) instead of a specific IDL-generated data type.
 
 .. _alternate_interfaces_to_data--recorder-and-replayer:
 
@@ -54,7 +54,7 @@ Listeners may be optionally implemented by the application.
 The ``Recorder`` class acts similarly to a ``DataReader`` and the ``Replayer`` class acts similarly to a ``DataWriter``.
 
 Both ``Recorder`` and ``Replayer`` make use of the underlying OpenDDS discovery and transport libraries as if they were ``DataReader`` and ``DataWriter``, respectively.
-Regular OpenDDS applications in the domain will “see” the ``Recorder`` objects as if they were remote ``DataReader`` s and ``Replayers`` as if they were ``DataWriter`` s.
+Regular OpenDDS applications in the domain will "see" the ``Recorder`` objects as if they were remote ``DataReader`` s and ``Replayers`` as if they were ``DataWriter`` s.
 
 .. _alternate_interfaces_to_data--usage-model:
 
@@ -74,14 +74,14 @@ Here is the code needed to create a recorder:
 
 .. code-block:: cpp
 
-     OpenDDS::DCPS::Recorder_var recorder =
-          service_participant->create_recorder(domain_participant,
-                                               topic.in(),
-                                               sub_qos,
-                                               dr_qos,
-                                               recorder_listener);
+    OpenDDS::DCPS::Recorder_var recorder =
+         service_participant->create_recorder(domain_participant,
+                                              topic.in(),
+                                              sub_qos,
+                                              dr_qos,
+                                              recorder_listener);
 
-Data samples are made available to the application via the ``RecorderListener`` using a simple “one callback per sample” model.
+Data samples are made available to the application via the ``RecorderListener`` using a simple "one callback per sample" model.
 The sample is delivered as an ``OpenDDS::DCPS::RawDataSample`` object.
 This object includes the timestamp for that data sample as well as the marshaled sample value.
 Here is a class definition for a user-defined Recorder Listener.
@@ -174,7 +174,7 @@ Durable data is received from matched ``DataWriter`` s.
 On the ``Replayer`` side there are some differences.
 As opposed to the normal DDS ``DataWriter``, ``Replayer`` is not caching/storing any data samples (they are simply sent to the transport).
 Because instances are not known, storing data samples according to the usual History and Resource Limits rules is not possible.
-Instead, transient local durability can be supported with a “pull” model whereby the middleware invokes a method on the ``ReplayerListener`` when a new remote ``DataReader`` is discovered.
+Instead, transient local durability can be supported with a "pull" model whereby the middleware invokes a method on the ``ReplayerListener`` when a new remote ``DataReader`` is discovered.
 The application can then call a method on the ``Replayer`` with any data samples that should be sent to that newly-joined ``DataReader``.
 Determining which samples these are is left to the application.
 
@@ -186,11 +186,11 @@ Recorder With XTypes Dynamic Language Binding
 ..
     Sect<12.1.4>
 
-The Recorder class includes support for the Dynamic Language Binding from XTypes (see section :ref:`xtypes--dynamic-language-binding-1`).
+The Recorder class includes support for the Dynamic Language Binding from XTypes (:ref:`xtypes--dynamic-language-binding-1`).
 Type information for each matched DataWriter (that supports XTypes complete TypeObjects) is stored in the Recorder.
 Users can call Recorder::get_dynamic_data, passing a RawDataSample to get back a DynamicData object which includes type information – see DynamicData::type().
 
-A tool called “inspect,” uses the Recorder and Dynamic Language Binding allow for the printing of any type, so long as the topic name, type name, and domain ID are known.
+A tool called ``inspect``, uses the Recorder and Dynamic Language Binding allow for the printing of any type, so long as the topic name, type name, and domain ID are known.
 The DataWriter must include code generation for complete TypeObjects.
 See tools/inspect/Inspect.cpp for this tool’s source code.
 It can be used as a standalone tool or an example for developing your own applications using these APIs.
@@ -204,7 +204,7 @@ Observer
 ..
     Sect<12.2>
 
-To observe the most important events happening within OpenDDS, applications can create classes that derive from the Observer abstract base class (in :ghfile:`dds/DCPS/Observer.h`).
+To observe the most important events happening within OpenDDS, applications can create classes that derive from the Observer base class (in :ghfile:`dds/DCPS/Observer.h`).
 The design of Observer is intended to allow applications to have a single Observer object observing many Entities, however this is flexible to allow many different use cases.
 The following events can be observed:
 
@@ -214,9 +214,9 @@ The following events can be observed:
 
 * DataWriter/Reader peer associated, disassociated
 
-* DataWriter sample sent
+* DataWriter sample sent, instance disposed, instance unregistered
 
-* DataReader sample received (enters the cache), read, taken
+* DataReader sample received (enters the cache), read, taken, instance disposed, instance unregistered
 
 .. _alternate_interfaces_to_data--attaching-observers-to-entities:
 
@@ -248,12 +248,12 @@ These methods are not part of the IDL interfaces, so invoking them the requires 
 
 .. code-block:: cpp
 
-      DDS::DataWriter_var dw = /* ... */;
+     DDS::DataWriter_var dw = /* ... */;
      EntityImpl* entity = dynamic_cast<EntityImpl*>(dw.in());
      Observer_rch observer = make_rch<MyObserver>();
      entity->set_observer(observer, Observer::e_SAMPLE_SENT);
 
-Note that since the Observer class as an internal (not IDL) interface, it uses the “RCH” (Reference Counted Handle) smart pointer classes.
+Note that since the Observer class as an internal (not IDL) interface, it uses the "RCH" (Reference Counted Handle) smart pointer classes.
 Observer itself inherits from RcObject, and uses of Observer-derived classes should use the RcHandle template and its associated functions, as in the example above.
 See :ghfile:`dds/DCPS/RcHandle_T.h` for details.
 
@@ -282,7 +282,7 @@ The virtual methods in the Observer class are divided into 3 groups based on the
 
 #. Events relating to data samples moving through the system
 
-   * on_sample_sent, on_sample_received, on_sample_read, on_sample_taken
+   * on_sample_sent, on_sample_received, on_sample_read, on_sample_taken, on_disposed, on_unregistered
 
 #. * In addition to the Entity, the Observer implementation receives an instance of the Sample structure.
      The definition of this structure is nested within Observer.

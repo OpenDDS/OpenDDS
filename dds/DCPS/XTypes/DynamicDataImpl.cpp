@@ -11,9 +11,11 @@
 #  include "DynamicTypeMemberImpl.h"
 #  include "Utils.h"
 
+#  include <dds/DCPS/DisjointSequence.h>
+#  include <dds/DCPS/DCPS_Utils.h>
+
 #  include <dds/DdsDynamicDataSeqTypeSupportImpl.h>
 #  include <dds/DdsDcpsCoreTypeSupportImpl.h>
-#  include <dds/DCPS/DisjointSequence.h>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -22,6 +24,7 @@ namespace XTypes {
 
 using DCPS::LogLevel;
 using DCPS::log_level;
+using DCPS::retcode_to_string;
 
 DynamicDataImpl::DynamicDataImpl(DDS::DynamicType_ptr type)
   : DynamicDataBase(type)
@@ -38,21 +41,9 @@ DynamicDataImpl::DynamicDataImpl(const DynamicDataImpl& other)
   , container_(other.container_, this)
 {}
 
-DDS::DynamicType_ptr DynamicDataImpl::type()
-{
-  return DDS::DynamicType::_duplicate(type_);
-}
-
 DDS::ReturnCode_t DynamicDataImpl::set_descriptor(MemberId, DDS::MemberDescriptor*)
 {
   return DDS::RETCODE_UNSUPPORTED;
-}
-
-CORBA::Boolean DynamicDataImpl::equals(DDS::DynamicData_ptr /*other*/)
-{
-  // FUTURE: Implement this.
-  ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: DynamicDataImpl::equals: Not implemented\n"));
-  return false;
 }
 
 DDS::MemberId DynamicDataImpl::get_member_id_at_index(ACE_CDR::ULong index)
@@ -79,7 +70,7 @@ DDS::MemberId DynamicDataImpl::get_member_id_at_index(ACE_CDR::ULong index)
   case TK_ENUM:
     // Value of enum or primitive types can be indicated by Id MEMBER_ID_INVALID
     // or by index 0 (Section 7.5.2.11.1).
-    if (index != 0 && DCPS::log_level >= DCPS::LogLevel::Notice) {
+    if (index != 0 && log_level >= LogLevel::Notice) {
       ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicDataImpl::get_member_id_at_index:"
                  " Received invalid index (%u) for type %C\n", index, typekind_to_string(tk)));
     }
@@ -92,13 +83,9 @@ DDS::MemberId DynamicDataImpl::get_member_id_at_index(ACE_CDR::ULong index)
   case TK_STRING16:
 #endif
   case TK_SEQUENCE: {
-    DDS::TypeDescriptor_var descriptor;
-    if (type_->get_descriptor(descriptor) != DDS::RETCODE_OK) {
-      return MEMBER_ID_INVALID;
-    }
-    const CORBA::ULong bound = descriptor->bound()[0];
+    const CORBA::ULong bound = type_desc_->bound()[0];
     if (bound > 0 && index >= bound) {
-      if (DCPS::log_level >= DCPS::LogLevel::Notice) {
+      if (log_level >= LogLevel::Notice) {
         ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicDataImpl::get_member_id_at_index:"
                    " Input index (%u) is out-of-bound (bound is %u)\n", index, bound));
       }
@@ -107,13 +94,9 @@ DDS::MemberId DynamicDataImpl::get_member_id_at_index(ACE_CDR::ULong index)
     return index;
   }
   case TK_ARRAY: {
-    DDS::TypeDescriptor_var descriptor;
-    if (type_->get_descriptor(descriptor) != DDS::RETCODE_OK) {
-      return MEMBER_ID_INVALID;
-    }
-    const CORBA::ULong length = bound_total(descriptor);
+    const DDS::UInt32 length = bound_total(type_desc_);
     if (index >= length) {
-      if (DCPS::log_level >= DCPS::LogLevel::Notice) {
+      if (log_level >= LogLevel::Notice) {
         ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicDataImpl::get_member_id_at_index:"
                    " Input index (%u) is out-of-bound (array length is %u)\n", index, length));
       }
@@ -122,54 +105,44 @@ DDS::MemberId DynamicDataImpl::get_member_id_at_index(ACE_CDR::ULong index)
     return index;
   }
   case TK_MAP:
-    if (DCPS::log_level >= DCPS::LogLevel::Notice) {
+    if (log_level >= LogLevel::Notice) {
       ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicDataImpl::get_member_id_at_index:"
                  " Map is currently not supported\n"));
     }
     return MEMBER_ID_INVALID;
-  case TK_STRUCTURE:
-    if (index < container_.single_map_.size()) {
-      DataContainer::const_single_iterator it = container_.single_map_.begin();
-      std::advance(it, index);
-      return it->first;
+  case TK_STRUCTURE: {
+    DDS::DynamicTypeMember_var dtm;
+    if (type_->get_member_by_index(dtm, index) != DDS::RETCODE_OK) {
+      return MEMBER_ID_INVALID;
     }
-    if (index - container_.single_map_.size() < container_.sequence_map_.size()) {
-      DataContainer::const_sequence_iterator it = container_.sequence_map_.begin();
-      std::advance(it, index - container_.single_map_.size());
-      return it->first;
-    }
-    if (index - container_.single_map_.size() - container_.sequence_map_.size() < container_.complex_map_.size()) {
-      DataContainer::const_complex_iterator it = container_.complex_map_.begin();
-      std::advance(it, index - container_.single_map_.size() - container_.sequence_map_.size());
-      return it->first;
-    }
-    return MEMBER_ID_INVALID;
-  case TK_UNION:
+    return dtm->get_id();
+  }
+  case TK_UNION: {
     if (index == 0) {
       return DISCRIMINATOR_ID;
     }
-    if (index >= get_item_count()) {
+    bool select_a_member;
+    DDS::MemberDescriptor_var selected_md;
+    const DDS::ReturnCode_t rc = get_selected_union_branch(select_a_member, selected_md);
+    if (rc != DDS::RETCODE_OK) {
+      if (log_level >= LogLevel::Warning) {
+        ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: DynamicDataImpl::get_member_id_at_index:"
+                   " get_selected_union_branch failed: %C\n", retcode_to_string(rc)));
+      }
       return MEMBER_ID_INVALID;
     }
-    if (!container_.sequence_map_.empty()) {
-      return container_.sequence_map_.begin()->first;
+    if (index == 1 && select_a_member) {
+      return selected_md->id();
     }
-    for (DataContainer::const_complex_iterator iter = container_.complex_map_.begin();
-         iter != container_.complex_map_.end(); ++iter) {
-      if (iter->first != DISCRIMINATOR_ID) {
-        return iter->first;
-      }
-    }
-    for (DataContainer::const_single_iterator iter = container_.single_map_.begin();
-         iter != container_.single_map_.end(); ++iter) {
-      if (iter->first != DISCRIMINATOR_ID) {
-        return iter->first;
-      }
+    if (log_level >= LogLevel::Warning) {
+      ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: DynamicDataImpl::get_member_id_at_index:"
+                 " invalid index: %u\n", index));
     }
     return MEMBER_ID_INVALID;
   }
+  }
 
-  if (DCPS::log_level >= DCPS::LogLevel::Notice) {
+  if (log_level >= LogLevel::Notice) {
     ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicDataImpl::get_member_id_at_index:"
                " Calling on an unexpected type %C\n", typekind_to_string(tk)));
   }
@@ -256,13 +229,8 @@ ACE_CDR::ULong DynamicDataImpl::get_item_count()
   case TK_BITMASK:
     return static_cast<ACE_CDR::ULong>(container_.single_map_.size() +
                                        container_.complex_map_.size());
-  case TK_ARRAY: {
-    DDS::TypeDescriptor_var descriptor;
-    if (type_->get_descriptor(descriptor) != DDS::RETCODE_OK) {
-      return 0;
-    }
-    return bound_total(descriptor);
-  }
+  case TK_ARRAY:
+    return bound_total(type_desc_);
   case TK_STRUCTURE: {
     const CORBA::ULong member_count = type_->get_member_count();
     CORBA::ULong count = member_count;
@@ -296,18 +264,23 @@ ACE_CDR::ULong DynamicDataImpl::get_item_count()
     if (count > 0) {
       return count;
     }
-    DDS::TypeDescriptor_var td;
-    if (type_->get_descriptor(td) != DDS::RETCODE_OK) {
-      return 0;
-    }
-    DDS::DynamicType_var disc_type = get_base_type(td->discriminator_type());
+    DDS::DynamicType_var disc_type = get_base_type(type_desc_->discriminator_type());
     CORBA::Long disc_val;
     if (!container_.set_default_discriminator_value(disc_val, disc_type)) {
+      if (log_level >= LogLevel::Warning) {
+        ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: DynamicDataImpl::get_item_count:"
+                   " set_default_discriminator_value failed\n"));
+      }
       return 0;
     }
     bool select_a_member;
     DDS::MemberDescriptor_var selected_md;
-    if (!container_.select_union_member(disc_val, select_a_member, selected_md)) {
+    const DDS::ReturnCode_t rc = get_selected_union_branch(disc_val, select_a_member, selected_md);
+    if (rc != DDS::RETCODE_OK) {
+      if (log_level >= LogLevel::Warning) {
+        ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: DynamicDataImpl::get_item_count:"
+                   " get_selected_union_branch failed: %C\n", retcode_to_string(rc)));
+      }
       return 0;
     }
     return select_a_member ? 2 : 1;
@@ -384,15 +357,11 @@ DDS::ReturnCode_t DynamicDataImpl::clear_value(DDS::MemberId id)
   case TK_BITMASK:
     return set_boolean_value(id, false);
   case TK_ARRAY: {
-    DDS::TypeDescriptor_var td;
-    if (type_->get_descriptor(td) != DDS::RETCODE_OK) {
-      return DDS::RETCODE_ERROR;
-    }
-    const CORBA::ULong bound = bound_total(td);
+    const DDS::UInt32 bound = bound_total(type_desc_);
     if (id >= bound) {
       return DDS::RETCODE_BAD_PARAMETER;
     }
-    DDS::DynamicType_var elem_type = get_base_type(td->element_type());
+    DDS::DynamicType_var elem_type = get_base_type(type_desc_->element_type());
     return clear_value_i(id, elem_type);
   }
   case TK_STRING8:
@@ -636,18 +605,6 @@ DDS::ReturnCode_t DynamicDataImpl::clear_value_i(DDS::MemberId id, const DDS::Dy
     return DDS::RETCODE_ERROR;
   }
   return DDS::RETCODE_OK;
-}
-
-DDS::DynamicData_ptr DynamicDataImpl::loan_value(DDS::MemberId /*id*/)
-{
-  ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: DynamicDataImpl::loan_value: Not implemented\n"));
-  return 0;
-}
-
-DDS::ReturnCode_t DynamicDataImpl::return_loaned_value(DDS::DynamicData_ptr /*value*/)
-{
-  ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: DynamicDataImpl::return_loaned_value: Not implemented\n"));
-  return DDS::RETCODE_UNSUPPORTED;
 }
 
 DDS::DynamicData_ptr DynamicDataImpl::clone()
@@ -1457,17 +1414,12 @@ template<TypeKind MemberTypeKind, typename MemberType>
 bool DynamicDataImpl::set_value_to_union(DDS::MemberId id, const MemberType& value,
                                          TypeKind enum_or_bitmask, LBound lower, LBound upper)
 {
-  DDS::TypeDescriptor_var descriptor;
-  if (type_->get_descriptor(descriptor) != DDS::RETCODE_OK) {
-    return false;
-  }
-
   // This follows the IDL-to-C++ mapping for union.
   DDS::DynamicType_var member_type;
   if (id == DISCRIMINATOR_ID) {
     // Discriminator can only be of certain types (XTypes spec, 7.2.2.4.4.3)
     if (!is_valid_discriminator_type(MemberTypeKind)) {
-      if (DCPS::log_level >= DCPS::LogLevel::Notice) {
+      if (log_level >= LogLevel::Notice) {
         ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicDataImpl::set_value_to_union:"
                    " Type %C cannot be used for union discriminator\n",
                    typekind_to_string(MemberTypeKind)));
@@ -1475,7 +1427,7 @@ bool DynamicDataImpl::set_value_to_union(DDS::MemberId id, const MemberType& val
       return false;
     }
 
-    member_type = get_base_type(descriptor->discriminator_type());
+    member_type = get_base_type(type_desc_->discriminator_type());
 
     const TypeKind member_tk = member_type->get_kind();
     if (member_tk != MemberTypeKind && member_tk != enum_or_bitmask) {
@@ -1510,7 +1462,7 @@ bool DynamicDataImpl::set_value_to_union(DDS::MemberId id, const MemberType& val
       }
 
       if (!validate_discriminator(disc_value, selected_md)) {
-        if (DCPS::log_level >= DCPS::LogLevel::Notice) {
+        if (log_level >= LogLevel::Notice) {
           ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicDataImpl::set_value_to_union:"
                      " Discriminator value %d does not select the activated member (ID %u)\n",
                      disc_value, selected_id));
@@ -1522,10 +1474,10 @@ bool DynamicDataImpl::set_value_to_union(DDS::MemberId id, const MemberType& val
       // In case the union has implicit default member and the input discriminator value
       // selects that implicit default member, store the discriminator value. The semantics
       // of this is similar to the _default() method of the IDL-to-C++ mapping for union.
-      if (discriminator_selects_no_member(type_, disc_value)) {
+      if (discriminator_selects_no_member(disc_value)) {
         return insert_single(id, value);
       }
-      if (DCPS::log_level >= DCPS::LogLevel::Notice) {
+      if (log_level >= LogLevel::Notice) {
         ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicDataImpl::set_value_to_union:"
                    " Can't directly set a discriminator that selects a member."
                    " Activate the member first!\n"));
@@ -1656,16 +1608,11 @@ template<TypeKind ElementTypeKind, typename ElementType>
 bool DynamicDataImpl::set_value_to_collection(DDS::MemberId id, const ElementType& value,
   TypeKind collection_tk, TypeKind enum_or_bitmask, LBound lower, LBound upper)
 {
-  DDS::TypeDescriptor_var descriptor;
-  if (type_->get_descriptor(descriptor) != DDS::RETCODE_OK) {
-    return false;
-  }
-
-  const DDS::DynamicType_var elem_type = get_base_type(descriptor->element_type());
+  const DDS::DynamicType_var elem_type = get_base_type(type_desc_->element_type());
   const TypeKind elem_tk = elem_type->get_kind();
 
   if (elem_tk != ElementTypeKind && elem_tk != enum_or_bitmask) {
-    if (DCPS::log_level >= DCPS::LogLevel::Notice) {
+    if (log_level >= LogLevel::Notice) {
       ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicDataImpl::set_value_to_collection:"
                  " Could not write a value of type %C to %C with element type %C\n",
                  typekind_to_string(ElementTypeKind), typekind_to_string(collection_tk),
@@ -1685,8 +1632,7 @@ bool DynamicDataImpl::set_value_to_collection(DDS::MemberId id, const ElementTyp
     }
   }
 
-  return validate_member_id_collection(descriptor, id, collection_tk) &&
-    insert_single(id, value);
+  return validate_member_id_collection(id, collection_tk) && insert_single(id, value);
 }
 
 template<TypeKind ValueTypeKind, typename ValueType>
@@ -1707,11 +1653,7 @@ DDS::ReturnCode_t DynamicDataImpl::set_single_value(DDS::MemberId id, const Valu
   // the unsigned integer representation or invalidate it. Similarly, when the unsigned
   // integer value is updated, either update the stored elements or invalidate them all.
   if (tk == enum_or_bitmask) {
-    DDS::TypeDescriptor_var descriptor;
-    if (type_->get_descriptor(descriptor) != DDS::RETCODE_OK) {
-      return DDS::RETCODE_ERROR;
-    }
-    const CORBA::ULong bit_bound = descriptor->bound()[0];
+    const CORBA::ULong bit_bound = type_desc_->bound()[0];
     good = id == MEMBER_ID_INVALID && bit_bound >= lower && bit_bound <= upper &&
       insert_single(id, value);
   } else {
@@ -1736,7 +1678,7 @@ DDS::ReturnCode_t DynamicDataImpl::set_single_value(DDS::MemberId id, const Valu
     }
   }
 
-  if (!good && DCPS::log_level >= DCPS::LogLevel::Notice) {
+  if (!good && log_level >= LogLevel::Notice) {
     ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicDataImpl::set_single_value: "
                "Failed to write a value of %C to DynamicData object of type %C\n",
                typekind_to_string(ValueTypeKind), typekind_to_string(tk)));
@@ -1810,12 +1752,7 @@ DDS::ReturnCode_t DynamicDataImpl::set_char_common(DDS::MemberId id, const FromC
     good = id == MEMBER_ID_INVALID && insert_single(id, value);
     break;
   case StringKind: {
-    DDS::TypeDescriptor_var descriptor;
-    if (type_->get_descriptor(descriptor) != DDS::RETCODE_OK) {
-      good = false;
-      break;
-    }
-    const CORBA::ULong bound = descriptor->bound()[0];
+    const CORBA::ULong bound = type_desc_->bound()[0];
     if (!check_index_from_id(tk, id, bound)) {
       good = false;
     } else {
@@ -1839,7 +1776,7 @@ DDS::ReturnCode_t DynamicDataImpl::set_char_common(DDS::MemberId id, const FromC
     break;
   }
 
-  if (!good && DCPS::log_level >= DCPS::LogLevel::Notice) {
+  if (!good && log_level >= LogLevel::Notice) {
     ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicDataImpl::set_char_common:"
                " Failed to write DynamicData object of type %C\n", typekind_to_string(tk)));
   }
@@ -1875,12 +1812,7 @@ DDS::ReturnCode_t DynamicDataImpl::set_boolean_value(DDS::MemberId id, CORBA::Bo
     good = id == MEMBER_ID_INVALID && insert_single(id, ACE_OutputCDR::from_boolean(value));
     break;
   case TK_BITMASK: {
-    DDS::TypeDescriptor_var descriptor;
-    if (type_->get_descriptor(descriptor) != DDS::RETCODE_OK) {
-      good = false;
-      break;
-    }
-    const CORBA::ULong bit_bound = descriptor->bound()[0];
+    const CORBA::ULong bit_bound = type_desc_->bound()[0];
     if (!check_index_from_id(tk, id, bit_bound)) {
       good = false;
     } else {
@@ -1904,7 +1836,7 @@ DDS::ReturnCode_t DynamicDataImpl::set_boolean_value(DDS::MemberId id, CORBA::Bo
     break;
   }
 
-  if (!good && DCPS::log_level >= DCPS::LogLevel::Notice) {
+  if (!good && log_level >= LogLevel::Notice) {
     ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicDataImpl::set_boolean_value:"
                " Failed to write boolean to DynamicData object of type %C\n",
                typekind_to_string(tk)));
@@ -2026,7 +1958,7 @@ DDS::ReturnCode_t DynamicDataImpl::get_simple_value_string(DCPS::Value& value,
   if (complex_it != container_.complex_map_.end()) {
     // The string member has its own DynamicData object.
     const DynamicDataImpl* str_dd = dynamic_cast<DynamicDataImpl*>(complex_it->second.in());
-    char* str;
+    char* str = 0;
     if (!str_dd || !str_dd->read_basic_value(str)) {
       return DDS::RETCODE_ERROR;
     }
@@ -2095,7 +2027,7 @@ DDS::ReturnCode_t DynamicDataImpl::get_simple_value(DCPS::Value& value, DDS::Mem
   case TK_ENUM:
     return get_simple_value_enum(value, id);
   default:
-    if (DCPS::log_level >= DCPS::LogLevel::Notice) {
+    if (log_level >= LogLevel::Notice) {
       ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicDataImpl::get_simple_value:"
                  " Member type %C is not supported by DCPS::Value\n",
                  typekind_to_string(member_kind)));
@@ -2124,11 +2056,10 @@ bool DynamicDataImpl::set_complex_to_struct(DDS::MemberId id, DDS::DynamicData_v
   return insert_complex(id, value);
 }
 
-bool DynamicDataImpl::set_complex_to_union(DDS::MemberId id, DDS::DynamicData_var value,
-                                           const DDS::TypeDescriptor_var& descriptor)
+bool DynamicDataImpl::set_complex_to_union(DDS::MemberId id, DDS::DynamicData_var value)
 {
   if (id == DISCRIMINATOR_ID) {
-    DDS::DynamicType_var disc_type = get_base_type(descriptor->discriminator_type());
+    DDS::DynamicType_var disc_type = get_base_type(type_desc_->discriminator_type());
     const DDS::DynamicType_var value_type = value->type();
     if (!disc_type->equals(value_type)) {
       return false;
@@ -2151,7 +2082,7 @@ bool DynamicDataImpl::set_complex_to_union(DDS::MemberId id, DDS::DynamicData_va
         return false;
       }
       if (!validate_discriminator(disc_val, selected_md)) {
-        if (DCPS::log_level >= DCPS::LogLevel::Notice) {
+        if (log_level >= LogLevel::Notice) {
           ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicDataImpl::set_complex_to_union:"
                      " Discriminator value %d does not select the activated member (ID %u)\n",
                      disc_val, selected_id));
@@ -2160,10 +2091,10 @@ bool DynamicDataImpl::set_complex_to_union(DDS::MemberId id, DDS::DynamicData_va
       }
       return insert_complex(id, value);
     } else {
-      if (discriminator_selects_no_member(type_, disc_val)) {
+      if (discriminator_selects_no_member(disc_val)) {
         return insert_complex(id, value);
       }
-      if (DCPS::log_level >= DCPS::LogLevel::Notice) {
+      if (log_level >= LogLevel::Notice) {
         ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicDataImpl::set_complex_to_union:"
                    " Can't directly set a discriminator that selects a member."
                    " Activate the member first!\n"));
@@ -2191,25 +2122,14 @@ bool DynamicDataImpl::set_complex_to_union(DDS::MemberId id, DDS::DynamicData_va
   return insert_valid_discriminator(md) && insert_complex(id, value);
 }
 
-bool DynamicDataImpl::validate_member_id_collection(const DDS::TypeDescriptor_var& descriptor,
-                                                         DDS::MemberId id, TypeKind tk) const
+bool DynamicDataImpl::validate_member_id_collection(DDS::MemberId id, TypeKind tk) const
 {
   switch (tk) {
   case TK_SEQUENCE:
-    {
-      const CORBA::ULong bound = descriptor->bound()[0];
-      return check_index_from_id(tk, id, bound);
-    }
   case TK_ARRAY:
-    {
-      CORBA::ULong bound = 1;
-      for (CORBA::ULong i = 0; i < descriptor->bound().length(); ++i) {
-        bound *= descriptor->bound()[i];
-      }
-      return check_index_from_id(tk, id, bound);
-    }
+    return check_index_from_id(tk, id, bound_total(type_desc_));
   case TK_MAP:
-    if (DCPS::log_level >= DCPS::LogLevel::Notice) {
+    if (log_level >= LogLevel::Notice) {
       ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicDataImpl::validate_member_id_collection::"
                  " Map is currently not supported\n"));
     }
@@ -2220,27 +2140,17 @@ bool DynamicDataImpl::validate_member_id_collection(const DDS::TypeDescriptor_va
 bool DynamicDataImpl::set_complex_to_collection(DDS::MemberId id, DDS::DynamicData_var value,
                                                 TypeKind collection_tk)
 {
-  DDS::TypeDescriptor_var descriptor;
-  if (type_->get_descriptor(descriptor) != DDS::RETCODE_OK) {
-    return false;
-  }
-
-  const DDS::DynamicType_var elem_type = get_base_type(descriptor->element_type());
+  const DDS::DynamicType_var elem_type = get_base_type(type_desc_->element_type());
   const DDS::DynamicType_var value_type = value->type();
   if (!elem_type->equals(value_type)) {
     return false;
   }
 
-  return validate_member_id_collection(descriptor, id, collection_tk) && insert_complex(id, value);
+  return validate_member_id_collection(id, collection_tk) && insert_complex(id, value);
 }
 
 DDS::ReturnCode_t DynamicDataImpl::set_complex_value(DDS::MemberId id, DDS::DynamicData_ptr value)
 {
-  DDS::TypeDescriptor_var descriptor;
-  if (type_->get_descriptor(descriptor) != DDS::RETCODE_OK) {
-    return DDS::RETCODE_ERROR;
-  }
-
   DDS::DynamicData_var value_var = DDS::DynamicData::_duplicate(value);
   const TypeKind tk = type_->get_kind();
   bool good = false;
@@ -2250,7 +2160,7 @@ DDS::ReturnCode_t DynamicDataImpl::set_complex_value(DDS::MemberId id, DDS::Dyna
     good = set_complex_to_struct(id, value_var);
     break;
   case TK_UNION:
-    good = set_complex_to_union(id, value_var, descriptor);
+    good = set_complex_to_union(id, value_var);
     break;
   case TK_SEQUENCE:
   case TK_ARRAY:
@@ -2262,7 +2172,7 @@ DDS::ReturnCode_t DynamicDataImpl::set_complex_value(DDS::MemberId id, DDS::Dyna
     break;
   }
 
-  if (!good && DCPS::log_level >= DCPS::LogLevel::Notice) {
+  if (!good && log_level >= LogLevel::Notice) {
     ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicDataImpl::set_complex_value:"
                " Failed to write complex value for member with ID %d\n", id));
   }
@@ -2336,7 +2246,7 @@ bool DynamicDataImpl::set_values_to_union(DDS::MemberId id, const SequenceType& 
                                           LBound lower, LBound upper)
 {
   if (id == DISCRIMINATOR_ID) {
-    if (DCPS::log_level >= DCPS::LogLevel::Notice) {
+    if (log_level >= LogLevel::Notice) {
       ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicDataImpl::set_values_to_union:"
                  " Union discriminator cannot be a sequence\n"));
     }
@@ -2368,12 +2278,8 @@ bool DynamicDataImpl::check_seqmem_in_sequence_and_array(DDS::MemberId id, CORBA
   if (!check_index_from_id(type_->get_kind(), id, bound)) {
     return false;
   }
-  DDS::TypeDescriptor_var descriptor;
-  if (type_->get_descriptor(descriptor) != DDS::RETCODE_OK) {
-    return false;
-  }
 
-  const DDS::DynamicType_var elem_type = get_base_type(descriptor->element_type());
+  const DDS::DynamicType_var elem_type = get_base_type(type_desc_->element_type());
   const TypeKind elem_tk = elem_type->get_kind();
   if (elem_tk != TK_SEQUENCE) {
     return false;
@@ -2407,14 +2313,10 @@ bool DynamicDataImpl::set_values_to_sequence(DDS::MemberId id, const SequenceTyp
                                              TypeKind enum_or_bitmask,
                                              LBound lower, LBound upper)
 {
-  DDS::TypeDescriptor_var descriptor;
-  if (type_->get_descriptor(descriptor) != DDS::RETCODE_OK) {
-    return false;
-  }
-  const CORBA::ULong bound = descriptor->bound()[0];
+  const DDS::UInt32 bound = type_desc_->bound()[0];
   return
     check_seqmem_in_sequence_and_array<ElementTypeKind>(id, bound, enum_or_bitmask, lower, upper) &&
-    validate_member_id_collection(descriptor, id, TK_SEQUENCE) &&
+    validate_member_id_collection(id, TK_SEQUENCE) &&
     insert_sequence(id, value);
 }
 
@@ -2423,14 +2325,10 @@ bool DynamicDataImpl::set_values_to_array(DDS::MemberId id, const SequenceType& 
                                           TypeKind enum_or_bitmask,
                                           LBound lower, LBound upper)
 {
-  DDS::TypeDescriptor_var descriptor;
-  if (type_->get_descriptor(descriptor) != DDS::RETCODE_OK) {
-    return false;
-  }
-  const CORBA::ULong length = bound_total(descriptor);
+  const DDS::UInt32 length = bound_total(type_desc_);
   return
     check_seqmem_in_sequence_and_array<ElementTypeKind>(id, length, enum_or_bitmask, lower, upper) &&
-    validate_member_id_collection(descriptor, id, TK_ARRAY) &&
+    validate_member_id_collection(id, TK_ARRAY) &&
     insert_sequence(id, value);
 }
 
@@ -2460,20 +2358,20 @@ DDS::ReturnCode_t DynamicDataImpl::set_sequence_values(DDS::MemberId id, const S
     good = set_values_to_array<ElementTypeKind>(id, value, enum_or_bitmask, lower, upper);
     break;
   case TK_MAP:
-    if (DCPS::log_level >= DCPS::LogLevel::Notice) {
+    if (log_level >= LogLevel::Notice) {
       ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicDataImpl::set_sequence_values:"
                  " Map is currently not supported\n"));
     }
     return DDS::RETCODE_ERROR;
   default:
-    if (DCPS::log_level >= DCPS::LogLevel::Notice) {
+    if (log_level >= LogLevel::Notice) {
       ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicDataImpl::set_sequence_values:"
                  " Write to unsupported type (%C)\n", typekind_to_string(tk)));
     }
     return DDS::RETCODE_ERROR;
   }
 
-  if (!good && DCPS::log_level >= DCPS::LogLevel::Notice) {
+  if (!good && log_level >= LogLevel::Notice) {
     ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicDataImpl::set_sequence_values:"
                " Failed to write sequence of %C to member with ID %d\n",
                typekind_to_string(ElementTypeKind), id));
@@ -2660,13 +2558,13 @@ bool DynamicDataImpl::read_basic_value(char*& value) const
       return false;
     }
     const CORBA::ULong length = largest_index + 2;
-    char* str = CORBA::string_alloc(length);
-    ACE_OS::memset(str, 0, length);
-    if (!container_.reconstruct_string_value(str)) {
+    CORBA::String_var str_var = CORBA::string_alloc(length);
+    ACE_OS::memset(str_var.inout(), 0, length);
+    if (!container_.reconstruct_string_value(str_var.inout())) {
       return false;
     }
     CORBA::string_free(value);
-    value = str;
+    value = str_var._retn();
   } else {
     CORBA::string_free(value);
     value = CORBA::string_dup("");
@@ -2684,13 +2582,13 @@ bool DynamicDataImpl::read_basic_value(CORBA::WChar*& value) const
       return false;
     }
     const CORBA::ULong length = largest_index + 2;
-    CORBA::WChar* wstr = CORBA::wstring_alloc(length);
-    ACE_OS::memset(wstr, 0, length * sizeof(CORBA::WChar));
-    if (!container_.reconstruct_wstring_value(wstr)) {
+    CORBA::WString_var wstr_var = CORBA::wstring_alloc(length);
+    ACE_OS::memset(wstr_var.inout(), 0, length * sizeof(CORBA::WChar));
+    if (!container_.reconstruct_wstring_value(wstr_var.inout())) {
       return false;
     }
     CORBA::wstring_free(value);
-    value = wstr;
+    value = wstr_var._retn();
   } else {
     CORBA::wstring_free(value);
     value = CORBA::wstring_dup(L"");
@@ -2906,7 +2804,13 @@ bool DynamicDataImpl::get_value_from_union(ValueType& value, DDS::MemberId id)
     }
     bool found_selected_member = false;
     DDS::MemberDescriptor_var selected_md;
-    if (!container_.select_union_member(disc_value, found_selected_member, selected_md)) {
+    const DDS::ReturnCode_t rc =
+      get_selected_union_branch(disc_value, found_selected_member, selected_md);
+    if (rc != DDS::RETCODE_OK) {
+      if (log_level >= LogLevel::Notice) {
+        ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicDataImpl::get_value_from_union:"
+                   " get_selected_union_branch failed: %C\n", retcode_to_string(rc)));
+      }
       return false;
     }
     insert_single(id, value);
@@ -2922,7 +2826,7 @@ bool DynamicDataImpl::get_value_from_union(ValueType& value, DDS::MemberId id)
     const bool has_disc = single_it != container_.single_map_.end() ||
       complex_it != container_.complex_map_.end();
     if (has_disc) {
-      if (DCPS::log_level >= DCPS::LogLevel::Notice) {
+      if (log_level >= LogLevel::Notice) {
         ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicDataImpl::get_value_from_union:"
                    " Branch Id %u is not the active branch in the union\n", id));
       }
@@ -2971,15 +2875,11 @@ void DynamicDataImpl::cast_to_enum_value(ValueType&, CORBA::Long) const
 template<TypeKind ValueTypeKind, typename ValueType>
 bool DynamicDataImpl::get_value_from_collection(ValueType& value, DDS::MemberId id)
 {
-  DDS::TypeDescriptor_var descriptor;
-  if (type_->get_descriptor(descriptor) != DDS::RETCODE_OK) {
-    return false;
-  }
-  if (type_->get_kind() == TK_ARRAY && id >= bound_total(descriptor)) {
+  if (type_->get_kind() == TK_ARRAY && id >= bound_total(type_desc_)) {
     return false;
   }
 
-  DDS::DynamicType_var elem_type = get_base_type(descriptor->element_type());
+  DDS::DynamicType_var elem_type = get_base_type(type_desc_->element_type());
   const TypeKind elem_tk = elem_type->get_kind();
   TypeKind treat_as_tk = elem_tk;
   switch (elem_tk) {
@@ -3040,7 +2940,7 @@ DDS::ReturnCode_t DynamicDataImpl::get_single_value(ValueType& value, DDS::Membe
     good = get_value_from_collection<ValueTypeKind>(value, id);
     break;
   case TK_MAP:
-    if (DCPS::log_level >= DCPS::LogLevel::Notice) {
+    if (log_level >= LogLevel::Notice) {
       ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicDataImpl::get_single_value:"
                  " Map is currently not supported\n"));
     }
@@ -3051,7 +2951,7 @@ DDS::ReturnCode_t DynamicDataImpl::get_single_value(ValueType& value, DDS::Membe
     break;
   }
 
-  if (!good && DCPS::log_level >= DCPS::LogLevel::Notice) {
+  if (!good && log_level >= LogLevel::Notice) {
     ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicDataImpl::get_single_value:"
                " Failed to read a value of type %C from a DynamicData object of type %C\n",
                typekind_to_string(ValueTypeKind), typekind_to_string(tk)));
@@ -3099,12 +2999,12 @@ DDS::ReturnCode_t DynamicDataImpl::get_uint32_value(CORBA::ULong& value, DDS::Me
   return get_single_value<TK_UINT32>(value, id);
 }
 
-DDS::ReturnCode_t DynamicDataImpl::get_int64_value(CORBA::LongLong& value, DDS::MemberId id)
+DDS::ReturnCode_t DynamicDataImpl::get_int64_value_impl(CORBA::LongLong& value, DDS::MemberId id)
 {
   return get_single_value<TK_INT64>(value, id);
 }
 
-DDS::ReturnCode_t DynamicDataImpl::get_uint64_value(CORBA::ULongLong& value, DDS::MemberId id)
+DDS::ReturnCode_t DynamicDataImpl::get_uint64_value_impl(CORBA::ULongLong& value, DDS::MemberId id)
 {
   return get_single_value<TK_UINT64>(value, id);
 }
@@ -3180,7 +3080,7 @@ DDS::ReturnCode_t DynamicDataImpl::get_char_common(CharT& value, DDS::MemberId i
     break;
   }
   case TK_MAP:
-    if (DCPS::log_level >= DCPS::LogLevel::Notice) {
+    if (log_level >= LogLevel::Notice) {
       ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicDataImpl::get_char_common:"
                  " Map is currently not supported\n"));
     }
@@ -3191,7 +3091,7 @@ DDS::ReturnCode_t DynamicDataImpl::get_char_common(CharT& value, DDS::MemberId i
     break;
   }
 
-  if (!good && DCPS::log_level >= DCPS::LogLevel::Notice) {
+  if (!good && log_level >= LogLevel::Notice) {
     ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicDataImpl::get_char_common::"
                " Failed to read a value of type %C from a DynamicData object of type %C\n",
                typekind_to_string(CharKind), typekind_to_string(tk)));
@@ -3267,12 +3167,7 @@ DDS::ReturnCode_t DynamicDataImpl::get_boolean_value(CORBA::Boolean& value, DDS:
     break;
   }
   case TK_BITMASK: {
-    DDS::TypeDescriptor_var descriptor;
-    if (type_->get_descriptor(descriptor) != DDS::RETCODE_OK) {
-      good = false;
-      break;
-    }
-    const LBound bitbound = descriptor->bound()[0];
+    const LBound bitbound = type_desc_->bound()[0];
     ACE_CDR::ULong index;
     if (!get_index_from_id(id, index, bitbound)) {
       good = false;
@@ -3315,7 +3210,7 @@ DDS::ReturnCode_t DynamicDataImpl::get_boolean_value(CORBA::Boolean& value, DDS:
     break;
   }
   case TK_MAP:
-    if (DCPS::log_level >= DCPS::LogLevel::Notice) {
+    if (log_level >= LogLevel::Notice) {
       ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicDataImpl::get_boolean_value:"
                  " Map is currently not supported\n"));
     }
@@ -3326,7 +3221,7 @@ DDS::ReturnCode_t DynamicDataImpl::get_boolean_value(CORBA::Boolean& value, DDS:
     break;
   }
 
-  if (!good && DCPS::log_level >= DCPS::LogLevel::Notice) {
+  if (!good && log_level >= LogLevel::Notice) {
     ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicDataImpl::get_boolean_value:"
                " Failed to read a boolean value from a DynamicData object of type %C\n",
                typekind_to_string(tk)));
@@ -3778,18 +3673,20 @@ bool DynamicDataImpl::get_complex_from_union(DDS::DynamicData_ptr& value, DDS::M
 
   // Requested member with the given Id is not present in the container.
   if (id == DISCRIMINATOR_ID) {
-    DDS::TypeDescriptor_var td;
-    if (type_->get_descriptor(td) != DDS::RETCODE_OK) {
-      return false;
-    }
-    DDS::DynamicType_var disc_type = get_base_type(td->discriminator_type());
+    DDS::DynamicType_var disc_type = get_base_type(type_desc_->discriminator_type());
     CORBA::Long disc_value;
     if (!container_.set_default_discriminator_value(disc_value, disc_type)) {
       return false;
     }
     bool found_selected_member = false;
     DDS::MemberDescriptor_var selected_md;
-    if (!container_.select_union_member(disc_value, found_selected_member, selected_md)) {
+    const DDS::ReturnCode_t rc =
+      get_selected_union_branch(disc_value, found_selected_member, selected_md);
+    if (rc != DDS::RETCODE_OK) {
+      if (log_level >= LogLevel::Notice) {
+        ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicDataImpl::get_complex_from_union:"
+                   " get_selected_union_branch failed: %C\n", retcode_to_string(rc)));
+      }
       return false;
     }
     DynamicDataImpl* dd_impl = new DynamicDataImpl(disc_type);
@@ -3810,7 +3707,7 @@ bool DynamicDataImpl::get_complex_from_union(DDS::DynamicData_ptr& value, DDS::M
     const bool has_disc = single_it != container_.single_map_.end() ||
       complex_it != container_.complex_map_.end();
     if (has_disc) {
-      if (DCPS::log_level >= DCPS::LogLevel::Notice) {
+      if (log_level >= LogLevel::Notice) {
         ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicDataImpl::get_complex_from_union:"
                    " Branch Id %u is not the active branch in the union\n", id));
       }
@@ -3846,15 +3743,11 @@ bool DynamicDataImpl::get_complex_from_collection(DDS::DynamicData_ptr& value, D
     return true;
   }
 
-  DDS::TypeDescriptor_var td;
-  if (type_->get_descriptor(td) != DDS::RETCODE_OK) {
-    return false;
-  }
-  if (type_->get_kind() == TK_ARRAY && id >= bound_total(td)) {
+  if (type_->get_kind() == TK_ARRAY && id >= bound_total(type_desc_)) {
     return false;
   }
 
-  DynamicDataImpl* dd_impl = new DynamicDataImpl(td->element_type());
+  DynamicDataImpl* dd_impl = new DynamicDataImpl(type_desc_->element_type());
   DDS::DynamicData_var dd_var = dd_impl;
 
   DataContainer::const_single_iterator single_it = container_.single_map_.find(id);
@@ -3892,7 +3785,7 @@ DDS::ReturnCode_t DynamicDataImpl::get_complex_value(DDS::DynamicData_ptr& value
     good = get_complex_from_collection(value, id);
     break;
   case TK_MAP:
-    if (DCPS::log_level >= DCPS::LogLevel::Notice) {
+    if (log_level >= LogLevel::Notice) {
       ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicDataImpl::get_complex_value:"
                  " Map is currently not supported\n"));
     }
@@ -3903,7 +3796,7 @@ DDS::ReturnCode_t DynamicDataImpl::get_complex_value(DDS::DynamicData_ptr& value
     break;
   }
 
-  if (!good && DCPS::log_level >= DCPS::LogLevel::Notice) {
+  if (!good && log_level >= LogLevel::Notice) {
     ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicDataImpl::get_complex_value:"
                " Failed to read a complex value from a DynamicData object of type %C\n",
                typekind_to_string(tk)));
@@ -4040,15 +3933,8 @@ void DynamicDataImpl::DataContainer::clear()
 // Get largest index among elements of a sequence-like type written to the single map.
 bool DynamicDataImpl::DataContainer::get_largest_single_index(CORBA::ULong& largest_index) const
 {
-  const TypeKind tk = type_->get_kind();
-  if (tk != TK_STRING8 && tk != TK_STRING16 && tk != TK_SEQUENCE) {
-    return false;
-  }
-  DDS::TypeDescriptor_var descriptor;
-  if (type_->get_descriptor(descriptor) != DDS::RETCODE_OK) {
-    return false;
-  }
-  const CORBA::ULong bound = descriptor->bound()[0];
+  OPENDDS_ASSERT(is_sequence_like(type_->get_kind()));
+  const DDS::UInt32 bound = bound_total(type_desc_);
 
   // Since ID is used as index in this implementation, the last element has largest index.
   // A different implementation (ID-to-index mapping) may need to iterate through all
@@ -4059,29 +3945,16 @@ bool DynamicDataImpl::DataContainer::get_largest_single_index(CORBA::ULong& larg
 // Get largest index among elements of a nesting sequence type written to the sequence map.
 bool DynamicDataImpl::DataContainer::get_largest_sequence_index(CORBA::ULong& largest_index) const
 {
-  if (type_->get_kind() != TK_SEQUENCE) {
-    return false;
-  }
-  DDS::TypeDescriptor_var descriptor;
-  if (type_->get_descriptor(descriptor) != DDS::RETCODE_OK) {
-    return false;
-  }
-  const CORBA::ULong bound = descriptor->bound()[0];
+  OPENDDS_ASSERT(type_->get_kind() == TK_SEQUENCE);
+  const CORBA::ULong bound = type_desc_->bound()[0];
   return data_->get_index_from_id(sequence_map_.rbegin()->first, largest_index, bound);
 }
 
 // Get largest index among elements of a sequence-like type written to the complex map.
 bool DynamicDataImpl::DataContainer::get_largest_complex_index(CORBA::ULong& largest_index) const
 {
-  const TypeKind tk = type_->get_kind();
-  if (tk != TK_STRING8 && tk != TK_STRING16 && tk != TK_SEQUENCE) {
-    return false;
-  }
-  DDS::TypeDescriptor_var descriptor;
-  if (type_->get_descriptor(descriptor) != DDS::RETCODE_OK) {
-    return false;
-  }
-  const CORBA::ULong bound = descriptor->bound()[0];
+  OPENDDS_ASSERT(is_sequence_like(type_->get_kind()));
+  const DDS::UInt32 bound = bound_total(type_desc_);
   return data_->get_index_from_id(complex_map_.rbegin()->first, largest_index, bound);
 }
 
@@ -4286,11 +4159,7 @@ bool DynamicDataImpl::DataContainer::serialize_bitmask_value(DCPS::Serializer& s
 
 bool DynamicDataImpl::DataContainer::reconstruct_string_value(CORBA::Char* str) const
 {
-  DDS::TypeDescriptor_var descriptor;
-  if (type_->get_descriptor(descriptor) != DDS::RETCODE_OK) {
-    return false;
-  }
-  const CORBA::ULong bound = descriptor->bound()[0];
+  const CORBA::ULong bound = type_desc_->bound()[0];
   for (const_single_iterator it = single_map_.begin(); it != single_map_.end(); ++it) {
     CORBA::ULong index;
     if (!data_->get_index_from_id(it->first, index, bound)) {
@@ -4342,18 +4211,14 @@ bool DynamicDataImpl::DataContainer::serialized_size_string(const DCPS::Encoding
 
 bool DynamicDataImpl::DataContainer::serialize_string_value(DCPS::Serializer& ser) const
 {
-  char* str;
+  char* str = 0;
   return data_->read_basic_value(str) && (ser << str);
 }
 
 #ifdef DDS_HAS_WCHAR
 bool DynamicDataImpl::DataContainer::reconstruct_wstring_value(CORBA::WChar* wstr) const
 {
-  DDS::TypeDescriptor_var descriptor;
-  if (type_->get_descriptor(descriptor) != DDS::RETCODE_OK) {
-    return false;
-  }
-  const CORBA::ULong bound = descriptor->bound()[0];
+  const CORBA::ULong bound = type_desc_->bound()[0];
   for (const_single_iterator it = single_map_.begin(); it != single_map_.end(); ++it) {
     CORBA::ULong index;
     if (!data_->get_index_from_id(it->first, index, bound)) {
@@ -4402,7 +4267,7 @@ bool DynamicDataImpl::DataContainer::serialized_size_wstring(const DCPS::Encodin
 
 bool DynamicDataImpl::DataContainer::serialize_wstring_value(DCPS::Serializer& ser) const
 {
-  CORBA::WChar* wstr;
+  CORBA::WChar* wstr = 0;
   return data_->read_basic_value(wstr) && (ser << wstr);
 }
 #endif
@@ -5697,11 +5562,17 @@ bool DynamicDataImpl::DataContainer::serialize_sequence_value(DCPS::Serializer& 
   }
 }
 
-// Helper function for serializing sequence or array where element type is sequence
-// of basic or enumerated type.
+// Helper function for serializing sequences and arrays
 bool DynamicDataImpl::DataContainer::get_index_to_id_map(IndexToIdMap& index_to_id,
                                                          CORBA::ULong bound) const
 {
+  for (const_single_iterator it = single_map_.begin(); it != single_map_.end(); ++it) {
+    CORBA::ULong index;
+    if (!data_->get_index_from_id(it->first, index, bound)) {
+      return false;
+    }
+    index_to_id[index] = it->first;
+  }
   for (const_sequence_iterator it = sequence_map_.begin(); it != sequence_map_.end(); ++it) {
     CORBA::ULong index;
     if (!data_->get_index_from_id(it->first, index, bound)) {
@@ -6192,20 +6063,16 @@ bool DynamicDataImpl::DataContainer::serialized_size_sequence(const DCPS::Encodi
                                                               size_t& size,
                                                               DCPS::Sample::Extent ext) const
 {
-  DDS::TypeDescriptor_var descriptor;
-  if (type_->get_descriptor(descriptor) != DDS::RETCODE_OK) {
-    return false;
-  }
-  const CORBA::ULong bound = descriptor->bound()[0];
+  const CORBA::ULong bound = type_desc_->bound()[0];
 
-  const DDS::DynamicType_var elem_type = get_base_type(descriptor->element_type());
+  const DDS::DynamicType_var elem_type = get_base_type(type_desc_->element_type());
   const TypeKind elem_tk = elem_type->get_kind();
   DDS::TypeDescriptor_var elem_td;
   if (elem_type->get_descriptor(elem_td) != DDS::RETCODE_OK) {
     return false;
   }
 
-  if (data_->is_basic(elem_tk) || elem_tk == TK_ENUM || elem_tk == TK_BITMASK) {
+  if (is_basic(elem_tk) || elem_tk == TK_ENUM || elem_tk == TK_BITMASK) {
     const bool is_empty = single_map_.empty() && complex_map_.empty();
     CORBA::ULong length = 0;
     if (!is_empty) {
@@ -6215,7 +6082,7 @@ bool DynamicDataImpl::DataContainer::serialized_size_sequence(const DCPS::Encodi
       }
       length = largest_index + 1;
     }
-    if (data_->is_primitive(elem_tk)) {
+    if (is_primitive(elem_tk)) {
       serialized_size_primitive_sequence(encoding, size, elem_tk, length);
       return true;
     } else if (elem_tk == TK_STRING8) {
@@ -6245,7 +6112,7 @@ bool DynamicDataImpl::DataContainer::serialized_size_sequence(const DCPS::Encodi
   } else if (elem_tk == TK_SEQUENCE) {
     const DDS::DynamicType_var nested_elem_type = get_base_type(elem_td->element_type());
     const TypeKind nested_elem_tk = nested_elem_type->get_kind();
-    if (data_->is_basic(nested_elem_tk) || nested_elem_tk == TK_ENUM ||
+    if (is_basic(nested_elem_tk) || nested_elem_tk == TK_ENUM ||
         nested_elem_tk == TK_BITMASK) {
       const bool is_empty = sequence_map_.empty() && complex_map_.empty();
       CORBA::ULong length = 0;
@@ -6260,7 +6127,7 @@ bool DynamicDataImpl::DataContainer::serialized_size_sequence(const DCPS::Encodi
       if (!get_index_to_id_map(index_to_id, bound)) {
         return false;
       }
-      if (data_->is_basic(nested_elem_tk)) {
+      if (is_basic(nested_elem_tk)) {
         return serialized_size_nesting_basic_sequence(encoding, size, nested_elem_tk, index_to_id);
       } else if (nested_elem_tk == TK_ENUM) {
         return serialized_size_nesting_enum_sequence(encoding, size, index_to_id);
@@ -6280,20 +6147,16 @@ bool DynamicDataImpl::DataContainer::serialized_size_sequence(const DCPS::Encodi
 
 bool DynamicDataImpl::DataContainer::serialize_sequence(DCPS::Serializer& ser, DCPS::Sample::Extent ext) const
 {
-  DDS::TypeDescriptor_var descriptor;
-  if (type_->get_descriptor(descriptor) != DDS::RETCODE_OK) {
-    return false;
-  }
-  const CORBA::ULong bound = descriptor->bound()[0];
+  const CORBA::ULong bound = type_desc_->bound()[0];
 
-  const DDS::DynamicType_var elem_type = get_base_type(descriptor->element_type());
+  const DDS::DynamicType_var elem_type = get_base_type(type_desc_->element_type());
   const TypeKind elem_tk = elem_type->get_kind();
   DDS::TypeDescriptor_var elem_td;
   if (elem_type->get_descriptor(elem_td) != DDS::RETCODE_OK) {
     return false;
   }
 
-  if (data_->is_basic(elem_tk) || elem_tk == TK_ENUM || elem_tk == TK_BITMASK) {
+  if (is_basic(elem_tk) || elem_tk == TK_ENUM || elem_tk == TK_BITMASK) {
     const bool is_empty = single_map_.empty() && complex_map_.empty();
     CORBA::ULong length = 0;
     if (!is_empty) {
@@ -6303,7 +6166,7 @@ bool DynamicDataImpl::DataContainer::serialize_sequence(DCPS::Serializer& ser, D
       }
       length = largest_index + 1;
     }
-    if (data_->is_primitive(elem_tk)) {
+    if (is_primitive(elem_tk)) {
       return serialize_primitive_sequence(ser, elem_tk, length, bound);
     } else if (elem_tk == TK_STRING8) {
       return serialize_generic_string_sequence<const char*>(ser, length, bound);
@@ -6323,7 +6186,7 @@ bool DynamicDataImpl::DataContainer::serialize_sequence(DCPS::Serializer& ser, D
   } else if (elem_tk == TK_SEQUENCE) {
     const DDS::DynamicType_var nested_elem_type = get_base_type(elem_td->element_type());
     const TypeKind nested_elem_tk = nested_elem_type->get_kind();
-    if (data_->is_basic(nested_elem_tk) || nested_elem_tk == TK_ENUM ||
+    if (is_basic(nested_elem_tk) || nested_elem_tk == TK_ENUM ||
         nested_elem_tk == TK_BITMASK) {
       const bool is_empty = sequence_map_.empty() && complex_map_.empty();
       CORBA::ULong length = 0;
@@ -6334,7 +6197,7 @@ bool DynamicDataImpl::DataContainer::serialize_sequence(DCPS::Serializer& ser, D
         }
         length = largest_index + 1;
       }
-      if (data_->is_basic(nested_elem_tk)) {
+      if (is_basic(nested_elem_tk)) {
         return serialize_nesting_basic_sequence(ser, nested_elem_tk, length, bound);
       } else if (nested_elem_tk == TK_ENUM) {
         return serialize_nesting_enum_sequence(ser, length, bound);
@@ -6996,20 +6859,15 @@ bool DynamicDataImpl::DataContainer::serialized_size_array(const DCPS::Encoding&
                                                            size_t& size,
                                                            DCPS::Sample::Extent ext) const
 {
-  DDS::TypeDescriptor_var descriptor;
-  if (type_->get_descriptor(descriptor) != DDS::RETCODE_OK) {
-    return false;
-  }
-
-  const DDS::DynamicType_var elem_type = get_base_type(descriptor->element_type());
+  const DDS::DynamicType_var elem_type = get_base_type(type_desc_->element_type());
   const TypeKind elem_tk = elem_type->get_kind();
   DDS::TypeDescriptor_var elem_td;
   if (elem_type->get_descriptor(elem_td) != DDS::RETCODE_OK) {
     return false;
   }
 
-  const CORBA::ULong length = bound_total(descriptor);
-  if (data_->is_basic(elem_tk)) {
+  const CORBA::ULong length = bound_total(type_desc_);
+  if (is_basic(elem_tk)) {
     serialized_size_primitive_array(encoding, size, elem_tk, length);
     return true;
   } else if (elem_tk == TK_STRING8) {
@@ -7043,7 +6901,7 @@ bool DynamicDataImpl::DataContainer::serialized_size_array(const DCPS::Encoding&
     if (!get_index_to_id_map(index_to_id, length)) {
       return false;
     }
-    if (data_->is_basic(nested_elem_tk)) {
+    if (is_basic(nested_elem_tk)) {
       return serialized_size_nesting_basic_array(encoding, size, nested_elem_tk, index_to_id);
     } else if (nested_elem_tk == TK_ENUM) {
       return serialized_size_nesting_enum_array(encoding, size, index_to_id);
@@ -7062,20 +6920,15 @@ bool DynamicDataImpl::DataContainer::serialized_size_array(const DCPS::Encoding&
 
 bool DynamicDataImpl::DataContainer::serialize_array(DCPS::Serializer& ser, DCPS::Sample::Extent ext) const
 {
-  DDS::TypeDescriptor_var descriptor;
-  if (type_->get_descriptor(descriptor) != DDS::RETCODE_OK) {
-    return false;
-  }
-
-  const DDS::DynamicType_var elem_type = get_base_type(descriptor->element_type());
+  const DDS::DynamicType_var elem_type = get_base_type(type_desc_->element_type());
   const TypeKind elem_tk = elem_type->get_kind();
   DDS::TypeDescriptor_var elem_td;
   if (elem_type->get_descriptor(elem_td) != DDS::RETCODE_OK) {
     return false;
   }
 
-  const CORBA::ULong length = bound_total(descriptor);
-  if (data_->is_basic(elem_tk)) {
+  const CORBA::ULong length = bound_total(type_desc_);
+  if (is_basic(elem_tk)) {
     return serialize_primitive_array(ser, elem_tk, length);
   } else if (elem_tk == TK_STRING8) {
     return serialize_generic_string_array<const char*>(ser, length);
@@ -7094,7 +6947,7 @@ bool DynamicDataImpl::DataContainer::serialize_array(DCPS::Serializer& ser, DCPS
   } else if (elem_tk == TK_SEQUENCE) {
     const DDS::DynamicType_var nested_elem_type = get_base_type(elem_td->element_type());
     const TypeKind nested_elem_tk = nested_elem_type->get_kind();
-    if (data_->is_basic(nested_elem_tk)) {
+    if (is_basic(nested_elem_tk)) {
       return serialize_nesting_basic_array(ser, nested_elem_tk, length);
     } else if (nested_elem_tk == TK_ENUM) {
       return serialize_nesting_enum_array(ser, length);
@@ -7156,7 +7009,7 @@ bool DynamicDataImpl::DataContainer::serialized_size_primitive_member(const DCPS
 bool DynamicDataImpl::DataContainer::serialized_size_basic_member_default_value(
   const DCPS::Encoding& encoding, size_t& size, TypeKind member_tk) const
 {
-  if (data_->is_primitive(member_tk)) {
+  if (is_primitive(member_tk)) {
     return serialized_size_primitive_member(encoding, size, member_tk);
   } else if (member_tk == TK_STRING8) {
     const char* str_default;
@@ -7179,7 +7032,7 @@ bool DynamicDataImpl::DataContainer::serialized_size_basic_member_default_value(
 bool DynamicDataImpl::DataContainer::serialized_size_basic_member(const DCPS::Encoding& encoding,
   size_t& size, TypeKind member_tk, const_single_iterator it) const
 {
-  if (data_->is_primitive(member_tk)) {
+  if (is_primitive(member_tk)) {
     return serialized_size_primitive_member(encoding, size, member_tk);
   } else if (member_tk == TK_STRING8 || member_tk == TK_STRING16) {
     serialized_size_string_common(encoding, size, it->second);
@@ -7296,7 +7149,7 @@ bool DynamicDataImpl::DataContainer::serialized_size_single_aggregated_member_xc
     serialized_size_parameter_id(encoding, size, mutable_running_total);
   }
   const TypeKind member_tk = member_type->get_kind();
-  if (data_->is_basic(member_tk)) {
+  if (is_basic(member_tk)) {
     return serialized_size_basic_member(encoding, size, member_tk, it);
   } else if (member_tk == TK_ENUM) {
     return serialized_size_enum(encoding, size, member_type);
@@ -7317,7 +7170,7 @@ bool DynamicDataImpl::DataContainer::serialize_single_aggregated_member_xcdr2(DC
     const DCPS::Encoding& encoding = ser.encoding();
     const TypeKind member_tk = member_type->get_kind();
     size_t member_size = 0;
-    if (data_->is_basic(member_tk)) {
+    if (is_basic(member_tk)) {
       serialized_size_basic_member(encoding, member_size, member_tk, it);
     } else if (member_tk == TK_ENUM) {
       serialized_size_enum(encoding, member_size, member_type);
@@ -7442,7 +7295,7 @@ bool DynamicDataImpl::DataContainer::serialized_size_basic_struct_member_xcdr2(
     if (extensibility == DDS::MUTABLE) {
       serialized_size_parameter_id(encoding, size, mutable_running_total);
     }
-    if (data_->is_basic(member_tk)) {
+    if (is_basic(member_tk)) {
       return serialized_size_basic_member_default_value(encoding, size, member_tk);
     } else if (member_tk == TK_ENUM) {
       return serialized_size_enum(encoding, size, member_type);
@@ -7477,7 +7330,7 @@ bool DynamicDataImpl::DataContainer::serialize_basic_struct_member_xcdr2(DCPS::S
     }
     if (extensibility == DDS::MUTABLE) {
       size_t member_size = 0;
-      if (data_->is_basic(member_tk)) {
+      if (is_basic(member_tk)) {
         serialized_size_basic_member_default_value(encoding, member_size, member_tk);
       } else if (member_tk == TK_ENUM) {
         serialized_size_enum(encoding, member_size, member_type);
@@ -7490,7 +7343,7 @@ bool DynamicDataImpl::DataContainer::serialize_basic_struct_member_xcdr2(DCPS::S
         return false;
       }
     }
-    if (data_->is_basic(member_tk)) {
+    if (is_basic(member_tk)) {
       return serialize_basic_member_default_value(ser, member_tk);
     } else if (member_tk == TK_ENUM) {
       return serialize_enum_default_value(ser, member_type);
@@ -7513,7 +7366,7 @@ void DynamicDataImpl::DataContainer::serialized_size_sequence_member_default_val
   const DCPS::Encoding& encoding, size_t& size, TypeKind elem_tk) const
 {
   // Zero-length sequence
-  if (!data_->is_primitive(elem_tk)) {
+  if (!is_primitive(elem_tk)) {
     serialized_size_delimiter(encoding, size);
   }
   primitive_serialized_size_ulong(encoding, size);
@@ -7524,7 +7377,7 @@ bool DynamicDataImpl::DataContainer::serialize_sequence_member_default_value(DCP
 {
   // Zero-length sequence
   const DCPS::Encoding& encoding = ser.encoding();
-  if (encoding.xcdr_version() == DCPS::Encoding::XCDR_VERSION_2 && !data_->is_primitive(elem_tk)) {
+  if (encoding.xcdr_version() == DCPS::Encoding::XCDR_VERSION_2 && !is_primitive(elem_tk)) {
     if (!ser.write_delimiter(2 * DCPS::uint32_cdr_size)) {
       return false;
     }
@@ -7811,7 +7664,7 @@ void DynamicDataImpl::DataContainer::serialized_size_sequence_aggregated_member_
   } else if (extensibility == DDS::MUTABLE) {
     serialized_size_parameter_id(encoding, size, mutable_running_total);
   }
-  if (data_->is_basic(elem_tk)) {
+  if (is_basic(elem_tk)) {
     serialized_size_basic_sequence(encoding, size, it);
   } else if (elem_tk == TK_ENUM) {
     serialized_size_enum_sequence(encoding, size, it);
@@ -7831,7 +7684,7 @@ bool DynamicDataImpl::DataContainer::serialize_sequence_aggregated_member_xcdr2(
   } else if (extensibility == DDS::MUTABLE) {
     const DCPS::Encoding& encoding = ser.encoding();
     size_t member_size = 0;
-    if (data_->is_basic(elem_tk)) {
+    if (is_basic(elem_tk)) {
       serialized_size_basic_sequence(encoding, member_size, it);
     } else if (elem_tk == TK_ENUM) {
       serialized_size_enum_sequence(encoding, member_size, it);
@@ -7844,7 +7697,7 @@ bool DynamicDataImpl::DataContainer::serialize_sequence_aggregated_member_xcdr2(
       return false;
     }
   }
-  if (data_->is_basic(elem_tk)) {
+  if (is_basic(elem_tk)) {
     return serialize_basic_sequence(ser, it);
   } else if (elem_tk == TK_ENUM) {
     return serialize_enum_sequence(ser, it);
@@ -7921,11 +7774,7 @@ bool DynamicDataImpl::DataContainer::serialize_sequence_struct_member_xcdr2(DCPS
 bool DynamicDataImpl::DataContainer::serialized_size_structure_xcdr2(
   const DCPS::Encoding& encoding, size_t& size, DCPS::Sample::Extent ext) const
 {
-  DDS::TypeDescriptor_var descriptor;
-  if (type_->get_descriptor(descriptor) != DDS::RETCODE_OK) {
-    return false;
-  }
-  const DDS::ExtensibilityKind extensibility = descriptor->extensibility_kind();
+  const DDS::ExtensibilityKind extensibility = type_desc_->extensibility_kind();
   const bool struct_has_explicit_keys = has_explicit_keys(type_);
 
   // Delimiter
@@ -7955,7 +7804,7 @@ bool DynamicDataImpl::DataContainer::serialized_size_structure_xcdr2(
     const DDS::DynamicType_var member_type = get_base_type(md->type());
     const TypeKind member_tk = member_type->get_kind();
 
-    if (data_->is_basic(member_tk) || member_tk == TK_ENUM || member_tk == TK_BITMASK) {
+    if (is_basic(member_tk) || member_tk == TK_ENUM || member_tk == TK_BITMASK) {
       if (!serialized_size_basic_struct_member_xcdr2(encoding, size, id, member_type, optional,
                                                      extensibility, mutable_running_total)) {
         return false;
@@ -7968,7 +7817,7 @@ bool DynamicDataImpl::DataContainer::serialized_size_structure_xcdr2(
       }
       const DDS::DynamicType_var elem_type = get_base_type(member_td->element_type());
       const TypeKind elem_tk = elem_type->get_kind();
-      if (data_->is_basic(elem_tk) || elem_tk == TK_ENUM || elem_tk == TK_BITMASK) {
+      if (is_basic(elem_tk) || elem_tk == TK_ENUM || elem_tk == TK_BITMASK) {
         if (!serialized_size_sequence_struct_member_xcdr2(encoding, size, id, elem_tk, optional,
                                                           extensibility, mutable_running_total, nested(ext))) {
           return false;
@@ -7999,11 +7848,7 @@ bool DynamicDataImpl::DataContainer::serialized_size_structure_xcdr2(
 
 bool DynamicDataImpl::DataContainer::serialize_structure_xcdr2(DCPS::Serializer& ser, DCPS::Sample::Extent ext) const
 {
-  DDS::TypeDescriptor_var descriptor;
-  if (type_->get_descriptor(descriptor) != DDS::RETCODE_OK) {
-    return false;
-  }
-  const DDS::ExtensibilityKind extensibility = descriptor->extensibility_kind();
+  const DDS::ExtensibilityKind extensibility = type_desc_->extensibility_kind();
   const bool struct_has_explicit_keys = has_explicit_keys(type_);
 
   // Delimiter
@@ -8033,11 +7878,11 @@ bool DynamicDataImpl::DataContainer::serialize_structure_xcdr2(DCPS::Serializer&
 
     const DDS::MemberId id = md->id();
     const CORBA::Boolean optional = md->is_optional();
-    const CORBA::Boolean must_understand = md->is_must_understand();
+    const CORBA::Boolean must_understand = md->is_must_understand() || md->is_key();
     const DDS::DynamicType_var member_type = get_base_type(md->type());
     const TypeKind member_tk = member_type->get_kind();
 
-    if (data_->is_basic(member_tk) || member_tk == TK_ENUM || member_tk == TK_BITMASK) {
+    if (is_basic(member_tk) || member_tk == TK_ENUM || member_tk == TK_BITMASK) {
       if (!serialize_basic_struct_member_xcdr2(ser, id, member_type, optional,
                                                must_understand, extensibility)) {
         return false;
@@ -8050,7 +7895,7 @@ bool DynamicDataImpl::DataContainer::serialize_structure_xcdr2(DCPS::Serializer&
       }
       const DDS::DynamicType_var elem_type = get_base_type(member_td->element_type());
       const TypeKind elem_tk = elem_type->get_kind();
-      if (data_->is_basic(elem_tk) || elem_tk == TK_ENUM || elem_tk == TK_BITMASK) {
+      if (is_basic(elem_tk) || elem_tk == TK_ENUM || elem_tk == TK_BITMASK) {
         if (!serialize_sequence_struct_member_xcdr2(ser, id, elem_tk, optional,
                                                     must_understand, extensibility, nested(ext))) {
           return false;
@@ -8211,7 +8056,7 @@ bool DynamicDataImpl::DataContainer::get_discriminator_value(
     if (it != dd_impl->container_.single_map_.end()) {
       data_->read_discriminator(value, disc_type, it);
     } else {
-      set_default_discriminator_value(value, disc_type);
+      return set_default_discriminator_value(value, disc_type);
     }
   }
   return true;
@@ -8225,7 +8070,7 @@ bool DynamicDataImpl::DataContainer::serialized_size_discriminator_member_xcdr2(
     serialized_size_parameter_id(encoding, size, mutable_running_total);
   }
   const TypeKind disc_tk = disc_type->get_kind();
-  if (data_->is_primitive(disc_tk)) {
+  if (is_primitive(disc_tk)) {
     return serialized_size_primitive_member(encoding, size, disc_tk);
   }
   return serialized_size_enum(encoding, size, disc_type);
@@ -8239,7 +8084,7 @@ bool DynamicDataImpl::DataContainer::serialize_discriminator_member_xcdr2(
   const TypeKind disc_tk = disc_type->get_kind();
   if (extensibility == DDS::MUTABLE) {
     size_t disc_size = 0;
-    if (data_->is_primitive(disc_tk)) {
+    if (is_primitive(disc_tk)) {
       serialized_size_primitive_member(encoding, disc_size, disc_tk);
     } else {
       serialized_size_enum(encoding, disc_size, disc_type);
@@ -8378,48 +8223,6 @@ bool DynamicDataImpl::DataContainer::serialize_selected_member_xcdr2(DCPS::Seria
   return false;
 }
 
-bool DynamicDataImpl::DataContainer::select_union_member(CORBA::Long disc_value,
-  bool& found_selected_member, DDS::MemberDescriptor_var& selected_md) const
-{
-  found_selected_member = false;
-  bool has_default = false;
-  DDS::MemberDescriptor_var default_md;
-  for (CORBA::ULong i = 0; i < type_->get_member_count(); ++i) {
-    DDS::DynamicTypeMember_var dtm;
-    if (type_->get_member_by_index(dtm, i) != DDS::RETCODE_OK) {
-      return false;
-    }
-    if (dtm->get_id() == DISCRIMINATOR_ID) {
-      continue;
-    }
-    DDS::MemberDescriptor_var md;
-    if (dtm->get_descriptor(md) != DDS::RETCODE_OK) {
-      return false;
-    }
-    bool found_matched_label = false;
-    const DDS::UnionCaseLabelSeq labels = md->label();
-    for (CORBA::ULong j = 0; !found_matched_label && j < labels.length(); ++j) {
-      if (disc_value == labels[j]) {
-        found_matched_label = true;
-      }
-    }
-    if (found_matched_label) {
-      selected_md = md;
-      found_selected_member = true;
-      break;
-    }
-    if (md->is_default_label()) {
-      default_md = md;
-      has_default = true;
-    }
-  }
-  if (!found_selected_member && has_default) {
-    selected_md = default_md;
-    found_selected_member = true;
-  }
-  return true;
-}
-
 bool DynamicDataImpl::DataContainer::serialized_size_union_xcdr2(const DCPS::Encoding& encoding,
                                                                  size_t& size, DCPS::Sample::Extent ext) const
 {
@@ -8428,17 +8231,13 @@ bool DynamicDataImpl::DataContainer::serialized_size_union_xcdr2(const DCPS::Enc
     return true;
   }
 
-  DDS::TypeDescriptor_var descriptor;
-  if (type_->get_descriptor(descriptor) != DDS::RETCODE_OK) {
-    return false;
-  }
-  const DDS::ExtensibilityKind extensibility = descriptor->extensibility_kind();
+  const DDS::ExtensibilityKind extensibility = type_desc_->extensibility_kind();
   if (extensibility == DDS::APPENDABLE || extensibility == DDS::MUTABLE) {
     serialized_size_delimiter(encoding, size);
   }
 
   size_t mutable_running_total = 0;
-  DDS::DynamicType_var disc_type = get_base_type(descriptor->discriminator_type());
+  DDS::DynamicType_var disc_type = get_base_type(type_desc_->discriminator_type());
   if (ext != DCPS::Sample::Full) {
     if (!serialized_size_discriminator_member_xcdr2(encoding, size, disc_type,
                                                     extensibility, mutable_running_total)) {
@@ -8464,13 +8263,22 @@ bool DynamicDataImpl::DataContainer::serialized_size_union_xcdr2(const DCPS::Enc
 
   if (selected_id == MEMBER_ID_INVALID) {
     bool found_selected_member = false;
-    DDS::MemberDescriptor_var  selected_md;
-    if (!select_union_member(disc_value, found_selected_member, selected_md)) {
+    DDS::MemberDescriptor_var selected_md;
+    const DDS::ReturnCode_t rc =
+      data_->get_selected_union_branch(disc_value, found_selected_member, selected_md);
+    if (rc != DDS::RETCODE_OK) {
+      if (log_level >= LogLevel::Notice) {
+        ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicDataImpl::serialized_size_union_xcdr2:"
+                   " get_selected_union_branch failed: %C\n", retcode_to_string(rc)));
+      }
       return false;
     }
     if (!serialized_size_discriminator_member_xcdr2(encoding, size, disc_type,
                                                     extensibility, mutable_running_total)) {
       return false;
+    }
+    if (ext == DCPS::Sample::KeyOnly) {
+      return true;
     }
     if (found_selected_member) {
       DDS::DynamicType_var selected_type = get_base_type(selected_md->type());
@@ -8485,29 +8293,15 @@ bool DynamicDataImpl::DataContainer::serialized_size_union_xcdr2(const DCPS::Enc
     return true;
   }
 
-  if (!has_disc) {
-    DDS::DynamicTypeMember_var selected_dtm;
-    if (type_->get_member(selected_dtm, selected_id) != DDS::RETCODE_OK) {
-      return false;
-    }
-    DDS::MemberDescriptor_var selected_md;
-    if (selected_dtm->get_descriptor(selected_md) != DDS::RETCODE_OK) {
-      return false;
-    }
-    if (!data_->validate_discriminator(disc_value, selected_md)) {
-      if (DCPS::log_level >= DCPS::LogLevel::Notice) {
-        ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicDataImpl::DataContainer::serialized_size_union_xcdr2:"
-                   " Default discriminator value does not select the existing selected member\n"));
-      }
-      return false;
-    }
-  }
-
   if (!serialized_size_discriminator_member_xcdr2(encoding, size, disc_type,
-                                                  extensibility, mutable_running_total) ||
-      !serialized_size_selected_member_xcdr2(encoding, size, selected_id,
-                                             extensibility, mutable_running_total)) {
+                                                  extensibility, mutable_running_total)) {
     return false;
+  }
+  if (ext != DCPS::Sample::KeyOnly) {
+    if (!serialized_size_selected_member_xcdr2(
+        encoding, size, selected_id, extensibility, mutable_running_total)) {
+      return false;
+    }
   }
   serialized_size_list_end_parameter_id(encoding, size, mutable_running_total);
   return true;
@@ -8520,11 +8314,7 @@ bool DynamicDataImpl::DataContainer::serialize_union_xcdr2(DCPS::Serializer& ser
     return true;
   }
 
-  DDS::TypeDescriptor_var descriptor;
-  if (type_->get_descriptor(descriptor) != DDS::RETCODE_OK) {
-    return false;
-  }
-  const DDS::ExtensibilityKind extensibility = descriptor->extensibility_kind();
+  const DDS::ExtensibilityKind extensibility = type_desc_->extensibility_kind();
 
   // Delimiter
   const DCPS::Encoding& encoding = ser.encoding();
@@ -8539,7 +8329,7 @@ bool DynamicDataImpl::DataContainer::serialize_union_xcdr2(DCPS::Serializer& ser
   const_complex_iterator complex_it = complex_map_.find(DISCRIMINATOR_ID);
   const bool has_disc = single_it != single_map_.end() || complex_it != complex_map_.end();
   const DDS::MemberId selected_id = data_->find_selected_member();
-  DDS::DynamicType_var disc_type = get_base_type(descriptor->discriminator_type());
+  DDS::DynamicType_var disc_type = get_base_type(type_desc_->discriminator_type());
   const TypeKind disc_tk = disc_type->get_kind();
 
   // Read the discriminator value if the user already set it. Otherwise,
@@ -8558,12 +8348,21 @@ bool DynamicDataImpl::DataContainer::serialize_union_xcdr2(DCPS::Serializer& ser
     // its default value. Otherwise, serialize only the discriminator.
     bool found_selected_member = false;
     DDS::MemberDescriptor_var selected_md;
-    if (!select_union_member(disc_value, found_selected_member, selected_md)) {
+    const DDS::ReturnCode_t rc =
+      data_->get_selected_union_branch(disc_value, found_selected_member, selected_md);
+    if (rc != DDS::RETCODE_OK) {
+      if (log_level >= LogLevel::Notice) {
+        ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicDataImpl::serialize_union_xcdr2:"
+                   " get_selected_union_branch failed: %C\n", retcode_to_string(rc)));
+      }
       return false;
     }
     // Discriminator
     if (!serialize_discriminator_member_xcdr2(ser, disc_value, disc_type, extensibility)) {
       return false;
+    }
+    if (ext == DCPS::Sample::KeyOnly) {
+      return true;
     }
     // Selected member
     if (found_selected_member) {
@@ -8578,33 +8377,11 @@ bool DynamicDataImpl::DataContainer::serialize_union_xcdr2(DCPS::Serializer& ser
     return true;
   }
 
-  if (!has_disc) {
-    // If the default value of the discriminator doesn't select the member written
-    // by user, return an error. Otherwise, serialize both as normal.
-    DDS::DynamicTypeMember_var selected_dtm;
-    if (type_->get_member(selected_dtm, selected_id) != DDS::RETCODE_OK) {
-      return false;
-    }
-    DDS::MemberDescriptor_var selected_md;
-    if (selected_dtm->get_descriptor(selected_md) != DDS::RETCODE_OK) {
-      return false;
-    }
-    if (!data_->validate_discriminator(disc_value, selected_md)) {
-      if (DCPS::log_level >= DCPS::LogLevel::Notice) {
-        ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicDataImpl::DataContainer::serialize_union_xcdr2:"
-                   " Default discriminator value does not select the existing selected member\n"));
-      }
-      return false;
-    }
-    return serialize_discriminator_member_xcdr2(ser, disc_value, disc_type, extensibility) &&
-      serialize_selected_member_xcdr2(ser, selected_id, extensibility);
-  }
-
   // Both discriminator and a selected member exist in the data container.
   if (single_it != single_map_.end()) {
     if (extensibility == DDS::MUTABLE) {
       size_t disc_size = 0;
-      if (data_->is_primitive(disc_tk)) {
+      if (is_primitive(disc_tk)) {
         serialized_size_primitive_member(encoding, disc_size, disc_tk);
       } else { // Enum is the only other type can be used for discriminator
         serialized_size_enum(encoding, disc_size, disc_type);
@@ -8629,7 +8406,8 @@ bool DynamicDataImpl::DataContainer::serialize_union_xcdr2(DCPS::Serializer& ser
       return false;
     }
   }
-  return serialize_selected_member_xcdr2(ser, selected_id, extensibility);
+  return ext == DCPS::Sample::KeyOnly ||
+    serialize_selected_member_xcdr2(ser, selected_id, extensibility);
 }
 
 bool DynamicDataImpl::DataContainer::serialized_size_union_xcdr1(const DCPS::Encoding& /*encoding*/,
@@ -8729,7 +8507,7 @@ bool DynamicDataImpl::serialized_size_i(const DCPS::Encoding& encoding, size_t& 
   case TK_ARRAY:
     return container_.serialized_size_array(encoding, size, ext);
   case TK_MAP:
-    if (DCPS::log_level >= DCPS::LogLevel::Notice) {
+    if (log_level >= LogLevel::Notice) {
       ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicDataImpl::serialized_size_i: Serialization of map types is not supported\n"));
     }
   }
@@ -8791,7 +8569,7 @@ bool DynamicDataImpl::serialize_i(DCPS::Serializer& ser, DCPS::Sample::Extent ex
   case TK_ARRAY:
     return container_.serialize_array(ser, ext);
   case TK_MAP:
-    if (DCPS::log_level >= DCPS::LogLevel::Notice) {
+    if (log_level >= LogLevel::Notice) {
       ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicDataImpl::serialize_i: Serialization of map types is not supported\n"));
     }
   }

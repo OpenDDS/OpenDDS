@@ -3,33 +3,14 @@
 #  include <key_annotationTypeSupportImpl.h>
 #  include <DynamicDataImplTypeSupportImpl.h>
 
+#  include <tests/Utils/GtestRc.h>
+
 #  include <dds/DCPS/XTypes/Utils.h>
 #  include <dds/DCPS/XTypes/TypeLookupService.h>
 #  include <dds/DCPS/XTypes/DynamicDataAdapter.h>
 #  include <dds/DCPS/XTypes/DynamicDataFactory.h>
-#  include <dds/DCPS/DCPS_Utils.h>
 
 #  include <gtest/gtest.h>
-
-::testing::AssertionResult retcodes_equal(
-  const char* a_expr, const char* b_expr,
-  DDS::ReturnCode_t a, DDS::ReturnCode_t b)
-{
-  if (a == b) {
-    return ::testing::AssertionSuccess();
-  }
-  return ::testing::AssertionFailure() <<
-    "Expected equality of these values:\n"
-    "  " << a_expr << "\n"
-    "    Which is: " << OpenDDS::DCPS::retcode_to_string(a) << "\n"
-    "  " << b_expr << "\n"
-    "    Which is: " << OpenDDS::DCPS::retcode_to_string(b) << "\n";
-}
-
-#define EXPECT_RC_EQ(A, B) EXPECT_PRED_FORMAT2(retcodes_equal, (A), (B))
-#define ASSERT_RC_EQ(A, B) ASSERT_PRED_FORMAT2(retcodes_equal, (A), (B))
-#define EXPECT_RC_OK(VALUE) EXPECT_RC_EQ(::DDS::RETCODE_OK, (VALUE))
-#define ASSERT_RC_OK(VALUE) ASSERT_RC_EQ(::DDS::RETCODE_OK, (VALUE))
 
 using namespace OpenDDS::DCPS;
 using namespace OpenDDS::XTypes;
@@ -285,7 +266,7 @@ TEST_F(dds_DCPS_XTypes_Utils, member_path_get_member_from_data)
   SimpleKeyStruct sample;
   sample.key = 10;
   sample.value = 20;
-  DynamicDataAdapter<SimpleKeyStruct> dda(dt, getMetaStruct<SimpleKeyStruct>(), sample);
+  DDS::DynamicData_var dda = get_dynamic_data_adapter<SimpleKeyStruct>(dt, sample);
 
   std::vector<ACE_CDR::Long> expected_values;
   expected_values.push_back(10);
@@ -293,7 +274,7 @@ TEST_F(dds_DCPS_XTypes_Utils, member_path_get_member_from_data)
   for (MemberPathVec::iterator it = keys.begin(); it != keys.end(); ++it) {
     DDS::DynamicData_var container;
     DDS::MemberId id;
-    ASSERT_RC_OK(it->get_member_from_data(&dda, container, id));
+    ASSERT_RC_OK(it->get_member_from_data(dda, container, id));
     ACE_CDR::Long value;
     ASSERT_RC_OK(container->get_int32_value(value, id));
     actual_values.push_back(value);
@@ -494,7 +475,6 @@ TEST_F(dds_DCPS_XTypes_Utils, less_than)
 
   // nested_union
   ++id;
-  /* TODO
   DDS::DynamicData_var a_nested_union;
   ASSERT_RC_OK(a->get_complex_value(a_nested_union, id));
   DDS::DynamicData_var b_nested_union;
@@ -505,7 +485,6 @@ TEST_F(dds_DCPS_XTypes_Utils, less_than)
   ASSERT_RC_OK(a_nested_union->set_char8_value(1, 'x'));
   ASSERT_RC_OK(less_than(is_less_than, a, b, Filter_All));
   ASSERT_FALSE(is_less_than);
-  */
 
   // uint32_array
   ++id;

@@ -2258,7 +2258,7 @@ TEST(dds_DCPS_XTypes_DynamicDataImpl, Mutable_WriteValueToArray)
     0x00,0x00,0x00,0x1e, // +4=4 dheader
     0x30,0x00,0x00,0x00, 0x00,0x00,0x00,0x12, 0x00,0x00,0x00,0x34, // +12=16 int_32a
     0x30,0x00,0x00,0x01, 0x00,0x00,0x00,0xff, 0x00,0x00,0x00,0xff,  // +12=28 uint_32a
-    0x10,0x00,0x00,0x02, 0x01, 0x02 // +6=34 int_8a
+    0x90,0x00,0x00,0x02, 0x01, 0x02 // +6=34 int_8a
   };
   verify_array_struct(dt, expected_cdr);
 }
@@ -2278,7 +2278,7 @@ TEST(dds_DCPS_XTypes_DynamicDataImpl, Mutable_WriteValueToArrayDefault)
     0x00,0x00,0x00,0x1e, // +4=4 dheader
     0x30,0x00,0x00,0x00, 0x00,0x00,0x00,0x00, 0x00,0x00,0x00,0x00, // +12=16 int_32a
     0x30,0x00,0x00,0x01, 0x00,0x00,0x00,0x00, 0x00,0x00,0x00,0x00,  // +12=28 uint_32a
-    0x10,0x00,0x00,0x02, 0x00, 0x00 // +6=34 int_8a
+    0x90,0x00,0x00,0x02, 0x00, 0x00 // +6=34 int_8a
   };
   verify_array_struct_default(dt, expected_cdr);
 }
@@ -2305,7 +2305,7 @@ TEST(dds_DCPS_XTypes_DynamicDataImpl, Mutable_WriteStructWithNestedMembers)
     ////////////////////////////////////////////////////////
     0x10,0x00,0x00,0x02, 0x00,0x0a,(0),(0), // +6+(2)=44 s
     /////////// inner (FinalNestedUnionInner) ////////////
-    0x30,0x00,0x00,0x03, // +4=48 Emheader
+    0xb0,0x00,0x00,0x03, // +4=48 Emheader
     0x00,0x00,0x00,0x01, // +4=52 discriminator
     0xff,0xff,0xff,0xff, // +4=56 ul
     ////////////////////////////////////////////////////////
@@ -3399,17 +3399,16 @@ TEST(dds_DCPS_XTypes_DynamicDataImpl, Appendable_WriteKeyOnly)
   static const ACE_CDR::Short expected_value = 42;
   EXPECT_EQ(DDS::RETCODE_OK, data.set_int16_value(2, expected_value));
 
-  static const DCPS::Encoding xcdr2_le(DCPS::Encoding::KIND_XCDR2, DCPS::ENDIAN_LITTLE);
   static const size_t expected_size = 6u;
-  EXPECT_EQ(expected_size, DCPS::serialized_size(xcdr2_le, DCPS::KeyOnly<const XTypes::DynamicDataImpl>(data)));
+  EXPECT_EQ(expected_size, DCPS::serialized_size(xcdr2, DCPS::KeyOnly<const XTypes::DynamicDataImpl>(data)));
 
   ACE_Message_Block buffer(expected_size);
-  DCPS::Serializer ser(&buffer, xcdr2_le);
+  DCPS::Serializer ser(&buffer, xcdr2);
   EXPECT_TRUE(ser << DCPS::KeyOnly<const XTypes::DynamicDataImpl>(data));
-  static const unsigned char expected_buffer[] =
-    {2, 0, 0, 0, // DHEADER
-     expected_value & 0xff, (expected_value >> 8) & 0xff
-    };
+  static const unsigned char expected_buffer[] = {
+    0, 0, 0, 2, // DHEADER
+    (expected_value >> 8) & 0xff, expected_value & 0xff,
+  };
   EXPECT_PRED_FORMAT2(assert_DataView, expected_buffer, buffer);
 }
 
@@ -3439,17 +3438,16 @@ TEST(dds_DCPS_XTypes_DynamicDataImpl, Mutable_WriteKeyOnly)
   static const SomeEnum expected_value = E_UINT64;
   EXPECT_EQ(DDS::RETCODE_OK, inner->set_int32_value(id_disc, expected_value));
 
-  static const DCPS::Encoding xcdr2_le(DCPS::Encoding::KIND_XCDR2, DCPS::ENDIAN_LITTLE);
-  static const unsigned char expected_buffer[] =
-    {8, 0, 0, 0, // DHEADER
-     3, 0, 0, 0x20, // EMHEADER1 for 'inner'
-     expected_value & 0xff, 0, 0, 0
-    };
+  static const unsigned char expected_buffer[] = {
+    0, 0, 0, 8, // DHEADER
+    0xa0, 0, 0, 3, // EMHEADER1 for 'inner'
+    0, 0, 0, expected_value & 0xff
+  };
   static const size_t expected_size = sizeof expected_buffer;
-  EXPECT_EQ(expected_size, DCPS::serialized_size(xcdr2_le, DCPS::KeyOnly<const XTypes::DynamicDataImpl>(data)));
+  EXPECT_EQ(expected_size, DCPS::serialized_size(xcdr2, DCPS::KeyOnly<const XTypes::DynamicDataImpl>(data)));
 
   ACE_Message_Block buffer(expected_size);
-  DCPS::Serializer ser(&buffer, xcdr2_le);
+  DCPS::Serializer ser(&buffer, xcdr2);
   EXPECT_TRUE(ser << DCPS::KeyOnly<const XTypes::DynamicDataImpl>(data));
   EXPECT_PRED_FORMAT2(assert_DataView, expected_buffer, buffer);
 }
@@ -3483,17 +3481,16 @@ TEST(dds_DCPS_XTypes_DynamicDataImpl, MutableArray_WriteKeyOnly)
   EXPECT_NE(id0, XTypes::MEMBER_ID_INVALID);
   EXPECT_EQ(DDS::RETCODE_OK, inner->set_int8_value(id1, expected_values[1]));
 
-  static const DCPS::Encoding xcdr2_le(DCPS::Encoding::KIND_XCDR2, DCPS::ENDIAN_LITTLE);
-  static const unsigned char expected_buffer[] =
-    {6, 0, 0, 0, // DHEADER
-     2, 0, 0, 0x10, // EMHEADER1 for 'int_8a'
-     static_cast<unsigned char>(expected_values[0]), static_cast<unsigned char>(expected_values[1])
-    };
+  static const unsigned char expected_buffer[] = {
+    0, 0, 0, 6, // DHEADER
+    0x90, 0, 0, 2, // EMHEADER1 for 'int_8a'
+    static_cast<unsigned char>(expected_values[0]), static_cast<unsigned char>(expected_values[1])
+  };
   static const size_t expected_size = sizeof expected_buffer;
-  EXPECT_EQ(expected_size, DCPS::serialized_size(xcdr2_le, DCPS::KeyOnly<const XTypes::DynamicDataImpl>(data)));
+  EXPECT_EQ(expected_size, DCPS::serialized_size(xcdr2, DCPS::KeyOnly<const XTypes::DynamicDataImpl>(data)));
 
   ACE_Message_Block buffer(expected_size);
-  DCPS::Serializer ser(&buffer, xcdr2_le);
+  DCPS::Serializer ser(&buffer, xcdr2);
   EXPECT_TRUE(ser << DCPS::KeyOnly<const XTypes::DynamicDataImpl>(data));
   EXPECT_PRED_FORMAT2(assert_DataView, expected_buffer, buffer);
 }
@@ -3524,16 +3521,15 @@ TEST(dds_DCPS_XTypes_DynamicDataImpl, Nested_WriteKeyOnly)
   static const ACE_CDR::Long expected_value = 99;
   EXPECT_EQ(DDS::RETCODE_OK, inner->set_int32_value(id, expected_value));
 
-  static const DCPS::Encoding xcdr2_le(DCPS::Encoding::KIND_XCDR2, DCPS::ENDIAN_LITTLE);
-  static const unsigned char expected_buffer[] =
-    {4, 0, 0, 0, // DHEADER for 'inner'
-     expected_value & 0xff, 0, 0, 0
-    };
+  static const unsigned char expected_buffer[] = {
+    0, 0, 0, 4, // DHEADER for 'inner'
+    0, 0, 0, expected_value & 0xff
+  };
   static const size_t expected_size = sizeof expected_buffer;
-  EXPECT_EQ(expected_size, DCPS::serialized_size(xcdr2_le, DCPS::KeyOnly<const XTypes::DynamicDataImpl>(data)));
+  EXPECT_EQ(expected_size, DCPS::serialized_size(xcdr2, DCPS::KeyOnly<const XTypes::DynamicDataImpl>(data)));
 
   ACE_Message_Block buffer(expected_size);
-  DCPS::Serializer ser(&buffer, xcdr2_le);
+  DCPS::Serializer ser(&buffer, xcdr2);
   EXPECT_TRUE(ser << DCPS::KeyOnly<const XTypes::DynamicDataImpl>(data));
   EXPECT_PRED_FORMAT2(assert_DataView, expected_buffer, buffer);
 }

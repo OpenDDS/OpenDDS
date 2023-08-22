@@ -164,7 +164,7 @@ ShmemTransport::configure_i(const ShmemInst_rch& config)
   void* mem = alloc_->malloc(sizeof(ShmemSharedSemaphore));
   if (mem == 0) {
     if (log_level >= LogLevel::Error) {
-      ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: ShmemTrasport::configure_i: failed to allocate"
+      ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: ShmemTransport::configure_i: failed to allocate"
                  " space for semaphore in shared memory!\n"));
     }
     return false;
@@ -210,6 +210,8 @@ ShmemTransport::configure_i(const ShmemInst_rch& config)
 void
 ShmemTransport::shutdown_i()
 {
+  DBG_ENTRY_LVL("ShmemTransport","shutdown_i",6);
+
   if (read_task_) {
     read_task_->stop();
     ThreadStatusManager::Sleeper s(TheServiceParticipant->get_thread_status_manager());
@@ -238,7 +240,11 @@ ShmemTransport::shutdown_i()
 #  endif /* OPENDDS_SHMEM_WINDOWS */
 #endif /* OPENDDS_SHMEM_UNSUPPORTED */
 
-    alloc_->release(1 /*close*/);
+    if (alloc_->release(1 /*close*/) == -1) {
+      VDBG_LVL((LM_ERROR,
+                "(%P|%t) ShmemTransport::shutdown_i Release shared memory failed\n"), 1);
+    }
+
     alloc_.reset();
   }
 }
@@ -268,17 +274,27 @@ ShmemTransport::blob_to_key(const TransportBLOB& blob)
 void
 ShmemTransport::release_datalink(DataLink* link)
 {
+  DBG_ENTRY_LVL("ShmemTransport", "release_datalink", 6);
+
   GuardType guard(links_lock_);
   for (ShmemDataLinkMap::iterator it(links_.begin());
        it != links_.end(); ++it) {
     // We are guaranteed to have exactly one matching DataLink
     // in the map; release any resources held and return.
     if (link == static_cast<DataLink*>(it->second.in())) {
+      VDBG_LVL((LM_DEBUG,
+                "(%P|%t) ShmemTransport::release_datalink link[%@]\n",
+                link), 2);
+
       link->stop();
       links_.erase(it);
       return;
     }
   }
+
+  VDBG_LVL((LM_ERROR,
+            "(%P|%t) ShmemTransport::release_datalink link[%@] not found in ShmemDataLinkMap\n",
+            link), 1);
 }
 
 ShmemTransport::ReadTask::ReadTask(ShmemTransport* outer, ACE_sema_t semaphore)

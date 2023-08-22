@@ -19,7 +19,7 @@ Introduction
 In OpenDDS, Built-In-Topics are created and published by default to exchange information about DDS participants operating in the deployment.
 When OpenDDS is used in a centralized discovery approach using the ``DCPSInfoRepo`` service, the Built-In-Topics are published by this service.
 For DDSI-RTPS discovery, the internal OpenDDS implementation instantiated in a process populates the caches of the Built-In Topic DataReaders.
-See Section :ref:`run_time_configuration--configuring-for-ddsi-rtps-discovery` for a description of RTPS discovery configuration.
+See :ref:`run_time_configuration--configuring-for-ddsi-rtps-discovery` for a description of RTPS discovery configuration.
 
 The IDL struct ``BuiltinTopicKey_t`` is used by the Built-In Topics.
 This structure contains an array of 16 octets (bytes) which corresponds to an InfoRepo identifier or a DDSI-RTPS GUID.
@@ -36,19 +36,18 @@ Built-In Topics for DCPSInfoRepo Configuration
 When starting the ``DCPSInfoRepo`` a command line option of ``-NOBITS`` may be used to suppress publication of built-in topics.
 
 Four separate topics are defined for each domain.
-Each is dedicated to a particular entity (domain participant, topic, data writer, data reader) and publishes instances describing the state for each entity in the domain.
+Each is dedicated to a particular entity (domain participant :ref:`built_in_topics--dcpsparticipant-topic`, topic :ref:`built_in_topics--dcpsparticipant-topic`, data writer :ref:`built_in_topics--dcpspublication-topic`, data reader :ref:`built_in_topics--dcpssubscription-topic`) and publishes instances describing the state for each entity in the domain.
 
 Subscriptions to built-in topics are automatically created for each domain participant.
-A participant’s support for Built-In-Topics can be toggled via the ``DCPSBit`` configuration option (see the table in Section :ref:`run_time_configuration--common-configuration-options`) (Note: this option cannot be used for RTPS discovery).
+A participant’s support for Built-In-Topics can be toggled via the ``DCPSBit`` configuration option (see the table in :ref:`run_time_configuration--common-configuration-options`) (Note: this option cannot be used for RTPS discovery).
 To view the built-in topic data, simply obtain the built-in Subscriber and then use it to access the Data Reader for the built-in topic of interest.
 The Data Reader can then be used like any other Data Reader.
 
-Sections :ref:`built_in_topics--dcpsparticipant-topic` through :ref:`built_in_topics--dcpssubscription-topic` provide details on the data published for each of the four built-in topics.
-An example showing how to read from a built-in topic follows those sections.
+See :ref:`built_in_topics--built-in-topic-subscription-example` for an example showing how to read from a built-in topic.
 
 If you are not planning on using Built-in-Topics in your application, you can configure OpenDDS to remove Built-In-Topic support at build time.
 Doing so can reduce the footprint of the core DDS library by up to 30%.
-See Section :ref:`introduction--disabling-the-building-of-built-in-topic-support` for information on disabling Built-In-Topic support.
+See :ref:`introduction--disabling-the-building-of-built-in-topic-support` for information on disabling Built-In-Topic support.
 
 .. _built_in_topics--dcpsparticipant-topic:
 
@@ -228,7 +227,7 @@ OpenDDSParticipantLocation Topic
 ..
     Sect<6.8.1>
 
-The Built-In Topic “OpenDDSParticipantLocation” is published by the DDSI-RTPS discovery implementation to give applications visibility into the details of how each remote participant is connected over the network.
+The Built-In Topic "OpenDDSParticipantLocation" is published by the DDSI-RTPS discovery implementation to give applications visibility into the details of how each remote participant is connected over the network.
 If the RtpsRelay (:ref:`internet_enabled_rtps--the-rtpsrelay`) and/or IETF ICE (:ref:`internet_enabled_rtps--interactive-connectivity-establishment-ice-for-rtps`) are enabled, their usage is reflected in the OpenDDSParticipantLocation topic data.
 The topic type ParticipantLocationBuiltinTopicData is defined in :ghfile:`dds/OpenddsDcpsExt.idl` in the ``OpenDDS::DCPS`` module:
 
@@ -261,8 +260,8 @@ OpenDDSConnectionRecord Topic
 ..
     Sect<6.8.2>
 
-The Built-In Topic “OpenDDSConnectionRecord” is published by the DDSI-RTPS discovery implementation and RTPS_UDP transport implementation to give applications visibility into the details of a participant’s connection to an RtpsRelay instance.
-Security must be enabled in the build of OpenDDS (see section :ref:`dds_security--building-opendds-with-security-enabled`) to use this topic.
+The Built-In Topic "OpenDDSConnectionRecord" is published by the DDSI-RTPS discovery implementation and RTPS_UDP transport implementation to give applications visibility into the details of a participant’s connection to an RtpsRelay instance.
+Security must be enabled in the build of OpenDDS (:ref:`dds_security--building-opendds-with-security-enabled`) to use this topic.
 
 The topic type ConnectionRecord is defined in :ghfile:`dds/OpenddsDcpsExt.idl` in the ``OpenDDS::DCPS`` module:
 
@@ -272,7 +271,7 @@ The topic type ConnectionRecord is defined in :ghfile:`dds/OpenddsDcpsExt.idl` i
 * ``address`` (key) – The address of the remote participant.
 
 * ``protocol`` (key) – The method used to determine connectivity.
-  Currently, “RtpsRelay:STUN” is the only supported protocol.
+  Currently, "RtpsRelay:STUN" is the only supported protocol.
 
 * ``latency`` – A measured round-trip latency for protocols that support it.
 
@@ -284,7 +283,7 @@ OpenDDSInternalThread Topic
 ..
     Sect<6.8.3>
 
-The Built-In Topic “OpenDDSInternalThread” is published when OpenDDS is configured with DCPSThreadStatusInterval (see section :ref:`run_time_configuration--common-configuration-options`).
+The Built-In Topic "OpenDDSInternalThread" is published when OpenDDS is configured with DCPSThreadStatusInterval (:ref:`run_time_configuration--common-configuration-options`).
 When enabled, the DataReader for this Built-In Topic will report the status of threads created and managed by OpenDDS within the current process.
 The timestamp associated with samples can be used to determine the health (responsiveness) of the thread.
 

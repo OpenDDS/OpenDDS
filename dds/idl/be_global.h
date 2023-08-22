@@ -147,6 +147,9 @@ public:
   bool old_typeobject_encoding() const { return old_typeobject_encoding_; }
   void old_typeobject_encoding(bool b) { old_typeobject_encoding_ = b; }
 
+  bool old_typeobject_member_order() const { return old_typeobject_member_order_; }
+  void old_typeobject_member_order(bool b) { old_typeobject_member_order_ = b; }
+
   ACE_CString java_arg() const;
   void java_arg(const ACE_CString& str);
 
@@ -223,6 +226,7 @@ public:
   bool hashid(AST_Decl* node, std::string& value) const;
   bool is_optional(AST_Decl* node) const;
   bool is_must_understand(AST_Decl* node) const;
+  bool is_effectively_must_understand(AST_Decl* node) const;
   bool is_key(AST_Decl* node) const;
   bool is_external(AST_Decl* node) const;
   bool is_plain(AST_Decl* node) const;
@@ -245,6 +249,13 @@ public:
     return default_enum_extensibility_zero_;
   }
 
+  bool dynamic_data_adapter(AST_Decl* node) const;
+
+  bool special_serialization(AST_Decl* node, std::string& template_name) const;
+
+  void generate_equality(bool flag) { generate_equality_ = flag; }
+  bool generate_equality() const { return generate_equality_; }
+
 private:
   /// Name of the IDL file we are processing.
   const char* filename_;
@@ -252,7 +263,7 @@ private:
   bool java_, suppress_idl_, suppress_typecode_, suppress_xtypes_,
     no_default_gen_, generate_itl_,
     generate_value_reader_writer_,
-    generate_xtypes_complete_, face_ts_;
+    generate_xtypes_complete_, face_ts_, generate_equality_;
 
   bool filename_only_includes_;
 
@@ -277,6 +288,7 @@ private:
   typedef std::map<AST_Structure*, MemberIdCollisionMap> GlobalMemberIdCollisionMap;
   GlobalMemberIdCollisionMap member_id_collision_map_;
   bool old_typeobject_encoding_;
+  bool old_typeobject_member_order_;
 
   bool is_default_nested(UTL_Scope* scope);
   AutoidKind scoped_autoid(UTL_Scope* scope) const;

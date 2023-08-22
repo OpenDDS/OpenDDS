@@ -39,8 +39,9 @@ public:
 
   virtual ~DataWriterCallbacks() {}
 
-  virtual void add_association(const GUID_t& yourId,
-                               const ReaderAssociation& reader,
+  virtual void set_publication_id(const GUID_t& guid) = 0;
+
+  virtual void add_association(const ReaderAssociation& reader,
                                bool active) = 0;
 
   virtual void remove_associations(const ReaderIdSeq& readers,

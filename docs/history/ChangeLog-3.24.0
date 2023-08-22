@@ -1,0 +1,4762 @@
+Tue Apr 11 18:03:29 UTC 2023  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 88ae1fac6aecc7290310f4e20acf6dd33ed97d52
+
+          Merge pull request #4106 from iguessthislldo/igtd/3.24-news
+
+          3.24 News
+
+Tue Apr 11 18:03:15 UTC 2023  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit c7e293b29f17523135f011d0c275c3549b7ceff0
+
+          Merge pull request #4107 from jwillemsen/jwi-openddsfound
+
+          OpenDDS Foundation as author of DevGuide
+
+Tue Apr 11 16:28:30 UTC 2023  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit 3179e930020a1a0f2e213a4f3f3cb1d2a3faf62b
+
+        * NEWS.md:
+
+          Respond to Reviews, Other Tweaks
+
+Tue Apr 11 13:30:46 UTC 2023  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit 05a9e136e4f12ef2abc99c70c46786e9330d1f4c
+
+        * docs/conf.py:
+
+          devGuid OpenDDS Foundation?
+
+          * docs/conf.py:
+
+Mon Apr 10 22:43:34 UTC 2023  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit fe562b453ccfcac230cafd86c8368eff13fd0ac3
+
+        * NEWS.md:
+
+          Tweaked NEWS
+
+Mon Apr 10 22:10:14 UTC 2023  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit 9ac254b0656baa457fed73d1f9aaa73d5f32c03e
+
+        * NEWS.md:
+
+          3.24 News
+
+Mon Apr 10 21:40:48 UTC 2023  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit 95d5ed8eec275aa90b221b1a5c3714debef8dcf6
+
+          Merge pull request #4105 from jrw972/rtps-relay-arguments
+
+          Add missing RtpsRelay arguments
+
+Mon Apr 10 21:40:17 UTC 2023  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit 212a2ae41724e7d5086e63d97adea97f24b8c1b4
+
+          Merge pull request #4078 from
+          iguessthislldo/igtd/dynamic-data-adapter
+
+          Make `DynamicDataAdapter` More Functional and Use It in the xcdr
+          Test
+
+Mon Apr 10 20:41:27 UTC 2023  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 83e9748070e6cc124c241c92a421c42b96192468
+
+        * docs/devguide/internet_enabled_rtps.rst:
+
+          Add missing RtpsRelay arguments
+
+Mon Apr 10 18:02:04 UTC 2023  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit 5394cb900a322801ae1557c7cc90fbff951be2ea
+
+        * dds/DCPS/XTypes/DynamicDataAdapter.cpp:
+        * dds/DCPS/XTypes/DynamicDataAdapter.h:
+
+          Respond to Review
+
+Fri Apr 07 18:05:40 UTC 2023  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit cadb4cc99a86093cbbdedfc4186ee62588786d72
+
+          Merge pull request #4104 from
+          iguessthislldo/igtd/release-script-3.24
+
+          Update Release Script for New DevGuide
+
+Fri Apr 07 17:04:06 UTC 2023  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit 8ff7cd8b40baf2cf46fd0a7b8c6ea31fab5ec9fa
+
+          Merge pull request #4102 from jrw972/clean-up-code-examples
+
+          Clean up code examples in DevGuide
+
+Fri Apr 07 11:22:49 UTC 2023  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit 69b5dfe84b0f115acd3bba34ce7263d4bb4e92b9
+
+        * MPC/config/googletest.mpb:
+        * MPC/config/opendds_unit_test.mpb:
+        * dds/DCPS/XTypes/DynamicDataBase.cpp:
+        * dds/DCPS/XTypes/DynamicDataImpl.cpp:
+        * dds/DCPS/XTypes/DynamicDataXcdrReadImpl.cpp:
+        * dds/DCPS/XTypes/Utils.cpp:
+        * dds/idl/dds_generator.cpp:
+        * dds/idl/dds_generator.h:
+        * tests/DCPS/Compiler/xcdr/xcdr.mpc:
+        * tests/unit-tests/UnitTests.mpc:
+
+          Respond to Reviews, Fix Memory Leak
+
+Fri Apr 07 11:15:34 UTC 2023  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit af2239d8121308f561081e5a3eeaed88c200bd9a
+
+          Merge remote-tracking branch 'upstream/master' into
+          clean-up-code-examples
+
+Fri Apr 07 11:11:25 UTC 2023  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit 39af634b709f119cbc385b8b1478a025de1155d5
+
+        * docs/devguide/dds_security.rst:
+        * docs/devguide/introduction.rst:
+        * docs/devguide/modeling_sdk.rst:
+        * docs/devguide/run_time_configuration.rst:
+
+          Apply Suggestions, Fix Some Other Major Issues
+
+Fri Apr 07 05:19:28 UTC 2023  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit 6d454dfd166e51d049e3249f25605a162b93db60
+
+        * tools/scripts/gitrelease.pl:
+
+          Update Release Script for New DevGuide
+
+          Also disabled Doxygen generation and server upload, at least
+          temporarily.
+
+Thu Apr 06 12:58:52 UTC 2023  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit a68fcd17bf55ad3720cdd0ce27561b76413a7ff8
+
+        * NEWS.md:
+        * tests/DCPS/Compiler/xcdr/xcdr.cpp:
+
+          Fix Unused Warnings, Tweak NEWS
+
+Thu Apr 06 11:26:21 UTC 2023  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit 79c7a52b4ac6f1abed50ea67cf1f1ee321ae1618
+
+        * tests/unit-tests/dds/DCPS/XTypes/DynamicDataAdapter.cpp:
+
+          More CI Fixes
+
+Thu Apr 06 09:17:58 UTC 2023  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit 1e712c391c2c2850b1e19f631b11197928ef56df
+
+        * NEWS.md:
+        * dds/DCPS/XTypes/DynamicDataImpl.cpp:
+        * dds/idl/be_global.cpp:
+        * dds/idl/be_global.h:
+        * dds/idl/be_util.cpp:
+        * dds/idl/typeobject_generator.cpp:
+        * docs/devguide/opendds_idl.rst:
+        * tests/dcps_tests.lst:
+        * tests/unit-tests/dds/DCPS/XTypes/DynamicDataAdapter.cpp:
+
+          CI Fixes, NEWS, Add --old-typeobject-member-order
+
+Thu Apr 06 03:52:18 UTC 2023  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit 024d34727f274a002936a45792330c15643f092c
+
+        * dds/DCPS/RTPS/Sedp.cpp:
+        * dds/DCPS/XTypes/DynamicDataBase.cpp:
+        * dds/DCPS/XTypes/DynamicDataBase.h:
+        * dds/DCPS/XTypes/DynamicDataXcdrReadImpl.cpp:
+        * dds/DCPS/XTypes/Utils.cpp:
+        * dds/DCPS/XTypes/Utils.h:
+        * tests/DCPS/Compiler/xcdr/xcdr.cpp:
+        * tests/DCPS/DynamicTypes/Recorder/XTypesDynamicRecorder.cpp:
+        * tests/DCPS/DynamicTypes/run_test.pl:
+        * tests/DCPS/XTypes/run_test.pl:
+        * tests/unit-tests/dds/DCPS/XTypes/DynamicDataAdapter.cpp:
+
+          Respond to Review and CI Fixes
+
+          - Fix issues with `print_dynamic_data` and reduce duplicated
+          code.
+          - Update DynamicTypes test for `print_dynamic_data` changes.
+          - Add logging cases of a non-match and TypeObject assignability
+          isn't possible.
+          - Improve error reporting in XTypes test
+          - Correct expected result for reordered mutable struct with
+          DISALLOW_TYPE_COERCION in XTypes test
+
+Wed Apr 05 21:02:36 UTC 2023  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 1cdf1ca2f85da958ee99d1076e9c2349c8fc6c67
+
+          Merge pull request #4103 from iguessthislldo/igtd/sphinx-sidebar
+
+          Add Bullets To Top-Level Sidebar Links in Sphinx
+
+Wed Apr 05 21:01:50 UTC 2023  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit c11a613fd416827c9e1f7ff1cfe05df12802edf6
+
+          Merge pull request #4095 from
+          mitza-oci/rtpsrelay-partition-dependent-forwarding
+
+          RtpsRelay: partition-dependent forwarding
+
+Wed Apr 05 20:22:24 UTC 2023  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit 0d0984b23c3de5063f7e59c4bc3a7b76f971f764
+
+        * docs/custom.css:
+
+          Add Bullets To Top-Level Sidebar Links in Sphinx
+
+          Top-level navigation side bar links are a little hard to
+          distinguish
+          from one another because some of them will overflow into multiple
+          lines.
+          A ul tag would have bullets, but that's disabled in the theme's
+          CSS.
+          This overrides that and readds the bullets.
+
+Tue Apr 04 20:28:11 UTC 2023  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit eb46146b4aa7ac9d2ccc08b4623d036a5c7c67e8
+
+        * docs/devguide/alternate_interfaces_to_data.rst:
+        * docs/devguide/conditions_and_listeners.rst:
+        * docs/devguide/dds_security.rst:
+        * docs/devguide/getting_started.rst:
+        * docs/devguide/internet_enabled_rtps.rst:
+        * docs/devguide/introduction.rst:
+        * docs/devguide/java_bindings.rst:
+        * docs/devguide/modeling_sdk.rst:
+        * docs/devguide/opendds_idl.rst:
+        * docs/devguide/quality_of_service.rst:
+        * docs/devguide/run_time_configuration.rst:
+        * docs/devguide/the_dcps_information_repository.rst:
+
+          Clean up code examples in DevGuide
+
+Wed Apr 05 16:58:33 UTC 2023  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 07c7bbc00a51633bdcfbfe274c842198d8fd1e24
+
+          Merge pull request #4101 from jrw972/remove-chapters
+
+          DevGuide refers to chapters and sections
+
+Wed Apr 05 16:58:12 UTC 2023  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 3d6327e316cee989031cd2d3a88b06062d99a9bb
+
+          Merge pull request #4100 from mitza-oci/devguide
+
+          Devguide updates
+
+Wed Apr 05 15:25:49 UTC 2023  Adam Mitz  <mitza@objectcomputing.com>
+        commit 226c70d3c6bdc6342a0a072875332eea07b5a899
+
+        * tests/security/security_tests.lst:
+
+          Skip this test case with IPv6 enabled
+
+          Equivalent option for SedpAdvertisedLocalAddress in IPv6 isn't
+          supported
+
+Wed Apr 05 02:19:16 UTC 2023  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit 69bc27882c771c89a2c4f0096a540486e8f4b5d4
+
+        * dds/DCPS/XTypes/DynamicDataAdapter.cpp:
+        * dds/DCPS/XTypes/DynamicDataAdapter.h:
+        * dds/DCPS/XTypes/DynamicDataBase.cpp:
+        * dds/DCPS/XTypes/DynamicDataBase.h:
+        * dds/DCPS/XTypes/DynamicDataImpl.cpp:
+        * dds/DCPS/XTypes/DynamicDataXcdrReadImpl.cpp:
+        * dds/DCPS/XTypes/TypeObject.cpp:
+        * dds/DCPS/XTypes/TypeObject.h:
+        * dds/DCPS/XTypes/Utils.cpp:
+        * dds/DCPS/XTypes/Utils.h:
+        * dds/idl/annotations.h:
+        * dds/idl/be_produce.cpp:
+        * dds/idl/dynamic_data_adapter_generator.cpp:
+        * dds/idl/metaclass_generator.cpp:
+        * tests/DCPS/Compiler/xcdr/xcdr.cpp:
+
+          Build Fixes and Changes from Self Review
+
+Tue Apr 04 22:38:55 UTC 2023  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit d02fb9928fcc32c7bb420b372467a73c06c5a31b
+
+          Merge remote-tracking branch 'upstream/master' into
+          igtd/dynamic-data-adapter
+
+Tue Apr 04 22:34:40 UTC 2023  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit 1efac17d5e3a39c8c71daaf7cdc7e1838df4c222
+
+        * dds/DCPS/XTypes/Utils.cpp:
+        * tests/unit-tests/dds/DCPS/Serializer.cpp:
+        * tests/unit-tests/dds/DCPS/XTypes/DynamicDataAdapter.cpp:
+        * tests/unit-tests/dds/DCPS/XTypes/DynamicDataAdapter.idl:
+        * tests/unit-tests/dds/DCPS/XTypes/Utils.cpp:
+
+          Expand Testing, Tweak
+
+Tue Apr 04 21:26:37 UTC 2023  Adam Mitz  <mitza@objectcomputing.com>
+        commit bb7fb584610c198e19eb33ff2553528b7dd049cd
+
+        * tests/DCPS/RtpsRelay/Smoke/Smoke.mpc:
+
+          exclude this test from no-BITs builds
+
+Tue Apr 04 18:41:23 UTC 2023  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 6484fb0cf4b76bc82fc35e0e3ec9a4ddc24487d7
+
+        * docs/devguide/alternate_interfaces_to_data.rst:
+        * docs/devguide/built_in_topics.rst:
+        * docs/devguide/conditions_and_listeners.rst:
+        * docs/devguide/content_subscription_profile.rst:
+        * docs/devguide/dds_security.rst:
+        * docs/devguide/getting_started.rst:
+        * docs/devguide/internet_enabled_rtps.rst:
+        * docs/devguide/introduction.rst:
+        * docs/devguide/java_bindings.rst:
+        * docs/devguide/modeling_sdk.rst:
+        * docs/devguide/opendds_idl.rst:
+        * docs/devguide/quality_of_service.rst:
+        * docs/devguide/run_time_configuration.rst:
+        * docs/devguide/safety_profile.rst:
+        * docs/devguide/the_dcps_information_repository.rst:
+        * docs/devguide/xtypes.rst:
+
+          DevGuide refers to chapters and sections
+
+          Problem
+          -------
+
+          The conversion of the DevGuide means that the concept of a
+          "chapter"
+          is no longer well defined. Many references are introduced as "see
+          section X".
+
+          Solution
+          --------
+
+          - Where possible remove the descriptor (chapter/section) of the
+          target
+          of the reference.
+
+          - Change generic references to be section.
+
+Tue Apr 04 19:05:35 UTC 2023  Adam Mitz  <mitza@objectcomputing.com>
+        commit 91ab8d9f9c7fe294418e44797defe710ee69b1a6
+
+        * docs/devguide/run_time_configuration.rst:
+
+          Fixed newlines
+
+Tue Apr 04 18:28:48 UTC 2023  Adam Mitz  <mitza@objectcomputing.com>
+        commit a6cc46525478debfe939523cb5f1bb468e79db46
+
+        * docs/devguide/safety_profile.rst:
+
+          removed some email addresses
+
+Tue Apr 04 18:19:41 UTC 2023  Adam Mitz  <mitza@objectcomputing.com>
+        commit 7b2521d96817ad9188f490838f9d66498772dc43
+
+        * docs/devguide/run_time_configuration.rst:
+
+          Update example domain name
+
+Tue Apr 04 18:01:50 UTC 2023  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 794120e8c24196aff6ed81f8a1132f9e9f878eb9
+
+          Merge pull request #4091 from jrw972/link-to-dev-guide
+
+          README does not link to online DevGuide
+
+Tue Apr 04 17:45:48 UTC 2023  Adam Mitz  <mitza@objectcomputing.com>
+        commit e82e413575e89829209add7c7dda511d9c74dd0b
+
+        * tests/DCPS/RtpsRelay/Smoke/Args.h:
+        * tests/DCPS/RtpsRelay/Smoke/ParticipantBit.h:
+        * tests/DCPS/RtpsRelay/Smoke/publisher.cpp:
+        * tests/DCPS/RtpsRelay/Smoke/run_test.pl:
+        * tests/DCPS/RtpsRelay/Smoke/subscriber.cpp:
+        * tests/security/security_tests.lst:
+
+          Added a test to RtpsRelay/Smoke for this use case
+
+Tue Apr 04 10:25:48 UTC 2023  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit 021a7c286ce431c295076c8b85b5fd36377e1975
+
+          Merge pull request #4092 from iguessthislldo/igtd/sphinx-devguide
+
+          Cleanup XTypes Section in Devguide
+
+Thu Mar 30 22:10:54 UTC 2023  Adam Mitz  <mitza@objectcomputing.com>
+        commit 8c4d2ce877e65c79bab80e63f8b3bec3f38233d1
+
+        * tests/DCPS/RtpsRelay/Smoke/Args.h:
+        * tests/DCPS/RtpsRelay/Smoke/pub_same_relay.ini:
+        * tests/DCPS/RtpsRelay/Smoke/publisher.cpp:
+        * tests/DCPS/RtpsRelay/Smoke/run_test.pl:
+        * tests/DCPS/RtpsRelay/Smoke/sub_same_relay.ini:
+        * tests/DCPS/RtpsRelay/Smoke/subscriber.cpp:
+        * tests/unit-tests/tools/dds/rtpsrelaylib/PartitionIndex.cpp:
+        * tools/dds/rtpsrelaylib/PartitionIndex.h:
+        * tools/dds/rtpsrelaylib/Utility.h:
+        * tools/rtpsrelay/GuidPartitionTable.h:
+        * tools/rtpsrelay/RelayHandler.cpp:
+
+          RtpsRelay: use partitions to determine if data should be
+          forwarded within the same instance
+
+          Test is not complete - the new test configuration will always
+          fail so it's not yet in the test list file
+
+Mon Mar 27 21:53:21 UTC 2023  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 8a73d3e12922173798ed1307cb2b4288ac77ce6f
+
+        * docs/devguide/xtypes.rst:
+
+          Document how unions are handling for writing DynamicData
+
+          See #4024.
+
+Mon Apr 03 18:25:14 UTC 2023  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit f4a84274d6172421233c718e1324a5e980db9a43
+
+          Merge pull request #4097 from sonndinh/update-union-serialization
+
+          Remove unnecessary logic for serialization of union in
+          DynamicDataImpl
+
+Mon Apr 03 08:44:35 UTC 2023  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit 4a5723c224d6ec181126b28fb491abba280ae911
+
+        * dds/DCPS/Serializer.cpp:
+        * dds/DCPS/XTypes/DynamicDataImpl.cpp:
+        * dds/DCPS/XTypes/DynamicDataXcdrReadImpl.cpp:
+        * dds/idl/be_global.cpp:
+        * dds/idl/be_global.h:
+        * dds/idl/marshal_generator.cpp:
+        * tests/Utils/DataView.h:
+        * tests/unit-tests/dds/DCPS/XTypes/DynamicDataAdapter.cpp:
+
+          Fixes for DynamicDataAdapter Changes
+
+          - `Serializer::read_parameter_id` now correctly includes size of
+          the
+          "next int" with the member field when "length code" is 5, 6, or
+          7.
+          - `@key` doesn't directly mean the same thing as
+          `@must_understand`, but
+          still implies it for serialization.
+          - Added test for TestStruct to DynamicDataAdapter unit test.
+
+Fri Mar 31 18:23:34 UTC 2023  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit 21d0ebdde86b6575e9b304ca89fa4ec278408745
+
+          Merge remote-tracking branch 'upstream/master' into
+          igtd/sphinx-devguide
+
+Fri Mar 31 18:07:45 UTC 2023  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 8487ebd1f08e0a967e6ddecd154ec5ceebb6904c
+
+          Merge pull request #4096 from jwillemsen/jwi-vcpkg11
+
+          Upgrade to run-vcpkg@v11
+
+Fri Mar 31 17:58:29 UTC 2023  Son Dinh  <dinhs@objectcomputing.com>
+        commit 30877f84c1d671dccc70aa026dceb304d51ac189
+
+        * dds/DCPS/XTypes/DynamicDataImpl.cpp:
+
+          Remove unnecessary logic
+
+Fri Mar 31 17:23:03 UTC 2023  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 5cede0ae7f5e9603d3881f673f562bfac7ef05c4
+
+          Merge pull request #4094 from jrw972/preface-to-intro
+
+          Merge DevGuide preface into introduction
+
+Fri Mar 31 07:43:40 UTC 2023  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit 42f05499983a60c291a2ba40b7d2662fdd240dc5
+
+        * .github/workflows/build_and_test.yml:
+
+          Upgrade vcpkg version
+
+          * .github/workflows/build_and_test.yml:
+
+Fri Mar 31 07:32:02 UTC 2023  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit 7d15a37fca34c0ca23aca832e441f317c8c4a4ab
+
+        * .github/workflows/build_and_test.yml:
+        * .github/workflows/ishapes.yml:
+
+          Upgrade to run-vcpkg@v11
+
+          * .github/workflows/build_and_test.yml:
+          * .github/workflows/ishapes.yml:
+
+Thu Mar 30 22:07:43 UTC 2023  Adam Mitz  <mitza@objectcomputing.com>
+        commit 2206392a618949cd20528af612ab56f71c38ff88
+
+        * dds/DCPS/security/AccessControl/LocalAccessCredentialData.cpp:
+
+          fixed typo
+
+Thu Mar 30 15:38:16 UTC 2023  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit ec6562222fd178dbdeed0bd15111ef25c3575021
+
+        * docs/devguide/introduction.rst:
+
+          From review
+
+Thu Mar 30 13:18:17 UTC 2023  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit 9bd0eca5f7cb01d7465316b108fd8a1a210ff93d
+
+        * docs/conf.py:
+        * docs/devguide/internet_enabled_rtps.rst:
+        * docs/devguide/introduction.rst:
+        * docs/devguide/java_bindings.rst:
+        * docs/devguide/opendds_idl.rst:
+        * docs/devguide/safety_profile.rst:
+        * docs/devguide/xtypes.rst:
+        * docs/index.rst:
+        * docs/sphinx_extensions/links.py:
+
+          Respond to Reviews
+
+          Also:
+          - Slightly widen Sphinx pages
+          - Replace some redirected links
+          - Replace unnecessary non-ASCII in XTypes section
+          - Move XCDR1 limitations with other spec limitations
+          - Tweak custom link role code a bit
+
+Thu Mar 30 05:53:49 UTC 2023  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit 44a8a222be653b443528690c3ff5ff509e60f35d
+
+        * MPC/config/googletest.mpb:
+        * dds/DCPS/Serializer.h:
+        * dds/DCPS/XTypes/DynamicDataAdapter.cpp:
+        * dds/DCPS/XTypes/DynamicDataAdapter.h:
+        * dds/DCPS/XTypes/DynamicDataBase.cpp:
+        * dds/DCPS/XTypes/DynamicDataBase.h:
+        * dds/DCPS/XTypes/DynamicDataImpl.cpp:
+        * dds/DCPS/XTypes/DynamicDataImpl.h:
+        * dds/DCPS/XTypes/DynamicDataXcdrReadImpl.cpp:
+        * dds/DCPS/XTypes/DynamicDataXcdrReadImpl.h:
+        * dds/DCPS/XTypes/TypeObject.cpp:
+        * dds/DCPS/XTypes/TypeObject.h:
+        * dds/DCPS/XTypes/Utils.cpp:
+        * dds/idl/be_global.cpp:
+        * dds/idl/dynamic_data_adapter_generator.cpp:
+        * dds/idl/marshal_generator.cpp:
+        * dds/idl/typeobject_generator.cpp:
+        * tests/DCPS/Compiler/xcdr/run_test.pl:
+        * tests/DCPS/Compiler/xcdr/xcdr.cpp:
+        * tests/DCPS/Compiler/xcdr/xcdr.mpc:
+        * tests/DCPS/Compiler/xcdr/xcdrbasetypes.idl:
+        * tests/dcps_tests.lst:
+        * tests/unit-tests/dds/DCPS/XTypes/DynamicDataImpl.cpp:
+        * tests/unit-tests/dds/DCPS/XTypes/DynamicDataXcdrReadImpl.cpp:
+        * tests/unit-tests/dds/DCPS/security/AccessControlBuiltInImpl.cpp:
+
+          Add DynamicData to xcdr Test
+
+          Also:
+          - Basically rewrote the DynamicData copier to fix problems found
+          with
+          it.
+          - Tweaks to `print_dynamic_data` used to help debug the xcdr test
+          - Generated TypeObjects:
+          - Struct members with key are also marked as "must understand".
+          - Struct and union members are now sorted by declaration order
+          instead
+          of by member id.
+          - Added `IdVsDeclOrder` to xcdr test to assert this works
+          - TODO: What ever follow on tasks we decide
+          - `DynamicDataBase`:
+          - `get_int64_value` and `get_uint64_value` will now cast the
+          underlying type to the requested type.
+          - Now has a shared `TypeDescriptor_var`
+          - `get_union_branch` helper that can optionally get the
+          discriminator
+          on by itself.
+          - `DynamicDataXcdrReadImpl`:
+          - Return `RETCODE_NO_DATA` when it doesn't have the requested
+          member
+          id in the sample, because it's non-key in key only, not in the
+          parameter list, or the appendable struct ended early.
+          - TODO: Unit tests are failing
+          - Change `DynamicDataXcdrReadImpl` unit test to use
+          `MEMBER_ID_INVALID`
+          as spec says to access values in scalar `DynamicData`.
+          - `DynamicDataAdaptor`:
+          - Implement `get_item_count` for all types.
+          - Implement `get_item_count` and `get_member_id_at_index`
+          correctly
+          for Unions.
+          - `DynamicDataImpl`:
+          - Serialization of key only unions.
+          - Fix `get_member_id_at_index` not getting ids for uninitialized
+          values.
+          - Remove `DCPS::` in log level checks
+          - Make use of `type_desc_` and `get_union_branch`.
+          - Allow arrays to be used by `get_largest_single_index` and
+          `get_largest_complex_index`.
+          - Search `single_map_` as part of `get_index_to_id_map`
+
+Wed Mar 29 16:14:01 UTC 2023  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 9a631253272aad34785789884c8a9a73ae05ae59
+
+        * docs/devguide/index.rst:
+        * docs/devguide/introduction.rst:
+        * docs/devguide/preface.rst:
+
+          Merge DevGuide preface into introduction
+
+Tue Mar 28 06:39:06 UTC 2023  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit b7f618827881f49fde56c53dfeb761bcd9e62404
+
+        * docs/devguide/opendds_idl.rst:
+        * docs/devguide/xtypes.rst:
+
+          Refine Ext. Defs, Link to --default-extensibility
+
+Mon Mar 27 20:25:43 UTC 2023  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit 1309e87dfb184f588ac366c034bc8bc5b46953ed
+
+        * docs/conf.py:
+        * docs/devguide/content_subscription_profile.rst:
+        * docs/devguide/index.rst:
+        * docs/devguide/introduction.rst:
+        * docs/devguide/opendds_idl.rst:
+        * docs/devguide/safety_profile.rst:
+        * docs/devguide/xtypes.rst:
+        * docs/getting_started.odt:
+        * docs/index.rst:
+        * docs/internal/docs.rst:
+        * docs/sphinx_extensions/github_links.py  docs/sphinx_extensions/links.py:
+        * docs/sphinx_extensions/mpc_lexer.py:
+
+          Cleanup XTypes Section in Devguide
+
+          - Changes in General:
+          - Added `omgissue` RST Role
+          - Make navigation sidebar fixed to top of page since otherwise it
+          goes
+          past the bottom of the page and becomes basically useless.
+          - Merge `docs/devguide/index.rst` into `docs/index.rst` and
+          reduce
+          tree depth.
+          - Point users to latest release documenation on main page
+          - Random minor cleanup from conversion
+          - Minor fixes for MPC syntax highlighter
+          - XTypes Section:
+          - Extensive cleanup from conversion
+          - Minor tweaks to content
+          - Replaced ’ (U+2019) with normal single quote ('). Need to do
+          similar
+          things everywhere else.
+          - Document information from
+          https://github.com/OpenDDS/OpenDDS/discussions/4083#discussioncomment-5332350
+          - Expand "Data Representation" Section to be more detailed and
+          include
+          unaligned CDR. (I thought this was something I already did, but
+          apparently not)
+          - Merged "Creating and Using a DynamicDataReader" and "Creating
+          and
+          Using a DynamicDataWriter" sections as they mostly contained the
+          same exact text.
+          - Converted OMG Issues to use `omgissue`
+
+Mon Mar 27 20:17:15 UTC 2023  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 1f3f0fb2624902de3f332fdadf29f678d4067295
+
+        * README.md:
+
+          README does not link to online DevGuide
+
+          Problem
+          -------
+
+          The README.md file does not contain a link to the online
+          DevGuide.
+
+          Solution
+          --------
+
+          Add a link.
+
+Mon Mar 27 20:11:25 UTC 2023  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 3734398337a043e067fe6439e09100f974962e94
+
+          Merge pull request #4090 from sonndinh/update-var-usage
+
+          Update the usage of var objects in DynamicDataXcdrReadImpl
+
+Thu Mar 23 19:16:35 UTC 2023  Son Dinh  <dinhs@objectcomputing.com>
+        commit f5866b61e3d5963555c622d07db7001988c37690
+
+        * dds/DCPS/XTypes/DynamicDataXcdrReadImpl.cpp:
+        * tests/unit-tests/dds/DCPS/XTypes/DynamicDataXcdrReadImpl.cpp:
+
+          Update *_var usage
+
+Thu Mar 23 02:15:34 UTC 2023  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit 7a2e5bdb7665a4679000cffbd41cdcb007911159
+
+          Merge remote-tracking branch 'upstream/master' into
+          igtd/dynamic-data-adapter
+
+Thu Mar 23 02:15:17 UTC 2023  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit 501238693be5dd726ac940ac16cb65cf9e0d45f1
+
+        * dds/DCPS/Definitions.h:
+        * dds/DCPS/Sample.h:
+        * dds/DCPS/security/AccessControlBuiltInImpl.cpp:
+
+          Fixes for Safety Profile and Security
+
+Thu Mar 23 01:17:25 UTC 2023  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit fad3fe2ee257ac849d45e4e54929033df3a2dc37
+
+          Merge pull request #4089 from sonndinh/fix-coverity
+
+          Fix DynamicDataImpl Coverity issues
+
+Wed Mar 22 18:58:06 UTC 2023  Son Dinh  <dinhs@objectcomputing.com>
+        commit 691e1292905429c4c69beac5292614d271ac607c
+
+        * dds/DCPS/XTypes/DynamicDataImpl.cpp:
+
+          Fix issues reported by coverity
+
+Wed Mar 22 10:06:57 UTC 2023  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit 17979b1b61028fdbd0c930bccc9ea7b18643a837
+
+        * dds/DCPS/XTypes/DynamicDataAdapter.h:
+        * dds/DCPS/XTypes/TypeObject.cpp:
+        * dds/DCPS/XTypes/TypeObject.h:
+        * dds/DCPS/XTypes/Utils.cpp:
+        * dds/DCPS/XTypes/Utils.h:
+        * dds/idl/dynamic_data_adapter_generator.cpp:
+
+          Extend Missing Support Cases
+
+Mon Mar 20 18:08:53 UTC 2023  Adam Mitz  <mitza@objectcomputing.com>
+        commit 9159f052d4bc9c90b9bf9f8b32af3bfb09c3127a
+
+          Merge pull request #4084 from jwillemsen/patch-30
+
+          [README.md] Yocto 2.5.3 isn't maintained anymore
+
+Mon Mar 20 18:06:32 UTC 2023  Adam Mitz  <mitza@objectcomputing.com>
+        commit 9b19fdc47fe6c1950a2060ccad6dc824395c5f5b
+
+          Merge pull request #4086 from sonndinh/fix-scoreboard
+
+          Fix DynamicDataImpl compile issues with VC12
+
+Mon Mar 20 07:28:08 UTC 2023  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit 4d56a3f40a5a45c4d9d2d63313b7fc3a9413e31e
+
+        * dds/DCPS/XTypes/DynamicDataAdapter.h:
+        * dds/idl/dynamic_data_adapter_generator.cpp:
+
+          Fix GCC 4 and C++11 Mapping Issues
+
+Mon Mar 20 04:30:17 UTC 2023  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit feaeaa467e7a06fc50e24ccd4f2f07093ba3749a
+
+        * dds/DCPS/DataReaderImpl_T.h:
+        * dds/DCPS/Sample.h:
+        * dds/DCPS/XTypes/DynamicDataAdapter.cpp:
+        * dds/DCPS/XTypes/DynamicDataAdapter.h:
+        * dds/DCPS/XTypes/DynamicDataBase.cpp:
+        * dds/DCPS/XTypes/DynamicDataBase.h:
+        * dds/DCPS/XTypes/DynamicTypeSupport.cpp:
+        * dds/DCPS/XTypes/Utils.cpp:
+        * dds/DCPS/XTypes/Utils.h:
+        * dds/idl/annotations.h:
+        * dds/idl/dds_generator.cpp:
+        * dds/idl/dds_generator.h:
+        * dds/idl/dynamic_data_adapter_generator.cpp:
+        * dds/idl/marshal_generator.cpp:
+        * dds/idl/metaclass_generator.cpp:
+        * dds/idl/value_reader_generator.cpp:
+        * tests/Utils/DataView.h:
+        * tests/Utils/GtestRc.h:
+        * tests/unit-tests/.gitignore:
+        * tests/unit-tests/UnitTests.mpc:
+        * tests/unit-tests/dds/DCPS/XTypes/DynamicDataAdapter.cpp:
+        * tests/unit-tests/dds/DCPS/XTypes/DynamicDataAdapter.idl:
+        * tests/unit-tests/dds/DCPS/XTypes/Utils.cpp:
+
+          Try to Fix Template Issues Again
+
+          Also:
+          - Support anonymous arrays and sequences in unions.
+          - Added initial part of DynamicDataAdapter unit test.
+          - Remove unneeded raw_value functions in DynamicDataAdapter.
+          - Implement clone for DynamicDataAdapter.
+          - Fixes and Cleanup for copy DynamicData.
+          - Move google test ReturnCode_t macros to own header.
+
+Sat Mar 18 08:25:44 UTC 2023  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit 2ab9328079f93fdffc3c7ecfff5edfd2d6885f57
+
+        * dds/DCPS/Definitions.h:
+        * dds/DCPS/Sample.h:
+        * dds/DCPS/XTypes/DynamicDataAdapter.h:
+
+          Try to fix template issue
+
+Sat Mar 18 08:11:10 UTC 2023  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit a2f461e09f6c14c9a68314991ab0b95d176ee6d5
+
+        * dds/idl/be_produce.cpp:
+
+          Revert Accidentally Committed Change
+
+Sat Mar 18 07:48:09 UTC 2023  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit caeed84ae62e8aa5952aace44a5b543c7a79b256
+
+        * dds/DCPS/Sample.h:
+        * dds/DCPS/XTypes/DynamicDataAdapter.h:
+        * dds/idl/annotations.h:
+        * dds/idl/be_produce.cpp:
+        * dds/idl/dds_generator.cpp:
+        * dds/idl/dds_generator.h:
+        * dds/idl/dynamic_data_adapter_generator.cpp:
+        * dds/idl/marshal_generator.cpp:
+        * tests/unit-tests/dds/DCPS/XTypes/Utils.cpp:
+
+          Add Tag Type To DynamicDataAdapter
+
+Fri Mar 17 01:57:31 UTC 2023  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit d70e913e485434faa60531a828a3c3f2ad804222
+
+        * dds/DCPS/FilterEvaluator.h:
+        * dds/idl/marshal_generator.cpp:
+        * dds/idl/metaclass_generator.cpp:
+
+          Remove MetaStruct getValue by Member ID
+
+Fri Mar 17 18:28:32 UTC 2023  Son Dinh  <dinhs@objectcomputing.com>
+        commit d1ec77934cddfd66c25c970ceaef897318f9666d
+
+        * dds/DCPS/XTypes/DynamicDataImpl.cpp:
+
+          Explicitly get C-string from an element of StringSeq
+
+Thu Mar 16 23:15:45 UTC 2023  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit 9e55300dd6e52855c83d67176f294430c226b228
+
+        * dds/DCPS/RTPS/RtpsCore.idl:
+        * dds/DdsDcpsCore.idl:
+        * dds/idl/annotations.cpp:
+        * dds/idl/annotations.h:
+        * dds/idl/be_global.cpp:
+        * dds/idl/be_global.h:
+        * dds/idl/dds_generator.h:
+        * dds/idl/marshal_generator.cpp:
+
+          Move (Ref)Wrapper, Add special_serialization Anno.
+
+          RefWrapper is going to be needed for
+          dynamic_data_adapter_generator, so
+          I moved it from marshal_generator to dds_generator. The only
+          problem
+          with this is it needs to know if a type has special
+          serialization. To
+          make that work independently of marshal_generator I changed how
+          it works
+          from name-based to one based on a new annotation:
+          @OpenDDS::internal:::special_serialization.
+
+Thu Mar 16 23:08:35 UTC 2023  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit 9bd45d7dd54c57131380d503ebb5e7b26f307fe9
+
+        * dds/DCPS/DataReaderImpl_T.h:
+        * dds/DCPS/Sample.h:
+        * dds/DCPS/XTypes/DynamicDataAdapter.cpp:
+        * dds/DCPS/XTypes/DynamicDataAdapter.h:
+        * dds/DCPS/XTypes/DynamicTypeSupport.cpp:
+
+          Fix DynamicDataAdapter in DataReaderImpl_T
+
+Thu Mar 16 13:18:31 UTC 2023  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit 82147d553c593ba1669a92eafb4f7149897d5ddf
+
+        * README.md:
+
+          [README.md] Yocto 2.5.3 isn't maintained anymore
+
+Thu Mar 16 09:50:16 UTC 2023  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit a6459b44f7931ff87d97eaaad0c9df4049d33cb3
+
+        * dds/DCPS/XTypes/DynamicDataAdapter.h:
+        * dds/DCPS/XTypes/DynamicDataBase.cpp:
+        * dds/DCPS/XTypes/DynamicDataBase.h:
+        * dds/DCPS/XTypes/DynamicDataImpl.cpp:
+
+          Build Fixes
+
+Thu Mar 16 09:08:35 UTC 2023  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit 5d07cc1cd021bccfedc626eac0e3c3239430bced
+
+          Merge remote-tracking branch 'upstream/master' into
+          igtd/dynamic-data-adapter
+
+Thu Mar 16 08:48:08 UTC 2023  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit d86dc7e2fcc84f8cb73f3b3db634a7a6898ac133
+
+        * dds/DCPS/Definitions.h:
+        * dds/DCPS/Sample.h:
+        * dds/DCPS/XTypes/DynamicDataAdapter.cpp:
+        * dds/DCPS/XTypes/DynamicDataAdapter.h:
+        * dds/DCPS/XTypes/DynamicDataBase.cpp:
+        * dds/DCPS/XTypes/DynamicDataBase.h:
+        * dds/DCPS/XTypes/DynamicDataImpl.cpp:
+        * dds/DCPS/XTypes/DynamicDataImpl.h:
+        * dds/DCPS/XTypes/DynamicTypeImpl.cpp:
+        * dds/DCPS/XTypes/TypeObject.idl:
+        * dds/idl/annotations.cpp:
+        * dds/idl/annotations.h:
+        * dds/idl/be_global.cpp:
+        * dds/idl/dds_generator.h:
+        * dds/idl/dds_visitor.cpp:
+        * dds/idl/dynamic_data_adapter_generator.cpp:
+        * dds/idl/dynamic_data_adapter_generator.h:
+        * dds/idl/metaclass_generator.cpp:
+
+          DynamicDataAdapter Now Implemented in TypeSupport
+
+Wed Mar 15 18:07:50 UTC 2023  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 90513732e67efa6fb5c68d2168ed4011aad5694f
+
+          Merge pull request #4077 from OpenDDS/idl2jni_paths
+
+          Handle idl and TypeSupport.idl not living in the same directory.
+
+Wed Mar 15 18:07:26 UTC 2023  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 2e588f400b47fbb1e42984043fa22cf27bc590fe
+
+          Merge pull request #4024 from sonndinh/opendds-745
+
+          Use lazy initialization in DynamicDataImpl
+
+Wed Mar 15 04:00:42 UTC 2023  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit 02fb6eade5f4a366670ae0d679639fee8cd92137
+
+        * dds/DCPS/Sample.h:
+        * dds/DCPS/XTypes/DynamicDataAdapter.h:
+        * dds/DCPS/XTypes/DynamicDataBase.cpp:
+        * dds/DCPS/XTypes/DynamicDataBase.h:
+        * dds/DCPS/XTypes/DynamicDataImpl.cpp:
+        * dds/DCPS/XTypes/TypeObject.cpp:
+        * dds/DCPS/XTypes/TypeObject.h:
+        * dds/DCPS/XTypes/TypeObject.idl:
+        * dds/DCPS/XTypes/Utils.cpp:
+        * dds/DCPS/XTypes/Utils.h:
+        * dds/idl/annotations.cpp:
+        * dds/idl/annotations.h:
+        * dds/idl/be_global.cpp:
+        * dds/idl/be_global.h:
+        * dds/idl/dds_generator.h:
+        * dds/idl/metaclass_generator.cpp:
+
+          Minimal DynamicDataAdapter First Draft
+
+Tue Mar 14 21:56:54 UTC 2023  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 03f05c93b15bc4b8eaad2f3e8849ef3cd8470cab
+
+          Merge pull request #4075 from jrw972/data-writer-qos-builder
+
+          Initializing DDS::DataWriterQos for constructors is difficult
+
+Tue Mar 14 19:08:15 UTC 2023  Son Dinh  <dinhs@objectcomputing.com>
+        commit 92753a5eb3da62c1590b3ef186e903ee7dcd45af
+
+        * tests/unit-tests/dds/DCPS/XTypes/DynamicDataImpl.cpp:
+
+          Use String_var
+
+Fri Mar 10 19:20:58 UTC 2023  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 2cd7f2503a8a6124c360fcecfc84453362a4001d
+
+        * dds/DCPS/Qos_Helper.cpp:
+        * dds/DCPS/Qos_Helper.h:
+        * dds/DCPS/Service_Participant.cpp:
+        * dds/DCPS/Service_Participant.h:
+        * dds/DCPS/Time_Helper.h:
+        * dds/DCPS/Time_Helper.inl:
+        * dds/DdsDcpsCore.idl:
+        * tests/unit-tests/dds/DCPS/MockLogger.h:
+        * tests/unit-tests/dds/DCPS/MockPublisher.h:
+        * tests/unit-tests/dds/DCPS/MockTopic.h:
+        * tests/unit-tests/dds/DCPS/Qos_Helper.cpp:
+        * tests/unit-tests/dds/DCPS/SporadicTask.cpp:
+        * tests/unit-tests/dds/DCPS/Time_Helper.cpp:
+
+          Initializing DDS::DataWriterQos for constructors is difficult
+
+          Problem
+          -------
+
+          InternalDataWriters will be converted to use DDS::DataWriterQos.
+          InternalDataWriters are often initialized in constructors meaning
+          that
+          we need a way to initialize the DDS::DataWriterQoS.
+
+          Solution
+          --------
+
+          Provide a builder to initialize DDS::DataWriterQos.
+
+Tue Mar 14 16:21:43 UTC 2023  Son Dinh  <dinhs@objectcomputing.com>
+        commit f4cc4a66781f544dd893af6d1a185467d3e52238
+
+        * dds/DCPS/XTypes/DynamicDataImpl.cpp:
+        * dds/DCPS/XTypes/DynamicDataImpl.h:
+        * tests/unit-tests/dds/DCPS/XTypes/DynamicDataImpl.cpp:
+
+          Use string manager. Finished clear_value for string and sequence
+
+Tue Mar 14 12:09:25 UTC 2023  Chad Elliott  <elliottc@objectcomputing.com>
+        commit 7d2c9a58ca127e953bb64b87d4de6fb76c420f8c
+
+        * MPC/modules/IDLBase.pm:
+
+          Handle situations where the TypeSupport.idl does not get
+          generated where the original idl file resides.
+
+Fri Mar 10 22:56:08 UTC 2023  Son Dinh  <dinhs@objectcomputing.com>
+        commit 9ce877cc37b80102470a6a7abab77f6ef9ea696a
+
+        * dds/DCPS/XTypes/DynamicDataImpl.cpp:
+        * tests/unit-tests/dds/DCPS/XTypes/DynamicDataImpl.cpp:
+
+          More changes from reviews
+
+Fri Mar 10 21:11:07 UTC 2023  Son Dinh  <dinhs@objectcomputing.com>
+        commit cc954de7eaa90b20b5c4ee89b72e4d000cb1aa9a
+
+        * dds/DCPS/XTypes/DynamicDataImpl.cpp:
+        * dds/DCPS/XTypes/DynamicDataImpl.h:
+        * tests/unit-tests/dds/DCPS/XTypes/DynamicDataImpl.cpp:
+
+          From reviews. Fixed inout argument usage in get_complex_value
+
+Fri Mar 10 07:06:14 UTC 2023  Son Dinh  <dinhs@objectcomputing.com>
+        commit b70d165d2f7d97364e415f082c3ce6785f171740
+
+        * dds/DCPS/XTypes/DynamicDataImpl.cpp:
+
+          Use warning
+
+Thu Mar 09 21:13:44 UTC 2023  Son Dinh  <dinhs@objectcomputing.com>
+        commit 1d7b6d2e05780909db7150de5a2703c224dce3fe
+
+        * dds/DCPS/XTypes/DynamicDataBase.cpp:
+        * dds/DCPS/XTypes/DynamicDataImpl.cpp:
+
+          From review
+
+Thu Mar 09 20:35:48 UTC 2023  Son Dinh  <dinhs@objectcomputing.com>
+        commit c4403cde9d2b0bf6ef2508ac8c6601a6ccd4d0a8
+
+        * tests/unit-tests/dds/DCPS/XTypes/DynamicDataImpl.cpp:
+
+          Try fixing memory leak
+
+Thu Mar 09 13:34:11 UTC 2023  Son Dinh  <dinhs@objectcomputing.com>
+        commit 4741bc6f9002b3a0db7fc6c514535b4452001a4d
+
+          Merge branch 'master' of github.com:OpenDDS/OpenDDS into
+          opendds-745
+
+Thu Mar 09 13:33:48 UTC 2023  Son Dinh  <dinhs@objectcomputing.com>
+        commit 22992356c8941bc92f511f8c097576be12c7d881
+
+        * tests/unit-tests/dds/DCPS/XTypes/DynamicDataImpl.cpp:
+
+          Updated unit tests
+
+Thu Mar 09 11:45:02 UTC 2023  Son Dinh  <dinhs@objectcomputing.com>
+        commit 67c76034a8c64de1d6a57220e632b2baa0aca292
+
+        * dds/DCPS/XTypes/DynamicDataImpl.cpp:
+        * dds/DCPS/XTypes/DynamicDataImpl.h:
+
+          Updated clear_all_values
+
+Wed Mar 08 20:27:28 UTC 2023  Son Dinh  <dinhs@objectcomputing.com>
+        commit caa575fafafb9614ac5dd66e8e0c5e53dad7cb00
+
+        * dds/DCPS/XTypes/DynamicDataImpl.cpp:
+        * dds/DCPS/XTypes/DynamicDataImpl.h:
+        * tests/unit-tests/dds/DCPS/XTypes/DynamicDataImpl.cpp:
+
+          Fixed memory issue. Updated logic for setting union. Updated
+          get_item_count
+
+Tue Mar 07 18:36:50 UTC 2023  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit e2de6b55e92d932dadd4e261fda4a85e3595acd0
+
+          Merge pull request #4071 from
+          iguessthislldo/igtd/cmake-idl-o-option
+
+          Refactor and Improve Parts of CMake Support
+
+Tue Mar 07 18:28:19 UTC 2023  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit ba481b6616c38f493e434eefb4c05cc259e86b7d
+
+          Merge pull request #4073 from iguessthislldo/igtd/keywords-test
+
+          Extend Proper Support for C++ Keywords in IDL
+
+Tue Mar 07 02:01:25 UTC 2023  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit 80fa9695da8462a87f05e8aaad035fe402fe5449
+
+        * dds/idl/dds_generator.cpp:
+        * dds/idl/dds_generator.h:
+        * dds/idl/langmap_generator.cpp:
+        * dds/idl/marshal_generator.cpp:
+        * dds/idl/metaclass_generator.cpp:
+        * dds/idl/topic_keys.cpp:
+        * dds/idl/topic_keys.h:
+        * dds/idl/ts_generator.cpp:
+        * dds/idl/typeobject_generator.cpp:
+        * dds/idl/value_reader_generator.cpp:
+        * dds/idl/value_writer_generator.cpp:
+        * tests/DCPS/Compiler/keywords/classic/keywords_classic.mpc:
+        * tests/DCPS/Compiler/keywords/cpp11/keywords_cpp11.mpc:
+        * tests/DCPS/Compiler/keywords/run_test.pl:
+        * tests/DCPS/Compiler/keywords/test.idl:
+
+          Extend Proper Support for C++ Keywords in IDL
+
+          Added test for looking for "_cxx_" in the *TypeSupportImpl.cpp
+          file and
+          fix instances where that happens.
+
+Fri Mar 03 20:08:35 UTC 2023  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 10aa01d11335f8f7eafecdc7982529d4b822ad74
+
+          Merge pull request #4072 from jwillemsen/patch-30
+
+          [configure] Upgrade to ACE 7.1.0 and TAO 3.1.0 for DOCGroup v3
+
+Fri Mar 03 14:44:26 UTC 2023  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit 0c18297bc7e4b7b18b4246a1c486426b926645d1
+
+        * README.md:
+
+          Update README.md
+
+Fri Mar 03 14:42:59 UTC 2023  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit bb6796541f209d5cff09aa446bad0fbddefe6ea6
+
+          Merge branch 'OpenDDS:master' into patch-30
+
+Fri Mar 03 14:35:34 UTC 2023  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 5a5acc02d70279a8d3cd54801de418d800d4a81b
+
+          Merge pull request #4069 from jrw972/ace-tao-submodule
+
+          Use DOCGroup ACE6/TAO2 as default ACE/TAO for OpenDDS
+
+Fri Mar 03 08:51:24 UTC 2023  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit ba1eca178422454a48317746feeffc8b8bb6b5dc
+
+        * configure:
+
+          [configure] Upgrade to ACE 7.1.0 and TAO 3.1.0 for DOCGroup v3
+
+Thu Mar 02 18:16:30 UTC 2023  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit f10e42fcb6b40f3b07dc339f00add78f6862aac9
+
+        * tests/cmake/generated_global/cpp/CMakeLists.txt:
+
+          Restore Include for test/Utils
+
+Wed Mar 01 15:07:45 UTC 2023  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 10893f579c30984c33d1fcc5e0aab8edf0f892ba
+
+        * README.md:
+        * configure:
+
+          OpenDDS depends on OCI ACE/TAO releases
+
+          Problem
+          -------
+
+          The OpenDDS build process is dependent on OCI ACE/TAO releases
+          which
+          will not be available or maintained in the future.
+
+          Solution
+          --------
+
+          Replace OCI ACE/TAO dependency with ace6tao2 from DOCGroup.
+
+Tue Feb 28 23:17:46 UTC 2023  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit 9b7630e5c847cdd7c226c0c5fdeb4ef96b95048b
+
+        * cmake/api_macros.cmake:
+        * cmake/dds_idl_sources.cmake:
+        * cmake/init.cmake:
+        * cmake/tao_idl_sources.cmake:
+        * docs/cmake.md:
+        * tests/cmake/CMakeLists.txt:
+        * tests/cmake/Nested_IDL/CMakeLists.txt:
+        * tests/cmake/generated_global/cpp/CMakeLists.txt:
+        * tests/cmake/generated_global/idl/CMakeLists.txt:
+        * tests/cmake/idl_compiler_tests/CMakeLists.txt:
+        * tests/cmake/idl_compiler_tests/test.idl:
+
+          Refactor and Improve Parts of CMake Support
+
+          The main purpose of this is to fix
+          https://github.com/OpenDDS/OpenDDS/issues/3899, where there was a
+          typo
+          in processing the opendds_idl -o command.
+
+          Also:
+
+          - The directories passed to `-o` for tao_idl and opendds_idl are
+          automatically included for C++ source files.
+          - Refactored parts of CMake code to remove some style
+          inconsistencies such
+          as using a space before parentheses in declarations and control
+          flow,
+          prefixing a variable name with `_` when it's unnecessary, and
+          using a
+          macro when a function could be used.
+          - Added `OPENDDS_AUTO_LINK_DCPS` option to automatically link
+          `OpenDDS::Dcps` when using `OPENDDS_TARGET_SOURCES`. This is off
+          because it's not compatible with a possible existing usage of
+          `target_link_libraries` that doesn't specify a scope: "All uses
+          of
+          target_link_libraries with a target must be either all-keyword or
+          all-plain."
+          - Added `OPENDDS_USE_CORRECT_INCLUDE_SCOPE` option to limit scope
+          of
+          includes for generated files depending on scope given to
+          `OPENDDS_TARGET_SOURCES`. This is currently always PUBLIC. This
+          is off
+          by default because it could cause "Cannot find source file"
+          errors on
+          `TypeSupport.idl` files generated in a another directory. This
+          should be
+          able to be resolved by requiring at least CMake 3.20 in the
+          furniture.
+          - Added a CMake test that is meant to more directly test
+          `OPENDDS_TARGET_SOURCES`. For now it just tests the included
+          changes.
+
+Mon Feb 27 16:02:57 UTC 2023  Adam Mitz  <mitza@objectcomputing.com>
+        commit 45032c8fb6ac94a182b23071f15920a4c74b3e90
+
+          Merge pull request #4065 from OpenDDS/build_w22_x86_i0_j_FM-1f
+
+          Attempting to fix disk space issues.
+
+Mon Feb 27 16:02:39 UTC 2023  Adam Mitz  <mitza@objectcomputing.com>
+        commit e0c489e2e7ee6f4c5580ad2da42a9471ffdf1dc6
+
+          Merge pull request #4064 from
+          OpenDDS/OPENDDS-831-optional_implementation
+
+          Update Optional implementation in TypeObject.h
+
+Mon Feb 27 15:05:39 UTC 2023  Son Dinh  <dinhs@objectcomputing.com>
+        commit b01c9031bc970f5656bdd45b3d0ebf8b49235b71
+
+          Merge branch 'master' of github.com:OpenDDS/OpenDDS into
+          opendds-745
+
+Mon Feb 27 15:05:24 UTC 2023  Son Dinh  <dinhs@objectcomputing.com>
+        commit 64256d71df663a466c5ec6d0c4206e5baab9be16
+
+        * dds/DCPS/XTypes/DynamicDataImpl.cpp:
+        * dds/DCPS/XTypes/DynamicDataImpl.h:
+        * tests/unit-tests/dds/DCPS/XTypes/DynamicDataImpl.cpp:
+
+          Updated unit tests and fixed new issues
+
+Sun Feb 26 11:50:07 UTC 2023  Chad Elliott  <elliottc@objectcomputing.com>
+        commit a699bc549458403b51ec1ece158d4c816dcd4c42
+
+        * .github/workflows/build_and_test.yml:
+
+          Corrected the path to autobuild_brief_html_to_text.pl
+
+Sat Feb 25 16:04:36 UTC 2023  Chad Elliott  <elliottc@objectcomputing.com>
+        commit 1ea59688d359694c341242c366109299f0801c23
+
+        * .github/workflows/build_and_test.yml:
+
+          Corrected the autobuild xml file location.
+
+Sat Feb 25 12:39:57 UTC 2023  Chad Elliott  <elliottc@objectcomputing.com>
+        commit 20043f44ff88d598f1e6e6fd26bc4e3de715d5c9
+
+        * .github/workflows/build_and_test.yml:
+
+          No longer move ACE and MPC.
+
+Sat Feb 25 00:29:17 UTC 2023  Adam Mitz  <mitza@objectcomputing.com>
+        commit 651d0b4758c1e0030e950ca2a71306f29564ada4
+
+          Merge pull request #4068 from
+          OpenDDS/elliottc/union_defaults_warnings
+
+          Reorder setting the default on the temporary
+
+Sat Feb 25 00:29:07 UTC 2023  Adam Mitz  <mitza@objectcomputing.com>
+        commit 0435d3fe225c9810a6f872ea37845d78fca9d75e
+
+          Merge pull request #4066 from jwillemsen/patch-29
+
+          [readme] Add Yocto 3.4.4
+
+Fri Feb 24 19:29:44 UTC 2023  Chad Elliott  <elliottc@objectcomputing.com>
+        commit caa9706952c82ab6907c8c84c941566a12dd643a
+
+        * .github/workflows/build_and_test.yml:
+
+          Move the OpenDDS artifact to C: for the build that uses it so
+          that the environment variables match up.
+
+Fri Feb 24 18:23:46 UTC 2023  Chad Elliott  <elliottc@objectcomputing.com>
+        commit 198317c534971017e18cafa2a89482f64260b406
+
+        * dds/idl/marshal_generator.cpp:
+
+          Update style.
+
+          Co-authored-by: Adam Mitz <mitza@objectcomputing.com>
+
+Fri Feb 24 17:56:08 UTC 2023  Chad Elliott  <elliottc@objectcomputing.com>
+        commit 452c24a8da9adf9fe9fb1048fac6c3bc97594b97
+
+        * dds/DCPS/XTypes/TypeObject.h:
+
+          Update with style suggestions.
+
+Fri Feb 24 17:41:17 UTC 2023  Chad Elliott  <elliottc@objectcomputing.com>
+        commit 209c011381f2df338077c15e0f8b43ef13b4b53b
+
+        * dds/idl/marshal_generator.cpp:
+
+          Reorder setting the default on the temporary so that we do not
+          use memory that has not been initialized.
+
+Fri Feb 24 17:32:03 UTC 2023  Chad Elliott  <elliottc@objectcomputing.com>
+        commit 34d667eff1dcba9a6031c96644d5f1a24e0b9ca0
+
+        * .github/workflows/build_and_test.yml:
+
+          Corrected the drive letter.
+
+Fri Feb 24 15:57:42 UTC 2023  Chad Elliott  <elliottc@objectcomputing.com>
+        commit d701eb99d0d0d8a5b621fa4c2bc4ec3cd06d4bd4
+
+        * .github/workflows/build_and_test.yml:
+
+          Fixed cd command for bash.
+
+Fri Feb 24 14:44:12 UTC 2023  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit 2892e6af0e8e13a04b39b487237a91cd3b4f3c15
+
+        * README.md:
+
+          [readme] Add Yocto 3.4.4
+
+Fri Feb 24 14:26:00 UTC 2023  Chad Elliott  <elliottc@objectcomputing.com>
+        commit c69c4f905de9db5ce7c6dca0688fc47c76740c3c
+
+        * .github/workflows/build_and_test.yml:
+
+          Checkout and move OpenDDS to C:
+
+Fri Feb 24 14:17:32 UTC 2023  Chad Elliott  <elliottc@objectcomputing.com>
+        commit a034c623e77b3a379d70f05d3340f8d9bd2105a7
+
+        * .github/workflows/build_and_test.yml:
+
+          Attempting to check everything out for build_w22_x86_i0_j_FM-1f
+          onto the C: drive to fix disk space issues.
+
+Fri Feb 24 12:31:24 UTC 2023  Chad Elliott  <elliottc@objectcomputing.com>
+        commit 564882bc3d65ebdfa3f635165f4b4e89fc4cbb49
+
+        * dds/DCPS/XTypes/TypeObject.h:
+
+          Added alignment for the data member.
+
+Fri Feb 24 12:09:44 UTC 2023  Chad Elliott  <elliottc@objectcomputing.com>
+        commit a9abe966b426e86db35e1596a467cc9bf395aca9
+
+          Merge branch 'master' into OPENDDS-831-optional_implementation
+
+Thu Feb 23 23:01:49 UTC 2023  Adam Mitz  <mitza@objectcomputing.com>
+        commit a1abc21613dbc19837902fc562d45e7b72ab8502
+
+          Merge pull request #4063 from
+          OpenDDS/OPENDDS-299-use_util_in_marshal_generator
+
+          Make use of libOpenDDS_Util in Marshal Generator
+
+Thu Feb 23 23:01:35 UTC 2023  Adam Mitz  <mitza@objectcomputing.com>
+        commit f189910001e16b4320b7bd1c493d2490b5c65e97
+
+          Merge pull request #4061 from OpenDDS/OPENDDS-803-cache_key
+
+          GitHub Actions: detect JDK location changes
+
+Thu Feb 23 21:05:45 UTC 2023  Son Dinh  <dinhs@objectcomputing.com>
+        commit f344cd16b0f00e79501c24b56e01ff16c9a5fbfe
+
+        * dds/DCPS/XTypes/DynamicDataImpl.cpp:
+        * dds/DCPS/XTypes/DynamicDataImpl.h:
+
+          Update clear_valur
+
+Thu Feb 23 19:44:33 UTC 2023  Chad Elliott  <elliottc@objectcomputing.com>
+        commit f709b2c124343e4da6d10b50e98676b3de54d2d8
+
+        * tests/unit-tests/dds/DCPS/XTypes/TypeObject.cpp:
+
+          Removed trailing whitespace.
+
+Thu Feb 23 19:38:54 UTC 2023  Chad Elliott  <elliottc@objectcomputing.com>
+        commit 47a41e472f30d7726e81c4f0202d37e80363f41a
+
+        * tests/unit-tests/dds/DCPS/XTypes/TypeObject.cpp:
+
+          Updated the use of Optional and added new tests to ensure
+          Optional works as expected.
+
+Thu Feb 23 19:38:16 UTC 2023  Chad Elliott  <elliottc@objectcomputing.com>
+        commit 49ffffe66796dfda6016a60a98f8bfdf86df613b
+
+        * dds/DCPS/XTypes/TypeLookupService.cpp:
+        * dds/DCPS/XTypes/TypeObject.cpp:
+        * dds/DCPS/XTypes/TypeObject.h:
+        * dds/idl/typeobject_generator.cpp:
+
+          Implemented Optional using placement new onto an array the size
+          of T. This required making the `present` bool private and adding
+          a manual call to the destructor of T when the object was present.
+
+Thu Feb 23 13:46:41 UTC 2023  Chad Elliott  <elliottc@objectcomputing.com>
+        commit 27e8fbc1d760798cd80909d0eaee49d356902293
+
+        * dds/idl/marshal_generator.cpp:
+
+          OPENDDS-299 - Replaced duplicated Encoding Kind and align
+          functionality with that of OpenDDS_Util.
+
+Wed Feb 22 22:50:49 UTC 2023  Adam Mitz  <mitza@objectcomputing.com>
+        commit 780eaaef962425494d5d7cbf71bc5eefe07eefd4
+
+          Merge pull request #4058 from jrw972/opendds-810
+
+          Transport config and inst derived from template may conflict
+
+Wed Feb 22 22:50:37 UTC 2023  Adam Mitz  <mitza@objectcomputing.com>
+        commit 15fb5b8c111ac55ea2dbc5d4a180c81595875335
+
+          Merge pull request #4057 from jrw972/opendds-817
+
+          Intentional unit test coverage is not practical with current
+          tools
+
+Wed Feb 22 22:50:22 UTC 2023  Adam Mitz  <mitza@objectcomputing.com>
+        commit 42b9df987837d4992200a9f74c7cc0b10df4812f
+
+          Merge pull request #4056 from OpenDDS/OPENDDS-820-idl_unions
+
+          Check usage of IDL unions in marshal_generator
+
+Wed Feb 22 22:50:11 UTC 2023  Adam Mitz  <mitza@objectcomputing.com>
+        commit 3e4ea1b99c2c827450c0b93e931935fbc0d942b5
+
+          Merge pull request #4051 from iguessthislldo/igtd/sphinx-devguide
+
+          Add DevGuide to Sphinx Documentation
+
+Wed Feb 22 18:16:33 UTC 2023  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit ea0483312bea4ce1b2055bc62f13efc6359e1710
+
+        * docs/devguide/dds_security.rst:
+
+          Fix RSA link, make other links in the table match
+
+Wed Feb 22 17:46:09 UTC 2023  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit 4a52cd07cd77d1a9f942de5d29e17db3252c079a
+
+          Merge branch 'igtd/sphinx-devguide' of
+          github.com:iguessthislldo/OpenDDS into igtd/sphinx-devguide
+
+Wed Feb 22 17:45:21 UTC 2023  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit be0f8e810f8a54d41f694c4fc176a07acd82a800
+
+        * docs/devguide/modeling_sdk.rst:
+        * docs/devguide/preface.rst:
+
+          Link Fixes Suggested from PR
+
+Tue Feb 21 20:51:21 UTC 2023  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 18b47287c1159280d063687929221e94db20c74f
+
+        * tools/scripts/unit_test_coverage.sh:
+
+          Intentional unit test coverage is not practical with current
+          tools
+
+          Problem
+          -------
+
+          Deriving code coverage from intentional unit testing slow and has
+          broken recently due to compiler changes.
+
+          Solution
+          --------
+
+          Accumulate coverage for all unit tests. While not intentional,
+          the
+          output is still useful and reveals areas where more testing is
+          needed.
+
+Wed Feb 22 15:50:25 UTC 2023  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit c80e594123e42875a6aa7fd237065b1a0d005132
+
+        * docs/devguide/introduction.rst:
+
+          Update docs/devguide/introduction.rst
+
+          Co-authored-by: Adam Mitz <mitza@objectcomputing.com>
+
+Wed Feb 22 15:37:42 UTC 2023  Chad Elliott  <elliottc@objectcomputing.com>
+        commit 13cc9f0049cc7ca3cf0f5b5df0514bab9a9f44a4
+
+        * .github/workflows/build_and_test.yml:
+
+          Added the JDK version to artifact cache keys for artifacts that
+          are used by builds that use java.
+
+Wed Feb 22 12:43:18 UTC 2023  Chad Elliott  <elliottc@objectcomputing.com>
+        commit 488050b395f0934266b3b4c09b013c9e91aae501
+
+        * tests/core_ci_tests.lst:
+
+          Require the STATIC_COMPILER config to run the union_defaults
+          tests.
+
+Wed Feb 22 12:28:48 UTC 2023  Chad Elliott  <elliottc@objectcomputing.com>
+        commit 6f7e0e709ddaee82df43558f74787fb68427f260
+
+        * tests/DCPS/Compiler/union_defaults/.gitignore:
+
+          Ignore main for non-windows builds.
+
+Wed Feb 22 12:28:22 UTC 2023  Chad Elliott  <elliottc@objectcomputing.com>
+        commit 9c80ae10fda64ce0f4f397a7a0e7963ec199eb3b
+
+        * dds/idl/dds_generator.cpp:
+
+          Fixed setting the default for arrays within unions.
+
+Wed Feb 22 07:53:33 UTC 2023  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit 15a87dcc2b3e6a5e4d900320332210688c5963d0
+
+        * docs/devguide/content_subscription_profile.rst:
+        * docs/devguide/dds_security.rst:
+        * docs/devguide/getting_started.rst:
+        * docs/devguide/index.rst:
+        * docs/devguide/internet_enabled_rtps.rst:
+        * docs/devguide/introduction.rst:
+        * docs/devguide/java_bindings.rst:
+        * docs/devguide/modeling_sdk.rst:
+        * docs/devguide/opendds_idl.rst:
+        * docs/devguide/preface.rst:
+        * docs/devguide/quality_of_service.rst:
+        * docs/devguide/run_time_configuration.rst:
+        * docs/devguide/the_dcps_information_repository.rst:
+        * docs/devguide/xtypes.rst:
+
+          Fix Line breaks, Footnotes, Change Table Format
+
+Wed Feb 22 07:52:28 UTC 2023  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit b83978d716bda6731e9af9dc6b6279bc36002708
+
+        * docs/build.py:
+        * docs/internal/docs.rst:
+        * docs/requirements.txt:
+
+          Add Single HTML Page Output to docs/build.py
+
+Tue Feb 21 21:13:48 UTC 2023  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit f1b0799794268f213e76f5bd617e2c4739004631
+
+        * dds/DCPS/transport/framework/TransportRegistry.cpp:
+
+          Transport config and inst derived from template may conflict
+
+          Problem
+          --------
+
+          Transport config and inst objects may have names that conflict
+          when using configuration templates, even when they are in
+          different domains.
+          This may cause tests to fail.
+
+          Solution
+          --------
+
+          Add the domain to the identifiers.
+
+Tue Feb 21 20:04:54 UTC 2023  Chad Elliott  <elliottc@objectcomputing.com>
+        commit 7dddde394fa32ea5820f707c34be4194d8d2aee6
+
+        * tests/DCPS/Compiler/union_defaults/C++11/run_test.pl:
+
+          Made run_test.pl executable.
+
+Tue Feb 21 20:04:14 UTC 2023  Chad Elliott  <elliottc@objectcomputing.com>
+        commit 66c71348aa08df680e83ef0b232d36a17b654720
+
+        * tests/DCPS/Compiler/union_defaults/C++11/main.cpp:
+        * tests/DCPS/Compiler/union_defaults/C++11/run_test.pl:
+        * tests/DCPS/Compiler/union_defaults/C++11/union_defaults_C++11.mpc:
+        * tests/core_ci_tests.lst:
+        * tests/dcps_tests.lst:
+
+          Added a C++11 version of the union_defaults test.
+
+Tue Feb 21 19:52:41 UTC 2023  Chad Elliott  <elliottc@objectcomputing.com>
+        commit 6433da8d0a004d0d84858a6385cde9467fe6aa38
+
+          Merge branch 'master' into OPENDDS-820-idl_unions
+
+Tue Feb 21 19:34:19 UTC 2023  Chad Elliott  <elliottc@objectcomputing.com>
+        commit ac1708b0e88043a0ecef435302a48d899d02e6b5
+
+        * tests/DCPS/Compiler/union_defaults/run_test.pl:
+        * tests/core_ci_tests.lst:
+        * tests/dcps_tests.lst:
+
+          Added the union_defaults test to the test lists.
+
+Tue Feb 21 19:28:46 UTC 2023  Chad Elliott  <elliottc@objectcomputing.com>
+        commit 4c9d993d9587ea8f8b922cd5d191855574306013
+
+        * tests/DCPS/Compiler/union_defaults/main.cpp:
+        * tests/DCPS/Compiler/union_defaults/union_defaults.idl:
+        * tests/DCPS/Compiler/union_defaults/union_defaults.mpc:
+
+          Added an enum default and converted the test to a gtest.
+
+Tue Feb 21 19:00:18 UTC 2023  Chad Elliott  <elliottc@objectcomputing.com>
+        commit bde43c8c182a3ac55376ee383d800e13a13916f1
+
+        * tests/DCPS/Compiler/union_defaults/main.cpp:
+        * tests/DCPS/Compiler/union_defaults/union_defaults.idl:
+
+          Exercise more discriminators and default types.
+
+Tue Feb 21 18:59:56 UTC 2023  Chad Elliott  <elliottc@objectcomputing.com>
+        commit 50ae2077aceebd4e0b7f40d1454397da56f5919e
+
+        * dds/idl/marshal_generator.cpp:
+
+          Replaced hard-coded variable name.
+
+Tue Feb 21 18:53:04 UTC 2023  Adam Mitz  <mitza@objectcomputing.com>
+        commit d020f0091bc73f5099920b9c8e2227d9a6442dea
+
+          Merge pull request #4053 from
+          simpsont-oci/minor_bench_documentation_updates
+
+          [Bench] Minor Documentation Updates
+
+Tue Feb 21 18:52:55 UTC 2023  Adam Mitz  <mitza@objectcomputing.com>
+        commit 74c271c992c246a3ce447c78647b2e259c0196d4
+
+          Merge pull request #4050 from
+          simpsont-oci/remove_extra_call_to_destinations_erase_in_transportsendbuffer
+
+          Remove Extra Call To destinations_.erase() In TransportSendBuffer
+
+Tue Feb 21 18:33:23 UTC 2023  Chad Elliott  <elliottc@objectcomputing.com>
+        commit bcbf8077b0d6a02891674a7c59d91b8975b50750
+
+        * dds/idl/marshal_generator.cpp:
+
+          Removed code duplication.
+
+Tue Feb 21 18:14:58 UTC 2023  Chad Elliott  <elliottc@objectcomputing.com>
+        commit 15d689676806613a42d36f76b95f9457e68c2d99
+
+        * tests/DCPS/Compiler/union_defaults/main.cpp:
+        * tests/DCPS/Compiler/union_defaults/union_defaults.idl:
+
+          Test sequences and arrays as union defaults.
+
+Tue Feb 21 18:13:13 UTC 2023  Chad Elliott  <elliottc@objectcomputing.com>
+        commit 26eb341125c784cac288c084d6b18ae8f3cc1fef
+
+        * dds/idl/marshal_generator.cpp:
+
+          Added newline at the end of the file.
+
+Tue Feb 21 16:08:24 UTC 2023  Timothy Simpson  <simpsont@objectcomputing.com>
+        commit cbc40cec8bffcfb8b8c99f69785dc97f1cadcaa4
+
+        * docs/index.rst:
+
+          updates index to point to new bench documentation location
+
+Tue Feb 21 16:00:27 UTC 2023  Timothy Simpson  <simpsont@objectcomputing.com>
+        commit 5e446d7fcc00003fdfadaa467f58ea4a6f86ec75
+
+        * docs/internal/bench2.rst  docs/internal/bench.rst:
+        * performance-tests/bench/README.md:
+
+          [Bench] Minor Documentation Updates
+
+Tue Feb 21 15:33:52 UTC 2023  Chad Elliott  <elliottc@objectcomputing.com>
+        commit 020667ac536aee4e5784ee22236fc951612152a9
+
+        * dds/idl/marshal_generator.cpp:
+        * dds/idl/marshal_generator.h:
+        * tests/DCPS/Compiler/union_defaults/.gitignore:
+        * tests/DCPS/Compiler/union_defaults/main.cpp:
+        * tests/DCPS/Compiler/union_defaults/run_test.pl:
+        * tests/DCPS/Compiler/union_defaults/union_defaults.idl:
+        * tests/DCPS/Compiler/union_defaults/union_defaults.mpc:
+
+          Moved the existing union default code into a separate function
+          and added support for unions and structs.
+
+Mon Feb 20 17:54:26 UTC 2023  Timothy Simpson  <simpsont@objectcomputing.com>
+        commit e1e683250d42fb8a26e7b9dfadd9e356b4d14da8
+
+        * dds/DCPS/transport/framework/TransportSendBuffer.cpp:
+
+          Remove Extra Call To destinations_.erase() In TransportSendBuffer
+
+Tue Feb 21 08:52:05 UTC 2023  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit 142d7187da70280d356e16fb828845282f05ebc9
+
+        * docs/conf.py:
+        * docs/devguide/alternate_interfaces_to_data.rst:
+        * docs/devguide/built_in_topics.rst:
+        * docs/devguide/conditions_and_listeners.rst:
+        * docs/devguide/content_subscription_profile.rst:
+        * docs/devguide/dds_security.rst:
+        * docs/devguide/getting_started.rst:
+        * docs/devguide/images/10000000000000A00000006884075897C7EA9E35.png:
+        * docs/devguide/images/100000000000018A000001582B13D316CA761B88.png:
+        * docs/devguide/images/10000000000001E000000168096C98DBD1C93465.png:
+        * docs/devguide/images/100000000000020B000001FCAD2359FAA3105C98.png:
+        * docs/devguide/images/10000001000001830000010C56B9073ACA60B44D.png:
+        * docs/devguide/images/10000001000001C100000202637D36545E22157D.png:
+        * docs/devguide/images/10000001000002E50000018D97FADEED4445DDBB.png:
+        * docs/devguide/images/10000001000003BA000005345220EFBC3B2965C5.png:
+        * docs/devguide/images/10000001000003CA00000534AF32FC1EC2AA656B.png:
+        * docs/devguide/images/10000001000003FC0000025E8CF71A4C4FCDEFF3.png:
+        * docs/devguide/images/100000010000045A0000025185A3A43482F62E3D.png:
+        * docs/devguide/images/10000001000005B4000003E0BE5C08B1D30CA54A.png:
+        * docs/devguide/index.rst:
+        * docs/devguide/internet_enabled_rtps.rst:
+        * docs/devguide/introduction.rst:
+        * docs/devguide/java_bindings.rst:
+        * docs/devguide/modeling_sdk.rst:
+        * docs/devguide/opendds_idl.rst:
+        * docs/devguide/preface.rst:
+        * docs/devguide/quality_of_service.rst:
+        * docs/devguide/run_time_configuration.rst:
+        * docs/devguide/safety_profile.rst:
+        * docs/devguide/the_dcps_information_repository.rst:
+        * docs/devguide/xtypes.rst:
+        * docs/index.rst:
+        * docs/sphinx_extensions/mpc_lexer.py:
+
+          Add DevGuide to Sphinx Documentation
+
+          This almost exactly matches the contents of
+          https://github.com/iguessthislldo/opendds-devguide-converter
+
+          The goal of this PR is just making sure the concept is sound.
+          Further
+          cleanup and adjustments can and will come after this.
+
+Tue Feb 21 03:16:13 UTC 2023  Adam Mitz  <mitza@objectcomputing.com>
+        commit d492a2e83e75ae5efce7ea3f1189fc886c555c16
+
+          Merge pull request #4049 from OpenDDS/OPENDDS-133
+
+          Make TryConstruct Test Compatible With Safety Profile
+
+Tue Feb 21 03:16:02 UTC 2023  Adam Mitz  <mitza@objectcomputing.com>
+        commit b571b5c55a2cd97b6072cccd2bc0df7ffb845e3e
+
+          Merge pull request #4045 from simpsont-oci/relay_server_hardening
+
+          Add Hardening Features To RtpsRelay
+
+Mon Feb 20 22:23:26 UTC 2023  Son Dinh  <dinhs@objectcomputing.com>
+        commit 6722ac2807535c57e741d2775541a8a92b308f9b
+
+        * dds/DCPS/XTypes/DynamicDataImpl.cpp:
+        * dds/DCPS/XTypes/DynamicDataImpl.h:
+
+          Added get complex value
+
+Mon Feb 20 21:39:47 UTC 2023  Timothy Simpson  <simpsont@objectcomputing.com>
+        commit 8ada54bed0e9d145619189fcae46530c56f33805
+
+        * tools/rtpsrelay/RelayHandler.cpp:
+
+          Resolve Review Comments
+
+Mon Feb 20 16:57:58 UTC 2023  Chad Elliott  <elliottc@objectcomputing.com>
+        commit 965d3cad53a126f245342a3d57f3bb2b38ac8d51
+
+        * tests/dcps_tests.lst:
+
+          Run TryConstruct even in safety-profile builds.
+
+Mon Feb 20 16:29:14 UTC 2023  Chad Elliott  <elliottc@objectcomputing.com>
+        commit 0dfa6c954b9b3cb7e1d491b8dec3fe05fd3472f9
+
+        * tests/DCPS/Compiler/TryConstruct/AnonTypes.idl:
+        * tests/DCPS/Compiler/TryConstruct/C++11/TryConstruct_C++11.mpc:
+        * tests/DCPS/Compiler/TryConstruct/Compiler.mpc:
+        * tests/DCPS/Compiler/TryConstruct/NestedTrimStruct.idl:
+        * tests/DCPS/Compiler/TryConstruct/TryConstruct.cpp:
+        * tests/DCPS/Compiler/TryConstruct/TryConstruct.idl:
+        * tests/DCPS/Compiler/TryConstruct/TryConstructBaseTypes.idl:
+
+          Do not use wstring when OPENDDS_SAFETY_PROFILE is defined.
+
+Mon Feb 20 16:28:09 UTC 2023  Chad Elliott  <elliottc@objectcomputing.com>
+        commit 4fe580ff2bf63da869eab520ddc1a1ceb5b87f4c
+
+        * dds/idl/dds_generator.h:
+
+          When assigning tmp to the "strtype", use .c_str() which should
+          work for all string types that tmp may be.
+
+Mon Feb 20 14:41:45 UTC 2023  Adam Mitz  <mitza@objectcomputing.com>
+        commit ee61f1a3f3822047199e7dcae807fae772f338a6
+
+          Merge pull request #4048 from mitza-oci/configure-macos
+
+          configure: Added macOS cross-compile
+
+Mon Feb 20 14:41:33 UTC 2023  Adam Mitz  <mitza@objectcomputing.com>
+        commit 3e3b8433a43ebae5ce7ed2a53f89836b3dc866d6
+
+          Merge pull request #4047 from
+          simpsont-oci/fix_transportreassembly_warnings
+
+          Fix Various TransportReassembly Compile Warnings
+
+Fri Feb 17 23:24:51 UTC 2023  Adam Mitz  <mitza@objectcomputing.com>
+        commit 15b8a5afc70602bf2e71b516e4241068f79deda0
+
+        * configure:
+
+          configure: Added macOS cross-compile
+
+          This can be used to have an x86_64 macOS system generate arm64
+          builds.
+
+Fri Feb 17 23:20:52 UTC 2023  Adam Mitz  <mitza@objectcomputing.com>
+        commit 53eef318a52940a317cd55c14ac8f09d0ff85409
+
+          Merge pull request #4013 from jrw972/opendds-794
+
+          TypeLookup.idl has allocator issues in safety profile
+
+Fri Feb 17 23:11:28 UTC 2023  Timothy Simpson  <simpsont@objectcomputing.com>
+        commit 162a48f969560c56d6c7a0a1baffd911d2d37052
+
+        * dds/DCPS/transport/framework/ReceivedDataSample.cpp:
+
+          Fix ReceivedDataSample Warnings
+
+Fri Feb 17 21:36:32 UTC 2023  Timothy Simpson  <simpsont@objectcomputing.com>
+        commit 30b562cf266b380661650a1b9eac120d003e2af1
+
+        * dds/DCPS/transport/framework/TransportReassembly.cpp:
+        * tests/unit-tests/dds/DCPS/transport/framework/TransportReassembly.cpp:
+
+          Fix Various TransportReassembly Compile Warnings
+
+Fri Feb 17 18:59:20 UTC 2023  Timothy Simpson  <simpsont@objectcomputing.com>
+        commit 1e98a4d4dcdbc7a142189cc6f38f8c9843507412
+
+        * tools/rtpsrelay/GuidAddrSet.cpp:
+        * tools/rtpsrelay/GuidAddrSet.h:
+
+          respond to review comments
+
+Fri Feb 17 15:01:42 UTC 2023  Adam Mitz  <mitza@objectcomputing.com>
+        commit d289af63d1882ad58af568eebc110eeba19567d2
+
+          Merge pull request #4046 from simpsont-oci/fix_sedp_data_race
+
+          Fix data race in replay of Sedp durable data
+
+Fri Feb 17 15:01:30 UTC 2023  Adam Mitz  <mitza@objectcomputing.com>
+        commit f1cdbbfe5a872f1c30d80ea0de3ee07b38c45682
+
+          Merge pull request #4035 from
+          simpsont-oci/allow_reassembly_of_overlapping_fragments
+
+          Allow Reassembly of Overlapping Fragment Ranges
+
+Tue Jan 31 16:22:27 UTC 2023  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 2987b49847fb988c31ece29fed328aa61e212d08
+
+        * dds/DCPS/RTPS/.gitignore:
+        * dds/DCPS/RTPS/Sedp.h:
+        * dds/DCPS/RTPS/TypeLookup.cpp:
+        * dds/DCPS/RTPS/TypeLookup.h:
+        * dds/DCPS/RTPS/rtps.mpc:
+        * dds/DCPS/RTPS/rtps_optional_safety.mpb:
+        * dds/DCPS/XTypes/TypeObject.cpp:
+        * dds/DCPS/XTypes/TypeObject.h:
+        * dds/DCPS/XTypes/TypeObjectTypeSupportImpl.h:
+        * tests/unit-tests/dds/DCPS/XTypes/DynamicTypeImpl.cpp:
+        * tests/unit-tests/dds/DCPS/XTypes/TypeObject.cpp:
+
+          TypeLookup.idl has allocator issues in safety profile
+
+          Problem
+          -------
+
+          The TypeLookup.idl file is unconditionally processed by tao_idl
+          which
+          is unaware of the allocator support for safety profile.
+
+          Solution
+          --------
+
+          Compile TypeLookup.idl with opendds_idl in safety profile.
+          This required the addition of various comparison operators and
+          serialization functions.
+
+Thu Feb 16 22:09:37 UTC 2023  Timothy Simpson  <simpsont@objectcomputing.com>
+        commit 33f34d1aeaaed49eb9790a3d95b9971fb5cd0c74
+
+          Merge branch 'master' into
+          allow_reassembly_of_overlapping_fragments
+
+Thu Feb 16 21:58:14 UTC 2023  Timothy Simpson  <simpsont@objectcomputing.com>
+        commit f73b7a22583d488d92c09369cae276cc1c93879e
+
+        * dds/DCPS/RTPS/Sedp.cpp:
+
+          Fix data race in replay of Sedp durable data
+
+Thu Feb 16 21:07:50 UTC 2023  Timothy Simpson  <simpsont@objectcomputing.com>
+        commit 7d9bfdc2f740ac22c909cea364edced10af063af
+
+        * performance-tests/bench/example/config/worker/ci-fan-frag-ws_client.json:
+        * performance-tests/bench/example/config/worker/ci-fan-frag-ws_server.json:
+
+          tweak ci-fan-frag-ws run times
+
+Thu Feb 16 19:38:02 UTC 2023  Timothy Simpson  <simpsont@objectcomputing.com>
+        commit 4c477b01f397665f99b4bdb0124766e0aa28ea5a
+
+        * tools/dds/rtpsrelaylib/Relay.idl:
+        * tools/rtpsrelay/Config.h:
+        * tools/rtpsrelay/GuidAddrSet.cpp:
+        * tools/rtpsrelay/GuidAddrSet.h:
+        * tools/rtpsrelay/RelayHandler.cpp:
+        * tools/rtpsrelay/RelayStatisticsReporter.h:
+        * tools/rtpsrelay/RtpsRelay.cpp:
+
+          Add Hardening Features To RtpsRelay
+
+Thu Feb 16 04:39:34 UTC 2023  Adam Mitz  <mitza@objectcomputing.com>
+        commit 0bfb5534b51fd6e6427a5b407348d0cbc4ebe536
+
+          Merge pull request #4043 from
+          iguessthislldo/igtd/large-sample-shmem
+
+          Fix Compile Issue in LargeSample Test
+
+Thu Feb 16 04:39:16 UTC 2023  Adam Mitz  <mitza@objectcomputing.com>
+        commit 2ab2e08c868727eb1d2b2c63eb33f226d0f5d7c8
+
+          Merge pull request #4041 from OpenDDS/same-secure-participant-bug
+
+          Secure writer and reader in same participant do not associate
+
+Tue Feb 14 04:05:52 UTC 2023  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit aa5803d2bd78952f35e4722757fef9101590647b
+
+        * dds/DCPS/RTPS/Sedp.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpReceiveStrategy.cpp:
+        * tests/security/SingleParticipantWithSecurity/governance.xml:
+        * tests/security/SingleParticipantWithSecurity/governance_signed.p7s:
+
+          Secure writer and reader in same participant do not associate
+
+          Problem
+          -------
+
+          A writer and reader in the same participant that uses non-trivial
+          security fail to associate and exchange data.  The
+          SingleParticipantWithSecurity tests this scenario but uses an
+          "open"
+          domain so all of the encryption and decryption logic was skipped.
+
+          Solution
+          --------
+
+          * Turn on encryption so that those code paths are exercised in
+          the
+          test.
+          * Fix code paths that cannot handle a remote writer being local.
+
+Wed Feb 15 18:24:40 UTC 2023  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit dd28d25e262456ea931ee2e6820e61d97e63cc4c
+
+        * tests/DCPS/LargeSample/DataReaderListener.h:
+
+          Fix Compile Issue in LargeSample Test
+
+Wed Feb 15 14:18:01 UTC 2023  Adam Mitz  <mitza@objectcomputing.com>
+        commit 1f03369ba5ccbc3503f90de1c85ef1bb41f246a0
+
+          Merge pull request #4042 from simonmcqueen/master
+
+          Implement _refcount_value() on OpenDDS::DCPS::LocalObject by
+          delegating to RcObject
+
+Wed Feb 15 14:17:50 UTC 2023  Adam Mitz  <mitza@objectcomputing.com>
+        commit fca091d8fe630134a45dc1056ad92255967f0e98
+
+          Merge pull request #4040 from
+          iguessthislldo/igtd/guid-gen-unit-test
+
+          Fix Issues with GuidGenerator and its Unit Test
+
+Wed Feb 15 14:17:39 UTC 2023  Adam Mitz  <mitza@objectcomputing.com>
+        commit e6e207fe3d23bf625b4cc6da7bd00a3615c86e32
+
+          Merge pull request #4028 from
+          iguessthislldo/igtd/large-sample-shmem
+
+          Fix Random LargeSample Shmem Failures
+
+Wed Feb 15 08:22:57 UTC 2023  Son Dinh  <dinhs@objectcomputing.com>
+        commit 0e1b7d2a155ffb4bc67867f21ed7069e28d1e8c4
+
+          Merge from master
+
+Wed Feb 15 07:53:41 UTC 2023  Son Dinh  <dinhs@objectcomputing.com>
+        commit ea214961661328f732dd078ca1c8b3a34f3d5a49
+
+        * dds/DCPS/XTypes/DynamicDataImpl.cpp:
+        * dds/DCPS/XTypes/DynamicDataImpl.h:
+
+          Get complex from struct
+
+Tue Feb 14 23:23:11 UTC 2023  Timothy Simpson  <simpsont@objectcomputing.com>
+        commit 27b64a8f152aaef63300f9873226959e31411330
+
+        * tests/unit-tests/dds/DCPS/transport/framework/TransportReassembly.cpp:
+
+          fix c++03 issue, add hashing checks in c++11
+
+Tue Feb 14 21:48:36 UTC 2023  Adam Mitz  <mitza@objectcomputing.com>
+        commit 4653e95be38d2f6729301cd0c84699d7c66b36ea
+
+        * dds/DCPS/LocalObject.h:
+
+          Format based on style guide and code directly next to this
+
+Tue Feb 14 20:24:17 UTC 2023  Timothy Simpson  <simpsont@objectcomputing.com>
+        commit 4bb50ea720704a74072efe96e9a2642f8008ccea
+
+        * tests/unit-tests/dds/DCPS/transport/framework/TransportReassembly.cpp:
+
+          add insertion permutations coverage test
+
+Tue Feb 14 19:28:30 UTC 2023  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit cc806396435747fb2802e2ca01dbe94bd4400577
+
+        * dds/DCPS/Discovery.h:
+        * dds/DCPS/RTPS/Sedp.cpp:
+        * dds/DCPS/RTPS/Sedp.h:
+
+          Rename and Document non_match_cond
+
+Tue Feb 14 19:11:40 UTC 2023  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit 553e66318264eecd5dd6e975c8f42ab671516b1c
+
+        * dds/DCPS/RTPS/GuidGenerator.cpp:
+
+          Remove extra colon [skip ci]
+
+Tue Feb 14 15:20:20 UTC 2023  Simon McQueen  <simon.mcqueen@microfocus.com>
+        commit 6ef7e6dbbc5e159ea498eb44a832a3172000484e
+
+        * dds/DCPS/LocalObject.h:
+        * dds/DCPS/RcObject.h:
+
+          Remove ::_refcount_value from RcObject and call ::ref_count
+          directly.
+          Thanks to Timothy Simpson for the review and suggestions.
+
+Tue Feb 14 15:11:03 UTC 2023  Simon McQueen  <simon.mcqueen@gmail.com>
+        commit c0151fb4fdc3abbf7bf3b6a64d95fb4ed3531d42
+
+          Merge branch 'OpenDDS:master' into master
+
+Tue Feb 14 14:39:32 UTC 2023  Simon McQueen  <simon.mcqueen@microfocus.com>
+        commit e44bd6a2fa9392b2e2bd3ee17863391d5ea266b3
+
+        * dds/DCPS/LocalObject.h:
+
+          Add missing const qualifier.
+
+          Thanks to Johnny Willemsen <jwillemsen@remedy.nl> for reporting
+          this.
+
+Tue Feb 14 12:35:20 UTC 2023  Simon McQueen  <simon.mcqueen@microfocus.com>
+        commit 07cf1fd327303cef473a29d8d4fc3793704a2bfb
+
+          Merge branch 'master' of github.com:simonmcqueen/OpenDDS
+
+Tue Feb 14 12:23:54 UTC 2023  Simon McQueen  <simon.mcqueen@microfocus.com>
+        commit b340e51f350795e87fc5cbd84c5bfb7565b01a60
+
+        * dds/DCPS/LocalObject.h:
+        * dds/DCPS/RcObject.h:
+
+          Implement _refcount_value on LocalObjectBase by delegating to
+          RcObject
+          and add a corresponding function there. Previously the call to
+          _refcount_value from the Listener in e.g.
+          dds/DCPS/MultiTopicDataReaderBase.cpp
+          was returning the refcount value from CORBA::LocalObject.
+
+Mon Feb 13 22:43:00 UTC 2023  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit bddb70c9d88d3c53c0d11d1a6feb29d8a378854b
+
+        * dds/DCPS/GuidUtils.h:
+        * dds/DCPS/Util.h:
+        * dds/DCPS/transport/shmem/ShmemDataLink.h:
+        * tests/unit-tests/dds/DCPS/GuidUtils.cpp:
+
+          Respond to Review
+
+Mon Feb 13 21:03:08 UTC 2023  Son Dinh  <dinhs@objectcomputing.com>
+        commit 94d689ef79c1733efe078f2cebde432e9095e667
+
+        * dds/DCPS/XTypes/DynamicDataBase.h:
+        * dds/DCPS/XTypes/DynamicDataImpl.cpp:
+        * dds/DCPS/XTypes/DynamicDataImpl.h:
+
+          Fixed compile errors
+
+Mon Feb 13 18:03:03 UTC 2023  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit ef7d28d5e43ecd222bbc3fb3520eef707f0414ea
+
+        * dds/DCPS/RTPS/GuidGenerator.cpp:
+        * tests/unit-tests/dds/DCPS/GuidGenerator.cpp  tests/unit-tests/dds/DCPS/RTPS/GuidGenerator.cpp:
+
+          Fix Issues with GuidGenerator and its Unit Test
+
+          - Logging is left enabled for a failing case and that logging is
+          unconditional and isn't properly formatted.
+          - Second is that the unit test is in `dds/DCPS` when the class
+          it's
+          testing is in `dds/DCPS/RTPS`.
+
+Mon Feb 13 07:55:16 UTC 2023  Timothy Simpson  <simpsont@objectcomputing.com>
+        commit 99c9c9523ea90f76d49287d66e05635b73048d0e
+
+        * dds/DCPS/transport/framework/ReceivedDataSample.cpp:
+        * dds/DCPS/transport/framework/ReceivedDataSample.h:
+
+          fix init
+
+Mon Feb 13 05:45:21 UTC 2023  Timothy Simpson  <simpsont@objectcomputing.com>
+        commit b13d8e41ceca9c735278ff0882882bb6bdbdb16a
+
+        * tests/unit-tests/dds/DCPS/transport/framework/TransportReassembly.cpp:
+
+          fix unit test build
+
+Mon Feb 13 03:07:44 UTC 2023  Timothy Simpson  <simpsont@objectcomputing.com>
+        commit 740f8d10cf4051136af8839eed977f41f9a00aba
+
+        * dds/DCPS/DataSampleHeader.h:
+        * dds/DCPS/DataSampleHeader.inl:
+        * dds/DCPS/transport/framework/ReceivedDataSample.cpp:
+        * dds/DCPS/transport/framework/ReceivedDataSample.h:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpReceiveStrategy.cpp:
+
+          move fragment_size_
+
+Sun Feb 12 14:52:17 UTC 2023  Timothy Simpson  <simpsont@objectcomputing.com>
+        commit 9743648c4caa7644a8af7099482501cc2b9a3e48
+
+        * dds/DCPS/MessageBlock.cpp:
+        * dds/DCPS/MessageBlock.h:
+
+          add swap member
+
+Sun Feb 12 08:02:04 UTC 2023  Timothy Simpson  <simpsont@objectcomputing.com>
+        commit 75be54163ad183c67ac3dfe127345d4429e3555b
+
+        * dds/DCPS/MessageBlock.h:
+        * dds/DCPS/SequenceNumber.h:
+        * dds/DCPS/transport/framework/ReceivedDataSample.cpp:
+        * dds/DCPS/transport/framework/ReceivedDataSample.h:
+        * dds/DCPS/transport/framework/TransportReassembly.h:
+
+          resolve review comments
+
+Sat Feb 11 23:26:15 UTC 2023  Adam Mitz  <mitza@objectcomputing.com>
+        commit dea1a2d994a21802e60f6f7f5bebde505864523c
+
+          Merge pull request #4038 from mitza-oci/filter-serialized-enum
+
+          Fixed a bug in content filtering with enum comparisons on
+          serialized samples
+
+Thu Feb 09 18:07:44 UTC 2023  Timothy Simpson  <simpsont@objectcomputing.com>
+        commit b54a57b43e20ca37a3343b1099ff66e2236dc00b
+
+        * dds/DCPS/DataSampleHeader.h:
+        * dds/DCPS/DataSampleHeader.inl:
+        * dds/DCPS/MessageBlock.cpp:
+        * dds/DCPS/MessageBlock.h:
+        * dds/DCPS/transport/framework/ReceivedDataSample.cpp:
+        * dds/DCPS/transport/framework/ReceivedDataSample.h:
+        * dds/DCPS/transport/framework/TransportReassembly.cpp:
+        * dds/DCPS/transport/framework/TransportReassembly.h:
+        * dds/DCPS/transport/multicast/BestEffortSession.cpp:
+        * dds/DCPS/transport/multicast/ReliableSession.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpReceiveStrategy.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpReceiveStrategy.h:
+        * dds/DCPS/transport/udp/UdpReceiveStrategy.cpp:
+        * tests/unit-tests/dds/DCPS/transport/framework/TransportReassembly.cpp:
+
+          Allow Reassembly of Overlapping Fragment Ranges
+
+Sat Feb 11 06:04:45 UTC 2023  Timothy Simpson  <simpsont@objectcomputing.com>
+        commit 380a29e0932ac9ec1f0132de999a44ce52015bee
+
+          Merge pull request #4037 from
+          simpsont-oci/improve_bench_forward_action
+
+          [Bench] Improve Worker ForwardAction Queue Locking Performance
+
+Sat Feb 11 06:04:32 UTC 2023  Timothy Simpson  <simpsont@objectcomputing.com>
+        commit 7fffa82a110e6340648b9f55e18dae450d1faf25
+
+          Merge pull request #4034 from simpsont-oci/update_dev_guidelines
+
+          Update Dev Guidelines For Whitespace Around Braces
+
+Sat Feb 11 02:40:18 UTC 2023  Timothy Simpson  <simpsont@objectcomputing.com>
+        commit 216c8e2b52097f2b4f2bf427cc6a65bb8249babd
+
+        * performance-tests/bench/node_controller/main.cpp:
+        * performance-tests/bench/worker/ForwardAction.cpp:
+        * performance-tests/bench/worker/ForwardAction.h:
+
+          more scheduling fixes
+
+Fri Feb 10 22:38:04 UTC 2023  Adam Mitz  <mitza@objectcomputing.com>
+        commit e3aa5454e8e38d670305fa9f80b5f79c089a8acb
+
+        * tests/DCPS/MetaStruct/MetaStructTest.cpp:
+
+          MetaStructTest: updated for enums-as-strings
+
+Fri Feb 10 05:40:44 UTC 2023  Timothy Simpson  <simpsont@objectcomputing.com>
+        commit d7c757138fdc9e0d81ea94ecbe6c8a18cf58dbce
+
+        * performance-tests/bench/worker/ForwardAction.cpp:
+
+          fix scheduling
+
+Thu Feb 09 19:37:34 UTC 2023  Timothy Simpson  <simpsont@objectcomputing.com>
+        commit 4bf66e20ebcf80e9e8ac5fbc0a25926fa2563e02
+
+        * docs/internal/dev_guidelines.rst:
+        * docs/internal/docs.rst:
+
+          Update Dev Guidelines For Whitespace Around Braces
+
+Thu Feb 09 19:35:02 UTC 2023  Adam Mitz  <mitza@objectcomputing.com>
+        commit 1a27402a256759917555bdb822ad65f7b6625bf7
+
+        * dds/idl/marshal_generator.cpp:
+
+          corrected whitespace
+
+Thu Feb 09 19:04:45 UTC 2023  Adam Mitz  <mitza@objectcomputing.com>
+        commit 2a80b4f7e73a09a91867ef8c8df355a1c0b6fd1a
+
+          Merge remote-tracking branch 'upstream/master' into
+          filter-serialized-enum
+
+Thu Feb 09 19:03:48 UTC 2023  Adam Mitz  <mitza@objectcomputing.com>
+        commit 6ed3fd4ca5177f32957a1556a175089664681b2c
+
+        * tests/DCPS/FilterExpression/FilterExpression.cpp:
+        * tests/DCPS/FilterExpression/FilterStructDynamicTypeSupport.cpp:
+
+          FilterExpression: filled in some gaps in the test
+
+Thu Feb 09 17:59:55 UTC 2023  Timothy Simpson  <simpsont@objectcomputing.com>
+        commit f4bffb8dadc87334ac93d5492793376e20376595
+
+        * performance-tests/bench/worker/ForwardAction.cpp:
+
+          [Bench] Improve Worker ForwardAction Queue Locking Performance
+
+Thu Feb 09 17:43:18 UTC 2023  Son Dinh  <dinhs@objectcomputing.com>
+        commit 6bcb7bb734c961b5381f95c1b792ef6ff740878d
+
+        * dds/DCPS/XTypes/DynamicDataBase.cpp:
+        * dds/DCPS/XTypes/DynamicDataBase.h:
+        * dds/DCPS/XTypes/DynamicDataImpl.cpp:
+        * dds/DCPS/XTypes/DynamicDataImpl.h:
+        * dds/DCPS/XTypes/DynamicDataXcdrReadImpl.cpp:
+
+          Added get char/wchar and boolean
+
+Thu Feb 09 14:54:25 UTC 2023  Adam Mitz  <mitza@objectcomputing.com>
+        commit 38bf47973f70cfb1212d3adc1847f97a99b0e24d
+
+          Merge pull request #4036 from iguessthislldo/igtd/rm-bound-max
+
+          Remove bound_max for now
+
+Thu Feb 09 13:12:39 UTC 2023  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit f80ee118cbc1dd1e327f08214deae7aebbf76af4
+
+        * dds/DCPS/GuidUtils.h:
+        * dds/DCPS/transport/framework/DataLink.cpp:
+        * dds/DCPS/transport/framework/DataLink.h:
+        * dds/DCPS/transport/shmem/ShmemDataLink.cpp:
+        * dds/DCPS/transport/shmem/ShmemDataLink.h:
+        * dds/DCPS/transport/shmem/ShmemInst.cpp:
+        * dds/DCPS/transport/shmem/ShmemInst.h:
+        * dds/DCPS/transport/shmem/ShmemTransport.cpp:
+
+          Cleanup Shmem Changes
+
+          - Remove resend count and tied to association
+          - Make sure writer acknowledgement is only once
+          - Make errors conditional
+
+Wed Feb 08 18:09:41 UTC 2023  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit 6ab0a6586b72db01d04a3694f600e842080718f2
+
+        * dds/DCPS/XTypes/DynamicDataBase.cpp:
+        * dds/DCPS/XTypes/DynamicDataBase.h:
+        * dds/DCPS/XTypes/DynamicDataImpl.cpp:
+
+          Fix Usage of bitmask_bound, Fix Return Type
+
+Wed Feb 08 16:53:38 UTC 2023  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit 244d3c2f4ec262c521a6048e74e7c77af9dbe28e
+
+        * dds/DCPS/XTypes/Utils.cpp:
+        * dds/DCPS/XTypes/Utils.h:
+
+          Remove bound_max for now
+
+Wed Feb 08 16:50:09 UTC 2023  Son Dinh  <dinhs@objectcomputing.com>
+        commit 35874e4200bd011fc64c98f0e70227ab13f6add9
+
+        * dds/DCPS/XTypes/DynamicDataImpl.cpp:
+
+          Added common get method
+
+Wed Feb 08 15:02:40 UTC 2023  Adam Mitz  <mitza@objectcomputing.com>
+        commit a534383963caee7a2fb08890960f2f2a274b48e9
+
+          Merge remote-tracking branch 'upstream/master' into
+          filter-serialized-enum
+
+Tue Feb 07 22:40:54 UTC 2023  Adam Mitz  <mitza@objectcomputing.com>
+        commit 57b2da6bfc46b7ff97249328e1556148f9843723
+
+          Merge pull request #4022 from
+          mitza-oci/dynamic-content-subscription
+
+          Dynamic Data: read/write enum members as strings
+
+Tue Feb 07 18:58:19 UTC 2023  Son Dinh  <dinhs@objectcomputing.com>
+        commit b35ff363d291316a551f5e787b003d3a21241e3f
+
+        * dds/DCPS/XTypes/DynamicDataImpl.cpp:
+
+          Wip
+
+Tue Feb 07 18:09:40 UTC 2023  Adam Mitz  <mitza@objectcomputing.com>
+        commit e7d0d7060da492d2df13c0bff44e73344fdde235
+
+        * tests/DCPS/FilterExpression/FilterStructDynamicTypeSupport.cpp:
+        * tests/DCPS/FilterExpression/FilterStructDynamicTypeSupport.h:
+
+          Fixed memory management for DynamicType in test
+
+Tue Feb 07 14:07:06 UTC 2023  Adam Mitz  <mitza@objectcomputing.com>
+        commit f66d7cb72a2444ff95d992927a30ade6cdb52c64
+
+          Merge pull request #4033 from mitza-oci/openssl3
+
+          Fixed warning when building with OpenSSL v3
+
+Tue Feb 07 14:06:48 UTC 2023  Adam Mitz  <mitza@objectcomputing.com>
+        commit e0ec0f93b4e6c753108cd919b2888dfe03d1bcdf
+
+          Merge pull request #4032 from simpsont-oci/fix_atomic_warnings
+
+          Fix new test warnings from recent Atomic changes
+
+Tue Feb 07 14:06:23 UTC 2023  Adam Mitz  <mitza@objectcomputing.com>
+        commit 61e094b724d4ace5e8f3120d5716976d8ffc7f28
+
+          Merge pull request #4031 from mitza-oci/gh_wf_move_cmake
+
+          GitHub Actions: Moved the part of build_w22_x86_i0_j_FM-1f that
+          builds CMake tests
+
+Tue Feb 07 14:06:06 UTC 2023  Adam Mitz  <mitza@objectcomputing.com>
+        commit e72c91ea22d43b3af171d0194b928c2afb156cdd
+
+          Merge pull request #4030 from
+          OpenDDS/dependabot/github_actions/docker/build-push-action-4.0.0
+
+          Bump docker/build-push-action from 3.3.0 to 4.0.0
+
+Mon Feb 06 20:02:05 UTC 2023  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit b8cc3c1836b210bccc0c5ab81f135578a6dc6dfe
+
+        * dds/DCPS/GuidUtils.h:
+        * dds/DCPS/RTPS/ICE/Ice.h:
+        * dds/DCPS/RTPS/Sedp.cpp:
+        * dds/DCPS/RTPS/Sedp.h:
+        * dds/DCPS/StaticDiscovery.cpp:
+        * dds/DCPS/StaticDiscovery.h:
+        * dds/DCPS/transport/rtps_udp/RoutedGuidPair.h:
+        * dds/DCPS/transport/shmem/ShmemDataLink.h:
+
+          Consolidate GuidPair Types into GuidUtils.h
+
+          - This includes the Shmem one, the ICE one, and Sedp
+          `MatchingPair`.
+          Removed unused equivalents:
+          - `MatchedPair` and related code in `StaticDiscovery`
+          - `RoutedGuidPair` in rtps_udp
+          - Refactored `GuidUtils.h` to make style consistent and remove
+          the need
+          to pass `sizeof(x)` to `memcmp` by wrapping it in template
+          functions.
+
+Mon Feb 06 20:20:58 UTC 2023  Adam Mitz  <mitza@objectcomputing.com>
+        commit 31caecb24be666c417ff54fe836622577c50a650
+
+        * dds/DCPS/security/SSL/DiffieHellman.cpp:
+
+          Fixed warning when building with OpenSSL v3
+
+Mon Feb 06 20:15:52 UTC 2023  Adam Mitz  <mitza@objectcomputing.com>
+        commit 2086f46e1a1b418ffb718b10324db257b6f0b4a7
+
+        * tests/DCPS/FilterExpression/FilterExpression.cpp:
+
+          fixed warnings in test
+
+Mon Feb 06 18:55:27 UTC 2023  Adam Mitz  <mitza@objectcomputing.com>
+        commit 8a3e41f74fec075ae5fcf01e6eca456b1ad88052
+
+        * dds/DCPS/XTypes/DynamicDataBase.cpp:
+        * dds/DCPS/XTypes/DynamicDataBase.h:
+        * dds/DCPS/XTypes/DynamicDataImpl.cpp:
+
+          Dynamic enums: support enums with different bounds
+
+          (cherry picked from commit
+          5da4ec936ea9041cfc122d476df08c95b08a8b7b)
+
+Mon Feb 06 18:53:57 UTC 2023  Adam Mitz  <mitza@objectcomputing.com>
+        commit e906edb96c5acbfde4e3aa51ba531592270e0027
+
+        * dds/DCPS/XTypes/Utils.cpp:
+
+          Use MemberDescriptor::id for enum MemberId
+
+          (cherry picked from commit
+          386e4c24406d15e8b46c9eb9b9a22cc8f7feea80)
+
+Mon Feb 06 19:14:43 UTC 2023  Adam Mitz  <mitza@objectcomputing.com>
+        commit b916e3be800ca085b89a533da89c7738e5e9c6b8
+
+        * tests/DCPS/FilterExpression/FilterExpression.cpp:
+        * tests/DCPS/FilterExpression/FilterStructDynamicTypeSupport.cpp:
+
+          Test serialized dynamic data filtering
+
+Mon Feb 06 18:55:27 UTC 2023  Adam Mitz  <mitza@objectcomputing.com>
+        commit 5da4ec936ea9041cfc122d476df08c95b08a8b7b
+
+        * dds/DCPS/XTypes/DynamicDataBase.cpp:
+        * dds/DCPS/XTypes/DynamicDataBase.h:
+        * dds/DCPS/XTypes/DynamicDataImpl.cpp:
+
+          Dynamic enums: support enums with different bounds
+
+Mon Feb 06 18:53:57 UTC 2023  Adam Mitz  <mitza@objectcomputing.com>
+        commit 386e4c24406d15e8b46c9eb9b9a22cc8f7feea80
+
+        * dds/DCPS/XTypes/Utils.cpp:
+
+          Use MemberDescriptor::id for enum MemberId
+
+Mon Feb 06 17:49:06 UTC 2023  Timothy Simpson  <simpsont@objectcomputing.com>
+        commit 09fd92bd1c49bc89a5da15f8be0db2595646d18d
+
+        * tests/stress-tests/dds/DCPS/MultiTask.cpp:
+        * tests/stress-tests/dds/DCPS/SporadicTask.cpp:
+        * tests/unit-tests/dds/DCPS/RTPS/LocalEntities.cpp:
+
+          Fix new test warnings from recent Atomic changes
+
+Mon Feb 06 07:07:53 UTC 2023  dependabot[bot]  <49699333+dependabot[bot]@users.noreply.github.com>
+        commit 9f18951bb0ed6ba56e7e2b509447bd690653becd
+
+        * .github/workflows/docker_image.yml:
+
+          Bump docker/build-push-action from 3.3.0 to 4.0.0
+
+          Bumps
+          [docker/build-push-action](https://github.com/docker/build-push-action)
+          from 3.3.0 to 4.0.0.
+          - [Release
+          notes](https://github.com/docker/build-push-action/releases)
+          -
+          [Commits](https://github.com/docker/build-push-action/compare/37abcedcc1da61a57767b7588cb9d03eb57e28b3...3b5e8027fcad23fda98b2e3ac259d8d67585f671)
+
+          ---
+          updated-dependencies:
+          - dependency-name: docker/build-push-action
+          dependency-type: direct:production
+          update-type: version-update:semver-major
+          ...
+
+          Signed-off-by: dependabot[bot] <support@github.com>
+
+Sat Feb 04 01:34:01 UTC 2023  Adam Mitz  <mitza@objectcomputing.com>
+        commit 30ce6c2398bbb989ef2e2d7b613ef175e855bcf7
+
+        * .github/workflows/build_and_test.yml:
+
+          Moved the part of build_w22_x86_i0_j_FM-1f that builds CMake
+          tests
+
+          This may avoid running of space during the build
+
+Sat Feb 04 01:05:08 UTC 2023  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit 51bd0090677030b03ddc54b19866829110503073
+
+        * dds/DCPS/transport/framework/TransportClient.cpp:
+        * dds/DCPS/transport/shmem/ShmemDataLink.cpp:
+        * dds/DCPS/transport/shmem/ShmemDataLink.h:
+        * dds/DCPS/transport/shmem/ShmemInst.cpp:
+        * dds/DCPS/transport/shmem/ShmemInst.h:
+        * dds/DCPS/transport/shmem/ShmemReceiveStrategy.cpp:
+        * dds/DCPS/transport/shmem/ShmemSendStrategy.cpp:
+        * dds/DCPS/transport/shmem/ShmemTransport.cpp:
+        * dds/DCPS/transport/shmem/ShmemTransport.h:
+        * tests/DCPS/LargeSample/DataReaderListener.cpp:
+        * tests/DCPS/LargeSample/DataReaderListener.h:
+
+          Fix Random LargeSample Shmem Failures
+
+          A initial message exchange was previously added to shared memory
+          association that went from the reader to the writer and back to
+          indicate
+          to the writer that it could start:
+
+          https://github.com/OpenDDS/OpenDDS/pull/3549
+
+          After this was added occasionally the LargeSample shared memory
+          test
+          would fail.
+
+          - The main cause of this was a broken less than operator for a
+          map
+          tracking writers that readers should resend association messages
+          to.
+          - A another cause that probably occurred a smaller part of the
+          time was
+          an unanticipated call path on the writer side that sent an
+          acknowledgement message to the reader that messed up the
+          exchange. The
+          fix for this was to adjust how the writer association messages
+          were
+          sent and how data links where created.
+
+          Also:
+          - Some refactoring in Shmem, especially in `ShmemTransport` to
+          cleanup
+          shared code between `accept_datalink` and `connect_datalink`.
+          - Fix data race TSAN identified in the LargeSample test
+
+          Still need to add some more checks like to detect when the
+          association
+          exchange is out of order, add log level conditions to errors, see
+          about
+          having the association resend rely more on the transport
+          framework,
+          and address other TODOs.
+
+Fri Feb 03 22:48:14 UTC 2023  Adam Mitz  <mitza@objectcomputing.com>
+        commit d1364a4bc77e02e6dc5b34612856caf408ccaabf
+
+          Merge pull request #4027 from iguessthislldo/igtd/shapes-demo-gha
+
+          Update Vcpkg in ishapes GHA
+
+Fri Feb 03 22:48:04 UTC 2023  Adam Mitz  <mitza@objectcomputing.com>
+        commit 761ad463bc952ad0baa8a0cf76085927f4bfb87d
+
+          Merge pull request #4025 from
+          simpsont-oci/increase_stress_test_timeout
+
+          Increase Timeout For Stress Tests
+
+Fri Feb 03 22:47:52 UTC 2023  Adam Mitz  <mitza@objectcomputing.com>
+        commit f2de046a1b1f2b7cd2bfa8ea1a9202da7853b392
+
+          Merge pull request #4014 from jrw972/opendds-408
+
+          Enable tests that used to be problematic on MacOS in GitHub
+          Actions
+
+Fri Feb 03 18:38:23 UTC 2023  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit a6a7294a06aaa9a7c4b248bffaa49c0d0d6406c8
+
+        * .github/workflows/ishapes.yml:
+
+          Try Out Latest Vcpkg in ishapes GHA
+
+Fri Feb 03 16:55:46 UTC 2023  Adam Mitz  <mitza@objectcomputing.com>
+        commit 4bce35bd3ee1cd55f50c74592de87e33f5bbe196
+
+        * dds/idl/marshal_generator.cpp:
+        * tests/DCPS/FilterExpression/FilterExpression.cpp:
+
+          Fixed bug in filtering serialized data with enums
+
+          Enum members need to be treated as strings for comparison with
+          filter
+          literals/parameters. Similar to handling dynamic data in PR
+          #4022.
+
+Fri Feb 03 15:26:25 UTC 2023  Timothy Simpson  <simpsont@objectcomputing.com>
+        commit 5fa87db566eabc66c1dd98142afe78aa44919288
+
+        * tests/stress-tests/run_test.pl:
+
+          Increase Timeout For Stress Tests
+
+Fri Feb 03 13:51:41 UTC 2023  Adam Mitz  <mitza@objectcomputing.com>
+        commit 40de2a1e1057c3fcda1bc5fe6f27fd5b482ca1fe
+
+          Merge pull request #4023 from
+          simpsont-oci/pre-11-windows-atomic-type-fixes
+
+          Fixes for new Atomic template types for pre-C++11 Windows builds
+
+Fri Feb 03 06:36:59 UTC 2023  Son Dinh  <dinhs@objectcomputing.com>
+        commit ffff871ee4b1aa46a036fdb3755f84a3efec60eb
+
+        * dds/DCPS/XTypes/DynamicDataBase.cpp:
+        * dds/DCPS/XTypes/DynamicDataBase.h:
+        * dds/DCPS/XTypes/DynamicDataImpl.cpp:
+        * dds/DCPS/XTypes/DynamicDataImpl.h:
+        * dds/DCPS/XTypes/DynamicDataXcdrReadImpl.cpp:
+
+          Updating get methods
+
+Thu Feb 02 20:24:16 UTC 2023  Adam Mitz  <mitza@objectcomputing.com>
+        commit 587223d6cdf2689f29495b516cd7950a7e71c465
+
+        * tests/DCPS/FilterExpression/FilterStructDynamicTypeSupport.cpp:
+
+          Fixed CI errors related to ambiguous type names
+
+Thu Feb 02 20:08:46 UTC 2023  Timothy Simpson  <simpsont@objectcomputing.com>
+        commit 3889ec543b07362f174d9c167ffff18471888804
+
+        * dds/DCPS/TopicDescriptionImpl.h:
+        * dds/DCPS/WriterInfo.h:
+
+          Fixes for new Atomic template types for pre-C++11 Windows builds
+
+Thu Feb 02 17:44:11 UTC 2023  Adam Mitz  <mitza@objectcomputing.com>
+        commit fd7e976e5cd8359f3380219546cffcfdca27ee23
+
+        * dds/DCPS/XTypes/DynamicDataImpl.cpp:
+
+          Use get_member_type
+
+Thu Feb 02 17:27:38 UTC 2023  Adam Mitz  <mitza@objectcomputing.com>
+        commit 41480f9c72e205cf8b60946fc1deda048d3d3b09
+
+        * dds/DCPS/XTypes/DynamicDataBase.cpp:
+        * dds/DCPS/XTypes/DynamicDataBase.h:
+        * dds/DCPS/XTypes/DynamicDataImpl.cpp:
+        * dds/DCPS/XTypes/DynamicDataXcdrReadImpl.cpp:
+        * dds/DCPS/XTypes/Utils.cpp:
+        * dds/DCPS/XTypes/Utils.h:
+        * tests/DCPS/FilterExpression/FilterExpression.cpp:
+        * tests/unit-tests/dds/DCPS/XTypes/DynamicDataImpl.cpp:
+        * tests/unit-tests/dds/DCPS/XTypes/DynamicDataXcdrReadImpl.cpp:
+
+          DynamicData: get/set enums as strings
+
+Thu Feb 02 14:38:05 UTC 2023  Adam Mitz  <mitza@objectcomputing.com>
+        commit 5abebb96f64c1348c7aa608cb2377b3d45fb94b7
+
+          Merge pull request #4020 from
+          iguessthislldo/igtd/post-3.23.1-release-script
+
+          Post 3.23.1 Release Script Improvements
+
+Thu Feb 02 14:37:55 UTC 2023  Adam Mitz  <mitza@objectcomputing.com>
+        commit 07d67294892863bed8dfbe01ef223b1b882758f3
+
+          Merge pull request #4017 from
+          simpsont-oci/migrate_to_opendds_atomic
+
+          Prefer New OpenDDS::DCPS::Atomic To ACE_Atomic_Op
+
+Thu Feb 02 14:37:41 UTC 2023  Adam Mitz  <mitza@objectcomputing.com>
+        commit edfd60a9b14de677652ee23f5bb37b4e1488fbdc
+
+          Merge pull request #4012 from jrw972/opendds-693
+
+          Factor out LocalEntities to make Sedp.h smaller
+
+Thu Feb 02 14:31:48 UTC 2023  Adam Mitz  <mitza@objectcomputing.com>
+        commit 174335f4a276c4168428d155817bdd1f46e50898
+
+          Merge remote-tracking branch 'fred/igtd/enum-helpers' into
+          dynamic-content-subscription
+
+          # Conflicts:
+          #       dds/DCPS/XTypes/Utils.cpp
+
+Thu Feb 02 14:25:33 UTC 2023  Adam Mitz  <mitza@objectcomputing.com>
+        commit b1423b7ddb8d7fae914ac348b0c8c4b26a82ce7a
+
+        * dds/DCPS/XTypes/DynamicDataImpl.cpp:
+        * dds/DCPS/XTypes/DynamicDataImpl.h:
+        * dds/DCPS/XTypes/DynamicDataXcdrReadImpl.cpp:
+        * dds/DCPS/XTypes/Utils.cpp:
+        * dds/DCPS/XTypes/Utils.h:
+        * tests/DCPS/FilterExpression/FilterExpression.cpp:
+        * tests/DCPS/FilterExpression/FilterStructDynamicTypeSupport.cpp:
+        * tests/DCPS/FilterExpression/FilterStructDynamicTypeSupport.h:
+
+          DynamicData: get enums as strings
+
+Wed Feb 01 22:17:53 UTC 2023  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit f595c52542362b3525f9d4dd98563baff8fc2a9f
+
+        * tools/scripts/gitrelease.pl:
+
+          Post 3.23.1 Release Script Improvements
+
+          - Changed GitHub organization to "OpenDDS".
+          - Fix and expand checks for PitHub HTTP errors.
+          - Rename `--write-authors` to `--update-authors` and add it to
+          `--help`.
+
+Tue Jan 24 19:29:18 UTC 2023  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 722963fa9d215072a070a2af27b05dc572ad3e01
+
+        * dds/DCPS/RTPS/LocalEntities.h:
+        * dds/DCPS/RTPS/Sedp.cpp:
+        * dds/DCPS/RTPS/Sedp.h:
+        * tests/unit-tests/dds/DCPS/RTPS/DiscoveredEntities.cpp:
+        * tests/unit-tests/dds/DCPS/RTPS/LocalEntities.cpp:
+
+          Factor out LocalEntities to make Sedp.h smaller
+
+Wed Feb 01 19:26:37 UTC 2023  Timothy Simpson  <simpsont@objectcomputing.com>
+        commit 4255184500be9ea20f3b913f824c3beeaa463ede
+
+        * dds/DCPS/AtomicBool.h:
+
+          Update dds/DCPS/AtomicBool.h
+
+          Co-authored-by: Fred Hornsey <fred@hornsey.us>
+
+Wed Feb 01 17:08:27 UTC 2023  Timothy Simpson  <simpsont@objectcomputing.com>
+        commit 75ff0788ae70cae09d5f2b6ac8f59f4ea5d8bb2b
+
+        * dds/DCPS/ReceivedDataElementList.cpp:
+
+          fix another pre-11 issue
+
+Wed Feb 01 16:37:57 UTC 2023  Adam Mitz  <mitza@objectcomputing.com>
+        commit 09ded6f1022151002347c3c7efb8091ee56bbe32
+
+          Merge remote-tracking branch 'upstream/master' into
+          dynamic-content-subscription
+
+Wed Feb 01 15:02:36 UTC 2023  Timothy Simpson  <simpsont@objectcomputing.com>
+        commit 4769ad9be9a20f50125bc6603e90e42c87b7583d
+
+        * dds/DCPS/Atomic.h:
+
+          rework pre-11 class definition to avoid operator ambiguity, more
+          closely follow std::atomic member definitions
+
+Wed Feb 01 13:41:59 UTC 2023  Adam Mitz  <mitza@objectcomputing.com>
+        commit e4c4910cf6aaf9cdb2f2e699166dc0119c7708ff
+
+          Merge pull request #4018 from mitza-oci/serializer
+
+          Serializer: detect some invalid CDR bounded strings
+
+Wed Feb 01 04:12:42 UTC 2023  Adam Mitz  <mitza@objectcomputing.com>
+        commit 514fc757193a3d01af04a77335184542f752148a
+
+        * dds/DCPS/Serializer.inl:
+        * tests/unit-tests/dds/DCPS/RTPS/RtpsCoreTypeSupportImpl.cpp:
+
+          Serializer: detect some invalid CDR bounded strings
+
+Wed Feb 01 03:39:43 UTC 2023  Adam Mitz  <mitza@objectcomputing.com>
+        commit d37f66c4035994800c87ab53999af174112d4450
+
+          Merge pull request #4016 from mitza-oci/serializer
+
+          Serializer: detect other kinds of invalid CDR strings
+
+Tue Jan 31 22:44:46 UTC 2023  Timothy Simpson  <simpsont@objectcomputing.com>
+        commit be29e7a972130a5f776adeb7e08699d614455650
+
+        * dds/DCPS/Atomic.h:
+        * dds/DCPS/AtomicBool.h:
+        * dds/DCPS/DataBlockLockPool.h:
+        * dds/DCPS/DataWriterImpl.h:
+        * dds/DCPS/Dynamic_Cached_Allocator_With_Overflow_T.h:
+        * dds/DCPS/GuardCondition.cpp:
+        * dds/DCPS/GuardCondition.h:
+        * dds/DCPS/InfoRepoDiscovery/InfoRepoDiscovery.h:
+        * dds/DCPS/InstanceHandle.h:
+        * dds/DCPS/ReceivedDataElementList.h:
+        * dds/DCPS/TopicDescriptionImpl.h:
+        * dds/DCPS/WriterInfo.h:
+        * dds/DCPS/transport/framework/TransportImpl.cpp:
+        * dds/DCPS/transport/framework/TransportImpl.h:
+        * dds/DCPS/transport/framework/TransportQueueElement.h:
+        * dds/DCPS/transport/framework/TransportQueueElement.inl:
+        * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
+        * dds/DCPS/transport/framework/TransportSendStrategy.h:
+        * dds/DCPS/transport/framework/TransportSendStrategy.inl:
+        * dds/DCPS/transport/tcp/TcpTransport.cpp:
+        * dds/DCPS/transport/tcp/TcpTransport.h:
+        * dds/DCPS/unique_ptr.h:
+        * dds/InfoRepo/DCPS_IR_Domain.cpp:
+        * dds/InfoRepo/DCPS_IR_Domain.h:
+        * examples/DCPS/Messenger_IOGR_Imr/Writer.cpp:
+        * examples/DCPS/Messenger_IOGR_Imr/Writer.h:
+        * examples/DCPS/Messenger_Imr/Writer.cpp:
+        * examples/DCPS/Messenger_Imr/Writer.h:
+        * performance-tests/DCPS/InfoRepo_population/Writer.cpp:
+        * performance-tests/DCPS/InfoRepo_population/Writer.h:
+        * tests/DCPS/BuiltInTopicTest/Writer.cpp:
+        * tests/DCPS/BuiltInTopicTest/Writer.h:
+        * tests/DCPS/CorbaSeq/Writer.cpp:
+        * tests/DCPS/CorbaSeq/Writer.h:
+        * tests/DCPS/DPFactoryQos/Writer.h:
+        * tests/DCPS/FooTest3_2/Writer.cpp:
+        * tests/DCPS/FooTest5/DataReaderListener.cpp:
+        * tests/DCPS/FooTest5/Writer.cpp:
+        * tests/DCPS/FooTest5/Writer.h:
+        * tests/DCPS/FooTest5/common.cpp:
+        * tests/DCPS/FooTest5/common.h:
+        * tests/DCPS/FooTest5/subscriber.cpp:
+        * tests/DCPS/GroupPresentation/Writer.cpp:
+        * tests/DCPS/GroupPresentation/Writer.h:
+        * tests/DCPS/Instances/PubDriver.h:
+        * tests/DCPS/LargeSample/Writer.cpp:
+        * tests/DCPS/LargeSample/Writer.h:
+        * tests/DCPS/LatencyBudget/Writer.cpp:
+        * tests/DCPS/LatencyBudget/Writer.h:
+        * tests/DCPS/Lifespan/Writer.cpp:
+        * tests/DCPS/Lifespan/Writer.h:
+        * tests/DCPS/ManualAssertLiveliness/DataWriterListenerImpl.cpp:
+        * tests/DCPS/ManualAssertLiveliness/DataWriterListenerImpl.h:
+        * tests/DCPS/ManyTopicMultiProcess/Writer.cpp:
+        * tests/DCPS/ManyTopicTest/publisher.cpp:
+        * tests/DCPS/Monitor/Writer.cpp:
+        * tests/DCPS/Monitor/Writer.h:
+        * tests/DCPS/MultiDPTest/Writer.cpp:
+        * tests/DCPS/MultiDPTest/Writer.h:
+        * tests/DCPS/MultiDPTest/common.cpp:
+        * tests/DCPS/MultiDPTest/common.h:
+        * tests/DCPS/NotifyTest/Writer.cpp:
+        * tests/DCPS/NotifyTest/Writer.h:
+        * tests/DCPS/Ownership/Writer.cpp:
+        * tests/DCPS/Ownership/Writer.h:
+        * tests/DCPS/Partition/DataReaderListener.cpp:
+        * tests/DCPS/Partition/DataReaderListener.h:
+        * tests/DCPS/Partition/DataWriterListener.cpp:
+        * tests/DCPS/Partition/DataWriterListener.h:
+        * tests/DCPS/PersistentDurability/DataWriterListenerImpl.h:
+        * tests/DCPS/PersistentDurability/Writer.cpp:
+        * tests/DCPS/PersistentDurability/Writer.h:
+        * tests/DCPS/PersistentDurability/publisher.cpp:
+        * tests/DCPS/Prst_delayed_subscriber/Writer.cpp:
+        * tests/DCPS/Prst_delayed_subscriber/Writer.h:
+        * tests/DCPS/Reconnect/Writer.cpp:
+        * tests/DCPS/Reconnect/Writer.h:
+        * tests/DCPS/RtpsRelay/Smoke/Writer.h:
+        * tests/DCPS/SampleLost/DataWriterListenerImpl.cpp:
+        * tests/DCPS/SampleLost/DataWriterListenerImpl.h:
+        * tests/DCPS/SampleLost/Writer.cpp:
+        * tests/DCPS/SampleLost/Writer.h:
+        * tests/DCPS/SampleLost/publisher.cpp:
+        * tests/DCPS/Serializer_wstring/Writer.cpp:
+        * tests/DCPS/Serializer_wstring/Writer.h:
+        * tests/DCPS/SkipSerialize/Writer.h:
+        * tests/DCPS/StaticDiscovery/StaticDiscoveryTest.cpp:
+        * tests/DCPS/StringKey/Writer.cpp:
+        * tests/DCPS/StringKey/Writer.h:
+        * tests/DCPS/TcpReconnect/Writer.cpp:
+        * tests/DCPS/TcpReconnect/Writer.h:
+        * tests/DCPS/TransientDurability/DataWriterListenerImpl.cpp:
+        * tests/DCPS/TransientDurability/DataWriterListenerImpl.h:
+        * tests/DCPS/TransientDurability/Writer.cpp:
+        * tests/DCPS/TransientDurability/Writer.h:
+        * tests/DCPS/TransientDurability/publisher.cpp:
+        * tests/DCPS/WaitForAck/Writer.cpp:
+        * tests/DCPS/WaitForAck/Writer.h:
+        * tests/DCPS/ZeroCopyDataReaderListener/Writer.h:
+        * tests/FACE/SingleProcessMessenger/SingleProcess/SingleProcess.cpp:
+        * tests/security/attributes/Writer.h:
+        * tests/stress-tests/dds/DCPS/DispatchService.cpp:
+        * tests/stress-tests/dds/DCPS/MultiTask.cpp:
+        * tests/stress-tests/dds/DCPS/ServiceEventDispatcher.cpp:
+        * tests/stress-tests/dds/DCPS/SporadicTask.cpp:
+        * tests/unit-tests/dds/DCPS/DispatchService.cpp:
+        * tests/unit-tests/dds/DCPS/ServiceEventDispatcher.cpp:
+        * tests/unit-tests/dds/DCPS/ThreadPool.cpp:
+
+          Prefer New OpenDDS:DCPS::Atomic To ACE_Atomic_Op
+
+Tue Jan 31 21:48:39 UTC 2023  Adam Mitz  <mitza@objectcomputing.com>
+        commit a62f3e6fc319db8ed6ba28065a59b034277d7c48
+
+        * dds/DCPS/Serializer.cpp:
+        * tests/unit-tests/dds/DCPS/RTPS/RtpsCoreTypeSupportImpl.cpp:
+        * tests/unit-tests/dds/DCPS/Serializer.cpp:
+
+          Serializer: detect other kinds of invalid CDR strings
+
+          See GitHub Issue #4015
+
+Tue Jan 31 16:36:29 UTC 2023  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 44fed8d50a571cf0fd25b529e1736a6cc085e0e4
+
+        * docs/internal/github_actions.rst:
+        * tests/dcps_tests.lst:
+
+          Enable tests that used to be problematic on MacOS in GitHub
+          Actions
+
+Tue Jan 31 15:05:48 UTC 2023  Adam Mitz  <mitza@objectcomputing.com>
+        commit 9b8b65b675973c9f0cf6260a5a6ed5a7daf0b797
+
+          Merge pull request #4011 from
+          iguessthislldo/igtd/redmine-comments
+
+          Remove Leftover Redmine Comments
+
+Tue Jan 31 15:05:34 UTC 2023  Adam Mitz  <mitza@objectcomputing.com>
+        commit 62aa46c90c28a68734b1f4fa39ada737b594a053
+
+          Merge pull request #4010 from mitza-oci/serializer
+
+          Serializer: detect certain kinds of invalid CDR strings
+
+Tue Jan 31 15:05:22 UTC 2023  Adam Mitz  <mitza@objectcomputing.com>
+        commit 46bc49d79f48f4f72455bb697b3a09c60f054898
+
+          Merge pull request #4008 from iguessthislldo/igtd/messengermc
+
+          Compile Fix for MessengerMC Modeling Test
+
+Tue Jan 31 04:53:26 UTC 2023  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit ebfc819ee8d14ec288423f3d614a109dbfc42be1
+
+        * tests/DCPS/LargeSample/run_test.pl:
+        * tests/DCPS/ManyToMany/run_test.pl:
+        * tests/DCPS/Messenger/run_test.pl:
+
+          [skip ci] Remove Leftover Redmine Comments
+
+          The things these coments reference were removed in
+          https://github.com/OpenDDS/OpenDDS/pull/3711
+
+Mon Jan 30 23:20:11 UTC 2023  Adam Mitz  <mitza@objectcomputing.com>
+        commit 3e665f2797fe94d877e8fc27ef14edf113797925
+
+        * dds/DCPS/Serializer.cpp:
+        * tests/unit-tests/dds/DCPS/Serializer.cpp:
+
+          Serializer: detect certain kinds of invalid CDR strings
+
+          See GitHub Issue #4009
+
+Mon Jan 30 20:20:58 UTC 2023  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit d4323500e887337ef1e08458d0bb453f08963bb1
+
+        * tools/modeling/tests/MessengerMC/fs_signal.cpp:
+
+          Compile Fix for MessengerMC Modeling Test
+
+          Follow up to https://github.com/OpenDDS/OpenDDS/pull/4003
+
+Mon Jan 30 19:07:47 UTC 2023  Adam Mitz  <mitza@objectcomputing.com>
+        commit 482bb96e3c45ed798b2cc4075a01d3e123b7a788
+
+          Merge pull request #4004 from sonndinh/opendds-726
+
+          Enhance DynamicDataImpl unit tests
+
+Mon Jan 30 16:13:50 UTC 2023  Adam Mitz  <mitza@objectcomputing.com>
+        commit 9f0b61ec4447a2de2d4befb7325b868b3a925f7c
+
+        * tests/DCPS/QueryCondition/QueryConditionTest.cpp:
+
+          QueryConditionTest: initialize data sample
+
+Sat Jan 28 04:49:58 UTC 2023  Son Dinh  <dinhs@objectcomputing.com>
+        commit 4348940017f639c0374048860b7f75793a47f362
+
+        * tests/unit-tests/dds/DCPS/XTypes/DynamicDataXcdrReadImpl.cpp:
+        * tests/unit-tests/dds/DCPS/XTypes/DynamicDataXcdrReadImpl.idl:
+
+          Test read from recursive type
+
+Fri Jan 27 20:42:08 UTC 2023  Adam Mitz  <mitza@objectcomputing.com>
+        commit f0999b24e9f71cff6f32afd975d7b6ee68699dde
+
+          Merge pull request #4006 from
+          simpsont-oci/pub_matched_counts_to_relay_stats
+
+          Add PublicationMatchedStatus Current Count To RtpsRelay
+          Statistics
+
+Fri Jan 27 20:41:58 UTC 2023  Adam Mitz  <mitza@objectcomputing.com>
+        commit 28e3683fb00341140b9d16ce7456000460904ae1
+
+          Merge pull request #4001 from jrw972/opendds-694
+
+          Remove GuidPrefixWrapper
+
+Fri Jan 27 19:20:11 UTC 2023  Son Dinh  <dinhs@objectcomputing.com>
+        commit 4e592cd95a17e2afa145c510e9131a9bfc5c78b9
+
+        * tests/unit-tests/dds/DCPS/XTypes/DynamicDataImpl.cpp:
+
+          Remove default union test case
+
+Fri Jan 27 17:22:00 UTC 2023  Son Dinh  <dinhs@objectcomputing.com>
+        commit 9b6ded0e93906e092e771cc22d4818aa1a911508
+
+          Merge branch 'master' of github.com:OpenDDS/OpenDDS into
+          opendds-726
+
+Fri Jan 27 17:21:09 UTC 2023  Son Dinh  <dinhs@objectcomputing.com>
+        commit 3852b54a2566e491dbd102e8ed71bf0d25ecbdbc
+
+        * tests/unit-tests/dds/DCPS/XTypes/DynamicDataImpl.cpp:
+
+          More test cases
+
+Fri Jan 27 14:57:00 UTC 2023  Adam Mitz  <mitza@objectcomputing.com>
+        commit 2498380280d8dd758db7fc75b27f3f75bfcd3c30
+
+          Merge pull request #4005 from
+          simpsont-oci/fix_increment_in_prepare_relay_partitions
+
+          Fix index increment in
+          GuidPartitionTable::prepare_relay_partitions
+
+Fri Jan 27 14:56:48 UTC 2023  Adam Mitz  <mitza@objectcomputing.com>
+        commit 9aa0eceac06e3d8f7e8e71cd0d4466891f5e621f
+
+          Merge pull request #4003 from iguessthislldo/igtd/dds-primitives
+
+          Follow up to 3994 and Fix sprintf Warnings
+
+Fri Jan 27 14:56:38 UTC 2023  Adam Mitz  <mitza@objectcomputing.com>
+        commit e19ae890cfbdf89ae5f45c8a261f9e49eda882c1
+
+          Merge pull request #4002 from jrw972/opendds-752
+
+          Socket handles invalid in RtpsUdpTransport
+
+Fri Jan 20 22:14:03 UTC 2023  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 718b5294793ef59fd1f60c410c4407d8a1f6deee
+
+        * dds/DCPS/RTPS/DiscoveredEntities.h:
+        * dds/DCPS/RTPS/Sedp.cpp:
+        * dds/DCPS/RTPS/Sedp.h:
+        * dds/DCPS/RTPS/Spdp.cpp:
+        * tests/unit-tests/dds/DCPS/RTPS/DiscoveredEntities.cpp:
+
+          Remove GuidPrefixWrapper
+
+Fri Jan 27 02:23:20 UTC 2023  Timothy Simpson  <simpsont@objectcomputing.com>
+        commit b828fd8649a93b3124df1e01429c3ab74d944b48
+
+        * tools/dds/rtpsrelaylib/Relay.idl:
+        * tools/rtpsrelay/ParticipantListener.h:
+        * tools/rtpsrelay/PublicationListener.h:
+        * tools/rtpsrelay/ListenerBase.h  tools/rtpsrelay/ReaderListenerBase.h:
+        * tools/rtpsrelay/RelayAddressListener.h:
+        * tools/rtpsrelay/RelayPartitionsListener.h:
+        * tools/rtpsrelay/RelayStatisticsReporter.h:
+        * tools/rtpsrelay/RelayThreadMonitor.h:
+        * tools/rtpsrelay/RtpsRelay.cpp:
+        * tools/rtpsrelay/SpdpReplayListener.h:
+        * tools/rtpsrelay/StatisticsWriterListener.h:
+        * tools/rtpsrelay/SubscriptionListener.h:
+        * tools/rtpsrelay/WriterListenerBase.h:
+
+          Add Publication Matched Counts To RtpsRelay Statistics
+
+Thu Jan 26 23:05:30 UTC 2023  Adam Mitz  <mitza@objectcomputing.com>
+        commit 31f364b5d1312657fbcda43a5b86eb22d7161c94
+
+          Merge pull request #3988 from
+          mitza-oci/dynamic-content-subscription
+
+          Dynamic content subscription
+
+Thu Jan 26 22:00:16 UTC 2023  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit 1f5454aade284624f32065d88ddb467386ef69e5
+
+        * tests/DCPS/ManyTopicTest/publisher.cpp:
+        * tools/modeling/tests/MessengerMC/fs_signal.cpp:
+        * tools/modeling/tests/MessengerMC/fs_signal.h:
+
+          Removed Unused Member and Try to Fix Asan Issue
+
+          For ManyTopicTest the string in Foo3 appears to be missing a null
+          terminator:
+          https://github.com/OpenDDS/OpenDDS/actions/runs/4015514096/jobs/6899467008#logs
+
+          This fix is assuming that the static buffer is causing the issue
+          because
+          there can multiple threads using the function.
+
+Thu Jan 26 19:09:19 UTC 2023  Timothy Simpson  <simpsont@objectcomputing.com>
+        commit ac6166c90652dd4f8e6fff2e40ed63be9bb55e4b
+
+        * tools/rtpsrelay/GuidPartitionTable.h:
+
+          Fix index increment in
+          GuidPartitionTable::prepare_relay_partitions
+
+Thu Jan 26 14:43:32 UTC 2023  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 0d50e96fc7f27689d1ae125f5d5eee0d9bcab75d
+
+        * .github/workflows/build_u14_gcc4.Dockerfile:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpReceiveStrategy.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpTransport.cpp:
+
+          Fix gcc4 build
+
+Thu Jan 26 13:17:38 UTC 2023  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit bce75d1dff2dda7d2f7842308132d958654c8769
+
+        * tools/modeling/tests/MessengerMC/fs_signal.cpp:
+
+          Fix Compile Errors in Modeling Test
+
+Wed Jan 25 23:26:29 UTC 2023  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit 644a52ffc35ed78a05d13423a970bbae8cc02f05
+
+        * dds/.gitignore:
+        * dds/CORBA/tao/Exception.cpp:
+        * tests/DCPS/PersistentInfoRepo/Publisher.cpp:
+        * tests/DCPS/Reliability/pub/Publisher.cpp:
+        * tests/DCPS/StaticDiscovery/StaticDiscoveryTest.cpp:
+        * tests/DCPS/XTypes/Subscriber.cpp:
+        * tests/unit-tests/dds/DCPS/MemoryPool.cpp:
+        * tools/modeling/tests/MessengerMC/fs_signal.cpp:
+        * tools/modeling/tests/MessengerMC/fs_signal.h:
+        * tools/scripts/update_gitignore.pl:
+
+          Follow up to 3994 and Fix sprintf Warnings
+
+          https://github.com/OpenDDS/OpenDDS/pull/3994
+
+          - Fixed missing `TAO_VERSION_CODE` on TAO 2.2 by using
+          `TAO_MAJOR_VERSION` instead.
+          - Replaced reference to bugzilla ticket with
+          https://github.com/DOCGroup/ACE_TAO/issues/2037
+          - Cleaned up and added sorting option for `update_gitignore.pl`
+          used in
+          #3994
+          - Replaced sprintf usage to satisfy build_m12_i0_j_FM-1f GHA
+          warnings
+
+Wed Jan 25 22:43:33 UTC 2023  Son Dinh  <dinhs@objectcomputing.com>
+        commit 248d59960e0cec807436cee727ada38a4467fde9
+
+        * tests/unit-tests/dds/DCPS/XTypes/DynamicDataImpl.cpp:
+        * tests/unit-tests/dds/DCPS/XTypes/DynamicDataImpl.idl:
+
+          Added test cases
+
+Wed Jan 25 15:03:50 UTC 2023  Adam Mitz  <mitza@objectcomputing.com>
+        commit 2e1e58674ca7d9eafc9e09ebb29ff3f3a823a826
+
+          Merge remote-tracking branch 'upstream/master' into
+          dynamic-content-subscription
+
+Wed Jan 25 15:00:10 UTC 2023  Adam Mitz  <mitza@objectcomputing.com>
+        commit 96ca54c9bd72650bbf2a2b737c81dfa20703f992
+
+          Merge pull request #4000 from jrw972/opendds-692
+
+          Factor out DiscoveredParticipant, DiscoveredPublication,
+          DiscoveredSubscription
+
+Wed Jan 25 14:59:55 UTC 2023  Adam Mitz  <mitza@objectcomputing.com>
+        commit 69c8d1f5e839ac7b089a962fbb2701ddd1885b05
+
+          Merge pull request #3994 from iguessthislldo/igtd/dds-primitives
+
+          Add `DDS` IDL Namespace Primitives and Normalize
+          `DdsDcpsCore.idl`
+
+Wed Jan 25 14:59:43 UTC 2023  Adam Mitz  <mitza@objectcomputing.com>
+        commit fd48b3e65922444cd88f492aad0e17e363c73559
+
+          Merge pull request #3993 from
+          iguessthislldo/igtd/xtypes-dynamic-data-test
+
+          Update XTypes Test to Use DynamicData
+
+Wed Jan 25 08:27:18 UTC 2023  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit 95c88bf84ebcd6c84562995e477032424913f54e
+
+        * java/dds/DDS/.gitignore:
+
+          Add Missing Files to gitignore
+
+Tue Jan 24 23:37:14 UTC 2023  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit cc306f41a53758aab7edf47a8da43a9aa7257885
+
+        * dds/DCPS/XTypes/Utils.h:
+        * tests/DCPS/XTypes/run_test.pl:
+
+          More Respond to Review
+
+Tue Jan 24 23:22:56 UTC 2023  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit f7ca95f083d981725b6318dab88452efb9eaa2f6
+
+        * dds/DCPS/XTypes/DynamicDataXcdrReadImpl.cpp:
+        * tests/DCPS/XTypes/Subscriber.cpp:
+
+          Respond to Review
+
+Tue Jan 24 21:25:25 UTC 2023  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 47efeb475f61d7949db1ce3b22b102e12099559c
+
+        * dds/DCPS/Time_Helper.h:
+        * dds/DCPS/Time_Helper.inl:
+
+          Fix safety profile
+
+Tue Jan 24 20:45:18 UTC 2023  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit b9f9df2650d06dc117c125018f2f86cebc23df28
+
+        * dds/DCPS/ReactorInterceptor.h:
+
+          Add missing exports
+
+Tue Jan 24 20:13:49 UTC 2023  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit a28f325a909f8757724b1b2bffcebd830654a80c
+
+        * tests/DCPS/XTypes/Publisher.cpp:
+        * tests/DCPS/XTypes/Subscriber.cpp:
+        * tests/unit-tests/dds/DCPS/Serializer.cpp:
+
+          Respond to Review and Add Missing Include
+
+Tue Jan 24 17:31:58 UTC 2023  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 418d962471d0967ff3b1ab87ed6c9534cdd8fb0a
+
+        * dds/DCPS/ReactorInterceptor.cpp:
+        * dds/DCPS/ReactorInterceptor.h:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.h:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.inl:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpReceiveStrategy.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpReceiveStrategy.h:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpTransport.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpTransport.h:
+
+          Socket handles invalid in RtpsUdpTransport
+
+          Problem
+          -------
+
+          The changes from #3990 created a race where the socket handles
+          are
+          nulled out as part of the transfer to the data link before the
+          `remove_handler` call.
+
+          Solution
+          --------
+
+          Capture the inputs to `register_handler` and `remove_handler` in
+          ReactorInterceptor Commands.
+
+Tue Jan 24 17:24:10 UTC 2023  Son Dinh  <dinhs@objectcomputing.com>
+        commit 4d956e69c44372dd85df900e6b25cc4c44e0b38e
+
+        * tests/unit-tests/dds/DCPS/XTypes/DynamicDataImpl.cpp:
+        * tests/unit-tests/dds/DCPS/XTypes/DynamicDataImpl.idl:
+
+          Add a recursive test case
+
+Tue Jan 24 17:22:50 UTC 2023  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 3be4483c9d70411b091daa8879896ea5367dad44
+
+        * tests/unit-tests/dds/DCPS/RTPS/DiscoveredEntities.cpp:
+
+          Fix CI issues in unit test
+
+Mon Jan 23 22:57:42 UTC 2023  Adam Mitz  <mitza@objectcomputing.com>
+        commit 289446535e846e7614287d1222dbf7ac440068d0
+
+        * tests/DCPS/ContentFilteredTopic/ContentFilteredTopicTest.cpp:
+        * tests/dcps_tests.lst:
+
+          completed adapting ContentFilteredTopicTest for dynamic
+
+Tue Jan 24 15:36:17 UTC 2023  Adam Mitz  <mitza@objectcomputing.com>
+        commit 2ebc9653177631afc61b5c35727055ebd81d2e79
+
+          Merge pull request #3999 from simpsont-oci/rcobject_stress_test
+
+          Add RcObject (et al.) Stress Test
+
+Tue Jan 24 06:10:26 UTC 2023  Timothy Simpson  <simpsont@objectcomputing.com>
+        commit bd9cf6f73ff4fbae3edb1d66e84a97f0ecbd0c41
+
+        * dds/DCPS/Atomic.h:
+
+          resolve c++03 build issues
+
+Tue Jan 24 04:44:35 UTC 2023  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit b57e04d47d1f7c83c38cd57f817ebdb3114b598d
+
+        * dds/CORBA/tao/Exception.cpp:
+        * dds/DdsDcpsCore.idl:
+        * dds/idl/be_global.cpp:
+        * dds/idl/be_global.h:
+        * dds/idl/be_produce.cpp:
+
+          Fixes for Safety Profile
+
+          Also:
+          - Some cleanup in be_global that was going to come with some
+          additional code to inject the `using namespace IDLv4;` like the
+          includes are, but that ended up being unnecessary because of
+          be_produce.
+          - Fix problem compiling dds/CORBA/tao/Exception.cpp with TAO 3.
+
+Tue Jan 24 02:02:55 UTC 2023  Timothy Simpson  <simpsont@objectcomputing.com>
+        commit 709410dd050c965cd4e5cbc1f3a0712ff14364e1
+
+        * dds/DCPS/Atomic.h:
+
+          whitespace issues
+
+Tue Jan 24 02:01:20 UTC 2023  Timothy Simpson  <simpsont@objectcomputing.com>
+        commit 5b675bf283fbe4df1ad983bfe277e73563feed84
+
+        * dds/DCPS/Atomic.h:
+
+          add explicit
+
+Tue Jan 24 02:00:10 UTC 2023  Timothy Simpson  <simpsont@objectcomputing.com>
+        commit 1edbabdd2196fe657c08338fb0a832e33311ecdb
+
+        * dds/DCPS/Atomic.h:
+
+          whitespace issues
+
+Tue Jan 24 01:55:31 UTC 2023  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit c0917eaa23ca611e847d284eb42e288b204b38b8
+
+        * dds/DCPS/XTypes/Utils.h:
+        * tests/DCPS/XTypes/Publisher.cpp:
+
+          Fix CI Issues
+
+Tue Jan 24 01:55:20 UTC 2023  Timothy Simpson  <simpsont@objectcomputing.com>
+        commit 2c396d842e8efa9e03fa9a1b819677303ee9b12b
+
+        * dds/DCPS/Atomic.h:
+        * dds/DCPS/RcObject.h:
+
+          attempt to define consolidated atomic type definition in its own
+          header
+
+Tue Jan 24 01:54:33 UTC 2023  Timothy Simpson  <simpsont@objectcomputing.com>
+        commit ab0131893fa6d8653bbea9f6dc04554337a518d3
+
+        * tests/stress-tests/dds/DCPS/RcObject.cpp:
+
+          resolve review comments
+
+Fri Jan 20 20:51:05 UTC 2023  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit b5bd26aa781e547905b4133117f5f240dc33d863
+
+        * dds/DCPS/RTPS/DiscoveredEntities.h:
+        * dds/DCPS/RTPS/Sedp.h:
+        * dds/DCPS/Time_Helper.h:
+        * dds/DCPS/Time_Helper.inl:
+        * tests/unit-tests/dds/DCPS/RTPS/DiscoveredEntities.cpp:
+        * tests/unit-tests/dds/DCPS/Time_Helper.cpp:
+
+          Factor out DiscoveredParticipant, DiscoveredPublication,
+          DiscoveredSubscription
+
+          Problem
+          -------
+
+          Sedp.h is too big.
+
+          Solution
+          --------
+
+          Make Sedp.h smaller by factoring out data structures.
+
+Mon Jan 23 18:58:22 UTC 2023  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit cb415f458c373c4e004da21a3a08a516b365ea31
+
+        * dds/DCPS/XTypes/Utils.cpp:
+        * dds/DCPS/XTypes/Utils.h:
+        * tests/DCPS/XTypes/Publisher.cpp:
+        * tests/DCPS/XTypes/Subscriber.cpp:
+        * tests/unit-tests/dds/DCPS/Serializer.cpp:
+        * tests/unit-tests/dds/DCPS/XTypes/Utils.cpp:
+
+          Fixes for CI and Improved Member Path Resolve Util
+
+Mon Jan 23 17:02:06 UTC 2023  Timothy Simpson  <simpsont@objectcomputing.com>
+        commit 8b3d82e91ee612899cd528f1bc05cf8d379056ee
+
+        * dds/DCPS/LocalObject.h:
+        * dds/DCPS/RcHandle_T.h:
+        * dds/DCPS/RcObject.h:
+
+          resolve test issues
+
+Mon Jan 23 17:01:21 UTC 2023  Timothy Simpson  <simpsont@objectcomputing.com>
+        commit 1097d10bca1f02afe9ca01a8bbbbb431ae93fbbc
+
+        * tests/stress-tests/dds/DCPS/RcObject.cpp:
+
+          Add RcObject (et al.) Stress Test
+
+Mon Jan 23 15:16:25 UTC 2023  Adam Mitz  <mitza@objectcomputing.com>
+        commit 5729da3811d80b52776d1b00e7989edc6e6e782b
+
+          Merge pull request #3998 from simpsont-oci/lncm_notify_all
+
+          LinuxNetworkConfigMonitor Should Use `notify_all` For Waitable
+          Conditions
+
+Mon Jan 23 15:16:10 UTC 2023  Adam Mitz  <mitza@objectcomputing.com>
+        commit 3d85ba5c6414530a2beecf8aa54c951af3b29c91
+
+          Merge pull request #3997 from simpsont-oci/improve_reader_locking
+
+          Minor Improvements For Reader-Side Locking
+
+Mon Jan 23 15:15:54 UTC 2023  Adam Mitz  <mitza@objectcomputing.com>
+        commit 676900cf2689f0499fa359dae393a54a3387b4aa
+
+          Merge pull request #3996 from
+          simpsont-oci/relax_besteffort_requirements_for_sharedtransport
+
+          Relax Best-Effort Requirements For SharedTransport Test
+
+Mon Jan 23 15:15:37 UTC 2023  Adam Mitz  <mitza@objectcomputing.com>
+        commit 54228996079a39766bcb52eccbcb9dcd01e60307
+
+          Merge pull request #3995 from
+          simpsont-oci/addresscache_unittest_coverity_issue
+
+          Resolve Coverity Issues In AddressCache Unit Test
+
+Fri Jan 20 18:06:54 UTC 2023  Timothy Simpson  <simpsont@objectcomputing.com>
+        commit 7d7a9f607b98587b1e4307d038472b21b791f298
+
+        * dds/DCPS/LinuxNetworkConfigMonitor.cpp:
+
+          LinuxNetworkConfigMonitor Should Use notify_all For Waitable
+          Conditions
+
+Fri Jan 20 18:03:08 UTC 2023  Timothy Simpson  <simpsont@objectcomputing.com>
+        commit 3043c5d3ab7d9f8da736634076d9b25e76603a02
+
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/transport/framework/ReceiveListenerSet.cpp:
+        * dds/DCPS/transport/framework/ReceiveListenerSet.h:
+        * dds/DCPS/transport/framework/ReceiveListenerSet.inl:
+
+          Minor Improvements For Reader-Side Locking
+
+Fri Jan 20 17:54:50 UTC 2023  Timothy Simpson  <simpsont@objectcomputing.com>
+        commit a820ee71f62148a6fa0fbde8b992426c0fd4e01b
+
+        * tests/DCPS/SharedTransport/TestCase.cpp:
+        * tests/DCPS/TestFramework/TestFramework_T.h:
+
+          Relax Best-Effort Requirements For SharedTransport Test
+
+Fri Jan 20 17:39:59 UTC 2023  Timothy Simpson  <simpsont@objectcomputing.com>
+        commit eae530cf763dea02a8a39ef3a9ae99121816e39d
+
+        * tests/unit-tests/dds/DCPS/AddressCache.cpp:
+
+          resolve PR comments
+
+Fri Jan 20 16:45:31 UTC 2023  Timothy Simpson  <simpsont@objectcomputing.com>
+        commit ac5896be0b062cc8820d32810826e502550a95c0
+
+        * tests/unit-tests/dds/DCPS/AddressCache.cpp:
+
+          Resolve Coverity Issues In AddressCache Unit Test
+
+Fri Jan 20 05:20:15 UTC 2023  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit 6198570cd6435643c1faeea19e84e5366f7ec141
+
+        * dds/DdsDcpsCore.idl:
+
+          DDS::* Primitives and Normalize DdsDcpsCore.idl
+
+          These are defined in XTypes 1.3 Table 43. They are specified in
+          the
+          context of the language binding, but makes more sense for them to
+          be
+          defined in IDL.
+
+Fri Jan 20 02:22:42 UTC 2023  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit 14171da9a545bf2bcf026d35215e3f1a037f2ce5
+
+        * dds/DCPS/XTypes/Utils.h:
+        * tests/DCPS/XTypes/Publisher.cpp:
+        * tests/DCPS/XTypes/Subscriber.cpp:
+        * tests/DCPS/XTypes/run_test.pl:
+
+          More Fixes and Simplifications in XTypes Test
+
+          - Added ExtendedMutableStructMatch sub-test that is failing like
+          ExtendedAppendableMatch is
+          - Removed accidentally committed parts of dds/DCPS/XTypes/Utils.h
+          - Fix skip_read default
+          - Simplified run_test.pl and added additional checks
+          - Made structure of how Publisher writes types somewhat more like
+          the
+          structure of how Subscriber reads types.
+
+Fri Jan 20 00:07:55 UTC 2023  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit 570ba55fd0c628511684a5accfa9f58255e6c087
+
+          Merge remote-tracking branch 'upstream/master' into
+          igtd/xtypes-dynamic-data-test
+
+Thu Jan 19 23:59:17 UTC 2023  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit 4d5c65bb88a01e1d67c0a028ddc2c17263ecf62e
+
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DataReaderImpl_T.h:
+        * dds/DCPS/XTypes/DynamicDataXcdrReadImpl.cpp:
+        * dds/DCPS/XTypes/DynamicTypeSupport.h:
+        * tests/DCPS/XTypes/Subscriber.cpp:
+        * tests/DCPS/XTypes/run_test.pl:
+        * tests/dcps_tests.lst:
+
+          Fixes for XTypes Test
+
+          - Various fixes in the XTypes subscriber.
+          - To fix encap header error, refactored remaining cases of
+          DataReaderImpl relying on MarshalTraits, except for special ROS
+          message block cases.
+          - Added logging for failed primitive deserialization in
+          DynamicDataXcdrReadImpl.
+          - Ignore broken cases in XTypes test caused by missing support in
+          DynamicDataXcdrReadImpl.
+
+Thu Jan 19 23:14:53 UTC 2023  Adam Mitz  <mitza@objectcomputing.com>
+        commit dc3e691f4a79ebc74f970ea734f223ad2e02d467
+
+          Merge pull request #3992 from jrw972/opendds-756
+
+          Participants can sign their own permissions file if the same CA
+          is used for both identity and permissions
+
+Thu Jan 19 19:02:55 UTC 2023  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit 9e421d285a1b7b54bf91ddd50c07ec74e578e047
+
+        * dds/DCPS/DomainParticipantImpl.cpp:
+        * dds/DCPS/Serializer.cpp:
+        * dds/DCPS/Serializer.h:
+        * dds/DCPS/XTypes/Utils.cpp:
+        * dds/DCPS/XTypes/Utils.h:
+        * tests/DCPS/XTypes/Common.h:
+        * tests/DCPS/XTypes/Publisher.cpp:
+        * tests/DCPS/XTypes/Subscriber.cpp:
+        * tests/DCPS/XTypes/run_test.pl:
+
+          Update XTypes Test to Use DynamicData
+
+Thu Jan 19 14:11:19 UTC 2023  Adam Mitz  <mitza@objectcomputing.com>
+        commit df85c5daf6a3ac96635c0e2f01ae1117ea597bf2
+
+          Merge pull request #3990 from jrw972/opendds-752
+
+          RtpsUdpTransport has data race from `relay_stun_mutex_`
+
+Wed Jan 18 22:22:21 UTC 2023  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 70410e8975e45a765cf19dc4fc50b33c8e051e61
+
+        * dds/DCPS/security/SSL/SignedDocument.cpp:
+
+          Participants can sign their own permissions file
+
+          Problem
+          -------
+
+          Assume a usage of DDS Security where the same CA is used for both
+          permissions
+          and identity. The certificates issued to particpants allow them
+          to
+          sign documents. Assume the participant generates a permissions
+          file
+          and then signs it. Chain verification causes verification
+          attempts to
+          succeed since the signing certificate, i.e., the participant's
+          certificate, can be chained back to the permission CA's
+          certificate (which is also the identity CA).
+
+          This problem was identified in
+          https://github.com/ros2/sros2/issues/282.
+
+          Solution
+          --------
+
+          Implement the suggestion in
+          https://github.com/ros2/sros2/issues/282.
+          Specifically, use PKCS7_NOINTERN to not accept any signatures in
+          the
+          signed document. This, in turn, requires the use of the `certs`
+          parameter to
+          `PKCS7_verify`.  PKCS7_NOVERIFY is used since the permissions CA
+          certificate will not be chain verified.
+
+Wed Jan 18 20:58:24 UTC 2023  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit d3abde6ea73f08225cd06444b6c2caf898cd7d47
+
+        * dds/DCPS/XTypes/Utils.cpp:
+        * dds/DCPS/XTypes/Utils.h:
+
+          Enum DynamicData Helpers
+
+Tue Jan 17 21:10:19 UTC 2023  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 42fcd6f65320636d9d5511b225514055a5311c6e
+
+        * dds/DCPS/ConnectionRecords.h:
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/InternalDataReaderListener.h:
+        * dds/DCPS/JobQueue.h:
+        * dds/DCPS/RTPS/Spdp.h:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.h:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpReceiveStrategy.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpReceiveStrategy.h:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpTransport.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpTransport.h:
+
+          RtpsUdpTransport has data race from `relay_stun_mutex_`
+
+          Problem
+          -------
+
+          ASAN reports a data race stemming from the use of the data link
+          from
+          the `relay_stun_task` in RtpsUdpTransport.
+
+          Solution
+          --------
+
+          Replace the existing mutex in `relay_stun_task` with the data
+          link
+          mutex. Unfortunately, this causes a deadlock with the reactor.
+          The
+          `relay_stun_task` acquires the reactor token and then the link
+          lock.
+          Other methods have the link lock and then interact with the
+          reactor.
+          A JobQueue job was used to safely dispatch to the reactor.
+
+Wed Jan 18 14:14:57 UTC 2023  Adam Mitz  <mitza@objectcomputing.com>
+        commit d97069242f13afe0a6281746dfd61b27068624f4
+
+          Merge pull request #3991 from OpenDDS/gha-wireshark-vcpkg
+
+          GitHub Actions: update vcpkg commit for wireshark
+
+Wed Jan 18 14:14:45 UTC 2023  Adam Mitz  <mitza@objectcomputing.com>
+        commit a701d8f4ae24063d7ba111a40a213caa0f951b20
+
+          Merge pull request #3989 from jrw972/rtps-relay-address-change
+
+          `rtps_relay_address_change` deadlocks
+
+Tue Jan 17 23:46:05 UTC 2023  Adam Mitz  <mitza@objectcomputing.com>
+        commit f94bc1bee49d04871d487b856e13244038c9f1a9
+
+        * .github/workflows/build_and_test.yml:
+
+          GitHub Actions: update vcpkg commit for wireshark
+
+          One of wireshark's dependencies in vcpkg was broken.
+
+          Fixed by vcpkg PR 28919
+
+Tue Jan 17 20:34:58 UTC 2023  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 55344d82689e5ba13eeff120acc2fd6968848287
+
+        * dds/DCPS/transport/framework/TransportInst.cpp:
+
+          Update dds/DCPS/transport/framework/TransportInst.cpp
+
+          Co-authored-by: Timothy Simpson <simpsont@objectcomputing.com>
+
+Tue Jan 17 15:35:22 UTC 2023  Adam Mitz  <mitza@objectcomputing.com>
+        commit e6dd84dd5adb1c611349537511d2361a47109add
+
+        * tests/DCPS/ContentFilteredTopic/ContentFilteredTopicTest.cpp:
+
+          fixed test build error on older compilers
+
+Tue Jan 17 16:10:31 UTC 2023  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 0e74a4606971733edd299033c62e9904c7af5ebf
+
+        * dds/DCPS/transport/framework/TransportClient.cpp:
+        * dds/DCPS/transport/framework/TransportInst.cpp:
+        * dds/DCPS/transport/framework/TransportInst.h:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpInst.cpp:
+
+          `rtps_relay_address_change` deadlocks
+
+          Problem
+          -------
+
+          `rtps_relay_address_change` deadlocks if it causes the impl to be
+          created.
+
+          Solution
+          --------
+
+          Don't create the impl.
+
+          There is no downside here, that is, when the impl is created, it
+          will
+          have the correct configuration.
+
+Tue Jan 17 00:40:29 UTC 2023  Adam Mitz  <mitza@objectcomputing.com>
+        commit 57815f7bf8770a2ad8e36e87416f65ecb834a12a
+
+        * dds/DCPS/XTypes/DynamicSample.h:
+        * tests/DCPS/ContentFilteredTopic/ContentFilteredTopicTest.cpp:
+
+          more ContentFilteredTopic testing
+
+Tue Jan 17 00:15:14 UTC 2023  Adam Mitz  <mitza@objectcomputing.com>
+        commit 5f62e246261d849a104f3ca5802af4d5dd775123
+
+        * tests/DCPS/ContentFilteredTopic/ContentFilteredTopic.mpc:
+        * tests/DCPS/ContentFilteredTopic/ContentFilteredTopicTest.cpp:
+        * tests/DCPS/ContentFilteredTopic/run_test.pl:
+        * tests/dcps_tests.lst:
+
+          ContentFilteredTopicTest: started adding dynamic
+
+          For now just the writer side of the primary test can be dynamic
+
+Tue Jan 17 00:14:28 UTC 2023  Adam Mitz  <mitza@objectcomputing.com>
+        commit 13836260d01c58e4061a948c7a4b5e81ece16d3c
+
+        * tests/DCPS/QueryCondition/QueryConditionTest.cpp:
+
+          style guidelines
+
+Mon Jan 16 23:44:30 UTC 2023  Adam Mitz  <mitza@objectcomputing.com>
+        commit 94f42bb8f8dc9a8a776a4baf3ae20547de443734
+
+          Merge pull request #3987 from
+          OpenDDS/dependabot/github_actions/docker/metadata-action-4.3.0
+
+          Bump docker/metadata-action from 4.1.1 to 4.3.0
+
+Mon Jan 16 23:44:19 UTC 2023  Adam Mitz  <mitza@objectcomputing.com>
+        commit a4f78ea6b70de0ed2a09f0e3c9d55c49ebb9edda
+
+          Merge pull request #3986 from
+          OpenDDS/dependabot/github_actions/docker/build-push-action-3.3.0
+
+          Bump docker/build-push-action from 3.2.0 to 3.3.0
+
+Mon Jan 16 23:44:08 UTC 2023  Adam Mitz  <mitza@objectcomputing.com>
+        commit 45d3e70691e57a658e65dd52e183d7180aacd122
+
+          Merge pull request #3982 from jrw972/opendds-691
+
+          AssociationRecord lacks unit tests
+
+Mon Jan 16 22:40:04 UTC 2023  Adam Mitz  <mitza@objectcomputing.com>
+        commit 4242aa74c62749fcf3a6ee61e0cf4c3dc7c9c5a2
+
+        * dds/DCPS/XTypes/DynamicDataXcdrReadImpl.cpp:
+
+          fixed non-content-subscription build
+
+Mon Jan 16 22:20:47 UTC 2023  Adam Mitz  <mitza@objectcomputing.com>
+        commit 42e538c07bdea22db6ff04ea8faa9908b28d2fbf
+
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/FilterEvaluator.cpp:
+        * dds/DCPS/FilterEvaluator.h:
+        * dds/DCPS/TypeSupportImpl.h:
+        * dds/DCPS/XTypes/DynamicTypeSupport.cpp:
+        * dds/DCPS/XTypes/DynamicTypeSupport.h:
+        * dds/idl/marshal_generator.cpp:
+        * dds/idl/metaclass_generator.cpp:
+        * dds/idl/ts_generator.cpp:
+        * tests/DCPS/MockedTypeSupport/MyTypeSupportImpl.cpp:
+        * tests/DCPS/MockedTypeSupport/MyTypeSupportImpl.h:
+
+          Use TypeSupport in getValue(Serializer&)
+
+          This allows the MetaStruct for DynamicSample to know which type
+          it has
+          Also added some constness
+
+Mon Jan 16 19:33:03 UTC 2023  Adam Mitz  <mitza@objectcomputing.com>
+        commit 16e34ca67882f03b011400133aff92b7cc85240e
+
+        * dds/DCPS/XTypes/DynamicDataXcdrReadImpl.cpp:
+
+          Added #include
+
+Thu Jan 12 18:11:23 UTC 2023  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 44c52d59bafd7ed4436d9dc9abb9b22b2c52da7b
+
+        * dds/DCPS/RTPS/AssociationRecord.h:
+        * dds/DCPS/RTPS/Sedp.h:
+        * tests/unit-tests/dds/DCPS/RTPS/AssociationRecord.cpp:
+
+          AssociationRecord lacks unit tests
+
+          Problem
+          -------
+
+          The AssociationRecord classes in Sedp.h don't have unit tests.
+
+          Solution
+          --------
+
+          Factor out the AssociationRecord classes and add unit tests.
+
+Mon Jan 16 17:34:52 UTC 2023  Adam Mitz  <mitza@objectcomputing.com>
+        commit 5427e929c0ea08700cee32d3137c0eade45a677f
+
+        * dds/DCPS/XTypes/DynamicDataBase.h:
+        * dds/DCPS/XTypes/DynamicDataXcdrReadImpl.cpp:
+        * dds/DCPS/XTypes/DynamicDataXcdrReadImpl.h:
+        * dds/DCPS/XTypes/DynamicTypeSupport.cpp:
+        * tests/DCPS/QueryCondition/QueryConditionTest.cpp:
+        * tests/DCPS/QueryCondition/run_test.pl:
+        * tests/dcps_tests.lst:
+
+          Content filtering based on DynamicData samples
+
+Mon Jan 16 07:11:59 UTC 2023  dependabot[bot]  <49699333+dependabot[bot]@users.noreply.github.com>
+        commit 36083f63e2a07b4a92dc69439858327640a1a8bf
+
+        * .github/workflows/docker_image.yml:
+
+          Bump docker/metadata-action from 4.1.1 to 4.3.0
+
+          Bumps
+          [docker/metadata-action](https://github.com/docker/metadata-action)
+          from 4.1.1 to 4.3.0.
+          - [Release
+          notes](https://github.com/docker/metadata-action/releases)
+          -
+          [Commits](https://github.com/docker/metadata-action/compare/57396166ad8aefe6098280995947635806a0e6ea...507c2f2dc502c992ad446e3d7a5dfbe311567a96)
+
+          ---
+          updated-dependencies:
+          - dependency-name: docker/metadata-action
+          dependency-type: direct:production
+          update-type: version-update:semver-minor
+          ...
+
+          Signed-off-by: dependabot[bot] <support@github.com>
+
+Mon Jan 16 07:11:49 UTC 2023  dependabot[bot]  <49699333+dependabot[bot]@users.noreply.github.com>
+        commit 8b1a724186289df0a246c45b83ec6a1465441fed
+
+        * .github/workflows/docker_image.yml:
+
+          Bump docker/build-push-action from 3.2.0 to 3.3.0
+
+          Bumps
+          [docker/build-push-action](https://github.com/docker/build-push-action)
+          from 3.2.0 to 3.3.0.
+          - [Release
+          notes](https://github.com/docker/build-push-action/releases)
+          -
+          [Commits](https://github.com/docker/build-push-action/compare/c56af957549030174b10d6867f20e78cfd7debc5...37abcedcc1da61a57767b7588cb9d03eb57e28b3)
+
+          ---
+          updated-dependencies:
+          - dependency-name: docker/build-push-action
+          dependency-type: direct:production
+          update-type: version-update:semver-minor
+          ...
+
+          Signed-off-by: dependabot[bot] <support@github.com>
+
+Fri Jan 13 21:27:33 UTC 2023  Adam Mitz  <mitza@objectcomputing.com>
+        commit 195701cba35cbe34b88276b5bd3863e73716317f
+
+        * dds/DCPS/ContentFilteredTopicImpl.h:
+
+          Added #include
+
+Fri Jan 13 20:58:04 UTC 2023  Adam Mitz  <mitza@objectcomputing.com>
+        commit c887f2ab861cac67074302e96bb74a25da70754b
+
+        * tests/DCPS/Compiler/C++11/idl_test1_main/main.cpp:
+        * tests/DCPS/Compiler/C++11/idl_test3_main/main.cpp:
+        * tests/DCPS/Compiler/idl_test1_main/main.cpp:
+        * tests/DCPS/Compiler/idl_test3_main/main.cpp:
+        * tests/DCPS/Compiler/key_annotation/main.cpp:
+        * tests/DCPS/MockedTypeSupport/MyTypeSupportImpl.h:
+        * tests/FACE/Compiler/idl_test1_main/main.cpp:
+        * tests/FACE/Compiler/idl_test3_main/main.cpp:
+
+          fix tests
+
+Fri Jan 13 20:37:07 UTC 2023  Adam Mitz  <mitza@objectcomputing.com>
+        commit dd10bab86aadfcc42fb8d10d2d1606cd58f15563
+
+        * dds/idl/ts_generator.cpp:
+
+          fix warnings
+
+Fri Jan 13 17:56:05 UTC 2023  Adam Mitz  <mitza@objectcomputing.com>
+        commit bb38dc68fe97320655a85b2ccc8b1f936dce570f
+
+        * dds/DCPS/ContentFilteredTopicImpl.h:
+        * dds/DCPS/DataReaderImpl_T.h:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/FilterEvaluator.cpp:
+        * dds/DCPS/FilterEvaluator.h:
+        * dds/DCPS/QueryConditionImpl.cpp:
+        * dds/DCPS/QueryConditionImpl.h:
+        * dds/DCPS/TypeSupportImpl.h:
+        * dds/DCPS/XTypes/DynamicTypeSupport.cpp:
+        * dds/DCPS/XTypes/DynamicTypeSupport.h:
+        * dds/DCPS/XTypes/Utils.cpp:
+        * dds/DCPS/XTypes/Utils.h:
+        * dds/idl/metaclass_generator.cpp:
+        * dds/idl/ts_generator.cpp:
+
+          Moved "is this field a key?" from MetaStruct to TypeSupport
+
+          This allows dynamic types to answer on a per-type basis.
+
+Fri Jan 13 00:02:36 UTC 2023  Adam Mitz  <mitza@objectcomputing.com>
+        commit bf853e05e759f88ee4fceb58fe594daa2cc9e5c7
+
+        * dds/DCPS/XTypes/DynamicTypeSupport.cpp:
+        * dds/DCPS/XTypes/Utils.cpp:
+        * dds/DCPS/XTypes/Utils.h:
+        * tests/DCPS/QueryCondition/QueryCondition.mpc:
+        * tests/DCPS/QueryCondition/QueryConditionTest.cpp:
+        * tests/DCPS/QueryCondition/rtps_disc.ini:
+
+          QueryCondition ORDER BY for DynamicDataReader
+
+Thu Jan 12 23:59:33 UTC 2023  Adam Mitz  <mitza@objectcomputing.com>
+        commit 1a7426de87e80f17d2fe80cb15a3f994fe590d28
+
+        * dds/DCPS/FilterEvaluator.h:
+        * dds/DCPS/XTypes/DynamicTypeSupport.cpp:
+        * dds/idl/metaclass_generator.cpp:
+
+          MetaStruct::compare is only used for MultiTopic
+
+Thu Jan 12 23:05:26 UTC 2023  Adam Mitz  <mitza@objectcomputing.com>
+        commit addfc31d230b90dcd57fd552a57789054497716e
+
+          Merge pull request #3972 from jrw972/opendds-247
+
+          RepoId is confusing
+
+Thu Jan 12 14:30:17 UTC 2023  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit c951358a5aa0144b17bbaad994013f98ac7a9ccb
+
+          Merge remote-tracking branch 'upstream/master' into opendds-247
+
+Tue Jan 10 18:59:05 UTC 2023  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 8b5e07953026f575a747a40d4597f6db96169828
+
+        * dds/DCPS/AssociationData.h:
+        * dds/DCPS/BitPubListenerImpl.cpp:
+        * dds/DCPS/CoherentChangeControl.cpp:
+        * dds/DCPS/CoherentChangeControl.h:
+        * dds/DCPS/CoherentChangeControl.inl:
+        * dds/DCPS/DataReaderCallbacks.h:
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DataReaderImpl_T.h:
+        * dds/DCPS/DataSampleElement.cpp:
+        * dds/DCPS/DataSampleElement.h:
+        * dds/DCPS/DataSampleElement.inl:
+        * dds/DCPS/DataSampleHeader.h:
+        * dds/DCPS/DataWriterCallbacks.h:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/DataWriterImpl.h:
+        * dds/DCPS/Discovery.cpp:
+        * dds/DCPS/Discovery.h:
+        * dds/DCPS/DiscoveryListener.h:
+        * dds/DCPS/DomainParticipantFactoryImpl.cpp:
+        * dds/DCPS/DomainParticipantImpl.cpp:
+        * dds/DCPS/DomainParticipantImpl.h:
+        * dds/DCPS/EntityImpl.h:
+        * dds/DCPS/GuidUtils.h:
+        * dds/DCPS/InfoRepoDiscovery/DataReaderRemote.idl:
+        * dds/DCPS/InfoRepoDiscovery/DataReaderRemoteImpl.cpp:
+        * dds/DCPS/InfoRepoDiscovery/DataReaderRemoteImpl.h:
+        * dds/DCPS/InfoRepoDiscovery/DataWriterRemote.idl:
+        * dds/DCPS/InfoRepoDiscovery/DataWriterRemoteImpl.cpp:
+        * dds/DCPS/InfoRepoDiscovery/DataWriterRemoteImpl.h:
+        * dds/DCPS/InfoRepoDiscovery/Info.idl:
+        * dds/DCPS/InfoRepoDiscovery/InfoRepoDiscovery.cpp:
+        * dds/DCPS/InfoRepoDiscovery/InfoRepoDiscovery.h:
+        * dds/DCPS/InstanceState.cpp:
+        * dds/DCPS/InstanceState.h:
+        * dds/DCPS/InstanceState.inl:
+        * dds/DCPS/OwnershipManager.cpp:
+        * dds/DCPS/OwnershipManager.h:
+        * dds/DCPS/PublisherImpl.cpp:
+        * dds/DCPS/PublisherImpl.h:
+        * dds/DCPS/RTPS/ICE/AgentImpl.cpp:
+        * dds/DCPS/RTPS/ICE/AgentImpl.h:
+        * dds/DCPS/RTPS/ICE/EndpointManager.cpp:
+        * dds/DCPS/RTPS/ICE/EndpointManager.h:
+        * dds/DCPS/RTPS/ICE/Ice.h:
+        * dds/DCPS/RTPS/RtpsDiscovery.cpp:
+        * dds/DCPS/RTPS/RtpsDiscovery.h:
+        * dds/DCPS/RTPS/Sedp.cpp:
+        * dds/DCPS/RTPS/Sedp.h:
+        * dds/DCPS/RTPS/Spdp.cpp:
+        * dds/DCPS/RTPS/Spdp.h:
+        * dds/DCPS/RawDataSample.cpp:
+        * dds/DCPS/RawDataSample.h:
+        * dds/DCPS/ReceivedDataElementList.h:
+        * dds/DCPS/ReceivedDataStrategy.cpp:
+        * dds/DCPS/ReceivedDataStrategy.h:
+        * dds/DCPS/Recorder.h:
+        * dds/DCPS/RecorderImpl.cpp:
+        * dds/DCPS/RecorderImpl.h:
+        * dds/DCPS/ReplayerImpl.cpp:
+        * dds/DCPS/ReplayerImpl.h:
+        * dds/DCPS/RepoIdBuilder.cpp:
+        * dds/DCPS/RepoIdBuilder.h:
+        * dds/DCPS/RepoIdConverter.cpp:
+        * dds/DCPS/RepoIdConverter.h:
+        * dds/DCPS/RepoIdGenerator.cpp:
+        * dds/DCPS/RepoIdGenerator.h:
+        * dds/DCPS/RepoIdTypes.h:
+        * dds/DCPS/Service_Participant.cpp:
+        * dds/DCPS/StaticDiscovery.cpp:
+        * dds/DCPS/StaticDiscovery.h:
+        * dds/DCPS/SubscriberImpl.cpp:
+        * dds/DCPS/SubscriberImpl.h:
+        * dds/DCPS/TopicDetails.h:
+        * dds/DCPS/TopicImpl.cpp:
+        * dds/DCPS/TopicImpl.h:
+        * dds/DCPS/WriteDataContainer.cpp:
+        * dds/DCPS/WriteDataContainer.h:
+        * dds/DCPS/WriterInfo.cpp:
+        * dds/DCPS/WriterInfo.h:
+        * dds/DCPS/security/framework/HandleRegistry.cpp:
+        * dds/DCPS/security/framework/HandleRegistry.h:
+        * dds/DCPS/security/framework/SecurityConfig.h:
+        * dds/DCPS/transport/framework/DataLink.cpp:
+        * dds/DCPS/transport/framework/DataLink.h:
+        * dds/DCPS/transport/framework/DataLink.inl:
+        * dds/DCPS/transport/framework/DataLinkSet.cpp:
+        * dds/DCPS/transport/framework/DataLinkSet.h:
+        * dds/DCPS/transport/framework/DataLinkSet.inl:
+        * dds/DCPS/transport/framework/ReceiveListenerSet.cpp:
+        * dds/DCPS/transport/framework/ReceiveListenerSet.h:
+        * dds/DCPS/transport/framework/ReceiveListenerSet.inl:
+        * dds/DCPS/transport/framework/ReceiveListenerSetMap.cpp:
+        * dds/DCPS/transport/framework/ReceiveListenerSetMap.h:
+        * dds/DCPS/transport/framework/ReceiveListenerSetMap.inl:
+        * dds/DCPS/transport/framework/SendResponseListener.h:
+        * dds/DCPS/transport/framework/TransportClient.cpp:
+        * dds/DCPS/transport/framework/TransportClient.h:
+        * dds/DCPS/transport/framework/TransportControlElement.h:
+        * dds/DCPS/transport/framework/TransportControlElement.inl:
+        * dds/DCPS/transport/framework/TransportCustomizedElement.h:
+        * dds/DCPS/transport/framework/TransportCustomizedElement.inl:
+        * dds/DCPS/transport/framework/TransportImpl.h:
+        * dds/DCPS/transport/framework/TransportInst.h:
+        * dds/DCPS/transport/framework/TransportQueueElement.cpp:
+        * dds/DCPS/transport/framework/TransportQueueElement.h:
+        * dds/DCPS/transport/framework/TransportReassembly.cpp:
+        * dds/DCPS/transport/framework/TransportReassembly.h:
+        * dds/DCPS/transport/framework/TransportReplacedElement.h:
+        * dds/DCPS/transport/framework/TransportReplacedElement.inl:
+        * dds/DCPS/transport/framework/TransportRetainedElement.cpp:
+        * dds/DCPS/transport/framework/TransportRetainedElement.h:
+        * dds/DCPS/transport/framework/TransportRetainedElement.inl:
+        * dds/DCPS/transport/framework/TransportSendBuffer.cpp:
+        * dds/DCPS/transport/framework/TransportSendBuffer.h:
+        * dds/DCPS/transport/framework/TransportSendControlElement.cpp:
+        * dds/DCPS/transport/framework/TransportSendControlElement.h:
+        * dds/DCPS/transport/framework/TransportSendElement.cpp:
+        * dds/DCPS/transport/framework/TransportSendElement.h:
+        * dds/DCPS/transport/framework/TransportSendListener.h:
+        * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
+        * dds/DCPS/transport/framework/TransportSendStrategy.h:
+        * dds/DCPS/transport/multicast/MulticastDataLink.cpp:
+        * dds/DCPS/transport/multicast/MulticastDataLink.h:
+        * dds/DCPS/transport/multicast/MulticastSession.cpp:
+        * dds/DCPS/transport/multicast/MulticastSession.h:
+        * dds/DCPS/transport/multicast/MulticastTransport.cpp:
+        * dds/DCPS/transport/multicast/MulticastTransport.h:
+        * dds/DCPS/transport/multicast/ReliableSession.cpp:
+        * dds/DCPS/transport/multicast/ReliableSession.h:
+        * dds/DCPS/transport/rtps_udp/MetaSubmessage.h:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.h:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpInst.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpInst.h:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpReceiveStrategy.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpReceiveStrategy.h:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpSendStrategy.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpSendStrategy.h:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpTransport.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpTransport.h:
+        * dds/DCPS/transport/rtps_udp/TransactionalRtpsSendQueue.cpp:
+        * dds/DCPS/transport/rtps_udp/TransactionalRtpsSendQueue.h:
+        * dds/DCPS/transport/shmem/ShmemTransport.cpp:
+        * dds/DCPS/transport/shmem/ShmemTransport.h:
+        * dds/DCPS/transport/tcp/TcpDataLink.cpp:
+        * dds/DCPS/transport/tcp/TcpDataLink.h:
+        * dds/DCPS/transport/tcp/TcpTransport.cpp:
+        * dds/DCPS/transport/tcp/TcpTransport.h:
+        * dds/DCPS/transport/udp/UdpTransport.cpp:
+        * dds/DCPS/transport/udp/UdpTransport.h:
+        * dds/DdsDcpsInfoUtils.idl:
+        * dds/FACE/FaceTSS.cpp:
+        * dds/FACE/FaceTSS.h:
+        * dds/FACE/config/Parser.cpp:
+        * dds/InfoRepo/DCPSInfo_i.cpp:
+        * dds/InfoRepo/DCPSInfo_i.h:
+        * dds/InfoRepo/DCPS_IR_Domain.cpp:
+        * dds/InfoRepo/DCPS_IR_Domain.h:
+        * dds/InfoRepo/DCPS_IR_Participant.cpp:
+        * dds/InfoRepo/DCPS_IR_Participant.h:
+        * dds/InfoRepo/DCPS_IR_Publication.cpp:
+        * dds/InfoRepo/DCPS_IR_Publication.h:
+        * dds/InfoRepo/DCPS_IR_Subscription.cpp:
+        * dds/InfoRepo/DCPS_IR_Subscription.h:
+        * dds/InfoRepo/DCPS_IR_Topic.cpp:
+        * dds/InfoRepo/DCPS_IR_Topic.h:
+        * dds/InfoRepo/FederatorManagerImpl.cpp:
+        * dds/InfoRepo/UpdateDataTypes.h:
+        * dds/monitor/DRMonitorImpl.cpp:
+        * dds/monitor/DRPeriodicMonitorImpl.cpp:
+        * dds/monitor/DWMonitorImpl.cpp:
+        * dds/monitor/DWPeriodicMonitorImpl.cpp:
+        * examples/DCPS/DistributedContent/AbstractionLayer.cpp:
+        * tests/DCPS/BuiltInTopic/common.cpp:
+        * tests/DCPS/BuiltInTopic/main.cpp:
+        * tests/DCPS/BuiltInTopicTest/monitor.cpp:
+        * tests/DCPS/DCPSInfoRepo/DCPSDataReaderI.cpp:
+        * tests/DCPS/DCPSInfoRepo/DCPSDataReaderI.h:
+        * tests/DCPS/DCPSInfoRepo/DCPSDataWriterI.cpp:
+        * tests/DCPS/DCPSInfoRepo/DCPSDataWriterI.h:
+        * tests/DCPS/DCPSInfoRepo/pubsub.cpp:
+        * tests/DCPS/FindTopic/LocalDiscovery.cpp:
+        * tests/DCPS/FindTopic/LocalDiscovery.h:
+        * tests/DCPS/FooTest3_0/PubDriver.cpp:
+        * tests/DCPS/FooTest3_0/SubDriver.h:
+        * tests/DCPS/FooTest3_2/SubDriver.h:
+        * tests/DCPS/MockedTypeSupport/MockedTypeSupport.cpp:
+        * tests/DCPS/Observer/TestObserver.cpp:
+        * tests/DCPS/ParticipantLocationTopic/ParticipantLocationListenerImpl.cpp:
+        * tests/DCPS/ParticipantLocationTopic/ParticipantLocationListenerImpl.h:
+        * tests/DCPS/RtpsDiscovery/RtpsDiscoveryTest.cpp:
+        * tests/DCPS/StaticDiscovery/StaticDiscoveryTest.cpp:
+        * tests/DCPS/Thrasher/Publisher.cpp:
+        * tests/DCPS/Thrasher/Subscriber.cpp:
+        * tests/FACE/Header/Publisher/Publisher.cpp:
+        * tests/transport/RtpsUtils.h:
+        * tests/transport/best_effort_reader/AppConfig.cpp:
+        * tests/transport/best_effort_reader/AppConfig.h:
+        * tests/transport/best_effort_reader/SimpleDataReader.cpp:
+        * tests/transport/best_effort_reader/SimpleDataReader.h:
+        * tests/transport/best_effort_reader/SocketWriter.cpp:
+        * tests/transport/best_effort_reader/SocketWriter.h:
+        * tests/transport/error_handling/SimpleTransportClient.h:
+        * tests/transport/rtps/publisher.cpp:
+        * tests/transport/rtps/subscriber.cpp:
+        * tests/transport/rtps_directed_write/AppConfig.cpp:
+        * tests/transport/rtps_directed_write/AppConfig.h:
+        * tests/transport/rtps_directed_write/publisher.cpp:
+        * tests/transport/rtps_directed_write/subscriber.cpp:
+        * tests/transport/rtps_reliability/rtps_reliability.cpp:
+        * tests/transport/simple/PubDriver.h:
+        * tests/transport/simple/SimpleDataReader.cpp:
+        * tests/transport/simple/SimpleDataReader.h:
+        * tests/transport/simple/SimpleDataWriter.cpp:
+        * tests/transport/simple/SimpleDataWriter.h:
+        * tests/transport/simple/SubDriver.h:
+        * tests/transport/spdp/spdp_transport.cpp:
+        * tests/unit-tests/dds/DCPS/AddressCache.cpp:
+        * tests/unit-tests/dds/DCPS/DomainParticipantImpl.cpp:
+        * tests/unit-tests/dds/DCPS/transport/framework/TransportReassembly.cpp:
+        * tools/dissector/giop_base.cpp:
+        * tools/dissector/giop_base.h:
+        * tools/dissector/packet-repo.cpp:
+        * tools/dissector/packet-repo.h:
+        * tools/monitor/MonitorDataStorage.inl:
+
+          RepoId is confusing
+
+          Problem
+          -------
+
+          Usage of both RepoId and GUID_t causes confusion.
+
+          Solution
+          --------
+
+          Remove RepoId.
+
+Thu Jan 12 14:19:41 UTC 2023  Adam Mitz  <mitza@objectcomputing.com>
+        commit 00eccfca0d0a2326a12fbb7ce113ffa039e7ffe4
+
+          Merge pull request #3968 from OpenDDS/OPENDDS-690-type-lookup
+
+          Type lookup using IDL
+
+Wed Jan 11 22:24:15 UTC 2023  Adam Mitz  <mitza@objectcomputing.com>
+        commit 62873bff21619ba7e74eaef0f3465dd229dd3ab1
+
+          Merge pull request #3973 from mitza-oci/dynamicdatareader
+
+          DynamicDataReaderImpl: Some older compilers need the export macro
+          here
+
+Wed Jan 11 22:23:59 UTC 2023  Adam Mitz  <mitza@objectcomputing.com>
+        commit 748d09b192fbbeca95130b3f6fcbe49d152cebc4
+
+          Merge pull request #3967 from mitza-oci/gha-vcpkg
+
+          GitHub Actions: use a newer vcpkgGitCommitId
+
+Wed Jan 11 19:49:48 UTC 2023  Chad Elliott  <elliottc@objectcomputing.com>
+        commit 77f764a1b4cf89c3d4fdcf16f2a79943a30d350f
+
+        * dds/DCPS/RTPS/Sedp.cpp:
+        * dds/DCPS/RTPS/Sedp.h:
+
+          Corrected the sign of parameters to match the idl generated
+          types.
+
+Wed Jan 11 15:45:09 UTC 2023  Adam Mitz  <mitza@objectcomputing.com>
+        commit 25b8fded08a63110b79f2e20e37b956be90a4e8c
+
+        * dds/DCPS/XTypes/DynamicDataReaderImpl.h:
+
+          Some older compilers need the export macro here
+
+Tue Jan 10 19:09:00 UTC 2023  Chad Elliott  <elliottc@objectcomputing.com>
+        commit 2e5b4f8d0293f8c32094d8e27686f1d6ec0793eb
+
+        * dds/DCPS/RTPS/rtps.mpc:
+
+          Suppress type code generation explicitly, since turning off the
+          dds_suppress_anys feature enables type code generation.
+
+Tue Jan 10 18:43:36 UTC 2023  Chad Elliott  <elliottc@objectcomputing.com>
+        commit 85212ea8628702d8c892307d29b072994eab5157
+
+        * dds/DCPS/RTPS/TypeLookup.idl:
+        * dds/DCPS/XTypes/TypeObject.idl:
+
+          Removed data structures from TypeObject that were not necessary
+          for processing of TypeLookup.idl and marked the
+          TypeLookup_Request and TypeLookup_Reply structs as final.
+
+Tue Jan 10 16:58:38 UTC 2023  Chad Elliott  <elliottc@objectcomputing.com>
+        commit 7e08dec42b117faa3bc728aef12e85ce885559a0
+
+        * dds/DCPS/RTPS/TypeLookup.idl:
+
+          Corrected the annotation for TypeLookup_Reply.
+
+Mon Jan 09 17:44:38 UTC 2023  Adam Mitz  <mitza@objectcomputing.com>
+        commit 8664ee37a8a22741dda2e58330d30b06cbdf729a
+
+        * .github/workflows/build_and_test.yml:
+
+          GitHub Actions: use a newer vcpkgGitCommitId
+
+Tue Jan 10 15:38:30 UTC 2023  Chad Elliott  <elliottc@objectcomputing.com>
+        commit 900872bd38eaf9cfbf297fa69c59b90c8bf0a0b0
+
+        * dds/DCPS/XTypes/TypeObjectC.h:
+
+          Corrected include guard.
+
+Tue Jan 10 13:52:26 UTC 2023  Adam Mitz  <mitza@objectcomputing.com>
+        commit f5046a4fa43c01246da0784ff94a29ae891c5d77
+
+          Merge pull request #3970 from iguessthislldo/igtd/art-fixes
+
+          Fixes for `auto_run_tests.pl`
+
+Tue Jan 10 13:52:15 UTC 2023  Adam Mitz  <mitza@objectcomputing.com>
+        commit ac253c62aa7f33facf488ede23213ff5e385ee78
+
+          Merge pull request #3969 from
+          simpsont-oci/avoid_duplicate_test_names
+
+          Avoid Duplicate Test Names In Test Lists
+
+Tue Jan 10 13:52:00 UTC 2023  Adam Mitz  <mitza@objectcomputing.com>
+        commit b3b054dda2d3e1aa2f6a76ad559c8830bca30813
+
+          Merge pull request #3966 from mitza-oci/dynamicreader-compat
+
+          DynamicDataReaderImpl: inline dynamic_hook function
+
+Tue Jan 10 13:51:47 UTC 2023  Adam Mitz  <mitza@objectcomputing.com>
+        commit 87ccc023830ace7dfe063edf23a282cd77474d45
+
+          Merge pull request #3965 from mitza-oci/newurl
+
+          Updated repository URLs to the OpenDDS GitHub org
+
+Tue Jan 10 13:37:39 UTC 2023  Chad Elliott  <elliottc@objectcomputing.com>
+        commit 1d9de649991f54f18e00291dfc7bb1c820f686a2
+
+        * dds/DCPS/RTPS/TypeLookup.cpp:
+
+          Replaced some of the hard-coded numbers with IDL generated
+          symbols.
+
+Tue Jan 10 13:37:07 UTC 2023  Chad Elliott  <elliottc@objectcomputing.com>
+        commit e8e661106fd249eb7734a3bef9f4834891ff1caf
+
+        * dds/DCPS/RTPS/TypeLookup.idl:
+        * dds/DCPS/XTypes/TypeObject.idl:
+        * dds/DCPS/XTypes/TypeObjectC.h:
+
+          Added include guards.
+
+Tue Jan 10 00:25:14 UTC 2023  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit 9b4efd80ef1d18ed92ae3eca2d65d1cc67dbf99b
+
+        * docs/internal/running_tests.rst:
+        * tests/auto_run_tests.pl:
+        * tools/scripts/modules/command_utils.pm:
+
+          Minor Fixes for `auto_run_tests.pl`
+
+          - ConfigList in PerlACE can't properly handle multiple entries
+          with the
+          same commands and run all the entries based on the last one's
+          configs.
+          This adds a warning to detect when that happened. It also makes
+          note
+          of it in the The particular case
+          will be fixed by:
+          https://github.com/OpenDDS/OpenDDS/pull/3969
+          - --dry-run/-z was being ignored because inside run_command the
+          dry_run
+          option was dependent on the verbose option. Changed this so they
+          can
+          be set separately, which is what configure is trying to do.
+          auto_run_test.pl will still set them both based on --dry-run/-z.
+          - Builtin test list options were being ignored with
+          --no-auto-config.
+
+Mon Jan 09 23:52:06 UTC 2023  Timothy Simpson  <simpsont@objectcomputing.com>
+        commit e2b4de44052ee601a282d4c7dce46a1837a5e56d
+
+        * tests/dcps_tests.lst:
+
+          Avoid Duplicate Test Names In Test Lists
+
+Mon Jan 09 19:53:56 UTC 2023  Chad Elliott  <elliottc@objectcomputing.com>
+        commit c39b59eaf89a1109ea7858b8469fd8c85d997a44
+
+        * dds/DCPS/RTPS/TypeLookup.cpp:
+
+          Replaced hard-coded values with IDL generated symbol.
+
+Mon Jan 09 19:19:44 UTC 2023  Chad Elliott  <elliottc@objectcomputing.com>
+        commit 94c62e92d99968fe8135a5d4a8529f627587ce06
+
+        * dds/DCPS/RTPS/.gitignore:
+        * dds/DCPS/RTPS/Sedp.cpp:
+        * dds/DCPS/RTPS/TypeLookup.cpp:
+        * dds/DCPS/RTPS/TypeLookup.h:
+        * dds/DCPS/RTPS/TypeLookup.idl:
+        * dds/DCPS/RTPS/rtps.mpc:
+        * dds/DCPS/XTypes/TypeObject.idl:
+        * dds/DCPS/XTypes/TypeObjectC.h:
+
+          Initial set of changes to replace TypeLookup.h with IDL.
+
+Mon Jan 09 16:05:19 UTC 2023  Adam Mitz  <mitza@objectcomputing.com>
+        commit 9c68a9becd4fd29ff73b1a45ea807d5448c3cffa
+
+        * dds/DCPS/XTypes/DynamicDataReaderImpl.cpp:
+        * dds/DCPS/XTypes/DynamicDataReaderImpl.h:
+
+          DynamicDataReaderImpl: inline dynamic_hook function
+
+          Some older compilers need to see this inlined
+
+Mon Jan 09 15:36:46 UTC 2023  Adam Mitz  <mitza@objectcomputing.com>
+        commit 6df575ec5ba0e932dca3044429d4816aaedec3dc
+
+        * .gitmodules:
+        * README.md:
+        * dds/DCPS/Serializer.inl:
+        * dds/idl/marshal_generator.cpp:
+        * docs/internal/dev_guidelines.rst:
+        * docs/sphinx_extensions/github_links.py:
+        * tests/DCPS/Compiler/idl_test1_lib/FooDef.idl:
+        * tests/DCPS/FooTest3_0/PubDriver.cpp:
+        * tests/DCPS/FooTest4/Reader.cpp:
+        * tests/DCPS/MultiTopic/MultiTopicTest.cpp:
+        * tests/cmake/Messenger/Messenger_1/CMakeLists.txt:
+        * tests/cmake/Messenger/Messenger_Space/CMakeLists.txt:
+        * tools/dissector/README.md:
+        * tools/modeling/README.dev:
+        * tools/scripts/release_notes/README.md:
+        * tools/scripts/release_notes/get_pr_info.sh:
+        * tools/scripts/release_notes/mkcsv.py:
+
+          Updated repository URLs to the OpenDDS GitHub org
+
+Fri Jan 06 22:48:55 UTC 2023  Adam Mitz  <mitza@objectcomputing.com>
+        commit c6d255be5b8c22f9014b9fc968d6c870855e315d
+
+          Merge pull request #3962 from mitza-oci/ishapes-gha
+
+          GitHub Actions updates for ishapes demo
+
+Fri Jan 06 22:48:48 UTC 2023  Adam Mitz  <mitza@objectcomputing.com>
+        commit 89f299e6763bcdb0d3e3f311198788292656b65a
+
+          Merge pull request #3963 from mitza-oci/dynamictypesupport
+
+          Refactored the DynamicTypeSupport header and source files
+
+Fri Jan 06 17:56:20 UTC 2023  Adam Mitz  <mitza@objectcomputing.com>
+        commit c23980e752bbd37b3fd7721cc001311c2b0ca3e2
+
+        * dds/DCPS/XTypes/DynamicTypeSupport.h:
+
+          Added forward declarations needed to build
+
+Fri Jan 06 17:44:40 UTC 2023  Adam Mitz  <mitza@objectcomputing.com>
+        commit d99d8122501e98b2d5d4c46c816b28d96693e64f
+
+        * dds/DCPS/XTypes/DynamicSample.cpp:
+
+          fixed versioned namespace
+
+Fri Jan 06 17:11:51 UTC 2023  Adam Mitz  <mitza@objectcomputing.com>
+        commit 4118bb9364854534ff22435d908d5564538fad2a
+
+        * dds/DCPS/XTypes/DynamicDataReaderImpl.cpp:
+        * dds/DCPS/XTypes/DynamicDataReaderImpl.h:
+        * dds/DCPS/XTypes/DynamicDataWriterImpl.h:
+        * dds/DCPS/XTypes/DynamicSample.cpp:
+        * dds/DCPS/XTypes/DynamicSample.h:
+        * dds/DCPS/XTypes/DynamicTypeSupport.cpp:
+        * dds/DCPS/XTypes/DynamicTypeSupport.h:
+
+          Refactored the DynamicTypeSupport header and source files
+
+          Moved DynamicSample and the dynamic DW and DR to their own files.
+
+Thu Jan 05 15:33:48 UTC 2023  Adam Mitz  <mitza@objectcomputing.com>
+        commit fb37624f14ef6543629813698db52fb4ed5b196d
+
+        * .github/workflows/ishapes.yml:
+
+          GitHub Actions updates for ishapes demo:
+
+          - no need to set up env vars that are never used
+          - updated gcc-problem-matcher action dependency
+          - use Windows 2022 base image
+          - updated run-vcpkg action dependency
+          - updated vcpkg version used by run-vcpkg
+
+Thu Jan 05 22:36:48 UTC 2023  Adam Mitz  <mitza@objectcomputing.com>
+        commit 8413bf5b4a0995db57395c88322fff4b55a7b6bc
+
+          Merge pull request #3960 from mitza-oci/master
+
+          Updated README.md
+
+Thu Jan 05 22:36:40 UTC 2023  Adam Mitz  <mitza@objectcomputing.com>
+        commit 3bdd41ae8052ef101f2471fff1b203d080f4a521
+
+          Merge pull request #3958 from jrw972/opendds-549
+
+          Code has references to Sun and Solaris
+
+Tue Jan 03 20:47:25 UTC 2023  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 8fc560dd2bef33b151faa222aa04b79143b35687
+
+        * FACE/TS_common.hpp:
+        * INSTALL.md:
+        * configure:
+        * dds/DCPS/SafetyProfileSequence.h:
+        * dds/DCPS/SendStateDataSampleList.h:
+        * dds/DCPS/StaticDiscovery.cpp:
+        * dds/DCPS/transport/framework/TransportInst.cpp:
+        * dds/DCPS/unique_ptr.h:
+        * dds/InfoRepo/FederatorManagerImpl.h:
+        * dds/idl/langmap_generator.cpp:
+        * java/README:
+        * java/build_scripts/jni_check.pl:
+        * java/jms/native/build.xml:
+        * tests/DCPS/BuiltInTopic/main.cpp:
+        * tests/DCPS/ConfigTransports/run_test.pl:
+        * tests/DCPS/FooTest3_0/PubDriver.cpp:
+        * tests/DCPS/ManyToMany/subscriber.cpp:
+        * tests/DCPS/Priority/run_test.pl:
+        * tests/DCPS/Priority/transport_solaris.ini:
+        * tests/transport/rtps_reliability/rtps_reliability.cpp:
+        * tests/unit-tests/FACE/Sequence.cpp:
+        * tools/scripts/run_dds.pl:
+
+          Code has references to Sun and Solaris
+
+          Problem
+          -------
+
+          Sun and Solaris are no longer supported.
+
+          Solution
+          --------
+
+          Remove references to Sun and Solaris.
+
+Tue Jan 03 23:02:29 UTC 2023  Adam Mitz  <mitza@objectcomputing.com>
+        commit 80dcee6c3996ecafa5a1c26ee96dacf5d1aae4c5
+
+        * README.md:
+
+          Updated README.md
+
+Tue Jan 03 22:54:55 UTC 2023  Adam Mitz  <mitza@objectcomputing.com>
+        commit 090dd0dffadf34368b61f29239ab2d06d4ab117a
+
+          Merge pull request #3959 from jrw972/opendds-747
+
+          Upgrade ishapes workflow to Ubuntu 22
+
+Tue Jan 03 22:53:41 UTC 2023  Adam Mitz  <mitza@objectcomputing.com>
+        commit f88be05050ce1e03dff52566c6f0b31d1639025c
+
+          Merge pull request #3957 from jrw972/remove-docker-quickstart
+
+          Remove unmaintained Docker quickstart
+
+Tue Jan 03 22:53:28 UTC 2023  Adam Mitz  <mitza@objectcomputing.com>
+        commit 39505c7249850e7609fd706122c6a3f911eeb10e
+
+          Merge pull request #3955 from
+          objectcomputing/OPENDDS-744-transport-client
+
+          Check for null pointer when sending a data sample
+
+Tue Jan 03 20:52:57 UTC 2023  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit f8c243daff4e0b2b7164c6954969aedea173ecb8
+
+        * .github/workflows/ishapes.yml:
+
+          Upgrade ishapes workflow to Ubuntu 22
+
+Tue Jan 03 18:03:26 UTC 2023  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit d23773638085c53db913d829aa4924f052d83fd4
+
+        * README.md:
+        * docs/docker.md:
+
+          Remove unmaintained Docker quickstart
+
+Tue Jan 03 17:10:56 UTC 2023  Adam Mitz  <mitza@objectcomputing.com>
+        commit c0196a11745c93c1e206a4a92f5c4668488c0e64
+
+          Merge pull request #3952 from sonndinh/dynamicdata_getbasetype
+
+          Add missing calls to get_base_type to DynamicDataXcdrReadImpl
+
+Tue Jan 03 17:08:37 UTC 2023  Chad Elliott  <elliottc@objectcomputing.com>
+        commit 562d8cca40015f77462fdbc4be8b35b0c47f44d5
+
+        * dds/DCPS/transport/framework/TransportClient.cpp:
+
+          Check for null pointer when sending a data sample in
+          TransportClient::send_i
+
+Sun Jan 01 16:44:35 UTC 2023  Son Dinh  <dinhs@objectcomputing.com>
+        commit 5b761d35e504a0b0785dd35eb3a6efb11b84b021
+
+        * dds/DCPS/XTypes/DynamicDataXcdrReadImpl.cpp:
+
+          Get base element type for sequence and array
+
+Thu Dec 22 15:33:01 UTC 2022  Timothy Simpson  <simpsont@objectcomputing.com>
+        commit 0ee84abadc2a916e3240054f05405d941e75b3b6
+
+          Merge pull request #3950 from jwillemsen/jwi-acetaoversions
+
+          Updated ACE/TAO versions as used by the configure script
+
+Thu Dec 22 15:32:49 UTC 2022  Timothy Simpson  <simpsont@objectcomputing.com>
+        commit 5a298d782b8e4e73e74d508a7e055a2f53cac64b
+
+          Merge pull request #3949 from mitza-oci/master
+
+          Update test list and a log message
+
+Thu Dec 22 15:32:23 UTC 2022  Timothy Simpson  <simpsont@objectcomputing.com>
+        commit df153825d1919c089a740fb8acd17cd7e02860d2
+
+          Merge pull request #3946 from
+          simpsont-oci/misc_data_reader_rch_cleanup
+
+          Misc Cleanup For Reference Counting Of DataReaders
+
+Thu Dec 22 08:13:32 UTC 2022  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit 544509d9ac35a258691be8eae10630b335257ccd
+
+        * README.md:
+
+          Updated ACE/TAO versions as used by the configure script
+
+          * README.md:
+
+Wed Dec 21 19:07:42 UTC 2022  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit 7b43f1105d20dca93b1ad46c4fdca2b6c4d7228f
+
+        * NEWS.md:
+        * PROBLEM-REPORT-FORM:
+        * VERSION.txt:
+        * dds/Version.h:
+
+          OpenDDS Post Release 3.23.0
+
+Wed Dec 21 15:07:54 UTC 2022  Adam Mitz  <mitza@objectcomputing.com>
+        commit 0d7ecafc13f7b061213b183a461eaf95e580c56a
+
+        * tests/dcps_tests.lst:
+
+          DynamicResponse test needs Ownership Profile
+
+Wed Dec 21 15:05:05 UTC 2022  Adam Mitz  <mitza@objectcomputing.com>
+        commit e5afe5b78e34b99195a7a6b3f17068286851e69a
+
+        * dds/DCPS/RTPS/GuidGenerator.cpp:
+
+          log messages need to end in \n
+
+Tue Dec 20 21:37:24 UTC 2022  Timothy Simpson  <simpsont@objectcomputing.com>
+
+        * dds/DCPS/DataReaderImpl_T.h:
+        * dds/DCPS/InstanceState.cpp:
+        * dds/DCPS/InstanceState.h:
+        * dds/DCPS/LinuxNetworkConfigMonitor.h:
+        * dds/DCPS/ReceivedDataElementList.cpp:
+        * dds/DCPS/ReceivedDataElementList.h:
+        * dds/DCPS/SubscriptionInstance.cpp:
+        * dds/DCPS/SubscriptionInstance.h:
+
+          Misc Cleanup For Reference Counting Of DataReaders
+
+Local Variables:
+mode: change-log
+add-log-time-format: (lambda () (progn (setq tz (getenv "TZ")) (set-time-zone-rule "UTC") (setq time (format-time-string "%a %b %e %H:%M:%S %Z %Y" (current-time))) (set-time-zone-rule tz) time))
+indent-tabs-mode: nil
+End:

@@ -1,16 +1,185 @@
 # OpenDDS Releases
 
-## Version 3.24.0 of OpenDDS
-OpenDDS 3.24.0 is currently in development, so this list might change.
+## Version 3.25.0 of OpenDDS
 
-### Additions:
-- TODO: Add your features here
+Released 2023-07-20
+
+Download [this release on GitHub](https://github.com/OpenDDS/OpenDDS/releases/tag/DDS-3.25).
+
+Read [the documenation for this release on Read the Docs](https://opendds.readthedocs.io/en/dds-3.25).
+
+### Additions
+
+* The Observer interface now has support for dispose and unregister. ([PR #4137](https://github.com/OpenDDS/OpenDDS/pull/4137))
+* OpenDDS now stores configuration information in a key-value store. ([PR #4138](https://github.com/OpenDDS/OpenDDS/pull/4138), [PR #4134](https://github.com/OpenDDS/OpenDDS/pull/4134), [PR #4151](https://github.com/OpenDDS/OpenDDS/pull/4151))
+    * Configuration values can be set via API, config file, or command line.
+
+        * Currently applies to the common section and common transport configuration.
+
+* Added `encode_to_string`, `encode_to_bytes`, `decode_from_string`, and `decode_from_bytes` to `TypeSupport`. ([PR #4144](https://github.com/OpenDDS/OpenDDS/pull/4144), [PR #4122](https://github.com/OpenDDS/OpenDDS/pull/4122), [PR #4133](https://github.com/OpenDDS/OpenDDS/pull/4133), [PR #4135](https://github.com/OpenDDS/OpenDDS/pull/4135))
+    * These methods convert samples to and from other formats.
+    * Currently only `OpenDDS::DCPS::JSON_DATA_REPRESENTATION` is supported.
+
+* Add `-Gequality` option to opendds_idl to generate `==` and `!=` for structs and unions. ([PR #4154](https://github.com/OpenDDS/OpenDDS/pull/4154))
+    * The members of the struct or union must have a type that could appear in a DDS topic and be supported by opendds_idl.
+    * The motivation for this change was to make the generated code more useful as many users go on to define these operators.
+
+* CMake Config Package
+
+    * Added [executable targets](https://opendds.readthedocs.io/en/dds-3.25/building/cmake.html#cmake-executables). ([PR #4160](https://github.com/OpenDDS/OpenDDS/pull/4160))
+    * [`OPENDDS_CMAKE_VERBOSE`](https://opendds.readthedocs.io/en/dds-3.25/building/cmake.html#var-OPENDDS_CMAKE_VERBOSE) output has been expanded, but now accepts a list of categories to control how much is logged. ([PR #4160](https://github.com/OpenDDS/OpenDDS/pull/4160))
+    * Added [`opendds_export_header`](https://opendds.readthedocs.io/en/dds-3.25/building/cmake.html#func-opendds_export_header) to generate an export header. ([PR #4160](https://github.com/OpenDDS/OpenDDS/pull/4160))
+    * [`opendds_target_sources`](https://opendds.readthedocs.io/en/dds-3.25/building/cmake.html#func-opendds_target_sources):
+        * Added [`opendds_target_sources(GENERATE_SERVER_SKELETONS)`](https://opendds.readthedocs.io/en/dds-3.25/building/cmake.html#func-arg-opendds_target_sources-GENERATE_SERVER_SKELETONS) to allow `tao_idl` to generate code for CORBA servers. ([PR #4140](https://github.com/OpenDDS/OpenDDS/pull/4140))
+        * Added [`opendds_target_sources(AUTO_LINK)`](https://opendds.readthedocs.io/en/dds-3.25/building/cmake.html#func-arg-opendds_target_sources-AUTO_LINK) as a fine-grained version of [`OPENDDS_AUTO_LINK_DCPS`](https://opendds.readthedocs.io/en/dds-3.25/building/cmake.html#var-OPENDDS_AUTO_LINK_DCPS). ([PR #4140](https://github.com/OpenDDS/OpenDDS/pull/4140))
+        * Added [`opendds_target_sources(SKIP_TAO_IDL)`](https://opendds.readthedocs.io/en/dds-3.25/building/cmake.html#func-arg-opendds_target_sources-SKIP_TAO_IDL) to disable `tao_idl`. ([PR #4140](https://github.com/OpenDDS/OpenDDS/pull/4140))
+        * Added [`opendds_target_sources(SKIP_OPENDDS_IDL)`](https://opendds.readthedocs.io/en/dds-3.25/building/cmake.html#func-arg-opendds_target_sources-SKIP_OPENDDS_IDL) to disable `opendds_idl`. ([PR #4140](https://github.com/OpenDDS/OpenDDS/pull/4140))
+        * Added [`opendds_target_sources(USE_EXPORT)`](https://opendds.readthedocs.io/en/dds-3.25/building/cmake.html#func-arg-opendds_target_sources-USE_EXPORT) to allow overriding the generated export header with an existing one. ([PR #4160](https://github.com/OpenDDS/OpenDDS/pull/4160))
+
+    * Libraries and features can be passed to `find_package(OpenDDS COMPONENTS)` to change what is required. ([PR #4160](https://github.com/OpenDDS/OpenDDS/pull/4160), [PR #4140](https://github.com/OpenDDS/OpenDDS/pull/4140))
+
+        * See [Components](https://opendds.readthedocs.io/en/dds-3.25/building/cmake.html#cmake-components) for details.
+
+### Security
+
+* Fixed null pointer exception caused by RTPS Parameters with incorrect zero size. ([PR #4197](https://github.com/OpenDDS/OpenDDS/pull/4197))
+
+### Fixes
+
+* CMake Config Package
+    * Made linking dependencies and macro definitions closer match using MPC with OpenDDS and TAO. ([PR #4140](https://github.com/OpenDDS/OpenDDS/pull/4140))
+    * Fixed issues with passing `OPENDDS_IDL_OPTIONS -SI` to `opendds_target_sources`. ([PR #4140](https://github.com/OpenDDS/OpenDDS/pull/4140))
+
+* Fixed issue deserializing bounded sequences with JSON ([PR #4150](https://github.com/OpenDDS/OpenDDS/pull/4150))
+    * The deserialization will fail if the JSON input contains more elements than the bounded sequence can hold.
+
+* Updated the RtpsRelay's tracking of client IP addresses so they are removed when no longer used. ([PR #4202](https://github.com/OpenDDS/OpenDDS/pull/4202))
+
+    * The RtpsRelay configuration option -MaxAddrSetSize was renamed to -MaxIpsPerClient
+
+### Documentation
+
+* Moved various markdown files into the Sphinx documentation so that they are now included along with the Developer's Guide: ([PR #4139](https://github.com/OpenDDS/OpenDDS/pull/4139))
+    * `INSTALL.md` is now [Building and Installing](https://opendds.readthedocs.io/en/dds-3.25/building/index.html).
+    * `docs/dependencies.md` is now [Dependencies](https://opendds.readthedocs.io/en/dds-3.25/building/dependencies.html).
+    * `docs/cmake.md` is now [Using OpenDDS in a CMake Project](https://opendds.readthedocs.io/en/dds-3.25/building/cmake.html).
+    * `docs/android.md` is now [Android](https://opendds.readthedocs.io/en/dds-3.25/building/android.html).
+    * `docs/ios.md` is now [iOS](https://opendds.readthedocs.io/en/dds-3.25/building/ios.html).
+
+* Restructured how the documentation is presented to cleanly separate the Developer's Guide and internal documentation. ([PR #4139](https://github.com/OpenDDS/OpenDDS/pull/4139))
+* Added a [proper main page](https://opendds.readthedocs.io/en/dds-3.25/index.html). ([PR #4139](https://github.com/OpenDDS/OpenDDS/pull/4139))
+* Added [Glossary](https://opendds.readthedocs.io/en/dds-3.25/glossary.html). ([PR #4139](https://github.com/OpenDDS/OpenDDS/pull/4139))
+* In addition to [`NEWS.md`](https://github.com/OpenDDS/OpenDDS/blob/DDS-3.25/NEWS.md), started adding release notes to [Release Notes](https://opendds.readthedocs.io/en/dds-3.25/news.html). ([PR #4125](https://github.com/OpenDDS/OpenDDS/pull/4125))
+
+### Notes
+
+* CMake Config Package
+
+    * `OPENDDS_TARGET_SOURCES` is now called `opendds_target_sources`. ([PR #4140](https://github.com/OpenDDS/OpenDDS/pull/4140))
+
+        * CMake macros and functions names are case insensitive, so this should have no effect on CMake code.
+
+## Version 3.24.2 of OpenDDS
+OpenDDS 3.24.2 was released on Jun 30 2023.
+
+### Security:
+- Fixed a vulnerability in the rtps_udp transport where an acknowledgement sequence number beyond the maximum expected by the writer leads to an assert and incorrect state. (#4155)
+  - Thanks to Seulbae Kim (@squizz617) for discovering this.
 
 ### Fixes:
-- TODO: Add your fixes here
+- Fixed leaked shared memory by the shared memory transport. (#4171)
+  - For a 100% fix, a new ACE version including https://github.com/DOCGroup/ACE_TAO/pull/2077 must be used.
+- Fixed bug introduced by #4120 (#4180, #4184)
+  - The fix introduced in #4120 causes the TransportClient to silently drop messages when the client's guid is not initialized.
+    This causes issues for TransportClients that send messages to the transport before association.
+    One such example is a DataWriter with liveliness configured.
+    The DataWriter will send liveliness messages to the transport (which will be dropped) and hang waiting for them to be delivered.
+  - The solution was set the guid for a TransportClient before calling any method that uses the guid.
 
 ### Notes:
-- TODO: Add your notes here
+- #4180 required changes in InfoRepoDiscovery's IDL, so InfoRepo compatibility with older versions has been broken.
+
+## Version 3.24.1 of OpenDDS
+OpenDDS 3.24.1 was released on Apr 21 2023.
+
+### Fixes:
+- Fixed compile warnings in TypeSupport that can happen with GCC and `-O2` or higher (#4117)
+- Fixed compile error in TypeSupport for IDL that contains a typedef of a typedef (#4117)
+- Fixed bug in the tcp transport where readers and writers can fail to associate (#4120)
+- Fixed issue in some headers that could leak `#pragma pack (push, 8)` into user code on Visual Studio (#4123)
+- Fixed theoretical infinite loop in rtps_udp transport code (#4124)
+
+### Documentation:
+- Removed invalid links and references in README and the Developer's Guide and fixed other minor issues (#4115, #4116, #4121, #4126)
+- Changed theme used by the Sphinx documentation to make the Developer's Guide easier to navigate (#4127)
+- Added copy buttons to embedded code and code-like examples (#4127)
+
+## Version 3.24.0 of OpenDDS
+OpenDDS 3.24.0 was released on Apr 11 2023.
+
+### Additions:
+- The OpenDDS Developer's Guide is now available at https://opendds.readthedocs.io/ (#4051, #4094, #4092, #4100, #4101, #4095, #4103, #4102, #4104, #4105)
+  - The Sphinx/reStructuredText source for this new format is now located in the repo at `docs/devguide`
+- DOCGroup ACE6/TAO2 is now the default ACE/TAO for OpenDDS, OCI ACE/TAO is no longer supported (#4069)
+- Dynamic content subscription (#3988)
+  - This allows `DynamicDataReader`s to use `QueryCondition` and `ContentFilteredTopic` and allows `DynamicDataWriter`s to do filtering on behalf of matched `DataReader`s that use `ContentFilteredTopic`.
+- `DynamicData`:
+  - Can now read and write enum members as strings (#4022)
+  - `get_int64_value` and `get_uint64_value` can now cast from different types (#4078)
+  - `DynamicDataImpl` now uses lazy initialization to reduce memory usage (#4024)
+- Added aliases for IDL types from XTypes spec such as `DDS::UInt32` (#3994)
+  - See `DdsDcpsCore.idl` for all of them.
+- Added PublicationMatchedStatus Current Count To RtpsRelay Statistics (#4006)
+- Allow reassembly of overlapping fragment ranges in RTPS (#4035, #4047)
+- Can now cross-compile on macOS (#4048)
+- Added hardening features to RtpsRelay (#4045)
+  - These are configured with the new options `-MaxAddrSetSize` and `-RejectedAddressDuration`.
+- Added `OPENDDS_AUTO_LINK_DCPS` and `OPENDDS_USE_CORRECT_INCLUDE_SCOPE` global options to the CMake package (#4071)
+- Expanded support for using C++ keywords in IDL (#4073)
+- Improved support for anonymous types in unions branches (#4078)
+- IDL file and generated TypeSupport.idl can now be in different directories (#4077)
+
+### Fixes:
+- Fixed `rtps_relay_address_change` deadlocks (#3989)
+- Fixed RtpsUdpTransport data race from `relay_stun_mutex_` (#3990)
+- Fixed invalid socket handles in RtpsUdpTransport (#4002)
+- Fixed index increment in `GuidPartitionTable::prepare_relay_partitions` (#4005)
+- Fixed a bug in content filtering with enum comparisons on serialized samples (#4038)
+- Fixed transport config and transport instance derived from template conflicting (#4058)
+- Improved reliability of the shared memory transport (#4028)
+- Secure writers and readers in same participant can now associate (#4041)
+- Fixed issue with using `-o` in `tao_idl`/`opendds_idl` options in `OPENDDS_TARGET_SOURCES` and those directories are now automatically included (#4071)
+- XTypes (#4078):
+  - `TypeObject`s struct and union members used to be sorted by member ID, but they are now sorted by declaration order as the XTypes spec calls for.
+    By default member IDs increment starting at 0, and in that case the `TypeObject`s will be the same.
+    If `@autoid(hash)`, `--default-autoid hash`, or `@id(ID)` are being used then the order could be different.
+    This could cause some reader/writer matching incompatibility with older versions of OpenDDS:
+    - Topics with final and appendable structs will no longer match.
+    - If `DISALLOW_TYPE_COERCION` QoS is being used, then all topics where the order differ will not longer match.
+      Note that this is true for any time the type hash changes.
+    - Pass the `--old-typeobject-member-order` option to `opendds_idl` to use the non-standard order.
+  - The size of XCDR2 member parameters in mutable structs and unions is now correctly interpreted when the "length code" is 5, 6, or 7.
+    - This is an optimization that OpenDDS doesn't serialize samples with, so this could only be an issue when dealing with samples from other DDS implementations.
+  - `DynamicDataImpl` (`DynamicData` made by `DynamicDataFactory` that can be passed to `DynamicDataWriter`):
+    - `get_member_id_at_index` now returns ids for members that haven't been initialized yet.
+    - Fixed incorrect serialization of keyed unions for instance registration, disposal, and unregistration samples.
+    - Fixed errors from serializing some cases of arrays and sequences.
+
+### Notes:
+- Release files will only be uploaded to GitHub from now on
+- `OpenDDS::DCPS::RepoId` has been removed, if needed use `OpenDDS::DCPS::GUID_t` instead (#3972)
+
+## Version 3.23.1 of OpenDDS
+OpenDDS 3.23.1 was released on Feb 1 2023.
+
+### Fixes:
+
+- Addressed a DDS Security issue where participants can sign their own permissions file if the same CA is used for both identity and permissions (#3992)
+- Addressed CVE-2023-23932, where untrusted sources can use invalid CDR strings in RTPS messages to crash OpenDDS applications (#4010, #4016, #4018)
+  - Thanks to Seulbae Kim (@squizz617) for discovering this.
+- Fixed an issue in `DynamicData::get_*_values` and `print_dynamic_data` (#3952)
+- Fixed a bug where `DynamicDataReader` wouldn't be able to read a topic type with final or mutable extensibility (#3993)
+- Fixed race conditions involving reference counted objects (#3999)
 
 ## Version 3.23.0 of OpenDDS
 OpenDDS 3.23.0 was released on Dec 21 2022.

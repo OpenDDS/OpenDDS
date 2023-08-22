@@ -101,7 +101,7 @@ public:
    * Unknown ones are ignored and "all" enables all the flags.
    * Ex: "bookkeeping,showkeys"
    */
-  void parse_flags(const ACE_TCHAR* flags);
+  void parse_flags(const char* flags);
 
   /**
    * Set debug level similarly to DCPSDebugLevel

@@ -7,6 +7,13 @@ The DCPS Information Repository
 ..
     Sect<9>
 
+The DCPS Information Repository is a non-interoperable and OpenDDS-specific service to distribute discovery information.
+See :ref:`run_time_configuration--configuring-for-ddsi-rtps-discovery` for interoperable discovery.
+The DCPS Information Repository is scheduled for deprecation with OpenDDS 4 and scheduled for removal with OpenDDS 5.
+
+There is no interoperability guarantee between multiple OpenDDS releases when you are using the DCPS Information Repository.
+All applications using a specific DCPS Information Repository must use the same OpenDDS release as that DCPS Information Repository.
+
 .. _the_dcps_information_repository--dcps-information-repository-options:
 
 ***********************************
@@ -124,7 +131,7 @@ Currently available configuration options are:
 
 The following directive:
 
-::
+.. code-block:: cpp
 
     static PersistenceUpdater_Static_Service "-file info.pr -reset 1"
 
@@ -134,7 +141,7 @@ Used with the command-line option ``-r``, the ``DCPSInfoRepo`` can be reincarnat
 When using persistence, start the ``DCPSInfoRepo`` process using a TCP fixed port number with the following command line option.
 This allows existing clients to reconnect to a restarted InfoRepo.
 
-::
+.. code-block:: bash
 
     -ORBListenEndpoints iiop://:<port>
 
@@ -170,7 +177,7 @@ The default domain used for federation is defined by the constant ``Federator::D
 
 Currently only static specification of federation topology is available.
 This means that each DCPS Information Repository, as well as each application using a federated DDS service, needs to include federation configuration as part of its configuration data.
-This is done by specifying each available repository within the federation to each participating process and assigning each repository to a different key value in the configuration files as described in Section :ref:`run_time_configuration--configuring-for-multiple-dcpsinforepo-instances`.
+This is done by specifying each available repository within the federation to each participating process and assigning each repository to a different key value in the configuration files as described in :ref:`run_time_configuration--configuring-for-multiple-dcpsinforepo-instances`.
 
 Each application and repository must include the same set of repositories in its configuration information.
 Failover sequencing will attempt to reach the next repository in numeric sequence (wrapping from the last to the first) of the repository key values.
@@ -188,7 +195,7 @@ Only repositories which are started with a federation identification number may 
 The first repository started should not be given a ``-FederateWith`` command line directive.
 All others are required to have this directive in order to establish the initial federation.
 There is a command line tool (``federation``) supplied that can be used to establish federation associations if this is not done at startup.
-See Section :ref:`the_dcps_information_repository--federation-management` for a description.
+See :ref:`the_dcps_information_repository--federation-management` for a description.
 It is possible, with the current static-only implementation, that the failure of a repository before a federation topology is entirely established could result in a partially unusable service.
 Due to this current limitation, it is highly recommended to always establish the federation topology of repositories prior to starting the applications.
 
@@ -207,7 +214,7 @@ Since the operation of the federated repositories and failover sequencing depend
 The command is named ``repoctl`` and is located in the :ghfile:`bin/` directory.
 It has a command format syntax of:
 
-::
+.. code-block:: bash
 
        repoctl <cmd> <arguments>
 
@@ -263,7 +270,7 @@ This endpoint information is used to create a CORBA object reference using the c
 
 A join command specifies two repository servers (by endpoint) and asks the second to join the first in a federation:
 
-::
+.. code-block:: bash
 
        repoctl join 2112 otherhost:1812
 
@@ -307,7 +314,7 @@ Federation Example
 ..
     Sect<9.2.2>
 
-In order to illustrate the setup and use of a federation, this section walks through a simple example that establishes a federation and a working service that uses it.
+To illustrate the setup and use of a federation, this section walks through a simple example that establishes a federation and a working service that uses it.
 
 This example is based on a two repository federation, with the simple Message publisher and subscriber from :ref:`getting_started--using-dcps` configured to use the federated repositories.
 
@@ -325,23 +332,22 @@ The Message Publisher configuration ``pub.ini`` for this example is as follows:
 
 .. code-block:: ini
 
-        [common]
-        DCPSDebugLevel=0
+    [common]
+    DCPSDebugLevel=0
 
-        [domain/information]
-        DomainId=42
-        DomainRepoKey=1
+    [domain/information]
+    DomainId=42
+    DomainRepoKey=1
 
-        [repository/primary]
-        RepositoryKey=1
-        RepositoryIor=corbaloc::localhost:2112/InfoRepo
+    [repository/primary]
+    RepositoryKey=1
+    RepositoryIor=corbaloc::localhost:2112/InfoRepo
 
-        [repository/secondary]
-        RepositoryKey=2
-        RepositoryIor=file://repo.ior
+    [repository/secondary]
+    RepositoryKey=2
+    RepositoryIor=file://repo.ior
 
 Note that the ``DCPSInfo`` attribute/value pair has been omitted from the ``[common]`` section.
-This has been replaced by the ``[domain/user]`` section as described in 7.5.
 The user domain is 42, so that domain is configured to use the primary repository for service metadata and events.
 
 The ``[repository/primary]`` and ``[repository/secondary]`` sections define the primary and secondary repositories to use within the federation (of two repositories) for this application.
@@ -354,20 +360,20 @@ The subscriber process is configured with the ``sub.ini`` file as follows:
 
 .. code-block:: ini
 
-        [common]
-        DCPSDebugLevel=0
+    [common]
+    DCPSDebugLevel=0
 
-        [domain/information]
-        DomainId=42
-        DomainRepoKey=1
+    [domain/information]
+    DomainId=42
+    DomainRepoKey=1
 
-        [repository/primary]
-        RepositoryKey=1
-        RepositoryIor=file://repo.ior
+    [repository/primary]
+    RepositoryKey=1
+    RepositoryIor=file://repo.ior
 
-        [repository/secondary]
-        RepositoryKey=2
-        RepositoryIor=corbaloc::localhost:2112/InfoRepo
+    [repository/secondary]
+    RepositoryKey=2
+    RepositoryIor=corbaloc::localhost:2112/InfoRepo
 
 Note that this is the same as the ``pub.ini`` file except the subscriber has specified that the repository located at port 2112 of the ``localhost`` is the secondary and the repository located by the ``repo.ior`` file is the primary.
 This is opposite of the assignment for the publisher.
@@ -384,13 +390,13 @@ Running the Federation Example
 ..
     Sect<9.2.2.2>
 
-The example is executed by first starting the repositories and federating them, then starting the application publisher and subscriber processes the same way as was done in the example of  Section :ref:`getting_started--running-the-example`.
+The example is executed by first starting the repositories and federating them, then starting the application publisher and subscriber processes the same way as was done in the example of :ref:`getting_started--running-the-example`.
 
 Start the first repository as:
 
 .. code-block:: bash
 
-        $DDS/bin/DCPSInfoRepo -o repo.ior -FederationId 1024
+    $DDS/bin/DCPSInfoRepo -o repo.ior -FederationId 1024
 
 The ``-o repo.ior`` option ensures that the repository IOR will be placed into the file as expected by the configuration files.
 The ``-FederationId 1024`` option assigns the value 1024 to this repository as its unique id within the federation.
@@ -399,14 +405,13 @@ Start the second repository as:
 
 .. code-block:: bash
 
-        $DDS/bin/DCPSInfoRepo \
-          -ORBListenEndpoints iiop://localhost:2112 \
-          -FederationId 2048 -FederateWith file://repo.ior
+    $DDS/bin/DCPSInfoRepo \
+      -ORBListenEndpoints iiop://localhost:2112 \
+      -FederationId 2048 -FederateWith file://repo.ior
 
 Note that this is all intended to be on a single command line.
 The ``-ORBListenEndpoints iiop://localhost:2112`` option ensures that the repository will be listening on the port that the previous configuration files are expecting.
 The ``-FederationId 2048`` option assigns the value 2048 as the repositories unique id within the federation.
 The ``-FederateWith file://repo.ior`` option initiates federation with the repository located at the IOR contained within the named file - which was written by the previously started repository.
 
-Once the repositories have been started and federation has been established (this will be done automatically after the second repository has initialized), the application publisher and subscriber processes can be started and should execute as they did for the previous example in Section :ref:`getting_started--running-the-example`.
-
+Once the repositories have been started and federation has been established (this will be done automatically after the second repository has initialized), the application publisher and subscriber processes can be started and should execute as they did for the previous example in :ref:`getting_started--running-the-example`.

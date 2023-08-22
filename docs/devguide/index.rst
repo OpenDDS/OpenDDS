@@ -1,23 +1,24 @@
-#########################
-OpenDDS Developer's Guide
-#########################
+#################
+Developer's Guide
+#################
+
+The Developer's Guide explains how to use OpenDDS.
 
 .. toctree::
 
-   preface.rst
-   introduction.rst
-   getting_started.rst
-   quality_of_service.rst
-   conditions_and_listeners.rst
-   content_subscription_profile.rst
-   built_in_topics.rst
-   run_time_configuration.rst
-   opendds_idl.rst
-   the_dcps_information_repository.rst
-   java_bindings.rst
-   modeling_sdk.rst
-   alternate_interfaces_to_data.rst
-   safety_profile.rst
-   dds_security.rst
-   internet_enabled_rtps.rst
-   xtypes.rst
+  introduction
+  getting_started
+  quality_of_service
+  conditions_and_listeners
+  content_subscription_profile
+  built_in_topics
+  run_time_configuration
+  opendds_idl
+  the_dcps_information_repository
+  java_bindings
+  modeling_sdk
+  alternate_interfaces_to_data
+  safety_profile
+  dds_security
+  internet_enabled_rtps
+  xtypes

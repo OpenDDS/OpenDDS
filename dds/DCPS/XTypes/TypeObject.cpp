@@ -1188,6 +1188,68 @@ const char* typekind_to_string(TypeKind tk)
   }
 }
 
+bool is_primitive(TypeKind tk)
+{
+  switch (tk) {
+  case TK_BOOLEAN:
+  case TK_BYTE:
+  case TK_INT8:
+  case TK_UINT8:
+  case TK_INT16:
+  case TK_UINT16:
+  case TK_INT32:
+  case TK_UINT32:
+  case TK_INT64:
+  case TK_UINT64:
+  case TK_FLOAT32:
+  case TK_FLOAT64:
+  case TK_FLOAT128:
+  case TK_CHAR8:
+  case TK_CHAR16:
+    return true;
+  default:
+    return false;
+  }
+}
+
+bool is_scalar(TypeKind tk)
+{
+  return is_primitive(tk) || tk == TK_ENUM;
+}
+
+bool is_basic(TypeKind tk)
+{
+  return is_primitive(tk) || tk == TK_STRING8 || tk == TK_STRING16;
+}
+
+bool is_complex(TypeKind tk)
+{
+  switch (tk) {
+  case TK_ARRAY:
+  case TK_SEQUENCE:
+  case TK_MAP:
+  case TK_STRUCTURE:
+  case TK_UNION:
+  case TK_BITSET:
+    return true;
+  default:
+    return false;
+  }
+}
+
+bool is_sequence_like(TypeKind tk)
+{
+  switch (tk) {
+  case TK_SEQUENCE:
+  case TK_ARRAY:
+  case TK_STRING8:
+  case TK_STRING16:
+    return true;
+  default:
+    return false;
+  }
+}
+
 } // namespace XTypes
 
 namespace DCPS {

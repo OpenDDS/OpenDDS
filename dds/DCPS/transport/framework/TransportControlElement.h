@@ -31,7 +31,8 @@ public:
    * msg_block - chain of ACE_Message_Blocks containing the control
    *             sample held by this queue element, if any.
    */
-  explicit TransportControlElement(Message_Block_Ptr msg_block);
+  explicit TransportControlElement(Message_Block_Ptr msg_block,
+                                   const GUID_t& publication_id = GUID_UNKNOWN);
 
   virtual ~TransportControlElement();
 
@@ -57,6 +58,7 @@ private:
   TransportControlElement(const TransportControlElement&);
   /// The control message.
   Message_Block_Ptr msg_;
+  GUID_t publication_id_;
 };
 
 } // namespace DCPS

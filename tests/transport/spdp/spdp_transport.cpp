@@ -528,6 +528,8 @@ bool run_test()
     }
   }
 
+  spdp->shutdown();
+
   return true;
 }
 

@@ -140,6 +140,8 @@ public:
 
   void add_types(const XTypes::TypeLookupService_rch& tls) const;
 
+  RepresentationFormat* make_format(DDS::DataRepresentationId_t representation);
+
 protected:
 #ifndef OPENDDS_SAFETY_PROFILE
   void get_type_from_type_lookup_service();

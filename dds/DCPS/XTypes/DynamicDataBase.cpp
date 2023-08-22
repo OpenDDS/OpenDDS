@@ -7,17 +7,49 @@
 
 #ifndef OPENDDS_SAFETY_PROFILE
 #  include "DynamicDataBase.h"
+
 #  include "Utils.h"
+#  include "DynamicDataFactory.h"
+
+#  include <dds/DCPS/debug.h>
+#  include <dds/DCPS/ValueHelper.h>
+#  include <dds/DCPS/DCPS_Utils.h>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
 namespace XTypes {
 
-DynamicDataBase::DynamicDataBase() {}
+using DCPS::LogLevel;
+using DCPS::log_level;
+using DCPS::retcode_to_string;
+
+namespace {
+  DDS::TypeDescriptor_var get_type_desc(DDS::DynamicType_ptr type)
+  {
+    if (!type && log_level >= LogLevel::Warning) {
+      ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: DynamicDataBase: "
+        "Passed null DynamicType pointer\n"));
+      return DDS::TypeDescriptor_var();
+    }
+    DDS::TypeDescriptor_var td;
+    const DDS::ReturnCode_t rc = type->get_descriptor(td);
+    if (rc != DDS::RETCODE_OK && log_level >= LogLevel::Warning) {
+      const CORBA::String_var name = type->get_name();
+      ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: DynamicDataBase: "
+        "Failed to get type descriptor for %C\n", name.in()));
+    }
+    return td;
+  }
+}
+
+DynamicDataBase::DynamicDataBase()
+{
+}
 
 DynamicDataBase::DynamicDataBase(DDS::DynamicType_ptr type)
   : type_(get_base_type(type))
+  , type_desc_(get_type_desc(type_))
 {}
 
 DDS::DynamicData* DynamicDataBase::interface_from_this() const
@@ -30,10 +62,17 @@ DDS::DynamicData* DynamicDataBase::interface_from_this() const
 DDS::ReturnCode_t DynamicDataBase::get_descriptor(DDS::MemberDescriptor*& value, MemberId id)
 {
   DDS::DynamicTypeMember_var dtm;
-  if (type_->get_member(dtm, id) != DDS::RETCODE_OK) {
-    return DDS::RETCODE_ERROR;
+  const DDS::ReturnCode_t rc = type_->get_member(dtm, id);
+  if (rc != DDS::RETCODE_OK) {
+    return rc;
   }
   return dtm->get_descriptor(value);
+}
+
+DDS::ReturnCode_t DynamicDataBase::set_descriptor(
+  DDS::MemberId /*id*/, DDS::MemberDescriptor* /*value*/)
+{
+  return unsupported_method("DynamicData::set_descriptor");
 }
 
 DDS::MemberId DynamicDataBase::get_member_id_by_name(const char* name)
@@ -87,7 +126,7 @@ DDS::MemberId DynamicDataBase::get_member_id_by_name(const char* name)
     }
   }
   }
-  if (DCPS::log_level >= DCPS::LogLevel::Notice) {
+  if (log_level >= LogLevel::Notice) {
     ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicDataBase::get_member_id_by_name:"
                " Calling on an unexpected type %C\n", typekind_to_string(tk)));
   }
@@ -97,7 +136,7 @@ DDS::MemberId DynamicDataBase::get_member_id_by_name(const char* name)
 bool DynamicDataBase::is_type_supported(TypeKind tk, const char* func_name)
 {
   if (!is_basic(tk)) {
-    if (DCPS::log_level >= DCPS::LogLevel::Notice) {
+    if (log_level >= LogLevel::Notice) {
       ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicDataBase::is_type_supported:"
                  " Called function %C on an unsupported type (%C)\n",
                  func_name, typekind_to_string(tk)));
@@ -105,50 +144,6 @@ bool DynamicDataBase::is_type_supported(TypeKind tk, const char* func_name)
     return false;
   }
   return true;
-}
-
-bool DynamicDataBase::is_primitive(TypeKind tk) const
-{
-  switch (tk) {
-  case TK_BOOLEAN:
-  case TK_BYTE:
-  case TK_INT8:
-  case TK_UINT8:
-  case TK_CHAR8:
-  case TK_INT16:
-  case TK_UINT16:
-  case TK_CHAR16:
-  case TK_INT32:
-  case TK_UINT32:
-  case TK_FLOAT32:
-  case TK_INT64:
-  case TK_UINT64:
-  case TK_FLOAT64:
-  case TK_FLOAT128:
-    return true;
-  default:
-    return false;
-  }
-}
-
-bool DynamicDataBase::is_basic(TypeKind tk) const
-{
-  return is_primitive(tk) || tk == TK_STRING8 || tk == TK_STRING16;
-}
-
-bool DynamicDataBase::is_complex(TypeKind tk) const
-{
-  switch (tk) {
-  case TK_ARRAY:
-  case TK_SEQUENCE:
-  case TK_MAP:
-  case TK_STRUCTURE:
-  case TK_UNION:
-  case TK_BITSET:
-    return true;
-  default:
-    return false;
-  }
 }
 
 bool DynamicDataBase::get_index_from_id(DDS::MemberId id, ACE_CDR::ULong& index,
@@ -201,14 +196,30 @@ bool DynamicDataBase::enum_string_helper(char*& strInOut, MemberId id)
 
 DDS::ReturnCode_t DynamicDataBase::check_member(
   DDS::MemberDescriptor_var& md, DDS::DynamicType_var& type,
-  const char* method, const char* what, DDS::MemberId id, DDS::TypeKind tk)
+  const char* method, const char* action, DDS::MemberId id, DDS::TypeKind tk)
 {
-  DDS::ReturnCode_t rc = get_descriptor(md, id);
-  if (rc != DDS::RETCODE_OK) {
-    return rc;
-  }
-  type = get_base_type(md->type());
-  if (!type) {
+  DDS::ReturnCode_t rc = DDS::RETCODE_OK;
+  switch (type_->get_kind()) {
+  case TK_STRING8:
+  case TK_STRING16:
+  case TK_SEQUENCE:
+  case TK_ARRAY:
+  case TK_MAP:
+    type = get_base_type(type_desc_->element_type());
+    break;
+  case TK_BITMASK:
+  case TK_STRUCTURE:
+  case TK_UNION:
+    rc = get_descriptor(md, id);
+    if (rc != DDS::RETCODE_OK) {
+      return rc;
+    }
+    type = get_base_type(md->type());
+    if (!type) {
+      return DDS::RETCODE_ERROR;
+    }
+    break;
+  default:
     return DDS::RETCODE_BAD_PARAMETER;
   }
 
@@ -232,30 +243,22 @@ DDS::ReturnCode_t DynamicDataBase::check_member(
   bool invalid_tk = true;
   if (is_basic(cmp_type_kind)) {
     invalid_tk = cmp_type_kind != tk;
+  } else if (tk == TK_NONE) {
+    invalid_tk = !is_complex(type_kind);
   }
   if (invalid_tk) {
-    if (DCPS::log_level >= DCPS::LogLevel::Notice) {
+    if (log_level >= LogLevel::Notice) {
       const CORBA::String_var member_name = md->name();
       const CORBA::String_var type_name = type_->get_name();
       ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: %C: "
         "trying to %C %C.%C id %u kind %C (%C) as an invalid kind %C\n",
-        method, what, type_name.in(), member_name.in(), id,
+        method, action, type_name.in(), member_name.in(), id,
         typekind_to_string(cmp_type_kind), typekind_to_string(type_kind),
         typekind_to_string(tk)));
     }
     return DDS::RETCODE_BAD_PARAMETER;
   }
   return DDS::RETCODE_OK;
-}
-
-CORBA::ULong DynamicDataBase::bound_total(DDS::TypeDescriptor_var descriptor)
-{
-  CORBA::ULong total = 1;
-  const DDS::BoundSeq& bounds = descriptor->bound();
-  for (CORBA::ULong i = 0; i < bounds.length(); ++i) {
-    total *= bounds[i];
-  }
-  return total;
 }
 
 DDS::MemberId DynamicDataBase::get_union_default_member(DDS::DynamicType* type)
@@ -296,32 +299,83 @@ DDS::MemberId DynamicDataBase::get_union_default_member(DDS::DynamicType* type)
   return default_branch;
 }
 
-bool DynamicDataBase::discriminator_selects_no_member(DDS::DynamicType* type, ACE_CDR::Long disc)
+DDS::ReturnCode_t DynamicDataBase::get_selected_union_branch(DDS::Int32 disc,
+  bool& found_selected_member, DDS::MemberDescriptor_var& selected_md) const
 {
-  const ACE_CDR::ULong members = type->get_member_count();
-  for (ACE_CDR::ULong i = 0; i < members; ++i) {
-    DDS::DynamicTypeMember_var member;
-    if (type->get_member_by_index(member, i) != DDS::RETCODE_OK) {
-      return false;
+  found_selected_member = false;
+  bool has_default = false;
+  DDS::ReturnCode_t rc = DDS::RETCODE_OK;
+  DDS::MemberDescriptor_var default_md;
+  for (DDS::UInt32 i = 0; i < type_->get_member_count(); ++i) {
+    DDS::DynamicTypeMember_var dtm;
+    rc = type_->get_member_by_index(dtm, i);
+    if (rc != DDS::RETCODE_OK) {
+      return rc;
     }
-    if (member->get_id() == DISCRIMINATOR_ID) {
+    if (dtm->get_id() == DISCRIMINATOR_ID) {
       continue;
     }
-    DDS::MemberDescriptor_var mdesc;
-    if (member->get_descriptor(mdesc) != DDS::RETCODE_OK) {
-      return false;
+    DDS::MemberDescriptor_var md;
+    rc = dtm->get_descriptor(md);
+    if (rc != DDS::RETCODE_OK) {
+      return rc;
     }
-    if (mdesc->is_default_label()) {
-      return false;
-    }
-    const DDS::UnionCaseLabelSeq& lseq = mdesc->label();
-    for (ACE_CDR::ULong lbl = 0; lbl < lseq.length(); ++lbl) {
-      if (lseq[lbl] == disc) {
-        return false;
+    bool found_matched_label = false;
+    const DDS::UnionCaseLabelSeq labels = md->label();
+    for (DDS::UInt32 j = 0; !found_matched_label && j < labels.length(); ++j) {
+      if (disc == labels[j]) {
+        found_matched_label = true;
       }
     }
+    if (found_matched_label) {
+      selected_md = md;
+      found_selected_member = true;
+      break;
+    }
+    if (md->is_default_label()) {
+      default_md = md;
+      has_default = true;
+    }
   }
-  return true;
+  if (!found_selected_member && has_default) {
+    selected_md = default_md;
+    found_selected_member = true;
+  }
+  return rc;
+}
+
+DDS::ReturnCode_t DynamicDataBase::get_selected_union_branch(
+  bool& found_selected_member, DDS::MemberDescriptor_var& selected_md)
+{
+  // TODO: Support UInt64 and Int64 (https://issues.omg.org/issues/DDSXTY14-36)
+  DDS::Int64 i64_disc;
+  DDS::ReturnCode_t rc = get_int64_value(i64_disc, DISCRIMINATOR_ID);
+  if (rc != DDS::RETCODE_OK) {
+    return rc;
+  }
+  if (i64_disc < ACE_INT32_MIN || i64_disc > ACE_INT32_MAX) {
+    if (log_level >= LogLevel::Notice) {
+      ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicDataBase::get_selected_union_branch: "
+        "union discriminator can't fit in int32: %q\n", i64_disc));
+    }
+    return DDS::RETCODE_ERROR;
+  }
+  return get_selected_union_branch(static_cast<DDS::Int32>(i64_disc), found_selected_member, selected_md);
+}
+
+bool DynamicDataBase::discriminator_selects_no_member(DDS::Int32 disc) const
+{
+  bool found_selected_member;
+  DDS::MemberDescriptor_var selected_md;
+  const DDS::ReturnCode_t rc = get_selected_union_branch(disc, found_selected_member, selected_md);
+  if (rc != DDS::RETCODE_OK) {
+    if (log_level >= LogLevel::Warning) {
+      ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: DynamicDataBase::discriminator_selects_no_member: "
+        "get_selected_union_branch failed: %C\n", retcode_to_string(rc)));
+    }
+    return false;
+  }
+  return !found_selected_member;
 }
 
 bool DynamicDataBase::has_explicit_keys(DDS::DynamicType* dt)
@@ -353,6 +407,210 @@ bool DynamicDataBase::has_explicit_keys(DDS::DynamicType* dt)
     }
   }
   return false;
+}
+
+DDS::ReturnCode_t DynamicDataBase::unsupported_method(const char* method_name, bool warning) const
+{
+  if (log_level >= (warning ? LogLevel::Warning : LogLevel::Notice)) {
+    ACE_ERROR((warning ? LM_WARNING : LM_NOTICE, "(%P|%t) %C: %C: not implemented\n",
+      warning ? "WARNING" : "NOTICE", method_name));
+  }
+  return DDS::RETCODE_UNSUPPORTED;
+}
+
+#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+DDS::ReturnCode_t DynamicDataBase::get_simple_value(DCPS::Value& /*value*/, DDS::MemberId /*id*/)
+{
+  return unsupported_method("DynamicDataBase::get_simple_value");
+}
+#endif
+
+DDS::DynamicType_ptr DynamicDataBase::type()
+{
+  return DDS::DynamicType::_duplicate(type_);
+}
+
+DDS::Boolean DynamicDataBase::equals(DDS::DynamicData_ptr /*other*/)
+{
+  unsupported_method("DynamicDataBase::equals", true);
+  return false;
+}
+
+DDS::DynamicData_ptr DynamicDataBase::loan_value(DDS::MemberId /*id*/)
+{
+  unsupported_method("DynamicDataBase::loan_value");
+  return 0;
+}
+
+DDS::ReturnCode_t DynamicDataBase::return_loaned_value(DDS::DynamicData_ptr /*other*/)
+{
+  return unsupported_method("DynamicDataBase::return_loaned_value");
+}
+
+DDS::DynamicData_ptr DynamicDataBase::clone()
+{
+  DDS::DynamicData_var new_copy = DDS::DynamicDataFactory::get_instance()->create_data(type_);
+  if (!new_copy || copy(new_copy, this) != DDS::RETCODE_OK) {
+    if (log_level >= LogLevel::Notice) {
+      ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicDataBase::clone: Failed to create a copy\n"));
+    }
+    return 0;
+  }
+  return new_copy._retn();
+}
+
+namespace {
+  DDS::ReturnCode_t invalid_cast(const char* method, TypeKind to, TypeKind from)
+  {
+    if (log_level >= LogLevel::Notice) {
+      ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicDataBase::%C: Can't cast %C to %C\n",
+        method, typekind_to_string(from), typekind_to_string(to)));
+    }
+    return DDS::RETCODE_ILLEGAL_OPERATION;
+  }
+}
+
+DDS::ReturnCode_t DynamicDataBase::get_int64_value(DDS::Int64& value, DDS::MemberId id)
+{
+  DDS::DynamicType_var member_type;
+  DDS::ReturnCode_t rc = get_member_type(member_type, type_, id);
+  if (rc != DDS::RETCODE_OK) {
+    return rc;
+  }
+  const TypeKind tk = member_type->get_kind();
+  switch (tk) {
+  case TK_BOOLEAN:
+    {
+      DDS::Boolean tmp;
+      rc = get_boolean_value(tmp, id);
+      if (rc == DDS::RETCODE_OK) {
+        value = static_cast<DDS::Int64>(tmp);
+      }
+      return rc;
+    }
+  case TK_BYTE:
+    {
+      DDS::Byte tmp;
+      rc = get_byte_value(tmp, id);
+      if (rc == DDS::RETCODE_OK) {
+        value = static_cast<DDS::Int64>(tmp);
+      }
+      return rc;
+    }
+  case TK_INT8:
+  case TK_INT16:
+  case TK_INT32:
+    return get_int_value(value, this, id, tk);
+  case TK_INT64:
+    return get_int64_value_impl(value, id);
+  case TK_UINT8:
+  case TK_UINT16:
+  case TK_UINT32:
+    {
+      DDS::UInt64 tmp;
+      rc = get_uint_value(tmp, this, id, tk);
+      if (rc == DDS::RETCODE_OK) {
+        value = static_cast<DDS::Int64>(tmp);
+      }
+      return rc;
+    }
+  case TK_CHAR8:
+    {
+      DDS::Char8 tmp;
+      rc = get_char8_value(tmp, id);
+      if (rc == DDS::RETCODE_OK) {
+        value = static_cast<DDS::Int64>(tmp);
+      }
+      return rc;
+    }
+  case TK_CHAR16:
+    {
+      DDS::Char16 tmp;
+      rc = get_char16_value(tmp, id);
+      if (rc == DDS::RETCODE_OK) {
+        value = static_cast<DDS::Int64>(tmp);
+      }
+      return rc;
+    }
+  case TK_ENUM:
+    {
+      DDS::Int32 tmp;
+      rc = get_enum_value(tmp, member_type, this, id);
+      if (rc == DDS::RETCODE_OK) {
+        value = static_cast<DDS::Int64>(tmp);
+      }
+      return rc;
+    }
+  default:
+    return invalid_cast("get_int64_value", TK_INT64, tk);
+  }
+}
+
+DDS::ReturnCode_t DynamicDataBase::get_uint64_value(DDS::UInt64& value, DDS::MemberId id)
+{
+  DDS::DynamicType_var member_type;
+  DDS::ReturnCode_t rc = get_member_type(member_type, type_, id);
+  if (rc != DDS::RETCODE_OK) {
+    return rc;
+  }
+  const TypeKind tk = member_type->get_kind();
+  switch (tk) {
+  case TK_BOOLEAN:
+    {
+      DDS::Boolean tmp;
+      rc = get_boolean_value(tmp, id);
+      if (rc == DDS::RETCODE_OK) {
+        value = tmp ? 1 : 0;
+      }
+      return rc;
+    }
+  case TK_BYTE:
+    {
+      DDS::Byte tmp;
+      rc = get_byte_value(tmp, id);
+      if (rc == DDS::RETCODE_OK) {
+        value = static_cast<DDS::UInt64>(tmp);
+      }
+      return rc;
+    }
+  case TK_INT8:
+  case TK_INT16:
+  case TK_INT32:
+    {
+      DDS::Int64 tmp;
+      rc = get_int_value(tmp, this, id, tk);
+      if (rc == DDS::RETCODE_OK) {
+        value = static_cast<DDS::UInt64>(tmp);
+      }
+      return rc;
+    }
+  case TK_UINT8:
+  case TK_UINT16:
+  case TK_UINT32:
+    return get_uint_value(value, this, id, tk);
+  case TK_UINT64:
+    return get_uint64_value_impl(value, id);
+  case TK_CHAR8:
+    {
+      DDS::Char8 tmp;
+      rc = get_char8_value(tmp, id);
+      if (rc == DDS::RETCODE_OK) {
+        value = DCPS::char_value(tmp);
+      }
+      return rc;
+    }
+  case TK_CHAR16:
+    {
+      DDS::Char16 tmp;
+      rc = get_char16_value(tmp, id);
+      if (rc == DDS::RETCODE_OK) {
+        value = DCPS::char_value(tmp);
+      }
+      return rc;
+    }
+  default:
+    return invalid_cast("get_uint64_value", TK_UINT64, tk);
+  }
 }
 
 } // namespace XTypes

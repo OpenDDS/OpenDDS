@@ -4,36 +4,196 @@
 Introduction
 ############
 
+.. _introduction--what-is-opendds:
+
+****************
+What is OpenDDS?
+****************
+
+..
+    Sect<0.1>
+    Sect<0.6>
+
+OpenDDS is an open-source C++ framework for exchanging data in distributed systems.
+It is an implementation of :ref:`a group of related OMG specifications <specs>`.
+OpenDDS is implemented in C++ and contains support for :doc:`Java <java_bindings>`.
+Users in the OpenDDS community have contributed and maintain bindings for other languages that include `C# <https://www.openddsharp.com/>`__, `Node.js <https://github.com/OpenDDS/node-opendds>`__, and `Python <https://github.com/OpenDDS/pyopendds>`__.
+OpenDDS is sponsored by the OpenDDS Foundation and is available via https://opendds.org and https://github.com/OpenDDS/OpenDDS.
+
+There is an FAQ available at https://opendds.org/faq.html.
+
+.. _specs:
+
+**************
+Specifications
+**************
+
+OpenDDS is an open source implementation of a group of related :term:`OMG` specifications.
+
+.. _spec-dds:
+
+Data Distribution Service (DDS) for Real-Time Systems
+=====================================================
+
+This specification defines a service for efficiently distributing application data between participants in a distributed application.
+This is the core functionality implemented by OpenDDS for real-time publish and subscribe applications and is described throughout this document.
+
+The version OpenDDS uses is v1.4 (OMG document ``formal/2015-04-10``), which can be found at https://www.omg.org/spec/DDS/1.4.
+Compliance with the specification is documented in :ref:`introduction--dds-compliance`.
+More information about the DDS itself can be found on the `DDS Foundation website <https://www.dds-foundation.org/>`__.
+
+.. _spec-rtps:
+
+Real-time Publish-Subscribe (RTPS)
+==================================
+
+The full name of this specification is the *Real-time Publish-Subscribe Protocol DDS Interoperability Wire Protocol* (DDSI-RTPS), but can also be just called RTPS.
+This specification describes the requirements for interoperability between DDS implementations.
+See :ref:`introduction--peer-to-peer-discovery-with-rtps` for more information.
+
+The version OpenDDS uses is v2.3 (OMG document ``formal/2019-04-03``), which can be found at https://www.omg.org/spec/DDSI-RTPS/2.3.
+Although the document number is v2.3, it specifies protocol version 2.4.
+Compliance with the specification is documented in :ref:`introduction--ddsi-rtps-compliance`.
+
+.. _spec-dds-security:
+
+DDS Security
+============
+
+This specification extends DDS with capabilities for authentication and encryption.
+OpenDDS’s support for the DDS Security specification is described in :doc:`dds_security`.
+
+The version OpenDDS uses is v1.1 (OMG document ``formal/2018-04-01``), which can be found at https://www.omg.org/spec/DDS-SECURITY/1.1.
+Compliance with the specification is documented in :ref:`dds_security--dds-security-implementation-status`.
+
+.. _spec-xtypes:
+
+Extensible and Dynamic Topic Types for DDS (XTypes)
+===================================================
+
+This specification defines details of the type system used for the data exchanged on DDS Topics, including how schema and data are encoded for network transmission.
+OpenDDS's support for XTypes is described in :doc:`xtypes`.
+
+The version OpenDDS uses is v1.3 (OMG document ``formal/2020-02-04``), which can be found at https://www.omg.org/spec/DDS-XTypes/1.3.
+Compliance with the specification is documented in :ref:`xtypes--unimplemented-features` and :ref:`xtypes--differences-from-the-specification`.
+
+.. _spec-idl-to-cpp11:
+
+IDL to C++11 Language Mapping
+=============================
+
+This specification defines an :term:`IDL` to C++ mapping that takes advantage of C++11 language features and standard library types.
+OpenDDS's support for IDL to C++11 is described in :ref:`opendds_idl--using-the-idl-to-c-11-mapping`.
+
+The version OpenDDS uses is v1.5 (OMG document ``formal/2021-05-01``), which can be found at https://www.omg.org/spec/CPP11/1.5.
+
+***************
+Licensing Terms
+***************
+
+..
+    Sect<0.2>
+
+OpenDDS is *open source software*.
+The source code may be freely downloaded and is open for inspection, review, comment, and improvement.
+Copies may be freely installed across all your systems and those of your customers.
+There is no charge for development or run-time licenses.
+The source code is designed to be compiled, and used, across a wide variety of hardware and operating systems architectures.
+You may modify it for your own needs, within the terms of the license agreements.
+You must not copyright OpenDDS software.
+For details of the licensing terms, see the file named :ghfile:`LICENSE` that is included in the OpenDDS source code distribution or visit https://opendds.org/about/license.html.
+
+OpenDDS also utilizes other open source software products including MPC (Make Project Creator), ACE (the ADAPTIVE Communication Environment), and TAO (The ACE ORB).
+
+OpenDDS is open source and the development team welcomes contributions of code, tests, documentation, and ideas.
+Active participation by users ensures a robust implementation.
+Contact the OpenDDS Foundation if you are interested in contributing to the development of OpenDDS.
+Please note that any code or documentation that is contributed to and becomes part of the OpenDDS open source code base is subject to the same licensing terms as the rest of the OpenDDS code base.
+
+****************
+About This Guide
+****************
+
+..
+    Sect<0.3>
+
+This Developer’s Guide corresponds to OpenDDS version |release|.
+This guide is primarily focused on the specifics of using and configuring OpenDDS to build distributed publish-subscribe applications.
+While it does give a general overview of the OMG Data Distribution Service, this guide is not intended to provide comprehensive coverage of the specification.
+The intent of this guide is to help you become proficient with OpenDDS as quickly as possible.
+Readers are encouraged to submit corrections to this guide using a GitHub pull request.
+The source for this guide can be found at :ghfile:`docs/devguide` and :doc:`/internal/docs` contains guidance for editing and building it.
+
+ACE/TAO Version Compatibility
+=============================
+
+..
+    Sect<0.4.1>
+
+OpenDDS is compatible with the current DOC Group micro release in the ACE 6.x / TAO 2.x series.
+See the :ghfile:`README.md` file for details.
+
+Conventions
+===========
+
+..
+    Sect<0.4.2>
+
+This guide uses the following conventions:
+
+.. list-table::
+   :header-rows: 0
+
+   * - ``Fixed pitch text``
+
+     - Indicates example code or information a user would enter using a keyboard.
+
+   * - *Italic text*
+
+     - Indicates a point of emphasis.
+
+   * - ...
+
+     - An ellipsis indicates a section of omitted text.
+
+********
+Examples
+********
+
+..
+    Sect<0.5>
+
+The examples in this guide are intended for the learning of the reader and should not be considered to be "production-ready" code.
+In particular, error handling is sometimes kept to a minimum to help the reader focus on the particular feature or technique that is being presented in the example.
+The source code for all these examples is available as part of the OpenDDS source code distribution in the :ghfile:`DevGuideExamples` directory.
+MPC files are provided with the examples for generating build-tool specific files, such as GNU Makefiles or Visual C++ project and solution files.
+To run an example, execute the ``run_test.pl`` Perl script.
+
+*******************
+Supported Platforms
+*******************
+
+..
+    Sect<0.7>
+
+The OpenDDS Foundation regularly builds and tests OpenDDS on a wide variety of platforms, operating systems, and compilers.
+The OpenDDS Foundation continually updates OpenDDS to support additional platforms.
+See the :ghfile:`README.md` file in the distribution for the most recent platform support information.
+
 ..
     Sect<1>
 
-OpenDDS is an open source implementation of the OMG Data Distribution Service (DDS) for Real-Time Systems Specification v1.4 (OMG Document ``formal/2015-04-10``) and the Real-time Publish-Subscribe Wire Protocol DDS Interoperability Wire Protocol Specification (DDSI-RTPS) v2.3 (OMG Document ``formal/2019-04-03``).
-OpenDDS also implements the DDS Security Specification v1.1 (OMG Document ``formal/2018-04-01``) and DDS XTypes v1.3 (OMG Document ``formal/2020-02-04``).
-OpenDDS is sponsored by Object Computing, Inc. (OCI) and is available at https://www.opendds.org/.
-This Developer’s Guide is based on the version 3.23 release of OpenDDS.
-
-DDS defines a service for efficiently distributing application data between participants in a distributed application.
-This service is not tied to CORBA.
-The specification provides a Platform Independent Model (PIM) as well as a Platform Specific Model (PSM) that maps the PIM onto an OMG IDL implementation.
-
-For additional details about DDS, developers should refer to the DDS specification (OMG Document ``formal/2015-04-10``) as it contains in-depth coverage of all the service’s features.
-
-OpenDDS is the open-source C++ implementation of OMG’s DDS specification developed and commercially supported by Object Computing, Inc. (OCI).
-It is available for download from https://www.opendds.org/downloads.html and is compatible with the latest patch level of OCI TAO version 2.2a (includes ACE), and the latest DOC Group release of ACE+TAO in the ACE 6.x / TAO 2.x series.
-
-.. note:: OpenDDS currently implements the OMG DDS version 1.4 specification.
-  See the compliance information in or at https://www.opendds.org/ for more information.
-
 .. _introduction--dcps-overview:
 
-*************
-DCPS Overview
-*************
+**********************************************
+Data-Centric Publish-Subscribe (DCPS) Overview
+**********************************************
 
 ..
     Sect<1.1>
 
-In this section we introduce the main concepts and entities of the DCPS layer and discuss how they interact and work together.
+Data-Centric Publish-Subscribe (DCPS) is the application model defined by the DDS specification.
+This section describes the main concepts and entities of the DCPS API and discuss how they interact and work together.
 
 .. _introduction--basic-concepts:
 
@@ -105,7 +265,7 @@ Each data writer is bound to a particular topic.
 The application uses the data writer’s type-specific interface to publish samples on that topic.
 The data writer is responsible for marshaling the data and passing it to the publisher for transmission.
 
-Dynamic data writers (see section :ref:`xtypes--creating-and-using-a-dynamicdatawriter`) can be used when code generated from IDL is not available or desired.
+Dynamic data writers (:ref:`xtypes--creating-and-using-a-dynamicdatawriter-or-dynamicdatareader`) can be used when code generated from IDL is not available or desired.
 Dynamic data writers are also type-safe, but type checking happens at runtime.
 
 .. _introduction--publisher:
@@ -141,7 +301,7 @@ The *data reader* takes data from the subscriber, demarshals it into the appropr
 Each data reader is bound to a particular topic.
 The application uses the data reader’s type-specific interfaces to receive the samples.
 
-Dynamic data readers (see section :ref:`xtypes--creating-and-using-a-dynamicdatareader`) can be used when code generated from IDL is not available or desired.
+Dynamic data readers (:ref:`xtypes--creating-and-using-a-dynamicdatawriter-or-dynamicdatareader`) can be used when code generated from IDL is not available or desired.
 Dynamic data readers are also type-safe, but type checking happens at runtime.
 
 .. _introduction--built-in-topics:
@@ -202,7 +362,7 @@ Subscribers *request* a set of policies that are minimally required.
 Publishers *offer* a set of QoS policies to potential subscribers.
 The DDS implementation then attempts to match the requested policies with the offered policies; if these policies are compatible then the association is formed.
 
-The QoS policies currently implemented by OpenDDS are discussed in detail in Chapter :ref:`quality_of_service--quality-of-service`.
+The QoS policies currently implemented by OpenDDS are discussed in detail in :ref:`quality_of_service--quality-of-service`.
 
 .. _introduction--listeners:
 
@@ -212,7 +372,7 @@ Listeners
 ..
     Sect<1.1.4>
 
-The DCPS layer defines a callback interface for each entity that allows an application processes to “listen” for certain state changes or events pertaining to that entity.
+The DCPS layer defines a callback interface for each entity that allows an application processes to listen for certain state changes or events pertaining to that entity.
 For example, a Data Reader Listener is notified when there are data values available for reading.
 
 .. _introduction--conditions:
@@ -257,8 +417,7 @@ Compliance
 OpenDDS complies with the OMG DDS and the OMG DDSI-RTPS specifications.
 Details of that compliance follows here.
 OpenDDS also implements the OMG DDS Security specification.
-Details of compliance to that specification are in section :ref:`dds_security--dds-security-implementation-status`.
-Details of XTypes compliance are in sections :ref:`xtypes--unimplemented-features` and :ref:`xtypes--differences-from-the-specification`.
+See :ref:`specs` for how OpenDDS complies with other specifications it implements.
 
 .. _introduction--dds-compliance:
 
@@ -309,7 +468,7 @@ OpenDDS RTPS Implementation Notes
 ..
     Sect<1.2.1.2.1>
 
-The OMG DDSI-RTPS specification (formal/2019-04-03) supplies statements for implementation, but not required for compliance.
+The :ref:`OMG DDSI-RTPS specification <spec-rtps>` supplies statements for implementation, but not required for compliance.
 The following items should be taken into consideration when utilizing the OpenDDS RTPS functionality for transport and/or discovery.
 Section numbers of the DDSI-RTPS specification are supplied with each item for further reference.
 
@@ -353,12 +512,12 @@ OMG IDL is used in a few different ways in the OpenDDS code base and downstream 
 
 This section only describes the latter use.
 
-The IDL specification (version 4.2) uses the term “building block” to define subsets of the overall IDL grammar that may be supported by certain tools.
+The IDL specification (version 4.2) uses the term "building block" to define subsets of the overall IDL grammar that may be supported by certain tools.
 OpenDDS supports the following building blocks, with notes/caveats listed below each:
 
 * Core Data Types
 
-  * Support for the “fixed” data type (fixed point decimal) is incomplete.
+  * Support for the "fixed" data type (fixed point decimal) is incomplete.
 
 * Anonymous Types
 
@@ -367,7 +526,7 @@ OpenDDS supports the following building blocks, with notes/caveats listed below 
 
 * Annotations
 
-  * See sections :ref:`getting_started--defining-data-types-with-idl` and :ref:`xtypes--idl-annotations` for details on which built-in annotations are supported.
+  * See :ref:`getting_started--defining-data-types-with-idl` and :ref:`xtypes--idl-annotations` for details on which built-in annotations are supported.
 
   * User-defined annotation types are also supported.
 
@@ -392,7 +551,7 @@ Data types, interfaces, and constants in the **DDS** IDL module (C++ namespace, 
 * Type-specific DataReaders (including those for Built-in Topics) have additional operations ``read_instance_w_condition()`` and ``take_instance_w_condition()``.
 
 Additional extended behavior is provided by various classes and interfaces in the OpenDDS module/namespace/package.
-Those include features like Recorder and Replayer (see chapter :ref:`alternate_interfaces_to_data--alternate-interfaces-to-data`) and also:
+Those include features like Recorder and Replayer (:ref:`alternate_interfaces_to_data--alternate-interfaces-to-data`) and also:
 
 * ``OpenDDS::DCPS::TypeSupport`` adds the ``unregister_type()`` operation not found in the DDS spec.
 
@@ -439,7 +598,7 @@ Data transmission is accomplished via an OpenDDS-specific transport framework th
 This is referred to as *pluggable transports* and makes the extensibility of OpenDDS an important part of its architecture.
 OpenDDS currently supports TCP/IP, UDP/IP, IP multicast, shared-memory, and RTPS_UDP transport protocols as shown in :ref:`Figure 1-2 <introduction--reffigure1>`.
 Transports are typically specified via configuration files and are attached to various entities in the publisher and subscriber processes.
-Refer to Section :ref:`run_time_configuration--transport-configuration-options` for details on configuring ETF components.
+See :ref:`run_time_configuration--transport-configuration-options` for details on configuring ETF components.
 
 .. _introduction--reffigure1:
 
@@ -514,7 +673,7 @@ This style of discovery is accomplished only through the use of the RTPS protoco
 This simple form of discovery is accomplished through simple configuration of DDS application data readers and data writers running in application processes as shown in :ref:`Figure 1-4 <introduction--reffigure3>`.
 As each participating process activates the DDSI-RTPS discovery mechanisms in OpenDDS for their data readers and writers, network endpoints are created with either default or configured network ports such that DDS participants can begin advertising the availability of their data readers and data writers.
 After a period of time, those seeking one another based on criteria will find each other and establish a connection based on the configured pluggable transport as discussed in Extensible Transport Framework (ETF).
-A more detailed description of this flexible configuration approach is discussed in Section :ref:`run_time_configuration--transport-concepts` and Section :ref:`run_time_configuration--rtps-udp-transport-configuration-options`.
+A more detailed description of this flexible configuration approach is discussed in :ref:`run_time_configuration--transport-concepts` and :ref:`run_time_configuration--rtps-udp-transport-configuration-options`.
 
 .. _introduction--reffigure3:
 
@@ -548,7 +707,7 @@ Your application may get called back from these threads via the Listener mechani
 
 When publishing a sample via DDS, OpenDDS normally attempts to send the sample to any connected subscribers using the calling thread.
 If the send call blocks, then the sample may be queued for sending on a separate service thread.
-This behavior depends on the QoS policies described in Chapter :ref:`quality_of_service--quality-of-service`.
+This behavior depends on the QoS policies described in :ref:`quality_of_service--quality-of-service`.
 
 All incoming data in the subscriber is read by a service thread and queued for reading by the application.
 DataReader listeners are called from the service thread.
@@ -563,7 +722,7 @@ Configuration
 
 OpenDDS includes a file-based configuration framework for configuring both global items such as debug level, memory allocation, and discovery, as well as transport implementation details for publishers and subscribers.
 Configuration can also be achieved directly in code, however, it is recommended that configuration be externalized for ease of maintenance and reduction in runtime errors.
-The complete set of configuration options are described in Chapter :ref:`run_time_configuration--run-time-configuration`.
+The complete set of configuration options are described in :ref:`run_time_configuration--run-time-configuration`.
 
 .. _introduction--installation:
 
@@ -574,14 +733,14 @@ Installation
 ..
     Sect<1.3>
 
-The steps on how to build OpenDDS can be found in :ghfile:`INSTALL.md`.
+The steps on how to build OpenDDS can be found in :doc:`/building/index`.
 
-To build OpenDDS with DDS Security, see section :ref:`dds_security--building-opendds-with-security-enabled` below.
+To build OpenDDS with DDS Security, see :ref:`dds_security--building-opendds-with-security-enabled`.
 
 To avoid compiling OpenDDS code that you will not be using, there are certain features than can be excluded from being built.
 The features are discussed below.
 
-Users requiring a small-footprint configuration or compatibility with safety-oriented platforms should consider using the OpenDDS Safety Profile, which is described in chapter :ref:`safety_profile--safety-profile` of this guide.
+Users requiring a small-footprint configuration or compatibility with safety-oriented platforms should consider using the OpenDDS Safety Profile, which is described in :ref:`safety_profile--safety-profile` of this guide.
 
 .. _introduction--building-with-a-feature-enabled-or-disabled:
 
@@ -599,13 +758,15 @@ If you are not using the ``configure`` script, continue reading below for instru
 For the features described below, MPC is used for enabling (the default) a feature or disabling the feature.
 For a feature named *feature*, the following steps are used to disable the feature from the build:
 
-#. Use the command line “features” argument to MPC:
+#. Use the command line ``features`` argument to MPC:
 
-   ``mwc.pl -type <type> -featuresfeature=0 DDS.mwc``
+   .. code-block:: bash
+
+      mwc.pl -type type -features feature=0 DDS.mwc
 
    Or alternatively, add the line ``feature=0`` to the file ``$ACE_ROOT/bin/MakeProjectCreator/config/default.features`` and regenerate the project files using MPC.
 
-#. If you are using the ``gnuace`` MPC project type (which is the case if you will be using GNU make as your build system), add line “``feature=0``” to the file ``$ACE_ROOT/include/makeinclude/platform_macros.GNU``.
+#. If you are using the ``gnuace`` MPC project type (which is the case if you will be using GNU make as your build system), add line ``feature=0`` to the file ``$ACE_ROOT/include/makeinclude/platform_macros.GNU``.
 
 To explicitly enable the feature, use ``feature=1`` above.
 
@@ -625,7 +786,7 @@ Disabling the Building of Built-In Topic Support
 Feature Name: ``built_in_topics``
 
 You can reduce the footprint of the core DDS library by up to 30% by disabling Built-in Topic Support.
-See Chapter :ref:`built_in_topics--built-in-topics` for a description of Built-In Topics.
+See :ref:`built_in_topics--built-in-topics` for a description of Built-In Topics.
 
 .. _introduction--disabling-the-building-of-compliance-profile-features:
 
@@ -652,7 +813,7 @@ Content-Subscription Profile
 
 Feature Name: ``content_subscription``
 
-This profile adds the classes ``ContentFilteredTopic``, ``QueryCondition``, and ``MultiTopic`` discussed in Chapter :ref:`content_subscription_profile--content-subscription-profile`.
+This profile adds the classes ``ContentFilteredTopic``, ``QueryCondition``, and ``MultiTopic`` discussed in :ref:`content_subscription_profile--content-subscription-profile`.
 
 In addition, individual classes can be excluded by using the features given in the table below.
 
@@ -689,7 +850,7 @@ Persistence Profile
 
 Feature Name: ``persistence_profile``
 
-This profile adds the QoS policy ``DURABILITY_SERVICE`` and the settings ‘``TRANSIENT``’ and ‘``PERSISTENT``’ of the ``DURABILITY`` QoS policy ``kind``.
+This profile adds the QoS policy ``DURABILITY_SERVICE`` and the settings ``TRANSIENT`` and ``PERSISTENT`` of the ``DURABILITY`` QoS policy ``kind``.
 
 .. _introduction--ownership-profile:
 
@@ -703,7 +864,7 @@ Feature Name: ``ownership_profile``
 
 This profile adds:
 
-* the setting ‘``EXCLUSIVE``’ of the ``OWNERSHIP`` ``kind``
+* the setting ``EXCLUSIVE`` of the ``OWNERSHIP`` ``kind``
 
 * support for the ``OWNERSHIP_STRENGTH`` policy
 
@@ -722,9 +883,9 @@ Object Model Profile
 
 Feature Name: ``object_model_profile``
 
-This profile includes support for the ``PRESENTATION`` access_scope setting of ‘``GROUP``’.
+This profile includes support for the ``PRESENTATION`` access_scope setting of ``GROUP``.
 
-.. note:: Currently, the ``PRESENTATION`` access_scope of ‘``TOPIC``’ is also excluded when ``object_model_profile`` is disabled.
+.. note:: Currently, the ``PRESENTATION`` access_scope of ``TOPIC`` is also excluded when ``object_model_profile`` is disabled.
 
 .. _introduction--building-applications-that-use-opendds:
 
@@ -736,7 +897,7 @@ Building Applications that use OpenDDS
     Sect<1.4>
 
 This section applies to any C++ code that directly or indirectly includes OpenDDS headers.
-For Java applications, see Chapter :ref:`java_bindings--java-bindings` below.
+For Java applications, see :ref:`java_bindings--java-bindings`.
 
 C++ source code that includes OpenDDS headers can be built using either build system: MPC or CMake.
 
@@ -749,12 +910,12 @@ MPC: The Makefile, Project, and Workspace Creator
     Sect<1.4.1>
 
 OpenDDS is itself built with MPC, so development systems that are set up to use OpenDDS already have MPC available.
-The OpenDDS configure script creates a “setenv” script with environment settings (``setenv.cmd`` on Windows; ``setenv.sh`` on Linux/macOS).
+The OpenDDS configure script creates a "setenv" script with environment settings (``setenv.cmd`` on Windows; ``setenv.sh`` on Linux/macOS).
 This environment contains the ``PATH`` and ``MPC_ROOT`` settings necessary to use MPC.
 
-MPC’s source tree (in ``MPC_ROOT``) contains a “docs” directory with both HTML and plain text documentation (``USAGE`` and ``README`` files).
+MPC’s source tree (in ``MPC_ROOT``) contains a "docs" directory with both HTML and plain text documentation (``USAGE`` and ``README`` files).
 
-The example walk-through in section :ref:`getting_started--using-dcps` uses MPC as its build system.
+The example walk-through in :ref:`getting_started--using-dcps` uses MPC as its build system.
 The OpenDDS source tree contains many tests and examples that are built with MPC.
 These can be used as starting points for application MPC files.
 
@@ -767,10 +928,7 @@ CMake
     Sect<1.4.2>
 
 Applications can also be built with `CMake <https://cmake.org/>`__.
-See the included documentation in the OpenDDS source tree: :ghfile:`docs/cmake.md`
-
-The OpenDDS source tree also includes examples of using CMake.
-They are listed in the ``cmake.md`` file.
+See :doc:`/building/cmake` for more information.
 
 .. _introduction--custom-build-systems:
 
@@ -784,5 +942,3 @@ Users of OpenDDS are strongly encouraged to select one of the two options listed
 If this is not possible, users of OpenDDS must make sure that all code generator, compiler, and linker settings in the custom build setup result in API- and ABI-compatible code.
 To do this, start with an MPC or CMake-generated project file (makefile or Visual Studio project file) and make sure all relevant settings are represented in the custom build system.
 This is often done through a combination of inspecting the project file and running the build with verbose output to see how the toolchain (code generators, compiler, linker) is invoked.
-Contact Object Computing, Inc. (OCI) via https://objectcomputing.com/products/opendds/opendds-consulting-and-support to have our expert software engineers work on this for you.
-

@@ -2,14 +2,12 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
      & eval 'exec perl -S $0 $argv:q'
      if 0;
 
+use strict;
+
 use lib "$ENV{ACE_ROOT}/bin";
 use lib "$ENV{DDS_ROOT}/bin";
 use PerlDDS::Run_Test;
 use Getopt::Long;
-use strict;
-
-my $test = new PerlDDS::TestFramework();
-$test->enable_console_logging();
 
 my $secure = 0;
 my $tcp = 0;
@@ -25,6 +23,8 @@ GetOptions(
   "dynamic-writers" => \$dynamic_writers,
   "dynamic-readers" => \$dynamic_readers,
 ) or die("Invalid options");
+
+my $governance_generated = 0;
 
 my $default_ini;
 my %all_test_params;
@@ -48,8 +48,6 @@ if ($secure) {
       topic => "PD_OL_OA_OM_OD",
     },
   );
-
-  $test->generate_governance("AU_UA_ND_NL_NR", "governance.xml.p7s");
 
 } elsif ($tcp) {
   $default_ini = 'tcp.ini';
@@ -204,9 +202,10 @@ if ($secure) {
       expect_inconsistent_topic => 1, topic => "AppendableStructNoMatch2_DTC",
       reader_args => "--disallow-type-coercion",
     },
-    "DisallowTypeCoercion_MutableStructMatch" => {
+    "DisallowTypeCoercion_MutableStructNoMatch" => {
       reader_type => "MutableStruct", writer_type => "ModifiedMutableStruct",
-      topic => "MutableStructMatch_DTC", reader_args => "--disallow-type-coercion",
+      expect_inconsistent_topic => 1, topic => "MutableStructMatch_DTC",
+      reader_args => "--disallow-type-coercion",
     },
     "DisallowTypeCoercion_MutableStructNoMatchId" => {
       reader_type => "MutableStruct", writer_type => "ModifiedIdMutableStruct",
@@ -284,7 +283,7 @@ for my $test_name (keys(%all_test_params)) {
   $params->{w_ini} = $ini if (!exists($params->{w_ini}));
 }
 
-my $status = 0;
+my @failed;
 
 sub run_test {
   my $name = shift;
@@ -293,6 +292,13 @@ sub run_test {
     die("$name is not a valid test");
   }
   my $params = $all_test_params{$name};
+
+  my $test = new PerlDDS::TestFramework();
+  $test->enable_console_logging();
+  if ($secure && !$governance_generated) {
+    $test->generate_governance("AU_UA_ND_NL_NR", "governance.xml.p7s");
+    $governance_generated = 1;
+  }
 
   my @common_args = (
     '-ORBDebugLevel 1 -DCPSDebugLevel 6',
@@ -338,11 +344,12 @@ sub run_test {
   $test->process($writer, './publisher', join(' ', @writer_args));
   $test->start_process($writer);
 
-  my $this_status = 0;
-  $this_status |= $test->wait_kill($reader, 30);
-  $this_status |= $test->wait_kill($writer, 30);
-  print("$name ", $this_status ? "failed" : "passed", "\n");
-  $status |= $this_status;
+  $test->stop_process(30, $reader);
+  $test->stop_process(30, $writer);
+  if ($test->finish(60)) {
+    print("$name failed\n");
+    push(@failed, $name);
+  }
 }
 
 if ($run_test_name) {
@@ -353,8 +360,10 @@ if ($run_test_name) {
   }
 }
 
-if ($status) {
-  print STDERR "ERROR: test failed\n";
+if (scalar(@failed)) {
+  for my $name (@failed) {
+    print("$name failed\n");
+  }
+  exit(1);
 }
 
-exit $test->finish(60);

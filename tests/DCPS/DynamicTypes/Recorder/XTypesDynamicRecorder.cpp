@@ -47,15 +47,15 @@ public:
     String struct_string_final =
       "struct Dynamic::my_struct_final\n"
       "  Dynamic::long_struct_arr_final my_long_struct_arr Dynamic::long_struct_final[2] =\n"
-      "    [0]struct Dynamic::long_struct_final\n"
+      "    [0] struct Dynamic::long_struct_final\n"
       "      Int32 my_long = 1\n"
-      "    [1]struct Dynamic::long_struct_final\n"
+      "    [1] struct Dynamic::long_struct_final\n"
       "      Int32 my_long = 2\n"
       "  Dynamic::inner_union_seq_final my_inner_union_seq Dynamic::inner_union_final[2] =\n"
-      "    [0]union Dynamic::inner_union_final\n"
+      "    [0] union Dynamic::inner_union_final\n"
       "      Int32 discriminator = -2147483647\n"
       "      Boolean b = true\n"
-      "    [1]union Dynamic::inner_union_final\n"
+      "    [1] union Dynamic::inner_union_final\n"
       "      Int32 discriminator = 2\n"
       "      Dynamic::bool_seq my_alias_seq Boolean[2] =\n"
       "        [0] = true\n"
@@ -95,8 +95,8 @@ public:
 
     String nested_struct_string_final =
       "struct Dynamic::outer_struct_final\n"
-      "  struct Dynamic::inner_struct_final\n"
-      "    union Dynamic::inner_union_final\n"
+      "  struct Dynamic::inner_struct_final is\n"
+      "    union Dynamic::inner_union_final iu\n"
       "      Int32 discriminator = 2\n"
       "      Dynamic::bool_seq my_alias_seq Boolean[2] =\n"
       "        [0] = false\n"
@@ -110,23 +110,23 @@ public:
     String nested_union_string_final =
       "union Dynamic::outer_union_final\n"
       "  Dynamic::EnumType discriminator = V1\n"
-      "  struct Dynamic::inner_struct_final\n"
-      "    union Dynamic::inner_union_final\n"
+      "  struct Dynamic::inner_struct_final is\n"
+      "    union Dynamic::inner_union_final iu\n"
       "      Int32 discriminator = 1\n"
       "      Int32 l = 5\n";
 
     String struct_string_appendable =
       "struct Dynamic::my_struct_appendable\n"
       "  Dynamic::long_struct_arr_appendable my_long_struct_arr Dynamic::long_struct_appendable[2] =\n"
-      "    [0]struct Dynamic::long_struct_appendable\n"
+      "    [0] struct Dynamic::long_struct_appendable\n"
       "      Int32 my_long = 1\n"
-      "    [1]struct Dynamic::long_struct_appendable\n"
+      "    [1] struct Dynamic::long_struct_appendable\n"
       "      Int32 my_long = 2\n"
       "  Dynamic::inner_union_seq_appendable my_inner_union_seq Dynamic::inner_union_appendable[2] =\n"
-      "    [0]union Dynamic::inner_union_appendable\n"
+      "    [0] union Dynamic::inner_union_appendable\n"
       "      Int32 discriminator = -2147483647\n"
       "      Boolean b = true\n"
-      "    [1]union Dynamic::inner_union_appendable\n"
+      "    [1] union Dynamic::inner_union_appendable\n"
       "      Int32 discriminator = 2\n"
       "      Dynamic::bool_seq my_alias_seq Boolean[2] =\n"
       "        [0] = true\n"
@@ -166,8 +166,8 @@ public:
 
     String nested_struct_string_appendable =
       "struct Dynamic::outer_struct_appendable\n"
-      "  struct Dynamic::inner_struct_appendable\n"
-      "    union Dynamic::inner_union_appendable\n"
+      "  struct Dynamic::inner_struct_appendable is\n"
+      "    union Dynamic::inner_union_appendable iu\n"
       "      Int32 discriminator = 2\n"
       "      Dynamic::bool_seq my_alias_seq Boolean[2] =\n"
       "        [0] = false\n"
@@ -181,23 +181,23 @@ public:
     String nested_union_string_appendable =
       "union Dynamic::outer_union_appendable\n"
       "  Dynamic::EnumType discriminator = V1\n"
-      "  struct Dynamic::inner_struct_appendable\n"
-      "    union Dynamic::inner_union_appendable\n"
+      "  struct Dynamic::inner_struct_appendable is\n"
+      "    union Dynamic::inner_union_appendable iu\n"
       "      Int32 discriminator = 1\n"
       "      Int32 l = 5\n";
 
     String struct_string_mutable =
       "struct Dynamic::my_struct_mutable\n"
       "  Dynamic::long_struct_arr_mutable my_long_struct_arr Dynamic::long_struct_mutable[2] =\n"
-      "    [0]struct Dynamic::long_struct_mutable\n"
+      "    [0] struct Dynamic::long_struct_mutable\n"
       "      Int32 my_long = 1\n"
-      "    [1]struct Dynamic::long_struct_mutable\n"
+      "    [1] struct Dynamic::long_struct_mutable\n"
       "      Int32 my_long = 2\n"
       "  Dynamic::inner_union_seq_mutable my_inner_union_seq Dynamic::inner_union_mutable[2] =\n"
-      "    [0]union Dynamic::inner_union_mutable\n"
+      "    [0] union Dynamic::inner_union_mutable\n"
       "      Int32 discriminator = -2147483647\n"
       "      Boolean b = true\n"
-      "    [1]union Dynamic::inner_union_mutable\n"
+      "    [1] union Dynamic::inner_union_mutable\n"
       "      Int32 discriminator = 2\n"
       "      Dynamic::bool_seq my_alias_seq Boolean[2] =\n"
       "        [0] = true\n"
@@ -237,8 +237,8 @@ public:
 
     String nested_struct_string_mutable =
       "struct Dynamic::outer_struct_mutable\n"
-      "  struct Dynamic::inner_struct_mutable\n"
-      "    union Dynamic::inner_union_mutable\n"
+      "  struct Dynamic::inner_struct_mutable is\n"
+      "    union Dynamic::inner_union_mutable iu\n"
       "      Int32 discriminator = 2\n"
       "      Dynamic::bool_seq my_alias_seq Boolean[2] =\n"
       "        [0] = false\n"
@@ -252,8 +252,8 @@ public:
     String nested_union_string_mutable =
       "union Dynamic::outer_union_mutable\n"
       "  Dynamic::EnumType discriminator = V1\n"
-      "  struct Dynamic::inner_struct_mutable\n"
-      "    union Dynamic::inner_union_mutable\n"
+      "  struct Dynamic::inner_struct_mutable is\n"
+      "    union Dynamic::inner_union_mutable iu\n"
       "      Int32 discriminator = 1\n"
       "      Int32 l = 5\n";
 
