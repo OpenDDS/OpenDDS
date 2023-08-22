@@ -919,7 +919,7 @@ namespace {
       map = dynamic_cast<AST_Map*>(anonymous->type_);
     }
     const std::string named_as = anonymous ? anonymous->scoped_type_ : scoped(tdname);
-    Wrapper base_wrapper(map, named_as, "map");
+    RefWrapper base_wrapper(map, named_as, "map");
     base_wrapper.nested_key_only_ = nested_key_only;
 
     NamespaceGuard ng(!anonymous);
@@ -973,7 +973,7 @@ namespace {
 
     {
       Intro intro;
-      Wrapper wrapper(base_wrapper);
+      RefWrapper wrapper(base_wrapper);
       wrapper.done(&intro);
       const std::string value_access = wrapper.value_access();
       const std::string get_length = wrapper.map_get_length();
@@ -1048,7 +1048,7 @@ namespace {
                   "}\n";
               }
             } else {
-              Wrapper elem_wrapper(key, key_cxx_elem, "it->first");
+              RefWrapper elem_wrapper(key, key_cxx_elem, "it->first");
               elem_wrapper.nested_key_only_ = nested_key_only;
               Intro intro;
               elem_wrapper.done(&intro);
@@ -1069,7 +1069,7 @@ namespace {
               be_global->impl_ << indent <<
                 "size += it->second.size()" << strlen_suffix;
             } else {
-              Wrapper elem_wrapper(key, key_cxx_elem, "it->second");
+              RefWrapper elem_wrapper(key, key_cxx_elem, "it->second");
               elem_wrapper.nested_key_only_ = nested_key_only;
               Intro intro;
               elem_wrapper.done(&intro);
@@ -1088,7 +1088,7 @@ namespace {
 
     {
       Intro intro;
-      Wrapper wrapper(base_wrapper);
+      RefWrapper wrapper(base_wrapper);
       wrapper.done(&intro);
       const std::string value_access = wrapper.value_access();
       const std::string get_length = wrapper.map_get_length();
@@ -1139,7 +1139,7 @@ namespace {
             be_global->impl_ <<
               streamAndCheck("<< " + getWrapper(args, key, WD_OUTPUT), 4);
           } else {
-            Wrapper key_wrapper(key, key_cxx_elem, "it->first");
+            RefWrapper key_wrapper(key, key_cxx_elem, "it->first");
             key_wrapper.nested_key_only_ = nested_key_only;
             Intro intro;
             key_wrapper.done(&intro);
@@ -1157,7 +1157,7 @@ namespace {
             be_global->impl_ <<
               streamAndCheck("<< " + getWrapper(args, key, WD_OUTPUT), 4);
           } else {
-            Wrapper val_wrapper(val, val_cxx_elem, "it->second");
+            RefWrapper val_wrapper(val, val_cxx_elem, "it->second");
             val_wrapper.nested_key_only_ = nested_key_only;
             Intro intro;
             val_wrapper.done(&intro);
@@ -1174,7 +1174,7 @@ namespace {
 
     {
       Intro intro;
-      Wrapper wrapper(base_wrapper);
+      RefWrapper wrapper(base_wrapper);
       wrapper.is_const_ = false;
       wrapper.done(&intro);
       const std::string value_access = wrapper.value_access();

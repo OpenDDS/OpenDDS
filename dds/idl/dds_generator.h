@@ -1564,6 +1564,17 @@ struct RefWrapper {
     return value_access() + (cpp11_ ? ".data()" : ".get_buffer()");
   }
 
+  std::string map_check_empty() const 
+  {
+    return value_access() + ".empty()";
+  }
+
+  std::string map_get_length() const 
+  {
+    const std::string value = value_access();
+    return "static_cast<uint32_t>(" + value + ".size())";
+  }
+
   std::string flat_collection_access(std::string index) const
   {
     AST_Array* const array_node = dynamic_cast<AST_Array*>(type_);
