@@ -60,7 +60,7 @@ Here is the IDL file that defines our Message data type:
       };
     };
 
-The ``@topic`` annotation marks a data type that can be used as a topic’s type.
+The ``@topic`` annotation marks a data type that can be used as a topic's type.
 This must be a structure or a union.
 The structure or union may contain basic types (short, long, float, etc.
 ), enumerations, strings, sequences, arrays, structures, and unions.
@@ -111,10 +111,10 @@ Since we are using the default QoS policies, subsequent samples with the same su
     };
 
 In this example, every type from the key marked on the topic type down to what primitive data types to use as the key is annotated with ``@key``.
-That isn’t strictly necessary though, as the next section shows.
+That isn't strictly necessary though, as the next section shows.
 
-* Other structures that don’t have any defined keys.
-  In the following example, it’s implied that all the fields in InnerStruct are keys.
+* Other structures that don't have any defined keys.
+  In the following example, it's implied that all the fields in InnerStruct are keys.
 
 .. code-block:: omg-idl
 
@@ -148,12 +148,12 @@ Fields marked with ``@key(FALSE)`` are always excluded from being a key, such as
     };
 
 * Unions can also be used as keys if their discriminator is marked as a key.
-  There is an example of a keyed union topic type in the next section, but keep in mind a union being used as a key doesn’t have to be a topic type.
+  There is an example of a keyed union topic type in the next section, but keep in mind a union being used as a key doesn't have to be a topic type.
 
 * Arrays of any of the previous data types.
-  ``@key`` can’t be applied to sequences, even if the base type would be valid in an array.
+  ``@key`` can't be applied to sequences, even if the base type would be valid in an array.
   Also ``@key``, when applied to arrays, it makes every element in the array part of the key.
-  They can’t be applied to individual array elements.
+  They can't be applied to individual array elements.
 
 .. _getting_started--union-topic-types:
 
@@ -197,7 +197,7 @@ Topic Types vs. Nested Types
     Sect<2.1.1.4>
 
 In addition to ``@topic``, the set of IDL types OpenDDS can use can also be controlled using ``@nested`` and ``@default_nested``.
-Types that are "nested" are the opposite of topic types; they can’t be used for the top-level type of a topic, but they can be nested inside the top-level type (at any level of nesting).
+Types that are "nested" are the opposite of topic types; they can't be used for the top-level type of a topic, but they can be nested inside the top-level type (at any level of nesting).
 All types are nested by default in OpenDDS to reduce the code generated for type support, but there a number of ways to change this:
 
 * The type can be annotated with ``@topic`` (see :ref:`getting_started--identifying-topic-types`), or with ``@nested(FALSE)``, which is equivalent to ``@topic``.
@@ -212,7 +212,7 @@ All types are nested by default in OpenDDS to reduce the code generated for type
   * When using CMake, this can be done by setting either :cmake:var:`OPENDDS_DEFAULT_NESTED` to ``FALSE`` or passing ``--no-default-nested`` to :cmake:func:`opendds_target_sources(OPENDDS_IDL_OPTIONS)`.
 
 In cases where the module default is not nested, you can reverse this by using ``@nested`` or ``@nested(TRUE)`` for structures/unions and ``@default_nested`` or ``@default_nested(TRUE)`` for modules.
-NOTE: the ``@topic`` annotation doesn’t take a boolean argument, so ``@topic(FALSE)`` would cause an error in the OpenDDS IDL Compiler.
+NOTE: the ``@topic`` annotation doesn't take a boolean argument, so ``@topic(FALSE)`` would cause an error in the OpenDDS IDL Compiler.
 
 .. _getting_started--processing-the-idl:
 
@@ -261,9 +261,9 @@ Two different build systems are supported for projects that use OpenDDS:
 
 * MPC, the "Make Project Creator" which is used to build OpenDDS itself and the majority of its included tests and examples
 
-* `CMake <https://cmake.org>`__, a build system that’s commonly used across the industry
+* `CMake <https://cmake.org>`__, a build system that's commonly used across the industry
 
-Even if you will eventually use some custom build system that’s not one of the two listed above, start by building an example OpenDDS application using one of the supported build systems and then migrate the code generator command lines, compiler options, etc., to the custom build system.
+Even if you will eventually use some custom build system that's not one of the two listed above, start by building an example OpenDDS application using one of the supported build systems and then migrate the code generator command lines, compiler options, etc., to the custom build system.
 
 The remainder of this section will assume MPC.
 For more details on using CMake, see the :doc:`/building/cmake`.
@@ -575,7 +575,7 @@ Setting up the Subscriber
 ..
     Sect<2.1.4>
 
-Much of the subscriber’s code is identical or analogous to the publisher that we just finished exploring.
+Much of the subscriber's code is identical or analogous to the publisher that we just finished exploring.
 We will progress quickly through the similar parts and refer you to the discussion above for details.
 The full source code for this sample subscriber is found in the ``Subscriber.cpp`` and ``DataReaderListener.cpp`` files in :ghfile:`DevGuideExamples/DCPS/Messenger/`.
 
@@ -712,7 +712,7 @@ The Data Reader Listener Implementation
 Our listener class implements the ``DDS::DataReaderListener`` interface defined by the DDS specification.
 The ``DataReaderListener`` is wrapped within a ``DCPS::LocalObject`` which resolves ambiguously-inherited members such as ``_narrow`` and ``_ptr_type``.
 The interface defines a number of operations we must implement, each of which is invoked to inform us of different events.
-The ``OpenDDS::DCPS::DataReaderListener`` defines operations for OpenDDS’s special needs such as disconnecting and reconnected event updates.
+The ``OpenDDS::DCPS::DataReaderListener`` defines operations for OpenDDS's special needs such as disconnecting and reconnected event updates.
 Here is the interface definition:
 
 .. code-block:: omg-idl
@@ -753,7 +753,7 @@ The only operation that is really needed for this example is ``on_data_available
 
 The code above narrows the generic data reader passed into the listener to the type-specific ``MessageDataReader`` interface.
 The following code takes the next sample from the message reader.
-If the take is successful and returns valid data, we print out each of the message’s fields.
+If the take is successful and returns valid data, we print out each of the message's fields.
 
 .. code-block:: cpp
 
@@ -817,7 +817,7 @@ After we are finished in the publisher and subscriber, we can use the following 
         dpf->delete_participant(participant);
         TheServiceParticipant->shutdown();
 
-The domain participant’s ``delete_contained_entities()`` operation deletes all the topics, subscribers, and publishers created with that participant.
+The domain participant's ``delete_contained_entities()`` operation deletes all the topics, subscribers, and publishers created with that participant.
 Once this is done, we can use the domain participant factory to delete our domain participant.
 
 Since the publication and subscription of data within DDS is decoupled, data is not guaranteed to be delivered if a publication is disassociated (shutdown) prior to all data that has been sent having been received by the subscriptions.
@@ -854,10 +854,13 @@ First we will start a ``DCPSInfoRepo`` service so our publishers and subscribers
 
 The ``DCPSInfoRepo`` executable is found in ``bin/DCPSInfoRepo``.
 When we start the ``DCPSInfoRepo`` we need to ensure that publisher and subscriber application processes can also find the started ``DCPSInfoRepo``.
-This information can be provided in one of three ways: a.)
-parameters on the command line , b.)
-generated and placed in a shared file for applications to use, or c.) parameters placed in a configuration file for other processes to use.
-For our simple example here we will use option ‘b’ by generating the location properties of the ``DCPSInfoRepo`` into a file so that our simple publisher and subscriber can read it in and connect to it.
+This information can be provided in one of three ways:
+
+#. Pass arguments on the command line.
+#. Connection info generated and placed in a shared file for applications to use.
+#. Options put in a configuration file for other processes to use.
+
+For our simple example here we will use option 2 by generating the location properties of the ``DCPSInfoRepo`` into a file so that our simple publisher and subscriber can read it in and connect to it.
 
 From your current directory type:
 
@@ -998,8 +1001,8 @@ Registering and Using Instances in the Publisher
 ..
     Sect<2.2.1>
 
-The previous example implicitly specifies the instance it is publishing via the sample’s data fields.
-When ``write()`` is called, the data writer queries the sample’s key fields to determine the instance.
+The previous example implicitly specifies the instance it is publishing via the sample's data fields.
+When ``write()`` is called, the data writer queries the sample's key fields to determine the instance.
 The publisher also has the option to explicitly register the instance by calling ``register_instance()`` on the data writer:
 
 .. code-block:: cpp
@@ -1034,11 +1037,11 @@ The DDS specification provides a number of operations for reading and writing da
 In the examples above we used the ``take_next_sample()`` operation, to read the next sample and "take" ownership of it from the reader.
 The Message Data Reader also has the following take operations.
 
-* ``take()``—Take a sequence of up to max_samples values from the reader
+* ``take()``--Take a sequence of up to max_samples values from the reader
 
-* ``take_instance()``—Take a sequence of values for a specified instance
+* ``take_instance()``--Take a sequence of values for a specified instance
 
-* ``take_next_instance()``—Take a sequence of samples belonging to the same instance, without specifying the instance.
+* ``take_next_instance()``--Take a sequence of samples belonging to the same instance, without specifying the instance.
 
 There are also "read" operations corresponding to each of these "take" operations that obtain the same values, but leave the samples in the reader and simply mark them as read in the ``SampleInfo``.
 
@@ -1088,7 +1091,7 @@ The following example code is taken from ``DevGuideExamples/DCPS/Messenger_ZeroC
                                               DDS::ANY_VIEW_STATE,
                                               DDS::ANY_INSTANCE_STATE);
 
-After both zero-copy takes/reads and single-copy takes/reads, the sample and info sequences’ length are set to the number of samples read.
+After both zero-copy takes/reads and single-copy takes/reads, the sample and info sequences' length are set to the number of samples read.
 For the zero-copy reads, the ``max_len`` is set to a ``value >= length``.
 
 Since the application code has asked for a zero-copy loan of the data, it must return that loan when it is finished with the data:
@@ -1097,7 +1100,7 @@ Since the application code has asked for a zero-copy loan of the data, it must r
 
           dr->return_loan(messages, info);
 
-Calling ``return_loan()`` results in the sequences’ ``max_len`` being set to 0 and its owns member set to false, allowing the same sequences to be used for another zero-copy read.
+Calling ``return_loan()`` results in the sequences' ``max_len`` being set to 0 and its owns member set to false, allowing the same sequences to be used for another zero-copy read.
 
 If the first parameter of the data sample sequence constructor and info sequence constructor were changed to a value greater than zero, then the sample values returned would be copies.
 When values are copied, the application developer has the option of calling ``return_loan()``, but is not required to do so.
@@ -1107,7 +1110,7 @@ Because of this default, a sequence will automatically call ``return_loan()`` on
 To conform with the DDS specification and be portable to other implementations of DDS, applications should not rely on this automatic ``return_loan()`` feature.
 
 The second parameter to the sample and info sequences is the maximum slots available in the sequence.
-If the ``read()`` or ``take()`` operation’s ``max_samples`` parameter is larger than this value, then the maximum samples returned by ``read()`` or ``take()`` will be limited by this parameter of the sequence constructor.
+If the ``read()`` or ``take()`` operation's ``max_samples`` parameter is larger than this value, then the maximum samples returned by ``read()`` or ``take()`` will be limited by this parameter of the sequence constructor.
 
 Although the application can change the length of a zero-copy sequence, by calling the ``length(len)`` operation, you are advised against doing so because this call results in copying the data and creating a single-copy sequence of samples.
 

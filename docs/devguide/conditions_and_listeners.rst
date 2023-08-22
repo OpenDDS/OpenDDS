@@ -78,8 +78,8 @@ The IDL associated with the Inconsistent Topic Status is listed below:
 .. code-block:: omg-idl
 
     struct InconsistentTopicStatus {
-      long total_count;
-      long total_count_change;
+      long total_count;
+      long total_count_change;
     };
 
 The ``total_count`` value is the cumulative count of topics that have been reported as inconsistent.
@@ -127,17 +127,17 @@ The IDL associated with the Sample Rejected Status is listed below:
 .. code-block:: omg-idl
 
     enum SampleRejectedStatusKind {
-      NOT_REJECTED,
-      REJECTED_BY_INSTANCES_LIMIT,
-      REJECTED_BY_SAMPLES_LIMIT,
-      REJECTED_BY_SAMPLES_PER_INSTANCE_LIMIT
+      NOT_REJECTED,
+      REJECTED_BY_INSTANCES_LIMIT,
+      REJECTED_BY_SAMPLES_LIMIT,
+      REJECTED_BY_SAMPLES_PER_INSTANCE_LIMIT
     };
 
     struct SampleRejectedStatus {
-      long total_count;
-      long total_count_change;
-      SampleRejectedStatusKind last_reason;
-      InstanceHandle_t last_instance_handle;
+      long total_count;
+      long total_count_change;
+      SampleRejectedStatusKind last_reason;
+      InstanceHandle_t last_instance_handle;
     };
 
 The ``total_count`` value is the cumulative count of samples that have been reported as rejected.
@@ -159,15 +159,15 @@ The IDL associated with the Liveliness Changed Status is listed below:
 .. code-block:: omg-idl
 
     struct LivelinessChangedStatus {
-      long alive_count;
-      long not_alive_count;
-      long alive_count_change;
-      long not_alive_count_change;
-      InstanceHandle_t last_publication_handle;
+      long alive_count;
+      long not_alive_count;
+      long alive_count_change;
+      long not_alive_count_change;
+      InstanceHandle_t last_publication_handle;
     };
 
 The ``alive_count`` value is the total number of data writers currently active on the topic this data reader is reading.
-The ``not_alive_count`` value is the total number of data writers writing to the data reader’s topic that are no longer asserting their liveliness.
+The ``not_alive_count`` value is the total number of data writers writing to the data reader's topic that are no longer asserting their liveliness.
 The ``alive_count_change`` value is the change in the alive count since the last time the status was accessed.
 The ``not_alive_count_change`` value is the change in the not alive count since the last time the status was accessed.
 The ``last_publication_handle`` is the handle of the last data writer whose liveliness has changed.
@@ -186,9 +186,9 @@ The IDL associated with the Requested Deadline Missed Status is listed below:
 .. code-block:: omg-idl
 
     struct RequestedDeadlineMissedStatus {
-      long total_count;
-      long total_count_change;
-      InstanceHandle_t last_instance_handle;
+      long total_count;
+      long total_count_change;
+      InstanceHandle_t last_instance_handle;
     };
 
 The ``total_count`` value is the cumulative count of missed requested deadlines that have been reported.
@@ -209,17 +209,17 @@ The IDL associated with the Requested Incompatible QoS Status is listed below:
 .. code-block:: omg-idl
 
     struct QosPolicyCount {
-      QosPolicyId_t policy_id;
-      long count;
+      QosPolicyId_t policy_id;
+      long count;
     };
 
     typedef sequence<QosPolicyCount> QosPolicyCountSeq;
 
     struct RequestedIncompatibleQosStatus {
-      long total_count;
-      long total_count_change;
-      QosPolicyId_t last_policy_id;
-      QosPolicyCountSeq policies;
+      long total_count;
+      long total_count_change;
+      QosPolicyId_t last_policy_id;
+      QosPolicyCountSeq policies;
     };
 
 The ``total_count`` value is the cumulative count of times data writers with incompatible QoS have been reported.
@@ -253,8 +253,8 @@ The IDL associated with the Sample Lost Status is listed below:
 .. code-block:: omg-idl
 
     struct SampleLostStatus {
-      long total_count;
-      long total_count_change;
+      long total_count;
+      long total_count_change;
     };
 
 The ``total_count`` value is the cumulative count of samples reported as lost.
@@ -274,11 +274,11 @@ The IDL associated with the Subscription Matched Status is listed below:
 .. code-block:: omg-idl
 
     struct SubscriptionMatchedStatus {
-      long total_count;
-      long total_count_change;
-      long current_count;
-      long current_count_change;
-      InstanceHandle_t last_publication_handle;
+      long total_count;
+      long total_count_change;
+      long current_count;
+      long current_count_change;
+      InstanceHandle_t last_publication_handle;
     };
 
 The ``total_count`` value is the cumulative count of data writers that have compatibly matched this data reader.
@@ -309,8 +309,8 @@ This means that any connected data readers will consider this data writer no lon
 .. code-block:: omg-idl
 
     struct LivelinessLostStatus {
-      long total_count;
-      long total_count_change;
+      long total_count;
+      long total_count_change;
     };
 
 The ``total_count`` value is the cumulative count of times that an alive data writer has become not alive.
@@ -330,9 +330,9 @@ The IDL associated with the Offered Deadline Missed Status is listed below:
 .. code-block:: omg-idl
 
     struct OfferedDeadlineMissedStatus {
-      long total_count;
-      long total_count_change;
-      InstanceHandle_t last_instance_handle;
+      long total_count;
+      long total_count_change;
+      InstanceHandle_t last_instance_handle;
     };
 
 The ``total_count`` value is the cumulative count of times that deadlines have been missed for an instance.
@@ -353,16 +353,16 @@ The IDL associated with the Offered Incompatible QoS Status is listed below:
 .. code-block:: omg-idl
 
     struct QosPolicyCount {
-      QosPolicyId_t policy_id;
-      long count;
+      QosPolicyId_t policy_id;
+      long count;
     };
     typedef sequence<QosPolicyCount> QosPolicyCountSeq;
 
     struct OfferedIncompatibleQosStatus {
-      long total_count;
-      long total_count_change;
-      QosPolicyId_t last_policy_id;
-      QosPolicyCountSeq policies;
+      long total_count;
+      long total_count_change;
+      QosPolicyId_t last_policy_id;
+      QosPolicyCountSeq policies;
     };
 
 The ``total_count`` value is the cumulative count of times that data readers with incompatible QoS have been found.
@@ -384,11 +384,11 @@ The IDL associated with the Publication Matched Status is listed below:
 .. code-block:: omg-idl
 
     struct PublicationMatchedStatus {
-      long total_count;
-      long total_count_change;
-      long current_count;
-      long current_count_change;
-      InstanceHandle_t last_subscription_handle;
+      long total_count;
+      long total_count_change;
+      long current_count;
+      long current_count_change;
+      InstanceHandle_t last_subscription_handle;
     };
 
 The ``total_count`` value is the cumulative count of data readers that have compatibly matched this data writer.
@@ -407,7 +407,7 @@ Listeners
     Sect<4.3>
 
 Each entity defines its own listener interface based on the statuses it can report.
-Any entity’s listener interface also inherits from the listeners of its owned entities, allowing it to handle statuses for owned entities as well.
+Any entity's listener interface also inherits from the listeners of its owned entities, allowing it to handle statuses for owned entities as well.
 For example, a subscriber listener directly defines an operation to handle Data On Readers statuses and inherits from the data reader listener as well.
 
 Each status operation takes the general form of ``on_<status_name>(<entity>, <status_struct>)``, where ``<status_name>`` is the name of the status being reported, ``<entity>`` is a reference to the entity the status is reported for, and ``<status_struct>`` is the structure with details of the status.
@@ -416,7 +416,7 @@ For example, here is the operation for the Sample Lost status:
 
 .. code-block:: cpp
 
-      void on_sample_lost(in DataReader the_reader, in SampleLostStatus status);
+      void on_sample_lost(in DataReader the_reader, in SampleLostStatus status);
 
 Listeners can either be passed to the factory function used to create their entity or explicitly set by calling ``set_listener()`` on the entity after it is created.
 Both of these functions also take a status mask as a parameter.
@@ -429,19 +429,19 @@ Mask bit values for each status are defined in DdsDcpsInfrastructure.idl:
       typedef unsigned long StatusKind;
       typedef unsigned long StatusMask; // bit-mask StatusKind
 
-      const StatusKind INCONSISTENT_TOPIC_STATUS        = 0x0001 << 0;
-      const StatusKind OFFERED_DEADLINE_MISSED_STATUS   = 0x0001 << 1;
-      const StatusKind REQUESTED_DEADLINE_MISSED_STATUS = 0x0001 << 2;
-      const StatusKind OFFERED_INCOMPATIBLE_QOS_STATUS  = 0x0001 << 5;
+      const StatusKind INCONSISTENT_TOPIC_STATUS        = 0x0001 << 0;
+      const StatusKind OFFERED_DEADLINE_MISSED_STATUS   = 0x0001 << 1;
+      const StatusKind REQUESTED_DEADLINE_MISSED_STATUS = 0x0001 << 2;
+      const StatusKind OFFERED_INCOMPATIBLE_QOS_STATUS  = 0x0001 << 5;
       const StatusKind REQUESTED_INCOMPATIBLE_QOS_STATUS= 0x0001 << 6;
-      const StatusKind SAMPLE_LOST_STATUS               = 0x0001 << 7;
-      const StatusKind SAMPLE_REJECTED_STATUS           = 0x0001 << 8;
-      const StatusKind DATA_ON_READERS_STATUS           = 0x0001 << 9;
-      const StatusKind DATA_AVAILABLE_STATUS            = 0x0001 << 10;
-      const StatusKind LIVELINESS_LOST_STATUS           = 0x0001 << 11;
-      const StatusKind LIVELINESS_CHANGED_STATUS        = 0x0001 << 12;
-      const StatusKind PUBLICATION_MATCHED_STATUS       = 0x0001 << 13;
-      const StatusKind SUBSCRIPTION_MATCHED_STATUS      = 0x0001 << 14;
+      const StatusKind SAMPLE_LOST_STATUS               = 0x0001 << 7;
+      const StatusKind SAMPLE_REJECTED_STATUS           = 0x0001 << 8;
+      const StatusKind DATA_ON_READERS_STATUS           = 0x0001 << 9;
+      const StatusKind DATA_AVAILABLE_STATUS            = 0x0001 << 10;
+      const StatusKind LIVELINESS_LOST_STATUS           = 0x0001 << 11;
+      const StatusKind LIVELINESS_CHANGED_STATUS        = 0x0001 << 12;
+      const StatusKind PUBLICATION_MATCHED_STATUS       = 0x0001 << 13;
+      const StatusKind SUBSCRIPTION_MATCHED_STATUS      = 0x0001 << 14;
     };
 
 Simply do a bit-wise "or" of the desired status bits to construct a mask for your listener.
@@ -449,23 +449,23 @@ Here is an example of attaching a listener to a data reader (for just Data Avail
 
 .. code-block:: cpp
 
-        DDS::DataReaderListener_var listener (new DataReaderListenerImpl);
-        // Create the Datareader
-        DDS::DataReader_var dr = sub->create_datareader(
-          topic,
-          DATAREADER_QOS_DEFAULT,
-          listener,
-          DDS::DATA_AVAILABLE_STATUS);
+        DDS::DataReaderListener_var listener (new DataReaderListenerImpl);
+        // Create the Datareader
+        DDS::DataReader_var dr = sub->create_datareader(
+          topic,
+          DATAREADER_QOS_DEFAULT,
+          listener,
+          DDS::DATA_AVAILABLE_STATUS);
 
 Here is an example showing how to change the listener using ``set_listener()``:
 
 .. code-block:: cpp
 
-      dr->set_listener(listener,
+      dr->set_listener(listener,
                        DDS::DATA_AVAILABLE_STATUS | DDS::LIVELINESS_CHANGED_STATUS);
 
 When a plain communication status changes, OpenDDS invokes the most specific relevant listener operation.
-This means, for example, that a data reader’s listener would take precedence over the subscriber’s listener for statuses related to the data reader.
+This means, for example, that a data reader's listener would take precedence over the subscriber's listener for statuses related to the data reader.
 
 A common "gotcha" when using ``set_listener`` is that the listener is not invoked immediately.
 Instead, the listener will be invoked for the next status change.
@@ -485,8 +485,8 @@ Topic Listener
 .. code-block:: omg-idl
 
     interface TopicListener : Listener {
-      void on_inconsistent_topic(in Topic the_topic,
-                                 in InconsistentTopicStatus status);
+      void on_inconsistent_topic(in Topic the_topic,
+                                 in InconsistentTopicStatus status);
     };
 
 .. _conditions_and_listeners--data-writer-listener:
@@ -500,14 +500,14 @@ Data Writer Listener
 .. code-block:: omg-idl
 
     interface DataWriterListener : Listener {
-      void on_offered_deadline_missed(in DataWriter writer,
-                                      in OfferedDeadlineMissedStatus status);
-      void on_offered_incompatible_qos(in DataWriter writer,
-                                       in OfferedIncompatibleQosStatus status);
-      void on_liveliness_lost(in DataWriter writer,
-                              in LivelinessLostStatus status);
-      void on_publication_matched(in DataWriter writer,
-                                  in PublicationMatchedStatus status);
+      void on_offered_deadline_missed(in DataWriter writer,
+                                      in OfferedDeadlineMissedStatus status);
+      void on_offered_incompatible_qos(in DataWriter writer,
+                                       in OfferedIncompatibleQosStatus status);
+      void on_liveliness_lost(in DataWriter writer,
+                              in LivelinessLostStatus status);
+      void on_publication_matched(in DataWriter writer,
+                                  in PublicationMatchedStatus status);
     };
 
 .. _conditions_and_listeners--publisher-listener:
@@ -534,19 +534,19 @@ Data Reader Listener
 .. code-block:: omg-idl
 
     interface DataReaderListener : Listener {
-      void on_requested_deadline_missed(in DataReader the_reader,
-                                        in RequestedDeadlineMissedStatus status);
-      void on_requested_incompatible_qos(in DataReader the_reader,
-                                         in RequestedIncompatibleQosStatus status);
-      void on_sample_rejected(in DataReader the_reader,
-                              in SampleRejectedStatus status);
-      void on_liveliness_changed(in DataReader the_reader,
-                                 in LivelinessChangedStatus status);
-      void on_data_available(in DataReader the_reader);
-      void on_subscription_matched(in DataReader the_reader,
-                                   in SubscriptionMatchedStatus status);
-      void on_sample_lost(in DataReader the_reader,
-                          in SampleLostStatus status);
+      void on_requested_deadline_missed(in DataReader the_reader,
+                                        in RequestedDeadlineMissedStatus status);
+      void on_requested_incompatible_qos(in DataReader the_reader,
+                                         in RequestedIncompatibleQosStatus status);
+      void on_sample_rejected(in DataReader the_reader,
+                              in SampleRejectedStatus status);
+      void on_liveliness_changed(in DataReader the_reader,
+                                 in LivelinessChangedStatus status);
+      void on_data_available(in DataReader the_reader);
+      void on_subscription_matched(in DataReader the_reader,
+                                   in SubscriptionMatchedStatus status);
+      void on_sample_lost(in DataReader the_reader,
+                          in SampleLostStatus status);
     };
 
 .. _conditions_and_listeners--subscriber-listener:
@@ -560,7 +560,7 @@ Subscriber Listener
 .. code-block:: omg-idl
 
     interface SubscriberListener : DataReaderListener {
-      void on_data_on_readers(in Subscriber the_subscriber);
+      void on_data_on_readers(in Subscriber the_subscriber);
     };
 
 .. _conditions_and_listeners--domain-participant-listener:
@@ -574,8 +574,8 @@ Domain Participant Listener
 .. code-block:: omg-idl
 
     interface DomainParticipantListener : TopicListener,
-                                          PublisherListener,
-                                          SubscriberListener {
+                                          PublisherListener,
+                                          SubscriberListener {
     };
 
 .. _conditions_and_listeners--conditions:
@@ -607,7 +607,7 @@ Status Condition
 
 Each entity has a status condition object associated with it and a ``get_statuscondition()`` operation that lets applications access the status condition.
 Each condition has a set of enabled statuses that can trigger that condition.
-Attaching one or more conditions to a wait set allows application developers to wait on the condition’s status set.
+Attaching one or more conditions to a wait set allows application developers to wait on the condition's status set.
 Once an enabled status is triggered, the wait call returns from the wait set and the developer can query the relevant status condition on the entity.
 Querying the status condition resets the status.
 
@@ -624,31 +624,31 @@ The first step is to get the status condition from the data writer, enable the d
 
 .. code-block:: cpp
 
-      DDS::StatusCondition_var cond = data_writer->get_statuscondition();
-      cond->set_enabled_statuses(DDS::OFFERED_INCOMPATIBLE_QOS_STATUS);
+      DDS::StatusCondition_var cond = data_writer->get_statuscondition();
+      cond->set_enabled_statuses(DDS::OFFERED_INCOMPATIBLE_QOS_STATUS);
 
-      DDS::WaitSet_var ws = new DDS::WaitSet;
-      ws->attach_condition(cond);
+      DDS::WaitSet_var ws = new DDS::WaitSet;
+      ws->attach_condition(cond);
 
 Now we can wait ten seconds for the condition:
 
 .. code-block:: cpp
 
-      DDS::ConditionSeq active;
-      DDS::Duration_t ten_seconds = {10, 0};
-      int result = ws->wait(active, ten_seconds);
+      DDS::ConditionSeq active;
+      DDS::Duration_t ten_seconds = {10, 0};
+      int result = ws->wait(active, ten_seconds);
 
 The result of this operation is either a timeout or a set of triggered conditions in the active sequence:
 
 .. code-block:: cpp
 
-      if (result == DDS::RETCODE_TIMEOUT) {
-        cout << "Wait timed out" << std::endl;
-      } else if (result == DDS::RETCODE_OK) {
-        DDS::OfferedIncompatibleQosStatus incompatibleStatus;
-        data_writer->get_offered_incompatible_qos(incompatibleStatus);
-        // Access status fields as desired...
-      }
+      if (result == DDS::RETCODE_TIMEOUT) {
+        cout << "Wait timed out" << std::endl;
+      } else if (result == DDS::RETCODE_OK) {
+        DDS::OfferedIncompatibleQosStatus incompatibleStatus;
+        data_writer->get_offered_incompatible_qos(incompatibleStatus);
+        // Access status fields as desired...
+      }
 
 Developers have the option of attaching multiple conditions to a single wait set as well as enabling multiple statuses per condition.
 
