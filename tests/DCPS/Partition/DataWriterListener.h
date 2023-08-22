@@ -64,7 +64,7 @@ namespace Test
     long const expected_matches_;
 
     /// The actual number of publication matches.
-    ACE_Atomic_Op<ACE_Thread_Mutex, long> publication_matches_;
+    OpenDDS::DCPS::Atomic<long> publication_matches_;
 
   };
 

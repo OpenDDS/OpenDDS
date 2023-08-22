@@ -25,11 +25,11 @@ class SubDriver
     int parse_pub_arg(const ACE_TString& arg);
     int parse_sub_arg(const ACE_TString& arg);
 
-    OpenDDS::DCPS::RepoId pub_id_;
+    OpenDDS::DCPS::GUID_t pub_id_;
     ACE_INET_Addr     pub_addr_;
     ACE_TString       pub_addr_str_;
 
-    OpenDDS::DCPS::RepoId sub_id_;
+    OpenDDS::DCPS::GUID_t sub_id_;
     ACE_INET_Addr     sub_addr_;
     ACE_TString       sub_addr_str_;
 

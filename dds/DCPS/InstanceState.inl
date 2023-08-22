@@ -68,7 +68,7 @@ size_t OpenDDS::DCPS::InstanceState::no_writers_generation_count() const
 
 ACE_INLINE
 void
-OpenDDS::DCPS::InstanceState::data_was_received(const PublicationId& writer_id)
+OpenDDS::DCPS::InstanceState::data_was_received(const GUID_t& writer_id)
 {
   ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, lock_);
   cancel_release();
@@ -120,7 +120,7 @@ OpenDDS::DCPS::InstanceState::data_was_received(const PublicationId& writer_id)
 
 ACE_INLINE
 void
-OpenDDS::DCPS::InstanceState::lively(const PublicationId& writer_id)
+OpenDDS::DCPS::InstanceState::lively(const GUID_t& writer_id)
 {
   ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, lock_);
 
@@ -160,7 +160,7 @@ OpenDDS::DCPS::InstanceState::empty(bool value)
 
 ACE_INLINE
 bool
-OpenDDS::DCPS::InstanceState::is_last (const PublicationId& pub)
+OpenDDS::DCPS::InstanceState::is_last (const GUID_t& pub)
 {
   ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, lock_, false);
 

@@ -1432,9 +1432,12 @@ operator>>(Serializer& s, String& x)
 {
   char* buf = 0;
   const size_t length = s.read_string(buf);
+  if (!s.good_bit()) {
+    return false;
+  }
   x.assign(buf, length);
   s.free_string(buf);
-  return s.good_bit();
+  return true;
 }
 
 ACE_INLINE bool
@@ -1456,9 +1459,12 @@ operator>>(Serializer& s, WString& x)
 {
   ACE_CDR::WChar* buf = 0;
   const size_t length = s.read_string(buf);
+  if (!s.good_bit()) {
+    return false;
+  }
   x.assign(buf, length);
   s.free_string(buf);
-  return s.good_bit();
+  return true;
 }
 
 ACE_INLINE bool
@@ -1720,7 +1726,7 @@ void serialized_size_list_end_parameter_id(
   if (encoding.xcdr_version() == Encoding::XCDR_VERSION_1) {
     /*
      * TODO(iguessthislldo): See how DDSXTY14-23 is resolved.
-     * https://github.com/objectcomputing/OpenDDS/pull/1722#discussion_r447165924
+     * https://github.com/OpenDDS/OpenDDS/pull/1722#discussion_r447165924
      */
     encoding.align(size, xcdr1_pid_alignment);
     size += uint16_cdr_size * 2;

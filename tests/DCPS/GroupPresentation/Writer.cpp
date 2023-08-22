@@ -17,7 +17,7 @@
 
 const int num_instances_per_writer = 1;
 extern int num_messages;
-static ACE_Atomic_Op<ACE_SYNCH_MUTEX, int> count;
+static OpenDDS::DCPS::Atomic<int> count;
 
 
 Writer::Writer(DDS::Publisher_ptr publisher, DDS::DataWriter_ptr writer)
@@ -155,13 +155,12 @@ Writer::is_finished() const
 int
 Writer::get_timeout_writes() const
 {
-  return timeout_writes_.value();
+  return timeout_writes_;
 }
 
 
 int
 Writer::next_count()
 {
-  ++ count;
-  return count.value();
+  return ++count;
 }

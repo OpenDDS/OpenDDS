@@ -11,9 +11,17 @@
 
 #  include <dds/DdsDynamicDataC.h>
 
+#  include <cstring>
+
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace XTypes {
+
+inline bool dynamic_type_is_valid(DDS::DynamicType_ptr type)
+{
+  DDS::TypeDescriptor_var td;
+  return type && type->get_descriptor(td) == DDS::RETCODE_OK && td;
+}
 
 OpenDDS_Dcps_Export DDS::ReturnCode_t extensibility(
   DDS::DynamicType_ptr type, DCPS::Extensibility& ext);
@@ -21,7 +29,57 @@ OpenDDS_Dcps_Export DDS::ReturnCode_t max_extensibility(
   DDS::DynamicType_ptr type, DCPS::Extensibility& ext);
 OpenDDS_Dcps_Export DCPS::Extensibility dds_to_opendds_ext(DDS::ExtensibilityKind ext);
 
-/*
+/**
+ * Iterate over parts of a member name path that can be the name of a
+ * field inside a function or an array element nested multiple levels inside a
+ * type.
+ *
+ * Examples:
+ *   "member_a"
+ *   "member_b[2]"
+ *   "member_b[2].x"
+ *   "[2]" (If the DynamicData is indexed or keyed)
+ */
+class OpenDDS_Dcps_Export MemberPathParser {
+public:
+  size_t pos;
+  size_t left;
+  const char* path;
+  bool error;
+  bool in_subscript;
+  DCPS::String subpath;
+
+  MemberPathParser(const char* path)
+    : pos(0)
+    , left(path ? std::strlen(path) : 0)
+    , path(left > 0 ? path : 0)
+    , error(false)
+    , in_subscript(false)
+  {
+  }
+
+  MemberPathParser(const DCPS::String& path)
+    : pos(0)
+    , left(path.size())
+    , path(left > 0 ? path.c_str() : 0)
+    , error(false)
+    , in_subscript(false)
+  {
+  }
+
+  bool consume(size_t by);
+
+  /**
+   * Put the next member name or subscript value in subpath and which kind in
+   * in_subscript. Returns false when the end of the path is reached or there
+   * was an error in which case error is set to true.
+   */
+  bool get_next_subpath();
+
+  bool get_index(DDS::UInt32 &index);
+};
+
+/**
  * Provides access to a specific member using MemberIds that may be nested
  * inside a DynamicType or DynamicData.
  */
@@ -48,6 +106,9 @@ public:
 
   size_t level() const { return ids.size(); }
 
+  DDS::ReturnCode_t resolve_string_path(
+    DDS::DynamicType_ptr type, const DCPS::String &path);
+
   DDS::ReturnCode_t get_member_from_type(
     DDS::DynamicType_ptr type, DDS::DynamicTypeMember_var& member);
 
@@ -61,8 +122,103 @@ public:
 };
 typedef OPENDDS_VECTOR(MemberPath) MemberPathVec;
 
+enum Filter {
+  Filter_All,
+  Filter_Keys,
+  Filter_NestedKeys,
+  Filter_NonKeys
+};
+
+OpenDDS_Dcps_Export DDS::ReturnCode_t get_values(
+  DDS::DynamicType_ptr type, MemberPathVec& paths, Filter filter);
 OpenDDS_Dcps_Export DDS::ReturnCode_t get_keys(DDS::DynamicType_ptr type, MemberPathVec& paths);
+OpenDDS_Dcps_Export bool is_key(DDS::DynamicType_ptr type, const char* field);
 OpenDDS_Dcps_Export DDS::ReturnCode_t key_count(DDS::DynamicType_ptr type, size_t& count);
+
+OpenDDS_Dcps_Export DDS::ReturnCode_t less_than(
+  bool& result, DDS::DynamicData_ptr a, DDS::DynamicData_ptr b, Filter filter);
+OpenDDS_Dcps_Export DDS::ReturnCode_t key_less_than(
+  bool& result, DDS::DynamicData_ptr a, DDS::DynamicData_ptr b);
+OpenDDS_Dcps_Export DDS::ReturnCode_t compare_members(
+  int& result, DDS::DynamicData_ptr a, DDS::DynamicData_ptr b, DDS::MemberId id);
+
+OpenDDS_Dcps_Export DDS::ReturnCode_t get_member_type(
+  DDS::DynamicType_var& member_type, DDS::DynamicType_ptr container_type, DDS::MemberId id);
+
+inline DDS::ReturnCode_t get_member_type(
+  DDS::DynamicType_var& member_type, DDS::DynamicData_ptr container, DDS::MemberId id)
+{
+  DDS::DynamicType_var container_type = container->type();
+  return get_member_type(member_type, container_type, id);
+}
+
+OpenDDS_Dcps_Export DDS::ReturnCode_t get_uint_value(
+  DDS::UInt64& value, DDS::DynamicData_ptr src, DDS::MemberId id, DDS::TypeKind kind);
+OpenDDS_Dcps_Export DDS::ReturnCode_t set_uint_value(
+  DDS::DynamicData_ptr dest, DDS::MemberId id, DDS::TypeKind kind, DDS::UInt64 value);
+OpenDDS_Dcps_Export DDS::ReturnCode_t get_int_value(
+  DDS::Int64& value, DDS::DynamicData_ptr src, DDS::MemberId id, DDS::TypeKind kind);
+OpenDDS_Dcps_Export DDS::ReturnCode_t set_int_value(
+  DDS::DynamicData_ptr dest, DDS::MemberId id, DDS::TypeKind kind, DDS::Int64 value);
+
+OpenDDS_Dcps_Export DDS::UInt32 bound_total(DDS::TypeDescriptor_var descriptor);
+
+OpenDDS_Dcps_Export DDS::ReturnCode_t bitmask_bound(
+  DDS::DynamicType_ptr type, DDS::TypeKind& bound_kind);
+OpenDDS_Dcps_Export DDS::ReturnCode_t get_bitmask_value(
+  DDS::UInt64& value, DDS::DynamicType_ptr type, DDS::DynamicData_ptr src, DDS::MemberId id);
+
+OpenDDS_Dcps_Export DDS::ReturnCode_t enum_bound(DDS::DynamicType_ptr enum_type, DDS::TypeKind& bound_kind);
+
+OpenDDS_Dcps_Export DDS::ReturnCode_t get_enum_value(
+  DDS::Int32& value, DDS::DynamicType_ptr enum_type, DDS::DynamicData_ptr src, DDS::MemberId id);
+inline DDS::ReturnCode_t get_enum_value(
+  DDS::Int32& value, DDS::DynamicData_ptr src, DDS::MemberId id)
+{
+  DDS::DynamicType_var enum_type;
+  const DDS::ReturnCode_t rc = get_member_type(enum_type, src, id);
+  if (rc != DDS::RETCODE_OK) {
+    return rc;
+  }
+  return get_enum_value(value, enum_type, src, id);
+}
+
+OpenDDS_Dcps_Export DDS::ReturnCode_t set_enum_value(
+  DDS::DynamicType_ptr enum_type, DDS::DynamicData_ptr dest, DDS::MemberId id, DDS::Int32 value);
+inline DDS::ReturnCode_t set_enum_value(
+  DDS::DynamicData_ptr dest, DDS::MemberId id, DDS::Int32 value)
+{
+  DDS::DynamicType_var enum_type;
+  const DDS::ReturnCode_t rc = get_member_type(enum_type, dest, id);
+  if (rc != DDS::RETCODE_OK) {
+    return rc;
+  }
+  return set_enum_value(enum_type, dest, id, value);
+}
+
+OpenDDS_Dcps_Export DDS::ReturnCode_t set_enum_value(
+  DDS::DynamicType_ptr enum_type, DDS::DynamicData_ptr dest, DDS::MemberId id,
+  const char* enumeral_name);
+inline DDS::ReturnCode_t set_enum_value(
+  DDS::DynamicData_ptr dest, DDS::MemberId id, const char* enumeral_name)
+{
+  DDS::DynamicType_var enum_type;
+  const DDS::ReturnCode_t rc = get_member_type(enum_type, dest, id);
+  if (rc != DDS::RETCODE_OK) {
+    return rc;
+  }
+  return set_enum_value(enum_type, dest, id, enumeral_name);
+}
+
+OpenDDS_Dcps_Export DDS::ReturnCode_t get_enumerator_name(
+  DDS::String8_var& name, DDS::Int32 value, DDS::DynamicType_ptr type);
+OpenDDS_Dcps_Export DDS::ReturnCode_t get_enumerator_value(
+  DDS::Int32& value, const char* name, DDS::DynamicType_ptr type);
+
+OpenDDS_Dcps_Export DDS::ReturnCode_t copy_member(
+  DDS::DynamicData_ptr dest, DDS::MemberId dest_id,
+  DDS::DynamicData_ptr src, DDS::MemberId src_id);
+OpenDDS_Dcps_Export DDS::ReturnCode_t copy(DDS::DynamicData_ptr dest, DDS::DynamicData_ptr src);
 
 } // namespace XTypes
 } // namespace OpenDDS

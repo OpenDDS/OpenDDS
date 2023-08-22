@@ -9,32 +9,95 @@
 #ifndef OPENDDS_SAFETY_PROFILE
 #  include "DynamicTypeImpl.h"
 
-#  include <dds/DCPS/debug.h>
 #  include <dds/DCPS/LocalObject.h>
+#  include <dds/DCPS/Sample.h>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
+
+namespace DCPS {
+  struct Value;
+}
+
 namespace XTypes {
 
-class DynamicDataBase : public virtual DCPS::LocalObject<DDS::DynamicData> {
+class OpenDDS_Dcps_Export DynamicDataBase : public virtual DCPS::LocalObject<DDS::DynamicData> {
 public:
   DynamicDataBase();
   DynamicDataBase(DDS::DynamicType_ptr type);
 
   DDS::ReturnCode_t get_descriptor(DDS::MemberDescriptor*& value, MemberId id);
+  DDS::ReturnCode_t set_descriptor(DDS::MemberId id, DDS::MemberDescriptor* value);
   DDS::MemberId get_member_id_by_name(const char* name);
+  DDS::DynamicType_ptr type();
+  DDS::Boolean equals(DDS::DynamicData_ptr other);
+  DDS::DynamicData_ptr loan_value(DDS::MemberId id);
+  DDS::ReturnCode_t return_loaned_value(DDS::DynamicData_ptr other);
+  DDS::DynamicData_ptr clone();
+
+  DDS::ReturnCode_t get_int64_value(DDS::Int64& value, DDS::MemberId id);
+  virtual DDS::ReturnCode_t get_int64_value_impl(DDS::Int64& value, DDS::MemberId id) = 0;
+  DDS::ReturnCode_t get_uint64_value(DDS::UInt64& value, DDS::MemberId id);
+  virtual DDS::ReturnCode_t get_uint64_value_impl(DDS::UInt64& value, DDS::MemberId id) = 0;
+
+  static bool has_explicit_keys(DDS::DynamicType* dt);
+  static bool exclude_member(DCPS::Sample::Extent ext, bool is_key, bool has_explicit_keys);
+  static DCPS::Sample::Extent nested(DCPS::Sample::Extent ext);
+
+#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+  virtual DDS::ReturnCode_t get_simple_value(DCPS::Value& value, DDS::MemberId id);
+#endif
 
 protected:
   /// Verify that a given type is primitive or string or wstring.
-  ///
   bool is_type_supported(TypeKind tk, const char* func_name);
-  bool is_primitive(TypeKind tk) const;
+
   bool get_index_from_id(DDS::MemberId id, ACE_CDR::ULong& index, ACE_CDR::ULong bound) const;
+  bool enum_string_helper(char*& strInOut, MemberId id);
+
+  DDS::ReturnCode_t check_member(
+    DDS::MemberDescriptor_var& member_desc, DDS::DynamicType_var& member_type,
+    const char* method, const char* action, DDS::MemberId id, DDS::TypeKind tk = TK_NONE);
+
+  DDS::ReturnCode_t check_member(
+    DDS::DynamicType_var& member_type, const char* method, const char* action,
+    DDS::MemberId id, DDS::TypeKind tk = TK_NONE)
+  {
+    DDS::MemberDescriptor_var md;
+    return check_member(md, member_type, method, action, id, tk);
+  }
+
+  static DDS::MemberId get_union_default_member(DDS::DynamicType* type);
+  DDS::ReturnCode_t get_selected_union_branch(
+    DDS::Int32 disc, bool& found_selected_member, DDS::MemberDescriptor_var& selected_md) const;
+  DDS::ReturnCode_t get_selected_union_branch(
+    bool& found_selected_member, DDS::MemberDescriptor_var& selected_md);
+  bool discriminator_selects_no_member(DDS::Int32 disc) const;
+
+  /// Similar idea to std::shared_from_this(), provide a type compatible with parameter
+  /// passing rules for IDL interfaces that are arguments to operations.
+  /// Doesn't change the reference count.
+  DDS::DynamicData* interface_from_this() const;
+
+  DDS::ReturnCode_t unsupported_method(const char* method_name, bool warning = false) const;
 
   /// The actual (i.e., non-alias) DynamicType of the associated type.
   DDS::DynamicType_var type_;
+  DDS::TypeDescriptor_var type_desc_;
 };
+
+inline bool DynamicDataBase::exclude_member(DCPS::Sample::Extent ext, bool is_key, bool has_explicit_keys)
+{
+  // see Fields::Iterator and explicit_keys_only() in opendds_idl's dds_generator.h
+  const bool explicit_keys_only = ext == DCPS::Sample::KeyOnly || (ext == DCPS::Sample::NestedKeyOnly && has_explicit_keys);
+  return explicit_keys_only && !is_key;
+}
+
+inline DCPS::Sample::Extent DynamicDataBase::nested(DCPS::Sample::Extent ext)
+{
+  return ext == DCPS::Sample::KeyOnly ? DCPS::Sample::NestedKeyOnly : ext;
+}
 
 } // namespace XTypes
 } // namespace OpenDDS

@@ -13,6 +13,27 @@
 module OpenDDS {
   module DCPS {
 
+    /**
+    * The generated type-specific FooTypeSupport interfaces include encode_to_* and
+    * decode_from_* operations that take an argument of type RepresentationFormat.
+    * Use one of the derived interfaces of RepresentationFormat to specify the external
+    * format type (JSON, CDR, etc.) and any details of the type conversion.
+    */
+    local interface RepresentationFormat {
+    };
+
+    /**
+    * Create an instance by passing *CDR_DATA_REPRESENTATION to TypeSupport::make_format().
+    */
+    local interface CdrRepresentationFormat : RepresentationFormat {
+    };
+
+    /**
+    * Create an instance by passing JSON_DATA_REPRESENTATION to TypeSupport::make_format().
+    */
+    local interface JsonRepresentationFormat : RepresentationFormat {
+    };
+
     local interface TypeSupport : ::DDS::TypeSupport {
 
       /**
@@ -46,6 +67,8 @@ module OpenDDS {
       /// Get allowed representations defined by IDL annotations
       void representations_allowed_by_type(
         inout ::DDS::DataRepresentationIdSeq seq);
+
+      RepresentationFormat make_format(in ::DDS::DataRepresentationId_t representation);
     };
   };
 };

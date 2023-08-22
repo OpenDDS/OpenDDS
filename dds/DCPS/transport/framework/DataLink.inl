@@ -132,7 +132,7 @@ DataLink::send_i(TransportQueueElement* element, bool relink)
 }
 
 ACE_INLINE void
-DataLink::send_stop(RepoId repoId)
+DataLink::send_stop(GUID_t repoId)
 {
   DBG_ENTRY_LVL("DataLink","send_stop",6);
 
@@ -144,7 +144,7 @@ DataLink::send_stop(RepoId repoId)
 }
 
 ACE_INLINE void
-DataLink::send_stop_i(RepoId repoId)
+DataLink::send_stop_i(GUID_t repoId)
 {
   DBG_ENTRY_LVL("DataLink","send_stop_i",6);
   // This one is easy.  Simply delegate to our TransportSendStrategy
@@ -187,7 +187,7 @@ DataLink::remove_sample(const DataSampleElement* sample)
 }
 
 ACE_INLINE void
-DataLink::remove_all_msgs(const RepoId& pub_id)
+DataLink::remove_all_msgs(const GUID_t& pub_id)
 {
   DBG_ENTRY_LVL("DataLink","remove_all_msgs",6);
 
@@ -286,7 +286,7 @@ DataLink::terminate_send()
 
 ACE_INLINE
 void
-DataLink::remove_listener(const RepoId& local_id)
+DataLink::remove_listener(const GUID_t& local_id)
 {
   GuardType guard(pub_sub_maps_lock_);
   {
@@ -321,7 +321,7 @@ DataLink::remove_listener(const RepoId& local_id)
 
 ACE_INLINE
 TransportSendListener_rch
-DataLink::send_listener_for(const RepoId& pub_id) const
+DataLink::send_listener_for(const GUID_t& pub_id) const
 {
   // pub_map_ (and send_listeners_) are already locked when entering this
   // private method.
@@ -335,7 +335,7 @@ DataLink::send_listener_for(const RepoId& pub_id) const
 
 ACE_INLINE
 TransportReceiveListener_rch
-DataLink::recv_listener_for(const RepoId& sub_id) const
+DataLink::recv_listener_for(const GUID_t& sub_id) const
 {
   // sub_map_ (and recv_listeners_) are already locked when entering this
   // private method.
@@ -365,7 +365,7 @@ DataLink::default_listener() const
 
 ACE_INLINE
 void
-DataLink::send_final_acks (const RepoId& /*readerid*/)
+DataLink::send_final_acks (const GUID_t& /*readerid*/)
 {
 }
 

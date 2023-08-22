@@ -180,7 +180,7 @@ public:
    * and "sent" samples. The samples will be sent to the
    *  subscriber specified.
    */
-  DDS::ReturnCode_t reenqueue_all(const RepoId& reader_id,
+  DDS::ReturnCode_t reenqueue_all(const GUID_t& reader_id,
                                   const DDS::LifespanQosPolicy& lifespan
 #ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
                                   ,
@@ -370,7 +370,7 @@ private:
 
   void copy_and_prepend(SendStateDataSampleList& list,
                         const SendStateDataSampleList& appended,
-                        const RepoId& reader_id,
+                        const GUID_t& reader_id,
                         const DDS::LifespanQosPolicy& lifespan,
 #ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
                         const OPENDDS_STRING& filterClassName,
@@ -411,17 +411,17 @@ private:
    */
   void wakeup_blocking_writers (DataSampleElement* stale);
 
-  void add_reader_acks(const RepoId& reader, const SequenceNumber& base);
-  void remove_reader_acks(const RepoId& reader);
+  void add_reader_acks(const GUID_t& reader, const SequenceNumber& base);
+  void remove_reader_acks(const GUID_t& reader);
 
 private:
 
   void log_send_state_lists (OPENDDS_STRING description);
 
 #ifdef ACE_HAS_CPP11
-  typedef OPENDDS_UNORDERED_MAP(RepoId, DisjointSequence) AckedSequenceMap;
+  typedef OPENDDS_UNORDERED_MAP(GUID_t, DisjointSequence) AckedSequenceMap;
 #else
-  typedef OPENDDS_MAP_CMP(RepoId, DisjointSequence, GUID_tKeyLessThan) AckedSequenceMap;
+  typedef OPENDDS_MAP_CMP(GUID_t, DisjointSequence, GUID_tKeyLessThan) AckedSequenceMap;
 #endif
   AckedSequenceMap acked_sequences_;
   SequenceNumber cached_cumulative_ack_;
@@ -429,7 +429,7 @@ private:
 
   SequenceNumber get_cumulative_ack();
   SequenceNumber get_last_ack();
-  void update_acked(const SequenceNumber& seq, const RepoId& id = GUID_UNKNOWN);
+  void update_acked(const SequenceNumber& seq, const GUID_t& id = GUID_UNKNOWN);
   bool sequence_acknowledged_i(const SequenceNumber& sequence);
 
   /// List of data that has not been sent yet.
@@ -463,7 +463,7 @@ private:
   PublicationInstanceMapType instances_;
 
   /// The publication Id from repo.
-  PublicationId    publication_id_;
+  GUID_t    publication_id_;
 
   /// The writer that owns this container.
   DataWriterImpl*  writer_;

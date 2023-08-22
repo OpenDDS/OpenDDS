@@ -27,6 +27,7 @@ namespace OpenDDS {
 namespace DCPS {
 
 class MetaStruct;
+class TypeSupportImpl;
 
 template<typename T>
 const MetaStruct& getMetaStruct();
@@ -106,7 +107,7 @@ public:
 
   size_t number_parameters() const { return number_parameters_; }
 
-  bool has_non_key_fields(const MetaStruct& meta) const;
+  bool has_non_key_fields(const TypeSupportImpl& ts) const;
 
   /**
    * Returns true if the unserialized sample matches the filter.
@@ -121,12 +122,11 @@ public:
   /**
    * Returns true if the serialized sample matches the filter.
    */
-  bool eval(ACE_Message_Block* serializedSample, bool swap_bytes,
-            bool cdr_encap, const MetaStruct& meta,
-            const DDS::StringSeq& params, Extensibility exten) const
+  bool eval(ACE_Message_Block* serializedSample, Encoding encoding,
+            const TypeSupportImpl& typeSupport,
+            const DDS::StringSeq& params) const
   {
-    SerializedForEval data(serializedSample, meta, params,
-                           swap_bytes, cdr_encap, exten);
+    SerializedForEval data(serializedSample, typeSupport, params, encoding);
     return eval_i(data);
   }
 
@@ -162,12 +162,12 @@ private:
   };
 
   struct SerializedForEval : DataForEval {
-    SerializedForEval(ACE_Message_Block* data, const MetaStruct& meta,
-                      const DDS::StringSeq& params, bool swap, bool cdr, Extensibility exten)
-      : DataForEval(meta, params), serialized_(data), swap_(swap), cdr_(cdr), exten_(exten) {}
+    SerializedForEval(ACE_Message_Block* data, const TypeSupportImpl& type_support,
+                      const DDS::StringSeq& params, Encoding encoding);
     Value lookup(const char* field) const;
     ACE_Message_Block* serialized_;
-    bool swap_, cdr_;
+    Encoding encoding_;
+    const TypeSupportImpl& type_support_;
     mutable OPENDDS_MAP(OPENDDS_STRING, Value) cache_;
     Extensibility exten_;
   };
@@ -177,7 +177,7 @@ private:
   bool extended_grammar_;
   EvalNode* filter_root_;
   OPENDDS_VECTOR(OPENDDS_STRING) order_bys_;
-  /// Number of parameter used in the filter, this should
+  /// Number of parameters used in the filter, this should
   /// match the number of values passed when evaluating the filter
   size_t number_parameters_;
 
@@ -187,9 +187,8 @@ class OpenDDS_Dcps_Export MetaStruct {
 public:
   virtual ~MetaStruct();
 
-  virtual Value getValue(const void* stru, DDS::MemberId memberId) const = 0;
   virtual Value getValue(const void* stru, const char* fieldSpec) const = 0;
-  virtual Value getValue(Serializer& ser, const char* fieldSpec) const = 0;
+  virtual Value getValue(Serializer& ser, const char* fieldSpec, const TypeSupportImpl* ts = 0) const = 0;
 
   virtual ComparatorBase::Ptr create_qc_comparator(const char* fieldSpec,
     ComparatorBase::Ptr next) const = 0;
@@ -197,13 +196,11 @@ public:
   ComparatorBase::Ptr create_qc_comparator(const char* fieldSpec) const
   { return create_qc_comparator(fieldSpec, ComparatorBase::Ptr()); }
 
-  virtual bool compare(const void* lhs, const void* rhs,
-                       const char* fieldSpec) const = 0;
-
-  virtual bool isDcpsKey(const char* field) const = 0;
-
 #ifndef OPENDDS_NO_MULTI_TOPIC
   virtual size_t numDcpsKeys() const = 0;
+
+  virtual bool compare(const void* lhs, const void* rhs,
+                       const char* fieldSpec) const = 0;
 
   virtual const char** getFieldNames() const = 0;
 

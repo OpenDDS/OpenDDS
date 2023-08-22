@@ -12,8 +12,7 @@
 #include "ace/Configuration_Import_Export.h"
 
 // These are just used to meet signature requirements for a test
-#include "gtest/gtest.h"
-#include "gmock/gmock.h"
+#include <gtestWrapper.h>
 
 using namespace OpenDDS::DCPS;
 using namespace OpenDDS::Security;

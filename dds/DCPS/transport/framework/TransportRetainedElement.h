@@ -27,13 +27,13 @@ public:
   /// Construct with message block chain and Id values.
   TransportRetainedElement(
     ACE_Message_Block*                 message,
-    const RepoId&                      pubId
+    const GUID_t&                      pubId
   );
 
   /// Construct with message block chain and Id values.
   TransportRetainedElement(
     const ACE_Message_Block*           message,
-    const RepoId&                      pubId,
+    const GUID_t&                      pubId,
     MessageBlockAllocator*             mb_allocator_ = 0,
     DataBlockAllocator*                db_allocator_ = 0
   );
@@ -45,7 +45,7 @@ public:
 
   ///{ @name TransportQueueElement methods
 
-  virtual RepoId publication_id() const;
+  virtual GUID_t publication_id() const;
 
   virtual ACE_Message_Block* duplicate_msg() const;
   virtual const ACE_Message_Block* msg() const;
@@ -65,7 +65,7 @@ private:
   Message_Block_Ptr msg_;
 
   /// Originating publication Id, if any.
-  RepoId publication_id_;
+  GUID_t publication_id_;
 
   /// Cached allocator for DataSampleHeader message block
   MessageBlockAllocator* mb_allocator_;

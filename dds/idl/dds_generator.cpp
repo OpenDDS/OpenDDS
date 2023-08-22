@@ -1,20 +1,22 @@
 /*
- *
- *
  * Distributed under the OpenDDS License.
  * See: http://www.opendds.org/license.html
  */
 
 #include "dds_generator.h"
 
-#include "utl_identifier.h"
+#include "field_info.h"
+
+#include <utl_identifier.h>
 
 using namespace std;
 using namespace AstTypeClassification;
 
 dds_generator::~dds_generator() {}
 
-const std::string cxx_escape = "_cxx_";
+namespace {
+  const std::string cxx_escape = "_cxx_";
+}
 
 bool dds_generator::cxx_escaped(const std::string& s)
 {
@@ -56,9 +58,9 @@ std::string dds_generator::valid_var_name(const std::string& str)
   return s;
 }
 
-std::string dds_generator::get_tag_name(const std::string& base_name, bool nested_key_only)
+std::string dds_generator::get_tag_name(const std::string& base_name, const std::string& qualifier)
 {
-  return valid_var_name(base_name) + (nested_key_only ? "_nested_key_only" : "") + "_tag";
+  return valid_var_name(base_name) + qualifier + "_tag";
 }
 
 std::string dds_generator::get_xtag_name(UTL_ScopedName* name)
@@ -320,6 +322,7 @@ NestedForLoops::~NestedForLoops()
 string type_to_default_array(const std::string& indent, AST_Type* type, const string& name,
   bool is_anonymous, bool is_union, bool use_cxx11, Classification fld_cls)
 {
+  // TODO: Most of what's in here looks like it could be replaced with RefWrapper
   string val;
   string temp = name;
   if (temp.size() > 2 && temp.substr(temp.size() - 2, 2) == "()") {
@@ -330,7 +333,7 @@ string type_to_default_array(const std::string& indent, AST_Type* type, const st
   replace(temp.begin(), temp.end(), '[', '_');
   replace(temp.begin(), temp.end(), ']', '_');
   if (use_cxx11) {
-    string n = scoped(type->name());
+    string n = scoped(deepest_named_type(type)->name());
     if (is_anonymous) {
       n = n.substr(0, n.rfind("::") + 2) + "AnonymousType_" + type->local_name()->get_string();
       n = (fld_cls == AST_Decl::NT_sequence) ? (n + "_seq") : n;
@@ -346,9 +349,9 @@ string type_to_default_array(const std::string& indent, AST_Type* type, const st
     val = indent + n + "_forany " + temp + "(const_cast<"
       + n + "_slice*>(" + (is_union ? "tmp": name) + "));\n";
     val += indent + "set_default(" + temp + ");\n";
-    if (is_union) {
-      val += indent + name + "(tmp);\n";
-    }
+  }
+  if (is_union) {
+    val += indent + name + "(tmp);\n";
   }
   return val;
 }
@@ -417,4 +420,32 @@ string type_to_default(const std::string& indent, AST_Type* type, const string& 
     }
   }
   return indent + name + pre + def_val + post + ";\n";
+}
+
+std::string field_type_name(AST_Field* field, AST_Type* field_type)
+{
+  if (!field_type) {
+    field_type = field->field_type();
+  }
+  const Classification cls = classify(field_type);
+  const std::string name = (cls & CL_STRING) ?
+    string_type(cls) : scoped(deepest_named_type(field_type)->name());
+  if (field) {
+    FieldInfo af(*field);
+    if (af.as_base_ && af.type_->anonymous()) {
+      return af.scoped_type_;
+    }
+  }
+  return name;
+}
+
+AST_Type* deepest_named_type(AST_Type* type)
+{
+  AST_Type* consider = type;
+  AST_Type* named_type = type;
+  while (consider->node_type() == AST_Decl::NT_typedef) {
+    named_type = consider;
+    consider = dynamic_cast<AST_Typedef*>(named_type)->base_type();
+  }
+  return named_type;
 }

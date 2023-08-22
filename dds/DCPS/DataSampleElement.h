@@ -55,7 +55,7 @@ class OpenDDS_Dcps_Export DataSampleElement : public PoolAllocationBase {
 
 
 public:
-  DataSampleElement(PublicationId                   publication_id,
+  DataSampleElement(GUID_t                   publication_id,
                     TransportSendListener*          send_listener,
                     PublicationInstance_rch         handle);
 
@@ -72,16 +72,16 @@ public:
 
   void set_sample(Message_Block_Ptr sample);
 
-  PublicationId get_pub_id() const;
+  GUID_t get_pub_id() const;
 
   CORBA::ULong get_num_subs() const;
 
   void set_num_subs(CORBA::ULong num_subs);
 
-  const OpenDDS::DCPS::RepoId* get_sub_ids() const;
-  OpenDDS::DCPS::RepoId get_sub_id(CORBA::ULong index) const;
+  const OpenDDS::DCPS::GUID_t* get_sub_ids() const;
+  OpenDDS::DCPS::GUID_t get_sub_id(CORBA::ULong index) const;
 
-  void set_sub_id(CORBA::ULong index, OpenDDS::DCPS::RepoId id);
+  void set_sub_id(CORBA::ULong index, OpenDDS::DCPS::GUID_t id);
 
   TransportSendListener* get_send_listener() const;
   TransportSendListener* get_send_listener();
@@ -109,11 +109,11 @@ private:
   Message_Block_Ptr      sample_;
 
   /// Publication Id used downstream.
-  PublicationId          publication_id_;
+  GUID_t          publication_id_;
 
   CORBA::ULong           num_subs_;
 
-  OpenDDS::DCPS::RepoId  subscription_ids_[OpenDDS::DCPS::MAX_READERS_PER_ELEM];
+  OpenDDS::DCPS::GUID_t  subscription_ids_[OpenDDS::DCPS::MAX_READERS_PER_ELEM];
 
   /// Pointer to object that will be informed when the data has
   /// been delivered.  This needs to be set prior to using the

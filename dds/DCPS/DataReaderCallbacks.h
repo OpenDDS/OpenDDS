@@ -40,8 +40,9 @@ public:
 
   virtual ~DataReaderCallbacks() {}
 
-  virtual void add_association(const RepoId& yourId,
-                               const WriterAssociation& writer,
+  virtual void set_subscription_id(const GUID_t& guid) = 0;
+
+  virtual void add_association(const WriterAssociation& writer,
                                bool active) = 0;
 
   virtual void remove_associations(const WriterIdSeq& writers,
@@ -49,19 +50,19 @@ public:
 
   virtual void update_incompatible_qos(const IncompatibleQosStatus& status) = 0;
 
-  virtual void signal_liveliness(const RepoId& remote_participant) = 0;
+  virtual void signal_liveliness(const GUID_t& remote_participant) = 0;
 
-  virtual void register_for_writer(const RepoId& /*participant*/,
-                                   const RepoId& /*readerid*/,
-                                   const RepoId& /*writerid*/,
+  virtual void register_for_writer(const GUID_t& /*participant*/,
+                                   const GUID_t& /*readerid*/,
+                                   const GUID_t& /*writerid*/,
                                    const TransportLocatorSeq& /*locators*/,
                                    DiscoveryListener* /*listener*/) { }
 
-  virtual void unregister_for_writer(const RepoId& /*participant*/,
-                                     const RepoId& /*readerid*/,
-                                     const RepoId& /*writerid*/) { }
+  virtual void unregister_for_writer(const GUID_t& /*participant*/,
+                                     const GUID_t& /*readerid*/,
+                                     const GUID_t& /*writerid*/) { }
 
-  virtual void update_locators(const RepoId& /*remote*/,
+  virtual void update_locators(const GUID_t& /*remote*/,
                                const TransportLocatorSeq& /*locators*/) { }
 
   virtual DCPS::WeakRcHandle<ICE::Endpoint> get_ice_endpoint() = 0;

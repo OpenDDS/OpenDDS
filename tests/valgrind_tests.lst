@@ -10,4 +10,6 @@
 # means to run if the build is not a minimal test and RTPS is enabled.
 #
 
-tests/unit-tests/run_test.pl --gtest_filter=*-*RecursiveDispatch*: !DCPS_MIN !NO_UNIT_TESTS
+tests/unit-tests/run_test.pl: !DCPS_MIN !NO_UNIT_TESTS
+
+performance-tests/bench/unit-tests/run_test.pl: !DCPS_MIN !NO_UNIT_TESTS CXX11 RAPIDJSON

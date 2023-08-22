@@ -87,7 +87,7 @@ class OpenDDS_Dcps_Export SecurityConfig : public DCPS::RcObject {
     return utility_plugin_;
   }
 
-  HandleRegistry_rch get_handle_registry(const DCPS::RepoId& participant_id)
+  HandleRegistry_rch get_handle_registry(const DCPS::GUID_t& participant_id)
   {
     HandleRegistry_rch handle_registry;
 
@@ -110,7 +110,7 @@ class OpenDDS_Dcps_Export SecurityConfig : public DCPS::RcObject {
     return handle_registry;
   }
 
-  void erase_handle_registry(const DCPS::RepoId& participant_id)
+  void erase_handle_registry(const DCPS::GUID_t& participant_id)
   {
     ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
     handle_registry_map_.erase(participant_id);
@@ -156,7 +156,7 @@ class OpenDDS_Dcps_Export SecurityConfig : public DCPS::RcObject {
   CryptoKeyFactory_var key_factory_plugin_;
   CryptoTransform_var transform_plugin_;
   DCPS::RcHandle<Utility> utility_plugin_;
-  typedef OPENDDS_MAP_CMP(DCPS::RepoId, HandleRegistry_rch, DCPS::GUID_tKeyLessThan) HandleRegistryMap;
+  typedef OPENDDS_MAP_CMP(DCPS::GUID_t, HandleRegistry_rch, DCPS::GUID_tKeyLessThan) HandleRegistryMap;
   HandleRegistryMap handle_registry_map_;
   mutable ACE_Thread_Mutex mutex_;
 #endif

@@ -10,7 +10,7 @@ concurrency:
 jobs:
 
   Linux:
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-22.04
     steps:
     - name: update apt
       run: sudo apt-get update
@@ -27,17 +27,6 @@ jobs:
         repository: DOCGroup/ACE_TAO
         ref: Latest_Micro
         path: OpenDDS/ACE_TAO
-    - name: get ACE_TAO commit
-      shell: bash
-      run: |
-        cd OpenDDS/ACE_TAO
-        export ACE_COMMIT=$(git rev-parse HEAD)
-        echo "ACE_COMMIT=$ACE_COMMIT" >> $GITHUB_ENV
-    - name: get compiler version
-      shell: bash
-      run: |
-        export COMPILER_VERSION=$(c++ --version 2>&1 | head -n 1)
-        echo "COMPILER_VERSION=$COMPILER_VERSION" >> $GITHUB_ENV
     - name: checkout MPC
       uses: actions/checkout@v3
       with:
@@ -48,7 +37,7 @@ jobs:
         cd OpenDDS
         ./configure --optimize --no-debug --static --tests --qt
         tools/scripts/show_build_config.pl
-    - uses: ammaraskar/gcc-problem-matcher@0.1
+    - uses: ammaraskar/gcc-problem-matcher@0.2.0
     - name: build
       shell: bash
       run: |
@@ -61,7 +50,7 @@ jobs:
         path: OpenDDS/examples/DCPS/ishapes/ishapes
 
   Windows:
-    runs-on: windows-2019
+    runs-on: windows-2022
     steps:
     - name: checkout OpenDDS
       uses: actions/checkout@v3
@@ -74,25 +63,19 @@ jobs:
         repository: DOCGroup/ACE_TAO
         ref: Latest_Micro
         path: OpenDDS/ACE_TAO
-    - name: get ACE_TAO commit
-      shell: bash
+    - name: setup for run-vcpkg
+      shell: cmd
       run: |
-        cd OpenDDS/ACE_TAO
-        export ACE_COMMIT=$(git rev-parse HEAD)
-        echo "ACE_COMMIT=$ACE_COMMIT" >> $GITHUB_ENV
-    - name: get compiler version
-      shell: bash
-      run: |
-        export COMPILER_VERSION=$("C:\Program Files (x86)\Microsoft Visual Studio\Installer\vswhere.exe" -property catalog_productDisplayVersion)
-        echo "COMPILER_VERSION=$COMPILER_VERSION" >> $GITHUB_ENV
+        echo { "name": "opendds", "version-string": "github-actions", "dependencies": [ "qt5-base" ] } > vcpkg.json
+        echo VCPKG_DEFAULT_TRIPLET=x64-windows>> %GITHUB_ENV%
+        echo VCPKG_INSTALLED_DIR=${{ github.workspace }}\vcpkg-qt\installed>> %GITHUB_ENV%
     - name: install vcpkg packages
       id: runvcpkg
-      uses: lukka/run-vcpkg@v7
+      uses: lukka/run-vcpkg@v11
       with:
         vcpkgDirectory: '${{ github.workspace }}/vcpkg-qt'
-        vcpkgGitCommitId: b86c0c35b88e2bf3557ff49dc831689c2f085090
-        vcpkgArguments: --recurse qt5-base
-        vcpkgTriplet: x64-windows
+        vcpkgGitCommitId: f6a5d4e8eb7476b8d7fc12a56dff300c1c986131
+        runVcpkgInstall: true
     - name: checkout MPC
       uses: actions/checkout@v3
       with:
@@ -104,7 +87,11 @@ jobs:
       shell: cmd
       run: |
         cd OpenDDS
-        perl configure --optimize --no-debug --static --tests --qt=%VCPKG_ROOT%/installed/x64-windows "--mpcopts=-value_template platforms=x64" "--mpcopts=-value_template configurations=Release" "--mpcopts=-value_template Release::runtime_library=MultiThreadedDLL"
+        perl configure --optimize --no-debug --static --tests ^
+          "--qt=%VCPKG_ROOT%/installed/x64-windows" ^
+          "--mpcopts=-value_template platforms=x64" ^
+          "--mpcopts=-value_template configurations=Release" ^
+          "--mpcopts=-value_template Release::runtime_library=MultiThreadedDLL"
         tools\scripts\show_build_config.pl
     - name: build
       shell: cmd

@@ -35,8 +35,9 @@ RtpsUdpReceiveStrategy::RtpsUdpReceiveStrategy(RtpsUdpDataLink* link,
   , link_(link)
   , last_received_()
   , recvd_sample_(0)
+  , fragment_size_(0)
   , total_frags_(0)
-  , reassembly_(link->config().fragment_reassembly_timeout_)
+  , reassembly_(link->config()->fragment_reassembly_timeout())
   , receiver_(local_prefix)
   , thread_status_manager_(thread_status_manager)
 #ifdef OPENDDS_SECURITY
@@ -240,9 +241,10 @@ RtpsUdpReceiveStrategy::receive_bytes_helper(iovec iov[],
   }
 
   if (n > 0 && ret > 0 && iov[0].iov_len >= 4 && std::memcmp(iov[0].iov_base, "RTPS", 4) == 0) {
-    if (tport.config().count_messages()) {
+    RtpsUdpInst_rch cfg = tport.config();
+    if (tport.transport_statistics_.count_messages()) {
       const NetworkAddress ra(remote_address);
-      const InternalMessageCountKey key(ra, MCK_RTPS, ra == tport.config().rtps_relay_address());
+      const InternalMessageCountKey key(ra, MCK_RTPS, ra == cfg->rtps_relay_address());
       ACE_GUARD_RETURN(ACE_Thread_Mutex, g, tport.transport_statistics_mutex_, -1);
       tport.transport_statistics_.message_count[key].recv(ret);
     }
@@ -280,9 +282,10 @@ RtpsUdpReceiveStrategy::receive_bytes_helper(iovec iov[],
   STUN::Message message;
   message.block = head;
   if (serializer >> message) {
-    if (tport.config().count_messages()) {
+    RtpsUdpInst_rch cfg = tport.config();
+    if (cfg && tport.transport_statistics_.count_messages()) {
       const NetworkAddress ra(remote_address);
-      const InternalMessageCountKey key(ra, MCK_STUN, ra == tport.config().rtps_relay_address());
+      const InternalMessageCountKey key(ra, MCK_STUN, ra == cfg->rtps_relay_address());
       ACE_GUARD_RETURN(ACE_Thread_Mutex, g, tport.transport_statistics_mutex_, -1);
       tport.transport_statistics_.message_count[key].recv(ret);
     }
@@ -306,7 +309,7 @@ RtpsUdpReceiveStrategy::receive_bytes_helper(iovec iov[],
 
 #ifdef OPENDDS_SECURITY
 namespace {
-  ssize_t recv_err(const char* msg, const ACE_INET_Addr& remote, const DCPS::RepoId& peer, bool& stop)
+  ssize_t recv_err(const char* msg, const ACE_INET_Addr& remote, const DCPS::GUID_t& peer, bool& stop)
   {
     if (security_debug.encdec_warn) {
       ACE_ERROR((LM_WARNING, "(%P|%t) {encdec_warn} RtpsUdpReceiveStrategy::receive_bytes - "
@@ -362,7 +365,7 @@ RtpsUdpReceiveStrategy::receive_bytes(iovec iov[],
 #ifdef OPENDDS_SECURITY
                                            link_->get_ice_agent(), link_->get_ice_endpoint(),
 #endif
-                                           link_->transport(), stop);
+                                           *link_->transport(), stop);
 #endif
   remote_address_ = remote_address;
 
@@ -410,9 +413,11 @@ RtpsUdpReceiveStrategy::receive_bytes(iovec iov[],
     static const int GuidPrefixOffset = 8; // "RTPS", Version(2), Vendor(2)
     std::memcpy(peer.guidPrefix, encBuf + GuidPrefixOffset, sizeof peer.guidPrefix);
     peer.entityId = RTPS::ENTITYID_PARTICIPANT;
-    const ParticipantCryptoHandle sender = link_->handle_registry()->get_remote_participant_crypto_handle(peer);
+    const ParticipantCryptoHandle sender = equal_guid_prefixes(peer.guidPrefix, receiver_.local_) ?
+      link_->local_crypto_handle() :
+      link_->handle_registry()->get_remote_participant_crypto_handle(peer);
     if (sender == DDS::HANDLE_NIL) {
-      if (transport_debug.log_dropped_messages && !equal_guid_prefixes(peer.guidPrefix, receiver_.local_)) {
+      if (transport_debug.log_dropped_messages) {
         ACE_DEBUG((LM_DEBUG, "(%P|%t) {transport_debug.log_dropped_messages} RtpsUdpReceiveStrategy::receive_bytes - decode error from %C\n", LogGuid(peer).c_str()));
       }
       if (security_debug.encdec_warn) {
@@ -427,7 +432,7 @@ RtpsUdpReceiveStrategy::receive_bytes(iovec iov[],
     DDS::OctetSeq plain;
     SecurityException ex = {"", 0, 0};
     if (!crypto->decode_rtps_message(plain, encoded, receiver, sender, ex)) {
-      if (transport_debug.log_dropped_messages && !equal_guid_prefixes(peer.guidPrefix, receiver_.local_)) {
+      if (transport_debug.log_dropped_messages) {
         ACE_DEBUG((LM_DEBUG, "(%P|%t) {transport_debug.log_dropped_messages} RtpsUdpReceiveStrategy::receive_bytes - decode error from %C\n", LogGuid(peer).c_str()));
       }
       if (security_debug.encdec_warn) {
@@ -595,7 +600,7 @@ RtpsUdpReceiveStrategy::deliver_sample_i(ReceivedDataSample& sample,
     link_->filterBestEffortReaders(sample, readers_selected_, readers_withheld_);
 
     if (data.readerId != ENTITYID_UNKNOWN) {
-      RepoId reader;
+      GUID_t reader;
       std::memcpy(reader.guidPrefix, link_->local_prefix(),
                   sizeof(GuidPrefix_t));
       reader.entityId = data.readerId;
@@ -759,14 +764,16 @@ RtpsUdpReceiveStrategy::deliver_from_secure(const RTPS::Submessage& submessage,
     return;
   }
 
-  const RepoId peer = make_id(receiver_.source_guid_prefix_, ENTITYID_PARTICIPANT);
-  const ParticipantCryptoHandle peer_pch = link_->handle_registry()->get_remote_participant_crypto_handle(peer);
+  const GUID_t peer = make_id(receiver_.source_guid_prefix_, ENTITYID_PARTICIPANT);
+  const ParticipantCryptoHandle peer_pch = equal_guid_prefixes(peer.guidPrefix, receiver_.local_) ?
+    link_->local_crypto_handle() :
+    link_->handle_registry()->get_remote_participant_crypto_handle(peer);
 
   DDS::OctetSeq encoded_submsg, plain_submsg;
   if (!sec_submsg_to_octets(encoded_submsg, submessage)) {
     if (security_debug.encdec_warn) {
       ACE_ERROR((LM_WARNING, ACE_TEXT("(%P|%t) {encdec_warn} RtpsUdpReceiveStrategy: ")
-                 ACE_TEXT("preprocess_secure_submsg failed to encode submessage %C RPCH %d\n"),
+                 ACE_TEXT("deliver_from_secure failed to encode submessage %C RPCH %d\n"),
                  LogGuid(peer).c_str(), peer_pch));
     }
     return;
@@ -800,8 +807,8 @@ RtpsUdpReceiveStrategy::deliver_from_secure(const RTPS::Submessage& submessage,
 
   } else {
     if (security_debug.encdec_warn) {
-      ACE_ERROR((LM_WARNING, ACE_TEXT("(%P|%t) {encdec_warn} RtpsUdpReceiveStrategy: ")
-                 ACE_TEXT("preprocess_secure_submsg failed remote %C RPCH %d, [%d.%d]: %C\n"),
+      ACE_ERROR((LM_WARNING, ACE_TEXT("(%P|%t) {encdec_warn} RtpsUdpReceiveStrategy::deliver_from_secure ")
+                 ACE_TEXT("failed remote %C RPCH %d, [%d.%d]: %C\n"),
                  LogGuid(peer).c_str(), peer_pch, ex.code, ex.minor_code, ex.message.in()));
     }
     return;
@@ -810,8 +817,8 @@ RtpsUdpReceiveStrategy::deliver_from_secure(const RTPS::Submessage& submessage,
   if (!ok) {
     bool dw = category == DATAWRITER_SUBMESSAGE;
     if (security_debug.encdec_warn) {
-      ACE_ERROR((LM_WARNING, ACE_TEXT("(%P|%t) {encdec_warn} RtpsUdpReceiveStrategy: ")
-                 ACE_TEXT("decode_data%C_submessage failed [%d.%d]: \"%C\" ")
+      ACE_ERROR((LM_WARNING, ACE_TEXT("(%P|%t) {encdec_warn} RtpsUdpReceiveStrategy::deliver_from_secure ")
+                 ACE_TEXT("decode %C submessage failed [%d.%d]: \"%C\" ")
                  ACE_TEXT("(rpch: %u, local d%cch: %u, remote d%cch: %u)\n"),
                  dw ? "writer" : "reader",
                  ex.code, ex.minor_code, ex.message.in(),
@@ -920,14 +927,25 @@ bool RtpsUdpReceiveStrategy::decode_payload(ReceivedDataSample& sample,
                                             const RTPS::DataSubmessage& submsg)
 {
   using namespace DDS::Security;
-  const DatawriterCryptoHandle writer_crypto_handle =
-    link_->handle_registry()->get_remote_datawriter_crypto_handle(sample.header_.publication_id_);
-  const CryptoTransform_var crypto = link_->security_config()->get_crypto_transform();
 
-  const EndpointSecurityAttributesMask esa = RTPS::security_attributes_to_bitmask(
-    link_->handle_registry()->get_remote_datawriter_security_attributes(sample.header_.publication_id_));
   static const EndpointSecurityAttributesMask MASK_PROTECT_PAYLOAD =
     ENDPOINT_SECURITY_ATTRIBUTES_FLAG_IS_VALID | ENDPOINT_SECURITY_ATTRIBUTES_FLAG_IS_PAYLOAD_PROTECTED;
+  const CryptoTransform_var crypto = link_->security_config()->get_crypto_transform();
+  DatawriterCryptoHandle writer_crypto_handle;
+  EndpointSecurityAttributesMask esa;
+
+  if (equal_guid_prefixes(sample.header_.publication_id_.guidPrefix, receiver_.local_)) {
+    writer_crypto_handle =
+      link_->handle_registry()->get_local_datawriter_crypto_handle(sample.header_.publication_id_);
+    esa =
+      RTPS::security_attributes_to_bitmask(link_->handle_registry()->get_local_datawriter_security_attributes(sample.header_.publication_id_));
+  } else {
+    writer_crypto_handle =
+      link_->handle_registry()->get_remote_datawriter_crypto_handle(sample.header_.publication_id_);
+    esa =
+      RTPS::security_attributes_to_bitmask(link_->handle_registry()->get_remote_datawriter_security_attributes(sample.header_.publication_id_));
+  }
+
   const bool payload_protected = (esa & MASK_PROTECT_PAYLOAD) == MASK_PROTECT_PAYLOAD;
 
   if (writer_crypto_handle == DDS::HANDLE_NIL || !crypto || !payload_protected) {
@@ -976,37 +994,10 @@ bool RtpsUdpReceiveStrategy::decode_payload(ReceivedDataSample& sample,
 int
 RtpsUdpReceiveStrategy::start_i()
 {
-  ACE_Reactor* reactor = link_->get_reactor();
-  if (reactor == 0) {
-    ACE_ERROR_RETURN((LM_ERROR,
-                      ACE_TEXT("(%P|%t) ERROR: ")
-                      ACE_TEXT("RtpsUdpReceiveStrategy::start_i: ")
-                      ACE_TEXT("NULL reactor reference!\n")),
-                     -1);
-  }
-
-  if (reactor->register_handler(link_->unicast_socket().get_handle(), this,
-                                ACE_Event_Handler::READ_MASK) != 0) {
-    ACE_ERROR_RETURN((LM_ERROR,
-                      ACE_TEXT("(%P|%t) ERROR: ")
-                      ACE_TEXT("RtpsUdpReceiveStrategy::start_i: ")
-                      ACE_TEXT("failed to register handler for unicast ")
-                      ACE_TEXT("socket %d\n"),
-                      link_->unicast_socket().get_handle()),
-                     -1);
-  }
-
+  ReactorInterceptor_rch ri = link_->get_reactor_interceptor();
+  ri->execute_or_enqueue(make_rch<RegisterHandler>(link_->unicast_socket().get_handle(), this, static_cast<ACE_Reactor_Mask>(ACE_Event_Handler::READ_MASK)));
 #ifdef ACE_HAS_IPV6
-  if (reactor->register_handler(link_->ipv6_unicast_socket().get_handle(), this,
-                                ACE_Event_Handler::READ_MASK) != 0) {
-    ACE_ERROR_RETURN((LM_ERROR,
-                      ACE_TEXT("(%P|%t) ERROR: ")
-                      ACE_TEXT("RtpsUdpReceiveStrategy::start_i: ")
-                      ACE_TEXT("failed to register handler for unicast ")
-                      ACE_TEXT("socket %d\n"),
-                      link_->unicast_socket().get_handle()),
-                     -1);
-  }
+  ri->execute_or_enqueue(make_rch<RegisterHandler>(link_->ipv6_unicast_socket().get_handle(), this, static_cast<ACE_Reactor_Mask>(ACE_Event_Handler::READ_MASK)));
 #endif
 
   return 0;
@@ -1015,29 +1006,17 @@ RtpsUdpReceiveStrategy::start_i()
 void
 RtpsUdpReceiveStrategy::stop_i()
 {
-  ACE_Reactor* reactor = link_->get_reactor();
-  if (reactor == 0) {
-    ACE_ERROR((LM_ERROR,
-               ACE_TEXT("(%P|%t) ERROR: ")
-               ACE_TEXT("RtpsUdpReceiveStrategy::stop_i: ")
-               ACE_TEXT("NULL reactor reference!\n")));
-    return;
-  }
-
-  reactor->remove_handler(link_->unicast_socket().get_handle(),
-                          ACE_Event_Handler::READ_MASK);
-
+  ReactorInterceptor_rch ri = link_->get_reactor_interceptor();
+  ri->execute_or_enqueue(make_rch<RemoveHandler>(link_->unicast_socket().get_handle(), static_cast<ACE_Reactor_Mask>(ACE_Event_Handler::READ_MASK)));
 #ifdef ACE_HAS_IPV6
-  reactor->remove_handler(link_->ipv6_unicast_socket().get_handle(),
-                          ACE_Event_Handler::READ_MASK);
+  ri->execute_or_enqueue(make_rch<RemoveHandler>(link_->ipv6_unicast_socket().get_handle(), static_cast<ACE_Reactor_Mask>(ACE_Event_Handler::READ_MASK)));
 #endif
 
-  if (link_->config().use_multicast_) {
-    reactor->remove_handler(link_->multicast_socket().get_handle(),
-                            ACE_Event_Handler::READ_MASK);
+  RtpsUdpInst_rch cfg = link_->config();
+  if (cfg && cfg->use_multicast_) {
+    ri->execute_or_enqueue(make_rch<RemoveHandler>(link_->multicast_socket().get_handle(), static_cast<ACE_Reactor_Mask>(ACE_Event_Handler::READ_MASK)));
 #ifdef ACE_HAS_IPV6
-    reactor->remove_handler(link_->ipv6_multicast_socket().get_handle(),
-                            ACE_Event_Handler::READ_MASK);
+    ri->execute_or_enqueue(make_rch<RemoveHandler>(link_->ipv6_multicast_socket().get_handle(), static_cast<ACE_Reactor_Mask>(ACE_Event_Handler::READ_MASK)));
 #endif
   }
 }
@@ -1075,6 +1054,7 @@ RtpsUdpReceiveStrategy::check_header(const RtpsSampleHeader& header)
     const RTPS::DataFragSubmessage& rtps = header.submessage_.data_frag_sm();
     frags_.first = rtps.fragmentStartingNum.value;
     frags_.second = frags_.first + (rtps.fragmentsInSubmessage - 1);
+    fragment_size_ = rtps.fragmentSize;
     total_frags_ = (rtps.sampleSize / rtps.fragmentSize) + (rtps.sampleSize % rtps.fragmentSize ? 1 : 0);
   }
 
@@ -1094,14 +1074,14 @@ RtpsUdpReceiveStrategy::end_transport_header_processing()
 }
 
 const ReceivedDataSample*
-RtpsUdpReceiveStrategy::withhold_data_from(const RepoId& sub_id)
+RtpsUdpReceiveStrategy::withhold_data_from(const GUID_t& sub_id)
 {
   readers_withheld_.insert(sub_id);
   return recvd_sample_;
 }
 
 void
-RtpsUdpReceiveStrategy::do_not_withhold_data_from(const RepoId& sub_id)
+RtpsUdpReceiveStrategy::do_not_withhold_data_from(const GUID_t& sub_id)
 {
   readers_selected_.insert(sub_id);
 }
@@ -1128,6 +1108,7 @@ bool RtpsUdpReceiveStrategy::reassemble_i(ReceivedDataSample& data, RtpsSampleHe
 {
   using namespace RTPS;
   receiver_.fill_header(data.header_); // set publication_id_.guidPrefix
+  data.fragment_size_ = fragment_size_;
   if (link_->is_target(data.header_.publication_id_) && reassembly_.reassemble(frags_, data, total_frags_)) {
 
     // Reassembly was successful, replace DataFrag with Data.  This doesn't have
@@ -1155,7 +1136,7 @@ bool
 RtpsUdpReceiveStrategy::remove_frags_from_bitmap(CORBA::Long bitmap[],
                                                  CORBA::ULong num_bits,
                                                  const SequenceNumber& base,
-                                                 const RepoId& pub_id,
+                                                 const GUID_t& pub_id,
                                                  ACE_CDR::ULong& cumulative_bits_added)
 {
   bool modified = false;
@@ -1191,7 +1172,7 @@ RtpsUdpReceiveStrategy::remove_frags_from_bitmap(CORBA::Long bitmap[],
 
 void
 RtpsUdpReceiveStrategy::remove_fragments(const SequenceRange& range,
-                                         const RepoId& pub_id)
+                                         const GUID_t& pub_id)
 {
   for (SequenceNumber sn = range.first; sn <= range.second; ++sn) {
     reassembly_.data_unavailable(sn, pub_id);
@@ -1199,14 +1180,14 @@ RtpsUdpReceiveStrategy::remove_fragments(const SequenceRange& range,
 }
 
 void
-RtpsUdpReceiveStrategy::clear_completed_fragments(const RepoId& pub_id)
+RtpsUdpReceiveStrategy::clear_completed_fragments(const GUID_t& pub_id)
 {
   reassembly_.clear_completed(pub_id);
 }
 
 bool
 RtpsUdpReceiveStrategy::has_fragments(const SequenceRange& range,
-                                      const RepoId& pub_id,
+                                      const GUID_t& pub_id,
                                       FragmentInfo* frag_info)
 {
   for (SequenceNumber sn = range.first; sn <= range.second; ++sn) {

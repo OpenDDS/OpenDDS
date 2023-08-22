@@ -1,14 +1,14 @@
 #ifndef RTPSRELAY_PARTICIPANT_LISTENER_H_
 #define RTPSRELAY_PARTICIPANT_LISTENER_H_
 
-#include "ListenerBase.h"
+#include "ReaderListenerBase.h"
 #include "RelayParticipantStatusReporter.h"
 
 #include <dds/DCPS/DomainParticipantImpl.h>
 
 namespace RtpsRelay {
 
-class ParticipantListener : public ListenerBase {
+class ParticipantListener : public ReaderListenerBase {
 public:
   ParticipantListener(OpenDDS::DCPS::DomainParticipantImpl* participant,
                       GuidAddrSet& guid_addr_set,

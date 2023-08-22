@@ -143,6 +143,70 @@ public:
     report(guard, now);
   }
 
+  void handler_statistics_sub_count(uint32_t count, const OpenDDS::DCPS::MonotonicTimePoint& now)
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+    log_relay_statistics_.handler_statistics_sub_count() = count;
+    publish_relay_statistics_.handler_statistics_sub_count() = count;
+    report(guard, now);
+  }
+
+  void relay_statistics_sub_count(uint32_t count, const OpenDDS::DCPS::MonotonicTimePoint& now)
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+    log_relay_statistics_.relay_statistics_sub_count() = count;
+    publish_relay_statistics_.relay_statistics_sub_count() = count;
+    report(guard, now);
+  }
+
+  void participant_statistics_sub_count(uint32_t count, const OpenDDS::DCPS::MonotonicTimePoint& now)
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+    log_relay_statistics_.participant_statistics_sub_count() = count;
+    publish_relay_statistics_.participant_statistics_sub_count() = count;
+    report(guard, now);
+  }
+
+  void relay_partitions_sub_count(uint32_t count, const OpenDDS::DCPS::MonotonicTimePoint& now)
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+    log_relay_statistics_.relay_partitions_sub_count() = count;
+    publish_relay_statistics_.relay_partitions_sub_count() = count;
+    report(guard, now);
+  }
+
+  void relay_participant_status_sub_count(uint32_t count, const OpenDDS::DCPS::MonotonicTimePoint& now)
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+    log_relay_statistics_.relay_participant_status_sub_count() = count;
+    publish_relay_statistics_.relay_participant_status_sub_count() = count;
+    report(guard, now);
+  }
+
+  void spdp_replay_sub_count(uint32_t count, const OpenDDS::DCPS::MonotonicTimePoint& now)
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+    log_relay_statistics_.spdp_replay_sub_count() = count;
+    publish_relay_statistics_.spdp_replay_sub_count() = count;
+    report(guard, now);
+  }
+
+  void relay_address_sub_count(uint32_t count, const OpenDDS::DCPS::MonotonicTimePoint& now)
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+    log_relay_statistics_.relay_address_sub_count() = count;
+    publish_relay_statistics_.relay_address_sub_count() = count;
+    report(guard, now);
+  }
+
+  void relay_status_sub_count(uint32_t count, const OpenDDS::DCPS::MonotonicTimePoint& now)
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+    log_relay_statistics_.relay_status_sub_count() = count;
+    publish_relay_statistics_.relay_status_sub_count() = count;
+    report(guard, now);
+  }
+
   void relay_partitions_pub_count(uint32_t count, const OpenDDS::DCPS::MonotonicTimePoint& now)
   {
     ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
@@ -175,6 +239,30 @@ public:
     report(guard, now);
   }
 
+  void remote_map_size(uint32_t size, const OpenDDS::DCPS::MonotonicTimePoint& now)
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+    log_relay_statistics_.remote_map_size(size);
+    publish_relay_statistics_.remote_map_size(size);
+    report(guard, now);
+  }
+
+  void max_ips_per_client(uint32_t size, const OpenDDS::DCPS::MonotonicTimePoint& now)
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+    log_relay_statistics_.max_ips_per_client(std::max(log_relay_statistics_.max_ips_per_client(), size));
+    publish_relay_statistics_.max_ips_per_client(std::max(publish_relay_statistics_.max_ips_per_client(), size));
+    report(guard, now);
+  }
+
+  void rejected_address_map_size(uint32_t size, const OpenDDS::DCPS::MonotonicTimePoint& now)
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+    log_relay_statistics_.rejected_address_map_size(std::max(log_relay_statistics_.rejected_address_map_size(), size));
+    publish_relay_statistics_.rejected_address_map_size(std::max(publish_relay_statistics_.rejected_address_map_size(), size));
+    report(guard, now);
+  }
+
   void report()
   {
     ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
@@ -204,6 +292,7 @@ private:
     log_relay_statistics_.new_address_count(0);
     log_relay_statistics_.expired_address_count(0);
     log_relay_statistics_.admission_deferral_count(0);
+    log_relay_statistics_.max_ips_per_client(0);
   }
 
   void publish_report(ACE_Guard<ACE_Thread_Mutex>& guard,
@@ -221,6 +310,7 @@ private:
     publish_relay_statistics_.new_address_count(0);
     publish_relay_statistics_.expired_address_count(0);
     publish_relay_statistics_.admission_deferral_count(0);
+    publish_relay_statistics_.max_ips_per_client(0);
 
     guard.release();
 

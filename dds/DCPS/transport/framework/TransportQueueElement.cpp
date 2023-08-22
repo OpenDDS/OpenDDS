@@ -35,7 +35,7 @@ TransportQueueElement::requires_exclusive_packet() const
 }
 
 bool
-TransportQueueElement::is_control(RepoId /*pub_id*/) const
+TransportQueueElement::is_control(GUID_t /*pub_id*/) const
 {
   DBG_ENTRY_LVL("TransportQueueElement", "is_control", 6);
   return false;

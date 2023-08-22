@@ -12,9 +12,8 @@
 
 #include "TestException.h"
 
-SimpleDataReader::SimpleDataReader(const OpenDDS::DCPS::RepoId& sub_id)
-  : sub_id_(sub_id)
-  , num_messages_expected_(0)
+SimpleDataReader::SimpleDataReader()
+  : num_messages_expected_(0)
   , num_messages_received_(0)
 {
   DBG_ENTRY("SimpleDataReader","SimpleDataReader");
@@ -102,7 +101,7 @@ SimpleDataReader::print_time()
 }
 
 void
-SimpleDataReader::transport_assoc_done(int flags, const OpenDDS::DCPS::RepoId& remote)
+SimpleDataReader::transport_assoc_done(int flags, const OpenDDS::DCPS::GUID_t& remote)
 {
   ACE_DEBUG((LM_INFO,
              "(%P|%t) DataReader association with %C is done flags=%d.\n", OpenDDS::DCPS::LogGuid(remote).c_str(), flags));

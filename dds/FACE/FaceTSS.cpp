@@ -806,7 +806,7 @@ FACE::SYSTEM_TIME_TYPE convertTime(const DDS::Time_t& timestamp)
 }
 
 FACE::MESSAGE_INSTANCE_GUID
-create_message_instance_guid(const OpenDDS::DCPS::RepoId& pub, const CORBA::LongLong& orig_seq)
+create_message_instance_guid(const OpenDDS::DCPS::GUID_t& pub, const CORBA::LongLong& orig_seq)
 {
   OpenDDS::DCPS::GuidConverter writer(pub);
 
@@ -872,7 +872,7 @@ void populate_header_received(const FACE::CONNECTION_ID_TYPE& connection_id,
     return_code = FACE::NOT_AVAILABLE;
     return;
   }
-  const OpenDDS::DCPS::RepoId pub = dpi->get_repoid(sinfo.publication_handle);
+  const OpenDDS::DCPS::GUID_t pub = dpi->get_repoid(sinfo.publication_handle);
   header.message_instance_guid = create_message_instance_guid(pub, sinfo.opendds_reserved_publication_seq);
 
   header.message_timestamp = convertTime(sinfo.source_timestamp);
@@ -890,7 +890,7 @@ void populate_header_received(const FACE::CONNECTION_ID_TYPE& connection_id,
 
   DDS::UserDataQosPolicy qos_user_data;
   DDS::LifespanQosPolicy qos_lifespan;
-  const OpenDDS::DCPS::RepoId sub = dpi->get_id();
+  const OpenDDS::DCPS::GUID_t sub = dpi->get_id();
 
   // Test if the reader and writer share a participant
   if (std::memcmp(pub.guidPrefix, sub.guidPrefix, sizeof(sub.guidPrefix)) == 0) {

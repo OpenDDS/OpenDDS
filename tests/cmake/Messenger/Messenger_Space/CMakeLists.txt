@@ -12,10 +12,10 @@ enable_testing()
 
 find_package(OpenDDS REQUIRED)
 
-if (NOT OPENDDS_OWNERSHIP_PROFILE)
+if(NOT OPENDDS_OWNERSHIP_PROFILE)
   message(FATAL_ERROR "This test requires OpenDDS to be built with Ownership Profile enabled")
 endif()
-if (CMAKE_GENERATOR MATCHES "Visual Studio 10.*")
+if(CMAKE_GENERATOR MATCHES "Visual Studio 10.*")
   message(FATAL_ERROR "This test does not support Visual Studio 2010")
 endif()
 
@@ -40,11 +40,11 @@ set_target_properties(${publisher}
   PROPERTIES OUTPUT_NAME publisher
 )
 target_include_directories(${publisher} PRIVATE "${src}/../../../")
-OPENDDS_TARGET_SOURCES(${publisher} "${dst}/Messenger.idl")
+opendds_target_sources(${publisher} "${dst}/Messenger.idl")
 
 foreach(t ${all_targets})
   # Using explicit scope here is a regression test for
-  # https://github.com/objectcomputing/OpenDDS/issues/1336
+  # https://github.com/OpenDDS/OpenDDS/issues/1336
   # See https://cmake.org/cmake/help/latest/policy/CMP0023.html
   target_link_libraries(${t} PUBLIC OpenDDS::OpenDDS)
 

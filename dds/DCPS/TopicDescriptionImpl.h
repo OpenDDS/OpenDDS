@@ -8,16 +8,14 @@
 #ifndef OPENDDS_DCPS_TOPIC_DESCRIPTION_IMPL_H
 #define OPENDDS_DCPS_TOPIC_DESCRIPTION_IMPL_H
 
-#include "dds/DdsDcpsTopicC.h"
-#include "dds/DdsDcpsTypeSupportExtC.h"
+#include "Atomic.h"
 #include "Definitions.h"
-#include "ace/SString.h"
-#ifdef ACE_HAS_CPP11
-#  include <atomic>
-#else
-#  include <ace/Atomic_Op.h>
-#endif
 #include "LocalObject.h"
+
+#include <dds/DdsDcpsTopicC.h>
+#include <dds/DdsDcpsTypeSupportExtC.h>
+
+#include <ace/SString.h>
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
@@ -88,11 +86,7 @@ protected:
   OpenDDS::DCPS::TypeSupport_var type_support_;
 
   /// The number of entities using this topic
-#ifdef ACE_HAS_CPP11
-  std::atomic<uint32_t> entity_refs_;
-#else
-  ACE_Atomic_Op<ACE_Thread_Mutex, unsigned long> entity_refs_;
-#endif
+  Atomic<ACE_UINT32> entity_refs_;
 };
 
 template <typename Topic>

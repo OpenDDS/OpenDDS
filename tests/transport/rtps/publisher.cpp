@@ -88,12 +88,13 @@ class SimpleDataWriter : public TransportSendListener, public TransportClient
 {
 public:
 
-  explicit SimpleDataWriter(const RepoId& pub_id)
+  explicit SimpleDataWriter(const GUID_t& pub_id)
     : pub_id_(pub_id)
     , sub_id_(GUID_UNKNOWN)
     , callbacks_expected_(0)
     , inline_qos_mode_(DEFAULT_QOS)
   {
+    TransportClient::set_guid(pub_id_);
   }
 
   virtual ~SimpleDataWriter() {}
@@ -179,7 +180,7 @@ public:
   // Implementing TransportClient
   bool check_transport_qos(const TransportInst&)
     { return true; }
-  RepoId get_repo_id() const
+  GUID_t get_guid() const
     { return pub_id_; }
   DDS::DomainId_t domain_id() const
     { return 0; }
@@ -191,8 +192,8 @@ public:
   using TransportClient::send;
   using TransportClient::send_control;
 
-  const RepoId pub_id_;
-  RepoId sub_id_;
+  const GUID_t pub_id_;
+  GUID_t sub_id_;
   ssize_t callbacks_expected_;
   InlineQosMode inline_qos_mode_;
 };
@@ -226,7 +227,7 @@ int DDS_TEST::test(ACE_TString host, u_short port)
     std::cerr << "ERROR: Failed to cast to RtpsUdpInst\n";
     return 1;
   }
-  rtps_inst->datalink_release_delay_ = 0;
+  rtps_inst->datalink_release_delay(0);
   rtps_inst->heartbeat_period_ = TimeDuration::from_msec(100);
 
   TransportConfig_rch cfg = TheTransportRegistry->create_config("cfg");

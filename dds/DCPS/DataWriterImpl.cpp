@@ -73,15 +73,15 @@ DataWriterImpl::DataWriterImpl()
   , sequence_number_(SequenceNumber::SEQUENCENUMBER_UNKNOWN())
   , coherent_(false)
   , coherent_samples_(0)
-  , liveliness_lost_(false)
-  , reactor_(0)
-  , liveliness_check_interval_(TimeDuration::max_value)
   , last_deadline_missed_total_count_(0)
   , is_bit_(false)
   , min_suspended_transaction_id_(0)
   , max_suspended_transaction_id_(0)
-  , liveliness_asserted_(false)
-  , liveness_timer_(make_rch<LivenessTimer>(ref(*this)))
+  , liveliness_send_task_(make_rch<DWISporadicTask>(TheServiceParticipant->time_source(), TheServiceParticipant->interceptor(), rchandle_from(this), &DataWriterImpl::liveliness_send_task))
+  , liveliness_lost_task_(make_rch<DWISporadicTask>(TheServiceParticipant->time_source(), TheServiceParticipant->interceptor(), rchandle_from(this), &DataWriterImpl::liveliness_lost_task))
+  , liveliness_send_interval_(TimeDuration::max_value)
+  , liveliness_lost_interval_(TimeDuration::max_value)
+  , liveliness_lost_(false)
 {
   liveliness_lost_status_.total_count = 0;
   liveliness_lost_status_.total_count_change = 0;
@@ -110,6 +110,10 @@ DataWriterImpl::DataWriterImpl()
 DataWriterImpl::~DataWriterImpl()
 {
   DBG_ENTRY_LVL("DataWriterImpl", "~DataWriterImpl", 6);
+
+  liveliness_send_task_->cancel();
+  liveliness_lost_task_->cancel();
+
 #ifndef OPENDDS_SAFETY_PROFILE
   RcHandle<DomainParticipantImpl> participant = participant_servant_.lock();
   if (participant) {
@@ -168,15 +172,13 @@ DataWriterImpl::init(
   // Only store the publisher pointer, since it is our parent, we will
   // exist as long as it does.
   publisher_servant_ = *publisher_servant;
-
-  this->reactor_ = TheServiceParticipant->timer();
 }
 
 DDS::InstanceHandle_t
 DataWriterImpl::get_instance_handle()
 {
   const RcHandle<DomainParticipantImpl> participant = participant_servant_.lock();
-  return get_entity_instance_handle(publication_id_, participant.get());
+  return get_entity_instance_handle(publication_id_, participant);
 }
 
 DDS::InstanceHandle_t
@@ -209,8 +211,16 @@ DataWriterImpl::get_builtin_subscriber_proxy() const
 }
 
 void
-DataWriterImpl::add_association(const RepoId& yourId,
-                                const ReaderAssociation& reader,
+DataWriterImpl::set_publication_id(const GUID_t& guid)
+{
+  OPENDDS_ASSERT(publication_id_ == GUID_UNKNOWN);
+  OPENDDS_ASSERT(guid != GUID_UNKNOWN);
+  publication_id_ = guid;
+  TransportClient::set_guid(guid);
+}
+
+void
+DataWriterImpl::add_association(const ReaderAssociation& reader,
                                 bool active)
 {
   DBG_ENTRY_LVL("DataWriterImpl", "add_association", 6);
@@ -218,7 +228,7 @@ DataWriterImpl::add_association(const RepoId& yourId,
   if (DCPS_debug_level) {
     ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) DataWriterImpl::add_association - ")
                ACE_TEXT("bit %d local %C remote %C\n"), is_bit_,
-               LogGuid(yourId).c_str(),
+               LogGuid(publication_id_).c_str(),
                LogGuid(reader.readerId).c_str()));
   }
 
@@ -229,8 +239,6 @@ DataWriterImpl::add_association(const RepoId& yourId,
 
     return;
   }
-
-  check_and_set_repo_id(yourId);
 
   {
     ACE_GUARD(ACE_Thread_Mutex, reader_info_guard, this->reader_info_lock_);
@@ -245,7 +253,7 @@ DataWriterImpl::add_association(const RepoId& yourId,
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("(%P|%t) DataWriterImpl::add_association(): ")
                ACE_TEXT("adding subscription to publication %C with priority %d.\n"),
-               LogGuid(get_repo_id()).c_str(),
+               LogGuid(get_guid()).c_str(),
                qos_.transport_priority.value));
   }
 
@@ -276,7 +284,7 @@ DataWriterImpl::add_association(const RepoId& yourId,
 }
 
 void
-DataWriterImpl::transport_assoc_done(int flags, const RepoId& remote_id)
+DataWriterImpl::transport_assoc_done(int flags, const GUID_t& remote_id)
 {
   DBG_ENTRY_LVL("DataWriterImpl", "transport_assoc_done", 6);
 
@@ -367,7 +375,7 @@ DataWriterImpl::ReaderInfo::~ReaderInfo()
 }
 
 void
-DataWriterImpl::association_complete_i(const RepoId& remote_id)
+DataWriterImpl::association_complete_i(const GUID_t& remote_id)
 {
   DBG_ENTRY_LVL("DataWriterImpl", "association_complete_i", 6);
 
@@ -681,7 +689,7 @@ DataWriterImpl::remove_associations(const ReaderIdSeq & readers,
   }
 }
 
-void DataWriterImpl::replay_durable_data_for(const RepoId& remote_id)
+void DataWriterImpl::replay_durable_data_for(const GUID_t& remote_id)
 {
   DBG_ENTRY_LVL("DataWriterImpl", "replay_durable_data_for", 6);
 
@@ -819,9 +827,9 @@ void DataWriterImpl::remove_all_associations()
 }
 
 void
-DataWriterImpl::register_for_reader(const RepoId& participant,
-                                    const RepoId& writerid,
-                                    const RepoId& readerid,
+DataWriterImpl::register_for_reader(const GUID_t& participant,
+                                    const GUID_t& writerid,
+                                    const GUID_t& readerid,
                                     const TransportLocatorSeq& locators,
                                     DiscoveryListener* listener)
 {
@@ -829,15 +837,15 @@ DataWriterImpl::register_for_reader(const RepoId& participant,
 }
 
 void
-DataWriterImpl::unregister_for_reader(const RepoId& participant,
-                                      const RepoId& writerid,
-                                      const RepoId& readerid)
+DataWriterImpl::unregister_for_reader(const GUID_t& participant,
+                                      const GUID_t& writerid,
+                                      const GUID_t& readerid)
 {
   TransportClient::unregister_for_reader(participant, writerid, readerid);
 }
 
 void
-DataWriterImpl::update_locators(const RepoId& readerId,
+DataWriterImpl::update_locators(const GUID_t& readerId,
                                 const TransportLocatorSeq& locators)
 {
   {
@@ -888,7 +896,7 @@ DataWriterImpl::update_incompatible_qos(const IncompatibleQosStatus& status)
 }
 
 void
-DataWriterImpl::update_subscription_params(const RepoId& readerId,
+DataWriterImpl::update_subscription_params(const GUID_t& readerId,
                                            const DDS::StringSeq& params)
 {
 #ifdef OPENDDS_NO_CONTENT_FILTERED_TOPIC
@@ -1189,6 +1197,7 @@ DataWriterImpl::get_publication_matched_status(
 DDS::ReturnCode_t
 DataWriterImpl::assert_liveliness()
 {
+  ACE_Guard<ACE_Recursive_Thread_Mutex> guard(lock_);
   switch (this->qos_.liveliness.kind) {
   case DDS::AUTOMATIC_LIVELINESS_QOS:
     // Do nothing.
@@ -1214,10 +1223,11 @@ DataWriterImpl::assert_liveliness()
 DDS::ReturnCode_t
 DataWriterImpl::assert_liveliness_by_participant()
 {
+  ACE_Guard<ACE_Recursive_Thread_Mutex> guard(lock_);
   // This operation is called by participant.
-  if (this->qos_.liveliness.kind == DDS::MANUAL_BY_PARTICIPANT_LIVELINESS_QOS) {
-    // Set a flag indicating that we should send a liveliness message on the timer if necessary.
-    liveliness_asserted_ = true;
+  if (this->qos_.liveliness.kind == DDS::MANUAL_BY_PARTICIPANT_LIVELINESS_QOS &&
+      !send_liveliness(MonotonicTimePoint::now())) {
+    return DDS::RETCODE_ERROR;
   }
 
   return DDS::RETCODE_OK;
@@ -1227,7 +1237,7 @@ TimeDuration
 DataWriterImpl::liveliness_check_interval(DDS::LivelinessQosPolicyKind kind)
 {
   if (this->qos_.liveliness.kind == kind) {
-    return liveliness_check_interval_;
+    return liveliness_send_interval_;
   } else {
     return TimeDuration::max_value;
   }
@@ -1432,19 +1442,10 @@ DataWriterImpl::enable()
   if (qos_.liveliness.lease_duration.sec != DDS::DURATION_INFINITE_SEC &&
       qos_.liveliness.lease_duration.nanosec != DDS::DURATION_INFINITE_NSEC) {
     // Must be at least 1 micro second.
-    liveliness_check_interval_ = std::max(
+    liveliness_send_interval_ = std::max(
       TimeDuration(qos_.liveliness.lease_duration) * (TheServiceParticipant->liveliness_factor() / 100.0),
       TimeDuration(0, 1));
-
-    if (reactor_->schedule_timer(liveness_timer_.in(),
-                                 0,
-                                 liveliness_check_interval_.value(),
-                                 liveliness_check_interval_.value()) == -1) {
-      ACE_ERROR((LM_ERROR,
-                 ACE_TEXT("(%P|%t) ERROR: DataWriterImpl::enable: %p.\n"),
-                 ACE_TEXT("schedule_timer")));
-
-    }
+    liveliness_lost_interval_ = TimeDuration(qos_.liveliness.lease_duration);
   }
 
   if (!participant) {
@@ -1495,9 +1496,8 @@ DataWriterImpl::enable()
 
   XTypes::TypeLookupService_rch type_lookup_service = participant->get_type_lookup_service();
   type_support_->add_types(type_lookup_service);
-  type_support_->populate_dependencies(type_lookup_service);
 
-  const RepoId publication_id =
+  const bool success =
     disco->add_publication(this->domain_id_,
                            this->dp_id_,
                            this->topic_servant_->get_id(),
@@ -1507,34 +1507,41 @@ DataWriterImpl::enable()
                            pub_qos,
                            type_info);
 
-  ACE_Guard<ACE_Recursive_Thread_Mutex> guard(lock_);
-  publication_id_ = publication_id;
+  {
+    ACE_Guard<ACE_Recursive_Thread_Mutex> guard(lock_);
 
-  if (publication_id_ == GUID_UNKNOWN) {
-    if (DCPS_debug_level >= 1) {
-      ACE_DEBUG((LM_WARNING, "(%P|%t) WARNING: DataWriterImpl::enable: "
-        "add_publication failed\n"));
+    if (!success || publication_id_ == GUID_UNKNOWN) {
+      if (DCPS_debug_level >= 1) {
+        ACE_DEBUG((LM_WARNING, "(%P|%t) WARNING: DataWriterImpl::enable: "
+                   "add_publication failed\n"));
+      }
+      data_container_->shutdown_ = true;
+      return DDS::RETCODE_ERROR;
     }
-    data_container_->shutdown_ = true;
-    return DDS::RETCODE_ERROR;
-  }
 
 #if defined(OPENDDS_SECURITY)
-  security_config_ = participant->get_security_config();
-  participant_permissions_handle_ = participant->permissions_handle();
-  dynamic_type_ = type_support_->get_type();
+    security_config_ = participant->get_security_config();
+    participant_permissions_handle_ = participant->permissions_handle();
+    dynamic_type_ = type_support_->get_type();
 #endif
 
-  if (DCPS_debug_level >= 2) {
-    ACE_DEBUG((LM_DEBUG, "(%P|%t) DataWriterImpl::enable: "
-      "got GUID %C, publishing to topic name \"%C\" type \"%C\"\n",
-      LogGuid(publication_id_).c_str(),
-      topic_servant_->topic_name(), topic_servant_->type_name()));
+    if (DCPS_debug_level >= 2) {
+      ACE_DEBUG((LM_DEBUG, "(%P|%t) DataWriterImpl::enable: "
+                 "got GUID %C, publishing to topic name \"%C\" type \"%C\"\n",
+                 LogGuid(publication_id_).c_str(),
+                 topic_servant_->topic_name(), topic_servant_->type_name()));
+    }
+
+    this->data_container_->publication_id_ = this->publication_id_;
   }
 
-  this->data_container_->publication_id_ = this->publication_id_;
-
-  guard.release();
+  if (qos_.liveliness.lease_duration.sec != DDS::DURATION_INFINITE_SEC &&
+      qos_.liveliness.lease_duration.nanosec != DDS::DURATION_INFINITE_NSEC) {
+    if (qos_.liveliness.kind == DDS::AUTOMATIC_LIVELINESS_QOS) {
+      liveliness_send_task_->schedule(liveliness_send_interval_);
+    }
+    liveliness_lost_task_->schedule(liveliness_lost_interval_);
+  }
 
   const DDS::ReturnCode_t writer_enabled_result =
     publisher->writer_enabled(topic_name_.in(), this);
@@ -1684,6 +1691,7 @@ DataWriterImpl::register_instance_from_durable_data(
 
 DDS::ReturnCode_t
 DataWriterImpl::unregister_instance_i(DDS::InstanceHandle_t handle,
+                                      const Sample* samp,
                                       const DDS::Time_t& source_timestamp)
 {
   DBG_ENTRY_LVL("DataWriterImpl","unregister_instance_i",6);
@@ -1698,7 +1706,7 @@ DataWriterImpl::unregister_instance_i(DDS::InstanceHandle_t handle,
   // According to spec 1.2, autodispose_unregistered_instances true causes
   // dispose on the instance prior to calling unregister operation.
   if (this->qos_.writer_data_lifecycle.autodispose_unregistered_instances) {
-    return this->dispose_and_unregister(handle, source_timestamp);
+    return this->dispose_and_unregister(handle, samp, source_timestamp);
   }
 
   DDS::ReturnCode_t ret = DDS::RETCODE_ERROR;
@@ -1744,11 +1752,20 @@ DataWriterImpl::unregister_instance_i(DDS::InstanceHandle_t handle,
   }
 
   send_all_to_flush_control(guard);
+
+  const ValueDispatcher* vd = get_value_dispatcher();
+  const Observer_rch observer = get_observer(Observer::e_UNREGISTERED);
+  if (observer && samp && samp->native_data() && vd) {
+    Observer::Sample s(handle, element->get_header().instance_state(), source_timestamp, element->get_header().sequence_, samp->native_data(), *vd);
+    observer->on_unregistered(this, s);
+  }
+
   return DDS::RETCODE_OK;
 }
 
 DDS::ReturnCode_t
 DataWriterImpl::dispose_and_unregister(DDS::InstanceHandle_t handle,
+                                       const Sample* samp,
                                        const DDS::Time_t& source_timestamp)
 {
   DBG_ENTRY_LVL("DataWriterImpl", "dispose_and_unregister", 6);
@@ -1807,6 +1824,23 @@ DataWriterImpl::dispose_and_unregister(DDS::InstanceHandle_t handle,
   }
 
   send_all_to_flush_control(guard);
+
+  const ValueDispatcher* vd = get_value_dispatcher();
+  {
+    const Observer_rch observer = get_observer(Observer::e_DISPOSED);
+    if (observer && samp && samp->native_data() && vd) {
+      Observer::Sample s(handle, element->get_header().instance_state(), source_timestamp, element->get_header().sequence_, samp->native_data(), *vd);
+      observer->on_disposed(this, s);
+    }
+  }
+  {
+    const Observer_rch observer = get_observer(Observer::e_UNREGISTERED);
+    if (observer && samp && samp->native_data() && vd) {
+      Observer::Sample s(handle, element->get_header().instance_state(), source_timestamp, element->get_header().sequence_, samp->native_data(), *vd);
+      observer->on_unregistered(this, s);
+    }
+  }
+
   return DDS::RETCODE_OK;
 }
 
@@ -1816,7 +1850,14 @@ DataWriterImpl::unregister_instances(const DDS::Time_t& source_timestamp)
   ACE_GUARD(ACE_Thread_Mutex, guard, sync_unreg_rem_assocs_lock_);
 
   while (!this->data_container_->instances_.empty()) {
-    this->unregister_instance_i(this->data_container_->instances_.begin()->first, source_timestamp);
+    const DDS::InstanceHandle_t handle = data_container_->instances_.begin()->first;
+    InstanceHandlesToValues::const_iterator pos = instance_handles_to_values_.find(handle);
+    if (pos != instance_handles_to_values_.end()) {
+      const Sample& s = *pos->second;
+      unregister_instance_i(handle, &s, source_timestamp);
+    } else {
+      unregister_instance_i(handle, 0, source_timestamp);
+    }
   }
 }
 
@@ -1888,6 +1929,7 @@ DataWriterImpl::write(Message_Block_Ptr data,
                      ret);
   }
   last_liveliness_activity_time_.set_to_now();
+  liveliness_lost_ = false;
 
   track_sequence_number(filter_out);
 
@@ -1982,6 +2024,7 @@ DataWriterImpl::send_suspended_data()
 
 DDS::ReturnCode_t
 DataWriterImpl::dispose(DDS::InstanceHandle_t handle,
+                        const Sample& samp,
                         const DDS::Time_t & source_timestamp)
 {
   DBG_ENTRY_LVL("DataWriterImpl","dispose",6);
@@ -2039,6 +2082,13 @@ DataWriterImpl::dispose(DDS::InstanceHandle_t handle,
 
   send_all_to_flush_control(guard);
 
+  const ValueDispatcher* vd = get_value_dispatcher();
+  const Observer_rch observer = get_observer(Observer::e_DISPOSED);
+  if (observer && samp.native_data() && vd) {
+    Observer::Sample s(handle, element->get_header().instance_state(), source_timestamp, element->get_header().sequence_, samp.native_data(), *vd);
+    observer->on_disposed(this, s);
+  }
+
   return DDS::RETCODE_OK;
 }
 
@@ -2055,7 +2105,7 @@ DataWriterImpl::unregister_all()
   data_container_->unregister_all();
 }
 
-RepoId
+GUID_t
 DataWriterImpl::get_dp_id()
 {
   return dp_id_;
@@ -2283,15 +2333,12 @@ DataWriterImpl::filter_out(const DataSampleElement& elt,
 
   if (filterClassName == "DDSSQL" ||
       filterClassName == "OPENDDSSQL") {
-    const MetaStruct& meta = type_support_->getMetaStructForType();
-    if (!elt.get_header().valid_data() && evaluator.has_non_key_fields(meta)) {
+    if (!elt.get_header().valid_data() && evaluator.has_non_key_fields(*type_support_)) {
       return true;
     }
     try {
-      return !evaluator.eval(elt.get_sample()->cont(),
-                             elt.get_header().byte_order_ != ACE_CDR_BYTE_ORDER,
-                             elt.get_header().cdr_encapsulation_, meta,
-                             expression_params, type_support_->base_extensibility());
+      return !evaluator.eval(elt.get_sample()->cont(), encoding_mode_.encoding(),
+                             *type_support_, expression_params);
     } catch (const std::runtime_error&) {
       // if the eval fails, the throws will do the logging
       // return false here so that the sample is not filtered
@@ -2431,86 +2478,63 @@ DataWriterImpl::listener_for(DDS::StatusKind kind)
   }
 }
 
-int
-DataWriterImpl::handle_timeout(const ACE_Time_Value& tv,
-                               const void* /* arg */)
+void
+DataWriterImpl::liveliness_send_task(const MonotonicTimePoint& now)
 {
   ThreadStatusManager::Event ev(TheServiceParticipant->get_thread_status_manager());
 
-  const MonotonicTimePoint now(tv);
-  bool liveliness_lost = false;
+  ACE_Guard<ACE_Recursive_Thread_Mutex> guard(lock_);
+  OPENDDS_ASSERT(qos_.liveliness.kind == DDS::AUTOMATIC_LIVELINESS_QOS);
+
+  const TimeDuration elapsed = now - last_liveliness_activity_time_;
+
+  if (elapsed < liveliness_send_interval_) {
+    // Reschedule.
+    liveliness_send_task_->schedule(liveliness_send_interval_ - elapsed);
+    return;
+  }
+
+  send_liveliness(now);
+  liveliness_send_task_->schedule(liveliness_send_interval_);
+}
+
+void
+DataWriterImpl::liveliness_lost_task(const MonotonicTimePoint& now)
+{
+  ThreadStatusManager::Event ev(TheServiceParticipant->get_thread_status_manager());
 
   ACE_Guard<ACE_Recursive_Thread_Mutex> guard(lock_);
 
-  TimeDuration elapsed = now - last_liveliness_activity_time_;
+  const TimeDuration elapsed = now - last_liveliness_activity_time_;
 
-  // Do we need to send a liveliness message?
-  if (elapsed >= liveliness_check_interval_) {
-    switch (this->qos_.liveliness.kind) {
-    case DDS::AUTOMATIC_LIVELINESS_QOS:
-      if (!send_liveliness(now)) {
-        liveliness_lost = true;
-      }
-      break;
-
-    case DDS::MANUAL_BY_PARTICIPANT_LIVELINESS_QOS:
-      if (liveliness_asserted_) {
-        if (!send_liveliness(now)) {
-          liveliness_lost = true;
-        }
-      }
-      break;
-
-    case DDS::MANUAL_BY_TOPIC_LIVELINESS_QOS:
-      // Do nothing.
-      break;
-    }
-  }
-  else {
+  if (elapsed < liveliness_lost_interval_) {
     // Reschedule.
-    if (reactor_->cancel_timer(liveness_timer_.in()) == -1) {
-      ACE_ERROR((LM_ERROR,
-        ACE_TEXT("(%P|%t) ERROR: DataWriterImpl::handle_timeout: %p.\n"),
-        ACE_TEXT("cancel_timer")));
-    }
-    if (reactor_->schedule_timer(liveness_timer_.in(), 0,
-      (liveliness_check_interval_ - elapsed).value(),
-      liveliness_check_interval_.value()) == -1)
-    {
-      ACE_ERROR((LM_ERROR,
-        ACE_TEXT("(%P|%t) ERROR: DataWriterImpl::handle_timeout: %p.\n"),
-        ACE_TEXT("schedule_timer")));
-    }
-    return 0;
+    liveliness_lost_task_->schedule(liveliness_lost_interval_ - elapsed);
+    return;
   }
 
-  liveliness_asserted_ = false;
-  elapsed = now - last_liveliness_activity_time_;
+  const bool notify = !liveliness_lost_;
+  liveliness_lost_task_->schedule(liveliness_lost_interval_);
+  liveliness_lost_ = true;
 
-  // Have we lost liveliness?
-  if (elapsed >= TimeDuration(qos_.liveliness.lease_duration)) {
-    liveliness_lost = true;
-  }
+  if (notify) {
+    ++liveliness_lost_status_.total_count;
+    ++liveliness_lost_status_.total_count_change;
 
-  if (!this->liveliness_lost_ && liveliness_lost) {
-    ++ this->liveliness_lost_status_.total_count;
-    ++ this->liveliness_lost_status_.total_count_change;
+    set_status_changed_flag(DDS::LIVELINESS_LOST_STATUS, true);
+    notify_status_condition();
 
-    DDS::DataWriterListener_var listener =
-      listener_for(DDS::LIVELINESS_LOST_STATUS);
+    DDS::DataWriterListener_var listener = listener_for(DDS::LIVELINESS_LOST_STATUS);
 
     if (!CORBA::is_nil(listener.in())) {
       {
         ACE_Reverse_Lock<ACE_Recursive_Thread_Mutex> rev_lock(lock_);
         ACE_Guard<ACE_Reverse_Lock<ACE_Recursive_Thread_Mutex> > rev_guard(rev_lock);
-        listener->on_liveliness_lost(this, this->liveliness_lost_status_);
+        listener->on_liveliness_lost(this, liveliness_lost_status_);
       }
-      this->liveliness_lost_status_.total_count_change = 0;
+      liveliness_lost_status_.total_count_change = 0;
     }
   }
-
-  this->liveliness_lost_ = liveliness_lost;
-  return 0;
 }
 
 bool
@@ -2533,17 +2557,13 @@ DataWriterImpl::send_liveliness(const MonotonicTimePoint& now)
     }
   }
   last_liveliness_activity_time_ = now;
+  liveliness_lost_ = false;
   return true;
 }
 
 void
 DataWriterImpl::prepare_to_delete()
 {
-  const Observer_rch observer = get_observer(Observer::e_DELETED);
-  if (observer) {
-    observer->on_deleted(this);
-  }
-
   this->set_deleted(true);
   this->stop_associating();
   this->terminate_send_if_suspended();
@@ -2560,6 +2580,11 @@ DataWriterImpl::prepare_to_delete()
 
   // Unregister all registered instances prior to deletion.
   unregister_instances(SystemTimePoint::now().to_dds_time());
+
+  const Observer_rch observer = get_observer(Observer::e_DELETED);
+  if (observer) {
+    observer->on_deleted(this);
+  }
 }
 
 PublicationInstance_rch
@@ -2793,27 +2818,14 @@ void DataWriterImpl::set_wait_pending_deadline(const MonotonicTimePoint& deadlin
   wait_pending_deadline_ = deadline;
 }
 
-int LivenessTimer::handle_timeout(const ACE_Time_Value& tv, const void* arg)
-{
-  ThreadStatusManager::Event ev(TheServiceParticipant->get_thread_status_manager());
-
-  DataWriterImpl_rch writer = this->writer_.lock();
-  if (writer) {
-    writer->handle_timeout(tv, arg);
-  } else {
-    this->reactor()->cancel_timer(this);
-  }
-  return 0;
-}
-
 void DataWriterImpl::transport_discovery_change()
 {
   populate_connection_info();
   const TransportLocatorSeq& trans_conf_info = connection_info();
 
   ACE_Guard<ACE_Recursive_Thread_Mutex> guard(lock_);
-  const RepoId dp_id_copy = dp_id_;
-  const RepoId publication_id_copy = publication_id_;
+  const GUID_t dp_id_copy = dp_id_;
+  const GUID_t publication_id_copy = publication_id_;
   const int domain_id = domain_id_;
   guard.release();
 
@@ -2906,7 +2918,7 @@ DDS::ReturnCode_t DataWriterImpl::get_key_value(Sample_rch& sample, DDS::Instanc
   if (it == instance_handles_to_values_.end()) {
     return DDS::RETCODE_BAD_PARAMETER;
   }
-  sample = it->second;
+  sample = it->second->copy(Sample::Mutable);
   return DDS::RETCODE_OK;
 }
 
@@ -2940,7 +2952,7 @@ DDS::ReturnCode_t DataWriterImpl::unregister_instance_w_timestamp(
   if (rc != DDS::RETCODE_OK) {
     return rc;
   }
-  return unregister_instance_i(instance_handle, timestamp);
+  return unregister_instance_i(instance_handle, &sample, timestamp);
 }
 
 DDS::ReturnCode_t DataWriterImpl::dispose_w_timestamp(
@@ -2968,7 +2980,7 @@ DDS::ReturnCode_t DataWriterImpl::dispose_w_timestamp(
   if (rc != DDS::RETCODE_OK) {
     return rc;
   }
-  return dispose(instance_handle, source_timestamp);
+  return dispose(instance_handle, sample, source_timestamp);
 }
 
 ACE_Message_Block* DataWriterImpl::serialize_sample(const Sample& sample)
@@ -3196,7 +3208,7 @@ DDS::ReturnCode_t DataWriterImpl::write_w_timestamp(
     handle = registered_handle;
   }
 
-  // list of reader RepoIds that should not get data
+  // list of reader GUID_ts that should not get data
   GUIDSeq_var filter_out;
 #ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
   if (TheServiceParticipant->publisher_content_filter()) {

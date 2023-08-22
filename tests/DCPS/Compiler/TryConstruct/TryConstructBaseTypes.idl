@@ -10,16 +10,20 @@ enum EnumType2 {B1, B2, B3, B4, BExtra};
 
 // bounded string definitions for trim
 typedef string<20> str20;
-typedef wstring<20> wstr20;
 typedef string<64> str64;
+#ifndef OPENDDS_SAFETY_PROFILE
+typedef wstring<20> wstr20;
 typedef wstring<64> wstr64;
+#endif
 
 typedef sequence<@try_construct(USE_DEFAULT) str20> BoundStringSeq_ud;
 typedef sequence<@try_construct(TRIM) str20> BoundStringSeq_t;
 typedef sequence<@try_construct(DISCARD) str20> BoundStringSeq_d;
+#ifndef OPENDDS_SAFETY_PROFILE
 typedef sequence<@try_construct(USE_DEFAULT) wstr20> BoundWStringSeq_ud;
 typedef sequence<@try_construct(TRIM) wstr20> BoundWStringSeq_t;
 typedef sequence<@try_construct(DISCARD) wstr20> BoundWStringSeq_d;
+#endif
 
 // array for use in struct, union, and sequence
 typedef short ShortArray[15];
@@ -43,10 +47,12 @@ typedef sequence<unsigned short, 3> UnsignedShortSeqBound2;
 typedef sequence<str64> StringSeqUnbound;
 typedef sequence<str64, 2> StringSeqBound;
 typedef sequence<str64, 3> StringSeqBound2;
+#ifndef OPENDDS_SAFETY_PROFILE
 // wstring
 typedef sequence<wstr64> WideStringSeqUnbound;
 typedef sequence<wstr64, 2> WideStringSeqBound;
 typedef sequence<wstr64, 3> WideStringSeqBound2;
+#endif
 // array
 typedef sequence<ShortArray> ShortArraySeqUnbound;
 typedef sequence<ShortArray, 2> ShortArraySeqBound;
@@ -68,8 +74,10 @@ typedef short ShortArr[3];
 typedef unsigned short UnsignedShortArr[3];
 // string
 typedef str64 StringArr[3];
+#ifndef OPENDDS_SAFETY_PROFILE
 // wstring
 typedef wstr64 WideStringArr[3];
+#endif
 // multi-dimensional arrays
 typedef short ShortArrTwoDim[3][3];
 typedef short ShortArrThreeDim[3][3][3];
@@ -94,10 +102,12 @@ struct AnonSeqStruct {
   sequence<str64> AnonStringSeqUnbound;
   sequence<str64, 2> AnonStringSeqBound;
   sequence<str64, 3> AnonStringSeqBound2;
+#ifndef OPENDDS_SAFETY_PROFILE
   // wstring
   sequence<wstr64> AnonWideStringSeqUnbound;
   sequence<wstr64, 2> AnonWideStringSeqBound;
   sequence<wstr64, 3> AnonWideStringSeqBound2;
+#endif
   // array
   sequence<ShortArray> AnonShortArraySeqUnbound;
   sequence<ShortArray, 2> AnonShortArraySeqBound;
@@ -121,8 +131,10 @@ struct AnonSeqStruct {
   unsigned short AnonUnsignedShortArr[3];
   // string
   str64 AnonStringArr[3];
+#ifndef OPENDDS_SAFETY_PROFILE
   // wstring
   wstr64 AnonWideStringArr[3];
+#endif
   // multi-dimensional arrays
   short AnonShortArrTwoDim[3][3];
   short AnonShortArrThreeDim[3][3][3];

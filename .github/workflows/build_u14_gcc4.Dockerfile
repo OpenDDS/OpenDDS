@@ -7,7 +7,8 @@ RUN apt-get update && apt-get install -y \
     make \
     libxerces-c-dev \
     libssl-dev \
-    perl
+    perl \
+    git
 
 ADD . /opt/OpenDDS
 

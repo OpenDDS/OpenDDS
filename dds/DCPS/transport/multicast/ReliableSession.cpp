@@ -163,7 +163,7 @@ ReliableSession::deliver_held_data()
 }
 
 void
-ReliableSession::release_remote(const RepoId& remote)
+ReliableSession::release_remote(const GUID_t& remote)
 {
   ACE_GUARD(ACE_Thread_Mutex, guard, held_lock_);
   if (!held_.empty()) {
@@ -225,7 +225,9 @@ ReliableSession::expire_naks()
 {
   if (this->nak_requests_.empty()) return; // nothing to expire
 
-  const MonotonicTimePoint deadline(MonotonicTimePoint::now() - link_->config().nak_timeout_);
+  MulticastInst_rch cfg = link_->config();
+  const TimeDuration timeout = cfg ? cfg->nak_timeout_: TimeDuration::from_msec(MulticastInst::DEFAULT_NAK_TIMEOUT);
+  const MonotonicTimePoint deadline(MonotonicTimePoint::now() - timeout);
   NakRequestMap::iterator first(this->nak_requests_.begin());
   NakRequestMap::iterator last(this->nak_requests_.upper_bound(deadline));
 
@@ -242,7 +244,8 @@ ReliableSession::expire_naks()
                                                lastSeq), dropped)) {
 
     for (size_t i = 0; i < dropped.size(); ++i) {
-      this->reassembly_.data_unavailable(dropped[i]);
+      const SequenceRange& sr = dropped[i];
+      reassembly_.data_unavailable(FragmentRange(sr.first.getValue(), sr.second.getValue()));
     }
 
     ACE_ERROR((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: ReliableSession::expire_naks: ")
@@ -334,9 +337,10 @@ ReliableSession::send_naks()
     // The sequences between rbegin - 1 and rbegin will not be ignored for naking.
     ++itr;
 
-    size_t nak_delay_intervals = this->link()->config().nak_delay_intervals_;
-    size_t nak_max = this->link()->config().nak_max_;
-    size_t sz = this->nak_requests_.size();
+    MulticastInst_rch cfg = link_->config();
+    size_t nak_delay_intervals = cfg ? cfg->nak_delay_intervals_ : MulticastInst::DEFAULT_NAK_DELAY_INTERVALS;
+    size_t nak_max = cfg ? cfg->nak_max_ : MulticastInst::DEFAULT_NAK_MAX;
+    size_t sz = nak_requests_.size();
 
     // Image i is the index of element in nak_requests_ in reverse order.
     // index 0 sequence is most recent high water mark.
@@ -609,7 +613,8 @@ ReliableSession::nakack_received(const Message_Block_Ptr& control)
   } else if (this->nak_sequence_.insert(SequenceRange(range_low, range_high), dropped)) {
 
     for (size_t i = 0; i < dropped.size(); ++i) {
-      this->reassembly_.data_unavailable(dropped[i]);
+      const SequenceRange& sr = dropped[i];
+      reassembly_.data_unavailable(FragmentRange(sr.first.getValue(), sr.second.getValue()));
     }
 
     if (DCPS_debug_level > 0) {
@@ -680,7 +685,8 @@ ReliableSession::stop()
 TimeDuration
 ReliableSession::nak_delay()
 {
-  TimeDuration interval(link()->config().nak_interval_);
+  MulticastInst_rch cfg = link_->config();
+  TimeDuration interval = cfg ? cfg->nak_interval_ : TimeDuration::from_msec(MulticastInst::DEFAULT_NAK_INTERVAL);
 
   // Apply random backoff to minimize potential collisions:
   interval *= static_cast<double>(std::rand()) /

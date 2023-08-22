@@ -29,7 +29,7 @@ public:
                 MessageId,
                 ACE_INT32          sec,
                 ACE_UINT32         nano_sec,
-                PublicationId      pid,
+                GUID_t      pid,
                 bool               byte_order,
                 ACE_Message_Block* blk,
                 Encoding::Kind     encoding_kind);
@@ -45,7 +45,7 @@ public:
   /// The timestamp the sender put on the sample
   DDS::Time_t source_timestamp_;
   /// Id of the datawriter that sent the sample
-  PublicationId publication_id_;
+  GUID_t publication_id_;
   /// false -  Message encoded using big-endian byte order. (see ace/CDR_Base.h)
   /// true -  Message encoded using little-endian byte order.
   bool sample_byte_order_;

@@ -1,0 +1,64 @@
+/*
+ * Distributed under the OpenDDS License.
+ * See: http://www.opendds.org/license.html
+ */
+
+#ifndef OPENDDS_DCPS_XTYPES_TYPEOBJECT_IDL
+#define OPENDDS_DCPS_XTYPES_TYPEOBJECT_IDL
+
+module OpenDDS {
+  module XTypes {
+    typedef short EquivalenceKind;
+    typedef short TypeKind;
+
+    @nested
+    @final
+    @OpenDDS::internal::no_dynamic_data_adapter
+    union TypeIdentifier switch (TypeKind) {
+      // =================== Future extensibility ============
+      // Future extensions
+      default:
+        char dummy;
+    };
+
+    @OpenDDS::internal::no_dynamic_data_adapter
+    typedef sequence<TypeIdentifier> TypeIdentifierSeq;
+
+    @OpenDDS::internal::no_dynamic_data_adapter
+    struct TypeIdentifierPair {
+      TypeIdentifier type_identifier1;
+      TypeIdentifier type_identifier2;
+    };
+
+    @OpenDDS::internal::no_dynamic_data_adapter
+    typedef sequence<TypeIdentifierPair> TypeIdentifierPairSeq;
+
+    @nested
+    @appendable
+    @OpenDDS::internal::no_dynamic_data_adapter
+    union TypeObject switch (EquivalenceKind) {
+      default:
+        char dummy;
+    };
+
+    @OpenDDS::internal::no_dynamic_data_adapter
+    struct TypeIdentifierTypeObjectPair {
+      TypeIdentifier type_identifier;
+      TypeObject type_object;
+    };
+
+    @OpenDDS::internal::no_dynamic_data_adapter
+    typedef sequence<TypeIdentifierTypeObjectPair> TypeIdentifierTypeObjectPairSeq;
+
+    @OpenDDS::internal::no_dynamic_data_adapter
+    struct TypeIdentifierWithSize {
+      TypeIdentifier type_id;
+      long typeobject_serialized_size;
+    };
+
+    @OpenDDS::internal::no_dynamic_data_adapter
+    typedef sequence<TypeIdentifierWithSize> TypeIdentifierWithSizeSeq;
+  }; // namespace XTypes
+}; // namespace OpenDDS
+
+#endif /* OPENDDS_DCPS_XTYPES_TYPEOBJECT_IDL */

@@ -260,7 +260,6 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
   remote_permissions->perm_token_ = remote_permissions_token;
   remote_permissions->perm_cred_token_ = remote_credential_token;
 
-
   AccessData cache_this;
   cache_this.identity = remote_identity_handle;
   cache_this.subject = sn_id_remote;
@@ -987,10 +986,8 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
   if (0 == reader) {
     return CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_remote_datawriter_register_instance: Invalid Reader pointer");
   }
-  if (0 == key) {
-    return CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_remote_datawriter_register_instance: Invalid Topic Key");
-  }
-
+  // Key could be null if we don't have complete type objects
+  ACE_UNUSED_ARG(key);
   return true;
 }
 
@@ -1008,9 +1005,8 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
   if (0 == reader) {
     return CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_remote_datawriter_dispose_instance: Invalid Reader pointer");
   }
-  if (0 == key) {
-    return CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_remote_datawriter_dispose_instance: Invalid Topic Key");
-  }
+  // Key could be null if we don't have complete type objects
+  ACE_UNUSED_ARG(key);
   return true;
 }
 

@@ -116,7 +116,13 @@ namespace {
     if (use_cxx11) {
       be_global->impl_ << indent << "  " << expression << ".resize(" << expression << ".size() + 1);\n";
     } else {
-      be_global->impl_ << indent << "  OpenDDS::DCPS::grow(" << expression << ");\n";
+      if (!sequence->unbounded()) {
+        be_global->impl_ << indent << "  if (i >= " << expression << ".maximum()) return false;\n";
+        be_global->impl_ << indent << "  const ACE_CDR::ULong len = " << expression << ".length();\n";
+        be_global->impl_ << indent << "  " << expression << ".length(len + 1);\n";
+      } else {
+        be_global->impl_ << indent << " OpenDDS::DCPS::grow(" << expression << ");\n";
+      }
     }
     be_global->impl_ <<
       indent << "  if (!value_reader.begin_element()) return false;\n";
@@ -182,7 +188,7 @@ namespace {
     }
   }
 
-  std::string branch_helper(const std::string&,
+  std::string branch_helper(const std::string&, AST_Decl* branch,
                             const std::string& field_name,
                             AST_Type* type,
                             const std::string&,
@@ -191,7 +197,7 @@ namespace {
                             const std::string&)
   {
     AST_Type* const actual = resolveActualType(type);
-    std::string decl = scoped(type->name());
+    std::string decl = field_type_name(dynamic_cast<AST_Field*>(branch), type);
 
     const Classification c = classify(actual);
     if (c & CL_STRING) {
@@ -234,8 +240,9 @@ bool value_reader_generator::gen_enum(AST_Enum*,
       if (i) {
         be_global->impl_ << ',';
       }
+      const std::string idl_name = canonical_name(contents[i]);
       be_global->impl_ <<
-        '{' << '"' << contents[i]->local_name()->get_string() << '"' << ',' << contents[i]->constant_value()->ev()->u.eval << '}';
+        '{' << '"' << idl_name << '"' << ',' << contents[i]->constant_value()->ev()->u.eval << '}';
     }
 
     be_global->impl_ <<
@@ -283,8 +290,9 @@ bool value_reader_generator::gen_struct(AST_Structure*,
       if (i) {
         be_global->impl_ << ',';
       }
+      const std::string idl_name = canonical_name(fields[i]);
       be_global->impl_ <<
-        '{' << '"' << fields[i]->local_name()->get_string() << '"' << ',' << be_global->get_id(fields[i]) << '}';
+        '{' << '"' << idl_name << '"' << ',' << be_global->get_id(fields[i]) << '}';
     }
 
     be_global->impl_ <<

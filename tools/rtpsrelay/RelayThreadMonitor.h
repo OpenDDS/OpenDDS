@@ -2,7 +2,7 @@
 #define RTPSRELAY_RELAY_THREAD_MONITOR_H_
 
 #include "Config.h"
-#include "ListenerBase.h"
+#include "ReaderListenerBase.h"
 
 #include <dds/OpenddsDcpsExtTypeSupportImpl.h>
 #include <dds/DCPS/ConditionVariable.h>
@@ -11,7 +11,7 @@
 
 namespace RtpsRelay {
 
-class RelayThreadMonitor : public virtual ACE_Task_Base, public ListenerBase {
+class RelayThreadMonitor : public virtual ACE_Task_Base, public ReaderListenerBase {
 public:
   explicit RelayThreadMonitor(const Config& config)
     : config_(config)

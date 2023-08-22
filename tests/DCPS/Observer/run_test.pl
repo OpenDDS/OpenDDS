@@ -14,11 +14,9 @@ PerlDDS::add_lib_path('../common');
 
 my $test = new PerlDDS::TestFramework();
 
-$test->process('publisher', 'publisher', " -DCPSConfigFile rtps_disc.ini");
-$test->process('subscriber', 'subscriber', " -DCPSConfigFile rtps_disc.ini");
+$test->process('pubsub', 'pubsub', " -DCPSConfigFile rtps_disc.ini");
 
-$test->start_process('subscriber');
-$test->start_process('publisher');
+$test->start_process('pubsub');
 
 my $result = $test->finish(60);
 if ($result != 0) {

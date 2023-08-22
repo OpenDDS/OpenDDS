@@ -200,5 +200,5 @@ Writer::wait_for_acks()
 int
 Writer::get_timeout_writes() const
 {
-  return timeout_writes_.value();
+  return timeout_writes_;
 }

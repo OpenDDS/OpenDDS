@@ -1,0 +1,319 @@
+#ifndef OPENDDS_SAFETY_PROFILE
+#  include <tao/LongSeq.pidl>
+#  include <tao/ULongSeq.pidl>
+#  include <tao/Int8Seq.pidl>
+#  include <tao/UInt8Seq.pidl>
+#  include <tao/ShortSeq.pidl>
+#  include <tao/UShortSeq.pidl>
+#  include <tao/LongLongSeq.pidl>
+#  include <tao/ULongLongSeq.pidl>
+#  include <tao/FloatSeq.pidl>
+#  include <tao/DoubleSeq.pidl>
+#  include <tao/LongDoubleSeq.pidl>
+#  include <tao/CharSeq.pidl>
+#  include <tao/WCharSeq.pidl>
+#  include <tao/OctetSeq.pidl>
+#  include <tao/BooleanSeq.pidl>
+#  include <tao/StringSeq.pidl>
+#  include <tao/WStringSeq.pidl>
+
+module DynamicDataAdapterIdl {
+
+enum EnumType {
+  TypeByte,
+  TypeBool,
+  TypeInt8,
+  TypeUint8,
+  TypeInt16,
+  TypeUint16,
+  TypeInt32,
+  TypeUint32,
+  TypeInt64,
+  TypeUint64,
+  TypeFloat32,
+  TypeFloat64,
+  TypeFloat128,
+  TypeChar8,
+  TypeChar16,
+  TypeString8,
+  TypeString16,
+  TypeEnum,
+  TypeStruct,
+  TypeUnion
+};
+
+@topic
+struct SimpleStruct {
+  uint32 value;
+};
+
+union SimpleUnion switch (uint32) {
+case 0:
+  uint32 value;
+};
+
+@OpenDDS::internal::no_dynamic_data_adapter
+struct NoDdaStruct {
+  uint32 value;
+};
+
+@OpenDDS::internal::no_dynamic_data_adapter
+union NoDdaUnion switch (uint32) {
+case 0:
+  uint32 value;
+};
+
+@OpenDDS::internal::no_dynamic_data_adapter
+typedef sequence<uint32> NoDdaSequ;
+
+@OpenDDS::internal::no_dynamic_data_adapter
+typedef uint32 NoDdaArray[2];
+
+union NoDdaTestUnion switch (uint32) {
+case 0:
+  uint32 value;
+case 1:
+  NoDdaStruct no_dda_struct;
+};
+
+@topic
+struct NoDdaTestStruct {
+  uint32 value;
+  NoDdaStruct no_dda_struct;
+  NoDdaUnion no_dda_union;
+  NoDdaSequ no_dda_seq;
+  NoDdaArray no_dda_array;
+  NoDdaTestUnion nested_union;
+};
+
+typedef sequence<octet> ByteSequ;
+typedef sequence<boolean> BoolSequ;
+typedef sequence<int8> Int8Sequ;
+typedef sequence<uint8> UInt8Sequ;
+typedef sequence<int16> Int16Sequ;
+typedef sequence<uint16> UInt16Sequ;
+typedef sequence<int32> Int32Sequ;
+typedef sequence<uint32> UInt32Sequ;
+typedef sequence<int64> Int64Sequ;
+typedef sequence<uint64> UInt64Sequ;
+typedef sequence<float> Float32Sequ;
+typedef sequence<double> Float64Sequ;
+typedef sequence<long double> Float128Sequ;
+typedef sequence<char> Char8Sequ;
+typedef sequence<wchar> Char16Sequ;
+typedef sequence<string> String8Sequ;
+typedef sequence<wstring> String16Sequ;
+typedef sequence<EnumType> EnumTypeSequ;
+typedef sequence<SimpleStruct> SimpleStructSequ;
+typedef sequence<SimpleUnion> SimpleUnionSequ;
+
+struct SeqStruct {
+  ByteSequ byte;
+  BoolSequ boole;
+  Int8Sequ i8;
+  UInt8Sequ u8;
+  Int16Sequ i16;
+  UInt16Sequ u16;
+  Int32Sequ i32;
+  UInt32Sequ u32;
+  Int64Sequ i64;
+  UInt64Sequ u64;
+  Float32Sequ f32;
+  Float64Sequ f64;
+  Float128Sequ f128;
+  Char8Sequ c8;
+  Char16Sequ c16;
+  String8Sequ s8;
+  String16Sequ s16;
+  EnumTypeSequ enum_type;
+  SimpleStructSequ simple_struct;
+  SimpleUnionSequ simple_union;
+};
+
+struct AnonSeqStruct {
+  sequence<octet> byte;
+  sequence<boolean> boole;
+  sequence<int8> i8;
+  sequence<uint8> u8;
+  sequence<int16> i16;
+  sequence<uint16> u16;
+  sequence<int32> i32;
+  sequence<uint32> u32;
+  sequence<int64> i64;
+  sequence<uint64> u64;
+  sequence<float> f32;
+  sequence<double> f64;
+  sequence<long double> f128;
+  sequence<char> c8;
+  sequence<wchar> c16;
+  sequence<string> s8;
+  sequence<wstring> s16;
+  sequence<EnumType> enum_type;
+  sequence<SimpleStruct> simple_struct;
+  sequence<SimpleUnion> simple_union;
+};
+
+typedef octet ByteArray[2];
+typedef boolean BoolArray[2];
+typedef int8 Int8Array[2];
+typedef uint8 UInt8Array[2];
+typedef int16 Int16Array[2];
+typedef uint16 UInt16Array[2];
+typedef int32 Int32Array[2];
+typedef uint32 UInt32Array[2];
+typedef int64 Int64Array[2];
+typedef uint64 UInt64Array[2];
+typedef float Float32Array[2];
+typedef double Float64Array[2];
+typedef long double Float128Array[2];
+typedef char Char8Array[2];
+typedef wchar Char16Array[2];
+typedef string String8Array[2];
+typedef wstring String16Array[2];
+typedef EnumType EnumTypeArray[2];
+typedef SimpleStruct SimpleStructArray[2];
+typedef SimpleUnion SimpleUnionArray[2];
+
+struct ArrayStruct {
+  ByteArray byte;
+  BoolArray boole;
+  Int8Array i8;
+  UInt8Array u8;
+  Int16Array i16;
+  UInt16Array u16;
+  Int32Array i32;
+  UInt32Array u32;
+  Int64Array i64;
+  UInt64Array u64;
+  Float32Array f32;
+  Float64Array f64;
+  Float128Array f128;
+  Char8Array c8;
+  Char16Array c16;
+  String8Array s8;
+  String16Array s16;
+  EnumTypeArray enum_type;
+  SimpleStructArray simple_struct;
+  SimpleUnionArray simple_union;
+};
+
+struct AnonArrayStruct {
+  octet byte[2];
+  boolean boole[2];
+  int8 i8[2];
+  uint8 u8[2];
+  int16 i16[2];
+  uint16 u16[2];
+  int32 i32[2];
+  uint32 u32[2];
+  int64 i64[2];
+  uint64 u64[2];
+  float f32[2];
+  double f64[2];
+  long double f128[2];
+  char c8[2];
+  wchar c16[2];
+  string s8[2];
+  wstring s16[2];
+  EnumType enum_type[2];
+  SimpleStruct simple_struct[2];
+  SimpleUnion simple_union[2];
+};
+
+typedef Int32Sequ TypedefOfSeqTypedef;
+typedef Int32Array TypedefOfArrayTypedef;
+
+@topic
+struct TestStruct {
+  octet byte;
+  boolean boole;
+  int8 i8;
+  uint8 u8;
+  int16 i16;
+  uint16 u16;
+  int32 i32;
+  uint32 u32;
+  int64 i64;
+  uint64 u64;
+  float f32;
+  double f64;
+  double f128;
+  char c8;
+  wchar c16;
+  string s8;
+  wstring s16;
+  EnumType enum_type;
+  SimpleStruct simple_struct;
+  SimpleUnion simple_union;
+
+  SeqStruct seqs;
+  AnonSeqStruct anon_seqs;
+  ArrayStruct arrays;
+  AnonArrayStruct anon_arrays;
+
+  TypedefOfSeqTypedef typedef_of_seq_typedef;
+  TypedefOfArrayTypedef typedef_of_array_typedef;
+};
+
+@topic
+union TestUnion switch (EnumType) {
+case TypeByte:
+  octet byte;
+case TypeBool:
+  boolean boole;
+case TypeInt8:
+  int8 i8;
+case TypeUint8:
+  uint8 u8;
+case TypeInt16:
+  int16 i16;
+case TypeUint16:
+  uint16 u16;
+case TypeInt32:
+  int32 i32;
+case TypeUint32:
+  uint32 u32;
+case TypeInt64:
+  int64 i64;
+case TypeUint64:
+  uint64 u64;
+case TypeFloat32:
+  float f32;
+case TypeFloat64:
+  double f64;
+case TypeFloat128:
+  double f128;
+case TypeChar8:
+  char c8;
+case TypeChar16:
+  wchar c16;
+case TypeString8:
+  string s8;
+case TypeString16:
+  wstring s16;
+case TypeEnum:
+  EnumType enum_type;
+case TypeStruct:
+  SimpleStruct simple_struct;
+/* TODO: This casues a segfault. DynamicDataAdapter needs a way to intialize
+ branchs with default values.
+case TypeUnion:
+  SimpleUnion simple_union;
+*/
+};
+
+@topic
+union ColUnion switch (EnumType) {
+case TypeInt16:
+  Int16Sequ i16_seq;
+case TypeUint16:
+  sequence<uint16> anon_u16_seq;
+case TypeInt32:
+  Int32Array i32_array;
+case TypeUint32:
+  uint32 anon_u32_array[2];
+};
+
+};
+
+#endif // OPENDDS_SAFETY_PROFILE

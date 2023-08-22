@@ -24,7 +24,7 @@ inline OpenDDS::RTPS::SequenceNumber_t toSN(unsigned int n)
 inline ACE_Message_Block*
 buildHeartbeat(const OpenDDS::DCPS::EntityId_t& writer, const OpenDDS::RTPS::Header& header,
                const SequencePair& sequenceRange, int& count,
-               const OpenDDS::DCPS::RepoId& reader = OpenDDS::DCPS::GUID_UNKNOWN)
+               const OpenDDS::DCPS::GUID_t& reader = OpenDDS::DCPS::GUID_UNKNOWN)
 {
   using namespace OpenDDS::DCPS;
   using namespace OpenDDS::RTPS;

@@ -61,10 +61,11 @@ public:
 #endif
 
 #ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
-  virtual const OpenDDS::DCPS::MetaStruct& getMetaStructForType();
+  virtual const OpenDDS::DCPS::MetaStruct& getMetaStructForType() const;
 #endif
 
   size_t key_count() const { return 0; }
+  bool is_dcps_key(const char*) const { return false; }
 
   void representations_allowed_by_type(DDS::DataRepresentationIdSeq& seq);
 
@@ -135,17 +136,12 @@ public:
   virtual void release_instance_i(DDS::InstanceHandle_t) {}
   virtual void state_updated_i(DDS::InstanceHandle_t) {}
   void release_all_instances() {}
-  virtual OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::MessageHolder>
-  dds_demarshal(const OpenDDS::DCPS::ReceivedDataSample&,
-                DDS::InstanceHandle_t,
-                OpenDDS::DCPS::SubscriptionInstance_rch &,
-                bool&,
-                bool&,
-                OpenDDS::DCPS::MarshalingType,
-                bool)
-  {
-    return OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::MessageHolder>();
-  }
+  virtual void dds_demarshal(const OpenDDS::DCPS::ReceivedDataSample&,
+                             DDS::InstanceHandle_t,
+                             OpenDDS::DCPS::SubscriptionInstance_rch &,
+                             bool&,
+                             bool&,
+                             OpenDDS::DCPS::MarshalingType) {}
   bool contains_sample_filtered(DDS::SampleStateMask, DDS::ViewStateMask,
     DDS::InstanceStateMask, const OpenDDS::DCPS::FilterEvaluator&,
     const DDS::StringSeq&) { return true; }

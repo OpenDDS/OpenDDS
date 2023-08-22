@@ -64,7 +64,12 @@ namespace DCPS {
 class OpenDDS_Dcps_Export TransportInst : public virtual RcObject {
 public:
 
-  const OPENDDS_STRING& name() const { return name_; }
+  static const long DEFAULT_DATALINK_RELEASE_DELAY = 10000;
+  static const size_t DEFAULT_DATALINK_CONTROL_CHUNKS = 32u;
+
+  const String& name() const { return name_; }
+  const String& config_prefix() const { return config_prefix_; }
+  String config_key(const String& key) const;
 
   /// Overwrite the default configurations with the configuration from the
   /// given section in the ACE_Configuration_Heap object.
@@ -81,46 +86,47 @@ public:
 
   const OPENDDS_STRING transport_type_;
 
-  /// Number of pre-created link (list) objects per pool for the
-  /// "send queue" of each DataLink.
-  size_t queue_messages_per_pool_;
-
-  /// Initial number of pre-allocated pools of link (list) objects
-  /// for the "send queue" of each DataLink.
-  size_t queue_initial_pools_;
-
   /// Max size (in bytes) of a packet (packet header + sample(s))
-  ACE_UINT32 max_packet_size_;
+  void max_packet_size(ACE_UINT32 mps);
+  ACE_UINT32 max_packet_size() const;
 
   /// Max number of samples that should ever be in a single packet.
-  size_t max_samples_per_packet_;
+  void max_samples_per_packet(size_t mspp);
+  size_t max_samples_per_packet() const;
 
   /// Optimum size (in bytes) of a packet (packet header + sample(s)).
-  ACE_UINT32 optimum_packet_size_;
+  void optimum_packet_size(ACE_UINT32 ops);
+  ACE_UINT32 optimum_packet_size() const;
 
   /// Flag for whether a new thread is needed for connection to
   /// send without backpressure.
-  bool thread_per_connection_;
+  void thread_per_connection(bool tpc);
+  bool thread_per_connection() const;
 
   /// Delay in milliseconds that the datalink should be released after all
   /// associations are removed. The default value is 10 seconds.
-  long datalink_release_delay_;
+  void datalink_release_delay(long drd);
+  long datalink_release_delay() const;
 
   /// The number of chunks used to size allocators for transport control
   /// samples. The default value is 32.
-  size_t datalink_control_chunks_;
+  void datalink_control_chunks(size_t dcc);
+  size_t datalink_control_chunks() const;
 
   /// Maximum time to store incoming fragments of incomplete data samples.
   /// The expiration time is relative to the last received fragment.
-  TimeDuration fragment_reassembly_timeout_;
+  void fragment_reassembly_timeout(const TimeDuration& frt);
+  TimeDuration fragment_reassembly_timeout() const;
 
   /// Preallocated chunks in allocator for message blocks.
   /// Default (0) is to use built-in constants in TransportReceiveStrategy
-  size_t receive_preallocated_message_blocks_;
+  void receive_preallocated_message_blocks(size_t rpmb);
+  size_t receive_preallocated_message_blocks() const;
 
   /// Preallocated chunks in allocator for data blocks and data buffers.
   /// Default (0) is to use built-in constants in TransportReceiveStrategy
-  size_t receive_preallocated_data_blocks_;
+  void receive_preallocated_data_blocks(size_t rpdb);
+  size_t receive_preallocated_data_blocks() const;
 
   /// Does the transport as configured support RELIABLE_RELIABILITY_QOS?
   virtual bool is_reliable() const = 0;
@@ -136,10 +142,10 @@ public:
   void use_rtps_relay_now(bool flag);
   void use_ice_now(bool flag);
 
-  virtual void update_locators(const RepoId& /*remote_id*/,
+  virtual void update_locators(const GUID_t& /*remote_id*/,
                                const TransportLocatorSeq& /*locators*/) {}
 
-  virtual void get_last_recv_locator(const RepoId& /*remote_id*/,
+  virtual void get_last_recv_locator(const GUID_t& /*remote_id*/,
                                      TransportLocator& /*locators*/) {}
 
   virtual void rtps_relay_address_change() {}
@@ -171,47 +177,18 @@ public:
    * message is .4.  In this example, all messages longer than 800
    * bytes will be dropped.
    */
-  void drop_messages(bool flag)
-  {
-    ACE_GUARD(ACE_Thread_Mutex, g, config_lock_);
-    drop_messages_ = flag;
-  }
+  void drop_messages(bool flag);
+  bool drop_messages() const;
 
-  void drop_messages_m(double m)
-  {
-    ACE_GUARD(ACE_Thread_Mutex, g, config_lock_);
-    drop_messages_m_ = m;
-  }
+  void drop_messages_m(double m);
+  double drop_messages_m() const;
 
-  void drop_messages_b(double b)
-  {
-    ACE_GUARD(ACE_Thread_Mutex, g, config_lock_);
-    drop_messages_b_ = b;
-  }
-
-  bool should_drop(ssize_t length) const;
-
-  bool should_drop(const iovec iov[], int n, ssize_t& length) const
-  {
-    length = 0;
-    for (int i = 0; i < n; ++i) {
-      length += iov[i].iov_len;
-    }
-    return should_drop(length);
-  }
+  void drop_messages_b(double b);
+  double drop_messages_b() const;
   /**@}*/
 
-  void count_messages(bool flag)
-  {
-    ACE_GUARD(ACE_Thread_Mutex, g, config_lock_);
-    count_messages_ = flag;
-  }
-
-  bool count_messages() const
-  {
-    ACE_GUARD_RETURN(ACE_Thread_Mutex, g, config_lock_, false);
-    return count_messages_;
-  }
+  void count_messages(bool flag);
+  bool count_messages() const;
 
   virtual void append_transport_statistics(TransportStatisticsSequence& /*seq*/) {}
 
@@ -229,30 +206,20 @@ protected:
 
 private:
 
-  /// Adjust the configuration values which gives warning on adjusted
-  /// value.
-  void adjust_config_value();
-
   friend class TransportRegistry;
   void shutdown();
 
   friend class TransportClient;
  protected:
-  TransportImpl_rch impl();
+  TransportImpl_rch get_or_create_impl();
+  TransportImpl_rch get_impl();
  private:
   virtual TransportImpl_rch new_impl() = 0;
 
-  const OPENDDS_STRING name_;
+  const String name_;
+  const String config_prefix_;
 
   TransportImpl_rch impl_;
-
-  bool drop_messages_;
-  double drop_messages_m_;
-  double drop_messages_b_;
-
-  bool count_messages_;
-
-  mutable ACE_Thread_Mutex config_lock_;
 };
 
 } // namespace DCPS

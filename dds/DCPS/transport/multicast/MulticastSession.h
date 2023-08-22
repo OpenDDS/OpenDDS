@@ -46,18 +46,18 @@ public:
 
   void syn_received(const Message_Block_Ptr& control);
   void send_all_syn(const MonotonicTimePoint& now);
-  void send_syn(const RepoId& local_writer,
-                const RepoId& remote_reader);
+  void send_syn(const GUID_t& local_writer,
+                const GUID_t& remote_reader);
 
   void synack_received(const Message_Block_Ptr& control);
-  void send_synack(const RepoId& local_reader, const RepoId& remote_writer);
+  void send_synack(const GUID_t& local_reader, const GUID_t& remote_writer);
   virtual void send_naks() {}
 
   virtual bool check_header(const TransportHeader& header) = 0;
   virtual void record_header_received(const TransportHeader& header) = 0;
   virtual bool ready_to_deliver(const TransportHeader& header,
                                 const ReceivedDataSample& data) = 0;
-  virtual void release_remote(const RepoId& /*remote*/) {};
+  virtual void release_remote(const GUID_t& /*remote*/) {};
 
   virtual bool control_received(char submessage_id,
                                 const Message_Block_Ptr& control);
@@ -67,14 +67,14 @@ public:
 
   bool reassemble(ReceivedDataSample& data, const TransportHeader& header);
 
-  void add_remote(const RepoId& local);
+  void add_remote(const GUID_t& local);
 
   // Reliability.
-  void add_remote(const RepoId& local,
-                  const RepoId& remote);
+  void add_remote(const GUID_t& local,
+                  const GUID_t& remote);
 
-  void remove_remote(const RepoId& local,
-                     const RepoId& remote);
+  void remove_remote(const GUID_t& local,
+                     const GUID_t& remote);
 
 protected:
   MulticastDataLink* link_;
@@ -108,7 +108,7 @@ protected:
   TransportReassembly reassembly_;
 
   bool acked_;
-  typedef OPENDDS_MAP_CMP(RepoId, RepoIdSet, GUID_tKeyLessThan) PendingRemoteMap;
+  typedef OPENDDS_MAP_CMP(GUID_t, RepoIdSet, GUID_tKeyLessThan) PendingRemoteMap;
   // For the active side, the pending_remote_map_ is used as a work queue.
   // The active side will send SYNs to all of the readers until it gets a SYNACK.
   // For the passive side, the pending_remote_map_ is used as a filter.
@@ -116,8 +116,8 @@ protected:
   PendingRemoteMap pending_remote_map_;
 
 private:
-  void remove_remote_i(const RepoId& local,
-                       const RepoId& remote);
+  void remove_remote_i(const GUID_t& local,
+                       const GUID_t& remote);
 
 
   ACE_Thread_Mutex ack_lock_;
@@ -125,6 +125,8 @@ private:
   typedef PmfSporadicTask<MulticastSession> Sporadic;
   RcHandle<Sporadic> syn_watchdog_;
   TimeDuration syn_delay_;
+  const TimeDuration initial_syn_delay_;
+  String config_name;
 };
 
 } // namespace DCPS

@@ -6,18 +6,20 @@
 #ifndef OPENDDS_DCPS_TRANSPORT_RTPS_UDP_RTPSUDPTRANSPORT_H
 #define OPENDDS_DCPS_TRANSPORT_RTPS_UDP_RTPSUDPTRANSPORT_H
 
-#include "RtpsUdpDataLink.h"
-#include "RtpsUdpDataLink_rch.h"
 #include "Rtps_Udp_Export.h"
+#include "RtpsUdpDataLink_rch.h"
+#include "RtpsUdpDataLink.h"
 
-#include <dds/DCPS/PoolAllocator.h>
 #include <dds/DCPS/ConnectionRecords.h>
+#include <dds/DCPS/FibonacciSequence.h>
+#include <dds/DCPS/PoolAllocator.h>
 #include <dds/DCPS/SporadicTask.h>
-#include <dds/DCPS/transport/framework/TransportImpl.h>
-#include <dds/DCPS/transport/framework/TransportClient.h>
 #include <dds/DCPS/RTPS/ICE/Ice.h>
-
 #include <dds/DCPS/RTPS/RtpsCoreC.h>
+#include <dds/DCPS/transport/framework/TransportClient.h>
+#include <dds/DCPS/transport/framework/TransportImpl.h>
+#include <dds/DCPS/transport/framework/TransportStatistics.h>
+#include <dds/DCPS/transport/framework/MessageDropper.h>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -26,10 +28,10 @@ namespace DCPS {
 
 class RtpsUdpInst;
 
-class OpenDDS_Rtps_Udp_Export RtpsUdpTransport : public TransportImpl {
+class OpenDDS_Rtps_Udp_Export RtpsUdpTransport : public TransportImpl, public ConfigListener {
 public:
-  RtpsUdpTransport(RtpsUdpInst& inst);
-  RtpsUdpInst& config() const;
+  RtpsUdpTransport(const RtpsUdpInst_rch& inst);
+  RtpsUdpInst_rch config() const;
 #ifdef OPENDDS_SECURITY
   DCPS::RcHandle<ICE::Agent> get_ice_agent() const;
 #endif
@@ -43,14 +45,16 @@ public:
   void disable_relay_stun_task();
 #endif
 
-  virtual void update_locators(const RepoId& /*remote*/,
+  virtual void update_locators(const GUID_t& /*remote*/,
                                const TransportLocatorSeq& /*locators*/);
 
-  virtual void get_last_recv_locator(const RepoId& /*remote_id*/,
+  virtual void get_last_recv_locator(const GUID_t& /*remote_id*/,
                                      TransportLocator& /*locators*/);
 
   void rtps_relay_address_change();
   void append_transport_statistics(TransportStatisticsSequence& seq);
+
+  const MessageDropper message_dropper() const { return message_dropper_; }
 
 private:
   virtual AcceptConnectResult connect_datalink(const RemoteTransport& remote,
@@ -62,35 +66,35 @@ private:
                                               const TransportClient_rch& client);
 
   virtual void stop_accepting_or_connecting(const TransportClient_wrch& client,
-                                            const RepoId& remote_id,
+                                            const GUID_t& remote_id,
                                             bool disassociate,
                                             bool association_failed);
 
-  bool configure_i(RtpsUdpInst& config);
+  bool configure_i(const RtpsUdpInst_rch& config);
 
-  void client_stop(const RepoId& localId);
+  void client_stop(const GUID_t& localId);
 
   virtual void shutdown_i();
 
-  virtual void register_for_reader(const RepoId& participant,
-                                   const RepoId& writerid,
-                                   const RepoId& readerid,
+  virtual void register_for_reader(const GUID_t& participant,
+                                   const GUID_t& writerid,
+                                   const GUID_t& readerid,
                                    const TransportLocatorSeq& locators,
                                    DiscoveryListener* listener);
 
-  virtual void unregister_for_reader(const RepoId& participant,
-                                     const RepoId& writerid,
-                                     const RepoId& readerid);
+  virtual void unregister_for_reader(const GUID_t& participant,
+                                     const GUID_t& writerid,
+                                     const GUID_t& readerid);
 
-  virtual void register_for_writer(const RepoId& /*participant*/,
-                                   const RepoId& /*readerid*/,
-                                   const RepoId& /*writerid*/,
+  virtual void register_for_writer(const GUID_t& /*participant*/,
+                                   const GUID_t& /*readerid*/,
+                                   const GUID_t& /*writerid*/,
                                    const TransportLocatorSeq& /*locators*/,
                                    DiscoveryListener* /*listener*/);
 
-  virtual void unregister_for_writer(const RepoId& /*participant*/,
-                                     const RepoId& /*readerid*/,
-                                     const RepoId& /*writerid*/);
+  virtual void unregister_for_writer(const GUID_t& /*participant*/,
+                                     const GUID_t& /*readerid*/,
+                                     const GUID_t& /*writerid*/);
 
   virtual bool connection_info_i(TransportLocator& info, ConnectionInfoFlags flags) const;
 
@@ -106,8 +110,8 @@ private:
 
   RtpsUdpDataLink_rch make_datalink(const GuidPrefix_t& local_prefix);
 
-  bool use_datalink(const RepoId& local_id,
-                    const RepoId& remote_id,
+  bool use_datalink(const GUID_t& local_id,
+                    const GUID_t& remote_id,
                     const TransportBLOB& remote_data,
                     const TransportBLOB& discovery_locator,
                     const MonotonicTime_t& participant_discovered_at,
@@ -118,18 +122,7 @@ private:
                     const TransportClient_rch& client);
 
 #if defined(OPENDDS_SECURITY)
-  void local_crypto_handle(DDS::Security::ParticipantCryptoHandle pch)
-  {
-    RtpsUdpDataLink_rch link;
-    {
-      ACE_Guard<ACE_Thread_Mutex> guard(links_lock_);
-      local_crypto_handle_ = pch;
-      link = link_;
-    }
-    if (link) {
-      link->local_crypto_handle(pch);
-    }
-  }
+  void local_crypto_handle(DDS::Security::ParticipantCryptoHandle pch);
 #endif
 
   //protects access to link_ for duration of make_datalink
@@ -160,11 +153,9 @@ private:
 
   JobQueue_rch job_queue_;
 
-#if defined(OPENDDS_SECURITY)
-  DDS::Security::ParticipantCryptoHandle local_crypto_handle_;
-#endif
-
 #ifdef OPENDDS_SECURITY
+
+  DDS::Security::ParticipantCryptoHandle local_crypto_handle_;
 
 #ifndef DDS_HAS_MINIMUM_BIT
   ConnectionRecords deferred_connection_records_;
@@ -192,17 +183,20 @@ private:
   typedef PmfSporadicTask<RtpsUdpTransport> Sporadic;
   void relay_stun_task(const MonotonicTimePoint& now);
   RcHandle<Sporadic> relay_stun_task_;
-  DCPS::FibonacciSequence<TimeDuration> relay_stun_task_falloff_;
+  FibonacciSequence<TimeDuration> relay_stun_task_falloff_;
   ThreadLockType relay_stun_task_falloff_mutex_;
   ICE::ServerReflexiveStateMachine relay_srsm_;
-
-  mutable ACE_Thread_Mutex relay_stun_mutex_;
 
   void start_ice();
   void stop_ice();
 
   RcHandle<ICE::Agent> ice_agent_;
 #endif
+
+  MessageDropper message_dropper_;
+
+  ConfigReader_rch config_reader_;
+  void on_data_available(ConfigReader_rch reader);
 
   InternalTransportStatistics transport_statistics_;
   ACE_Thread_Mutex transport_statistics_mutex_;
@@ -216,4 +210,4 @@ private:
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
-#endif  /* DCPS_RTPSUDPTRANSPORT_H */
+#endif /* OPENDDS_DCPS_TRANSPORT_RTPS_UDP_RTPSUDPTRANSPORT_H */

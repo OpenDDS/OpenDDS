@@ -6,7 +6,6 @@
 
 #include <dds/DdsDcpsPublicationC.h>
 #include "MessengerTypeSupportC.h"
-#include "DataWriterListenerImpl.h"
 #include <ace/Task.h>
 
 class Writer : public ACE_Task_Base
@@ -29,14 +28,12 @@ private:
 
   ::DDS::DataWriter_var writer_;
 
-  ACE_Atomic_Op<ACE_SYNCH_MUTEX, int> timeout_writes_;
+  OpenDDS::DCPS::Atomic<int> timeout_writes_;
 
   // The lock used to synchronize the two write threads.
   ACE_Thread_Mutex lock_;
 
   int count_;
-
-  DataWriterListenerImpl* dwl_servant_;
 };
 
 #endif /* WRITER_H */

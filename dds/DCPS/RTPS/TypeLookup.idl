@@ -1,0 +1,94 @@
+/*
+ * Distributed under the OpenDDS License.
+ * See: http://www.opendds.org/license.html
+ */
+
+#ifndef OPENDDS_DCPS_RTPS_TYPELOOKUP_IDL
+#define OPENDDS_DCPS_RTPS_TYPELOOKUP_IDL
+
+#include <dds/DCPS/XTypes/TypeObject.idl>
+#include <dds/DCPS/RTPS/RtpsRpc.idl>
+
+@annotation RPCRequestType {};
+@annotation RPCReplyType {};
+
+module OpenDDS {
+  module XTypes {
+
+    const long DDS_RETCODE_OK = 0;
+
+    // As per chapter 7.6.3.3.3 of XTypes spec
+    // Issue DDSXTY14-30:
+    // - These use XCDR2 and default to appendable.
+    // - The @RPCRequestType/@RPCReplyType structs are final.
+
+    // Used in TypeLookup_Call and TypeLookup_Return
+    const long TypeLookup_getTypes_HashId = 0x018252d3;
+    const long TypeLookup_getDependencies_HashId = 0x05aafb31;
+
+    @extensibility(MUTABLE)
+    struct TypeLookup_getTypes_In {
+      @hashid TypeIdentifierSeq type_ids;
+    };
+
+    @extensibility(MUTABLE)
+    struct TypeLookup_getTypes_Out {
+      @hashid TypeIdentifierTypeObjectPairSeq types;
+      @hashid TypeIdentifierPairSeq complete_to_minimal;
+    };
+
+    union TypeLookup_getTypes_Result switch(long) {
+      case DDS_RETCODE_OK:
+        TypeLookup_getTypes_Out result;
+    };
+
+    typedef sequence<octet, 32> OctetSeq32;
+
+    @extensibility(MUTABLE)
+    struct TypeLookup_getTypeDependencies_In {
+      @hashid TypeIdentifierSeq type_ids;
+      @hashid OctetSeq32 continuation_point;
+    };
+
+    @extensibility(MUTABLE)
+    struct TypeLookup_getTypeDependencies_Out {
+      @hashid TypeIdentifierWithSizeSeq dependent_typeids;
+      @hashid OctetSeq32 continuation_point;
+    };
+
+    union TypeLookup_getTypeDependencies_Result switch(long) {
+      case DDS_RETCODE_OK:
+        TypeLookup_getTypeDependencies_Out result;
+    };
+
+    union TypeLookup_Call switch(long) {
+      case TypeLookup_getTypes_HashId:
+        TypeLookup_getTypes_In getTypes;
+
+      case TypeLookup_getDependencies_HashId:
+        TypeLookup_getTypeDependencies_In getTypeDependencies;
+    };
+
+    @RPCRequestType @final
+    struct TypeLookup_Request {
+      DDS::RPC::RequestHeader header;
+      TypeLookup_Call data;
+    };
+
+    union TypeLookup_Return switch(long) {
+      case TypeLookup_getTypes_HashId:
+        TypeLookup_getTypes_Result getType;
+
+      case TypeLookup_getDependencies_HashId:
+        TypeLookup_getTypeDependencies_Result getTypeDependencies;
+    };
+
+    @RPCReplyType @final
+    struct TypeLookup_Reply {
+      DDS::RPC::ReplyHeader header;
+      TypeLookup_Return return;
+    };
+  }; // namespace XTypes
+}; // namespace OpenDDS
+
+#endif /* OPENDDS_DCPS_RTPS_TYPELOOKUP_IDL */

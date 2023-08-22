@@ -172,6 +172,12 @@ void TypeLookupService::cache_type_info(const DDS::BuiltinTopicKey_t& key,
   }
 }
 
+void TypeLookupService::clear_type_info(const DDS::BuiltinTopicKey_t& key)
+{
+  ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
+  type_info_map_.erase(key);
+}
+
 const TypeInformation& TypeLookupService::get_type_info(const DDS::BuiltinTopicKey_t& key) const
 {
   ACE_GUARD_RETURN(ACE_Thread_Mutex, g, mutex_, type_info_empty_);
@@ -763,8 +769,10 @@ void TypeLookupService::complete_to_dynamic_i(DynamicTypeImpl* dt,
   case TK_STRUCTURE: {
     td->kind(TK_STRUCTURE);
     td->name(cto.struct_type.header.detail.type_name.c_str());
-    const DDS::DynamicType_var temp = type_identifier_to_dynamic(cto.struct_type.header.base_type, guid);
-    td->base_type(temp);
+    if (cto.struct_type.header.base_type.kind() != TK_NONE) {
+      const DDS::DynamicType_var base = type_identifier_to_dynamic(cto.struct_type.header.base_type, guid);
+      td->base_type(base);
+    }
     td->extensibility_kind(type_flags_to_extensibility(cto.struct_type.struct_flags));
     td->is_nested(cto.struct_type.struct_flags & IS_NESTED);
     for (ACE_CDR::ULong i = 0; i < cto.struct_type.member_seq.length(); ++i) {
@@ -787,7 +795,7 @@ void TypeLookupService::complete_to_dynamic_i(DynamicTypeImpl* dt,
       type_identifier_to_dynamic(cto.union_type.discriminator.common.type_id, guid);
     td->discriminator_type(disc_type);
     DDS::MemberDescriptor_var disc_md = new MemberDescriptorImpl();
-    disc_md->name("_d");
+    disc_md->name("discriminator");
     disc_md->is_key(cto.union_type.discriminator.common.member_flags & IS_KEY);
     disc_md->type(disc_type);
     disc_md->id(DISCRIMINATOR_ID);
@@ -813,8 +821,8 @@ void TypeLookupService::complete_to_dynamic_i(DynamicTypeImpl* dt,
     break;
   case TK_SEQUENCE: {
     td->kind(TK_SEQUENCE);
-    if (cto.sequence_type.header.detail.present) {
-      td->name(cto.sequence_type.header.detail.value.type_name.c_str());
+    if (cto.sequence_type.header.detail) {
+      td->name(cto.sequence_type.header.detail.value().type_name.c_str());
     }
     td->bound().length(1);
     td->bound()[0] = cto.sequence_type.header.common.bound;
@@ -838,8 +846,8 @@ void TypeLookupService::complete_to_dynamic_i(DynamicTypeImpl* dt,
     break;
   case TK_MAP: {
     td->kind(TK_MAP);
-    if (cto.map_type.header.detail.present) {
-      td->name(cto.map_type.header.detail.value.type_name.c_str());
+    if (cto.map_type.header.detail) {
+      td->name(cto.map_type.header.detail.value().type_name.c_str());
     }
     td->bound().length(1);
     td->bound()[0] = cto.map_type.header.common.bound;
@@ -1092,6 +1100,7 @@ DDS::DynamicType_ptr TypeLookupService::type_identifier_to_dynamic(const TypeIde
     dt->set_descriptor(td);
     break;
   }
+
   return dt_var._retn();
 }
 #endif // OPENDDS_SAFETY_PROFILE
@@ -1172,6 +1181,12 @@ void TypeLookupService::remove_guid_from_dynamic_map(const DCPS::GUID_t& guid)
         "Alerted to removal of %C, removing GUID from GuidTypeMap.\n", DCPS::to_string(guid).c_str()));
     }
   }
+}
+
+bool TypeLookupService::has_complete(const TypeIdentifier& ti) const
+{
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, mutex_, false);
+  return ti.kind() == EK_COMPLETE && type_map_.count(ti);
 }
 #endif
 

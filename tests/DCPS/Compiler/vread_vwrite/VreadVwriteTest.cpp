@@ -14,16 +14,31 @@ TEST(VreadVwriteTest, ParseTest)
 {
   std::ifstream ifs("VreadVwriteTest.json", std::ios_base::in | std::ios_base::binary);
 
+  std::stringstream stream;
+  stream << ifs.rdbuf();
   ASSERT_EQ(ifs.good(), true);
 
-  rapidjson::IStreamWrapper isw(ifs);
-  Mod::Sample sample;
-  OpenDDS::DCPS::from_json(sample, isw);
+  Mod::SampleTypeSupport_var ts = new Mod::SampleTypeSupportImpl;
+  OpenDDS::DCPS::RepresentationFormat_var format = ts->make_format(OpenDDS::DCPS::JSON_DATA_REPRESENTATION);
+  Mod::Sample_var samplev;
+  std::string as_string = stream.str();
+  ASSERT_EQ(ts->decode_from_string(as_string.c_str(), samplev, format), DDS::RETCODE_OK);
+  const Mod::Sample sample = *samplev;
+
+  const unsigned int len = static_cast<unsigned int>(as_string.size());
+  DDS::OctetSeq octets(len, len, reinterpret_cast<unsigned char*>(&as_string[0]));
+  ASSERT_EQ(ts->decode_from_bytes(octets, samplev, format), DDS::RETCODE_OK);
+  const Mod::Sample sample2 = *samplev;
+  // sample2 should be exactly the same as sample, a few of the members are checked below
 
   ASSERT_EQ(sample.id, 5);
+  ASSERT_EQ(sample2.id, 5);
   ASSERT_EQ(std::string(sample.data.in()), "The most rapid of JSONs");
+  ASSERT_EQ(std::string(sample2.data.in()), "The most rapid of JSONs");
   ASSERT_EQ(sample.enu, Mod::three);
+  ASSERT_EQ(sample2.enu, Mod::three);
   ASSERT_EQ(sample.enu2, Mod::two);
+  ASSERT_EQ(sample2.enu2, Mod::two);
   ASSERT_EQ(sample.bt.o, 129);
 #if OPENDDS_HAS_EXPLICIT_INTS
   ASSERT_EQ(sample.bt.u8, 130);
@@ -62,6 +77,15 @@ TEST(VreadVwriteTest, ParseTest)
   ASSERT_EQ(sample.seq2[0], 42);
   ASSERT_EQ(sample.seq2[1], 777);
   ASSERT_EQ(sample.seq2[2], 123454321);
+  ASSERT_EQ(sample.seq3.length(), 8u);
+  ASSERT_EQ(sample.seq3[0], 1);
+  ASSERT_EQ(sample.seq3[1], 1);
+  ASSERT_EQ(sample.seq3[2], 2);
+  ASSERT_EQ(sample.seq3[3], 3);
+  ASSERT_EQ(sample.seq3[4], 5);
+  ASSERT_EQ(sample.seq3[5], 8);
+  ASSERT_EQ(sample.seq3[6], 13);
+  ASSERT_EQ(sample.seq3[7], 21);
   ASSERT_EQ(sample.ns.length(), 2u);
   ASSERT_EQ(sample.ns[0].length(), 3u);
   ASSERT_EQ(std::string(sample.ns[0][0].in()), "alvin");
@@ -133,6 +157,15 @@ TEST(VreadVwriteTest, SerializeTest)
   sample.seq2[0] = 42;
   sample.seq2[1] = 777;
   sample.seq2[2] = 123454321;
+  sample.seq3.length(8);
+  sample.seq3[0] = 1;
+  sample.seq3[1] = 1;
+  sample.seq3[2] = 2;
+  sample.seq3[3] = 3;
+  sample.seq3[4] = 5;
+  sample.seq3[5] = 8;
+  sample.seq3[6] = 13;
+  sample.seq3[7] = 21;
   sample.ns.length(2);
   sample.ns[0].length(3);
   sample.ns[0][0] = "alvin";
@@ -157,14 +190,20 @@ TEST(VreadVwriteTest, SerializeTest)
   sample.sa[3] = "west";
 
   // Serialize to JSON string.
-  rapidjson::StringBuffer buffer;
-  rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
-  OpenDDS::DCPS::JsonValueWriter<rapidjson::Writer<rapidjson::StringBuffer>> jvw(writer);
-  vwrite(jvw, sample);
+  Mod::SampleTypeSupport_var ts = new Mod::SampleTypeSupportImpl;
+  OpenDDS::DCPS::RepresentationFormat_var format = ts->make_format(OpenDDS::DCPS::JSON_DATA_REPRESENTATION);
+  CORBA::String_var buffer;
+  ASSERT_EQ(DDS::RETCODE_OK, ts->encode_to_string(sample, buffer, format));
+
+  DDS::OctetSeq_var bytes;
+  ASSERT_EQ(DDS::RETCODE_OK, ts->encode_to_bytes(sample, bytes, format));
+  const unsigned int n = bytes->length();
+  ASSERT_EQ(n, std::strlen(buffer));
+  ASSERT_EQ(0, std::memcmp(buffer.in(), bytes->get_buffer(), n));
 
   // Then parse.
   rapidjson::Document document;
-  document.Parse(buffer.GetString());
+  document.Parse(buffer.in());
   rapidjson::Value& val = document;
 
   ASSERT_EQ(val.IsObject(), true);
@@ -207,6 +246,14 @@ TEST(VreadVwriteTest, SerializeTest)
   ASSERT_EQ(val["seq2"][0], 42);
   ASSERT_EQ(val["seq2"][1], 777);
   ASSERT_EQ(val["seq2"][2], 123454321);
+  ASSERT_EQ(val["seq3"][0], 1);
+  ASSERT_EQ(val["seq3"][1], 1);
+  ASSERT_EQ(val["seq3"][2], 2);
+  ASSERT_EQ(val["seq3"][3], 3);
+  ASSERT_EQ(val["seq3"][4], 5);
+  ASSERT_EQ(val["seq3"][5], 8);
+  ASSERT_EQ(val["seq3"][6], 13);
+  ASSERT_EQ(val["seq3"][7], 21);
   ASSERT_EQ(val["ns"].Size(), 2u);
   ASSERT_EQ(val["ns"][0].Size(), 3u);
   ASSERT_EQ(val["ns"][0][0], "alvin");

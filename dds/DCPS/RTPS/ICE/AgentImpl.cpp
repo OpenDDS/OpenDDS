@@ -10,6 +10,7 @@
 #include "Task.h"
 #include "EndpointManager.h"
 
+#include <dds/DCPS/Qos_Helper.h>
 #include <dds/DCPS/Service_Participant.h>
 #include <dds/DCPS/TimeTypes.h>
 
@@ -90,7 +91,7 @@ AgentImpl::AgentImpl()
   : DCPS::InternalDataReaderListener<DCPS::NetworkInterfaceAddress>(TheServiceParticipant->job_queue())
   , ReactorInterceptor(TheServiceParticipant->reactor(), TheServiceParticipant->reactor_owner())
   , unfreeze_(false)
-  , reader_(DCPS::make_rch<DCPS::InternalDataReader<DCPS::NetworkInterfaceAddress> >(true, DCPS::rchandle_from(this)))
+  , reader_(DCPS::make_rch<DCPS::InternalDataReader<DCPS::NetworkInterfaceAddress> >(DCPS::DataReaderQosBuilder().reliability_reliable().durability_transient_local(), DCPS::rchandle_from(this)))
   , reader_added_(false)
   , remote_peer_reflexive_counter_(0)
 {
@@ -146,7 +147,7 @@ AgentInfo AgentImpl::get_local_agent_info(DCPS::WeakRcHandle<Endpoint> a_endpoin
 }
 
 void AgentImpl::add_local_agent_info_listener(DCPS::WeakRcHandle<Endpoint> a_endpoint,
-                                              const DCPS::RepoId& a_local_guid,
+                                              const DCPS::GUID_t& a_local_guid,
                                               DCPS::WeakRcHandle<AgentInfoListener> a_agent_info_listener)
 {
   ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, mutex);
@@ -156,7 +157,7 @@ void AgentImpl::add_local_agent_info_listener(DCPS::WeakRcHandle<Endpoint> a_end
 }
 
 void AgentImpl::remove_local_agent_info_listener(DCPS::WeakRcHandle<Endpoint> a_endpoint,
-                                                 const DCPS::RepoId& a_local_guid)
+                                                 const DCPS::GUID_t& a_local_guid)
 {
   ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, mutex);
   EndpointManagerMapType::const_iterator pos = endpoint_managers_.find(a_endpoint);
@@ -165,8 +166,8 @@ void AgentImpl::remove_local_agent_info_listener(DCPS::WeakRcHandle<Endpoint> a_
 }
 
 void  AgentImpl::start_ice(DCPS::WeakRcHandle<Endpoint> a_endpoint,
-                           const DCPS::RepoId& a_local_guid,
-                           const DCPS::RepoId& a_remote_guid,
+                           const DCPS::GUID_t& a_local_guid,
+                           const DCPS::GUID_t& a_remote_guid,
                            const AgentInfo& a_remote_agent_info)
 {
   ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, mutex);
@@ -178,8 +179,8 @@ void  AgentImpl::start_ice(DCPS::WeakRcHandle<Endpoint> a_endpoint,
 }
 
 void AgentImpl::stop_ice(DCPS::WeakRcHandle<Endpoint> a_endpoint,
-                         const DCPS::RepoId& a_local_guid,
-                         const DCPS::RepoId& a_remote_guid)
+                         const DCPS::GUID_t& a_local_guid,
+                         const DCPS::GUID_t& a_remote_guid)
 {
   ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, mutex);
   check_invariants();
@@ -190,8 +191,8 @@ void AgentImpl::stop_ice(DCPS::WeakRcHandle<Endpoint> a_endpoint,
 }
 
 ACE_INET_Addr  AgentImpl::get_address(DCPS::WeakRcHandle<Endpoint> a_endpoint,
-                                      const DCPS::RepoId& a_local_guid,
-                                      const DCPS::RepoId& a_remote_guid) const
+                                      const DCPS::GUID_t& a_local_guid,
+                                      const DCPS::GUID_t& a_remote_guid) const
 {
   ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, mutex, ACE_INET_Addr());
   EndpointManagerMapType::const_iterator pos = endpoint_managers_.find(a_endpoint);
@@ -262,7 +263,7 @@ void AgentImpl::on_data_available(DCPS::RcHandle<DCPS::InternalDataReader<DCPS::
 {
   DCPS::InternalDataReader<DCPS::NetworkInterfaceAddress>::SampleSequence samples;
   DCPS::InternalSampleInfoSequence infos;
-  reader_->take(samples, infos);
+  reader_->take(samples, infos, DDS::LENGTH_UNLIMITED, DDS::ANY_SAMPLE_STATE, DDS::ANY_VIEW_STATE, DDS::ANY_INSTANCE_STATE);
 
   // FUTURE: This polls the endpoints.  The endpoints should just publish the change.
   ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, mutex);

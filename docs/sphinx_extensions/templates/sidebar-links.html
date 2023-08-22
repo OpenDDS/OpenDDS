@@ -1,0 +1,5 @@
+<div class="sidebar-tree" style="margin-top: 0px;"><ul>
+  {% for name, url in sidebar_links.items() -%}
+  <li><a class="reference external" href="{{ url }}">{{ name }}</a></li>
+  {% endfor %}
+</ul></div>

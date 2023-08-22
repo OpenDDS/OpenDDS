@@ -189,6 +189,15 @@ struct GuidHash {
 };
 typedef std::unordered_set<OpenDDS::DCPS::GUID_t, GuidHash> GuidSet;
 
+inline GuidSet relay_guids_to_set(const RtpsRelay::GuidSequence& seq)
+{
+  GuidSet set;
+  for (const auto& guid : seq) {
+    set.insert(relay_guid_to_rtps_guid(guid));
+  }
+  return set;
+}
+
 }
 
 #endif // RTPSRELAY_UTILITY_H_

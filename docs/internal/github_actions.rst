@@ -1,6 +1,6 @@
-##############################
-GitHub Actions Summary and FAQ
-##############################
+##############
+GitHub Actions
+##############
 
 ********
 Overview
@@ -22,7 +22,7 @@ Operating System
 
 .. seealso::
 
-  `GitHub Runner Images <https://github.com/actions/runner-images>`
+  `GitHub Runner Images <https://github.com/actions/runner-images>`__
 
 Build Configuration
 ===================
@@ -178,11 +178,11 @@ Running this script requires the `YAML CPAN module <https://metacpan.org/pod/YAM
 As a safety measure, it has some picky rules about how steps are named and ordered.
 In simplified terms, these rules include:
 
-  * If used, the problem matcher must be appropriate for the platform the job is running on.
-  * The problem matcher must not be declared before steps that are named "setup gtest" or named like "build ACE/TAO".
-    This should reduce any warnings from Google Test or ACE/TAO.
-  * A problem matcher should be declared before steps that start with "build" or contain "make".
-    These steps should also contain ``cmake --build``, ``make``, or ``msbuild`` in their ``run`` string.
+* If used, the problem matcher must be appropriate for the platform the job is running on.
+* The problem matcher must not be declared before steps that are named "setup gtest" or named like "build ACE/TAO".
+  This should reduce any warnings from Google Test or ACE/TAO.
+* A problem matcher should be declared before steps that start with "build" or contain "make".
+  These steps should also contain ``cmake --build``, ``make``, or ``msbuild`` in their ``run`` string.
 
 Blocked Tests
 =============
@@ -197,25 +197,11 @@ Only Failing on CI
 
   * Multicast times out waiting for remote peer. Fails on ``test_u20_p1_j8_FM-1f`` and ``test_u20_p1_sec``.
 
-* tests/DCPS/StringKey/run_test.pl
-
-  * A timeout occurs during the writer writing.  Fails on ``test_u18_bsafe_js0_FM-1f``.
-
 * tests/DCPS/Thrasher/run_test.pl high/aggressive/medium XXXX XXXX
 
   * The more intense thrasher tests cause consistent failures due to the increased load from ASAN.
     GitHub Actions fails these tests very consistently compared to the scoreboard which is more intermittent.
     Fails on ``test_u20_p1_asan_sec``.
-
-* tests/stress-tests/dds/DCPS/run_test.pl
-
-  * This test fails due to only getting ``17 of the expected >=19 total_count``.
-    Fails on ``test_m10_i0_j_FM-1f`` and ``test_m10_o1d0_sec``.
-
-* tests/DCPS/StaticDiscoveryReconnect/run_test.pl
-
-  * This test fails due to ``<StaticDiscoveryTest> failed: No such file or directory``.
-    Fails on ``test_m10_i0_j_FM-1f`` and ``test_m10_o1d0_sec``.
 
 Failing Both CI and scoreboard
 ------------------------------

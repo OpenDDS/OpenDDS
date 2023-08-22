@@ -1,24 +1,21 @@
 /*
- *
- *
  * Distributed under the OpenDDS License.
  * See: http://www.opendds.org/license.html
  */
 
 #ifndef OPENDDS_DCPS_TRANSPORT_TCP_TCPLOADER_H
 #define OPENDDS_DCPS_TRANSPORT_TCP_TCPLOADER_H
-#include /**/ "ace/pre.h"
 
 #include "Tcp_export.h"
 
-#include "ace/Service_Object.h"
-#include "ace/Service_Config.h"
+#include <dds/Versioned_Namespace.h>
 
-#if !defined (ACE_LACKS_PRAGMA_ONCE)
-# pragma once
-#endif /* ACE_LACKS_PRAGMA_ONCE */
+#include <ace/Service_Object.h>
+#include <ace/Service_Config.h>
 
-#include "dds/Versioned_Namespace.h"
+#ifndef ACE_LACKS_PRAGMA_ONCE
+#  pragma once
+#endif
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -44,5 +41,4 @@ ACE_FACTORY_DECLARE(OpenDDS_Tcp, TcpLoader)
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
-#include /**/ "ace/post.h"
 #endif /* TCP_LOADER_H */

@@ -161,10 +161,21 @@ module RtpsRelay {
     unsigned long local_participants;
     unsigned long local_writers;
     unsigned long local_readers;
+    unsigned long handler_statistics_sub_count;
+    unsigned long relay_statistics_sub_count;
+    unsigned long participant_statistics_sub_count;
+    unsigned long relay_partitions_sub_count;
+    unsigned long relay_participant_status_sub_count;
+    unsigned long spdp_replay_sub_count;
+    unsigned long relay_address_sub_count;
+    unsigned long relay_status_sub_count;
     unsigned long relay_partitions_pub_count;
     unsigned long relay_address_pub_count;
     unsigned long spdp_replay_pub_count;
     unsigned long admission_deferral_count;
+    unsigned long remote_map_size;
+    unsigned long max_ips_per_client;
+    unsigned long rejected_address_map_size;
   };
 };
 

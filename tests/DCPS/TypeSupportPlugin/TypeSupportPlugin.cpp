@@ -13,7 +13,10 @@
 
 int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 {
-#ifndef ACE_AS_STATIC_LIBS
+#ifdef ACE_AS_STATIC_LIBS
+  ACE_UNUSED_ARG(argc);
+  ACE_UNUSED_ARG(argv);
+#else
   DDS::DomainParticipantFactory_var dpf = TheParticipantFactoryWithArgs(argc, argv);
 
   ACE_DLL ts_plugin;

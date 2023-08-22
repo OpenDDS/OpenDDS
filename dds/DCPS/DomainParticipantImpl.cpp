@@ -34,6 +34,7 @@
 #  include "security/framework/SecurityConfig.h"
 #  include "security/framework/Properties.h"
 #endif
+#include "XTypes/Utils.h"
 
 #include <dds/DdsDcpsGuidC.h>
 #ifndef DDS_HAS_MINIMUM_BIT
@@ -718,7 +719,7 @@ DomainParticipantImpl::find_topic(
       first_time = false;
     }
 
-    RepoId topic_id;
+    GUID_t topic_id;
     CORBA::String_var type_name;
     DDS::TopicQos_var qos;
 
@@ -1235,7 +1236,7 @@ DomainParticipantImpl::ignore_participant(
     return DDS::RETCODE_NOT_ENABLED;
   }
 
-  RepoId ignoreId = get_repoid(handle);
+  GUID_t ignoreId = get_repoid(handle);
   HandleMap::const_iterator location = this->ignored_participants_.find(ignoreId);
 
   if (location == this->ignored_participants_.end()) {
@@ -1294,7 +1295,7 @@ DomainParticipantImpl::ignore_topic(
     return DDS::RETCODE_NOT_ENABLED;
   }
 
-  RepoId ignoreId = get_repoid(handle);
+  GUID_t ignoreId = get_repoid(handle);
   HandleMap::const_iterator location = this->ignored_topics_.find(ignoreId);
 
   if (location == this->ignored_topics_.end()) {
@@ -1352,7 +1353,7 @@ DomainParticipantImpl::ignore_publication(
                handle));
   }
 
-  RepoId ignoreId = get_repoid(handle);
+  GUID_t ignoreId = get_repoid(handle);
   Discovery_rch disco = TheServiceParticipant->get_discovery(domain_id_);
   if (!disco->ignore_publication(domain_id_,
                                  dp_id_,
@@ -1394,7 +1395,7 @@ DomainParticipantImpl::ignore_subscription(
                handle));
   }
 
-  RepoId ignoreId = get_repoid(handle);
+  GUID_t ignoreId = get_repoid(handle);
   Discovery_rch disco = TheServiceParticipant->get_discovery(domain_id_);
   if (!disco->ignore_subscription(domain_id_,
                                   dp_id_,
@@ -1819,7 +1820,7 @@ DomainParticipantImpl::enable()
   return DDS::RETCODE_OK;
 }
 
-RepoId
+GUID_t
 DomainParticipantImpl::get_id() const
 {
   return dp_id_;
@@ -1835,7 +1836,7 @@ DomainParticipantImpl::get_unique_id()
 DDS::InstanceHandle_t
 DomainParticipantImpl::get_instance_handle()
 {
-  return get_entity_instance_handle(dp_id_, this);
+  return get_entity_instance_handle(dp_id_, rchandle_from(this));
 }
 
 DDS::InstanceHandle_t DomainParticipantImpl::assign_handle(const GUID_t& id)
@@ -2106,7 +2107,7 @@ DomainParticipantImpl::ownership_manager()
 }
 
 void
-DomainParticipantImpl::update_ownership_strength (const PublicationId& pub_id,
+DomainParticipantImpl::update_ownership_strength (const GUID_t& pub_id,
                                                   const CORBA::Long& ownership_strength)
 {
   ACE_GUARD(ACE_Recursive_Thread_Mutex,
@@ -2124,14 +2125,14 @@ DomainParticipantImpl::update_ownership_strength (const PublicationId& pub_id,
 
 #endif // OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
 
-DomainParticipantImpl::RepoIdSequence::RepoIdSequence(const RepoId& base) :
+DomainParticipantImpl::RepoIdSequence::RepoIdSequence(const GUID_t& base) :
   base_(base),
   serial_(0),
   builder_(base_)
 {
 }
 
-RepoId
+GUID_t
 DomainParticipantImpl::RepoIdSequence::next()
 {
   builder_.entityKey(++serial_);
@@ -2611,6 +2612,77 @@ bool DomainParticipantImpl::set_wait_pending_deadline(const MonotonicTimePoint& 
   }
   return result;
 }
+
+#ifndef OPENDDS_SAFETY_PROFILE
+DDS::ReturnCode_t DomainParticipantImpl::get_dynamic_type(
+  DDS::DynamicType_var& type, const DDS::BuiltinTopicKey_t& key)
+{
+  if (!type_lookup_service_) {
+    if (log_level >= LogLevel::Notice) {
+      ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DomainParticipantImpl::get_dynamic_type: "
+        "Can't get a DynamicType, no type lookup service\n"));
+    }
+    return DDS::RETCODE_UNSUPPORTED;
+  }
+
+  XTypes::TypeInformation ti = type_lookup_service_->get_type_info(key);
+  if (ti.complete.typeid_with_size.typeobject_serialized_size == 0) {
+    if (log_level >= LogLevel::Notice) {
+      ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DomainParticipantImpl::get_dynamic_type: "
+        "Can't get a DynamicType, type info is missing complete\n"));
+    }
+    return DDS::RETCODE_NO_DATA;
+  }
+
+  const XTypes::TypeIdentifier& ctid = ti.complete.typeid_with_size.type_id;
+  const GUID_t entity = bit_key_to_guid(key);
+  if (!type_lookup_service_->has_complete(ctid)) {
+    // We don't have it, try to asking the remote for the complete
+    // TypeObjects.
+    if (DCPS_debug_level >= 4) {
+      ACE_DEBUG((LM_DEBUG, "(%P|%t) DomainParticipantImpl::get_dynamic_type: "
+        "requesting remote complete TypeObject from %C\n", LogGuid(entity).c_str()));
+    }
+    Discovery_rch disco = TheServiceParticipant->get_discovery(domain_id_);
+    TypeObjReqCond cond;
+    disco->request_remote_complete_type_objects(domain_id_, dp_id_, entity, ti, cond);
+    const DDS::ReturnCode_t rc = cond.wait();
+    if (rc != DDS::RETCODE_OK) {
+      if (log_level >= LogLevel::Notice) {
+        ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DomainParticipantImpl::get_dynamic_type: "
+          "Couldn't get remote complete type object: %C\n", retcode_to_string(rc)));
+      }
+      return rc;
+    }
+
+    if (!type_lookup_service_->has_complete(ctid)) {
+      if (log_level >= LogLevel::Notice) {
+        ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DomainParticipantImpl::get_dynamic_type: "
+          "request_remote_complete_type_objects succeeded, but type lookup service still says it "
+          "doesn't have the complete TypeObject?\n"));
+      }
+      return DDS::RETCODE_ERROR;
+    }
+  }
+
+  DDS::DynamicType_var got_type = type_lookup_service_->type_identifier_to_dynamic(ctid, entity);
+  if (!XTypes::dynamic_type_is_valid(got_type)) {
+    if (log_level >= LogLevel::Notice) {
+      ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DomainParticipantImpl::get_dynamic_type: "
+        "Got an invalid DynamicType\n"));
+    }
+    return DDS::RETCODE_ERROR;
+  }
+  type = got_type;
+
+  XTypes::DynamicTypeImpl* impl = dynamic_cast<XTypes::DynamicTypeImpl*>(type.in());
+  impl->set_complete_type_identifier(ctid);
+  impl->set_minimal_type_identifier(ti.minimal.typeid_with_size.type_id);
+  impl->set_preset_type_info(ti);
+
+  return DDS::RETCODE_OK;
+}
+#endif
 
 } // namespace DCPS
 } // namespace OpenDDS

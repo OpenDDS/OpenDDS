@@ -28,7 +28,7 @@ OpenDDS::DCPS::TcpInst::~TcpInst()
 OpenDDS::DCPS::TransportImpl_rch
 OpenDDS::DCPS::TcpInst::new_impl()
 {
-  return make_rch<TcpTransport>(ref(*this));
+  return make_rch<TcpTransport>(rchandle_from(this));
 }
 
 int

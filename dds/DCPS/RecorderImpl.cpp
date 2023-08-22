@@ -161,11 +161,6 @@ bool RecorderImpl::check_transport_qos(const TransportInst& ti)
   return true;
 }
 
-RepoId RecorderImpl::get_repo_id() const
-{
-  return subscription_id_;
-}
-
 CORBA::Long RecorderImpl::get_priority_value(const AssociationData& data) const
 {
   return data.publication_transport_priority_;
@@ -231,7 +226,7 @@ void RecorderImpl::notify_subscription_lost(const WriterIdSeq&)
 
 #ifndef OPENDDS_SAFETY_PROFILE
 void
-RecorderImpl::add_to_dynamic_type_map(const PublicationId& pub_id, const XTypes::TypeIdentifier& ti)
+RecorderImpl::add_to_dynamic_type_map(const GUID_t& pub_id, const XTypes::TypeIdentifier& ti)
 {
   XTypes::TypeLookupService_rch tls = participant_servant_->get_type_lookup_service();
   DDS::DynamicType_var dt = tls->type_identifier_to_dynamic(ti, pub_id);
@@ -245,15 +240,23 @@ RecorderImpl::add_to_dynamic_type_map(const PublicationId& pub_id, const XTypes:
 #endif
 
 void
-RecorderImpl::add_association(const RepoId&            yourId,
-                              const WriterAssociation& writer,
+RecorderImpl::set_subscription_id(const GUID_t& guid)
+{
+  OPENDDS_ASSERT(subscription_id_ == GUID_UNKNOWN);
+  OPENDDS_ASSERT(guid != GUID_UNKNOWN);
+  subscription_id_ = guid;
+  TransportClient::set_guid(guid);
+}
+
+void
+RecorderImpl::add_association(const WriterAssociation& writer,
                               bool                     active)
 {
   if (DCPS_debug_level >= 4) {
     ACE_DEBUG((LM_DEBUG, "(%P|%t) RecorderImpl::add_association: "
                "bit %d local %C remote %C\n",
                is_bit_,
-               LogGuid(yourId).c_str(),
+               LogGuid(subscription_id_).c_str(),
                LogGuid(writer.writerId).c_str()));
   }
 
@@ -271,16 +274,6 @@ RecorderImpl::add_association(const RepoId&            yourId,
   // }
 
   //
-  // We are being called back from the repository before we are done
-  // processing after our call to the repository that caused this call
-  // (from the repository) to be made.
-  //
-  if (GUID_UNKNOWN == subscription_id_) {
-    // add_associations was invoked before DCSPInfoRepo::add_subscription() returned.
-    subscription_id_ = yourId;
-  }
-
-  //
   // We do the following while holding the publication_handle_lock_.
   //
   {
@@ -294,8 +287,8 @@ RecorderImpl::add_association(const RepoId&            yourId,
     {
       ACE_WRITE_GUARD(ACE_RW_Thread_Mutex, write_guard, writers_lock_);
 
-      const PublicationId& writer_id = writer.writerId;
-      RcHandle<WriterInfo> info ( make_rch<WriterInfo>(static_cast<WriterInfoListener*>(this), writer_id, writer.writerQos));
+      const GUID_t& writer_id = writer.writerId;
+      RcHandle<WriterInfo> info ( make_rch<WriterInfo>(rchandle_from<WriterInfoListener>(this), writer_id, writer.writerQos));
       /*std::pair<WriterMapType::iterator, bool> bpair =*/
       writers_.insert(
         // This insertion is idempotent.
@@ -545,7 +538,7 @@ RecorderImpl::remove_associations_i(const WriterIdSeq& writers,
     wr_len = writers.length();
 
     for (CORBA::ULong i = 0; i < wr_len; i++) {
-      PublicationId writer_id = writers[i];
+      GUID_t writer_id = writers[i];
 
 #ifndef OPENDDS_SAFETY_PROFILE
       if (dt_map_.erase(writer_id) == 0) {
@@ -725,14 +718,14 @@ RecorderImpl::update_incompatible_qos(const IncompatibleQosStatus& status)
 }
 
 void
-RecorderImpl::signal_liveliness(const RepoId& remote_participant)
+RecorderImpl::signal_liveliness(const GUID_t& remote_participant)
 {
-  RepoId prefix = remote_participant;
+  GUID_t prefix = remote_participant;
   prefix.entityId = EntityId_t();
 
   ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, sample_lock_);
 
-  typedef std::pair<RepoId, RcHandle<WriterInfo> > WriterSetElement;
+  typedef std::pair<GUID_t, RcHandle<WriterInfo> > WriterSetElement;
   typedef OPENDDS_VECTOR(WriterSetElement) WriterSet;
   WriterSet writers;
 
@@ -921,7 +914,7 @@ RecorderImpl::enable()
 
     XTypes::TypeInformation type_info;
 
-    subscription_id_ =
+    const bool success =
       disco->add_subscription(domain_id_,
                               participant_servant_->get_id(),
                               topic_servant_->get_id(),
@@ -934,7 +927,7 @@ RecorderImpl::enable()
                               exprParams,
                               type_info);
 
-    if (subscription_id_ == OpenDDS::DCPS::GUID_UNKNOWN) {
+    if (!success || subscription_id_ == OpenDDS::DCPS::GUID_UNKNOWN) {
       if (log_level >= LogLevel::Warning) {
         ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: RecorderImpl::enable: "
           "add_subscription returned invalid id\n"));
@@ -949,13 +942,13 @@ RecorderImpl::enable()
 DDS::InstanceHandle_t
 RecorderImpl::get_instance_handle()
 {
-  return get_entity_instance_handle(subscription_id_, participant_servant_);
+  return get_entity_instance_handle(subscription_id_, rchandle_from(participant_servant_));
 }
 
 void
-RecorderImpl::register_for_writer(const RepoId& participant,
-                                  const RepoId& readerid,
-                                  const RepoId& writerid,
+RecorderImpl::register_for_writer(const GUID_t& participant,
+                                  const GUID_t& readerid,
+                                  const GUID_t& writerid,
                                   const TransportLocatorSeq& locators,
                                   DiscoveryListener* listener)
 {
@@ -963,9 +956,9 @@ RecorderImpl::register_for_writer(const RepoId& participant,
 }
 
 void
-RecorderImpl::unregister_for_writer(const RepoId& participant,
-                                    const RepoId& readerid,
-                                    const RepoId& writerid)
+RecorderImpl::unregister_for_writer(const GUID_t& participant,
+                                    const GUID_t& readerid,
+                                    const GUID_t& writerid)
 {
   TransportClient::unregister_for_writer(participant, readerid, writerid);
 }

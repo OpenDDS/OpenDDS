@@ -502,8 +502,8 @@ void compute_dependencies(const TypeMap& type_map,
                           const Optional<AppliedAnnotationSeq>& ann_seq,
                           OPENDDS_SET(TypeIdentifier)& dependencies)
 {
-  if (ann_seq.present) {
-    compute_dependencies(type_map, ann_seq.value, dependencies);
+  if (ann_seq) {
+    compute_dependencies(type_map, ann_seq.value(), dependencies);
   }
 }
 
@@ -754,8 +754,8 @@ void compute_dependencies(const TypeMap& type_map,
                           const CompleteCollectionHeader& header,
                           OPENDDS_SET(TypeIdentifier)& dependencies)
 {
-  if (header.detail.present) {
-    compute_dependencies(type_map, header.detail.value, dependencies);
+  if (header.detail) {
+    compute_dependencies(type_map, header.detail.value(), dependencies);
   }
 }
 
@@ -1123,6 +1123,8 @@ bool read_empty_xcdr2_nonfinal(DCPS::Serializer& strm)
 const char* typekind_to_string(TypeKind tk)
 {
   switch (tk) {
+  case TK_NONE:
+    return "none";
   case TK_BOOLEAN:
     return "boolean";
   case TK_BYTE:
@@ -1183,6 +1185,68 @@ const char* typekind_to_string(TypeKind tk)
         "passed unknown TypeKind %u\n", tk));
     }
     return "unknown";
+  }
+}
+
+bool is_primitive(TypeKind tk)
+{
+  switch (tk) {
+  case TK_BOOLEAN:
+  case TK_BYTE:
+  case TK_INT8:
+  case TK_UINT8:
+  case TK_INT16:
+  case TK_UINT16:
+  case TK_INT32:
+  case TK_UINT32:
+  case TK_INT64:
+  case TK_UINT64:
+  case TK_FLOAT32:
+  case TK_FLOAT64:
+  case TK_FLOAT128:
+  case TK_CHAR8:
+  case TK_CHAR16:
+    return true;
+  default:
+    return false;
+  }
+}
+
+bool is_scalar(TypeKind tk)
+{
+  return is_primitive(tk) || tk == TK_ENUM;
+}
+
+bool is_basic(TypeKind tk)
+{
+  return is_primitive(tk) || tk == TK_STRING8 || tk == TK_STRING16;
+}
+
+bool is_complex(TypeKind tk)
+{
+  switch (tk) {
+  case TK_ARRAY:
+  case TK_SEQUENCE:
+  case TK_MAP:
+  case TK_STRUCTURE:
+  case TK_UNION:
+  case TK_BITSET:
+    return true;
+  default:
+    return false;
+  }
+}
+
+bool is_sequence_like(TypeKind tk)
+{
+  switch (tk) {
+  case TK_SEQUENCE:
+  case TK_ARRAY:
+  case TK_STRING8:
+  case TK_STRING16:
+    return true;
+  default:
+    return false;
   }
 }
 
@@ -1259,6 +1323,12 @@ void serialized_size(const Encoding& encoding, size_t& size,
   }
 }
 
+void serialized_size(const Encoding& encoding, size_t& size,
+  const NestedKeyOnly<const XTypes::TypeIdentifier>& uni)
+{
+  serialized_size(encoding, size, uni.value);
+}
+
 bool operator<<(Serializer& strm, const XTypes::TypeIdentifier& uni)
 {
   if (!(strm << ACE_OutputCDR::from_octet(uni.kind()))) {
@@ -1312,6 +1382,11 @@ bool operator<<(Serializer& strm, const XTypes::TypeIdentifier& uni)
   default:
     return (strm << uni.extended_defn());
   }
+}
+
+bool operator<<(Serializer& strm, const NestedKeyOnly<const XTypes::TypeIdentifier>& uni)
+{
+  return (strm << uni.value);
 }
 
 bool operator>>(Serializer& strm, XTypes::TypeIdentifier& uni)
@@ -1371,6 +1446,10 @@ bool operator>>(Serializer& strm, XTypes::TypeIdentifier& uni)
   }
 }
 
+bool operator>>(Serializer& strm, NestedKeyOnly<XTypes::TypeIdentifier>& uni)
+{
+  return (strm >> uni.value);
+}
 
 void serialized_size(const Encoding& encoding, size_t& size,
   const XTypes::LBoundSeq& seq)
@@ -2298,6 +2377,12 @@ void serialized_size(const Encoding& encoding, size_t& size,
   primitive_serialized_size(encoding, size, stru.typeobject_serialized_size);
 }
 
+void serialized_size(const Encoding& encoding, size_t& size,
+                     const NestedKeyOnly<const XTypes::TypeIdentifierWithSize>& stru)
+{
+  serialized_size(encoding, size, stru.value);
+}
+
 bool operator<<(Serializer& strm, const XTypes::TypeIdentifierWithSize& stru)
 {
   size_t total_size = 0;
@@ -2308,6 +2393,11 @@ bool operator<<(Serializer& strm, const XTypes::TypeIdentifierWithSize& stru)
 
   return (strm << stru.type_id)
     && (strm << stru.typeobject_serialized_size);
+}
+
+bool operator<<(Serializer& strm, const NestedKeyOnly<const XTypes::TypeIdentifierWithSize>& stru)
+{
+  return (strm << stru.value);
 }
 
 bool operator>>(Serializer& strm, XTypes::TypeIdentifierWithSize& stru)
@@ -2328,6 +2418,10 @@ bool operator>>(Serializer& strm, XTypes::TypeIdentifierWithSize& stru)
   return ret;
 }
 
+bool operator>>(Serializer& strm, NestedKeyOnly<XTypes::TypeIdentifierWithSize>& stru)
+{
+  return (strm >> stru.value);
+}
 
 void serialized_size(const Encoding& encoding, size_t& size,
   const XTypes::TypeIdentifierWithDependencies& stru)
@@ -3782,18 +3876,18 @@ void serialized_size(const Encoding& encoding, size_t& size,
   serialized_size_delimiter(encoding, size);
 
   size += DCPS::boolean_cdr_size;
-  if (stru.unit.present) {
+  if (stru.unit) {
     DCPS::primitive_serialized_size_ulong(encoding, size);
-    size += ACE_OS::strlen(stru.unit.value.c_str()) + 1;
+    size += ACE_OS::strlen(stru.unit.value().c_str()) + 1;
   }
 
   serialized_size(encoding, size, stru.min);
   serialized_size(encoding, size, stru.max);
 
   size += DCPS::boolean_cdr_size;
-  if (stru.hash_id.present) {
+  if (stru.hash_id) {
     DCPS::primitive_serialized_size_ulong(encoding, size);
-    size += ACE_OS::strlen(stru.hash_id.value.c_str()) + 1;
+    size += ACE_OS::strlen(stru.hash_id.value().c_str()) + 1;
   }
 }
 
@@ -4893,10 +4987,21 @@ void serialized_size(const Encoding& encoding, size_t& size,
   serialized_size(encoding, size, stru.type_object);
 }
 
+void serialized_size(const Encoding& encoding, size_t& size,
+                     const NestedKeyOnly<const XTypes::TypeIdentifierTypeObjectPair>& stru)
+{
+  serialized_size(encoding, size, stru.value);
+}
+
 bool operator<<(Serializer& strm, const XTypes::TypeIdentifierTypeObjectPair& stru)
 {
   return (strm << stru.type_identifier)
     && (strm << stru.type_object);
+}
+
+bool operator<<(Serializer& strm, const NestedKeyOnly<const XTypes::TypeIdentifierTypeObjectPair>& stru)
+{
+  return (strm << stru.value);
 }
 
 bool operator>>(Serializer& strm, XTypes::TypeIdentifierTypeObjectPair& stru)
@@ -4905,6 +5010,10 @@ bool operator>>(Serializer& strm, XTypes::TypeIdentifierTypeObjectPair& stru)
     && (strm >> stru.type_object);
 }
 
+bool operator>>(Serializer& strm, NestedKeyOnly<XTypes::TypeIdentifierTypeObjectPair>& stru)
+{
+  return (strm >> stru.value);
+}
 
 void serialized_size(const Encoding& encoding, size_t& size,
   const XTypes::TypeIdentifierPair& stru)
@@ -4913,16 +5022,32 @@ void serialized_size(const Encoding& encoding, size_t& size,
   serialized_size(encoding, size, stru.type_identifier2);
 }
 
+void serialized_size(const Encoding& encoding, size_t& size,
+                     const NestedKeyOnly<const XTypes::TypeIdentifierPair>& stru)
+{
+  serialized_size(encoding, size, stru.value);
+}
+
 bool operator<<(Serializer& strm, const XTypes::TypeIdentifierPair& stru)
 {
   return (strm << stru.type_identifier1)
     && (strm << stru.type_identifier2);
 }
 
+bool operator<<(Serializer& strm, const NestedKeyOnly<const XTypes::TypeIdentifierPair>& stru)
+{
+  return (strm << stru.value);
+}
+
 bool operator>>(Serializer& strm, XTypes::TypeIdentifierPair& stru)
 {
   return (strm >> stru.type_identifier1)
     && (strm >> stru.type_identifier2);
+}
+
+bool operator>>(Serializer& strm, NestedKeyOnly<XTypes::TypeIdentifierPair>& stru)
+{
+  return (strm >> stru.value);
 }
 
 bool to_type_object(const unsigned char* buffer, size_t size, XTypes::TypeObject& to)

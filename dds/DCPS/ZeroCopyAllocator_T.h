@@ -1,6 +1,4 @@
 /*
- *
- *
  * Distributed under the OpenDDS License.
  * See: http://www.opendds.org/license.html
  */
@@ -8,15 +6,14 @@
 #ifndef OPENDDS_DCPS_ZEROCOPYALLOCATOR_T_H
 #define OPENDDS_DCPS_ZEROCOPYALLOCATOR_T_H
 
-#include /**/ "ace/pre.h"
-#include "ace/Malloc_Base.h"          /* Need ACE_Allocator */
-// not needed export for templates #include "dcps_export.h"
+#include <ace/config-macros.h>
+#ifndef ACE_LACKS_PRAGMA_ONCE
+#  pragma once
+#endif
 
-#if !defined (ACE_LACKS_PRAGMA_ONCE)
-# pragma once
-#endif /* ACE_LACKS_PRAGMA_ONCE */
+#include <dds/Versioned_Namespace.h>
 
-#include "dds/Versioned_Namespace.h"
+#include <ace/Malloc_Base.h> /* Need ACE_Allocator */
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -82,7 +79,5 @@ OPENDDS_END_VERSIONED_NAMESPACE_DECL
 #if defined (ACE_TEMPLATES_REQUIRE_PRAGMA)
 #pragma implementation ("ZeroCopyAllocator_T.cpp")
 #endif /* ACE_TEMPLATES_REQUIRE_PRAGMA */
-
-#include /**/ "ace/post.h"
 
 #endif /* ZEROCOPYALLOCATOR_H  */

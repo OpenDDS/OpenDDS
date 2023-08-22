@@ -20,7 +20,7 @@ namespace OpenDDS {
 namespace DCPS {
 
 DataSampleElement::DataSampleElement(
-  PublicationId           publication_id,
+  GUID_t           publication_id,
   TransportSendListener*  send_listener,
   PublicationInstance_rch handle)
   : transaction_id_(0),

@@ -6,24 +6,26 @@
 #ifndef OPENDDS_DCPS_DATAWRITERIMPL_H
 #define OPENDDS_DCPS_DATAWRITERIMPL_H
 
-#include "Sample.h"
-#include "DataWriterCallbacks.h"
-#include "transport/framework/TransportSendListener.h"
-#include "transport/framework/TransportClient.h"
-#include "MessageTracker.h"
-#include "DataBlockLockPool.h"
-#include "PoolAllocator.h"
-#include "WriteDataContainer.h"
-#include "Definitions.h"
-#include "DataSampleHeader.h"
-#include "TopicImpl.h"
-#include "Time_Helper.h"
+#include "Atomic.h"
 #include "CoherentChangeControl.h"
+#include "DataBlockLockPool.h"
+#include "DataSampleHeader.h"
+#include "DataWriterCallbacks.h"
+#include "Definitions.h"
 #include "GuidUtils.h"
-#include "RcEventHandler.h"
-#include "unique_ptr.h"
+#include "MessageTracker.h"
 #include "Message_Block_Ptr.h"
+#include "PoolAllocator.h"
+#include "RcEventHandler.h"
+#include "Sample.h"
+#include "SporadicTask.h"
 #include "TimeTypes.h"
+#include "Time_Helper.h"
+#include "TopicImpl.h"
+#include "WriteDataContainer.h"
+#include "transport/framework/TransportClient.h"
+#include "transport/framework/TransportSendListener.h"
+#include "unique_ptr.h"
 #ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
 #  include "FilterEvaluator.h"
 #endif
@@ -53,7 +55,6 @@ class Monitor;
 class DataSampleElement;
 class SendStateDataSampleList;
 struct AssociationData;
-class LivenessTimer;
 
 /**
  * @class DataWriterImpl
@@ -87,7 +88,7 @@ public:
   friend class WriteDataContainer;
   friend class PublisherImpl;
 
-  typedef OPENDDS_MAP_CMP(RepoId, SequenceNumber, GUID_tKeyLessThan) RepoIdToSequenceMap;
+  typedef OPENDDS_MAP_CMP(GUID_t, SequenceNumber, GUID_tKeyLessThan) RepoIdToSequenceMap;
   typedef Dynamic_Cached_Allocator_With_Overflow<ACE_Thread_Mutex> DataAllocator;
 
   struct AckToken {
@@ -190,20 +191,21 @@ public:
 
   virtual DDS::ReturnCode_t enable();
 
-  virtual void add_association(const RepoId& yourId,
-                               const ReaderAssociation& reader,
+  virtual void set_publication_id(const GUID_t& guid);
+
+  virtual void add_association(const ReaderAssociation& reader,
                                bool active);
 
-  virtual void transport_assoc_done(int flags, const RepoId& remote_id);
+  virtual void transport_assoc_done(int flags, const GUID_t& remote_id);
 
   virtual void remove_associations(const ReaderIdSeq & readers,
                                    bool callback);
 
-  virtual void replay_durable_data_for(const RepoId& remote_sub_id);
+  virtual void replay_durable_data_for(const GUID_t& remote_sub_id);
 
   virtual void update_incompatible_qos(const IncompatibleQosStatus& status);
 
-  virtual void update_subscription_params(const RepoId& readerId,
+  virtual void update_subscription_params(const GUID_t& readerId,
                                           const DDS::StringSeq& params);
 
   /**
@@ -252,6 +254,7 @@ public:
   DDS::ReturnCode_t
   unregister_instance_i(
     DDS::InstanceHandle_t handle,
+    const Sample* sample,
     const DDS::Time_t & source_timestamp);
 
   /**
@@ -265,7 +268,7 @@ public:
    * sample and finally tell the transport to send the sample.
    * \param filter_out can either be null (if the writer can't
    *        or won't evaluate the filters), or a list of
-   *        associated reader RepoIds that should NOT get the
+   *        associated reader GUID_ts that should NOT get the
    *        data sample due to content filtering.
    */
   DDS::ReturnCode_t write(Message_Block_Ptr sample,
@@ -286,6 +289,7 @@ public:
    * broadcast the disposed instance.
    */
   DDS::ReturnCode_t dispose(DDS::InstanceHandle_t handle,
+                            const Sample& sample,
                             const DDS::Time_t & source_timestamp);
 
   /**
@@ -310,7 +314,7 @@ public:
   /**
    * Accessor of the repository id of the domain participant.
    */
-  RepoId get_dp_id();
+  GUID_t get_dp_id();
 
   /**
    * Delegate to WriteDataContainer to unregister all instances.
@@ -394,27 +398,23 @@ public:
    */
   DDS::DataWriterListener_ptr listener_for(DDS::StatusKind kind);
 
-  /// Handle the assert liveliness timeout.
-  virtual int handle_timeout(const ACE_Time_Value &tv,
-                             const void *arg);
-
   /// Called by the PublisherImpl to indicate that the Publisher is now
   /// resumed and any data collected while it was suspended should now be sent.
   void send_suspended_data();
 
   void remove_all_associations();
 
-  virtual void register_for_reader(const RepoId& participant,
-                                   const RepoId& writerid,
-                                   const RepoId& readerid,
+  virtual void register_for_reader(const GUID_t& participant,
+                                   const GUID_t& writerid,
+                                   const GUID_t& readerid,
                                    const TransportLocatorSeq& locators,
                                    DiscoveryListener* listener);
 
-  virtual void unregister_for_reader(const RepoId& participant,
-                                     const RepoId& writerid,
-                                     const RepoId& readerid);
+  virtual void unregister_for_reader(const GUID_t& participant,
+                                     const GUID_t& writerid,
+                                     const GUID_t& readerid);
 
-  virtual void update_locators(const RepoId& remote,
+  virtual void update_locators(const GUID_t& remote,
                                const TransportLocatorSeq& locators);
 
   void notify_publication_disconnected(const ReaderIdSeq& subids);
@@ -422,8 +422,8 @@ public:
   void notify_publication_lost(const ReaderIdSeq& subids);
 
   /// Statistics counter.
-  ACE_Atomic_Op<ACE_Thread_Mutex, int> data_dropped_count_;
-  ACE_Atomic_Op<ACE_Thread_Mutex, int> data_delivered_count_;
+  Atomic<int> data_dropped_count_;
+  Atomic<int> data_delivered_count_;
 
   MessageTracker controlTracker;
 
@@ -484,12 +484,6 @@ public:
 
   virtual WeakRcHandle<ICE::Endpoint> get_ice_endpoint();
 
-  RepoId get_repo_id() const
-  {
-    ACE_Guard<ACE_Recursive_Thread_Mutex> guard(lock_);
-    return publication_id_;
-  }
-
   SequenceNumber get_max_sn() const
   {
     ACE_Guard<ACE_Thread_Mutex> guard(sn_lock_);
@@ -515,14 +509,6 @@ public:
     const DDS::Time_t& source_timestamp);
 
 protected:
-
-  void check_and_set_repo_id(const RepoId& id)
-  {
-    ACE_Guard<ACE_Recursive_Thread_Mutex> guard(lock_);
-    if (GUID_UNKNOWN == publication_id_) {
-      publication_id_ = id;
-    }
-  }
 
   SequenceNumber get_next_sn()
   {
@@ -592,7 +578,7 @@ protected:
     ~ReaderInfo();
   };
 
-  typedef OPENDDS_MAP_CMP(RepoId, ReaderInfo, GUID_tKeyLessThan) RepoIdToReaderInfoMap;
+  typedef OPENDDS_MAP_CMP(GUID_t, ReaderInfo, GUID_tKeyLessThan) RepoIdToReaderInfoMap;
   RepoIdToReaderInfoMap reader_info_;
 
   struct AckCustomization {
@@ -689,6 +675,7 @@ private:
   void notify_publication_lost(const DDS::InstanceHandleSeq& handles);
 
   DDS::ReturnCode_t dispose_and_unregister(DDS::InstanceHandle_t handle,
+                                           const Sample* sample,
                                            const DDS::Time_t& timestamp);
 
   /**
@@ -726,7 +713,7 @@ private:
   DDS::Security::ParticipantCryptoHandle get_crypto_handle() const;
 #endif
 
-  void association_complete_i(const RepoId& remote_id);
+  void association_complete_i(const GUID_t& remote_id);
 
   void return_handle(DDS::InstanceHandle_t handle);
 
@@ -757,7 +744,7 @@ private:
   /// The publisher servant which creates this datawriter.
   WeakRcHandle<PublisherImpl> publisher_servant_;
   /// The repository id of this datawriter/publication.
-  PublicationId publication_id_;
+  GUID_t publication_id_;
   /// The sequence number unique in DataWriter scope.
   SequenceNumber sequence_number_;
   /// Mutex for sequence_number_
@@ -774,7 +761,7 @@ private:
   /// and status changes.
   mutable ACE_Recursive_Thread_Mutex lock_;
 
-  typedef OPENDDS_MAP_CMP(RepoId, DDS::InstanceHandle_t, GUID_tKeyLessThan) RepoIdToHandleMap;
+  typedef OPENDDS_MAP_CMP(GUID_t, DDS::InstanceHandle_t, GUID_tKeyLessThan) RepoIdToHandleMap;
   RepoIdToHandleMap id_to_handle_map_;
 
   RepoIdSet readers_;
@@ -784,10 +771,6 @@ private:
   DDS::OfferedDeadlineMissedStatus offered_deadline_missed_status_ ;
   DDS::OfferedIncompatibleQosStatus offered_incompatible_qos_status_ ;
   DDS::PublicationMatchedStatus publication_match_status_ ;
-
-  /// True if the writer failed to actively signal its liveliness within
-  /// its offered liveliness period.
-  bool liveliness_lost_;
 
   /**
    * @todo The publication_lost_status_ and
@@ -809,13 +792,6 @@ private:
   unique_ptr<DataSampleHeaderAllocator> header_allocator_;
   unique_ptr<DataAllocator> data_allocator_;
 
-  /// The orb's reactor to be used to register the liveliness
-  /// timer.
-  ACE_Reactor_Timer_Interface* reactor_;
-  /// The time interval for sending liveliness message.
-  TimeDuration liveliness_check_interval_;
-  /// Timestamp of last write/dispose/assert_liveliness.
-  MonotonicTimePoint last_liveliness_activity_time_;
   /// Total number of offered deadlines missed during last offered
   /// deadline status check.
   CORBA::Long last_deadline_missed_total_count_;
@@ -841,15 +817,27 @@ private:
   bool need_sequence_repair();
   bool need_sequence_repair_i() const;
 
-  DDS::ReturnCode_t send_end_historic_samples(const RepoId& readerId);
+  DDS::ReturnCode_t send_end_historic_samples(const GUID_t& readerId);
   DDS::ReturnCode_t send_request_ack();
-
-  bool liveliness_asserted_;
 
   // Lock used to synchronize remove_associations calls from discovery
   // and unregister_instances during deletion of datawriter from application
   ACE_Thread_Mutex sync_unreg_rem_assocs_lock_;
-  RcHandle<LivenessTimer> liveness_timer_;
+
+  typedef PmfSporadicTask<DataWriterImpl> DWISporadicTask;
+
+  RcHandle<DWISporadicTask> liveliness_send_task_;
+  virtual void liveliness_send_task(const MonotonicTimePoint& now);
+  RcHandle<DWISporadicTask> liveliness_lost_task_;
+  virtual void liveliness_lost_task(const MonotonicTimePoint& now);
+  /// The time interval for sending liveliness message.
+  TimeDuration liveliness_send_interval_;
+  TimeDuration liveliness_lost_interval_;
+  /// True if the writer failed to actively signal its liveliness within
+  /// its offered liveliness period.
+  bool liveliness_lost_;
+  /// Timestamp of last write/dispose/assert_liveliness.
+  MonotonicTimePoint last_liveliness_activity_time_;
 
   MonotonicTimePoint wait_pending_deadline_;
 
@@ -870,22 +858,6 @@ protected:
 };
 
 typedef RcHandle<DataWriterImpl> DataWriterImpl_rch;
-
-
-class LivenessTimer : public virtual RcEventHandler
-{
-public:
-  LivenessTimer(DataWriterImpl& writer)
-    : writer_(writer)
-  {
-  }
-
-  /// Handle the assert liveliness timeout.
-  virtual int handle_timeout(const ACE_Time_Value& tv, const void* arg);
-
-private:
-  WeakRcHandle<DataWriterImpl> writer_;
-};
 
 } // namespace DCPS
 } // namespace OpenDDS

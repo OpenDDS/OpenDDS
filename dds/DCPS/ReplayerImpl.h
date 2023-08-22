@@ -101,7 +101,6 @@ public:
 
   // Implement TransportClient
   virtual bool check_transport_qos(const TransportInst& inst);
-  virtual RepoId get_repo_id() const;
   DDS::DomainId_t domain_id() const { return this->domain_id_; }
   virtual CORBA::Long get_priority_value(const AssociationData& data) const;
   SequenceNumber get_max_sn() const { return sequence_number_; }
@@ -128,31 +127,32 @@ public:
   virtual void retrieve_inline_qos_data(InlineQosData& qos_data) const;
 
   // implement DataWriterCallbacks
-  virtual void add_association(const RepoId&            yourId,
-                               const ReaderAssociation& reader,
+  virtual void set_publication_id(const GUID_t& guid);
+
+  virtual void add_association(const ReaderAssociation& reader,
                                bool                     active);
 
   virtual void remove_associations(const ReaderIdSeq& readers,
                                    CORBA::Boolean     callback);
 
-  virtual void replay_durable_data_for(const RepoId&) {}
+  virtual void replay_durable_data_for(const GUID_t&) {}
 
   virtual void update_incompatible_qos(const IncompatibleQosStatus& status);
 
-  virtual void update_subscription_params(const RepoId&         readerId,
+  virtual void update_subscription_params(const GUID_t&         readerId,
                                           const DDS::StringSeq& exprParams);
 
   void remove_all_associations();
 
-  virtual void register_for_reader(const RepoId& participant,
-                                   const RepoId& writerid,
-                                   const RepoId& readerid,
+  virtual void register_for_reader(const GUID_t& participant,
+                                   const GUID_t& writerid,
+                                   const GUID_t& readerid,
                                    const TransportLocatorSeq& locators,
                                    DiscoveryListener* listener);
 
-  virtual void unregister_for_reader(const RepoId& participant,
-                                     const RepoId& writerid,
-                                     const RepoId& readerid);
+  virtual void unregister_for_reader(const GUID_t& participant,
+                                     const GUID_t& writerid,
+                                     const GUID_t& readerid);
 
   virtual DCPS::WeakRcHandle<ICE::Endpoint> get_ice_endpoint() { return DCPS::WeakRcHandle<ICE::Endpoint>(); }
 
@@ -207,17 +207,17 @@ private:
     ~ReaderInfo();
   };
 
-  typedef OPENDDS_MAP_CMP(RepoId, ReaderInfo, GUID_tKeyLessThan) RepoIdToReaderInfoMap;
+  typedef OPENDDS_MAP_CMP(GUID_t, ReaderInfo, GUID_tKeyLessThan) RepoIdToReaderInfoMap;
   RepoIdToReaderInfoMap reader_info_;
 
-  void association_complete_i(const RepoId& remote_id);
+  void association_complete_i(const GUID_t& remote_id);
 
   friend class ::DDS_TEST; // allows tests to get at privates
 
   /// The name of associated topic.
   CORBA::String_var topic_name_;
   /// The associated topic repository id.
-  RepoId topic_id_;
+  GUID_t topic_id_;
   /// The object reference of the associated topic.
   DDS::Topic_var topic_objref_;
   /// The topic servant.
@@ -235,7 +235,7 @@ private:
   DDS::PublisherQos publisher_qos_;
 
   /// The repository id of this datawriter/publication.
-  PublicationId publication_id_;
+  GUID_t publication_id_;
   /// The sequence number unique in DataWriter scope.
   SequenceNumber sequence_number_;
 
@@ -245,7 +245,7 @@ private:
   /// and status changes.
   ACE_Recursive_Thread_Mutex lock_;
 
-  typedef OPENDDS_MAP_CMP(RepoId, DDS::InstanceHandle_t, GUID_tKeyLessThan) RepoIdToHandleMap;
+  typedef OPENDDS_MAP_CMP(GUID_t, DDS::InstanceHandle_t, GUID_tKeyLessThan) RepoIdToHandleMap;
 
   RepoIdToHandleMap id_to_handle_map_;
 
@@ -305,7 +305,7 @@ private:
   /// datawriter.
   bool is_bit_;
 
-  typedef OPENDDS_MAP_CMP(RepoId, SequenceNumber, GUID_tKeyLessThan)
+  typedef OPENDDS_MAP_CMP(GUID_t, SequenceNumber, GUID_tKeyLessThan)
   RepoIdToSequenceMap;
 
   RepoIdToSequenceMap idToSequence_;

@@ -13,13 +13,13 @@
 #endif
 #include <iostream>
 
-const OpenDDS::DCPS::RepoId AppConfig::writerId[3] = {
+const OpenDDS::DCPS::GUID_t AppConfig::writerId[3] = {
   createID(0x11111111, 0x111111, OpenDDS::DCPS::ENTITYKIND_USER_WRITER_WITH_KEY),
   createID(0x11111111, 0x222222, OpenDDS::DCPS::ENTITYKIND_USER_WRITER_WITH_KEY),
   createID(0x11111111, 0x333333, OpenDDS::DCPS::ENTITYKIND_USER_WRITER_WITH_KEY)
 };
 
-const OpenDDS::DCPS::RepoId AppConfig::readerId[3] = {
+const OpenDDS::DCPS::GUID_t AppConfig::readerId[3] = {
   createID(0x22222222, 0x111111, OpenDDS::DCPS::ENTITYKIND_USER_READER_WITH_KEY),
   createID(0x22222222, 0x222222, OpenDDS::DCPS::ENTITYKIND_USER_READER_WITH_KEY),
   createID(0x22222222, 0x333333, OpenDDS::DCPS::ENTITYKIND_USER_READER_WITH_KEY)
@@ -72,7 +72,7 @@ bool AppConfig::configureTransport(){
     if (!rtpsUdp) {
       ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Failed to cast to RtpsUdpInst*%m\n")), false);
     }
-    rtpsUdp->datalink_release_delay_ = 0;
+    rtpsUdp->datalink_release_delay(0);
     ACE_INET_Addr addr(port, ACE_TEXT_ALWAYS_CHAR(host.c_str()));
     rtpsUdp->local_address(OpenDDS::DCPS::NetworkAddress(addr));
 
@@ -89,7 +89,7 @@ bool AppConfig::configureTransport(){
   }
 }
 
-OpenDDS::DCPS::RepoId AppConfig::createID(long participantId, long key, CORBA::Octet kind) {
+OpenDDS::DCPS::GUID_t AppConfig::createID(long participantId, long key, CORBA::Octet kind) {
   OpenDDS::DCPS::RepoIdBuilder idBd;
   idBd.federationId(0x01234567); // guidPrefix1
   idBd.participantId(participantId); // guidPrefix2
@@ -98,7 +98,7 @@ OpenDDS::DCPS::RepoId AppConfig::createID(long participantId, long key, CORBA::O
   return idBd;
 }
 
-void AppConfig::to_cerr(const OpenDDS::DCPS::RepoId& remote, const OpenDDS::DCPS::RepoId& local, const std::string& txt) const {
+void AppConfig::to_cerr(const OpenDDS::DCPS::GUID_t& remote, const OpenDDS::DCPS::GUID_t& local, const std::string& txt) const {
   std::cerr << OpenDDS::DCPS::LogGuid(remote).conv_ << " <- "
             << OpenDDS::DCPS::LogGuid(local).conv_ << " " << txt << std::endl;
 }

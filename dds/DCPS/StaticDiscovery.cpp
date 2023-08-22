@@ -35,12 +35,12 @@ void EndpointRegistry::match()
   for (WriterMapType::iterator wp = writer_map.begin(), wp_limit = writer_map.end();
        wp != wp_limit;
        ++wp) {
-    const RepoId& writerid = wp->first;
+    const GUID_t& writerid = wp->first;
     Writer& writer = wp->second;
     for (ReaderMapType::iterator rp = reader_map.begin(), rp_limit = reader_map.end();
          rp != rp_limit;
          ++rp) {
-      const RepoId& readerid = rp->first;
+      const GUID_t& readerid = rp->first;
       Reader& reader = rp->second;
 
       if (StaticDiscGuidDomainEqual()(readerid.guidPrefix, writerid.guidPrefix) &&
@@ -74,7 +74,7 @@ void EndpointRegistry::match()
   }
 }
 
-StaticEndpointManager::StaticEndpointManager(const RepoId& participant_id,
+StaticEndpointManager::StaticEndpointManager(const GUID_t& participant_id,
                                              ACE_Thread_Mutex& lock,
                                              const EndpointRegistry& registry,
                                              StaticParticipant& participant)
@@ -107,11 +107,11 @@ void StaticEndpointManager::init_bit()
          limit = registry_.writer_map.end();
        pos != limit;
        ++pos) {
-    const RepoId& remoteid = pos->first;
+    const GUID_t& remoteid = pos->first;
     const EndpointRegistry::Writer& writer = pos->second;
 
     if (!equal_guid_prefixes(participant_id_, remoteid)) {
-      const DDS::BuiltinTopicKey_t key = repo_id_to_bit_key(remoteid);
+      const DDS::BuiltinTopicKey_t key = guid_to_bit_key(remoteid);
 
       // pos represents a remote.
       // Populate data.
@@ -153,11 +153,11 @@ void StaticEndpointManager::init_bit()
          limit = registry_.reader_map.end();
        pos != limit;
        ++pos) {
-    const RepoId& remoteid = pos->first;
+    const GUID_t& remoteid = pos->first;
     const EndpointRegistry::Reader& reader = pos->second;
 
     if (!equal_guid_prefixes(participant_id_, remoteid)) {
-      const DDS::BuiltinTopicKey_t key = repo_id_to_bit_key(remoteid);
+      const DDS::BuiltinTopicKey_t key = guid_to_bit_key(remoteid);
 
       // pos represents a remote.
       // Populate data.
@@ -194,8 +194,8 @@ void StaticEndpointManager::init_bit()
   }
 }
 
-void StaticEndpointManager::assign_publication_key(RepoId& rid,
-                                                   const RepoId& /*topicId*/,
+void StaticEndpointManager::assign_publication_key(GUID_t& rid,
+                                                   const GUID_t& /*topicId*/,
                                                    const DDS::DataWriterQos& qos)
 {
   if (qos.user_data.value.length() != BYTES_IN_ENTITY) {
@@ -230,8 +230,8 @@ void StaticEndpointManager::assign_publication_key(RepoId& rid,
   }
 }
 
-void StaticEndpointManager::assign_subscription_key(RepoId& rid,
-                                                    const RepoId& /*topicId*/,
+void StaticEndpointManager::assign_subscription_key(GUID_t& rid,
+                                                    const GUID_t& /*topicId*/,
                                                     const DDS::DataReaderQos& qos)
 {
   if (qos.user_data.value.length() != BYTES_IN_ENTITY) {
@@ -262,7 +262,7 @@ void StaticEndpointManager::assign_subscription_key(RepoId& rid,
 }
 
 bool
-StaticEndpointManager::update_topic_qos(const RepoId& /*topicId*/,
+StaticEndpointManager::update_topic_qos(const GUID_t& /*topicId*/,
                                         const DDS::TopicQos& /*qos*/)
 {
   ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: StaticEndpointManager::update_topic_qos - ")
@@ -271,7 +271,7 @@ StaticEndpointManager::update_topic_qos(const RepoId& /*topicId*/,
 }
 
 bool
-StaticEndpointManager::update_publication_qos(const RepoId& /*publicationId*/,
+StaticEndpointManager::update_publication_qos(const GUID_t& /*publicationId*/,
                                               const DDS::DataWriterQos& /*qos*/,
                                               const DDS::PublisherQos& /*publisherQos*/)
 {
@@ -281,7 +281,7 @@ StaticEndpointManager::update_publication_qos(const RepoId& /*publicationId*/,
 }
 
 bool
-StaticEndpointManager::update_subscription_qos(const RepoId& /*subscriptionId*/,
+StaticEndpointManager::update_subscription_qos(const GUID_t& /*subscriptionId*/,
                                                const DDS::DataReaderQos& /*qos*/,
                                                const DDS::SubscriberQos& /*subscriberQos*/)
 {
@@ -291,7 +291,7 @@ StaticEndpointManager::update_subscription_qos(const RepoId& /*subscriptionId*/,
 }
 
 bool
-StaticEndpointManager::update_subscription_params(const RepoId& /*subId*/,
+StaticEndpointManager::update_subscription_params(const GUID_t& /*subId*/,
                                                   const DDS::StringSeq& /*params*/)
 {
   ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: StaticEndpointManager::update_subscription_qos - ")
@@ -308,7 +308,7 @@ StaticEndpointManager::disassociate()
 }
 
 DDS::ReturnCode_t
-StaticEndpointManager::add_publication_i(const RepoId& writerid,
+StaticEndpointManager::add_publication_i(const GUID_t& writerid,
                                          LocalPublication& pub)
 {
   /*
@@ -325,32 +325,21 @@ StaticEndpointManager::add_publication_i(const RepoId& writerid,
   for (RepoIdSet::const_iterator pos = writer.best_effort_readers.begin(), limit = writer.best_effort_readers.end();
        pos != limit;
        ++pos) {
-    const RepoId& readerid = *pos;
+    const GUID_t& readerid = *pos;
     const EndpointRegistry::Reader& reader = registry_.reader_map.find(readerid)->second;
 
-#ifdef __SUNPRO_CC
-    ReaderAssociation ra;
-    ra.readerTransInfo = reader.trans_info;
-    ra.readerId = readerid;
-    ra.subQos = reader.subscriber_qos;
-    ra.readerQos = reader.qos;
-    ra.filterClassName = "";
-    ra.filterExpression = "";
-    ra.exprParams = 0;
-#else
     const ReaderAssociation ra =
       {reader.trans_info, TransportLocator(), 0, readerid, reader.subscriber_qos, reader.qos, "", "", 0, 0, {0, 0}};
-#endif
     DataWriterCallbacks_rch pl = pub.publication_.lock();
     if (pl) {
-      pl->add_association(writerid, ra, true);
+      pl->add_association(ra, true);
     }
   }
 
   for (RepoIdSet::const_iterator pos = writer.reliable_readers.begin(), limit = writer.reliable_readers.end();
        pos != limit;
        ++pos) {
-    const RepoId& readerid = *pos;
+    const GUID_t& readerid = *pos;
     const EndpointRegistry::Reader& reader = registry_.reader_map.find(readerid)->second;
     DataWriterCallbacks_rch pl = pub.publication_.lock();
     if (pl) {
@@ -362,7 +351,7 @@ StaticEndpointManager::add_publication_i(const RepoId& writerid,
 }
 
 DDS::ReturnCode_t
-StaticEndpointManager::remove_publication_i(const RepoId& writerid, LocalPublication& pub)
+StaticEndpointManager::remove_publication_i(const GUID_t& writerid, LocalPublication& pub)
 {
   EndpointRegistry::WriterMapType::const_iterator pos = registry_.writer_map.find(writerid);
   if (pos == registry_.writer_map.end()) {
@@ -377,7 +366,7 @@ StaticEndpointManager::remove_publication_i(const RepoId& writerid, LocalPublica
   for (RepoIdSet::const_iterator pos = writer.reliable_readers.begin(), limit = writer.reliable_readers.end();
         pos != limit;
         ++pos, ++idx) {
-    const RepoId& readerid = *pos;
+    const GUID_t& readerid = *pos;
     ids[idx] = readerid;
     DataWriterCallbacks_rch pl = pub.publication_.lock();
     if (pl) {
@@ -389,7 +378,7 @@ StaticEndpointManager::remove_publication_i(const RepoId& writerid, LocalPublica
 }
 
 DDS::ReturnCode_t
-StaticEndpointManager::add_subscription_i(const RepoId& readerid,
+StaticEndpointManager::add_subscription_i(const GUID_t& readerid,
                                           LocalSubscription& sub)
 {
   /*
@@ -406,7 +395,7 @@ StaticEndpointManager::add_subscription_i(const RepoId& readerid,
   for (RepoIdSet::const_iterator pos = reader.best_effort_writers.begin(), limit = reader.best_effort_writers.end();
        pos != limit;
        ++pos) {
-    const RepoId& writerid = *pos;
+    const GUID_t& writerid = *pos;
     const EndpointRegistry::Writer& writer = registry_.writer_map.find(writerid)->second;
 
     DDS::OctetSeq type_info;
@@ -415,14 +404,14 @@ StaticEndpointManager::add_subscription_i(const RepoId& readerid,
     };
     DataReaderCallbacks_rch sl = sub.subscription_.lock();
     if (sl) {
-      sl->add_association(readerid, wa, false);
+      sl->add_association(wa, false);
     }
   }
 
   for (RepoIdSet::const_iterator pos = reader.reliable_writers.begin(), limit = reader.reliable_writers.end();
        pos != limit;
        ++pos) {
-    const RepoId& writerid = *pos;
+    const GUID_t& writerid = *pos;
     const EndpointRegistry::Writer& writer = registry_.writer_map.find(writerid)->second;
     DataReaderCallbacks_rch sl = sub.subscription_.lock();
     if (sl) {
@@ -449,7 +438,7 @@ DDS::ReturnCode_t StaticEndpointManager::remove_subscription_i(
   for (RepoIdSet::const_iterator pos = reader.reliable_writers.begin(), limit = reader.reliable_writers.end();
         pos != limit;
         ++pos, ++idx) {
-    const RepoId& writerid = *pos;
+    const GUID_t& writerid = *pos;
     ids[idx] = writerid;
     DataReaderCallbacks_rch sl = sub.subscription_.lock();
     if (sl) {
@@ -479,7 +468,7 @@ StaticEndpointManager::shutting_down() const
 void
 StaticEndpointManager::populate_transport_locator_sequence(TransportLocatorSeq*& /*tls*/,
                                                            DiscoveredSubscriptionIter& /*iter*/,
-                                                           const RepoId& /*reader*/)
+                                                           const GUID_t& /*reader*/)
 {
   ACE_DEBUG((LM_NOTICE, ACE_TEXT("(%P|%t) StaticEndpointManager::populate_transport_locator_sequence TODO\n")));
   // TODO
@@ -488,14 +477,14 @@ StaticEndpointManager::populate_transport_locator_sequence(TransportLocatorSeq*&
 void
 StaticEndpointManager::populate_transport_locator_sequence(TransportLocatorSeq*& /*tls*/,
                                                            DiscoveredPublicationIter& /*iter*/,
-                                                           const RepoId& /*reader*/)
+                                                           const GUID_t& /*reader*/)
 {
   ACE_DEBUG((LM_NOTICE, ACE_TEXT("(%P|%t) StaticEndpointManager::populate_transport_locator_sequence TODO\n")));
   // TODO
 }
 
 void
-StaticEndpointManager::reader_exists(const RepoId& readerid, const RepoId& writerid)
+StaticEndpointManager::reader_exists(const GUID_t& readerid, const GUID_t& writerid)
 {
   ACE_GUARD(ACE_Thread_Mutex, g, lock_);
   LocalPublicationMap::const_iterator lp_pos = local_publications_.find(writerid);
@@ -507,13 +496,13 @@ StaticEndpointManager::reader_exists(const RepoId& readerid, const RepoId& write
       const ReaderAssociation ra =
         {reader_pos->second.trans_info, TransportLocator(), 0, readerid, reader_pos->second.subscriber_qos, reader_pos->second.qos,
          "", "", DDS::StringSeq(), DDS::OctetSeq(), {0, 0}};
-      dwr->add_association(writerid, ra, true);
+      dwr->add_association(ra, true);
     }
   }
 }
 
 void
-StaticEndpointManager::reader_does_not_exist(const RepoId& readerid, const RepoId& writerid)
+StaticEndpointManager::reader_does_not_exist(const GUID_t& readerid, const GUID_t& writerid)
 {
   ACE_GUARD(ACE_Thread_Mutex, g, lock_);
   LocalPublicationMap::const_iterator lp_pos = local_publications_.find(writerid);
@@ -531,7 +520,7 @@ StaticEndpointManager::reader_does_not_exist(const RepoId& readerid, const RepoI
 }
 
 void
-StaticEndpointManager::writer_exists(const RepoId& writerid, const RepoId& readerid)
+StaticEndpointManager::writer_exists(const GUID_t& writerid, const GUID_t& readerid)
 {
   ACE_GUARD(ACE_Thread_Mutex, g, lock_);
   LocalSubscriptionMap::const_iterator ls_pos = local_subscriptions_.find(readerid);
@@ -542,13 +531,13 @@ StaticEndpointManager::writer_exists(const RepoId& writerid, const RepoId& reade
     if (drr) {
       const WriterAssociation wa =
         {writer_pos->second.trans_info, TransportLocator(), 0, writerid, writer_pos->second.publisher_qos, writer_pos->second.qos, DDS::OctetSeq(), {0,0}};
-      drr->add_association(readerid, wa, false);
+      drr->add_association(wa, false);
     }
   }
 }
 
 void
-StaticEndpointManager::writer_does_not_exist(const RepoId& writerid, const RepoId& readerid)
+StaticEndpointManager::writer_does_not_exist(const GUID_t& writerid, const GUID_t& readerid)
 {
   ACE_GUARD(ACE_Thread_Mutex, g, lock_);
   LocalSubscriptionMap::const_iterator ls_pos = local_subscriptions_.find(readerid);
@@ -768,18 +757,18 @@ TopicStatus StaticEndpointManager::remove_topic(const GUID_t& topicId)
   return REMOVED;
 }
 
-GUID_t StaticEndpointManager::add_publication(
-  const GUID_t& topicId,
-  DataWriterCallbacks_rch publication,
-  const DDS::DataWriterQos& qos,
-  const TransportLocatorSeq& transInfo,
-  const DDS::PublisherQos& publisherQos,
-  const XTypes::TypeInformation& type_info)
+bool StaticEndpointManager::add_publication(const GUID_t& topicId,
+                                            DataWriterCallbacks_rch publication,
+                                            const DDS::DataWriterQos& qos,
+                                            const TransportLocatorSeq& transInfo,
+                                            const DDS::PublisherQos& publisherQos,
+                                            const XTypes::TypeInformation& type_info)
 {
-  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, GUID_t());
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, false);
 
   GUID_t rid = participant_id_;
   assign_publication_key(rid, topicId, qos);
+  publication->set_publication_id(rid);
   LocalPublication& pb = local_publications_[rid];
   pb.topic_id_ = topicId;
   pb.publication_ = publication;
@@ -793,11 +782,11 @@ GUID_t StaticEndpointManager::add_publication(
   td.add_local_publication(rid);
 
   if (DDS::RETCODE_OK != add_publication_i(rid, pb)) {
-    return GUID_t();
+    return false;
   }
 
   if (DDS::RETCODE_OK != write_publication_data(rid, pb)) {
-    return GUID_t();
+    return false;
   }
 
   if (DCPS_debug_level > 3) {
@@ -806,7 +795,7 @@ GUID_t StaticEndpointManager::add_publication(
   }
   match_endpoints(rid, td);
 
-  return rid;
+  return true;
 }
 
 void StaticEndpointManager::remove_publication(const GUID_t& publicationId)
@@ -847,21 +836,21 @@ void StaticEndpointManager::update_publication_locators(
   }
 }
 
-GUID_t StaticEndpointManager::add_subscription(
-  const GUID_t& topicId,
-  DataReaderCallbacks_rch subscription,
-  const DDS::DataReaderQos& qos,
-  const TransportLocatorSeq& transInfo,
-  const DDS::SubscriberQos& subscriberQos,
-  const char* filterClassName,
-  const char* filterExpr,
-  const DDS::StringSeq& params,
-  const XTypes::TypeInformation& type_info)
+bool StaticEndpointManager::add_subscription(const GUID_t& topicId,
+                                             DataReaderCallbacks_rch subscription,
+                                             const DDS::DataReaderQos& qos,
+                                             const TransportLocatorSeq& transInfo,
+                                             const DDS::SubscriberQos& subscriberQos,
+                                             const char* filterClassName,
+                                             const char* filterExpr,
+                                             const DDS::StringSeq& params,
+                                             const XTypes::TypeInformation& type_info)
 {
-  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, GUID_t());
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, false);
 
   GUID_t rid = participant_id_;
   assign_subscription_key(rid, topicId, qos);
+  subscription->set_subscription_id(rid);
   LocalSubscription& sb = local_subscriptions_[rid];
   sb.topic_id_ = topicId;
   sb.subscription_ = subscription;
@@ -878,11 +867,11 @@ GUID_t StaticEndpointManager::add_subscription(
   td.add_local_subscription(rid);
 
   if (DDS::RETCODE_OK != add_subscription_i(rid, sb)) {
-    return GUID_t();
+    return false;
   }
 
   if (DDS::RETCODE_OK != write_subscription_data(rid, sb)) {
-    return GUID_t();
+    return false;
   }
 
   if (DCPS_debug_level > 3) {
@@ -891,7 +880,7 @@ GUID_t StaticEndpointManager::add_subscription(
   }
   match_endpoints(rid, td);
 
-  return rid;
+  return true;
 }
 
 void StaticEndpointManager::remove_subscription(const GUID_t& subscriptionId)
@@ -1051,21 +1040,6 @@ void StaticEndpointManager::remove_expired_endpoints(
 {
   ACE_GUARD(ACE_Thread_Mutex, g, lock_);
   const MonotonicTimePoint now = MonotonicTimePoint::now();
-
-  MatchingDataIter end_iter = matching_data_buffer_.end();
-  for (MatchingDataIter iter = matching_data_buffer_.begin(); iter != end_iter; ) {
-    // Do not try to simplify increment: "associative container erase idiom"
-    if (now - iter->second.time_added_to_map >= max_type_lookup_service_reply_period_) {
-      if (DCPS_debug_level >= 4) {
-        ACE_DEBUG((LM_DEBUG, "(%P|%t) StaticEndpointManager::remove_expired_endpoints: "
-          "clean up pending pair w: %C r: %C\n",
-          LogGuid(iter->first.writer_).c_str(), LogGuid(iter->first.reader_).c_str()));
-      }
-      matching_data_buffer_.erase(iter++);
-    } else {
-      ++iter;
-    }
-  }
 
   // Clean up internal data used by getTypeDependencies
   for (OrigSeqNumberMap::iterator it = orig_seq_numbers_.begin(); it != orig_seq_numbers_.end();) {
@@ -1406,13 +1380,13 @@ void StaticEndpointManager::match_continue(const GUID_t& writer, const GUID_t& r
         if (call_reader) {
           DataReaderCallbacks_rch drr_lock = drr.lock();
           if (drr_lock) {
-            DcpsUpcalls thr(drr_lock, reader, wa, !writer_active, dwr_lock);
+            DcpsUpcalls thr(drr_lock, wa, !writer_active, dwr_lock);
             thr.activate();
-            dwr_lock->add_association(writer, ra, writer_active);
+            dwr_lock->add_association(ra, writer_active);
             thr.writer_done();
           }
         } else {
-          dwr_lock->add_association(writer, ra, writer_active);
+          dwr_lock->add_association(ra, writer_active);
         }
       }
     } else if (call_reader) {
@@ -1423,7 +1397,7 @@ void StaticEndpointManager::match_continue(const GUID_t& writer, const GUID_t& r
       }
       DataReaderCallbacks_rch drr_lock = drr.lock();
       if (drr_lock) {
-        drr_lock->add_association(reader, wa, !writer_active);
+        drr_lock->add_association(wa, !writer_active);
       }
     }
 
@@ -1560,12 +1534,12 @@ EndpointRegistry::build_id(const unsigned char* entity_key,
   return retval;
 }
 
-RepoId
+GUID_t
 EndpointRegistry::build_id(DDS::DomainId_t domain,
                            const unsigned char* participant_id,
                            const EntityId_t& entity_id)
 {
-  RepoId id;
+  GUID_t id;
   id.guidPrefix[0] = VENDORID_OCI[0];
   id.guidPrefix[1] = VENDORID_OCI[1];
   // id.guidPrefix[2] = domain[0]
@@ -1585,7 +1559,7 @@ EndpointRegistry::build_id(DDS::DomainId_t domain,
   return id;
 }
 
-OpenDDS::DCPS::RepoId
+OpenDDS::DCPS::GUID_t
 StaticDiscovery::generate_participant_guid()
 {
   return GUID_UNKNOWN;
@@ -1596,7 +1570,7 @@ StaticDiscovery::add_domain_participant(DDS::DomainId_t domain,
                                         const DDS::DomainParticipantQos& qos,
                                         XTypes::TypeLookupService_rch tls)
 {
-  AddDomainStatus ads = {RepoId(), false /*federated*/};
+  AddDomainStatus ads = {GUID_t(), false /*federated*/};
 
   if (qos.user_data.value.length() != BYTES_IN_PARTICIPANT) {
     ACE_ERROR((LM_ERROR,
@@ -1605,7 +1579,7 @@ StaticDiscovery::add_domain_participant(DDS::DomainId_t domain,
     return ads;
   }
 
-  RepoId id = EndpointRegistry::build_id(domain,
+  GUID_t id = EndpointRegistry::build_id(domain,
                                          qos.user_data.value.get_buffer(),
                                          ENTITYID_PARTICIPANT);
   if (!get_part(domain, id).is_nil()) {
@@ -1634,7 +1608,7 @@ StaticDiscovery::add_domain_participant_secure(
   DDS::DomainId_t /*domain*/,
   const DDS::DomainParticipantQos& /*qos*/,
   XTypes::TypeLookupService_rch /*tls*/,
-  const OpenDDS::DCPS::RepoId& /*guid*/,
+  const OpenDDS::DCPS::GUID_t& /*guid*/,
   DDS::Security::IdentityHandle /*id*/,
   DDS::Security::PermissionsHandle /*perm*/,
   DDS::Security::ParticipantCryptoHandle /*part_crypto*/)
@@ -2491,11 +2465,7 @@ StaticDiscovery::parse_endpoints(ACE_Configuration_Heap& cf)
                             -1);
         }
       } else if (name == "participant") {
-#ifdef __SUNPRO_CC
-        int count = 0; std::count_if(value.begin(), value.end(), isxdigit, count);
-#else
         const OPENDDS_STRING::difference_type count = std::count_if(value.begin(), value.end(), isxdigit);
-#endif
         if (value.size() != HEX_DIGITS_IN_PARTICIPANT || static_cast<size_t>(count) != HEX_DIGITS_IN_PARTICIPANT) {
           ACE_ERROR_RETURN((LM_ERROR,
                             ACE_TEXT("(%P|%t) ERROR: StaticDiscovery::parse_endpoints ")
@@ -2509,11 +2479,7 @@ StaticDiscovery::parse_endpoints(ACE_Configuration_Heap& cf)
         }
         participant_specified = true;
       } else if (name == "entity") {
-#ifdef __SUNPRO_CC
-        int count = 0; std::count_if(value.begin(), value.end(), isxdigit, count);
-#else
         const OPENDDS_STRING::difference_type count = std::count_if(value.begin(), value.end(), isxdigit);
-#endif
         if (value.size() != HEX_DIGITS_IN_ENTITY || static_cast<size_t>(count) != HEX_DIGITS_IN_ENTITY) {
           ACE_ERROR_RETURN((LM_ERROR,
                             ACE_TEXT("(%P|%t) ERROR: StaticDiscovery::parse_endpoints ")
@@ -2690,7 +2656,7 @@ StaticDiscovery::parse_endpoints(ACE_Configuration_Heap& cf)
     EntityId_t entity_id = EndpointRegistry::build_id(entity,
       (type == Reader) ? ENTITYKIND_USER_READER_WITH_KEY : ENTITYKIND_USER_WRITER_WITH_KEY);
 
-    RepoId id = EndpointRegistry::build_id(domain, participant, entity_id);
+    GUID_t id = EndpointRegistry::build_id(domain, participant, entity_id);
 
     if (DCPS_debug_level > 0) {
       ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) DEBUG: StaticDiscovery::parse_endpoints adding entity with id %C\n"), LogGuid(id).c_str()));
@@ -2763,7 +2729,7 @@ void StaticDiscovery::pre_writer(DataWriterImpl* writer)
 
   const EntityId_t entId =
     EndpointRegistry::build_id(dwId, ENTITYKIND_USER_WRITER_WITH_KEY);
-  const RepoId rid = EndpointRegistry::build_id(dom, partId, entId);
+  const GUID_t rid = EndpointRegistry::build_id(dom, partId, entId);
 
   const EndpointRegistry::WriterMapType::const_iterator iter =
     registry.writer_map.find(rid);
@@ -2793,7 +2759,7 @@ void StaticDiscovery::pre_reader(DataReaderImpl* reader)
 
   const EntityId_t entId =
     EndpointRegistry::build_id(drId, ENTITYKIND_USER_READER_WITH_KEY);
-  const RepoId rid = EndpointRegistry::build_id(dom, partId, entId);
+  const GUID_t rid = EndpointRegistry::build_id(dom, partId, entId);
 
   const EndpointRegistry::ReaderMapType::const_iterator iter =
     registry.reader_map.find(rid);
@@ -2991,7 +2957,7 @@ bool StaticDiscovery::update_topic_qos(const GUID_t& topicId, DDS::DomainId_t do
   return participants_[domainId][participantId]->update_topic_qos(topicId, qos);
 }
 
-GUID_t StaticDiscovery::add_publication(
+bool StaticDiscovery::add_publication(
   DDS::DomainId_t domainId,
   const GUID_t& participantId,
   const GUID_t& topicId,
@@ -3001,8 +2967,7 @@ GUID_t StaticDiscovery::add_publication(
   const DDS::PublisherQos& publisherQos,
   const XTypes::TypeInformation& type_info)
 {
-  return get_part(domainId, participantId)->add_publication(
-    topicId, publication, qos, transInfo, publisherQos, type_info);
+  return get_part(domainId, participantId)->add_publication(topicId, publication, qos, transInfo, publisherQos, type_info);
 }
 
 bool StaticDiscovery::remove_publication(
@@ -3037,7 +3002,7 @@ void StaticDiscovery::update_publication_locators(
   get_part(domainId, partId)->update_publication_locators(dwId, transInfo);
 }
 
-GUID_t StaticDiscovery::add_subscription(
+bool StaticDiscovery::add_subscription(
   DDS::DomainId_t domainId,
   const GUID_t& participantId,
   const GUID_t& topicId,
@@ -3050,9 +3015,15 @@ GUID_t StaticDiscovery::add_subscription(
   const DDS::StringSeq& params,
   const XTypes::TypeInformation& type_info)
 {
-  return get_part(domainId, participantId)->add_subscription(
-    topicId, subscription, qos, transInfo, subscriberQos, filterClassName,
-    filterExpr, params, type_info);
+  return get_part(domainId, participantId)->add_subscription(topicId,
+                                                             subscription,
+                                                             qos,
+                                                             transInfo,
+                                                             subscriberQos,
+                                                             filterClassName,
+                                                             filterExpr,
+                                                             params,
+                                                             type_info);
 }
 
 bool StaticDiscovery::remove_subscription(

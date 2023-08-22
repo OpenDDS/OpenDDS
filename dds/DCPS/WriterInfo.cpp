@@ -53,8 +53,8 @@ WriterInfoListener::writer_removed(WriterInfo&)
 {
 }
 
-WriterInfo::WriterInfo(WriterInfoListener* reader,
-                       const PublicationId& writer_id,
+WriterInfo::WriterInfo(const WriterInfoListener_rch& reader,
+                       const GUID_t& writer_id,
                        const ::DDS::DataWriterQos& writer_qos)
   : last_liveliness_activity_time_(MonotonicTimePoint::now())
   , historic_samples_timer_(NO_TIMER)
@@ -177,7 +177,7 @@ WriterInfo::add_coherent_samples(const SequenceNumber& seq)
 }
 
 void
-WriterInfo::coherent_change(bool group_coherent, const RepoId& publisher_id)
+WriterInfo::coherent_change(bool group_coherent, const GUID_t& publisher_id)
 {
   ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
   group_coherent_ = group_coherent;
@@ -223,13 +223,14 @@ WriterInfo::check_activity(const MonotonicTimePoint& now)
 
   ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
 
+  WriterInfoListener_rch reader = reader_.lock();
+
   // We only need check the liveliness with the non-zero liveliness_lease_duration_.
-  if (state_ == ALIVE && !reader_->liveliness_lease_duration_.is_zero()) {
-    expires_at = last_liveliness_activity_time_ + reader_->liveliness_lease_duration_;
+  if (state_ == ALIVE && reader && !reader->liveliness_lease_duration_.is_zero()) {
+    expires_at = last_liveliness_activity_time_ + reader->liveliness_lease_duration_;
 
     if (expires_at <= now) {
       // let all instances know this write is not alive.
-      WriterInfoListener* reader = reader_;
       guard.release();
       reader->writer_became_dead(*this);
       expires_at = MonotonicTimePoint::max_value;
@@ -243,9 +244,11 @@ void
 WriterInfo::removed()
 {
   ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
-  WriterInfoListener* reader = reader_;
+  WriterInfoListener_rch reader = reader_.lock();
   guard.release();
-  reader->writer_removed(*this);
+  if (reader) {
+    reader->writer_removed(*this);
+  }
 }
 
 #ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
@@ -290,10 +293,11 @@ WriterInfo::set_group_info(const CoherentChangeControl& info)
   ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
   if (!(publisher_id_ == info.publisher_id_)
       || group_coherent_ != info.group_coherent_) {
+    WriterInfoListener_rch reader = reader_.lock();
     ACE_ERROR((LM_ERROR,
                ACE_TEXT("(%P|%t) ERROR: WriterInfo::set_group_info()")
                ACE_TEXT(" reader %C writer %C incorrect coherent info !\n"),
-               LogGuid(reader_->subscription_id_).c_str(),
+               reader ? LogGuid(reader->subscription_id_).c_str() : "",
                LogGuid(writer_id_).c_str()));
   }
 

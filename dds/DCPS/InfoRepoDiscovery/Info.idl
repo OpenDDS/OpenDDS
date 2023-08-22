@@ -43,15 +43,15 @@ module OpenDDS {
       // Attach a DomainParticipant and assert that ownership resides
       // with the called repository.
       boolean attach_participant(in ::DDS::DomainId_t domainId,
-                                 in RepoId            participantId)
+                                 in GUID_t            participantId)
         raises (Invalid_Domain,
                 Invalid_Participant);
 
 
       // Domain participant calls to notify of a new topic
-      TopicStatus assert_topic (out RepoId topicId,
+      TopicStatus assert_topic (out GUID_t topicId,
                                 in ::DDS::DomainId_t domainId,
-                                in RepoId  participantId,
+                                in GUID_t  participantId,
                                 in string          topicName,
                                 in string          DataTypeName,
                                 in ::DDS::TopicQos   qos,
@@ -66,31 +66,36 @@ module OpenDDS {
                               in string          topicName,
                               out string         DataTypeName,
                               out ::DDS::TopicQos  qos,
-                              out RepoId topicId)
+                              out GUID_t topicId)
         raises (Invalid_Domain);
 
 
       // Domain participant calls to remove a topic
       TopicStatus remove_topic (in ::DDS::DomainId_t domainId,
-                                        in RepoId  participantId,
-                                        in RepoId  topicId)
+                                        in GUID_t  participantId,
+                                        in GUID_t  topicId)
         raises (Invalid_Domain,
                 Invalid_Participant,
                 Invalid_Topic);
 
-
+      GUID_t reserve_publication_id(in ::DDS::DomainId_t domainId,
+                                    in GUID_t participantId,
+                                    in GUID_t topicId)
+        raises (Invalid_Domain,
+                Invalid_Participant,
+                Invalid_Topic);
 
       // publisher calls to create new publication
-      // returns the id of the added publication
-      // 0 is an invalid id
-      RepoId add_publication (in ::DDS::DomainId_t domainId,
-                              in RepoId participantId,
-                              in RepoId topicId,
-                              in DataWriterRemote publication,
-                              in ::DDS::DataWriterQos qos,
-                              in TransportLocatorSeq transInfo,
-                              in ::DDS::PublisherQos publisherQos,
-                              in ::DDS::OctetSeq serializedTypeInfo)
+      // returns true on success
+      boolean add_publication (in ::DDS::DomainId_t domainId,
+                               in GUID_t participantId,
+                               in GUID_t topicId,
+                               in GUID_t pubId,
+                               in DataWriterRemote publication,
+                               in ::DDS::DataWriterQos qos,
+                               in TransportLocatorSeq transInfo,
+                               in ::DDS::PublisherQos publisherQos,
+                               in ::DDS::OctetSeq serializedTypeInfo)
         raises (Invalid_Domain,
                 Invalid_Participant,
                 Invalid_Topic);
@@ -98,28 +103,33 @@ module OpenDDS {
 
       // publisher calls to remove a publication
       void remove_publication (in ::DDS::DomainId_t domainId,
-                               in RepoId participantId,
-                               in RepoId publicationId)
+                               in GUID_t participantId,
+                               in GUID_t publicationId)
         raises (Invalid_Domain,
                 Invalid_Participant,
                 Invalid_Publication);
 
-
+      GUID_t reserve_subscription_id(in ::DDS::DomainId_t domainId,
+                                     in GUID_t participantId,
+                                     in GUID_t topicId)
+        raises (Invalid_Domain,
+                Invalid_Participant,
+                Invalid_Topic);
 
       // subscriber calls to create new subscription
-      // returns the id of the added subscription
-      // 0 is an invalid id
-      RepoId add_subscription (in ::DDS::DomainId_t domainId,
-                               in RepoId participantId,
-                               in RepoId topicId,
-                               in DataReaderRemote subscription,
-                               in ::DDS::DataReaderQos qos,
-                               in TransportLocatorSeq transInfo,
-                               in ::DDS::SubscriberQos subscriberQos,
-                               in string filterClassName,
-                               in string filterExpression,
-                               in ::DDS::StringSeq exprParams,
-                               in ::DDS::OctetSeq serializedTypeInfo)
+      // returns true on success.
+      boolean add_subscription (in ::DDS::DomainId_t domainId,
+                                in GUID_t participantId,
+                                in GUID_t topicId,
+                                in GUID_t subId,
+                                in DataReaderRemote subscription,
+                                in ::DDS::DataReaderQos qos,
+                                in TransportLocatorSeq transInfo,
+                                in ::DDS::SubscriberQos subscriberQos,
+                                in string filterClassName,
+                                in string filterExpression,
+                                in ::DDS::StringSeq exprParams,
+                                in ::DDS::OctetSeq serializedTypeInfo)
         raises (Invalid_Domain,
                 Invalid_Participant,
                 Invalid_Topic);
@@ -127,8 +137,8 @@ module OpenDDS {
 
       // subscriber calls to remove a subscription
       void remove_subscription (in ::DDS::DomainId_t domainId,
-                                in RepoId participantId,
-                                in RepoId subscriptionId)
+                                in GUID_t participantId,
+                                in GUID_t subscriptionId)
         raises (Invalid_Domain,
                 Invalid_Participant,
                 Invalid_Subscription);
@@ -146,31 +156,31 @@ module OpenDDS {
 
       // DomainParticipantFactory calls to remove a domain participant
       void remove_domain_participant (in ::DDS::DomainId_t domainId,
-                                      in RepoId participantId)
+                                      in GUID_t participantId)
         raises (Invalid_Domain,
                 Invalid_Participant);
 
       /// Forces associations to dissolve by participant.
       void disassociate_participant(in DDS::DomainId_t domainId,
-                                    in RepoId local_id,
-                                    in RepoId remote_id)
+                                    in GUID_t local_id,
+                                    in GUID_t remote_id)
         raises(Invalid_Domain,
                Invalid_Participant);
 
       /// Forces an association to dissolve by subscription.
       void disassociate_subscription(in DDS::DomainId_t domainId,
-                                     in RepoId participantId,
-                                     in RepoId local_id,
-                                     in RepoId remote_id)
+                                     in GUID_t participantId,
+                                     in GUID_t local_id,
+                                     in GUID_t remote_id)
         raises(Invalid_Domain,
                Invalid_Participant,
                Invalid_Subscription);
 
       /// Forces an association to dissolve by publication.
       void disassociate_publication(in DDS::DomainId_t domainId,
-                                    in RepoId participantId,
-                                    in RepoId local_id,
-                                    in RepoId remote_id)
+                                    in GUID_t participantId,
+                                    in GUID_t local_id,
+                                    in GUID_t remote_id)
         raises(Invalid_Domain,
                Invalid_Participant,
                Invalid_Publication);
@@ -179,16 +189,16 @@ module OpenDDS {
 
       // ignore participant when matching/associating pubs & subs
       void ignore_domain_participant (in ::DDS::DomainId_t domainId,
-                                      in RepoId myParticipantId,
-                                      in RepoId ignoreId)
+                                      in GUID_t myParticipantId,
+                                      in GUID_t ignoreId)
         raises (Invalid_Domain,
                 Invalid_Participant);
 
 
       // ignore topic when matching/associating pubs & subs
       void ignore_topic (in ::DDS::DomainId_t domainId,
-                         in RepoId myParticipantId,
-                         in RepoId ignoreId)
+                         in GUID_t myParticipantId,
+                         in GUID_t ignoreId)
         raises (Invalid_Domain,
                 Invalid_Participant,
                 Invalid_Topic);
@@ -196,8 +206,8 @@ module OpenDDS {
 
       // ignore subscription when matching/associating pubs & subs
       void ignore_subscription (in ::DDS::DomainId_t domainId,
-                                in RepoId myParticipantId,
-                                in RepoId ignoreId)
+                                in GUID_t myParticipantId,
+                                in GUID_t ignoreId)
         raises (Invalid_Domain,
                 Invalid_Participant,
                 Invalid_Subscription);
@@ -205,8 +215,8 @@ module OpenDDS {
 
       // ignore publication when matching/associating pubs & subs
       void ignore_publication (in ::DDS::DomainId_t domainId,
-                               in RepoId myParticipantId,
-                               in RepoId ignoreId)
+                               in GUID_t myParticipantId,
+                               in GUID_t ignoreId)
         raises (Invalid_Domain,
                 Invalid_Participant,
                 Invalid_Publication);
@@ -220,22 +230,22 @@ module OpenDDS {
       // incompatible.
       //
       boolean update_domain_participant_qos (in ::DDS::DomainId_t domain,
-                                          in RepoId participantId,
+                                          in GUID_t participantId,
                                           in ::DDS::DomainParticipantQos qos)
         raises (Invalid_Domain,
                 Invalid_Participant);
 
-      boolean update_topic_qos (in RepoId topicId,
+      boolean update_topic_qos (in GUID_t topicId,
                              in ::DDS::DomainId_t domainId,
-                             in RepoId  participantId,
+                             in GUID_t  participantId,
                              in ::DDS::TopicQos   qos)
         raises (Invalid_Domain,
                 Invalid_Participant,
                 Invalid_Topic);
 
       boolean update_publication_qos (in ::DDS::DomainId_t domainId,
-                                   in RepoId participantId,
-                                   in RepoId publicationId,
+                                   in GUID_t participantId,
+                                   in GUID_t publicationId,
                                    in ::DDS::DataWriterQos qos,
                                    in ::DDS::PublisherQos publisherQos)
         raises (Invalid_Domain,
@@ -243,8 +253,8 @@ module OpenDDS {
                 Invalid_Publication);
 
       boolean update_subscription_qos (in ::DDS::DomainId_t domainId,
-                                    in RepoId participantId,
-                                    in RepoId subscriptionId,
+                                    in GUID_t participantId,
+                                    in GUID_t subscriptionId,
                                     in ::DDS::DataReaderQos qos,
                                     in ::DDS::SubscriberQos subscriberQos)
         raises (Invalid_Domain,
@@ -252,8 +262,8 @@ module OpenDDS {
                 Invalid_Subscription);
 
       boolean update_subscription_params(in ::DDS::DomainId_t domainId,
-                                         in RepoId participantId,
-                                         in RepoId subscriptionId,
+                                         in GUID_t participantId,
+                                         in GUID_t subscriptionId,
                                          in ::DDS::StringSeq exprParams)
         raises (Invalid_Domain,
                 Invalid_Participant,

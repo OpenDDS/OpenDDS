@@ -3,20 +3,21 @@
 #include <dds/DdsDcpsPublicationC.h>
 #include <dds/DCPS/Service_Participant.h>
 
-DataWriterListenerImpl::DataWriterListenerImpl()
+DataWriterListenerImpl::DataWriterListenerImpl(const OpenDDS::DCPS::String& name)
   : num_liveliness_lost_callbacks_(0)
+  , name_(name)
 {}
 
 DataWriterListenerImpl::~DataWriterListenerImpl()
 {}
 
-void DataWriterListenerImpl::on_liveliness_lost(::DDS::DataWriter_ptr writer,
+void DataWriterListenerImpl::on_liveliness_lost(::DDS::DataWriter_ptr,
                                                 const ::DDS::LivelinessLostStatus& status)
 {
   ++num_liveliness_lost_callbacks_;
   ACE_DEBUG((LM_INFO,
-              ACE_TEXT("(%P|%t) DataWriterListenerImpl::on_liveliness_lost %@ %d\n"),
-              writer, (int) num_liveliness_lost_callbacks_.value()));
+             ACE_TEXT("(%P|%t) DataWriterListenerImpl::on_liveliness_lost %C %d\n"),
+             name_.c_str(), (int) num_liveliness_lost_callbacks_.load()));
   ACE_DEBUG((LM_INFO,
               ACE_TEXT("(%P|%t)    total_count=%d total_count_change=%d\n"),
               status.total_count, status.total_count_change));

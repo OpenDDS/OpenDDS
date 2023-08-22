@@ -1,6 +1,4 @@
 /*
- *
- *
  * Distributed under the OpenDDS License.
  * See: http://www.opendds.org/license.html
  */
@@ -8,19 +6,18 @@
 #ifndef OPENDDS_DCPS_GROUPRAKEDATA_H
 #define OPENDDS_DCPS_GROUPRAKEDATA_H
 
-#include /**/ "ace/pre.h"
-#include "dcps_export.h"
+#include <ace/config-macros.h>
+#ifndef ACE_LACKS_PRAGMA_ONCE
+#  pragma once
+#endif
 
-#if !defined (ACE_LACKS_PRAGMA_ONCE)
-# pragma once
-#endif /* ACE_LACKS_PRAGMA_ONCE */
-
-#include "dds/DdsDcpsSubscriptionC.h"
-#include "dds/DdsDcpsInfrastructureC.h"
 #include "RakeData.h"
 #include "Comparator_T.h"
-
 #include "PoolAllocator.h"
+#include "dcps_export.h"
+
+#include <dds/DdsDcpsSubscriptionC.h>
+#include <dds/DdsDcpsInfrastructureC.h>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 

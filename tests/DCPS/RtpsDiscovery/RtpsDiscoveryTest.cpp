@@ -120,7 +120,7 @@ void set_qos(OctetSeq& qos, CORBA::Octet value)
 
 bool read_participant_bit(const Subscriber_var& bit_sub,
                           const DomainParticipant_var& dp,
-                          const OpenDDS::DCPS::RepoId& other_dp_repo_id,
+                          const OpenDDS::DCPS::GUID_t& other_dp_repo_id,
                           int user_data)
 {
   OpenDDS::DCPS::Discovery_rch disc =
@@ -165,7 +165,7 @@ bool read_participant_bit(const Subscriber_var& bit_sub,
   for (CORBA::ULong i = 0; i < data.length(); ++i) {
     if (infos[i].valid_data) {
       ++num_valid;
-      OpenDDS::DCPS::RepoId repo_id = OpenDDS::DCPS::bit_key_to_repo_id(data[i].key);
+      OpenDDS::DCPS::GUID_t repo_id = OpenDDS::DCPS::bit_key_to_guid(data[i].key);
 
       ACE_DEBUG((LM_DEBUG,
                  ACE_TEXT("%P ")
@@ -345,7 +345,7 @@ DataReader_var create_data_reader(const DomainParticipant_var& dp)
 
 bool read_publication_bit(const Subscriber_var& bit_sub,
                           const DomainParticipant_var& subscriber,
-                          const OpenDDS::DCPS::RepoId& publisher_repo_id,
+                          const OpenDDS::DCPS::GUID_t& publisher_repo_id,
                           InstanceHandle_t& handle,
                           int user_data,
                           int topic_data,
@@ -408,8 +408,8 @@ bool read_publication_bit(const Subscriber_var& bit_sub,
     if (infos[i].valid_data) {
       ++num_valid;
 
-      OpenDDS::DCPS::RepoId publication_repo_id = OpenDDS::DCPS::bit_key_to_repo_id(data[i].key);
-      OpenDDS::DCPS::RepoId repo_id = OpenDDS::DCPS::bit_key_to_repo_id(data[i].participant_key);
+      OpenDDS::DCPS::GUID_t publication_repo_id = OpenDDS::DCPS::bit_key_to_guid(data[i].key);
+      OpenDDS::DCPS::GUID_t repo_id = OpenDDS::DCPS::bit_key_to_guid(data[i].participant_key);
 
       ACE_DEBUG((LM_DEBUG,
                  "%P Read Publication BIT with key: %C and handle %d\n"
@@ -474,7 +474,7 @@ bool read_publication_bit(const Subscriber_var& bit_sub,
 
 bool read_subscription_bit(const Subscriber_var& bit_sub,
                            const DomainParticipant_var& publisher,
-                           const OpenDDS::DCPS::RepoId& subscriber_repo_id,
+                           const OpenDDS::DCPS::GUID_t& subscriber_repo_id,
                            InstanceHandle_t& handle,
                            int user_data,
                            int topic_data,
@@ -534,8 +534,8 @@ bool read_subscription_bit(const Subscriber_var& bit_sub,
     if (infos[i].valid_data) {
       ++num_valid;
 
-      OpenDDS::DCPS::RepoId subscription_repo_id = OpenDDS::DCPS::bit_key_to_repo_id(data[i].key);
-      OpenDDS::DCPS::RepoId repo_id = OpenDDS::DCPS::bit_key_to_repo_id(data[i].participant_key);
+      OpenDDS::DCPS::GUID_t subscription_repo_id = OpenDDS::DCPS::bit_key_to_guid(data[i].key);
+      OpenDDS::DCPS::GUID_t repo_id = OpenDDS::DCPS::bit_key_to_guid(data[i].participant_key);
 
       ACE_DEBUG((LM_DEBUG,
                  "%P Read Subscription BIT with key: %C and handle %d\n"
@@ -640,7 +640,7 @@ bool check_discovered_participants(DomainParticipant_var& dp,
           false);
       }
 
-      OpenDDS::DCPS::RepoId repo_id = OpenDDS::DCPS::bit_key_to_repo_id(data.key);
+      OpenDDS::DCPS::GUID_t repo_id = OpenDDS::DCPS::bit_key_to_guid(data.key);
       if (dp_impl->lookup_handle(repo_id) != part_handles[0]) {
         ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("ERROR: %P discovered participant ")
                                     ACE_TEXT("BIT key could not be converted ")
@@ -663,7 +663,7 @@ bool check_discovered_participants(DomainParticipant_var& dp,
 bool run_test(DomainParticipant_var& dp_sub,
               DomainParticipant_var& dp_pub)
 {
-  OpenDDS::DCPS::RepoId sub_repo_id, pub_repo_id;
+  OpenDDS::DCPS::GUID_t sub_repo_id, pub_repo_id;
 
   {
     OpenDDS::DCPS::DomainParticipantImpl* dp_impl =

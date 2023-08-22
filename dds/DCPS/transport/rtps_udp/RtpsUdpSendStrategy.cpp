@@ -10,19 +10,15 @@
 #include "RtpsUdpInst.h"
 #include "RtpsUdpTransport.h"
 
+#include <dds/DdsDcpsGuidTypeSupportImpl.h>
 #include <dds/DCPS/LogAddr.h>
-
-#include "dds/DCPS/transport/framework/NullSynchStrategy.h"
-#include "dds/DCPS/transport/framework/TransportCustomizedElement.h"
-#include "dds/DCPS/transport/framework/TransportSendElement.h"
-
-#include "dds/DCPS/RTPS/MessageUtils.h"
-#include "dds/DCPS/RTPS/MessageParser.h"
-#include "dds/DCPS/RTPS/RtpsCoreTypeSupportImpl.h"
-
-#include "dds/DCPS/Serializer.h"
-
-#include "dds/DdsDcpsGuidTypeSupportImpl.h"
+#include <dds/DCPS/Serializer.h>
+#include <dds/DCPS/RTPS/MessageUtils.h>
+#include <dds/DCPS/RTPS/MessageParser.h>
+#include <dds/DCPS/RTPS/RtpsCoreTypeSupportImpl.h>
+#include <dds/DCPS/transport/framework/NullSynchStrategy.h>
+#include <dds/DCPS/transport/framework/TransportCustomizedElement.h>
+#include <dds/DCPS/transport/framework/TransportSendElement.h>
 
 #include <cstring>
 
@@ -44,7 +40,7 @@ RtpsUdpSendStrategy::RtpsUdpSendStrategy(RtpsUdpDataLink* link,
     link_(link),
     override_dest_(0),
     override_single_dest_(0),
-    max_message_size_(link->config().max_message_size_),
+    max_message_size_(link->config()->max_message_size_),
     rtps_header_db_(RTPS::RTPSHDR_SZ, ACE_Message_Block::MB_DATA,
                     rtps_header_data_, 0, 0, ACE_Message_Block::DONT_DELETE, 0),
     rtps_header_mb_(&rtps_header_db_, ACE_Message_Block::DONT_DELETE),
@@ -288,9 +284,19 @@ RtpsUdpSendStrategy::send_single_i(const iovec iov[], int n,
 
   const ACE_SOCK_Dgram& socket = choose_send_socket(addr);
 
+  RtpsUdpTransport_rch transport = link_->transport();
+  if (!transport) {
+    return 0;
+  }
+
+  RtpsUdpInst_rch cfg = transport->config();
+  if (!cfg) {
+    return 0;
+  }
+
 #ifdef OPENDDS_TESTING_FEATURES
   ssize_t total_length;
-  if (link_->transport().config().should_drop(iov, n, total_length)) {
+  if (transport->message_dropper().should_drop(iov, n, total_length)) {
     return total_length;
   }
 #endif
@@ -312,10 +318,10 @@ RtpsUdpSendStrategy::send_single_i(const iovec iov[], int n,
   const ssize_t result = socket.send(iov, n, addr.to_addr());
 #endif
   if (result < 0) {
-    if (link_->transport().config().count_messages()) {
-      const InternalMessageCountKey key(addr, MCK_RTPS, addr == NetworkAddress(link_->transport().config().rtps_relay_address()));
-      ACE_GUARD_RETURN(ACE_Thread_Mutex, g, link_->transport().transport_statistics_mutex_, -1);
-      link_->transport().transport_statistics_.message_count[key].send_fail(result);
+    if (transport->transport_statistics_.count_messages()) {
+      const InternalMessageCountKey key(addr, MCK_RTPS, addr == NetworkAddress(cfg->rtps_relay_address()));
+      ACE_GUARD_RETURN(ACE_Thread_Mutex, g, transport->transport_statistics_mutex_, -1);
+      transport->transport_statistics_.message_count[key].send_fail(result);
     }
     const int err = errno;
     if (err != ENETUNREACH || !network_is_unreachable_) {
@@ -336,10 +342,10 @@ RtpsUdpSendStrategy::send_single_i(const iovec iov[], int n,
     // Reset errno since the rest of framework expects it.
     errno = err;
   } else {
-    if (link_->transport().config().count_messages()) {
-      const InternalMessageCountKey key(addr, MCK_RTPS, addr == NetworkAddress(link_->transport().config().rtps_relay_address()));
-      ACE_GUARD_RETURN(ACE_Thread_Mutex, g, link_->transport().transport_statistics_mutex_, -1);
-      link_->transport().transport_statistics_.message_count[key].send(result);
+    if (transport->transport_statistics_.count_messages()) {
+      const InternalMessageCountKey key(addr, MCK_RTPS, addr == NetworkAddress(cfg->rtps_relay_address()));
+      ACE_GUARD_RETURN(ACE_Thread_Mutex, g, transport->transport_statistics_mutex_, -1);
+      transport->transport_statistics_.message_count[key].send(result);
     }
     network_is_unreachable_ = false;
   }
@@ -376,7 +382,7 @@ RtpsUdpSendStrategy::security_config() const
 }
 
 void
-RtpsUdpSendStrategy::encode_payload(const RepoId& pub_id,
+RtpsUdpSendStrategy::encode_payload(const GUID_t& pub_id,
                                     Message_Block_Ptr& payload,
                                     RTPS::SubmessageSeq& submessages)
 {
@@ -639,10 +645,10 @@ RtpsUdpSendStrategy::encode_submessages(const ACE_Message_Block* plain,
   RTPS::MessageParser parser(*plain);
   bool ok = parser.parseHeader();
 
-  RepoId sender = GUID_UNKNOWN;
+  GUID_t sender = GUID_UNKNOWN;
   assign(sender.guidPrefix, link_->local_prefix());
 
-  RepoId receiver = GUID_UNKNOWN;
+  GUID_t receiver = GUID_UNKNOWN;
 
   OPENDDS_VECTOR(Chunk) replacements;
 

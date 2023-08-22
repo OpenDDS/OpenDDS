@@ -40,13 +40,15 @@ class SimpleDataReader : public TransportReceiveListener, public TransportClient
 {
 public:
 
-  explicit SimpleDataReader(const RepoId& sub_id)
+  explicit SimpleDataReader(const GUID_t& sub_id)
     : done_(false)
     , sub_id_(sub_id)
     , pub_id_(GUID_UNKNOWN)
     , seq_(SequenceNumber::ZERO())
     , control_msg_count_(0)
-  {}
+  {
+    TransportClient::set_guid(sub_id_);
+  }
 
   virtual ~SimpleDataReader() {}
 
@@ -191,7 +193,7 @@ public:
   // Implementing TransportClient
   bool check_transport_qos(const TransportInst&)
     { return true; }
-  RepoId get_repo_id() const
+  GUID_t get_guid() const
     { return sub_id_; }
   DDS::DomainId_t domain_id() const
     { return 0; }
@@ -202,8 +204,8 @@ public:
   using TransportClient::disassociate;
 
   bool done_;
-  const RepoId sub_id_;
-  RepoId pub_id_;
+  const GUID_t sub_id_;
+  GUID_t pub_id_;
   SequenceNumber seq_;
   int control_msg_count_;
 };
@@ -250,7 +252,7 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 #endif
     ACE_INET_Addr addr(port, ACE_TEXT_ALWAYS_CHAR(host.c_str()));
     rtps_inst->local_address(OpenDDS::DCPS::NetworkAddress(addr));
-    rtps_inst->datalink_release_delay_ = 0;
+    rtps_inst->datalink_release_delay(0);
 
     TransportConfig_rch cfg = TheTransportRegistry->create_config("cfg");
     cfg->instances_.push_back(inst);

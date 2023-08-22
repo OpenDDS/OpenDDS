@@ -106,20 +106,23 @@ public:
     }
   }
 
+  /// Add to 'guids' the GUIDs of participants that should receive messages based on 'partitions'.
+  /// If 'allowed' is empty, it has no effect. Otherwise all entires added to 'guids' must be in 'allowed'.
   template <typename T>
-  void lookup(GuidSet& guids, const T& partitions) const
+  void lookup(GuidSet& guids, const T& partitions, const GuidSet& allowed) const
   {
+    const auto limits = allowed.empty() ? nullptr : &allowed;
     ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
 
     for (const auto& part : partitions) {
       if (config_.allow_empty_partition() || !part.empty()) {
-        partition_index_.lookup(part, guids);
+        partition_index_.lookup(part, guids, limits);
       }
     }
   }
 
 private:
-  void remove_from_cache(const OpenDDS::DCPS::GUID_t guid)
+  void remove_from_cache(const OpenDDS::DCPS::GUID_t& guid)
   {
     // Invalidate the cache.
     const OpenDDS::DCPS::GUID_t prefix = make_id(guid, OpenDDS::DCPS::ENTITYID_UNKNOWN);
@@ -188,6 +191,7 @@ private:
       relay_partitions[idx].relay_id(config_.relay_id());
       relay_partitions[idx].slot(static_cast<CORBA::ULong>(slot));
       relay_partitions[idx].partitions().assign(slots_[slot].begin(), slots_[slot].end());
+      ++idx;
     }
   }
 

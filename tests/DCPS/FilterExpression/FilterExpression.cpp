@@ -2,11 +2,15 @@
 #include "string.h" // yard references strncpy() without including this
 
 #include "FilterStructTypeSupportImpl.h"
+#include "FilterStructDynamicTypeSupport.h"
 
 #include "dds/DCPS/Definitions.h"
 #include "dds/DCPS/FilterExpressionGrammar.h"
 #include "dds/DCPS/yard/yard_parser.hpp"
 #include "dds/DCPS/FilterEvaluator.h"
+
+#include "dds/DCPS/XTypes/DynamicDataFactory.h"
+#include "dds/DCPS/XTypes/DynamicSample.h"
 
 #include "ace/OS_main.h"
 #include "ace/OS_NS_string.h"
@@ -16,19 +20,96 @@
 #include <cstdio>
 #include <iostream>
 
-template<size_t N, typename T>
-bool doEvalTest(const char* (&input)[N], bool expected, const T& sample,
-                const DDS::StringSeq& params) {
+DDS::DynamicData_var copy(const TBTD& sample, DDS::DynamicType* type)
+{
+  using namespace DDS;
+  DynamicData_var dd = DynamicDataFactory::get_instance()->create_data(type);
+  dd->set_string_value(dd->get_member_id_by_name("name"), sample.name);
+
+  DynamicData_var nested;
+  dd->get_complex_value(nested, dd->get_member_id_by_name("durability"));
+  nested->set_int32_value(nested->get_member_id_by_name("kind"), static_cast<ACE_CDR::Long>(sample.durability.kind));
+
+  dd->get_complex_value(nested, dd->get_member_id_by_name("durability_service"));
+  DynamicData_var duration;
+  nested->get_complex_value(duration, nested->get_member_id_by_name("service_cleanup_delay"));
+  duration->set_int32_value(duration->get_member_id_by_name("sec"), sample.durability_service.service_cleanup_delay.sec);
+  duration->set_uint32_value(duration->get_member_id_by_name("nanosec"), sample.durability_service.service_cleanup_delay.nanosec);
+
+  nested->set_int32_value(nested->get_member_id_by_name("history_kind"), static_cast<ACE_CDR::Long>(sample.durability_service.history_kind));
+  nested->set_int32_value(nested->get_member_id_by_name("history_depth"), sample.durability_service.history_depth);
+  nested->set_int32_value(nested->get_member_id_by_name("max_samples"), sample.durability_service.max_samples);
+  nested->set_int32_value(nested->get_member_id_by_name("max_instances"), sample.durability_service.max_instances);
+  nested->set_int32_value(nested->get_member_id_by_name("max_samples_per_instance"), sample.durability_service.max_samples_per_instance);
+  return dd;
+}
+
+template <typename T>
+ACE_Message_Block* serialize(const OpenDDS::DCPS::Encoding& enc, const T& sample)
+{
+  using namespace OpenDDS::DCPS;
+  const EncapsulationHeader encapsulation(enc, APPENDABLE);
+  size_t sz = EncapsulationHeader::serialized_size;
+  serialized_size(enc, sz, sample);
+  Message_Block_Ptr mb(new ACE_Message_Block(sz));
+  Serializer ser(mb.get(), enc);
+  if (!(ser << encapsulation) || !(ser << sample)) {
+    return 0;
+  }
+  return mb.release();
+}
+
+using OpenDDS::DCPS::TypeSupportImpl;
+template <size_t N, typename T>
+bool doEvalTest(const char* (&input)[N], bool expected, const T& sample, const DDS::StringSeq& params,
+                const TypeSupportImpl& tsStatic, const TypeSupportImpl& tsDynamic)
+{
+  ACE_UNUSED_ARG(tsStatic);
+  ACE_UNUSED_ARG(tsDynamic);
+  using namespace OpenDDS::DCPS;
+  static const Encoding enc_xcdr2(Encoding::KIND_XCDR2);
   bool pass = true;
   for (size_t i = 0; i < N; ++i) {
     try {
-      OpenDDS::DCPS::FilterEvaluator fe(input[i], false);
+      FilterEvaluator fe(input[i], false);
       const bool result = fe.eval(sample, params);
       if (result != expected) pass = false;
       std::cout << input[i] << " => " << result << std::endl;
     } catch (const std::exception& e) {
       if (expected) pass = false;
       std::cout << input[i] << " => exception " << e.what() << std::endl;
+    }
+    try {
+      Message_Block_Ptr amb(serialize(enc_xcdr2, sample));
+      FilterEvaluator fe(input[i], false);
+      const bool result = fe.eval(amb.get(), enc_xcdr2, tsStatic, params);
+      if (result != expected) pass = false;
+      std::cout << input[i] << " =xcdr=> " << result << std::endl;
+    } catch (const std::exception& e) {
+      if (expected) pass = false;
+      std::cout << input[i] << " =xcdr=> exception " << e.what() << std::endl;
+    }
+    try {
+      DDS::DynamicType_var dyntype = tsDynamic.get_type();
+      DDS::DynamicData_var dynamic = copy(sample, dyntype);
+      OpenDDS::XTypes::DynamicSample dsample(dynamic);
+      FilterEvaluator fe(input[i], false);
+      const bool result = fe.eval(dsample, params);
+      if (result != expected) pass = false;
+      std::cout << input[i] << " =dynamic=> " << result << std::endl;
+    } catch (const std::exception& e) {
+      if (expected) pass = false;
+      std::cout << input[i] << " =dynamic=> exception " << e.what() << std::endl;
+    }
+    try {
+      Message_Block_Ptr amb(serialize(enc_xcdr2, sample));
+      FilterEvaluator fe(input[i], false);
+      const bool result = fe.eval(amb.get(), enc_xcdr2, tsDynamic, params);
+      if (result != expected) pass = false;
+      std::cout << input[i] << " =dynamic/xcdr=> " << result << std::endl;
+    } catch (const std::exception& e) {
+      if (expected) pass = false;
+      std::cout << input[i] << " =dynamic/xcdr=> exception " << e.what() << std::endl;
     }
   }
   return pass;
@@ -41,9 +122,13 @@ bool testEval() {
     TBTD sample;
     sample.name = "Adam";
     sample.durability.kind = DDS::PERSISTENT_DURABILITY_QOS;
+    sample.durability_service.history_kind = DDS::KEEP_LAST_HISTORY_QOS;
     sample.durability_service.history_depth = 15;
     sample.durability_service.service_cleanup_delay.sec = 0;
     sample.durability_service.service_cleanup_delay.nanosec = 10;
+    sample.durability_service.max_samples = 0;
+    sample.durability_service.max_instances = 0;
+    sample.durability_service.max_samples_per_instance = 0;
 
     DDS::StringSeq params;
     params.length(1);
@@ -65,8 +150,10 @@ bool testEval() {
                                          "MOD(durability_service.history_depth,4) = 0"};
 
     std::cout << std::boolalpha;
-    bool ok = doEvalTest(filters_pass, true, sample, params);
-    ok &= doEvalTest(filters_fail, false, sample, params);
+    TBTDTypeSupportImpl tsStat;
+    DummyTypeSupport tsDyn;
+    bool ok = doEvalTest(filters_pass, true, sample, params, tsStat, tsDyn);
+    ok &= doEvalTest(filters_fail, false, sample, params, tsStat, tsDyn);
     return ok;
 
   } catch (const CORBA::BAD_PARAM&) {

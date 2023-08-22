@@ -8,6 +8,8 @@
 #ifndef OPENDDS_DCPS_TIME_HELPER_H
 #define OPENDDS_DCPS_TIME_HELPER_H
 
+#include "PoolAllocator.h"
+
 #include <dds/DdsDcpsCoreC.h>
 #include <dds/DdsDcpsInfoUtilsC.h>
 
@@ -98,6 +100,9 @@ ACE_INLINE OpenDDS_Dcps_Export
 bool operator>=(const DDS::Time_t& t1, const DDS::Time_t& t2);
 
 ACE_INLINE OpenDDS_Dcps_Export
+DDS::Time_t operator+(const DDS::Time_t& t1, const DDS::Duration_t& d1);
+
+ACE_INLINE OpenDDS_Dcps_Export
 DDS::Duration_t operator-(const DDS::Time_t& t1, const DDS::Time_t& t2);
 
 ACE_INLINE OpenDDS_Dcps_Export
@@ -108,6 +113,11 @@ DDS::Duration_t operator-(const MonotonicTime_t& t1, const MonotonicTime_t& t2);
 
 ACE_INLINE OpenDDS_Dcps_Export
 bool operator<(const MonotonicTime_t& t1, const MonotonicTime_t& t2);
+
+#ifndef OPENDDS_SAFETY_PROFILE
+ACE_INLINE OpenDDS_Dcps_Export
+bool operator==(const MonotonicTime_t& t1, const MonotonicTime_t& t2);
+#endif
 
 ACE_INLINE OpenDDS_Dcps_Export
 ACE_UINT32 uint32_fractional_seconds_to_nanoseconds(ACE_UINT32 fraction);
@@ -126,6 +136,18 @@ bool is_infinite(const DDS::Duration_t& value);
 
 ACE_INLINE OpenDDS_Dcps_Export
 const MonotonicTime_t& monotonic_time_zero();
+
+ACE_INLINE OpenDDS_Dcps_Export
+DDS::Duration_t make_duration_t(int sec, unsigned long nanosec);
+
+ACE_INLINE OpenDDS_Dcps_Export
+String to_dds_string(const DDS::Duration_t& duration);
+
+ACE_INLINE OpenDDS_Dcps_Export
+bool from_dds_string(const String& str, DDS::Duration_t& duration);
+
+ACE_INLINE OpenDDS_Dcps_Export
+DDS::Time_t make_time_t(int sec, unsigned long nanosec);
 
 } // namespace DCPS
 } // namespace OpenDDS

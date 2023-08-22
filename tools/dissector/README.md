@@ -306,8 +306,8 @@ To create an ITL file from your IDL files:
 
 Type information is exported using Intermediate Type Language (ITL).
 For more information, see
-  [https://github.com/objectcomputing/OpenDDS/tree/master/tools/IntermediateTypeLang](
-  https://github.com/objectcomputing/OpenDDS/tree/master/tools/IntermediateTypeLang)
+  [https://github.com/OpenDDS/OpenDDS/tree/master/tools/IntermediateTypeLang](
+  https://github.com/OpenDDS/OpenDDS/tree/master/tools/IntermediateTypeLang)
 
 <a name="sample-dissection-filtering"></a>
 ### Using Display Filters with Samples

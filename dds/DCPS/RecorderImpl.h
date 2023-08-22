@@ -72,7 +72,6 @@ public:
 
   // Implement TransportClient
   virtual bool check_transport_qos(const TransportInst& inst);
-  virtual RepoId get_repo_id() const;
   DDS::DomainId_t domain_id() const { return this->domain_id_; }
   virtual CORBA::Long get_priority_value(const AssociationData& data) const;
 
@@ -84,8 +83,9 @@ public:
 
   // Implement DataReaderCallbacks
 
-  virtual void add_association(const RepoId&            yourId,
-                               const WriterAssociation& writer,
+  virtual void set_subscription_id(const GUID_t& guid);
+
+  virtual void add_association(const WriterAssociation& writer,
                                bool                     active);
 
   virtual void remove_associations(const WriterIdSeq& writers,
@@ -93,17 +93,17 @@ public:
 
   virtual void update_incompatible_qos(const IncompatibleQosStatus& status);
 
-  virtual void signal_liveliness(const RepoId& remote_participant);
+  virtual void signal_liveliness(const GUID_t& remote_participant);
 
   void remove_all_associations();
 
 #ifndef OPENDDS_SAFETY_PROFILE
-  void add_to_dynamic_type_map(const PublicationId& pub_id, const XTypes::TypeIdentifier& ti);
+  void add_to_dynamic_type_map(const GUID_t& pub_id, const XTypes::TypeIdentifier& ti);
 #endif
 
 #if !defined (DDS_HAS_MINIMUM_BIT)
   // implement Recoder
-  virtual DDS::ReturnCode_t repoid_to_bit_key(const DCPS::RepoId&     id,
+  virtual DDS::ReturnCode_t repoid_to_bit_key(const DCPS::GUID_t&     id,
                                               DDS::BuiltinTopicKey_t& key);
 #endif
   /**
@@ -132,15 +132,15 @@ public:
 
   virtual DDS::InstanceHandle_t get_instance_handle();
 
-  virtual void register_for_writer(const RepoId& /*participant*/,
-                                   const RepoId& /*readerid*/,
-                                   const RepoId& /*writerid*/,
+  virtual void register_for_writer(const GUID_t& /*participant*/,
+                                   const GUID_t& /*readerid*/,
+                                   const GUID_t& /*writerid*/,
                                    const TransportLocatorSeq& /*locators*/,
                                    DiscoveryListener* /*listener*/);
 
-  virtual void unregister_for_writer(const RepoId& /*participant*/,
-                                     const RepoId& /*readerid*/,
-                                     const RepoId& /*writerid*/);
+  virtual void unregister_for_writer(const GUID_t& /*participant*/,
+                                     const GUID_t& /*readerid*/,
+                                     const GUID_t& /*writerid*/);
 
   virtual WeakRcHandle<ICE::Endpoint> get_ice_endpoint() { return WeakRcHandle<ICE::Endpoint>(); }
 
@@ -187,7 +187,7 @@ private:
 
   ACE_Recursive_Thread_Mutex publication_handle_lock_;
 
-  typedef OPENDDS_MAP_CMP(RepoId, DDS::InstanceHandle_t, GUID_tKeyLessThan) RepoIdToHandleMap;
+  typedef OPENDDS_MAP_CMP(GUID_t, DDS::InstanceHandle_t, GUID_tKeyLessThan) RepoIdToHandleMap;
   RepoIdToHandleMap id_to_handle_map_;
 
   DDS::RequestedIncompatibleQosStatus requested_incompatible_qos_status_;
@@ -198,7 +198,7 @@ private:
   bool is_bit_;
 
   /// publications writing to this reader.
-  typedef OPENDDS_MAP_CMP(PublicationId, RcHandle<WriterInfo>,
+  typedef OPENDDS_MAP_CMP(GUID_t, RcHandle<WriterInfo>,
                    GUID_tKeyLessThan) WriterMapType;
   WriterMapType writers_;
 
@@ -206,7 +206,7 @@ private:
   ACE_RW_Thread_Mutex writers_lock_;
 
 #ifndef OPENDDS_SAFETY_PROFILE
-  typedef OPENDDS_MAP(PublicationId, DDS::DynamicType_var) DynamicTypeByPubId;
+  typedef OPENDDS_MAP(GUID_t, DDS::DynamicType_var) DynamicTypeByPubId;
   DynamicTypeByPubId dt_map_;
 #endif
   bool check_encap_;

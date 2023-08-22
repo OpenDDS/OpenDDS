@@ -33,23 +33,13 @@ DataWriterRemoteImpl::detach_parent()
 }
 
 void
-DataWriterRemoteImpl::add_association(const RepoId& yourId,
-                                      const ReaderAssociation& reader,
+DataWriterRemoteImpl::add_association(const ReaderAssociation& reader,
                                       bool active)
 {
-  if (DCPS_debug_level) {
-    LogGuid writer_log(yourId);
-    LogGuid reader_log(reader.readerId);
-    ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) DataWriterRemoteImpl::add_association - ")
-               ACE_TEXT("local %C remote %C\n"),
-               writer_log.c_str(),
-               reader_log.c_str()));
-  }
-
   // the local copy of parent_ is necessary to prevent race condition
   RcHandle<DataWriterCallbacks> parent = parent_.lock();
   if (parent.in()) {
-    parent->add_association(yourId, reader, active);
+    parent->add_association(reader, active);
   }
 }
 
@@ -76,7 +66,7 @@ DataWriterRemoteImpl::update_incompatible_qos(
 }
 
 void
-DataWriterRemoteImpl::update_subscription_params(const RepoId& readerId,
+DataWriterRemoteImpl::update_subscription_params(const GUID_t& readerId,
                                                  const DDS::StringSeq& params)
 {
   // the local copy of parent_ is necessary to prevent race condition

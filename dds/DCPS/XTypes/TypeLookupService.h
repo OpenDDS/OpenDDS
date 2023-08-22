@@ -52,6 +52,7 @@ public:
   DDS::DynamicType_ptr complete_to_dynamic(const CompleteTypeObject& cto, const DCPS::GUID_t& guid);
   void remove_guid_from_dynamic_map(const DCPS::GUID_t& guid);
 
+  bool has_complete(const TypeIdentifier& ti) const;
   DDS::DynamicType_ptr type_identifier_to_dynamic(const TypeIdentifier& ti, const DCPS::GUID_t& guid);
 #endif // OPENDDS_SAFETY_PROFILE
 
@@ -71,6 +72,7 @@ public:
 
   /// For caching and retrieving TypeInformation of remote endpoints
   void cache_type_info(const DDS::BuiltinTopicKey_t& key, const TypeInformation& type_info);
+  void clear_type_info(const DDS::BuiltinTopicKey_t& key);
   const TypeInformation& get_type_info(const DDS::BuiltinTopicKey_t& key) const;
 
 private:

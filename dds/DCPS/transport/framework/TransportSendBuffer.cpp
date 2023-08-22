@@ -34,7 +34,7 @@ TransportSendBuffer::~TransportSendBuffer()
 }
 
 void
-TransportSendBuffer::retain_all(const RepoId&)
+TransportSendBuffer::retain_all(const GUID_t&)
 {
 }
 
@@ -170,7 +170,7 @@ SingleSendBuffer::remove_i(BufferMap::iterator buffer_iter, BufferVec& removed)
 }
 
 void
-SingleSendBuffer::retain_all(const RepoId& pub_id)
+SingleSendBuffer::retain_all(const GUID_t& pub_id)
 {
   if (Transport_debug_level > 5) {
     LogGuid logger(pub_id);
@@ -220,7 +220,7 @@ SingleSendBuffer::retain_all(const RepoId& pub_id)
 }
 
 RemoveResult
-SingleSendBuffer::retain_buffer(const RepoId& pub_id, BufferType& buffer)
+SingleSendBuffer::retain_buffer(const GUID_t& pub_id, BufferType& buffer)
 {
   TransportQueueElement::MatchOnPubId match(pub_id);
   PacketRemoveVisitor visitor(match,
@@ -268,7 +268,7 @@ SingleSendBuffer::insert(SequenceNumber sequence,
 
   if (queue && queue->size() == 1) {
     const TransportQueueElement* elt = queue->peek();
-    const RepoId subId = elt->subscription_id();
+    const GUID_t subId = elt->subscription_id();
     const ACE_Message_Block* msg = elt->msg();
     if (msg && subId != GUID_UNKNOWN &&
         !DataSampleHeader::test_flag(HISTORIC_SAMPLE_FLAG, msg)) {
@@ -365,7 +365,6 @@ SingleSendBuffer::check_capacity_i(BufferVec& removed)
       ));
     }
 
-    destinations_.erase(it->first);
     remove_i(it, removed);
   }
 }
@@ -392,7 +391,7 @@ SingleSendBuffer::resend_i(const SequenceRange& range, DisjointSequence* gaps)
 
 bool
 SingleSendBuffer::resend_i(const SequenceRange& range, DisjointSequence* gaps,
-                           const RepoId& destination)
+                           const GUID_t& destination)
 {
   //Special case, nak to make sure it has all history
   if (buffers_.empty()) throw std::exception();

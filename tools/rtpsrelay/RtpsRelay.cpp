@@ -18,6 +18,7 @@
 #include "RelayStatusReporter.h"
 #include "RelayThreadMonitor.h"
 #include "SpdpReplayListener.h"
+#include "StatisticsWriterListener.h"
 #include "SubscriptionListener.h"
 
 #include <dds/DCPS/BuiltInTopicUtils.h>
@@ -209,6 +210,12 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
       args.consume_arg();
     } else if ((arg = args.get_the_parameter("-RunTime"))) {
       config.run_time(OpenDDS::DCPS::TimeDuration(ACE_OS::atoi(arg)));
+      args.consume_arg();
+    } else if ((arg = args.get_the_parameter("-MaxIpsPerClient"))) {
+      config.max_ips_per_client(ACE_OS::atoi(arg));
+      args.consume_arg();
+    } else if ((arg = args.get_the_parameter("-RejectedAddressDuration"))) {
+      config.rejected_address_duration(OpenDDS::DCPS::TimeDuration(ACE_OS::atoi(arg)));
       args.consume_arg();
 #ifdef OPENDDS_SECURITY
     } else if ((arg = args.get_the_parameter("-IdentityCA"))) {
@@ -525,18 +532,6 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   reader_qos.reader_data_lifecycle.autopurge_disposed_samples_delay = one_minute;
 
   // Setup statistics publishing.
-  DDS::DataWriter_var handler_statistics_writer_var = relay_publisher->create_datawriter(handler_statistics_topic, writer_qos, nullptr, OpenDDS::DCPS::DEFAULT_STATUS_MASK);
-  if (!handler_statistics_writer_var) {
-    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: failed to create Handler Statistics data writer\n")));
-    return EXIT_FAILURE;
-  }
-
-  HandlerStatisticsDataWriter_var handler_statistics_writer = HandlerStatisticsDataWriter::_narrow(handler_statistics_writer_var);
-  if (!handler_statistics_writer) {
-    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: failed to narrow Handler Statistics data writer\n")));
-    return EXIT_FAILURE;
-  }
-
   DDS::DataWriter_var relay_statistics_writer_var = relay_publisher->create_datawriter(relay_statistics_topic, writer_qos, nullptr, OpenDDS::DCPS::DEFAULT_STATUS_MASK);
   if (!relay_statistics_writer_var) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: failed to create Relay Statistics data writer\n")));
@@ -549,9 +544,31 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     return EXIT_FAILURE;
   }
 
-  auto participant_statistics_writer_qos = writer_qos;
+  RelayStatisticsReporter relay_statistics_reporter(config, relay_statistics_writer);
+
+  DDS::DataWriterListener_var relay_statistics_writer_listener =
+    new StatisticsWriterListener(relay_statistics_reporter, &RelayStatisticsReporter::relay_statistics_sub_count);
+  relay_statistics_writer->set_listener(relay_statistics_writer_listener, OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+
+  DDS::DataWriterListener_var handler_statistics_writer_listener =
+    new StatisticsWriterListener(relay_statistics_reporter, &RelayStatisticsReporter::handler_statistics_sub_count);
+  DDS::DataWriter_var handler_statistics_writer_var = relay_publisher->create_datawriter(handler_statistics_topic, writer_qos, handler_statistics_writer_listener, OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+  if (!handler_statistics_writer_var) {
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: failed to create Handler Statistics data writer\n")));
+    return EXIT_FAILURE;
+  }
+
+  HandlerStatisticsDataWriter_var handler_statistics_writer = HandlerStatisticsDataWriter::_narrow(handler_statistics_writer_var);
+  if (!handler_statistics_writer) {
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: failed to narrow Handler Statistics data writer\n")));
+    return EXIT_FAILURE;
+  }
+
+  DDS::DataWriterQos participant_statistics_writer_qos = writer_qos;
   participant_statistics_writer_qos.writer_data_lifecycle.autodispose_unregistered_instances = false;
-  auto participant_statistics_writer_var = relay_publisher->create_datawriter(participant_statistics_topic, participant_statistics_writer_qos, nullptr, OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+  DDS::DataWriterListener_var participant_statistics_writer_listener =
+    new StatisticsWriterListener(relay_statistics_reporter, &RelayStatisticsReporter::participant_statistics_sub_count);
+  DDS::DataWriter_var participant_statistics_writer_var = relay_publisher->create_datawriter(participant_statistics_topic, participant_statistics_writer_qos, participant_statistics_writer_listener, OpenDDS::DCPS::DEFAULT_STATUS_MASK);
   if (!participant_statistics_writer_var) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: failed to create Participant Statistics data writer\n")));
     return EXIT_FAILURE;
@@ -652,8 +669,10 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 #endif
 
 
+  DDS::DataWriterListener_var relay_partitions_writer_listener =
+    new StatisticsWriterListener(relay_statistics_reporter, &RelayStatisticsReporter::relay_partitions_sub_count);
   DDS::DataWriter_var relay_partitions_writer_var =
-    relay_publisher->create_datawriter(relay_partitions_topic, writer_qos, nullptr,
+    relay_publisher->create_datawriter(relay_partitions_topic, writer_qos, relay_partitions_writer_listener,
                                        OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
   if (!relay_partitions_writer_var) {
@@ -670,8 +689,10 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 
   auto relay_participant_status_writer_qos = writer_qos;
   relay_participant_status_writer_qos.writer_data_lifecycle.autodispose_unregistered_instances = false;
+  DDS::DataWriterListener_var relay_participant_status_writer_listener =
+    new StatisticsWriterListener(relay_statistics_reporter, &RelayStatisticsReporter::relay_participant_status_sub_count);
   DDS::DataWriter_var relay_participant_status_writer_var =
-    relay_publisher->create_datawriter(relay_participant_status_topic, relay_participant_status_writer_qos, nullptr,
+    relay_publisher->create_datawriter(relay_participant_status_topic, relay_participant_status_writer_qos, relay_participant_status_writer_listener,
                                        OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
   if (!relay_participant_status_writer_var) {
@@ -693,8 +714,10 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   replay_writer_qos.reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
   replay_writer_qos.history.kind = DDS::KEEP_ALL_HISTORY_QOS;
 
+  DDS::DataWriterListener_var spdp_replay_writer_listener =
+    new StatisticsWriterListener(relay_statistics_reporter, &RelayStatisticsReporter::spdp_replay_sub_count);
   DDS::DataWriter_var spdp_replay_writer_var =
-    relay_publisher->create_datawriter(spdp_replay_topic, replay_writer_qos, nullptr,
+    relay_publisher->create_datawriter(spdp_replay_topic, replay_writer_qos, spdp_replay_writer_listener,
                                        OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
   if (!spdp_replay_writer_var) {
@@ -709,7 +732,6 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     return EXIT_FAILURE;
   }
 
-  RelayStatisticsReporter relay_statistics_reporter(config, relay_statistics_writer);
   RelayParticipantStatusReporter relay_participant_status_reporter(config, relay_participant_status_writer, relay_statistics_reporter);
   RelayThreadMonitor* relay_thread_monitor = new RelayThreadMonitor(config);
   GuidAddrSet guid_addr_set(config, rtps_discovery, relay_participant_status_reporter, relay_statistics_reporter, *relay_thread_monitor);
@@ -868,7 +890,9 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) INFO: Data Vertical listening on %C\n"), OpenDDS::DCPS::LogAddr(data_vertical_addr).c_str()));
 
   // Write about the relay.
-  DDS::DataWriter_var relay_address_writer_var = relay_publisher->create_datawriter(relay_addresses_topic, writer_qos, nullptr, OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+  DDS::DataWriterListener_var relay_address_writer_listener =
+    new StatisticsWriterListener(relay_statistics_reporter, &RelayStatisticsReporter::relay_address_sub_count);
+  DDS::DataWriter_var relay_address_writer_var = relay_publisher->create_datawriter(relay_addresses_topic, writer_qos, relay_address_writer_listener, OpenDDS::DCPS::DEFAULT_STATUS_MASK);
   if (!relay_address_writer_var) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: failed to create Relay Address data writer\n")));
     return EXIT_FAILURE;
@@ -916,7 +940,9 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     relay_status_writer_qos.liveliness.kind = DDS::MANUAL_BY_TOPIC_LIVELINESS_QOS;
   }
 
-  DDS::DataWriter_var relay_status_writer_var = relay_publisher->create_datawriter(relay_statuss_topic, relay_status_writer_qos, nullptr, OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+  DDS::DataWriterListener_var relay_status_writer_listener =
+    new StatisticsWriterListener(relay_statistics_reporter, &RelayStatisticsReporter::relay_status_sub_count);
+  DDS::DataWriter_var relay_status_writer_var = relay_publisher->create_datawriter(relay_statuss_topic, relay_status_writer_qos, relay_status_writer_listener, OpenDDS::DCPS::DEFAULT_STATUS_MASK);
   if (!relay_status_writer_var) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: failed to create Relay Status data writer\n")));
     return EXIT_FAILURE;

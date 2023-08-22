@@ -46,3 +46,9 @@ union MutableUnion switch (UnionDisc) {
 union FinalUnion switch(UnionDisc) {
   COMMON_BRANCHES
 };
+
+@final
+struct IdVsDeclOrder {
+  @id(2) uint32 first_id2;
+  @id(1) uint16 second_id1;
+};

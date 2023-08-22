@@ -77,7 +77,7 @@ operator>>(Serializer& serializer, CoherentChangeControl& value)
     }
 
     for (ACE_UINT32 i = 0; i < sz; ++i) {
-      PublicationId writer(GUID_UNKNOWN);
+      GUID_t writer(GUID_UNKNOWN);
       ACE_UINT32 num_sample = 0;
       ACE_INT16 last_sample = 0;
 

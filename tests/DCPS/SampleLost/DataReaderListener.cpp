@@ -9,11 +9,14 @@
 
 using namespace Messenger;
 
-DataReaderListenerImpl::DataReaderListenerImpl()
-  : num_data_available_(0),
-    num_samples_lost_ (0),
-    num_samples_rejected_ (0),
-    num_budget_exceeded_ (0)
+DataReaderListenerImpl::DataReaderListenerImpl(DistributedConditionSet_rch dcs,
+                                               long expected_num_data_available)
+  : dcs_(dcs)
+  , expected_num_data_available_(expected_num_data_available)
+  , num_data_available_(0)
+  , num_samples_lost_ (0)
+  , num_samples_rejected_ (0)
+  , num_budget_exceeded_ (0)
 {
 }
 
@@ -25,6 +28,11 @@ void
 DataReaderListenerImpl::on_data_available(DDS::DataReader_ptr /*reader*/)
 {
   ++num_data_available_;
+
+  if (num_data_available_ == expected_num_data_available_) {
+    cerr << "Got sufficient number of data available callbacks" << endl;
+    dcs_->post(SUBSCRIBER, ON_DATA_AVAILABLE);
+  }
 }
 
 void
@@ -83,6 +91,10 @@ void DataReaderListenerImpl::on_sample_lost(
   DDS::DataReader_ptr,
   const DDS::SampleLostStatus& status)
 {
+  if (num_samples_lost_ == 0 && status.total_count_change > 0) {
+    dcs_->post(SUBSCRIBER, ON_SAMPLE_LOST);
+  }
+
   this->num_samples_lost_ += status.total_count_change;
 
   cerr << "DataReaderListenerImpl::on_sample_lost, "

@@ -21,6 +21,7 @@
 #include "Replayer.h"
 #include "TimeSource.h"
 #include "AtomicBool.h"
+#include "ConfigStoreImpl.h"
 
 #include <dds/DdsDcpsInfrastructureC.h>
 #include <dds/DdsDcpsDomainC.h>
@@ -41,6 +42,142 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
 namespace DCPS {
+
+const char OPENDDS_COMMON_BIT_AUTOPURGE_DISPOSED_SAMPLES_DELAY[] =
+  "OPENDDS_COMMON_BIT_AUTOPURGE_DISPOSED_SAMPLES_DELAY";
+const DDS::Duration_t OPENDDS_COMMON_BIT_AUTOPURGE_DISPOSED_SAMPLES_DELAY_default =
+  { DDS::DURATION_INFINITE_SEC, DDS::DURATION_INFINITE_NSEC };
+
+const char OPENDDS_COMMON_BIT_AUTOPURGE_NOWRITER_SAMPLES_DELAY[] =
+  "OPENDDS_COMMON_BIT_AUTOPURGE_NOWRITER_SAMPLES_DELAY";
+const DDS::Duration_t OPENDDS_COMMON_BIT_AUTOPURGE_NOWRITER_SAMPLES_DELAY_default =
+  { DDS::DURATION_INFINITE_SEC, DDS::DURATION_INFINITE_NSEC };
+
+const char OPENDDS_COMMON_DCPSRTI_SERIALIZATION[] = "OPENDDS_COMMON_DCPSRTI_SERIALIZATION";
+
+const char OPENDDS_COMMON_DCPS_BIDIR_GIOP[] = "OPENDDS_COMMON_DCPS_BIDIR_GIOP";
+const bool OPENDDS_COMMON_DCPS_BIDIR_GIOP_default = true;
+
+const char OPENDDS_COMMON_DCPS_BIT[] = "OPENDDS_COMMON_DCPS_BIT";
+#ifdef DDS_HAS_MINIMUM_BIT
+const bool OPENDDS_COMMON_DCPS_BIT_default = false;
+#else
+const bool OPENDDS_COMMON_DCPS_BIT_default = true;
+#endif
+
+const char OPENDDS_COMMON_DCPS_BIT_LOOKUP_DURATION_MSEC[] = "OPENDDS_COMMON_DCPS_BIT_LOOKUP_DURATION_MSEC";
+const int OPENDDS_COMMON_DCPS_BIT_LOOKUP_DURATION_MSEC_default = 2000;
+
+const char OPENDDS_COMMON_DCPS_BIT_TRANSPORT_IP_ADDRESS[] = "OPENDDS_COMMON_DCPS_BIT_TRANSPORT_IP_ADDRESS";
+const String OPENDDS_COMMON_DCPS_BIT_TRANSPORT_IP_ADDRESS_default = "";
+
+const char OPENDDS_COMMON_DCPS_BIT_TRANSPORT_PORT[] = "OPENDDS_COMMON_DCPS_BIT_TRANSPORT_PORT";
+const int OPENDDS_COMMON_DCPS_BIT_TRANSPORT_PORT_default = 0;
+
+const char OPENDDS_COMMON_DCPS_CHUNKS[] = "OPENDDS_COMMON_DCPS_CHUNKS";
+const size_t OPENDDS_COMMON_DCPS_CHUNKS_default = 20;
+
+const char OPENDDS_COMMON_DCPS_CHUNK_ASSOCIATION_MULTIPLIER[] = "OPENDDS_COMMON_DCPS_CHUNK_ASSOCIATION_MULTIPLIER";
+const char OPENDDS_COMMON_DCPS_CHUNK_ASSOCIATION_MUTLTIPLIER[] = "OPENDDS_COMMON_DCPS_CHUNK_ASSOCIATION_MUTLTIPLIER";
+const size_t OPENDDS_COMMON_DCPS_CHUNK_ASSOCIATION_MULTIPLIER_default = 10;
+
+const char OPENDDS_COMMON_DCPS_CONFIG_FILE[] = "OPENDDS_COMMON_DCPS_CONFIG_FILE";
+const String OPENDDS_COMMON_DCPS_CONFIG_FILE_default = "";
+
+const char OPENDDS_COMMON_DCPS_DEBUG_LEVEL[] = "OPENDDS_COMMON_DCPS_DEBUG_LEVEL";
+
+const char OPENDDS_COMMON_DCPS_DEFAULT_ADDRESS[] = "OPENDDS_COMMON_DCPS_DEFAULT_ADDRESS";
+const NetworkAddress OPENDDS_COMMON_DCPS_DEFAULT_ADDRESS_default = NetworkAddress();
+
+const char OPENDDS_COMMON_DCPS_DEFAULT_DISCOVERY[] = "OPENDDS_COMMON_DCPS_DEFAULT_DISCOVERY";
+#ifdef DDS_DEFAULT_DISCOVERY_METHOD
+const Discovery::RepoKey OPENDDS_COMMON_DCPS_DEFAULT_DISCOVERY_default = DDS_DEFAULT_DISCOVERY_METHOD;
+#else
+# ifdef OPENDDS_SAFETY_PROFILE
+const Discovery::RepoKey OPENDDS_COMMON_DCPS_DEFAULT_DISCOVERY_default = Discovery::DEFAULT_RTPS;
+# else
+const Discovery::RepoKey OPENDDS_COMMON_DCPS_DEFAULT_DISCOVERY_default = Discovery::DEFAULT_REPO;
+# endif
+#endif
+
+const char OPENDDS_COMMON_DCPS_GLOBAL_TRANSPORT_CONFIG[] = "OPENDDS_COMMON_DCPS_GLOBAL_TRANSPORT_CONFIG";
+const String OPENDDS_COMMON_DCPS_GLOBAL_TRANSPORT_CONFIG_default = "";
+
+const char OPENDDS_COMMON_DCPS_INFO_REPO[] = "OPENDDS_COMMON_DCPS_INFO_REPO";
+
+const char OPENDDS_COMMON_DCPS_LIVELINESS_FACTOR[] = "OPENDDS_COMMON_DCPS_LIVELINESS_FACTOR";
+const int OPENDDS_COMMON_DCPS_LIVELINESS_FACTOR_default = 80;
+
+const char OPENDDS_COMMON_DCPS_LOG_LEVEL[] = "OPENDDS_COMMON_DCPS_LOG_LEVEL";
+
+const char OPENDDS_COMMON_DCPS_MONITOR[] = "OPENDDS_COMMON_DCPS_MONITOR";
+const bool OPENDDS_COMMON_DCPS_MONITOR_default = false;
+
+const char OPENDDS_COMMON_DCPS_PENDING_TIMEOUT[] = "OPENDDS_COMMON_DCPS_PENDING_TIMEOUT";
+// Can't use TimeDuration::zero_value since initialization order is undefined.
+const TimeDuration OPENDDS_COMMON_DCPS_PENDING_TIMEOUT_default(0, 0);
+
+#ifndef OPENDDS_NO_PERSISTENCE_PROFILE
+const char OPENDDS_COMMON_DCPS_PERSISTENT_DATA_DIR[] = "OPENDDS_COMMON_DCPS_PERSISTENT_DATA_DIR";
+const String OPENDDS_COMMON_DCPS_PERSISTENT_DATA_DIR_default = "OpenDDS-durable-data-dir";
+#endif
+
+const char OPENDDS_COMMON_DCPS_PUBLISHER_CONTENT_FILTER[] = "OPENDDS_COMMON_DCPS_PUBLISHER_CONTENT_FILTER";
+const bool OPENDDS_COMMON_DCPS_PUBLISHER_CONTENT_FILTER_default = true;
+
+const char OPENDDS_COMMON_DCPS_THREAD_STATUS_INTERVAL[] = "OPENDDS_COMMON_DCPS_THREAD_STATUS_INTERVAL";
+
+const char OPENDDS_COMMON_DCPS_TRANSPORT_DEBUG_LEVEL[] = "OPENDDS_COMMON_DCPS_TRANSPORT_DEBUG_LEVEL";
+
+const char OPENDDS_COMMON_DCPS_TYPE_OBJECT_ENCODING[] = "OPENDDS_COMMON_DCPS_TYPE_OBJECT_ENCODING";
+const String OPENDDS_COMMON_DCPS_TYPE_OBJECT_ENCODING_default = "Normal";
+
+const char OPENDDS_COMMON_FEDERATION_BACKOFF_MULTIPLIER[] = "OPENDDS_COMMON_FEDERATION_BACKOFF_MULTIPLIER";
+const int OPENDDS_COMMON_FEDERATION_BACKOFF_MULTIPLIER_default = 2;
+
+const char OPENDDS_COMMON_FEDERATION_INITIAL_BACKOFF_SECONDS[] = "OPENDDS_COMMON_FEDERATION_INITIAL_BACKOFF_SECONDS";
+const int OPENDDS_COMMON_FEDERATION_INITIAL_BACKOFF_SECONDS_default = 1;
+
+const char OPENDDS_COMMON_FEDERATION_LIVELINESS_DURATION[] = "OPENDDS_COMMON_FEDERATION_LIVELINESS_DURATION";
+const int OPENDDS_COMMON_FEDERATION_LIVELINESS_DURATION_default = 60;
+
+const char OPENDDS_COMMON_FEDERATION_RECOVERY_DURATION[] = "OPENDDS_COMMON_FEDERATION_RECOVERY_DURATION";
+const int OPENDDS_COMMON_FEDERATION_RECOVERY_DURATION_default = 900;
+
+const char OPENDDS_COMMON_ORB_LOG_FILE[] = "OPENDDS_COMMON_ORB_LOG_FILE";
+
+const char OPENDDS_COMMON_ORB_VERBOSE_LOGGING[] = "OPENDDS_COMMON_ORB_VERBOSE_LOGGING";
+
+const char OPENDDS_COMMON_PRINTER_VALUE_WRITER_INDENT[] = "OPENDDS_COMMON_PRINTER_VALUE_WRITER_INDENT";
+const unsigned int OPENDDS_COMMON_PRINTER_VALUE_WRITER_INDENT_default = 4;
+
+const char OPENDDS_COMMON_SCHEDULER[] = "OPENDDS_COMMON_SCHEDULER";
+const String OPENDDS_COMMON_SCHEDULER_default = "";
+
+const char OPENDDS_COMMON_SCHEDULER_SLICE[] = "OPENDDS_COMMON_SCHEDULER_SLICE";
+const int OPENDDS_COMMON_SCHEDULER_SLICE_default = 0;
+
+const char OPENDDS_DEFAULT_CONFIGURATION_FILE[] = "OPENDDS_DEFAULT_CONFIGURATION_FILE";
+const String OPENDDS_DEFAULT_CONFIGURATION_FILE_default = "";
+
+#ifdef OPENDDS_SECURITY
+const char OPENDDS_COMMON_DCPS_SECURITY[] = "OPENDDS_COMMON_DCPS_SECURITY";
+const bool OPENDDS_COMMON_DCPS_SECURITY_default = false;
+
+const char OPENDDS_COMMON_DCPS_SECURITY_DEBUG[] = "OPENDDS_COMMON_DCPS_SECURITY_DEBUG";
+
+const char OPENDDS_COMMON_DCPS_SECURITY_DEBUG_LEVEL[] = "OPENDDS_COMMON_DCPS_SECURITY_DEBUG_LEVEL";
+
+const char OPENDDS_COMMON_DCPS_SECURITY_FAKE_ENCRYPTION[] = "OPENDDS_COMMON_DCPS_SECURITY_FAKE_ENCRYPTION";
+#endif
+
+#if OPENDDS_POOL_ALLOCATOR
+const char OPENDDS_COMMON_POOL_GRANULARITY[] = "OPENDDS_COMMON_POOL_GRANULARITY";
+const size_t OPENDDS_COMMON_POOL_GRANULARITY_default = 8;
+
+const char OPENDDS_COMMON_POOL_SIZE[] = "OPENDDS_COMMON_POOL_SIZE";
+const size_t OPENDDS_COMMON_POOL_SIZE_default = 1024 * 1024 * 16;
+#endif
 
 #ifndef OPENDDS_NO_PERSISTENCE_PROFILE
 class DataDurabilityCache;
@@ -140,9 +277,7 @@ public:
   const DDS::DeadlineQosPolicy& initial_DeadlineQosPolicy() const;
   const DDS::LatencyBudgetQosPolicy& initial_LatencyBudgetQosPolicy() const;
   const DDS::OwnershipQosPolicy& initial_OwnershipQosPolicy() const;
-#ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
   const DDS::OwnershipStrengthQosPolicy& initial_OwnershipStrengthQosPolicy() const;
-#endif
   const DDS::LivelinessQosPolicy& initial_LivelinessQosPolicy() const;
   const DDS::TimeBasedFilterQosPolicy& initial_TimeBasedFilterQosPolicy() const;
   const DDS::PartitionQosPolicy& initial_PartitionQosPolicy() const;
@@ -208,7 +343,8 @@ public:
 
   bool set_repo_ior(const char* ior,
                     Discovery::RepoKey key = Discovery::DEFAULT_REPO,
-                    bool attach_participant = true);
+                    bool attach_participant = true,
+                    bool write_config = true);
 
 #ifdef DDS_HAS_WCHAR
   /// Convenience overload for wchar_t
@@ -242,38 +378,38 @@ public:
 
   /// Accessors for FederationRecoveryDuration in seconds.
   //@{
-  int& federation_recovery_duration();
-  int  federation_recovery_duration() const;
+  void federation_recovery_duration(int);
+  int federation_recovery_duration() const;
   //@}
 
   /// Accessors for FederationInitialBackoffSeconds.
   //@{
-  int& federation_initial_backoff_seconds();
-  int  federation_initial_backoff_seconds() const;
+  void federation_initial_backoff_seconds(int);
+  int federation_initial_backoff_seconds() const;
   //@}
 
   /// Accessors for FederationBackoffMultiplier.
   //@{
-  int& federation_backoff_multiplier();
-  int  federation_backoff_multiplier() const;
+  void federation_backoff_multiplier(int);
+  int federation_backoff_multiplier() const;
   //@}
 
   /// Accessors for FederationLivelinessDuration.
   //@{
-  int& federation_liveliness();
-  int  federation_liveliness() const;
+  void federation_liveliness(int);
+  int federation_liveliness() const;
   //@}
 
   /// Accessors for scheduling policy value.
   //@{
-  long& scheduler();
-  long  scheduler() const;
+  void scheduler(long);
+  long scheduler() const;
   //@}
 
   /// Accessors for PublisherContentFilter.
   //@{
-  bool& publisher_content_filter();
-  bool  publisher_content_filter() const;
+  void publisher_content_filter(bool);
+  bool publisher_content_filter() const;
   //@}
 
   /// Accessors for pending data timeout.
@@ -319,24 +455,14 @@ public:
   //@}
 
 #if defined(OPENDDS_SECURITY)
-  bool get_security() {
-    return security_enabled_;
-  }
-
-  void set_security(bool b) {
-    security_enabled_ = b;
-  }
+  bool get_security() const;
+  void set_security(bool b);
 #endif
 
-  bool get_BIT() {
-    return bit_enabled_;
-  }
+  bool get_BIT() const;
+  void set_BIT(bool b);
 
-  void set_BIT(bool b) {
-    bit_enabled_ = b;
-  }
-
-  const NetworkAddress& default_address() const { return default_address_; }
+  NetworkAddress default_address() const;
 
 #ifndef OPENDDS_NO_PERSISTENCE_PROFILE
   /// Get the data durability cache corresponding to the given
@@ -415,7 +541,7 @@ public:
    */
   bool belongs_to_domain_range(DDS::DomainId_t domainId) const;
 
-  bool get_transport_base_config_name(DDS::DomainId_t domainId, ACE_TString& name) const;
+  bool get_transport_base_config_name(DDS::DomainId_t domainId, String& name) const;
 
 #ifdef OPENDDS_SAFETY_PROFILE
   /**
@@ -447,6 +573,11 @@ public:
   XTypes::TypeInformation get_type_information(DDS::DomainParticipant_ptr participant,
                                                const DDS::BuiltinTopicKey_t& key) const;
 
+#ifndef OPENDDS_SAFETY_PROFILE
+  DDS::ReturnCode_t get_dynamic_type(DDS::DynamicType_var& type,
+    DDS::DomainParticipant_ptr participant, const DDS::BuiltinTopicKey_t& key) const;
+#endif
+
   /**
    * Get TypeObject for a given TypeIdentifier.
    */
@@ -463,14 +594,12 @@ public:
     return network_interface_address_topic_;
   }
 
-  unsigned int printer_value_writer_indent() const
-  {
-    return printer_value_writer_indent_;
-  }
+  unsigned int printer_value_writer_indent() const;
+  void printer_value_writer_indent(unsigned int value);
 
-  void printer_value_writer_indent(unsigned int value)
+  RcHandle<ConfigStoreImpl> config_store() const
   {
-    printer_value_writer_indent_ = value;
+    return config_store_;
   }
 
 private:
@@ -494,17 +623,7 @@ private:
    * transport section configuration to the TransportRegistry
    * singleton.
    */
-  int load_configuration();
-
-  /**
-   * Load the common configuration to the Service_Participant
-   * singleton.
-   *
-   * @note The values from command line can overwrite the values
-   *       in configuration file.
-   */
-  int load_common_configuration(ACE_Configuration_Heap& cf,
-                                const ACE_TCHAR* filename);
+  int load_configuration(const String& config_fname);
 
   /**
    * Load the domain configuration to the Service_Participant
@@ -562,8 +681,6 @@ private:
   /// The DomainId to RepoKey mapping.
   DomainRepoMap domainRepoMap_;
 
-  Discovery::RepoKey defaultDiscovery_;
-
   /// The lock to serialize DomainParticipantFactory singleton
   /// creation and shutdown.
   mutable ACE_Thread_Mutex factory_lock_;
@@ -580,9 +697,7 @@ private:
   DDS::DeadlineQosPolicy              initial_DeadlineQosPolicy_;
   DDS::LatencyBudgetQosPolicy         initial_LatencyBudgetQosPolicy_;
   DDS::OwnershipQosPolicy             initial_OwnershipQosPolicy_;
-#ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
   DDS::OwnershipStrengthQosPolicy     initial_OwnershipStrengthQosPolicy_;
-#endif
   DDS::LivelinessQosPolicy            initial_LivelinessQosPolicy_;
   DDS::TimeBasedFilterQosPolicy       initial_TimeBasedFilterQosPolicy_;
   DDS::PartitionQosPolicy             initial_PartitionQosPolicy_;
@@ -604,42 +719,6 @@ private:
   DDS::SubscriberQos                  initial_SubscriberQos_;
   DDS::DomainParticipantFactoryQos    initial_DomainParticipantFactoryQos_;
   DDS::TypeConsistencyEnforcementQosPolicy initial_TypeConsistencyEnforcementQosPolicy_;
-
-  /// The configurable value of the number chunks that the
-  /// @c DataWriter's cached allocator can allocate.
-  size_t                                 n_chunks_;
-
-  /// The configurable value of maximum number of expected
-  /// associations for publishers and subscribers.  This is used
-  /// to pre allocate enough memory and reduce heap allocations.
-  size_t                                 association_chunk_multiplier_;
-
-  /// The propagation delay factor.
-  int                                    liveliness_factor_;
-
-  /// The builtin topic transport address.
-  ACE_TString bit_transport_ip_;
-
-  /// The builtin topic transport port number.
-  int bit_transport_port_;
-
-  bool bit_enabled_;
-
-#if defined(OPENDDS_SECURITY)
-  bool security_enabled_;
-#endif
-
-  /// The timeout for lookup data from the builtin topic
-  /// @c DataReader.
-  int bit_lookup_duration_msec_;
-
-  /// The default network address to use.
-  NetworkAddress default_address_;
-
-  /// Specifies the name of the transport configuration that
-  /// is used when the entity tree does not specify one.  If
-  /// not set, the default transport configuration is used.
-  ACE_TString global_transport_config_;
 
   // domain range template support
   struct DomainRange
@@ -693,43 +772,11 @@ public:
   unique_ptr<Monitor> monitor_;
 
 private:
-  /// The FederationRecoveryDuration value in seconds.
-  int federation_recovery_duration_;
-
-  /// The FederationInitialBackoffSeconds value.
-  int federation_initial_backoff_seconds_;
-
-  /// This FederationBackoffMultiplier.
-  int federation_backoff_multiplier_;
-
-  /// This FederationLivelinessDuration.
-  int federation_liveliness_;
-
-  /// Scheduling policy value from configuration file.
-  ACE_TString schedulerString_;
-
-  /// Scheduler time slice from configuration file.
-  TimeDuration schedulerQuantum_;
-
-#if OPENDDS_POOL_ALLOCATOR
-  /// Pool size from configuration file.
-  size_t pool_size_;
-
-  /// Pool granularity from configuration file.
-  size_t pool_granularity_;
-#endif
-
-  /// Scheduling policy value used for setting thread priorities.
-  long scheduler_;
-
   /// Minimum priority value for the current scheduling policy.
   int priority_min_;
 
   /// Maximum priority value for the current scheduling policy.
   int priority_max_;
-
-  /// Allow the publishing side to do content filtering?
-  bool publisher_content_filter_;
 
 #ifndef OPENDDS_NO_PERSISTENCE_PROFILE
 
@@ -739,25 +786,12 @@ private:
   /// The @c PERSISTENT data durability cache.
   unique_ptr<DataDurabilityCache> persistent_data_cache_;
 
-  /// The @c PERSISTENT data durability directory.
-  ACE_CString persistent_data_dir_;
-
 #endif
-
-  /// Number of seconds to wait on pending samples to be sent
-  /// or dropped.
-  TimeDuration pending_timeout_;
-
-  /// Enable TAO's Bidirectional GIOP?
-  bool bidir_giop_;
 
   ThreadStatusManager thread_status_manager_;
 
   /// Thread mutex used to protect the static initialization of XTypes data structures
   ACE_Thread_Mutex xtypes_lock_;
-
-  /// Enable Monitor functionality
-  bool monitor_enabled_;
 
   /// Used to track state of service participant
   AtomicBool shut_down_;
@@ -769,23 +803,28 @@ private:
 
   static int zero_argc;
 
-  /**
-   * If set before TheParticipantFactoryWithArgs and -DCPSConfigFile is not
-   * passed, use this as the configuration file.
-   */
-  ACE_TString default_configuration_file_;
-
   NetworkConfigMonitor_rch network_config_monitor_;
   mutable ACE_Thread_Mutex network_config_monitor_lock_;
 
-  DDS::Duration_t bit_autopurge_nowriter_samples_delay_;
-  DDS::Duration_t bit_autopurge_disposed_samples_delay_;
-
-  TypeObjectEncoding type_object_encoding_;
-
   RcHandle<InternalTopic<NetworkInterfaceAddress> > network_interface_address_topic_;
 
-  unsigned int printer_value_writer_indent_;
+  RcHandle<ConfigStoreImpl> config_store_;
+  ConfigReader_rch config_reader_;
+  ConfigReaderListener_rch config_reader_listener_;
+
+  class ConfigReaderListener : public InternalDataReaderListener<ConfigPair> {
+  public:
+    ConfigReaderListener(Service_Participant& service_participant)
+      : service_participant_(service_participant)
+    {}
+
+    void on_data_available(InternalDataReader_rch reader);
+
+  private:
+    Service_Participant& service_participant_;
+  };
+
+  bool set_repo_ior_result_;
 };
 
 #define TheServiceParticipant OpenDDS::DCPS::Service_Participant::instance()

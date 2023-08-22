@@ -1,29 +1,30 @@
 #include "TestMsgTypeSupportImpl.h"
 #include "DataReaderListenerImpl.h"
 
-#include "dds/DCPS/Service_Participant.h"
-#include "dds/DCPS/Marked_Default_Qos.h"
-#include "dds/DCPS/BuiltInTopicUtils.h"
-#include "dds/DCPS/WaitSet.h"
+#include <tests/Utils/StatusMatching.h>
 
-#include "dds/DCPS/transport/framework/TransportExceptions.h"
-#include "dds/DCPS/transport/framework/TransportRegistry.h"
+#include <dds/DCPS/Service_Participant.h>
+#include <dds/DCPS/Marked_Default_Qos.h>
+#include <dds/DCPS/BuiltInTopicUtils.h>
+#include <dds/DCPS/WaitSet.h>
+#include <dds/DCPS/SafetyProfileStreams.h>
+#include <dds/DCPS/GuidConverter.h>
+#include <dds/DCPS/DataReaderImpl.h>
+#include <dds/DCPS/DataWriterImpl.h>
+#include <dds/DCPS/transport/framework/TransportExceptions.h>
+#include <dds/DCPS/transport/framework/TransportRegistry.h>
 
-#include "dds/DdsDcpsInfrastructureC.h"
-#include "dds/DdsDcpsCoreTypeSupportImpl.h"
-#include "dds/DCPS/GuidConverter.h"
-#include "dds/DCPS/DataReaderImpl.h"
-#include "dds/DCPS/DataWriterImpl.h"
-#include "tests/Utils/StatusMatching.h"
+#include <dds/DdsDcpsInfrastructureC.h>
+#include <dds/DdsDcpsCoreTypeSupportImpl.h>
 
-#include "dds/DCPS/StaticIncludes.h"
+#include <dds/DCPS/StaticIncludes.h>
 #ifdef ACE_AS_STATIC_LIBS
-#include "dds/DCPS/transport/rtps_udp/RtpsUdp.h"
+#  include <dds/DCPS/transport/rtps_udp/RtpsUdp.h>
 #endif
 
-#include "ace/Arg_Shifter.h"
-#include "ace/OS_NS_stdlib.h"
-#include "ace/OS_NS_unistd.h"
+#include <ace/Arg_Shifter.h>
+#include <ace/OS_NS_stdlib.h>
+#include <ace/OS_NS_unistd.h>
 
 /*
   NOTE:  The messages may not be processed by the reader in this test.
@@ -91,9 +92,8 @@ public:
     unsigned long binary_id = static_cast<unsigned long>(fromhex(writers_[thread_id], 2))
                             + (256 * static_cast<unsigned long>(fromhex(writers_[thread_id], 1)))
                             + (256 * 256 * static_cast<unsigned long>(fromhex(writers_[thread_id], 0)));
-    char config_name_buffer[16];
-    sprintf(config_name_buffer, "Config%lu", binary_id);
-    OpenDDS::DCPS::TransportRegistry::instance()->bind_config(config_name_buffer, publisher);
+    const OpenDDS::DCPS::String config_name = "Config" + OpenDDS::DCPS::to_dds_string(binary_id);
+    OpenDDS::DCPS::TransportRegistry::instance()->bind_config(config_name.c_str(), publisher);
 
     DDS::DataWriterQos qos;
     publisher->get_default_datawriter_qos(qos);
@@ -131,7 +131,7 @@ public:
                         ACE_TEXT(" casting datawriter failed!\n")),
                        -1);
     }
-    const OpenDDS::DCPS::GUID_t writer_guid = writer_impl->get_repo_id();
+    const OpenDDS::DCPS::GUID_t writer_guid = writer_impl->get_guid();
 
     ACE_DEBUG((LM_INFO, "(%P|%t) DataWriter %C created\n", OpenDDS::DCPS::LogGuid(writer_guid).c_str()));
 
@@ -181,14 +181,14 @@ public:
 
 private:
   std::vector<std::string>& writers_;
-  static ACE_Atomic_Op<ACE_SYNCH_MUTEX, int> thread_counter_;
+  static OpenDDS::DCPS::Atomic<int> thread_counter_;
   DDS::DomainParticipant_var participant_;
   DDS::Topic_var topic_;
   const bool& reliable_;
   int total_readers_;
 };
 
-ACE_Atomic_Op<ACE_SYNCH_MUTEX, int> WriterTask::thread_counter_;
+OpenDDS::DCPS::Atomic<int> WriterTask::thread_counter_;
 
 ACE_Thread_Mutex readers_done_lock;
 ACE_Condition_Thread_Mutex readers_done_cond(readers_done_lock);
@@ -350,9 +350,8 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       unsigned long binary_id = static_cast<unsigned long>(fromhex(*pos, 2))
                               + (256 * static_cast<unsigned long>(fromhex(*pos, 1)))
                               + (256 * 256 * static_cast<unsigned long>(fromhex(*pos, 0)));
-      char config_name_buffer[16];
-      sprintf(config_name_buffer, "Config%lu", binary_id);
-      OpenDDS::DCPS::TransportRegistry::instance()->bind_config(config_name_buffer, subscriber);
+      const OpenDDS::DCPS::String config_name = "Config" + OpenDDS::DCPS::to_dds_string(binary_id);
+      OpenDDS::DCPS::TransportRegistry::instance()->bind_config(config_name.c_str(), subscriber);
 
       DDS::DataReaderQos qos;
       subscriber->get_default_datareader_qos(qos);
@@ -381,7 +380,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
                           ACE_TEXT("ERROR: %N:%l: main() -")
                           ACE_TEXT(" casting datareader failed!\n")), -1);
       }
-      drl_impl->set_guid(reader_impl->get_repo_id());
+      drl_impl->set_guid(reader_impl->get_guid());
 
       datareaders.push_back(reader);
 

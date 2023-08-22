@@ -121,7 +121,7 @@ defined.
                             Make sure this is running ActiveState Perl.
 
 6. Compile the generated C++ and Java code
-   Unix    => make (GNU make, so this may be "gmake" on Solaris systems)
+   Unix    => make (GNU make)
    Windows => Build the generated .sln (Solution) file using your preferred
      method.  This can be either the Visual Studio IDE or one of the
      command-line tools.  If it's the IDE, start it from a command prompt

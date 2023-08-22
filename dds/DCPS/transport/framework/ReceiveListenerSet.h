@@ -33,16 +33,16 @@ public:
     SET_INCLUDED
   };
 
-  typedef OPENDDS_MAP_CMP(RepoId, TransportReceiveListener_wrch, GUID_tKeyLessThan) MapType;
+  typedef OPENDDS_MAP_CMP(GUID_t, TransportReceiveListener_wrch, GUID_tKeyLessThan) MapType;
 
   ReceiveListenerSet();
   ReceiveListenerSet(const ReceiveListenerSet&);
   ReceiveListenerSet& operator=(const ReceiveListenerSet&);
   virtual ~ReceiveListenerSet();
 
-  int insert(RepoId                              subscriber_id,
+  int insert(GUID_t                              subscriber_id,
              const TransportReceiveListener_wrch& listener);
-  int remove(RepoId subscriber_id);
+  int remove(GUID_t subscriber_id);
   void remove_all(const GUIDSeq& to_remove);
 
   ssize_t size() const;
@@ -50,7 +50,7 @@ public:
   void data_received(const ReceivedDataSample& sample,
                      const RepoIdSet& incl_excl,
                      ConstrainReceiveSet constrain);
-  void data_received(const ReceivedDataSample& sample, const RepoId& readerId);
+  void data_received(const ReceivedDataSample& sample, const GUID_t& readerId);
 
   /// Give access to the underlying map for iteration purposes.
   MapType& map();
@@ -58,8 +58,8 @@ public:
 
   /// Check if the key is in the map and if it's the only left entry
   /// in the map.
-  bool exist(const RepoId& key, bool& last);
-  bool exist(const RepoId& local_id);
+  bool exist(const GUID_t& key, bool& last);
+  bool exist(const GUID_t& local_id);
 
   void get_keys(ReaderIdSeq & ids);
 
@@ -73,7 +73,7 @@ private:
   /// This lock will protect the map.
   mutable LockType lock_;
 
-  MapType  map_;
+  MapType map_;
 };
 
 } // namespace DCPS

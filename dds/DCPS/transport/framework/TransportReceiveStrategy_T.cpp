@@ -22,13 +22,13 @@ namespace OpenDDS {
 namespace DCPS {
 
 template<typename TH, typename DSH>
-TransportReceiveStrategy<TH, DSH>::TransportReceiveStrategy(const TransportInst& config,
+TransportReceiveStrategy<TH, DSH>::TransportReceiveStrategy(const TransportInst_rch& config,
                                                             size_t receive_buffers_count)
   : gracefully_disconnected_(false),
     receive_sample_remaining_(0),
-    mb_allocator_(config.receive_preallocated_message_blocks_ ? config.receive_preallocated_message_blocks_ : MESSAGE_BLOCKS),
-    db_allocator_(config.receive_preallocated_data_blocks_ ? config.receive_preallocated_data_blocks_ : DATA_BLOCKS),
-    data_allocator_(config.receive_preallocated_data_blocks_ ? config.receive_preallocated_data_blocks_ : receive_buffers_count * 2),
+    mb_allocator_((config && config->receive_preallocated_message_blocks()) ? config->receive_preallocated_message_blocks() : MESSAGE_BLOCKS),
+    db_allocator_((config && config->receive_preallocated_data_blocks()) ? config->receive_preallocated_data_blocks() : DATA_BLOCKS),
+    data_allocator_((config && config->receive_preallocated_data_blocks()) ? config->receive_preallocated_data_blocks() : receive_buffers_count * 2),
     receive_buffers_(receive_buffers_count, 0),
     buffer_index_(0),
     payload_(0),

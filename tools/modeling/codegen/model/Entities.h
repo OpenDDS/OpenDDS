@@ -171,6 +171,8 @@ class OpenDDS_Model_Export Entities  {
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
+#include /**/ "ace/post.h"
+
 #if defined (__ACE_INLINE__)
 # include "Entities.inl"
 #endif  /* __ACE_INLINE__ */

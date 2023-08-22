@@ -1,4 +1,5 @@
 #include <dds/DCPS/Serializer.h>
+#include <dds/DCPS/debug.h>
 
 #include <gtest/gtest.h>
 
@@ -131,6 +132,8 @@ TEST(dds_DCPS_Serializer, EncapsulationHeader_EncapsulationHeader_Encoding_Valid
 
 TEST(dds_DCPS_Serializer, EncapsulationHeader_EncapsulationHeader_Encoding_Invalid)
 {
+  OpenDDS::DCPS::LogRestore restore;
+  OpenDDS::DCPS::log_level.set(OpenDDS::DCPS::LogLevel::None);
   Encoding initenc(Encoding::KIND_UNALIGNED_CDR, ENDIAN_LITTLE);
   EncapsulationHeader eh(initenc, FINAL);
   EXPECT_FALSE(eh.is_good());
@@ -187,6 +190,8 @@ TEST(dds_DCPS_Serializer, EncapsulationHeader_from_encoding_XCDR2_LITTLE_MUTABLE
 
 TEST(dds_DCPS_Serializer, EncapsulationHeader_from_encoding_UNALIGNED_CDR_LITTLE_MUTABLE)
 {
+  OpenDDS::DCPS::LogRestore restore;
+  OpenDDS::DCPS::log_level.set(OpenDDS::DCPS::LogLevel::None);
   EncapsulationHeader eh;
   Encoding enc(Encoding::KIND_UNALIGNED_CDR, ENDIAN_LITTLE);
   EXPECT_FALSE(eh.from_encoding(enc, MUTABLE));
@@ -195,6 +200,8 @@ TEST(dds_DCPS_Serializer, EncapsulationHeader_from_encoding_UNALIGNED_CDR_LITTLE
 
 TEST(dds_DCPS_Serializer, EncapsulationHeader_to_encoding_MUTABLE)
 {
+  OpenDDS::DCPS::LogRestore restore;
+  OpenDDS::DCPS::log_level.set(OpenDDS::DCPS::LogLevel::None);
   EncapsulationHeader eh;
   Encoding enc;
   EXPECT_FALSE(eh.to_encoding(enc, MUTABLE));
@@ -211,6 +218,8 @@ TEST(dds_DCPS_Serializer, EncapsulationHeader_to_encoding_NOT_MUTABLE)
 
 TEST(dds_DCPS_Serializer, EncapsulationHeader_to_encoding_CDR_LE_MUTABLE)
 {
+  OpenDDS::DCPS::LogRestore restore;
+  OpenDDS::DCPS::log_level.set(OpenDDS::DCPS::LogLevel::None);
   EncapsulationHeader eh;
   eh.kind(EncapsulationHeader::KIND_CDR_LE);
   Encoding enc;
@@ -301,6 +310,8 @@ TEST(dds_DCPS_Serializer, EncapsulationHeader_to_encoding_PL_CDR2_LE_MUTABLE)
 
 TEST(dds_DCPS_Serializer, EncapsulationHeader_to_encoding_XML)
 {
+  OpenDDS::DCPS::LogRestore restore;
+  OpenDDS::DCPS::log_level.set(OpenDDS::DCPS::LogLevel::None);
   EncapsulationHeader eh;
   eh.kind(EncapsulationHeader::KIND_XML);
   Encoding enc;
@@ -310,6 +321,8 @@ TEST(dds_DCPS_Serializer, EncapsulationHeader_to_encoding_XML)
 
 TEST(dds_DCPS_Serializer, EncapsulationHeader_to_encoding_INVALID)
 {
+  OpenDDS::DCPS::LogRestore restore;
+  OpenDDS::DCPS::log_level.set(OpenDDS::DCPS::LogLevel::None);
   Encoding initenc(Encoding::KIND_UNALIGNED_CDR, ENDIAN_LITTLE);
   EncapsulationHeader eh(initenc, FINAL);
   Encoding enc;
@@ -317,7 +330,7 @@ TEST(dds_DCPS_Serializer, EncapsulationHeader_to_encoding_INVALID)
   EXPECT_STREQ("Invalid", eh.to_string().c_str());
 }
 
-TEST(serializer_test, Serializer_Serializer_ACE_Message_Block_Encoding)
+TEST(dds_DCPS_Serializer, Serializer_Serializer_ACE_Message_Block_Encoding)
 {
   ACE_Message_Block amb;
   Encoding enc(Encoding::KIND_UNALIGNED_CDR, ENDIAN_LITTLE);
@@ -368,7 +381,7 @@ TEST(dds_DCPS_Serializer, Serializer_swap_bytes_endianness)
   EXPECT_EQ(ser.endianness(), ENDIAN_NONNATIVE);
 }
 
-TEST(serializer_test, Serializer_align_context_basic_reference)
+TEST(dds_DCPS_Serializer, Serializer_align_context_basic_reference)
 {
   ACE_Message_Block amb(64);
   Encoding enc;
@@ -399,7 +412,7 @@ TEST(serializer_test, Serializer_align_context_basic_reference)
   //std::cout << std::endl;
 }
 
-TEST(serializer_test, Serializer_align_context_basic)
+TEST(dds_DCPS_Serializer, Serializer_align_context_basic)
 {
   ACE_Message_Block amb(64);
 
@@ -433,7 +446,7 @@ TEST(serializer_test, Serializer_align_context_basic)
   //std::cout << std::endl;
 }
 
-TEST(serializer_test, Serializer_align_context_2_buff)
+TEST(dds_DCPS_Serializer, Serializer_align_context_2_buff)
 {
   OpenDDS::DCPS::Message_Block_Ptr amb(new ACE_Message_Block(24));
   amb->cont(new ACE_Message_Block(32));
@@ -469,7 +482,7 @@ TEST(serializer_test, Serializer_align_context_2_buff)
   //std::cout << std::endl;
 }
 
-TEST(serializer_test, Serializer_align_context_2_buff_diff_walign)
+TEST(dds_DCPS_Serializer, Serializer_align_context_2_buff_diff_walign)
 {
   OpenDDS::DCPS::Message_Block_Ptr amb(new ACE_Message_Block(21));
   amb->cont(new ACE_Message_Block(32));
@@ -508,7 +521,7 @@ TEST(serializer_test, Serializer_align_context_2_buff_diff_walign)
   //std::cout << std::endl;
 }
 
-TEST(serializer_test, Serializer_align_context_2_buff_diff_walign_read)
+TEST(dds_DCPS_Serializer, Serializer_align_context_2_buff_diff_walign_read)
 {
   OpenDDS::DCPS::Message_Block_Ptr amb(new ACE_Message_Block(21));
   amb->cont(new ACE_Message_Block(32));
@@ -554,7 +567,7 @@ TEST(serializer_test, Serializer_align_context_2_buff_diff_walign_read)
   ASSERT_EQ(d, d_out);
 }
 
-TEST(serializer_test, Serializer_align_context_2_buff_diff_walign_read_with_min)
+TEST(dds_DCPS_Serializer, Serializer_align_context_2_buff_diff_walign_read_with_min)
 {
   OpenDDS::DCPS::Message_Block_Ptr amb(new ACE_Message_Block(21));
   amb->cont(new ACE_Message_Block(32));
@@ -600,7 +613,7 @@ TEST(serializer_test, Serializer_align_context_2_buff_diff_walign_read_with_min)
   ASSERT_EQ(d, d_out);
 }
 
-TEST(serializer_test, Serializer_test_peek_align)
+TEST(dds_DCPS_Serializer, Serializer_test_peek_align)
 {
   OpenDDS::DCPS::Message_Block_Ptr amb(new ACE_Message_Block(5));
   amb->cont(new ACE_Message_Block(8));
@@ -639,7 +652,7 @@ TEST(serializer_test, Serializer_test_peek_align)
   ASSERT_TRUE(res == c);
 }
 
-TEST(serializer_test, Serializer_test_peek_depth)
+TEST(dds_DCPS_Serializer, Serializer_test_peek_depth)
 {
   OpenDDS::DCPS::Message_Block_Ptr amb(new ACE_Message_Block(1));
   ACE_Message_Block* cont = amb.get();
@@ -676,7 +689,7 @@ TEST(serializer_test, Serializer_test_peek_depth)
   ASSERT_TRUE(res == c);
 }
 
-TEST(serializer_test, Serializer_test_trim)
+TEST(dds_DCPS_Serializer, Serializer_test_trim)
 {
   OpenDDS::DCPS::Message_Block_Ptr amb(new ACE_Message_Block(1));
   ACE_Message_Block* cont = amb.get();
@@ -701,4 +714,148 @@ TEST(serializer_test, Serializer_test_trim)
   ASSERT_TRUE(subset->cont());
   ASSERT_TRUE(subset->cont()->cont());
   ASSERT_FALSE(subset->cont()->cont()->cont());
+}
+
+TEST(dds_DCPS_Serializer, Serializer_test_bad_string)
+{
+  Message_Block_Ptr amb(new ACE_Message_Block(4));
+  const Encoding enc(Encoding::KIND_XCDR1, ENDIAN_LITTLE);
+  Serializer ser_w(amb.get(), enc);
+  ACE_CDR::Octet x[] = {1, 0, 0, 0};
+  ASSERT_TRUE(ser_w.write_octet_array(x, sizeof x));
+
+  Serializer ser(amb.get(), enc);
+  ACE_CDR::Char* str = 0; // since read_string fails, no need to deallocate
+  ASSERT_EQ(0u, ser.read_string(str));
+  ASSERT_FALSE(ser.good_bit());
+  ASSERT_EQ(0, str);
+}
+
+TEST(dds_DCPS_Serializer, Serializer_test_bad_wstring)
+{
+  Message_Block_Ptr amb(new ACE_Message_Block(4));
+  const Encoding enc(Encoding::KIND_XCDR1, ENDIAN_LITTLE);
+  Serializer ser_w(amb.get(), enc);
+  ACE_CDR::Octet x[] = {1, 0, 0, 0};
+  ASSERT_TRUE(ser_w.write_octet_array(x, sizeof x));
+
+  Serializer ser(amb.get(), enc);
+  ACE_CDR::WChar* str = 0; // since read_string fails, no need to deallocate
+  ASSERT_EQ(0u, ser.read_string(str));
+  ASSERT_FALSE(ser.good_bit());
+  ASSERT_EQ(0, str);
+}
+
+TEST(dds_DCPS_Serializer, Serializer_test_bad_string2)
+{
+  static const ACE_CDR::Octet x[] = {1, 0, 0, 0, 1};
+  Message_Block_Ptr amb(new ACE_Message_Block(sizeof x));
+  const Encoding enc(Encoding::KIND_XCDR1, ENDIAN_LITTLE);
+  Serializer ser_w(amb.get(), enc);
+  ASSERT_TRUE(ser_w.write_octet_array(x, sizeof x));
+
+  Serializer ser(amb.get(), enc);
+  ACE_CDR::Char* str = 0; // since read_string fails, no need to deallocate
+  ASSERT_EQ(0u, ser.read_string(str));
+  ASSERT_FALSE(ser.good_bit());
+  ASSERT_EQ(0, str);
+}
+
+TEST(dds_DCPS_Serializer, read_parameter_id_xcdr2)
+{
+  unsigned char xcdr[] = {
+    // must understand, length code = 0, member id = 0x1111111
+    0x81, 0x11, 0x11, 0x11,
+    0xff,
+    0x0, 0x0, 0x0, // Padding
+    // length code = 1, member id = 0x2222222
+    0x12, 0x22, 0x22, 0x22,
+    0xff, 0xff,
+    0x0, 0x0, // Padding
+    // must understand, length code = 2, member id = 0x3333333
+    0xa3, 0x33, 0x33, 0x33,
+    0xff, 0xff, 0xff, 0xff,
+    // length code = 3, member id = 0x4444444
+    0x34, 0x44, 0x44, 0x44,
+    0xff, 0xff, 0xff, 0xff,
+    0xff, 0xff, 0xff, 0xff,
+    // must understand, length code = 4, member id = 0x5555555
+    0xc5, 0x55, 0x55, 0x55,
+    0x0, 0x0, 0x0, 0x3, // NEXTINT that is NOT shared with member
+    0xff, 0xff, 0xff,
+    0x0, // Padding
+    // length code = 5, member id = 0x6666666
+    0x56, 0x66, 0x66, 0x66,
+    0x0, 0x0, 0x0, 0x3, // NEXTINT that is shared with member
+    0xff, 0xff, 0xff,
+    0x0, // Padding
+    // must understand, length code = 6, member id = 0x7777777
+    0xe7, 0x77, 0x77, 0x77,
+    0x0, 0x0, 0x0, 0x3, // NEXTINT that is shared with member
+    0xff, 0xff, 0xff, 0xff,
+    0xff, 0xff, 0xff, 0xff,
+    0xff, 0xff, 0xff, 0xff,
+    // length code = 7, member id = 0x8888888
+    0x78, 0x88, 0x88, 0x88,
+    0x0, 0x0, 0x0, 0x3, // NEXTINT that is shared with member
+    0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
+    0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
+    0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
+  };
+
+  const Encoding enc(Encoding::KIND_XCDR2, ENDIAN_BIG);
+  ACE_Message_Block mb(sizeof(xcdr));
+  mb.copy((const char*)xcdr, sizeof(xcdr));
+  Serializer ser(&mb, enc);
+  unsigned id;
+  size_t size;
+  bool must_understand;
+
+  ASSERT_TRUE(ser.read_parameter_id(id, size, must_understand));
+  EXPECT_EQ(0x1111111u, id);
+  EXPECT_EQ(1u, size);
+  EXPECT_TRUE(must_understand);
+  ASSERT_TRUE(ser.skip(size));
+
+  ASSERT_TRUE(ser.read_parameter_id(id, size, must_understand));
+  EXPECT_EQ(0x2222222u, id);
+  EXPECT_EQ(2u, size);
+  EXPECT_FALSE(must_understand);
+  ASSERT_TRUE(ser.skip(size));
+
+  ASSERT_TRUE(ser.read_parameter_id(id, size, must_understand));
+  EXPECT_EQ(0x3333333u, id);
+  EXPECT_EQ(4u, size);
+  EXPECT_TRUE(must_understand);
+  ASSERT_TRUE(ser.skip(size));
+
+  ASSERT_TRUE(ser.read_parameter_id(id, size, must_understand));
+  EXPECT_EQ(0x4444444u, id);
+  EXPECT_EQ(8u, size);
+  EXPECT_FALSE(must_understand);
+  ASSERT_TRUE(ser.skip(size));
+
+  ASSERT_TRUE(ser.read_parameter_id(id, size, must_understand));
+  EXPECT_EQ(0x5555555u, id);
+  EXPECT_EQ(3u, size);
+  EXPECT_TRUE(must_understand);
+  ASSERT_TRUE(ser.skip(size));
+
+  ASSERT_TRUE(ser.read_parameter_id(id, size, must_understand));
+  EXPECT_EQ(0x6666666u, id);
+  EXPECT_EQ(7u, size);
+  EXPECT_FALSE(must_understand);
+  ASSERT_TRUE(ser.skip(size));
+
+  ASSERT_TRUE(ser.read_parameter_id(id, size, must_understand));
+  EXPECT_EQ(0x7777777u, id);
+  EXPECT_EQ(16u, size);
+  EXPECT_TRUE(must_understand);
+  ASSERT_TRUE(ser.skip(size));
+
+  ASSERT_TRUE(ser.read_parameter_id(id, size, must_understand));
+  EXPECT_EQ(0x8888888u, id);
+  EXPECT_EQ(28u, size);
+  EXPECT_FALSE(must_understand);
+  ASSERT_TRUE(ser.skip(size));
 }

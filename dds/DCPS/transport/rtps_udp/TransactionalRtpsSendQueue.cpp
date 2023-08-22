@@ -59,7 +59,7 @@ void TransactionalRtpsSendQueue::end_transaction(MetaSubmessageVec& vec)
   }
 }
 
-void TransactionalRtpsSendQueue::ignore(const RepoId& local, const RepoId& remote)
+void TransactionalRtpsSendQueue::ignore(const GUID_t& local, const GUID_t& remote)
 {
   ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
   for (MetaSubmessageVec::iterator pos = queue_.begin(), limit = queue_.end(); pos != limit; ++pos) {
@@ -69,7 +69,7 @@ void TransactionalRtpsSendQueue::ignore(const RepoId& local, const RepoId& remot
   }
 }
 
-void TransactionalRtpsSendQueue::ignore_remote(const RepoId& id)
+void TransactionalRtpsSendQueue::ignore_remote(const GUID_t& id)
 {
   ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
   for (MetaSubmessageVec::iterator pos = queue_.begin(), limit = queue_.end(); pos != limit; ++pos) {
@@ -79,7 +79,7 @@ void TransactionalRtpsSendQueue::ignore_remote(const RepoId& id)
   }
 }
 
-void TransactionalRtpsSendQueue::ignore_local(const RepoId& id)
+void TransactionalRtpsSendQueue::ignore_local(const GUID_t& id)
 {
   ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
   for (MetaSubmessageVec::iterator pos = queue_.begin(), limit = queue_.end(); pos != limit; ++pos) {

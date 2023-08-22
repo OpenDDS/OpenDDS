@@ -28,8 +28,8 @@ namespace {
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 OpenDDS::DCPS::TcpDataLink::TcpDataLink(
+  const OpenDDS::DCPS::TcpTransport_rch& transport_impl,
   const ACE_INET_Addr& remote_address,
-  OpenDDS::DCPS::TcpTransport& transport_impl,
   Priority priority,
   bool is_loopback,
   bool is_active)
@@ -76,7 +76,7 @@ OpenDDS::DCPS::TcpDataLink::send_i(TransportQueueElement* element, bool relink)
 }
 
 void
-OpenDDS::DCPS::TcpDataLink::send_stop_i(RepoId repoId)
+OpenDDS::DCPS::TcpDataLink::send_stop_i(GUID_t repoId)
 {
   ACE_Guard<ACE_Thread_Mutex> guard(stopped_clients_mutex_);
   if (!stopped_clients_.count(repoId)) {
@@ -85,14 +85,14 @@ OpenDDS::DCPS::TcpDataLink::send_stop_i(RepoId repoId)
 }
 
 bool
-OpenDDS::DCPS::TcpDataLink::check_active_client(const RepoId& local_id)
+OpenDDS::DCPS::TcpDataLink::check_active_client(const GUID_t& local_id)
 {
   ACE_Guard<ACE_Thread_Mutex> guard(stopped_clients_mutex_);
   return stopped_clients_.count(local_id) == 0;
 }
 
 void
-OpenDDS::DCPS::TcpDataLink::client_stop(const RepoId& local_id)
+OpenDDS::DCPS::TcpDataLink::client_stop(const GUID_t& local_id)
 {
   ACE_Guard<ACE_Thread_Mutex> guard(stopped_clients_mutex_);
   stopped_clients_.insert(local_id);
@@ -241,7 +241,7 @@ OpenDDS::DCPS::TcpDataLink::reconnect(const TcpConnection_rch& connection)
 {
   DBG_ENTRY_LVL("TcpDataLink","reconnect",6);
 
-  TcpConnection_rch existing_connection(this->connection_.lock());
+  TcpConnection_rch existing_connection(connection_.lock());
   // Sanity check - the connection should exist already since we are reconnecting.
   if (!existing_connection) {
     VDBG_LVL((LM_ERROR,
@@ -253,42 +253,44 @@ OpenDDS::DCPS::TcpDataLink::reconnect(const TcpConnection_rch& connection)
   existing_connection->transfer(connection.in());
 
   bool released = false;
-  TransportStrategy_rch brs;
-  TransportSendStrategy_rch bss;
+  TcpReceiveStrategy_rch trs;
+  TcpSendStrategy_rch tss;
 
   {
-    GuardType guard2(this->strategy_lock_);
+    GuardType strategy_guard(strategy_lock_);
 
-    if (this->receive_strategy_.is_nil() && this->send_strategy_.is_nil()) {
+    trs = dynamic_rchandle_cast<TcpReceiveStrategy>(receive_strategy_);
+    tss = dynamic_rchandle_cast<TcpSendStrategy>(send_strategy_);
+
+    if (!trs || !tss) {
+      // if either are invalid, both should be
+      receive_strategy_.reset();
+      send_strategy_.reset();
       released = true;
-
-    } else {
-      brs = this->receive_strategy_;
-      bss = this->send_strategy_;
     }
   }
 
   if (released) {
-    int result = static_cast<TcpTransport&>(impl()).connect_tcp_datalink(*this, connection);
-    if (result == 0) {
-      do_association_actions();
+    RcHandle<TcpTransport> transport = dynamic_rchandle_cast<TcpTransport>(impl());
+    if (transport) {
+      const int result = transport->connect_tcp_datalink(*this, connection);
+      if (result == 0) {
+        do_association_actions();
+      }
+      return result;
     }
-    return result;
+    return -1;
   }
 
-  this->connection_ = connection;
-
-  TcpReceiveStrategy* rs = static_cast<TcpReceiveStrategy*>(brs.in());
-
-  TcpSendStrategy* ss = static_cast<TcpSendStrategy*>(bss.in());
+  connection_ = connection;
 
   // Associate the new connection object with the receiveing strategy and disassociate
   // the old connection object with the receiveing strategy.
-  int rs_result = rs->reset(existing_connection.in(), connection.in());
+  int rs_result = trs->reset(existing_connection.in(), connection.in());
 
   // Associate the new connection object with the sending strategy and disassociate
   // the old connection object with the sending strategy.
-  int ss_result = ss->reset();
+  int ss_result = tss->reset();
 
   if (rs_result == 0 && ss_result == 0) {
     do_association_actions();
@@ -497,7 +499,7 @@ OpenDDS::DCPS::TcpDataLink::do_association_actions()
 {
   // We have a connection.
   // Invoke callbacks for readers so we can receive messages and let writers know we are ready.
-  typedef std::vector<std::pair<RepoId, RepoId> > PairVec;
+  typedef std::vector<std::pair<GUID_t, GUID_t> > PairVec;
   PairVec to_call_and_send;
 
   {
@@ -525,7 +527,7 @@ OpenDDS::DCPS::TcpDataLink::do_association_actions()
 }
 
 void
-OpenDDS::DCPS::TcpDataLink::send_association_msg(const RepoId& local, const RepoId& remote)
+OpenDDS::DCPS::TcpDataLink::send_association_msg(const GUID_t& local, const GUID_t& remote)
 {
   DataSampleHeader header_data;
   header_data.message_id_ = REQUEST_ACK;
@@ -552,7 +554,7 @@ OpenDDS::DCPS::TcpDataLink::send_association_msg(const RepoId& local, const Repo
   Serializer ser(message.get(), encoding_unaligned_native);
   ser << remote;
 
-  TransportControlElement* send_element = new TransportControlElement(move(message));
+  TransportControlElement* send_element = new TransportControlElement(move(message), local);
 
   this->send_i(send_element, false);
 }
@@ -583,8 +585,8 @@ OpenDDS::DCPS::TcpDataLink::receive_strategy()
 }
 
 int
-OpenDDS::DCPS::TcpDataLink::make_reservation(const RepoId& remote_subscription_id,
-                                             const RepoId& local_publication_id,
+OpenDDS::DCPS::TcpDataLink::make_reservation(const GUID_t& remote_subscription_id,
+                                             const GUID_t& local_publication_id,
                                              const TransportSendListener_wrch& send_listener,
                                              bool reliable)
 {
@@ -598,8 +600,8 @@ OpenDDS::DCPS::TcpDataLink::make_reservation(const RepoId& remote_subscription_i
 }
 
 int
-OpenDDS::DCPS::TcpDataLink::make_reservation(const RepoId& remote_publication_id,
-                                             const RepoId& local_subscription_id,
+OpenDDS::DCPS::TcpDataLink::make_reservation(const GUID_t& remote_publication_id,
+                                             const GUID_t& local_subscription_id,
                                              const TransportReceiveListener_wrch& receive_listener,
                                              bool reliable)
 {

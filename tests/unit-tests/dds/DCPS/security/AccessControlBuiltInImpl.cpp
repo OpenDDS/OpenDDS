@@ -20,8 +20,7 @@
 #include <ace/Null_Mutex.h>
 #endif
 // These are just used to meet signature requirements for a test
-#include <gtest/gtest.h>
-#include <gmock/gmock.h>
+#include <gtestWrapper.h>
 
 #include <sstream>
 #include <fstream>
@@ -385,7 +384,7 @@ public:
 
     DDS::Security::IdentityToken local_id_token;
     OpenDDS::Security::TokenWriter local_tw(local_id_token);
-    local_tw.add_property("dds.cert.sn", "/C=AU/ST=Some-State/O=Internet Widgits Pty Ltd/CN=Ozzie Ozmann");
+    local_tw.add_property("dds.cert.sn", "CN=Ozzie Ozmann,O=Internet Widgits Pty Ltd,ST=Some-State,C=AU");
 
     EXPECT_CALL(*dynamic_cast<MockAuthentication*>(auth_plugin_.get()), get_identity_token(A<DDS::Security::IdentityToken&>(), 1, A<DDS::Security::SecurityException&>())).WillRepeatedly(DoAll(SetArgReferee<0>(local_id_token), Return(true)));
   }
@@ -1272,8 +1271,6 @@ TEST_F(dds_DCPS_security_AccessControlBuiltInImpl, check_remote_datawriter_regis
   // Null pointers
   EXPECT_FALSE(get_inst().check_remote_datawriter_register_instance(
     perm_handle, 0, pub_handle, key.get(), ex));
-  EXPECT_FALSE(get_inst().check_remote_datawriter_register_instance(
-    perm_handle, reader.get(), pub_handle, 0, ex));
 }
 
 TEST_F(dds_DCPS_security_AccessControlBuiltInImpl, check_remote_datawriter_register_instance_Success)
@@ -1305,8 +1302,6 @@ TEST_F(dds_DCPS_security_AccessControlBuiltInImpl, check_remote_datawriter_dispo
   // Null pointers
   EXPECT_FALSE(get_inst().check_remote_datawriter_dispose_instance(
     perm_handle, 0, pub_handle, key.get(), ex));
-  EXPECT_FALSE(get_inst().check_remote_datawriter_dispose_instance(
-    perm_handle, reader.get(), pub_handle, 0, ex));
 }
 
 TEST_F(dds_DCPS_security_AccessControlBuiltInImpl, get_permissions_token_InvalidInput)

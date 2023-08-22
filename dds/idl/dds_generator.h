@@ -49,7 +49,7 @@ class dds_generator {
 public:
   virtual ~dds_generator() = 0;
 
-  static std::string get_tag_name(const std::string& base_name, bool nested_key_only = false);
+  static std::string get_tag_name(const std::string& base_name, const std::string& qualifier = "");
 
   static std::string get_xtag_name(UTL_ScopedName* name);
 
@@ -116,6 +116,22 @@ public:
     UTL_ScopedName* sn, const char* sep, EscapeContext cxt = EscapeContext_Normal);
 };
 
+inline std::string canonical_name(UTL_ScopedName* sn)
+{
+  // NOTE: Names should not have leading "::" according to the XTypes spec.
+  return dds_generator::scoped_helper(sn, "::", EscapeContext_StripEscapes);
+}
+
+inline std::string canonical_name(Identifier* id)
+{
+  return dds_generator::to_string(id, EscapeContext_StripEscapes);
+}
+
+inline std::string canonical_name(AST_Decl* node)
+{
+  return canonical_name(node->local_name());
+}
+
 class composite_generator : public dds_generator {
 public:
   void gen_prologue();
@@ -167,29 +183,47 @@ private:
 
 // common utilities for all "generator" derived classes
 
-const char* const namespace_guard_start =
-  "OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL\n"
-  "namespace OpenDDS { namespace DCPS {\n\n";
-const char* const namespace_guard_end =
-  "} }\n"
-  "OPENDDS_END_VERSIONED_NAMESPACE_DECL\n\n";
-
 struct NamespaceGuard {
   const bool enabled_;
+  std::vector<std::string>* ns_;
+  std::vector<std::string> default_ns_;
 
-  NamespaceGuard(bool enabled = true)
-  : enabled_(enabled)
+  NamespaceGuard(bool enabled = true, std::vector<std::string>* ns = 0)
+    : enabled_(enabled)
+    , ns_(ns)
   {
+    if (!ns_) {
+      default_ns_.push_back("OpenDDS");
+      default_ns_.push_back("DCPS");
+      ns_ = &default_ns_;
+    }
     if (enabled_) {
-      be_global->header_ << namespace_guard_start;
-      be_global->impl_ << namespace_guard_start;
+      std::string start_ns = "OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL\n";
+      for (size_t i = 0; i < ns_->size(); ++i) {
+        if (i > 0) {
+          start_ns += " ";
+        }
+        start_ns += "namespace " + (*ns_)[i] + " {";
+      }
+      start_ns += "\n\n";
+      be_global->header_ << start_ns;
+      be_global->impl_ << start_ns;
     }
   }
+
   ~NamespaceGuard()
   {
     if (enabled_) {
-      be_global->header_ << namespace_guard_end;
-      be_global->impl_ << namespace_guard_end;
+      std::string end_ns;
+      for (size_t i = 0; i < ns_->size(); ++i) {
+        if (i > 0) {
+          end_ns += " ";
+        }
+        end_ns += "}";
+      }
+      end_ns += "\nOPENDDS_END_VERSIONED_NAMESPACE_DECL\n\n";
+      be_global->header_ << end_ns;
+      be_global->impl_ << end_ns;
     }
   }
 };
@@ -281,11 +315,11 @@ public:
     const std::string& what,
     bool impl = true, bool header = true,
     const std::string& indent = "")
-  : what_(what)
-  , impl_(impl)
-  , header_(header)
-  , indent_(indent)
-  , extra_newline_(false)
+    : what_(what)
+    , impl_(impl)
+    , header_(header)
+    , indent_(indent)
+    , extra_newline_(true)
   {
     output("#" + indent + "if" + what + "\n");
   }
@@ -752,8 +786,18 @@ struct Intro {
   }
 };
 
+std::string field_type_name(AST_Field* field, AST_Type* field_type = 0);
+
+/**
+ * For the some situations, like a tag name, the type name we need is the
+ * deepest named type, not the actual type. This will be the name of the
+ * deepest typedef if it's an array or sequence, otherwise the name of the
+ * type.
+ */
+AST_Type* deepest_named_type(AST_Type* type);
+
 typedef std::string (*CommonFn)(
-  const std::string& indent,
+  const std::string& indent, AST_Decl* node,
   const std::string& name, AST_Type* type,
   const std::string& prefix, bool wrap_nested_key_only, Intro& intro,
   const std::string&);
@@ -769,7 +813,8 @@ void generateCaseBody(
   const bool use_cxx11 = lmap == BE_GlobalData::LANGMAP_CXX11;
   const std::string name = branch->local_name()->get_string();
   if (namePrefix == std::string(">> ")) {
-    std::string brType = scoped(branch->field_type()->name()), forany;
+    std::string brType = field_type_name(branch, branch->field_type());
+    std::string forany;
     AST_Type* br = resolveActualType(branch->field_type());
     Classification br_cls = classify(br);
     if (!br->in_main_file()
@@ -797,7 +842,7 @@ void generateCaseBody(
       rhs = use_cxx11 ? "tmp" : "tmp.out()";
     } else if (use_cxx11 && (br_cls & (CL_ARRAY | CL_SEQUENCE))) {  //array or seq C++11
       rhs = "IDL::DistinctType<" + brType + ", "
-        + dds_generator::get_tag_name(dds_generator::scoped_helper(branch->field_type()->name(), "::"))
+        + dds_generator::get_tag_name(brType)
         + ">(tmp)";
     } else if (br_cls & CL_ARRAY) { //array classic
       forany = "    " + brType + "_forany fa = tmp;\n";
@@ -832,7 +877,7 @@ void generateCaseBody(
         be_global->impl_ <<
           "        if (strm.get_construction_status() == Serializer::BoundConstructionFailure && " << check_not_empty << " && ("
                     << bounded_arg(br) << " < " << get_length << ")) {\n"
-          "          " << strtype << " s = tmp;\n"
+          "          " << strtype << " s = tmp.c_str();\n"
           "          s.resize(" << bounded_arg(br) << ");\n"
           "          uni." << name << "(s.c_str());\n"
           "          strm.set_construction_status(Serializer::ConstructionSuccessful);\n"
@@ -865,12 +910,12 @@ void generateCaseBody(
     if (commonFn2) {
       const OpenDDS::XTypes::MemberId id = be_global->get_id(branch);
       contents
-        << commonFn2(indent, name + (parens ? "()" : ""), branch->field_type(), "uni", false, intro, "")
+        << commonFn2(indent, branch, name + (parens ? "()" : ""), branch->field_type(), "uni", false, intro, "")
         << indent << "if (!strm.write_parameter_id(" << id << ", size)) {\n"
         << indent << "  return false;\n"
         << indent << "}\n";
     }
-    const std::string expr = commonFn(indent,
+    const std::string expr = commonFn(indent, branch,
       name + (parens ? "()" : ""), branch->field_type(),
       std::string(namePrefix) + "uni", false, intro, uni);
     if (*statementPrefix) {
@@ -1209,5 +1254,356 @@ AST_Type* container_base_type(AST_Type* type)
   }
   return 0;
 }
+
+/**
+ * Returns true for a type if nested key serialization is different from
+ * normal serialization.
+ */
+inline bool needs_nested_key_only(AST_Type* type)
+{
+  AST_Type* const non_aliased_type = type;
+
+  using namespace AstTypeClassification;
+
+  static std::vector<AST_Type*> type_stack;
+  type = resolveActualType(type);
+  // Check if we have encountered the same type recursively
+  for (size_t i = 0; i < type_stack.size(); ++i) {
+    if (type == type_stack[i]) {
+      return true;
+    }
+  }
+  type_stack.push_back(type);
+
+  bool result = false;
+  const std::string name = scoped(type->name());
+
+  std::string template_name;
+  if (be_global->special_serialization(non_aliased_type, template_name)) {
+    result = false;
+  } else {
+    const Classification type_class = classify(type);
+    if (type_class & CL_ARRAY) {
+      result = needs_nested_key_only(dynamic_cast<AST_Array*>(type)->base_type());
+    } else if (type_class & CL_SEQUENCE) {
+      result = needs_nested_key_only(dynamic_cast<AST_Sequence*>(type)->base_type());
+    } else if (type_class & CL_STRUCTURE) {
+      AST_Structure* const struct_node = dynamic_cast<AST_Structure*>(type);
+      // TODO(iguessthislldo): Possible optimization: If everything in a struct
+      // was a key recursively, then we could return false.
+      if (struct_has_explicit_keys(struct_node)) {
+        result = true;
+      } else {
+        const Fields fields(struct_node);
+        const Fields::Iterator fields_end = fields.end();
+        for (Fields::Iterator i = fields.begin(); i != fields_end; ++i) {
+          if (needs_nested_key_only((*i)->field_type())) {
+            result = true;
+            break;
+          }
+        }
+      }
+    } else if (type_class & CL_UNION) {
+      // A union will always be different as a key because it's just the
+      // discriminator.
+      result = true;
+    }
+  }
+  type_stack.pop_back();
+  return result;
+}
+
+inline bool needs_forany(AST_Type* type)
+{
+  using namespace AstTypeClassification;
+  const Classification type_class = classify(resolveActualType(type));
+  return be_global->language_mapping() != BE_GlobalData::LANGMAP_CXX11 &&
+    type_class & CL_ARRAY;
+}
+
+inline bool needs_distinct_type(AST_Type* type)
+{
+  using namespace AstTypeClassification;
+  const Classification type_class = classify(resolveActualType(type));
+  return be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11 &&
+    type_class & (CL_SEQUENCE | CL_ARRAY);
+}
+
+const char* const shift_out = "<< ";
+const char* const shift_in = ">> ";
+
+inline std::string strip_shift_op(const std::string& s)
+{
+  const size_t shift_len = 3;
+  std::string rv = s;
+  if (rv.size() > shift_len) {
+    const std::string first3 = rv.substr(0, shift_len);
+    if (first3 == shift_out || first3 == shift_in) {
+      rv.erase(0, 3);
+    }
+  }
+  return rv;
+}
+
+inline const char* get_shift_op(const std::string& s)
+{
+  const size_t shift_len = 3;
+  if (s.size() > shift_len) {
+    const std::string first3 = s.substr(0, shift_len);
+    if (first3 == shift_in) {
+      return shift_in;
+    }
+    if (first3 == shift_out) {
+      return shift_out;
+    }
+  }
+  return "";
+}
+
+/// Handling wrapping and unwrapping references in the wrapper types:
+/// NestedKeyOnly, IDL::DistinctType, and *_forany.
+struct RefWrapper {
+  const bool cpp11_;
+  AST_Type* const type_;
+  const std::string type_name_;
+  const std::string to_wrap_;
+  const char* const shift_op_;
+  const std::string fieldref_;
+  const std::string local_;
+  bool is_const_;
+  bool nested_key_only_;
+  bool classic_array_copy_;
+  bool dynamic_data_adapter_;
+  std::string classic_array_copy_var_;
+  AST_Typedef* typedef_node_;
+
+  RefWrapper(AST_Type* type, const std::string& type_name,
+    const std::string& to_wrap, bool is_const = true)
+    : cpp11_(be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11)
+    , type_(type)
+    , type_name_(type_name)
+    , to_wrap_(strip_shift_op(to_wrap))
+    , shift_op_(get_shift_op(to_wrap))
+    , is_const_(is_const)
+    , nested_key_only_(false)
+    , classic_array_copy_(false)
+    , dynamic_data_adapter_(false)
+    , typedef_node_(0)
+    , done_(false)
+  {
+  }
+
+  RefWrapper(AST_Type* type, const std::string& type_name,
+    const std::string& fieldref, const std::string& local, bool is_const = true)
+    : cpp11_(be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11)
+    , type_(type)
+    , type_name_(type_name)
+    , shift_op_("")
+    , fieldref_(strip_shift_op(fieldref))
+    , local_(local)
+    , is_const_(is_const)
+    , nested_key_only_(false)
+    , classic_array_copy_(false)
+    , dynamic_data_adapter_(false)
+    , typedef_node_(0)
+    , done_(false)
+  {
+  }
+
+  RefWrapper& done(Intro* intro = 0)
+  {
+    ACE_ASSERT(!done_);
+
+    if (is_const_ && !std::strcmp(shift_op_, shift_in)) {
+      is_const_ = false;
+    }
+    const std::string const_str = is_const_ ? "const " : "";
+    const bool forany = classic_array_copy_ || needs_forany(type_);
+    const bool distinct_type = needs_distinct_type(type_);
+    needs_dda_tag_ = dynamic_data_adapter_ && (forany || distinct_type);
+    nested_key_only_ = nested_key_only_ &&
+      needs_nested_key_only(typedef_node_ ? typedef_node_ : type_);
+    wrapped_type_name_ = type_name_;
+    bool by_ref = true;
+
+    if (to_wrap_.size()) {
+      ref_ = to_wrap_;
+    } else {
+      ref_ = fieldref_;
+      if (local_.size()) {
+        ref_ += '.' + local_;
+      }
+    }
+
+    if (forany && !dynamic_data_adapter_) {
+      const std::string forany_type = type_name_ + "_forany";
+      if (classic_array_copy_) {
+        const std::string var_name = dds_generator::valid_var_name(ref_) + "_tmp_var";
+        classic_array_copy_var_ = var_name;
+        if (intro) {
+          intro->insert(type_name_ + "_var " + var_name + "= " + type_name_ + "_alloc();");
+        }
+        ref_ = var_name;
+      }
+      const std::string var_name = dds_generator::valid_var_name(ref_) + "_forany";
+      wrapped_type_name_ = forany_type;
+      if (intro) {
+        std::string line = forany_type + " " + var_name;
+        if (classic_array_copy_) {
+          line += " = " + ref_ + ".inout();";
+        } else {
+          line += "(const_cast<" + type_name_ + "_slice*>(" + ref_ + "));";
+        }
+        intro->insert(line);
+      }
+      ref_ = var_name;
+    }
+
+    if (nested_key_only_) {
+      wrapped_type_name_ =
+        std::string("NestedKeyOnly<") + const_str + wrapped_type_name_ + ">";
+      value_access_post_ = ".value" + value_access_post_;
+      const std::string nko_arg = "(" + ref_ + ")";
+      if (is_const_) {
+        ref_ = wrapped_type_name_ + nko_arg;
+      } else {
+        ref_ = dds_generator::valid_var_name(ref_) + "_nested_key_only";
+        if (intro) {
+          intro->insert(wrapped_type_name_ + " " + ref_ + nko_arg + ";");
+        }
+      }
+    }
+
+    if (distinct_type && !dynamic_data_adapter_) {
+      wrapped_type_name_ =
+        std::string("IDL::DistinctType<") + const_str + wrapped_type_name_ +
+        ", " + get_tag_name_i() + ">";
+      value_access_pre_ += "(*";
+      value_access_post_ = ".val_)" + value_access_post_;
+      const std::string idt_arg = "(" + ref_ + ")";
+      if (is_const_) {
+        ref_ = wrapped_type_name_ + idt_arg;
+      } else {
+        ref_ = dds_generator::valid_var_name(ref_) + "_distinct_type";
+        if (intro) {
+          intro->insert(wrapped_type_name_ + " " + ref_ + idt_arg + ";");
+        }
+      }
+      by_ref = false;
+    }
+
+    wrapped_type_name_ = const_str + wrapped_type_name_ + (by_ref ? "&" : "");
+    done_ = true;
+    return *this;
+  }
+
+  std::string ref() const
+  {
+    ACE_ASSERT(done_);
+    return ref_;
+  }
+
+  std::string wrapped_type_name() const
+  {
+    ACE_ASSERT(done_);
+    return wrapped_type_name_;
+  }
+
+  bool needs_dda_tag() const
+  {
+    ACE_ASSERT(done_);
+    return needs_dda_tag_;
+  }
+
+  void generate_tag() const
+  {
+    if (cpp11_ || needs_dda_tag_) {
+      be_global->header_ << "struct " << get_tag_name() << " {};\n\n";
+    }
+  }
+
+  std::string get_tag_name() const
+  {
+    ACE_ASSERT(done_);
+    return get_tag_name_i();
+  }
+
+  std::string get_var_name(const std::string& var_name) const
+  {
+    return var_name.size() ? var_name : to_wrap_;
+  }
+
+  std::string value_access(const std::string& var_name = "") const
+  {
+    return value_access_pre_ + get_var_name(var_name) + value_access_post_;
+  }
+
+  std::string seq_check_empty() const
+  {
+    return value_access() + (cpp11_ ? ".empty()" : ".length() == 0");
+  }
+
+  std::string seq_get_length() const
+  {
+    const std::string value = value_access();
+    return cpp11_ ? "static_cast<uint32_t>(" + value + ".size())" : value + ".length()";
+  }
+
+  std::string seq_resize(const std::string& new_size) const
+  {
+    const std::string value = value_access();
+    return value + (cpp11_ ? ".resize" : ".length") + "(" + new_size + ");\n";
+  }
+
+  std::string seq_get_buffer() const
+  {
+    return value_access() + (cpp11_ ? ".data()" : ".get_buffer()");
+  }
+
+  std::string flat_collection_access(std::string index) const
+  {
+    AST_Array* const array_node = dynamic_cast<AST_Array*>(type_);
+    std::string ref;
+    if (array_node) {
+      ref = "(&" + value_access();
+      for (ACE_CDR::ULong dim = array_node->n_dims(); dim; --dim) {
+        ref += "[0]";
+      }
+      ref += ")";
+    } else {
+      ref = value_access();
+    }
+    return ref += "[" + index + "]";
+  }
+
+  std::string stream() const
+  {
+    return shift_op_ + ref();
+  }
+
+  std::string classic_array_copy() const
+  {
+    return type_name_ + "_copy(" + to_wrap_ + ", " + classic_array_copy_var_ + ".in());";
+  }
+
+private:
+  bool done_;
+  std::string wrapped_type_name_;
+  std::string ref_;
+  std::string value_access_pre_;
+  std::string value_access_post_;
+  bool needs_dda_tag_;
+
+  std::string get_tag_name_i() const
+  {
+    std::string qualifier;
+    if (nested_key_only_) {
+      qualifier = "_nested_key_only";
+    } else if (needs_dda_tag_) {
+      qualifier = "_dda";
+    }
+    return dds_generator::get_tag_name(type_name_, qualifier);
+  }
+};
 
 #endif

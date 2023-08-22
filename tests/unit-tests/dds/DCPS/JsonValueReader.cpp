@@ -606,4 +606,87 @@ TEST(dds_DCPS_JsonValueReader, from_json)
   EXPECT_TRUE(from_json(s, ss));
 }
 
+void check_members(JsonValueReader<>& jvr)
+{
+  MemberId member_id;
+  ACE_CDR::Boolean bool_value;
+  ACE_CDR::Octet byte_value;
+  ACE_CDR::Short int16_value;
+  ACE_CDR::UShort uint16_value;
+
+  EXPECT_TRUE(jvr.begin_struct_member(member_id, member_helper));
+  EXPECT_EQ(member_id, BOOL_MEMBER_ID);
+  EXPECT_TRUE(jvr.read_boolean(bool_value));
+  EXPECT_EQ(bool_value, true);
+  EXPECT_TRUE(jvr.end_struct_member());
+
+  EXPECT_TRUE(jvr.begin_struct_member(member_id, member_helper));
+  EXPECT_EQ(member_id, BYTE_MEMBER_ID);
+  EXPECT_TRUE(jvr.read_byte(byte_value));
+  EXPECT_EQ(byte_value, 255);
+  EXPECT_TRUE(jvr.end_struct_member());
+
+  EXPECT_TRUE(jvr.begin_struct_member(member_id, member_helper));
+  EXPECT_EQ(member_id, INT16_MEMBER_ID);
+  EXPECT_TRUE(jvr.read_int16(int16_value));
+  EXPECT_EQ(int16_value, 32767);
+  EXPECT_TRUE(jvr.end_struct_member());
+
+  EXPECT_TRUE(jvr.begin_struct_member(member_id, member_helper));
+  EXPECT_EQ(member_id, UINT16_MEMBER_ID);
+  EXPECT_TRUE(jvr.read_uint16(uint16_value));
+  EXPECT_EQ(uint16_value, 65535);
+  EXPECT_TRUE(jvr.end_struct_member());
+}
+
+#define SKIP_VALUE "{\"nested1\":[1,2,3,4,5],\"nested2\":2.17}"
+
+TEST(dds_DCPS_JsonValueReader, skip_unknown_first)
+{
+  const char json[] = "{"
+    "  \"unknown\": " SKIP_VALUE ","
+    "  \"bool\": true,"
+    "  \"byte\": 255,"
+    "  \"int16\": 32767,"
+    "  \"uint16\": 65535"
+    "}";
+  StringStream ss(json);
+  JsonValueReader<> jvr(ss);
+  EXPECT_TRUE(jvr.begin_struct());
+  check_members(jvr);
+  EXPECT_TRUE(jvr.end_struct());
+}
+
+TEST(dds_DCPS_JsonValueReader, skip_unknown_middle)
+{
+  const char json[] = "{"
+    "  \"bool\": true,"
+    "  \"byte\": 255,"
+    "  \"unknown\": " SKIP_VALUE ","
+    "  \"int16\": 32767,"
+    "  \"uint16\": 65535"
+    "}";
+  StringStream ss(json);
+  JsonValueReader<> jvr(ss);
+  EXPECT_TRUE(jvr.begin_struct());
+  check_members(jvr);
+  EXPECT_TRUE(jvr.end_struct());
+}
+
+TEST(dds_DCPS_JsonValueReader, skip_unknown_last)
+{
+  const char json[] = "{"
+    "  \"bool\": true,"
+    "  \"byte\": 255,"
+    "  \"int16\": 32767,"
+    "  \"uint16\": 65535,"
+    "  \"unknown\": " SKIP_VALUE
+    "}";
+  StringStream ss(json);
+  JsonValueReader<> jvr(ss);
+  EXPECT_TRUE(jvr.begin_struct());
+  check_members(jvr);
+  EXPECT_TRUE(jvr.end_struct());
+}
+
 #endif

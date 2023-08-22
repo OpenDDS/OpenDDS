@@ -321,6 +321,30 @@ module OpenDDS
     const DDS::StatusMask ALL_STATUS_MASK = 0xffffffff;
     const DDS::StatusMask NO_STATUS_MASK = 0x00000000;
     const DDS::StatusMask DEFAULT_STATUS_MASK = ALL_STATUS_MASK;
+
+    local interface ConfigStore {
+      boolean has(in string key);
+
+      void set_boolean(in string key, in boolean value);
+      boolean get_boolean(in string key, in boolean default_value);
+
+      void set_int32(in string key, in int32 value);
+      int32 get_int32(in string key, in int32 default_value);
+
+      void set_uint32(in string key, in uint32 value);
+      uint32 get_uint32(in string key, in uint32 default_value);
+
+      void set_float64(in string key, in double value);
+      double get_float64(in string key, in double default_value);
+
+      void set_string(in string key, in string value);
+      string get_string(in string key, in string default_value);
+
+      void set_duration(in string key, in DDS::Duration_t value);
+      DDS::Duration_t get_duration(in string key, in DDS::Duration_t default_value);
+
+      void unset(in string key);
+    };
   };
 };
 

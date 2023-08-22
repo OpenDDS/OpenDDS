@@ -135,7 +135,12 @@ string idl_mapping_jni::taoParam(AST_Type *decl, AST_Argument::Direction dir,
     addConst = false;
     break;
   case AST_Decl::NT_string:
-    param = "char *";
+    if (dir == AST_Argument::dir_OUT) {
+      param = "CORBA::String_out";
+      addRef = false;
+    } else {
+      param = "char *";
+    }
     break;
   case AST_Decl::NT_wstring:
     param = "CORBA::WChar *";
@@ -516,6 +521,8 @@ bool idl_mapping_jni::gen_struct(UTL_ScopedName *name,
   for (size_t i = 0; i < fields.size(); ++i) {
     string fname = fields[i]->local_name()->get_string();
     string jvmSig = jvmSignature(fields[i]->field_type()); // "I"
+    const string getPrefix = jvmSig == "C" ? "static_cast<char> (" : "",
+      getSuffix = jvmSig == "C" ? ")" : "";
     string jniFn = jniFnName(fields[i]->field_type()); // "Int"
     string fieldID =
       "    jfieldID fid = jni->GetFieldID (clazz, \"" + fname + "\", \""
@@ -525,8 +532,8 @@ bool idl_mapping_jni::gen_struct(UTL_ScopedName *name,
 
     if (isPrimitive(fields[i]->field_type())) {
       fieldsToCxx +=
-        "    target." + fname + " = jni->Get" + jniFn
-        + "Field (source, fid);\n";
+        "    target." + fname + " = " + getPrefix + "jni->Get" + jniFn
+        + "Field (source, fid)" + getSuffix + ";\n";
       fieldsToJava +=
         "    jni->Set" + jniFn + "Field (target, fid, source." + fname
         + ");\n";
@@ -668,6 +675,7 @@ bool idl_mapping_jni::gen_jarray_copies(UTL_ScopedName *name,
                                         const string &jniArrayType, const string &taoTypeName, bool sequence,
                                         const string &length, bool elementIsObjref /* = false */)
 {
+  const bool lengthIsConstant = !sequence;
   commonSetup c(name, jniArrayType.c_str(), false, !sequence);
   string preLoop, postLoopCxx, postLoopJava, preNewArray, newArrayExtra,
   postNewArray, loopCxx, loopJava, actualJniType = jniType,
@@ -809,12 +817,21 @@ bool idl_mapping_jni::gen_jarray_copies(UTL_ScopedName *name,
   "  target = arr;\n";
 
   ostringstream toCxxBody;
+  if (lengthIsConstant) {
+    toCxxBody <<
+      "  const CORBA::ULong target_len = " << length << ";\n";
+  }
   toCxxBody <<
   "  " << actualJniType << "Array arr = source;\n"
   "  jsize len = jni->GetArrayLength (arr);\n"
   << resizeCxx
   << preLoop <<
-  "  for (CORBA::ULong i = 0; i < static_cast<CORBA::ULong> (len); ++i)\n"
+  "  for (CORBA::ULong i = 0; ";
+  if (lengthIsConstant) {
+    toCxxBody << "i < target_len && ";
+  }
+  toCxxBody <<
+  "i < static_cast<CORBA::ULong> (len); ++i)\n"
   "    {\n"
   << loopCxx <<
   "    }\n"

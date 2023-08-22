@@ -80,12 +80,9 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
           // Initialize samples
           ::Xyz::Foo message;
 
-          char number[20];
-
           std::cerr << pid << "Pub Stage " << stage << " sending id=" << id << "\n";
           for (int i = 0; i<msg_count; ++i) {
             // Prepare next sample
-            sprintf(number, "foo %d", i);
             message.key = msg_count;
             message.c = (char)i;
             message.x = id;
