@@ -1052,7 +1052,7 @@ Those properties, along with options specific to OpenDDS’s RTPS Discovery impl
 
      - ``DCPSDefaultAddress, or IPADDR_ANY``
 
-   * - SedpAdvertisedLocalAddress= addr:[port]
+   * - ``SedpAdvertisedLocalAddress= addr:[port]``
 
      - Sets the address advertised by SEDP.
        Typically used when the participant is behind a firewall or NAT.
@@ -1060,23 +1060,23 @@ Those properties, along with options specific to OpenDDS’s RTPS Discovery impl
 
      -
 
-   * - SedpSendDelay=msec
+   * - ``SedpSendDelay=msec``
 
      - Time in milliseconds for a built-in  (SEDP) Writer to wait before sending data.
 
-     - 10
+     - ``10``
 
-   * - SedpHeartbeatPeriod=msec
+   * - ``SedpHeartbeatPeriod=msec``
 
      - Time in milliseconds for a built-in (SEDP) Writer to announce the availability of data.
 
-     - 200
+     - ``200``
 
-   * - SedpNakResponseDelay=msec
+   * - ``SedpNakResponseDelay=msec``
 
      - Time in milliseconds for a built-in (SEDP) Writer to delay the response to a negative acknowledgment.
 
-     - 100
+     - ``100``
 
    * - ``DX=n``
 
@@ -1103,21 +1103,21 @@ Those properties, along with options specific to OpenDDS’s RTPS Discovery impl
 
      - Remove a discovered participant after this number of SPDP messages with earlier sequence numbers.
 
-     - 3
+     - ``3``
 
    * - ``PeriodicDirectedSpdp=[0|1]``
 
      - A boolean value that determines whether directed SPDP messages are sent to all participants once every resend period.
        This setting should be enabled for participants that cannot use multicast to send SPDP announcements, e.g., an RtpsRelay.
 
-     - 0
+     - ``0``
 
    * - ``UndirectedSpdp=[0|1]``
 
      - A boolean value that determines whether undirected SPDP messages are sent.
        This setting should be disabled for participants that cannot use multicast to send SPDP announcements, e.g., an RtpsRelay.
 
-     - 1
+     - ``1``
 
    * - InteropMulticastOverride=
 
