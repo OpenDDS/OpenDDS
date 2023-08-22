@@ -509,5 +509,6 @@ tests/DCPS/TypeSupportPlugin/run_test.pl: !DCPS_MIN !BROKEN_DLCLOSE
 
 tests/DCPS/DynamicData/run_test.pl dyn=dw ini=rtps.ini: RTPS !OPENDDS_SAFETY_PROFILE
 tests/DCPS/DynamicData/run_test.pl dyn=dr ini=rtps.ini: RTPS !OPENDDS_SAFETY_PROFILE
+tests/DCPS/DynamicData/run_test.pl dyn=dw ini=rtps.ini adapt: RTPS !OPENDDS_SAFETY_PROFILE !DDS_NO_CONTENT_SUBSCRIPTION
 
 tests/DCPS/DynamicResponse/run_test.pl: RTPS !OPENDDS_SAFETY_PROFILE !DDS_NO_OWNERSHIP_PROFILE !NO_BUILT_IN_TOPICS

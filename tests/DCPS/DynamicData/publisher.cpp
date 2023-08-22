@@ -91,8 +91,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 
   if (dynamic) {
     if (adapter) {
-#ifndef OPENDDS_SAFETY_PROFILE
-#  if OPENDDS_HAS_DYNAMIC_DATA_ADAPTER
+#if OPENDDS_HAS_DYNAMIC_DATA_ADAPTER
       DDS::DynamicDataWriter_var ddw = DDS::DynamicDataWriter::_narrow(data_writer);
       HelloWorld::Message msg;
       msg.value = HelloWorld::MESSAGE_EXAMPLE_VALUE;
@@ -100,7 +99,6 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
       if (check_rc(ddw->write(ddai, DDS::HANDLE_NIL), "write (DynamicDataAdapter) failed")) {
         return 1;
       }
-#  endif
 #endif
     } else {
       DDS::DynamicDataWriter_var ddw = DDS::DynamicDataWriter::_narrow(data_writer);
