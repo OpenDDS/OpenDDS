@@ -455,6 +455,7 @@ namespace {
       }
 
       be_global->header_ <<
+        "  DDS::DynamicData_ptr clone();\n"
         "  bool serialized_size(const OpenDDS::DCPS::Encoding& enc, size_t& size, OpenDDS::DCPS::Sample::Extent ext) const;\n"
         "  bool serialize(OpenDDS::DCPS::Serializer& ser, OpenDDS::DCPS::Sample::Extent ext) const;\n"
         "\n";
@@ -463,6 +464,11 @@ namespace {
       const bool forany = needs_forany(dynamic_cast<AST_Type*>(node));
       const bool distinct_type = needs_distinct_type(dynamic_cast<AST_Type*>(node));
       be_global->impl_ <<
+        "DDS::DynamicData_ptr " << impl_classname << "::clone()\n"
+        "{\n"
+        "  return new DynamicDataAdapterImpl(type_, value_);\n"
+        "}\n"
+        "\n"
         "bool " << impl_classname << "::serialized_size(\n"
         "  const OpenDDS::DCPS::Encoding& enc, size_t& size, OpenDDS::DCPS::Sample::Extent ext) const\n"
         "{\n";

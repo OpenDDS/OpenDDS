@@ -196,12 +196,6 @@ DDS::ReturnCode_t DynamicDataAdapter::clear_value(DDS::MemberId)
   return unsupported_method("DynamicDataAdapater::clear_value");
 }
 
-DDS::DynamicData_ptr DynamicDataAdapter::clone()
-{
-  unsupported_method("DynamicDataAdapater::clone");
-  return 0;
-}
-
 DDS::ReturnCode_t DynamicDataAdapter::invalid_id(const char* method, DDS::MemberId id) const
 {
   if (DCPS::log_level >= DCPS::LogLevel::Notice) {

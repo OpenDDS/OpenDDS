@@ -39,10 +39,12 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   ACE_Argv_Type_Converter conv(argc, argv);
   char** const argva = conv.get_ASCII_argv();
   bool dynamic = false;
-  for (int i = 1; i < argc; ++i) {
+  bool adapter = false;
+  for (int i = 1; i < argc && !(dynamic && adapter); ++i) {
     if (0 == std::strcmp("-dynamic", argva[i])) {
       dynamic = true;
-      break;
+    } else if (0 == std::strcmp("-adapter", argva[i])) {
+      adapter = true;
     }
   }
 
@@ -88,29 +90,29 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   distributed_condition_set->wait_for(HelloWorld::PUBLISHER, HelloWorld::SUBSCRIBER, HelloWorld::SUBSCRIBER_READY);
 
   if (dynamic) {
-    DDS::DynamicDataWriter_var ddw = DDS::DynamicDataWriter::_narrow(data_writer);
-    DDS::DynamicData_var dd = DDS::DynamicDataFactory::get_instance()->create_data(dt);
-    if (check_rc(dd->set_string_value(0, HelloWorld::MESSAGE_EXAMPLE_VALUE), "set_string_value failed")) {
-      return 1;
+    if (adapter) {
+#ifndef OPENDDS_SAFETY_PROFILE
+#  if OPENDDS_HAS_DYNAMIC_DATA_ADAPTER
+      DDS::DynamicDataWriter_var ddw = DDS::DynamicDataWriter::_narrow(data_writer);
+      HelloWorld::Message msg;
+      msg.value = HelloWorld::MESSAGE_EXAMPLE_VALUE;
+      DDS::DynamicData_var ddai = OpenDDS::XTypes::get_dynamic_data_adapter<HelloWorld::Message, HelloWorld::Message>(dt, msg);
+      if (check_rc(ddw->write(ddai, DDS::HANDLE_NIL), "write (DynamicDataAdapter) failed")) {
+        return 1;
+      }
+#  endif
+#endif
+    } else {
+      DDS::DynamicDataWriter_var ddw = DDS::DynamicDataWriter::_narrow(data_writer);
+      DDS::DynamicData_var dd = DDS::DynamicDataFactory::get_instance()->create_data(dt);
+      if (check_rc(dd->set_string_value(0, HelloWorld::MESSAGE_EXAMPLE_VALUE), "set_string_value failed")) {
+        return 1;
+      }
+      if (check_rc(ddw->write(dd, DDS::HANDLE_NIL), "write (DynamicDataImpl) failed")) {
+        return 1;
+      }
     }
-    if (check_rc(ddw->write(dd, DDS::HANDLE_NIL), "write (DynamicDataImpl) failed")) {
-      return 1;
-    }
-  }
-// #ifndef OPENDDS_SAFETY_PROFILE
-// #if OPENDDS_HAS_DYNAMIC_DATA_ADAPTER
-//   else if (/*adapter*/true) { // TODO(sonndinh): Add "adapter" option.
-//     DDS::DynamicDataWriter_var ddw = DDS::DynamicDataWriter::_narrow(data_writer);
-//     HelloWorld::Message msg;
-//     msg.value = HelloWorld::MESSAGE_EXAMPLE_VALUE;
-//     OpenDDS::XTypes::DynamicDataAdapterImpl<HelloWorld::Message, HelloWorld::Message> ddai(dt, msg);
-//     if (check_rc(ddw->write(&ddai, DDS::HANDLE_NIL), "write (DynamicDataAdapter) failed")) {
-//       return 1;
-//     }
-//   }
-// #endif
-// #endif
-  else {
+  } else {
     HelloWorld::MessageDataWriter_var mdw = HelloWorld::MessageDataWriter::_narrow(data_writer);
     HelloWorld::Message msg;
     msg.value = HelloWorld::MESSAGE_EXAMPLE_VALUE;
