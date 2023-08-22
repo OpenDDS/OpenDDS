@@ -913,7 +913,7 @@ OpenDDS is itself built with MPC, so development systems that are set up to use 
 The OpenDDS configure script creates a "setenv" script with environment settings (``setenv.cmd`` on Windows; ``setenv.sh`` on Linux/macOS).
 This environment contains the ``PATH`` and ``MPC_ROOT`` settings necessary to use MPC.
 
-MPC's source tree (in ``MPC_ROOT``) contains a "docs" directory with both HTML and plain text documentation (``USAGE`` and ``README`` files).
+MPC's source tree (in ``MPC_ROOT``) contains a ``docs`` directory with both HTML and plain text documentation (``USAGE`` and ``README`` files).
 
 The example walk-through in :ref:`getting_started--using-dcps` uses MPC as its build system.
 The OpenDDS source tree contains many tests and examples that are built with MPC.

@@ -352,7 +352,7 @@ Topic expressions use a syntax that is very similar to a complete SQL query:
 * The selection lists one or more constituent topic names.
   Topic names are separated by a ``join`` keyword (all 3 join keywords are equivalent):
 
-* * ``<topic> [{NATURAL INNER | NATURAL | INNER NATURAL}  JOIN <topic>]...``
+* * ``<topic> [{NATURAL INNER | NATURAL | INNER NATURAL} JOIN <topic>]...``
 
   * Topic names must contain only letters, digits, and dashes (but may not start with a digit).
 

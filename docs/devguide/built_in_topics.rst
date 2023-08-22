@@ -250,7 +250,7 @@ The topic type ParticipantLocationBuiltinTopicData is defined in :ghfile:`dds/Op
 
 * ``relay_timestamp`` -- Time that ``relay_addr`` was set.
 
-* ``local6_addr, local6_timestamp, ice6_addr, ice6_timestamp, relay6_addr,`` and ``relay6_timestamp``-- Are the IPV6 equivalents.
+* ``local6_addr``, ``local6_timestamp``, ``ice6_addr``, ``ice6_timestamp``, ``relay6_addr``, and ``relay6_timestamp`` -- Are the IPV6 equivalents.
 
 .. _built_in_topics--openddsconnectionrecord-topic:
 

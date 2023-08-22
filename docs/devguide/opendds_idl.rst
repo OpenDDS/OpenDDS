@@ -242,7 +242,7 @@ The following table summarizes the options supported by ``opendds_idl``.
 
    * - ``--default-autoid VAL``
 
-     - Set the default XTypes auto member-id assignment strategy: sequential or hash -- see :ref:`xtypes--autoid-value`
+     - Set the default XTypes auto member-id assignment strategy: ``sequential`` or ``hash`` -- see :ref:`xtypes--autoid-value`
 
      - ``sequential``
 

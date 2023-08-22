@@ -1037,11 +1037,11 @@ The DDS specification provides a number of operations for reading and writing da
 In the examples above we used the ``take_next_sample()`` operation, to read the next sample and "take" ownership of it from the reader.
 The Message Data Reader also has the following take operations.
 
-* ``take()``--Take a sequence of up to max_samples values from the reader
+* ``take()`` -- Take a sequence of up to max_samples values from the reader
 
-* ``take_instance()``--Take a sequence of values for a specified instance
+* ``take_instance()`` -- Take a sequence of values for a specified instance
 
-* ``take_next_instance()``--Take a sequence of samples belonging to the same instance, without specifying the instance.
+* ``take_next_instance()`` -- Take a sequence of samples belonging to the same instance, without specifying the instance.
 
 There are also "read" operations corresponding to each of these "take" operations that obtain the same values, but leave the samples in the reader and simply mark them as read in the ``SampleInfo``.
 

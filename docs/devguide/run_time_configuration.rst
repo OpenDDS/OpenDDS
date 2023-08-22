@@ -113,7 +113,10 @@ This is accomplished by using the ``TheParticipantFactoryWithArgs`` macro:
       // ...
     }
 
-To set a default configuration file to load, use ``TheServiceParticipant->default_configuration_file(ACE_TCHAR* path)``, like in the following example:
+..
+  Keep the "word joiner" U+FEFF in the next sentence, otherwise the line is broken up and it comes out strange in the output.
+
+To set a default configuration file to load, use ``TheServiceParticipant-﻿>default_configuration_file(ACE_TCHAR* path)``, like in the following example:
 
 .. code-block:: cpp
 
@@ -128,7 +131,7 @@ To set a default configuration file to load, use ``TheServiceParticipant->defaul
       // ...
     }
 
-``pub.ini would`` be used unless ``-DCPSConfigFile`` is passed to override the default configuration file.
+``pub.ini`` would be used unless ``-DCPSConfigFile`` is passed to override the default configuration file.
 
 The ``Service_Participant`` class also provides methods that allow an application to configure the DDS service.
 See the header file :ghfile:`dds/DCPS/Service_Participant.h` for details.
@@ -806,7 +809,7 @@ For this example we will only show the discovery aspects of the configuration an
     RepositoryIor=host2.mydomain.com:12345
 
 When Process ``E`` in :ref:`Figure 7-1 <run_time_configuration--reffigure4>` reads in the above configuration it finds the occurrence of multiple domain sections.
-As described in Section  each domain has an instance integer and a property of ``DiscoveryConfig`` defined.
+As described in :ref:`run_time_configuration--domain-configuration` each domain has an instance integer and a property of ``DiscoveryConfig`` defined.
 
 For the first domain (``[domain/1]``), the ``DiscoveryConfig`` property is supplied with the user-defined name of ``DiscoveryConfig1`` value.
 This property causes the OpenDDS implementation to find a section title of either ``repository`` or ``rtps_discovery`` and an instance name of ``DiscoveryConfig1``.
@@ -1394,7 +1397,7 @@ Additional DDSI-RTPS Discovery Features
 ..
     Sect<7.3.3.1>
 
-The DDSI_RTPS discovery implementation creates and manages a transport instance --  specifically an object of class ``RtpsUdpInst``.
+The DDSI_RTPS discovery implementation creates and manages a transport instance -- specifically an object of class ``RtpsUdpInst``.
 In order for applications to access this object and enable advanced features (:ref:`Additional RTPS_UDP Features <run_time_configuration--additional-rtps-udp-features>`), the ``RtpsDiscovery`` class provides the method ``sedp_transport_inst(domainId, participant)``.
 
 .. _run_time_configuration--configuring-for-static-discovery:
@@ -3391,7 +3394,7 @@ The highest level logging is controlled by the general log levels listed in the 
 
    * - Level
 
-     - ``Values``
+     - Values
 
      - Description
 
@@ -3399,9 +3402,9 @@ The highest level logging is controlled by the general log levels listed in the 
 
      - ``DCPSLogLevel``: ``error``
 
-       ``log_level: Log_Level::Error``
+       ``log_level``: ``Log_Level::Error``
 
-       ``ACE_Log_Priority:LM_ERROR``
+       ``ACE_Log_Priority``: ``LM_ERROR``
 
      - Logs issues that may prevent OpenDDS from functioning properly or functioning as configured.
 
@@ -3409,9 +3412,9 @@ The highest level logging is controlled by the general log levels listed in the 
 
      - ``DCPSLogLevel``: ``warning``
 
-       ``log_level: Log_Level::Warning``
+       ``log_level``: ``Log_Level::Warning``
 
-       ``ACE_Log_Priority:LM_WARNING``
+       ``ACE_Log_Priority``: ``LM_WARNING``
 
      - Log issues that should probably be addressed, but don't prevent OpenDDS from functioning.
        This is the default.
@@ -3420,9 +3423,9 @@ The highest level logging is controlled by the general log levels listed in the 
 
      - ``DCPSLogLevel``: ``notice``
 
-       ``log_level: Log_Level::Notice``
+       ``log_level``: ``Log_Level::Notice``
 
-       ``ACE_Log_Priority:LM_NOTICE``
+       ``ACE_Log_Priority``: ``LM_NOTICE``
 
      - Logs details of issues that are returned to the user via the API, for example through a ``DDS::ReturnCode_t``.
 
@@ -3430,9 +3433,9 @@ The highest level logging is controlled by the general log levels listed in the 
 
      - ``DCPSLogLevel``: ``info``
 
-       ``log_level: Log_Level::Info``
+       ``log_level``: ``Log_Level::Info``
 
-       ``ACE_Log_Priority:LM_INFO``
+       ``ACE_Log_Priority``: ``LM_INFO``
 
      - Logs a small amount of basic information, such as the version of OpenDDS being used.
 
@@ -3442,7 +3445,7 @@ The highest level logging is controlled by the general log levels listed in the 
 
        ``log_level``: ``Log_Level::Debug``
 
-       ``ACE_Log_Priority:LM_DEBUG``
+       ``ACE_Log_Priority``: ``LM_DEBUG``
 
      - This level doesn't directly control any logging but will enable at least DCPS and security debug level 1.
        For backwards compatibility, setting DCPS debug logging to greater than zero will set this log level.
@@ -3487,17 +3490,17 @@ The *level* defaults to a value of 0 and has values of 0 to 10 as defined below:
 
 * 0 -- debug logging is disabled
 
-* 1 - logs that should happen once per process
+* 1 -- logs that should happen once per process
 
-* 2 - logs that should happen once per DDS entity
+* 2 -- logs that should happen once per DDS entity
 
-* 4 - logs that are related to administrative interfaces
+* 4 -- logs that are related to administrative interfaces
 
-* 6 - logs that should happen every Nth sample write/read
+* 6 -- logs that should happen every Nth sample write/read
 
-* 8 - logs that should happen once per sample write/read
+* 8 -- logs that should happen once per sample write/read
 
-* 10 - logs that may happen more than once per sample write/read
+* 10 -- logs that may happen more than once per sample write/read
 
 .. _run_time_configuration--transport-layer-debug-logging:
 
