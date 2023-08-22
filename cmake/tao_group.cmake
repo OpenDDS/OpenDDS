@@ -10,24 +10,42 @@ set(_OPENDDS_TAO_GROUP_CMAKE TRUE)
 
 include("${CMAKE_CURRENT_LIST_DIR}/import_common.cmake")
 
-set(_opendds_tao_required_deps TAO::TAO tao_idl)
+_opendds_group(TAO DEFAULT_REQUIRED TAO::TAO TAO::tao_idl)
 
-set(_opendds_tao_executables tao_idl)
-find_program(TAO_IDL NAMES tao_idl HINTS "${TAO_BIN_DIR}")
+_opendds_group_lib(TAO
+  MPC_NAME TAO-target
+  DEPENDS ACE::ACE
+)
+_opendds_group_lib(IDL_FE
+  MPC_NAME TAO_IDL_FE
+  DEPENDS ACE::ACE
+)
+set(TAO_IDL_FE_INCLUDE_DIRS
+  "${TAO_INCLUDE_DIRS}"
+  # TODO: These only work with source tree right now
+  "${TAO_ROOT}/TAO_IDL/include"
+  "${TAO_ROOT}/TAO_IDL/be_include"
+)
+_opendds_group_lib(AnyTypeCode DEPENDS TAO::TAO)
+_opendds_group_lib(BiDirGIOP
+  MPC_NAME BiDir_GIOP
+  DEPENDS TAO::TAO TAO::PI
+)
+_opendds_group_lib(CodecFactory DEPENDS TAO::TAO TAO::AnyTypeCode)
+_opendds_group_lib(IORManip
+  MPC_NAME IORManipulation
+  DEPENDS TAO::TAO TAO::AnyTypeCode
+)
+_opendds_group_lib(IORTable DEPENDS TAO::TAO)
+_opendds_group_lib(ImR_Client DEPENDS TAO::TAO TAO::PortableServer TAO::IORManip)
+_opendds_group_lib(PI DEPENDS TAO::TAO TAO::CodecFactory)
+_opendds_group_lib(PortableServer DEPENDS TAO::TAO TAO::AnyTypeCode)
+_opendds_group_lib(Svc_Utils DEPENDS TAO::PortableServer TAO::AnyTypeCode)
+_opendds_group_lib(Valuetype DEPENDS TAO::TAO TAO::AnyTypeCode)
 
-set(_opendds_tao_libs
-  TAO
-  TAO_IDL_FE
-  TAO_AnyTypeCode
-  TAO_BiDirGIOP
-  TAO_CodecFactory
-  TAO_IORManip
-  TAO_IORTable
-  TAO_ImR_Client
-  TAO_PI
-  TAO_PortableServer
-  TAO_Svc_Utils
-  TAO_Valuetype
+_opendds_group_exe(tao_idl
+  MPC_NAME TAO_IDL_EXE
+  DEPENDS ACE::ace_gperf
 )
 
 if(OPENDDS_STATIC)
@@ -45,23 +63,3 @@ endif()
 if(OPENDDS_TAO_MINIMUM_CORBA)
   list(APPEND TAO_COMPILE_DEFINITIONS TAO_HAS_MINIMUM_CORBA=1)
 endif()
-
-set(TAO_DEPS ACE::ACE)
-set(TAO_IDL_FE_DEPS ACE::ACE)
-set(TAO_ANYTYPECODE_DEPS TAO::TAO)
-set(TAO_BIDIRGIOP_DEPS TAO::TAO TAO::PI)
-set(TAO_CODECFACTORY_DEPS TAO::TAO TAO::AnyTypeCode)
-set(TAO_IORMANIP_DEPS TAO::TAO TAO::AnyTypeCode)
-set(TAO_IORTABLE_DEPS TAO::TAO)
-set(TAO_IMR_CLIENT_DEPS TAO::TAO TAO::PortableServer TAO::IORManip)
-set(TAO_PI_DEPS TAO::TAO TAO::CodecFactory)
-set(TAO_PORTABLESERVER_DEPS TAO::TAO TAO::AnyTypeCode)
-set(TAO_SVC_UTILS_DEPS TAO::PortableServer TAO::AnyTypeCode)
-set(TAO_VALUETYPE_DEPS TAO::TAO TAO::AnyTypeCode)
-
-set(TAO_IDL_FE_INCLUDE_DIRS
-  "${TAO_INCLUDE_DIRS}"
-  # These only work with source tree right now
-  "${TAO_ROOT}/TAO_IDL/include"
-  "${TAO_ROOT}/TAO_IDL/be_include"
-)

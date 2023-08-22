@@ -1,0 +1,6 @@
+A basic liveliness lost DDS WaitSet notification test.
+Create a DataWriter with a liveliness QoS of 1 second and manual_liveliness_kind.
+Assert the liveliness once and then wait for the liveliness lost to be notified in the configured WaitSet.
+
+run_test.pl
+  Run a separate WaitSetLivelinessLost process.

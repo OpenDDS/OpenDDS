@@ -105,11 +105,11 @@ def release(args):
     else:
         print('  No changes needed!')
 
-        if not args.solo_test:
-            print('Removing fragments...')
-            for fragment in get_fragments():
-                print(fragment)
-                fragment.unlink()
+    if not args.solo_test:
+        print('Removing fragments...')
+        for fragment in get_fragments():
+            print(fragment)
+            fragment.unlink()
 
     return 0
 

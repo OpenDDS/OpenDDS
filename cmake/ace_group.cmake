@@ -10,9 +10,26 @@ set(_OPENDDS_ACE_GROUP_CMAKE TRUE)
 
 include("${CMAKE_CURRENT_LIST_DIR}/import_common.cmake")
 
-set(_opendds_ace_required_deps ACE::ACE ace_gperf)
+_opendds_group(ACE DEFAULT_REQUIRED ACE::ACE)
 
-if(OPENDDS_XERCES3 AND NOT XercesC_FOUND)
+_opendds_group_lib(ACE DEPENDS Threads::Threads)
+_opendds_group_lib(XML_Utils
+  MPC_NAME ACE_XML_Utils
+  DEPENDS ACE::ACE XercesC::XercesC
+)
+
+_opendds_group_exe(ace_gperf
+  MPC_NAME gperf
+  DEPENDS ACE::ACE
+  # Adding ${TAO_BIN_DIR} to the ace bin hints allows users of
+  # VxWorks layer builds to set TAO_BIN_DIR to the location of
+  # the partner host tools directory, but keep ACE_BIN_DIR the
+  # value of $ACE_ROOT so that other ACE related scripts can
+  # be located.
+  EXTRA_BIN_DIRS "${TAO_BIN_DIR}"
+)
+
+if(OPENDDS_XERCES3)
   find_package(XercesC PATHS "${OPENDDS_XERCES3}" NO_DEFAULT_PATH)
   if(NOT XercesC_FOUND)
     find_package(XercesC)
@@ -38,30 +55,12 @@ if(MSVC AND OPENDDS_STATIC)
   _opendds_vs_force_static()
 endif()
 
-set(_opendds_ace_executables ace_gperf)
-find_program(ACE_GPERF
-  NAMES
-    ace_gperf
-  # Adding ${TAO_BIN_DIR} to the ace bin hints allows users of
-  # VxWorks layer builds to set TAO_BIN_DIR to the location of
-  # the partner host tools directory, but keep ACE_BIN_DIR the
-  # value of $ACE_ROOT so that other ACE related scripts can
-  # be located.
-  HINTS
-    "${ACE_BIN_DIR}" "${TAO_BIN_DIR}"
-)
-
-set(_opendds_ace_libs ACE ACE_XML_Utils)
-
 enable_language(C)
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
 
-set(ACE_DEPS Threads::Threads)
-
 function(_opendds_add_ace_system_library name)
-  list(APPEND ACE_DEPS "${name}")
-  set(ACE_DEPS ${ACE_DEPS} PARENT_SCOPE)
+  _opendds_append(ACE_ACE_DEPENDS "${name}")
   string(TOUPPER "${name}" cap_name)
   set(cap_name "${cap_name}_LIBRARY")
   if((${ARGC} GREATER 1) AND ("${ARGV1}" STREQUAL "NO_CHECK"))
@@ -69,13 +68,12 @@ function(_opendds_add_ace_system_library name)
   else()
     find_library("${cap_name}" "${name}")
   endif()
-  list(APPEND _opendds_ace_required_deps "${cap_name}")
-  set(_opendds_ace_required_deps "${_opendds_ace_required_deps}" PARENT_SCOPE)
+  _opendds_append(ACE_ACE_DEFAULT_REQUIRED "${cap_name}")
 endfunction()
 
 if(UNIX)
   _opendds_add_ace_system_library(dl)
-  if(NOT APPLE)
+  if(NOT APPLE AND NOT ANDROID)
     _opendds_add_ace_system_library(rt)
   endif()
 
@@ -122,5 +120,3 @@ endif()
 if(OPENDDS_VERSIONED_NAMESPACE)
   list(APPEND ACE_COMPILE_DEFINITIONS ACE_HAS_VERSIONED_NAMESPACE=1)
 endif()
-
-set(ACE_XML_UTILS_DEPS ACE::ACE XercesC::XercesC)

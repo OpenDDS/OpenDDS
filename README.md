@@ -9,8 +9,8 @@ These standards define a set of interfaces and protocols for developing distribu
 Although OpenDDS is itself developed in C++, Java bindings are provided so that Java applications can use OpenDDS.
 OpenDDS also includes support for the DDS Security and XTypes specifications.
 
-OpenDDS is built on the [ACE](https://opendds.readthedocs.io/en/master/building/dependencies.html#ace-tao) abstraction layer to provide platform portability.
-OpenDDS also leverages the capabilities of [TAO](https://opendds.readthedocs.io/en/master/building/dependencies.html#ace-tao) for IDL compilation and the OpenDDS [DCPS Information Repository](https://opendds.readthedocs.io/en/master/devguide/the_dcps_information_repository.html).
+OpenDDS is built on the [ACE](https://opendds.readthedocs.io/en/dds-3.25/building/dependencies.html#ace-tao) abstraction layer to provide platform portability.
+OpenDDS also leverages the capabilities of [TAO](https://opendds.readthedocs.io/en/dds-3.25/building/dependencies.html#ace-tao) for IDL compilation and the OpenDDS [DCPS Information Repository](https://opendds.readthedocs.io/en/latest-release/devguide/the_dcps_information_repository.html).
 
 The primary development of OpenDDS was done by
 [Object Computing, Incorporated](http://www.objectcomputing.com) in
@@ -35,7 +35,7 @@ details.
 
 ## Documentation
 
-- The OpenDDS Developer's Guide is available at https://opendds.readthedocs.io/.
+- The OpenDDS Developer's Guide is available at https://opendds.readthedocs.io/en/dds-3.25.
 
 - For developers wanting to contribute to OpenDDS, please read [the development guidelines](https://opendds.readthedocs.io/en/master/internal/dev_guidelines.html).
 
@@ -83,7 +83,7 @@ formal/2019-04-03 (version 2.3)](https://www.omg.org/spec/DDSI-RTPS/2.3).  See
 the OpenDDS Developer's Guide and the file [docs/design/RTPS](docs/design/RTPS)
 for more details on RTPS.
 
-See the [Developer's Guide](https://opendds.readthedocs.io/en/latest-release/building/introduction.html) for
+See the [Developer's Guide](https://opendds.readthedocs.io/en/dds-3.25/building/introduction.html) for
 information on OpenDDS compliance with the DDS specification. If you would like
 to contribute a feature or sponsor the developers to add a feature please see
 the Support section above for contact information.
@@ -92,7 +92,7 @@ the Support section above for contact information.
 
 These are just the required dependencies. For a complete detailed list of
 dependencies, including optional ones, see
-https://opendds.readthedocs.io/en/master/building/dependencies.html.
+https://opendds.readthedocs.io/en/dds-3.25/building/dependencies.html.
 
 ### ACE/TAO
 
@@ -134,7 +134,7 @@ Embedded/Mobile/IoT:
 * LynxOS-178 (OpenDDS Safety Profile)
 * VxWorks 6.9, 7, 21.03 (see below)
 * [Linux on Raspberry Pi](https://opendds.org/quickstart/GettingStartedPi.html)
-* [Android 9.0 "Pie" (API Level 28) NDK r18b](https://opendds.readthedocs.io/en/latest-release/building/android.html)
+* [Android 9.0 "Pie" (API Level 28) NDK r18b](https://opendds.readthedocs.io/en/dds-3.25/building/android.html)
 
 We have built OpenDDS for VxWorks 6.9, 7, and 21.03 and have run basic
 system and performance tests (but not the entire regression test suite).
@@ -164,7 +164,7 @@ This release of OpenDDS has been tested using the following compilers:
 ## Building and Installing
 
 For building and installation instructions see
-https://opendds.readthedocs.io/en/latest-release/building/index.html
+https://opendds.readthedocs.io/en/dds-3.25/building/index.html
 
 ## Quick Start with Docker
 
