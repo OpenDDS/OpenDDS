@@ -2,7 +2,7 @@ ARG BASIS=ubuntu:focal
 FROM $BASIS
 
 ENV DEBIAN_FRONTEND=noninteractive
-RUN apt-get update && apt-get -y upgrade && apt-get install -y \
+RUN apt-get update && apt-get install -y \
     cmake \
     curl \
     g++ \
