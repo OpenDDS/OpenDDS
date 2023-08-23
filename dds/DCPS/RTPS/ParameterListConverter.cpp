@@ -1639,18 +1639,13 @@ bool from_param_list(const ParameterList& param_list,
     case PID_OPENDDS_ICE_CANDIDATE: {
       const IceCandidate_t& ice_candidate = parameter.ice_candidate();
       ICE::Candidate candidate;
-#if IPV6_V6ONLY
       // https://tools.ietf.org/html/rfc8445
 
       // IPv4-mapped IPv6 addresses SHOULD NOT be included in the
       // address candidates unless the application using ICE does not
       // support IPv4 (i.e., it is an IPv6-only application
       // [RFC4038]).
-      const bool map_ipv4_to_ipv6 = true;
-#else
-      const bool map_ipv4_to_ipv6 = false;
-#endif
-      if (locator_to_address(candidate.address, ice_candidate.locator, map_ipv4_to_ipv6) != 0) {
+      if (locator_to_address(candidate.address, ice_candidate.locator, false /* map ipv4 to ipv6*/) != 0) {
         return false;
       }
       candidate.foundation = ice_candidate.foundation;
