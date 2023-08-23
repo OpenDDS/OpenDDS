@@ -32,7 +32,7 @@ QoS Policies
 Each policy defines a structure to specify its data.
 Each entity supports a subset of the policies and defines a QoS structure that is composed of the supported policy structures.
 The set of allowable policies for a given entity is constrained by the policy structures nested in its QoS structure.
-For example, the Publisher’s QoS structure is defined in the specification’s IDL as follows:
+For example, the Publisher's QoS structure is defined in the specification's IDL as follows:
 
 .. code-block:: omg-idl
 
@@ -81,42 +81,42 @@ The following examples illustrate how to obtain the default policies for publish
     DDS::ReturnCode_t ret;
     ret = domain_participant->get_default_publisher_qos(pub_qos);
     if (DDS::RETCODE_OK != ret) {
-      std::cerr << "Could not get default publisher QoS" << std::endl;
+      std::cerr << "Could not get default publisher QoS" << std::endl;
     }
 
     // Get default Subscriber QoS from a DomainParticipant:
     DDS::SubscriberQos sub_qos;
     ret = domain_participant->get_default_subscriber_qos(sub_qos);
     if (DDS::RETCODE_OK != ret) {
-      std::cerr << "Could not get default subscriber QoS" << std::endl;
+      std::cerr << "Could not get default subscriber QoS" << std::endl;
     }
 
     // Get default Topic QoS from a DomainParticipant:
     DDS::TopicQos topic_qos;
     ret = domain_participant->get_default_topic_qos(topic_qos);
     if (DDS::RETCODE_OK != ret) {
-      std::cerr << "Could not get default topic QoS" << std::endl;
+      std::cerr << "Could not get default topic QoS" << std::endl;
     }
 
     // Get default DomainParticipant QoS from a DomainParticipantFactory:
     DDS::DomainParticipantQos dp_qos;
     ret = domain_participant_factory->get_default_participant_qos(dp_qos);
     if (DDS::RETCODE_OK != ret) {
-      std::cerr << "Could not get default participant QoS" << std::endl;
+      std::cerr << "Could not get default participant QoS" << std::endl;
     }
 
     // Get default DataWriter QoS from a Publisher:
     DDS::DataWriterQos dw_qos;
     ret = pub->get_default_datawriter_qos(dw_qos);
     if (DDS::RETCODE_OK != ret) {
-      std::cerr << "Could not get default data writer QoS" << std::endl;
+      std::cerr << "Could not get default data writer QoS" << std::endl;
     }
 
     // Get default DataReader QoS from a Subscriber:
     DDS::DataReaderQos dr_qos;
     ret = sub->get_default_datareader_qos(dr_qos);
     if (DDS::RETCODE_OK != ret) {
-      std::cerr << "Could not get default data reader QoS" << std::endl;
+      std::cerr << "Could not get default data reader QoS" << std::endl;
     }
 
 The following tables summarize the default QoS policies for each entity type in OpenDDS to which policies can be applied.
@@ -740,14 +740,14 @@ Below is the IDL related to the liveliness QoS policy:
 .. code-block:: omg-idl
 
     enum LivelinessQosPolicyKind {
-      AUTOMATIC_LIVELINESS_QOS,
-      MANUAL_BY_PARTICIPANT_LIVELINESS_QOS,
-      MANUAL_BY_TOPIC_LIVELINESS_QOS
+      AUTOMATIC_LIVELINESS_QOS,
+      MANUAL_BY_PARTICIPANT_LIVELINESS_QOS,
+      MANUAL_BY_TOPIC_LIVELINESS_QOS
     };
 
     struct LivelinessQosPolicy {
-      LivelinessQosPolicyKind kind;
-      Duration_t lease_duration;
+      LivelinessQosPolicyKind kind;
+      Duration_t lease_duration;
     };
 
 The ``LIVELINESS`` policy controls when and how the service determines whether participants are alive, meaning they are still reachable and active.
@@ -760,13 +760,13 @@ The default lease duration is a pre-defined infinite value, which disables any l
 To manually assert liveliness without publishing a sample, the application must call the ``assert_liveliness()`` operation on the data writer (for the "by topic" setting) or on the domain participant (for the "by participant" setting) within the specified heartbeat interval.
 
 Data writers specify (*offer*) their own liveliness criteria and data readers specify (*request*) the desired liveliness of their writers.
-Writers that are not heard from within the lease duration (either by writing a sample or by asserting liveliness) cause a change in the ``LIVELINESS_CHANGED_STATUS`` communication status and notification to the application (e.g., by calling the data reader listener’s ``on_liveliness_changed()`` callback operation or by signaling any related wait sets).
+Writers that are not heard from within the lease duration (either by writing a sample or by asserting liveliness) cause a change in the ``LIVELINESS_CHANGED_STATUS`` communication status and notification to the application (e.g., by calling the data reader listener's ``on_liveliness_changed()`` callback operation or by signaling any related wait sets).
 
 This policy is considered during the establishment of associations between data writers and data readers.
 The value of both sides of the association must be compatible in order for an association to be established.
-Compatibility is determined by comparing the data reader’s requested liveliness with the data writer’s offered liveliness.
+Compatibility is determined by comparing the data reader's requested liveliness with the data writer's offered liveliness.
 Both the kind of liveliness (automatic, manual by topic, manual by participant) and the value of the lease duration are considered in determining compatibility.
-The writer’s offered kind of liveliness must be greater than or equal to the reader’s requested kind of liveliness.
+The writer's offered kind of liveliness must be greater than or equal to the reader's requested kind of liveliness.
 The liveliness kind values are ordered as follows:
 
 ::
@@ -775,7 +775,7 @@ The liveliness kind values are ordered as follows:
     MANUAL_BY_PARTICIPANT_LIVELINESS_QOS >
     AUTOMATIC_LIVELINESS_QOS
 
-In addition, the writer’s offered lease duration must be less than or equal to the reader’s requested lease duration.
+In addition, the writer's offered lease duration must be less than or equal to the reader's requested lease duration.
 Both of these conditions must be met for the offered and requested liveliness policy settings to be considered compatible and the association established.
 
 .. _quality_of_service--reliability:
@@ -792,13 +792,13 @@ Below is the IDL related to the reliability QoS policy:
 .. code-block:: omg-idl
 
     enum ReliabilityQosPolicyKind {
-      BEST_EFFORT_RELIABILITY_QOS,
-      RELIABLE_RELIABILITY_QOS
+      BEST_EFFORT_RELIABILITY_QOS,
+      RELIABLE_RELIABILITY_QOS
     };
 
     struct ReliabilityQosPolicy {
-      ReliabilityQosPolicyKind kind;
-      Duration_t max_blocking_time;
+      ReliabilityQosPolicyKind kind;
+      Duration_t max_blocking_time;
     };
 
 This policy controls how data readers and writers treat the data samples they process.
@@ -830,13 +830,13 @@ Below is the IDL related to the history QoS policy:
 .. code-block:: omg-idl
 
     enum HistoryQosPolicyKind {
-      KEEP_LAST_HISTORY_QOS,
-      KEEP_ALL_HISTORY_QOS
+      KEEP_LAST_HISTORY_QOS,
+      KEEP_ALL_HISTORY_QOS
     };
 
     struct HistoryQosPolicy {
-      HistoryQosPolicyKind kind;
-      long depth;
+      HistoryQosPolicyKind kind;
+      long depth;
     };
 
 The "keep all" value (``KEEP_ALL_HISTORY_QOS``) specifies that all possible samples for that instance should be kept.
@@ -863,14 +863,14 @@ Below is the IDL related to the durability QoS policy:
 .. code-block:: omg-idl
 
     enum DurabilityQosPolicyKind {
-      VOLATILE_DURABILITY_QOS,         // Least Durability
-      TRANSIENT_LOCAL_DURABILITY_QOS,
-      TRANSIENT_DURABILITY_QOS,
-      PERSISTENT_DURABILITY_QOS        // Greatest Durability
+      VOLATILE_DURABILITY_QOS,         // Least Durability
+      TRANSIENT_LOCAL_DURABILITY_QOS,
+      TRANSIENT_DURABILITY_QOS,
+      PERSISTENT_DURABILITY_QOS        // Greatest Durability
     };
 
     struct DurabilityQosPolicy {
-      DurabilityQosPolicyKind kind;
+      DurabilityQosPolicyKind kind;
     };
 
 By default the kind is ``VOLATILE_DURABILITY_QOS``.
@@ -878,7 +878,7 @@ By default the kind is ``VOLATILE_DURABILITY_QOS``.
 A durability kind of ``VOLATILE_DURABILITY_QOS`` means samples are discarded after being sent to all known subscribers.
 As a side effect, subscribers cannot recover samples sent before they connect.
 
-A durability kind of ``TRANSIENT_LOCAL_DURABILITY_QOS`` means that data readers that are associated/connected with a data writer will be sent all of the samples in the data writer’s history.
+A durability kind of ``TRANSIENT_LOCAL_DURABILITY_QOS`` means that data readers that are associated/connected with a data writer will be sent all of the samples in the data writer's history.
 
 A durability kind of ``TRANSIENT_DURABILITY_QOS`` means that samples outlive a data writer and last as long as the process is alive.
 The samples are kept in memory, but are not persisted to permanent storage.
@@ -915,12 +915,12 @@ Below is the IDL related to the durability service QoS policy:
 .. code-block:: omg-idl
 
     struct DurabilityServiceQosPolicy {
-      Duration_t              service_cleanup_delay;
-      HistoryQosPolicyKind    history_kind;
-      long                    history_depth;
-      long                    max_samples;
-      long                    max_instances;
-      long                    max_samples_per_instance;
+      Duration_t              service_cleanup_delay;
+      HistoryQosPolicyKind    history_kind;
+      long                    history_depth;
+      long                    max_samples;
+      long                    max_instances;
+      long                    max_samples_per_instance;
     };
 
 The history and resource limits members are analogous to, although independent of, those found in the ``HISTORY`` and ``RESOURCE_LIMITS`` policies.
@@ -942,9 +942,9 @@ Below is the IDL related to the resource limits QoS policy.
 .. code-block:: omg-idl
 
     struct ResourceLimitsQosPolicy {
-      long max_samples;
-      long max_instances;
-      long max_samples_per_instance;
+      long max_samples;
+      long max_instances;
+      long max_samples_per_instance;
     };
 
 The ``max_samples`` member specifies the maximum number of samples a single data writer or data reader can manage across all of its instances.
@@ -971,7 +971,7 @@ Below is the IDL related to the partition QoS policy.
 .. code-block:: omg-idl
 
     struct PartitionQosPolicy {
-      StringSeq name;
+      StringSeq name;
     };
 
 The name member defaults to an empty sequence of strings.
@@ -999,7 +999,7 @@ Below is the IDL related to the deadline QoS policy.
 .. code-block:: omg-idl
 
     struct DeadlineQosPolicy {
-      Duration_t period;
+      Duration_t period;
     };
 
 The default value of the ``period`` member is infinite, which requires no behavior.
@@ -1031,7 +1031,7 @@ Below is the IDL related to the lifespan QoS policy.
 .. code-block:: omg-idl
 
     struct LifespanQosPolicy {
-      Duration_t duration;
+      Duration_t duration;
     }
 
 The default value of the ``duration`` member is infinite, which means samples never expire.
@@ -1055,7 +1055,7 @@ Below is the IDL related to the user data QoS policy:
 .. code-block:: omg-idl
 
     struct UserDataQosPolicy {
-      sequence<octet> value;
+      sequence<octet> value;
     };
 
 By default, the ``value`` member is not set.
@@ -1078,7 +1078,7 @@ Below is the IDL related to the topic data QoS policy:
 .. code-block:: omg-idl
 
     struct TopicDataQosPolicy {
-      sequence<octet> value;
+      sequence<octet> value;
     };
 
 By default, the ``value`` is not set.
@@ -1100,7 +1100,7 @@ Below is the IDL related to the group data QoS policy:
 .. code-block:: omg-idl
 
     struct GroupDataQosPolicy {
-      sequence<octet> value;
+      sequence<octet> value;
     };
 
 By default, the ``value`` member is not set.
@@ -1123,7 +1123,7 @@ Below is the IDL related to the TransportPriority QoS policy:
 .. code-block:: omg-idl
 
     struct TransportPriorityQosPolicy {
-      long value;
+      long value;
     };
 
 The default value member of ``transport_priority`` is zero.
@@ -1164,7 +1164,7 @@ Below is the IDL related to the LatencyBudget QoS policy:
 .. code-block:: omg-idl
 
     struct LatencyBudgetQosPolicy {
-      Duration_t duration;
+      Duration_t duration;
     };
 
 The default value of ``duration`` is zero indicating that the delay should be minimized.
@@ -1180,60 +1180,60 @@ The IDL for this method is:
 
 .. code-block:: omg-idl
 
-      struct BudgetExceededStatus {
-        long total_count;
-        long total_count_change;
-        DDS::InstanceHandle_t last_instance_handle;
-      };
+      struct BudgetExceededStatus {
+        long total_count;
+        long total_count_change;
+        DDS::InstanceHandle_t last_instance_handle;
+      };
 
-      void on_budget_exceeded(
-             in DDS::DataReader reader,
-             in BudgetExceededStatus status);
+      void on_budget_exceeded(
+             in DDS::DataReader reader,
+             in BudgetExceededStatus status);
 
 To use the extended listener callback you will need to derive the listener implementation from the extended interface, as shown in the following code fragment:
 
 .. code-block:: cpp
 
-      class DataReaderListenerImpl
-            : public virtual
-              OpenDDS::DCPS::LocalObject<OpenDDS::DCPS::DataReaderListener>
+      class DataReaderListenerImpl
+            : public virtual
+              OpenDDS::DCPS::LocalObject<OpenDDS::DCPS::DataReaderListener>
 
 Then you must provide a non-null implementation for the ``on_budget_exceeded()`` operation.
 Note that you will need to provide empty implementations for the following extended operations as well:
 
 .. code-block:: cpp
 
-      on_subscription_disconnected()
-      on_subscription_reconnected()
-      on_subscription_lost()
-      on_connection_deleted()
+      on_subscription_disconnected()
+      on_subscription_reconnected()
+      on_subscription_lost()
+      on_connection_deleted()
 
 OpenDDS also makes the summary latency statistics available via an extended interface of the data reader.
 This extended interface is located in the ``OpenDDS::DCPS`` module and the IDL is defined as:
 
 .. code-block:: omg-idl
 
-      struct LatencyStatistics {
-        GUID_t        publication;
-        unsigned long n;
-        double        maximum;
-        double        minimum;
-        double        mean;
-        double        variance;
-      };
+      struct LatencyStatistics {
+        GUID_t        publication;
+        unsigned long n;
+        double        maximum;
+        double        minimum;
+        double        mean;
+        double        variance;
+      };
 
-      typedef sequence<LatencyStatistics> LatencyStatisticsSeq;
+      typedef sequence<LatencyStatistics> LatencyStatisticsSeq;
 
-      local interface DataReaderEx : DDS::DataReader {
-        /// Obtain a sequence of statistics summaries.
-        void get_latency_stats( inout LatencyStatisticsSeq stats);
+      local interface DataReaderEx : DDS::DataReader {
+        /// Obtain a sequence of statistics summaries.
+        void get_latency_stats( inout LatencyStatisticsSeq stats);
 
-        /// Clear any intermediate statistical values.
-        void reset_latency_stats();
+        /// Clear any intermediate statistical values.
+        void reset_latency_stats();
 
-        /// Statistics gathering enable state.
-        attribute boolean statistics_enabled;
-      };
+        /// Statistics gathering enable state.
+        attribute boolean statistics_enabled;
+      };
 
 To gather this statistical summary data you will need to use the extended interface.
 You can do so simply by dynamically casting the OpenDDS data reader pointer and calling the operations directly.
@@ -1241,30 +1241,30 @@ In the following example, we assume that reader is initialized correctly by call
 
 .. code-block:: cpp
 
-      DDS::DataReader_var reader;
-      // ...
+      DDS::DataReader_var reader;
+      // ...
 
-      // To start collecting new data.
-      dynamic_cast<OpenDDS::DCPS::DataReaderImpl*>(reader.in())->
-        reset_latency_stats();
-      dynamic_cast<OpenDDS::DCPS::DataReaderImpl*>(reader.in())->
-        statistics_enabled(true);
+      // To start collecting new data.
+      dynamic_cast<OpenDDS::DCPS::DataReaderImpl*>(reader.in())->
+        reset_latency_stats();
+      dynamic_cast<OpenDDS::DCPS::DataReaderImpl*>(reader.in())->
+        statistics_enabled(true);
 
-      // ...
+      // ...
 
-      // To collect data.
-      OpenDDS::DCPS::LatencyStatisticsSeq stats;
-      dynamic_cast<OpenDDS::DCPS::DataReaderImpl*>(reader.in())->
-        get_latency_stats(stats);
-      for (unsigned long i = 0; i < stats.length(); ++i)
-      {
-        std::cout << "stats[" << i << "]:" << std::endl;
-        std::cout << "         n = " << stats[i].n << std::endl;
-        std::cout << "       max = " << stats[i].maximum << std::endl;
-        std::cout << "       min = " << stats[i].minimum << std::endl;
-        std::cout << "      mean = " << stats[i].mean << std::endl;
-        std::cout << "  variance = " << stats[i].variance << std::endl;
-      }
+      // To collect data.
+      OpenDDS::DCPS::LatencyStatisticsSeq stats;
+      dynamic_cast<OpenDDS::DCPS::DataReaderImpl*>(reader.in())->
+        get_latency_stats(stats);
+      for (unsigned long i = 0; i < stats.length(); ++i)
+      {
+        std::cout << "stats[" << i << "]:" << std::endl;
+        std::cout << "         n = " << stats[i].n << std::endl;
+        std::cout << "       max = " << stats[i].maximum << std::endl;
+        std::cout << "       min = " << stats[i].minimum << std::endl;
+        std::cout << "      mean = " << stats[i].mean << std::endl;
+        std::cout << "  variance = " << stats[i].variance << std::endl;
+      }
 
 .. _quality_of_service--entity-factory:
 
@@ -1280,14 +1280,14 @@ Below is the IDL related to the Entity Factory QoS policy:
 .. code-block:: omg-idl
 
     struct EntityFactoryQosPolicy {
-      boolean autoenable_created_entities;
+      boolean autoenable_created_entities;
     };
 
 This policy can be applied to entities that serve as factories for other entities and controls whether or not entities created by those factories are automatically enabled upon creation.
 This policy can be applied to the domain participant factory (as a factory for domain participants), domain participant (as a factory for publishers, subscribers, and topics), publisher (as a factory for data writers), or subscriber (as a factory for data readers).
 The default value for the ``autoenable_created_entities`` member is ``true``, indicating that entities are automatically enabled when they are created.
 Applications that wish to explicitly enable entities some time after they are created should set the value of the ``autoenable_created_entities`` member of this policy to ``false`` and apply the policy to the appropriate factory entities.
-The application must then manually enable the entity by calling the entity’s ``enable()`` operation.
+The application must then manually enable the entity by calling the entity's ``enable()`` operation.
 
 The value of this policy may be changed at any time.
 Changes to this policy affect only entities created after the change.
@@ -1308,15 +1308,15 @@ Here is the IDL for the Presentation QoS:
 .. code-block:: omg-idl
 
     enum PresentationQosPolicyAccessScopeKind {
-      INSTANCE_PRESENTATION_QOS,
-      TOPIC_PRESENTATION_QOS,
-      GROUP_PRESENTATION_QOS
+      INSTANCE_PRESENTATION_QOS,
+      TOPIC_PRESENTATION_QOS,
+      GROUP_PRESENTATION_QOS
     };
 
     struct PresentationQosPolicy {
-      PresentationQosPolicyAccessScopeKind access_scope;
-      boolean coherent_access;
-      boolean ordered_access;
+      PresentationQosPolicyAccessScopeKind access_scope;
+      boolean coherent_access;
+      boolean ordered_access;
     };
 
 The scope of these changes (``access_scope``) specifies the level in which an application may be made aware:
@@ -1356,12 +1356,12 @@ Here is the IDL for the Destination Order Qos:
 .. code-block:: omg-idl
 
     enum DestinationOrderQosPolicyKind {
-      BY_RECEPTION_TIMESTAMP_DESTINATIONORDER_QOS,
-      BY_SOURCE_TIMESTAMP_DESTINATIONORDER_QOS
+      BY_RECEPTION_TIMESTAMP_DESTINATIONORDER_QOS,
+      BY_SOURCE_TIMESTAMP_DESTINATIONORDER_QOS
     };
 
     struct DestinationOrderQosPolicy {
-      DestinationOrderQosPolicyKind kind;
+      DestinationOrderQosPolicyKind kind;
     };
 
 The ``BY_RECEPTION_TIMESTAMP_DESTINATIONORDER_QOS`` value (the default) indicates that samples within an instance are ordered in the order in which they were received by the data reader.
@@ -1385,7 +1385,7 @@ Here is the IDL for the Writer Data Lifecycle QoS policy:
 .. code-block:: omg-idl
 
     struct WriterDataLifecycleQosPolicy {
-      boolean autodispose_unregistered_instances;
+      boolean autodispose_unregistered_instances;
     };
 
 When ``autodispose_unregistered_instances`` is set to ``true`` (the default), a data writer disposes an instance when it is unregistered.
@@ -1407,8 +1407,8 @@ Here is the IDL for the Reader Data Lifecycle QoS policy:
 .. code-block:: omg-idl
 
     struct ReaderDataLifecycleQosPolicy {
-      Duration_t autopurge_nowriter_samples_delay;
-      Duration_t autopurge_disposed_samples_delay;
+      Duration_t autopurge_nowriter_samples_delay;
+      Duration_t autopurge_disposed_samples_delay;
     };
 
 Normally, a data reader maintains data for all instances until there are no more associated data writers for the instance, the instance has been disposed, or the data has been taken by the user.
@@ -1436,7 +1436,7 @@ Here is the IDL for the Time Based Filter QoS:
 .. code-block:: omg-idl
 
     struct TimeBasedFilterQosPolicy {
-      Duration_t minimum_separation;
+      Duration_t minimum_separation;
     };
 
 An interval (``minimum_separation``) may be specified on the data reader.
@@ -1460,12 +1460,12 @@ Below is the IDL related to the Ownership QoS policy:
 .. code-block:: omg-idl
 
     enum OwnershipQosPolicyKind {
-      SHARED_OWNERSHIP_QOS,
-      EXCLUSIVE_OWNERSHIP_QOS
+      SHARED_OWNERSHIP_QOS,
+      EXCLUSIVE_OWNERSHIP_QOS
     };
 
     struct OwnershipQosPolicy {
-      OwnershipQosPolicyKind kind;
+      OwnershipQosPolicyKind kind;
     };
 
 If the kind member is set to ``SHARED_OWNERSHIP_QOS``, more than one Data Writer is allowed to update the same data-object instance.
@@ -1487,7 +1487,7 @@ Below is the IDL related to the Ownership Strength QoS policy:
 .. code-block:: omg-idl
 
     struct OwnershipStrengthQosPolicy {
-      long value;
+      long value;
     };
 
 The value member is used to determine which Data Writer is the *owner* of the data-object instance.
@@ -1506,22 +1506,22 @@ The following sample code illustrates some policies being set and applied for a 
 
 .. code-block:: cpp
 
-          DDS::DataWriterQos dw_qos;
-          pub->get_default_datawriter_qos (dw_qos);
+          DDS::DataWriterQos dw_qos;
+          pub->get_default_datawriter_qos (dw_qos);
 
-          dw_qos.history.kind = DDS::KEEP_ALL_HISTORY_QOS;
+          dw_qos.history.kind = DDS::KEEP_ALL_HISTORY_QOS;
 
-          dw_qos.reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
-          dw_qos.reliability.max_blocking_time.sec = 10;
-          dw_qos.reliability.max_blocking_time.nanosec = 0;
+          dw_qos.reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
+          dw_qos.reliability.max_blocking_time.sec = 10;
+          dw_qos.reliability.max_blocking_time.nanosec = 0;
 
-          dw_qos.resource_limits.max_samples_per_instance = 100;
+          dw_qos.resource_limits.max_samples_per_instance = 100;
 
-          DDS::DataWriter_var dw =
-            pub->create_datawriter(topic,
-                                   dw_qos,
-                                   0,   // No listener
-                                   OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+          DDS::DataWriter_var dw =
+            pub->create_datawriter(topic,
+                                   dw_qos,
+                                   0,   // No listener
+                                   OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
 This code creates a publisher with the following qualities:
 

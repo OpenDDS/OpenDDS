@@ -251,15 +251,15 @@ The process of generating code is documented in the Eclipse help.
 
    * - ``<ModelName>.idl``
 
-     - Data types from the model’s ``DataLib``
+     - Data types from the model's ``DataLib``
 
    * - ``<ModelName>_T.h``
 
-     - C++ class from the model’s ``DcpsLib``
+     - C++ class from the model's ``DcpsLib``
 
    * - ``<ModelName>_T.cpp``
 
-     - C++ implementation of the model’s ``DcpsLib``
+     - C++ implementation of the model's ``DcpsLib``
 
    * - ``<ModelName>.mpc``
 
@@ -759,7 +759,7 @@ Dependencies Between Models
 ..
     Sect<11.3.3.7>
 
-One final consideration — the generated model library could itself depend on other generated model libraries.
+One final consideration -- the generated model library could itself depend on other generated model libraries.
 For example, there could be an external data type library which is generated to a different directory.
 
 This possibility could cause a great deal of maintenance of project files, as models change their dependencies over time.
