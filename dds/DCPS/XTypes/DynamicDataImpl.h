@@ -629,8 +629,7 @@ private:
 
   // Copy a value of a basic member from single map to a DynamicData object.
   bool move_single_to_complex(const const_single_iterator& it, DynamicDataImpl* data);
-  bool move_single_to_complex_i(const const_single_iterator& it, DynamicDataImpl* data,
-                                const TypeKind treat_as);
+  bool move_single_to_complex_i(const const_single_iterator& it, DynamicDataImpl* data, TypeKind treat_as);
 
   template<typename SequenceType>
   void move_sequence_helper(const const_sequence_iterator& it, DynamicDataImpl* data);

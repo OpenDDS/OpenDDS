@@ -3266,7 +3266,7 @@ bool DynamicDataImpl::move_single_to_complex(const const_single_iterator& it, Dy
 }
 
 bool DynamicDataImpl::move_single_to_complex_i(const const_single_iterator& it,
-                                               DynamicDataImpl* data, const TypeKind treat_as)
+                                               DynamicDataImpl* data, TypeKind treat_as)
 {
   switch (treat_as) {
   case TK_INT8: {

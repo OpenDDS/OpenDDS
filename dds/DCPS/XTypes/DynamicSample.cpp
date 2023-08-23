@@ -44,16 +44,16 @@ size_t DynamicSample::serialized_size(const Encoding& enc) const
 {
   const DynamicDataBase* const ddb = dynamic_cast<DynamicDataBase*>(data_.in());
   if (!ddb) {
-    if (log_level >= LogLevel::Notice) {
-      ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicSample::serialized_size: "
+    if (log_level >= LogLevel::Warning) {
+      ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: DynamicSample::serialized_size: "
                  "DynamicData must be a DynamicDataBase\n"));
     }
-    return false;
+    return 0;
   }
   size_t size = 0;
   if (!ddb->serialized_size(enc, size, extent_)) {
-    if (log_level >= LogLevel::Notice) {
-      ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicSample::serialized_size: "
+    if (log_level >= LogLevel::Warning) {
+      ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: DynamicSample::serialized_size: "
                  "DynamicDataBase::serialized_size failed!\n"));
     }
     return 0;
