@@ -31,7 +31,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
   MapsTest::MessageTypeSupport_var type_support = new MapsTest::MessageTypeSupportImpl();
   type_support->register_type(participant, "");
-  CORBA::String_var type_name = type_support->get_type_name ();
+  CORBA::String_var type_name = type_support->get_type_name();
 
   DDS::Topic_var topic = participant->create_topic(MapsTest::MESSAGE_TOPIC_NAME,
                                                    type_name,
@@ -51,9 +51,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
   MapsTest::MessageDataWriter_var message_data_writer = MapsTest::MessageDataWriter::_narrow(data_writer);
 
   MapsTest::Message message;
-  message.intIntMap[0] = 10;
-  message.intIntMap[1] = 20;
-  message.intIntMap[2] = 30;
+  message.intIntMap[10] = 12345;
+  message.intIntMap[11] = 54321;
 
   distributed_condition_set->wait_for(MapsTest::PUBLISHER, MapsTest::SUBSCRIBER, MapsTest::SUBSCRIBER_READY);
 
