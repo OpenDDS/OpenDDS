@@ -1645,7 +1645,9 @@ bool from_param_list(const ParameterList& param_list,
       // address candidates unless the application using ICE does not
       // support IPv4 (i.e., it is an IPv6-only application
       // [RFC4038]).
-      if (locator_to_address(candidate.address, ice_candidate.locator, false /* map ipv4 to ipv6*/) != 0) {
+      //
+      // Change this if we ever do an IPV6-only build.
+      if (locator_to_address(candidate.address, ice_candidate.locator, false /* do not map ipv4 to ipv6 */) != 0) {
         return false;
       }
       candidate.foundation = ice_candidate.foundation;
