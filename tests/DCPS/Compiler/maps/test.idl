@@ -1,6 +1,6 @@
 #if defined __TAO_IDL_FEATURES
   #include __TAO_IDL_FEATURES
-  #if defined TAO_IDL_HAS_MAPS
+  #if defined TAO_IDL_HAS_MAP
     struct TestStruct {
         int32 id;
         string msg;

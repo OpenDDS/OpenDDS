@@ -6,8 +6,7 @@
  */
 #if defined __TAO_IDL_FEATURES
 #  include __TAO_IDL_FEATURES
-#endif
-
+#  if TAO_IDL_HAS_MAP
 module MapsTest {
 
   const long MAPS_DOMAIN = 111;
@@ -24,3 +23,5 @@ module MapsTest {
   const string SUBSCRIBER_READY = "SUBSCRIBER_READY";
   const string SUBSCRIBER_DONE = "SUBSCRIBER_DONE";
 };
+#  endif
+#endif
