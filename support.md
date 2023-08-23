@@ -40,6 +40,10 @@ The [GitHub Discussions]({{ site.opendds.discussions_uri }}) for the OpenDDS pro
 
 The documentation for OpenDDS is available on [Read the Docs]({{ site.latest_docs_url }}).
 
+### YouTube
+
+The [OpenDDS YouTube channel](https://www.youtube.com/channel/UCqeNMrDR3rmv5yuwdKAa2ng) contains technical and non-technial videos about OpenDDS.
+
 ### The Code
 
 Documentation is included with the code in the `DDS_ROOT/docs` directory.
