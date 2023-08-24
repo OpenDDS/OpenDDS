@@ -76,10 +76,10 @@ MulticastTransport::make_datalink(const GUID_t& local_id,
                                                          active));
 
   // Join multicast group:
-  if (!link->join(cfg->group_address_)) {
+  if (!link->join(cfg->group_address().to_addr())) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: MulticastTransport::make_datalink: ")
                ACE_TEXT("failed to join multicast group: %C!\n"),
-               LogAddr(cfg->group_address_, LogAddr::HostPort).c_str()));
+               LogAddr(cfg->group_address(), LogAddr::HostPort).c_str()));
     return MulticastDataLink_rch();
   }
 
@@ -371,20 +371,13 @@ MulticastTransport::configure_i(const MulticastInst_rch& config)
     return false;
   }
 
-  // Override with DCPSDefaultAddress.
-  if (config->local_address_.empty() &&
-      TheServiceParticipant->default_address() != NetworkAddress::default_IPV4) {
-    char buffer[INET6_ADDRSTRLEN];
-    config->local_address_ = TheServiceParticipant->default_address().to_addr().get_host_addr(buffer, sizeof buffer);
-  }
-
-  if (!config->group_address_.is_multicast()) {
+  if (!config->group_address().is_multicast()) {
     ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: MulticastTransport[%@]::configure_i: ")
                       ACE_TEXT("invalid configuration: address %C is not multicast.\n"),
-                      this, LogAddr::ip(config->group_address_).c_str()), false);
+                      this, LogAddr::ip(config->group_address().to_addr()).c_str()), false);
   }
 
-  this->create_reactor_task(config->async_send_, "MulticastTransport" + config->name());
+  this->create_reactor_task(config->async_send(), "MulticastTransport" + config->name());
 
   return true;
 }
