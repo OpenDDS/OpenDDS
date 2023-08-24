@@ -23,19 +23,23 @@ bool NetworkInterfaceAddress::exclude_from_multicast(const char* configured_inte
     return true;
   }
 
-  if (configured_interface && *configured_interface && name != configured_interface) {
+  if (configured_interface && *configured_interface) {
+    if (name == configured_interface) {
+      return false;
+    }
+
     OPENDDS_STRING ci_semi(configured_interface);
     if (ci_semi.find_first_of(':') == OPENDDS_STRING::npos) {
       ci_semi += ':';
     }
-    NetworkAddress as_addr(ci_semi.c_str());
+    const NetworkAddress as_addr(ci_semi.c_str());
     if (as_addr == NetworkAddress() || address != as_addr) {
       return true;
     }
   }
 
   const NetworkAddress sp_default = TheServiceParticipant->default_address();
-  return sp_default != NetworkAddress() && address != sp_default;
+  return sp_default != NetworkAddress::default_IPV4 && address != sp_default;
 }
 
 NetworkConfigMonitor::NetworkConfigMonitor()

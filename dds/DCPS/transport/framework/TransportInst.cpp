@@ -19,30 +19,39 @@
 #include <cstring>
 #include <algorithm>
 
-#if !defined (__ACE_INLINE__)
-# include "TransportInst.inl"
-#endif /* !__ACE_INLINE__ */
-
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
 namespace DCPS {
+
+TransportInst::TransportInst(const char* type,
+                             const OPENDDS_STRING& name)
+  : transport_type_(type)
+  , shutting_down_(false)
+  , name_(name)
+  , config_prefix_(ConfigPair::canonicalize("OPENDDS_TRANSPORT_" + name_))
+{
+  DBG_ENTRY_LVL("TransportInst", "TransportInst", 6);
+}
 
 TransportInst::~TransportInst()
 {
   DBG_ENTRY_LVL("TransportInst","~TransportInst",6);
 }
 
-String
-TransportInst::config_key(const String& key) const
-{
-  return ConfigPair::canonicalize(config_prefix_ + "_" + key);
-}
-
 int
 TransportInst::load(ACE_Configuration_Heap& cf,
                     ACE_Configuration_Section_Key& sect)
 {
+  process_section(*TheServiceParticipant->config_store(),
+                  ConfigReader_rch(),
+                  ConfigReaderListener_rch(),
+                  config_prefix_,
+                  cf,
+                  sect,
+                  "",
+                  false);
+
   ACE_TString stringvalue;
   if (cf.get_string_value (sect, ACE_TEXT("passive_connect_duration"), stringvalue) == 0) {
     ACE_DEBUG ((LM_WARNING,
@@ -123,7 +132,8 @@ TransportInst::max_samples_per_packet() const
 {
   // Ensure that the number of samples put into the packet does
   // not exceed the allowed number of io vectors to be sent by the OS.
-  const size_t configured = TheServiceParticipant->config_store()->get_uint32(config_key("MAX_SAMPLES_PER_PACKET").c_str(), DEFAULT_CONFIG_MAX_SAMPLES_PER_PACKET);
+  const size_t configured = TheServiceParticipant->config_store()->get_uint32(config_key("MAX_SAMPLES_PER_PACKET").c_str(),
+                                                                              DEFAULT_CONFIG_MAX_SAMPLES_PER_PACKET);
   size_t retval = configured;
 
   if ((2 * retval + 1) > MAX_SEND_BLOCKS) {
@@ -342,28 +352,19 @@ TransportInst::get_ice_endpoint()
 void
 TransportInst::rtps_relay_only_now(bool flag)
 {
-  const TransportImpl_rch temp = get_or_create_impl();
-  if (temp) {
-    temp->rtps_relay_only_now(flag);
-  }
+  TheServiceParticipant->config_store()->set_boolean(config_key("RTPS_RELAY_ONLY").c_str(), flag);
 }
 
 void
 TransportInst::use_rtps_relay_now(bool flag)
 {
-  const TransportImpl_rch temp = get_or_create_impl();
-  if (temp) {
-    temp->use_rtps_relay_now(flag);
-  }
+  TheServiceParticipant->config_store()->set_boolean(config_key("USE_RTPS_RELAY").c_str(), flag);
 }
 
 void
 TransportInst::use_ice_now(bool flag)
 {
-  const TransportImpl_rch temp = get_or_create_impl();
-  if (temp) {
-    temp->use_ice_now(flag);
-  }
+  TheServiceParticipant->config_store()->set_boolean(config_key("USE_ICE").c_str(), flag);
 }
 
 ReactorTask_rch

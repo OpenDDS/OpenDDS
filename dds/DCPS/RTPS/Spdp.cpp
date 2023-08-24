@@ -2417,7 +2417,7 @@ Spdp::SpdpTransport::open(const DCPS::ReactorTask_rch& reactor_task,
 
   DCPS::ConfigListener::job_queue(job_queue);
   config_reader_ = DCPS::make_rch<DCPS::ConfigReader>(DCPS::ConfigStoreImpl::datareader_qos(), rchandle_from(this));
-  TheServiceParticipant->config_store()->connect(config_reader_);
+  TheServiceParticipant->config_topic()->connect(config_reader_);
 
 #ifdef OPENDDS_SECURITY
   // Add the endpoint before any sending and receiving occurs.
@@ -2660,7 +2660,7 @@ Spdp::SpdpTransport::close(const DCPS::ReactorTask_rch& reactor_task)
 #endif
 
   if (config_reader_) {
-    TheServiceParticipant->config_store()->disconnect(config_reader_);
+    TheServiceParticipant->config_topic()->disconnect(config_reader_);
   }
 }
 
@@ -3658,8 +3658,10 @@ void Spdp::SpdpTransport::on_data_available(DCPS::ConfigReader_rch)
     return;
   }
 
+  // TODO: Fix this when RtpsDiscovery is converted to config store.
+  // The config should come from discovery and not the transport.
   const String& config_prefix = outer->sedp_->transport_inst()->config_prefix();
-  if (DCPS::ConfigStoreImpl::contains_prefix(config_reader_, config_prefix)) {
+  if (take_has_prefix(config_reader_, config_prefix)) {
     message_dropper_.reload(TheServiceParticipant->config_store(), config_prefix);
     transport_statistics_.reload(TheServiceParticipant->config_store(), config_prefix);
   }

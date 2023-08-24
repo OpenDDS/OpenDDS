@@ -237,6 +237,8 @@ private:
   bool use_local_bit_config_;
   TransportConfig_rch bit_config_;
 
+  bool use_bidir_giop_;
+
   CORBA::ORB_var orb_;
   bool orb_from_user_;
 

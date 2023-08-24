@@ -28,6 +28,226 @@ namespace DCPS {
 
 class RtpsUdpInst;
 
+class OpenDDS_Rtps_Udp_Export RtpsUdpCore {
+public:
+  RtpsUdpCore(const RtpsUdpInst_rch& inst);
+
+  TimeDuration send_delay() const
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+    return send_delay_;
+  }
+
+  TimeDuration heartbeat_period() const
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+    return heartbeat_period_;
+  }
+
+  TimeDuration nak_response_delay() const
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+    return nak_response_delay_;
+  }
+
+  TimeDuration receive_address_duration() const
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+    return receive_address_duration_;
+  }
+
+  void rtps_relay_only(bool flag)
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+    rtps_relay_only_ = flag;
+  }
+
+  bool rtps_relay_only() const
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+    return rtps_relay_only_;
+  }
+
+  void use_rtps_relay(bool flag)
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+    use_rtps_relay_ = flag;
+  }
+
+  bool use_rtps_relay() const
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+    return use_rtps_relay_;
+  }
+
+  void rtps_relay_address(const NetworkAddress& address)
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+    rtps_relay_address_ = address;
+  }
+
+  NetworkAddress rtps_relay_address() const
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+    return rtps_relay_address_;
+  }
+
+  void use_ice(bool flag)
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+    use_ice_ = flag;
+  }
+
+  bool use_ice() const
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+    return use_ice_;
+  }
+
+  void stun_server_address(const NetworkAddress& address)
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+    stun_server_address_ = address;
+  }
+
+  NetworkAddress stun_server_address() const
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+    return stun_server_address_;
+  }
+
+  void send(const NetworkAddress& remote_address,
+            CORBA::Long key_kind,
+            ssize_t bytes)
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+    if (transport_statistics_.count_messages()) {
+      const InternalMessageCountKey key(remote_address, key_kind, remote_address == rtps_relay_address_);
+      transport_statistics_.message_count[key].send(bytes);
+    }
+  }
+
+  void send_fail(const NetworkAddress& remote_address,
+                 CORBA::Long key_kind,
+                 ssize_t bytes)
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+    if (transport_statistics_.count_messages()) {
+      const InternalMessageCountKey key(remote_address, key_kind, remote_address == rtps_relay_address_);
+      transport_statistics_.message_count[key].send_fail(bytes);
+    }
+  }
+
+  void send_fail(const NetworkAddress& remote_address,
+                 CORBA::Long key_kind,
+                 iovec iov[],
+                 int num_blocks)
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+    if (transport_statistics_.count_messages()) {
+      ssize_t bytes = 0;
+      for (int i = 0; i < num_blocks; ++i) {
+        bytes += iov[i].iov_len;
+      }
+      const InternalMessageCountKey key(remote_address, key_kind, remote_address == rtps_relay_address_);
+      transport_statistics_.message_count[key].send_fail(bytes);
+    }
+  }
+
+  void recv(const NetworkAddress& remote_address,
+            CORBA::Long key_kind,
+            ssize_t bytes)
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+    if (transport_statistics_.count_messages()) {
+      const InternalMessageCountKey key(remote_address, key_kind, remote_address == rtps_relay_address_);
+      transport_statistics_.message_count[key].recv(bytes);
+    }
+  }
+
+  void reader_nack_count(const GUID_t& guid,
+                         ACE_CDR::ULong count)
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+    if (transport_statistics_.count_messages()) {
+      transport_statistics_.reader_nack_count[guid] += count;
+    }
+  }
+
+  void writer_resend_count(const GUID_t& guid,
+                           ACE_CDR::ULong count)
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+    if (transport_statistics_.count_messages()) {
+      transport_statistics_.writer_resend_count[guid] += count;
+    }
+  }
+
+  void append_transport_statistics(TransportStatisticsSequence& seq)
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+    append(seq, transport_statistics_);
+    transport_statistics_.clear();
+  }
+
+  bool should_drop(ssize_t length) const
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+    return message_dropper_.should_drop(length);
+  }
+
+  bool should_drop(const iovec iov[],
+                   int n,
+                   ssize_t& length) const
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+    return message_dropper_.should_drop(iov, n, length);
+  }
+
+  void reload(const String& config_prefix)
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+    message_dropper_.reload(TheServiceParticipant->config_store(), config_prefix);
+    transport_statistics_.reload(TheServiceParticipant->config_store(), config_prefix);
+  }
+
+#ifdef OPENDDS_SECURITY
+  void reset_relay_stun_task_falloff()
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+    relay_stun_task_falloff_.set(heartbeat_period_);
+  }
+
+  TimeDuration advance_relay_stun_task_falloff()
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+    relay_stun_task_falloff_.advance(ICE::Configuration::instance()->server_reflexive_address_period());
+    return relay_stun_task_falloff_.get();
+  }
+
+  void set_relay_stun_task_falloff()
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+    relay_stun_task_falloff_.set(ICE::Configuration::instance()->server_reflexive_address_period());
+  }
+#endif
+
+private:
+  mutable ACE_Thread_Mutex mutex_;
+  TimeDuration send_delay_;
+  TimeDuration heartbeat_period_;
+  TimeDuration nak_response_delay_;
+  TimeDuration receive_address_duration_;
+  bool rtps_relay_only_;
+  bool use_rtps_relay_;
+  NetworkAddress rtps_relay_address_;
+  bool use_ice_;
+  NetworkAddress stun_server_address_;
+  MessageDropper message_dropper_;
+  InternalTransportStatistics transport_statistics_;
+  FibonacciSequence<TimeDuration> relay_stun_task_falloff_;
+};
+
 class OpenDDS_Rtps_Udp_Export RtpsUdpTransport : public TransportImpl, public ConfigListener {
 public:
   RtpsUdpTransport(const RtpsUdpInst_rch& inst);
@@ -36,9 +256,6 @@ public:
   DCPS::RcHandle<ICE::Agent> get_ice_agent() const;
 #endif
   virtual DCPS::WeakRcHandle<ICE::Endpoint> get_ice_endpoint();
-  virtual void rtps_relay_only_now(bool flag);
-  virtual void use_rtps_relay_now(bool flag);
-  virtual void use_ice_now(bool flag);
 #ifdef OPENDDS_SECURITY
   ICE::ServerReflexiveStateMachine& relay_srsm() { return relay_srsm_; }
   void process_relay_sra(ICE::ServerReflexiveStateMachine::StateChange);
@@ -51,10 +268,10 @@ public:
   virtual void get_last_recv_locator(const GUID_t& /*remote_id*/,
                                      TransportLocator& /*locators*/);
 
-  void rtps_relay_address_change();
   void append_transport_statistics(TransportStatisticsSequence& seq);
 
-  const MessageDropper message_dropper() const { return message_dropper_; }
+  RtpsUdpCore& core() { return core_; }
+  const RtpsUdpCore& core() const { return core_; }
 
 private:
   virtual AcceptConnectResult connect_datalink(const RemoteTransport& remote,
@@ -130,11 +347,6 @@ private:
   typedef ACE_Guard<ThreadLockType> GuardThreadType;
   ThreadLockType links_lock_;
 
-  /// This protects the connections_ data member
-  typedef ACE_SYNCH_MUTEX     LockType;
-  typedef ACE_Guard<LockType> GuardType;
-  LockType connections_lock_;
-
   RcHandle<BitSubscriber> bit_sub_;
   GuidPrefix_t local_prefix_;
 
@@ -183,8 +395,6 @@ private:
   typedef PmfSporadicTask<RtpsUdpTransport> Sporadic;
   void relay_stun_task(const MonotonicTimePoint& now);
   RcHandle<Sporadic> relay_stun_task_;
-  FibonacciSequence<TimeDuration> relay_stun_task_falloff_;
-  ThreadLockType relay_stun_task_falloff_mutex_;
   ICE::ServerReflexiveStateMachine relay_srsm_;
 
   void start_ice();
@@ -193,16 +403,13 @@ private:
   RcHandle<ICE::Agent> ice_agent_;
 #endif
 
-  MessageDropper message_dropper_;
-
   ConfigReader_rch config_reader_;
   void on_data_available(ConfigReader_rch reader);
 
-  InternalTransportStatistics transport_statistics_;
-  ACE_Thread_Mutex transport_statistics_mutex_;
-
   friend class RtpsUdpSendStrategy;
   friend class RtpsUdpReceiveStrategy;
+
+  RtpsUdpCore core_;
 };
 
 } // namespace DCPS

@@ -21,7 +21,7 @@ public:
   const OpenDDS::DCPS::GUID_t& getSubRdrId(int i) const { return subRdrId[i]; }
 
   ACE_INET_Addr getHostAddress() const;
-  const OpenDDS::DCPS::TimeDuration& getHeartbeatPeriod() const;
+  const OpenDDS::DCPS::TimeDuration getHeartbeatPeriod() const;
   void setHeartbeatPeriod(const ACE_UINT64& ms);
   bool readersReliable() const { return reliableReaders; }
 

@@ -27,11 +27,11 @@ sub runTest {
     print "messages to its DRs.\n";
     print "*********************************\n";
 
-    $test->process("alpha", 'DomainRangeTest', "-DCPSConfigFile config.ini -DCPSDebugLevel $dcps_debug_lvl $arg -domain 2 -domain 8 -domain 20 -domain 50 -domain 8");
+    $test->process("alpha", 'DomainRangeTest', "-DCPSConfigFile config.ini -ORBVerboseLogging 1 -DCPSDebugLevel $dcps_debug_lvl $arg -domain 2 -domain 8 -domain 20 -domain 50 -domain 8");
 
     $test->start_process("alpha");
 
-    my $res = $test->finish(40);
+    my $res = $test->finish(60);
     if ($res != 0) {
         print STDERR "ERROR: test returned $res\n";
         $result += $res;

@@ -1184,7 +1184,7 @@ Those properties, along with options specific to OpenDDS's RTPS Discovery implem
      - Only send RTPS message to the RtpsRelay (for debugging).
        See :ref:`internet_enabled_rtps--the-rtpsrelay`.
 
-     - 0
+     - ``0``
 
    * - ``UseRtpsRelay=[0|1]``
 
@@ -1192,7 +1192,7 @@ Those properties, along with options specific to OpenDDS's RTPS Discovery implem
        Messages will only be sent if SpdpRtpsRelayAddress and/or SedpRtpsRelayAddress is set.
        See :ref:`internet_enabled_rtps--the-rtpsrelay`.
 
-     - 0
+     - ``0``
 
    * - ``SpdpStunServerAddress=host:port``
 
@@ -2936,6 +2936,15 @@ Some implementation notes related to using the ``rtps_udp`` transport protocol a
 
      - ``239.255.0.2:7401``
 
+   * - ``ipv6_multicast_group_address``
+
+       ``=network_address``
+
+     - When the transport is set to multicast, this is the multicast network address that should be used.
+       If no port is specified for the network address, port 7401 will be used.
+
+     - ``[FF03::2]:7401``
+
    * - ``multicast_interface=iface``
 
      - Specifies the network interface to be used by this transport instance.
@@ -2953,9 +2962,7 @@ Some implementation notes related to using the ``rtps_udp`` transport protocol a
 
      - System default
 
-   * - ipv6_local_address ``=``
-
-       ``addr:[port]``
+   * - ``ipv6_local_address=addr:[port]``
 
      - Bind the socket to the given address and port.
        Port can be omitted but the trailing ":" is required.
@@ -2972,9 +2979,7 @@ Some implementation notes related to using the ``rtps_udp`` transport protocol a
 
      -
 
-   * - ipv6_advertised_address ``=``
-
-       ``addr:[port]``
+   * - ``ipv6_advertised_address=addr:[port]``
 
      - Sets the address advertised by the transport.
        Typically used when the participant is behind a firewall or NAT.
@@ -2982,11 +2987,11 @@ Some implementation notes related to using the ``rtps_udp`` transport protocol a
 
      -
 
-   * - send_delay=*msec*
+   * - ``send_delay=msec``
 
      - Time in milliseconds for an RTPS Writer to wait before sending data.
 
-     - 10
+     - ``10``
 
    * - ``nak_depth=n``
 
@@ -3010,7 +3015,7 @@ Some implementation notes related to using the ``rtps_udp`` transport protocol a
 
      - ``1000 (1 sec)``
 
-   * - ResponsiveMode ``=[0|1]``
+   * - ``ResponsiveMode=[0|1]``
 
      - Causes reliable writers and readers to send additional messages which may reduce latency.
 
