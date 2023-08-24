@@ -17,9 +17,17 @@ $test->setup_discovery();
 
 my $dyn;
 $test->flag('dyn', \$dyn);
+my $adapt = 0;
+if ($test->flag('adapt')) {
+  $adapt = 1;
+}
+
+my @pub_args = ();
+push(@pub_args, "-dynamic") if ($dyn eq 'dw');
+push(@pub_args, "-adapter") if ($adapt);
 
 $test->process('subscriber', 'subscriber', $dyn eq 'dr' ? '-dynamic' : '');
-$test->process('publisher', 'publisher', $dyn eq 'dw' ? '-dynamic' : '');
+$test->process('publisher', 'publisher', join(' ', @pub_args));
 
 rmtree './DCS';
 

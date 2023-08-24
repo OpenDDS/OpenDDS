@@ -342,6 +342,18 @@ public:
   DDS::ReturnCode_t get_simple_value(DCPS::Value& value, DDS::MemberId id);
 #endif
 
+  bool serialized_size(const DCPS::Encoding&, size_t&, DCPS::Sample::Extent) const
+  {
+    // Not supported.
+    return false;
+  }
+
+  bool serialize(DCPS::Serializer&, DCPS::Sample::Extent) const
+  {
+    // Not supported.
+    return false;
+  }
+
 private:
 
   class ScopedChainManager {

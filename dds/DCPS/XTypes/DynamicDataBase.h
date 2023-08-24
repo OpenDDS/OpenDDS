@@ -49,6 +49,9 @@ public:
   virtual DDS::ReturnCode_t get_simple_value(DCPS::Value& value, DDS::MemberId id);
 #endif
 
+  virtual bool serialized_size(const DCPS::Encoding& enc, size_t& size, DCPS::Sample::Extent extent) const = 0;
+  virtual bool serialize(DCPS::Serializer& ser, DCPS::Sample::Extent extent) const = 0;
+
 protected:
   /// Verify that a given type is primitive or string or wstring.
   bool is_type_supported(TypeKind tk, const char* func_name);

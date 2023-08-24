@@ -79,7 +79,7 @@ public:
   DDS::ReturnCode_t clear_all_values();
   DDS::ReturnCode_t clear_nonkey_values();
   DDS::ReturnCode_t clear_value(DDS::MemberId);
-  DDS::DynamicData_ptr clone();
+  DDS::DynamicData_ptr clone() = 0;
 
   DDS::ReturnCode_t get_int8_value(CORBA::Int8& value,
                                    DDS::MemberId id)
