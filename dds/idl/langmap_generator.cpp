@@ -89,7 +89,7 @@ struct GeneratorBase
   virtual ~GeneratorBase() {}
   virtual void init() = 0;
   virtual void gen_sequence(UTL_ScopedName* tdname, AST_Sequence* seq) = 0;
-  virtual void gen_map(UTL_ScopedName* tdname, AST_Map* map) {}
+  virtual void gen_map(UTL_ScopedName* /*tdnam*/, AST_Map* /*map*/) {}
   virtual bool gen_struct(AST_Structure* s, UTL_ScopedName* name, const std::vector<AST_Field*>& fields, AST_Type::SIZE_TYPE size, const char* x) = 0;
 
   virtual std::string const_keyword(AST_Expression::ExprType)
