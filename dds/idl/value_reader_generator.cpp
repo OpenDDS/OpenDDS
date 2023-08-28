@@ -114,11 +114,7 @@ namespace {
       indent << "if (!value_reader.begin_map()) return false;\n" <<
       indent << "for (" << (use_cxx11 ? "size_t " : "unsigned int ") << idx << " = 0; "
         "value_reader.pairs_remaining(); ++" << idx << ") {\n";
-    // if (use_cxx11) {
-    //   be_global->impl_ << indent << "  " << expression << ".resize(" << expression << ".size() + 1);\n";
-    // } else {
-    //   be_global->impl_ << indent << "  OpenDDS::DCPS::grow(" << expression << ");\n";
-    // }
+
     auto key_name = scoped(map->key_type()->name());
 
     be_global->impl_ <<
