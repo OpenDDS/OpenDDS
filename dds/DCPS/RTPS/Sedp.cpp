@@ -274,6 +274,8 @@ using DCPS::Serializer;
 using DCPS::Encoding;
 using DCPS::TopicDetails;
 using DCPS::TopicDetailsMap;
+using DCPS::ConfigStoreImpl;
+using DCPS::NetworkAddress;
 
 namespace {
   const Encoding sedp_encoding(Encoding::KIND_XCDR1, DCPS::ENDIAN_LITTLE);
@@ -281,7 +283,8 @@ namespace {
 }
 
 Sedp::Sedp(const GUID_t& participant_id, Spdp& owner, ACE_Thread_Mutex& lock)
-  : spdp_(owner)
+  : config_store_(make_rch<ConfigStoreImpl>(TheServiceParticipant->config_topic()))
+  , spdp_(owner)
   , lock_(lock)
   , participant_id_(participant_id)
   , publication_counter_(0)
@@ -394,53 +397,76 @@ Sedp::init(const GUID_t& guid,
   // Be careful to not call any function that causes the transport be
   // to created before the configuration is complete.
 
-  // Use a static cast to avoid dependency on the RtpsUdp library
-  DCPS::RtpsUdpInst_rch rtps_inst =
-      DCPS::static_rchandle_cast<DCPS::RtpsUdpInst>(transport_inst_);
-  rtps_inst->max_message_size_ = disco.config()->sedp_max_message_size();
-  rtps_inst->heartbeat_period_ = disco.config()->sedp_heartbeat_period();
-  rtps_inst->nak_response_delay_ = disco.config()->sedp_nak_response_delay();
-  rtps_inst->responsive_mode_ = disco.config()->sedp_responsive_mode();
-  rtps_inst->send_delay_ = disco.config()->sedp_send_delay();
-  rtps_inst->send_buffer_size_ = disco.config()->send_buffer_size();
-  rtps_inst->rcv_buffer_size_ = disco.config()->recv_buffer_size();
-  rtps_inst->receive_preallocated_message_blocks(disco.config()->sedp_receive_preallocated_message_blocks());
-  rtps_inst->receive_preallocated_data_blocks(disco.config()->sedp_receive_preallocated_data_blocks());
+  config_store_->set_uint32(transport_inst_->config_key("MAX_MESSAGE_SIZE").c_str(),
+                            static_cast<DDS::UInt32>(disco.config()->sedp_max_message_size()));
+  config_store_->set(transport_inst_->config_key("HEARTBEAT_PERIOD").c_str(),
+                     disco.config()->sedp_heartbeat_period(), ConfigStoreImpl::Format_IntegerMilliseconds);
+  config_store_->set(transport_inst_->config_key("NAK_RESPONSE_DELAY").c_str(),
+                     disco.config()->sedp_nak_response_delay(), ConfigStoreImpl::Format_IntegerMilliseconds);
+  config_store_->set_boolean(transport_inst_->config_key("RESPONSIVE_MODE").c_str(),
+                             disco.config()->sedp_responsive_mode());
+  config_store_->set(transport_inst_->config_key("SEND_DELAY").c_str(),
+                     disco.config()->sedp_send_delay(), ConfigStoreImpl::Format_IntegerMilliseconds);
+  config_store_->set_int32(transport_inst_->config_key("SEND_BUFFER_SIZE").c_str(),
+                           disco.config()->send_buffer_size());
+  config_store_->set_int32(transport_inst_->config_key("RCV_BUFFER_SIZE").c_str(),
+                           disco.config()->recv_buffer_size());
+  transport_inst_->receive_preallocated_message_blocks(disco.config()->sedp_receive_preallocated_message_blocks());
+  transport_inst_->receive_preallocated_data_blocks(disco.config()->sedp_receive_preallocated_data_blocks());
 
   if (disco.sedp_multicast()) {
+    config_store_->set_boolean(transport_inst_->config_key("USE_MULTICAST").c_str(), true);
+
     // Bind to a specific multicast group
     const u_short mc_port = disco.pb() + disco.dg() * domainId + disco.dx();
 
     ACE_INET_Addr mc_addr = disco.default_multicast_group();
     mc_addr.set_port_number(mc_port);
-    rtps_inst->multicast_group_address_ = mc_addr;
+    config_store_->set(transport_inst_->config_key("MULTICAST_GROUP_ADDRESS").c_str(),
+                       NetworkAddress(mc_addr),
+                       ConfigStoreImpl::Format_Optional_Port,
+                       ConfigStoreImpl::Kind_IPV4);
 
-    rtps_inst->ttl_ = disco.ttl();
-    rtps_inst->multicast_interface_ = disco.multicast_interface();
-
+    config_store_->set_uint32(transport_inst_->config_key("TTL").c_str(), disco.ttl());
+    config_store_->set(transport_inst_->config_key("MULTICAST_INTERFACE").c_str(), disco.multicast_interface());
   } else {
-    rtps_inst->use_multicast_ = false;
+    config_store_->set_boolean(transport_inst_->config_key("USE_MULTICAST").c_str(), false);
   }
 
-  rtps_inst->local_address_ = disco.config()->sedp_local_address();
-  rtps_inst->advertised_address_ = disco.config()->sedp_advertised_address();
+  config_store_->set(transport_inst_->config_key("LOCAL_ADDRESS").c_str(),
+                     NetworkAddress(disco.config()->sedp_local_address()),
+                     ConfigStoreImpl::Format_Required_Port,
+                     ConfigStoreImpl::Kind_IPV4);
+  config_store_->set(transport_inst_->config_key("ADVERTISED_ADDRESS").c_str(),
+                     NetworkAddress(disco.config()->sedp_advertised_address()),
+                     ConfigStoreImpl::Format_Required_Port,
+                     ConfigStoreImpl::Kind_IPV4);
 #ifdef ACE_HAS_IPV6
-  rtps_inst->ipv6_local_address_ = disco.config()->ipv6_sedp_local_address();
-  rtps_inst->ipv6_advertised_address_ = disco.config()->ipv6_sedp_advertised_address();
+  config_store_->set(transport_inst_->config_key("IPV6_LOCAL_ADDRESS").c_str(),
+                     NetworkAddress(disco.config()->ipv6_sedp_local_address()),
+                     ConfigStoreImpl::Format_Required_Port,
+                     ConfigStoreImpl::Kind_IPV6);
+  config_store_->set(transport_inst_->config_key("IPV6_ADVERTISED_ADDRESS").c_str(),
+                     NetworkAddress(disco.config()->ipv6_sedp_advertised_address()),
+                     ConfigStoreImpl::Format_Required_Port,
+                     ConfigStoreImpl::Kind_IPV6);
 #endif
 
   if (!disco.config()->sedp_fragment_reassembly_timeout().is_zero()) {
-    rtps_inst->fragment_reassembly_timeout(disco.config()->sedp_fragment_reassembly_timeout());
+    transport_inst_->fragment_reassembly_timeout(disco.config()->sedp_fragment_reassembly_timeout());
   }
 
-  {
-    ACE_GUARD_RETURN(ACE_Thread_Mutex, g, rtps_inst->config_lock_, DDS::RETCODE_PRECONDITION_NOT_MET);
-    rtps_inst->rtps_relay_address_ = disco.config()->sedp_rtps_relay_address();
-    rtps_inst->use_rtps_relay_ = disco.config()->use_rtps_relay();
-    rtps_inst->rtps_relay_only_ = disco.config()->rtps_relay_only();
-    rtps_inst->stun_server_address_ = disco.config()->sedp_stun_server_address();
-    rtps_inst->use_ice_ = disco.config()->use_ice();
-  }
+  config_store_->set(transport_inst_->config_key("DATA_RTPS_RELAY_ADDRESS").c_str(),
+                     disco.config()->sedp_rtps_relay_address(),
+                     ConfigStoreImpl::Format_Required_Port,
+                     ConfigStoreImpl::Kind_IPV4);
+  config_store_->set_boolean(transport_inst_->config_key("USE_RTPS_RELAY").c_str(), disco.config()->use_rtps_relay());
+  config_store_->set_boolean(transport_inst_->config_key("RTPS_RELAY_ONLY").c_str(), disco.config()->rtps_relay_only());
+  config_store_->set(transport_inst_->config_key("DATA_STUN_SERVER_ADDRESS").c_str(),
+                     disco.config()->sedp_stun_server_address(),
+                     ConfigStoreImpl::Format_Required_Port,
+                     ConfigStoreImpl::Kind_IPV4);
+  config_store_->set_boolean(transport_inst_->config_key("USE_ICE").c_str(), disco.config()->use_ice());
 
   // Create a config
   OPENDDS_STRING config_name = DCPS::TransportRegistry::DEFAULT_INST_PREFIX +
@@ -451,6 +477,9 @@ Sedp::init(const GUID_t& guid,
   transport_cfg_->passive_connect_duration_ =
     static_cast<unsigned long>(disco.config()->sedp_passive_connect_duration().value().get_msec());
 
+  // Use a static cast to avoid dependency on the RtpsUdp library
+  DCPS::RtpsUdpInst_rch rtps_inst =
+    DCPS::static_rchandle_cast<DCPS::RtpsUdpInst>(transport_inst_);
   rtps_inst->opendds_discovery_default_listener_ = publications_reader_;
   rtps_inst->opendds_discovery_guid_ = guid;
 
@@ -894,30 +923,31 @@ Sedp::multicast_locators() const
   return transport_locator_to_locator_seq(trans_info);
 }
 
-const DCPS::NetworkAddress&
+NetworkAddress
 Sedp::local_address() const
 {
   DCPS::RtpsUdpInst_rch rtps_inst =
-      DCPS::static_rchandle_cast<DCPS::RtpsUdpInst>(transport_inst_);
-  return rtps_inst->local_address_;
+    DCPS::static_rchandle_cast<DCPS::RtpsUdpInst>(transport_inst_);
+  return rtps_inst->actual_local_address_;
 }
 
 #ifdef ACE_HAS_IPV6
-const DCPS::NetworkAddress&
+NetworkAddress
 Sedp::ipv6_local_address() const
 {
   DCPS::RtpsUdpInst_rch rtps_inst =
-      DCPS::static_rchandle_cast<DCPS::RtpsUdpInst>(transport_inst_);
-  return rtps_inst->ipv6_local_address_;
+    DCPS::static_rchandle_cast<DCPS::RtpsUdpInst>(transport_inst_);
+  return rtps_inst->ipv6_actual_local_address_;
 }
 #endif
 
-const DCPS::NetworkAddress&
+NetworkAddress
 Sedp::multicast_group() const
 {
-  DCPS::RtpsUdpInst_rch rtps_inst =
-      DCPS::static_rchandle_cast<DCPS::RtpsUdpInst>(transport_inst_);
-  return rtps_inst->multicast_group_address_;
+  return config_store_->get(transport_inst_->config_key("MULTICAST_GROUP_ADDRESS").c_str(),
+                            NetworkAddress::default_IPV4,
+                            ConfigStoreImpl::Format_Optional_Port,
+                            ConfigStoreImpl::Kind_IPV4);
 }
 
 void
@@ -5959,22 +5989,21 @@ Sedp::use_ice_now(bool f)
 }
 
 void
-Sedp::rtps_relay_address(const ACE_INET_Addr& address)
+Sedp::rtps_relay_address(const NetworkAddress& address)
 {
-  DCPS::RtpsUdpInst_rch rtps_inst = DCPS::static_rchandle_cast<DCPS::RtpsUdpInst>(transport_inst_);
-  {
-    ACE_GUARD(ACE_Thread_Mutex, g, rtps_inst->config_lock_);
-    rtps_inst->rtps_relay_address_ = address;
-  }
-  rtps_inst->rtps_relay_address_change();
+  config_store_->set(transport_inst_->config_key("DATA_RTPS_RELAY_ADDRESS").c_str(),
+                     address,
+                     ConfigStoreImpl::Format_Required_Port,
+                     ConfigStoreImpl::Kind_IPV4);
 }
 
 void
-Sedp::stun_server_address(const ACE_INET_Addr& address)
+Sedp::stun_server_address(const NetworkAddress& address)
 {
-  DCPS::RtpsUdpInst_rch rtps_inst = DCPS::static_rchandle_cast<DCPS::RtpsUdpInst>(transport_inst_);
-  ACE_GUARD(ACE_Thread_Mutex, g, rtps_inst->config_lock_);
-  rtps_inst->stun_server_address_ = address;
+  config_store_->set(transport_inst_->config_key("DATA_STUN_SERVER_ADDRESS").c_str(),
+                     address,
+                     ConfigStoreImpl::Format_Required_Port,
+                     ConfigStoreImpl::Kind_IPV4);
 }
 
 void

@@ -46,16 +46,18 @@ std::ostream& operator<<(std::ostream& out, const SIW& siw)
   return out;
 }
 
-typedef InternalDataReader<Sample> ReaderType;
+namespace {
+  typedef InternalDataReader<Sample> ReaderType;
 
-class Listener : public InternalDataReaderListener<Sample> {
-public:
-  Listener(JobQueue_rch job_queue)
-    : InternalDataReaderListener<Sample>(job_queue)
-  {}
+  class Listener : public InternalDataReaderListener<Sample> {
+  public:
+    Listener(JobQueue_rch job_queue)
+      : InternalDataReaderListener<Sample>(job_queue)
+    {}
 
-  MOCK_METHOD1(on_data_available, void(RcHandle<ReaderType>));
-};
+    MOCK_METHOD1(on_data_available, void(RcHandle<ReaderType>));
+  };
+}
 
 TEST(dds_DCPS_InternalDataReader, durable)
 {
@@ -439,4 +441,25 @@ TEST(dds_DCPS_InternalDataReader, take_instance)
 
   ASSERT_EQ(samples.size(), 0U);
   ASSERT_EQ(infos.size(), 0U);
+}
+
+TEST(dds_DCPS_InternalDataReader, remove_publication_does_not_dispose_everything)
+{
+  Sample sample("key");
+  ReaderType::SampleSequence samples;
+  InternalSampleInfoSequence infos;
+
+  RcHandle<InternalEntity> writer1 = make_rch<InternalEntity>();
+  RcHandle<InternalEntity> writer2 = make_rch<InternalEntity>();
+  RcHandle<ReaderType> reader = make_rch<ReaderType>(DataReaderQosBuilder().reliability_reliable());
+
+  reader->write(writer1, sample);
+  reader->remove_publication(writer2, true);
+  reader->read(samples, infos, DDS::LENGTH_UNLIMITED, DDS::ANY_SAMPLE_STATE, DDS::ANY_VIEW_STATE, DDS::ANY_INSTANCE_STATE);
+
+  ASSERT_EQ(samples.size(), 1U);
+  ASSERT_EQ(infos.size(), 1U);
+
+  EXPECT_EQ(samples[0], sample);
+  EXPECT_EQ(SIW(infos[0]), SIW(make_sample_info(DDS::NOT_READ_SAMPLE_STATE, DDS::NEW_VIEW_STATE, DDS::ALIVE_INSTANCE_STATE, 0, 0, 0, 0, 0, true)));
 }

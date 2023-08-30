@@ -170,7 +170,7 @@ OpenDDS automatically detects the loss of a repository by using the ``LIVELINESS
 When a federation is used, the ``LIVELINESS`` QoS policy is modified to a non-infinite value.
 When ``LIVELINESS`` is lost for a Built-in Topic an application will initiate a failover sequence causing it to associate with a different repository server.
 Because the federation implementation currently uses a Built-in Topic ``ParticipantDataDataReaderListener`` entity, applications should not install their own listeners for this topic.
-Doing so would affect the federation implementation’s capability to detect repository failures.
+Doing so would affect the federation implementation's capability to detect repository failures.
 
 The federation implementation distributes repository data within the federation using a reserved DDS domain.
 The default domain used for federation is defined by the constant ``Federator::DEFAULT_FEDERATIONDOMAIN``.
@@ -216,7 +216,7 @@ It has a command format syntax of:
 
 .. code-block:: bash
 
-       repoctl <cmd> <arguments>
+       repoctl <cmd> <arguments>
 
 Where each individual command has its own format as shown in :ref:`Table 9-3 <the_dcps_information_repository--reftable32>`.
 Some options contain endpoint information.
@@ -272,7 +272,7 @@ A join command specifies two repository servers (by endpoint) and asks the secon
 
 .. code-block:: bash
 
-       repoctl join 2112 otherhost:1812
+       repoctl join 2112 otherhost:1812
 
 This generates a CORBA object reference of ``corbaloc::otherhost:1812/Federator`` that the federator connects to and invokes a join operation.
 The join operation invocation passes the default Federation Domain value (because we did not specify one) and the location of the joining repository which is obtained by resolving the object reference ``corbaloc::localhost:2112/Federator``.
@@ -406,8 +406,8 @@ Start the second repository as:
 .. code-block:: bash
 
     $DDS/bin/DCPSInfoRepo \
-      -ORBListenEndpoints iiop://localhost:2112 \
-      -FederationId 2048 -FederateWith file://repo.ior
+      -ORBListenEndpoints iiop://localhost:2112 \
+      -FederationId 2048 -FederateWith file://repo.ior
 
 Note that this is all intended to be on a single command line.
 The ``-ORBListenEndpoints iiop://localhost:2112`` option ensures that the repository will be listening on the port that the previous configuration files are expecting.

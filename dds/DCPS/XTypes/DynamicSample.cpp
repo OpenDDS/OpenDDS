@@ -42,32 +42,36 @@ DynamicSample& DynamicSample::operator=(const DynamicSample& rhs)
 
 size_t DynamicSample::serialized_size(const Encoding& enc) const
 {
-  const DynamicDataImpl* const ddi = dynamic_cast<DynamicDataImpl*>(data_.in());
-  if (!ddi) {
+  const DynamicDataBase* const ddb = dynamic_cast<DynamicDataBase*>(data_.in());
+  if (!ddb) {
     if (log_level >= LogLevel::Warning) {
       ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: DynamicSample::serialized_size: "
-        "DynamicData must be DynamicDataImpl, the type supplied by DynamicDataFactory\n"));
+                 "DynamicData must be a DynamicDataBase\n"));
     }
     return 0;
   }
-  return key_only()
-    ? DCPS::serialized_size(enc, DCPS::KeyOnly<const DynamicDataImpl>(*ddi))
-    : DCPS::serialized_size(enc, *ddi);
+  size_t size = 0;
+  if (!ddb->serialized_size(enc, size, extent_)) {
+    if (log_level >= LogLevel::Warning) {
+      ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: DynamicSample::serialized_size: "
+                 "DynamicDataBase::serialized_size failed!\n"));
+    }
+    return 0;
+  }
+  return size;
 }
 
 bool DynamicSample::serialize(Serializer& ser) const
 {
-  const DynamicDataImpl* const ddi = dynamic_cast<DynamicDataImpl*>(data_.in());
-  if (!ddi) {
+  const DynamicDataBase* const ddb = dynamic_cast<DynamicDataBase*>(data_.in());
+  if (!ddb) {
     if (log_level >= LogLevel::Notice) {
       ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicSample::serialize: "
-        "DynamicData must be DynamicDataImpl, the type supplied by DynamicDataFactory\n"));
+                 "DynamicData must be a DynamicDataBase\n"));
     }
     return false;
   }
-  return key_only()
-    ? ser << DCPS::KeyOnly<const DynamicDataImpl>(*ddi)
-    : ser << *ddi;
+  return ddb->serialize(ser, extent_);
 }
 
 bool DynamicSample::deserialize(Serializer& ser)

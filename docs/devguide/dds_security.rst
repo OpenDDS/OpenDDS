@@ -307,7 +307,7 @@ These are specific to the individual Domain Participants within the DDS Domain:
 
 * Permissions Document
 
-- Contains a "subject name" which matches the participant certificate’s Subject
+- Contains a "subject name" which matches the participant certificate's Subject
 
 - Signed by Permissions CA using its private key
 
@@ -405,7 +405,7 @@ PropertyQosPolicy Example Code
 ..
     Sect<14.5.2>
 
-Below is an example of code that sets the DDS Participant QoS’s PropertyQoSPolicy in order to configure DDS Security.
+Below is an example of code that sets the DDS Participant QoS's PropertyQoSPolicy in order to configure DDS Security.
 
 .. code-block:: cpp
 
@@ -534,8 +534,8 @@ Using OpenSSL Utilities for OpenDDS
     Sect<14.5.6>
 
 To generate certificates using the openssl command, a configuration file "openssl.cnf" is required (see below for example commands).
-Before proceeding, it may be helpful to review OpenSSL’s manpages to get help with the file format.
-In particular, configuration file format and ca command’s documentation and configuration file options.
+Before proceeding, it may be helpful to review OpenSSL's manpages to get help with the file format.
+In particular, configuration file format and ca command's documentation and configuration file options.
 
 An example OpenSSL CA-Config file used in OpenDDS testing can be found here: :ghfile:`tests/security/certs/identity/identity_ca_openssl.cnf`
 
@@ -621,7 +621,7 @@ Global Governance Model
 ..
     Sect<14.6.1>
 
-It’s worth noting that the DDS Security Model expects the governance document to be globally shared by all participants making use of the relevant domains described within the governance document.
+It's worth noting that the DDS Security Model expects the governance document to be globally shared by all participants making use of the relevant domains described within the governance document.
 Even if this is not the case, the local participant will verify incoming authentication and access control requests as if the remote participant shared the same governance document and accept or reject the requests accordingly.
 
 .. _dds_security--key-governance-elements:
@@ -651,7 +651,7 @@ If the domain rule or permissions grant should to apply to all domains, use the 
       <id_range><min>0</min></id_range>
     </domains>
 
-If there’s a need to be selective about what domains are chosen, here’s an annotated example:
+If there's a need to be selective about what domains are chosen, here's an annotated example:
 
 .. code-block:: xml
 
@@ -664,7 +664,7 @@ If there’s a need to be selective about what domains are chosen, here’s an a
 Governance Configuration Types
 
 The following types and values are used in configuring both per-domain and per-topic security configuration options.
-We summarize them here to simplify discussion of the configuration options where they’re used, found below.
+We summarize them here to simplify discussion of the configuration options where they're used, found below.
 
 **Boolean**
 
@@ -674,7 +674,7 @@ Recognized values are: ``TRUE/true/1`` or ``FALSE/false/0.``
 **ProtectionKind**
 
 The method used to protect domain data (message signatures or message encryption) along with the ability to include origin authentication for either protection kind.
-Currently, OpenDDS doesn’t implement origin authentication.
+Currently, OpenDDS doesn't implement origin authentication.
 So while the "_WITH_ORIGIN_AUTHENTICATION" options are recognized, the underlying configuration is unsupported.
 Recognized values are: ``{NONE, SIGN, ENCRYPT,SIGN_WITH_ORIGIN_AUTHENTICATION``, or ``ENCRYPT_WITH_ORIGIN_AUTHENTICATION}``
 
@@ -774,11 +774,11 @@ Enables the use of access control protections for matching user topic DataWriter
 
 ``<metadata_protection_kind>`` : **ProtectionKind**
 
-Specifies the protection kind used for the RTPS SubMessages sent by any DataWriter and DataReader whose associated Topic name matches the rule’s topic expression.
+Specifies the protection kind used for the RTPS SubMessages sent by any DataWriter and DataReader whose associated Topic name matches the rule's topic expression.
 
 ``<data_protection_kind>`` : **BasicProtectionKind**
 
-Specifies the basic protection kind used for the RTPS SerializedPayload SubMessage element sent by any DataWriter whose associated Topic name matches the rule’s topic expression.
+Specifies the basic protection kind used for the RTPS SerializedPayload SubMessage element sent by any DataWriter whose associated Topic name matches the rule's topic expression.
 
 .. _dds_security--governance-xml-example:
 
@@ -871,37 +871,37 @@ Each grant bestows access control privileges to a single subject name for a limi
 
 **Subject Name**
 
-Each grant’s subject name is intended to match against a corresponding identity certificate’s "subject" field.
+Each grant's subject name is intended to match against a corresponding identity certificate's "subject" field.
 In order for permissions checks to successfully validate for both local and remote participants, the supplied identity certificate subject name must match the subject name of one of the grants included in the permissions file.
 
 **Validity**
 
-Each grant’s validity section contains a start date and time (``<not_before>``) and an end date and time (``<not_after>``) to indicate the period of time during which the grant is valid.
+Each grant's validity section contains a start date and time (``<not_before>``) and an end date and time (``<not_after>``) to indicate the period of time during which the grant is valid.
 
-The format of the date and time, which is like ISO-8601, must take one of the following forms:
+The format of the date and time, which is like `ISO-8601 <https://www.iso.org/iso-8601-date-and-time-format.html>`__, must take one of the following forms:
 
-* ``YYYY-MM-DDThh:mm:ss``
+#. ``YYYY-MM-DDThh:mm:ss``
 
   * Example: ``2020-10-26T22:45:30``
 
-* ``YYYY-MM-DDThh:mm:ssZ``
+#. ``YYYY-MM-DDThh:mm:ssZ``
 
   * Example:``2020-10-26T22:45:30Z``
 
-* ``YYYY-MM-DDThh:mm:ss+hh:mm``
+#. ``YYYY-MM-DDThh:mm:ss+hh:mm``
 
   * Example:``2020-10-26T23:45:30+01:00``
 
-* ``YYYY-MM-DDThh:mm:ss-hh:mm``
+#. ``YYYY-MM-DDThh:mm:ss-hh:mm``
 
   * Example:``2020-10-26T16:45:30-06:00``
 
 All fields shown must include leading zeros to fill out their full width, as shown in the examples.
-YYYY-MM-DD is the date and hh:mm:ss is the time in 24-hour format.
-The date and time must be able to be represented by the time_t (C standard library) type of the system.
-The seconds field can also include a variable length fractional part, like 00.0 or 01.234, but it will be ignored because time_t represents a whole number of seconds.
+``YYYY-MM-DD`` is the date and ``hh:mm:ss`` is the time in 24-hour format.
+The date and time must be able to be represented by the ``time_t`` (C standard library) type of the system.
+The seconds field can also include a variable length fractional part, like ``00.0`` or ``01.234``, but it will be ignored because ``time_t`` represents a whole number of seconds.
 Examples #1 and #2 are both interpreted to be using UTC.
-To put the date and time in a local time, a time zone offset can to be added that says how far the local timezone is ahead of (using ‘+’ as in example #3) or behind (using ‘-’ as in example #4) UTC at that date and time.
+To put the date and time in a local time, a time zone offset can to be added that says how far the local timezone is ahead of (using ``+`` as in example #3) or behind (using ``-`` as in example #4) UTC at that date and time.
 
 **Allow / Deny Rules**
 
@@ -913,7 +913,7 @@ Special Note: If a grant contains any allow rule that matches a given domain (ev
 
 **Default Rule**
 
-The default rule is the rule applied if none of the grant’s allow rules or deny rules match the incoming operation to be verified.
+The default rule is the rule applied if none of the grant's allow rules or deny rules match the incoming operation to be verified.
 
 **Domain Id Set**
 
@@ -1042,7 +1042,7 @@ The following DDS Security features are not implemented in OpenDDS.
 
    * OpenDDS doesn't use KeyHash, so it meets the spec requirements of not leaking secured data through KeyHash
 
-#. Immutability of Publisher’s Partition QoS, see :omgissue:`DDSSEC12-49`
+#. Immutability of Publisher's Partition QoS, see :omgissue:`DDSSEC12-49`
 
 #. Use of multiple plugin configurations (with different Domain Participants)
 
@@ -1060,7 +1060,7 @@ The following DDS Security features are not implemented in OpenDDS.
 
 #. 128-bit AES keys (256-bit is supported)
 
-#. Configuration of Built-In Crypto’s key reuse (within the DataWriter) and blocks-per-session
+#. Configuration of Built-In Crypto's key reuse (within the DataWriter) and blocks-per-session
 
 #. Signing (without encrypting) at the payload level, see :omgissue:`DDSSEC12-59`
 

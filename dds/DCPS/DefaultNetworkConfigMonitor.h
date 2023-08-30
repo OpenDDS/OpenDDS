@@ -23,17 +23,14 @@ public:
   bool open()
   {
     const NetworkAddress sp_default = TheServiceParticipant->default_address();
-    if (sp_default != NetworkAddress()) {
+    if (sp_default != NetworkAddress::default_IPV4) {
       set(NetworkInterfaceAddress("", true, sp_default));
       return true;
     }
 
-    static const u_short port_zero = 0;
-    ACE_INET_Addr addr(port_zero, "0.0.0.0");
-    set(NetworkInterfaceAddress("", true, NetworkAddress(addr)));
+    set(NetworkInterfaceAddress("", true, NetworkAddress(u_short(0), "0.0.0.0")));
 #ifdef ACE_HAS_IPV6
-    ACE_INET_Addr addr2(port_zero, "::");
-    set(NetworkInterfaceAddress("", true, NetworkAddress(addr2)));
+    set(NetworkInterfaceAddress("", true, NetworkAddress(u_short(0), "::")));
 #endif
 
     return true;

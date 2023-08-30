@@ -364,6 +364,11 @@ size_t calculate_hash(const AddrSet& addrs, size_t start_hash)
 }
 #endif
 
+const NetworkAddress NetworkAddress::default_IPV4("0.0.0.0:0");
+#ifdef ACE_HAS_IPV6
+const NetworkAddress NetworkAddress::default_IPV6("[::]:0");
+#endif
+
 } // namespace DCPS
 } // namespace OpenDDS
 

@@ -145,87 +145,6 @@ String toupper(const String& x)
   return retval;
 }
 
-void
-process_section(ConfigStoreImpl& config_store,
-                ConfigReader_rch reader,
-                ConfigReaderListener_rch listener,
-                const String& key_prefix,
-                ACE_Configuration_Heap& config,
-                const ACE_Configuration_Section_Key& base,
-                const String& filename,
-                bool allow_overwrite)
-{
-  // Process the values.
-  int status = 0;
-  for (int idx = 0; status == 0; ++idx) {
-    ACE_TString key;
-    ACE_Configuration_Heap::VALUETYPE value_type;
-    status = config.enumerate_values(base, idx, key, value_type);
-    if (status == 0) {
-      switch (value_type) {
-      case ACE_Configuration_Heap::STRING:
-        {
-          ACE_TString value;
-          if (config.get_string_value(base, key.c_str(), value) == 0) {
-            const String key_name = key_prefix + "_" + ACE_TEXT_ALWAYS_CHAR(key.c_str());
-            String value_str = ACE_TEXT_ALWAYS_CHAR(value.c_str());
-            if (value_str == "$file") {
-              value_str = filename;
-            }
-            if (allow_overwrite || !config_store.has(key_name.c_str())) {
-              config_store.set(key_name.c_str(), value_str);
-              listener->on_data_available(reader);
-            } else if (log_level >= LogLevel::Notice) {
-              ACE_DEBUG((LM_NOTICE,
-                         "(%P|%t) NOTICE: process_section: "
-                         "value from commandline or user for %s overrides value in config file\n",
-                         key.c_str()));
-            }
-          } else {
-            if (log_level >= LogLevel::Error) {
-              ACE_ERROR((LM_ERROR,
-                         "(%P|%t) ERROR: process_section: "
-                         "get_string_value() failed for key \"%s\"\n",
-                         key.c_str()));
-            }
-          }
-        }
-        break;
-      case ACE_Configuration_Heap::INTEGER:
-      case ACE_Configuration_Heap::BINARY:
-      case ACE_Configuration_Heap::INVALID:
-        if (log_level >= LogLevel::Error) {
-          ACE_ERROR((LM_ERROR,
-                     "(%P|%t) ERROR: process_section: "
-                     "unsupported value type for key \"%s\"\n",
-                     key.c_str()));
-        }
-        break;
-      }
-    }
-  }
-
-  // Recur on the subsections.
-  status = 0;
-  for (int idx = 0; status == 0; ++idx) {
-    ACE_TString section_name;
-    status = config.enumerate_sections(base, idx, section_name);
-    if (status == 0) {
-      ACE_Configuration_Section_Key key;
-      if (config.open_section(base, section_name.c_str(), 0, key) == 0) {
-        process_section(config_store, reader, listener, key_prefix + "_" + ACE_TEXT_ALWAYS_CHAR(section_name.c_str()), config, key, filename, allow_overwrite);
-      } else {
-        if (log_level >= LogLevel::Error) {
-          ACE_ERROR((LM_ERROR,
-                     "(%P|%t) ERROR: process_section: "
-                     "open_section() failed for name \"%s\"\n",
-                     section_name.c_str()));
-        }
-      }
-    }
-  }
-}
-
 }
 
 Service_Participant::Service_Participant()
@@ -240,12 +159,23 @@ Service_Participant::Service_Participant()
   , priority_max_(0)
   , shut_down_(false)
   , network_interface_address_topic_(make_rch<InternalTopic<NetworkInterfaceAddress> >())
-  , config_store_(make_rch<ConfigStoreImpl>())
+  , config_topic_(make_rch<InternalTopic<ConfigPair> >())
+  , config_store_(make_rch<ConfigStoreImpl>(config_topic_))
   , config_reader_(make_rch<InternalDataReader<ConfigPair> >(DataReaderQosBuilder().reliability_reliable().durability_transient_local()))
   , config_reader_listener_(make_rch<ConfigReaderListener>(ref(*this)))
   , set_repo_ior_result_(false)
+  , pending_timeout_(0,0) // Can't use OPENDDS_COMMON_DCPS_PENDING_TIMEOUT_default due to initialization order.
+#ifdef DDS_DEFAULT_DISCOVERY_METHOD
+  , default_discovery_(DDS_DEFAULT_DISCOVERY_METHOD)
+#else
+# ifdef OPENDDS_SAFETY_PROFILE
+  , default_discovery_(Discovery::DEFAULT_RTPS)
+# else
+  , default_discovery_(Discovery::DEFAULT_REPO)
+# endif
+#endif
 {
-  config_store_->connect(config_reader_);
+  config_topic_->connect(config_reader_);
   initialize();
 }
 
@@ -286,7 +216,7 @@ Service_Participant::~Service_Participant()
     }
   }
 
-  config_store_->disconnect(config_reader_);
+  config_topic_->disconnect(config_reader_);
 }
 
 Service_Participant*
@@ -1178,13 +1108,18 @@ Service_Participant::repository_lost(Discovery::RepoKey key)
 void
 Service_Participant::set_default_discovery(const Discovery::RepoKey& key)
 {
+  {
+    ACE_GUARD(ACE_Thread_Mutex, guard, cached_config_mutex_);
+    default_discovery_ = key;
+  }
   config_store_->set_string(OPENDDS_COMMON_DCPS_DEFAULT_DISCOVERY, key.c_str());
 }
 
 Discovery::RepoKey
 Service_Participant::get_default_discovery()
 {
-  return config_store_->get(OPENDDS_COMMON_DCPS_DEFAULT_DISCOVERY, OPENDDS_COMMON_DCPS_DEFAULT_DISCOVERY_default);
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, cached_config_mutex_, OPENDDS_COMMON_DCPS_DEFAULT_DISCOVERY_default);
+  return default_discovery_;
 }
 
 Discovery_rch
@@ -1436,13 +1371,16 @@ Service_Participant::publisher_content_filter() const
 TimeDuration
 Service_Participant::pending_timeout() const
 {
-  return config_store_->get(OPENDDS_COMMON_DCPS_PENDING_TIMEOUT,
-                           OPENDDS_COMMON_DCPS_PENDING_TIMEOUT_default,
-                           ConfigStoreImpl::Format_IntegerSeconds);
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, cached_config_mutex_, OPENDDS_COMMON_DCPS_PENDING_TIMEOUT_default);
+  return pending_timeout_;
 }
 
 void Service_Participant::pending_timeout(const TimeDuration& value)
 {
+  {
+    ACE_GUARD(ACE_Thread_Mutex, guard, cached_config_mutex_);
+    pending_timeout_ = value;
+  }
   config_store_->set(OPENDDS_COMMON_DCPS_PENDING_TIMEOUT, value, ConfigStoreImpl::Format_IntegerSeconds);
 }
 
@@ -1516,7 +1454,10 @@ Service_Participant::set_BIT(bool b)
 NetworkAddress
 Service_Participant::default_address() const
 {
-  return config_store_->get(OPENDDS_COMMON_DCPS_DEFAULT_ADDRESS, OPENDDS_COMMON_DCPS_DEFAULT_ADDRESS_default);
+  return config_store_->get(OPENDDS_COMMON_DCPS_DEFAULT_ADDRESS,
+                            OPENDDS_COMMON_DCPS_DEFAULT_ADDRESS_default,
+                            ConfigStoreImpl::Format_No_Port,
+                            ConfigStoreImpl::Kind_IPV4);
 }
 
 size_t
@@ -2819,6 +2760,21 @@ Service_Participant::ConfigReaderListener::on_data_available(InternalDataReader_
 #endif
       } else if (p.key() == OPENDDS_COMMON_DCPS_LOG_LEVEL) {
         log_level.set_from_string(p.value().c_str());
+      } else if (p.key() == OPENDDS_COMMON_DCPS_PENDING_TIMEOUT) {
+        ACE_GUARD(ACE_Thread_Mutex, guard, service_participant_.cached_config_mutex_);
+        service_participant_.pending_timeout_ =
+          service_participant_.config_store_->get(OPENDDS_COMMON_DCPS_PENDING_TIMEOUT,
+                                                  OPENDDS_COMMON_DCPS_PENDING_TIMEOUT_default,
+                                                  ConfigStoreImpl::Format_IntegerSeconds);
+      } else if (p.key() == OPENDDS_COMMON_DCPS_DEFAULT_DISCOVERY) {
+        ACE_GUARD(ACE_Thread_Mutex, guard, service_participant_.cached_config_mutex_);
+        service_participant_.default_discovery_ =
+          service_participant_.config_store_->get(OPENDDS_COMMON_DCPS_DEFAULT_DISCOVERY,
+                                                  OPENDDS_COMMON_DCPS_DEFAULT_DISCOVERY_default);
+      } else if (p.key() == OPENDDS_CONFIG_DEBUG_LOGGING) {
+        const bool flag = service_participant_.config_store_->get_boolean(OPENDDS_CONFIG_DEBUG_LOGGING,
+                                                                          OPENDDS_CONFIG_DEBUG_LOGGING_default);
+        service_participant_.config_store_->debug_logging = flag;
       }
     }
   }

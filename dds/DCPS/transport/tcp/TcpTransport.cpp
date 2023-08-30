@@ -330,7 +330,7 @@ TcpTransport::configure_i(const TcpInst_rch& config)
 
   // Override with DCPSDefaultAddress.
   if (config->local_address() == ACE_INET_Addr() &&
-      TheServiceParticipant->default_address().to_addr() != ACE_INET_Addr()) {
+      TheServiceParticipant->default_address() != NetworkAddress::default_IPV4) {
     VDBG_LVL((LM_DEBUG,
               ACE_TEXT("(%P|%t) TcpTransport::configure_i overriding with DCPSDefaultAddress\n")), 2);
 

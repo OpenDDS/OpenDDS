@@ -100,11 +100,11 @@ public:
 
   // @brief return the ip address we have bound to.
   // Valid after init() call
-  const DCPS::NetworkAddress& local_address() const;
+  DCPS::NetworkAddress local_address() const;
 #ifdef ACE_HAS_IPV6
-  const DCPS::NetworkAddress& ipv6_local_address() const;
+  DCPS::NetworkAddress ipv6_local_address() const;
 #endif
-  const DCPS::NetworkAddress& multicast_group() const;
+  DCPS::NetworkAddress multicast_group() const;
 
   void associate(DiscoveredParticipant& participant
 #ifdef OPENDDS_SECURITY
@@ -191,8 +191,8 @@ public:
   void rtps_relay_only_now(bool f);
   void use_rtps_relay_now(bool f);
   void use_ice_now(bool f);
-  void rtps_relay_address(const ACE_INET_Addr& address);
-  void stun_server_address(const ACE_INET_Addr& address);
+  void rtps_relay_address(const DCPS::NetworkAddress& address);
+  void stun_server_address(const DCPS::NetworkAddress& address);
 
   DCPS::ReactorTask_rch reactor_task() const { return reactor_task_; }
 
@@ -771,6 +771,7 @@ private:
   // Transport
   DCPS::TransportInst_rch transport_inst_;
   DCPS::TransportConfig_rch transport_cfg_;
+  DCPS::RcHandle<DCPS::ConfigStoreImpl> config_store_;
   DCPS::ReactorTask_rch reactor_task_;
   DCPS::JobQueue_rch job_queue_;
   DCPS::EventDispatcher_rch event_dispatcher_;

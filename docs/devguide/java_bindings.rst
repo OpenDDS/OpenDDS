@@ -23,7 +23,7 @@ See the :ghfile:`java/INSTALL` file for information on getting started, includin
 
 Java versions 9 and up use the `Java Platform Module System <https://en.wikipedia.org/wiki/Java_Platform_Module_System>`__.
 To use OpenDDS with one of these Java versions, set the MPC feature java_pre_jpms to 0.
-OpenDDS’s configure script will attempt to detect the Java version and set this automatically.
+OpenDDS's configure script will attempt to detect the Java version and set this automatically.
 
 See the :ghfile:`java/FAQ` file for information on common issues encountered while developing applications with the Java bindings.
 
@@ -288,21 +288,21 @@ We can then create Participants for specific domains.
 
 .. code-block:: java
 
-        public static void main(String[] args) {
+        public static void main(String[] args) {
 
-            DomainParticipantFactory dpf =
-                TheParticipantFactory.WithArgs(new StringSeqHolder(args));
-            if (dpf == null) {
-              System.err.println ("Domain Participant Factory not found");
-              return;
-            }
-            final int DOMAIN_ID = 42;
-            DomainParticipant dp = dpf.create_participant(DOMAIN_ID,
-              PARTICIPANT_QOS_DEFAULT.get(), null, DEFAULT_STATUS_MASK.value);
-            if (dp == null) {
-              System.err.println ("Domain Participant creation failed");
-              return;
-            }
+            DomainParticipantFactory dpf =
+                TheParticipantFactory.WithArgs(new StringSeqHolder(args));
+            if (dpf == null) {
+              System.err.println ("Domain Participant Factory not found");
+              return;
+            }
+            final int DOMAIN_ID = 42;
+            DomainParticipant dp = dpf.create_participant(DOMAIN_ID,
+              PARTICIPANT_QOS_DEFAULT.get(), null, DEFAULT_STATUS_MASK.value);
+            if (dp == null) {
+              System.err.println ("Domain Participant creation failed");
+              return;
+            }
 
 Object creation failure is indicated by a null return.
 The third argument to ``create_participant()`` takes a Participant events listener.
@@ -322,20 +322,20 @@ Passing an empty string indicates that the middleware should simply use the iden
 
 .. code-block:: java
 
-            MessageTypeSupportImpl servant = new MessageTypeSupportImpl();
-            if (servant.register_type(dp, "") != RETCODE_OK.value) {
-              System.err.println ("register_type failed");
-              return;
-            }
+            MessageTypeSupportImpl servant = new MessageTypeSupportImpl();
+            if (servant.register_type(dp, "") != RETCODE_OK.value) {
+              System.err.println ("register_type failed");
+              return;
+            }
 
-Next we create a topic using the type support servant’s registered name.
+Next we create a topic using the type support servant's registered name.
 
 .. code-block:: java
 
-            Topic top = dp.create_topic("Movie Discussion List",
-                                        servant.get_type_name(),
-                                        TOPIC_QOS_DEFAULT.get(), null,
-                                        DEFAULT_STATUS_MASK.value);
+            Topic top = dp.create_topic("Movie Discussion List",
+                                        servant.get_type_name(),
+                                        TOPIC_QOS_DEFAULT.get(), null,
+                                        DEFAULT_STATUS_MASK.value);
 
 Now we have a topic named "*Movie Discussion List*" with the registered data type and default QoS policies.
 
@@ -351,10 +351,10 @@ Next, we create a publisher:
 
 .. code-block:: java
 
-            Publisher pub = dp.create_publisher(
-              PUBLISHER_QOS_DEFAULT.get(),
-              null,
-              DEFAULT_STATUS_MASK.value);
+            Publisher pub = dp.create_publisher(
+              PUBLISHER_QOS_DEFAULT.get(),
+              null,
+              DEFAULT_STATUS_MASK.value);
 
 .. _java_bindings--creating-a-datawriter-and-registering-an-instance:
 
@@ -368,8 +368,8 @@ With the publisher, we can now create a DataWriter:
 
 .. code-block:: java
 
-            DataWriter dw = pub.create_datawriter(
-              top, DATAWRITER_QOS_DEFAULT.get(), null, DEFAULT_STATUS_MASK.value);
+            DataWriter dw = pub.create_datawriter(
+              top, DATAWRITER_QOS_DEFAULT.get(), null, DEFAULT_STATUS_MASK.value);
 
 The ``DataWriter`` is for a specific topic.
 For our example, we use the default ``DataWriter`` QoS policies and a null ``DataWriterListener``.
@@ -379,21 +379,21 @@ In our data definition IDL we had specified the subject_id field as the key, so 
 
 .. code-block:: java
 
-            MessageDataWriter mdw = MessageDataWriterHelper.narrow(dw);
-            Message msg = new Message();
-            msg.subject_id = 99;
-            int handle = mdw.register(msg);
+            MessageDataWriter mdw = MessageDataWriterHelper.narrow(dw);
+            Message msg = new Message();
+            msg.subject_id = 99;
+            int handle = mdw.register(msg);
 
 Our example waits for any peers to be initialized and connected.
 It then publishes a few messages which are distributed to any subscribers of this topic in the same domain.
 
 .. code-block:: java
 
-            msg.from = "OpenDDS-Java";
-            msg.subject = "Review";
-            msg.text = "Worst. Movie. Ever.";
-            msg.count = 0;
-            int ret = mdw.write(msg, handle);
+            msg.from = "OpenDDS-Java";
+            msg.subject = "Review";
+            msg.text = "Worst. Movie. Ever.";
+            msg.count = 0;
+            int ret = mdw.write(msg, handle);
 
 .. _java_bindings--setting-up-the-subscriber:
 
@@ -409,30 +409,30 @@ The subscriber needs to create a participant in the same domain, register an ide
 
 .. code-block:: java
 
-        public static void main(String[] args) {
+        public static void main(String[] args) {
 
-            DomainParticipantFactory dpf =
-                TheParticipantFactory.WithArgs(new StringSeqHolder(args));
-            if (dpf == null) {
-              System.err.println ("Domain Participant Factory not found");
-              return;
-            }
-            DomainParticipant dp = dpf.create_participant(42,
-              PARTICIPANT_QOS_DEFAULT.get(), null, DEFAULT_STATUS_MASK.value);
-            if (dp == null) {
-              System.err.println("Domain Participant creation failed");
-              return;
-            }
+            DomainParticipantFactory dpf =
+                TheParticipantFactory.WithArgs(new StringSeqHolder(args));
+            if (dpf == null) {
+              System.err.println ("Domain Participant Factory not found");
+              return;
+            }
+            DomainParticipant dp = dpf.create_participant(42,
+              PARTICIPANT_QOS_DEFAULT.get(), null, DEFAULT_STATUS_MASK.value);
+            if (dp == null) {
+              System.err.println("Domain Participant creation failed");
+              return;
+            }
 
-            MessageTypeSupportImpl servant = new MessageTypeSupportImpl();
+            MessageTypeSupportImpl servant = new MessageTypeSupportImpl();
                            if (servant.register_type(dp, "") != RETCODE_OK.value) {
-              System.err.println ("register_type failed");
-              return;
-            }
-            Topic top = dp.create_topic("Movie Discussion List",
-                                        servant.get_type_name(),
-                                        TOPIC_QOS_DEFAULT.get(), null,
-                                        DEFAULT_STATUS_MASK.value);
+              System.err.println ("register_type failed");
+              return;
+            }
+            Topic top = dp.create_topic("Movie Discussion List",
+                                        servant.get_type_name(),
+                                        TOPIC_QOS_DEFAULT.get(), null,
+                                        DEFAULT_STATUS_MASK.value);
 
 .. _java_bindings--creating-a-subscriber:
 
@@ -446,8 +446,8 @@ As with the publisher, we create a subscriber:
 
 .. code-block:: java
 
-            Subscriber sub = dp.create_subscriber(
-              SUBSCRIBER_QOS_DEFAULT.get(), null, DEFAULT_STATUS_MASK.value);
+            Subscriber sub = dp.create_subscriber(
+              SUBSCRIBER_QOS_DEFAULT.get(), null, DEFAULT_STATUS_MASK.value);
 
 .. _java_bindings--creating-a-datareader-and-listener:
 
@@ -462,12 +462,12 @@ We therefore create an instance of a ``DataReaderListenerImpl`` and pass it as a
 
 .. code-block:: java
 
-            DataReaderListenerImpl listener = new DataReaderListenerImpl();
-             DataReader dr = sub.create_datareader(
-               top, DATAREADER_QOS_DEFAULT.get(), listener,
-               DEFAULT_STATUS_MASK.value);
+            DataReaderListenerImpl listener = new DataReaderListenerImpl();
+             DataReader dr = sub.create_datareader(
+               top, DATAREADER_QOS_DEFAULT.get(), listener,
+               DEFAULT_STATUS_MASK.value);
 
-Any incoming messages will be received by the Listener in the middleware’s thread.
+Any incoming messages will be received by the Listener in the middleware's thread.
 The application thread is free to perform other tasks at this time.
 
 .. _java_bindings--the-datareader-listener-implementation:
@@ -479,9 +479,9 @@ The DataReader Listener Implementation
 ..
     Sect<10.6>
 
-The application defined ``DataReaderListenerImpl`` needs to implement the specification’s ``DDS.DataReaderListener`` interface.
+The application defined ``DataReaderListenerImpl`` needs to implement the specification's ``DDS.DataReaderListener`` interface.
 OpenDDS provides an abstract class ``DDS._DataReaderListenerLocalBase``.
-The application’s listener class extends this abstract class and implements the abstract methods to add application-specific functionality.
+The application's listener class extends this abstract class and implements the abstract methods to add application-specific functionality.
 
 Our example ``DataReaderListener`` stubs out most of the Listener methods.
 The only method implemented is the message available callback from the middleware:
@@ -490,67 +490,67 @@ The only method implemented is the message available callback from the middlewar
 
     public class DataReaderListenerImpl extends DDS._DataReaderListenerLocalBase {
 
-        private int num_reads_;
+        private int num_reads_;
 
-        public synchronized void on_data_available(DDS.DataReader reader) {
-            ++num_reads_;
-            MessageDataReader mdr = MessageDataReaderHelper.narrow(reader);
-            if (mdr == null) {
-              System.err.println ("read: narrow failed.");
-              return;
-            }
+        public synchronized void on_data_available(DDS.DataReader reader) {
+            ++num_reads_;
+            MessageDataReader mdr = MessageDataReaderHelper.narrow(reader);
+            if (mdr == null) {
+              System.err.println ("read: narrow failed.");
+              return;
+            }
 
 The Listener callback is passed a reference to a generic ``DataReader``.
 The application narrows it to a type-specific ``DataReader``:
 
 .. code-block:: java
 
-            MessageHolder mh = new MessageHolder(new Message());
-            SampleInfoHolder sih = new SampleInfoHolder(new SampleInfo(0, 0, 0,
-                new DDS.Time_t(), 0, 0, 0, 0, 0, 0, 0, false));
-            int status  = mdr.take_next_sample(mh, sih);
+            MessageHolder mh = new MessageHolder(new Message());
+            SampleInfoHolder sih = new SampleInfoHolder(new SampleInfo(0, 0, 0,
+                new DDS.Time_t(), 0, 0, 0, 0, 0, 0, 0, false));
+            int status  = mdr.take_next_sample(mh, sih);
 
 It then creates holder objects for the actual message and associated ``SampleInfo`` and takes the next sample from the ``DataReader``.
-Once taken, that sample is removed from the ``DataReader``’s available sample pool.
+Once taken, that sample is removed from the ``DataReader``'s available sample pool.
 
 .. code-block:: java
 
-            if (status == RETCODE_OK.value) {
+            if (status == RETCODE_OK.value) {
 
-              System.out.println ("SampleInfo.sample_rank = "+ sih.value.sample_rank);
-              System.out.println ("SampleInfo.instance_state = "+
-                                  sih.value.instance_state);
+              System.out.println ("SampleInfo.sample_rank = "+ sih.value.sample_rank);
+              System.out.println ("SampleInfo.instance_state = "+
+                                  sih.value.instance_state);
 
-              if (sih.value.valid_data) {
+              if (sih.value.valid_data) {
 
-                System.out.println("Message: subject    = " + mh.value.subject);
-                System.out.println("         subject_id = " + mh.value.subject_id);
-                System.out.println("         from       = " + mh.value.from);
-                System.out.println("         count      = " + mh.value.count);
-                System.out.println("         text       = " + mh.value.text);
-                System.out.println("SampleInfo.sample_rank = " +
-                                   sih.value.sample_rank);
-              }
-              else if (sih.value.instance_state ==
-                         NOT_ALIVE_DISPOSED_INSTANCE_STATE.value) {
-                System.out.println ("instance is disposed");
-              }
-              else if (sih.value.instance_state ==
-                         NOT_ALIVE_NO_WRITERS_INSTANCE_STATE.value) {
-                System.out.println ("instance is unregistered");
-              }
-              else {
-                System.out.println ("DataReaderListenerImpl::on_data_available: "+
-                                    "received unknown instance state "+
-                                    sih.value.instance_state);
-              }
+                System.out.println("Message: subject    = " + mh.value.subject);
+                System.out.println("         subject_id = " + mh.value.subject_id);
+                System.out.println("         from       = " + mh.value.from);
+                System.out.println("         count      = " + mh.value.count);
+                System.out.println("         text       = " + mh.value.text);
+                System.out.println("SampleInfo.sample_rank = " +
+                                   sih.value.sample_rank);
+              }
+              else if (sih.value.instance_state ==
+                         NOT_ALIVE_DISPOSED_INSTANCE_STATE.value) {
+                System.out.println ("instance is disposed");
+              }
+              else if (sih.value.instance_state ==
+                         NOT_ALIVE_NO_WRITERS_INSTANCE_STATE.value) {
+                System.out.println ("instance is unregistered");
+              }
+              else {
+                System.out.println ("DataReaderListenerImpl::on_data_available: "+
+                                    "received unknown instance state "+
+                                    sih.value.instance_state);
+              }
 
-            } else if (status == RETCODE_NO_DATA.value) {
-              System.err.println ("ERROR: reader received DDS::RETCODE_NO_DATA!");
-            } else {
-              System.err.println ("ERROR: read Message: Error: "+ status);
-            }
-        }
+            } else if (status == RETCODE_NO_DATA.value) {
+              System.err.println ("ERROR: reader received DDS::RETCODE_NO_DATA!");
+            } else {
+              System.err.println ("ERROR: read Message: Error: "+ status);
+            }
+        }
 
     }
 
@@ -569,19 +569,19 @@ An application should clean up its OpenDDS environment with the following steps:
 
 .. code-block:: java
 
-            dp.delete_contained_entities();
+            dp.delete_contained_entities();
 
 Cleans up all topics, subscribers and publishers associated with that ``Participant``.
 
 .. code-block:: java
 
-            dpf.delete_participant(dp);
+            dpf.delete_participant(dp);
 
 The ``DomainParticipantFactory`` reclaims any resources associated with the ``DomainParticipant``.
 
 .. code-block:: java
 
-            TheServiceParticipant.shutdown();
+            TheServiceParticipant.shutdown();
 
 Shuts down the ``ServiceParticipant``.
 This cleans up all OpenDDS associated resources.

@@ -373,7 +373,7 @@ MulticastTransport::configure_i(const MulticastInst_rch& config)
 
   // Override with DCPSDefaultAddress.
   if (config->local_address_.empty() &&
-      TheServiceParticipant->default_address().to_addr() != ACE_INET_Addr()) {
+      TheServiceParticipant->default_address() != NetworkAddress::default_IPV4) {
     char buffer[INET6_ADDRSTRLEN];
     config->local_address_ = TheServiceParticipant->default_address().to_addr().get_host_addr(buffer, sizeof buffer);
   }
