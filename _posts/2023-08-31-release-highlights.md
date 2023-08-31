@@ -5,7 +5,7 @@ categories: news
 author: OpenDDS
 ---
 
-OpenDDS 3.2 was release in July 2023 and contains
+OpenDDS 3.25 was release in July 2023 and contains
 
 * New support for JSON encoding and decoding using TypeSupport
 * Equality operators for the C++11 language mapping
