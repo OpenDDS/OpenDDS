@@ -21,6 +21,7 @@ my @required_values = qw/
   config-file
 /;
 my @optional_values = qw/
+  workspace-file
   platform-macros-file
   static
 /;
@@ -31,6 +32,7 @@ for my $key (@required_values, @optional_values) {
   $values{$key} = undef;
   push(@opts, "$key=s");
 }
+push(@opts, "macro-line=s@");
 if (!GetOptions(\%values, @opts)) {
   exit(1);
 }
@@ -63,6 +65,15 @@ sub run_command {
   );
 }
 
+sub read_file {
+  my $path = shift();
+
+  open(my $file, $path) or die("Failed to open $path: $!");
+  my $contents = do { local $/; <$file> };
+  close($file);
+  return $contents;
+}
+
 my $features_path = "$values{ace}/bin/MakeProjectCreator/config/default.features";
 open(my $features_file, '>', $features_path) or die("Failed to open $features_path: $!");
 for my $feature (@ARGV) {
@@ -72,20 +83,29 @@ for my $feature (@ARGV) {
 close($features_file);
 
 my $config_path = "$values{ace}/ace/config.h";
-open(my $config_file, '>', $config_path) or die("Failed to open $config_path: $!");
-print $config_file (
+my $config_file_should_be =
   "#define ACE_DISABLE_MKTEMP\n" .
   "#define ACE_LACKS_READDIR_R\n" .
   "#define ACE_LACKS_TEMPNAM\n" .
-  "#include \"$values{'config-file'}\"\n");
-close($config_file);
+  "#include \"$values{'config-file'}\"\n";
+# Always writing the config.h file will cause rebuilds, so don't it unless we
+# actually need to change it.
+if (!-f $config_path || read_file($config_path) ne $config_file_should_be) {
+  open(my $config_file, '>', $config_path) or die("Failed to open $config_path: $!");
+  print $config_file ($config_file_should_be);
+  close($config_file);
+}
 
 if ($gnuace) {
   my $platform_macros_path = "$values{ace}/include/makeinclude/platform_macros.GNU";
   open(my $platform_macros_file, '>', $platform_macros_path)
     or die("Failed to open $platform_macros_path: $!");
+  if ($values{'macro-line'}) {
+    for my $line (@{$values{'macro-line'}}) {
+      print $platform_macros_file ("$line\n");
+    }
+  }
   print $platform_macros_file (
-    "optimize = 0\n" .
     "include \$(ACE_ROOT)/include/makeinclude/$values{'platform-macros-file'}\n");
   close($platform_macros_file);
 }
@@ -94,7 +114,7 @@ $ENV{MPC_ROOT} = File::Spec->rel2abs($values{mpc});
 $ENV{ACE_ROOT} = File::Spec->rel2abs($values{ace});
 $ENV{TAO_ROOT} = File::Spec->rel2abs($values{tao});
 my $mwc_name = 'ACE_TAO_for_OpenDDS.mwc';
-my $mwc_src = "$FindBin::RealBin/../$mwc_name";
+my $mwc_src = $values{'workspace-file'} // "$FindBin::RealBin/../$mwc_name";
 my $mwc = "$values{src}/$mwc_name";
 copy($mwc_src, $mwc) or die("Failed to copy $mwc_src to $mwc: $!");
 my $cmd = [$Config{perlpath}, "$ENV{ACE_ROOT}/bin/mwc.pl", $mwc, '-type', $values{'mpc-type'}];

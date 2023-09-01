@@ -35,6 +35,7 @@ function(_opendds_library target)
     LIBRARY_OUTPUT_DIRECTORY "${OPENDDS_LIB_DIR}"
     ARCHIVE_OUTPUT_DIRECTORY "${OPENDDS_LIB_DIR}"
     POSITION_INDEPENDENT_CODE TRUE
+    BUILD_RPATH "${OPENDDS_LIB_DIR}"
   )
 
   get_target_property(target_type ${target} TYPE)
