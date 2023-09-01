@@ -80,7 +80,7 @@ RtpsDiscovery::Config::discovery_config(ACE_Configuration_Heap& cf)
       RtpsDiscoveryConfig_rch config = discovery->config();
 
       // spdpaddr defaults to DCPSDefaultAddress if set
-      if (TheServiceParticipant->default_address().to_addr() != ACE_INET_Addr()) {
+      if (TheServiceParticipant->default_address() != DCPS::NetworkAddress::default_IPV4) {
         config->spdp_local_address(TheServiceParticipant->default_address().to_addr());
         config->multicast_interface(DCPS::LogAddr::ip(TheServiceParticipant->default_address().to_addr()));
       }
@@ -391,7 +391,7 @@ RtpsDiscovery::Config::discovery_config(ACE_Configuration_Heap& cf)
                               it->second.c_str()),
                              -1);
           }
-          config->sedp_rtps_relay_address(addr);
+          config->sedp_rtps_relay_address(DCPS::NetworkAddress(addr));
         } else if (name == "SedpRtpsRelayBeaconPeriod") {
           ACE_ERROR((LM_ERROR,
                      ACE_TEXT("(%P|%t) RtpsDiscovery::Config::discovery_config(): ")
@@ -438,7 +438,7 @@ RtpsDiscovery::Config::discovery_config(ACE_Configuration_Heap& cf)
                               it->second.c_str()),
                              -1);
           }
-          config->sedp_stun_server_address(addr);
+          config->sedp_stun_server_address(DCPS::NetworkAddress(addr));
         } else if (name == "UseIce") {
           const OPENDDS_STRING& value = it->second;
           int smInt = 0;
@@ -1067,13 +1067,13 @@ void
 RtpsDiscovery::sedp_rtps_relay_address(const ACE_INET_Addr& address)
 {
   RtpsDiscoveryConfig_rch config = get_config();
-  config->sedp_rtps_relay_address(address);
+  config->sedp_rtps_relay_address(DCPS::NetworkAddress(address));
 
   ACE_GUARD(ACE_Thread_Mutex, g, participants_lock_);
   for (DomainParticipantMap::const_iterator dom_pos = participants_.begin(), dom_limit = participants_.end();
        dom_pos != dom_limit; ++dom_pos) {
     for (ParticipantMap::const_iterator part_pos = dom_pos->second.begin(), part_limit = dom_pos->second.end(); part_pos != part_limit; ++part_pos) {
-      part_pos->second->sedp_rtps_relay_address(address);
+      part_pos->second->sedp_rtps_relay_address(DCPS::NetworkAddress(address));
     }
   }
 }
@@ -1087,13 +1087,13 @@ RtpsDiscovery::spdp_stun_server_address(const ACE_INET_Addr& address)
 void
 RtpsDiscovery::sedp_stun_server_address(const ACE_INET_Addr& address)
 {
-  get_config()->sedp_stun_server_address(address);
+  get_config()->sedp_stun_server_address(DCPS::NetworkAddress(address));
 
   ACE_GUARD(ACE_Thread_Mutex, g, participants_lock_);
   for (DomainParticipantMap::const_iterator dom_pos = participants_.begin(), dom_limit = participants_.end();
        dom_pos != dom_limit; ++dom_pos) {
     for (ParticipantMap::const_iterator part_pos = dom_pos->second.begin(), part_limit = dom_pos->second.end(); part_pos != part_limit; ++part_pos) {
-      part_pos->second->sedp_stun_server_address(address);
+      part_pos->second->sedp_stun_server_address(DCPS::NetworkAddress(address));
     }
   }
 }

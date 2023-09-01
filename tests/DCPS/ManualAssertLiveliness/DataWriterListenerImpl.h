@@ -4,6 +4,7 @@
 #include "dds/DdsDcpsPublicationC.h"
 #include "dds/DCPS/Definitions.h"
 #include "dds/DCPS/LocalObject.h"
+#include "dds/DCPS/PoolAllocator.h"
 
 #include "ace/Atomic_Op.h"
 
@@ -15,7 +16,7 @@ class DataWriterListenerImpl
   : public virtual OpenDDS::DCPS::LocalObject<OpenDDS::DCPS::DataWriterListener>
 {
 public:
-  DataWriterListenerImpl (void);
+  DataWriterListenerImpl(const OpenDDS::DCPS::String& name);
 
   virtual ~DataWriterListenerImpl (void);
 
@@ -66,6 +67,7 @@ public:
 
 private:
   OpenDDS::DCPS::Atomic<unsigned long> num_liveliness_lost_callbacks_;
+  const OpenDDS::DCPS::String name_;
 };
 
 #endif /* DATAWRITER_LISTENER_IMPL  */

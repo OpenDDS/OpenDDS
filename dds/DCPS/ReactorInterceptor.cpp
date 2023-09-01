@@ -135,7 +135,7 @@ void RemoveHandler::execute()
   if (reactor()->remove_handler(io_handle_, mask_) != 0) {
     if (log_level >= LogLevel::Error) {
       ACE_ERROR((LM_ERROR,
-                 "(%P|%t) ERROR: UnregisterHandler::execute: failed to remove handler for socket %d\n",
+                 "(%P|%t) ERROR: RemoveHandler::execute: failed to remove handler for socket %d\n",
                  io_handle_));
     }
   }

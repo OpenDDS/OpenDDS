@@ -49,7 +49,7 @@ my $sftp_downloads_path = "downloads/OpenDDS";
 my $sftp_previous_releases_path = 'previous-releases/';
 my $rtd_project_name = 'opendds';
 my $rtd_project_url = "https://readthedocs.org/api/v3/projects/$rtd_project_name/";
-my $rtd_url = "https://$rtd_project_name.readthedocs.io/";
+my $rtd_url = "https://$rtd_project_name.readthedocs.io";
 my $json_mime = 'application/json';
 
 $ENV{TZ} = "UTC";
@@ -75,11 +75,7 @@ sub get_rtd_link {
   my $settings = shift();
   my $post_release = shift() // 0;
 
-  my $link = $rtd_url;
-  if (!$post_release) {
-    $link .= 'en/' . lc($settings->{git_tag});
-  }
-  return $link;
+  return "$rtd_url/en/" . ($post_release ? 'latest-release' : lc($settings->{git_tag}));
 }
 
 sub usage {
@@ -217,6 +213,7 @@ sub normalizePath {
 sub run_command {
   return !command_utils::run_command(@_,
     script_name => 'gitrelease.pl',
+    verbose => 1,
   );
 }
 
@@ -1747,7 +1744,7 @@ sub verify_update_readme_file {
   my $post_release = $step_options->{post_release} // 0;
 
   my $link = get_rtd_link($settings, $post_release);
-  my $link_re = quotemeta("$link.");
+  my $link_re = quotemeta($link);
   my $found_link = 0;
   open(my $fh, $readme_file) or die("Can't open \"$readme_file\": $?");
   while (<$fh>) {
@@ -1773,13 +1770,13 @@ sub remedy_update_readme_file {
   my $settings = shift();
   my $post_release = shift() // 0;
 
-  my $link = quotemeta(get_rtd_link($settings, !$post_release) . '.');
-  my $replace_with = get_rtd_link($settings, $post_release) . '.';
+  my $link = quotemeta(get_rtd_link($settings, !$post_release));
+  my $replace_with = get_rtd_link($settings, $post_release);
   my $replaced_link = 0;
   open(my $fh, "+< $readme_file") or die("Can't open \"$readme_file\": $?");
   my $out = '';
   while (<$fh>) {
-    if (!$replaced_link && $_ =~ s/$link/$replace_with/) {
+    if ($_ =~ s/$link/$replace_with/) {
       $replaced_link = 1;
     }
     $out .= $_;

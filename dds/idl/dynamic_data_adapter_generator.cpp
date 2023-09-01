@@ -216,6 +216,7 @@ namespace {
     } else {
       be_global->impl_ << "void* dest, DDS::TypeKind tk, DDS::MemberId id";
     }
+
     be_global->impl_ << ")\n"
       "  {\n";
 
@@ -399,77 +400,175 @@ namespace {
       tag = ", " + cpp_name;
     }
 
-    if (generate) {
-      DynamicDataAdapterGuard ddag;
-
-      be_global->impl_ <<
-        "template <>\n"
-        "class DynamicDataAdapterImpl<" << cpp_name << tag << " > : public DynamicDataAdapter_T<"
-          << cpp_name << "> {\n"
-        "public:\n"
-        "  DynamicDataAdapterImpl(DDS::DynamicType_ptr type, " << cpp_name << "& value)\n"
-        "    : DynamicDataAdapter_T<" << cpp_name << ">(type, value)\n"
-        "  {\n"
-        "  }\n"
-        "\n"
-        "  DynamicDataAdapterImpl(DDS::DynamicType_ptr type, const " << cpp_name << "& value)\n"
-        "    : DynamicDataAdapter_T<" << cpp_name << ">(type, value)\n"
-        "  {\n"
-        "  }\n"
-        "\n";
-      if (struct_node || seq_node || array_node) {
-        be_global->impl_ <<
-          "  DDS::UInt32 get_item_count()\n"
-          "  {\n"
-          "    return ";
-        if (struct_node) {
-          be_global->impl_ << struct_node->nfields();
-        } else if (seq_node) {
-          be_global->impl_ << wrapper.seq_get_length();
-        } else if (array_node) {
-          be_global->impl_ << array_element_count(array_node);
-        }
-        be_global->impl_ << ";\n"
-          "  }\n"
-          "\n";
-      }
-
-      if (seq_node) {
-        // TODO: Set new elements to default values?
-        be_global->impl_ <<
-          "  DDS::MemberId get_member_id_at_index_impl(DDS::UInt32 index)\n"
-          "  {\n"
-          "    const DDS::UInt32 count = " << wrapper.seq_get_length() << ";\n"
-          "    if (!read_only_ && index >= count) {\n"
-          "      " << wrapper.seq_resize("index + 1") <<
-          "      return index;\n"
-          "    }\n"
-          "    return check_index(\"get_member_id_at_index\", index, count)"
-            " == DDS::RETCODE_OK ? index : MEMBER_ID_INVALID;\n"
-          "  }\n"
-          "\n";
-      }
-
-      be_global->impl_ <<
-        "protected:\n";
-
-      if (!generate_dynamic_data_adapter_access(node, wrapper, false)) {
-        return false;
-      }
-      be_global->impl_ << "\n";
-      if (!generate_dynamic_data_adapter_access(node, wrapper, true)) {
-        return false;
-      }
-
-      be_global->impl_ <<
-        "};\n"
-        "\n";
-    }
-
     {
       NoSafetyProfileGuard nspg;
-
       wrapper.generate_tag();
+
+      if (generate) {
+        DynamicDataAdapterGuard ddag;
+
+        std::string impl_classname = "DynamicDataAdapterImpl<" + cpp_name + tag + " >";
+        be_global->impl_ <<
+          "template <>\n"
+          "class " << impl_classname << " : public DynamicDataAdapter_T<" << cpp_name << "> {\n"
+          "public:\n"
+          "  DynamicDataAdapterImpl(DDS::DynamicType_ptr type, " << cpp_name << "& value)\n"
+          "    : DynamicDataAdapter_T<" << cpp_name << ">(type, value)\n"
+          "  {\n"
+          "  }\n"
+          "\n"
+          "  DynamicDataAdapterImpl(DDS::DynamicType_ptr type, const " << cpp_name << "& value)\n"
+          "    : DynamicDataAdapter_T<" << cpp_name << ">(type, value)\n"
+          "  {\n"
+          "  }\n"
+          "\n";
+        if (struct_node || seq_node || array_node) {
+          be_global->impl_ <<
+            "  DDS::UInt32 get_item_count()\n"
+            "  {\n"
+            "    return ";
+          if (struct_node) {
+            be_global->impl_ << struct_node->nfields();
+          } else if (seq_node) {
+            be_global->impl_ << wrapper.seq_get_length();
+          } else if (array_node) {
+            be_global->impl_ << array_element_count(array_node);
+          }
+          be_global->impl_ << ";\n"
+            "  }\n"
+            "\n";
+        }
+
+        if (seq_node) {
+          // TODO: Set new elements to default values?
+          be_global->impl_ <<
+            "  DDS::MemberId get_member_id_at_index_impl(DDS::UInt32 index)\n"
+            "  {\n"
+            "    const DDS::UInt32 count = " << wrapper.seq_get_length() << ";\n"
+            "    if (!read_only_ && index >= count) {\n"
+            "      " << wrapper.seq_resize("index + 1") <<
+            "      return index;\n"
+            "    }\n"
+            "    return check_index(\"get_member_id_at_index\", index, count)"
+            " == DDS::RETCODE_OK ? index : MEMBER_ID_INVALID;\n"
+            "  }\n"
+            "\n";
+        }
+
+        const bool is_topic_type = be_global->is_topic_type(node);
+        AST_Type* const node_as_type = dynamic_cast<AST_Type*>(node);
+        const bool forany = needs_forany(node_as_type);
+        const bool distinct_type = needs_distinct_type(node_as_type);
+        be_global->impl_ <<
+          "  DDS::DynamicData_ptr clone()\n"
+          "  {\n"
+          "    return new DynamicDataAdapterImpl(type_, value_);\n"
+          "  }\n"
+          "\n"
+          "  bool serialized_size(const OpenDDS::DCPS::Encoding& enc, size_t& size, OpenDDS::DCPS::Sample::Extent ext) const\n"
+          "  {\n";
+        if (struct_node || union_node) {
+          be_global->impl_ <<
+            "    using namespace OpenDDS::DCPS;\n"
+            "    if (ext == Sample::Full) {\n"
+            "      DCPS::serialized_size(enc, size, value_);\n"
+            "    } else if (ext == Sample::NestedKeyOnly) {\n"
+            "      const NestedKeyOnly<const " << cpp_name << "> nested_key_only(value_);\n"
+            "      DCPS::serialized_size(enc, size, nested_key_only);\n"
+            "    } else {\n";
+          if (is_topic_type) {
+            be_global->impl_ <<
+              "      KeyOnly<const " << cpp_name << "> key_only(value_);\n"
+              "      DCPS::serialized_size(enc, size, key_only);\n";
+          } else {
+            be_global->impl_ <<
+              "      return false; // Non-topic type\n";
+          }
+          be_global->impl_ <<
+            "    }\n"
+            "    return true;\n";
+        } else {
+          be_global->impl_ <<
+            "    ACE_UNUSED_ARG(ext);\n";
+          if (distinct_type) { // sequence or array (C++11 mapping)
+            RefWrapper distinct_type_wrapper(node_as_type, cpp_name, "");
+            distinct_type_wrapper.done();
+            be_global->impl_ <<
+              "    using namespace OpenDDS::DCPS;\n"
+              "    " << distinct_type_wrapper.wrapped_type_name() << " distinct_value(value_);\n"
+              "    DCPS::serialized_size(enc, size, distinct_value);\n";
+          } else if (forany) { // array only (classic mapping)
+            be_global->impl_ <<
+              "    OpenDDS::DCPS::serialized_size(enc, size, " << cpp_name << "_forany(value_));\n";
+          } else {
+            be_global->impl_ <<
+              "    OpenDDS::DCPS::serialized_size(enc, size, value_);\n";
+          }
+          be_global->impl_ <<
+            "    return true;\n";
+        }
+
+        be_global->impl_ <<
+          "  }\n"
+          "\n"
+          "  bool serialize(OpenDDS::DCPS::Serializer& ser, OpenDDS::DCPS::Sample::Extent ext) const\n"
+          "  {\n";
+        if (struct_node || union_node) {
+          be_global->impl_ <<
+            "    using namespace OpenDDS::DCPS;\n"
+            "    if (ext == Sample::Full) {\n"
+            "      return ser << value_;\n"
+            "    } else if (ext == Sample::NestedKeyOnly) {\n"
+            "      NestedKeyOnly<const " << cpp_name << "> nested_key_only(value_);\n"
+            "      return ser << nested_key_only;\n"
+            "    } else {\n";
+          if (is_topic_type) {
+            be_global->impl_ <<
+              "      KeyOnly<const " << cpp_name << "> key_only(value_);\n"
+              "      return ser << key_only;\n";
+          } else {
+            be_global->impl_ <<
+              "      return false; // Non-topic type\n";
+          }
+          be_global->impl_ <<
+            "    }\n";
+        } else {
+          be_global->impl_ <<
+            "    ACE_UNUSED_ARG(ext);\n"
+            "    using namespace OpenDDS::DCPS;\n";
+          if (distinct_type) {
+            RefWrapper distinct_type_wrapper(node_as_type, cpp_name, "");
+            distinct_type_wrapper.done();
+            be_global->impl_ <<
+              "    " << distinct_type_wrapper.wrapped_type_name() << " distinct_value(value_);\n"
+              "    return ser << distinct_value;\n";
+          } else if (forany) {
+            be_global->impl_ <<
+              "    return ser << " << cpp_name << "_forany(value_);\n";
+          } else {
+            be_global->impl_ <<
+              "    return ser << value_;\n";
+          }
+        }
+        be_global->impl_ <<
+          "  }\n"
+          "\n";
+
+        be_global->impl_ <<
+          "protected:\n";
+
+        if (!generate_dynamic_data_adapter_access(node, wrapper, false)) {
+          return false;
+        }
+        be_global->impl_ << "\n";
+        if (!generate_dynamic_data_adapter_access(node, wrapper, true)) {
+          return false;
+        }
+
+        be_global->impl_ <<
+          "};\n"
+          "\n";
+      }
 
       std::string export_macro = be_global->export_macro().c_str();
       if (export_macro.size()) {
@@ -482,13 +581,13 @@ namespace {
       be_global->header_ <<
         "template <>\n" <<
         export_macro << "const " << cpp_name << "* get_dynamic_data_adapter_value<" <<
-          cpp_name << tag << ">(DDS::DynamicData_ptr dd);\n"
+        cpp_name << tag << ">(DDS::DynamicData_ptr dd);\n"
         "\n";
 
       be_global->impl_ <<
         "template <>\n"
         "const " << cpp_name << "* get_dynamic_data_adapter_value<" <<
-          cpp_name << tag << ">(DDS::DynamicData_ptr dd)\n"
+        cpp_name << tag << ">(DDS::DynamicData_ptr dd)\n"
         "{\n"
         "  ACE_UNUSED_ARG(dd);\n";
       if (generate) {

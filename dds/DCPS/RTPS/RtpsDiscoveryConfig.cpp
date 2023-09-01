@@ -52,10 +52,12 @@ RtpsDiscoveryConfig::RtpsDiscoveryConfig()
 #endif
   , sedp_multicast_(true)
   , sedp_local_address_(u_short(0), "0.0.0.0")
+  , sedp_advertised_address_(u_short(0), "0.0.0.0")
   , spdp_local_address_(u_short(0), "0.0.0.0")
   , default_multicast_group_(u_short(0), "239.255.0.1") /*RTPS v2.1 9.6.1.4.1*/
 #ifdef ACE_HAS_IPV6
   , ipv6_sedp_local_address_(u_short(0), "::")
+  , ipv6_sedp_advertised_address_(u_short(0), "::")
   , ipv6_spdp_local_address_(u_short(0), "::")
   , ipv6_default_multicast_group_(u_short(0), "FF03::1")
 #endif
@@ -64,8 +66,10 @@ RtpsDiscoveryConfig::RtpsDiscoveryConfig()
   , auth_resend_period_(1, 0)
   , max_spdp_sequence_msg_reset_check_(3)
   , spdp_rtps_relay_send_period_(30, 0)
+  , sedp_rtps_relay_address_(DCPS::NetworkAddress::default_IPV4)
   , use_rtps_relay_(false)
   , rtps_relay_only_(false)
+  , sedp_stun_server_address_(DCPS::NetworkAddress::default_IPV4)
   , use_ice_(false)
   , sedp_max_message_size_(DCPS::TransportSendStrategy::UDP_MAX_MESSAGE_SIZE)
   , undirected_spdp_(true)

@@ -158,7 +158,7 @@ The command-line options for the RtpsRelay:
 
 * ``-UserData STRING``
 
-  Set the contents of the Application Participant’s UserData QoS policy to the provided string.
+  Set the contents of the Application Participant's UserData QoS policy to the provided string.
 
 * ``-BufferSize INTEGER``
 
@@ -258,9 +258,9 @@ The command-line options for the RtpsRelay:
   The content returned by the meta discovery config endpoint, default {}.
   If a path is specified, the content of the file will be used.
 
-* ``-MaxAddrSetSize INTEGER``
+* ``-MaxIpsPerClient INTEGER``
 
-  The maximum number addresses that the RtpsRelay will maintain for a client participant, defaults to 0 (infinite).
+  The maximum number of IP addresses that the RtpsRelay will maintain for a client participant, defaults to 0 (infinite).
 
 * ``-RejectedAddressDuration SECONDS``
 
@@ -399,7 +399,7 @@ OpenDDS includes the following features for mitigation:
 
 * Use the participant lease time from secure discovery and bound it otherwise.
   By default, OpenDDS will attempt authentication for the participant lease duration specified in the SPDP message.
-  However, this data can’t be trusted so a smaller maximum lease time can be specified to force authentication or discovery to terminate before the lease time.
+  However, this data can't be trusted so a smaller maximum lease time can be specified to force authentication or discovery to terminate before the lease time.
 
   * See MaxAuthTime in :ref:`Table 7-5 RTPS Discovery Configuration Options <run_time_configuration--reftable12>`
 

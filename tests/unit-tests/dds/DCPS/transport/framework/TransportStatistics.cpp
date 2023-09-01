@@ -14,9 +14,10 @@ TEST(dds_DCPS_transport_framework_InternalTransportStatistics, reload)
 {
   InternalTransportStatistics uut("a transport");
 
-  RcHandle<ConfigStoreImpl> config_store = make_rch<ConfigStoreImpl>();
-  config_store->set_boolean("key_COUNT_MESSAGES", true);
-  uut.reload(config_store, "key");
+  ConfigTopic_rch topic = make_rch<ConfigTopic>();
+  RcHandle<ConfigStoreImpl> config_store = make_rch<ConfigStoreImpl>(topic);
+  config_store->set_boolean("KEY_PREFIX_COUNT_MESSAGES", true);
+  uut.reload(config_store, "KEY_PREFIX");
 
   EXPECT_TRUE(uut.count_messages());
 }

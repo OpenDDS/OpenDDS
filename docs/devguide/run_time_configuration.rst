@@ -22,14 +22,14 @@ This section summarizes the configuration options supported by OpenDDS.
 
 OpenDDS configuration is concerned with three main areas:
 
-#. **Common Configuration Options** – configure the behavior of DCPS entities at a global level.
+#. **Common Configuration Options** -- configure the behavior of DCPS entities at a global level.
    This allows separately deployed processes in a computing environment to share common settings for the specified behavior (e.g.
    all readers and writers should use RTPS discovery).
 
-#. **Discovery Configuration Options** – configure the behavior of the discovery mechanism(s).
+#. **Discovery Configuration Options** -- configure the behavior of the discovery mechanism(s).
    OpenDDS supports multiple approaches for discovering and associating writers and readers as detailed in :ref:`run_time_configuration--discovery-configuration`.
 
-#. **Transport Configuration Options** – configure the Extensible Transport Framework (ETF) which abstracts the transport layer from the DCPS layer of OpenDDS.
+#. **Transport Configuration Options** -- configure the Extensible Transport Framework (ETF) which abstracts the transport layer from the DCPS layer of OpenDDS.
    Each pluggable transport can be configured separately.
 
 The configuration file for OpenDDS is a human-readable ini-style text file.
@@ -91,13 +91,13 @@ Windows:
 
 .. code-block:: doscon
 
-        publisher -DCPSConfigFile pub.ini
+        publisher -DCPSConfigFile pub.ini
 
 Unix:
 
 .. code-block:: bash
 
-        ./publisher -DCPSConfigFile pub.ini
+        ./publisher -DCPSConfigFile pub.ini
 
 Command-line arguments are passed to the service participant singleton when initializing the domain participant factory.
 This is accomplished by using the ``TheParticipantFactoryWithArgs`` macro:
@@ -112,6 +112,9 @@ This is accomplished by using the ``TheParticipantFactoryWithArgs`` macro:
         TheParticipantFactoryWithArgs(argc, argv);
       // ...
     }
+
+..
+  Keep the "word joiner" U+FEFF in the next sentence, otherwise the line is broken up and it comes out strange in the output.
 
 To set a default configuration file to load, use ``TheServiceParticipant-﻿>default_configuration_file(ACE_TCHAR* path)``, like in the following example:
 
@@ -128,7 +131,7 @@ To set a default configuration file to load, use ``TheServiceParticipant-﻿>def
       // ...
     }
 
-``pub.ini would`` be used unless ``-DCPSConfigFile`` is passed to override the default configuration file.
+``pub.ini`` would be used unless ``-DCPSConfigFile`` is passed to override the default configuration file.
 
 The ``Service_Participant`` class also provides methods that allow an application to configure the DDS service.
 See the header file :ghfile:`dds/DCPS/Service_Participant.h` for details.
@@ -166,7 +169,7 @@ For example:
 
 .. code-block:: bash
 
-        subscriber -DCPSInfoRepo localhost:12345
+        subscriber -DCPSInfoRepo localhost:12345
 
 The following table summarizes the ``[common]`` configuration options:
 
@@ -201,14 +204,16 @@ The following table summarizes the ``[common]`` configuration options:
 
      - IP address identifying the local interface to be used by tcp transport for the Built-In Topics.
 
-       **NOTE**: This property is only applicable to a ``DCPSInfoRepo`` configuration.
+       .. note:: This property is only applicable to a ``DCPSInfoRepo`` configuration.
 
      - ``INADDR_ANY``
 
    * - ``DCPSBitTransportPort=port``
 
-     - Port used by the tcp transport for Built-In Topics.If the default of ‘0’ is used, the operating system will choose a port to use.
-       **NOTE**: This property is only applicable to a ``DCPSInfoRepo`` configuration.
+     - Port used by the tcp transport for Built-In Topics.
+       If the default of ``0`` is used, the operating system will choose a port to use.
+
+       .. note:: This property is only applicable to a ``DCPSInfoRepo`` configuration.
 
      - ``0``
 
@@ -246,11 +251,11 @@ The following table summarizes the ``[common]`` configuration options:
 
      - Add a prefix to each log message, using a format defined by the ACE library:
 
-       0 – no prefix
+       0 -- no prefix
 
-       1 – verbose "lite": adds timestamp and priority
+       1 -- verbose "lite": adds timestamp and priority
 
-       2 – verbose: in addition to "lite" has host name, PID, program name
+       2 -- verbose: in addition to "lite" has host name, PID, program name
 
        See the note below this table regarding the ORB prefix.
 
@@ -428,7 +433,7 @@ The following table summarizes the ``[common]`` configuration options:
 
    * - ``DCPSBidirGIOP=[0|1]``
 
-     - Use TAO’s BiDirectional GIOP feature for interaction with the DCPSInfoRepo.
+     - Use TAO's BiDirectional GIOP feature for interaction with the DCPSInfoRepo.
        With BiDir enabled, fewer sockets are needed since the same socket can be used for both client and server roles.
 
      - ``1``
@@ -462,14 +467,14 @@ The following table summarizes the ``[common]`` configuration options:
 
      - ``Normal``
 
-The ``DCPSInfoRepo`` option’s value is passed to ``CORBA::ORB::string_to_object()`` and can be any Object URL type understandable by TAO (file, IOR, corbaloc, corbaname).
+The ``DCPSInfoRepo`` option's value is passed to ``CORBA::ORB::string_to_object()`` and can be any Object URL type understandable by TAO (file, IOR, corbaloc, corbaname).
 A simplified endpoint description of the form ``<host>:<port>`` is also accepted.
 It is equivalent to ``corbaloc::<host>:<port>/DCPSInfoRepo``.
 
 Certain options that begin with "ORB" instead of "DCPS" are listed in the table above.
 They are named differently since they are inherited from TAO.
 The options starting with "ORB" listed in this table are implemented directly by OpenDDS (not passed to TAO) and are supported either on the command line (using a "-" prefix) or in the configuration file.
-Other command-line options that begin with ``-ORB`` are passed to TAO’s ``ORB_init`` if DCPSInfoRepo discovery is used.
+Other command-line options that begin with ``-ORB`` are passed to TAO's ``ORB_init`` if DCPSInfoRepo discovery is used.
 
 The ``DCPSChunks`` option allows application developers to tune the amount of memory preallocated when the ``RESOURCE_LIMITS`` are set to infinite.
 Once the allocated memory is exhausted, additional chunks are allocated/deallocated from the heap.
@@ -573,13 +578,13 @@ For example, if an OpenDDS application assigns a domain ID of 3 to its participa
     [repository/DiscoveryConfig1]
     RepositoryIor=host1.mydomain.com:12345
 
-The ``DCPSDefaultDiscovery`` property tells the application to assign any participant that doesn’t have a domain id found in the configuration file to use a discovery type of ``DEFAULT_REPO`` which means "use a ``DCPSInfoRepo`` service"  and that ``DCPSInfoRepo`` service can be found at ``host3.mydomain.com:12345``.
+The ``DCPSDefaultDiscovery`` property tells the application to assign any participant that doesn't have a domain id found in the configuration file to use a discovery type of ``DEFAULT_REPO`` which means "use a ``DCPSInfoRepo`` service"  and that ``DCPSInfoRepo`` service can be found at ``host3.mydomain.com:12345``.
 
 As shown in :ref:`Table 7-2 <run_time_configuration--reftable9>` the ``DCPSDefaultDiscovery`` property has three other values that can be used.
-The ``DEFAULT_RTPS`` constant value informs participants that don’t have a domain configuration to use RTPS discovery to find other participants.
+The ``DEFAULT_RTPS`` constant value informs participants that don't have a domain configuration to use RTPS discovery to find other participants.
 Similarly, the ``DEFAULT_STATIC`` constant value informs the participants that don't have a domain configuration to use static discovery to find other participants.
 
-The final option for the ``DCPSDefaultDiscovery`` property is to tell an application to use one of the defined discovery configurations to be the default configuration for any participant domain that isn’t called out in the file.
+The final option for the ``DCPSDefaultDiscovery`` property is to tell an application to use one of the defined discovery configurations to be the default configuration for any participant domain that isn't called out in the file.
 Here is an example:
 
 .. code-block:: ini
@@ -599,7 +604,7 @@ Here is an example:
     [repository/DiscoveryConfig2]
     RepositoryIor=host2.mydomain.com:12345
 
-By adding the ``DCPSDefaultDiscovery`` property to the ``[common]`` section, any participant that hasn’t been assigned to a domain id of ``1`` or ``2`` will use the configuration of ``DiscoveryConfig2``.
+By adding the ``DCPSDefaultDiscovery`` property to the ``[common]`` section, any participant that hasn't been assigned to a domain id of ``1`` or ``2`` will use the configuration of ``DiscoveryConfig2``.
 For more explanation of a similar configuration for RTPS discovery see :ref:`run_time_configuration--configuring-for-ddsi-rtps-discovery`.
 
 Here are the available properties for the [domain] section.
@@ -804,7 +809,7 @@ For this example we will only show the discovery aspects of the configuration an
     RepositoryIor=host2.mydomain.com:12345
 
 When Process ``E`` in :ref:`Figure 7-1 <run_time_configuration--reffigure4>` reads in the above configuration it finds the occurrence of multiple domain sections.
-As described in Section  each domain has an instance integer and a property of ``DiscoveryConfig`` defined.
+As described in :ref:`run_time_configuration--domain-configuration` each domain has an instance integer and a property of ``DiscoveryConfig`` defined.
 
 For the first domain (``[domain/1]``), the ``DiscoveryConfig`` property is supplied with the user-defined name of ``DiscoveryConfig1`` value.
 This property causes the OpenDDS implementation to find a section title of either ``repository`` or ``rtps_discovery`` and an instance name of ``DiscoveryConfig1``.
@@ -813,7 +818,7 @@ The section found now tells us that the address of the ``DCPSInfoRepo`` that thi
 In particular it is ``host1.mydomain.com`` and port ``12345``.
 The values of the ``RepositoryIor`` can be a full CORBA IOR or a simple ``host:port`` string.
 
-A second domain section title ``[domain/2]`` is found in this configuration file along with it’s corresponding repository section ``[repository/DiscoveryConfig2]`` that represents the configuration for the second domain of interest and the ``InfoRepo_2`` repository.
+A second domain section title ``[domain/2]`` is found in this configuration file along with it's corresponding repository section ``[repository/DiscoveryConfig2]`` that represents the configuration for the second domain of interest and the ``InfoRepo_2`` repository.
 There may be any number of repository or domain sections within a single configuration file.
 
 .. note:: Domains not explicitly configured are automatically associated with the default discovery configuration.
@@ -922,7 +927,7 @@ Some important implementation notes regarding DDSI-RTPS discovery in OpenDDS are
 #. OpenDDS's multicast transport (:ref:`run_time_configuration--ip-multicast-transport-configuration-options`) does not work with RTPS Discovery due to the way GUIDs are assigned (a warning will be issued if this is attempted).
 
 The OMG DDSI-RTPS specification details several properties that can be adjusted from their defaults that influence the behavior of DDSI-RTPS discovery.
-Those properties, along with options specific to OpenDDS’s RTPS Discovery implementation, are listed in :ref:`Table 7-5 <run_time_configuration--reftable12>`.
+Those properties, along with options specific to OpenDDS's RTPS Discovery implementation, are listed in :ref:`Table 7-5 <run_time_configuration--reftable12>`.
 
 .. _run_time_configuration--reftable12:
 
@@ -958,7 +963,7 @@ Those properties, along with options specific to OpenDDS’s RTPS Discovery impl
    * - ``LeaseDuration=sec``
 
      - Sent as part of the participant announcement.
-       It tells the peer participants that if they don’t hear from this participant for the specified duration, then this participant can be considered "not alive."
+       It tells the peer participants that if they don't hear from this participant for the specified duration, then this participant can be considered "not alive."
 
      - ``300``
 
@@ -1052,7 +1057,7 @@ Those properties, along with options specific to OpenDDS’s RTPS Discovery impl
 
      - ``DCPSDefaultAddress, or IPADDR_ANY``
 
-   * - SedpAdvertisedLocalAddress= addr:[port]
+   * - ``SedpAdvertisedLocalAddress= addr:[port]``
 
      - Sets the address advertised by SEDP.
        Typically used when the participant is behind a firewall or NAT.
@@ -1060,23 +1065,23 @@ Those properties, along with options specific to OpenDDS’s RTPS Discovery impl
 
      -
 
-   * - SedpSendDelay=msec
+   * - ``SedpSendDelay=msec``
 
      - Time in milliseconds for a built-in  (SEDP) Writer to wait before sending data.
 
-     - 10
+     - ``10``
 
-   * - SedpHeartbeatPeriod=msec
+   * - ``SedpHeartbeatPeriod=msec``
 
      - Time in milliseconds for a built-in (SEDP) Writer to announce the availability of data.
 
-     - 200
+     - ``200``
 
-   * - SedpNakResponseDelay=msec
+   * - ``SedpNakResponseDelay=msec``
 
      - Time in milliseconds for a built-in (SEDP) Writer to delay the response to a negative acknowledgment.
 
-     - 100
+     - ``100``
 
    * - ``DX=n``
 
@@ -1103,21 +1108,21 @@ Those properties, along with options specific to OpenDDS’s RTPS Discovery impl
 
      - Remove a discovered participant after this number of SPDP messages with earlier sequence numbers.
 
-     - 3
+     - ``3``
 
    * - ``PeriodicDirectedSpdp=[0|1]``
 
      - A boolean value that determines whether directed SPDP messages are sent to all participants once every resend period.
        This setting should be enabled for participants that cannot use multicast to send SPDP announcements, e.g., an RtpsRelay.
 
-     - 0
+     - ``0``
 
    * - ``UndirectedSpdp=[0|1]``
 
      - A boolean value that determines whether undirected SPDP messages are sent.
        This setting should be disabled for participants that cannot use multicast to send SPDP announcements, e.g., an RtpsRelay.
 
-     - 1
+     - ``1``
 
    * - InteropMulticastOverride=
 
@@ -1179,7 +1184,7 @@ Those properties, along with options specific to OpenDDS’s RTPS Discovery impl
      - Only send RTPS message to the RtpsRelay (for debugging).
        See :ref:`internet_enabled_rtps--the-rtpsrelay`.
 
-     - 0
+     - ``0``
 
    * - ``UseRtpsRelay=[0|1]``
 
@@ -1187,7 +1192,7 @@ Those properties, along with options specific to OpenDDS’s RTPS Discovery impl
        Messages will only be sent if SpdpRtpsRelayAddress and/or SedpRtpsRelayAddress is set.
        See :ref:`internet_enabled_rtps--the-rtpsrelay`.
 
-     - 0
+     - ``0``
 
    * - ``SpdpStunServerAddress=host:port``
 
@@ -1288,7 +1293,7 @@ Those properties, along with options specific to OpenDDS’s RTPS Discovery impl
 
    * - ``SecureParticipantUserData=[0|1]``
 
-     - If DDS Security is enabled, the Participant’s USER_DATA QoS is omitted from unsecured discovery messages.
+     - If DDS Security is enabled, the Participant's USER_DATA QoS is omitted from unsecured discovery messages.
 
      - ``0``
 
@@ -1314,7 +1319,7 @@ Those properties, along with options specific to OpenDDS’s RTPS Discovery impl
 
    * - ``TypeLookupServiceReplyTimeout=msec``
 
-     - If a request is sent to a peer’s Type Lookup Service (see UseXTypes above), wait up to this duration (in milliseconds) for a reply.
+     - If a request is sent to a peer's Type Lookup Service (see UseXTypes above), wait up to this duration (in milliseconds) for a reply.
 
      - ``5000``
 
@@ -1350,20 +1355,20 @@ Those properties, along with options specific to OpenDDS’s RTPS Discovery impl
 
    * - ``MaxParticipantsInAuthentication=n``
 
-     - If DDS Security is enabled, this option (when set to a positive number) limits the number of peer participants that can be concurrently in the process of authenticating – that is, not yet completed authentication.
+     - If DDS Security is enabled, this option (when set to a positive number) limits the number of peer participants that can be concurrently in the process of authenticating -- that is, not yet completed authentication.
 
      - 0 (unlimited)
 
    * - ``SedpReceivePreallocatedMessageBlocks=n``
 
-     - Configure the receive_preallocated_message_blocks attribute of SEDP’s transport.
+     - Configure the receive_preallocated_message_blocks attribute of SEDP's transport.
        See :ref:`run_time_configuration--configuration-options-common-to-all-transports`.
 
      - 0 (use default)
 
    * - ``SedpReceivePreallocatedDataBlocks=n``
 
-     - Configure the receive_preallocated_data_blocks attribute of SEDP’s transport.
+     - Configure the receive_preallocated_data_blocks attribute of SEDP's transport.
        See :ref:`run_time_configuration--configuration-options-common-to-all-transports`.
 
      - 0 (use default)
@@ -1378,7 +1383,7 @@ Those properties, along with options specific to OpenDDS’s RTPS Discovery impl
 
        * An ICE AgentInfo parameter
 
-         Announcements that don’t match any of these are dropped if this check is enabled.
+         Announcements that don't match any of these are dropped if this check is enabled.
 
      - 1 (enabled)
 
@@ -1392,7 +1397,7 @@ Additional DDSI-RTPS Discovery Features
 ..
     Sect<7.3.3.1>
 
-The DDSI_RTPS discovery implementation creates and manages a transport instance –  specifically an object of class ``RtpsUdpInst``.
+The DDSI_RTPS discovery implementation creates and manages a transport instance -- specifically an object of class ``RtpsUdpInst``.
 In order for applications to access this object and enable advanced features (:ref:`Additional RTPS_UDP Features <run_time_configuration--additional-rtps-udp-features>`), the ``RtpsDiscovery`` class provides the method ``sedp_transport_inst(domainId, participant)``.
 
 .. _run_time_configuration--configuring-for-static-discovery:
@@ -2091,7 +2096,7 @@ If the Data Writer does not specify a configuration, it tries to use that of its
 If none of these entities have a transport configuration specified, the *Global Transport Configuration* is obtained from the Transport Registry.
 The Global Transport Configuration can be specified by the user via either configuration file, command line option, or a member function call on the Transport Registry.
 If not defined by the user, a default transport configuration is used which contains all available transport implementations with their default configuration parameters.
-If you don’t specifically load or link in any other transport implementations, OpenDDS uses the tcp transport for all communication.
+If you don't specifically load or link in any other transport implementations, OpenDDS uses the tcp transport for all communication.
 
 .. _run_time_configuration--how-opendds-selects-a-transport:
 
@@ -2104,7 +2109,7 @@ How OpenDDS Selects a Transport
 Currently, the behavior for OpenDDS is that Data Writers actively connect to Data Readers, which are passively awaiting those connections.
 Data Readers "listen" for connections on each of the Transport Instances that are defined in their Transport Configuration.
 Data Writers use their Transport Instances to "connect" to those of the Data Readers.
-Because the logical connections discussed here don’t correspond to the physical connections of the transport, OpenDDS often refers to them as *Data Links*.
+Because the logical connections discussed here don't correspond to the physical connections of the transport, OpenDDS often refers to them as *Data Links*.
 
 When a Data Writer tries to connect to a Data Reader, it first attempts to see if there is an existing data link that it can use to communicate with that Data Reader.
 The Data Writer iterates (in definition order) through each of its Transport Instances and looks for an existing data link to the Transport Instances that the reader defined.
@@ -2238,13 +2243,13 @@ Here is the source code mechanism (using a domain participant):
 
 .. code-block:: cpp
 
-      DDS::DomainParticipant_var dp =
-              dpf->create_participant(MY_DOMAIN,
-                                      PARTICIPANT_QOS_DEFAULT,
-                                      DDS::DomainParticipantListener::_nil(),
-                                      OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+      DDS::DomainParticipant_var dp =
+              dpf->create_participant(MY_DOMAIN,
+                                      PARTICIPANT_QOS_DEFAULT,
+                                      DDS::DomainParticipantListener::_nil(),
+                                      OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
-     OpenDDS::DCPS::TransportRegistry::instance()->bind_config("config_b", dp);
+     OpenDDS::DCPS::TransportRegistry::instance()->bind_config("config_b", dp);
 
 Any Data Writers or Readers owned by this Domain Participant should now use the ``B`` side configuration.
 
@@ -2275,26 +2280,26 @@ First, we need to include the correct header files:
 
     using namespace OpenDDS::DCPS;
 
-Next we create the transport configuration, create the transport instance, configure the transport instance, and then add the instance to the configuration’s collection of instances:
+Next we create the transport configuration, create the transport instance, configure the transport instance, and then add the instance to the configuration's collection of instances:
 
 .. code-block:: cpp
 
-      TransportConfig_rch cfg = TheTransportRegistry->create_config("myconfig");
-      TransportInst_rch inst = TheTransportRegistry->create_inst("mytcp", // name
-                                                                 "tcp");  // type
+      TransportConfig_rch cfg = TheTransportRegistry->create_config("myconfig");
+      TransportInst_rch inst = TheTransportRegistry->create_inst("mytcp", // name
+                                                                 "tcp");  // type
 
-      // Must cast to TcpInst to get access to transport-specific options
-      TcpInst_rch tcp_inst = dynamic_rchandle_cast<TcpInst>(inst);
-      tcp_inst->local_address_str_ = "myhost";
+      // Must cast to TcpInst to get access to transport-specific options
+      TcpInst_rch tcp_inst = dynamic_rchandle_cast<TcpInst>(inst);
+      tcp_inst->local_address_str_ = "myhost";
 
-      // Add the inst to the config
-      cfg->instances_.push_back(inst);
+      // Add the inst to the config
+      cfg->instances_.push_back(inst);
 
 Lastly, we can make our newly defined transport configuration the global transport configuration:
 
 .. code-block:: cpp
 
-      TheTransportRegistry->global_config(cfg);
+      TheTransportRegistry->global_config(cfg);
 
 This code should be executed before any Data Readers or Writers are enabled.
 
@@ -2552,10 +2557,10 @@ The following table summarizes the transport configuration options that are uniq
 
    * - ``enable_nagle_algorithm=[0|1]``
 
-     - Enable or disable the Nagle’s algorithm.
+     - Enable or disable the Nagle's algorithm.
        By default, it is disabled.
 
-       Enabling the Nagle’s algorithm may increase throughput at the expense of increased latency.
+       Enabling the Nagle's algorithm may increase throughput at the expense of increased latency.
 
      - ``0``
 
@@ -2563,7 +2568,7 @@ The following table summarizes the transport configuration options that are uniq
 
      - Hostname and port of the connection acceptor.
        The default value is the FQDN and port 0, which means the OS will choose the port.
-       If only the host is specified and the port number is omitted, the ‘:’ is still required on the host specifier.
+       If only the host is specified and the port number is omitted, the ``:`` is still required on the host specifier.
 
      - ``fqdn:0``
 
@@ -2701,7 +2706,7 @@ Given the values of ``syn_backoff`` and ``syn_interval``, it is possible to calc
 
 ::
 
-        delay = syn_interval * syn_backoff ^ number_of_retries
+        delay = syn_interval * syn_backoff ^ number_of_retries
 
 For example, if the default configuration options are assumed, the delays between handshake attempts would be: 0, 250, 1000, 2000, 4000, and 8000 milliseconds respectively.
 
@@ -2931,6 +2936,15 @@ Some implementation notes related to using the ``rtps_udp`` transport protocol a
 
      - ``239.255.0.2:7401``
 
+   * - ``ipv6_multicast_group_address``
+
+       ``=network_address``
+
+     - When the transport is set to multicast, this is the multicast network address that should be used.
+       If no port is specified for the network address, port 7401 will be used.
+
+     - ``[FF03::2]:7401``
+
    * - ``multicast_interface=iface``
 
      - Specifies the network interface to be used by this transport instance.
@@ -2948,9 +2962,7 @@ Some implementation notes related to using the ``rtps_udp`` transport protocol a
 
      - System default
 
-   * - ipv6_local_address ``=``
-
-       ``addr:[port]``
+   * - ``ipv6_local_address=addr:[port]``
 
      - Bind the socket to the given address and port.
        Port can be omitted but the trailing ":" is required.
@@ -2967,9 +2979,7 @@ Some implementation notes related to using the ``rtps_udp`` transport protocol a
 
      -
 
-   * - ipv6_advertised_address ``=``
-
-       ``addr:[port]``
+   * - ``ipv6_advertised_address=addr:[port]``
 
      - Sets the address advertised by the transport.
        Typically used when the participant is behind a firewall or NAT.
@@ -2977,11 +2987,11 @@ Some implementation notes related to using the ``rtps_udp`` transport protocol a
 
      -
 
-   * - send_delay=*msec*
+   * - ``send_delay=msec``
 
      - Time in milliseconds for an RTPS Writer to wait before sending data.
 
-     - 10
+     - ``10``
 
    * - ``nak_depth=n``
 
@@ -3005,7 +3015,7 @@ Some implementation notes related to using the ``rtps_udp`` transport protocol a
 
      - ``1000 (1 sec)``
 
-   * - ResponsiveMode ``=[0|1]``
+   * - ``ResponsiveMode=[0|1]``
 
      - Causes reliable writers and readers to send additional messages which may reduce latency.
 
@@ -3333,7 +3343,7 @@ Example Config.ini
     Sect<7.5.4>
 
 The following is an example configuration file for domains 2 through 10.
-It includes customizations to add the domain ID to the discovery ``InteropMulticastOverride`` address and customizations to add the domain ID to the transport’s multicast group IP address and port.
+It includes customizations to add the domain ID to the discovery ``InteropMulticastOverride`` address and customizations to add the domain ID to the transport's multicast group IP address and port.
 
 .. code-block:: ini
 
@@ -3372,10 +3382,10 @@ Logging
 ..
     Sect<7.6>
 
-By default, the OpenDDS framework will only log serious errors and warnings that can’t be conveyed to the user in the API.
+By default, the OpenDDS framework will only log serious errors and warnings that can't be conveyed to the user in the API.
 An OpenDDS user may increase the amount of logging via the log level and debug logging via controls at the DCPS, Transport, or Security layers.
 
-The default destination of these log messages is the process’s standard error stream.
+The default destination of these log messages is the process's standard error stream.
 See :ref:`Table 7-2 Common Configuration Options <run_time_configuration--reftable9>` for options controlling the destination and formatting of log messages.
 
 The highest level logging is controlled by the general log levels listed in the following table.
@@ -3389,7 +3399,7 @@ The highest level logging is controlled by the general log levels listed in the 
 
    * - Level
 
-     - ``Values``
+     - Values
 
      - Description
 
@@ -3397,9 +3407,9 @@ The highest level logging is controlled by the general log levels listed in the 
 
      - ``DCPSLogLevel``: ``error``
 
-       ``log_level: Log_Level::Error``
+       ``log_level``: ``Log_Level::Error``
 
-       ``ACE_Log_Priority:LM_ERROR``
+       ``ACE_Log_Priority``: ``LM_ERROR``
 
      - Logs issues that may prevent OpenDDS from functioning properly or functioning as configured.
 
@@ -3407,20 +3417,20 @@ The highest level logging is controlled by the general log levels listed in the 
 
      - ``DCPSLogLevel``: ``warning``
 
-       ``log_level: Log_Level::Warning``
+       ``log_level``: ``Log_Level::Warning``
 
-       ``ACE_Log_Priority:LM_WARNING``
+       ``ACE_Log_Priority``: ``LM_WARNING``
 
-     - Log issues that should probably be addressed, but don’t prevent OpenDDS from functioning.
+     - Log issues that should probably be addressed, but don't prevent OpenDDS from functioning.
        This is the default.
 
    * - ``Notice``
 
      - ``DCPSLogLevel``: ``notice``
 
-       ``log_level: Log_Level::Notice``
+       ``log_level``: ``Log_Level::Notice``
 
-       ``ACE_Log_Priority:LM_NOTICE``
+       ``ACE_Log_Priority``: ``LM_NOTICE``
 
      - Logs details of issues that are returned to the user via the API, for example through a ``DDS::ReturnCode_t``.
 
@@ -3428,9 +3438,9 @@ The highest level logging is controlled by the general log levels listed in the 
 
      - ``DCPSLogLevel``: ``info``
 
-       ``log_level: Log_Level::Info``
+       ``log_level``: ``Log_Level::Info``
 
-       ``ACE_Log_Priority:LM_INFO``
+       ``ACE_Log_Priority``: ``LM_INFO``
 
      - Logs a small amount of basic information, such as the version of OpenDDS being used.
 
@@ -3440,9 +3450,9 @@ The highest level logging is controlled by the general log levels listed in the 
 
        ``log_level``: ``Log_Level::Debug``
 
-       ``ACE_Log_Priority:LM_DEBUG``
+       ``ACE_Log_Priority``: ``LM_DEBUG``
 
-     - This level doesn’t directly control any logging but will enable at least DCPS and security debug level 1.
+     - This level doesn't directly control any logging but will enable at least DCPS and security debug level 1.
        For backwards compatibility, setting DCPS debug logging to greater than zero will set this log level.
        Setting the log level to below this level will disable all debug logging.
 
@@ -3483,19 +3493,19 @@ It can also be set in application code using:
 
 The *level* defaults to a value of 0 and has values of 0 to 10 as defined below:
 
-* 0 – debug logging is disabled
+* 0 -- debug logging is disabled
 
-* 1 - logs that should happen once per process
+* 1 -- logs that should happen once per process
 
-* 2 - logs that should happen once per DDS entity
+* 2 -- logs that should happen once per DDS entity
 
-* 4 - logs that are related to administrative interfaces
+* 4 -- logs that are related to administrative interfaces
 
-* 6 - logs that should happen every Nth sample write/read
+* 6 -- logs that should happen every Nth sample write/read
 
-* 8 - logs that should happen once per sample write/read
+* 8 -- logs that should happen once per sample write/read
 
-* 10 - logs that may happen more than once per sample write/read
+* 10 -- logs that may happen more than once per sample write/read
 
 .. _run_time_configuration--transport-layer-debug-logging:
 

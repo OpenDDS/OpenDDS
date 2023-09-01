@@ -25,6 +25,11 @@ public:
   ACE_INT32 send_buffer_size_;
   ACE_INT32 rcv_buffer_size_;
 
+  void rcv_buffer_size(ACE_INT32 rbs)
+  {
+    rcv_buffer_size_ = rbs;
+  }
+
   virtual int load(ACE_Configuration_Heap& cf,
                    ACE_Configuration_Section_Key& sect);
 

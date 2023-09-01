@@ -180,7 +180,7 @@ UdpTransport::configure_i(const UdpInst_rch& config)
 
   // Override with DCPSDefaultAddress.
   if (config->local_address() == ACE_INET_Addr() &&
-      TheServiceParticipant->default_address().to_addr() != ACE_INET_Addr()) {
+      TheServiceParticipant->default_address() != NetworkAddress::default_IPV4) {
     config->local_address(TheServiceParticipant->default_address().to_addr());
   }
 

@@ -188,7 +188,8 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
             if (LogAddr::ip(mcga).compare("239.255.20.0") != 0) {
               ACE_ERROR_RETURN((LM_ERROR,
                                 ACE_TEXT("ERROR: %N:%l: main() -")
-                                ACE_TEXT(" multicast group address is does not match!\n")),
+                                ACE_TEXT(" multicast group address is does not match! %C != 239.255.20.0\n"),
+                                LogAddr::ip(mcga).c_str()),
                                -1);
             }
             else {
