@@ -1,9 +1,18 @@
 cmake_minimum_required(VERSION 3.23)
-project(opendds CXX)
+include("${CMAKE_CURRENT_LIST_DIR}/cmake/opendds_version.cmake")
+project(opendds
+  DESCRIPTION
+    "OpenDDS is an open-source C++ framework for exchanging data in distributed systems."
+  VERSION "${OPENDDS_VERSION}"
+  HOMEPAGE_URL "https://opendds.org/"
+  LANGUAGES CXX
+)
+set(CPACK_PACKAGE_CONTACT info@opendds.org)
 
 include(CMakePackageConfigHelpers)
 include(GNUInstallDirs)
 include(FetchContent)
+include(CPack)
 
 set(OPENDDS_IS_BEING_BUILT TRUE CACHE INTERNAL "")
 set(OPENDDS_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}" CACHE INTERNAL "")
