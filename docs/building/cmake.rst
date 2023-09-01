@@ -453,7 +453,7 @@ Functions
     Any IDL file passed that's outside the include base will cause an error.
     The default behavior is the legacy behavior that assumes a flat hierarchy.
 
-    .. versionadded:: 3.25
+    .. versionadded:: 3.26
 
   .. cmake:func:arg:: SKIP_TAO_IDL
 
@@ -579,7 +579,7 @@ Functions
     opendds_export_header(<target> [USE_EXPORT_VAR <use-export-var-name>])
 
   Generates a header that is compatible with `ACE's generate_export_file.pl <https://github.com/DOCGroup/ACE_TAO/blob/master/ACE/bin/generate_export_file.pl>`__ for exporting symbols in shared libraries.
-  The header will able to be included as ``<target>_export.h`` and macro will be to use on symbols to will be ``<target>_Export``.
+  The header will able to be included as ``<target>_export.h`` and the macro that can be used to export symbols wll be named ``<target>_Export``.
   It is the same function :cmake:func:`opendds_target_sources` uses so all the same info about :ref:`generated files <cmake-files-props>` applies.
 
   .. cmake:func:arg:: USE_EXPORT_VAR <use-export-var-name>
@@ -616,7 +616,7 @@ Functions
 
     Extra custom files that are in :cmake:prop:`OPENDDS_GENERATED_DIRECTORY` to install using the same method.
 
-  .. versionadded:: 3.25
+  .. versionadded:: 3.26
 
 Variables
 =========
@@ -675,7 +675,7 @@ These variables can be used to override default behavior of the CMake package.
 
   .. versionadded:: 3.15
 
-  .. deprecated:: 3.25
+  .. deprecated:: 3.26
 
     :cmake:func:`opendds_target_sources(INCLUDE_BASE)` is a better way to handle IDL in multiple nested directories.
 
@@ -780,14 +780,14 @@ Dependencies
 
   A directory that contains a ``bin`` directory with ``opendds_idl`` to be used for cross-compiling.
 
-  .. versionadded:: 3.25
+  .. versionadded:: 3.26
 
 .. cmake:var:: OPENDDS_ACE_TAO_HOST_TOOLS
 
   A directory that contains a ``bin`` directory with ``tao_idl`` and ``ace_gperf`` to be used for cross-compiling.
   This isn't set by default unless :cmake:var:`OPENDDS_HOST_TOOLS` is set, in which case it defaults to that.
 
-  .. versionadded:: 3.25
+  .. versionadded:: 3.26
 
 .. _cmake-feature-vars:
 

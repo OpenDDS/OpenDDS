@@ -179,7 +179,7 @@ See :doc:`/internal/running_tests` for running all tests or individual tests.
 Building OpenDDS Using CMake
 ****************************
 
-.. versionadded:: 3.25
+.. versionadded:: 3.26
 
 OpenDDS can be built with CMake 3.23 or later.
 
@@ -333,8 +333,10 @@ Other Known Limitations
 =======================
 
 - The following features are planned, but not implemented yet:
+
   - The ability to use MPC for building user applications.
   - Safety profile
-  - Java
+  - Java Mapping
+
 - CMake-build OpenDDS libraries and executables will currently be ignored by :ref:`find_package(OpenDDS COMPONENTS ...) <cmake-components>`.
   Passing feature should work.
