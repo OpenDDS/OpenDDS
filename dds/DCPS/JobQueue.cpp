@@ -27,14 +27,16 @@ int JobQueue::handle_exception(ACE_HANDLE /*fd*/)
 
   Queue q;
 
-  ACE_Reverse_Lock<ACE_Thread_Mutex> rev_lock(mutex_);
-  ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, mutex_, -1);
-  q.swap(job_queue_);
+  {
+    ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, mutex_, -1);
+    q.swap(job_queue_);
+  }
+
   for (Queue::const_iterator pos = q.begin(), limit = q.end(); pos != limit; ++pos) {
-    ACE_GUARD_RETURN(ACE_Reverse_Lock<ACE_Thread_Mutex>, rev_guard, rev_lock, -1);
     (*pos)->execute();
   }
 
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, mutex_, -1);
   if (!job_queue_.empty()) {
     guard.release();
     reactor()->notify(this);
