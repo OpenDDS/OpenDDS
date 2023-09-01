@@ -398,7 +398,8 @@ ConfigStoreImpl::set(const char* key,
 
 String
 ConfigStoreImpl::get(const char* key,
-                     const String& value) const
+                     const String& value,
+                     bool allow_empty) const
 {
   const ConfigPair cp(key, "");
   String retval = value;
@@ -410,7 +411,7 @@ ConfigStoreImpl::get(const char* key,
   for (size_t idx = 0; idx != samples.size(); ++idx) {
     const ConfigPair& sample = samples[idx];
     const DDS::SampleInfo& info = infos[idx];
-    if (info.valid_data) {
+    if (info.valid_data && (allow_empty || !sample.value().empty())) {
       retval = sample.value();
     }
   }
@@ -502,6 +503,12 @@ namespace {
                      ConfigStoreImpl::NetworkAddressKind kind)
   {
     switch (kind) {
+    case ConfigStoreImpl::Kind_ANY:
+      return value.get_type() == AF_INET
+#ifdef ACE_HAS_IPV6
+        || value.get_type() == AF_INET6
+#endif
+        ;
     case ConfigStoreImpl::Kind_IPV4:
       return value.get_type() == AF_INET;
 #ifdef ACE_HAS_IPV6

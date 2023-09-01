@@ -154,6 +154,9 @@ TEST(dds_DCPS_ConfigStoreImpl, set_get_String)
   EXPECT_EQ(store.get("key", default_string), default_string);
   store.set("key", other_string);
   EXPECT_EQ(store.get("key", default_string), other_string);
+
+  store.set("key", "");
+  EXPECT_EQ(store.get("key", default_string, false), default_string);
 }
 
 TEST(dds_DCPS_ConfigStoreImpl, set_get_TimeDuration_seconds)
@@ -219,6 +222,12 @@ TEST(dds_DCPS_ConfigStoreImpl, get_NetworkAddress)
       store.set_string("key", "not a network address");
       EXPECT_EQ(store.get("key", default_value, ConfigStoreImpl::Format_Optional_Port, ConfigStoreImpl::Kind_IPV4), default_value);
     }
+
+    {
+      const NetworkAddress value_required_port("127.0.0.1:80");
+      store.set("key", value_required_port, ConfigStoreImpl::Format_Required_Port, ConfigStoreImpl::Kind_ANY);
+      EXPECT_EQ(store.get("key", default_value, ConfigStoreImpl::Format_Required_Port, ConfigStoreImpl::Kind_ANY), value_required_port);
+    }
   }
 
 #if ACE_HAS_IPV6
@@ -253,6 +262,12 @@ TEST(dds_DCPS_ConfigStoreImpl, get_NetworkAddress)
     {
       store.set_string("key6", "not a network address");
       EXPECT_EQ(store.get("key6", default_value, ConfigStoreImpl::Format_Optional_Port, ConfigStoreImpl::Kind_IPV6), default_value);
+    }
+
+    {
+      const NetworkAddress value_required_port("[::1]:80");
+      store.set("key6", value_required_port, ConfigStoreImpl::Format_Required_Port, ConfigStoreImpl::Kind_ANY);
+      EXPECT_EQ(store.get("key6", default_value, ConfigStoreImpl::Format_Required_Port, ConfigStoreImpl::Kind_ANY), value_required_port);
     }
   }
 #endif
