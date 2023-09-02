@@ -145,7 +145,7 @@ namespace {
 #if OPENDDS_HAS_MAP
   void map_helper(const std::string& expression, AST_Map* map, const std::string& idx, int level)
   {
-    const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
+    // const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
     const std::string indent(level * 2, ' ');
     be_global->impl_ << indent << "value_writer.begin_map();\n";
 
