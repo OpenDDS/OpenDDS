@@ -921,17 +921,8 @@ namespace {
     const std::string named_as = anonymous ? anonymous->scoped_type_ : scoped(tdname);
     RefWrapper base_wrapper(map, named_as, "map");
     base_wrapper.nested_key_only_ = nested_key_only;
-
+    base_wrapper.done();
     NamespaceGuard ng(!anonymous);
-
-    // if (!anonymous) {
-    //   for (size_t i = 0; i < array_count(special_sequences); ++i) {
-    //     if (special_sequences[i].check(base_wrapper.type_name_)) {
-    //       special_sequences[i].gen(base_wrapper.type_name_);
-    //       return;
-    //     }
-    //   }
-    // }
 
     AST_Type* key = resolveActualType(map->key_type());
     AST_Type* val = resolveActualType(map->value_type());
@@ -942,19 +933,6 @@ namespace {
 
     Classification val_cls = classify(val);
     const bool val_primitive = val_cls & CL_PRIMITIVE;
-
-    if (!key->in_main_file()) {
-      // if (key->node_type() == AST_Decl::NT_pre_defined) {
-      //   if (be_global->language_mapping() != BE_GlobalData::LANGMAP_FACE_CXX &&
-      //       be_global->language_mapping() != BE_GlobalData::LANGMAP_SP_CXX) {
-      //     const std::string hdr = "dds/CorbaSeq/" + nameOfSeqHeader(key) + "SeqTypeSupportImpl.h";
-      //     be_global->conditional_include(hdr.c_str(), BE_GlobalData::STREAM_CPP,
-      //                                    "#ifndef OPENDDS_SAFETY_PROFILE");
-      //   }
-      // } else {
-      // be_global->add_referenced(key->file_name().c_str());
-      // }
-    }
 
     const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
     std::string key_cxx_elem;

@@ -479,13 +479,14 @@ dds_visitor::visit_sequence(AST_Sequence*)
   return 0;
 }
 
+#if OPENDDS_HAS_MAP
 int
 dds_visitor::visit_map(AST_Map*)
 {
   //maps always appear as typedefs, see visit_typedef ()
   return 0;
 }
-
+#endif
 
 int
 dds_visitor::visit_operation(AST_Operation*)
