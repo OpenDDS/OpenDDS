@@ -15,9 +15,7 @@
 #include "EntryExit.h"
 #include "dds/DCPS/DataSampleElement.h"
 #include "dds/DCPS/Service_Participant.h"
-
-#include "ace/Auto_Ptr.h"
-#include <memory>
+#include "unique_ptr.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
