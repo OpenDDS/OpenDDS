@@ -28,6 +28,18 @@ namespace DCPS {
 
 RtpsUdpInst::RtpsUdpInst(const OPENDDS_STRING& name)
   : TransportInst("rtps_udp", name)
+  , send_buffer_size_(*this, &RtpsUdpInst::send_buffer_size, &RtpsUdpInst::send_buffer_size)
+  , rcv_buffer_size_(*this, &RtpsUdpInst::rcv_buffer_size, &RtpsUdpInst::rcv_buffer_size)
+  , use_multicast_(*this, &RtpsUdpInst::use_multicast, &RtpsUdpInst::use_multicast)
+  , ttl_(*this, &RtpsUdpInst::ttl, &RtpsUdpInst::ttl)
+  , multicast_interface_(*this, &RtpsUdpInst::multicast_interface, &RtpsUdpInst::multicast_interface)
+  , anticipated_fragments_(*this, &RtpsUdpInst::anticipated_fragments, &RtpsUdpInst::anticipated_fragments)
+  , max_message_size_(*this, &RtpsUdpInst::max_message_size, &RtpsUdpInst::max_message_size)
+  , nak_depth_(*this, &RtpsUdpInst::nak_depth, &RtpsUdpInst::nak_depth)
+  , nak_response_delay_(*this, &RtpsUdpInst::nak_response_delay, &RtpsUdpInst::nak_response_delay)
+  , heartbeat_period_(*this, &RtpsUdpInst::heartbeat_period, &RtpsUdpInst::heartbeat_period)
+  , receive_address_duration_(*this, &RtpsUdpInst::receive_address_duration, &RtpsUdpInst::receive_address_duration)
+  , responsive_mode_(*this, &RtpsUdpInst::responsive_mode, &RtpsUdpInst::responsive_mode)
   , opendds_discovery_guid_(GUID_UNKNOWN)
   , actual_local_address_(NetworkAddress::default_IPV4)
 #ifdef ACE_HAS_IPV6
@@ -146,7 +158,7 @@ RtpsUdpInst::nak_depth() const
 }
 
 void
-RtpsUdpInst::nak_response_delay(TimeDuration nrd)
+RtpsUdpInst::nak_response_delay(const TimeDuration& nrd)
 {
   TheServiceParticipant->config_store()->set(config_key("NAK_RESPONSE_DELAY").c_str(),
                                              nrd,
@@ -162,7 +174,7 @@ RtpsUdpInst::nak_response_delay() const
 }
 
 void
-RtpsUdpInst::heartbeat_period(TimeDuration hp)
+RtpsUdpInst::heartbeat_period(const TimeDuration& hp)
 {
   TheServiceParticipant->config_store()->set(config_key("HEARTBEAT_PERIOD").c_str(),
                                              hp,
@@ -178,7 +190,7 @@ RtpsUdpInst::heartbeat_period() const
 }
 
 void
-RtpsUdpInst::receive_address_duration(TimeDuration rad)
+RtpsUdpInst::receive_address_duration(const TimeDuration& rad)
 {
   TheServiceParticipant->config_store()->set(config_key("RECEIVE_ADDRESS_DURATION").c_str(),
                                              rad,
