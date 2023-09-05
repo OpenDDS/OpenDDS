@@ -470,6 +470,24 @@ bool test_messages()
       1, 0, 0, 224, 6, 192, 0, 0}; // multicastLocator
     ok &= test(iri4, expected_mc, "multicast InfoReplyIp4Submessage");
   }
+  {
+    Parameter param;
+    const CORBA::Octet input[] = {
+      0x59, 0x00, // id: PID_PROPERTY_LIST
+      0x00, 0x00, // length: 0 (this is a problem)
+    };
+    ACE_Message_Block mb(reinterpret_cast<const char*>(input),
+                         sizeof(input));
+    mb.wr_ptr(sizeof(input));
+    Serializer ser(&mb, le_encoding);
+    // This should fail.
+    if (ser >> param) {
+      std::cerr << "ERROR: Parsing Parameter with 0 length succeeded when PID indicates length cannot be 0"
+                << std::endl;
+      ok = false;
+    }
+  }
+
   return ok;
 }
 

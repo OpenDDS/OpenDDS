@@ -872,7 +872,7 @@ Enabling Use of CompleteTypeObjects
 ..
     Sect<16.7.1.1>
 
-To enable use of ``CompleteTypeObject`` s needed for the dynamic binding, they must be generated and OpenDDS must be configured to use them.
+To enable use of ``CompleteTypeObject``\s needed for the dynamic binding, they must be generated and OpenDDS must be configured to use them.
 To generate them, :ref:`-Gxtypes-complete <opendds_idl--gxtypes-complete>` must be passed to ``opendds_idl`` (:ref:`opendds_idl--opendds-idl-command-line-options`).
 For MPC, this can be done by adding this to the opendds_idl arguments for idl files in the project, like this:
 
@@ -892,7 +892,7 @@ To do the same for CMake:
       OPENDDS_IDL_OPTIONS -Gxtypes-complete
     )
 
-Once set up to be generated, OpenDDS has to be configured to send and receive the ``CompleteTypeObject`` s.
+Once set up to be generated, OpenDDS has to be configured to send and receive the ``CompleteTypeObject``\s.
 This can be done by setting the :ref:`UseXTypes <run_time_configuration--usextypes>` RTPS discovery configuration option (:ref:`run_time_configuration--configuring-for-ddsi-rtps-discovery`) or programmatically using the ``OpenDDS::RTPS::RtpsDiscovery::use_xtypes()`` setter methods.
 
 .. _xtypes--interpreting-data-samples-with-dynamicdata:

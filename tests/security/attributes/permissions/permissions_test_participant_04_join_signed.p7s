@@ -1,9 +1,9 @@
 MIME-Version: 1.0
-Content-Type: multipart/signed; protocol="application/x-pkcs7-signature"; micalg="sha1"; boundary="----5E07763584BBEFFF1BD734E5C01A33C6"
+Content-Type: multipart/signed; protocol="application/x-pkcs7-signature"; micalg="sha1"; boundary="----7FC85E145895242F62315F9E5FFBC8DC"
 
 This is an S/MIME signed message
 
-------5E07763584BBEFFF1BD734E5C01A33C6
+------7FC85E145895242F62315F9E5FFBC8DC
 Content-Type: text/plain
 
 <?xml version="1.0"?>
@@ -11,7 +11,7 @@ Content-Type: text/plain
   <permissions>
     <grant name="fuppy_grant_join_domain_0">
       <!-- only allow joining domain 0. No explicit permission to read or write any topic -->
-      <subject_name>/emailAddress=fuppy@mail.fuphouse.ca/CN=Fuppy Fuppington III/OU=The Upper Room/O=House of Fuppy/ST=Nunavut/C=CA</subject_name>
+      <subject_name>emailAddress=fuppy@mail.fuphouse.ca,CN=Fuppy Fuppington III,OU=The Upper Room,O=House of Fuppy,ST=Nunavut,C=CA</subject_name>
       <validity>
         <!-- Format is CCYY-MM-DDThh:mm:ss[Z|(+|-)hh:mm] in GMT -->
         <not_before>2015-09-15T01:00:00</not_before>
@@ -27,7 +27,7 @@ Content-Type: text/plain
   </permissions>
 </dds>
 
-------5E07763584BBEFFF1BD734E5C01A33C6
+------7FC85E145895242F62315F9E5FFBC8DC
 Content-Type: application/x-pkcs7-signature; name="smime.p7s"
 Content-Transfer-Encoding: base64
 Content-Disposition: attachment; filename="smime.p7s"
@@ -60,17 +60,17 @@ Y3QgQ29tcHV0aW5nIChUZXN0IFBlcm1pc3Npb25zIENBKTEvMC0GA1UEAwwmT2Jq
 ZWN0IENvbXB1dGluZyAoVGVzdCBQZXJtaXNzaW9ucyBDQSkxJzAlBgkqhkiG9w0B
 CQEWGGluZm9Ab2JqZWN0Y29tcHV0aW5nLmNvbQIJAKSOim/ArjfyMAkGBSsOAwIa
 BQCgggEHMBgGCSqGSIb3DQEJAzELBgkqhkiG9w0BBwEwHAYJKoZIhvcNAQkFMQ8X
-DTIyMDIwNDIwMTMxMVowIwYJKoZIhvcNAQkEMRYEFNSld+YhfyquRWjGOVdt4+JU
-fSiFMIGnBgkqhkiG9w0BCQ8xgZkwgZYwCwYJYIZIAWUDBAEqMAgGBiqFAwICCTAK
+DTIzMDcyNTE1MjM0N1owIwYJKoZIhvcNAQkEMRYEFIinBBOekN3J9QiQ1yVxTyov
+5FuxMIGnBgkqhkiG9w0BCQ8xgZkwgZYwCwYJYIZIAWUDBAEqMAgGBiqFAwICCTAK
 BggqhQMHAQECAjAKBggqhQMHAQECAzAIBgYqhQMCAhUwCwYJYIZIAWUDBAEWMAsG
 CWCGSAFlAwQBAjAKBggqhkiG9w0DBzAOBggqhkiG9w0DAgICAIAwDQYIKoZIhvcN
 AwICAUAwBwYFKw4DAgcwDQYIKoZIhvcNAwICASgwDQYJKoZIhvcNAQEBBQAEggEA
-X8d/jeIfMq8tjIMQwi6eb8yv8fUa6/odreS5aLoTMH4SjLC7iYJsPrp4q2RAQPV6
-iuTahRXh4lPLrB8RqX3F2JR0tHh01O/4YOJPglIN9bAI+48l1Qyklu4JUnPMIjqa
-PVxS7O6UZh5CGyJwB8T8dUfGGnv/k1EjhJAPrrk4/A1pSxhCUiBY5wg+bw8Ldd+j
-opmn/KRoFcClPTZf4VFOgRBCo9EXsequKZ3tCaRoT2EyNswCV9ykj+GPUyvdfSpb
-yIO5rfXBWaaOF8wH04eBQ+GQUQLMftN0bai8AVmtisVxTAyv0Z1cvsoyBBx4AexH
-Y1rLathOAGJHBT6vFrdVIg==
+hyLONjea1vmVrmSnIPi23pIDw4ayv21SO2Nx2nec647RsT0vjRDNzxZMIdjhIOiV
+ey7bCg6QqYY5KCglvm0FTQnMOgLToIrjKh7r++wUgStQyzREd4aE8Dn8PRjhvOac
+tNax+VO87LFvHC9SAfNLjwng6KQhIHSZhhMw1kh74tCBjExrvEKHq6Swql3LHrV6
+o/Zo7xcaUNPCUllk81u3DTjHBH/UGZdIft3rvq1oe2+JjhhygEmmxMFG4SFZRe3T
+wBUGl6a3BhENsgNqTVtHTW6davtTJ3rYr6aLcCRrUvrnVO1u+cocqJobgnI7/7yX
+DwSRj3HhfUONLdqiCFEemg==
 
-------5E07763584BBEFFF1BD734E5C01A33C6--
+------7FC85E145895242F62315F9E5FFBC8DC--
 

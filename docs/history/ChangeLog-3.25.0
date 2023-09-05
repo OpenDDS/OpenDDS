@@ -1,0 +1,3410 @@
+Wed Jul 19 18:44:34 UTC 2023  Justin Wilson  <wilsonj@unityfoundation.io>
+        commit 59c850bca9487e67b8645162226c2585b2155c34
+
+          Merge pull request #4205 from mitza-oci/vcpkg
+
+          GitHub Actions: update vcpkg to 2023.06.20
+
+Tue Jul 18 20:37:08 UTC 2023  Adam Mitz  <mitza@objectcomputing.com>
+        commit 1011e9336db61b51ec36410c71848edd237d4f4f
+
+        * .github/workflows/build_and_test.yml:
+        * .github/workflows/ishapes.yml:
+
+          GitHub Actions: update vcpkg to 2023.06.20
+
+Tue Jul 18 20:36:05 UTC 2023  Justin Wilson  <wilsonj@unityfoundation.io>
+        commit bbfabaccb8489e4c43c1d07b48511b0b42ee42df
+
+          Merge pull request #4200 from
+          jrw972/datawriterimpl-liveliness-timer
+
+          DataWriterImpl can send liveliness before GUID is set
+
+Fri Jul 14 14:27:14 UTC 2023  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 44b5af2222b9e22d54ebe3fcbcedaa613982e630
+
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/DataWriterImpl.h:
+        * tests/DCPS/ManualAssertLiveliness/DataWriterListenerImpl.cpp:
+        * tests/DCPS/ManualAssertLiveliness/DataWriterListenerImpl.h:
+        * tests/DCPS/ManualAssertLiveliness/publisher.cpp:
+
+          DataWriterImpl can send liveliness before GUID is set
+
+          Problem
+          -------
+
+          PR #4180 requires that the GUID be set before using the
+          TransportClient.  DataWriterImpl can set a liveliness timer that
+          expires before the GUID is set which leads to an assertion.
+
+          Solution
+          --------
+
+          Defer scheduling the liveliness timer until after the GUID is
+          set.
+
+Tue Jul 18 13:55:04 UTC 2023  Justin Wilson  <wilsonj@unityfoundation.io>
+        commit 332d65c431a975bac55a1b13470ab692d11659f2
+
+          Merge pull request #4202 from mitza-oci/rtpsrelay-addrs
+
+          RtpsRelay: updated tracking of client network addresses
+
+Mon Jul 17 18:39:25 UTC 2023  Adam Mitz  <mitza@objectcomputing.com>
+        commit 537a7dd6af80a0796c0cff461f0a45e022728250
+
+        * docs/devguide/internet_enabled_rtps.rst:
+        * docs/news.d/rtpsrelay-addresses.rst:
+        * tools/dds/rtpsrelaylib/Relay.idl:
+        * tools/rtpsrelay/Config.h:
+        * tools/rtpsrelay/GuidAddrSet.cpp:
+        * tools/rtpsrelay/GuidAddrSet.h:
+        * tools/rtpsrelay/RelayStatisticsReporter.h:
+        * tools/rtpsrelay/RtpsRelay.cpp:
+
+          Renamed config option; Added documentation
+
+Mon Jul 17 16:46:33 UTC 2023  Adam Mitz  <mitza@objectcomputing.com>
+        commit 2ee26128e407b65007f299c63780184ba30c88c0
+
+        * tools/rtpsrelay/GuidAddrSet.cpp:
+        * tools/rtpsrelay/GuidAddrSet.h:
+
+          from review
+
+Mon Jul 17 13:56:32 UTC 2023  Justin Wilson  <wilsonj@unityfoundation.io>
+        commit 3737a3d930b50d0d7fb2e8c4f448e9f055589801
+
+          Merge pull request #4198 from jrw972/fix-compiler-warnings
+
+          Fix compiler warnings
+
+Fri Jul 14 22:29:04 UTC 2023  Adam Mitz  <mitza@objectcomputing.com>
+        commit ada2da43adb096019fbd2237bb7dc01b3b049c50
+
+        * tools/dds/rtpsrelaylib/Relay.idl:
+        * tools/rtpsrelay/GuidAddrSet.cpp:
+        * tools/rtpsrelay/GuidAddrSet.h:
+        * tools/rtpsrelay/RelayHandler.cpp:
+        * tools/rtpsrelay/RelayStatisticsReporter.h:
+
+          RtpsRelay: updated tracking of client network addresses
+
+Wed Jul 12 15:29:06 UTC 2023  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit f11b668530d4ab3ce3cbabc1ee35dfda5f34c323
+
+        * tests/unit-tests/dds/DCPS/ConfigStoreImpl.cpp:
+        * tests/unit-tests/dds/DCPS/RTPS/ParameterListConverter.cpp:
+
+          Fix compiler warnings
+
+Wed Jul 12 18:03:12 UTC 2023  Justin Wilson  <wilsonj@unityfoundation.io>
+        commit 0541c70c29ccccecea5c6b547f74fe263fd47570
+
+          Merge pull request #4197 from jrw972/rtps-parameter-zero-size
+
+          RTPS Parameter parsing erroneously succeeds when size is 0
+
+Tue Jul 11 14:32:18 UTC 2023  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit dcf2d752c99a1b74a210bbcd32d0fb669e65728b
+
+        * dds/idl/marshal_generator.cpp:
+        * docs/news.d/rtps-parameter-size.rst:
+        * tests/DCPS/RtpsMessages/RtpsMessagesTest.cpp:
+
+          RTPS Parameter parsing erroneously succeeds when size is 0
+
+          Problem
+          -------
+
+          The specialized RTPS Parameter parsing code in
+          `marshal_generator.cpp`
+          accepts parameters that declare a zero size by setting the
+          discriminator in the union and returning successfully.  If the
+          discriminator is for a declared case of the union, then this
+          creates a
+          problem since the corresponding member of the union is not
+          initialized. This is especially problematic for members that
+          require
+          dynamic allocation like strings and sequences since the code
+          accessing
+          the Parameter will see a null pointer.
+
+          Solution
+          --------
+
+          Remove the special handling for size==0. This causes known cases
+          to
+          be parsed. If size==0 and the discriminator is a known case, then
+          the
+          parse will fail.
+
+Mon Jul 10 15:29:10 UTC 2023  Justin Wilson  <wilsonj@unityfoundation.io>
+        commit 8cf5ba86bd7947505bb5fd1f6c90e67d551bf90a
+
+          Merge pull request #4196 from jwillemsen/patch-30
+
+          Update dependencies.rst
+
+Sat Jul 08 09:23:28 UTC 2023  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit df42f2bcb41b457df51cdab64420f6dbba946dc3
+
+        * docs/building/dependencies.rst:
+
+          Update dependencies.rst
+
+          Document change of #4195
+
+Fri Jul 07 18:10:39 UTC 2023  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit 7908b4ed9fe88adcb4bbb8906cdf8697d8a89ffb
+
+          Merge pull request #4160 from iguessthislldo/igtd/cmake
+
+          Improve CMake Logging and Library and Program Importing
+
+Fri Jul 07 18:03:45 UTC 2023  Justin Wilson  <wilsonj@unityfoundation.io>
+        commit 16f7dc2a3db63123f5262ff13e98c518c3213ec0
+
+          Merge pull request #4195 from jwillemsen/jwi-githulatest
+
+          Add support for combining --ace-github-latest with --doc-group3,
+          whic…
+
+Fri Jul 07 14:51:27 UTC 2023  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit 40138931e2ee694ab0f931d1512f4cfea99bdeca
+
+        * cmake/import_common.cmake:
+
+          Fix Missing ACE on Windows in CMake
+
+Fri Jul 07 11:39:24 UTC 2023  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit 8d3ce16bf3bc51c3fcd7dd2784cdf29e78d73c01
+
+        * configure:
+
+          Fixed syntax error
+
+          * configure:
+
+Fri Jul 07 11:21:52 UTC 2023  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit c820789088cc29f80efe7fa30e6dc79606fd2502
+
+        * configure:
+
+          Add support for combining --ace-github-latest with --doc-group3,
+          which clones ACE/TAO master from github (ACE 7.x)
+
+          * configure:
+
+Thu Jul 06 18:30:50 UTC 2023  Justin Wilson  <wilsonj@unityfoundation.io>
+        commit 72462b97d5ee53f18e699260406487ae419e2ffd
+
+          Merge pull request #4194 from jrw972/data-comma
+
+          DevGuide updates
+
+Thu Jul 06 14:23:59 UTC 2023  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 20b5a9c9317d9cf673c9dc19c39c4b349a586dcc
+
+        * docs/devguide/alternate_interfaces_to_data.rst:
+        * docs/devguide/content_subscription_profile.rst:
+        * docs/devguide/dds_security.rst:
+        * docs/devguide/java_bindings.rst:
+        * docs/devguide/modeling_sdk.rst:
+        * docs/devguide/run_time_configuration.rst:
+        * docs/devguide/safety_profile.rst:
+
+          Apply suggestions from code review
+
+          Co-authored-by: Fred Hornsey <fred@hornsey.us>
+
+Thu Jul 06 14:17:00 UTC 2023  Justin Wilson  <wilsonj@unityfoundation.io>
+        commit a8e21fb2fe391eea9cccd980e19842d2b479baa9
+
+          Merge pull request #4192 from jrw972/news-4137
+
+          Add news for #4137
+
+Thu Jul 06 14:16:30 UTC 2023  Justin Wilson  <wilsonj@unityfoundation.io>
+        commit 5573ffd1af0e3a7bffc28262ba8d61f493e3477c
+
+          Merge pull request #4193 from
+          jrw972/w22-quote-paths-xerces-openssl
+
+          Path to xerces3 is incorrect for GHA jobs using vcpkg
+
+Wed Jul 05 20:46:57 UTC 2023  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 3cf3bd2fa80fc6f6a614321d5c7259c37f714b62
+
+        * .github/workflows/build_and_test.yml:
+
+          Windows 22 builds use %VCPKG_ROOT%
+
+          Problem
+          -------
+
+          The Windows 22 builds using %VCPKG_ROOT% which is defined but
+          incorrect and unquoted.
+
+          Solution
+          --------
+
+          Use the actual location of the installed packages.
+
+Thu Jul 06 09:16:44 UTC 2023  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit c575e74643bc37b0aad9f2dab5fe8336c88d9a76
+
+        * cmake/OpenDDSConfig.cmake:
+        * cmake/ace_group.cmake:
+        * cmake/dds_idl_sources.cmake:
+        * cmake/export.h.in:
+        * cmake/import_common.cmake:
+        * cmake/init.cmake:
+        * cmake/opendds_group.cmake:
+        * cmake/opendds_target_sources.cmake:
+        * cmake/tao_group.cmake:
+        * cmake/tao_idl_sources.cmake:
+        * dds/DdsDcps.mpc:
+        * docs/building/cmake.rst:
+        * docs/news.d/cmake-4160.rst:
+        * docs/news.d/cmake-ace-tao.rst:
+        * docs/news.d/components.rst:
+        * tests/cmake/ace_tao_only/CMakeLists.txt:
+
+          Improve CMake Logging and Library Importing
+
+          This simplifies the declaration parts for importing and allows
+          for
+          sharing declaration-related code. Logging from
+          `OPENDDS_CMAKE_VERBOSE`
+          is now expanded and more controllable.
+
+          Also:
+
+          - Added executable targets
+          - Added `opendds_export_header`
+          - Corrected `COMPONENTS` documentation
+          - Replaced `NO_*` components with `NO_DEFAULTS` which simplifies
+          things.
+
+Wed Jul 05 21:58:03 UTC 2023  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 4fe4b36c21edf26083e6fadea9c527e53c5ed095
+
+        * docs/devguide/dds_security.rst:
+
+          Add comma to data: URIs for DDS Security
+
+Wed Jul 05 21:51:58 UTC 2023  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 8e382ccee7ad3ac574c15df890a5e388d10a6019
+
+        * docs/devguide/alternate_interfaces_to_data.rst:
+        * docs/devguide/built_in_topics.rst:
+        * docs/devguide/conditions_and_listeners.rst:
+        * docs/devguide/content_subscription_profile.rst:
+        * docs/devguide/dds_security.rst:
+        * docs/devguide/getting_started.rst:
+        * docs/devguide/internet_enabled_rtps.rst:
+        * docs/devguide/java_bindings.rst:
+        * docs/devguide/modeling_sdk.rst:
+        * docs/devguide/opendds_idl.rst:
+        * docs/devguide/quality_of_service.rst:
+        * docs/devguide/run_time_configuration.rst:
+        * docs/devguide/safety_profile.rst:
+
+          Remove smart quotes from the DevGuide
+
+Wed Jul 05 20:46:57 UTC 2023  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 461c86cfd1c3550315c0116595d85f1563d6ceb5
+
+        * .github/workflows/build_and_test.yml:
+
+          Windows 22 builds use %VCPKG_ROOT%
+
+          Problem
+          -------
+
+          The Windows 22 builds using %VCPKG_ROOT% which is defined but
+          incorrect and unquoted.
+
+          Solution
+          --------
+
+          Use the actual location of the installed packages.
+
+Wed Jul 05 19:51:56 UTC 2023  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 33ccef7f7f4192a6763c6a94f7a44655bf43a353
+
+        * docs/news.d/observer.rst:
+
+          Add news for #4137
+
+Wed Jul 05 18:32:00 UTC 2023  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit f876083f2ddcd04a0cd4880d73d46466050a51eb
+
+          Merge pull request #4190 from jwillemsen/patch-30
+
+          Update the_dcps_information_repository.rst
+
+Wed Jul 05 18:31:35 UTC 2023  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit 5d5b201ac8724aea66a295011703f1bf2111276e
+
+        * docs/devguide/the_dcps_information_repository.rst:
+
+          Update docs/devguide/the_dcps_information_repository.rst
+
+Wed Jul 05 18:14:02 UTC 2023  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit e5cd89928ff1cb5d506388b1a3dac5a406693db8
+
+        * docs/devguide/the_dcps_information_repository.rst:
+
+          Update docs/devguide/the_dcps_information_repository.rst
+
+          Co-authored-by: Fred Hornsey <fred@hornsey.us>
+
+Wed Jul 05 18:04:32 UTC 2023  Justin Wilson  <wilsonj@unityfoundation.io>
+        commit 0119abb21915a33d2822929edde61bb3d1794725
+
+          Merge pull request #4191 from jwillemsen/patch-31
+
+          [README.md] Fixed broken links to dependencies
+
+Wed Jul 05 18:02:57 UTC 2023  Justin Wilson  <wilsonj@unityfoundation.io>
+        commit 151ce9589aee85463639f5746513ab5e3d2915ce
+
+          Merge pull request #4189 from
+          iguessthislldo/igtd/sync-news-3.24.2
+
+          Sync News from 3.24.2
+
+Wed Jul 05 14:45:58 UTC 2023  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit 8ccfa5528a48b389492902acb60142bbb011867a
+
+        * docs/devguide/the_dcps_information_repository.rst:
+
+          Update docs/devguide/the_dcps_information_repository.rst
+
+          Co-authored-by: Justin Wilson <wilsonj@unityfoundation.io>
+
+Wed Jul 05 08:01:31 UTC 2023  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit 99da4328e4a53332d2f4124465ee259154701ba9
+
+        * README.md:
+
+          [README.md] Fixed broken links to dependencies
+
+Mon Jul 03 11:56:52 UTC 2023  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit bf9c6e4e9ffac67c66531037c537ad6758c81d3e
+
+        * docs/devguide/the_dcps_information_repository.rst:
+
+          Update the_dcps_information_repository.rst
+
+Mon Jul 03 07:11:09 UTC 2023  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit d6db411ec5c4d59763ab400325b1130d523dc9ce
+
+        * docs/devguide/the_dcps_information_repository.rst:
+
+          Update the_dcps_information_repository.rst
+
+Fri Jun 30 19:21:43 UTC 2023  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit 05478ba62ad84cc77241202a182400ff40774f10
+
+        * NEWS.md:
+        * docs/news.d/_releases/v3.24.2.rst:
+        * docs/news.d/security.rst:
+        * docs/news.d/shmem.rst:
+        * docs/news.d/transport_client_guid.rst:
+
+          Sync News from 3.24.2
+
+Fri Jun 30 18:13:44 UTC 2023  Justin Wilson  <wilsonj@unityfoundation.io>
+        commit 28f9482e51d1e4e742c38aac7072d0849c6b6fcf
+
+          Merge pull request #4186 from jrw972/sample-lost-test-refactor
+
+          SampleLost test fails sporadically
+
+Fri Jun 30 02:50:50 UTC 2023  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit a85daa2d5bd116b6d2062e4f1ead7f91f6fc9d9a
+
+        * tests/DCPS/SampleLost/.gitignore:
+        * tests/DCPS/SampleLost/Common.h:
+        * tests/DCPS/SampleLost/DataReaderListener.cpp:
+        * tests/DCPS/SampleLost/DataReaderListener.h:
+        * tests/DCPS/SampleLost/DataWriterListenerImpl.cpp:
+        * tests/DCPS/SampleLost/DataWriterListenerImpl.h:
+        * tests/DCPS/SampleLost/SampleLost.mpc:
+        * tests/DCPS/SampleLost/Writer.cpp:
+        * tests/DCPS/SampleLost/Writer.h:
+        * tests/DCPS/SampleLost/publisher.cpp:
+        * tests/DCPS/SampleLost/pubsub.cpp:
+        * tests/DCPS/SampleLost/pub.ini  tests/DCPS/SampleLost/pubsub.ini:
+        * tests/DCPS/SampleLost/run_test.pl:
+        * tests/DCPS/SampleLost/sub.ini:
+        * tests/DCPS/SampleLost/subscriber.cpp:
+
+          SampleLost test fails sporadically
+
+          Problem
+          -------
+
+          The SampleLost test fails sporadically. The root cause is that
+          the
+          publisher can finish before the reader is fully initialized.
+
+          Solution
+          --------
+
+          * Convert to a single process test
+          * Use the StatusMatching library to wait for a match on the
+          DataReader instead of the DataWriter
+          * Use the distributed condition set for coordination
+
+Thu Jun 29 15:06:08 UTC 2023  Justin Wilson  <wilsonj@unityfoundation.io>
+        commit 88704c289b750005f4a9c9cd19187106ccd6f977
+
+          Merge pull request #4184 from jrw972/new-for-4180
+
+          Fix warnings and add news for #4180
+
+Wed Jun 28 18:54:48 UTC 2023  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit f72879d3756af10498cceec69b60f02739798358
+
+        * docs/news.d/transport_client_guid.rst:
+
+          Update docs/news.d/transport_client_guid.rst
+
+          Co-authored-by: Fred Hornsey <fred@hornsey.us>
+
+Wed Jun 28 18:53:59 UTC 2023  Justin Wilson  <wilsonj@unityfoundation.io>
+        commit ba34197e95e33e734f7466bdaba8a8213c4cf158
+
+          Merge pull request #4185 from jwillemsen/patch-30
+
+          [configure] Upgrade to ACE/TAO 6.5.20 and 7.1.1
+
+Wed Jun 28 10:04:39 UTC 2023  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit 0e159d333a9d77de1f9de8012a491eff06034364
+
+        * configure:
+
+          [configure] Upgrade to ACE/TAO 6.5.20 and 7.1.1
+
+Tue Jun 27 19:02:31 UTC 2023  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 6c0150990f9373630945892aa9140aaf2febdd3d
+
+        * dds/DCPS/DcpsUpcalls.cpp:
+        * dds/DCPS/DcpsUpcalls.h:
+        * dds/DCPS/StaticDiscovery.cpp:
+        * docs/news.d/transport_client_guid.rst:
+
+          Fix warnings and add news for #4180
+
+Tue Jun 27 18:27:54 UTC 2023  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 2e2f4033bcc1cb6943d5230714198e5b0012ad19
+
+        * dds/DCPS/security/AccessControlBuiltInImpl.cpp:
+
+          Remove debugging log message
+
+Tue Jun 27 18:03:11 UTC 2023  Justin Wilson  <wilsonj@unityfoundation.io>
+        commit e72006b99bf93b72a33c1ecdd5fdd389dbafb410
+
+          Merge pull request #4180 from jrw972/transport-client-guid2
+
+          TransportClient uses uninitialized GUID
+
+Tue Jun 20 20:23:35 UTC 2023  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 607a9027f85a05721bec9be67c9dd7cc63264c6e
+
+        * dds/DCPS/DataReaderCallbacks.h:
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DataReaderImpl_T.h:
+        * dds/DCPS/DataWriterCallbacks.h:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/DataWriterImpl.h:
+        * dds/DCPS/DcpsUpcalls.cpp:
+        * dds/DCPS/Discovery.h:
+        * dds/DCPS/InfoRepoDiscovery/DataReaderRemote.idl:
+        * dds/DCPS/InfoRepoDiscovery/DataReaderRemoteImpl.cpp:
+        * dds/DCPS/InfoRepoDiscovery/DataReaderRemoteImpl.h:
+        * dds/DCPS/InfoRepoDiscovery/DataWriterRemote.idl:
+        * dds/DCPS/InfoRepoDiscovery/DataWriterRemoteImpl.cpp:
+        * dds/DCPS/InfoRepoDiscovery/DataWriterRemoteImpl.h:
+        * dds/DCPS/InfoRepoDiscovery/Info.idl:
+        * dds/DCPS/InfoRepoDiscovery/InfoRepoDiscovery.cpp:
+        * dds/DCPS/InfoRepoDiscovery/InfoRepoDiscovery.h:
+        * dds/DCPS/RTPS/RtpsDiscovery.cpp:
+        * dds/DCPS/RTPS/RtpsDiscovery.h:
+        * dds/DCPS/RTPS/Sedp.cpp:
+        * dds/DCPS/RTPS/Sedp.h:
+        * dds/DCPS/RTPS/Spdp.h:
+        * dds/DCPS/RecorderImpl.cpp:
+        * dds/DCPS/RecorderImpl.h:
+        * dds/DCPS/ReplayerImpl.cpp:
+        * dds/DCPS/ReplayerImpl.h:
+        * dds/DCPS/StaticDiscovery.cpp:
+        * dds/DCPS/StaticDiscovery.h:
+        * dds/DCPS/SubscriberImpl.cpp:
+        * dds/DCPS/security/AccessControlBuiltInImpl.cpp:
+        * dds/DCPS/transport/framework/TransportClient.cpp:
+        * dds/DCPS/transport/framework/TransportClient.h:
+        * dds/InfoRepo/DCPSInfo_i.cpp:
+        * dds/InfoRepo/DCPSInfo_i.h:
+        * dds/InfoRepo/DCPS_IR_Publication.cpp:
+        * dds/InfoRepo/DCPS_IR_Subscription.cpp:
+        * tests/DCPS/DCPSInfoRepo/DCPSDataReaderI.cpp:
+        * tests/DCPS/DCPSInfoRepo/DCPSDataReaderI.h:
+        * tests/DCPS/DCPSInfoRepo/DCPSDataWriterI.cpp:
+        * tests/DCPS/DCPSInfoRepo/DCPSDataWriterI.h:
+        * tests/DCPS/DCPSInfoRepo/pubsub.cpp:
+        * tests/DCPS/FindTopic/LocalDiscovery.cpp:
+        * tests/DCPS/FindTopic/LocalDiscovery.h:
+        * tests/DCPS/WriteDataContainer/WriteDataContainerTest.cpp:
+        * tests/transport/best_effort_reader/SimpleDataReader.cpp:
+        * tests/transport/rtps/publisher.cpp:
+        * tests/transport/rtps/subscriber.cpp:
+        * tests/transport/rtps_directed_write/subscriber.cpp:
+        * tests/transport/rtps_reliability/rtps_reliability.cpp:
+        * tests/transport/simple/PubDriver.cpp:
+        * tests/transport/simple/SimpleDataReader.cpp:
+        * tests/transport/simple/SimpleDataReader.h:
+        * tests/transport/simple/SimpleDataWriter.cpp:
+        * tests/transport/simple/SimpleDataWriter.h:
+        * tests/transport/simple/SubDriver.cpp:
+        * tests/unit-tests/dds/DCPS/RTPS/AssociationRecord.cpp:
+
+          TransportClient uses uninitialized GUID
+
+          Problem
+          -------
+
+          The TransportClient class does not initialize its guid until an
+          association.  However, the client can and is used before an
+          association.  One example is a DataWriter that sends liveliness
+          messages. The fix introduced by #4120 caused various functions to
+          short-circuit when the guid was not set. However, this introduced
+          a
+          deadlock in the example where the DataWriter was waiting for the
+          liveliness message to be delivered.
+
+          Solution
+          --------
+
+          Three alternatives were considered.
+
+          First, extending the solution in #4120 lacked confidence as it
+          was
+          impossible to explore all of the corner cases.
+
+          Second, the guid was passed in the constructor of the
+          TransportClient.
+          This solution failed as the current design in concert with
+          spec-defined behavior 1) allows DataWriters and DataReaders to be
+          created before enabling them and 2) determines the guid during
+          the
+          call to enable via a call into discovery. While this solution was
+          the
+          best in terms of maintainability, it would require extensive
+          refactoring.
+
+          Third, modifying discovery to set the guid as soon as it is known
+          and
+          before any associations are processed. This solution was close to
+          the
+          second one in terms of the class invariant of an initialized guid
+          while fitting within the current design.
+
+          Discovery implementations now how the responsibility of calling
+          `set_publication_id` and `set_subscription_id` when a publication
+          or
+          subscription is added. DataReaderImpl was modifying to not use
+          the
+          TransportClient when the transport is disableb as it is for
+          built-in
+          topics.
+
+Wed Jun 21 19:27:13 UTC 2023  Justin Wilson  <wilsonj@unityfoundation.io>
+        commit 8ba7f634c6d3912e52a47f6809a6fb5e5b6073e8
+
+          Merge pull request #4171 from jwillemsen/jwi-sharedmemoryclose
+
+          Release the used shared memory in the datalink
+
+Wed Jun 21 19:26:55 UTC 2023  Justin Wilson  <wilsonj@unityfoundation.io>
+        commit 0d4d44e6ce2600e9447c95cbf4f4e597e7bea0b1
+
+        * docs/news.d/shmem.rst:
+
+          Update docs/news.d/shmem.rst
+
+Wed Jun 21 17:55:29 UTC 2023  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit c6343f8fa8b89a77e5a4e64a905cc7b0c3dad360
+
+          Merge pull request #4173 from iguessthislldo/igtd/sphinx-docs
+
+          Update `docs/build.py` for Windows and Remove `./`
+
+Wed Jun 21 07:35:14 UTC 2023  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit e88b5a819843b7652561bb232ec71ff2e66036bf
+
+          Merge branch 'master' into jwi-sharedmemoryclose
+
+Tue Jun 20 18:52:47 UTC 2023  Justin Wilson  <wilsonj@unityfoundation.io>
+        commit 258991a56e6bb525a00faca900d1802203d0c380
+
+          Merge pull request #4179 from jrw972/master
+
+          Add news for #4155
+
+Tue Jun 20 15:34:02 UTC 2023  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit 2180f9e10c98c3afb92c200f4b9e6e63e0ebf62e
+
+        * docs/news.d/shmem.rst:
+
+          Update shmem.rst
+
+Tue Jun 20 06:59:52 UTC 2023  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit cf36e8a532cf9d501775e97f814c124523ece053
+
+          Merge branch 'master' into jwi-sharedmemoryclose
+
+Tue Jun 20 06:59:33 UTC 2023  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit 1ca147b63ca2fb0307eca10bf5c542c5cf60261d
+
+        * docs/news.d/shmem.rst:
+
+          Add news
+
+          * docs/news.d/shmem.rst:
+          Added.
+
+Tue Jun 20 06:56:31 UTC 2023  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit 03718aae6ae4bc16190baf9198037642ce562479
+
+          Merge branch 'jwi-sharedmemoryclose' of
+          https://github.com/jwillemsen/OpenDDS into jwi-sharedmemoryclose
+
+Mon Jun 19 18:03:28 UTC 2023  Justin Wilson  <wilsonj@unityfoundation.io>
+        commit e7b054cf5f6fc7acf30903b02fe101e832872538
+
+          Merge pull request #4177 from
+          OpenDDS/dependabot/github_actions/docker/build-push-action-4.1.1
+
+          Bump docker/build-push-action from 4.1.0 to 4.1.1
+
+Mon Jun 19 18:03:07 UTC 2023  Justin Wilson  <wilsonj@unityfoundation.io>
+        commit 5b1c22747e45ccc00c368d70e70fe06dfd13119e
+
+          Merge pull request #4176 from
+          OpenDDS/dependabot/github_actions/docker/metadata-action-4.6.0
+
+          Bump docker/metadata-action from 4.5.0 to 4.6.0
+
+Mon Jun 19 16:31:28 UTC 2023  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit eb442f0a32889ac7ebe03a99bf0971af5f28082b
+
+        * docs/news.d/security.rst:
+
+          Add news for #4155
+
+Mon Jun 19 14:34:17 UTC 2023  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit e5483b4c5c8d232290109941d7d0f027b88778f0
+
+          Merge branch 'master' into jwi-sharedmemoryclose
+
+Mon Jun 19 12:36:10 UTC 2023  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit aea02b90f7b73d89db3edc7fac326ae4995bd432
+
+        * dds/DCPS/transport/shmem/ShmemDataLink.cpp:
+
+          Add some documentation
+
+          * dds/DCPS/transport/shmem/ShmemDataLink.cpp:
+
+Mon Jun 19 08:01:26 UTC 2023  dependabot[bot]  <49699333+dependabot[bot]@users.noreply.github.com>
+        commit 467d3096c4b0939e7cee7db0e01ab448b77411f0
+
+        * .github/workflows/docker_image.yml:
+
+          Bump docker/build-push-action from 4.1.0 to 4.1.1
+
+          Bumps
+          [docker/build-push-action](https://github.com/docker/build-push-action)
+          from 4.1.0 to 4.1.1.
+          - [Release
+          notes](https://github.com/docker/build-push-action/releases)
+          -
+          [Commits](https://github.com/docker/build-push-action/compare/44ea916f6c540f9302d50c2b1e5a8dc071f15cdf...2eb1c1961a95fc15694676618e422e8ba1d63825)
+
+          ---
+          updated-dependencies:
+          - dependency-name: docker/build-push-action
+          dependency-type: direct:production
+          update-type: version-update:semver-patch
+          ...
+
+          Signed-off-by: dependabot[bot] <support@github.com>
+
+Mon Jun 19 08:01:18 UTC 2023  dependabot[bot]  <49699333+dependabot[bot]@users.noreply.github.com>
+        commit 5477ce0175201ad01ed69dbca7d42803222ccaa2
+
+        * .github/workflows/docker_image.yml:
+
+          Bump docker/metadata-action from 4.5.0 to 4.6.0
+
+          Bumps
+          [docker/metadata-action](https://github.com/docker/metadata-action)
+          from 4.5.0 to 4.6.0.
+          - [Release
+          notes](https://github.com/docker/metadata-action/releases)
+          -
+          [Commits](https://github.com/docker/metadata-action/compare/2c0bd771b40637d97bf205cbccdd294a32112176...818d4b7b91585d195f67373fd9cb0332e31a7175)
+
+          ---
+          updated-dependencies:
+          - dependency-name: docker/metadata-action
+          dependency-type: direct:production
+          update-type: version-update:semver-minor
+          ...
+
+          Signed-off-by: dependabot[bot] <support@github.com>
+
+Fri Jun 16 18:01:47 UTC 2023  Justin Wilson  <wilsonj@unityfoundation.io>
+        commit 8b8e4edd7b206f474530ac6a5a5348f933b39b5a
+
+          Merge pull request #4155 from sonndinh/fix-acknack-sn
+
+          RTPS AckNack can contain invalid sequence number
+
+Fri Jun 16 04:10:13 UTC 2023  Son Dinh  <dinhs@objectcomputing.com>
+        commit 819fe4794313979456a7d4dd65c7c6c46608db50
+
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.cpp:
+
+          Fix indentation
+
+Thu Jun 15 11:35:27 UTC 2023  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit 75e994a522d8a4e54f32a0307f97d77954c1b798
+
+        * dds/DCPS/transport/shmem/ShmemDataLink.cpp:
+        * dds/DCPS/transport/shmem/ShmemDataLink.h:
+
+          SHould release
+
+          * dds/DCPS/transport/shmem/ShmemDataLink.cpp:
+          * dds/DCPS/transport/shmem/ShmemDataLink.h:
+
+Thu Jun 15 07:13:30 UTC 2023  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit 9f0e7602a26e7bf5ccd8aad5d67c0a52f1f2250c
+
+        * dds/DCPS/transport/shmem/ShmemDataLink.cpp:
+        * dds/DCPS/transport/shmem/ShmemTransport.cpp:
+
+          Check for -1 for failure
+
+          * dds/DCPS/transport/shmem/ShmemDataLink.cpp:
+          * dds/DCPS/transport/shmem/ShmemTransport.cpp:
+
+Thu Jun 15 06:49:03 UTC 2023  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit b8bcbd1383f0929dc5c414cc0166faabcd9fe40b
+
+        * dds/DCPS/transport/shmem/ShmemDataLink.cpp:
+        * dds/DCPS/transport/shmem/ShmemTransport.cpp:
+
+          Add a log message when releasing the shared memory failed
+
+          * dds/DCPS/transport/shmem/ShmemDataLink.cpp:
+          * dds/DCPS/transport/shmem/ShmemTransport.cpp:
+
+Thu Jun 15 02:59:56 UTC 2023  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit dea633fde179adf0ac3dd093fbb59032fa749185
+
+        * docs/build.py:
+        * docs/internal/docs.rst:
+        * docs/internal/release.rst:
+        * docs/internal/running_tests.rst:
+
+          Update `docs/build.py` for Windows and Remove `./`
+
+          `docs/build.py` almost works on Windows, but there is an extra
+          check for
+          the existence of `sphinx-build` that apparently doesn't work on
+          Windows
+          because the virutalenv directory structure is different. It isn't
+          really
+          necessary anyways.
+
+          Also removed unnecessary `./` before scripts.
+
+Wed Jun 14 19:52:14 UTC 2023  Son Dinh  <dinhs@objectcomputing.com>
+        commit 7e2a16f73ffa24243cdefe2957887beb9e875eea
+
+          Merge branch 'master' of github.com:OpenDDS/OpenDDS into
+          fix-acknack-sn
+
+Wed Jun 14 19:51:34 UTC 2023  Son Dinh  <dinhs@objectcomputing.com>
+        commit 66cc08b94f1e4c0e3ad2532dd4fc21c11a0b3e13
+
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.cpp:
+
+          Cleanup
+
+Wed Jun 14 19:46:19 UTC 2023  Son Dinh  <dinhs@objectcomputing.com>
+        commit 2c3fafc2d8ab8cffbb5c0a6c6e78cb899c4a8393
+
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.cpp:
+
+          Update check
+
+Tue Jun 13 06:49:46 UTC 2023  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit 5366efe7b23aecefb00b163cd4161409777ada03
+
+          Merge branch 'master' into jwi-sharedmemoryclose
+
+Tue Jun 13 06:22:20 UTC 2023  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit 4a14c6623a0feb91a8d7defaa30d6fcd52f040ad
+
+        * dds/DCPS/transport/shmem/ShmemDataLink.cpp:
+
+          Close shared memory when we don't need it anymore
+
+          * dds/DCPS/transport/shmem/ShmemDataLink.cpp:
+
+Mon Jun 12 21:01:35 UTC 2023  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit 96c22ad1a42af8fb29af29f87487845aeb0271d9
+
+          Merge pull request #4139 from iguessthislldo/igtd/sphinx-docs
+
+          Documentation Restructuring
+
+Mon Jun 12 18:07:00 UTC 2023  Justin Wilson  <wilsonj@unityfoundation.io>
+        commit 803438fc30c45d0353d8d084759bc9c148033cb7
+
+          Merge pull request #4170 from jrw972/initialize-variable
+
+          Initialize variable in unit test to silence warnings
+
+Mon Jun 12 18:05:38 UTC 2023  Justin Wilson  <wilsonj@unityfoundation.io>
+        commit db444e9371da3c3512a359902cc3adf118a5bc87
+
+          Merge pull request #4166 from
+          OpenDDS/dependabot/github_actions/docker/build-push-action-4.1.0
+
+          Bump docker/build-push-action from 4.0.0 to 4.1.0
+
+Mon Jun 12 18:05:24 UTC 2023  Justin Wilson  <wilsonj@unityfoundation.io>
+        commit 56e017afaeaaa543750d412e9de779a80a1bce40
+
+          Merge pull request #4165 from
+          OpenDDS/dependabot/github_actions/docker/login-action-2.2.0
+
+          Bump docker/login-action from 2.1.0 to 2.2.0
+
+Mon Jun 12 18:05:10 UTC 2023  Justin Wilson  <wilsonj@unityfoundation.io>
+        commit 8c193f4647ff868339652143133008905f39aa80
+
+          Merge pull request #4164 from
+          OpenDDS/dependabot/github_actions/docker/metadata-action-4.5.0
+
+          Bump docker/metadata-action from 4.4.0 to 4.5.0
+
+Mon Jun 12 14:24:25 UTC 2023  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 45728014ad178b29887fb687b3b76c7c45d715de
+
+        * tests/unit-tests/dds/DCPS/Time_Helper.cpp:
+
+          Initialize variable in unit test to silence warnings
+
+Mon Jun 12 10:08:00 UTC 2023  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit 398c56cf0d354c113f4c4e0278ab309490715255
+
+        * dds/DCPS/transport/shmem/ShmemTransport.cpp:
+
+          Add debug message when link is not found
+
+Mon Jun 12 10:07:33 UTC 2023  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit 9a3a66cb299fcaf4d0e9eaf07ab50f119daaf729
+
+        * dds/DCPS/transport/tcp/TcpTransport.cpp:
+
+          No need to mention link twice
+
+Mon Jun 12 10:07:03 UTC 2023  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit f7bb1443a03d76968ab6c4e16e38c42f79e80ed3
+
+        * tests/DCPS/LargeSample/rtps_disc_sec.ini:
+
+          Fixed typo in comment
+
+Mon Jun 12 08:13:37 UTC 2023  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit 4e511ed53c23f6c83600a48b9f0b35b04bea58a4
+
+        * docs/building/cmake.rst:
+
+          Tweaks to cmake.rst
+
+Mon Jun 12 08:01:09 UTC 2023  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit 42a8279f37f435a54d4afd80cccb98313eaa4654
+
+        * docs/building/cmake.rst:
+        * docs/building/dependencies.rst:
+
+          Respond to Review
+
+Mon Jun 12 08:02:15 UTC 2023  dependabot[bot]  <49699333+dependabot[bot]@users.noreply.github.com>
+        commit 0333b7c6899725d86cb1fe7a7d9640c45b3a26e9
+
+        * .github/workflows/docker_image.yml:
+
+          Bump docker/build-push-action from 4.0.0 to 4.1.0
+
+          Bumps
+          [docker/build-push-action](https://github.com/docker/build-push-action)
+          from 4.0.0 to 4.1.0.
+          - [Release
+          notes](https://github.com/docker/build-push-action/releases)
+          -
+          [Commits](https://github.com/docker/build-push-action/compare/3b5e8027fcad23fda98b2e3ac259d8d67585f671...44ea916f6c540f9302d50c2b1e5a8dc071f15cdf)
+
+          ---
+          updated-dependencies:
+          - dependency-name: docker/build-push-action
+          dependency-type: direct:production
+          update-type: version-update:semver-minor
+          ...
+
+          Signed-off-by: dependabot[bot] <support@github.com>
+
+Mon Jun 12 08:02:04 UTC 2023  dependabot[bot]  <49699333+dependabot[bot]@users.noreply.github.com>
+        commit 2d3079ca6209dd455001ea373fae3b999923ca54
+
+        * .github/workflows/docker_image.yml:
+
+          Bump docker/login-action from 2.1.0 to 2.2.0
+
+          Bumps
+          [docker/login-action](https://github.com/docker/login-action)
+          from 2.1.0 to 2.2.0.
+          - [Release
+          notes](https://github.com/docker/login-action/releases)
+          -
+          [Commits](https://github.com/docker/login-action/compare/f4ef78c080cd8ba55a85445d5b36e214a81df20a...465a07811f14bebb1938fbed4728c6a1ff8901fc)
+
+          ---
+          updated-dependencies:
+          - dependency-name: docker/login-action
+          dependency-type: direct:production
+          update-type: version-update:semver-minor
+          ...
+
+          Signed-off-by: dependabot[bot] <support@github.com>
+
+Mon Jun 12 08:02:04 UTC 2023  dependabot[bot]  <49699333+dependabot[bot]@users.noreply.github.com>
+        commit ae3eec6d7869dfc064c6054d49218a4f390810bc
+
+        * .github/workflows/docker_image.yml:
+
+          Bump docker/metadata-action from 4.4.0 to 4.5.0
+
+          Bumps
+          [docker/metadata-action](https://github.com/docker/metadata-action)
+          from 4.4.0 to 4.5.0.
+          - [Release
+          notes](https://github.com/docker/metadata-action/releases)
+          -
+          [Commits](https://github.com/docker/metadata-action/compare/c4ee3adeed93b1fa6a762f209fb01608c1a22f1e...2c0bd771b40637d97bf205cbccdd294a32112176)
+
+          ---
+          updated-dependencies:
+          - dependency-name: docker/metadata-action
+          dependency-type: direct:production
+          update-type: version-update:semver-minor
+          ...
+
+          Signed-off-by: dependabot[bot] <support@github.com>
+
+Fri Jun 09 18:04:27 UTC 2023  Justin Wilson  <wilsonj@unityfoundation.io>
+        commit 03245433e316ae9d62a4e431a90f8674fb5aa284
+
+          Merge pull request #4154 from jrw972/cxx11-equality
+
+          Some language mappings don't support equality comparison
+
+Fri Jun 09 13:10:56 UTC 2023  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit 7d58e3f9406ff817e79a0c2cd9374b8fbd15d76a
+
+        * docs/devguide/introduction.rst:
+        * docs/devguide/opendds_idl.rst:
+        * docs/glossary.rst:
+
+          Apply suggestions from code review
+
+          Co-authored-by: Justin Wilson <wilsonj@unityfoundation.io>
+
+Thu May 25 18:23:58 UTC 2023  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 8091d34428a94a5e287e6be180c81580c0b07149
+
+        * dds/idl/be_global.cpp:
+        * dds/idl/be_global.h:
+        * dds/idl/be_util.cpp:
+        * dds/idl/langmap_generator.cpp:
+        * dds/idl/ts_generator.cpp:
+        * docs/devguide/opendds_idl.rst:
+        * docs/news.d/equality_operators.rst:
+        * tests/DCPS/Compiler/C++11/idl_test_nested_types_lib/cxx11_idl_test_nested_types_lib.mpc:
+        * tests/DCPS/Compiler/idl_test_nested_types_lib/idl_test_nested_types_lib.mpc:
+
+          C++11 mapping doesn't support equality comparison
+
+          Problem
+          -------
+
+          The type support for C++11 does not include equality operators
+          (`==`
+          and `!=`). These operators make the IDL defined types easier to
+          use
+          with generic programming techniques.
+
+          Solution
+          --------
+
+          Implement support for `==` and `!=`.  Currently, this support is
+          enabled by passed `-Gequality` to `opendds_idl`.
+
+Thu Jun 08 17:32:56 UTC 2023  Son Dinh  <dinhs@objectcomputing.com>
+        commit 37034a812376337c4cc2b729255cd833bbe5aa97
+
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.cpp:
+
+          Ignore check for Volatile Secure Writer
+
+Wed Jun 07 13:43:26 UTC 2023  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit 5e4e874905807466a7dd8f989735b6e40fa7d187
+
+        * docs/README.md:
+        * docs/glossary.rst:
+
+          Apply suggestions from code review
+
+          Co-authored-by: Adam Mitz <mitza@objectcomputing.com>
+
+Tue Jun 06 18:06:01 UTC 2023  Justin Wilson  <wilsonj@unityfoundation.io>
+        commit d6814d6ea77c1fedd09365cc5d8666222f55fadd
+
+          Merge pull request #4151 from jrw972/transport-inst-refactoring
+
+          `TransportInst` does not use `ConfigStore`
+
+Mon May 22 22:21:17 UTC 2023  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 5287d9f8fa09d7a471420c18103d4b5d33512d39
+
+        * dds/DCPS/ConfigStoreImpl.cpp:
+        * dds/DCPS/ConfigStoreImpl.h:
+        * dds/DCPS/InfoRepoDiscovery/InfoRepoDiscovery.cpp:
+        * dds/DCPS/RTPS/Sedp.cpp:
+        * dds/DCPS/RTPS/Spdp.cpp:
+        * dds/DCPS/RTPS/Spdp.h:
+        * dds/DCPS/Service_Participant.cpp:
+        * dds/DCPS/Service_Participant.h:
+        * dds/DCPS/transport/framework/DataLink.cpp:
+        * dds/DCPS/transport/framework/MessageDropper.cpp:
+        * dds/DCPS/transport/framework/MessageDropper.h:
+        * dds/DCPS/transport/framework/TransportDefs.h:
+        * dds/DCPS/transport/framework/TransportInst.cpp:
+        * dds/DCPS/transport/framework/TransportInst.h:
+        * dds/DCPS/transport/framework/TransportInst.inl:
+        * dds/DCPS/transport/framework/TransportReceiveStrategy_T.cpp:
+        * dds/DCPS/transport/framework/TransportRegistry.cpp:
+        * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
+        * dds/DCPS/transport/framework/TransportStatistics.cpp:
+        * dds/DCPS/transport/framework/TransportStatistics.h:
+        * dds/DCPS/transport/multicast/MulticastDataLink.cpp:
+        * dds/DCPS/transport/multicast/MulticastSession.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpReceiveStrategy.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpSendStrategy.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpTransport.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpTransport.h:
+        * dds/InfoRepo/DCPSInfo_i.cpp:
+        * docs/devguide/run_time_configuration.rst:
+        * docs/news.d/config_store.rst:
+        * java/dds/OpenDDS/DCPS/transport/TransportInst.java:
+        * java/dds/OpenDDS_DCPS_jni.cpp:
+        * tests/DCPS/ConfigFile/ConfigFile.cpp:
+        * tests/DCPS/Messenger/Args.h:
+        * tests/DCPS/RecorderLogging/Args.h:
+        * tests/DCPS/RecorderReplayer/Args.h:
+        * tests/DCPS/SkipSerialize/Args.h:
+        * tests/DCPS/TcpReconnect/Args.h:
+        * tests/DCPS/ZeroCopyDataReaderListener/Args.h:
+        * tests/security/attributes/Args.cpp:
+        * tests/transport/best_effort_reader/AppConfig.cpp:
+        * tests/transport/rtps/publisher.cpp:
+        * tests/transport/rtps/subscriber.cpp:
+        * tests/transport/rtps_directed_write/AppConfig.cpp:
+        * tests/transport/rtps_reliability/rtps_reliability.cpp:
+        * tests/transport/spdp/spdp_transport.cpp:
+        * tests/unit-tests/dds/DCPS/ConfigStoreImpl.cpp:
+        * tests/unit-tests/dds/DCPS/transport/framework/MessageDropper.cpp:
+        * tests/unit-tests/dds/DCPS/transport/framework/TransportStatistics.cpp:
+        * tests/unit-tests/dds/DCPS/transport/framework/run_test_unit.pl:
+        * tools/modeling/plugins/org.opendds.modeling.common/src/org/opendds/modeling/common/Plugin.java:
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model.edit/plugin.properties:
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model.edit/src/org/opendds/modeling/sdk/model/GeneratorSpecification/Provider/GeneratorItemProviderAdapterFactory.java:
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model.edit/src/org/opendds/modeling/sdk/model/GeneratorSpecification/Provider/TransportInstItemProvider.java:
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model/xsl/traits_cpp.xsl:
+
+          `TransportInst` does not use `ConfigStore`
+
+          Problem
+          -------
+
+          `TransportInst` does not use `ConfigStore`.  See #4134.
+
+          Solution
+          --------
+
+          Convert `TransportInst` to use `ConfigStore`.
+
+          * `queue_messages_per_pool_` and `queue_initial_pools_` were
+          removed
+          because they are not used.
+
+          * Member access has been replaced with getters and setters. This
+          will
+          break code that interacts with `TransportInst`. The code should
+          be
+          updated to either use the getters or setters or use the
+          ConfigStore.
+
+          * Members for dropping and counting messages have been relocated
+          close
+          to where they are used and updated via a listener. If concurrent
+          access becomes an issue, then they can be wrapped with `Atomic`.
+
+Fri Jun 02 18:21:07 UTC 2023  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit fac881ffd6f740b9be0cb53559254c88460494b2
+
+          Merge pull request #4157 from iguessthislldo/igtd/editorconfig
+
+          Add `.editorconfig` and Document Lint Script
+
+Fri Jun 02 18:20:27 UTC 2023  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit 8b29089e28fa395931cb836af1dd164a3d428c39
+
+          Merge pull request #4158 from
+          iguessthislldo/igtd/news-corrections
+
+          Corrections to the News
+
+Fri Jun 02 17:43:56 UTC 2023  Timothy Simpson  <simpsont@objectcomputing.com>
+        commit 787d02b87659e4dee9b891bdb23e22575ce418ef
+
+          Merge pull request #4156 from simpsont-oci/bench_unit_tests
+
+          [Bench] Restructure Bench Unit Tests, Add PropertyStatBlock Test,
+          Add To CI
+
+Fri Jun 02 16:12:59 UTC 2023  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit 7719b7fd4551c13115f156f11d2924b087beea32
+
+        * docs/internal/dev_guidelines.rst:
+
+          Resond to Review and Tweak Paragraph
+
+Fri Jun 02 16:05:44 UTC 2023  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit 1df2cdcb742b266a9266de8835238b2a690b3dad
+
+        * docs/conf.py:
+
+          Rename version_info to Avoid Name Clash on RTD
+
+          Read the docs apparently injects their own stuff into conf.py.
+
+Fri Jun 02 15:39:25 UTC 2023  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit 1fd2fb54a70d39565e25e74a4a56fba670644ee7
+
+        * docs/README.md:
+        * docs/conf.py:
+
+          Tweak docs/README, Debug RTD Error
+
+Thu Jun 01 18:17:38 UTC 2023  Son Dinh  <dinhs@objectcomputing.com>
+        commit a6c48d7653d3c7b76f877d54410ed101761f5ef2
+
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.cpp:
+
+          Remove extra ')'
+
+Thu Jun 01 12:58:12 UTC 2023  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit f79434d510f1bdd3caf8cd4cff8484c1df475db7
+
+        * README.md:
+        * docs/building/cmake.rst:
+        * docs/building/dependencies.rst:
+        * docs/building/ios.rst:
+        * docs/conf.py:
+        * docs/sphinx_extensions/version_info.py:
+
+          Move ACE/TAO Version Info to dependencies.rst
+
+          Simplify it and automatically get the versions from the configure
+          script.
+
+Thu Jun 01 11:20:49 UTC 2023  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit d1432304f1f016f0f38ae39225bee1b564218a65
+
+        * INSTALL.md:
+        * docs/android.md:
+        * docs/building/index.rst:
+        * docs/ios.md:
+
+          Tweak docs/building/index, Add Stub Files
+
+Thu Jun 01 10:32:43 UTC 2023  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit f637cb001e0ab255202c964d606b4391acef3fbe
+
+        * docs/building/cmake.rst:
+        * docs/internal/docs.rst:
+        * docs/sphinx_extensions/cmake.py:
+
+          Convert Library List to the CMake Domain
+
+Thu Jun 01 08:58:26 UTC 2023  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit 7214a32f224ef8c524d378b75077e8b71382b89f
+
+        * docs/building/cmake.rst:
+        * docs/news.d/cmake-ace-tao.rst:
+
+          Document Recent CMake Changes
+
+          From https://github.com/OpenDDS/OpenDDS/pull/4140
+          Also update the news to take advantage of the new form of the
+          CMake
+          documentation.
+
+Thu Jun 01 05:52:28 UTC 2023  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit fadf0cd904459affb8febe8bb0eb200adb7e86c9
+
+        * NEWS.md:
+        * docs/news.d/_releases/v3.24.0.rst:
+        * docs/news.d/sample_convert.rst:
+
+          Corrections to the News
+
+          - Add https://github.com/OpenDDS/OpenDDS/pull/4144 to News
+          - Retroactively add new global options from
+          https://github.com/OpenDDS/OpenDDS/pull/4071 to
+          3.24.0
+
+Thu Jun 01 05:21:20 UTC 2023  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit f1866becd24aa3bc4de3c40cb3a906af1100a821
+
+        * docs/build.py:
+        * docs/conf.py:
+        * docs/sphinx_extensions/cmake.py:
+
+          Fix Python Capability Issue with cmake.py
+
+          Also:
+          - Fixed an issue with links from the news to read the docs that
+          were not
+          going to work after release.
+          - Add added some possibly useful options to Sphinx conf.py and
+          build.py.
+
+Thu Jun 01 00:21:29 UTC 2023  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit a17b3035b27d5db3804f4dfdb15160cb33eeda7c
+
+          Merge remote-tracking branch 'upstream/master' into
+          igtd/sphinx-docs
+
+Wed May 31 22:34:24 UTC 2023  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit af11f6b0e9ac74b72bea2355af758eff6c259fe9
+
+        * .editorconfig:
+        * docs/internal/dev_guidelines.rst:
+
+          Add .editorconfig and Document Lint Script
+
+          [EditorConfig](https://editorconfig.org/) can help enforce our
+          text file
+          formatting. It is natively supported by many editors including
+          Visual
+          Studio and Neovim (the fork of Vim I use) with plugins available
+          for
+          other editors. It's also used by many big projects such as
+          Jekyll, Git,
+          Rust, Python, and CMake (where I recently first noticed it). It's
+          also
+          used by Micronaut. This means even if it's not natively supported
+          by a
+          contributor's editor, there's a chance they already have a plugin
+          for it
+          installed.
+
+Wed May 31 17:59:52 UTC 2023  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit 5b1e9796d54e7cce2607eb4a980fd23b7bd13fda
+
+          Merge pull request #4140 from iguessthislldo/igtd/cmake
+
+          Allow Using Only ACE/TAO in CMake Module
+
+Wed May 31 07:04:01 UTC 2023  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit 483bd626f35be36c3b35971dd26a6f45079b9ad5
+
+        * docs/building/cmake.rst:
+        * docs/building/dependencies.rst:
+        * docs/building/index.rst:
+        * docs/cmake.md:
+        * docs/conf.py:
+        * docs/devguide/getting_started.rst:
+        * docs/devguide/introduction.rst:
+        * docs/devguide/opendds_idl.rst:
+        * docs/internal/docs.rst:
+        * docs/news.d/docs_restructure.rst:
+        * docs/sphinx_extensions/cmake.py:
+
+          Convert docs/cmake.md to docs/building/cmake.rst
+
+Wed May 31 05:58:50 UTC 2023  Timothy Simpson  <simpsont@objectcomputing.com>
+        commit b41a3d6426194ebd28957f9ac17bf481801b7fa7
+
+        * performance-tests/bench/common/PropertyStatBlock.cpp:
+        * performance-tests/bench/unit-tests/unit-tests.mpc:
+        * tests/ubsan_tests.lst:
+
+          resolve PR comments, attempted build and test fixes
+
+Wed May 31 05:55:40 UTC 2023  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit 5e141d0c3dd9b9360ead878e8694b2dbf942c575
+
+        * docs/conf.py:
+        * docs/glossary.rst:
+        * docs/index.rst:
+
+          Tweak index and confg.py
+
+Tue May 30 19:51:58 UTC 2023  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit 3a7b77713a0b0541e0f657bd0bdced172064b682
+
+        * cmake/OpenDDSConfig.cmake:
+        * cmake/OpenDDSConfigVersion.cmake:
+        * cmake/tao_idl_sources.cmake:
+        * docs/internal/dev_guidelines.rst:
+        * tests/cmake/C++11_typecode/CMakeLists.txt:
+        * tests/cmake/Messenger/C++11_Messenger/CMakeLists.txt:
+        * tests/cmake/Messenger/CMakeLists.txt:
+        * tests/cmake/Messenger/Messenger_1/CMakeLists.txt:
+        * tests/cmake/Messenger/Messenger_2/CMakeLists.txt:
+        * tests/cmake/Messenger/Messenger_Space/CMakeLists.txt:
+        * tests/cmake/generated_global/cpp/CMakeLists.txt:
+        * tests/cmake/generated_global/idl/CMakeLists.txt:
+        * tools/scripts/lint.pl:
+
+          Add `if(`, etc to Style Guide and Lint Script
+
+          Also fixed instances of this using the lint script.
+
+Tue May 30 17:37:41 UTC 2023  Timothy Simpson  <simpsont@objectcomputing.com>
+        commit 45190b4da2f03e3e6228c0abb8a1a9da123fa2df
+
+        * performance-tests/bench/common/PropertyStatBlock.cpp:
+        * performance-tests/bench/test_controller/unit_tests/.gitignore:
+        * performance-tests/bench/test_controller/unit_tests/unit_tests.mpc:
+        * performance-tests/bench/unit-tests/.gitignore:
+        * performance-tests/bench/unit-tests/UnitTests.cpp:
+        * performance-tests/bench/unit-tests/common/PropertyStatBlock.cpp:
+        * performance-tests/bench/test_controller/unit_tests/run_test.pl  performance-tests/bench/unit-tests/run_test.pl:
+        * performance-tests/bench/test_controller/unit_tests/ScenarioAllocationTest.cpp  performance-tests/bench/unit-tests/test_controller/ScenarioAllocation.cpp:
+        * performance-tests/bench/unit-tests/unit-tests.mpc:
+        * tests/dcps_tests.lst:
+        * tests/tsan_tests.lst:
+        * tests/ubsan_tests.lst:
+        * tests/valgrind_tests.lst:
+
+          Restructure Bench Unit Tests, Add PropertyStatBlock Test, Add To
+          CI
+
+Fri May 26 21:36:26 UTC 2023  Son Dinh  <dinhs@objectcomputing.com>
+        commit 1be213231f52eec91385bad73518bcb9effbdb23
+
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.cpp:
+
+          From review
+
+Fri May 26 15:23:07 UTC 2023  Son Dinh  <dinhs@objectcomputing.com>
+        commit 6f4be0fe1fabffe8ac6bd7e2197ef612a1f414f7
+
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.cpp:
+
+          Avoid invalid acknack
+
+Thu May 25 10:04:14 UTC 2023  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit f0038e1887280113f5975be2434b626fb6b93004
+
+        * .github/workflows/build_and_test.yml:
+        * cmake/OpenDDS-opendds_idlConfig.cmake:
+        * cmake/OpenDDSConfig.cmake:
+        * cmake/OpenDDS-ACEConfig.cmake  cmake/ace_group.cmake:
+        * cmake/import_common.cmake:
+        * cmake/init.cmake:
+        * cmake/opendds_group.cmake:
+        * cmake/opendds_target_sources.cmake:
+        * cmake/OpenDDS-TAOConfig.cmake  cmake/tao_group.cmake:
+        * docs/news.d/cmake-ace-tao.rst:
+        * tests/cmake/ace_tao_only/CMakeLists.txt:
+
+          find_package(COMPONENTS)
+
+          This allows find_package calls to define what the config package
+          requires and loads. This replaces the separate config packages.
+
+          Also added Dcps macro definitions to the IDL compiler options.
+
+Wed May 24 06:58:16 UTC 2023  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit bda6f1fffc50bd966d8e8a706b02869eb03f50b9
+
+          Merge remote-tracking branch 'upstream/master' into igtd/cmake
+
+Wed May 24 05:57:24 UTC 2023  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit dc8cc4691259fc791c38bdf875e131018b56d2e0
+
+        * .github/workflows/build_and_test.yml:
+        * cmake/OpenDDS-TAOConfig.cmake:
+        * cmake/OpenDDSConfig.cmake:
+        * tests/cmake/ace_tao_only/CMakeLists.txt:
+
+          Try to Fix Installed Case
+
+Wed May 24 01:47:09 UTC 2023  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit cb263b67ad2563f261b846c39d68399f9885095a
+
+        * cmake/OpenDDS-ACEConfig.cmake:
+        * cmake/dds_idl_sources.cmake:
+        * cmake/import_common.cmake:
+        * cmake/init.cmake:
+        * cmake/opendds_target_sources.cmake:
+        * docs/news.d/cmake-ace-tao.rst:
+        * tests/cmake/CMakeLists.txt:
+        * tests/cmake/ace_tao_only/CMakeLists.txt:
+
+          Add ACE/TAO Only Test
+
+Wed May 24 01:21:31 UTC 2023  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit 04127bace30f467669b1aa52389a34819ae136c5
+
+        * docs/building/index.rst:
+        * docs/building/ios.rst:
+        * docs/devguide/introduction.rst:
+        * docs/devguide/opendds_idl.rst:
+        * docs/ios.md:
+        * docs/news.d/docs_restructure.rst:
+
+          Convert docs/ios.md to docs/building/ios.rst
+
+          Also add IDL-to-C++11 spec to specs section and other tweaks.
+
+Tue May 23 22:07:37 UTC 2023  Justin Wilson  <wilsonj@unityfoundation.io>
+        commit 27ea3728477342c43e71a618cf6476cf7c3e6728
+
+          Merge pull request #4150 from jmmorato/master
+
+          Fixed bounded sequences JSON ParseTest
+
+Tue May 23 16:30:05 UTC 2023  jose_morato  <jmmorato@enxarxats.com>
+        commit bb99bbdb4a6997065dfa388ca98948dd99523d93
+
+        * docs/news.d/json_bounded_sequences.rst:
+
+          Added json_bounded_sequences fragment to `new.d`
+
+Tue May 23 08:42:51 UTC 2023  jose_morato  <jmmorato@enxarxats.com>
+        commit b3a49c5857dd24487a2203b01f3da9f82278bd49
+
+        * dds/idl/value_reader_generator.cpp:
+
+          Inline if statement to keep code style
+
+Tue May 23 08:17:46 UTC 2023  jose_morato  <jmmorato@enxarxats.com>
+        commit 5a58f4d791d4cb98eb47128328fd95586f8327c6
+
+        * dds/idl/value_reader_generator.cpp:
+        * tests/DCPS/Compiler/vread_vwrite/VreadVwriteTest.cpp:
+        * tests/DCPS/Compiler/vread_vwrite/VreadVwriteTest.idl:
+        * tests/DCPS/Compiler/vread_vwrite/VreadVwriteTest.json:
+
+          Value reader check sequence bound overflow
+
+Mon May 22 18:39:42 UTC 2023  jose_morato  <jmmorato@enxarxats.com>
+        commit adb37fd3440a40fe495ddea4072de51c8699d90e
+
+        * dds/idl/value_reader_generator.cpp:
+
+          Use grow for unbounded sequences
+
+Sat May 20 15:04:44 UTC 2023  jose_morato  <jmmorato@enxarxats.com>
+        commit 64917c68b90b9c380da2eaa4952e5682ef926d11
+
+        * dds/idl/value_reader_generator.cpp:
+        * tests/DCPS/Compiler/vread_vwrite/VreadVwriteTest.idl:
+
+          Fixed bounded sequences parse test
+
+Fri May 19 21:53:40 UTC 2023  Justin Wilson  <wilsonj@unityfoundation.io>
+        commit caedb74eec9d35687e087f127707e64d060548b0
+
+          Merge pull request #4138 from jrw972/internal-dds-improvements
+
+          `Service_Participant` does not use `ConfigStore`
+
+Fri May 19 21:53:24 UTC 2023  Justin Wilson  <wilsonj@unityfoundation.io>
+        commit 61601721e8b7b015b85cbd0af48d4744daada00b
+
+          Merge pull request #4144 from jmmorato/master
+
+          Support JSON in CMake compilations
+
+Fri May 19 18:05:04 UTC 2023  Justin Wilson  <wilsonj@unityfoundation.io>
+        commit b4d3b67b34f63c75ac2e0e35630b9a411ce6448e
+
+          Merge pull request #4148 from jrw972/ghcr-links
+
+          DevGuideExamples reference ghcr.io/objectcomputing
+
+Fri May 19 17:20:55 UTC 2023  jmorato  <jmmorato@enxarxats.com>
+        commit 6287b4b9b6879c79b497cea757239af250411ffa
+
+          Merge branch 'master' into master
+
+Tue May 09 15:43:16 UTC 2023  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit aa103fb40eda157ef7d55eea13a900f1e8d83670
+
+        * dds/DCPS/DataDurabilityCache.cpp:
+        * dds/DCPS/DataDurabilityCache.h:
+        * dds/DCPS/DomainParticipantFactoryImpl.cpp:
+        * dds/DCPS/Service_Participant.cpp:
+        * dds/DCPS/Service_Participant.h:
+        * dds/DCPS/Service_Participant.inl:
+        * dds/DCPS/debug.cpp:
+        * dds/DCPS/debug.h:
+        * dds/DCPS/transport/framework/TransportRegistry.cpp:
+        * dds/DCPS/transport/framework/TransportRegistry.h:
+
+          `Service_Participant` does not use `ConfigStore`
+
+          Problem
+          -------
+
+          The `Service_Participant` does not use the `ConfigStore`. See
+          #4134.
+
+          Solution
+          --------
+
+          Convert the `Service_Participant` to use the `ConfigStore`.
+
+          * Methods that returned references to configuration values in
+          `Service_Participant` have been removed.
+
+          * Various strings have changed type.
+
+          * Each configuration value has a canonical name starting with
+          `OPENDDS`. The rest of the name is taken from its position in the
+          config file by considering the section name. Camelcase is
+          converted
+          into all-caps with underscores.  The canonical name resembles an
+          environment variable to enable eventual support for environment
+          variables.  See `Service_Participant.h` for the current list of
+          configuration values.
+
+          * Argument parsing has been consolidated. Arguments starting with
+          `-DCPS`, `-Federation`, or `-OpenDDS` are canonicalized and added
+          to
+          the `ConfigStore`. `-DCPS` and `-Federation` options are prefixed
+          with `OPENDDS_COMMON_`.  `-OpenDDS` options are prefixed with
+          "OPENDDS_" after stripping `-OpenDDS`. The ability to pass
+          options
+          via `-OpenDDS` means that any configuration value can be changed
+          via
+          the command line once all modules have adopted the `ConfigStore`.
+
+          * The configuration file is loaded into the `ConfigStore`.  The
+          section name and key are concatenated and canonicalized.
+
+          * Configuration that involved more than setting a value has been
+          implemented via an Internal DDS Listener. The appropriate values
+          are written into the `ConfigStore` and then the listener is
+          manually
+          invoked for the changes. It is possible to set the listener for
+          the
+          reader if it is necessary to react to changes after the initial
+          configuration.
+
+Fri May 19 14:36:15 UTC 2023  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit f29b9934c638f6d60cfa49cbecb59e2829426a4d
+
+        * DevGuideExamples/DCPS/Messenger/docker-compose-inforepo.yml:
+        * DevGuideExamples/DCPS/Messenger/docker-compose.yml:
+
+          DevGuideExamples reference ghcr.io/objectcomputing
+
+          Problem
+          -------
+
+          Docker compose files in DevGuideExamples reference
+          ghcr.io/objectcomputing which is no longer being updated since
+          OpenDDS
+          is now under the opendds GitHub organization.
+
+          Solution
+          --------
+
+          Fix the references.
+
+Fri May 19 12:53:50 UTC 2023  Justin Wilson  <wilsonj@unityfoundation.io>
+        commit cbe19c11f095536973f44389ba4e4eb215abf2c0
+
+          Merge pull request #4146 from jrw972/docker-master
+
+          No Docker image for master
+
+Fri May 19 08:18:35 UTC 2023  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit fd4d6d6f47f7f9758cdc4af670c98937be0abab6
+
+        * cmake/import_common.cmake:
+
+          Try to Fix Static MSVC Runtime
+
+Thu May 18 23:54:21 UTC 2023  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit 1844dcb053fb4fbe607c95cc37a89beb7ff7d238
+
+        * cmake/OpenDDS-ACEConfig.cmake:
+        * cmake/OpenDDS-TAOConfig.cmake:
+        * cmake/OpenDDSConfig.cmake:
+        * cmake/init.cmake:
+        * cmake/opendds_target_sources.cmake:
+
+          Add Missing BiDir, Use Bultin Perl Package
+
+Thu May 18 19:13:41 UTC 2023  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 97881697accb6c70fe76b18d395a394383f664c9
+
+        * .github/workflows/docker_image.yml:
+
+          No Docker image for master
+
+          Problem
+          -------
+
+          Docker images are only produced for releases. Having a Docker
+          image
+          of master is useful for trying new features.
+
+          Solution
+          --------
+
+          Build Docker images for master branch.
+
+Thu May 18 18:04:59 UTC 2023  Justin Wilson  <wilsonj@unityfoundation.io>
+        commit 590f521b39ffc3dbb6c91db9248497e8d3d68355
+
+          Merge pull request #4145 from
+          jrw972/remove-references-to-download-server
+
+          Remove references to download server
+
+Thu May 18 15:25:55 UTC 2023  jose_morato  <jmmorato@enxarxats.com>
+        commit 8383236b106fae7a0fd1d0409106e5bb5fe4d0b7
+
+        * cmake/api_macros.cmake:
+        * tests/cmake/idl_compiler_tests/CMakeLists.txt:
+
+          Assert rapidjson include
+
+Thu May 18 15:12:12 UTC 2023  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 7bca661864496fc43693a3cb6d3510203e43cdd2
+
+        * docs/cmake.md:
+        * docs/history/NEWS-2.md:
+
+          Remove references to download server
+
+Thu May 18 12:11:51 UTC 2023  jose_morato  <jmmorato@enxarxats.com>
+        commit b49cbae554689da45db98da625f24eeae167451b
+
+        * cmake/api_macros.cmake:
+
+          Use _inc_scope for the rapidjson includes
+
+Thu May 18 10:40:32 UTC 2023  jose_morato  <jmmorato@enxarxats.com>
+        commit 7684e3514eb64c9aa69bd5f81e24ed5dee2f7802
+
+        * cmake/api_macros.cmake:
+
+          Include rapidjson when defined
+
+Thu May 18 08:59:22 UTC 2023  jose_morato  <jmmorato@enxarxats.com>
+        commit c1cc897c75d4e60a6e7fb43d228fecb9a421ec17
+
+        * cmake/options.cmake:
+
+          Support JSON in CMake compilations
+
+Thu May 18 04:46:29 UTC 2023  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit fa5212c934bc3e2e113115cc7329f683b2515942
+
+        * cmake/dds_idl_sources.cmake:
+
+          Revert Accidentally Committed Line
+
+Sat May 13 03:14:48 UTC 2023  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit 2b97a53581a578c121eac2ab9c847374feb63a19
+
+        * DevGuideExamples/DCPS/Messenger/CMakeLists.txt:
+        * cmake/OpenDDS-ACEConfig.cmake:
+        * cmake/OpenDDS-TAOConfig.cmake:
+        * cmake/OpenDDS-opendds_idlConfig.cmake:
+        * cmake/OpenDDSConfig.cmake:
+        * cmake/api_macros.cmake:
+        * cmake/dds_idl_sources.cmake:
+        * cmake/import_common.cmake:
+        * cmake/init.cmake:
+        * cmake/opendds_target_sources.cmake:
+        * cmake/options.cmake:
+        * cmake/tao_idl_sources.cmake:
+        * configure:
+        * docs/devguide/getting_started.rst:
+        * docs/devguide/xtypes.rst:
+        * docs/internal/dev_guidelines.rst:
+        * docs/news.d/cmake-ace-tao.rst:
+        * examples/DCPS/ishapes/CMakeLists.txt:
+        * tests/cmake/C++11_typecode/CMakeLists.txt:
+        * tests/cmake/Messenger/C++11_Messenger/CMakeLists.txt:
+        * tests/cmake/Messenger/Messenger_1/CMakeLists.txt:
+        * tests/cmake/Messenger/Messenger_2/CMakeLists.txt:
+        * tests/cmake/Messenger/Messenger_Space/CMakeLists.txt:
+        * tests/cmake/Nested_IDL/CMakeLists.txt:
+        * tests/cmake/generated_global/idl/CMakeLists.txt:
+        * tests/cmake/idl_compiler_tests/CMakeLists.txt:
+        * tests/cmake/include_subdir/CMakeLists.txt:
+        * tests/cmake/install/library/CMakeLists.txt:
+
+          Allow Only Using ACE/TAO/opendds_idl in CMake
+
+          This allows a user of the cmake module to use ACE, TAO, and
+          opendds_idl
+          without OpenDDS being built. This is in preparation of being able
+          to
+          build OpenDDS with CMake.
+
+          The user does this by calling `find_package(OpenDDS-ACE)`,
+          `find_package(OpenDDS-TAO)`, or
+          `find_package(OpenDDS-opendds_idl)`
+          instead of `find_package(OpenDDS)`.
+
+          Also:
+          - Expanded and clarified CMake style guidelines.
+          - Renamed `OPENDDS_TARGET_SOURCES` to `opendds_target_sources` to
+          make
+          style consistent with guidelines. Apparently the case of
+          functions and
+          macros doesn't matter.
+          - Also renamed `api_macros.cmake` to
+          `opendds_target_sources.cmake`
+          - Made other changes to make naming consistent.
+          - Fixed error not stopping the configure early.
+          - Fix bug where IDL includes were not getting set correctly.
+          - Added missing TAO MPC features for config.cmake to configure
+          script.
+          - Declaring all library dependencies is now required.
+          - Added `SKIP_TAO_IDL` option to `opendds_target_sources`
+          - Fixed passing `-SI` to `opendds_target_sources`.
+
+Tue May 16 23:10:33 UTC 2023  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit eca1754a3be8ca1c84132126a837736fd63c830c
+
+        * docs/internal/bench.rst:
+
+          Fix minor issues with bench.rst
+
+Tue May 16 22:56:34 UTC 2023  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit afa84fa7cd86e995deddef29c8b729c6bc5d55fc
+
+        * docs/build.py:
+        * docs/building/android.rst:
+        * docs/building/index.rst:
+        * docs/news.d/docs_restructure.rst:
+
+          Fix Some Redirect Links, Force Color on Sphinx
+
+          Github actions doesn't act as a TTY:
+          https://github.com/actions/runner/issues/241
+          This should force at least sphinx-builder to use color for the
+          link
+          check so it's easier to see errors.
+
+Tue May 16 22:26:13 UTC 2023  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit a3e463cabf79529df97800761f5f13134827edec
+
+        * README.md:
+        * configure:
+        * docs/android.md:
+        * docs/building/android.rst:
+        * docs/building/index.rst:
+        * docs/devguide/dds_security.rst:
+        * docs/news.d/docs_restructure.rst:
+
+          Convert android.md, Add News Fragment
+
+Tue May 16 16:54:18 UTC 2023  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit 176abfdd9ee532bcc46312aa92e739432d95f4e9
+
+          Merge remote-tracking branch 'upstream/master' into
+          igtd/sphinx-docs
+
+Tue May 16 16:20:59 UTC 2023  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit f5183cc32d9f34748b46187fd8ef09ae66625254
+
+          Merge pull request #4125 from iguessthislldo/igtd/news-fragments
+
+          Generate News in Sphinx From Fragments
+
+Tue May 16 15:00:10 UTC 2023  Justin Wilson  <wilsonj@unityfoundation.io>
+        commit b7ce6fb2993dad9b372583e8fe71428a0bb7b0f1
+
+          Merge pull request #4137 from jrw972/observer-dispose-unregister
+
+          Observer doesn't support dispose/unregister
+
+Tue May 16 14:55:52 UTC 2023  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit c3aa76c28f95ff824cc1e2814c3c7313216e4ab6
+
+          Merge pull request #4141 from jwillemsen/jwi-shmemlogging
+
+          Extended some logging in order to determine what ShMem entities
+          are s…
+
+Mon May 15 18:47:00 UTC 2023  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit 96c747e8232d7ed38176c709a3309b8e9f15c228
+
+        * dds/DCPS/transport/framework/DataLinkSet.cpp:
+
+          Update dds/DCPS/transport/framework/DataLinkSet.cpp
+
+          Co-authored-by: Justin Wilson <wilsonj@unityfoundation.io>
+
+Mon May 15 18:46:52 UTC 2023  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit d86bef25a62074cad9c7d2bcd231d9391c745955
+
+        * dds/DCPS/transport/framework/DataLinkSet.cpp:
+
+          Update dds/DCPS/transport/framework/DataLinkSet.cpp
+
+          Co-authored-by: Justin Wilson <wilsonj@unityfoundation.io>
+
+Thu May 04 16:32:34 UTC 2023  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit c18052ee3a4dbe9f04d261974a07a9994ec01a09
+
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DataReaderImpl_T.h:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/DataWriterImpl.h:
+        * dds/DCPS/Observer.h:
+        * docs/devguide/alternate_interfaces_to_data.rst:
+        * tests/DCPS/MockedTypeSupport/MyTypeSupportImpl.h:
+        * tests/DCPS/Observer/.gitignore:
+        * tests/DCPS/Observer/DataReaderListenerImpl.cpp:
+        * tests/DCPS/Observer/DataReaderListenerImpl.h:
+        * tests/DCPS/Observer/Domain.cpp:
+        * tests/DCPS/Observer/Domain.h:
+        * tests/DCPS/Observer/Observer.mpc:
+        * tests/DCPS/Observer/README.rst:
+        * tests/DCPS/Observer/TestObserver.cpp:
+        * tests/DCPS/Observer/TestObserver.h:
+        * tests/DCPS/Observer/publisher.cpp:
+        * tests/DCPS/Observer/pubsub.cpp:
+        * tests/DCPS/Observer/run_test.pl:
+        * tests/DCPS/Observer/subscriber.cpp:
+        * tests/Utils/DistributedConditionSet.h:
+
+          Observer doesn't support dispose/unregister
+
+          Problem
+          -------
+
+          The Observer interface doesn't support dispose and unregister.
+          Support for dispose and unregister is necessary for logs that
+          must
+          contain these activities.
+
+          Solution
+          --------
+
+          Implement support for dispose and unregister on both the writer
+          and
+          reader side.
+
+          Notes
+          -----
+
+          * The DataReader support for Observer has moved to
+          `finish_store_instance_data`. This means that observers will not
+          receive samples that are rejected due to resource limits.
+
+          * The Observer Test has been rewritten as a single-process test.
+
+Mon May 15 10:35:56 UTC 2023  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit 86622022eaea6b0ff7a53ecc000ec01884258298
+
+        * dds/DCPS/transport/framework/DataLinkSet.cpp:
+
+          Extended logging
+
+          * dds/DCPS/transport/framework/DataLinkSet.cpp:
+
+Mon May 15 10:08:07 UTC 2023  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit 6ae4ace256fe40f6c2f6eda1cb8b23fef051be82
+
+        * dds/DCPS/transport/framework/DataLinkSet.cpp:
+        * dds/DCPS/transport/shmem/ShmemDataLink.cpp:
+        * dds/DCPS/transport/shmem/ShmemTransport.cpp:
+
+          Extended some logging in order to determine what ShMem entities
+          are stopped
+
+          * dds/DCPS/transport/framework/DataLinkSet.cpp:
+          * dds/DCPS/transport/shmem/ShmemDataLink.cpp:
+          * dds/DCPS/transport/shmem/ShmemTransport.cpp:
+
+Sat May 13 01:24:53 UTC 2023  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit 07b19c647d7566970d120887a64663a690c431c5
+
+        * docs/internal/docs.rst:
+        * docs/internal/release.rst:
+
+          Apply suggestions from code review
+
+          Co-authored-by: Justin Wilson <wilsonj@unityfoundation.io>
+
+Fri May 12 14:23:40 UTC 2023  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit 34867edf62c9cc918e07727b2cbd697d643a84bf
+
+        * docs/README.md:
+        * docs/NOTES  docs/design/NOTES:
+
+          Move docs/NOTES, Update docs/README.md
+
+Thu May 11 11:19:55 UTC 2023  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit 2992aad610b3ade00f49bf70f3e610e092fc291d
+
+        * docs/building/dependencies.rst:
+
+          Update docs/building/dependencies.rst
+
+          Co-authored-by: Johnny Willemsen <jwillemsen@remedy.nl>
+
+Thu May 11 11:15:05 UTC 2023  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit 88ebfbdfe9996d990a1c6dbb6284dd44db3591a5
+
+        * docs/building/dependencies.rst:
+        * docs/building/index.rst:
+        * docs/devguide/dds_security.rst:
+        * docs/devguide/introduction.rst:
+        * docs/devguide/xtypes.rst:
+        * docs/glossary.rst:
+        * docs/index.rst:
+
+          Centralize Specs, Use Tabs in Building
+
+Thu May 11 10:44:35 UTC 2023  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit 0c482c357de83aae0b16cf23ec5a2102b221351c
+
+        * docs/conf.py:
+
+          Remove Unused rst_prolog
+
+Thu May 11 10:39:18 UTC 2023  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit 931a6795765495beef72c2a4810ead9676c831ce
+
+        * tools/scripts/release_notes/.gitignore:
+        * tools/scripts/release_notes/README.md:
+        * tools/scripts/release_notes/get_pr_info.sh:
+        * tools/scripts/release_notes/missing-news-prs.py:
+        * tools/scripts/release_notes/mkcsv.py:
+
+          rm tools/scripts/release_notes
+
+          The news fragments supersede these scripts.
+
+Thu May 11 10:26:42 UTC 2023  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit 822e0c1d6dcb04ea4cfcb09e80929a2c0b1734a7
+
+        * docs/conf.py:
+        * docs/internal/docs.rst:
+        * docs/internal/release.rst:
+        * docs/news.py:
+        * docs/requirements.txt:
+        * docs/sphinx_extensions/newsd.py:
+        * tools/scripts/gitrelease.pl:
+
+          Update Release Script and Doc for News Changes
+
+Thu May 11 05:50:46 UTC 2023  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit 44ce0bc8a399f500d125dae6367e181ca068045d
+
+        * NEWS.md:
+        * docs/.gitignore:
+        * docs/conf.py:
+        * docs/history/ChangeLog-2.2:
+        * docs/internal/dev_guidelines.rst:
+        * docs/internal/docs.rst:
+        * docs/news.d/PublicationMatchedStatus.rst:
+        * docs/news.rst  docs/news.d/_releases/v3.24.0.rst:
+        * docs/news.d/_releases/v3.24.1.rst:
+        * docs/news.d/config_conflict.rst:
+        * docs/news.d/dd_enum_string.rst:
+        * docs/news.d/ddi_lazy_init.rst:
+        * docs/news.d/devguide.rst:
+        * docs/news.d/docacetao.rst:
+        * docs/news.d/dynamic_content_subscription.rst:
+        * docs/news.d/enum_str_content_filtering.rst:
+        * docs/news.d/explict_ints.rst:
+        * docs/news.d/github_only.rst:
+        * docs/news.d/idl_loc.rst:
+        * docs/news.d/invalid_socket_handles.rst:
+        * docs/news.d/keywords.rst:
+        * docs/news.d/macos_cross_compile.rst:
+        * docs/news.d/opendds_target_sources-o_option.rst:
+        * docs/news.d/overlapping_fragments.rst:
+        * docs/news.d/prepare_relay_partitions.rst:
+        * docs/news.d/relay_hardening.rst:
+        * docs/news.d/relay_stun_mutex.rst:
+        * docs/news.d/repoid.rst:
+        * docs/news.d/rtps_relay_address_change.rst:
+        * docs/news.d/sample_convert.rst:
+        * docs/news.d/secure_entities.rst:
+        * docs/news.d/shmem.rst:
+        * docs/news.d/xtypes.rst:
+        * docs/news.py:
+        * docs/sphinx_extensions/newsd.py:
+        * docs/sphinx_extensions/version_info.py:
+
+          Assemble news.rst from Individual Files
+
+          This fixes a few minor problems:
+          - As the whole news.rst file is generated, there is now a page
+          table of
+          contents entry in news.rst for the release that's in development.
+          For
+          some reason including a rst file doesn't include sections, so for
+          it
+          wasn't showing up before.
+          - It makes it easier for `news.py release`, because now it can
+          just
+          create a file instead of inserting into an existing news.rst.
+          - It makes it easier to forward port micro release notes as they
+          are
+          just files.
+
+          Also:
+          - Removed 3.24.0 test/example news fragments.
+          - Added news fragment for new sample conversion PRs.
+          - Removed NEWS.md template entry.
+          - Added 3.24.1 to NEWS.md.
+
+Tue May 09 22:51:50 UTC 2023  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit 7b04bc08cd5e4e0692efa550005bd4069d052cea
+
+        * docs/requirements.txt:
+
+          Add Missing Sphinx Dependency
+
+Fri May 05 10:19:45 UTC 2023  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit e780e193eb4e17cfda717e91e40da7abf65852ce
+
+        * docs/requirements.txt:
+
+          Try to Fix Read the Docs Error
+
+Tue May 09 11:37:53 UTC 2023  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit 0e7e2c7402d8704e1b0ff8adb4d43afc4efa4292
+
+        * INSTALL.md:
+        * README.md:
+        * docs/building/dependencies.rst:
+        * docs/building/index.rst:
+        * docs/conf.py:
+        * docs/dependencies.md:
+        * docs/devguide/common_terms.rst:
+        * docs/devguide/index.rst:
+        * docs/devguide/introduction.rst:
+        * docs/glossary.rst:
+        * docs/index.rst:
+        * docs/internal/dev_guidelines.rst:
+        * docs/internal/index.rst:
+        * docs/internal/release.rst:
+        * docs/sphinx_extensions/templates/.gitignore:
+        * docs/sphinx_extensions/templates/sidebar-links.html:
+
+          Documentation Restructuring
+
+          This restructures existing Sphinx documents to separate devguide
+          sections from internal documentation sections in the resulting
+          output.
+          This also moves `dependencies.md` and `INSTALL.md` into the
+          Sphinx
+          documentation with more to follow.
+
+          More minor changes:
+          - Moved and renamed common_terms to glossary and put in a set of
+          definitions to start off with.
+          - Turned sidebar links into a proper Jinja template instead of
+          having
+          `conf.py` generate the file.
+
+Mon May 08 18:05:14 UTC 2023  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 80f31e754381b29ce2565006919df3377f1865c4
+
+          Merge pull request #4134 from jrw972/internal-dds-improvements
+
+          OpenDDS lacks a dynamic configuration store
+
+Fri May 05 19:16:28 UTC 2023  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit c7d7c895794294c2ace4f3a4b5f48c4cf53a3e1a
+
+        * dds/DCPS/ConfigStoreImpl.cpp:
+        * dds/DCPS/ConfigStoreImpl.h:
+        * dds/DCPS/Time_Helper.h:
+
+          From review
+
+Fri May 05 10:40:40 UTC 2023  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit 2eadb1904268703b22b05ef48bc1e599c646e5c5
+
+        * docs/devguide/introduction.rst:
+
+          Remove Broken Link
+
+Fri May 05 10:34:09 UTC 2023  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit b33620b2f4259add9b8a7f64e0bcfefa4366826c
+
+        * docs/news.d/_example.rst:
+        * docs/news.d/news.rst:
+        * docs/sphinx_extensions/newsd.py:
+
+          Remove More PR Number Insert Stuff
+
+Fri May 05 10:19:45 UTC 2023  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit e068a1f720503f6c428183a973a54f8b0c056392
+
+        * docs/requirements.txt:
+
+          Try to Fix Read the Docs Error
+
+Fri May 05 10:02:51 UTC 2023  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit b7645f42de5616debbf8475899a22a8490e9c09a
+
+        * .github/workflows/insert_news_pr_num.yml:
+        * docs/internal/docs.rst:
+        * docs/news.py:
+        * docs/news.rst:
+
+          Tweaks News Docs, Remove Auto Inserting PR Numbers
+
+          It would be convenient, but it might cause problems. For example
+          when
+          gathering commits for a patch release, if only the actual PR
+          commits are
+          considered, then the auto commits could be left out. For now PR
+          numbers
+          will either have to be predicted or pushed after creating the PR.
+
+Thu Apr 27 16:06:53 UTC 2023  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 7dcf2922a244bfaac885be4e51e539f6e8e127a4
+
+        * dds/DCPS/ConfigStoreImpl.cpp:
+        * dds/DCPS/ConfigStoreImpl.h:
+        * dds/DCPS/SafetyProfileStreams.cpp:
+        * dds/DCPS/SafetyProfileStreams.h:
+        * dds/DCPS/Time_Helper.h:
+        * dds/DCPS/Time_Helper.inl:
+        * dds/DdsDcpsInfrastructure.idl:
+        * java/dds/.gitignore:
+        * java/dds/OpenDDS/DCPS/.gitignore:
+        * tests/unit-tests/dds/DCPS/ConfigStoreImpl.cpp:
+        * tests/unit-tests/dds/DCPS/InternalDataReader.cpp:
+        * tests/unit-tests/dds/DCPS/SafetyProfileStreams.cpp:
+        * tests/unit-tests/dds/DCPS/Time_Helper.cpp:
+
+          OpenDDS lacks a dynamic configuration store
+
+          Problem
+          -------
+
+          Configuration in OpenDDS has the following issues:
+
+          * Values that can be set via configuration file cannot be set via
+          command line.
+          * Values that can be set via API cannot be set via configuration
+          file.
+          * Configuration APIs are written in C++ and not fully exposed for
+          other language bindings.
+          * Dynamic reconfiguration is messy.
+          * OpenDDS cannot be configured via environment variables.
+          * OpenDDS cannot take advantage of multiple configuration files.
+
+          Solution
+          --------
+
+          Implement a store of key-value pairs based on an Internal DDS
+          Topic.
+          The key is the canonicalized name of the configuration value and
+          the
+          value is the desired value stored as a string. Using an Internal
+          DDS
+          Topic will allow different modules to subscribe to the
+          configuration
+          for dynamic updates.
+
+          The interface to the configuration store will be captured in IDL
+          so
+          that it can be exposed for different language bindings.
+
+          Subsequent work will apply the store to command-line arguments,
+          configuration file processing, and environment variables.
+
+Fri Apr 28 18:03:38 UTC 2023  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit da2160f02edad2383da21fd7c232b532dc9f5d2e
+
+          Merge pull request #4135 from
+          mitza-oci/typesupport-data-conversions
+
+          Fixed warnings in FooTypeSupportImpl::encode_to_bytes
+
+Thu Apr 27 22:26:07 UTC 2023  Adam Mitz  <mitza@objectcomputing.com>
+        commit 5ca90580109c94d43a3ee3fa7f627fa560c7709b
+
+        * dds/idl/ts_generator.cpp:
+
+          Fixed warnings in FooTypeSupportImpl::encode_to_bytes
+
+          Errors from encode_to_string need to be passed through and the
+          out sequence initialized
+
+Thu Apr 27 14:21:38 UTC 2023  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit fa417f89fbc80007ad623c943f40fc7be39ce401
+
+          Merge pull request #4133 from
+          mitza-oci/typesupport-data-conversions
+
+          Extend JSON data conversions via TypeSupport
+
+Wed Apr 26 20:29:14 UTC 2023  Adam Mitz  <mitza@objectcomputing.com>
+        commit a89caf111b9f9c304cbc74e5230d83cff53752d0
+
+        * dds/idl/ts_generator.cpp:
+        * java/tests/vread_vwrite/VreadVwrite.java:
+        * tests/DCPS/Compiler/vread_vwrite/VreadVwriteTest.cpp:
+
+          JSON conversion using OctetSeq
+
+          Also need to initialize out params when !OPENDDS_HAS_JSON_VALUE_*
+
+Wed Apr 26 18:03:08 UTC 2023  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit be83ddb4cab2ee4eaa9d0adeb3584ce926bbb741
+
+          Merge pull request #4085 from jrw972/internal-dds-improvements
+
+          Internal DDS improvements
+
+Sat Apr 22 00:27:57 UTC 2023  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit e1f3bad64dcc6cf3a83f20af0c6466f0716836a2
+
+        * dds/DCPS/InternalDataReader.h:
+        * dds/DCPS/RTPS/ICE/AgentImpl.cpp:
+        * dds/DCPS/RTPS/Spdp.cpp:
+        * dds/DCPS/Time_Helper.h:
+        * dds/DCPS/Time_Helper.inl:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.cpp:
+        * tests/unit-tests/dds/DCPS/InternalDataReader.cpp:
+        * tests/unit-tests/dds/DCPS/InternalDataWriter.cpp:
+        * tests/unit-tests/dds/DCPS/Time_Helper.cpp:
+
+          InternalDataReader read/take do not support sample, view,
+          instance state
+
+          Problem
+          -------
+
+          InternalDataReader does not support passing the sample, view, or
+          instance state to the read and take methods. Furthemore, the
+          reader
+          data lifecycle QoS is not implemented.
+
+          Solution
+          --------
+
+          * Add support for filtering samples based on sample, view, and
+          instance state.
+          * Add support for the reader data lifecycle.
+
+Wed Apr 26 13:22:24 UTC 2023  Adam Mitz  <mitza@objectcomputing.com>
+        commit 746d5bed1eee410be5283f35802e1cde67de36de
+
+        * dds/DCPS/TypeSupportImpl.cpp:
+
+          use allocators
+
+Tue Apr 25 20:48:48 UTC 2023  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit f5009f70ddda3eb431a7a017209c02b0c18de4c9
+
+        * docs/.gitignore:
+        * docs/conf.py:
+        * docs/internal/docs.rst:
+        * docs/news.py:
+        * docs/news.rst:
+        * docs/this_release.rst:
+
+          Review Fragment Doc, Make Single Temp News File
+
+Tue Apr 25 18:03:49 UTC 2023  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 6e26024901fb893d0ceb1390705a7243f997b7a7
+
+          Merge pull request #4129 from
+          OpenDDS/dependabot/github_actions/docker/metadata-action-4.4.0
+
+          Bump docker/metadata-action from 4.3.0 to 4.4.0
+
+Tue Apr 25 05:42:30 UTC 2023  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit 94b1721ff9d944de6efd715d0c6df7a7cb843db3
+
+        * .github/workflows/insert_news_pr_num.yml:
+        * docs/news.py:
+
+          Change insert_news_pr_num to Commit After Merge
+
+Tue Apr 25 05:26:25 UTC 2023  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit a0cede3184e67b8b2fd563e0c37f5450a7a47672
+
+          Merge remote-tracking branch 'upstream/master' into
+          igtd/news-fragments
+
+Tue Apr 25 05:25:23 UTC 2023  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit 6040f5c31c89444e854c9c4c90fb8aba88f11607
+
+        * docs/news.d/news.rst:
+
+          Add News Fragment for this PR
+
+Tue Apr 25 05:07:11 UTC 2023  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit 2efa5b46493bf350f753b6777901967c334af68a
+
+        * docs/news.py:
+
+          More Fixes for news.py insert-pr-num
+
+Tue Apr 25 04:48:37 UTC 2023  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit 0e21660056481434313b42e130eb7926867ca342
+
+        * .github/workflows/insert_news_pr_num.yml:
+        * docs/internal/docs.rst:
+        * docs/news.py:
+        * docs/sphinx_extensions/newsd.py:
+
+          Try to Fix insert_news_pr_num
+
+          Also some minor fixes and tweaks for docs.rst and news.py
+
+Mon Apr 24 08:35:09 UTC 2023  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit 50c6b1f910e961d9ef8bf0a52b8d8c7c8d8b5349
+
+        * .github/workflows/insert_news_pr_num.yml:
+        * docs/internal/docs.rst:
+        * docs/news.d/_example.rst:
+        * docs/mknews.py  docs/news.py:
+        * docs/sphinx_extensions/newsd.py:
+        * docs/this_release.rst:
+
+          Workflow to Insert PR Numbers into News Fragments
+
+Mon Apr 24 08:03:06 UTC 2023  dependabot[bot]  <49699333+dependabot[bot]@users.noreply.github.com>
+        commit 3f1fc085d4e1545198ef06b98d06bf4507223ca8
+
+        * .github/workflows/docker_image.yml:
+
+          Bump docker/metadata-action from 4.3.0 to 4.4.0
+
+          Bumps
+          [docker/metadata-action](https://github.com/docker/metadata-action)
+          from 4.3.0 to 4.4.0.
+          - [Release
+          notes](https://github.com/docker/metadata-action/releases)
+          -
+          [Commits](https://github.com/docker/metadata-action/compare/507c2f2dc502c992ad446e3d7a5dfbe311567a96...c4ee3adeed93b1fa6a762f209fb01608c1a22f1e)
+
+          ---
+          updated-dependencies:
+          - dependency-name: docker/metadata-action
+          dependency-type: direct:production
+          update-type: version-update:semver-minor
+          ...
+
+          Signed-off-by: dependabot[bot] <support@github.com>
+
+Sun Apr 23 14:36:34 UTC 2023  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit f939f19a158833d33182c5d42499224fc62aa153
+
+        * docs/.gitignore:
+        * docs/build.py:
+        * docs/conf.py:
+        * docs/internal/docs.rst:
+        * docs/mknews.py:
+        * docs/news.rst:
+        * docs/requirements.txt:
+        * docs/sphinx_extensions/newsd.py:
+
+          Document Fragments, Convert News to Markdown
+
+Sat Apr 22 02:12:23 UTC 2023  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit b314a27ba4e40aa04c019f1158ed52e378e048e6
+
+        * docs/conf.py:
+        * docs/news.d/PublicationMatchedStatus.rst:
+        * docs/news.d/_example.rst:
+        * docs/news.d/config_conflict.rst:
+        * docs/news.d/dd_enum_string.rst:
+        * docs/news.d/ddi_lazy_init.rst:
+        * docs/news.d/devguide.rst:
+        * docs/news.d/docacetao.rst:
+        * docs/news.d/dynamic_content_subscription.rst:
+        * docs/news.d/enum_str_content_filtering.rst:
+        * docs/news.d/explict_ints.rst:
+        * docs/news.d/github_only.rst:
+        * docs/news.d/idl_loc.rst:
+        * docs/news.d/invalid_socket_handles.rst:
+        * docs/news.d/keywords.rst:
+        * docs/news.d/macos_cross_compile.rst:
+        * docs/news.d/opendds_target_sources-o_option.rst:
+        * docs/news.d/overlapping_fragments.rst:
+        * docs/news.d/prepare_relay_partitions.rst:
+        * docs/news.d/relay_hardening.rst:
+        * docs/news.d/relay_stun_mutex.rst:
+        * docs/news.d/repoid.rst:
+        * docs/news.d/rtps_relay_address_change.rst:
+        * docs/news.d/secure_entities.rst:
+        * docs/news.d/shmem.rst:
+        * docs/news.d/xtypes.rst:
+        * docs/news.rst:
+        * docs/sphinx_extensions/newsd.py:
+
+          Temp
+
+Fri Apr 21 19:14:25 UTC 2023  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit e25a5ca644b278240a3641783fbd8cd1efafc148
+
+          Merge pull request #4122 from
+          mitza-oci/typesupport-data-conversions
+
+          IDL-accessible encoding conversions for topic types
+
+Fri Apr 21 19:13:14 UTC 2023  Adam Mitz  <mitza@objectcomputing.com>
+        commit 02333671dd841af83dfb9c706e80dea3fce00215
+
+        * java/tests/vread_vwrite/run_test.pl:
+
+          run_test.pl: removed old comment
+
+Fri Apr 21 18:22:43 UTC 2023  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit 2f18b2ca733f1ef46b593a62a7e3d6f35a467b6a
+
+          Merge pull request #4127 from iguessthislldo/igtd/dev-guidelines
+
+          Expand and Fix Dev Guidelines, Change Sphinx Theme
+
+Fri Apr 21 02:28:25 UTC 2023  Adam Mitz  <mitza@objectcomputing.com>
+        commit 2eb5b815fcddcb1e5e5d8f96b13a057b17005911
+
+        * dds/DCPS/JsonValueReader.h:
+        * dds/DCPS/TypeSupportImpl.cpp:
+        * dds/idl/ts_generator.cpp:
+
+          fixed warnings
+
+Fri Apr 21 07:01:59 UTC 2023  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit 525b2bdfaa37d942ce37b1abbaebca5551019a4d
+
+          Merge remote-tracking branch 'origin/igtd/dev-guidelines' into
+          igtd/news-fragments
+
+Fri Apr 21 07:01:42 UTC 2023  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit 61ef30850ba8e8deb63b3586622dddbc807d370a
+
+        * docs/news.rst:
+        * docs/sphinx_extensions/newsd.py:
+        * docs/sphinx_extensions/version_info.py:
+
+          Add Date to Release Entry
+
+Fri Apr 21 02:00:45 UTC 2023  Adam Mitz  <mitza@objectcomputing.com>
+        commit 5d2add25715509d28b4c5185c3e493da46b81b74
+
+        * java/tests/dcps_java_tests.lst:
+        * java/tests/vread_vwrite/.gitignore:
+        * java/tests/vread_vwrite/VreadVwrite.java:
+        * java/tests/vread_vwrite/VreadVwriteTest.idl:
+        * java/tests/vread_vwrite/VreadVwriteTest.json:
+        * java/tests/vread_vwrite/run_test.pl:
+        * java/tests/vread_vwrite/vread_vwrite_test.mpc:
+
+          Java test for converting to/from JSON
+
+Thu Apr 20 23:35:20 UTC 2023  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit 58d9d183dcfca15d08fe5e958b4352d82c627a78
+
+        * docs/conf.py:
+
+          Try to Fix Logo on RTD
+
+Thu Apr 20 23:05:22 UTC 2023  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit 57847d5bf002c46f5649ebe2dd6b544d094c38d6
+
+        * docs/conf.py:
+        * docs/custom.css:
+        * docs/internal/dev_guidelines.rst:
+        * docs/requirements.txt:
+        * docs/sphinx_extensions/links.py:
+        * docs/sphinx_extensions/templates/.gitignore:
+
+          Expand and Fix Dev Guidelines, Change Sphinx Theme
+
+          - The developer's guidelines had several formatting issues that
+          needed
+          fixed. It also could use some guidance on style of languages
+          other
+          than C++. Added sections for Perl, Python, and CMake. Also made
+          some
+          smaller tweaks and additions.
+
+          - Changed theme to https://pradyunsg.me/furo/. The default Sphinx
+          theme
+          we were using, called alabaster, is clean and pleasant for the
+          most
+          part, but navigation was so problematic that I was trying to
+          tweak
+          over time to be better. furo has better navigation because it has
+          two
+          sidebars, one for all content and one for the headers on the
+          current
+          page. They also scroll independently of the page's content, which
+          fixes a problem in alabaster where links were too long for a
+          floating
+          sidebar.
+
+          - Added https://sphinx-copybutton.readthedocs.io/en/latest/ to
+          put a
+          copy button on code blocks.
+
+          - Removed custom CSS file. This was no longer needed with the new
+          theme
+          and changes to the `ghfile` RST role to allowing it to use a
+          literal
+          node instead of just copying the CSS for one.
+
+          - Removed rule to ignore Modeling SDK URL since that was fixed.
+
+Thu Apr 20 18:14:59 UTC 2023  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit 92bded893101d16431d8fd569ec4ae2a05b106ee
+
+          Merge pull request #4126 from jwillemsen/patch-30
+
+          [README.md] Removed link to not available Doxygen
+
+Thu Apr 20 07:25:06 UTC 2023  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit afd46b2441c9e5fad627f9b39b8351e3517bb3f1
+
+        * README.md:
+
+          [README.md] Removed link to not available Doxygen
+
+Thu Apr 20 02:08:12 UTC 2023  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit 8029f5acbcf34349f860474d8a1fc67524fa4fa1
+
+        * docs/.gitignore:
+        * docs/conf.py:
+        * docs/index.rst:
+        * docs/internal/docs.rst:
+        * docs/mknews.py:
+        * docs/news.d/PublicationMatchedStatus.rst:
+        * docs/news.d/_example.rst:
+        * docs/news.d/config_conflict.rst:
+        * docs/news.d/dd_enum_string.rst:
+        * docs/news.d/ddi_lazy_init.rst:
+        * docs/news.d/devguide.rst:
+        * docs/news.d/docacetao.rst:
+        * docs/news.d/dynamic_content_subscription.rst:
+        * docs/news.d/enum_str_content_filtering.rst:
+        * docs/news.d/explict_ints.rst:
+        * docs/news.d/github_only.rst:
+        * docs/news.d/idl_loc.rst:
+        * docs/news.d/invalid_socket_handles.rst:
+        * docs/news.d/keywords.rst:
+        * docs/news.d/macos_cross_compile.rst:
+        * docs/news.d/opendds_target_sources-o_option.rst:
+        * docs/news.d/overlapping_fragments.rst:
+        * docs/news.d/prepare_relay_partitions.rst:
+        * docs/news.d/relay_hardening.rst:
+        * docs/news.d/relay_stun_mutex.rst:
+        * docs/news.d/repoid.rst:
+        * docs/news.d/rtps_relay_address_change.rst:
+        * docs/news.d/secure_entities.rst:
+        * docs/news.d/shmem.rst:
+        * docs/news.d/xtypes.rst:
+        * docs/news.rst:
+        * docs/sphinx_extensions/links.py:
+        * docs/sphinx_extensions/newsd.py:
+        * docs/sphinx_extensions/version_info.py:
+
+          Generate News in Sphinx From Fragments
+
+          The current way of generating the news for releases mostly
+          consists of
+          generating a spreadsheet of PRs, editing that, and creating the
+          new
+          entries from that manually. More info on that process
+          [here](https://opendds.readthedocs.io/en/master/internal/release.html#update-files-in-the-repo-as-needed)
+          and
+          [here](https://github.com/OpenDDS/OpenDDS/blob/f511b1f1582664ab7f49b3b012b968e684928aa2/tools/scripts/release_notes/README.md).
+          News entries can be directly committed in the PR where the change
+          is
+          taking place, but doing that risks merge conflicts.
+
+          Overall this process is somewhat messy and limiting:
+
+          - Deciding what's newsworthy, what exactly to write, and
+          reviewing the
+          news is done all at once right before the release, sometimes
+          months
+          after the work was done. This makes it harder to remember what's
+          newsworthy, what specific things needs to be pointed out to
+          users, and
+          what PRs should go together for single news item. This also means
+          it
+          takes more time to prepare the release and there's less time to
+          spot
+          and correct mistakes in the news or improve it.
+          - Most of the time the news item is left as just the title of PR.
+          In the
+          best case these might not need to be tweaked much or at all for
+          changes that require little explanation. However this is
+          certainly
+          inadequate for explaining larger changes, for example like for
+          [the
+          XTypes fixes from PR4078](
+          https://github.com/OpenDDS/OpenDDS/blob/f511b1f1582664ab7f49b3b012b968e684928aa2/NEWS.md?plain=1#L49).
+          It'd be very awkward to write that much in a spreadsheet.
+          - It's hard to link to documentation. This is better than it was
+          before
+          with the PDF devguide, when it was impossible, but this could
+          still be
+          improved on more. Linking would give more context to users and
+          could
+          immediately give them details on use a new feature.
+          - Contributors outside the OpenDDS maintainers basically have no
+          direct
+          input on what the news says for changes they contribute. Honestly
+          I'm
+          not sure if any have wanted to, but they couldn't if they did.
+
+          The solution in this PR is committing the news of changes of a PR
+          as a
+          file in that PR. At release these fragments of the news are
+          brought together automatically. There are still a few kinks to
+          iron out,
+          but even if those are mostly unresolved I think this system will
+          improve
+          the quaility of the news.
+
+          The system is inspired by [Python's blurb
+          tool](https://pypi.org/project/blurb/) and to a lesser extent
+          tools like
+          [towncrier](https://towncrier.readthedocs.io/en/stable/index.html).
+          These tools are not bad, but they have some serious drawbacks.
+          blurb is
+          specifically tailored for CPython development. For example, it's
+          oriented by GitHub issues, where as many of the changes we make
+          are not
+          prompted by a GitHub issue. towncrier really expects the project
+          to be a
+          Python project and has some quirks for some of use cases I was
+          looking
+          for. Specifically needing multiple identical files for to
+          attribute a
+          news item to multiple PRs and needing multiple files for a PR to
+          have
+          different kinds of changes. Also both rely on the files having a
+          specific name, which seems unnecessary to me.
+
+          The following is the basics of adding a news fragment and how the
+          news
+          is generated in this system:
+
+          Create a rst file in `docs/news.d/`. This is a news fragment. It
+          can be
+          named anything as long as it doesn't have an leading underscore
+          and is a
+          rst file, but it should be somewhat descriptive. Naming it the
+          same as
+          the branch the change is on might be good idea. The change must
+          be a rst
+          list. It has to have some rst-directive-like metadata around it.
+          A
+          minimal file looks like this:
+
+          ``` rst
+          .. news-prs: 5000
+          .. news-push: Additions
+          - This is an addition we made.
+          .. news-pop
+          ```
+
+          Additional PRs are added by appending them to end of the
+          `news-prs`
+          line. Additional `news-push`s and `news-pop`s can be used to add
+          list
+          items to other sections, like fixes, or to create nested sections
+          for
+          groups of changes like like "XTypes" or "RTPS". All sections will
+          be
+          merged together in the final result. These sections and items are
+          sorted
+          first by a quality called rank, then by the PR numbers in reverse
+          order
+          (basically chronological). The rank is changed by `.. news-rand:
+          RANK_NUMBER`. It can be used to headline an important change or
+          set of
+          changes,
+
+          See `docs/news.d/_example.rst` for a longer example. I also have
+          added a
+          recreation of the 3.24.0 news as fragments as a test and a full
+          example
+          of what this would look like.
+
+          Before release a preview of the news entry will always be
+          available in
+          the built version of `docs/news.rst`. The means news added in an
+          PR can
+          be previewed in the PR. During a release the fragments are
+          permanently
+          committed to that file and the fragment files in `docs/news.d`
+          are
+          removed.
+
+          Here are the two main issues I see with this system right now:
+
+          - To do a PR with a news fragment in one commit, you basically
+          have to
+          know what the PR number is going to be before hand. Otherwise
+          another
+          commit is needed to add the PR number. The PR number could
+          technically
+          be manually added after the PR is merged, but I would consider
+          that
+          poor practice. One solution could be a placeholder in `news-pr`
+          statement that an action automatically replaces with the PR
+          number
+          after the PR is merged.
+          - How does this relate/integrate with `NEWS.md` and the GitHub
+          release
+          notes? I'm honestly a little stumped by this and unlike the other
+          issue this needs to be figured out before this can be merged.
+          - Something like pandoc could be used to convert the rst, but it
+          would
+          still need some manual intervention based on tests I did with the
+          3.24.0 news.
+          - The markdown version could just be a summarized version of the
+          news,
+          mostly consisting of highlights. This could be manually done or
+          done
+          with pandoc with human intervention. Also this summery could be
+          what
+          goes out in a prerelease announcement on social media.
+          - The `NEWS.md` file could be also be done away with to simplify
+          things. If that's the case, shuold news.rst live in the root
+          directory and be called `NEWS.rst`? Is that going to case
+          problems to
+          try to include it in Shpinx?
+          - The GitHub release notes could just link to `news.rst`, but I
+          feel
+          like they probably should at least have a summery.
+
+          Besides that there are some more things I needs to do,
+          specifically:
+
+          - Document either in the documentation guidlines or dev
+          guidelines how
+          to add to the news.
+          - Improve release entries, it needs the release date and output
+          could be
+          tweaked.
+          - Maybe add two smaller examples just for "Additions" and "Fixes"
+          without comments that are eaiser to use as templates.
+          - Before merge, remove 3.24.0 fragments, add any newer releases,
+          and add
+          any news fragments for a pending release.
+
+Wed Apr 19 21:57:52 UTC 2023  Adam Mitz  <mitza@objectcomputing.com>
+        commit 9296c62e1fa44e9caf88773798f81b4f5b1c780a
+
+        * dds/DCPS/JsonValueReader.h:
+        * tests/unit-tests/dds/DCPS/JsonValueReader.cpp:
+
+          JsonValueReader: skip over unknown members
+
+          unknown members are those that cause MemberHelper::get_value to
+          return false
+
+Wed Apr 19 21:53:12 UTC 2023  Adam Mitz  <mitza@objectcomputing.com>
+        commit 25ec081ddf605c1594282ca1ed4730e781167e64
+
+        * java/idl2jni/codegen/im_jni.cpp:
+
+          idl2jni: fixed a type conversion warning in generated code
+
+Wed Apr 19 18:59:08 UTC 2023  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit f511b1f1582664ab7f49b3b012b968e684928aa2
+
+          Merge pull request #4124 from
+          iguessthislldo/igtd/rtps-port-checks
+
+          Add Some Extra Checks for RTPS Unicast Ports
+
+Wed Apr 19 16:27:06 UTC 2023  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit b7e4024cfa57f27da041c9ab8858ef4ee6694671
+
+          Merge pull request #4123 from iguessthislldo/igtd/rm-ace-pre-post
+
+          Remove Many Uses of `ace/pre.h` and `ace/post.h`
+
+Wed Apr 19 13:57:45 UTC 2023  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit a80e2405a2cfd9d6a8fe0a94fd0ea625de58aa4a
+
+          Merge pull request #4120 from jrw972/async-tcp-on-start-callbacks
+
+          TcpDataLink fails to send association message
+
+Wed Apr 19 08:32:15 UTC 2023  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit b5a9c49a8511baf6c2c3aa2a5d5ee54eee9e5735
+
+        * dds/DCPS/RTPS/Spdp.cpp:
+
+          Add Checks for RTPS Unicast Ports
+
+          The loop for opening RTPS ports for a participant could
+          theoretically go
+          on forever. This stops it once it goes past the max UDP port.
+          Also add a
+          warning for going past the max participant id allowed in the RTPS
+          spec
+          (119, in section 9.6.2.3). As long as it doesn't result in an
+          invalid
+          port, going past that shouldn't cause a problem, but it could be
+          a sign
+          that OpenDDS has a limited number of ports at its disposal. Also
+          another
+          implementation could use this as a hard limit, but that's much
+          less of a
+          concern.
+
+Wed Apr 19 01:46:24 UTC 2023  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit cf370ec5382c3a8f0e01555015f5f5ac1ecb579b
+
+          Merge pull request #4117 from
+          iguessthislldo/igtd/dynamic-data-adapter
+
+          Fix Warnings and Typedef of Typedef Build Issues
+
+Wed Apr 19 00:49:26 UTC 2023  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit f9c705f61f75ac34d01be2af4e7662688a8de24a
+
+        * dds/DCPS/Comparator_T.h:
+        * dds/DCPS/DataCollector_T.h:
+        * dds/DCPS/GroupRakeData.h:
+        * dds/DCPS/RakeData.h:
+        * dds/DCPS/RakeResults_T.h:
+        * dds/DCPS/ZeroCopyAllocator_T.h:
+        * dds/DCPS/ZeroCopySeq_T.h:
+        * dds/DCPS/transport/framework/DataLinkCleanupTask.h:
+        * dds/DCPS/transport/tcp/Tcp.h:
+        * dds/DCPS/transport/tcp/TcpLoader.h:
+        * performance-tests/DCPS/Priority/Options.h:
+        * tests/DCPS/Priority/Options.h:
+        * tools/modeling/codegen/model/Config.h:
+        * tools/modeling/codegen/model/Entities.h:
+        * tools/modeling/codegen/model/TransportDirectives.h:
+        * tools/monitor/Options.h:
+        * tools/scripts/lint.pl:
+
+          Remove Most Uses of ace/pre.h and ace/post.h
+
+          Some headers used `pre.h` without `post.h` which [leaks `pragma
+          pack (push, 8)`](
+          https://github.com/DOCGroup/ACE_TAO/blob/ab3b192fcda5715a0c92e5627acdeb4e8f71911c/ACE/ace/pre.h#L17)
+          into the code using those headers. Even if this was fixed, it's
+          not
+          clear what is gained by using these headers, except maybe
+          [improved ABI compatibility](
+          https://github.com/DOCGroup/ACE_TAO/blob/ab3b192fcda5715a0c92e5627acdeb4e8f71911c/ACE/ChangeLogs/ChangeLog-2000a#L9726-L9762),
+          if the alignment changed somehow. OpenDDS doesn't guarantee ABI
+          compatibility at all though, so this seems like this doesn't do
+          anything
+          for us. Instead of using these headers inconsistently, remove
+          them
+          everywhere except for the libraries that consistently use them,
+          the
+          modeling and the QoS XML libraries.
+
+          Also made some tweaks to the lint script:
+          - Enable the `check_for_pre_and_post` ACE check for the remaining
+          cases
+          of `pre.h` and `post.h`.
+          - Improve logic for finding ACE using `$ACE_ROOT` by treating it
+          as a
+          candidate instead of automatically accepting it.
+          - Fix else brackets.
+
+Tue Apr 18 18:08:04 UTC 2023  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit b6ff7228c7967d46674b9ae4f0f85596c34e04ed
+
+          Merge pull request #4121 from iguessthislldo/igtd/release-process
+
+          Add Release Guide to Sphinx Documentation
+
+Mon Apr 17 20:46:26 UTC 2023  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit cc6aa5c400ca06ff5045ace54b9931e67ae5040b
+
+        * dds/DCPS/transport/framework/TransportClient.cpp:
+        * dds/DCPS/transport/framework/TransportControlElement.cpp:
+        * dds/DCPS/transport/framework/TransportControlElement.h:
+        * dds/DCPS/transport/framework/TransportControlElement.inl:
+        * dds/DCPS/transport/tcp/TcpDataLink.cpp:
+
+          TcpDataLink fails to send association message
+
+          Problem
+          -------
+
+          The `send_association_msg` method creates a special `REQUEST_ACK`
+          control message to signal that the local reader is ready to
+          receive
+          data. On receipt of the message, the remote writer completes the
+          association and can start sending data. `send_association_msg`
+          calls
+          `send_i` which checks if the publication id of the
+          `TransportControlElement` is for a stopped (local) client.  The
+          publication id returned by the `TransportControlElement` is
+          always
+          GUID_UNKNOWN. Thus, if GUID_UNKNOWN gets put into the stopped
+          client
+          set then the `TcpDataLink` will never send the association
+          message and
+          association will stall on the writer side.
+
+          `TransportClient` caches its guid when an association is made.
+          Suppose the `TransportClient` is stopped before an association.
+          In
+          this case the guid is `GUID_UNNOWN` and this guid is put in the
+          stopped client set of the `TcpDataLink`.
+
+          Solution
+          --------
+
+          1. Implement support for the publisher id.
+          2. Guard against usages of an uninitialized `repo_id_` in
+          `TransportClient`.
+
+Tue Apr 18 06:51:49 UTC 2023  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit 865a7f0f85f303a3069972cd2a9ff1ef1f757251
+
+        * dds/DCPS/Definitions.h:
+        * dds/DCPS/DirentWrapper.h:
+        * dds/DCPS/XTypes/DynamicDataAdapter.h:
+        * tests/unit-tests/dds/DCPS/XTypes/DynamicDataAdapter.cpp:
+
+          Try to Fix Warnings
+
+Tue Apr 18 05:29:12 UTC 2023  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit 242b107ea9330c9a0ef952a622f4d4425ea9aaf2
+
+          Merge remote-tracking branch
+          'refs/remotes/origin/igtd/release-process' into
+          igtd/release-process
+
+Tue Apr 18 05:28:02 UTC 2023  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit d2ce2fc32a712061653650940c41f8d23c0ffe6f
+
+        * docs/conf.py:
+
+          Ignore Modeling SDK for Right Now
+
+Mon Apr 17 22:01:49 UTC 2023  Adam Mitz  <mitza@objectcomputing.com>
+        commit 2697c388cd2ef99f867d3fecabed4e16dffa6339
+
+        * dds/DCPS/JsonValueReader.h:
+        * dds/DCPS/TypeSupportImpl.cpp:
+        * dds/DCPS/TypeSupportImpl.h:
+        * dds/DdsDcpsCore.idl:
+        * dds/DdsDcpsTypeSupportExt.idl:
+        * dds/idl/IDLTemplate.txt:
+        * dds/idl/langmap_generator.cpp:
+        * dds/idl/ts_generator.cpp:
+        * java/dds/.gitignore:
+        * java/dds/OpenDDS/DCPS/.gitignore:
+        * java/idl2jni/codegen/im_jni.cpp:
+        * tests/DCPS/Compiler/vread_vwrite/VreadVwriteTest.cpp:
+
+          IDL-accessible encoding conversions for topic types
+
+          Extends the generated TypeSupport IDL with encode_to_string/bytes
+          and
+          decode_from_string/bytes.
+
+          Support for CDR is not yet implemented.
+          JSON is supported using the existing JsonValueWriter/Reader.
+          Other types can be added as needed.
+
+Mon Apr 17 19:16:49 UTC 2023  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit a599e6c4b4bdd82a2ca3c602d91ee25164ab2ba4
+
+        * docs/internal/release.rst:
+
+          Apply suggestions from code review
+
+          Co-authored-by: Justin Wilson <wilsonj@unityfoundation.io>
+
+Fri Apr 14 20:46:44 UTC 2023  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit 5cd5219d45263c99f63942871da41a227f39a067
+
+        * docs/devguide/modeling_sdk.rst:
+
+          Fix List in Modeling SDK Installation
+
+Fri Apr 14 20:23:40 UTC 2023  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit d1f8f98ab3326831f863b9cb437fbec1571b0e81
+
+        * docs/devguide/modeling_sdk.rst:
+        * docs/internal/dev_guidelines.rst:
+
+          Fix Image and Remove Doxygen from Dev Guidelines
+
+Fri Apr 14 19:09:00 UTC 2023  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit e9c9bdb622c43a8bba769ae7238177690f43e5a6
+
+        * docs/index.rst:
+        * docs/internal/docs.rst:
+        * docs/internal/release.rst:
+        * docs/sphinx_extensions/links.py:
+
+          Add Release Guide to Sphinx Documentation
+
+          This has all OCI-internal parts removed (I hope) and SFTP and
+          Doxygen
+          parts removed as we don't know if and how that's going to be
+          involved
+          for now. Announcement section was also removed.
+
+          There are other more minor changes throughout the document,
+          particularly
+          merging and tweaking the parts that are now in the "Update Files
+          in the
+          Repo as Needed".
+
+Thu Apr 13 21:20:45 UTC 2023  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit cb147673117cc294a4a3372a1cf7d81f3822ec39
+
+          Merge pull request #4116 from
+          iguessthislldo/igtd/devguide-rm-3.23
+
+          Remove/Replace References to 3.23 in DevGuide
+
+Thu Apr 13 05:05:38 UTC 2023  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit a217759f1802f4a016976cf2c4f04cc94597e3ab
+
+        * dds/DCPS/XTypes/DynamicDataAdapter.h:
+        * tests/DCPS/Compiler/idl_test3_lib/FooDef.idl:
+
+          Fixes for CI
+
+Thu Apr 13 03:06:52 UTC 2023  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit c9b9ebda2b1da714d510c187390a834e155400ef
+
+        * dds/DCPS/XTypes/DynamicDataAdapter.h:
+        * dds/idl/dds_generator.cpp:
+        * dds/idl/dds_generator.h:
+        * dds/idl/dynamic_data_adapter_generator.cpp:
+        * dds/idl/marshal_generator.cpp:
+        * dds/idl/metaclass_generator.cpp:
+        * tests/DCPS/Compiler/idl_test3_lib/FooDef.idl:
+        * tests/unit-tests/dds/DCPS/XTypes/DynamicDataAdapter.cpp:
+        * tests/unit-tests/dds/DCPS/XTypes/DynamicDataAdapter.idl:
+
+          Fix Warnings and Typedef of Typedef Build Issues
+
+          Follow up to https://github.com/OpenDDS/OpenDDS/pull/4078
+
+          Fixes https://github.com/OpenDDS/OpenDDS/issues/4112 and
+          https://github.com/OpenDDS/OpenDDS/issues/4109
+
+Wed Apr 12 19:12:02 UTC 2023  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit 39cfa6f8ee32d1e610a861cb7d4aa0d51bb5f952
+
+        * docs/devguide/introduction.rst:
+
+          Remove/Replace References to 3.23 in DevGuide
+
+Wed Apr 12 16:20:46 UTC 2023  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 40b0305f7fdad908aed4e01b487022923f6fbf04
+
+          Merge pull request #4115 from jwillemsen/patch-30
+
+          Update README.md
+
+Wed Apr 12 10:28:19 UTC 2023  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit df482cf060fc8397e9cc721a6e9e8d0f5130f585
+
+        * README.md:
+
+          Update README.md
+
+          DevGuide seems only to be available at
+          https://opendds.readthedocs.io/
+
+Tue Apr 11 20:31:09 UTC 2023  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit 7c57bc7bb8b17b63ade8271f49e32b62989d0862
+
+        * NEWS.md:
+        * PROBLEM-REPORT-FORM:
+        * README.md:
+        * VERSION.txt:
+        * dds/Version.h:
+
+          OpenDDS Post Release 3.24.0
+
+Fri Mar 31 19:38:56 UTC 2023  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 9c188724cf46003691149856e574310f55447a70
+
+        * dds/DCPS/InternalDataReader.h:
+        * dds/DCPS/MulticastManager.cpp:
+        * tests/unit-tests/dds/DCPS/InternalDataReader.cpp:
+        * tests/unit-tests/dds/DCPS/InternalDataWriter.cpp:
+
+          From review
+
+Wed Mar 29 19:40:58 UTC 2023  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 5036f312f91b4eba03f9475dbb8b75bc8ba3693f
+
+        * dds/DCPS/InternalDataReader.h:
+        * tests/unit-tests/dds/DCPS/InternalDataReader.cpp:
+
+          InternalDataReader does not support read_instance or
+          take_instance
+
+          Problem
+          -------
+
+          InternalDataReader does not support read_instance or
+          take_instance
+          which are necessary to interact with it as a persistent store.
+
+          Solution
+          --------
+
+          Add read_instance and take_instance.
+
+Wed Mar 29 19:29:43 UTC 2023  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 70ba453b38935f22837d19da0fd163ba6ebba549
+
+        * dds/DCPS/InternalDataReader.h:
+        * tests/unit-tests/dds/DCPS/InternalDataReader.cpp:
+
+          InternalDataReader doesn't support read
+
+          Problem
+          -------
+
+          InternalDataReader doesn't support read (only take). This
+          prevents it
+          from being used as a persistent cache.
+
+          Solution
+          --------
+
+          Add support for read.
+
+Wed Mar 29 19:10:43 UTC 2023  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 0bb360922365f1224d7e8ac62cbc158d36895ba3
+
+        * dds/DCPS/InternalDataReader.h:
+        * tests/unit-tests/dds/DCPS/InternalDataReader.cpp:
+        * tests/unit-tests/dds/DCPS/InternalDataWriter.cpp:
+
+          InternalDataReader doesn't respect History QoS
+
+          Problem
+          -------
+
+          InternalDataReader does not respect the History QoS. This will be
+          needed for upcoming changes.
+
+          Solution
+          --------
+
+          Implement support for the History QoS.
+
+Wed Mar 29 18:31:42 UTC 2023  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit b28404e40005add955f6ce278cb16a58431fbd7b
+
+        * dds/DCPS/InternalDataReader.h:
+        * dds/DCPS/RTPS/ICE/AgentImpl.cpp:
+        * dds/DCPS/RTPS/Spdp.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.cpp:
+        * tests/unit-tests/dds/DCPS/InternalDataReader.cpp:
+        * tests/unit-tests/dds/DCPS/InternalDataWriter.cpp:
+        * tests/unit-tests/dds/DCPS/InternalTopic.cpp:
+
+          InternalDataReader cannot be initialized with a DataReaderQos
+
+          Problem
+          -------
+
+          An InternalDataReader cannot be initialized with a DataReaderQos
+          which
+          is a convenient container for options.
+
+          Solution
+          --------
+
+          Change the constructor to take a DataReaderQos.
+
+Mon Mar 27 20:04:10 UTC 2023  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit d10aa7f253a8786949a9eae1d5fb376c004f2166
+
+        * dds/DCPS/Qos_Helper.cpp:
+        * dds/DCPS/Qos_Helper.h:
+        * dds/DCPS/Service_Participant.cpp:
+        * tests/unit-tests/dds/DCPS/MockSubscriber.h:
+        * tests/unit-tests/dds/DCPS/Qos_Helper.cpp:
+
+          Initializing DDS::DataReaderQos for constructors is difficult
+
+          Problem
+          -------
+
+          InternalDataReaders will be converted to use DDS::DataReaderQos.
+          InternalDataReaders are often initialized in constructors meaning
+          that
+          we need a way to initialize the DDS::DataReaderQoS.
+
+          Solution
+          --------
+
+          Provide a builder to initialize DDS::DataReaderQos.
+
+          Note
+          ----
+
+          See #4075.
+
+Mon Mar 27 16:39:10 UTC 2023  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 52587f8d79205bd09c68c5add3802125794d698a
+
+        * dds/DCPS/InternalDataReader.h:
+        * dds/DCPS/InternalDataWriter.h:
+        * dds/DCPS/MulticastManager.cpp:
+        * dds/DCPS/MulticastManager.h:
+        * dds/DCPS/Qos_Helper.h:
+        * dds/DCPS/Time_Helper.h:
+        * dds/DCPS/Time_Helper.inl:
+        * tests/unit-tests/dds/DCPS/InternalDataReader.cpp:
+        * tests/unit-tests/dds/DCPS/InternalDataWriter.cpp:
+        * tests/unit-tests/dds/DCPS/Time_Helper.cpp:
+
+          InternalDataReader doesn't use DDS::SampleInfo
+
+          Problem
+          -------
+
+          The InternalDataReader doesn't use DDS::SampleInfo which causes
+          it to
+          deviate away from DDS concepts.
+
+          Solution
+          --------
+
+          Use SampleInfo.
+
+          Note
+          ----
+
+          This also removes support for register on the reader side as it
+          is unnecessary.
+
+Fri Mar 17 17:14:03 UTC 2023  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit f355ba8e64f0c033867abe33065db16846bc1165
+
+        * dds/DCPS/InternalDataReader.h:
+        * dds/DCPS/InternalDataWriter.h:
+        * dds/DCPS/NetworkConfigMonitor.cpp:
+        * tests/unit-tests/dds/DCPS/InternalDataReader.cpp:
+        * tests/unit-tests/dds/DCPS/InternalDataWriter.cpp:
+
+          InternalDataWriter doesn't support datawriter lifecycle QoS
+
+          Problem
+          -------
+
+          The InternalDataWriter doesn't support the datawriter lifecycle
+          QoS.
+
+          Solution
+          --------
+
+          Add support.
+
+Fri Mar 17 13:44:32 UTC 2023  Justin Wilson  <wilsonj@objectcomputing.com>
+
+        * dds/DCPS/InternalDataWriter.h:
+        * dds/DCPS/NetworkConfigMonitor.cpp:
+        * tests/unit-tests/dds/DCPS/InternalDataWriter.cpp:
+        * tests/unit-tests/dds/DCPS/InternalTopic.cpp:
+
+          InternalDataWriter doesn't support the history QoS
+
+          Problem
+          -------
+
+          The InternalDataWriter doesn't support the history QoS.
+
+          Solution
+          --------
+
+          Implement support for the history QoS.
+
+          Notes
+          -----
+
+          Since writer/reader communication is instantaneous, the history
+          only
+          applies to writers that have transient local durability.
+
+Local Variables:
+mode: change-log
+add-log-time-format: (lambda () (progn (setq tz (getenv "TZ")) (set-time-zone-rule "UTC") (setq time (format-time-string "%a %b %e %H:%M:%S %Z %Y" (current-time))) (set-time-zone-rule tz) time))
+indent-tabs-mode: nil
+End:

@@ -240,14 +240,10 @@ RtpsUdpReceiveStrategy::receive_bytes_helper(iovec iov[],
     return 0;
   }
 
+  const NetworkAddress ra(remote_address);
+
   if (n > 0 && ret > 0 && iov[0].iov_len >= 4 && std::memcmp(iov[0].iov_base, "RTPS", 4) == 0) {
-    RtpsUdpInst_rch cfg = tport.config();
-    if (tport.transport_statistics_.count_messages()) {
-      const NetworkAddress ra(remote_address);
-      const InternalMessageCountKey key(ra, MCK_RTPS, ra == cfg->rtps_relay_address());
-      ACE_GUARD_RETURN(ACE_Thread_Mutex, g, tport.transport_statistics_mutex_, -1);
-      tport.transport_statistics_.message_count[key].recv(ret);
-    }
+    tport.core().recv(ra, MCK_RTPS, ret);
     return ret;
   }
 
@@ -282,13 +278,7 @@ RtpsUdpReceiveStrategy::receive_bytes_helper(iovec iov[],
   STUN::Message message;
   message.block = head;
   if (serializer >> message) {
-    RtpsUdpInst_rch cfg = tport.config();
-    if (cfg && tport.transport_statistics_.count_messages()) {
-      const NetworkAddress ra(remote_address);
-      const InternalMessageCountKey key(ra, MCK_STUN, ra == cfg->rtps_relay_address());
-      ACE_GUARD_RETURN(ACE_Thread_Mutex, g, tport.transport_statistics_mutex_, -1);
-      tport.transport_statistics_.message_count[key].recv(ret);
-    }
+    tport.core().recv(ra, MCK_STUN, ret);
 
     if (tport.relay_srsm().is_response(message)) {
       tport.process_relay_sra(tport.relay_srsm().receive(message));
@@ -1013,7 +1003,7 @@ RtpsUdpReceiveStrategy::stop_i()
 #endif
 
   RtpsUdpInst_rch cfg = link_->config();
-  if (cfg && cfg->use_multicast_) {
+  if (cfg && cfg->use_multicast()) {
     ri->execute_or_enqueue(make_rch<RemoveHandler>(link_->multicast_socket().get_handle(), static_cast<ACE_Reactor_Mask>(ACE_Event_Handler::READ_MASK)));
 #ifdef ACE_HAS_IPV6
     ri->execute_or_enqueue(make_rch<RemoveHandler>(link_->ipv6_multicast_socket().get_handle(), static_cast<ACE_Reactor_Mask>(ACE_Event_Handler::READ_MASK)));

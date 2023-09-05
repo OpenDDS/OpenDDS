@@ -52,10 +52,10 @@ struct Application {
     TheServiceParticipant->set_default_discovery(OpenDDS::DCPS::Discovery::DEFAULT_RTPS);
 
     std::stringstream ss;
-    ss << "Config" << instances_;
+    ss << "Config" << id_;
     transport_config_name_ = ss.str();
     ss.str("");
-    ss << "Inst" << instances_;
+    ss << "Inst" << id_;
     const std::string transport_instance_name = ss.str();
 
     OpenDDS::DCPS::TransportInst_rch ti = TheTransportRegistry->create_inst(transport_instance_name, "rtps_udp");

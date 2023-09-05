@@ -28,34 +28,380 @@ namespace DCPS {
 
 RtpsUdpInst::RtpsUdpInst(const OPENDDS_STRING& name)
   : TransportInst("rtps_udp", name)
-#if defined (ACE_DEFAULT_MAX_SOCKET_BUFSIZ)
-  , send_buffer_size_(ACE_DEFAULT_MAX_SOCKET_BUFSIZ)
-  , rcv_buffer_size_(ACE_DEFAULT_MAX_SOCKET_BUFSIZ)
-#else
-  , send_buffer_size_(0)
-  , rcv_buffer_size_(0)
-#endif
-  , use_multicast_(true)
-  , ttl_(1)
-  , anticipated_fragments_(RtpsUdpSendStrategy::UDP_MAX_MESSAGE_SIZE / RtpsSampleHeader::FRAG_SIZE)
-  , max_message_size_(RtpsUdpSendStrategy::UDP_MAX_MESSAGE_SIZE)
-  , nak_depth_(0)
-  , nak_response_delay_(0, DEFAULT_NAK_RESPONSE_DELAY_USEC)
-  , heartbeat_period_(DEFAULT_HEARTBEAT_PERIOD_SEC)
-  , receive_address_duration_(5)
-  , responsive_mode_(false)
-  , send_delay_(0, 10 * 1000)
   , opendds_discovery_guid_(GUID_UNKNOWN)
-  , multicast_group_address_(7401, "239.255.0.2")
-  , local_address_(u_short(0), "0.0.0.0")
+  , actual_local_address_(NetworkAddress::default_IPV4)
 #ifdef ACE_HAS_IPV6
-  , ipv6_multicast_group_address_(7401, "FF03::2")
-  , ipv6_local_address_(u_short(0), "::")
+  , ipv6_actual_local_address_(NetworkAddress::default_IPV6)
 #endif
-  , rtps_relay_only_(false)
-  , use_rtps_relay_(false)
-  , use_ice_(false)
 {}
+
+void
+RtpsUdpInst::send_buffer_size(ACE_INT32 sbs)
+{
+  TheServiceParticipant->config_store()->set_int32(config_key("SEND_BUFFER_SIZE").c_str(), sbs);
+}
+
+ACE_INT32
+RtpsUdpInst::send_buffer_size() const
+{
+  return TheServiceParticipant->config_store()->get_int32(config_key("SEND_BUFFER_SIZE").c_str(),
+#if defined (ACE_DEFAULT_MAX_SOCKET_BUFSIZ)
+                                                          ACE_DEFAULT_MAX_SOCKET_BUFSIZ
+#else
+                                                          0
+#endif
+                                                          );
+}
+
+void
+RtpsUdpInst::rcv_buffer_size(ACE_INT32 sbs)
+{
+  TheServiceParticipant->config_store()->set_int32(config_key("RCV_BUFFER_SIZE").c_str(), sbs);
+}
+
+ACE_INT32
+RtpsUdpInst::rcv_buffer_size() const
+{
+  return TheServiceParticipant->config_store()->get_int32(config_key("RCV_BUFFER_SIZE").c_str(),
+#if defined (ACE_DEFAULT_MAX_SOCKET_BUFSIZ)
+                                                          ACE_DEFAULT_MAX_SOCKET_BUFSIZ
+#else
+                                                          0
+#endif
+                                                          );
+}
+
+void
+RtpsUdpInst::use_multicast(bool um)
+{
+  TheServiceParticipant->config_store()->set_boolean(config_key("USE_MULTICAST").c_str(), um);
+}
+
+bool
+RtpsUdpInst::use_multicast() const
+{
+  return TheServiceParticipant->config_store()->get_boolean(config_key("USE_MULTICAST").c_str(), true);
+}
+
+void
+RtpsUdpInst::ttl(unsigned char t)
+{
+  TheServiceParticipant->config_store()->set_uint32(config_key("TTL").c_str(), t);
+}
+
+unsigned char
+RtpsUdpInst::ttl() const
+{
+  return TheServiceParticipant->config_store()->get_uint32(config_key("TTL").c_str(), 1);
+}
+
+void
+RtpsUdpInst::multicast_interface(const String& mi)
+{
+  TheServiceParticipant->config_store()->set(config_key("MULTICAST_INTERFACE").c_str(), mi);
+}
+
+String
+RtpsUdpInst::multicast_interface() const
+{
+  const String d = (TheServiceParticipant->default_address() != NetworkAddress::default_IPV4) ?
+    DCPS::LogAddr::ip(TheServiceParticipant->default_address().to_addr()) : "";
+  return TheServiceParticipant->config_store()->get(config_key("MULTICAST_INTERFACE").c_str(), d);
+}
+
+void
+RtpsUdpInst::anticipated_fragments(size_t af)
+{
+  TheServiceParticipant->config_store()->set_uint32(config_key("ANTICIPATED_FRAGMENTS").c_str(), static_cast<DDS::UInt32>(af));
+}
+
+size_t
+RtpsUdpInst::anticipated_fragments() const
+{
+  return TheServiceParticipant->config_store()->get_uint32(config_key("ANTICIPATED_FRAGMENTS").c_str(), RtpsUdpSendStrategy::UDP_MAX_MESSAGE_SIZE / RtpsSampleHeader::FRAG_SIZE);
+}
+
+void
+RtpsUdpInst::max_message_size(size_t mms)
+{
+  TheServiceParticipant->config_store()->set_uint32(config_key("MAX_MESSAGE_SIZE").c_str(), static_cast<DDS::UInt32>(mms));
+}
+
+size_t
+RtpsUdpInst::max_message_size() const
+{
+  return TheServiceParticipant->config_store()->get_uint32(config_key("MAX_MESSAGE_SIZE").c_str(), RtpsUdpSendStrategy::UDP_MAX_MESSAGE_SIZE);
+}
+
+void
+RtpsUdpInst::nak_depth(size_t mms)
+{
+  TheServiceParticipant->config_store()->set_uint32(config_key("NAK_DEPTH").c_str(), static_cast<DDS::UInt32>(mms));
+}
+
+size_t
+RtpsUdpInst::nak_depth() const
+{
+  return TheServiceParticipant->config_store()->get_uint32(config_key("NAK_DEPTH").c_str(), 0);
+}
+
+void
+RtpsUdpInst::nak_response_delay(TimeDuration nrd)
+{
+  TheServiceParticipant->config_store()->set(config_key("NAK_RESPONSE_DELAY").c_str(),
+                                             nrd,
+                                             ConfigStoreImpl::Format_IntegerMilliseconds);
+}
+
+TimeDuration
+RtpsUdpInst::nak_response_delay() const
+{
+  return TheServiceParticipant->config_store()->get(config_key("NAK_RESPONSE_DELAY").c_str(),
+                                                    TimeDuration(0, DEFAULT_NAK_RESPONSE_DELAY_USEC),
+                                                    ConfigStoreImpl::Format_IntegerMilliseconds);
+}
+
+void
+RtpsUdpInst::heartbeat_period(TimeDuration hp)
+{
+  TheServiceParticipant->config_store()->set(config_key("HEARTBEAT_PERIOD").c_str(),
+                                             hp,
+                                             ConfigStoreImpl::Format_IntegerMilliseconds);
+}
+
+TimeDuration
+RtpsUdpInst::heartbeat_period() const
+{
+  return TheServiceParticipant->config_store()->get(config_key("HEARTBEAT_PERIOD").c_str(),
+                                                    TimeDuration(DEFAULT_HEARTBEAT_PERIOD_SEC, 0),
+                                                    ConfigStoreImpl::Format_IntegerMilliseconds);
+}
+
+void
+RtpsUdpInst::receive_address_duration(TimeDuration rad)
+{
+  TheServiceParticipant->config_store()->set(config_key("RECEIVE_ADDRESS_DURATION").c_str(),
+                                             rad,
+                                             ConfigStoreImpl::Format_IntegerMilliseconds);
+}
+
+TimeDuration
+RtpsUdpInst::receive_address_duration() const
+{
+  return TheServiceParticipant->config_store()->get(config_key("RECEIVE_ADDRESS_DURATION").c_str(),
+                                                    TimeDuration(5, 0),
+                                                    ConfigStoreImpl::Format_IntegerMilliseconds);
+}
+
+void
+RtpsUdpInst::responsive_mode(bool rm)
+{
+  TheServiceParticipant->config_store()->set_boolean(config_key("RESPONSIVE_MODE").c_str(), rm);
+}
+
+bool
+RtpsUdpInst::responsive_mode() const
+{
+  return TheServiceParticipant->config_store()->get_boolean(config_key("RESPONSIVE_MODE").c_str(), false);
+}
+
+void
+RtpsUdpInst::send_delay(TimeDuration sd)
+{
+  TheServiceParticipant->config_store()->set(config_key("SEND_DELAY").c_str(),
+                                             sd,
+                                             ConfigStoreImpl::Format_IntegerMilliseconds);
+}
+
+TimeDuration
+RtpsUdpInst::send_delay() const
+{
+  return TheServiceParticipant->config_store()->get(config_key("SEND_DELAY").c_str(),
+                                                    TimeDuration(0, 10 * 1000),
+                                                    ConfigStoreImpl::Format_IntegerMilliseconds);
+}
+
+void
+RtpsUdpInst::multicast_group_address(const NetworkAddress& addr)
+{
+  TheServiceParticipant->config_store()->set(config_key("MULTICAST_GROUP_ADDRESS").c_str(),
+                                             addr,
+                                             ConfigStoreImpl::Format_Optional_Port,
+                                             ConfigStoreImpl::Kind_IPV4);
+}
+
+NetworkAddress
+RtpsUdpInst::multicast_group_address() const
+{
+  return TheServiceParticipant->config_store()->get(config_key("MULTICAST_GROUP_ADDRESS").c_str(),
+                                                    NetworkAddress(7401, "239.255.0.2"),
+                                                    ConfigStoreImpl::Format_Optional_Port,
+                                                    ConfigStoreImpl::Kind_IPV4);
+}
+
+void
+RtpsUdpInst::local_address(const NetworkAddress& addr)
+{
+  TheServiceParticipant->config_store()->set(config_key("LOCAL_ADDRESS").c_str(),
+                                             addr,
+                                             ConfigStoreImpl::Format_Required_Port,
+                                             ConfigStoreImpl::Kind_IPV4);
+}
+
+NetworkAddress
+RtpsUdpInst::local_address() const
+{
+  return TheServiceParticipant->config_store()->get(config_key("LOCAL_ADDRESS").c_str(),
+                                                    TheServiceParticipant->default_address(),
+                                                    ConfigStoreImpl::Format_Required_Port,
+                                                    ConfigStoreImpl::Kind_IPV4);
+}
+
+void
+RtpsUdpInst::advertised_address(const NetworkAddress& addr)
+{
+  TheServiceParticipant->config_store()->set(config_key("ADVERTISED_ADDRESS").c_str(),
+                                             addr,
+                                             ConfigStoreImpl::Format_Required_Port,
+                                             ConfigStoreImpl::Kind_IPV4);
+}
+
+NetworkAddress
+RtpsUdpInst::advertised_address() const
+{
+  return TheServiceParticipant->config_store()->get(config_key("ADVERTISED_ADDRESS").c_str(),
+                                                    NetworkAddress::default_IPV4,
+                                                    ConfigStoreImpl::Format_Required_Port,
+                                                    ConfigStoreImpl::Kind_IPV4);
+}
+
+#ifdef ACE_HAS_IPV6
+void
+RtpsUdpInst::ipv6_multicast_group_address(const NetworkAddress& addr)
+{
+  TheServiceParticipant->config_store()->set(config_key("IPV6_MULTICAST_GROUP_ADDRESS").c_str(),
+                                             addr,
+                                             ConfigStoreImpl::Format_Optional_Port,
+                                             ConfigStoreImpl::Kind_IPV6);
+}
+
+NetworkAddress
+RtpsUdpInst::ipv6_multicast_group_address() const
+{
+  return TheServiceParticipant->config_store()->get(config_key("IPV6_MULTICAST_GROUP_ADDRESS").c_str(),
+                                                    NetworkAddress(7401, "FF03::2"),
+                                                    ConfigStoreImpl::Format_Optional_Port,
+                                                    ConfigStoreImpl::Kind_IPV6);
+}
+
+void
+RtpsUdpInst::ipv6_local_address(const NetworkAddress& addr)
+{
+  TheServiceParticipant->config_store()->set(config_key("IPV6_LOCAL_ADDRESS").c_str(),
+                                             addr,
+                                             ConfigStoreImpl::Format_Required_Port,
+                                             ConfigStoreImpl::Kind_IPV6);
+}
+
+NetworkAddress
+RtpsUdpInst::ipv6_local_address() const
+{
+  return TheServiceParticipant->config_store()->get(config_key("IPV6_LOCAL_ADDRESS").c_str(),
+                                                    NetworkAddress::default_IPV6,
+                                                    ConfigStoreImpl::Format_Required_Port,
+                                                    ConfigStoreImpl::Kind_IPV6);
+}
+
+void
+RtpsUdpInst::ipv6_advertised_address(const NetworkAddress& addr)
+{
+  TheServiceParticipant->config_store()->set(config_key("IPV6_ADVERTISED_ADDRESS").c_str(),
+                                             addr,
+                                             ConfigStoreImpl::Format_Required_Port,
+                                             ConfigStoreImpl::Kind_IPV6);
+}
+
+NetworkAddress
+RtpsUdpInst::ipv6_advertised_address() const
+{
+  return TheServiceParticipant->config_store()->get(config_key("IPV6_ADVERTISED_ADDRESS").c_str(),
+                                                    NetworkAddress::default_IPV6,
+                                                    ConfigStoreImpl::Format_Required_Port,
+                                                    ConfigStoreImpl::Kind_IPV6);
+}
+#endif
+
+void
+RtpsUdpInst::rtps_relay_only(bool flag)
+{
+  TheServiceParticipant->config_store()->set_boolean(config_key("RTPS_RELAY_ONLY").c_str(), flag);
+}
+
+bool
+RtpsUdpInst::rtps_relay_only() const
+{
+  return TheServiceParticipant->config_store()->get_boolean(config_key("RTPS_RELAY_ONLY").c_str(), false);
+}
+
+void
+RtpsUdpInst::use_rtps_relay(bool flag)
+{
+  TheServiceParticipant->config_store()->set_boolean(config_key("USE_RTPS_RELAY").c_str(), flag);
+}
+
+bool
+RtpsUdpInst::use_rtps_relay() const
+{
+  return TheServiceParticipant->config_store()->get_boolean(config_key("USE_RTPS_RELAY").c_str(), false);
+}
+
+void
+RtpsUdpInst::rtps_relay_address(const NetworkAddress& address)
+{
+  TheServiceParticipant->config_store()->set(config_key("DATA_RTPS_RELAY_ADDRESS").c_str(),
+                                             address,
+                                             ConfigStoreImpl::Format_Required_Port,
+                                             ConfigStoreImpl::Kind_IPV4);
+}
+
+NetworkAddress
+RtpsUdpInst::rtps_relay_address() const
+{
+  return TheServiceParticipant->config_store()->get(config_key("DATA_RTPS_RELAY_ADDRESS").c_str(),
+                                                    NetworkAddress::default_IPV4,
+                                                    ConfigStoreImpl::Format_Required_Port,
+                                                    ConfigStoreImpl::Kind_IPV4);
+}
+
+void
+RtpsUdpInst::use_ice(bool flag)
+{
+  TheServiceParticipant->config_store()->set_boolean(config_key("USE_ICE").c_str(), flag);
+}
+
+bool
+RtpsUdpInst::use_ice() const
+{
+  return TheServiceParticipant->config_store()->get_boolean(config_key("USE_ICE").c_str(), false);
+}
+
+void
+RtpsUdpInst::stun_server_address(const NetworkAddress& address)
+{
+  TheServiceParticipant->config_store()->set(config_key("DATA_STUN_SERVER_ADDRESS").c_str(),
+                                             address,
+                                             ConfigStoreImpl::Format_Required_Port,
+                                             ConfigStoreImpl::Kind_IPV4);
+}
+
+NetworkAddress
+RtpsUdpInst::stun_server_address() const
+{
+  return TheServiceParticipant->config_store()->get(config_key("DATA_STUN_SERVER_ADDRESS").c_str(),
+                                                    NetworkAddress::default_IPV4,
+                                                    ConfigStoreImpl::Format_Required_Port,
+                                                    ConfigStoreImpl::Kind_IPV4);
+}
 
 TransportImpl_rch
 RtpsUdpInst::new_impl()
@@ -68,105 +414,6 @@ RtpsUdpInst::load(ACE_Configuration_Heap& cf,
                   ACE_Configuration_Section_Key& sect)
 {
   TransportInst::load(cf, sect); // delegate to parent
-
-  ACE_TString local_address_s;
-  GET_CONFIG_TSTRING_VALUE(cf, sect, ACE_TEXT("local_address"),
-                           local_address_s);
-  if (!local_address_s.is_empty()) {
-    NetworkAddress addr(local_address_s.c_str());
-    local_address(addr);
-  }
-
-  ACE_TString advertised_address_s;
-  GET_CONFIG_TSTRING_VALUE(cf, sect, ACE_TEXT("advertised_address"),
-                           advertised_address_s);
-  if (!advertised_address_s.is_empty()) {
-    NetworkAddress addr(advertised_address_s.c_str());
-    advertised_address(addr);
-  }
-
-#ifdef ACE_HAS_IPV6
-  ACE_TString ipv6_local_address_s;
-  GET_CONFIG_TSTRING_VALUE(cf, sect, ACE_TEXT("ipv6_local_address"),
-                           ipv6_local_address_s);
-  if (!ipv6_local_address_s.is_empty()) {
-    NetworkAddress addr(ipv6_local_address_s.c_str());
-    ipv6_local_address(addr);
-  }
-
-  ACE_TString ipv6_advertised_address_s;
-  GET_CONFIG_TSTRING_VALUE(cf, sect, ACE_TEXT("ipv6_advertised_address"),
-                           ipv6_advertised_address_s);
-  if (!ipv6_advertised_address_s.is_empty()) {
-    NetworkAddress addr(ipv6_advertised_address_s.c_str());
-    ipv6_advertised_address(addr);
-  }
-#endif
-
-  GET_CONFIG_VALUE(cf, sect, ACE_TEXT("send_buffer_size"), send_buffer_size_, ACE_UINT32);
-
-  GET_CONFIG_VALUE(cf, sect, ACE_TEXT("rcv_buffer_size"), rcv_buffer_size_, ACE_UINT32);
-
-  GET_CONFIG_VALUE(cf, sect, ACE_TEXT("use_multicast"), use_multicast_, bool);
-
-  ACE_TString group_address_s;
-  GET_CONFIG_TSTRING_VALUE(cf, sect, ACE_TEXT("multicast_group_address"),
-                           group_address_s);
-  if (!group_address_s.is_empty()) {
-    if (group_address_s.rfind(':') == group_address_s.npos) {
-      // Concatenate a port number if the user does not supply one.
-      group_address_s += ACE_TEXT(":7401");
-    }
-    NetworkAddress addr(group_address_s.c_str());
-    multicast_group_address(addr);
-  }
-
-  GET_CONFIG_STRING_VALUE(cf, sect, ACE_TEXT("multicast_interface"),
-                          multicast_interface_);
-
-  GET_CONFIG_VALUE(cf, sect, ACE_TEXT("anticipated_fragments"), anticipated_fragments_, size_t);
-
-  GET_CONFIG_VALUE(cf, sect, ACE_TEXT("max_message_size"), max_message_size_, size_t);
-
-  GET_CONFIG_VALUE(cf, sect, ACE_TEXT("nak_depth"), nak_depth_, size_t);
-
-  GET_CONFIG_VALUE(cf, sect, ACE_TEXT("ttl"), ttl_, unsigned char);
-
-  GET_CONFIG_TIME_VALUE(cf, sect, ACE_TEXT("nak_response_delay"),
-                        nak_response_delay_);
-  GET_CONFIG_TIME_VALUE(cf, sect, ACE_TEXT("heartbeat_period"),
-                        heartbeat_period_);
-  GET_CONFIG_TIME_VALUE(cf, sect, ACE_TEXT("send_delay"),
-                        send_delay_);
-
-  ACE_TString rtps_relay_address_s;
-  GET_CONFIG_TSTRING_VALUE(cf, sect, ACE_TEXT("DataRtpsRelayAddress"),
-                           rtps_relay_address_s);
-  if (!rtps_relay_address_s.is_empty()) {
-    NetworkAddress addr(rtps_relay_address_s.c_str());
-    rtps_relay_address(addr);
-  }
-
-  GET_CONFIG_VALUE(cf, sect, ACE_TEXT("RtpsRelayOnly"), rtps_relay_only_, bool);
-  GET_CONFIG_VALUE(cf, sect, ACE_TEXT("UseRtpsRelay"), use_rtps_relay_, bool);
-
-  ACE_TString stun_server_address_s;
-  GET_CONFIG_TSTRING_VALUE(cf, sect, ACE_TEXT("DataStunServerAddress"),
-                           stun_server_address_s);
-  if (!stun_server_address_s.is_empty()) {
-    NetworkAddress addr(stun_server_address_s.c_str());
-    stun_server_address(addr);
-  }
-
-#ifdef OPENDDS_SECURITY
-  GET_CONFIG_VALUE(cf, sect, ACE_TEXT("UseIce"), use_ice_, bool);
-  if (use_ice_ && !TheServiceParticipant->get_security()) {
-    ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Security must be enabled (-DCPSSecurity 1) when using ICE (UseIce)\n")), -1);
-  }
-#endif
-
-  GET_CONFIG_VALUE(cf, sect, ACE_TEXT("ResponsiveMode"), responsive_mode_, bool);
-
   return 0;
 }
 
@@ -174,19 +421,25 @@ OPENDDS_STRING
 RtpsUdpInst::dump_to_str() const
 {
   OPENDDS_STRING ret = TransportInst::dump_to_str();
+  ret += formatNameForDump("send_buffer_size") + to_dds_string(send_buffer_size()) + '\n';
+  ret += formatNameForDump("rcv_buffer_size") + to_dds_string(rcv_buffer_size()) + '\n';
+  ret += formatNameForDump("use_multicast") + (use_multicast() ? "true" : "false") + '\n';
+  ret += formatNameForDump("ttl") + to_dds_string(ttl()) + '\n';
+  ret += formatNameForDump("multicast_interface") + multicast_interface() + '\n';
+  ret += formatNameForDump("anticipated_fragments") + to_dds_string(unsigned(anticipated_fragments())) + '\n';
+  ret += formatNameForDump("max_message_size") + to_dds_string(unsigned(max_message_size())) + '\n';
+  ret += formatNameForDump("nak_depth") + to_dds_string(unsigned(nak_depth())) + '\n';
+  ret += formatNameForDump("nak_response_delay") + nak_response_delay().str() + '\n';
+  ret += formatNameForDump("heartbeat_period") + heartbeat_period().str() + '\n';
+  ret += formatNameForDump("responsive_mode") + (responsive_mode() ? "true" : "false") + '\n';
+  ret += formatNameForDump("multicast_group_address") + LogAddr(multicast_group_address()).str() + '\n';
   ret += formatNameForDump("local_address") + LogAddr(local_address()).str() + '\n';
-  ret += formatNameForDump("use_multicast") + (use_multicast_ ? "true" : "false") + '\n';
-  ret += formatNameForDump("multicast_group_address") + LogAddr(multicast_group_address_).str() + '\n';
-  ret += formatNameForDump("multicast_interface") + multicast_interface_ + '\n';
-  ret += formatNameForDump("nak_depth") + to_dds_string(unsigned(nak_depth_)) + '\n';
-  ret += formatNameForDump("anticipated_fragments") + to_dds_string(unsigned(anticipated_fragments_)) + '\n';
-  ret += formatNameForDump("max_message_size") + to_dds_string(unsigned(max_message_size_)) + '\n';
-  ret += formatNameForDump("nak_response_delay") + nak_response_delay_.str() + '\n';
-  ret += formatNameForDump("heartbeat_period") + heartbeat_period_.str() + '\n';
-  ret += formatNameForDump("send_buffer_size") + to_dds_string(send_buffer_size_) + '\n';
-  ret += formatNameForDump("rcv_buffer_size") + to_dds_string(rcv_buffer_size_) + '\n';
-  ret += formatNameForDump("ttl") + to_dds_string(ttl_) + '\n';
-  ret += formatNameForDump("responsive_mode") + (responsive_mode_ ? "true" : "false") + '\n';
+  ret += formatNameForDump("advertised_address") + LogAddr(advertised_address()).str() + '\n';
+#ifdef ACE_HAS_IPV6
+  ret += formatNameForDump("ipv6_multicast_group_address") + LogAddr(ipv6_multicast_group_address()).str() + '\n';
+  ret += formatNameForDump("ipv6_local_address") + LogAddr(ipv6_local_address()).str() + '\n';
+  ret += formatNameForDump("ipv6_advertised_address") + LogAddr(ipv6_advertised_address()).str() + '\n';
+#endif
   return ret;
 }
 
@@ -199,27 +452,30 @@ RtpsUdpInst::populate_locator(TransportLocator& info, ConnectionInfoFlags flags)
   CORBA::ULong idx = 0;
 
   // multicast first so it's preferred by remote peers
-  if ((flags & CONNINFO_MULTICAST) && use_multicast_ && multicast_group_address_ != NetworkAddress()) {
+  const NetworkAddress multicast_group_addr = multicast_group_address();
+  if ((flags & CONNINFO_MULTICAST) && use_multicast() && multicast_group_addr != NetworkAddress::default_IPV4) {
     grow(locators);
-    address_to_locator(locators[idx++], multicast_group_address_.to_addr());
+    address_to_locator(locators[idx++], multicast_group_addr.to_addr());
   }
 #ifdef ACE_HAS_IPV6
-  if ((flags & CONNINFO_MULTICAST) && use_multicast_ && ipv6_multicast_group_address_ != NetworkAddress()) {
+  const NetworkAddress ipv6_multicast_group_addr = ipv6_multicast_group_address();
+  if ((flags & CONNINFO_MULTICAST) && use_multicast() && ipv6_multicast_group_addr != NetworkAddress::default_IPV6) {
     grow(locators);
-    address_to_locator(locators[idx++], ipv6_multicast_group_address_.to_addr());
+    address_to_locator(locators[idx++], ipv6_multicast_group_addr.to_addr());
   }
 #endif
 
   if (flags & CONNINFO_UNICAST) {
-    if (local_address() != NetworkAddress()) {
-      if (advertised_address() != NetworkAddress()) {
+    const NetworkAddress addr = (actual_local_address_ == NetworkAddress::default_IPV4) ? local_address() : actual_local_address_;
+    if (addr != NetworkAddress::default_IPV4) {
+      if (advertised_address() != NetworkAddress::default_IPV4) {
         grow(locators);
         address_to_locator(locators[idx], advertised_address().to_addr());
         if (locators[idx].port == 0) {
-          locators[idx].port = local_address().get_port_number();
+          locators[idx].port = addr.get_port_number();
         }
         ++idx;
-      } else if (local_address().is_any()) {
+      } else if (addr.is_any()) {
         typedef OPENDDS_VECTOR(ACE_INET_Addr) AddrVector;
         AddrVector addrs;
         get_interface_addrs(addrs);
@@ -227,25 +483,26 @@ RtpsUdpInst::populate_locator(TransportLocator& info, ConnectionInfoFlags flags)
           if (*adr_it != ACE_INET_Addr() && adr_it->get_type() == AF_INET) {
             grow(locators);
             address_to_locator(locators[idx], *adr_it);
-            locators[idx].port = local_address().get_port_number();
+            locators[idx].port = addr.get_port_number();
             ++idx;
           }
         }
       } else {
         grow(locators);
-        address_to_locator(locators[idx++], local_address().to_addr());
+        address_to_locator(locators[idx++], addr.to_addr());
       }
     }
 #ifdef ACE_HAS_IPV6
-    if (ipv6_local_address() != NetworkAddress()) {
-      if (ipv6_advertised_address() != NetworkAddress()) {
+    const NetworkAddress addr6 = (ipv6_actual_local_address_ == NetworkAddress::default_IPV6) ? ipv6_local_address() : ipv6_actual_local_address_;
+    if (addr6 != NetworkAddress::default_IPV6) {
+      if (ipv6_advertised_address() != NetworkAddress::default_IPV6) {
         grow(locators);
         address_to_locator(locators[idx], ipv6_advertised_address().to_addr());
         if (locators[idx].port == 0) {
-          locators[idx].port = ipv6_local_address().get_port_number();
+          locators[idx].port = addr6.get_port_number();
         }
         ++idx;
-      } else if (ipv6_local_address().is_any()) {
+      } else if (addr6.is_any()) {
         typedef OPENDDS_VECTOR(ACE_INET_Addr) AddrVector;
         AddrVector addrs;
         get_interface_addrs(addrs);
@@ -253,13 +510,13 @@ RtpsUdpInst::populate_locator(TransportLocator& info, ConnectionInfoFlags flags)
           if (*adr_it != ACE_INET_Addr() && adr_it->get_type() == AF_INET6) {
             grow(locators);
             address_to_locator(locators[idx], *adr_it);
-            locators[idx].port = ipv6_local_address().get_port_number();
+            locators[idx].port = addr6.get_port_number();
             ++idx;
           }
         }
       } else {
         grow(locators);
-        address_to_locator(locators[idx++], ipv6_local_address().to_addr());
+        address_to_locator(locators[idx++], addr6.to_addr());
       }
     }
 #endif
@@ -302,16 +559,6 @@ RtpsUdpInst::get_last_recv_locator(const GUID_t& remote_id,
   if (imp) {
     RtpsUdpTransport_rch rtps_impl = static_rchandle_cast<RtpsUdpTransport>(imp);
     rtps_impl->get_last_recv_locator(remote_id, locator);
-  }
-}
-
-void
-RtpsUdpInst::rtps_relay_address_change()
-{
-  TransportImpl_rch imp = get_impl();
-  if (imp) {
-    RtpsUdpTransport_rch rtps_impl = static_rchandle_cast<RtpsUdpTransport>(imp);
-    rtps_impl->rtps_relay_address_change();
   }
 }
 

@@ -2,7 +2,7 @@
 project(opendds_ace_tao_only CXX)
 enable_testing()
 
-find_package(OpenDDS REQUIRED COMPONENTS NO_OPENDDS)
+find_package(OpenDDS REQUIRED COMPONENTS NO_DEFAULTS TAO::tao_idl TAO::PortableServer)
 
 _opendds_save_cache(OPENDDS_AUTO_LINK_DCPS BOOL TRUE)
 

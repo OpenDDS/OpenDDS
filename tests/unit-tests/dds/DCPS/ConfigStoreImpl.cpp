@@ -2,7 +2,7 @@
 
 #include <dds/DCPS/Qos_Helper.h>
 
-#include <gtest/gtest.h>
+#include <gtestWrapper.h>
 
 using namespace OpenDDS::DCPS;
 
@@ -58,7 +58,8 @@ TEST(dds_DCPS_ConfigPair, key_has_prefix)
 
 TEST(dds_DCPS_ConfigStoreImpl, has)
 {
-  ConfigStoreImpl store;
+  ConfigTopic_rch topic = make_rch<ConfigTopic>();
+  ConfigStoreImpl store(topic);
   EXPECT_FALSE(store.has("key"));
   store.set_boolean("key", true);
   EXPECT_TRUE(store.has("key"));
@@ -66,7 +67,8 @@ TEST(dds_DCPS_ConfigStoreImpl, has)
 
 TEST(dds_DCPS_ConfigStoreImpl, set_get_boolean)
 {
-  ConfigStoreImpl store;
+  ConfigTopic_rch topic = make_rch<ConfigTopic>();
+  ConfigStoreImpl store(topic);
   EXPECT_TRUE(store.get_boolean("key", true));
   EXPECT_FALSE(store.get_boolean("key", false));
   store.set_boolean("key", "true");
@@ -77,7 +79,8 @@ TEST(dds_DCPS_ConfigStoreImpl, set_get_boolean)
 
 TEST(dds_DCPS_ConfigStoreImpl, set_get_int32)
 {
-  ConfigStoreImpl store;
+  ConfigTopic_rch topic = make_rch<ConfigTopic>();
+  ConfigStoreImpl store(topic);
   EXPECT_EQ(store.get_int32("key", -37), -37);
   store.set_int32("key", -38);
   EXPECT_EQ(store.get_int32("key", -37), -38);
@@ -87,17 +90,19 @@ TEST(dds_DCPS_ConfigStoreImpl, set_get_int32)
 
 TEST(dds_DCPS_ConfigStoreImpl, set_get_uint32)
 {
-  ConfigStoreImpl store;
-  EXPECT_EQ(store.get_uint32("key", 37), 37);
+  ConfigTopic_rch topic = make_rch<ConfigTopic>();
+  ConfigStoreImpl store(topic);
+  EXPECT_EQ(store.get_uint32("key", 37), 37u);
   store.set_uint32("key", 38);
-  EXPECT_EQ(store.get_uint32("key", 37), 38);
+  EXPECT_EQ(store.get_uint32("key", 37), 38u);
   store.set_string("key", "not a uint32");
-  EXPECT_EQ(store.get_uint32("key", 37), 37);
+  EXPECT_EQ(store.get_uint32("key", 37), 37u);
 }
 
 TEST(dds_DCPS_ConfigStoreImpl, set_get_float64)
 {
-  ConfigStoreImpl store;
+  ConfigTopic_rch topic = make_rch<ConfigTopic>();
+  ConfigStoreImpl store(topic);
   EXPECT_EQ(store.get_float64("key", 1.5), 1.5);
   store.set_float64("key", 2);
   EXPECT_EQ(store.get_float64("key", 1.5), 2);
@@ -107,7 +112,8 @@ TEST(dds_DCPS_ConfigStoreImpl, set_get_float64)
 
 TEST(dds_DCPS_ConfigStoreImpl, set_get_string)
 {
-  ConfigStoreImpl store;
+  ConfigTopic_rch topic = make_rch<ConfigTopic>();
+  ConfigStoreImpl store(topic);
   CORBA::String_var str = store.get_string("key", "default");
   EXPECT_STREQ(str, "default");
   store.set_string("key", "not default");
@@ -119,7 +125,8 @@ TEST(dds_DCPS_ConfigStoreImpl, set_get_duration)
 {
   using OpenDDS::DCPS::operator==;
 
-  ConfigStoreImpl store;
+  ConfigTopic_rch topic = make_rch<ConfigTopic>();
+  ConfigStoreImpl store(topic);
   const DDS::Duration_t default_duration = make_duration_t(1,2);
   const DDS::Duration_t duration = make_duration_t(3,4);
   EXPECT_TRUE(store.get_duration("key", default_duration) == default_duration);
@@ -131,7 +138,8 @@ TEST(dds_DCPS_ConfigStoreImpl, set_get_duration)
 
 TEST(dds_DCPS_ConfigStoreImpl, unset)
 {
-  ConfigStoreImpl store;
+  ConfigTopic_rch topic = make_rch<ConfigTopic>();
+  ConfigStoreImpl store(topic);
   store.set_boolean("key", true);
   store.unset("key");
   EXPECT_FALSE(store.has("key"));
@@ -139,17 +147,22 @@ TEST(dds_DCPS_ConfigStoreImpl, unset)
 
 TEST(dds_DCPS_ConfigStoreImpl, set_get_String)
 {
-  ConfigStoreImpl store;
+  ConfigTopic_rch topic = make_rch<ConfigTopic>();
+  ConfigStoreImpl store(topic);
   const String default_string = "default";
   const String other_string = "other";
   EXPECT_EQ(store.get("key", default_string), default_string);
   store.set("key", other_string);
   EXPECT_EQ(store.get("key", default_string), other_string);
+
+  store.set("key", "");
+  EXPECT_EQ(store.get("key", default_string, false), default_string);
 }
 
 TEST(dds_DCPS_ConfigStoreImpl, set_get_TimeDuration_seconds)
 {
-  ConfigStoreImpl store;
+  ConfigTopic_rch topic = make_rch<ConfigTopic>();
+  ConfigStoreImpl store(topic);
   const TimeDuration default_duration(1,2);
   const TimeDuration duration(3);
   EXPECT_EQ(store.get("key", default_duration, ConfigStoreImpl::Format_IntegerSeconds), default_duration);
@@ -161,7 +174,8 @@ TEST(dds_DCPS_ConfigStoreImpl, set_get_TimeDuration_seconds)
 
 TEST(dds_DCPS_ConfigStoreImpl, set_get_TimeDuration_milliseconds)
 {
-  ConfigStoreImpl store;
+  ConfigTopic_rch topic = make_rch<ConfigTopic>();
+  ConfigStoreImpl store(topic);
   const TimeDuration default_duration(1,2);
   const TimeDuration duration(3,4000);
   EXPECT_EQ(store.get("key", default_duration, ConfigStoreImpl::Format_IntegerMilliseconds), default_duration);
@@ -173,57 +187,158 @@ TEST(dds_DCPS_ConfigStoreImpl, set_get_TimeDuration_milliseconds)
 
 TEST(dds_DCPS_ConfigStoreImpl, get_NetworkAddress)
 {
-  const NetworkAddress default_value;
-  const NetworkAddress value("127.0.0.1:0");
-  ConfigStoreImpl store;
-  EXPECT_EQ(store.get("key", default_value), default_value);
-  store.set("key", "127.0.0.1");
-  EXPECT_EQ(store.get("key", default_value), value);
-  store.set_string("key", "not a network address");
-  EXPECT_EQ(store.get("key", default_value), default_value);
-}
+  ConfigTopic_rch topic = make_rch<ConfigTopic>();
+  ConfigStoreImpl store(topic);
 
-TEST(dds_DCPS_ConfigStoreImpl, connect_disconnect)
-{
-  ConfigStoreImpl store;
-  ConfigReader_rch reader = make_rch<ConfigReader>(DataReaderQosBuilder());
+  {
+    const NetworkAddress default_value("0.0.0.0:0");
+    EXPECT_EQ(store.get("key", default_value, ConfigStoreImpl::Format_No_Port, ConfigStoreImpl::Kind_IPV4), default_value);
 
-  store.connect(reader);
-  store.set_string("key", "value1");
-  ConfigReader::SampleSequence datas;
-  InternalSampleInfoSequence infos;
-  reader->take(datas, infos, DDS::LENGTH_UNLIMITED,
-               DDS::ANY_SAMPLE_STATE, DDS::ANY_VIEW_STATE, DDS::ANY_INSTANCE_STATE);
-  bool found_it = false;
-  for (size_t idx = 0; !found_it && idx != datas.size(); ++idx) {
-    if (datas[idx] == ConfigPair("key", "value1")) {
-      found_it = true;
+    {
+      const NetworkAddress value_no_port("127.0.0.1:0");
+      store.set("key", value_no_port, ConfigStoreImpl::Format_No_Port, ConfigStoreImpl::Kind_IPV4);
+      EXPECT_EQ(store.get("key", default_value, ConfigStoreImpl::Format_No_Port, ConfigStoreImpl::Kind_IPV4), value_no_port);
+    }
+
+    {
+      const NetworkAddress value_required_port("127.0.0.1:80");
+      store.set("key", value_required_port, ConfigStoreImpl::Format_Required_Port, ConfigStoreImpl::Kind_IPV4);
+      EXPECT_EQ(store.get("key", default_value, ConfigStoreImpl::Format_Required_Port, ConfigStoreImpl::Kind_IPV4), value_required_port);
+    }
+
+    {
+      const NetworkAddress value_optional_port("127.0.0.1:0");
+      store.set("key", value_optional_port, ConfigStoreImpl::Format_Optional_Port, ConfigStoreImpl::Kind_IPV4);
+      EXPECT_EQ(store.get("key", default_value, ConfigStoreImpl::Format_Optional_Port, ConfigStoreImpl::Kind_IPV4), value_optional_port);
+    }
+
+    {
+      const NetworkAddress value_optional_port("127.0.0.1:80");
+      store.set("key", value_optional_port, ConfigStoreImpl::Format_Optional_Port, ConfigStoreImpl::Kind_IPV4);
+      EXPECT_EQ(store.get("key", default_value, ConfigStoreImpl::Format_Optional_Port, ConfigStoreImpl::Kind_IPV4), value_optional_port);
+    }
+
+    {
+      store.set_string("key", "not a network address");
+      EXPECT_EQ(store.get("key", default_value, ConfigStoreImpl::Format_Optional_Port, ConfigStoreImpl::Kind_IPV4), default_value);
+    }
+
+    {
+      const NetworkAddress value_required_port("127.0.0.1:80");
+      store.set("key", value_required_port, ConfigStoreImpl::Format_Required_Port, ConfigStoreImpl::Kind_ANY);
+      EXPECT_EQ(store.get("key", default_value, ConfigStoreImpl::Format_Required_Port, ConfigStoreImpl::Kind_ANY), value_required_port);
     }
   }
-  EXPECT_TRUE(found_it);
-  store.disconnect(reader);
-  store.set_string("key", "value2");
-  reader->take(datas, infos, DDS::LENGTH_UNLIMITED,
-               DDS::ANY_SAMPLE_STATE, DDS::ANY_VIEW_STATE, DDS::ANY_INSTANCE_STATE);
-  found_it = false;
-  for (size_t idx = 0; !found_it && idx != datas.size(); ++idx) {
-    if (datas[idx] == ConfigPair("key", "value2")) {
-      found_it = true;
+
+#if ACE_HAS_IPV6
+  {
+    const NetworkAddress default_value("::");
+    EXPECT_EQ(store.get("key6", default_value, ConfigStoreImpl::Format_No_Port, ConfigStoreImpl::Kind_IPV6), default_value);
+
+    {
+      const NetworkAddress value_no_port("::1");
+      store.set("key6", value_no_port, ConfigStoreImpl::Format_No_Port, ConfigStoreImpl::Kind_IPV6);
+      EXPECT_EQ(store.get("key6", default_value, ConfigStoreImpl::Format_No_Port, ConfigStoreImpl::Kind_IPV6), value_no_port);
+    }
+
+    {
+      const NetworkAddress value_required_port("[::1]:80");
+      store.set("key6", value_required_port, ConfigStoreImpl::Format_Required_Port, ConfigStoreImpl::Kind_IPV6);
+      EXPECT_EQ(store.get("key6", default_value, ConfigStoreImpl::Format_Required_Port, ConfigStoreImpl::Kind_IPV6), value_required_port);
+    }
+
+    {
+      const NetworkAddress value_optional_port("::1");
+      store.set("key6", value_optional_port, ConfigStoreImpl::Format_Optional_Port, ConfigStoreImpl::Kind_IPV6);
+      EXPECT_EQ(store.get("key6", default_value, ConfigStoreImpl::Format_Optional_Port, ConfigStoreImpl::Kind_IPV6), value_optional_port);
+    }
+
+    {
+      const NetworkAddress value_optional_port("[::1]:80");
+      store.set("key6", value_optional_port, ConfigStoreImpl::Format_Optional_Port, ConfigStoreImpl::Kind_IPV6);
+      EXPECT_EQ(store.get("key6", default_value, ConfigStoreImpl::Format_Optional_Port, ConfigStoreImpl::Kind_IPV6), value_optional_port);
+    }
+
+    {
+      store.set_string("key6", "not a network address");
+      EXPECT_EQ(store.get("key6", default_value, ConfigStoreImpl::Format_Optional_Port, ConfigStoreImpl::Kind_IPV6), default_value);
+    }
+
+    {
+      const NetworkAddress value_required_port("[::1]:80");
+      store.set("key6", value_required_port, ConfigStoreImpl::Format_Required_Port, ConfigStoreImpl::Kind_ANY);
+      EXPECT_EQ(store.get("key6", default_value, ConfigStoreImpl::Format_Required_Port, ConfigStoreImpl::Kind_ANY), value_required_port);
     }
   }
-  EXPECT_FALSE(found_it);
+#endif
 }
 
-TEST(dds_DCPS_ConfigStoreImpl, contains_prefix)
+TEST(dds_DCPS_ConfigStoreImpl, take_has_prefix)
 {
-  ConfigStoreImpl store;
-  ConfigReader_rch reader = make_rch<ConfigReader>(store.datareader_qos());
-  store.connect(reader);
+  ConfigTopic_rch topic = make_rch<ConfigTopic>();
+  ConfigStoreImpl store1(topic);
+  ConfigReader_rch reader = make_rch<ConfigReader>(store1.datareader_qos());
+  topic->connect(reader);
 
-  store.set("key", "value");
-  EXPECT_TRUE(ConfigStoreImpl::contains_prefix(reader, "ke"));
-  store.set("key", "value");
-  EXPECT_FALSE(ConfigStoreImpl::contains_prefix(reader, "notkey"));
+  store1.set("PREFIX1_key", "value");
+  EXPECT_TRUE(take_has_prefix(reader, "PREFIX1"));
+  EXPECT_FALSE(take_has_prefix(reader, "PREFIX1"));
 
-  store.disconnect(reader);
+  topic->disconnect(reader);
+}
+
+namespace {
+  class Listener : public ConfigListener {
+  public:
+    Listener(JobQueue_rch job_queue)
+      : ConfigListener(job_queue)
+    {}
+
+    MOCK_METHOD1(on_data_available, void(ConfigReader_rch));
+  };
+}
+
+TEST(dds_DCPS_ConfigStoreImpl, process_section)
+{
+  JobQueue_rch job_queue = make_rch<JobQueue>(ACE_Reactor::instance());
+  ConfigTopic_rch topic = make_rch<ConfigTopic>();
+  ConfigStoreImpl config_store(topic);
+  config_store.set("MYPREFIX_MY_SECTION_THIRDKEY", "firstvalue");
+  ConfigReader_rch reader = make_rch<ConfigReader>(config_store.datareader_qos());
+  RcHandle<Listener> listener = make_rch<Listener>(job_queue);
+  ACE_Configuration_Heap config;
+  ACE_Configuration_Section_Key section_key;
+  config.open();
+  config.open_section(config.root_section(), ACE_TEXT("my_section"), true, section_key);
+  config.set_string_value(section_key, ACE_TEXT("mykey"), ACE_TEXT("myvalue"));
+  config.set_string_value(section_key, ACE_TEXT("anotherkey"), ACE_TEXT("$file"));
+  config.set_string_value(section_key, ACE_TEXT("thirdkey"), ACE_TEXT("secondvalue"));
+
+  EXPECT_CALL(*listener.get(), on_data_available(reader)).Times(2);
+
+  process_section(config_store, reader, listener, "MYPREFIX", config, config.root_section(), "my file name", false);
+
+  EXPECT_EQ(config_store.get("MYPREFIX_MY_SECTION_MYKEY", "default"), "myvalue");
+  EXPECT_EQ(config_store.get("MYPREFIX_MY_SECTION_ANOTHERKEY", "default"), "my file name");
+  EXPECT_EQ(config_store.get("MYPREFIX_MY_SECTION_THIRDKEY", "default"), "firstvalue");
+}
+
+TEST(dds_DCPS_ConfigStoreImpl, process_section_allow_overwrite)
+{
+  ConfigTopic_rch topic = make_rch<ConfigTopic>();
+  ConfigStoreImpl config_store(topic);
+  config_store.set("MYPREFIX_MY_SECTION_THIRDKEY", "firstvalue");
+  ACE_Configuration_Heap config;
+  ACE_Configuration_Section_Key section_key;
+  config.open();
+  config.open_section(config.root_section(), ACE_TEXT("my_section"), true, section_key);
+  config.set_string_value(section_key, ACE_TEXT("mykey"), ACE_TEXT("myvalue"));
+  config.set_string_value(section_key, ACE_TEXT("anotherkey"), ACE_TEXT("$file"));
+  config.set_string_value(section_key, ACE_TEXT("thirdkey"), ACE_TEXT("secondvalue"));
+
+  process_section(config_store, ConfigReader_rch(), ConfigReaderListener_rch(), "MYPREFIX", config, config.root_section(), "my file name", true);
+
+  EXPECT_EQ(config_store.get("MYPREFIX_MY_SECTION_MYKEY", "default"), "myvalue");
+  EXPECT_EQ(config_store.get("MYPREFIX_MY_SECTION_ANOTHERKEY", "default"), "my file name");
+  EXPECT_EQ(config_store.get("MYPREFIX_MY_SECTION_THIRDKEY", "default"), "secondvalue");
 }

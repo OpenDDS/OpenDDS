@@ -111,8 +111,6 @@ be_util::usage()
     " -Sdefault              exclude default TypeSupport generators from output\n"
     " -Gitl                  generate ITL\n"
     " -GfaceTS               generate FACE TS API for DCPS data types\n"
-    " -Grapidjson            generate TypeSupport for converting data samples to\n"
-    "                        RapidJSON JavaScript objects\n"
     " -Gxtypes-complete      generate XTypes complete TypeObject and TypeIdentifier\n"
     " -Gequality             generate == and != for structs and unions\n"
     " --filename-only-includes                strip leading directories from generated\n"

@@ -132,7 +132,7 @@ class DocEnv:
         return None
 
     def do_markdown(self):
-        self.sphinx_build('markdown')
+        self.sphinx_build('markdown', '-Dsmartquotes_action=')
         return None
 
 

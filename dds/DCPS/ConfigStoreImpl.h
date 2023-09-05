@@ -14,12 +14,17 @@
 
 #include "dds/DdsDcpsInfrastructureC.h"
 
+#include <ace/Configuration.h>
+
 #include <cstring>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
 namespace DCPS {
+
+const char OPENDDS_CONFIG_DEBUG_LOGGING[] = "OPENDDS_CONFIG_DEBUG_LOGGING";
+const bool OPENDDS_CONFIG_DEBUG_LOGGING_default = false;
 
 /**
  * @class ConfigPair
@@ -83,7 +88,21 @@ public:
     Format_IntegerMilliseconds
   };
 
-  ConfigStoreImpl();
+  enum NetworkAddressFormat {
+    Format_No_Port,
+    Format_Required_Port,
+    Format_Optional_Port
+  };
+
+  enum NetworkAddressKind {
+    Kind_ANY,
+    Kind_IPV4
+#ifdef ACE_HAS_IPV6
+    , Kind_IPV6
+#endif
+  };
+
+  ConfigStoreImpl(ConfigTopic_rch config_topic);
   ~ConfigStoreImpl();
 
   DDS::Boolean has(const char* key);
@@ -124,7 +143,8 @@ public:
   void set(const char* key,
            const String& value);
   String get(const char* key,
-             const String& value) const;
+             const String& value,
+             bool allow_empty = true) const;
 
   void set(const char* key,
            const TimeDuration& value,
@@ -133,32 +153,40 @@ public:
                    const TimeDuration& value,
                    IntegerTimeFormat format) const;
 
-  // Currently, this only supports IPv4 Addresses without port numbers.
+  void set(const char* key,
+           const NetworkAddress& value,
+           NetworkAddressFormat format,
+           NetworkAddressKind kind);
   NetworkAddress get(const char* key,
-                     const NetworkAddress& value) const;
+                     const NetworkAddress& value,
+                     NetworkAddressFormat format,
+                     NetworkAddressKind kind) const;
 
   static DDS::DataWriterQos datawriter_qos();
   static DDS::DataReaderQos datareader_qos();
 
-  void connect(ConfigReader_rch config_reader)
-  {
-    config_topic_->connect(config_reader);
-  }
-
-  void disconnect(ConfigReader_rch config_reader)
-  {
-    config_topic_->disconnect(config_reader);
-  }
-
-  // Takes all samples from reader and returns true if any have the given prefix.
-  static bool contains_prefix(ConfigReader_rch reader,
-                              const String& prefix);
+  static bool debug_logging;
 
 private:
   ConfigTopic_rch config_topic_;
   ConfigWriter_rch config_writer_;
   ConfigReader_rch config_reader_;
 };
+
+// Takes all samples from reader and returns true if any have the key prefix.
+OpenDDS_Dcps_Export bool
+take_has_prefix(ConfigReader_rch reader,
+                const String& prefix);
+
+OpenDDS_Dcps_Export void
+process_section(ConfigStoreImpl& config_store,
+                ConfigReader_rch reader,
+                ConfigReaderListener_rch listener,
+                const String& key_prefix,
+                ACE_Configuration_Heap& config,
+                const ACE_Configuration_Section_Key& base,
+                const String& filename,
+                bool allow_overwrite);
 
 } // namespace DCPS
 } // namespace OpenDDS

@@ -10,7 +10,9 @@
 #include <dds/DCPS/security/OpenDDS_Security_Export.h>
 
 #include <string>
+#include <vector>
 #include <map>
+#include <algorithm>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -18,9 +20,42 @@ namespace OpenDDS {
 namespace Security {
 namespace SSL {
 
+// A parser for subject names represented by the string format described in RFC 4514.
+class OpenDDS_Security_Export Parser {
+public:
+  typedef std::map<std::string, std::string> RelativeDistinguishedName;
+  typedef std::vector<RelativeDistinguishedName> RDNVec;
+
+  Parser(std::string in) : in_(in), pos_(0) {}
+
+  // Parse and store the result to the provided vector.
+  bool parse(RDNVec& store);
+  void reset(std::string in);
+
+private:
+  bool is_alpha(char c) const;
+  bool accept(char c);
+  bool distinguished_name(RDNVec&);
+  bool relative_distinguished_name(RelativeDistinguishedName&);
+  bool attribute_type_value(RelativeDistinguishedName&);
+  bool attribute_type(std::string& at);
+  bool validate_attribute_type(const std::string& at) const;
+
+  bool attribute_value(std::string& av);
+  void unescape(std::string& av) const;
+  void replace_all(std::string& str, const std::string& s, const std::string& t) const;
+  bool validate_attribute_value(const std::string& av) const;
+
+  std::string in_;
+
+  // Current position in the input string.
+  std::string::size_type pos_;
+};
+
 class OpenDDS_Security_Export SubjectName {
- private:
-    typedef std::map<std::string, std::string> AttrMap;
+private:
+  typedef std::map<std::string, std::string> AttrInRDN;
+  typedef std::vector<AttrInRDN> AttrVec;
 
 public:
   SubjectName();
@@ -40,10 +75,12 @@ public:
   bool operator==(const SubjectName&) const;
   bool operator!=(const SubjectName&) const;
 
-  typedef AttrMap::const_iterator const_iterator;
-  const_iterator begin() const { return map_.begin(); }
-  const_iterator end() const { return map_.end(); }
-  const_iterator find(const std::string& key) const { return map_.find(key); }
+  typedef AttrVec::const_iterator const_iterator;
+  const_iterator begin() const { return attr_vec_.begin(); }
+  const_iterator end() const { return attr_vec_.end(); }
+
+  // Return iterator to the map that contains this key.
+  const_iterator find(const std::string& key) const;
 
 private:
   /**
@@ -65,7 +102,7 @@ private:
                            const char* a_del, const char* s_trim,
                            const char* a_trim, bool push_back);
 
-  AttrMap map_;
+  AttrVec attr_vec_;
 };
 
 }  // namespace SSL

@@ -42,7 +42,7 @@ MulticastSession::MulticastSession(RcHandle<ReactorInterceptor> interceptor,
                                      interceptor,
                                      rchandle_from(this),
                                      &MulticastSession::send_all_syn))
-  , initial_syn_delay_(link->config()->syn_interval_)
+  , initial_syn_delay_(link->config()->syn_interval())
   , config_name(link->config()->name())
 {}
 
