@@ -24,7 +24,7 @@ GuidAddrSet::record_activity(const Proxy& proxy,
 
   if (config_.restart_detection()) {
     Remote remote(remote_address.addr, src_guid);
-    const auto result = remote_map_.insert(std::make_pair(remote, src_guid));
+    auto result = remote_map_.insert(std::make_pair(remote, src_guid));
     if (result.second) {
       relay_stats_reporter_.remote_map_size(static_cast<uint32_t>(remote_map_.size()), now);
     }
@@ -36,18 +36,22 @@ GuidAddrSet::record_activity(const Proxy& proxy,
       }
       rtps_discovery_->remove_domain_participant(config_.application_domain(), config_.application_participant_guid(), result.first->second);
       const auto pos = guid_addr_set_map_.find(result.first->second);
+      const auto prev_guid = result.first->second;
       if (pos != guid_addr_set_map_.end()) {
-        remove(proxy, result.first->second, pos, now, &relay_participant_status_reporter_);
+        remove(proxy, prev_guid, pos, now, &relay_participant_status_reporter_);
+        result.first = remote_map_.find(remote); // remote_map_ was updated by remove()
+      }
+      if (result.first != remote_map_.end()) {
+        result.first->second = src_guid;
       }
       if (config_.admission_control_queue_size()) {
         for (auto it = admission_control_queue_.begin(); it != admission_control_queue_.end(); ++it) {
-          if (OpenDDS::DCPS::equal_guid_prefixes(it->prefix_, result.first->second.guidPrefix)) {
+          if (OpenDDS::DCPS::equal_guid_prefixes(it->prefix_, prev_guid.guidPrefix)) {
             admission_control_queue_.erase(it);
             break;
           }
         }
       }
-      result.first->second = src_guid;
     }
   }
 
