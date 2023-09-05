@@ -1,4 +1,4 @@
-.. news-prs: 4162 4241
+.. news-prs: 4162 4241 4242
 .. news-start-section: Additions
 - OpenDDS now stores ``rtps_udp`` transport configuration in the key-value store.
   The following members of ``RtpsUdpInst`` must now be accessed with getters and setters:
@@ -35,5 +35,11 @@
   -  ``ttl_``
   -  ``rcv_buffer_size_``
   -  ``async_send_``
+
+- OpenDDS now stores ``shmem`` transport configuration in the key-value store.
+  The following members of ``ShmemInst`` must now be accessed with getters and setters:
+
+  -  ``pool_size_``
+  -  ``datalink_control_size_``
 
 .. news-end-section
