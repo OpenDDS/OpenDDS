@@ -349,12 +349,22 @@ namespace {
 ACE_INLINE OpenDDS_Dcps_Export
 String to_dds_string(const DDS::Duration_t& duration)
 {
+  if (is_infinite(duration)) {
+    return "DURATION_INFINITY";
+  }
+
   return to_dds_string(duration.sec) + '.' + left_pad(to_dds_string(duration.nanosec), '0', 9);
 }
 
 ACE_INLINE OpenDDS_Dcps_Export
 bool from_dds_string(const String& str, DDS::Duration_t& duration)
 {
+  if (str == "DURATION_INFINITY") {
+    duration.sec = DDS::DURATION_INFINITE_SEC;
+    duration.nanosec = DDS::DURATION_INFINITE_NSEC;
+    return true;
+  }
+
   DDS::Duration_t temp = { 0, 0 };
 
   const size_t decimal_pos = str.find_first_of('.');

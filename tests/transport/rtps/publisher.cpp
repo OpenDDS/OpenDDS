@@ -228,7 +228,7 @@ int DDS_TEST::test(ACE_TString host, u_short port)
     return 1;
   }
   rtps_inst->datalink_release_delay(0);
-  rtps_inst->heartbeat_period_ = TimeDuration::from_msec(100);
+  rtps_inst->heartbeat_period(TimeDuration::from_msec(100));
 
   TransportConfig_rch cfg = TheTransportRegistry->create_config("cfg");
   cfg->instances_.push_back(inst);
@@ -544,7 +544,7 @@ int DDS_TEST::test(ACE_TString host, u_short port)
   }
 
   // Allow enough time for a HEARTBEAT message to be generated
-  ACE_OS::sleep((rtps_inst->heartbeat_period_ * 2.0).value());
+  ACE_OS::sleep((rtps_inst->heartbeat_period() * 2.0).value());
 
 
   // 3. cleanup

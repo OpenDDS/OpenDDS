@@ -1,28 +1,7 @@
 # Distributed under the OpenDDS License. See accompanying LICENSE
 # file or http://www.opendds.org/license.html for details.
 #
-# Common system for the OpenDDS*Config.cmake files to declare imported
-# libraries and executables.
-#
-# The system works like this:
-# - Declare a list of all libraries to find. This is the library group. This
-#   must use the filename minus any "lib" prefix and file extensions.
-# - Find any programs needed manually using find_program.
-# - For each library in the group list, a list can be defined to add
-#   properties. They must begin with a prefix that is the upper case version of
-#   the name in the group list.
-#   - <prefix>_DEPS: a required list of required libraries and programs.
-#     Programs names must be the name from find_program. Libraries must be the
-#     name the user would use (<group>::<name>).
-#   - <prefix>_INCLUDE_DIRS
-#   - <prefix>_COMPILE_DEFINITIONS
-#   - <prefix>_COMPILE_OPTIONS
-# - Call _opendds_find_our_libraries with the group name and group lib list.
-# - Call _opendds_found_required_deps with the FOUND variable name and a list
-#   of required dependencies. The list should use the format
-#   "SelectLibraryConfigurations" makes.
-# - If found call _opendds_add_target_binary to declare imported execuatables
-#   and _opendds_add_library_group to declare the imported libraries.
+# Common system for to declare imported libraries and executables.
 
 if(_OPENDDS_IMPORT_COMMON_CMAKE)
   return()
@@ -38,22 +17,144 @@ if(NOT DEFINED ACE_ROOT OR NOT DEFINED TAO_ROOT)
   return()
 endif()
 
-function(_opendds_find_our_libraries_for_config lib_group_name libs config suffix)
+macro(_opendds_append name value)
+  string(TOUPPER "_OPENDDS_${name}" _var)
+  list(APPEND "${_var}" "${value}")
+  set("${_var}" "${${_var}}" PARENT_SCOPE)
+endmacro()
+
+set(_OPENDDS_ALL_GROUPS)
+set(_OPENDDS_ALL_TARGETS)
+set(_OPENDDS_ALL_LIBRARIES)
+set(_OPENDDS_ALL_EXECUTABLES)
+function(_opendds_group name)
+  set(no_value_options)
+  set(single_value_options)
+  set(multi_value_options DEFAULT_REQUIRED)
+  cmake_parse_arguments(arg
+    "${no_value_options}" "${single_value_options}" "${multi_value_options}" ${ARGN})
+
+  _opendds_append(ALL_GROUPS "${name}")
+  set(_opendds_group_name "${name}" PARENT_SCOPE)
+  string(TOUPPER "_OPENDDS_${name}" prefix)
+  set(_opendds_group_prefix "${prefix}" PARENT_SCOPE)
+  set("${prefix}_DEFAULT_REQUIRED" ${arg_DEFAULT_REQUIRED} PARENT_SCOPE)
+  set("${prefix}_ALL_TARGETS" PARENT_SCOPE)
+  set("${prefix}_ALL_LIBRARIES" PARENT_SCOPE)
+  set("${prefix}_ALL_EXECUTABLES" PARENT_SCOPE)
+endfunction()
+
+function(_opendds_group_lib name)
+  set(no_value_options)
+  set(single_value_options MPC_NAME)
+  set(multi_value_options DEPENDS)
+  cmake_parse_arguments(arg
+    "${no_value_options}" "${single_value_options}" "${multi_value_options}" ${ARGN})
+  set(target "${_opendds_group_name}::${name}")
+
+  _opendds_append("ALL_TARGETS" "${target}")
+  _opendds_append("${_opendds_group_name}_ALL_TARGETS" "${target}")
+  _opendds_append("ALL_LIBRARIES" "${target}")
+  _opendds_append("${_opendds_group_name}_ALL_LIBRARIES" "${name}")
+
+  string(TOUPPER "${name}" upper)
+  set(prefix "${_opendds_group_prefix}_${upper}")
+  set("${prefix}_DEPENDS" "${arg_DEPENDS}" PARENT_SCOPE)
+  if(NOT DEFINED arg_MPC_NAME)
+    set(arg_MPC_NAME "${name}")
+  endif()
+  set("${prefix}_MPC_NAME" "${arg_MPC_NAME}" PARENT_SCOPE)
+endfunction()
+
+function(_opendds_group_exe name)
+  set(no_value_options)
+  set(single_value_options MPC_NAME)
+  set(multi_value_options DEPENDS EXTRA_BIN_DIRS)
+  cmake_parse_arguments(arg
+    "${no_value_options}" "${single_value_options}" "${multi_value_options}" ${ARGN})
+  set(target "${_opendds_group_name}::${name}")
+
+  _opendds_append("ALL_TARGETS" "${target}")
+  _opendds_append("${_opendds_group_name}_ALL_TARGETS" "${target}")
+  _opendds_append("ALL_EXECUTABLES" "${target}")
+  _opendds_append("${_opendds_group_name}_ALL_EXECUTABLES" "${name}")
+
+  string(TOUPPER "${name}" upper)
+  set(prefix "${_opendds_group_prefix}_${upper}")
+  set("${prefix}_DEPENDS" "${arg_DEPENDS}" PARENT_SCOPE)
+  if(NOT DEFINED arg_MPC_NAME)
+    set(arg_MPC_NAME "${name}")
+  endif()
+  set("${prefix}_MPC_NAME" "${arg_MPC_NAME}" PARENT_SCOPE)
+
+  string(TOUPPER "${_opendds_group_name}" group_upper)
+  set(bin_dirs "${${group_upper}_BIN_DIR}")
+  if(arg_EXTRA_BIN_DIRS)
+    list(APPEND bin_dirs ${arg_EXTRA_BIN_DIRS})
+  endif()
+  list(REMOVE_DUPLICATES bin_dirs)
+  set("${prefix}_BIN_DIRS" "${bin_dirs}" PARENT_SCOPE)
+endfunction()
+
+function(_opendds_get_lib_filename filename_var group_name short_name)
+  if(short_name STREQUAL "${group_name}")
+    set(filename "${short_name}")
+  else()
+    set(filename "${group_name}_${short_name}")
+  endif()
+  set("${filename_var}" "${filename}" PARENT_SCOPE)
+endfunction()
+
+function(_opendds_find_our_libraries_for_config group libs config suffix)
+  set(debug FALSE)
+  if(imports IN_LIST OPENDDS_CMAKE_VERBOSE)
+    set(debug TRUE)
+  endif()
+
+  string(TOUPPER "_OPENDDS_${group}" group_prefix)
+
   if(MSVC AND OPENDDS_STATIC)
     set(suffix "s${suffix}")
   endif()
 
-  set(lib_dir "${${lib_group_name}_LIB_DIR}")
+  string(TOUPPER "${group}_LIB_DIR" lib_dir_var)
+  set(lib_dir "${${lib_dir_var}}")
 
   foreach(lib ${libs})
+    set(short_name "${lib}")
+    set(target "${group}::${lib}")
+    _opendds_get_lib_filename(lib "${group}" "${lib}")
     set(lib_file_base "${lib}${suffix}")
-    string(TOUPPER ${lib} var_prefix)
-    set(lib_var "${var_prefix}_LIBRARY_${config}")
+    string(TOUPPER "${group_prefix}_${short_name}" lib_prefix)
+    string(TOUPPER "${lib}" upper)
+    set(lib_var "${upper}_LIBRARY_${config}")
+    set(found_var "${upper}_LIBRARY_FOUND")
+    string(TOUPPER "${group}_IS_BEING_BUILT" group_is_being_built_var)
+    set(group_is_being_built "${${group_is_being_built_var}}")
+
+    if(TARGET "${target}")
+      if(group_is_being_built)
+        set(${lib_var} TARGET-TRUE CACHE INTERNAL "" FORCE)
+        set(${found_var} TRUE CACHE INTERNAL "" FORCE)
+      endif()
+      if(debug)
+        message(STATUS "${config} lib ${target} is already a target")
+      endif()
+      continue()
+    endif()
+
+    # If there are configuration types (like VS) and it doesn't find release,
+    # then that prevents debug from being found.
+    if(DEFINED "${found_var}" AND NOT "${${found_var}}" AND NOT CMAKE_CONFIGURATION_TYPES)
+      if(debug)
+        message(STATUS "lib ${target} already not found")
+      endif()
+      continue()
+    endif()
 
     find_library(${lib_var} "${lib_file_base}" HINTS "${lib_dir}")
-    set(found_var "${var_prefix}_LIBRARY_FOUND")
     if(${lib_var})
-      set(${found_var} TRUE PARENT_SCOPE)
+      set(${found_var} TRUE CACHE INTERNAL "" FORCE)
 
       # Workaround https://gitlab.kitware.com/cmake/cmake/-/issues/23249
       # These paths might be symlinks and IMPORTED_RUNTIME_ARTIFACTS seems to
@@ -63,8 +164,10 @@ function(_opendds_find_our_libraries_for_config lib_group_name libs config suffi
       # find_library makes cache variables, so we have to override it.
       set(${lib_var} "${${lib_var_real}}" CACHE FILEPATH "" FORCE)
 
-      if(OPENDDS_CMAKE_VERBOSE)
-        message(STATUS "${lib_var}: ${${lib_var_real}}")
+      if(debug)
+        message(STATUS "${config} lib ${target} found: ${${lib_var_real}}")
+      elseif(OPENDDS_CMAKE_VERBOSE)
+        message(STATUS "${config} lib ${target} found")
       endif()
 
       if(MSVC AND NOT OPENDDS_STATIC)
@@ -74,32 +177,65 @@ function(_opendds_find_our_libraries_for_config lib_group_name libs config suffi
         find_file("${lib_var}_DLL" "${lib_file_base}.dll" HINTS "${lib_dir}")
       endif()
     elseif(NOT DEFINED ${found_var})
-      if(OPENDDS_CMAKE_VERBOSE)
-        message(STATUS "${lib_var}: NOT FOUND")
+      if(debug)
+        message(STATUS "${config} lib ${target} NOT FOUND")
       endif()
-      set(${found_var} FALSE PARENT_SCOPE)
+      set(${found_var} FALSE CACHE INTERNAL "" FORCE)
     endif()
   endforeach()
 endfunction()
 
+function(_opendds_find_executables group exes)
+  set(debug FALSE)
+  if(imports IN_LIST OPENDDS_CMAKE_VERBOSE)
+    set(debug TRUE)
+  endif()
+
+  string(TOUPPER "${group}" group_upper)
+  set(group_prefix "_OPENDDS_${group_upper}")
+  set(group_is_being_built "${${group_upper}_IS_BEING_BUILT}")
+
+  foreach(exe ${exes})
+    set(target "${group}::${exe}")
+    string(TOUPPER "${group_prefix}_${exe}" var)
+
+    if(TARGET "${target}")
+      if(group_is_being_built)
+        set(${var} TRUE CACHE INTERNAL "" FORCE)
+        set(${found_var} TRUE CACHE INTERNAL "" FORCE)
+      endif()
+      if(debug)
+        message(STATUS "${config} exe ${target} is already a target")
+      endif()
+      continue()
+    endif()
+
+    find_program("${var}" NAMES "${exe}" HINTS ${${var}_BIN_DIRS})
+  endforeach()
+endfunction()
+
 # Needs to be a macro because of select_library_configurations
-macro(_opendds_find_our_libraries lib_group libs)
+macro(_opendds_find_group_targets group libs exes)
   if(MSVC)
-    _opendds_find_our_libraries_for_config(${lib_group} "${libs}" "RELEASE" "")
-    _opendds_find_our_libraries_for_config(${lib_group} "${libs}" "DEBUG" "d")
+    _opendds_find_our_libraries_for_config(${group} "${libs}" "RELEASE" "")
+    _opendds_find_our_libraries_for_config(${group} "${libs}" "DEBUG" "d")
   elseif(OPENDDS_DEBUG)
-    _opendds_find_our_libraries_for_config(${lib_group} "${libs}" "DEBUG" "")
+    _opendds_find_our_libraries_for_config(${group} "${libs}" "DEBUG" "")
   else()
-    _opendds_find_our_libraries_for_config(${lib_group} "${libs}" "RELEASE" "")
+    _opendds_find_our_libraries_for_config(${group} "${libs}" "RELEASE" "")
   endif()
 
   foreach(_lib ${libs})
-    string(TOUPPER ${_lib} _lib_var)
-    if(NOT DEFINED "${_lib_var}_DEPS")
-      message(FATAL_ERROR "Library ${_lib} is missing a dependency list called ${_lib_var}_DEPS!")
+    string(TOUPPER "_OPENDDS_${group}_${_lib}_DEPENDS" _dep_var)
+    if(NOT DEFINED "${_dep_var}")
+      message(FATAL_ERROR "Library ${group}::${_lib} is missing a dependency list called ${_dep_var}!")
     endif()
+    _opendds_get_lib_filename(_lib "${group}" "${_lib}")
+    string(TOUPPER ${_lib} _lib_var)
     select_library_configurations(${_lib_var})
   endforeach()
+
+  _opendds_find_executables("${group}" "${exes}")
 endmacro()
 
 function(_opendds_found_required_deps found_var required_deps)
@@ -118,27 +254,9 @@ function(_opendds_found_required_deps found_var required_deps)
   endif()
 endfunction()
 
-function(_opendds_add_target_binary target path)
-  if(NOT TARGET ${target} AND EXISTS "${path}")
-    add_executable(${target} IMPORTED)
-    set_target_properties(${target}
-      PROPERTIES
-        IMPORTED_LOCATION "${path}"
-    )
-  endif()
-endfunction()
-
-function(_opendds_library_filename_to_target_name target_name_var lib_group_name name)
-  if(lib STREQUAL "${lib_group_name}")
-    set(target "${lib_group_name}::${lib_group_name}")
-  else()
-    string(REPLACE "${lib_group_name}_" "${lib_group_name}::" target "${lib}")
-  endif()
-  set("${target_name_var}" "${target}" PARENT_SCOPE)
-endfunction()
-
-function(_opendds_add_library_group lib_group_name libs)
-  string(TOUPPER ${lib_group_name} lib_group_var_prefix)
+function(_opendds_import_group_targets group libs exes)
+  string(TOUPPER "${group}" group_upper)
+  set(group_prefix "_OPENDDS_${group_upper}")
 
   macro(add_target_library_config target var_prefix config)
     set(lib_var "${var_prefix}_LIBRARY_${config}")
@@ -151,7 +269,7 @@ function(_opendds_add_library_group lib_group_name libs)
 
       # Set any extra compiler and linker options that are needed to use the
       # libraries.
-      foreach(from_libs ALL "JUST_${lib_group_var_prefix}")
+      foreach(from_libs ALL "JUST_${group_upper}")
         foreach(kind COMPILE LINK)
           set(options_var "OPENDDS_${from_libs}_LIBS_INTERFACE_${kind}_OPTIONS")
           if(DEFINED ${options_var})
@@ -180,13 +298,16 @@ function(_opendds_add_library_group lib_group_name libs)
     endif()
   endmacro()
 
-  macro(add_target_library target var_prefix include_dirs)
+  macro(add_target_library var_prefix include_dirs)
+    set(target "${group}::${short_name}")
+    string(TOUPPER "${group_prefix}_${short_name}" lib_prefix)
+
     if(NOT TARGET ${target} AND ${var_prefix}_LIBRARY_FOUND)
-      add_library(${target} ${OPENDDS_LIBRARY_TYPE} IMPORTED)
+      add_library(${target} ${OPENDDS_LIBRARY_TYPE} IMPORTED GLOBAL)
       set_target_properties(${target}
         PROPERTIES
           INTERFACE_INCLUDE_DIRECTORIES "${include_dirs}"
-          INTERFACE_LINK_LIBRARIES "${${var_prefix}_DEPS}"
+          INTERFACE_LINK_LIBRARIES "${${prefix}_DEPENDS}"
           INTERFACE_COMPILE_DEFINITIONS "${${var_prefix}_COMPILE_DEFINITIONS}"
           INTERFACE_COMPILE_OPTIONS "${${var_prefix}_COMPILE_OPTIONS}"
       )
@@ -197,35 +318,53 @@ function(_opendds_add_library_group lib_group_name libs)
   endmacro()
 
   foreach(lib ${libs})
-    _opendds_library_filename_to_target_name(target "${lib_group_name}" "${lib}")
+    set(short_name "${lib}")
+    string(TOUPPER "${group_prefix}_${lib}" prefix)
+    _opendds_get_lib_filename(lib "${group}" "${lib}")
     string(TOUPPER ${lib} var_prefix)
 
     if(DEFINED "${var_prefix}_INCLUDE_DIRS")
       set(include_dirs "${${var_prefix}_INCLUDE_DIRS}")
     else()
-      set(include_dirs "${${lib_group_var_prefix}_INCLUDE_DIRS}")
+      set(include_dirs "${${group_upper}_INCLUDE_DIRS}")
     endif()
 
-    add_target_library(${target} ${var_prefix} "${include_dirs}")
+    add_target_library(${var_prefix} "${include_dirs}")
+  endforeach()
+
+  foreach(exe ${exes})
+    set(target "${group}::${exe}")
+    string(TOUPPER "${group_prefix}_${exe}" path_var)
+    set(path "${${path_var}}")
+    if(TARGET "${target}")
+      if(imports IN_LIST OPENDDS_CMAKE_VERBOSE)
+        message(STATUS "exe ${target} is already a target")
+      endif()
+    else()
+      add_executable(${target} IMPORTED GLOBAL)
+      set_target_properties(${target}
+        PROPERTIES
+          IMPORTED_LOCATION "${path}"
+      )
+      if(imports IN_LIST OPENDDS_CMAKE_VERBOSE)
+        message(STATUS "exe ${target}: ${path}")
+      elseif(OPENDDS_CMAKE_VERBOSE)
+        message(STATUS "exe ${target}")
+      endif()
+    endif()
   endforeach()
 endfunction()
 
-function(_opendds_get_library_var_prefix scoped_name var_prefix_var)
-  if(scoped_name STREQUAL "ACE::ACE")
-    set(var_prefix "ACE")
-  elseif(scoped_name STREQUAL "TAO::TAO")
-    set(var_prefix "TAO")
-  else()
-    string(TOUPPER ${scoped_name} var_prefix)
-    string(REPLACE "::" "_" var_prefix "${var_prefix}")
-  endif()
-
-  set(${var_prefix_var} ${var_prefix} PARENT_SCOPE)
+function(_opendds_scoped_list scoped_list_var list group)
+  set(scoped_list)
+  foreach(item ${list})
+    list(APPEND scoped_list "${group}::${item}")
+  endforeach()
+  set("${scoped_list_var}" "${scoped_list}" PARENT_SCOPE)
 endfunction()
 
-function(opendds_get_library_dependencies deps_var lib)
-  set(libs "${lib}")
-  list(APPEND libs ${ARGN})
+function(opendds_get_library_dependencies deps_var)
+  set(libs ${ARGN})
   set(passthrough FALSE)
   if(PASSTHROUGH IN_LIST libs)
     set(passthrough TRUE)
@@ -234,11 +373,9 @@ function(opendds_get_library_dependencies deps_var lib)
   set(deps "${${deps_var}}")
   foreach(lib ${libs})
     if(NOT ${lib} IN_LIST deps)
-      string(REGEX MATCH "^(OpenDDS|ACE|TAO)::" re_out "${lib}")
-      if(CMAKE_MATCH_1)
-        set(ace_tao_opendds ${CMAKE_MATCH_1})
-        _opendds_get_library_var_prefix(${lib} var_prefix)
-        set(dep_list_name "${var_prefix}_DEPS")
+      if(lib IN_LIST _OPENDDS_ALL_TARGETS)
+        string(REPLACE "::" "_" dep_list_name "${lib}")
+        string(TOUPPER "_OPENDDS_${dep_list_name}_DEPENDS" dep_list_name)
         if(DEFINED ${dep_list_name})
           opendds_get_library_dependencies(deps ${${dep_list_name}})
         endif()

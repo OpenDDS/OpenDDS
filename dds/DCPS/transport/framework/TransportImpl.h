@@ -110,7 +110,6 @@ public:
   virtual void get_last_recv_locator(const GUID_t& /*remote_id*/,
                                      TransportLocator& /*locators*/) {}
 
-  virtual void rtps_relay_address_change() {}
   virtual void append_transport_statistics(TransportStatisticsSequence& /*seq*/) {}
 
   /// Interface to the transport's reactor for scheduling timers.
@@ -170,9 +169,6 @@ public:
   };
 
   virtual WeakRcHandle<ICE::Endpoint> get_ice_endpoint() { return WeakRcHandle<ICE::Endpoint>(); }
-  virtual void rtps_relay_only_now(bool /*flag*/) {}
-  virtual void use_rtps_relay_now(bool /*flag*/) {}
-  virtual void use_ice_now(bool /*flag*/) {}
 
   /// Accessor to obtain a "copy" of the reference to the reactor task.
   /// Caller is responsible for the "copy" of the reference that is

@@ -115,11 +115,13 @@ public:
     // FUTURE: Index by publication_handle to avoid the loop.
     bool schedule = false;
     for (typename InstanceMap::iterator pos = instance_map_.begin(), limit = instance_map_.end(); pos != limit; ++pos) {
-      if (autodispose_unregistered_instances && pos->second.dispose(publication_handle, qos_)) {
-        schedule = true;
-      }
-      if (pos->second.unregister_instance(publication_handle, qos_)) {
-        schedule = true;
+      if (pos->second.is_publication(publication_handle)) {
+        if (autodispose_unregistered_instances && pos->second.dispose(publication_handle, qos_)) {
+          schedule = true;
+        }
+        if (pos->second.unregister_instance(publication_handle, qos_)) {
+          schedule = true;
+        }
       }
     }
 
@@ -308,6 +310,11 @@ private:
       disposed_expiration_date_.nanosec = 0;
       no_writers_expiration_date_.sec = 0;
       no_writers_expiration_date_.nanosec = 0;
+    }
+
+    bool is_publication(InternalEntity_wrch publication_handle) const
+    {
+      return publication_set_.count(publication_handle);
     }
 
     DDS::ViewStateKind view_state() const { return view_state_; }

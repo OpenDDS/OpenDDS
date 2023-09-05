@@ -78,14 +78,25 @@ sub get_permissions_file_signed_name {
   return get_permissions_file_base_name($num) . '_signed.p7s';
 };
 
+sub convert_subject_to_rfc4514_format {
+  my $dn = shift;
+  my @rdns = split(/\//, $dn);
+  # It's observed that the first element can be an empty string.
+  if ($rdns[0] eq "") {
+    shift(@rdns);
+  }
+  return join(',', @rdns);
+}
+
 my %subjects = ();
 open(my $identity_index, '<', "$identity_ca_path/index.txt")
   or die("Couldn't open $identity_ca_path: $!");
 while (<$identity_index>) {
   my @fields = split('\t', $_);
   my $participant = $fields[3];
-  my $subject = $fields[5];
-  chop($subject); # Remove newline
+  my $dn = $fields[5];
+  chop($dn); # Remove newline
+  my $subject = convert_subject_to_rfc4514_format($dn);
   $subjects{$participant} = $subject;
 }
 close($identity_index);

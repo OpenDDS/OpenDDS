@@ -38,6 +38,10 @@ ReliableSession::ReliableSession(RcHandle<ReactorInterceptor> interceptor,
                                      interceptor,
                                      rchandle_from(this),
                                      &ReliableSession::process_naks))
+  , nak_timeout_(link->config()->nak_timeout())
+  , nak_delay_intervals_(link->config()->nak_delay_intervals())
+  , nak_max_(link->config()->nak_max())
+  , nak_interval_(link->config()->nak_interval())
 {}
 
 ReliableSession::~ReliableSession()
@@ -225,9 +229,7 @@ ReliableSession::expire_naks()
 {
   if (this->nak_requests_.empty()) return; // nothing to expire
 
-  MulticastInst_rch cfg = link_->config();
-  const TimeDuration timeout = cfg ? cfg->nak_timeout_: TimeDuration::from_msec(MulticastInst::DEFAULT_NAK_TIMEOUT);
-  const MonotonicTimePoint deadline(MonotonicTimePoint::now() - timeout);
+  const MonotonicTimePoint deadline(MonotonicTimePoint::now() - nak_timeout_);
   NakRequestMap::iterator first(this->nak_requests_.begin());
   NakRequestMap::iterator last(this->nak_requests_.upper_bound(deadline));
 
@@ -337,9 +339,6 @@ ReliableSession::send_naks()
     // The sequences between rbegin - 1 and rbegin will not be ignored for naking.
     ++itr;
 
-    MulticastInst_rch cfg = link_->config();
-    size_t nak_delay_intervals = cfg ? cfg->nak_delay_intervals_ : MulticastInst::DEFAULT_NAK_DELAY_INTERVALS;
-    size_t nak_max = cfg ? cfg->nak_max_ : MulticastInst::DEFAULT_NAK_MAX;
     size_t sz = nak_requests_.size();
 
     // Image i is the index of element in nak_requests_ in reverse order.
@@ -351,7 +350,7 @@ ReliableSession::send_naks()
     //  are skipped for naking due to nak_delay_intervals and 20 - 16 are skipped for
     //  naking due to nak_max.
     for (size_t i = 1; i < sz; ++i) {
-      if ((i * 1.0) / (nak_delay_intervals + 1) > nak_max) {
+      if ((i * 1.0) / (nak_delay_intervals_ + 1) > nak_max_) {
         if (first != SequenceNumber()) {
           first = this->nak_requests_.begin()->second;
         }
@@ -361,14 +360,14 @@ ReliableSession::send_naks()
         break;
       }
 
-      if (i % (nak_delay_intervals + 1) == 1) {
+      if (i % (nak_delay_intervals_ + 1) == 1) {
         second = itr->second;
       }
       if (second != SequenceNumber()) {
         first = itr->second;
       }
 
-      if (i % (nak_delay_intervals + 1) == 0) {
+      if (i % (nak_delay_intervals_ + 1) == 0) {
         first = itr->second;
 
         if (first != SequenceNumber() && second != SequenceNumber()) {
@@ -685,8 +684,7 @@ ReliableSession::stop()
 TimeDuration
 ReliableSession::nak_delay()
 {
-  MulticastInst_rch cfg = link_->config();
-  TimeDuration interval = cfg ? cfg->nak_interval_ : TimeDuration::from_msec(MulticastInst::DEFAULT_NAK_INTERVAL);
+  TimeDuration interval = nak_interval_;
 
   // Apply random backoff to minimize potential collisions:
   interval *= static_cast<double>(std::rand()) /

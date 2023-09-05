@@ -49,13 +49,13 @@ struct DestroyPolicy {
   CORBA::Policy_var p_;
 };
 
-PortableServer::POA_ptr get_POA(CORBA::ORB_ptr orb)
+PortableServer::POA_ptr get_POA(CORBA::ORB_ptr orb, bool use_bidir_giop)
 {
   CORBA::Object_var obj =
     orb->resolve_initial_references(ROOT_POA);
   PortableServer::POA_var root_poa = PortableServer::POA::_narrow(obj.in());
 
-  if (TheServiceParticipant->use_bidir_giop()) {
+  if (use_bidir_giop) {
     while (true) {
       try {
         return root_poa->find_POA(BIDIR_POA, false /*activate*/);
@@ -86,13 +86,13 @@ PortableServer::POA_ptr get_POA(CORBA::ORB_ptr orb)
 ///         PortableServer::POA::WrongAdapter
 ///         PortableServer::POA::WrongPolicy
 template <class T_impl, class T_ptr>
-T_impl* remote_reference_to_servant(T_ptr p, CORBA::ORB_ptr orb)
+T_impl* remote_reference_to_servant(T_ptr p, CORBA::ORB_ptr orb, bool use_bidir_giop)
 {
   if (CORBA::is_nil(p)) {
     return 0;
   }
 
-  PortableServer::POA_var poa = get_POA(orb);
+  PortableServer::POA_var poa = get_POA(orb, use_bidir_giop);
 
   T_impl* the_servant =
     dynamic_cast<T_impl*>(poa->reference_to_servant(p));
@@ -108,9 +108,9 @@ T_impl* remote_reference_to_servant(T_ptr p, CORBA::ORB_ptr orb)
 /// @throws PortableServer::POA::ServantNotActive,
 ///         PortableServer::POA::WrongPolicy
 template <class T>
-typename T::_stub_ptr_type servant_to_remote_reference(T* servant, CORBA::ORB_ptr orb)
+typename T::_stub_ptr_type servant_to_remote_reference(T* servant, CORBA::ORB_ptr orb, bool use_bidir_giop)
 {
-  PortableServer::POA_var poa = get_POA(orb);
+  PortableServer::POA_var poa = get_POA(orb, use_bidir_giop);
   PortableServer::ObjectId_var oid = poa->activate_object(servant);
   CORBA::Object_var obj = poa->id_to_reference(oid.in());
 
@@ -119,9 +119,9 @@ typename T::_stub_ptr_type servant_to_remote_reference(T* servant, CORBA::ORB_pt
 }
 
 template <class T>
-void deactivate_remote_object(T obj, CORBA::ORB_ptr orb)
+void deactivate_remote_object(T obj, CORBA::ORB_ptr orb, bool use_bidir_giop)
 {
-  PortableServer::POA_var poa = get_POA(orb);
+  PortableServer::POA_var poa = get_POA(orb, use_bidir_giop);
   PortableServer::ObjectId_var oid =
     poa->reference_to_id(obj);
   poa->deactivate_object(oid.in());
@@ -136,21 +136,23 @@ namespace DCPS {
 
 InfoRepoDiscovery::InfoRepoDiscovery(const RepoKey& key,
                                      const std::string& ior)
-  : Discovery(key),
-    ior_(ior),
-    bit_transport_port_(0),
-    use_local_bit_config_(false),
-    orb_from_user_(false)
+  : Discovery(key)
+  , ior_(ior)
+  , bit_transport_port_(0)
+  , use_local_bit_config_(false)
+  , use_bidir_giop_(TheServiceParticipant->use_bidir_giop())
+  , orb_from_user_(false)
 {
 }
 
 InfoRepoDiscovery::InfoRepoDiscovery(const RepoKey& key,
                                      const DCPSInfo_var& info)
-  : Discovery(key),
-    info_(info),
-    bit_transport_port_(0),
-    use_local_bit_config_(false),
-    orb_from_user_(false)
+  : Discovery(key)
+  , info_(info)
+  , bit_transport_port_(0)
+  , use_local_bit_config_(false)
+  , use_bidir_giop_(TheServiceParticipant->use_bidir_giop())
+  , orb_from_user_(false)
 {
 }
 
@@ -618,7 +620,7 @@ InfoRepoDiscovery::add_publication(DDS::DomainId_t domainId,
 
     //this is the client reference to the DataWriterRemoteImpl
     OpenDDS::DCPS::DataWriterRemote_var dr_remote_obj =
-      servant_to_remote_reference(writer_remote_impl, orb_);
+      servant_to_remote_reference(writer_remote_impl, orb_, use_bidir_giop_);
     //turn into a octet seq to pass through generated files
     DDS::OctetSeq serializedTypeInfo;
     XTypes::serialize_type_info(type_info, serializedTypeInfo);
@@ -728,7 +730,7 @@ InfoRepoDiscovery::add_subscription(DDS::DomainId_t domainId,
 
     //this is the client reference to the DataReaderRemoteImpl
     OpenDDS::DCPS::DataReaderRemote_var dr_remote_obj =
-      servant_to_remote_reference(reader_remote_impl, orb_);
+      servant_to_remote_reference(reader_remote_impl, orb_, use_bidir_giop_);
     //turn into a octet seq to pass through generated files
     DDS::OctetSeq serializedTypeInfo;
     XTypes::serialize_type_info(type_info, serializedTypeInfo);
@@ -846,9 +848,9 @@ InfoRepoDiscovery::removeDataReaderRemote(const GUID_t& subscriptionId)
 
   try {
     DataReaderRemoteImpl* impl =
-      remote_reference_to_servant<DataReaderRemoteImpl>(drr->second.in(), orb_);
+      remote_reference_to_servant<DataReaderRemoteImpl>(drr->second.in(), orb_, use_bidir_giop_);
     impl->detach_parent();
-    deactivate_remote_object(drr->second.in(), orb_);
+    deactivate_remote_object(drr->second.in(), orb_, use_bidir_giop_);
   } catch (const CORBA::BAD_INV_ORDER&) {
     // The orb may throw ::CORBA::BAD_INV_ORDER when is has been shutdown.
     // Ignore it anyway.
@@ -872,9 +874,9 @@ InfoRepoDiscovery::removeDataWriterRemote(const GUID_t& publicationId)
 
   try {
     DataWriterRemoteImpl* impl =
-      remote_reference_to_servant<DataWriterRemoteImpl>(dwr->second.in(), orb_);
+      remote_reference_to_servant<DataWriterRemoteImpl>(dwr->second.in(), orb_, use_bidir_giop_);
     impl->detach_parent();
-    deactivate_remote_object(dwr->second.in(), orb_);
+    deactivate_remote_object(dwr->second.in(), orb_, use_bidir_giop_);
   } catch (const CORBA::BAD_INV_ORDER&) {
     // The orb may throw ::CORBA::BAD_INV_ORDER when is has been shutdown.
     // Ignore it anyway.

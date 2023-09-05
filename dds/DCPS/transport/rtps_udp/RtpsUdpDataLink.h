@@ -95,9 +95,7 @@ public:
   RtpsUdpDataLink(const RtpsUdpTransport_rch& transport,
                   const GuidPrefix_t& local_prefix,
                   const RtpsUdpInst_rch& config,
-                  const ReactorTask_rch& reactor_task,
-                  InternalTransportStatistics& transport_statistics,
-                  ACE_Thread_Mutex& transport_statistics_mutex);
+                  const ReactorTask_rch& reactor_task);
 
   ~RtpsUdpDataLink();
 
@@ -238,7 +236,7 @@ public:
   static bool separate_message(EntityId_t entity);
 #endif
 
-  RtpsUdpTransport_rch transport();
+  RtpsUdpTransport_rch transport() const;
 
   void enable_response_queue();
   void disable_response_queue(bool send_immediately);
@@ -905,8 +903,6 @@ private:
   CountMapType heartbeat_counts_;
 
   const size_t max_bundle_size_;
-  InternalTransportStatistics& transport_statistics_;
-  ACE_Thread_Mutex& transport_statistics_mutex_;
 
   class DeliverHeldData {
   public:

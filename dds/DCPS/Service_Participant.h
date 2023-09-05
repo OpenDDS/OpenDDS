@@ -87,7 +87,7 @@ const String OPENDDS_COMMON_DCPS_CONFIG_FILE_default = "";
 const char OPENDDS_COMMON_DCPS_DEBUG_LEVEL[] = "OPENDDS_COMMON_DCPS_DEBUG_LEVEL";
 
 const char OPENDDS_COMMON_DCPS_DEFAULT_ADDRESS[] = "OPENDDS_COMMON_DCPS_DEFAULT_ADDRESS";
-const NetworkAddress OPENDDS_COMMON_DCPS_DEFAULT_ADDRESS_default = NetworkAddress();
+const NetworkAddress OPENDDS_COMMON_DCPS_DEFAULT_ADDRESS_default = NetworkAddress("0.0.0.0:0");
 
 const char OPENDDS_COMMON_DCPS_DEFAULT_DISCOVERY[] = "OPENDDS_COMMON_DCPS_DEFAULT_DISCOVERY";
 #ifdef DDS_DEFAULT_DISCOVERY_METHOD
@@ -597,6 +597,11 @@ public:
   unsigned int printer_value_writer_indent() const;
   void printer_value_writer_indent(unsigned int value);
 
+  ConfigTopic_rch config_topic() const
+  {
+    return config_topic_;
+  }
+
   RcHandle<ConfigStoreImpl> config_store() const
   {
     return config_store_;
@@ -808,6 +813,7 @@ private:
 
   RcHandle<InternalTopic<NetworkInterfaceAddress> > network_interface_address_topic_;
 
+  ConfigTopic_rch config_topic_;
   RcHandle<ConfigStoreImpl> config_store_;
   ConfigReader_rch config_reader_;
   ConfigReaderListener_rch config_reader_listener_;
@@ -825,6 +831,11 @@ private:
   };
 
   bool set_repo_ior_result_;
+
+  // This mutex protection configuration that is cached for efficient access.
+  mutable ACE_Thread_Mutex cached_config_mutex_;
+  TimeDuration pending_timeout_;
+  Discovery::RepoKey default_discovery_;
 };
 
 #define TheServiceParticipant OpenDDS::DCPS::Service_Participant::instance()

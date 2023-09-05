@@ -476,12 +476,12 @@ public:
     spdp_rtps_relay_send_period_ = period;
   }
 
-  ACE_INET_Addr sedp_rtps_relay_address() const
+  DCPS::NetworkAddress sedp_rtps_relay_address() const
   {
-    ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, ACE_INET_Addr());
+    ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, DCPS::NetworkAddress());
     return sedp_rtps_relay_address_;
   }
-  void sedp_rtps_relay_address(const ACE_INET_Addr& address)
+  void sedp_rtps_relay_address(const DCPS::NetworkAddress& address)
   {
     ACE_GUARD(ACE_Thread_Mutex, g, lock_);
     sedp_rtps_relay_address_ = address;
@@ -516,12 +516,12 @@ public:
     spdp_stun_server_address_ = address;
   }
 
-  ACE_INET_Addr sedp_stun_server_address() const
+  DCPS::NetworkAddress sedp_stun_server_address() const
   {
-    ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, ACE_INET_Addr());
+    ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, DCPS::NetworkAddress());
     return sedp_stun_server_address_;
   }
-  void sedp_stun_server_address(const ACE_INET_Addr& address)
+  void sedp_stun_server_address(const DCPS::NetworkAddress& address)
   {
     ACE_GUARD(ACE_Thread_Mutex, g, lock_);
     sedp_stun_server_address_ = address;
@@ -764,11 +764,11 @@ private:
   u_short max_spdp_sequence_msg_reset_check_;
   ACE_INET_Addr spdp_rtps_relay_address_;
   DCPS::TimeDuration spdp_rtps_relay_send_period_;
-  ACE_INET_Addr sedp_rtps_relay_address_;
+  DCPS::NetworkAddress sedp_rtps_relay_address_;
   AtomicBool use_rtps_relay_;
   AtomicBool rtps_relay_only_;
   ACE_INET_Addr spdp_stun_server_address_;
-  ACE_INET_Addr sedp_stun_server_address_;
+  DCPS::NetworkAddress sedp_stun_server_address_;
   AtomicBool use_ice_;
   size_t sedp_max_message_size_;
   AtomicBool undirected_spdp_;

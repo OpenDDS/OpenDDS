@@ -54,7 +54,7 @@ MulticastDataLink::MulticastDataLink(const MulticastTransport_rch& transport,
   // A send buffer may be bound to the send strategy to ensure a
   // configured number of most-recent datagrams are retained:
   if (session_factory_->requires_send_buffer()) {
-    const size_t nak_depth = config ? config->nak_depth_ : MulticastInst::DEFAULT_NAK_DEPTH;
+    const size_t nak_depth = config ? config->nak_depth() : MulticastInst::DEFAULT_NAK_DEPTH;
     const size_t default_max_samples = DEFAULT_CONFIG_MAX_SAMPLES_PER_PACKET;
     const size_t max_samples_per_packet = config ? config->max_samples_per_packet() : default_max_samples;
     send_buffer_.reset(new SingleSendBuffer(nak_depth, max_samples_per_packet));
@@ -78,7 +78,7 @@ MulticastDataLink::join(const ACE_INET_Addr& group_address)
     return false;
   }
 
-  const std::string& net_if = cfg->local_address_;
+  const String net_if = cfg->local_address();
 #ifdef ACE_HAS_MAC_OSX
   socket_.opts(ACE_SOCK_Dgram_Mcast::OPT_BINDADDR_NO |
                ACE_SOCK_Dgram_Mcast::DEFOPT_NULLIFACE);
@@ -95,7 +95,7 @@ MulticastDataLink::join(const ACE_INET_Addr& group_address)
 
   ACE_HANDLE handle = this->socket_.get_handle();
 
-  if (!OpenDDS::DCPS::set_socket_multicast_ttl(this->socket_, cfg->ttl_)) {
+  if (!OpenDDS::DCPS::set_socket_multicast_ttl(this->socket_, cfg->ttl())) {
     ACE_ERROR_RETURN((LM_ERROR,
         ACE_TEXT("(%P|%t) ERROR: ")
         ACE_TEXT("MulticastDataLink::join: ")
@@ -103,7 +103,7 @@ MulticastDataLink::join(const ACE_INET_Addr& group_address)
         false);
   }
 
-  int rcv_buffer_size = ACE_Utils::truncate_cast<int>(cfg->rcv_buffer_size_);
+  int rcv_buffer_size = ACE_Utils::truncate_cast<int>(cfg->rcv_buffer_size());
   if (rcv_buffer_size != 0
       && ACE_OS::setsockopt(handle, SOL_SOCKET,
           SO_RCVBUF,

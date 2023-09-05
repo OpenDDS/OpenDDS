@@ -75,11 +75,11 @@ ACE_INET_Addr AppConfig::getHostAddress() const {
     (host == ACE_TEXT("localhost")) ? AF_UNSPEC : AF_INET);
 }
 
-const OpenDDS::DCPS::TimeDuration& AppConfig::getHeartbeatPeriod() const {
-  return rtpsInst->heartbeat_period_;
+const OpenDDS::DCPS::TimeDuration AppConfig::getHeartbeatPeriod() const {
+  return rtpsInst->heartbeat_period();
 }
 void AppConfig::setHeartbeatPeriod(const ACE_UINT64& ms) {
-  rtpsInst->heartbeat_period_ = OpenDDS::DCPS::TimeDuration::from_msec(ms);
+  rtpsInst->heartbeat_period(OpenDDS::DCPS::TimeDuration::from_msec(ms));
 }
 
 OpenDDS::DCPS::GUID_t AppConfig::createID(long participantId, long key, CORBA::Octet kind) {

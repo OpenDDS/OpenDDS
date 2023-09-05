@@ -211,6 +211,7 @@ Language Usage
 * Modifiers like ``const`` appear left of the types they modify, like: ``const char* cstring = ...``.
   ``char const*`` is equivalent but not conventional.
 * For function arguments that are not modified by the callee, pass by value for small objects (8 bytes?) and pass by const-reference for everything else.
+  Function argument that is passed by value should not have ``const`` qualifier in the function declaration; use of ``const`` in the definition is optional.
 * Arguments unused by the implementation have no names (in the definition that is, the declarations still have names), or a ``/*commented-out*/`` name.
 * Use ``explicit`` constructors unless implicit conversions are intended and desirable.
 * Use the constructor initializer list and make sure its order matches the declaration order.

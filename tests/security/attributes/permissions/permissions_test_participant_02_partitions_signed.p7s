@@ -1,16 +1,16 @@
 MIME-Version: 1.0
-Content-Type: multipart/signed; protocol="application/x-pkcs7-signature"; micalg="sha1"; boundary="----5169B0EEA66B224F4E66DAF857773FB1"
+Content-Type: multipart/signed; protocol="application/x-pkcs7-signature"; micalg="sha1"; boundary="----9278C3A3D933D586A2ED271CC7315ED7"
 
 This is an S/MIME signed message
 
-------5169B0EEA66B224F4E66DAF857773FB1
+------9278C3A3D933D586A2ED271CC7315ED7
 Content-Type: text/plain
 
 <?xml version="1.0"?>
 <dds xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.omg.org/spec/DDS-SECURITY/20170901/omg_shared_ca_permissions.xsd">
   <permissions>
     <grant name="ski_shop_grant_all_domain_0">
-      <subject_name>/CN=Tahoe Joe/O=Super Swanky Ski and Snow Shop/ST=California/C=US</subject_name>
+      <subject_name>CN=Tahoe Joe,O=Super Swanky Ski and Snow Shop,ST=California,C=US</subject_name>
       <validity>
         <not_before>2015-09-15T01:00:00</not_before>
         <not_after>2025-09-15T01:00:00</not_after>
@@ -43,7 +43,7 @@ Content-Type: text/plain
   </permissions>
 </dds>
 
-------5169B0EEA66B224F4E66DAF857773FB1
+------9278C3A3D933D586A2ED271CC7315ED7
 Content-Type: application/x-pkcs7-signature; name="smime.p7s"
 Content-Transfer-Encoding: base64
 Content-Disposition: attachment; filename="smime.p7s"
@@ -76,17 +76,17 @@ Y3QgQ29tcHV0aW5nIChUZXN0IFBlcm1pc3Npb25zIENBKTEvMC0GA1UEAwwmT2Jq
 ZWN0IENvbXB1dGluZyAoVGVzdCBQZXJtaXNzaW9ucyBDQSkxJzAlBgkqhkiG9w0B
 CQEWGGluZm9Ab2JqZWN0Y29tcHV0aW5nLmNvbQIJAKSOim/ArjfyMAkGBSsOAwIa
 BQCgggEHMBgGCSqGSIb3DQEJAzELBgkqhkiG9w0BBwEwHAYJKoZIhvcNAQkFMQ8X
-DTIyMDIwNDIwMTMxMVowIwYJKoZIhvcNAQkEMRYEFL16+RZgC8C4pH3gUVpNL48d
-iSjLMIGnBgkqhkiG9w0BCQ8xgZkwgZYwCwYJYIZIAWUDBAEqMAgGBiqFAwICCTAK
+DTIzMDcyNTE1MTY1NlowIwYJKoZIhvcNAQkEMRYEFIUFWF6M2Yu8SntaDSPSnyzI
+Y9qFMIGnBgkqhkiG9w0BCQ8xgZkwgZYwCwYJYIZIAWUDBAEqMAgGBiqFAwICCTAK
 BggqhQMHAQECAjAKBggqhQMHAQECAzAIBgYqhQMCAhUwCwYJYIZIAWUDBAEWMAsG
 CWCGSAFlAwQBAjAKBggqhkiG9w0DBzAOBggqhkiG9w0DAgICAIAwDQYIKoZIhvcN
 AwICAUAwBwYFKw4DAgcwDQYIKoZIhvcNAwICASgwDQYJKoZIhvcNAQEBBQAEggEA
-H94fG/HBuUZ2BbmdvJsURWLuMbfV5s69oUz4umutsrFpG1SDehfw+RpWVQrthABS
-nUDtLZ1/y4irtyKDw9iU9tmQMnp8LiDwKzAOdCHaOvFvd1nRkNj4ELEyNP7V0H39
-KqGohxXJboK72aX4RKMu6GSwWRFYFBXdaI8Bjh2CJ/FrfFN5HBjglyr/3214jU4l
-1W1XLD89yIX51At/tPyH9+NMW5yAVuymlgvRTNiCzA2loPuMCR/D7fJhoTaDW1MX
-mQAu78MkGj2Cb0PgxnhMhZ/2wgYgiq06dgZddaIS8w+EiICb9X5BqwvA++8d5dDb
-ZeTo0WF6KAGLhWsKi01D1g==
+mBe6Re4AOo3HItDroYaSyLxqKluSALFQoFIYgVjjiKutW3zI1SOGfQFrGI32FcUI
+KHiu2Pjzl9LBntIGA8tlBJgnNQ+NdKnGxwpnHpBB1m3OJeJZizCjKo+FMWjZoj9L
+qfULunQukE+sm/2Lifc/e9ec9MRWydPOYs1v4wBfcbwx/1ljEQ/jkqAJrwNEblGP
+3tb0wro8Oi7mqlJz5aWfgE3Kb21KMweuSXQ+onixdcViyq2Ook/HqsKX/qYVA2Yi
+59QLXnsdk3AAHmtr3sHvTo7fnaVUoDiv9ur+F3QIp0TTotoagiWd02i8PjWN8A90
++8cgHsT+yiiLidDA4yfFuA==
 
-------5169B0EEA66B224F4E66DAF857773FB1--
+------9278C3A3D933D586A2ED271CC7315ED7--
 

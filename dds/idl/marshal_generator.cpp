@@ -952,6 +952,7 @@ namespace {
     {
       RefWrapper wrapper(base_wrapper);
       wrapper.done();
+
       Function serialized_size("serialized_size", "void");
       serialized_size.addArg("encoding", "const Encoding&");
       serialized_size.addArg("size", "size_t&");
@@ -3280,11 +3281,8 @@ namespace {
         "    return false;\n"
         "  }\n"
         "  if (disc == OpenDDS::RTPS::PID_SENTINEL) {\n"
+        "    uni.unknown_data(DDS::OctetSeq());\n"
         "    uni._d(OpenDDS::RTPS::PID_SENTINEL);\n"
-        "    return true;\n"
-        "  }\n"
-        "  if (size == 0) {\n"
-        "    uni._d(disc);\n"
         "    return true;\n"
         "  }\n"
         "  if (size > strm.length()) {\n"

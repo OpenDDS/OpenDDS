@@ -72,6 +72,7 @@ public:
 
   /// For caching and retrieving TypeInformation of remote endpoints
   void cache_type_info(const DDS::BuiltinTopicKey_t& key, const TypeInformation& type_info);
+  void clear_type_info(const DDS::BuiltinTopicKey_t& key);
   const TypeInformation& get_type_info(const DDS::BuiltinTopicKey_t& key) const;
 
 private:

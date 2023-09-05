@@ -19,8 +19,10 @@ MulticastSendStrategy::MulticastSendStrategy(MulticastDataLink* link)
   : TransportSendStrategy(0, link->impl(),
                           0,  // synch_resource
                           link->transport_priority(),
-                          make_rch<NullSynchStrategy>()),
-    link_(link)
+                          make_rch<NullSynchStrategy>())
+  , link_(link)
+  , async_send_(link->config()->async_send())
+  , group_address_(link->config()->group_address())
 #if defined (ACE_HAS_WIN32_OVERLAPPED_IO) || defined (ACE_HAS_AIO_CALLS)
   , async_init_(false)
 #endif
@@ -40,8 +42,7 @@ MulticastSendStrategy::prepare_header_i()
 ssize_t
 MulticastSendStrategy::send_bytes_i(const iovec iov[], int n)
 {
-  MulticastInst_rch cfg = link_->config();
-  return (cfg && cfg->async_send()) ? async_send(iov, n, cfg->group_address_) : sync_send(iov, n);
+  return async_send_ ? async_send(iov, n, group_address_.to_addr()) : sync_send(iov, n);
 }
 
 ssize_t

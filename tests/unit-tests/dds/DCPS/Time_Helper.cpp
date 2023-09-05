@@ -105,9 +105,17 @@ TEST(dds_DCPS_Time_Helper, make_duration)
 
 TEST(dds_DCPS_Time_Helper, duration_to_dds_string)
 {
-  const DDS::Duration_t d = { 1, 2 };
-  const String s = to_dds_string(d);
-  EXPECT_EQ(s, "1.000000002");
+  {
+    const DDS::Duration_t d = { 1, 2 };
+    const String s = to_dds_string(d);
+    EXPECT_EQ(s, "1.000000002");
+  }
+
+  {
+    const DDS::Duration_t d = { DDS::DURATION_INFINITE_SEC, DDS::DURATION_INFINITE_NSEC };
+    const String s = to_dds_string(d);
+    EXPECT_EQ(s, "DURATION_INFINITY");
+  }
 }
 
 TEST(dds_DCPS_Time_Helper, duration_from_dds_string)

@@ -627,9 +627,9 @@ void transport_setup()
     std::cerr << "ERROR: Could not cast to RtpsUdpInst\n";
     return;
   }
-  rtps_inst->use_multicast_ = false;
+  rtps_inst->use_multicast(false);
   rtps_inst->datalink_release_delay(0);
-  rtps_inst->heartbeat_period_ = TimeDuration::from_msec(500);
+  rtps_inst->heartbeat_period(TimeDuration::from_msec(500));
   TransportConfig_rch cfg = TheTransportRegistry->create_config("cfg");
   cfg->instances_.push_back(inst);
   TheTransportRegistry->global_config(cfg);
