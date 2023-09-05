@@ -222,7 +222,6 @@ private:
   void init();
 
 private:
-
   /// Allocator used to allocate memory for sample map and lists.
   unique_ptr<ACE_Allocator> const allocator_;
 
