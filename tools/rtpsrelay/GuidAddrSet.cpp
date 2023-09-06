@@ -36,10 +36,10 @@ GuidAddrSet::record_activity(const Proxy& proxy,
       const auto prev_guid = result.first->second;
       if (pos != guid_addr_set_map_.end()) {
         remove(proxy, prev_guid, pos, now, &relay_participant_status_reporter_);
-        result.first = remote_map_.find(remote); // remote_map_ was updated by remove()
-      }
-      if (result.first != remote_map_.end()) {
-        result.first->second = src_guid;
+        result = remote_map_.insert(std::make_pair(remote, src_guid));
+        if (!result.second) {
+          result.first->second = src_guid;
+        }
       }
       if (config_.admission_control_queue_size()) {
         for (auto it = admission_control_queue_.begin(); it != admission_control_queue_.end(); ++it) {
