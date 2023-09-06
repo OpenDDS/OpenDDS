@@ -15,8 +15,7 @@
 #include "EntryExit.h"
 #include "dds/DCPS/DataSampleElement.h"
 #include "dds/DCPS/Service_Participant.h"
-
-#include "ace/Auto_Ptr.h"
+#include "dds/DCPS/unique_ptr.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -44,7 +43,7 @@ int ThreadPerConnectionSendTask::add_request(SendStrategyOpType op,
 {
   DBG_ENTRY("ThreadPerConnectionSendTask", "add");
 
-  ACE_Auto_Ptr<SendRequest> req(new SendRequest);
+  unique_ptr<SendRequest> req(new SendRequest);
   req->op_ = op;
   req->element_ = element;
 

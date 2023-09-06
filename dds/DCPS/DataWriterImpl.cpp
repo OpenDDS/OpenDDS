@@ -44,7 +44,6 @@
 #include <dds/DdsDcpsGuidTypeSupportImpl.h>
 
 #include <ace/Reactor.h>
-#include <ace/Auto_Ptr.h>
 
 #include <stdexcept>
 

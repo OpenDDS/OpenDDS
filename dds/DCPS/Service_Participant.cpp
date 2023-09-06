@@ -32,7 +32,6 @@
 #include <ace/Configuration_Import_Export.h>
 #include <ace/Service_Config.h>
 #include <ace/Argv_Type_Converter.h>
-#include <ace/Auto_Ptr.h>
 #include <ace/Sched_Params.h>
 #include <ace/Malloc_Allocator.h>
 #include <ace/OS_NS_unistd.h>

@@ -39,7 +39,6 @@
 #include "transport/framework/TransportCustomizedElement.h"
 
 #include "ace/Reactor.h"
-#include "ace/Auto_Ptr.h"
 
 #include <stdexcept>
 
