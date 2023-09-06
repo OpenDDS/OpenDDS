@@ -46,6 +46,7 @@ def setup(app):
     app.add_config_value('is_release', False, True)
     app.add_lexer('mpc', MpcLexer)
     app.add_transform(GlobalSubstitutions)
+    app.add_js_file("autotab.js")
 
 
 # -- Project information -----------------------------------------------------

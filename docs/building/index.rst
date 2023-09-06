@@ -34,7 +34,7 @@ Older versions of Perl will probably work, but are not tested.
 
   To start the script change to the root of the OpenDDS source directory and run:
 
-  .. code-block::
+  .. code-block:: bash
 
     ./configure
 
@@ -44,7 +44,7 @@ Older versions of Perl will probably work, but are not tested.
 
   To start the script open a `Visual Studio Developer Command Prompt <https://learn.microsoft.com/en-us/visualstudio/ide/reference/command-prompt-powershell>`__ that has C++ tools available, then change to the root of the OpenDDS source directory and run:
 
-  .. code-block::
+  .. code-block:: batch
 
     configure
 

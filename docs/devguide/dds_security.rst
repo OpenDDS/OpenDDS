@@ -72,21 +72,21 @@ As of this writing, vcpkg is only supported on Visual Studio 2015 Update 3 and l
 
 * Fetch and build the dependencies; by default, vcpkg targets x86 so be sure to specify the x64 target if required by specifying it when invoking vcpkg install, as shown here:
 
-  .. code-block:: doscon
+  .. code-block:: batch
 
       vcpkg install openssl:x64-windows xerces-c:x64-windows
 
 * Configure OpenDDS by passing the openssl and xerces3 switches.
   As a convenience, it can be helpful to set an environment variable to store the path since it is the same location for both dependencies.
 
-  .. code-block:: doscon
+  .. code-block:: batch
 
       set VCPKG_INSTALL=c:\path\to\vcpkg\installed\x64-windows
       configure --security --openssl=%VCPKG_INSTALL% --xerces3=%VCPKG_INSTALL%
 
 * Compile with msbuild or by launching Visual Studio from this command prompt so it inherits the correct environment variables and building from there.
 
-  .. code-block:: doscon
+  .. code-block:: batch
 
       msbuild /m DDS_TAOv2_all.sln
 
@@ -160,14 +160,14 @@ Official Xerces instructions can be found `here <https://xerces.apache.org/xerce
 
 #. If a different location was used (assuming environment variables ``NEW_SSL_ROOT`` and ``NEW_XERCES_ROOT`` point to their respective library directories):
 
-   .. code-block:: doscon
+   .. code-block:: batch
 
        configure --security --openssl=%NEW_SSL_ROOT% \
          --xerces3=%NEW_XERCES_ROOT%
 
 #. Compile with msbuild (or by opening the solution file in Visual Studio and building from there).
 
-   .. code-block:: doscon
+   .. code-block:: batch
 
        msbuild /m DDS_TAOv2_all.sln
 

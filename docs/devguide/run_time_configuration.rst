@@ -87,17 +87,17 @@ How to use instances to configure discovery and transports is explained further 
 The ``-DCPSConfigFile`` command-line argument can be used to pass the location of a configuration file to OpenDDS.
 For example:
 
-Windows:
+.. tab:: Linux, macOS, BSDs, etc.
 
-.. code-block:: doscon
+  .. code-block:: bash
 
-        publisher -DCPSConfigFile pub.ini
+    ./publisher -DCPSConfigFile pub.ini
 
-Unix:
+.. tab:: Windows
 
-.. code-block:: bash
+  .. code-block:: batch
 
-        ./publisher -DCPSConfigFile pub.ini
+    publisher -DCPSConfigFile pub.ini
 
 Command-line arguments are passed to the service participant singleton when initializing the domain participant factory.
 This is accomplished by using the ``TheParticipantFactoryWithArgs`` macro:
@@ -169,7 +169,7 @@ For example:
 
 .. code-block:: bash
 
-        subscriber -DCPSInfoRepo localhost:12345
+  subscriber -DCPSInfoRepo localhost:12345
 
 The following table summarizes the ``[common]`` configuration options:
 
@@ -662,17 +662,17 @@ In our Getting Started example from 2.1.7, "Running the Example" the executables
 
 This assumes that the ``DCPSInfoRepo`` has been started with the following syntax:
 
-Windows:
+.. tab:: Linux, macOS, BSDs, etc.
 
-.. code-block:: doscon
-
-    %DDS_ROOT%\bin\DCPSInfoRepo -o repo.ior
-
-Unix:
-
-.. code-block:: bash
+  .. code-block:: bash
 
     $DDS_ROOT/bin/DCPSInfoRepo -o repo.ior
+
+.. tab:: Windows
+
+  .. code-block:: batch
+
+    %DDS_ROOT%\bin\DCPSInfoRepo -o repo.ior
 
 The ``DCPSInfoRepo`` service generates its location object information in this file and participants need to read this file to ultimately connect.
 The use of file based IORs to find a discovery service, however, is not practical in most production environments, so applications instead can use a command line option like the following to simply point to the host and port where the ``DCPSInfoRepo`` is running.
@@ -683,17 +683,17 @@ The use of file based IORs to find a discovery service, however, is not practica
 
 The above assumes that the ``DCPSInfoRepo`` has been started on a host (``myhost.mydomain.com``) as follows:
 
-Windows:
+.. tab:: Linux, macOS, BSDs, etc.
 
-.. code-block:: doscon
-
-    %DDS_ROOT%\bin\DCPSInfoRepo -ORBListenEndpoints iiop://:12345
-
-Unix:
-
-.. code-block:: bash
+  .. code-block:: bash
 
     $DDS_ROOT/bin/DCPSInfoRepo -ORBListenEndpoints iiop://:12345
+
+.. tab:: Windows
+
+  .. code-block:: batch
+
+    %DDS_ROOT%\bin\DCPSInfoRepo -ORBListenEndpoints iiop://:12345
 
 If an application needs to use a configuration file for other settings, it would become more convenient to place discovery content in the file and reduce command line complexity and clutter.
 The use of a configuration file also introduces the opportunity for multiple application processes to share common OpenDDS configuration.

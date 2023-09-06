@@ -135,129 +135,117 @@ Setting up an OpenDDS Java Project
 
 These instructions assume you have completed the installation steps in the :ghfile:`java/INSTALL` document, including having the various environment variables defined.
 
-* Start with an empty directory that will be used for your IDL and the code generated from it.
-  :ghfile:`java/tests/messenger/messenger_idl/` is set up this way.
+#. Start with an empty directory that will be used for your IDL and the code generated from it.
+   :ghfile:`java/tests/messenger/messenger_idl/` is set up this way.
 
-* Create an IDL file describing the data structure you will be using with OpenDDS.
-  See ``Messenger.idl`` for an example.
-  This file will contain at least struct/union annotated with ``@topic``.
-  For the sake of these instructions, we will call the file ``Foo.idl``.
+#. Create an IDL file describing the data structure you will be using with OpenDDS.
+   See ``Messenger.idl`` for an example.
+   This file will contain at least struct/union annotated with ``@topic``.
+   For the sake of these instructions, we will call the file ``Foo.idl``.
 
-* The C++ generated classes will be packaged in a shared library to be loaded at run-time by the JVM.
-  This requires the packaged classes to be exported for external visibility.
-  ACE provides a utility script for generating the correct export macros.
-  The script usage is shown here:
+#. The C++ generated classes will be packaged in a shared library to be loaded at run-time by the JVM.
+   This requires the packaged classes to be exported for external visibility.
+   ACE provides a utility script for generating the correct export macros.
+   The script usage is shown here:
 
-Unix:
+   .. tab:: Linux, macOS, BSDs, etc.
 
-.. code-block:: bash
+     .. code-block:: bash
 
-    $ACE_ROOT/bin/generate_export_file.pl Foo > Foo_Export.h
+       $ACE_ROOT/bin/generate_export_file.pl Foo > Foo_Export.h
 
-Windows:
+   .. tab:: Windows
 
-.. code-block:: doscon
+     .. code-block:: batch
 
-    %ACE_ROOT%\bin\generate_export_file.pl Foo > Foo_Export.h
+       %ACE_ROOT%\bin\generate_export_file.pl Foo > Foo_Export.h
 
-* Create an MPC file, Foo.mpc, from this template:
+#. Create an MPC file, Foo.mpc, from this template:
 
-.. code-block:: mpc
+   .. code-block:: mpc
 
-    project: dcps_java {
-      idlflags += -Wb,stub_export_include=Foo_Export.h \
-        -Wb,stub_export_macro=Foo_Export
-      dcps_ts_flags += -Wb,export_macro=Foo_Export
-      idl2jniflags += -Wb,stub_export_include=Foo_Export.h \
-        -Wb,stub_export_macro=Foo_Export
-      dynamicflags += FOO_BUILD_DLL
+       project: dcps_java {
+         idlflags += -Wb,stub_export_include=Foo_Export.h \
+           -Wb,stub_export_macro=Foo_Export
+         dcps_ts_flags += -Wb,export_macro=Foo_Export
+         idl2jniflags += -Wb,stub_export_include=Foo_Export.h \
+           -Wb,stub_export_macro=Foo_Export
+         dynamicflags += FOO_BUILD_DLL
 
-      specific {
-        jarname = DDS_Foo_types
-      }
+         specific {
+           jarname = DDS_Foo_types
+         }
 
-     TypeSupport_Files {
-        Foo.idl
-      }
-    }
+        TypeSupport_Files {
+           Foo.idl
+         }
+       }
 
-You can leave out the specific {...} block if you do not need to create a jar file.
-In this case you can directly use the Java .class files which will be generated under the classes subdirectory of the current directory.
+   You can leave out the ``specific {...}`` block if you do not need to create a jar file.
+   In this case you can directly use the Java .class files which will be generated under the classes subdirectory of the current directory.
 
-* Run MPC to generate platform-specific build files.
+#. Run MPC to generate platform-specific build files.
 
-Unix:
+   .. tab:: Linux, macOS, BSDs, etc.
 
-.. code-block:: bash
+     .. code-block:: bash
 
-    $ACE_ROOT/bin/mwc.pl -type gnuace
+       $ACE_ROOT/bin/mwc.pl -type gnuace
 
-Windows:
+   .. tab:: Windows
 
-.. code-block:: doscon
+     .. code-block:: batch
 
-    %ACE_ROOT%\bin\mwc.pl -type [CompilerType]
+       %ACE_ROOT%\bin\mwc.pl -type [CompilerType]
 
-CompilerType can be any supported MPC type (such as "vs2019")
+     CompilerType can be any supported MPC type (such as "vs2019")
 
-Make sure this is running ActiveState Perl or Strawberry Perl.
+     Make sure this is running ActiveState Perl or Strawberry Perl.
 
-* Compile the generated C++ and Java code
+#. Compile the generated C++ and Java code
 
-Unix:
+   .. tab:: Linux, macOS, BSDs, etc.
 
-.. code-block:: bash
+     .. code-block:: bash
 
-    make
+       make
 
-Windows:
+   .. tab:: Windows
 
-Build the generated .``sln`` (Solution) file using your preferred method.
-This can be either the Visual Studio IDE or one of the command-line tools.
-If you use the IDE, start it from a command prompt using ``devenv`` so that it inherits the environment variables.
-Command-line tools for building include ms ``build`` and invoking the IDE (``devenv``) with the appropriate arguments.
+     Build the generated ``.sln`` (Solution) file using your preferred method.
+     This can be either the Visual Studio IDE or one of the command-line tools.
+     If you use the IDE, start it from a command prompt using ``devenv`` so that it inherits the environment variables.
+     Command-line tools for building include ms ``build`` and invoking the IDE (``devenv``) with the appropriate arguments.
 
-When this completes successfully you have a native library and a Java ``.jar`` file.
-The native library names are as follows:
+   When this completes successfully you have a native library and a Java ``.jar`` file.
+   The native library names are ``Foo.dll`` (Release) or ``Food.dll`` (Debug) on Windows and ``libFoo.so`` on Linux.
 
-Unix:
+   You can change the locations of these libraries (including the ``.jar`` file) by adding a line such as the following to the ``Foo.mpc`` file:
 
-::
+   .. code-block:: mpc
 
-    libFoo.so
+     libout = $(PROJECT_ROOT)/lib
 
-Windows:
+   where ``PROJECT_ROOT`` can be any environment variable defined at build-time.
 
-::
+#. You now have all of the Java and C++ code needed to compile and run a Java OpenDDS application.
+   The generated ``.jar`` file needs to be added to your ``classpath``, along with the ``.jar`` files that come from OpenDDS (in the ``lib`` directory).
+   The generated C++ library needs to be available for loading at run-time:
 
-    Foo.dll (Release) or Food.dll (Debug)
+   .. tab:: Linux, macOS, BSDs, etc.
 
-You can change the locations of these libraries (including the ``.jar`` file) by adding a line such as the following to the ``Foo.mpc`` file:
+     Add the directory containing ``libFoo.so`` to the ``LD_LIBRARY_PATH``.
 
-.. code-block:: mpc
+   .. tab:: Windows
 
-    libout = $(PROJECT_ROOT)/lib
+     Add the directory containing ``Foo.dll`` (or ``Food.dll``) to the ``PATH``.
+     If you are using the debug version (``Food.dll``) you will need to inform the OpenDDS middleware that it should not look for ``Foo.dll``.
+     To do this, add ``-Dopendds.native.debug=1`` to the Java VM arguments.
 
-where ``PROJECT_ROOT`` can be any environment variable defined at build-time.
+   See the publisher and subscriber directories in :ghfile:`java/tests/messenger/` for examples of publishing and subscribing applications using the OpenDDS Java bindings.
 
-* You now have all of the Java and C++ code needed to compile and run a Java OpenDDS application.
-  The generated ``.jar`` file needs to be added to your ``classpath``, along with the ``.jar`` files that come from OpenDDS (in the lib directory).
-  The generated C++ library needs to be available for loading at run-time:
-
-Unix:
-
-Add the directory containing ``libFoo.so`` to the ``LD_LIBRARY_PATH``.
-
-Windows:
-
-Add the directory containing ``Foo.dll`` (or ``Food.dll``) to the ``PATH``.
-If you are using the debug version (``Food.dll``) you will need to inform the OpenDDS middleware that it should not look for ``Foo.dll``.
-To do this, add ``-Dopendds.native.debug=1`` to the Java VM arguments.
-
-See the publisher and subscriber directories in :ghfile:`java/tests/messenger/` for examples of publishing and subscribing applications using the OpenDDS Java bindings.
-
-* If you make subsequent changes to ``Foo.idl``, start by re-running MPC (step #5 above).
-  This is needed because certain changes to ``Foo.idl`` will affect which files are generated and need to be compiled.
+#. If you make subsequent changes to ``Foo.idl``, start by re-running MPC (step #5 above).
+   This is needed because certain changes to ``Foo.idl`` will affect which files are generated and need to be compiled.
 
 .. _java_bindings--a-simple-message-publisher:
 

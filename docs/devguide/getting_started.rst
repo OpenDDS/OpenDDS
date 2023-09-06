@@ -864,47 +864,47 @@ For our simple example here we will use option 2 by generating the location prop
 
 From your current directory type:
 
-Windows:
+.. tab:: Linux, macOS, BSDs, etc.
 
-.. code-block:: doscon
+ .. code-block:: bash
+
+   $DDS_ROOT/bin/DCPSInfoRepo -o simple.ior
+
+.. tab:: Windows
+
+  .. code-block:: batch
 
     %DDS_ROOT%\bin\DCPSInfoRepo -o simple.ior
-
-Unix:
-
-.. code-block:: bash
-
-    $DDS_ROOT/bin/DCPSInfoRepo -o simple.ior
 
 The ``-o`` parameter instructs the ``DCPSInfoRepo`` to generate its connection information to the file ``simple.ior`` for use by the publisher and subscriber.
 In a separate window navigate to the same directory that contains the ``simple.ior`` file and start the subscriber application in our example by typing:
 
-Windows:
+.. tab:: Linux, macOS, BSDs, etc.
 
-.. code-block:: doscon
-
-    subscriber -DCPSInfoRepo file://simple.ior
-
-Unix:
-
-.. code-block:: bash
+  .. code-block:: bash
 
     ./subscriber -DCPSInfoRepo file://simple.ior
+
+.. tab:: Windows
+
+  .. code-block:: batch
+
+    subscriber -DCPSInfoRepo file://simple.ior
 
 The command line parameters direct the application to use the specified file to locate the ``DCPSInfoRepo``.
 Our subscriber is now waiting for messages to be sent, so we will now start the publisher in a separate window with the same parameters:
 
-Windows:
+.. tab:: Linux, macOS, BSDs, etc.
 
-.. code-block:: doscon
-
-    publisher -DCPSInfoRepo file://simple.ior
-
-Unix
-
-.. code-block:: bash
+  .. code-block:: bash
 
     ./publisher -DCPSInfoRepo file://simple.ior
+
+.. tab:: Windows
+
+  .. code-block:: batch
+
+    publisher -DCPSInfoRepo file://simple.ior
 
 The publisher connects to the ``DCPSInfoRepo`` to find the location of any subscribers and begins to publish messages as well as write them to the console.
 In the subscriber window, you should also now be seeing console output from the subscriber that is reading messages from the topic demonstrating a simple publish and subscribe application.
@@ -949,31 +949,31 @@ It is best to start them in separate windows to see the two working separately.
 
 Start the subscriber with the ``-DCPSConfigFile`` command line parameter to point to the newly created configuration file...
 
-Windows:
+.. tab:: Linux, macOS, BSDs, etc.
 
-.. code-block:: bash
-
-    subscriber -DCPSConfigFile rtps.ini
-
-Unix:
-
-.. code-block:: doscon
+  .. code-block:: bash
 
     ./subscriber -DCPSConfigFile rtps.ini
 
+.. tab:: Windows
+
+  .. code-block:: batch
+
+    subscriber -DCPSConfigFile rtps.ini
+
 Now start the publisher with the same parameter...
 
-Windows:
+.. tab:: Linux, macOS, BSDs, etc.
 
-.. code-block:: doscon
-
-    publisher -DCPSConfigFile rtps.ini
-
-Unix:
-
-.. code-block:: bash
+  .. code-block:: bash
 
     ./publisher -DCPSConfigFile rtps.ini
+
+.. tab:: Windows
+
+  .. code-block:: batch
+
+    publisher -DCPSConfigFile rtps.ini
 
 Since there is no centralized discovery in the RTPS specification, there are provisions to allow for wait times to allow discovery to occur.
 The specification sets the default to 30 seconds.
