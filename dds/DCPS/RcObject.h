@@ -223,13 +223,6 @@ namespace DCPS {
     }
 
   private:
-
-    WeakRcHandle(WeakObject* obj)
-      : weak_object_(obj)
-      , cached_(dynamic_cast<T*>(obj))
-    {
-    }
-
     WeakObject* weak_object_;
     T* cached_;
   };
