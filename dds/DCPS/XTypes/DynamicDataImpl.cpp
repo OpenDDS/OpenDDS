@@ -26,9 +26,12 @@ using DCPS::LogLevel;
 using DCPS::log_level;
 using DCPS::retcode_to_string;
 
-DynamicDataImpl::DynamicDataImpl(DDS::DynamicType_ptr type)
+DynamicDataImpl::DynamicDataImpl(DDS::DynamicType_ptr type,
+                                 ACE_Message_Block* chain,
+                                 const DCPS::Encoding* encoding)
   : DynamicDataBase(type)
   , container_(type_, this)
+  , backing_store_(new DynamicDataXcdrReadImpl(chain, *encoding, type, DCPS::Sample::Full))
 {
 }
 
@@ -39,7 +42,15 @@ DynamicDataImpl::DynamicDataImpl(const DynamicDataImpl& other)
   , DCPS::RcObject()
   , DynamicDataBase(other.type_)
   , container_(other.container_, this)
+  , backing_store_(new DynamicDataXcdrReadImpl(*other.backing_store_))
 {}
+
+DynamicDataImpl::~DynamicDataImpl()
+{
+  if (backing_store_) {
+    delete backing_store_;
+  }
+}
 
 DDS::ReturnCode_t DynamicDataImpl::set_descriptor(MemberId, DDS::MemberDescriptor*)
 {
@@ -2651,19 +2662,117 @@ bool DynamicDataImpl::read_basic_in_complex_map(ValueType& value, DDS::MemberId 
 template<typename ValueType>
 bool DynamicDataImpl::read_basic_member(ValueType& value, DDS::MemberId id)
 {
-  return read_basic_in_single_map(value, id) || read_basic_in_complex_map(value, id);
+  return read_basic_in_single_map(value, id)
+    || read_basic_in_complex_map(value, id)
+    || get_value_from_backing_store(value, id);
 }
 
-template<>
-bool DynamicDataImpl::read_basic_member(char*& value, DDS::MemberId id)
+// TODO(sonndinh): May not need these.
+// template<>
+// bool DynamicDataImpl::read_basic_member(char*& value, DDS::MemberId id)
+// {
+//   return read_basic_in_single_map(value, id)
+//     || read_basic_in_complex_map(value, id)
+//     || get_value_from_backing_store(value, id);
+// }
+
+// template<>
+// bool DynamicDataImpl::read_basic_member(CORBA::WChar*& value, DDS::MemberId id)
+// {
+//   return read_basic_in_single_map(value, id)
+//     || read_basic_in_complex_map(value, id)
+//     || get_value_from_backing_store(value, id);
+// }
+
+bool DynamicDataImpl::get_value_from_backing_store(ACE_OutputCDR::from_int8& value,
+                                                   DDS::MemberId id) const
 {
-  return read_basic_in_single_map(value, id) || read_basic_in_complex_map(value, id);
+  return backing_store_ && backing_store_->get_int8_value(value.val_, id) == DDS::RETCODE_OK;
 }
 
-template<>
-bool DynamicDataImpl::read_basic_member(CORBA::WChar*& value, DDS::MemberId id)
+bool DynamicDataImpl::get_value_from_backing_store(ACE_OutputCDR::from_uint8& value,
+                                                   DDS::MemberId id) const
 {
-  return read_basic_in_single_map(value, id) || read_basic_in_complex_map(value, id);
+  return backing_store_ && backing_store_->get_uint8_value(value.val_, id) == DDS::RETCODE_OK;
+}
+
+bool DynamicDataImpl::get_value_from_backing_store(CORBA::Short& value, DDS::MemberId id) const
+{
+  return backing_store_ && backing_store_->get_int16_value(value, id) == DDS::RETCODE_OK;
+}
+
+bool DynamicDataImpl::get_value_from_backing_store(CORBA::UShort& value, DDS::MemberId id) const
+{
+  return backing_store_ && backing_store_->get_uint16_value(value, id) == DDS::RETCODE_OK;
+}
+
+bool DynamicDataImpl::get_value_from_backing_store(CORBA::Long& value, DDS::MemberId id) const
+{
+  return backing_store_ && backing_store_->get_int32_value(value, id) == DDS::RETCODE_OK;
+}
+
+bool DynamicDataImpl::get_value_from_backing_store(CORBA::ULong& value, DDS::MemberId id) const
+{
+  return backing_store_ && backing_store_->get_uint32_value(value, id) == DDS::RETCODE_OK;
+}
+
+bool DynamicDataImpl::get_value_from_backing_store(CORBA::LongLong& value, DDS::MemberId id) const
+{
+  return backing_store_ && backing_store_->get_int64_value(value, id) == DDS::RETCODE_OK;
+}
+
+bool DynamicDataImpl::get_value_from_backing_store(CORBA::ULongLong& value, DDS::MemberId id) const
+{
+  return backing_store_ && backing_store_->get_uint64_value(value, id) == DDS::RETCODE_OK;
+}
+
+bool DynamicDataImpl::get_value_from_backing_store(CORBA::Float& value, DDS::MemberId id) const
+{
+  return backing_store_ && backing_store_->get_float32_value(value, id) == DDS::RETCODE_OK;
+}
+
+bool DynamicDataImpl::get_value_from_backing_store(CORBA::Double& value, DDS::MemberId id) const
+{
+  return backing_store_ && backing_store_->get_float64_value(value, id) == DDS::RETCODE_OK;
+}
+
+bool DynamicDataImpl::get_value_from_backing_store(CORBA::LongDouble& value, DDS::MemberId id) const
+{
+  return backing_store_ && backing_store_->get_float128_value(value, id) == DDS::RETCODE_OK;
+}
+
+bool DynamicDataImpl::get_value_from_backing_store(ACE_OutputCDR::from_byte& value,
+                                                   DDS::MemberId id) const
+{
+  return backing_store_ && backing_store_->get_byte_value(value.val_, id) == DDS::RETCODE_OK;
+}
+
+bool DynamicDataImpl::get_value_from_backing_store(char*& value, DDS::MemberId id) const
+{
+  return backing_store_ && backing_store_->get_string_value(value, id) == DDS::RETCODE_OK;
+}
+
+bool DynamicDataImpl::get_value_from_backing_store(CORBA::WChar*& value, DDS::MemberId id) const
+{
+  return backing_store_ && backing_store_->get_wstring_value(value, id) == DDS::RETCODE_OK;
+}
+
+bool DynamicDataImpl::get_value_from_backing_store(ACE_OutputCDR::from_char& value,
+                                                   DDS::MemberId id) const
+{
+  return backing_store_ && backing_store_->get_char8_value(value.val_, id) == DDS::RETCODE_OK;
+}
+
+bool DynamicDataImpl::get_value_from_backing_store(ACE_OutputCDR::from_wchar& value,
+                                                   DDS::MemberId id) const
+{
+  return backing_store_ && backing_store_->get_char16_value(value.val_, id) == DDS::RETCODE_OK;
+}
+
+bool DynamicDataImpl::get_value_from_backing_store(ACE_OutputCDR::from_boolean& value,
+                                                   DDS::MemberId id) const
+{
+  return backing_store_ && backing_store_->get_boolean_value(value.val_, id) == DDS::RETCODE_OK;
 }
 
 template<typename ValueType>
@@ -2676,7 +2785,7 @@ bool DynamicDataImpl::get_value_from_self(ValueType& value, DDS::MemberId id)
   const_single_iterator it = container_.single_map_.find(MEMBER_ID_INVALID);
   if (it != container_.single_map_.end()) {
     value = it->second.get<ValueType>();
-  } else {
+  } else if (!get_value_from_backing_store(value, id)) {
     set_default_basic_value(value);
   }
   return true;
@@ -2707,7 +2816,7 @@ bool DynamicDataImpl::get_value_from_enum(ValueType& value, DDS::MemberId id)
   const_single_iterator it = container_.single_map_.find(MEMBER_ID_INVALID);
   if (it != container_.single_map_.end()) {
     value = it->second.get<ValueType>();
-  } else {
+  } else if (!get_value_from_backing_store(value, id)) {
     CORBA::Long enum_default_val;
     if (!set_default_enum_value(type_, enum_default_val)) {
       return false;
@@ -2740,7 +2849,7 @@ bool DynamicDataImpl::get_value_from_bitmask(ValueType& value, DDS::MemberId id)
   const_single_iterator it = container_.single_map_.find(MEMBER_ID_INVALID);
   if (it != container_.single_map_.end()) {
     value = it->second.get<ValueType>();
-  } else {
+  } else if (!get_value_from_backing_store(value, id)) {
     set_default_bitmask_value(value);
   }
   return true;
@@ -2794,7 +2903,7 @@ bool DynamicDataImpl::get_value_from_union(ValueType& value, DDS::MemberId id)
     return false;
   }
 
-  // Return the member if it is in the container.
+  // Return the member if the container or the backing store has it.
   if (read_basic_member(value, id)) {
     return true;
   }
@@ -3036,18 +3145,10 @@ DDS::ReturnCode_t DynamicDataImpl::get_char_common(CharT& value, DDS::MemberId i
   bool good = true;
   switch (tk) {
   case CharKind: {
-    if (id != MEMBER_ID_INVALID) {
-      good = false;
-      break;
-    }
-    const_single_iterator it = container_.single_map_.find(id);
-    if (it != container_.single_map_.end()) {
-      FromCharT from_char = it->second.get<FromCharT>();
-      value = from_char.val_;
-    } else {
-      FromCharT from_char('\0');
-      set_default_basic_value(from_char);
-      value = from_char.val_;
+    FromCharT from_char_t('\0');
+    good = get_value_from_self(from_char_t, id);
+    if (good) {
+      value = from_char_t.val_;
     }
     break;
   }
@@ -3142,7 +3243,7 @@ bool DynamicDataImpl::get_boolean_from_bitmask(CORBA::ULong index, CORBA::Boolea
 template<>
 bool DynamicDataImpl::get_boolean_from_bitmask<CORBA::UInt8>(CORBA::ULong index, CORBA::Boolean& value)
 {
-  ACE_OutputCDR::from_int8 bitmask(0);
+  ACE_OutputCDR::from_uint8 bitmask(0);
   if (!read_basic_value(bitmask)) {
     return false;
   }
@@ -3156,17 +3257,9 @@ DDS::ReturnCode_t DynamicDataImpl::get_boolean_value(CORBA::Boolean& value, DDS:
   bool good = true;
   switch (tk) {
   case TK_BOOLEAN: {
-    if (id != MEMBER_ID_INVALID) {
-      good = false;
-      break;
-    }
-    const_single_iterator it = container_.single_map_.find(id);
-    if (it != container_.single_map_.end()) {
-      ACE_OutputCDR::from_boolean from_bool = it->second.get<ACE_OutputCDR::from_boolean>();
-      value = from_bool.val_;
-    } else {
-      ACE_OutputCDR::from_boolean from_bool(false);
-      set_default_basic_value(from_bool);
+    ACE_OutputCDR::from_boolean from_bool(false);
+    good = get_value_from_self(from_bool, id);
+    if (good) {
       value = from_bool.val_;
     }
     break;
@@ -3240,12 +3333,14 @@ DDS::ReturnCode_t DynamicDataImpl::get_string_value(char*& value, DDS::MemberId 
     return DDS::RETCODE_OK;
   }
 
+  CORBA::string_free(value);
   return get_single_value<TK_STRING8>(value, id);
 }
 
 DDS::ReturnCode_t DynamicDataImpl::get_wstring_value(CORBA::WChar*& value, DDS::MemberId id)
 {
 #ifdef DDS_HAS_WCHAR
+  CORBA::wstring_free(value);
   return get_single_value<TK_STRING16>(value, id);
 #else
   return DDS::RETCODE_UNSUPPORTED;

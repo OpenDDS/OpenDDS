@@ -8,6 +8,7 @@
 
 #ifndef OPENDDS_SAFETY_PROFILE
 #  include "DynamicDataBase.h"
+#  include "DynamicDataXcdrReadImpl.h"
 
 #  include <dds/DCPS/FilterEvaluator.h>
 #  include <dds/DCPS/Sample.h>
@@ -35,8 +36,10 @@ namespace XTypes {
 
 class OpenDDS_Dcps_Export DynamicDataImpl : public DynamicDataBase {
 public:
-  explicit DynamicDataImpl(DDS::DynamicType_ptr type);
+  DynamicDataImpl(DDS::DynamicType_ptr type, ACE_Message_Block* chain = 0, const DCPS::Encoding* encoding = 0);
   DynamicDataImpl(const DynamicDataImpl& other);
+
+  ~DynamicDataImpl();
 
   DDS::ReturnCode_t set_descriptor(MemberId id, DDS::MemberDescriptor* value);
 
@@ -269,6 +272,25 @@ private:
 
   template<typename ValueType>
   void cast_to_enum_value(ValueType& dst, CORBA::Long src) const;
+
+  // Wrappers for reading different types from the backing store
+  bool get_value_from_backing_store(ACE_OutputCDR::from_int8& value, DDS::MemberId id) const;
+  bool get_value_from_backing_store(ACE_OutputCDR::from_uint8& value, DDS::MemberId id) const;
+  bool get_value_from_backing_store(CORBA::Short& value, DDS::MemberId id) const;
+  bool get_value_from_backing_store(CORBA::UShort& value, DDS::MemberId id) const;
+  bool get_value_from_backing_store(CORBA::Long& value, DDS::MemberId id) const;
+  bool get_value_from_backing_store(CORBA::ULong& value, DDS::MemberId id) const;
+  bool get_value_from_backing_store(CORBA::LongLong& value, DDS::MemberId id) const;
+  bool get_value_from_backing_store(CORBA::ULongLong& value, DDS::MemberId id) const;
+  bool get_value_from_backing_store(CORBA::Float& value, DDS::MemberId id) const;
+  bool get_value_from_backing_store(CORBA::Double& value, DDS::MemberId id) const;
+  bool get_value_from_backing_store(CORBA::LongDouble& value, DDS::MemberId id) const;
+  bool get_value_from_backing_store(ACE_OutputCDR::from_byte& value, DDS::MemberId id) const;
+  bool get_value_from_backing_store(char*& value, DDS::MemberId id) const;
+  bool get_value_from_backing_store(CORBA::WChar*& value, DDS::MemberId id) const;
+  bool get_value_from_backing_store(ACE_OutputCDR::from_char& value, DDS::MemberId id) const;
+  bool get_value_from_backing_store(ACE_OutputCDR::from_wchar& value, DDS::MemberId id) const;
+  bool get_value_from_backing_store(ACE_OutputCDR::from_boolean& value, DDS::MemberId id) const;
 
   /// Read a basic member from a containing type
   template<typename ValueType>
@@ -657,7 +679,11 @@ private:
   bool insert_discriminator(ACE_CDR::Long value);
   void clear_container();
 
+  // Container for data set by the user.
   DataContainer container_;
+
+  // Immutable backing store to retrieve data in case the container doesn't have it.
+  DynamicDataXcdrReadImpl* backing_store_;
 
   // XCDR serialization functions
   bool serialize_single_value(DCPS::Serializer& ser, const DynamicDataImpl::SingleValue& sv) const;
