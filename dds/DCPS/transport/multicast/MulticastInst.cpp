@@ -45,6 +45,22 @@ namespace DCPS {
 
 MulticastInst::MulticastInst(const std::string& name)
   : TransportInst("multicast", name)
+  , default_to_ipv6_(*this, &MulticastInst::default_to_ipv6, &MulticastInst::default_to_ipv6)
+  , port_offset_(*this, &MulticastInst::port_offset, &MulticastInst::port_offset)
+  , group_address_(*this, &MulticastInst::group_address, &MulticastInst::group_address)
+  , local_address_(*this, &MulticastInst::local_address, &MulticastInst::local_address)
+  , reliable_(*this, &MulticastInst::reliable, &MulticastInst::reliable)
+  , syn_backoff_(*this, &MulticastInst::syn_backoff, &MulticastInst::syn_backoff)
+  , syn_interval_(*this, &MulticastInst::syn_interval, &MulticastInst::syn_interval)
+  , syn_timeout_(*this, &MulticastInst::syn_timeout, &MulticastInst::syn_timeout)
+  , nak_depth_(*this, &MulticastInst::nak_depth, &MulticastInst::nak_depth)
+  , nak_interval_(*this, &MulticastInst::nak_interval, &MulticastInst::nak_interval)
+  , nak_delay_intervals_(*this, &MulticastInst::nak_delay_intervals, &MulticastInst::nak_delay_intervals)
+  , nak_max_(*this, &MulticastInst::nak_max, &MulticastInst::nak_max)
+  , nak_timeout_(*this, &MulticastInst::nak_timeout, &MulticastInst::nak_timeout)
+  , ttl_(*this, &MulticastInst::ttl, &MulticastInst::ttl)
+  , rcv_buffer_size_(*this, &MulticastInst::rcv_buffer_size, &MulticastInst::rcv_buffer_size)
+  , async_send_(*this, &MulticastInst::async_send, &MulticastInst::async_send)
 {}
 
 int
