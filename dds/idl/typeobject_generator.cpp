@@ -846,14 +846,6 @@ typeobject_generator::strong_connect(AST_Type* type, const std::string& anonymou
       break;
     }
 
-  case AST_ConcreteType::NT_string:
-  case AST_ConcreteType::NT_wstring:
-  case AST_ConcreteType::NT_pre_defined:
-  case AST_ConcreteType::NT_fixed:
-  case AST_ConcreteType::NT_interface:
-  case AST_ConcreteType::NT_interface_fwd:
-      break;
-
   case AST_ConcreteType::NT_struct_fwd:
   case AST_ConcreteType::NT_union_fwd:
   case AST_ConcreteType::NT_native:
@@ -892,6 +884,11 @@ typeobject_generator::strong_connect(AST_Type* type, const std::string& anonymou
   case AST_ConcreteType::NT_field:
   case AST_ConcreteType::NT_enum_val:
     be_util::misc_error_and_abort("Unexpected AST type", type);
+    break;
+
+  default:
+    // Different versions of TAO_IDL_FE can have additional NT_* enumerators.
+    // Ignoring them with a default: case silences a compiler warning.
     break;
   }
 
@@ -1642,6 +1639,11 @@ typeobject_generator::generate_type_identifier(AST_Type* type, bool force_type_o
   case AST_ConcreteType::NT_field:
   case AST_ConcreteType::NT_enum_val:
     be_util::misc_error_and_abort("Unexpected AST type", type);
+
+  default:
+    // Different versions of TAO_IDL_FE can have additional NT_* enumerators.
+    // Ignoring them with a default: case silences a compiler warning.
+    break;
   }
 }
 
