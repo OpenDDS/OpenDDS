@@ -45,15 +45,21 @@ public:
   /// The address string provided to DCPSInfoRepo for connectors.
   /// This string is either from configuration file or defaults
   /// to the local address.
-  std::string pub_address_str_;
+  ConfigValueRef<TcpInst, String> pub_address_str_;
+  void pub_address_str(const String& pas);
+  String pub_address_str() const;
 
-  bool enable_nagle_algorithm_;
+  ConfigValue<TcpInst, bool> enable_nagle_algorithm_;
+  void enable_nagle_algorithm(bool ena);
+  bool enable_nagle_algorithm() const;
 
   /// The initial retry delay in milliseconds.
   /// The first connection retry will be when the loss of connection
   /// is detected.  The second try will be after this delay.
   /// The default is 500 miliseconds.
-  int conn_retry_initial_delay_;
+  ConfigValue<TcpInst, int> conn_retry_initial_delay_;
+  void conn_retry_initial_delay(int crid);
+  int conn_retry_initial_delay() const;
 
   /// The backoff multiplier for reconnection strategy.
   /// The third and so on reconnect will be this value * the previous delay.
@@ -63,19 +69,25 @@ public:
   /// fails; the fourth attempt will be 1.125 seconds after the third retry connect
   /// fails.
   /// The default value is 2.0.
-  double conn_retry_backoff_multiplier_;
+  ConfigValue<TcpInst, double> conn_retry_backoff_multiplier_;
+  void conn_retry_backoff_multiplier(double crbm);
+  double conn_retry_backoff_multiplier() const;
 
   /// Number of attempts to reconnect before giving up and calling
   /// on_publication_lost() and on_subscription_lost() callbacks.
   /// The default is 3.
-  int conn_retry_attempts_;
+  ConfigValue<TcpInst, int> conn_retry_attempts_;
+  void conn_retry_attempts(int cra);
+  int conn_retry_attempts() const;
 
   /// Maximum period (in milliseconds) of not being able to send queued
   /// messages. If there are samples queued and no output for longer
   /// than this period then the connection will be closed and on_*_lost()
   /// callbacks will be called. If the value is zero, the default, then
   /// this check will not be made.
-  int max_output_pause_period_;
+  ConfigValue<TcpInst, int> max_output_pause_period_;
+  void max_output_pause_period(int mopp);
+  int max_output_pause_period() const;
 
   /// The time period in milliseconds for the acceptor side
   /// of a connection to wait for the connection to be reconnected.
@@ -83,48 +95,57 @@ public:
   /// on_publication_lost() and on_subscription_lost() callbacks
   /// will be called.
   /// The default is 2 seconds (2000 millseconds).
-  int passive_reconnect_duration_;
+  ConfigValue<TcpInst, int> passive_reconnect_duration_;
+  void passive_reconnect_duration(int prd);
+  int passive_reconnect_duration() const;
 
   /// The time period in milliseconds for the acceptor side
   /// of a connection to wait for the connection to be established.
   /// If not connected within this period then this link is removed
   /// from pending and any other links are attempted.
   /// The default is 5 seconds (5000 millseconds).
-  int active_conn_timeout_period_;
+  ConfigValue<TcpInst, int> active_conn_timeout_period_;
+  void active_conn_timeout_period(int actp);
+  int active_conn_timeout_period() const;
 
   bool is_reliable() const { return true; }
+
+  /// The address string used to configure the acceptor.
+  /// This string is either from configuration file or default
+  /// to hostname:port. The hostname is fully qualified hostname
+  /// and the port is randomly picked by os.
+  void local_address(const String& la);
+  void local_address(const ACE_INET_Addr& addr)
+  {
+    local_address(LogAddr(addr).str());
+  }
+  void local_address(u_short port_number, const char* host_name)
+  {
+    local_address(String(host_name) + ":" + to_dds_string(port_number));
+  }
+  void local_address_set_port(u_short port_number) {
+    String addr = local_address();
+    set_port_in_addr_string(addr, port_number);
+    local_address(addr);
+  }
+  String local_address() const;
+
+  /// Describes the local endpoint to be used to accept
+  /// passive connections.
+  ACE_INET_Addr accept_address() const;
+
+  bool set_locator_address(const ACE_INET_Addr& address);
 
   /// The public address is our publicly advertised address.
   /// Usually this is the same as the local address, but if
   /// a public address is explicitly specified, use that.
-  const std::string& get_public_address() const {
-    return (pub_address_str_ == "") ? local_address_str_ : pub_address_str_;
+  std::string get_locator_address() const
+  {
+    const String pub_addr = pub_address_str();
+    return (pub_addr == "") ? locator_address_ : pub_addr;
   }
 
   virtual size_t populate_locator(OpenDDS::DCPS::TransportLocator& trans_info, ConnectionInfoFlags flags) const;
-
-  OPENDDS_STRING local_address_string() const { return local_address_str_; }
-  ACE_INET_Addr local_address() const { return local_address_; }
-  void local_address(const ACE_INET_Addr& addr)
-  {
-    local_address_ = addr;
-    local_address_str_ = LogAddr(addr).str();
-  }
-  void local_address(const char* str)
-  {
-    local_address_str_ = str;
-    local_address_ = choose_single_coherent_address(local_address_str_, false);
-  }
-  void local_address(u_short port_number, const char* host_name)
-  {
-    local_address_str_ = host_name;
-    local_address_str_ += ":" + to_dds_string(port_number);
-    local_address_ = choose_single_coherent_address(local_address_str_, false);
-  }
-  void local_address_set_port(u_short port_number) {
-    local_address_.set_port_number(port_number);
-    set_port_in_addr_string(local_address_str_, port_number);
-  }
 
 private:
   friend class TcpType;
@@ -137,15 +158,7 @@ private:
 
   TransportImpl_rch new_impl();
 
-  /// Describes the local endpoint to be used to accept
-  /// passive connections.
-  ACE_INET_Addr local_address_;
-
-  /// The address string used to configure the acceptor.
-  /// This string is either from configuration file or default
-  /// to hostname:port. The hostname is fully qualified hostname
-  /// and the port is randomly picked by os.
-  std::string local_address_str_;
+  std::string locator_address_;
 };
 
 } // namespace DCPS
