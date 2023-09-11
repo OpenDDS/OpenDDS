@@ -36,6 +36,9 @@ namespace XTypes {
 
 class OpenDDS_Dcps_Export DynamicDataImpl : public DynamicDataBase {
 public:
+  // The optional ACE_Message_Block chain can be passed to provide an XCDR backing store for this object.
+  // User should only pass a message block chain for the top-level type. The backing stores for the enclosed
+  // types will be derived from it.
   DynamicDataImpl(DDS::DynamicType_ptr type, ACE_Message_Block* chain = 0, const DCPS::Encoding* encoding = 0);
   DynamicDataImpl(const DynamicDataImpl& other);
 
@@ -272,6 +275,8 @@ private:
 
   template<typename ValueType>
   void cast_to_enum_value(ValueType& dst, CORBA::Long src) const;
+
+  void set_backing_store();
 
   // Wrappers for reading different types from the backing store
   bool get_value_from_backing_store(ACE_OutputCDR::from_int8& value, DDS::MemberId id) const;
@@ -662,6 +667,7 @@ private:
   // Indicate whether the value of a member is found in the complex map or
   // one of the other two maps or not found from any map in the container.
   enum FoundStatus { FOUND_IN_COMPLEX_MAP, FOUND_IN_NON_COMPLEX_MAP, NOT_FOUND };
+  bool set_member_backing_store(DynamicDataImpl* member_ddi, DDS::MemberId id);
   bool get_complex_from_aggregated(DDS::DynamicData_var& value, DDS::MemberId id,
                                    FoundStatus& found_status);
 
@@ -683,6 +689,9 @@ private:
   DataContainer container_;
 
   // Immutable backing store to retrieve data in case the container doesn't have it.
+  // Reading from the backing store is considered best effort, that is failure to read
+  // from it doesn't cascade to the caller. E.g., an optional member might not appear
+  // in the backing store but user is allowed to get it from the public API.
   DynamicDataXcdrReadImpl* backing_store_;
 
   // XCDR serialization functions

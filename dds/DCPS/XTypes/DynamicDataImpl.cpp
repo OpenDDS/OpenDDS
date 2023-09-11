@@ -31,8 +31,11 @@ DynamicDataImpl::DynamicDataImpl(DDS::DynamicType_ptr type,
                                  const DCPS::Encoding* encoding)
   : DynamicDataBase(type)
   , container_(type_, this)
-  , backing_store_(new DynamicDataXcdrReadImpl(chain, *encoding, type, DCPS::Sample::Full))
+  , backing_store_(0)
 {
+  if (chain) {
+    backing_store_ = new DynamicDataXcdrReadImpl(chain, *encoding, type, DCPS::Sample::Full);
+  }
 }
 
 DynamicDataImpl::DynamicDataImpl(const DynamicDataImpl& other)
@@ -42,14 +45,17 @@ DynamicDataImpl::DynamicDataImpl(const DynamicDataImpl& other)
   , DCPS::RcObject()
   , DynamicDataBase(other.type_)
   , container_(other.container_, this)
-  , backing_store_(new DynamicDataXcdrReadImpl(*other.backing_store_))
-{}
+  , backing_store_(0)
+{
+  if (other.backing_store_) {
+    backing_store_ = new DynamicDataXcdrReadImpl(*other.backing_store_);
+  }
+}
 
 DynamicDataImpl::~DynamicDataImpl()
 {
-  if (backing_store_) {
-    delete backing_store_;
-  }
+  // TODO(sonndinh): delete backing_store_; ?
+  CORBA::release(backing_store_);
 }
 
 DDS::ReturnCode_t DynamicDataImpl::set_descriptor(MemberId, DDS::MemberDescriptor*)
@@ -1175,7 +1181,13 @@ template<> const DDS::WstringSeq& DynamicDataImpl::SequenceValue::get() const
 bool DynamicDataImpl::read_discriminator(CORBA::Long& disc_val, const DDS::DynamicType_var& disc_type,
                                          const_single_iterator it) const
 {
-  switch (disc_type->get_kind()) {
+  const TypeKind disc_tk = disc_type->get_kind();
+  TypeKind treat_as_tk = disc_tk;
+  if (disc_tk == TK_ENUM && enum_bound(disc_type, treat_as_tk) != DDS::RETCODE_OK) {
+    return false;
+  }
+
+  switch (treat_as_tk) {
   case TK_BOOLEAN: {
     const ACE_OutputCDR::from_boolean& value = it->second.get<ACE_OutputCDR::from_boolean>();
     disc_val = static_cast<CORBA::Long>(value.val_);
@@ -1210,7 +1222,7 @@ bool DynamicDataImpl::read_discriminator(CORBA::Long& disc_val, const DDS::Dynam
   }
   case TK_INT16: {
     CORBA::Short value = it->second.get<CORBA::Short>();
-    disc_val = static_cast<CORBA::Long>(value);
+    disc_val = value;
     return true;
   }
   case TK_UINT16: {
@@ -1235,23 +1247,6 @@ bool DynamicDataImpl::read_discriminator(CORBA::Long& disc_val, const DDS::Dynam
   case TK_UINT64: {
     CORBA::ULongLong value = it->second.get<CORBA::ULongLong>();
     disc_val = static_cast<CORBA::Long>(value);
-    return true;
-  }
-  case TK_ENUM: {
-    DDS::TypeDescriptor_var td;
-    if (disc_type->get_descriptor(td) != DDS::RETCODE_OK) {
-      return false;
-    }
-    const CORBA::ULong bitbound = td->bound()[0];
-    if (bitbound >= 1 && bitbound <= 8) {
-      const ACE_OutputCDR::from_int8& value = it->second.get<ACE_OutputCDR::from_int8>();
-      disc_val = static_cast<CORBA::Long>(value.val_);
-    } else if (bitbound >= 9 && bitbound <= 16) {
-      CORBA::Short value = it->second.get<CORBA::Short>();
-      disc_val = static_cast<CORBA::Long>(value);
-    } else {
-      disc_val = it->second.get<CORBA::Long>();
-    }
     return true;
   }
   }
@@ -2684,6 +2679,12 @@ bool DynamicDataImpl::read_basic_member(ValueType& value, DDS::MemberId id)
 //     || get_value_from_backing_store(value, id);
 // }
 
+void DynamicDataImpl::set_backing_store(DynamicDataXcdrReadImpl* xcdr_store)
+{
+  CORBA::release(backing_store_);
+  backing_store_ = xcdr_store;
+}
+
 bool DynamicDataImpl::get_value_from_backing_store(ACE_OutputCDR::from_int8& value,
                                                    DDS::MemberId id) const
 {
@@ -3691,12 +3692,31 @@ bool DynamicDataImpl::get_complex_from_aggregated(DDS::DynamicData_var& value, D
   return true;
 }
 
+bool DynamicDataImpl::set_member_backing_store(DynamicDataImpl* member_ddi, DDS::MemberId id)
+{
+  DynamicDataXcdrReadImpl* member_store = 0;
+  if (backing_store_->get_complex_value(member_store, id) != DDS::RETCODE_OK) {
+    return false;
+  }
+  member_ddi->set_backing_store(member_store);
+  return true;
+}
+
 bool DynamicDataImpl::get_complex_from_struct(DDS::DynamicData_ptr& value, DDS::MemberId id)
 {
   FoundStatus found_status = NOT_FOUND;
   DDS::DynamicData_var dd_var;
   if (!get_complex_from_aggregated(dd_var, id, found_status)) {
     return false;
+  }
+  if (found_status == NOT_FOUND && backing_store_) {
+    // The returned DynamicDataImpl object contains the data for the member
+    // from the backing store, if available.
+    DynamicDataImpl* ddi = dynamic_cast<DynamicDataImpl*>(dd_var.in());
+    if (!ddi) {
+      return false;
+    }
+    set_member_backing_store(ddi, id);
   }
 
   if (found_status == FOUND_IN_NON_COMPLEX_MAP || found_status == NOT_FOUND) {
@@ -3753,6 +3773,113 @@ bool DynamicDataImpl::write_discriminator(CORBA::Long value)
   return write_discriminator_helper(value, treat_as);
 }
 
+// TODO(sonndinh): Maybe merge with existing functions to read discriminator value?
+// bool DynamicDataImpl::get_disc_from_backing_store(CORBA::Long& disc_val,
+//                                                   const DDS::DynamicType_var& disc_type)
+// {
+//   const TypeKind disc_tk = disc_type->get_kind();
+//   TypeKind treat_as_tk = disc_tk;
+//   if (disc_tk == TK_ENUM && enum_bound(disc_type, treat_as_tk) != DDS::RETCODE_OK) {
+//     return false;
+//   }
+
+//   switch (treat_as_tk) {
+//   case TK_BOOLEAN: {
+//     ACE_OutputCDR::from_boolean val;
+//     if (!get_value_from_backing_store(val, DISCRIMINATOR_ID)) {
+//       return false;
+//     }
+//     disc_val = static_cast<CORBA::Long>(val.val_);
+//     return true;
+//   }
+//   case TK_BYTE: {
+//     ACE_OutputCDR::from_octet val;
+//     if (!get_value_from_backing_store(val, DISCRIMINATOR_ID)) {
+//       return false;
+//     }
+//     disc_val = static_cast<CORBA::Long>(val.val_);
+//     return true;
+//   }
+//   case TK_CHAR8: {
+//     ACE_OutputCDR::from_char val;
+//     if (!get_value_from_backing_store(val, DISCRIMINATOR_ID)) {
+//       return false;
+//     }
+//     disc_val = static_cast<CORBA::Long>(val.val_);
+//     return true;
+//   }
+// #ifdef DDS_HAS_WCHAR
+//   case TK_CHAR16: {
+//     ACE_OutputCDR::from_wchar val;
+//     if (!get_value_from_backing_store(val, DISCRIMINATOR_ID)) {
+//       return false;
+//     }
+//     disc_val = static_cast<CORBA::Long>(val.val_);
+//     return true;
+//   }
+// #endif
+//   case TK_INT8: {
+//     ACE_OutputCDR::from_int8 val;
+//     if (!get_value_from_backing_store(val, DISCRIMINATOR_ID)) {
+//       return false;
+//     }
+//     disc_val = static_cast<CORBA::Long>(val.val_);
+//     return true;
+//   }
+//   case TK_UINT8: {
+//     ACE_OutputCDR::from_uint8 val;
+//     if (!get_value_from_backing_store(val, DISCRIMINATOR_ID)) {
+//       return false;
+//     }
+//     disc_val = static_cast<CORBA::Long>(val.val_);
+//     return true;
+//   }
+//   case TK_INT16: {
+//     CORBA::Short val;
+//     if (!get_value_from_backing_store(val, DISCRIMINATOR_ID)) {
+//       return false;
+//     }
+//     disc_val = val;
+//     return true;
+//   }
+//   case TK_UINT16: {
+//     CORBA::UShort val;
+//     if (!get_value_from_backing_store(val, DISCRIMINATOR_ID)) {
+//       return false;
+//     }
+//     disc_val = static_cast<CORBA::Long>(val);
+//     return true;
+//   }
+//   case TK_INT32:
+//     return get_value_from_backing_store(disc_val, DISCRIMINATOR_ID);
+//   case TK_UINT32: {
+//     CORBA::ULong val;
+//     if (!get_value_from_backing_store(val, DISCRIMINATOR_ID)) {
+//       return false;
+//     }
+//     disc_val = static_cast<CORBA::Long>(val);
+//     return true;
+//   }
+//   case TK_INT64: {
+//     CORBA::LongLong val;
+//     if (!get_value_from_backing_store(val, DISCRIMINATOR_ID)) {
+//       return false;
+//     }
+//     disc_val = static_cast<CORBA::Long>(val);
+//     return true;
+//   }
+//   case TK_UINT64: {
+//     CORBA::ULongLong val;
+//     if (!get_value_from_backing_store(val, DISCRIMINATOR_ID)) {
+//       return false;
+//     }
+//     disc_val = static_cast<CORBA::Long>(val);
+//     return true;
+//   }
+//   }
+//   return false;
+// }
+
 bool DynamicDataImpl::get_complex_from_union(DDS::DynamicData_ptr& value, DDS::MemberId id)
 {
   FoundStatus found_status = NOT_FOUND;
@@ -3769,71 +3896,84 @@ bool DynamicDataImpl::get_complex_from_union(DDS::DynamicData_ptr& value, DDS::M
     return true;
   }
 
-  // Requested member with the given Id is not present in the container.
-  if (id == DISCRIMINATOR_ID) {
-    DDS::DynamicType_var disc_type = get_base_type(type_desc_->discriminator_type());
-    CORBA::Long disc_value;
-    if (!set_default_discriminator_value(disc_value, disc_type)) {
+  if (backing_store_) {
+    // For simplicity, we're not caching the returned dynamic data of the requested
+    // member to the map. The reason is the maps always represent a valid state for
+    // union, so if we cache the discriminator, we also need to store the selected
+    // branch, if exists. Instead, a new instance is returned if user calls this again.
+    DynamicDataImpl* ddi = dynamic_cast<DynamicDataImpl*>(dd_var.in());
+    if (!ddi) {
       return false;
     }
-    bool found_selected_member = false;
-    DDS::MemberDescriptor_var selected_md;
-    const DDS::ReturnCode_t rc =
-      get_selected_union_branch(disc_value, found_selected_member, selected_md);
-    if (rc != DDS::RETCODE_OK) {
-      if (log_level >= LogLevel::Notice) {
-        ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicDataImpl::get_complex_from_union:"
-                   " get_selected_union_branch failed: %C\n", retcode_to_string(rc)));
-      }
+    if (!set_member_backing_store(ddi, id) && id == DISCRIMINATOR_ID) {
+      // Discriminator should always appear.
       return false;
     }
-    DynamicDataImpl* dd_impl = new DynamicDataImpl(disc_type);
-    DDS::DynamicData_var dd_var = dd_impl;
-    dd_impl->write_discriminator(disc_value);
-    insert_complex(DISCRIMINATOR_ID, dd_var);
-    if (found_selected_member && !selected_md->is_optional()) {
-      DDS::DynamicType_var selected_type = get_base_type(selected_md->type());
-      if (clear_value_i(selected_md->id(), selected_type) != DDS::RETCODE_OK) {
+  } else {
+    // Return default value for the requested member.
+    if (id == DISCRIMINATOR_ID) {
+      CORBA::Long disc_value;
+      if (!set_default_discriminator_value(disc_value, disc_type)) {
         return false;
       }
-    }
-    CORBA::release(value);
-    value = DDS::DynamicData::_duplicate(dd_var);
-  } else {
-    const_single_iterator single_it = container_.single_map_.find(DISCRIMINATOR_ID);
-    const_complex_iterator complex_it = container_.complex_map_.find(DISCRIMINATOR_ID);
-    const bool has_disc = single_it != container_.single_map_.end() ||
-      complex_it != container_.complex_map_.end();
-    if (has_disc) {
-      if (log_level >= LogLevel::Notice) {
-        ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicDataImpl::get_complex_from_union:"
-                   " Branch Id %u is not the active branch in the union\n", id));
+      bool found_selected_member = false;
+      DDS::MemberDescriptor_var selected_md;
+      const DDS::ReturnCode_t rc =
+        get_selected_union_branch(disc_value, found_selected_member, selected_md);
+      if (rc != DDS::RETCODE_OK) {
+        if (log_level >= LogLevel::Notice) {
+          ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicDataImpl::get_complex_from_union:"
+                     " get_selected_union_branch failed: %C\n", retcode_to_string(rc)));
+        }
+        return false;
       }
-      return false;
+      DynamicDataImpl* dd_impl = dynamic_cast<DynamicDataImpl*>(dd_var.in());
+      dd_impl->write_discriminator(disc_value);
+      insert_complex(DISCRIMINATOR_ID, dd_var);
+      if (found_selected_member && !selected_md->is_optional()) {
+        DDS::DynamicType_var selected_type = get_base_type(selected_md->type());
+        if (clear_value_i(selected_md->id(), selected_type) != DDS::RETCODE_OK) {
+          return false;
+        }
+      }
+    } else {
+      const_single_iterator single_it = container_.single_map_.find(DISCRIMINATOR_ID);
+      const_complex_iterator complex_it = container_.complex_map_.find(DISCRIMINATOR_ID);
+      const bool has_disc = single_it != container_.single_map_.end() ||
+        complex_it != container_.complex_map_.end();
+      if (has_disc) {
+        if (log_level >= LogLevel::Notice) {
+          ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicDataImpl::get_complex_from_union:"
+                     " Branch Id %u is not the active branch in the union\n", id));
+        }
+        return false;
+      }
+      DDS::DynamicTypeMember_var dtm;
+      if (type_->get_member(dtm, id) != DDS::RETCODE_OK) {
+        return false;
+      }
+      DDS::MemberDescriptor_var md;
+      if (dtm->get_descriptor(md) != DDS::RETCODE_OK) {
+        return false;
+      }
+      if (!insert_valid_discriminator(md)) {
+        return false;
+      }
+      insert_complex(id, dd_var);
     }
-    DDS::DynamicTypeMember_var dtm;
-    if (type_->get_member(dtm, id) != DDS::RETCODE_OK) {
-      return false;
-    }
-    DDS::MemberDescriptor_var md;
-    if (dtm->get_descriptor(md) != DDS::RETCODE_OK) {
-      return false;
-    }
-    // An empty DynamicData object implicitly contains default value of the associated type.
-    DynamicDataImpl* dd_impl = new DynamicDataImpl(md->type());
-    DDS::DynamicData_var dd_var = dd_impl;
-    if (!insert_valid_discriminator(md)) {
-      return false;
-    }
-    insert_complex(id, dd_var);
-    CORBA::release(value);
-    value = DDS::DynamicData::_duplicate(dd_var);
   }
+
+  CORBA::release(value);
+  value = DDS::DynamicData::_duplicate(dd_var);
   return true;
 }
 
 bool DynamicDataImpl::get_complex_from_collection(DDS::DynamicData_ptr& value, DDS::MemberId id)
 {
+  if (type_->get_kind() == TK_ARRAY && id >= bound_total(type_desc_)) {
+    return false;
+  }
+
   const_complex_iterator complex_it = container_.complex_map_.find(id);
   if (complex_it != container_.complex_map_.end()) {
     CORBA::release(value);
@@ -3841,26 +3981,30 @@ bool DynamicDataImpl::get_complex_from_collection(DDS::DynamicData_ptr& value, D
     return true;
   }
 
-  if (type_->get_kind() == TK_ARRAY && id >= bound_total(type_desc_)) {
-    return false;
-  }
-
   DynamicDataImpl* dd_impl = new DynamicDataImpl(type_desc_->element_type());
   DDS::DynamicData_var dd_var = dd_impl;
 
   const_single_iterator single_it = container_.single_map_.find(id);
+  bool found_in_map = false;
   if (single_it != container_.single_map_.end()) {
     if (!move_single_to_complex(single_it, dd_impl)) {
       return false;
     }
+    found_in_map = true;
   } else {
     const_sequence_iterator sequence_it = container_.sequence_map_.find(id);
     if (sequence_it != container_.sequence_map_.end()) {
       if (!move_sequence_to_complex(sequence_it, dd_impl)) {
         return false;
       }
+      found_in_map = true;
     }
   }
+  if (!found_in_map && backing_store_) {
+    // Reading an out-of-range element from the backing store doesn't signify an error.
+    set_member_backing_store(dd_impl, id);
+  }
+
   insert_complex(id, dd_var);
   CORBA::release(value);
   value = DDS::DynamicData::_duplicate(dd_var);
