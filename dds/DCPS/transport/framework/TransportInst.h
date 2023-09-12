@@ -250,6 +250,17 @@ public:
     return (delegate_.*getter_)();
   }
 
+  T get() const
+  {
+    return (delegate_.*getter_)();
+  }
+
+  ConfigValue& operator=(const ConfigValue& cv)
+  {
+    (delegate_.*setter_)(cv.get());
+    return *this;
+  }
+
 private:
   Delegate& delegate_;
   Setter setter_;
@@ -279,6 +290,17 @@ public:
   operator T() const
   {
     return (delegate_.*getter_)();
+  }
+
+  T get() const
+  {
+    return (delegate_.*getter_)();
+  }
+
+  ConfigValueRef& operator=(const ConfigValueRef& cv)
+  {
+    (delegate_.*setter_)(cv.get());
+    return *this;
   }
 
 private:
