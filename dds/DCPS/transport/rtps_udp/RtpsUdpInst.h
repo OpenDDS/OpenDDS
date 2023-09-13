@@ -82,7 +82,8 @@ public:
   void responsive_mode(bool rm);
   bool responsive_mode() const;
 
-  void send_delay(TimeDuration sd);
+  ConfigValueRef<RtpsUdpInst, TimeDuration> send_delay_;
+  void send_delay(const TimeDuration& sd);
   TimeDuration send_delay() const;
 
   virtual int load(ACE_Configuration_Heap& cf,

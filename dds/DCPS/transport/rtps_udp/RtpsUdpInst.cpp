@@ -40,6 +40,7 @@ RtpsUdpInst::RtpsUdpInst(const OPENDDS_STRING& name)
   , heartbeat_period_(*this, &RtpsUdpInst::heartbeat_period, &RtpsUdpInst::heartbeat_period)
   , receive_address_duration_(*this, &RtpsUdpInst::receive_address_duration, &RtpsUdpInst::receive_address_duration)
   , responsive_mode_(*this, &RtpsUdpInst::responsive_mode, &RtpsUdpInst::responsive_mode)
+  , send_delay_(*this, &RtpsUdpInst::send_delay, &RtpsUdpInst::send_delay)
   , opendds_discovery_guid_(GUID_UNKNOWN)
   , actual_local_address_(NetworkAddress::default_IPV4)
 #ifdef ACE_HAS_IPV6
@@ -218,7 +219,7 @@ RtpsUdpInst::responsive_mode() const
 }
 
 void
-RtpsUdpInst::send_delay(TimeDuration sd)
+RtpsUdpInst::send_delay(const TimeDuration& sd)
 {
   TheServiceParticipant->config_store()->set(config_key("SEND_DELAY").c_str(),
                                              sd,
