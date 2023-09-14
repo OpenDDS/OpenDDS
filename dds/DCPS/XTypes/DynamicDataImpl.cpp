@@ -54,7 +54,6 @@ DynamicDataImpl::DynamicDataImpl(const DynamicDataImpl& other)
 
 DynamicDataImpl::~DynamicDataImpl()
 {
-  // TODO(sonndinh): delete backing_store_; ?
   CORBA::release(backing_store_);
 }
 
@@ -1178,8 +1177,9 @@ template<> const DDS::WstringSeq& DynamicDataImpl::SequenceValue::get() const
 #endif
 #undef SEQUENCE_VALUE_GETTERS
 
-bool DynamicDataImpl::read_discriminator(CORBA::Long& disc_val, const DDS::DynamicType_var& disc_type,
-                                         const_single_iterator it) const
+bool DynamicDataImpl::read_disc_from_single_map(CORBA::Long& disc_val,
+                                                const DDS::DynamicType_var& disc_type,
+                                                const_single_iterator it) const
 {
   const TypeKind disc_tk = disc_type->get_kind();
   TypeKind treat_as_tk = disc_tk;
@@ -1253,6 +1253,114 @@ bool DynamicDataImpl::read_discriminator(CORBA::Long& disc_val, const DDS::Dynam
   return false;
 }
 
+// Read discriminator, identified by a given id, from the backing store.
+bool DynamicDataImpl::read_disc_from_backing_store(CORBA::Long& disc_val,
+                                                   DDS::MemberId id,
+                                                   const DDS::DynamicType_var& disc_type) const
+{
+  const TypeKind disc_tk = disc_type->get_kind();
+  TypeKind treat_as_tk = disc_tk;
+  if (disc_tk == TK_ENUM && enum_bound(disc_type, treat_as_tk) != DDS::RETCODE_OK) {
+    return false;
+  }
+
+  switch (treat_as_tk) {
+  case TK_BOOLEAN: {
+    ACE_OutputCDR::from_boolean val(false);
+    if (!get_value_from_backing_store(val, id)) {
+      return false;
+    }
+    disc_val = static_cast<CORBA::Long>(val.val_);
+    return true;
+  }
+  case TK_BYTE: {
+    ACE_OutputCDR::from_octet val(0x00);
+    if (!get_value_from_backing_store(val, id)) {
+      return false;
+    }
+    disc_val = static_cast<CORBA::Long>(val.val_);
+    return true;
+  }
+  case TK_CHAR8: {
+    ACE_OutputCDR::from_char val('\0');
+    if (!get_value_from_backing_store(val, id)) {
+      return false;
+    }
+    disc_val = static_cast<CORBA::Long>(val.val_);
+    return true;
+  }
+#ifdef DDS_HAS_WCHAR
+  case TK_CHAR16: {
+    ACE_OutputCDR::from_wchar val(0);
+    if (!get_value_from_backing_store(val, id)) {
+      return false;
+    }
+    disc_val = static_cast<CORBA::Long>(val.val_);
+    return true;
+  }
+#endif
+  case TK_INT8: {
+    ACE_OutputCDR::from_int8 val(0);
+    if (!get_value_from_backing_store(val, id)) {
+      return false;
+    }
+    disc_val = static_cast<CORBA::Long>(val.val_);
+    return true;
+  }
+  case TK_UINT8: {
+    ACE_OutputCDR::from_uint8 val(0);
+    if (!get_value_from_backing_store(val, id)) {
+      return false;
+    }
+    disc_val = static_cast<CORBA::Long>(val.val_);
+    return true;
+  }
+  case TK_INT16: {
+    CORBA::Short val;
+    if (!get_value_from_backing_store(val, id)) {
+      return false;
+    }
+    disc_val = val;
+    return true;
+  }
+  case TK_UINT16: {
+    CORBA::UShort val;
+    if (!get_value_from_backing_store(val, id)) {
+      return false;
+    }
+    disc_val = static_cast<CORBA::Long>(val);
+    return true;
+  }
+  case TK_INT32:
+    return get_value_from_backing_store(disc_val, id);
+  case TK_UINT32: {
+    CORBA::ULong val;
+    if (!get_value_from_backing_store(val, id)) {
+      return false;
+    }
+    disc_val = static_cast<CORBA::Long>(val);
+    return true;
+  }
+  case TK_INT64: {
+    CORBA::LongLong val;
+    if (!get_value_from_backing_store(val, id)) {
+      return false;
+    }
+    disc_val = static_cast<CORBA::Long>(val);
+    return true;
+  }
+  case TK_UINT64: {
+    CORBA::ULongLong val;
+    if (!get_value_from_backing_store(val, id)) {
+      return false;
+    }
+    disc_val = static_cast<CORBA::Long>(val);
+    return true;
+  }
+  }
+  return false;
+}
+
 // Read a discriminator value from a DynamicData that represents it.
 bool DynamicDataImpl::read_discriminator(CORBA::Long& disc_val) const
 {
@@ -1260,14 +1368,16 @@ bool DynamicDataImpl::read_discriminator(CORBA::Long& disc_val) const
     return false;
   }
   const_single_iterator it = container_.single_map_.find(MEMBER_ID_INVALID);
-  if (it == container_.single_map_.end()) {
-    return false;
+  if (it != container_.single_map_.end()) {
+    return read_disc_from_single_map(disc_val, type_, it);
   }
-  return read_discriminator(disc_val, type_, it);
+  return read_disc_from_backing_store(disc_val, MEMBER_ID_INVALID, type_);
 }
 
-// If a selected member of a union is already written, return its ID.
+// Return the ID of a selected branch from the maps or backing store.
 // Should only be called for union.
+// TODO(sonndinh): Need to look at the backing store for existing member if not
+// already cached in the maps.
 DDS::MemberId DynamicDataImpl::find_selected_member() const
 {
   // There can be at most 2 entries in total in all three maps,
@@ -1293,7 +1403,10 @@ DDS::MemberId DynamicDataImpl::find_selected_member() const
     }
   }
 
-  // There was no selected member written.
+  // TODO(sonndinh): Check if the backing store has one.
+
+
+  // There was no selected member.
   return MEMBER_ID_INVALID;
 }
 
@@ -1414,73 +1527,119 @@ bool DynamicDataImpl::cast_to_discriminator_value(CORBA::Long& /*disc_value*/,
   return false;
 }
 
+// Return true if the DynamicData instance contains a value for the discriminator.
+bool DynamicDataImpl::has_discriminator_value(const_single_iterator& single_it,
+                                              const_complex_iterator& complex_it) const
+{
+  single_it = container_.single_map_.find(DISCRIMINATOR_ID);
+  complex_it = container_.complex_map_.find(DISCRIMINATOR_ID);
+  if (single_it != container_.single_map_.end() || complex_it != container_.complex_map_.end()) {
+    return true;
+  }
+  // A backing store must have valid data (for union in this case).
+  return backing_store_ ? true : false;
+}
+
+// Get discriminator value from the data container or the backing store.
+// Call only when the instance has data for discriminator.
+bool DynamicDataImpl::get_discriminator_value(const_single_iterator& single_it,
+                                              const_complex_iterator& complex_it,
+                                              CORBA::Long& value,
+                                              const DDS::DynamicType_var& disc_type) const
+{
+  if (single_it != container_.single_map_.end() || complex_it != container_.complex_map_.end()) {
+    return get_discriminator_value(value, single_it, complex_it, disc_type);
+  }
+  return read_disc_from_backing_store(value, DISCRIMINATOR_ID, mmeber_type);
+}
+
+// With backing store, data for union (discriminator and selected branch) can
+// scatter across the maps and the backing store. E.g., the discriminator can be
+// in a map but a branch selected by it is in the backing store, and vice versa.
+// In any case, the maps and backing store as a whole must represent a valid state
+// of the union. That is, they represent an empty union, a union with a discriminator
+// that selects no branch, or a union with a discriminator and a branch selected by it.
+// Note also that the maps have priority over the backing store. So if that maps
+// already have all data for the union, then the backing store won't be considered.
 template<TypeKind MemberTypeKind, typename MemberType>
 bool DynamicDataImpl::set_value_to_union(DDS::MemberId id, const MemberType& value,
                                          TypeKind enum_or_bitmask, LBound lower, LBound upper)
 {
-  // This follows the IDL-to-C++ mapping for union.
+  // Discriminator can only be of certain types (XTypes spec, 7.2.2.4.4.3)
+  if (id == DISCRIMINATOR_ID && !is_valid_discriminator_type(MemberTypeKind)) {
+    if (log_level >= LogLevel::Notice) {
+      ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicDataImpl::set_value_to_union:"
+                 " Type %C cannot be used for union discriminator\n",
+                 typekind_to_string(MemberTypeKind)));
+    }
+    return false;
+  }
+
   DDS::DynamicType_var member_type;
+  DDS::MemberDescriptor_var md;
   if (id == DISCRIMINATOR_ID) {
-    // Discriminator can only be of certain types (XTypes spec, 7.2.2.4.4.3)
-    if (!is_valid_discriminator_type(MemberTypeKind)) {
-      if (log_level >= LogLevel::Notice) {
-        ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicDataImpl::set_value_to_union:"
-                   " Type %C cannot be used for union discriminator\n",
-                   typekind_to_string(MemberTypeKind)));
-      }
-      return false;
-    }
-
     member_type = get_base_type(type_desc_->discriminator_type());
-
-    const TypeKind member_tk = member_type->get_kind();
-    if (member_tk != MemberTypeKind && member_tk != enum_or_bitmask) {
+  } else {
+    DDS::DynamicTypeMember_var member;
+    if (type_->get_member(member, id) != DDS::RETCODE_OK) {
       return false;
     }
-
-    if (member_tk == enum_or_bitmask) {
-      DDS::TypeDescriptor_var member_td;
-      if (member_type->get_descriptor(member_td) != DDS::RETCODE_OK) {
-        return false;
-      }
-      const CORBA::ULong bit_bound = member_td->bound()[0];
-      if (bit_bound < lower || bit_bound > upper) {
-        return false;
-      }
+    if (member->get_descriptor(md) != DDS::RETCODE_OK) {
+      return false;
     }
+    member_type = get_base_type(md->type());
+  }
+  const TypeKind member_tk = member_type->get_kind();
+  if (member_tk != MemberTypeKind && member_tk != enum_or_bitmask) {
+    return false;
+  }
 
+  if (member_tk == enum_or_bitmask) {
+    DDS::TypeDescriptor_var member_td;
+    if (member_type->get_descriptor(member_td) != DDS::RETCODE_OK) {
+      return false;
+    }
+    const CORBA::ULong bit_bound = member_td->bound()[0];
+    if (bit_bound < lower || bit_bound > upper) {
+      return false;
+    }
+  }
+
+  // This follows the IDL-to-C++ mapping for union.
+  if (id == DISCRIMINATOR_ID) {
     CORBA::Long disc_value;
     if (!cast_to_discriminator_value(disc_value, value)) {
       return false;
     }
 
-    const DDS::MemberId selected_id = find_selected_member();
-    if (selected_id != MEMBER_ID_INVALID) {
-      DDS::DynamicTypeMember_var selected_member;
-      if (type_->get_member(selected_member, selected_id) != DDS::RETCODE_OK) {
+    const_single_iterator single_it;
+    const_complex_iterator complex_it;
+    const bool has_disc = has_discriminator_value(single_it, complex_it);
+    bool has_existing_branch = false;
+    if (has_disc) {
+      CORBA::Long existing_disc;
+      if (!get_discriminator_value(single_it, complex_it, existing_disc, member_type)) {
         return false;
       }
-      DDS::MemberDescriptor_var selected_md;
-      if (selected_member->get_descriptor(selected_md) != DDS::RETCODE_OK) {
+      DDS::MemberDescriptor_var existing_md;
+      if (get_selected_union_branch(current_disc, has_existing_branch, existing_md) != DDS::RETCODE_OK) {
         return false;
       }
-
-      if (!validate_discriminator(disc_value, selected_md)) {
+      if (has_existing_branch && !validate_discriminator(disc_value, existing_md)) {
         if (log_level >= LogLevel::Notice) {
           ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicDataImpl::set_value_to_union:"
-                     " Discriminator value %d does not select the activated member (ID %u)\n",
-                     disc_value, selected_id));
+                     " Discriminator value %d does not select the activated branch (ID %u)\n",
+                     disc_value, existing_md->id()));
         }
         return false;
       }
-      return insert_single(id, value);
-    } else {
-      // In case the union has implicit default member and the input discriminator value
-      // selects that implicit default member, store the discriminator value. The semantics
-      // of this is similar to the _default() method of the IDL-to-C++ mapping for union.
-      if (discriminator_selects_no_member(disc_value)) {
-        return insert_single(id, value);
-      }
+    }
+
+    // In case the union has implicit default member and the input discriminator value
+    // selects that implicit default member, store the discriminator value. The semantics
+    // of this is similar to the _default() method of the IDL-to-C++ mapping for union.
+    const set_disc_implicit_default = !has_disc || !has_existing_branch;
+    if (set_disc_implicit_default && !discriminator_selects_no_member(disc_value)) {
       if (log_level >= LogLevel::Notice) {
         ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicDataImpl::set_value_to_union:"
                    " Can't directly set a discriminator that selects a member."
@@ -1488,25 +1647,11 @@ bool DynamicDataImpl::set_value_to_union(DDS::MemberId id, const MemberType& val
       }
       return false;
     }
+    return insert_single(id, value);
   }
 
   // Activate a member
   clear_container();
-
-  DDS::DynamicTypeMember_var member;
-  if (type_->get_member(member, id) != DDS::RETCODE_OK) {
-    return false;
-  }
-  DDS::MemberDescriptor_var md;
-  if (member->get_descriptor(md) != DDS::RETCODE_OK) {
-    return false;
-  }
-  member_type = get_base_type(md->type());
-
-  const TypeKind member_tk = member_type->get_kind();
-  if (member_tk != MemberTypeKind && member_tk != enum_or_bitmask) {
-    return false;
-  }
 
   return insert_valid_discriminator(md) && insert_single(id, value);
 }
@@ -2126,7 +2271,7 @@ bool DynamicDataImpl::set_complex_to_union(DDS::MemberId id, DDS::DynamicData_va
     return false;
   }
   const DDS::DynamicType_var value_type = value->type();
-  if (get_base_type(md->type())->equals(value_type)) {
+  if (!get_base_type(md->type())->equals(value_type)) {
     return false;
   }
 
@@ -2655,125 +2800,125 @@ bool DynamicDataImpl::read_basic_in_complex_map(ValueType& value, DDS::MemberId 
 }
 
 template<typename ValueType>
-bool DynamicDataImpl::read_basic_member(ValueType& value, DDS::MemberId id)
+bool DynamicDataImpl::read_basic_member(ValueType& value, DDS::MemberId id, bool do_cache)
 {
   return read_basic_in_single_map(value, id)
     || read_basic_in_complex_map(value, id)
-    || get_value_from_backing_store(value, id);
+    || get_value_from_backing_store(value, id, do_cache);
 }
-
-// TODO(sonndinh): May not need these.
-// template<>
-// bool DynamicDataImpl::read_basic_member(char*& value, DDS::MemberId id)
-// {
-//   return read_basic_in_single_map(value, id)
-//     || read_basic_in_complex_map(value, id)
-//     || get_value_from_backing_store(value, id);
-// }
-
-// template<>
-// bool DynamicDataImpl::read_basic_member(CORBA::WChar*& value, DDS::MemberId id)
-// {
-//   return read_basic_in_single_map(value, id)
-//     || read_basic_in_complex_map(value, id)
-//     || get_value_from_backing_store(value, id);
-// }
 
 void DynamicDataImpl::set_backing_store(DynamicDataXcdrReadImpl* xcdr_store)
 {
   CORBA::release(backing_store_);
-  backing_store_ = xcdr_store;
+  backing_store_ = dynamic_cast<DynamicDataXcdrReadImpl*>(DDS::DynamicData::_duplicate(xcdr_store));
 }
 
 bool DynamicDataImpl::get_value_from_backing_store(ACE_OutputCDR::from_int8& value,
-                                                   DDS::MemberId id) const
+                                                   DDS::MemberId id, bool cache) const
 {
-  return backing_store_ && backing_store_->get_int8_value(value.val_, id) == DDS::RETCODE_OK;
+  return backing_store_ && backing_store_->get_int8_value(value.val_, id) == DDS::RETCODE_OK
+    && (cache ? insert_single(id, value) : true);
 }
 
 bool DynamicDataImpl::get_value_from_backing_store(ACE_OutputCDR::from_uint8& value,
-                                                   DDS::MemberId id) const
+                                                   DDS::MemberId id, bool cache) const
 {
-  return backing_store_ && backing_store_->get_uint8_value(value.val_, id) == DDS::RETCODE_OK;
+  return backing_store_ && backing_store_->get_uint8_value(value.val_, id) == DDS::RETCODE_OK
+    && (cache ? insert_single(id, value) : true);
 }
 
-bool DynamicDataImpl::get_value_from_backing_store(CORBA::Short& value, DDS::MemberId id) const
+bool DynamicDataImpl::get_value_from_backing_store(CORBA::Short& value, DDS::MemberId id, bool cache) const
 {
-  return backing_store_ && backing_store_->get_int16_value(value, id) == DDS::RETCODE_OK;
+  return backing_store_ && backing_store_->get_int16_value(value, id) == DDS::RETCODE_OK
+    && (cache ? insert_single(id, value) : true);
 }
 
-bool DynamicDataImpl::get_value_from_backing_store(CORBA::UShort& value, DDS::MemberId id) const
+bool DynamicDataImpl::get_value_from_backing_store(CORBA::UShort& value, DDS::MemberId id, bool cache) const
 {
-  return backing_store_ && backing_store_->get_uint16_value(value, id) == DDS::RETCODE_OK;
+  return backing_store_ && backing_store_->get_uint16_value(value, id) == DDS::RETCODE_OK
+    && (cache ? insert_single(id, value) : true);
 }
 
-bool DynamicDataImpl::get_value_from_backing_store(CORBA::Long& value, DDS::MemberId id) const
+bool DynamicDataImpl::get_value_from_backing_store(CORBA::Long& value, DDS::MemberId id, bool cache) const
 {
-  return backing_store_ && backing_store_->get_int32_value(value, id) == DDS::RETCODE_OK;
+  return backing_store_ && backing_store_->get_int32_value(value, id) == DDS::RETCODE_OK
+    && (cache ? insert_single(id, value) : true);
 }
 
-bool DynamicDataImpl::get_value_from_backing_store(CORBA::ULong& value, DDS::MemberId id) const
+bool DynamicDataImpl::get_value_from_backing_store(CORBA::ULong& value, DDS::MemberId id, bool cache) const
 {
-  return backing_store_ && backing_store_->get_uint32_value(value, id) == DDS::RETCODE_OK;
+  return backing_store_ && backing_store_->get_uint32_value(value, id) == DDS::RETCODE_OK
+    && (cache ? insert_single(id, value) : true);
 }
 
-bool DynamicDataImpl::get_value_from_backing_store(CORBA::LongLong& value, DDS::MemberId id) const
+bool DynamicDataImpl::get_value_from_backing_store(CORBA::LongLong& value, DDS::MemberId id, bool cache) const
 {
-  return backing_store_ && backing_store_->get_int64_value(value, id) == DDS::RETCODE_OK;
+  return backing_store_ && backing_store_->get_int64_value(value, id) == DDS::RETCODE_OK
+    && (cache ? insert_single(id, value) : true);
 }
 
-bool DynamicDataImpl::get_value_from_backing_store(CORBA::ULongLong& value, DDS::MemberId id) const
+bool DynamicDataImpl::get_value_from_backing_store(CORBA::ULongLong& value, DDS::MemberId id, bool cache) const
 {
-  return backing_store_ && backing_store_->get_uint64_value(value, id) == DDS::RETCODE_OK;
+  return backing_store_ && backing_store_->get_uint64_value(value, id) == DDS::RETCODE_OK
+    && (cache ? insert_single(id, value) : true);
 }
 
-bool DynamicDataImpl::get_value_from_backing_store(CORBA::Float& value, DDS::MemberId id) const
+bool DynamicDataImpl::get_value_from_backing_store(CORBA::Float& value, DDS::MemberId id, bool cache) const
 {
-  return backing_store_ && backing_store_->get_float32_value(value, id) == DDS::RETCODE_OK;
+  return backing_store_ && backing_store_->get_float32_value(value, id) == DDS::RETCODE_OK
+    && (cache ? insert_single(id, value) : true);
 }
 
-bool DynamicDataImpl::get_value_from_backing_store(CORBA::Double& value, DDS::MemberId id) const
+bool DynamicDataImpl::get_value_from_backing_store(CORBA::Double& value, DDS::MemberId id, bool cache) const
 {
-  return backing_store_ && backing_store_->get_float64_value(value, id) == DDS::RETCODE_OK;
+  return backing_store_ && backing_store_->get_float64_value(value, id) == DDS::RETCODE_OK
+    && (cache ? insert_single(id, value) : true);
 }
 
-bool DynamicDataImpl::get_value_from_backing_store(CORBA::LongDouble& value, DDS::MemberId id) const
+bool DynamicDataImpl::get_value_from_backing_store(CORBA::LongDouble& value, DDS::MemberId id, bool cache) const
 {
-  return backing_store_ && backing_store_->get_float128_value(value, id) == DDS::RETCODE_OK;
+  return backing_store_ && backing_store_->get_float128_value(value, id) == DDS::RETCODE_OK
+    && (cache ? insert_single(id, value) : true);
 }
 
-bool DynamicDataImpl::get_value_from_backing_store(ACE_OutputCDR::from_byte& value,
-                                                   DDS::MemberId id) const
+bool DynamicDataImpl::get_value_from_backing_store(ACE_OutputCDR::from_octet& value,
+                                                   DDS::MemberId id, bool cache) const
 {
-  return backing_store_ && backing_store_->get_byte_value(value.val_, id) == DDS::RETCODE_OK;
+  return backing_store_ && backing_store_->get_byte_value(value.val_, id) == DDS::RETCODE_OK
+    && (cache ? insert_single(id, value) : true);
 }
 
-bool DynamicDataImpl::get_value_from_backing_store(char*& value, DDS::MemberId id) const
+bool DynamicDataImpl::get_value_from_backing_store(char*& value, DDS::MemberId id, bool cache) const
 {
-  return backing_store_ && backing_store_->get_string_value(value, id) == DDS::RETCODE_OK;
+  return backing_store_ && backing_store_->get_string_value(value, id) == DDS::RETCODE_OK
+    && (cache ? insert_single(id, value) : true);
 }
 
-bool DynamicDataImpl::get_value_from_backing_store(CORBA::WChar*& value, DDS::MemberId id) const
+bool DynamicDataImpl::get_value_from_backing_store(CORBA::WChar*& value, DDS::MemberId id, bool cache) const
 {
-  return backing_store_ && backing_store_->get_wstring_value(value, id) == DDS::RETCODE_OK;
+  return backing_store_ && backing_store_->get_wstring_value(value, id) == DDS::RETCODE_OK
+    && (cache ? insert_single(id, value) : true);
 }
 
 bool DynamicDataImpl::get_value_from_backing_store(ACE_OutputCDR::from_char& value,
-                                                   DDS::MemberId id) const
+                                                   DDS::MemberId id, bool cache) const
 {
-  return backing_store_ && backing_store_->get_char8_value(value.val_, id) == DDS::RETCODE_OK;
+  return backing_store_ && backing_store_->get_char8_value(value.val_, id) == DDS::RETCODE_OK
+    && (cache ? insert_single(id, value) : true);
 }
 
 bool DynamicDataImpl::get_value_from_backing_store(ACE_OutputCDR::from_wchar& value,
-                                                   DDS::MemberId id) const
+                                                   DDS::MemberId id, bool cache) const
 {
-  return backing_store_ && backing_store_->get_char16_value(value.val_, id) == DDS::RETCODE_OK;
+  return backing_store_ && backing_store_->get_char16_value(value.val_, id) == DDS::RETCODE_OK
+    && (cache ? insert_single(id, value) : true);
 }
 
 bool DynamicDataImpl::get_value_from_backing_store(ACE_OutputCDR::from_boolean& value,
-                                                   DDS::MemberId id) const
+                                                   DDS::MemberId id, bool cache) const
 {
-  return backing_store_ && backing_store_->get_boolean_value(value.val_, id) == DDS::RETCODE_OK;
+  return backing_store_ && backing_store_->get_boolean_value(value.val_, id) == DDS::RETCODE_OK
+    && (cache ? insert_single(id, value) : true);
 }
 
 template<typename ValueType>
@@ -2905,7 +3050,7 @@ bool DynamicDataImpl::get_value_from_union(ValueType& value, DDS::MemberId id)
   }
 
   // Return the member if the container or the backing store has it.
-  if (read_basic_member(value, id)) {
+  if (read_basic_member(value, id, false)) {
     return true;
   }
 
@@ -3694,8 +3839,12 @@ bool DynamicDataImpl::get_complex_from_aggregated(DDS::DynamicData_var& value, D
 
 bool DynamicDataImpl::set_member_backing_store(DynamicDataImpl* member_ddi, DDS::MemberId id)
 {
-  DynamicDataXcdrReadImpl* member_store = 0;
-  if (backing_store_->get_complex_value(member_store, id) != DDS::RETCODE_OK) {
+  DDS::DynamicData_var member_dd;
+  if (backing_store_->get_complex_value(member_dd, id) != DDS::RETCODE_OK) {
+    return false;
+  }
+  DynamicDataXcdrReadImpl* member_store = dynamic_cast<DynamicDataXcdrReadImpl*>(member_dd.in());
+  if (!member_store) {
     return false;
   }
   member_ddi->set_backing_store(member_store);
@@ -3773,113 +3922,6 @@ bool DynamicDataImpl::write_discriminator(CORBA::Long value)
   return write_discriminator_helper(value, treat_as);
 }
 
-// TODO(sonndinh): Maybe merge with existing functions to read discriminator value?
-// bool DynamicDataImpl::get_disc_from_backing_store(CORBA::Long& disc_val,
-//                                                   const DDS::DynamicType_var& disc_type)
-// {
-//   const TypeKind disc_tk = disc_type->get_kind();
-//   TypeKind treat_as_tk = disc_tk;
-//   if (disc_tk == TK_ENUM && enum_bound(disc_type, treat_as_tk) != DDS::RETCODE_OK) {
-//     return false;
-//   }
-
-//   switch (treat_as_tk) {
-//   case TK_BOOLEAN: {
-//     ACE_OutputCDR::from_boolean val;
-//     if (!get_value_from_backing_store(val, DISCRIMINATOR_ID)) {
-//       return false;
-//     }
-//     disc_val = static_cast<CORBA::Long>(val.val_);
-//     return true;
-//   }
-//   case TK_BYTE: {
-//     ACE_OutputCDR::from_octet val;
-//     if (!get_value_from_backing_store(val, DISCRIMINATOR_ID)) {
-//       return false;
-//     }
-//     disc_val = static_cast<CORBA::Long>(val.val_);
-//     return true;
-//   }
-//   case TK_CHAR8: {
-//     ACE_OutputCDR::from_char val;
-//     if (!get_value_from_backing_store(val, DISCRIMINATOR_ID)) {
-//       return false;
-//     }
-//     disc_val = static_cast<CORBA::Long>(val.val_);
-//     return true;
-//   }
-// #ifdef DDS_HAS_WCHAR
-//   case TK_CHAR16: {
-//     ACE_OutputCDR::from_wchar val;
-//     if (!get_value_from_backing_store(val, DISCRIMINATOR_ID)) {
-//       return false;
-//     }
-//     disc_val = static_cast<CORBA::Long>(val.val_);
-//     return true;
-//   }
-// #endif
-//   case TK_INT8: {
-//     ACE_OutputCDR::from_int8 val;
-//     if (!get_value_from_backing_store(val, DISCRIMINATOR_ID)) {
-//       return false;
-//     }
-//     disc_val = static_cast<CORBA::Long>(val.val_);
-//     return true;
-//   }
-//   case TK_UINT8: {
-//     ACE_OutputCDR::from_uint8 val;
-//     if (!get_value_from_backing_store(val, DISCRIMINATOR_ID)) {
-//       return false;
-//     }
-//     disc_val = static_cast<CORBA::Long>(val.val_);
-//     return true;
-//   }
-//   case TK_INT16: {
-//     CORBA::Short val;
-//     if (!get_value_from_backing_store(val, DISCRIMINATOR_ID)) {
-//       return false;
-//     }
-//     disc_val = val;
-//     return true;
-//   }
-//   case TK_UINT16: {
-//     CORBA::UShort val;
-//     if (!get_value_from_backing_store(val, DISCRIMINATOR_ID)) {
-//       return false;
-//     }
-//     disc_val = static_cast<CORBA::Long>(val);
-//     return true;
-//   }
-//   case TK_INT32:
-//     return get_value_from_backing_store(disc_val, DISCRIMINATOR_ID);
-//   case TK_UINT32: {
-//     CORBA::ULong val;
-//     if (!get_value_from_backing_store(val, DISCRIMINATOR_ID)) {
-//       return false;
-//     }
-//     disc_val = static_cast<CORBA::Long>(val);
-//     return true;
-//   }
-//   case TK_INT64: {
-//     CORBA::LongLong val;
-//     if (!get_value_from_backing_store(val, DISCRIMINATOR_ID)) {
-//       return false;
-//     }
-//     disc_val = static_cast<CORBA::Long>(val);
-//     return true;
-//   }
-//   case TK_UINT64: {
-//     CORBA::ULongLong val;
-//     if (!get_value_from_backing_store(val, DISCRIMINATOR_ID)) {
-//       return false;
-//     }
-//     disc_val = static_cast<CORBA::Long>(val);
-//     return true;
-//   }
-//   }
-//   return false;
-// }
-
 bool DynamicDataImpl::get_complex_from_union(DDS::DynamicData_ptr& value, DDS::MemberId id)
 {
   FoundStatus found_status = NOT_FOUND;
@@ -3912,6 +3954,7 @@ bool DynamicDataImpl::get_complex_from_union(DDS::DynamicData_ptr& value, DDS::M
   } else {
     // Return default value for the requested member.
     if (id == DISCRIMINATOR_ID) {
+      DDS::DynamicType_var disc_type = dd_var->type();
       CORBA::Long disc_value;
       if (!set_default_discriminator_value(disc_value, disc_type)) {
         return false;
@@ -3985,22 +4028,22 @@ bool DynamicDataImpl::get_complex_from_collection(DDS::DynamicData_ptr& value, D
   DDS::DynamicData_var dd_var = dd_impl;
 
   const_single_iterator single_it = container_.single_map_.find(id);
-  bool found_in_map = false;
+  bool found_in_maps = false;
   if (single_it != container_.single_map_.end()) {
     if (!move_single_to_complex(single_it, dd_impl)) {
       return false;
     }
-    found_in_map = true;
+    found_in_maps = true;
   } else {
     const_sequence_iterator sequence_it = container_.sequence_map_.find(id);
     if (sequence_it != container_.sequence_map_.end()) {
       if (!move_sequence_to_complex(sequence_it, dd_impl)) {
         return false;
       }
-      found_in_map = true;
+      found_in_maps = true;
     }
   }
-  if (!found_in_map && backing_store_) {
+  if (!found_in_maps && backing_store_) {
     // Reading an out-of-range element from the backing store doesn't signify an error.
     set_member_backing_store(dd_impl, id);
   }
@@ -8232,14 +8275,15 @@ bool DynamicDataImpl::set_default_discriminator_value(CORBA::Long& value,
   return false;
 }
 
-// Get discriminator value from the data container. The discriminator data must present
-// in either single map or complex map.
+// Get discriminator value from the data container.
+// The discriminator data must be present in either single map or complex map.
+// TODO(sonndinh): Merge into the more general get_discriminator_value function?
 bool DynamicDataImpl::get_discriminator_value(
   CORBA::Long& value, const_single_iterator single_it, const_complex_iterator complex_it,
   const DDS::DynamicType_var& disc_type) const
 {
   if (single_it != container_.single_map_.end()) {
-    read_discriminator(value, disc_type, single_it);
+    read_disc_from_single_map(value, disc_type, single_it);
   } else { // Find in complex map
     const DynamicDataImpl* dd_impl = dynamic_cast<const DynamicDataImpl*>(complex_it->second.in());
     if (!dd_impl) {
@@ -8247,7 +8291,7 @@ bool DynamicDataImpl::get_discriminator_value(
     }
     const_single_iterator it = dd_impl->container_.single_map_.find(MEMBER_ID_INVALID);
     if (it != dd_impl->container_.single_map_.end()) {
-      read_discriminator(value, disc_type, it);
+      read_disc_from_single_map(value, disc_type, it);
     } else {
       return set_default_discriminator_value(value, disc_type);
     }
@@ -8440,6 +8484,7 @@ bool DynamicDataImpl::serialized_size_union_xcdr2(const DCPS::Encoding& encoding
     return true;
   }
 
+  // TODO(sonndinh): Update to find discriminator from the backing store.
   const_single_iterator single_it = container_.single_map_.find(DISCRIMINATOR_ID);
   const_complex_iterator complex_it = container_.complex_map_.find(DISCRIMINATOR_ID);
   const bool has_disc = single_it != container_.single_map_.end() ||
