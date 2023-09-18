@@ -1,4 +1,4 @@
-.. _introduction--introduction:
+.. _introduction:
 
 ############
 Introduction
@@ -362,7 +362,7 @@ Subscribers *request* a set of policies that are minimally required.
 Publishers *offer* a set of QoS policies to potential subscribers.
 The DDS implementation then attempts to match the requested policies with the offered policies; if these policies are compatible then the association is formed.
 
-The QoS policies currently implemented by OpenDDS are discussed in detail in :ref:`quality_of_service--quality-of-service`.
+The QoS policies currently implemented by OpenDDS are discussed in detail in :ref:`qos`.
 
 .. _introduction--listeners:
 
@@ -544,14 +544,14 @@ Extensions to the DDS Specification
 ..
     Sect<1.2.2>
 
-Data types, interfaces, and constants in the **DDS** IDL module (C++ namespace, Java package) correspond directly to the DDS specification with very few exceptions:
+Data types, interfaces, and constants in the ``DDS`` IDL module (C++ namespace, Java package) correspond directly to the DDS specification with very few exceptions:
 
 * ``DDS::SampleInfo`` contains an extra field starting with ``opendds_reserved``.
 
 * Type-specific DataReaders (including those for Built-in Topics) have additional operations ``read_instance_w_condition()`` and ``take_instance_w_condition()``.
 
-Additional extended behavior is provided by various classes and interfaces in the OpenDDS module/namespace/package.
-Those include features like Recorder and Replayer (:ref:`alternate_interfaces_to_data--alternate-interfaces-to-data`) and also:
+Additional extended behavior is provided by various classes and interfaces in the ``OpenDDS`` module/namespace/package.
+Those include features like Recorder and Replayer (:ref:`altdata`) and also:
 
 * ``OpenDDS::DCPS::TypeSupport`` adds the ``unregister_type()`` operation not found in the DDS spec.
 
@@ -707,7 +707,7 @@ Your application may get called back from these threads via the Listener mechani
 
 When publishing a sample via DDS, OpenDDS normally attempts to send the sample to any connected subscribers using the calling thread.
 If the send call blocks, then the sample may be queued for sending on a separate service thread.
-This behavior depends on the QoS policies described in :ref:`quality_of_service--quality-of-service`.
+This behavior depends on the QoS policies described in :ref:`qos`.
 
 All incoming data in the subscriber is read by a service thread and queued for reading by the application.
 DataReader listeners are called from the service thread.
@@ -722,7 +722,7 @@ Configuration
 
 OpenDDS includes a file-based configuration framework for configuring both global items such as debug level, memory allocation, and discovery, as well as transport implementation details for publishers and subscribers.
 Configuration can also be achieved directly in code, however, it is recommended that configuration be externalized for ease of maintenance and reduction in runtime errors.
-The complete set of configuration options are described in :ref:`run_time_configuration--run-time-configuration`.
+The complete set of configuration options are described in :ref:`config`.
 
 .. _introduction--installation:
 
@@ -740,7 +740,7 @@ To build OpenDDS with DDS Security, see :ref:`dds_security--building-opendds-wit
 To avoid compiling OpenDDS code that you will not be using, there are certain features than can be excluded from being built.
 The features are discussed below.
 
-Users requiring a small-footprint configuration or compatibility with safety-oriented platforms should consider using the OpenDDS Safety Profile, which is described in :ref:`safety_profile--safety-profile` of this guide.
+Users requiring a small-footprint configuration or compatibility with safety-oriented platforms should consider using the OpenDDS Safety Profile, which is described in :ref:`safety_profile` of this guide.
 
 .. _introduction--building-with-a-feature-enabled-or-disabled:
 
@@ -786,7 +786,7 @@ Disabling the Building of Built-In Topic Support
 Feature Name: ``built_in_topics``
 
 You can reduce the footprint of the core DDS library by up to 30% by disabling Built-in Topic Support.
-See :ref:`built_in_topics--built-in-topics` for a description of Built-In Topics.
+See :ref:`bit` for a description of Built-In Topics.
 
 .. _introduction--disabling-the-building-of-compliance-profile-features:
 
@@ -813,7 +813,7 @@ Content-Subscription Profile
 
 Feature Name: ``content_subscription``
 
-This profile adds the classes ``ContentFilteredTopic``, ``QueryCondition``, and ``MultiTopic`` discussed in :ref:`content_subscription_profile--content-subscription-profile`.
+This profile adds the classes ``ContentFilteredTopic``, ``QueryCondition``, and ``MultiTopic`` discussed in :ref:`content_subscription_profile`.
 
 In addition, individual classes can be excluded by using the features given in the table below.
 
@@ -897,7 +897,7 @@ Building Applications that use OpenDDS
     Sect<1.4>
 
 This section applies to any C++ code that directly or indirectly includes OpenDDS headers.
-For Java applications, see :ref:`java_bindings--java-bindings`.
+For Java applications, see :ref:`java`.
 
 C++ source code that includes OpenDDS headers can be built using either build system: MPC or CMake.
 

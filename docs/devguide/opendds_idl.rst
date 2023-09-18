@@ -1,4 +1,4 @@
-.. _opendds_idl--opendds-idl:
+.. _opendds_idl:
 
 ###########
 opendds_idl

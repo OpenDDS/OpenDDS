@@ -1,4 +1,4 @@
-.. _xtypes--xtypes:
+.. _xtypes:
 
 ######
 XTypes
@@ -485,16 +485,16 @@ The full type object compatibility check is too detailed to reproduce here.
 It can be found in section 7.2.4 of the XTypes 1.3 specification.
 In general though two topic types and their nested types are compatible if:
 
-  * Extensibilities of shared types match
-  * Extensibility rules haven't been broken, for example:
+* Extensibilities of shared types match
+* Extensibility rules haven't been broken, for example:
 
-    * Changing a ``@final`` struct
-    * Adding a member in the middle of an ``@appendable`` struct
+  * Changing a ``@final`` struct
+  * Adding a member in the middle of an ``@appendable`` struct
 
-  * Length bounds of strings and sequences are the same or greater
-  * Lengths of arrays are exactly the same
-  * The keys of the types match exactly
-  * Shared member IDs match when required, like when they are final or are being used as keys
+* Length bounds of strings and sequences are the same or greater
+* Lengths of arrays are exactly the same
+* The keys of the types match exactly
+* Shared member IDs match when required, like when they are final or are being used as keys
 
 If the type objects are compatible then the match goes ahead.
 If one or both type objects are not available, then OpenDDS falls back to checking the names each entity's ``TypeSupport`` was given.
@@ -1141,7 +1141,7 @@ DynamicDataWriters and DynamicDataReaders
 DynamicDataWriters and DataReaders are designed to work like any other DataWriter and DataReader except that their APIs are defined in terms of the DynamicData type instead of a type generated from IDL.
 Each DataWriter and DataReader has an associated Topic and that Topic has a data type (represented by a TypeSupport object).
 Behavior related to keys, QoS policies, discovery and built-in topics, DDS Security, and transport is not any different for a DynamicDataWriter or DataReader.
-One exception is that in the current implementation, Content-Subscription features (:ref:`content_subscription_profile--content-subscription-profile`) are not supported for DynamicDataWriters and DataReaders.
+One exception is that in the current implementation, :ref:`content_subscription_profile` is not supported for DynamicDataWriters and DataReaders.
 
 .. _xtypes--obtaining-dynamictype-and-registering-typesupport:
 
@@ -1192,7 +1192,7 @@ To do this, use the ``get_dynamic_type`` method on the singleton ``Service_Parti
 
 The two input parameters to ``get_dynamic_type`` are the ``participant`` (an object reference to the DomainParticipant that will be used to register our TypeSupport and create Topics, DataWriters, and/or DataReders) and the ``key`` which is the ``DDS::BuiltinTopicKey_t`` that identifies the remote entity which has the data type that we'll use.
 This key can be obtained from the Built-In Publications topic (which identifies remote DataWriters) or the Built-In Subscriptions topic (which identifies remote DataReaders).
-See :ref:`built_in_topics--built-in-topics` for details on using the Built-In Topics.
+See :ref:`bit` for details on using the Built-In Topics.
 
 The type obtained from ``get_dynamic_type`` can be used to create and register a TypeSupport object.
 

@@ -1,4 +1,5 @@
-.. _the_dcps_information_repository--the-dcps-information-repository:
+.. _the_dcps_information_repository:
+.. _inforepo:
 
 ###############################
 The DCPS Information Repository

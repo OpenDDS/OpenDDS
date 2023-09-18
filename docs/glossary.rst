@@ -55,12 +55,12 @@ Common Terms
 
   Data-Centric Publish-Subscribe
   DCPS
-    DCPS is essentially synonymous with :term:`DDS`, but can specially refer to the API described in the main DDS specification.
+    DCPS is essentially synonymous with :term:`DDS`, but can specifically refer to the API described in the main DDS specification.
 
   Data Distribution Service
   DDS
     DDS is a specification for exchanging strongly-typed data across a distributed system.
-    It is essentially synonymous with :term:`DCPS`, but can specially refer to the main DDS specification.
+    It is essentially synonymous with :term:`DCPS`, but can specifically refer to the main DDS specification.
 
     See :ref:`spec-dds` for more information.
 

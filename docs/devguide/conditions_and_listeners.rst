@@ -1,4 +1,4 @@
-.. _conditions_and_listeners--conditions-and-listeners:
+.. _conditions_and_listeners:
 
 ########################
 Conditions and Listeners

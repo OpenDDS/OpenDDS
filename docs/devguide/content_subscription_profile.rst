@@ -1,4 +1,4 @@
-.. _content_subscription_profile--content-subscription-profile:
+.. _content_subscription_profile:
 
 ############################
 Content-Subscription Profile

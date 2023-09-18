@@ -1,4 +1,5 @@
-.. _run_time_configuration--run-time-configuration:
+.. _run_time_configuration:
+.. _config:
 
 ######################
 Run-time Configuration
@@ -23,8 +24,8 @@ This section summarizes the configuration options supported by OpenDDS.
 OpenDDS configuration is concerned with three main areas:
 
 #. **Common Configuration Options** -- configure the behavior of DCPS entities at a global level.
-   This allows separately deployed processes in a computing environment to share common settings for the specified behavior (e.g.
-   all readers and writers should use RTPS discovery).
+   This allows separately deployed processes in a computing environment to share common settings for the specified behavior (e.g. all readers and writers should use RTPS discovery).
+   See :ref:`run_time_configuration--common-configuration-options` for details.
 
 #. **Discovery Configuration Options** -- configure the behavior of the discovery mechanism(s).
    OpenDDS supports multiple approaches for discovering and associating writers and readers as detailed in :ref:`run_time_configuration--discovery-configuration`.
@@ -33,11 +34,11 @@ OpenDDS configuration is concerned with three main areas:
    Each pluggable transport can be configured separately.
 
 The configuration file for OpenDDS is a human-readable ini-style text file.
-:ref:`Table 7-1 <run_time_configuration--reftable8>` shows a list of the available configuration section types as they relate to the area of OpenDDS that they configure.
+:ref:`This table <run_time_configuration--sections>` shows a list of the available configuration section types as they relate to the area of OpenDDS that they configure.
 
-.. _run_time_configuration--reftable8:
+.. _run_time_configuration--sections:
 
-**Table  Configuration File Sections**
+**Configuration File Sections**
 
 .. list-table::
    :header-rows: 1
@@ -46,7 +47,7 @@ The configuration file for OpenDDS is a human-readable ini-style text file.
 
      - **File Section Title**
 
-   * - Global Settings
+   * - :ref:`Global Settings <run_time_configuration--common-configuration-options>`
 
      - ``[common]``
 
@@ -175,7 +176,7 @@ The following table summarizes the ``[common]`` configuration options:
 
 .. _run_time_configuration--reftable9:
 
-**Table  Common Configuration Options**
+**Common Configuration Options**
 
 .. list-table::
    :header-rows: 1

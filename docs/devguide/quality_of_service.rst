@@ -1,4 +1,5 @@
-.. _quality_of_service--quality-of-service:
+.. _quality_of_service:
+.. _qos:
 
 ##################
 Quality of Service

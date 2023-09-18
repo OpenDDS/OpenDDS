@@ -1,4 +1,4 @@
-.. _internet_enabled_rtps--internet-enabled-rtps:
+.. _internet_enabled_rtps:
 
 #####################
 Internet-Enabled RTPS
@@ -371,7 +371,7 @@ Most applications have common objectives with respect to data security:
 
 * Privacy - The content of a sample cannot be read by an unauthorized third party.
 
-If an application is subject to any of these security objectives, then it should use the DDS Security features described in :ref:`dds_security--dds-security`.
+If an application is subject to any of these security objectives, then it should use the DDS Security features described in :ref:`sec`.
 Using a non-secure discovery mechanism or a non-secure transport leaves the application exposed to data security breaches.
 
 .. _internet_enabled_rtps--understand-the-weaknesses-of-secure-rtps-discovery:

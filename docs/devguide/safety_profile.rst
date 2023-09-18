@@ -1,4 +1,4 @@
-.. _safety_profile--safety-profile:
+.. _safety_profile:
 
 ##############
 Safety Profile

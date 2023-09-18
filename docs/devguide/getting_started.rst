@@ -1,4 +1,4 @@
-.. _getting_started--getting-started:
+.. _getting_started:
 
 ###############
 Getting Started
@@ -254,7 +254,7 @@ The implementation files contain implementations for these interfaces.
 The generated IDL file should itself be compiled with the TAO IDL compiler to generate stubs and skeletons.
 These and the implementation file should be linked with your OpenDDS applications that use the Message type.
 The OpenDDS IDL compiler has a number of options that specialize the generated code.
-These options are described in :ref:`opendds_idl--opendds-idl`.
+These options are described in :ref:`opendds_idl`.
 
 Typically, you do not directly invoke the TAO or OpenDDS IDL compilers as above, but let your build system do it for you.
 Two different build systems are supported for projects that use OpenDDS:
@@ -367,7 +367,7 @@ The first section of ``main()`` initializes the current process as an OpenDDS pa
 The ``TheParticipantFactoryWithArgs`` macro is defined in ``Service_Participant.h`` and initializes the Domain Participant Factory with the command line arguments.
 These command line arguments are used to initialize the ORB that the OpenDDS service uses as well as the service itself.
 This allows us to pass ``ORB_init()`` options on the command line as well as OpenDDS configuration options of the form ``-DCPS*``.
-Available OpenDDS options are fully described in :ref:`run_time_configuration--run-time-configuration`.
+Available OpenDDS options are fully described in :ref:`config`.
 
 The ``create_participant()`` operation uses the domain participant factory to register this process as a participant in the domain specified by the ID of 42.
 The participant uses the default QoS policies and no listeners.
@@ -529,7 +529,7 @@ Here is the corresponding code:
 
         ws->detach_condition(condition);
 
-For more details about status, conditions, and wait sets, see :ref:`conditions_and_listeners--conditions-and-listeners`.
+For more details about status, conditions, and wait sets, see :ref:`conditions_and_listeners`.
 
 .. _getting_started--sample-publication:
 
@@ -910,8 +910,8 @@ The publisher connects to the ``DCPSInfoRepo`` to find the location of any subsc
 In the subscriber window, you should also now be seeing console output from the subscriber that is reading messages from the topic demonstrating a simple publish and subscribe application.
 
 You can read more about configuring your application for RTPS and other more advanced configuration options in :ref:`run_time_configuration--configuring-for-ddsi-rtps-discovery` and :ref:`run_time_configuration--rtps-udp-transport-configuration-options` .
-See :ref:`run_time_configuration--discovery-configuration` and :ref:`the_dcps_information_repository--the-dcps-information-repository` for configuring and using the ``DCPSInfoRepo`` .
-See :ref:`quality_of_service--quality-of-service` for setting and using QoS features that modify the behavior of your application.
+See :ref:`run_time_configuration--discovery-configuration` and :ref:`inforepo` for configuring and using the ``DCPSInfoRepo`` .
+See :ref:`qos` for setting and using QoS features that modify the behavior of your application.
 
 .. _getting_started--running-our-example-with-rtps:
 
@@ -928,7 +928,7 @@ This is important in scenarios when your OpenDDS application needs to interopera
 The coding and building of the Messenger example above is not changed for using RTPS, so you will not need to modify or rebuild your publisher and subscriber services.
 This is a strength of the OpenDDS architecture in that to enable the RTPS capabilities, it is an exercise in configuration.
 For this exercise, we will enable RTPS for the Messenger example using a configuration file that the publisher and subscriber will share.
-More details concerning the configuration of all the available transports including RTPS are described in :ref:`run_time_configuration--run-time-configuration`.
+More details concerning the configuration of all the available transports including RTPS are described in :ref:`config`.
 
 Navigate to the directory where your publisher and subscriber have been built.
 Create a new text file named ``rtps.ini`` and populate it with the following content:

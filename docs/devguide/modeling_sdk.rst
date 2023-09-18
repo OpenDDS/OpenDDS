@@ -1,4 +1,4 @@
-.. _modeling_sdk--modeling-sdk:
+.. _modeling_sdk:
 
 ############
 Modeling SDK

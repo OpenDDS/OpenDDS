@@ -1,4 +1,5 @@
-.. _built_in_topics--built-in-topics:
+.. _built_in_topics:
+.. _bit:
 
 ###############
 Built-In Topics
