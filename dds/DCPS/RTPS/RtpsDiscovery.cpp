@@ -32,7 +32,7 @@ namespace RTPS {
 using DCPS::TimeDuration;
 
 RtpsDiscovery::RtpsDiscovery(const RepoKey& key)
-  : Discovery(key)
+  : key_(key)
   , config_(DCPS::make_rch<RtpsDiscoveryConfig>())
 {
 }
