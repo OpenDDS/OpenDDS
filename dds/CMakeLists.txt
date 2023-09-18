@@ -506,7 +506,6 @@ target_sources(OpenDDS_Dcps
     DCPS/transport/framework/TransportImpl.inl
     DCPS/transport/framework/TransportImpl_rch.h
     DCPS/transport/framework/TransportInst.h
-    DCPS/transport/framework/TransportInst.inl
     DCPS/transport/framework/TransportInst_rch.h
     DCPS/transport/framework/TransportQueueElement.h
     DCPS/transport/framework/TransportQueueElement.inl

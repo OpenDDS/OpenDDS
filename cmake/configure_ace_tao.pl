@@ -88,8 +88,8 @@ my $config_file_should_be =
   "#define ACE_LACKS_READDIR_R\n" .
   "#define ACE_LACKS_TEMPNAM\n" .
   "#include \"$values{'config-file'}\"\n";
-# Always writing the config.h file will cause rebuilds, so don't it unless we
-# actually need to change it.
+# Always writing the config.h file will cause rebuilds, so don't do it unless
+# we actually need to change it.
 if (!-f $config_path || read_file($config_path) ne $config_file_should_be) {
   open(my $config_file, '>', $config_path) or die("Failed to open $config_path: $!");
   print $config_file ($config_file_should_be);

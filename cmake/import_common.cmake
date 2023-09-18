@@ -247,7 +247,7 @@ function(_opendds_find_executables group exes)
     endif()
 
     set(mpc_projects_var "${group_prefix}_MPC_PROJECTS")
-    if(DEFINED "${mpc_projects_var}")
+    if(DEFINED "${mpc_projects_var}" AND NOT ${var}_HOST_TOOL)
       _opendds_find_in_mpc_projects(
         "${found_var}" "${var}" "${${mpc_projects_var}}" "${${var}_MPC_NAME}")
       if(${${found_var}})
