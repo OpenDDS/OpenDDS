@@ -210,7 +210,7 @@ The following subsections define the concepts shown in this diagram.
 
 **Figure  DCPS Conceptual Overview**
 
-.. image:: images/10000001000001C100000202637D36545E22157D.png
+.. image:: images/domain.png
 
 .. _introduction--domain:
 
@@ -602,7 +602,7 @@ See :ref:`run_time_configuration--transport-configuration-options` for details o
 
 .. _introduction--reffigure1:
 
-.. image:: images/10000001000002E50000018D97FADEED4445DDBB.png
+.. image:: images/pluggable.png
 
 **Figure  OpenDDS Extensible Transport Framework**
 
@@ -649,7 +649,7 @@ The DCPSInfoRepo is not involved in data propagation, its role is limited in sco
 
 .. _introduction--reffigure2:
 
-.. image:: images/100000010000045A0000025185A3A43482F62E3D.png
+.. image:: images/inforepo_discovery.png
 
 **Figure : Centralized Discovery with OpenDDS InfoRepo**
 
@@ -677,7 +677,7 @@ A more detailed description of this flexible configuration approach is discussed
 
 .. _introduction--reffigure3:
 
-.. image:: images/10000001000003FC0000025E8CF71A4C4FCDEFF3.png
+.. image:: images/rtps_discovery.png
 
 **Figure : Peer-to-peer Discovery with RTPS**
 

@@ -37,7 +37,7 @@ Zero or one DCPS elements definition can be included in any given model.
 
 .. _modeling_sdk--reffigure5:
 
-.. image:: images/10000001000003BA000005345220EFBC3B2965C5.png
+.. image:: images/modeling_data_definitions.png
    :scale: 50%
 
 **Figure  Graphical modeling of the data definitions**
@@ -48,7 +48,7 @@ This allows sharing of data definitions and QoS policies among different DCPS mo
 
 .. _modeling_sdk--reffigure6:
 
-.. image:: images/10000001000003CA00000534AF32FC1EC2AA656B.png
+.. image:: images/modeling_dcps_entities.png
    :scale: 50%
 
 **Figure  Graphical modeling of the DCPS entities**
@@ -118,7 +118,7 @@ Installation
 
 .. _modeling_sdk--reffigure7:
 
-.. image:: images/100000000000018A000001582B13D316CA761B88.png
+.. image:: images/modeling_sdk_install.png
    :scale: 150%
 
 **Figure  Eclipse Software Installation Dialog**
