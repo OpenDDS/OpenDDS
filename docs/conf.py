@@ -21,6 +21,7 @@ github_links_root_path = str(opendds_root_path)
 from mpc_lexer import MpcLexer
 from newsd import print_all_news, parse_newsd
 from version_info import VersionInfo
+from links import get_omg_spec_section_links
 
 # Custom Values ---------------------------------------------------------------
 
@@ -47,6 +48,17 @@ def setup(app):
     app.add_lexer('mpc', MpcLexer)
     app.add_transform(GlobalSubstitutions)
     app.add_js_file("autotab.js")
+
+    omg_specs = {}
+    get_omg_spec_section_links(omg_specs, 'DDS', '1.4')
+    get_omg_spec_section_links(omg_specs, 'DDSI-RTPS', '2.3', 'rtps', 'RTPS')
+    get_omg_spec_section_links(omg_specs, 'DDS-SECURITY', '1.1', 'sec', 'DDS Security')
+    get_omg_spec_section_links(omg_specs, 'DDS-XTypes', '1.3', 'xtypes')
+    get_omg_spec_section_links(omg_specs, 'IDL', '4.2', 'idl')
+    get_omg_spec_section_links(omg_specs, 'CPP', '1.3', 'cpp03', 'IDL to C++03')
+    get_omg_spec_section_links(omg_specs, 'CPP11', '1.5', 'cpp11', 'IDL to C++11')
+    get_omg_spec_section_links(omg_specs, 'I2JAV', '1.3', 'java', 'IDL to Java')
+    app.add_config_value('omg_specs', omg_specs, True)
 
 
 # -- Project information -----------------------------------------------------

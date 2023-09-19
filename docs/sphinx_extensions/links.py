@@ -1,12 +1,26 @@
-from docutils import nodes
-from docutils.parsers.rst.states import Struct
-from docutils.utils import unescape
 import subprocess
 from pathlib import Path
 import re
+from urllib.request import urlopen
+from urllib.error import URLError
+import shutil
+
+from docutils import nodes
+from docutils.parsers.rst import directives
+from docutils.parsers.rst.states import Struct
+from docutils.utils import unescape
+
+from sphinx.util.docutils import SphinxDirective
+from sphinx.util.typing import OptionSpec
+from sphinx.util import logging
+
+import fitz # PyMuPDF
 
 gh_url_base = 'https://github.com'
 omg_url_base = 'https://issues.omg.org'
+omg_spec_section_re = re.compile(r'^(\d(\.\d+)*) (.*)')
+logger = logging.getLogger(__name__)
+docs_path = Path(__file__).parent.parent
 
 
 def get_config(inliner):
@@ -173,17 +187,176 @@ def omgissue_role(name, rawtext, text, lineno, inliner, options={}, content=[]):
     return rv
 
 
+def get_omg_spec_section_links(omg_specs, slug, version, our_name=None, display_name=None):
+    our_name = slug.lower() if our_name is None else our_name
+    display_name = slug.replace('-', ' ') if display_name is None else display_name
+
+    dir_path = docs_path / Path('_build') / 'omg-specs'
+    dir_path.mkdir(parents=True, exist_ok=True)
+    pdf_path = dir_path / '{}-{}.pdf'.format(slug, version)
+    url = 'https://www.omg.org/spec/{}/{}'.format(slug, version)
+    pdf_url = url + '/PDF'
+    if not pdf_path.is_file():
+        logger.info('Downloading spec %s from %s', our_name, pdf_url)
+        try:
+            with urlopen(pdf_url) as res, pdf_path.open('wb') as pdf_file:
+                shutil.copyfileobj(res, pdf_file)
+        except Exception as e:
+            logger.warning("Couldn't download pdf %s: %s", pdf_url, repr(e))
+            pdf_path.unlink(missing_ok=True)
+            pdf_path = None
+
+    root = dict(subsections=None)
+    sections_by_number = {}
+    sections_by_title = {}
+    if pdf_path:
+        doc = fitz.open(pdf_path)
+        root = dict(subsections=[])
+        section_stack = []
+        last_section = root
+        # See https://pymupdf.readthedocs.io/en/latest/document.html#Document.get_toc
+        for level, title, page, dest in doc.get_toc(simple=False):
+            assert page >= 1
+
+            # We only have level numbers, so we have to recreate the structure
+            # of the sections by using last_section and section_stack to keep
+            # track what the different levels mean.
+            if level > len(section_stack):
+                section_stack.append(last_section)
+            elif level < len(section_stack):
+                del section_stack[level - len(section_stack):]
+
+            kind = dest['kind']
+            # See https://pdfobject.com/pdf/pdf_open_parameters_acro8.pdf
+            if kind == fitz.LINK_GOTO:
+                loc = 'page={}&view=FitH,{}'.format(page, dest['to'].y)
+            elif kind == fitz.LINK_NAMED:
+                loc = dest['name']
+            else:
+                continue
+
+            section = dict(title=title, loc=loc, subsections=[], level=level)
+            section_stack[-1]['subsections'].append(section)
+            last_section = section
+            m = omg_spec_section_re.match(title)
+            if m:
+                sections_by_number[m.group(1)] = section
+            sections_by_title[title] = section
+
+    omg_specs[our_name] = dict(
+        display_name=display_name,
+        url=url,
+        pdf_url=pdf_url,
+        version=version,
+        sections=root['subsections'],
+        sections_by_number=sections_by_number,
+        sections_by_title=sections_by_title,
+    )
+
+
+def section_link(spec, section):
+    return spec['pdf_url'] + '#' + section['loc']
+
+
+def omgspec_role(name, rawtext, text, lineno, inliner, options={}, content=[]):
+    config = get_config(inliner)
+    explicit_title, title, target = process_title_target(text)
+    args = target.split(':', 1)
+    if len(args) == 1:
+        spec_name = args[0]
+        section_key = None
+    elif len(args) == 2:
+        spec_name = args[0]
+        section_key = args[1]
+    else:
+        return rst_error(rawtext, text, lineno, inliner,
+            'omgspec target must be of the form SPEC[:SECTION], not {}', repr(target))
+
+    spec = config.omg_specs.get(spec_name)
+    if spec is None:
+        return rst_error(rawtext, text, lineno, inliner,
+            '{} is not a valid omgspec spec name, must be one of: {}',
+            repr(spec_name), ', '.join(config.omg_specs.keys()))
+
+    section = None
+    if section_key is None or spec['sections'] is None:
+        # Either no section was specified or we couldn't download the PDF for
+        # some reason.
+        url = spec['url']
+    else:
+        section = spec['sections_by_number'].get(section_key)
+        if section is None:
+            for section_title, sect in spec['sections_by_title'].items():
+                if section_key in section_title:
+                    section = sect
+                    break
+        if section is None:
+            return rst_error(rawtext, text, lineno, inliner,
+                '{} is not a valid section in the {} spec', repr(section_key), spec_name)
+        url = section_link(spec, section)
+
+    if not explicit_title:
+        title = '{display_name} v{version}'.format(**spec)
+        if section_key is not None:
+            if section is None:
+                # If we got here then we couldn't download the PDF for some
+                # reason, so just use the target/section_key in the title.
+                title += ' ' + section_key
+            else:
+                title += ' ' + section['title']
+
+    return link_node(rawtext, lineno, inliner, title, explicit_title, url, options)
+
+
+class OmgSpecsDirective(SphinxDirective):
+    option_spec: OptionSpec = {
+        'debug-links': directives.flag,
+    }
+
+    def spec_sections(self, spec, node, sections):
+        if sections is None:
+            node += nodes.inline('', '(No section info, PDF download failed)')
+        else:
+            section_list = nodes.bullet_list()
+            for section in sections:
+                section_node = nodes.list_item()
+                p = nodes.paragraph()
+                p += nodes.reference('', section['title'], refuri=section_link(spec, section))
+                p += nodes.inline('', ' ({})'.format(section['level']))
+                self.spec_sections(spec, p, section['subsections'])
+                section_node += p
+                section_list += section_node
+            node += section_list
+
+    def run(self):
+        specs_node = nodes.bullet_list()
+        for spec_name, spec in self.env.app.config.omg_specs.items():
+            spec_node = nodes.list_item()
+            p = nodes.paragraph()
+            p += nodes.reference('',
+                spec['display_name'] + ' ' + spec['version'], refuri=spec['url'])
+            p += nodes.inline('', ' (')
+            p += nodes.literal('', spec_name)
+            p += nodes.inline('', ')')
+            spec_node += p
+            if 'debug-links' in self.options:
+                self.spec_sections(spec, spec_node, spec['sections'])
+            specs_node += spec_node
+        return [specs_node]
+
+
 def setup(app):
     app.add_config_value('github_links_repo', None, 'env', types=[str])
     app.add_config_value('github_links_commitish', None, 'env', types=[str])
     app.add_config_value('github_links_release_tag', None, 'env', types=[str])
     app.add_config_value('github_links_root_path', None, 'env', types=[str])
-
     app.add_role('ghfile', ghfile_role)
     app.add_role('ghissue', ghissue_role)
     app.add_role('ghpr', ghpr_role)
     app.add_role('ghrelease', ghrelease_role)
 
     app.add_role('omgissue', omgissue_role)
+    app.add_role('omgspec', omgspec_role)
+    app.add_directive("omgspecs", OmgSpecsDirective)
 
 # vim: expandtab:ts=4:sw=4

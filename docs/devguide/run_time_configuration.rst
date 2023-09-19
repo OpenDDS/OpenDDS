@@ -655,7 +655,7 @@ Configuring how participants should find ``DCPSInfoRepo`` is the purpose of this
 Assume for example that the ``DCPSInfoRepo`` service is started on a host and port of ``myhost.mydomain.com:12345``.
 Applications can make their OpenDDS participants aware of how to find this service through command line options or by reading a configuration file.
 
-In our Getting Started example from 2.1.7, "Running the Example" the executables were given a command line parameter to find the ``DCPSInfoRepo`` service like so:
+In :ref:`getting_started--running-the-example` the executables were given a command line parameter to find the ``DCPSInfoRepo`` service like so:
 
 .. code-block:: bash
 
@@ -858,19 +858,17 @@ Configuring for DDSI-RTPS Discovery
     Sect<7.3.3>
 
 The OMG DDSI-RTPS specification gives the following simple description that forms the basis for the discovery approach used by OpenDDS and the two different protocols used to accomplish the discovery operations.
-The excerpt from the OMG DDSI-RTPS specification Section 8.5.1 is as follows:
+The excerpt from the :omgspec:`rtps:8.5.1` is as follows:
 
-"The RTPS specification splits up the discovery protocol into two independent protocols:
+  The RTPS specification splits up the discovery protocol into two independent protocols:
 
-1.
-Participant Discovery Protocol
+  1. Participant Discovery Protocol
 
-2.
-Endpoint Discovery Protocol
+  2. Endpoint Discovery Protocol
 
-A Participant Discovery Protocol (PDP) specifies how Participants discover each other in the network.
-Once two Participants have discovered each other, they exchange information on the Endpoints they contain using an Endpoint Discovery Protocol (EDP).
-Apart from this causality relationship, both protocols can be considered independent."
+  A Participant Discovery Protocol (PDP) specifies how Participants discover each other in the network.
+  Once two Participants have discovered each other, they exchange information on the Endpoints they contain using an Endpoint Discovery Protocol (EDP).
+  Apart from this causality relationship, both protocols can be considered independent.
 
 The configuration options discussed in this section allow a user to specify property values to change the behavior of the Simple Participant Discovery Protocol (SPDP) and/or the Simple Endpoint Discovery Protocol (SEDP) default settings.
 
@@ -945,7 +943,7 @@ Those properties, along with options specific to OpenDDS's RTPS Discovery implem
 
    * - ``ResendPeriod=sec``
 
-     - The number of seconds that a process waits between the announcement of participants (see section 8.5.3 in the OMG DDSI-RTPS specification for details).
+     - The number of seconds that a process waits between the announcement of participants (see :omgspec:`rtps:8.5.3`).
 
      - ``30``
 
@@ -980,7 +978,7 @@ Those properties, along with options specific to OpenDDS's RTPS Discovery implem
      - Port Base number.
        This number sets the starting point for deriving port numbers used for Simple Endpoint Discovery Protocol (SEDP).
        This property is used in conjunction with ``DG``, ``PG``, ``D0`` (or ``DX``), and ``D1`` to construct the necessary Endpoints for RTPS discovery communication.
-       (see section 9.6.1.1 in the OMG DDSI-RTPS specification in how these Endpoints are constructed)
+       See :omgspec:`rtps:9.6.1.1` for how these Endpoints are constructed.
 
      - ``7400``
 
@@ -997,7 +995,7 @@ Those properties, along with options specific to OpenDDS's RTPS Discovery implem
 
        ``PB + DG * domainId + d1 + PG * participantId``
 
-       (see section 9.6.1.1 in the OMG DDSI-RTPS specification in how these Endpoints are constructed)
+       See :omgspec:`rtps:9.6.1.1` for how these Endpoints are constructed.
 
      - 2
 
@@ -1008,7 +1006,7 @@ Those properties, along with options specific to OpenDDS's RTPS Discovery implem
 
        PB + DG * domainId + d0
 
-       (see section 9.6.1.1 in the OMG DDSI-RTPS specification in how these Endpoints are constructed)
+       See :omgspec:`rtps:9.6.1.1` for how these Endpoints are constructed.
 
      - ``0``
 
@@ -1019,7 +1017,7 @@ Those properties, along with options specific to OpenDDS's RTPS Discovery implem
 
        ``PB + DG * domainId + d1 + PG * participantId``
 
-       (see section 9.6.1.1 in the OMG DDSI-RTPS specification in how these Endpoints are constructed)
+       See :omgspec:`rtps:9.6.1.1` for how these Endpoints are constructed.
 
      - ``10``
 
@@ -2901,7 +2899,7 @@ The interesting pattern that this allows for is a deployed OpenDDS application t
 
 Some implementation notes related to using the ``rtps_udp`` transport protocol are as follows:
 
-#. ``WRITER_DATA_LIFECYCLE`` (8.7.2.2.7) notes that the same Data sub-message should dispose and unregister an instance.
+#. :omgspec:`rtps:8.7.2.2.7` notes that the same Data sub-message should dispose and unregister an instance.
    OpenDDS may use two Data sub-messages.
 
 #. RTPS transport instances can not be shared by different Domain Participants.

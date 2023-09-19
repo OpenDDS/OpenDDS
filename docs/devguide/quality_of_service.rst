@@ -1108,7 +1108,7 @@ By default, the ``value`` member is not set.
 It can be set to attach additional information to the created entities.
 The value of the ``GROUP_DATA`` policy is propagated via built-in topics.
 The data writer built-in topic data contains the ``GROUP_DATA`` from the publisher and the data reader built-in topic data contains the ``GROUP_DATA`` from the subscriber.
-The ``GROUP_DATA`` policy could be used to implement matching mechanisms similar to those of the ``PARTITION`` policy described in 1.1.6 except the decision could be made based on an application-defined policy.
+The ``GROUP_DATA`` policy could be used to implement matching mechanisms similar to those of the :ref:`PARTITION policy <quality_of_service--partition>` except the decision could be made based on an application-defined policy.
 
 .. _quality_of_service--transport-priority:
 
@@ -1340,7 +1340,7 @@ This is similar in nature to the ``DESTINATION_ORDER QoS`` policy, however ``ord
 By default, ``ordered_access`` is ``false``.
 
 .. note:: This policy controls the ordering and scope of samples made available to the subscriber, but the subscriber application must use the proper logic in reading samples to guarantee the requested behavior.
-  For more details, see Section 2.2.2.5.1.9 of the Version 1.4 DDS Specification.
+  For more details, see :omgspec:`dds:2.2.2.5.1.9`.
 
 .. _quality_of_service--destination-order:
 

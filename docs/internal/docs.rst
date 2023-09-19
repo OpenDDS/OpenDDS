@@ -19,6 +19,7 @@ Requirements
 ============
 
 The script requires `Python 3.6 or later <https://www.python.org/downloads/>`__ and an internet connection if the script needs to download dependencies or check the validity of external links.
+It will also try to download extra information for things like :rst:role:`omgspec`, but it shouldn't be a fatal error if there's not internet.
 
 You might receive a message like this when running for the first time::
 
@@ -34,10 +35,10 @@ If you do, then follow the directions it gives, remove the ``docs/.venv`` direct
 HTML
 ====
 
-HTML documentation can be built and viewed using ``docs/build.py -o html``.
+HTML documentation can be built and viewed using ``docs/build.py html -o``.
 If it was built successfully, then the front page will be at ``docs/_build/html/index.html``.
 
-A single page variant is also available using ``docs/build.py -o singlehtml``
+A single page variant is also available using ``docs/build.py singlehtml -o``
 If it was built successfully, then the page will be at ``docs/_build/singlehtml/index.html``.
 
 PDF
@@ -45,7 +46,7 @@ PDF
 
 .. note:: This has additional dependencies on LaTeX that are documented `here <https://www.sphinx-doc.org/en/master/usage/builders/index.html#sphinx.builders.latex.LaTeXBuilder>`__.
 
-PDF documentation can be built and viewed using ``docs/build.py -o pdf``.
+PDF documentation can be built and viewed using ``docs/build.py pdf -o``.
 If it was built successfully, then the PDF file will be at ``docs/_build/latex/opendds.pdf``.
 
 Dash
@@ -214,6 +215,58 @@ These come in the form of `RST roles <https://docutils.sourceforge.io/docs/ref/r
     :omgissue:`this is the issue <DDSXTY14-29>`
 
     :omgissue:`this is **the issue** <DDSXTY14-29>`
+
+.. rst:role:: omgspec
+
+  The OMG specs are published as PDFs and it would be nice to be able to link to subsections within the specs using something like ``DDS.pdf#2.2.2``.
+  It's possible for the OMG to enable that when the PDF is created, but they don't.
+  This role works around that by downloading the PDFs and extracting sections from the table of contents to generate links that that can be used by browsers.
+  If a spec PDF can't be downloaded, the link will be just to the spec PDF.
+
+  .. code-block:: rst
+
+    :omgspec:`dds`
+
+    :omgspec:`dds:2.2.2`
+
+    :omgspec:`dds:Annex B`
+
+    :omgspec:`Somewhere in the XTypes spec <xtypes>`
+
+    :omgspec:`Exactly here in the XTypes spec <xtypes:2.2.2>`
+
+    :omgspec:`TypeObject IDL <xtypes:Annex B>`
+
+  Turns into:
+
+    :omgspec:`dds`
+
+    :omgspec:`dds:2.2.2`
+
+    :omgspec:`dds:Annex B`
+
+    :omgspec:`Somewhere in the XTypes spec <xtypes>`
+
+    :omgspec:`Exactly here in the XTypes spec <xtypes:2.2.2>`
+
+    :omgspec:`TypeObject IDL <xtypes:Annex B>`
+
+  The format of the target is ``SPEC[:SECTION]``.
+
+  Valid specs are:
+
+  .. omgspecs::
+
+  These are defined in :ghfile:`docs/conf.py`.
+
+  Valid sections can be named one of two ways:
+
+  - Section that start with section numbers, such as ``2.2.2``.
+    This is based on the start of the full name of the section in the table of contents.
+  - All others can be linked using the section title, either part or whole, such as ``Anex B`` or ``Annex B - Syntax for Queries and Filters``.
+    This can be used to link to sections that don't have section numbers, but can be ambiguous, so should be most or all of the title.
+
+  See :doc:`here <omg_spec_links>` for all the possible sections.
 
 CMake Domain
 ============

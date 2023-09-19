@@ -484,7 +484,7 @@ Domain Governance Document
     Sect<14.6>
 
 The signed governance document is used by the DDS Security built-in access control plugin in order to determine both per-domain and per-topic security configuration options for specific domains.
-For full details regarding the content of the governance document, see the OMG DDS Security specification section 9.4.1.2
+For full details regarding the content of the governance document, see :omgspec:`sec:9.4.1.2`.
 
 .. _dds_security--global-governance-model:
 
@@ -726,7 +726,7 @@ Participant Permissions Document
     Sect<14.7>
 
 The signed permissions document is used by the DDS Security built-in access control plugin in order to determine participant permissions to join domains and to create endpoints for reading, writing, and relaying domain data.
-For full details regarding the content of the permissions document, see the OMG DDS Security specification section 9.4.1.3.
+For full details regarding the content of the permissions document, see :omgspec:`sec:9.4.1.3`.
 
 .. _dds_security--key-permissions-elements:
 
@@ -967,7 +967,7 @@ The following DDS Security features are not implemented in OpenDDS.
 
 #. Relay as a permissions "action" (Publish and Subscribe are supported)
 
-#. Legacy matching behavior of permissions based on Partition QoS (9.4.1.3.2.3.1.4 in spec)
+#. :omgspec:`Legacy matching behavior of permissions based on Partition QoS <sec:9.4.1.3.2.3.1.4>`
 
 #. 128-bit AES keys (256-bit is supported)
 

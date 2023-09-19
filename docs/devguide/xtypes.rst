@@ -482,7 +482,7 @@ Type Compatibility
 When a reader/writer match is happening, type consistency enforcement checks that the two types are compatible according to the type objects if they are available.
 This check will not happen if OpenDDS has been :ref:`configured not to generate or use type objects <xtypes--representing-types-with-typeobject-and-dynamictype>` or if the remote DDS doesn't support type objects.
 The full type object compatibility check is too detailed to reproduce here.
-It can be found in section 7.2.4 of the XTypes 1.3 specification.
+It can be found in :omgspec:`xtypes:7.2.4`.
 In general though two topic types and their nested types are compatible if:
 
 * Extensibilities of shared types match
@@ -1295,10 +1295,10 @@ Annotations
     Sect<16.8.2>
 
 IDL4 defines many standardized annotations and XTypes uses some of them.
-The Annotations recognized by XTypes are in Table 21 in XTypes 1.3.
+The Annotations recognized by XTypes are in Table 21 in :omgspec:`xtypes:7.3.1.2.2 Using Built-in Annotations`.
 Of those listed in that table, the following are not supported in OpenDDS.
 They are listed in groups defined by the rows of that table.
-Some annotations in that table, and not listed here, can only be used with new capabilities of the Type System (:ref:`xtypes--type-system`).
+Some annotations in that table, and not listed here, can only be used with new capabilities of the :ref:`xtypes--type-system`.
 
 * Struct members
 
