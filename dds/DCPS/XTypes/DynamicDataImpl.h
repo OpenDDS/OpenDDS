@@ -279,23 +279,23 @@ private:
   void set_backing_store(DynamicDataXcdrReadImpl* xcdr_store);
 
   // Wrappers for reading different types from the backing store
-  bool get_value_from_backing_store(ACE_OutputCDR::from_int8& value, DDS::MemberId id, bool cache) const;
-  bool get_value_from_backing_store(ACE_OutputCDR::from_uint8& value, DDS::MemberId id, bool cache) const;
-  bool get_value_from_backing_store(CORBA::Short& value, DDS::MemberId id, bool cache) const;
-  bool get_value_from_backing_store(CORBA::UShort& value, DDS::MemberId id, bool cache) const;
-  bool get_value_from_backing_store(CORBA::Long& value, DDS::MemberId id, bool cache) const;
-  bool get_value_from_backing_store(CORBA::ULong& value, DDS::MemberId id, bool cache) const;
-  bool get_value_from_backing_store(CORBA::LongLong& value, DDS::MemberId id, bool cache) const;
-  bool get_value_from_backing_store(CORBA::ULongLong& value, DDS::MemberId id, bool cache) const;
-  bool get_value_from_backing_store(CORBA::Float& value, DDS::MemberId id, bool cache) const;
-  bool get_value_from_backing_store(CORBA::Double& value, DDS::MemberId id, bool cache) const;
-  bool get_value_from_backing_store(CORBA::LongDouble& value, DDS::MemberId id, bool cache) const;
-  bool get_value_from_backing_store(ACE_OutputCDR::from_octet& value, DDS::MemberId id, bool cache) const;
-  bool get_value_from_backing_store(char*& value, DDS::MemberId id, bool cache) const;
-  bool get_value_from_backing_store(CORBA::WChar*& value, DDS::MemberId id, bool cache) const;
-  bool get_value_from_backing_store(ACE_OutputCDR::from_char& value, DDS::MemberId id, bool cache) const;
-  bool get_value_from_backing_store(ACE_OutputCDR::from_wchar& value, DDS::MemberId id, bool cache) const;
-  bool get_value_from_backing_store(ACE_OutputCDR::from_boolean& value, DDS::MemberId id, bool cache) const;
+  bool get_value_from_backing_store(ACE_OutputCDR::from_int8& value, DDS::MemberId id) const;
+  bool get_value_from_backing_store(ACE_OutputCDR::from_uint8& value, DDS::MemberId id) const;
+  bool get_value_from_backing_store(CORBA::Short& value, DDS::MemberId id) const;
+  bool get_value_from_backing_store(CORBA::UShort& value, DDS::MemberId id) const;
+  bool get_value_from_backing_store(CORBA::Long& value, DDS::MemberId id) const;
+  bool get_value_from_backing_store(CORBA::ULong& value, DDS::MemberId id) const;
+  bool get_value_from_backing_store(CORBA::LongLong& value, DDS::MemberId id) const;
+  bool get_value_from_backing_store(CORBA::ULongLong& value, DDS::MemberId id) const;
+  bool get_value_from_backing_store(CORBA::Float& value, DDS::MemberId id) const;
+  bool get_value_from_backing_store(CORBA::Double& value, DDS::MemberId id) const;
+  bool get_value_from_backing_store(CORBA::LongDouble& value, DDS::MemberId id) const;
+  bool get_value_from_backing_store(ACE_OutputCDR::from_octet& value, DDS::MemberId id) const;
+  bool get_value_from_backing_store(char*& value, DDS::MemberId id) const;
+  bool get_value_from_backing_store(CORBA::WChar*& value, DDS::MemberId id) const;
+  bool get_value_from_backing_store(ACE_OutputCDR::from_char& value, DDS::MemberId id) const;
+  bool get_value_from_backing_store(ACE_OutputCDR::from_wchar& value, DDS::MemberId id) const;
+  bool get_value_from_backing_store(ACE_OutputCDR::from_boolean& value, DDS::MemberId id) const;
 
   /// Read a basic member from a containing type
   template<typename ValueType>
@@ -305,7 +305,7 @@ private:
   bool read_basic_in_complex_map(ValueType& value, DDS::MemberId id);
 
   template<typename ValueType>
-  bool read_basic_member(ValueType& value, DDS::MemberId id, bool do_cache = true);
+  bool read_basic_member(ValueType& value, DDS::MemberId id);
 
   template<typename ValueType>
   bool get_value_from_self(ValueType& value, DDS::MemberId id);
@@ -351,6 +351,9 @@ private:
 
   template<typename MemberType>
   bool cast_to_discriminator_value(CORBA::Long& disc_value, const MemberType& value) const;
+
+  bool set_union_discriminator_helper(DDS::DynamicType_var disc_type, CORBA::Long disc_val,
+                                      const char* func_name) const;
 
   template<TypeKind MemberTypeKind, typename MemberType>
   bool set_value_to_union(DDS::MemberId id, const MemberType& value,
@@ -1024,6 +1027,7 @@ private:
                                  DCPS::Sample::Extent ext) const;
   bool serialize_structure(DCPS::Serializer& ser, DCPS::Sample::Extent) const;
 
+  bool has_discriminator_value(const_single_iterator& single_it, const_complex_iterator& complex_it) const;
   bool get_discriminator_value(CORBA::Long& value, const_single_iterator single_it,
     const_complex_iterator complex_it, const DDS::DynamicType_var& disc_type) const;
   bool serialized_size_discriminator_member_xcdr2(const DCPS::Encoding& encoding, size_t& size,

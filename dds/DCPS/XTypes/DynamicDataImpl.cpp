@@ -1403,9 +1403,6 @@ DDS::MemberId DynamicDataImpl::find_selected_member() const
     }
   }
 
-  // TODO(sonndinh): Check if the backing store has one.
-
-
   // There was no selected member.
   return MEMBER_ID_INVALID;
 }
@@ -1536,7 +1533,8 @@ bool DynamicDataImpl::has_discriminator_value(const_single_iterator& single_it,
   if (single_it != container_.single_map_.end() || complex_it != container_.complex_map_.end()) {
     return true;
   }
-  // A backing store must have valid data (for union in this case).
+  // A backing store must have valid data (for union in this case), meaning
+  // it must have at least data for discriminator.
   return backing_store_ ? true : false;
 }
 
@@ -1551,6 +1549,48 @@ bool DynamicDataImpl::get_discriminator_value(const_single_iterator& single_it,
     return get_discriminator_value(value, single_it, complex_it, disc_type);
   }
   return read_disc_from_backing_store(value, DISCRIMINATOR_ID, mmeber_type);
+}
+
+bool DynamicDataImpl::set_union_discriminator_helper(DDS::DynamicType_var disc_type,
+                                                     CORBA::Long new_disc_value,
+                                                     const char* func_name) const
+{
+  const_single_iterator single_it;
+  const_complex_iterator complex_it;
+  const bool has_disc = has_discriminator_value(single_it, complex_it);
+  bool has_existing_branch = false;
+  if (has_disc) {
+    CORBA::Long existing_disc;
+    if (!get_discriminator_value(single_it, complex_it, existing_disc, disc_type)) {
+      return false;
+    }
+    DDS::MemberDescriptor_var existing_md;
+    if (get_selected_union_branch(existing_disc, has_existing_branch, existing_md) != DDS::RETCODE_OK) {
+      return false;
+    }
+    if (has_existing_branch && !validate_discriminator(new_disc_value, existing_md)) {
+      if (log_level >= LogLevel::Notice) {
+        ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicDataImpl::%C:"
+                   " Discriminator value %d does not select the activated branch (ID %u)\n",
+                   func_name, new_disc_value, existing_md->id()));
+      }
+      return false;
+    }
+  }
+
+  // In case the union has implicit default member and the input discriminator value
+  // selects that implicit default member, store the discriminator value. The semantics
+  // of this is similar to the _default() method of the IDL-to-C++ mapping for union.
+  const set_disc_implicit_default = !has_disc || !has_existing_branch;
+  if (set_disc_implicit_default && !discriminator_selects_no_member(new_disc_value)) {
+    if (log_level >= LogLevel::Notice) {
+      ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicDataImpl::%C:"
+                 " Can't directly set a discriminator that selects a member."
+                 " Activate the member first!\n", func_name));
+    }
+    return false;
+  }
+  return true;
 }
 
 // With backing store, data for union (discriminator and selected branch) can
@@ -1612,39 +1652,7 @@ bool DynamicDataImpl::set_value_to_union(DDS::MemberId id, const MemberType& val
       return false;
     }
 
-    const_single_iterator single_it;
-    const_complex_iterator complex_it;
-    const bool has_disc = has_discriminator_value(single_it, complex_it);
-    bool has_existing_branch = false;
-    if (has_disc) {
-      CORBA::Long existing_disc;
-      if (!get_discriminator_value(single_it, complex_it, existing_disc, member_type)) {
-        return false;
-      }
-      DDS::MemberDescriptor_var existing_md;
-      if (get_selected_union_branch(current_disc, has_existing_branch, existing_md) != DDS::RETCODE_OK) {
-        return false;
-      }
-      if (has_existing_branch && !validate_discriminator(disc_value, existing_md)) {
-        if (log_level >= LogLevel::Notice) {
-          ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicDataImpl::set_value_to_union:"
-                     " Discriminator value %d does not select the activated branch (ID %u)\n",
-                     disc_value, existing_md->id()));
-        }
-        return false;
-      }
-    }
-
-    // In case the union has implicit default member and the input discriminator value
-    // selects that implicit default member, store the discriminator value. The semantics
-    // of this is similar to the _default() method of the IDL-to-C++ mapping for union.
-    const set_disc_implicit_default = !has_disc || !has_existing_branch;
-    if (set_disc_implicit_default && !discriminator_selects_no_member(disc_value)) {
-      if (log_level >= LogLevel::Notice) {
-        ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicDataImpl::set_value_to_union:"
-                   " Can't directly set a discriminator that selects a member."
-                   " Activate the member first!\n"));
-      }
+    if (!set_union_discriminator_helper(member_type, disc_value, "set_value_to_union")) {
       return false;
     }
     return insert_single(id, value);
@@ -2227,36 +2235,10 @@ bool DynamicDataImpl::set_complex_to_union(DDS::MemberId id, DDS::DynamicData_va
       return false;
     }
 
-    const DDS::MemberId selected_id = find_selected_member();
-    if (selected_id != MEMBER_ID_INVALID) {
-      DDS::DynamicTypeMember_var selected_member;
-      if (type_->get_member(selected_member, selected_id) != DDS::RETCODE_OK) {
-        return false;
-      }
-      DDS::MemberDescriptor_var selected_md;
-      if (selected_member->get_descriptor(selected_md) != DDS::RETCODE_OK) {
-        return false;
-      }
-      if (!validate_discriminator(disc_val, selected_md)) {
-        if (log_level >= LogLevel::Notice) {
-          ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicDataImpl::set_complex_to_union:"
-                     " Discriminator value %d does not select the activated member (ID %u)\n",
-                     disc_val, selected_id));
-        }
-        return false;
-      }
-      return insert_complex(id, value);
-    } else {
-      if (discriminator_selects_no_member(disc_val)) {
-        return insert_complex(id, value);
-      }
-      if (log_level >= LogLevel::Notice) {
-        ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicDataImpl::set_complex_to_union:"
-                   " Can't directly set a discriminator that selects a member."
-                   " Activate the member first!\n"));
-      }
+    if (!set_union_discriminator_helper(disc_type, disc_val, "set_complex_to_union")) {
       return false;
     }
+    return insert_complex(id, value);
   }
 
   // Activate a member
@@ -2800,11 +2782,11 @@ bool DynamicDataImpl::read_basic_in_complex_map(ValueType& value, DDS::MemberId 
 }
 
 template<typename ValueType>
-bool DynamicDataImpl::read_basic_member(ValueType& value, DDS::MemberId id, bool do_cache)
+bool DynamicDataImpl::read_basic_member(ValueType& value, DDS::MemberId id)
 {
   return read_basic_in_single_map(value, id)
     || read_basic_in_complex_map(value, id)
-    || get_value_from_backing_store(value, id, do_cache);
+    || get_value_from_backing_store(value, id);
 }
 
 void DynamicDataImpl::set_backing_store(DynamicDataXcdrReadImpl* xcdr_store)
@@ -2814,111 +2796,111 @@ void DynamicDataImpl::set_backing_store(DynamicDataXcdrReadImpl* xcdr_store)
 }
 
 bool DynamicDataImpl::get_value_from_backing_store(ACE_OutputCDR::from_int8& value,
-                                                   DDS::MemberId id, bool cache) const
+                                                   DDS::MemberId id) const
 {
   return backing_store_ && backing_store_->get_int8_value(value.val_, id) == DDS::RETCODE_OK
-    && (cache ? insert_single(id, value) : true);
+    && insert_single(id, value);
 }
 
 bool DynamicDataImpl::get_value_from_backing_store(ACE_OutputCDR::from_uint8& value,
-                                                   DDS::MemberId id, bool cache) const
+                                                   DDS::MemberId id) const
 {
   return backing_store_ && backing_store_->get_uint8_value(value.val_, id) == DDS::RETCODE_OK
-    && (cache ? insert_single(id, value) : true);
+    && insert_single(id, value);
 }
 
-bool DynamicDataImpl::get_value_from_backing_store(CORBA::Short& value, DDS::MemberId id, bool cache) const
+bool DynamicDataImpl::get_value_from_backing_store(CORBA::Short& value, DDS::MemberId id) const
 {
   return backing_store_ && backing_store_->get_int16_value(value, id) == DDS::RETCODE_OK
-    && (cache ? insert_single(id, value) : true);
+    && insert_single(id, value);
 }
 
-bool DynamicDataImpl::get_value_from_backing_store(CORBA::UShort& value, DDS::MemberId id, bool cache) const
+bool DynamicDataImpl::get_value_from_backing_store(CORBA::UShort& value, DDS::MemberId id) const
 {
   return backing_store_ && backing_store_->get_uint16_value(value, id) == DDS::RETCODE_OK
-    && (cache ? insert_single(id, value) : true);
+    && insert_single(id, value);
 }
 
-bool DynamicDataImpl::get_value_from_backing_store(CORBA::Long& value, DDS::MemberId id, bool cache) const
+bool DynamicDataImpl::get_value_from_backing_store(CORBA::Long& value, DDS::MemberId id) const
 {
   return backing_store_ && backing_store_->get_int32_value(value, id) == DDS::RETCODE_OK
-    && (cache ? insert_single(id, value) : true);
+    && insert_single(id, value);
 }
 
-bool DynamicDataImpl::get_value_from_backing_store(CORBA::ULong& value, DDS::MemberId id, bool cache) const
+bool DynamicDataImpl::get_value_from_backing_store(CORBA::ULong& value, DDS::MemberId id) const
 {
   return backing_store_ && backing_store_->get_uint32_value(value, id) == DDS::RETCODE_OK
-    && (cache ? insert_single(id, value) : true);
+    && insert_single(id, value);
 }
 
-bool DynamicDataImpl::get_value_from_backing_store(CORBA::LongLong& value, DDS::MemberId id, bool cache) const
+bool DynamicDataImpl::get_value_from_backing_store(CORBA::LongLong& value, DDS::MemberId id) const
 {
   return backing_store_ && backing_store_->get_int64_value(value, id) == DDS::RETCODE_OK
-    && (cache ? insert_single(id, value) : true);
+    && insert_single(id, value);
 }
 
-bool DynamicDataImpl::get_value_from_backing_store(CORBA::ULongLong& value, DDS::MemberId id, bool cache) const
+bool DynamicDataImpl::get_value_from_backing_store(CORBA::ULongLong& value, DDS::MemberId id) const
 {
   return backing_store_ && backing_store_->get_uint64_value(value, id) == DDS::RETCODE_OK
-    && (cache ? insert_single(id, value) : true);
+    && insert_single(id, value);
 }
 
-bool DynamicDataImpl::get_value_from_backing_store(CORBA::Float& value, DDS::MemberId id, bool cache) const
+bool DynamicDataImpl::get_value_from_backing_store(CORBA::Float& value, DDS::MemberId id) const
 {
   return backing_store_ && backing_store_->get_float32_value(value, id) == DDS::RETCODE_OK
-    && (cache ? insert_single(id, value) : true);
+    && insert_single(id, value);
 }
 
-bool DynamicDataImpl::get_value_from_backing_store(CORBA::Double& value, DDS::MemberId id, bool cache) const
+bool DynamicDataImpl::get_value_from_backing_store(CORBA::Double& value, DDS::MemberId id) const
 {
   return backing_store_ && backing_store_->get_float64_value(value, id) == DDS::RETCODE_OK
-    && (cache ? insert_single(id, value) : true);
+    && insert_single(id, value);
 }
 
-bool DynamicDataImpl::get_value_from_backing_store(CORBA::LongDouble& value, DDS::MemberId id, bool cache) const
+bool DynamicDataImpl::get_value_from_backing_store(CORBA::LongDouble& value, DDS::MemberId id) const
 {
   return backing_store_ && backing_store_->get_float128_value(value, id) == DDS::RETCODE_OK
-    && (cache ? insert_single(id, value) : true);
+    && insert_single(id, value);
 }
 
 bool DynamicDataImpl::get_value_from_backing_store(ACE_OutputCDR::from_octet& value,
-                                                   DDS::MemberId id, bool cache) const
+                                                   DDS::MemberId id) const
 {
   return backing_store_ && backing_store_->get_byte_value(value.val_, id) == DDS::RETCODE_OK
-    && (cache ? insert_single(id, value) : true);
+    && insert_single(id, value);
 }
 
-bool DynamicDataImpl::get_value_from_backing_store(char*& value, DDS::MemberId id, bool cache) const
+bool DynamicDataImpl::get_value_from_backing_store(char*& value, DDS::MemberId id) const
 {
   return backing_store_ && backing_store_->get_string_value(value, id) == DDS::RETCODE_OK
-    && (cache ? insert_single(id, value) : true);
+    && insert_single(id, value);
 }
 
-bool DynamicDataImpl::get_value_from_backing_store(CORBA::WChar*& value, DDS::MemberId id, bool cache) const
+bool DynamicDataImpl::get_value_from_backing_store(CORBA::WChar*& value, DDS::MemberId id) const
 {
   return backing_store_ && backing_store_->get_wstring_value(value, id) == DDS::RETCODE_OK
-    && (cache ? insert_single(id, value) : true);
+    && insert_single(id, value);
 }
 
 bool DynamicDataImpl::get_value_from_backing_store(ACE_OutputCDR::from_char& value,
-                                                   DDS::MemberId id, bool cache) const
+                                                   DDS::MemberId id) const
 {
   return backing_store_ && backing_store_->get_char8_value(value.val_, id) == DDS::RETCODE_OK
-    && (cache ? insert_single(id, value) : true);
+    && insert_single(id, value);
 }
 
 bool DynamicDataImpl::get_value_from_backing_store(ACE_OutputCDR::from_wchar& value,
-                                                   DDS::MemberId id, bool cache) const
+                                                   DDS::MemberId id) const
 {
   return backing_store_ && backing_store_->get_char16_value(value.val_, id) == DDS::RETCODE_OK
-    && (cache ? insert_single(id, value) : true);
+    && insert_single(id, value);
 }
 
 bool DynamicDataImpl::get_value_from_backing_store(ACE_OutputCDR::from_boolean& value,
-                                                   DDS::MemberId id, bool cache) const
+                                                   DDS::MemberId id) const
 {
   return backing_store_ && backing_store_->get_boolean_value(value.val_, id) == DDS::RETCODE_OK
-    && (cache ? insert_single(id, value) : true);
+    && insert_single(id, value);
 }
 
 template<typename ValueType>
@@ -3050,7 +3032,7 @@ bool DynamicDataImpl::get_value_from_union(ValueType& value, DDS::MemberId id)
   }
 
   // Return the member if the container or the backing store has it.
-  if (read_basic_member(value, id, false)) {
+  if (read_basic_member(value, id)) {
     return true;
   }
 
@@ -3081,11 +3063,9 @@ bool DynamicDataImpl::get_value_from_union(ValueType& value, DDS::MemberId id)
       }
     }
   } else {
-    const_single_iterator single_it = container_.single_map_.find(DISCRIMINATOR_ID);
-    const_complex_iterator complex_it = container_.complex_map_.find(DISCRIMINATOR_ID);
-    const bool has_disc = single_it != container_.single_map_.end() ||
-      complex_it != container_.complex_map_.end();
-    if (has_disc) {
+    const_single_iterator single_it;
+    const_complex_iterator complex_it;
+    if (has_discriminator_value(single_it, complex_it)) {
       if (log_level >= LogLevel::Notice) {
         ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicDataImpl::get_value_from_union:"
                    " Branch Id %u is not the active branch in the union\n", id));
@@ -3840,7 +3820,13 @@ bool DynamicDataImpl::get_complex_from_aggregated(DDS::DynamicData_var& value, D
 bool DynamicDataImpl::set_member_backing_store(DynamicDataImpl* member_ddi, DDS::MemberId id)
 {
   DDS::DynamicData_var member_dd;
-  if (backing_store_->get_complex_value(member_dd, id) != DDS::RETCODE_OK) {
+  const DDS::ReturnCode rc = backing_store_->get_complex_value(member_dd, id);
+  if (rc != DDS::RETCODE_OK) {
+    if (log_level >= LogLevel::Notice) {
+      ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicDataImpl::set_member_backing_store:"
+                 " Get complex value for member ID: %u failed: %C\n",
+                 id, retcode_to_string(rc)));
+    }
     return false;
   }
   DynamicDataXcdrReadImpl* member_store = dynamic_cast<DynamicDataXcdrReadImpl*>(member_dd.in());
@@ -3938,19 +3924,20 @@ bool DynamicDataImpl::get_complex_from_union(DDS::DynamicData_ptr& value, DDS::M
     return true;
   }
 
+  // Cases where the requested member is not found in the maps.
   if (backing_store_) {
-    // For simplicity, we're not caching the returned dynamic data of the requested
-    // member to the map. The reason is the maps always represent a valid state for
-    // union, so if we cache the discriminator, we also need to store the selected
-    // branch, if exists. Instead, a new instance is returned if user calls this again.
     DynamicDataImpl* ddi = dynamic_cast<DynamicDataImpl*>(dd_var.in());
     if (!ddi) {
       return false;
     }
-    if (!set_member_backing_store(ddi, id) && id == DISCRIMINATOR_ID) {
-      // Discriminator should always appear.
+    if (!set_member_backing_store(ddi, id)) {
+      if (log_level >= LogLevel::Notice) {
+        ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicDataImpl::get_complex_from_union:"
+                   " Set backing store for member ID %u failed\n", id));
+      }
       return false;
     }
+    insert_complex(id, dd_var);
   } else {
     // Return default value for the requested member.
     if (id == DISCRIMINATOR_ID) {
@@ -3980,11 +3967,9 @@ bool DynamicDataImpl::get_complex_from_union(DDS::DynamicData_ptr& value, DDS::M
         }
       }
     } else {
-      const_single_iterator single_it = container_.single_map_.find(DISCRIMINATOR_ID);
-      const_complex_iterator complex_it = container_.complex_map_.find(DISCRIMINATOR_ID);
-      const bool has_disc = single_it != container_.single_map_.end() ||
-        complex_it != container_.complex_map_.end();
-      if (has_disc) {
+      const_single_iterator single_it;
+      const_complex_iterator complex_it;
+      if (has_discriminator_value(single_it, complex_it)) {
         if (log_level >= LogLevel::Notice) {
           ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicDataImpl::get_complex_from_union:"
                      " Branch Id %u is not the active branch in the union\n", id));
@@ -3999,10 +3984,7 @@ bool DynamicDataImpl::get_complex_from_union(DDS::DynamicData_ptr& value, DDS::M
       if (dtm->get_descriptor(md) != DDS::RETCODE_OK) {
         return false;
       }
-      if (!insert_valid_discriminator(md)) {
-        return false;
-      }
-      insert_complex(id, dd_var);
+      return insert_valid_discriminator(md) && insert_complex(id, dd_var);
     }
   }
 
@@ -7423,9 +7405,7 @@ bool DynamicDataImpl::serialize_single_aggregated_member_xcdr2(DCPS::Serializer&
   return serialize_single_value(ser, it->second);
 }
 
-// Serialize a member of an aggregated type whose value must be represented by a DynamicData
-// object. However, the data for the member is missing from the complex map. So default value
-// of the corresponding type is used for serialization.
+// Serialized size of the default value of a member of an aggregated type.
 bool DynamicDataImpl::serialized_size_complex_aggregated_member_xcdr2_default(
   const DCPS::Encoding& encoding, size_t& size, const DDS::DynamicType_var& member_type,
   bool optional, DDS::ExtensibilityKind extensibility, size_t& mutable_running_total,
@@ -8377,20 +8357,196 @@ bool DynamicDataImpl::serialize_discriminator_member_xcdr2(
   return false;
 }
 
+// Generic serialization functions for DynamicData.
+bool DynamicDataImpl::serialized_size_dynamic_data(DDS::DynamicData_ptr data,
+                                                   const DCPS::Encoding& encoding, size_t& size) const
+{
+  const DDS::DynamicType_var type = data->type();
+  const DDS::DynamicType_var base_type = get_base_type(type);
+  switch (base_type->get_kind()) {
+  case TK_STRUCTURE:
+  case TK_UNION:
+    return serialized_size_dynamic_data_members(data, encoding, size);
+  }
+  return false;
+}
+
+// Only called for aggregated types (struct and union).
+bool DynamicDataImpl::serialized_size_dynamic_data_members(DDS::DynamicData_ptr data,
+  const DCPS::Encoding& encoding, size_t& size) const
+{
+  const DDS::DynamicType_var type = data->type();
+  const DDS::DynamicType_var base_type = get_base_type(type);
+
+  for (CORBA::ULong i = 0; i < data->get_item_count(); ++i) {
+    const DDS::MemberId member_id = data->get_member_id_at_index(i);
+    if (member_id == MEMBER_ID_INVALID) {
+      if (log_level >= LogLevel::Notice) {
+        ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicDataImpl::serialized_size_dynamic_data_members:"
+                   " Failed to get member ID at index %u\n", i));
+      }
+      return false;
+    }
+    if (!serialized_size_dynamic_data_member(data, encoding, size, member_id)) {
+      if (log_level >= LogLevel:: Notice) {
+        ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicDataImpl::serialized_size_dynamic_data_members:"
+                   " Failed to compute serialized size for member ID %u\n", member_id));
+      }
+      return false;
+    }
+  }
+  return true;
+}
+
+// Serialized size of a member of an aggregated type. The dynamic data instance
+// of the containing type is passed.
+bool DynamicDataImpl::serialized_size_dynamic_data_member(DDS::DynamicData_ptr data,
+  const DCPS::Encoding& encoding, size_t& size, DDS::MemberId member_id) const
+{
+  const DDS::DynamicType_var type = data->type();
+
+  DDS::DynamicTypeMember_var dtm;
+  if (type->get_member(dtm, member_id) != DDS::RETCODE_OK) {
+    return false;
+  }
+  DDS::MemberDescriptor_var md;
+  if (dtm->get_descriptor(md) != DDS::RETCODE_OK) {
+    return false;
+  }
+  const DDS::DynamicType_var member_type = md->type();
+  const DDS::DynamicType_var member_base_type = get_base_type(member_type);
+  const TypeKind member_tk = member_base_type->get_kind();
+  TypeKind treat_as = member_tk;
+
+  // TODO(sonndinh): Add size of the member header.
+  if (member_tk == TK_ENUM && enum_bound(member_base_type, treat_as) != DDS::RETCODE_OK) {
+    return false;
+  }
+  if (member_tk == TK_BITMASK && bitmask_bound(member_base_type, treat_as) != DDS::RETCODE_OK) {
+    return false;
+  }
+
+  switch (treat_as) {
+  case TK_INT8:
+  case TK_UINT8:
+  case TK_INT16:
+  case TK_UINT16:
+  case TK_INT32:
+  case TK_UINT32:
+  case TK_INT64:
+  case TK_UINT64:
+  case TK_FLOAT32:
+  case TK_FLOAT64:
+  case TK_FLOAT128:
+  case TK_CHAR8:
+  case TK_CHAR16:
+  case TK_BYTE:
+  case TK_BOOLEAN:
+    return serialized_size_primitive_member(encoding, size, member_tk);
+  case TK_STRING8: {
+    CORBA::String_var str;
+    if (data->get_string_value(str, member_id) != DDS::RETCODE_OK) {
+      return false;
+    }
+    serialized_size_string_common(encoding, size, str);
+    return true;
+  }
+#ifdef DDS_HAS_WCHAR
+  case TK_STRING16: {
+    CORBA::WString_var wstr;
+    if (data->get_wstring_value(wstr, member_id) != DDS::RETCODE_OK) {
+      return false;
+    }
+    serialized_size_string_common(encoding, size, wstr);
+    return true;
+  }
+#endif
+  case TK_STRUCTURE:
+  case TK_UNION: {
+    DDS::DynamicData_var member_dd;
+    if (data->get_complex_value(member_dd, member_id) != DDS::RETCODE_OK) {
+      return false;
+    }
+    return serialized_size_dynamic_data(member_dd, encoding, size);
+  }
+  case TK_ARRAY:
+  case TK_SEQUENCE:
+  default:
+    return false;
+  }
+}
+
+// Serialized size of a member whose data is found in the backing store.
+bool DynamicDataImpl::serialized_size_member_backing_store_xcdr2(const DDS::MemberDescriptor_var& md,
+  const DCPS::Encoding& encoding, size_t& size) const
+{
+  if (!backing_store_) {
+    return false;
+  }
+
+  const DDS::DynamicType_var member_type = md->type();
+  const DDS::DynamicType_var type = get_base_type(member_type);
+  const DDS::MemberId id = md->id();
+  const TypeKind tk = type->get_kind();
+  TypeKind treat_as = tk;
+
+  if (tk == TK_ENUM && enum_bound(type, treat_as) != DDS::RETCODE_OK) {
+    return false;
+  }
+  if (tk == TK_BITMASK && bitmask_bound(type, treat_as) != DDS::RETCODE_OK) {
+    return false;
+  }
+
+  if (is_primitive(treat_as)) {
+    return serialized_size_primitive_member(encoding, size, treat_as);
+  }
+
+  switch (treat_as) {
+  case TK_STRING8: {
+    CORBA::String_var str;
+    if (backing_store_->get_string_value(str, id) != DDS::RETCODE_OK) {
+      return false;
+    }
+    serialized_size_string_common(encoding, size, str);
+    return true;
+  }
+#ifdef DDS_HAS_WCHAR
+  case TK_STRING16: {
+    CORBA::WString_var wstr;
+    if (backing_store_->get_wstring_value(wstr, id) != DDS::RETCODE_OK) {
+      return false;
+    }
+    serialized_size_string_common(encoding, size, wstr);
+    return true;
+  }
+#endif
+  case TK_STRUCTURE: {
+
+  }
+  case TK_UNION:
+  case TK_SEQUENCE:
+  case TK_ARRAY:
+  case TK_MAP:
+  default:
+    return false;
+  }
+}
+
 bool DynamicDataImpl::serialized_size_selected_member_xcdr2(
-  const DCPS::Encoding& encoding, size_t& size, DDS::MemberId selected_id,
+  const DCPS::Encoding& encoding, size_t& size, const DDS::MemberDescriptor_var& selected_md, //DDS::MemberId selected_id,
   DDS::ExtensibilityKind extensibility, size_t& mutable_running_total) const
 {
-  DDS::DynamicTypeMember_var selected_dtm;
-  if (type_->get_member(selected_dtm, selected_id) != DDS::RETCODE_OK) {
-    return false;
-  }
-  DDS::MemberDescriptor_var selected_md;
-  if (selected_dtm->get_descriptor(selected_md) != DDS::RETCODE_OK) {
-    return false;
-  }
+  // DDS::DynamicTypeMember_var selected_dtm;
+  // if (type_->get_member(selected_dtm, selected_id) != DDS::RETCODE_OK) {
+  //   return false;
+  // }
+  // DDS::MemberDescriptor_var selected_md;
+  // if (selected_dtm->get_descriptor(selected_md) != DDS::RETCODE_OK) {
+  //   return false;
+  // }
   DDS::DynamicType_var selected_type = get_base_type(selected_md->type());
   const bool optional = selected_md->is_optional();
+  const DDS::MemberId selected_id = selected_md->id();
 
   const_single_iterator single_it = container_.single_map_.find(selected_id);
   if (single_it != container_.single_map_.end()) {
@@ -8416,6 +8572,8 @@ bool DynamicDataImpl::serialized_size_selected_member_xcdr2(
                                                            extensibility, mutable_running_total,
                                                            DCPS::Sample::Full);
   }
+
+  // TODO(sonndinh): Serialized size of the member from the backing store.
   return false;
 }
 
@@ -8475,71 +8633,53 @@ bool DynamicDataImpl::serialized_size_union_xcdr2(const DCPS::Encoding& encoding
 
   size_t mutable_running_total = 0;
   DDS::DynamicType_var disc_type = get_base_type(type_desc_->discriminator_type());
+  if (!serialized_size_discriminator_member_xcdr2(encoding, size, disc_type,
+                                                  extensibility, mutable_running_total)) {
+    return false;
+  }
+
   if (ext != DCPS::Sample::Full) {
-    if (!serialized_size_discriminator_member_xcdr2(encoding, size, disc_type,
-                                                    extensibility, mutable_running_total)) {
-      return false;
-    }
     serialized_size_list_end_parameter_id(encoding, size, mutable_running_total);
     return true;
   }
 
-  // TODO(sonndinh): Update to find discriminator from the backing store.
-  const_single_iterator single_it = container_.single_map_.find(DISCRIMINATOR_ID);
-  const_complex_iterator complex_it = container_.complex_map_.find(DISCRIMINATOR_ID);
-  const bool has_disc = single_it != container_.single_map_.end() ||
-    complex_it != container_.complex_map_.end();
-  const DDS::MemberId selected_id = find_selected_member();
-
+  const_single_iterator single_it;
+  const_complex_iterator complex_it;
+  const bool has_disc = has_discriminator_value(single_it, complex_it);
   CORBA::Long disc_value;
   if (has_disc) {
-    if (!get_discriminator_value(disc_value, single_it, complex_it, disc_type)) {
+    if (!get_discriminator_value(single_it, complex_it, disc_value, disc_type)) {
       return false;
     }
   } else if (!set_default_discriminator_value(disc_value, disc_type)) {
     return false;
   }
 
-  if (selected_id == MEMBER_ID_INVALID) {
-    bool found_selected_member = false;
-    DDS::MemberDescriptor_var selected_md;
-    const DDS::ReturnCode_t rc =
-      get_selected_union_branch(disc_value, found_selected_member, selected_md);
-    if (rc != DDS::RETCODE_OK) {
-      if (log_level >= LogLevel::Notice) {
-        ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicDataImpl::serialized_size_union_xcdr2:"
-                   " get_selected_union_branch failed: %C\n", retcode_to_string(rc)));
-      }
-      return false;
+  bool select_member = false;
+  DDS::MemberDescriptor_var selected_md;
+  const DDS::ReturnCode_t rc =
+    get_selected_union_branch(disc_value, select_member, selected_md);
+  if (rc != DDS::RETCODE_OK) {
+    if (log_level >= LogLevel::Notice) {
+      ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicDataImpl::serialized_size_union_xcdr2:"
+                 " get_selected_union_branch failed: %C\n", retcode_to_string(rc)));
     }
-    if (!serialized_size_discriminator_member_xcdr2(encoding, size, disc_type,
-                                                    extensibility, mutable_running_total)) {
-      return false;
-    }
-    if (ext == DCPS::Sample::KeyOnly) {
-      return true;
-    }
-    if (found_selected_member) {
-      DDS::DynamicType_var selected_type = get_base_type(selected_md->type());
-      const bool optional = selected_md->is_optional();
-      if (!serialized_size_complex_aggregated_member_xcdr2_default(encoding, size, selected_type, optional,
-                                                                   extensibility, mutable_running_total,
-                                                                   DCPS::Sample::Full)) {
-        return false;
-      }
-    }
-    serialized_size_list_end_parameter_id(encoding, size, mutable_running_total);
-    return true;
-  }
-
-  if (!serialized_size_discriminator_member_xcdr2(encoding, size, disc_type,
-                                                  extensibility, mutable_running_total)) {
     return false;
   }
-  if (ext != DCPS::Sample::KeyOnly) {
-    if (!serialized_size_selected_member_xcdr2(
-        encoding, size, selected_id, extensibility, mutable_running_total)) {
-      return false;
+
+  if (select_member) {
+    DDS::DynamicType_var selected_type = get_base_type(selected_md->type());
+    const bool optional = selected_md->is_optional();
+    if (!has_disc) {
+      if (!serialized_size_complex_aggregated_member_xcdr2_default(encoding, size, selected_type,
+            optional, extensibility, mutable_running_total, DCPS::Sample::Full)) {
+        return false;
+      }
+    } else {
+      if (!serialized_size_selected_member_xcdr2(encoding, size, selected_md,
+                                                 extensibility, mutable_running_total)) {
+        return false;
+      }
     }
   }
   serialized_size_list_end_parameter_id(encoding, size, mutable_running_total);
