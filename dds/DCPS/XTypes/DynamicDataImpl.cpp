@@ -8357,7 +8357,11 @@ bool DynamicDataImpl::serialize_discriminator_member_xcdr2(
   return false;
 }
 
-// Generic serialization functions for DynamicData.
+/////////////////////////////////////////////////////////////////////////////////
+// These functions are to be moved out of the DynamicDataImpl class and will serve
+// as general serialization functions for any DynamicData implementation.
+
+// Serialized size of the top-level DynamicData instance.
 bool DynamicDataImpl::serialized_size_dynamic_data(DDS::DynamicData_ptr data,
                                                    const DCPS::Encoding& encoding, size_t& size) const
 {
@@ -8365,68 +8369,282 @@ bool DynamicDataImpl::serialized_size_dynamic_data(DDS::DynamicData_ptr data,
   const DDS::DynamicType_var base_type = get_base_type(type);
   switch (base_type->get_kind()) {
   case TK_STRUCTURE:
+    return serialized_size_dynamic_struct(data, encoding, size);
   case TK_UNION:
-    return serialized_size_dynamic_data_members(data, encoding, size);
+    return serialized_size_dynamic_union(data, encoding, size);
+  case TK_ARRAY:
+  case TK_SEQUENCE:
+    return serialized_size_dynamic_collection(data, encoding, size);
   }
   return false;
 }
 
-// Only called for aggregated types (struct and union).
-bool DynamicDataImpl::serialized_size_dynamic_data_members(DDS::DynamicData_ptr data,
+// TODO(sonndinh): May merge with get_type_descriptor from DynamicDataBase.
+bool DynamicDataImpl::get_type_descriptor(const DDS::DynamicType_var& type,
+                                          DDS::TypeDescriptor_var& td) const
+{
+  if (type->get_descriptor(td) != DDS::RETCODE_OK) {
+    if (log_level >= LogLevel::Notice) {
+      const CORBA::String_var type_name = type->get_name();
+      ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicDataImpl::get_type_descriptor:"
+                 " Failed to get type descriptor for type %C\n", type_name.in()));
+    }
+    return false;
+  }
+  return true;
+}
+
+bool DynamicDataImpl::serialized_size_dynamic_struct(DDS::DynamicData_ptr struct_data,
   const DCPS::Encoding& encoding, size_t& size) const
 {
-  const DDS::DynamicType_var type = data->type();
+  // TODO(sonndinh): Handle KeyOnly/NestedKeyOnly
+  const DDS::DynamicType_var type = struct_data->type();
   const DDS::DynamicType_var base_type = get_base_type(type);
+  DDS::TypeDescriptr_var td;
+  if (!get_type_descriptor(base_type, td)) {
+    return false;
+  }
 
-  for (CORBA::ULong i = 0; i < data->get_item_count(); ++i) {
-    const DDS::MemberId member_id = data->get_member_id_at_index(i);
-    if (member_id == MEMBER_ID_INVALID) {
-      if (log_level >= LogLevel::Notice) {
-        ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicDataImpl::serialized_size_dynamic_data_members:"
-                   " Failed to get member ID at index %u\n", i));
+  const DDS::ExtensibilityKind extensibility = td->extensibility_kind();
+  if (extensibility == DDS::APPENDABLE || extensibility == DDS::MUTABLE) {
+    serialized_size_delimiter(encoding, size);
+  }
+
+  size_t mutable_running_total = 0;
+  const CORBA::ULong member_count = base_type->get_member_count();
+  for (CORBA::ULong i = 0; i < member_count; ++i) {
+    DDS::DynamicTypeMember_var dtm;
+    if (base_type->get_member_by_index(dtm, i) != DDS::RETCODE_OK) {
+      return false;
+    }
+    DDS::MemberDescriptor_var md;
+    if (dtm->get_descriptor(md) != DDS::RETCODE_OK) {
+      return false;
+    }
+
+    // The serialization function for individual member must account for any header it has.
+    if (!serialized_size_dynamic_data_member(struct_data, encoding, size, md,
+                                             extensibility, mutable_running_total)) {
+      if (log_level >= LogLevel:: Notice) {
+        ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicDataImpl::serialized_size_dynamic_struct:"
+                   " Failed to compute serialized size for member ID %u\n", md->id()));
       }
       return false;
     }
-    if (!serialized_size_dynamic_data_member(data, encoding, size, member_id)) {
-      if (log_level >= LogLevel:: Notice) {
-        ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicDataImpl::serialized_size_dynamic_data_members:"
-                   " Failed to compute serialized size for member ID %u\n", member_id));
-      }
+  }
+
+  if (extensibility == DDS::MUTABLE) {
+    serialized_size_list_end_parameter_id(encoding, size, mutable_running_total);
+  }
+  return true;
+}
+
+bool DynamicDataImpl::get_discriminator_value(DDS::DynamicData_ptr union_data,
+  CORBA::Long& disc_val, const DDS::DynamicType_var& disc_type) const
+{
+  const TypeKind disc_tk = disc_type->get_kind();
+  TypeKind treat_as = disc_tk;
+  if (disc_tk == TK_ENUM && enum_bound(disc_type, treat_as) != DDS::RETCODE_OK) {
+    return false;
+  }
+
+  const DDS::MemberId id = DISCRIMINATOR_ID;
+  switch (treat_as) {
+  case TK_BOOLEAN: {
+    CORBA::Boolean value;
+    if (union_data->get_boolean_value(value, id) != DDS::RETCODE_OK) {
+      return false;
+    }
+    disc_val = static_cast<CORBA::Long>(value);
+    return true;
+  }
+  case TK_BYTE: {
+    CORBA::Octet value;
+    if (union_data->get_byte_value(value, id) != DDS::RETCODE_OK) {
+      return false;
+    }
+    disc_val = static_cast<CORBA::Long>(value);
+    return true;
+  }
+  case TK_CHAR8: {
+    CORBA::Char value;
+    if (union_data->get_char8_value(value, id) != DDS::RETCODE_OK) {
+      return false;
+    }
+    disc_val = static_cast<CORBA::Long>(value);
+    return true;
+  }
+  case TK_CHAR16: {
+    CORBA::WChar value;
+    if (union_data->get_char16_value(value, id) != DDS::RETCODE_OK) {
+      return false;
+    }
+    disc_val = static_cast<CORBA::Long>(value);
+    return true;
+  }
+  case TK_INT8: {
+    CORBA::Int8 value;
+    if (union_data->get_int8_value(value, id) != DDS::RETCODE_OK) {
+      return false;
+    }
+    disc_val = static_cast<CORBA::Long>(value);
+    return true;
+  }
+  case TK_UINT8: {
+    CORBA::UInt8 value;
+    if (union_data->get_uint8_value(value, id) != DDS::RETCODE_OK) {
+      return false;
+    }
+    disc_val = static_cast<CORBA::Long>(value);
+    return true;
+  }
+  case TK_INT16: {
+    CORBA::Short value;
+    if (union_data->get_int16_value(value, id) != DDS::RETCODE_OK) {
+      return false;
+    }
+    disc_val = value;
+    return true;
+  }
+  case TK_UINT16: {
+    CORBA::UShort value;
+    if (union_data->get_uint16_value(value, id) != DDS::RETCODE_OK) {
+      return false;
+    }
+    disc_val = static_cast<CORBA::Long>(value);
+    return true;
+  }
+  case TK_INT32:
+    return union_data->get_int32_value(disc_val, id) == DDS::RETCODE_OK;
+  case TK_UINT32: {
+    CORBA::ULong value;
+    if (union_data->get_uint32_value(value, id) != DDS::RETCODE_OK) {
+      return false;
+    }
+    disc_val = static_cast<CORBA::Long>(value);
+    return true;
+  }
+  case TK_INT64: {
+    CORBA::LongLong value;
+    if (union_data->get_int64_value(value, id) != DDS::RETCODE_OK) {
+      return false;
+    }
+    disc_val = static_cast<CORBA::Long>(value);
+    return true;
+  }
+  case TK_UINT64: {
+    CORBA::ULongLong value;
+    if (union_data->get_uint64_value(value, id) != DDS::RETCODE_OK) {
+      return false;
+    }
+    disc_val = static_cast<CORBA::Long>(value);
+    return true;
+  }
+  }
+  return false;
+}
+
+bool DynamicDataImpl::serialized_size_dynamic_union(DDS::DynamicData_ptr union_data,
+  const DCPS::Encoding& encoding, size_t& size) const
+{
+  // TODO(sonndinh): Handle KeyOnly/NestedKeyOnly
+  const DDS::DynamicType_var type = union_data->type();
+  const DDS::DynamicType_var base_type = get_base_type(type);
+  DDS::TypeDescriptor_var td;
+  if (!get_type_descriptor(base_type, td)) {
+    return false;
+  }
+
+  const DDS::ExtensibilityKind extensibility = td->extensibility_kind();
+  if (extensibility == DDS::APPENDABLE || extensibility == DDS::MUTABLE) {
+    serialized_size_delimiter(encoding, size);
+  }
+
+  size_t mutable_running_total = 0;
+  DDS::DynamicType_var disc_type = get_base_type(td->discriminator_type());
+  if (!serialized_size_discriminator_member_xcdr2(encoding, size, disc_type,
+                                                  extensibility, mutable_running_total)) {
+    return false;
+  }
+
+  CORBA::Long disc_val;
+  DDS::DynamicType_var disc_type = get_base_type(td->discriminator_type());
+  if (!get_discriminator_value(data, disc_val, disc_type)) {
+    return false;
+  }
+
+  bool has_branch = false;
+  DDS::MemberDescriptor_var selected_md;
+  if (get_selected_union_branch(disc_val, has_branch, selected_md) != DDS::RETCODE_OK) {
+    return false;
+  }
+
+  if (has_branch && !serialized_size_dynamic_data_member(union_data, encoding, size, selected_md,
+                                                         extensibility, mutable_running_total)) {
+    return false;
+  }
+
+  if (extensibility == DDS::MUTABLE) {
+    serialized_size_list_end_parameter_id(encoding, size, mutable_running_total);
+  }
+  return true;
+}
+
+bool DynamicDataImpl::serialized_size_dynamic_collection(DDS::DynamicData_ptr col_data,
+  const DCPS::Encoding& encoding, size_t& size) const
+{
+  const DDS::DynamicType_var type = col_data->type();
+  const DDS::DynamicType_var base_type = get_base_type(type);
+  DDS::TypeDescriptor_var td;
+  if (!get_type_descriptor(base_type, td)) {
+    return false;
+  }
+  DDS::DynamicType_var elem_type = get_base_type(td->element_type());
+  const TypeKind elem_tk = elem_type->get_kind();
+
+  // Dheader
+  if (!is_primitive(elem_tk)) {
+    serialized_size_delimiter(encoding, size);
+  }
+
+  const TypeKind col_tk = base_type->get_kind();
+  if (col_tk == TK_SEQUENCE) {
+    // For the sequence length.
+    primitive_serialized_size_ulong(encoding, size);
+  }
+
+  // When DynamicDataImpl supports get value sequence, we can serialize
+  // the whole sequence of basic types all at once.
+  const CORBA::ULong item_count = col_data->get_item_count();
+  for (CORBA::ULong i = 0; i < item_count; ++i) {
+    const DDS::MemberId elem_id = col_data->get_member_id_at_index(i);
+    if (elem_id == MEMBER_ID_INVALID) {
+      return false;
+    }
+    if (!serialized_size_dynamic_data_member_helper(col_data, encoding, size, elem_id, elem_type)) {
       return false;
     }
   }
   return true;
 }
 
-// Serialized size of a member of an aggregated type. The dynamic data instance
-// of the containing type is passed.
-bool DynamicDataImpl::serialized_size_dynamic_data_member(DDS::DynamicData_ptr data,
-  const DCPS::Encoding& encoding, size_t& size, DDS::MemberId member_id) const
+// Compute the serialized size of a member of struct, union, array, sequence.
+// Headers are not included.
+bool DynamicDataImpl::serialized_size_dynamic_data_member_helper(DDS::DynamicData_pr data,
+  const DCPS::Encoding& encoding, size_t& size, DDS::MemberId member_id,
+  const DDS::DynamicType_var& member_type) const
 {
-  const DDS::DynamicType_var type = data->type();
+  const TypeKind member_tk = member_type->get_kind();
+  TypeKind treat_member_as = member_tk;
 
-  DDS::DynamicTypeMember_var dtm;
-  if (type->get_member(dtm, member_id) != DDS::RETCODE_OK) {
+  if (member_tk == TK_ENUM && enum_bound(member_type, treat_member_as) != DDS::RETCODE_OK) {
     return false;
   }
-  DDS::MemberDescriptor_var md;
-  if (dtm->get_descriptor(md) != DDS::RETCODE_OK) {
-    return false;
-  }
-  const DDS::DynamicType_var member_type = md->type();
-  const DDS::DynamicType_var member_base_type = get_base_type(member_type);
-  const TypeKind member_tk = member_base_type->get_kind();
-  TypeKind treat_as = member_tk;
-
-  // TODO(sonndinh): Add size of the member header.
-  if (member_tk == TK_ENUM && enum_bound(member_base_type, treat_as) != DDS::RETCODE_OK) {
-    return false;
-  }
-  if (member_tk == TK_BITMASK && bitmask_bound(member_base_type, treat_as) != DDS::RETCODE_OK) {
+  if (member_tk == TK_BITMASK && bitmask_bound(member_type, treat_member_as) != DDS::RETCODE_OK) {
     return false;
   }
 
-  switch (treat_as) {
+  switch (treat_member_as) {
   case TK_INT8:
   case TK_UINT8:
   case TK_INT16:
@@ -8442,7 +8660,7 @@ bool DynamicDataImpl::serialized_size_dynamic_data_member(DDS::DynamicData_ptr d
   case TK_CHAR16:
   case TK_BYTE:
   case TK_BOOLEAN:
-    return serialized_size_primitive_member(encoding, size, member_tk);
+    return serialized_size_primitive_member(encoding, size, treat_member_as);
   case TK_STRING8: {
     CORBA::String_var str;
     if (data->get_string_value(str, member_id) != DDS::RETCODE_OK) {
@@ -8462,19 +8680,81 @@ bool DynamicDataImpl::serialized_size_dynamic_data_member(DDS::DynamicData_ptr d
   }
 #endif
   case TK_STRUCTURE:
-  case TK_UNION: {
-    DDS::DynamicData_var member_dd;
-    if (data->get_complex_value(member_dd, member_id) != DDS::RETCODE_OK) {
+  case TK_UNION:
+  case TK_ARRAY:
+  case TK_SEQUENCE: {
+    DDS::DynamicData_var member_data;
+    if (data->get_complex_value(member_data, member_id) != DDS::RETCODE_OK) {
       return false;
     }
-    return serialized_size_dynamic_data(member_dd, encoding, size);
+    return serialized_size_dynamic_data(member_data, encoding, size);
   }
+  default:
+    if (log_level >= LogLevel::Notice) {
+      ACE_ERROR((LM_ERROR, "(%P|%t) NOTICE: DynamicDataImpl::serialized_size_dynamic_data_member_helper:"
+                 " Unsupported member type %C\n", typekind_to_string(treat_member_as)));
+    }
+  }
+  return false;
+}
+
+// Serialized size of a member of an aggregated type.
+// Use the get interfaces of DynamicData to get the member data for serialization.
+// This assumes that the get API already handle try-construct (in case of reading from
+// a XCDR backing store) or returning default value (in case the member data is missing
+// from the internal container). So it's guaranteed that some data for each valid
+// member is available for serialization.
+bool DynamicDataImpl::serialized_size_dynamic_data_member(
+  DDS::DynamicData_ptr data, const DCPS::Encoding& encoding, size_t& size,
+  const DDS::MemberDescriptor_var& md, DDS::ExtensibilityKind extensibility,
+  size_t& mutable_running_total) const
+{
+  const DDS::MemberId member_id = md->id();
+  const DDS::DynamicType_var member_type = get_base_type(md->type());
+
+  // Member header
+  if (md->is_optional() && (extensibility == DDS::FINAL || extensibility == DDS::APPENDABLE)) {
+    primitive_serialized_size_boolean(encoding, size);
+  } else if (extensibility == DDS::MUTABLE) {
+    serialized_size_parameter_id(encoding, size, mutable_running_total);
+  }
+
+  // Member contents
+  return serialized_size_dynamic_data_member_helper(data, encoding, size, member_id, member_type);
+}
+
+bool DynamicDataImpl::serialize_dynamic_data(DCPS::Serializer& ser, DDS::DynamicData_ptr data) const
+{
+  const DDS::DynamicType_var type = data->type();
+  const DDS::DynamicType_var base_type = get_base_type(type);
+  switch (base_type->get_kind()) {
+  case TK_STRUCTURE:
+    return serialize_dynamic_struct(ser, data);
+  case TK_UNION:
+    return serialize_dynamic_union(ser, data);
   case TK_ARRAY:
   case TK_SEQUENCE:
-  default:
-    return false;
+    return serialize_dynamic_collection(ser, data);
   }
+  return false;
 }
+
+bool DynamicDataImpl::serialize_dynamic_struct(DCPS::Serializer& ser, DDS::DynamicData_ptr data) const
+{
+  // TODO(sonndinh)
+}
+
+bool DynamicDataImpl::serialize_dynamic_union(DCPS::Serializer& ser, DDS::DynamicData_ptr data) const
+{
+  // TODO(sonndinh)
+}
+
+bool DynamicDataImpl::serialize_dynamic_collection(DCPS::Serializer& ser, DDS::DynamicData_ptr data) const
+{
+  // TODO(sonndinh)
+}
+
+//////////////////////////////////////////////////////////////////////
 
 // Serialized size of a member whose data is found in the backing store.
 bool DynamicDataImpl::serialized_size_member_backing_store_xcdr2(const DDS::MemberDescriptor_var& md,
