@@ -39,7 +39,6 @@
 #include <dds/DdsDcpsGuidTypeSupportImpl.h>
 
 #include <ace/Reactor.h>
-#include <ace/Auto_Ptr.h>
 #include <ace/OS_NS_sys_time.h>
 
 #include <cstdio>

@@ -1,4 +1,4 @@
-project: dcps {
+project: dcps, dcps_tcp {
   after += OpenDDS_InfoRepoDiscovery
   libs  += OpenDDS_InfoRepoDiscovery
 }
