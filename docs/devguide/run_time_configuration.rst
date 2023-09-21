@@ -38,9 +38,7 @@ The configuration file for OpenDDS is a human-readable ini-style text file.
 
 .. _run_time_configuration--sections:
 
-**Configuration File Sections**
-
-.. list-table::
+.. list-table:: Configuration File Sections
    :header-rows: 1
 
    * - **Focus Area**
@@ -173,10 +171,6 @@ For example:
   subscriber -DCPSInfoRepo localhost:12345
 
 The following table summarizes the ``[common]`` configuration options:
-
-.. _run_time_configuration--reftable9:
-
-**Common Configuration Options**
 
 .. list-table::
    :header-rows: 1
@@ -362,7 +356,7 @@ The following table summarizes the ``[common]`` configuration options:
      - This setting is only available when OpenDDS is compiled with DDS Security enabled.
        If set to 1, enable DDS Security framework and built-in plugins.
        Each Domain Participant using security must be created with certain QoS policy values.
-       See :ref:`dds_security--dds-security`: DDS Security for more information.
+       See :ref:`dds_security`: DDS Security for more information.
 
      - ``0``
 
@@ -546,8 +540,7 @@ The ``DomainId`` property assigns the integer value of ``1`` needed by a DDS app
 Multiple domain instances can be identified in a single configuration file in this format.
 
 Once one or more domain instances are established, the discovery properties must be identified for that domain.
-The ``DiscoveryConfig`` property must either point to another section that holds the discovery configuration or specify one of the internal default values for discovery (e.g.
-``DEFAULT_REPO``, ``DEFAULT_RTPS``, or ``DEFAULT_STATIC``).
+The ``DiscoveryConfig`` property must either point to another section that holds the discovery configuration or specify one of the internal default values for discovery (e.g. ``DEFAULT_REPO``, ``DEFAULT_RTPS``, or ``DEFAULT_STATIC``).
 The instance name in our example is ``DiscoveryConfig1``.
 This instance name must be associated with a section type of either ``[repository]`` or ``[rtps_discovery]``.
 
@@ -581,7 +574,7 @@ For example, if an OpenDDS application assigns a domain ID of 3 to its participa
 
 The ``DCPSDefaultDiscovery`` property tells the application to assign any participant that doesn't have a domain id found in the configuration file to use a discovery type of ``DEFAULT_REPO`` which means "use a ``DCPSInfoRepo`` service"  and that ``DCPSInfoRepo`` service can be found at ``host3.mydomain.com:12345``.
 
-As shown in :ref:`Table 7-2 <run_time_configuration--reftable9>` the ``DCPSDefaultDiscovery`` property has three other values that can be used.
+As shown in :ref:`run_time_configuration--common-configuration-options` the ``DCPSDefaultDiscovery`` property has three other values that can be used.
 The ``DEFAULT_RTPS`` constant value informs participants that don't have a domain configuration to use RTPS discovery to find other participants.
 Similarly, the ``DEFAULT_STATIC`` constant value informs the participants that don't have a domain configuration to use static discovery to find other participants.
 
@@ -608,13 +601,9 @@ Here is an example:
 By adding the ``DCPSDefaultDiscovery`` property to the ``[common]`` section, any participant that hasn't been assigned to a domain id of ``1`` or ``2`` will use the configuration of ``DiscoveryConfig2``.
 For more explanation of a similar configuration for RTPS discovery see :ref:`run_time_configuration--configuring-for-ddsi-rtps-discovery`.
 
-Here are the available properties for the [domain] section.
+Here are the available properties for the ``[domain]`` section:
 
-.. _run_time_configuration--reftable10:
-
-**Table  Domain Section Configuration Properties**
-
-.. list-table::
+.. list-table:: Domain Section Configuration Properties
    :header-rows: 1
 
    * - Option
@@ -635,7 +624,7 @@ Here are the available properties for the [domain] section.
    * - ``DiscoveryConfig=config instance name``
 
      - A user-defined string that refers to the instance name of a ``[repository]`` or ``[rtps_discovery]`` section in the same configuration file or one of the internal default values (``DEFAULT_REPO``, ``DEFAULT_RTPS``, or ``DEFAULT_STATIC``).
-       (Also see the ``DCPSDefaultDiscovery`` property in :ref:`Table 7-2 <run_time_configuration--reftable9>`)
+       (Also see the ``DCPSDefaultDiscovery`` property in :ref:`run_time_configuration--common-configuration-options`)
 
    * - ``DefaultTransportConfig=config``
 
@@ -773,7 +762,10 @@ The DDS entities in a single OpenDDS process can be associated with multiple DCP
 The repository information and domain associations can be configured using a configuration file, or via application API.
 Internal defaults, command line arguments, and configuration file options will work as-is for existing applications that do not want to use multiple ``DCPSInfoRepo`` associations.
 
-See :ref:`Figure 7-1 <run_time_configuration--reffigure4>` for an example of a process that uses multiple ``DCPSInfoRepo`` repositories.
+The following is an example of a process that uses multiple ``DCPSInfoRepo`` repositories.
+
+.. image:: images/10000001000005B4000003E0BE5C08B1D30CA54A.png
+
 Processes ``A`` and ``B`` are typical application processes that have been configured to communicate with one another and discover one another in ``InfoRepo_1``.
 This is a simple use of basic discovery.
 However, an additional layer of context has been applied with the use of a specified domain (Domain ``1``).
@@ -785,18 +777,12 @@ This is Process ``E`` in our example.
 It contains two subscribers, one subscribing to publications from ``InfoRepo_1`` and the other subscribing to publications in ``InfoRepo_2``.
 What allows this configuration to work can be found in the ``configE.ini`` file.
 
-.. _run_time_configuration--reffigure4:
-
-.. image:: images/10000001000005B4000003E0BE5C08B1D30CA54A.png
-
-**Figure  Multiple DCPSInfoRepo Configuration**
-
 We will now look at the configuration file (referred to as ``configE.ini``) to demonstrate how Process ``E`` can communicate to both domains and separate ``DCPSInfoRepo`` services.
 For this example we will only show the discovery aspects of the configuration and not show transport content.
 
 .. code-block:: ini
+    :name: configE.ini
 
-    configE.ini
     [domain/1]
     DiscoveryConfig=DiscoveryConfig1
 
@@ -809,7 +795,7 @@ For this example we will only show the discovery aspects of the configuration an
     [repository/DiscoveryConfig2]
     RepositoryIor=host2.mydomain.com:12345
 
-When Process ``E`` in :ref:`Figure 7-1 <run_time_configuration--reffigure4>` reads in the above configuration it finds the occurrence of multiple domain sections.
+When Process ``E`` reads in the above configuration it finds the occurrence of multiple domain sections.
 As described in :ref:`run_time_configuration--domain-configuration` each domain has an instance integer and a property of ``DiscoveryConfig`` defined.
 
 For the first domain (``[domain/1]``), the ``DiscoveryConfig`` property is supplied with the user-defined name of ``DiscoveryConfig1`` value.
@@ -826,13 +812,9 @@ There may be any number of repository or domain sections within a single configu
 
 .. note:: Individual DCPSInfoRepos can be associated with multiple domains, however domains cannot be shared between multiple DCPSInfoRepos.
 
-Here are the valid properties for a ``[repository]`` section.
+Here are the valid properties for a ``[repository]`` section:
 
-.. _run_time_configuration--reftable11:
-
-**Table  Multiple repository configuration sections**
-
-.. list-table::
+.. list-table:: Multiple repository configuration sections
    :header-rows: 1
 
    * - Option
@@ -926,13 +908,11 @@ Some important implementation notes regarding DDSI-RTPS discovery in OpenDDS are
 #. OpenDDS's multicast transport (:ref:`run_time_configuration--ip-multicast-transport-configuration-options`) does not work with RTPS Discovery due to the way GUIDs are assigned (a warning will be issued if this is attempted).
 
 The OMG DDSI-RTPS specification details several properties that can be adjusted from their defaults that influence the behavior of DDSI-RTPS discovery.
-Those properties, along with options specific to OpenDDS's RTPS Discovery implementation, are listed in :ref:`Table 7-5 <run_time_configuration--reftable12>`.
+Those properties, along with options specific to OpenDDS's RTPS Discovery implementation, are listed below.
 
-.. _run_time_configuration--reftable12:
+.. _run_time_configuration--rtps-disc-config-options:
 
-**Table  RTPS Discovery Configuration Options**
-
-.. list-table::
+.. list-table:: RTPS Discovery Configuration Options
    :header-rows: 1
 
    * - Option
@@ -1415,10 +1395,10 @@ A domain participant learns about the existence of an endpoint through hints sup
 
 .. note:: Currently, static discovery can only be used for endpoints using the RTPS UDP transport.
 
-Static discovery introduces the following configuration file sections:  ``[topic/*]``,``[datawriterqos/*]``, ``[datareaderqos/*]``, ``[publisherqos/*]``, ``[subscriberqos/*]``, and ``[endpoint/*]``.
-The ``[topic/*]`` (:ref:`Table 7-6 <run_time_configuration--reftable13>`) section is used to introduce a topic.
-The ``[datawriterqos/*]`` (:ref:`Table 7-7 <run_time_configuration--reftable14>`), ``[datareaderqos/*]`` (:ref:`Table 7-8 <run_time_configuration--reftable15>`), ``[publisherqos/*]`` (:ref:`Table 7-9 <run_time_configuration--reftable16>`), and ``[subscriberqos/*]`` (:ref:`Table 7-10 <run_time_configuration--reftable17>`) sections are used to describe a QoS of the associated type.
-The ``[endpoint/*]`` (:ref:`Table 7-11 <run_time_configuration--reftable18>`) section describes a data reader or writer.
+Static discovery introduces the following configuration file sections:  ``[topic/*]``, ``[datawriterqos/*]``, ``[datareaderqos/*]``, ``[publisherqos/*]``, ``[subscriberqos/*]``, and ``[endpoint/*]``.
+The :ref:`topic <run_time_configuration--reftable13>` section is used to introduce a topic.
+The :ref:`datawriterqos <run_time_configuration--reftable14>`, :ref:`datareaderqos <run_time_configuration--reftable15>`, :ref:`publisherqos <run_time_configuration--reftable16>`, and :ref:`subscriberqos <run_time_configuration--reftable17>` sections are used to describe a QoS of the associated type.
+The :ref:`endpoint <run_time_configuration--reftable18>` section describes a data reader or writer.
 
 Data reader and writer objects must be identified by the user so that the static discovery mechanism can associate them with the correct ``[endpoint/*]`` section in the configuration file.
 This is done by setting the ``user_data`` of the ``DomainParticipantQos`` to an octet sequence of length 6.
@@ -1482,9 +1462,7 @@ The static discovery implementation also checks that the QoS of a data reader or
 
 .. _run_time_configuration--reftable13:
 
-**Table  [topic/*] Configuration Options**
-
-.. list-table::
+.. list-table:: [topic/\*] Configuration Options
    :header-rows: 1
 
    * - Option
@@ -1502,15 +1480,13 @@ The static discovery implementation also checks that the QoS of a data reader or
    * - ``type_name=string``
 
      - Identifier which uniquely defines the sample type.
-       This is typically a  CORBA interface repository type name.
+       This is typically a CORBA interface repository type name.
 
      - ``Required``
 
 .. _run_time_configuration--reftable14:
 
-**Table  [datawriterqos/*] Configuration Options**
-
-.. list-table::
+.. list-table:: [datawriterqos/\*] Configuration Options
    :header-rows: 1
 
    * - Option
@@ -1525,7 +1501,7 @@ The static discovery implementation also checks that the QoS of a data reader or
 
      - See :ref:`quality_of_service--durability`.
 
-     - See :ref:`Table 3-5 <quality_of_service--reftable6>`.
+     - See :ref:`DataWriter QoS <quality_of_service--reftable6>`.
 
    * - ``deadline.period.sec=[``
 
@@ -1533,7 +1509,7 @@ The static discovery implementation also checks that the QoS of a data reader or
 
      - See :ref:`quality_of_service--deadline`.
 
-     - See :ref:`Table 3-5 <quality_of_service--reftable6>`.
+     - See :ref:`DataWriter QoS <quality_of_service--reftable6>`.
 
    * - ``deadline.period.nanosec=[``
 
@@ -1541,7 +1517,7 @@ The static discovery implementation also checks that the QoS of a data reader or
 
      - See :ref:`quality_of_service--deadline`.
 
-     - See :ref:`Table 3-5 <quality_of_service--reftable6>`.
+     - See :ref:`DataWriter QoS <quality_of_service--reftable6>`.
 
    * - ``latency_budget.duration.sec=[``
 
@@ -1549,7 +1525,7 @@ The static discovery implementation also checks that the QoS of a data reader or
 
      - See :ref:`quality_of_service--latency-budget`.
 
-     - See :ref:`Table 3-5 <quality_of_service--reftable6>`.
+     - See :ref:`DataWriter QoS <quality_of_service--reftable6>`.
 
    * - ``latency_budget.duration.nanosec=[``
 
@@ -1557,7 +1533,7 @@ The static discovery implementation also checks that the QoS of a data reader or
 
      - See :ref:`quality_of_service--latency-budget`.
 
-     - See :ref:`Table 3-5 <quality_of_service--reftable6>`.
+     - See :ref:`DataWriter QoS <quality_of_service--reftable6>`.
 
    * - ``liveliness.kind=[``
 
@@ -1569,7 +1545,7 @@ The static discovery implementation also checks that the QoS of a data reader or
 
      - See :ref:`quality_of_service--liveliness`.
 
-     - See :ref:`Table 3-5 <quality_of_service--reftable6>`.
+     - See :ref:`DataWriter QoS <quality_of_service--reftable6>`.
 
    * - ``liveliness.lease_duration.sec=[``
 
@@ -1577,7 +1553,7 @@ The static discovery implementation also checks that the QoS of a data reader or
 
      - See :ref:`quality_of_service--liveliness`.
 
-     - See :ref:`Table 3-5 <quality_of_service--reftable6>`.
+     - See :ref:`DataWriter QoS <quality_of_service--reftable6>`.
 
    * - ``liveliness.lease_duration.nanosec=[``
 
@@ -1585,13 +1561,13 @@ The static discovery implementation also checks that the QoS of a data reader or
 
      - See :ref:`quality_of_service--liveliness`.
 
-     - See :ref:`Table 3-5 <quality_of_service--reftable6>`.
+     - See :ref:`DataWriter QoS <quality_of_service--reftable6>`.
 
    * - ``reliability.kind=[BEST_EFFORT|RELIABILE]``
 
      - See :ref:`quality_of_service--reliability`.
 
-     - See :ref:`Table 3-5 <quality_of_service--reftable6>`.
+     - See :ref:`DataWriter QoS <quality_of_service--reftable6>`.
 
    * - ``reliability.max_blocking_time.sec=[``
 
@@ -1599,7 +1575,7 @@ The static discovery implementation also checks that the QoS of a data reader or
 
      - See :ref:`quality_of_service--reliability`.
 
-     - See :ref:`Table 3-5 <quality_of_service--reftable6>`.
+     - See :ref:`DataWriter QoS <quality_of_service--reftable6>`.
 
    * - ``reliability.max_blocking_time.nanosec=[``
 
@@ -1607,7 +1583,7 @@ The static discovery implementation also checks that the QoS of a data reader or
 
      - See :ref:`quality_of_service--reliability`.
 
-     - See :ref:`Table 3-5 <quality_of_service--reftable6>`.
+     - See :ref:`DataWriter QoS <quality_of_service--reftable6>`.
 
    * - ``destination_order.kind=[``
 
@@ -1617,31 +1593,31 @@ The static discovery implementation also checks that the QoS of a data reader or
 
      - See :ref:`quality_of_service--destination-order`.
 
-     - See :ref:`Table 3-5 <quality_of_service--reftable6>`.
+     - See :ref:`DataWriter QoS <quality_of_service--reftable6>`.
 
    * - ``history.kind=[KEEP_LAST|KEEP_ALL]``
 
      - See :ref:`quality_of_service--history`.
 
-     - See :ref:`Table 3-5 <quality_of_service--reftable6>`.
+     - See :ref:`DataWriter QoS <quality_of_service--reftable6>`.
 
    * - ``history.depth=numeric``
 
      - See :ref:`quality_of_service--history`.
 
-     - See :ref:`Table 3-5 <quality_of_service--reftable6>`.
+     - See :ref:`DataWriter QoS <quality_of_service--reftable6>`.
 
    * - ``resource_limits.max_samples=numeric``
 
      - See :ref:`quality_of_service--resource-limits`.
 
-     - See :ref:`Table 3-5 <quality_of_service--reftable6>`.
+     - See :ref:`DataWriter QoS <quality_of_service--reftable6>`.
 
    * - ``resource_limits.max_instances=numeric``
 
      - See :ref:`quality_of_service--resource-limits`.
 
-     - See :ref:`Table 3-5 <quality_of_service--reftable6>`.
+     - See :ref:`DataWriter QoS <quality_of_service--reftable6>`.
 
    * - ``resource_limits.max_samples_per_instance=``
 
@@ -1649,13 +1625,13 @@ The static discovery implementation also checks that the QoS of a data reader or
 
      - See :ref:`quality_of_service--resource-limits`.
 
-     - See :ref:`Table 3-5 <quality_of_service--reftable6>`.
+     - See :ref:`DataWriter QoS <quality_of_service--reftable6>`.
 
    * - ``transport_priority.value=numeric``
 
      - See :ref:`quality_of_service--transport-priority`.
 
-     - See :ref:`Table 3-5 <quality_of_service--reftable6>`.
+     - See :ref:`DataWriter QoS <quality_of_service--reftable6>`.
 
    * - ``lifespan.duration.sec=[``
 
@@ -1663,7 +1639,7 @@ The static discovery implementation also checks that the QoS of a data reader or
 
      - See :ref:`quality_of_service--lifespan`.
 
-     - See :ref:`Table 3-5 <quality_of_service--reftable6>`.
+     - See :ref:`DataWriter QoS <quality_of_service--reftable6>`.
 
    * - ``lifespan.duration.nanosec=[``
 
@@ -1671,25 +1647,23 @@ The static discovery implementation also checks that the QoS of a data reader or
 
      - See :ref:`quality_of_service--lifespan`.
 
-     - See :ref:`Table 3-5 <quality_of_service--reftable6>`.
+     - See :ref:`DataWriter QoS <quality_of_service--reftable6>`.
 
    * - ``ownership.kind=[SHARED|EXCLUSIVE]``
 
      - See :ref:`quality_of_service--ownership`.
 
-     - See :ref:`Table 3-5 <quality_of_service--reftable6>`.
+     - See :ref:`DataWriter QoS <quality_of_service--reftable6>`.
 
    * - ``ownership_strength.value=numeric``
 
      - See :ref:`quality_of_service--ownership-strength`.
 
-     - See :ref:`Table 3-5 <quality_of_service--reftable6>`.
+     - See :ref:`DataWriter QoS <quality_of_service--reftable6>`.
 
 .. _run_time_configuration--reftable15:
 
-**Table  [datareaderqos/*] Configuration Options**
-
-.. list-table::
+.. list-table:: [datareaderqos/\*] Configuration Options
    :header-rows: 1
 
    * - Option
@@ -1704,7 +1678,7 @@ The static discovery implementation also checks that the QoS of a data reader or
 
      - See :ref:`quality_of_service--durability`.
 
-     - See :ref:`Table 3-6 <quality_of_service--reftable7>`.
+     - See :ref:`DataReader QoS <quality_of_service--reftable7>`.
 
    * - ``deadline.period.sec=[``
 
@@ -1712,7 +1686,7 @@ The static discovery implementation also checks that the QoS of a data reader or
 
      - See :ref:`quality_of_service--deadline`.
 
-     - See :ref:`Table 3-6 <quality_of_service--reftable7>`.
+     - See :ref:`DataReader QoS <quality_of_service--reftable7>`.
 
    * - ``deadline.period.nanosec=[``
 
@@ -1720,7 +1694,7 @@ The static discovery implementation also checks that the QoS of a data reader or
 
      - See :ref:`quality_of_service--deadline`.
 
-     - See :ref:`Table 3-6 <quality_of_service--reftable7>`.
+     - See :ref:`DataReader QoS <quality_of_service--reftable7>`.
 
    * - ``latency_budget.duration.sec=[``
 
@@ -1728,7 +1702,7 @@ The static discovery implementation also checks that the QoS of a data reader or
 
      - See :ref:`quality_of_service--latency-budget`.
 
-     - See :ref:`Table 3-6 <quality_of_service--reftable7>`.
+     - See :ref:`DataReader QoS <quality_of_service--reftable7>`.
 
    * - ``latency_budget.duration.nanosec=[``
 
@@ -1736,7 +1710,7 @@ The static discovery implementation also checks that the QoS of a data reader or
 
      - See :ref:`quality_of_service--latency-budget`.
 
-     - See :ref:`Table 3-6 <quality_of_service--reftable7>`.
+     - See :ref:`DataReader QoS <quality_of_service--reftable7>`.
 
    * - ``liveliness.kind=[``
 
@@ -1748,7 +1722,7 @@ The static discovery implementation also checks that the QoS of a data reader or
 
      - See :ref:`quality_of_service--liveliness`.
 
-     - See :ref:`Table 3-6 <quality_of_service--reftable7>`.
+     - See :ref:`DataReader QoS <quality_of_service--reftable7>`.
 
    * - ``liveliness.lease_duration.sec=[``
 
@@ -1756,7 +1730,7 @@ The static discovery implementation also checks that the QoS of a data reader or
 
      - See :ref:`quality_of_service--liveliness`.
 
-     - See :ref:`Table 3-6 <quality_of_service--reftable7>`.
+     - See :ref:`DataReader QoS <quality_of_service--reftable7>`.
 
    * - ``liveliness.lease_duration.nanosec=[``
 
@@ -1764,13 +1738,13 @@ The static discovery implementation also checks that the QoS of a data reader or
 
      - See :ref:`quality_of_service--liveliness`.
 
-     - See :ref:`Table 3-6 <quality_of_service--reftable7>`.
+     - See :ref:`DataReader QoS <quality_of_service--reftable7>`.
 
    * - ``reliability.kind=[BEST_EFFORT|RELIABILE]``
 
      - See :ref:`quality_of_service--reliability`.
 
-     - See :ref:`Table 3-6 <quality_of_service--reftable7>`.
+     - See :ref:`DataReader QoS <quality_of_service--reftable7>`.
 
    * - ``reliability.max_blocking_time.sec=[``
 
@@ -1778,7 +1752,7 @@ The static discovery implementation also checks that the QoS of a data reader or
 
      - See :ref:`quality_of_service--reliability`.
 
-     - See :ref:`Table 3-6 <quality_of_service--reftable7>`.
+     - See :ref:`DataReader QoS <quality_of_service--reftable7>`.
 
    * - ``reliability.max_blocking_time.nanosec=[``
 
@@ -1786,7 +1760,7 @@ The static discovery implementation also checks that the QoS of a data reader or
 
      - See :ref:`quality_of_service--reliability`.
 
-     - See :ref:`Table 3-6 <quality_of_service--reftable7>`.
+     - See :ref:`DataReader QoS <quality_of_service--reftable7>`.
 
    * - ``destination_order.kind=[``
 
@@ -1796,31 +1770,31 @@ The static discovery implementation also checks that the QoS of a data reader or
 
      - See :ref:`quality_of_service--destination-order`.
 
-     - See :ref:`Table 3-6 <quality_of_service--reftable7>`.
+     - See :ref:`DataReader QoS <quality_of_service--reftable7>`.
 
    * - ``history.kind=[KEEP_LAST|KEEP_ALL]``
 
      - See :ref:`quality_of_service--history`.
 
-     - See :ref:`Table 3-6 <quality_of_service--reftable7>`.
+     - See :ref:`DataReader QoS <quality_of_service--reftable7>`.
 
    * - ``history.depth=numeric``
 
      - See :ref:`quality_of_service--history`.
 
-     - See :ref:`Table 3-6 <quality_of_service--reftable7>`.
+     - See :ref:`DataReader QoS <quality_of_service--reftable7>`.
 
    * - ``resource_limits.max_samples=numeric``
 
      - See :ref:`quality_of_service--resource-limits`.
 
-     - See :ref:`Table 3-6 <quality_of_service--reftable7>`.
+     - See :ref:`DataReader QoS <quality_of_service--reftable7>`.
 
    * - ``resource_limits.max_instances=numeric``
 
      - See :ref:`quality_of_service--resource-limits`.
 
-     - See :ref:`Table 3-6 <quality_of_service--reftable7>`.
+     - See :ref:`DataReader QoS <quality_of_service--reftable7>`.
 
    * - ``resource_limits.max_samples_per_instance=``
 
@@ -1828,7 +1802,7 @@ The static discovery implementation also checks that the QoS of a data reader or
 
      - See :ref:`quality_of_service--resource-limits`.
 
-     - See :ref:`Table 3-6 <quality_of_service--reftable7>`.
+     - See :ref:`DataReader QoS <quality_of_service--reftable7>`.
 
    * - ``time_based_filter.minimum_separation.sec=[``
 
@@ -1836,7 +1810,7 @@ The static discovery implementation also checks that the QoS of a data reader or
 
      - See :ref:`quality_of_service--time-based-filter`.
 
-     - See :ref:`Table 3-6 <quality_of_service--reftable7>`.
+     - See :ref:`DataReader QoS <quality_of_service--reftable7>`.
 
    * - ``time_based_filter.minimum_separation.nanosec=[``
 
@@ -1844,7 +1818,7 @@ The static discovery implementation also checks that the QoS of a data reader or
 
      - See :ref:`quality_of_service--time-based-filter`.
 
-     - See :ref:`Table 3-6 <quality_of_service--reftable7>`.
+     - See :ref:`DataReader QoS <quality_of_service--reftable7>`.
 
    * - ``reader_data_lifecycle.``
        ``autopurge_nowriter_samples_delay.sec=[``
@@ -1853,7 +1827,7 @@ The static discovery implementation also checks that the QoS of a data reader or
 
      - See :ref:`quality_of_service--reader-data-lifecycle`.
 
-     - See :ref:`Table 3-6 <quality_of_service--reftable7>`.
+     - See :ref:`DataReader QoS <quality_of_service--reftable7>`.
 
    * - ``reader_data_lifecycle.``
        ``autopurge_nowriter_samples_delay.nanosec=[``
@@ -1862,7 +1836,7 @@ The static discovery implementation also checks that the QoS of a data reader or
 
      - See :ref:`quality_of_service--reader-data-lifecycle`.
 
-     - See :ref:`Table 3-6 <quality_of_service--reftable7>`.
+     - See :ref:`DataReader QoS <quality_of_service--reftable7>`.
 
    * - ``reader_data_lifecycle.``
        ``autopurge_dispose_samples_delay.sec=[``
@@ -1871,7 +1845,7 @@ The static discovery implementation also checks that the QoS of a data reader or
 
      - See :ref:`quality_of_service--reader-data-lifecycle`.
 
-     - See :ref:`Table 3-6 <quality_of_service--reftable7>`.
+     - See :ref:`DataReader QoS <quality_of_service--reftable7>`.
 
    * - ``reader_data_lifecycle.``
        ``autopurge_dispose_samples_delay.nanosec=[``
@@ -1880,13 +1854,11 @@ The static discovery implementation also checks that the QoS of a data reader or
 
      - See :ref:`quality_of_service--reader-data-lifecycle`.
 
-     - See :ref:`Table 3-6 <quality_of_service--reftable7>`.
+     - See :ref:`DataReader QoS <quality_of_service--reftable7>`.
 
 .. _run_time_configuration--reftable16:
 
-**Table  [publisherqos/*] Configuration Options**
-
-.. list-table::
+.. list-table:: [publisherqos/\*] Configuration Options
    :header-rows: 1
 
    * - Option
@@ -1899,31 +1871,29 @@ The static discovery implementation also checks that the QoS of a data reader or
 
      - See :ref:`quality_of_service--presentation`.
 
-     - See :ref:`Table 3-3 <quality_of_service--reftable4>`.
+     - See :ref:`Publisher QoS <quality_of_service--publisher>`.
 
    * - ``presentation.coherent_access=[true|false]``
 
      - See :ref:`quality_of_service--presentation`.
 
-     - See :ref:`Table 3-3 <quality_of_service--reftable4>`.
+     - See :ref:`Publisher QoS <quality_of_service--publisher>`.
 
    * - ``presentation.ordered_access=[true|false]``
 
      - See :ref:`quality_of_service--presentation`.
 
-     - See :ref:`Table 3-3 <quality_of_service--reftable4>`.
+     - See :ref:`Publisher QoS <quality_of_service--publisher>`.
 
    * - ``partition.name=name0,name1,...``
 
      - See :ref:`quality_of_service--partition`.
 
-     - See :ref:`Table 3-3 <quality_of_service--reftable4>`.
+     - See :ref:`Publisher QoS <quality_of_service--publisher>`.
 
 .. _run_time_configuration--reftable17:
 
-**Table  [subscriberqos/*] Configuration Options**
-
-.. list-table::
+.. list-table:: [subscriberqos/\*] Configuration Options
    :header-rows: 1
 
    * - Option
@@ -1936,31 +1906,29 @@ The static discovery implementation also checks that the QoS of a data reader or
 
      - See :ref:`quality_of_service--presentation`.
 
-     - See :ref:`Table 3-4 <quality_of_service--reftable5>`.
+     - See :ref:`Subscriber QoS <quality_of_service--reftable5>`.
 
    * - ``presentation.coherent_access=[true|false]``
 
      - See :ref:`quality_of_service--presentation`.
 
-     - See :ref:`Table 3-4 <quality_of_service--reftable5>`.
+     - See :ref:`Subscriber QoS <quality_of_service--reftable5>`.
 
    * - ``presentation.ordered_access=[true|false]``
 
      - See :ref:`quality_of_service--presentation`.
 
-     - See :ref:`Table 3-4 <quality_of_service--reftable5>`.
+     - See :ref:`Subscriber QoS <quality_of_service--reftable5>`.
 
    * - ``partition.name=name0,name1,...``
 
      - See :ref:`quality_of_service--partition`.
 
-     - See :ref:`Table 3-4 <quality_of_service--reftable5>`.
+     - See :ref:`Subscriber QoS <quality_of_service--reftable5>`.
 
 .. _run_time_configuration--reftable18:
 
-**Table  [endpoint/*] Configuration Options**
-
-.. list-table::
+.. list-table:: [endpoint/\*] Configuration Options
    :header-rows: 1
 
    * - Option
@@ -2008,25 +1976,25 @@ The static discovery implementation also checks that the QoS of a data reader or
 
      - Refers to a ``[datawriterqos/*]`` section.
 
-     - See :ref:`Table 3-5 <quality_of_service--reftable6>`.
+     - See :ref:`DataWriter QoS <quality_of_service--reftable6>`.
 
    * - ``datareaderqos=name``
 
      - Refers to a ``[datareaderqos/*]`` section.
 
-     - See :ref:`Table 3-6 <quality_of_service--reftable7>`.
+     - See :ref:`DataReader QoS <quality_of_service--reftable7>`.
 
    * - ``publisherqos=name``
 
      - Refers to a ``[publisherqos/*]`` section.
 
-     - See :ref:`Table 3-3 <quality_of_service--reftable4>`.
+     - See :ref:`Publisher QoS <quality_of_service--publisher>`.
 
    * - ``subscriberqos=name``
 
      - Refers to a ``[subscriberqos/*]`` section.
 
-     - See :ref:`Table 3-4 <quality_of_service--reftable5>`.
+     - See :ref:`Subscriber QoS <quality_of_service--reftable5>`.
 
    * - ``config``
 
@@ -2084,8 +2052,7 @@ Transport Concepts
 This section provides an overview of the concepts involved in transport configuration and how they interact.
 
 Each data reader and writer uses a *Transport Configuration* consisting of an ordered set of *Transport Instances*.
-Each Transport Instance specifies a Transport Implementation (i.e.
-tcp, udp, multicast, shmem, or rtps_udp) and can customize the configuration parameters defined by that transport.
+Each Transport Instance specifies a Transport Implementation (i.e. ``tcp``, ``udp``, ``multicast``, ``shmem``, or ``rtps_udp``) and can customize the configuration parameters defined by that transport.
 Transport Configurations and Transport Instances are managed by the *Transport Registry* and can be created via configuration files or through programming APIs.
 
 Transport Configurations can be specified for Domain Participants, Publishers, Subscribers, Data Writers, and Data Readers.
@@ -2321,9 +2288,7 @@ The following table summarizes the options when specifying a transport configura
 
 .. _run_time_configuration--reftable19:
 
-**Table  Transport Configuration Options**
-
-.. list-table::
+.. list-table:: Transport Configuration Options
    :header-rows: 1
 
    * - Option
@@ -2398,9 +2363,7 @@ The following table summarizes the transport configuration options that are comm
 
 .. _run_time_configuration--reftable20:
 
-**Table  Common Transport Configuration Options**
-
-.. list-table::
+.. list-table:: Common Transport Configuration Options
    :header-rows: 1
 
    * - Option
@@ -2488,8 +2451,7 @@ Almost all of the options available to customize the connection and reconnection
 The local_address option is used by the peer to establish a connection.
 By default, the TCP transport selects an ephemeral port number on the NIC with the FQDN (fully qualified domain name) resolved.
 Therefore, you may wish to explicitly set the address if you have multiple NICs or if you wish to specify the port number.
-When you configure inter-host communication, the local_address can not be localhost and should be configured with an externally visible address (i.e.
-192.168.0.2), or you can leave it unspecified in which case the FQDN and an ephemeral port will be used.
+When you configure inter-host communication, the local_address can not be localhost and should be configured with an externally visible address (i.e. 192.168.0.2), or you can leave it unspecified in which case the FQDN and an ephemeral port will be used.
 
 FQDN resolution is dependent upon system configuration.
 In the absence of a FQDN (e.g. ``example.opendds.org``), OpenDDS will use any discovered short names (e.g. example).
@@ -2512,9 +2474,7 @@ The following table summarizes the transport configuration options that are uniq
 
 .. _run_time_configuration--reftable21:
 
-**Table  TCP/IP Configuration Options**
-
-.. list-table::
+.. list-table:: TCP Transport Configuration Options
    :header-rows: 1
 
    * - Option
@@ -2632,9 +2592,7 @@ The following table summarizes the transport configuration options that are uniq
 
 .. _run_time_configuration--reftable22:
 
-**Table  UDP/IP Configuration Options**
-
-.. list-table::
+.. list-table:: UDP Transport Configuration Options
    :header-rows: 1
 
    * - Option
@@ -2737,9 +2695,7 @@ The following table summarizes the transport configuration options that are uniq
 
 .. _run_time_configuration--reftable23:
 
-**Table  IP Multicast Configuration Options**
-
-.. list-table::
+.. list-table:: Multicast Transport Configuration Options
    :header-rows: 1
 
    * - Option
@@ -2908,9 +2864,7 @@ Some implementation notes related to using the ``rtps_udp`` transport protocol a
 
 .. _run_time_configuration--reftable24:
 
-**Table  RTPS_UDP Configuration Options**
-
-.. list-table::
+.. list-table:: RTPS/UDP Transport Configuration Options
    :header-rows: 1
 
    * - Option
@@ -3086,9 +3040,7 @@ The ``RtpsUdpInst`` class has a method ``count_messages(bool flag)`` via inherit
 With count_messages enabled, the transport will track various counters and make them available to the application using the method ``append_transport_statistics(TransportStatisticsSequence& seq)``.
 The elements of that sequence are defined in IDL: ``OpenDDS::DCPS::TransportStatistics`` and detailed in the tables below.
 
-**TransportStatistics**
-
-.. list-table::
+.. list-table:: ``TransportStatistics``
    :header-rows: 1
 
    * - **Type**
@@ -3204,9 +3156,7 @@ As part of transport negotiation (:ref:`run_time_configuration--using-mixed-tran
 
 .. _run_time_configuration--reftable25:
 
-**Table  Shared-Memory Transport Configuration Options**
-
-.. list-table::
+.. list-table:: Shared-Memory Transport Configuration Options
    :header-rows: 1
 
    * - Option
@@ -3385,13 +3335,9 @@ By default, the OpenDDS framework will only log serious errors and warnings that
 An OpenDDS user may increase the amount of logging via the log level and debug logging via controls at the DCPS, Transport, or Security layers.
 
 The default destination of these log messages is the process's standard error stream.
-See :ref:`Table 7-2 Common Configuration Options <run_time_configuration--reftable9>` for options controlling the destination and formatting of log messages.
+See :ref:`run_time_configuration--common-configuration-options` for options controlling the destination and formatting of log messages.
 
 The highest level logging is controlled by the general log levels listed in the following table.
-
-.. _run_time_configuration--reftable26:
-
-**Table : Log Levels**
 
 .. list-table::
    :header-rows: 1
@@ -3464,7 +3410,10 @@ To do it with command line arguments, pass:
 
 Using a configuration file option is similar:
 
-``DCPSLogLevel=notice``
+.. code-block:: ini
+
+  [common]
+  DCPSLogLevel=notice
 
 Doing this from code can be done using an enumerator or a string:
 
@@ -3542,9 +3491,7 @@ For the moment this can only be configured using C++; for example:
 
 .. _run_time_configuration--reftable27:
 
-**Table  Transport Debug Logging Categories**
-
-.. list-table::
+.. list-table:: Transport Debug Logging Categories
    :header-rows: 1
 
    * - Option
@@ -3581,14 +3528,12 @@ Security Debug Logging
 ..
     Sect<7.6.3>
 
-When OpenDDS is compiled with security enabled, debug logging for security can be enabled using ``DCPSecurityDebug`` (:ref:`Table 7-2 Common Configuration Options <run_time_configuration--reftable9>`).
+When OpenDDS is compiled with security enabled, debug logging for security can be enabled using ``DCPSecurityDebug`` (:ref:`run_time_configuration--common-configuration-options`).
 Security logging is divided into categories, although ``DCPSSecurityDebugLevel`` is also provided, which controls the categories in a similar manner and using the same scale as ``DCPSDebugLevel``.
 
 .. _run_time_configuration--reftable28:
 
-**Table  Security Debug Logging Categories**
-
-.. list-table::
+.. list-table:: Security Debug Logging Categories
    :header-rows: 1
 
    * - Option
@@ -3705,4 +3650,3 @@ All the following are equivalent:
     OpenDDS::DCPS::security_debug.access_warn = true;
     OpenDDS::DCPS::security_debug.set_debug_level(1);
     OpenDDS::DCPS::security_debug.parse_flags(ACE_TEXT("access_warn"));
-

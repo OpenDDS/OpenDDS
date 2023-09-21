@@ -52,6 +52,8 @@ Fixes
 - Fixed issue with using ``-o`` in ``tao_idl``/``opendds_idl`` options in ``OPENDDS_TARGET_SOURCES`` and those directories are now automatically included (:ghpr:`4071`)
 - XTypes (:ghpr:`4078`)
 
+  .. _3-24-0-typeobject-fix:
+
   - ``TypeObject``\s struct and union members used to be sorted by member ID, but they are now sorted by declaration order as the XTypes spec calls for.
 
     By default member IDs increment starting at 0, and in that case the ``TypeObject``\s will be the same.
@@ -61,7 +63,7 @@ Fixes
     - Topics with final and appendable structs will no longer match.
     - If ``DISALLOW_TYPE_COERCION`` QoS is being used, then all topics where the order differ will not longer match.
       Note that this is true for any time the type hash changes.
-    - Pass the ``--old-typeobject-member-order`` option to ``opendds_idl`` to use the non-standard order.
+    - Pass the :option:`opendds_idl --old-typeobject-member-order` to use the non-standard order.
 
   - The size of XCDR2 member parameters in mutable structs and unions is now correctly interpreted when the "length code" is 5, 6, or 7.
 

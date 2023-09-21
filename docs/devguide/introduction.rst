@@ -233,14 +233,13 @@ Basic Concepts
 ..
     Sect<1.1.1>
 
-:ref:`Figure 1-1 <introduction--reffigure0>` shows an overview of the DDS DCPS layer.
-The following subsections define the concepts shown in this diagram.
+This is an overview of the DDS DCPS layer:
 
-.. _introduction--reffigure0:
+.. figure:: images/10000001000001C100000202637D36545E22157D.png
 
-**Figure  DCPS Conceptual Overview**
+  DCPS Conceptual Overview
 
-.. image:: images/10000001000001C100000202637D36545E22157D.png
+The following subsections define the concepts shown in the diagram.
 
 .. _introduction--domain:
 
@@ -336,7 +335,7 @@ Dynamic data readers are also type-safe, but type checking happens at runtime.
 
 .. _introduction--built-in-topics:
 
-Built-In Topics
+Built-in Topics
 ===============
 
 ..
@@ -348,11 +347,7 @@ While subscribed, the application receives samples indicating changes in the ent
 
 The following table shows the built-in topics defined within the DDS specification:
 
-.. _introduction--reftable0:
-
-**Table  Built-in Topics**
-
-.. list-table::
+.. list-table:: Built-in Topics
    :header-rows: 1
 
    * - Topic Name
@@ -630,15 +625,14 @@ Extensible Transport Framework (ETF)
 OpenDDS uses the IDL interfaces defined by the DDS specification to initialize and control service usage.
 Data transmission is accomplished via an OpenDDS-specific transport framework that allows the service to be used with a variety of transport protocols.
 This is referred to as *pluggable transports* and makes the extensibility of OpenDDS an important part of its architecture.
-OpenDDS currently supports TCP/IP, UDP/IP, IP multicast, shared-memory, and RTPS_UDP transport protocols as shown in :ref:`Figure 1-2 <introduction--reffigure1>`.
+OpenDDS currently supports TCP/IP, UDP/IP, IP multicast, shared-memory, and RTPS_UDP transport protocols as shown below.
+
+.. figure:: images/10000001000002E50000018D97FADEED4445DDBB.png
+
+  OpenDDS Transport Framework
+
 Transports are typically specified via configuration files and are attached to various entities in the publisher and subscriber processes.
 See :ref:`run_time_configuration--transport-configuration-options` for details on configuring ETF components.
-
-.. _introduction--reffigure1:
-
-.. image:: images/10000001000002E50000018D97FADEED4445DDBB.png
-
-**Figure  OpenDDS Extensible Transport Framework**
 
 The ETF enables application developers to implement their own customized transports.
 Implementing a custom transport involves specializing a number of classes defined in the transport framework.
@@ -681,11 +675,9 @@ The DCPSInfoRepo process needs to be running whenever OpenDDS is being used in a
 An RTPS configuration does not use the DCPSInfoRepo.
 The DCPSInfoRepo is not involved in data propagation, its role is limited in scope to OpenDDS applications discovering one another.
 
-.. _introduction--reffigure2:
+.. figure:: images/100000010000045A0000025185A3A43482F62E3D.png
 
-.. image:: images/100000010000045A0000025185A3A43482F62E3D.png
-
-**Figure : Centralized Discovery with OpenDDS InfoRepo**
+   Centralized Discovery with DCPSInfoRepo
 
 Application developers are free to run multiple information repositories with each managing their own non-overlapping sets of DCPS domains.
 
@@ -704,16 +696,15 @@ Peer-to-Peer Discovery with RTPS
 
 DDS applications requiring a Peer-to-Peer discovery pattern can be accommodated by OpenDDS capabilities.
 This style of discovery is accomplished only through the use of the RTPS protocol as of the current release.
-This simple form of discovery is accomplished through simple configuration of DDS application data readers and data writers running in application processes as shown in :ref:`Figure 1-4 <introduction--reffigure3>`.
+This simple form of discovery is accomplished through simple configuration of DDS application data readers and data writers running in application processes as shown below.
+
+.. figure:: images/10000001000003FC0000025E8CF71A4C4FCDEFF3.png
+
+  Peer-to-peer Discovery with RTPS
+
 As each participating process activates the DDSI-RTPS discovery mechanisms in OpenDDS for their data readers and writers, network endpoints are created with either default or configured network ports such that DDS participants can begin advertising the availability of their data readers and data writers.
-After a period of time, those seeking one another based on criteria will find each other and establish a connection based on the configured pluggable transport as discussed in Extensible Transport Framework (ETF).
+After a period of time, those seeking one another based on criteria will find each other and establish a connection using a transport.
 A more detailed description of this flexible configuration approach is discussed in :ref:`run_time_configuration--transport-concepts` and :ref:`run_time_configuration--rtps-udp-transport-configuration-options`.
-
-.. _introduction--reffigure3:
-
-.. image:: images/10000001000003FC0000025E8CF71A4C4FCDEFF3.png
-
-**Figure : Peer-to-peer Discovery with RTPS**
 
 The following are additional implementation limits that developers need to take into consideration when developing and deploying applications that use RTPS discovery:
 
@@ -851,11 +842,7 @@ This profile adds the classes ``ContentFilteredTopic``, ``QueryCondition``, and 
 
 In addition, individual classes can be excluded by using the features given in the table below.
 
-.. _introduction--reftable1:
-
-**Table : Content-Subscription Class Features**
-
-.. list-table::
+.. list-table:: Content-Subscription Class Features
    :header-rows: 1
 
    * - Class

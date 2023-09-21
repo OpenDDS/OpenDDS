@@ -4,11 +4,13 @@
 opendds_idl
 ###########
 
+.. program:: opendds_idl
+
 ..
     Sect<8>
 
-opendds_idl is one of the code generators used in the process of building OpenDDS and OpenDDS applications.
-It can be used in a number of different ways to customize how source code is generated from IDL files.
+``opendds_idl`` is one of the code generators used in the process of building OpenDDS and OpenDDS applications.
+It can be used in a number of different ways to customize how source code is generated from :term:`IDL` files.
 See :ref:`getting_started--processing-the-idl` for an overview of the default usage pattern.
 
 The OpenDDS IDL compiler is invoked using the ``opendds_idl`` executable, located in :ghfile:`bin/` (on the ``PATH``).
@@ -32,238 +34,172 @@ opendds_idl Command Line Options
 ..
     Sect<8.1>
 
-The following table summarizes the options supported by ``opendds_idl``.
+.. option:: --help, -h
 
-.. _opendds_idl--reftable29:
+  Prints a help message and exits.
 
-**Table  opendds_idl Command Line Options**
+.. option:: -v
 
-.. list-table::
-   :header-rows: 1
+  Enables verbose/debug logging.
 
-   * - Option
+.. option:: --version, -V
 
-     - Description
+  Prints version numbers of both TAO and OpenDDS.
 
-     - Default
+.. option:: --idl-version VERSION
 
-   * - ``-v``
+  Set the version of the :ref:`IDL specification <spec-idl>` to use.
+  The default is ``4``.
 
-     - Enables verbose execution
+.. option:: --list-idl-versions
 
-     - Quiet execution
+  List the versions of IDL at least partially supported and exits.
 
-   * - ``-h``
+.. option:: --syntax-only
 
-     - Prints a help (usage) message and exits
+  Just check syntax of input files and exit without generating any code.
 
-     - N/A
+.. option:: -Wb,export_macro=MACRO
 
-   * - ``-V``
+  Use the export macro for generating C++ implementation code named *MACRO*.
+  By default export macros are not used.
+  ``--export`` is an alias for this.
 
-     - Prints version numbers of both TAO and OpenDDS
+.. option:: -Wb,export_include=FILE
 
-     - N/A
+  Add an additional header *FILE* to ``#include`` in generated code that has the export macro.
 
-   * - ``--idl-version VERSION``
+.. option:: -Wb,pch_include=FILE
 
-     - Set the version of IDL to use.
+  Include a pre-compiled header *FILE* in generated C++ files.
 
-     - 4
+.. option:: -Dname[=value]
 
-   * - ``--list-idl-versions``
+  Define a preprocessor macro named *name* optionally with value *value* for IDL.
 
-     - List the versions of IDL at least partially supported.
+.. option:: -Idir
 
-     - N/A
+  Adds *dir* to the preprocessor include path for IDL.
 
-   * - ``--syntax-only``
+.. option:: -o OUTPUT_PATH
 
-     - Just check syntax of input files, exiting after parsing.
+  Output directory where generated files are put.
+  By default this is the current working directory.
 
-     - Goes on to generate code
+.. option:: -Wb,java
 
-   * - ``-Wb,export_macro=macro``
+  Generate Java Bindings for generated ``TypeSupport`` implementation classes.
+  See :ref:`java` for more information.
 
-     - Export macro used for generating C++ implementation code.
-       ``--export`` is equivalent to ``-Wb,export_macro``
+.. option:: -Gitl
 
-     - No export macro used
+  Generate "Intermediate Type Language" descriptions of topic types.
+  These files are used by the Wireshark dissector or other external applications.
 
-   * - ``-Wb,export_include=file``
+.. option:: -GfaceTS
 
-     - Additional header to ``#include`` in generated code -- this header ``#defines`` the export macro
+  Generate FACE (Future Airborne Capability Environment) Transport Services API.
+  See :doc:`safety_profile` for more information.
 
-     - No additional include
+.. option:: -Gv8
 
-   * - ``-Wb,pch_include=file``
+  Generate type support for converting data samples to/from V8 JavaScript objects
+  ``-Wb,v8`` is an alias for this.
 
-     - Pre-compiled header file to include in generated C++ files
+.. option:: -Gxtypes-complete
 
-     - No pre-compiled header included
+  Generate complete XTypes TypeObjects which can be used to provide type information to applications that don't have compile-time knowledge of the IDL.
+  By default only minimal TypeObjects are generated.
+  See :ref:`xtypes--dynamic-language-binding-1` for more information.
 
-   * - ``-Dname[=value]``
+.. option:: -Gequality
 
-     - Define a preprocessor macro
+  Generate ``==`` and ``!=`` for structs and unions.
+  The members of the struct or union must have a type that could appear in a DDS topic and be supported by ``opendds_idl``.
 
-     - N/A
+.. option:: -Lface
 
-   * - ``-Idir``
+  Generates IDL-to-C++ mapping for FACE.
+  See :doc:`safety_profile` for more information.
 
-     - Add ``dir`` to the preprocessor include path
+.. option:: -Lspcpp
 
-     - N/A
+  Generates IDL-to-C++ mapping for :doc:`safety_profile`.
 
-   * - ``-o outputdir``
+.. option:: -Lc++11
 
-     - Output directory where ``opendds_idl`` should place the generated files.
+  Generates :ref:`IDL-to-C++11 mapping <opendds_idl--using-the-idl-to-c-11-mapping>`.
 
-     - The current directory
+.. option:: -Wb,tao_include_prefix=S
 
-   * - ``-Wb,java``
+ Prefix the string *S* to ``#include`` directives meant to include headers generated by ``tao_idl``.
 
-     - Enable OpenDDS Java Bindings for generated TypeSupport implementation classes
+.. option:: -St
 
-     - No Java support
+  Suppress generation of IDL TypeCodes when one of the ``-L`` options are present.
 
-   * - ``-Gitl``
+.. option:: --unknown-annotations REACTION
 
-     - Generates "Intermediate Type Language" descriptions of datatypes.
-       These files are used by the Wireshark dissector or other external applications.
+  Control the reaction to unknown IDL annotations.
+  *REACTION* can be:
 
-     - Not generated
+  * ``warn-once`` -- the default, warn once per annotation with the same name.
 
-   * - ``-GfaceTS``
+  * ``warn-all`` -- warn for every use of an unknown annotation.
 
-     - Generates FACE (Future Airborne Capability Environment) Transport Services API
+  * ``error`` -- similar to ``warn-all``, but causes the compiler to exit with an error status when finished.
 
-     - Not generated
+  * ``ignore`` -- ignore all unknown annotations.
 
-   * - ``-Gv8``
+.. option:: --no-dcps-data-type-warnings
 
-     - Generate type support for converting data samples to/from V8 JavaScript objects
+  Don't warn about ``#pragma DCPS_DATA_TYPE``.
+  See :ref:`getting_started--identifying-topic-types` for more information.
 
-       ``-Wb,v8`` is an alternative form of this option
+.. option:: --[no-]default-nested
 
-     - Not generated
+  Un-annotated types/modules are treated as nested.
+  By default all types are nested by default
+  See :ref:`getting_started--topic-types-vs-nested-types` for details.
 
-   * - .. _opendds_idl--gxtypes-complete-option:
+.. option:: --default-extensibility EXT
 
-       .. _opendds_idl--gxtypes-complete:
+  Set the :ref:`default XTypes extensibility <xtypes--extensibility>`.
+  *EXT* can be:
 
-       ``-Gxtypes-complete``
+  - ``final``
+  - ``appendable`` (default)
+  - ``mutable``
 
-     - Generate complete XTypes TypeObjects which can be used to provide type information to applications that don't have compile-time knowledge of the IDL.
-       See :ref:`xtypes--dynamic-language-binding-1`.
+.. option:: --default-autoid VALUE
 
-     - Only minimal TypeObjects are generated
+  Set the default :ref:`XTypes auto member-id assignment strategy <xtypes--autoid-value>`.
+  *VALUE* can be ``sequential`` (the default) or ``hash``.
 
-   * - ``-Gequality``
+.. option:: --default-try-construct VALUE
 
-     - Generate ``==`` and ``!=`` for structs and unions.
-       The members of the struct or union must have a type that could appear in a DDS topic and be supported by opendds_idl.
+  Set the default :ref:`XTypes try-construct strategy <xtypes--customizing-xtypes-per-member>`.
+  *VALUE* can be ``discard`` (the default), ``use-default``, or ``trim``.
 
-     - Not generated
+.. option:: --old-typeobject-encoding
 
-   * - ``-Lface``
+  .. versionadded:: 3.18
 
-     - Generates IDL-to-C++ mapping for FACE
+  Use the pre-3.18 encoding of ``TypeObject``\s when deriving ``TypeIdentifier``\s.
 
-     - Not generated
+.. option:: --default-enum-extensibility-zero
 
-   * - ``-Lspcpp``
+  .. versionadded:: 3.22
 
-     - Generates IDL-to-C++ mapping for Safety Profile
+  Do not set the type flags for enums.
+  This flag is for simulating the behavior of OpenDDS before 3.22.
 
-     - Not generated
+.. option:: --old-typeobject-member-order
 
-   * - ``-Lc++11``
+  .. versionadded:: 3.24
 
-     - Generates IDL-to-C++11 mapping
-
-     - Not generated
-
-   * - ``-Wb,tao_include_prefix=s``
-
-     - Prefix the string *s* to #include directives meant to include headers generated by ``tao_idl``
-
-     - N/A
-
-   * - ``-St``
-
-     - Suppress generation of IDL TypeCodes when one of the ``-L`` options are present.
-
-     - IDL TypeCodes generated
-
-   * - ``--unknown-annotations VAL``
-
-     - For IDL version 4, control the reaction to unknown annotations.
-       The options are:
-
-       * ``warn-once, the default, warn once per annotation with the same name.``
-
-       * ``warn-all, warn for every use of an unknown annotation.``
-
-       * ``error, similar to warn-all, but causes the compiler to exit with an error status when finished.``
-
-       * ``ignore, ignore all unknown annotations.``
-
-     - ``warn-once``
-
-   * - ``--no-dcps-data-type-warnings``
-
-     - Don't warn about ``#pragma DCPS_DATA_TYPE``
-
-     - Warnings are issued, use annotations to silence them
-
-   * - ``--[no-]default-nested``
-
-     - Un-annotated types/modules are treated as nested.
-       See :ref:`getting_started--topic-types-vs-nested-types` for details.
-
-     - Types are nested by default.
-
-   * - .. _opendds_idl--default-extensibility:
-
-       ``--default-extensibility``
-
-     - Set the default XTypes extensibility.
-       Can be ``final``, ``appendable`` or ``mutable``.
-       See :ref:`xtypes--extensibility` for details.
-
-     - ``appendable``
-
-   * - ``--default-enum-extensibility-zero``
-
-     - Do not set the type flags for enums.
-       This flag is for simulating the behavior of previous versions of OpenDDS.
-
-     -
-
-   * - ``--default-autoid VAL``
-
-     - Set the default XTypes auto member-id assignment strategy: ``sequential`` or ``hash`` -- see :ref:`xtypes--autoid-value`
-
-     - ``sequential``
-
-   * - ``--default-try-construct VAL``
-
-     - Set the default XTypes try-construct strategy: ``discard``, ``use-default``, or ``trim`` -- see :ref:`xtypes--customizing-xtypes-per-member`
-
-     - ``discard``
-
-   * - ``--old-typeobject-encoding``
-
-     - Use the pre-3.18 encoding of ``TypeObject``\s when deriving ``TypeIdentifier``\s
-
-     - Use standard encoding
-
-   * - ``--old-typeobject-member-order``
-
-     - Use the pre-3.24 struct and union member order for ``TypeObject``\s, which is ordered by member id instead of declared order.
-       See 3.24.0 news entry for more info.
-
-     - Use standard declared order
+  Use the pre-3.24 struct and union member order for ``TypeObject``\s, which is ordered by member id instead of declared order.
+  See :ref:`3.24.0 news entry <3-24-0-typeobject-fix>` for more info.
 
 The code generation options allow the application developer to use the generated code in a wide variety of environments.
 Since IDL may contain preprocessing directives (``#include``, ``#define``, etc.), the C++ preprocessor is invoked by ``opendds_idl``.

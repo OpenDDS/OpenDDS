@@ -337,8 +337,8 @@ Using OpenSSL Utilities for OpenDDS
 ..
     Sect<14.5.6>
 
-To generate certificates using the openssl command, a configuration file "openssl.cnf" is required (see below for example commands).
-Before proceeding, it may be helpful to review OpenSSL's manpages to get help with the file format.
+To generate certificates using the ``openssl`` command, a configuration file ``openssl.cnf`` is required (see below for example commands).
+Before proceeding, it may be helpful to review OpenSSL's man pages to get help with the file format.
 In particular, configuration file format and ca command's documentation and configuration file options.
 
 An example OpenSSL CA-Config file used in OpenDDS testing can be found here: :ghfile:`tests/security/certs/identity/identity_ca_openssl.cnf`

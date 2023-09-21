@@ -35,23 +35,19 @@ This diagram includes any package structures to be included in the model along w
 Zero or more of the policy or data definition elements can be included.
 Zero or one DCPS elements definition can be included in any given model.
 
-.. _modeling_sdk--reffigure5:
+.. figure:: images/10000001000003BA000005345220EFBC3B2965C5.png
+  :scale: 50%
 
-.. image:: images/10000001000003BA000005345220EFBC3B2965C5.png
-   :scale: 50%
-
-**Figure  Graphical modeling of the data definitions**
+  Graphical modeling of the data definitions
 
 Creating separate models for QoS policies only, data definitions only, or DCPS elements only is supported.
 References to other models allows externally defined models to be included in a model.
 This allows sharing of data definitions and QoS policies among different DCPS models as well as including externally defined data in a new set of data definitions.
 
-.. _modeling_sdk--reffigure6:
+.. figure:: images/10000001000003CA00000534AF32FC1EC2AA656B.png
+  :scale: 50%
 
-.. image:: images/10000001000003CA00000534AF32FC1EC2AA656B.png
-   :scale: 50%
-
-**Figure  Graphical modeling of the DCPS entities**
+  Graphical modeling of the DCPS entities
 
 .. _modeling_sdk--code-generation:
 
@@ -116,12 +112,10 @@ Installation
 ..
     Sect<11.2.2>
 
-.. _modeling_sdk--reffigure7:
+.. figure:: images/100000000000018A000001582B13D316CA761B88.png
+  :scale: 150%
 
-.. image:: images/100000000000018A000001582B13D316CA761B88.png
-   :scale: 150%
-
-**Figure  Eclipse Software Installation Dialog**
+  Eclipse Software Installation Dialog
 
 #. From Eclipse, open the "Help" menu and select "Install New Software".
 
@@ -235,12 +229,8 @@ Generated Code
     Sect<11.3.2>
 
 The OpenDDS Modeling SDK generates model-specific code for use by an OpenDDS Modeling SDK application.
-Starting with a .codegen file (which refers to an ``.opendds`` model file), the files described in :ref:`Table 11-1 <modeling_sdk--reftable35>`.
+Starting with a .codegen file (which refers to an ``.opendds`` model file), the files described in the table below.
 The process of generating code is documented in the Eclipse help.
-
-.. _modeling_sdk--reftable35:
-
-**Table  Generated Files**
 
 .. list-table::
    :header-rows: 1

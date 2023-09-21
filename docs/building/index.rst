@@ -154,7 +154,7 @@ It requires the following libraries to be available:
 
           vcpkg install openssl:x64-windows xerces-c:x64-windows
 
-    * Configure OpenDDS by passing the openssl and xerces3 switches.
+    * Configure OpenDDS by passing the ``--openssl`` and ``--xerces3`` options.
       As a convenience, it can be helpful to set an environment variable to store the path since it is the same location for both dependencies.
 
       .. code-block:: batch
@@ -162,7 +162,7 @@ It requires the following libraries to be available:
           set VCPKG_INSTALL=c:\path\to\vcpkg\installed\x64-windows
           configure --security --openssl=%VCPKG_INSTALL% --xerces3=%VCPKG_INSTALL%
 
-    * Compile with msbuild:
+    * Compile with ``msbuild``:
 
       .. code-block:: batch
 

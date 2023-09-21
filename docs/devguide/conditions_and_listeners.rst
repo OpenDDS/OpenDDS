@@ -18,7 +18,7 @@ Introduction
 
 The DDS specification defines two separate mechanisms for notifying applications of DCPS communication status changes.
 Most of the status types define a structure that contains information related to the change of status and can be detected by the application using conditions or listeners.
-The different status types are described in  :ref:`conditions_and_listeners--communication-status-types`.
+The different status types are described in :ref:`conditions_and_listeners--communication-status-types`.
 
 Each entity type (domain participant, topic, publisher, subscriber, data reader, and data writer) defines its own corresponding listener interface.
 Applications can implement this interface and then attach their listener implementation to the entity.

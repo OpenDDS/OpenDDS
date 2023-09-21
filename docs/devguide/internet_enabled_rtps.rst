@@ -77,7 +77,7 @@ Using the RtpsRelay
     Sect<15.2.1>
 
 Support for the RtpsRelay is activated via configuration.
-See :ref:`Table 7-5 RTPS Discovery Configuration Options <run_time_configuration--reftable12>` and :ref:`Table 7-17 RTPS_UDP Configuration Options <run_time_configuration--reftable24>`.
+See :ref:`RTPS Discovery Configuration Options <run_time_configuration--rtps-disc-config-options>` and :ref:`RTPS_UDP Configuration Options <run_time_configuration--reftable24>`.
 As an example:
 
 .. code-block:: ini
@@ -312,13 +312,13 @@ For OpenDDS, ICE can be used to potentially establish connectivity between SPDP 
 SPDP is used as the side channel for SEDP and SEDP is used as the side channel for the ordinary RTPS endpoints.
 To this, we added two parameters to the RTPS protocol for sending general ICE information and ICE candidates and added the ability to execute the ICE protocol and process STUN messages to the RTPS transports.
 
-ICE is defined in `IETF RFC 8445 <https://www.rfc-editor.org/info/rfc8445>`__.
-ICE utilizes the STUN protocol that is defined in `IETF RFC 5389 <https://www.rfc-editor.org/info/rfc5389>`__.
+ICE is defined in :rfc:`8445`.
+ICE utilizes the STUN protocol that is defined in :rfc:`5389`.
 The ICE implementation in OpenDDS does not use TURN servers.
 
 ICE is enabled through configuration.
 The minimum configuration involves setting the ``UseIce`` flag and providing addresses for the STUN servers.
-See :ref:`Table 7-5 RTPS Discovery Configuration Options <run_time_configuration--reftable12>` and :ref:`Table 7-17 RTPS_UDP Configuration Options <run_time_configuration--reftable24>` for details.
+See :ref:`RTPS Discovery Configuration Options <run_time_configuration--rtps-disc-config-options>` and :ref:`RTPS_UDP Configuration Options <run_time_configuration--reftable24>` for details.
 
 .. code-block:: ini
 
@@ -395,18 +395,18 @@ OpenDDS includes the following features for mitigation:
 * Compare the source IP of the SPDP message to the locators.
   For most applications, the locators advertised by SPDP should match the source IP of the SPDP message.
 
-  * See CheckSourceIp in :ref:`Table 7-5 RTPS Discovery Configuration Options <run_time_configuration--reftable12>`
+  * See ``CheckSourceIp`` in :ref:`RTPS Discovery Configuration Options <run_time_configuration--rtps-disc-config-options>`
 
 * Use the participant lease time from secure discovery and bound it otherwise.
   By default, OpenDDS will attempt authentication for the participant lease duration specified in the SPDP message.
   However, this data can't be trusted so a smaller maximum lease time can be specified to force authentication or discovery to terminate before the lease time.
 
-  * See MaxAuthTime in :ref:`Table 7-5 RTPS Discovery Configuration Options <run_time_configuration--reftable12>`
+  * See ``MaxAuthTime`` in :ref:`RTPS Discovery Configuration Options <run_time_configuration--rtps-disc-config-options>`
 
 * Limit the number of outstanding secure discoveries.
   The number of discovered but not-yet-authenticated participants is capped when using secure discovery.
 
-  * See MaxParticipantsInAuthentication in :ref:`Table 7-5 RTPS Discovery Configuration Options <run_time_configuration--reftable12>`
+  * See ``MaxParticipantsInAuthentication`` in :ref:`RTPS Discovery Configuration Options <run_time_configuration--rtps-disc-config-options>`
 
 .. _internet_enabled_rtps--run-participants-in-a-secure-network:
 

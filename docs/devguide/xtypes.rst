@@ -64,7 +64,7 @@ There are 3 kinds of extensibility for types:
   This can be considered a non-extensible constructed type, with behavior similar to that of a type created before XTypes.
   A type can be marked as final with the :ref:`@final <xtypes--final>` annotation.
 
-The default extensibility can be changed with the :ref:`--default-extensibility <opendds_idl--default-extensibility>` opendds_idl option.
+The default extensibility can be changed with :option:`opendds_idl --default-extensibility`.
 
 Structs, unions, and enums are the only types which can use any of the extensibilities.
 
@@ -647,7 +647,7 @@ Determining Extensibility
 
 The extensibility annotations can explicitly define the :ref:`extensibility <xtypes--extensibility>` of a type.
 If no extensibility annotation is used, then the type will have the default extensibility.
-This will be `appendable` unless the :ref:`--default-extensibility <opendds_idl--default-extensibility>` `opendds_idl` option is to override the default.
+This will be `appendable` unless the :option:`opendds_idl --default-extensibility` is used to override the default.
 
 .. _xtypes--mutable:
 
@@ -873,7 +873,7 @@ Enabling Use of CompleteTypeObjects
     Sect<16.7.1.1>
 
 To enable use of ``CompleteTypeObject``\s needed for the dynamic binding, they must be generated and OpenDDS must be configured to use them.
-To generate them, :ref:`-Gxtypes-complete <opendds_idl--gxtypes-complete>` must be passed to ``opendds_idl`` (:ref:`opendds_idl--opendds-idl-command-line-options`).
+To generate them, use :option:`opendds_idl -Gxtypes-complete`.
 For MPC, this can be done by adding this to the opendds_idl arguments for idl files in the project, like this:
 
 .. code-block:: mpc

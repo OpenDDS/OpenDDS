@@ -50,11 +50,7 @@ Below is a description of the generated files and which tools generate them.
 In this example, ``Foo.idl`` contains a single struct ``Bar`` contained in module ``Baz`` (IDL modules are similar to C++ namespaces and Java packages).
 To the right of each file name is the name of the tool that generates it, followed by some notes on its purpose.
 
-.. _java_bindings--reftable34:
-
-**Table  Generated files descriptions**
-
-.. list-table::
+.. list-table:: Generated files descriptions
    :header-rows: 1
 
    * - File

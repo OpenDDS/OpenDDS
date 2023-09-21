@@ -122,11 +122,7 @@ The following examples illustrate how to obtain the default policies for publish
 
 The following tables summarize the default QoS policies for each entity type in OpenDDS to which policies can be applied.
 
-.. _quality_of_service--reftable2:
-
-**Table  Default DomainParticipant QoS Policies**
-
-.. list-table::
+.. list-table:: Default DomainParticipant QoS Policies
    :header-rows: 1
 
    * - Policy
@@ -147,11 +143,7 @@ The following tables summarize the default QoS policies for each entity type in 
 
      - ``true``
 
-.. _quality_of_service--reftable3:
-
-**Table  Default Topic QoS Policies**
-
-.. list-table::
+.. list-table:: Default Topic QoS Policies
    :header-rows: 1
 
    * - Policy
@@ -312,11 +304,9 @@ The following tables summarize the default QoS policies for each entity type in 
 
      - ``SHARED_OWNERSHIP_QOS``
 
-.. _quality_of_service--reftable4:
+.. _quality_of_service--publisher:
 
-**Table  Default Publisher QoS Policies**
-
-.. list-table::
+.. list-table:: Default Publisher QoS Policies
    :header-rows: 1
 
    * - Policy
@@ -359,9 +349,7 @@ The following tables summarize the default QoS policies for each entity type in 
 
 .. _quality_of_service--reftable5:
 
-**Table  Default Subscriber QoS Policies**
-
-.. list-table::
+.. list-table:: Default Subscriber QoS Policies
    :header-rows: 1
 
    * - Policy
@@ -404,9 +392,7 @@ The following tables summarize the default QoS policies for each entity type in 
 
 .. _quality_of_service--reftable6:
 
-**Table  Default DataWriter QoS Policies**
-
-.. list-table::
+.. list-table:: Default DataWriter QoS Policies
    :header-rows: 1
 
    * - Policy
@@ -581,9 +567,7 @@ The following tables summarize the default QoS policies for each entity type in 
 
 .. _quality_of_service--reftable7:
 
-**Table  Default DataReader QoS Policies**
-
-.. list-table::
+.. list-table:: Default DataReader QoS Policies
    :header-rows: 1
 
    * - Policy

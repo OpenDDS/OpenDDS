@@ -980,8 +980,7 @@ The specification sets the default to 30 seconds.
 When the two above processes are started there may be up to a 30 second delay depending on how far apart they are started from each other.
 This time can be adjusted in OpenDDS configuration files and is discussed in :ref:`run_time_configuration--configuring-for-ddsi-rtps-discovery`.
 
-Because the architecture of OpenDDS allows for pluggable discovery and pluggable transports the two configuration entries called out in the ``rtps.ini`` file above can be changed independently with one using RTPS and the other not using RTPS (e.g.
-centralized discovery using ``DCPSInfoRepo``).
+Because the architecture of OpenDDS allows for pluggable discovery and pluggable transports the two configuration entries called out in the ``rtps.ini`` file above can be changed independently with one using RTPS and the other not using RTPS (e.g. centralized discovery using ``DCPSInfoRepo``).
 Setting them both to RTPS in our example makes this application fully interoperable with other non-OpenDDS implementations.
 
 .. _getting_started--data-handling-optimizations:
