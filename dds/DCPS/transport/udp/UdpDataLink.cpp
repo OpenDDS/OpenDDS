@@ -52,7 +52,7 @@ UdpDataLink::open(const ACE_INET_Addr& remote_address)
     return false;
   }
 
-  this->is_loopback_ = this->remote_address_ == cfg->local_address();
+  this->is_loopback_ = this->remote_address_ == cfg->send_receive_address();
 
   ACE_INET_Addr local_address;
   if (this->active_) {
@@ -60,7 +60,7 @@ UdpDataLink::open(const ACE_INET_Addr& remote_address)
       local_address.set(0, "", 0, remote_address.get_type());
     }
   } else {
-    local_address = cfg->local_address();
+    local_address = cfg->send_receive_address();
   }
 
   if (!open_appropriate_socket_type(this->socket_, local_address)) {
@@ -73,42 +73,19 @@ UdpDataLink::open(const ACE_INET_Addr& remote_address)
   VDBG((LM_DEBUG, "(%P|%t) UdpDataLink::open: listening on %C\n",
         LogAddr(local_address).c_str()));
 
-  // If listening on "any" host/port, need to record the actual port number
-  // selected by the OS, as well as our actual hostname, into the config_
-  // object's local_address_ for use in UdpTransport::connection_info_i().
-  if (!this->active_ && cfg->local_address().is_any()) {
-    ACE_INET_Addr address;
-    if (this->socket_.get_local_addr(address) != 0) {
-      ACE_ERROR_RETURN((LM_ERROR,
-                        ACE_TEXT("(%P|%t) ERROR: UdpDataLink::open - %p"),
-                        ACE_TEXT("cannot get local addr\n")), false);
-    }
-    const unsigned short port = address.get_port_number();
-    const std::string hostname = get_fully_qualified_hostname();
-    VDBG_LVL((LM_DEBUG,
-              ACE_TEXT("(%P|%t) UdpDataLink::open listening on host %C:%hu\n"),
-              hostname.c_str(), port), 2);
-
-    cfg->local_address(port, hostname.c_str());
-
-  // Similar case to the "if" case above, but with a bound host/IP but no port
-  } else if (!this->active_ &&
-             0 == cfg->local_address().get_port_number()) {
-    ACE_INET_Addr address;
-    if (this->socket_.get_local_addr(address) != 0) {
-      ACE_ERROR_RETURN((LM_ERROR,
-                        ACE_TEXT("(%P|%t) ERROR: UdpDataLink::open - %p"),
-                        ACE_TEXT("cannot get local addr\n")), false);
-    }
-    const unsigned short port = address.get_port_number();
-    VDBG_LVL((LM_DEBUG,
-              ACE_TEXT("(%P|%t) UdpDataLink::open listening on port %hu\n"),
-              port), 2);
-    cfg->local_address_set_port(port);
+  ACE_INET_Addr address;
+  if (this->socket_.get_local_addr(address) != 0) {
+    ACE_ERROR_RETURN((LM_ERROR,
+                      ACE_TEXT("(%P|%t) ERROR: UdpDataLink::open - %p"),
+                      ACE_TEXT("cannot get local addr\n")), false);
   }
 
-  if (cfg->send_buffer_size_ > 0) {
-    int snd_size = cfg->send_buffer_size_;
+  if (!this->active_ && !cfg->set_locator_address(address)) {
+    return false;
+  }
+
+  if (cfg->send_buffer_size() > 0) {
+    int snd_size = cfg->send_buffer_size();
     if (this->socket_.set_option(SOL_SOCKET,
                                 SO_SNDBUF,
                                 (void *) &snd_size,
@@ -122,8 +99,8 @@ UdpDataLink::open(const ACE_INET_Addr& remote_address)
     }
   }
 
-  if (cfg->rcv_buffer_size_ > 0) {
-    int rcv_size = cfg->rcv_buffer_size_;
+  if (cfg->rcv_buffer_size() > 0) {
+    int rcv_size = cfg->rcv_buffer_size();
     if (this->socket_.set_option(SOL_SOCKET,
                                 SO_RCVBUF,
                                 (void *) &rcv_size,

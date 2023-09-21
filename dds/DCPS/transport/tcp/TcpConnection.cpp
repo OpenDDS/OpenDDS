@@ -53,7 +53,7 @@ OpenDDS::DCPS::TcpConnection::TcpConnection(const ACE_INET_Addr& remote_address,
                                             const TcpInst_rch& config)
   : is_connector_(true)
   , remote_address_(remote_address)
-  , local_address_(config->local_address())
+  , local_address_(config->accept_address())
   , tcp_config_(config)
   , reconnect_state_(INIT_STATE)
   , transport_priority_(priority)
@@ -191,7 +191,7 @@ OpenDDS::DCPS::TcpConnection::passive_open(void* arg)
     return -1;
   }
   tcp_config_ = cfg;
-  local_address_ = cfg->local_address();
+  local_address_ = cfg->accept_address();
 
   set_sock_options(cfg);
 
@@ -351,7 +351,7 @@ OpenDDS::DCPS::TcpConnection::close(u_long)
         config_name().c_str(), LogAddr(remote_address_).c_str()));
     }
 
-    if (conn_retry_counter_ >= cfg->conn_retry_attempts_) {
+    if (conn_retry_counter_ >= cfg->conn_retry_attempts()) {
       handle_stop_reconnecting();
     } else {
       TcpTransport_rch transport = dynamic_rchandle_cast<TcpTransport>(link_->impl());
@@ -439,7 +439,7 @@ OpenDDS::DCPS::TcpConnection::set_sock_options(const TcpInst_rch& tcp_config)
 
   // A little screwy double negative logic: disabling nagle involves
   // enabling TCP_NODELAY
-  int opt = (tcp_config->enable_nagle_algorithm_ == false);
+  int opt = (tcp_config->enable_nagle_algorithm() == false);
 
   if (this->peer().set_option(IPPROTO_TCP, TCP_NODELAY, &opt, sizeof(opt)) == -1) {
     ACE_ERROR((LM_ERROR, "Failed to set TCP_NODELAY\n"));
@@ -500,7 +500,7 @@ OpenDDS::DCPS::TcpConnection::on_active_connection_established()
   // It will use that as an "identifier" of sorts.  To the other
   // (passive) side, our local_address that we send here will be known
   // as the remote_address.
-  const std::string address = cfg->get_public_address();
+  const std::string address = cfg->get_locator_address();
 
   if (DCPS_debug_level >= 2) {
     ACE_DEBUG((LM_DEBUG,
@@ -572,13 +572,13 @@ OpenDDS::DCPS::TcpConnection::passive_reconnect_i()
     // Mark the connection lost since the recv/send just failed.
     // this->connected_ = false;
 
-    if (cfg->passive_reconnect_duration_ == 0)
+    if (cfg->passive_reconnect_duration() == 0)
       return;
 
     this->reconnect_state_ = PASSIVE_WAITING_STATE;
     this->link_->notify(DataLink::DISCONNECTED);
 
-    TimeDuration delay = TimeDuration::from_msec(cfg->passive_reconnect_duration_);
+    TimeDuration delay = TimeDuration::from_msec(cfg->passive_reconnect_duration());
     this->reactor()->schedule_timer(this, 0, delay.value(), TimeDuration::zero_value.value());
   }
 }
@@ -611,13 +611,13 @@ OpenDDS::DCPS::TcpConnection::active_reconnect_i()
     return;
   }
 
-  if (this->conn_retry_counter_ < cfg->conn_retry_attempts_ ) {
+  if (this->conn_retry_counter_ < cfg->conn_retry_attempts() ) {
     this->reconnect_state_ = ACTIVE_RECONNECTING_STATE;
     if (this->conn_retry_counter_ == 0)
       this->link_->notify(DataLink::DISCONNECTED);
 
-    double retry_delay_msec = cfg->conn_retry_initial_delay_;
-    retry_delay_msec *= std::pow(cfg->conn_retry_backoff_multiplier_, this->conn_retry_counter_);
+    double retry_delay_msec = cfg->conn_retry_initial_delay();
+    retry_delay_msec *= std::pow(cfg->conn_retry_backoff_multiplier(), this->conn_retry_counter_);
 
     if (DCPS_debug_level >= 1) {
       ACE_DEBUG((LM_DEBUG, "(%P|%t) DBG:   TcpConnection::"
@@ -687,7 +687,7 @@ OpenDDS::DCPS::TcpConnection::handle_stop_reconnecting()
   this->reconnect_state_ = LOST_STATE;
   notify_connection_lost();
   TcpInst_rch cfg = tcp_config_.lock();
-  if (cfg && cfg->conn_retry_attempts_ > 0) {
+  if (cfg && cfg->conn_retry_attempts() > 0) {
     ACE_DEBUG((LM_DEBUG, "(%P|%t) we tried and failed to re-establish connection on transport: %C to %C.\n",
       config_name().c_str(), LogAddr(remote_address_).c_str()));
   } else {

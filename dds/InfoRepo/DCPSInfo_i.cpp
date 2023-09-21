@@ -2266,7 +2266,7 @@ int TAO_DDS_DCPSInfo_i::init_transport(int listen_address_given,
       OpenDDS::DCPS::dynamic_rchandle_cast<OpenDDS::DCPS::TcpInst>(inst);
     inst->datalink_release_delay(0);
 
-    tcp_inst->conn_retry_attempts_ = 0;
+    tcp_inst->conn_retry_attempts(0);
 
     if (listen_address_given) {
       tcp_inst->local_address(listen_str);

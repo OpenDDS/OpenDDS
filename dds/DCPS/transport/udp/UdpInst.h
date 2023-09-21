@@ -22,13 +22,13 @@ namespace DCPS {
 
 class OpenDDS_Udp_Export UdpInst : public TransportInst {
 public:
-  ACE_INT32 send_buffer_size_;
-  ACE_INT32 rcv_buffer_size_;
+  ConfigValue<UdpInst, ACE_INT32> send_buffer_size_;
+  void send_buffer_size(ACE_INT32 sbs);
+  ACE_INT32 send_buffer_size() const;
 
-  void rcv_buffer_size(ACE_INT32 rbs)
-  {
-    rcv_buffer_size_ = rbs;
-  }
+  ConfigValue<UdpInst, ACE_INT32> rcv_buffer_size_;
+  void rcv_buffer_size(ACE_INT32 rbs);
+  ACE_INT32 rcv_buffer_size() const;
 
   virtual int load(ACE_Configuration_Heap& cf,
                    ACE_Configuration_Section_Key& sect);
@@ -38,30 +38,32 @@ public:
 
   bool is_reliable() const { return false; }
 
-  virtual size_t populate_locator(OpenDDS::DCPS::TransportLocator& trans_info, ConnectionInfoFlags flags) const;
-
-  OPENDDS_STRING local_address_string() const { return local_address_config_str_; }
-  ACE_INET_Addr local_address() const { return local_address_; }
+  void local_address(const String& la);
   void local_address(const ACE_INET_Addr& addr)
   {
-    local_address_ = addr;
-    local_address_config_str_ = LogAddr(addr).str();
-  }
-  void local_address(const char* str)
-  {
-    local_address_config_str_ = str;
-    local_address_ = choose_single_coherent_address(local_address_config_str_, false);
+    local_address(LogAddr(addr).str());
   }
   void local_address(u_short port_number, const char* host_name)
   {
-    local_address_config_str_ = host_name;
-    local_address_config_str_ += ":" + to_dds_string(port_number);
-    local_address_ = choose_single_coherent_address(local_address_config_str_, false);
+    local_address(String(host_name) + ":" + to_dds_string(port_number));
   }
   void local_address_set_port(u_short port_number) {
-    local_address_.set_port_number(port_number);
-    set_port_in_addr_string(local_address_config_str_, port_number);
+    String addr = local_address();
+    set_port_in_addr_string(addr, port_number);
+    local_address(addr);
   }
+  String local_address() const;
+
+  ACE_INET_Addr send_receive_address() const;
+
+  bool set_locator_address(const ACE_INET_Addr& address);
+
+  std::string get_locator_address() const
+  {
+    return locator_address_;
+  }
+
+  virtual size_t populate_locator(OpenDDS::DCPS::TransportLocator& trans_info, ConnectionInfoFlags flags) const;
 
 private:
   friend class UdpType;
@@ -72,10 +74,7 @@ private:
 
   TransportImpl_rch new_impl();
 
-  /// The address from which to send/receive data.
-  /// The default value is: none.
-  ACE_INET_Addr local_address_;
-  OPENDDS_STRING local_address_config_str_;
+  std::string locator_address_;
 };
 
 } // namespace DCPS

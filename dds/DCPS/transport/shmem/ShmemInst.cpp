@@ -23,6 +23,8 @@ const TimeDuration ShmemInst::default_association_resend_period(0, 250000);
 
 ShmemInst::ShmemInst(const std::string& name)
   : TransportInst("shmem", name)
+  , pool_size_(*this, &ShmemInst::pool_size, &ShmemInst::pool_size)
+  , datalink_control_size_(*this, &ShmemInst::datalink_control_size, &ShmemInst::datalink_control_size)
 {
   std::ostringstream pool;
   pool << "OpenDDS-" << ACE_OS::getpid() << '-' << this->name();

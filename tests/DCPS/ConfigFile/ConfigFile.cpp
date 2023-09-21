@@ -72,13 +72,13 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     TEST_CHECK(tcp_inst->thread_per_connection() == true);
     TEST_CHECK(tcp_inst->datalink_release_delay() == 5000);
     TEST_CHECK(tcp_inst->datalink_control_chunks() == 16);
-    TEST_CHECK(tcp_inst->local_address_string() == "localhost:");
-    TEST_CHECK(tcp_inst->enable_nagle_algorithm_ == true);
-    TEST_CHECK(tcp_inst->conn_retry_initial_delay_ == 1000);
-    TEST_CHECK(tcp_inst->conn_retry_backoff_multiplier_ == 4);
-    TEST_CHECK(tcp_inst->conn_retry_attempts_ == 4);
-    TEST_CHECK(tcp_inst->passive_reconnect_duration_ == 4000);
-    TEST_CHECK(tcp_inst->max_output_pause_period_ == 1000);
+    TEST_CHECK(tcp_inst->local_address() == "localhost:");
+    TEST_CHECK(tcp_inst->enable_nagle_algorithm() == true);
+    TEST_CHECK(tcp_inst->conn_retry_initial_delay() == 1000);
+    TEST_CHECK(tcp_inst->conn_retry_backoff_multiplier() == 4);
+    TEST_CHECK(tcp_inst->conn_retry_attempts() == 4);
+    TEST_CHECK(tcp_inst->passive_reconnect_duration() == 4000);
+    TEST_CHECK(tcp_inst->max_output_pause_period() == 1000);
 
     TransportInst_rch inst2 = TransportRegistry::instance()->get_inst("anothertcp");
     TEST_CHECK(inst2);

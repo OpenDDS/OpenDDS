@@ -28,12 +28,14 @@ public:
 
   /// Size (in bytes) of the single shared-memory pool allocated by this
   /// transport instance.  Defaults to 16 megabytes.
+  ConfigValue<ShmemInst, size_t> pool_size_;
   void pool_size(size_t ps);
   size_t pool_size() const;
 
   /// Size (in bytes) of the control area allocated for each data link.
   /// This allocation comes out of the shared-memory pool defined by pool_size_.
   /// Defaults to 4 kilobytes.
+  ConfigValue<ShmemInst, size_t> datalink_control_size_;
   void datalink_control_size(size_t dcs);
   size_t datalink_control_size() const;
 
