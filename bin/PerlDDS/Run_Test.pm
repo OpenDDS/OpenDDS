@@ -671,8 +671,10 @@ sub process {
 
   my $subdir = $PerlACE::Process::ExeSubDir;
   if (defined($ENV{CMAKE_CONFIG_TYPE})) {
-    $subdir = $ENV{CMAKE_CONFIG_TYPE};
+    $subdir = $ENV{CMAKE_CONFIG_TYPE} . (($^O eq 'MSWin32') ? '\\' : '/');
+    $PerlACE::Process::ExeSubDir = $subdir;
   }
+
   my $basename = File::Basename::basename($executable);
   my $dirname = File::Basename::dirname($executable);
   if (!defined(PerlDDS::get_executable($basename, $dirname, catdir($dirname, $subdir)))) {

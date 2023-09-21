@@ -12676,6 +12676,48 @@ jobs:
         cd OpenDDS
         cmake -B build \
           -DCMAKE_UNITY_BUILD=TRUE \
+          -DBUILD_SHARED_LIBS=TRUE \
+          -DCMAKE_BUILD_TYPE=Debug \
+          -DOPENDDS_SECURITY=TRUE \
+          -DOPENDDS_ACE_TAO_SRC=$GITHUB_WORKSPACE/OpenDDS/build/ACE_TAO \
+          -DOPENDDS_MPC=$GITHUB_WORKSPACE/MPC \
+          -DOPENDDS_BUILD_TESTS=TRUE \
+          -DOPENDDS_CMAKE_VERBOSE=all
+    - uses: ammaraskar/gcc-problem-matcher@0.2.0
+    - name: Build
+      run: |
+        cd OpenDDS
+        cmake --build build -- -j $(getconf _NPROCESSORS_ONLN)
+    - name: Run Tests
+      run: |
+        cd OpenDDS
+        cmake --build build -t test
+
+  build_cmake_u22_stat:
+
+    runs-on: ubuntu-22.04
+
+    steps:
+    - name: Checkout OpenDDS
+      uses: actions/checkout@v3
+      with:
+        path: OpenDDS
+        submodules: true
+    - name: Checkout MPC
+      uses: actions/checkout@v3
+      with:
+        repository: DOCGroup/MPC
+        path: MPC
+    - name: Checkout ACE/TAO
+      uses: actions/checkout@v3
+      with:
+        repository: DOCGroup/ACE_TAO
+        path: OpenDDS/build/ACE_TAO
+    - name: Configure
+      run: |
+        cd OpenDDS
+        cmake -B build \
+          -DCMAKE_UNITY_BUILD=TRUE \
           -DBUILD_SHARED_LIBS=FALSE \
           -DCMAKE_BUILD_TYPE=Debug \
           -DOPENDDS_ACE_TAO_SRC=$GITHUB_WORKSPACE/OpenDDS/build/ACE_TAO \
@@ -12712,14 +12754,15 @@ jobs:
       with:
         repository: DOCGroup/ACE_TAO
         path: OpenDDS/build/ACE_TAO
-    - name: Install xerces
-      run: sudo apt-get -y install libxerces-c-dev
+    - name: Install Ninja
+      run: sudo apt-get -y install ninja-build
     - name: Configure
       run: |
         cd OpenDDS
         cmake -B build \
+          -G Ninja \
           -DCMAKE_UNITY_BUILD=TRUE \
-          -DBUILD_SHARED_LIBS=FALSE \
+          -DBUILD_SHARED_LIBS=TRUE \
           -DCMAKE_BUILD_TYPE=Debug \
           -DOPENDDS_ACE_TAO_SRC=$GITHUB_WORKSPACE/OpenDDS/build/ACE_TAO \
           -DOPENDDS_MPC=$GITHUB_WORKSPACE/MPC \
@@ -12734,7 +12777,7 @@ jobs:
     - name: Build
       run: |
         cd OpenDDS
-        cmake --build build -- -j $(getconf _NPROCESSORS_ONLN)
+        cmake --build build
     - name: Run Tests
       run: |
         cd OpenDDS
@@ -12764,8 +12807,8 @@ jobs:
       with:
         repository: DOCGroup/ACE_TAO
         path: OpenDDS/build/ACE_TAO
-    - name: Install xerces
-      run: sudo apt-get -y install libxerces-c-dev
+    - name: Install Ninja
+      run: sudo apt-get -y install ninja-build
     - name: Configure Host Tools
       run: |
         cd OpenDDS
@@ -12792,3 +12835,56 @@ jobs:
       run: |
         cd OpenDDS
         cmake --build build-target
+
+  build_cmake_w22:
+
+    needs: ACE_TAO_w22_p1
+
+    - name: Checkout OpenDDS
+      uses: actions/checkout@v3
+      with:
+        path: OpenDDS
+        submodules: true
+    - name: Checkout MPC
+      uses: actions/checkout@v3
+      with:
+        repository: DOCGroup/MPC
+        path: MPC
+    - name: Checkout ACE_TAO
+      uses: actions/checkout@v3
+      with:
+        repository: DOCGroup/ACE_TAO
+        ref: ace6tao2
+        path: OpenDDS/ACE_TAO
+    - name: Download ACE_TAO artifact
+      uses: actions/download-artifact@v3
+      with:
+        name: ACE_TAO_w22_p1_artifact
+        path: OpenDDS/ACE_TAO
+    - name: Extract ACE_TAO artifact
+      shell: bash
+      run: |
+        cd OpenDDS/ACE_TAO
+        tar xvfJ ACE_TAO_w22_p1.tar.xz
+        rm -f ACE_TAO_w22_p1.tar.xz
+    - name: set up msvc env
+      uses: ilammy/msvc-dev-cmd@v1
+    - name: Configure
+      run: |
+        cd OpenDDS
+        cmake -B build^
+          -DBUILD_SHARED_LIBS=TRUE^
+          -DCMAKE_BUILD_TYPE=Debug^
+          -DOPENDDS_ACE=${{ github.workspace }}/OpenDDS/ACE_TAO^
+          -DOPENDDS_MPC=${{ github.workspace }}/MPC^
+          -DOPENDDS_BUILD_TESTS=TRUE^
+          -DOPENDDS_CMAKE_VERBOSE=all
+    - uses: ammaraskar/msvc-problem-matcher@0.2.0
+    - name: Build
+      run: |
+        cd OpenDDS
+        cmake --build build
+    - name: Run Tests
+      run: |
+        cd OpenDDS
+        cmake --build build -t RUN_TESTS
