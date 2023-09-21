@@ -1,4 +1,4 @@
-.. news-prs: 0
+.. news-prs: 4281
 
 .. news-start-section: Documentation
 - Restructured parts of :ref:`dds_security` page and expanded documentation of some XML security document elements.
