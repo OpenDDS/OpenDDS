@@ -764,7 +764,9 @@ Internal defaults, command line arguments, and configuration file options will w
 
 The following is an example of a process that uses multiple ``DCPSInfoRepo`` repositories.
 
-.. image:: images/10000001000005B4000003E0BE5C08B1D30CA54A.png
+.. figure:: images/federation.png
+
+   Multiple DCPSInfoRepo Configuration
 
 Processes ``A`` and ``B`` are typical application processes that have been configured to communicate with one another and discover one another in ``InfoRepo_1``.
 This is a simple use of basic discovery.

@@ -235,7 +235,7 @@ Basic Concepts
 
 This is an overview of the DDS DCPS layer:
 
-.. figure:: images/10000001000001C100000202637D36545E22157D.png
+.. figure:: images/domain.png
 
   DCPS Conceptual Overview
 
@@ -627,7 +627,7 @@ Data transmission is accomplished via an OpenDDS-specific transport framework th
 This is referred to as *pluggable transports* and makes the extensibility of OpenDDS an important part of its architecture.
 OpenDDS currently supports TCP/IP, UDP/IP, IP multicast, shared-memory, and RTPS_UDP transport protocols as shown below.
 
-.. figure:: images/10000001000002E50000018D97FADEED4445DDBB.png
+.. figure:: images/pluggable.png
 
   OpenDDS Transport Framework
 
@@ -675,7 +675,7 @@ The DCPSInfoRepo process needs to be running whenever OpenDDS is being used in a
 An RTPS configuration does not use the DCPSInfoRepo.
 The DCPSInfoRepo is not involved in data propagation, its role is limited in scope to OpenDDS applications discovering one another.
 
-.. figure:: images/100000010000045A0000025185A3A43482F62E3D.png
+.. figure:: images/inforepo_discovery.png
 
    Centralized Discovery with DCPSInfoRepo
 
@@ -698,7 +698,7 @@ DDS applications requiring a Peer-to-Peer discovery pattern can be accommodated 
 This style of discovery is accomplished only through the use of the RTPS protocol as of the current release.
 This simple form of discovery is accomplished through simple configuration of DDS application data readers and data writers running in application processes as shown below.
 
-.. figure:: images/10000001000003FC0000025E8CF71A4C4FCDEFF3.png
+.. figure:: images/rtps_discovery.png
 
   Peer-to-peer Discovery with RTPS
 

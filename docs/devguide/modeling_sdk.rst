@@ -35,7 +35,7 @@ This diagram includes any package structures to be included in the model along w
 Zero or more of the policy or data definition elements can be included.
 Zero or one DCPS elements definition can be included in any given model.
 
-.. figure:: images/10000001000003BA000005345220EFBC3B2965C5.png
+.. figure:: images/modeling_data_definitions.png
   :scale: 50%
 
   Graphical modeling of the data definitions
@@ -44,7 +44,7 @@ Creating separate models for QoS policies only, data definitions only, or DCPS e
 References to other models allows externally defined models to be included in a model.
 This allows sharing of data definitions and QoS policies among different DCPS models as well as including externally defined data in a new set of data definitions.
 
-.. figure:: images/10000001000003CA00000534AF32FC1EC2AA656B.png
+.. figure:: images/modeling_dcps_entities.png
   :scale: 50%
 
   Graphical modeling of the DCPS entities
@@ -112,7 +112,7 @@ Installation
 ..
     Sect<11.2.2>
 
-.. figure:: images/100000000000018A000001582B13D316CA761B88.png
+.. figure:: images/modeling_sdk_install.png
   :scale: 150%
 
   Eclipse Software Installation Dialog
