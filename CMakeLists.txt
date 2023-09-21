@@ -106,6 +106,7 @@ install(
     cmake/opendds_testing.cmake
     cmake/tao_group.cmake
     cmake/tao_idl_sources.cmake
+    cmale/opendds_version.cmake
     "${config_cmake}"
   DESTINATION "${cmake_dest}"
 )
