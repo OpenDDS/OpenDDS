@@ -187,10 +187,21 @@ def omgissue_role(name, rawtext, text, lineno, inliner, options={}, content=[]):
     return rv
 
 
-def get_omg_spec_section_links(omg_specs, slug, version, our_name=None, display_name=None):
+def add_omg_spec(app, slug, version, our_name=None, display_name=None):
+    '''To be used in conf.py to declare sepcs based on links like https://www.omg.org/spec/DDS/1.4.
+    slug is the OMG name in their URL.
+    version must also match the URL.
+    our_name is the name to use with :omgspec:.
+    display_name is the name of the spec to be used in output.
+    '''
+
     our_name = slug.lower() if our_name is None else our_name
+    omg_specs = app.config.omg_specs
+    if our_name in omg_specs:
+        raise KeyError('Already a spec named ' + our_name)
     display_name = slug.replace('-', ' ') if display_name is None else display_name
 
+    # Get the PDF if we don't have it
     dir_path = docs_path / Path('_build') / 'omg-specs'
     dir_path.mkdir(parents=True, exist_ok=True)
     pdf_path = dir_path / '{}-{}.pdf'.format(slug, version)
@@ -206,6 +217,7 @@ def get_omg_spec_section_links(omg_specs, slug, version, our_name=None, display_
             pdf_path.unlink(missing_ok=True)
             pdf_path = None
 
+    # Process PDF's Table of Contents
     root = dict(subsections=None)
     sections_by_number = {}
     sections_by_title = {}
@@ -227,7 +239,9 @@ def get_omg_spec_section_links(omg_specs, slug, version, our_name=None, display_
                 del section_stack[level - len(section_stack):]
 
             kind = dest['kind']
-            # See https://pdfobject.com/pdf/pdf_open_parameters_acro8.pdf
+            # PDFs have two kinds of internal links. One is named and the the
+            # other is page and coordinate based.
+            # See https://pdfobject.com/pdf/pdf_open_parameters_acro8.pdf for URL syntax
             if kind == fitz.LINK_GOTO:
                 loc = 'page={}&view=FitH,{}'.format(page, dest['to'].y)
             elif kind == fitz.LINK_NAMED:
@@ -235,6 +249,8 @@ def get_omg_spec_section_links(omg_specs, slug, version, our_name=None, display_
             else:
                 continue
 
+            # Sections can be referenced by section number, which is preferred
+            # or by part of or the whole title. See omgspec_role for why.
             section = dict(title=title, loc=loc, subsections=[], level=level)
             section_stack[-1]['subsections'].append(section)
             last_section = section
@@ -284,6 +300,10 @@ def omgspec_role(name, rawtext, text, lineno, inliner, options={}, content=[]):
         # some reason.
         url = spec['url']
     else:
+        # Here we check it as a section number first, then as a partial or
+        # whole title. The whole title includes the section number, so we could
+        # just check the title, but doing that can match part of an earlier
+        # section number/title. Ex: 1.2.3 would match 1.1.1.2.3
         section = spec['sections_by_number'].get(section_key)
         if section is None:
             for section_title, sect in spec['sections_by_title'].items():
@@ -355,6 +375,7 @@ def setup(app):
     app.add_role('ghpr', ghpr_role)
     app.add_role('ghrelease', ghrelease_role)
 
+    app.add_config_value('omg_specs', {}, 'env', types=[dict])
     app.add_role('omgissue', omgissue_role)
     app.add_role('omgspec', omgspec_role)
     app.add_directive("omgspecs", OmgSpecsDirective)
