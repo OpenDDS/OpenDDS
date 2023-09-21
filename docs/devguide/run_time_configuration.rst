@@ -786,7 +786,7 @@ What allows this configuration to work can be found in the ``configE.ini`` file.
 
 .. _run_time_configuration--reffigure4:
 
-.. image:: images/10000001000005B4000003E0BE5C08B1D30CA54A.png
+.. image:: images/federation.png
 
 **Figure  Multiple DCPSInfoRepo Configuration**
 
