@@ -27,8 +27,7 @@ Configuring and Building
   If not already done, download the source from :ghrelease:`GitHub`.
 
 Use the :ghfile:`configure` script to prepare to build OpenDDS.
-This script requires Perl 5.18 or newer to be installed and available on the system ``PATH``.
-Older versions of Perl will probably work, but are not tested.
+This script requires :ref:`deps-perl`.
 
 .. tab:: Linux, macOS, BSDs, etc.
 
@@ -49,7 +48,7 @@ Older versions of Perl will probably work, but are not tested.
     configure
 
 Optionally add ``--help`` to the command line to see the advanced options available for this script.
-The configure script will download ACE/TAO and configure it for your platform.
+The configure script will download :ref:`ACE/TAO <deps-ace-tao>` and configure it for your platform.
 To use an existing ACE/TAO installation, either set the :envvar:`ACE_ROOT` and :envvar:`TAO_ROOT` environment variables or pass the ``--ace`` and ``--tao`` (if TAO is not at ``$ACE_ROOT/TAO``) options to configure.
 
 .. seealso:: :doc:`dependencies` for a full list of dependencies including ones that can be configured with the configure script.
@@ -89,18 +88,18 @@ If configure runs successfully it will end with a message about the next steps f
 
   .. seealso:: `Microsoft MSBuild Documentation <https://learn.microsoft.com/en-us/visualstudio/msbuild/msbuild>`__
 
-  The configure script creates an environment setup file called ``setenv.sh`` that sets all the environment variables the build and test steps rely on.
+  The configure script creates an environment setup file called ``setenv.cmd`` that sets all the environment variables the build and test steps rely on.
   For the command prompt that ran the configure script, these variables were set automatically.
   If running in another command prompt, the variables need to be set again before building other projects and running tests:
 
   .. code-block::
 
-    setenv.cmd
+    setenv
 
 Java
 ====
 
-If you're building OpenDDS for use by Java applications, please see the file :ghfile:`java/INSTALL` instead of this one.
+If you're building OpenDDS for use by :ref:`Java applications <java>`, please see the file :ghfile:`java/INSTALL` instead of this one.
 
 .. _building-sec:
 
@@ -111,11 +110,7 @@ Security
     Sect<14.1>
 
 :ref:`sec` is disabled by default, and must be enabled by passing ``--security`` to the configure script.
-
-It requires the following libraries to be available:
-
-- Xerces-C++ v3.x
-- OpenSSL v1.0.2+, v1.1, or v3.0.1+
+It requires :ref:`deps-xerces` and :ref:`deps-openssl`.
 
 .. tab:: Linux, macOS, BSDs, etc.
 
@@ -184,8 +179,7 @@ It requires the following libraries to be available:
 
     Official OpenSSL instructions can be found `here <https://wiki.openssl.org/index.php/Compilation_and_Installation#Windows>`__.
 
-    #. Install Perl and add it to the Path environment variable.
-       For this guide, ActiveState is used.
+    #. Install :ref:`deps-perl` and add it to the ``PATH`` environment variable.
 
     #. Install Netwide Assembler (NASM).
        Click through the latest stable release and there is a win32 and win64 directory containing executable installers.

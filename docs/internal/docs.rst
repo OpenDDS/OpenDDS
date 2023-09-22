@@ -229,6 +229,8 @@ These come in the form of `RST roles <https://docutils.sourceforge.io/docs/ref/r
 
     :omgspec:`dds:2.2.2`
 
+    :omgspec:`dds:2.2.2 PIM Description`
+
     :omgspec:`dds:Annex B`
 
     :omgspec:`Somewhere in the XTypes spec <xtypes>`
@@ -242,6 +244,8 @@ These come in the form of `RST roles <https://docutils.sourceforge.io/docs/ref/r
     :omgspec:`dds`
 
     :omgspec:`dds:2.2.2`
+
+    :omgspec:`dds:2.2.2 PIM Description`
 
     :omgspec:`dds:Annex B`
 
@@ -264,7 +268,8 @@ These come in the form of `RST roles <https://docutils.sourceforge.io/docs/ref/r
   - Section that start with section numbers, such as ``2.2.2``.
     This is based on the start of the full name of the section in the table of contents.
   - All others can be linked using the section title, either part or whole, such as ``Annex B`` or ``Annex B - Syntax for Queries and Filters``.
-    This can be used to link to sections that don't have section numbers, but can be ambiguous, so it should be most or all of the title.
+    This can be used to link to sections that don't have section numbers, but can be ambiguous, so should be most or all of the title.
+    It can also be used to link to numbered sections in case the numbers change, such as ``2.2.2 PIM Description``.
 
   See :doc:`here <omg_spec_links>` for all the possible sections.
 

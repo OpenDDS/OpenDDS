@@ -23,7 +23,7 @@ Common Terms
     ACE is an open source C++ framework that is maintained alongside :term:`TAO` and is extensively used by OpenDDS.
     It provides a platform abstraction layer and various utilities such as reactors for event handing.
 
-    See :ref:`dependencies-ace` for more information.
+    See :ref:`deps-ace` for more information.
 
   Built-in Topics
   BITs
@@ -105,7 +105,7 @@ Common Terms
     A build-system that generates GNU Makefiles, Visual Studio projects, and other such files.
     It serves the same role that CMake, Meson, and Automake do in other projects.
 
-    See :ref:`dependencies-mpc` for more information.
+    See :ref:`deps-mpc` for more information.
 
   Object Management Group
   OMG
@@ -142,7 +142,7 @@ Common Terms
     TAO is a :term:`CORBA` implementation that is maintained alongside :term:`ACE`.
     OpenDDS uses it for InfoRepo discovery and :term:`tao_idl`.
 
-    See :ref:`dependencies-tao` for more information.
+    See :ref:`deps-tao` for more information.
 
   ``tao_idl``
     A program that is part of :term:`TAO` that generates C++ code from :term:`IDL` for use in TAO and OpenDDS.

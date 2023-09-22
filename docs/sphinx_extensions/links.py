@@ -239,8 +239,8 @@ def add_omg_spec(app, slug, version, our_name=None, display_name=None):
                 del section_stack[level - len(section_stack):]
 
             kind = dest['kind']
-            # PDFs have two kinds of internal links. One is named and the the
-            # other is page and coordinate based.
+            # PDFs have two kinds of internal links. One is named and the other
+            # is page and coordinate based.
             # See https://pdfobject.com/pdf/pdf_open_parameters_acro8.pdf for URL syntax
             if kind == fitz.LINK_GOTO:
                 loc = 'page={}&view=FitH,{}'.format(page, dest['to'].y)
