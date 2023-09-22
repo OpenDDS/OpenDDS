@@ -214,7 +214,7 @@ It requires the following libraries to be available:
 
     #. Create a cmake build directory and change into it (from within the Xerces source tree).
 
-       .. code-block:: bash
+       .. code-block:: batch
 
            mkdir build
            cd build
@@ -222,13 +222,13 @@ It requires the following libraries to be available:
     #. Run cmake with the appropriate generator.
        In this case Visual Studio 2017 with 64-bit is being used so:
 
-       .. code-block:: bash
+       .. code-block:: batch
 
            cmake -G "Visual Studio 15 2017 Win64" ..
 
     #. Run cmake again with the build switch and install target (this should be done in an administrator command-prompt to install in the default location as mentioned above).
 
-       .. code-block:: bash
+       .. code-block:: batch
 
            cmake --build . --target install
 
@@ -238,7 +238,7 @@ It requires the following libraries to be available:
 
        * If the default location was used for OpenSSL and Xerces, configure should automatically find the dependencies:
 
-         .. code-block:: bash
+         .. code-block:: batch
 
              configure --security
 

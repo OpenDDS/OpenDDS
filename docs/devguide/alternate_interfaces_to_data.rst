@@ -241,7 +241,7 @@ These methods are not part of the IDL interfaces, so invoking them the requires 
      Observer_rch observer = make_rch<MyObserver>();
      entity->set_observer(observer, Observer::e_SAMPLE_SENT);
 
-Note that since the ``Observer`` class as an internal (not IDL) interface, it uses the "RCH" (Reference Counted Handle) smart pointer classes.
+Note that since the ``Observer`` class is an internal (not IDL) interface, it uses the "RCH" (Reference Counted Handle) smart pointer classes.
 Observer itself inherits from ``RcObject``, and uses of ``Observer``-derived classes should use the ``RcHandle`` template and its associated functions, as in the example above.
 See :ghfile:`dds/DCPS/RcHandle_T.h` for details.
 

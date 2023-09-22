@@ -715,7 +715,7 @@ The following are additional implementation limits that developers need to take 
 
 #. OpenDDS's native multicast transport does not work with RTPS Discovery due to the way GUIDs are assigned (a warning will be issued if this is attempted).
 
-For more details in how RTPS discovery occurs, a very good reference to read can be found in :omgspec:`rtps:8.5 Discovery Module`.
+For more details on RTPS discovery, see :omgspec:`rtps:8.5 Discovery Module`.
 
 .. _introduction--threading:
 
