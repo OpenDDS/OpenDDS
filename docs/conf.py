@@ -21,6 +21,7 @@ github_links_root_path = str(opendds_root_path)
 from mpc_lexer import MpcLexer
 from newsd import print_all_news, parse_newsd
 from version_info import VersionInfo
+from links import add_omg_spec
 
 # Custom Values ---------------------------------------------------------------
 
@@ -46,6 +47,16 @@ def setup(app):
     app.add_config_value('is_release', False, True)
     app.add_lexer('mpc', MpcLexer)
     app.add_transform(GlobalSubstitutions)
+    app.add_js_file("autotab.js")
+
+    add_omg_spec(app, 'DDS', '1.4')
+    add_omg_spec(app, 'DDSI-RTPS', '2.3', our_name='rtps', display_name='RTPS')
+    add_omg_spec(app, 'DDS-SECURITY', '1.1', our_name='sec', display_name='DDS Security')
+    add_omg_spec(app, 'DDS-XTypes', '1.3', our_name='xtypes')
+    add_omg_spec(app, 'IDL', '4.2')
+    add_omg_spec(app, 'CPP', '1.3', our_name='cpp03', display_name='IDL to C++03')
+    add_omg_spec(app, 'CPP11', '1.5', display_name='IDL to C++11')
+    add_omg_spec(app, 'I2JAV', '1.3', our_name='java', display_name='IDL to Java')
 
 
 # -- Project information -----------------------------------------------------
@@ -128,10 +139,12 @@ numfig = False
 highlight_language = 'none'
 
 linkcheck_ignore = [
-    # Linkcheck fails to work with GitHub anchors
+    # Linkcheck doesn't work with GitHub anchors
     r'^https?://github\.com/.*#.+$',
     # Returns 403 for some reason
     r'^https?://docs\.github\.com/.*$',
+    # UTF-8 decode errors (trying to parse PDF as HTML?), shouldn't check these anyways
+    r'^https?://www\.omg\.org/spec/.*/PDF.*$',
 ]
 
 intersphinx_mapping = {

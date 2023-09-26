@@ -1,4 +1,4 @@
-.. _safety_profile--safety-profile:
+.. _safety_profile:
 
 ##############
 Safety Profile
@@ -95,8 +95,8 @@ Run-time Configurable Options
 ..
     Sect<13.4>
 
-The memory pool used by OpenDDS can be configured by setting values in the [common] section of the configuration file.
-See :ref:`run_time_configuration--common-configuration-options` and the pool_size and pool_granularity rows of table :ref:`Table 7-2 <run_time_configuration--reftable9>`.
+The memory pool used by OpenDDS can be configured by setting values in the ``[common]`` section of the configuration file.
+See ``pool_size`` and ``pool_granularity`` in :ref:`run_time_configuration--common-configuration-options`.
 
 .. _safety_profile--running-ace-and-opendds-tests:
 

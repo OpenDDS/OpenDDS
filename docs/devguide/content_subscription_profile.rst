@@ -1,4 +1,4 @@
-.. _content_subscription_profile--content-subscription-profile:
+.. _content_subscription_profile:
 
 ############################
 Content-Subscription Profile
@@ -70,7 +70,7 @@ This data reader is functionally equivalent to a normal data reader except that 
 Filter expressions are first evaluated at the publisher so that data samples which would be ignored by the subscriber can be dropped before even getting to the transport.
 This feature can be turned off with ``-DCPSPublisherContentFilter 0`` or the equivalent setting in the ``[common]`` section of the configuration file.
 The behavior of non-default ``DEADLINE`` or ``LIVELINESS`` QoS policies may be affected by this policy.
-Special consideration must be given to how the "missing" samples impact the QoS behavior, see the document in ``docs/design/CONTENT_SUBSCRIPTION``.
+Special consideration must be given to how the "missing" samples impact the QoS behavior, see the document in :ghfile:`docs/design/CONTENT_SUBSCRIPTION`.
 
 .. note:: RTPS_UDP transport does not always do Writer-side filtering.
   It does not currently implement transport level filtering, but may be able to filter above the transport layer.
@@ -498,7 +498,7 @@ Next we have the IDL for the resulting data type:
 
 Based on this IDL, the following topic expression can be used to combine data from a topic ``Location`` which uses type ``LocationInfo`` and a topic ``FlightPlan`` which uses type ``PlanInfo``:
 
-::
+.. code-block:: sql
 
     SELECT flight_name, x, y, z AS height FROM Location NATURAL JOIN FlightPlan WHERE height < 1000 AND x <23
 
