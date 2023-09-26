@@ -3150,6 +3150,8 @@ bool DynamicDataImpl::get_value_from_collection(ValueType& value, DDS::MemberId 
   return true;
 }
 
+// TODO(sonndinh): Update the interface to return RETCODE_NO_DATA if there is no
+// data for an optional member.
 template<TypeKind ValueTypeKind, typename ValueType>
 DDS::ReturnCode_t DynamicDataImpl::get_single_value(ValueType& value, DDS::MemberId id)
 {
@@ -3839,6 +3841,11 @@ bool DynamicDataImpl::set_member_backing_store(DynamicDataImpl* member_ddi, DDS:
 
 bool DynamicDataImpl::get_complex_from_struct(DDS::DynamicData_ptr& value, DDS::MemberId id)
 {
+  // TODO(sonndinh):
+  // In case the member is optional and is not present in the DynamicData of the enclosing
+  // type, return error. For non-optional member, return empty DynamicData as we are doing now.
+  // This allows serialization code to diffentiate when to ignore an optional member.
+  // Apply the same thing to other types that may have optional members.
   FoundStatus found_status = NOT_FOUND;
   DDS::DynamicData_var dd_var;
   if (!get_complex_from_aggregated(dd_var, id, found_status)) {
@@ -8423,8 +8430,8 @@ bool DynamicDataImpl::serialized_size_dynamic_struct(DDS::DynamicData_ptr struct
     }
 
     // The serialization function for individual member must account for any header it has.
-    if (!serialized_size_dynamic_data_member(struct_data, encoding, size, md,
-                                             extensibility, mutable_running_total)) {
+    if (!serialized_size_dynamic_member(struct_data, encoding, size, md,
+                                        extensibility, mutable_running_total)) {
       if (log_level >= LogLevel:: Notice) {
         ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicDataImpl::serialized_size_dynamic_struct:"
                    " Failed to compute serialized size for member ID %u\n", md->id()));
@@ -8579,8 +8586,8 @@ bool DynamicDataImpl::serialized_size_dynamic_union(DDS::DynamicData_ptr union_d
     return false;
   }
 
-  if (has_branch && !serialized_size_dynamic_data_member(union_data, encoding, size, selected_md,
-                                                         extensibility, mutable_running_total)) {
+  if (has_branch && !serialized_size_dynamic_member(union_data, encoding, size, selected_md,
+                                                    extensibility, mutable_running_total)) {
     return false;
   }
 
@@ -8621,18 +8628,32 @@ bool DynamicDataImpl::serialized_size_dynamic_collection(DDS::DynamicData_ptr co
     if (elem_id == MEMBER_ID_INVALID) {
       return false;
     }
-    if (!serialized_size_dynamic_data_member_helper(col_data, encoding, size, elem_id, elem_type)) {
+    if (!serialized_size_dynamic_member_helper(col_data, encoding, size, elem_id, elem_type)) {
       return false;
     }
   }
   return true;
 }
 
+bool DynamicDataImpl::check_rc_from_get(DDS::ReturnCode_t rc, DDS::MemberId id,
+                                        TypeKind tk, const char* fn_name) const
+{
+  if (rc != DDS::RETCODE_OK && rc != DDS::RETCODE_NO_DATA) {
+    if (log_level >= LogLevel::Notice) {
+      ACE_ERROR((LM_NOTICE,
+                 "(%P|t) NOTICE: DynamicDataImpl::%C: Failed to get %C member ID %u: %C\n",
+                 fn_name, typekind_to_string(tk), id, retcode_to_string(rc)));
+    }
+    return false;
+  }
+  return true;
+}
+
 // Compute the serialized size of a member of struct, union, array, sequence.
 // Headers are not included.
-bool DynamicDataImpl::serialized_size_dynamic_data_member_helper(DDS::DynamicData_pr data,
+bool DynamicDataImpl::serialized_size_dynamic_member_helper(DDS::DynamicData_pr data,
   const DCPS::Encoding& encoding, size_t& size, DDS::MemberId member_id,
-  const DDS::DynamicType_var& member_type) const
+  const DDS::DynamicType_var& member_type, CORBA::Boolean optional) const
 {
   const TypeKind member_tk = member_type->get_kind();
   TypeKind treat_member_as = member_tk;
@@ -8644,39 +8665,121 @@ bool DynamicDataImpl::serialized_size_dynamic_data_member_helper(DDS::DynamicDat
     return false;
   }
 
-  switch (treat_member_as) {
-  case TK_INT8:
-  case TK_UINT8:
-  case TK_INT16:
-  case TK_UINT16:
-  case TK_INT32:
-  case TK_UINT32:
-  case TK_INT64:
-  case TK_UINT64:
-  case TK_FLOAT32:
-  case TK_FLOAT64:
-  case TK_FLOAT128:
-  case TK_CHAR8:
-  case TK_CHAR16:
-  case TK_BYTE:
-  case TK_BOOLEAN:
-    return serialized_size_primitive_member(encoding, size, treat_member_as);
-  case TK_STRING8: {
-    CORBA::String_var str;
-    if (data->get_string_value(str, member_id) != DDS::RETCODE_OK) {
+  // Missing optional members are ignored.
+  // TODO(sonndinh): Rewrite using get_to_single_value?
+  DDS::ReturnCode_t rc = DDS::RETCODE_OK;
+  if (is_primitive(treat_member_as)) {
+    switch (treat_member_as) {
+    case TK_INT8: {
+      CORBA::Int8 val;
+      rc = data->get_int8_value(val, member_id);
+      break;
+    }
+    case TK_UINT8: {
+      CORBA::UInt8 val;
+      rc = data->get_uint8_value(val, member_id);
+      break;
+    }
+    case TK_INT16: {
+      CORBA::Short val;
+      rc = data->get_int16_value(val, member_id);
+      break;
+    }
+    case TK_UINT16: {
+      CORBA::UShort val;
+      rc = data->get_uint16_value(val, member_id);
+      break;
+    }
+    case TK_INT32: {
+      CORBA::Long val;
+      rc = data->get_int32_value(val, member_id);
+      break;
+    }
+    case TK_UINT32: {
+      CORBA::ULong val;
+      rc = data->get_uint32_value(val, member_id);
+      break;
+    }
+    case TK_INT64: {
+      CORBA::LongLong val;
+      rc = data->get_int64_value(val, member_id);
+      break;
+    }
+    case TK_UINT64: {
+      CORBA::ULongLong val;
+      rc = data->get_uint64_value(val, member_id);
+      break;
+    }
+    case TK_FLOAT32: {
+      CORBA::Float val;
+      rc = data->get_float32_value(val, member_id);
+      break;
+    }
+    case TK_FLOAT64: {
+      CORBA::Double val;
+      rc = data->get_float64_value(val, member_id);
+      break;
+    }
+    case TK_FLOAT128: {
+      CORBA::LongDouble val;
+      rc = data->get_float128_value(val, member_id);
+      break;
+    }
+    case TK_CHAR8: {
+      CORBA::Char val;
+      rc = data->get_char8_value(val, member_id);
+      break;
+    }
+    case TK_CHAR16: {
+      CORBA::WChar val;
+      rc = data->get_char16_value(val, member_id);
+      break;
+    }
+    case TK_BYTE: {
+      CORBA::Octet val;
+      rc = data->get_byte_value(val, member_id);
+      break;
+    }
+    case TK_BOOLEAN: {
+      CORBA::Boolean val;
+      rc = data->get_boolean_value(val, member_id);
+      break;
+    }
+    default:
+      if (log_level >= LogLevel::Notice) {
+        ACE_ERROR((LM_ERROR,
+                   "(%P|%t) NOTICE: DynamicDataImpl::serialized_size_dynamic_member_helper:"
+                   " %C is not a primitive type\n", typekind_to_string(treat_member_as)));
+      }
       return false;
     }
-    serialized_size_string_common(encoding, size, str);
-    return true;
+
+    if (!check_rc_from_get(rc, member_id, treat_member_as, "serialized_size_dynamic_member_helper")) {
+      return false;
+    }
+    // TODO(sonndinh): update this.
+    return rc == DDS::RETCODE_NO_DATA ||
+      serialized_size_primitive_member(encoding, size, treat_member_as);
+  }
+
+  // Handle remaining types.
+  switch (treat_member_as) {
+  case TK_STRING8: {
+    CORBA::String_var str;
+    rc = data->get_string_value(str, member_id);
+    if (!check_rc_from_get(rc, member_id, treat_member_as, "serialized_size_dynamic_member_helper")) {
+      return false;
+    }
+    return rc == DDS::RETCODE_NO_DATA || serialized_size_string_common(encoding, size, str);
   }
 #ifdef DDS_HAS_WCHAR
   case TK_STRING16: {
     CORBA::WString_var wstr;
-    if (data->get_wstring_value(wstr, member_id) != DDS::RETCODE_OK) {
+    rc = data->get_wstring_value(wstr, member_id);
+    if (!check_rc_from_get(rc, member_id, treat_member_as, "serialized_size_dynamic_member_helper")) {
       return false;
     }
-    serialized_size_string_common(encoding, size, wstr);
-    return true;
+    return rc == DDS::RETCODE_NO_DATA || serialized_size_string_common(encoding, size, wstr);
   }
 #endif
   case TK_STRUCTURE:
@@ -8684,15 +8787,17 @@ bool DynamicDataImpl::serialized_size_dynamic_data_member_helper(DDS::DynamicDat
   case TK_ARRAY:
   case TK_SEQUENCE: {
     DDS::DynamicData_var member_data;
-    if (data->get_complex_value(member_data, member_id) != DDS::RETCODE_OK) {
+    rc = data->get_complex_value(member_data, member_id);
+    if (!check_rc_from_get(rc, member_id, treat_member_as, "serialized_size_dynamic_member_helper")) {
       return false;
     }
-    return serialized_size_dynamic_data(member_data, encoding, size);
+    return rc == DDS::RETCODE_NO_DATA || serialized_size_dynamic_data(member_data, encoding, size);
   }
   default:
     if (log_level >= LogLevel::Notice) {
-      ACE_ERROR((LM_ERROR, "(%P|%t) NOTICE: DynamicDataImpl::serialized_size_dynamic_data_member_helper:"
-                 " Unsupported member type %C\n", typekind_to_string(treat_member_as)));
+      ACE_ERROR((LM_ERROR,
+                 "(%P|%t) NOTICE: DynamicDataImpl::serialized_size_dynamic_member_helper:"
+                 " Unsupported member type %C at ID %u\n", typekind_to_string(member_tk), member_id));
     }
   }
   return false;
@@ -8704,23 +8809,24 @@ bool DynamicDataImpl::serialized_size_dynamic_data_member_helper(DDS::DynamicDat
 // a XCDR backing store) or returning default value (in case the member data is missing
 // from the internal container). So it's guaranteed that some data for each valid
 // member is available for serialization.
-bool DynamicDataImpl::serialized_size_dynamic_data_member(
+bool DynamicDataImpl::serialized_size_dynamic_member(
   DDS::DynamicData_ptr data, const DCPS::Encoding& encoding, size_t& size,
   const DDS::MemberDescriptor_var& md, DDS::ExtensibilityKind extensibility,
   size_t& mutable_running_total) const
 {
   const DDS::MemberId member_id = md->id();
   const DDS::DynamicType_var member_type = get_base_type(md->type());
+  const CORBA::Boolean optional = md->is_optional();
 
   // Member header
-  if (md->is_optional() && (extensibility == DDS::FINAL || extensibility == DDS::APPENDABLE)) {
+  if (optional && (extensibility == DDS::FINAL || extensibility == DDS::APPENDABLE)) {
     primitive_serialized_size_boolean(encoding, size);
   } else if (extensibility == DDS::MUTABLE) {
     serialized_size_parameter_id(encoding, size, mutable_running_total);
   }
 
   // Member contents
-  return serialized_size_dynamic_data_member_helper(data, encoding, size, member_id, member_type);
+  return serialized_size_dynamic_member_helper(data, encoding, size, member_id, member_type, optional);
 }
 
 bool DynamicDataImpl::serialize_dynamic_data(DCPS::Serializer& ser, DDS::DynamicData_ptr data) const
@@ -8739,9 +8845,313 @@ bool DynamicDataImpl::serialize_dynamic_data(DCPS::Serializer& ser, DDS::Dynamic
   return false;
 }
 
+// Serialize header for a basic member.
+// The return code @rc must be either NO_DATA or OK.
+bool DynamicDataImpl::serialize_dynamic_basic_member_header(
+  DCPS::Serializer& ser, DDS::ReturnCode_t rc, const SingleValue& sv,
+  DDS::ExtensibilityKind extensibility, CORBA::Boolean optional,
+  TypeKind tk, DDS::MemberId id, CORBA::Boolean must_understand) const
+{
+  if (optional && rc == DDS::RETCODE_NO_DATA) {
+    if (extensibility == DDS::FINAL || extensibility == DDS::APPENDABLE) {
+      return ser << ACE_OutputCDR::from_boolean(false);
+    }
+    return true;
+  }
+
+  if (optional && (extensibility == DDS::FINAL || extensibility == DDS::APPENDABLE)) {
+    return ser << ACE_OutputCDR::from_boolean(true);
+  } else if (extensibility == DDS::MUTABLE) {
+    const DCPS::Encoding& encoding = ser.encoding();
+    size_t member_size = 0;
+    if (is_primitive(tk)) {
+      if (!serialized_size_primitive_member(encoding, member_size, tk)) {
+        return false;
+      }
+    } else if (tk == TK_STRING8 || tk == TK_STRING16) {
+      serialized_size_string_common(encoding, member_size, sv);
+    } else {
+      return false;
+    }
+    return ser.write_parameter_id(id, member_size, must_understand);
+  }
+}
+
+// Serialize header for a non-basic member.
+// The return code @rc must be either NO_DATA or OK.
+bool DynamicDataImpl::serialize_dynamic_complex_member_header(
+  DCPS::Serializer& ser, DDS::ReturnCode_t rc, const DDS::DynamicData_ptr member_data,
+  DDS::ExtensibilityKind extensibility, CORBA::Boolean optional, DDS::MemberId id,
+  CORBA::Boolean must_understand) const
+{
+  if (optional && rc == DDS::RETCODE_NO_DATA) {
+    if (extensibility == DDS::FINAL || extensibility == DDS::APPENDABLE) {
+      return ser << ACE_OutputCDR::from_boolean(false);
+    }
+    return true;
+  }
+
+  if (optional && (extensibility == DDS::FINAL || extensibility == DDS::APPENDABLE)) {
+    return ser << ACE_OutputCDR::from_boolean(true);
+  } else if (extensibility == DDS::MUTABLE) {
+    const DCPS::Encoding& encoding = ser.encoding();
+    size_t member_size = 0;
+    return serialized_size_dynamic_data(member_data, encoding, member_size)
+      && ser.write_parameter_id(id, member_size, must_understand);
+  }
+}
+
+bool DynamicDataImpl::get_to_single_value(DDS::DynamicData_ptr data, DDS::MemberId id,
+  TypeKind type_kind, SingleValue& sv, DDS::ReturnCode_t& rc) const
+{
+  switch (type_kind) {
+  case TK_INT8: {
+    CORBA::Int8 val;
+    rc = data->get_int8_value(val, id);
+    if (!check_rc_from_get(rc, id, treat_member_as, "get_to_single_value")) {
+      return false;
+    }
+    // TODO(sonndinh): Add copy assignment operator for SingleValue.
+    sv = SingleValue(ACE_OutputCDR::from_int8(val));
+    break;
+  }
+  case TK_UINT8: {
+    CORBA::UInt8 val;
+    rc = data->get_uint8_value(val, id);
+    if (!check_rc_from_get(rc, id, treat_member_as, "get_to_single_value")) {
+      return false;
+    }
+    sv = SingleValue(ACE_OutputCDR::from_uint8(val));
+    break;
+  }
+  case TK_INT16: {
+    CORBA::Short val;
+    rc = data->get_int16_value(val, id);
+    if (!check_rc_from_get(rc, id, treat_member_as, "get_to_single_value")) {
+      return false;
+    }
+    sv = SingleValue(val);
+    break;
+  }
+  case TK_UINT16: {
+    CORBA::UShort val;
+    rc = data->get_uint16_value(val, id);
+    if (!check_rc_from_get(rc, id, treat_member_as, "get_to_single_value")) {
+      return false;
+    }
+    sv = SingleValue(val);
+    break;
+  }
+  case TK_INT32: {
+    CORBA::Long val;
+    rc = data->get_int32_value(val, id);
+    if (!check_rc_from_get(rc, id, treat_member_as, "get_to_single_value")) {
+      return false;
+    }
+    sv = SingleValue(val);
+    break;
+  }
+  case TK_UINT32: {
+    CORBA::ULong val;
+    rc = data->get_uint32_value(val, id);
+    if (!check_rc_from_get(rc, id, treat_member_as, "get_to_single_value")) {
+      return false;
+    }
+    sv = SingleValue(val);
+    break;
+  }
+  case TK_INT64: {
+    CORBA::LongLong val;
+    rc = data->get_int64_value(val, id);
+    if (!check_rc_from_get(rc, id, treat_member_as, "get_to_single_value")) {
+      return false;
+    }
+    sv = SingleValue(val);
+    break;
+  }
+  case TK_UINT64: {
+    CORBA::ULongLong val;
+    rc = data->get_uint64_value(val, id);
+    if (!check_rc_from_get(rc, id, treat_member_as, "get_to_single_value")) {
+      return false;
+    }
+    sv = SingleValue(val);
+    break;
+  }
+  case TK_FLOAT32: {
+    CORBA::Float val;
+    rc = data->get_float32_value(val, id);
+    if (!check_rc_from_get(rc, id, treat_member_as, "get_to_single_value")) {
+      return false;
+    }
+    sv = SingleValue(val);
+    break;
+  }
+  case TK_FLOAT64: {
+    CORBA::Double val;
+    rc = data->get_float64_value(val, id);
+    if (!check_rc_from_get(rc, id, treat_member_as, "get_to_single_value")) {
+      return false;
+    }
+    sv = SingleValue(val);
+    break;
+  }
+  case TK_FLOAT128: {
+    CORBA::LongDouble val;
+    rc = data->get_float128_value(val, id);
+    if (!check_rc_from_get(rc, id, treat_member_as, "get_to_single_value")) {
+      return false;
+    }
+    sv = SingleValue(val);
+    break;
+  }
+  case TK_CHAR8: {
+    CORBA::Char val;
+    rc = data->get_char8_value(val, id);
+    if (!check_rc_from_get(rc, id, treat_member_as, "get_to_single_value")) {
+      return false;
+    }
+    sv = SingleValue(ACE_OutputCDR::from_char(val));
+    break;
+  }
+#ifdef DDS_HAS_WCHAR
+  case TK_CHAR16: {
+    CORBA::WChar val;
+    rc = data->get_char16_value(val, id);
+    if (!check_rc_from_get(rc, id, treat_member_as, "get_to_single_value")) {
+      return false;
+    }
+    sv = SingleValue(ACE_OutputCDR::from_wchar(val));
+    break;
+  }
+#endif
+  case TK_BYTE: {
+    CORBA::Octet val;
+    rc = data->get_byte_value(val, id);
+    if (!check_rc_from_get(rc, id, treat_member_as, "get_to_single_value")) {
+      return false;
+    }
+    sv = SingleValue(ACE_OutputCDR::from_octet(val));
+    break;
+  }
+  case TK_BOOLEAN: {
+    CORBA::Boolean val;
+    rc = data->get_boolean_value(val, id);
+    if (!check_rc_from_get(rc, id, treat_member_as, "get_to_single_value")) {
+      return false;
+    }
+    sv = SingleValue(ACE_OutputCDR::from_boolean(val));
+    break;
+  }
+  case TK_STRING8: {
+    CORBA::String_var val;
+    rc = data->get_string_value(val, id);
+    if (!check_rc_from_get(rc, id, treat_member_as, "get_to_single_value")) {
+      return false;
+    }
+    sv = SingleValue(val.in());
+    break;
+  }
+#ifdef DDS_HAS_WCHAR
+  case TK_STRING16: {
+    CORBA::WString_var val;
+    rc = data->get_wstring_value(val, id);
+    if (!check_rc_from_get(rc, id, treat_member_as, "get_to_single_value")) {
+      return false;
+    }
+    sv = SingleValue(val.in());
+    break;
+  }
+#endif
+  default:
+    return false;
+  }
+  return true;
+}
+
+bool DynamicDataImpl::serialize_dynamic_member(DCPS::Serializer& ser, DDS::DynamicData_ptr data,
+                                               const DDS::MemberDescriptor_var md,
+                                               DDS::ExtensibilityKind extensibility) const
+{
+  const DDS::MemberId id = md->id();
+  const CORBA::Boolean optional = md->is_optional();
+  const CORBA::Boolean must_understand = md->is_must_understand() || md->is_key();
+  const DDS::DynamicType_var member_type = get_base_type(md->type());
+  const TypeKind member_tk = member_type->get_kind();
+  TypeKind treat_member_as = member_tk;
+
+  if (member_tk == TK_ENUM && enum_bound(member_type, treat_member_as) != DDS::RETCODE_OK) {
+    return false;
+  }
+  if (member_tk == TK_BITMASK && bitmask_bound(member_type, treat_member_as) != DDS::RETCODE_OK) {
+    return false;
+  }
+
+  DDS::ReturnCode_t rc = DDS::RETCODE_OK;
+  if (is_basic(treat_member_as)) {
+    // TODO(sonndinh): Add default constructor for SingleValue
+    SingleValue sv;
+    return get_to_single_value(data, id, treat_member_as, sv, rc)
+      && serialize_dynamic_basic_member_header(ser, rc, sv, extensibility, optional,
+                                               treat_member_as, id, must_understand)
+      && serialize_single_value(ser, sv);
+  }
+
+  switch (treat_member_as) {
+  case TK_STRUCTURE:
+  case TK_UNION:
+  case TK_ARRAY:
+  case TK_SEQUENCE: {
+    DDS::DynamicData_var member_data;
+    rc = data->get_complex_value(member_data, id);
+    return check_rc_from_get(rc, id, treat_member_as, "serialize_dynamic_member")
+      && serialize_dynamic_complex_member_header(ser, rc, member_data, extensibility,
+                                                 optional, id, must_understand)
+      && serialize_dynamic_data(ser, member_data);
+  }
+  default:
+    if (log_level >= LogLevel::Notice) {
+      ACE_ERROR((LM_ERROR, "(%P|%t) NOTICE: DynamicDataImpl::serialize_dynamic_member:"
+                 " Unsupported member type %C at ID %u\n", typekind_to_string(member_tk), id));
+    }
+  }
+  return false;
+}
+
 bool DynamicDataImpl::serialize_dynamic_struct(DCPS::Serializer& ser, DDS::DynamicData_ptr data) const
 {
-  // TODO(sonndinh)
+  // TODO(sonndinh): Handle KeyOnly/NestedKeyOnly
+  const DDS::DynamicType_var type = data->type();
+  const DDS::DynamicType_var base_type = get_base_type(type);
+  DDS::TypeDescriptor_var td;
+  if (!get_type_descriptor(base_type, td)) {
+    return false;
+  }
+
+  const DCPS::Encoding& encoding = ser.encoding();
+  size_t total_size = 0;
+  const DDS::ExtensibilityKind extensibility = td->extensibility_kind();
+  if (extensibility == DDS::APPENDABLE || extensibility == DDS::MUTABLE) {
+    if (!serialized_size_dynamic_struct(data, encoding, size) || !ser.write_delimiter(total_size)) {
+      return false;
+    }
+  }
+
+  const CORBA::ULong member_count = base_type->get_member_count();
+  for (CORBA::ULong i = 0; i < member_count; ++i) {
+    DDS::DynamicTypeMember_var dtm;
+    if (base_type->get_member_by_index(dtm, i) != DDS::RETCODE_OK) {
+      return false;
+    }
+    DDS::MemberDescriptor_var md;
+    if (dtm->get_descriptor(md) != DDS::RETCODE_OK) {
+      return false;
+    }
+
+    if (!serialize_dynamic_member(ser, data, md, extensibility)) {
+      return false;
+    }
+  }
 }
 
 bool DynamicDataImpl::serialize_dynamic_union(DCPS::Serializer& ser, DDS::DynamicData_ptr data) const
