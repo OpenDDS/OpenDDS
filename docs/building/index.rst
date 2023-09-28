@@ -22,7 +22,7 @@ See :ref:`cross-compiling` for how to cross compile for other platforms.
 Configuring and Building
 ************************
 
-.. seealso:: :ref:`cmake-building` to use CMake instead of a :term:`MPC`-based build,
+.. seealso:: :ref:`cmake-building` to use CMake instead of a :term:`MPC`-based build.
 
 .. ifconfig:: is_release
 

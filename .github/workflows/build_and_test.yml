@@ -12880,8 +12880,8 @@ jobs:
         cmake -B build^
           -DBUILD_SHARED_LIBS=TRUE^
           -DCMAKE_BUILD_TYPE=Debug^
-          -DOPENDDS_ACE=${{ github.workspace }}/OpenDDS/ACE_TAO^
-          -DOPENDDS_MPC=${{ github.workspace }}/MPC^
+          -DOPENDDS_ACE=${{ github.workspace }}\OpenDDS\ACE_TAO\ACE^
+          -DOPENDDS_MPC=${{ github.workspace }}\MPC^
           -DOPENDDS_BUILD_TESTS=TRUE^
           -DOPENDDS_CMAKE_VERBOSE=all
     - uses: ammaraskar/msvc-problem-matcher@0.2.0
