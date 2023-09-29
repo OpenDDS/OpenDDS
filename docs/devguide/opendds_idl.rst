@@ -276,4 +276,4 @@ Unlike when using the classic mapping, ``Foo.idl`` is not processed by ``tao_idl
 When using MPC to generate projects, the ``opendds_cxx11`` base project should be used to inherit the correct settings for code generation.
 If the generated code will be part of a shared library, use the ``-Wb,export_include`` option (in addition to ``-Wb,export_macro``) so that the generated headers have an ``#include`` for the export header.
 
-When using CMake to generate projects, see :doc:`/building/cmake`.
+When using CMake to generate projects, see :doc:`/devguide/building/cmake`.

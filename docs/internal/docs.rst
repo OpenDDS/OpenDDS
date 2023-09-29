@@ -276,7 +276,7 @@ These come in the form of `RST roles <https://docutils.sourceforge.io/docs/ref/r
 CMake Domain
 ============
 
-For :doc:`/building/cmake` there's a custom CMake `Sphinx domain <https://www.sphinx-doc.org/en/master/usage/restructuredtext/domains.html>`__ in :ghfile:`docs/sphinx_extensions/cmake.py`.
+For :doc:`/devguide/building/cmake` there's a custom CMake `Sphinx domain <https://www.sphinx-doc.org/en/master/usage/restructuredtext/domains.html>`__ in :ghfile:`docs/sphinx_extensions/cmake.py`.
 All of the directives can and should have RST content nested in them.
 
 .. rst:directive:: .. cmake:func:: NAME

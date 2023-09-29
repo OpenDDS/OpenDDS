@@ -48,7 +48,7 @@ See :ref:`built_in_topics--built-in-topic-subscription-example` for an example s
 
 If you are not planning on using Built-in-Topics in your application, you can configure OpenDDS to remove Built-In-Topic support at build time.
 Doing so can reduce the footprint of the core DDS library by up to 30%.
-See :ref:`introduction--disabling-the-building-of-built-in-topic-support` for information on disabling Built-In-Topic support.
+See :ref:`building--disabling-the-building-of-built-in-topic-support` for information on disabling Built-In-Topic support.
 
 .. _built_in_topics--dcpsparticipant-topic:
 
