@@ -63,6 +63,7 @@ concurrency:
 env:
   TRIGGERING_COMMIT: ${{ github.event.pull_request.head.sha || github.sha }}
   VCPKG_INSTALLED_DIR: ${{ github.workspace }}\vcpkg\installed
+  CTEST_OUTPUT_ON_FAILURE: ON
 
 jobs:
 
@@ -12879,6 +12880,53 @@ jobs:
         cd OpenDDS
         cmake -B build^
           -DBUILD_SHARED_LIBS=TRUE^
+          -DCMAKE_BUILD_TYPE=Debug^
+          -DOPENDDS_ACE=${{ github.workspace }}\OpenDDS\ACE_TAO\ACE^
+          -DOPENDDS_MPC=${{ github.workspace }}\MPC^
+          -DOPENDDS_BUILD_TESTS=TRUE^
+          -DOPENDDS_CMAKE_VERBOSE=all
+    - uses: ammaraskar/msvc-problem-matcher@0.2.0
+    - name: Build
+      shell: cmd
+      run: |
+        cd OpenDDS
+        cmake --build build
+    - name: Run Tests
+      shell: cmd
+      run: |
+        cd OpenDDS\build
+        ctest -C Debug
+
+  build_cmake_w22_stat:
+
+    runs-on: windows-2022
+
+    steps:
+    - name: Checkout OpenDDS
+      uses: actions/checkout@v3
+      with:
+        path: OpenDDS
+        submodules: true
+    - name: Checkout MPC
+      uses: actions/checkout@v3
+      with:
+        repository: DOCGroup/MPC
+        path: MPC
+    - name: Checkout ACE_TAO
+      uses: actions/checkout@v3
+      with:
+        repository: DOCGroup/ACE_TAO
+        ref: ace6tao2
+        path: OpenDDS/ACE_TAO
+    - name: set up msvc env
+      uses: ilammy/msvc-dev-cmd@v1
+    - name: Configure
+      shell: cmd
+      run: |
+        cd OpenDDS
+        cmake -B build^
+          -DCMAKE_UNITY_BUILD=TRUE^
+          -DBUILD_SHARED_LIBS=FALSE^
           -DCMAKE_BUILD_TYPE=Debug^
           -DOPENDDS_ACE=${{ github.workspace }}\OpenDDS\ACE_TAO\ACE^
           -DOPENDDS_MPC=${{ github.workspace }}\MPC^

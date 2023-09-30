@@ -49,15 +49,25 @@ if(OPENDDS_XERCES3)
 endif()
 
 function(_opendds_vs_force_static)
-  # See https://gitlab.kitware.com/cmake/community/wikis/FAQ#dynamic-replace
-  foreach(flag_var
-          CMAKE_CXX_FLAGS CMAKE_CXX_FLAGS_DEBUG CMAKE_CXX_FLAGS_RELEASE
-          CMAKE_CXX_FLAGS_MINSIZEREL CMAKE_CXX_FLAGS_RELWITHDEBINFO)
-    if(${flag_var} MATCHES "/MD")
-      string(REGEX REPLACE "/MD" "/MT" ${flag_var} "${${flag_var}}")
-      set(${flag_var} "${${flag_var}}" PARENT_SCOPE)
-    endif()
-  endforeach()
+  # Make sure the MSVC runtime library, which is similar to libc of other
+  # systems, is the same kind everywhere. Normally we shouldn't make global
+  # changes, but if we don't do this, MSVC won't link the programs if the
+  # runtimes of compiled objects are different.
+  if(CMAKE_VERSION VERSION_LESS 3.15.0)
+    # See https://gitlab.kitware.com/cmake/community/wikis/FAQ#dynamic-replace
+    foreach(flag_var
+            CMAKE_CXX_FLAGS CMAKE_CXX_FLAGS_DEBUG CMAKE_CXX_FLAGS_RELEASE
+            CMAKE_CXX_FLAGS_MINSIZEREL CMAKE_CXX_FLAGS_RELWITHDEBINFO)
+      if(${flag_var} MATCHES "/MD")
+        string(REGEX REPLACE "/MD" "/MT" ${flag_var} "${${flag_var}}")
+        set(${flag_var} "${${flag_var}}" PARENT_SCOPE)
+      endif()
+    endforeach()
+  else()
+    # The above doesn't seem to work anymore, so use this newer setting to
+    # force it globally.
+    set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>" CACHE INTERNAL "" FORCE)
+  endif()
 endfunction()
 
 if(MSVC AND OPENDDS_STATIC)

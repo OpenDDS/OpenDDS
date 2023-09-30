@@ -52,7 +52,8 @@ while (my $line = <$fh>) {
       if ($pf_line =~ /<OutputFile>(\$\(OutDir\))?(.*)<\/OutputFile>$/) {
         my $out_dir = $1;
         my $output_file = $2;
-        $output_file =~ s/d?.dll/d.dll/;
+        $output_file =~ s/d?\.dll/d.dll/;
+        $output_file =~ s/\.dll$/.lib/;
         if ($out_dir) {
           my $dir = $output_file =~ /.exe/ ? 'bin' : 'lib';
           $loc = File::Spec->catfile($values{ace}, $dir, $output_file);
@@ -64,11 +65,11 @@ while (my $line = <$fh>) {
       }
     }
     if (!defined($loc)) {
-        print STDERR ("Didn't get OutputFile from $pf\n");
+        # print STDERR ("Didn't get OutputFile from $pf\n");
         next;
     }
 
-    print STDERR ("$name $pf $loc\n");
+    # print STDERR ("$name $pf $loc\n");
     $projects{$name} = {
       name => $name,
       loc => $loc,
