@@ -12912,12 +12912,11 @@ jobs:
       with:
         repository: DOCGroup/MPC
         path: MPC
-    - name: Checkout ACE_TAO
+    - name: Checkout ACE/TAO
       uses: actions/checkout@v3
       with:
         repository: DOCGroup/ACE_TAO
-        ref: ace6tao2
-        path: OpenDDS/ACE_TAO
+        path: OpenDDS/build/ACE_TAO
     - name: set up msvc env
       uses: ilammy/msvc-dev-cmd@v1
     - name: Configure
@@ -12928,7 +12927,7 @@ jobs:
           -DCMAKE_UNITY_BUILD=TRUE^
           -DBUILD_SHARED_LIBS=FALSE^
           -DCMAKE_BUILD_TYPE=Debug^
-          -DOPENDDS_ACE=${{ github.workspace }}\OpenDDS\ACE_TAO\ACE^
+          -DOPENDDS_ACE_TAO_SRC=${{ github.workspace }}\OpenDDS\build\ACE_TAO^
           -DOPENDDS_MPC=${{ github.workspace }}\MPC^
           -DOPENDDS_BUILD_TESTS=TRUE^
           -DOPENDDS_CMAKE_VERBOSE=all
