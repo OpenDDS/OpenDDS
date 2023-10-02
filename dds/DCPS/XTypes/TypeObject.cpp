@@ -4939,8 +4939,8 @@ bool operator>>(Serializer& strm, XTypes::TypeInformation& stru)
 
   const size_t start_pos = strm.rpos();
 
-  unsigned member_id;
-  size_t field_size;
+  unsigned member_id = 0;
+  size_t field_size = 0;
   while (true) {
 
     if (strm.rpos() - start_pos >= total_size) {
