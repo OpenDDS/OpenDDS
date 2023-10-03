@@ -472,9 +472,6 @@ Tests are not built by default, ``--tests`` must be passed to the configure scri
 All tests can be run using :ghfile:`tests/auto_run_tests.pl`.
 See :doc:`/internal/running_tests` for running all tests or individual tests.
 
-..
-    Sect<1.3>
-
 .. _building--building-applications-that-use-opendds:
 
 **************************************

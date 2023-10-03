@@ -47,9 +47,6 @@ It is included in the release archive of ACE/TAO, which is downloaded by the con
 ACE/TAO
 =======
 
-OpenDDS is compatible with the current DOC Group micro release in the ACE 6.x / TAO 2.x series.
-See the :ghfile:`README.md` file for details.
-
 The DOC Group repository for ACE/TAO is hosted on Github at `DOCGroup/ACE_TAO <https://github.com/DOCGroup/ACE_TAO>`__.
 
 There are two release series of ACE/TAO that are officially supported by OpenDDS:

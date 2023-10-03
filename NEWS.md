@@ -26,19 +26,19 @@ Read [the documenation for this release on Read the Docs](https://opendds.readth
 
 * CMake Config Package
 
-    * Added [executable targets](https://opendds.readthedocs.io/en/dds-3.25/devguide/building/cmake.html#cmake-executables). ([PR #4160](https://github.com/OpenDDS/OpenDDS/pull/4160))
-    * [`OPENDDS_CMAKE_VERBOSE`](https://opendds.readthedocs.io/en/dds-3.25/devguide/building/cmake.html#var-OPENDDS_CMAKE_VERBOSE) output has been expanded, but now accepts a list of categories to control how much is logged. ([PR #4160](https://github.com/OpenDDS/OpenDDS/pull/4160))
-    * Added [`opendds_export_header`](https://opendds.readthedocs.io/en/dds-3.25/devguide/building/cmake.html#func-opendds_export_header) to generate an export header. ([PR #4160](https://github.com/OpenDDS/OpenDDS/pull/4160))
-    * [`opendds_target_sources`](https://opendds.readthedocs.io/en/dds-3.25/devguide/building/cmake.html#func-opendds_target_sources):
-        * Added [`opendds_target_sources(GENERATE_SERVER_SKELETONS)`](https://opendds.readthedocs.io/en/dds-3.25/devguide/building/cmake.html#func-arg-opendds_target_sources-GENERATE_SERVER_SKELETONS) to allow `tao_idl` to generate code for CORBA servers. ([PR #4140](https://github.com/OpenDDS/OpenDDS/pull/4140))
-        * Added [`opendds_target_sources(AUTO_LINK)`](https://opendds.readthedocs.io/en/dds-3.25/devguide/building/cmake.html#func-arg-opendds_target_sources-AUTO_LINK) as a fine-grained version of [`OPENDDS_AUTO_LINK_DCPS`](https://opendds.readthedocs.io/en/dds-3.25/devguide/building/cmake.html#var-OPENDDS_AUTO_LINK_DCPS). ([PR #4140](https://github.com/OpenDDS/OpenDDS/pull/4140))
-        * Added [`opendds_target_sources(SKIP_TAO_IDL)`](https://opendds.readthedocs.io/en/dds-3.25/devguide/building/cmake.html#func-arg-opendds_target_sources-SKIP_TAO_IDL) to disable `tao_idl`. ([PR #4140](https://github.com/OpenDDS/OpenDDS/pull/4140))
-        * Added [`opendds_target_sources(SKIP_OPENDDS_IDL)`](https://opendds.readthedocs.io/en/dds-3.25/devguide/building/cmake.html#func-arg-opendds_target_sources-SKIP_OPENDDS_IDL) to disable `opendds_idl`. ([PR #4140](https://github.com/OpenDDS/OpenDDS/pull/4140))
-        * Added [`opendds_target_sources(USE_EXPORT)`](https://opendds.readthedocs.io/en/dds-3.25/devguide/building/cmake.html#func-arg-opendds_target_sources-USE_EXPORT) to allow overriding the generated export header with an existing one. ([PR #4160](https://github.com/OpenDDS/OpenDDS/pull/4160))
+    * Added [executable targets](https://opendds.readthedocs.io/en/dds-3.25/building/cmake.html#cmake-executables). ([PR #4160](https://github.com/OpenDDS/OpenDDS/pull/4160))
+    * [`OPENDDS_CMAKE_VERBOSE`](https://opendds.readthedocs.io/en/dds-3.25/building/cmake.html#var-OPENDDS_CMAKE_VERBOSE) output has been expanded, but now accepts a list of categories to control how much is logged. ([PR #4160](https://github.com/OpenDDS/OpenDDS/pull/4160))
+    * Added [`opendds_export_header`](https://opendds.readthedocs.io/en/dds-3.25/building/cmake.html#func-opendds_export_header) to generate an export header. ([PR #4160](https://github.com/OpenDDS/OpenDDS/pull/4160))
+    * [`opendds_target_sources`](https://opendds.readthedocs.io/en/dds-3.25/building/cmake.html#func-opendds_target_sources):
+        * Added [`opendds_target_sources(GENERATE_SERVER_SKELETONS)`](https://opendds.readthedocs.io/en/dds-3.25/building/cmake.html#func-arg-opendds_target_sources-GENERATE_SERVER_SKELETONS) to allow `tao_idl` to generate code for CORBA servers. ([PR #4140](https://github.com/OpenDDS/OpenDDS/pull/4140))
+        * Added [`opendds_target_sources(AUTO_LINK)`](https://opendds.readthedocs.io/en/dds-3.25/building/cmake.html#func-arg-opendds_target_sources-AUTO_LINK) as a fine-grained version of [`OPENDDS_AUTO_LINK_DCPS`](https://opendds.readthedocs.io/en/dds-3.25/building/cmake.html#var-OPENDDS_AUTO_LINK_DCPS). ([PR #4140](https://github.com/OpenDDS/OpenDDS/pull/4140))
+        * Added [`opendds_target_sources(SKIP_TAO_IDL)`](https://opendds.readthedocs.io/en/dds-3.25/building/cmake.html#func-arg-opendds_target_sources-SKIP_TAO_IDL) to disable `tao_idl`. ([PR #4140](https://github.com/OpenDDS/OpenDDS/pull/4140))
+        * Added [`opendds_target_sources(SKIP_OPENDDS_IDL)`](https://opendds.readthedocs.io/en/dds-3.25/building/cmake.html#func-arg-opendds_target_sources-SKIP_OPENDDS_IDL) to disable `opendds_idl`. ([PR #4140](https://github.com/OpenDDS/OpenDDS/pull/4140))
+        * Added [`opendds_target_sources(USE_EXPORT)`](https://opendds.readthedocs.io/en/dds-3.25/building/cmake.html#func-arg-opendds_target_sources-USE_EXPORT) to allow overriding the generated export header with an existing one. ([PR #4160](https://github.com/OpenDDS/OpenDDS/pull/4160))
 
     * Libraries and features can be passed to `find_package(OpenDDS COMPONENTS)` to change what is required. ([PR #4160](https://github.com/OpenDDS/OpenDDS/pull/4160), [PR #4140](https://github.com/OpenDDS/OpenDDS/pull/4140))
 
-        * See [Components](https://opendds.readthedocs.io/en/dds-3.25/devguide/building/cmake.html#cmake-components) for details.
+        * See [Components](https://opendds.readthedocs.io/en/dds-3.25/building/cmake.html#cmake-components) for details.
 
 ### Security
 
@@ -60,11 +60,11 @@ Read [the documenation for this release on Read the Docs](https://opendds.readth
 ### Documentation
 
 * Moved various markdown files into the Sphinx documentation so that they are now included along with the Developer's Guide: ([PR #4139](https://github.com/OpenDDS/OpenDDS/pull/4139))
-    * `INSTALL.md` is now [Building and Installing](https://opendds.readthedocs.io/en/dds-3.25/devguide/building/index.html).
-    * `docs/dependencies.md` is now [Dependencies](https://opendds.readthedocs.io/en/dds-3.25/devguide/building/dependencies.html).
-    * `docs/cmake.md` is now [Using OpenDDS in a CMake Project](https://opendds.readthedocs.io/en/dds-3.25/devguide/building/cmake.html).
-    * `docs/android.md` is now [Android](https://opendds.readthedocs.io/en/dds-3.25/devguide/building/android.html).
-    * `docs/ios.md` is now [iOS](https://opendds.readthedocs.io/en/dds-3.25/devguide/building/ios.html).
+    * `INSTALL.md` is now [Building and Installing](https://opendds.readthedocs.io/en/dds-3.25/building/index.html).
+    * `docs/dependencies.md` is now [Dependencies](https://opendds.readthedocs.io/en/dds-3.25/building/dependencies.html).
+    * `docs/cmake.md` is now [Using OpenDDS in a CMake Project](https://opendds.readthedocs.io/en/dds-3.25/building/cmake.html).
+    * `docs/android.md` is now [Android](https://opendds.readthedocs.io/en/dds-3.25/building/android.html).
+    * `docs/ios.md` is now [iOS](https://opendds.readthedocs.io/en/dds-3.25/building/ios.html).
 
 * Restructured how the documentation is presented to cleanly separate the Developer's Guide and internal documentation. ([PR #4139](https://github.com/OpenDDS/OpenDDS/pull/4139))
 * Added a [proper main page](https://opendds.readthedocs.io/en/dds-3.25/index.html). ([PR #4139](https://github.com/OpenDDS/OpenDDS/pull/4139))
