@@ -51,7 +51,7 @@ Dependencies
 
 .. seealso::
 
-  :doc:`/building/dependencies` for all dependencies and details on how these are used in OpenDDS.
+  :doc:`/devguide/building/dependencies` for all dependencies and details on how these are used in OpenDDS.
 
 .. _dev_guidelines-text_file_formating:
 

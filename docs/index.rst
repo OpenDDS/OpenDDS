@@ -8,7 +8,6 @@ OpenDDS
   :hidden:
 
   news
-  building/index
   devguide/index
   internal/index
   glossary
@@ -41,7 +40,7 @@ They are attached to their corresponding releases as ``OpenDDS-VERSION.pdf``.
 Using OpenDDS
 *************
 
-:doc:`building/index`
+:doc:`devguide/building/index`
   How to build and install OpenDDS
 
 :ref:`introduction--what-is-opendds`

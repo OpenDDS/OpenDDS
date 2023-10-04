@@ -66,11 +66,11 @@ Documentation
 
 - Moved various markdown files into the Sphinx documentation so that they are now included along with the Developer's Guide: (:ghpr:`4139`)
 
-  - ``INSTALL.md`` is now :doc:`/building/index`.
-  - ``docs/dependencies.md`` is now :doc:`/building/dependencies`.
-  - ``docs/cmake.md`` is now :doc:`/building/cmake`.
-  - ``docs/android.md`` is now :doc:`/building/android`.
-  - ``docs/ios.md`` is now :doc:`/building/ios`.
+  - ``INSTALL.md`` is now :doc:`/devguide/building/index`.
+  - ``docs/dependencies.md`` is now :doc:`/devguide/building/dependencies`.
+  - ``docs/cmake.md`` is now :doc:`/devguide/building/cmake`.
+  - ``docs/android.md`` is now :doc:`/devguide/building/android`.
+  - ``docs/ios.md`` is now :doc:`/devguide/building/ios`.
 
 - Restructured how the documentation is presented to cleanly separate the Developer's Guide and internal documentation. (:ghpr:`4139`)
 - Added a :doc:`proper main page </index>`. (:ghpr:`4139`)

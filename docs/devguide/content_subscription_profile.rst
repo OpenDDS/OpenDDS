@@ -31,7 +31,7 @@ Content-filtered topic and query condition allow filtering (selection) of data s
 Additionally, query condition allows sorting the result set returned from a data reader's ``read()`` or ``take()`` operation.
 Multi topic also has this selection capability as well as the ability to aggregate data from different data writers into a single data type and data reader.
 
-If you are not planning on using the Content-Subscription Profile features in your application, you can configure OpenDDS to remove support for it at build time (:ref:`introduction--content-subscription-profile`).
+If you are not planning on using the Content-Subscription Profile features in your application, you can configure OpenDDS to remove support for it at build time (:ref:`building--content-subscription-profile`).
 
 .. _content_subscription_profile--content-filtered-topic:
 

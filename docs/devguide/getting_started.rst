@@ -266,7 +266,7 @@ Two different build systems are supported for projects that use OpenDDS:
 Even if you will eventually use some custom build system that's not one of the two listed above, start by building an example OpenDDS application using one of the supported build systems and then migrate the code generator command lines, compiler options, etc., to the custom build system.
 
 The remainder of this section will assume MPC.
-For more details on using CMake, see the :doc:`/building/cmake`.
+For more details on using CMake, see the :doc:`/devguide/building/cmake`.
 
 The code generation process is simplified when using MPC, by inheriting from the dcps base project.
 Here is the MPC file section common to both the publisher and subscriber

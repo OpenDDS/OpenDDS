@@ -14,9 +14,10 @@ Building and Installing
 Supported Platforms
 *******************
 
-We have built OpenDDS on number of different platforms and compilers.
-See :ghfile:`README.md#supported-platforms` for a complete description of supported platforms.
-See :ref:`cross-compiling` for how to cross compile for other platforms.
+The OpenDDS Foundation regularly builds and tests OpenDDS on a wide variety of platforms, operating systems, and compilers.
+The OpenDDS Foundation continually updates OpenDDS to support additional platforms.
+See the :ghfile:`README.md#supported-platforms` file in the distribution for the most recent platform support information.
+See :ref:`cross_compiling` for how to cross compile for other platforms.
 
 ************************
 Configuring and Building
@@ -31,7 +32,7 @@ This script requires :ref:`deps-perl`.
 
 .. tab:: Linux, macOS, BSDs, etc.
 
-  To start the script change to the root of the OpenDDS source directory and run:
+  To start the script, change to the root of the OpenDDS source directory and run:
 
   .. code-block:: bash
 
@@ -41,7 +42,7 @@ This script requires :ref:`deps-perl`.
 
   `Strawberry Perl <https://strawberryperl.com>`__ is recommended for Windows.
 
-  To start the script open a `Visual Studio Developer Command Prompt <https://learn.microsoft.com/en-us/visualstudio/ide/reference/command-prompt-powershell>`__ that has C++ tools available, then change to the root of the OpenDDS source directory and run:
+  To start the script, open a `Visual Studio Developer Command Prompt <https://learn.microsoft.com/en-us/visualstudio/ide/reference/command-prompt-powershell>`__ that has C++ tools available, then change to the root of the OpenDDS source directory and run:
 
   .. code-block:: batch
 
@@ -249,7 +250,160 @@ It requires :ref:`deps-xerces` and :ref:`deps-openssl`.
 
            msbuild /m DDS_TAOv2_all.sln
 
-.. _cross-compiling:
+Optional Features
+=================
+
+To avoid compiling OpenDDS code that you will not be using, there are certain features than can be excluded from being built.
+The features are discussed below.
+
+Users requiring a small-footprint configuration or compatibility with safety-oriented platforms should consider using the OpenDDS Safety Profile, which is described in :ref:`safety_profile` of this guide.
+
+.. _building--building-with-a-feature-enabled-or-disabled:
+
+Building With a Feature Enabled or Disabled
+-------------------------------------------
+
+..
+    Sect<1.3.1>
+
+Most features are supported by the ``configure`` script.
+The ``configure`` script creates config files with the correct content and then runs MPC.
+If you are using the ``configure`` script, run it with the ``--help`` command line option and look for the feature you wish to enable/disable.
+If you are not using the ``configure`` script, continue reading below for instructions on running MPC directly.
+
+For the features described below, MPC is used for enabling (the default) a feature or disabling the feature.
+For a feature named *feature*, the following steps are used to disable the feature from the build:
+
+#. Use the command line ``features`` argument to MPC:
+
+   .. code-block:: bash
+
+      mwc.pl -type type -features feature=0 DDS.mwc
+
+   Or alternatively, add the line ``feature=0`` to the file ``$ACE_ROOT/bin/MakeProjectCreator/config/default.features`` and regenerate the project files using MPC.
+
+#. If you are using the ``gnuace`` MPC project type (which is the case if you will be using GNU make as your build system), add line ``feature=0`` to the file ``$ACE_ROOT/include/makeinclude/platform_macros.GNU``.
+
+To explicitly enable the feature, use ``feature=1`` above.
+
+.. note:: You can also use the :ghfile:`configure` script to enable or disable features.
+  To disable the feature, pass ``--no-feature`` to the script, to enable pass ``--feature``.
+  In this case ``-`` is used instead of ``_`` in the feature name.
+  For example, to disable feature ``content_subscription`` discussed below, pass ``--no-content-subscription`` to the configure script.
+
+.. _building--disabling-the-building-of-built-in-topic-support:
+
+Disabling the Building of Built-In Topic Support
+------------------------------------------------
+
+..
+    Sect<1.3.2>
+
+Feature Name: ``built_in_topics``
+
+You can reduce the footprint of the core DDS library by up to 30% by disabling Built-in Topic Support.
+See :ref:`bit` for a description of Built-In Topics.
+
+.. _building--disabling-the-building-of-compliance-profile-features:
+
+Disabling the Building of Compliance Profile Features
+-----------------------------------------------------
+
+..
+    Sect<1.3.3>
+
+The DDS specification defines *compliance profiles* to provide a common terminology for indicating certain feature sets that a DDS implementation may or may not support.
+These profiles are given below, along with the name of the MPC feature to use to disable support for that profile or components of that profile.
+
+Many of the profile options involve QoS settings.
+If you attempt to use a QoS value that is incompatible with a disabled profile, a runtime error will occur.
+If a profile involves a class, a compile time error will occur if you try to use the class and the profile is disabled.
+
+.. _building--content-subscription-profile:
+
+==============================
+ Content-Subscription Profile
+==============================
+
+..
+    Sect<1.3.3.1>
+
+Feature Name: ``content_subscription``
+
+This profile adds the classes ``ContentFilteredTopic``, ``QueryCondition``, and ``MultiTopic`` discussed in :ref:`content_subscription_profile`.
+
+In addition, individual classes can be excluded by using the features given in the table below.
+
+.. list-table:: Content-Subscription Class Features
+   :header-rows: 1
+
+   * - Class
+
+     - Feature
+
+   * - ContentFilteredTopic
+
+     - ``content_filtered_topic``
+
+   * - QueryCondition
+
+     - ``query_condition``
+
+   * - MultiTopic
+
+     - ``multi_topic``
+
+.. _building--persistence-profile:
+
+=====================
+ Persistence Profile
+=====================
+
+..
+    Sect<1.3.3.2>
+
+Feature Name: ``persistence_profile``
+
+This profile adds the QoS policy ``DURABILITY_SERVICE`` and the settings ``TRANSIENT`` and ``PERSISTENT`` of the ``DURABILITY`` QoS policy ``kind``.
+
+.. _building--ownership-profile:
+
+===================
+ Ownership Profile
+===================
+
+..
+    Sect<1.3.3.3>
+
+Feature Name: ``ownership_profile``
+
+This profile adds:
+
+* the setting ``EXCLUSIVE`` of the ``OWNERSHIP`` ``kind``
+
+* support for the ``OWNERSHIP_STRENGTH`` policy
+
+* setting a ``depth > 1`` for the ``HISTORY`` QoS policy.
+
+*Some users may wish to exclude support for the Exclusive OWNERSHIP policy and its associated OWNERSHIP_STRENGTH without impacting use of HISTORY.*
+*In order to support this configuration, OpenDDS also has the MPC feature ownership_kind_exclusive (configure script option --no-ownership-kind-exclusive).*
+
+.. _building--object-model-profile:
+
+======================
+ Object Model Profile
+======================
+
+..
+    Sect<1.3.3.4>
+
+Feature Name: ``object_model_profile``
+
+This profile includes support for the ``PRESENTATION`` access_scope setting of ``GROUP``.
+
+.. note:: Currently, the ``PRESENTATION`` access_scope of ``TOPIC`` is also excluded when ``object_model_profile`` is disabled.
+
+.. _cross_compiling:
 
 Cross Compiling
 ===============
@@ -317,3 +471,59 @@ Tests
 Tests are not built by default, ``--tests`` must be passed to the configure script.
 All tests can be run using :ghfile:`tests/auto_run_tests.pl`.
 See :doc:`/internal/running_tests` for running all tests or individual tests.
+
+.. _building--building-applications-that-use-opendds:
+
+**************************************
+Building Applications that use OpenDDS
+**************************************
+
+..
+    Sect<1.4>
+
+This section applies to any C++ code that directly or indirectly includes OpenDDS headers.
+For Java applications, see :ref:`java`.
+
+C++ source code that includes OpenDDS headers can be built using either build system: MPC or CMake.
+
+.. _building--mpc-the-makefile-project-and-workspace-creator:
+
+MPC: The Makefile, Project, and Workspace Creator
+=================================================
+
+..
+    Sect<1.4.1>
+
+OpenDDS is itself built with MPC, so development systems that are set up to use OpenDDS already have MPC available.
+The OpenDDS configure script creates a "setenv" script with environment settings (``setenv.cmd`` on Windows; ``setenv.sh`` on Linux/macOS).
+This environment contains the ``PATH`` and ``MPC_ROOT`` settings necessary to use MPC.
+
+MPC's source tree (in ``MPC_ROOT``) contains a ``docs`` directory with both HTML and plain text documentation (``USAGE`` and ``README`` files).
+
+The example walk-through in :ref:`getting_started--using-dcps` uses MPC as its build system.
+The OpenDDS source tree contains many tests and examples that are built with MPC.
+These can be used as starting points for application MPC files.
+
+.. _building--cmake:
+
+CMake
+=====
+
+..
+    Sect<1.4.2>
+
+Applications can also be built with `CMake <https://cmake.org/>`__.
+See :doc:`/devguide/building/cmake` for more information.
+
+.. _building--custom-build-systems:
+
+Custom Build systems
+====================
+
+..
+    Sect<1.4.3>
+
+Users of OpenDDS are strongly encouraged to select one of the two options listed above (MPC or CMake) to generate consistent build files on any supported platform.
+If this is not possible, users of OpenDDS must make sure that all code generator, compiler, and linker settings in the custom build setup result in API- and ABI-compatible code.
+To do this, start with an MPC or CMake-generated project file (makefile or Visual Studio project file) and make sure all relevant settings are represented in the custom build system.
+This is often done through a combination of inspecting the project file and running the build with verbose output to see how the toolchain (code generators, compiler, linker) is invoked.
