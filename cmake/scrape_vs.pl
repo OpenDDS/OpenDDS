@@ -49,14 +49,22 @@ while (my $line = <$fh>) {
     open(my $pf_fh, $pf) or die("Couldn't open \"$pf\": $!");
     while (my $pf_line = <$pf_fh>) {
       $pf_line =~ s/\s$//;
-      if ($pf_line =~ /<OutputFile>(\$\(OutDir\))?(.*)<\/OutputFile>$/) {
-        my $out_dir = $1;
+      if ($pf_line =~ /<OutputFile>(\$\(\w+\))?(.*)<\/OutputFile>$/) {
+        my $base_var = $1;
         my $output_file = $2;
         $output_file =~ s/d?\.dll/d.dll/;
         $output_file =~ s/\.dll$/.lib/;
-        if ($out_dir) {
-          my $dir = $output_file =~ /.exe/ ? 'bin' : 'lib';
-          $loc = File::Spec->catfile($values{ace}, $dir, $output_file);
+        if ($base_var) {
+          if ($base_var eq '$(OutDir)') {
+            $loc = File::Spec->catfile(
+              $values{ace}, $output_file =~ /.exe/ ? 'bin' : 'lib', $output_file);
+          }
+          elsif ($base_var eq '$(ACE_ROOT)') {
+            $loc = File::Spec->catfile($values{ace}, $output_file);
+          }
+          else {
+            die("Unexpected name $base_var on $pf:$.");
+          }
         }
         else {
           $loc = File::Spec->catfile(dirname($pf), $output_file);

@@ -8322,6 +8322,24 @@ jobs:
     needs: build_w19_re_o1p1_sec
 
     steps:
+    - name: download openssl artifact
+      uses: actions/download-artifact@v3
+      with:
+        name: openssl3_w19_artifact
+    - name: extract openssl artifact
+      shell: bash
+      run: |
+        tar xvJf openssl3_w19.tar.xz
+        rm -f openssl3_w19.tar.xz
+    - name: setup for run-vcpkg
+      shell: bash
+      run: |
+        echo '{ "name": "opendds", "version-string": "github-actions", "dependencies": [ "xerces-c" ] }' > vcpkg.json
+    - name: install xerces-c
+      uses: lukka/run-vcpkg@v11
+      with:
+        vcpkgGitCommitId: f6a5d4e8eb7476b8d7fc12a56dff300c1c986131
+        runVcpkgInstall: true
     - name: checkout MPC
       uses: actions/checkout@v4
       with:
@@ -12845,6 +12863,15 @@ jobs:
     needs: ACE_TAO_w22_p1
 
     steps:
+    - name: setup for run-vcpkg
+      shell: bash
+      run: |
+        echo '{ "name": "opendds", "version-string": "github-actions", "dependencies": [ "openssl", "xerces-c" ] }' > vcpkg.json
+    - name: install openssl & xerces-c
+      uses: lukka/run-vcpkg@v11
+      with:
+        vcpkgGitCommitId: f6a5d4e8eb7476b8d7fc12a56dff300c1c986131
+        runVcpkgInstall: true
     - name: Checkout OpenDDS
       uses: actions/checkout@v3
       with:
