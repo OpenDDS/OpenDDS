@@ -55,9 +55,9 @@ These are files or the parts of the files that the release script won't be able 
     In addition to that there are general rules in the release script such as ignoring bots, preferring ``objectcomputing.com`` email addresses to ``ociweb.com`` ones, and dealing with GitHub-specific issues.
   - Run ``./tools/scripts/gitrelease.pl --update-authors`` again to make sure the changes worked.
 
-- Update :ghfile:`README.md` and :doc:`/building/dependencies` for any platform or dependency changes, such as updates to the ACE/TAO version being used.
+- Update :ghfile:`README.md` and :doc:`/devguide/building/dependencies` for any platform or dependency changes, such as updates to the ACE/TAO version being used.
   Specifically, double check that the ACE and TAO versions listed in ``README.md`` match the versions in the configure script.
-- Document changes to building OpenDDS, at least in :doc:`/building/index`, but possibly also in :ghfile:`java/README` and :ghfile:`java/INSTALL`.
+- Document changes to building OpenDDS, at least in :doc:`/devguide/building/index`, but possibly also in :ghfile:`java/README` and :ghfile:`java/INSTALL`.
 
 Update the Modeling SDK version numbers and release notes
 =========================================================

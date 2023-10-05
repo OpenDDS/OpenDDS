@@ -145,3 +145,18 @@ performance-tests/bench/run_test.pl ci-fan-frag --show-worker-logs: !DCPS_MIN !N
 #performance-tests/bench/run_test.pl ci-fan-frag-ws --show-worker-logs: !DCPS_MIN !NO_MCAST RTPS !DDS_NO_OWNERSHIP_PROFILE CXX11 RAPIDJSON
 performance-tests/bench/run_test.pl ci-mixed --show-worker-logs: !DCPS_MIN !NO_MCAST RTPS !DDS_NO_OWNERSHIP_PROFILE CXX11 RAPIDJSON
 
+tests/DCPS/RtpsRelay/Smoke/run_test.pl: !DCPS_MIN CXX11 RTPS !NO_BUILT_IN_TOPICS !OPENDDS_SAFETY_PROFILE RAPIDJSON
+tests/DCPS/RtpsRelay/Smoke/run_test.pl secure: !DCPS_MIN CXX11 RTPS !NO_BUILT_IN_TOPICS !OPENDDS_SAFETY_PROFILE RAPIDJSON
+tests/DCPS/RtpsRelay/Smoke/run_test.pl secure partition_same_relay: !DCPS_MIN CXX11 RTPS !NO_BUILT_IN_TOPICS !OPENDDS_SAFETY_PROFILE RAPIDJSON !IPV6
+tests/DCPS/RtpsRelay/Smoke/run_test.pl join: !DCPS_MIN CXX11 RTPS !NO_BUILT_IN_TOPICS !OPENDDS_SAFETY_PROFILE RAPIDJSON
+tests/DCPS/RtpsRelay/Smoke/run_test.pl single: !DCPS_MIN CXX11 RTPS !NO_BUILT_IN_TOPICS !OPENDDS_SAFETY_PROFILE RAPIDJSON
+tests/DCPS/RtpsRelay/Smoke/run_test.pl ipv6: !DCPS_MIN CXX11 RTPS !NO_BUILT_IN_TOPICS !OPENDDS_SAFETY_PROFILE IPV6 RAPIDJSON
+tests/DCPS/RtpsRelay/Smoke/run_test.pl ipv6 secure: !DCPS_MIN CXX11 RTPS !NO_BUILT_IN_TOPICS !OPENDDS_SAFETY_PROFILE IPV6 RAPIDJSON
+tests/DCPS/RtpsRelay/Smoke/run_test.pl ipv6 join: !DCPS_MIN CXX11 RTPS !NO_BUILT_IN_TOPICS !OPENDDS_SAFETY_PROFILE IPV6 RAPIDJSON
+tests/DCPS/RtpsRelay/Smoke/run_test.pl ipv6 single: !DCPS_MIN CXX11 RTPS !NO_BUILT_IN_TOPICS !OPENDDS_SAFETY_PROFILE IPV6 RAPIDJSON
+tests/DCPS/RtpsRelay/Smoke/run_lease_duration_test.pl: !DCPS_MIN CXX11 RTPS !NO_BUILT_IN_TOPICS !OPENDDS_SAFETY_PROFILE RAPIDJSON
+tests/DCPS/RtpsRelay/Smoke/run_lease_duration_test.pl reverse: !DCPS_MIN CXX11 RTPS !NO_BUILT_IN_TOPICS !OPENDDS_SAFETY_PROFILE RAPIDJSON
+tests/DCPS/RtpsRelay/Smoke/run_lease_duration_test.pl secure: !DCPS_MIN CXX11 RTPS !NO_BUILT_IN_TOPICS !OPENDDS_SAFETY_PROFILE RAPIDJSON
+tests/DCPS/RtpsRelay/Smoke/run_lease_duration_test.pl reverse secure: !DCPS_MIN CXX11 RTPS !NO_BUILT_IN_TOPICS !OPENDDS_SAFETY_PROFILE RAPIDJSON
+tests/DCPS/RtpsRelay/STUN/run_test.pl: !DCPS_MIN CXX11 RTPS !NO_BUILT_IN_TOPICS !OPENDDS_SAFETY_PROFILE RAPIDJSON
+tests/DCPS/RtpsRelay/STUN/run_test.pl ipv6: !DCPS_MIN CXX11 RTPS !NO_BUILT_IN_TOPICS !OPENDDS_SAFETY_PROFILE IPV6 RAPIDJSON

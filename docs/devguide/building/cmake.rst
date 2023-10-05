@@ -154,7 +154,7 @@ Adding IDL Sources with opendds_target_sources
 The CMake config package provides an easy way to add IDL sources to CMake targets using :cmake:func:`opendds_target_sources`.
 Here is how it's used in the :ghfile:`Developer’s Guide Messenger example <DevGuideExamples/DCPS/Messenger/CMakeLists.txt>`:
 
-.. literalinclude:: ../../DevGuideExamples/DCPS/Messenger/CMakeLists.txt
+.. literalinclude:: ../../../DevGuideExamples/DCPS/Messenger/CMakeLists.txt
   :language: cmake
   :start-at: IDL TypeSupport Library
   :end-before: set(opendds_libs
@@ -172,7 +172,7 @@ In addition to C++ types generated from IDL and their type support, OpenDDS appl
 `target_link_libraries <https://cmake.org/cmake/help/latest/command/target_link_libraries.html>`__ should be used with all the libraries needed.
 Here is the usage in the :ghfile:`Developer’s Guide Messenger example <DevGuideExamples/DCPS/Messenger/CMakeLists.txt>`:
 
-.. literalinclude:: ../../DevGuideExamples/DCPS/Messenger/CMakeLists.txt
+.. literalinclude:: ../../../DevGuideExamples/DCPS/Messenger/CMakeLists.txt
   :language: cmake
   :start-at: set(opendds_libs
   :end-at: target_link_libraries(subscriber ${opendds_libs})
