@@ -7,6 +7,7 @@ The Developer's Guide explains how to use OpenDDS.
 .. toctree::
 
   introduction
+  quickstart/index
   building/index
   getting_started
   quality_of_service
