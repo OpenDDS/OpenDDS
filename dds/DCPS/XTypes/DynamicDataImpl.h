@@ -21,17 +21,6 @@ namespace XTypes {
 class DynamicDataImpl;
 }
 
-namespace DCPS {
-OpenDDS_Dcps_Export
-bool serialized_size(const Encoding& encoding, size_t& size, const XTypes::DynamicDataImpl& data);
-OpenDDS_Dcps_Export
-bool operator<<(Serializer& ser, const XTypes::DynamicDataImpl& data);
-OpenDDS_Dcps_Export
-bool serialized_size(const Encoding& encoding, size_t& size, const KeyOnly<const XTypes::DynamicDataImpl>& data);
-OpenDDS_Dcps_Export
-bool operator<<(Serializer& ser, const KeyOnly<const XTypes::DynamicDataImpl>& data);
-}
-
 namespace XTypes {
 
 class OpenDDS_Dcps_Export DynamicDataImpl : public DynamicDataBase {
@@ -231,9 +220,6 @@ public:
 #ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
   DDS::ReturnCode_t get_simple_value(DCPS::Value& value, DDS::MemberId id);
 #endif
-
-  bool serialized_size(const DCPS::Encoding& enc, size_t& size, DCPS::Sample::Extent ext) const;
-  bool serialize(DCPS::Serializer& ser, DCPS::Sample::Extent ext) const;
 
 private:
 #ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
@@ -706,6 +692,17 @@ private:
 };
 
 } // namespace XTypes
+
+namespace DCPS {
+
+OpenDDS_Dcps_Export
+bool serialized_size(const Encoding& encoding, size_t& size, DDS::DynamicData_ptr data);
+
+OpenDDS_Dcps_Export
+bool operator<<(Serializer& ser, DDS::DynamicData_ptr data);
+
+}
+
 } // namespace OpenDDS
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
