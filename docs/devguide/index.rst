@@ -24,3 +24,4 @@ The Developer's Guide explains how to use OpenDDS.
   dds_security
   internet_enabled_rtps
   xtypes
+  faq

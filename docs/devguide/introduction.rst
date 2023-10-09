@@ -20,8 +20,6 @@ OpenDDS is implemented in C++ and contains support for :doc:`Java <java_bindings
 Users in the OpenDDS community have contributed and maintain bindings for other languages that include `C# <https://www.openddsharp.com/>`__, `Node.js <https://github.com/OpenDDS/node-opendds>`__, and `Python <https://github.com/OpenDDS/pyopendds>`__.
 OpenDDS is sponsored by the OpenDDS Foundation and is available via https://opendds.org and https://github.com/OpenDDS/OpenDDS.
 
-There is an FAQ available at https://opendds.org/faq.html.
-
 .. _specs:
 
 **************
