@@ -1,0 +1,15 @@
+{
+    "version": 7,
+    "configurePresets": [
+        {
+            "name": "config1",
+            "binaryDir": "build"
+        }
+    ],
+    "buildPresets": [
+        {
+            "name": "build1",
+            "configurePreset": "config1"
+        }
+    ]
+}

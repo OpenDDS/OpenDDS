@@ -9610,6 +9610,10 @@ jobs:
     runs-on: windows-2019
 
     steps:
+    - name: checkout OpenDDS
+      uses: actions/checkout@v4
+      with:
+        path: OpenDDS
     - name: checkout Wireshark
       shell: cmd
       run: |
@@ -9626,7 +9630,7 @@ jobs:
       uses: actions/cache@v3
       with:
         path: ${{ github.job }}.tar.xz
-        key: c01_${{ github.job }}_${{ env.WIRESHARK_COMMIT }}_${{ env.COMPILER_VERSION }}
+        key: c02_${{ github.job }}_${{ env.WIRESHARK_COMMIT }}_${{ env.COMPILER_VERSION }}
     - name: setup for run-vcpkg
       shell: bash
       run: |
@@ -9648,27 +9652,34 @@ jobs:
     - name: set up msvc env
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       uses: ilammy/msvc-dev-cmd@v1
+    - name: copy CMakePresets for WinFlexBison
+      if: steps.cache-artifact.outputs.cache-hit != 'true'
+      shell: cmd
+      run: copy OpenDDS\.github\workflows\WinFlexBison_CMakePresets.json winflexbison\CMakePresets.json
     - name: build WinFlexBison
       if: steps.cache-artifact.outputs.cache-hit != 'true'
-      uses: lukka/run-cmake@v3
+      uses: lukka/run-cmake@v10
       with:
         cmakeListsTxtPath: winflexbison/CMakeLists.txt
-    - name: set Wireshark environment
+        configurePreset: config1
+        buildPreset: build1
+    - name: set Wireshark environment and copy CMakePresets
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       shell: cmd
       run: |
         echo WIRESHARK_LIB_DIR=%CD%\wireshark-win64-libs-3.6>> %GITHUB_ENV%
         echo QT5_BASE_DIR=${{ steps.runvcpkg.outputs.RUNVCPKG_VCPKG_ROOT_OUT }}\installed\x64-windows>> %GITHUB_ENV%
+        echo WIRESHARK_BUILD_DIR=${{ github.workspace }}\wsbuild>> %GITHUB_ENV%
+        echo WINFLEXBISON_ROOT=${{ github.workspace }}\winflexbison>> %GITHUB_ENV%
         type %GITHUB_ENV%
+        copy OpenDDS\.github\workflows\Wireshark_CMakePresets.json wireshark\CMakePresets.json
     - name: build Wireshark
       if: steps.cache-artifact.outputs.cache-hit != 'true'
-      uses: lukka/run-cmake@v3
+      uses: lukka/run-cmake@v10
       with:
         cmakeListsTxtPath: wireshark/CMakeLists.txt
-        cmakeListsOrSettingsJson: CMakeListsTxtAdvanced
-        buildDirectory: ${{ github.workspace }}/wsbuild
-        cmakeAppendedArgs: '-GNinja -DLEX_EXECUTABLE=${{ github.workspace }}\winflexbison\bin\Debug\win_flex.exe'
-        buildWithCMakeArgs: '-t epan'
+        configurePreset: config1
+        buildPreset: build1
     - name: create Wireshark artifact
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       shell: bash
