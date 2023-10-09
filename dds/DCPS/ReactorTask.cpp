@@ -162,7 +162,7 @@ int ReactorTask::svc()
 
   // Tell the reactor to handle events.
   if (thread_status_manager_->update_thread_status()) {
-    while (state_ == STATE_RUNNING) {
+    while (state() == STATE_RUNNING) {
       ACE_Time_Value t = thread_status_manager_->thread_status_interval().value();
       ThreadStatusManager::Sleeper sleeper(*thread_status_manager_);
       reactor_->run_reactor_event_loop(t, 0);
@@ -223,22 +223,18 @@ void ReactorTask::stop()
     reactor->end_reactor_event_loop();
   }
 
-  {
-    GuardType guard(lock_);
+  // In the future, we will likely want to replace this assert with a new "SHUTTING_DOWN" state
+  // which can be used to delay any potential new calls to open_reactor_task()
+  OPENDDS_ASSERT(state() == STATE_SHUT_DOWN);
 
-    // In the future, we will likely want to replace this assert with a new "SHUTTING_DOWN" state
-    // which can be used to delay any potential new calls to open_reactor_task()
-    OPENDDS_ASSERT(state_ == STATE_SHUT_DOWN);
+  // Let's wait for the reactor task's thread to complete before we
+  // leave this stop method.
+  if (thread_status_manager_) {
+    ThreadStatusManager::Sleeper sleeper(*thread_status_manager_);
+    wait();
 
-    // Let's wait for the reactor task's thread to complete before we
-    // leave this stop method.
-    if (thread_status_manager_) {
-      ThreadStatusManager::Sleeper sleeper(*thread_status_manager_);
-      wait();
-
-      // Reset the thread manager in case it goes away before the next open.
-      thr_mgr(0);
-    }
+    // Reset the thread manager in case it goes away before the next open.
+    thr_mgr(0);
   }
 }
 
