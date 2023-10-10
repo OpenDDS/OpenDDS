@@ -165,15 +165,6 @@ function(_opendds_find_our_libraries_for_config group libs config suffix)
       continue()
     endif()
 
-    # If there are configuration types (like VS) and it doesn't find release,
-    # then that prevents debug from being found.
-    if(DEFINED "${found_var}" AND NOT "${${found_var}}" AND NOT CMAKE_CONFIGURATION_TYPES)
-      if(debug)
-        message(STATUS "lib ${target} already not found")
-      endif()
-      continue()
-    endif()
-
     set(mpc_projects_var "${group_prefix}_MPC_PROJECTS")
     if(DEFINED "${mpc_projects_var}")
       _opendds_find_in_mpc_projects(
@@ -188,6 +179,9 @@ function(_opendds_find_our_libraries_for_config group libs config suffix)
       continue()
     endif()
 
+    if(debug)
+      message(STATUS "find_library(${lib_var} ${lib_file_base} ${lib_dir})")
+    endif()
     find_library(${lib_var} "${lib_file_base}" HINTS "${lib_dir}" NO_CMAKE_FIND_ROOT_PATH)
     if(${lib_var})
       set(${found_var} TRUE CACHE INTERNAL "" FORCE)

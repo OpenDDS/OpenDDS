@@ -1,5 +1,8 @@
-project(opendds_install_test_library CXX)
 cmake_minimum_required(VERSION 3.3)
+if(POLICY CMP0091)
+  cmake_policy(SET CMP0091 NEW)
+endif()
+project(opendds_install_test_library CXX)
 
 include(GNUInstallDirs)
 include(CMakePackageConfigHelpers)

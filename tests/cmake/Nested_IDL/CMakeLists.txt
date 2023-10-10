@@ -1,8 +1,11 @@
 # Distributed under the OpenDDS License. See accompanying LICENSE
 # file or http://www.opendds.org/license.html for details.
 
-project(opendds_nested_idl CXX)
 cmake_minimum_required(VERSION 3.8.2)
+if(POLICY CMP0091)
+  cmake_policy(SET CMP0091 NEW)
+endif()
+project(opendds_nested_idl CXX)
 enable_testing()
 
 find_package(OpenDDS REQUIRED)

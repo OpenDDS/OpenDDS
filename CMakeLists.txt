@@ -1,4 +1,7 @@
 cmake_minimum_required(VERSION 3.23)
+if(POLICY CMP0091)
+  cmake_policy(SET CMP0091 NEW)
+endif()
 include("${CMAKE_CURRENT_LIST_DIR}/cmake/opendds_version.cmake")
 project(opendds
   DESCRIPTION
@@ -33,7 +36,7 @@ list(APPEND CMAKE_PREFIX_PATH "${OPENDDS_SOURCE_DIR}")
 list(APPEND CMAKE_FIND_ROOT_PATH "${OPENDDS_SOURCE_DIR}")
 set(_OPENDDS_CMAKE_DIR "${OPENDDS_SOURCE_DIR}/cmake" CACHE INTERNAL "")
 
-include("${_OPENDDS_CMAKE_DIR}/opendds_features.cmake")
+include("${_OPENDDS_CMAKE_DIR}/init.cmake")
 
 if(NOT DEFINED OPENDDS_ACE OR DEFINED ACE_IS_BEING_BUILT)
   include("${_OPENDDS_CMAKE_DIR}/build_ace_tao.cmake")
@@ -130,8 +133,8 @@ if(OPENDDS_BUILD_TESTS)
   endif()
   add_subdirectory(tests/cmake/idl_compiler_tests)
   add_subdirectory(tests/cmake/include_subdir)
-  # TODO: This shouldn't matter, but linker complains about ACE/TAO libs
-  # lacking -fPIC.
+  # TODO: This test always builds shared libraries and linker complains about
+  # ACE/TAO libs lacking -fPIC when ACE is static.
   if(OPENDDS_OWNERSHIP_PROFILE AND NOT OPENDDS_STATIC)
     add_subdirectory(tests/cmake/generated_global)
   endif()

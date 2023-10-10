@@ -39,7 +39,7 @@
 #    include "security/BuiltInPlugins.h"
 #  endif
 
-#elif OPENDDS_DO_MANNUAL_STATIC_INCLUDES
+#elif OPENDDS_DO_MANUAL_STATIC_INCLUDES
 // Only for static builds, include default libraries for both discovery
 // and transport.  This file will be included by the code in the executable
 // so that the static link includes the initializers for these libraries.

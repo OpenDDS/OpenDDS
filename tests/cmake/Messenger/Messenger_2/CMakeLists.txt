@@ -3,9 +3,11 @@
 #
 # This file is setup the way it is for testing purposes. For a cleaner example
 # see DevGuideExamples/DCPS/Messenger/CMakeLists.txt
-
-project(opendds_messenger_2 CXX)
 cmake_minimum_required(VERSION 3.8.2)
+if(POLICY CMP0091)
+  cmake_policy(SET CMP0091 NEW)
+endif()
+project(opendds_messenger_2 CXX)
 enable_testing()
 
 set(OPENDDS_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../../../..")

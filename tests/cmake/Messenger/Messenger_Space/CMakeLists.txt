@@ -6,8 +6,11 @@
 
 # This test checks to make sure idl files can be processed when there is a space in the file path
 
-project(opendds_messenger_space CXX)
 cmake_minimum_required(VERSION 3.8.2)
+if(POLICY CMP0091)
+  cmake_policy(SET CMP0091 NEW)
+endif()
+project(opendds_messenger_space CXX)
 enable_testing()
 
 find_package(OpenDDS REQUIRED)

@@ -117,10 +117,6 @@ my @configs = (
     feature => 'optimize_collocated_invocations',
     default => 1,
   },
-  # {
-  #   name => 'XERCES',
-  #   feature => 'xerces3',
-  # },
 );
 
 my @cmake_values;
@@ -137,6 +133,6 @@ for my $config (@configs) {
   else {
     $enabled = $default;
   }
-  push(@cmake_values, "$name=" . to_cmake_value($enabled) . "\n");
+  push(@cmake_values, "$name=" . to_cmake_value($enabled));
 }
 print(join(';', @cmake_values), "\n");

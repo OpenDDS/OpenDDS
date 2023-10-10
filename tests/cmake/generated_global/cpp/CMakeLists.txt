@@ -4,8 +4,11 @@
 # This file is setup the way it is for testing purposes. For a cleaner example
 # see DevGuideExamples/DCPS/Messenger/CMakeLists.txt
 
-project(opendds_generated_global_cpp CXX)
 cmake_minimum_required(VERSION 3.8.2)
+if(POLICY CMP0091)
+  cmake_policy(SET CMP0091 NEW)
+endif()
+project(opendds_generated_global_cpp CXX)
 
 find_package(OpenDDS REQUIRED)
 

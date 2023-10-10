@@ -10,7 +10,7 @@
 #include <dds/DCPS/Service_Participant.h>
 #include <dds/DCPS/WaitSet.h>
 #include <dds/DCPS/StaticIncludes.h>
-#if OPENDDS_DO_MANNUAL_STATIC_INCLUDES
+#if OPENDDS_DO_MANUAL_STATIC_INCLUDES
 #  include <dds/DCPS/RTPS/RtpsDiscovery.h>
 #  include <dds/DCPS/transport/rtps_udp/RtpsUdp.h>
 #endif

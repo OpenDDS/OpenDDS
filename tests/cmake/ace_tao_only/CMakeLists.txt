@@ -1,4 +1,7 @@
 cmake_minimum_required(VERSION 3.8.2)
+if(POLICY CMP0091)
+  cmake_policy(SET CMP0091 NEW)
+endif()
 project(opendds_ace_tao_only CXX)
 enable_testing()
 

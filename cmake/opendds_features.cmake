@@ -72,6 +72,7 @@ else()
   _opendds_feature(STATIC ON MPC)
 endif()
 _opendds_feature(XERCES3 ${OPENDDS_SECURITY} MPC)
+_opendds_feature(IPV6 OFF MPC)
 
 # TAO Features
 _opendds_feature(TAO_IIOP ON MPC_INVERTED MPC_NAME tao_no_iiop)
