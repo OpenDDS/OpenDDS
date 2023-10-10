@@ -229,13 +229,11 @@ void ReactorTask::stop()
 
   // Let's wait for the reactor task's thread to complete before we
   // leave this stop method.
-  if (thread_status_manager_) {
-    ThreadStatusManager::Sleeper sleeper(*thread_status_manager_);
-    wait();
+  ThreadStatusManager::Sleeper sleeper(thread_status_manager_);
+  wait();
 
-    // Reset the thread manager in case it goes away before the next open.
-    thr_mgr(0);
-  }
+  // Reset the thread manager in case it goes away before the next open.
+  thr_mgr(0);
 }
 
 void ReactorTask::reactor(ACE_Reactor* reactor)
