@@ -6,6 +6,7 @@ The Developer's Guide explains how to use OpenDDS.
 
 .. toctree::
 
+  introduction_to_dds
   introduction
   quickstart/index
   building/index

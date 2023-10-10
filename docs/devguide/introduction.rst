@@ -1,8 +1,8 @@
 .. _introduction:
 
-############
-Introduction
-############
+#######################
+Introduction to OpenDDS
+#######################
 
 .. _introduction--what-is-opendds:
 
@@ -187,218 +187,6 @@ In particular, error handling is sometimes kept to a minimum to help the reader 
 The source code for all these examples is available as part of the OpenDDS source code distribution in the :ghfile:`DevGuideExamples` directory.
 MPC files are provided with the examples for generating build-tool specific files, such as GNU Makefiles or Visual C++ project and solution files.
 To run an example, execute the ``run_test.pl`` Perl script.
-
-..
-    Sect<1>
-
-.. _introduction--dcps-overview:
-
-**********************************************
-Data-Centric Publish-Subscribe (DCPS) Overview
-**********************************************
-
-..
-    Sect<1.1>
-
-Data-Centric Publish-Subscribe (DCPS) is the application model defined by the DDS specification.
-This section describes the main concepts and entities of the DCPS API and discuss how they interact and work together.
-
-.. _introduction--basic-concepts:
-
-Basic Concepts
-==============
-
-..
-    Sect<1.1.1>
-
-This is an overview of the DDS DCPS layer:
-
-.. figure:: images/domain.png
-
-  DCPS Conceptual Overview
-
-The following subsections define the concepts shown in the diagram.
-
-.. _introduction--domain:
-
-Domain
-------
-
-..
-    Sect<1.1.1.1>
-
-The *domain* is the fundamental partitioning unit within DCPS.
-Each of the other entities belongs to a domain and can only interact with other entities in that same domain.
-Application code is free to interact with multiple domains but must do so via separate entities that belong to the different domains.
-
-.. _introduction--domainparticipant:
-
-DomainParticipant
------------------
-
-..
-    Sect<1.1.1.2>
-
-A *domain participant* is the entry-point for an application to interact within a particular domain.
-The domain participant is a factory for many of the objects involved in writing or reading data.
-
-.. _introduction--topic:
-
-Topic
------
-
-..
-    Sect<1.1.1.3>
-
-The *topic* is the fundamental means of interaction between publishing and subscribing applications.
-Each topic has a unique name within the domain and a specific data type that it publishes.
-Each topic data type can specify zero or more fields that make up its *key*.
-When publishing data, the publishing process always specifies the topic.
-Subscribers request data via the topic.
-In DCPS terminology you publish individual data *samples* for different *instances* on a topic.
-Each instance is associated with a unique value for the key.
-A publishing process publishes multiple data samples on the same instance by using the same key value for each sample.
-
-.. _introduction--datawriter:
-
-DataWriter
-----------
-
-..
-    Sect<1.1.1.4>
-
-The *data writer* is used by the publishing application code to pass values to the DDS.
-Each data writer is bound to a particular topic.
-The application uses the data writer's type-specific interface to publish samples on that topic.
-The data writer is responsible for marshaling the data and passing it to the publisher for transmission.
-
-Dynamic data writers (:ref:`xtypes--creating-and-using-a-dynamicdatawriter-or-dynamicdatareader`) can be used when code generated from IDL is not available or desired.
-Dynamic data writers are also type-safe, but type checking happens at runtime.
-
-.. _introduction--publisher:
-
-Publisher
----------
-
-..
-    Sect<1.1.1.5>
-
-The *publisher* is responsible for taking the published data and disseminating it to all relevant subscribers in the domain.
-The exact mechanism employed is left to the service implementation.
-
-.. _introduction--subscriber:
-
-Subscriber
-----------
-
-..
-    Sect<1.1.1.6>
-
-The *subscriber* receives the data from the publisher and passes it to any relevant data readers that are connected to it.
-
-.. _introduction--datareader:
-
-DataReader
-----------
-
-..
-    Sect<1.1.1.7>
-
-The *data reader* takes data from the subscriber, demarshals it into the appropriate type for that topic, and delivers the sample to the application.
-Each data reader is bound to a particular topic.
-The application uses the data reader's type-specific interfaces to receive the samples.
-
-Dynamic data readers (:ref:`xtypes--creating-and-using-a-dynamicdatawriter-or-dynamicdatareader`) can be used when code generated from IDL is not available or desired.
-Dynamic data readers are also type-safe, but type checking happens at runtime.
-
-.. _introduction--built-in-topics:
-
-Built-in Topics
-===============
-
-..
-    Sect<1.1.2>
-
-The DDS specification defines a number of topics that are built-in to the DDS implementation.
-Subscribing to these *built-in topics* gives application developers access to the state of the domain being used including which topics are registered, which data readers and data writers are connected and disconnected, and the QoS settings of the various entities.
-While subscribed, the application receives samples indicating changes in the entities within the domain.
-
-The following table shows the built-in topics defined within the DDS specification:
-
-.. list-table:: Built-in Topics
-   :header-rows: 1
-
-   * - Topic Name
-
-     - Description
-
-   * - ``DCPSParticipant``
-
-     - Each instance represents a domain participant.
-
-   * - ``DCPSTopic``
-
-     - Each instance represents a normal (not built-in) topic.
-
-   * - ``DCPSPublication``
-
-     - Each instance represents a data writer.
-
-   * - ``DCPSSubscription``
-
-     - Each instance represents a data reader.
-
-.. _introduction--quality-of-service-policies:
-
-Quality of Service Policies
-===========================
-
-..
-    Sect<1.1.3>
-
-The DDS specification defines a number of Quality of Service (QoS) policies that are used by applications to specify their QoS requirements to the service.
-Participants specify what behavior they require from the service and the service decides how to achieve these behaviors.
-These policies can be applied to the various DCPS entities (topic, data writer, data reader, publisher, subscriber, domain participant) although not all policies are valid for all types of entities.
-
-Subscribers and publishers are matched using a request-versus-offered (RxO) model.
-Subscribers *request* a set of policies that are minimally required.
-Publishers *offer* a set of QoS policies to potential subscribers.
-The DDS implementation then attempts to match the requested policies with the offered policies; if these policies are compatible then the association is formed.
-
-The QoS policies currently implemented by OpenDDS are discussed in detail in :ref:`qos`.
-
-.. _introduction--listeners:
-
-Listeners
-=========
-
-..
-    Sect<1.1.4>
-
-The DCPS layer defines a callback interface for each entity that allows an application processes to listen for certain state changes or events pertaining to that entity.
-For example, a Data Reader Listener is notified when there are data values available for reading.
-
-.. _introduction--conditions:
-
-Conditions
-==========
-
-..
-    Sect<1.1.5>
-
-*Conditions* and *Wait Sets* allow an alternative to listeners in detecting events of interest in DDS.
-The general pattern is
-
-The application creates a specific kind of ``Condition`` object, such as a ``StatusCondition``, and attaches it to a ``WaitSet``.
-
-* The application waits on the ``WaitSet`` until one or more conditions become true.
-
-* The application calls operations on the corresponding entity objects to extract the necessary information.
-
-* The ``DataReader`` interface also has operations that take a ``ReadCondition`` argument.
-
-* ``QueryCondition`` objects are provided as part of the implementation of the Content-Subscription Profile.
-  The ``QueryCondition`` interface extends the ``ReadCondition`` interface.
 
 .. _introduction--opendds-implementation:
 
@@ -632,7 +420,7 @@ In the case of interoperability between DDS implementations, the OMG DDSI-RTPS `
 
 OpenDDS provides two options for discovery.
 
-#. Information Repository: a centralized repository style that runs as a separate process allowing publishers and subscribers to discover one another centrally or
+#. DCPSInfoRepo: a centralized repository style that runs as a separate process allowing publishers and subscribers to discover one another centrally or
 
 #. RTPS Discovery: a peer-to-peer style of discovery that utilizes the RTPS protocol to advertise availability and location information.
 
