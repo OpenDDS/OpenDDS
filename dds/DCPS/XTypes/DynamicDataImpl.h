@@ -8,7 +8,6 @@
 
 #ifndef OPENDDS_SAFETY_PROFILE
 #  include "DynamicDataBase.h"
-#  include "DynamicDataXcdrReadImpl.h"
 
 #  include <dds/DCPS/FilterEvaluator.h>
 #  include <dds/DCPS/Sample.h>
@@ -22,6 +21,8 @@ class DynamicDataImpl;
 }
 
 namespace XTypes {
+
+class DynamicDataXcdrReadImpl;
 
 class OpenDDS_Dcps_Export DynamicDataImpl : public DynamicDataBase {
 public:
@@ -701,6 +702,11 @@ bool serialized_size(const Encoding& encoding, size_t& size, DDS::DynamicData_pt
 OpenDDS_Dcps_Export
 bool operator<<(Serializer& ser, DDS::DynamicData_ptr data);
 
+OpenDDS_Dcps_Export
+bool serialized_size(const Encoding& encoding, size_t& size, const KeyOnly<DDS::DynamicData_ptr>& key);
+
+OpenDDS_Dcps_Export
+bool operator<<(Serializer& ser, const KeyOnly<DDS::DynamicData_ptr>& key);
 }
 
 } // namespace OpenDDS

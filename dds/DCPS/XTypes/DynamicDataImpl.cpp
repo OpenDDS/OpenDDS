@@ -7,6 +7,7 @@
 
 #ifndef OPENDDS_SAFETY_PROFILE
 #  include "DynamicDataImpl.h"
+#  include "DynamicDataXcdrReadImpl.h"
 
 #  include "DynamicTypeMemberImpl.h"
 #  include "Utils.h"
@@ -4662,13 +4663,16 @@ bool DynamicDataImpl::get_discriminator_value(
 
 namespace DCPS {
 
-// Serialization using the API of DynamicData. Intended to work with any implementation.
+// XCDR2 Serialization using the API of DynamicData. Intended to work with any implementation.
 // The get functions must already handle try-construct behavior (in case of reading from
 // a XCDR backing store) or returning default value (in case the member data is missing
 // from the internal container). So it's guaranteed that some data for each valid
 // member is available for serialization.
 
-// TODO(sonndinh): May merge with get_type_descriptor from DynamicDataBase.
+bool serialized_size_i(
+  const Encoding& encoding, size_t& size, DDS::DynamicData_ptr data, Sample::Extent ext);
+bool serialize(Serializer& ser, DDS::DynamicData_ptr data, Sample::Extent ext);
+
 bool get_type_descriptor(const DDS::DynamicType_var& type, DDS::TypeDescriptor_var& td)
 {
   if (type->get_descriptor(td) != DDS::RETCODE_OK) {
@@ -4775,7 +4779,7 @@ bool check_rc_from_get(DDS::ReturnCode_t rc, DDS::MemberId id, TypeKind tk, cons
 
 bool serialized_size_dynamic_member(DDS::DynamicData_ptr data, const Encoding& encoding,
   size_t& size, const DDS::MemberDescriptor_var& md, DDS::ExtensibilityKind extensibility,
-  size_t& mutable_running_total)
+  size_t& mutable_running_total, Sample::Extent ext)
 {
   const DDS::MemberId member_id = md->id();
   const CORBA::Boolean optional = md->is_optional();
@@ -4928,7 +4932,7 @@ bool serialized_size_dynamic_member(DDS::DynamicData_ptr data, const Encoding& e
     if (optional && rc == DDS::RETCODE_NO_DATA) {
       return true;
     }
-    return serialized_size(encoding, size, member_data);
+    return serialized_size_i(encoding, size, member_data, ext);
   }
   default:
     if (log_level >= LogLevel::Notice) {
@@ -4941,11 +4945,11 @@ bool serialized_size_dynamic_member(DDS::DynamicData_ptr data, const Encoding& e
 }
 
 bool serialized_size_dynamic_struct(const Encoding& encoding, size_t& size,
-                                    DDS::DynamicData_ptr struct_data)
+                                    DDS::DynamicData_ptr struct_data, Sample::Extent ext)
 {
-  // TODO(sonndinh): Handle KeyOnly/NestedKeyOnly
   const DDS::DynamicType_var type = struct_data->type();
   const DDS::DynamicType_var base_type = get_base_type(type);
+  const bool struct_has_explicit_keys = has_explicit_keys(base_type);
   DDS::TypeDescriptr_var td;
   if (!get_type_descriptor(base_type, td)) {
     return false;
@@ -4968,9 +4972,12 @@ bool serialized_size_dynamic_struct(const Encoding& encoding, size_t& size,
       return false;
     }
 
-    // The serialization function for individual member must account for any header it has.
-    if (!serialized_size_dynamic_member(struct_data, encoding, size, md,
-                                        extensibility, mutable_running_total)) {
+    if (exclude_member(ext, md->is_key(), struct_has_explicit_keys)) {
+      continue;
+    }
+
+    if (!serialized_size_dynamic_member(struct_data, encoding, size, md, extensibility,
+                                        mutable_running_total, nested(ext))) {
       if (log_level >= LogLevel:: Notice) {
         ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: serialized_size_dynamic_struct:"
                    " Failed to compute serialized size for member ID %u\n", md->id()));
@@ -5109,7 +5116,7 @@ bool serialized_size_enum(const Encoding& encoding, size_t& size,
   return false;
 }
 
-bool serialized_size_discriminator(
+bool serialized_size_dynamic_discriminator(
   const Encoding& encoding, size_t& size, const DDS::DynamicType_var& disc_type,
   DDS::ExtensibilityKind extensibility, size_t& mutable_running_total)
 {
@@ -5124,11 +5131,15 @@ bool serialized_size_discriminator(
 }
 
 bool serialized_size_dynamic_union(const Encoding& encoding, size_t& size,
-                                   DDS::DynamicData_ptr union_data)
+                                   DDS::DynamicData_ptr union_data, Sample::Extent ext)
 {
-  // TODO(sonndinh): Handle KeyOnly/NestedKeyOnly
   const DDS::DynamicType_var type = union_data->type();
   const DDS::DynamicType_var base_type = get_base_type(type);
+  if (ext == Sample::KeyOnly && !has_explicit_keys(base_type)) {
+    // nothing is serialized (not even a delimiter) for key-only serialization when there is no @key
+    return true;
+  }
+
   DDS::TypeDescriptor_var td;
   if (!get_type_descriptor(base_type, td)) {
     return false;
@@ -5143,28 +5154,29 @@ bool serialized_size_dynamic_union(const Encoding& encoding, size_t& size,
   // Discriminator
   size_t mutable_running_total = 0;
   DDS::DynamicType_var disc_type = get_base_type(td->discriminator_type());
-  if (!serialized_size_discriminator(encoding, size, disc_type,
-                                     extensibility, mutable_running_total)) {
+  if (!serialized_size_dynamic_discriminator(encoding, size, disc_type,
+                                             extensibility, mutable_running_total)) {
     return false;
   }
 
   CORBA::Long disc_val;
-  DDS::DynamicType_var disc_type = get_base_type(td->discriminator_type());
   if (!get_discriminator_value(disc_val, data, disc_type)) {
     return false;
   }
 
-  // Selected branch
-  bool has_branch = false;
-  DDS::MemberDescriptor_var selected_md;
-  // TODO(sonndinh): Move this function from DynamicDataBase to a common library.
-  if (get_selected_union_branch(disc_val, has_branch, selected_md) != DDS::RETCODE_OK) {
-    return false;
-  }
+  if (ext == Sample::Full) {
+    // Selected branch
+    bool has_branch = false;
+    DDS::MemberDescriptor_var selected_md;
+    if (get_selected_union_branch(disc_val, has_branch, selected_md) != DDS::RETCODE_OK) {
+      return false;
+    }
 
-  if (has_branch && !serialized_size_dynamic_member(union_data, encoding, size, selected_md,
-                                                    extensibility, mutable_running_total)) {
-    return false;
+    if (has_branch &&
+        !serialized_size_dynamic_member(union_data, encoding, size, selected_md,
+                                        extensibility, mutable_running_total, nested(ext))) {
+      return false;
+    }
   }
 
   if (extensibility == DDS::MUTABLE) {
@@ -5174,7 +5186,7 @@ bool serialized_size_dynamic_union(const Encoding& encoding, size_t& size,
 }
 
 bool serialized_size_dynamic_element(DDS::DynamicData_ptr col_data, const Encoding& encoding,
-                                     size_t& size, DDS::MemberId elem_id, TypeKind elem_tk)
+  size_t& size, DDS::MemberId elem_id, TypeKind elem_tk, Sample::Extent ext)
 {
   DDS::ReturnCode_t rc = DDS::RETCODE_OK;
   switch (elem_tk) {
@@ -5205,7 +5217,7 @@ bool serialized_size_dynamic_element(DDS::DynamicData_ptr col_data, const Encodi
     if (!check_rc_from_get(rc, elem_id, elem_tk, "serialized_size_dynamic_element")) {
       return false;
     }
-    return serialized_size(encoding, size, elem_data);
+    return serialized_size_i(encoding, size, elem_data, ext);
   }
   default:
     if (log_level >= LogLevel::Notice) {
@@ -5316,7 +5328,7 @@ void serialized_size_primitive_sequence(const Encoding& encoding, size_t& size,
 }
 
 bool serialized_size_dynamic_collection(const Encoding& encoding, size_t& size,
-                                        DDS::DynamicData_ptr col_data)
+                                        DDS::DynamicData_ptr col_data, Sample::Extent ext)
 {
   const DDS::DynamicType_var type = col_data->type();
   const DDS::DynamicType_var base_type = get_base_type(type);
@@ -5355,30 +5367,40 @@ bool serialized_size_dynamic_collection(const Encoding& encoding, size_t& size,
   // Non-primitive element types.
   for (CORBA::ULong i = 0; i < item_count; ++i) {
     const DDS::MemberId elem_id = col_data->get_member_id_at_index(i);
-    if (elem_id == MEMBER_ID_INVALID) {
-      return false;
-    }
-    if (!serialized_size_dynamic_element(col_data, encoding, size, elem_id, treat_elem_as)) {
+    if (elem_id == MEMBER_ID_INVALID ||
+        !serialized_size_dynamic_element(col_data, encoding, size, elem_id,
+                                         treat_elem_as, nested(ext))) {
       return false;
     }
   }
   return true;
 }
 
-bool serialized_size(const Encoding& encoding, size_t& size, DDS::DynamicData_ptr data)
+bool serialized_size_i(const Encoding& encoding, size_t& size,
+                       DDS::DynamicData_ptr data, Sample::Extent ext)
 {
   const DDS::DynamicType_var type = data->type();
   const DDS::DynamicType_var base_type = get_base_type(type);
   switch (base_type->get_kind()) {
   case TK_STRUCTURE:
-    return serialized_size_dynamic_struct(encoding, size, data);
+    return serialized_size_dynamic_struct(encoding, size, data, ext);
   case TK_UNION:
-    return serialized_size_dynamic_union(encoding, size, data);
+    return serialized_size_dynamic_union(encoding, size, data, ext);
   case TK_ARRAY:
   case TK_SEQUENCE:
-    return serialized_size_dynamic_collection(encoding, size, data);
+    return serialized_size_dynamic_collection(encoding, size, data, ext);
   }
   return false;
+}
+
+bool serialized_size(const Encoding& encoding, size_t& size, DDS::DynamicData_ptr data)
+{
+  return serialized_size_i(encoding, size, data, Sample::Full);
+}
+
+bool serialized_size(const Encoding& encoding, size_t& size, const KeyOnly<DDS::DynamicData_ptr>& key)
+{
+  return serialized_size_i(encoding, size, key.value, Sample::KeyOnly);
 }
 
 // Serialize header for a basic member.
@@ -5429,7 +5451,7 @@ bool serialize_dynamic_basic_member_header(Serializer& ser, void* value, DDS::Re
 // The return code @rc must be either NO_DATA or OK.
 bool serialize_dynamic_complex_member_header(Serializer& ser, DDS::ReturnCode_t rc,
   const DDS::DynamicData_ptr member_data, DDS::ExtensibilityKind extensibility,
-  CORBA::Boolean optional, DDS::MemberId id, CORBA::Boolean must_understand)
+  CORBA::Boolean optional, DDS::MemberId id, CORBA::Boolean must_understand, Sample::Extent ext)
 {
   if (optional && rc == DDS::RETCODE_NO_DATA) {
     if (extensibility == DDS::FINAL || extensibility == DDS::APPENDABLE) {
@@ -5443,7 +5465,7 @@ bool serialize_dynamic_complex_member_header(Serializer& ser, DDS::ReturnCode_t 
   } else if (extensibility == DDS::MUTABLE) {
     const Encoding& encoding = ser.encoding();
     size_t member_size = 0;
-    return serialized_size(encoding, member_size, member_data)
+    return serialized_size_i(encoding, member_size, member_data, ext)
       && ser.write_parameter_id(id, member_size, must_understand);
   }
   return true;
@@ -5561,7 +5583,7 @@ bool serialize_dynamic_primitive_member(Serializer& ser, const T& value, DDS::Re
 }
 
 bool serialize_dynamic_member(Serializer& ser, DDS::DynamicData_ptr data,
-  const DDS::MemberDescriptor_var md, DDS::ExtensibilityKind extensibility)
+  const DDS::MemberDescriptor_var md, DDS::ExtensibilityKind extensibility, Sample::Extent ext)
 {
   const DDS::MemberId id = md->id();
   const CORBA::Boolean optional = md->is_optional();
@@ -5707,13 +5729,13 @@ bool serialize_dynamic_member(Serializer& ser, DDS::DynamicData_ptr data,
     rc = data->get_complex_value(member_data, id);
     if (!check_rc_from_get(rc, id, treat_member_as, "serialize_dynamic_member") ||
         !serialize_dynamic_complex_member_header(ser, rc, member_data, extensibility,
-                                                 optional, id, must_understand)) {
+                                                 optional, id, must_understand, ext)) {
       return false;
     }
     if (optional && rc == DDS::RETCODE_NO_DATA) {
       return true;
     }
-    return ser << member_data;
+    return serialize(ser, member_data, ext);
   }
   default:
     if (log_level >= LogLevel::Notice) {
@@ -5724,11 +5746,11 @@ bool serialize_dynamic_member(Serializer& ser, DDS::DynamicData_ptr data,
   return false;
 }
 
-bool serialize_dynamic_struct(Serializer& ser, DDS::DynamicData_ptr data)
+bool serialize_dynamic_struct(Serializer& ser, DDS::DynamicData_ptr data, Sample::Extent ext)
 {
-  // TODO(sonndinh): Handle KeyOnly/NestedKeyOnly
   const DDS::DynamicType_var type = data->type();
   const DDS::DynamicType_var base_type = get_base_type(type);
+  const bool struct_has_explicit_keys = has_explicit_keys(base_type);
   DDS::TypeDescriptor_var td;
   if (!get_type_descriptor(base_type, td)) {
     return false;
@@ -5738,7 +5760,8 @@ bool serialize_dynamic_struct(Serializer& ser, DDS::DynamicData_ptr data)
   size_t total_size = 0;
   const DDS::ExtensibilityKind extensibility = td->extensibility_kind();
   if (extensibility == DDS::APPENDABLE || extensibility == DDS::MUTABLE) {
-    if (!serialized_size_dynamic_struct(encoding, size, data) || !ser.write_delimiter(total_size)) {
+    if (!serialized_size_dynamic_struct(encoding, size, data, ext)
+        || !ser.write_delimiter(total_size)) {
       return false;
     }
   }
@@ -5754,7 +5777,12 @@ bool serialize_dynamic_struct(Serializer& ser, DDS::DynamicData_ptr data)
       return false;
     }
 
-    if (!serialize_dynamic_member(ser, data, md, extensibility)) {
+    if (exclude_member(ext, md->is_key(), struct_has_explicit_keys)) {
+      continue;
+    }
+
+    // The serialization function for individual member must account for any header it has.
+    if (!serialize_dynamic_member(ser, data, md, extensibility, nested(ext))) {
       return false;
     }
   }
@@ -5871,11 +5899,15 @@ bool serialize_dynamic_discriminator(Serializer& ser, DDS::DynamicData_ptr union
   return false;
 }
 
-bool serialize_dynamic_union(Serializer& ser, DDS::DynamicData_ptr data)
+bool serialize_dynamic_union(Serializer& ser, DDS::DynamicData_ptr data, Sample::Extent ext)
 {
-  // TODO(sonndinh): Handle KeyOnly/NestedKeyOnly
   const DDS::DynamicType_var type = data->type();
   const DDS::DynamicType_var base_type = get_base_type(type);
+  if (ext == Sample::KeyOnly && !has_explicit_keys(base_type)) {
+    // nothing is serialized (not even a delimiter) for key-only serialization when there is no @key
+    return true;
+  }
+
   DDS::TypeDescriptor_var td;
   if (!get_type_descriptor(base_type, td)) {
     return false;
@@ -5886,7 +5918,8 @@ bool serialize_dynamic_union(Serializer& ser, DDS::DynamicData_ptr data)
   size_t total_size = 0;
   const DDS::ExtensibilityKind extensibility = td->extensibility_kind();
   if (extensibility == DDS::APPENDABLE || extensibility == DDS::MUTABLE) {
-    if (!serialized_size_dynamic_union(encoding, total_size, data) || !ser.write_delimiter(total_size)) {
+    if (!serialized_size_dynamic_union(encoding, total_size, data, ext)
+        || !ser.write_delimiter(total_size)) {
       return false;
     }
   }
@@ -5905,6 +5938,10 @@ bool serialize_dynamic_union(Serializer& ser, DDS::DynamicData_ptr data)
     return false;
   }
 
+  if (ext != Sample::Full) {
+    return true;
+  }
+
   // Selected branch
   bool has_branch = false;
   DDS::MemberDescriptor_var selected_md;
@@ -5916,7 +5953,7 @@ bool serialize_dynamic_union(Serializer& ser, DDS::DynamicData_ptr data)
 }
 
 bool serialize_dynamic_element(Serializer& ser, DDS::DynamicData_ptr col_data,
-                               DDS::MemberId elem_id, TypeKind elem_tk)
+                               DDS::MemberId elem_id, TypeKind elem_tk, Sample::Extent ext)
 {
   DDS::ReturnCode_t rc = DDS::RETCODE_OK;
   switch (elem_tk) {
@@ -6033,7 +6070,7 @@ bool serialize_dynamic_element(Serializer& ser, DDS::DynamicData_ptr col_data,
     DDS::DynamicData_ptr elem_data;
     rc = col_data->get_complex_value(elem_data, elem_id);
     return check_rc_from_get(rc, elem_id, elem_tk, "serialize_dynamic_element")
-      && (ser << elem_data);
+      && serialize(ser, elem_data, ext);
   }
   default:
     if (log_level >= LogLevel::Notice) {
@@ -6044,7 +6081,7 @@ bool serialize_dynamic_element(Serializer& ser, DDS::DynamicData_ptr col_data,
   return false;
 }
 
-bool serialize_dynamic_collection(Serializer& ser, DDS::DynamicData_ptr data)
+bool serialize_dynamic_collection(Serializer& ser, DDS::DynamicData_ptr data, Sample::Extent ext)
 {
   const DDS::DynamicType_var type = data->type();
   const DDS::DynamicType_var base_type = get_base_type(type);
@@ -6067,7 +6104,7 @@ bool serialize_dynamic_collection(Serializer& ser, DDS::DynamicData_ptr data)
   const Encoding& encoding = ser.encoding();
   size_t total_size;
   if (!is_primitive(elem_tk)) {
-    if (!serialized_size_dynamic_collection(encoding, total_size, data) ||
+    if (!serialized_size_dynamic_collection(encoding, total_size, data, ext) ||
         !ser.write_delimiter(total_size)) {
       return false;
     }
@@ -6085,27 +6122,38 @@ bool serialize_dynamic_collection(Serializer& ser, DDS::DynamicData_ptr data)
   // For now, serialize elements one-by-one.
   for (CORBA::ULong i = 0; i < item_count; ++i) {
     const DDS::MemberId elem_id = data->get_member_id_at_index(i);
-    if (elem_id == MEMBER_ID_INVALID || !serialize_dynamic_element(ser, data, elem_id, treat_elem_as)) {
+    if (elem_id == MEMBER_ID_INVALID ||
+        !serialize_dynamic_element(ser, data, elem_id, treat_elem_as, nested(ext))) {
       return false;
     }
   }
   return true;
 }
 
-bool operator<<(Serializer& ser, DDS::DynamicData_ptr data)
+bool serialize(Serializer& ser, DDS::DynamicData_ptr data, Sample::Extent ext)
 {
   const DDS::DynamicType_var type = data->type();
   const DDS::DynamicType_var base_type = get_base_type(type);
   switch (base_type->get_kind()) {
   case TK_STRUCTURE:
-    return serialize_dynamic_struct(ser, data);
+    return serialize_dynamic_struct(ser, data, ext);
   case TK_UNION:
-    return serialize_dynamic_union(ser, data);
+    return serialize_dynamic_union(ser, data, ext);
   case TK_ARRAY:
   case TK_SEQUENCE:
-    return serialize_dynamic_collection(ser, data);
+    return serialize_dynamic_collection(ser, data, ext);
   }
   return false;
+}
+
+bool operator<<(Serializer& ser, DDS::DynamicData_ptr data)
+{
+  return serialize(ser, data, Sample::Full);
+}
+
+bool operator<<(Serializer& ser, const KeyOnly<DDS::DynamicData_ptr>& key)
+{
+  return serialize(ser, key.value, Sample::KeyOnly);
 }
 
 } // namespace DCPS

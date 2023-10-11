@@ -1581,6 +1581,95 @@ DDS::ReturnCode_t copy(DDS::DynamicData_ptr dest, DDS::DynamicData_ptr src)
   return rc;
 }
 
+DDS::ReturnCode_t get_selected_union_branch(
+  DDS::DynamicType_var union_type, DDS::Int32 disc,
+  bool& found_selected_member, DDS::MemberDescriptor_var& selected_md)
+{
+  found_selected_member = false;
+  bool has_default = false;
+  DDS::ReturnCode_t rc = DDS::RETCODE_OK;
+  DDS::MemberDescriptor_var default_md;
+  for (DDS::UInt32 i = 0; i < union_type->get_member_count(); ++i) {
+    DDS::DynamicTypeMember_var dtm;
+    rc = union_type->get_member_by_index(dtm, i);
+    if (rc != DDS::RETCODE_OK) {
+      return rc;
+    }
+    if (dtm->get_id() == DISCRIMINATOR_ID) {
+      continue;
+    }
+    DDS::MemberDescriptor_var md;
+    rc = dtm->get_descriptor(md);
+    if (rc != DDS::RETCODE_OK) {
+      return rc;
+    }
+    bool found_matched_label = false;
+    const DDS::UnionCaseLabelSeq labels = md->label();
+    for (DDS::UInt32 j = 0; !found_matched_label && j < labels.length(); ++j) {
+      if (disc == labels[j]) {
+        found_matched_label = true;
+      }
+    }
+    if (found_matched_label) {
+      selected_md = md;
+      found_selected_member = true;
+      break;
+    }
+    if (md->is_default_label()) {
+      default_md = md;
+      has_default = true;
+    }
+  }
+  if (!found_selected_member && has_default) {
+    selected_md = default_md;
+    found_selected_member = true;
+  }
+  return rc;
+}
+
+bool has_explicit_keys(DDS::DynamicType* dt)
+{
+  // see dds_generator.h struct_has_explicit_keys() in opendds_idl
+  DDS::TypeDescriptor_var type_descriptor;
+  DDS::ReturnCode_t ret = dt->get_descriptor(type_descriptor);
+  if (ret != DDS::RETCODE_OK) {
+    return false;
+  }
+  DDS::DynamicType* const base = type_descriptor->base_type();
+  if (base && has_explicit_keys(base)) {
+    return true;
+  }
+
+  for (ACE_CDR::ULong i = 0; i < dt->get_member_count(); ++i) {
+    DDS::DynamicTypeMember_var member;
+    ret = dt->get_member_by_index(member, i);
+    if (ret != DDS::RETCODE_OK) {
+      return false;
+    }
+    DDS::MemberDescriptor_var descriptor;
+    ret = member->get_descriptor(descriptor);
+    if (ret != DDS::RETCODE_OK) {
+      return false;
+    }
+    if (descriptor->is_key()) {
+      return true;
+    }
+  }
+  return false;
+}
+
+bool exclude_member(DCPS::Sample::Extent ext, bool is_key, bool has_explicit_keys)
+{
+  // see Fields::Iterator and explicit_keys_only() in opendds_idl's dds_generator.h
+  const bool explicit_keys_only = ext == DCPS::Sample::KeyOnly || (ext == DCPS::Sample::NestedKeyOnly && has_explicit_keys);
+  return explicit_keys_only && !is_key;
+}
+
+DCPS::Sample::Extent nested(DCPS::Sample::Extent ext)
+{
+  return ext == DCPS::Sample::KeyOnly ? DCPS::Sample::NestedKeyOnly : ext;
+}
+
 } // namespace XTypes
 } // namespace OpenDDS
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
