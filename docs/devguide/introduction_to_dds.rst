@@ -144,18 +144,21 @@ The application uses the data reader's type-specific interfaces to receive the s
 Dynamic data readers (:ref:`xtypes--creating-and-using-a-dynamicdatawriter-or-dynamicdatareader`) can be used when code generated from IDL is not available or desired.
 Dynamic data readers are also type-safe, but type checking happens at runtime.
 
+.. _dds-introduction--discovery:
+
 Discovery, Matching, and Association
 ====================================
 
-Discovery is the process whereby a participant learns about the publications and subscriptions offered by other participants.
+*Discovery* is the process whereby a participant learns about the publications and subscriptions offered by other participants.
 The OMG DDS specification (``formal/2015-04-10``) leaves the details of discovery to the implementation.
 However, the OMG DDSI-RTPS specification (``formal/2014-09-01``) defines an interoperable peer-to-peer system for discovery.
 
 After discovering a remote publication and subscription, a participant compares the remote entity with its local entities to determine if they are compatible.
-This process is called matching.
+This process is called *matching*.
 A data writer and data reader match if they are on the same topic, they have compatible types, and they have compatible QoS policies.
 
 If a local entity matches a remote entity, then the implementation is configured to allow data to flow from the data writer to the data reader.
+This is called *association*.
 
 Conceptual Data Flow
 ====================
@@ -171,8 +174,8 @@ The QoS policies of the Subscriber, DataReader, and Topic control the data on th
 
 .. _introduction--built-in-topics:
 
-Built-in Topics
-===============
+Built-in Topics (BITs)
+======================
 
 ..
     Sect<1.1.2>
