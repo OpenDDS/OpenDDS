@@ -36,9 +36,17 @@ list(APPEND CMAKE_PREFIX_PATH "${OPENDDS_SOURCE_DIR}")
 list(APPEND CMAKE_FIND_ROOT_PATH "${OPENDDS_SOURCE_DIR}")
 set(_OPENDDS_CMAKE_DIR "${OPENDDS_SOURCE_DIR}/cmake" CACHE INTERNAL "")
 
-include("${_OPENDDS_CMAKE_DIR}/init.cmake")
-
+# Get and build ACE/TAO if OPENDDS_ACE wasn't defined and initialize the core
+# of the CMake support in init.cmake.
 if(NOT DEFINED OPENDDS_ACE OR DEFINED ACE_IS_BEING_BUILT)
+  # This is before init.cmake so init.cmake can get the features from ACE if
+  # ACE was already built.
+  include("${_OPENDDS_CMAKE_DIR}/get_ace_tao.cmake")
+endif()
+include("${_OPENDDS_CMAKE_DIR}/init.cmake")
+if(DEFINED ACE_IS_BEING_BUILT)
+  # This is after init.cmake so ACE/TAO can be configured using the features
+  # from init.cmake.
   include("${_OPENDDS_CMAKE_DIR}/build_ace_tao.cmake")
 endif()
 
@@ -103,13 +111,12 @@ install(
     cmake/export.h.in
     cmake/import_common.cmake
     cmake/init.cmake
-    cmake/opendds_features.cmake
     cmake/opendds_group.cmake
     cmake/opendds_target_sources.cmake
     cmake/opendds_testing.cmake
+    cmake/opendds_version.cmake
     cmake/tao_group.cmake
     cmake/tao_idl_sources.cmake
-    cmale/opendds_version.cmake
     "${config_cmake}"
   DESTINATION "${cmake_dest}"
 )

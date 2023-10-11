@@ -427,7 +427,7 @@ Functions
 
     Pass a CMake list (``;``-delimited) of an existing versioned namespace header and prefix to use in the generated code.
 
-    .. versionadded:: 3.25
+    .. versionadded:: 3.26
 
   .. cmake:func:arg:: GENERATE_SERVER_SKELETONS TRUE|FALSE
 
@@ -579,7 +579,7 @@ Functions
     opendds_export_header(<target> [USE_EXPORT_VAR <use-export-var-name>])
 
   Generates a header that is compatible with `ACE's generate_export_file.pl <https://github.com/DOCGroup/ACE_TAO/blob/master/ACE/bin/generate_export_file.pl>`__ for exporting symbols in shared libraries.
-  The header will able to be included as ``<target>_export.h`` and the macro that can be used to export symbols wll be named ``<target>_Export``.
+  The header will able to be included as ``<target>_export.h`` and the macro that can be used to export symbols will be named ``<target>_Export``.
   It is the same function :cmake:func:`opendds_target_sources` uses so all the same info about :ref:`generated files <cmake-files-props>` applies.
 
   .. cmake:func:arg:: USE_EXPORT_VAR <use-export-var-name>

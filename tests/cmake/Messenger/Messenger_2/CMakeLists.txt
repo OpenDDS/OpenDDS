@@ -75,7 +75,7 @@ target_link_libraries(${stack_subscriber} ${messenger} OpenDDS::OpenDDS)
 
 # Testing
 configure_file("${src}/run_test.pl" . COPYONLY)
-set(OPENDDS_TEST_CONFIG_DIR "${src}")
+set(OPENDDS_CONFIG_DIR "${src}")
 opendds_add_test(NAME tcp)
 opendds_add_test(NAME default_tcp ARGS default_tcp)
 opendds_add_test(NAME thread_per ARGS thread_per)

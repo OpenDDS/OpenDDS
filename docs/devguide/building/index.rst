@@ -323,9 +323,8 @@ If a profile involves a class, a compile time error will occur if you try to use
 
 .. _building--content-subscription-profile:
 
-==============================
- Content-Subscription Profile
-==============================
+Content-Subscription Profile
+============================
 
 ..
     Sect<1.3.3.1>
@@ -357,9 +356,8 @@ In addition, individual classes can be excluded by using the features given in t
 
 .. _building--persistence-profile:
 
-=====================
- Persistence Profile
-=====================
+Persistence Profile
+===================
 
 ..
     Sect<1.3.3.2>
@@ -370,9 +368,8 @@ This profile adds the QoS policy ``DURABILITY_SERVICE`` and the settings ``TRANS
 
 .. _building--ownership-profile:
 
-===================
- Ownership Profile
-===================
+Ownership Profile
+=================
 
 ..
     Sect<1.3.3.3>
@@ -392,9 +389,8 @@ This profile adds:
 
 .. _building--object-model-profile:
 
-======================
- Object Model Profile
-======================
+Object Model Profile
+=====================
 
 ..
     Sect<1.3.3.4>
@@ -618,60 +614,41 @@ Cross Compiling
 Once set up properly, OpenDDS can be cross-compiled with CMake using normal `CMake cross compiling <https://cmake.org/cmake/help/book/mastering-cmake/chapter/Cross%20Compiling%20With%20CMake.html>`__.
 A few things to note:
 
-- Native-built host tools, like :term:`opendds_idl`, have to be configured and built separately and provided to the target build using :cmake:var:`OPENDDS_HOST_TOOLS`.
-- The host tools can build its own ACE/TAO for the host system, but it will currently also build all of ACE/TAO.
-  This can be skipped by providing a prebuilt ACE/TAO to the host tools build using :cmake:var:`OPENDDS_ACE`.
-  This also has to be provided to the target build using :cmake:var:`OPENDDS_ACE_TAO_HOST_TOOLS`.
-- ACE/TAO for the target build has to be configured and built separately and provided using :cmake:var:`OPENDDS_ACE`.
+- Host tools:
+
+  - Native-built host tools, like :term:`opendds_idl`, have to be configured and built separately and provided to the target build using :cmake:var:`OPENDDS_HOST_TOOLS`.
+
+  - The host tools can build its own ACE/TAO for the host system, but this can be overridden using :cmake:var:`OPENDDS_ACE` on the host build and :cmake:var:`OPENDDS_ACE_TAO_HOST_TOOLS` on the target build.
+
+- Target build:
+
+  - If building ACE/TAO for a target isn't automatically supported, then ACE/TAO will have to be configured and built separately and provided using :cmake:var:`OPENDDS_ACE`.
+    Current only ACE/TAO for Android can built automatically, see below for an example for this.
 
   - See https://www.dre.vanderbilt.edu/~schmidt/DOC_ROOT/ACE/ACE-INSTALL.html for how to manually build ACE/TAO.
 
+Android
+^^^^^^^
+
 The following is an example of cross-compiling OpenDDS for Android on Linux using CMake.
+
 It assumes the NDK has been downloaded and the location is in an environment variables called ``NDK`` and the downloaded ACE/TAO version matches the version being used by host tools.
 
 .. code-block:: shell
 
   # Build Host Tools
-  cmake -B build-host -DOPENDDS_JUST_BUILD_HOST_TOOLS=TRUE
+  cmake -B build-host \
+    -DBUILD_SHARED_LIBS=FALSE \
+    -DOPENDDS_JUST_BUILD_HOST_TOOLS=TRUE
   cmake --build build-host -- -j 4
-  export HOST_ROOT=$(realpath build-host/ace_tao)
-
-  # Build ACE/TAO for Android
-  curl -L https://github.com/DOCGroup/ACE_TAO/releases/download/ACE+TAO-7_1_0/ACE+TAO-7.1.0.tar.gz \
-    --output ACE+TAO.tar.gz
-  tar xzf ACE+TAO.tar.gz
-  export ACE_ROOT=$(realpath ACE_wrappers)
-  export TAO_ROOT=$ACE_ROOT/TAO
-  export MPC_ROOT=$ACE_ROOT/MPC
-  echo 'no_cxx11=0' > "$ACE_ROOT/bin/MakeProjectCreator/config/default.features"
-  cat << EOF > "$ACE_ROOT/include/makeinclude/platform_macros.GNU"
-  optimize = 0
-  android_abi := armeabi-v7a
-  android_api := 29
-  android_ndk := \$(NDK)
-  TAO_IDL := \$(HOST_ROOT)/bin/tao_idl
-  TAO_IDLFLAGS += -g \$(HOST_ROOT)/ace_gperf
-  TAO_IDL_DEP := \$(HOST_ROOT)/bin/tao_idl
-  include \$(ACE_ROOT)/include/makeinclude/platform_android.GNU
-  EOF
-  cat << EOF > "$ACE_ROOT/ace/config.h"
-  #define ACE_DISABLE_MKTEMP
-  #define ACE_LACKS_READDIR_R
-  #define ACE_LACKS_TEMPNAM
-  #include "config-android.h"
-  EOF
-  cp ACE_TAO_for_OpenDDS.mwc $ACE_ROOT
-  (cd $ACE_ROOT && bin/mwc.pl -type gnuace ACE_TAO_for_OpenDDS.mwc && make -j 4)
 
   # Build OpenDDS for Android
   cmake -B build-target \
     -DBUILD_SHARED_LIBS=TRUE \
     -DANDROID_ABI=armeabi-v7a -DANDROID_PLATFORM=android-29 \
     --toolchain $NDK/build/cmake/android.toolchain.cmake \
-    -DOPENDDS_ACE_TAO_HOST_TOOLS=$(realpath build-host/ace_tao) \
-    -DOPENDDS_HOST_TOOLS=$(realpath build-host) \
-    -DOPENDDS_ACE=$ACE_ROOT
-  cmake --build build-target -- -j 4
+    -DOPENDDS_HOST_TOOLS=$(realpath build-host)
+  cmake --build build-target-- -j 4
 
 Installation
 ============
@@ -692,8 +669,5 @@ Other Known Limitations
 - The following features are planned, but not implemented yet:
 
   - The ability to use MPC for building user applications.
-  - Safety profile
+  - Safety Profile
   - Java Mapping
-
-- CMake-build OpenDDS libraries and executables will currently be ignored by :ref:`find_package(OpenDDS COMPONENTS ...) <cmake-components>`.
-  Passing feature should work.

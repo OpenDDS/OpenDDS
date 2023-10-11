@@ -139,7 +139,8 @@ function(_opendds_target_idl_sources target)
     get_property(generated_dependencies SOURCE ${idl_file}
       PROPERTY OPENDDS_IDL_GENERATED_DEPENDENCIES SET)
 
-    # TODO Fix this
+    # TODO: This breaks the OpenDDS build because must be able to call
+    # opendds_target_sources on the same IDL files with different options.
     if(generated_dependencies AND FALSE)
       # If an IDL-Generation command was already created this file can safely be
       # skipped; however, the dependencies still need to be added to the target.

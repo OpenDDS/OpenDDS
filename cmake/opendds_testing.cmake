@@ -5,6 +5,8 @@ function(opendds_add_test)
   cmake_parse_arguments(arg
     "${no_value_options}" "${single_value_options}" "${multi_value_options}" ${ARGN})
 
+  find_package(Perl REQUIRED)
+
   set(test_name "${PROJECT_NAME}_test")
   if(arg_NAME)
     set(test_name "${test_name}_${arg_NAME}")
@@ -40,8 +42,8 @@ function(opendds_add_test)
     list(APPEND env "OPENDDS_BUILD_DIR=${OPENDDS_BUILD_DIR}")
   endif()
 
-  if(DEFINED OPENDDS_TEST_CONFIG_DIR)
-    list(APPEND env "OPENDDS_TEST_CONFIG_DIR=${OPENDDS_TEST_CONFIG_DIR}")
+  if(DEFINED OPENDDS_CONFIG_DIR)
+    list(APPEND env "OPENDDS_CONFIG_DIR=${OPENDDS_CONFIG_DIR}")
   endif()
 
   if(DEFINED OPENDDS_SOURCE_DIR)

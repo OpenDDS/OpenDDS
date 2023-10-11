@@ -40,15 +40,17 @@ sub to_cmake_value {
 
 my %features;
 my $file = "$ace_root/bin/MakeProjectCreator/config/default.features";
-open(my $fh, '<', $file) or die "ERROR: Could not open $file: $!";
-while (my $row = <$fh>) {
-  chomp $row;
-  $row =~ s/\/\/.*//;
-  $row =~ s/^\s+//;
-  $row =~ s/\s+$//;
-  next if $row eq '';
-  my ($key, $value) = split(/\s*=\s*/, $row);
-  $features{$key} = $value;
+if (-f $file) {
+  open(my $fh, '<', $file) or die "ERROR: Could not open $file: $!";
+  while (my $row = <$fh>) {
+    chomp $row;
+    $row =~ s/\/\/.*//;
+    $row =~ s/^\s+//;
+    $row =~ s/\s+$//;
+    next if $row eq '';
+    my ($key, $value) = split(/\s*=\s*/, $row);
+    $features{$key} = $value;
+  }
 }
 
 for my $f (@ARGV) {

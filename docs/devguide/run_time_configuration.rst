@@ -132,6 +132,20 @@ To set a default configuration file to load, use ``TheServiceParticipant-﻿>def
 
 ``pub.ini`` would be used unless ``-DCPSConfigFile`` is passed to override the default configuration file.
 
+.. _OPENDDS_CONFIG_DIR:
+
+If there is a directory with multiple configuration files, then :envvar:`OPENDDS_CONFIG_DIR` can be used to make ``-DCPSConfigFile`` relative to that directory.
+For example, the following commands would have the same effect:
+
+.. code-block:: bash
+
+  ./publisher -DCPSConfigFile /pretend/this/is/a/long/path/a.ini
+  ./subscriber -DCPSConfigFile /pretend//this/is/a/long/path/b.ini
+
+  export OPENDDS_CONFIG_DIR=/pretend/this/is/a/long/path
+  ./publisher -DCPSConfigFile a.ini
+  ./subscriber -DCPSConfigFile b.ini
+
 The ``Service_Participant`` class also provides methods that allow an application to configure the DDS service.
 See the header file :ghfile:`dds/DCPS/Service_Participant.h` for details.
 

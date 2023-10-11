@@ -590,6 +590,8 @@ opendds_target_sources(OpenDDS_Dcps
   ${opendds_target_sources_args}
 )
 
+# TODO: Ones marked TODO should be processed differently in safety profile.
+# See dcps_optional_safety.mpb.
 opendds_target_sources(OpenDDS_Dcps
   PUBLIC
     DdsDcps.idl
