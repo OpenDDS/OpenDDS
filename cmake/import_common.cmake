@@ -8,7 +8,7 @@ if(_OPENDDS_IMPORT_COMMON_CMAKE)
 endif()
 set(_OPENDDS_IMPORT_COMMON_CMAKE TRUE)
 
-cmake_minimum_required(VERSION 3.3.2)
+cmake_minimum_required(VERSION 3.3...3.27)
 
 include(SelectLibraryConfigurations)
 

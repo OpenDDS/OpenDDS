@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.23)
+cmake_minimum_required(VERSION 3.23...3.27)
 project(opendds_qos_xml_xsc_handler CXX)
 
 set(deps OpenDDS::Dcps ACE::XML_Utils)

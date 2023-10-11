@@ -6,7 +6,7 @@
 # Distributed under the OpenDDS License. See accompanying LICENSE
 # file or http://www.opendds.org/license.html for details.
 
-cmake_minimum_required(VERSION 3.3.2)
+cmake_minimum_required(VERSION 3.3...3.27)
 
 if(OPENDDS_CMAKE_VERBOSE)
   message(STATUS "find_package(OpenDDS) called from ${PROJECT_NAME}")
