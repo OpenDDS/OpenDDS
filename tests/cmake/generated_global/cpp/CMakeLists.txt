@@ -5,9 +5,6 @@
 # see DevGuideExamples/DCPS/Messenger/CMakeLists.txt
 
 cmake_minimum_required(VERSION 3.8...3.27)
-if(POLICY CMP0091)
-  cmake_policy(SET CMP0091 NEW)
-endif()
 project(opendds_generated_global_cpp CXX)
 
 find_package(OpenDDS REQUIRED)

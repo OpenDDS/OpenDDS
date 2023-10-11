@@ -53,27 +53,21 @@ function(_opendds_vs_force_static)
   # systems, is the same kind everywhere. Normally we shouldn't make global
   # changes, but if we don't do this, MSVC won't link the programs if the
   # runtimes of compiled objects are different.
-  set(fallback TRUE)
-  if(POLICY CMP0091)
-    # This is the offical method CMake provides for doing this, but this only works if the policy has already been set to NEW.
-    cmake_policy(GET CMP0091 runtime_policy)
-    if(runtime_policy STREQUAL NEW)
-      set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>" CACHE INTERNAL "" FORCE)
-      set(fallback FALSE)
+  # This is based on an old CMake FAQ:
+  # https://web.archive.org/web/20210319004154/https://gitlab.kitware.com/cmake/community/-/wikis/FAQ#dynamic-replace
+  # At some point at or before CMake 3.26 these became cache variables.
+  # There are alternative methods of making this work, like
+  # MSVC_RUNTIME_LIBRARY, but this method seems like it works best for our
+  # purposes.
+  foreach(flag_var
+      CMAKE_CXX_FLAGS CMAKE_CXX_FLAGS_DEBUG CMAKE_CXX_FLAGS_RELEASE
+      CMAKE_CXX_FLAGS_MINSIZEREL CMAKE_CXX_FLAGS_RELWITHDEBINFO)
+    if(${flag_var} MATCHES "/MD")
+      string(REGEX REPLACE "/MD" "/MT" new_value "${${flag_var}}")
+      set(${flag_var} "${new_value}" CACHE INTERNAL
+        "CXX Flags (Overridden by OpenDDS to match /MT* with ACE)")
     endif()
-  endif()
-
-  if(fallback)
-    # This is the unoffical method CMake used to recommend.
-    foreach(flag_var
-            CMAKE_CXX_FLAGS CMAKE_CXX_FLAGS_DEBUG CMAKE_CXX_FLAGS_RELEASE
-            CMAKE_CXX_FLAGS_MINSIZEREL CMAKE_CXX_FLAGS_RELWITHDEBINFO)
-      if(${flag_var} MATCHES "/MD")
-        string(REGEX REPLACE "/MD" "/MT" ${flag_var} "${${flag_var}}")
-        set(${flag_var} "${${flag_var}}" PARENT_SCOPE)
-      endif()
-    endforeach()
-  endif()
+  endforeach()
 endfunction()
 
 if(MSVC AND OPENDDS_STATIC)

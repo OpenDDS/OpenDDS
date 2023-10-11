@@ -1,7 +1,4 @@
 cmake_minimum_required(VERSION 3.3...3.27)
-if(POLICY CMP0091)
-  cmake_policy(SET CMP0091 NEW)
-endif()
 project(opendds_install_test)
 enable_testing()
 
@@ -20,7 +17,6 @@ set(common_cmake_args
   "-DCMAKE_PREFIX_PATH:PATH=${_OPENDDS_ROOT}$<SEMICOLON>${dest_install_prefix}"
   "-DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}"
   "-DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}"
-  "-DCMAKE_MSVC_RUNTIME_LIBRARY=${CMAKE_MSVC_RUNTIME_LIBRARY}"
 )
 if(DEFINED CMAKE_CXX_STANDARD)
   list(APPEND common_cmake_args "-DCMAKE_CXX_STANDARD=${CMAKE_CXX_STANDARD}")
