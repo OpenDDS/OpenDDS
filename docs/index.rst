@@ -40,6 +40,9 @@ They are attached to their corresponding releases as ``OpenDDS-VERSION.pdf``.
 Using OpenDDS
 *************
 
+:ref:`quickstart`
+  Download and compile OpenDDS and then run an example application
+
 :ref:`introduction--dcps-overview`
   A conceptual overview of the Data Distribution Service
 

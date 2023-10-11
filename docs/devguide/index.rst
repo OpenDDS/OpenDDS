@@ -6,9 +6,10 @@ The Developer's Guide explains how to use OpenDDS.
 
 .. toctree::
 
-  introduction_to_dds
-  introduction
   quickstart/index
+  introduction_to_dds
+  shapes
+  introduction
   building/index
   getting_started
   quality_of_service

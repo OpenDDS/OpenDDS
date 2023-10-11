@@ -10,6 +10,5 @@ Quick Start Guides
    linux
    pi
    docker
-   shapes
 
 See :ref:`building` for detailed build instructions.
