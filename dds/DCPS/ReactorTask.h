@@ -83,6 +83,7 @@ private:
     ACE_SYNCH_RECURSIVE_MUTEX, MonotonicClock> TimerQueueType;
 
   enum State { STATE_UNINITIALIZED, STATE_OPENING, STATE_RUNNING, STATE_SHUT_DOWN };
+  State state() const;
 
   class Interceptor : public DCPS::ReactorInterceptor {
   public:
