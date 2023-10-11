@@ -53,21 +53,30 @@ function(_opendds_vs_force_static)
   # systems, is the same kind everywhere. Normally we shouldn't make global
   # changes, but if we don't do this, MSVC won't link the programs if the
   # runtimes of compiled objects are different.
-  # This is based on an old CMake FAQ:
-  # https://web.archive.org/web/20210319004154/https://gitlab.kitware.com/cmake/community/-/wikis/FAQ#dynamic-replace
-  # At some point at or before CMake 3.26 these became cache variables.
-  # There are alternative methods of making this work, like
-  # MSVC_RUNTIME_LIBRARY, but this method seems like it works best for our
-  # purposes.
-  foreach(flag_var
-      CMAKE_CXX_FLAGS CMAKE_CXX_FLAGS_DEBUG CMAKE_CXX_FLAGS_RELEASE
-      CMAKE_CXX_FLAGS_MINSIZEREL CMAKE_CXX_FLAGS_RELWITHDEBINFO)
-    if(${flag_var} MATCHES "/MD")
-      string(REGEX REPLACE "/MD" "/MT" new_value "${${flag_var}}")
-      set(${flag_var} "${new_value}" CACHE INTERNAL
-        "CXX Flags (Overridden by OpenDDS to match /MT* with ACE)")
-    endif()
-  endforeach()
+  # See the following for more info:
+  #   https://cmake.org/cmake/help/latest/variable/CMAKE_MSVC_RUNTIME_LIBRARY.html#variable:CMAKE_MSVC_RUNTIME_LIBRARY
+  #   https://gitlab.kitware.com/cmake/community/-/wikis/FAQ#how-can-i-build-my-msvc-application-with-a-static-runtime
+  cmake_policy(GET CMP0091 policy91)
+  if(policy91 STREQUAL NEW)
+    set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>"  CACHE STRING "" FORCE)
+  else()
+    foreach(flag_var
+        CMAKE_CXX_FLAGS_DEBUG CMAKE_CXX_FLAGS_RELEASE
+        CMAKE_CXX_FLAGS_MINSIZEREL CMAKE_CXX_FLAGS_RELWITHDEBINFO)
+      string(REGEX REPLACE "/M[DT][d]? " "" value "${${flag_var}}")
+      string(REGEX REPLACE " /M[DT][d]?" "" value "${value}")
+      string(REGEX REPLACE "/M[DT][d]?" "" value "${value}")
+      if(value)
+        set(value "${value} ")
+      endif()
+      set(value "${value}/MT")
+      if(flag_var STREQUAL "CMAKE_CXX_FLAGS_DEBUG")
+        set(value "${value}d")
+      endif()
+      set(${flag_var} "${value}" CACHE STRING
+        "CXX Flags (Overridden by OpenDDS to match /MT* with ACE)" FORCE)
+    endforeach()
+  endif()
 endfunction()
 
 if(MSVC AND OPENDDS_STATIC)
