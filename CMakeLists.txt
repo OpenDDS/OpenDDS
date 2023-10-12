@@ -25,7 +25,7 @@ get_filename_component(_OPENDDS_SOURCE_DIR_REAL "${OPENDDS_SOURCE_DIR}" REALPATH
 get_filename_component(_OPENDDS_BUILD_DIR_REAL "${OPENDDS_BUILD_DIR}" REALPATH)
 if("${_OPENDDS_SOURCE_DIR_REAL}" STREQUAL "${_OPENDDS_BUILD_DIR_REAL}")
   message(FATAL_ERROR "Please build OpenDDS in a different directory from the source tree "
-    "directory. Use something like \"cmake -B build\".")
+    "directory. Use something like \"cmake -S . -B build\".")
 endif()
 set(OPENDDS_BIN_DIR "${OPENDDS_BUILD_DIR}/bin" CACHE INTERNAL "")
 set(OPENDDS_LIB_DIR "${OPENDDS_BUILD_DIR}/lib" CACHE INTERNAL "")
@@ -88,6 +88,7 @@ if(OPENDDS_SECURITY)
 endif()
 add_subdirectory(tools/inspect)
 
+# Installation
 set(cmake_dest "${CMAKE_INSTALL_DATAROOTDIR}/cmake/OpenDDS")
 install(EXPORT opendds_targets
   FILE "opendds_targets.cmake"
@@ -123,9 +124,14 @@ if(OPENDDS_RAPIDJSON)
     DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 endif()
 
-if(NOT DEFINED OPENDDS_BUILD_TESTS AND BUILD_TESTING)
-  set(OPENDDS_BUILD_TESTS TRUE)
+# Examples and Tests
+if(BUILD_TESTING)
+  set(_OPENDDS_BUILD_TESTS_DEFAULT TRUE)
+else()
+  set(_OPENDDS_BUILD_TESTS_DEFAULT FALSE)
 endif()
+set(OPENDDS_BUILD_TESTS ${_OPENDDS_BUILD_TESTS_DEFAULT} CACHE BOOL "Build OpenDDS Tests")
+set(OPENDDS_BUILD_EXAMPLES TRUE CACHE BOOL "Build OpenDDS Examples")
 if(OPENDDS_BUILD_EXAMPLES OR OPENDDS_BUILD_TESTS)
   enable_testing()
   add_subdirectory(DevGuideExamples/DCPS/Messenger)

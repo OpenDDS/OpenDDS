@@ -3,15 +3,14 @@
  * See: http://www.OpenDDS.org/license.html
  */
 
-#ifndef OPENDDS_DCPS_SECURITY_UTILITY_H
-#define OPENDDS_DCPS_SECURITY_UTILITY_H
+#ifndef OPENDDS_DCPS_SECURITY_FRAMEWORK_UTILITY_H
+#define OPENDDS_DCPS_SECURITY_FRAMEWORK_UTILITY_H
 
 #include <dds/DCPS/dcps_export.h>
-#include <dds/DCPS/SequenceIterator.h>
 #include <dds/DCPS/RcObject.h>
 #include <dds/Versioned_Namespace.h>
 
-#include <dds/DdsSecurityCoreC.h>
+#include <string>
 
 #ifndef ACE_LACKS_PRAGMA_ONCE
 #  pragma once

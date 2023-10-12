@@ -426,6 +426,7 @@ target_sources(OpenDDS_Dcps
     DCPS/security/framework/SecurityPluginInst.h
     DCPS/security/framework/SecurityPluginInst_rch.h
     DCPS/security/framework/SecurityRegistry.h
+    DCPS/security/framework/Utility.h
     DCPS/transport/framework/BasicQueueVisitor_T.h
     DCPS/transport/framework/BasicQueue_T.h
     DCPS/transport/framework/BuildChainVisitor.h

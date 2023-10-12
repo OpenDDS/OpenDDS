@@ -451,7 +451,9 @@ Functions
     This allows using IDL files from multiple directories.
     :cmake:func:`opendds_install_interface_files` is proved to help install generated files that result from this.
     Any IDL file passed that's outside the include base will cause an error.
+
     The default behavior is the legacy behavior that assumes a flat hierarchy.
+    Starting with OpenDDS 4.0 this will always be enabled and will default to ``CMAKE_CURRENT_SOURCE_DIR``.
 
     .. versionadded:: 3.26
 

@@ -1,7 +1,7 @@
-# This is what's CMake evaluates when find_package(OpenDDS) is called. It
-# should find ACE/TAO and OpenDDS according to COMPONENTS passed, make those
-# libraries and executables available, and make opendds_targets_sources
-# available if possible.
+# This is what CMake evaluates when find_package(OpenDDS) is called. It should
+# find ACE/TAO and OpenDDS according to COMPONENTS passed and other information
+# like OpenDDS_ROOT, make those libraries and executables available, and make
+# opendds_targets_sources available if possible.
 #
 # Distributed under the OpenDDS License. See accompanying LICENSE
 # file or http://www.opendds.org/license.html for details.

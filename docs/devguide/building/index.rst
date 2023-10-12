@@ -592,7 +592,7 @@ These are the variables that are exclusive to building OpenDDS with CMake:
 
   Build examples that are currently supported when building OpenDDS with CMake.
   See :ref:`cmake-running-tests` for how to run them.
-  The default for this is :cmake:var:`OPENDDS_BUILD_TESTS`.
+  The default for this is ``TRUE``.
 
 Speeding up the build
 ---------------------
@@ -614,25 +614,15 @@ Cross Compiling
 Once set up properly, OpenDDS can be cross-compiled with CMake using normal `CMake cross compiling <https://cmake.org/cmake/help/book/mastering-cmake/chapter/Cross%20Compiling%20With%20CMake.html>`__.
 A few things to note:
 
-- Host tools:
-
-  - Native-built host tools, like :term:`opendds_idl`, have to be configured and built separately and provided to the target build using :cmake:var:`OPENDDS_HOST_TOOLS`.
-
-  - The host tools can build its own ACE/TAO for the host system, but this can be overridden using :cmake:var:`OPENDDS_ACE` on the host build and :cmake:var:`OPENDDS_ACE_TAO_HOST_TOOLS` on the target build.
-
-- Target build:
-
-  - If building ACE/TAO for a target isn't automatically supported, then ACE/TAO will have to be configured and built separately and provided using :cmake:var:`OPENDDS_ACE`.
-    Current only ACE/TAO for Android can built automatically, see below for an example for this.
-
-  - See https://www.dre.vanderbilt.edu/~schmidt/DOC_ROOT/ACE/ACE-INSTALL.html for how to manually build ACE/TAO.
+- Native-built host tools, like :term:`opendds_idl`, have to be configured and built separately and provided to the target build using :cmake:var:`OPENDDS_HOST_TOOLS`.
+- The host tools will build its own ACE/TAO for the host system, but this can be overridden using :cmake:var:`OPENDDS_ACE` on the host build and :cmake:var:`OPENDDS_ACE_TAO_HOST_TOOLS` on the target build.
+- If the target platform isn't automatically supported, then ACE/TAO will have to be :ref:`built serperatly <cmake-ace-tao-manual>`.
 
 Android
 ^^^^^^^
 
 The following is an example of cross-compiling OpenDDS for Android on Linux using CMake.
-
-It assumes the NDK has been downloaded and the location is in an environment variables called ``NDK`` and the downloaded ACE/TAO version matches the version being used by host tools.
+It assumes the NDK has been downloaded and the location is in an environment variable called ``NDK``.
 
 .. code-block:: shell
 
@@ -661,13 +651,24 @@ Currently ACE/TAO has to be installed separately and this is only possible with 
 Running Tests
 =============
 
-Tests (:cmake:var:`OPENDDS_BUILD_TESTS`) and examples (:cmake:var:`OPENDDS_BUILD_EXAMPLES`) can be run using the ``test`` target (``cmake --build build -t test``) or directly using `ctest <https://cmake.org/cmake/help/latest/manual/ctest.1.html>`__.
+:cmake:var:`Tests <OPENDDS_BUILD_TESTS>` and :cmake:var:`examples <OPENDDS_BUILD_EXAMPLES>` can be run using using `ctest <https://cmake.org/cmake/help/latest/manual/ctest.1.html>`__.
+There is also a target for running tests in the build, but the name differs based on the CMake generator used.
 
-Other Known Limitations
-=======================
+.. _cmake-known-limitations:
+
+Known Limitations
+=================
+
+.. _cmake-ace-tao-manual:
+
+- ACE/TAO can't be automatically built unless there is explicit support for the platform.
+  Currently this only exists for Windows, Linux, macOS, and Android.
+  All other platforms will require configuring and building ACE/TAO separately :cmake:var:`OPENDDS_ACE`
+
+  - See https://www.dre.vanderbilt.edu/~schmidt/DOC_ROOT/ACE/ACE-INSTALL.html for how to manually build ACE/TAO.
 
 - The following features are planned, but not implemented yet:
 
-  - The ability to use MPC for building user applications.
-  - Safety Profile
-  - Java Mapping
+  - Support for :ref:`safety_profile`
+  - Support for :ref:`java`
+  - The ability to use MPC for building user applications with an installed CMake-built OpenDDS

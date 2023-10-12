@@ -2260,7 +2260,7 @@ int TAO_DDS_DCPSInfo_i::init_transport(int listen_address_given,
     OpenDDS::DCPS::TransportInst_rch inst =
       OpenDDS::DCPS::TransportRegistry::instance()->create_inst(inst_name,
                                                                "tcp");
-    if(!inst) {
+    if (!inst) {
       if (OpenDDS::DCPS::log_level >= OpenDDS::DCPS::LogLevel::Error) {
         ACE_DEBUG((LM_DEBUG, "(%P|%t) TAO_DDS_DCPSInfo_i::init_transport: "
           "couldn't create TCP transport instance for BITs\n"));

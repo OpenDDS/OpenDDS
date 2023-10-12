@@ -1,6 +1,4 @@
 /*
- *
- *
  * Distributed under the OpenDDS License.
  * See: http://www.opendds.org/license.html
  */
@@ -8,15 +6,14 @@
 #ifndef OPENDDS_DCPS_SECURITY_FRAMEWORK_SECURITYPLUGININST_H
 #define OPENDDS_DCPS_SECURITY_FRAMEWORK_SECURITYPLUGININST_H
 
-#ifdef OPENDDS_SECURITY
-#include "dds/DdsSecurityCoreC.h"
-#include "dds/DCPS/security/Utility.h"
-#endif
+#include "Utility.h"
 
-#include "dds/DCPS/dcps_export.h"
-#include "dds/DCPS/RcObject.h"
+#include <dds/DCPS/dcps_export.h>
+#include <dds/DCPS/RcObject.h>
 
-#include "ace/Synch_Traits.h"
+#include <dds/DdsSecurityCoreC.h>
+
+#include <ace/Synch_Traits.h>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 

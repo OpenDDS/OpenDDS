@@ -55,7 +55,6 @@ target_sources(OpenDDS_Security
     SSL/Utils.h
     TokenReader.h
     TokenWriter.h
-    Utility.h
     UtilityImpl.h
     framework/HandleRegistry.h
     framework/Properties.h
