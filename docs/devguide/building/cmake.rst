@@ -186,7 +186,7 @@ install(IMPORTED_RUNTIME_ARTIFACTS)
 
 .. versionadded:: 3.20
 
-If using CMake 3.21 or later, it’s possible to install :ref:`executables <cmake-executables>` and :ref:`shared libraries <cmake-libraries>` from OpenDDS, ACE, and TAO in CMake along side the application using `install(IMPORTED_RUNTIME_ARTIFACTS) <https://cmake.org/cmake/help/latest/command/install.html#install-imported-runtime-artifacts>`__.
+If using CMake 3.21 or later, it’s possible to install :ref:`executables <cmake-executables>` and :ref:`shared libraries <cmake-libraries>` from OpenDDS, ACE, and TAO in CMake along side the application using `install(IMPORTED_RUNTIME_ARTIFACTS) <https://cmake.org/cmake/help/latest/command/install.html#imported-runtime-artifacts>`__.
 This will just install shared libraries and executables, not static libraries, headers, or anything else required for building applications.
 
 If OpenDDS and ACE/TAO is built with ``clang``, the shared libraries might be missing an ``SONAME`` entry.
@@ -212,7 +212,7 @@ It is possible to install files from the :ref:`OPENDDS_*_INTERFACE_FILES target 
 See the :ghfile:`install Test <tests/cmake/install/library/CMakeLists.txt>` for an example of this.
 It uses `install(FILES) <https://cmake.org/cmake/help/latest/command/install.html#files>`__, but there isn't any restriction on what installation method can be used.
 For example, the `PUBLIC_HEADER <https://cmake.org/cmake/help/latest/prop_tgt/PUBLIC_HEADER.html>`__ target property could be set on target to the desired files from the interface lists.
-Then they can be installed using `install(TARGETS ... PUBLIC_HEADER ...) <https://cmake.org/cmake/help/latest/command/install.html#installing-targets>`__.
+Then they could be installed using `install(TARGETS ... PUBLIC_HEADER ...) <https://cmake.org/cmake/help/latest/command/install.html#targets>`__.
 Another method is provided by :cmake:func:`opendds_install_interface_files`.
 
 Manually Creating config.cmake
