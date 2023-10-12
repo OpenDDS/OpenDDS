@@ -20,8 +20,9 @@ This section describes the main concepts and entities of the DCPS API and discus
 
 .. _introduction--basic-concepts:
 
+**************
 Basic Concepts
-==============
+**************
 
 ..
     Sect<1.1.1>
@@ -37,7 +38,7 @@ The following subsections define the concepts shown in the diagram.
 .. _introduction--domain:
 
 Domain
-------
+======
 
 ..
     Sect<1.1.1.1>
@@ -49,7 +50,7 @@ Domains are identified by an identifier.
 There is no entity in the DCPS API that represents the domain.
 
 Entity
-------
+======
 
 An *entity* is an object in a domain that has a QoS policy, status, and can be used with listeners and waitsets.
 "Entity" is an interface that is implemented by the other concepts in a DCPS domain.
@@ -58,7 +59,7 @@ The QoS policy for each derived entity is specialized for that entity.
 .. _introduction--domainparticipant:
 
 Domain Participant
-------------------
+==================
 
 ..
     Sect<1.1.1.2>
@@ -69,7 +70,7 @@ The domain participant is a factory for many of the objects involved in writing 
 .. _introduction--topic:
 
 Topic
------
+=====
 
 ..
     Sect<1.1.1.3>
@@ -92,7 +93,7 @@ Subscribers request data via the topic.
 .. _introduction--datawriter:
 
 DataWriter
-----------
+==========
 
 ..
     Sect<1.1.1.4>
@@ -108,7 +109,7 @@ Dynamic data writers are also type-safe, but type checking happens at runtime.
 .. _introduction--publisher:
 
 Publisher
----------
+=========
 
 ..
     Sect<1.1.1.5>
@@ -121,7 +122,7 @@ A publisher can group a sequence of writes that span multiple data writers so th
 .. _introduction--subscriber:
 
 Subscriber
-----------
+==========
 
 ..
     Sect<1.1.1.6>
@@ -132,7 +133,7 @@ A participant can have multiple subscribers and each subscriber can have multipl
 .. _introduction--datareader:
 
 DataReader
-----------
+==========
 
 ..
     Sect<1.1.1.7>
@@ -146,8 +147,9 @@ Dynamic data readers are also type-safe, but type checking happens at runtime.
 
 .. _dds-introduction--discovery:
 
+************************************
 Discovery, Matching, and Association
-====================================
+************************************
 
 *Discovery* is the process whereby a participant learns about the publications and subscriptions offered by other participants.
 The OMG DDS specification (``formal/2015-04-10``) leaves the details of discovery to the implementation.
@@ -160,8 +162,29 @@ A data writer and data reader match if they are on the same topic, they have com
 If a local entity matches a remote entity, then the implementation is configured to allow data to flow from the data writer to the data reader.
 This is called *association*.
 
+.. _introduction--quality-of-service-policies:
+
+***************************
+Quality of Service Policies
+***************************
+
+..
+    Sect<1.1.3>
+
+The DDS specification defines a number of Quality of Service (QoS) policies that are used by applications to specify their QoS requirements to the service.
+Participants specify what behavior they require from the service and the service decides how to achieve these behaviors.
+These policies can be applied to the various DCPS entities (topic, data writer, data reader, publisher, subscriber, domain participant) although not all policies are valid for all types of entities.
+
+Subscribers and publishers are matched using a request-versus-offered (RxO) model.
+Subscribers *request* a set of policies that are minimally required.
+Publishers *offer* a set of QoS policies to potential subscribers.
+The DDS implementation then attempts to match the requested policies with the offered policies; if these policies are compatible then the association is formed.
+
+The QoS policies currently implemented by OpenDDS are discussed in detail in :ref:`qos`.
+
+********************
 Conceptual Data Flow
-====================
+********************
 
 The application on the publishing side initiates the flow of data by writing a sample to the DataWriter which then passes it to its associated Publisher.
 The Publisher sends the sample to associated Subscribers.
@@ -174,8 +197,9 @@ The QoS policies of the Subscriber, DataReader, and Topic control the data on th
 
 .. _introduction--built-in-topics:
 
+**********************
 Built-in Topics (BITs)
-======================
+**********************
 
 ..
     Sect<1.1.2>
@@ -209,29 +233,11 @@ The following table shows the built-in topics defined within the DDS specificati
 
      - Each instance represents a data reader.
 
-.. _introduction--quality-of-service-policies:
-
-Quality of Service Policies
-===========================
-
-..
-    Sect<1.1.3>
-
-The DDS specification defines a number of Quality of Service (QoS) policies that are used by applications to specify their QoS requirements to the service.
-Participants specify what behavior they require from the service and the service decides how to achieve these behaviors.
-These policies can be applied to the various DCPS entities (topic, data writer, data reader, publisher, subscriber, domain participant) although not all policies are valid for all types of entities.
-
-Subscribers and publishers are matched using a request-versus-offered (RxO) model.
-Subscribers *request* a set of policies that are minimally required.
-Publishers *offer* a set of QoS policies to potential subscribers.
-The DDS implementation then attempts to match the requested policies with the offered policies; if these policies are compatible then the association is formed.
-
-The QoS policies currently implemented by OpenDDS are discussed in detail in :ref:`qos`.
-
 .. _introduction--listeners:
 
+*********
 Listeners
-=========
+*********
 
 ..
     Sect<1.1.4>
@@ -241,8 +247,9 @@ For example, a Data Reader Listener is notified when there are data values avail
 
 .. _introduction--conditions:
 
+**********
 Conditions
-==========
+**********
 
 ..
     Sect<1.1.5>

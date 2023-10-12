@@ -1,6 +1,6 @@
-****************
+################
 About This Guide
-****************
+################
 
 ..
     Sect<0.3>
@@ -12,8 +12,9 @@ The intent of this guide is to help you become proficient with OpenDDS as quickl
 Readers are encouraged to submit corrections to this guide using a GitHub pull request.
 The source for this guide can be found at :ghfile:`docs/devguide` and :doc:`/internal/docs` contains guidance for editing and building it.
 
+***********
 Conventions
-===========
+***********
 
 ..
     Sect<0.4.2>
@@ -35,14 +36,16 @@ This guide uses the following conventions:
 
      - An ellipsis indicates a section of omitted text.
 
+************
 ``DDS_ROOT``
-============
+************
 
-This guide refers to the ``DDS_ROOT`` environment variable which should point to the base directory of the OpenDDS distribution.
+This guide refers to the :envvar:`DDS_ROOT` environment variable which should point to the base directory of the OpenDDS distribution.
 Often, this will be written as ``$DDS_ROOT`` indicating the value of the environment variable.
 
+********
 Examples
-========
+********
 
 ..
     Sect<0.5>

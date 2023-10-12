@@ -312,7 +312,7 @@ This section gives a brief overview of the OpenDDS implementation, its features,
 Source Code Organization
 ========================
 
-Relative to ``$DDS_ROOT``:
+Relative to :envvar:`DDS_ROOT`:
 
 * the :ghfile:`dds/` directory contains the source code for OpenDDS.
 * the :ghfile:`tests/` directory contains tests.
