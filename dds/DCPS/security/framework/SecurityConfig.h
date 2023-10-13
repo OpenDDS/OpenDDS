@@ -1,6 +1,4 @@
 /*
- *
- *
  * Distributed under the OpenDDS License.
  * See: http://www.opendds.org/license.html
  */
@@ -9,18 +7,13 @@
 #define OPENDDS_DCPS_SECURITY_FRAMEWORK_SECURITYCONFIG_H
 
 #include "SecurityConfigPropertyList.h"
-#ifdef OPENDDS_SECURITY
-#  include "HandleRegistry.h"
-#endif
+#include "HandleRegistry.h"
+#include "Utility.h"
 
 #include <dds/DCPS/dcps_export.h>
-
 #include <dds/DCPS/debug.h>
 #include <dds/DCPS/RcObject.h>
 #include <dds/DCPS/GuidUtils.h>
-#ifdef OPENDDS_SECURITY
-#  include <dds/DCPS/security/Utility.h>
-#endif
 
 #ifdef OPENDDS_SECURITY
 #  include <dds/DdsSecurityCoreC.h>

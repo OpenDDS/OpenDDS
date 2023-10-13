@@ -4,14 +4,10 @@
 # This file is setup the way it is for testing purposes. For a cleaner example
 # see DevGuideExamples/DCPS/Messenger/CMakeLists.txt
 
+cmake_minimum_required(VERSION 3.8...3.27)
 project(opendds_generated_global_cpp CXX)
-cmake_minimum_required(VERSION 3.8.2)
 
 find_package(OpenDDS REQUIRED)
-
-if(OPENDDS_STATIC)
-  message(FATAL_ERROR "This test cannot be run on static builds.")
-endif()
 
 if(NOT OPENDDS_OWNERSHIP_PROFILE)
   message(FATAL_ERROR "These tests require OpenDDS to be built with Ownership Profile enabled")

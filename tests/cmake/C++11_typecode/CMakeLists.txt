@@ -1,5 +1,5 @@
+cmake_minimum_required(VERSION 3.8...3.27)
 project(opendds_cpp11_typecode CXX)
-cmake_minimum_required(VERSION 3.8.2)
 
 find_package(OpenDDS REQUIRED)
 

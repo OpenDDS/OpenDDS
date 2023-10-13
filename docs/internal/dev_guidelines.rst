@@ -248,7 +248,6 @@ Naming
 
 **(For library code that the user may link to)**
 
-
 * Preprocessor macros visible to user code must begin with ``OPENDDS_``
 * C++ identifiers are either in top-level namespace ``DDS`` (OMG spec defined) or ``OpenDDS`` (otherwise)
 * Within the ``OpenDDS`` namespace there are some nested namespaces:
@@ -264,6 +263,11 @@ Naming
   * ``methodsAreCamelCaseWithInitialLower`` OR ``methods_are_lower_case_with_underscores``
   * ``member_data_use_underscores_and_end_with_an_underscore_``
   * ``ThisIsANamespaceScopedOrStaticClassMemberConstant``
+
+.. note::
+
+  For CMake `<https://cmake.org/cmake/help/latest/prop_tgt/UNITY_BUILD.html>` are nominally supported.
+  This may cause unexpected build issues in CI builds when a name in one file happens to clash with another source file in the same source file batch.
 
 Comments
 ========

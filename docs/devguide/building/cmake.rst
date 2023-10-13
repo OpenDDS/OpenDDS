@@ -213,6 +213,7 @@ See the :ghfile:`install Test <tests/cmake/install/library/CMakeLists.txt>` for 
 It uses `install(FILES) <https://cmake.org/cmake/help/latest/command/install.html#files>`__, but there isn't any restriction on what installation method can be used.
 For example, the `PUBLIC_HEADER <https://cmake.org/cmake/help/latest/prop_tgt/PUBLIC_HEADER.html>`__ target property could be set on target to the desired files from the interface lists.
 Then they could be installed using `install(TARGETS ... PUBLIC_HEADER ...) <https://cmake.org/cmake/help/latest/command/install.html#targets>`__.
+Another method is provided by :cmake:func:`opendds_install_interface_files`.
 
 Manually Creating config.cmake
 ==============================
@@ -370,9 +371,11 @@ Functions
       [OPENDDS_IDL_OPTIONS <option>...]
       [SUPPRESS_ANYS TRUE|FALSE]
       [ALWAYS_GENERATE_LIB_EXPORT_HEADER TRUE|FALSE]
-      [USE_EXPORT <export-header;export-macro>]
+      [USE_EXPORT <export-header>;<export-macro>]
+      [USE_VERSIONED_NAMESPACE <vns-header>;<vns-prefix>]
       [GENERATE_SERVER_SKELETONS TRUE|FALSE]
       [AUTO_LINK TRUE|FALSE]
+      [INCLUDE_BASE <dir>]
       [SKIP_TAO_IDL]
       [SKIP_OPENDDS_IDL]
     )
@@ -414,11 +417,17 @@ Functions
 
     .. versionadded:: 3.20
 
-  .. cmake:func:arg:: USE_EXPORT <export-header;export-macro>
+  .. cmake:func:arg:: USE_EXPORT <export-header>;<export-macro>
 
     Pass a CMake list (``;``-delimited) of an existing export header and export macro to use in the generated code.
 
     .. versionadded:: 3.25
+
+  .. cmake:func:arg:: USE_VERSIONED_NAMESPACE <version-ns-header>;<version-ns-prefix>
+
+    Pass a CMake list (``;``-delimited) of an existing versioned namespace header and prefix to use in the generated code.
+
+    .. versionadded:: 3.26
 
   .. cmake:func:arg:: GENERATE_SERVER_SKELETONS TRUE|FALSE
 
@@ -435,6 +444,18 @@ Functions
     The default is set by :cmake:var:`OPENDDS_AUTO_LINK_DCPS`.
 
     .. versionadded:: 3.25
+
+  .. cmake:func:arg:: INCLUDE_BASE <dir>
+
+    Recreates the directory structure of all the passed IDLs relative to the passed base directory in the generated files.
+    This allows using IDL files from multiple directories.
+    :cmake:func:`opendds_install_interface_files` is proved to help install generated files that result from this.
+    Any IDL file passed that's outside the include base will cause an error.
+
+    The default behavior is the legacy behavior that assumes a flat hierarchy.
+    Starting with OpenDDS 4.0 this will always be enabled and will default to ``CMAKE_CURRENT_SOURCE_DIR``.
+
+    .. versionadded:: 3.26
 
   .. cmake:func:arg:: SKIP_TAO_IDL
 
@@ -560,7 +581,7 @@ Functions
     opendds_export_header(<target> [USE_EXPORT_VAR <use-export-var-name>])
 
   Generates a header that is compatible with `ACE's generate_export_file.pl <https://github.com/DOCGroup/ACE_TAO/blob/master/ACE/bin/generate_export_file.pl>`__ for exporting symbols in shared libraries.
-  The header will able to be included as ``<target>_export.h`` and macro will be to use on symbols to will be ``<target>_Export``.
+  The header will able to be included as ``<target>_export.h`` and the macro that can be used to export symbols will be named ``<target>_Export``.
   It is the same function :cmake:func:`opendds_target_sources` uses so all the same info about :ref:`generated files <cmake-files-props>` applies.
 
   .. cmake:func:arg:: USE_EXPORT_VAR <use-export-var-name>
@@ -569,6 +590,36 @@ Functions
 
   .. versionadded:: 3.25
 
+.. cmake:func:: opendds_install_interface_files
+
+  ::
+
+    opendds_install_interface_files(<target>
+      [DEST <dir>]
+      [INCLUDE_BASE <dir>]
+      [EXTRA_GENERATED_FILES <file>...]
+    )
+
+  A helper function that installs the files from the :ref:`OPENDDS_*_INTERFACE_FILES target properties <cmake-files-props>` of the given target and is meant to be used with :cmake:func:`opendds_target_sources(INCLUDE_BASE)`.
+  The install path of a file ``idl_file`` could be described as ``DEST/relative(idl_file,INCLUDE_BASE)/idl_file``.
+
+  .. cmake:func:arg:: DEST <dir>
+
+    The base directory to install them to.
+    By default this is `CMAKE_INSTALL_INCLUDEDIR <https://cmake.org/cmake/help/latest/module/GNUInstallDirs.html>`__.
+
+  .. cmake:func:arg:: INCLUDE_BASE <dir>
+
+    The source directory relative to the source IDL files to define the directory structure of the installed files.
+    This should probably be the same as :cmake:func:`opendds_target_sources(INCLUDE_BASE)`.
+    By default this is ``CMAKE_CURRENT_SOURCE_DIR``.
+
+  .. cmake:func:arg:: EXTRA_GENERATED_FILES <file>...
+
+    Extra custom files that are in :cmake:prop:`OPENDDS_GENERATED_DIRECTORY` to install using the same method.
+
+  .. versionadded:: 3.26
+
 Variables
 =========
 
@@ -576,6 +627,11 @@ Package Options
 ---------------
 
 These variables can be used to override default behavior of the CMake package.
+
+.. warning::
+
+  Except for :cmake:var:`OPENDDS_CMAKE_VERBOSE`, do not set these when building OpenDDS using CMake.
+  All the others will either have no effect or break the build.
 
 .. cmake:var:: OPENDDS_CMAKE_VERBOSE
 
@@ -620,6 +676,10 @@ These variables can be used to override default behavior of the CMake package.
   The default for this is ``FALSE``.
 
   .. versionadded:: 3.15
+
+  .. deprecated:: 3.26
+
+    :cmake:func:`opendds_target_sources(INCLUDE_BASE)` is a better way to handle IDL in multiple nested directories.
 
 .. cmake:var:: OPENDDS_SUPPRESS_ANYS
 
@@ -718,6 +778,19 @@ Dependencies
 
   Path to Xerces
 
+.. cmake:var:: OPENDDS_HOST_TOOLS
+
+  A directory that contains a ``bin`` directory with ``opendds_idl`` to be used for cross-compiling.
+
+  .. versionadded:: 3.26
+
+.. cmake:var:: OPENDDS_ACE_TAO_HOST_TOOLS
+
+  A directory that contains a ``bin`` directory with ``tao_idl`` and ``ace_gperf`` to be used for cross-compiling.
+  This isn't set by default unless :cmake:var:`OPENDDS_HOST_TOOLS` is set, in which case it defaults to that.
+
+  .. versionadded:: 3.26
+
 .. _cmake-feature-vars:
 
 Features
@@ -732,7 +805,14 @@ Features
 .. cmake:var:: OPENDDS_DEBUG
   :nocontentsentry:
 
-  Default is ``ON``
+  Default depends on `CMAKE_BUILD_TYPE <https://cmake.org/cmake/help/latest/variable/CMAKE_BUILD_TYPE.html>`__.
+  When building OpenDDS using CMake ``CMAKE_BUILD_TYPE`` should be used.
+
+.. cmake:var:: OPENDDS_OPTIMIZE
+  :nocontentsentry:
+
+  Default depends on `CMAKE_BUILD_TYPE <https://cmake.org/cmake/help/latest/variable/CMAKE_BUILD_TYPE.html>`__.
+  When building OpenDDS using CMake ``CMAKE_BUILD_TYPE`` should be used.
 
 .. cmake:var:: OPENDDS_INLINE
   :nocontentsentry:
@@ -750,7 +830,8 @@ Features
   :nocontentsentry:
 
   ACE/TAO are built as static libraries.
-  Default is ``OFF``
+  Default depends on `BUILD_SHARED_LIBS <https://cmake.org/cmake/help/latest/variable/BUILD_SHARED_LIBS.html>`__.
+  When building OpenDDS using CMake ``BUILD_SHARED_LIBS`` should be used.
 
 .. cmake:var:: OPENDDS_WCHAR
   :nocontentsentry:

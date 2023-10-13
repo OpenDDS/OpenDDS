@@ -2238,7 +2238,7 @@ int TAO_DDS_DCPSInfo_i::init_transport(int listen_address_given,
 #ifndef DDS_HAS_MINIMUM_BIT
   try {
 
-#ifndef ACE_AS_STATIC_LIBS
+#  if OPENDDS_TCP_HAS_DLL
     if (ACE_Service_Config::current()->find(ACE_TEXT("OpenDDS_Tcp"))
         < 0 /* not found (-1) or suspended (-2) */) {
       static const ACE_TCHAR directive[] =
@@ -2246,7 +2246,7 @@ int TAO_DDS_DCPSInfo_i::init_transport(int listen_address_given,
         ACE_TEXT("OpenDDS_Tcp:_make_TcpLoader()");
       ACE_Service_Config::process_directive(directive);
     }
-#endif
+#  endif
 
     const std::string config_name =
       OpenDDS::DCPS::TransportRegistry::DEFAULT_INST_PREFIX
@@ -2260,6 +2260,13 @@ int TAO_DDS_DCPSInfo_i::init_transport(int listen_address_given,
     OpenDDS::DCPS::TransportInst_rch inst =
       OpenDDS::DCPS::TransportRegistry::instance()->create_inst(inst_name,
                                                                "tcp");
+    if (!inst) {
+      if (OpenDDS::DCPS::log_level >= OpenDDS::DCPS::LogLevel::Error) {
+        ACE_DEBUG((LM_DEBUG, "(%P|%t) TAO_DDS_DCPSInfo_i::init_transport: "
+          "couldn't create TCP transport instance for BITs\n"));
+      }
+      return -1;
+    }
     config->instances_.push_back(inst);
 
     OpenDDS::DCPS::TcpInst_rch tcp_inst =

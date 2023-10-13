@@ -13,32 +13,6 @@
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
-namespace DCPS {
-
-#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
-  template <>
-  DDS::ReturnCode_t
-  DataReaderImpl_T<XTypes::DynamicSample>::read_generic(GenericBundle&,
-                                                        DDS::SampleStateMask,
-                                                        DDS::ViewStateMask,
-                                                        DDS::InstanceStateMask,
-                                                        bool)
-  {
-    return DDS::RETCODE_UNSUPPORTED;
-  }
-
-  template <>
-  DDS::ReturnCode_t
-  DataReaderImpl_T<XTypes::DynamicSample>::take(AbstractSamples&,
-                                                DDS::SampleStateMask,
-                                                DDS::ViewStateMask,
-                                                DDS::InstanceStateMask)
-  {
-    return DDS::RETCODE_UNSUPPORTED;
-  }
-#endif
-}
-
 namespace XTypes {
   using namespace OpenDDS::DCPS;
 

@@ -7,13 +7,13 @@
 #define OPENDDS_DCPS_SECURITY_UTILITYIMPL_H
 
 #include "OpenDDS_Security_Export.h"
-#include "Utility.h"
+#include "framework/Utility.h"
 
 #include <dds/Versioned_Namespace.h>
 
-#if !defined (ACE_LACKS_PRAGMA_ONCE)
-#pragma once
-#endif /* ACE_LACKS_PRAGMA_ONCE */
+#ifndef ACE_LACKS_PRAGMA_ONCE
+#  pragma once
+#endif
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 

@@ -177,3 +177,9 @@ Environment Variables
 .. envvar:: TAO_ROOT
 
   The path of the :term:`TAO` source tree or installation prefix being used.
+
+.. envvar:: OPENDDS_CONFIG_DIR
+
+  Makes ``-DCPSConfigFile`` paths relative to the path in the environment variable.
+
+  See :ref:`here <OPENDDS_CONFIG_DIR>` for more information.

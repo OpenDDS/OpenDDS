@@ -1,12 +1,12 @@
 /*
- *
- *
  * Distributed under the OpenDDS License.
  * See: http://www.opendds.org/license.html
  */
 
 #ifndef OPENDDS_DCPS_DURABILITYARRAY_H
 #define OPENDDS_DCPS_DURABILITYARRAY_H
+
+#include <dds/Versioned_Namespace.h>
 
 #include <ace/Array_Base.h>
 

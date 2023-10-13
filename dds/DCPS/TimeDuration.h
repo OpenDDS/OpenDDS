@@ -3,6 +3,7 @@
 
 #include "PoolAllocator.h"
 #include "SafeBool_T.h"
+#include "dcps_export.h"
 
 #include <dds/DdsDcpsCoreC.h>
 
