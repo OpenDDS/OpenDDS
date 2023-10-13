@@ -11,7 +11,9 @@
 #include <dds/DCPS/dcps_export.h>
 #include <dds/DCPS/RcObject.h>
 
-#include <dds/DdsSecurityCoreC.h>
+#ifdef OPENDDS_SECURITY
+#  include <dds/DdsSecurityCoreC.h>
+#endif
 
 #include <ace/Synch_Traits.h>
 
