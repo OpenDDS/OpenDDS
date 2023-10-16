@@ -2788,14 +2788,6 @@ bool DynamicDataImpl::read_basic_in_complex_map(ValueType& value, DDS::MemberId 
   return false;
 }
 
-template<typename ValueType>
-bool DynamicDataImpl::read_basic_member(ValueType& value, DDS::MemberId id)
-{
-  return read_basic_in_single_map(value, id)
-    || read_basic_in_complex_map(value, id)
-    || get_value_from_backing_store(value, id);
-}
-
 void DynamicDataImpl::set_backing_store(DynamicDataXcdrReadImpl* xcdr_store)
 {
   CORBA::release(backing_store_);
@@ -2911,108 +2903,140 @@ bool DynamicDataImpl::get_value_from_backing_store(ACE_OutputCDR::from_boolean& 
 }
 
 template<typename ValueType>
-bool DynamicDataImpl::get_value_from_self(ValueType& value, DDS::MemberId id)
+bool DynamicDataImpl::read_basic_member(ValueType& value, DDS::MemberId id)
+{
+  return read_basic_in_single_map(value, id)
+    || read_basic_in_complex_map(value, id)
+    || get_value_from_backing_store(value, id);
+}
+
+template<typename ValueType>
+DDS::ReturnCode_t DynamicDataImpl::get_value_from_self(ValueType& value, DDS::MemberId id)
 {
   // Primitive or enum value can be read using MEMBER_ID_INVALID.
-  if (!is_primitive(type_->get_kind()) || id != MEMBER_ID_INVALID) {
-    return false;
+  if (!is_primitive(type_->get_kind())) {
+    return DDS::RETCODE_ERROR;
   }
+  if (id != MEMBER_ID_INVALID) {
+    return DDS::RETCODE_BAD_PARAMETER;
+  }
+
   const_single_iterator it = container_.single_map_.find(MEMBER_ID_INVALID);
   if (it != container_.single_map_.end()) {
     value = it->second.get<ValueType>();
-  } else if (!get_value_from_backing_store(value, id)) {
-    set_default_basic_value(value);
+    return DDS::RETCODE_OK;
   }
-  return true;
+  if (get_value_from_backing_store(value, id)) {
+    return DDS::RETCODE_OK;
+  }
+
+  set_default_basic_value(value);
+  return DDS::RETCODE_NO_DATA;
 }
 
 template<>
-bool DynamicDataImpl::get_value_from_self(char*&, DDS::MemberId)
+DDS::ReturnCode_t DynamicDataImpl::get_value_from_self(char*&, DDS::MemberId)
 {
   // Can't read a string from a DynamicData instance representing a string.
-  return false;
+  return DDS::RETCODE_ERROR;
 }
 
 template<>
-bool DynamicDataImpl::get_value_from_self(CORBA::WChar*&, DDS::MemberId)
+DDS::ReturnCode_t DynamicDataImpl::get_value_from_self(CORBA::WChar*&, DDS::MemberId)
 {
   // Can't read a wstring from a DynamicData instance representing a wstring.
-  return false;
+  return DDS::RETCODE_ERROR;
 }
 
 template<TypeKind ValueTypeKind, typename ValueType>
-bool DynamicDataImpl::get_value_from_enum(ValueType& value, DDS::MemberId id)
+DDS::ReturnCode_t DynamicDataImpl::get_value_from_enum(ValueType& value, DDS::MemberId id)
 {
   TypeKind treat_as_tk;
   const DDS::ReturnCode_t rc = enum_bound(type_, treat_as_tk);
-  if (rc != DDS::RETCODE_OK || treat_as_tk != ValueTypeKind || id != MEMBER_ID_INVALID) {
-    return false;
+  if (rc != DDS::RETCODE_OK || treat_as_tk != ValueTypeKind) {
+    return DDS::RETCODE_ERROR;
   }
+  if (id != MEMBER_ID_INVALID) {
+    return DDS::RETCODE_BAD_PARAMETER;
+  }
+
   const_single_iterator it = container_.single_map_.find(MEMBER_ID_INVALID);
   if (it != container_.single_map_.end()) {
     value = it->second.get<ValueType>();
-  } else if (!get_value_from_backing_store(value, id)) {
-    CORBA::Long enum_default_val;
-    if (!set_default_enum_value(type_, enum_default_val)) {
-      return false;
-    }
-    cast_to_enum_value(value, enum_default_val);
+    return DDS::RETCODE_OK;
   }
-  return true;
+  if (get_value_from_backing_store(value, id)) {
+    return DDS::RETCODE_OK;
+  }
+
+  CORBA::Long enum_default_val;
+  if (!set_default_enum_value(type_, enum_default_val)) {
+    return DDS::RETCODE_ERROR;
+  }
+  cast_to_enum_value(value, enum_default_val);
+  return DDS::RETCODE_NO_DATA;
 }
 
 template<>
-bool DynamicDataImpl::get_value_from_enum<TK_STRING8>(char*&, DDS::MemberId)
+DDS::ReturnCode_t DynamicDataImpl::get_value_from_enum<TK_STRING8>(char*&, DDS::MemberId)
 {
-  return false;
+  return DDS::RETCODE_ERROR;
 }
 template<>
-bool DynamicDataImpl::get_value_from_enum<TK_STRING16>(CORBA::WChar*&, DDS::MemberId)
+DDS::ReturnCode_t DynamicDataImpl::get_value_from_enum<TK_STRING16>(CORBA::WChar*&, DDS::MemberId)
 {
-  return false;
+  return DDS::RETCODE_ERROR;
 }
 
 template<TypeKind ValueTypeKind, typename ValueType>
-bool DynamicDataImpl::get_value_from_bitmask(ValueType& value, DDS::MemberId id)
+DDS::ReturnCode_t DynamicDataImpl::get_value_from_bitmask(ValueType& value, DDS::MemberId id)
 {
   // Allow bitmask to be read as an unsigned integer.
   TypeKind treat_as_tk;
   const DDS::ReturnCode_t rc = bitmask_bound(type_, treat_as_tk);
-  if (rc != DDS::RETCODE_OK || treat_as_tk != ValueTypeKind || id != MEMBER_ID_INVALID) {
-    return false;
+  if (rc != DDS::RETCODE_OK || treat_as_tk != ValueTypeKind) {
+    return DDS::RETCODE_ERROR;
   }
+  if (id != MEMBER_ID_INVALID) {
+    return DDS::RETCODE_BAD_PARAMETER;
+  }
+
   const_single_iterator it = container_.single_map_.find(MEMBER_ID_INVALID);
   if (it != container_.single_map_.end()) {
     value = it->second.get<ValueType>();
-  } else if (!get_value_from_backing_store(value, id)) {
-    set_default_bitmask_value(value);
+    return DDS::RETCODE_OK;
   }
-  return true;
+  if (get_value_from_backing_store(value, id)) {
+    return DDS::RETCODE_OK;
+  }
+
+  set_default_bitmask_value(value);
+  return DDS::RETCODE_NO_DATA;
 }
 
 template<>
-bool DynamicDataImpl::get_value_from_bitmask<TK_STRING8>(char*&, DDS::MemberId)
+DDS::ReturnCode_t DynamicDataImpl::get_value_from_bitmask<TK_STRING8>(char*&, DDS::MemberId)
 {
-  return false;
+  return DDS::RETCODE_ERROR;
 }
 template<>
-bool DynamicDataImpl::get_value_from_bitmask<TK_STRING16>(CORBA::WChar*&, DDS::MemberId)
+DDS::ReturnCode_t DynamicDataImpl::get_value_from_bitmask<TK_STRING16>(CORBA::WChar*&, DDS::MemberId)
 {
-  return false;
+  return DDS::RETCODE_ERROR;
 }
 
 template<TypeKind ValueTypeKind, typename ValueType>
-bool DynamicDataImpl::get_value_from_struct(ValueType& value, DDS::MemberId id)
+DDS::ReturnCode_t DynamicDataImpl::get_value_from_struct(ValueType& value, DDS::MemberId id)
 {
   DDS::MemberDescriptor_var md;
   DDS::DynamicType_var member_type;
   DDS::ReturnCode_t rc = check_member(
     md, member_type, "DynamicDataImpl::get_value_from_struct", "get", id, ValueTypeKind);
   if (rc != DDS::RETCODE_OK) {
-    return false;
+    return rc;
   }
   if (read_basic_member(value, id)) {
-    return true;
+    return DDS::RETCODE_OK;
   }
 
   // Not returning a default value for a missing optional member.
@@ -3021,83 +3045,44 @@ bool DynamicDataImpl::get_value_from_struct(ValueType& value, DDS::MemberId id)
       ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicDataImpl::get_value_from_struct:"
                  " Optional member Id %u is not present\n", id));
     }
-    return false;
+  } else {
+    set_default_basic_value(value);
   }
-  set_default_basic_value(value);
-  return true;
+  return DDS::RETCODE_NO_DATA;
 }
 
 template<TypeKind ValueTypeKind, typename ValueType>
-bool DynamicDataImpl::get_value_from_union(ValueType& value, DDS::MemberId id)
+DDS::ReturnCode_t DynamicDataImpl::get_value_from_union(ValueType& value, DDS::MemberId id)
 {
   DDS::MemberDescriptor_var md;
   DDS::DynamicType_var member_type;
   DDS::ReturnCode_t rc = check_member(
     md, member_type, "DynamicDataImpl::get_value_from_union", "get", id, ValueTypeKind);
   if (rc != DDS::RETCODE_OK) {
-    return false;
+    return rc;
   }
 
   // Return the member if the container or the backing store has it.
   if (read_basic_member(value, id)) {
-    return true;
+    return DDS::RETCODE_OK;
   }
 
-  if (id == DISCRIMINATOR_ID) {
-    // Set the discriminator to default value.
-    // If it selects a branch, set the branch to default value.
-    set_default_basic_value(value);
-    CORBA::Long disc_value;
-    if (!cast_to_discriminator_value(disc_value, value)) {
-      return false;
-    }
-    bool found_selected_member = false;
-    DDS::MemberDescriptor_var selected_md;
-    const DDS::ReturnCode_t rc =
-      get_selected_union_branch(disc_value, found_selected_member, selected_md);
-    if (rc != DDS::RETCODE_OK) {
-      if (log_level >= LogLevel::Notice) {
-        ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicDataImpl::get_value_from_union:"
-                   " get_selected_union_branch failed: %C\n", retcode_to_string(rc)));
-      }
-      return false;
-    }
-    insert_single(id, value);
-    if (found_selected_member && !selected_md->is_optional()) {
-      DDS::DynamicType_var selected_type = get_base_type(selected_md->type());
-      if (clear_value_i(selected_md->id(), selected_type) != DDS::RETCODE_OK) {
-        return false;
-      }
-    }
-  } else {
-    const_single_iterator single_it;
-    const_complex_iterator complex_it;
-    if (has_discriminator_value(single_it, complex_it)) {
-      if (log_level >= LogLevel::Notice) {
-        ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicDataImpl::get_value_from_union:"
-                   " Branch Id %u is not the active branch in the union\n", id));
-      }
-      return false;
-    }
-    // Set the branch to default value and set the discriminator to a value that selects this branch.
+  if (id != DISCRIMINATOR_ID) {
     DDS::DynamicTypeMember_var dtm;
     if (type_->get_member(dtm, id) != DDS::RETCODE_OK) {
-      return false;
+      return DDS::RETCODE_ERROR;
     }
     DDS::MemberDescriptor_var md;
     if (dtm->get_descriptor(md) != DDS::RETCODE_OK) {
-      return false;
+      return DDS::RETCODE_ERROR;
     }
-    DDS::DynamicType_var dt = get_base_type(md->type());
-    if (clear_value_i(id, dt) != DDS::RETCODE_OK) {
-      return false;
+    if (md->is_optional()) {
+      return DDS::RETCODE_NO_DATA;
     }
-    if (!insert_valid_discriminator(md)) {
-      return false;
-    }
-    OPENDDS_ASSERT(read_basic_in_single_map(value, id));
   }
-  return true;
+
+  set_default_basic_value(value);
+  return DDS::RETCODE_NO_DATA;
 }
 
 void DynamicDataImpl::cast_to_enum_value(ACE_OutputCDR::from_int8& dst, CORBA::Long src) const
@@ -3120,10 +3105,17 @@ void DynamicDataImpl::cast_to_enum_value(ValueType&, CORBA::Long) const
 {}
 
 template<TypeKind ValueTypeKind, typename ValueType>
-bool DynamicDataImpl::get_value_from_collection(ValueType& value, DDS::MemberId id)
+DDS::ReturnCode_t DynamicDataImpl::get_value_from_collection(ValueType& value, DDS::MemberId id)
 {
-  if (type_->get_kind() == TK_ARRAY && id >= bound_total(type_desc_)) {
-    return false;
+  CORBA::ULong bound = 0;
+  const TypeKind tk = type_->get_kind();
+  if (tk == TK_ARRAY) {
+    bound = bound_total(type_desc_);
+  } else if (tk == TK_SEQUENCE || tk == TK_STRING8 || tk == TK_STRING16) {
+    bound = get_item_count();
+  }
+  if (!check_index_from_id(tk, id, bound)) {
+    return DDS::RETCODE_BAD_PARAMETER;
   }
 
   DDS::DynamicType_var elem_type = get_base_type(type_desc_->element_type());
@@ -3132,33 +3124,29 @@ bool DynamicDataImpl::get_value_from_collection(ValueType& value, DDS::MemberId 
   switch (elem_tk) {
   case TK_ENUM:
     if (enum_bound(elem_type, treat_as_tk) != DDS::RETCODE_OK) {
-      return false;
+      return DDS::RETCODE_ERROR;
     }
     break;
   case TK_BITMASK: {
     if (bitmask_bound(elem_type, treat_as_tk) != DDS::RETCODE_OK) {
-      return false;
+      return DDS::RETCODE_ERROR;
     }
     break;
   }
   }
   if (treat_as_tk != ValueTypeKind) {
-    return false;
+    return DDS::RETCODE_ERROR;
   }
   if (read_basic_member(value, id)) {
-    return true;
+    return DDS::RETCODE_OK;
   }
-  set_default_basic_value(value);
 
-  // Must insert this member in case it's index is larger than the current largest index,
-  // so that all new members up to this member are serialized. Otherwise, we would be returning
-  // a value that wouldn't be in the serialized data.
-  insert_single(id, value);
-  return true;
+  // This may only happen for array. For sequence or string, as long as there is no
+  // out-of-range access, it will succeed.
+  set_default_basic_value(value);
+  return DDS::RETCODE_NO_DATA;
 }
 
-// TODO(sonndinh): Update the interface to return RETCODE_NO_DATA if there is no
-// data for an optional member.
 template<TypeKind ValueTypeKind, typename ValueType>
 DDS::ReturnCode_t DynamicDataImpl::get_single_value(ValueType& value, DDS::MemberId id)
 {
@@ -3166,65 +3154,44 @@ DDS::ReturnCode_t DynamicDataImpl::get_single_value(ValueType& value, DDS::Membe
     return DDS::RETCODE_ERROR;
   }
   const TypeKind tk = type_->get_kind();
-  bool good = true;
 
   switch (tk) {
   case ValueTypeKind:
-    good = get_value_from_self(value, id);
-    break;
+    return get_value_from_self(value, id);
   case TK_ENUM:
-    good = get_value_from_enum<ValueTypeKind>(value, id);
-    break;
+    return get_value_from_enum<ValueTypeKind>(value, id);
   case TK_BITMASK:
-    good = get_value_from_bitmask<ValueTypeKind>(value, id);
-    break;
+    return get_value_from_bitmask<ValueTypeKind>(value, id);
   case TK_STRUCTURE:
-    good = get_value_from_struct<ValueTypeKind>(value, id);
-    break;
+    return get_value_from_struct<ValueTypeKind>(value, id);
   case TK_UNION:
-    good = get_value_from_union<ValueTypeKind>(value, id);
-    break;
+    return get_value_from_union<ValueTypeKind>(value, id);
   case TK_SEQUENCE:
   case TK_ARRAY:
-    good = get_value_from_collection<ValueTypeKind>(value, id);
-    break;
-  case TK_MAP:
+    return get_value_from_collection<ValueTypeKind>(value, id);
+  default:
     if (log_level >= LogLevel::Notice) {
       ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicDataImpl::get_single_value:"
-                 " Map is currently not supported\n"));
+                 " Called on unexpected type %C\n", typekind_to_string(tk)));
     }
-    good = false;
-    break;
-  default:
-    good = false;
     break;
   }
-
-  if (!good && log_level >= LogLevel::Notice) {
-    ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicDataImpl::get_single_value:"
-               " Failed to read a value of type %C from a DynamicData object of type %C\n",
-               typekind_to_string(ValueTypeKind), typekind_to_string(tk)));
-  }
-  return good ? DDS::RETCODE_OK : DDS::RETCODE_ERROR;
+  return DDS::RETCODE_ERROR;
 }
 
 DDS::ReturnCode_t DynamicDataImpl::get_int8_value(CORBA::Int8& value, DDS::MemberId id)
 {
-  ACE_OutputCDR::from_int8 from_int8(0);
+  ACE_OutputCDR::from_int8 from_int8(value);
   const DDS::ReturnCode_t rc = get_single_value<TK_INT8>(from_int8, id);
-  if (rc == DDS::RETCODE_OK) {
-    value = from_int8.val_;
-  }
+  value = from_int8.val_;
   return rc;
 }
 
 DDS::ReturnCode_t DynamicDataImpl::get_uint8_value(CORBA::UInt8& value, DDS::MemberId id)
 {
-  ACE_OutputCDR::from_uint8 from_uint8(0);
+  ACE_OutputCDR::from_uint8 from_uint8(value);
   const DDS::ReturnCode_t rc = get_single_value<TK_UINT8>(from_uint8, id);
-  if (rc == DDS::RETCODE_OK) {
-    value = from_uint8.val_;
-  }
+  value = from_uint8.val_;
   return rc;
 }
 
@@ -3277,67 +3244,41 @@ template<TypeKind CharKind, TypeKind StringKind, typename FromCharT, typename Ch
 DDS::ReturnCode_t DynamicDataImpl::get_char_common(CharT& value, DDS::MemberId id)
 {
   const TypeKind tk = type_->get_kind();
-  bool good = true;
   switch (tk) {
   case CharKind: {
-    FromCharT from_char_t('\0');
-    good = get_value_from_self(from_char_t, id);
-    if (good) {
-      value = from_char_t.val_;
-    }
-    break;
-  }
-  case StringKind: {
-    FromCharT from_char('\0');
-    good = read_basic_member(from_char, id);
-    if (good) {
-      value = from_char.val_;
-    }
-    break;
+    FromCharT from_char(value);
+    const DDS::ReturnCode_t rc = get_value_from_self(from_char, id);
+    value = from_char.val_;
+    return rc;
   }
   case TK_STRUCTURE: {
-    FromCharT from_char('\0');
-    good = get_value_from_struct<CharKind>(from_char, id);
-    if (good) {
-      value = from_char.val_;
-    }
-    break;
+    FromCharT from_char(value);
+    const DDS::ReturnCode_t rc = get_value_from_struct<CharKind>(from_char, id);
+    value = from_char.val_;
+    return rc;
   }
   case TK_UNION: {
-    FromCharT from_char('\0');
-    good = get_value_from_union<CharKind>(from_char, id);
-    if (good) {
-      value = from_char.val_;
-    }
-    break;
+    FromCharT from_char(value);
+    const DDS::ReturnCode_t rc = get_value_from_union<CharKind>(from_char, id);
+    value = from_char.val_;
+    return rc;
   }
+  case StringKind:
   case TK_SEQUENCE:
   case TK_ARRAY: {
-    FromCharT from_char('\0');
-    good = get_value_from_collection<CharKind>(from_char, id);
-    if (good) {
-      value = from_char.val_;
-    }
-    break;
+    FromCharT from_char(value);
+    const DDS::ReturnCode_t rc = get_value_from_collection<CharKind>(from_char, id);
+    value = from_char.val_;
+    return rc;
   }
-  case TK_MAP:
+  default:
     if (log_level >= LogLevel::Notice) {
       ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicDataImpl::get_char_common:"
-                 " Map is currently not supported\n"));
+                 " Called on unexpected type %C\n", typekind_to_string(tk)));
     }
-    good = false;
-    break;
-  default:
-    good = false;
     break;
   }
-
-  if (!good && log_level >= LogLevel::Notice) {
-    ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicDataImpl::get_char_common::"
-               " Failed to read a value of type %C from a DynamicData object of type %C\n",
-               typekind_to_string(CharKind), typekind_to_string(tk)));
-  }
-  return good ? DDS::RETCODE_OK : DDS::RETCODE_ERROR;
+  return DDS::RETCODE_ERROR;
 }
 
 DDS::ReturnCode_t DynamicDataImpl::get_char8_value(CORBA::Char& value, DDS::MemberId id)
@@ -3356,110 +3297,86 @@ DDS::ReturnCode_t DynamicDataImpl::get_char16_value(CORBA::WChar& value, DDS::Me
 
 DDS::ReturnCode_t DynamicDataImpl::get_byte_value(CORBA::Octet& value, DDS::MemberId id)
 {
-  ACE_OutputCDR::from_octet from_octet(0);
+  ACE_OutputCDR::from_octet from_octet(value);
   const DDS::ReturnCode_t rc = get_single_value<TK_BYTE>(from_octet, id);
-  if (rc == DDS::RETCODE_OK) {
-    value = from_octet.val_;
-  }
+  value = from_octet.val_;
   return rc;
 }
 
 template<typename UIntType>
-bool DynamicDataImpl::get_boolean_from_bitmask(CORBA::ULong index, CORBA::Boolean& value)
+DDS::ReturnCode_t DynamicDataImpl::get_boolean_from_bitmask(CORBA::ULong index, CORBA::Boolean& value)
 {
   UIntType bitmask;
   if (!read_basic_value(bitmask)) {
-    return false;
+    return DDS::RETCODE_ERROR;
   }
   value = (1ULL << index) & bitmask;
-  return true;
+  return DDS::RETCODE_OK;
 }
 
 template<>
-bool DynamicDataImpl::get_boolean_from_bitmask<CORBA::UInt8>(CORBA::ULong index, CORBA::Boolean& value)
+DDS::ReturnCode_t DynamicDataImpl::get_boolean_from_bitmask<CORBA::UInt8>(CORBA::ULong index, CORBA::Boolean& value)
 {
   ACE_OutputCDR::from_uint8 bitmask(0);
   if (!read_basic_value(bitmask)) {
-    return false;
+    return DDS::RETCODE_ERROR;
   }
   value = ((1 << index) & bitmask.val_) ? true : false;
-  return true;
+  return DDS::RETCODE_OK;
 }
 
 DDS::ReturnCode_t DynamicDataImpl::get_boolean_value(CORBA::Boolean& value, DDS::MemberId id)
 {
   const TypeKind tk = type_->get_kind();
-  bool good = true;
   switch (tk) {
   case TK_BOOLEAN: {
-    ACE_OutputCDR::from_boolean from_bool(false);
-    good = get_value_from_self(from_bool, id);
-    if (good) {
-      value = from_bool.val_;
-    }
-    break;
+    ACE_OutputCDR::from_boolean from_bool(value);
+    const DDS::ReturnCode_t rc = get_value_from_self(from_bool, id);
+    value = from_bool.val_;
+    return rc;
   }
   case TK_BITMASK: {
     const LBound bitbound = type_desc_->bound()[0];
     ACE_CDR::ULong index;
     if (!get_index_from_id(id, index, bitbound)) {
-      good = false;
-      break;
+      return DDS::RETCODE_BAD_PARAMETER;
     }
     if (bitbound >= 1 && bitbound <= 8) {
-      good = get_boolean_from_bitmask<CORBA::UInt8>(index, value);
+      return get_boolean_from_bitmask<CORBA::UInt8>(index, value);
     } else if (bitbound >= 9 && bitbound <= 16) {
-      good = get_boolean_from_bitmask<CORBA::UShort>(index, value);
+      return get_boolean_from_bitmask<CORBA::UShort>(index, value);
     } else if (bitbound >= 17 && bitbound <= 32) {
-      good = get_boolean_from_bitmask<CORBA::ULong>(index, value);
-    } else {
-      good = get_boolean_from_bitmask<CORBA::ULongLong>(index, value);
+      return get_boolean_from_bitmask<CORBA::ULong>(index, value);
     }
-    break;
+    return get_boolean_from_bitmask<CORBA::ULongLong>(index, value);
   }
   case TK_STRUCTURE: {
-    ACE_OutputCDR::from_boolean from_bool(false);
-    good = get_value_from_struct<TK_BOOLEAN>(from_bool, id);
-    if (good) {
-      value = from_bool.val_;
-    }
-    break;
+    ACE_OutputCDR::from_boolean from_bool(value);
+    const DDS::ReturnCode_t rc = get_value_from_struct<TK_BOOLEAN>(from_bool, id);
+    value = from_bool.val_;
+    return rc;
   }
   case TK_UNION: {
-    ACE_OutputCDR::from_boolean from_bool(false);
-    good = get_value_from_union<TK_BOOLEAN>(from_bool, id);
-    if (good) {
-      value = from_bool.val_;
-    }
-    break;
+    ACE_OutputCDR::from_boolean from_bool(value);
+    const DDS::ReturnCode_t rc = get_value_from_union<TK_BOOLEAN>(from_bool, id);
+    value = from_bool.val_;
+    return rc;
   }
   case TK_SEQUENCE:
   case TK_ARRAY: {
-    ACE_OutputCDR::from_boolean from_bool(false);
-    good = get_value_from_collection<TK_BOOLEAN>(from_bool, id);
-    if (good) {
-      value = from_bool.val_;
-    }
-    break;
+    ACE_OutputCDR::from_boolean from_bool(value);
+    const DDS::ReturnCode_t rc = get_value_from_collection<TK_BOOLEAN>(from_bool, id);
+    value = from_bool.val_;
+    return rc;
   }
-  case TK_MAP:
+  default:
     if (log_level >= LogLevel::Notice) {
       ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicDataImpl::get_boolean_value:"
-                 " Map is currently not supported\n"));
+                 " Called on unexpected type %C\n", typekind_to_string(tk)));
     }
-    good = false;
-    break;
-  default:
-    good = false;
     break;
   }
-
-  if (!good && log_level >= LogLevel::Notice) {
-    ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicDataImpl::get_boolean_value:"
-               " Failed to read a boolean value from a DynamicData object of type %C\n",
-               typekind_to_string(tk)));
-  }
-  return good ? DDS::RETCODE_OK : DDS::RETCODE_ERROR;
+  return DDS::RETCODE_ERROR;
 }
 
 DDS::ReturnCode_t DynamicDataImpl::get_string_value(char*& value, DDS::MemberId id)
@@ -3828,13 +3745,16 @@ bool DynamicDataImpl::get_complex_from_aggregated(DDS::DynamicData_var& value, D
 
 bool DynamicDataImpl::set_member_backing_store(DynamicDataImpl* member_ddi, DDS::MemberId id)
 {
+  if (!backing_store_) {
+    return false;
+  }
+
   DDS::DynamicData_var member_dd;
   const DDS::ReturnCode rc = backing_store_->get_complex_value(member_dd, id);
   if (rc != DDS::RETCODE_OK) {
     if (log_level >= LogLevel::Notice) {
       ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicDataImpl::set_member_backing_store:"
-                 " Get complex value for member ID: %u failed: %C\n",
-                 id, retcode_to_string(rc)));
+                 " Get complex value for member ID: %u failed: %C\n", id, retcode_to_string(rc)));
     }
     return false;
   }
@@ -3846,34 +3766,41 @@ bool DynamicDataImpl::set_member_backing_store(DynamicDataImpl* member_ddi, DDS:
   return true;
 }
 
-bool DynamicDataImpl::get_complex_from_struct(DDS::DynamicData_ptr& value, DDS::MemberId id)
+DDS::ReturnCode_t DynamicDataImpl::get_complex_from_struct(DDS::DynamicData_ptr& value, DDS::MemberId id)
 {
-  // TODO(sonndinh):
-  // In case the member is optional and is not present in the DynamicData of the enclosing
-  // type, return error. For non-optional member, return empty DynamicData as we are doing now.
-  // This allows serialization code to diffentiate when to ignore an optional member.
-  // Apply the same thing to other types that may have optional members.
   FoundStatus found_status = NOT_FOUND;
   DDS::DynamicData_var dd_var;
   if (!get_complex_from_aggregated(dd_var, id, found_status)) {
-    return false;
-  }
-  if (found_status == NOT_FOUND && backing_store_) {
-    // The returned DynamicDataImpl object contains the data for the member
-    // from the backing store, if available.
-    DynamicDataImpl* ddi = dynamic_cast<DynamicDataImpl*>(dd_var.in());
-    if (!ddi) {
-      return false;
-    }
-    set_member_backing_store(ddi, id);
+    return DDS::RETCODE_ERROR;
   }
 
-  if (found_status == FOUND_IN_NON_COMPLEX_MAP || found_status == NOT_FOUND) {
+  DDS::ReturnCode_t rc = DDS::RETCODE_OK;
+  if (found_status == NOT_FOUND) {
+    DynamicDataImpl* ddi = dynamic_cast<DynamicDataImpl*>(dd_var.in());
+    if (!ddi) {
+      return DDS::RETCODE_ERROR;
+    }
+    if (!set_member_backing_store(ddi, id)) {
+      DDS::DynamicTypeMember_var dtm;
+      if (type_->get_member(dtm, id) != DDS::RETCODE_OK) {
+        return DDS::RETCODE_ERROR;
+      }
+      DDS::MemberDescriptor_var md;
+      if (dtm->get_descriptor(md) != DDS::RETCODE_OK) {
+        return DDS::RETCODE_ERROR;
+      }
+      rc = DDS::RETCODE_NO_DATA;
+      if (md->is_optional()) {
+        return rc;
+      }
+    }
+  } else if (found_status == FOUND_IN_NON_COMPLEX_MAP) {
     insert_complex(id, dd_var);
   }
+
   CORBA::release(value);
   value = DDS::DynamicData::_duplicate(dd_var);
-  return true;
+  return rc;
 }
 
 bool DynamicDataImpl::write_discriminator_helper(CORBA::Long value, TypeKind treat_as)
@@ -4053,11 +3980,9 @@ bool DynamicDataImpl::get_complex_from_collection(DDS::DynamicData_ptr& value, D
 DDS::ReturnCode_t DynamicDataImpl::get_complex_value(DDS::DynamicData_ptr& value, DDS::MemberId id)
 {
   const TypeKind tk = type_->get_kind();
-  bool good = true;
   switch (tk) {
   case TK_STRUCTURE:
-    good = get_complex_from_struct(value, id);
-    break;
+    return get_complex_from_struct(value, id);
   case TK_UNION:
     good = get_complex_from_union(value, id);
     break;

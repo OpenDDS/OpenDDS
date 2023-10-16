@@ -295,28 +295,28 @@ private:
   bool read_basic_member(ValueType& value, DDS::MemberId id);
 
   template<typename ValueType>
-  bool get_value_from_self(ValueType& value, DDS::MemberId id);
+  DDS::ReturnCode_t get_value_from_self(ValueType& value, DDS::MemberId id);
 
   template<TypeKind ValueTypeKind, typename ValueType>
-  bool get_value_from_enum(ValueType& value, DDS::MemberId id);
+  DDS::ReturnCode_t get_value_from_enum(ValueType& value, DDS::MemberId id);
 
   template<TypeKind ValueTypeKind, typename ValueType>
-  bool get_value_from_bitmask(ValueType& value, DDS::MemberId id);
+  DDS::ReturnCode_t get_value_from_bitmask(ValueType& value, DDS::MemberId id);
 
   template<TypeKind ValueTypeKind, typename ValueType>
-  bool get_value_from_struct(ValueType& value, DDS::MemberId id);
+  DDS::ReturnCode_t get_value_from_struct(ValueType& value, DDS::MemberId id);
 
   template<TypeKind ValueTypeKind, typename ValueType>
-  bool get_value_from_union(ValueType& value, DDS::MemberId id);
+  DDS::ReturnCode_t get_value_from_union(ValueType& value, DDS::MemberId id);
 
   template<TypeKind ValueTypeKind, typename ValueType>
-  bool get_value_from_collection(ValueType& value, DDS::MemberId id);
+  DDS::ReturnCode_t get_value_from_collection(ValueType& value, DDS::MemberId id);
 
   template<TypeKind CharKind, TypeKind StringKind, typename FromCharT, typename CharT>
   DDS::ReturnCode_t get_char_common(CharT& value, DDS::MemberId id);
 
   template<typename UIntType>
-  bool get_boolean_from_bitmask(CORBA::ULong index, CORBA::Boolean& value);
+  DDS::ReturnCode_t get_boolean_from_bitmask(CORBA::ULong index, CORBA::Boolean& value);
 
   template<TypeKind MemberTypeKind, typename MemberType>
   bool set_value_to_struct(DDS::MemberId id, const MemberType& value);
@@ -660,7 +660,7 @@ private:
   bool get_complex_from_aggregated(DDS::DynamicData_var& value, DDS::MemberId id,
                                    FoundStatus& found_status);
 
-  bool get_complex_from_struct(DDS::DynamicData_ptr& value, DDS::MemberId id);
+  DDS::ReturnCode_t get_complex_from_struct(DDS::DynamicData_ptr& value, DDS::MemberId id);
   bool write_discriminator_helper(CORBA::Long value, TypeKind treat_as);
   bool write_discriminator(CORBA::Long value);
   bool get_complex_from_union(DDS::DynamicData_ptr& value, DDS::MemberId id);
