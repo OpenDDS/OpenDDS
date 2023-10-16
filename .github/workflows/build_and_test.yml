@@ -12676,17 +12676,17 @@ jobs:
 
     steps:
     - name: Checkout OpenDDS
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
       with:
         path: OpenDDS
         submodules: true
     - name: Checkout MPC
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
       with:
         repository: DOCGroup/MPC
         path: MPC
     - name: Checkout ACE/TAO
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
       with:
         repository: DOCGroup/ACE_TAO
         path: OpenDDS/build/ACE_TAO
@@ -12720,17 +12720,17 @@ jobs:
 
     steps:
     - name: Checkout OpenDDS
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
       with:
         path: OpenDDS
         submodules: true
     - name: Checkout MPC
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
       with:
         repository: DOCGroup/MPC
         path: MPC
     - name: Checkout ACE/TAO
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
       with:
         repository: DOCGroup/ACE_TAO
         path: OpenDDS/build/ACE_TAO
@@ -12761,17 +12761,17 @@ jobs:
 
     steps:
     - name: Checkout OpenDDS
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
       with:
         path: OpenDDS
         submodules: true
     - name: Checkout MPC
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
       with:
         repository: DOCGroup/MPC
         path: MPC
     - name: Checkout ACE/TAO
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
       with:
         repository: DOCGroup/ACE_TAO
         path: OpenDDS/build/ACE_TAO
@@ -12810,7 +12810,7 @@ jobs:
 
     steps:
     - name: Checkout OpenDDS
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
       with:
         path: OpenDDS
         submodules: true
@@ -12820,12 +12820,12 @@ jobs:
         ndk-version: r25c
         add-to-path: false
     - name: Checkout MPC
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
       with:
         repository: DOCGroup/MPC
         path: MPC
     - name: Checkout ACE/TAO
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
       with:
         repository: DOCGroup/ACE_TAO
         path: OpenDDS/build/ACE_TAO
@@ -12875,17 +12875,17 @@ jobs:
         vcpkgGitCommitId: f6a5d4e8eb7476b8d7fc12a56dff300c1c986131
         runVcpkgInstall: true
     - name: Checkout OpenDDS
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
       with:
         path: OpenDDS
         submodules: true
     - name: Checkout MPC
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
       with:
         repository: DOCGroup/MPC
         path: MPC
     - name: Checkout ACE_TAO
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
       with:
         repository: DOCGroup/ACE_TAO
         ref: ace6tao2
@@ -12932,17 +12932,17 @@ jobs:
 
     steps:
     - name: Checkout OpenDDS
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
       with:
         path: OpenDDS
         submodules: true
     - name: Checkout MPC
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
       with:
         repository: DOCGroup/MPC
         path: MPC
     - name: Checkout ACE/TAO
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
       with:
         repository: DOCGroup/ACE_TAO
         path: OpenDDS/build/ACE_TAO
