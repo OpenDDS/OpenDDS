@@ -647,10 +647,10 @@ Installation
 Once built, OpenDDS can be installed using `cmake --install <https://cmake.org/cmake/help/latest/manual/cmake.1.html#install-a-project>`__.
 Currently ACE/TAO has to be installed separately and this is only possible with GNU Make.
 
-Using CMake-built OpenDDS
-=========================
+Using a CMake-built OpenDDS
+===========================
 
-After building and optionally installing OpenDDS, it can be used through the same :doc:`CMake package <cmake>` as a MPC-built OpenDDS.
+After building and optionally installing OpenDDS, it can be used through the same :doc:`CMake package <cmake>` as an MPC-built OpenDDS.
 
 .. _cmake-running-tests:
 

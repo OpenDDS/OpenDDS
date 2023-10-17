@@ -3,8 +3,8 @@
 .. news-rank: 10
 - OpenDDS can now be built using CMake for most common scenarios.
 
-  - This is still considered somewhat experimental as it doesn't support :ref:`all the scenarios that a MPC-built OpenDDS currently can <cmake-known-limitations>`.
-  - See :ref:`cmake-building` for how to build OpenDDS using CMake and other details.
+  - This is still considered somewhat experimental as it doesn't support :ref:`everything that an MPC-built OpenDDS currently can <cmake-known-limitations>`.
+  - See :ref:`cmake-building` for details.
 
 .. news-rank: 0
 .. news-start-section: CMake Config Package
