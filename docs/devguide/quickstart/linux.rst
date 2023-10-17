@@ -67,7 +67,7 @@ Once the publisher finds the subscriber, it sends 10 messages to the subscriber 
 
 .. important::
 
-   ``The setenv.sh`` script sets various environment variables needed for running OpenDDS tests.
+   The ``setenv.sh`` script sets various environment variables needed for running OpenDDS tests.
    Be sure to ``source setenv.sh`` if you start a new terminal session.
 
 **********

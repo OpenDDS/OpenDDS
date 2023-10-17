@@ -76,19 +76,31 @@ Topic
     Sect<1.1.1.3>
 
 The *topic* is the fundamental means of interaction between publishing and subscribing applications.
-Each topic has a unique name within the domain.
+Each topic has a unique name within the domain that connects publishers to subscribers.
+Multiple processes can publish on a topic and multiple processes can subscribe to a topic which allows for many-to-many communication.
+A publishing process specifies the topic when publishing samples and a subscribing process requests samples via the topic.
+
+Samples, Instances, and Types
+=============================
+
 In DCPS terminology, an application publishes individual data *samples* for different *instances* on a topic.
 Each topic has a specific type that describes the samples.
 Each topic data type can specify zero or more fields that make up its *key*.
 Each instance is associated with a unique value for the key.
 A publishing process publishes multiple data samples on the same instance by using the same key value for each sample.
+Conceptually, a topic data type without a key has a single instance.
 
-A publishing process specifies the topic when publishing samples and a subscribing process requests samples via the topic.
-Multiple processes can publish on a topic and multiple processes can subscribe to a topic which allows for many-to-many communication.
+A type can be defined at compile-time (static type) or at run-time (dynamic type).
+An application can use both static types and dynamic types.
+Static types are defined using OMG Interface Description Language (:term:`IDL`).
+See :ref:`getting_started--defining-data-types-with-idl` for more information and examples.
+Dynamic types can be created or acquired via API.
+(OpenDDS current does not support the creation of dynamic types.)
 
-When publishing data, the publishing process always specifies the topic.
-Subscribers request data via the topic.
-
+The type associated with a topic is relative to a participant.
+That is, two different participants may have different definitions for the same topic type.
+A feature called :ref:`xtypes` allows participants with different topic types to still exchange samples.
+If XTypes is not used, then the types must match exactly.
 
 .. _introduction--datawriter:
 

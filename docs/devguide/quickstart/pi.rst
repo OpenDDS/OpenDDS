@@ -30,7 +30,7 @@ Perform these all these steps on the host computer:
 #. Download and extract the `Linux GCC 10.2 cross-compiler toolchain <https://developer.arm.com/-/media/Files/downloads/gnu-a/10.2-2020.11/binrel/gcc-arm-10.2-2020.11-x86_64-arm-none-linux-gnueabihf.tar.xz?revision=d0b90559-3960-4e4b-9297-7ddbc3e52783&hash=6F50B04F08298881CA3596CE99E5ABB3925DEB24>`__ from the `ARM Developer website <https://developer.arm.com/>`__.
    Rename the resulting directory from ``gcc-arm-10.2-2020.11-x86_64-arm-none-linux-gnueabihf`` to ``cross-pi-gcc`` and move it to ``/opt``.
 
-#. If building with DDS Security, follow :ref:`the steps below <thirdparty>` to build OpenSSL and Xerces-C++ for the Pi.
+#. If building with :ref:`dds_security`, follow :ref:`the steps below <thirdparty>` to build OpenSSL and Xerces-C++ for the Pi.
 
 #. Enter the ``OpenDDS-<version>`` directory
 
