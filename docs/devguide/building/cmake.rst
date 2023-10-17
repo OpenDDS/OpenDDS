@@ -737,8 +737,8 @@ These variables can be used to override default behavior of the CMake package.
 Config Variables
 -----------------
 
-These variables are set by the ``configure`` script  in a MPC-built OpenDDS and normally shouldn't be changed.
-They can be changed when configuring a :ref:`CMake-built OpenDDS <cmake-building>` using ``-D``, but should not be chagned after that.
+These variables are set by the ``configure`` script in an MPC-built OpenDDS and normally shouldn't be changed.
+They can be changed when configuring a :ref:`CMake-built OpenDDS <cmake-building>` using ``-D``, but should not be changed after that.
 
 Dependencies
 ^^^^^^^^^^^^
