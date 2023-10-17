@@ -108,7 +108,7 @@ FreeHeader*
 FreeHeader::smaller_free(unsigned char* pool_base) const
 {
   FreeHeader* result = NULL;
-  if (offset_smaller_free_ != std::numeric_limits<size_t>::max()) {
+  if (offset_smaller_free_ != (std::numeric_limits<size_t>::max)()) {
     result = reinterpret_cast<FreeHeader*>(pool_base + offset_smaller_free_);
   }
   return result;
@@ -118,7 +118,7 @@ FreeHeader*
 FreeHeader::larger_free(unsigned char* pool_base) const
 {
   FreeHeader* result = NULL;
-  if (offset_larger_free_ != std::numeric_limits<size_t>::max()) {
+  if (offset_larger_free_ != (std::numeric_limits<size_t>::max)()) {
     result = reinterpret_cast<FreeHeader*>(pool_base + offset_larger_free_);
   }
   return result;
@@ -130,7 +130,7 @@ FreeHeader::set_smaller_free(FreeHeader* next, unsigned char* pool_base)
   if (next) {
     offset_smaller_free_ = reinterpret_cast<unsigned char*>(next) - pool_base;
   } else {
-    offset_smaller_free_ = std::numeric_limits<size_t>::max();
+    offset_smaller_free_ = (std::numeric_limits<size_t>::max)();
   }
 }
 
@@ -140,7 +140,7 @@ FreeHeader::set_larger_free(FreeHeader* prev, unsigned char* pool_base)
   if (prev) {
     offset_larger_free_ = reinterpret_cast<unsigned char*>(prev) - pool_base;
   } else {
-    offset_larger_free_ = std::numeric_limits<size_t>::max();
+    offset_larger_free_ = (std::numeric_limits<size_t>::max)();
   }
 }
 
@@ -197,9 +197,9 @@ FreeIndex::remove(FreeHeader* free_block, FreeHeader* larger)
 void
 FreeIndex::init(FreeHeader* init_free_block)
 {
-  size_t max = std::numeric_limits<size_t>::max();
+  const size_t max_size = (std::numeric_limits<size_t>::max)();
   for (size_t size = min_index; size <= max_index; size *= 2) {
-    nodes_[size_].set_sizes(size, (size == max_index) ? max  :  size*2);
+    nodes_[size_].set_sizes(size, (size == max_index) ? max_size : size * 2);
     ++size_;
   }
   add(init_free_block);

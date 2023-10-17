@@ -1,7 +1,12 @@
+# This is what CMake evaluates when find_package(OpenDDS) is called. It should
+# find ACE/TAO and OpenDDS according to COMPONENTS passed and other information
+# like OpenDDS_ROOT, make those libraries and executables available, and make
+# opendds_targets_sources available if possible.
+#
 # Distributed under the OpenDDS License. See accompanying LICENSE
 # file or http://www.opendds.org/license.html for details.
 
-cmake_minimum_required(VERSION 3.3.2)
+cmake_minimum_required(VERSION 3.3...3.27)
 
 if(OPENDDS_CMAKE_VERBOSE)
   message(STATUS "find_package(OpenDDS) called from ${PROJECT_NAME}")
@@ -9,6 +14,7 @@ endif()
 set(_opendds_old_cmake_message_indent "${CMAKE_MESSAGE_INDENT}")
 list(APPEND CMAKE_MESSAGE_INDENT "  ")
 
+include("${CMAKE_CURRENT_LIST_DIR}/init.cmake")
 include("${CMAKE_CURRENT_LIST_DIR}/ace_group.cmake")
 include("${CMAKE_CURRENT_LIST_DIR}/tao_group.cmake")
 include("${CMAKE_CURRENT_LIST_DIR}/opendds_group.cmake")
@@ -159,6 +165,7 @@ function(_opendds_process_components)
   process_target_list("find" FALSE)
   process_target_list("required" TRUE)
 
+  set(_opendds_required_targets "${required_targets}" PARENT_SCOPE)
   set(_opendds_request_failed "${request_failed}" PARENT_SCOPE)
   foreach(name
         ace_find_libs
@@ -219,37 +226,60 @@ if(_opendds_tao_find_libs OR _opendds_tao_find_exes)
   endif()
 endif()
 
-if(_opendds_find_libs OR _opendds_find_exes)
+if(_OPENDDS_CMAKE_BUILT_AND_INSTALLED)
+  include("${CMAKE_CURRENT_LIST_DIR}/opendds_targets.cmake")
+  set(OpenDDS_FOUND TRUE)
+  foreach(_tgt ${_opendds_required_targets})
+    if(NOT TARGET ${_tgt})
+      message(SEND_ERROR "${_tgt} was not in installed OpenDDS/ACE/TAO")
+      set(OpenDDS_FOUND FALSE)
+    endif()
+  endforeach()
+elseif(_opendds_find_libs OR _opendds_find_exes)
   _opendds_find_group_targets(OpenDDS "${_opendds_find_libs}" "${_opendds_find_exes}")
   _opendds_found_required_deps(OpenDDS_FOUND "${_opendds_required}")
   if(OpenDDS_FOUND)
     _opendds_import_group_targets(OpenDDS "${_opendds_find_libs}" "${_opendds_find_exes}")
-
-    if(NOT TARGET OpenDDS::OpenDDS)
-      add_library(OpenDDS::OpenDDS INTERFACE IMPORTED)
-
-      set(_opendds_core_libs
-        OpenDDS::Dcps
-        OpenDDS::Multicast
-        OpenDDS::Rtps
-        OpenDDS::Rtps_Udp
-        OpenDDS::InfoRepoDiscovery
-        OpenDDS::Shmem
-        OpenDDS::Tcp
-        OpenDDS::Udp
-      )
-      if(OPENDDS_SECURITY)
-        list(APPEND _opendds_core_libs OpenDDS::Security)
-      endif()
-
-      set_target_properties(OpenDDS::OpenDDS
-        PROPERTIES
-          INTERFACE_LINK_LIBRARIES "${_opendds_core_libs}")
-    endif()
   else()
     set(CMAKE_MESSAGE_INDENT "${_opendds_cmake_message_indent}")
     return()
   endif()
+endif()
+
+if(NOT TARGET OpenDDS::OpenDDS)
+  set(_opendds_core_libs
+    OpenDDS::Dcps
+    OpenDDS::Multicast
+    OpenDDS::Rtps
+    OpenDDS::Rtps_Udp
+    OpenDDS::InfoRepoDiscovery
+    OpenDDS::Shmem
+    OpenDDS::Tcp
+    OpenDDS::Udp
+  )
+  if(OPENDDS_SECURITY)
+    list(APPEND _opendds_core_libs OpenDDS::Security)
+  endif()
+
+  set(_found_all TRUE)
+  foreach(_lib ${_opendds_core_libs})
+    if(NOT TARGET "${_lib}")
+      set(_found_all FALSE)
+      break()
+    endif()
+  endforeach()
+
+  if(_found_all)
+    add_library(OpenDDS::OpenDDS INTERFACE IMPORTED)
+    set_target_properties(OpenDDS::OpenDDS
+      PROPERTIES
+        INTERFACE_LINK_LIBRARIES "${_opendds_core_libs}")
+  endif()
+endif()
+
+if(NOT TARGET OpenDDS::TestUtils AND DEFINED OPENDDS_SOURCE_DIR)
+  add_library(OpenDDS::TestUtils INTERFACE IMPORTED)
+  target_include_directories(OpenDDS::TestUtils INTERFACE "${OPENDDS_SOURCE_DIR}")
 endif()
 
 if(TARGET TAO::tao_idl OR TARGET OpenDDS::opendds_idl)

@@ -1,3 +1,5 @@
+.. _deps:
+
 ############
 Dependencies
 ############
@@ -8,13 +10,17 @@ Required to Build the Core OpenDDS Libraries
 
 .. note:: Perl is required to run the configure script; MPC, ACE, and TAO will be downloaded automatically by the configure script by default.
 
-.. _dependencies-perl:
+.. _deps-perl:
 
 Perl
 ====
 
-Perl is an interpreted language used in the configure script, the tests, and most other scripting in OpenDDS codebase.
+`Perl <https://www.perl.org/>`__ is an interpreted language used in the configure script, the tests, and most other scripting in OpenDDS codebase.
 Even if the configure script is not used, it is also required to run MPC, so it is required to build OpenDDS.
+
+Perl should be 5.18 or newer and be available on the system ``PATH``.
+Older versions of Perl will probably work, but are not tested anymore.
+`Strawberry Perl <https://strawberryperl.com>`__ is recommended for Windows.
 
 Testing scripts are written in Perl and use the common PerlACE modules provided by ACE.
 For scripts that will be part of automated testing, don't assume the presence of any non-standard (CPAN) modules.
@@ -25,7 +31,7 @@ Perl core modules are a required part of Perl.
 Some Linux distributions install the Perl interpreter without including core modules.
 Using OpenDDS with this sort of partial Perl installation may fail unexpectedly when using configure, MPC, ``make depend``, or test scripts.
 
-.. _dependencies-mpc:
+.. _deps-mpc:
 
 MPC
 ===
@@ -35,6 +41,8 @@ MPC is the build system used by OpenDDS, used to configure the build and generat
 The official repository is hosted on Github at `DOCGroup/MPC <https://github.com/DOCGroup/MPC>`__.
 
 It is included in the release archive of ACE/TAO, which is downloaded by the configure script by default.
+
+.. _deps-ace-tao:
 
 ACE/TAO
 =======
@@ -59,7 +67,7 @@ DOC Group ACE 7.1/TAO 3.1
 
 Both can also be manually downloaded from https://github.com/DOCGroup/ACE_TAO/releases
 
-.. _dependencies-ace:
+.. _deps-ace:
 
 ACE
 ---
@@ -89,7 +97,7 @@ Some other features OpenDDS relies on ACE for:
 - ACE provides support for platforms that have a non-standard program entry point (``main``).
   All of our ``main`` functions are ``int ACE_TMAIN(int argc, ACE_TCHAR* argv[])``.
 
-.. _dependencies-tao:
+.. _deps-tao:
 
 TAO
 ---
@@ -105,88 +113,105 @@ TAO is a C++ CORBA Implementation built on ACE.
 The TAO Developer's Guide book can be requested for free from https://objectcomputing.com/products/tao/tao-developers-guide.
 The CORBA Programmers Guide can be downloaded for free from https://www.remedy.nl/opensource/corbapg.html.
 
+.. _deps-optional:
+
 *********************
 Optional Dependencies
 *********************
 
+.. _deps-cmake:
+
 CMake
 =====
 
-OpenDDS has a :ghfile:`CMake package included <cmake>`.
+OpenDDS has a :ghfile:`package included <cmake>` for `CMake <https://cmake.org/>`__.
 See :doc:`cmake` for how to build OpenDDS applications with CMake and without the need to use MPC in your application.
 
-CMake is required to build Google Test for OpenDDS tests if a prebuilt Google Test is not found or provided.
+CMake is required to build :ref:`deps-gtest` for OpenDDS tests if a prebuilt GoogleTest is not found or provided.
 See :ghfile:`tests/gtest_setup.txt` for details.
 
-A recent release of CMake from the 3.x series should be used.
+CMake should be version 3.3 or later for :doc:`cmake`.
+It should be version 3.23 or later for :ref:`cmake-building`.
 
-Google Test
-===========
+.. _deps-gtest:
 
-Google Test is required for OpenDDS tests.
+GoogleTest
+==========
 
-Google Test is a git submodule that will be downloaded automatically if the repository was recursively cloned or submodules were initialized separately.
+`GoogleTest <https://google.github.io/googletest/>`__ is required for OpenDDS tests.
 
-.. note:: If OpenDDS was downloaded from opendds.org or another source that's not a git repository, Google Test will have to be downloaded separately and configured manually.
+GoogleTest is a git submodule that will be downloaded automatically if the repository was recursively cloned or submodules were initialized separately.
 
-Google Test is available as package, at least in Debian based Linux distributions.
+.. note:: If OpenDDS is not a git repository or Git isn't available, GoogleTest will have to be downloaded separately and configured manually.
 
 See :ghfile:`tests/gtest_setup.txt` for details.
+
+.. _deps-java:
 
 Java
 ====
 
-OpenDDS has optional Java bindings.
+OpenDDS has optional :ref:`Java bindings <java>`.
 It requires the Java Development Kit (JDK).
-See :ghfile:`java/README`.
 
 There is also support for Java Message Server (JMS) v1.1.
-In addition to the JDK, it requires Ant and JBoss 4.2.x. See :ghfile:`java/jms/README`.
+In addition to the JDK, it requires Ant and JBoss 4.2.x.
+See :ghfile:`java/jms/README`.
+
+.. _deps-qt:
 
 Qt
 ==
 
-Qt5 is used for the :ghfile:`tools/monitor` utility program and the :ghfile:`examples/DCPS/ishapes` RTPS demo.
+`Qt5 <https://www.qt.io/>`__ is used for the :ghfile:`tools/monitor` utility program and the :ghfile:`examples/DCPS/ishapes` RTPS demo.
 
 See :ghfile:`docs/qt.md` for details on configuring OpenDDS to use Qt.
+
+.. _deps-wireshark:
 
 Wireshark
 =========
 
-A Wireshark dissector plugin for OpenDDS' non-RTPS transports is included with OpenDDS.
+A `Wireshark <https://www.wireshark.org/>`__ dissector plugin for OpenDDS' non-RTPS transports is included with OpenDDS.
 The dissector supports Wireshark 1.2 and onwards and supports displaying and filtering by sample contents and from Wireshark 1.12 onwards.
 
 Because of Wireshark's use of Glib, Glib is also required to build the dissector.
 
 See :ghfile:`tools/dissector/README.md` for details.
 
+.. _deps-rapidjson:
+
 RapidJSON
 =========
 
-RapidJSON is a C++ JSON Library used for :ghfile:`sample dissection in the Wireshark dissector <tools/dissector/README.md#sample-dissection>` and RapidJSON type support.
+`RapidJSON <https://rapidjson.org/>`__ is a C++ JSON Library used for :ghfile:`sample dissection in the Wireshark dissector <tools/dissector/README.md#sample-dissection>` and RapidJSON type support.
 Support for RapidJSON, if available, is enabled by default unless ``--no-rapidjson`` was passed.
 
 RapidJSON is a git submodule that will be downloaded automatically if the repository was recursively cloned or submodules were initialized separately.
 
-.. note:: If OpenDDS was downloaded from opendds.org or another source that's not a git repository, RapidJSON will have to be downloaded separately and configured manually.
+.. note:: If OpenDDS is not a git repository or Git isn't available, RapidJSON will have to be downloaded separately and configured manually.
 
-RapidJSON is also available as package, at least in Debian-based Linux distributions.
+.. _deps-xerces:
 
 Xerces
 ======
 
-Apache Xerces ("Xerces 3 C++" specifically) is used for parsing QoS XML and security XML configuration files.
+`Apache Xerces <https://xerces.apache.org/xerces-c/>`__ ("Xerces 3 C++" specifically) is used for parsing QoS XML and :ref:`sec` XML configuration files.
+
+.. _deps-openssl:
 
 OpenSSL
 =======
 
-OpenSSL is used for DDS Security for verifying security configurations and encryption and decryption.
+`OpenSSL <https://www.openssl.org/>`__ is used for :ref:`sec` for verifying security configurations and encryption and decryption.
 Versions 1.0, 1.1 and 3.0 (3.0.1 or later) are supported.
+
+.. _deps-python:
 
 Python
 ======
 
-Python is used for some scripts where Perl isn't as suitable.
+`Python <https://www.python.org/>`__ is used for some scripts where Perl isn't as suitable.
 Most notably this includes :doc:`this Sphinx-based documentation </internal/docs>` and processing the results of the CMake tests in :ghfile:`tests/auto_run_tests.pl` if ``--cmake`` is passed.
 
 Unless noted otherwise, Python should be version 3.6 or later.

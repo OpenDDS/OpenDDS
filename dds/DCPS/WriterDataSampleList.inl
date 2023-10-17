@@ -61,16 +61,16 @@ WriterDataSampleList::enqueue_tail(const DataSampleElement* sample)
 
   mSample->next_writer_sample_ = 0;
 
-  ++size_ ;
+  ++size_;
 
   if (head_ == 0) {
     // First sample in the list.
-    head_ = tail_ = mSample ;
+    head_ = tail_ = mSample;
     mSample->previous_writer_sample_ = 0;
 
   } else {
     // Add to existing list.
-    tail_->next_writer_sample_ = mSample ;
+    tail_->next_writer_sample_ = mSample;
     mSample->previous_writer_sample_ = tail_;
     tail_ = mSample;
   }
@@ -89,7 +89,7 @@ WriterDataSampleList::dequeue_head(DataSampleElement*& stale)
     return false;
 
   } else {
-    --size_ ;
+    --size_;
     head_ = head_->next_writer_sample_;
 
     if (head_ == 0) {

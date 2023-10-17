@@ -1366,7 +1366,15 @@ void RtpsDiscovery::update_publication_locators(
   DDS::DomainId_t domainId, const GUID_t& partId, const GUID_t& dwId,
   const DCPS::TransportLocatorSeq& transInfo)
 {
-  get_part(domainId, partId)->update_publication_locators(dwId, transInfo);
+  const ParticipantHandle ph = get_part(domainId, partId);
+  if (ph) {
+    ph->update_publication_locators(dwId, transInfo);
+  } else if (log_level >= DCPS::LogLevel::Warning) {
+    ACE_ERROR((LM_WARNING,
+               "(%P|%t) WARNING: RtpsDiscovery::update_publication_locators: "
+               "no participant for domain %d participant %C writer %C\n",
+               domainId, LogGuid(partId).c_str(), LogGuid(dwId).c_str()));
+  }
 }
 
 bool RtpsDiscovery::add_subscription(
@@ -1427,7 +1435,15 @@ void RtpsDiscovery::update_subscription_locators(
   DDS::DomainId_t domainId, const GUID_t& partId, const GUID_t& subId,
   const DCPS::TransportLocatorSeq& transInfo)
 {
-  get_part(domainId, partId)->update_subscription_locators(subId, transInfo);
+  const ParticipantHandle ph = get_part(domainId, partId);
+  if (ph) {
+    ph->update_subscription_locators(subId, transInfo);
+  } else if (log_level >= DCPS::LogLevel::Warning) {
+    ACE_ERROR((LM_WARNING,
+               "(%P|%t) WARNING: RtpsDiscovery::update_subscription_locators: "
+               "no participant for domain %d participant %C reader %C\n",
+               domainId, LogGuid(partId).c_str(), LogGuid(subId).c_str()));
+  }
 }
 
 RcHandle<DCPS::TransportInst> RtpsDiscovery::sedp_transport_inst(DDS::DomainId_t domainId,

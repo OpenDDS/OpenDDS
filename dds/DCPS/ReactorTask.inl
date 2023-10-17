@@ -69,6 +69,13 @@ ReactorInterceptor_rch ReactorTask::interceptor() const
   return interceptor_;
 }
 
+ACE_INLINE
+ReactorTask::State ReactorTask::state() const
+{
+  ACE_Guard<ACE_SYNCH_MUTEX> guard(lock_);
+  return state_;
+}
+
 } // namespace DCPS
 } // namespace OpenDDS
 

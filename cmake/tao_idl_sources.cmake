@@ -3,59 +3,88 @@
 
 function(_opendds_tao_append_runtime_lib_dir_to_path dst)
   if(MSVC)
-    set(val "PATH=")
-    if(DEFINED ENV{PATH})
-      set(val "${val}$ENV{PATH};")
-    endif()
-    set(val "${val}${TAO_BIN_DIR}")
+    set(env_var_name PATH)
   else()
-    set(val "LD_LIBRARY_PATH=")
-    if(DEFINED ENV{LD_LIBRARY_PATH})
-      string(REPLACE "\\" "/" tmp "$ENV{LD_LIBRARY_PATH}")
-      set(val "${val}${tmp}:")
-    endif()
-    string(REPLACE "\\" "/" tmp ${TAO_LIB_DIR})
-    set(val "\"${val}${tmp}\"")
+    set(env_var_name LD_LIBRARY_PATH)
   endif()
-  set(${dst} "${val}" PARENT_SCOPE)
+  set(path_list "$ENV{${env_var_name}}" "${TAO_LIB_DIR}")
+  if(TARGET OpenDDS::Util)
+    list(APPEND path_list "$<TARGET_FILE_DIR:OpenDDS::Util>")
+  endif()
+  _opendds_path_list(path_list ${path_list})
+  if(NOT MSVC)
+    string(REPLACE "\\" "/" path_list "${path_list}")
+  endif()
+  set(${dst} "${env_var_name}=${path_list}" PARENT_SCOPE)
 endfunction()
 
 function(_opendds_get_generated_output_dir target output_dir_var)
+  set(no_value_options)
+  set(single_value_options O_OPT)
+  set(multi_value_options)
+  cmake_parse_arguments(arg
+    "${no_value_options}" "${single_value_options}" "${multi_value_options}" ${ARGN})
+
   # TODO base output_dir_var on target
-  set(${output_dir_var} "${CMAKE_CURRENT_BINARY_DIR}/opendds_generated" PARENT_SCOPE)
+  set(output_dir "${CMAKE_CURRENT_BINARY_DIR}/opendds_generated")
+  if(arg_O_OPT)
+    if(IS_ABSOLUTE "${arg_O_OPT}")
+      set(output_dir "${arg_O_OPT}")
+    else()
+      set(output_dir "${output_dir}/${arg_O_OPT}")
+    endif()
+  endif()
+  set(${output_dir_var} "${output_dir}" PARENT_SCOPE)
 endfunction()
 
-function(_opendds_ensure_generated_output_dir target file o_arg output_dir_var)
+function(_opendds_ensure_generated_output_dir target include_base file o_opt output_dir_var)
   get_filename_component(abs_file "${file}" ABSOLUTE)
   get_filename_component(abs_dir "${abs_file}" DIRECTORY)
-  _opendds_get_generated_output_dir("${target}" output_dir)
-  if(o_arg)
-    if(IS_ABSOLUTE "${o_arg}")
-      set(output_dir "${o_arg}")
+  _opendds_get_generated_output_dir("${target}" output_dir O_OPT "${o_opt}")
+  if(include_base AND NOT OPENDDS_FILENAME_ONLY_INCLUDES AND NOT O_OPT)
+    get_filename_component(output_dir "${output_dir}" REALPATH)
+    get_filename_component(real_abs_file "${abs_file}" REALPATH)
+    get_filename_component(real_include_base "${include_base}" REALPATH)
+    file(RELATIVE_PATH rel_to_output "${output_dir}" "${real_abs_file}")
+    if(rel_to_output MATCHES "^\\.\\.")
+      # This should be an IDL file that is relative to include_base.
+      file(RELATIVE_PATH rel_file "${real_include_base}" "${real_abs_file}")
     else()
-      set(output_dir "${output_dir}/${o_arg}")
+      # This should be our own generated IDL file that is relative to
+      # opendds_generated.
+      file(RELATIVE_PATH rel_file "${output_dir}" "${real_abs_file}")
+    endif()
+    get_filename_component(rel_dir "${rel_file}" DIRECTORY)
+    if(rel_file MATCHES "^\\.\\.")
+      message(FATAL_ERROR "This IDL file:\n\n  ${rel_file}\n\nis outside the INCLUDE_BASE:\n\n  ${include_base}")
+    endif()
+    if(rel_dir)
+      set(output_dir "${output_dir}/${rel_dir}")
     endif()
   endif()
   file(MAKE_DIRECTORY "${output_dir}")
   set(${output_dir_var} "${output_dir}" PARENT_SCOPE)
 endfunction()
 
-function(_opendds_get_generated_file_path target file output_path_var)
-  _opendds_ensure_generated_output_dir(${target} ${file} "" output_dir)
+function(_opendds_get_generated_file_path target include_base file output_path_var)
+  _opendds_ensure_generated_output_dir(${target} "${include_base}" "${file}" "" output_dir)
   get_filename_component(filename ${file} NAME)
   set(${output_path_var} "${output_dir}/${filename}" PARENT_SCOPE)
 endfunction()
 
-function(_opendds_get_generated_idl_output target idl_file o_arg output_prefix_var output_dir_var)
-  _opendds_ensure_generated_output_dir(${target} ${idl_file} "${o_arg}" output_dir)
+function(_opendds_get_generated_idl_output
+    target include_base idl_file o_opt output_prefix_var output_dir_var)
+  _opendds_ensure_generated_output_dir(
+    ${target} "${include_base}" "${idl_file}" "${o_opt}" output_dir)
   get_filename_component(idl_filename_no_ext ${idl_file} NAME_WE)
   set(${output_prefix_var} "${output_dir}/${idl_filename_no_ext}" PARENT_SCOPE)
   set(${output_dir_var} "${output_dir}" PARENT_SCOPE)
 endfunction()
 
 function(_opendds_tao_idl target)
+  set(one_value_args AUTO_INCLUDES INCLUDE_BASE)
   set(multi_value_args IDL_FLAGS IDL_FILES)
-  cmake_parse_arguments(arg "" "AUTO_INCLUDES" "${multi_value_args}" ${ARGN})
+  cmake_parse_arguments(arg "" "${one_value_args}" "${multi_value_args}" ${ARGN})
 
   if(NOT arg_IDL_FILES)
     message(FATAL_ERROR "called _opendds_tao_idl(${target}) without specifying IDL_FILES")
@@ -103,15 +132,21 @@ function(_opendds_tao_idl target)
     list(APPEND feature_flags -Sp -Sd)
   endif()
 
+  if(arg_INCLUDE_BASE)
+    list(APPEND converted_flags "-I${arg_INCLUDE_BASE}")
+    list(APPEND auto_includes "${arg_INCLUDE_BASE}")
+  endif()
+
   foreach(idl_file ${arg_IDL_FILES})
     set(added_output_args)
     _opendds_get_generated_idl_output(
-      ${target} ${idl_file} "${idl_cmd_arg_-o}" output_prefix output_dir)
+      ${target} "${arg_INCLUDE_BASE}" "${idl_file}" "${idl_cmd_arg_-o}" output_prefix output_dir)
     list(APPEND auto_includes "${output_dir}")
     list(APPEND added_output_args "-o" "${output_dir}")
     if(idl_cmd_arg_-oS)
       _opendds_get_generated_idl_output(
-        ${target} ${idl_file} "${idl_cmd_arg_-oS}" skel_output_prefix skel_output_dir)
+        ${target} "${arg_INCLUDE_BASE}" ${idl_file} "${idl_cmd_arg_-oS}"
+        skel_output_prefix skel_output_dir)
       list(APPEND auto_includes "${skel_output_dir}")
       list(APPEND added_output_args "-oS" "${skel_output_dir}")
     else()
@@ -119,7 +154,8 @@ function(_opendds_tao_idl target)
     endif()
     if(idl_cmd_arg_-oA)
       _opendds_get_generated_idl_output(
-        ${target} ${idl_file} "${idl_cmd_arg_-oA}" anyop_output_prefix anyop_output_dir)
+        ${target} "${arg_INCLUDE_BASE}" "${idl_file}" "${idl_cmd_arg_-oA}"
+        anyop_output_prefix anyop_output_dir)
       list(APPEND auto_includes "${anyop_output_dir}")
       list(APPEND added_output_args "-oA" "${anyop_output_dir}")
     else()
@@ -161,11 +197,11 @@ function(_opendds_tao_idl target)
         "${skel_output_prefix}S_T.cpp")
     endif()
 
-    if(idl_cmd_arg_-Gxhst)
+    if(idl_cmd_arg_-Gxhst AND DEFINED idl_cmd_arg-wb-stub_export_file)
       list(APPEND stub_header_files "${CMAKE_CURRENT_BINARY_DIR}/${idl_cmd_arg-wb-stub_export_file}")
     endif()
 
-    if(idl_cmd_arg_-Gxhsk)
+    if(idl_cmd_arg_-Gxhsk AND DEFINED idl_cmd_arg-wb-skel_export_file)
       list(APPEND skel_header_files "${CMAKE_CURRENT_BINARY_DIR}/${idl_cmd_arg-wb-skel_export_file}")
     endif()
 
@@ -201,13 +237,24 @@ function(_opendds_tao_idl target)
         message(STATUS "tao_idl: ${generated_file}")
       endforeach()
     endif()
+
+    set(tao_idl "$<TARGET_FILE:TAO::tao_idl>")
+    if(CMAKE_GENERATOR STREQUAL "Ninja" AND TAO_IS_BEING_BUILT)
+      if(CMAKE_VERSION VERSION_LESS 3.24)
+        message(FATAL_ERROR "Using Ninja to build ACE/TAO requires CMake 3.24 or later. "
+         "Please build ACE/TAO separately, use a newer CMake, or a different CMake generator.")
+      else()
+        set(tao_idl "$<PATH:ABSOLUTE_PATH,${tao_idl},\${cmake_ninja_workdir}>")
+        set(gperf_location "$<PATH:ABSOLUTE_PATH,${gperf_location},\${cmake_ninja_workdir}>")
+      endif()
+    endif()
     add_custom_command(
       OUTPUT ${generated_files}
       DEPENDS TAO::tao_idl ${tao_idl_shared_libs} ACE::ace_gperf
       MAIN_DEPENDENCY ${idl_file_path}
       COMMAND ${CMAKE_COMMAND} -E env "DDS_ROOT=${DDS_ROOT}" "TAO_ROOT=${TAO_INCLUDE_DIR}"
         "${extra_lib_dirs}"
-        $<TARGET_FILE:TAO::tao_idl> -g ${gperf_location} ${feature_flags} -Sg
+        "${tao_idl}" -g ${gperf_location} ${feature_flags} -Sg
         -Wb,pre_include=ace/pre.h -Wb,post_include=ace/post.h
         --idl-version 4 -as --unknown-annotations ignore
         -I${TAO_INCLUDE_DIR} -I${working_source_dir}

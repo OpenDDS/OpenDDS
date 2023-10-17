@@ -1,5 +1,4 @@
-cmake_minimum_required(VERSION 3.3)
-
+cmake_minimum_required(VERSION 3.3...3.27)
 project(opendds_cmake_tests_root_project)
 enable_testing()
 

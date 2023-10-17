@@ -1,6 +1,4 @@
 /*
- *
- *
  * Distributed under the OpenDDS License.
  * See: http://www.opendds.org/license.html
  */
@@ -9,6 +7,8 @@
 #define OPENDDS_DCPS_WRITERDATASAMPLELIST_H
 
 #include "dcps_export.h"
+
+#include <ace/Basic_Types.h> // For ssize_t
 
 #include <cstring>
 

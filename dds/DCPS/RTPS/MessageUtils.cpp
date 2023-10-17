@@ -17,10 +17,6 @@ namespace RTPS {
 
 using DCPS::Encoding;
 
-namespace {
-  const Encoding encoding_plain_native(Encoding::KIND_XCDR1);
-}
-
 const DCPS::Encoding& get_locators_encoding()
 {
   static const Encoding encoding(Encoding::KIND_XCDR1, DCPS::ENDIAN_BIG);

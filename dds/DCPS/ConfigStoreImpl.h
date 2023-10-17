@@ -95,6 +95,7 @@ public:
   };
 
   enum NetworkAddressKind {
+    Kind_ANY,
     Kind_IPV4
 #ifdef ACE_HAS_IPV6
     , Kind_IPV6
@@ -142,7 +143,8 @@ public:
   void set(const char* key,
            const String& value);
   String get(const char* key,
-             const String& value) const;
+             const String& value,
+             bool allow_empty = true) const;
 
   void set(const char* key,
            const TimeDuration& value,

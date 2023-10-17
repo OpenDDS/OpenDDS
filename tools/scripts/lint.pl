@@ -751,7 +751,7 @@ my %all_checks = (
           my $after = $3;
           foreach my $find (@included_in) {
             my $suffix = match_prefix_get_suffix($what, $find);
-            if (defined($suffix)) {
+            if (defined($suffix) && -f $dir . $suffix) {
               $failed = 1;
               $line_failed = 1;
               push(@{${$line_numbers}}, $.);

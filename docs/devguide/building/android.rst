@@ -103,7 +103,7 @@ In addition to OpenDDS and the Android NDK you will also need the following soft
 - `Strawberry Perl <https://strawberryperl.com/>`__
 - OpenDDS Host tools build using Visual Studio
 
-  - In a separate copy of OpenDDS, build OpenDDS as described in :doc:`/building/index` using Visual Studio, except use the ``--host-tools-only`` configure script option.
+  - In a separate copy of OpenDDS, build OpenDDS as described in :doc:`/devguide/building/index` using Visual Studio, except use the ``--host-tools-only`` configure script option.
     This OpenDDS (and the ACE+TAO it uses) must be the same version as the one used to build for Android.
   - If you want to use Java in the Android build, also pass the ``--java`` configure script option here as described in :ref:`android-java`.
     You will also need to pass it to the configure script build for

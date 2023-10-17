@@ -51,7 +51,7 @@ Dependencies
 
 .. seealso::
 
-  :doc:`/building/dependencies` for all dependencies and details on how these are used in OpenDDS.
+  :doc:`/devguide/building/dependencies` for all dependencies and details on how these are used in OpenDDS.
 
 .. _dev_guidelines-text_file_formating:
 
@@ -248,7 +248,6 @@ Naming
 
 **(For library code that the user may link to)**
 
-
 * Preprocessor macros visible to user code must begin with ``OPENDDS_``
 * C++ identifiers are either in top-level namespace ``DDS`` (OMG spec defined) or ``OpenDDS`` (otherwise)
 * Within the ``OpenDDS`` namespace there are some nested namespaces:
@@ -264,6 +263,11 @@ Naming
   * ``methodsAreCamelCaseWithInitialLower`` OR ``methods_are_lower_case_with_underscores``
   * ``member_data_use_underscores_and_end_with_an_underscore_``
   * ``ThisIsANamespaceScopedOrStaticClassMemberConstant``
+
+.. note::
+
+  For CMake `<https://cmake.org/cmake/help/latest/prop_tgt/UNITY_BUILD.html>` are nominally supported.
+  This may cause unexpected build issues in CI builds when a name in one file happens to clash with another source file in the same source file batch.
 
 Comments
 ========
@@ -423,7 +427,7 @@ Using ``ACE_Time_Value`` is discouraged unless directly dealing with ACE code wh
 Therefore the ``Condition`` class wraps it and makes it so it always uses monotonic time like it should.
 Like ``ACE_OS::gettimeofday()``, referencing ``ACE_Condition`` in :ghfile:`dds/DCPS` will be treated as an error by the :ref:`lint script <dev_guidelines-lint-script>`.
 
-More information on using monotonic time with ACE can be found `here <http://www.dre.vanderbilt.edu/~schmidt/DOC_ROOT/ACE/docs/ACE-monotonic-timer.html>`_.
+More information on using monotonic time with ACE can be found `here <https://htmlpreview.github.io/?https://github.com/DOCGroup/ACE_TAO/blob/master/ACE/docs/ACE-monotonic-timer.html>`_.
 
 ``SystemTimePoint`` should be used when dealing with the DDS API and timestamps on incoming and outgoing messages.
 

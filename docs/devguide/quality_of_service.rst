@@ -1,4 +1,5 @@
-.. _quality_of_service--quality-of-service:
+.. _quality_of_service:
+.. _qos:
 
 ##################
 Quality of Service
@@ -121,11 +122,7 @@ The following examples illustrate how to obtain the default policies for publish
 
 The following tables summarize the default QoS policies for each entity type in OpenDDS to which policies can be applied.
 
-.. _quality_of_service--reftable2:
-
-**Table  Default DomainParticipant QoS Policies**
-
-.. list-table::
+.. list-table:: Default DomainParticipant QoS Policies
    :header-rows: 1
 
    * - Policy
@@ -146,11 +143,7 @@ The following tables summarize the default QoS policies for each entity type in 
 
      - ``true``
 
-.. _quality_of_service--reftable3:
-
-**Table  Default Topic QoS Policies**
-
-.. list-table::
+.. list-table:: Default Topic QoS Policies
    :header-rows: 1
 
    * - Policy
@@ -311,11 +304,9 @@ The following tables summarize the default QoS policies for each entity type in 
 
      - ``SHARED_OWNERSHIP_QOS``
 
-.. _quality_of_service--reftable4:
+.. _quality_of_service--publisher:
 
-**Table  Default Publisher QoS Policies**
-
-.. list-table::
+.. list-table:: Default Publisher QoS Policies
    :header-rows: 1
 
    * - Policy
@@ -358,9 +349,7 @@ The following tables summarize the default QoS policies for each entity type in 
 
 .. _quality_of_service--reftable5:
 
-**Table  Default Subscriber QoS Policies**
-
-.. list-table::
+.. list-table:: Default Subscriber QoS Policies
    :header-rows: 1
 
    * - Policy
@@ -403,9 +392,7 @@ The following tables summarize the default QoS policies for each entity type in 
 
 .. _quality_of_service--reftable6:
 
-**Table  Default DataWriter QoS Policies**
-
-.. list-table::
+.. list-table:: Default DataWriter QoS Policies
    :header-rows: 1
 
    * - Policy
@@ -580,9 +567,7 @@ The following tables summarize the default QoS policies for each entity type in 
 
 .. _quality_of_service--reftable7:
 
-**Table  Default DataReader QoS Policies**
-
-.. list-table::
+.. list-table:: Default DataReader QoS Policies
    :header-rows: 1
 
    * - Policy
@@ -1107,7 +1092,7 @@ By default, the ``value`` member is not set.
 It can be set to attach additional information to the created entities.
 The value of the ``GROUP_DATA`` policy is propagated via built-in topics.
 The data writer built-in topic data contains the ``GROUP_DATA`` from the publisher and the data reader built-in topic data contains the ``GROUP_DATA`` from the subscriber.
-The ``GROUP_DATA`` policy could be used to implement matching mechanisms similar to those of the ``PARTITION`` policy described in 1.1.6 except the decision could be made based on an application-defined policy.
+The ``GROUP_DATA`` policy could be used to implement matching mechanisms similar to those of the :ref:`PARTITION policy <quality_of_service--partition>` except the decision could be made based on an application-defined policy.
 
 .. _quality_of_service--transport-priority:
 
@@ -1339,7 +1324,7 @@ This is similar in nature to the ``DESTINATION_ORDER QoS`` policy, however ``ord
 By default, ``ordered_access`` is ``false``.
 
 .. note:: This policy controls the ordering and scope of samples made available to the subscriber, but the subscriber application must use the proper logic in reading samples to guarantee the requested behavior.
-  For more details, see Section 2.2.2.5.1.9 of the Version 1.4 DDS Specification.
+  For more details, see :omgspec:`dds:2.2.2.5.1.9`.
 
 .. _quality_of_service--destination-order:
 

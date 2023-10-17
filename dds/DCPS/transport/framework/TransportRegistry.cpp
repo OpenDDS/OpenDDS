@@ -1,32 +1,32 @@
 /*
- *
- *
  * Distributed under the OpenDDS License.
  * See: http://www.opendds.org/license.html
  */
 
-#include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
+#include <DCPS/DdsDcps_pch.h> //Only the _pch include should start with DCPS/
+
 #include "TransportRegistry.h"
 #include "TransportDebug.h"
 #include "TransportInst.h"
 #include "TransportExceptions.h"
 #include "TransportType.h"
-#include "dds/DCPS/GuidConverter.h"
-#include "dds/DCPS/Util.h"
-#include "dds/DCPS/Service_Participant.h"
-#include "dds/DCPS/EntityImpl.h"
-#include "dds/DCPS/SafetyProfileStreams.h"
+
+#include <dds/DCPS/debug.h>
+#include <dds/DCPS/GuidConverter.h>
+#include <dds/DCPS/Util.h>
+#include <dds/DCPS/Service_Participant.h>
+#include <dds/DCPS/EntityImpl.h>
+#include <dds/DCPS/SafetyProfileStreams.h>
+
 #include <dds/DdsDcpsInfrastructureC.h>
 
+#include <ace/Singleton.h>
+#include <ace/OS_NS_strings.h>
+#include <ace/Service_Config.h>
 
-#include "ace/Singleton.h"
-#include "ace/OS_NS_strings.h"
-#include "ace/Service_Config.h"
-
-#if !defined (__ACE_INLINE__)
-#include "TransportRegistry.inl"
-#endif /* __ACE_INLINE__ */
-
+#ifndef __ACE_INLINE__
+#  include "TransportRegistry.inl"
+#endif
 
 namespace {
   /// Used for sorting
@@ -515,6 +515,11 @@ TransportRegistry::load_transport_lib_i(const OPENDDS_STRING& transport_type)
   {
     ACE_Guard<ACE_Reverse_Lock<LockType> > guard(rev_lock);
     if (0 != ACE_Service_Config::process_directive(directive.c_str())) {
+      if (log_level >= LogLevel::Error) {
+        ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: TransportRegistry::load_transport_lib_i: "
+          "process_directive failed for transport_type=%C\n",
+          transport_type.c_str()));
+      }
       return TransportType_rch();
     }
   }

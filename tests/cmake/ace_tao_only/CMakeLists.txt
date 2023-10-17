@@ -1,8 +1,9 @@
-﻿cmake_minimum_required(VERSION 3.8.2)
+cmake_minimum_required(VERSION 3.8...3.27)
 project(opendds_ace_tao_only CXX)
 enable_testing()
 
 find_package(OpenDDS REQUIRED COMPONENTS NO_DEFAULTS TAO::tao_idl TAO::PortableServer)
+include(opendds_testing)
 
 _opendds_save_cache(OPENDDS_AUTO_LINK_DCPS BOOL TRUE)
 
@@ -43,20 +44,23 @@ endforeach()
 add_library(${idl})
 opendds_target_sources(${idl}
   PUBLIC "${dst}/${idl_file}"
+  SKIP_OPENDDS_IDL
   GENERATE_SERVER_SKELETONS TRUE
 )
+target_link_libraries(${idl} PUBLIC TAO::PortableServer)
 
 add_executable(${server} ${server_files})
 set_target_properties(${server} PROPERTIES OUTPUT_NAME MessengerServer)
-target_link_libraries(${server} ${idl} TAO::PortableServer)
+target_link_libraries(${server} ${idl})
 
 add_executable(${client} ${client_files})
 set_target_properties(${client} PROPERTIES OUTPUT_NAME MessengerClient)
 target_link_libraries(${client} ${idl})
 
-# Testing
-add_test(NAME "${target_prefix}test"
-  COMMAND perl run_test.pl $<$<BOOL:$<CONFIG>>:-ExeSubDir> $<CONFIG>
-)
+if(CMAKE_CONFIGURATION_TYPES)
+  opendds_add_test(COMMAND perl run_test.pl $<$<BOOL:$<CONFIG>>:-ExeSubDir> $<CONFIG>)
+else()
+  opendds_add_test(COMMAND perl run_test.pl)
+endif()
 
 _opendds_restore_cache()

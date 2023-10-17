@@ -6,6 +6,14 @@
 #ifndef OPENDDS_DCPS_DEFINITIONS_H
 #define OPENDDS_DCPS_DEFINITIONS_H
 
+#include <ace/config-lite.h>
+
+#ifdef __has_include
+#  if __has_include(<dds/DCPS/config.h>)
+#    include <dds/DCPS/config.h>
+#  endif
+#endif
+
 #include <dds/Versioned_Namespace.h>
 
 #include <ace/Message_Block.h>
@@ -92,6 +100,16 @@
 #if defined TAO_HAS_IDL_FEATURES && TAO_HAS_IDL_FEATURES
 #  include <tao/idl_features.h>
 #  define OPENDDS_HAS_MAP TAO_IDL_HAS_MAP
+#endif
+
+#ifndef OPENDDS_USES_AUTO_STATIC_INCLUDES
+#  define OPENDDS_USES_AUTO_STATIC_INCLUDES 0
+#endif
+
+#if !OPENDDS_USES_AUTO_STATIC_INCLUDES && defined(ACE_AS_STATIC_LIBS)
+#  define OPENDDS_DO_MANUAL_STATIC_INCLUDES 1
+#else
+#  define OPENDDS_DO_MANUAL_STATIC_INCLUDES 0
 #endif
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL

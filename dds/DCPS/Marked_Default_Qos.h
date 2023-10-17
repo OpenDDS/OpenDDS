@@ -1,6 +1,4 @@
 /*
- *
- *
  * Distributed under the OpenDDS License.
  * See: http://www.opendds.org/license.html
  */
@@ -8,11 +6,13 @@
 #ifndef OPENDDS_DCPS_MARKED_DEFAULT_QOS_H
 #define OPENDDS_DCPS_MARKED_DEFAULT_QOS_H
 
-#include "dds/DdsDcpsInfrastructureC.h"
+#include "dcps_export.h"
 
-#if !defined (ACE_LACKS_PRAGMA_ONCE)
-#pragma once
-#endif /* ACE_LACKS_PRAGMA_ONCE */
+#include <dds/DdsDcpsInfrastructureC.h>
+
+#ifndef ACE_LACKS_PRAGMA_ONCE
+#  pragma once
+#endif
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
