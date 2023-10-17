@@ -343,20 +343,28 @@ private:
                                       const char* func_name) const;
 
   template<TypeKind MemberTypeKind, typename MemberType>
-  bool set_value_to_union(DDS::MemberId id, const MemberType& value,
-    TypeKind enum_or_bitmask = TK_NONE, LBound lower = 0, LBound upper = 0);
+  bool set_value_to_union(DDS::MemberId id, const MemberType& value);
 
   template<TypeKind ElementTypeKind, typename ElementType>
-  bool set_value_to_collection(DDS::MemberId id, const ElementType& value,
-    TypeKind coll_tk, TypeKind enum_or_bitmask = TK_NONE, LBound lower = 0, LBound upper = 0);
+  bool set_value_to_collection(DDS::MemberId id, const ElementType& value);
 
   template<TypeKind ValueTypeKind, typename ValueType>
-  DDS::ReturnCode_t set_single_value(DDS::MemberId id, const ValueType& value,
-    TypeKind enum_or_bitmask = TK_NONE, LBound lower = 0, LBound upper = 0);
+  DDS::ReturnCode_t set_single_value(DDS::MemberId id, const ValueType& value);
 
   template<TypeKind CharKind, TypeKind StringKind, typename FromCharT>
   DDS::ReturnCode_t set_char_common(DDS::MemberId id, const FromCharT& value);
 
+  // Conversion between index and ID for collection
+  CORBA::ULong index_to_id(CORBA::ULong index) const
+  {
+    return index;
+  }
+
+  CORBA::ULong id_to_index(CORBA::ULong id) const
+  {
+    return id;
+  }
+  
   bool check_index_from_id(TypeKind tk, DDS::MemberId id, CORBA::ULong bound) const;
   static bool is_valid_discriminator_type(TypeKind tk);
   bool is_default_member_selected(CORBA::Long disc_val, DDS::MemberId default_id) const;
@@ -653,21 +661,18 @@ private:
   // Copy values of a basic sequence member from sequence map to a DynamicData object.
   bool move_sequence_to_complex(const const_sequence_iterator& it, DynamicDataImpl* data);
 
+  bool set_member_backing_store(DynamicDataImpl* member_ddi, DDS::MemberId id);
+
   // Indicate whether the value of a member is found in the complex map or
   // one of the other two maps or not found from any map in the container.
   enum FoundStatus { FOUND_IN_COMPLEX_MAP, FOUND_IN_NON_COMPLEX_MAP, NOT_FOUND };
-  bool set_member_backing_store(DynamicDataImpl* member_ddi, DDS::MemberId id);
-  bool get_complex_from_aggregated(DDS::DynamicData_var& value, DDS::MemberId id,
-                                   FoundStatus& found_status);
 
-  DDS::ReturnCode_t get_complex_from_struct(DDS::DynamicData_ptr& value, DDS::MemberId id);
-  bool write_discriminator_helper(CORBA::Long value, TypeKind treat_as);
-  bool write_discriminator(CORBA::Long value);
-  bool get_complex_from_union(DDS::DynamicData_ptr& value, DDS::MemberId id);
-  bool get_complex_from_collection(DDS::DynamicData_ptr& value, DDS::MemberId id);
+  bool get_complex_from_container(DDS::DynamicData_var& value, DDS::MemberId id, FoundStatus& found_status);
+  DDS::ReturnCode_t get_complex_from_aggregated(DDS::DynamicData_ptr& value, DDS::MemberId id);
+  DDS::ReturnCode_t get_complex_from_collection(DDS::DynamicData_ptr& value, DDS::MemberId id);
 
   bool read_disc_from_single_map(CORBA::Long& disc_val, const DDS::DynamicType_var& disc_type,
-                                 const_single_iterator it) const;
+                                 const const_single_iterator& it) const;
   bool read_disc_from_backing_store(CORBA::Long& disc_val, DDS::MemberId id,
                                     const DDS::DynamicType_var& disc_type) const;
 
@@ -688,8 +693,8 @@ private:
   bool reconstruct_string_value(CORBA::Char* str) const;
   bool reconstruct_wstring_value(CORBA::WChar* wstr) const;
   bool has_discriminator_value(const_single_iterator& single_it, const_complex_iterator& complex_it) const;
-  bool get_discriminator_value(CORBA::Long& value, const_single_iterator single_it,
-    const_complex_iterator complex_it, const DDS::DynamicType_var& disc_type) const;
+  bool get_discriminator_value(CORBA::Long& value, const const_single_iterator& single_it,
+    const const_complex_iterator& complex_it, const DDS::DynamicType_var& disc_type) const;
 };
 
 } // namespace XTypes
