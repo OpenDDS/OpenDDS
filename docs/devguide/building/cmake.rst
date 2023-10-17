@@ -2,6 +2,10 @@
 Using OpenDDS in a CMake Project
 ################################
 
+.. seealso::
+
+  :ref:`cmake-building`
+
 OpenDDS can be used with `CMake <https://cmake.org>`__\-based projects by using the :ghfile:`OpenDDS CMake config package <cmake>`.
 This package bridges the gap between the MPC build system used by OpenDDS and CMake-based projects by providing :ref:`imported library targets <cmake-libraries>` and the ability to add IDL to a target using :cmake:func:`opendds_target_sources`.
 
@@ -733,7 +737,8 @@ These variables can be used to override default behavior of the CMake package.
 Config Variables
 -----------------
 
-These variables are set by the configure script and normally shouldn't be changed.
+These variables are set by the ``configure`` script  in a MPC-built OpenDDS and normally shouldn't be changed.
+They can be changed when configuring a :ref:`CMake-built OpenDDS <cmake-building>` using ``-D``, but should not be chagned after that.
 
 Dependencies
 ^^^^^^^^^^^^
@@ -741,42 +746,42 @@ Dependencies
 .. cmake:var:: OPENDDS_ACE
   :nocontentsentry:
 
-  Path to ACE, usually :envvar:`ACE_ROOT`
+  Path to :ref:`deps-ace`, usually :envvar:`ACE_ROOT`
 
 .. cmake:var:: OPENDDS_TAO
   :nocontentsentry:
 
-  Path to TAO, usually :envvar:`TAO_ROOT`
+  Path to :ref:`deps-tao`, usually :envvar:`TAO_ROOT`
 
 .. cmake:var:: OPENDDS_OPENSSL
   :nocontentsentry:
 
-  Path to OpenSSL
+  Path to :ref:`deps-openssl`
 
 .. cmake:var:: OPENDDS_GTEST
   :nocontentsentry:
 
-  Path to Google Test
+  Path to :ref:`deps-gtest`
 
 .. cmake:var:: OPENDDS_JAVA
   :nocontentsentry:
 
-  Path to Java
+  Path to :ref:`deps-gtest`
 
 .. cmake:var:: OPENDDS_QT
   :nocontentsentry:
 
-  Path to QT
+  Path to :ref:`deps-qt`
 
 .. cmake:var:: OPENDDS_RAPIDJSON
   :nocontentsentry:
 
-  Path to RapidJSON
+  Path to :ref:`deps-rapidjson`
 
 .. cmake:var:: OPENDDS_XERCES3
   :nocontentsentry:
 
-  Path to Xerces
+  Path to :ref:`deps-xerces`
 
 .. cmake:var:: OPENDDS_HOST_TOOLS
 

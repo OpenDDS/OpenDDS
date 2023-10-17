@@ -1,4 +1,4 @@
-.. news-prs: 4203
+.. news-prs: 4203 4214
 .. news-start-section: Additions
 .. news-rank: 10
 - OpenDDS can now be built using CMake for most common scenarios.
@@ -9,6 +9,7 @@
 .. news-rank: 0
 .. news-start-section: CMake Config Package
 - Added :cmake:func:`opendds_install_interface_files` to help install IDL files and the files generated from them.
+- Added :cmake:var:`OPENDDS_HOST_TOOLS` and :cmake:var:`OPENDDS_ACE_TAO_HOST_TOOLS` to allow cross compiling applications with both MPC and CMake-built OpenDDS.
 .. news-rank: 0
 .. news-start-section: :cmake:func:`opendds_target_sources`:
 .. news-rank: 10
