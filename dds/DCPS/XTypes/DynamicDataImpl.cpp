@@ -1864,7 +1864,7 @@ bool DynamicDataImpl::set_value_to_collection(DDS::MemberId id, const ElementTyp
     return DDS::RETCODE_BAD_PARAMETER;
   }
 
-  // Check the element type
+  // Check the compatibility of the element type.
   const DDS::DynamicType_var elem_type = get_base_type(type_desc_->element_type());
   const TypeKind elem_tk = elem_type->get_kind();
   TypeKind treat_elem_as = elem_tk;
@@ -2341,20 +2341,20 @@ bool DynamicDataImpl::set_complex_to_union(DDS::MemberId id, DDS::DynamicData_va
   return insert_valid_discriminator(md) && insert_complex(id, value);
 }
 
-bool DynamicDataImpl::validate_member_id_collection(DDS::MemberId id, TypeKind tk) const
-{
-  switch (tk) {
-  case TK_SEQUENCE:
-  case TK_ARRAY:
-    return check_index_from_id(tk, id, bound_total(type_desc_));
-  case TK_MAP:
-    if (log_level >= LogLevel::Notice) {
-      ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicDataImpl::validate_member_id_collection::"
-                 " Map is currently not supported\n"));
-    }
-  }
-  return false;
-}
+// bool DynamicDataImpl::validate_member_id_collection(DDS::MemberId id, TypeKind tk) const
+// {
+//   switch (tk) {
+//   case TK_SEQUENCE:
+//   case TK_ARRAY:
+//     return check_index_from_id(tk, id, bound_total(type_desc_));
+//   case TK_MAP:
+//     if (log_level >= LogLevel::Notice) {
+//       ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicDataImpl::validate_member_id_collection::"
+//                  " Map is currently not supported\n"));
+//     }
+//   }
+//   return false;
+// }
 
 bool DynamicDataImpl::set_complex_to_collection(DDS::MemberId id, DDS::DynamicData_var value)
 {
@@ -2411,15 +2411,14 @@ bool DynamicDataImpl::insert_sequence(DDS::MemberId id, const SequenceType& valu
   return container_.sequence_map_.insert(std::make_pair(id, value)).second;
 }
 
+// Check that the member at the given Id has a compatible type.
 template<TypeKind ElementTypeKind>
-bool DynamicDataImpl::check_seqmem_in_struct_and_union(DDS::MemberId id, TypeKind enum_or_bitmask,
-                                                       LBound lower, LBound upper) const
+bool DynamicDataImpl::check_seqmem_in_struct_and_union(DDS::MemberId id, DDS::MemberDescriptor_var& md) const
 {
   DDS::DynamicTypeMember_var member;
   if (type_->get_member(member, id)) {
     return false;
   }
-  DDS::MemberDescriptor_var md;
   if (member->get_descriptor(md) != DDS::RETCODE_OK) {
     return false;
   }
@@ -2437,74 +2436,58 @@ bool DynamicDataImpl::check_seqmem_in_struct_and_union(DDS::MemberId id, TypeKin
 
   const DDS::DynamicType_var elem_type = get_base_type(member_td->element_type());
   const TypeKind elem_tk = elem_type->get_kind();
-  if (elem_tk != ElementTypeKind && elem_tk != enum_or_bitmask) {
+  TypeKind treat_elem_as = elem_tk;
+  if (elem_tk == TK_ENUM && enum_bound(elem_type, treat_elem_as) != DDS::RETCODE_OK) {
+    return false;
+  }
+  if (elem_tk == TK_BITMASK && bitmask_bound(elem_type, treat_elem_as) != DDS::RETCODE_OK) {
     return false;
   }
 
-  if (elem_tk == enum_or_bitmask) {
-    DDS::TypeDescriptor_var elem_td;
-    if (elem_type->get_descriptor(elem_td) != DDS::RETCODE_OK) {
-      return false;
-    }
-    const CORBA::ULong bit_bound = elem_td->bound()[0];
-    if (bit_bound < lower || bit_bound > upper) {
-      return false;
-    }
-  }
-  return true;
+  return treat_elem_as == ElementTypeKind;
 }
 
 template<TypeKind ElementTypeKind, typename SequenceType>
-bool DynamicDataImpl::set_values_to_struct(DDS::MemberId id, const SequenceType& value,
-                                           TypeKind enum_or_bitmask,
-                                           LBound lower, LBound upper)
+bool DynamicDataImpl::set_values_to_struct(DDS::MemberId id, const SequenceType& value)
 {
-  return check_seqmem_in_struct_and_union<ElementTypeKind>(id, enum_or_bitmask, lower, upper) &&
-    insert_sequence(id, value);
+  DDS::MemberDescriptor_var md;
+  return check_seqmem_in_struct_and_union<ElementTypeKind>(id, md)
+    && insert_sequence(id, value);
 }
 
 template<TypeKind ElementTypeKind, typename SequenceType>
-bool DynamicDataImpl::set_values_to_union(DDS::MemberId id, const SequenceType& value,
-                                          TypeKind enum_or_bitmask,
-                                          LBound lower, LBound upper)
+bool DynamicDataImpl::set_values_to_union(DDS::MemberId id, const SequenceType& value)
 {
-  if (id == DISCRIMINATOR_ID) {
-    if (log_level >= LogLevel::Notice) {
-      ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicDataImpl::set_values_to_union:"
-                 " Union discriminator cannot be a sequence\n"));
-    }
+  DDS::MemberDescriptor_var md;
+  if (!check_seqmem_in_struct_and_union<ElementTypeKind>(id, md)) {
     return false;
   }
 
-  // Check the member type against the input type parameters.
-  if (!check_seqmem_in_struct_and_union<ElementTypeKind>(id, enum_or_bitmask, lower, upper)) {
+  bool has_existing_branch = false;
+  DDS::MemberDescriptor_var exising_md;
+  if (!find_selected_union_branch(has_existing_branch, existing_md)) {
     return false;
+  }
+
+  if (has_existing_branch && existing_md->id() == id) {
+    return insert_sequence(id, value);
   }
 
   clear_container();
 
-  DDS::DynamicTypeMember_var member;
-  if (type_->get_member(member, id) != DDS::RETCODE_OK) {
-    return false;
-  }
-  DDS::MemberDescriptor_var md;
-  if (member->get_descriptor(md) != DDS::RETCODE_OK) {
-    return false;
-  }
   return insert_valid_discriminator(md) && insert_sequence(id, value);
 }
 
-template<TypeKind ElementTypeKind>
-bool DynamicDataImpl::check_seqmem_in_sequence_and_array(DDS::MemberId id, CORBA::ULong bound,
-  TypeKind enum_or_bitmask, LBound lower, LBound upper) const
+template<TypeKind ElementTypeKind, typename SequenceType>
+bool DynamicDataImpl::set_values_to_collection(DDS::MemberId id, const SequenceType& value)
 {
-  if (!check_index_from_id(type_->get_kind(), id, bound)) {
-    return false;
+  if (!check_out_of_bound_write(id)) {
+    return DDS::RETCODE_BAD_PARAMETER;
   }
 
+  // Check that the element type is compatible with the input sequence.
   const DDS::DynamicType_var elem_type = get_base_type(type_desc_->element_type());
-  const TypeKind elem_tk = elem_type->get_kind();
-  if (elem_tk != TK_SEQUENCE) {
+  if (elem_type->get_kind() != TK_SEQUENCE) {
     return false;
   }
 
@@ -2512,47 +2495,26 @@ bool DynamicDataImpl::check_seqmem_in_sequence_and_array(DDS::MemberId id, CORBA
   if (elem_type->get_descriptor(elem_td) != DDS::RETCODE_OK) {
     return false;
   }
-
   const DDS::DynamicType_var nested_elem_type = get_base_type(elem_td->element_type());
   const TypeKind nested_elem_tk = nested_elem_type->get_kind();
-  if (nested_elem_tk != ElementTypeKind && nested_elem_tk != enum_or_bitmask) {
+  TypeKind treat_nested_as = nested_elem_tk;
+  if (nested_elem_tk == TK_ENUM && enum_bound(nested_elem_type, treat_nested_as) != DDS::RETCODE_OK) {
     return false;
   }
-  if (nested_elem_tk == enum_or_bitmask) {
-    DDS::TypeDescriptor_var nested_elem_td;
-    if (nested_elem_type->get_descriptor(nested_elem_td) != DDS::RETCODE_OK) {
-      return false;
-    }
-    const CORBA::ULong bit_bound = nested_elem_td->bound()[0];
-    if (bit_bound < lower || bit_bound > upper) {
-      return false;
-    }
+  if (nested_elem_tk == TK_BITMASK && bitmask_bound(nested_elem_type, treat_nested_as) != DDS::RETCODE_OK) {
+    return false;
   }
-  return true;
-}
+  if (nested_elem_tk != ElementTypeKind) {
+    return false;
+  }
 
-template<TypeKind ElementTypeKind, typename SequenceType>
-bool DynamicDataImpl::set_values_to_sequence(DDS::MemberId id, const SequenceType& value,
-                                             TypeKind enum_or_bitmask,
-                                             LBound lower, LBound upper)
-{
-  const DDS::UInt32 bound = type_desc_->bound()[0];
-  return
-    check_seqmem_in_sequence_and_array<ElementTypeKind>(id, bound, enum_or_bitmask, lower, upper) &&
-    validate_member_id_collection(id, TK_SEQUENCE) &&
-    insert_sequence(id, value);
-}
+  // The length must be at most the bound of the element sequence type.
+  const CORBA::ULong bound = bound_total(elem_td);
+  if (bound > 0 && bound < value.length()) {
+    return false;
+  }
 
-template<TypeKind ElementTypeKind, typename SequenceType>
-bool DynamicDataImpl::set_values_to_array(DDS::MemberId id, const SequenceType& value,
-                                          TypeKind enum_or_bitmask,
-                                          LBound lower, LBound upper)
-{
-  const DDS::UInt32 length = bound_total(type_desc_);
-  return
-    check_seqmem_in_sequence_and_array<ElementTypeKind>(id, length, enum_or_bitmask, lower, upper) &&
-    validate_member_id_collection(id, TK_ARRAY) &&
-    insert_sequence(id, value);
+  return insert_sequence(id, value);
 }
 
 template<TypeKind ElementTypeKind, typename SequenceType>
@@ -2565,33 +2527,24 @@ DDS::ReturnCode_t DynamicDataImpl::set_sequence_values(DDS::MemberId id, const S
   }
 
   const TypeKind tk = type_->get_kind();
-  bool good = true;
+  bool good = false;
 
   switch (tk) {
   case TK_STRUCTURE:
-    good = set_values_to_struct<ElementTypeKind>(id, value, enum_or_bitmask, lower, upper);
+    good = set_values_to_struct<ElementTypeKind>(id, value);
     break;
   case TK_UNION:
-    good = set_values_to_union<ElementTypeKind>(id, value, enum_or_bitmask, lower, upper);
+    good = set_values_to_union<ElementTypeKind>(id, value);
     break;
   case TK_SEQUENCE:
-    good = set_values_to_sequence<ElementTypeKind>(id, value, enum_or_bitmask, lower, upper);
-    break;
   case TK_ARRAY:
-    good = set_values_to_array<ElementTypeKind>(id, value, enum_or_bitmask, lower, upper);
+    good = set_values_to_collection<ElementTypeKind>(id, value);
     break;
-  case TK_MAP:
-    if (log_level >= LogLevel::Notice) {
-      ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicDataImpl::set_sequence_values:"
-                 " Map is currently not supported\n"));
-    }
-    return DDS::RETCODE_ERROR;
   default:
     if (log_level >= LogLevel::Notice) {
       ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicDataImpl::set_sequence_values:"
                  " Write to unsupported type (%C)\n", typekind_to_string(tk)));
     }
-    return DDS::RETCODE_ERROR;
   }
 
   if (!good && log_level >= LogLevel::Notice) {
