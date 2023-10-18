@@ -1,0 +1,5 @@
+.. news-prs: 4254
+
+.. news-start-section: Fixes
+- RtpsRelay: fixed bug in record_activity's use of remove in GuidAddrSet
+.. news-end-section

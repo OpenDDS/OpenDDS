@@ -1,0 +1,5 @@
+.. news-prs: 4265
+
+.. news-start-section: Fixes
+- Fix null pointer when participant is absent when updating locators
+.. news-end-section
