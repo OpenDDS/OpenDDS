@@ -143,6 +143,8 @@ if(OPENDDS_BUILD_TESTS)
   endif()
   add_subdirectory(tests/cmake/idl_compiler_tests)
   add_subdirectory(tests/cmake/include_subdir)
+  add_subdirectory(tests/DCPS/Compiler/maps)
+  add_subdirectory(tests/DCPS/Maps)
   # TODO: This test always builds shared libraries and linker complains about
   # ACE/TAO libs lacking -fPIC when ACE is static.
   if(OPENDDS_OWNERSHIP_PROFILE AND NOT OPENDDS_STATIC)
