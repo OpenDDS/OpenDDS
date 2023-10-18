@@ -766,7 +766,7 @@ Dependencies
 .. cmake:var:: OPENDDS_JAVA
   :nocontentsentry:
 
-  Path to :ref:`deps-gtest`
+  Path to :ref:`deps-java`
 
 .. cmake:var:: OPENDDS_QT
   :nocontentsentry:
@@ -806,6 +806,7 @@ Features
 
   ACE/TAO and OpenDDS were built with C++11 or later.
   Default depends on the compiler being used.
+  Has no effect when building OpenDDS using CMake.
 
 .. cmake:var:: OPENDDS_DEBUG
   :nocontentsentry:
@@ -824,6 +825,7 @@ Features
 
   ``.inl`` files are included in header files.
   Default is ``ON``
+  Has no effect when building OpenDDS using CMake.
 
 .. cmake:var:: OPENDDS_VERSIONED_NAMEPSACE
   :nocontentsentry:
