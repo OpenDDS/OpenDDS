@@ -2,7 +2,7 @@
 # file or http://www.opendds.org/license.html for details.
 #
 # Definitions for the OpenDDS libraries that are shared between the CMake
-# config package for a MPC-built OpenDDS and a CMake-built OpenDDS.
+# config package for an MPC-built OpenDDS and a CMake-built OpenDDS.
 
 if(_OPENDDS_GROUP_CMAKE)
   return()

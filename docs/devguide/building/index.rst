@@ -576,7 +576,8 @@ These are the variables that are exclusive to building OpenDDS with CMake:
 
 .. cmake:var:: OPENDDS_JUST_BUILD_HOST_TOOLS
 
-  If true, just builds ``opendds_idl``.
+  If true, ``opendds_idl`` is the only thing built for OpenDDS.
+  If ACE/TAO is also being built, then ``ace_gperf``, ``tao_idl``, and their dependencies are also built.
   The build directory for this can be passed to :cmake:var:`OPENDDS_HOST_TOOLS`.
 
 .. cmake:var:: OPENDDS_ACE_TAO_SRC
@@ -648,6 +649,11 @@ Installation
 Once built, OpenDDS can be installed using `cmake --install <https://cmake.org/cmake/help/latest/manual/cmake.1.html#install-a-project>`__.
 Currently ACE/TAO has to be installed separately and this is only possible with GNU Make.
 
+Using a CMake-built OpenDDS
+===========================
+
+After building and optionally installing OpenDDS, it can be used through the same :doc:`CMake package <cmake>` as an MPC-built OpenDDS.
+
 .. _cmake-running-tests:
 
 Running Tests
@@ -665,7 +671,7 @@ Known Limitations
 
 - ACE/TAO can't be automatically built unless there is explicit support for the platform.
   Currently this only exists for Windows, Linux, macOS, and Android.
-  All other platforms will require configuring and building ACE/TAO separately :cmake:var:`OPENDDS_ACE`
+  All other platforms will require configuring and building ACE/TAO separately and passing the path using :cmake:var:`OPENDDS_ACE`.
 
   - See https://www.dre.vanderbilt.edu/~schmidt/DOC_ROOT/ACE/ACE-INSTALL.html for how to manually build ACE/TAO.
 
