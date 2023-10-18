@@ -309,6 +309,8 @@ private:
   template<TypeKind ValueTypeKind, typename ValueType>
   DDS::ReturnCode_t get_value_from_union(ValueType& value, DDS::MemberId id);
 
+  bool check_out_of_bound_read(DDS::MemberId id) const;
+
   template<TypeKind ValueTypeKind, typename ValueType>
   DDS::ReturnCode_t get_value_from_collection(ValueType& value, DDS::MemberId id);
 
@@ -342,8 +344,15 @@ private:
   bool set_union_discriminator_helper(DDS::DynamicType_var disc_type, CORBA::Long disc_val,
                                       const char* func_name) const;
 
+  bool get_union_member_type(DDS::MemberId id, DDS::DynamicType_var& member_type,
+                             DDS::MemberDescriptor_var& md) const;
+  bool find_selected_union_branch(bool& has_existing_branch,
+                                  DDS::MemberDescriptor_var& existing_md) const;
+
   template<TypeKind MemberTypeKind, typename MemberType>
   bool set_value_to_union(DDS::MemberId id, const MemberType& value);
+
+  bool check_out_of_bound_write(DDS::MemberId id) const;
 
   template<TypeKind ElementTypeKind, typename ElementType>
   bool set_value_to_collection(DDS::MemberId id, const ElementType& value);
@@ -364,7 +373,7 @@ private:
   {
     return id;
   }
-  
+
   bool check_index_from_id(TypeKind tk, DDS::MemberId id, CORBA::ULong bound) const;
   static bool is_valid_discriminator_type(TypeKind tk);
   bool is_default_member_selected(CORBA::Long disc_val, DDS::MemberId default_id) const;
@@ -374,7 +383,7 @@ private:
 
   bool set_complex_to_struct(DDS::MemberId id, DDS::DynamicData_var value);
   bool set_complex_to_union(DDS::MemberId id, DDS::DynamicData_var value);
-  bool set_complex_to_collection(DDS::MemberId id, DDS::DynamicData_var value, TypeKind tk);
+  bool set_complex_to_collection(DDS::MemberId id, DDS::DynamicData_var value);
   bool validate_member_id_collection(DDS::MemberId id, TypeKind collection_tk) const;
 
   DDS::ReturnCode_t clear_value_i(DDS::MemberId id, const DDS::DynamicType_var& member_type);
