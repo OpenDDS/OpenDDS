@@ -163,11 +163,10 @@ module DDS {
 
   local interface DynamicDataFactoryInterf {
     // Implemented in C++
-    //static DynamicDataFactory get_instance();
-    // Not Implemented
-    //static DDS::ReturnCode_t delete_instance();
+    // static DynamicDataFactory get_instance();
+    // Implemented in C++
+    // static DDS::ReturnCode_t delete_instance();
     DynamicData create_data(in DynamicType type);
-    /// This is a NOP in OpenDDS
     DDS::ReturnCode_t delete_data(in DynamicData data);
   };
 

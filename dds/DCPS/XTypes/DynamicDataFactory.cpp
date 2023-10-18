@@ -22,6 +22,11 @@ DynamicDataFactory_ptr DynamicDataFactory::get_instance()
   return ACE_Singleton<DynamicDataFactory, ACE_SYNCH_MUTEX>::instance();
 }
 
+ReturnCode_t DynamicDataFactory::delete_instance()
+{
+  return RETCODE_OK;
+}
+
 DynamicData_ptr DynamicDataFactory::create_data(DynamicType_ptr type)
 {
   return new OpenDDS::XTypes::DynamicDataImpl(type);
