@@ -115,7 +115,7 @@ namespace {
       indent << "for (" << (use_cxx11 ? "size_t " : "unsigned int ") << idx << " = 0; "
         "value_reader.pairs_remaining(); ++" << idx << ") {\n";
 
-    auto key_name = scoped(map->key_type()->name());
+    std::string key_name = scoped(map->key_type()->name());
 
     be_global->impl_ <<
       indent << "  if (!value_reader.begin_pair()) return false;\n";
