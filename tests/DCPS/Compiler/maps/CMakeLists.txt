@@ -39,17 +39,13 @@ if(NOT ("C++11" IN_LIST mappings))
 endif()
 
 set(maps_test "${target_prefix}test")
-add_executable(${maps_test}
+add_executable(compiler_maps_exe
   "${src}/main.cpp"
 )
-set_target_properties(${maps_test} PROPERTIES
-  OUTPUT_NAME ${maps_test}
+set_target_properties(compiler_maps_exe PROPERTIES
+  # OUTPUT_NAME ${maps_test}
   RUNTIME_OUTPUT_DIRECTORY "${dst}"
 )
-target_link_libraries(${maps_test} ${opendds_libs} ${idl})
+target_link_libraries(compiler_maps_exe ${opendds_libs} ${idl})
 
-add_test(${maps_test} ${maps_test})
-
-# # run_test.pl
-# configure_file("${src}/run_test.pl" "." COPYONLY)
-# opendds_add_test(COMMAND perl run_test.pl EXTRA_LIB_DIRS "${idl_dir}")
+add_test(compiler_maps_test compiler_maps_exe)
