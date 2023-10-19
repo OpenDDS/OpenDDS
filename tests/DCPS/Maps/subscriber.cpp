@@ -34,7 +34,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   type_support->register_type(participant, "");
   CORBA::String_var type_name = type_support->get_type_name();
 
-  DDS::Topic_var topic = participant->create_topic(MapsTest::MESSAGE_TOPIC_NAME,
+  DDS::Topic_var topic = participant->create_topic(MapsTest::MESSAGE_TOPIC_NAME.c_str(),
                                                    type_name,
                                                    TOPIC_QOS_DEFAULT,
                                                    0,
@@ -76,7 +76,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
                               DDS::ANY_SAMPLE_STATE, DDS::ANY_VIEW_STATE, DDS::ANY_INSTANCE_STATE);
     for (unsigned int idx = 0; idx != messages.length(); ++idx) {
       if (infos[idx].valid_data) {
-        ACE_DEBUG((LM_DEBUG, "received {%d, %d}\n", messages[idx].intIntMap[10], messages[idx].intIntMap[11]));
+        ACE_DEBUG((LM_DEBUG, "received {%d, %d}\n", messages[idx].intIntMap()[10], messages[idx].intIntMap()[11]));
         distributed_condition_set->post(MapsTest::SUBSCRIBER, MapsTest::SUBSCRIBER_DONE);
         done = true;
       }
