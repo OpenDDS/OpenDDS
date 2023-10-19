@@ -7,6 +7,9 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+env:
+  VCPKG_GIT_COMMIT: 8eb57355a4ffb410a2e94c07b4dca2dffbee8e50
+
 jobs:
 
   Linux:
@@ -74,7 +77,7 @@ jobs:
       uses: lukka/run-vcpkg@v11
       with:
         vcpkgDirectory: '${{ github.workspace }}/vcpkg-qt'
-        vcpkgGitCommitId: f6a5d4e8eb7476b8d7fc12a56dff300c1c986131
+        vcpkgGitCommitId: '${{ env.VCPKG_GIT_COMMIT }}'
         runVcpkgInstall: true
     - name: checkout MPC
       uses: actions/checkout@v4
@@ -88,7 +91,7 @@ jobs:
       run: |
         cd OpenDDS
         perl configure --optimize --no-debug --static --tests ^
-          "--qt=%VCPKG_ROOT%/installed/x64-windows" ^
+          "--qt=%VCPKG_INSTALLED_DIR%/x64-windows" ^
           "--mpcopts=-value_template platforms=x64" ^
           "--mpcopts=-value_template configurations=Release" ^
           "--mpcopts=-value_template Release::runtime_library=MultiThreadedDLL"

@@ -64,6 +64,7 @@ env:
   TRIGGERING_COMMIT: ${{ github.event.pull_request.head.sha || github.sha }}
   VCPKG_INSTALLED_DIR: ${{ github.workspace }}\vcpkg\installed
   CTEST_OUTPUT_ON_FAILURE: ON
+  VCPKG_GIT_COMMIT: 8eb57355a4ffb410a2e94c07b4dca2dffbee8e50
 
 jobs:
 
@@ -6345,7 +6346,7 @@ jobs:
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       uses: lukka/run-vcpkg@v11
       with:
-        vcpkgGitCommitId: f6a5d4e8eb7476b8d7fc12a56dff300c1c986131
+        vcpkgGitCommitId: '${{ env.VCPKG_GIT_COMMIT }}'
         runVcpkgInstall: true
     - name: checkout MPC
       if: steps.cache-artifact.outputs.cache-hit != 'true'
@@ -6402,7 +6403,7 @@ jobs:
     - name: install openssl & xerces-c
       uses: lukka/run-vcpkg@v11
       with:
-        vcpkgGitCommitId: f6a5d4e8eb7476b8d7fc12a56dff300c1c986131
+        vcpkgGitCommitId: '${{ env.VCPKG_GIT_COMMIT }}'
         runVcpkgInstall: true
     - name: checkout MPC
       uses: actions/checkout@v4
@@ -6491,7 +6492,7 @@ jobs:
     - name: install openssl & xerces-c
       uses: lukka/run-vcpkg@v11
       with:
-        vcpkgGitCommitId: f6a5d4e8eb7476b8d7fc12a56dff300c1c986131
+        vcpkgGitCommitId: '${{ env.VCPKG_GIT_COMMIT }}'
         runVcpkgInstall: true
     - name: checkout MPC
       uses: actions/checkout@v4
@@ -6620,7 +6621,7 @@ jobs:
     - name: install openssl & xerces-c
       uses: lukka/run-vcpkg@v11
       with:
-        vcpkgGitCommitId: f6a5d4e8eb7476b8d7fc12a56dff300c1c986131
+        vcpkgGitCommitId: '${{ env.VCPKG_GIT_COMMIT }}'
         runVcpkgInstall: true
     - name: checkout MPC
       uses: actions/checkout@v4
@@ -7074,7 +7075,7 @@ jobs:
     - name: install openssl & xerces-c
       uses: lukka/run-vcpkg@v11
       with:
-        vcpkgGitCommitId: f6a5d4e8eb7476b8d7fc12a56dff300c1c986131
+        vcpkgGitCommitId: '${{ env.VCPKG_GIT_COMMIT }}'
         runVcpkgInstall: true
     - name: checkout MPC
       uses: actions/checkout@v4
@@ -7246,7 +7247,7 @@ jobs:
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       uses: lukka/run-vcpkg@v11
       with:
-        vcpkgGitCommitId: f6a5d4e8eb7476b8d7fc12a56dff300c1c986131
+        vcpkgGitCommitId: '${{ env.VCPKG_GIT_COMMIT }}'
         runVcpkgInstall: true
     - name: checkout MPC
       if: steps.cache-artifact.outputs.cache-hit != 'true'
@@ -7303,7 +7304,7 @@ jobs:
     - name: install openssl & xerces-c
       uses: lukka/run-vcpkg@v11
       with:
-        vcpkgGitCommitId: f6a5d4e8eb7476b8d7fc12a56dff300c1c986131
+        vcpkgGitCommitId: '${{ env.VCPKG_GIT_COMMIT }}'
         runVcpkgInstall: true
     - name: checkout MPC
       uses: actions/checkout@v4
@@ -7392,7 +7393,7 @@ jobs:
     - name: install openssl & xerces-c
       uses: lukka/run-vcpkg@v11
       with:
-        vcpkgGitCommitId: f6a5d4e8eb7476b8d7fc12a56dff300c1c986131
+        vcpkgGitCommitId: '${{ env.VCPKG_GIT_COMMIT }}'
         runVcpkgInstall: true
     - name: checkout MPC
       uses: actions/checkout@v4
@@ -7521,7 +7522,7 @@ jobs:
     - name: install openssl & xerces-c
       uses: lukka/run-vcpkg@v11
       with:
-        vcpkgGitCommitId: f6a5d4e8eb7476b8d7fc12a56dff300c1c986131
+        vcpkgGitCommitId: '${{ env.VCPKG_GIT_COMMIT }}'
         runVcpkgInstall: true
     - name: checkout MPC
       uses: actions/checkout@v4
@@ -7973,7 +7974,7 @@ jobs:
     - name: install openssl & xerces-c
       uses: lukka/run-vcpkg@v11
       with:
-        vcpkgGitCommitId: f6a5d4e8eb7476b8d7fc12a56dff300c1c986131
+        vcpkgGitCommitId: '${{ env.VCPKG_GIT_COMMIT }}'
         runVcpkgInstall: true
     - name: checkout MPC
       uses: actions/checkout@v4
@@ -8155,7 +8156,7 @@ jobs:
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       uses: lukka/run-vcpkg@v11
       with:
-        vcpkgGitCommitId: f6a5d4e8eb7476b8d7fc12a56dff300c1c986131
+        vcpkgGitCommitId: '${{ env.VCPKG_GIT_COMMIT }}'
         runVcpkgInstall: true
     - name: checkout MPC
       if: steps.cache-artifact.outputs.cache-hit != 'true'
@@ -8224,7 +8225,7 @@ jobs:
     - name: install xerces-c
       uses: lukka/run-vcpkg@v11
       with:
-        vcpkgGitCommitId: f6a5d4e8eb7476b8d7fc12a56dff300c1c986131
+        vcpkgGitCommitId: '${{ env.VCPKG_GIT_COMMIT }}'
         runVcpkgInstall: true
     - name: checkout MPC
       uses: actions/checkout@v4
@@ -8340,7 +8341,7 @@ jobs:
     - name: install xerces-c
       uses: lukka/run-vcpkg@v11
       with:
-        vcpkgGitCommitId: f6a5d4e8eb7476b8d7fc12a56dff300c1c986131
+        vcpkgGitCommitId: '${{ env.VCPKG_GIT_COMMIT }}'
         runVcpkgInstall: true
     - name: checkout MPC
       uses: actions/checkout@v4
@@ -8479,7 +8480,7 @@ jobs:
     - name: install xerces-c
       uses: lukka/run-vcpkg@v11
       with:
-        vcpkgGitCommitId: f6a5d4e8eb7476b8d7fc12a56dff300c1c986131
+        vcpkgGitCommitId: '${{ env.VCPKG_GIT_COMMIT }}'
         runVcpkgInstall: true
     - name: checkout MPC
       uses: actions/checkout@v4
@@ -8637,7 +8638,7 @@ jobs:
     - name: install openssl & xerces-c
       uses: lukka/run-vcpkg@v11
       with:
-        vcpkgGitCommitId: f6a5d4e8eb7476b8d7fc12a56dff300c1c986131
+        vcpkgGitCommitId: '${{ env.VCPKG_GIT_COMMIT }}'
         runVcpkgInstall: true
     - name: checkout MPC
       uses: actions/checkout@v4
@@ -8790,7 +8791,7 @@ jobs:
     - name: install xerces-c
       uses: lukka/run-vcpkg@v11
       with:
-        vcpkgGitCommitId: f6a5d4e8eb7476b8d7fc12a56dff300c1c986131
+        vcpkgGitCommitId: '${{ env.VCPKG_GIT_COMMIT }}'
         runVcpkgInstall: true
     - name: checkout MPC
       uses: actions/checkout@v4
@@ -8951,7 +8952,7 @@ jobs:
       id: runvcpkg
       uses: lukka/run-vcpkg@v11
       with:
-        vcpkgGitCommitId: f6a5d4e8eb7476b8d7fc12a56dff300c1c986131
+        vcpkgGitCommitId: '${{ env.VCPKG_GIT_COMMIT }}'
         runVcpkgInstall: true
     - name: checkout WinFlexBison
       if: steps.cache-artifact.outputs.cache-hit != 'true'
@@ -9044,7 +9045,7 @@ jobs:
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       uses: lukka/run-vcpkg@v11
       with:
-        vcpkgGitCommitId: f6a5d4e8eb7476b8d7fc12a56dff300c1c986131
+        vcpkgGitCommitId: '${{ env.VCPKG_GIT_COMMIT }}'
         runVcpkgInstall: true
     - name: checkout MPC
       if: steps.cache-artifact.outputs.cache-hit != 'true'
@@ -9110,7 +9111,7 @@ jobs:
     - name: install openssl & xerces-c
       uses: lukka/run-vcpkg@v11
       with:
-        vcpkgGitCommitId: f6a5d4e8eb7476b8d7fc12a56dff300c1c986131
+        vcpkgGitCommitId: '${{ env.VCPKG_GIT_COMMIT }}'
         runVcpkgInstall: true
     - name: checkout MPC
       uses: actions/checkout@v4
@@ -9318,7 +9319,7 @@ jobs:
     - name: install xerces-c
       uses: lukka/run-vcpkg@v11
       with:
-        vcpkgGitCommitId: f6a5d4e8eb7476b8d7fc12a56dff300c1c986131
+        vcpkgGitCommitId: '${{ env.VCPKG_GIT_COMMIT }}'
         runVcpkgInstall: true
     - name: checkout MPC
       uses: actions/checkout@v4
@@ -9476,7 +9477,7 @@ jobs:
     - name: install xerces-c
       uses: lukka/run-vcpkg@v11
       with:
-        vcpkgGitCommitId: f6a5d4e8eb7476b8d7fc12a56dff300c1c986131
+        vcpkgGitCommitId: '${{ env.VCPKG_GIT_COMMIT }}'
         runVcpkgInstall: true
     - name: checkout MPC
       uses: actions/checkout@v4
@@ -9620,7 +9621,7 @@ jobs:
     - name: install xerces-c
       uses: lukka/run-vcpkg@v11
       with:
-        vcpkgGitCommitId: f6a5d4e8eb7476b8d7fc12a56dff300c1c986131
+        vcpkgGitCommitId: '${{ env.VCPKG_GIT_COMMIT }}'
         runVcpkgInstall: true
     - name: checkout MPC
       uses: actions/checkout@v4
@@ -9805,7 +9806,7 @@ jobs:
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       uses: lukka/run-vcpkg@v11
       with:
-        vcpkgGitCommitId: f6a5d4e8eb7476b8d7fc12a56dff300c1c986131
+        vcpkgGitCommitId: '${{ env.VCPKG_GIT_COMMIT }}'
         runVcpkgInstall: true
     - name: checkout MPC
       if: steps.cache-artifact.outputs.cache-hit != 'true'
@@ -9866,7 +9867,7 @@ jobs:
     - name: install openssl & xerces-c
       uses: lukka/run-vcpkg@v11
       with:
-        vcpkgGitCommitId: f6a5d4e8eb7476b8d7fc12a56dff300c1c986131
+        vcpkgGitCommitId: '${{ env.VCPKG_GIT_COMMIT }}'
         runVcpkgInstall: true
     - name: remove unused files
       shell: bash
@@ -9956,7 +9957,7 @@ jobs:
     - name: install openssl & xerces-c
       uses: lukka/run-vcpkg@v11
       with:
-        vcpkgGitCommitId: f6a5d4e8eb7476b8d7fc12a56dff300c1c986131
+        vcpkgGitCommitId: '${{ env.VCPKG_GIT_COMMIT }}'
         runVcpkgInstall: true
     - name: checkout MPC
       uses: actions/checkout@v4
@@ -10088,7 +10089,7 @@ jobs:
     - name: install openssl & xerces-c
       uses: lukka/run-vcpkg@v11
       with:
-        vcpkgGitCommitId: f6a5d4e8eb7476b8d7fc12a56dff300c1c986131
+        vcpkgGitCommitId: '${{ env.VCPKG_GIT_COMMIT }}'
         runVcpkgInstall: true
     - name: checkout MPC
       uses: actions/checkout@v4
@@ -10221,7 +10222,7 @@ jobs:
     - name: install xerces-c
       uses: lukka/run-vcpkg@v11
       with:
-        vcpkgGitCommitId: f6a5d4e8eb7476b8d7fc12a56dff300c1c986131
+        vcpkgGitCommitId: '${{ env.VCPKG_GIT_COMMIT }}'
         runVcpkgInstall: true
     - name: checkout MPC
       uses: actions/checkout@v4
@@ -10306,7 +10307,7 @@ jobs:
     - name: install openssl & xerces-c
       uses: lukka/run-vcpkg@v11
       with:
-        vcpkgGitCommitId: f6a5d4e8eb7476b8d7fc12a56dff300c1c986131
+        vcpkgGitCommitId: '${{ env.VCPKG_GIT_COMMIT }}'
         runVcpkgInstall: true
     - name: checkout MPC
       uses: actions/checkout@v4
@@ -10467,7 +10468,7 @@ jobs:
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       uses: lukka/run-vcpkg@v11
       with:
-        vcpkgGitCommitId: f6a5d4e8eb7476b8d7fc12a56dff300c1c986131
+        vcpkgGitCommitId: '${{ env.VCPKG_GIT_COMMIT }}'
         runVcpkgInstall: true
     - name: checkout MPC
       if: steps.cache-artifact.outputs.cache-hit != 'true'
@@ -10524,7 +10525,7 @@ jobs:
     - name: install openssl & xerces-c
       uses: lukka/run-vcpkg@v11
       with:
-        vcpkgGitCommitId: f6a5d4e8eb7476b8d7fc12a56dff300c1c986131
+        vcpkgGitCommitId: '${{ env.VCPKG_GIT_COMMIT }}'
         runVcpkgInstall: true
     - name: checkout MPC
       uses: actions/checkout@v4
@@ -10613,7 +10614,7 @@ jobs:
     - name: install openssl & xerces-c
       uses: lukka/run-vcpkg@v11
       with:
-        vcpkgGitCommitId: f6a5d4e8eb7476b8d7fc12a56dff300c1c986131
+        vcpkgGitCommitId: '${{ env.VCPKG_GIT_COMMIT }}'
         runVcpkgInstall: true
     - name: checkout MPC
       uses: actions/checkout@v4
@@ -10742,7 +10743,7 @@ jobs:
     - name: install openssl & xerces-c
       uses: lukka/run-vcpkg@v11
       with:
-        vcpkgGitCommitId: f6a5d4e8eb7476b8d7fc12a56dff300c1c986131
+        vcpkgGitCommitId: '${{ env.VCPKG_GIT_COMMIT }}'
         runVcpkgInstall: true
     - name: checkout MPC
       uses: actions/checkout@v4
@@ -10889,7 +10890,7 @@ jobs:
     - name: install openssl & xerces-c
       uses: lukka/run-vcpkg@v11
       with:
-        vcpkgGitCommitId: f6a5d4e8eb7476b8d7fc12a56dff300c1c986131
+        vcpkgGitCommitId: '${{ env.VCPKG_GIT_COMMIT }}'
         runVcpkgInstall: true
     - name: checkout MPC
       uses: actions/checkout@v4
@@ -11033,7 +11034,7 @@ jobs:
     - name: install openssl & xerces-c
       uses: lukka/run-vcpkg@v11
       with:
-        vcpkgGitCommitId: f6a5d4e8eb7476b8d7fc12a56dff300c1c986131
+        vcpkgGitCommitId: '${{ env.VCPKG_GIT_COMMIT }}'
         runVcpkgInstall: true
     - name: checkout MPC
       uses: actions/checkout@v4
@@ -12872,7 +12873,7 @@ jobs:
     - name: install openssl & xerces-c
       uses: lukka/run-vcpkg@v11
       with:
-        vcpkgGitCommitId: f6a5d4e8eb7476b8d7fc12a56dff300c1c986131
+        vcpkgGitCommitId: '${{ env.VCPKG_GIT_COMMIT }}'
         runVcpkgInstall: true
     - name: Checkout OpenDDS
       uses: actions/checkout@v4
