@@ -5,14 +5,6 @@ enable_testing()
 find_package(OpenDDS REQUIRED)
 include(opendds_testing)
 
-if(NOT OPENDDS_OWNERSHIP_PROFILE)
-  message(FATAL_ERROR "This test requires OpenDDS to be built with Ownership Profile enabled")
-endif()
-
-# if(NOT OPENDDS_CXX11)
-#   message(FATAL_ERROR "This test requires OpenDDS to be built with C++11 Support")
-# endif()
-
 set(target_prefix "${PROJECT_NAME}_")
 set(src "${CMAKE_CURRENT_SOURCE_DIR}")
 set(dst ${CMAKE_CURRENT_BINARY_DIR})
