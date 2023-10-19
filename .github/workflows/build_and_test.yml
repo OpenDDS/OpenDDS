@@ -12712,7 +12712,7 @@ jobs:
     - name: Run Tests
       run: |
         cd OpenDDS/build
-        ctest
+        ctets --output-on-failure
 
   build_cmake_u22_stat:
 
@@ -12753,7 +12753,7 @@ jobs:
     - name: Run Tests
       run: |
         cd OpenDDS/build
-        ctest
+        ctets --output-on-failure
 
   build_cmake_u22_no_features:
 
@@ -12802,7 +12802,7 @@ jobs:
     - name: Run Tests
       run: |
         cd OpenDDS/build
-        ctest
+        ctets --output-on-failure
 
   build_cmake_u22_android29:
 
@@ -12924,7 +12924,7 @@ jobs:
       shell: cmd
       run: |
         cd OpenDDS\build
-        ctest -C Debug
+        ctets --output-on-failure -C Debug
 
   build_cmake_w22_stat:
 
@@ -12970,4 +12970,4 @@ jobs:
       shell: cmd
       run: |
         cd OpenDDS\build
-        ctest -C Debug
+        ctets --output-on-failure -C Debug
