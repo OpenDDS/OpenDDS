@@ -921,7 +921,7 @@ namespace {
     const std::string named_as = anonymous ? anonymous->scoped_type_ : scoped(tdname);
     RefWrapper base_wrapper(map, named_as, "map");
     base_wrapper.nested_key_only_ = nested_key_only;
-    base_wrapper.done();
+
     NamespaceGuard ng(!anonymous);
 
     AST_Type* key = resolveActualType(map->key_type());
@@ -947,7 +947,7 @@ namespace {
       val_cxx_elem = scoped(val->name());
     }
 
-    base_wrapper.generate_tag();
+    RefWrapper (base_wrapper).done().generate_tag();
 
     {
       Intro intro;
