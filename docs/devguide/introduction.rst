@@ -1,8 +1,8 @@
 .. _introduction:
 
-############
-Introduction
-############
+#######################
+Introduction to OpenDDS
+#######################
 
 .. _introduction--what-is-opendds:
 
@@ -20,7 +20,28 @@ OpenDDS is implemented in C++ and contains support for :doc:`Java <java_bindings
 Users in the OpenDDS community have contributed and maintain bindings for other languages that include `C# <https://www.openddsharp.com/>`__, `Node.js <https://github.com/OpenDDS/node-opendds>`__, and `Python <https://github.com/OpenDDS/pyopendds>`__.
 OpenDDS is sponsored by the OpenDDS Foundation and is available via https://opendds.org and https://github.com/OpenDDS/OpenDDS.
 
-There is an FAQ available at https://opendds.org/faq.html.
+***************
+Licensing Terms
+***************
+
+..
+    Sect<0.2>
+
+OpenDDS is *open source software*.
+The source code may be freely downloaded and is open for inspection, review, comment, and improvement.
+Copies may be freely installed across all your systems and those of your customers.
+There is no charge for development or run-time licenses.
+The source code is designed to be compiled, and used, across a wide variety of hardware and operating systems architectures.
+You may modify it for your own needs, within the terms of the license agreements.
+You must not copyright OpenDDS software.
+For details of the licensing terms, see the file named :ghfile:`LICENSE` that is included in the OpenDDS source code distribution or visit https://opendds.org/about/license.html.
+
+OpenDDS also utilizes other open source software products including MPC (Make Project Creator), ACE (the ADAPTIVE Communication Environment), and TAO (The ACE ORB).
+
+OpenDDS is open source and the development team welcomes contributions of code, tests, documentation, and ideas.
+Active participation by users ensures a robust implementation.
+Contact the OpenDDS Foundation if you are interested in contributing to the development of OpenDDS.
+Please note that any code or documentation that is contributed to and becomes part of the OpenDDS open source code base is subject to the same licensing terms as the rest of the OpenDDS code base.
 
 .. _specs:
 
@@ -117,304 +138,14 @@ This specification defines an :term:`IDL` to Java mapping and is used for the :r
 
 The version OpenDDS uses is :omgspec:`java`.
 
-***************
-Licensing Terms
-***************
-
-..
-    Sect<0.2>
-
-OpenDDS is *open source software*.
-The source code may be freely downloaded and is open for inspection, review, comment, and improvement.
-Copies may be freely installed across all your systems and those of your customers.
-There is no charge for development or run-time licenses.
-The source code is designed to be compiled, and used, across a wide variety of hardware and operating systems architectures.
-You may modify it for your own needs, within the terms of the license agreements.
-You must not copyright OpenDDS software.
-For details of the licensing terms, see the file named :ghfile:`LICENSE` that is included in the OpenDDS source code distribution or visit https://opendds.org/about/license.html.
-
-OpenDDS also utilizes other open source software products including MPC (Make Project Creator), ACE (the ADAPTIVE Communication Environment), and TAO (The ACE ORB).
-
-OpenDDS is open source and the development team welcomes contributions of code, tests, documentation, and ideas.
-Active participation by users ensures a robust implementation.
-Contact the OpenDDS Foundation if you are interested in contributing to the development of OpenDDS.
-Please note that any code or documentation that is contributed to and becomes part of the OpenDDS open source code base is subject to the same licensing terms as the rest of the OpenDDS code base.
-
-****************
-About This Guide
-****************
-
-..
-    Sect<0.3>
-
-This Developer's Guide corresponds to OpenDDS version |release|.
-This guide is primarily focused on the specifics of using and configuring OpenDDS to build distributed publish-subscribe applications.
-While it does give a general overview of the OMG Data Distribution Service, this guide is not intended to provide comprehensive coverage of the specification.
-The intent of this guide is to help you become proficient with OpenDDS as quickly as possible.
-Readers are encouraged to submit corrections to this guide using a GitHub pull request.
-The source for this guide can be found at :ghfile:`docs/devguide` and :doc:`/internal/docs` contains guidance for editing and building it.
-
-Conventions
-===========
-
-..
-    Sect<0.4.2>
-
-This guide uses the following conventions:
-
-.. list-table::
-   :header-rows: 0
-
-   * - ``Fixed pitch text``
-
-     - Indicates example code or information a user would enter using a keyboard.
-
-   * - *Italic text*
-
-     - Indicates a point of emphasis.
-
-   * - ...
-
-     - An ellipsis indicates a section of omitted text.
-
-********
-Examples
-********
-
-..
-    Sect<0.5>
-
-The examples in this guide are intended for the learning of the reader and should not be considered to be "production-ready" code.
-In particular, error handling is sometimes kept to a minimum to help the reader focus on the particular feature or technique that is being presented in the example.
-The source code for all these examples is available as part of the OpenDDS source code distribution in the :ghfile:`DevGuideExamples` directory.
-MPC files are provided with the examples for generating build-tool specific files, such as GNU Makefiles or Visual C++ project and solution files.
-To run an example, execute the ``run_test.pl`` Perl script.
-
-..
-    Sect<1>
-
-.. _introduction--dcps-overview:
-
-**********************************************
-Data-Centric Publish-Subscribe (DCPS) Overview
-**********************************************
-
-..
-    Sect<1.1>
-
-Data-Centric Publish-Subscribe (DCPS) is the application model defined by the DDS specification.
-This section describes the main concepts and entities of the DCPS API and discuss how they interact and work together.
-
-.. _introduction--basic-concepts:
-
-Basic Concepts
-==============
-
-..
-    Sect<1.1.1>
-
-This is an overview of the DDS DCPS layer:
-
-.. figure:: images/domain.png
-
-  DCPS Conceptual Overview
-
-The following subsections define the concepts shown in the diagram.
-
-.. _introduction--domain:
-
-Domain
-------
-
-..
-    Sect<1.1.1.1>
-
-The *domain* is the fundamental partitioning unit within DCPS.
-Each of the other entities belongs to a domain and can only interact with other entities in that same domain.
-Application code is free to interact with multiple domains but must do so via separate entities that belong to the different domains.
-
-.. _introduction--domainparticipant:
-
-DomainParticipant
------------------
-
-..
-    Sect<1.1.1.2>
-
-A *domain participant* is the entry-point for an application to interact within a particular domain.
-The domain participant is a factory for many of the objects involved in writing or reading data.
-
-.. _introduction--topic:
-
-Topic
------
-
-..
-    Sect<1.1.1.3>
-
-The *topic* is the fundamental means of interaction between publishing and subscribing applications.
-Each topic has a unique name within the domain and a specific data type that it publishes.
-Each topic data type can specify zero or more fields that make up its *key*.
-When publishing data, the publishing process always specifies the topic.
-Subscribers request data via the topic.
-In DCPS terminology you publish individual data *samples* for different *instances* on a topic.
-Each instance is associated with a unique value for the key.
-A publishing process publishes multiple data samples on the same instance by using the same key value for each sample.
-
-.. _introduction--datawriter:
-
-DataWriter
-----------
-
-..
-    Sect<1.1.1.4>
-
-The *data writer* is used by the publishing application code to pass values to the DDS.
-Each data writer is bound to a particular topic.
-The application uses the data writer's type-specific interface to publish samples on that topic.
-The data writer is responsible for marshaling the data and passing it to the publisher for transmission.
-
-Dynamic data writers (:ref:`xtypes--creating-and-using-a-dynamicdatawriter-or-dynamicdatareader`) can be used when code generated from IDL is not available or desired.
-Dynamic data writers are also type-safe, but type checking happens at runtime.
-
-.. _introduction--publisher:
-
-Publisher
----------
-
-..
-    Sect<1.1.1.5>
-
-The *publisher* is responsible for taking the published data and disseminating it to all relevant subscribers in the domain.
-The exact mechanism employed is left to the service implementation.
-
-.. _introduction--subscriber:
-
-Subscriber
-----------
-
-..
-    Sect<1.1.1.6>
-
-The *subscriber* receives the data from the publisher and passes it to any relevant data readers that are connected to it.
-
-.. _introduction--datareader:
-
-DataReader
-----------
-
-..
-    Sect<1.1.1.7>
-
-The *data reader* takes data from the subscriber, demarshals it into the appropriate type for that topic, and delivers the sample to the application.
-Each data reader is bound to a particular topic.
-The application uses the data reader's type-specific interfaces to receive the samples.
-
-Dynamic data readers (:ref:`xtypes--creating-and-using-a-dynamicdatawriter-or-dynamicdatareader`) can be used when code generated from IDL is not available or desired.
-Dynamic data readers are also type-safe, but type checking happens at runtime.
-
-.. _introduction--built-in-topics:
-
-Built-in Topics
-===============
-
-..
-    Sect<1.1.2>
-
-The DDS specification defines a number of topics that are built-in to the DDS implementation.
-Subscribing to these *built-in topics* gives application developers access to the state of the domain being used including which topics are registered, which data readers and data writers are connected and disconnected, and the QoS settings of the various entities.
-While subscribed, the application receives samples indicating changes in the entities within the domain.
-
-The following table shows the built-in topics defined within the DDS specification:
-
-.. list-table:: Built-in Topics
-   :header-rows: 1
-
-   * - Topic Name
-
-     - Description
-
-   * - ``DCPSParticipant``
-
-     - Each instance represents a domain participant.
-
-   * - ``DCPSTopic``
-
-     - Each instance represents a normal (not built-in) topic.
-
-   * - ``DCPSPublication``
-
-     - Each instance represents a data writer.
-
-   * - ``DCPSSubscription``
-
-     - Each instance represents a data reader.
-
-.. _introduction--quality-of-service-policies:
-
-Quality of Service Policies
-===========================
-
-..
-    Sect<1.1.3>
-
-The DDS specification defines a number of Quality of Service (QoS) policies that are used by applications to specify their QoS requirements to the service.
-Participants specify what behavior they require from the service and the service decides how to achieve these behaviors.
-These policies can be applied to the various DCPS entities (topic, data writer, data reader, publisher, subscriber, domain participant) although not all policies are valid for all types of entities.
-
-Subscribers and publishers are matched using a request-versus-offered (RxO) model.
-Subscribers *request* a set of policies that are minimally required.
-Publishers *offer* a set of QoS policies to potential subscribers.
-The DDS implementation then attempts to match the requested policies with the offered policies; if these policies are compatible then the association is formed.
-
-The QoS policies currently implemented by OpenDDS are discussed in detail in :ref:`qos`.
-
-.. _introduction--listeners:
-
-Listeners
-=========
-
-..
-    Sect<1.1.4>
-
-The DCPS layer defines a callback interface for each entity that allows an application processes to listen for certain state changes or events pertaining to that entity.
-For example, a Data Reader Listener is notified when there are data values available for reading.
-
-.. _introduction--conditions:
-
-Conditions
-==========
-
-..
-    Sect<1.1.5>
-
-*Conditions* and *Wait Sets* allow an alternative to listeners in detecting events of interest in DDS.
-The general pattern is
-
-The application creates a specific kind of ``Condition`` object, such as a ``StatusCondition``, and attaches it to a ``WaitSet``.
-
-* The application waits on the ``WaitSet`` until one or more conditions become true.
-
-* The application calls operations on the corresponding entity objects to extract the necessary information.
-
-* The ``DataReader`` interface also has operations that take a ``ReadCondition`` argument.
-
-* ``QueryCondition`` objects are provided as part of the implementation of the Content-Subscription Profile.
-  The ``QueryCondition`` interface extends the ``ReadCondition`` interface.
-
-.. _introduction--opendds-implementation:
-
-**********************
-OpenDDS Implementation
-**********************
-
 ..
     Sect<1.2>
 
 .. _introduction--compliance:
 
+**********
 Compliance
-==========
+**********
 
 ..
     Sect<1.2.1>
@@ -427,7 +158,7 @@ See :ref:`specs` for how OpenDDS complies with other specifications it implement
 .. _introduction--dds-compliance:
 
 DDS Compliance
---------------
+==============
 
 ..
     Sect<1.2.1.1>
@@ -460,7 +191,7 @@ Although version 1.5 of the DDS specification is not yet published, OpenDDS inco
 .. _introduction--ddsi-rtps-compliance:
 
 DDSI-RTPS Compliance
---------------------
+====================
 
 ..
     Sect<1.2.1.2>
@@ -470,7 +201,7 @@ The OpenDDS implementation complies with the requirements of the OMG DDSI-RTPS s
 .. _introduction--opendds-rtps-implementation-notes:
 
 OpenDDS RTPS Implementation Notes
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+---------------------------------
 
 ..
     Sect<1.2.1.2.1>
@@ -507,7 +238,7 @@ Items not implemented in OpenDDS:
 .. _introduction--idl-compliance:
 
 IDL Compliance
---------------
+==============
 
 ..
     Sect<1.2.1.3>
@@ -547,8 +278,9 @@ OpenDDS supports the following building blocks, with notes/caveats listed below 
 
 .. _introduction--extensions-to-the-dds-specification:
 
+***********************************
 Extensions to the DDS Specification
-===================================
+***********************************
 
 ..
     Sect<1.2.2>
@@ -568,21 +300,31 @@ Those include features like Recorder and Replayer (:ref:`altdata`) and also:
 
 .. _introduction--opendds-architecture:
 
-OpenDDS Architecture
-====================
+***************************************
+OpenDDS Implementation and Architecture
+***************************************
 
 ..
     Sect<1.2.3>
 
 This section gives a brief overview of the OpenDDS implementation, its features, and some of its components.
-The ``$DDS_ROOT`` environment variable should point to the base directory of the OpenDDS distribution.
-Source code for OpenDDS can be found under the :ghfile:`dds/` directory.
-Tests can be found under :ghfile:`tests/`.
+
+Source Code Organization
+========================
+
+Relative to :envvar:`DDS_ROOT`:
+
+* the :ghfile:`dds/` directory contains the source code for OpenDDS.
+* the :ghfile:`tests/` directory contains tests.
+* the :ghfile:`tools/` directory contains tools and libraries like the DCPSInfoRepo, RtpsRelay, and the Modeling SDK.
+* the :ghfile:`DevGuideExamples/` directory contains examples used in this guide.
+* the :ghfile:`examples/` directory contains examples *not* used in this guide.
+* the :ghfile:`docs/` directory contains documentation for users and developers of OpenDDS.
 
 .. _introduction--design-philosophy:
 
 Design Philosophy
------------------
+=================
 
 ..
     Sect<1.2.3.1>
@@ -597,7 +339,7 @@ Defining them as local interfaces improves performance, reduces memory usage, si
 .. _introduction--extensible-transport-framework-etf:
 
 Extensible Transport Framework (ETF)
-------------------------------------
+====================================
 
 ..
     Sect<1.2.3.2>
@@ -621,43 +363,44 @@ See the :ghfile:`dds/DCPS/transport/udp/` directory for details.
 
 .. _introduction--dds-discovery:
 
-DDS Discovery
--------------
+Discovery
+=========
 
 ..
     Sect<1.2.3.3>
 
-DDS applications must discover one another via some central agent or through some distributed scheme.
-An important feature of OpenDDS is that DDS applications can be configured to perform discovery using the DCPSInfoRepo or RTPS discovery, but utilize a different transport type for data transfer between data writers and data readers.
-The OMG DDS specification (``formal/2015-04-10``) leaves the details of discovery to the implementation.
-In the case of interoperability between DDS implementations, the OMG DDSI-RTPS ``(formal/2014-09-01)`` specification provides requirements for a peer-to-peer style of discovery.
+DDS applications must discover one another via some central agent or through some distributed scheme (see :ref:`dds-introduction--discovery`).
+OpenDDS provides three options for discovery:  :ref:`introduction--centralized-discovery-with-dcpsinforepo`, :ref:`introduction--peer-to-peer-discovery-with-rtps`, and :ref:`introduction--static-discovery`.
+The choice of discovery is independent of the choice of transport in most cases.
+For example, one can use the tcp transport with RTPS Discovery.
+Two notable exceptions are:
 
-OpenDDS provides two options for discovery.
+#. If using DDS Security, RTPS must be used for both the transport and discovery.
+#. RTPS must be used for the transport when using Static Discovery.
 
-#. Information Repository: a centralized repository style that runs as a separate process allowing publishers and subscribers to discover one another centrally or
-
-#. RTPS Discovery: a peer-to-peer style of discovery that utilizes the RTPS protocol to advertise availability and location information.
-
-Interoperability with other DDS implementations must utilize the peer-to-peer method, but can be useful in OpenDDS-only deployments.
+Like transports, additional discovery implementations can be created and plugged in.
 
 .. _introduction--centralized-discovery-with-dcpsinforepo:
 
-Centralized Discovery with DCPSInfoRepo
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+DCPSInfoRepo
+------------
 
 ..
     Sect<1.2.3.3.1>
 
-OpenDDS implements a standalone service called the DCPS Information Repository (DCPSInfoRepo) to achieve the centralized discovery method.
-It is implemented as a CORBA server.
-When a client requests a subscription for a topic, the DCPS Information Repository locates the topic and notifies any existing publishers of the location of the new subscriber.
-The DCPSInfoRepo process needs to be running whenever OpenDDS is being used in a non-RTPS configuration.
-An RTPS configuration does not use the DCPSInfoRepo.
-The DCPSInfoRepo is not involved in data propagation, its role is limited in scope to OpenDDS applications discovering one another.
-
 .. figure:: images/inforepo_discovery.png
 
    Centralized Discovery with DCPSInfoRepo
+
+OpenDDS contains a standalone CORBA service called :ref:`inforepo`.
+An instance of the DCPSInfoRepo is shared by all the participants in a domain and constitutes a centralized approach to discovery.
+Each OpenDDS application connects to the DCPSInfoRepo and creates records for its participants, topics, data writers, and data readers.
+As records for data writers and data readers are created, they are matched against the existing set of records.
+When matches are found, the DCPSInfoRepo invokes the participant to perform the necessary associations.
+The DCPSInfoRepo is not involved in data propagation; its role is limited in scope to OpenDDS applications discovering one another.
+The DCPSInfoRepo populates the :ref:`introduction--built-in-topics` for a participant if configured to do so.
+OpenDDS creates its own ORB and a separate thread to run that ORB when using DCPSInfoRepo discovery.
+See :ref:`run_time_configuration--configuring-applications-for-dcpsinforepo` for details on how applications can be configured to use the DCPSInfoRepo.
 
 Application developers are free to run multiple information repositories with each managing their own non-overlapping sets of DCPS domains.
 
@@ -668,23 +411,27 @@ See :ref:`the_dcps_information_repository--repository-federation` for further in
 
 .. _introduction--peer-to-peer-discovery-with-rtps:
 
-Peer-to-Peer Discovery with RTPS
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+RTPS Discovery
+--------------
 
 ..
     Sect<1.2.3.3.2>
-
-DDS applications requiring a Peer-to-Peer discovery pattern can be accommodated by OpenDDS capabilities.
-This style of discovery is accomplished only through the use of the RTPS protocol as of the current release.
-This simple form of discovery is accomplished through simple configuration of DDS application data readers and data writers running in application processes as shown below.
 
 .. figure:: images/rtps_discovery.png
 
   Peer-to-peer Discovery with RTPS
 
-As each participating process activates the DDSI-RTPS discovery mechanisms in OpenDDS for their data readers and writers, network endpoints are created with either default or configured network ports such that DDS participants can begin advertising the availability of their data readers and data writers.
-After a period of time, those seeking one another based on criteria will find each other and establish a connection using a transport.
-A more detailed description of this flexible configuration approach is discussed in :ref:`run_time_configuration--transport-concepts` and :ref:`run_time_configuration--rtps-udp-transport-configuration-options`.
+RTPS Discovery is an implementation of the OMG DDSI-RTPS ``(formal/2014-09-01)`` specification (see :omgspec:`rtps:8.5 Discovery Module`).
+RTPS Discovery uses the RTPS protocol to advertise and discover participants, data writers, and data readers.
+RTPS Discovery uses multicast to discover participants and *builtin endpoints* (not to be confused with Builtin Topics).
+This part of RTPS discovery is called the Simple Participant Discovery Protocol (SPDP).
+After the builtin endpoints are discovered and associated, they exchange information about data writers and data readers which are called *endpoints*.
+This part of RTPS discovery is called Simple Endpoint Discovery Protocol (SEDP).
+RTPS Discovery is a peer-to-peer approach to discovery as each participant interacts directly with other participants to accomplish discovery.
+RTPS is interoperable and supports :ref:`dds_security`.
+RTPS discovery populates the Builtin Topics for a participant.
+See :ref:`run_time_configuration--configuring-for-ddsi-rtps-discovery` for details on how applications can be configured to use RTPS Discovery.
+See also :ref:`run_time_configuration--rtps-udp-transport-configuration-options` as the parameters for configuring an RTPS transport also apply to SEDP.
 
 The following are additional implementation limits that developers need to take into consideration when developing and deploying applications that use RTPS discovery:
 
@@ -695,32 +442,45 @@ The following are additional implementation limits that developers need to take 
 
 #. OpenDDS's native multicast transport does not work with RTPS Discovery due to the way GUIDs are assigned (a warning will be issued if this is attempted).
 
-For more details on RTPS discovery, see :omgspec:`rtps:8.5 Discovery Module`.
+.. _introduction--static-discovery:
+
+Static Discovery
+----------------
+
+In Static Discovery, each particpant starts with a database containing identifiers, QoS settings, and network locators for all participants, topics, data writers, data readers.
+The RTPS transport must be used with Static Discovery.
+When an application creates a data writer or data reader, Static Discovery causes it to send out periodic announcements.
+Upon receiving one of these announcements, Static Discovery consults its local database of entities to look up the details necessary for matching and matches it against local entities.
+See :ref:`run_time_configuration--configuring-for-static-discovery` for details on how applications can be configured to use Static Discovery.
+
+Static Discovery requires that the :ref:`quality_of_service--user-data` QoS be configured for each participant, data writer, and data reader.
+This user data must contain the identifier of the entity that is being created.
+Thus, the user data QoS is not available for general use when using Static Discovery.
+Static Discovery also requires that the network locators for all entities be determined up front by configuring the transport with the necessary networking information.
 
 .. _introduction--threading:
 
 Threading
----------
+=========
 
 ..
     Sect<1.2.3.4>
 
-OpenDDS creates its own ORB (when one is required) as well as a separate thread upon which to run that ORB.
-It also uses its own threads to process incoming and outgoing transport I/O.
-A separate thread is created to cleanup resources upon unexpected connection closure.
-Your application may get called back from these threads via the Listener mechanism of DCPS.
+OpenDDS creates its own threads for handling I/O, timers, asynchronous jobs, and cleanup tasks.
+These threads are collectively called *service threads*.
+Applications may receive a callback from these threads via :ref:`introduction--listeners` (see :ref:`conditions_and_listeners--listeners`).
 
-When publishing a sample via DDS, OpenDDS normally attempts to send the sample to any connected subscribers using the calling thread.
-If the send call blocks, then the sample may be queued for sending on a separate service thread.
+When publishing a sample, OpenDDS normally attempts to send the sample to any connected subscribers using the calling thread.
+If the send call would block, then the sample may be queued for sending on a separate service thread.
 This behavior depends on the QoS policies described in :ref:`qos`.
 
-All incoming data in the subscriber is read by a service thread and queued for reading by the application.
-DataReader listeners are called from the service thread.
+All incoming data is read by a service thread and queued for reading in DataReaders by the application.
+If a DataReader has a listener that should be invoked when data is available, then the listener is invoked by the service thread.
 
 .. _introduction--configuration:
 
 Configuration
--------------
+=============
 
 ..
     Sect<1.2.3.5>
