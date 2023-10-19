@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.8...3.27)
-project(compiler_char_literals CXX)
+project(opendds_compiler_char_literals CXX)
 enable_testing()
 
 find_package(OpenDDS REQUIRED)
@@ -10,7 +10,6 @@ set(src "${CMAKE_CURRENT_SOURCE_DIR}")
 set(dst ${CMAKE_CURRENT_BINARY_DIR})
 set(opendds_libs
   OpenDDS::Dcps
-  gtest
 )
 
 # IDL Library
@@ -30,14 +29,12 @@ if(NOT ("C++11" IN_LIST mappings))
   message(FATAL_ERROR "${idl}: C++11 NOT in mapping list: ${mappings}")
 endif()
 
-set(char_literals_test "${target_prefix}test")
-add_executable(char_literals_exe
+add_executable(opendds_compiler_char_literals_exe
   "${src}/main.cpp"
 )
-set_target_properties(char_literals_exe PROPERTIES
-  # OUTPUT_NAME ${maps_test}
+set_target_properties(opendds_compiler_char_literals_exe PROPERTIES
   RUNTIME_OUTPUT_DIRECTORY "${dst}"
 )
-target_link_libraries(char_literals_exe ${opendds_libs} ${idl})
+target_link_libraries(opendds_compiler_char_literals_exe ${opendds_libs} ${idl} gtest)
 
-add_test(char_literals_test char_literals_exe)
+add_test(opendds_compiler_char_literals_test opendds_compiler_char_literals_exe)
