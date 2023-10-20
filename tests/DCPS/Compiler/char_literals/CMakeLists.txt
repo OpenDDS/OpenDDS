@@ -10,7 +10,6 @@ set(src "${CMAKE_CURRENT_SOURCE_DIR}")
 set(dst ${CMAKE_CURRENT_BINARY_DIR})
 set(opendds_libs
   OpenDDS::Dcps
-  TAO::AnyTypeCode
 )
 
 # IDL Library
