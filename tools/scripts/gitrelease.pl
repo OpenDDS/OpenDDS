@@ -159,8 +159,7 @@ sub help {
     "Environment Variables:\n" .
     "  GITHUB_TOKEN           GitHub token with repo access to publish release on\n" .
     "                         GitHub.\n" .
-    # When this is ready also remove fixed skip on RTD step
-    # "  READ_THE_DOCS_TOKEN    Access token for Read the Docs Admin\n" .
+    "  READ_THE_DOCS_TOKEN    Access token for Read the Docs Admin\n" .
     "  SFTP_USERNAME          SFTP Username\n" .
     "  SFTP_HOST              SFTP Server Address\n" .
     "\n" .
@@ -388,8 +387,6 @@ sub compare_workspace_info {
 
 sub check_workspace {
   my $settings = shift();
-
-  return if $settings->{list};
 
   if (!-d $settings->{workspace}) {
     print("Creating workspace directory \"$settings->{workspace}\"\n");
@@ -1743,23 +1740,19 @@ sub verify_update_readme_file {
   my $step_options = shift() // {};
   my $post_release = $step_options->{post_release} // 0;
 
-  my $link = get_rtd_link($settings, $post_release);
+  my $link = get_rtd_link($settings, !$post_release);
   my $link_re = quotemeta($link);
   my $found_link = 0;
   open(my $fh, $readme_file) or die("Can't open \"$readme_file\": $?");
   while (<$fh>) {
     if ($_ =~ /$link_re/) {
+      print STDERR ("Found $link on $readme_file:$.\n");
       $found_link = 1;
-      last;
     }
   }
   close($fh);
 
-  if (!$found_link) {
-    print("Didn't find $link\n");
-  }
-
-  return $found_link;
+  return !$found_link;
 }
 
 sub message_update_readme_file {
@@ -1770,15 +1763,12 @@ sub remedy_update_readme_file {
   my $settings = shift();
   my $post_release = shift() // 0;
 
-  my $link = quotemeta(get_rtd_link($settings, !$post_release));
+  my $link_re = quotemeta(get_rtd_link($settings, !$post_release));
   my $replace_with = get_rtd_link($settings, $post_release);
-  my $replaced_link = 0;
   open(my $fh, "+< $readme_file") or die("Can't open \"$readme_file\": $?");
   my $out = '';
   while (<$fh>) {
-    if ($_ =~ s/$link/$replace_with/) {
-      $replaced_link = 1;
-    }
+    $_ =~ s/$link_re/$replace_with/g;
     $out .= $_;
   }
 
@@ -1787,7 +1777,7 @@ sub remedy_update_readme_file {
   truncate($fh, tell($fh)) or die("Truncating: $!");
   close($fh) or die("Closing: $!");
 
-  return $replaced_link;
+  return 1;
 }
 
 ############################################################################
@@ -2718,7 +2708,8 @@ sub verify_rtd_activate {
     $settings, 'GET',
     res_json_ref => \$version_info,
   ));
-  return $version_info->{active} && !$version_info->{hidden};
+  return $version_info->{active} && !$version_info->{hidden} &&
+    $version_info->{privacy_level} eq 'public';
 }
 
 sub message_rtd_activate {
@@ -2734,6 +2725,7 @@ sub remedy_rtd_activate {
     req_json_ref => {
       active => $JSON::PP::true,
       hidden => $JSON::PP::false,
+      privacy_level => 'public',
     },
     expect_status => 204,
   ));
@@ -3291,7 +3283,6 @@ my @release_steps = (
     remedy => sub{remedy_rtd_activate(@_)},
     post_release => 1,
     can_force => 1,
-    skip => 1, # When this is ready, also uncomment READ_THE_DOCS_TOKEN in help
   },
   {
     name => 'Trigger Shapes Demo Build',
