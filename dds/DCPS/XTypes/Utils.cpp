@@ -1658,18 +1658,6 @@ bool has_explicit_keys(DDS::DynamicType* dt)
   return false;
 }
 
-bool exclude_member(DCPS::Sample::Extent ext, bool is_key, bool has_explicit_keys)
-{
-  // see Fields::Iterator and explicit_keys_only() in opendds_idl's dds_generator.h
-  const bool explicit_keys_only = ext == DCPS::Sample::KeyOnly || (ext == DCPS::Sample::NestedKeyOnly && has_explicit_keys);
-  return explicit_keys_only && !is_key;
-}
-
-DCPS::Sample::Extent nested(DCPS::Sample::Extent ext)
-{
-  return ext == DCPS::Sample::KeyOnly ? DCPS::Sample::NestedKeyOnly : ext;
-}
-
 } // namespace XTypes
 } // namespace OpenDDS
 OPENDDS_END_VERSIONED_NAMESPACE_DECL

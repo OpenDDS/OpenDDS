@@ -315,15 +315,15 @@ DDS::ReturnCode_t DynamicDataBase::get_selected_union_branch(
     }
     return DDS::RETCODE_ERROR;
   }
-  return get_selected_union_branch(type_, static_cast<DDS::Int32>(i64_disc),
-                                   found_selected_member, selected_md);
+  return XTypes::get_selected_union_branch(type_, static_cast<DDS::Int32>(i64_disc),
+                                           found_selected_member, selected_md);
 }
 
 bool DynamicDataBase::discriminator_selects_no_member(DDS::Int32 disc) const
 {
   bool found_selected_member;
   DDS::MemberDescriptor_var selected_md;
-  const DDS::ReturnCode_t rc = get_selected_union_branch(type_, disc, found_selected_member, selected_md);
+  const DDS::ReturnCode_t rc = XTypes::get_selected_union_branch(type_, disc, found_selected_member, selected_md);
   if (rc != DDS::RETCODE_OK) {
     if (log_level >= LogLevel::Warning) {
       ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: DynamicDataBase::discriminator_selects_no_member: "
