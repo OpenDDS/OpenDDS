@@ -26,6 +26,9 @@ add_executable(${publisher}
   publisher.cpp
 )
 target_link_libraries(${publisher} ${opendds_libs})
+set_target_properties(${publisher} PROPERTIES
+  OUTPUT_NAME publisher
+)
 
 # Subscriber
 set(subscriber "${target_prefix}subscriber")
@@ -33,9 +36,12 @@ add_executable(${subscriber}
   subscriber.cpp
 )
 target_link_libraries(${subscriber} ${opendds_libs})
+set_target_properties(${subscriber} PROPERTIES
+  OUTPUT_NAME subscriber
+)
 
 # Testing
 configure_file(run_test.pl . COPYONLY)
 configure_file(rtps.ini . COPYONLY)
 opendds_add_test(NAME info_repo COMMAND perl run_test.pl)
-opendds_add_test(NAME rtps COMMAND perl run_test.pl --rtps)
+opendds_add_test(NAME rtps COMMAND perl run_test.pl init=rtps.ini)
