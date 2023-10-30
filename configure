@@ -30,7 +30,7 @@ use ChangeDir;
 
 ## Version of DOC Group ACE/TAO to download, uses the ACE version number
 my $doc_tao2_version = '6.5.20';
-my $doc_tao3_version = '7.1.1';
+my $doc_tao3_version = '7.1.2';
 
 my $backup_timestamp = strftime "%Y-%m-%d-%H-%M-%S", localtime time;
 
