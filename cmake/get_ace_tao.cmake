@@ -5,9 +5,9 @@ if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.24)
 endif()
 
 set(url_base "https://github.com/DOCGroup/ACE_TAO/releases/download/")
-set(ace_ver "7.1.1")
-set(zip_md5 "db6d014b6d5863090988204295a0f73e")
-set(tbz_md5 "2f60399b059dfd184c8248443920b6e5")
+set(ace_ver "7.1.2")
+set(zip_md5 "983581a5813331fc7597d1e5ec811e1c")
+set(tbz_md5 "949c55575b4a5753e8457eb5b5562fac")
 
 set(_OPENDDS_CONFIGURE_ACE_TAO_ARGS)
 set(ACE_IS_BEING_BUILT MPC CACHE INTERNAL "")
