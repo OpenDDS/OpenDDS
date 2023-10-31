@@ -35,6 +35,8 @@ public:
 
   static DynamicDataFactory_ptr get_instance();
 
+  static ReturnCode_t delete_instance();
+
   DynamicData_ptr create_data(DynamicType_ptr type);
 
   ReturnCode_t delete_data(DynamicData_ptr /*data*/)

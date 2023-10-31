@@ -1,5 +1,0 @@
-.. news-prs: 4298
-
-.. news-start-section: Fixes
-- Fix tsan warning in ReactorTask
-.. news-end-section

@@ -1,5 +1,0 @@
-.. news-prs: 4293
-
-.. news-start-section: Fixes
-- RtpsRelay: Use ACE_Message_Block's locking strategy for cached SPDP to fix tsan warning
-.. news-end-section
