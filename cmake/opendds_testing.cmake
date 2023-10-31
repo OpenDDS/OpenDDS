@@ -20,7 +20,7 @@ function(opendds_add_test)
   list(APPEND arg_COMMAND ${arg_ARGS})
   add_test(NAME "${test_name}" ${arg_UNPARSED_ARGUMENTS} COMMAND ${arg_COMMAND})
 
-  set(env "ACE_ROOT=${ACE_ROOT}" "TAO_ROOT=${TAO_ROOT}")
+  set(env "ACE_ROOT=${ACE_ROOT}" "TAO_ROOT=${TAO_ROOT}" "DDS_ROOT=${DDS_ROOT}")
 
   if(MSVC)
     set(env_var_name PATH)
