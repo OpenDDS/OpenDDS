@@ -1382,9 +1382,14 @@ DDS::ReturnCode_t copy_member(
       get_rc = src->get_complex_value(subsrc, src_id);
       if (get_rc == DDS::RETCODE_OK) {
         DDS::DynamicData_var subdest;
-        get_rc = dest->get_complex_value(subdest, dest_id);
-        if (get_rc == DDS::RETCODE_OK) {
+        const DDS::ReturnCode_t get_rc_dest = dest->get_complex_value(subdest, dest_id);
+        if (get_rc_dest == DDS::RETCODE_OK || get_rc_dest == DDS::RETCODE_NO_DATA) {
           set_rc = copy(subdest, subsrc);
+          if (set_rc == DDS::RETCODE_OK && get_rc_dest == DDS::RETCODE_NO_DATA) {
+            set_rc = dest->set_complex_value(dest_id, subdest);
+          }
+        } else {
+          get_rc = get_rc_dest;
         }
       }
     }

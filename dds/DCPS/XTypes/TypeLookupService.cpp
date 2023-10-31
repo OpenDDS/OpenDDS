@@ -798,6 +798,7 @@ void TypeLookupService::complete_to_dynamic_i(DynamicTypeImpl* dt,
     disc_md->name("discriminator");
     disc_md->is_key(cto.union_type.discriminator.common.member_flags & IS_KEY);
     disc_md->type(disc_type);
+    // Is the discriminator Id always 0?
     disc_md->id(DISCRIMINATOR_ID);
     disc_md->index(DISCRIMINATOR_ID);
     DynamicTypeMemberImpl* disc_dtm = new DynamicTypeMemberImpl();

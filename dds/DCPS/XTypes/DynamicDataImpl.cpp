@@ -212,7 +212,7 @@ CORBA::ULong DynamicDataImpl::get_sequence_item_count() const
   }
   const CORBA::ULong container_item_count = std::max(largest_single_index,
                                                      std::max(largest_sequence_index,
-                                                              largest_complex_index));
+                                                              largest_complex_index)) + 1;
   return std::max(bs_item_count, container_item_count);
 }
 
@@ -5050,99 +5050,84 @@ bool serialized_size_dynamic_element(DDS::DynamicData_ptr col_data, const Encodi
   return false;
 }
 
-void serialized_size_primitive_sequence(const Encoding& encoding, size_t& size,
+void serialized_size_primitive_elements(const Encoding& encoding, size_t& size,
                                         DDS::TypeKind elem_tk, CORBA::ULong length)
 {
   using namespace OpenDDS::XTypes;
   switch (elem_tk) {
   case TK_INT32:
-    primitive_serialized_size_ulong(encoding, size);
     if (length != 0) {
       primitive_serialized_size(encoding, size, CORBA::Long(), length);
     }
     return;
   case TK_UINT32:
-    primitive_serialized_size_ulong(encoding, size);
     if (length != 0) {
       primitive_serialized_size(encoding, size, CORBA::ULong(), length);
     }
     return;
   case TK_INT8:
-    primitive_serialized_size_ulong(encoding, size);
     if (length != 0) {
       primitive_serialized_size_int8(encoding, size, length);
     }
     return;
   case TK_UINT8:
-    primitive_serialized_size_ulong(encoding, size);
     if (length != 0) {
       primitive_serialized_size_uint8(encoding, size, length);
     }
     return;
   case TK_INT16:
-    primitive_serialized_size_ulong(encoding, size);
     if (length != 0) {
       primitive_serialized_size(encoding, size, CORBA::Short(), length);
     }
     return;
   case TK_UINT16:
-    primitive_serialized_size_ulong(encoding, size);
     if (length != 0) {
       primitive_serialized_size(encoding, size, CORBA::UShort(), length);
     }
     return;
   case TK_INT64:
-    primitive_serialized_size_ulong(encoding, size);
     if (length != 0) {
       primitive_serialized_size(encoding, size, CORBA::LongLong(), length);
     }
     return;
   case TK_UINT64:
-    primitive_serialized_size_ulong(encoding, size);
     if (length != 0) {
       primitive_serialized_size(encoding, size, CORBA::ULongLong(), length);
     }
     return;
   case TK_FLOAT32:
-    primitive_serialized_size_ulong(encoding, size);
     if (length != 0) {
       primitive_serialized_size(encoding, size, CORBA::Float(), length);
     }
     return;
   case TK_FLOAT64:
-    primitive_serialized_size_ulong(encoding, size);
     if (length != 0) {
       primitive_serialized_size(encoding, size, CORBA::Double(), length);
     }
     return;
   case TK_FLOAT128:
-    primitive_serialized_size_ulong(encoding, size);
     if (length != 0) {
       primitive_serialized_size(encoding, size, CORBA::LongDouble(), length);
     }
     return;
   case TK_CHAR8:
-    primitive_serialized_size_ulong(encoding, size);
     if (length != 0) {
       primitive_serialized_size_char(encoding, size, length);
     }
     return;
 #ifdef DDS_HAS_WCHAR
   case TK_CHAR16:
-    primitive_serialized_size_ulong(encoding, size);
     if (length != 0) {
       primitive_serialized_size_wchar(encoding, size, length);
     }
     return;
 #endif
   case TK_BYTE:
-    primitive_serialized_size_ulong(encoding, size);
     if (length != 0) {
       primitive_serialized_size_octet(encoding, size, length);
     }
     return;
   case TK_BOOLEAN:
-    primitive_serialized_size_ulong(encoding, size);
     if (length != 0) {
       primitive_serialized_size_boolean(encoding, size, length);
     }
@@ -5176,15 +5161,14 @@ bool serialized_size_dynamic_collection(const Encoding& encoding, size_t& size,
     serialized_size_delimiter(encoding, size);
   }
 
-  const DDS::TypeKind col_tk = base_type->get_kind();
-  if (col_tk == TK_SEQUENCE) {
+  if (base_type->get_kind() == TK_SEQUENCE) {
     // Sequence length.
     primitive_serialized_size_ulong(encoding, size);
   }
 
   const CORBA::ULong item_count = col_data->get_item_count();
   if (is_primitive(treat_elem_as)) {
-    serialized_size_primitive_sequence(encoding, size, treat_elem_as, item_count);
+    serialized_size_primitive_elements(encoding, size, treat_elem_as, item_count);
     return true;
   }
 
@@ -5522,6 +5506,8 @@ bool serialize_dynamic_discriminator(Serializer& ser, DDS::DynamicData_ptr union
   const DDS::MemberDescriptor_var disc_md, DDS::ExtensibilityKind extensibility, CORBA::Long& disc_val)
 {
   using namespace OpenDDS::XTypes;
+  // What is the actual Id of the discriminator? Use 0 for serialization for now.
+  const DDS::MemberId disc_id = 0;
   const CORBA::Boolean optional = disc_md->is_optional(); // Discriminator must be non-optional.
   const CORBA::Boolean must_understand = disc_md->is_must_understand() || disc_md->is_key();
   const DDS::DynamicType_var disc_type = get_base_type(disc_md->type());
@@ -5532,93 +5518,91 @@ bool serialize_dynamic_discriminator(Serializer& ser, DDS::DynamicData_ptr union
     return false;
   }
 
-  DDS::ReturnCode_t rc = DDS::RETCODE_OK;
-  const DDS::MemberId id = DISCRIMINATOR_ID;
   switch (treat_disc_as) {
   case TK_BOOLEAN: {
     CORBA::Boolean val;
-    rc = union_data->get_boolean_value(val, id);
+    const DDS::ReturnCode_t rc = union_data->get_boolean_value(val, DISCRIMINATOR_ID);
     disc_val = static_cast<CORBA::Long>(val);
-    return serialize_dynamic_primitive_member(ser, ACE_OutputCDR::from_boolean(val), rc, id,
+    return serialize_dynamic_primitive_member(ser, ACE_OutputCDR::from_boolean(val), rc, disc_id,
                                               treat_disc_as, extensibility, optional, must_understand);
   }
   case TK_BYTE: {
     CORBA::Octet val;
-    rc = union_data->get_byte_value(val, id);
+    const DDS::ReturnCode_t rc = union_data->get_byte_value(val, DISCRIMINATOR_ID);
     disc_val = static_cast<CORBA::Long>(val);
-    return serialize_dynamic_primitive_member(ser, ACE_OutputCDR::from_octet(val), rc, id,
+    return serialize_dynamic_primitive_member(ser, ACE_OutputCDR::from_octet(val), rc, disc_id,
                                               treat_disc_as, extensibility, optional, must_understand);
   }
   case TK_CHAR8: {
     CORBA::Char val;
-    rc = union_data->get_char8_value(val, id);
+    const DDS::ReturnCode_t rc = union_data->get_char8_value(val, DISCRIMINATOR_ID);
     disc_val = static_cast<CORBA::Long>(val);
-    return serialize_dynamic_primitive_member(ser, ACE_OutputCDR::from_char(val), rc, id,
+    return serialize_dynamic_primitive_member(ser, ACE_OutputCDR::from_char(val), rc, disc_id,
                                               treat_disc_as, extensibility, optional, must_understand);
   }
 #ifdef DDS_HAS_WCHAR
   case TK_CHAR16: {
     CORBA::WChar val;
-    rc = union_data->get_char16_value(val, id);
+    const DDS::ReturnCode_t rc = union_data->get_char16_value(val, DISCRIMINATOR_ID);
     disc_val = static_cast<CORBA::Long>(val);
-    return serialize_dynamic_primitive_member(ser, ACE_OutputCDR::from_wchar(val), rc, id,
+    return serialize_dynamic_primitive_member(ser, ACE_OutputCDR::from_wchar(val), rc, disc_id,
                                               treat_disc_as, extensibility, optional, must_understand);
   }
 #endif
   case TK_INT8: {
     CORBA::Int8 val;
-    rc = union_data->get_int8_value(val, id);
+    const DDS::ReturnCode_t rc = union_data->get_int8_value(val, DISCRIMINATOR_ID);
     disc_val = static_cast<CORBA::Long>(val);
-    return serialize_dynamic_primitive_member(ser, ACE_OutputCDR::from_int8(val), rc, id,
+    return serialize_dynamic_primitive_member(ser, ACE_OutputCDR::from_int8(val), rc, disc_id,
                                               treat_disc_as, extensibility, optional, must_understand);
   }
   case TK_UINT8: {
     CORBA::UInt8 val;
-    rc = union_data->get_uint8_value(val, id);
+    const DDS::ReturnCode_t rc = union_data->get_uint8_value(val, DISCRIMINATOR_ID);
     disc_val = static_cast<CORBA::Long>(val);
-    return serialize_dynamic_primitive_member(ser, ACE_OutputCDR::from_uint8(val), rc, id,
+    return serialize_dynamic_primitive_member(ser, ACE_OutputCDR::from_uint8(val), rc, disc_id,
                                               treat_disc_as, extensibility, optional, must_understand);
   }
   case TK_INT16: {
     CORBA::Short val;
-    rc = union_data->get_int16_value(val, id);
+    const DDS::ReturnCode_t rc = union_data->get_int16_value(val, DISCRIMINATOR_ID);
     disc_val = val;
-    return serialize_dynamic_primitive_member(ser, val, rc, id, treat_disc_as,
+    return serialize_dynamic_primitive_member(ser, val, rc, disc_id, treat_disc_as,
                                               extensibility, optional, must_understand);
   }
   case TK_UINT16: {
     CORBA::UShort val;
-    rc = union_data->get_uint16_value(val, id);
+    const DDS::ReturnCode_t rc = union_data->get_uint16_value(val, DISCRIMINATOR_ID);
     disc_val = static_cast<CORBA::Long>(val);
-    return serialize_dynamic_primitive_member(ser, val, rc, id, treat_disc_as,
+    return serialize_dynamic_primitive_member(ser, val, rc, disc_id, treat_disc_as,
                                               extensibility, optional, must_understand);
   }
   case TK_INT32: {
     CORBA::Long val;
-    rc = union_data->get_int32_value(val, id);
+    const DDS::ReturnCode_t rc = union_data->get_int32_value(val, DISCRIMINATOR_ID);
     disc_val = val;
-    return serialize_dynamic_primitive_member(ser, val, rc, id, treat_disc_as,
+    return serialize_dynamic_primitive_member(ser, val, rc, disc_id, treat_disc_as,
                                               extensibility, optional, must_understand);
   }
   case TK_UINT32: {
     CORBA::ULong val;
-    rc = union_data->get_uint32_value(val, id);
+    const DDS::ReturnCode_t rc = union_data->get_uint32_value(val, DISCRIMINATOR_ID);
     disc_val = static_cast<CORBA::Long>(val);
-    return serialize_dynamic_primitive_member(ser, val, rc, id, treat_disc_as,
+    return serialize_dynamic_primitive_member(ser, val, rc, disc_id, treat_disc_as,
                                               extensibility, optional, must_understand);
   }
   case TK_INT64: {
     CORBA::LongLong val;
-    rc = union_data->get_int64_value(val, id);
+    const DDS::ReturnCode_t rc = union_data->get_int64_value(val, DISCRIMINATOR_ID);
     disc_val = static_cast<CORBA::Long>(val);
-    return serialize_dynamic_primitive_member(ser, val, rc, id, treat_disc_as,
+    return serialize_dynamic_primitive_member(ser, val, rc, disc_id, treat_disc_as,
                                               extensibility, optional, must_understand);
   }
   case TK_UINT64: {
     CORBA::ULongLong val;
-    rc = union_data->get_uint64_value(val, id);
+    const DDS::ReturnCode_t rc = union_data->get_uint64_value(val, DISCRIMINATOR_ID);
     disc_val = static_cast<CORBA::Long>(val);
-    return serialize_dynamic_primitive_member(ser, val, rc, id, treat_disc_as,
+    return serialize_dynamic_primitive_member(ser, val, rc, disc_id, treat_disc_as,
                                               extensibility, optional, must_understand);
   }
   default:
@@ -5802,7 +5786,7 @@ bool serialize_dynamic_element(Serializer& ser, DDS::DynamicData_ptr col_data,
   case TK_UNION:
   case TK_ARRAY:
   case TK_SEQUENCE: {
-    DDS::DynamicData_ptr elem_data;
+    DDS::DynamicData_var elem_data;
     rc = col_data->get_complex_value(elem_data, elem_id);
     return check_rc_from_get(rc, elem_id, elem_tk, "serialize_dynamic_element")
       && serialize(ser, elem_data, ext);
@@ -5838,7 +5822,7 @@ bool serialize_dynamic_collection(Serializer& ser, DDS::DynamicData_ptr data, Sa
 
   // Dheader
   const Encoding& encoding = ser.encoding();
-  size_t total_size;
+  size_t total_size = 0;
   if (!is_primitive(elem_tk)) {
     if (!serialized_size_dynamic_collection(encoding, total_size, data, ext) ||
         !ser.write_delimiter(total_size)) {
