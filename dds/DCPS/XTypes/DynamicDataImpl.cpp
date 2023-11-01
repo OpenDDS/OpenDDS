@@ -4480,7 +4480,7 @@ bool DynamicDataImpl::set_default_discriminator_value(CORBA::Long& value,
 
 namespace DCPS {
 
-// XCDR2 Serialization using the API of DynamicData. Intended to work with any implementation.
+// XCDR2 serialization using the DynamicData API (intended to work with any implementation).
 // The get functions must already handle try-construct behavior (in case of reading from
 // a XCDR backing store) or returning default value (in case the member data is missing
 // from the internal container). So it's guaranteed that some data for each valid
