@@ -1,0 +1,62 @@
+name: "Update ACE/TAO Versions"
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 33 23 * * *'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  update-ace-tao:
+    runs-on: ubuntu-22.04
+    steps:
+    - name: Checkout OpenDDS
+      uses: actions/checkout@v4
+      with:
+        path: OpenDDS
+        submodules: true
+    - name: Install Perl Dependencies
+      uses: shogo82148/actions-setup-perl@v1
+      with:
+        install-modules: |
+          Pithub
+          Net::SFTP::Foreign
+          Time::Piece
+          LWP::UserAgent
+          LWP::Protocol::https
+    - name: Run gitrelease.pl --update-ace-tao
+      run: |
+        cd OpenDDS
+        GITHUB_TOKEN=${{secrets.GITHUB_TOKEN}} perl tools/scripts/gitrelease.pl --update-ace-tao
+        # Help make the title and message for commit and PR
+        perl tools/scripts/modules/ini.pm acetao.ini --join ', ' '.*/version' > ../acevers
+        echo "ACEVERS=$(cat ../acevers)" >> $GITHUB_ENV
+        perl tools/scripts/modules/ini.pm acetao.ini --join ', ' '.*/url' > ../acevers_urls
+        echo "ACEVERS_URLS=$(cat ../acevers_urls)" >> $GITHUB_ENV
+    - name: Create Pull Request
+      uses: peter-evans/create-pull-request@v5
+      id: cpr
+      with:
+        path: OpenDDS
+        token: ${{ secrets.GITHUB_TOKEN }}
+        commit-message: |
+          Update ACE/TAO to ${{env.ACEVERS}}
+
+          The releases are ${{env.ACEVERS_URLS}}
+        committer: GitHub <noreply@github.com>
+        author: ${{ github.actor }} <${{ github.actor }}@users.noreply.github.com>
+        signoff: false
+        branch: workflows/update-ace-tao
+        delete-branch: true
+        title: Update ACE/TAO to ${{env.ACEVERS}}
+        body: "Releases: ${{env.ACEVERS_URLS}}"
+        labels: |
+          dependencies
+    - name: Check outputs
+      if: ${{ steps.cpr.outputs.pull-request-number }}
+      run: |
+        echo "Pull Request Number - ${{ steps.cpr.outputs.pull-request-number }}"
+        echo "Pull Request URL - ${{ steps.cpr.outputs.pull-request-url }}"

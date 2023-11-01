@@ -22,15 +22,13 @@ use FileHandle;
 use Cwd;
 use POSIX qw(strftime);
 use B qw/perlstring/;
+use Digest::MD5;
 
 use FindBin;
 use lib "$FindBin::RealBin/tools/scripts/modules";
 use command_utils;
 use ChangeDir;
-
-## Version of DOC Group ACE/TAO to download, uses the ACE version number
-my $doc_tao2_version = '6.5.20';
-my $doc_tao3_version = '7.1.2';
+use ini qw/read_ini_file/;
 
 my $backup_timestamp = strftime "%Y-%m-%d-%H-%M-%S", localtime time;
 
@@ -534,6 +532,24 @@ sub git_ensure_submodule {
   return !git_clone($path, git_submodule_prop($path, 'url'), commit => $commit);
 }
 
+sub md5sum {
+  my $path = shift();
+  my $expected_hash = shift();
+
+  my $md5 = Digest::MD5->new;
+  open(my $fh, $path) or die("Couldn't open \"$path\": $!");
+  $md5->addfile($fh);
+  my $hash = $md5->hexdigest();
+  my $failed = $expected_hash ne $hash;
+  if ($failed) {
+    print(
+      "MD5 hash mismatch for $path\n",
+      "  expected: $expected_hash\n",
+      "       got: $hash\n");
+  }
+  return $failed;
+}
+
 my $curpathRef = $specific{'refpre'} . 'PATH' . $specific{'refpost'};
 my %hostEnv = ('build' => 'host', 'PATH' => $curpathRef);
 my %targetEnv = ('build' => 'target', 'PATH' => $curpathRef);
@@ -870,39 +886,47 @@ if (!$ace_src || !$tao_src) {
     $tao_src = normalizePath('ACE_TAO/TAO');
   }
   else {
-    my($urlbase, $file, $download_message);
+    # Get ACE/TAO version info
+    my ($section_names, $sections) = read_ini_file("$FindBin::RealBin/acetao.ini");
+    my $ace_tao_version = $opts{'doc-group3'} ? $sections->{ace7tao3} : $sections->{ace6tao2};
+    if ($opts{verbose}) {
+      print("ACE/TAO Version Info:");
+      new Dumpvalue()->dumpValue($ace_tao_version);
+    }
+    my $ext = $is_windows ? 'zip' : 'tar.gz';
+    my $file = $ace_tao_version->{"$ext-filename"};
+    my $url = $ace_tao_version->{"$ext-url"};
+    my $md5_hash = $ace_tao_version->{"$ext-md5"};
 
-    if ($opts{'doc-group3'}) {
-      my $github_url_tao_version = $doc_tao3_version;
-      $github_url_tao_version =~ s/\./_/g;
-      $urlbase = 'https://github.com/DOCGroup/ACE_TAO/releases/download/ACE%2BTAO-' . $github_url_tao_version . '/';
-      $file = 'ACE+TAO-src-' . $doc_tao3_version . '.'
-        . ($is_windows ? 'zip' : 'tar.gz');
-      $download_message = "Downloading $file";
-    }
-    else {
-      my $github_url_tao_version = $doc_tao2_version;
-      $github_url_tao_version =~ s/\./_/g;
-      $urlbase = 'https://github.com/DOCGroup/ACE_TAO/releases/download/ACE%2BTAO-' . $github_url_tao_version . '/';
-      $file = 'ACE+TAO-src-' . $doc_tao2_version . '.'
-        . ($is_windows ? 'zip' : 'tar.gz');
-      $download_message = "Downloading $file";
-    }
+    # Check for an existing file
     if (-r $file) {
-      print "Using ACE+TAO source package $file\n" if $opts{'verbose'};
+      if (md5sum($file, $md5_hash)) {
+        if ($opts{'dry-run'}) {
+          print("Would remove existing $file and attempt to download\n");
+        }
+        else {
+          print("Removing existing $file and attempting to download\n");
+          unlink($file) or die("Couldn't remove $file: $!\nStopped");
+        }
+      }
+      elsif ($opts{'verbose'}) {
+        print("Using ACE+TAO source package $file\n");
+      }
     }
-    else {
+
+    if (!-r $file) {
+      my $dl_msg = "Downloading $file from using";
       $would_download = 1;
       eval {
         require LWP::UserAgent;
         my $ua = LWP::UserAgent->new;
         $ua->env_proxy;
-        print $download_message . "\n";
+        print("$dl_msg LWP\n");
         if ($opts{'dry-run'}) {
-          print "Dry-run: would LWP::UserAgent get $urlbase$file\n";
+          print("Dry-run: would LWP::UserAgent get $url\n");
         }
         else {
-          my $response = $ua->get($urlbase . $file, ':content_file' => $file);
+          my $response = $ua->get($url, ':content_file' => $file);
           if ($response->is_error) {
             die $response->message . "\nstopped";
           }
@@ -910,23 +934,23 @@ if (!$ace_src || !$tao_src) {
       };
       if ($@) {
         if (which('wget')) {
-          print $download_message . " (using wget)\n";
-          if (run_command(['wget', "$urlbase$file"])) {
-            die "ERROR from wget, stopped";
-          }
+          print("$dl_msg wget\n");
+          run_command(['wget', '--output-document', $file, $url], autodie => 1);
         }
         elsif (which('curl')) {
-          print $download_message . " (using curl)\n";
-          if (run_command(['curl', '-L', "$urlbase$file", '-o', "$file"])) {
-            die "ERROR: from curl, stopped";
-          }
+          print("$dl_msg curl\n");
+          run_command(['curl', '--location', $url, '--output', $file], autodie => 1);
         }
         else {
           die "ERROR: Can't download ACE+TAO using LWP, wget, or curl.\n" .
-            "Download ACE+TAO from $urlbase$file, place the file here\n, " .
+            "Download ACE+TAO from $url, place the file here\n, " .
             "and re-run the script.\nStopped";
         }
       }
+    }
+
+    if (!$opts{'dry-run'} && md5sum($file, $md5_hash)) {
+      die("MD5 hash check failed after download, try running again?\nStopped");
     }
 
     print "Extracting archive $file\n";
