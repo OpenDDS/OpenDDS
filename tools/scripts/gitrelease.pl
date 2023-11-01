@@ -155,6 +155,10 @@ sub help {
     "  --update-authors       Just update the AUTHORS files like in a release.\n" .
     "                         This doesn't run any release steps and doesn't require\n" .
     "                         the WORKSPACE or VERSION arguments.\n" .
+    "  --update-ace-tao       Update acetao.ini to the latest ACE/TAO releases.\n" .
+    "                         This doesn't run any release steps or require the\n" .
+    "                         WORKSPACE or VERSION arguments, but does require the\n" .
+    "                         GITHUB_TOKEN environment variable\n" .
     "\n" .
     "Environment Variables:\n" .
     "  GITHUB_TOKEN           GitHub token with repo access to publish release on\n" .
@@ -1046,6 +1050,104 @@ sub get_releases {
 
   my @sorted = sort { version_cmp($b->{version}, $a->{version}) } @releases;
   return \@sorted;
+}
+
+sub update_ace_tao {
+  my $settings = dclone(shift()); # Clone so we have different pithub
+  $settings->{pithub} = $settings->{pithub}->new(user => 'DOCGroup', repo => 'ACE_TAO');
+
+  my @arc_exts = ('zip', 'tar.gz', 'tar.bz2');
+  my @ace_tao_versions = (
+    {
+      name => 'ace6tao2',
+      min => parse_version('6.5.0'),
+    },
+    {
+      name => 'ace7tao3',
+      min => parse_version('7.1.0'),
+    },
+  );
+
+  # Get all the ACE/TAO releases
+  my $release_list = get_github_releases($settings);
+  my @releases = ();
+  while (my $release = $release_list->next) {
+    next if $release->{prerelease};
+    next if ($release->{tag_name} !~ /^ACE\+TAO-(\d+_\d+_\d+)$/);
+    my $ver = $1;
+    $ver =~ s/_/./g;
+    push(@releases, {
+      version => parse_version($ver),
+      release => $release,
+    });
+  }
+  my @sorted = sort { version_cmp($b->{version}, $a->{version}) } @releases;
+
+  for my $ace_tao_version (@ace_tao_versions) {
+    # Find versions that match ace_tao_versions. This is the first one that's
+    # less than MAJOR.MINOR+1.MICRO.
+    my $min = $ace_tao_version->{min};
+    my $plus = $min->{minor} + 1;
+    my $max = parse_version("$min->{major}.$plus.$min->{micro}");
+    for my $r (@sorted) {
+      if (version_lesser($r->{version}, $max)) {
+        my $version = $r->{version}->{string};
+        $ace_tao_version->{version} = $version;
+        $ace_tao_version->{url} = $r->{release}->{html_url};
+
+        # Get the filenames, URLs, and checksums for each asset.
+        my $prefix = quotemeta("ACE+TAO-src-$version.");
+        for my $asset (@{$r->{release}->{assets}}) {
+          next if ($asset->{name} !~ /^$prefix(.*)$/);
+          my $ext = $1;
+          my $ext_re = quotemeta($ext);
+          if (grep(/^$ext_re$/, @arc_exts)) {
+            $ace_tao_version->{"$ext-filename"} = $asset->{name};
+            $ace_tao_version->{"$ext-url"} = $asset->{browser_download_url};
+          }
+          elsif ($ext =~ /^(.*)\.md5$/) {
+            my $about_ext = $1;
+            my $about_ext_re = quotemeta($about_ext);
+            if (grep(/^$about_ext_re$/, @arc_exts)) {
+              my $content;
+              if (!download($asset->{browser_download_url}, content_ref => \$content)) {
+                die("Couldn't get file from $asset->{browser_download_url}");
+              }
+              $ace_tao_version->{"$about_ext-md5"} = substr($content, 0, 32);
+            }
+            else {
+              print("Ignored $asset->{name}\n");
+            }
+          }
+          else {
+            print("Ignored $asset->{name}\n");
+          }
+        }
+
+        last;
+      }
+    }
+  }
+
+  # Print the INI file
+  my $ini_path = 'acetao.ini';
+  open(my $ini_fh, '>', $ini_path) or die("Could not open $ini_path: $!");
+  print $ini_fh (
+    "# This file contains the common info for ACE/TAO releases. Insead of editing\n",
+    "# this directly, run:\n",
+    "#   GITHUB_TOKEN=... ./tools/scripts/gitrelease.pl --update-ace-tao\n");
+  for my $ace_tao_version (@ace_tao_versions) {
+    print $ini_fh ("\n[$ace_tao_version->{name}]\n",
+      "version=$ace_tao_version->{version}\n",
+      "url=$ace_tao_version->{url}\n");
+    for my $ext (@arc_exts) {
+      for my $suffix ('filename', 'url', 'md5') {
+        my $key = "$ext-$suffix";
+        print $ini_fh ("$key=$ace_tao_version->{$key}\n");
+      }
+    }
+  }
+  close($ini_fh);
 }
 
 ############################################################################
@@ -2806,6 +2908,7 @@ my $force_not_highest_version = 0;
 my $sftp_base_dir = $default_sftp_base_dir;
 my $upload_shapes_demo = 0;
 my $update_authors = 0;
+my $update_ace_tao = 0;
 
 GetOptions(
   'help' => \$print_help,
@@ -2830,6 +2933,7 @@ GetOptions(
   'skip-github=i' => \$skip_github,
   'upload-shapes-demo' => \$upload_shapes_demo,
   'update-authors' => \$update_authors,
+  'update-ace-tao' => \$update_ace_tao,
 ) or arg_error("Invalid option");
 
 if ($print_help) {
@@ -2855,7 +2959,7 @@ my $version = "";
 my $base_name = "";
 my $release_branch = "";
 
-my $ignore_args = $update_authors || $print_list_all;
+my $ignore_args = $update_authors || $print_list_all || $update_ace_tao;
 if ($ignore_args) {
   $parsed_version = $zero_version;
   $parsed_next_version = $zero_version;
@@ -2986,9 +3090,11 @@ my %global_settings = (
     force_not_highest_version => $force_not_highest_version,
 );
 
-if (!$ignore_args) {
+if (!$ignore_args || $update_ace_tao) {
   $global_settings{pithub} = new_pithub(\%global_settings);
+}
 
+if (!$ignore_args) {
   check_workspace(\%global_settings);
 
   if ($mock) {
@@ -3441,6 +3547,9 @@ if ($upload_shapes_demo) {
 }
 elsif ($update_authors) {
   remedy_authors(\%global_settings);
+}
+elsif ($update_ace_tao) {
+  update_ace_tao(\%global_settings);
 }
 elsif (!$alt && ($ignore_args || ($workspace && $parsed_version))) {
   my @steps_to_do;
