@@ -198,6 +198,22 @@ These come in the form of `RST roles <https://docutils.sourceforge.io/docs/ref/r
 
     :ghrelease:`This is the release <DDS-3.24>`
 
+.. rst:role:: acetaorel
+
+  ``acetaorel`` accepts the ACE/TAO major version nickname from :ghfile:`acetao.ini` and makes a link to that release this version of OpenDDS uses.
+
+  .. code-block:: rst
+
+    See :acetaorel:`ace6tao2`
+
+    Also see :acetaorel:`this <ace7tao3>`
+
+  Turns into:
+
+    See :acetaorel:`ace6tao2`
+
+    Also see :acetaorel:`this <ace7tao3>`
+
 .. rst:role:: omgissue
 
   .. code-block:: rst

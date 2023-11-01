@@ -1,5 +1,0 @@
-.. news-prs: 4295
-
-.. news-start-section: Additions
-- Added export macro to ConditionImpl
-.. news-end-section
