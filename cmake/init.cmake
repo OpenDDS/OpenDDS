@@ -9,6 +9,8 @@ if(_OPENDDS_INIT_CMAKE)
 endif()
 set(_OPENDDS_INIT_CMAKE TRUE)
 
+# This is required for CMake <=3.4 for cmake_parse_arguments. Remove this when
+# we no longer need to support those versions.
 include(CMakeParseArguments)
 
 include("${CMAKE_CURRENT_LIST_DIR}/opendds_version.cmake")
@@ -108,9 +110,9 @@ function(_opendds_feature name default_value)
     list(APPEND _OPENDDS_MPC_FEATURES "${mpc_feature}")
   endif()
 
-  set(_OPENDDS_ALL_FEATURES "${_OPENDDS_ALL_FEATURES}" CACHE INTERNAL "" FORCE)
-  set(_OPENDDS_FEATURE_VARS "${_OPENDDS_FEATURE_VARS}" CACHE INTERNAL "" FORCE)
-  set(_OPENDDS_MPC_FEATURES "${_OPENDDS_MPC_FEATURES}" CACHE INTERNAL "" FORCE)
+  set(_OPENDDS_ALL_FEATURES "${_OPENDDS_ALL_FEATURES}" PARENT_SCOPE)
+  set(_OPENDDS_FEATURE_VARS "${_OPENDDS_FEATURE_VARS}" PARENT_SCOPE)
+  set(_OPENDDS_MPC_FEATURES "${_OPENDDS_MPC_FEATURES}" PARENT_SCOPE)
 endfunction()
 
 # OpenDDS Features
@@ -119,7 +121,7 @@ _opendds_feature(OBJECT_MODEL_PROFILE ON DOC "Allows using presentation group Qo
 _opendds_feature(PERSISTENCE_PROFILE ON
   DOC "Allows using the durability and durability service QoS")
 _opendds_feature(OWNERSHIP_PROFILE ON
-  DOC "Allows history depth QoS adn implies OPENDDS_OWNERSHIP_KIND_EXCLUSIVE")
+  DOC "Allows history depth QoS and implies OPENDDS_OWNERSHIP_KIND_EXCLUSIVE")
 _opendds_feature(OWNERSHIP_KIND_EXCLUSIVE ${OPENDDS_OWNERSHIP_PROFILE}
   DOC "Allows the EXCLUSIVE ownership QoS")
 _opendds_feature(CONTENT_SUBSCRIPTION ON
@@ -147,7 +149,7 @@ else()
   _opendds_feature(STATIC ON MPC DOC "(Not for CMake-built OpenDDS)")
 endif()
 _opendds_feature(XERCES3 "${OPENDDS_SECURITY}" MPC TYPE PATH
-  DOC "Build with Xerces XML parser, needed for secuirty and QoS XML Handler")
+  DOC "Build with Xerces XML parser, needed for security and QoS XML Handler")
 _opendds_feature(IPV6 OFF MPC DOC "Build with IPv6 support")
 
 # TAO Features
