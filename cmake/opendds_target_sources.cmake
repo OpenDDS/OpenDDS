@@ -211,7 +211,7 @@ function(opendds_export_header target)
   _opendds_get_generated_file_path(${target} "${arg_INCLUDE_BASE}" "${target}_export.h" export_header)
 
   string(TOUPPER "${target}" uppercase_target)
-  if(NOT EXISTS ${output_file})
+  if(NOT EXISTS ${export_header})
     configure_file("${_OPENDDS_CMAKE_DIR}/export.h.in" "${export_header}")
   endif()
 
