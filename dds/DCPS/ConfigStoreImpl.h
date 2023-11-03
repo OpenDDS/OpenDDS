@@ -162,6 +162,11 @@ public:
                      NetworkAddressFormat format,
                      NetworkAddressKind kind) const;
 
+  // Section names are identified as values starting with '@' and
+  // having the original text of the last part of the section name.
+  // This is used to create objects of different types.
+  OPENDDS_VECTOR(String) get_section_names(const String& prefix) const;
+
   static DDS::DataWriterQos datawriter_qos();
   static DDS::DataReaderQos datareader_qos();
 

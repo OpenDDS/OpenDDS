@@ -12,7 +12,7 @@ use PerlDDS::Run_Test;
 
 $status = 0;
 
-my $debug ;# = 1;
+my $debug = 1;
 my $debuglevel;
 my $orbdebuglevel;
 my $verbose;
@@ -21,7 +21,7 @@ if( $debug) {
   $debuglevel = 10;
   $orbdebuglevel ;# = 5;
   $verbose    ;# = 1;
-  $debugfile  = "log.out";
+  #$debugfile  = "log.out";
 }
 
 unlink $debugfile if $debugfile;
