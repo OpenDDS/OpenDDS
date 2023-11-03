@@ -3,7 +3,7 @@ name: "Update ACE/TAO Versions"
 on:
   workflow_dispatch:
   schedule:
-    - cron: '0 33 23 * * *'
+    - cron: '33 23 * * *'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
