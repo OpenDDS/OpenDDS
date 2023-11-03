@@ -133,9 +133,21 @@ DDS::MemberId DynamicDataImpl::get_member_id_at_index(ACE_CDR::ULong index)
     if (index == 0) {
       return DISCRIMINATOR_ID;
     }
-    bool select_a_member;
+    const_single_iterator single_it;
+    const_complex_iterator complex_it;
+    const bool has_disc = has_discriminator_value(single_it, complex_it);
+    CORBA::Long disc_val;
+    DDS::DynamicType_var disc_type = get_base_type(type_desc_->discriminator_type());
+    if (has_disc) {
+      if (!get_discriminator_value(disc_val, single_it, complex_it, disc_type)) {
+        return MEMBER_ID_INVALID;
+      }
+    } else if (!set_default_discriminator_value(disc_val, disc_type)) {
+      return MEMBER_ID_INVALID;
+    }
+    bool has_selected_branch;
     DDS::MemberDescriptor_var selected_md;
-    const DDS::ReturnCode_t rc = get_selected_union_branch(select_a_member, selected_md);
+    const DDS::ReturnCode_t rc = XTypes::get_selected_union_branch(type_, disc_val, has_selected_branch, selected_md);
     if (rc != DDS::RETCODE_OK) {
       if (log_level >= LogLevel::Warning) {
         ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: DynamicDataImpl::get_member_id_at_index:"
@@ -143,7 +155,7 @@ DDS::MemberId DynamicDataImpl::get_member_id_at_index(ACE_CDR::ULong index)
       }
       return MEMBER_ID_INVALID;
     }
-    if (index == 1 && select_a_member) {
+    if (index == 1 && has_selected_branch) {
       return selected_md->id();
     }
     if (log_level >= LogLevel::Warning) {
@@ -195,24 +207,30 @@ CORBA::ULong DynamicDataImpl::get_sequence_item_count() const
     bs_item_count = backing_store_->get_item_count();
   }
 
-  CORBA::ULong largest_single_index = 0;
-  if (!container_.single_map_.empty() &&
-      !container_.get_largest_single_index(largest_single_index)) {
-    return 0;
+  CORBA::ULong container_item_count = 0;
+  if (!container_.single_map_.empty()
+      || !container_.sequence_map_.empty()
+      || !container_.complex_map_.empty()) {
+    CORBA::ULong largest_single_index = 0;
+    if (!container_.single_map_.empty() &&
+        !container_.get_largest_single_index(largest_single_index)) {
+      return 0;
+    }
+    CORBA::ULong largest_sequence_index = 0;
+    if (!container_.sequence_map_.empty() &&
+        !container_.get_largest_sequence_index(largest_sequence_index)) {
+      return 0;
+    }
+    CORBA::ULong largest_complex_index = 0;
+    if (!container_.complex_map_.empty() &&
+        !container_.get_largest_complex_index(largest_complex_index)) {
+      return 0;
+    }
+    container_item_count = std::max(largest_single_index,
+                                    std::max(largest_sequence_index,
+                                             largest_complex_index)) + 1;
   }
-  CORBA::ULong largest_sequence_index = 0;
-  if (!container_.sequence_map_.empty() &&
-      !container_.get_largest_sequence_index(largest_sequence_index)) {
-    return 0;
-  }
-  CORBA::ULong largest_complex_index = 0;
-  if (!container_.complex_map_.empty() &&
-      !container_.get_largest_complex_index(largest_complex_index)) {
-    return 0;
-  }
-  const CORBA::ULong container_item_count = std::max(largest_single_index,
-                                                     std::max(largest_sequence_index,
-                                                              largest_complex_index)) + 1;
+
   return std::max(bs_item_count, container_item_count);
 }
 
@@ -3577,7 +3595,7 @@ void DynamicDataImpl::move_sequence_helper(const const_sequence_iterator& it, Dy
 {
   const SequenceType& values = it->second.get<SequenceType>();
   for (CORBA::ULong i = 0; i < values.length(); ++i) {
-    data->insert_single(i, values[i]);
+    data->insert_single(index_to_id(i), values[i]);
   }
 }
 
@@ -3588,7 +3606,7 @@ void DynamicDataImpl::move_sequence_helper<DDS::StringSeq>(const const_sequence_
 {
   const DDS::StringSeq& values = it->second.get<DDS::StringSeq>();
   for (CORBA::ULong i = 0; i < values.length(); ++i) {
-    data->insert_single(i, values[i].in());
+    data->insert_single(index_to_id(i), values[i].in());
   }
 }
 
@@ -3599,7 +3617,7 @@ void DynamicDataImpl::move_sequence_helper<DDS::WstringSeq>(const const_sequence
 {
   const DDS::WstringSeq& values = it->second.get<DDS::WstringSeq>();
   for (CORBA::ULong i = 0; i < values.length(); ++i) {
-    data->insert_single(i, values[i].in());
+    data->insert_single(index_to_id(i), values[i].in());
   }
 }
 #endif
@@ -3610,7 +3628,7 @@ void DynamicDataImpl::move_sequence_helper<DDS::Int8Seq>(const const_sequence_it
 {
   const DDS::Int8Seq& values = it->second.get<DDS::Int8Seq>();
   for (CORBA::ULong i = 0; i < values.length(); ++i) {
-    data->insert_single(i, ACE_OutputCDR::from_int8(values[i]));
+    data->insert_single(index_to_id(i), ACE_OutputCDR::from_int8(values[i]));
   }
 }
 
@@ -3620,7 +3638,7 @@ void DynamicDataImpl::move_sequence_helper<DDS::UInt8Seq>(const const_sequence_i
 {
   const DDS::UInt8Seq& values = it->second.get<DDS::UInt8Seq>();
   for (CORBA::ULong i = 0; i < values.length(); ++i) {
-    data->insert_single(i, ACE_OutputCDR::from_uint8(values[i]));
+    data->insert_single(index_to_id(i), ACE_OutputCDR::from_uint8(values[i]));
   }
 }
 
@@ -3630,7 +3648,7 @@ void DynamicDataImpl::move_sequence_helper<DDS::CharSeq>(const const_sequence_it
 {
   const DDS::CharSeq& values = it->second.get<DDS::CharSeq>();
   for (CORBA::ULong i = 0; i < values.length(); ++i) {
-    data->insert_single(i, ACE_OutputCDR::from_char(values[i]));
+    data->insert_single(index_to_id(i), ACE_OutputCDR::from_char(values[i]));
   }
 }
 
@@ -3640,7 +3658,7 @@ void DynamicDataImpl::move_sequence_helper<DDS::ByteSeq>(const const_sequence_it
 {
   const DDS::ByteSeq& values = it->second.get<DDS::ByteSeq>();
   for (CORBA::ULong i = 0; i < values.length(); ++i) {
-    data->insert_single(i, ACE_OutputCDR::from_octet(values[i]));
+    data->insert_single(index_to_id(i), ACE_OutputCDR::from_octet(values[i]));
   }
 }
 
@@ -3650,7 +3668,7 @@ void DynamicDataImpl::move_sequence_helper<DDS::BooleanSeq>(const const_sequence
 {
   const DDS::BooleanSeq& values = it->second.get<DDS::BooleanSeq>();
   for (CORBA::ULong i = 0; i < values.length(); ++i) {
-    data->insert_single(i, ACE_OutputCDR::from_boolean(values[i]));
+    data->insert_single(index_to_id(i), ACE_OutputCDR::from_boolean(values[i]));
   }
 }
 
@@ -3661,7 +3679,7 @@ void DynamicDataImpl::move_sequence_helper<DDS::WcharSeq>(const const_sequence_i
 {
   const DDS::WcharSeq& values = it->second.get<DDS::WcharSeq>();
   for (CORBA::ULong i = 0; i < values.length(); ++i) {
-    data->insert_single(i, ACE_OutputCDR::from_wchar(values[i]));
+    data->insert_single(index_to_id(i), ACE_OutputCDR::from_wchar(values[i]));
   }
 }
 #endif
@@ -3675,8 +3693,16 @@ bool DynamicDataImpl::move_sequence_to_complex(const const_sequence_iterator& it
     return false;
   }
   DDS::DynamicType_var elem_type = get_base_type(seq_td->element_type());
+  const TypeKind elem_tk = elem_type->get_kind();
+  TypeKind treat_elem_as = elem_tk;
+  if (elem_tk == TK_ENUM && enum_bound(elem_type, treat_elem_as) != DDS::RETCODE_OK) {
+    return false;
+  }
+  if (elem_tk == TK_BITMASK && bitmask_bound(elem_type, treat_elem_as) != DDS::RETCODE_OK) {
+    return false;
+  }
 
-  switch (elem_type->get_kind()) {
+  switch (treat_elem_as) {
   case TK_INT8: {
     move_sequence_helper<DDS::Int8Seq>(it, data);
     break;
@@ -4824,7 +4850,8 @@ bool get_discriminator_value(CORBA::Long& disc_val, DDS::DynamicData_ptr union_d
   switch (treat_as) {
   case TK_BOOLEAN: {
     CORBA::Boolean value;
-    if (union_data->get_boolean_value(value, id) != DDS::RETCODE_OK) {
+    const DDS::ReturnCode_t rc = union_data->get_boolean_value(value, id);
+    if (!check_rc_from_get(rc, id, disc_tk, "get_discriminator_value")) {
       return false;
     }
     disc_val = static_cast<CORBA::Long>(value);
@@ -4832,7 +4859,8 @@ bool get_discriminator_value(CORBA::Long& disc_val, DDS::DynamicData_ptr union_d
   }
   case TK_BYTE: {
     CORBA::Octet value;
-    if (union_data->get_byte_value(value, id) != DDS::RETCODE_OK) {
+    const DDS::ReturnCode_t rc = union_data->get_byte_value(value, id);
+    if (!check_rc_from_get(rc, id, disc_tk, "get_discriminator_value")) {
       return false;
     }
     disc_val = static_cast<CORBA::Long>(value);
@@ -4840,7 +4868,8 @@ bool get_discriminator_value(CORBA::Long& disc_val, DDS::DynamicData_ptr union_d
   }
   case TK_CHAR8: {
     CORBA::Char value;
-    if (union_data->get_char8_value(value, id) != DDS::RETCODE_OK) {
+    const DDS::ReturnCode_t rc = union_data->get_char8_value(value, id);
+    if (!check_rc_from_get(rc, id, disc_tk, "get_discriminator_value")) {
       return false;
     }
     disc_val = static_cast<CORBA::Long>(value);
@@ -4848,7 +4877,8 @@ bool get_discriminator_value(CORBA::Long& disc_val, DDS::DynamicData_ptr union_d
   }
   case TK_CHAR16: {
     CORBA::WChar value;
-    if (union_data->get_char16_value(value, id) != DDS::RETCODE_OK) {
+    const DDS::ReturnCode_t rc = union_data->get_char16_value(value, id);
+    if (!check_rc_from_get(rc, id, disc_tk, "get_discriminator_value")) {
       return false;
     }
     disc_val = static_cast<CORBA::Long>(value);
@@ -4856,7 +4886,8 @@ bool get_discriminator_value(CORBA::Long& disc_val, DDS::DynamicData_ptr union_d
   }
   case TK_INT8: {
     CORBA::Int8 value;
-    if (union_data->get_int8_value(value, id) != DDS::RETCODE_OK) {
+    const DDS::ReturnCode_t rc = union_data->get_int8_value(value, id);
+    if (!check_rc_from_get(rc, id, disc_tk, "get_discriminator_value")) {
       return false;
     }
     disc_val = static_cast<CORBA::Long>(value);
@@ -4864,7 +4895,8 @@ bool get_discriminator_value(CORBA::Long& disc_val, DDS::DynamicData_ptr union_d
   }
   case TK_UINT8: {
     CORBA::UInt8 value;
-    if (union_data->get_uint8_value(value, id) != DDS::RETCODE_OK) {
+    const DDS::ReturnCode_t rc = union_data->get_uint8_value(value, id);
+    if (!check_rc_from_get(rc, id, disc_tk, "get_discriminator_value")) {
       return false;
     }
     disc_val = static_cast<CORBA::Long>(value);
@@ -4872,7 +4904,8 @@ bool get_discriminator_value(CORBA::Long& disc_val, DDS::DynamicData_ptr union_d
   }
   case TK_INT16: {
     CORBA::Short value;
-    if (union_data->get_int16_value(value, id) != DDS::RETCODE_OK) {
+    const DDS::ReturnCode_t rc = union_data->get_int16_value(value, id);
+    if (!check_rc_from_get(rc, id, disc_tk, "get_discriminator_value")) {
       return false;
     }
     disc_val = value;
@@ -4880,17 +4913,21 @@ bool get_discriminator_value(CORBA::Long& disc_val, DDS::DynamicData_ptr union_d
   }
   case TK_UINT16: {
     CORBA::UShort value;
-    if (union_data->get_uint16_value(value, id) != DDS::RETCODE_OK) {
+    const DDS::ReturnCode_t rc = union_data->get_uint16_value(value, id);
+    if (!check_rc_from_get(rc, id, disc_tk, "get_discriminator_value")) {
       return false;
     }
     disc_val = static_cast<CORBA::Long>(value);
     return true;
   }
-  case TK_INT32:
-    return union_data->get_int32_value(disc_val, id) == DDS::RETCODE_OK;
+  case TK_INT32: {
+    const DDS::ReturnCode_t rc = union_data->get_int32_value(disc_val, id);
+    return check_rc_from_get(rc, id, disc_tk, "get_discriminator_value");
+  }
   case TK_UINT32: {
     CORBA::ULong value;
-    if (union_data->get_uint32_value(value, id) != DDS::RETCODE_OK) {
+    const DDS::ReturnCode_t rc = union_data->get_uint32_value(value, id);
+    if (!check_rc_from_get(rc, id, disc_tk, "get_discriminator_value")) {
       return false;
     }
     disc_val = static_cast<CORBA::Long>(value);
@@ -4898,7 +4935,8 @@ bool get_discriminator_value(CORBA::Long& disc_val, DDS::DynamicData_ptr union_d
   }
   case TK_INT64: {
     CORBA::LongLong value;
-    if (union_data->get_int64_value(value, id) != DDS::RETCODE_OK) {
+    const DDS::ReturnCode_t rc = union_data->get_int64_value(value, id);
+    if (!check_rc_from_get(rc, id, disc_tk, "get_discriminator_value")) {
       return false;
     }
     disc_val = static_cast<CORBA::Long>(value);
@@ -4906,7 +4944,8 @@ bool get_discriminator_value(CORBA::Long& disc_val, DDS::DynamicData_ptr union_d
   }
   case TK_UINT64: {
     CORBA::ULongLong value;
-    if (union_data->get_uint64_value(value, id) != DDS::RETCODE_OK) {
+    const DDS::ReturnCode_t rc = union_data->get_uint64_value(value, id);
+    if (!check_rc_from_get(rc, id, disc_tk, "get_discriminator_value")) {
       return false;
     }
     disc_val = static_cast<CORBA::Long>(value);
