@@ -2816,7 +2816,6 @@ bool DynamicDataImpl::read_basic_in_single_map(char*& value, DDS::MemberId id)
 {
   const_single_iterator single_it = container_.single_map_.find(id);
   if (single_it != container_.single_map_.end()) {
-    CORBA::string_free(value);
     value = single_it->second.get_string();
     return true;
   }
@@ -2828,7 +2827,6 @@ bool DynamicDataImpl::read_basic_in_single_map(CORBA::WChar*& value, DDS::Member
 {
   const_single_iterator single_it = container_.single_map_.find(id);
   if (single_it != container_.single_map_.end()) {
-    CORBA::wstring_free(value);
     value = single_it->second.get_wstring();
     return true;
   }

@@ -878,7 +878,7 @@ TEST(dds_DCPS_XTypes_DynamicDataXcdrReadImpl, Mutable_ReadValueFromStruct)
     0x00,0x00,0x00,0x06, 0,0x61,0,0x62,0,0x63 // +4+4+10=198 wstr
   };
   ACE_Message_Block msg(1024);
-  msg.copy((const char*)single_value_struct, sizeof(single_value_struct));
+  msg.copy((const char*)single_value_struct, sizeof single_value_struct);
   XTypes::DynamicDataXcdrReadImpl data(&msg, xcdr2, dt);
 
   verify_single_value_struct<MutableSingleValueStruct>(&data);
