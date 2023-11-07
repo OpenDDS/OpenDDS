@@ -538,6 +538,7 @@ sub md5sum {
 
   my $md5 = Digest::MD5->new;
   open(my $fh, $path) or die("Couldn't open \"$path\": $!");
+  binmode $fh;
   $md5->addfile($fh);
   my $hash = $md5->hexdigest();
   my $failed = $expected_hash ne $hash;
