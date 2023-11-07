@@ -3457,6 +3457,9 @@ DDS::ReturnCode_t DynamicDataImpl::get_string_value(char*& value, DDS::MemberId 
   }
 
   CORBA::string_free(value);
+  // Set to nil since get_string_value of the backing store may be called which
+  // also releases the memory pointed to by value, causing double-free error.
+  value = 0;
   return get_single_value<TK_STRING8>(value, id);
 }
 
@@ -3464,6 +3467,7 @@ DDS::ReturnCode_t DynamicDataImpl::get_wstring_value(CORBA::WChar*& value, DDS::
 {
 #ifdef DDS_HAS_WCHAR
   CORBA::wstring_free(value);
+  value = 0;
   return get_single_value<TK_STRING16>(value, id);
 #else
   return DDS::RETCODE_UNSUPPORTED;
