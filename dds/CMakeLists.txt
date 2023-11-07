@@ -120,6 +120,7 @@ add_library(OpenDDS_Dcps
   DCPS/XTypes/DynamicTypeImpl.cpp
   DCPS/XTypes/DynamicTypeMemberImpl.cpp
   DCPS/XTypes/DynamicTypeSupport.cpp
+  DCPS/XTypes/IdlScanner.cpp
   DCPS/XTypes/MemberDescriptorImpl.cpp
   DCPS/XTypes/TypeAssignability.cpp
   DCPS/XTypes/TypeDescriptorImpl.cpp
@@ -400,6 +401,7 @@ target_sources(OpenDDS_Dcps
     DCPS/XTypes/DynamicTypeMemberImpl.h
     DCPS/XTypes/DynamicTypeSupport.h
     DCPS/XTypes/External.h
+    DCPS/XTypes/IdlScanner.h
     DCPS/XTypes/MemberDescriptorImpl.h
     DCPS/XTypes/TypeAssignability.h
     DCPS/XTypes/TypeDescriptorImpl.h

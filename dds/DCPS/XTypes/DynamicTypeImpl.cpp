@@ -199,12 +199,12 @@ bool test_equality(DDS::DynamicType_ptr lhs, DDS::DynamicType_ptr rhs, DynamicTy
     return true;
   }
 
-  OPENDDS_ASSERT(lhs);
-  OPENDDS_ASSERT(rhs);
-
   if (lhs == 0 || rhs == 0) {
     return false;
   }
+
+  OPENDDS_ASSERT(lhs);
+  OPENDDS_ASSERT(rhs);
 
   const DynamicTypePtrPair this_pair = std::make_pair(lhs, rhs);
   DynamicTypePtrPairSeen::const_iterator have_seen = dt_ptr_pair.find(this_pair);
