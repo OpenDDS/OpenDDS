@@ -1,4 +1,4 @@
-.. _xtypes--xtypes:
+.. _xtypes:
 
 ######
 XTypes
@@ -64,7 +64,7 @@ There are 3 kinds of extensibility for types:
   This can be considered a non-extensible constructed type, with behavior similar to that of a type created before XTypes.
   A type can be marked as final with the :ref:`@final <xtypes--final>` annotation.
 
-The default extensibility can be changed with the :ref:`--default-extensibility <opendds_idl--default-extensibility>` opendds_idl option.
+The default extensibility can be changed with :option:`opendds_idl --default-extensibility`.
 
 Structs, unions, and enums are the only types which can use any of the extensibilities.
 
@@ -482,19 +482,19 @@ Type Compatibility
 When a reader/writer match is happening, type consistency enforcement checks that the two types are compatible according to the type objects if they are available.
 This check will not happen if OpenDDS has been :ref:`configured not to generate or use type objects <xtypes--representing-types-with-typeobject-and-dynamictype>` or if the remote DDS doesn't support type objects.
 The full type object compatibility check is too detailed to reproduce here.
-It can be found in section 7.2.4 of the XTypes 1.3 specification.
+It can be found in :omgspec:`xtypes:7.2.4`.
 In general though two topic types and their nested types are compatible if:
 
-  * Extensibilities of shared types match
-  * Extensibility rules haven't been broken, for example:
+* Extensibilities of shared types match
+* Extensibility rules haven't been broken, for example:
 
-    * Changing a ``@final`` struct
-    * Adding a member in the middle of an ``@appendable`` struct
+  * Changing a ``@final`` struct
+  * Adding a member in the middle of an ``@appendable`` struct
 
-  * Length bounds of strings and sequences are the same or greater
-  * Lengths of arrays are exactly the same
-  * The keys of the types match exactly
-  * Shared member IDs match when required, like when they are final or are being used as keys
+* Length bounds of strings and sequences are the same or greater
+* Lengths of arrays are exactly the same
+* The keys of the types match exactly
+* Shared member IDs match when required, like when they are final or are being used as keys
 
 If the type objects are compatible then the match goes ahead.
 If one or both type objects are not available, then OpenDDS falls back to checking the names each entity's ``TypeSupport`` was given.
@@ -647,7 +647,7 @@ Determining Extensibility
 
 The extensibility annotations can explicitly define the :ref:`extensibility <xtypes--extensibility>` of a type.
 If no extensibility annotation is used, then the type will have the default extensibility.
-This will be `appendable` unless the :ref:`--default-extensibility <opendds_idl--default-extensibility>` `opendds_idl` option is to override the default.
+This will be `appendable` unless the :option:`opendds_idl --default-extensibility` is used to override the default.
 
 .. _xtypes--mutable:
 
@@ -873,7 +873,7 @@ Enabling Use of CompleteTypeObjects
     Sect<16.7.1.1>
 
 To enable use of ``CompleteTypeObject``\s needed for the dynamic binding, they must be generated and OpenDDS must be configured to use them.
-To generate them, :ref:`-Gxtypes-complete <opendds_idl--gxtypes-complete>` must be passed to ``opendds_idl`` (:ref:`opendds_idl--opendds-idl-command-line-options`).
+To generate them, use :option:`opendds_idl -Gxtypes-complete`.
 For MPC, this can be done by adding this to the opendds_idl arguments for idl files in the project, like this:
 
 .. code-block:: mpc
@@ -1141,7 +1141,7 @@ DynamicDataWriters and DynamicDataReaders
 DynamicDataWriters and DataReaders are designed to work like any other DataWriter and DataReader except that their APIs are defined in terms of the DynamicData type instead of a type generated from IDL.
 Each DataWriter and DataReader has an associated Topic and that Topic has a data type (represented by a TypeSupport object).
 Behavior related to keys, QoS policies, discovery and built-in topics, DDS Security, and transport is not any different for a DynamicDataWriter or DataReader.
-One exception is that in the current implementation, Content-Subscription features (:ref:`content_subscription_profile--content-subscription-profile`) are not supported for DynamicDataWriters and DataReaders.
+One exception is that in the current implementation, :ref:`content_subscription_profile` is not supported for DynamicDataWriters and DataReaders.
 
 .. _xtypes--obtaining-dynamictype-and-registering-typesupport:
 
@@ -1192,7 +1192,7 @@ To do this, use the ``get_dynamic_type`` method on the singleton ``Service_Parti
 
 The two input parameters to ``get_dynamic_type`` are the ``participant`` (an object reference to the DomainParticipant that will be used to register our TypeSupport and create Topics, DataWriters, and/or DataReders) and the ``key`` which is the ``DDS::BuiltinTopicKey_t`` that identifies the remote entity which has the data type that we'll use.
 This key can be obtained from the Built-In Publications topic (which identifies remote DataWriters) or the Built-In Subscriptions topic (which identifies remote DataReaders).
-See :ref:`built_in_topics--built-in-topics` for details on using the Built-In Topics.
+See :ref:`bit` for details on using the Built-In Topics.
 
 The type obtained from ``get_dynamic_type`` can be used to create and register a TypeSupport object.
 
@@ -1295,10 +1295,10 @@ Annotations
     Sect<16.8.2>
 
 IDL4 defines many standardized annotations and XTypes uses some of them.
-The Annotations recognized by XTypes are in Table 21 in XTypes 1.3.
+The Annotations recognized by XTypes are in Table 21 in :omgspec:`xtypes:7.3.1.2.2 Using Built-in Annotations`.
 Of those listed in that table, the following are not supported in OpenDDS.
 They are listed in groups defined by the rows of that table.
-Some annotations in that table, and not listed here, can only be used with new capabilities of the Type System (:ref:`xtypes--type-system`).
+Some annotations in that table, and not listed here, can only be used with new capabilities of the :ref:`xtypes--type-system`.
 
 * Struct members
 

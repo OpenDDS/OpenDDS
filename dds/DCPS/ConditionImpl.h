@@ -24,7 +24,7 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-class ConditionImpl
+class OpenDDS_Dcps_Export ConditionImpl
   : public virtual OpenDDS::DCPS::LocalObject<DDS::Condition> {
 public:
   DDS::ReturnCode_t attach_to_ws(DDS::WaitSet_ptr ws);

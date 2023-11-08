@@ -1497,7 +1497,7 @@ bool StaticEndpointManager::has_dcps_key(const GUID_t& topicId) const
 }
 
 StaticDiscovery::StaticDiscovery(const RepoKey& key)
-  : Discovery(key)
+  : key_(key)
 {}
 
 namespace {

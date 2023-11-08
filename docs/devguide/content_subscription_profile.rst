@@ -1,4 +1,4 @@
-.. _content_subscription_profile--content-subscription-profile:
+.. _content_subscription_profile:
 
 ############################
 Content-Subscription Profile
@@ -31,7 +31,7 @@ Content-filtered topic and query condition allow filtering (selection) of data s
 Additionally, query condition allows sorting the result set returned from a data reader's ``read()`` or ``take()`` operation.
 Multi topic also has this selection capability as well as the ability to aggregate data from different data writers into a single data type and data reader.
 
-If you are not planning on using the Content-Subscription Profile features in your application, you can configure OpenDDS to remove support for it at build time (:ref:`introduction--content-subscription-profile`).
+If you are not planning on using the Content-Subscription Profile features in your application, you can configure OpenDDS to remove support for it at build time (:ref:`building--content-subscription-profile`).
 
 .. _content_subscription_profile--content-filtered-topic:
 
@@ -70,7 +70,7 @@ This data reader is functionally equivalent to a normal data reader except that 
 Filter expressions are first evaluated at the publisher so that data samples which would be ignored by the subscriber can be dropped before even getting to the transport.
 This feature can be turned off with ``-DCPSPublisherContentFilter 0`` or the equivalent setting in the ``[common]`` section of the configuration file.
 The behavior of non-default ``DEADLINE`` or ``LIVELINESS`` QoS policies may be affected by this policy.
-Special consideration must be given to how the "missing" samples impact the QoS behavior, see the document in ``docs/design/CONTENT_SUBSCRIPTION``.
+Special consideration must be given to how the "missing" samples impact the QoS behavior, see the document in :ghfile:`docs/design/CONTENT_SUBSCRIPTION`.
 
 .. note:: RTPS_UDP transport does not always do Writer-side filtering.
   It does not currently implement transport level filtering, but may be able to filter above the transport layer.
@@ -498,7 +498,7 @@ Next we have the IDL for the resulting data type:
 
 Based on this IDL, the following topic expression can be used to combine data from a topic ``Location`` which uses type ``LocationInfo`` and a topic ``FlightPlan`` which uses type ``PlanInfo``:
 
-::
+.. code-block:: sql
 
     SELECT flight_name, x, y, z AS height FROM Location NATURAL JOIN FlightPlan WHERE height < 1000 AND x <23
 

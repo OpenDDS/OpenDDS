@@ -76,6 +76,11 @@ private:
 
   typedef OPENDDS_SET(SequenceRange) NakPeerSet;
   NakPeerSet nak_peers_;
+
+  const TimeDuration nak_timeout_;
+  const size_t nak_delay_intervals_;
+  const size_t nak_max_;
+  const TimeDuration nak_interval_;
 };
 
 } // namespace DCPS

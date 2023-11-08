@@ -1,4 +1,4 @@
-.. _safety_profile--safety-profile:
+.. _safety_profile:
 
 ##############
 Safety Profile
@@ -52,12 +52,12 @@ When developing the Safety Profile, the following DDS Compliance Profiles were d
 
 * persistence_profile
 
-See :ref:`introduction--disabling-the-building-of-compliance-profile-features` for more details on compliance profiles.
+See :ref:`building--disabling-the-building-of-compliance-profile-features` for more details on compliance profiles.
 It is possible that enabling any of these compliance profiles in a Safety Profile build will result in a compile-time or run-time error.
 
 To build OpenDDS Safety Profile, pass the command line argument ``--safety-profile`` to the configure script along with any other arguments needed for your platform or configuration.
 When safety profile is enabled in the configure script, the four compliance profiles listed above default to disabled.
-See :ref:`introduction--installation` and the ``INSTALL.md`` file in the source distribution for more information about the configure script.
+See :ref:`install` and the ``INSTALL.md`` file in the source distribution for more information about the configure script.
 
 .. _safety_profile--safety-profile-configurations-of-ace:
 
@@ -95,8 +95,8 @@ Run-time Configurable Options
 ..
     Sect<13.4>
 
-The memory pool used by OpenDDS can be configured by setting values in the [common] section of the configuration file.
-See :ref:`run_time_configuration--common-configuration-options` and the pool_size and pool_granularity rows of table :ref:`Table 7-2 <run_time_configuration--reftable9>`.
+The memory pool used by OpenDDS can be configured by setting values in the ``[common]`` section of the configuration file.
+See ``pool_size`` and ``pool_granularity`` in :ref:`run_time_configuration--common-configuration-options`.
 
 .. _safety_profile--running-ace-and-opendds-tests:
 

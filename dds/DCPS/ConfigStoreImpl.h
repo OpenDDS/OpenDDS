@@ -95,6 +95,7 @@ public:
   };
 
   enum NetworkAddressKind {
+    Kind_ANY,
     Kind_IPV4
 #ifdef ACE_HAS_IPV6
     , Kind_IPV6
@@ -142,7 +143,8 @@ public:
   void set(const char* key,
            const String& value);
   String get(const char* key,
-             const String& value) const;
+             const String& value,
+             bool allow_empty = true) const;
 
   void set(const char* key,
            const TimeDuration& value,
@@ -159,6 +161,11 @@ public:
                      const NetworkAddress& value,
                      NetworkAddressFormat format,
                      NetworkAddressKind kind) const;
+
+  // Section names are identified as values starting with '@' and
+  // having the original text of the last part of the section name.
+  // This is used to create objects of different types.
+  OPENDDS_VECTOR(String) get_section_names(const String& prefix) const;
 
   static DDS::DataWriterQos datawriter_qos();
   static DDS::DataReaderQos datareader_qos();

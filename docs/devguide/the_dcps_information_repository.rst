@@ -1,4 +1,5 @@
-.. _the_dcps_information_repository--the-dcps-information-repository:
+.. _the_dcps_information_repository:
+.. _inforepo:
 
 ###############################
 The DCPS Information Repository
@@ -25,11 +26,7 @@ DCPS Information Repository Options
 
 The table below shows the command line options for the ``DCPSInfoRepo`` server:
 
-.. _the_dcps_information_repository--reftable30:
-
-**Table  DCPS Information Repository Options**
-
-.. list-table::
+.. list-table:: DCPS Information Repository Options
    :header-rows: 1
 
    * - Option
@@ -106,9 +103,7 @@ Currently available configuration options are:
 
 .. _the_dcps_information_repository--reftable31:
 
-**Table  InfoRepo persistence directives**
-
-.. list-table::
+.. list-table:: InfoRepo persistence directives
    :header-rows: 1
 
    * - Options
@@ -184,7 +179,7 @@ Failover sequencing will attempt to reach the next repository in numeric sequenc
 This sequence is unique to each application configured, and should be different to avoid overloading any individual repository.
 
 Once the topology information has been specified, then repositories will need to be started with two additional command line arguments.
-These are shown in :ref:`Table 9-1 <the_dcps_information_repository--reftable30>`.
+These are shown in :ref:`the_dcps_information_repository--dcps-information-repository-options`.
 One, ``-FederationId <value>``, specifies the unique identifier for a repository within the federation.
 This is a 32 bit numeric value and needs to be unique for all possible federation topologies.
 
@@ -218,16 +213,13 @@ It has a command format syntax of:
 
        repoctl <cmd> <arguments>
 
-Where each individual command has its own format as shown in :ref:`Table 9-3 <the_dcps_information_repository--reftable32>`.
 Some options contain endpoint information.
 This information consists of an optional host specification, separated from a required port specification by a colon.
 This endpoint information is used to create a CORBA object reference using the corbaloc: syntax in order to locate the 'Federator' object of the repository server.
 
 .. _the_dcps_information_repository--reftable32:
 
-**Table  repoctl Repository Management Command**
-
-.. list-table::
+.. list-table:: repoctl Repository Management Command
    :header-rows: 1
 
    * - Command
@@ -277,13 +269,9 @@ A join command specifies two repository servers (by endpoint) and asks the secon
 This generates a CORBA object reference of ``corbaloc::otherhost:1812/Federator`` that the federator connects to and invokes a join operation.
 The join operation invocation passes the default Federation Domain value (because we did not specify one) and the location of the joining repository which is obtained by resolving the object reference ``corbaloc::localhost:2112/Federator``.
 
-A full description of the command arguments are shown in :ref:`Table 9-4 <the_dcps_information_repository--reftable33>`.
-
 .. _the_dcps_information_repository--reftable33:
 
-**Table  Federation Management Command Arguments**
-
-.. list-table::
+.. list-table:: Federation Management Command Arguments
    :header-rows: 1
 
    * - Option

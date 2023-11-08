@@ -54,7 +54,7 @@ MulticastLoader::init(int /*argc*/, ACE_TCHAR* /*argv*/[])
     ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("(%P|%t) MulticastLoader::init:")
       ACE_TEXT(" failed to obtain MulticastInst.\n")), -1);
   }
-  mi->reliable_ = false;
+  mi->reliable(false);
   cfg->sorted_insert(default_unrel);
 
   TransportInst_rch default_rel =

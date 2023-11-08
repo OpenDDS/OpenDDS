@@ -4,11 +4,12 @@
 # This file is setup the way it is for testing purposes. For a cleaner example
 # see DevGuideExamples/DCPS/Messenger/CMakeLists.txt
 
+cmake_minimum_required(VERSION 3.8...3.27)
 project(opendds_messenger_1 CXX)
-cmake_minimum_required(VERSION 3.8.2)
 enable_testing()
 
 find_package(OpenDDS REQUIRED)
+include(opendds_testing)
 
 if(NOT OPENDDS_OWNERSHIP_PROFILE)
   message(FATAL_ERROR "This test requires OpenDDS to be built with Ownership Profile enabled")
@@ -64,6 +65,4 @@ endforeach()
 
 # Testing
 configure_file("${src}/run_test.pl" . COPYONLY)
-add_test(NAME "${target_prefix}test"
-  COMMAND perl run_test.pl $<$<BOOL:$<CONFIG>>:-ExeSubDir> $<CONFIG>
-)
+opendds_add_test(COMMAND perl run_test.pl)

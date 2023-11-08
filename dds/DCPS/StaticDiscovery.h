@@ -439,6 +439,7 @@ private:
   bool has_dcps_key(const GUID_t& topicId) const;
 
   ACE_Thread_Mutex& lock_;
+  const Discovery::RepoKey key_;
   GUID_t participant_id_;
   RepoIdSet ignored_guids_;
   unsigned int topic_counter_;
@@ -862,6 +863,8 @@ class OpenDDS_Dcps_Export StaticDiscovery : public Discovery {
 public:
   explicit StaticDiscovery(const RepoKey& key);
 
+  RepoKey key() const { return key_; }
+
   int load_configuration(ACE_Configuration_Heap& config);
 
   virtual GUID_t generate_participant_guid();
@@ -1016,6 +1019,7 @@ private:
 
   static StaticDiscovery_rch instance_;
 
+  const RepoKey key_;
   mutable ACE_Thread_Mutex lock_;
 
   DomainParticipantMap participants_;

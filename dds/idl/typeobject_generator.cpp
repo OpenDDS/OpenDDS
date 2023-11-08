@@ -554,10 +554,10 @@ typeobject_generator::declare_get_type_map()
 
   be_global->add_include("dds/DCPS/XTypes/TypeObject.h", BE_GlobalData::STREAM_H);
 
-  be_global->impl_ << "static const XTypes::TypeMap& get_minimal_type_map();\n";
+  be_global->impl_ << "static const XTypes::TypeMap& OPENDDS_IDL_FILE_SPECIFIC(get_minimal_type_map, 0)();\n";
 
   if (produce_xtypes_complete_) {
-    be_global->impl_ << "static const XTypes::TypeMap& get_complete_type_map();\n";
+    be_global->impl_ << "static const XTypes::TypeMap& OPENDDS_IDL_FILE_SPECIFIC(get_complete_type_map, 0)();\n";
   }
 }
 
@@ -587,7 +587,7 @@ typeobject_generator::gen_epilogue()
   for (OpenDDS::XTypes::TypeMap::const_iterator pos = minimal_type_map_.begin();
        pos != minimal_type_map_.end(); ++pos, ++idx) {
     be_global->impl_ <<
-      "XTypes::TypeObject minimal_to" << idx << "()\n"
+      "XTypes::TypeObject OPENDDS_IDL_FILE_SPECIFIC(minimal_to, " << idx << ")()\n"
       "{\n"
       "  const unsigned char to_bytes[] = { ";
     dump_bytes(pos->second);
@@ -603,14 +603,14 @@ typeobject_generator::gen_epilogue()
   }
 
   be_global->impl_ <<
-    "XTypes::TypeMap get_minimal_type_map_private()\n"
+    "XTypes::TypeMap OPENDDS_IDL_FILE_SPECIFIC(get_minimal_type_map_private, 0)()\n"
     "{\n"
     "  XTypes::TypeMap tm;\n";
 
   idx = 0;
   for (OpenDDS::XTypes::TypeMap::const_iterator pos = minimal_type_map_.begin();
        pos != minimal_type_map_.end(); ++pos, ++idx) {
-    be_global->impl_ << "  tm[" << pos->first << "] = minimal_to" << idx << "();\n";
+    be_global->impl_ << "  tm[" << pos->first << "] = OPENDDS_IDL_FILE_SPECIFIC(minimal_to, " << idx << ")();\n";
   }
 
   be_global->impl_ <<
@@ -622,7 +622,7 @@ typeobject_generator::gen_epilogue()
     for (OpenDDS::XTypes::TypeMap::const_iterator pos = complete_type_map_.begin();
          pos != complete_type_map_.end(); ++pos, ++idx) {
       be_global->impl_ <<
-        "XTypes::TypeObject complete_to" << idx << "()\n"
+        "XTypes::TypeObject OPENDDS_IDL_FILE_SPECIFIC(complete_to, " << idx << ")()\n"
         "{\n"
         "  const unsigned char to_bytes[] = {\n";
       dump_bytes(pos->second);
@@ -638,14 +638,14 @@ typeobject_generator::gen_epilogue()
     }
 
     be_global->impl_ <<
-      "XTypes::TypeMap get_complete_type_map_private()\n"
+      "XTypes::TypeMap OPENDDS_IDL_FILE_SPECIFIC(get_complete_type_map_private, 0)()\n"
       "{\n"
       "  XTypes::TypeMap tm;\n";
 
     idx = 0;
     for (OpenDDS::XTypes::TypeMap::const_iterator pos = complete_type_map_.begin();
          pos != complete_type_map_.end(); ++pos, ++idx) {
-      be_global->impl_ << "  tm[" << pos->first << "] = complete_to" << idx << "();\n";
+      be_global->impl_ << "  tm[" << pos->first << "] = OPENDDS_IDL_FILE_SPECIFIC(complete_to, " << idx << ")();\n";
     }
 
     be_global->impl_ <<
@@ -660,16 +660,16 @@ typeobject_generator::gen_epilogue()
     "  if (tm.empty()) {\n";
 
   be_global->impl_ <<
-    "const XTypes::TypeMap& get_minimal_type_map()\n" << common <<
-    "    tm = get_minimal_type_map_private();\n"
+    "const XTypes::TypeMap& OPENDDS_IDL_FILE_SPECIFIC(get_minimal_type_map, 0)()\n" << common <<
+    "    tm = OPENDDS_IDL_FILE_SPECIFIC(get_minimal_type_map_private, 0)();\n"
     "  }\n"
     "  return tm;\n"
     "}\n\n";
 
   if (produce_xtypes_complete_) {
     be_global->impl_ <<
-      "const XTypes::TypeMap& get_complete_type_map()\n" << common <<
-      "    tm = get_complete_type_map_private();\n"
+      "const XTypes::TypeMap& OPENDDS_IDL_FILE_SPECIFIC(get_complete_type_map, 0)()\n" << common <<
+      "    tm = OPENDDS_IDL_FILE_SPECIFIC(get_complete_type_map_private, 0)();\n"
       "  }\n"
       "  return tm;\n"
       "}\n";
@@ -846,14 +846,6 @@ typeobject_generator::strong_connect(AST_Type* type, const std::string& anonymou
       break;
     }
 
-  case AST_ConcreteType::NT_string:
-  case AST_ConcreteType::NT_wstring:
-  case AST_ConcreteType::NT_pre_defined:
-  case AST_ConcreteType::NT_fixed:
-  case AST_ConcreteType::NT_interface:
-  case AST_ConcreteType::NT_interface_fwd:
-      break;
-
   case AST_ConcreteType::NT_struct_fwd:
   case AST_ConcreteType::NT_union_fwd:
   case AST_ConcreteType::NT_native:
@@ -892,6 +884,11 @@ typeobject_generator::strong_connect(AST_Type* type, const std::string& anonymou
   case AST_ConcreteType::NT_field:
   case AST_ConcreteType::NT_enum_val:
     be_util::misc_error_and_abort("Unexpected AST type", type);
+    break;
+
+  default:
+    // Different versions of TAO_IDL_FE can have additional NT_* enumerators.
+    // Ignoring them with a default: case silences a compiler warning.
     break;
   }
 
@@ -1642,6 +1639,11 @@ typeobject_generator::generate_type_identifier(AST_Type* type, bool force_type_o
   case AST_ConcreteType::NT_field:
   case AST_ConcreteType::NT_enum_val:
     be_util::misc_error_and_abort("Unexpected AST type", type);
+
+  default:
+    // Different versions of TAO_IDL_FE can have additional NT_* enumerators.
+    // Ignoring them with a default: case silences a compiler warning.
+    break;
   }
 }
 
@@ -1736,7 +1738,7 @@ typeobject_generator::generate(AST_Type* node, UTL_ScopedName* name)
     Function gti(decl.c_str(), "const XTypes::TypeMap&", "");
     gti.endArgs();
     be_global->impl_ <<
-      "  return get_minimal_type_map();\n";
+      "  return OPENDDS_IDL_FILE_SPECIFIC(get_minimal_type_map, 0)();\n";
   }
 
   if (produce_xtypes_complete_) {
@@ -1763,7 +1765,7 @@ typeobject_generator::generate(AST_Type* node, UTL_ScopedName* name)
       Function gti(decl.c_str(), "const XTypes::TypeMap&", "");
       gti.endArgs();
       be_global->impl_ <<
-        "  return get_complete_type_map();\n";
+        "  return OPENDDS_IDL_FILE_SPECIFIC(get_complete_type_map, 0)();\n";
     }
   }
 

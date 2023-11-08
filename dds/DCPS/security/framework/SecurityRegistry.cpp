@@ -277,18 +277,16 @@ SecurityRegistry::default_config(const SecurityConfig_rch& config)
 SecurityConfig_rch
 SecurityRegistry::builtin_config() const
 {
-#if defined(OPENDDS_SECURITY)
+#ifdef OPENDDS_SECURITY
   GuardType g1(default_load_lock_);
   GuardType guard(lock_);
   if (!builtin_config_) {
-#if !defined(ACE_AS_STATIC_LIBS)
     LibDirectiveMap::const_iterator lib_iter = lib_directive_map_.find(DEFAULT_PLUGIN_NAME);
     OPENDDS_ASSERT(lib_iter != lib_directive_map_.end());
     ACE_TString directive = ACE_TEXT_CHAR_TO_TCHAR(lib_iter->second.c_str());
     guard.release();
     ACE_Service_Config::process_directive(directive.c_str());
     guard.acquire();
-#endif
   }
 #endif
   return builtin_config_;
@@ -372,8 +370,6 @@ SecurityRegistry::load_security_configuration(ACE_Configuration_Heap& cf)
 void
 SecurityRegistry::load_security_plugin_lib(const OPENDDS_STRING& security_plugin_type)
 {
-  ACE_UNUSED_ARG(security_plugin_type);
-#if !defined(ACE_AS_STATIC_LIBS)
   GuardType guard(lock_);
   LibDirectiveMap::iterator lib_iter = lib_directive_map_.find(security_plugin_type);
   if (lib_iter != lib_directive_map_.end()) {
@@ -381,7 +377,6 @@ SecurityRegistry::load_security_plugin_lib(const OPENDDS_STRING& security_plugin
     guard.release();
     ACE_Service_Config::process_directive(directive.c_str());
   }
-#endif
 }
 
 bool
@@ -426,7 +421,6 @@ SecurityPluginInst_rch SecurityRegistry::get_plugin_inst(
   SecurityPluginInst_rch plugin_inst;
 
   if (find(registered_plugins_, plugin_name, plugin_inst) != 0 && attempt_fix) {
-#if !defined(ACE_AS_STATIC_LIBS)
     guard.release();
     // Not present, try to load library
     load_security_plugin_lib(plugin_name);
@@ -434,7 +428,6 @@ SecurityPluginInst_rch SecurityRegistry::get_plugin_inst(
 
     // Try to find it again
     find(registered_plugins_, plugin_name, plugin_inst);
-#endif
   }
 
   return plugin_inst;

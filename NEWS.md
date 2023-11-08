@@ -1,5 +1,65 @@
 # OpenDDS Releases
 
+## Version 3.26.0 of OpenDDS
+
+Released 2023-10-23
+
+Download [this release on GitHub](https://github.com/OpenDDS/OpenDDS/releases/tag/DDS-3.26).
+
+Read [the documenation for this release on Read the Docs](https://opendds.readthedocs.io/en/dds-3.26).
+
+### Additions
+
+* OpenDDS can now be built using CMake for most common scenarios. ([PR #4203](https://github.com/OpenDDS/OpenDDS/pull/4203), [PR #4214](https://github.com/OpenDDS/OpenDDS/pull/4214))
+    * This is still considered somewhat experimental as it doesn't support [everything that an MPC-built OpenDDS currently can](https://opendds.readthedocs.io/en/dds-3.26/devguide/building/index.html#cmake-known-limitations).
+    * See [Building OpenDDS Using CMake](https://opendds.readthedocs.io/en/dds-3.26/devguide/building/index.html#cmake-building) for details.
+
+* Convert transport configurations (`rtps_udp`, `multicast`, `shmem`, `tcp`, `udp`) uses key-value store. ([PR #4162](https://github.com/OpenDDS/OpenDDS/pull/4162), [PR #4270](https://github.com/OpenDDS/OpenDDS/pull/4270), [PR #4272](https://github.com/OpenDDS/OpenDDS/pull/4272), [PR #4241](https://github.com/OpenDDS/OpenDDS/pull/4241), [PR #4242](https://github.com/OpenDDS/OpenDDS/pull/4242), [PR #4243](https://github.com/OpenDDS/OpenDDS/pull/4243), [PR #4249](https://github.com/OpenDDS/OpenDDS/pull/4249), [PR #4255](https://github.com/OpenDDS/OpenDDS/pull/4255))
+* CMake Config Package
+    * Added [`opendds_install_interface_files`](https://opendds.readthedocs.io/en/dds-3.26/devguide/building/cmake.html#func-opendds_install_interface_files) to help install IDL files and the files generated from them. ([PR #4203](https://github.com/OpenDDS/OpenDDS/pull/4203), [PR #4214](https://github.com/OpenDDS/OpenDDS/pull/4214))
+    * Added [`OPENDDS_HOST_TOOLS`](https://opendds.readthedocs.io/en/dds-3.26/devguide/building/cmake.html#var-OPENDDS_HOST_TOOLS) and [`OPENDDS_ACE_TAO_HOST_TOOLS`](https://opendds.readthedocs.io/en/dds-3.26/devguide/building/cmake.html#var-OPENDDS_ACE_TAO_HOST_TOOLS) to allow cross compiling applications with both MPC and CMake-built OpenDDS. ([PR #4203](https://github.com/OpenDDS/OpenDDS/pull/4203), [PR #4214](https://github.com/OpenDDS/OpenDDS/pull/4214))
+    * [`opendds_target_sources`](https://opendds.readthedocs.io/en/dds-3.26/devguide/building/cmake.html#func-opendds_target_sources):
+
+        * Added [`opendds_target_sources(INCLUDE_BASE)`](https://opendds.readthedocs.io/en/dds-3.26/devguide/building/cmake.html#func-arg-opendds_target_sources-INCLUDE_BASE) to preserve the directory structure of the IDL files for compiling the resulting generated files and installing everything using [`opendds_install_interface_files`](https://opendds.readthedocs.io/en/dds-3.26/devguide/building/cmake.html#func-opendds_install_interface_files). ([PR #4203](https://github.com/OpenDDS/OpenDDS/pull/4203), [PR #4214](https://github.com/OpenDDS/OpenDDS/pull/4214))
+        * Added [`opendds_target_sources(USE_VERSIONED_NAMESPACE)`](https://opendds.readthedocs.io/en/dds-3.26/devguide/building/cmake.html#func-arg-opendds_target_sources-USE_VERSIONED_NAMESPACE) as a shortcut to the `-Wb,versioning_\*` IDL compiler options. ([PR #4203](https://github.com/OpenDDS/OpenDDS/pull/4203), [PR #4214](https://github.com/OpenDDS/OpenDDS/pull/4214))
+
+* Support sending DynamicDataAdapter sample via DynamicDataWriter ([PR #4226](https://github.com/OpenDDS/OpenDDS/pull/4226))
+* Added export macro to ConditionImpl ([PR #4295](https://github.com/OpenDDS/OpenDDS/pull/4295))
+
+### Deprecations
+
+* Deprecated [`OPENDDS_FILENAME_ONLY_INCLUDES`](https://opendds.readthedocs.io/en/dds-3.26/devguide/building/cmake.html#var-OPENDDS_FILENAME_ONLY_INCLUDES) in favor of [`opendds_target_sources(INCLUDE_BASE)`](https://opendds.readthedocs.io/en/dds-3.26/devguide/building/cmake.html#func-arg-opendds_target_sources-INCLUDE_BASE). ([PR #4203](https://github.com/OpenDDS/OpenDDS/pull/4203), [PR #4214](https://github.com/OpenDDS/OpenDDS/pull/4214))
+
+### Fixes
+
+* Improved the [subject name](https://opendds.readthedocs.io/en/dds-3.26/devguide/dds_security.html#dds-security-subject-name) parsing to better conform to the DDS Security spec. ([PR #4201](https://github.com/OpenDDS/OpenDDS/pull/4201))
+    * The order of attributes in subject names is now significant when comparing them.
+
+* Remove from TypeLookupService when remote endpoint is removed from SEDP ([PR #4216](https://github.com/OpenDDS/OpenDDS/pull/4216))
+* WaitSet is now notified when DataWriter liveliness is lost. ([PR #4223](https://github.com/OpenDDS/OpenDDS/pull/4223))
+* ICE doesn't use IPv4-mapped IPv6 addresses anymore. ([PR #4230](https://github.com/OpenDDS/OpenDDS/pull/4230))
+* Efficiency: Remove per-element locking in JobQueue ([PR #4253](https://github.com/OpenDDS/OpenDDS/pull/4253))
+* RtpsRelay: fixed bug in record_activity's use of remove in GuidAddrSet ([PR #4254](https://github.com/OpenDDS/OpenDDS/pull/4254))
+* Fix warnings in typeobject_generator when using TAO 3 ([PR #4262](https://github.com/OpenDDS/OpenDDS/pull/4262))
+* Fix null pointer when participant is absent when updating locators ([PR #4265](https://github.com/OpenDDS/OpenDDS/pull/4265))
+* Initialize variables in TypeObject to silence warnings ([PR #4292](https://github.com/OpenDDS/OpenDDS/pull/4292))
+* RtpsRelay: Use ACE_Message_Block's locking strategy for cached SPDP to fix tsan warning ([PR #4293](https://github.com/OpenDDS/OpenDDS/pull/4293))
+* Fix tsan warning in ReactorTask ([PR #4298](https://github.com/OpenDDS/OpenDDS/pull/4298))
+
+### Documentation
+
+* Remove -Grapidjson flag [opendds_idl] ([PR #4231](https://github.com/OpenDDS/OpenDDS/pull/4231))
+* Remove reference to mailing lists ([PR #4234](https://github.com/OpenDDS/OpenDDS/pull/4234))
+* Restructured parts of [DDS Security](https://opendds.readthedocs.io/en/dds-3.26/devguide/dds_security.html#dds-security) page and expanded documentation of some XML security document elements. ([PR #4281](https://github.com/OpenDDS/OpenDDS/pull/4281))
+* OS-specific instructions will now be automatically selected based on the browser's user agent. ([PR #4281](https://github.com/OpenDDS/OpenDDS/pull/4281))
+* OMG specification section references are now links to that section in the specification PDF. ([PR #4281](https://github.com/OpenDDS/OpenDDS/pull/4281))
+* Move build and install instructions to DevGuide ([PR #4294](https://github.com/OpenDDS/OpenDDS/pull/4294))
+* Incorporate the quick start guides, FAQ, and shapes demo into the DevGuide. ([PR #4297](https://github.com/OpenDDS/OpenDDS/pull/4297))
+
+### Notes
+
+* Using Perl 5.38.0 might prevent TAO from building properly, see [here](https://github.com/DOCGroup/ACE_TAO/issues/2148) for details.
+
 ## Version 3.25.0 of OpenDDS
 
 Released 2023-07-20

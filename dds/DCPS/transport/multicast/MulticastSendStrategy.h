@@ -10,7 +10,9 @@
 
 #include "Multicast_Export.h"
 
+#include "dds/DCPS/NetworkAddress.h"
 #include "dds/DCPS/transport/framework/TransportSendStrategy.h"
+
 #include "ace/Asynch_IO.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
@@ -51,6 +53,8 @@ protected:
 
 private:
   MulticastDataLink* link_;
+  const bool async_send_;
+  const NetworkAddress group_address_;
 
 #if defined (ACE_HAS_WIN32_OVERLAPPED_IO) || defined (ACE_HAS_AIO_CALLS)
   ACE_Asynch_Write_Dgram async_writer_;

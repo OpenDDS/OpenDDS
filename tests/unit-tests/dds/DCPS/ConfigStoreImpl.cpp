@@ -154,6 +154,9 @@ TEST(dds_DCPS_ConfigStoreImpl, set_get_String)
   EXPECT_EQ(store.get("key", default_string), default_string);
   store.set("key", other_string);
   EXPECT_EQ(store.get("key", default_string), other_string);
+
+  store.set("key", "");
+  EXPECT_EQ(store.get("key", default_string, false), default_string);
 }
 
 TEST(dds_DCPS_ConfigStoreImpl, set_get_TimeDuration_seconds)
@@ -219,6 +222,12 @@ TEST(dds_DCPS_ConfigStoreImpl, get_NetworkAddress)
       store.set_string("key", "not a network address");
       EXPECT_EQ(store.get("key", default_value, ConfigStoreImpl::Format_Optional_Port, ConfigStoreImpl::Kind_IPV4), default_value);
     }
+
+    {
+      const NetworkAddress value_required_port("127.0.0.1:80");
+      store.set("key", value_required_port, ConfigStoreImpl::Format_Required_Port, ConfigStoreImpl::Kind_ANY);
+      EXPECT_EQ(store.get("key", default_value, ConfigStoreImpl::Format_Required_Port, ConfigStoreImpl::Kind_ANY), value_required_port);
+    }
   }
 
 #if ACE_HAS_IPV6
@@ -253,6 +262,12 @@ TEST(dds_DCPS_ConfigStoreImpl, get_NetworkAddress)
     {
       store.set_string("key6", "not a network address");
       EXPECT_EQ(store.get("key6", default_value, ConfigStoreImpl::Format_Optional_Port, ConfigStoreImpl::Kind_IPV6), default_value);
+    }
+
+    {
+      const NetworkAddress value_required_port("[::1]:80");
+      store.set("key6", value_required_port, ConfigStoreImpl::Format_Required_Port, ConfigStoreImpl::Kind_ANY);
+      EXPECT_EQ(store.get("key6", default_value, ConfigStoreImpl::Format_Required_Port, ConfigStoreImpl::Kind_ANY), value_required_port);
     }
   }
 #endif
@@ -299,10 +314,11 @@ TEST(dds_DCPS_ConfigStoreImpl, process_section)
   config.set_string_value(section_key, ACE_TEXT("anotherkey"), ACE_TEXT("$file"));
   config.set_string_value(section_key, ACE_TEXT("thirdkey"), ACE_TEXT("secondvalue"));
 
-  EXPECT_CALL(*listener.get(), on_data_available(reader)).Times(2);
+  EXPECT_CALL(*listener.get(), on_data_available(reader)).Times(4);
 
   process_section(config_store, reader, listener, "MYPREFIX", config, config.root_section(), "my file name", false);
 
+  EXPECT_EQ(config_store.get("MYPREFIX_MY_SECTION", "default"), "@my_section");
   EXPECT_EQ(config_store.get("MYPREFIX_MY_SECTION_MYKEY", "default"), "myvalue");
   EXPECT_EQ(config_store.get("MYPREFIX_MY_SECTION_ANOTHERKEY", "default"), "my file name");
   EXPECT_EQ(config_store.get("MYPREFIX_MY_SECTION_THIRDKEY", "default"), "firstvalue");
@@ -326,4 +342,21 @@ TEST(dds_DCPS_ConfigStoreImpl, process_section_allow_overwrite)
   EXPECT_EQ(config_store.get("MYPREFIX_MY_SECTION_MYKEY", "default"), "myvalue");
   EXPECT_EQ(config_store.get("MYPREFIX_MY_SECTION_ANOTHERKEY", "default"), "my file name");
   EXPECT_EQ(config_store.get("MYPREFIX_MY_SECTION_THIRDKEY", "default"), "secondvalue");
+}
+
+TEST(dds_DCPS_ConfigStoreImpl, get_section_names)
+{
+  ConfigTopic_rch topic = make_rch<ConfigTopic>();
+  ConfigStoreImpl config_store(topic);
+  config_store.set("MYPREFIX_MY_SECTION", "@my_section");
+  config_store.set("MYPREFIX_MY_SECTION_KEY", "not a section");
+  config_store.set("MYPREFIX_MY_SECTION2", "@my_section2");
+  config_store.set("MYPREFIX_MY_SECTION2_KEY", "not a section");
+  config_store.set("NOTMYPREFIX_MY_SECTION2", "@my_section2");
+  config_store.set("NOTMYPREFIX_MY_SECTION2_KEY", "not a section");
+
+  const OPENDDS_VECTOR(String) sections = config_store.get_section_names("MYPREFIX");
+  ASSERT_EQ(sections.size(), 2);
+  EXPECT_NE(std::find(sections.begin(), sections.end(), "my_section"), sections.end());
+  EXPECT_NE(std::find(sections.begin(), sections.end(), "my_section2"), sections.end());
 }
