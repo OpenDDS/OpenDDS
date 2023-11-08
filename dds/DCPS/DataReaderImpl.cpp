@@ -1939,6 +1939,24 @@ DataReaderImpl::release_instance(DDS::InstanceHandle_t handle)
     instances_.erase(handle);
   }
 
+#ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
+  if (this->is_exclusive_ownership_) {
+    if (instance->instance_state_->is_exclusive()) {
+      DataReaderImpl::OwnershipManagerPtr owner_manager = ownership_manager();
+      if (owner_manager)
+        owner_manager->remove_writers(instance->instance_handle_);
+
+      // Would be better to know how to convert from instancehandle to publicationid
+      // to allow lookup into this container.
+      WriterMapType::iterator iter = writers_.begin();
+      while (iter != writers_.end()) {
+        iter->second->remove_instance(instance->instance_handle_);
+        ++iter;
+      }
+    }
+#endif
+  }
+
   this->release_instance_i(handle);
   if (this->monitor_) {
     this->monitor_->report();
