@@ -34,6 +34,8 @@ project(UnitTests): opendds_unit_test, googlemock, msvc_bigobj, dcpsexe, dcps_tr
     dds/DCPS
     dds/DCPS/RTPS
     dds/DCPS/security
+    dds/DCPS/security/AccessControl
+    dds/DCPS/security/Authentication
     dds/DCPS/security/SSL
     dds/DCPS/transport/framework
     dds/DCPS/transport/rtps_udp

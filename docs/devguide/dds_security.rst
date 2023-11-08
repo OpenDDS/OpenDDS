@@ -860,6 +860,19 @@ When no data tag list is given for an "allow" PSR rule, the empty set of data ta
 For "deny" PSR rules, the rule will apply if the associated DDS entity is using any of the data tags listed.
 When no data tag list is given for a "deny" PSR rule, the set of "all possible tags" is used as the default value.
 
+.. _dds_security--psr-validity:
+
+validity
+""""""""
+
+.. attention::
+
+   This is an OpenDDS extension.
+
+This structure defines the validity of a particular publish or subscribe action.
+Thus, it is possible to declare that an action is valid for some subset of the grant's validity.
+The format for `validity` is the same as :ref:`dds_security--validity`.
+
 .. _dds_security--default_rule:
 
 default_rule
@@ -975,3 +988,6 @@ The following DDS Security features are not implemented in OpenDDS.
 
 #. Signing (without encrypting) at the payload level, see :omgissue:`DDSSEC12-59`
 
+The following features are OpenDDS extensions:
+
+#. Validity of publish/subscribe actions :ref:`dds_security--psr-validity`.

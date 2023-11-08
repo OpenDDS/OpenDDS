@@ -26,7 +26,7 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace Security {
 
-struct Permissions : DCPS::RcObject {
+struct OpenDDS_Security_Export Permissions : DCPS::RcObject {
   typedef DCPS::RcHandle<Permissions> shared_ptr;
 
   enum AllowDeny_t {
@@ -42,15 +42,37 @@ struct Permissions : DCPS::RcObject {
   struct Validity_t {
     time_t not_before;
     time_t not_after;
+
+    Validity_t()
+      : not_before(0)
+      , not_after(0)
+    {}
+
+    Validity_t(time_t nb, time_t na)
+      : not_before(nb)
+      , not_after(na)
+    {}
+
+    bool operator==(const Validity_t& other) const
+    {
+      return not_before == other.not_before && not_after == other.not_after;
+    }
+
+    bool operator!=(const Validity_t& other) const
+    {
+      return not_before != other.not_before || not_after != other.not_after;
+    }
   };
 
-  struct Action {
+  struct OpenDDS_Security_Export Action {
     PublishSubscribe_t ps_type;
     std::vector<std::string> topics;
     std::vector<std::string> partitions;
+    Validity_t validity;
 
     bool topic_matches(const char* topic) const;
     bool partitions_match(const DDS::StringSeq& entity_partitions, AllowDeny_t allow_or_deny) const;
+    bool valid(time_t now_utc) const;
   };
 
   typedef std::vector<Action> Actions;
