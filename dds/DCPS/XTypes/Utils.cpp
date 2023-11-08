@@ -311,6 +311,15 @@ DDS::ReturnCode_t MemberPath::get_member_from_type(
   return DDS::RETCODE_OK;
 }
 
+namespace {
+
+// Check return code returned from reading a dynamic data instance.
+bool is_good(DDS::ReturnCode_t rc)
+{
+  return rc == DDS::RETCODE_OK || rc == DDS::RETCODE_NO_DATA;
+}
+}
+
 DDS::ReturnCode_t MemberPath::get_member_from_data(
   DDS::DynamicData_ptr data, DDS::DynamicData_var& container, DDS::MemberId& member_id)
 {
@@ -330,7 +339,7 @@ DDS::ReturnCode_t MemberPath::get_member_from_data(
 
     DDS::DynamicData_var next;
     DDS::ReturnCode_t rc = current_container->get_complex_value(next, current_id);
-    if (rc != DDS::RETCODE_OK) {
+    if (!is_good(rc)) {
       return rc;
     }
     current_container = next;
@@ -543,10 +552,10 @@ namespace {
       {
         DDS::Boolean a_value;
         a_rc = a_data->get_boolean_value(a_value, a_id);
-        if (a_rc == DDS::RETCODE_OK) {
+        if (is_good(a_rc)) {
           DDS::Boolean b_value;
           b_rc = b_data->get_boolean_value(b_value, b_id);
-          if (b_rc == DDS::RETCODE_OK) {
+          if (is_good(b_rc)) {
             cmp(result, a_value, b_value);
           }
         }
@@ -557,10 +566,10 @@ namespace {
       {
         DDS::Byte a_value;
         a_rc = a_data->get_byte_value(a_value, a_id);
-        if (a_rc == DDS::RETCODE_OK) {
+        if (is_good(a_rc)) {
           DDS::Byte b_value;
           b_rc = b_data->get_byte_value(b_value, b_id);
-          if (b_rc == DDS::RETCODE_OK) {
+          if (is_good(b_rc)) {
             cmp(result, a_value, b_value);
           }
         }
@@ -574,10 +583,10 @@ namespace {
       {
         DDS::UInt64 a_value;
         a_rc = get_uint_value(a_value, a_data, a_id, tk);
-        if (a_rc == DDS::RETCODE_OK) {
+        if (is_good(a_rc)) {
           DDS::UInt64 b_value;
           b_rc = get_uint_value(b_value, b_data, b_id, tk);
-          if (b_rc == DDS::RETCODE_OK) {
+          if (is_good(b_rc)) {
             cmp(result, a_value, b_value);
           }
         }
@@ -591,10 +600,10 @@ namespace {
       {
         DDS::Int64 a_value;
         a_rc = get_int_value(a_value, a_data, a_id, tk);
-        if (a_rc == DDS::RETCODE_OK) {
+        if (is_good(a_rc)) {
           DDS::Int64 b_value;
           b_rc = get_int_value(b_value, b_data, b_id, tk);
-          if (b_rc == DDS::RETCODE_OK) {
+          if (is_good(b_rc)) {
             cmp(result, a_value, b_value);
           }
         }
@@ -605,10 +614,10 @@ namespace {
       {
         DDS::Float32 a_value;
         a_rc = a_data->get_float32_value(a_value, a_id);
-        if (a_rc == DDS::RETCODE_OK) {
+        if (is_good(a_rc)) {
           DDS::Float32 b_value;
           b_rc = b_data->get_float32_value(b_value, b_id);
-          if (b_rc == DDS::RETCODE_OK) {
+          if (is_good(b_rc)) {
             cmp(result, a_value, b_value);
           }
         }
@@ -619,10 +628,10 @@ namespace {
       {
         DDS::Float64 a_value;
         a_rc = a_data->get_float64_value(a_value, a_id);
-        if (a_rc == DDS::RETCODE_OK) {
+        if (is_good(a_rc)) {
           DDS::Float64 b_value;
           b_rc = b_data->get_float64_value(b_value, b_id);
-          if (b_rc == DDS::RETCODE_OK) {
+          if (is_good(b_rc)) {
             cmp(result, a_value, b_value);
           }
         }
@@ -633,10 +642,10 @@ namespace {
       {
         DDS::Float128 a_value;
         a_rc = a_data->get_float128_value(a_value, a_id);
-        if (a_rc == DDS::RETCODE_OK) {
+        if (is_good(a_rc)) {
           DDS::Float128 b_value;
           b_rc = b_data->get_float128_value(b_value, b_id);
-          if (b_rc == DDS::RETCODE_OK) {
+          if (is_good(b_rc)) {
             cmp(result, a_value, b_value);
           }
         }
@@ -647,10 +656,10 @@ namespace {
       {
         CORBA::Char a_value;
         a_rc = a_data->get_char8_value(a_value, a_id);
-        if (a_rc == DDS::RETCODE_OK) {
+        if (is_good(a_rc)) {
           CORBA::Char b_value;
           b_rc = b_data->get_char8_value(b_value, b_id);
-          if (b_rc == DDS::RETCODE_OK) {
+          if (is_good(b_rc)) {
             cmp(result, a_value, b_value);
           }
         }
@@ -661,10 +670,10 @@ namespace {
       {
         CORBA::WChar a_value;
         a_rc = a_data->get_char16_value(a_value, a_id);
-        if (a_rc == DDS::RETCODE_OK) {
+        if (is_good(a_rc)) {
           CORBA::WChar b_value;
           b_rc = b_data->get_char16_value(b_value, b_id);
-          if (b_rc == DDS::RETCODE_OK) {
+          if (is_good(b_rc)) {
             cmp(result, a_value, b_value);
           }
         }
@@ -675,10 +684,10 @@ namespace {
       {
         CORBA::String_var a_value;
         a_rc = a_data->get_string_value(a_value, a_id);
-        if (a_rc == DDS::RETCODE_OK) {
+        if (is_good(a_rc)) {
           CORBA::String_var b_value;
           b_rc = b_data->get_string_value(b_value, b_id);
-          if (b_rc == DDS::RETCODE_OK) {
+          if (is_good(b_rc)) {
             result = std::strcmp(a_value.in(), b_value.in());
           }
         }
@@ -689,10 +698,10 @@ namespace {
       {
         CORBA::WString_var a_value;
         a_rc = a_data->get_wstring_value(a_value, a_id);
-        if (a_rc == DDS::RETCODE_OK) {
+        if (is_good(a_rc)) {
           CORBA::WString_var b_value;
           b_rc = b_data->get_wstring_value(b_value, b_id);
-          if (b_rc == DDS::RETCODE_OK) {
+          if (is_good(b_rc)) {
             result = std::wcscmp(a_value.in(), b_value.in());
           }
         }
@@ -703,10 +712,10 @@ namespace {
       {
         DDS::Int32 a_value;
         a_rc = get_enum_value(a_value, a_type, a_data, a_id);
-        if (a_rc == DDS::RETCODE_OK) {
+        if (is_good(a_rc)) {
           DDS::Int32 b_value;
           b_rc = get_enum_value(b_value, b_type, b_data, b_id);
-          if (b_rc == DDS::RETCODE_OK) {
+          if (is_good(b_rc)) {
             cmp(result, a_value, b_value);
           }
         }
@@ -717,10 +726,10 @@ namespace {
       {
         DDS::UInt64 a_value;
         a_rc = get_bitmask_value(a_value, a_type, a_data, a_id);
-        if (a_rc == DDS::RETCODE_OK) {
+        if (is_good(a_rc)) {
           DDS::UInt64 b_value;
           b_rc = get_bitmask_value(b_value, b_type, b_data, b_id);
-          if (b_rc == DDS::RETCODE_OK) {
+          if (is_good(b_rc)) {
             cmp(result, a_value, b_value);
           }
         }
@@ -739,10 +748,10 @@ namespace {
       {
         DDS::DynamicData_var a_value;
         a_rc = a_data->get_complex_value(a_value, a_id);
-        if (a_rc == DDS::RETCODE_OK) {
+        if (is_good(a_rc)) {
           DDS::DynamicData_var b_value;
           b_rc = b_data->get_complex_value(b_value, b_id);
-          if (b_rc == DDS::RETCODE_OK) {
+          if (is_good(b_rc)) {
             switch (tk) {
             case TK_ARRAY:
             case TK_SEQUENCE:
@@ -750,8 +759,8 @@ namespace {
                 const DDS::UInt32 a_count = a_value->get_item_count();
                 const DDS::UInt32 b_count = b_value->get_item_count();
                 const DDS::UInt32 count = std::min(a_count, b_count);
-                for (DDS::UInt32 i = 0;
-                    a_rc == DDS::RETCODE_OK && i < count && result == 0; ++i) {
+                a_rc = DDS::RETCODE_OK;
+                for (DDS::UInt32 i = 0; a_rc == DDS::RETCODE_OK && i < count && result == 0; ++i) {
                   a_rc = b_rc = member_compare(result,
                     a_value, a_value->get_member_id_at_index(i),
                     b_value, b_value->get_member_id_at_index(i));
@@ -787,7 +796,7 @@ namespace {
       b_rc = DDS::RETCODE_BAD_PARAMETER;
     }
 
-    if (a_rc != DDS::RETCODE_OK || b_rc != DDS::RETCODE_OK) {
+    if (!is_good(a_rc) || !is_good(b_rc)) {
       const CORBA::String_var b_type_name = b_data->type()->get_name();
       const CORBA::String_var a_type_name = a_data->type()->get_name();
       if (log_level >= LogLevel::Warning) {
@@ -911,7 +920,7 @@ DDS::ReturnCode_t get_uint_value(
     {
       DDS::UInt8 v;
       rc = src->get_uint8_value(v, id);
-      if (rc == DDS::RETCODE_OK) {
+      if (is_good(rc)) {
         value = v;
       }
     }
@@ -920,7 +929,7 @@ DDS::ReturnCode_t get_uint_value(
     {
       DDS::UInt16 v;
       rc = src->get_uint16_value(v, id);
-      if (rc == DDS::RETCODE_OK) {
+      if (is_good(rc)) {
         value = v;
       }
     }
@@ -929,7 +938,7 @@ DDS::ReturnCode_t get_uint_value(
     {
       DDS::UInt32 v;
       rc = src->get_uint32_value(v, id);
-      if (rc == DDS::RETCODE_OK) {
+      if (is_good(rc)) {
         value = v;
       }
     }
@@ -966,7 +975,7 @@ DDS::ReturnCode_t get_int_value(
     {
       DDS::Int8 v;
       rc = src->get_int8_value(v, id);
-      if (rc == DDS::RETCODE_OK) {
+      if (is_good(rc)) {
         value = v;
       }
     }
@@ -975,7 +984,7 @@ DDS::ReturnCode_t get_int_value(
     {
       DDS::Int16 v;
       rc = src->get_int16_value(v, id);
-      if (rc == DDS::RETCODE_OK) {
+      if (is_good(rc)) {
         value = v;
       }
     }
@@ -984,7 +993,7 @@ DDS::ReturnCode_t get_int_value(
     {
       DDS::Int32 v;
       rc = src->get_int32_value(v, id);
-      if (rc == DDS::RETCODE_OK) {
+      if (is_good(rc)) {
         value = v;
       }
     }
@@ -1117,11 +1126,11 @@ DDS::ReturnCode_t get_enum_value(
   }
   DDS::Int64 v = 0;
   rc = get_int_value(v, src, id, bound_kind);
-  if (rc != DDS::RETCODE_OK) {
+  if (!is_good(rc)) {
     return rc;
   }
   value = static_cast<DDS::Int32>(v);
-  return rc;
+  return DDS::RETCODE_OK;
 }
 
 DDS::ReturnCode_t get_enumerator_name(
