@@ -569,10 +569,22 @@ Variables
 ---------
 
 Unless otherwise noted, the build features and behavior can be controlled by the OpenDDS Config Package :ref:`cmake-config-vars`.
+
+ACE/TAO
+^^^^^^^
+
 A prebuilt ACE/TAO can be passed using :cmake:var:`OPENDDS_ACE`.
 In that case :ref:`cmake-feature-vars` will be automatically derived from ACE's ``default.features`` file.
+If :cmake:var:`OPENDDS_ACE` is not passed, then ACE/TAO will be built.
+When building ACE/TAO a release is downloaded by default, but source can also be provided using :cmake:var:`OPENDDS_ACE_TAO_SRC` or cloned using :cmake:var:`OPENDDS_ACE_TAO_GIT`.
+:cmake:var:`OPENDDS_ACE_TAO_KIND` controls what version of ACE/TAO is downloaded for both releases and :cmake:var:`OPENDDS_ACE_TAO_GIT`.
 
-These are the variables that are exclusive to building OpenDDS with CMake:
+.. _cmake-building-vars:
+
+Build-Exclusive CMake Variables
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+These are all the variables that are exclusive to building OpenDDS with CMake:
 
 .. cmake:var:: OPENDDS_JUST_BUILD_HOST_TOOLS
 
@@ -583,7 +595,68 @@ These are the variables that are exclusive to building OpenDDS with CMake:
 .. cmake:var:: OPENDDS_ACE_TAO_SRC
 
   If defined, sets the ACE/TAO to build and use.
-  By default, a hardcoded release is downloaded.
+  A prebuilt ACE/TAO can be provided using :cmake:var:`OPENDDS_ACE`.
+  By default, a hardcoded release depending on :cmake:var:`OPENDDS_ACE_TAO_KIND` is downloaded.
+
+.. cmake:var:: OPENDDS_ACE_TAO_KIND
+
+  The default is ``ace7tao3`` for :ref:`ACE 7/TAO 3 <ace7tao3>`.
+  Use ``ace6tao2`` to get :ref:`ACE 6/TAO 2 <ace6tao2>`.
+
+  .. versionadded:: 3.27
+
+.. cmake:var:: OPENDDS_ACE_TAO_GIT
+
+  Implies :cmake:var:`OPENDDS_MPC_GIT`.
+  If true clone ACE/TAO from :cmake:var:`OPENDDS_ACE_TAO_GIT_TAG` at :cmake:var:`OPENDDS_ACE_TAO_GIT_REPO`.
+  By default, a hardcoded release depending on :cmake:var:`OPENDDS_ACE_TAO_KIND` is downloaded.
+
+  .. versionadded:: 3.27
+
+.. cmake:var:: OPENDDS_ACE_TAO_GIT_REPO
+
+  Implies :cmake:var:`OPENDDS_ACE_TAO_GIT`.
+  The Git repository to clone ACE/TAO from.
+  The default is ``https://github.com/DOCGroup/ACE_TAO``.
+
+  .. versionadded:: 3.27
+
+.. cmake:var:: OPENDDS_ACE_TAO_GIT_TAG
+
+  Implies :cmake:var:`OPENDDS_ACE_TAO_GIT`.
+  The Git tag to clone ACE/TAO from.
+  The default depends on :cmake:var:`OPENDDS_ACE_TAO_KIND`.
+
+  .. versionadded:: 3.27
+
+.. cmake:var:: OPENDDS_MPC
+
+  Path to :ref:`deps-mpc`.
+  In most cases this will be provided and automatically detected, unless ACE/TAO was cloned manually and provided using :cmake:var:`OPENDDS_ACE_TAO_SRC`.
+
+  .. versionadded:: 3.26, but documented in 3.27
+
+.. cmake:var:: OPENDDS_MPC_GIT
+
+  If true clone MPC from :cmake:var:`OPENDDS_MPC_GIT_TAG` at :cmake:var:`OPENDDS_MPC_GIT_REPO`.
+
+  .. versionadded:: 3.27
+
+.. cmake:var:: OPENDDS_MPC_GIT_REPO
+
+  Implies :cmake:var:`OPENDDS_MPC_GIT`.
+  The Git repository to clone MPC from.
+  The default is ``https://github.com/DOCGroup/MPC``.
+
+  .. versionadded:: 3.27
+
+.. cmake:var:: OPENDDS_MPC_GIT_TAG
+
+  Implies :cmake:var:`OPENDDS_MPC_GIT`.
+  This is the Git tag to clone MPC from.
+  The default is ``master``.
+
+  .. versionadded:: 3.27
 
 .. cmake:var:: OPENDDS_BUILD_TESTS
 
