@@ -478,9 +478,42 @@ DDS::ReturnCode_t DynamicDataImpl::clear_value(DDS::MemberId id)
       return DDS::RETCODE_ERROR;
     }
     if (md->is_optional()) {
-      // TODO(sonndinh): if the backing store contains this member, needs a way to ignore
-      // it in the subsequent reads.
       erase_member(id);
+      DDS::DynamicData_var opt_val;
+      if (backing_store_ && backing_store_->get_complex_value(opt_val, id) == DDS::RETCODE_OK) {
+        // The backing store is read-only, so to remove the optional member we need to
+        // invalidate the backing store. Save all the members that are in the backing store
+        // but not in the container.
+        DDS::DynamicTypeMembersById_var members_var;
+        if (type_->get_all_members(members_var) != DDS::RETCODE_OK) {
+          return DDS::RETCODE_ERROR;
+        }
+        DynamicTypeMembersByIdImpl* members = dynamic_cast<DynamicTypeMembersByIdImpl*>(members_var.in());
+        if (!members) {
+          return DDS::RETCODE_ERROR;
+        }
+        for (DynamicTypeMembersByIdImpl::const_iterator it = members->begin(); it != members->end(); ++it) {
+          const DDS::MemberId mid = it->first;
+          const bool container_has_it =
+            container_.single_map_.find(mid) != container_.single_map_.end() ||
+            container_.sequence_map_.find(mid) != container_.sequence_map_.end() ||
+            container_.complex_map_.find(mid) != container_.complex_map_.end();
+          if (!container_has_it) {
+            DDS::MemberDescriptor_var mem_desc;
+            if (it->second->get_descriptor(mem_desc) != DDS::RETCODE_OK) {
+              return DDS::RETCODE_ERROR;
+            }
+            DDS::DynamicType_var mem_dt = get_base_type(mem_desc->type());
+            DynamicDataImpl* mem_ddi = new DynamicDataImpl(mem_dt);
+            DDS::DynamicData_var mem_dd = mem_ddi;
+            if (!set_member_backing_store(mem_ddi, mid)) {
+              continue;
+            }
+            container_.complex_map_.insert(std::make_pair(mid, mem_dd));
+          }
+        }
+        set_backing_store(0);
+      }
       break;
     }
     DDS::DynamicType_var member_type = get_base_type(md->type());
