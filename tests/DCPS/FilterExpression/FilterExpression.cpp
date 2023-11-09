@@ -27,20 +27,28 @@ DDS::DynamicData_var copy(const TBTD& sample, DDS::DynamicType* type)
   dd->set_string_value(dd->get_member_id_by_name("name"), sample.name);
 
   DynamicData_var nested;
-  dd->get_complex_value(nested, dd->get_member_id_by_name("durability"));
+  DDS::MemberId id = dd->get_member_id_by_name("durability");
+  dd->get_complex_value(nested, id);
   nested->set_int32_value(nested->get_member_id_by_name("kind"), static_cast<ACE_CDR::Long>(sample.durability.kind));
+  dd->set_complex_value(id, nested);
 
-  dd->get_complex_value(nested, dd->get_member_id_by_name("durability_service"));
-  DynamicData_var duration;
-  nested->get_complex_value(duration, nested->get_member_id_by_name("service_cleanup_delay"));
-  duration->set_int32_value(duration->get_member_id_by_name("sec"), sample.durability_service.service_cleanup_delay.sec);
-  duration->set_uint32_value(duration->get_member_id_by_name("nanosec"), sample.durability_service.service_cleanup_delay.nanosec);
+  id = dd->get_member_id_by_name("durability_service");
+  dd->get_complex_value(nested, id);
+  {
+    DynamicData_var duration;
+    DDS::MemberId id = nested->get_member_id_by_name("service_cleanup_delay");
+    nested->get_complex_value(duration, id);
+    duration->set_int32_value(duration->get_member_id_by_name("sec"), sample.durability_service.service_cleanup_delay.sec);
+    duration->set_uint32_value(duration->get_member_id_by_name("nanosec"), sample.durability_service.service_cleanup_delay.nanosec);
+    nested->set_complex_value(id, duration);
+  }
 
   nested->set_int32_value(nested->get_member_id_by_name("history_kind"), static_cast<ACE_CDR::Long>(sample.durability_service.history_kind));
   nested->set_int32_value(nested->get_member_id_by_name("history_depth"), sample.durability_service.history_depth);
   nested->set_int32_value(nested->get_member_id_by_name("max_samples"), sample.durability_service.max_samples);
   nested->set_int32_value(nested->get_member_id_by_name("max_instances"), sample.durability_service.max_instances);
   nested->set_int32_value(nested->get_member_id_by_name("max_samples_per_instance"), sample.durability_service.max_samples_per_instance);
+  dd->set_complex_value(id, nested);
   return dd;
 }
 
