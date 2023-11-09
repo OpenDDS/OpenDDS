@@ -89,6 +89,21 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]){
                         -1);
       }
 
+      // Creating the same topic another time should fail
+      DDS::Topic_var topic3 =
+        participant->create_topic("Movie Discussion List",
+                                  type_name.in(),
+                                  TOPIC_QOS_DEFAULT,
+                                  DDS::TopicListener::_nil(),
+                                  OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+
+      if (!CORBA::is_nil(topic3.in())) {
+        ACE_ERROR_RETURN((LM_ERROR,
+                          ACE_TEXT("%N:%l: main()")
+                          ACE_TEXT(" ERROR: create_topic another time should failed!\n")),
+                        -1);
+      }
+
       // Create Publisher
       DDS::Publisher_var pub =
         participant->create_publisher(PUBLISHER_QOS_DEFAULT,
