@@ -140,7 +140,9 @@ if(OPENDDS_BUILD_TESTS)
   find_package(GTest QUIET)
   if(NOT GTest_FOUND)
     message("GTest not found, falling back to local copy")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DGTEST_CREATE_SHARED_LIBRARY")
+    # Prevent overriding the parent project's compiler/linker
+    # settings on Windows
+    set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
     add_subdirectory(tests/googletest)
   endif()
 
