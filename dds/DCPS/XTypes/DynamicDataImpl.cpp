@@ -4749,7 +4749,7 @@ bool serialized_size_dynamic_member(DDS::DynamicData_ptr data, const Encoding& e
       break;
     }
     case TK_BOOLEAN: {
-      CORBA::Boolean val;
+      CORBA::Boolean val = false;
       rc = data->get_boolean_value(val, member_id);
       break;
     }
@@ -4884,7 +4884,7 @@ bool get_discriminator_value(CORBA::Long& disc_val, DDS::DynamicData_ptr union_d
   const DDS::MemberId id = DISCRIMINATOR_ID;
   switch (treat_as) {
   case TK_BOOLEAN: {
-    CORBA::Boolean value;
+    CORBA::Boolean value = false;
     const DDS::ReturnCode_t rc = union_data->get_boolean_value(value, id);
     if (!check_rc_from_get(rc, id, disc_tk, "get_discriminator_value")) {
       return false;
@@ -5474,7 +5474,7 @@ bool serialize_dynamic_member(Serializer& ser, DDS::DynamicData_ptr data,
                                               treat_member_as, extensibility, optional, must_understand);
   }
   case TK_BOOLEAN: {
-    CORBA::Boolean val;
+    CORBA::Boolean val = false;
     rc = data->get_boolean_value(val, id);
     return serialize_dynamic_primitive_member(ser, ACE_OutputCDR::from_boolean(val), rc, id,
                                               treat_member_as, extensibility, optional, must_understand);
@@ -5594,7 +5594,7 @@ bool serialize_dynamic_discriminator(Serializer& ser, DDS::DynamicData_ptr union
 
   switch (treat_disc_as) {
   case TK_BOOLEAN: {
-    CORBA::Boolean val;
+    CORBA::Boolean val = false;
     const DDS::ReturnCode_t rc = union_data->get_boolean_value(val, DISCRIMINATOR_ID);
     disc_val = static_cast<CORBA::Long>(val);
     return serialize_dynamic_primitive_member(ser, ACE_OutputCDR::from_boolean(val), rc, disc_id,
@@ -5837,7 +5837,7 @@ bool serialize_dynamic_element(Serializer& ser, DDS::DynamicData_ptr col_data,
       && (ser << ACE_OutputCDR::from_octet(val));
   }
   case TK_BOOLEAN: {
-    CORBA::Boolean val;
+    CORBA::Boolean val = false;
     rc = col_data->get_boolean_value(val, elem_id);
     return check_rc_from_get(rc, elem_id, elem_tk, "serialize_dynamic_element")
       && (ser << ACE_OutputCDR::from_boolean(val));

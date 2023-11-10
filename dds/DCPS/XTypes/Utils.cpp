@@ -550,10 +550,10 @@ namespace {
     switch (tk) {
     case TK_BOOLEAN:
       {
-        DDS::Boolean a_value;
+        DDS::Boolean a_value = false;
         a_rc = a_data->get_boolean_value(a_value, a_id);
         if (is_good(a_rc)) {
-          DDS::Boolean b_value;
+          DDS::Boolean b_value = false;
           b_rc = b_data->get_boolean_value(b_value, b_id);
           if (is_good(b_rc)) {
             cmp(result, a_value, b_value);
@@ -1258,7 +1258,7 @@ DDS::ReturnCode_t copy_member(
   switch (src_tk) {
   case TK_BOOLEAN:
     {
-      DDS::Boolean value;
+      DDS::Boolean value = false;
       get_rc = src->get_boolean_value(value, src_id);
       if (get_rc == DDS::RETCODE_OK) {
         set_rc = dest->set_boolean_value(dest_id, value);
@@ -1392,7 +1392,7 @@ DDS::ReturnCode_t copy_member(
       if (get_rc == DDS::RETCODE_OK) {
         DDS::DynamicData_var subdest;
         const DDS::ReturnCode_t get_rc_dest = dest->get_complex_value(subdest, dest_id);
-        if (get_rc_dest == DDS::RETCODE_OK || get_rc_dest == DDS::RETCODE_NO_DATA) {
+        if (is_good(get_rc_dest)) {
           set_rc = copy(subdest, subsrc);
           if (set_rc == DDS::RETCODE_OK && get_rc_dest == DDS::RETCODE_NO_DATA) {
             set_rc = dest->set_complex_value(dest_id, subdest);
