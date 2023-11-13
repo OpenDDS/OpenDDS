@@ -51,20 +51,27 @@ The DOC Group repository for ACE/TAO is hosted on Github at `DOCGroup/ACE_TAO <h
 
 There are two versions of ACE/TAO that are officially supported by OpenDDS in this release (|release|):
 
+.. _ace6tao2:
+
 DOC Group :acetaorel:`ace6tao2`
   The configure script will download this version by default.
+  :ref:`CMake <cmake-building>` will download this version if :cmake:var:`OPENDDS_ACE_TAO_KIND` is set to ``ace6tao``.
 
   Pass ``--ace-github-latest`` to the configure script to clone the ``ace6tao2`` branch of ACE/TAO as is.
   This also clones the ``master`` branch of MPC as is.
+  :ref:`CMake <cmake-building>` will do the same if :cmake:var:`OPENDDS_ACE_TAO_KIND` is set to ``ace6tao`` and :cmake:var:`OPENDDS_ACE_TAO_GIT` is set to ``TRUE``.
+
+.. _ace7tao3:
 
 DOC Group :acetaorel:`ace7tao3`
-  :ref:`CMake <cmake-building>` will download this version by default.
   Pass ``--doc-group3`` to the configure script to download this version.
+  :ref:`CMake <cmake-building>` will download this version by default.
 
   This version requires a C++14-capable compiler.
 
   Pass ``--ace-github-latest`` to the configure script to clone the ``master`` branch of ACE/TAO as is.
   This also clones the ``master`` branch of MPC as is.
+  :ref:`CMake <cmake-building>` will do the same if :cmake:var:`OPENDDS_ACE_TAO_GIT` is set to ``TRUE``.
 
 .. _deps-ace:
 

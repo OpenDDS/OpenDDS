@@ -286,7 +286,7 @@ sub new_pithub {
     die("GITHUB_TOKEN must be defined");
   }
 
-  return Pithub->new(
+  $settings->{pithub} = Pithub->new(
     user => $settings->{github_user},
     repo => $settings->{github_repo},
     token => $settings->{github_token},
@@ -1054,17 +1054,24 @@ sub get_releases {
 
 sub update_ace_tao {
   my $settings = dclone(shift()); # Clone so we have different pithub
-  $settings->{pithub} = $settings->{pithub}->new(user => 'DOCGroup', repo => 'ACE_TAO');
+  $settings->{github_user} = 'DOCGroup';
+  $settings->{github_repo} = 'ACE_TAO';
+  new_pithub($settings);
 
+  my $doc_repo = $settings->{pithub}->repos->get()->content->{clone_url};
   my @arc_exts = ('zip', 'tar.gz', 'tar.bz2');
   my @ace_tao_versions = (
     {
       name => 'ace6tao2',
       min => parse_version('6.5.0'),
+      repo => $doc_repo,
+      branch => 'ace6tao2',
     },
     {
       name => 'ace7tao3',
       min => parse_version('7.1.0'),
+      repo => $doc_repo,
+      branch => 'master',
     },
   );
 
@@ -1139,6 +1146,8 @@ sub update_ace_tao {
   for my $ace_tao_version (@ace_tao_versions) {
     print $ini_fh ("\n[$ace_tao_version->{name}]\n",
       "version=$ace_tao_version->{version}\n",
+      "repo=$ace_tao_version->{repo}\n",
+      "branch=$ace_tao_version->{branch}\n",
       "url=$ace_tao_version->{url}\n");
     for my $ext (@arc_exts) {
       for my $suffix ('filename', 'url', 'md5') {
@@ -3090,11 +3099,8 @@ my %global_settings = (
     force_not_highest_version => $force_not_highest_version,
 );
 
-if (!$ignore_args || $update_ace_tao) {
-  $global_settings{pithub} = new_pithub(\%global_settings);
-}
-
 if (!$ignore_args) {
+  new_pithub(\%global_settings);
   check_workspace(\%global_settings);
 
   if ($mock) {
