@@ -1233,18 +1233,14 @@ protected:
 
       SharedInstanceMap_rch inst = dynamic_rchandle_cast<SharedInstanceMap>(owner_manager->get_instance_map(topic_servant_->type_name(), this));
       if (inst != 0) {
-        auto iter = inst->begin();
-        while (iter != inst->end()) {
-          if ((*iter).second == handle) {
-            inst->erase(iter);
-            break;
-          }
-          ++iter;
+        const typename ReverseInstanceMap::iterator pos = reverse_instance_map_.find(handle);
+        if (pos != reverse_instance_map_.end()) {
+          inst->erase(pos->second);
         }
       }
     }
-#endif  
-  
+#endif
+
     const typename ReverseInstanceMap::iterator pos = reverse_instance_map_.find(handle);
     if (pos != reverse_instance_map_.end()) {
       remove_from_lookup_maps(handle);
