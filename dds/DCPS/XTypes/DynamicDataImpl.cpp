@@ -133,21 +133,10 @@ DDS::MemberId DynamicDataImpl::get_member_id_at_index(ACE_CDR::ULong index)
     if (index == 0) {
       return DISCRIMINATOR_ID;
     }
-    const_single_iterator single_it;
-    const_complex_iterator complex_it;
-    const bool has_disc = has_discriminator_value(single_it, complex_it);
-    CORBA::Long disc_val;
-    DDS::DynamicType_var disc_type = get_base_type(type_desc_->discriminator_type());
-    if (has_disc) {
-      if (!get_discriminator_value(disc_val, single_it, complex_it, disc_type)) {
-        return MEMBER_ID_INVALID;
-      }
-    } else if (!set_default_discriminator_value(disc_val, disc_type)) {
-      return MEMBER_ID_INVALID;
-    }
+
     bool has_selected_branch;
     DDS::MemberDescriptor_var selected_md;
-    const DDS::ReturnCode_t rc = XTypes::get_selected_union_branch(type_, disc_val, has_selected_branch, selected_md);
+    const DDS::ReturnCode_t rc = get_selected_union_branch(has_selected_branch, selected_md);
     if (rc != DDS::RETCODE_OK) {
       if (log_level >= LogLevel::Warning) {
         ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: DynamicDataImpl::get_member_id_at_index:"
@@ -455,7 +444,8 @@ DDS::ReturnCode_t DynamicDataImpl::clear_value(DDS::MemberId id)
       if (backing_store_) {
         DynamicDataImpl* elem_ddi = new DynamicDataImpl(elem_type);
         DDS::DynamicData_var elem_dd = elem_ddi;
-        if (!set_member_backing_store(elem_ddi, curr_id)) {
+        const DDS::ReturnCode_t rc = set_member_backing_store(elem_ddi, curr_id);
+        if (rc != DDS::RETCODE_OK && rc != DDS::RETCODE_NO_DATA) {
           return DDS::RETCODE_ERROR;
         }
         container_.complex_map_.insert(std::make_pair(prev_id, elem_dd));
@@ -494,6 +484,9 @@ DDS::ReturnCode_t DynamicDataImpl::clear_value(DDS::MemberId id)
         }
         for (DynamicTypeMembersByIdImpl::const_iterator it = members->begin(); it != members->end(); ++it) {
           const DDS::MemberId mid = it->first;
+          if (mid == id) {
+            continue;
+          }
           const bool container_has_it =
             container_.single_map_.find(mid) != container_.single_map_.end() ||
             container_.sequence_map_.find(mid) != container_.sequence_map_.end() ||
@@ -506,8 +499,9 @@ DDS::ReturnCode_t DynamicDataImpl::clear_value(DDS::MemberId id)
             DDS::DynamicType_var mem_dt = get_base_type(mem_desc->type());
             DynamicDataImpl* mem_ddi = new DynamicDataImpl(mem_dt);
             DDS::DynamicData_var mem_dd = mem_ddi;
-            if (!set_member_backing_store(mem_ddi, mid)) {
-              continue;
+            const DDS::ReturnCode_t rc = set_member_backing_store(mem_ddi, mid);
+            if (rc != DDS::RETCODE_OK && rc != DDS::RETCODE_NO_DATA) {
+              return DDS::RETCODE_ERROR;
             }
             container_.complex_map_.insert(std::make_pair(mid, mem_dd));
           }
@@ -3013,14 +3007,10 @@ DDS::ReturnCode_t DynamicDataImpl::get_value_from_self(ValueType& value, DDS::Me
   const_single_iterator it = container_.single_map_.find(MEMBER_ID_INVALID);
   if (it != container_.single_map_.end()) {
     value = it->second.get<ValueType>();
-    return DDS::RETCODE_OK;
+  } else if (!get_value_from_backing_store(value, id)) {
+    set_default_basic_value(value);
   }
-  if (get_value_from_backing_store(value, id)) {
-    return DDS::RETCODE_OK;
-  }
-
-  set_default_basic_value(value);
-  return DDS::RETCODE_NO_DATA;
+  return DDS::RETCODE_OK;
 }
 
 template<>
@@ -3052,18 +3042,15 @@ DDS::ReturnCode_t DynamicDataImpl::get_value_from_enum(ValueType& value, DDS::Me
   const_single_iterator it = container_.single_map_.find(MEMBER_ID_INVALID);
   if (it != container_.single_map_.end()) {
     value = it->second.get<ValueType>();
-    return DDS::RETCODE_OK;
-  }
-  if (get_value_from_backing_store(value, id)) {
-    return DDS::RETCODE_OK;
+  } else if (!get_value_from_backing_store(value, id)) {
+    CORBA::Long enum_default_val;
+    if (!set_default_enum_value(type_, enum_default_val)) {
+      return DDS::RETCODE_ERROR;
+    }
+    cast_to_enum_value(value, enum_default_val);
   }
 
-  CORBA::Long enum_default_val;
-  if (!set_default_enum_value(type_, enum_default_val)) {
-    return DDS::RETCODE_ERROR;
-  }
-  cast_to_enum_value(value, enum_default_val);
-  return DDS::RETCODE_NO_DATA;
+  return DDS::RETCODE_OK;
 }
 
 template<>
@@ -3093,14 +3080,10 @@ DDS::ReturnCode_t DynamicDataImpl::get_value_from_bitmask(ValueType& value, DDS:
   const_single_iterator it = container_.single_map_.find(MEMBER_ID_INVALID);
   if (it != container_.single_map_.end()) {
     value = it->second.get<ValueType>();
-    return DDS::RETCODE_OK;
+  } else if (!get_value_from_backing_store(value, id)) {
+    set_default_bitmask_value(value);
   }
-  if (get_value_from_backing_store(value, id)) {
-    return DDS::RETCODE_OK;
-  }
-
-  set_default_bitmask_value(value);
-  return DDS::RETCODE_NO_DATA;
+  return DDS::RETCODE_OK;
 }
 
 template<>
@@ -3134,10 +3117,11 @@ DDS::ReturnCode_t DynamicDataImpl::get_value_from_struct(ValueType& value, DDS::
       ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicDataImpl::get_value_from_struct:"
                  " Optional member Id %u is not present\n", id));
     }
-  } else {
-    set_default_basic_value(value);
+    return DDS::RETCODE_NO_DATA;
   }
-  return DDS::RETCODE_NO_DATA;
+
+  set_default_basic_value(value);
+  return DDS::RETCODE_OK;
 }
 
 template<TypeKind ValueTypeKind, typename ValueType>
@@ -3151,27 +3135,36 @@ DDS::ReturnCode_t DynamicDataImpl::get_value_from_union(ValueType& value, DDS::M
     return rc;
   }
 
-  // Return the member if the container or the backing store has it.
+  if (id == DISCRIMINATOR_ID) {
+    if (!read_basic_member(value, id)) {
+      set_default_basic_value(value);
+    }
+    return DDS::RETCODE_OK;
+  }
+
+  // Branch
+  bool has_selected_branch;
+  DDS::MemberDescriptor_var selected_md;
+  if (get_selected_union_branch(has_selected_branch, selected_md) != DDS::RETCODE_OK) {
+    return DDS::RETCODE_ERROR;
+  }
+
+  // Requesting a branch that is not selected.
+  if (!has_selected_branch || selected_md->id() != id) {
+    return DDS::RETCODE_PRECONDITION_NOT_MET;
+  }
+
   if (read_basic_member(value, id)) {
     return DDS::RETCODE_OK;
   }
 
-  if (id != DISCRIMINATOR_ID) {
-    DDS::DynamicTypeMember_var dtm;
-    if (type_->get_member(dtm, id) != DDS::RETCODE_OK) {
-      return DDS::RETCODE_ERROR;
-    }
-    DDS::MemberDescriptor_var md;
-    if (dtm->get_descriptor(md) != DDS::RETCODE_OK) {
-      return DDS::RETCODE_ERROR;
-    }
-    if (md->is_optional()) {
-      return DDS::RETCODE_NO_DATA;
-    }
+  // The selected branch has not been set explicitly, either because the union data
+  // is completely empty, or the selected branch is optional and hasn't been set.
+  if (selected_md->is_optional()) {
+    return DDS::RETCODE_NO_DATA;
   }
-
   set_default_basic_value(value);
-  return DDS::RETCODE_NO_DATA;
+  return DDS::RETCODE_OK;
 }
 
 void DynamicDataImpl::cast_to_enum_value(ACE_OutputCDR::from_int8& dst, CORBA::Long src) const
@@ -3241,14 +3234,14 @@ DDS::ReturnCode_t DynamicDataImpl::get_value_from_collection(ValueType& value, D
   if (treat_as_tk != ValueTypeKind) {
     return DDS::RETCODE_ERROR;
   }
-  if (read_basic_member(value, id)) {
-    return DDS::RETCODE_OK;
-  }
 
-  // This may only happen for array. For sequence or string, as long as there is no
-  // out-of-range access, it will succeed.
-  set_default_basic_value(value);
-  return DDS::RETCODE_NO_DATA;
+  // For sequence or string, as long as there is no out-of-range access,
+  // it'll read successfully from the container or the backing store.
+  if (!read_basic_member(value, id)) {
+    // This may only happen for array.
+    set_default_basic_value(value);
+  }
+  return DDS::RETCODE_OK;
 }
 
 template<TypeKind ValueTypeKind, typename ValueType>
@@ -3859,10 +3852,11 @@ bool DynamicDataImpl::get_complex_from_container(DDS::DynamicData_var& value, DD
   return true;
 }
 
-bool DynamicDataImpl::set_member_backing_store(DynamicDataImpl* member_ddi, DDS::MemberId id)
+DDS::ReturnCode_t DynamicDataImpl::set_member_backing_store(DynamicDataImpl* member_ddi,
+                                                            DDS::MemberId id)
 {
   if (!backing_store_) {
-    return false;
+    return DDS::RETCODE_NO_DATA;
   }
 
   DDS::DynamicData_var member_dd;
@@ -3872,31 +3866,32 @@ bool DynamicDataImpl::set_member_backing_store(DynamicDataImpl* member_ddi, DDS:
       ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicDataImpl::set_member_backing_store:"
                  " Get complex value for member ID: %u failed: %C\n", id, retcode_to_string(rc)));
     }
-    return false;
+    return DDS::RETCODE_NO_DATA;
   }
   DynamicDataXcdrReadImpl* member_store = dynamic_cast<DynamicDataXcdrReadImpl*>(member_dd.in());
   if (!member_store) {
-    return false;
+    return DDS::RETCODE_ERROR;
   }
   member_ddi->set_backing_store(member_store);
-  return true;
+  return DDS::RETCODE_OK;
 }
 
-DDS::ReturnCode_t DynamicDataImpl::get_complex_from_aggregated(DDS::DynamicData_ptr& value, DDS::MemberId id)
+// Get complex value for a member of a struct or a branch of a union.
+DDS::ReturnCode_t DynamicDataImpl::get_complex_from_aggregated(DDS::DynamicData_var& dd_var,
+                                                               DDS::MemberId id)
 {
+  // Whether the member is found in the container.
   FoundStatus found_status = NOT_FOUND;
-  DDS::DynamicData_var dd_var;
   if (!get_complex_from_container(dd_var, id, found_status)) {
     return DDS::RETCODE_ERROR;
   }
 
-  DDS::ReturnCode_t rc = DDS::RETCODE_OK;
   if (found_status == NOT_FOUND) {
     DynamicDataImpl* ddi = dynamic_cast<DynamicDataImpl*>(dd_var.in());
     if (!ddi) {
       return DDS::RETCODE_ERROR;
     }
-    if (!set_member_backing_store(ddi, id)) {
+    if (set_member_backing_store(ddi, id) != DDS::RETCODE_OK) {
       DDS::DynamicTypeMember_var dtm;
       if (type_->get_member(dtm, id) != DDS::RETCODE_OK) {
         return DDS::RETCODE_ERROR;
@@ -3905,18 +3900,87 @@ DDS::ReturnCode_t DynamicDataImpl::get_complex_from_aggregated(DDS::DynamicData_
       if (dtm->get_descriptor(md) != DDS::RETCODE_OK) {
         return DDS::RETCODE_ERROR;
       }
-      rc = DDS::RETCODE_NO_DATA;
       if (md->is_optional()) {
-        return rc;
+        return DDS::RETCODE_NO_DATA;
       }
     }
-  } else if (found_status == FOUND_IN_NON_COMPLEX_MAP) {
+  }
+
+  if (found_status == NOT_FOUND || found_status == FOUND_IN_NON_COMPLEX_MAP) {
     insert_complex(id, dd_var);
+  }
+  return DDS::RETCODE_OK;
+}
+
+DDS::ReturnCode_t DynamicDataImpl::get_complex_from_struct(DDS::DynamicData_ptr& value, DDS::MemberId id)
+{
+  DDS::MemberDescriptor_var md;
+  if (get_descriptor(md, id) != DDS::RETCODE_OK) {
+    return DDS::RETCODE_BAD_PARAMETER;
+  }
+
+  DDS::DynamicData_var dd_var;
+  const DDS::ReturnCode_t rc = get_complex_from_aggregated(dd_var, id);
+  if (rc != DDS::RETCODE_OK) {
+    return rc;
   }
 
   CORBA::release(value);
   value = DDS::DynamicData::_duplicate(dd_var);
-  return rc;
+  return DDS::RETCODE_OK;
+}
+
+DDS::ReturnCode_t DynamicDataImpl::get_complex_from_union(DDS::DynamicData_ptr& value, DDS::Memberid id)
+{
+  DDS::MemberDescriptor_var md;
+  if (get_descriptor(md, id) != DDS::RETCODE_OK) {
+    return DDS::RETCODE_BAD_PARAMETER;
+  }
+
+  // Whether it is found in the container.
+  FoundStatus found_status = NOT_FOUND;
+  DDS::DynamicData_var dd_var;
+
+  if (id == DISCRIMINATOR_ID) {
+    if (!get_complex_from_container(dd_var, id, found_status)) {
+      return DDS::RETCODE_ERROR;
+    }
+    if (found_status == NOT_FOUND) {
+      DynamicDataImpl* ddi = dynamic_cast<DynamicDataImpl*>(dd_var.in());
+      if (!ddi) {
+        return DDS::RETCODE_ERROR;
+      }
+      const DDS::ReturnCode_t rc = set_member_backing_store(ddi, id);
+      if (rc != DDS::RETCODE_OK && rc != DDS::RETCODE_NO_DATA) {
+        return DDS::RETCODE_ERROR;
+      }
+    }
+
+    if (found_status == NOT_FOUND || found_status == FOUND_IN_NON_COMPLEX_MAP) {
+      insert_complex(id, dd_var);
+    }
+  } else { // Branch
+    bool has_selected_branch;
+    DDS::MemberDescriptor_var selected_md;
+    if (get_selected_union_branch(has_selected_branch, selected_md) != DDS::RETCODE_OK) {
+      return DDS::RETCODE_ERROR;
+    }
+
+    // Requesting a branch that is not selected.
+    if (!has_selected_branch || selected_md->id() != id) {
+      return DDS::RETCODE_PRECONDITION_NOT_MET;
+    }
+
+    DDS::DynamicData_var dd_var;
+    const DDS::ReturnCode_t rc = get_complex_from_aggregated(dd_var, id);
+    if (rc != DDS::RETCODE_OK) {
+      return rc;
+    }
+  }
+
+  CORBA::release(value);
+  value = DDS::DynamicData::_duplicate(dd_var);
+  return DDS::RETCODE_OK;
 }
 
 DDS::ReturnCode_t DynamicDataImpl::get_complex_from_collection(DDS::DynamicData_ptr& value, DDS::MemberId id)
@@ -3953,18 +4017,17 @@ DDS::ReturnCode_t DynamicDataImpl::get_complex_from_collection(DDS::DynamicData_
     }
   }
 
-  DDS::ReturnCode_t rc = DDS::RETCODE_OK;
   if (!found_in_maps) {
-    if (!set_member_backing_store(dd_impl, id)) {
-      // The output value parameter is set to a default (empty) object below.
-      rc = DDS::RETCODE_NO_DATA;
+    const DDS::ReturnCode_t rc = set_member_backing_store(dd_impl, id);
+    if (rc != DDS::RETCODE_OK && rc != DDS::RETCODE_NO_DATA) {
+      return DDS::RETCODE_ERROR;
     }
-  } else {
-    insert_complex(id, dd_var);
   }
+  insert_complex(id, dd_var);
+
   CORBA::release(value);
   value = DDS::DynamicData::_duplicate(dd_var);
-  return rc;
+  return DDS::RETCODE_OK;
 }
 
 DDS::ReturnCode_t DynamicDataImpl::get_complex_value(DDS::DynamicData_ptr& value, DDS::MemberId id)
@@ -3972,8 +4035,9 @@ DDS::ReturnCode_t DynamicDataImpl::get_complex_value(DDS::DynamicData_ptr& value
   const TypeKind tk = type_->get_kind();
   switch (tk) {
   case TK_STRUCTURE:
+    return get_complex_from_struct(value, id);
   case TK_UNION:
-    return get_complex_from_aggregated(value, id);
+    return get_complex_from_union(value, id);
   case TK_SEQUENCE:
   case TK_ARRAY:
     return get_complex_from_collection(value, id);

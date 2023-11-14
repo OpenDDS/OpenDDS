@@ -660,14 +660,17 @@ private:
   // Copy values of a basic sequence member from sequence map to a DynamicData object.
   bool move_sequence_to_complex(const const_sequence_iterator& it, DynamicDataImpl* data);
 
-  bool set_member_backing_store(DynamicDataImpl* member_ddi, DDS::MemberId id);
+  DDS::ReturnCode_t set_member_backing_store(DynamicDataImpl* member_ddi, DDS::MemberId id);
 
   // Indicate whether the value of a member is found in the complex map or
   // one of the other two maps or not found from any map in the container.
   enum FoundStatus { FOUND_IN_COMPLEX_MAP, FOUND_IN_NON_COMPLEX_MAP, NOT_FOUND };
 
-  bool get_complex_from_container(DDS::DynamicData_var& value, DDS::MemberId id, FoundStatus& found_status);
-  DDS::ReturnCode_t get_complex_from_aggregated(DDS::DynamicData_ptr& value, DDS::MemberId id);
+  bool get_complex_from_container(DDS::DynamicData_var& value, DDS::MemberId id,
+                                  FoundStatus& found_status);
+  DDS::ReturnCode_t get_complex_from_aggregated(DDS::DynamicData_var& dd_var, DDS::MemberId id);
+  DDS::ReturnCode_t get_complex_from_struct(DDS::DynamicData_ptr& value, DDS::MemberId id);
+  DDS::ReturnCode_t get_complex_from_union(DDS::DynamicData_ptr& value, DDS::MemberId id);
   DDS::ReturnCode_t get_complex_from_collection(DDS::DynamicData_ptr& value, DDS::MemberId id);
 
   bool read_disc_from_single_map(CORBA::Long& disc_val, const DDS::DynamicType_var& disc_type,
