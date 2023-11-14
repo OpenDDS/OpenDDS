@@ -1,4 +1,4 @@
-This is OpenDDS version 3.26.0, released Oct 23 2023
+This is OpenDDS version 3.26.1, released Nov 14 2023
 
 This software is open source and free of licensing fees.  See the
 LICENSE file (in this directory) for license details.

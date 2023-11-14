@@ -1,0 +1,87 @@
+Mon Nov 13 15:08:11 UTC 2023  Adam Mitz  <mitza@objectcomputing.com>
+        commit b47ae4d91f79ef2aaf3cf367d8a0a14dee931b73
+
+        * tests/unit-tests/dds/DCPS/transport/rtps_udp/RtpsSampleHeader.cpp:
+
+          fixed unit test
+
+Fri Nov 10 23:16:58 UTC 2023  Adam Mitz  <mitza@objectcomputing.com>
+        commit 98faa32fafdc0e84184ad35d01c2f8dae43d1019
+
+        * dds/DCPS/transport/rtps_udp/RtpsSampleHeader.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsSampleHeader.h:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpReceiveStrategy.cpp:
+        * docs/news.d/rtps-badmsg.rst:
+        * rtps-parameterlist.rst  docs/news.d/rtps-parameterlist.rst:
+        * tests/unit-tests/dds/DCPS/transport/rtps_udp/RtpsSampleHeader.cpp:
+
+          RtpsSampleHeader: reject invalid DataFrag submessages
+
+Fri Nov 03 21:29:53 UTC 2023  Adam Mitz  <mitza@objectcomputing.com>
+        commit f33b4dbab74ac7d04609d90195858cf116e1630e
+
+        * rtps-parameterlist.rst:
+
+          Added news
+
+Fri Nov 03 21:13:55 UTC 2023  Adam Mitz  <mitza@objectcomputing.com>
+        commit 0825043db47386ba3c81ac125e9b1ee7d39dec9e
+
+        * dds/DCPS/Serializer.cpp:
+        * tests/unit-tests/dds/DCPS/RTPS/RtpsCoreTypeSupportImpl.cpp:
+
+          Fixed a corner case in RTPS ParameterList parsing
+
+          Without this fix, when the end of the stream is reached before
+          PID_SENTINEL the parser may attempt to dereference an invalid
+          pointer.
+
+Tue Oct 31 20:27:16 UTC 2023  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit cc3e9e666ec1bed7c1c57c1a9d73e147dc8e71ac
+
+        * cmake/init.cmake:
+        * docs/news.d/cmake-features.rst:
+
+          "Un-cache" Feature Lists in CMake
+
+          Fixes #4328
+
+          The equivalent to many MPC features in CMake are built up using a
+          function called `_opendds_feature` that adds features to lists to
+          use.
+          The issue is these lists are set as cache variables, which are
+          persistent across CMake runs. This resulted in the features being
+          appended each time, so they are listed multiple times in output
+          and
+          `default.features` if building ACE.
+
+          These don't really have to be cache variables, so just set them
+          as
+          normal variables in the parent scope.
+
+          Also fixed some typos in the same file and added a note about
+          removing
+          an include in the future.
+
+Mon Oct 23 21:10:10 UTC 2023  Fred Hornsey  <hornseyf@unityfoundation.io>
+
+        * docs/internal/release.rst:
+        * tools/scripts/gitrelease.pl:
+
+          Fixes for Release Script and Doc Post-3.26.0
+
+          - Fixed Read the Docs links in README not getting updated
+          properly.
+          - Fixed `gitrelease.pl --list` ignoring the current release
+          workspace.
+          This comes at the cost of having to have that workspace though.
+          - Re-enabled Read the Docs version activation and updated release
+          doc
+          for this.
+          - Other small fixes for the release doc.
+
+Local Variables:
+mode: change-log
+add-log-time-format: (lambda () (progn (setq tz (getenv "TZ")) (set-time-zone-rule "UTC") (setq time (format-time-string "%a %b %e %H:%M:%S %Z %Y" (current-time))) (set-time-zone-rule tz) time))
+indent-tabs-mode: nil
+End:

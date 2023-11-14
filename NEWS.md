@@ -1,5 +1,21 @@
 # OpenDDS Releases
 
+## Version 3.26.1 of OpenDDS
+
+Released 2023-11-14
+
+Download [this release on GitHub](https://github.com/OpenDDS/OpenDDS/releases/tag/DDS-3.26.1).
+
+Read [the documenation for this release on Read the Docs](https://opendds.readthedocs.io/en/dds-3.26.1).
+
+### Fixes
+
+* Building with CMake
+    * Fixed [Issue #4328](https://github.com/OpenDDS/OpenDDS/issues/4328), where each run of CMake effectively always appended the MPC features to `default.features` in ACE. ([PR #4330](https://github.com/OpenDDS/OpenDDS/pull/4330))
+
+* Fixed a corner case in RTPS ParameterList parsing ([PR #4336](https://github.com/OpenDDS/OpenDDS/pull/4336))
+* Reject some types of invalid RTPS DataFrag submessages ([PR #4348](https://github.com/OpenDDS/OpenDDS/pull/4348))
+
 ## Version 3.26.0 of OpenDDS
 
 Released 2023-10-23
