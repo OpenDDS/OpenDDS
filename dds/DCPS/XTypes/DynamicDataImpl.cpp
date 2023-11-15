@@ -781,16 +781,17 @@ bool DynamicDataImpl::insert_complex(DDS::MemberId id, const DDS::DynamicData_va
 // Set a member with the given ID in a struct. The member must have type MemberTypeKind or
 // enum/bitmask. In the latter case, its bit bound must be in the range [lower, upper].
 template<TypeKind MemberTypeKind, typename MemberType>
-bool DynamicDataImpl::set_value_to_struct(DDS::MemberId id, const MemberType& value)
+DDS::ReturnCode_t DynamicDataImpl::set_value_to_struct(DDS::MemberId id, const MemberType& value)
 {
   DDS::MemberDescriptor_var md;
   DDS::DynamicType_var member_type;
   const DDS::ReturnCode_t rc = check_member(
     md, member_type, "DynamicDataImpl::set_value_to_struct", "set", id, MemberTypeKind);
   if (rc != DDS::RETCODE_OK) {
-    return false;
+    return rc;
   }
-  return insert_single(id, value);
+  insert_single(id, value);
+  return DDS::RETCODE_OK;
 }
 
 bool DynamicDataImpl::is_valid_discriminator_type(TypeKind tk)
@@ -1633,9 +1634,9 @@ bool DynamicDataImpl::get_discriminator_value(CORBA::Long& value,
 // the union data. That means, it selects the same branch, including the implicit
 // default if it exists. If the current union data is empty, it's only allowed
 // to set the discriminator value directly if it selects the implicit default branch.
-bool DynamicDataImpl::set_union_discriminator_helper(DDS::DynamicType_var disc_type,
-                                                     CORBA::Long new_disc_value,
-                                                     const char* func_name)
+DDS::ReturnCode_t DynamicDataImpl::set_union_discriminator_helper(DDS::DynamicType_var disc_type,
+                                                                  CORBA::Long new_disc_value,
+                                                                  const char* func_name)
 {
   const_single_iterator single_it;
   const_complex_iterator complex_it;
@@ -1644,11 +1645,11 @@ bool DynamicDataImpl::set_union_discriminator_helper(DDS::DynamicType_var disc_t
   if (has_disc) {
     CORBA::Long existing_disc;
     if (!get_discriminator_value(existing_disc, single_it, complex_it, disc_type)) {
-      return false;
+      return DDS::RETCODE_ERROR;
     }
     DDS::MemberDescriptor_var existing_md;
     if (XTypes::get_selected_union_branch(type_, existing_disc, has_existing_branch, existing_md) != DDS::RETCODE_OK) {
-      return false;
+      return DDS::RETCODE_ERROR;
     }
     if (has_existing_branch && !validate_discriminator(new_disc_value, existing_md)) {
       if (log_level >= LogLevel::Notice) {
@@ -1656,7 +1657,7 @@ bool DynamicDataImpl::set_union_discriminator_helper(DDS::DynamicType_var disc_t
                    " Discriminator value %d does not select the activated branch (ID %u)\n",
                    func_name, new_disc_value, existing_md->id()));
       }
-      return false;
+      return DDS::RETCODE_PRECONDITION_NOT_MET;
     }
   }
 
@@ -1670,9 +1671,9 @@ bool DynamicDataImpl::set_union_discriminator_helper(DDS::DynamicType_var disc_t
                  " Can't directly set a discriminator that selects a member."
                  " Activate the member first!\n", func_name));
     }
-    return false;
+    return DDS::RETCODE_PRECONDITION_NOT_MET;
   }
-  return true;
+  return DDS::RETCODE_OK;
 }
 
 bool DynamicDataImpl::get_union_member_type(DDS::MemberId id, DDS::DynamicType_var& member_type,
@@ -1735,54 +1736,60 @@ bool DynamicDataImpl::find_selected_union_branch(bool& has_existing_branch,
 //
 // Note also that the container have priority over the backing store when reading data.
 template<TypeKind ValueTypeKind, typename MemberType>
-bool DynamicDataImpl::set_value_to_union(DDS::MemberId id, const MemberType& value)
+DDS::ReturnCode_t DynamicDataImpl::set_value_to_union(DDS::MemberId id, const MemberType& value)
 {
   DDS::DynamicType_var member_type;
   DDS::MemberDescriptor_var md;
   if (!get_union_member_type(id, member_type, md)) {
-    return false;
+    return DDS::RETCODE_ERROR;
   }
 
   const TypeKind member_tk = member_type->get_kind();
   TypeKind treat_member_as = member_tk;
   if (member_tk == TK_ENUM && enum_bound(member_type, treat_member_as) != DDS::RETCODE_OK) {
-    return false;
+    return DDS::RETCODE_ERROR;
   }
   if (member_tk == TK_BITMASK && bitmask_bound(member_type, treat_member_as) != DDS::RETCODE_OK) {
-    return false;
+    return DDS::RETCODE_ERROR;
   }
 
   if (treat_member_as != ValueTypeKind) {
-    return false;
+    return DDS::RETCODE_BAD_PARAMETER;
   }
 
   // This follows the IDL-to-C++ mapping for union.
   if (id == DISCRIMINATOR_ID) {
     CORBA::Long disc_value;
     if (!cast_to_discriminator_value(disc_value, value)) {
-      return false;
+      return DDS::RETCODE_ERROR;
     }
-    if (!set_union_discriminator_helper(member_type, disc_value, "set_value_to_union")) {
-      return false;
+    const DDS::ReturnCode_t rc = set_union_discriminator_helper(member_type, disc_value, "set_value_to_union");
+    if (rc != DDS::RETCODE_OK) {
+      return rc;
     }
-    return insert_single(id, value);
+    insert_single(id, value);
+    return DDS::RETCODE_OK;
   }
 
   bool has_existing_branch = false;
   DDS::MemberDescriptor_var existing_md;
   if (!find_selected_union_branch(has_existing_branch, existing_md)) {
-    return false;
+    return DDS::RETCODE_ERROR;
   }
 
   // Update the value of the branch, but keep the existing discriminator value.
   if (has_existing_branch && existing_md->id() == id) {
-    return insert_single(id, value);
+    insert_single(id, value);
+    return DDS::RETCODE_OK;
   }
 
   // Store both the selected branch and a matching discriminator to the container.
   clear_container();
 
-  return insert_valid_discriminator(md) && insert_single(id, value);
+  if (!insert_valid_discriminator(md) || !insert_single(id, value)) {
+    return DDS::RETCODE_ERROR;
+  }
+  return DDS::RETCODE_OK;
 }
 
 bool DynamicDataImpl::insert_valid_discriminator(DDS::MemberDescriptor* memberSelected)
@@ -1906,10 +1913,10 @@ bool DynamicDataImpl::check_out_of_bound_write(DDS::MemberId id)
 }
 
 template<TypeKind ElementTypeKind, typename ElementType>
-bool DynamicDataImpl::set_value_to_collection(DDS::MemberId id, const ElementType& value)
+DDS::ReturnCode_t DynamicDataImpl::set_value_to_collection(DDS::MemberId id, const ElementType& value)
 {
   if (!check_out_of_bound_write(id)) {
-    return false;
+    return DDS::RETCODE_BAD_PARAMETER;
   }
 
   // Check the compatibility of the element type.
@@ -1917,10 +1924,10 @@ bool DynamicDataImpl::set_value_to_collection(DDS::MemberId id, const ElementTyp
   const TypeKind elem_tk = elem_type->get_kind();
   TypeKind treat_elem_as = elem_tk;
   if (elem_tk == TK_ENUM && enum_bound(elem_type, treat_elem_as) != DDS::RETCODE_OK) {
-    return false;
+    return DDS::RETCODE_ERROR;
   }
   if (elem_tk == TK_BITMASK && bitmask_bound(elem_type, treat_elem_as) != DDS::RETCODE_OK) {
-    return false;
+    return DDS::RETCODE_ERROR;
   }
 
   if (treat_elem_as != ElementTypeKind) {
@@ -1929,9 +1936,10 @@ bool DynamicDataImpl::set_value_to_collection(DDS::MemberId id, const ElementTyp
                  " Can't write a value of type %C to a collection with element type %C\n",
                  typekind_to_string(ElementTypeKind), typekind_to_string(elem_tk)));
     }
-    return false;
+    return DDS::RETCODE_BAD_PARAMETER;
   }
-  return insert_single(id, value);
+  insert_single(id, value);
+  return DDS::RETCODE_OK;
 }
 
 template<TypeKind ValueTypeKind, typename ValueType>
@@ -1957,34 +1965,27 @@ DDS::ReturnCode_t DynamicDataImpl::set_single_value(DDS::MemberId id, const Valu
     return DDS::RETCODE_ERROR;
   }
 
-  bool good = false;
   switch (treat_as) {
   case ValueTypeKind:
-    good = is_primitive(treat_as) && id == MEMBER_ID_INVALID && insert_single(id, value);
-    break;
+    if (!is_primitive(treat_as) || id != MEMBER_ID_INVALID) {
+      return DDS::RETCODE_BAD_PARAMETER;
+    }
+    insert_single(id, value);
+    return DDS::RETCODE_OK;
   case TK_STRUCTURE:
-    good = set_value_to_struct<ValueTypeKind>(id, value);
-    break;
+    return set_value_to_struct<ValueTypeKind>(id, value);
   case TK_UNION:
-    good = set_value_to_union<ValueTypeKind>(id, value);
-    break;
+    return set_value_to_union<ValueTypeKind>(id, value);
   case TK_SEQUENCE:
   case TK_ARRAY:
-    good = set_value_to_collection<ValueTypeKind>(id, value);
-    break;
+    return set_value_to_collection<ValueTypeKind>(id, value);
   default:
     if (log_level >= LogLevel::Notice) {
       ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicDataImpl::set_single_value:"
                  " Called on unexpected type %C\n", typekind_to_string(tk)));
     }
   }
-
-  if (!good && log_level >= LogLevel::Notice) {
-    ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicDataImpl::set_single_value: "
-               "Failed to write a value of %C to DynamicData object of type %C\n",
-               typekind_to_string(ValueTypeKind), typekind_to_string(tk)));
-  }
-  return good ? DDS::RETCODE_OK : DDS::RETCODE_ERROR;
+  return DDS::RETCODE_ERROR;
 }
 
 DDS::ReturnCode_t DynamicDataImpl::set_int32_value(DDS::MemberId id, CORBA::Long value)
@@ -2046,36 +2047,29 @@ template<TypeKind CharKind, TypeKind StringKind, typename FromCharT>
 DDS::ReturnCode_t DynamicDataImpl::set_char_common(DDS::MemberId id, const FromCharT& value)
 {
   const TypeKind tk = type_->get_kind();
-  bool good = false;
 
   switch (tk) {
   case CharKind:
-    good = id == MEMBER_ID_INVALID && insert_single(id, value);
-    break;
+    if (id != MEMBER_ID_INVALID) {
+      return DDS::RETCODE_BAD_PARAMETER;
+    }
+    insert_single(id, value);
+    return DDS::RETCODE_OK;
   case TK_STRUCTURE:
-    good = set_value_to_struct<CharKind>(id, value);
-    break;
+    return set_value_to_struct<CharKind>(id, value);
   case TK_UNION:
-    good = set_value_to_union<CharKind>(id, value);
-    break;
+    return set_value_to_union<CharKind>(id, value);
   case StringKind:
   case TK_SEQUENCE:
   case TK_ARRAY:
-    good = set_value_to_collection<CharKind>(id, value);
-    break;
+    return set_value_to_collection<CharKind>(id, value);
   default:
     if (log_level >= LogLevel::Notice) {
       ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicDataImpl::set_char_common:"
                  " Called on unexpected type %C\n", typekind_to_string(tk)));
     }
   }
-
-  if (!good && log_level >= LogLevel::Notice) {
-    ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicDataImpl::set_char_common:"
-               " Failed to write a value of %C to DynamicData object of type %C\n",
-               typekind_to_string(CharKind), typekind_to_string(tk)));
-  }
-  return good ? DDS::RETCODE_OK : DDS::RETCODE_ERROR;
+  return DDS::RETCODE_ERROR;
 }
 
 DDS::ReturnCode_t DynamicDataImpl::set_char8_value(DDS::MemberId id, CORBA::Char value)
@@ -2100,41 +2094,36 @@ DDS::ReturnCode_t DynamicDataImpl::set_byte_value(DDS::MemberId id, CORBA::Octet
 DDS::ReturnCode_t DynamicDataImpl::set_boolean_value(DDS::MemberId id, CORBA::Boolean value)
 {
   const TypeKind tk = type_->get_kind();
-  bool good = false;
 
   switch (tk) {
   case TK_BOOLEAN:
-    good = id == MEMBER_ID_INVALID && insert_single(id, ACE_OutputCDR::from_boolean(value));
-    break;
+    if (id != MEMBER_ID_INVALID) {
+      return DDS::RETCODE_BAD_PARAMETER;
+    }
+    insert_single(id, ACE_OutputCDR::from_boolean(value));
+    return DDS::RETCODE_OK;
   case TK_BITMASK: {
     const CORBA::ULong bit_bound = type_desc_->bound()[0];
-    good = check_index_from_id(tk, id, bit_bound)
-      && insert_single(id, ACE_OutputCDR::from_boolean(value));
-    break;
+    if (!check_index_from_id(tk, id, bit_bound)) {
+      return DDS::RETCODE_BAD_PARAMETER;
+    }
+    insert_single(id, ACE_OutputCDR::from_boolean(value));
+    return DDS::RETCODE_OK;
   }
   case TK_STRUCTURE:
-    good = set_value_to_struct<TK_BOOLEAN>(id, ACE_OutputCDR::from_boolean(value));
-    break;
+    return set_value_to_struct<TK_BOOLEAN>(id, ACE_OutputCDR::from_boolean(value));
   case TK_UNION:
-    good = set_value_to_union<TK_BOOLEAN>(id, ACE_OutputCDR::from_boolean(value));
-    break;
+    return set_value_to_union<TK_BOOLEAN>(id, ACE_OutputCDR::from_boolean(value));
   case TK_SEQUENCE:
   case TK_ARRAY:
-    good = set_value_to_collection<TK_BOOLEAN>(id, ACE_OutputCDR::from_boolean(value));
-    break;
+    return set_value_to_collection<TK_BOOLEAN>(id, ACE_OutputCDR::from_boolean(value));
   default:
     if (log_level >= LogLevel::Notice) {
       ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicDataImpl::set_boolean_value:"
                  " Called on unexpected type %C\n", typekind_to_string(tk)));
     }
   }
-
-  if (!good && log_level >= LogLevel::Notice) {
-    ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicDataImpl::set_boolean_value:"
-               " Failed to write boolean to DynamicData object of type %C\n",
-               typekind_to_string(tk)));
-  }
-  return good ? DDS::RETCODE_OK : DDS::RETCODE_ERROR;
+  return DDS::RETCODE_ERROR;
 }
 
 DDS::ReturnCode_t DynamicDataImpl::set_string_value(DDS::MemberId id, const char* value)
@@ -2351,68 +2340,75 @@ bool DynamicDataImpl::serialize(DCPS::Serializer& ser, DCPS::Sample::Extent ext)
   return false;
 }
 
-bool DynamicDataImpl::set_complex_to_struct(DDS::MemberId id, DDS::DynamicData_var value)
+DDS::ReturnCode_t DynamicDataImpl::set_complex_to_struct(DDS::MemberId id, DDS::DynamicData_var value)
 {
   DDS::DynamicTypeMember_var member;
   if (type_->get_member(member, id) != DDS::RETCODE_OK) {
-    return false;
+    return DDS::RETCODE_ERROR;
   }
   DDS::MemberDescriptor_var md;
   if (member->get_descriptor(md) != DDS::RETCODE_OK) {
-    return false;
+    return DDS::RETCODE_ERROR;
   }
 
   const DDS::DynamicType_var member_type = get_base_type(md->type());
   const DDS::DynamicType_var value_type = value->type();
   if (!member_type || !value_type || !member_type->equals(value_type)) {
-    return false;
+    return DDS::RETCODE_BAD_PARAMETER;
   }
-  return insert_complex(id, value);
+  insert_complex(id, value);
+  return DDS::RETCODE_OK;
 }
 
-bool DynamicDataImpl::set_complex_to_union(DDS::MemberId id, DDS::DynamicData_var value)
+DDS::ReturnCode_t DynamicDataImpl::set_complex_to_union(DDS::MemberId id, DDS::DynamicData_var value)
 {
   DDS::DynamicType_var member_type;
   DDS::MemberDescriptor_var md;
   if (!get_union_member_type(id, member_type, md)) {
-    return false;
+    return DDS::RETCODE_ERROR;
   }
 
   const DDS::DynamicType_var value_type = value->type();
   if (!member_type->equals(value_type)) {
-    return false;
+    return DDS::RETCODE_BAD_PARAMETER;
   }
 
   if (id == DISCRIMINATOR_ID) {
     CORBA::Long disc_val;
     DynamicDataImpl* dd_impl = dynamic_cast<DynamicDataImpl*>(value.in());
     if (!dd_impl || !dd_impl->read_discriminator(disc_val)) {
-      return false;
+      return DDS::RETCODE_ERROR;
     }
-    if (!set_union_discriminator_helper(member_type, disc_val, "set_complex_to_union")) {
-      return false;
+    const DDS::ReturnCode_t rc = set_union_discriminator_helper(member_type, disc_val, "set_complex_to_union");
+    if (rc != DDS::RETCODE_OK) {
+      return rc;
     }
-    return insert_complex(id, value);
+    insert_complex(id, value);
+    return DDS::RETCODE_OK;
   }
 
   bool has_existing_branch = false;
   DDS::MemberDescriptor_var existing_md;
   if (!find_selected_union_branch(has_existing_branch, existing_md)) {
-    return false;
+    return DDS::RETCODE_ERROR;
   }
 
   // Update the value for the existing branch.
   if (has_existing_branch && existing_md->id() == id) {
-    return insert_complex(id, value);
+    insert_complex(id, value);
+    return DDS::RETCODE_OK;
   }
 
   // Set the union to the new branch.
   clear_container();
 
-  return insert_valid_discriminator(md) && insert_complex(id, value);
+  if (!insert_valid_discriminator(md) || !insert_complex(id, value)) {
+    return DDS::RETCODE_ERROR;
+  }
+  return DDS::RETCODE_OK;
 }
 
-bool DynamicDataImpl::set_complex_to_collection(DDS::MemberId id, DDS::DynamicData_var value)
+DDS::ReturnCode_t DynamicDataImpl::set_complex_to_collection(DDS::MemberId id, DDS::DynamicData_var value)
 {
   if (!check_out_of_bound_write(id)) {
     return DDS::RETCODE_BAD_PARAMETER;
@@ -2421,41 +2417,33 @@ bool DynamicDataImpl::set_complex_to_collection(DDS::MemberId id, DDS::DynamicDa
   const DDS::DynamicType_var elem_type = get_base_type(type_desc_->element_type());
   const DDS::DynamicType_var value_type = value->type();
   if (!elem_type->equals(value_type)) {
-    return false;
+    return DDS::RETCODE_BAD_PARAMETER;
   }
 
-  return insert_complex(id, value);
+  insert_complex(id, value);
+  return DDS::RETCODE_OK;
 }
 
 DDS::ReturnCode_t DynamicDataImpl::set_complex_value(DDS::MemberId id, DDS::DynamicData_ptr value)
 {
   DDS::DynamicData_var value_var = DDS::DynamicData::_duplicate(value);
   const TypeKind tk = type_->get_kind();
-  bool good = false;
 
   switch (tk) {
   case TK_STRUCTURE:
-    good = set_complex_to_struct(id, value_var);
-    break;
+    return set_complex_to_struct(id, value_var);
   case TK_UNION:
-    good = set_complex_to_union(id, value_var);
-    break;
+    return set_complex_to_union(id, value_var);
   case TK_SEQUENCE:
   case TK_ARRAY:
-    good = set_complex_to_collection(id, value_var);
-    break;
+    return set_complex_to_collection(id, value_var);
   default:
     if (log_level >= LogLevel::Notice) {
       ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicDataImpl::set_complex_value:"
                  " Called on unexpected type %C\n", typekind_to_string(tk)));
     }
   }
-
-  if (!good && log_level >= LogLevel::Notice) {
-    ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicDataImpl::set_complex_value:"
-               " Failed to write complex value for member with ID %d\n", id));
-  }
-  return good ? DDS::RETCODE_OK : DDS::RETCODE_ERROR;
+  return DDS::RETCODE_ERROR;
 }
 
 template<typename SequenceType>
@@ -3930,7 +3918,7 @@ DDS::ReturnCode_t DynamicDataImpl::get_complex_from_struct(DDS::DynamicData_ptr&
   return DDS::RETCODE_OK;
 }
 
-DDS::ReturnCode_t DynamicDataImpl::get_complex_from_union(DDS::DynamicData_ptr& value, DDS::Memberid id)
+DDS::ReturnCode_t DynamicDataImpl::get_complex_from_union(DDS::DynamicData_ptr& value, DDS::MemberId id)
 {
   DDS::MemberDescriptor_var md;
   if (get_descriptor(md, id) != DDS::RETCODE_OK) {

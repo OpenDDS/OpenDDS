@@ -326,7 +326,7 @@ private:
   DDS::ReturnCode_t get_boolean_from_bitmask(CORBA::ULong index, CORBA::Boolean& value);
 
   template<TypeKind MemberTypeKind, typename MemberType>
-  bool set_value_to_struct(DDS::MemberId id, const MemberType& value);
+  DDS::ReturnCode_t set_value_to_struct(DDS::MemberId id, const MemberType& value);
 
   bool cast_to_discriminator_value(CORBA::Long& disc_value, const ACE_OutputCDR::from_boolean& value) const;
   bool cast_to_discriminator_value(CORBA::Long& disc_value, const ACE_OutputCDR::from_octet& value) const;
@@ -346,20 +346,20 @@ private:
   template<typename MemberType>
   bool cast_to_discriminator_value(CORBA::Long& disc_value, const MemberType& value) const;
 
-  bool set_union_discriminator_helper(DDS::DynamicType_var disc_type, CORBA::Long disc_val,
-                                      const char* func_name);
+  DDS::ReturnCode_t set_union_discriminator_helper(DDS::DynamicType_var disc_type, CORBA::Long disc_val,
+                                                   const char* func_name);
 
   bool get_union_member_type(DDS::MemberId id, DDS::DynamicType_var& member_type,
                              DDS::MemberDescriptor_var& md) const;
   bool find_selected_union_branch(bool& has_existing_branch, DDS::MemberDescriptor_var& existing_md);
 
   template<TypeKind MemberTypeKind, typename MemberType>
-  bool set_value_to_union(DDS::MemberId id, const MemberType& value);
+  DDS::ReturnCode_t set_value_to_union(DDS::MemberId id, const MemberType& value);
 
   bool check_out_of_bound_write(DDS::MemberId id);
 
   template<TypeKind ElementTypeKind, typename ElementType>
-  bool set_value_to_collection(DDS::MemberId id, const ElementType& value);
+  DDS::ReturnCode_t set_value_to_collection(DDS::MemberId id, const ElementType& value);
 
   template<TypeKind ValueTypeKind, typename ValueType>
   DDS::ReturnCode_t set_single_value(DDS::MemberId id, const ValueType& value);
@@ -384,9 +384,9 @@ private:
   bool read_discriminator(CORBA::Long& disc_val);
   bool validate_discriminator(CORBA::Long disc_val, const DDS::MemberDescriptor_var& md) const;
 
-  bool set_complex_to_struct(DDS::MemberId id, DDS::DynamicData_var value);
-  bool set_complex_to_union(DDS::MemberId id, DDS::DynamicData_var value);
-  bool set_complex_to_collection(DDS::MemberId id, DDS::DynamicData_var value);
+  DDS::ReturnCode_t set_complex_to_struct(DDS::MemberId id, DDS::DynamicData_var value);
+  DDS::ReturnCode_t set_complex_to_union(DDS::MemberId id, DDS::DynamicData_var value);
+  DDS::ReturnCode_t set_complex_to_collection(DDS::MemberId id, DDS::DynamicData_var value);
 
   DDS::ReturnCode_t clear_value_i(DDS::MemberId id, const DDS::DynamicType_var& member_type);
 
