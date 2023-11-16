@@ -1,5 +1,0 @@
-.. news-prs: 4226
-
-.. news-start-section: Additions
-- Support sending DynamicDataAdapter sample via DynamicDataWriter
-.. news-end-section

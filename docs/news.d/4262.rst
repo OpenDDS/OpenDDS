@@ -1,5 +1,0 @@
-.. news-prs: 4262
-
-.. news-start-section: Fixes
-- Fix warnings in typeobject_generator when using TAO 3
-.. news-end-section

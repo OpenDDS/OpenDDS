@@ -1,6 +1,6 @@
-#######################
-OpenDDS Release Process
-#######################
+###############
+Release Process
+###############
 
 The page provides the steps needed to make and publish a release of OpenDDS.
 
@@ -20,8 +20,7 @@ Temporary Notes
 List of current problems with the release process and their workarounds.
 If there's nothing to note then the list should just consist of ``- N/A``.
 
-- The readthedocs.org version needs to be activated manually after the tag has been pushed.
-  There's a part of the script to do this automatically, but it's only partially working.
+- N/A
 
 ********************
 Prior to the Release
@@ -56,7 +55,6 @@ These are files or the parts of the files that the release script won't be able 
   - Run ``./tools/scripts/gitrelease.pl --update-authors`` again to make sure the changes worked.
 
 - Update :ghfile:`README.md` and :doc:`/devguide/building/dependencies` for any platform or dependency changes, such as updates to the ACE/TAO version being used.
-  Specifically, double check that the ACE and TAO versions listed in ``README.md`` match the versions in the configure script.
 - Document changes to building OpenDDS, at least in :doc:`/devguide/building/index`, but possibly also in :ghfile:`java/README` and :ghfile:`java/INSTALL`.
 
 Update the Modeling SDK version numbers and release notes
@@ -160,6 +158,11 @@ Before Running the Release Script
     - `You have uploaded your SSH public key to your GitHub account <https://help.github.com/articles/generating-an-ssh-key>`__
     - `You have created a Personal Access Token for your GitHub account <https://help.github.com/articles/creating-an-access-token-for-command-line-use/>`__
 
+  - You are a maintainer on the `OpenDDS Read the Docs project <https://readthedocs.org/projects/opendds/>`__.
+
+    - Maintainers can add new maintainers `here <https://readthedocs.org/dashboard/opendds/users/>`__.
+    - You will need a `API token <https://readthedocs.org/accounts/tokens/>`__.
+
   - The following `Perl CPAN modules <http://www.cpan.org/modules/INSTALL.html>`__ are required (`Perl core modules <https://perldoc.perl.org/modules>`__ should not be listed here):
 
     - `Pithub <https://metacpan.org/pod/Pithub>`__
@@ -187,11 +190,13 @@ Before Running the Release Script
 
   For micro releases, check out the relevant branch that the release will come from and pass ``--branch=BRANCH`` along with the ``--micro`` argument.
 
-- Export a ``GITHUB_TOKEN`` Bash shell variable with your `GitHub Personal Access Token <https://help.github.com/articles/creating-an-access-token-for-command-line-use/>`__ as shown below:
+- Set tokens the release script needs to interact with web services by exporting them as environment variables.
+  These are ``GITHUB_TOKEN`` for your `GitHub Personal Access Token <https://help.github.com/articles/creating-an-access-token-for-command-line-use/>`__ and ``READ_THE_DOCS_TOKEN`` for your `Read the Docs API token <https://readthedocs.org/accounts/tokens/>`__ as shown below:
 
   .. code-block:: bash
 
       export GITHUB_TOKEN=ff00ff00ff00ff00ff00ff00ff00ff00ff00ff00
+      export READ_THE_DOCS_TOKEN=ff00ff00ff00ff00ff00ff00ff00ff00ff00ff00
 
 Running the Release Script
 ==========================

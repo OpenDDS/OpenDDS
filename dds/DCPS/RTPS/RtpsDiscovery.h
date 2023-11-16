@@ -59,6 +59,8 @@ public:
   explicit RtpsDiscovery(const RepoKey& key);
   ~RtpsDiscovery();
 
+  virtual RepoKey key() const { return key_; }
+
   virtual OpenDDS::DCPS::GUID_t generate_participant_guid();
 
   virtual OpenDDS::DCPS::AddDomainStatus add_domain_participant(
@@ -332,6 +334,8 @@ private:
   DomainParticipantMap participants_;
 
   ParticipantHandle get_part(const DDS::DomainId_t domain_id, const GUID_t& part_id) const;
+
+  const RepoKey key_;
 
   // This mutex protects everything else
   mutable ACE_Thread_Mutex lock_;

@@ -171,6 +171,19 @@ def ghrelease_role(name, rawtext, text, lineno, inliner, options={}, content=[])
     return ([node], [])
 
 
+def acetaorel_role(name, rawtext, text, lineno, inliner, options={}, content=[]):
+    config = get_config(inliner)
+    info = vars(config.opendds_version_info)
+    explicit_title, title, target = process_title_target(text)
+    if not explicit_title:
+        ace_ver = info[target + '_version']
+        parts = ace_ver.split('.')
+        tao_ver = '.'.join([str(int(parts[0]) - 4)] + parts[1:3])
+        title = f'ACE {ace_ver}/TAO {tao_ver}'
+    return link_node(rawtext, lineno, inliner,
+        title, explicit_title, info[target + '_url'], options)
+
+
 def omgissue_role(name, rawtext, text, lineno, inliner, options={}, content=[]):
     explicit_title, title, target = process_title_target(
         text, 'OMG Issue {}'.format(text))
@@ -374,6 +387,9 @@ def setup(app):
     app.add_role('ghissue', ghissue_role)
     app.add_role('ghpr', ghpr_role)
     app.add_role('ghrelease', ghrelease_role)
+
+    app.add_config_value('opendds_version_info', None, 'env')
+    app.add_role('acetaorel', acetaorel_role)
 
     app.add_config_value('omg_specs', {}, 'env', types=[dict])
     app.add_role('omgissue', omgissue_role)

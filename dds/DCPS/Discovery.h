@@ -79,8 +79,6 @@ public:
   /// Probably should just be Discovery::Key
   typedef OPENDDS_STRING RepoKey;
 
-  explicit Discovery(const RepoKey& key) : key_(key) { }
-
   /// Key value for the default repository IOR.
   static const char* DEFAULT_REPO;
   static const char* DEFAULT_RTPS;
@@ -93,7 +91,7 @@ public:
 
   virtual void fini_bit(DCPS::DomainParticipantImpl* participant) = 0;
 
-  RepoKey key() const { return this->key_; }
+  virtual RepoKey key() const = 0;
 
   class OpenDDS_Dcps_Export Config
     : public PoolAllocationBase
@@ -288,9 +286,6 @@ public:
 
 protected:
   DDS::ReturnCode_t create_bit_topics(DomainParticipantImpl* participant);
-
-private:
-  RepoKey key_;
 };
 
 typedef RcHandle<Discovery> Discovery_rch;

@@ -1,5 +1,0 @@
-.. news-prs: 4216
-
-.. news-start-section: Fixes
-- Remove from TypeLookupService when remote endpoint is removed from SEDP
-.. news-end-section

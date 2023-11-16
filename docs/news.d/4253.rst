@@ -1,5 +1,0 @@
-.. news-prs: 4253
-
-.. news-start-section: Fixes
-- Efficiency: Remove per-element locking in JobQueue
-.. news-end-section
