@@ -309,6 +309,12 @@ dds_visitor::visit_structure(AST_Structure* node)
     field_vec.push_back(*i);
   }
 
+  for (const auto &field : field_vec) {
+    if (be_global->is_optional(field)) {
+      idl_global->err()->misc_warning("@optional annotation isn't supported", field);
+    }
+  }
+
   if (!java_ts_only_) {
     error_ |= !gen_target_.gen_struct(node, node->name(), field_vec,
                                       node->size_type(), node->repoID());

@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.8...3.27)
-project(opendds_compiler_char_literals CXX)
+project(opendds_compiler_optional CXX)
 enable_testing()
 
 find_package(OpenDDS REQUIRED)
@@ -16,16 +16,15 @@ set(idl "${target_prefix}idl")
 add_library(${idl})
 opendds_target_sources(${idl} PUBLIC "optional.idl" OPENDDS_IDL_OPTIONS "-Lc++11")
 target_link_libraries(${idl} PUBLIC OpenDDS::Dcps)
-set(idl_dir "${dst}")
-set_target_properties(${idl} PROPERTIES
-  RUNTIME_OUTPUT_DIRECTORY "${idl_dir}"
-  LIBRARY_OUTPUT_DIRECTORY "${idl_dir}"
-)
+set(idl_dir "${CMAKE_CURRENT_BINARY_DIR}")
 
 add_executable(opendds_compiler_optional_exe
   "main.cpp"
 )
-target_link_libraries(opendds_compiler_optional_exe ${opendds_libs} ${idl} gtest)
+set_target_properties(opendds_compiler_optional_exe PROPERTIES
+  OUTPUT_NAME optional
+)
+target_link_libraries(opendds_compiler_optional_exe ${opendds_libs} ${idl})
 
 configure_file(run_test.pl . COPYONLY)
 opendds_add_test(COMMAND perl run_test.pl cpp11 EXTRA_LIB_DIRS "${idl_dir}")
