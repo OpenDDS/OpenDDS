@@ -1235,7 +1235,7 @@ protected:
       if (inst != 0) {
         const typename ReverseInstanceMap::iterator pos = reverse_instance_map_.find(handle);
         if (pos != reverse_instance_map_.end()) {
-          inst->erase(pos->second);
+          inst->erase(pos->second->first);
         }
       }
     }
