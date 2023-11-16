@@ -1,5 +1,6 @@
-#include "key_annotationTypeSupportImpl.h"
+#include "optionalTypeSupportImpl.h"
 
+#include <cstdlib>
 #include <dds/DCPS/Serializer.h>
 #include <dds/DCPS/TypeSupportImpl.h>
 #include <dds/DCPS/FilterEvaluator.h>
@@ -10,7 +11,5 @@
 
 int ACE_TMAIN(int, ACE_TCHAR**)
 {
-  
-
-  return failed;
+  return EXIT_SUCCESS;
 }
