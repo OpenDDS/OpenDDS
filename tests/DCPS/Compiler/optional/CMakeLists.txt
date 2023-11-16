@@ -23,7 +23,7 @@ add_executable(${optional}
   "main.cpp"
 )
 set_target_properties(${optional} PROPERTIES
-  OUTPUT_NAME optional
+  OUTPUT_NAME optional_annotation
   RUNTIME_OUTPUT_DIRECTORY "${dst}"
 )
 target_link_libraries(${optional} ${opendds_libs} ${idl})

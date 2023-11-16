@@ -9,7 +9,7 @@ use lib "$ACE_ROOT/bin";
 use PerlDDS::Run_Test;
 use strict;
 
-my $name = 'optional';
+my $name = 'optional_annotation';
 
 my $status = 0;
 my $TESTDVR = PerlDDS::create_process ($name);
