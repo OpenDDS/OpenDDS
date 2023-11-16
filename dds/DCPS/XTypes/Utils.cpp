@@ -1382,7 +1382,7 @@ DDS::ReturnCode_t copy_member(
       get_rc = src->get_complex_value(subsrc, src_id);
       if (get_rc == DDS::RETCODE_OK) {
         DDS::DynamicType_var parent_dest_type = get_base_type(dest_type);
-        if (parent_dest_type->get_kind() == TK_UNION && dest_id != DISCRIMINATOR_ID) {
+        if (parent_dest_type->get_kind() == TK_UNION) {
           DDS::DynamicData_var temp = new DynamicDataImpl(use_dest_type);
           set_rc = dest->set_complex_value(dest_id, temp);
         }
