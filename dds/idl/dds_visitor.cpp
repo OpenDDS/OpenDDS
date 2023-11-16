@@ -309,9 +309,9 @@ dds_visitor::visit_structure(AST_Structure* node)
     field_vec.push_back(*i);
   }
 
-  for (const auto &field : field_vec) {
-    if (be_global->is_optional(field)) {
-      idl_global->err()->misc_warning("@optional annotation isn't supported", field);
+  for (vector<AST_Field*>::iterator it = field_vec.begin(); it != field_vec.end(); ++it) {
+    if (be_global->is_optional(*it)) {
+      idl_global->err()->misc_warning("@optional annotation isn't supported", *it);
     }
   }
 
