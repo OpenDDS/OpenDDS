@@ -311,7 +311,7 @@ dds_visitor::visit_structure(AST_Structure* node)
 
   for (vector<AST_Field*>::iterator it = field_vec.begin(); it != field_vec.end(); ++it) {
     if (be_global->is_optional(*it)) {
-      idl_global->err()->misc_warning("@optional annotation isn't supported", *it);
+      idl_global->err()->misc_warning("@optional annotation isn't fully supported", *it);
     }
   }
 
