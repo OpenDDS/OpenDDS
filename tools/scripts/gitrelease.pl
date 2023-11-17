@@ -71,11 +71,24 @@ sub get_version_line {
   return $line;
 }
 
+sub git_tag {
+  my $version = shift();
+
+  return "${git_name_prefix}$version->{tag_string}";
+}
+
 sub get_rtd_link {
   my $settings = shift();
   my $post_release = shift() // 0;
 
-  return "$rtd_url/en/" . ($post_release ? 'latest-release' : lc($settings->{git_tag}));
+  my $last_tag = 'lastest-release';
+  if ($settings->{micro}) {
+    my $v = $settings->{parsed_version};
+    my $last_micro = $v->{micro} - 1;
+    $last_tag = lc(git_tag(parse_version("$v->{major}.$v->{minor}.$last_micro")));
+  }
+
+  return "$rtd_url/en/" . ($post_release ? $last_tag : lc($settings->{git_tag})) . "/";
 }
 
 sub usage {
@@ -159,6 +172,7 @@ sub help {
     "                         This doesn't run any release steps or require the\n" .
     "                         WORKSPACE or VERSION arguments, but does require the\n" .
     "                         GITHUB_TOKEN environment variable\n" .
+    "  --cherry-pick-prs PR.. Use git cherry-pick from the given GitHub PRs.\n" .
     "\n" .
     "Environment Variables:\n" .
     "  GITHUB_TOKEN           GitHub token with repo access to publish release on\n" .
@@ -909,6 +923,27 @@ sub upload_shapes_demo {
   my $release = get_github_releases($settings)->first;
   github_upload_assets($settings, \@to_upload, \%asset_details, $release->{id},
     "\nGithub upload failed, try again");
+}
+
+sub cherry_pick_prs {
+  my $settings = shift();
+  if (scalar(@_) == 0) {
+    arg_error("Expecting PR arguments");
+  }
+
+  my $ph = Pithub->new(
+    user => $settings->{github_user},
+    repo => $settings->{github_repo},
+  );
+
+  foreach my $prnum (@_) {
+    print("Cherry picking PR #$prnum\n");
+    my $result = $ph->pull_requests->commits(pull_request_id => $prnum);
+    check_pithub_result($result);
+    my $first_commit = $result->content->[0]->{sha};
+    my $last_commit = $result->content->[-1]->{sha};
+    run_command(['git', 'cherry-pick', "$first_commit^..$last_commit"], autodie => 1)
+  }
 }
 
 my $step_subexpr_re = qr/(\^?)(\d*)(-?)(\d*)/;
@@ -2918,6 +2953,7 @@ my $sftp_base_dir = $default_sftp_base_dir;
 my $upload_shapes_demo = 0;
 my $update_authors = 0;
 my $update_ace_tao = 0;
+my $cherry_pick_prs = 0;
 
 GetOptions(
   'help' => \$print_help,
@@ -2943,6 +2979,7 @@ GetOptions(
   'upload-shapes-demo' => \$upload_shapes_demo,
   'update-authors' => \$update_authors,
   'update-ace-tao' => \$update_ace_tao,
+  'cherry-pick-prs' => \$cherry_pick_prs,
 ) or arg_error("Invalid option");
 
 if ($print_help) {
@@ -2968,7 +3005,7 @@ my $version = "";
 my $base_name = "";
 my $release_branch = "";
 
-my $ignore_args = $update_authors || $print_list_all || $update_ace_tao;
+my $ignore_args = $update_authors || $print_list_all || $update_ace_tao || $cherry_pick_prs;
 if ($ignore_args) {
   $parsed_version = $zero_version;
   $parsed_next_version = $zero_version;
@@ -3056,7 +3093,7 @@ my %global_settings = (
     next_version => $next_version,
     parsed_next_version => $parsed_next_version,
     base_name => $base_name,
-    git_tag => "${git_name_prefix}$parsed_version->{tag_string}",
+    git_tag => git_tag($parsed_version),
     tgz_worktree => "$workspace/tgz/${base_name}",
     zip_worktree => "$workspace/zip/${base_name}",
     doxygen_dir => $doxygen_dir,
@@ -3365,6 +3402,9 @@ my @release_steps = (
     },
     message => sub{message_update_readme_file(@_, 1)},
     remedy => sub{remedy_update_readme_file(@_, 1)},
+    # Otherwise this would revert the README to the last micro version and it
+    # doesn't make sense for it to be latest-release, so just leave it.
+    skip => $global_settings{micro},
     can_force => 1,
     post_release => 1,
   },
@@ -3547,7 +3587,7 @@ sub run_step {
   $step->{verified} = 1;
 }
 
-my $alt = $upload_shapes_demo || $update_authors;
+my $alt = $upload_shapes_demo || $update_authors || $cherry_pick_prs;
 if ($upload_shapes_demo) {
   upload_shapes_demo(\%global_settings);
 }
@@ -3556,6 +3596,9 @@ elsif ($update_authors) {
 }
 elsif ($update_ace_tao) {
   update_ace_tao(\%global_settings);
+}
+elsif ($cherry_pick_prs) {
+  cherry_pick_prs(\%global_settings, map { int($_) } @ARGV);
 }
 elsif (!$alt && ($ignore_args || ($workspace && $parsed_version))) {
   my @steps_to_do;
