@@ -6,7 +6,7 @@ Released 2023-11-14
 
 Download [this release on GitHub](https://github.com/OpenDDS/OpenDDS/releases/tag/DDS-3.26.1).
 
-Read [the documenation for this release on Read the Docs](https://opendds.readthedocs.io/en/dds-3.26.1).
+Read [the documentation for this release on Read the Docs](https://opendds.readthedocs.io/en/dds-3.26.1).
 
 ### Fixes
 
@@ -22,7 +22,7 @@ Released 2023-10-23
 
 Download [this release on GitHub](https://github.com/OpenDDS/OpenDDS/releases/tag/DDS-3.26).
 
-Read [the documenation for this release on Read the Docs](https://opendds.readthedocs.io/en/dds-3.26).
+Read [the documentation for this release on Read the Docs](https://opendds.readthedocs.io/en/dds-3.26).
 
 ### Additions
 
@@ -82,7 +82,7 @@ Released 2023-07-20
 
 Download [this release on GitHub](https://github.com/OpenDDS/OpenDDS/releases/tag/DDS-3.25).
 
-Read [the documenation for this release on Read the Docs](https://opendds.readthedocs.io/en/dds-3.25).
+Read [the documentation for this release on Read the Docs](https://opendds.readthedocs.io/en/dds-3.25).
 
 ### Additions
 
