@@ -1,5 +1,0 @@
-@topic
-struct Data {
-    @optional
-    boolean opt_data;
-};
