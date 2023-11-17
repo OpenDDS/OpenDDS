@@ -2120,7 +2120,7 @@ bool DynamicDataImpl::set_complex_to_union(DDS::MemberId id, DDS::DynamicData_va
     return false;
   }
   const DDS::DynamicType_var value_type = value->type();
-  if (get_base_type(md->type())->equals(value_type)) {
+  if (!get_base_type(md->type())->equals(value_type)) {
     return false;
   }
 
