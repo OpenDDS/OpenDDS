@@ -11,13 +11,9 @@ use strict;
 
 my $name = 'optional_annotation';
 
-my $status = 0;
-my $TESTDVR = PerlDDS::create_process ($name);
+my $test = new PerlDDS::TestFramework();
 
-my $status = $TESTDVR->SpawnWaitKill (300);
-if ($status != 0) {
-    print STDERR "ERROR: $name returned $status\n";
-    $status = 1;
-}
+$test->process($name, $name);
+$test->start_process($name);
 
-exit $status;
+exit $test->finish(30);
