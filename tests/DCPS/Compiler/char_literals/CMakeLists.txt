@@ -32,4 +32,6 @@ set_target_properties(opendds_compiler_char_literals_exe PROPERTIES
 target_link_libraries(opendds_compiler_char_literals_exe ${opendds_libs} ${idl} gtest)
 
 configure_file(run_test.pl . COPYONLY)
-opendds_add_test(COMMAND perl run_test.pl cpp11 EXTRA_LIB_DIRS "${idl_dir}")
+# opendds_add_test(COMMAND perl run_test.pl cpp11 EXTRA_LIB_DIRS "${idl_dir}")
+
+gtest_discover_tests(opendds_compiler_char_literals_exe SOURCES "main.cpp")
