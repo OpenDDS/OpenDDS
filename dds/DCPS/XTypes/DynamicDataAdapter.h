@@ -58,10 +58,9 @@ class DynamicDataAdapterImpl;
  *   - Part of this is accessing all types as complex value.
  * - Implement equals, clear_value, clear_all_values, and clear_nonkey_values
  * - Respect bounds of strings and sequences.
- * - Implement way for unions branch to initialized with a default value so
- *   get_complex_value works like DynamicDataImpl if there is no selected
- *   branch. This might be able to be done in either code generation of
- *   DynamicDataAdapterImpl or maybe purely in terms of DynamicDataAdapter.
+ * - Add a way to check if using get_complex_value on a complex member of a
+ *   union that isn't selected. Doing this will cause a segfault. It should
+ *   return DDS::PRECONDITION_NOT_MET.
  */
 class OpenDDS_Dcps_Export DynamicDataAdapter : public DynamicDataBase {
 public:
