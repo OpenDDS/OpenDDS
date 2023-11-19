@@ -61,3 +61,61 @@ function(opendds_add_test)
     set_property(TEST "${test_name}" PROPERTY ENVIRONMENT "${env}")
   endif()
 endfunction()
+
+function(opendds_add_gtest TARGET SOURCES)
+  set(no_value_options)
+  set(single_value_options NAME)
+  set(multi_value_options COMMAND ARGS EXTRA_LIB_DIRS)
+  # cmake_parse_arguments(arg
+  #   "${sources}" ${ARGN})
+
+  find_package(Perl REQUIRED)
+
+  set(test_name "${PROJECT_NAME}_test")
+  gtest_discover_tests(${TARGET} SOURCES ${SOURCES} TEST_LIST ${tests})
+
+  foreach(test ${tests})
+    set(env "ACE_ROOT=${ACE_ROOT}" "TAO_ROOT=${TAO_ROOT}" "DDS_ROOT=${DDS_ROOT}")
+  
+    if(MSVC)
+      set(env_var_name PATH)
+    else()
+      set(env_var_name LD_LIBRARY_PATH)
+    endif()
+    
+    _opendds_path_list(lib_dir_list "$ENV{${env_var_name}}" "${TAO_LIB_DIR}")
+    foreach(lib_dir "${OPENDDS_LIB_DIR}" ${arg_EXTRA_LIB_DIRS})
+      _opendds_path_list(lib_dir_list APPEND "${lib_dir}")
+      if(CMAKE_CONFIGURATION_TYPES)
+        _opendds_path_list(lib_dir_list APPEND "${lib_dir}$<$<BOOL:$<CONFIG>>:/$<CONFIG>>")
+      endif()
+    endforeach()
+    if(WIN32)
+      string(REPLACE "/" "\\" lib_dir_list "${lib_dir_list}")
+      string(REPLACE ";" "\;" lib_dir_list "${lib_dir_list}")
+    endif()
+    list(APPEND env "${env_var_name}=${lib_dir_list}")
+      
+    if(DEFINED OPENDDS_BUILD_DIR)
+      list(APPEND env "OPENDDS_BUILD_DIR=${OPENDDS_BUILD_DIR}")
+    endif()
+      
+    if(DEFINED OPENDDS_CONFIG_DIR)
+      list(APPEND env "OPENDDS_CONFIG_DIR=${OPENDDS_CONFIG_DIR}")
+    endif()
+      
+    if(DEFINED OPENDDS_SOURCE_DIR)
+      if(NOT DEFINED ACE_SOURCE_DIR)
+        set(ACE_SOURCE_DIR "${ACE_ROOT}")
+      endif()
+      _opendds_path_list(perl5lib "${OPENDDS_SOURCE_DIR}/bin" "${ACE_SOURCE_DIR}/bin")
+      list(APPEND env "PERL5LIB=${perl5lib}")
+      list(APPEND env "OPENDDS_SOURCE_DIR=${OPENDDS_SOURCE_DIR}")
+    endif()
+      
+    if(env)
+      set_property(TEST "${test_name}" PROPERTY ENVIRONMENT "${env}")
+    endif()
+  endforeach()
+endfunction()
+    
