@@ -76,13 +76,13 @@ function(opendds_add_gtest TARGET SOURCES)
 
   foreach(test ${tests})
     set(env "ACE_ROOT=${ACE_ROOT}" "TAO_ROOT=${TAO_ROOT}" "DDS_ROOT=${DDS_ROOT}")
-  
+
     if(MSVC)
       set(env_var_name PATH)
     else()
       set(env_var_name LD_LIBRARY_PATH)
     endif()
-    
+
     _opendds_path_list(lib_dir_list "$ENV{${env_var_name}}" "${TAO_LIB_DIR}")
     foreach(lib_dir "${OPENDDS_LIB_DIR}" ${arg_EXTRA_LIB_DIRS})
       _opendds_path_list(lib_dir_list APPEND "${lib_dir}")
@@ -95,15 +95,15 @@ function(opendds_add_gtest TARGET SOURCES)
       string(REPLACE ";" "\;" lib_dir_list "${lib_dir_list}")
     endif()
     list(APPEND env "${env_var_name}=${lib_dir_list}")
-      
+
     if(DEFINED OPENDDS_BUILD_DIR)
       list(APPEND env "OPENDDS_BUILD_DIR=${OPENDDS_BUILD_DIR}")
     endif()
-      
+
     if(DEFINED OPENDDS_CONFIG_DIR)
       list(APPEND env "OPENDDS_CONFIG_DIR=${OPENDDS_CONFIG_DIR}")
     endif()
-      
+
     if(DEFINED OPENDDS_SOURCE_DIR)
       if(NOT DEFINED ACE_SOURCE_DIR)
         set(ACE_SOURCE_DIR "${ACE_ROOT}")
@@ -112,10 +112,9 @@ function(opendds_add_gtest TARGET SOURCES)
       list(APPEND env "PERL5LIB=${perl5lib}")
       list(APPEND env "OPENDDS_SOURCE_DIR=${OPENDDS_SOURCE_DIR}")
     endif()
-      
+
     if(env)
       set_property(TEST "${test_name}" PROPERTY ENVIRONMENT "${env}")
     endif()
   endforeach()
 endfunction()
-    
