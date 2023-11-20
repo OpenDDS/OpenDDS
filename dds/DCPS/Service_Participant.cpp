@@ -395,9 +395,9 @@ Service_Participant::get_domain_participant_factory(int &argc,
       }
 
       String config_fname = config_store_->get(OPENDDS_COMMON_DCPS_CONFIG_FILE,
-                                              OPENDDS_COMMON_DCPS_CONFIG_FILE_default);
+                                               OPENDDS_COMMON_DCPS_CONFIG_FILE_default);
       const String default_configuration_file = config_store_->get(OPENDDS_DEFAULT_CONFIGURATION_FILE,
-                                                                  OPENDDS_DEFAULT_CONFIGURATION_FILE_default);
+                                                                   OPENDDS_DEFAULT_CONFIGURATION_FILE_default);
 
       if (config_fname.empty() && !default_configuration_file.empty()) {
         config_fname = default_configuration_file;
@@ -496,7 +496,7 @@ Service_Participant::get_domain_participant_factory(int &argc,
       job_queue_ = make_rch<JobQueue>(reactor_task_.get_reactor());
 
       const bool monitor_enabled = config_store_->get_boolean(OPENDDS_COMMON_DCPS_MONITOR,
-                                                             OPENDDS_COMMON_DCPS_MONITOR_default);
+                                                              OPENDDS_COMMON_DCPS_MONITOR_default);
 
       if (monitor_enabled) {
 #if !defined(ACE_AS_STATIC_LIBS)
