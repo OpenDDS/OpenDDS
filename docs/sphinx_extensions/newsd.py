@@ -62,7 +62,7 @@ class PrintHelper:
             print(line, file=self.file, **kw)
             self.printed_blank_line = blank
 
-    def put_level_seperator(self):
+    def put_level_separator(self):
         if not self.printed_blank_line:
             print(file=self.file)
             self.printed_blank_line = True
@@ -181,7 +181,7 @@ class Section(Node):
     def print(self, h):
         if self.empty():
             return
-        h.put_level_seperator()
+        h.put_level_separator()
         if self.level:
             if self.level == 1:
                 h.put(0, self.name)
@@ -189,11 +189,11 @@ class Section(Node):
                 h.put(0, self.rank_str(h))
             elif self.level > 1:
                 h.put(self.level - 1, '-', self.name, decorate=self.rank_str(h))
-            h.put_level_seperator()
+            h.put_level_separator()
         for child in sorted(self.children):
             child.print(h)
         if self.level:
-            h.put_level_seperator()
+            h.put_level_separator()
 
     def print_all(self, file=sys.stdout):
         version_info = VersionInfo()
@@ -202,7 +202,7 @@ class Section(Node):
             print((
                 'Released {}\n\n' +
                 'Download :ghrelease:`this release on GitHub <{}>`.\n\n' +
-                'Read `the documenation for this release on Read the Docs <https://opendds.readthedocs.io/en/{}>`__.'
+                'Read `the documentation for this release on Read the Docs <https://opendds.readthedocs.io/en/{}>`__.'
             ).format(today.isoformat(), version_info.tag, version_info.tag.lower()), file=file)
         else:
             print('This version is currently still in development, so this list might change.', file=file)
@@ -218,7 +218,7 @@ class Section(Node):
 def test_section():
     root = Section()
     a = root.get_section('Section A')
-    a.add_text(set([0]), ['- This is some text\n', '- This is a seperate item\n'])
+    a.add_text(set([0]), ['- This is some text\n', '- This is a separate item\n'])
     aa = a.get_section('Section AA')
     aa.add_text(set([3]), ['- This is some text\n  - This is some more\n'])
     aa.add_text(set([1]), ['- This is some text  \n  - This is some more\n'])
@@ -249,7 +249,7 @@ Section A
 [Rank 0]
 
 - This is some text (:ghpr:`0`) [Rank 0]
-- This is a seperate item (:ghpr:`0`) [Rank 0]
+- This is a separate item (:ghpr:`0`) [Rank 0]
 
 - Section AA [Rank 0]
 
@@ -321,7 +321,7 @@ def parse(root, path):
                             prs = set([int(pr) for pr in arg.split(' ')])
                     except ValueError:
                         raise ParseError(loc,
-                            'news-prs must be space seperated PR numbers or just "none"')
+                            'news-prs must be space-separated PR numbers or just "none"')
                     seen_prs = True
                 elif name == 'start-section':
                     if not seen_prs:
