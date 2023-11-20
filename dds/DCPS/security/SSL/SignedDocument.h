@@ -32,10 +32,11 @@ public:
   bool load(const std::string& uri, DDS::Security::SecurityException& ex);
   bool verify(const Certificate& ca);
 
-  const DDS::OctetSeq& original() const {return original_;}
-  const std::string& content() const {return content_;}
+  const DDS::OctetSeq& original() const { return original_; }
+  void content(const std::string& value) { content_ = value; }
+  const std::string& content() const { return content_; }
   bool verified() const { return verified_; }
-  const std::string& filename() const {return filename_;}
+  const std::string& filename() const { return filename_; }
 
   bool operator==(const SignedDocument& other) const;
 

@@ -1099,3 +1099,29 @@ TEST(dds_DCPS_DisjointSequence, OrderedRanges_insert_ranges)
   EXPECT_TRUE(ir.has(11, 13));
   EXPECT_EQ(ir.size(), 2UL);
 }
+
+typedef DisjointSequence::OrderedRanges<char> CharRanges;
+typedef DisjointSequence::OrderedRanges<unsigned char> UCharRanges;
+
+TEST(dds_DCPS_DisjointSequence, OrderedRanges_add_overflow)
+{
+  {
+    CharRanges r;
+    r.add(0, 0);
+    EXPECT_TRUE(r.has(0, 0));
+    r.add(-128, -1);
+    EXPECT_TRUE(r.has(-128, 0));
+    r.add(1, 127);
+    EXPECT_TRUE(r.has(-128, -127));
+  }
+
+  {
+    UCharRanges r;
+    r.add(128, 128);
+    EXPECT_TRUE(r.has(128, 128));
+    r.add(0, 127);
+    EXPECT_TRUE(r.has(0, 128));
+    r.add(129, 255);
+    EXPECT_TRUE(r.has(0, 255));
+  }
+}
