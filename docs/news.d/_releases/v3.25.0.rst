@@ -2,7 +2,7 @@ Released 2023-07-20
 
 Download :ghrelease:`this release on GitHub <DDS-3.25>`.
 
-Read `the documenation for this release on Read the Docs <https://opendds.readthedocs.io/en/dds-3.25>`__.
+Read `the documentation for this release on Read the Docs <https://opendds.readthedocs.io/en/dds-3.25>`__.
 
 Additions
 =========

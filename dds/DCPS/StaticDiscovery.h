@@ -1007,12 +1007,12 @@ private:
                      SubscriberImpl* sub,
                      const DDS::DataReaderQos& qos);
 
-  int parse_topics(ACE_Configuration_Heap& cf);
-  int parse_datawriterqos(ACE_Configuration_Heap& cf);
-  int parse_datareaderqos(ACE_Configuration_Heap& cf);
-  int parse_publisherqos(ACE_Configuration_Heap& cf);
-  int parse_subscriberqos(ACE_Configuration_Heap& cf);
-  int parse_endpoints(ACE_Configuration_Heap& cf);
+  int parse_topics();
+  int parse_datawriterqos();
+  int parse_datareaderqos();
+  int parse_publisherqos();
+  int parse_subscriberqos();
+  int parse_endpoints();
 
   void pre_writer(DataWriterImpl* writer);
   void pre_reader(DataReaderImpl* reader);
