@@ -463,62 +463,54 @@ TEST_F(dds_DCPS_XTypes_Utils, less_than)
   // nested_struct.value
   ++id;
   DDS::DynamicData_var a_nested_struct;
-  ASSERT_EQ(DDS::RETCODE_NO_DATA, a->get_complex_value(a_nested_struct, id));
+  ASSERT_RC_OK(a->get_complex_value(a_nested_struct, id));
   DDS::DynamicData_var b_nested_struct;
-  ASSERT_EQ(DDS::RETCODE_NO_DATA, b->get_complex_value(b_nested_struct, id));
+  ASSERT_RC_OK(b->get_complex_value(b_nested_struct, id));
   ASSERT_RC_OK(b_nested_struct->set_int32_value(0, 1));
-  ASSERT_RC_OK(b->set_complex_value(id, b_nested_struct));
   ASSERT_RC_OK(less_than(is_less_than, a, b, Filter_All));
   ASSERT_TRUE(is_less_than);
   ASSERT_RC_OK(a_nested_struct->set_int32_value(0, 1));
-  ASSERT_RC_OK(a->set_complex_value(id, a_nested_struct));
   ASSERT_RC_OK(less_than(is_less_than, a, b, Filter_All));
   ASSERT_FALSE(is_less_than);
 
   // nested_union
   ++id;
   DDS::DynamicData_var a_nested_union;
-  ASSERT_EQ(DDS::RETCODE_NO_DATA, a->get_complex_value(a_nested_union, id));
+  ASSERT_RC_OK(a->get_complex_value(a_nested_union, id));
   DDS::DynamicData_var b_nested_union;
-  ASSERT_EQ(DDS::RETCODE_NO_DATA, b->get_complex_value(b_nested_union, id));
+  ASSERT_RC_OK(b->get_complex_value(b_nested_union, id));
   ASSERT_RC_OK(b_nested_union->set_char8_value(1, 'x'));
-  ASSERT_RC_OK(b->set_complex_value(id, b_nested_union));
   ASSERT_RC_OK(less_than(is_less_than, a, b, Filter_All));
   ASSERT_TRUE(is_less_than);
   ASSERT_RC_OK(a_nested_union->set_char8_value(1, 'x'));
-  ASSERT_RC_OK(a->set_complex_value(id, a_nested_union));
   ASSERT_RC_OK(less_than(is_less_than, a, b, Filter_All));
   ASSERT_FALSE(is_less_than);
 
   // uint32_array
   ++id;
   DDS::DynamicData_var a_uint32_array;
-  ASSERT_EQ(DDS::RETCODE_NO_DATA, a->get_complex_value(a_uint32_array, id));
+  ASSERT_RC_OK(a->get_complex_value(a_uint32_array, id));
   DDS::DynamicData_var b_uint32_array;
-  ASSERT_EQ(DDS::RETCODE_NO_DATA, b->get_complex_value(b_uint32_array, id));
+  ASSERT_RC_OK(b->get_complex_value(b_uint32_array, id));
   ASSERT_RC_OK(b_uint32_array->set_uint32_value(b_uint32_array->get_member_id_at_index(0), 1));
-  ASSERT_RC_OK(b->set_complex_value(id, b_uint32_array));
   ASSERT_RC_OK(less_than(is_less_than, a, b, Filter_All));
   ASSERT_TRUE(is_less_than);
   ASSERT_RC_OK(a_uint32_array->set_uint32_value(a_uint32_array->get_member_id_at_index(0), 1));
-  ASSERT_RC_OK(a->set_complex_value(id, a_uint32_array));
   ASSERT_RC_OK(less_than(is_less_than, a, b, Filter_All));
   ASSERT_FALSE(is_less_than);
 
   // uint32_seq
   ++id;
   DDS::DynamicData_var a_uint32_seq;
-  ASSERT_EQ(DDS::RETCODE_NO_DATA, a->get_complex_value(a_uint32_seq, id));
+  ASSERT_RC_OK(a->get_complex_value(a_uint32_seq, id));
   DDS::DynamicData_var b_uint32_seq;
-  ASSERT_EQ(DDS::RETCODE_NO_DATA, b->get_complex_value(b_uint32_seq, id));
+  ASSERT_RC_OK(b->get_complex_value(b_uint32_seq, id));
   // a = {} b = {1}
   ASSERT_RC_OK(b_uint32_seq->set_uint32_value(b_uint32_seq->get_member_id_at_index(0), 1));
-  ASSERT_RC_OK(b->set_complex_value(id, b_uint32_seq));
   ASSERT_RC_OK(less_than(is_less_than, a, b, Filter_All));
   ASSERT_TRUE(is_less_than);
   // a = {0} b = {1}
   ASSERT_RC_OK(a_uint32_seq->set_uint32_value(a_uint32_seq->get_member_id_at_index(0), 0));
-  ASSERT_RC_OK(a->set_complex_value(id, a_uint32_seq));
   ASSERT_RC_OK(less_than(is_less_than, a, b, Filter_All));
   ASSERT_TRUE(is_less_than);
   // a = {1} b = {1}
