@@ -346,8 +346,7 @@ private:
   template<typename MemberType>
   bool cast_to_discriminator_value(CORBA::Long& disc_value, const MemberType& value) const;
 
-  DDS::ReturnCode_t set_union_discriminator_helper(DDS::DynamicType_var disc_type, CORBA::Long disc_val,
-                                                   const char* func_name);
+  DDS::ReturnCode_t set_union_discriminator_helper(CORBA::Long disc_val, const char* func_name);
 
   bool get_union_member_type(DDS::MemberId id, DDS::DynamicType_var& member_type,
                              DDS::MemberDescriptor_var& md) const;

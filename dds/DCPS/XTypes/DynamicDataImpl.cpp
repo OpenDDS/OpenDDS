@@ -273,7 +273,7 @@ ACE_CDR::ULong DynamicDataImpl::get_item_count()
   case TK_STRUCTURE: {
     const CORBA::ULong member_count = type_->get_member_count();
     CORBA::ULong count = member_count;
-    // An optional member that hasn't been set is considered missing.
+    // An optional member that hasn't been set is not counted.
     // All non-optional members are counted since they either are set directly
     // or hold default values (XTypes spec 7.5.2.11.6).
     for (CORBA::ULong i = 0; i < member_count; ++i) {
@@ -292,38 +292,24 @@ ACE_CDR::ULong DynamicDataImpl::get_item_count()
     return count;
   }
   case TK_UNION: {
-    CORBA::Long disc_val;
-    DDS::DynamicData_var disc_dd;
-    DDS::ReturnCode_t rc = get_complex_value(disc_dd, DISCRIMINATOR_ID);
-    if (rc == DDS::RETCODE_OK) {
-      DynamicDataImpl* disc_ddi = dynamic_cast<DynamicDataImpl*>(disc_dd.in());
-      if (!disc_dd || !disc_ddi->read_discriminator(disc_val)) {
-        return 0;
-      }
-    } else if (rc == DDS::RETCODE_NO_DATA) {
-      DDS::DynamicType_var disc_type = get_base_type(type_desc_->discriminator_type());
-      if (!set_default_discriminator_value(disc_val, disc_type)) {
-        if (log_level >= LogLevel::Warning) {
-          ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: DynamicDataImpl::get_item_count:"
-                     " set_default_discriminator_value failed\n"));
-        }
-        return 0;
-      }
-    } else {
-      return 0;
-    }
-
-    bool select_a_member;
+    bool has_selected_branch;
     DDS::MemberDescriptor_var selected_md;
-    rc = XTypes::get_selected_union_branch(type_, disc_val, select_a_member, selected_md);
+    const DDS::ReturnCode_t rc = get_selected_union_branch(has_selected_branch, selected_md);
     if (rc != DDS::RETCODE_OK) {
       if (log_level >= LogLevel::Warning) {
         ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: DynamicDataImpl::get_item_count:"
-                   " get_selected_union_branch failed: %C\n", retcode_to_string(rc)));
+                   " get_selected_union_branch returned %C\n", retcode_to_string(rc)));
       }
       return 0;
     }
-    return select_a_member ? 2 : 1;
+    if (has_selected_branch) {
+      DDS::UInt32 count = 2;
+      if (selected_md->is_optional() && !has_member(selected_md->id())) {
+        --count;
+      }
+      return count;
+    }
+    return 1;
   }
   case TK_MAP:
   case TK_BITSET:
@@ -1470,7 +1456,10 @@ bool DynamicDataImpl::read_discriminator(CORBA::Long& disc_val)
   if (it != container_.single_map_.end()) {
     return read_disc_from_single_map(disc_val, type_, it);
   }
-  return read_disc_from_backing_store(disc_val, MEMBER_ID_INVALID, type_);
+  if (read_disc_from_backing_store(disc_val, MEMBER_ID_INVALID, type_)) {
+    return true;
+  }
+  return set_default_discriminator_value(disc_val, type_);
 }
 
 // Check if a discriminator value would select a member with the given descriptor in a union.
@@ -1630,46 +1619,37 @@ bool DynamicDataImpl::get_discriminator_value(CORBA::Long& value,
   return true;
 }
 
-// Check that the new discriminator value is compatible with the current state of
-// the union data. That means, it selects the same branch, including the implicit
-// default if it exists. If the current union data is empty, it's only allowed
-// to set the discriminator value directly if it selects the implicit default branch.
-DDS::ReturnCode_t DynamicDataImpl::set_union_discriminator_helper(DDS::DynamicType_var disc_type,
-                                                                  CORBA::Long new_disc_value,
+// The following cases will succeed:
+// (1) If the current state of the union has a branch, including the implicit default branch,
+//     the new discriminator value must selects the same branch.
+// (2) When the union is empty, the discriminator has its default value and if it
+//     selects a branch, that branch will also have the default value. In this case, if
+//     the new discriminator selects the same branch, the operation succeeds.
+// (3) The new discriminator selects the implicit default member, if there is one. This
+//     is equivalent to the _default() method of the IDL-to-C++ mappings.
+//
+// For all other cases, the operation returns PRECONDITION_NOT_MET.
+DDS::ReturnCode_t DynamicDataImpl::set_union_discriminator_helper(CORBA::Long new_disc_value,
                                                                   const char* func_name)
 {
-  const_single_iterator single_it;
-  const_complex_iterator complex_it;
-  const bool has_disc = has_discriminator_value(single_it, complex_it);
-  bool has_existing_branch = false;
-  if (has_disc) {
-    CORBA::Long existing_disc;
-    if (!get_discriminator_value(existing_disc, single_it, complex_it, disc_type)) {
-      return DDS::RETCODE_ERROR;
-    }
-    DDS::MemberDescriptor_var existing_md;
-    if (XTypes::get_selected_union_branch(type_, existing_disc, has_existing_branch, existing_md) != DDS::RETCODE_OK) {
-      return DDS::RETCODE_ERROR;
-    }
-    if (has_existing_branch && !validate_discriminator(new_disc_value, existing_md)) {
-      if (log_level >= LogLevel::Notice) {
-        ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicDataImpl::%C:"
-                   " Discriminator value %d does not select the activated branch (ID %u)\n",
-                   func_name, new_disc_value, existing_md->id()));
-      }
-      return DDS::RETCODE_PRECONDITION_NOT_MET;
-    }
+  bool has_existing_branch;
+  DDS::MemberDescriptor_var existing_md;
+  const DDS::ReturnCode_t rc = get_selected_union_branch(has_existing_branch, existing_md);
+  if (rc != DDS::RETCODE_OK) {
+    return DDS::RETCODE_ERROR;
   }
 
-  // In case the union has implicit default member and the input discriminator value
-  // selects that implicit default member, store the discriminator value. The semantics
-  // of this is similar to the _default() method of the IDL-to-C++ mapping for union.
-  const bool set_disc_implicit_default = !has_disc || !has_existing_branch;
-  if (set_disc_implicit_default && !discriminator_selects_no_member(new_disc_value)) {
+  // Always allow setting discriminator that selects the implicit default member.
+  if (discriminator_selects_no_member(new_disc_value)) {
+    return DDS::RETCODE_OK;
+  }
+
+  // The new discriminator selects a different branch than the current one.
+  if (!has_existing_branch || !validate_discriminator(new_disc_value, existing_md)) {
     if (log_level >= LogLevel::Notice) {
       ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicDataImpl::%C:"
-                 " Can't directly set a discriminator that selects a member."
-                 " Activate the member first!\n", func_name));
+                 " Discriminator value %d does not select the same activated branch!\n",
+                 func_name, new_disc_value));
     }
     return DDS::RETCODE_PRECONDITION_NOT_MET;
   }
@@ -1763,7 +1743,7 @@ DDS::ReturnCode_t DynamicDataImpl::set_value_to_union(DDS::MemberId id, const Me
     if (!cast_to_discriminator_value(disc_value, value)) {
       return DDS::RETCODE_ERROR;
     }
-    const DDS::ReturnCode_t rc = set_union_discriminator_helper(member_type, disc_value, "set_value_to_union");
+    const DDS::ReturnCode_t rc = set_union_discriminator_helper(disc_value, "set_value_to_union");
     if (rc != DDS::RETCODE_OK) {
       return rc;
     }
@@ -2379,7 +2359,7 @@ DDS::ReturnCode_t DynamicDataImpl::set_complex_to_union(DDS::MemberId id, DDS::D
     if (!dd_impl || !dd_impl->read_discriminator(disc_val)) {
       return DDS::RETCODE_ERROR;
     }
-    const DDS::ReturnCode_t rc = set_union_discriminator_helper(member_type, disc_val, "set_complex_to_union");
+    const DDS::ReturnCode_t rc = set_union_discriminator_helper(disc_val, "set_complex_to_union");
     if (rc != DDS::RETCODE_OK) {
       return rc;
     }
@@ -2460,7 +2440,7 @@ template<TypeKind ElementTypeKind>
 bool DynamicDataImpl::check_seqmem_in_struct_and_union(DDS::MemberId id, DDS::MemberDescriptor_var& md) const
 {
   DDS::DynamicTypeMember_var member;
-  if (type_->get_member(member, id)) {
+  if (type_->get_member(member, id) != DDS::RETCODE_OK) {
     return false;
   }
   if (member->get_descriptor(md) != DDS::RETCODE_OK) {
@@ -3802,7 +3782,7 @@ bool DynamicDataImpl::get_complex_from_container(DDS::DynamicData_var& value, DD
 {
   const_complex_iterator complex_it = container_.complex_map_.find(id);
   if (complex_it != container_.complex_map_.end()) {
-    value = DDS::DynamicData::_duplicate(complex_it->second);
+    value = complex_it->second;
     found_status = FOUND_IN_COMPLEX_MAP;
     return true;
   }
@@ -3959,7 +3939,6 @@ DDS::ReturnCode_t DynamicDataImpl::get_complex_from_union(DDS::DynamicData_ptr& 
       return DDS::RETCODE_PRECONDITION_NOT_MET;
     }
 
-    DDS::DynamicData_var dd_var;
     const DDS::ReturnCode_t rc = get_complex_from_aggregated(dd_var, id);
     if (rc != DDS::RETCODE_OK) {
       return rc;
