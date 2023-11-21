@@ -44,4 +44,4 @@ set_target_properties(${subscriber} PROPERTIES
 configure_file(run_test.pl . COPYONLY)
 configure_file(rtps.ini . COPYONLY)
 opendds_add_test(NAME info_repo COMMAND perl run_test.pl)
-opendds_add_test(NAME rtps COMMAND perl run_test.pl init=rtps.ini)
+opendds_add_test(NAME rtps COMMAND perl run_test.pl ini=rtps.ini)
