@@ -137,13 +137,34 @@ if(OPENDDS_BUILD_EXAMPLES OR OPENDDS_BUILD_TESTS)
   add_subdirectory(DevGuideExamples/DCPS/Messenger)
 endif()
 if(OPENDDS_BUILD_TESTS)
-  find_package(GTest QUIET)
+  find_package(GTest QUIET PATHS "${OPENDDS_GTEST}")
   if(NOT GTest_FOUND)
-    message("GTest not found, falling back to local copy")
+    set(gtestsm "${OPENDDS_SOURCE_DIR}/tests/googletest")
+    if(EXISTS "${gtestsm}/CMakeLists.txt")
+      message("GTest not found, using submodule")
+      set(fetch_args SOURCE_DIR "${gtestsm}")
+    else()
+      message("GTest not found, using clone")
+      set(fetch_args
+        GIT_REPOSITORY "https://github.com/OpenDDS/googletest"
+        GIT_TAG "v1.8.x"
+        GIT_SHALLOW TRUE
+        GIT_PROGRESS TRUE
+        USES_TERMINAL_DOWNLOAD TRUE
+      )
+    endif()
+    FetchContent_Declare(googletest ${fetch_args})
     # Prevent overriding the parent project's compiler/linker
     # settings on Windows
     set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
-    add_subdirectory(tests/googletest)
+    FetchContent_MakeAvailable(googletest)
+  endif()
+  if(TARGET GTest::gtest)
+    get_target_property(google_test_bin_dir GTest::gtest BINARY_DIR)
+    set(_OPENDDS_GOOGLE_TEST_DIR "${google_test_bin_dir}" CACHE INTERNAL "")
+  elseif(TARGET gtest)
+    get_target_property(google_test_bin_dir gtest BINARY_DIR)
+    set(_OPENDDS_GOOGLE_TEST_DIR "${google_test_bin_dir}" CACHE INTERNAL "")
   endif()
 
   add_subdirectory(tests/cmake/ace_tao_only)
