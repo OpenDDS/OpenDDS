@@ -1541,7 +1541,14 @@ DDS::ReturnCode_t copy(DDS::DynamicData_ptr dest, DDS::DynamicData_ptr src)
 
   case TK_STRUCTURE:
     {
-      const DDS::UInt32 src_count = src->get_item_count();
+      DDS::DynamicTypeMembersById_var src_members_var;
+      rc = actual_src_type->get_all_members(src_members_var);
+      if (rc != DDS::RETCODE_OK) {
+        return rc;
+      }
+      DynamicTypeMembersByIdImpl* src_members =
+        dynamic_cast<DynamicTypeMembersByIdImpl*>(src_members_var.in());
+
       DDS::DynamicTypeMembersById_var dest_members_var;
       rc = actual_dest_type->get_all_members(dest_members_var);
       if (rc != DDS::RETCODE_OK) {
@@ -1550,14 +1557,14 @@ DDS::ReturnCode_t copy(DDS::DynamicData_ptr dest, DDS::DynamicData_ptr src)
       DynamicTypeMembersByIdImpl* dest_members =
         dynamic_cast<DynamicTypeMembersByIdImpl*>(dest_members_var.in());
 
-      for (DDS::UInt32 i = 0; i < src_count; ++i) {
-        const DDS::MemberId id = src->get_member_id_at_index(i);
+      for (DynamicTypeMembersByIdImpl::const_iterator src_it = src_members->begin();
+           src_it != src_members->end(); ++src_it) {
+        const DDS::MemberId id = src_it->first;
         const DynamicTypeMembersByIdImpl::const_iterator dest_it = dest_members->find(id);
         if (dest_it == dest_members->end()) {
           continue;
         }
-        // Each of these members appears in the source object, so inside copy_member
-        // we don't have to worry about whether the member is missing.
+
         const DDS::ReturnCode_t this_rc = copy_member(dest, id, src, id);
         if (this_rc != DDS::RETCODE_OK && rc == DDS::RETCODE_OK) {
           rc = this_rc;
