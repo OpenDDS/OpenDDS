@@ -133,6 +133,13 @@ namespace {
       indent << "if (!value_reader.end_sequence()) return false;\n";
   }
 
+  void optional_helper(const std::string& expression, AST_Type* type,
+                       size_t dim_idx, const std::string& idx, int level)
+  {
+    be_global->impl_ << "if (!value_reader.begin_optional()) return false;\n";
+    be_global->impl_ << "if (!value_reader.end_optional()) return false;\n";
+  }
+
   void generate_read(const std::string& expression, const std::string& accessor,
                      AST_Type* type, const std::string& idx, int level)
   {
