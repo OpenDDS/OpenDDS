@@ -45,6 +45,9 @@ public:
   virtual void begin_struct_member(const DDS::MemberDescriptor& /*descriptor*/) {}
   virtual void end_struct_member() {}
 
+  virtual void begin_optional() {}
+  virtual void end_optional() {}
+
   virtual void begin_union() {}
   virtual void end_union() {}
   virtual void begin_discriminator() {}

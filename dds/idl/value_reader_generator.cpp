@@ -133,11 +133,18 @@ namespace {
       indent << "if (!value_reader.end_sequence()) return false;\n";
   }
 
-  void optional_helper(const std::string& expression, AST_Type* type,
-                       size_t dim_idx, const std::string& idx, int level)
+  void optional_helper(const std::string& expression, AST_Type* type, const std::string& idx, int level)
   {
-    be_global->impl_ << "if (!value_reader.begin_optional()) return false;\n";
-    be_global->impl_ << "if (!value_reader.end_optional()) return false;\n";
+    const std::string indent(level * 2, ' ');
+    be_global->impl_ << indent << "if (!value_reader.begin_optional()) return false;\n";
+
+    be_global->impl_ << indent << "bool has_value = false;\n";
+    be_global->impl_ << indent << "value_reader.read_boolean(has_value);\n";
+    be_global->impl_ << indent << "if (has_value) {\n";
+    generate_read(expression + "().value()", "", type, "i", 4);
+    be_global->impl_ << indent << "}\n";
+
+    be_global->impl_ << indent << "if (!value_reader.end_optional()) return false;\n";
   }
 
   void generate_read(const std::string& expression, const std::string& accessor,
@@ -154,12 +161,6 @@ namespace {
     } else if (c & CL_ARRAY) {
       AST_Array* const array = dynamic_cast<AST_Array*>(actual);
       array_helper(expression + accessor, array, 0, idx, level);
-      return;
-    }
-
-    // TODO Not sure how to check for annotations here.
-    if (actual->annotation_appls().find("@optional") != nullptr) {
-      optional_helper(expression + accessor, actual, 0, idx, level);
       return;
     }
 
@@ -324,7 +325,13 @@ bool value_reader_generator::gen_struct(AST_Structure*,
       const std::string field_name = field->local_name()->get_string();
       be_global->impl_ <<
         "    case " << be_global->get_id(field) << ": {\n";
-      generate_read("value." + field_name, accessor, field->field_type(), "i", 3);
+
+      if (be_global->is_optional(field)) {
+        optional_helper("value." + field_name, field->field_type(), "i", 3);
+      } else {
+        generate_read("value." + field_name, accessor, field->field_type(), "i", 3);
+      }
+        
       be_global->impl_ <<
         "      break;\n"
         "    }\n";

@@ -110,6 +110,9 @@ public:
   virtual bool begin_struct_member(XTypes::MemberId& member_id, const MemberHelper& helper) = 0;
   virtual bool end_struct_member() = 0;
 
+  virtual bool begin_optional() = 0;
+  virtual bool end_optional() = 0;
+
   virtual bool begin_union() = 0;
   virtual bool end_union() = 0;
   virtual bool begin_discriminator() = 0;
