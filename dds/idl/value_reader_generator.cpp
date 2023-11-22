@@ -157,6 +157,12 @@ namespace {
       return;
     }
 
+    // TODO Not sure how to check for annotations here.
+    if (actual->annotation_appls().find("@optional") != nullptr) {
+      optional_helper(expression + accessor, actual, 0, idx, level);
+      return;
+    }
+
     const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
     const std::string indent(level * 2, ' ');
     if (c & CL_FIXED) {
