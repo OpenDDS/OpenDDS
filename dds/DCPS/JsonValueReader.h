@@ -56,8 +56,8 @@ public:
   bool begin_struct_member(XTypes::MemberId& member_id, const MemberHelper& helper);
   bool end_struct_member();
 
-  bool begin_optional() {}
-  bool end_optional() {}
+  bool begin_optional() { return true; }
+  bool end_optional() { return true; }
 
   bool begin_union();
   bool end_union();

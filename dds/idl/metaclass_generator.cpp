@@ -68,7 +68,11 @@ namespace {
   {
     const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
     const Classification cls = classify(field->field_type());
-    const std::string fieldName = field->local_name()->get_string();
+    std::string fieldName = field->local_name()->get_string();
+    if (be_global->is_optional(field)) {
+      fieldName += "().value";
+    }
+
     const std::string idl_name = canonical_name(field);
     if (cls & CL_SCALAR) {
       std::string prefix, suffix;

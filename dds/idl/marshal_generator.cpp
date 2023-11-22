@@ -1626,6 +1626,10 @@ namespace {
     const std::string& indent, AST_Field* field, const std::string& prefix,
     bool wrap_nested_key_only, Intro& intro)
   {
+    if (be_global->is_optional(field)) {
+      return indent + "//TODO OPTIONAL HERE\n";
+    }
+
     FieldInfo af(*field);
     if (af.anonymous()) {
       RefWrapper wrapper(af.type_, af.scoped_type_,
@@ -1698,6 +1702,10 @@ namespace {
     const std::string& indent, AST_Field* field, const std::string& prefix,
     bool wrap_nested_key_only, Intro& intro)
   {
+    if (be_global->is_optional(field)) {
+      return indent + "false //TODO OPTIONAL HERE\n";
+    }
+
     FieldInfo af(*field);
     if (af.anonymous()) {
       RefWrapper wrapper(af.type_, af.scoped_type_,
