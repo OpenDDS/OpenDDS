@@ -1155,6 +1155,7 @@ Setting the value of a member of a DynamicData union using a ``set_*`` method im
 and 2) sets the discriminator to a value corresponding to the active branch. For example, the ``l_field`` member of ``MyUnion`` above can be set as follows:
 
 .. code-block:: cpp
+
     DDS::Int32 l_field_value = 12;
     data.set_int32_value(id, l_field_value); // id is 2
 
@@ -1164,12 +1165,14 @@ As an example for the first case, suppose the union currently has the discrimina
 as it selects the same member.
 
 .. code-block:: cpp
+
     DDS::Int16 new_disc_value = 2;
     data.set_int16_value(XTypes::DISCRIMINATOR_ID, new_disc_value);
 
 For the second case, setting the discriminator to any value that doesn't select a member will succeed. After that, the union contains only the discriminator.
 
 .. code-block:: cpp
+
     DDS::Int16 new_disc_value = 5; // does not select any branch
     data.set_int16_value(XTypes::DISCRIMINATOR_ID, new_disc_value);
 
