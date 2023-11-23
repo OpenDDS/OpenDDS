@@ -977,6 +977,7 @@ Suppose id is 1, meaning that the member at index 0 is ``l_field``, we now can g
 
 After the call, ``int32_value`` contains the value of the member ``l_field`` from the sample.
 The method returns ``DDS::RETCODE_OK`` if successful.
+In case the type has an optional member and it is not present in the DynamicData instance, ``DDS::RETCODE_NO_DATA`` is returned.
 
 Similarly, suppose we have already found out the types and ids of the members ``us_field`` and ``f_field``, their values can be read as follows.
 
@@ -986,6 +987,39 @@ Similarly, suppose we have already found out the types and ids of the members ``
     ret = data.get_uint16_value(uint16_value, 2); // Get the value of us_field
     DDS::Float32 float32_value;
     ret = data.get_float32_value(float32_value, 3); // Get the value of f_field
+
+Reading members from union is a little different as there is at most one activated branch at any time.
+In general, DynamicData in OpenDDS follows the IDL-to-C++ mappings for union.
+Consider the following union as an example.
+
+.. code-block:: omg-idl
+
+    @mutable
+    union MyUnion switch(short) {
+    case 1:
+    case 2:
+      @id(1) short s_field;
+    case 3:
+      @id(2) long l_field;
+    case 4:
+      @id(3) string str_field;
+    };
+
+The discriminator can be read using the appropriate method for the discriminator type and id ``XTypes::DISCRIMINATOR_ID`` (see :ghfile:`dds/DCPS/XTypes/TypeObject.h`).
+
+.. code-block:: cpp
+
+    DDS::Int32 disc_value;
+    ret = data.get_int16_value(disc_val, XTypes::DISCRIMINATOR_ID);
+
+Using the value of the discriminator, user can decide which branch is activated and read its value in a similar way as
+reading a struct member. Reading a branch that is not activated returns ``DDS::RETCODE_PRECONDITION_NOT_MET``.
+
+At anytime, a DynamicData instance of a union represents a valid state of that union. A special case is an empty
+DynamicData instance. In this case, the discriminator takes the default value of the discriminator type (the XTypes
+specification specifies the default value for each type). If that discriminator value selects a branch, the selected
+branch also takes the default value corresponding to its type. If it doesn't select a branch, the union contains only
+the discriminator.
 
 .. _xtypes--reading-collections-of-basic-types:
 
@@ -1117,18 +1151,34 @@ The operations used for this include the DynamicData operations named "set_*" fo
 They are analogous to the "get_*" operations that are described in :ref:`xtypes--interpreting-data-samples-with-dynamicdata`.
 When populating the DynamicData of complex data types, use get_complex_value() (:ref:`xtypes--reading-members-of-more-complex-types`) to navigate from DynamicData representing containing types to DynamicData representing contained types.
 
-Setting the value of a member of a DynamicData union using a ``set_*`` method implicitly 1) activates the branch corresponding to the member and 2) sets the discriminator to a value corresponding to the active branch.
-After a branch has been activated, the value of the discriminator can be changed using a ``set_*`` method.
-However, the new value of the discriminator must correspond to the active branch.
-To set the discriminator, use ``DISCRIMINATOR_ID`` as the member id for the call to ``set_*`` (see :ghfile:`dds/DCPS/XTypes/TypeObject.h`).
+Setting the value of a member of a DynamicData union using a ``set_*`` method implicitly 1) activates the branch corresponding to the member
+and 2) sets the discriminator to a value corresponding to the active branch. For example, the ``l_field`` member of ``MyUnion`` above can be set as follows:
 
-Unions start in an "empty" state meaning that no branch is active.
-At the point of serialization, the middleware will treat an empty union according to the following procedure.
-The discriminator is assumed to have the default value for the discriminator type and all members are assumed to have the default value for their type.
-There are three possibilities.
-First, the discriminator selects a non-default branch in which case the serialized union will have the default discriminator value and the default value for the implicitly selected member;
-Second, the discriminator selects a default branch in which case the serialized union will have the default discriminator value and the default value for the default branch member.
-Third, the discriminator selects no branch (and a default branch is not defined) in which case the serialized union will have the default discriminator only.
+.. code-block:: cpp
+    DDS::Int32 l_field_value = 12;
+    data.set_int32_value(id, l_field_value); // id is 2
+
+The discriminator can also be set directly in the following two cases. First, the new discriminator value selects the same branch that is currently activated.
+Second, the new discriminator value selects the implicit default member, i.e., no branch is activated. In all other cases, ``DDS::RETCODE_PRECONDITION_NOT_MET`` is returned.
+As an example for the first case, suppose the union currently has the discriminator value of 1 and the member `s_field` is active. We can set the discriminator value to 2
+as it selects the same member.
+
+.. code-block:: cpp
+    DDS::Int16 new_disc_value = 2;
+    data.set_int16_value(XTypes::DISCRIMINATOR_ID, new_disc_value);
+
+For the second case, setting the discriminator to any value that doesn't select a member will succeed. After that, the union contains only the discriminator.
+
+.. code-block:: cpp
+    DDS::Int16 new_disc_value = 5; // does not select any branch
+    data.set_int16_value(XTypes::DISCRIMINATOR_ID, new_disc_value);
+
+Unions start in an "empty" state as described in :ref:`xtypes--interpreting-data-samples-with-dynamicdata`.
+Consequently, at the point of serialization, empty and non-empty unions are not differentiated.
+
+Expandable collection types such as sequences or strings can be extended one element at a time. To extend a sequence (or string), we first get the id of the new element at
+index equal to the current length of the sequence using the ``get_member_id_at_index`` operation. The length of the sequence can be got using ``get_item_count``. After we
+obtain the id, we can write the new element using the ``set_*`` operation as usual.
 
 .. _xtypes--dynamicdatawriters-and-dynamicdatareaders:
 
