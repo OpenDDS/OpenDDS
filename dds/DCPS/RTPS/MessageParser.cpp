@@ -13,12 +13,12 @@ namespace RTPS {
 using DCPS::Encoding;
 
 namespace {
-  const Encoding encoding_plain_native(Encoding::KIND_XCDR1);
+  const Encoding mp_encoding_plain_native(Encoding::KIND_XCDR1);
 }
 
 MessageParser::MessageParser(const ACE_Message_Block& in)
   : in_(in.duplicate())
-  , ser_(in_.get(), encoding_plain_native)
+  , ser_(in_.get(), mp_encoding_plain_native)
   , header_()
   , sub_()
   , smContentStart_(0)
@@ -26,7 +26,7 @@ MessageParser::MessageParser(const ACE_Message_Block& in)
 
 MessageParser::MessageParser(const DDS::OctetSeq& in)
   : fromSeq_(reinterpret_cast<const char*>(in.get_buffer()), in.length())
-  , ser_(&fromSeq_, encoding_plain_native)
+  , ser_(&fromSeq_, mp_encoding_plain_native)
   , header_()
   , sub_()
   , smContentStart_(0)

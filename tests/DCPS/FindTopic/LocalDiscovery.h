@@ -11,6 +11,8 @@ class LocalDiscovery : public Discovery {
 public:
   LocalDiscovery();
 
+  virtual RepoKey key() const { return "LocalDiscovery"; }
+
 private:
   EntityId_t next_topic_id_;
 

@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.3)
+cmake_minimum_required(VERSION 3.3...3.27)
 find_package(OpenDDS REQUIRED)
 project(ishapes VERSION ${OpenDDS_VERSION} LANGUAGES CXX)
 

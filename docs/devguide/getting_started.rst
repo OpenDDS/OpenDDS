@@ -1,4 +1,4 @@
-.. _getting_started--getting-started:
+.. _getting_started:
 
 ###############
 Getting Started
@@ -254,7 +254,7 @@ The implementation files contain implementations for these interfaces.
 The generated IDL file should itself be compiled with the TAO IDL compiler to generate stubs and skeletons.
 These and the implementation file should be linked with your OpenDDS applications that use the Message type.
 The OpenDDS IDL compiler has a number of options that specialize the generated code.
-These options are described in :ref:`opendds_idl--opendds-idl`.
+These options are described in :ref:`opendds_idl`.
 
 Typically, you do not directly invoke the TAO or OpenDDS IDL compilers as above, but let your build system do it for you.
 Two different build systems are supported for projects that use OpenDDS:
@@ -266,7 +266,7 @@ Two different build systems are supported for projects that use OpenDDS:
 Even if you will eventually use some custom build system that's not one of the two listed above, start by building an example OpenDDS application using one of the supported build systems and then migrate the code generator command lines, compiler options, etc., to the custom build system.
 
 The remainder of this section will assume MPC.
-For more details on using CMake, see the :doc:`/building/cmake`.
+For more details on using CMake, see the :doc:`/devguide/building/cmake`.
 
 The code generation process is simplified when using MPC, by inheriting from the dcps base project.
 Here is the MPC file section common to both the publisher and subscriber
@@ -367,7 +367,7 @@ The first section of ``main()`` initializes the current process as an OpenDDS pa
 The ``TheParticipantFactoryWithArgs`` macro is defined in ``Service_Participant.h`` and initializes the Domain Participant Factory with the command line arguments.
 These command line arguments are used to initialize the ORB that the OpenDDS service uses as well as the service itself.
 This allows us to pass ``ORB_init()`` options on the command line as well as OpenDDS configuration options of the form ``-DCPS*``.
-Available OpenDDS options are fully described in :ref:`run_time_configuration--run-time-configuration`.
+Available OpenDDS options are fully described in :ref:`config`.
 
 The ``create_participant()`` operation uses the domain participant factory to register this process as a participant in the domain specified by the ID of 42.
 The participant uses the default QoS policies and no listeners.
@@ -529,7 +529,7 @@ Here is the corresponding code:
 
         ws->detach_condition(condition);
 
-For more details about status, conditions, and wait sets, see :ref:`conditions_and_listeners--conditions-and-listeners`.
+For more details about status, conditions, and wait sets, see :ref:`conditions_and_listeners`.
 
 .. _getting_started--sample-publication:
 
@@ -864,54 +864,54 @@ For our simple example here we will use option 2 by generating the location prop
 
 From your current directory type:
 
-Windows:
+.. tab:: Linux, macOS, BSDs, etc.
 
-.. code-block:: doscon
+ .. code-block:: bash
+
+   $DDS_ROOT/bin/DCPSInfoRepo -o simple.ior
+
+.. tab:: Windows
+
+  .. code-block:: batch
 
     %DDS_ROOT%\bin\DCPSInfoRepo -o simple.ior
-
-Unix:
-
-.. code-block:: bash
-
-    $DDS_ROOT/bin/DCPSInfoRepo -o simple.ior
 
 The ``-o`` parameter instructs the ``DCPSInfoRepo`` to generate its connection information to the file ``simple.ior`` for use by the publisher and subscriber.
 In a separate window navigate to the same directory that contains the ``simple.ior`` file and start the subscriber application in our example by typing:
 
-Windows:
+.. tab:: Linux, macOS, BSDs, etc.
 
-.. code-block:: doscon
-
-    subscriber -DCPSInfoRepo file://simple.ior
-
-Unix:
-
-.. code-block:: bash
+  .. code-block:: bash
 
     ./subscriber -DCPSInfoRepo file://simple.ior
+
+.. tab:: Windows
+
+  .. code-block:: batch
+
+    subscriber -DCPSInfoRepo file://simple.ior
 
 The command line parameters direct the application to use the specified file to locate the ``DCPSInfoRepo``.
 Our subscriber is now waiting for messages to be sent, so we will now start the publisher in a separate window with the same parameters:
 
-Windows:
+.. tab:: Linux, macOS, BSDs, etc.
 
-.. code-block:: doscon
-
-    publisher -DCPSInfoRepo file://simple.ior
-
-Unix
-
-.. code-block:: bash
+  .. code-block:: bash
 
     ./publisher -DCPSInfoRepo file://simple.ior
+
+.. tab:: Windows
+
+  .. code-block:: batch
+
+    publisher -DCPSInfoRepo file://simple.ior
 
 The publisher connects to the ``DCPSInfoRepo`` to find the location of any subscribers and begins to publish messages as well as write them to the console.
 In the subscriber window, you should also now be seeing console output from the subscriber that is reading messages from the topic demonstrating a simple publish and subscribe application.
 
 You can read more about configuring your application for RTPS and other more advanced configuration options in :ref:`run_time_configuration--configuring-for-ddsi-rtps-discovery` and :ref:`run_time_configuration--rtps-udp-transport-configuration-options` .
-See :ref:`run_time_configuration--discovery-configuration` and :ref:`the_dcps_information_repository--the-dcps-information-repository` for configuring and using the ``DCPSInfoRepo`` .
-See :ref:`quality_of_service--quality-of-service` for setting and using QoS features that modify the behavior of your application.
+See :ref:`run_time_configuration--discovery-configuration` and :ref:`inforepo` for configuring and using the ``DCPSInfoRepo`` .
+See :ref:`qos` for setting and using QoS features that modify the behavior of your application.
 
 .. _getting_started--running-our-example-with-rtps:
 
@@ -928,7 +928,7 @@ This is important in scenarios when your OpenDDS application needs to interopera
 The coding and building of the Messenger example above is not changed for using RTPS, so you will not need to modify or rebuild your publisher and subscriber services.
 This is a strength of the OpenDDS architecture in that to enable the RTPS capabilities, it is an exercise in configuration.
 For this exercise, we will enable RTPS for the Messenger example using a configuration file that the publisher and subscriber will share.
-More details concerning the configuration of all the available transports including RTPS are described in :ref:`run_time_configuration--run-time-configuration`.
+More details concerning the configuration of all the available transports including RTPS are described in :ref:`config`.
 
 Navigate to the directory where your publisher and subscriber have been built.
 Create a new text file named ``rtps.ini`` and populate it with the following content:
@@ -949,39 +949,38 @@ It is best to start them in separate windows to see the two working separately.
 
 Start the subscriber with the ``-DCPSConfigFile`` command line parameter to point to the newly created configuration file...
 
-Windows:
+.. tab:: Linux, macOS, BSDs, etc.
 
-.. code-block:: bash
-
-    subscriber -DCPSConfigFile rtps.ini
-
-Unix:
-
-.. code-block:: doscon
+  .. code-block:: bash
 
     ./subscriber -DCPSConfigFile rtps.ini
 
+.. tab:: Windows
+
+  .. code-block:: batch
+
+    subscriber -DCPSConfigFile rtps.ini
+
 Now start the publisher with the same parameter...
 
-Windows:
+.. tab:: Linux, macOS, BSDs, etc.
 
-.. code-block:: doscon
-
-    publisher -DCPSConfigFile rtps.ini
-
-Unix:
-
-.. code-block:: bash
+  .. code-block:: bash
 
     ./publisher -DCPSConfigFile rtps.ini
+
+.. tab:: Windows
+
+  .. code-block:: batch
+
+    publisher -DCPSConfigFile rtps.ini
 
 Since there is no centralized discovery in the RTPS specification, there are provisions to allow for wait times to allow discovery to occur.
 The specification sets the default to 30 seconds.
 When the two above processes are started there may be up to a 30 second delay depending on how far apart they are started from each other.
 This time can be adjusted in OpenDDS configuration files and is discussed in :ref:`run_time_configuration--configuring-for-ddsi-rtps-discovery`.
 
-Because the architecture of OpenDDS allows for pluggable discovery and pluggable transports the two configuration entries called out in the ``rtps.ini`` file above can be changed independently with one using RTPS and the other not using RTPS (e.g.
-centralized discovery using ``DCPSInfoRepo``).
+Because the architecture of OpenDDS allows for pluggable discovery and pluggable transports the two configuration entries called out in the ``rtps.ini`` file above can be changed independently with one using RTPS and the other not using RTPS (e.g. centralized discovery using ``DCPSInfoRepo``).
 Setting them both to RTPS in our example makes this application fully interoperable with other non-OpenDDS implementations.
 
 .. _getting_started--data-handling-optimizations:

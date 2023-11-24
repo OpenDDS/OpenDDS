@@ -1,8 +1,9 @@
+cmake_minimum_required(VERSION 3.8...3.27)
 project(opendds_cpp11_messenger CXX)
-cmake_minimum_required(VERSION 3.8.2)
 enable_testing()
 
 find_package(OpenDDS REQUIRED)
+include(opendds_testing)
 
 if(NOT OPENDDS_OWNERSHIP_PROFILE)
   message(FATAL_ERROR "This test requires OpenDDS to be built with Ownership Profile enabled")
@@ -25,8 +26,10 @@ set(idl "${target_prefix}idl")
 add_library(${idl})
 opendds_target_sources(${idl} PUBLIC "${src}/Idl/Messenger.idl" OPENDDS_IDL_OPTIONS "-Lc++11")
 target_link_libraries(${idl} PUBLIC OpenDDS::Dcps)
+set(idl_dir "${dst}/Idl")
 set_target_properties(${idl} PROPERTIES
-  RUNTIME_OUTPUT_DIRECTORY "${dst}/Idl"
+  RUNTIME_OUTPUT_DIRECTORY "${idl_dir}"
+  LIBRARY_OUTPUT_DIRECTORY "${idl_dir}"
 )
 
 # Assert the mapping used was C++11
@@ -59,6 +62,4 @@ target_link_libraries(${subscriber} ${opendds_libs} ${idl})
 
 # run_test.pl
 configure_file("${src}/run_test.pl" "." COPYONLY)
-add_test(NAME "${target_prefix}test"
-  COMMAND perl run_test.pl $<$<BOOL:$<CONFIG>>:-ExeSubDir> $<CONFIG>
-)
+opendds_add_test(COMMAND perl run_test.pl EXTRA_LIB_DIRS "${idl_dir}")

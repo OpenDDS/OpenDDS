@@ -7,6 +7,9 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+env:
+  VCPKG_GIT_COMMIT: 8eb57355a4ffb410a2e94c07b4dca2dffbee8e50
+
 jobs:
 
   Linux:
@@ -17,18 +20,18 @@ jobs:
     - name: install qt
       run: sudo apt-get -y install qtbase5-dev
     - name: checkout OpenDDS
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
       with:
         path: OpenDDS
         submodules: true
     - name: checkout ACE_TAO
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
       with:
         repository: DOCGroup/ACE_TAO
         ref: Latest_Micro
         path: OpenDDS/ACE_TAO
     - name: checkout MPC
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
       with:
         repository: DOCGroup/MPC
         path: OpenDDS/ACE_TAO/ACE/MPC
@@ -53,12 +56,12 @@ jobs:
     runs-on: windows-2022
     steps:
     - name: checkout OpenDDS
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
       with:
         path: OpenDDS
         submodules: true
     - name: checkout ACE_TAO
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
       with:
         repository: DOCGroup/ACE_TAO
         ref: Latest_Micro
@@ -74,10 +77,10 @@ jobs:
       uses: lukka/run-vcpkg@v11
       with:
         vcpkgDirectory: '${{ github.workspace }}/vcpkg-qt'
-        vcpkgGitCommitId: f6a5d4e8eb7476b8d7fc12a56dff300c1c986131
+        vcpkgGitCommitId: '${{ env.VCPKG_GIT_COMMIT }}'
         runVcpkgInstall: true
     - name: checkout MPC
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
       with:
         repository: DOCGroup/MPC
         path: OpenDDS/ACE_TAO/ACE/MPC
@@ -88,7 +91,7 @@ jobs:
       run: |
         cd OpenDDS
         perl configure --optimize --no-debug --static --tests ^
-          "--qt=%VCPKG_ROOT%/installed/x64-windows" ^
+          "--qt=%VCPKG_INSTALLED_DIR%/x64-windows" ^
           "--mpcopts=-value_template platforms=x64" ^
           "--mpcopts=-value_template configurations=Release" ^
           "--mpcopts=-value_template Release::runtime_library=MultiThreadedDLL"

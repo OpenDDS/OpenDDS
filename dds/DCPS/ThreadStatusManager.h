@@ -132,19 +132,29 @@ public:
 
   class Sleeper {
   public:
-    Sleeper(ThreadStatusManager& thread_status_manager)
+    explicit Sleeper(ThreadStatusManager* thread_status_manager)
       : thread_status_manager_(thread_status_manager)
     {
-      thread_status_manager_.idle();
+      if (thread_status_manager_) {
+        thread_status_manager_->idle();
+      }
+    }
+
+    explicit Sleeper(ThreadStatusManager& thread_status_manager)
+      : thread_status_manager_(&thread_status_manager)
+    {
+      thread_status_manager_->idle();
     }
 
     ~Sleeper()
     {
-      thread_status_manager_.active();
+      if (thread_status_manager_) {
+        thread_status_manager_->active();
+      }
     }
 
   private:
-    ThreadStatusManager& thread_status_manager_;
+    ThreadStatusManager* const thread_status_manager_;
   };
 
   /// Copy active and idle threads to running and finished threads to

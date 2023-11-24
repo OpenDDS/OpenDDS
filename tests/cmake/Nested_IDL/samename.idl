@@ -1,0 +1,8 @@
+#ifndef SAMENAME_1_IDL
+#define SAMENAME_1_IDL
+
+struct SameName1 {
+  long value;
+};
+
+#endif

@@ -26,8 +26,8 @@ namespace OpenDDS {
 namespace DCPS {
 
 namespace {
-  const Encoding::Kind encoding_kind = Encoding::KIND_UNALIGNED_CDR;
-  const Encoding encoding_unaligned_native(encoding_kind);
+  const Encoding::Kind reliable_session_encoding_kind = Encoding::KIND_UNALIGNED_CDR;
+  const Encoding encoding_unaligned_native(reliable_session_encoding_kind);
 }
 
 ReliableSession::ReliableSession(RcHandle<ReactorInterceptor> interceptor,
@@ -485,7 +485,7 @@ ReliableSession::nak_received(const Message_Block_Ptr& control)
   const TransportHeader& header =
     this->link_->receive_strategy()->received_header();
 
-  Serializer serializer(control.get(), encoding_kind, header.swap_bytes());
+  Serializer serializer(control.get(), reliable_session_encoding_kind, header.swap_bytes());
 
   MulticastPeer local_peer;
   CORBA::ULong size = 0;
@@ -593,7 +593,7 @@ ReliableSession::nakack_received(const Message_Block_Ptr& control)
   // Not from the remote peer for this session.
   if (this->remote_peer_ != header.source_) return;
 
-  Serializer serializer(control.get(), encoding_kind, header.swap_bytes());
+  Serializer serializer(control.get(), reliable_session_encoding_kind, header.swap_bytes());
 
   SequenceNumber low;
   serializer >> low;

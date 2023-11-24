@@ -86,6 +86,8 @@ TEST(dds_DCPS_ConfigStoreImpl, set_get_int32)
   EXPECT_EQ(store.get_int32("key", -37), -38);
   store.set_string("key", "not an int32");
   EXPECT_EQ(store.get_int32("key", -37), -37);
+  store.set_string("key", "DURATION_INFINITE_SEC");
+  EXPECT_EQ(store.get_int32("key", 0), DDS::DURATION_INFINITE_SEC);
 }
 
 TEST(dds_DCPS_ConfigStoreImpl, set_get_uint32)
@@ -97,6 +99,8 @@ TEST(dds_DCPS_ConfigStoreImpl, set_get_uint32)
   EXPECT_EQ(store.get_uint32("key", 37), 38u);
   store.set_string("key", "not a uint32");
   EXPECT_EQ(store.get_uint32("key", 37), 37u);
+  store.set_string("key", "DURATION_INFINITE_NANOSEC");
+  EXPECT_EQ(store.get_uint32("key", 0), DDS::DURATION_INFINITE_NSEC);
 }
 
 TEST(dds_DCPS_ConfigStoreImpl, set_get_float64)
@@ -157,6 +161,45 @@ TEST(dds_DCPS_ConfigStoreImpl, set_get_String)
 
   store.set("key", "");
   EXPECT_EQ(store.get("key", default_string, false), default_string);
+}
+
+TEST(dds_DCPS_ConfigStoreImpl, set_get_StringList)
+{
+  ConfigTopic_rch topic = make_rch<ConfigTopic>();
+  ConfigStoreImpl store(topic);
+  ConfigStoreImpl::StringList default_list;
+  default_list.push_back("Lorem");
+  default_list.push_back("ipsum");
+  default_list.push_back("dolor");
+
+  ConfigStoreImpl::StringList other_list;
+  other_list.push_back("other");
+  EXPECT_EQ(store.get("key", default_list), default_list);
+  store.set("key", other_list);
+  EXPECT_EQ(store.get("key", default_list), other_list);
+}
+
+enum MyConfigStoreEnum {
+  ALPHA,
+  BETA,
+  GAMMA
+};
+
+TEST(dds_DCPS_ConfigStoreImpl, set_get_Enum)
+{
+  const EnumList<MyConfigStoreEnum> kinds[] =
+    {
+      { ALPHA, "alpha" },
+      { BETA, "beta" },
+      { GAMMA, "gamma" },
+      { static_cast<MyConfigStoreEnum>(0), 0 }
+    };
+
+  ConfigTopic_rch topic = make_rch<ConfigTopic>();
+  ConfigStoreImpl store(topic);
+  EXPECT_EQ(store.get("key", GAMMA, kinds), GAMMA);
+  store.set("key", "beta");
+  EXPECT_EQ(store.get("key", GAMMA, kinds), BETA);
 }
 
 TEST(dds_DCPS_ConfigStoreImpl, set_get_TimeDuration_seconds)
@@ -314,10 +357,11 @@ TEST(dds_DCPS_ConfigStoreImpl, process_section)
   config.set_string_value(section_key, ACE_TEXT("anotherkey"), ACE_TEXT("$file"));
   config.set_string_value(section_key, ACE_TEXT("thirdkey"), ACE_TEXT("secondvalue"));
 
-  EXPECT_CALL(*listener.get(), on_data_available(reader)).Times(2);
+  EXPECT_CALL(*listener.get(), on_data_available(reader)).Times(4);
 
   process_section(config_store, reader, listener, "MYPREFIX", config, config.root_section(), "my file name", false);
 
+  EXPECT_EQ(config_store.get("MYPREFIX_MY_SECTION", "default"), "@my_section");
   EXPECT_EQ(config_store.get("MYPREFIX_MY_SECTION_MYKEY", "default"), "myvalue");
   EXPECT_EQ(config_store.get("MYPREFIX_MY_SECTION_ANOTHERKEY", "default"), "my file name");
   EXPECT_EQ(config_store.get("MYPREFIX_MY_SECTION_THIRDKEY", "default"), "firstvalue");
@@ -341,4 +385,21 @@ TEST(dds_DCPS_ConfigStoreImpl, process_section_allow_overwrite)
   EXPECT_EQ(config_store.get("MYPREFIX_MY_SECTION_MYKEY", "default"), "myvalue");
   EXPECT_EQ(config_store.get("MYPREFIX_MY_SECTION_ANOTHERKEY", "default"), "my file name");
   EXPECT_EQ(config_store.get("MYPREFIX_MY_SECTION_THIRDKEY", "default"), "secondvalue");
+}
+
+TEST(dds_DCPS_ConfigStoreImpl, get_section_names)
+{
+  ConfigTopic_rch topic = make_rch<ConfigTopic>();
+  ConfigStoreImpl config_store(topic);
+  config_store.set("MYPREFIX_MY_SECTION", "@my_section");
+  config_store.set("MYPREFIX_MY_SECTION_KEY", "not a section");
+  config_store.set("MYPREFIX_MY_SECTION2", "@my_section2");
+  config_store.set("MYPREFIX_MY_SECTION2_KEY", "not a section");
+  config_store.set("NOTMYPREFIX_MY_SECTION2", "@my_section2");
+  config_store.set("NOTMYPREFIX_MY_SECTION2_KEY", "not a section");
+
+  const OPENDDS_VECTOR(String) sections = config_store.get_section_names("MYPREFIX");
+  ASSERT_EQ(sections.size(), 2U);
+  EXPECT_NE(std::find(sections.begin(), sections.end(), "my_section"), sections.end());
+  EXPECT_NE(std::find(sections.begin(), sections.end(), "my_section2"), sections.end());
 }

@@ -149,10 +149,10 @@ ShmemTransport::configure_i(const ShmemInst_rch& config)
 
   ShmemAllocator::MEMORY_POOL_OPTIONS alloc_opts;
 #  if defined OPENDDS_SHMEM_WINDOWS
-  alloc_opts.max_size_ = config->pool_size_;
+  alloc_opts.max_size_ = config->pool_size();
 #  elif defined OPENDDS_SHMEM_UNIX
   alloc_opts.base_addr_ = 0;
-  alloc_opts.segment_size_ = config->pool_size_;
+  alloc_opts.segment_size_ = config->pool_size();
   alloc_opts.minimum_bytes_ = alloc_opts.segment_size_;
   alloc_opts.max_segments_ = 1;
 #  endif /* OPENDDS_SHMEM_WINDOWS */

@@ -1939,6 +1939,23 @@ DataReaderImpl::release_instance(DDS::InstanceHandle_t handle)
     instances_.erase(handle);
   }
 
+#ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
+  if (this->is_exclusive_ownership_ && instance->instance_state_->is_exclusive()) {
+    DataReaderImpl::OwnershipManagerPtr owner_manager = ownership_manager();
+    if (owner_manager) {
+      owner_manager->remove_writers(instance->instance_handle_);
+    }
+
+    for (RepoIdSet::const_iterator pos = instance->instance_state_->writers_begin(),
+           limit = instance->instance_state_->writers_end(); pos != limit; ++pos) {
+      WriterMapType::iterator iter = writers_.find(*pos);
+      if (iter != writers_.end()) {
+        iter->second->remove_instance(instance->instance_handle_);
+      }
+    }
+  }
+#endif
+
   this->release_instance_i(handle);
   if (this->monitor_) {
     this->monitor_->report();

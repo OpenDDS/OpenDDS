@@ -116,25 +116,6 @@ static const ACE_TCHAR RTPS_SECTION_NAME[]   = ACE_TEXT("rtps_discovery");
 
 namespace {
 
-OPENDDS_VECTOR(String) split(const String& str, const char delim)
-{
-  OPENDDS_VECTOR(String) retval;
-
-  std::string::size_type pos = 0;
-  while (pos < str.size()) {
-    const std::string::size_type limit = str.find_first_of(delim, pos);
-    if (limit == std::string::npos) {
-      retval.push_back(str.substr(pos));
-      break;
-    } else {
-      retval.push_back(str.substr(pos, limit - pos));
-      pos = limit + 1;
-    }
-  }
-
-  return retval;
-}
-
 String toupper(const String& x)
 {
   String retval;
@@ -162,7 +143,6 @@ Service_Participant::Service_Participant()
   , config_store_(make_rch<ConfigStoreImpl>(config_topic_))
   , config_reader_(make_rch<InternalDataReader<ConfigPair> >(DataReaderQosBuilder().reliability_reliable().durability_transient_local()))
   , config_reader_listener_(make_rch<ConfigReaderListener>(ref(*this)))
-  , set_repo_ior_result_(false)
   , pending_timeout_(0,0) // Can't use OPENDDS_COMMON_DCPS_PENDING_TIMEOUT_default due to initialization order.
 #ifdef DDS_DEFAULT_DISCOVERY_METHOD
   , default_discovery_(DDS_DEFAULT_DISCOVERY_METHOD)
@@ -431,6 +411,15 @@ Service_Participant::get_domain_participant_factory(int &argc,
         }
 
       } else {
+        // Convenient way to run tests in a different place from ini files.
+        const char* const config_dir = ACE_OS::getenv("OPENDDS_CONFIG_DIR");
+        if (config_dir && config_dir[0]) {
+          String new_path = config_dir;
+          new_path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
+          new_path += config_fname;
+          config_fname = new_path;
+        }
+
         // Load configuration only if the configuration
         // file exists.
         FILE* in = ACE_OS::fopen(config_fname.c_str(),
@@ -812,9 +801,10 @@ Service_Participant::initializeScheduling()
 bool
 Service_Participant::set_repo_ior(const wchar_t* ior,
                                   Discovery::RepoKey key,
-                                  bool attach_participant)
+                                  bool attach_participant,
+                                  bool overwrite)
 {
-  return set_repo_ior(ACE_Wide_To_Ascii(ior).char_rep(), key, attach_participant);
+  return set_repo_ior(ACE_Wide_To_Ascii(ior).char_rep(), key, attach_participant, overwrite);
 }
 #endif
 
@@ -822,58 +812,45 @@ bool
 Service_Participant::set_repo_ior(const char* ior,
                                   Discovery::RepoKey key,
                                   bool attach_participant,
-                                  bool write_config)
+                                  bool overwrite)
 {
-  if (write_config) {
-    String value = ior;
-    value += String("^") + key;
-    value += String("^") + (attach_participant ? "true" : "false");
-    config_store_->set_string(OPENDDS_COMMON_DCPS_INFO_REPO, value.c_str());
-    config_reader_listener_->on_data_available(config_reader_);
-    return set_repo_ior_result_;
-  } else {
-    if (DCPS_debug_level > 0) {
-      ACE_DEBUG((LM_DEBUG,
-                 ACE_TEXT("(%P|%t) Service_Participant::set_repo_ior: Repo[%C] == %C\n"),
-                 key.c_str(), ior));
-    }
-
-    if (key == "-1") {
-      key = Discovery::DEFAULT_REPO;
-    }
-
-    const OPENDDS_STRING repo_type = ACE_TEXT_ALWAYS_CHAR(REPO_SECTION_NAME);
-    if (!discovery_types_.count(repo_type)) {
-      // Re-use a transport registry function to attempt a dynamic load of the
-      // library that implements the 'repo_type' (InfoRepoDiscovery)
-      TheTransportRegistry->load_transport_lib(repo_type);
-    }
-
-    if (discovery_types_.count(repo_type)) {
-      ACE_Configuration_Heap cf;
-      cf.open();
-      ACE_Configuration_Section_Key sect_key;
-      ACE_TString section = REPO_SECTION_NAME;
-      section += ACE_TEXT('\\');
-      section += ACE_TEXT_CHAR_TO_TCHAR(key.c_str());
-      cf.open_section(cf.root_section(), section.c_str(), true /*create*/, sect_key);
-      cf.set_string_value(sect_key, ACE_TEXT("RepositoryIor"),
-                          ACE_TEXT_CHAR_TO_TCHAR(ior));
-
-      discovery_types_[repo_type]->discovery_config(cf);
-
-      this->remap_domains(key, key, attach_participant);
-      set_repo_ior_result_ = true;
-      return true;
-    }
-
-    set_repo_ior_result_ = false;
-    ACE_ERROR_RETURN((LM_ERROR,
-                      ACE_TEXT("(%P|%t) Service_Participant::set_repo_ior ")
-                      ACE_TEXT("ERROR - no discovery type registered for ")
-                      ACE_TEXT("InfoRepoDiscovery\n")),
-                     false);
+  if (key == "-1") {
+    key = Discovery::DEFAULT_REPO;
   }
+
+  // Create the repository.
+  config_store_->set((String("OPENDDS_REPOSITORY_") + key).c_str(), String("@") + key);
+  const String k = String("OPENDDS_REPOSITORY_") + key + "_RepositoryIor";
+  if (overwrite) {
+    config_store_->set(k.c_str(), ior);
+  }
+  config_reader_listener_->on_data_available(config_reader_);
+
+  if (DCPS_debug_level > 0) {
+    ACE_DEBUG((LM_DEBUG,
+               ACE_TEXT("(%P|%t) Service_Participant::set_repo_ior: Repo[%C] == %C\n"),
+               key.c_str(), ior));
+  }
+
+  const OPENDDS_STRING repo_type = ACE_TEXT_ALWAYS_CHAR(REPO_SECTION_NAME);
+  if (!discovery_types_.count(repo_type)) {
+    // Re-use a transport registry function to attempt a dynamic load of the
+    // library that implements the 'repo_type' (InfoRepoDiscovery)
+    TheTransportRegistry->load_transport_lib(repo_type);
+  }
+
+  if (discovery_types_.count(repo_type)) {
+    ACE_Configuration_Heap cf;
+    discovery_types_[repo_type]->discovery_config(cf);
+    this->remap_domains(key, key, attach_participant);
+    return true;
+  }
+
+  ACE_ERROR_RETURN((LM_ERROR,
+                    ACE_TEXT("(%P|%t) Service_Participant::set_repo_ior ")
+                    ACE_TEXT("ERROR - no discovery type registered for ")
+                    ACE_TEXT("InfoRepoDiscovery\n")),
+                   false);
 }
 
 bool
@@ -1179,7 +1156,7 @@ Service_Participant::get_discovery(const DDS::DomainId_t domain)
         (repo == "-1")) {
       // Set the default repository IOR if it hasn't already happened
       // by this point.  This is why this can't be const.
-      bool ok = this->set_repo_ior(DEFAULT_REPO_IOR, Discovery::DEFAULT_REPO);
+      bool ok = this->set_repo_ior(DEFAULT_REPO_IOR, Discovery::DEFAULT_REPO, true, false);
 
       if (!ok) {
         if (DCPS_debug_level > 0) {
@@ -2733,12 +2710,6 @@ Service_Participant::ConfigReaderListener::on_data_available(InternalDataReader_
         set_log_verbose(ACE_OS::atoi(p.value().c_str()));
       } else if (p.key() == OPENDDS_COMMON_DCPS_DEBUG_LEVEL) {
         set_DCPS_debug_level(ACE_OS::atoi(p.value().c_str()));
-      } else if (p.key() == OPENDDS_COMMON_DCPS_INFO_REPO) {
-        const OPENDDS_VECTOR(String) pieces = split(p.value(), '^');
-        const String ior = pieces[0];
-        const String repo = pieces.size() > 1 ? pieces[1] : Discovery::DEFAULT_REPO;
-        const bool attach_participant = pieces.size() > 2 ? (pieces[2] == "true") : true;
-        service_participant_.set_repo_ior(ior.c_str(), repo.c_str(), attach_participant, false);
       } else if (p.key() == OPENDDS_COMMON_DCPSRTI_SERIALIZATION) {
         if (ACE_OS::atoi(p.value().c_str()) == 0 && log_level >= LogLevel::Warning) {
           ACE_ERROR((LM_WARNING,

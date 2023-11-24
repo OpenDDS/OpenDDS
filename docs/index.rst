@@ -8,7 +8,6 @@ OpenDDS
   :hidden:
 
   news
-  building/index
   devguide/index
   internal/index
   glossary
@@ -41,14 +40,17 @@ They are attached to their corresponding releases as ``OpenDDS-VERSION.pdf``.
 Using OpenDDS
 *************
 
-:doc:`building/index`
-  How to build and install OpenDDS
-
-:ref:`introduction--what-is-opendds`
-  A brief explanation of what OpenDDS is
+:ref:`quickstart`
+  Download and compile OpenDDS and then run an example application
 
 :ref:`introduction--dcps-overview`
-  A conceptual overview of how DDS works
+  A conceptual overview of the Data Distribution Service
+
+:ref:`introduction--what-is-opendds`
+  OpenDDS is an open-source DDS
+
+:doc:`devguide/building/index`
+  How to build and install OpenDDS
 
 :doc:`devguide/getting_started`
   A tutorial on making basic OpenDDS applications

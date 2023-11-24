@@ -1226,6 +1226,21 @@ protected:
 
   virtual void release_instance_i(DDS::InstanceHandle_t handle)
   {
+#ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
+    OwnershipManagerPtr owner_manager = ownership_manager();
+    if (owner_manager) {
+      ACE_GUARD(ACE_Recursive_Thread_Mutex, instance_guard, instances_lock_);
+
+      SharedInstanceMap_rch inst = dynamic_rchandle_cast<SharedInstanceMap>(owner_manager->get_instance_map(topic_servant_->type_name(), this));
+      if (inst != 0) {
+        const typename ReverseInstanceMap::iterator pos = reverse_instance_map_.find(handle);
+        if (pos != reverse_instance_map_.end()) {
+          inst->erase(pos->second->first);
+        }
+      }
+    }
+#endif
+
     const typename ReverseInstanceMap::iterator pos = reverse_instance_map_.find(handle);
     if (pos != reverse_instance_map_.end()) {
       remove_from_lookup_maps(handle);

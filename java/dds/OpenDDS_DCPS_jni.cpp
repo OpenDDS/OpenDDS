@@ -701,7 +701,7 @@ jstring JNICALL Java_OpenDDS_DCPS_transport_TcpInst_getLocalAddress
 (JNIEnv * jni, jobject jthis)
 {
   OpenDDS::DCPS::TcpInst_rch inst = OpenDDS::DCPS::rchandle_from(recoverCppObj<OpenDDS::DCPS::TcpInst>(jni, jthis));
-  jstring retStr = jni->NewStringUTF(inst->local_address_string().c_str());
+  jstring retStr = jni->NewStringUTF(inst->local_address().c_str());
   return retStr;
 }
 
@@ -817,7 +817,7 @@ jstring JNICALL Java_OpenDDS_DCPS_transport_UdpInst_getLocalAddress
 (JNIEnv * jni, jobject jthis)
 {
   OpenDDS::DCPS::UdpInst_rch inst = OpenDDS::DCPS::rchandle_from(recoverCppObj<OpenDDS::DCPS:: UdpInst>(jni, jthis)); // Don't take ownership
-  jstring retStr = jni->NewStringUTF(inst->local_address_string().c_str());
+  jstring retStr = jni->NewStringUTF(inst->local_address().c_str());
   return retStr;
 }
 

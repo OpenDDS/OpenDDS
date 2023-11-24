@@ -16,7 +16,7 @@
 #  include <dds/DCPS/security/framework/Properties.h>
 #endif
 #include <dds/DCPS/StaticIncludes.h>
-#ifdef ACE_AS_STATIC_LIBS
+#if OPENDDS_DO_MANUAL_STATIC_INCLUDES
 #  ifndef OPENDDS_SAFETY_PROFILE
 #    include <dds/DCPS/transport/udp/Udp.h>
 #    include <dds/DCPS/transport/multicast/Multicast.h>
@@ -30,18 +30,12 @@
 #endif
 
 #include <cstdlib>
-#ifdef OPENDDS_SECURITY
-const char auth_ca_file_from_tests[] = "security/certs/identity/identity_ca_cert.pem";
-const char perm_ca_file_from_tests[] = "security/certs/permissions/permissions_ca_cert.pem";
-const char id_cert_file_from_tests[] = "security/certs/identity/test_participant_02_cert.pem";
-const char id_key_file_from_tests[] = "security/certs/identity/test_participant_02_private_key.pem";
-const char governance_file[] = "file:./governance_signed.p7s";
-const char permissions_file[] = "file:./permissions_2_signed.p7s";
-#endif
 
-void append(DDS::PropertySeq& props, const char* name, const char* value, bool propagate = false)
+using OpenDDS::DCPS::String;
+
+void append(DDS::PropertySeq& props, const String& name, const String& value, bool propagate = false)
 {
-  const DDS::Property_t prop = {name, value, propagate};
+  const DDS::Property_t prop = {name.c_str(), value.c_str(), propagate};
   const unsigned int len = props.length();
   props.length(len + 1);
   props[len] = prop;
@@ -67,29 +61,28 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     append(props, "OpenDDS.RtpsRelay.Groups", "Messenger", true);
 
 #ifdef OPENDDS_SECURITY
-    using OpenDDS::DCPS::String;
-    // Determine the path to the keys
-    String path_to_tests;
-    const char* dds_root = ACE_OS::getenv("DDS_ROOT");
-    if (dds_root && dds_root[0]) {
-      // Use DDS_ROOT in case we are one of the CMake tests
-      path_to_tests = String("file:") + dds_root + "/tests/";
-    } else {
-      // Else if DDS_ROOT isn't defined try to do it relative to the traditional location
-      path_to_tests = "file:../../";
-    }
-    const String auth_ca_file = path_to_tests + auth_ca_file_from_tests;
-    const String perm_ca_file = path_to_tests + perm_ca_file_from_tests;
-    const String id_cert_file = path_to_tests + id_cert_file_from_tests;
-    const String id_key_file = path_to_tests + id_key_file_from_tests;
     if (TheServiceParticipant->get_security()) {
+      // Determine the path to the keys
+      String path_to_tests;
+      const char* const source_root = ACE_OS::getenv("OPENDDS_SOURCE_DIR");
+      if (source_root && source_root[0]) {
+        // Use OPENDDS_SOURCE_DIR in case we are one of the CMake tests
+        path_to_tests = String("file:") + source_root + "/tests/";
+      } else {
+        // Else try to do it relative to the traditional location
+        path_to_tests = "file:../../";
+      }
+
+      const String certs = path_to_tests + "security/certs/";
+      const String identity = certs + "identity/";
+      const String messenger = path_to_tests + "DCPS/Messenger/";
       using namespace DDS::Security::Properties;
-      append(props, AuthIdentityCA, auth_ca_file.c_str());
-      append(props, AuthIdentityCertificate, id_cert_file.c_str());
-      append(props, AuthPrivateKey, id_key_file.c_str());
-      append(props, AccessPermissionsCA, perm_ca_file.c_str());
-      append(props, AccessGovernance, governance_file);
-      append(props, AccessPermissions, permissions_file);
+      append(props, AuthIdentityCA, identity + "identity_ca_cert.pem");
+      append(props, AuthIdentityCertificate, identity + "test_participant_02_cert.pem");
+      append(props, AuthPrivateKey, identity + "test_participant_02_private_key.pem");
+      append(props, AccessPermissionsCA, certs + "permissions/permissions_ca_cert.pem");
+      append(props, AccessGovernance, messenger + "governance_signed.p7s");
+      append(props, AccessPermissions, messenger + "permissions_2_signed.p7s");
     }
 #endif
 

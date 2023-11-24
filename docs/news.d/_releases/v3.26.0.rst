@@ -1,0 +1,70 @@
+Released 2023-10-23
+
+Download :ghrelease:`this release on GitHub <DDS-3.26>`.
+
+Read `the documentation for this release on Read the Docs <https://opendds.readthedocs.io/en/dds-3.26>`__.
+
+Additions
+=========
+
+- OpenDDS can now be built using CMake for most common scenarios. (:ghpr:`4203`, :ghpr:`4214`)
+
+  - This is still considered somewhat experimental as it doesn't support :ref:`everything that an MPC-built OpenDDS currently can <cmake-known-limitations>`.
+  - See :ref:`cmake-building` for details.
+
+- Convert transport configurations (``rtps_udp``, ``multicast``, ``shmem``, ``tcp``, ``udp``) uses key-value store. (:ghpr:`4162`, :ghpr:`4270`, :ghpr:`4272`, :ghpr:`4241`, :ghpr:`4242`, :ghpr:`4243`, :ghpr:`4249`, :ghpr:`4255`)
+
+- CMake Config Package
+
+  - Added :cmake:func:`opendds_install_interface_files` to help install IDL files and the files generated from them. (:ghpr:`4203`, :ghpr:`4214`)
+  - Added :cmake:var:`OPENDDS_HOST_TOOLS` and :cmake:var:`OPENDDS_ACE_TAO_HOST_TOOLS` to allow cross compiling applications with both MPC and CMake-built OpenDDS. (:ghpr:`4203`, :ghpr:`4214`)
+
+  - :cmake:func:`opendds_target_sources`:
+
+    - Added :cmake:func:`opendds_target_sources(INCLUDE_BASE)` to preserve the directory structure of the IDL files for compiling the resulting generated files and installing everything using :cmake:func:`opendds_install_interface_files`. (:ghpr:`4203`, :ghpr:`4214`)
+    - Added :cmake:func:`opendds_target_sources(USE_VERSIONED_NAMESPACE)` as a shortcut to the ``-Wb,versioning_*`` IDL compiler options. (:ghpr:`4203`, :ghpr:`4214`)
+
+- Support sending DynamicDataAdapter sample via DynamicDataWriter (:ghpr:`4226`)
+- Added export macro to ConditionImpl (:ghpr:`4295`)
+
+Deprecations
+============
+
+- Deprecated :cmake:var:`OPENDDS_FILENAME_ONLY_INCLUDES` in favor of :cmake:func:`opendds_target_sources(INCLUDE_BASE)`. (:ghpr:`4203`, :ghpr:`4214`)
+
+Fixes
+=====
+
+- Improved the :ref:`subject name <dds_security--subject-name>` parsing to better conform to the DDS Security spec. (:ghpr:`4201`)
+
+  - The order of attributes in subject names is now significant when comparing them.
+
+- Remove from TypeLookupService when remote endpoint is removed from SEDP (:ghpr:`4216`)
+- WaitSet is now notified when DataWriter liveliness is lost. (:ghpr:`4223`)
+
+- ICE doesn't use IPv4-mapped IPv6 addresses anymore. (:ghpr:`4230`)
+
+- Efficiency: Remove per-element locking in JobQueue (:ghpr:`4253`)
+- RtpsRelay: fixed bug in record_activity's use of remove in GuidAddrSet (:ghpr:`4254`)
+- Fix warnings in typeobject_generator when using TAO 3 (:ghpr:`4262`)
+- Fix null pointer when participant is absent when updating locators (:ghpr:`4265`)
+- Initialize variables in TypeObject to silence warnings (:ghpr:`4292`)
+- RtpsRelay: Use ACE_Message_Block's locking strategy for cached SPDP to fix tsan warning (:ghpr:`4293`)
+- Fix tsan warning in ReactorTask (:ghpr:`4298`)
+
+Documentation
+=============
+
+- Remove -Grapidjson flag [opendds_idl] (:ghpr:`4231`)
+- Remove reference to mailing lists (:ghpr:`4234`)
+- Restructured parts of :ref:`dds_security` page and expanded documentation of some XML security document elements. (:ghpr:`4281`)
+- OS-specific instructions will now be automatically selected based on the browser's user agent. (:ghpr:`4281`)
+- OMG specification section references are now links to that section in the specification PDF. (:ghpr:`4281`)
+- Move build and install instructions to DevGuide (:ghpr:`4294`)
+- Incorporate the quick start guides, FAQ, and shapes demo into the DevGuide. (:ghpr:`4297`)
+
+Notes
+=====
+
+- Using Perl 5.38.0 might prevent TAO from building properly, see `here <https://github.com/DOCGroup/ACE_TAO/issues/2148>`__ for details.
+

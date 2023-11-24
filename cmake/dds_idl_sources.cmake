@@ -27,7 +27,9 @@ function(_opendds_add_idl_or_header_files target scope is_generated files)
         "_opendds_add_idl_or_header_files(${target} ${scope} ${gen_kind} ${files})")
     endif()
     get_filename_component(file ${file} REALPATH)
-    target_sources(${target} ${scope} $<BUILD_INTERFACE:${file}>)
+    if(NOT file MATCHES "\\.idl$")
+      target_sources(${target} PRIVATE $<BUILD_INTERFACE:${file}>)
+    endif()
 
     if(NOT ${scope} STREQUAL "PRIVATE")
       if(file MATCHES "\\.idl$")
@@ -116,6 +118,7 @@ function(_opendds_target_idl_sources target)
     SKIP_TAO_IDL
     SKIP_OPENDDS_IDL
     AUTO_INCLUDES
+    INCLUDE_BASE
   )
   set(multi_value_args TAO_IDL_FLAGS DDS_IDL_FLAGS IDL_FILES)
   cmake_parse_arguments(arg "" "${one_value_args}" "${multi_value_args}" ${ARGN})
@@ -136,7 +139,9 @@ function(_opendds_target_idl_sources target)
     get_property(generated_dependencies SOURCE ${idl_file}
       PROPERTY OPENDDS_IDL_GENERATED_DEPENDENCIES SET)
 
-    if(generated_dependencies)
+    # TODO: This breaks the OpenDDS build because must be able to call
+    # opendds_target_sources on the same IDL files with different options.
+    if(generated_dependencies AND FALSE)
       # If an IDL-Generation command was already created this file can safely be
       # skipped; however, the dependencies still need to be added to the target.
       _opendds_target_generated_dependencies(${target} ${idl_file} ${arg_SCOPE})
@@ -245,7 +250,7 @@ function(_opendds_target_idl_sources target)
     set(h_files)
     set(cpp_files)
     set(run_tao_idl_on_input FALSE)
-    set(file_auto_includes)
+    set(file_auto_includes "${gen_out}")
     set(file_mappings)
     set(tao_idl_opts ${arg_TAO_IDL_FLAGS})
     set(generated_files)
@@ -258,8 +263,11 @@ function(_opendds_target_idl_sources target)
       endif()
     else()
       _opendds_get_generated_idl_output(
-        ${target} "${input}" "${opendds_idl_opt_-o}" output_prefix output_dir)
-      list(APPEND file_auto_includes "${output_dir}")
+        ${target} "${arg_INCLUDE_BASE}" "${input}" "${opendds_idl_opt_-o}" output_prefix output_dir)
+      _opendds_get_generated_output_dir(${target} file_auto_includes O_OPT "${opendds_idl_opt_-o}")
+      if(arg_INCLUDE_BASE)
+        list(APPEND file_auto_includes "${arg_INCLUDE_BASE}")
+      endif()
 
       if(NOT opendds_idl_opt_-SI)
         set(type_support_idl_file "${output_prefix}TypeSupport.idl")
@@ -335,6 +343,7 @@ function(_opendds_target_idl_sources target)
         _opendds_tao_idl(${target}
           IDL_FLAGS ${tao_idl_opts}
           IDL_FILES ${idl_files}
+          INCLUDE_BASE "${include_base}"
           AUTO_INCLUDES tao_idl_auto_includes
         )
         list(APPEND file_auto_includes "${tao_idl_auto_includes}")

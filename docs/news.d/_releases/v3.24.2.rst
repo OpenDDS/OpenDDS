@@ -2,7 +2,7 @@ Released 2023-06-30
 
 Download :ghrelease:`this release on GitHub <DDS-3.24.2>`.
 
-Read `the documenation for this release on Read the Docs <https://opendds.readthedocs.io/en/dds-3.24.2>`__.
+Read `the documentation for this release on Read the Docs <https://opendds.readthedocs.io/en/dds-3.24.2>`__.
 
 Security
 ========

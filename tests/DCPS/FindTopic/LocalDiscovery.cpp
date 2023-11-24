@@ -4,7 +4,7 @@
 #include <dds/DCPS/BuiltInTopicUtils.h>
 
 LocalDiscovery::LocalDiscovery()
-  : Discovery("LocalDiscovery")
+  : Discovery()
 {
   next_topic_id_.entityKey[0] = 0;
   next_topic_id_.entityKey[1] = 0;

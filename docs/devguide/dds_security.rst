@@ -1,4 +1,5 @@
-.. _dds_security--dds-security:
+.. _dds_security:
+.. _sec:
 
 ############
 DDS Security
@@ -7,202 +8,17 @@ DDS Security
 ..
     Sect<14>
 
+OpenDDS includes an implementation of the :ref:`DDS Security specification <spec-dds-security>`.
+This allows participants to encrypt messages and to authenticate remote participants before engaging with them.
+
 .. _dds_security--building-opendds-with-security-enabled:
 
 **************************************
 Building OpenDDS with Security Enabled
 **************************************
 
-..
-    Sect<14.1>
-
-Prior to utilizing DDS Security, OpenDDS must be built to include security elements into the resulting libraries.
-The following instructions show how this is to be completed on various platforms.
-
-.. _dds_security--prerequisites:
-
-Prerequisites
-=============
-
-..
-    Sect<14.1.1>
-
-OpenDDS includes an implementation of the :ref:`DDS Security specification <spec-dds-security>`.
-Building OpenDDS with security enabled requires the following dependencies:
-
-#. Xerces-C++ v3.x
-
-#. OpenSSL v1.0.2+, v1.1, or v3.0.1+ (1.1 is preferred)
-
-#. Google Test (only required if building OpenDDS tests)
-
-   * If you are using OpenDDS from a git repository, Google Test is provided as a git submodule.
-     Make sure to enable submodules with the ``--recursive`` option to git clone.
-
-#. CMake (required if building OpenDDS tests and building Google Test and other dependencies from source).
-
-General Notes on Using OpenDDS Configure Script with DDS Security:
-
-#. DDS Security is disabled by default, enable it with ``--security``
-
-#. OpenDDS tests are disabled by default, enable them with ``--tests``
-
-   * Disabling tests skips the Google Test and CMake dependencies
-
-   * If tests are enabled, the configure script can run CMake and build Google Test
-
-.. _dds_security--building-opendds-with-security-on-windows:
-
-Building OpenDDS with Security on Windows
-=========================================
-
-..
-    Sect<14.1.2>
-
-**Using Microsoft vcpkg**
-
-Microsoft vcpkg is a "C++ Library Manager for Windows, Linux, and macOS" which helps developers build/install dependencies.
-Although it is cross-platform, this guide only discusses vcpkg on Windows.
-
-As of this writing, vcpkg is only supported on Visual Studio 2015 Update 3 and later versions; if using an earlier version of Visual Studio, skip down to the manual setup instructions later in this section.
-
-* If OpenDDS tests will be built, install CMake or put the one that comes with Visual Studio on the ``PATH`` (see ``Common7\IDE\CommonExtensions\Microsoft\CMake``).
-
-* If you need to obtain and install vcpkg, navigate to `https://github.com/Microsoft/vcpkg <#https://github.com/Microsoft/vcpkg>`__ and follow the instructions to obtain vcpkg by cloning the repository and bootstrapping it.
-
-* Fetch and build the dependencies; by default, vcpkg targets x86 so be sure to specify the x64 target if required by specifying it when invoking vcpkg install, as shown here:
-
-  .. code-block:: doscon
-
-      vcpkg install openssl:x64-windows xerces-c:x64-windows
-
-* Configure OpenDDS by passing the openssl and xerces3 switches.
-  As a convenience, it can be helpful to set an environment variable to store the path since it is the same location for both dependencies.
-
-  .. code-block:: doscon
-
-      set VCPKG_INSTALL=c:\path\to\vcpkg\installed\x64-windows
-      configure --security --openssl=%VCPKG_INSTALL% --xerces3=%VCPKG_INSTALL%
-
-* Compile with msbuild or by launching Visual Studio from this command prompt so it inherits the correct environment variables and building from there.
-
-  .. code-block:: doscon
-
-      msbuild /m DDS_TAOv2_all.sln
-
-**Manual Build**
-
-.. note::
-
-   For all of the build steps listed here, check that each package targets the same architecture (either 32-bit or 64-bit) by compiling all dependencies within the same type of Developer Command Prompt.
-
-**Compiling OpenSSL**
-
-Official OpenSSL instructions can be found `here <https://wiki.openssl.org/index.php/Compilation_and_Installation#Windows>`__.
-
-#. Install Perl and add it to the Path environment variable.
-   For this guide, ActiveState is used.
-
-#. Install Netwide Assembler (NASM).
-   Click through the latest stable release and there is a win32 and win64 directory containing executable installers.
-   The installer does not update the Path environment variable, so a manual entry (``%LOCALAPPDATA%\bin\NASM``) is necessary.
-
-#. Download the required version of OpenSSL by cloning the repository.
-
-#. Open a Developer Command Prompt (32-bit or 64-bit depending on the desired target architecture) and change into the freshly cloned openssl directory.
-
-#. Run the configure script and specify a required architecture (``perl Configure VC-WIN32`` or ``perl Configure VC-WIN64A``).
-
-#. Run ``nmake``
-
-#. Run ``nmake install``
-
-.. note::
-
-   If the default OpenSSL location is desired, which will be searched by OpenDDS, open the "Developer Command Prompt" as an administrator before running the install.
-   It will write to ``C:\Program Files`` or ``C:\Program Files (x86)`` depending on the architecture.
-
-**Compiling Xerces-C++ 3**
-
-Official Xerces instructions can be found `here <https://xerces.apache.org/xerces-c/build-3.html>`__.
-
-#. Download/extract the Xerces source files.
-
-#. Create a cmake build directory and change into it (from within the Xerces source tree).
-
-   .. code-block:: bash
-
-       mkdir build
-       cd build
-
-#. Run cmake with the appropriate generator.
-   In this case Visual Studio 2017 with 64-bit is being used so:
-
-   .. code-block:: bash
-
-       cmake -G "Visual Studio 15 2017 Win64" ..
-
-#. Run cmake again with the build switch and install target (this should be done in an administrator command-prompt to install in the default location as mentioned above).
-
-   .. code-block:: bash
-
-       cmake --build . --target install
-
-**Configuring and Building OpenDDS**:
-
-#. Change into the OpenDDS root folder and run configure with security enabled.
-
-   * If the default location was used for OpenSSL and Xerces, configure should automatically find the dependencies:
-
-     .. code-block:: bash
-
-         configure --security
-
-#. If a different location was used (assuming environment variables ``NEW_SSL_ROOT`` and ``NEW_XERCES_ROOT`` point to their respective library directories):
-
-   .. code-block:: doscon
-
-       configure --security --openssl=%NEW_SSL_ROOT% \
-         --xerces3=%NEW_XERCES_ROOT%
-
-#. Compile with msbuild (or by opening the solution file in Visual Studio and building from there).
-
-   .. code-block:: doscon
-
-       msbuild /m DDS_TAOv2_all.sln
-
-.. _dds_security--building-opendds-with-security-on-linux:
-
-Building OpenDDS with Security on Linux
-=======================================
-
-..
-    Sect<14.1.3>
-
-Xerces-C++ and OpenSSL may be installed using the system package manager, or built from source.
-If using the system package manager (that is, headers can be found under ``/usr/include``), invoke the configure script with the --security option.
-If Xerces-C++ and/or OpenSSL are built from source or installed in a custom location, also provide the ``--xerces3=/foo`` and ``--openssl=/bar`` command line options.
-
-.. _dds_security--building-opendds-with-security-on-macos:
-
-Building OpenDDS with Security on macOS
-=======================================
-
-..
-    Sect<14.1.4>
-
-Xerces-C++ and OpenSSL may be installed using homebrew or another developer-focused package manager, or built from source.
-The instructions above for Linux also apply to macOS but the package manager will not install directly in ``/usr`` so make sure to specify the library locations to the configure script.
-
-.. _dds_security--building-opendds-with-security-for-android:
-
-Building OpenDDS with Security for Android
-==========================================
-
-..
-    Sect<14.1.5>
-
-See :doc:`/building/android`
+OpenDDS isn't built with security enabled by default.
+See :ref:`building-sec` for more information.
 
 .. _dds_security--architecture-of-the-dds-security-specification:
 
@@ -260,10 +76,6 @@ As such, this document makes use of several security concepts which may warrant 
 
      - * `Digital Signature <https://en.wikipedia.org/wiki/Digital_signature>`__
 
-.. _dds_security--reftable36:
-
-**Table**
-
 .. _dds_security--required-dds-security-artifacts:
 
 *******************************
@@ -289,7 +101,7 @@ These are shared by all participants within the secured DDS Domain:
 
 * Governance Document
 
-- Signed by Permissions CA using its private key
+  - Signed by Permissions CA using its private key
 
 .. _dds_security--per-participant-artifacts:
 
@@ -303,13 +115,13 @@ These are specific to the individual Domain Participants within the DDS Domain:
 
 * Identity Certificate and its Private Key
 
-- Issued by Identity CA (or a CA that it authorized to act on its behalf)
+  - Issued by Identity CA (or a CA that it authorized to act on its behalf)
 
 * Permissions Document
 
-- Contains a "subject name" which matches the participant certificate's Subject
+  - Contains a "subject name" which matches the participant certificate's Subject
 
-- Signed by Permissions CA using its private key
+  - Signed by Permissions CA using its private key
 
 .. _dds_security--required-opendds-configuration:
 
@@ -392,10 +204,6 @@ Except where noted, these values take the form of a URI starting with either the
      - Signed XML (.p7s)
 
      - Signed by ``permissions_ca``
-
-.. _dds_security--reftable37:
-
-**Table**
 
 .. _dds_security--propertyqospolicy-example-code:
 
@@ -521,10 +329,6 @@ The following table describes the various examples and where to find them in the
 
      - :ghfile:`tests/DCPS/Messenger/permissions_1.xml`
 
-.. _dds_security--reftable38:
-
-**Table**
-
 .. _dds_security--using-openssl-utilities-for-opendds:
 
 Using OpenSSL Utilities for OpenDDS
@@ -533,8 +337,8 @@ Using OpenSSL Utilities for OpenDDS
 ..
     Sect<14.5.6>
 
-To generate certificates using the openssl command, a configuration file "openssl.cnf" is required (see below for example commands).
-Before proceeding, it may be helpful to review OpenSSL's manpages to get help with the file format.
+To generate certificates using the ``openssl`` command, a configuration file ``openssl.cnf`` is required (see below for example commands).
+Before proceeding, it may be helpful to review OpenSSL's man pages to get help with the file format.
 In particular, configuration file format and ca command's documentation and configuration file options.
 
 An example OpenSSL CA-Config file used in OpenDDS testing can be found here: :ghfile:`tests/security/certs/identity/identity_ca_openssl.cnf`
@@ -601,6 +405,75 @@ Sign a document using existing CA & CA private key:
 
     openssl smime -sign -in doc.xml -text -out doc_signed.p7s -signer ca_cert.pem -inkey ca_private_key.pem
 
+.. _dds_security--common-xml:
+
+*******************
+Common XML Elements
+*******************
+
+These are elements that are common to all the XML documents.
+
+.. _dds_security--domains:
+
+Domain Id Set
+=============
+
+A list of domain ids and/or domain id ranges of domains impacted by the current domain rule.
+This is the type of ``domains`` in the :ref:`governance document <dds_security--gov-domains>` and in the :ref:`permissions document <dds_security--perm-domains>`.
+
+The set is made up of ``<id>`` tags or ``<id_range>`` tags.
+An ``<id>`` tag simply contains the domain id that are part of the set.
+An ``<id_range>`` tag can be used to add multiple ids at once.
+It must contain a ``<min>`` tag to say where the range starts and may also have a ``<max>`` tag to say where the range ends.
+If the ``<max>`` tag is omitted then the set includes all valid domain ids starting at ``<min>``.
+
+If the domain rule or permissions grant should to apply to all domains, use the following:
+
+.. code-block:: xml
+
+    <domains>
+      <id_range><min>0</min></id_range>
+    </domains>
+
+If there's a need to be selective about what domains are chosen, here's an annotated example:
+
+.. code-block:: xml
+
+    <domains>
+      <id>2</id>
+      <id_range><min>4</min><max>6</max></id_range> <!-- 4, 5, 6 -->
+      <id_range><min>10</min></id_range> <!-- 10 and onward -->
+    </domains>
+
+.. _dds_security--fnmatch-expr:
+
+Fnmatch Expression
+==================
+
+A wildcard-capable string used to match one or more names from a set.
+This is used to match topic and partition names to the rules that apply to them.
+Recognized values will conform to POSIX ``fnmatch()`` function as specified in POSIX 1003.2-1992, Section B.6.
+This is a subset of UNIX shell file matching and is similar to, but separate from standard regular expressions.
+
+Simplified, this consists of the following:
+
+``?``
+  Will match any single character.
+  For example ``ab?`` matches ``abc`` and ``abb``.
+
+``*``
+  Will match any zero or more characters.
+  For example ``*`` will match anything and ``a*`` matches ``a``, ``abc``, and ``aaaaa``.
+
+``[]``
+  Will match a single character specified in the brackets.
+  For example ``a[bc]`` matches ``ab`` and ``ac``.
+  Can also use ranges, for example ``a[b-d]`` matches ``ab``, ``ac``, and ``ad``.
+
+``\``
+  Will escape the following character.
+  For example ``\?`` just matches ``?`` and ``\\`` matches ``\``.
+
 .. _dds_security--domain-governance-document:
 
 **************************
@@ -611,7 +484,7 @@ Domain Governance Document
     Sect<14.6>
 
 The signed governance document is used by the DDS Security built-in access control plugin in order to determine both per-domain and per-topic security configuration options for specific domains.
-For full details regarding the content of the governance document, see the OMG DDS Security specification section 9.4.1.2.
+For full details regarding the content of the governance document, see :omgspec:`sec:9.4.1.2`.
 
 .. _dds_security--global-governance-model:
 
@@ -632,61 +505,44 @@ Key Governance Elements
 ..
     Sect<14.6.2>
 
-Domain Id Set
-
-A list of domain ids and/or domain id ranges of domains impacted by the current domain rule.
-The syntax is the same as the domain id set found in the governance document.
-
-The set is made up of <id> tags or <id_range> tags.
-An <id> tag simply contains the domain id that are part of the set.
-An <id_range> tag can be used to add multiple ids at once.
-It must contain a <min> tag to say where the range starts and may also have a <max> tag to say where the range ends.
-If the <max> tag is omitted then the set includes all valid domain ids starting at <min>.
-
-If the domain rule or permissions grant should to apply to all domains, use the following:
-
-.. code-block:: xml
-
-    <domains>
-      <id_range><min>0</min></id_range>
-    </domains>
-
-If there's a need to be selective about what domains are chosen, here's an annotated example:
-
-.. code-block:: xml
-
-    <domains>
-      <id>2</id>
-      <id_range><min>4</min><max>6</max></id_range> <!-- 4, 5, 6 -->
-      <id_range><min>10</min></id_range> <!-- 10 and onward -->
-    </domains>
-
-Governance Configuration Types
-
 The following types and values are used in configuring both per-domain and per-topic security configuration options.
 We summarize them here to simplify discussion of the configuration options where they're used, found below.
 
-**Boolean**
+.. _dds_security--boolean:
+
+Boolean
+-------
 
 A boolean value indicating whether a configuration option is enabled or not.
-Recognized values are: ``TRUE/true/1`` or ``FALSE/false/0.``
+Recognized values are: ``TRUE``/``true``/``1`` and ``FALSE``/``false``/``0``
 
-**ProtectionKind**
+.. _dds_security--protection-kind:
+
+Protection Kind
+---------------
 
 The method used to protect domain data (message signatures or message encryption) along with the ability to include origin authentication for either protection kind.
-Currently, OpenDDS doesn't implement origin authentication.
-So while the "_WITH_ORIGIN_AUTHENTICATION" options are recognized, the underlying configuration is unsupported.
-Recognized values are: ``{NONE, SIGN, ENCRYPT,SIGN_WITH_ORIGIN_AUTHENTICATION``, or ``ENCRYPT_WITH_ORIGIN_AUTHENTICATION}``
 
-**BasicProtectionKind**
+Recognized values are:
+
+- ``NONE``
+- ``SIGN``
+- ``ENCRYPT``
+- ``SIGN_WITH_ORIGIN_AUTHENTICATION``
+- ``ENCRYPT_WITH_ORIGIN_AUTHENTICATION``
+
+.. attention::
+
+  Currently, OpenDDS doesn't implement origin authentication.
+  So while the ``_WITH_ORIGIN_AUTHENTICATION`` options are recognized, the underlying configuration is unsupported.
+
+.. _dds_security--basic-protection-kind:
+
+Basic Protection Kind
+---------------------
 
 The method used to protect domain data (message signatures or message encryption).
-Recognized values are: ``{NONE, SIGN, or ENCRYPT}``
-
-**FnmatchExpression**
-
-A wildcard-capable string used to match topic names.
-Recognized values will conform to POSIX ``fnmatch()`` function as specified in POSIX 1003.2-1992, Section B.6.
+Recognized values are ``NONE``, ``SIGN``, and ``ENCRYPT``
 
 .. _dds_security--domain-rule-configuration-options:
 
@@ -698,51 +554,50 @@ Domain Rule Configuration Options
 
 The following XML elements are used to configure domain participant behaviors.
 
-.. list-table::
-   :header-rows: 1
+.. _dds_security--gov-domains:
 
-   * - Element
+domains
+-------
 
-     - Type
+A :ref:`dds_security--domains` of domains impacted by the current domain rule.
 
-     - Description
+.. _dds_security--allow-unauthenticated-participants:
 
-   * - ``<allow_unauthenticated_participants>``
+allow_unauthenticated_participants
+----------------------------------
 
-     - Boolean
+A :ref:`dds_security--boolean` value which determines whether to allow unauthenticated participants for the current domain rule
 
-     - A boolean value which determines whether to allow unauthenticated participants for the current domain rule
+.. _dds_security--enable-join-access-control:
 
-   * - ``<enable_join_access_control>``
+enable_join_access_control
+--------------------------
 
-     - Boolean
+A :ref:`dds_security--boolean` value which determines whether to enforce domain access controls for authenticated participants
 
-     - A boolean value which determines whether to enforce domain access controls for authenticated participants
+.. _dds_security--discovery-protection-kind:
 
-   * - <discovery_protection_kind>
+discovery_protection_kind
+-------------------------
 
-     - ProtectionKind
+The discovery protection element specifies the :ref:`dds_security--protection-kind` used for the built-in DataWriter(s) and DataReader(s) used for secure endpoint discovery messages
 
-     - The discovery protection element specifies the protection kind used for the built-in DataWriter(s) and DataReader(s) used for secure endpoint discovery messages
+.. _dds_security--liveliness-protection-kind:
 
-   * - <liveliness_protection_kind>
+liveliness_protection_kind
+--------------------------
 
-     - ProtectionKind
+The liveliness protection element specifies the :ref:`dds_security--protection-kind` used for the built-in DataWriter and DataReader used for secure liveliness messages
 
-     - The liveliness protection element specifies the protection kind used for the built-in DataWriter and DataReader used for secure liveliness messages
+.. _dds_security--rtps-protection-kind:
 
-   * - <rtps_protection_kind>
+rtps_protection_kind
+--------------------
 
-     - ProtectionKind
-
-     - Indicate the desired level of protection for the whole RTPS message.
-       Very little RTPS data exists outside the "metadata protection" envelope (see topic rule configuration options), and so for most use cases topic-level "data protection" or "metadata protection" can be combined with discovery protection and/or liveliness protection in order to secure domain data adequately.
-       One item that is not secured by "metadata protection" is the timestamp, since RTPS uses a separate InfoTimestamp submessage for this.
-       The timestamp can be secured by using <rtps_protection_kind>
-
-.. _dds_security--reftable39:
-
-**Table**
+Indicate the :ref:`dds_security--protection-kind` for the whole RTPS message.
+Very little RTPS data exists outside the "metadata protection" envelope (see topic rule configuration options), and so for most use cases topic-level "data protection" or "metadata protection" can be combined with discovery protection and/or liveliness protection in order to secure domain data adequately.
+One item that is not secured by "metadata protection" is the timestamp, since RTPS uses a separate InfoTimestamp submessage for this.
+The timestamp can be secured by using ``rtps_protection_kind``
 
 .. _dds_security--topic-rule-configuration-options:
 
@@ -754,31 +609,48 @@ Topic Rule Configuration Options
 
 The following XML elements are used to configure topic endpoint behaviors:
 
-``<topic_expression>`` : **FnmatchExpression**
+.. _dds_security--topic-expression:
 
-A wildcard-capable string used to match topic names.
-See description above.
+topic_expression
+----------------
+
+A :ref:`dds_security--fnmatch-expr` of the topic names to match.
 A default rule to catch all previously unmatched topics can be made with: ``<topic_expression>*</topic_expression>``
 
-``<enable_discovery_protection>`` : **Boolean**
+.. _dds_security--enable-discovery-protection:
 
-Enables the use of secure discovery protections for matching user topic announcements.
+enable_discovery_protection
+---------------------------
 
-``<enable_read_access_control>`` : **Boolean**
+A :ref:`dds_security--boolean` to enable the use of secure discovery protections for matching user topic announcements.
 
-Enables the use of access control protections for matching user topic DataReaders.
+.. _dds_security--enable-read-access-control:
 
-``<enable_write_access_control>`` : **Boolean**
+enable_read_access_control
+--------------------------
 
-Enables the use of access control protections for matching user topic DataWriters.
+A :ref:`dds_security--boolean` to enable the use of access control protections for matching user topic DataReaders.
 
-``<metadata_protection_kind>`` : **ProtectionKind**
+.. _dds_security--enable-write-access-control:
 
-Specifies the protection kind used for the RTPS SubMessages sent by any DataWriter and DataReader whose associated Topic name matches the rule's topic expression.
+enable_write_access_control
+---------------------------
 
-``<data_protection_kind>`` : **BasicProtectionKind**
+A :ref:`dds_security--boolean` to enable the use of access control protections for matching user topic DataWriters.
 
-Specifies the basic protection kind used for the RTPS SerializedPayload SubMessage element sent by any DataWriter whose associated Topic name matches the rule's topic expression.
+.. _dds_security--metadata-protection-kind:
+
+metadata_protection_kind
+------------------------
+
+Specifies the :ref:`dds_security--protection-kind` used for the RTPS SubMessages sent by any DataWriter and DataReader whose associated Topic name matches the rule's topic expression.
+
+.. _dds_security--data-protection-kind:
+
+data_protection_kind
+--------------------
+
+Specifies the :ref:`dds_security--basic-protection-kind` used for the RTPS SerializedPayload SubMessage element sent by any DataWriter whose associated Topic name matches the rule's topic expression.
 
 .. _dds_security--governance-xml-example:
 
@@ -801,7 +673,7 @@ Governance XML Example
               <max>20</max>
             </id_range>
           </domains>
-    <allow_unauthenticated_participants>FALSE</allow_unauthenticated_participants>
+          <allow_unauthenticated_participants>FALSE</allow_unauthenticated_participants>
           <enable_join_access_control>TRUE</enable_join_access_control>
           <rtps_protection_kind>SIGN</rtps_protection_kind>
           <discovery_protection_kind>ENCRYPT</discovery_protection_kind>
@@ -854,7 +726,7 @@ Participant Permissions Document
     Sect<14.7>
 
 The signed permissions document is used by the DDS Security built-in access control plugin in order to determine participant permissions to join domains and to create endpoints for reading, writing, and relaying domain data.
-For full details regarding the content of the permissions document, see the OMG DDS Security specification section 9.4.1.3.
+For full details regarding the content of the permissions document, see :omgspec:`sec:9.4.1.3`.
 
 .. _dds_security--key-permissions-elements:
 
@@ -864,46 +736,63 @@ Key Permissions Elements
 ..
     Sect<14.7.1>
 
-**Grants**
-
 Each permissions file consists of one or more permissions grants.
 Each grant bestows access control privileges to a single subject name for a limited validity period.
 
-**Subject Name**
+.. _dds_security--subject-name:
 
-Each grant's subject name is intended to match against a corresponding identity certificate's "subject" field.
+subject_name
+------------
+
+This is a X.509 subject name field.
 In order for permissions checks to successfully validate for both local and remote participants, the supplied identity certificate subject name must match the subject name of one of the grants included in the permissions file.
 
-**Validity**
+This will look something like:
+
+.. code-block:: xml
+
+  <subject_name>emailAddress=cto@acme.com, CN=DDS Shapes Demo, OU=CTO Office, O=ACME Inc., L=Sunnyvale, ST=CA, C=US</subject_name>
+
+.. versionchanged:: 3.25.0
+
+  The order of attributes in subject names is now significant.
+
+.. _dds_security--validity:
+
+validity
+--------
 
 Each grant's validity section contains a start date and time (``<not_before>``) and an end date and time (``<not_after>``) to indicate the period of time during which the grant is valid.
 
-The format of the date and time, which is like `ISO-8601 <https://www.iso.org/iso-8601-date-and-time-format.html>`__, must take one of the following forms:
+The format of the date and time, which is like `ISO-8601 <https://en.wikipedia.org/wiki/ISO_8601>`__, must take one of the following forms:
 
 #. ``YYYY-MM-DDThh:mm:ss``
 
-  * Example: ``2020-10-26T22:45:30``
+   Example: ``2020-10-26T22:45:30``
 
 #. ``YYYY-MM-DDThh:mm:ssZ``
 
-  * Example:``2020-10-26T22:45:30Z``
+   Example:``2020-10-26T22:45:30Z``
 
 #. ``YYYY-MM-DDThh:mm:ss+hh:mm``
 
-  * Example:``2020-10-26T23:45:30+01:00``
+   Example:``2020-10-26T23:45:30+01:00``
 
 #. ``YYYY-MM-DDThh:mm:ss-hh:mm``
 
-  * Example:``2020-10-26T16:45:30-06:00``
+   Example:``2020-10-26T16:45:30-06:00``
 
 All fields shown must include leading zeros to fill out their full width, as shown in the examples.
 ``YYYY-MM-DD`` is the date and ``hh:mm:ss`` is the time in 24-hour format.
 The date and time must be able to be represented by the ``time_t`` (C standard library) type of the system.
 The seconds field can also include a variable length fractional part, like ``00.0`` or ``01.234``, but it will be ignored because ``time_t`` represents a whole number of seconds.
-Examples #1 and #2 are both interpreted to be using UTC.
+Examples #1 and #2 are both interpreted using UTC.
 To put the date and time in a local time, a time zone offset can to be added that says how far the local timezone is ahead of (using ``+`` as in example #3) or behind (using ``-`` as in example #4) UTC at that date and time.
 
-**Allow / Deny Rules**
+.. _dds_security--allow-rule-and-deny-rule:
+
+allow_rule and deny_rule
+------------------------
 
 Grants will contain one or more allow / deny rules to indicate which privileges are being applied.
 When verifying that a particular operation is allowed by the supplied grant, rules are checked in the order they appear in the file.
@@ -911,17 +800,19 @@ If the domain, partition, and (when implemented) data tags for an applicable top
 Otherwise, the next rule is considered.
 Special Note: If a grant contains any allow rule that matches a given domain (even one with no publish / subscribe / relay rules), the grant may be used to join a domain with join access controls enabled.
 
-**Default Rule**
+.. _dds_security--perm-domains:
 
-The default rule is the rule applied if none of the grant's allow rules or deny rules match the incoming operation to be verified.
-
-**Domain Id Set**
+domains
+^^^^^^^
 
 Every allow or deny rule must contain a set of domain ids to which it applies.
 The syntax is the same as the domain id set found in the governance document.
-See :ref:`dds_security--key-governance-elements` for details.
+See :ref:`dds_security--domains` for details.
 
-**Publish / Subscribe / Relay Rules (PSR rules)**
+.. _dds_security--psr-rules:
+
+publish, subscribe, and relay Rules (PSR rules)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Every allow or deny rule may optionally contain a list of publish, subscribe, or relay rules bestowing privileges to publish, subscribe, or relay data (respectively).
 Each rule applies to a collection of topics in a set of partitions with a particular set of data tags.
@@ -932,30 +823,63 @@ See the DDS Security specification for full details.
 OpenDDS does not currently support relay-only behavior and consequently ignores allow and deny relay rules for both local and remote entities.
 Additionally, OpenDDS does not currently support data tags, and so the data tag condition applied is always the "default" behavior described below.
 
-**Topic List**
+.. _dds_security--topics:
+
+topics
+""""""
 
 The list of topics and/or topic expressions for which a rule applies.
-Topic names and expressions are matched using POSIX fnmatch() rules and syntax.
+Topic names and expressions are matched using :ref:`dds_security--fnmatch-expr`.
 If the triggering operation matches any of the topics listed, the topic condition is met.
 The topic section must always be present for a PSR rule, so there there is no default behavior.
 
-**Partition List**
+.. _dds_security--partitions:
+
+partitions
+""""""""""
 
 The partitions list contains the set of partition names for which the parent PSR rule applies.
-Similarly to topics, partition names and expressions are matched using POSIX ``fnmatch()`` rules and syntax.
+Similarly to topics, partition names and expressions are matched using :ref:`dds_security--fnmatch-expr`.
 For "allow" PSR rules, the DDS entity of the associated triggering operation must be using a strict subset of the partitions listed for the rule to apply.
 When no partition list is given for an "allow" PSR rule, the "empty string" partition is used as the default value.
 For "deny" PSR rules, the rule will apply if the associated DDS entity is using any of the partitions listed.
 When no partition list is given for a "deny" PSR rule, the wildcard expression "*" is used as the default value.
 
-**Data Tags List**
+.. _dds_security--data-tags:
 
-Data tags are an optional part of the DDS Security specification and are not currently implemented by OpenDDS.
-If they were implemented, the condition criteria for data tags would be similar to partitions.
+data_tags
+"""""""""
+
+.. attention::
+
+  Data tags are an optional part of the DDS Security specification and are not currently implemented by OpenDDS.
+  If they were implemented, the condition criteria for data tags would be similar to partitions.
+
 For "allow" PSR rules, the DDS entity of the associated triggering operation must be using a strict subset of the data tags listed for the rule to apply.
 When no data tag list is given for an "allow" PSR rule, the empty set of data tags is used as the default value.
 For "deny" PSR rules, the rule will apply if the associated DDS entity is using any of the data tags listed.
 When no data tag list is given for a "deny" PSR rule, the set of "all possible tags" is used as the default value.
+
+.. _dds_security--psr-validity:
+
+validity
+""""""""
+
+.. attention::
+
+   This is an OpenDDS extension.
+
+This structure defines the validity of a particular publish or subscribe action.
+Thus, it is possible to declare that an action is valid for some subset of the grant's validity.
+The format for `validity` is the same as :ref:`dds_security--validity`.
+
+.. _dds_security--default_rule:
+
+default_rule
+^^^^^^^^^^^^
+
+The default rule is the rule applied if none of the grant's allow rules or deny rules match the incoming operation to be verified.
+Recognized values are ``ALLOW`` and ``DENY``.
 
 .. _dds_security--permissions-xml-example:
 
@@ -1046,7 +970,7 @@ The following DDS Security features are not implemented in OpenDDS.
 
 #. Use of multiple plugin configurations (with different Domain Participants)
 
-#. CRL (:RFC:`5280`) and OCSP (:RFC:`2560`) support
+#. CRL (:rfc:`5280`) and OCSP (:rfc:`2560`) support
 
 #. Certain plugin operations not used by built-in plugins may not be invoked by middleware
 
@@ -1056,7 +980,7 @@ The following DDS Security features are not implemented in OpenDDS.
 
 #. Relay as a permissions "action" (Publish and Subscribe are supported)
 
-#. Legacy matching behavior of permissions based on Partition QoS (9.4.1.3.2.3.1.4 in spec)
+#. :omgspec:`Legacy matching behavior of permissions based on Partition QoS <sec:9.4.1.3.2.3.1.4>`
 
 #. 128-bit AES keys (256-bit is supported)
 
@@ -1064,3 +988,6 @@ The following DDS Security features are not implemented in OpenDDS.
 
 #. Signing (without encrypting) at the payload level, see :omgissue:`DDSSEC12-59`
 
+The following features are OpenDDS extensions:
+
+#. Validity of publish/subscribe actions :ref:`dds_security--psr-validity`.

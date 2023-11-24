@@ -166,6 +166,29 @@ int Permissions::load(const SSL::SignedDocument& doc)
                     action.partitions.push_back(to_string(partitionNode));
                   }
                 }
+              } else if (ACE_TEXT("validity") == XStr(topicListNode->getNodeName())) {
+                const xercesc::DOMNodeList* validityNodes = topicListNode->getChildNodes();
+                for (XMLSize_t vn = 0, vn_len = validityNodes->getLength(); vn < vn_len; ++vn) {
+                  const xercesc::DOMNode* validityNode = validityNodes->item(vn);
+                  const XStr v_tag = validityNode->getNodeName();
+                  if (v_tag == ACE_TEXT("not_before")) {
+                    if (!parse_time(validityNode->getTextContent(), action.validity.not_before)) {
+                      if (security_debug.access_error) {
+                        ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: {access_error} Permissions::load: "
+                                   "invalid datetime in not_before\n"));
+                      }
+                      return -1;
+                    }
+                  } else if (v_tag == ACE_TEXT("not_after")) {
+                    if (!parse_time(validityNode->getTextContent(), action.validity.not_after)) {
+                      if (security_debug.access_error) {
+                        ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: {access_error} Permissions::load: "
+                                   "invalid datetime in not_after\n"));
+                      }
+                      return -1;
+                    }
+                  }
+                }
               }
             }
 
@@ -274,6 +297,19 @@ bool Permissions::Action::partitions_match(const DDS::StringSeq& entity_partitio
   }
 
   return allow_or_deny == ALLOW;
+}
+
+bool Permissions::Action::valid(time_t now_utc) const
+{
+  if (validity.not_before != 0 && now_utc < validity.not_before) {
+    return false;
+  }
+
+  if (validity.not_after != 0 && now_utc > validity.not_after) {
+    return false;
+  }
+
+  return true;
 }
 
 }

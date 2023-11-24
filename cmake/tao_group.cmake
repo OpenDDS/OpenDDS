@@ -1,7 +1,7 @@
 # Distributed under the OpenDDS License. See accompanying LICENSE
 # file or http://www.opendds.org/license.html for details.
 
-cmake_minimum_required(VERSION 3.3.2)
+cmake_minimum_required(VERSION 3.3...3.27)
 
 if(_OPENDDS_TAO_GROUP_CMAKE)
   return()
@@ -12,8 +12,13 @@ include("${CMAKE_CURRENT_LIST_DIR}/import_common.cmake")
 
 _opendds_group(TAO DEFAULT_REQUIRED TAO::TAO TAO::tao_idl)
 
+if(_OPENDDS_TAO_MPC_NAME_IS_TAO_TARGET)
+  set(_mpc_name TAO-target)
+else()
+  set(_mpc_name TAO)
+endif()
 _opendds_group_lib(TAO
-  MPC_NAME TAO-target
+  MPC_NAME "${_mpc_name}"
   DEPENDS ACE::ACE
 )
 _opendds_group_lib(IDL_FE
@@ -46,6 +51,7 @@ _opendds_group_lib(Valuetype DEPENDS TAO::TAO TAO::AnyTypeCode)
 _opendds_group_exe(tao_idl
   MPC_NAME TAO_IDL_EXE
   DEPENDS ACE::ace_gperf
+  HOST_TOOL
 )
 
 if(OPENDDS_STATIC)

@@ -1,0 +1,2983 @@
+Fri Oct 20 15:33:13 UTC 2023  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit 6fbaec6f205cf03dd30042cd9cdbe268389ade6b
+
+          Merge pull request #4318 from iguessthislldo/igtd/vcpkg
+
+          Update vcpkg, Fix Qt Directory for ishapes GHA
+
+Thu Oct 19 23:14:13 UTC 2023  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit c52c0b52dd6953f6ade0ca9f1272f127313f00ea
+
+        * .github/workflows/build_and_test.yml:
+        * .github/workflows/ishapes.yml:
+
+          Update vcpkg, Fix Qt Directory for ishapes GHA
+
+Wed Oct 18 22:06:15 UTC 2023  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit 18103482a923d95ecb1370cf235d992e9529c0a8
+
+          Merge pull request #4314 from iguessthislldo/igtd/cmake-build
+
+          Fixes and Tweaks for CMake Documentation
+
+Wed Oct 18 22:05:12 UTC 2023  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit 88b9e4fa26279e28eec88b70386f90ed11174038
+
+        * cmake/get_ace_tao.cmake:
+
+          Fix Typo in get_ace_tao.cmake
+
+Wed Oct 18 18:03:12 UTC 2023  Justin Wilson  <wilsonj@unityfoundation.io>
+        commit 7c1c3c48978479b3bc445d8b44daaf1879b9a5f5
+
+          Merge pull request #4312 from
+          jrw972/run-lease-duration-test-meta-port
+
+          `run_lease_duration_test.pl` uses common port
+
+Wed Oct 18 18:02:32 UTC 2023  Justin Wilson  <wilsonj@unityfoundation.io>
+        commit d60c34cac5afd224f046ff8e7848c48a17a7b93b
+
+          Merge pull request #4297 from jrw972/quickstart-migration
+
+          DevGuide does not contain quick starts
+
+Wed Oct 18 17:47:11 UTC 2023  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit bdbc6eb0d160d774332b88f89d03e550c2186b59
+
+        * docs/devguide/building/cmake.rst:
+
+          Fix Typo, Add Qualifier to 2 Variables
+
+Tue Oct 17 17:49:22 UTC 2023  Justin Wilson  <wilsonj@unityfoundation.io>
+        commit e611009f42bc219a39f099f1565db5143fabbf8d
+
+        * docs/devguide/introduction_to_dds.rst:
+        * docs/devguide/quickstart/linux.rst:
+        * docs/devguide/quickstart/pi.rst:
+        * docs/news.d/quickstart.rst:
+
+          From review
+
+Tue Oct 17 22:30:59 UTC 2023  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit 4e4e877302d37d59e7e134b737e4392ae7892a87
+
+        * cmake/opendds_group.cmake:
+        * docs/devguide/building/index.rst:
+        * docs/news.d/cmake-build.rst:
+
+          More Fixes and Tweaks
+
+Tue Oct 17 21:23:05 UTC 2023  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit b41a5a3067d7b38204db454274bbca41db91fa9a
+
+        * docs/devguide/building/cmake.rst:
+
+          Update docs/devguide/building/cmake.rst
+
+          Co-authored-by: Adam Mitz <mitza@objectcomputing.com>
+
+Tue Oct 17 19:40:40 UTC 2023  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit 626679036f68f888c24a842445d53638d43023bd
+
+        * docs/devguide/building/cmake.rst:
+        * docs/devguide/building/index.rst:
+        * docs/news.d/cmake-build.rst:
+
+          Fixes and Tweaks for CMake Documentation
+
+Tue Oct 17 18:04:26 UTC 2023  Justin Wilson  <wilsonj@unityfoundation.io>
+        commit 4a72ce70e7d060390dd9c83316bb4e336997967b
+
+          Merge pull request #4311 from jrw972/fix-multiple-grants-test
+
+          tests/security/attributes/run_test.pl multiple_grants is broken
+
+Tue Oct 17 18:03:34 UTC 2023  Justin Wilson  <wilsonj@unityfoundation.io>
+        commit b4ac4c54db9bd1a88d92387f7d90641c07147171
+
+          Merge pull request #4310 from
+          jrw972/documentation-for-next-release
+
+          Documentation for next release
+
+Mon Oct 16 14:11:17 UTC 2023  Justin Wilson  <wilsonj@unityfoundation.io>
+        commit 09eaf479022e16142667cddf136061cfde107038
+
+        * docs/news.d/4216.rst:
+        * docs/news.d/4226.rst:
+        * docs/news.d/4253.rst:
+        * docs/news.d/4254.rst:
+        * docs/news.d/4262.rst:
+        * docs/news.d/4265.rst:
+        * docs/news.d/4292.rst:
+        * docs/news.d/4293.rst:
+        * docs/news.d/4295.rst:
+        * docs/news.d/4298.rst:
+        * docs/news.d/build-and-install.rst:
+        * docs/news.d/config_store.rst:
+        * docs/news.d/remove-mailing-lists.rst:
+        * docs/news.d/remove-rapidjson-flag.rst:
+
+          Documentation for next release
+
+Mon Oct 16 14:59:53 UTC 2023  Justin Wilson  <wilsonj@unityfoundation.io>
+        commit a6f4b29ffc998bbdd89b55ef3508556aafed8a97
+
+        * tests/security/attributes/permissions/permissions_multi_p_01_02_03_04_readwrite.xml:
+        * tests/security/attributes/permissions/permissions_multi_p_01_02_03_04_readwrite_signed.p7s:
+
+          tests/security/attributes/run_test.pl multiple_grants is broken
+
+          Problem
+          -------
+
+          tests/security/attributes/run_test.pl multiple_grants was broken
+          by #4201.
+
+          Solution
+          --------
+
+          Correct the subject name.
+
+Mon Oct 16 18:07:21 UTC 2023  Justin Wilson  <wilsonj@unityfoundation.io>
+        commit e69bc272452a485c5bac5b3b4ae66c3105052e79
+
+          Merge pull request #4303 from OpenDDS/jrw972-patch-3
+
+          Create SECURITY.md
+
+Mon Oct 16 15:58:23 UTC 2023  Justin Wilson  <wilsonj@unityfoundation.io>
+        commit f8fd79a5de9925dedb0be4f7e4705886204ae755
+
+        * performance-tests/bench/example/config/scenario/ci-disco-relay.json:
+        * tests/DCPS/ParticipantLocationTopic/run_test.pl:
+        * tests/DCPS/RtpsRelay/STUN/run_test.pl:
+        * tests/DCPS/RtpsRelay/Smoke/run_lease_duration_test.pl:
+
+          `run_lease_duration_test.pl` uses common port
+
+          Problem
+          -------
+
+          The default -MetaDiscoveryAddress uses port 8080 which is
+          often used by other services.  This causes the
+          `run_lease_duration_test.pl` to fail.
+
+          Solution
+          --------
+
+          Set the port to 0.
+
+Mon Oct 16 13:57:31 UTC 2023  Justin Wilson  <wilsonj@unityfoundation.io>
+        commit 75fd2739e75e7fe5873768d10234d69b0f8d2dca
+
+          Merge pull request #4309 from
+          OpenDDS/dependabot/github_actions/actions/checkout-4
+
+          Bump actions/checkout from 3 to 4
+
+Mon Oct 16 07:38:20 UTC 2023  dependabot[bot]  <49699333+dependabot[bot]@users.noreply.github.com>
+        commit 73980f3a62a83c0498dac077dec056d8b1d5afd6
+
+        * .github/workflows/build_and_test.yml:
+
+          Bump actions/checkout from 3 to 4
+
+          Bumps [actions/checkout](https://github.com/actions/checkout)
+          from 3 to 4.
+          - [Release notes](https://github.com/actions/checkout/releases)
+          -
+          [Changelog](https://github.com/actions/checkout/blob/main/CHANGELOG.md)
+          - [Commits](https://github.com/actions/checkout/compare/v3...v4)
+
+          ---
+          updated-dependencies:
+          - dependency-name: actions/checkout
+          dependency-type: direct:production
+          update-type: version-update:semver-major
+          ...
+
+          Signed-off-by: dependabot[bot] <support@github.com>
+
+Thu Oct 12 21:38:00 UTC 2023  Justin Wilson  <wilsonj@unityfoundation.io>
+        commit 1aa0cf47eb927215ebeac044f63d59d7ce3f567b
+
+        * SECURITY.md:
+
+          Create SECURITY.md
+
+Fri Oct 13 18:02:29 UTC 2023  Justin Wilson  <wilsonj@unityfoundation.io>
+        commit 3134be6b77f9a3ac429d685b6e21b74f9a9ae38f
+
+          Merge pull request #4203 from iguessthislldo/igtd/cmake-build
+
+          Building OpenDDS with CMake
+
+Fri Oct 13 08:25:45 UTC 2023  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit dd17bc78bdfb49bbb7176ba208676d2390a60e53
+
+        * dds/DCPS/security/framework/SecurityPluginInst.h:
+
+          Fix Missing DdsSecurityCoreC.h Include
+
+Thu Oct 12 23:55:53 UTC 2023  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit be7de0f9c24b04431893afe43c688f7f301affbe
+
+          Merge remote-tracking branch 'upstream/master' into
+          igtd/cmake-build
+
+Thu Oct 12 23:51:25 UTC 2023  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit dd927cdbbe2a8220489762f1443571cbccaa42f2
+
+        * CMakeLists.txt:
+        * cmake/OpenDDSConfig.cmake:
+        * cmake/init.cmake:
+        * cmake/opendds_target_sources.cmake:
+        * dds/CMakeLists.txt:
+        * dds/DCPS/security/CMakeLists.txt:
+        * dds/DCPS/security/UtilityImpl.h:
+        * dds/DCPS/security/framework/SecurityConfig.h:
+        * dds/DCPS/security/framework/SecurityPluginInst.h:
+        * dds/DCPS/security/Utility.h  dds/DCPS/security/framework/Utility.h:
+        * dds/InfoRepo/DCPSInfo_i.cpp:
+        * docs/devguide/building/cmake.rst:
+        * docs/devguide/building/dependencies.rst:
+        * docs/devguide/building/index.rst:
+        * docs/news.d/cmake-build.rst:
+
+          Review Changes and Other Fixes and Tweaks
+
+          - Changed many cache variables to be typed with a documentation
+          string.
+          - Fixed compatibility with CMake 3.3
+          - Added NO_PASSED and NO_GENERATED to
+          opendds_install_interface_files
+          - Properly moved dds/DCPS/security/Uility.h to framework.
+          - Many fixes and tweaks to documentation.
+
+Thu Oct 12 23:22:16 UTC 2023  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit 588ad82620ce6c3ba1f3aeb2b51efc0dec183db8
+
+          Merge pull request #4304 from iguessthislldo/igtd/linkfix
+
+          Fix Links in CMake Package Documentation
+
+Thu Oct 12 22:58:49 UTC 2023  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit 251274b7b8a4e08f5cab25ba87809e0c94584cfb
+
+        * docs/devguide/building/cmake.rst:
+
+          Fix Links in CMake Package Documentation
+
+          The CMake 3.28 release candidate was put up recently and
+          apparently the
+          latest documentation is updated to point to release candidates.
+          This
+          updates URLs to the `install` command documentation, which seems
+          to have
+          had layout changed somewhat.
+
+Thu Oct 12 14:02:54 UTC 2023  Justin Wilson  <wilsonj@unityfoundation.io>
+        commit 92f546b6a8497df3dc00c18563888f3b3e57e724
+
+        * docs/devguide/about.rst:
+        * docs/devguide/introduction.rst:
+        * docs/devguide/introduction_to_dds.rst:
+
+          From review
+
+Wed Oct 11 19:35:44 UTC 2023  Justin Wilson  <wilsonj@unityfoundation.io>
+        commit 8bdf06dbf8d45d44a13b904047fd69b542890025
+
+        * docs/devguide/about.rst:
+        * docs/devguide/index.rst:
+        * docs/devguide/introduction.rst:
+        * docs/devguide/introduction_to_dds.rst:
+
+          DevGuide introduction needs refactoring
+
+          Problem
+          -------
+
+          The "Introduction" chapter contains a wide variety of content.
+          This
+          PR attempts to reorganize it for completeness and
+          approachability.
+
+          Solution
+          --------
+
+          * Move the "About This Guide" section to its own chapter at the
+          beginning of the DevGuide.
+
+          * Move "Licensing Terms" to the second section.
+
+          * Add a "Source Code Organization" section.
+
+          * Add "Static Discovery" section.
+
+          * Rework "Threading" section.
+
+Wed Oct 11 18:06:30 UTC 2023  Justin Wilson  <wilsonj@unityfoundation.io>
+        commit 8155756fd84ecb7e1d9d29633005bc8e162c208e
+
+          Merge pull request #4298 from mitza-oci/tsan-reactortask
+
+          ReactorTask: fixed tsan warning
+
+Wed Oct 11 14:11:50 UTC 2023  Justin Wilson  <wilsonj@unityfoundation.io>
+        commit 01fb101e206d8bfb9f47e0387d959054937969a3
+
+        * docs/devguide/index.rst:
+        * docs/devguide/quickstart/index.rst:
+        * docs/devguide/quickstart/shapes.rst  docs/devguide/shapes.rst:
+        * docs/devguide/quickstart/shapes/content-based-filter-1.png  docs/devguide/shapes/content-based-filter-1.png:
+        * docs/devguide/quickstart/shapes/content-based-filter-2.png  docs/devguide/shapes/content-based-filter-2.png:
+        * docs/devguide/quickstart/shapes/content-based-filter-menu.png  docs/devguide/shapes/content-based-filter-menu.png:
+        * docs/devguide/quickstart/shapes/contentfilter.rst  docs/devguide/shapes/contentfilter.rst:
+        * docs/devguide/quickstart/shapes/default.png  docs/devguide/shapes/default.png:
+        * docs/devguide/quickstart/shapes/durability-example.png  docs/devguide/shapes/durability-example.png:
+        * docs/devguide/quickstart/shapes/durability.rst  docs/devguide/shapes/durability.rst:
+        * docs/devguide/quickstart/shapes/instances.rst  docs/devguide/shapes/instances.rst:
+        * docs/devguide/quickstart/shapes/ownership-example-final.png  docs/devguide/shapes/ownership-example-final.png:
+        * docs/devguide/quickstart/shapes/ownership-example-initial.png  docs/devguide/shapes/ownership-example-initial.png:
+        * docs/devguide/quickstart/shapes/ownership.rst  docs/devguide/shapes/ownership.rst:
+        * docs/devguide/quickstart/shapes/partition-example.png  docs/devguide/shapes/partition-example.png:
+        * docs/devguide/quickstart/shapes/partition.rst  docs/devguide/shapes/partition.rst:
+        * docs/devguide/quickstart/shapes/pub-circle-matched.png  docs/devguide/shapes/pub-circle-matched.png:
+        * docs/devguide/quickstart/shapes/pub-circle-unmatched.png  docs/devguide/shapes/pub-circle-unmatched.png:
+        * docs/devguide/quickstart/shapes/pub-sub-triangle.png  docs/devguide/shapes/pub-sub-triangle.png:
+        * docs/devguide/quickstart/shapes/pub-triangle.png  docs/devguide/shapes/pub-triangle.png:
+        * docs/devguide/quickstart/shapes/publisher-qos-menu.png  docs/devguide/shapes/publisher-qos-menu.png:
+        * docs/devguide/quickstart/shapes/reliability-example.png  docs/devguide/shapes/reliability-example.png:
+        * docs/devguide/quickstart/shapes/reliability.rst  docs/devguide/shapes/reliability.rst:
+        * docs/devguide/quickstart/shapes/subscriber-qos-menu.png  docs/devguide/shapes/subscriber-qos-menu.png:
+        * docs/devguide/quickstart/shapes/time-based-filter-example-1.png  docs/devguide/shapes/time-based-filter-example-1.png:
+        * docs/devguide/quickstart/shapes/time-based-filter-example-2.png  docs/devguide/shapes/time-based-filter-example-2.png:
+        * docs/devguide/quickstart/shapes/timebased.rst  docs/devguide/shapes/timebased.rst:
+        * docs/devguide/quickstart/shapes/two-instances-pub-triangle.png  docs/devguide/shapes/two-instances-pub-triangle.png:
+        * docs/devguide/quickstart/shapes/two-instances.png  docs/devguide/shapes/two-instances.png:
+        * docs/index.rst:
+
+          Shapes demo is lumped with quickstarts
+
+          Problem
+          -------
+
+          The Shapes demo allows users to download an OpenDDS application
+          and
+          use it. In that case, it is a quick start. However, the intent of
+          the demo is to explore different QoS settings and DDS features.
+
+          Solution
+          --------
+
+          Move the Shapes demo to after the introduction to DDS as a
+          continuation of the exploration of DDS concepts.
+
+Tue Oct 10 19:58:04 UTC 2023  Justin Wilson  <wilsonj@unityfoundation.io>
+        commit 21c67d10ea5aadd3bf1222e0f5a1df1663f76e87
+
+        * docs/devguide/index.rst:
+        * docs/devguide/introduction.rst:
+        * docs/devguide/introduction_to_dds.rst:
+        * docs/index.rst:
+
+          DDS Overview is not separate
+
+          Problem
+          -------
+
+          The DDS overview is not separate.
+
+          Solution
+          --------
+
+          Factor it out and combine it with overview from website.
+          Move it to the front of the DevGuide.
+
+Mon Oct 09 20:12:18 UTC 2023  Justin Wilson  <wilsonj@unityfoundation.io>
+        commit dc08a041d8721306bc0c67717929ba044b0260cc
+
+        * docs/devguide/faq.rst:
+        * docs/devguide/index.rst:
+        * docs/devguide/introduction.rst:
+
+          DevGuide does not contain FAQ
+
+          Problem
+          -------
+
+          The DevGuide does not contain the FAQ.
+
+          Solution
+          --------
+
+          Add the FAQ.
+
+Fri Oct 06 20:26:31 UTC 2023  Justin Wilson  <wilsonj@unityfoundation.io>
+        commit f1da8722c961ed426be20081de76d55c5b679948
+
+        * docs/devguide/building/index.rst:
+        * docs/devguide/index.rst:
+        * docs/devguide/quickstart/docker.rst:
+        * docs/devguide/quickstart/index.rst:
+        * docs/devguide/quickstart/linux.rst:
+        * docs/devguide/quickstart/pi.rst:
+        * docs/devguide/quickstart/shapes.rst:
+        * docs/devguide/quickstart/shapes/content-based-filter-1.png:
+        * docs/devguide/quickstart/shapes/content-based-filter-2.png:
+        * docs/devguide/quickstart/shapes/content-based-filter-menu.png:
+        * docs/devguide/quickstart/shapes/contentfilter.rst:
+        * docs/devguide/quickstart/shapes/default.png:
+        * docs/devguide/quickstart/shapes/durability-example.png:
+        * docs/devguide/quickstart/shapes/durability.rst:
+        * docs/devguide/quickstart/shapes/instances.rst:
+        * docs/devguide/quickstart/shapes/ownership-example-final.png:
+        * docs/devguide/quickstart/shapes/ownership-example-initial.png:
+        * docs/devguide/quickstart/shapes/ownership.rst:
+        * docs/devguide/quickstart/shapes/partition-example.png:
+        * docs/devguide/quickstart/shapes/partition.rst:
+        * docs/devguide/quickstart/shapes/pub-circle-matched.png:
+        * docs/devguide/quickstart/shapes/pub-circle-unmatched.png:
+        * docs/devguide/quickstart/shapes/pub-sub-triangle.png:
+        * docs/devguide/quickstart/shapes/pub-triangle.png:
+        * docs/devguide/quickstart/shapes/publisher-qos-menu.png:
+        * docs/devguide/quickstart/shapes/reliability-example.png:
+        * docs/devguide/quickstart/shapes/reliability.rst:
+        * docs/devguide/quickstart/shapes/subscriber-qos-menu.png:
+        * docs/devguide/quickstart/shapes/time-based-filter-example-1.png:
+        * docs/devguide/quickstart/shapes/time-based-filter-example-2.png:
+        * docs/devguide/quickstart/shapes/timebased.rst:
+        * docs/devguide/quickstart/shapes/two-instances-pub-triangle.png:
+        * docs/devguide/quickstart/shapes/two-instances.png:
+        * docs/devguide/quickstart/windows.rst:
+
+          DevGuide does not contain quick starts
+
+          Problem
+          -------
+
+          The DevGuide does not contain the quick starts.
+
+          Solution
+          --------
+
+          Add them.
+
+Wed Oct 11 11:47:24 UTC 2023  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit d2767ceb20bf8a6c0396195df6829f23d9ddfc06
+
+        * cmake/ace_group.cmake:
+        * cmake/init.cmake:
+        * cmake/opendds_testing.cmake:
+
+          Try to Fix Paths in Tests and Putback MSVC_RUNTIME
+
+Wed Oct 11 08:36:04 UTC 2023  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit 2662c8782030aeb0dd928524849fb3358d4b0638
+
+        * CMakeLists.txt:
+        * DevGuideExamples/DCPS/Messenger/CMakeLists.txt:
+        * cmake/ace_group.cmake:
+        * tests/cmake/C++11_typecode/CMakeLists.txt:
+        * tests/cmake/CMakeLists.txt:
+        * tests/cmake/Messenger/C++11_Messenger/CMakeLists.txt:
+        * tests/cmake/Messenger/CMakeLists.txt:
+        * tests/cmake/Messenger/Messenger_1/CMakeLists.txt:
+        * tests/cmake/Messenger/Messenger_2/CMakeLists.txt:
+        * tests/cmake/Messenger/Messenger_Space/CMakeLists.txt:
+        * tests/cmake/Nested_IDL/CMakeLists.txt:
+        * tests/cmake/ace_tao_only/CMakeLists.txt:
+        * tests/cmake/generated_global/cpp/CMakeLists.txt:
+        * tests/cmake/generated_global/idl/CMakeLists.txt:
+        * tests/cmake/idl_compiler_tests/CMakeLists.txt:
+        * tests/cmake/include_subdir/CMakeLists.txt:
+        * tests/cmake/install/CMakeLists.txt:
+        * tests/cmake/install/library/CMakeLists.txt:
+        * tests/cmake/install/user/CMakeLists.txt:
+
+          Reverse MSVC_RUNTIME_LIBRARY/CMP0091 Changes
+
+          The reason the old method stopped working is the variables it was
+          changing are now cache variables. This reverts the
+          MSVC_RUNTIME_LIBRARY/CMP0091 changes and updates to old method to
+          override the variables as cache variables
+
+Wed Oct 11 07:13:19 UTC 2023  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit 6975c8d7ebffd162b87dfc5235a8604efc4785b8
+
+        * cmake/opendds_testing.cmake:
+        * tests/cmake/Messenger/C++11_Messenger/CMakeLists.txt:
+
+          Fix CMake C++11 Messenger Test
+
+Wed Oct 11 05:11:42 UTC 2023  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit a163aa84510afaceac7b8de0348a8a7819b3339d
+
+        * CMakeLists.txt:
+        * DevGuideExamples/DCPS/Messenger/CMakeLists.txt:
+        * cmake/OpenDDSConfig.cmake:
+        * cmake/ace_group.cmake:
+        * cmake/import_common.cmake:
+        * cmake/init.cmake:
+        * cmake/tao_group.cmake:
+        * dds/CMakeLists.txt:
+        * dds/DCPS/CMakeLists.txt:
+        * dds/DCPS/InfoRepoDiscovery/CMakeLists.txt:
+        * dds/DCPS/QOS_XML_Handler/CMakeLists.txt:
+        * dds/DCPS/RTPS/CMakeLists.txt:
+        * dds/DCPS/Util.h:
+        * dds/DCPS/security/CMakeLists.txt:
+        * dds/DCPS/transport/multicast/CMakeLists.txt:
+        * dds/DCPS/transport/rtps_udp/CMakeLists.txt:
+        * dds/DCPS/transport/shmem/CMakeLists.txt:
+        * dds/DCPS/transport/tcp/CMakeLists.txt:
+        * dds/DCPS/transport/udp/CMakeLists.txt:
+        * dds/InfoRepo/CMakeLists.txt:
+        * dds/idl/CMakeLists.txt:
+        * examples/DCPS/ishapes/CMakeLists.txt:
+        * tests/cmake/C++11_typecode/CMakeLists.txt:
+        * tests/cmake/CMakeLists.txt:
+        * tests/cmake/Messenger/C++11_Messenger/CMakeLists.txt:
+        * tests/cmake/Messenger/CMakeLists.txt:
+        * tests/cmake/Messenger/Messenger_1/CMakeLists.txt:
+        * tests/cmake/Messenger/Messenger_2/CMakeLists.txt:
+        * tests/cmake/Messenger/Messenger_Space/CMakeLists.txt:
+        * tests/cmake/Nested_IDL/CMakeLists.txt:
+        * tests/cmake/ace_tao_only/CMakeLists.txt:
+        * tests/cmake/generated_global/CMakeLists.txt:
+        * tests/cmake/generated_global/cpp/CMakeLists.txt:
+        * tests/cmake/generated_global/idl/CMakeLists.txt:
+        * tests/cmake/idl_compiler_tests/CMakeLists.txt:
+        * tests/cmake/include_subdir/CMakeLists.txt:
+        * tests/cmake/install/CMakeLists.txt:
+        * tests/cmake/install/library/CMakeLists.txt:
+        * tests/cmake/install/user/CMakeLists.txt:
+        * tools/dds/rtpsrelaylib/CMakeLists.txt:
+        * tools/inspect/CMakeLists.txt:
+        * tools/rtpsrelay/CMakeLists.txt:
+
+          Get Rid of Warnings from CMake 3.27
+
+Wed Oct 11 01:59:47 UTC 2023  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit 49060052182b8fbf6f975a74adfe9f0bf9ac0093
+
+        * CMakeLists.txt:
+        * cmake/OpenDDSConfig.cmake:
+        * cmake/ace_group.cmake:
+        * cmake/build_ace_tao.cmake:
+        * cmake/dds_idl_sources.cmake:
+        * cmake/detect_ace.pl:
+        * cmake/get_ace_tao.cmake:
+        * cmake/import_common.cmake:
+        * cmake/init.cmake:
+        * cmake/opendds_features.cmake:
+        * cmake/opendds_group.cmake:
+        * cmake/opendds_testing.cmake:
+        * cmake/scrape_vs.pl:
+        * dds/CMakeLists.txt:
+        * dds/DCPS/Service_Participant.cpp:
+        * docs/devguide/building/cmake.rst:
+        * docs/devguide/building/index.rst:
+        * docs/devguide/run_time_configuration.rst:
+        * docs/glossary.rst:
+        * docs/internal/dev_guidelines.rst:
+        * tests/cmake/Messenger/Messenger_2/CMakeLists.txt:
+
+          Respond to Review and Refactor CMake Init
+
+          - Refactored CMake init to deal with conflicting needs of
+          configuring
+          ACE/TAO with features before knowing OPENDDS_ACE vs decting an
+          existing ACE/TAO with known OPENDDS_ACE, but unknown features.
+          - Support targets in find_package(COMPONENTS) in installed
+          CMake-built
+          OpenDDS.
+          - Fix some issues with CMake logging.
+          - Support missing default.features while detecting existing
+          ACE/TAO.
+          - Document and rename OPENDDS_TEST_CONFIG_DIR as
+          OPENDDS_CONFIG_DIR
+          - Update Android CMake instructions in
+          devguide/building/index.rst and
+          fix title inconsistency issue.
+          - Add note about possible naming clashes with unity builds in the
+          dev
+          guidelines.
+
+Tue Oct 10 19:01:33 UTC 2023  Adam Mitz  <mitza@objectcomputing.com>
+        commit d2269058ec6045a8d6170d4895f41dba0c34ce9a
+
+        * dds/DCPS/ReactorTask.cpp:
+        * dds/DCPS/ThreadStatusManager.h:
+
+          ReactorTask::stop - call wait() unconditionally
+
+Tue Oct 10 18:05:48 UTC 2023  Justin Wilson  <wilsonj@unityfoundation.io>
+        commit eb011d68c99cf6096465bb34f3539eda9a5a6ac7
+
+          Merge pull request #4299 from mitza-oci/gha-apt
+
+          GitHub Actions: use apt-get update
+
+Tue Oct 10 18:05:47 UTC 2023  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit 43f0679b10cb66981cfe74125251bee76ac42f3d
+
+        * CMakeLists.txt:
+        * DevGuideExamples/DCPS/Messenger/CMakeLists.txt:
+        * DevGuideExamples/DCPS/Messenger/Publisher.cpp:
+        * DevGuideExamples/DCPS/Messenger/Subscriber.cpp:
+        * cmake/ace_group.cmake:
+        * cmake/detect_ace.pl:
+        * cmake/import_common.cmake:
+        * cmake/init.cmake:
+        * cmake/opendds_features.cmake:
+        * dds/DCPS/Definitions.h:
+        * dds/DCPS/StaticIncludes.h:
+        * tests/DCPS/Messenger/publisher.cpp:
+        * tests/DCPS/Messenger/subscriber.cpp:
+        * tests/cmake/C++11_typecode/CMakeLists.txt:
+        * tests/cmake/CMakeLists.txt:
+        * tests/cmake/Messenger/C++11_Messenger/CMakeLists.txt:
+        * tests/cmake/Messenger/CMakeLists.txt:
+        * tests/cmake/Messenger/Messenger_1/CMakeLists.txt:
+        * tests/cmake/Messenger/Messenger_2/CMakeLists.txt:
+        * tests/cmake/Messenger/Messenger_Space/CMakeLists.txt:
+        * tests/cmake/Nested_IDL/CMakeLists.txt:
+        * tests/cmake/ace_tao_only/CMakeLists.txt:
+        * tests/cmake/generated_global/CMakeLists.txt:
+        * tests/cmake/generated_global/cpp/CMakeLists.txt:
+        * tests/cmake/generated_global/idl/CMakeLists.txt:
+        * tests/cmake/idl_compiler_tests/CMakeLists.txt:
+        * tests/cmake/include_subdir/CMakeLists.txt:
+        * tests/cmake/install/CMakeLists.txt:
+        * tests/cmake/install/library/CMakeLists.txt:
+        * tests/cmake/install/user/CMakeLists.txt:
+
+          More CI Fixes
+
+Mon Oct 09 16:11:38 UTC 2023  Adam Mitz  <mitza@objectcomputing.com>
+        commit 5f21f4bce2530887008fc315929c970043d8d720
+
+        * dds/DCPS/ReactorTask.cpp:
+        * dds/DCPS/ReactorTask.h:
+        * dds/DCPS/ReactorTask.inl:
+
+          ReactorTask: fixed tsan warning
+
+Mon Oct 09 16:18:04 UTC 2023  Adam Mitz  <mitza@objectcomputing.com>
+        commit d9e33783179c5e88a38629451206860d01344a1d
+
+        * .github/workflows/build_and_test.yml:
+
+          GitHub Actions: try using apt-get update
+
+Thu Oct 05 07:02:45 UTC 2023  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit d1cdb48a76bcefca6702fccda4332b791998477a
+
+        * .github/workflows/build_and_test.yml:
+        * cmake/scrape_vs.pl:
+        * dds/DCPS/XTypes/DynamicDataReaderImpl.cpp:
+        * dds/DCPS/XTypes/DynamicTypeSupport.cpp:
+        * tests/cmake/install/CMakeLists.txt:
+
+          Try to Fix More Windows CI Issues
+
+          - Add Possible Missing Xerces/OpenSSL to Builds
+          - Install test should inherit CMAKE_MSVC_RUNTIME_LIBRARY
+          - Fix issue with scrap_vs.pl
+          - Try to fix issue encountered locally with missing symbols from
+          DynamicDataReader.
+
+Thu Oct 05 03:26:02 UTC 2023  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit 54ee15222b83870a9a527327552104663eacd04d
+
+          Merge remote-tracking branch 'upstream/master' into
+          igtd/cmake-build
+
+Wed Oct 04 18:04:24 UTC 2023  Justin Wilson  <wilsonj@unityfoundation.io>
+        commit 0d9e25ced32c082a302a6c6c809536db8f99de71
+
+          Merge pull request #4294 from jrw972/move-building-and-installing
+
+          Build and install instructions are outside of DevGuide
+
+Wed Oct 04 18:03:28 UTC 2023  Justin Wilson  <wilsonj@unityfoundation.io>
+        commit 300dfbf218b612f68f01d80537647b2181a5f5b1
+
+          Merge pull request #4295 from mitza-oci/export
+
+          Added export macro to ConditionImpl
+
+Wed Oct 04 18:02:05 UTC 2023  Justin Wilson  <wilsonj@unityfoundation.io>
+        commit f033dd61ac1a0810d08f288e5ded1061eee76d36
+
+          Merge pull request #4296 from
+          iguessthislldo/igtd/devguide-cleanup
+
+          Workaround DOC Group Website Issue
+
+Tue Oct 03 21:17:13 UTC 2023  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit 54f73bb848dbf528f8e30be419de876282aed7d7
+
+        * docs/internal/dev_guidelines.rst:
+
+          Workaround DOC Group Website Issue
+
+          See https://github.com/DOCGroup/ACE_TAO/discussions/2137
+
+Tue Oct 03 19:28:42 UTC 2023  Justin Wilson  <wilsonj@unityfoundation.io>
+        commit 56acb387fcfbacf4cc865bbaa5acf034f429390f
+
+        * NEWS.md:
+        * docs/devguide/building/dependencies.rst:
+        * docs/devguide/building/index.rst:
+
+          From review
+
+Tue Oct 03 18:55:27 UTC 2023  Adam Mitz  <mitza@objectcomputing.com>
+        commit b124f0067482039ef94a80645fbeebc8f4c06069
+
+        * dds/DCPS/ConditionImpl.h:
+
+          Added export macro to ConditionImpl
+
+Fri Sep 29 21:28:57 UTC 2023  Justin Wilson  <wilsonj@unityfoundation.io>
+        commit 9d3dca70d082acca9a96fe7144e1dfae5c371956
+
+        * INSTALL.md:
+        * NEWS.md:
+        * README.md:
+        * docs/android.md:
+        * docs/building/android.rst  docs/devguide/building/android.rst:
+        * docs/building/cmake.rst  docs/devguide/building/cmake.rst:
+        * docs/building/dependencies.rst  docs/devguide/building/dependencies.rst:
+        * docs/building/index.rst  docs/devguide/building/index.rst:
+        * docs/building/ios.rst  docs/devguide/building/ios.rst:
+        * docs/devguide/built_in_topics.rst:
+        * docs/devguide/content_subscription_profile.rst:
+        * docs/devguide/getting_started.rst:
+        * docs/devguide/index.rst:
+        * docs/devguide/introduction.rst:
+        * docs/devguide/opendds_idl.rst:
+        * docs/devguide/safety_profile.rst:
+        * docs/index.rst:
+        * docs/internal/dev_guidelines.rst:
+        * docs/internal/docs.rst:
+        * docs/internal/release.rst:
+        * docs/ios.md:
+        * docs/news.d/_releases/v3.25.0.rst:
+
+          Build and install instructions are outside of DevGuide
+
+          Problem
+          -------
+
+          The build and install instruction are outside of the DevGuide
+          proper.
+          There is also duplication between the introduction and build
+          documentation.
+
+          Solution
+          --------
+
+          Move "Building and Installing" after the introduction and move
+          content
+          from the introduction into "Building and Installing".
+
+Mon Oct 02 20:08:41 UTC 2023  Justin Wilson  <wilsonj@unityfoundation.io>
+        commit 1b3a0fca66fc4895189de2642d46ff9742fd1c95
+
+          Merge pull request #4293 from mitza-oci/rtpsrelay-msgblock
+
+          RtpsRelay: use ACE_Message_Block's locking strategy for cached
+          SPDP
+
+Mon Oct 02 18:00:19 UTC 2023  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit 12e7931070bda07e7a1b98da3c6383b2fdf3b699
+
+        * .github/workflows/build_and_test.yml:
+
+          Try Fix for Static Build
+
+Wed Sep 27 20:46:54 UTC 2023  Adam Mitz  <mitza@objectcomputing.com>
+        commit b11d4de67a4c2b2c357a8b28a20fdd4771ad0a53
+
+        * dds/DCPS/Message_Block_Ptr.h:
+        * tests/tsan_tests.lst:
+        * tests/unit-tests/dds/DCPS/Message_Block_Ptr.cpp:
+        * tools/rtpsrelay/GuidAddrSet.h:
+        * tools/rtpsrelay/RelayHandler.cpp:
+        * tools/rtpsrelay/RelayHandler.h:
+
+          RtpsRelay: use ACE_Message_Block's locking strategy for cached
+          SPDP
+
+          Added RtpsRelay tests to tsan_tests
+
+Mon Oct 02 14:02:17 UTC 2023  Justin Wilson  <wilsonj@unityfoundation.io>
+        commit 4029df79e6a105b65907ba78684dae14a4b17aee
+
+          Merge pull request #4292 from Idan-Neeman/dev
+
+          Initialize variables in TypeObject to silence warnings
+
+Mon Oct 02 01:02:20 UTC 2023  Idan Neeman  <idan@livenet.co.il>
+        commit 4a067d62e4969ae0285a2a3c4228c82c29d9a38a
+
+        * dds/DCPS/XTypes/TypeObject.cpp:
+
+          Initialize variables in TypeObject to silence warnings
+
+Sat Sep 30 00:02:50 UTC 2023  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit 5d40bb42ba3888b9867fe6470f6d20bfd15eb8ee
+
+        * .github/workflows/build_and_test.yml:
+        * cmake/ace_group.cmake:
+        * cmake/scrape_vs.pl:
+        * dds/DCPS/RTPS/MessageParser.h:
+
+          Fixed Some Windows CMake Issues
+
+          - Fixed using dll instead of lib files when CMake has to build
+          ACE/TAO.
+          - Fixed static not linking
+          - Added static windows build to GHA that builds ACE/TAO
+          - CTest should now output logs on failures in GHA
+
+Thu Sep 28 19:44:18 UTC 2023  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit 410c7a45563904d4796b276ba215dadfdfaf8208
+
+        * .github/workflows/build_and_test.yml:
+        * docs/building/index.rst:
+
+          Fix Path in build_cmake_w22
+
+Thu Sep 21 12:08:20 UTC 2023  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit 97190e83b619d821cfe116e58a7a551234669a2e
+
+        * .github/workflows/build_and_test.yml:
+        * CMakeLists.txt:
+        * tests/cmake/Nested_IDL/ecu.mpc:
+        * tests/cmake/ace_tao_only/CMakeLists.txt:
+
+          Fix CI Issues
+
+Tue Sep 26 00:40:10 UTC 2023  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit 9133a16ef62f692c368cbcc904db5ae521dc7e4f
+
+          Merge pull request #4281 from
+          iguessthislldo/igtd/devguide-cleanup
+
+          DevGuide Cleanup and Improvments
+
+Fri Sep 22 23:26:37 UTC 2023  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit 91d21adfaa5008dfba948dfe1b39f84395c642ae
+
+        * docs/building/dependencies.rst:
+        * docs/building/index.rst:
+        * docs/glossary.rst:
+        * docs/internal/docs.rst:
+        * docs/sphinx_extensions/links.py:
+
+          Cleanup dependencies.rst
+
+Fri Sep 22 22:24:38 UTC 2023  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit 98557e171bcc0da68a605e23492720cd4dfbb476
+
+        * docs/building/index.rst:
+        * docs/devguide/alternate_interfaces_to_data.rst:
+        * docs/devguide/introduction.rst:
+        * docs/internal/docs.rst:
+
+          Apply suggestions from code review
+
+          Co-authored-by: Justin Wilson <wilsonj@unityfoundation.io>
+
+Thu Sep 21 20:46:59 UTC 2023  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit ecbeb05dd043d24bc7289e7a2456551dbd63f3f2
+
+        * docs/news.d/devguide-improvments.rst:
+
+          Set PR Number
+
+Thu Sep 21 19:59:11 UTC 2023  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit 1e6dc6ffa25ed4b0bb66beb8a63b88c70c9208ce
+
+        * docs/conf.py:
+        * docs/sphinx_extensions/links.py:
+
+          Ignore Spec PDF Links, Tweak links.py
+
+Thu Sep 21 19:12:58 UTC 2023  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit e50027fe95682a10714b66b636e0ab3989f293cb
+
+          Merge remote-tracking branch 'upstream/master' into
+          igtd/devguide-cleanup
+
+Thu Sep 21 19:06:38 UTC 2023  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit 3a10dabc04ad00b239418b444138a61c841cf044
+
+        * docs/devguide/introduction.rst:
+        * docs/devguide/modeling_sdk.rst:
+        * docs/devguide/run_time_configuration.rst:
+
+          Preemptively Rename Images
+
+          So the merge works
+
+Thu Sep 21 18:03:18 UTC 2023  Justin Wilson  <wilsonj@unityfoundation.io>
+        commit 96c0c7d802a43489d57eadc46e1a1834f894a8f5
+
+          Merge pull request #4279 from jrw972/image-names
+
+          DevGuide image files have non-descriptive names
+
+Thu Sep 21 12:06:08 UTC 2023  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit 9febed69fd3d6bb183c80a84e0eee64f402b0654
+
+          Merge remote-tracking branch 'upstream/master' into
+          igtd/cmake-build
+
+Thu Sep 21 12:04:33 UTC 2023  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit a7617250a2f8370810db109d760a2bdc76db9df6
+
+        * tools/scripts/lint.pl:
+
+          nonrelative_include_path Only For Committed Files
+
+Thu Sep 21 11:46:45 UTC 2023  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit 81e21116d6c908ef6663332f6b8033083caf7bfd
+
+        * .github/workflows/build_and_test.yml:
+        * bin/PerlDDS/Run_Test.pm:
+        * cmake/build_ace_tao.cmake:
+        * cmake/scrape_vs.pl:
+
+          Expand Testing, Add Missing File, Try to Fix CI
+
+Thu Sep 21 03:23:23 UTC 2023  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit 2b698688e07dfbd155690834b17e8d818432fd77
+
+        * docs/building/index.rst:
+        * docs/devguide/conditions_and_listeners.rst:
+        * docs/devguide/content_subscription_profile.rst:
+        * docs/devguide/dds_security.rst:
+        * docs/devguide/getting_started.rst:
+        * docs/devguide/internet_enabled_rtps.rst:
+        * docs/devguide/introduction.rst:
+        * docs/devguide/java_bindings.rst:
+        * docs/devguide/modeling_sdk.rst:
+        * docs/devguide/opendds_idl.rst:
+        * docs/devguide/quality_of_service.rst:
+        * docs/devguide/run_time_configuration.rst:
+        * docs/devguide/safety_profile.rst:
+        * docs/devguide/the_dcps_information_repository.rst:
+        * docs/devguide/xtypes.rst:
+        * docs/news.d/_releases/v3.24.0.rst:
+        * docs/news.d/devguide-improvments.rst:
+
+          Remove References to Numbered Tables and Figures
+
+          Also added news and converted opendds_idl options from a table.
+
+Tue Sep 19 23:00:27 UTC 2023  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit 9400f3e9e218954533b0797268e927f5221f4f0a
+
+        * docs/conf.py:
+        * docs/devguide/dds_security.rst:
+        * docs/devguide/introduction.rst:
+        * docs/devguide/quality_of_service.rst:
+        * docs/devguide/run_time_configuration.rst:
+        * docs/devguide/xtypes.rst:
+        * docs/internal/docs.rst:
+        * docs/internal/omg_spec_links.rst:
+        * docs/requirements.txt:
+        * docs/sphinx_extensions/links.py:
+
+          Add omgspec RST Role to Link to Spec Sections
+
+Tue Sep 19 21:50:07 UTC 2023  Justin Wilson  <wilsonj@unityfoundation.io>
+        commit 4cc663f6113cffe06eb208da98db873a1eb1f8a2
+
+        * docs/devguide/images/10000000000000A00000006884075897C7EA9E35.png:
+        * docs/devguide/images/100000000000020B000001FCAD2359FAA3105C98.png:
+        * docs/devguide/images/10000001000001830000010C56B9073ACA60B44D.png:
+        * docs/devguide/images/10000001000001C100000202637D36545E22157D.png  docs/devguide/images/domain.png:
+        * docs/devguide/images/10000001000005B4000003E0BE5C08B1D30CA54A.png  docs/devguide/images/federation.png:
+        * docs/devguide/images/100000010000045A0000025185A3A43482F62E3D.png  docs/devguide/images/inforepo_discovery.png:
+        * docs/devguide/images/10000001000003BA000005345220EFBC3B2965C5.png  docs/devguide/images/modeling_data_definitions.png:
+        * docs/devguide/images/10000001000003CA00000534AF32FC1EC2AA656B.png  docs/devguide/images/modeling_dcps_entities.png:
+        * docs/devguide/images/100000000000018A000001582B13D316CA761B88.png  docs/devguide/images/modeling_sdk_install.png:
+        * docs/devguide/images/10000001000002E50000018D97FADEED4445DDBB.png  docs/devguide/images/pluggable.png:
+        * docs/devguide/images/10000001000003FC0000025E8CF71A4C4FCDEFF3.png  docs/devguide/images/rtps_discovery.png:
+        * docs/devguide/images/10000000000001E000000168096C98DBD1C93465.png  docs/devguide/images/rtps_relay.png:
+        * docs/devguide/internet_enabled_rtps.rst:
+        * docs/devguide/introduction.rst:
+        * docs/devguide/modeling_sdk.rst:
+        * docs/devguide/run_time_configuration.rst:
+
+          DevGuide image files have non-descriptive names
+
+          Problem
+          -------
+
+          The images included in the DevGuide have non-descriptive names.
+
+          Solution
+          --------
+
+          Rename the images.
+
+Mon Sep 18 16:04:37 UTC 2023  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit 06ca9ca3ad800b32b76b4265606d60758dea7d28
+
+        * docs/building/index.rst:
+        * docs/devguide/alternate_interfaces_to_data.rst:
+        * docs/devguide/built_in_topics.rst:
+        * docs/devguide/conditions_and_listeners.rst:
+        * docs/devguide/content_subscription_profile.rst:
+        * docs/devguide/dds_security.rst:
+        * docs/devguide/getting_started.rst:
+        * docs/devguide/internet_enabled_rtps.rst:
+        * docs/devguide/introduction.rst:
+        * docs/devguide/java_bindings.rst:
+        * docs/devguide/modeling_sdk.rst:
+        * docs/devguide/opendds_idl.rst:
+        * docs/devguide/quality_of_service.rst:
+        * docs/devguide/run_time_configuration.rst:
+        * docs/devguide/safety_profile.rst:
+        * docs/devguide/the_dcps_information_repository.rst:
+        * docs/devguide/xtypes.rst:
+        * docs/glossary.rst:
+        * docs/news.d/subjectname_parsing.rst:
+
+          Restructure Security DevGuide Section
+
+          - Security Section
+          - Moved building instructions to building/index.
+          - Restructured to make governance and permissions sections more
+          consistent
+          - Document fnmatch expressions
+          - Simplified anchors at the top of devguide sections.
+          - Formatting in alternate_interfaces_to_data
+          - Fixed minor typos
+
+Mon Sep 18 15:53:21 UTC 2023  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit b51cea507f09abcb37043f8efe13a7b111336cf4
+
+        * .github/workflows/build_and_test.yml:
+        * CMakeLists.txt:
+        * cmake/configure_ace_tao.pl:
+        * cmake/import_common.cmake:
+        * dds/CMakeLists.txt:
+
+          Add Android CMake to GHA, Fix Building ACE/TAO
+
+Mon Sep 18 13:35:23 UTC 2023  Justin Wilson  <wilsonj@unityfoundation.io>
+        commit 5c788e6e78ff9c39048ad90d59b8c8cbe63382fa
+
+          Merge pull request #4275 from
+          OpenDDS/dependabot/github_actions/docker/build-push-action-5.0.0
+
+          Bump docker/build-push-action from 4.2.1 to 5.0.0
+
+Mon Sep 18 13:34:58 UTC 2023  Justin Wilson  <wilsonj@unityfoundation.io>
+        commit 2e9f8e815580d02949eed8884f3941459bf38c76
+
+          Merge pull request #4274 from
+          OpenDDS/dependabot/github_actions/docker/login-action-3.0.0
+
+          Bump docker/login-action from 2.2.0 to 3.0.0
+
+Mon Sep 18 13:34:40 UTC 2023  Justin Wilson  <wilsonj@unityfoundation.io>
+        commit 9eeac979865f96e7f3f6357eadd0ee065739c4f2
+
+          Merge pull request #4273 from
+          OpenDDS/dependabot/github_actions/docker/metadata-action-5.0.0
+
+          Bump docker/metadata-action from 4.6.0 to 5.0.0
+
+Mon Sep 18 07:45:09 UTC 2023  dependabot[bot]  <49699333+dependabot[bot]@users.noreply.github.com>
+        commit b6bcdcab0281f49fc294fe1d90b102d7db795879
+
+        * .github/workflows/docker_image.yml:
+
+          Bump docker/build-push-action from 4.2.1 to 5.0.0
+
+          Bumps
+          [docker/build-push-action](https://github.com/docker/build-push-action)
+          from 4.2.1 to 5.0.0.
+          - [Release
+          notes](https://github.com/docker/build-push-action/releases)
+          -
+          [Commits](https://github.com/docker/build-push-action/compare/0a97817b6ade9f46837855d676c4cca3a2471fc9...0565240e2d4ab88bba5387d719585280857ece09)
+
+          ---
+          updated-dependencies:
+          - dependency-name: docker/build-push-action
+          dependency-type: direct:production
+          update-type: version-update:semver-major
+          ...
+
+          Signed-off-by: dependabot[bot] <support@github.com>
+
+Mon Sep 18 07:44:54 UTC 2023  dependabot[bot]  <49699333+dependabot[bot]@users.noreply.github.com>
+        commit 1ab0bb95b37e6780f9d13a64e6b51866caa7d08e
+
+        * .github/workflows/docker_image.yml:
+
+          Bump docker/login-action from 2.2.0 to 3.0.0
+
+          Bumps
+          [docker/login-action](https://github.com/docker/login-action)
+          from 2.2.0 to 3.0.0.
+          - [Release
+          notes](https://github.com/docker/login-action/releases)
+          -
+          [Commits](https://github.com/docker/login-action/compare/465a07811f14bebb1938fbed4728c6a1ff8901fc...343f7c4344506bcbf9b4de18042ae17996df046d)
+
+          ---
+          updated-dependencies:
+          - dependency-name: docker/login-action
+          dependency-type: direct:production
+          update-type: version-update:semver-major
+          ...
+
+          Signed-off-by: dependabot[bot] <support@github.com>
+
+Mon Sep 18 07:44:49 UTC 2023  dependabot[bot]  <49699333+dependabot[bot]@users.noreply.github.com>
+        commit 6c7bd31aa787c65f91579d7a117df0ec7b063743
+
+        * .github/workflows/docker_image.yml:
+
+          Bump docker/metadata-action from 4.6.0 to 5.0.0
+
+          Bumps
+          [docker/metadata-action](https://github.com/docker/metadata-action)
+          from 4.6.0 to 5.0.0.
+          - [Release
+          notes](https://github.com/docker/metadata-action/releases)
+          - [Upgrade
+          guide](https://github.com/docker/metadata-action/blob/master/UPGRADE.md)
+          -
+          [Commits](https://github.com/docker/metadata-action/compare/818d4b7b91585d195f67373fd9cb0332e31a7175...96383f45573cb7f253c731d3b3ab81c87ef81934)
+
+          ---
+          updated-dependencies:
+          - dependency-name: docker/metadata-action
+          dependency-type: direct:production
+          update-type: version-update:semver-major
+          ...
+
+          Signed-off-by: dependabot[bot] <support@github.com>
+
+Thu Sep 14 14:03:12 UTC 2023  Justin Wilson  <wilsonj@unityfoundation.io>
+        commit 230d3a772bf0d8a4797dfc30c522ba36928f9609
+
+          Merge pull request #4272 from jrw972/send-delay-variable
+
+          `send_delay` does not have a variable
+
+Wed Sep 13 19:35:52 UTC 2023  Justin Wilson  <wilsonj@unityfoundation.io>
+        commit 9b35da37d74c63e0708c22d0e571cae22eaace21
+
+        * dds/DCPS/transport/rtps_udp/RtpsUdpInst.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpInst.h:
+
+          `send_delay` does not have a variable
+
+          Problem
+          -------
+
+          Missed the `send_delay_` variable in #4255.
+
+          Solution
+          --------
+
+          Add `send_delay_`.
+
+Wed Sep 13 18:19:42 UTC 2023  Justin Wilson  <wilsonj@unityfoundation.io>
+        commit d07ea5bd7763b71ddadba1c9edb5568736f73e89
+
+          Merge pull request #4270 from jrw972/config-value-assignment
+
+          ConfigValue lacks assignment operator
+
+Wed Sep 13 18:19:28 UTC 2023  Justin Wilson  <wilsonj@unityfoundation.io>
+        commit 3a85295785ffbef3e7c4d15e923e8cff6de774a5
+
+          Merge pull request #4249 from jrw972/udp-transport-inst
+
+          `UdpInst` does not use `ConfigStore`
+
+Fri Sep 01 16:19:39 UTC 2023  Justin Wilson  <wilsonj@unityfoundation.io>
+        commit 5ef625c922fe87ed587d87f63425a2e2f9038c59
+
+        * dds/DCPS/transport/udp/UdpDataLink.cpp:
+        * dds/DCPS/transport/udp/UdpInst.cpp:
+        * dds/DCPS/transport/udp/UdpInst.h:
+        * dds/DCPS/transport/udp/UdpTransport.cpp:
+        * docs/news.d/config_store.rst:
+        * java/dds/OpenDDS_DCPS_jni.cpp:
+
+          `UdpInst` does not use `ConfigStore`
+
+          Problem
+          -------
+          UdpInst does not use ConfigStore. See #4134.
+
+          Solution
+          --------
+          Convert UdpInst to use ConfigStore.
+
+          The signatures for methods manipulating the local address have
+          changed
+          to be more consistent and to prevent the system from overwriting
+          the
+          configuration provided by the user.
+
+Tue Sep 12 16:38:55 UTC 2023  Justin Wilson  <wilsonj@unityfoundation.io>
+        commit 865b4a79d2e3d2ca77f481fb7d3e6ea1fd87f278
+
+        * dds/DCPS/transport/framework/TransportInst.h:
+        * tests/unit-tests/dds/DCPS/transport/framework/TransportInst.cpp:
+
+          ConfigValue lacks assignment operator
+
+          Problem
+          -------
+
+          ConfigValue and ConfigValueRef don't have an assignment operator
+          which
+          prevents users from copying values between TransportInsts.
+
+          Solution
+          --------
+
+          Add an assignment operator.
+
+Tue Sep 12 16:13:36 UTC 2023  Justin Wilson  <wilsonj@unityfoundation.io>
+        commit ec6fc384f262c53418d403311a7fcdad25d4ee8c
+
+          Merge pull request #4265 from
+          jrw972/participant-update-locators-null-ptr
+
+          Participant might not exist when updating locators
+
+Mon Sep 11 18:06:02 UTC 2023  Justin Wilson  <wilsonj@unityfoundation.io>
+        commit 1d7f045f607742b18cf103fc93511cd04f7bebc9
+
+          Merge pull request #4267 from
+          OpenDDS/dependabot/github_actions/actions/checkout-4
+
+          Bump actions/checkout from 3 to 4
+
+Mon Sep 11 18:05:34 UTC 2023  Justin Wilson  <wilsonj@unityfoundation.io>
+        commit 9e9fc4449b3a148a7f0311113db92be92b09d978
+
+          Merge pull request #4266 from
+          OpenDDS/dependabot/github_actions/docker/build-push-action-4.2.1
+
+          Bump docker/build-push-action from 4.1.1 to 4.2.1
+
+Mon Sep 11 07:52:35 UTC 2023  dependabot[bot]  <49699333+dependabot[bot]@users.noreply.github.com>
+        commit c1af8cce2d65c7d64933619f5a26e2a50e784326
+
+        * .github/workflows/build_and_test.yml:
+        * .github/workflows/dds-rtps.yml:
+        * .github/workflows/docker_image.yml:
+        * .github/workflows/ishapes.yml:
+        * .github/workflows/lint.yml:
+        * .github/workflows/sphinx_strict.yml:
+
+          Bump actions/checkout from 3 to 4
+
+          Bumps [actions/checkout](https://github.com/actions/checkout)
+          from 3 to 4.
+          - [Release notes](https://github.com/actions/checkout/releases)
+          -
+          [Changelog](https://github.com/actions/checkout/blob/main/CHANGELOG.md)
+          - [Commits](https://github.com/actions/checkout/compare/v3...v4)
+
+          ---
+          updated-dependencies:
+          - dependency-name: actions/checkout
+          dependency-type: direct:production
+          update-type: version-update:semver-major
+          ...
+
+          Signed-off-by: dependabot[bot] <support@github.com>
+
+Mon Sep 11 07:52:25 UTC 2023  dependabot[bot]  <49699333+dependabot[bot]@users.noreply.github.com>
+        commit 414f1734d908ec8916089e9eef50adc1dd5bba94
+
+        * .github/workflows/docker_image.yml:
+
+          Bump docker/build-push-action from 4.1.1 to 4.2.1
+
+          Bumps
+          [docker/build-push-action](https://github.com/docker/build-push-action)
+          from 4.1.1 to 4.2.1.
+          - [Release
+          notes](https://github.com/docker/build-push-action/releases)
+          -
+          [Commits](https://github.com/docker/build-push-action/compare/2eb1c1961a95fc15694676618e422e8ba1d63825...0a97817b6ade9f46837855d676c4cca3a2471fc9)
+
+          ---
+          updated-dependencies:
+          - dependency-name: docker/build-push-action
+          dependency-type: direct:production
+          update-type: version-update:semver-minor
+          ...
+
+          Signed-off-by: dependabot[bot] <support@github.com>
+
+Fri Sep 08 19:01:29 UTC 2023  Justin Wilson  <wilsonj@unityfoundation.io>
+        commit 7cf2f81df424217c5d75407b3dd65fb41939fcee
+
+          Merge pull request #4243 from jrw972/tcp-transport-inst
+
+          `TcpInst` does not use `ConfigStore`
+
+Fri Sep 08 17:30:59 UTC 2023  Justin Wilson  <wilsonj@unityfoundation.io>
+        commit 4946ef3ed1e6765657634ac51974bf8d6870dbd0
+
+        * dds/DCPS/RTPS/RtpsDiscovery.cpp:
+
+          Participant might not exist when updating locators
+
+          Problem
+          -------
+
+          During startup or shutdown, a participant might not exist from
+          the
+          perspective of RtpsDiscovery. Updating locators at this time
+          leads to
+          a null pointer.
+
+          Solution
+          --------
+
+          Add check and logging.
+
+Fri Aug 25 21:13:59 UTC 2023  Justin Wilson  <wilsonj@unityfoundation.io>
+        commit 2085603ac8d96c798c17739840d2f2f0cb20c559
+
+        * MPC/config/dcps_default_discovery.mpb:
+        * MPC/config/dcps_inforepodiscovery.mpb:
+        * dds/DCPS/InfoRepoDiscovery/InfoRepoDiscovery.cpp:
+        * dds/DCPS/transport/tcp/TcpConnection.cpp:
+        * dds/DCPS/transport/tcp/TcpInst.cpp:
+        * dds/DCPS/transport/tcp/TcpInst.h:
+        * dds/DCPS/transport/tcp/TcpInst.inl:
+        * dds/DCPS/transport/tcp/TcpTransport.cpp:
+        * dds/InfoRepo/DCPSInfo_i.cpp:
+        * docs/news.d/config_store.rst:
+        * java/dds/OpenDDS_DCPS_jni.cpp:
+        * tests/DCPS/ConfigFile/ConfigFile.cpp:
+        * tests/transport/error_handling/main.cpp:
+
+          `TcpInst` does not use `ConfigStore`
+
+          Problem
+          -------
+
+          `TcpInst` does not use `ConfigStore`.  See #4134.
+
+          Solution
+          --------
+
+          Convert `TcpInst` to use `ConfigStore`.
+
+          The signatures for methods manipulating the local address have
+          changed
+          to be more consistent and to prevent the system from overwriting
+          the
+          configuration provided by the user.
+
+Thu Sep 07 18:06:13 UTC 2023  Justin Wilson  <wilsonj@unityfoundation.io>
+        commit dfe67180c164369c704aa1c80719effd9ec86719
+
+          Merge pull request #4262 from mitza-oci/idlwarn
+
+          typeobject_generator: fix warnings when using TAO 3
+
+Thu Sep 07 13:36:16 UTC 2023  Justin Wilson  <wilsonj@unityfoundation.io>
+        commit 7038d1a1df40fa898e07eeb2244d201f45d49645
+
+          Merge pull request #4254 from mitza-oci/relay-fix-4202
+
+          RtpsRelay: fixed bug in record_activity's use of remove in
+          GuidAddrSet
+
+Thu Sep 07 13:34:17 UTC 2023  Justin Wilson  <wilsonj@unityfoundation.io>
+        commit 8975f51949ff0ffb6be145f39a52567e1fe74aa2
+
+          Merge pull request #4255 from jrw972/config-value
+
+          ConfigStore changes break existing applications
+
+Wed Sep 06 22:28:10 UTC 2023  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit fd9ee9457c51dd9a7b2a76a5b4969f596f0e9637
+
+        * docs/autotab.js:
+        * docs/building/index.rst:
+        * docs/conf.py:
+        * docs/devguide/dds_security.rst:
+        * docs/devguide/getting_started.rst:
+        * docs/devguide/java_bindings.rst:
+        * docs/devguide/run_time_configuration.rst:
+
+          s/doscon/batch/g and Use Content Tabs
+
+Tue Sep 05 21:09:24 UTC 2023  Justin Wilson  <wilsonj@unityfoundation.io>
+        commit f5b405a1545648ed2f731ece9ebbb01590b6ce8d
+
+        * dds/DCPS/transport/framework/TransportInst.h:
+        * dds/DCPS/transport/multicast/MulticastInst.cpp:
+        * dds/DCPS/transport/multicast/MulticastInst.h:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpInst.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpInst.h:
+        * dds/DCPS/transport/shmem/ShmemInst.cpp:
+        * dds/DCPS/transport/shmem/ShmemInst.h:
+        * docs/news.d/config_store.rst:
+        * tests/unit-tests/dds/DCPS/transport/framework/TransportInst.cpp:
+
+          ConfigStore changes break existing applications
+
+          Problem
+          -------
+
+          Converting TransportInst to ConfigStore is leading to the
+          replacement
+          of raw values with getters and setters.  This breaks existing
+          applications.
+
+          Solution
+          --------
+
+          Introduce a value where conversion and assignment dispatch to the
+          corresponding getters and setters.
+
+Wed Sep 06 19:32:45 UTC 2023  Adam Mitz  <mitza@objectcomputing.com>
+        commit 976233382f4eb89b933ac80a88015d018db834fd
+
+        * dds/idl/typeobject_generator.cpp:
+
+          typeobject_generator: fix warnings when using TAO 3
+
+Wed Sep 06 18:34:02 UTC 2023  Adam Mitz  <mitza@objectcomputing.com>
+        commit a5c6182118bfe36292d491ad7031a9898f811910
+
+        * tools/rtpsrelay/GuidAddrSet.cpp:
+
+          from review
+
+Wed Sep 06 18:03:25 UTC 2023  Justin Wilson  <wilsonj@unityfoundation.io>
+        commit eb31c057d8bafe0462b837790195c22235c85056
+
+          Merge pull request #4253 from mitza-oci/jobqueue
+
+          Remove per-element locking in JobQueue
+
+Wed Sep 06 18:01:59 UTC 2023  Justin Wilson  <wilsonj@unityfoundation.io>
+        commit 4e821224a084375d62ef8453102a5ed3e1a2129f
+
+          Merge pull request #4252 from mitza-oci/weakobject
+
+          WeakObject: removed unused constructor
+
+Wed Sep 06 18:01:41 UTC 2023  Justin Wilson  <wilsonj@unityfoundation.io>
+        commit 3c7cd94dd659b146da748ec22d6ab6dd10c2835e
+
+          Merge pull request #4250 from jwillemsen/jwi-autoptr
+
+          Make use of unique_ptr and removed some obsolete includes
+
+Tue Sep 05 17:41:09 UTC 2023  Adam Mitz  <mitza@objectcomputing.com>
+        commit 7ca1e3af7e8d76ed6eea4eae01539e933ccff084
+
+        * tools/rtpsrelay/GuidAddrSet.cpp:
+
+          RtpsRelay: fixed bug in record_activity's use of remove in
+          GuidAddrSet
+
+          Bug was introduced in PR #4202
+
+Tue Sep 05 14:01:26 UTC 2023  Justin Wilson  <wilsonj@unityfoundation.io>
+        commit 9f974fe55a9d874491999c1860b66823e3a56426
+
+          Merge pull request #4242 from jrw972/shmem-transport-inst
+
+          `ShmemInst` does not use `ConfigStore`
+
+Tue Sep 05 08:24:07 UTC 2023  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit eb97b90652b71281f34dc253e182145e724eb73c
+
+        * dds/DCPS/transport/framework/ThreadPerConnectionSendTask.cpp:
+
+          Path fix
+
+          * dds/DCPS/transport/framework/ThreadPerConnectionSendTask.cpp:
+
+Tue Sep 05 07:08:26 UTC 2023  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit 5f3a5f0e0b7a0cd8f029e9db6f5de2c3da25280a
+
+          Merge branch 'jwi-autoptr' of
+          https://github.com/jwillemsen/OpenDDS into jwi-autoptr
+
+Tue Sep 05 07:08:18 UTC 2023  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit 6c4d70604c3ca7379aa3134399ace5f4d8c26a7a
+
+        * dds/DCPS/transport/framework/ThreadPerConnectionSendTask.cpp:
+
+          Include change
+
+          * dds/DCPS/transport/framework/ThreadPerConnectionSendTask.cpp:
+
+Tue Sep 05 07:01:41 UTC 2023  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit 79e5a9331262f38b9ac8a18b4c4d566ed44afab9
+
+          Merge branch 'master' into jwi-autoptr
+
+Tue Sep 05 07:01:16 UTC 2023  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit e42b99f4e84d4cfd65b3ca36c991b1800d6cfe29
+
+        * dds/DCPS/DataDurabilityCache.h:
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/ReplayerImpl.cpp:
+        * dds/DCPS/Service_Participant.cpp:
+
+          Removed obsolete include of ace/Auto_Ptr.h
+
+          * dds/DCPS/DataDurabilityCache.h:
+          * dds/DCPS/DataReaderImpl.cpp:
+          * dds/DCPS/DataWriterImpl.cpp:
+          * dds/DCPS/ReplayerImpl.cpp:
+          * dds/DCPS/Service_Participant.cpp:
+
+Tue Sep 05 07:01:02 UTC 2023  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit 089315cdc7a60f6ed77c4c1ecdec53a01b430e1d
+
+        * dds/DCPS/transport/framework/ThreadPerConnectionSendTask.cpp:
+
+          Make use of unique_ptr
+
+          * dds/DCPS/transport/framework/ThreadPerConnectionSendTask.cpp:
+
+Fri Sep 01 23:29:58 UTC 2023  Adam Mitz  <mitza@objectcomputing.com>
+        commit 8c694539809564d8614cc49c3f77d7e28c82f80c
+
+        * dds/DCPS/JobQueue.cpp:
+
+          Remove per-element locking in JobQueue
+
+Fri Sep 01 20:52:17 UTC 2023  Adam Mitz  <mitza@objectcomputing.com>
+        commit 6d1feac42b51c28d7d5c51b663816c5abc3c655d
+
+        * dds/DCPS/RcObject.h:
+
+          WeakObject: removed unused constructor
+
+Fri Sep 01 17:49:01 UTC 2023  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit b5afc6293a70795e892a3eb914e49b367e7fc870
+
+        * cmake/opendds_version.cmake:
+
+          Add Missing opendds_version.cmake File
+
+Fri Sep 01 17:47:40 UTC 2023  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit 5fff95064ea430534b1ed1d1899cfc8248dddc9c
+
+          Merge remote-tracking branch 'upstream/master' into
+          igtd/cmake-build
+
+Fri Sep 01 17:40:11 UTC 2023  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit 258d35bea53489b13f5dffca910237601c57fa0b
+
+        * docs/building/cmake.rst:
+        * docs/building/index.rst:
+
+          Fix Typos and Update Versions in Docs
+
+Fri Sep 01 17:35:36 UTC 2023  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit 31f723ef9b01918f8e88e33057c643d937419e6b
+
+        * CMakeLists.txt:
+        * cmake/build_ace_tao.cmake:
+        * cmake/configure_ace_tao.pl:
+        * cmake/init.cmake:
+        * cmake/opendds_build_helpers.cmake:
+
+          Android ACE/TAO Support and Other Tweaks
+
+Fri Sep 01 17:32:40 UTC 2023  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit e9b7fd152508e4a7520ff2613fd9c36a519f9910
+
+        * CMakeLists.txt:
+        * cmake/OpenDDSConfigVersion.cmake:
+        * cmake/init.cmake:
+
+          Allow Using CPack
+
+Fri Aug 25 21:36:51 UTC 2023  Justin Wilson  <wilsonj@unityfoundation.io>
+        commit a6cfd3afcc85f69075c074c545cdf2053f194943
+
+        * dds/DCPS/transport/shmem/ShmemInst.cpp:
+        * dds/DCPS/transport/shmem/ShmemInst.h:
+        * dds/DCPS/transport/shmem/ShmemSendStrategy.cpp:
+        * dds/DCPS/transport/shmem/ShmemTransport.cpp:
+        * docs/news.d/config_store.rst:
+
+          `ShmemInst` does not use `ConfigStore`
+
+          Problem
+          -------
+
+          `ShmemInst` does not use `ConfigStore`.  See #4134.
+
+          Solution
+          --------
+
+          Convert `ShmemInst` to use `ConfigStore`.
+
+          * The following members have been replaced with getters and
+          setters:
+          - `pool_size_`
+          - `datalink_control_size_`
+
+Fri Sep 01 17:03:15 UTC 2023  Justin Wilson  <wilsonj@unityfoundation.io>
+        commit b8525c5d1ba4a38f62bd75c355bb836897e308f7
+
+          Merge pull request #4241 from jrw972/multicast-transport-inst
+
+          `MulticastInst` does not use `ConfigStore`
+
+Thu Aug 24 20:36:56 UTC 2023  Justin Wilson  <wilsonj@unityfoundation.io>
+        commit 71b68115d8d660d7f6fcc9782e5965f519f63305
+
+        * dds/DCPS/ConfigStoreImpl.cpp:
+        * dds/DCPS/ConfigStoreImpl.h:
+        * dds/DCPS/transport/multicast/MulticastDataLink.cpp:
+        * dds/DCPS/transport/multicast/MulticastInst.cpp:
+        * dds/DCPS/transport/multicast/MulticastInst.h:
+        * dds/DCPS/transport/multicast/MulticastLoader.cpp:
+        * dds/DCPS/transport/multicast/MulticastSendStrategy.cpp:
+        * dds/DCPS/transport/multicast/MulticastSendStrategy.h:
+        * dds/DCPS/transport/multicast/MulticastSession.cpp:
+        * dds/DCPS/transport/multicast/MulticastTransport.cpp:
+        * dds/DCPS/transport/multicast/ReliableSession.cpp:
+        * dds/DCPS/transport/multicast/ReliableSession.h:
+        * dds/DCPS/transport/udp/UdpInst.h:
+        * docs/news.d/config_store.rst:
+        * java/dds/OpenDDS_DCPS_jni.cpp:
+        * java/dds/dcps_java.mpc:
+        * tests/unit-tests/dds/DCPS/ConfigStoreImpl.cpp:
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model/xsl/traits_cpp.xsl:
+
+          `MulticastInst` does not use `ConfigStore`
+
+          Problem
+          -------
+
+          `MulticastInst` does not use `ConfigStore`.  See #4134.
+
+          Solution
+          --------
+
+          Convert `MulticastInst` to use `ConfigStore`.
+
+          * The following members have been replaced with getters and
+          setters:
+          - default_to_ipv6
+          - port_offset
+          - group_address
+          - local_address
+          - reliable
+          - syn_backoff
+          - syn_interval
+          - syn_timeout
+          - nak_depth
+          - nak_interval
+          - nak_delay_intervals
+          - nak_max
+          - mak_timeout
+          - ttl
+          - rcv_buffer_size
+          - async_send
+
+Fri Aug 25 18:02:37 UTC 2023  Justin Wilson  <wilsonj@unityfoundation.io>
+        commit 8967e86d6c284212ce278d568d1a61eb2849ab69
+
+          Merge pull request #4240 from jrw972/hardcoded-jdk
+
+          Java 8 has moved on Ubuntu 20 in GitHub Actions
+
+Thu Aug 24 18:58:50 UTC 2023  Justin Wilson  <wilsonj@unityfoundation.io>
+        commit 0b40a332306169c8f66dad0e6f56c54047305c98
+
+        * .github/workflows/build_and_test.yml:
+
+          Java 8 has moved on Ubuntu 20 in GitHub Actions
+
+          Problem
+          -------
+
+          One GHA job used a hardcoded Java.
+
+          Solution
+          --------
+
+          Use an environment variable to find Java.
+
+Thu Aug 24 18:07:54 UTC 2023  Justin Wilson  <wilsonj@unityfoundation.io>
+        commit 7c31e87ba676073e19096fa9f93cea5465461a20
+
+          Merge pull request #4226 from sonndinh/consolidate-dynamicdata
+
+          Support sending `DynamicDataAdapter` sample via dynamic writer
+
+Thu Aug 24 18:02:51 UTC 2023  Justin Wilson  <wilsonj@unityfoundation.io>
+        commit 3e29641997ea7dbe1476d93c37ce8b68c7cbb72e
+
+          Merge pull request #4162 from jrw972/transport-inst-refactoring
+
+          `RtpsUdpInst` does not use `ConfigStore`
+
+Thu Aug 24 16:19:21 UTC 2023  Justin Wilson  <wilsonj@unityfoundation.io>
+        commit 37bb608b741b2505f16c738caa385b4a417bc6fc
+
+          Merge pull request #4230 from jrw972/ice-refactor
+
+          ICE doesn't handle IPV6 addresses correctly
+
+Wed Aug 23 22:35:19 UTC 2023  Son Dinh  <dinhs@objectcomputing.com>
+        commit 8a8aea020ea08917c082b5a29da53c5ed9b27eec
+
+        * dds/DCPS/XTypes/DynamicDataImpl.cpp:
+        * docs/internal/dev_guidelines.rst:
+
+          More from review
+
+Wed Aug 23 18:26:18 UTC 2023  Justin Wilson  <wilsonj@unityfoundation.io>
+        commit 287ff218b14db4ac0db57bc62ff7221b911fb9be
+
+        * dds/DCPS/RTPS/ParameterListConverter.cpp:
+        * docs/news.d/ice.rst:
+
+          From review
+
+Wed Aug 23 18:05:41 UTC 2023  Justin Wilson  <wilsonj@unityfoundation.io>
+        commit a5da6632104fa61dfb436c2a3b79fb8fccd145d6
+
+          Merge pull request #4238 from iguessthislldo/igtd/sphinx-docs
+
+          Remove Unneeded Non-ASCII From DevGuide
+
+Wed Aug 23 16:16:07 UTC 2023  Justin Wilson  <wilsonj@unityfoundation.io>
+        commit 4c4d057b69fc5a9cdcd663c9c8b8be719e61c6fb
+
+        * dds/DCPS/RTPS/ICE/EndpointManager.cpp:
+        * dds/DCPS/RTPS/ParameterListConverter.cpp:
+        * docs/news.d/ice.rst:
+        * tests/DCPS/ParticipantLocationTopic/run_test.pl:
+
+          ICE doesn't handle IPV6 addresses correctly
+
+          Problem
+          -------
+
+          ICE ends up mapping IPV4 to IPV6 addresses when it should not.
+
+          Solution
+          --------
+
+          Don't map.
+
+          Note
+          ----
+
+          The test time was extended to accommodate machines with lots of
+          IP
+          addresses. The ICE implementation should be updated to RFC8445
+          and
+          nominate earlier in the process.
+
+Wed Aug 23 15:58:01 UTC 2023  Son Dinh  <dinhs@objectcomputing.com>
+        commit cdaaf6c510416ab0a7a15a0c8ba0a6f57daf6983
+
+        * dds/DCPS/XTypes/DynamicDataImpl.cpp:
+        * dds/DCPS/XTypes/DynamicDataImpl.h:
+        * dds/DCPS/XTypes/DynamicSample.cpp:
+        * dds/idl/dynamic_data_adapter_generator.cpp:
+
+          From review
+
+Tue Aug 22 23:59:09 UTC 2023  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit 12019ae12392031c6efba60b9b29d00e8a3331d4
+
+        * docs/devguide/built_in_topics.rst:
+        * docs/devguide/content_subscription_profile.rst:
+        * docs/devguide/getting_started.rst:
+        * docs/devguide/introduction.rst:
+        * docs/devguide/opendds_idl.rst:
+        * docs/devguide/run_time_configuration.rst:
+
+          Respond to Review, Fix Other Minor Issues
+
+Tue Aug 22 20:41:53 UTC 2023  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit 6801c84394f9b7aa3b4a3a170570b64bdda3d207
+
+        * docs/devguide/alternate_interfaces_to_data.rst:
+        * docs/devguide/built_in_topics.rst:
+        * docs/devguide/conditions_and_listeners.rst:
+        * docs/devguide/content_subscription_profile.rst:
+        * docs/devguide/dds_security.rst:
+        * docs/devguide/getting_started.rst:
+        * docs/devguide/internet_enabled_rtps.rst:
+        * docs/devguide/introduction.rst:
+        * docs/devguide/java_bindings.rst:
+        * docs/devguide/modeling_sdk.rst:
+        * docs/devguide/opendds_idl.rst:
+        * docs/devguide/quality_of_service.rst:
+        * docs/devguide/run_time_configuration.rst:
+        * docs/devguide/the_dcps_information_repository.rst:
+        * docs/devguide/xtypes.rst:
+
+          Remove Unneeded Non-ASCII From DevGuide
+
+          - ``` `` s``` -> ``` ``\s ```
+          - `‘` (Left Single Quotation Mark U+2018) and `’` (Right
+          Single
+          Quotation Mark U+2019) -> `'` (U+0027) or to code formating
+          depending
+          on the context.
+          - (Non-breaking space U+00A0) -> Space
+          - `–` (En Dash U+2013) and `—` (Em Dash U+2014) -> `--`
+          - Other misc. changes.
+
+Tue Aug 22 18:54:06 UTC 2023  Son Dinh  <dinhs@objectcomputing.com>
+        commit 625acc46383236973c255699a9328acfae0399d3
+
+        * tests/DCPS/DynamicData/publisher.cpp:
+        * tests/dcps_tests.lst:
+
+          Update test list
+
+Tue Aug 22 18:03:13 UTC 2023  Justin Wilson  <wilsonj@unityfoundation.io>
+        commit 4d1d6a37ed7d86978600edf631e7bb9f1772a5aa
+
+          Merge pull request #4234 from jrw972/mailing-lists
+
+          Remove reference to mailing lists
+
+Tue Aug 22 17:06:33 UTC 2023  Son Dinh  <dinhs@objectcomputing.com>
+        commit 51ddfcff476f433f1299afd007251ac556d3d33f
+
+        * dds/DCPS/XTypes/DynamicDataAdapter.cpp:
+        * dds/DCPS/XTypes/DynamicDataAdapter.h:
+        * dds/idl/dynamic_data_adapter_generator.cpp:
+        * tests/DCPS/DynamicData/publisher.cpp:
+        * tests/DCPS/DynamicData/run_test.pl:
+
+          Update DynamicData test to send a DynamicDataAdapter sample
+
+Tue Aug 22 13:27:52 UTC 2023  Justin Wilson  <wilsonj@unityfoundation.io>
+        commit 4d016dab0620e51fc975f8826d4d2e990040f381
+
+          Merge pull request #4237 from jwillemsen/jwi-devguideformatting
+
+          Minor formatting changes
+
+Tue Aug 22 12:06:46 UTC 2023  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit 3591a8136b1aa1f20c23209d08c21896898d0013
+
+          Merge branch 'master' into jwi-devguideformatting
+
+Tue Aug 22 08:03:01 UTC 2023  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit fe221529e776979b48d9bd00a1eef8da43c899c8
+
+        * docs/devguide/run_time_configuration.rst:
+
+          Minor formatting changes
+
+          * docs/devguide/run_time_configuration.rst:
+
+Mon Aug 21 22:39:04 UTC 2023  Son Dinh  <dinhs@objectcomputing.com>
+        commit 982091d7bebc71f652d87fdeabfbd43c212173fe
+
+        * dds/DCPS/XTypes/DynamicSample.cpp:
+
+          Initialize size before calling serialized_size
+
+Mon Aug 21 17:18:59 UTC 2023  Justin Wilson  <wilsonj@unityfoundation.io>
+        commit a546aeece5c2df942077e435226d4a371b910816
+
+        * README.md:
+
+          Remove reference to mailing lists
+
+Mon Aug 21 17:12:21 UTC 2023  Son Dinh  <dinhs@objectcomputing.com>
+        commit 6695c1ba0970de27db7074bf623fe384253b183c
+
+        * tests/DCPS/DynamicData/publisher.cpp:
+
+          Comment out dda test
+
+Thu Jun 08 18:51:07 UTC 2023  Justin Wilson  <wilsonj@unityfoundation.io>
+        commit 790c9481c1bd166ce0987dac2d7dbacfabd5d789
+
+        * dds/DCPS/ConfigStoreImpl.cpp:
+        * dds/DCPS/ConfigStoreImpl.h:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/DataWriterImpl.h:
+        * dds/DCPS/DefaultNetworkConfigMonitor.h:
+        * dds/DCPS/InfoRepoDiscovery/InfoRepoDiscovery.cpp:
+        * dds/DCPS/InfoRepoDiscovery/InfoRepoDiscovery.h:
+        * dds/DCPS/InternalDataReader.h:
+        * dds/DCPS/NetworkAddress.cpp:
+        * dds/DCPS/NetworkAddress.h:
+        * dds/DCPS/NetworkConfigMonitor.cpp:
+        * dds/DCPS/RTPS/RtpsDiscovery.cpp:
+        * dds/DCPS/RTPS/RtpsDiscoveryConfig.cpp:
+        * dds/DCPS/RTPS/RtpsDiscoveryConfig.h:
+        * dds/DCPS/RTPS/Sedp.cpp:
+        * dds/DCPS/RTPS/Sedp.h:
+        * dds/DCPS/RTPS/Spdp.cpp:
+        * dds/DCPS/RTPS/Spdp.h:
+        * dds/DCPS/ReactorInterceptor.cpp:
+        * dds/DCPS/Service_Participant.cpp:
+        * dds/DCPS/Service_Participant.h:
+        * dds/DCPS/Time_Helper.inl:
+        * dds/DCPS/transport/framework/TransportImpl.h:
+        * dds/DCPS/transport/framework/TransportInst.cpp:
+        * dds/DCPS/transport/framework/TransportInst.h:
+        * dds/DCPS/transport/framework/TransportInst.inl:
+        * dds/DCPS/transport/multicast/MulticastTransport.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.h:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpInst.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpInst.h:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpReceiveStrategy.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpSendStrategy.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpTransport.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpTransport.h:
+        * dds/DCPS/transport/tcp/TcpTransport.cpp:
+        * dds/DCPS/transport/udp/UdpTransport.cpp:
+        * docs/devguide/run_time_configuration.rst:
+        * docs/news.d/_releases/v3.25.0.rst:
+        * docs/news.d/config_store.rst:
+        * examples/DCPS/ishapes/main.cpp:
+        * java/dds/OpenDDS_DCPS_jni.cpp:
+        * tests/DCPS/DomainRange/DomainRangeTest.cpp:
+        * tests/DCPS/DomainRange/run_test.pl:
+        * tests/DCPS/Restart/RestartTest.cpp:
+        * tests/transport/rtps/publisher.cpp:
+        * tests/transport/rtps_directed_write/AppConfig.cpp:
+        * tests/transport/rtps_directed_write/AppConfig.h:
+        * tests/transport/rtps_reliability/rtps_reliability.cpp:
+        * tests/unit-tests/dds/DCPS/ConfigStoreImpl.cpp:
+        * tests/unit-tests/dds/DCPS/InternalDataReader.cpp:
+        * tests/unit-tests/dds/DCPS/Time_Helper.cpp:
+        * tests/unit-tests/dds/DCPS/transport/framework/MessageDropper.cpp:
+        * tests/unit-tests/dds/DCPS/transport/framework/TransportStatistics.cpp:
+
+          `RtpsUdpInst` does not use `ConfigStore`
+
+          Problem
+          -------
+
+          `RtpsUdpInst` does not use `ConfigStore`.  See #4134.
+
+          Solution
+          --------
+
+          Convert `RtpsUdpInst` to use `ConfigStore`.
+
+          * Member access has been replaced with getters and setters.
+
+          * Dynamic configuration related to the RtpsRelay is handled via a
+          listener.
+
+          * The `RtpsUdpCore` caches dynamic configuration values and
+          values
+          that are used frequently.
+
+          Notes
+          -----
+
+          This fixes a bug in `ConfigStoreImpl` where the last valid value
+          was
+          returned instead of the provided default in the event of an
+          error.
+
+Mon Aug 21 15:11:01 UTC 2023  Son Dinh  <dinhs@objectcomputing.com>
+        commit eafdc7d68cd4851d89934ffbf587f580b57dfc81
+
+        * dds/idl/dynamic_data_adapter_generator.cpp:
+
+          Add missed tag
+
+Mon Aug 21 08:27:20 UTC 2023  Son Dinh  <dinhs@objectcomputing.com>
+        commit 119150db6e9dfb174f924cac5c18289d2305c908
+
+        * dds/idl/dynamic_data_adapter_generator.cpp:
+
+          Fix distinct type generation error
+
+Sat Aug 19 05:26:13 UTC 2023  Son Dinh  <dinhs@objectcomputing.com>
+        commit 1f914f91faff05e70562c2263e2a462cc644ca33
+
+        * dds/idl/dynamic_data_adapter_generator.cpp:
+        * dds/idl/marshal_generator.cpp:
+
+          Fix C++11 mapping for sequence and array
+
+Thu Aug 17 15:58:25 UTC 2023  Son Dinh  <dinhs@objectcomputing.com>
+        commit c3a245df281125e157b4cbb90c8cd8b87496e237
+
+        * dds/DCPS/XTypes/DynamicDataAdapter.h:
+        * dds/idl/dynamic_data_adapter_generator.cpp:
+
+          Add serialization functions for sequence and array
+
+Wed Aug 16 17:42:43 UTC 2023  Son Dinh  <dinhs@objectcomputing.com>
+        commit 2894bb275d07b8028ed59122c9347048910f55a5
+
+        * dds/idl/dynamic_data_adapter_generator.cpp:
+        * tests/DCPS/DynamicData/publisher.cpp:
+
+          Move dynamic data adapter impl class to header
+
+Tue Aug 15 19:37:49 UTC 2023  Son Dinh  <dinhs@objectcomputing.com>
+        commit c9724ac15336f5230960a5c218f29c812720e660
+
+        * dds/DCPS/XTypes/DynamicDataAdapter.h:
+        * dds/idl/dynamic_data_adapter_generator.cpp:
+
+          Update the generated DynamicDataAdapterImpl
+
+Tue Aug 15 02:41:12 UTC 2023  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit 43a66ff55ac0b82ee50a5e8cb64237de26adcb99
+
+          Merge pull request #4231 from Idan-Neeman/dev
+
+          Remove -Grapidjson flag [opendds_idl]
+
+Tue Aug 15 02:40:54 UTC 2023  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit 79066088ae6a88ca1398a630d636e1ebe4a642c2
+
+          Merge pull request #4233 from iguessthislldo/igtd/rtdcfg
+
+          Add Read the Docs Config File
+
+Mon Aug 14 23:08:21 UTC 2023  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit 4eeb4735a3a56ee4df021c6fd0690847bb6d24f2
+
+        * docs/.readthedocs.yaml:
+
+          Add Read the Docs Config File
+
+          This is apparently going to be required going forward:
+          https://blog.readthedocs.com/migrate-configuration-v2/
+
+Mon Aug 14 22:22:31 UTC 2023  Idan Neeman  <idan@livenet.co.il>
+        commit d4152cdfb9116cd9dd6fc69460d525ef35315b77
+
+        * dds/idl/be_util.cpp:
+        * docs/devguide/opendds_idl.rst:
+
+          Remove -Grapidjson flag [opendds_idl]
+
+          The -Grapidjson flag has been removed.
+
+Mon Aug 14 18:05:31 UTC 2023  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit bdfdde621cde0a056bdc79835dabcd25c4da51fe
+
+          Merge pull request #4223 from
+          jmmorato/fix/waitset_liveliness_lost
+
+          [fix] WaitSet not notified when DataWriter liveliness lost
+
+Fri Aug 11 19:47:51 UTC 2023  Son Dinh  <dinhs@objectcomputing.com>
+        commit deb7131770de03182abc58d03539220d97e18c00
+
+        * dds/DCPS/XTypes/DynamicDataAdapter.h:
+        * dds/DCPS/XTypes/DynamicDataBase.h:
+        * dds/DCPS/XTypes/DynamicDataImpl.cpp:
+        * dds/DCPS/XTypes/DynamicDataImpl.h:
+        * dds/DCPS/XTypes/DynamicDataXcdrReadImpl.h:
+        * dds/DCPS/XTypes/DynamicSample.cpp:
+
+          Add common serialization interface to DynamicDataBase
+
+Fri Aug 11 17:27:24 UTC 2023  Justin Wilson  <wilsonj@unityfoundation.io>
+        commit 72d68769f713d48add4665426db948e0a7dedd95
+
+        * docs/news.d/liveliness_lost.rst:
+        * tests/unit-tests/dds/DCPS/WaitSet.cpp:
+
+          Add news
+
+Fri Aug 11 03:41:54 UTC 2023  Jose Morato  <jmmorato@enxarxats.com>
+        commit 3b60da2cf247f9ba7a5ae1c208bb68312f91500d
+
+          Merge branch 'master' into fix/waitset_liveliness_lost
+
+Fri Aug 11 03:37:58 UTC 2023  Jose Morato  <jmmorato@enxarxats.com>
+        commit a44c80445a4ce5fb7cd3ec96c4748f3e39bcb64a
+
+        * tests/dcps_tests.lst:
+
+          Fixed typo in folder name
+
+Thu Aug 10 18:04:02 UTC 2023  Justin Wilson  <wilsonj@unityfoundation.io>
+        commit f587f29bb355c3e9c445b542bfb4146a8e03b572
+
+          Merge pull request #4208 from jrw972/gha-debug
+
+          Fix build_u22_stat_qs_ws_sec build
+
+Thu Aug 10 17:17:42 UTC 2023  Jose Morato  <jmmorato@enxarxats.com>
+        commit 078bf2840d1a5d673b3ad1bfdac06ca6fc5581ef
+
+        * tests/dcps_tests.lst:
+
+          Added !OPENDDS_SAFETY_PROFILE condition to the liveliness lost
+          test
+
+Thu Aug 10 15:52:40 UTC 2023  Jose Morato  <jmmorato@enxarxats.com>
+        commit edf2f3f5c458d4247a4c258d152e647822fe2ae6
+
+        * tests/DCPS/WaitSetLivelinessLost/.gitignore:
+        * tests/DCPS/WaitSetLivelinessLost/README:
+        * tests/DCPS/WaitSetLivelinessLost/WaitSetLivelinessLost.cpp:
+        * tests/DCPS/WaitSetLivelinessLost/WaitSetLivelinessLost.mpc:
+        * tests/DCPS/WaitSetLivelinessLost/common.h:
+        * tests/DCPS/WaitSetLivelinessLost/rtps_disc.ini:
+        * tests/DCPS/WaitSetLivelinessLost/run_test.pl:
+        * tests/dcps_tests.lst:
+        * tests/unit-tests/dds/DCPS/WaitSet.cpp:
+
+          Move test to `tests/DCPS`
+
+Wed Jul 19 19:15:32 UTC 2023  Justin Wilson  <wilsonj@unityfoundation.io>
+        commit 9ef8f1d25b7a5f9325bd41fd9a080934bdb57460
+
+        * .github/workflows/build_and_test.yml:
+
+          `build_u22_stat_qt_ws_sec` runs out of disk space
+
+          Problem
+          -------
+
+          The `build_u22_stat_qt_ws_sec` job runs out of disk space.
+
+          Solution
+          --------
+
+          Defer building tests and other artifacts until the job that needs
+          them.
+
+Tue Aug 08 15:56:21 UTC 2023  Son Dinh  <dinhs@objectcomputing.com>
+        commit c9cce6311e223c3d5b9950282ce76fc4784cd2f1
+
+        * dds/DCPS/XTypes/DynamicDataImpl.cpp:
+        * dds/DCPS/XTypes/DynamicDataImpl.h:
+
+          More updates
+
+Tue Aug 08 15:14:37 UTC 2023  Son Dinh  <dinhs@objectcomputing.com>
+        commit 31521605daf8e6ae9db17e6fc26d0c68ff46cf7c
+
+        * dds/DCPS/XTypes/DynamicDataImpl.cpp:
+
+          Update calls to DataContainer's functions
+
+Mon Aug 07 19:58:47 UTC 2023  Son Dinh  <dinhs@objectcomputing.com>
+        commit 15f379fbb85bc7bc379ab25424a2f2c1863b93b5
+
+        * dds/DCPS/XTypes/DynamicDataImpl.cpp:
+        * dds/DCPS/XTypes/DynamicDataImpl.h:
+
+          Move serialization functions out of DataContainer
+
+Sun Aug 06 18:40:24 UTC 2023  Jose Morato  <jmmorato@enxarxats.com>
+        commit 1752383cb4aa01d3cc6509e7b0567850b448ca48
+
+        * tests/unit-tests/dds/DCPS/WaitSet.cpp:
+
+          Increased lease duration to avoid test timing issues
+
+Fri Aug 04 15:39:35 UTC 2023  Jose Morato  <jmmorato@enxarxats.com>
+        commit 23932d89dc7f8b0b7e652abdc49e9e0788421b49
+
+        * tests/unit-tests/dds/DCPS/WaitSet.cpp:
+
+          Detach condition first when cleaning up
+
+Fri Aug 04 15:37:17 UTC 2023  Jose Morato  <jmmorato@enxarxats.com>
+        commit 3af986e9677a4efa42c7c86ba180877b0c48cb4d
+
+        * tests/unit-tests/dds/DCPS/WaitSet.cpp:
+
+          Added more status condition checks to the test
+
+Fri Aug 04 15:10:32 UTC 2023  Jose Morato  <jmmorato@enxarxats.com>
+        commit 608c8f4d46107373bc66e7cbd4b638e4533b3440
+
+        * dds/DCPS/DataWriterImpl.cpp:
+        * tests/unit-tests/dds/DCPS/WaitSet.cpp:
+
+          [fix] WaitSet not notified when DataWriter liveliness lost
+
+Tue Aug 01 18:07:35 UTC 2023  Justin Wilson  <wilsonj@unityfoundation.io>
+        commit 0d85140f59fcda8fa38064ca280e73e1b99702bf
+
+          Merge pull request #4220 from sonndinh/subjectname-parsing
+
+          Add news for subject name parsing
+
+Tue Aug 01 18:04:26 UTC 2023  Justin Wilson  <wilsonj@unityfoundation.io>
+        commit 442be64d3ae5574007b0c29bbc6490e8af7d3b77
+
+          Merge pull request #4219 from sonndinh/subjectname-cleanup
+
+          Remove redundant include
+
+Tue Aug 01 17:02:15 UTC 2023  Son Dinh  <dinhs@objectcomputing.com>
+        commit 3fd5c038f75ff29c3a17a522f2a0c0ecfb78f942
+
+        * docs/news.d/subjectname_parsing.rst:
+
+          Add news for subject name parsing
+
+Mon Jul 31 18:02:01 UTC 2023  Son Dinh  <dinhs@objectcomputing.com>
+        commit f16836d0c57b7026ee3a5e6d957ec44a5955baa2
+
+        * dds/DCPS/security/SSL/SubjectName.cpp:
+
+          Missed cleanup
+
+Fri Jul 28 22:33:47 UTC 2023  Adam Mitz  <mitza@objectcomputing.com>
+        commit 640a22cea9891ec1a56757ccf6415125667eec2a
+
+          Merge pull request #4216 from mitza-oci/tls-typeinfo
+
+          Remove from TypeLookupService when remote endpoint is removed
+          from SEDP
+
+Fri Jul 28 18:28:09 UTC 2023  Adam Mitz  <mitza@objectcomputing.com>
+        commit 18020cc6e7e2feda8e64ecdc5eb2fa991139ae52
+
+        * tests/DCPS/DCPSInfoRepo/pubsub.cpp:
+
+          DCPSInfoRepo test: use TypeLookupService with RtpsDiscovery
+
+Fri Jul 28 18:03:39 UTC 2023  Justin Wilson  <wilsonj@unityfoundation.io>
+        commit 0c01424ffc4599c31df2985085a7b92b9eca4d3f
+
+          Merge pull request #4201 from sonndinh/parse-ldap
+
+          Update subject name parsing
+
+Fri Jul 28 15:37:00 UTC 2023  Adam Mitz  <mitza@objectcomputing.com>
+        commit 3d6a13e0dd1a2618a81ea4a89847ac7b1fe8bb4f
+
+        * dds/DCPS/RTPS/Sedp.cpp:
+        * dds/DCPS/XTypes/TypeLookupService.cpp:
+        * dds/DCPS/XTypes/TypeLookupService.h:
+
+          Remove from TypeLookupService when remote endpoint is removed
+          from SEDP
+
+Tue Jul 25 20:40:01 UTC 2023  Son Dinh  <dinhs@objectcomputing.com>
+        commit 079d01f586ea0bccc2748f9281ea7ce9ec420c6e
+
+        * tools/scripts/lint.pl:
+
+          Ignore lint check for pem files
+
+Tue Jul 25 20:16:55 UTC 2023  Son Dinh  <dinhs@objectcomputing.com>
+        commit 1689f20b8d3f4e818f63ed9c621142eec3682fed
+
+        * tests/DCPS/ParticipantLocationTopic/permissions_publisher.xml:
+        * tests/DCPS/ParticipantLocationTopic/permissions_publisher_signed.p7s:
+        * tests/DCPS/ParticipantLocationTopic/permissions_relay.xml:
+        * tests/DCPS/ParticipantLocationTopic/permissions_relay_signed.p7s:
+        * tests/DCPS/ParticipantLocationTopic/permissions_subscriber.xml:
+        * tests/DCPS/ParticipantLocationTopic/permissions_subscriber_signed.p7s:
+        * tests/DCPS/RtpsRelay/Smoke/permissions_publisher.xml:
+        * tests/DCPS/RtpsRelay/Smoke/permissions_publisher_signed.p7s:
+        * tests/DCPS/RtpsRelay/Smoke/permissions_relay.xml:
+        * tests/DCPS/RtpsRelay/Smoke/permissions_relay_signed.p7s:
+        * tests/DCPS/RtpsRelay/Smoke/permissions_subscriber.xml:
+        * tests/DCPS/RtpsRelay/Smoke/permissions_subscriber_signed.p7s:
+        * tests/security/ConcurrentAuthLimit/permissions_1.xml:
+        * tests/security/ConcurrentAuthLimit/permissions_1_signed.p7s:
+        * tests/security/SingleParticipantWithSecurity/permissions_1.xml:
+        * tests/security/SingleParticipantWithSecurity/permissions_1_signed.p7s:
+        * tests/unit-tests/dds/DCPS/security/AccessControlBuiltInImpl.cpp:
+        * tests/unit-tests/dds/DCPS/security/AuthenticationBuiltInImpl.cpp:
+        * tests/unit-tests/dds/DCPS/security/SSL/Certificate.cpp:
+
+          Fix more tests
+
+Tue Jul 25 15:36:55 UTC 2023  Son Dinh  <dinhs@objectcomputing.com>
+        commit c23fe8e717c6fd52c58162377ff1a9446824b25c
+
+        * tests/DCPS/Messenger/permissions_1.xml:
+        * tests/DCPS/Messenger/permissions_1_signed.p7s:
+        * tests/DCPS/Messenger/permissions_2.xml:
+        * tests/DCPS/Messenger/permissions_2_signed.p7s:
+        * tests/security/attributes/permissions/permissions_multi_p_01_02_03_04_readwrite.xml:
+        * tests/security/attributes/permissions/permissions_multi_p_01_02_03_04_readwrite_signed.p7s:
+        * tests/security/attributes/permissions/permissions_test_participant_01_allowall.xml:
+        * tests/security/attributes/permissions/permissions_test_participant_01_allowall_signed.p7s:
+        * tests/security/attributes/permissions/permissions_test_participant_01_join.xml:
+        * tests/security/attributes/permissions/permissions_test_participant_01_join_signed.p7s:
+        * tests/security/attributes/permissions/permissions_test_participant_01_join_wrong.xml:
+        * tests/security/attributes/permissions/permissions_test_participant_01_join_wrong_signed.p7s:
+        * tests/security/attributes/permissions/permissions_test_participant_01_partitions.xml:
+        * tests/security/attributes/permissions/permissions_test_participant_01_partitions_signed.p7s:
+        * tests/security/attributes/permissions/permissions_test_participant_01_read.xml:
+        * tests/security/attributes/permissions/permissions_test_participant_01_read_signed.p7s:
+        * tests/security/attributes/permissions/permissions_test_participant_01_readwrite.xml:
+        * tests/security/attributes/permissions/permissions_test_participant_01_readwrite_signed.p7s:
+        * tests/security/attributes/permissions/permissions_test_participant_01_write.xml:
+        * tests/security/attributes/permissions/permissions_test_participant_01_write_signed.p7s:
+        * tests/security/attributes/permissions/permissions_test_participant_02_allowall.xml:
+        * tests/security/attributes/permissions/permissions_test_participant_02_allowall_signed.p7s:
+        * tests/security/attributes/permissions/permissions_test_participant_02_join.xml:
+        * tests/security/attributes/permissions/permissions_test_participant_02_join_signed.p7s:
+        * tests/security/attributes/permissions/permissions_test_participant_02_join_wrong.xml:
+        * tests/security/attributes/permissions/permissions_test_participant_02_join_wrong_signed.p7s:
+        * tests/security/attributes/permissions/permissions_test_participant_02_partitions.xml:
+        * tests/security/attributes/permissions/permissions_test_participant_02_partitions_signed.p7s:
+        * tests/security/attributes/permissions/permissions_test_participant_02_read.xml:
+        * tests/security/attributes/permissions/permissions_test_participant_02_read_signed.p7s:
+        * tests/security/attributes/permissions/permissions_test_participant_02_readwrite.xml:
+        * tests/security/attributes/permissions/permissions_test_participant_02_readwrite_signed.p7s:
+        * tests/security/attributes/permissions/permissions_test_participant_02_write.xml:
+        * tests/security/attributes/permissions/permissions_test_participant_02_write_signed.p7s:
+        * tests/security/attributes/permissions/permissions_test_participant_03_allowall.xml:
+        * tests/security/attributes/permissions/permissions_test_participant_03_allowall_signed.p7s:
+        * tests/security/attributes/permissions/permissions_test_participant_03_join.xml:
+        * tests/security/attributes/permissions/permissions_test_participant_03_join_signed.p7s:
+        * tests/security/attributes/permissions/permissions_test_participant_03_join_wrong.xml:
+        * tests/security/attributes/permissions/permissions_test_participant_03_join_wrong_signed.p7s:
+        * tests/security/attributes/permissions/permissions_test_participant_03_read.xml:
+        * tests/security/attributes/permissions/permissions_test_participant_03_read_signed.p7s:
+        * tests/security/attributes/permissions/permissions_test_participant_03_readwrite.xml:
+        * tests/security/attributes/permissions/permissions_test_participant_03_readwrite_signed.p7s:
+        * tests/security/attributes/permissions/permissions_test_participant_03_write.xml:
+        * tests/security/attributes/permissions/permissions_test_participant_03_write_signed.p7s:
+        * tests/security/attributes/permissions/permissions_test_participant_04_allowall.xml:
+        * tests/security/attributes/permissions/permissions_test_participant_04_allowall_signed.p7s:
+        * tests/security/attributes/permissions/permissions_test_participant_04_join.xml:
+        * tests/security/attributes/permissions/permissions_test_participant_04_join_signed.p7s:
+        * tests/security/attributes/permissions/permissions_test_participant_04_join_wrong.xml:
+        * tests/security/attributes/permissions/permissions_test_participant_04_join_wrong_signed.p7s:
+        * tests/security/attributes/permissions/permissions_test_participant_04_read.xml:
+        * tests/security/attributes/permissions/permissions_test_participant_04_read_signed.p7s:
+        * tests/security/attributes/permissions/permissions_test_participant_04_readwrite.xml:
+        * tests/security/attributes/permissions/permissions_test_participant_04_readwrite_signed.p7s:
+        * tests/security/attributes/permissions/permissions_test_participant_04_write.xml:
+        * tests/security/attributes/permissions/permissions_test_participant_04_write_signed.p7s:
+        * tests/security/certs/identity/01.pem:
+        * tests/security/certs/identity/02.pem:
+        * tests/security/certs/identity/03.pem:
+        * tests/security/certs/identity/04.pem:
+        * tests/security/certs/identity/identity_ca_openssl.cnf:
+        * tests/security/certs/identity/index.txt:
+        * tests/security/certs/identity/test_participant_01.csr:
+        * tests/security/certs/identity/test_participant_01_cert.pem:
+        * tests/security/certs/identity/test_participant_01_private_key.pem:
+        * tests/security/certs/identity/test_participant_02.csr:
+        * tests/security/certs/identity/test_participant_02_cert.pem:
+        * tests/security/certs/identity/test_participant_02_private_key.pem:
+        * tests/security/certs/identity/test_participant_03.csr:
+        * tests/security/certs/identity/test_participant_03_cert.pem:
+        * tests/security/certs/identity/test_participant_03_private_key.pem:
+        * tests/security/certs/identity/test_participant_04.csr:
+        * tests/security/certs/identity/test_participant_04_cert.pem:
+        * tests/security/certs/identity/test_participant_04_private_key.pem:
+        * tests/security/permissions/permissions_test_participant_01.xml:
+        * tests/security/permissions/permissions_test_participant_01_JoinDomain.xml:
+        * tests/security/permissions/permissions_test_participant_01_JoinDomain_signed.p7s:
+        * tests/security/permissions/permissions_test_participant_01_NotBefore.xml:
+        * tests/security/permissions/permissions_test_participant_01_NotBeforeOffset.xml:
+        * tests/security/permissions/permissions_test_participant_01_NotBeforeOffset_signed.p7s:
+        * tests/security/permissions/permissions_test_participant_01_NotBefore_signed.p7s:
+        * tests/security/permissions/permissions_test_participant_01_TopicLevel.xml:
+        * tests/security/permissions/permissions_test_participant_01_TopicLevel_2.xml:
+        * tests/security/permissions/permissions_test_participant_01_TopicLevel_2_signed.p7s:
+        * tests/security/permissions/permissions_test_participant_01_TopicLevel_Domain_Range_2.xml:
+        * tests/security/permissions/permissions_test_participant_01_TopicLevel_Domain_Range_2_signed.p7s:
+        * tests/security/permissions/permissions_test_participant_01_TopicLevel_Partitions_Default.xml:
+        * tests/security/permissions/permissions_test_participant_01_TopicLevel_Partitions_Default_signed.p7s:
+        * tests/security/permissions/permissions_test_participant_01_TopicLevel_Partitions_Deny.xml:
+        * tests/security/permissions/permissions_test_participant_01_TopicLevel_Partitions_Deny_signed.p7s:
+        * tests/security/permissions/permissions_test_participant_01_TopicLevel_signed.p7s:
+        * tests/security/permissions/permissions_test_participant_01_signed.p7s:
+        * tests/security/permissions/permissions_test_participant_02.xml:
+        * tests/security/permissions/permissions_test_participant_02_JoinDomain_signed.p7s:
+        * tests/security/permissions/permissions_test_participant_02_signed.p7s:
+        * tests/security/permissions/permissions_test_participant_03.xml:
+        * tests/security/permissions/permissions_test_participant_03_signed.p7s:
+        * tests/security/permissions/permissions_test_participant_04.xml:
+        * tests/security/permissions/permissions_test_participant_04_signed.p7s:
+
+          Update openssl config for better order in subject name. Update
+          security docs.
+
+Mon Jul 24 17:11:22 UTC 2023  Son Dinh  <dinhs@objectcomputing.com>
+        commit 22c535ca894593cc3ba65935a54226698f8bc175
+
+        * dds/DCPS/security/SSL/SubjectName.cpp:
+        * tests/DCPS/Messenger/permissions_2.xml:
+        * tests/DCPS/Messenger/permissions_2_signed.p7s:
+        * tests/security/attributes/permissions/permissions_test_participant_02_allowall.xml:
+        * tests/security/attributes/permissions/permissions_test_participant_02_allowall_signed.p7s:
+        * tests/security/attributes/permissions/permissions_test_participant_02_join.xml:
+        * tests/security/attributes/permissions/permissions_test_participant_02_join_signed.p7s:
+        * tests/security/attributes/permissions/permissions_test_participant_02_join_wrong.xml:
+        * tests/security/attributes/permissions/permissions_test_participant_02_join_wrong_signed.p7s:
+        * tests/security/attributes/permissions/permissions_test_participant_02_partitions.xml:
+        * tests/security/attributes/permissions/permissions_test_participant_02_partitions_signed.p7s:
+        * tests/security/attributes/permissions/permissions_test_participant_02_read.xml:
+        * tests/security/attributes/permissions/permissions_test_participant_02_read_signed.p7s:
+        * tests/security/attributes/permissions/permissions_test_participant_02_readwrite.xml:
+        * tests/security/attributes/permissions/permissions_test_participant_02_readwrite_signed.p7s:
+        * tests/security/attributes/permissions/permissions_test_participant_02_write.xml:
+        * tests/security/attributes/permissions/permissions_test_participant_02_write_signed.p7s:
+        * tests/security/attributes/permissions/permissions_test_participant_04_allowall.xml:
+        * tests/security/attributes/permissions/permissions_test_participant_04_allowall_signed.p7s:
+        * tests/security/attributes/permissions/permissions_test_participant_04_join.xml:
+        * tests/security/attributes/permissions/permissions_test_participant_04_join_signed.p7s:
+        * tests/security/attributes/permissions/permissions_test_participant_04_join_wrong.xml:
+        * tests/security/attributes/permissions/permissions_test_participant_04_join_wrong_signed.p7s:
+        * tests/security/attributes/permissions/permissions_test_participant_04_read.xml:
+        * tests/security/attributes/permissions/permissions_test_participant_04_read_signed.p7s:
+        * tests/security/attributes/permissions/permissions_test_participant_04_readwrite.xml:
+        * tests/security/attributes/permissions/permissions_test_participant_04_readwrite_signed.p7s:
+        * tests/security/attributes/permissions/permissions_test_participant_04_write.xml:
+        * tests/security/attributes/permissions/permissions_test_participant_04_write_signed.p7s:
+        * tests/unit-tests/dds/DCPS/security/SSL/SubjectName.cpp:
+
+          Fix tests
+
+Mon Jul 24 14:59:20 UTC 2023  Son Dinh  <dinhs@objectcomputing.com>
+        commit a502c8520d8f35d84ff43bd5d6ebb46ee7b36449
+
+          Merge branch 'master' of github.com:OpenDDS/OpenDDS into
+          parse-ldap
+
+Fri Jul 21 21:54:57 UTC 2023  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit b85e5b110e82f26cc1e577b8683598ca47a91ef2
+
+          Merge pull request #4210 from iguessthislldo/igtd/news-fixes
+
+          Fix Smartquotes and Trailing Spaces in News
+
+Fri Jul 21 21:43:44 UTC 2023  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit 5d0408d79fbfdfce4599127bbe36db024d2b2b79
+
+          Merge pull request #4209 from iguessthislldo/igtd/shapes
+
+          Quote Qt Windows Path in ishapes
+
+Fri Jul 21 21:30:36 UTC 2023  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit d98c43dbfc7c866ba16ec308684d3273b934fb4d
+
+        * NEWS.md:
+        * docs/build.py:
+        * docs/internal/github_actions.rst:
+        * docs/news.d/_releases/v3.25.0.rst:
+        * docs/sphinx_extensions/newsd.py:
+
+          Fix Smartquotes and Trailing Spaces in News
+
+          3.25.0 news had empty lines with tailing spaces in the RST news
+          and
+          broken encodings for single quotes in the GitHub release page.
+          The
+          trailing spaces was caused by some indent logic for indenting
+          sections
+          not checking if the line is empty before indenting. The broken
+          single
+          quotes were caused by Sphinx doing smartquotes and those
+          non-ASCII
+          quotes getting mangled by either the release script or maybe
+          GitHub.
+          This disables smartquotes in build.py, but if possible this
+          should
+          probably be something the Markdown builder sets since it doesn't
+          make
+          sense to do it in Markdown.
+
+          Also fixed some minor issues in the GHA document.
+
+Fri Jul 21 18:00:56 UTC 2023  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit 067cca0534c6ec92b2af75ccd4691d588c921f8b
+
+        * .github/workflows/ishapes.yml:
+
+          Quote Qt Windows Path in ishapes
+
+Fri Jul 21 18:00:52 UTC 2023  Son Dinh  <dinhs@objectcomputing.com>
+        commit 471b39e0e5b0e30b4601c5c715e1bf5eb20e7c22
+
+          Merge branch 'master' of github.com:OpenDDS/OpenDDS into
+          parse-ldap
+
+Fri Jul 21 17:56:56 UTC 2023  Son Dinh  <dinhs@objectcomputing.com>
+        commit c9a461baffbba32586f4613196eaef5542c8edc3
+
+        * dds/DCPS/security/AccessControlBuiltInImpl.cpp:
+        * tests/unit-tests/dds/DCPS/security/AccessControlBuiltInImpl.cpp:
+
+          Cleanup
+
+Fri Jul 21 17:54:37 UTC 2023  Son Dinh  <dinhs@objectcomputing.com>
+        commit f56fb7532a410fde7984dae6f4259c6f8bd3775e
+
+        * dds/DCPS/security/SSL/SubjectName.cpp:
+
+          Fix parse_dce
+
+Fri Jul 21 16:47:12 UTC 2023  Son Dinh  <dinhs@objectcomputing.com>
+        commit 8e7e190623261995972cbd28e5da18eb631ef113
+
+        * dds/DCPS/security/SSL/SubjectName.cpp:
+        * tests/unit-tests/dds/DCPS/security/SSL/SubjectName.cpp:
+
+          Update to handle empty attribute type
+
+Thu Jul 20 22:19:33 UTC 2023  Son Dinh  <dinhs@objectcomputing.com>
+        commit 0197f6aef0117f2a23b662fefc5b7247a5a0be0a
+
+        * dds/DCPS/security/AccessControlBuiltInImpl.cpp:
+        * dds/DCPS/security/SSL/SubjectName.cpp:
+        * tests/security/permissions/generate_generic_permissions.pl:
+        * tests/security/permissions/permissions_test_participant_01.xml:
+        * tests/security/permissions/permissions_test_participant_01_JoinDomain.xml:
+        * tests/security/permissions/permissions_test_participant_01_JoinDomain_signed.p7s:
+        * tests/security/permissions/permissions_test_participant_01_NotBefore.xml:
+        * tests/security/permissions/permissions_test_participant_01_NotBeforeOffset.xml:
+        * tests/security/permissions/permissions_test_participant_01_NotBeforeOffset_signed.p7s:
+        * tests/security/permissions/permissions_test_participant_01_NotBefore_signed.p7s:
+        * tests/security/permissions/permissions_test_participant_01_TopicLevel.xml:
+        * tests/security/permissions/permissions_test_participant_01_TopicLevel_2.xml:
+        * tests/security/permissions/permissions_test_participant_01_TopicLevel_2_signed.p7s:
+        * tests/security/permissions/permissions_test_participant_01_TopicLevel_Domain_Range_2.xml:
+        * tests/security/permissions/permissions_test_participant_01_TopicLevel_Domain_Range_2_signed.p7s:
+        * tests/security/permissions/permissions_test_participant_01_TopicLevel_Partitions_Default.xml:
+        * tests/security/permissions/permissions_test_participant_01_TopicLevel_Partitions_Default_signed.p7s:
+        * tests/security/permissions/permissions_test_participant_01_TopicLevel_Partitions_Deny.xml:
+        * tests/security/permissions/permissions_test_participant_01_TopicLevel_Partitions_Deny_signed.p7s:
+        * tests/security/permissions/permissions_test_participant_01_TopicLevel_signed.p7s:
+        * tests/security/permissions/permissions_test_participant_01_signed.p7s:
+        * tests/security/permissions/permissions_test_participant_02.xml:
+        * tests/security/permissions/permissions_test_participant_02_JoinDomain.xml:
+        * tests/security/permissions/permissions_test_participant_02_JoinDomain_signed.p7s:
+        * tests/security/permissions/permissions_test_participant_02_signed.p7s:
+        * tests/security/permissions/permissions_test_participant_03.xml:
+        * tests/security/permissions/permissions_test_participant_03_signed.p7s:
+        * tests/security/permissions/permissions_test_participant_04.xml:
+        * tests/security/permissions/permissions_test_participant_04_signed.p7s:
+        * tests/unit-tests/dds/DCPS/security/AccessControlBuiltInImpl.cpp:
+
+          Allow extra spaces in subject name. Update permission files.
+
+Thu Jul 20 21:39:33 UTC 2023  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit 81ace5ffb7cc09558419dbceac896d7a4970286b
+
+        * PROBLEM-REPORT-FORM:
+        * VERSION.txt:
+        * dds/Version.h:
+
+          OpenDDS Post Release 3.25.0
+
+Wed Jul 19 13:27:39 UTC 2023  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit 005fa0e03938531744e44cc4a3ee5b87a7a8ad02
+
+        * .github/workflows/build_and_test.yml:
+        * .gitignore:
+        * CMakeLists.txt:
+        * DevGuideExamples/DCPS/Messenger/CMakeLists.txt:
+        * cmake/ace_group.cmake:
+        * cmake/build_ace_tao.cmake:
+        * cmake/configure_ace_tao.pl:
+        * cmake/import_common.cmake:
+        * cmake/init.cmake:
+        * cmake/opendds_features.cmake:
+        * cmake/opendds_target_sources.cmake:
+        * cmake/opendds_testing.cmake:
+        * cmake/tao_group.cmake:
+        * cmake/tao_idl_sources.cmake:
+        * dds/CMakeLists.txt:
+        * dds/DCPS/CMakeLists.txt:
+        * dds/DCPS/Definitions.h:
+        * dds/DCPS/InfoRepoDiscovery/CMakeLists.txt:
+        * dds/DCPS/QOS_XML_Handler/CMakeLists.txt:
+        * dds/DCPS/RTPS/CMakeLists.txt:
+        * dds/DCPS/security/CMakeLists.txt:
+        * dds/DCPS/security/Utility.h:
+        * dds/DCPS/transport/multicast/CMakeLists.txt:
+        * dds/DCPS/transport/rtps_udp/CMakeLists.txt:
+        * dds/DCPS/transport/shmem/CMakeLists.txt:
+        * dds/DCPS/transport/tcp/CMakeLists.txt:
+        * dds/DCPS/transport/udp/CMakeLists.txt:
+        * dds/InfoRepo/CMakeLists.txt:
+        * dds/idl/CMakeLists.txt:
+        * dds/idl/be_produce.cpp:
+        * docs/building/cmake.rst:
+        * docs/building/index.rst:
+        * docs/news.d/cmake-build.rst:
+        * tests/DCPS/Compiler/typeobject_hash_consistency/.gitignore:
+        * tests/DCPS/Compiler/typeobject_hash_consistency/run_test.pl:
+        * tests/cmake/Messenger/C++11_Messenger/CMakeLists.txt:
+        * tests/cmake/Messenger/Messenger_1/CMakeLists.txt:
+        * tests/cmake/Messenger/Messenger_2/CMakeLists.txt:
+        * tests/cmake/ace_tao_only/CMakeLists.txt:
+        * tests/cmake/generated_global/cpp/CMakeLists.txt:
+        * tests/cmake/generated_global/idl/CMakeLists.txt:
+        * tools/dds/rtpsrelaylib/CMakeLists.txt:
+        * tools/inspect/CMakeLists.txt:
+        * tools/rtpsrelay/CMakeLists.txt:
+
+          Cleanup, Fixes, Docs, Add GHA Job for CMake Build
+
+Tue Jul 18 18:37:32 UTC 2023  Son Dinh  <dinhs@objectcomputing.com>
+        commit de08b6a7b6410755265b822e58c8a139886fc307
+
+        * dds/DCPS/security/SSL/SubjectName.cpp:
+        * dds/DCPS/security/SSL/SubjectName.h:
+        * tests/unit-tests/dds/DCPS/security/SSL/SubjectName.cpp:
+
+          From review
+
+Mon Jul 17 17:57:28 UTC 2023  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit b0f84f0635a33e315fb27374f40f5fa66433fa0f
+
+        * CMakeLists.txt:
+        * cmake/.gitignore:
+        * cmake/OpenDDSConfig.cmake:
+        * cmake/build_ace_tao.cmake:
+        * cmake/config.cmake.in:
+        * cmake/configure_ace_tao.pl:
+        * cmake/dds_idl_sources.cmake:
+        * cmake/init.cmake:
+        * cmake/opendds_features.cmake:
+        * cmake/opendds_installed_config.cmake.in:
+        * cmake/tao_group.cmake:
+        * cmake/tao_idl_sources.cmake:
+        * dds/CMakeLists.txt:
+        * dds/DCPS/CMakeLists.txt:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpSendStrategy.cpp:
+
+          Windows Fixes, Lof of Other Fixes
+
+Fri Jun 30 01:36:12 UTC 2023  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit 28132c2ad8710115037f7ae85ce1dd773528b389
+
+        * cmake/tao_idl_sources.cmake:
+
+          Allow Building ACE/TAO with CMake with Ninja
+
+Fri Jun 30 00:16:41 UTC 2023  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit df4d8d7ddc499859ac295d53811952957d6c5e2b
+
+        * CMakeLists.txt:
+        * cmake/OpenDDSConfig.cmake:
+        * cmake/OpenDDSConfigVersion.cmake:
+        * cmake/init.cmake:
+        * cmake/opendds_build_helpers.cmake:
+        * cmake/opendds_installed_config.cmake.in:
+        * cmake/opendds_target_sources.cmake:
+        * cmake/opendds_testing.cmake:
+        * dds/DCPS/InfoRepoDiscovery/CMakeLists.txt:
+        * dds/DCPS/RTPS/CMakeLists.txt:
+        * dds/DCPS/security/CMakeLists.txt:
+        * dds/DCPS/transport/multicast/CMakeLists.txt:
+        * dds/DCPS/transport/rtps_udp/CMakeLists.txt:
+        * dds/DCPS/transport/shmem/CMakeLists.txt:
+        * dds/DCPS/transport/tcp/CMakeLists.txt:
+        * dds/DCPS/transport/tcp/TcpReceiveStrategy_rch.h:
+        * dds/DCPS/transport/udp/CMakeLists.txt:
+        * dds/InfoRepo/CMakeLists.txt:
+        * dds/idl/CMakeLists.txt:
+        * tests/DCPS/Messenger/publisher.cpp:
+        * tests/DCPS/Messenger/subscriber.cpp:
+        * tests/cmake/Messenger/Messenger_2/CMakeLists.txt:
+        * tools/dds/rtpsrelaylib/CMakeLists.txt:
+        * tools/inspect/CMakeLists.txt:
+        * tools/rtpsrelay/CMakeLists.txt:
+        * tools/rtpsrelay/RelayThreadMonitor.cpp:
+
+          CMake Install, RtpsRelay, inspect
+
+Thu Jun 22 20:23:10 UTC 2023  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit 0d323ad580e0450fcdbfc2390a359f2544edbd56
+
+        * CMakeLists.txt:
+        * DevGuideExamples/DCPS/Messenger/Publisher.cpp:
+        * DevGuideExamples/DCPS/Messenger/Subscriber.cpp:
+        * cmake/config.h.in:
+        * cmake/opendds_build_helpers.cmake:
+        * dds/DCPS/Definitions.h:
+        * dds/DCPS/StaticIncludes.h:
+        * dds/DCPS/security/framework/SecurityRegistry.cpp:
+        * tests/DCPS/Messenger/publisher.cpp:
+        * tests/DCPS/Messenger/subscriber.cpp:
+
+          Auto Initialize Static Plugins
+
+          This uses macros set in CMake to include library init headers in
+          StaticIncludes.h as necessary. For right now this only works in
+          CMake
+          and only when __has_include and a config.h is present to tell
+          OpenDDS
+          it's doing this.
+
+Wed Jun 21 01:40:25 UTC 2023  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit 8688bd4f5cd1c47435ccd59d7448191b43a7a4ae
+
+        * CMakeLists.txt:
+        * cmake/opendds_testing.cmake:
+        * cmake/tao_idl_sources.cmake:
+        * dds/DCPS/Service_Participant.cpp:
+        * dds/DCPS/security/CMakeLists.txt:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpSendStrategy.cpp:
+        * tests/DCPS/Messenger/publisher.cpp:
+        * tests/DCPS/Messenger/subscriber.cpp:
+        * tests/cmake/Messenger/Messenger_2/CMakeLists.txt:
+        * tests/cmake/ace_tao_only/CMakeLists.txt:
+
+          Add Security, Expand Testing
+
+Fri Jun 16 05:43:09 UTC 2023  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit 935f430624a092971910b537044b7caa2092c7e8
+
+        * bin/PerlDDS/Run_Test.pm:
+        * cmake/opendds_testing.cmake:
+
+          Fix Running ctest on Windows
+
+Fri Jun 16 04:19:05 UTC 2023  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit 0a54c0dda53014811e2e5bfb16c20961e007d073
+
+        * CMakeLists.txt:
+        * DevGuideExamples/DCPS/Messenger/Publisher.cpp:
+        * DevGuideExamples/DCPS/Messenger/Subscriber.cpp:
+        * bin/PerlDDS/Run_Test.pm:
+        * cmake/init.cmake:
+        * cmake/opendds_target_sources.cmake:
+        * cmake/opendds_testing.cmake:
+        * cmake/scrape_gnuace.pl:
+        * cmake/tao_idl_sources.cmake:
+        * dds/DCPS/InfoRepoDiscovery/CMakeLists.txt:
+        * dds/DCPS/transport/framework/TransportRegistry.cpp:
+
+          Fixes for Windows, Other Minor Fixes
+
+Thu Jun 15 07:20:20 UTC 2023  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit 7eb4db5a57fc777d25ad817649461db5bf225ab9
+
+        * CMakeLists.txt:
+        * cmake/ace_group.cmake:
+        * cmake/build_ace_tao.cmake:
+        * cmake/detect_ace.cpp:
+        * cmake/import_common.cmake:
+        * cmake/init.cmake:
+        * cmake/opendds_group.cmake:
+        * cmake/scrap_gnuace.pl  cmake/scrape_gnuace.pl:
+        * cmake/tao_group.cmake:
+
+          Support Separate Host Tools/Cross Compiling
+
+          Also correct spelling of `scrap_gnuace.pl` and remove mostly
+          unused
+          `detect_ace.cpp`.
+
+Wed Jun 14 22:49:01 UTC 2023  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit 03174161350d37f665d588753e288ac5d9450c35
+
+        * CMakeLists.txt:
+        * cmake/dds_idl_sources.cmake:
+        * tests/cmake/generated_global/README.md:
+        * tests/cmake/generated_global/idl/CMakeLists.txt:
+
+          Fix `GENERATED` Issue with opendds_target_sources
+
+          `opendds_target_sources` has had a problem with the `GENERATED`
+          property
+          for while going back to
+          https://github.com/objectcomputing/OpenDDS/pull/2495. This is
+          because we
+          were unnecessarily using `target_sources(PUBLIC)` on generated
+          header
+          and IDL files that could get inherited by other targets. If this
+          target
+          was in another directory, then it cause CMake to fail because of
+          an
+          issue in CMake that's fixed by
+          https://cmake.org/cmake/help/latest/policy/CMP0118.html. If we
+          just use
+          `target_sources(PRIVATE)` on C++ files this fixes the `GENERATED`
+          issue
+          and a new issue when building OpenDDS with CMake with Visual
+          Studio
+          where it thinks IDL files passed to `target_sources` are MIDL
+          files.
+
+Wed Jun 14 21:35:14 UTC 2023  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit f361be3e7834c8299aec5293e31da62b8f14a275
+
+        * cmake/tao_idl_sources.cmake:
+
+          Use TARGET_FILE_DIR for opendds_idl PATH
+
+Wed Jun 14 20:53:03 UTC 2023  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit 5002c66a4726bea83237b821a40995cea40956b3
+
+        * cmake/tao_idl_sources.cmake:
+        * dds/DCPS/WriterDataSampleList.h:
+
+          Add Missing Include and OPENDDS_BIN_DIR to PATH
+
+Wed Jun 14 20:33:20 UTC 2023  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit dfdb85e091f9698d925716ef851b90248439fc93
+
+        * CMakeLists.txt:
+        * cmake/opendds_build_helpers.cmake:
+        * dds/DCPS/DisjointSequence.cpp:
+        * dds/DCPS/MemoryPool.cpp:
+        * dds/DCPS/WriterDataSampleList.cpp:
+        * dds/DCPS/WriterDataSampleList.inl:
+        * dds/DCPS/transport/rtps_udp/CMakeLists.txt:
+        * dds/InfoRepo/CMakeLists.txt:
+
+          Some Fixes for bigobj and min/max on Windows
+
+Wed Jun 14 19:28:04 UTC 2023  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit f42ff591d50b36324115d1494a946ead8061305d
+
+        * cmake/opendds_build_helpers.cmake:
+        * cmake/tao_idl_sources.cmake:
+
+          Fix PATH and EXPORT_SYMBOLS_NAME for Visual Studio
+
+Wed Jun 14 08:21:52 UTC 2023  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit f058c170b6858408a3aba9b69eb38721e5c567a9
+
+        * CMakeLists.txt:
+        * cmake/opendds_build_helpers.cmake:
+        * dds/DCPS/CMakeLists.txt:
+
+          Windows Workaround For OpenDDS_Utils
+
+Tue Jun 13 21:32:07 UTC 2023  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit 6d9f9bf12079b23fa3ff1be002c73e0799410061
+
+        * cmake/init.cmake:
+
+          Temp Workarounds for Windows
+
+Tue Jun 13 21:14:38 UTC 2023  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit 01f410eedeb7195f64c1d1e4a07b5d457fb15f2e
+
+        * CMakeLists.txt:
+        * DevGuideExamples/DCPS/Messenger/CMakeLists.txt:
+        * DevGuideExamples/DCPS/Messenger/Publisher.cpp:
+        * DevGuideExamples/DCPS/Messenger/Subscriber.cpp:
+        * bin/PerlDDS/Run_Test.pm:
+        * cmake/configure_ace_tao.pl:
+        * cmake/dds_idl_sources.cmake:
+        * cmake/detect_ace.cpp:
+        * cmake/detect_ace.pl:
+        * cmake/import_common.cmake:
+        * cmake/init.cmake:
+        * cmake/opendds_build_helpers.cmake:
+        * cmake/opendds_features.cmake:
+        * cmake/opendds_target_sources.cmake:
+        * cmake/opendds_testing.cmake:
+        * cmake/scrap_gnuace.pl:
+        * cmake/tao_idl_sources.cmake:
+        * dds/DCPS/CMakeLists.txt:
+        * dds/DCPS/DataDurabilityCache.h:
+        * dds/DCPS/DurabilityArray.h:
+        * dds/DCPS/InfoRepoDiscovery/CMakeLists.txt:
+        * dds/DCPS/Marked_Default_Qos.h:
+        * dds/DCPS/RTPS/CMakeLists.txt:
+        * dds/DCPS/RTPS/MessageParser.cpp:
+        * dds/DCPS/RTPS/MessageUtils.cpp:
+        * dds/DCPS/TimeDuration.h:
+        * dds/DCPS/Time_Helper.h:
+        * dds/DCPS/transport/multicast/CMakeLists.txt:
+        * dds/DCPS/transport/multicast/ReliableSession.cpp:
+        * dds/DCPS/transport/rtps_udp/CMakeLists.txt:
+        * dds/DCPS/transport/shmem/CMakeLists.txt:
+        * dds/DCPS/transport/tcp/CMakeLists.txt:
+        * dds/DCPS/transport/udp/CMakeLists.txt:
+        * dds/InfoRepo/CMakeLists.txt:
+        * dds/InfoRepo/DCPSInfoRepo.mpc:
+        * dds/InfoRepo/DCPSInfoRepoServ_Export.h:
+        * dds/InfoRepo/DCPSInfo_i.cpp:
+        * dds/idl/CMakeLists.txt:
+        * dds/idl/be_produce.cpp:
+        * dds/idl/typeobject_generator.cpp:
+        * tests/cmake/Messenger/C++11_Messenger/CMakeLists.txt:
+        * tests/cmake/Messenger/Messenger_1/CMakeLists.txt:
+        * tests/cmake/Messenger/Messenger_2/CMakeLists.txt:
+        * tests/cmake/Nested_IDL/CMakeLists.txt:
+        * tests/cmake/Nested_IDL/ecu.idl:
+        * tests/cmake/Nested_IDL/engine/engine_stats/samename.idl:
+        * tests/cmake/Nested_IDL/engine/samename.idl:
+        * tests/cmake/Nested_IDL/samename.idl:
+        * tests/cmake/ace_tao_only/CMakeLists.txt:
+
+          Use CMake to Build OpenDDS Initial Work
+
+Mon Jul 17 15:02:32 UTC 2023  Son Dinh  <dinhs@objectcomputing.com>
+        commit 7fa79e75a10a22cde4324978ec5fcd498eed577d
+
+        * dds/DCPS/security/SSL/SubjectName.cpp:
+        * dds/DCPS/security/SSL/SubjectName.h:
+
+          Fix CI & use signed int to terminate loop
+
+Mon Jul 17 06:27:52 UTC 2023  Son Dinh  <dinhs@objectcomputing.com>
+        commit 9987b5721615e7dd998859452ae64037e91f572d
+
+        * dds/DCPS/security/SSL/SubjectName.cpp:
+        * dds/DCPS/security/SSL/SubjectName.h:
+        * tests/unit-tests/dds/DCPS/security/SSL/SubjectName.cpp:
+
+          Add unit tests
+
+Fri Jul 14 22:52:28 UTC 2023  Son Dinh  <dinhs@objectcomputing.com>
+        commit b635e07e703d7fd7884807e3804ce7665b9e6081
+
+        * dds/DCPS/security/SSL/SubjectName.cpp:
+        * dds/DCPS/security/SSL/SubjectName.h:
+
+          Validate attribute type & fix compile errors
+
+Fri Jul 14 17:19:00 UTC 2023  Son Dinh  <dinhs@objectcomputing.com>
+
+        * dds/DCPS/security/SSL/SubjectName.cpp:
+        * dds/DCPS/security/SSL/SubjectName.h:
+
+          New class for parsing LDAP distinguished name
+
+Local Variables:
+mode: change-log
+add-log-time-format: (lambda () (progn (setq tz (getenv "TZ")) (set-time-zone-rule "UTC") (setq time (format-time-string "%a %b %e %H:%M:%S %Z %Y" (current-time))) (set-time-zone-rule tz) time))
+indent-tabs-mode: nil
+End:

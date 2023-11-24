@@ -44,13 +44,14 @@ protected:
                const std::string& name,
                Port port,
                ACE_Reactor* reactor,
-               HandlerStatisticsReporter& stats_reporter);
+               HandlerStatisticsReporter& stats_reporter,
+               OpenDDS::DCPS::Lockable_Message_Block_Ptr::Lock_Policy message_block_locking = OpenDDS::DCPS::Lockable_Message_Block_Ptr::Lock_Policy::No_Lock);
 
   int handle_input(ACE_HANDLE handle) override;
   int handle_output(ACE_HANDLE handle) override;
 
   void enqueue_message(const ACE_INET_Addr& addr,
-                       const OpenDDS::DCPS::Message_Block_Shared_Ptr& msg,
+                       const OpenDDS::DCPS::Lockable_Message_Block_Ptr& msg,
                        const OpenDDS::DCPS::MonotonicTimePoint& now,
                        MessageType type);
 
@@ -58,7 +59,7 @@ protected:
 
   virtual CORBA::ULong process_message(const ACE_INET_Addr& remote,
                                        const OpenDDS::DCPS::MonotonicTimePoint& now,
-                                       const OpenDDS::DCPS::Message_Block_Shared_Ptr& msg,
+                                       const OpenDDS::DCPS::Lockable_Message_Block_Ptr& msg,
                                        MessageType& type) = 0;
 
 private:
@@ -66,12 +67,12 @@ private:
 
   struct Element {
     ACE_INET_Addr address;
-    OpenDDS::DCPS::Message_Block_Shared_Ptr message_block;
+    OpenDDS::DCPS::Lockable_Message_Block_Ptr message_block;
     OpenDDS::DCPS::MonotonicTimePoint timestamp;
     MessageType type;
 
     Element(const ACE_INET_Addr& a_address,
-            OpenDDS::DCPS::Message_Block_Shared_Ptr a_message_block,
+            const OpenDDS::DCPS::Lockable_Message_Block_Ptr& a_message_block,
             const OpenDDS::DCPS::MonotonicTimePoint& a_timestamp,
             MessageType type)
       : address(a_address)
@@ -89,6 +90,7 @@ protected:
   const std::string name_;
   const Port port_;
   HandlerStatisticsReporter& stats_reporter_;
+  OpenDDS::DCPS::Lockable_Message_Block_Ptr::Lock_Policy message_block_locking_;
 };
 
 class HorizontalHandler;
@@ -108,7 +110,8 @@ public:
                   const OpenDDS::RTPS::RtpsDiscovery_rch& rtps_discovery,
                   const CRYPTO_TYPE& crypto,
                   const ACE_INET_Addr& application_participant_addr,
-                  HandlerStatisticsReporter& stats_reporter);
+                  HandlerStatisticsReporter& stats_reporter,
+                  OpenDDS::DCPS::Lockable_Message_Block_Ptr::Lock_Policy message_block_locking = OpenDDS::DCPS::Lockable_Message_Block_Ptr::Lock_Policy::No_Lock);
   void stop();
 
   void horizontal_handler(HorizontalHandler* horizontal_handler) { horizontal_handler_ = horizontal_handler; }
@@ -122,7 +125,7 @@ public:
 
   void venqueue_message(const ACE_INET_Addr& addr,
                         ParticipantStatisticsReporter& stats_reporter,
-                        const OpenDDS::DCPS::Message_Block_Shared_Ptr& msg,
+                        const OpenDDS::DCPS::Lockable_Message_Block_Ptr& msg,
                         const OpenDDS::DCPS::MonotonicTimePoint& now,
                         MessageType type);
 
@@ -130,7 +133,7 @@ protected:
   virtual void cache_message(GuidAddrSet::Proxy& /*proxy*/,
                              const OpenDDS::DCPS::GUID_t& /*src_guid*/,
                              const GuidSet& /*to*/,
-                             const OpenDDS::DCPS::Message_Block_Shared_Ptr& /*msg*/,
+                             const OpenDDS::DCPS::Lockable_Message_Block_Ptr& /*msg*/,
                              const OpenDDS::DCPS::MonotonicTimePoint& /*now*/) {}
 
   virtual bool do_normal_processing(GuidAddrSet::Proxy& /*proxy*/,
@@ -139,13 +142,13 @@ protected:
                                     GuidSet& /*to*/,
                                     bool /*admitted*/,
                                     bool& /*send_to_application_participant*/,
-                                    const OpenDDS::DCPS::Message_Block_Shared_Ptr& /*msg*/,
+                                    const OpenDDS::DCPS::Lockable_Message_Block_Ptr& /*msg*/,
                                     const OpenDDS::DCPS::MonotonicTimePoint& /*now*/,
                                     CORBA::ULong& /*sent*/) { return true; }
 
   CORBA::ULong process_message(const ACE_INET_Addr& remote,
                                const OpenDDS::DCPS::MonotonicTimePoint& now,
-                               const OpenDDS::DCPS::Message_Block_Shared_Ptr& msg,
+                               const OpenDDS::DCPS::Lockable_Message_Block_Ptr& msg,
                                MessageType& type) override;
   ParticipantStatisticsReporter& record_activity(GuidAddrSet::Proxy& proxy,
                                                  const AddrPort& remote_address,
@@ -158,7 +161,7 @@ protected:
                     const StringSet& to_partitions,
                     const GuidSet& to_guids,
                     bool send_to_application_participant,
-                    const OpenDDS::DCPS::Message_Block_Shared_Ptr& msg,
+                    const OpenDDS::DCPS::Lockable_Message_Block_Ptr& msg,
                     const OpenDDS::DCPS::MonotonicTimePoint& now);
   size_t send(const ACE_INET_Addr& addr,
               OpenDDS::STUN::Message message,
@@ -178,7 +181,7 @@ protected:
 
 private:
   bool parse_message(OpenDDS::RTPS::MessageParser& message_parser,
-                     const OpenDDS::DCPS::Message_Block_Shared_Ptr& msg,
+                     const OpenDDS::DCPS::Lockable_Message_Block_Ptr& msg,
                      OpenDDS::DCPS::GUID_t& src_guid,
                      GuidSet& to,
                      bool check_submessages,
@@ -205,7 +208,7 @@ public:
   void enqueue_message(const ACE_INET_Addr& addr,
                        const StringSet& to_partitions,
                        const GuidSet& to_guids,
-                       const OpenDDS::DCPS::Message_Block_Shared_Ptr& msg,
+                       const OpenDDS::DCPS::Lockable_Message_Block_Ptr& msg,
                        const OpenDDS::DCPS::MonotonicTimePoint& now);
 
 private:
@@ -213,7 +216,7 @@ private:
   VerticalHandler* vertical_handler_;
   CORBA::ULong process_message(const ACE_INET_Addr& remote,
                                const OpenDDS::DCPS::MonotonicTimePoint& now,
-                               const OpenDDS::DCPS::Message_Block_Shared_Ptr& msg,
+                               const OpenDDS::DCPS::Lockable_Message_Block_Ptr& msg,
                                MessageType& type) override;
 };
 
@@ -245,7 +248,7 @@ private:
   void cache_message(GuidAddrSet::Proxy& proxy,
                      const OpenDDS::DCPS::GUID_t& src_guid,
                      const GuidSet& to,
-                     const OpenDDS::DCPS::Message_Block_Shared_Ptr& msg,
+                     const OpenDDS::DCPS::Lockable_Message_Block_Ptr& msg,
                      const OpenDDS::DCPS::MonotonicTimePoint& now) override;
 
   bool do_normal_processing(GuidAddrSet::Proxy& proxy,
@@ -254,7 +257,7 @@ private:
                             GuidSet& to,
                             bool admitted,
                             bool& send_to_application_participant,
-                            const OpenDDS::DCPS::Message_Block_Shared_Ptr& msg,
+                            const OpenDDS::DCPS::Lockable_Message_Block_Ptr& msg,
                             const OpenDDS::DCPS::MonotonicTimePoint& now,
                             CORBA::ULong& sent) override;
 
@@ -282,7 +285,7 @@ private:
                             GuidSet& to,
                             bool admitted,
                             bool& send_to_application_participant,
-                            const OpenDDS::DCPS::Message_Block_Shared_Ptr& msg,
+                            const OpenDDS::DCPS::Lockable_Message_Block_Ptr& msg,
                             const OpenDDS::DCPS::MonotonicTimePoint& now,
                             CORBA::ULong& sent) override;
 };

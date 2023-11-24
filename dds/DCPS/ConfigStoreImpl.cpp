@@ -166,7 +166,9 @@ ConfigStoreImpl::get_int32(const char* key,
     const DDS::SampleInfo& info = infos[idx];
     if (info.valid_data) {
       DDS::Int32 x = 0;
-      if (DCPS::convertToInteger(sample.value(), x)) {
+      if (sample.value() == "DURATION_INFINITE_SEC") {
+        retval = DDS::DURATION_INFINITE_SEC;
+      } else if (DCPS::convertToInteger(sample.value(), x)) {
         retval = x;
       } else {
         retval = value;
@@ -213,7 +215,9 @@ ConfigStoreImpl::get_uint32(const char* key,
     const DDS::SampleInfo& info = infos[idx];
     if (info.valid_data) {
       DDS::UInt32 x = 0;
-      if (DCPS::convertToInteger(sample.value(), x)) {
+      if (sample.value() == "DURATION_INFINITE_NANOSEC") {
+        retval = DDS::DURATION_INFINITE_NSEC;
+      } else if (DCPS::convertToInteger(sample.value(), x)) {
         retval = x;
       } else {
         retval = value;
@@ -423,6 +427,50 @@ ConfigStoreImpl::get(const char* key,
                retval.c_str()));
 
   }
+
+  return retval;
+}
+
+void
+ConfigStoreImpl::set(const char* key,
+                     const StringList& value)
+{
+  String s;
+  for (StringList::const_iterator pos = value.begin(), limit = value.end(); pos != limit; ++pos) {
+    if (!s.empty()) {
+      s += ',';
+    }
+    s += *pos;
+  }
+
+  set(key, s);
+}
+
+ConfigStoreImpl::StringList
+ConfigStoreImpl::get(const char* key,
+                     const StringList& value) const
+{
+  // Join the default.
+  String s;
+  for (StringList::const_iterator pos = value.begin(), limit = value.end(); pos != limit; ++pos) {
+    if (!s.empty()) {
+      s += ',';
+    }
+    s += *pos;
+  }
+
+  const String t = get(key, s);
+
+  StringList retval;
+
+  const char* start = t.c_str();
+  while (const char* next_comma = std::strchr(start, ',')) {
+    const size_t size = next_comma - start;
+    retval.push_back(String(start, size));
+    start = next_comma + 1;
+  }
+  // Append everything after last comma
+  retval.push_back(start);
 
   return retval;
 }
@@ -670,6 +718,28 @@ ConfigStoreImpl::get(const char* key,
   return retval;
 }
 
+ConfigStoreImpl::StringList
+ConfigStoreImpl::get_section_names(const String& prefix) const
+{
+  const String cprefix = ConfigPair::canonicalize(prefix);
+
+  ConfigReader::SampleSequence samples;
+  DCPS::InternalSampleInfoSequence infos;
+  config_reader_->read(samples, infos, DDS::LENGTH_UNLIMITED,
+                       DDS::ANY_SAMPLE_STATE, DDS::ANY_VIEW_STATE, DDS::ALIVE_INSTANCE_STATE);
+  StringList retval;
+  for (ConfigReader::SampleSequence::const_iterator pos = samples.begin(), limit = samples.end(); pos != limit; ++pos) {
+    if (pos->key_has_prefix(cprefix) &&
+        pos->key() != cprefix &&
+        !pos->value().empty() &&
+        pos->value().substr(0, 1) == "@") {
+      retval.push_back(pos->value().substr(1));
+    }
+  }
+
+  return retval;
+}
+
 DDS::DataWriterQos ConfigStoreImpl::datawriter_qos()
 {
   return DataWriterQosBuilder().durability_transient_local();
@@ -770,10 +840,20 @@ process_section(ConfigStoreImpl& config_store,
   for (int idx = 0; status == 0; ++idx) {
     ACE_TString section_name;
     status = config.enumerate_sections(base, idx, section_name);
+    const String next_key_prefix = key_prefix + "_" + ACE_TEXT_ALWAYS_CHAR(section_name.c_str());
+
+    // Indicate the section.
+    if (allow_overwrite || !config_store.has(next_key_prefix.c_str())) {
+      config_store.set(next_key_prefix.c_str(), String("@") + ACE_TEXT_ALWAYS_CHAR(section_name.c_str()));
+      if (listener && reader) {
+        listener->on_data_available(reader);
+      }
+    }
+
     if (status == 0) {
       ACE_Configuration_Section_Key key;
       if (config.open_section(base, section_name.c_str(), 0, key) == 0) {
-        process_section(config_store, reader, listener, key_prefix + "_" + ACE_TEXT_ALWAYS_CHAR(section_name.c_str()), config, key, filename, allow_overwrite);
+        process_section(config_store, reader, listener, next_key_prefix, config, key, filename, allow_overwrite);
       } else {
         if (log_level >= LogLevel::Error) {
           ACE_ERROR((LM_ERROR,

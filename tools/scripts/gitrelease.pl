@@ -71,11 +71,24 @@ sub get_version_line {
   return $line;
 }
 
+sub git_tag {
+  my $version = shift();
+
+  return "${git_name_prefix}$version->{tag_string}";
+}
+
 sub get_rtd_link {
   my $settings = shift();
   my $post_release = shift() // 0;
 
-  return "$rtd_url/en/" . ($post_release ? 'latest-release' : lc($settings->{git_tag}));
+  my $last_tag = 'lastest-release';
+  if ($settings->{micro}) {
+    my $v = $settings->{parsed_version};
+    my $last_micro = $v->{micro} - 1;
+    $last_tag = lc(git_tag(parse_version("$v->{major}.$v->{minor}.$last_micro")));
+  }
+
+  return "$rtd_url/en/" . ($post_release ? $last_tag : lc($settings->{git_tag})) . "/";
 }
 
 sub usage {
@@ -155,12 +168,16 @@ sub help {
     "  --update-authors       Just update the AUTHORS files like in a release.\n" .
     "                         This doesn't run any release steps and doesn't require\n" .
     "                         the WORKSPACE or VERSION arguments.\n" .
+    "  --update-ace-tao       Update acetao.ini to the latest ACE/TAO releases.\n" .
+    "                         This doesn't run any release steps or require the\n" .
+    "                         WORKSPACE or VERSION arguments, but does require the\n" .
+    "                         GITHUB_TOKEN environment variable\n" .
+    "  --cherry-pick-prs PR.. Use git cherry-pick from the given GitHub PRs.\n" .
     "\n" .
     "Environment Variables:\n" .
     "  GITHUB_TOKEN           GitHub token with repo access to publish release on\n" .
     "                         GitHub.\n" .
-    # When this is ready also remove fixed skip on RTD step
-    # "  READ_THE_DOCS_TOKEN    Access token for Read the Docs Admin\n" .
+    "  READ_THE_DOCS_TOKEN    Access token for Read the Docs Admin\n" .
     "  SFTP_USERNAME          SFTP Username\n" .
     "  SFTP_HOST              SFTP Server Address\n" .
     "\n" .
@@ -283,7 +300,7 @@ sub new_pithub {
     die("GITHUB_TOKEN must be defined");
   }
 
-  return Pithub->new(
+  $settings->{pithub} = Pithub->new(
     user => $settings->{github_user},
     repo => $settings->{github_repo},
     token => $settings->{github_token},
@@ -388,8 +405,6 @@ sub compare_workspace_info {
 
 sub check_workspace {
   my $settings = shift();
-
-  return if $settings->{list};
 
   if (!-d $settings->{workspace}) {
     print("Creating workspace directory \"$settings->{workspace}\"\n");
@@ -910,6 +925,27 @@ sub upload_shapes_demo {
     "\nGithub upload failed, try again");
 }
 
+sub cherry_pick_prs {
+  my $settings = shift();
+  if (scalar(@_) == 0) {
+    arg_error("Expecting PR arguments");
+  }
+
+  my $ph = Pithub->new(
+    user => $settings->{github_user},
+    repo => $settings->{github_repo},
+  );
+
+  foreach my $prnum (@_) {
+    print("Cherry picking PR #$prnum\n");
+    my $result = $ph->pull_requests->commits(pull_request_id => $prnum);
+    check_pithub_result($result);
+    my $first_commit = $result->content->[0]->{sha};
+    my $last_commit = $result->content->[-1]->{sha};
+    run_command(['git', 'cherry-pick', "$first_commit^..$last_commit"], autodie => 1)
+  }
+}
+
 my $step_subexpr_re = qr/(\^?)(\d*)(-?)(\d*)/;
 my $step_expr_re = qr/^${step_subexpr_re}(,${step_subexpr_re})*$/;
 
@@ -1049,6 +1085,113 @@ sub get_releases {
 
   my @sorted = sort { version_cmp($b->{version}, $a->{version}) } @releases;
   return \@sorted;
+}
+
+sub update_ace_tao {
+  my $settings = dclone(shift()); # Clone so we have different pithub
+  $settings->{github_user} = 'DOCGroup';
+  $settings->{github_repo} = 'ACE_TAO';
+  new_pithub($settings);
+
+  my $doc_repo = $settings->{pithub}->repos->get()->content->{clone_url};
+  my @arc_exts = ('zip', 'tar.gz', 'tar.bz2');
+  my @ace_tao_versions = (
+    {
+      name => 'ace6tao2',
+      min => parse_version('6.5.0'),
+      repo => $doc_repo,
+      branch => 'ace6tao2',
+    },
+    {
+      name => 'ace7tao3',
+      min => parse_version('7.1.0'),
+      repo => $doc_repo,
+      branch => 'master',
+    },
+  );
+
+  # Get all the ACE/TAO releases
+  my $release_list = get_github_releases($settings);
+  my @releases = ();
+  while (my $release = $release_list->next) {
+    next if $release->{prerelease};
+    next if ($release->{tag_name} !~ /^ACE\+TAO-(\d+_\d+_\d+)$/);
+    my $ver = $1;
+    $ver =~ s/_/./g;
+    push(@releases, {
+      version => parse_version($ver),
+      release => $release,
+    });
+  }
+  my @sorted = sort { version_cmp($b->{version}, $a->{version}) } @releases;
+
+  for my $ace_tao_version (@ace_tao_versions) {
+    # Find versions that match ace_tao_versions. This is the first one that's
+    # less than MAJOR.MINOR+1.MICRO.
+    my $min = $ace_tao_version->{min};
+    my $plus = $min->{minor} + 1;
+    my $max = parse_version("$min->{major}.$plus.$min->{micro}");
+    for my $r (@sorted) {
+      if (version_lesser($r->{version}, $max)) {
+        my $version = $r->{version}->{string};
+        $ace_tao_version->{version} = $version;
+        $ace_tao_version->{url} = $r->{release}->{html_url};
+
+        # Get the filenames, URLs, and checksums for each asset.
+        my $prefix = quotemeta("ACE+TAO-src-$version.");
+        for my $asset (@{$r->{release}->{assets}}) {
+          next if ($asset->{name} !~ /^$prefix(.*)$/);
+          my $ext = $1;
+          my $ext_re = quotemeta($ext);
+          if (grep(/^$ext_re$/, @arc_exts)) {
+            $ace_tao_version->{"$ext-filename"} = $asset->{name};
+            $ace_tao_version->{"$ext-url"} = $asset->{browser_download_url};
+          }
+          elsif ($ext =~ /^(.*)\.md5$/) {
+            my $about_ext = $1;
+            my $about_ext_re = quotemeta($about_ext);
+            if (grep(/^$about_ext_re$/, @arc_exts)) {
+              my $content;
+              if (!download($asset->{browser_download_url}, content_ref => \$content)) {
+                die("Couldn't get file from $asset->{browser_download_url}");
+              }
+              $ace_tao_version->{"$about_ext-md5"} = substr($content, 0, 32);
+            }
+            else {
+              print("Ignored $asset->{name}\n");
+            }
+          }
+          else {
+            print("Ignored $asset->{name}\n");
+          }
+        }
+
+        last;
+      }
+    }
+  }
+
+  # Print the INI file
+  my $ini_path = 'acetao.ini';
+  open(my $ini_fh, '>', $ini_path) or die("Could not open $ini_path: $!");
+  print $ini_fh (
+    "# This file contains the common info for ACE/TAO releases. Insead of editing\n",
+    "# this directly, run:\n",
+    "#   GITHUB_TOKEN=... ./tools/scripts/gitrelease.pl --update-ace-tao\n");
+  for my $ace_tao_version (@ace_tao_versions) {
+    print $ini_fh ("\n[$ace_tao_version->{name}]\n",
+      "version=$ace_tao_version->{version}\n",
+      "repo=$ace_tao_version->{repo}\n",
+      "branch=$ace_tao_version->{branch}\n",
+      "url=$ace_tao_version->{url}\n");
+    for my $ext (@arc_exts) {
+      for my $suffix ('filename', 'url', 'md5') {
+        my $key = "$ext-$suffix";
+        print $ini_fh ("$key=$ace_tao_version->{$key}\n");
+      }
+    }
+  }
+  close($ini_fh);
 }
 
 ############################################################################
@@ -1743,23 +1886,19 @@ sub verify_update_readme_file {
   my $step_options = shift() // {};
   my $post_release = $step_options->{post_release} // 0;
 
-  my $link = get_rtd_link($settings, $post_release);
+  my $link = get_rtd_link($settings, !$post_release);
   my $link_re = quotemeta($link);
   my $found_link = 0;
   open(my $fh, $readme_file) or die("Can't open \"$readme_file\": $?");
   while (<$fh>) {
     if ($_ =~ /$link_re/) {
+      print STDERR ("Found $link on $readme_file:$.\n");
       $found_link = 1;
-      last;
     }
   }
   close($fh);
 
-  if (!$found_link) {
-    print("Didn't find $link\n");
-  }
-
-  return $found_link;
+  return !$found_link;
 }
 
 sub message_update_readme_file {
@@ -1770,15 +1909,12 @@ sub remedy_update_readme_file {
   my $settings = shift();
   my $post_release = shift() // 0;
 
-  my $link = quotemeta(get_rtd_link($settings, !$post_release));
+  my $link_re = quotemeta(get_rtd_link($settings, !$post_release));
   my $replace_with = get_rtd_link($settings, $post_release);
-  my $replaced_link = 0;
   open(my $fh, "+< $readme_file") or die("Can't open \"$readme_file\": $?");
   my $out = '';
   while (<$fh>) {
-    if ($_ =~ s/$link/$replace_with/) {
-      $replaced_link = 1;
-    }
+    $_ =~ s/$link_re/$replace_with/g;
     $out .= $_;
   }
 
@@ -1787,7 +1923,7 @@ sub remedy_update_readme_file {
   truncate($fh, tell($fh)) or die("Truncating: $!");
   close($fh) or die("Closing: $!");
 
-  return $replaced_link;
+  return 1;
 }
 
 ############################################################################
@@ -2718,7 +2854,8 @@ sub verify_rtd_activate {
     $settings, 'GET',
     res_json_ref => \$version_info,
   ));
-  return $version_info->{active} && !$version_info->{hidden};
+  return $version_info->{active} && !$version_info->{hidden} &&
+    $version_info->{privacy_level} eq 'public';
 }
 
 sub message_rtd_activate {
@@ -2734,6 +2871,7 @@ sub remedy_rtd_activate {
     req_json_ref => {
       active => $JSON::PP::true,
       hidden => $JSON::PP::false,
+      privacy_level => 'public',
     },
     expect_status => 204,
   ));
@@ -2814,6 +2952,8 @@ my $force_not_highest_version = 0;
 my $sftp_base_dir = $default_sftp_base_dir;
 my $upload_shapes_demo = 0;
 my $update_authors = 0;
+my $update_ace_tao = 0;
+my $cherry_pick_prs = 0;
 
 GetOptions(
   'help' => \$print_help,
@@ -2838,6 +2978,8 @@ GetOptions(
   'skip-github=i' => \$skip_github,
   'upload-shapes-demo' => \$upload_shapes_demo,
   'update-authors' => \$update_authors,
+  'update-ace-tao' => \$update_ace_tao,
+  'cherry-pick-prs' => \$cherry_pick_prs,
 ) or arg_error("Invalid option");
 
 if ($print_help) {
@@ -2863,7 +3005,7 @@ my $version = "";
 my $base_name = "";
 my $release_branch = "";
 
-my $ignore_args = $update_authors || $print_list_all;
+my $ignore_args = $update_authors || $print_list_all || $update_ace_tao || $cherry_pick_prs;
 if ($ignore_args) {
   $parsed_version = $zero_version;
   $parsed_next_version = $zero_version;
@@ -2951,7 +3093,7 @@ my %global_settings = (
     next_version => $next_version,
     parsed_next_version => $parsed_next_version,
     base_name => $base_name,
-    git_tag => "${git_name_prefix}$parsed_version->{tag_string}",
+    git_tag => git_tag($parsed_version),
     tgz_worktree => "$workspace/tgz/${base_name}",
     zip_worktree => "$workspace/zip/${base_name}",
     doxygen_dir => $doxygen_dir,
@@ -2995,8 +3137,7 @@ my %global_settings = (
 );
 
 if (!$ignore_args) {
-  $global_settings{pithub} = new_pithub(\%global_settings);
-
+  new_pithub(\%global_settings);
   check_workspace(\%global_settings);
 
   if ($mock) {
@@ -3261,6 +3402,9 @@ my @release_steps = (
     },
     message => sub{message_update_readme_file(@_, 1)},
     remedy => sub{remedy_update_readme_file(@_, 1)},
+    # Otherwise this would revert the README to the last micro version and it
+    # doesn't make sense for it to be latest-release, so just leave it.
+    skip => $global_settings{micro},
     can_force => 1,
     post_release => 1,
   },
@@ -3291,7 +3435,6 @@ my @release_steps = (
     remedy => sub{remedy_rtd_activate(@_)},
     post_release => 1,
     can_force => 1,
-    skip => 1, # When this is ready, also uncomment READ_THE_DOCS_TOKEN in help
   },
   {
     name => 'Trigger Shapes Demo Build',
@@ -3444,12 +3587,18 @@ sub run_step {
   $step->{verified} = 1;
 }
 
-my $alt = $upload_shapes_demo || $update_authors;
+my $alt = $upload_shapes_demo || $update_authors || $cherry_pick_prs;
 if ($upload_shapes_demo) {
   upload_shapes_demo(\%global_settings);
 }
 elsif ($update_authors) {
   remedy_authors(\%global_settings);
+}
+elsif ($update_ace_tao) {
+  update_ace_tao(\%global_settings);
+}
+elsif ($cherry_pick_prs) {
+  cherry_pick_prs(\%global_settings, map { int($_) } @ARGV);
 }
 elsif (!$alt && ($ignore_args || ($workspace && $parsed_version))) {
   my @steps_to_do;

@@ -34,11 +34,20 @@ sub get_executable {
 sub get_bin_executable {
   my $name = shift;
 
-  my $install_prefix_bin = "";
-  if (defined($ENV{OPENDDS_INSTALL_PREFIX})) {
-    $install_prefix_bin = catdir($ENV{OPENDDS_INSTALL_PREFIX}, "bin");
+  my $bin = catdir($ENV{DDS_ROOT}, "bin");
+  if (defined($ENV{OPENDDS_BUILD_DIR})) {
+    $bin = catdir($ENV{OPENDDS_BUILD_DIR}, "bin");
+    if (defined($ENV{CMAKE_CONFIG_TYPE})) {
+      my $subdir_bin = catdir($bin, $ENV{CMAKE_CONFIG_TYPE});
+      if (-d $subdir_bin) {
+        $bin = $subdir_bin;
+      }
+    }
   }
-  return get_executable($name, catdir($ENV{DDS_ROOT}, "bin"), $install_prefix_bin);
+  elsif (defined($ENV{OPENDDS_INSTALL_PREFIX})) {
+    $bin = catdir($ENV{OPENDDS_INSTALL_PREFIX}, "bin");
+  }
+  return get_executable($name, $bin);
 }
 
 sub get_opendds_idl {
@@ -661,6 +670,11 @@ sub process {
   }
 
   my $subdir = $PerlACE::Process::ExeSubDir;
+  if (defined($ENV{CMAKE_CONFIG_TYPE})) {
+    $subdir = $ENV{CMAKE_CONFIG_TYPE} . (($^O eq 'MSWin32') ? '\\' : '/');
+    $PerlACE::Process::ExeSubDir = $subdir;
+  }
+
   my $basename = File::Basename::basename($executable);
   my $dirname = File::Basename::dirname($executable);
   if (!defined(PerlDDS::get_executable($basename, $dirname, catdir($dirname, $subdir)))) {

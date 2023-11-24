@@ -194,14 +194,14 @@ public:
 
   virtual void append_transport_statistics(TransportStatisticsSequence& /*seq*/) {}
 
+  static void set_port_in_addr_string(OPENDDS_STRING& addr_str, u_short port_number);
+
 protected:
 
   TransportInst(const char* type,
                 const OPENDDS_STRING& name);
 
   virtual ~TransportInst();
-
-  void set_port_in_addr_string(OPENDDS_STRING& addr_str, u_short port_number);
 
   mutable ACE_SYNCH_MUTEX lock_;
   bool shutting_down_;
@@ -222,6 +222,91 @@ private:
   const String config_prefix_;
 
   TransportImpl_rch impl_;
+};
+
+// Helper to turn a raw value into getters and setters.
+template <typename Delegate, typename T>
+class ConfigValue {
+public:
+  typedef void (Delegate::*Setter)(T);
+  typedef T (Delegate::*Getter)(void) const;
+
+  ConfigValue(Delegate& delegate,
+              Setter setter,
+              Getter getter)
+    : delegate_(delegate)
+    , setter_(setter)
+    , getter_(getter)
+  {}
+
+  ConfigValue& operator=(T flag)
+  {
+    (delegate_.*setter_)(flag);
+    return *this;
+  }
+
+  operator T() const
+  {
+    return (delegate_.*getter_)();
+  }
+
+  T get() const
+  {
+    return (delegate_.*getter_)();
+  }
+
+  ConfigValue& operator=(const ConfigValue& cv)
+  {
+    (delegate_.*setter_)(cv.get());
+    return *this;
+  }
+
+private:
+  Delegate& delegate_;
+  Setter setter_;
+  Getter getter_;
+};
+
+template <typename Delegate, typename T>
+class ConfigValueRef {
+public:
+  typedef void (Delegate::*Setter)(const T&);
+  typedef T (Delegate::*Getter)(void) const;
+
+  ConfigValueRef(Delegate& delegate,
+                 Setter setter,
+                 Getter getter)
+    : delegate_(delegate)
+    , setter_(setter)
+    , getter_(getter)
+  {}
+
+  ConfigValueRef& operator=(const T& flag)
+  {
+    (delegate_.*setter_)(flag);
+    return *this;
+  }
+
+  operator T() const
+  {
+    return (delegate_.*getter_)();
+  }
+
+  T get() const
+  {
+    return (delegate_.*getter_)();
+  }
+
+  ConfigValueRef& operator=(const ConfigValueRef& cv)
+  {
+    (delegate_.*setter_)(cv.get());
+    return *this;
+  }
+
+private:
+  Delegate& delegate_;
+  Setter setter_;
+  Getter getter_;
 };
 
 } // namespace DCPS
