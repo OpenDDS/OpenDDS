@@ -58,7 +58,7 @@ QosCommon::get_duration(::DDS::Duration_t& duration, const ACE_TCHAR * sec, cons
   if (sec != 0) {
     if (ACE_OS::strcmp(sec, ACE_TEXT("DURATION_INFINITY")) == 0 ||
         ACE_OS::strcmp(sec, ACE_TEXT("DURATION_INFINITE_SEC")) == 0) {
-      duration.sec = 0x7fffffff;
+      duration.sec = ::DDS::DURATION_INFINITE_SEC;
     } else {
       duration.sec = ACE_OS::atoi(sec);
     }
@@ -67,7 +67,7 @@ QosCommon::get_duration(::DDS::Duration_t& duration, const ACE_TCHAR * sec, cons
   if (nsec != 0) {
     if (ACE_OS::strcmp(nsec, ACE_TEXT("DURATION_INFINITY")) == 0 ||
              ACE_OS::strcmp(nsec, ACE_TEXT("DURATION_INFINITE_NSEC")) == 0) {
-      duration.nanosec =  0x7fffffff;
+      duration.nanosec =  ::DDS::DURATION_INFINITE_NSEC;
     } else {
       duration.nanosec = ACE_OS::atoi(nsec);
     }
