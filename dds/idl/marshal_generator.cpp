@@ -1626,8 +1626,12 @@ namespace {
     const std::string& indent, AST_Field* field, const std::string& prefix,
     bool wrap_nested_key_only, Intro& intro)
   {
-    if (be_global->is_optional(field)) {
-      return indent + "//TODO OPTIONAL HERE\n";
+    std::string line = "";
+    std::string field_name = field->local_name()->get_string();;
+    bool is_optional = be_global->is_optional(field);
+    if (is_optional) {      
+      line += indent + "if (" + prefix + "." + field_name + "().has_value()) {\n";
+      field_name += ".value";
     }
 
     FieldInfo af(*field);
@@ -1636,11 +1640,16 @@ namespace {
         prefix + "." + insert_cxx11_accessor_parens(af.name_));
       wrapper.nested_key_only_ = wrap_nested_key_only;
       wrapper.done(&intro);
-      return indent + "serialized_size(encoding, size, " + wrapper.ref() + ");\n";
+      line += indent + "serialized_size(encoding, size, " + wrapper.ref() + ");\n";
+    } else {
+      line += findSizeCommon(
+        indent, field, field_name, field->field_type(), prefix,
+        wrap_nested_key_only, intro);
     }
-    return findSizeCommon(
-      indent, field, field->local_name()->get_string(), field->field_type(), prefix,
-      wrap_nested_key_only, intro);
+
+    if (is_optional) line += indent + "}\n";
+
+    return line;
   }
 
   // common to both fields (in structs) and branches (in unions)
@@ -1702,20 +1711,22 @@ namespace {
     const std::string& indent, AST_Field* field, const std::string& prefix,
     bool wrap_nested_key_only, Intro& intro)
   {
-    if (be_global->is_optional(field)) {
-      return indent + "false //TODO OPTIONAL HERE\n";
-    }
-
     FieldInfo af(*field);
+    const bool is_optional = be_global->is_optional(field);
+   
     if (af.anonymous()) {
       RefWrapper wrapper(af.type_, af.scoped_type_,
-        prefix + "." + insert_cxx11_accessor_parens(af.name_));
+        prefix + "." + insert_cxx11_accessor_parens(af.name_) + (is_optional ? ".value()" : ""));
       wrapper.nested_key_only_ = wrap_nested_key_only;
       wrapper.done(&intro);
       return "(strm " + wrapper.stream() + ")";
     }
+    std::string field_name = field->local_name()->get_string();
+    if (be_global->is_optional(field)) {
+      field_name += ".value";
+    }
     return streamCommon(
-      indent, field, field->local_name()->get_string(), field->field_type(), prefix,
+      indent, field, field_name, field->field_type(), prefix,
       wrap_nested_key_only, intro);
   }
 
@@ -2587,6 +2598,8 @@ namespace {
       expr = "";
       for (Fields::Iterator i = fields.begin(); i != fields_end; ++i) {
         AST_Field* const field = *i;
+        const bool is_optional = be_global->is_optional(field);
+
         if (expr.size() && exten != extensibilitykind_appendable) {
           expr += "\n    && ";
         }
@@ -2619,8 +2632,12 @@ namespace {
           expr +=
             "  if (reached_end_of_struct) {\n" +
             type_to_default("    ", type, stru_field_name, type->anonymous()) +
-            "  } else {\n"
-            "    if (!";
+            "  } else {\n";
+          if (is_optional) {
+            expr += "    if (" + stru_field_name + ".has_value() && !";
+          } else {
+            expr += "    if (!";
+          }
         }
         expr += generate_field_stream(
           indent, field, ">> stru" + value_access, wrap_nested_key_only, intro);
@@ -2788,14 +2805,24 @@ namespace {
       string expr;
       for (Fields::Iterator i = fields.begin(); i != fields_end; ++i) {
         AST_Field* const field = *i;
+        const bool is_optional = be_global->is_optional(field);;
+
         if (expr.size()) expr += "\n    && ";
         const string field_name = field->local_name()->get_string(),
           cond = rtpsCustom.getConditional(field_name);
         if (!cond.empty()) {
           expr += "(!(" + cond + ") || ";
         }
+
+        if (is_optional)
+          expr += "stru" + value_access + "." + field_name + "().has_value() ? ";
+        
         expr += generate_field_stream(
           indent, field, "<< stru" + value_access, wrap_nested_key_only, intro);
+
+        if (is_optional)
+          expr += " : true\n";
+
         if (!cond.empty()) {
           expr += ")";
         }
