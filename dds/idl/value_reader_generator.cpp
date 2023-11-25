@@ -331,7 +331,7 @@ bool value_reader_generator::gen_struct(AST_Structure*,
       } else {
         generate_read("value." + field_name, accessor, field->field_type(), "i", 3);
       }
-        
+
       be_global->impl_ <<
         "      break;\n"
         "    }\n";

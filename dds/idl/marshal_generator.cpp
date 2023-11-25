@@ -1629,7 +1629,7 @@ namespace {
     std::string line = "";
     std::string field_name = field->local_name()->get_string();;
     bool is_optional = be_global->is_optional(field);
-    if (is_optional) {      
+    if (is_optional) {
       line += indent + "if (" + prefix + "." + field_name + "().has_value()) {\n";
       field_name += ".value";
     }
@@ -1713,7 +1713,7 @@ namespace {
   {
     FieldInfo af(*field);
     const bool is_optional = be_global->is_optional(field);
-   
+
     if (af.anonymous()) {
       RefWrapper wrapper(af.type_, af.scoped_type_,
         prefix + "." + insert_cxx11_accessor_parens(af.name_) + (is_optional ? ".value()" : ""));
@@ -2816,7 +2816,7 @@ namespace {
 
         if (is_optional)
           expr += "stru" + value_access + "." + field_name + "().has_value() ? ";
-        
+
         expr += generate_field_stream(
           indent, field, "<< stru" + value_access, wrap_nested_key_only, intro);
 

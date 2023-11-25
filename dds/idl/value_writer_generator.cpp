@@ -292,7 +292,7 @@ bool value_writer_generator::gen_struct(AST_Structure*,
       } else {
         generate_write("value." + field_name + accessor_suffix, field->field_type(), "i");
       }
-      
+
       be_global->impl_ <<
         "  value_writer.end_struct_member();\n";
     }
