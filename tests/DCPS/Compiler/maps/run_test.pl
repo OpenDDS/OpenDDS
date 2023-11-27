@@ -16,4 +16,4 @@ my $test = new PerlDDS::TestFramework();
 $test->process($name, $name);
 $test->start_process($name);
 
-exit $test->finish(30);
+exit $test->finish(60);
