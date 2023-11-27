@@ -295,7 +295,10 @@ private:
 
   RevokePermissionsTask_rch& make_task(RevokePermissionsTask_rch& task);
 
+  static time_t utc_now();
+
   bool validate_date_time(const Permissions::Validity_t& validity,
+                          time_t now_utc,
                           DDS::Security::SecurityException& ex);
 
   bool get_sec_attributes(DDS::Security::PermissionsHandle permissions_handle,
@@ -310,6 +313,8 @@ private:
                           const DDS::PartitionQosPolicy& partition,
                           Permissions::PublishSubscribe_t pub_or_sub,
                           const Permissions::Grant& grant,
+                          time_t now_utc,
+                          time_t& expiration_time,
                           DDS::Security::SecurityException& ex);
 
   void parse_class_id(const std::string& class_id,

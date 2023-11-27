@@ -11,6 +11,7 @@
 #include "SafetyProfileStreams.h"
 #include "TimeDuration.h"
 #include "dcps_export.h"
+#include "debug.h"
 
 #include "dds/DdsDcpsInfrastructureC.h"
 
@@ -81,6 +82,12 @@ typedef RcHandle<ConfigListener> ConfigReaderListener_rch;
 typedef InternalDataReader<ConfigPair> ConfigReader;
 typedef RcHandle<ConfigReader> ConfigReader_rch;
 
+template<typename T>
+struct EnumList {
+  T value;
+  const char* name;
+};
+
 class OpenDDS_Dcps_Export ConfigStoreImpl : public ConfigStore {
 public:
   enum IntegerTimeFormat {
@@ -146,6 +153,51 @@ public:
              const String& value,
              bool allow_empty = true) const;
 
+  typedef OPENDDS_VECTOR(String) StringList;
+  void set(const char* key,
+           const StringList& value);
+  StringList get(const char* key,
+                 const StringList& value) const;
+
+  template<typename T>
+  T get(const char* key,
+        T value,
+        const EnumList<T> decoder[])
+  {
+    bool found = false;
+    // Encode the default.
+    String value_as_string;
+    for (size_t idx = 0; decoder[idx].name; ++idx) {
+      if (decoder[idx].value == value) {
+        value_as_string = decoder[idx].name;
+        found = true;
+        break;
+      }
+    }
+
+    if (!found && log_level >= LogLevel::Warning) {
+      ACE_ERROR((LM_WARNING,
+                 ACE_TEXT("(%P|%t) WARNING: ConfigStoreImpl::get: ")
+                 ACE_TEXT("failed to convert default value to string\n")));
+    }
+
+    const String actual = get(key, value_as_string);
+    for (size_t idx = 0; decoder[idx].name; ++idx) {
+      if (decoder[idx].name == actual) {
+        return decoder[idx].value;
+      }
+    }
+
+    if (log_level >= LogLevel::Warning) {
+      ACE_ERROR((LM_WARNING,
+                 ACE_TEXT("(%P|%t) WARNING: ConfigStoreImpl::get: ")
+                 ACE_TEXT("failed to encode (%C) to enumerated value, defaulting to (%C)\n"),
+                 actual.c_str(), value_as_string.c_str()));
+    }
+
+    return value;
+  }
+
   void set(const char* key,
            const TimeDuration& value,
            IntegerTimeFormat format);
@@ -161,6 +213,11 @@ public:
                      const NetworkAddress& value,
                      NetworkAddressFormat format,
                      NetworkAddressKind kind) const;
+
+  // Section names are identified as values starting with '@' and
+  // having the original text of the last part of the section name.
+  // This is used to create objects of different types.
+  StringList get_section_names(const String& prefix) const;
 
   static DDS::DataWriterQos datawriter_qos();
   static DDS::DataReaderQos datareader_qos();

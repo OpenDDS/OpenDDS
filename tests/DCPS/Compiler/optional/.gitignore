@@ -1,0 +1,14 @@
+optional_annotation
+optionalC.cpp
+optionalC.h
+optionalC.inl
+optionalS.cpp
+optionalS.h
+optionalTypeSupport.idl
+optionalTypeSupportC.cpp
+optionalTypeSupportC.h
+optionalTypeSupportC.inl
+optionalTypeSupportImpl.cpp
+optionalTypeSupportImpl.h
+optionalTypeSupportS.cpp
+optionalTypeSupportS.h

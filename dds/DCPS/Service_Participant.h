@@ -344,13 +344,14 @@ public:
   bool set_repo_ior(const char* ior,
                     Discovery::RepoKey key = Discovery::DEFAULT_REPO,
                     bool attach_participant = true,
-                    bool write_config = true);
+                    bool overwrite = true);
 
 #ifdef DDS_HAS_WCHAR
   /// Convenience overload for wchar_t
   bool set_repo_ior(const wchar_t* ior,
                     Discovery::RepoKey key = Discovery::DEFAULT_REPO,
-                    bool attach_participant = true);
+                    bool attach_participant = true,
+                    bool overwrite = true);
 #endif
 
   bool use_bidir_giop() const;
@@ -829,8 +830,6 @@ private:
   private:
     Service_Participant& service_participant_;
   };
-
-  bool set_repo_ior_result_;
 
   // This mutex protection configuration that is cached for efficient access.
   mutable ACE_Thread_Mutex cached_config_mutex_;

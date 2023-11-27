@@ -341,14 +341,13 @@ TEST_F(dds_DCPS_XTypes_DynamicDataAdapter, test_union)
       ASSERT_EQ(tu.simple_struct().value, 1u);
     }
   }
-  /* TODO: TestUnion::simple_union in IDL
   {
     DDS::DynamicData_var ddi = DDS::DynamicDataFactory::get_instance()->create_data(dt);
     {
       SimpleUnion su;
       su.value(1);
       TestUnion tu;
-      tu.simple_struct(su);
+      tu.simple_union(su);
       DDS::DynamicData_var dda = get_dynamic_data_adapter(dt, tu);
       ASSERT_RC_OK(copy(ddi, dda));
     }
@@ -359,7 +358,6 @@ TEST_F(dds_DCPS_XTypes_DynamicDataAdapter, test_union)
       ASSERT_EQ(tu.simple_union().value(), 1u);
     }
   }
-  */
 }
 
 #  else // (No DynamicDataAdapter)

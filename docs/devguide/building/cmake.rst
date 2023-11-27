@@ -740,6 +740,10 @@ Config Variables
 These variables are set by the ``configure`` script in an MPC-built OpenDDS and normally shouldn't be changed.
 They can be changed when configuring a :ref:`CMake-built OpenDDS <cmake-building>` using ``-D``, but should not be changed after that.
 
+.. seealso::
+
+  :ref:`cmake-building-vars`
+
 Dependencies
 ^^^^^^^^^^^^
 
@@ -748,10 +752,24 @@ Dependencies
 
   Path to :ref:`deps-ace`, usually :envvar:`ACE_ROOT`
 
+.. cmake:var:: OPENDDS_ACE_VERSION
+  :nocontentsentry:
+
+  The version of ACE being used.
+
+  .. versionadded:: 3.27
+
 .. cmake:var:: OPENDDS_TAO
   :nocontentsentry:
 
   Path to :ref:`deps-tao`, usually :envvar:`TAO_ROOT`
+
+.. cmake:var:: OPENDDS_TAO_VERSION
+  :nocontentsentry:
+
+  The version of TAO being used.
+
+  .. versionadded:: 3.27
 
 .. cmake:var:: OPENDDS_OPENSSL
   :nocontentsentry:

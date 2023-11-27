@@ -194,6 +194,7 @@ public:
   void set_owner_evaluated(DDS::InstanceHandle_t instance, bool flag);
   bool is_owner_evaluated(DDS::InstanceHandle_t instance);
 
+  void remove_instance(DDS::InstanceHandle_t instance);
   void schedule_historic_samples_timer(EndHistoricSamplesMissedSweeper* sweeper, const ACE_Time_Value& ten_seconds);
   void cancel_historic_samples_timer(EndHistoricSamplesMissedSweeper* sweeper);
   bool check_end_historic_samples(EndHistoricSamplesMissedSweeper* sweeper, OPENDDS_MAP(SequenceNumber, ReceivedDataSample)& to_deliver);

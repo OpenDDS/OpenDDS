@@ -1043,9 +1043,9 @@ RtpsUdpReceiveStrategy::check_header(const RtpsSampleHeader& header)
   if (header.valid() && header.submessage_._d() == RTPS::DATA_FRAG) {
     const RTPS::DataFragSubmessage& rtps = header.submessage_.data_frag_sm();
     frags_.first = rtps.fragmentStartingNum.value;
-    frags_.second = frags_.first + (rtps.fragmentsInSubmessage - 1);
+    frags_.second = RtpsSampleHeader::last_fragment(rtps);
     fragment_size_ = rtps.fragmentSize;
-    total_frags_ = (rtps.sampleSize / rtps.fragmentSize) + (rtps.sampleSize % rtps.fragmentSize ? 1 : 0);
+    total_frags_ = RtpsSampleHeader::total_fragments(rtps);
   }
 
   return header.valid();

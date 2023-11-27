@@ -1,0 +1,17 @@
+Released 2023-11-14
+
+Download :ghrelease:`this release on GitHub <DDS-3.26.1>`.
+
+Read `the documentation for this release on Read the Docs <https://opendds.readthedocs.io/en/dds-3.26.1>`__.
+
+Fixes
+=====
+
+- Building with CMake
+
+  - Fixed :ghissue:`4328`, where each run of CMake effectively always appended the MPC features to ``default.features`` in ACE. (:ghpr:`4330`)
+
+- Fixed a corner case in RTPS ParameterList parsing (:ghpr:`4336`)
+
+- Reject some types of invalid RTPS DataFrag submessages (:ghpr:`4348`)
+

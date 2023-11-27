@@ -194,14 +194,14 @@ public:
 
   virtual void append_transport_statistics(TransportStatisticsSequence& /*seq*/) {}
 
+  static void set_port_in_addr_string(OPENDDS_STRING& addr_str, u_short port_number);
+
 protected:
 
   TransportInst(const char* type,
                 const OPENDDS_STRING& name);
 
   virtual ~TransportInst();
-
-  void set_port_in_addr_string(OPENDDS_STRING& addr_str, u_short port_number);
 
   mutable ACE_SYNCH_MUTEX lock_;
   bool shutting_down_;

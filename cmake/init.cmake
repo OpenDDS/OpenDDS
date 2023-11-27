@@ -271,13 +271,14 @@ if(NOT DEFINED ACE_ROOT)
     set(ACE_LIB_DIR "${_OPENDDS_ROOT}/${OPENDDS_INSTALL_LIB}")
 
   elseif(OPENDDS_ACE)
-    set(ACE_ROOT ${OPENDDS_ACE})
+    set(ACE_ROOT "${OPENDDS_ACE}")
     set(ACE_INCLUDE_DIRS "${ACE_ROOT}")
     set(ACE_LIB_DIR "${ACE_ROOT}/lib")
   endif()
 
   set(ACE_BIN_DIR "${ACE_ROOT}/bin")
 endif()
+_opendds_get_version(OPENDDS_ACE_VERSION ACE "${ACE_ROOT}")
 
 if(NOT DEFINED TAO_ROOT)
   if(OPENDDS_USE_PREFIX_PATH)
@@ -296,6 +297,14 @@ if(NOT DEFINED TAO_ROOT)
     "${TAO_INCLUDE_DIR}/orbsvcs"
   )
 endif()
+_opendds_get_version(OPENDDS_TAO_VERSION TAO "${TAO_ROOT}")
+
+message(STATUS "Using OpenDDS ${OPENDDS_VERSION} at ${DDS_ROOT}")
+if(DEFINED OPENDDS_MPC)
+  message(STATUS "Using MPC at ${OPENDDS_MPC}")
+endif()
+message(STATUS "Using ACE ${OPENDDS_ACE_VERSION} at ${ACE_ROOT}")
+message(STATUS "Using TAO ${OPENDDS_TAO_VERSION} at ${TAO_ROOT}")
 
 if(OPENDDS_STATIC)
   set(OPENDDS_LIBRARY_TYPE STATIC)

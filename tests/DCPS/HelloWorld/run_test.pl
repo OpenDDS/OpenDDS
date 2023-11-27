@@ -18,9 +18,9 @@ $test->setup_discovery();
 $test->process('subscriber', 'subscriber');
 $test->process('publisher', 'publisher');
 
-rmtree './DCS';
+rmtree('./DCS');
 
 $test->start_process('publisher');
 $test->start_process('subscriber');
 
-exit $test->finish(30);
+exit($test->finish(60));

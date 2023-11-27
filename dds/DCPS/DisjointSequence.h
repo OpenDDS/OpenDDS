@@ -165,13 +165,25 @@ public:
         return;
       }
 
-      const T above = upper + 1;
-      for (typename Container::iterator i = lower_bound_i(lower - 1);
-          i != ranges_.end() && (i->first <= above || i->second <= above);
-          /* iterate in loop because of removal */) {
-        lower = (std::min)(lower, i->first);
-        upper = (std::max)(upper, i->second);
-        ranges_.erase(i++);
+      typename Container::iterator pos = lower_bound_i(lower);
+      if (pos != ranges_.begin()) {
+        std::advance(pos, -1);
+      }
+
+      typename Container::iterator limit = lower_bound_i(upper);
+      if (limit != ranges_.end()) {
+        std::advance(limit, 1);
+      }
+
+      while (pos != limit) {
+        if ((upper < pos->first || lower > pos->second) &&
+            !(static_cast<T>(pos->first - 1) == upper || static_cast<T>(pos->second + 1) == lower)) {
+          ++pos;
+        } else {
+          lower = (std::min)(lower, pos->first);
+          upper = (std::max)(upper, pos->second);
+          ranges_.erase(pos++);
+        }
       }
 
       ranges_.insert(TPair(lower, upper));

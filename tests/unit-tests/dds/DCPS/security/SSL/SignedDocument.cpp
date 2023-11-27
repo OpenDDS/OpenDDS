@@ -122,4 +122,11 @@ TEST_F(dds_DCPS_security_SSL_SignedDocument, CopyConstruct)
   ASSERT_EQ(doc, doc_);
 }
 
+TEST_F(dds_DCPS_security_SSL_SignedDocument, content)
+{
+  SignedDocument doc;
+  doc.content("my content");
+  EXPECT_EQ(doc.content(), "my content");
+}
+
 #endif
