@@ -56,6 +56,7 @@ inline DDS::SampleInfo make_sample_info(DDS::SampleStateKind sample_state,
   si.generation_rank = generation_rank;
   si.absolute_generation_rank = absolute_generation_rank;
   si.valid_data = valid_data;
+  si.opendds_reserved_publication_seq = 0;
   return si;
 }
 
@@ -98,7 +99,7 @@ public:
   typedef RcHandle<InternalDataReaderListener<T> > Listener_rch;
   typedef WeakRcHandle<InternalDataReaderListener<T> > Listener_wrch;
 
-  explicit InternalDataReader(const DDS::DataReaderQos qos,
+  explicit InternalDataReader(const DDS::DataReaderQos& qos,
                               Listener_rch listener = Listener_rch())
     : qos_(qos)
     , listener_(listener)
