@@ -404,10 +404,10 @@ Service_Participant::get_domain_participant_factory(int &argc,
       }
 
       if (config_fname.empty()) {
-        if (DCPS_debug_level) {
-          ACE_DEBUG((LM_NOTICE,
-                     ACE_TEXT("(%P|%t) NOTICE: not using file configuration - no configuration ")
-                     ACE_TEXT("file specified.\n")));
+        if (log_level >= LogLevel::Info) {
+          ACE_DEBUG((LM_INFO,
+                     "(%P|%t) INFO: Service_Participant::get_domain_participant_factory: "
+                     "no configuration file specified.\n"));
         }
 
       } else {
@@ -420,31 +420,33 @@ Service_Participant::get_domain_participant_factory(int &argc,
           config_fname = new_path;
         }
 
-        // Load configuration only if the configuration
-        // file exists.
-        FILE* in = ACE_OS::fopen(config_fname.c_str(),
-                                 ACE_TEXT("r"));
-
+        // Load configuration only if the configuration file exists.
+        FILE* const in = ACE_OS::fopen(config_fname.c_str(), ACE_TEXT("r"));
         if (!in) {
-          ACE_DEBUG((LM_WARNING,
-                     ACE_TEXT("(%P|%t) WARNING: not using file configuration - ")
-                     ACE_TEXT("can not open \"%s\" for reading. %p\n"),
-                     config_fname.c_str(), ACE_TEXT("fopen")));
+          if (log_level >= LogLevel::Error) {
+            ACE_ERROR((LM_ERROR,
+                       "(%P|%t) ERROR: Service_Participant::get_domain_participant_factory: "
+                       "could not find config file \"%s\": %p\n",
+                       config_fname.c_str(), ACE_TEXT("fopen")));
+          }
+          return DDS::DomainParticipantFactory::_nil();
 
         } else {
           ACE_OS::fclose(in);
 
-          if (DCPS_debug_level > 1) {
-            ACE_DEBUG((LM_NOTICE,
-                        ACE_TEXT("(%P|%t) NOTICE: Service_Participant::get_domain_participant_factory ")
-                        ACE_TEXT("Going to load configuration from <%s>\n"),
-                        config_fname.c_str()));
+          if (log_level >= LogLevel::Info) {
+            ACE_DEBUG((LM_INFO,
+                       "(%P|%t) INFO: Service_Participant::get_domain_participant_factory: "
+                       "Going to load configuration from <%s>\n",
+                       config_fname.c_str()));
           }
 
           if (this->load_configuration(config_fname) != 0) {
-            ACE_ERROR((LM_ERROR,
-                       ACE_TEXT("(%P|%t) ERROR: Service_Participant::get_domain_participant_factory: ")
-                       ACE_TEXT("load_configuration() failed.\n")));
+            if (log_level >= LogLevel::Error) {
+              ACE_ERROR((LM_ERROR,
+                         "(%P|%t) ERROR: Service_Participant::get_domain_participant_factory: "
+                         "load_configuration() failed.\n"));
+            }
             return DDS::DomainParticipantFactory::_nil();
           }
         }
