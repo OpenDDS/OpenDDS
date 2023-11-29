@@ -1045,7 +1045,7 @@ Service_Participant::repository_lost(Discovery::RepoKey key)
     }
 
     // Check the availability of the current repository.
-    if (current->second->active()) {
+    if (current != this->discoveryMap_.end() && current->second->active()) {
 
       if (DCPS_debug_level > 0) {
         ACE_DEBUG((LM_DEBUG,
@@ -1073,7 +1073,9 @@ Service_Participant::repository_lost(Discovery::RepoKey key)
     }
 
     // Move to the next candidate repository.
-    ++current;
+    if (current != this->discoveryMap_.end()) {
+      ++current;
+    }
   }
 
   // If we reach here, we have exceeded the total recovery time
