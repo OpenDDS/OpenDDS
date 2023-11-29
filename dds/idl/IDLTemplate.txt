@@ -9,6 +9,10 @@ typedef sequence<<%SCOPED%>> <%TYPE%><%SEQ%>;
  * this interface.
  */
 local interface <%TYPE%>TypeSupport : OpenDDS::DCPS::TypeSupport {
+#ifndef OPENDDS_SAFETY_PROFILE
+    <%SCOPED%> create_sample(in ::DDS::DynamicData src);
+    ::DDS::DynamicData create_dynamic_sample(in <%SCOPED%> src);
+#endif
 
     ::DDS::ReturnCode_t encode_to_string(in <%SCOPED%> sample, out string encoded, in OpenDDS::DCPS::RepresentationFormat format);
     ::DDS::ReturnCode_t encode_to_bytes(in <%SCOPED%> sample, out ::DDS::OctetSeq encoded, in OpenDDS::DCPS::RepresentationFormat format);
