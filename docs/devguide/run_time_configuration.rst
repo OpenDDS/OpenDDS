@@ -77,7 +77,11 @@ The configuration file for OpenDDS is a human-readable ini-style text file.
 
        ``[transport]``
 
-For each of the section types with the exception of ``[common]``, the syntax of a section header takes the form of ``[section type/instance]``.
+   * - Other
+
+     - ``[ice]``
+
+For each of the section types with the exception of ``[common]`` and ``[ice]``, the syntax of a section header takes the form of ``[section type/instance]``.
 For example, a ``[repository]`` section type would always be used in a configuration file like so:
 
 ``[repository/repo_1]`` where ``repository`` is the section type and ``repo_1`` is an instance name of a repository configuration.
@@ -1209,69 +1213,6 @@ Those properties, along with options specific to OpenDDS's RTPS Discovery implem
        See :ref:`internet_enabled_rtps--interactive-connectivity-establishment-ice-for-rtps`.
 
      - 0
-
-   * - ``IceTa=msec``
-
-     - Minimum interval between ICE sends.
-       See :ref:`internet_enabled_rtps--interactive-connectivity-establishment-ice-for-rtps`.
-
-     - 50
-
-   * - ``IceConnectivityCheckTTL=sec``
-
-     - Maximum duration of connectivity check.
-       See :ref:`internet_enabled_rtps--interactive-connectivity-establishment-ice-for-rtps`.
-
-     - 300
-
-   * - ``IceChecklistPeriod=sec``
-
-     - Attempt to cycle through all of the connectivity checks for a candidate in this amount of time.
-       See :ref:`internet_enabled_rtps--interactive-connectivity-establishment-ice-for-rtps`.
-
-     - 10
-
-   * - ``IceIndicationPeriod=sec``
-
-     - Send STUN indications to peers to maintain NAT bindings at this period.
-       See :ref:`internet_enabled_rtps--interactive-connectivity-establishment-ice-for-rtps`.
-
-     - 15
-
-   * - ``IceNominatedTTL=sec``
-
-     - Forget a valid candidate if an indication is not received in this amount of time.
-       See :ref:`internet_enabled_rtps--interactive-connectivity-establishment-ice-for-rtps`.
-
-     - 300
-
-   * - ``IceServerReflexiveAddressPeriod=sec``
-
-     - Send a messages to the STUN server at this period.
-       See :ref:`internet_enabled_rtps--interactive-connectivity-establishment-ice-for-rtps`.
-
-     - 30
-
-   * - ``IceServerReflexiveIndicationCount=integer``
-
-     - Send this many indications before sending a new binding request to the STUN server.
-       See :ref:`internet_enabled_rtps--interactive-connectivity-establishment-ice-for-rtps`.
-
-     - 10
-
-   * - ``IceDeferredTriggeredCheckTTL=sec``
-
-     - Purge deferred checks after this amount of time.
-       See :ref:`internet_enabled_rtps--interactive-connectivity-establishment-ice-for-rtps`.
-
-     - 300
-
-   * - ``IceChangePasswordPeriod=sec``
-
-     - Change the ICE password after this amount of time.
-       See :ref:`internet_enabled_rtps--interactive-connectivity-establishment-ice-for-rtps`.
-
-     - 300
 
    * - ``MaxAuthTime=sec``
 
@@ -3201,6 +3142,84 @@ As part of transport negotiation (:ref:`run_time_configuration--using-mixed-tran
      - Override the host name used to identify the host machine.
 
      - Uses fully qualified domain name
+
+*****************
+ICE Configuration
+*****************
+
+The ``[ice]`` section of an OpenDDS configuration file contains settings for the ICE Agent.
+See :ref:`internet_enabled_rtps--interactive-connectivity-establishment-ice-for-rtps` for details about OpenDDS's implementation of ICE.
+A sample ``[ice]`` section follows:
+
+.. code-block:: ini
+
+    [ice]
+    Ta=50
+    ConnectivityCheckTTL=300
+    ChecklistPeriod=10
+    IndicationPeriod=15
+    NominatedTTL=300
+    ServerReflexiveAddressPeriod=30
+    ServerReflexiveIndicationCount=10
+    DeferredTriggeredCheckTTL=300
+    ChangePasswordPeriod=300
+
+.. list-table:: ICE Configuration Options
+   :header-rows: 1
+
+   * - ``Ta=msec``
+
+     - Minimum interval between ICE sends.
+
+     - 50
+
+   * - ``ConnectivityCheckTTL=sec``
+
+     - Maximum duration of connectivity check.
+
+     - 300
+
+   * - ``ChecklistPeriod=sec``
+
+     - Attempt to cycle through all of the connectivity checks for a candidate in this amount of time.
+
+     - 10
+
+   * - ``IndicationPeriod=sec``
+
+     - Send STUN indications to peers to maintain NAT bindings at this period.
+
+     - 15
+
+   * - ``NominatedTTL=sec``
+
+     - Forget a valid candidate if an indication is not received in this amount of time.
+
+     - 300
+
+   * - ``ServerReflexiveAddressPeriod=sec``
+
+     - Send a messages to the STUN server at this period.
+
+     - 30
+
+   * - ``ServerReflexiveIndicationCount=integer``
+
+     - Send this many indications before sending a new binding request to the STUN server.
+
+     - 10
+
+   * - ``DeferredTriggeredCheckTTL=sec``
+
+     - Purge deferred checks after this amount of time.
+
+     - 300
+
+   * - ``ChangePasswordPeriod=sec``
+
+     - Change the ICE password after this amount of time.
+
+     - 300
 
 .. _run_time_configuration--discovery-and-transport-configuration-templates:
 

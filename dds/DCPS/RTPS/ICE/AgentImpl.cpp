@@ -43,7 +43,7 @@ void AgentImpl::enqueue(const DCPS::MonotonicTimePoint& a_release_time,
                         WeakTaskPtr wtask)
 {
   if (tasks_.empty() || a_release_time < tasks_.top().release_time_) {
-    const MonotonicTimePoint release = std::max(last_execute_ + ICE::Configuration::instance()->T_a(), a_release_time);
+    const MonotonicTimePoint release = std::max(last_execute_ + T_a_, a_release_time);
     execute_or_enqueue(DCPS::make_rch<ScheduleTimerCommand>(reactor(), this, release - MonotonicTimePoint::now()));
   }
   tasks_.push(Item(a_release_time, wtask));
@@ -80,7 +80,7 @@ int AgentImpl::handle_timeout(const ACE_Time_Value& a_now, const void* /*act*/)
   check_invariants();
 
   if (!tasks_.empty()) {
-    const MonotonicTimePoint release = std::max(last_execute_ + ICE::Configuration::instance()->T_a(), tasks_.top().release_time_);
+    const MonotonicTimePoint release = std::max(last_execute_ + T_a_, tasks_.top().release_time_);
     execute_or_enqueue(DCPS::make_rch<ScheduleTimerCommand>(reactor(), this, release - now));
   }
 
@@ -90,6 +90,15 @@ int AgentImpl::handle_timeout(const ACE_Time_Value& a_now, const void* /*act*/)
 AgentImpl::AgentImpl()
   : DCPS::InternalDataReaderListener<DCPS::NetworkInterfaceAddress>(TheServiceParticipant->job_queue())
   , ReactorInterceptor(TheServiceParticipant->reactor(), TheServiceParticipant->reactor_owner())
+  , T_a_(ICE::Configuration::instance()->T_a())
+  , connectivity_check_ttl_(ICE::Configuration::instance()->connectivity_check_ttl())
+  , checklist_period_(ICE::Configuration::instance()->checklist_period())
+  , indication_period_(ICE::Configuration::instance()->indication_period())
+  , nominated_ttl_(ICE::Configuration::instance()->nominated_ttl())
+  , server_reflexive_address_period_(ICE::Configuration::instance()->server_reflexive_address_period())
+  , server_reflexive_indication_count_(ICE::Configuration::instance()->server_reflexive_indication_count())
+  , deferred_triggered_check_ttl_(ICE::Configuration::instance()->deferred_triggered_check_ttl())
+  , change_password_period_(ICE::Configuration::instance()->change_password_period())
   , unfreeze_(false)
   , reader_(DCPS::make_rch<DCPS::InternalDataReader<DCPS::NetworkInterfaceAddress> >(DCPS::DataReaderQosBuilder().reliability_reliable().durability_transient_local(), DCPS::rchandle_from(this)))
   , reader_added_(false)
