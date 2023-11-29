@@ -273,7 +273,7 @@ Appendable Extensibility
     Sect<16.3.4>
 
 Mutable extensibility requires a certain amount of overhead both in terms of processing and network traffic.
-A more efficient but less flexible form of extensibility is appendable
+A more efficient but less flexible form of extensibility is appendable.
 Appendable is limited in that members can only be added to or removed from the end of the type.
 With appendable, the initial version of the weather station IDL would be:
 
@@ -988,14 +988,14 @@ Similarly, suppose we have already found out the types and ids of the members ``
     DDS::Float32 float32_value;
     ret = data.get_float32_value(float32_value, 3); // Get the value of f_field
 
-Reading members from union is a little different as there is at most one activated branch at any time.
+Reading members from union is a little different as there is at most one active branch at any time.
 In general, DynamicData in OpenDDS follows the IDL-to-C++ mappings for union.
 Consider the following union as an example.
 
 .. code-block:: omg-idl
 
     @mutable
-    union MyUnion switch(short) {
+    union MyUnion switch (short) {
     case 1:
     case 2:
       @id(1) short s_field;
@@ -1012,14 +1012,14 @@ The discriminator can be read using the appropriate method for the discriminator
     DDS::Int32 disc_value;
     ret = data.get_int16_value(disc_val, XTypes::DISCRIMINATOR_ID);
 
-Using the value of the discriminator, user can decide which branch is activated and read its value in a similar way as
-reading a struct member. Reading a branch that is not activated returns ``DDS::RETCODE_PRECONDITION_NOT_MET``.
+Using the value of the discriminator, user can decide which branch is activated and read its value in a similar way as reading a struct member.
+Reading a branch that is not activated returns ``DDS::RETCODE_PRECONDITION_NOT_MET``.
 
-At anytime, a DynamicData instance of a union represents a valid state of that union. A special case is an empty
-DynamicData instance. In this case, the discriminator takes the default value of the discriminator type (the XTypes
-specification specifies the default value for each type). If that discriminator value selects a branch, the selected
-branch also takes the default value corresponding to its type. If it doesn't select a branch, the union contains only
-the discriminator.
+At any time, a DynamicData instance of a union represents a valid state of that union.
+A special case is an empty DynamicData instance.
+In this case, the discriminator takes the default value of the discriminator type (the XTypes specification specifies the default value for each type).
+If that discriminator value selects a branch, the selected branch also takes the default value corresponding to its type.
+If it doesn't select a branch, the union contains only the discriminator.
 
 .. _xtypes--reading-collections-of-basic-types:
 
@@ -1151,18 +1151,19 @@ The operations used for this include the DynamicData operations named "set_*" fo
 They are analogous to the "get_*" operations that are described in :ref:`xtypes--interpreting-data-samples-with-dynamicdata`.
 When populating the DynamicData of complex data types, use get_complex_value() (:ref:`xtypes--reading-members-of-more-complex-types`) to navigate from DynamicData representing containing types to DynamicData representing contained types.
 
-Setting the value of a member of a DynamicData union using a ``set_*`` method implicitly 1) activates the branch corresponding to the member
-and 2) sets the discriminator to a value corresponding to the active branch. For example, the ``l_field`` member of ``MyUnion`` above can be set as follows:
+Setting the value of a member of a DynamicData union using a ``set_*`` method implicitly 1) activates the branch corresponding to the member and 2) sets the discriminator to a value corresponding to the active branch.
+For example, the ``l_field`` member of ``MyUnion`` above can be set as follows:
 
 .. code-block:: cpp
 
     DDS::Int32 l_field_value = 12;
     data.set_int32_value(id, l_field_value); // id is 2
 
-The discriminator can also be set directly in the following two cases. First, the new discriminator value selects the same branch that is currently activated.
-Second, the new discriminator value selects the implicit default member, i.e., no branch is activated. In all other cases, ``DDS::RETCODE_PRECONDITION_NOT_MET`` is returned.
-As an example for the first case, suppose the union currently has the discriminator value of 1 and the member `s_field` is active. We can set the discriminator value to 2
-as it selects the same member.
+The discriminator can also be set directly in the following two cases.
+First, the new discriminator value selects the same branch that is currently activated.
+Second, the new discriminator value selects no branch. In all other cases, ``DDS::RETCODE_PRECONDITION_NOT_MET`` is returned.
+As an example for the first case, suppose the union currently has the discriminator value of 1 and the member `s_field` is active.
+We can set the discriminator value to 2 as it selects the same member.
 
 .. code-block:: cpp
 
@@ -1179,9 +1180,10 @@ For the second case, setting the discriminator to any value that doesn't select 
 Unions start in an "empty" state as described in :ref:`xtypes--interpreting-data-samples-with-dynamicdata`.
 Consequently, at the point of serialization, empty and non-empty unions are not differentiated.
 
-Expandable collection types such as sequences or strings can be extended one element at a time. To extend a sequence (or string), we first get the id of the new element at
-index equal to the current length of the sequence using the ``get_member_id_at_index`` operation. The length of the sequence can be got using ``get_item_count``. After we
-obtain the id, we can write the new element using the ``set_*`` operation as usual.
+Expandable collection types such as sequences or strings can be extended one element at a time.
+To extend a sequence (or string), we first get the id of the new element at index equal to the current length of the sequence using the ``get_member_id_at_index`` operation.
+The length of the sequence can be got using ``get_item_count``.
+After we obtain the id, we can write the new element using the ``set_*`` operation as usual.
 
 .. _xtypes--dynamicdatawriters-and-dynamicdatareaders:
 
@@ -1191,10 +1193,10 @@ DynamicDataWriters and DynamicDataReaders
 ..
     Sect<16.7.4>
 
-DynamicDataWriters and DataReaders are designed to work like any other DataWriter and DataReader except that their APIs are defined in terms of the DynamicData type instead of a type generated from IDL.
+DynamicDataWriters and DynamicDataReaders are designed to work like any other DataWriter and DataReader except that their APIs are defined in terms of the DynamicData type instead of a type generated from IDL.
 Each DataWriter and DataReader has an associated Topic and that Topic has a data type (represented by a TypeSupport object).
-Behavior related to keys, QoS policies, discovery and built-in topics, DDS Security, and transport is not any different for a DynamicDataWriter or DataReader.
-One exception is that in the current implementation, :ref:`content_subscription_profile` is not supported for DynamicDataWriters and DataReaders.
+Behavior related to keys, QoS policies, discovery and built-in topics, DDS Security, and transport is not any different for a DynamicDataWriter or DynamicDataReader.
+One exception is that in the current implementation, :ref:`content_subscription_profile` is not supported for DynamicDataWriters and DynamicDataReaders.
 
 .. _xtypes--obtaining-dynamictype-and-registering-typesupport:
 
