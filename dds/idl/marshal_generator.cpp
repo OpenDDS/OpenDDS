@@ -481,6 +481,57 @@ namespace {
       indent << "}\n";
   }
 
+  void skip_to_end_map(const std::string& indent,
+    std::string start, std::string end, std::string map_type_name,
+    bool use_cxx11, Classification cls, AST_Map* map)
+  {
+    std::string elem_type_name = map_type_name + "::value_type";
+
+    if (cls & CL_STRING) {
+      if (cls & CL_WIDE) {
+        elem_type_name = use_cxx11 ? "std::wstring" : "CORBA::WString_var";
+      } else {
+        elem_type_name = use_cxx11 ? "std::string" : "CORBA::String_var";
+      }
+    }
+
+    std::string tempvar = "tempvar";
+    be_global->impl_ <<
+      indent << "if (encoding.xcdr_version() == Encoding::XCDR_VERSION_2) {\n" <<
+      indent << "//  strm.skip(end_of_map - strm.rpos());\n" <<
+      indent << "} else {\n";
+
+    const bool classic_array_copy = !use_cxx11 && (cls & CL_ARRAY);
+
+    if (!classic_array_copy) {
+      be_global->impl_ <<
+        indent << "  " << elem_type_name << " " << tempvar << ";\n";
+    }
+
+    std::string stream_to = tempvar;
+    if (cls & CL_STRING) {
+      if (cls & CL_BOUNDED) {
+        AST_Type* elem = resolveActualType(map->value_type());
+        const string args = stream_to + ", " + bounded_arg(elem);
+        stream_to = getWrapper(args, elem, WD_INPUT);
+      }
+    } else {
+      Intro intro;
+      RefWrapper wrapper(map->value_type(), scoped(deepest_named_type(map->value_type())->name()),
+        classic_array_copy ? tempvar : stream_to, false);
+      wrapper.classic_array_copy_ = classic_array_copy;
+      wrapper.done(&intro);
+      stream_to = wrapper.ref();
+      intro.join(be_global->impl_, indent + "    ");
+    }
+
+    be_global->impl_ <<
+      indent << "  for (CORBA::ULong j = " << start << " + 1; j < " << end << "; ++j) {\n" <<
+      indent << "//    strm >> " << stream_to << ";\n" <<
+      indent << "  }\n" <<
+      indent << "}\n";
+  }
+
   void gen_sequence_i(
     UTL_ScopedName* tdname, AST_Sequence* seq, bool nested_key_only, AST_Typedef* typedef_node = 0,
     const FieldInfo* anonymous = 0)
@@ -926,7 +977,8 @@ namespace {
 
     AST_Type* key = resolveActualType(map->key_type());
     AST_Type* val = resolveActualType(map->value_type());
-    // TryConstructFailAction try_construct = be_global->sequence_element_try_construct(map);
+    TryConstructFailAction key_try_construct = be_global->map_key_try_construct(map);
+    TryConstructFailAction val_try_construct = be_global->map_value_try_construct(map);
 
     Classification key_cls = classify(key);
     const bool key_primitive = key_cls & CL_PRIMITIVE;
@@ -1173,6 +1225,10 @@ namespace {
           "      return false;\n"
           "    }\n", !key_primitive);
 
+        if (!key_primitive) {
+          be_global->impl_ << "  const size_t end_of_map = strm.rpos() + total_size;\n";
+        }
+
         intro.join(be_global->impl_, "  ");
 
         be_global->impl_ <<
@@ -1219,10 +1275,56 @@ namespace {
             "    strm >> key;\n";
         }
 
-        // Value)
+        // Value
+        const std::string stream_to = value_access + "[key]";
+
+        const std::string indent = "    ";
+        intro.join(be_global->impl_, indent);
         be_global->impl_ <<
-          "    strm >> " << value_access << "[key];\n";
+          indent << " if (!(strm >> " << stream_to << ")) {\n";
+
+        if (val_try_construct == tryconstructfailaction_use_default) {
+          be_global->impl_ <<
+            type_to_default("        ", val, value_access) <<
+            "        strm.set_construction_status(Serializer::ConstructionSuccessful);\n";
+        } else if ((val_try_construct == tryconstructfailaction_trim) && (val_cls & CL_BOUNDED) &&
+                   (val_cls & (CL_STRING | CL_SEQUENCE))) {
+
+          if (val_cls & CL_STRING) {
+            const std::string check_not_empty = "!" + value_access + ".empty()";
+            const std::string get_length = value_access + ".length()";
+            be_global->impl_ <<
+              "        if (" + construct_bound_fail + " && " << check_not_empty << " && (" <<
+              bounded_arg(val) << " < " << get_length << ")) {\n"
+              "          "  << value_access <<
+              (use_cxx11 ? (".resize(" + bounded_arg(val) +  ");\n") : ("[" + bounded_arg(val) + "] = 0;\n")) <<
+              "          strm.set_construction_status(Serializer::ConstructionSuccessful);\n"
+              "        } else {\n"
+              "          strm.set_construction_status(Serializer::ElementConstructionFailure);\n";
+            skip_to_end_map("          ", "i", "length", named_as, use_cxx11, val_cls, map);
+            be_global->impl_ <<
+              "        return false;\n"
+              "      }\n";
+          } else if (val_cls & CL_SEQUENCE) {
+            be_global->impl_ <<
+              "      if (" + construct_elem_fail + ") {\n";
+            skip_to_end_map("          ", "i", "length", named_as, use_cxx11, val_cls, map);
+            be_global->impl_ <<
+              "        return false;\n"
+              "      }\n"
+              "      strm.set_construction_status(Serializer::ConstructionSuccessful);\n";
+          }
+        } else {
+          //discard/default
+          be_global->impl_ <<
+            "      strm.set_construction_status(Serializer::ElementConstructionFailure);\n";
+          skip_to_end_map("      ", "i", "length", named_as, use_cxx11, val_cls, map);
+          be_global->impl_ <<
+            "      return false;\n";
       }
+      be_global->impl_ <<
+        "    }\n";
+    }
 
       be_global->impl_ <<
         "  }\n"

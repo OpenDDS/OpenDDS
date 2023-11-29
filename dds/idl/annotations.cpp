@@ -8,6 +8,7 @@
 #include <ast_annotation_member.h>
 #include <ast_sequence.h>
 #include <ast_array.h>
+#include <ast_map.h>
 #include <ast_union.h>
 #include <utl_string.h>
 
@@ -425,6 +426,20 @@ TryConstructFailAction TryConstructAnnotation::array_element_value(AST_Array* no
 TryConstructFailAction TryConstructAnnotation::union_value(AST_Union* node) const
 {
   AST_Annotation_Appl* appl = node->disc_annotations().find(declaration());
+  if (!appl) { return absent_value; }
+  return value_from_appl(appl);
+}
+
+TryConstructFailAction TryConstructAnnotation::map_key(AST_Map* node) const
+{
+  AST_Annotation_Appl* appl = node->key_type_annotations().find(declaration());
+  if (!appl) { return absent_value; }
+  return value_from_appl(appl);
+}
+
+TryConstructFailAction TryConstructAnnotation::map_value(AST_Map* node) const
+{
+  AST_Annotation_Appl* appl = node->value_type_annotations().find(declaration());
   if (!appl) { return absent_value; }
   return value_from_appl(appl);
 }

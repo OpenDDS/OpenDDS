@@ -334,6 +334,8 @@ public:
   TryConstructFailAction sequence_element_value(AST_Sequence* node) const;
   TryConstructFailAction array_element_value(AST_Array* node) const;
   TryConstructFailAction union_value(AST_Union* node) const;
+  TryConstructFailAction map_key(AST_Map* node) const;
+  TryConstructFailAction map_value(AST_Map* node) const;
 };
 
 // OpenDDS Specific Annotations
