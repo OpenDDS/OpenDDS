@@ -5,7 +5,7 @@
 # see DevGuideExamples/DCPS/Messenger/CMakeLists.txt
 
 cmake_minimum_required(VERSION 3.8...3.27)
-project(opendds_messenger_1 CXX)
+project(opendds_tests_cmake_messenger_1 CXX)
 enable_testing()
 
 find_package(OpenDDS REQUIRED)
@@ -65,4 +65,4 @@ endforeach()
 
 # Testing
 configure_file("${src}/run_test.pl" . COPYONLY)
-opendds_add_test()
+opendds_add_test(ASSUME_RUN_TEST)

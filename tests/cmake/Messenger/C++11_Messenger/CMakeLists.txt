@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.8...3.27)
-project(opendds_cpp11_messenger CXX)
+project(opendds_tests_cmake_cpp11_messenger CXX)
 enable_testing()
 
 find_package(OpenDDS REQUIRED)
@@ -62,4 +62,4 @@ target_link_libraries(${subscriber} ${opendds_libs} ${idl})
 
 # run_test.pl
 configure_file("${src}/run_test.pl" "." COPYONLY)
-opendds_add_test(EXTRA_LIB_DIRS "${idl_dir}")
+opendds_add_test(ASSUME_RUN_TEST EXTRA_LIB_DIRS "${idl_dir}")

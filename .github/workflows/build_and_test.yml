@@ -12586,7 +12586,7 @@ jobs:
         repository: DOCGroup/ACE_TAO
         path: OpenDDS/build/ACE_TAO
     - name: Install xerces
-      run: sudo apt-get -y install libxerces-c-dev
+      run: brew install xerces-c
     - name: Configure
       run: |
         cd OpenDDS
