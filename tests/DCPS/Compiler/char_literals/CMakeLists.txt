@@ -28,5 +28,4 @@ set_target_properties(${exe} PROPERTIES
 )
 target_link_libraries(${exe} OpenDDS::Dcps ${idl} gtest)
 
-configure_file(run_test.pl . COPYONLY)
 opendds_add_test(ARGS cpp11 EXTRA_LIB_DIRS "${idl_dir}")

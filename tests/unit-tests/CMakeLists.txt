@@ -128,5 +128,4 @@ if(TARGET OpenDDS::Security)
   target_link_libraries(${PROJECT_NAME} PUBLIC OpenDDS::Security)
 endif()
 
-configure_file(run_test.pl . COPYONLY)
 opendds_add_test()

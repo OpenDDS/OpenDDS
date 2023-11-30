@@ -35,7 +35,6 @@ set_target_properties(${subscriber} PROPERTIES
 )
 
 # Testing
-configure_file(run_test.pl . COPYONLY)
 configure_file(rtps.ini . COPYONLY)
 opendds_add_test(NAME info_repo)
 opendds_add_test(NAME rtps ARGS ini=rtps.ini)

@@ -51,7 +51,6 @@ set_target_properties(${stack_subscriber}
 target_link_libraries(${stack_subscriber} ${messenger} OpenDDS::OpenDDS)
 
 # Testing
-configure_file(run_test.pl . COPYONLY)
 set(OPENDDS_CONFIG_DIR "${CMAKE_CURRENT_SOURCE_DIR}")
 opendds_add_test(NAME tcp)
 opendds_add_test(NAME default_tcp ARGS default_tcp)
@@ -61,7 +60,9 @@ if(OPENDDS_SUPPORTS_SHMEM)
 endif()
 opendds_add_test(NAME nobits ARGS nobits)
 opendds_add_test(NAME stack ARGS stack)
-opendds_add_test(NAME ipv6 ARGS ipv6)
+if(OPENDDS_IPV6)
+  opendds_add_test(NAME ipv6 ARGS ipv6)
+endif()
 opendds_add_test(NAME rtps ARGS rtps)
 opendds_add_test(NAME rtps_unicast ARGS rtps_unicast)
 opendds_add_test(NAME rtps_disc ARGS rtps_disc)

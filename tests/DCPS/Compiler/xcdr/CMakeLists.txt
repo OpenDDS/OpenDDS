@@ -16,8 +16,10 @@ opendds_target_sources(${PROJECT_NAME}
     keyonly.idl
   OPENDDS_IDL_OPTIONS --no-default-nested -Gxtypes-complete
 )
+_opendds_msvc_bigobj(${PROJECT_NAME})
 target_link_libraries(${PROJECT_NAME} PUBLIC OpenDDS::Dcps gtest)
 
-configure_file(run_test.pl . COPYONLY)
 opendds_add_test(NAME static)
-opendds_add_test(NAME dynamic ARGS --dynamic)
+if(OPENDDS_CONTENT_SUBSCRIPTION)
+  opendds_add_test(NAME dynamic ARGS --dynamic)
+endif()
