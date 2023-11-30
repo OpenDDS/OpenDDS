@@ -62,4 +62,4 @@ target_link_libraries(${subscriber} ${opendds_libs} ${idl})
 
 # run_test.pl
 configure_file("${src}/run_test.pl" "." COPYONLY)
-opendds_add_test(COMMAND perl run_test.pl EXTRA_LIB_DIRS "${idl_dir}")
+opendds_add_test(EXTRA_LIB_DIRS "${idl_dir}")

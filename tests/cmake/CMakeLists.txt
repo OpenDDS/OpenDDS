@@ -1,24 +1,34 @@
 cmake_minimum_required(VERSION 3.3...3.27)
-project(opendds_cmake_tests_root_project)
+project(opendds_tests_cmake)
 enable_testing()
 
 find_package(OpenDDS REQUIRED)
 
-configure_file("CTestCustom.cmake" "." COPYONLY)
+if(NOT OPENDDS_IS_BEING_BUILT)
+  configure_file("CTestCustom.cmake" "." COPYONLY)
 
-add_subdirectory(
-  "../../DevGuideExamples/DCPS/Messenger"
-  "${CMAKE_CURRENT_SOURCE_DIR}/../../DevGuideExamples/DCPS/Messenger/build")
-
-if(OPENDDS_QT AND OPENDDS_CXX11)
   add_subdirectory(
-    "../../examples/DCPS/ishapes"
-    "${CMAKE_CURRENT_SOURCE_DIR}/../../examples/DCPS/ishapes/build")
+    "../../DevGuideExamples/DCPS/Messenger"
+    "${CMAKE_CURRENT_SOURCE_DIR}/../../DevGuideExamples/DCPS/Messenger/build")
+
+  if(OPENDDS_QT AND OPENDDS_CXX11)
+    add_subdirectory(
+      "../../examples/DCPS/ishapes"
+      "${CMAKE_CURRENT_SOURCE_DIR}/../../examples/DCPS/ishapes/build")
+  endif()
+
+  add_subdirectory(install)
+
+  if(OPENDDS_OWNERSHIP_PROFILE)
+    add_subdirectory("../DCPS/Messenger" "${CMAKE_CURRENT_SOURCE_DIR}/../DCPS/Messenger/build")
+  endif()
 endif()
 
 if(NOT ${CMAKE_VERSION} VERSION_LESS "3.8.2")
   if(OPENDDS_OWNERSHIP_PROFILE)
     add_subdirectory(Messenger)
+    # TODO: This test always builds shared libraries and linker complains about
+    # ACE/TAO libs lacking -fPIC when ACE is static.
     if(NOT OPENDDS_STATIC)
       add_subdirectory(generated_global)
     endif()
@@ -32,4 +42,3 @@ if(NOT ${CMAKE_VERSION} VERSION_LESS "3.8.2")
 endif()
 
 add_subdirectory(include_subdir)
-add_subdirectory(install)
