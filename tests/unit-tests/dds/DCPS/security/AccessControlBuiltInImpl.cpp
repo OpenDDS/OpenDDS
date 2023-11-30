@@ -1,5 +1,7 @@
 #ifdef OPENDDS_SECURITY
 
+#include "sec_doc.h"
+
 #include <dds/DCPS/security/AccessControlBuiltInImpl.h>
 #include <dds/DCPS/security/OpenSSL_init.h>
 #include <dds/DCPS/security/framework/Properties.h>
@@ -14,13 +16,14 @@
 
 #include <dds/DdsDcpsC.h>
 #ifdef OPENDDS_HAS_STD_SHARED_PTR
-#include <memory>
+#  include <memory>
 #else
-#include <ace/Bound_Ptr.h>
-#include <ace/Null_Mutex.h>
+#  include <ace/Bound_Ptr.h>
+#  include <ace/Null_Mutex.h>
 #endif
+
 // These are just used to meet signature requirements for a test
-#include <gtestWrapper.h>
+#include <tests/Utils/gtestWrapper.h>
 
 #include <sstream>
 #include <fstream>
@@ -32,11 +35,12 @@ using DDS::DomainParticipantQos;
 using namespace testing;
 
 
-static const char* Expected_Permissions_Token_Class_Id ="DDS:Access:Permissions:1.0";
-static const char* Expected_Permissions_Cred_Token_Class_Id ="DDS:Access:PermissionsCredential";
-//static const char* identity_ca_file = "certs/opendds_identity_ca_cert.pem";
-static const char* mock_1_cert_file = "../security/certs/identity/test_participant_01_cert.pem";
-static const char* perm_mock_1_join_p7s_file = "../security/permissions/permissions_test_participant_01_JoinDomain_signed.p7s";
+static const char* Expected_Permissions_Token_Class_Id = "DDS:Access:Permissions:1.0";
+static const char* Expected_Permissions_Cred_Token_Class_Id = "DDS:Access:PermissionsCredential";
+const static std::string mock_1_cert_file =
+  sec_doc_path("certs/identity/test_participant_01_cert.pem");
+const static std::string perm_mock_1_join_p7s_file =
+  sec_doc_path("permissions/permissions_test_participant_01_JoinDomain_signed.p7s");
 static const char* remote_subject_name = "/C=US/ST=CO/O=Object Computing/CN=CN_TEST_DDS-SECURITY_OCI_OPENDDS/emailAddress=support@objectcomputing.com";
 
 namespace {
@@ -311,69 +315,69 @@ public:
   , test_class_()
   {
     perm_ca_.name = DDS::Security::Properties::AccessPermissionsCA;
-    perm_ca_.value = "file:../security/certs/permissions/permissions_ca_cert.pem";
+    perm_ca_.value = sec_doc_prop("certs/permissions/permissions_ca_cert.pem").c_str();
     perm_ca_.propagate = false;
 
     gov_0_p7s_.name = DDS::Security::Properties::AccessGovernance;
-    gov_0_p7s_.value = "file:../security/governance/governance_SC0_SecurityDisabled_signed.p7s";
+    gov_0_p7s_.value = sec_doc_prop("governance/governance_SC0_SecurityDisabled_signed.p7s").c_str();
     gov_0_p7s_.propagate = false;
 
     gov_1_p7s_.name = DDS::Security::Properties::AccessGovernance;
-    gov_1_p7s_.value = "file:../security/governance/governance_SC1_ProtectedDomain1_signed.p7s";
+    gov_1_p7s_.value = sec_doc_prop("governance/governance_SC1_ProtectedDomain1_signed.p7s").c_str();
     gov_1_p7s_.propagate = false;
 
     gov_2_p7s_.name = DDS::Security::Properties::AccessGovernance;
-    gov_2_p7s_.value = "file:../security/governance/governance_SC2_ProtectedDomain2_signed.p7s";
+    gov_2_p7s_.value = sec_doc_prop("governance/governance_SC2_ProtectedDomain2_signed.p7s").c_str();
     gov_2_p7s_.propagate = false;
 
     gov_3_p7s_.name = DDS::Security::Properties::AccessGovernance;
-    gov_3_p7s_.value = "file:../security/governance/governance_SC3_ProtectedDomain3_signed.p7s";
+    gov_3_p7s_.value = sec_doc_prop("governance/governance_SC3_ProtectedDomain3_signed.p7s").c_str();
     gov_3_p7s_.propagate = false;
 
     gov_4_p7s_.name = DDS::Security::Properties::AccessGovernance;
-    gov_4_p7s_.value = "file:../security/governance/governance_SC4_ProtectedDomain4_signed.p7s";
+    gov_4_p7s_.value = sec_doc_prop("governance/governance_SC4_ProtectedDomain4_signed.p7s").c_str();
     gov_4_p7s_.propagate = false;
 
     gov_5_p7s_.name = DDS::Security::Properties::AccessGovernance;
-    gov_5_p7s_.value = "file:../security/governance/governance_SC5_ProtectedDomain5_signed.p7s";
+    gov_5_p7s_.value = sec_doc_prop("governance/governance_SC5_ProtectedDomain5_signed.p7s").c_str();
     gov_5_p7s_.propagate = false;
 
     gov_6_p7s_.name = DDS::Security::Properties::AccessGovernance;
-    gov_6_p7s_.value = "file:../security/governance/governance_SC6_ProtectedDomain6_signed.p7s";
+    gov_6_p7s_.value = sec_doc_prop("governance/governance_SC6_ProtectedDomain6_signed.p7s").c_str();
     gov_6_p7s_.propagate = false;
 
     perm_allowall_p7s_.name = DDS::Security::Properties::AccessPermissions;
-    perm_allowall_p7s_.value = "file:../security/permissions/permissions_test_participant_01_JoinDomain_signed.p7s";
+    perm_allowall_p7s_.value = sec_doc_prop("permissions/permissions_test_participant_01_JoinDomain_signed.p7s").c_str();
     perm_allowall_p7s_.propagate = false;
 
     perm_topic_p7s_.name = DDS::Security::Properties::AccessPermissions;
-    perm_topic_p7s_.value = "file:../security/permissions/permissions_test_participant_01_TopicLevel_signed.p7s";
+    perm_topic_p7s_.value = sec_doc_prop("permissions/permissions_test_participant_01_TopicLevel_signed.p7s").c_str();
     perm_topic_p7s_.propagate = false;
 
     perm_topic2_p7s_.name = DDS::Security::Properties::AccessPermissions;
-    perm_topic2_p7s_.value = "file:../security/permissions/permissions_test_participant_01_TopicLevel_2_signed.p7s";
+    perm_topic2_p7s_.value = sec_doc_prop("permissions/permissions_test_participant_01_TopicLevel_2_signed.p7s").c_str();
     perm_topic2_p7s_.propagate = false;
 
     perm_date_p7s_.name = DDS::Security::Properties::AccessPermissions;
-    perm_date_p7s_.value = "file:../security/permissions/permissions_test_participant_01_NotBefore_signed.p7s";
+    perm_date_p7s_.value = sec_doc_prop("permissions/permissions_test_participant_01_NotBefore_signed.p7s").c_str();
     perm_date_p7s_.propagate = false;
 
     perm_action_validity_p7s_.name = DDS::Security::Properties::AccessPermissions;
-    perm_action_validity_p7s_.value = "file:../security/permissions/permissions_test_participant_01_ActionValidity_signed.p7s";
+    perm_action_validity_p7s_.value = sec_doc_prop("permissions/permissions_test_participant_01_ActionValidity_signed.p7s").c_str();
     perm_action_validity_p7s_.propagate = false;
 
     perm_dateoffset_p7s_.name = DDS::Security::Properties::AccessPermissions;
-    perm_dateoffset_p7s_.value = "file:../security/permissions/permissions_test_participant_01_NotBeforeOffset_signed.p7s";
+    perm_dateoffset_p7s_.value = sec_doc_prop("permissions/permissions_test_participant_01_NotBeforeOffset_signed.p7s").c_str();
     perm_dateoffset_p7s_.propagate = false;
 
     perm_parts_p7s_.name = DDS::Security::Properties::AccessPermissions;
     perm_parts_p7s_.value =
-      "file:../security/permissions/permissions_test_participant_01_TopicLevel_Partitions_Default_signed.p7s";
+      sec_doc_prop("permissions/permissions_test_participant_01_TopicLevel_Partitions_Default_signed.p7s").c_str();
     perm_parts_p7s_.propagate = false;
 
     perm_two_partitions_p7s_.name = DDS::Security::Properties::AccessPermissions;
     perm_two_partitions_p7s_.value =
-      "file:../security/attributes/permissions/permissions_test_participant_01_partitions_signed.p7s";
+      sec_doc_prop("attributes/permissions/permissions_test_participant_01_partitions_signed.p7s").c_str();
     perm_two_partitions_p7s_.propagate = false;
 
     add_property(perm_ca_);
@@ -431,7 +435,8 @@ public:
     add_property(p);
   }
 
-  std::string extract_file_name(const std::string& file_parm) {
+  std::string extract_file_name(const std::string& file_parm)
+  {
     std::string del = ":";
     size_t pos = file_parm.find_last_of(del);
     if ((pos > 0 ) && (pos != file_parm.length() - 1) ) {
@@ -441,23 +446,24 @@ public:
     }
   }
 
-  std::string get_file_contents(const char *filename) {
-    std::ifstream in(filename, std::ios::in | std::ios::binary);
-    if (in)
-    {
-        std::ostringstream contents;
-        contents << in.rdbuf();
-        in.close();
-        return(contents.str());
+  std::string get_file_contents(const std::string& path)
+  {
+    std::ifstream in(path, std::ios::in | std::ios::binary);
+    if (in) {
+      std::ostringstream contents;
+      contents << in.rdbuf();
+      in.close();
+      return(contents.str());
     }
     throw(errno);
   }
 
-  CORBA::Boolean clean_smime_content(std::string& content_) {
+  bool clean_smime_content(std::string& content_)
+  {
     std::string search_str("<?xml");
 
-    size_t found = content_.find(search_str);
-    if (found!=std::string::npos){
+    const size_t found = content_.find(search_str);
+    if (found != std::string::npos){
         std::string holder_(content_.substr(found));
         content_.clear();
         content_.assign(holder_);
@@ -1166,7 +1172,7 @@ TEST_F(dds_DCPS_security_AccessControlBuiltInImpl, check_remote_datawriter_actio
   remote_perm_token.properties[0].value = remote_subject_name;
 
   std::string id(get_file_contents(mock_1_cert_file));
-  std::string pf(get_file_contents("../security/permissions/permissions_test_participant_01_ActionValidity_signed.p7s"));
+  std::string pf(get_file_contents(sec_doc_path("permissions/permissions_test_participant_01_ActionValidity_signed.p7s")));
 
   remote_apc_token.class_id = Expected_Permissions_Cred_Token_Class_Id;
   remote_apc_token.binary_properties.length(2);
@@ -1258,7 +1264,7 @@ TEST_F(dds_DCPS_security_AccessControlBuiltInImpl, check_remote_datareader_actio
   remote_perm_token.properties[0].value = remote_subject_name;
 
   std::string id(get_file_contents(mock_1_cert_file));
-  std::string pf(get_file_contents("../security/permissions/permissions_test_participant_01_ActionValidity_signed.p7s"));
+  std::string pf(get_file_contents(sec_doc_path("permissions/permissions_test_participant_01_ActionValidity_signed.p7s")));
 
   remote_apc_token.class_id = Expected_Permissions_Cred_Token_Class_Id;
   remote_apc_token.binary_properties.length(2);

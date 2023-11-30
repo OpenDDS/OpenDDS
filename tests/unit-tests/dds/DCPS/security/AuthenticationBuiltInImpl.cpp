@@ -5,6 +5,8 @@
 
 #ifdef OPENDDS_SECURITY
 
+#include "sec_doc.h"
+
 #include <dds/DCPS/GuidUtils.h>
 #include <dds/DCPS/Serializer.h>
 #include <dds/DCPS/security/SSL/Certificate.h>
@@ -118,11 +120,11 @@ struct dds_DCPS_security_AuthenticationBuiltInImpl : public ::testing::Test
     Property_t idca, pkey, pass, idcert, cperms;
 
     idca.name = "dds.sec.auth.identity_ca";
-    idca.value = "file:../security/certs/identity/identity_ca_cert.pem";
+    idca.value = sec_doc_prop("certs/identity/identity_ca_cert.pem").c_str();
     idca.propagate = false;
 
     pkey.name = "dds.sec.auth.private_key";
-    pkey.value = "file:../security/certs/identity/test_participant_01_private_key.pem";
+    pkey.value = sec_doc_prop("certs/identity/test_participant_01_private_key.pem").c_str();
     pkey.propagate = false;
 
     pass.name = "dds.sec.auth.password";
@@ -130,11 +132,11 @@ struct dds_DCPS_security_AuthenticationBuiltInImpl : public ::testing::Test
     pass.propagate = false;
 
     idcert.name = "dds.sec.auth.identity_certificate";
-    idcert.value = "file:../security/certs/identity/test_participant_01_cert.pem";
+    idcert.value = sec_doc_prop("certs/identity/test_participant_01_cert.pem").c_str();
     idcert.propagate = false;
 
     cperms.name = "dds.sec.access.permissions";
-    cperms.value = "file:../security/permissions/permissions_test_participant_01_JoinDomain_signed.p7s";
+    cperms.value = sec_doc_prop("permissions/permissions_test_participant_01_JoinDomain_signed.p7s").c_str();
     cperms.propagate = false;
 
     mp1.add_property(idca);
@@ -153,11 +155,11 @@ struct dds_DCPS_security_AuthenticationBuiltInImpl : public ::testing::Test
     Property_t idca, pkey, pass, idcert, cperms;
 
     idca.name = "dds.sec.auth.identity_ca";
-    idca.value = "file:../security/certs/identity/identity_ca_cert.pem";
+    idca.value = sec_doc_prop("certs/identity/identity_ca_cert.pem").c_str();
     idca.propagate = false;
 
     pkey.name = "dds.sec.auth.private_key";
-    pkey.value = "file:../security/certs/identity/test_participant_02_private_key.pem";
+    pkey.value = sec_doc_prop("certs/identity/test_participant_02_private_key.pem").c_str();
     pkey.propagate = false;
 
     pass.name = "dds.sec.auth.password";
@@ -165,11 +167,11 @@ struct dds_DCPS_security_AuthenticationBuiltInImpl : public ::testing::Test
     pass.propagate = false;
 
     idcert.name = "dds.sec.auth.identity_certificate";
-    idcert.value = "file:../security/certs/identity/test_participant_02_cert.pem";
+    idcert.value = sec_doc_prop("certs/identity/test_participant_02_cert.pem").c_str();
     idcert.propagate = false;
 
     cperms.name = "dds.sec.access.permissions";
-    cperms.value = "file:../security/permissions/permissions_test_participant_02_JoinDomain_signed.p7s";
+    cperms.value = sec_doc_prop("permissions/permissions_test_participant_02_JoinDomain_signed.p7s").c_str();
     cperms.propagate = false;
 
     mp2.add_property(idca);
@@ -254,8 +256,10 @@ TEST_F(dds_DCPS_security_AuthenticationBuiltInImpl, ValidateLocalIdentity_Multip
 
   OpenDDS::Security::TokenReader r1(mp1.id_token),  r2(mp2.id_token);
 
-  const char *subject1 = r1.get_property_value("dds.cert.sn"),
-             *subject2 = r2.get_property_value("dds.cert.sn");
+  const char* subject1 = r1.get_property_value("dds.cert.sn");
+  ASSERT_TRUE(subject1);
+  const char* subject2 = r2.get_property_value("dds.cert.sn");
+  ASSERT_TRUE(subject2);
 
   ASSERT_NE(0, std::strcmp(subject1, subject2));
 }

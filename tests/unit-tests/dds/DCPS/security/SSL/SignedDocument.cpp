@@ -5,6 +5,8 @@
 
 #ifdef OPENDDS_SECURITY
 
+#include "../sec_doc.h"
+
 #include <dds/DCPS/security/OpenSSL_init.h>
 #include <dds/DCPS/security/SSL/SignedDocument.h>
 #include <dds/DCPS/security/SSL/Certificate.h>
@@ -24,7 +26,7 @@ class dds_DCPS_security_SSL_SignedDocument : public ::testing::Test
 {
 public:
   dds_DCPS_security_SSL_SignedDocument() :
-    ca_("file:../security/certs/permissions/permissions_ca_cert.pem"),
+    ca_(sec_doc_prop("certs/permissions/permissions_ca_cert.pem")),
     ca_data_("data:,-----BEGIN CERTIFICATE-----\n"
       "MIID9DCCAtwCCQCkjopvwK438jANBgkqhkiG9w0BAQsFADCBuzELMAkGA1UEBhMC\n"
       "VVMxCzAJBgNVBAgMAk1PMRQwEgYDVQQHDAtTYWludCBMb3VpczEvMC0GA1UECgwm\n"
@@ -52,7 +54,7 @@ public:
     doc_()
   {
     DDS::Security::SecurityException ex;
-    if (!doc_.load("file:../security/governance/governance_SC1_ProtectedDomain1_signed.p7s", ex)) {
+    if (!doc_.load(sec_doc_prop("governance/governance_SC1_ProtectedDomain1_signed.p7s"), ex)) {
       throw std::runtime_error("Could not load governance file");
     }
 
@@ -87,8 +89,8 @@ TEST_F(dds_DCPS_security_SSL_SignedDocument, VerifySignature_Data_Success)
 
 TEST_F(dds_DCPS_security_SSL_SignedDocument, LoadFromMemory)
 {
-  const char fname[] = "../security/governance/governance_SC1_ProtectedDomain1_signed.p7s";
-  std::ifstream file(fname, std::ifstream::binary);
+  const std::string path = sec_doc_path("governance/governance_SC1_ProtectedDomain1_signed.p7s");
+  std::ifstream file(path, std::ifstream::binary);
   std::ostringstream mem;
   mem << file.rdbuf();
   const std::string str = mem.str();

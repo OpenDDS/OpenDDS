@@ -3,6 +3,7 @@
 
 #include <gmock/gmock.h>
 
+#include <ace/Log_Msg.h>
 #include <ace/Log_Msg_Backend.h>
 #include <ace/Log_Record.h>
 

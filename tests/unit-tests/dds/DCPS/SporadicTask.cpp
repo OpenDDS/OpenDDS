@@ -5,13 +5,13 @@
  * See: http://www.opendds.org/license.html
  */
 
-#include <gtestWrapper.h>
+#include "MockLogger.h"
 
 #include <dds/DCPS/SporadicTask.h>
 
-#include "MockLogger.h"
-
 #include <ace/Thread_Manager.h>
+
+#include <tests/Utils/gtestWrapper.h>
 
 using namespace OpenDDS::DCPS;
 

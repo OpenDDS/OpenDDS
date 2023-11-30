@@ -5,10 +5,14 @@
 
 #ifdef OPENDDS_SECURITY
 
-#include "gtest/gtest.h"
-#include "dds/DCPS/security/OpenSSL_init.h"
-#include "dds/DCPS/security/SSL/PrivateKey.h"
-#include "dds/DCPS/security/SSL/Certificate.h"
+#include "../sec_doc.h"
+
+#include <dds/DCPS/security/OpenSSL_init.h>
+#include <dds/DCPS/security/SSL/PrivateKey.h>
+#include <dds/DCPS/security/SSL/Certificate.h>
+
+#include <gtest/gtest.h>
+
 #include <cstring>
 
 using namespace OpenDDS::Security::SSL;
@@ -19,7 +23,7 @@ class dds_DCPS_security_SSL_PrivateKey : public ::testing::Test
 {
 public:
   dds_DCPS_security_SSL_PrivateKey() :
-    ca_("file:../security/certs/identity/identity_ca_cert.pem"),
+    ca_(sec_doc_prop("certs/identity/identity_ca_cert.pem")),
     ca_data_("data:,-----BEGIN CERTIFICATE-----\n"
       "MIIEJDCCAwwCCQDpnuwIVmSK5jANBgkqhkiG9w0BAQsFADCB0zELMAkGA1UEBhMC\n"
       "VVMxCzAJBgNVBAgMAk1PMRQwEgYDVQQHDAtTYWludCBMb3VpczE7MDkGA1UECgwy\n"
@@ -45,7 +49,7 @@ public:
       "LULdD3nLP7M1yNJ0HE7/eXCTWgw5dBLik6Ig4d7QjWVa4osvPz3m4frCB8d2lkRr\n"
       "a2FBDC7mCEo=\n"
       "-----END CERTIFICATE-----"),
-    pubkey_("file:../security/certs/identity/test_participant_01_cert.pem"),
+    pubkey_(sec_doc_prop("certs/identity/test_participant_01_cert.pem")),
     pubkey_data_("data:,-----BEGIN CERTIFICATE-----\n"
       "MIIDpDCCAowCAQEwDQYJKoZIhvcNAQELBQAwgdMxCzAJBgNVBAYTAlVTMQswCQYD\n"
       "VQQIDAJNTzEUMBIGA1UEBwwLU2FpbnQgTG91aXMxOzA5BgNVBAoMMk9iamVjdCBD\n"
@@ -68,8 +72,8 @@ public:
       "9AdjUsAs4dBaNa1tK0vdJ0vqf7kRoHqPw511+1K4XTpca9cTwCVfeh0h4nNOpeRg\n"
       "xEKmvR/EewryBDJPaU31JQdVyqlEMtgm\n"
       "-----END CERTIFICATE-----"),
-    pubkey_ec_("file:../security/certs/identity/test_participant_03_cert.pem"),
-    privkey_("file:../security/certs/identity/test_participant_01_private_key.pem"),
+    pubkey_ec_(sec_doc_prop("certs/identity/test_participant_03_cert.pem")),
+    privkey_(sec_doc_prop("certs/identity/test_participant_01_private_key.pem")),
     privkey_data_("data:,-----BEGIN RSA PRIVATE KEY-----\n"
       "MIIEpQIBAAKCAQEAxo3qIy0JSC9DmlenQVMXdcstrwfVmidkjPH6LNdMlxL3ICHR\n"
       "BKGrIYh/Z67o0OEMQe4hnCoh4YH8I/yY9SAVztRUUvj9n5+41rPw7a4S18eIqdGH\n"
@@ -97,7 +101,7 @@ public:
       "gXSdff/CEvcyC7AP3NhNHQDqUWuI9UedCaGHY/kf3blu1/D0xL1OfGE1ZeBuoG9B\n"
       "Zvsf1uTb+JGPR5x+2BTXo4VZXzknBqM3S8XZDHSyQtKKxFekMYfNkkQ=\n"
       "-----END RSA PRIVATE KEY-----\n"),
-    privkey_ec_("file:../security/certs/identity/test_participant_03_private_key.pem"),
+    privkey_ec_(sec_doc_prop("certs/identity/test_participant_03_private_key.pem")),
     hello_(),
     world_(),
     empty_()

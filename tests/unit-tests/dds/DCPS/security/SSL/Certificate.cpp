@@ -5,9 +5,13 @@
 
 #ifdef OPENDDS_SECURITY
 
-#include "gtest/gtest.h"
-#include "dds/DCPS/security/OpenSSL_init.h"
-#include "dds/DCPS/security/SSL/Certificate.h"
+#include "../sec_doc.h"
+
+#include <dds/DCPS/security/OpenSSL_init.h>
+#include <dds/DCPS/security/SSL/Certificate.h>
+
+#include <gtest/gtest.h>
+
 #include <iostream>
 
 using namespace OpenDDS::Security::SSL;
@@ -18,7 +22,7 @@ class dds_DCPS_security_SSL_Certificate : public ::testing::Test
 {
 public:
   dds_DCPS_security_SSL_Certificate() :
-    ca_("file:../security/certs/identity/identity_ca_cert.pem"),
+    ca_(sec_doc_prop("certs/identity/identity_ca_cert.pem")),
     ca_data_("data:,-----BEGIN CERTIFICATE-----\n"
       "MIID6DCCAtACCQCSMMZ5KQ7ffTANBgkqhkiG9w0BAQsFADCBtTELMAkGA1UEBhMC\n"
       "VVMxCzAJBgNVBAgMAk1PMRQwEgYDVQQHDAtTYWludCBMb3VpczEsMCoGA1UECgwj\n"
@@ -42,7 +46,7 @@ public:
       "cPsocF+pCa71fQnlW8L9cyn2E/6zJkzj4aYZWwc2KVJm5JBuaIIcu1oeI5IdZ5sl\n"
       "w5GeIeP0nXVHuhQf4mWrMi+KvQhorQEGftxnDhS0TWWEFVOUigRao7blBXY=\n"
       "-----END CERTIFICATE-----"),
-    signed_("file:../security/certs/identity/test_participant_01_cert.pem"),
+    signed_(sec_doc_prop("certs/identity/test_participant_01_cert.pem")),
     signed_data_("data:,-----BEGIN CERTIFICATE-----\n"
       "MIIDhjCCAm4CAQEwDQYJKoZIhvcNAQELBQAwgbUxCzAJBgNVBAYTAlVTMQswCQYD\n"
       "VQQIDAJNTzEUMBIGA1UEBwwLU2FpbnQgTG91aXMxLDAqBgNVBAoMI09iamVjdCBD\n"
@@ -64,8 +68,8 @@ public:
       "AjTB14qF3FhQMxpfaY/zc4cKiC/fjj9WNIGW7D7sJNiT8WKkjGZjNH8NjMI5qzUp\n"
       "fLXxT12zMxJeVYhVC7W6UvyJAeQJU7k/faxS4KljC9o0e9tOHnuKEM3k\n"
       "-----END CERTIFICATE-----"),
-    signed_ec_("file:../security/certs/identity/test_participant_03_cert.pem"),
-    not_signed_("file:../security/certs/identity/not_signed.pem")
+    signed_ec_(sec_doc_prop("certs/identity/test_participant_03_cert.pem")),
+    not_signed_(sec_doc_prop("certs/identity/not_signed.pem"))
   {
 
   }
@@ -106,7 +110,7 @@ TEST_F(dds_DCPS_security_SSL_Certificate, Validate_ECDSA_SHA256_Data_Success)
 
 TEST_F(dds_DCPS_security_SSL_Certificate, Validate_RSASSA_PSS_SHA256_Failure_LoadingWrongKeyType)
 {
-  Certificate wrong_key_type("file:../security/certs/identity/test_participant_01_private_key.pem");
+  Certificate wrong_key_type(sec_doc_prop("certs/identity/test_participant_01_private_key.pem"));
   ASSERT_NE(wrong_key_type.validate(ca_), X509_V_OK);
 }
 

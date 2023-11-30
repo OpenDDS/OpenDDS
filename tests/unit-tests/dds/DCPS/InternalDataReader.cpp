@@ -2,7 +2,7 @@
 
 #include <dds/DCPS/Qos_Helper.h>
 
-#include <gtestWrapper.h>
+#include <tests/Utils/gtestWrapper.h>
 
 using namespace OpenDDS::DCPS;
 typedef SampleInfoWrapper SIW;

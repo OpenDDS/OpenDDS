@@ -3,7 +3,7 @@ project(UnitTests): opendds_unit_test, googlemock, msvc_bigobj, dcpsexe, dcps_tr
 
   dcps_ts_flags += -Gxtypes-complete
   idlflags += -SS -I dds/DCPS/XTypes -I ../DCPS/Compiler/key_annotation
-  includes += . ../Utils
+  includes += .
 
   Idl_Files {
     dds/DCPS/XTypes/CompleteToDynamicType.idl
