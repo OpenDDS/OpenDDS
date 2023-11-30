@@ -6,4 +6,6 @@ find_package(OpenDDS REQUIRED)
 
 add_subdirectory(Compiler)
 add_subdirectory(HelloWorld)
-add_subdirectory(Messenger)
+if(OPENDDS_OWNERSHIP_PROFILE)
+  add_subdirectory(Messenger)
+endif()
