@@ -26,6 +26,7 @@ public:
   /// This creates a duplicated ACE_Message_Block chain from the provided chain.
   /// The duplicated chain is released when the object is destroyed. Caller is
   /// responsible for the release of the input message block chain.
+  /// The provided DynamicType must be the type for the data in the message block.
   DynamicDataXcdrReadImpl(ACE_Message_Block* chain,
                           const DCPS::Encoding& encoding,
                           DDS::DynamicType_ptr type,
@@ -34,6 +35,7 @@ public:
   /// Use this when you want to pass the alignment state of a given Serializer object over.
   /// A typical use case would be when a part of the data has already been consumed from
   /// @a ser and you want to give the remaining to DynamicData.
+  /// The provided DynamicType must be the type for the data in the message block.
   DynamicDataXcdrReadImpl(DCPS::Serializer& ser, DDS::DynamicType_ptr type,
                           DCPS::Sample::Extent ext = DCPS::Sample::Full);
 
@@ -376,6 +378,9 @@ private:
   };
 
   void copy(const DynamicDataXcdrReadImpl& other);
+
+  bool get_struct_item_count();
+  bool get_union_item_count();
 
   /// Skip the whole data corresponding to this type if it is a struct or union.
   /// This is called by a containing type when it wants to skip a member which
