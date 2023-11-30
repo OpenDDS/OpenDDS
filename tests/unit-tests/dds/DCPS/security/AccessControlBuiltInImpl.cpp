@@ -448,7 +448,7 @@ public:
 
   std::string get_file_contents(const std::string& path)
   {
-    std::ifstream in(path, std::ios::in | std::ios::binary);
+    std::ifstream in(path.c_str(), std::ios::in | std::ios::binary);
     if (in) {
       std::ostringstream contents;
       contents << in.rdbuf();

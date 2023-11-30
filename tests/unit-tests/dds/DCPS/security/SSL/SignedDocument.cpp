@@ -90,7 +90,7 @@ TEST_F(dds_DCPS_security_SSL_SignedDocument, VerifySignature_Data_Success)
 TEST_F(dds_DCPS_security_SSL_SignedDocument, LoadFromMemory)
 {
   const std::string path = sec_doc_path("governance/governance_SC1_ProtectedDomain1_signed.p7s");
-  std::ifstream file(path, std::ifstream::binary);
+  std::ifstream file(path.c_str(), std::ifstream::binary);
   std::ostringstream mem;
   mem << file.rdbuf();
   const std::string str = mem.str();

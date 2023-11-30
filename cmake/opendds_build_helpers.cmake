@@ -54,8 +54,8 @@ function(_opendds_library target)
     message(FATAL_ERROR "Target ${target} has unexpected type ${target_type}")
   endif()
 
-  if(MSVC AND arg_MSVC_BIGOBJ)
-    target_compile_options(${target} PRIVATE /bigobj)
+  if(arg_MSVC_BIGOBJ)
+    _opendds_msvc_bigobj(${target})
   endif()
 
   if(NOT arg_NO_INSTALL)

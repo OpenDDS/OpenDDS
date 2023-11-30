@@ -93,6 +93,7 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
   OUTPUT_NAME UnitTests
   UNITY_BUILD FALSE # TODO
 )
+_opendds_msvc_bigobj(${PROJECT_NAME})
 opendds_target_sources(${PROJECT_NAME}
   PUBLIC
     dds/DCPS/XTypes/CompleteToDynamicType.idl

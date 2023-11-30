@@ -237,6 +237,12 @@ function(_opendds_path_list path_list_var)
   set("${path_list_var}" "${path_list}" PARENT_SCOPE)
 endfunction()
 
+function(_opendds_msvc_bigobj target)
+  if(MSVC)
+    target_compile_options(${target} PRIVATE /bigobj)
+  endif()
+endfunction()
+
 if(NOT DEFINED OPENDDS_INSTALL_LIB)
   set(OPENDDS_INSTALL_LIB "lib")
 endif()
