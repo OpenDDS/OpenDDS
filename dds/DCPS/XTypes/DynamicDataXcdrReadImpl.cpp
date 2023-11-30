@@ -15,6 +15,7 @@
 #  include <dds/DCPS/FilterEvaluator.h>
 #  include <dds/DCPS/SafetyProfileStreams.h>
 #  include <dds/DCPS/ValueHelper.h>
+#  include <dds/DCPS/DCPS_Utils.h>
 
 #  include <dds/DdsDcpsCoreTypeSupportImpl.h>
 #  include <dds/DdsDcpsInfrastructureC.h>
@@ -388,7 +389,7 @@ bool DynamicDataXcdrReadImpl::get_struct_item_count()
         if (rc != DDS::RETCODE_OK) {
           if (log_level >= LogLevel::Warning) {
             ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: DynamicDataXcdrReadImpl::get_item_count:"
-                       " get_member_by_index %u failed: %C\n", i, retcode_to_string(rc)));
+                       " get_member_by_index %u failed: %C\n", i, DCPS::retcode_to_string(rc)));
           }
           return false;
         }
@@ -397,7 +398,7 @@ bool DynamicDataXcdrReadImpl::get_struct_item_count()
         if (rc != DDS::RETCODE_OK) {
           if (log_level >= LogLevel::Warning) {
             ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: DynamicDataXcdrReadImpl::get_item_count:"
-                       " get_descriptor for member at index %u failed: %C\n", i, retcode_to_string(rc)));
+                       " get_descriptor for member at index %u failed: %C\n", i, DCPS::retcode_to_string(rc)));
           }
           return false;
         }
@@ -485,7 +486,7 @@ bool DynamicDataXcdrReadImpl::get_union_item_count()
     if (rc != DDS::RETCODE_OK) {
       if (log_level >= LogLevel::Warning) {
         ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: DynamicDataXcdrReadImpl::get_item_count:"
-                   " get_member for discriminator returned %C\n", retcode_to_string(rc)));
+                   " get_member for discriminator returned %C\n", DCPS::retcode_to_string(rc)));
       }
       return false;
     }
@@ -494,7 +495,7 @@ bool DynamicDataXcdrReadImpl::get_union_item_count()
     if (rc != DDS::RETCODE_OK) {
       if (log_level >= LogLevel::Warning) {
         ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: DynamicDataXcdrReadImpl::get_item_count:"
-                   " get_descriptor for discriminator returned %C\n", retcode_to_string(rc)));
+                   " get_descriptor for discriminator returned %C\n", DCPS::retcode_to_string(rc)));
       }
       return false;
     }
@@ -532,7 +533,7 @@ bool DynamicDataXcdrReadImpl::get_union_item_count()
   if (rc != DDS::RETCODE_OK) {
     if (log_level >= LogLevel::Warning) {
       ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: DynamicDataXcdrReadImpl::get_item_count:"
-                 " get_all_members returned %C\n", retcode_to_string(rc)));
+                 " get_all_members returned %C\n", DCPS::retcode_to_string(rc)));
     }
     return false;
   }
@@ -546,7 +547,7 @@ bool DynamicDataXcdrReadImpl::get_union_item_count()
     if (rc != DDS::RETCODE_OK) {
       if (log_level >= LogLevel::Warning) {
         ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: DynamicDataXcdrReadImpl::get_item_count:"
-                   " get_descriptor returned %C\n", retcode_to_string(rc)));
+                   " get_descriptor returned %C\n", DCPS::retcode_to_string(rc)));
       }
       return false;
     }
@@ -1015,7 +1016,7 @@ DDS::ReturnCode_t DynamicDataXcdrReadImpl::get_value_from_union(
   }
 
   DDS::TypeDescriptor_var td;
-  rc = member_type->get_descriptor(td);
+  DDS::ReturnCode_t rc = member_type->get_descriptor(td);
   if (rc != DDS::RETCODE_OK) {
     return rc;
   }
