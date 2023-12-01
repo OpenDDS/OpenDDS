@@ -8,7 +8,9 @@
 #include <ast_annotation_member.h>
 #include <ast_sequence.h>
 #include <ast_array.h>
+#if OPENDDS_HAS_MAPS
 #include <ast_map.h>
+#endif 
 #include <ast_union.h>
 #include <utl_string.h>
 
@@ -432,16 +434,20 @@ TryConstructFailAction TryConstructAnnotation::union_value(AST_Union* node) cons
 
 TryConstructFailAction TryConstructAnnotation::map_key(AST_Map* node) const
 {
+#if OPENDDS_HAS_MAPS
   AST_Annotation_Appl* appl = node->key_type_annotations().find(declaration());
   if (!appl) { return absent_value; }
   return value_from_appl(appl);
+#endif
 }
 
 TryConstructFailAction TryConstructAnnotation::map_value(AST_Map* node) const
 {
+#if OPENDDS_HAS_MAPS
   AST_Annotation_Appl* appl = node->value_type_annotations().find(declaration());
   if (!appl) { return absent_value; }
   return value_from_appl(appl);
+#endif
 }
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
