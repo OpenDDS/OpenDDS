@@ -476,14 +476,14 @@ ConfigStoreImpl::get(const char* key,
 }
 
 namespace {
-  DDS::Int32 time_duration_to_integer(const TimeDuration& value,
-                                      ConfigStoreImpl::IntegerTimeFormat format)
+  DDS::UInt32 time_duration_to_integer(const TimeDuration& value,
+                                       ConfigStoreImpl::IntegerTimeFormat format)
   {
     switch (format) {
     case ConfigStoreImpl::Format_IntegerMilliseconds:
       return value.value().msec();
     case ConfigStoreImpl::Format_IntegerSeconds:
-      return static_cast<DDS::Int32>(value.value().sec());
+      return static_cast<DDS::UInt32>(value.value().sec());
     }
     return 0;
   }
@@ -494,7 +494,7 @@ ConfigStoreImpl::set(const char* key,
                      const TimeDuration& value,
                      IntegerTimeFormat format)
 {
-  set_int32(key, time_duration_to_integer(value, format));
+  set_uint32(key, time_duration_to_integer(value, format));
 }
 
 TimeDuration
@@ -536,7 +536,7 @@ ConfigStoreImpl::get(const char* key,
   }
 
   if (debug_logging) {
-    ACE_DEBUG((LM_DEBUG, "(%P|%t) %C: ConfigStoreImpl::get: %C=%d\n",
+    ACE_DEBUG((LM_DEBUG, "(%P|%t) %C: ConfigStoreImpl::get: %C=%u\n",
                OPENDDS_CONFIG_DEBUG_LOGGING,
                cp.key().c_str(),
                time_duration_to_integer(retval, format)));

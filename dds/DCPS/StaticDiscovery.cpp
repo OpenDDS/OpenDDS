@@ -120,7 +120,18 @@ void StaticEndpointManager::init_bit()
       data.key = key;
       OPENDDS_STRING topic_name = writer.topic_name;
       data.topic_name = topic_name.c_str();
-      const EndpointRegistry::Topic& topic = registry_.topic_map.find(topic_name)->second;
+
+      EndpointRegistry::TopicMapType::const_iterator iter = registry_.topic_map.find(topic_name);
+      if (iter == registry_.topic_map.end()) {
+        if (log_level >= LogLevel::Error) {
+          ACE_ERROR((LM_ERROR,
+                     "(%P|%t) ERROR: StaticEndpointManager::init_bit: no topic named %C\n",
+                     topic_name.c_str()));
+        }
+        continue;
+      }
+
+      const EndpointRegistry::Topic& topic = iter->second;
       data.type_name = topic.type_name.c_str();
       data.durability = writer.qos.durability;
       data.durability_service = writer.qos.durability_service;
@@ -166,7 +177,18 @@ void StaticEndpointManager::init_bit()
       data.key = key;
       OPENDDS_STRING topic_name = reader.topic_name;
       data.topic_name = topic_name.c_str();
-      const EndpointRegistry::Topic& topic = registry_.topic_map.find(topic_name)->second;
+
+      EndpointRegistry::TopicMapType::const_iterator iter = registry_.topic_map.find(topic_name);
+      if (iter == registry_.topic_map.end()) {
+        if (log_level >= LogLevel::Error) {
+          ACE_ERROR((LM_ERROR,
+                     "(%P|%t) ERROR: StaticEndpointManager::init_bit: no topic named %C\n",
+                     topic_name.c_str()));
+        }
+        continue;
+      }
+
+      const EndpointRegistry::Topic& topic = iter->second;
       data.type_name = topic.type_name.c_str();
       data.durability = reader.qos.durability;
       data.deadline = reader.qos.deadline;

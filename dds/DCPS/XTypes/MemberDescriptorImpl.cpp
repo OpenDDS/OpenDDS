@@ -182,7 +182,7 @@ namespace {
       }
     }
 
-    return lhs_token == rhs_token;
+    return !lhs_token.is_error() && !rhs_token.is_error() && lhs_token == rhs_token;
   }
 }
 

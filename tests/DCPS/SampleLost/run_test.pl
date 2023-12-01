@@ -17,7 +17,7 @@ PerlDDS::add_lib_path('../ConsolidatedMessengerIdl');
 my $test = new PerlDDS::TestFramework();
 $test->setup_discovery();
 
-my $pubsub_opts = "-DCPSConfigFile pub.ini";
+my $pubsub_opts = "-DCPSConfigFile pubsub.ini";
 
 while (scalar @ARGV) {
   if ($ARGV[0] =~ /^-d/i) {

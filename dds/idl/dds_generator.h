@@ -1394,6 +1394,7 @@ struct RefWrapper {
     , dynamic_data_adapter_(false)
     , typedef_node_(0)
     , done_(false)
+    , needs_dda_tag_(false)
   {
   }
 
@@ -1411,6 +1412,7 @@ struct RefWrapper {
     , dynamic_data_adapter_(false)
     , typedef_node_(0)
     , done_(false)
+    , needs_dda_tag_(false)
   {
   }
 

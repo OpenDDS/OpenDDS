@@ -4481,13 +4481,23 @@ void Spdp::process_participant_ice(const ParameterList& plist,
 const ParticipantData_t& Spdp::get_participant_data(const DCPS::GUID_t& guid) const
 {
   DiscoveredParticipantConstIter iter = participants_.find(make_part_guid(guid));
-  return iter->second.pdata_;
+  if (iter != participants_.end()) {
+    return iter->second.pdata_;
+  }
+
+  static const ParticipantData_t pdata = {};
+  return pdata;
 }
 
 ParticipantData_t& Spdp::get_participant_data(const DCPS::GUID_t& guid)
 {
   DiscoveredParticipantIter iter = participants_.find(make_part_guid(guid));
-  return iter->second.pdata_;
+  if (iter != participants_.end()) {
+    return iter->second.pdata_;
+  }
+
+  static ParticipantData_t pdata;
+  return pdata;
 }
 
 DCPS::MonotonicTime_t Spdp::get_participant_discovered_at() const
@@ -4498,7 +4508,11 @@ DCPS::MonotonicTime_t Spdp::get_participant_discovered_at() const
 DCPS::MonotonicTime_t Spdp::get_participant_discovered_at(const DCPS::GUID_t& guid) const
 {
   const DiscoveredParticipantConstIter iter = participants_.find(make_part_guid(guid));
-  return iter->second.discovered_at_.to_monotonic_time();
+  if (iter != participants_.end()) {
+    return iter->second.discovered_at_.to_monotonic_time();
+  }
+
+  return DCPS::MonotonicTime_t();
 }
 
 void
