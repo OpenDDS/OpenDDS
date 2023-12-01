@@ -498,7 +498,7 @@ namespace {
     std::string tempvar = "tempvar";
     be_global->impl_ <<
       indent << "if (encoding.xcdr_version() == Encoding::XCDR_VERSION_2) {\n" <<
-      indent << "//  strm.skip(end_of_map - strm.rpos());\n" <<
+      indent << "  strm.skip(end_of_map - strm.rpos());\n" <<
       indent << "} else {\n";
 
     const bool classic_array_copy = !use_cxx11 && (cls & CL_ARRAY);
@@ -1136,7 +1136,7 @@ namespace {
           "    serialized_size(encoding, total_size, map);\n"
           "    if (!strm.write_delimiter(total_size)) {\n"
           "      return false;\n"
-          "    }\n", !key_primitive);
+          "    }\n", !val_primitive);
 
         intro.join(be_global->impl_, "  ");
 
@@ -1223,11 +1223,9 @@ namespace {
           "    serialized_size(encoding, total_size, map);\n"
           "    if (!strm.write_delimiter(total_size)) {\n"
           "      return false;\n"
-          "    }\n", !key_primitive);
+          "    }\n", !val_primitive);
 
-        if (!key_primitive) {
-          be_global->impl_ << "  const size_t end_of_map = strm.rpos() + total_size;\n";
-        }
+        be_global->impl_ << "  const size_t end_of_map = strm.rpos() + total_size;\n";
 
         intro.join(be_global->impl_, "  ");
 
@@ -1290,30 +1288,30 @@ namespace {
         } else if ((val_try_construct == tryconstructfailaction_trim) && (val_cls & CL_BOUNDED) &&
                    (val_cls & (CL_STRING | CL_SEQUENCE))) {
 
-          if (val_cls & CL_STRING) {
-            const std::string check_not_empty = "!" + value_access + ".empty()";
-            const std::string get_length = value_access + ".length()";
-            be_global->impl_ <<
-              "        if (" + construct_bound_fail + " && " << check_not_empty << " && (" <<
-              bounded_arg(val) << " < " << get_length << ")) {\n"
-              "          "  << value_access <<
-              (use_cxx11 ? (".resize(" + bounded_arg(val) +  ");\n") : ("[" + bounded_arg(val) + "] = 0;\n")) <<
-              "          strm.set_construction_status(Serializer::ConstructionSuccessful);\n"
-              "        } else {\n"
-              "          strm.set_construction_status(Serializer::ElementConstructionFailure);\n";
-            skip_to_end_map("          ", "i", "length", named_as, use_cxx11, val_cls, map);
-            be_global->impl_ <<
-              "        return false;\n"
-              "      }\n";
-          } else if (val_cls & CL_SEQUENCE) {
-            be_global->impl_ <<
-              "      if (" + construct_elem_fail + ") {\n";
-            skip_to_end_map("          ", "i", "length", named_as, use_cxx11, val_cls, map);
-            be_global->impl_ <<
-              "        return false;\n"
-              "      }\n"
-              "      strm.set_construction_status(Serializer::ConstructionSuccessful);\n";
-          }
+          // if (val_cls & CL_STRING) {
+          //   const std::string check_not_empty = "!" + value_access + ".empty()";
+          //   const std::string get_length = value_access + ".length()";
+          //   be_global->impl_ <<
+          //     "        if (" + construct_bound_fail + " && " << check_not_empty << " && (" <<
+          //     bounded_arg(val) << " < " << get_length << ")) {\n"
+          //     "          "  << value_access <<
+          //     (use_cxx11 ? (".resize(" + bounded_arg(val) +  ");\n") : ("[" + bounded_arg(val) + "] = 0;\n")) <<
+          //     "          strm.set_construction_status(Serializer::ConstructionSuccessful);\n"
+          //     "        } else {\n"
+          //     "          strm.set_construction_status(Serializer::ElementConstructionFailure);\n";
+          //   skip_to_end_map("          ", "i", "length", named_as, use_cxx11, val_cls, map);
+          //   be_global->impl_ <<
+          //     "        return false;\n"
+          //     "      }\n";
+          // } else if (val_cls & CL_SEQUENCE) {
+          //   be_global->impl_ <<
+          //     "      if (" + construct_elem_fail + ") {\n";
+          //   skip_to_end_map("          ", "i", "length", named_as, use_cxx11, val_cls, map);
+          //   be_global->impl_ <<
+          //     "        return false;\n"
+          //     "      }\n"
+          //     "      strm.set_construction_status(Serializer::ConstructionSuccessful);\n";
+          // }
         } else {
           //discard/default
           be_global->impl_ <<
