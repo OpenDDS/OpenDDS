@@ -914,7 +914,7 @@ namespace {
     std::string start, std::string end, std::string map_type_name,
     bool use_cxx11, Classification cls, AST_Map* map)
   {
-    std::string elem_type_name = map_type_name + "::value_type";
+    std::string elem_type_name = map_type_name + "::mapped_type";
 
     if (cls & CL_STRING) {
       if (cls & CL_WIDE) {
@@ -950,7 +950,7 @@ namespace {
         classic_array_copy ? tempvar : stream_to, false);
       wrapper.classic_array_copy_ = classic_array_copy;
       wrapper.done(&intro);
-      stream_to = wrapper.ref() + ".second";
+      stream_to = wrapper.ref();
       intro.join(be_global->impl_, indent + "    ");
     }
 
