@@ -235,8 +235,11 @@ public:
   TryConstructFailAction sequence_element_try_construct(AST_Sequence* node);
   TryConstructFailAction array_element_try_construct(AST_Array* node);
   TryConstructFailAction union_discriminator_try_construct(AST_Union* node);
+
+#if OPENDDS_HAS_MAP
   TryConstructFailAction map_key_try_construct(AST_Map* node);
   TryConstructFailAction map_value_try_construct(AST_Map* node);
+#endif
 
   OpenDDS::DataRepresentation data_representations(AST_Decl* node) const;
 
