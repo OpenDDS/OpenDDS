@@ -10,7 +10,7 @@
 #include <ast_array.h>
 #if OPENDDS_HAS_MAPS
 #include <ast_map.h>
-#endif 
+#endif
 #include <ast_union.h>
 #include <utl_string.h>
 
