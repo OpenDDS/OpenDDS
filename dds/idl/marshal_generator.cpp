@@ -496,10 +496,10 @@ namespace {
     }
 
     std::string tempvar = "tempvar";
-    be_global->impl_ <<
-      indent << "if (encoding.xcdr_version() == Encoding::XCDR_VERSION_2) {\n" <<
-      indent << "  strm.skip(end_of_map - strm.rpos());\n" <<
-      indent << "} else {\n";
+    // be_global->impl_ <<
+    //   indent << "if (encoding.xcdr_version() == Encoding::XCDR_VERSION_2) {\n" <<
+    //   indent << "  strm.skip(end_of_map - strm.rpos());\n" <<
+    //   indent << "} else {\n";
 
     const bool classic_array_copy = !use_cxx11 && (cls & CL_ARRAY);
 
@@ -521,14 +521,14 @@ namespace {
         classic_array_copy ? tempvar : stream_to, false);
       wrapper.classic_array_copy_ = classic_array_copy;
       wrapper.done(&intro);
-      stream_to = wrapper.ref();
+      stream_to = wrapper.ref() + ".second";
       intro.join(be_global->impl_, indent + "    ");
     }
 
     be_global->impl_ <<
-      indent << "  for (CORBA::ULong j = " << start << " + 1; j < " << end << "; ++j) {\n" <<
-      indent << "//    strm >> " << stream_to << ";\n" <<
-      indent << "  }\n" <<
+      indent << "for (CORBA::ULong j = " << start << " + 1; j < " << end << "; ++j) {\n" <<
+      indent << "  strm >> " << stream_to << ";\n" <<
+      // indent << "  }\n" <<
       indent << "}\n";
   }
 
@@ -1223,9 +1223,11 @@ namespace {
           "    serialized_size(encoding, total_size, map);\n"
           "    if (!strm.write_delimiter(total_size)) {\n"
           "      return false;\n"
-          "    }\n", !val_primitive);
+          "    }\n", !key_primitive || !val_primitive);
 
-        be_global->impl_ << "  const size_t end_of_map = strm.rpos() + total_size;\n";
+        if (!key_primitive || !val_primitive) {
+          be_global->impl_ << "  const size_t end_of_map = strm.rpos() + total_size;\n";
+        }
 
         intro.join(be_global->impl_, "  ");
 

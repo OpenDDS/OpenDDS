@@ -42,12 +42,12 @@ bool operator!=(const TestStruct& lhs, const TestStruct& rhs) {
 }
 
 bool CheckData(Data test, Data expected) {
-  // if (!CheckMaps(test.intIntMap(), expected.intIntMap())) return false;
+  if (!CheckMaps(test.intIntMap(), expected.intIntMap())) return false;
   if (!CheckMaps(test.stringStringMap(), expected.stringStringMap())) return false;
-  // if (!CheckMaps(test.enumIntMap(), expected.enumIntMap())) return false;
-  // if (!CheckMaps(test.intEnumMap(), expected.intEnumMap())) return false;
+  if (!CheckMaps(test.enumIntMap(), expected.enumIntMap())) return false;
+  if (!CheckMaps(test.intEnumMap(), expected.intEnumMap())) return false;
   if (!CheckMaps(test.stringStructsMap(), expected.stringStructsMap())) return false;
-  // if (!CheckMaps(test.stringSequenceMap(), expected.stringSequenceMap())) return false;
+  if (!CheckMaps(test.stringSequenceMap(), expected.stringSequenceMap())) return false;
   if (!CheckMaps(test.stringMapMap(), expected.stringMapMap())) return false;
 
   return true;
@@ -59,10 +59,10 @@ TEST(MapsTests, Marshalling)
   OpenDDS::DCPS::Serializer strm(b.get(), encoding);
 
   Data expectedData;
-  // expectedData.intIntMap()[10] = 10;
+  expectedData.intIntMap()[10] = 10;
   expectedData.stringStringMap()["Hello"] = "World";
-  // expectedData.enumIntMap()[TEST_ENUM::TEST1] = 10;
-  // expectedData.intEnumMap()[10] = TEST_ENUM::TEST1;
+  expectedData.enumIntMap()[TEST_ENUM::TEST1] = 10;
+  expectedData.intEnumMap()[10] = TEST_ENUM::TEST1;
 
   TestStruct stru;
   stru.msg("World");
@@ -86,35 +86,35 @@ TEST(MapsTests, SerializedSize)
   Data expectedData;
 
   // intIntMap
-  // auto size = (int32_t) OpenDDS::DCPS::serialized_size(encoding, expectedData.intIntMap());
-  // EXPECT_EQ(size, 4);
-  // expectedData.intIntMap()[10] = 10;
-  // size = (int32_t) OpenDDS::DCPS::serialized_size(encoding, expectedData.intIntMap());
-  // EXPECT_EQ(size, 12);
-  // expectedData.intIntMap()[20] = 10;
-  // size = (int32_t) OpenDDS::DCPS::serialized_size(encoding, expectedData.intIntMap());
-  // EXPECT_EQ(size, 20);
+  auto size = (int32_t) OpenDDS::DCPS::serialized_size(encoding, expectedData.intIntMap());
+  EXPECT_EQ(size, 4);
+  expectedData.intIntMap()[10] = 10;
+  size = (int32_t) OpenDDS::DCPS::serialized_size(encoding, expectedData.intIntMap());
+  EXPECT_EQ(size, 12);
+  expectedData.intIntMap()[20] = 10;
+  size = (int32_t) OpenDDS::DCPS::serialized_size(encoding, expectedData.intIntMap());
+  EXPECT_EQ(size, 20);
 
   // stringStringMap
-  auto size = (int32_t) OpenDDS::DCPS::serialized_size(encoding, expectedData.stringStringMap());
+  size = (int32_t) OpenDDS::DCPS::serialized_size(encoding, expectedData.stringStringMap());
   EXPECT_EQ(size, 4);
   expectedData.stringStringMap()["Hello"] = "World!";
   size = (int32_t) OpenDDS::DCPS::serialized_size(encoding, expectedData.stringStringMap());
   EXPECT_EQ(size, 25);
 
   // enumIntMap
-  // size = (int32_t) OpenDDS::DCPS::serialized_size(encoding, expectedData.enumIntMap());
-  // EXPECT_EQ(size, 4);
-  // expectedData.enumIntMap()[TEST_ENUM::TEST1] = 10;
-  // size = (int32_t) OpenDDS::DCPS::serialized_size(encoding, expectedData.enumIntMap());
-  // EXPECT_EQ(size, 12);
+  size = (int32_t) OpenDDS::DCPS::serialized_size(encoding, expectedData.enumIntMap());
+  EXPECT_EQ(size, 4);
+  expectedData.enumIntMap()[TEST_ENUM::TEST1] = 10;
+  size = (int32_t) OpenDDS::DCPS::serialized_size(encoding, expectedData.enumIntMap());
+  EXPECT_EQ(size, 12);
 
   // intEnumMap
-  // size = (int32_t) OpenDDS::DCPS::serialized_size(encoding, expectedData.intEnumMap());
-  // EXPECT_EQ(size, 4);
-  // expectedData.intEnumMap()[10] = TEST_ENUM::TEST1;
-  // size = (int32_t) OpenDDS::DCPS::serialized_size(encoding, expectedData.intEnumMap());
-  // EXPECT_EQ(size, 12);
+  size = (int32_t) OpenDDS::DCPS::serialized_size(encoding, expectedData.intEnumMap());
+  EXPECT_EQ(size, 4);
+  expectedData.intEnumMap()[10] = TEST_ENUM::TEST1;
+  size = (int32_t) OpenDDS::DCPS::serialized_size(encoding, expectedData.intEnumMap());
+  EXPECT_EQ(size, 12);
 
   // stringStructsMap
   TestStruct stru;
@@ -150,10 +150,10 @@ TEST(MapsTests, ValueWriterReader)
   OpenDDS::DCPS::JsonValueWriter<Writer> testWriter(writer);
 
   Data expectedData;
-  // expectedData.intIntMap()[10] = 10;
-  // expectedData.stringStringMap()["Hello"] = "World";
-  // expectedData.enumIntMap()[TEST_ENUM::TEST1] = 10;
-  // expectedData.intEnumMap()[10] = TEST_ENUM::TEST1;
+  expectedData.intIntMap()[10] = 10;
+  expectedData.stringStringMap()["Hello"] = "World";
+  expectedData.enumIntMap()[TEST_ENUM::TEST1] = 10;
+  expectedData.intEnumMap()[10] = TEST_ENUM::TEST1;
 
   TestStruct stru;
   stru.msg("World");

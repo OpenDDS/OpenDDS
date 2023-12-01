@@ -14,12 +14,12 @@
 
     @topic
     struct Data {
-      // map<int32, int32> intIntMap;
+      map<int32, int32> intIntMap;
 
       map<string, string> stringStringMap;
 
-      // map<TEST_ENUM, int32> enumIntMap;
-      // map<int32, TEST_ENUM> intEnumMap;
+      map<TEST_ENUM, int32> enumIntMap;
+      map<int32, TEST_ENUM> intEnumMap;
 
       map<string, TestStruct> stringStructsMap;
       // map<TestStruct, string> structStringMap; // Will not compile
