@@ -481,57 +481,6 @@ namespace {
       indent << "}\n";
   }
 
-  void skip_to_end_map(const std::string& indent,
-    std::string start, std::string end, std::string map_type_name,
-    bool use_cxx11, Classification cls, AST_Map* map)
-  {
-    std::string elem_type_name = map_type_name + "::value_type";
-
-    if (cls & CL_STRING) {
-      if (cls & CL_WIDE) {
-        elem_type_name = use_cxx11 ? "std::wstring" : "CORBA::WString_var";
-      } else {
-        elem_type_name = use_cxx11 ? "std::string" : "CORBA::String_var";
-      }
-    }
-
-    std::string tempvar = "tempvar";
-    // be_global->impl_ <<
-    //   indent << "if (encoding.xcdr_version() == Encoding::XCDR_VERSION_2) {\n" <<
-    //   indent << "  strm.skip(end_of_map - strm.rpos());\n" <<
-    //   indent << "} else {\n";
-
-    const bool classic_array_copy = !use_cxx11 && (cls & CL_ARRAY);
-
-    if (!classic_array_copy) {
-      be_global->impl_ <<
-        indent << "  " << elem_type_name << " " << tempvar << ";\n";
-    }
-
-    std::string stream_to = tempvar;
-    if (cls & CL_STRING) {
-      if (cls & CL_BOUNDED) {
-        AST_Type* elem = resolveActualType(map->value_type());
-        const string args = stream_to + ", " + bounded_arg(elem);
-        stream_to = getWrapper(args, elem, WD_INPUT);
-      }
-    } else {
-      Intro intro;
-      RefWrapper wrapper(map->value_type(), scoped(deepest_named_type(map->value_type())->name()),
-        classic_array_copy ? tempvar : stream_to, false);
-      wrapper.classic_array_copy_ = classic_array_copy;
-      wrapper.done(&intro);
-      stream_to = wrapper.ref() + ".second";
-      intro.join(be_global->impl_, indent + "    ");
-    }
-
-    be_global->impl_ <<
-      indent << "for (CORBA::ULong j = " << start << " + 1; j < " << end << "; ++j) {\n" <<
-      indent << "  strm >> " << stream_to << ";\n" <<
-      // indent << "  }\n" <<
-      indent << "}\n";
-  }
-
   void gen_sequence_i(
     UTL_ScopedName* tdname, AST_Sequence* seq, bool nested_key_only, AST_Typedef* typedef_node = 0,
     const FieldInfo* anonymous = 0)
@@ -961,6 +910,57 @@ namespace {
   }
 
 #if OPENDDS_HAS_MAP
+  void skip_to_end_map(const std::string& indent,
+    std::string start, std::string end, std::string map_type_name,
+    bool use_cxx11, Classification cls, AST_Map* map)
+  {
+    std::string elem_type_name = map_type_name + "::value_type";
+
+    if (cls & CL_STRING) {
+      if (cls & CL_WIDE) {
+        elem_type_name = use_cxx11 ? "std::wstring" : "CORBA::WString_var";
+      } else {
+        elem_type_name = use_cxx11 ? "std::string" : "CORBA::String_var";
+      }
+    }
+
+    std::string tempvar = "tempvar";
+    // be_global->impl_ <<
+    //   indent << "if (encoding.xcdr_version() == Encoding::XCDR_VERSION_2) {\n" <<
+    //   indent << "  strm.skip(end_of_map - strm.rpos());\n" <<
+    //   indent << "} else {\n";
+
+    const bool classic_array_copy = !use_cxx11 && (cls & CL_ARRAY);
+
+    if (!classic_array_copy) {
+      be_global->impl_ <<
+        indent << "  " << elem_type_name << " " << tempvar << ";\n";
+    }
+
+    std::string stream_to = tempvar;
+    if (cls & CL_STRING) {
+      if (cls & CL_BOUNDED) {
+        AST_Type* elem = resolveActualType(map->value_type());
+        const string args = stream_to + ", " + bounded_arg(elem);
+        stream_to = getWrapper(args, elem, WD_INPUT);
+      }
+    } else {
+      Intro intro;
+      RefWrapper wrapper(map->value_type(), scoped(deepest_named_type(map->value_type())->name()),
+        classic_array_copy ? tempvar : stream_to, false);
+      wrapper.classic_array_copy_ = classic_array_copy;
+      wrapper.done(&intro);
+      stream_to = wrapper.ref() + ".second";
+      intro.join(be_global->impl_, indent + "    ");
+    }
+
+    be_global->impl_ <<
+      indent << "for (CORBA::ULong j = " << start << " + 1; j < " << end << "; ++j) {\n" <<
+      indent << "  strm >> " << stream_to << ";\n" <<
+      // indent << "  }\n" <<
+      indent << "}\n";
+  }
+
   void gen_map_i(
     UTL_ScopedName* tdname, AST_Map* map, bool nested_key_only, const FieldInfo* anonymous = 0)
   {
