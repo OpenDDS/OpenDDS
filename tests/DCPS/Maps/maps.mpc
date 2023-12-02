@@ -1,4 +1,6 @@
 project(*Publisher) : dcpsexe, dcps_test, dcps_transports_for_test {
+  avoids += no_cxx11
+
   exename = publisher
 
   TypeSupport_Files {
@@ -11,6 +13,8 @@ project(*Publisher) : dcpsexe, dcps_test, dcps_transports_for_test {
 }
 
 project(*Subscriber) : dcpsexe, dcps_test, dcps_transports_for_test {
+  avoids += no_cxx11
+
   exename = subscriber
   after += *Publisher
   TypeSupport_Files {

@@ -13,13 +13,6 @@ add_library(${idl})
 opendds_target_sources(${idl} PUBLIC "maps.idl" OPENDDS_IDL_OPTIONS "-Lc++11")
 target_link_libraries(${idl} PUBLIC OpenDDS::Dcps)
 
-# Assert the mapping used was C++11
-get_property(mappings TARGET ${idl} PROPERTY OPENDDS_LANGUAGE_MAPPINGS)
-if(NOT ("C++11" IN_LIST mappings))
-  message(FATAL_ERROR "${idl}: C++11 NOT in mapping list: ${mappings}")
-  return()
-endif()
-
 set(opendds_libs
   OpenDDS::Dcps # Core OpenDDS Library
   OpenDDS::InfoRepoDiscovery OpenDDS::Tcp # For run_test.pl
