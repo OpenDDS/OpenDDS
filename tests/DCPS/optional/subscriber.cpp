@@ -2,6 +2,7 @@
 #include "optionalC.h"
 #include "optionalTypeSupportImpl.h"
 
+#include <ace/Assert.h>
 #include <tests/Utils/DistributedConditionSet.h>
 #include <tests/Utils/StatusMatching.h>
 
@@ -70,8 +71,10 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
                               DDS::ANY_SAMPLE_STATE, DDS::ANY_VIEW_STATE, DDS::ANY_INSTANCE_STATE);
     for (unsigned int idx = 0; idx != messages.length(); ++idx) {
       if (infos[idx].valid_data) {
-        // ACE_DEBUG((LM_DEBUG, "received %C\n", messages[idx].value.in()));
-        // distributed_condition_set->post(OptionalTest::SUBSCRIBER, OptionalTest::SUBSCRIBER_DONE);
+        const std::optional<std::string> opt = messages[idx].value();
+        ACE_ASSERT(opt.has_value());
+        ACE_DEBUG((LM_DEBUG, "received %C\n", opt ? opt->c_str() : "nullopt"));
+        distributed_condition_set->post(OptionalTest::SUBSCRIBER, OptionalTest::SUBSCRIBER_DONE);
         done = true;
       }
     }
