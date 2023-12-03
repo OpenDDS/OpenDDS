@@ -2637,7 +2637,7 @@ namespace {
           if (is_optional) {
             expr += "    bool has_value = false;\n";
             expr += "    strm >> ACE_InputCDR::to_boolean(has_value);\n";
-            expr += "    if (has_value) stru" + value_access + "._" + field->local_name()->get_string() + " = " + field->field_type()->full_name() + "{};\n";
+            expr += "    if (has_value) " + type_to_default("", type, stru_field_name, type->anonymous());
             expr += "    if (has_value && !";
           } else {
             expr += "    if (!";

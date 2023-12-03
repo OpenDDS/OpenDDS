@@ -9,8 +9,6 @@
 #include <ace/Log_Msg.h>
 #include <gtest/gtest.h>
 
-#include <cstdlib>
-
 TEST(OptionalTests, Empty)
 {
   optional::OptionalMembers empty;
