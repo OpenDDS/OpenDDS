@@ -1630,6 +1630,7 @@ namespace {
     std::string field_name = field->local_name()->get_string();;
     bool is_optional = be_global->is_optional(field);
     if (is_optional) {
+      line += indent + "primitive_serialized_size(encoding, size, ACE_OutputCDR::from_boolean(" + prefix + "." + field_name + "().has_value()));\n";
       line += indent + "if (" + prefix + "." + field_name + "().has_value()) {\n";
       field_name += ".value";
     }
@@ -1716,7 +1717,7 @@ namespace {
 
     if (af.anonymous()) {
       RefWrapper wrapper(af.type_, af.scoped_type_,
-        prefix + "." + insert_cxx11_accessor_parens(af.name_) + (is_optional ? ".value()" : ""));
+        prefix + "." + insert_cxx11_accessor_parens(af.name_));
       wrapper.nested_key_only_ = wrap_nested_key_only;
       wrapper.done(&intro);
       return "(strm " + wrapper.stream() + ")";
@@ -2634,7 +2635,10 @@ namespace {
             type_to_default("    ", type, stru_field_name, type->anonymous()) +
             "  } else {\n";
           if (is_optional) {
-            expr += "    if (" + stru_field_name + ".has_value() && !";
+            expr += "    bool has_value = false;\n";
+            expr += "    strm >> ACE_InputCDR::to_boolean(has_value);\n";
+            expr += "    if (has_value) stru" + value_access + "._" + field->local_name()->get_string() + " = " + field->field_type()->full_name() + "{};\n";
+            expr += "    if (has_value && !";
           } else {
             expr += "    if (!";
           }
@@ -2814,8 +2818,10 @@ namespace {
           expr += "(!(" + cond + ") || ";
         }
 
-        if (is_optional)
+        if (is_optional) {
+          expr += "(strm << ACE_OutputCDR::from_boolean(stru" + value_access + "." + field_name + "().has_value())) && ";
           expr += "stru" + value_access + "." + field_name + "().has_value() ? ";
+        }
 
         expr += generate_field_stream(
           indent, field, "<< stru" + value_access, wrap_nested_key_only, intro);
