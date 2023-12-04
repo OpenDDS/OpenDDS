@@ -48,6 +48,7 @@ namespace XTypes {
 
 using DCPS::log_level;
 using DCPS::LogLevel;
+using DPCS::retcode_to_string;
 
 DynamicDataXcdrReadImpl::DynamicDataXcdrReadImpl()
   : chain_(0)
@@ -196,8 +197,8 @@ DDS::MemberId DynamicDataXcdrReadImpl::get_member_id_at_index(ACE_CDR::ULong ind
   case TK_ENUM:
     // Value of enum or primitive types can be indicated by Id MEMBER_ID_INVALID
     // or by index 0 (Section 7.5.2.11.1).
-    if (index != 0 && DCPS::log_level >= DCPS::LogLevel::Notice) {
-      ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicDataXcdrReadImpl::get_member_id_at_index:"
+    if (index != 0 && log_level >= LogLevel::Warning) {
+      ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: DynamicDataXcdrReadImpl::get_member_id_at_index:"
                  " Received invalid index (%d) for type %C\n", index, typekind_to_string(tk)));
     }
     return MEMBER_ID_INVALID;
@@ -215,13 +216,22 @@ DDS::MemberId DynamicDataXcdrReadImpl::get_member_id_at_index(ACE_CDR::ULong ind
       const DDS::ExtensibilityKind ek = type_desc_->extensibility_kind();
       if (ek == DDS::APPENDABLE || ek == DDS::MUTABLE) {
         if (!strm_.skip_delimiter()) {
+          if (log_level >= LogLevel::Warning) {
+            ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: DynamicDataXcdrReadImpl::get_member_id_at_index:"
+                       " Failed to skip delimiter\n"));
+          }
           return MEMBER_ID_INVALID;
         }
       }
 
+      DDS::ReturnCode_t rc;
       if (ek == DDS::FINAL || ek == DDS::APPENDABLE) {
         bool has_optional;
         if (!has_optional_member(has_optional)) {
+          if (log_level >= LogLevel::Warning) {
+            ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: DynamicDataXcdrReadImpl::get_member_id_at_index:"
+                       " has_optional_member failed\n"));
+          }
           return MEMBER_ID_INVALID;
         }
 
@@ -233,11 +243,22 @@ DDS::MemberId DynamicDataXcdrReadImpl::get_member_id_at_index(ACE_CDR::ULong ind
             ACE_CDR::ULong curr_index = 0;
             for (ACE_CDR::ULong i = 0; i < type_->get_member_count(); ++i) {
               DDS::DynamicTypeMember_var dtm;
-              if (type_->get_member_by_index(dtm, i) != DDS::RETCODE_OK) {
+              rc = type_->get_member_by_index(dtm, i);
+              if (rc != DDS::RETCODE_OK) {
+                if (log_level >= LogLevel::Warning) {
+                  ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: DynamicDataXcdrReadImpl::get_member_id_at_index:"
+                             " get_member_by_index %u returned %C\n", i, retcode_to_string(rc)));
+                }
                 return MEMBER_ID_INVALID;
               }
               DDS::MemberDescriptor_var md;
-              if (dtm->get_descriptor(md) != DDS::RETCODE_OK) {
+              rc = dtm->get_descriptor(md);
+              if (rc != DDS::RETCODE_OK) {
+                if (log_level >= LogLevel::Warning) {
+                  ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: DynamicDataXcdrReadImpl::get_member_id_at_index:"
+                             " get_descriptor for member at index %u returned %C\n",
+                             i, retcode_to_string(rc)));
+                }
                 return MEMBER_ID_INVALID;
               }
               if (exclude_member(extent_, md->is_key(), struct_has_explicit_keys)) {
@@ -249,6 +270,7 @@ DDS::MemberId DynamicDataXcdrReadImpl::get_member_id_at_index(ACE_CDR::ULong ind
               ++curr_index;
             }
             // Should never reach here!
+            OPENDDS_ASSERT(false);
             return MEMBER_ID_INVALID;
           } else if (extent_ == DCPS::Sample::KeyOnly) {
             return MEMBER_ID_INVALID;
@@ -258,7 +280,12 @@ DDS::MemberId DynamicDataXcdrReadImpl::get_member_id_at_index(ACE_CDR::ULong ind
         // A Full sample or a NestedKeyOnly sample with no explicit key.
         if (!has_optional) {
           DDS::DynamicTypeMember_var member;
-          if (type_->get_member_by_index(member, index) != DDS::RETCODE_OK) {
+          rc = type_->get_member_by_index(member, index);
+          if (rc != DDS::RETCODE_OK) {
+            if (log_level >= LogLevel::Warning) {
+              ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: DynamicDataXcdrReadImpl::get_member_id_at_index:"
+                         " get_member_by_index %u returned %C\n", index, retcode_to_string(rc)));
+            }
             return MEMBER_ID_INVALID;
           }
           return member->get_id();
@@ -268,12 +295,22 @@ DDS::MemberId DynamicDataXcdrReadImpl::get_member_id_at_index(ACE_CDR::ULong ind
           for (ACE_CDR::ULong i = 0; i < type_->get_member_count(); ++i) {
             ACE_CDR::ULong num_skipped;
             if (!skip_struct_member_at_index(i, num_skipped)) {
+              if (log_level >= LogLevel::Warning) {
+                ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: DynamicDataXcdrReadImpl::get_member_id_at_index:"
+                           " skip_struct_member_at_index %u failed\n", i));
+              }
               break;
             }
             total_skipped += num_skipped;
             if (total_skipped == index + 1) {
               DDS::DynamicTypeMember_var member;
-              if (type_->get_member_by_index(member, i) == DDS::RETCODE_OK) {
+              rc = type_->get_member_by_index(member, i);
+              if (rc != DDS::RETCODE_OK) {
+                if (log_level >= LogLevel::Warning) {
+                  ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: DynamicDataXcdrReadImpl::get_member_id_at_index:"
+                             " get_member_by_index %u returned %C\n", i, retcode_to_string(rc)));
+                }
+              } else {
                 id = member->get_id();
               }
               break;
@@ -285,55 +322,53 @@ DDS::MemberId DynamicDataXcdrReadImpl::get_member_id_at_index(ACE_CDR::ULong ind
         ACE_CDR::ULong member_id;
         size_t member_size;
         bool must_understand;
-        bool good = true;
         for (unsigned i = 0; i < index; ++i) {
           if (!strm_.read_parameter_id(member_id, member_size, must_understand)) {
-            good = false;
-            break;
-          }
-
-          DDS::DynamicTypeMember_var dtm;
-          if (type_->get_member(dtm, member_id) != DDS::RETCODE_OK) {
-            good = false;
-            break;
-          }
-          DDS::MemberDescriptor_var descriptor;
-          if (dtm->get_descriptor(descriptor) != DDS::RETCODE_OK) {
-            good = false;
-            break;
-          }
-          const DDS::DynamicType_ptr mt = descriptor->type();
-          if (!mt) {
-            good = false;
-            break;
-          }
-          const DDS::DynamicType_var member = get_base_type(mt);
-          if (member->get_kind() == TK_SEQUENCE) {
-            if (!skip_sequence_member(member)) {
-              good = false;
-              break;
+            if (log_level >= LogLevel::Warning) {
+              ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: DynamicDataXcdrReadImpl::get_member_id_at_index:"
+                         " read_parameter_id for member at index %u failed\n", i));
             }
-          } else if (!strm_.skip(member_size)) {
-            good = false;
-            break;
+            return MEMBER_ID_INVALID;
+          }
+          if (!strm_.skip(member_size)) {
+            if (log_level >= LogLevel::Warning) {
+              ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: DynamicDataXcdrReadImpl::get_member_id_at_index:"
+                         " skip member with Id %u failed\n", member_id));
+            }
+            return MEMBER_ID_INVALID;
           }
         }
 
-        if (!good || !strm_.read_parameter_id(member_id, member_size, must_understand)) {
-          member_id = MEMBER_ID_INVALID;
+        if (!strm_.read_parameter_id(member_id, member_size, must_understand)) {
+          if (log_level >= LogLevel::Warning) {
+            ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: DynamicDataXcdrReadImpl::get_member_id_at_index:"
+                       " read_parameter_id for member at index %u failed\n", index));
+          }
+          return MEMBER_ID_INVALID;
         }
         return member_id;
       }
     }
   case TK_UNION:
     {
+      const DDS::ExtensibilityKind ek = type_desc_->extensibility_kind();
       if (extent_ == DCPS::Sample::KeyOnly) {
         DDS::DynamicTypeMember_var disc_dtm;
-        if (type_->get_member(disc_dtm, DISCRIMINATOR_ID) != DDS::RETCODE_OK) {
+        DDS::ReturnCode_t rc = type_->get_member(disc_dtm, DISCRIMINATOR_ID);
+        if (rc != DDS::RETCODE_OK) {
+          if (log_level >= LogLevel::Warning) {
+            ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: DynamicDataXcdrReadImpl::get_member_id_at_index:"
+                       "get_member for discriminator returned %C\n", retcode_to_string(rc)));
+          }
           return MEMBER_ID_INVALID;
         }
         DDS::MemberDescriptor_var disc_md;
-        if (disc_dtm->get_descriptor(disc_md) != DDS::RETCODE_OK) {
+        rc = disc_dtm->get_descriptor(disc_md);
+        if (rc != DDS::RETCODE_OK) {
+          if (log_level >= LogLevel::Warning) {
+            ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: DynamicDataXcdrReadImpl::get_member_id_at_index:"
+                       " get_descriptor for discriminator returned %C\n", retcode_to_string(rc)));
+          }
           return MEMBER_ID_INVALID;
         }
         if (!disc_md->is_key()) {
@@ -356,15 +391,29 @@ DDS::MemberId DynamicDataXcdrReadImpl::get_member_id_at_index(ACE_CDR::ULong ind
       if (!selected_md) {
         return MEMBER_ID_INVALID;
       }
+      if (!selected_md->is_optional()) {
+        return selected_md->id();
+      }
 
-      return selected_md->id();
+      // TODO: selected member can be optional and omitted.
+      // Check that the buffer really has the member.
+      if (ek == DDS::FINAL || ek == DDS::APPENDABLE) {
+        if (strm_.encoding().kind() == DCPS::Encoding::KIND_XCDR2) {
+          CORBA::Boolean present;
+          if (!(strm_ >> ACE_InputCDR::to_boolean(present))) {
+            return MEMBER_ID_INVALID;
+          }
+        }
+      } else {
+      }
+    }
+  default:
+    if (log_level >= LogLevel::Warning) {
+      ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: DynamicDataXcdrReadImpl::get_member_id_at_index:"
+                 " Called on an unexpected type %C\n", typekind_to_string(tk)));
     }
   }
 
-  if (DCPS::DCPS_debug_level >= 1) {
-    ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) DynamicDataXcdrReadImpl::get_member_id_at_index -")
-               ACE_TEXT(" Calling on an unexpected type %C\n"), typekind_to_string(tk)));
-  }
   return MEMBER_ID_INVALID;
 }
 
@@ -389,7 +438,7 @@ bool DynamicDataXcdrReadImpl::get_struct_item_count()
         if (rc != DDS::RETCODE_OK) {
           if (log_level >= LogLevel::Warning) {
             ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: DynamicDataXcdrReadImpl::get_item_count:"
-                       " get_member_by_index %u failed: %C\n", i, DCPS::retcode_to_string(rc)));
+                       " get_member_by_index %u failed: %C\n", i, retcode_to_string(rc)));
           }
           return false;
         }
@@ -398,7 +447,7 @@ bool DynamicDataXcdrReadImpl::get_struct_item_count()
         if (rc != DDS::RETCODE_OK) {
           if (log_level >= LogLevel::Warning) {
             ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: DynamicDataXcdrReadImpl::get_item_count:"
-                       " get_descriptor for member at index %u failed: %C\n", i, DCPS::retcode_to_string(rc)));
+                       " get_descriptor for member at index %u failed: %C\n", i, retcode_to_string(rc)));
           }
           return false;
         }
@@ -486,7 +535,7 @@ bool DynamicDataXcdrReadImpl::get_union_item_count()
     if (rc != DDS::RETCODE_OK) {
       if (log_level >= LogLevel::Warning) {
         ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: DynamicDataXcdrReadImpl::get_item_count:"
-                   " get_member for discriminator returned %C\n", DCPS::retcode_to_string(rc)));
+                   " get_member for discriminator returned %C\n", retcode_to_string(rc)));
       }
       return false;
     }
@@ -495,7 +544,7 @@ bool DynamicDataXcdrReadImpl::get_union_item_count()
     if (rc != DDS::RETCODE_OK) {
       if (log_level >= LogLevel::Warning) {
         ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: DynamicDataXcdrReadImpl::get_item_count:"
-                   " get_descriptor for discriminator returned %C\n", DCPS::retcode_to_string(rc)));
+                   " get_descriptor for discriminator returned %C\n", retcode_to_string(rc)));
       }
       return false;
     }
@@ -533,7 +582,7 @@ bool DynamicDataXcdrReadImpl::get_union_item_count()
   if (rc != DDS::RETCODE_OK) {
     if (log_level >= LogLevel::Warning) {
       ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: DynamicDataXcdrReadImpl::get_item_count:"
-                 " get_all_members returned %C\n", DCPS::retcode_to_string(rc)));
+                 " get_all_members returned %C\n", retcode_to_string(rc)));
     }
     return false;
   }
@@ -547,7 +596,7 @@ bool DynamicDataXcdrReadImpl::get_union_item_count()
     if (rc != DDS::RETCODE_OK) {
       if (log_level >= LogLevel::Warning) {
         ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: DynamicDataXcdrReadImpl::get_item_count:"
-                   " get_descriptor returned %C\n", DCPS::retcode_to_string(rc)));
+                   " get_descriptor returned %C\n", retcode_to_string(rc)));
       }
       return false;
     }
@@ -1586,7 +1635,7 @@ DDS::ReturnCode_t DynamicDataXcdrReadImpl::get_complex_value(DDS::DynamicData_pt
         break;
       }
 
-      const DDS::ExtensibilityKind ek = type_desc_->extensibility_kind(); 
+      const DDS::ExtensibilityKind ek = type_desc_->extensibility_kind();
       if (id == DISCRIMINATOR_ID) {
         if (ek == DDS::APPENDABLE || ek == DDS::MUTABLE) {
           if (!strm_.skip_delimiter()) {
