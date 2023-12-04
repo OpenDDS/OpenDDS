@@ -22,17 +22,11 @@ class DynamicDataImpl;
 
 namespace XTypes {
 
-class DynamicDataXcdrReadImpl;
-
 class OpenDDS_Dcps_Export DynamicDataImpl : public DynamicDataBase {
 public:
-  // The optional ACE_Message_Block chain can be passed to provide an XCDR backing store for this object.
-  // User should only pass a message block chain for the top-level type. The backing stores for the enclosed
-  // types will be derived from it.
-  DynamicDataImpl(DDS::DynamicType_ptr type, ACE_Message_Block* chain = 0, const DCPS::Encoding* encoding = 0);
+  // An optional, read-only backing store can be passed as a last resort for reading data.
+  DynamicDataImpl(DDS::DynamicType_ptr type, DDS::DynamicData_ptr backing_store = 0);
   DynamicDataImpl(const DynamicDataImpl& other);
-
-  ~DynamicDataImpl();
 
   DDS::ReturnCode_t set_descriptor(MemberId id, DDS::MemberDescriptor* value);
 
@@ -268,7 +262,7 @@ private:
   template<typename ValueType>
   void cast_to_enum_value(ValueType& dst, CORBA::Long src) const;
 
-  void set_backing_store(DynamicDataXcdrReadImpl* xcdr_store);
+  void set_backing_store(DDS::DynamicData_ptr backing_store);
 
   // Wrappers for reading different types from the backing store
   bool get_value_from_backing_store(ACE_OutputCDR::from_int8& value, DDS::MemberId id);
@@ -686,10 +680,10 @@ private:
   DataContainer container_;
 
   // Immutable backing store to retrieve data in case the container doesn't have it.
-  // Reading from the backing store is considered best effort, that is failure to read
-  // from it doesn't cascade to the caller. E.g., an optional member might not appear
-  // in the backing store but user is allowed to get it from the public API.
-  DynamicDataXcdrReadImpl* backing_store_;
+  // The type associated with the backing store can be different (but assignable to)
+  // the type associated with this object. Reading from the backing store is considered
+  // best effort, that is failure to read from it doesn't cascade to the caller.
+  DDS::DynamicData_var backing_store_;
 
   bool reconstruct_string_value(CORBA::Char* str) const;
   bool reconstruct_wstring_value(CORBA::WChar* wstr) const;

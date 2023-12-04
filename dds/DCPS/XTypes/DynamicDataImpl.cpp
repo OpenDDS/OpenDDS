@@ -7,7 +7,6 @@
 
 #ifndef OPENDDS_SAFETY_PROFILE
 #  include "DynamicDataImpl.h"
-#  include "DynamicDataXcdrReadImpl.h"
 
 #  include "DynamicTypeMemberImpl.h"
 #  include "Utils.h"
@@ -28,15 +27,11 @@ using DCPS::log_level;
 using DCPS::retcode_to_string;
 
 DynamicDataImpl::DynamicDataImpl(DDS::DynamicType_ptr type,
-                                 ACE_Message_Block* chain,
-                                 const DCPS::Encoding* encoding)
+                                 DDS::DynamicData_ptr backing_store)
   : DynamicDataBase(type)
   , container_(type_, this)
-  , backing_store_(0)
+  , backing_store_(backing_store)
 {
-  if (chain) {
-    backing_store_ = new DynamicDataXcdrReadImpl(chain, *encoding, type, DCPS::Sample::Full);
-  }
 }
 
 DynamicDataImpl::DynamicDataImpl(const DynamicDataImpl& other)
@@ -46,16 +41,8 @@ DynamicDataImpl::DynamicDataImpl(const DynamicDataImpl& other)
   , DCPS::RcObject()
   , DynamicDataBase(other.type_)
   , container_(other.container_, this)
-  , backing_store_(0)
+  , backing_store_(other.backing_store_)
 {
-  if (other.backing_store_) {
-    backing_store_ = new DynamicDataXcdrReadImpl(*other.backing_store_);
-  }
-}
-
-DynamicDataImpl::~DynamicDataImpl()
-{
-  CORBA::release(backing_store_);
 }
 
 DDS::ReturnCode_t DynamicDataImpl::set_descriptor(MemberId, DDS::MemberDescriptor*)
@@ -342,9 +329,7 @@ DDS::ReturnCode_t DynamicDataImpl::clear_all_values()
   case TK_STRUCTURE:
   case TK_UNION:
     clear_container();
-    if (backing_store_) {
-      set_backing_store(0);
-    }
+    set_backing_store(0);
     break;
   case TK_MAP:
   case TK_BITSET:
@@ -437,10 +422,9 @@ DDS::ReturnCode_t DynamicDataImpl::clear_value(DDS::MemberId id)
         container_.complex_map_.insert(std::make_pair(prev_id, elem_dd));
       }
     }
+
     // Then disable the backing store.
-    if (backing_store_) {
-      set_backing_store(0);
-    }
+    set_backing_store(0);
     break;
   }
   case TK_STRUCTURE:
@@ -2839,10 +2823,9 @@ bool DynamicDataImpl::read_basic_in_complex_map(ValueType& value, DDS::MemberId 
   return false;
 }
 
-void DynamicDataImpl::set_backing_store(DynamicDataXcdrReadImpl* xcdr_store)
+void DynamicDataImpl::set_backing_store(DDS::DynamicData_ptr backing_store)
 {
-  CORBA::release(backing_store_);
-  backing_store_ = dynamic_cast<DynamicDataXcdrReadImpl*>(DDS::DynamicData::_duplicate(xcdr_store));
+  backing_store_ = backing_store;
 }
 
 bool DynamicDataImpl::get_value_from_backing_store(ACE_OutputCDR::from_int8& value,
@@ -3836,11 +3819,8 @@ DDS::ReturnCode_t DynamicDataImpl::set_member_backing_store(DynamicDataImpl* mem
     }
     return DDS::RETCODE_NO_DATA;
   }
-  DynamicDataXcdrReadImpl* member_store = dynamic_cast<DynamicDataXcdrReadImpl*>(member_dd.in());
-  if (!member_store) {
-    return DDS::RETCODE_ERROR;
-  }
-  member_ddi->set_backing_store(member_store);
+
+  member_ddi->set_backing_store(DDS::DynamicData::_duplicate(member_dd));
   return DDS::RETCODE_OK;
 }
 

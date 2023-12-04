@@ -395,19 +395,19 @@ Service_Participant::get_domain_participant_factory(int &argc,
       }
 
       String config_fname = config_store_->get(OPENDDS_COMMON_DCPS_CONFIG_FILE,
-                                              OPENDDS_COMMON_DCPS_CONFIG_FILE_default);
+                                               OPENDDS_COMMON_DCPS_CONFIG_FILE_default);
       const String default_configuration_file = config_store_->get(OPENDDS_DEFAULT_CONFIGURATION_FILE,
-                                                                  OPENDDS_DEFAULT_CONFIGURATION_FILE_default);
+                                                                   OPENDDS_DEFAULT_CONFIGURATION_FILE_default);
 
       if (config_fname.empty() && !default_configuration_file.empty()) {
         config_fname = default_configuration_file;
       }
 
       if (config_fname.empty()) {
-        if (DCPS_debug_level) {
-          ACE_DEBUG((LM_NOTICE,
-                     ACE_TEXT("(%P|%t) NOTICE: not using file configuration - no configuration ")
-                     ACE_TEXT("file specified.\n")));
+        if (log_level >= LogLevel::Info) {
+          ACE_DEBUG((LM_INFO,
+                     "(%P|%t) INFO: Service_Participant::get_domain_participant_factory: "
+                     "no configuration file specified.\n"));
         }
 
       } else {
@@ -420,31 +420,33 @@ Service_Participant::get_domain_participant_factory(int &argc,
           config_fname = new_path;
         }
 
-        // Load configuration only if the configuration
-        // file exists.
-        FILE* in = ACE_OS::fopen(config_fname.c_str(),
-                                 ACE_TEXT("r"));
-
+        // Load configuration only if the configuration file exists.
+        FILE* const in = ACE_OS::fopen(config_fname.c_str(), ACE_TEXT("r"));
         if (!in) {
-          ACE_DEBUG((LM_WARNING,
-                     ACE_TEXT("(%P|%t) WARNING: not using file configuration - ")
-                     ACE_TEXT("can not open \"%s\" for reading. %p\n"),
-                     config_fname.c_str(), ACE_TEXT("fopen")));
+          if (log_level >= LogLevel::Error) {
+            ACE_ERROR((LM_ERROR,
+                       "(%P|%t) ERROR: Service_Participant::get_domain_participant_factory: "
+                       "could not find config file \"%s\": %p\n",
+                       config_fname.c_str(), ACE_TEXT("fopen")));
+          }
+          return DDS::DomainParticipantFactory::_nil();
 
         } else {
           ACE_OS::fclose(in);
 
-          if (DCPS_debug_level > 1) {
-            ACE_DEBUG((LM_NOTICE,
-                        ACE_TEXT("(%P|%t) NOTICE: Service_Participant::get_domain_participant_factory ")
-                        ACE_TEXT("Going to load configuration from <%s>\n"),
-                        config_fname.c_str()));
+          if (log_level >= LogLevel::Info) {
+            ACE_DEBUG((LM_INFO,
+                       "(%P|%t) INFO: Service_Participant::get_domain_participant_factory: "
+                       "Going to load configuration from <%s>\n",
+                       config_fname.c_str()));
           }
 
           if (this->load_configuration(config_fname) != 0) {
-            ACE_ERROR((LM_ERROR,
-                       ACE_TEXT("(%P|%t) ERROR: Service_Participant::get_domain_participant_factory: ")
-                       ACE_TEXT("load_configuration() failed.\n")));
+            if (log_level >= LogLevel::Error) {
+              ACE_ERROR((LM_ERROR,
+                         "(%P|%t) ERROR: Service_Participant::get_domain_participant_factory: "
+                         "load_configuration() failed.\n"));
+            }
             return DDS::DomainParticipantFactory::_nil();
           }
         }
@@ -496,7 +498,7 @@ Service_Participant::get_domain_participant_factory(int &argc,
       job_queue_ = make_rch<JobQueue>(reactor_task_.get_reactor());
 
       const bool monitor_enabled = config_store_->get_boolean(OPENDDS_COMMON_DCPS_MONITOR,
-                                                             OPENDDS_COMMON_DCPS_MONITOR_default);
+                                                              OPENDDS_COMMON_DCPS_MONITOR_default);
 
       if (monitor_enabled) {
 #if !defined(ACE_AS_STATIC_LIBS)
@@ -1045,7 +1047,7 @@ Service_Participant::repository_lost(Discovery::RepoKey key)
     }
 
     // Check the availability of the current repository.
-    if (current->second->active()) {
+    if (current != this->discoveryMap_.end() && current->second->active()) {
 
       if (DCPS_debug_level > 0) {
         ACE_DEBUG((LM_DEBUG,
@@ -1073,7 +1075,9 @@ Service_Participant::repository_lost(Discovery::RepoKey key)
     }
 
     // Move to the next candidate repository.
-    ++current;
+    if (current != this->discoveryMap_.end()) {
+      ++current;
+    }
   }
 
   // If we reach here, we have exceeded the total recovery time
