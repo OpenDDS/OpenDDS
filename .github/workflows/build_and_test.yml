@@ -336,7 +336,7 @@ jobs:
         name: ${{ github.job }}_autobuild_output
         path: OpenDDS/${{ github.job }}_autobuild_workspace
     - name: Authenticate to Google Cloud
-      uses: google-github-actions/auth@v1
+      uses: google-github-actions/auth@v2
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
@@ -835,7 +835,7 @@ jobs:
         name: ${{ github.job }}_autobuild_output
         path: OpenDDS/build/target/${{ github.job }}_autobuild_workspace
     - name: Authenticate to Google Cloud
-      uses: google-github-actions/auth@v1
+      uses: google-github-actions/auth@v2
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
@@ -1167,7 +1167,7 @@ jobs:
         name: ${{ github.job }}_autobuild_output
         path: OpenDDS/build/target/${{ github.job }}_autobuild_workspace
     - name: Authenticate to Google Cloud
-      uses: google-github-actions/auth@v1
+      uses: google-github-actions/auth@v2
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
@@ -1450,7 +1450,7 @@ jobs:
         name: ${{ github.job }}_autobuild_output
         path: OpenDDS/${{ github.job }}_autobuild_workspace
     - name: Authenticate to Google Cloud
-      uses: google-github-actions/auth@v1
+      uses: google-github-actions/auth@v2
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
@@ -1753,7 +1753,7 @@ jobs:
         name: ${{ github.job }}_autobuild_output
         path: OpenDDS/${{ github.job }}_autobuild_workspace
     - name: Authenticate to Google Cloud
-      uses: google-github-actions/auth@v1
+      uses: google-github-actions/auth@v2
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
@@ -2054,7 +2054,7 @@ jobs:
         name: ${{ github.job }}_autobuild_output
         path: OpenDDS/${{ github.job }}_autobuild_workspace
     - name: Authenticate to Google Cloud
-      uses: google-github-actions/auth@v1
+      uses: google-github-actions/auth@v2
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
@@ -2352,7 +2352,7 @@ jobs:
         name: ${{ github.job }}_autobuild_output
         path: OpenDDS/${{ github.job }}_autobuild_workspace
     - name: Authenticate to Google Cloud
-      uses: google-github-actions/auth@v1
+      uses: google-github-actions/auth@v2
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
@@ -2644,7 +2644,7 @@ jobs:
         name: ${{ github.job }}_autobuild_output
         path: OpenDDS/${{ github.job }}_autobuild_workspace
     - name: Authenticate to Google Cloud
-      uses: google-github-actions/auth@v1
+      uses: google-github-actions/auth@v2
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
@@ -2926,7 +2926,7 @@ jobs:
         name: ${{ github.job }}_autobuild_output
         path: OpenDDS/${{ github.job }}_autobuild_workspace
     - name: Authenticate to Google Cloud
-      uses: google-github-actions/auth@v1
+      uses: google-github-actions/auth@v2
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
@@ -3434,7 +3434,7 @@ jobs:
         name: ${{ github.job }}_autobuild_output
         path: OpenDDS/${{ github.job }}_autobuild_workspace
     - name: Authenticate to Google Cloud
-      uses: google-github-actions/auth@v1
+      uses: google-github-actions/auth@v2
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
@@ -3738,7 +3738,7 @@ jobs:
         name: ${{ github.job }}_autobuild_output
         path: OpenDDS/${{ github.job }}_autobuild_workspace
     - name: Authenticate to Google Cloud
-      uses: google-github-actions/auth@v1
+      uses: google-github-actions/auth@v2
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
@@ -4032,7 +4032,7 @@ jobs:
         name: ${{ github.job }}_autobuild_output
         path: OpenDDS/${{ github.job }}_autobuild_workspace
     - name: Authenticate to Google Cloud
-      uses: google-github-actions/auth@v1
+      uses: google-github-actions/auth@v2
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
@@ -4337,7 +4337,7 @@ jobs:
         name: ${{ github.job }}_autobuild_output
         path: OpenDDS/${{ github.job }}_autobuild_workspace
     - name: Authenticate to Google Cloud
-      uses: google-github-actions/auth@v1
+      uses: google-github-actions/auth@v2
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
@@ -4658,7 +4658,7 @@ jobs:
         name: ${{ github.job }}_autobuild_output
         path: OpenDDS/${{ github.job }}_autobuild_workspace
     - name: Authenticate to Google Cloud
-      uses: google-github-actions/auth@v1
+      uses: google-github-actions/auth@v2
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
@@ -4797,7 +4797,7 @@ jobs:
         name: ${{ github.job }}_autobuild_output
         path: OpenDDS/${{ github.job }}_autobuild_workspace
     - name: Authenticate to Google Cloud
-      uses: google-github-actions/auth@v1
+      uses: google-github-actions/auth@v2
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
@@ -5023,7 +5023,7 @@ jobs:
         name: ${{ github.job }}_autobuild_output
         path: OpenDDS/${{ github.job }}_autobuild_workspace
     - name: Authenticate to Google Cloud
-      uses: google-github-actions/auth@v1
+      uses: google-github-actions/auth@v2
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
@@ -5311,7 +5311,7 @@ jobs:
         name: ${{ github.job }}_autobuild_output
         path: OpenDDS/${{ github.job }}_autobuild_workspace
     - name: Authenticate to Google Cloud
-      uses: google-github-actions/auth@v1
+      uses: google-github-actions/auth@v2
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
@@ -5537,7 +5537,7 @@ jobs:
         name: ${{ github.job }}_autobuild_output
         path: OpenDDS/${{ github.job }}_autobuild_workspace
     - name: Authenticate to Google Cloud
-      uses: google-github-actions/auth@v1
+      uses: google-github-actions/auth@v2
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
@@ -5837,7 +5837,7 @@ jobs:
         name: ${{ github.job }}_autobuild_output
         path: OpenDDS/${{ github.job }}_autobuild_workspace
     - name: Authenticate to Google Cloud
-      uses: google-github-actions/auth@v1
+      uses: google-github-actions/auth@v2
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
@@ -6018,7 +6018,7 @@ jobs:
         name: ${{ github.job }}_autobuild_output
         path: OpenDDS/${{ github.job }}_autobuild_workspace
     - name: Authenticate to Google Cloud
-      uses: google-github-actions/auth@v1
+      uses: google-github-actions/auth@v2
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
@@ -6185,7 +6185,7 @@ jobs:
         name: ${{ github.job }}_autobuild_output
         path: OpenDDS/${{ github.job }}_autobuild_workspace
     - name: Authenticate to Google Cloud
-      uses: google-github-actions/auth@v1
+      uses: google-github-actions/auth@v2
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
@@ -6352,7 +6352,7 @@ jobs:
         name: ${{ github.job }}_autobuild_output
         path: OpenDDS/${{ github.job }}_autobuild_workspace
     - name: Authenticate to Google Cloud
-      uses: google-github-actions/auth@v1
+      uses: google-github-actions/auth@v2
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
@@ -6509,7 +6509,7 @@ jobs:
         name: ${{ github.job }}_autobuild_output
         path: OpenDDS/${{ github.job }}_autobuild_workspace
     - name: Authenticate to Google Cloud
-      uses: google-github-actions/auth@v1
+      uses: google-github-actions/auth@v2
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
@@ -6812,7 +6812,7 @@ jobs:
         name: ${{ github.job }}_autobuild_output
         path: OpenDDS/${{ github.job }}_autobuild_workspace
     - name: Authenticate to Google Cloud
-      uses: google-github-actions/auth@v1
+      uses: google-github-actions/auth@v2
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
@@ -7137,7 +7137,7 @@ jobs:
         name: ${{ github.job }}_autobuild_output
         path: OpenDDS\${{ github.job }}_autobuild_workspace
     - name: Authenticate to Google Cloud
-      uses: google-github-actions/auth@v1
+      uses: google-github-actions/auth@v2
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
@@ -7317,7 +7317,7 @@ jobs:
         name: ${{ github.job }}_autobuild_output
         path: OpenDDS\${{ github.job }}_autobuild_workspace
     - name: Authenticate to Google Cloud
-      uses: google-github-actions/auth@v1
+      uses: google-github-actions/auth@v2
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
@@ -7486,7 +7486,7 @@ jobs:
         name: ${{ github.job }}_autobuild_output
         path: OpenDDS\${{ github.job }}_autobuild_workspace
     - name: Authenticate to Google Cloud
-      uses: google-github-actions/auth@v1
+      uses: google-github-actions/auth@v2
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
@@ -7657,7 +7657,7 @@ jobs:
         name: ${{ github.job }}_autobuild_output
         path: OpenDDS\${{ github.job }}_autobuild_workspace
     - name: Authenticate to Google Cloud
-      uses: google-github-actions/auth@v1
+      uses: google-github-actions/auth@v2
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
@@ -7823,7 +7823,7 @@ jobs:
         name: ${{ github.job }}_autobuild_output
         path: OpenDDS\${{ github.job }}_autobuild_workspace
     - name: Authenticate to Google Cloud
-      uses: google-github-actions/auth@v1
+      uses: google-github-actions/auth@v2
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
@@ -8148,7 +8148,7 @@ jobs:
         name: ${{ github.job }}_autobuild_output
         path: OpenDDS\${{ github.job }}_autobuild_workspace
     - name: Authenticate to Google Cloud
-      uses: google-github-actions/auth@v1
+      uses: google-github-actions/auth@v2
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
@@ -8328,7 +8328,7 @@ jobs:
         name: ${{ github.job }}_autobuild_output
         path: OpenDDS\${{ github.job }}_autobuild_workspace
     - name: Authenticate to Google Cloud
-      uses: google-github-actions/auth@v1
+      uses: google-github-actions/auth@v2
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
@@ -8496,7 +8496,7 @@ jobs:
         name: ${{ github.job }}_autobuild_output
         path: OpenDDS\${{ github.job }}_autobuild_workspace
     - name: Authenticate to Google Cloud
-      uses: google-github-actions/auth@v1
+      uses: google-github-actions/auth@v2
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
@@ -8666,7 +8666,7 @@ jobs:
         name: ${{ github.job }}_autobuild_output
         path: OpenDDS\${{ github.job }}_autobuild_workspace
     - name: Authenticate to Google Cloud
-      uses: google-github-actions/auth@v1
+      uses: google-github-actions/auth@v2
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
@@ -8832,7 +8832,7 @@ jobs:
         name: ${{ github.job }}_autobuild_output
         path: OpenDDS\${{ github.job }}_autobuild_workspace
     - name: Authenticate to Google Cloud
-      uses: google-github-actions/auth@v1
+      uses: google-github-actions/auth@v2
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
@@ -9207,7 +9207,7 @@ jobs:
         name: ${{ github.job }}_autobuild_output
         path: OpenDDS\${{ github.job }}_autobuild_workspace
     - name: Authenticate to Google Cloud
-      uses: google-github-actions/auth@v1
+      uses: google-github-actions/auth@v2
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
@@ -9396,7 +9396,7 @@ jobs:
         name: ${{ github.job }}_autobuild_output
         path: OpenDDS\${{ github.job }}_autobuild_workspace
     - name: Authenticate to Google Cloud
-      uses: google-github-actions/auth@v1
+      uses: google-github-actions/auth@v2
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
@@ -9562,7 +9562,7 @@ jobs:
         name: ${{ github.job }}_autobuild_output
         path: OpenDDS\${{ github.job }}_autobuild_workspace
     - name: Authenticate to Google Cloud
-      uses: google-github-actions/auth@v1
+      uses: google-github-actions/auth@v2
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
@@ -9737,7 +9737,7 @@ jobs:
         name: ${{ github.job }}_autobuild_output
         path: OpenDDS\${{ github.job }}_autobuild_workspace
     - name: Authenticate to Google Cloud
-      uses: google-github-actions/auth@v1
+      uses: google-github-actions/auth@v2
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
@@ -10143,7 +10143,7 @@ jobs:
         name: ${{ github.job }}_autobuild_output
         path: OpenDDS\${{ github.job }}_autobuild_workspace
     - name: Authenticate to Google Cloud
-      uses: google-github-actions/auth@v1
+      uses: google-github-actions/auth@v2
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
@@ -10323,7 +10323,7 @@ jobs:
         name: ${{ github.job }}_autobuild_output
         path: OpenDDS\${{ github.job }}_autobuild_workspace
     - name: Authenticate to Google Cloud
-      uses: google-github-actions/auth@v1
+      uses: google-github-actions/auth@v2
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
@@ -10489,7 +10489,7 @@ jobs:
         name: ${{ github.job }}_autobuild_output
         path: OpenDDS\${{ github.job }}_autobuild_workspace
     - name: Authenticate to Google Cloud
-      uses: google-github-actions/auth@v1
+      uses: google-github-actions/auth@v2
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
@@ -10662,7 +10662,7 @@ jobs:
         name: ${{ github.job }}_autobuild_output
         path: OpenDDS\${{ github.job }}_autobuild_workspace
     - name: Authenticate to Google Cloud
-      uses: google-github-actions/auth@v1
+      uses: google-github-actions/auth@v2
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
@@ -11000,7 +11000,7 @@ jobs:
         name: ${{ github.job }}_autobuild_output
         path: C:\OpenDDS\${{ github.job }}_autobuild_workspace
     - name: Authenticate to Google Cloud
-      uses: google-github-actions/auth@v1
+      uses: google-github-actions/auth@v2
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
@@ -11155,7 +11155,7 @@ jobs:
         name: ${{ github.job }}_autobuild_output
         path: C:\OpenDDS\${{ github.job }}_autobuild_workspace
     - name: Authenticate to Google Cloud
-      uses: google-github-actions/auth@v1
+      uses: google-github-actions/auth@v2
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
@@ -11396,7 +11396,7 @@ jobs:
         name: ${{ github.job }}_autobuild_output
         path: OpenDDS\${{ github.job }}_autobuild_workspace
     - name: Authenticate to Google Cloud
-      uses: google-github-actions/auth@v1
+      uses: google-github-actions/auth@v2
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
@@ -11721,7 +11721,7 @@ jobs:
         name: ${{ github.job }}_autobuild_output
         path: OpenDDS\${{ github.job }}_autobuild_workspace
     - name: Authenticate to Google Cloud
-      uses: google-github-actions/auth@v1
+      uses: google-github-actions/auth@v2
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
@@ -11890,7 +11890,7 @@ jobs:
         name: ${{ github.job }}_autobuild_output
         path: OpenDDS\${{ github.job }}_autobuild_workspace
     - name: Authenticate to Google Cloud
-      uses: google-github-actions/auth@v1
+      uses: google-github-actions/auth@v2
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
@@ -12056,7 +12056,7 @@ jobs:
         name: ${{ github.job }}_autobuild_output
         path: OpenDDS\${{ github.job }}_autobuild_workspace
     - name: Authenticate to Google Cloud
-      uses: google-github-actions/auth@v1
+      uses: google-github-actions/auth@v2
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
@@ -12222,7 +12222,7 @@ jobs:
         name: ${{ github.job }}_autobuild_output
         path: OpenDDS\${{ github.job }}_autobuild_workspace
     - name: Authenticate to Google Cloud
-      uses: google-github-actions/auth@v1
+      uses: google-github-actions/auth@v2
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
@@ -12503,7 +12503,7 @@ jobs:
         name: ${{ github.job }}_autobuild_output
         path: OpenDDS/${{ github.job }}_autobuild_workspace
     - name: Authenticate to Google Cloud
-      uses: google-github-actions/auth@v1
+      uses: google-github-actions/auth@v2
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
@@ -12627,7 +12627,7 @@ jobs:
         name: ${{ github.job }}_autobuild_output
         path: OpenDDS/${{ github.job }}_autobuild_workspace
     - name: Authenticate to Google Cloud
-      uses: google-github-actions/auth@v1
+      uses: google-github-actions/auth@v2
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
@@ -12841,7 +12841,7 @@ jobs:
         name: ${{ github.job }}_autobuild_output
         path: OpenDDS/${{ github.job }}_autobuild_workspace
     - name: Authenticate to Google Cloud
-      uses: google-github-actions/auth@v1
+      uses: google-github-actions/auth@v2
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
@@ -12965,7 +12965,7 @@ jobs:
         name: ${{ github.job }}_autobuild_output
         path: OpenDDS/${{ github.job }}_autobuild_workspace
     - name: Authenticate to Google Cloud
-      uses: google-github-actions/auth@v1
+      uses: google-github-actions/auth@v2
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
@@ -13246,7 +13246,7 @@ jobs:
         name: ${{ github.job }}_autobuild_output
         path: OpenDDS/${{ github.job }}_autobuild_workspace
     - name: Authenticate to Google Cloud
-      uses: google-github-actions/auth@v1
+      uses: google-github-actions/auth@v2
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
@@ -13373,7 +13373,7 @@ jobs:
         name: ${{ github.job }}_autobuild_output
         path: OpenDDS/${{ github.job }}_autobuild_workspace
     - name: Authenticate to Google Cloud
-      uses: google-github-actions/auth@v1
+      uses: google-github-actions/auth@v2
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
@@ -13672,7 +13672,7 @@ jobs:
         name: ${{ github.job }}_autobuild_output
         path: OpenDDS/${{ github.job }}_autobuild_workspace
     - name: Authenticate to Google Cloud
-      uses: google-github-actions/auth@v1
+      uses: google-github-actions/auth@v2
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
@@ -13799,7 +13799,7 @@ jobs:
         name: ${{ github.job }}_autobuild_output
         path: OpenDDS/${{ github.job }}_autobuild_workspace
     - name: Authenticate to Google Cloud
-      uses: google-github-actions/auth@v1
+      uses: google-github-actions/auth@v2
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
