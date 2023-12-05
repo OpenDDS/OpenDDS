@@ -1,4 +1,4 @@
-project(*Publisher) : dcpsexem, opendds_cxx11, dcps_test, dcps_transports_for_test {
+project(*Publisher) : dcpsexe, opendds_cxx11, dcps_test, dcps_transports_for_test {
 
   exename = publisher
 
