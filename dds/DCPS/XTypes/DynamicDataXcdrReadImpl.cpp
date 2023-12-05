@@ -48,7 +48,7 @@ namespace XTypes {
 
 using DCPS::log_level;
 using DCPS::LogLevel;
-using DPCS::retcode_to_string;
+using DCPS::retcode_to_string;
 
 DynamicDataXcdrReadImpl::DynamicDataXcdrReadImpl()
   : chain_(0)
@@ -381,31 +381,51 @@ DDS::MemberId DynamicDataXcdrReadImpl::get_member_id_at_index(ACE_CDR::ULong ind
         return DISCRIMINATOR_ID;
       }
 
-      if (extent_ != DCPS::Sample::Full) {
-        // KeyOnly or NestedKeyOnly sample can only contain discriminator.
+      // KeyOnly or NestedKeyOnly sample can only contain discriminator.
+      if (index > 1 || extent_ != DCPS::Sample::Full) {
+        if (log_level >= LogLevel::Warning) {
+          ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: DynamicDataXcdrReadImpl::get_member_id_at_index:"
+                     " Invalid index: %u\n", index));
+        }
         return MEMBER_ID_INVALID;
       }
 
-      // Get the Id of the selected member.
+      // The selected member can be optional and omitted in the binary data.
       DDS::MemberDescriptor_var selected_md = get_union_selected_member();
       if (!selected_md) {
         return MEMBER_ID_INVALID;
       }
+      const DDS::MemberId id = selected_md->id();
       if (!selected_md->is_optional()) {
-        return selected_md->id();
+        return id;
       }
 
-      // TODO: selected member can be optional and omitted.
-      // Check that the buffer really has the member.
       if (ek == DDS::FINAL || ek == DDS::APPENDABLE) {
         if (strm_.encoding().kind() == DCPS::Encoding::KIND_XCDR2) {
           CORBA::Boolean present;
           if (!(strm_ >> ACE_InputCDR::to_boolean(present))) {
+            if (log_level >= LogLevel::Warning) {
+              ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: DynamicDataXcdrReadImpl::get_member_id_at_index:"
+                         " Read optional member with Id %u failed\n", id));
+            }
             return MEMBER_ID_INVALID;
           }
+          if (!present) {
+            ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: DynamicDataXcdrReadImpl::get_member_id_at_index:"
+                       " Optional member with Id %u is omitted\n", id));
+            return MEMBER_ID_INVALID;
+          }
+          return id;
         }
       } else {
+        DDS::MemberId member_id;
+        size_t member_size;
+        bool must_understand;
+        if (strm_.read_parameter_id(member_id, member_size, must_understand)) {
+          return id;
+        }
       }
+      return MEMBER_ID_INVALID;
     }
   default:
     if (log_level >= LogLevel::Warning) {
@@ -840,8 +860,7 @@ bool DynamicDataXcdrReadImpl::exclude_struct_member(MemberId id, DDS::MemberDesc
 }
 
 template<TypeKind MemberTypeKind, typename MemberType>
-DDS::ReturnCode_t DynamicDataXcdrReadImpl::get_value_from_struct(MemberType& value, MemberId id,
-  TypeKind enum_or_bitmask, LBound lower, LBound upper)
+DDS::ReturnCode_t DynamicDataXcdrReadImpl::get_value_from_struct(MemberType& value, MemberId id)
 {
   DDS::MemberDescriptor_var md;
   if (exclude_struct_member(id, md)) {
@@ -853,37 +872,18 @@ DDS::ReturnCode_t DynamicDataXcdrReadImpl::get_value_from_struct(MemberType& val
     return DDS::RETCODE_NO_DATA;
   }
 
-  DDS::ReturnCode_t rc;
-  if (get_from_struct_common_checks(md, id, MemberTypeKind)) {
-    rc = skip_to_struct_member(md, id);
-    if (rc != DDS::RETCODE_OK) {
-      return rc;
-    }
-    return read_value(value, MemberTypeKind) ? DDS::RETCODE_OK : DDS::RETCODE_ERROR;
+  DDS::DynamicType_var member_type;
+  DDS::ReturnCode_t rc = check_member(
+    md, member_type, "DynamicDataXcdrReadImpl::get_value_from_struct", "get", id, MemberTypeKind);
+  if (rc != DDS::RETCODE_OK) {
+    return rc;
   }
 
-  if (get_from_struct_common_checks(md, id, enum_or_bitmask)) {
-    const DDS::DynamicType_ptr member_type = md->type();
-    if (member_type) {
-      DDS::TypeDescriptor_var td;
-      rc = get_base_type(member_type)->get_descriptor(td);
-      if (rc != DDS::RETCODE_OK) {
-        return rc;
-      }
-      const LBound bit_bound = td->bound()[0];
-      if (bit_bound >= lower && bit_bound <= upper) {
-        rc = skip_to_struct_member(md, id);
-        if (rc != DDS::RETCODE_OK) {
-          return rc;
-        }
-        if (read_value(value, MemberTypeKind)) {
-          return DDS::RETCODE_OK;
-        }
-      }
-    }
+  rc = skip_to_struct_member(md, id);
+  if (rc != DDS::RETCODE_OK) {
+    return rc;
   }
-
-  return DDS::RETCODE_ERROR;
+  return read_value(value, MemberTypeKind) ? DDS::RETCODE_OK : DDS::RETCODE_ERROR;
 }
 
 DDS::MemberDescriptor* DynamicDataXcdrReadImpl::get_union_selected_member()
@@ -1259,56 +1259,52 @@ DDS::ReturnCode_t DynamicDataXcdrReadImpl::get_single_value(ValueType& value, Me
   ScopedChainManager chain_manager(*this);
 
   const TypeKind tk = type_->get_kind();
-  bool good = true;
-
-  // This is an extension to the XTypes spec where the value of a bitmask DynamicData
-  // can be read as a whole as a unsigned integer.
-  if (tk == enum_or_bitmask) {
-    // Per XTypes spec, the value of a DynamicData object of primitive type or TK_ENUM is
-    // accessed with MEMBER_ID_INVALID Id. However, there is only a single value in such
-    // a DynamicData object, and checking for MEMBER_ID_INVALID from the input is perhaps
-    // unnecessary. So, we read the value immediately here.
-    const LBound bit_bound = type_desc_->bound()[0];
-    good = bit_bound >= lower && bit_bound <= upper && read_value(value, ValueTypeKind);
-  } else {
-    switch (tk) {
-    case ValueTypeKind:
-      good = is_primitive(tk) && read_value(value, ValueTypeKind);
-      break;
-    case TK_STRUCTURE:
-      {
-        const DDS::ReturnCode_t rc =
-          get_value_from_struct<ValueTypeKind>(value, id, enum_or_bitmask, lower, upper);
-        if (rc == DDS::RETCODE_NO_DATA) {
-          return rc;
-        }
-        good = rc == DDS::RETCODE_OK;
-      }
-      break;
-    case TK_UNION:
-      {
-        const DDS::ReturnCode_t rc =
-          get_value_from_union<ValueTypeKind>(value, id, enum_or_bitmask, lower, upper);
-        if (rc == DDS::RETCODE_NO_DATA) {
-          return rc;
-        }
-        good = rc == DDS::RETCODE_OK;
-      }
-      break;
-    case TK_SEQUENCE:
-    case TK_ARRAY:
-    case TK_MAP:
-      good = get_value_from_collection<ValueTypeKind>(value, id, tk, enum_or_bitmask, lower, upper);
-      break;
-    default:
-      good = false;
-      break;
+  TypeKind treat_as = tk;
+  DDS::ReturnCode_t rc;
+  if ((tk == TK_ENUM && (rc = enum_bound(type_, treat_as)) != DDS::RETCODE_OK) ||
+      (tk == TK_BITMASK && (rc = bitmask_bound(type_, treat_as)) != DDS::RETCODE_OK)) {
+    if (log_level >= LogLevel::Notice) {
+      ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicDataXcdrReadImpl::get_single_value: %C returned: %C\n",
+                 tk == TK_ENUM ? "enum_bound" : "bitmask_bound", retcode_to_string(rc)));
     }
+    return DDS::RETCODE_ERROR;
   }
 
-  if (!good && DCPS::DCPS_debug_level >= 1) {
-    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) DynamicDataXcdrReadImpl::get_single_value -")
-               ACE_TEXT(" Failed to read a value of %C from a DynamicData object of type %C\n"),
+  bool good = true;
+
+  // An extension to the XTypes spec where the value of a bitmask DynamicData
+  // can be read as a whole as a unsigned integer.
+  switch (treat_as) {
+  case ValueTypeKind:
+    good = is_primitive(treat_as) && id == MEMBER_ID_INVALID && read_value(value, ValueTypeKind);
+    break;
+  case TK_STRUCTURE:
+    rc = get_value_from_struct<ValueTypeKind>(value, id);
+    if (rc == DDS::RETCODE_NO_DATA) {
+      return rc;
+    }
+    good = rc == DDS::RETCODE_OK;
+    break;
+  case TK_UNION:
+    rc = get_value_from_union<ValueTypeKind>(value, id, enum_or_bitmask, lower, upper);
+    if (rc == DDS::RETCODE_NO_DATA) {
+      return rc;
+    }
+    good = rc == DDS::RETCODE_OK;
+    break;
+  case TK_SEQUENCE:
+  case TK_ARRAY:
+  case TK_MAP:
+    good = get_value_from_collection<ValueTypeKind>(value, id, tk, enum_or_bitmask, lower, upper);
+    break;
+  default:
+    good = false;
+    break;
+  }
+
+  if (!good && log_level >= LogLevel::Notice) {
+    ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicDataXcdrReadImpl::get_single_value:"
+               " Failed to read a value of type %C from a DynamicData object of type %C\n",
                typekind_to_string(ValueTypeKind), typekind_to_string(tk)));
   }
   return good ? DDS::RETCODE_OK : DDS::RETCODE_ERROR;
@@ -1416,7 +1412,7 @@ DDS::ReturnCode_t DynamicDataXcdrReadImpl::get_char_common(CharT& value, MemberI
   case TK_STRUCTURE:
     {
       ToCharT wrap(value);
-      const DDS::ReturnCode_t rc = get_value_from_struct<CharKind>(wrap, id, extent_);
+      const DDS::ReturnCode_t rc = get_value_from_struct<CharKind>(wrap, id);
       if (rc == DDS::RETCODE_NO_DATA) {
         return rc;
       }
@@ -1531,7 +1527,7 @@ DDS::ReturnCode_t DynamicDataXcdrReadImpl::get_boolean_value(ACE_CDR::Boolean& v
   case TK_STRUCTURE:
     {
       ACE_InputCDR::to_boolean to_bool(value);
-      const DDS::ReturnCode_t rc = get_value_from_struct<TK_BOOLEAN>(to_bool, id, extent_);
+      const DDS::ReturnCode_t rc = get_value_from_struct<TK_BOOLEAN>(to_bool, id);
       if (rc == DDS::RETCODE_NO_DATA) {
         return rc;
       }
