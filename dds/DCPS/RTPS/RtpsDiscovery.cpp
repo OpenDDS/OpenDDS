@@ -454,6 +454,11 @@ RtpsDiscovery::Config::discovery_config(ACE_Configuration_Heap& cf)
             ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Security must be enabled (-DCPSSecurity 1) when using ICE (UseIce)\n")), -1);
           }
         } else if (name == "IceTa") {
+          if (log_level >= DCPS::LogLevel::Warning) {
+            ACE_ERROR((LM_WARNING,
+                       "(%P|%t) RtpsDiscovery::Config::discovery_config: "
+                       "IceTa is deprecated.  Use Ta in [ice]\n"));
+          }
           // In milliseconds.
           const OPENDDS_STRING& string_value = it->second;
           int int_value = 0;
@@ -467,6 +472,11 @@ RtpsDiscovery::Config::discovery_config(ACE_Configuration_Heap& cf)
                string_value.c_str(), rtps_name.c_str()), -1);
           }
         } else if (name == "IceConnectivityCheckTTL") {
+          if (log_level >= DCPS::LogLevel::Warning) {
+            ACE_ERROR((LM_WARNING,
+                       "(%P|%t) RtpsDiscovery::Config::discovery_config: "
+                       "IceConnectivityCheckTTL is deprecated.  Use ConnectivityCheckTTL in [ice]\n"));
+          }
           // In seconds.
           const OPENDDS_STRING& string_value = it->second;
           int int_value = 0;
@@ -480,6 +490,11 @@ RtpsDiscovery::Config::discovery_config(ACE_Configuration_Heap& cf)
                string_value.c_str(), rtps_name.c_str()), -1);
           }
         } else if (name == "IceChecklistPeriod") {
+          if (log_level >= DCPS::LogLevel::Warning) {
+            ACE_ERROR((LM_WARNING,
+                       "(%P|%t) RtpsDiscovery::Config::discovery_config: "
+                       "IceChecklistPeriod is deprecated.  Use ChecklistPeriod in [ice]\n"));
+          }
           // In seconds.
           const OPENDDS_STRING& string_value = it->second;
           int int_value = 0;
@@ -493,6 +508,11 @@ RtpsDiscovery::Config::discovery_config(ACE_Configuration_Heap& cf)
                string_value.c_str(), rtps_name.c_str()), -1);
           }
         } else if (name == "IceIndicationPeriod") {
+          if (log_level >= DCPS::LogLevel::Warning) {
+            ACE_ERROR((LM_WARNING,
+                       "(%P|%t) RtpsDiscovery::Config::discovery_config: "
+                       "IceIndicationPeriod is deprecated.  Use IndicationPeriod in [ice]\n"));
+          }
           // In seconds.
           const OPENDDS_STRING& string_value = it->second;
           int int_value = 0;
@@ -506,6 +526,11 @@ RtpsDiscovery::Config::discovery_config(ACE_Configuration_Heap& cf)
                string_value.c_str(), rtps_name.c_str()), -1);
           }
         } else if (name == "IceNominatedTTL") {
+          if (log_level >= DCPS::LogLevel::Warning) {
+            ACE_ERROR((LM_WARNING,
+                       "(%P|%t) RtpsDiscovery::Config::discovery_config: "
+                       "IceNominatedTTL is deprecated.  Use NominatedTTL in [ice]\n"));
+          }
           // In seconds.
           const OPENDDS_STRING& string_value = it->second;
           int int_value = 0;
@@ -519,6 +544,11 @@ RtpsDiscovery::Config::discovery_config(ACE_Configuration_Heap& cf)
                string_value.c_str(), rtps_name.c_str()), -1);
           }
         } else if (name == "IceServerReflexiveAddressPeriod") {
+          if (log_level >= DCPS::LogLevel::Warning) {
+            ACE_ERROR((LM_WARNING,
+                       "(%P|%t) RtpsDiscovery::Config::discovery_config: "
+                       "IceServerReflexiveAddressPeriod is deprecated.  Use ServerReflexiveAddressPeriod in [ice]\n"));
+          }
           // In seconds.
           const OPENDDS_STRING& string_value = it->second;
           int int_value = 0;
@@ -532,6 +562,11 @@ RtpsDiscovery::Config::discovery_config(ACE_Configuration_Heap& cf)
                string_value.c_str(), rtps_name.c_str()), -1);
           }
         } else if (name == "IceServerReflexiveIndicationCount") {
+          if (log_level >= DCPS::LogLevel::Warning) {
+            ACE_ERROR((LM_WARNING,
+                       "(%P|%t) RtpsDiscovery::Config::discovery_config: "
+                       "IceServerReflexiveIndicationCount is deprecated.  Use ServerReflexiveIndicationCount in [ice]\n"));
+          }
           const OPENDDS_STRING& string_value = it->second;
           int int_value = 0;
           if (DCPS::convertToInteger(string_value, int_value)) {
@@ -544,6 +579,11 @@ RtpsDiscovery::Config::discovery_config(ACE_Configuration_Heap& cf)
                string_value.c_str(), rtps_name.c_str()), -1);
           }
         } else if (name == "IceDeferredTriggeredCheckTTL") {
+          if (log_level >= DCPS::LogLevel::Warning) {
+            ACE_ERROR((LM_WARNING,
+                       "(%P|%t) RtpsDiscovery::Config::discovery_config: "
+                       "IceDeferredTriggeredCheckTTL is deprecated.  Use DeferredTriggeredCheckTTL in [ice]\n"));
+          }
           // In seconds.
           const OPENDDS_STRING& string_value = it->second;
           int int_value = 0;
@@ -557,6 +597,11 @@ RtpsDiscovery::Config::discovery_config(ACE_Configuration_Heap& cf)
                string_value.c_str(), rtps_name.c_str()), -1);
           }
         } else if (name == "IceChangePasswordPeriod") {
+          if (log_level >= DCPS::LogLevel::Warning) {
+            ACE_ERROR((LM_WARNING,
+                       "(%P|%t) RtpsDiscovery::Config::discovery_config: "
+                       "IceChangePasswordPeriod is deprecated.  Use ChangePasswordPeriod in [ice]\n"));
+          }
           // In seconds.
           const OPENDDS_STRING& string_value = it->second;
           int int_value = 0;

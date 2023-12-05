@@ -227,6 +227,10 @@ jobs:
 
     needs: build_u20_i0_xer0_js0_j17
 
+    permissions:
+      contents: read
+      id-token: write
+
     steps:
     - name: checkout MPC
       uses: actions/checkout@v4
@@ -287,6 +291,10 @@ jobs:
         sudo sysctl -w kernel.core_pattern=core.%e.%p
         echo Core file pattern set to:
         cat /proc/sys/kernel/core_pattern
+    - name: set log name
+      shell: bash
+      run: |
+        echo "LOG_NAME=$(date '+%Y_%m_%d_%H_%M')" >> "$GITHUB_ENV"
     - name: run OpenDDS tests
       shell: bash
       run: |
@@ -301,7 +309,7 @@ jobs:
         cat > config.xml <<EOF
         <autobuild>
         <configuration>
-        <variable name="log_file" value="output.log"/>
+        <variable name="log_file" value="${LOG_NAME}"/>
         <variable name="log_root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace"/>
         <variable name="project_root" value="$DDS_ROOT"/>
         <variable name="root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace"/>
@@ -327,10 +335,24 @@ jobs:
       with:
         name: ${{ github.job }}_autobuild_output
         path: OpenDDS/${{ github.job }}_autobuild_workspace
+    - name: Authenticate to Google Cloud
+      uses: google-github-actions/auth@v2
+      with:
+        workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
+        service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+    - name: upload to Google Cloud
+      uses: 'google-github-actions/upload-cloud-storage@v1'
+      with:
+        path: OpenDDS/${{ github.job }}_autobuild_workspace
+        destination: opendds-gha-scoreboard-uploads/${{ github.job }}
+        parent: false
+        process_gcloudignore: false
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
     - name: check results
       shell: bash
       run: |
-        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/output.log_Brief.html"
+        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/${LOG_NAME}_Brief.html"
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
         grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
 
@@ -703,6 +725,10 @@ jobs:
 
     needs: build_u22_esafe_js0
 
+    permissions:
+      contents: read
+      id-token: write
+
     steps:
     - name: checkout MPC
       uses: actions/checkout@v4
@@ -765,6 +791,10 @@ jobs:
         sudo sysctl -w kernel.core_pattern=core.%e.%p
         echo Core file pattern set to:
         cat /proc/sys/kernel/core_pattern
+    - name: set log name
+      shell: bash
+      run: |
+        echo "LOG_NAME=$(date '+%Y_%m_%d_%H_%M')" >> "$GITHUB_ENV"
     - name: run OpenDDS tests
       shell: bash
       run: |
@@ -779,7 +809,7 @@ jobs:
         cat > config.xml <<EOF
         <autobuild>
         <configuration>
-        <variable name="log_file" value="output.log"/>
+        <variable name="log_file" value="${LOG_NAME}"/>
         <variable name="log_root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace"/>
         <variable name="project_root" value="$DDS_ROOT"/>
         <variable name="root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace"/>
@@ -804,10 +834,24 @@ jobs:
       with:
         name: ${{ github.job }}_autobuild_output
         path: OpenDDS/build/target/${{ github.job }}_autobuild_workspace
+    - name: Authenticate to Google Cloud
+      uses: google-github-actions/auth@v2
+      with:
+        workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
+        service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+    - name: upload to Google Cloud
+      uses: 'google-github-actions/upload-cloud-storage@v1'
+      with:
+        path: OpenDDS/build/target/${{ github.job }}_autobuild_workspace
+        destination: opendds-gha-scoreboard-uploads/${{ github.job }}
+        parent: false
+        process_gcloudignore: false
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
     - name: check results
       shell: bash
       run: |
-        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/build/target/${{ github.job }}_autobuild_workspace/output.log_Brief.html"
+        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/build/target/${{ github.job }}_autobuild_workspace/${LOG_NAME}_Brief.html"
         cat "$GITHUB_WORKSPACE/OpenDDS/build/target/${{ github.job }}_autobuild_workspace/latest.txt"
         grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/build/target/${{ github.job }}_autobuild_workspace/latest.txt"
 
@@ -1013,6 +1057,10 @@ jobs:
 
     needs: build_u22_bsafe_js0_FM-1f
 
+    permissions:
+      contents: read
+      id-token: write
+
     steps:
     - name: checkout MPC
       uses: actions/checkout@v4
@@ -1075,6 +1123,10 @@ jobs:
         sudo sysctl -w kernel.core_pattern=core.%e.%p
         echo Core file pattern set to:
         cat /proc/sys/kernel/core_pattern
+    - name: set log name
+      shell: bash
+      run: |
+        echo "LOG_NAME=$(date '+%Y_%m_%d_%H_%M')" >> "$GITHUB_ENV"
     - name: run OpenDDS tests
       shell: bash
       run: |
@@ -1089,7 +1141,7 @@ jobs:
         cat > config.xml <<EOF
         <autobuild>
         <configuration>
-        <variable name="log_file" value="output.log"/>
+        <variable name="log_file" value="${LOG_NAME}"/>
         <variable name="log_root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace"/>
         <variable name="project_root" value="$DDS_ROOT"/>
         <variable name="root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace"/>
@@ -1114,10 +1166,24 @@ jobs:
       with:
         name: ${{ github.job }}_autobuild_output
         path: OpenDDS/build/target/${{ github.job }}_autobuild_workspace
+    - name: Authenticate to Google Cloud
+      uses: google-github-actions/auth@v2
+      with:
+        workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
+        service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+    - name: upload to Google Cloud
+      uses: 'google-github-actions/upload-cloud-storage@v1'
+      with:
+        path: OpenDDS/build/target/${{ github.job }}_autobuild_workspace
+        destination: opendds-gha-scoreboard-uploads/${{ github.job }}
+        parent: false
+        process_gcloudignore: false
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
     - name: check results
       shell: bash
       run: |
-        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/build/target/${{ github.job }}_autobuild_workspace/output.log_Brief.html"
+        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/build/target/${{ github.job }}_autobuild_workspace/${LOG_NAME}_Brief.html"
         cat "$GITHUB_WORKSPACE/OpenDDS/build/target/${{ github.job }}_autobuild_workspace/latest.txt"
         grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/build/target/${{ github.job }}_autobuild_workspace/latest.txt"
 
@@ -1273,6 +1339,10 @@ jobs:
 
     needs: build_u22_d0i0v1_sec_js0_FM-08
 
+    permissions:
+      contents: read
+      id-token: write
+
     steps:
     - name: install xerces
       run: sudo apt-get -y install libxerces-c-dev
@@ -1335,6 +1405,10 @@ jobs:
         sudo sysctl -w kernel.core_pattern=core.%e.%p
         echo Core file pattern set to:
         cat /proc/sys/kernel/core_pattern
+    - name: set log name
+      shell: bash
+      run: |
+        echo "LOG_NAME=$(date '+%Y_%m_%d_%H_%M')" >> "$GITHUB_ENV"
     - name: run OpenDDS tests
       shell: bash
       run: |
@@ -1349,7 +1423,7 @@ jobs:
         cat > config.xml <<EOF
         <autobuild>
         <configuration>
-        <variable name="log_file" value="output.log"/>
+        <variable name="log_file" value="${LOG_NAME}"/>
         <variable name="log_root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace"/>
         <variable name="project_root" value="$DDS_ROOT"/>
         <variable name="root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace"/>
@@ -1375,10 +1449,24 @@ jobs:
       with:
         name: ${{ github.job }}_autobuild_output
         path: OpenDDS/${{ github.job }}_autobuild_workspace
+    - name: Authenticate to Google Cloud
+      uses: google-github-actions/auth@v2
+      with:
+        workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
+        service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+    - name: upload to Google Cloud
+      uses: 'google-github-actions/upload-cloud-storage@v1'
+      with:
+        path: OpenDDS/${{ github.job }}_autobuild_workspace
+        destination: opendds-gha-scoreboard-uploads/${{ github.job }}
+        parent: false
+        process_gcloudignore: false
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
     - name: check results
       shell: bash
       run: |
-        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/output.log_Brief.html"
+        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/${LOG_NAME}_Brief.html"
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
         grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
 
@@ -1553,6 +1641,10 @@ jobs:
 
     needs: build_u20_clang12_i0w1_sec
 
+    permissions:
+      contents: read
+      id-token: write
+
     steps:
     - name: install xerces
       run: sudo apt-get -y install libxerces-c-dev
@@ -1615,6 +1707,10 @@ jobs:
         sudo sysctl -w kernel.core_pattern=core.%e.%p
         echo Core file pattern set to:
         cat /proc/sys/kernel/core_pattern
+    - name: set log name
+      shell: bash
+      run: |
+        echo "LOG_NAME=$(date '+%Y_%m_%d_%H_%M')" >> "$GITHUB_ENV"
     - name: run OpenDDS tests
       shell: bash
       run: |
@@ -1630,7 +1726,7 @@ jobs:
         cat > config.xml <<EOF
         <autobuild>
         <configuration>
-        <variable name="log_file" value="output.log"/>
+        <variable name="log_file" value="${LOG_NAME}"/>
         <variable name="log_root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace"/>
         <variable name="project_root" value="$DDS_ROOT"/>
         <variable name="root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace"/>
@@ -1656,10 +1752,24 @@ jobs:
       with:
         name: ${{ github.job }}_autobuild_output
         path: OpenDDS/${{ github.job }}_autobuild_workspace
+    - name: Authenticate to Google Cloud
+      uses: google-github-actions/auth@v2
+      with:
+        workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
+        service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+    - name: upload to Google Cloud
+      uses: 'google-github-actions/upload-cloud-storage@v1'
+      with:
+        path: OpenDDS/${{ github.job }}_autobuild_workspace
+        destination: opendds-gha-scoreboard-uploads/${{ github.job }}
+        parent: false
+        process_gcloudignore: false
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
     - name: check results
       shell: bash
       run: |
-        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/output.log_Brief.html"
+        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/${LOG_NAME}_Brief.html"
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
         grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
 
@@ -1832,6 +1942,10 @@ jobs:
 
     needs: build_u20_clang10_sec_js0
 
+    permissions:
+      contents: read
+      id-token: write
+
     steps:
     - name: install xerces
       run: sudo apt-get -y install libxerces-c-dev
@@ -1894,6 +2008,10 @@ jobs:
         sudo sysctl -w kernel.core_pattern=core.%e.%p
         echo Core file pattern set to:
         cat /proc/sys/kernel/core_pattern
+    - name: set log name
+      shell: bash
+      run: |
+        echo "LOG_NAME=$(date '+%Y_%m_%d_%H_%M')" >> "$GITHUB_ENV"
     - name: run OpenDDS tests
       shell: bash
       run: |
@@ -1909,7 +2027,7 @@ jobs:
         cat > config.xml <<EOF
         <autobuild>
         <configuration>
-        <variable name="log_file" value="output.log"/>
+        <variable name="log_file" value="${LOG_NAME}"/>
         <variable name="log_root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace"/>
         <variable name="project_root" value="$DDS_ROOT"/>
         <variable name="root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace"/>
@@ -1935,10 +2053,24 @@ jobs:
       with:
         name: ${{ github.job }}_autobuild_output
         path: OpenDDS/${{ github.job }}_autobuild_workspace
+    - name: Authenticate to Google Cloud
+      uses: google-github-actions/auth@v2
+      with:
+        workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
+        service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+    - name: upload to Google Cloud
+      uses: 'google-github-actions/upload-cloud-storage@v1'
+      with:
+        path: OpenDDS/${{ github.job }}_autobuild_workspace
+        destination: opendds-gha-scoreboard-uploads/${{ github.job }}
+        parent: false
+        process_gcloudignore: false
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
     - name: check results
       shell: bash
       run: |
-        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/output.log_Brief.html"
+        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/${LOG_NAME}_Brief.html"
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
         grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
 
@@ -2111,6 +2243,10 @@ jobs:
 
     needs: build_u20_gcc9_d0w1_cpp03
 
+    permissions:
+      contents: read
+      id-token: write
+
     steps:
     - name: checkout MPC
       uses: actions/checkout@v4
@@ -2171,6 +2307,10 @@ jobs:
         sudo sysctl -w kernel.core_pattern=core.%e.%p
         echo Core file pattern set to:
         cat /proc/sys/kernel/core_pattern
+    - name: set log name
+      shell: bash
+      run: |
+        echo "LOG_NAME=$(date '+%Y_%m_%d_%H_%M')" >> "$GITHUB_ENV"
     - name: run OpenDDS tests
       shell: bash
       run: |
@@ -2185,7 +2325,7 @@ jobs:
         cat > config.xml <<EOF
         <autobuild>
         <configuration>
-        <variable name="log_file" value="output.log"/>
+        <variable name="log_file" value="${LOG_NAME}"/>
         <variable name="log_root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace"/>
         <variable name="project_root" value="$DDS_ROOT"/>
         <variable name="root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace"/>
@@ -2211,10 +2351,24 @@ jobs:
       with:
         name: ${{ github.job }}_autobuild_output
         path: OpenDDS/${{ github.job }}_autobuild_workspace
+    - name: Authenticate to Google Cloud
+      uses: google-github-actions/auth@v2
+      with:
+        workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
+        service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+    - name: upload to Google Cloud
+      uses: 'google-github-actions/upload-cloud-storage@v1'
+      with:
+        path: OpenDDS/${{ github.job }}_autobuild_workspace
+        destination: opendds-gha-scoreboard-uploads/${{ github.job }}
+        parent: false
+        process_gcloudignore: false
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
     - name: check results
       shell: bash
       run: |
-        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/output.log_Brief.html"
+        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/${LOG_NAME}_Brief.html"
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
         grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
 
@@ -2381,6 +2535,10 @@ jobs:
 
     needs: build_u20_gcc8_i0_js0_j
 
+    permissions:
+      contents: read
+      id-token: write
+
     steps:
     - name: checkout MPC
       uses: actions/checkout@v4
@@ -2441,6 +2599,10 @@ jobs:
         sudo sysctl -w kernel.core_pattern=core.%e.%p
         echo Core file pattern set to:
         cat /proc/sys/kernel/core_pattern
+    - name: set log name
+      shell: bash
+      run: |
+        echo "LOG_NAME=$(date '+%Y_%m_%d_%H_%M')" >> "$GITHUB_ENV"
     - name: run OpenDDS tests
       shell: bash
       run: |
@@ -2455,7 +2617,7 @@ jobs:
         cat > config.xml <<EOF
         <autobuild>
         <configuration>
-        <variable name="log_file" value="output.log"/>
+        <variable name="log_file" value="${LOG_NAME}"/>
         <variable name="log_root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace"/>
         <variable name="project_root" value="$DDS_ROOT"/>
         <variable name="root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace"/>
@@ -2481,10 +2643,24 @@ jobs:
       with:
         name: ${{ github.job }}_autobuild_output
         path: OpenDDS/${{ github.job }}_autobuild_workspace
+    - name: Authenticate to Google Cloud
+      uses: google-github-actions/auth@v2
+      with:
+        workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
+        service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+    - name: upload to Google Cloud
+      uses: 'google-github-actions/upload-cloud-storage@v1'
+      with:
+        path: OpenDDS/${{ github.job }}_autobuild_workspace
+        destination: opendds-gha-scoreboard-uploads/${{ github.job }}
+        parent: false
+        process_gcloudignore: false
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
     - name: check results
       shell: bash
       run: |
-        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/output.log_Brief.html"
+        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/${LOG_NAME}_Brief.html"
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
         grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
 
@@ -2641,6 +2817,10 @@ jobs:
 
     needs: build_u22_gcc11_i0_xer0
 
+    permissions:
+      contents: read
+      id-token: write
+
     steps:
     - name: checkout MPC
       uses: actions/checkout@v4
@@ -2701,6 +2881,10 @@ jobs:
         sudo sysctl -w kernel.core_pattern=core.%e.%p
         echo Core file pattern set to:
         cat /proc/sys/kernel/core_pattern
+    - name: set log name
+      shell: bash
+      run: |
+        echo "LOG_NAME=$(date '+%Y_%m_%d_%H_%M')" >> "$GITHUB_ENV"
     - name: run OpenDDS tests
       shell: bash
       run: |
@@ -2715,7 +2899,7 @@ jobs:
         cat > config.xml <<EOF
         <autobuild>
         <configuration>
-        <variable name="log_file" value="output.log"/>
+        <variable name="log_file" value="${LOG_NAME}"/>
         <variable name="log_root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace"/>
         <variable name="project_root" value="$DDS_ROOT"/>
         <variable name="root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace"/>
@@ -2741,10 +2925,24 @@ jobs:
       with:
         name: ${{ github.job }}_autobuild_output
         path: OpenDDS/${{ github.job }}_autobuild_workspace
+    - name: Authenticate to Google Cloud
+      uses: google-github-actions/auth@v2
+      with:
+        workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
+        service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+    - name: upload to Google Cloud
+      uses: 'google-github-actions/upload-cloud-storage@v1'
+      with:
+        path: OpenDDS/${{ github.job }}_autobuild_workspace
+        destination: opendds-gha-scoreboard-uploads/${{ github.job }}
+        parent: false
+        process_gcloudignore: false
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
     - name: check results
       shell: bash
       run: |
-        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/output.log_Brief.html"
+        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/${LOG_NAME}_Brief.html"
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
         grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
 
@@ -3124,6 +3322,10 @@ jobs:
 
     needs: build_u20_ace7_j_qt_ws_sec
 
+    permissions:
+      contents: read
+      id-token: write
+
     steps:
     - name: update apt
       run: sudo apt-get update
@@ -3187,6 +3389,10 @@ jobs:
         sudo sysctl -w kernel.core_pattern=core.%e.%p
         echo Core file pattern set to:
         cat /proc/sys/kernel/core_pattern
+    - name: set log name
+      shell: bash
+      run: |
+        echo "LOG_NAME=$(date '+%Y_%m_%d_%H_%M')" >> "$GITHUB_ENV"
     - name: run OpenDDS tests
       shell: bash
       run: |
@@ -3201,7 +3407,7 @@ jobs:
         cat > config.xml <<EOF
         <autobuild>
         <configuration>
-        <variable name="log_file" value="output.log"/>
+        <variable name="log_file" value="${LOG_NAME}"/>
         <variable name="log_root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace"/>
         <variable name="project_root" value="$DDS_ROOT"/>
         <variable name="root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace"/>
@@ -3227,10 +3433,24 @@ jobs:
       with:
         name: ${{ github.job }}_autobuild_output
         path: OpenDDS/${{ github.job }}_autobuild_workspace
+    - name: Authenticate to Google Cloud
+      uses: google-github-actions/auth@v2
+      with:
+        workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
+        service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+    - name: upload to Google Cloud
+      uses: 'google-github-actions/upload-cloud-storage@v1'
+      with:
+        path: OpenDDS/${{ github.job }}_autobuild_workspace
+        destination: opendds-gha-scoreboard-uploads/${{ github.job }}
+        parent: false
+        process_gcloudignore: false
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
     - name: check results
       shell: bash
       run: |
-        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/output.log_Brief.html"
+        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/${LOG_NAME}_Brief.html"
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
         grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
 
@@ -3406,6 +3626,10 @@ jobs:
 
     needs: build_u20_p1_asan_sec
 
+    permissions:
+      contents: read
+      id-token: write
+
     steps:
     - name: install xerces
       run: sudo apt-get -y install libxerces-c-dev
@@ -3468,6 +3692,10 @@ jobs:
         sudo sysctl -w kernel.core_pattern=core.%e.%p
         echo Core file pattern set to:
         cat /proc/sys/kernel/core_pattern
+    - name: set log name
+      shell: bash
+      run: |
+        echo "LOG_NAME=$(date '+%Y_%m_%d_%H_%M')" >> "$GITHUB_ENV"
     - name: run OpenDDS tests
       shell: bash
       run: |
@@ -3483,7 +3711,7 @@ jobs:
         cat > config.xml <<EOF
         <autobuild>
         <configuration>
-        <variable name="log_file" value="output.log"/>
+        <variable name="log_file" value="${LOG_NAME}"/>
         <variable name="log_root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace"/>
         <variable name="project_root" value="$DDS_ROOT"/>
         <variable name="root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace"/>
@@ -3509,10 +3737,24 @@ jobs:
       with:
         name: ${{ github.job }}_autobuild_output
         path: OpenDDS/${{ github.job }}_autobuild_workspace
+    - name: Authenticate to Google Cloud
+      uses: google-github-actions/auth@v2
+      with:
+        workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
+        service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+    - name: upload to Google Cloud
+      uses: 'google-github-actions/upload-cloud-storage@v1'
+      with:
+        path: OpenDDS/${{ github.job }}_autobuild_workspace
+        destination: opendds-gha-scoreboard-uploads/${{ github.job }}
+        parent: false
+        process_gcloudignore: false
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
     - name: check results
       shell: bash
       run: |
-        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/output.log_Brief.html"
+        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/${LOG_NAME}_Brief.html"
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
         grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
 
@@ -3678,6 +3920,10 @@ jobs:
 
     needs: build_u20_p1_tsan_sec
 
+    permissions:
+      contents: read
+      id-token: write
+
     steps:
     - name: install xerces
       run: sudo apt-get -y install libxerces-c-dev
@@ -3740,6 +3986,10 @@ jobs:
         sudo sysctl -w kernel.core_pattern=core.%e.%p
         echo Core file pattern set to:
         cat /proc/sys/kernel/core_pattern
+    - name: set log name
+      shell: bash
+      run: |
+        echo "LOG_NAME=$(date '+%Y_%m_%d_%H_%M')" >> "$GITHUB_ENV"
     - name: run OpenDDS tests
       shell: bash
       run: |
@@ -3755,7 +4005,7 @@ jobs:
         cat > config.xml <<EOF
         <autobuild>
         <configuration>
-        <variable name="log_file" value="output.log"/>
+        <variable name="log_file" value="${LOG_NAME}"/>
         <variable name="log_root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace"/>
         <variable name="project_root" value="$DDS_ROOT"/>
         <variable name="root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace"/>
@@ -3781,10 +4031,24 @@ jobs:
       with:
         name: ${{ github.job }}_autobuild_output
         path: OpenDDS/${{ github.job }}_autobuild_workspace
+    - name: Authenticate to Google Cloud
+      uses: google-github-actions/auth@v2
+      with:
+        workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
+        service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+    - name: upload to Google Cloud
+      uses: 'google-github-actions/upload-cloud-storage@v1'
+      with:
+        path: OpenDDS/${{ github.job }}_autobuild_workspace
+        destination: opendds-gha-scoreboard-uploads/${{ github.job }}
+        parent: false
+        process_gcloudignore: false
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
     - name: check results
       shell: bash
       run: |
-        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/output.log_Brief.html"
+        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/${LOG_NAME}_Brief.html"
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
         grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
 
@@ -3961,6 +4225,10 @@ jobs:
 
     needs: build_u20_p1_ubsan_sec
 
+    permissions:
+      contents: read
+      id-token: write
+
     steps:
     - name: install xerces
       run: sudo apt-get -y install libxerces-c-dev
@@ -4023,6 +4291,10 @@ jobs:
         sudo sysctl -w kernel.core_pattern=core.%e.%p
         echo Core file pattern set to:
         cat /proc/sys/kernel/core_pattern
+    - name: set log name
+      shell: bash
+      run: |
+        echo "LOG_NAME=$(date '+%Y_%m_%d_%H_%M')" >> "$GITHUB_ENV"
     - name: run OpenDDS tests
       shell: bash
       run: |
@@ -4038,7 +4310,7 @@ jobs:
         cat > config.xml <<EOF
         <autobuild>
         <configuration>
-        <variable name="log_file" value="output.log"/>
+        <variable name="log_file" value="${LOG_NAME}"/>
         <variable name="log_root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace"/>
         <variable name="project_root" value="$DDS_ROOT"/>
         <variable name="root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace"/>
@@ -4064,10 +4336,24 @@ jobs:
       with:
         name: ${{ github.job }}_autobuild_output
         path: OpenDDS/${{ github.job }}_autobuild_workspace
+    - name: Authenticate to Google Cloud
+      uses: google-github-actions/auth@v2
+      with:
+        workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
+        service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+    - name: upload to Google Cloud
+      uses: 'google-github-actions/upload-cloud-storage@v1'
+      with:
+        path: OpenDDS/${{ github.job }}_autobuild_workspace
+        destination: opendds-gha-scoreboard-uploads/${{ github.job }}
+        parent: false
+        process_gcloudignore: false
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
     - name: check results
       shell: bash
       run: |
-        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/output.log_Brief.html"
+        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/${LOG_NAME}_Brief.html"
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
         grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
 
@@ -4252,6 +4538,10 @@ jobs:
 
     needs: build_u20_p1_sec
 
+    permissions:
+      contents: read
+      id-token: write
+
     steps:
     - name: download openssl artifact
       uses: actions/download-artifact@v3
@@ -4323,6 +4613,10 @@ jobs:
         sudo sysctl -w kernel.core_pattern=core.%e.%p
         echo Core file pattern set to:
         cat /proc/sys/kernel/core_pattern
+    - name: set log name
+      shell: bash
+      run: |
+        echo "LOG_NAME=$(date '+%Y_%m_%d_%H_%M')" >> "$GITHUB_ENV"
     - name: run OpenDDS tests
       shell: bash
       run: |
@@ -4337,7 +4631,7 @@ jobs:
         cat > config.xml <<EOF
         <autobuild>
         <configuration>
-        <variable name="log_file" value="output.log"/>
+        <variable name="log_file" value="${LOG_NAME}"/>
         <variable name="log_root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace"/>
         <variable name="project_root" value="$DDS_ROOT"/>
         <variable name="root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace"/>
@@ -4363,10 +4657,24 @@ jobs:
       with:
         name: ${{ github.job }}_autobuild_output
         path: OpenDDS/${{ github.job }}_autobuild_workspace
+    - name: Authenticate to Google Cloud
+      uses: google-github-actions/auth@v2
+      with:
+        workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
+        service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+    - name: upload to Google Cloud
+      uses: 'google-github-actions/upload-cloud-storage@v1'
+      with:
+        path: OpenDDS/${{ github.job }}_autobuild_workspace
+        destination: opendds-gha-scoreboard-uploads/${{ github.job }}
+        parent: false
+        process_gcloudignore: false
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
     - name: check results
       shell: bash
       run: |
-        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/output.log_Brief.html"
+        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/${LOG_NAME}_Brief.html"
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
         grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
 
@@ -4375,6 +4683,10 @@ jobs:
     runs-on: ubuntu-20.04
 
     needs: build_u20_p1_sec
+
+    permissions:
+      contents: read
+      id-token: write
 
     steps:
     - name: download openssl artifact
@@ -4437,6 +4749,10 @@ jobs:
         cd OpenDDS
         . setenv.sh
         tools/scripts/show_build_config.pl
+    - name: set log name
+      shell: bash
+      run: |
+        echo "LOG_NAME=$(date '+%Y_%m_%d_%H_%M')" >> "$GITHUB_ENV"
     - name: run OpenDDS tests
       shell: bash
       run: |
@@ -4454,7 +4770,7 @@ jobs:
         cat > config.xml <<EOF
         <autobuild>
         <configuration>
-        <variable name="log_file" value="output.log"/>
+        <variable name="log_file" value="${LOG_NAME}"/>
         <variable name="log_root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace"/>
         <variable name="project_root" value="$DDS_ROOT"/>
         <variable name="root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace"/>
@@ -4480,10 +4796,24 @@ jobs:
       with:
         name: ${{ github.job }}_autobuild_output
         path: OpenDDS/${{ github.job }}_autobuild_workspace
+    - name: Authenticate to Google Cloud
+      uses: google-github-actions/auth@v2
+      with:
+        workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
+        service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+    - name: upload to Google Cloud
+      uses: 'google-github-actions/upload-cloud-storage@v1'
+      with:
+        path: OpenDDS/${{ github.job }}_autobuild_workspace
+        destination: opendds-gha-scoreboard-uploads/${{ github.job }}
+        parent: false
+        process_gcloudignore: false
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
     - name: check results
       shell: bash
       run: |
-        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/output.log_Brief.html"
+        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/${LOG_NAME}_Brief.html"
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
         grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
 
@@ -4582,6 +4912,10 @@ jobs:
 
     needs: build_u20_p1_j8_FM-1f
 
+    permissions:
+      contents: read
+      id-token: write
+
     steps:
     - name: install xerces
       run: sudo apt-get -y install libxerces-c-dev
@@ -4644,6 +4978,10 @@ jobs:
         sudo sysctl -w kernel.core_pattern=core.%e.%p
         echo Core file pattern set to:
         cat /proc/sys/kernel/core_pattern
+    - name: set log name
+      shell: bash
+      run: |
+        echo "LOG_NAME=$(date '+%Y_%m_%d_%H_%M')" >> "$GITHUB_ENV"
     - name: run OpenDDS tests
       shell: bash
       run: |
@@ -4658,7 +4996,7 @@ jobs:
         cat > config.xml <<EOF
         <autobuild>
         <configuration>
-        <variable name="log_file" value="output.log"/>
+        <variable name="log_file" value="${LOG_NAME}"/>
         <variable name="log_root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace"/>
         <variable name="project_root" value="$DDS_ROOT"/>
         <variable name="root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace"/>
@@ -4684,10 +5022,24 @@ jobs:
       with:
         name: ${{ github.job }}_autobuild_output
         path: OpenDDS/${{ github.job }}_autobuild_workspace
+    - name: Authenticate to Google Cloud
+      uses: google-github-actions/auth@v2
+      with:
+        workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
+        service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+    - name: upload to Google Cloud
+      uses: 'google-github-actions/upload-cloud-storage@v1'
+      with:
+        path: OpenDDS/${{ github.job }}_autobuild_workspace
+        destination: opendds-gha-scoreboard-uploads/${{ github.job }}
+        parent: false
+        process_gcloudignore: false
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
     - name: check results
       shell: bash
       run: |
-        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/output.log_Brief.html"
+        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/${LOG_NAME}_Brief.html"
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
         grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
 
@@ -4848,6 +5200,10 @@ jobs:
 
     needs: build_u22_w1a1_sec
 
+    permissions:
+      contents: read
+      id-token: write
+
     steps:
     - name: install xerces
       run: sudo apt-get -y install libxerces-c-dev
@@ -4910,6 +5266,10 @@ jobs:
         sudo sysctl -w kernel.core_pattern=core.%e.%p
         echo Core file pattern set to:
         cat /proc/sys/kernel/core_pattern
+    - name: set log name
+      shell: bash
+      run: |
+        echo "LOG_NAME=$(date '+%Y_%m_%d_%H_%M')" >> "$GITHUB_ENV"
     - name: run OpenDDS tests
       shell: bash
       run: |
@@ -4924,7 +5284,7 @@ jobs:
         cat > config.xml <<EOF
         <autobuild>
         <configuration>
-        <variable name="log_file" value="output.log"/>
+        <variable name="log_file" value="${LOG_NAME}"/>
         <variable name="log_root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace"/>
         <variable name="project_root" value="$DDS_ROOT"/>
         <variable name="root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace"/>
@@ -4950,10 +5310,24 @@ jobs:
       with:
         name: ${{ github.job }}_autobuild_output
         path: OpenDDS/${{ github.job }}_autobuild_workspace
+    - name: Authenticate to Google Cloud
+      uses: google-github-actions/auth@v2
+      with:
+        workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
+        service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+    - name: upload to Google Cloud
+      uses: 'google-github-actions/upload-cloud-storage@v1'
+      with:
+        path: OpenDDS/${{ github.job }}_autobuild_workspace
+        destination: opendds-gha-scoreboard-uploads/${{ github.job }}
+        parent: false
+        process_gcloudignore: false
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
     - name: check results
       shell: bash
       run: |
-        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/output.log_Brief.html"
+        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/${LOG_NAME}_Brief.html"
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
         grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
 
@@ -5052,6 +5426,10 @@ jobs:
 
     needs: build_u22_w1_j_FM-2f
 
+    permissions:
+      contents: read
+      id-token: write
+
     steps:
     - name: install xerces
       run: sudo apt-get -y install libxerces-c-dev
@@ -5114,6 +5492,10 @@ jobs:
         sudo sysctl -w kernel.core_pattern=core.%e.%p
         echo Core file pattern set to:
         cat /proc/sys/kernel/core_pattern
+    - name: set log name
+      shell: bash
+      run: |
+        echo "LOG_NAME=$(date '+%Y_%m_%d_%H_%M')" >> "$GITHUB_ENV"
     - name: run OpenDDS tests
       shell: bash
       run: |
@@ -5128,7 +5510,7 @@ jobs:
         cat > config.xml <<EOF
         <autobuild>
         <configuration>
-        <variable name="log_file" value="output.log"/>
+        <variable name="log_file" value="${LOG_NAME}"/>
         <variable name="log_root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace"/>
         <variable name="project_root" value="$DDS_ROOT"/>
         <variable name="root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace"/>
@@ -5154,10 +5536,24 @@ jobs:
       with:
         name: ${{ github.job }}_autobuild_output
         path: OpenDDS/${{ github.job }}_autobuild_workspace
+    - name: Authenticate to Google Cloud
+      uses: google-github-actions/auth@v2
+      with:
+        workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
+        service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+    - name: upload to Google Cloud
+      uses: 'google-github-actions/upload-cloud-storage@v1'
+      with:
+        path: OpenDDS/${{ github.job }}_autobuild_workspace
+        destination: opendds-gha-scoreboard-uploads/${{ github.job }}
+        parent: false
+        process_gcloudignore: false
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
     - name: check results
       shell: bash
       run: |
-        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/output.log_Brief.html"
+        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/${LOG_NAME}_Brief.html"
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
         grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
 
@@ -5318,6 +5714,10 @@ jobs:
 
     needs: build_u22_stat_qt_ws_sec
 
+    permissions:
+      contents: read
+      id-token: write
+
     steps:
     - name: update apt
       run: sudo apt-get update
@@ -5392,6 +5792,10 @@ jobs:
         cd OpenDDS/tests/cmake/build
         cmake ..
         cmake --build . -- -j4
+    - name: set log name
+      shell: bash
+      run: |
+        echo "LOG_NAME=$(date '+%Y_%m_%d_%H_%M')" >> "$GITHUB_ENV"
     - name: run OpenDDS tests
       shell: bash
       run: |
@@ -5406,7 +5810,7 @@ jobs:
         cat > config.xml <<EOF
         <autobuild>
         <configuration>
-        <variable name="log_file" value="output.log"/>
+        <variable name="log_file" value="${LOG_NAME}"/>
         <variable name="log_root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace"/>
         <variable name="project_root" value="$DDS_ROOT"/>
         <variable name="root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace"/>
@@ -5432,10 +5836,24 @@ jobs:
       with:
         name: ${{ github.job }}_autobuild_output
         path: OpenDDS/${{ github.job }}_autobuild_workspace
+    - name: Authenticate to Google Cloud
+      uses: google-github-actions/auth@v2
+      with:
+        workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
+        service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+    - name: upload to Google Cloud
+      uses: 'google-github-actions/upload-cloud-storage@v1'
+      with:
+        path: OpenDDS/${{ github.job }}_autobuild_workspace
+        destination: opendds-gha-scoreboard-uploads/${{ github.job }}
+        parent: false
+        process_gcloudignore: false
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
     - name: check results
       shell: bash
       run: |
-        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/output.log_Brief.html"
+        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/${LOG_NAME}_Brief.html"
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
         grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
 
@@ -5444,6 +5862,10 @@ jobs:
     runs-on: ubuntu-22.04
 
     needs: build_u22_stat_qt_ws_sec
+
+    permissions:
+      contents: read
+      id-token: write
 
     steps:
     - name: install xerces
@@ -5552,6 +5974,10 @@ jobs:
         . setenv.sh
         cd tests/DCPS/C++11
         make
+    - name: set log name
+      shell: bash
+      run: |
+        echo "LOG_NAME=$(date '+%Y_%m_%d_%H_%M')" >> "$GITHUB_ENV"
     - name: run OpenDDS tests
       shell: bash
       run: |
@@ -5566,7 +5992,7 @@ jobs:
         cat > config.xml <<EOF
         <autobuild>
         <configuration>
-        <variable name="log_file" value="output.log"/>
+        <variable name="log_file" value="${LOG_NAME}"/>
         <variable name="log_root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace"/>
         <variable name="project_root" value="$DDS_ROOT"/>
         <variable name="root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace"/>
@@ -5591,10 +6017,24 @@ jobs:
       with:
         name: ${{ github.job }}_autobuild_output
         path: OpenDDS/${{ github.job }}_autobuild_workspace
+    - name: Authenticate to Google Cloud
+      uses: google-github-actions/auth@v2
+      with:
+        workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
+        service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+    - name: upload to Google Cloud
+      uses: 'google-github-actions/upload-cloud-storage@v1'
+      with:
+        path: OpenDDS/${{ github.job }}_autobuild_workspace
+        destination: opendds-gha-scoreboard-uploads/${{ github.job }}
+        parent: false
+        process_gcloudignore: false
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
     - name: check results
       shell: bash
       run: |
-        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/output.log_Brief.html"
+        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/${LOG_NAME}_Brief.html"
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
         grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
 
@@ -5603,6 +6043,10 @@ jobs:
     runs-on: ubuntu-22.04
 
     needs: build_u22_stat_qt_ws_sec
+
+    permissions:
+      contents: read
+      id-token: write
 
     steps:
     - name: install xerces
@@ -5697,6 +6141,10 @@ jobs:
         . setenv.sh
         cd tests/DCPS/Compiler
         make
+    - name: set log name
+      shell: bash
+      run: |
+        echo "LOG_NAME=$(date '+%Y_%m_%d_%H_%M')" >> "$GITHUB_ENV"
     - name: run OpenDDS tests
       shell: bash
       run: |
@@ -5711,7 +6159,7 @@ jobs:
         cat > config.xml <<EOF
         <autobuild>
         <configuration>
-        <variable name="log_file" value="output.log"/>
+        <variable name="log_file" value="${LOG_NAME}"/>
         <variable name="log_root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace"/>
         <variable name="project_root" value="$DDS_ROOT"/>
         <variable name="root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace"/>
@@ -5736,10 +6184,24 @@ jobs:
       with:
         name: ${{ github.job }}_autobuild_output
         path: OpenDDS/${{ github.job }}_autobuild_workspace
+    - name: Authenticate to Google Cloud
+      uses: google-github-actions/auth@v2
+      with:
+        workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
+        service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+    - name: upload to Google Cloud
+      uses: 'google-github-actions/upload-cloud-storage@v1'
+      with:
+        path: OpenDDS/${{ github.job }}_autobuild_workspace
+        destination: opendds-gha-scoreboard-uploads/${{ github.job }}
+        parent: false
+        process_gcloudignore: false
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
     - name: check results
       shell: bash
       run: |
-        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/output.log_Brief.html"
+        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/${LOG_NAME}_Brief.html"
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
         grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
 
@@ -5748,6 +6210,10 @@ jobs:
     runs-on: ubuntu-22.04
 
     needs: build_u22_stat_qt_ws_sec
+
+    permissions:
+      contents: read
+      id-token: write
 
     steps:
     - name: install xerces
@@ -5842,6 +6308,10 @@ jobs:
         . setenv.sh
         cd tests/unit-tests
         make
+    - name: set log name
+      shell: bash
+      run: |
+        echo "LOG_NAME=$(date '+%Y_%m_%d_%H_%M')" >> "$GITHUB_ENV"
     - name: run OpenDDS tests
       shell: bash
       run: |
@@ -5856,7 +6326,7 @@ jobs:
         cat > config.xml <<EOF
         <autobuild>
         <configuration>
-        <variable name="log_file" value="output.log"/>
+        <variable name="log_file" value="${LOG_NAME}"/>
         <variable name="log_root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace"/>
         <variable name="project_root" value="$DDS_ROOT"/>
         <variable name="root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace"/>
@@ -5881,10 +6351,24 @@ jobs:
       with:
         name: ${{ github.job }}_autobuild_output
         path: OpenDDS/${{ github.job }}_autobuild_workspace
+    - name: Authenticate to Google Cloud
+      uses: google-github-actions/auth@v2
+      with:
+        workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
+        service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+    - name: upload to Google Cloud
+      uses: 'google-github-actions/upload-cloud-storage@v1'
+      with:
+        path: OpenDDS/${{ github.job }}_autobuild_workspace
+        destination: opendds-gha-scoreboard-uploads/${{ github.job }}
+        parent: false
+        process_gcloudignore: false
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
     - name: check results
       shell: bash
       run: |
-        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/output.log_Brief.html"
+        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/${LOG_NAME}_Brief.html"
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
         grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
 
@@ -5894,6 +6378,10 @@ jobs:
 
     needs: build_u22_stat_qt_ws_sec
     timeout-minutes: 150
+
+    permissions:
+      contents: read
+      id-token: write
 
     steps:
     - name: install xerces
@@ -5978,6 +6466,10 @@ jobs:
         . setenv.sh
         cd tests/security/attributes
         make -j $(getconf _NPROCESSORS_ONLN)
+    - name: set log name
+      shell: bash
+      run: |
+        echo "LOG_NAME=$(date '+%Y_%m_%d_%H_%M')" >> "$GITHUB_ENV"
     - name: run security tests
       shell: bash
       run: |
@@ -5991,7 +6483,7 @@ jobs:
         cat > config.xml <<EOF
         <autobuild>
         <configuration>
-        <variable name="log_file" value="output.log"/>
+        <variable name="log_file" value="${LOG_NAME}"/>
         <variable name="log_root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace"/>
         <variable name="project_root" value="$DDS_ROOT"/>
         <variable name="root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace"/>
@@ -6016,10 +6508,24 @@ jobs:
       with:
         name: ${{ github.job }}_autobuild_output
         path: OpenDDS/${{ github.job }}_autobuild_workspace
+    - name: Authenticate to Google Cloud
+      uses: google-github-actions/auth@v2
+      with:
+        workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
+        service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+    - name: upload to Google Cloud
+      uses: 'google-github-actions/upload-cloud-storage@v1'
+      with:
+        path: OpenDDS/${{ github.job }}_autobuild_workspace
+        destination: opendds-gha-scoreboard-uploads/${{ github.job }}
+        parent: false
+        process_gcloudignore: false
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
     - name: check results
       shell: bash
       run: |
-        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/output.log_Brief.html"
+        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/${LOG_NAME}_Brief.html"
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
         grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
 
@@ -6195,6 +6701,10 @@ jobs:
 
     needs: build_u22_j_cft0_FM-37
 
+    permissions:
+      contents: read
+      id-token: write
+
     steps:
     - name: install xerces
       run: sudo apt-get -y install libxerces-c-dev
@@ -6257,6 +6767,10 @@ jobs:
         sudo sysctl -w kernel.core_pattern=core.%e.%p
         echo Core file pattern set to:
         cat /proc/sys/kernel/core_pattern
+    - name: set log name
+      shell: bash
+      run: |
+        echo "LOG_NAME=$(date '+%Y_%m_%d_%H_%M')" >> "$GITHUB_ENV"
     - name: run OpenDDS tests
       shell: bash
       run: |
@@ -6271,7 +6785,7 @@ jobs:
         cat > config.xml <<EOF
         <autobuild>
         <configuration>
-        <variable name="log_file" value="output.log"/>
+        <variable name="log_file" value="${LOG_NAME}"/>
         <variable name="log_root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace"/>
         <variable name="project_root" value="$DDS_ROOT"/>
         <variable name="root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace"/>
@@ -6297,10 +6811,24 @@ jobs:
       with:
         name: ${{ github.job }}_autobuild_output
         path: OpenDDS/${{ github.job }}_autobuild_workspace
+    - name: Authenticate to Google Cloud
+      uses: google-github-actions/auth@v2
+      with:
+        workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
+        service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+    - name: upload to Google Cloud
+      uses: 'google-github-actions/upload-cloud-storage@v1'
+      with:
+        path: OpenDDS/${{ github.job }}_autobuild_workspace
+        destination: opendds-gha-scoreboard-uploads/${{ github.job }}
+        parent: false
+        process_gcloudignore: false
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
     - name: check results
       shell: bash
       run: |
-        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/output.log_Brief.html"
+        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/${LOG_NAME}_Brief.html"
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
         grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
 
@@ -6484,6 +7012,10 @@ jobs:
 
     needs: build_w19_p1_stat_js0
 
+    permissions:
+      contents: read
+      id-token: write
+
     steps:
     - name: setup for run-vcpkg
       shell: bash
@@ -6555,6 +7087,10 @@ jobs:
         cd OpenDDS
         call setenv.cmd
         perl tools\scripts\show_build_config.pl
+    - name: set log name
+      shell: bash
+      run: |
+        echo "LOG_NAME=$(date '+%Y_%m_%d_%H_%M')" >> "$GITHUB_ENV"
     - name: create autobuild config
       shell: bash
       run: |
@@ -6567,7 +7103,7 @@ jobs:
         cat > config.xml <<EOF
         <autobuild>
         <configuration>
-        <variable name="log_file" value="output.log"/>
+        <variable name="log_file" value="${LOG_NAME}"/>
         <variable name="log_root" value="$FS_GHW/OpenDDS/${{ github.job }}_autobuild_workspace"/>
         <variable name="project_root" value="$FS_GHW/OpenDDS"/>
         <variable name="root" value="$FS_GHW/OpenDDS/${{ github.job }}_autobuild_workspace"/>
@@ -6600,10 +7136,24 @@ jobs:
       with:
         name: ${{ github.job }}_autobuild_output
         path: OpenDDS\${{ github.job }}_autobuild_workspace
+    - name: Authenticate to Google Cloud
+      uses: google-github-actions/auth@v2
+      with:
+        workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
+        service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+    - name: upload to Google Cloud
+      uses: 'google-github-actions/upload-cloud-storage@v1'
+      with:
+        path: OpenDDS/${{ github.job }}_autobuild_workspace
+        destination: opendds-gha-scoreboard-uploads/${{ github.job }}
+        parent: false
+        process_gcloudignore: false
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
     - name: check results
       shell: bash
       run: |
-        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/output.log_Brief.html"
+        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/${LOG_NAME}_Brief.html"
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
         grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
 
@@ -6612,6 +7162,10 @@ jobs:
     runs-on: windows-2019
 
     needs: build_w19_p1_stat_js0
+
+    permissions:
+      contents: read
+      id-token: write
 
     steps:
     - name: setup for run-vcpkg
@@ -6714,6 +7268,10 @@ jobs:
         call setenv.cmd
         cd tests\DCPS\C++11
         msbuild -p:Configuration=Debug,Platform=x64 -m C++11.sln
+    - name: set log name
+      shell: bash
+      run: |
+        echo "LOG_NAME=$(date '+%Y_%m_%d_%H_%M')" >> "$GITHUB_ENV"
     - name: create autobuild config
       shell: bash
       run: |
@@ -6726,7 +7284,7 @@ jobs:
         cat > config.xml <<EOF
         <autobuild>
         <configuration>
-        <variable name="log_file" value="output.log"/>
+        <variable name="log_file" value="${LOG_NAME}"/>
         <variable name="log_root" value="$FS_GHW/OpenDDS/${{ github.job }}_autobuild_workspace"/>
         <variable name="project_root" value="$FS_GHW/OpenDDS"/>
         <variable name="root" value="$FS_GHW/OpenDDS/${{ github.job }}_autobuild_workspace"/>
@@ -6758,10 +7316,24 @@ jobs:
       with:
         name: ${{ github.job }}_autobuild_output
         path: OpenDDS\${{ github.job }}_autobuild_workspace
+    - name: Authenticate to Google Cloud
+      uses: google-github-actions/auth@v2
+      with:
+        workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
+        service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+    - name: upload to Google Cloud
+      uses: 'google-github-actions/upload-cloud-storage@v1'
+      with:
+        path: OpenDDS/${{ github.job }}_autobuild_workspace
+        destination: opendds-gha-scoreboard-uploads/${{ github.job }}
+        parent: false
+        process_gcloudignore: false
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
     - name: check results
       shell: bash
       run: |
-        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/output.log_Brief.html"
+        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/${LOG_NAME}_Brief.html"
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
         grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
 
@@ -6770,6 +7342,10 @@ jobs:
     runs-on: windows-2019
 
     needs: build_w19_p1_stat_js0
+
+    permissions:
+      contents: read
+      id-token: write
 
     steps:
     - name: checkout MPC
@@ -6861,6 +7437,10 @@ jobs:
         cd tests\DCPS\Compiler
         dir
         msbuild -p:Configuration=Debug,Platform=x64 -m Compiler.sln
+    - name: set log name
+      shell: bash
+      run: |
+        echo "LOG_NAME=$(date '+%Y_%m_%d_%H_%M')" >> "$GITHUB_ENV"
     - name: create autobuild config
       shell: bash
       run: |
@@ -6873,7 +7453,7 @@ jobs:
         cat > config.xml <<EOF
         <autobuild>
         <configuration>
-        <variable name="log_file" value="output.log"/>
+        <variable name="log_file" value="${LOG_NAME}"/>
         <variable name="log_root" value="$FS_GHW/OpenDDS/${{ github.job }}_autobuild_workspace"/>
         <variable name="project_root" value="$FS_GHW/OpenDDS"/>
         <variable name="root" value="$FS_GHW/OpenDDS/${{ github.job }}_autobuild_workspace"/>
@@ -6905,10 +7485,24 @@ jobs:
       with:
         name: ${{ github.job }}_autobuild_output
         path: OpenDDS\${{ github.job }}_autobuild_workspace
+    - name: Authenticate to Google Cloud
+      uses: google-github-actions/auth@v2
+      with:
+        workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
+        service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+    - name: upload to Google Cloud
+      uses: 'google-github-actions/upload-cloud-storage@v1'
+      with:
+        path: OpenDDS/${{ github.job }}_autobuild_workspace
+        destination: opendds-gha-scoreboard-uploads/${{ github.job }}
+        parent: false
+        process_gcloudignore: false
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
     - name: check results
       shell: bash
       run: |
-        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/output.log_Brief.html"
+        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/${LOG_NAME}_Brief.html"
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
         grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
 
@@ -6917,6 +7511,10 @@ jobs:
     runs-on: windows-2019
 
     needs: build_w19_p1_stat_js0
+
+    permissions:
+      contents: read
+      id-token: write
 
     steps:
     - name: checkout MPC
@@ -7010,6 +7608,10 @@ jobs:
         cd tests\DCPS\Compiler
         dir
         msbuild -p:Configuration=Debug,Platform=x64 -m Compiler.sln
+    - name: set log name
+      shell: bash
+      run: |
+        echo "LOG_NAME=$(date '+%Y_%m_%d_%H_%M')" >> "$GITHUB_ENV"
     - name: create autobuild config
       shell: bash
       run: |
@@ -7022,7 +7624,7 @@ jobs:
         cat > config.xml <<EOF
         <autobuild>
         <configuration>
-        <variable name="log_file" value="output.log"/>
+        <variable name="log_file" value="${LOG_NAME}"/>
         <variable name="log_root" value="$FS_GHW/OpenDDS/${{ github.job }}_autobuild_workspace"/>
         <variable name="project_root" value="$FS_GHW/OpenDDS"/>
         <variable name="root" value="$FS_GHW/OpenDDS/${{ github.job }}_autobuild_workspace"/>
@@ -7054,10 +7656,24 @@ jobs:
       with:
         name: ${{ github.job }}_autobuild_output
         path: OpenDDS\${{ github.job }}_autobuild_workspace
+    - name: Authenticate to Google Cloud
+      uses: google-github-actions/auth@v2
+      with:
+        workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
+        service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+    - name: upload to Google Cloud
+      uses: 'google-github-actions/upload-cloud-storage@v1'
+      with:
+        path: OpenDDS/${{ github.job }}_autobuild_workspace
+        destination: opendds-gha-scoreboard-uploads/${{ github.job }}
+        parent: false
+        process_gcloudignore: false
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
     - name: check results
       shell: bash
       run: |
-        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/output.log_Brief.html"
+        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/${LOG_NAME}_Brief.html"
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
         grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
 
@@ -7066,6 +7682,10 @@ jobs:
     runs-on: windows-2019
 
     needs: build_w19_p1_stat_js0
+
+    permissions:
+      contents: read
+      id-token: write
 
     steps:
     - name: setup for run-vcpkg
@@ -7154,6 +7774,10 @@ jobs:
         call setenv.cmd
         cd tests\unit-tests
         msbuild -p:Configuration=Debug,Platform=x64 -m unit_tests.sln
+    - name: set log name
+      shell: bash
+      run: |
+        echo "LOG_NAME=$(date '+%Y_%m_%d_%H_%M')" >> "$GITHUB_ENV"
     - name: create autobuild config
       shell: bash
       run: |
@@ -7166,7 +7790,7 @@ jobs:
         cat > config.xml <<EOF
         <autobuild>
         <configuration>
-        <variable name="log_file" value="output.log"/>
+        <variable name="log_file" value="${LOG_NAME}"/>
         <variable name="log_root" value="$FS_GHW/OpenDDS/${{ github.job }}_autobuild_workspace"/>
         <variable name="project_root" value="$FS_GHW/OpenDDS"/>
         <variable name="root" value="$FS_GHW/OpenDDS/${{ github.job }}_autobuild_workspace"/>
@@ -7198,10 +7822,24 @@ jobs:
       with:
         name: ${{ github.job }}_autobuild_output
         path: OpenDDS\${{ github.job }}_autobuild_workspace
+    - name: Authenticate to Google Cloud
+      uses: google-github-actions/auth@v2
+      with:
+        workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
+        service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+    - name: upload to Google Cloud
+      uses: 'google-github-actions/upload-cloud-storage@v1'
+      with:
+        path: OpenDDS/${{ github.job }}_autobuild_workspace
+        destination: opendds-gha-scoreboard-uploads/${{ github.job }}
+        parent: false
+        process_gcloudignore: false
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
     - name: check results
       shell: bash
       run: |
-        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/output.log_Brief.html"
+        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/${LOG_NAME}_Brief.html"
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
         grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
 
@@ -7385,6 +8023,10 @@ jobs:
 
     needs: build_w19_re_p1_stat_FM-08
 
+    permissions:
+      contents: read
+      id-token: write
+
     steps:
     - name: setup for run-vcpkg
       shell: bash
@@ -7456,6 +8098,10 @@ jobs:
         cd OpenDDS
         call setenv.cmd
         perl tools\scripts\show_build_config.pl
+    - name: set log name
+      shell: bash
+      run: |
+        echo "LOG_NAME=$(date '+%Y_%m_%d_%H_%M')" >> "$GITHUB_ENV"
     - name: create autobuild config
       shell: bash
       run: |
@@ -7468,7 +8114,7 @@ jobs:
         cat > config.xml <<EOF
         <autobuild>
         <configuration>
-        <variable name="log_file" value="output.log"/>
+        <variable name="log_file" value="${LOG_NAME}"/>
         <variable name="log_root" value="$FS_GHW/OpenDDS/${{ github.job }}_autobuild_workspace"/>
         <variable name="project_root" value="$FS_GHW/OpenDDS"/>
         <variable name="root" value="$FS_GHW/OpenDDS/${{ github.job }}_autobuild_workspace"/>
@@ -7501,10 +8147,24 @@ jobs:
       with:
         name: ${{ github.job }}_autobuild_output
         path: OpenDDS\${{ github.job }}_autobuild_workspace
+    - name: Authenticate to Google Cloud
+      uses: google-github-actions/auth@v2
+      with:
+        workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
+        service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+    - name: upload to Google Cloud
+      uses: 'google-github-actions/upload-cloud-storage@v1'
+      with:
+        path: OpenDDS/${{ github.job }}_autobuild_workspace
+        destination: opendds-gha-scoreboard-uploads/${{ github.job }}
+        parent: false
+        process_gcloudignore: false
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
     - name: check results
       shell: bash
       run: |
-        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/output.log_Brief.html"
+        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/${LOG_NAME}_Brief.html"
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
         grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
 
@@ -7513,6 +8173,10 @@ jobs:
     runs-on: windows-2019
 
     needs: build_w19_re_p1_stat_FM-08
+
+    permissions:
+      contents: read
+      id-token: write
 
     steps:
     - name: setup for run-vcpkg
@@ -7615,6 +8279,10 @@ jobs:
         call setenv.cmd
         cd tests\DCPS\C++11
         msbuild -p:Configuration=Release,Platform=x64 -m C++11.sln
+    - name: set log name
+      shell: bash
+      run: |
+        echo "LOG_NAME=$(date '+%Y_%m_%d_%H_%M')" >> "$GITHUB_ENV"
     - name: create autobuild config
       shell: bash
       run: |
@@ -7627,7 +8295,7 @@ jobs:
         cat > config.xml <<EOF
         <autobuild>
         <configuration>
-        <variable name="log_file" value="output.log"/>
+        <variable name="log_file" value="${LOG_NAME}"/>
         <variable name="log_root" value="$FS_GHW/OpenDDS/${{ github.job }}_autobuild_workspace"/>
         <variable name="project_root" value="$FS_GHW/OpenDDS"/>
         <variable name="root" value="$FS_GHW/OpenDDS/${{ github.job }}_autobuild_workspace"/>
@@ -7659,10 +8327,24 @@ jobs:
       with:
         name: ${{ github.job }}_autobuild_output
         path: OpenDDS\${{ github.job }}_autobuild_workspace
+    - name: Authenticate to Google Cloud
+      uses: google-github-actions/auth@v2
+      with:
+        workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
+        service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+    - name: upload to Google Cloud
+      uses: 'google-github-actions/upload-cloud-storage@v1'
+      with:
+        path: OpenDDS/${{ github.job }}_autobuild_workspace
+        destination: opendds-gha-scoreboard-uploads/${{ github.job }}
+        parent: false
+        process_gcloudignore: false
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
     - name: check results
       shell: bash
       run: |
-        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/output.log_Brief.html"
+        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/${LOG_NAME}_Brief.html"
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
         grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
 
@@ -7671,6 +8353,10 @@ jobs:
     runs-on: windows-2019
 
     needs: build_w19_re_p1_stat_FM-08
+
+    permissions:
+      contents: read
+      id-token: write
 
     steps:
     - name: checkout MPC
@@ -7761,6 +8447,10 @@ jobs:
         call setenv.cmd
         cd tests\DCPS\Compiler
         msbuild -p:Configuration=Release,Platform=x64 -m Compiler.sln
+    - name: set log name
+      shell: bash
+      run: |
+        echo "LOG_NAME=$(date '+%Y_%m_%d_%H_%M')" >> "$GITHUB_ENV"
     - name: create autobuild config
       shell: bash
       run: |
@@ -7773,7 +8463,7 @@ jobs:
         cat > config.xml <<EOF
         <autobuild>
         <configuration>
-        <variable name="log_file" value="output.log"/>
+        <variable name="log_file" value="${LOG_NAME}"/>
         <variable name="log_root" value="$FS_GHW/OpenDDS/${{ github.job }}_autobuild_workspace"/>
         <variable name="project_root" value="$FS_GHW/OpenDDS"/>
         <variable name="root" value="$FS_GHW/OpenDDS/${{ github.job }}_autobuild_workspace"/>
@@ -7805,10 +8495,24 @@ jobs:
       with:
         name: ${{ github.job }}_autobuild_output
         path: OpenDDS\${{ github.job }}_autobuild_workspace
+    - name: Authenticate to Google Cloud
+      uses: google-github-actions/auth@v2
+      with:
+        workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
+        service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+    - name: upload to Google Cloud
+      uses: 'google-github-actions/upload-cloud-storage@v1'
+      with:
+        path: OpenDDS/${{ github.job }}_autobuild_workspace
+        destination: opendds-gha-scoreboard-uploads/${{ github.job }}
+        parent: false
+        process_gcloudignore: false
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
     - name: check results
       shell: bash
       run: |
-        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/output.log_Brief.html"
+        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/${LOG_NAME}_Brief.html"
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
         grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
 
@@ -7817,6 +8521,10 @@ jobs:
     runs-on: windows-2019
 
     needs: build_w19_re_p1_stat_FM-08
+
+    permissions:
+      contents: read
+      id-token: write
 
     steps:
     - name: checkout MPC
@@ -7909,6 +8617,10 @@ jobs:
         call setenv.cmd
         cd tests\DCPS\Compiler
         msbuild -p:Configuration=Release,Platform=x64 -m Compiler.sln
+    - name: set log name
+      shell: bash
+      run: |
+        echo "LOG_NAME=$(date '+%Y_%m_%d_%H_%M')" >> "$GITHUB_ENV"
     - name: create autobuild config
       shell: bash
       run: |
@@ -7921,7 +8633,7 @@ jobs:
         cat > config.xml <<EOF
         <autobuild>
         <configuration>
-        <variable name="log_file" value="output.log"/>
+        <variable name="log_file" value="${LOG_NAME}"/>
         <variable name="log_root" value="$FS_GHW/OpenDDS/${{ github.job }}_autobuild_workspace"/>
         <variable name="project_root" value="$FS_GHW/OpenDDS"/>
         <variable name="root" value="$FS_GHW/OpenDDS/${{ github.job }}_autobuild_workspace"/>
@@ -7953,10 +8665,24 @@ jobs:
       with:
         name: ${{ github.job }}_autobuild_output
         path: OpenDDS\${{ github.job }}_autobuild_workspace
+    - name: Authenticate to Google Cloud
+      uses: google-github-actions/auth@v2
+      with:
+        workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
+        service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+    - name: upload to Google Cloud
+      uses: 'google-github-actions/upload-cloud-storage@v1'
+      with:
+        path: OpenDDS/${{ github.job }}_autobuild_workspace
+        destination: opendds-gha-scoreboard-uploads/${{ github.job }}
+        parent: false
+        process_gcloudignore: false
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
     - name: check results
       shell: bash
       run: |
-        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/output.log_Brief.html"
+        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/${LOG_NAME}_Brief.html"
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
         grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
 
@@ -7965,6 +8691,10 @@ jobs:
     runs-on: windows-2019
 
     needs: build_w19_re_p1_stat_FM-08
+
+    permissions:
+      contents: read
+      id-token: write
 
     steps:
     - name: setup for run-vcpkg
@@ -8053,6 +8783,10 @@ jobs:
         call setenv.cmd
         cd tests\unit-tests
         msbuild -p:Configuration=Release,Platform=x64 -m unit_tests.sln
+    - name: set log name
+      shell: bash
+      run: |
+        echo "LOG_NAME=$(date '+%Y_%m_%d_%H_%M')" >> "$GITHUB_ENV"
     - name: create autobuild config
       shell: bash
       run: |
@@ -8065,7 +8799,7 @@ jobs:
         cat > config.xml <<EOF
         <autobuild>
         <configuration>
-        <variable name="log_file" value="output.log"/>
+        <variable name="log_file" value="${LOG_NAME}"/>
         <variable name="log_root" value="$FS_GHW/OpenDDS/${{ github.job }}_autobuild_workspace"/>
         <variable name="project_root" value="$FS_GHW/OpenDDS"/>
         <variable name="root" value="$FS_GHW/OpenDDS/${{ github.job }}_autobuild_workspace"/>
@@ -8097,10 +8831,24 @@ jobs:
       with:
         name: ${{ github.job }}_autobuild_output
         path: OpenDDS\${{ github.job }}_autobuild_workspace
+    - name: Authenticate to Google Cloud
+      uses: google-github-actions/auth@v2
+      with:
+        workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
+        service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+    - name: upload to Google Cloud
+      uses: 'google-github-actions/upload-cloud-storage@v1'
+      with:
+        path: OpenDDS/${{ github.job }}_autobuild_workspace
+        destination: opendds-gha-scoreboard-uploads/${{ github.job }}
+        parent: false
+        process_gcloudignore: false
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
     - name: check results
       shell: bash
       run: |
-        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/output.log_Brief.html"
+        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/${LOG_NAME}_Brief.html"
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
         grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
 
@@ -8324,6 +9072,10 @@ jobs:
 
     needs: build_w19_re_o1p1_sec
 
+    permissions:
+      contents: read
+      id-token: write
+
     steps:
     - name: download openssl artifact
       uses: actions/download-artifact@v3
@@ -8405,6 +9157,10 @@ jobs:
         cd OpenDDS
         call setenv.cmd
         perl tools\scripts\show_build_config.pl
+    - name: set log name
+      shell: bash
+      run: |
+        echo "LOG_NAME=$(date '+%Y_%m_%d_%H_%M')" >> "$GITHUB_ENV"
     - name: create autobuild config
       shell: bash
       run: |
@@ -8417,7 +9173,7 @@ jobs:
         cat > config.xml <<EOF
         <autobuild>
         <configuration>
-        <variable name="log_file" value="output.log"/>
+        <variable name="log_file" value="${LOG_NAME}"/>
         <variable name="log_root" value="$FS_GHW/OpenDDS/${{ github.job }}_autobuild_workspace"/>
         <variable name="project_root" value="$FS_GHW/OpenDDS"/>
         <variable name="root" value="$FS_GHW/OpenDDS/${{ github.job }}_autobuild_workspace"/>
@@ -8450,10 +9206,24 @@ jobs:
       with:
         name: ${{ github.job }}_autobuild_output
         path: OpenDDS\${{ github.job }}_autobuild_workspace
+    - name: Authenticate to Google Cloud
+      uses: google-github-actions/auth@v2
+      with:
+        workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
+        service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+    - name: upload to Google Cloud
+      uses: 'google-github-actions/upload-cloud-storage@v1'
+      with:
+        path: OpenDDS/${{ github.job }}_autobuild_workspace
+        destination: opendds-gha-scoreboard-uploads/${{ github.job }}
+        parent: false
+        process_gcloudignore: false
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
     - name: check results
       shell: bash
       run: |
-        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/output.log_Brief.html"
+        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/${LOG_NAME}_Brief.html"
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
         grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
 
@@ -8462,6 +9232,10 @@ jobs:
     runs-on: windows-2019
 
     needs: build_w19_re_o1p1_sec
+
+    permissions:
+      contents: read
+      id-token: write
 
     steps:
     - name: download openssl artifact
@@ -8573,6 +9347,10 @@ jobs:
         call setenv.cmd
         cd tests\DCPS\C++11
         msbuild -p:Configuration=Release,Platform=x64 -m C++11.sln
+    - name: set log name
+      shell: bash
+      run: |
+        echo "LOG_NAME=$(date '+%Y_%m_%d_%H_%M')" >> "$GITHUB_ENV"
     - name: create autobuild config
       shell: bash
       run: |
@@ -8585,7 +9363,7 @@ jobs:
         cat > config.xml <<EOF
         <autobuild>
         <configuration>
-        <variable name="log_file" value="output.log"/>
+        <variable name="log_file" value="${LOG_NAME}"/>
         <variable name="log_root" value="$FS_GHW/OpenDDS/${{ github.job }}_autobuild_workspace"/>
         <variable name="project_root" value="$FS_GHW/OpenDDS"/>
         <variable name="root" value="$FS_GHW/OpenDDS/${{ github.job }}_autobuild_workspace"/>
@@ -8617,10 +9395,24 @@ jobs:
       with:
         name: ${{ github.job }}_autobuild_output
         path: OpenDDS\${{ github.job }}_autobuild_workspace
+    - name: Authenticate to Google Cloud
+      uses: google-github-actions/auth@v2
+      with:
+        workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
+        service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+    - name: upload to Google Cloud
+      uses: 'google-github-actions/upload-cloud-storage@v1'
+      with:
+        path: OpenDDS/${{ github.job }}_autobuild_workspace
+        destination: opendds-gha-scoreboard-uploads/${{ github.job }}
+        parent: false
+        process_gcloudignore: false
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
     - name: check results
       shell: bash
       run: |
-        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/output.log_Brief.html"
+        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/${LOG_NAME}_Brief.html"
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
         grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
 
@@ -8629,6 +9421,10 @@ jobs:
     runs-on: windows-2019
 
     needs: build_w19_re_o1p1_sec
+
+    permissions:
+      contents: read
+      id-token: write
 
     steps:
     - name: setup for run-vcpkg
@@ -8717,6 +9513,10 @@ jobs:
         call setenv.cmd
         cd tests\DCPS\Compiler
         msbuild -p:Configuration=Release,Platform=x64 -m Compiler.sln
+    - name: set log name
+      shell: bash
+      run: |
+        echo "LOG_NAME=$(date '+%Y_%m_%d_%H_%M')" >> "$GITHUB_ENV"
     - name: create autobuild config
       shell: bash
       run: |
@@ -8729,7 +9529,7 @@ jobs:
         cat > config.xml <<EOF
         <autobuild>
         <configuration>
-        <variable name="log_file" value="output.log"/>
+        <variable name="log_file" value="${LOG_NAME}"/>
         <variable name="log_root" value="$FS_GHW/OpenDDS/${{ github.job }}_autobuild_workspace"/>
         <variable name="project_root" value="$FS_GHW/OpenDDS"/>
         <variable name="root" value="$FS_GHW/OpenDDS/${{ github.job }}_autobuild_workspace"/>
@@ -8761,10 +9561,24 @@ jobs:
       with:
         name: ${{ github.job }}_autobuild_output
         path: OpenDDS\${{ github.job }}_autobuild_workspace
+    - name: Authenticate to Google Cloud
+      uses: google-github-actions/auth@v2
+      with:
+        workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
+        service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+    - name: upload to Google Cloud
+      uses: 'google-github-actions/upload-cloud-storage@v1'
+      with:
+        path: OpenDDS/${{ github.job }}_autobuild_workspace
+        destination: opendds-gha-scoreboard-uploads/${{ github.job }}
+        parent: false
+        process_gcloudignore: false
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
     - name: check results
       shell: bash
       run: |
-        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/output.log_Brief.html"
+        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/${LOG_NAME}_Brief.html"
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
         grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
 
@@ -8773,6 +9587,10 @@ jobs:
     runs-on: windows-2019
 
     needs: build_w19_re_o1p1_sec
+
+    permissions:
+      contents: read
+      id-token: write
 
     steps:
     - name: download openssl artifact
@@ -8870,6 +9688,10 @@ jobs:
         call setenv.cmd
         cd tests\unit-tests
         msbuild -p:Configuration=Release,Platform=x64 -m unit_tests.sln
+    - name: set log name
+      shell: bash
+      run: |
+        echo "LOG_NAME=$(date '+%Y_%m_%d_%H_%M')" >> "$GITHUB_ENV"
     - name: create autobuild config
       shell: bash
       run: |
@@ -8882,7 +9704,7 @@ jobs:
         cat > config.xml <<EOF
         <autobuild>
         <configuration>
-        <variable name="log_file" value="output.log"/>
+        <variable name="log_file" value="${LOG_NAME}"/>
         <variable name="log_root" value="$FS_GHW/OpenDDS/${{ github.job }}_autobuild_workspace"/>
         <variable name="project_root" value="$FS_GHW/OpenDDS"/>
         <variable name="root" value="$FS_GHW/OpenDDS/${{ github.job }}_autobuild_workspace"/>
@@ -8914,10 +9736,24 @@ jobs:
       with:
         name: ${{ github.job }}_autobuild_output
         path: OpenDDS\${{ github.job }}_autobuild_workspace
+    - name: Authenticate to Google Cloud
+      uses: google-github-actions/auth@v2
+      with:
+        workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
+        service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+    - name: upload to Google Cloud
+      uses: 'google-github-actions/upload-cloud-storage@v1'
+      with:
+        path: OpenDDS/${{ github.job }}_autobuild_workspace
+        destination: opendds-gha-scoreboard-uploads/${{ github.job }}
+        parent: false
+        process_gcloudignore: false
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
     - name: check results
       shell: bash
       run: |
-        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/output.log_Brief.html"
+        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/${LOG_NAME}_Brief.html"
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
         grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
 
@@ -9201,6 +10037,10 @@ jobs:
 
     needs: build_w19_re_j_ws_FM-1f
 
+    permissions:
+      contents: read
+      id-token: write
+
     steps:
     - name: checkout MPC
       uses: actions/checkout@v4
@@ -9253,6 +10093,10 @@ jobs:
         cd OpenDDS
         call setenv.cmd
         perl tools\scripts\show_build_config.pl
+    - name: set log name
+      shell: bash
+      run: |
+        echo "LOG_NAME=$(date '+%Y_%m_%d_%H_%M')" >> "$GITHUB_ENV"
     - name: create autobuild config
       shell: bash
       run: |
@@ -9265,7 +10109,7 @@ jobs:
         cat > config.xml <<EOF
         <autobuild>
         <configuration>
-        <variable name="log_file" value="output.log"/>
+        <variable name="log_file" value="${LOG_NAME}"/>
         <variable name="log_root" value="$FS_GHW/OpenDDS/${{ github.job }}_autobuild_workspace"/>
         <variable name="project_root" value="$FS_GHW/OpenDDS"/>
         <variable name="root" value="$FS_GHW/OpenDDS/${{ github.job }}_autobuild_workspace"/>
@@ -9298,10 +10142,24 @@ jobs:
       with:
         name: ${{ github.job }}_autobuild_output
         path: OpenDDS\${{ github.job }}_autobuild_workspace
+    - name: Authenticate to Google Cloud
+      uses: google-github-actions/auth@v2
+      with:
+        workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
+        service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+    - name: upload to Google Cloud
+      uses: 'google-github-actions/upload-cloud-storage@v1'
+      with:
+        path: OpenDDS/${{ github.job }}_autobuild_workspace
+        destination: opendds-gha-scoreboard-uploads/${{ github.job }}
+        parent: false
+        process_gcloudignore: false
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
     - name: check results
       shell: bash
       run: |
-        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/output.log_Brief.html"
+        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/${LOG_NAME}_Brief.html"
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
         grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
 
@@ -9310,6 +10168,10 @@ jobs:
     runs-on: windows-2019
 
     needs: build_w19_re_j_ws_FM-1f
+
+    permissions:
+      contents: read
+      id-token: write
 
     steps:
     - name: setup for run-vcpkg
@@ -9412,6 +10274,10 @@ jobs:
         call setenv.cmd
         cd tests\DCPS\C++11
         msbuild -p:Configuration=Release,Platform=x64 -m C++11.sln
+    - name: set log name
+      shell: bash
+      run: |
+        echo "LOG_NAME=$(date '+%Y_%m_%d_%H_%M')" >> "$GITHUB_ENV"
     - name: create autobuild config
       shell: bash
       run: |
@@ -9424,7 +10290,7 @@ jobs:
         cat > config.xml <<EOF
         <autobuild>
         <configuration>
-        <variable name="log_file" value="output.log"/>
+        <variable name="log_file" value="${LOG_NAME}"/>
         <variable name="log_root" value="$FS_GHW/OpenDDS/${{ github.job }}_autobuild_workspace"/>
         <variable name="project_root" value="$FS_GHW/OpenDDS"/>
         <variable name="root" value="$FS_GHW/OpenDDS/${{ github.job }}_autobuild_workspace"/>
@@ -9456,10 +10322,24 @@ jobs:
       with:
         name: ${{ github.job }}_autobuild_output
         path: OpenDDS\${{ github.job }}_autobuild_workspace
+    - name: Authenticate to Google Cloud
+      uses: google-github-actions/auth@v2
+      with:
+        workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
+        service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+    - name: upload to Google Cloud
+      uses: 'google-github-actions/upload-cloud-storage@v1'
+      with:
+        path: OpenDDS/${{ github.job }}_autobuild_workspace
+        destination: opendds-gha-scoreboard-uploads/${{ github.job }}
+        parent: false
+        process_gcloudignore: false
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
     - name: check results
       shell: bash
       run: |
-        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/output.log_Brief.html"
+        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/${LOG_NAME}_Brief.html"
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
         grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
 
@@ -9468,6 +10348,10 @@ jobs:
     runs-on: windows-2019
 
     needs: build_w19_re_j_ws_FM-1f
+
+    permissions:
+      contents: read
+      id-token: write
 
     steps:
     - name: setup for run-vcpkg
@@ -9556,6 +10440,10 @@ jobs:
         call setenv.cmd
         cd tests\DCPS\Compiler
         msbuild -p:Configuration=Release,Platform=x64 -m Compiler.sln
+    - name: set log name
+      shell: bash
+      run: |
+        echo "LOG_NAME=$(date '+%Y_%m_%d_%H_%M')" >> "$GITHUB_ENV"
     - name: create autobuild config
       shell: bash
       run: |
@@ -9568,7 +10456,7 @@ jobs:
         cat > config.xml <<EOF
         <autobuild>
         <configuration>
-        <variable name="log_file" value="output.log"/>
+        <variable name="log_file" value="${LOG_NAME}"/>
         <variable name="log_root" value="$FS_GHW/OpenDDS/${{ github.job }}_autobuild_workspace"/>
         <variable name="project_root" value="$FS_GHW/OpenDDS"/>
         <variable name="root" value="$FS_GHW/OpenDDS/${{ github.job }}_autobuild_workspace"/>
@@ -9600,10 +10488,24 @@ jobs:
       with:
         name: ${{ github.job }}_autobuild_output
         path: OpenDDS\${{ github.job }}_autobuild_workspace
+    - name: Authenticate to Google Cloud
+      uses: google-github-actions/auth@v2
+      with:
+        workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
+        service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+    - name: upload to Google Cloud
+      uses: 'google-github-actions/upload-cloud-storage@v1'
+      with:
+        path: OpenDDS/${{ github.job }}_autobuild_workspace
+        destination: opendds-gha-scoreboard-uploads/${{ github.job }}
+        parent: false
+        process_gcloudignore: false
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
     - name: check results
       shell: bash
       run: |
-        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/output.log_Brief.html"
+        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/${LOG_NAME}_Brief.html"
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
         grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
 
@@ -9612,6 +10514,10 @@ jobs:
     runs-on: windows-2019
 
     needs: build_w19_re_j_ws_FM-1f
+
+    permissions:
+      contents: read
+      id-token: write
 
     steps:
     - name: setup for run-vcpkg
@@ -9707,6 +10613,10 @@ jobs:
         call setenv.cmd
         cd tests\unit-tests
         msbuild -p:Configuration=Release,Platform=x64 -m unit_tests.sln
+    - name: set log name
+      shell: bash
+      run: |
+        echo "LOG_NAME=$(date '+%Y_%m_%d_%H_%M')" >> "$GITHUB_ENV"
     - name: create autobuild config
       shell: bash
       run: |
@@ -9719,7 +10629,7 @@ jobs:
         cat > config.xml <<EOF
         <autobuild>
         <configuration>
-        <variable name="log_file" value="output.log"/>
+        <variable name="log_file" value="${LOG_NAME}"/>
         <variable name="log_root" value="$FS_GHW/OpenDDS/${{ github.job }}_autobuild_workspace"/>
         <variable name="project_root" value="$FS_GHW/OpenDDS"/>
         <variable name="root" value="$FS_GHW/OpenDDS/${{ github.job }}_autobuild_workspace"/>
@@ -9751,10 +10661,24 @@ jobs:
       with:
         name: ${{ github.job }}_autobuild_output
         path: OpenDDS\${{ github.job }}_autobuild_workspace
+    - name: Authenticate to Google Cloud
+      uses: google-github-actions/auth@v2
+      with:
+        workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
+        service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+    - name: upload to Google Cloud
+      uses: 'google-github-actions/upload-cloud-storage@v1'
+      with:
+        path: OpenDDS/${{ github.job }}_autobuild_workspace
+        destination: opendds-gha-scoreboard-uploads/${{ github.job }}
+        parent: false
+        process_gcloudignore: false
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
     - name: check results
       shell: bash
       run: |
-        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/output.log_Brief.html"
+        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/${LOG_NAME}_Brief.html"
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
         grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
 
@@ -9948,6 +10872,10 @@ jobs:
 
     needs: build_w22_x86_i0_sec
 
+    permissions:
+      contents: read
+      id-token: write
+
     steps:
     - name: setup for run-vcpkg
       shell: bash
@@ -10024,6 +10952,10 @@ jobs:
         cd /d C:\OpenDDS
         call setenv.cmd
         perl tools\scripts\show_build_config.pl
+    - name: set log name
+      shell: bash
+      run: |
+        echo "LOG_NAME=$(date '+%Y_%m_%d_%H_%M')" >> "$GITHUB_ENV"
     - name: create autobuild config
       shell: bash
       run: |
@@ -10035,7 +10967,7 @@ jobs:
         cat > config.xml <<EOF
         <autobuild>
         <configuration>
-        <variable name="log_file" value="output.log"/>
+        <variable name="log_file" value="${LOG_NAME}"/>
         <variable name="log_root" value="C:/OpenDDS/${{ github.job }}_autobuild_workspace"/>
         <variable name="project_root" value="C:/OpenDDS"/>
         <variable name="root" value="C:/OpenDDS/${{ github.job }}_autobuild_workspace"/>
@@ -10067,10 +10999,24 @@ jobs:
       with:
         name: ${{ github.job }}_autobuild_output
         path: C:\OpenDDS\${{ github.job }}_autobuild_workspace
+    - name: Authenticate to Google Cloud
+      uses: google-github-actions/auth@v2
+      with:
+        workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
+        service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+    - name: upload to Google Cloud
+      uses: 'google-github-actions/upload-cloud-storage@v1'
+      with:
+        path: C:\OpenDDS\${{ github.job }}_autobuild_workspace
+        destination: opendds-gha-scoreboard-uploads/${{ github.job }}
+        parent: false
+        process_gcloudignore: false
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
     - name: check results
       shell: bash
       run: |
-        /c/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "/c/OpenDDS/${{ github.job }}_autobuild_workspace/output.log_Brief.html"
+        /c/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "/c/OpenDDS/${{ github.job }}_autobuild_workspace/${LOG_NAME}_Brief.html"
         cat "/c/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
         grep -q 'Failures: 0' "/c/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
 
@@ -10079,6 +11025,10 @@ jobs:
     runs-on: windows-2022
 
     needs: build_w22_x86_i0_sec
+
+    permissions:
+      contents: read
+      id-token: write
 
     steps:
     - name: setup for run-vcpkg
@@ -10157,6 +11107,10 @@ jobs:
         cd /d C:\OpenDDS
         call setenv.cmd
         perl tools\scripts\show_build_config.pl
+    - name: set log name
+      shell: bash
+      run: |
+        echo "LOG_NAME=$(date '+%Y_%m_%d_%H_%M')" >> "$GITHUB_ENV"
     - name: create autobuild config
       shell: bash
       run: |
@@ -10168,7 +11122,7 @@ jobs:
         cat > config.xml <<EOF
         <autobuild>
         <configuration>
-        <variable name="log_file" value="output.log"/>
+        <variable name="log_file" value="${LOG_NAME}"/>
         <variable name="log_root" value="C:/OpenDDS/${{ github.job }}_autobuild_workspace"/>
         <variable name="project_root" value="C:/OpenDDS"/>
         <variable name="root" value="C:/OpenDDS/${{ github.job }}_autobuild_workspace"/>
@@ -10200,10 +11154,24 @@ jobs:
       with:
         name: ${{ github.job }}_autobuild_output
         path: C:\OpenDDS\${{ github.job }}_autobuild_workspace
+    - name: Authenticate to Google Cloud
+      uses: google-github-actions/auth@v2
+      with:
+        workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
+        service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+    - name: upload to Google Cloud
+      uses: 'google-github-actions/upload-cloud-storage@v1'
+      with:
+        path: C:\OpenDDS\${{ github.job }}_autobuild_workspace
+        destination: opendds-gha-scoreboard-uploads/${{ github.job }}
+        parent: false
+        process_gcloudignore: false
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
     - name: check results
       shell: bash
       run: |
-        /c/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "/c/OpenDDS/${{ github.job }}_autobuild_workspace/output.log_Brief.html"
+        /c/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "/c/OpenDDS/${{ github.job }}_autobuild_workspace/${LOG_NAME}_Brief.html"
         cat "/c/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
         grep -q 'Failures: 0' "/c/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
 
@@ -10298,6 +11266,10 @@ jobs:
 
     needs: build_w22_x86_i0_j_FM-1f
 
+    permissions:
+      contents: read
+      id-token: write
+
     steps:
     - name: setup for run-vcpkg
       shell: bash
@@ -10374,6 +11346,10 @@ jobs:
         cd /d C:\tests\cmake\build
         cmake -A Win32 %DDS_ROOT%\tests\cmake
         cmake --build .
+    - name: set log name
+      shell: bash
+      run: |
+        echo "LOG_NAME=$(date '+%Y_%m_%d_%H_%M')" >> "$GITHUB_ENV"
     - name: create autobuild config
       shell: bash
       run: |
@@ -10386,7 +11362,7 @@ jobs:
         cat > config.xml <<EOF
         <autobuild>
         <configuration>
-        <variable name="log_file" value="output.log"/>
+        <variable name="log_file" value="${LOG_NAME}"/>
         <variable name="log_root" value="$FS_GHW/OpenDDS/${{ github.job }}_autobuild_workspace"/>
         <variable name="project_root" value="$FS_GHW/OpenDDS"/>
         <variable name="root" value="$FS_GHW/OpenDDS/${{ github.job }}_autobuild_workspace"/>
@@ -10419,10 +11395,24 @@ jobs:
       with:
         name: ${{ github.job }}_autobuild_output
         path: OpenDDS\${{ github.job }}_autobuild_workspace
+    - name: Authenticate to Google Cloud
+      uses: google-github-actions/auth@v2
+      with:
+        workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
+        service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+    - name: upload to Google Cloud
+      uses: 'google-github-actions/upload-cloud-storage@v1'
+      with:
+        path: OpenDDS/${{ github.job }}_autobuild_workspace
+        destination: opendds-gha-scoreboard-uploads/${{ github.job }}
+        parent: false
+        process_gcloudignore: false
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
     - name: check results
       shell: bash
       run: |
-        /c/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "/c/OpenDDS/${{ github.job }}_autobuild_workspace/output.log_Brief.html"
+        /c/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "/c/OpenDDS/${{ github.job }}_autobuild_workspace/${LOG_NAME}_Brief.html"
         cat "/c/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
         grep -q 'Failures: 0' "/c/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
 
@@ -10606,6 +11596,10 @@ jobs:
 
     needs: build_w22_p1
 
+    permissions:
+      contents: read
+      id-token: write
+
     steps:
     - name: setup for run-vcpkg
       shell: bash
@@ -10677,6 +11671,10 @@ jobs:
         cd OpenDDS
         call setenv.cmd
         perl tools\scripts\show_build_config.pl
+    - name: set log name
+      shell: bash
+      run: |
+        echo "LOG_NAME=$(date '+%Y_%m_%d_%H_%M')" >> "$GITHUB_ENV"
     - name: create autobuild config
       shell: bash
       run: |
@@ -10689,7 +11687,7 @@ jobs:
         cat > config.xml <<EOF
         <autobuild>
         <configuration>
-        <variable name="log_file" value="output.log"/>
+        <variable name="log_file" value="${LOG_NAME}"/>
         <variable name="log_root" value="$FS_GHW/OpenDDS/${{ github.job }}_autobuild_workspace"/>
         <variable name="project_root" value="$FS_GHW/OpenDDS"/>
         <variable name="root" value="$FS_GHW/OpenDDS/${{ github.job }}_autobuild_workspace"/>
@@ -10722,10 +11720,24 @@ jobs:
       with:
         name: ${{ github.job }}_autobuild_output
         path: OpenDDS\${{ github.job }}_autobuild_workspace
+    - name: Authenticate to Google Cloud
+      uses: google-github-actions/auth@v2
+      with:
+        workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
+        service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+    - name: upload to Google Cloud
+      uses: 'google-github-actions/upload-cloud-storage@v1'
+      with:
+        path: OpenDDS/${{ github.job }}_autobuild_workspace
+        destination: opendds-gha-scoreboard-uploads/${{ github.job }}
+        parent: false
+        process_gcloudignore: false
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
     - name: check results
       shell: bash
       run: |
-        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/output.log_Brief.html"
+        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/${LOG_NAME}_Brief.html"
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
         grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
 
@@ -10734,6 +11746,10 @@ jobs:
     runs-on: windows-2022
 
     needs: build_w22_p1
+
+    permissions:
+      contents: read
+      id-token: write
 
     steps:
     - name: setup for run-vcpkg
@@ -10825,6 +11841,10 @@ jobs:
         call setenv.cmd
         cd tests\DCPS\C++11
         msbuild -p:Configuration=Debug,Platform=x64 -m C++11.sln
+    - name: set log name
+      shell: bash
+      run: |
+        echo "LOG_NAME=$(date '+%Y_%m_%d_%H_%M')" >> "$GITHUB_ENV"
     - name: create autobuild config
       shell: bash
       run: |
@@ -10837,7 +11857,7 @@ jobs:
         cat > config.xml <<EOF
         <autobuild>
         <configuration>
-        <variable name="log_file" value="output.log"/>
+        <variable name="log_file" value="${LOG_NAME}"/>
         <variable name="log_root" value="$FS_GHW/OpenDDS/${{ github.job }}_autobuild_workspace"/>
         <variable name="project_root" value="$FS_GHW/OpenDDS"/>
         <variable name="root" value="$FS_GHW/OpenDDS/${{ github.job }}_autobuild_workspace"/>
@@ -10869,10 +11889,24 @@ jobs:
       with:
         name: ${{ github.job }}_autobuild_output
         path: OpenDDS\${{ github.job }}_autobuild_workspace
+    - name: Authenticate to Google Cloud
+      uses: google-github-actions/auth@v2
+      with:
+        workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
+        service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+    - name: upload to Google Cloud
+      uses: 'google-github-actions/upload-cloud-storage@v1'
+      with:
+        path: OpenDDS/${{ github.job }}_autobuild_workspace
+        destination: opendds-gha-scoreboard-uploads/${{ github.job }}
+        parent: false
+        process_gcloudignore: false
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
     - name: check results
       shell: bash
       run: |
-        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/output.log_Brief.html"
+        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/${LOG_NAME}_Brief.html"
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
         grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
 
@@ -10881,6 +11915,10 @@ jobs:
     runs-on: windows-2022
 
     needs: build_w22_p1
+
+    permissions:
+      contents: read
+      id-token: write
 
     steps:
     - name: setup for run-vcpkg
@@ -10969,6 +12007,10 @@ jobs:
         call setenv.cmd
         cd tests\DCPS\Compiler
         msbuild -p:Configuration=Debug,Platform=x64 -m Compiler.sln
+    - name: set log name
+      shell: bash
+      run: |
+        echo "LOG_NAME=$(date '+%Y_%m_%d_%H_%M')" >> "$GITHUB_ENV"
     - name: create autobuild config
       shell: bash
       run: |
@@ -10981,7 +12023,7 @@ jobs:
         cat > config.xml <<EOF
         <autobuild>
         <configuration>
-        <variable name="log_file" value="output.log"/>
+        <variable name="log_file" value="${LOG_NAME}"/>
         <variable name="log_root" value="$FS_GHW/OpenDDS/${{ github.job }}_autobuild_workspace"/>
         <variable name="project_root" value="$FS_GHW/OpenDDS"/>
         <variable name="root" value="$FS_GHW/OpenDDS/${{ github.job }}_autobuild_workspace"/>
@@ -11013,10 +12055,24 @@ jobs:
       with:
         name: ${{ github.job }}_autobuild_output
         path: OpenDDS\${{ github.job }}_autobuild_workspace
+    - name: Authenticate to Google Cloud
+      uses: google-github-actions/auth@v2
+      with:
+        workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
+        service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+    - name: upload to Google Cloud
+      uses: 'google-github-actions/upload-cloud-storage@v1'
+      with:
+        path: OpenDDS/${{ github.job }}_autobuild_workspace
+        destination: opendds-gha-scoreboard-uploads/${{ github.job }}
+        parent: false
+        process_gcloudignore: false
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
     - name: check results
       shell: bash
       run: |
-        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/output.log_Brief.html"
+        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/${LOG_NAME}_Brief.html"
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
         grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
 
@@ -11025,6 +12081,10 @@ jobs:
     runs-on: windows-2022
 
     needs: build_w22_p1
+
+    permissions:
+      contents: read
+      id-token: write
 
     steps:
     - name: setup for run-vcpkg
@@ -11113,6 +12173,10 @@ jobs:
         call setenv.cmd
         cd tests\unit-tests
         msbuild -p:Configuration=Debug,Platform=x64 -m unit_tests.sln
+    - name: set log name
+      shell: bash
+      run: |
+        echo "LOG_NAME=$(date '+%Y_%m_%d_%H_%M')" >> "$GITHUB_ENV"
     - name: create autobuild config
       shell: bash
       run: |
@@ -11125,7 +12189,7 @@ jobs:
         cat > config.xml <<EOF
         <autobuild>
         <configuration>
-        <variable name="log_file" value="output.log"/>
+        <variable name="log_file" value="${LOG_NAME}"/>
         <variable name="log_root" value="$FS_GHW/OpenDDS/${{ github.job }}_autobuild_workspace"/>
         <variable name="project_root" value="$FS_GHW/OpenDDS"/>
         <variable name="root" value="$FS_GHW/OpenDDS/${{ github.job }}_autobuild_workspace"/>
@@ -11157,10 +12221,24 @@ jobs:
       with:
         name: ${{ github.job }}_autobuild_output
         path: OpenDDS\${{ github.job }}_autobuild_workspace
+    - name: Authenticate to Google Cloud
+      uses: google-github-actions/auth@v2
+      with:
+        workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
+        service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+    - name: upload to Google Cloud
+      uses: 'google-github-actions/upload-cloud-storage@v1'
+      with:
+        path: OpenDDS/${{ github.job }}_autobuild_workspace
+        destination: opendds-gha-scoreboard-uploads/${{ github.job }}
+        parent: false
+        process_gcloudignore: false
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
     - name: check results
       shell: bash
       run: |
-        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/output.log_Brief.html"
+        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/${LOG_NAME}_Brief.html"
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
         grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
 
@@ -11327,6 +12405,10 @@ jobs:
 
     needs: build_m11_sec
 
+    permissions:
+      contents: read
+      id-token: write
+
     steps:
     - name: install xerces-c
       run: |
@@ -11378,6 +12460,10 @@ jobs:
         cd OpenDDS
         . setenv.sh
         tools/scripts/show_build_config.pl
+    - name: set log name
+      shell: bash
+      run: |
+        echo "LOG_NAME=$(date '+%Y_%m_%d_%H_%M')" >> "$GITHUB_ENV"
     - name: run OpenDDS tests
       shell: bash
       run: |
@@ -11391,7 +12477,7 @@ jobs:
         cat > config.xml <<EOF
         <autobuild>
         <configuration>
-        <variable name="log_file" value="output.log"/>
+        <variable name="log_file" value="${LOG_NAME}"/>
         <variable name="log_root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace"/>
         <variable name="project_root" value="$DDS_ROOT"/>
         <variable name="root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace"/>
@@ -11416,10 +12502,24 @@ jobs:
       with:
         name: ${{ github.job }}_autobuild_output
         path: OpenDDS/${{ github.job }}_autobuild_workspace
+    - name: Authenticate to Google Cloud
+      uses: google-github-actions/auth@v2
+      with:
+        workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
+        service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+    - name: upload to Google Cloud
+      uses: 'google-github-actions/upload-cloud-storage@v1'
+      with:
+        path: OpenDDS/${{ github.job }}_autobuild_workspace
+        destination: opendds-gha-scoreboard-uploads/${{ github.job }}
+        parent: false
+        process_gcloudignore: false
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
     - name: check results
       shell: bash
       run: |
-        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/output.log_Brief.html"
+        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/${LOG_NAME}_Brief.html"
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
         grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
 
@@ -11428,6 +12528,10 @@ jobs:
     runs-on: macos-11.0
 
     needs: build_m11_sec
+
+    permissions:
+      contents: read
+      id-token: write
 
     steps:
     - name: install xerces-c
@@ -11480,6 +12584,10 @@ jobs:
         cd OpenDDS
         . setenv.sh
         tools/scripts/show_build_config.pl
+    - name: set log name
+      shell: bash
+      run: |
+        echo "LOG_NAME=$(date '+%Y_%m_%d_%H_%M')" >> "$GITHUB_ENV"
     - name: run OpenDDS tests
       shell: bash
       run: |
@@ -11493,7 +12601,7 @@ jobs:
         cat > config.xml <<EOF
         <autobuild>
         <configuration>
-        <variable name="log_file" value="output.log"/>
+        <variable name="log_file" value="${LOG_NAME}"/>
         <variable name="log_root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace"/>
         <variable name="project_root" value="$DDS_ROOT"/>
         <variable name="root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace"/>
@@ -11518,10 +12626,24 @@ jobs:
       with:
         name: ${{ github.job }}_autobuild_output
         path: OpenDDS/${{ github.job }}_autobuild_workspace
+    - name: Authenticate to Google Cloud
+      uses: google-github-actions/auth@v2
+      with:
+        workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
+        service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+    - name: upload to Google Cloud
+      uses: 'google-github-actions/upload-cloud-storage@v1'
+      with:
+        path: OpenDDS/${{ github.job }}_autobuild_workspace
+        destination: opendds-gha-scoreboard-uploads/${{ github.job }}
+        parent: false
+        process_gcloudignore: false
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
     - name: check results
       shell: bash
       run: |
-        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/output.log_Brief.html"
+        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/${LOG_NAME}_Brief.html"
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
         grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
 
@@ -11621,6 +12743,10 @@ jobs:
 
     needs: build_m11_j_FM-1f
 
+    permissions:
+      contents: read
+      id-token: write
+
     steps:
     - name: install xerces-c
       run: |
@@ -11672,6 +12798,10 @@ jobs:
         cd OpenDDS
         . setenv.sh
         tools/scripts/show_build_config.pl
+    - name: set log name
+      shell: bash
+      run: |
+        echo "LOG_NAME=$(date '+%Y_%m_%d_%H_%M')" >> "$GITHUB_ENV"
     - name: run OpenDDS tests
       shell: bash
       run: |
@@ -11685,7 +12815,7 @@ jobs:
         cat > config.xml <<EOF
         <autobuild>
         <configuration>
-        <variable name="log_file" value="output.log"/>
+        <variable name="log_file" value="${LOG_NAME}"/>
         <variable name="log_root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace"/>
         <variable name="project_root" value="$DDS_ROOT"/>
         <variable name="root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace"/>
@@ -11710,10 +12840,24 @@ jobs:
       with:
         name: ${{ github.job }}_autobuild_output
         path: OpenDDS/${{ github.job }}_autobuild_workspace
+    - name: Authenticate to Google Cloud
+      uses: google-github-actions/auth@v2
+      with:
+        workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
+        service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+    - name: upload to Google Cloud
+      uses: 'google-github-actions/upload-cloud-storage@v1'
+      with:
+        path: OpenDDS/${{ github.job }}_autobuild_workspace
+        destination: opendds-gha-scoreboard-uploads/${{ github.job }}
+        parent: false
+        process_gcloudignore: false
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
     - name: check results
       shell: bash
       run: |
-        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/output.log_Brief.html"
+        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/${LOG_NAME}_Brief.html"
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
         grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
 
@@ -11722,6 +12866,10 @@ jobs:
     runs-on: macos-11.0
 
     needs: build_m11_j_FM-1f
+
+    permissions:
+      contents: read
+      id-token: write
 
     steps:
     - name: install xerces-c
@@ -11774,6 +12922,10 @@ jobs:
         cd OpenDDS
         . setenv.sh
         tools/scripts/show_build_config.pl
+    - name: set log name
+      shell: bash
+      run: |
+        echo "LOG_NAME=$(date '+%Y_%m_%d_%H_%M')" >> "$GITHUB_ENV"
     - name: run OpenDDS tests
       shell: bash
       run: |
@@ -11787,7 +12939,7 @@ jobs:
         cat > config.xml <<EOF
         <autobuild>
         <configuration>
-        <variable name="log_file" value="output.log"/>
+        <variable name="log_file" value="${LOG_NAME}"/>
         <variable name="log_root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace"/>
         <variable name="project_root" value="$DDS_ROOT"/>
         <variable name="root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace"/>
@@ -11812,10 +12964,24 @@ jobs:
       with:
         name: ${{ github.job }}_autobuild_output
         path: OpenDDS/${{ github.job }}_autobuild_workspace
+    - name: Authenticate to Google Cloud
+      uses: google-github-actions/auth@v2
+      with:
+        workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
+        service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+    - name: upload to Google Cloud
+      uses: 'google-github-actions/upload-cloud-storage@v1'
+      with:
+        path: OpenDDS/${{ github.job }}_autobuild_workspace
+        destination: opendds-gha-scoreboard-uploads/${{ github.job }}
+        parent: false
+        process_gcloudignore: false
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
     - name: check results
       shell: bash
       run: |
-        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/output.log_Brief.html"
+        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/${LOG_NAME}_Brief.html"
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
         grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
 
@@ -11979,6 +13145,10 @@ jobs:
 
     needs: build_m12_o1d0_sec
 
+    permissions:
+      contents: read
+      id-token: write
+
     steps:
     - name: checkout OpenDDS
       uses: actions/checkout@v4
@@ -12030,6 +13200,10 @@ jobs:
         cd OpenDDS
         . setenv.sh
         tools/scripts/show_build_config.pl
+    - name: set log name
+      shell: bash
+      run: |
+        echo "LOG_NAME=$(date '+%Y_%m_%d_%H_%M')" >> "$GITHUB_ENV"
     - name: run OpenDDS tests
       shell: bash
       run: |
@@ -12045,7 +13219,7 @@ jobs:
         cat > config.xml <<EOF
         <autobuild>
         <configuration>
-        <variable name="log_file" value="output.log"/>
+        <variable name="log_file" value="${LOG_NAME}"/>
         <variable name="log_root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace"/>
         <variable name="project_root" value="$DDS_ROOT"/>
         <variable name="root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace"/>
@@ -12071,10 +13245,24 @@ jobs:
       with:
         name: ${{ github.job }}_autobuild_output
         path: OpenDDS/${{ github.job }}_autobuild_workspace
+    - name: Authenticate to Google Cloud
+      uses: google-github-actions/auth@v2
+      with:
+        workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
+        service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+    - name: upload to Google Cloud
+      uses: 'google-github-actions/upload-cloud-storage@v1'
+      with:
+        path: OpenDDS/${{ github.job }}_autobuild_workspace
+        destination: opendds-gha-scoreboard-uploads/${{ github.job }}
+        parent: false
+        process_gcloudignore: false
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
     - name: check results
       shell: bash
       run: |
-        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/output.log_Brief.html"
+        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/${LOG_NAME}_Brief.html"
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
         grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
 
@@ -12083,6 +13271,10 @@ jobs:
     runs-on: macos-12
 
     needs: build_m12_o1d0_sec
+
+    permissions:
+      contents: read
+      id-token: write
 
     steps:
     - name: checkout OpenDDS
@@ -12135,6 +13327,10 @@ jobs:
         cd OpenDDS
         . setenv.sh
         tools/scripts/show_build_config.pl
+    - name: set log name
+      shell: bash
+      run: |
+        echo "LOG_NAME=$(date '+%Y_%m_%d_%H_%M')" >> "$GITHUB_ENV"
     - name: run OpenDDS tests
       shell: bash
       run: |
@@ -12150,7 +13346,7 @@ jobs:
         cat > config.xml <<EOF
         <autobuild>
         <configuration>
-        <variable name="log_file" value="output.log"/>
+        <variable name="log_file" value="${LOG_NAME}"/>
         <variable name="log_root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace"/>
         <variable name="project_root" value="$DDS_ROOT"/>
         <variable name="root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace"/>
@@ -12176,10 +13372,24 @@ jobs:
       with:
         name: ${{ github.job }}_autobuild_output
         path: OpenDDS/${{ github.job }}_autobuild_workspace
+    - name: Authenticate to Google Cloud
+      uses: google-github-actions/auth@v2
+      with:
+        workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
+        service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+    - name: upload to Google Cloud
+      uses: 'google-github-actions/upload-cloud-storage@v1'
+      with:
+        path: OpenDDS/${{ github.job }}_autobuild_workspace
+        destination: opendds-gha-scoreboard-uploads/${{ github.job }}
+        parent: false
+        process_gcloudignore: false
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
     - name: check results
       shell: bash
       run: |
-        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/output.log_Brief.html"
+        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/${LOG_NAME}_Brief.html"
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
         grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
 
@@ -12361,6 +13571,10 @@ jobs:
 
     needs: build_m12_i0_j_FM-1f
 
+    permissions:
+      contents: read
+      id-token: write
+
     steps:
     - name: checkout OpenDDS
       uses: actions/checkout@v4
@@ -12412,6 +13626,10 @@ jobs:
         cd OpenDDS
         . setenv.sh
         tools/scripts/show_build_config.pl
+    - name: set log name
+      shell: bash
+      run: |
+        echo "LOG_NAME=$(date '+%Y_%m_%d_%H_%M')" >> "$GITHUB_ENV"
     - name: run OpenDDS tests
       shell: bash
       run: |
@@ -12427,7 +13645,7 @@ jobs:
         cat > config.xml <<EOF
         <autobuild>
         <configuration>
-        <variable name="log_file" value="output.log"/>
+        <variable name="log_file" value="${LOG_NAME}"/>
         <variable name="log_root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace"/>
         <variable name="project_root" value="$DDS_ROOT"/>
         <variable name="root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace"/>
@@ -12453,10 +13671,24 @@ jobs:
       with:
         name: ${{ github.job }}_autobuild_output
         path: OpenDDS/${{ github.job }}_autobuild_workspace
+    - name: Authenticate to Google Cloud
+      uses: google-github-actions/auth@v2
+      with:
+        workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
+        service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+    - name: upload to Google Cloud
+      uses: 'google-github-actions/upload-cloud-storage@v1'
+      with:
+        path: OpenDDS/${{ github.job }}_autobuild_workspace
+        destination: opendds-gha-scoreboard-uploads/${{ github.job }}
+        parent: false
+        process_gcloudignore: false
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
     - name: check results
       shell: bash
       run: |
-        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/output.log_Brief.html"
+        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/${LOG_NAME}_Brief.html"
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
         grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
 
@@ -12465,6 +13697,10 @@ jobs:
     runs-on: macos-12
 
     needs: build_m12_i0_j_FM-1f
+
+    permissions:
+      contents: read
+      id-token: write
 
     steps:
     - name: checkout OpenDDS
@@ -12517,6 +13753,10 @@ jobs:
         cd OpenDDS
         . setenv.sh
         tools/scripts/show_build_config.pl
+    - name: set log name
+      shell: bash
+      run: |
+        echo "LOG_NAME=$(date '+%Y_%m_%d_%H_%M')" >> "$GITHUB_ENV"
     - name: run OpenDDS tests
       shell: bash
       run: |
@@ -12532,7 +13772,7 @@ jobs:
         cat > config.xml <<EOF
         <autobuild>
         <configuration>
-        <variable name="log_file" value="output.log"/>
+        <variable name="log_file" value="${LOG_NAME}"/>
         <variable name="log_root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace"/>
         <variable name="project_root" value="$DDS_ROOT"/>
         <variable name="root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace"/>
@@ -12558,10 +13798,24 @@ jobs:
       with:
         name: ${{ github.job }}_autobuild_output
         path: OpenDDS/${{ github.job }}_autobuild_workspace
+    - name: Authenticate to Google Cloud
+      uses: google-github-actions/auth@v2
+      with:
+        workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
+        service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+    - name: upload to Google Cloud
+      uses: 'google-github-actions/upload-cloud-storage@v1'
+      with:
+        path: OpenDDS/${{ github.job }}_autobuild_workspace
+        destination: opendds-gha-scoreboard-uploads/${{ github.job }}
+        parent: false
+        process_gcloudignore: false
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
     - name: check results
       shell: bash
       run: |
-        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/output.log_Brief.html"
+        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/${LOG_NAME}_Brief.html"
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
         grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
 

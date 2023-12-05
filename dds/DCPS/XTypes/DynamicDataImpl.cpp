@@ -8232,9 +8232,6 @@ bool DynamicDataImpl::serialized_size_union_xcdr2(const DCPS::Encoding& encoding
                                                     extensibility, mutable_running_total)) {
       return false;
     }
-    if (ext == DCPS::Sample::KeyOnly) {
-      return true;
-    }
     if (found_selected_member) {
       DDS::DynamicType_var selected_type = get_base_type(selected_md->type());
       const bool optional = selected_md->is_optional();

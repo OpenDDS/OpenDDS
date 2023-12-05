@@ -27,9 +27,11 @@ using DCPS::retcode_to_string;
 namespace {
   DDS::TypeDescriptor_var get_type_desc(DDS::DynamicType_ptr type)
   {
-    if (!type && log_level >= LogLevel::Warning) {
-      ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: DynamicDataBase: "
-        "Passed null DynamicType pointer\n"));
+    if (!type) {
+      if (log_level >= LogLevel::Warning) {
+        ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: DynamicDataBase: "
+                   "Passed null DynamicType pointer\n"));
+      }
       return DDS::TypeDescriptor_var();
     }
     DDS::TypeDescriptor_var td;
