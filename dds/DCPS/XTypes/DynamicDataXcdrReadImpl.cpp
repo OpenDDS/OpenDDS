@@ -3270,16 +3270,12 @@ bool print_dynamic_data(DDS::DynamicData_ptr dd, DCPS::String& type_string, DCPS
   const DDS::DynamicType_var type = dd->type();
   const DDS::DynamicType_var base_type = get_base_type(type);
 
-  bool result;
   switch (base_type->get_kind()) {
   case TK_STRUCTURE:
   case TK_UNION:
-    result = print_members(dd, type_string, indent, true);
-    break;
-  default:
-    result = false;
+    return print_members(dd, type_string, indent, true);
   }
-  return result;
+  return false;
 }
 #endif
 
