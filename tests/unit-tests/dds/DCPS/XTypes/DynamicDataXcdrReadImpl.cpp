@@ -601,8 +601,7 @@ void verify_int32_union(DDS::DynamicData_ptr data)
   DDS::DynamicData_var disc_data;
   ret = data->get_complex_value(disc_data, disc_id);
   ASSERT_RC_OK(ret);
-  const XTypes::MemberId any_id = 100;
-  ret = disc_data->get_int32_value(disc_val, any_id);
+  ret = disc_data->get_int32_value(disc_val, XTypes::MEMBER_ID_INVALID);
   ASSERT_RC_OK(ret);
   EXPECT_EQ(disc_val, E_INT32);
 }
@@ -627,8 +626,7 @@ void verify_uint32_union(DDS::DynamicData_ptr data)
   DDS::DynamicData_var disc_data;
   ret = data->get_complex_value(disc_data, disc_id);
   ASSERT_RC_OK(ret);
-  const XTypes::MemberId any_id = 100;
-  ret = disc_data->get_int32_value(disc_val, any_id);
+  ret = disc_data->get_int32_value(disc_val, XTypes::MEMBER_ID_INVALID);
   ASSERT_RC_OK(ret);
   EXPECT_EQ(disc_val, E_UINT32);
 }
