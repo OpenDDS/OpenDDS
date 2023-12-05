@@ -1,8 +1,8 @@
-project(*Publisher) : dcpsexe, dcps_test, dcps_transports_for_test {
-  avoids += no_cxx11
+project(*Publisher) : dcpsexem, opendds_cxx11, dcps_test, dcps_transports_for_test {
 
   exename = publisher
 
+  macros += CPP11_MAPPING=1
   TypeSupport_Files {
     maps.idl
   }
@@ -12,11 +12,12 @@ project(*Publisher) : dcpsexe, dcps_test, dcps_transports_for_test {
   }
 }
 
-project(*Subscriber) : dcpsexe, dcps_test, dcps_transports_for_test {
-  avoids += no_cxx11
+project(*Subscriber) : dcpsexe, opendds_cxx11, dcps_test, dcps_transports_for_test {
 
   exename = subscriber
   after += *Publisher
+
+  macros += CPP11_MAPPING=1
   TypeSupport_Files {
     maps.idl
   }
