@@ -5,6 +5,7 @@
 
 #include "marshal_generator.h"
 
+#include "dds/idl/annotations.h"
 #include "dds_generator.h"
 #include "field_info.h"
 #include "topic_keys.h"
@@ -964,8 +965,6 @@ namespace {
   void gen_map_i(
     UTL_ScopedName* tdname, AST_Map* map, bool nested_key_only, const FieldInfo* anonymous = 0)
   {
-    // be_global->add_include("dds/DCPS/Util.h");
-    // be_global->add_include("dds/DCPS/Serializer.h");
     if (anonymous) {
       map = dynamic_cast<AST_Map*>(anonymous->type_);
     }
@@ -1268,12 +1267,27 @@ namespace {
         if (key_cls & CL_STRING) {
           be_global->impl_ <<
               "    std::string key;\n" <<
-              "    strm >> key;\n";
+              "    if (!(strm >> key)) {\n";
         } else {
           be_global->impl_ <<
             "   " << key_cxx_elem << " key;\n" <<
-            "    strm >> key;\n";
+            "    if(!(strm >> key)) {\n";
         }
+
+        if (key_try_construct == tryconstructfailaction_use_default) {
+          be_global->impl_ <<
+            type_to_default("        ", val, "key") <<
+            "        strm.set_construction_status(Serializer::ConstructionSuccessful);\n";
+        } else {
+          //discard/default
+          be_global->impl_ <<
+            "      strm.set_construction_status(Serializer::ElementConstructionFailure);\n";
+          skip_to_end_map("      ", "i", "length", named_as, use_cxx11, key_cls, map);
+          be_global->impl_ <<
+            "      return false;\n";
+        }
+
+        be_global->impl_ << "    }\n";
 
         // Value
         const std::string stream_to = value_access + "[key]";
@@ -1281,7 +1295,7 @@ namespace {
         const std::string indent = "    ";
         intro.join(be_global->impl_, indent);
         be_global->impl_ <<
-          indent << " if (!(strm >> " << stream_to << ")) {\n";
+          indent << "if (!(strm >> " << stream_to << ")) {\n";
 
         if (val_try_construct == tryconstructfailaction_use_default) {
           be_global->impl_ <<
@@ -1317,13 +1331,13 @@ namespace {
         } else {
           //discard/default
           be_global->impl_ <<
-            "      strm.set_construction_status(Serializer::ElementConstructionFailure);\n";
+            "     strm.set_construction_status(Serializer::ElementConstructionFailure);\n";
           skip_to_end_map("      ", "i", "length", named_as, use_cxx11, val_cls, map);
           be_global->impl_ <<
-            "      return false;\n";
+            "     return false;\n";
       }
       be_global->impl_ <<
-        "    }\n";
+        "   }\n";
     }
 
       be_global->impl_ <<
