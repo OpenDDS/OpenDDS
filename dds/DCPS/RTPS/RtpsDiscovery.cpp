@@ -353,7 +353,34 @@ RtpsDiscovery::Config::discovery_config(ACE_Configuration_Heap& cf)
           do {
             i = value.find_first_not_of(' ', i); // skip spaces
             const size_t n = value.find_first_of(", ", i);
-            spdp_send_addrs.push_back(value.substr(i, (n == OPENDDS_STRING::npos) ? n : n - i));
+            
+            // Format of item: <address>:<first_port>[:<count>[:<increment>]]
+            OPENDDS_STRING addr = value.substr(i, (n == OPENDDS_STRING::npos) ? n : n - i);
+            const size_t port_separator = addr.find_first_of(":", 0);
+            if (port_separator != OPENDDS_STRING::npos) {
+                const size_t count_separator = addr.find_first_of(":", port_separator + 1);
+                if (count_separator != OPENDDS_STRING::npos) {
+                    const OPENDDS_STRING address = addr.substr(0, port_separator);
+                    size_t base = std::stoi(addr.substr(port_separator + 1, count_separator - port_separator - 1));
+                    size_t count = 0;
+                    size_t inc = 2;
+
+                    const size_t inc_separator = addr.find_first_of(":", count_separator + 1);
+                    if (inc_separator != OPENDDS_STRING::npos) {
+                        count = std::stoi(addr.substr(count_separator + 1, inc_separator - count_separator - 1));
+                        inc = std::stoi(addr.substr(inc_separator + 1, OPENDDS_STRING::npos));
+                    } else {
+                        count = std::stoi(addr.substr(count_separator + 1, OPENDDS_STRING::npos));
+                    }
+
+                    for (size_t offset = 0; offset < (count * inc); offset += inc) {
+                        addr = address + ":" + std::to_string(base + offset);
+                        spdp_send_addrs.push_back(addr);
+                    }
+                } else {
+                    spdp_send_addrs.push_back(addr);
+                }
+            }
             i = value.find(',', i);
           } while (i++ != OPENDDS_STRING::npos); // skip past comma if there is one
           config->spdp_send_addrs(spdp_send_addrs);
