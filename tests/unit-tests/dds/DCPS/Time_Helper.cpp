@@ -142,3 +142,9 @@ TEST(dds_DCPS_Time_Helper, add_time_duration)
   EXPECT_EQ(r.sec, 3);
   EXPECT_EQ(r.nanosec, 0u);
 }
+
+TEST(dds_DCPS_Time_Helper, time_value_to_double)
+{
+  const ACE_Time_Value tv(1,500000);
+  EXPECT_EQ(time_value_to_double(tv), 1.5);
+}

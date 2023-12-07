@@ -265,14 +265,14 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   }
 
   const u_short port_common = disc->config()->port_common(domain);
-  const ACE_INET_Addr multicast_address = disc->config()->multicast_address(port_common);
+  const NetworkAddress multicast_address = disc->config()->multicast_address(port_common);
   ACE_DEBUG((LM_DEBUG, "multicast_address = %C\n", LogAddr(multicast_address).c_str()));
   ACE_SOCK_Dgram_Mcast multicast_socket;
 #ifdef ACE_HAS_MAC_OSX
   multicast_socket.opts(ACE_SOCK_Dgram_Mcast::OPT_BINDADDR_NO |
                         ACE_SOCK_Dgram_Mcast::DEFOPT_NULLIFACE);
 #endif
-  if (multicast_socket.join(multicast_address, 1, 0)) {
+  if (multicast_socket.join(multicast_address.to_addr(), 1, 0)) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("ERROR: failed to join multicast group\n")));
     return EXIT_FAILURE;
   }
@@ -305,10 +305,10 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   while (!receive(participant_guid, multicast_socket)) {}
 
   // Send an SPDP message from writer1.
-  send(writer1_socket, writer1_guid, writer1_sequence, multicast_address, participant_data(domain, writer1_guid.guidPrefix, DDS::DomainParticipantQos(), writer1_addr));
+  send(writer1_socket, writer1_guid, writer1_sequence, multicast_address.to_addr(), participant_data(domain, writer1_guid.guidPrefix, DDS::DomainParticipantQos(), writer1_addr));
 
   // Send an SPDP message from writer2.
-  send(writer2_socket, writer2_guid, writer2_sequence, multicast_address, participant_data(domain, writer2_guid.guidPrefix, DDS::DomainParticipantQos(), writer2_addr));
+  send(writer2_socket, writer2_guid, writer2_sequence, multicast_address.to_addr(), participant_data(domain, writer2_guid.guidPrefix, DDS::DomainParticipantQos(), writer2_addr));
 
   // Sleep to let SPDP process.
   ACE_OS::sleep(1);

@@ -38,13 +38,13 @@ struct AddressCacheEntry : public virtual RcObject {
 #endif
   {}
 
-  AddressCacheEntry(const AddrSet& addrs, const MonotonicTimePoint& expires) : addrs_(addrs), expires_(expires)
+  AddressCacheEntry(const NetworkAddressSet& addrs, const MonotonicTimePoint& expires) : addrs_(addrs), expires_(expires)
 #if defined ACE_HAS_CPP11
   , addrs_hash_(calculate_hash(addrs_))
 #endif
   {}
 
-  AddrSet addrs_;
+  NetworkAddressSet addrs_;
   MonotonicTimePoint expires_;
 #if defined ACE_HAS_CPP11
   size_t addrs_hash_;
@@ -70,7 +70,7 @@ struct AddressCacheEntryProxy {
 #endif
   }
 
-  const AddrSet& addrs() const { return entry_->addrs_; }
+  const NetworkAddressSet& addrs() const { return entry_->addrs_; }
 
 #if defined ACE_HAS_CPP11
   size_t hash() const noexcept { return entry_ ? entry_->addrs_hash_ : 0; }
@@ -179,14 +179,14 @@ public:
     ScopedAccess& operator=(const ScopedAccess&);
   };
 
-  bool load(const Key& key, AddrSet& addrs) const
+  bool load(const Key& key, NetworkAddressSet& addrs) const
   {
     ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
     const typename MapType::const_iterator pos = map_.find(key);
     if (pos != map_.end()) {
       if (MonotonicTimePoint::now() < pos->second->expires_) {
-        const AddrSet& as = pos->second->addrs_;
-        for (AddrSet::const_iterator it = as.begin(), limit = as.end(); it != limit; ++it) {
+        const NetworkAddressSet& as = pos->second->addrs_;
+        for (NetworkAddressSet::const_iterator it = as.begin(), limit = as.end(); it != limit; ++it) {
           addrs.insert(*it);
         }
         return true;
@@ -195,7 +195,7 @@ public:
     return false;
   }
 
-  void store(const Key& key, const AddrSet& addrs, const MonotonicTimePoint& expires = MonotonicTimePoint::max_value)
+  void store(const Key& key, const NetworkAddressSet& addrs, const MonotonicTimePoint& expires = MonotonicTimePoint::max_value)
   {
     ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
     RcHandle<AddressCacheEntry>& rch = map_[key];

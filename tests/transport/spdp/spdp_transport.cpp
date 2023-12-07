@@ -71,7 +71,7 @@ public:
       ACE_ERROR((LM_ERROR, ACE_TEXT("ERROR: Null SPDP Transport\n")));
       return false;
     }
-    addr = spdp_->tport_->multicast_address_;
+    addr = spdp_->tport_->multicast_address_.to_addr();
     return true;
   }
 
@@ -277,7 +277,7 @@ bool run_test()
   // Create and initialize RtpsDiscovery
   RtpsDiscovery rd("test");
   const ACE_INET_Addr local_addr(u_short(7575), "0.0.0.0");
-  rd.config()->spdp_local_address(local_addr);
+  rd.config()->spdp_local_address(NetworkAddress(local_addr));
   const DDS::DomainId_t domain = 0;
   const DDS::DomainParticipantQos qos = TheServiceParticipant->initial_DomainParticipantQos();
   GUID_t id = rd.generate_participant_guid();

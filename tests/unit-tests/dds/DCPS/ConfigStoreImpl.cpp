@@ -1,10 +1,58 @@
 #include <dds/DCPS/ConfigStoreImpl.h>
 
 #include <dds/DCPS/Qos_Helper.h>
+#include <dds/DCPS/LogAddr.h>
 
 #include <gtestWrapper.h>
 
 using namespace OpenDDS::DCPS;
+
+TEST(dds_DCPS_ConfigPair, split)
+{
+  typedef OPENDDS_VECTOR(String) StringVec;
+  {
+    const StringVec actual = split("a,b,c", ",", false, false);
+    ASSERT_EQ(actual.size(), 3u);
+    EXPECT_EQ(actual[0], "a");
+    EXPECT_EQ(actual[1], "b");
+    EXPECT_EQ(actual[2], "c");
+  }
+  {
+    const StringVec actual = split("a,,b,c,", ",", false, false);
+    ASSERT_EQ(actual.size(), 5u);
+    EXPECT_EQ(actual[0], "a");
+    EXPECT_EQ(actual[1], "");
+    EXPECT_EQ(actual[2], "b");
+    EXPECT_EQ(actual[3], "c");
+    EXPECT_EQ(actual[4], "");
+  }
+  {
+    const StringVec actual = split("a,b,c", " ", false, false);
+    ASSERT_EQ(actual.size(), 1u);
+    EXPECT_EQ(actual[0], "a,b,c");
+  }
+  {
+    const StringVec actual = split("a b,c", ", ", false, false);
+    ASSERT_EQ(actual.size(), 3u);
+    EXPECT_EQ(actual[0], "a");
+    EXPECT_EQ(actual[1], "b");
+    EXPECT_EQ(actual[2], "c");
+  }
+  {
+    const StringVec actual = split("  ,a b,c", ", ", true, false);
+    ASSERT_EQ(actual.size(), 3u);
+    EXPECT_EQ(actual[0], "a");
+    EXPECT_EQ(actual[1], "b");
+    EXPECT_EQ(actual[2], "c");
+  }
+  {
+    const StringVec actual = split("  ,a b, ,c", ", ", true, true);
+    ASSERT_EQ(actual.size(), 3u);
+    EXPECT_EQ(actual[0], "a");
+    EXPECT_EQ(actual[1], "b");
+    EXPECT_EQ(actual[2], "c");
+  }
+}
 
 TEST(dds_DCPS_ConfigPair, ctor)
 {
@@ -42,6 +90,18 @@ TEST(dds_DCPS_ConfigPair, ctor)
     ConfigPair cp("##CamelCase##", "value");
     EXPECT_EQ(cp.key(), "CAMEL_CASE");
     EXPECT_EQ(cp.value(), "value");
+  }
+
+  {
+    ConfigPair cp("UseXTypes", "complete");
+    EXPECT_EQ(cp.key(), "USE_X_TYPES");
+    EXPECT_EQ(cp.value(), "complete");
+  }
+
+  {
+    ConfigPair cp("UseXYZTypes", "complete");
+    EXPECT_EQ(cp.key(), "USE_XYZ_TYPES");
+    EXPECT_EQ(cp.value(), "complete");
   }
 }
 
@@ -228,6 +288,19 @@ TEST(dds_DCPS_ConfigStoreImpl, set_get_TimeDuration_milliseconds)
   EXPECT_EQ(store.get("key", default_duration, ConfigStoreImpl::Format_IntegerMilliseconds), default_duration);
 }
 
+TEST(dds_DCPS_ConfigStoreImpl, set_get_TimeDuration_fractional_seconds)
+{
+  ConfigTopic_rch topic = make_rch<ConfigTopic>();
+  ConfigStoreImpl store(topic);
+  const TimeDuration default_duration(1,500000);
+  const TimeDuration duration(2,500000);
+  EXPECT_EQ(store.get("key", default_duration, ConfigStoreImpl::Format_FractionalSeconds), default_duration);
+  store.set("key", duration, ConfigStoreImpl::Format_FractionalSeconds);
+  EXPECT_EQ(store.get("key", default_duration, ConfigStoreImpl::Format_FractionalSeconds), duration);
+  store.set_string("key", "not a duration");
+  EXPECT_EQ(store.get("key", default_duration, ConfigStoreImpl::Format_FractionalSeconds), default_duration);
+}
+
 TEST(dds_DCPS_ConfigStoreImpl, get_NetworkAddress)
 {
   ConfigTopic_rch topic = make_rch<ConfigTopic>();
@@ -311,6 +384,96 @@ TEST(dds_DCPS_ConfigStoreImpl, get_NetworkAddress)
       const NetworkAddress value_required_port("[::1]:80");
       store.set("key6", value_required_port, ConfigStoreImpl::Format_Required_Port, ConfigStoreImpl::Kind_ANY);
       EXPECT_EQ(store.get("key6", default_value, ConfigStoreImpl::Format_Required_Port, ConfigStoreImpl::Kind_ANY), value_required_port);
+    }
+  }
+#endif
+}
+
+TEST(dds_DCPS_ConfigStoreImpl, get_NetworkAddressSet)
+{
+  ConfigTopic_rch topic = make_rch<ConfigTopic>();
+  ConfigStoreImpl store(topic);
+
+  {
+    NetworkAddressSet default_value;
+    default_value.insert(NetworkAddress("0.0.0.0:0"));
+    EXPECT_EQ(store.get("key", default_value, ConfigStoreImpl::Format_No_Port, ConfigStoreImpl::Kind_IPV4), default_value);
+
+    {
+      NetworkAddressSet empty;
+      store.set("key", empty, ConfigStoreImpl::Format_No_Port, ConfigStoreImpl::Kind_IPV4);
+      EXPECT_EQ(store.get("key", default_value, ConfigStoreImpl::Format_No_Port, ConfigStoreImpl::Kind_IPV4), empty);
+    }
+
+    {
+      NetworkAddressSet value_no_port;
+      value_no_port.insert(NetworkAddress("127.0.0.1:0"));
+      store.set("key", value_no_port, ConfigStoreImpl::Format_No_Port, ConfigStoreImpl::Kind_IPV4);
+      EXPECT_EQ(store.get("key", default_value, ConfigStoreImpl::Format_No_Port, ConfigStoreImpl::Kind_IPV4), value_no_port);
+    }
+
+    {
+      NetworkAddressSet value_required_port;
+      value_required_port.insert(NetworkAddress("127.0.0.1:80"));
+      value_required_port.insert(NetworkAddress("127.0.0.1:81"));
+      store.set("key", value_required_port, ConfigStoreImpl::Format_Required_Port, ConfigStoreImpl::Kind_IPV4);
+      EXPECT_EQ(store.get("key", default_value, ConfigStoreImpl::Format_Required_Port, ConfigStoreImpl::Kind_IPV4), value_required_port);
+    }
+
+    {
+      NetworkAddressSet value_optional_port;
+      value_optional_port.insert(NetworkAddress("127.0.0.1:0"));
+      value_optional_port.insert(NetworkAddress("127.0.0.2:80"));
+      value_optional_port.insert(NetworkAddress("127.0.0.3:0"));
+      store.set("key", value_optional_port, ConfigStoreImpl::Format_Optional_Port, ConfigStoreImpl::Kind_IPV4);
+      EXPECT_EQ(store.get("key", default_value, ConfigStoreImpl::Format_Optional_Port, ConfigStoreImpl::Kind_IPV4), value_optional_port);
+    }
+
+    {
+      store.set_string("key", "not a network address");
+      EXPECT_EQ(store.get("key", default_value, ConfigStoreImpl::Format_Optional_Port, ConfigStoreImpl::Kind_IPV4), default_value);
+    }
+  }
+
+#if ACE_HAS_IPV6
+  {
+    NetworkAddressSet default_value;
+    default_value.insert(NetworkAddress("::"));
+    EXPECT_EQ(store.get("key6", default_value, ConfigStoreImpl::Format_No_Port, ConfigStoreImpl::Kind_IPV6), default_value);
+
+    {
+      NetworkAddressSet empty;
+      store.set("key", empty, ConfigStoreImpl::Format_No_Port, ConfigStoreImpl::Kind_IPV6);
+      EXPECT_EQ(store.get("key", default_value, ConfigStoreImpl::Format_No_Port, ConfigStoreImpl::Kind_IPV6), empty);
+    }
+
+    {
+      NetworkAddressSet value_no_port;
+      value_no_port.insert(NetworkAddress("::1"));
+      store.set("key6", value_no_port, ConfigStoreImpl::Format_No_Port, ConfigStoreImpl::Kind_IPV6);
+      EXPECT_EQ(store.get("key6", default_value, ConfigStoreImpl::Format_No_Port, ConfigStoreImpl::Kind_IPV6), value_no_port);
+    }
+
+    {
+      NetworkAddressSet value_required_port;
+      value_required_port.insert(NetworkAddress("[::1]:80"));
+      value_required_port.insert(NetworkAddress("[::1]:81"));
+      store.set("key6", value_required_port, ConfigStoreImpl::Format_Required_Port, ConfigStoreImpl::Kind_IPV6);
+      EXPECT_EQ(store.get("key6", default_value, ConfigStoreImpl::Format_Required_Port, ConfigStoreImpl::Kind_IPV6), value_required_port);
+    }
+
+    {
+      NetworkAddressSet value_optional_port;
+      value_optional_port.insert(NetworkAddress("::1"));
+      value_optional_port.insert(NetworkAddress("[::2]:80"));
+      value_optional_port.insert(NetworkAddress("::3"));
+      store.set("key6", value_optional_port, ConfigStoreImpl::Format_Optional_Port, ConfigStoreImpl::Kind_IPV6);
+      EXPECT_EQ(store.get("key6", default_value, ConfigStoreImpl::Format_Optional_Port, ConfigStoreImpl::Kind_IPV6), value_optional_port);
+    }
+
+    {
+      store.set_string("key6", "not a network address");
+      EXPECT_EQ(store.get("key6", default_value, ConfigStoreImpl::Format_Optional_Port, ConfigStoreImpl::Kind_IPV6), default_value);
     }
   }
 #endif

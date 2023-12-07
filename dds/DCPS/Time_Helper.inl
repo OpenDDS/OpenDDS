@@ -260,6 +260,12 @@ DDS::Duration_t time_value_to_duration(const ACE_Time_Value& tv)
 }
 
 ACE_INLINE
+double time_value_to_double(const ACE_Time_Value& tv)
+{
+  return double(tv.sec()) + (double(tv.usec()) / 1000000.0);
+}
+
+ACE_INLINE
 DDS::Duration_t time_to_duration(const DDS::Time_t& t)
 {
   DDS::Duration_t d = { t.sec, t.nanosec };
