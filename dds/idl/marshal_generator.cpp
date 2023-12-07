@@ -5,7 +5,6 @@
 
 #include "marshal_generator.h"
 
-#include "dds/idl/annotations.h"
 #include "dds_generator.h"
 #include "field_info.h"
 #include "topic_keys.h"
