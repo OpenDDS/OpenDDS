@@ -22,4 +22,5 @@ set_target_properties(${subscriber} PROPERTIES OUTPUT_NAME publisher)
 target_link_libraries(${subscriber} OpenDDS::Dcps ${idl})
 
 configure_file(run_test.pl . COPYONLY)
-opendds_add_test(COMMAND perl run_test.pl)
+opendds_add_test(NAME info_repo COMMAND perl run_test.pl)
+opendds_add_test(NAME rtps COMMAND perl run_test.pl ini=rtps.ini)

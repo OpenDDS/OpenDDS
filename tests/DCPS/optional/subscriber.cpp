@@ -24,6 +24,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
                                                    PARTICIPANT_QOS_DEFAULT,
                                                    0,
                                                    0);
+  ACE_ASSERT(participant != 0);
 
   OptionalTest::MessageTypeSupport_var type_support = new OptionalTest::MessageTypeSupportImpl;
   type_support->register_type(participant, "");

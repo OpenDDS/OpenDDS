@@ -14,7 +14,7 @@ module OptionalTest {
     @optional string value;
   };
 
-  const string MESSAGE_TOPIC_NAME = "Message";
+  const string MESSAGE_TOPIC_NAME = "OptionalTest Message Topci";
 
   const string PUBLISHER = "PUBLISHER";
   const string SUBSCRIBER = "SUBSCRIBER";
