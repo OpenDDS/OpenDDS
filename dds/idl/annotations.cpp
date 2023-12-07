@@ -439,9 +439,7 @@ TryConstructFailAction TryConstructAnnotation::map_key(AST_Map* node) const
   if (!appl) { return absent_value; }
   return value_from_appl(appl);
 }
-#endif
 
-#if OPENDDS_HAS_MAP
 TryConstructFailAction TryConstructAnnotation::map_value(AST_Map* node) const
 {
   AST_Annotation_Appl* appl = node->value_type_annotations().find(declaration());
