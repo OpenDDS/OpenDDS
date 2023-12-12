@@ -1,78 +1,10 @@
 ---
-layout: page
+layout: redirected
 title: Docker
+external_override: true
 categories: [opendds]
 tags: []
 order: 13
+redirect_to: https://opendds.readthedocs.io/en/latest-release/devguide/quickstart/docker.html
+redirect_from: /quickstart/GettingStartedDocker.html
 ---
-<p>
-  This guide will take you through the process of compiling and runnning an OpenDDS application with Docker.
-  Docker images containing a pre-built OpenDDS are available on <a href="https://github.com/OpenDDS/OpenDDS/pkgs/container/opendds">GitHub Container Registry</a>.
-  An image corresponding to a particular release has a tag of the form <code>DDS-X.xx</code>, e.g., <code>DDS-3.23</code>.
-</p>
-
-<div class="bodytext" align="justify">
-  <a name="Prerequisites"><span class="headertext">Prerequisites</span></a>
-  <p>Check that <code>docker</code> and <code>docker-compose</code> are installed.</p>
-  <pre>
-docker --version
-docker-compose --version
-</pre>
-</div>
-
-<div class="bodytext" align="justify">
-  <a name="Compile the Messenger Example"><span class="headertext">Compile the Messenger Example</span></a>
-  <ol>
-    <li>
-      <p>Enter a container</p>
-      <pre>docker run --rm -ti -v "$PWD:/opt/workspace" ghcr.io/opendds/opendds:latest-release</pre>
-    </li>
-    <li>
-      <p>Copy the <i>Messenger</i> directory which contains an example from the <a href="{{ site.data.opendds.latest_docs_url }}">Developer's Guide</a></p>
-      <pre>cp -R /opt/OpenDDS/DevGuideExamples/DCPS/Messenger Messenger
-cd Messenger</pre>
-    </li>
-    <li>
-      <p>Configure and build the Messenger example</p>
-      <pre>source /opt/OpenDDS/setenv.sh
-mwc.pl -type gnuace
-make</pre>
-    </li>
-    <li>
-      <p>Exit the container</p>
-      <pre>exit</pre>
-    </li>
-  </ol>
-</div>
-
-<div class="bodytext" align="justify">
-  <a name="Run the Messenger Example with RTPS"><span class="headertext">Run the Messenger Example with RTPS</span></a>
-  <ol>
-    <li>
-      <p>Enter the <i>Messenger</i> directory</p>
-      <pre>cd Messenger</pre>
-    </li>
-    <li>
-      <p>Run the Messenger example with RTPS</p>
-      <pre>docker-compose up</pre>
-    </li>
-  </ol>
-</div>
-
-<div class="bodytext" align="justify">
-  <a name="Run the Messenger Example with InfoRepo"><span class="headertext">Run the Messenger Example with InfoRepo</span></a>
-  <ol>
-    <li>
-      <p>Run the Messenger example with InfoRepo</p>
-      <pre>docker-compose -f docker-compose-inforepo.yml up</pre>
-    </li>
-    <li>
-      <p>Use Control-C to kill the InfoRepo process</p>
-    </li>
-  </ol>
-</div>
-
-<div class="bodytext" align="justify">
-  <a name="Next Steps"><span class="headertext">Next Steps</span></a>
-  <p>See Chapter 2 of the <a href="{{ site.data.opendds.latest_docs_url }}">Developer's Guide</a> for a detailed explanation of the Messenger C++ Example or Chapter 10 for the Java Example.</p>
-</div>

@@ -4,6 +4,7 @@ title: Quick Start
 order: 10
 categories: [opendds]
 ---
+- [Quick Start Guides in the DevGuide](https://opendds.readthedocs.io/en/latest-release/devguide/quickstart/index.html)
 {% assign sorted_pages = site.pages | sort:"order" %}
 {% assign thisdir = page.url | split: '/' %}
 {% assign dir = thisdir[1] %}
