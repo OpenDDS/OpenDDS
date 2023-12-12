@@ -520,7 +520,7 @@ TEST(dds_DCPS_ConfigStoreImpl, process_section)
   config.set_string_value(section_key, ACE_TEXT("anotherkey"), ACE_TEXT("$file"));
   config.set_string_value(section_key, ACE_TEXT("thirdkey"), ACE_TEXT("secondvalue"));
 
-  EXPECT_CALL(*listener.get(), on_data_available(reader)).Times(4);
+  EXPECT_CALL(*listener.get(), on_data_available(reader)).Times(3);
 
   process_section(config_store, reader, listener, "MYPREFIX", config, config.root_section(), "my file name", false);
 
@@ -561,8 +561,36 @@ TEST(dds_DCPS_ConfigStoreImpl, get_section_names)
   config_store.set("NOTMYPREFIX_MY_SECTION2", "@my_section2");
   config_store.set("NOTMYPREFIX_MY_SECTION2_KEY", "not a section");
 
-  const OPENDDS_VECTOR(String) sections = config_store.get_section_names("MYPREFIX");
+  const ConfigStoreImpl::StringList sections = config_store.get_section_names("MYPREFIX");
   ASSERT_EQ(sections.size(), 2U);
   EXPECT_NE(std::find(sections.begin(), sections.end(), "my_section"), sections.end());
   EXPECT_NE(std::find(sections.begin(), sections.end(), "my_section2"), sections.end());
+}
+
+TEST(dds_DCPS_ConfigStoreImpl, get_section_values)
+{
+  JobQueue_rch job_queue = make_rch<JobQueue>(ACE_Reactor::instance());
+  ConfigTopic_rch topic = make_rch<ConfigTopic>();
+  ConfigStoreImpl config_store(topic);
+  ConfigReader_rch reader = make_rch<ConfigReader>(config_store.datareader_qos());
+  RcHandle<Listener> listener = make_rch<Listener>(job_queue);
+  ACE_Configuration_Heap config;
+  ACE_Configuration_Section_Key section_key;
+  config.open();
+  config.open_section(config.root_section(), ACE_TEXT("my_section"), true, section_key);
+  config.set_string_value(section_key, ACE_TEXT("mykey"), ACE_TEXT("myvalue"));
+  config.set_string_value(section_key, ACE_TEXT("anotherkey"), ACE_TEXT("$file"));
+  config.set_string_value(section_key, ACE_TEXT("thirdkey"), ACE_TEXT("secondvalue"));
+
+  EXPECT_CALL(*listener.get(), on_data_available(reader)).Times(4);
+
+  process_section(config_store, reader, listener, "MYPREFIX", config, config.root_section(), "my file name", false);
+
+  ConfigStoreImpl::StringMap expected_sm;
+  expected_sm["MYKEY"] = "myvalue";
+  expected_sm["ANOTHERKEY"] = "my file name";
+  expected_sm["THIRDKEY"] = "secondvalue";
+
+  const ConfigStoreImpl::StringMap sm = config_store.get_section_values("MYPREFIX_MY_SECTION");
+  EXPECT_EQ(sm, expected_sm);
 }

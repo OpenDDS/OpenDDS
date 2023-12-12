@@ -544,10 +544,10 @@ ConfigStoreImpl::set(const char* key,
 {
   switch (format) {
   case Format_IntegerMilliseconds:
-    set_int32(key, value.value().msec());
+    set_uint32(key, value.value().msec());
     break;
   case Format_IntegerSeconds:
-    set_int32(key, static_cast<DDS::Int32>(value.value().sec()));
+    set_uint32(key, static_cast<DDS::UInt32>(value.value().sec()));
     break;
   case Format_FractionalSeconds:
     set_float64(key, value.to_double());
@@ -574,7 +574,7 @@ ConfigStoreImpl::get(const char* key,
       switch (format) {
       case Format_IntegerMilliseconds:
         {
-          int x = 0;
+          DDS::UInt32 x = 0;
           if (DCPS::convertToInteger(sample.value(), x)) {
             retval = TimeDuration::from_msec(x);
           } else {
@@ -590,7 +590,7 @@ ConfigStoreImpl::get(const char* key,
         break;
       case Format_IntegerSeconds:
         {
-          int x = 0;
+          DDS::UInt32 x = 0;
           if (DCPS::convertToInteger(sample.value(), x)) {
             retval = TimeDuration(x);
           } else {
@@ -997,6 +997,26 @@ ConfigStoreImpl::get_section_names(const String& prefix) const
   return retval;
 }
 
+ConfigStoreImpl::StringMap
+ConfigStoreImpl::get_section_values(const String& prefix) const
+{
+  const String cprefix = ConfigPair::canonicalize(prefix);
+
+  ConfigReader::SampleSequence samples;
+  DCPS::InternalSampleInfoSequence infos;
+  config_reader_->read(samples, infos, DDS::LENGTH_UNLIMITED,
+                       DDS::ANY_SAMPLE_STATE, DDS::ANY_VIEW_STATE, DDS::ALIVE_INSTANCE_STATE);
+  StringMap retval;
+  for (ConfigReader::SampleSequence::const_iterator pos = samples.begin(), limit = samples.end(); pos != limit; ++pos) {
+    if (pos->key_has_prefix(cprefix) &&
+        pos->key() != cprefix) {
+      retval[pos->key().substr(cprefix.size() + 1)] = pos->value();
+    }
+  }
+
+  return retval;
+}
+
 DDS::DataWriterQos ConfigStoreImpl::datawriter_qos()
 {
   return DataWriterQosBuilder().durability_transient_local();
@@ -1099,14 +1119,6 @@ process_section(ConfigStoreImpl& config_store,
     status = config.enumerate_sections(base, idx, section_name);
     const String next_key_prefix = key_prefix + "_" + ACE_TEXT_ALWAYS_CHAR(section_name.c_str());
 
-    // Indicate the section.
-    if (allow_overwrite || !config_store.has(next_key_prefix.c_str())) {
-      config_store.set(next_key_prefix.c_str(), String("@") + ACE_TEXT_ALWAYS_CHAR(section_name.c_str()));
-      if (listener && reader) {
-        listener->on_data_available(reader);
-      }
-    }
-
     if (status == 0) {
       ACE_Configuration_Section_Key key;
       if (config.open_section(base, section_name.c_str(), 0, key) == 0) {
@@ -1117,6 +1129,15 @@ process_section(ConfigStoreImpl& config_store,
                      "(%P|%t) ERROR: process_section: "
                      "open_section() failed for name \"%s\"\n",
                      section_name.c_str()));
+        }
+      }
+
+      // Indicate the section last.
+      // This allows the listener to see complete sections.
+      if (allow_overwrite || !config_store.has(next_key_prefix.c_str())) {
+        config_store.set(next_key_prefix.c_str(), String("@") + ACE_TEXT_ALWAYS_CHAR(section_name.c_str()));
+        if (listener && reader) {
+          listener->on_data_available(reader);
         }
       }
     }
