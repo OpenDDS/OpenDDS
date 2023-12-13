@@ -25,6 +25,7 @@ namespace XTypes {
 using DCPS::LogLevel;
 using DCPS::log_level;
 using DCPS::retcode_to_string;
+using DCPS::ValueWriter;
 
 DynamicDataImpl::DynamicDataImpl(DDS::DynamicType_ptr type,
                                  DDS::DynamicData_ptr backing_store)
@@ -5378,6 +5379,275 @@ bool serialize_dynamic_primitive_member(Serializer& ser, const T& value, DDS::Re
   return ser << value;
 }
 
+// Write a member of a struct or union.
+bool write_member(ValueWriter& value_writer, DDS::DynamicData_ptr data, CORBA::ULong index)
+{
+  using namespace OpenDDS::XTypes;
+  const DDS::DynamicType_var type = data->type();
+  const DDS::DynamicType_var base_type = get_base_type(type);
+  DDS::DynamicTypeMember_var dtm;
+  if (base_type->get_member_by_index(dtm, index) != DDS::RETCODE_OK) {
+    return false;
+  }
+  DDS::MemberDescriptor_var md;
+  if (dtm->get_descriptor(md) != DDS::RETCODE_OK) {
+    return false;
+  }
+
+  const DDS::MemberId id = md->id();
+  const CORBA::Boolean optional = md->is_optional();
+  const DDS::DynamicType_var member_type = get_base_type(md->type());
+  const DDS::TypeKind member_tk = member_type->get_kind();
+  DDS::TypeKind treat_member_as = member_tk;
+
+  if (member_tk == TK_ENUM && enum_bound(member_type, treat_member_as) != DDS::RETCODE_OK) {
+    return false;
+  }
+  if (member_tk == TK_BITMASK && bitmask_bound(member_type, treat_member_as) != DDS::RETCODE_OK) {
+    return false;
+  }
+
+  // Need a new DynamicValueWriter interface that fit the dynamic bindings better.
+  // For the concrete Xdcr2DynamicValueWriter, a question is whether to handle rc within
+  // the value writer class or here => probably in the value writer class since the rc handling
+  // is specific to Xcdr serialization and not needed by other format like Json or XML, so
+  // the generic code here should be as generic as possible.
+  DDS::ReturnCode_t rc = DDS::RETCODE_OK;
+  switch (treat_member_as) {
+  case TK_INT8: {
+    DDS::Int8 val;
+    rc = data->get_int8_value(val, id);
+    if (!check_rc_from_get(rc, id, treat_member_as, "write_member")
+        || !value_writer.begin_struct_member(md, rc, 0)) {
+      return false;
+    }
+    if (!optional || rc != DDS::RETCODE_NO_DATA) {
+      value_writer.write_int8(val);
+    }
+    break;
+  }
+  case TK_UINT8: {
+    DDS::UInt8 val;
+    rc = data->get_uint8_value(val, id);
+    if (!check_rc_from_get(rc, id, treat_member_as, "write_member")
+        || !value_writer.begin_struct_member(md, rc, 0)) {
+      return false;
+    }
+    if (!optional || rc != DDS::RETCODE_NO_DATA) {
+      value_writer.write_uint8(val);
+    }
+    break;
+  }
+  case TK_INT16: {
+    DDS::Int16 val;
+    rc = data->get_int16_value(val, id);
+    if (!check_rc_from_get(rc, id, treat_member_as, "write_member")
+        || !value_writer.begin_struct_member(md, rc, 0)) {
+      return false;
+    }
+    if (!optional || rc != DDS::RETCODE_NO_DATA) {
+      value_writer.write_int16(val);
+    }
+    break;
+  }
+  case TK_UINT16: {
+    DDS::UInt16 val;
+    rc = data->get_uint16_value(val, id);
+    if (!check_rc_from_get(rc, id, treat_member_as, "write_member")
+        || !value_writer.begin_struct_member(md, rc, 0)) {
+      return false;
+    }
+    if (!optional || rc != DDS::RETCODE_NO_DATA) {
+      value_writer.write_uint16(val);
+    }
+    break;
+  }
+  case TK_INT32: {
+    DDS::Int32 val;
+    rc = data->get_int32_value(val, id);
+    if (!check_rc_from_get(rc, id, treat_member_as, "write_member")
+        || !value_writer.begin_struct_member(md, rc, 0)) {
+      return false;
+    }
+    if (!optional || rc != DDS::RETCODE_NO_DATA) {
+      value_writer.write_int32(val);
+    }
+    break;
+  }
+  case TK_UINT32: {
+    DDS::UInt32 val;
+    rc = data->get_uint32_value(val, id);
+    if (!check_rc_from_get(rc, id, treat_member_as, "write_member")
+        || !value_writer.begin_struct_member(md, rc, 0)) {
+      return false;
+    }
+    if (!optional || rc != DDS::RETCODE_NO_DATA) {
+      value_writer.write_uint32(val);
+    }
+    break;
+  }
+  case TK_INT64: {
+    DDS::Int64 val;
+    rc = data->get_int64_value(val, id);
+    if (!check_rc_from_get(rc, id, treat_member_as, "write_member")
+        || !value_writer.begin_struct_member(md, rc, 0)) {
+      return false;
+    }
+    if (!optional || rc != DDS::RETCODE_NO_DATA) {
+      value_writer.write_int64(val);
+    }
+    break;
+  }
+  case TK_UINT64: {
+    DDS::UInt64 val;
+    rc = data->get_uint64_value(val, id);
+    if (!check_rc_from_get(rc, id, treat_member_as, "write_member")
+        || !value_writer.begin_struct_member(md, rc, 0)) {
+      return false;
+    }
+    if (!optional || rc != DDS::RETCODE_NO_DATA) {
+      value_writer.write_uint64(val);
+    }
+    break;
+  }
+  case TK_FLOAT32: {
+    CORBA::Float val;
+    rc = data->get_float32_value(val, id);
+    if (!check_rc_from_get(rc, id, treat_member_as, "write_member")
+        || !value_writer.begin_struct_member(md, rc, 0)) {
+      return false;
+    }
+    if (!optional || rc != DDS::RETCODE_NO_DATA) {
+      value_writer.write_float32(val);
+    }
+    break;
+  }
+  case TK_FLOAT64: {
+    CORBA::Double val;
+    rc = data->get_float64_value(val, id);
+    if (!check_rc_from_get(rc, id, treat_member_as, "write_member")
+        || !value_writer.begin_struct_member(md, rc, 0)) {
+      return false;
+    }
+    if (!optional || rc != DDS::RETCODE_NO_DATA) {
+      value_writer.write_float64(val);
+    }
+    break;
+  }
+  case TK_FLOAT128: {
+    CORBA::LongDouble val;
+    rc = data->get_float128_value(val, id);
+    if (!check_rc_from_get(rc, id, treat_member_as, "write_member")
+        || !value_writer.begin_struct_member(md, rc, 0)) {
+      return false;
+    }
+    if (!optional || rc != DDS::RETCODE_NO_DATA) {
+      value_writer.write_float128(val);
+    }
+    break;
+  }
+  case TK_CHAR8: {
+    CORBA::Char val;
+    rc = data->get_char8_value(val, id);
+    if (!check_rc_from_get(rc, id, treat_member_as, "write_member")
+        || !value_writer.begin_struct_member(md, rc, 0)) {
+      return false;
+    }
+    if (!optional || rc != DDS::RETCODE_NO_DATA) {
+      value_writer.write_char8(val);
+    }
+    break;
+  }
+#iddef DDS_HAS_WCHAR
+  case TK_CHAR16: {
+    CORBA::WChar val;
+    rc = data->get_char16_value(val, id);
+    if (!check_rc_from_get(rc, id, treat_member_as, "write_member")
+        || !value_writer.begin_struct_member(md, rc, 0)) {
+      return false;
+    }
+    if (!optional || rc != DDS::RETCODE_NO_DATA) {
+      value_writer.write_char16(val);
+    }
+    break;
+  }
+#endif
+  case TK_BYTE: {
+    CORBA::Octet val;
+    rc = data->get_byte_value(val, id);
+    if (!check_rc_from_get(rc, id, treat_member_as, "write_member")
+        || !value_writer.begin_struct_member(md, rc, 0)) {
+      return false;
+    }
+    if (!optional || rc != DDS::RETCODE_NO_DATA) {
+      value_writer.write_byte(val);
+    }
+    break;
+  }
+  case TK_BOOLEAN: {
+    CORBA::Boolean val;
+    rc = data->get_boolean_value(val, id);
+    if (!check_rc_from_get(rc, id, treat_member_as, "write_member")
+        || !value_writer.begin_struct_member(md, rc, 0)) {
+      return false;
+    }
+    if (!optional || rc != DDS::RETCODE_NO_DATA) {
+      value_writer.write_boolean(val);
+    }
+    break;
+  }
+  case TK_STRING8: {
+    CORBA::String_var val;
+    rc = data->get_string_value(val, id);
+    if (!check_rc_from_get(rc, id, treat_member_as, "write_member")
+        || !value_writer.begin_struct_member(md, rc, (void*)val.in())) {
+      return false;
+    }
+    if (!optional || rc != DDS::RETCODE_NO_DATA) {
+      value_writer.write_string(val.in());
+    }
+    break;
+  }
+#ifdef DDS_HAS_WCHAR
+  case TK_STRING16: {
+    CORBA::WString_var val;
+    rc = data->get_wstring_value(val, id);
+    if (!check_rc_from_get(rc, id, treat_member_as, "write_member")
+        || !value_writer.begin_struct_member(md, rc, (void*)val.in())) {
+      return false;
+    }
+    if (!optional || rc != DDS::RETCODE_NO_DATA) {
+      value_writer.write_wstring(val.in());
+    }
+    break;
+  }
+#endif
+  case TK_STRUCTURE:
+  case TK_UNION:
+  case TK_ARRAY:
+  case TK_SEQUENCE: {
+    DDS::DynamicData_var member_data;
+    rc = data->get_complex_value(member_data, id);
+    if (!check_rc_from_get(rc, id, treat_member_as, "write_member")
+        || !value_writer.begin_struct_member(md, rc, (void*)member_data.in())) {
+      return false;
+    }
+    if (!optional || rc != DDS::RETCODE_NO_DATA) {
+      vwrite(value_writer, member_data);
+    }
+    break;
+  }
+  default:
+    if (log_level >= LogLevel::Notice) {
+      ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: write_member:"
+                 " Unsupported member type %C at ID %u\n", typekind_to_string(member_tk), id));
+    }
+  }
+
+  value_writer.end_struct_member();
+  return true;
+}
+
 bool serialize_dynamic_member(Serializer& ser, DDS::DynamicData_ptr data,
   const DDS::MemberDescriptor_var md, DDS::ExtensibilityKind extensibility, Sample::Extent ext)
 {
@@ -5541,6 +5811,22 @@ bool serialize_dynamic_member(Serializer& ser, DDS::DynamicData_ptr data,
     }
   }
   return false;
+}
+
+bool write_struct(ValueWriter& value_writer, DDS::DynamicData_ptr struct_dd)
+{
+  value_writer.begin_struct(struct_dd);
+
+  const DDS::DynamicType_var type = struct_dd->type();
+  const DDS::DynamicType_var base_type = get_base_type(type);
+  for (CORBA::ULong i = 0; i < base_type->get_member_count(); ++i) {
+    if (!write_member(value_writer, struct_dd, i)) {
+      return false;
+    }
+  }
+
+  value_writer.end_struct();
+  return true;
 }
 
 bool serialize_dynamic_struct(Serializer& ser, DDS::DynamicData_ptr data, Sample::Extent ext)
@@ -5935,6 +6221,23 @@ bool serialize_dynamic_collection(Serializer& ser, DDS::DynamicData_ptr data, Sa
   return true;
 }
 
+bool vwrite(ValueWriter& value_writer, DDS::DynamicData_ptr data)
+{
+  using namespace OpenDDS::XTypes;
+  const DDS::DynamicType_var type = data->type();
+  const DDS::DynamicType_var base_type = get_base_type(type);
+  switch (base_type->get_kind()) {
+  case TK_STRUCTURE:
+    return write_struct(value_writer, data);
+  case TK_UNION:
+    return write_union(value_writer, data);
+  case TK_ARRAY:
+  case TK_SEQUENCE:
+    return write_collection(value_writer, data);
+  }
+  return false;
+}
+
 bool serialize(Serializer& ser, DDS::DynamicData_ptr data, Sample::Extent ext)
 {
   using namespace OpenDDS::XTypes;
@@ -5954,7 +6257,20 @@ bool serialize(Serializer& ser, DDS::DynamicData_ptr data, Sample::Extent ext)
 
 bool operator<<(Serializer& ser, DDS::DynamicData_ptr data)
 {
-  return serialize(ser, data, Sample::Full);
+  //  return serialize(ser, data, Sample::Full);
+
+  // Instantiate a concrete ValueWriter class for XCDR2. Then pass
+  // it to a vwrite function that take the abstract ValueWrite as its argument,
+  // similarly to the generated vwrite function for static type. This generic
+  // vwrite function will do the logic of the serialization using the provided
+  // concrete ValueWriter class.
+  Xcdr2ValueWriter value_writer(ser);
+  vwrite(value_writer, data);
+
+  // We can have different ValueWriter implementations for DynamicData.
+  // For example we can pass a JsonValueWriter (the existing one?) object
+  // to vwrite which will then write the DynamicData object to JSON string.
+  // Similarly, we can have XmlValueWriter for XML format, etc.
 }
 
 bool operator<<(Serializer& ser, const KeyOnly<DDS::DynamicData_ptr>& key)
