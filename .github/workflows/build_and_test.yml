@@ -291,10 +291,6 @@ jobs:
         sudo sysctl -w kernel.core_pattern=core.%e.%p
         echo Core file pattern set to:
         cat /proc/sys/kernel/core_pattern
-    - name: set log name
-      shell: bash
-      run: |
-        echo "LOG_NAME=$(date '+%Y_%m_%d_%H_%M')" >> "$GITHUB_ENV"
     - name: run OpenDDS tests
       shell: bash
       run: |
@@ -309,8 +305,8 @@ jobs:
         cat > config.xml <<EOF
         <autobuild>
         <configuration>
-        <variable name="log_file" value="${LOG_NAME}"/>
-        <variable name="log_root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace"/>
+        <variable name="log_file" value="output"/>
+        <variable name="log_root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace/logs"/>
         <variable name="project_root" value="$DDS_ROOT"/>
         <variable name="root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace"/>
         <variable name="junit_xml_output" value="Tests"/>
@@ -326,7 +322,7 @@ jobs:
         <command name="print_autobuild_config"/>
         <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS --no-dcps --cmake"/>
         <command name="log" options="off"/>
-        <command name="process_logs" options="prettify index"/>
+        <command name="process_logs" options="move prettify index"/>
         </autobuild>
         EOF
         $GITHUB_WORKSPACE/autobuild/autobuild.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/config.xml"
@@ -344,7 +340,7 @@ jobs:
     - name: upload to Google Cloud
       uses: 'google-github-actions/upload-cloud-storage@v1'
       with:
-        path: OpenDDS/${{ github.job }}_autobuild_workspace
+        path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
         destination: opendds-gha-scoreboard-uploads/${{ github.job }}
         parent: false
         process_gcloudignore: false
@@ -352,9 +348,9 @@ jobs:
     - name: check results
       shell: bash
       run: |
-        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/${LOG_NAME}_Brief.html"
-        cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
-        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
+        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/"*_Brief.html
+        cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
+        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
 
   build_u22_o1d0v1_xer0_j11:
 
@@ -791,10 +787,6 @@ jobs:
         sudo sysctl -w kernel.core_pattern=core.%e.%p
         echo Core file pattern set to:
         cat /proc/sys/kernel/core_pattern
-    - name: set log name
-      shell: bash
-      run: |
-        echo "LOG_NAME=$(date '+%Y_%m_%d_%H_%M')" >> "$GITHUB_ENV"
     - name: run OpenDDS tests
       shell: bash
       run: |
@@ -809,8 +801,8 @@ jobs:
         cat > config.xml <<EOF
         <autobuild>
         <configuration>
-        <variable name="log_file" value="${LOG_NAME}"/>
-        <variable name="log_root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace"/>
+        <variable name="log_file" value="output"/>
+        <variable name="log_root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace/logs"/>
         <variable name="project_root" value="$DDS_ROOT"/>
         <variable name="root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace"/>
         <variable name="junit_xml_output" value="Tests"/>
@@ -825,7 +817,7 @@ jobs:
         <command name="print_autobuild_config"/>
         <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS -Config SAFETY_EXTENDED -Config OPENDDS_SAFETY_PROFILE -Config DDS_NO_CONTENT_SUBSCRIPTION -Config DDS_NO_CONTENT_FILTERED_TOPIC -Config DDS_NO_MULTI_TOPIC -Config DDS_NO_QUERY_CONDITION -Config DDS_NO_OWNERSHIP_KIND_EXCLUSIVE -Config DDS_NO_OBJECT_MODEL_PROFILE -Config DDS_NO_PERSISTENCE_PROFILE -Config GH_ACTIONS_OPENDDS_SAFETY_PROFILE -Config NO_UNIT_TESTS"/>
         <command name="log" options="off"/>
-        <command name="process_logs" options="prettify index"/>
+        <command name="process_logs" options="move prettify index"/>
         </autobuild>
         EOF
         $GITHUB_WORKSPACE/autobuild/autobuild.pl "$GITHUB_WORKSPACE/OpenDDS/build/target/${{ github.job }}_autobuild_workspace/config.xml"
@@ -843,7 +835,7 @@ jobs:
     - name: upload to Google Cloud
       uses: 'google-github-actions/upload-cloud-storage@v1'
       with:
-        path: OpenDDS/build/target/${{ github.job }}_autobuild_workspace
+        path: OpenDDS/build/target/${{ github.job }}_autobuild_workspace/logs
         destination: opendds-gha-scoreboard-uploads/${{ github.job }}
         parent: false
         process_gcloudignore: false
@@ -851,9 +843,9 @@ jobs:
     - name: check results
       shell: bash
       run: |
-        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/build/target/${{ github.job }}_autobuild_workspace/${LOG_NAME}_Brief.html"
-        cat "$GITHUB_WORKSPACE/OpenDDS/build/target/${{ github.job }}_autobuild_workspace/latest.txt"
-        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/build/target/${{ github.job }}_autobuild_workspace/latest.txt"
+        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/build/target/${{ github.job }}_autobuild_workspace/logs/"*_Brief.html
+        cat "$GITHUB_WORKSPACE/OpenDDS/build/target/${{ github.job }}_autobuild_workspace/logs/latest.txt"
+        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/build/target/${{ github.job }}_autobuild_workspace/logs/latest.txt"
 
   ACE_TAO_u22_bsafe_js0_FM-1f:
 
@@ -1123,10 +1115,6 @@ jobs:
         sudo sysctl -w kernel.core_pattern=core.%e.%p
         echo Core file pattern set to:
         cat /proc/sys/kernel/core_pattern
-    - name: set log name
-      shell: bash
-      run: |
-        echo "LOG_NAME=$(date '+%Y_%m_%d_%H_%M')" >> "$GITHUB_ENV"
     - name: run OpenDDS tests
       shell: bash
       run: |
@@ -1141,8 +1129,8 @@ jobs:
         cat > config.xml <<EOF
         <autobuild>
         <configuration>
-        <variable name="log_file" value="${LOG_NAME}"/>
-        <variable name="log_root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace"/>
+        <variable name="log_file" value="output"/>
+        <variable name="log_root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace/logs"/>
         <variable name="project_root" value="$DDS_ROOT"/>
         <variable name="root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace"/>
         <variable name="junit_xml_output" value="Tests"/>
@@ -1157,7 +1145,7 @@ jobs:
         <command name="print_autobuild_config"/>
         <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS -Config SAFETY_BASE -Config OPENDDS_SAFETY_PROFILE -Config NO_BUILT_IN_TOPICS -Config DDS_NO_CONTENT_SUBSCRIPTION -Config DDS_NO_CONTENT_FILTERED_TOPIC -Config DDS_NO_MULTI_TOPIC -Config DDS_NO_QUERY_CONDITION -Config DDS_NO_OWNERSHIP_KIND_EXCLUSIVE -Config DDS_NO_OBJECT_MODEL_PROFILE -Config DDS_NO_PERSISTENCE_PROFILE -Config GH_ACTIONS_OPENDDS_SAFETY_PROFILE -Config NO_UNIT_TESTS"/>
         <command name="log" options="off"/>
-        <command name="process_logs" options="prettify index"/>
+        <command name="process_logs" options="move prettify index"/>
         </autobuild>
         EOF
         $GITHUB_WORKSPACE/autobuild/autobuild.pl "$GITHUB_WORKSPACE/OpenDDS/build/target/${{ github.job }}_autobuild_workspace/config.xml"
@@ -1175,7 +1163,7 @@ jobs:
     - name: upload to Google Cloud
       uses: 'google-github-actions/upload-cloud-storage@v1'
       with:
-        path: OpenDDS/build/target/${{ github.job }}_autobuild_workspace
+        path: OpenDDS/build/target/${{ github.job }}_autobuild_workspace/logs
         destination: opendds-gha-scoreboard-uploads/${{ github.job }}
         parent: false
         process_gcloudignore: false
@@ -1183,9 +1171,9 @@ jobs:
     - name: check results
       shell: bash
       run: |
-        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/build/target/${{ github.job }}_autobuild_workspace/${LOG_NAME}_Brief.html"
-        cat "$GITHUB_WORKSPACE/OpenDDS/build/target/${{ github.job }}_autobuild_workspace/latest.txt"
-        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/build/target/${{ github.job }}_autobuild_workspace/latest.txt"
+        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/build/target/${{ github.job }}_autobuild_workspace/logs/"*_Brief.html
+        cat "$GITHUB_WORKSPACE/OpenDDS/build/target/${{ github.job }}_autobuild_workspace/logs/latest.txt"
+        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/build/target/${{ github.job }}_autobuild_workspace/logs/latest.txt"
 
   ACE_TAO_u22_d0i0v1_sec_js0_FM-08:
 
@@ -1405,10 +1393,6 @@ jobs:
         sudo sysctl -w kernel.core_pattern=core.%e.%p
         echo Core file pattern set to:
         cat /proc/sys/kernel/core_pattern
-    - name: set log name
-      shell: bash
-      run: |
-        echo "LOG_NAME=$(date '+%Y_%m_%d_%H_%M')" >> "$GITHUB_ENV"
     - name: run OpenDDS tests
       shell: bash
       run: |
@@ -1423,8 +1407,8 @@ jobs:
         cat > config.xml <<EOF
         <autobuild>
         <configuration>
-        <variable name="log_file" value="${LOG_NAME}"/>
-        <variable name="log_root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace"/>
+        <variable name="log_file" value="output"/>
+        <variable name="log_root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace/logs"/>
         <variable name="project_root" value="$DDS_ROOT"/>
         <variable name="root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace"/>
         <variable name="junit_xml_output" value="Tests"/>
@@ -1440,7 +1424,7 @@ jobs:
         <command name="print_autobuild_config"/>
         <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS -Config XERCES3 -Config WCHAR -Config CXX11 -Config OPENDDS_SECURITY -Config NO_BUILT_IN_TOPICS -Config DDS_NO_CONTENT_SUBSCRIPTION -Config DDS_NO_OWNERSHIP_PROFILE -Config DDS_NO_OBJECT_MODEL_PROFILE -Config DDS_NO_PERSISTENCE_PROFILE -Config NO_UNIT_TESTS --security --cmake"/>
         <command name="log" options="off"/>
-        <command name="process_logs" options="prettify index"/>
+        <command name="process_logs" options="move prettify index"/>
         </autobuild>
         EOF
         $GITHUB_WORKSPACE/autobuild/autobuild.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/config.xml"
@@ -1458,7 +1442,7 @@ jobs:
     - name: upload to Google Cloud
       uses: 'google-github-actions/upload-cloud-storage@v1'
       with:
-        path: OpenDDS/${{ github.job }}_autobuild_workspace
+        path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
         destination: opendds-gha-scoreboard-uploads/${{ github.job }}
         parent: false
         process_gcloudignore: false
@@ -1466,9 +1450,9 @@ jobs:
     - name: check results
       shell: bash
       run: |
-        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/${LOG_NAME}_Brief.html"
-        cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
-        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
+        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/"*_Brief.html
+        cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
+        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
 
   ACE_TAO_u20_clang12_i0w1_sec:
 
@@ -1707,10 +1691,6 @@ jobs:
         sudo sysctl -w kernel.core_pattern=core.%e.%p
         echo Core file pattern set to:
         cat /proc/sys/kernel/core_pattern
-    - name: set log name
-      shell: bash
-      run: |
-        echo "LOG_NAME=$(date '+%Y_%m_%d_%H_%M')" >> "$GITHUB_ENV"
     - name: run OpenDDS tests
       shell: bash
       run: |
@@ -1726,8 +1706,8 @@ jobs:
         cat > config.xml <<EOF
         <autobuild>
         <configuration>
-        <variable name="log_file" value="${LOG_NAME}"/>
-        <variable name="log_root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace"/>
+        <variable name="log_file" value="output"/>
+        <variable name="log_root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace/logs"/>
         <variable name="project_root" value="$DDS_ROOT"/>
         <variable name="root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace"/>
         <variable name="junit_xml_output" value="Tests"/>
@@ -1743,7 +1723,7 @@ jobs:
         <command name="print_autobuild_config"/>
         <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS --no-dcps --cmake"/>
         <command name="log" options="off"/>
-        <command name="process_logs" options="prettify index"/>
+        <command name="process_logs" options="move prettify index"/>
         </autobuild>
         EOF
         $GITHUB_WORKSPACE/autobuild/autobuild.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/config.xml"
@@ -1761,7 +1741,7 @@ jobs:
     - name: upload to Google Cloud
       uses: 'google-github-actions/upload-cloud-storage@v1'
       with:
-        path: OpenDDS/${{ github.job }}_autobuild_workspace
+        path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
         destination: opendds-gha-scoreboard-uploads/${{ github.job }}
         parent: false
         process_gcloudignore: false
@@ -1769,9 +1749,9 @@ jobs:
     - name: check results
       shell: bash
       run: |
-        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/${LOG_NAME}_Brief.html"
-        cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
-        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
+        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/"*_Brief.html
+        cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
+        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
 
   ACE_TAO_u20_clang10_sec_js0:
 
@@ -2008,10 +1988,6 @@ jobs:
         sudo sysctl -w kernel.core_pattern=core.%e.%p
         echo Core file pattern set to:
         cat /proc/sys/kernel/core_pattern
-    - name: set log name
-      shell: bash
-      run: |
-        echo "LOG_NAME=$(date '+%Y_%m_%d_%H_%M')" >> "$GITHUB_ENV"
     - name: run OpenDDS tests
       shell: bash
       run: |
@@ -2027,8 +2003,8 @@ jobs:
         cat > config.xml <<EOF
         <autobuild>
         <configuration>
-        <variable name="log_file" value="${LOG_NAME}"/>
-        <variable name="log_root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace"/>
+        <variable name="log_file" value="output"/>
+        <variable name="log_root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace/logs"/>
         <variable name="project_root" value="$DDS_ROOT"/>
         <variable name="root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace"/>
         <variable name="junit_xml_output" value="Tests"/>
@@ -2044,7 +2020,7 @@ jobs:
         <command name="print_autobuild_config"/>
         <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS --no-dcps --cmake -Config OPENDDS_TESTING_FEATURES"/>
         <command name="log" options="off"/>
-        <command name="process_logs" options="prettify index"/>
+        <command name="process_logs" options="move prettify index"/>
         </autobuild>
         EOF
         $GITHUB_WORKSPACE/autobuild/autobuild.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/config.xml"
@@ -2062,7 +2038,7 @@ jobs:
     - name: upload to Google Cloud
       uses: 'google-github-actions/upload-cloud-storage@v1'
       with:
-        path: OpenDDS/${{ github.job }}_autobuild_workspace
+        path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
         destination: opendds-gha-scoreboard-uploads/${{ github.job }}
         parent: false
         process_gcloudignore: false
@@ -2070,9 +2046,9 @@ jobs:
     - name: check results
       shell: bash
       run: |
-        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/${LOG_NAME}_Brief.html"
-        cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
-        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
+        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/"*_Brief.html
+        cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
+        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
 
   ACE_TAO_u20_gcc9_d0w1_cpp03:
 
@@ -2307,10 +2283,6 @@ jobs:
         sudo sysctl -w kernel.core_pattern=core.%e.%p
         echo Core file pattern set to:
         cat /proc/sys/kernel/core_pattern
-    - name: set log name
-      shell: bash
-      run: |
-        echo "LOG_NAME=$(date '+%Y_%m_%d_%H_%M')" >> "$GITHUB_ENV"
     - name: run OpenDDS tests
       shell: bash
       run: |
@@ -2325,8 +2297,8 @@ jobs:
         cat > config.xml <<EOF
         <autobuild>
         <configuration>
-        <variable name="log_file" value="${LOG_NAME}"/>
-        <variable name="log_root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace"/>
+        <variable name="log_file" value="output"/>
+        <variable name="log_root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace/logs"/>
         <variable name="project_root" value="$DDS_ROOT"/>
         <variable name="root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace"/>
         <variable name="junit_xml_output" value="Tests"/>
@@ -2342,7 +2314,7 @@ jobs:
         <command name="print_autobuild_config"/>
         <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS --no-dcps --cmake"/>
         <command name="log" options="off"/>
-        <command name="process_logs" options="prettify index"/>
+        <command name="process_logs" options="move prettify index"/>
         </autobuild>
         EOF
         $GITHUB_WORKSPACE/autobuild/autobuild.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/config.xml"
@@ -2360,7 +2332,7 @@ jobs:
     - name: upload to Google Cloud
       uses: 'google-github-actions/upload-cloud-storage@v1'
       with:
-        path: OpenDDS/${{ github.job }}_autobuild_workspace
+        path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
         destination: opendds-gha-scoreboard-uploads/${{ github.job }}
         parent: false
         process_gcloudignore: false
@@ -2368,9 +2340,9 @@ jobs:
     - name: check results
       shell: bash
       run: |
-        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/${LOG_NAME}_Brief.html"
-        cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
-        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
+        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/"*_Brief.html
+        cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
+        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
 
   ACE_TAO_u20_gcc8_i0_js0_j:
 
@@ -2599,10 +2571,6 @@ jobs:
         sudo sysctl -w kernel.core_pattern=core.%e.%p
         echo Core file pattern set to:
         cat /proc/sys/kernel/core_pattern
-    - name: set log name
-      shell: bash
-      run: |
-        echo "LOG_NAME=$(date '+%Y_%m_%d_%H_%M')" >> "$GITHUB_ENV"
     - name: run OpenDDS tests
       shell: bash
       run: |
@@ -2617,8 +2585,8 @@ jobs:
         cat > config.xml <<EOF
         <autobuild>
         <configuration>
-        <variable name="log_file" value="${LOG_NAME}"/>
-        <variable name="log_root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace"/>
+        <variable name="log_file" value="output"/>
+        <variable name="log_root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace/logs"/>
         <variable name="project_root" value="$DDS_ROOT"/>
         <variable name="root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace"/>
         <variable name="junit_xml_output" value="Tests"/>
@@ -2634,7 +2602,7 @@ jobs:
         <command name="print_autobuild_config"/>
         <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS --no-dcps --cmake"/>
         <command name="log" options="off"/>
-        <command name="process_logs" options="prettify index"/>
+        <command name="process_logs" options="move prettify index"/>
         </autobuild>
         EOF
         $GITHUB_WORKSPACE/autobuild/autobuild.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/config.xml"
@@ -2652,7 +2620,7 @@ jobs:
     - name: upload to Google Cloud
       uses: 'google-github-actions/upload-cloud-storage@v1'
       with:
-        path: OpenDDS/${{ github.job }}_autobuild_workspace
+        path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
         destination: opendds-gha-scoreboard-uploads/${{ github.job }}
         parent: false
         process_gcloudignore: false
@@ -2660,9 +2628,9 @@ jobs:
     - name: check results
       shell: bash
       run: |
-        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/${LOG_NAME}_Brief.html"
-        cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
-        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
+        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/"*_Brief.html
+        cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
+        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
 
   ACE_TAO_u22_gcc11_i0_xer0:
 
@@ -2881,10 +2849,6 @@ jobs:
         sudo sysctl -w kernel.core_pattern=core.%e.%p
         echo Core file pattern set to:
         cat /proc/sys/kernel/core_pattern
-    - name: set log name
-      shell: bash
-      run: |
-        echo "LOG_NAME=$(date '+%Y_%m_%d_%H_%M')" >> "$GITHUB_ENV"
     - name: run OpenDDS tests
       shell: bash
       run: |
@@ -2899,8 +2863,8 @@ jobs:
         cat > config.xml <<EOF
         <autobuild>
         <configuration>
-        <variable name="log_file" value="${LOG_NAME}"/>
-        <variable name="log_root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace"/>
+        <variable name="log_file" value="output"/>
+        <variable name="log_root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace/logs"/>
         <variable name="project_root" value="$DDS_ROOT"/>
         <variable name="root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace"/>
         <variable name="junit_xml_output" value="Tests"/>
@@ -2916,7 +2880,7 @@ jobs:
         <command name="print_autobuild_config"/>
         <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS --no-dcps --cmake"/>
         <command name="log" options="off"/>
-        <command name="process_logs" options="prettify index"/>
+        <command name="process_logs" options="move prettify index"/>
         </autobuild>
         EOF
         $GITHUB_WORKSPACE/autobuild/autobuild.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/config.xml"
@@ -2934,7 +2898,7 @@ jobs:
     - name: upload to Google Cloud
       uses: 'google-github-actions/upload-cloud-storage@v1'
       with:
-        path: OpenDDS/${{ github.job }}_autobuild_workspace
+        path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
         destination: opendds-gha-scoreboard-uploads/${{ github.job }}
         parent: false
         process_gcloudignore: false
@@ -2942,9 +2906,9 @@ jobs:
     - name: check results
       shell: bash
       run: |
-        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/${LOG_NAME}_Brief.html"
-        cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
-        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
+        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/"*_Brief.html
+        cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
+        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
 
   ACE_TAO_u20_gcc10_bsafe_js0_FM-2c:
 
@@ -3389,10 +3353,6 @@ jobs:
         sudo sysctl -w kernel.core_pattern=core.%e.%p
         echo Core file pattern set to:
         cat /proc/sys/kernel/core_pattern
-    - name: set log name
-      shell: bash
-      run: |
-        echo "LOG_NAME=$(date '+%Y_%m_%d_%H_%M')" >> "$GITHUB_ENV"
     - name: run OpenDDS tests
       shell: bash
       run: |
@@ -3407,8 +3367,8 @@ jobs:
         cat > config.xml <<EOF
         <autobuild>
         <configuration>
-        <variable name="log_file" value="${LOG_NAME}"/>
-        <variable name="log_root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace"/>
+        <variable name="log_file" value="output"/>
+        <variable name="log_root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace/logs"/>
         <variable name="project_root" value="$DDS_ROOT"/>
         <variable name="root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace"/>
         <variable name="junit_xml_output" value="Tests"/>
@@ -3424,7 +3384,7 @@ jobs:
         <command name="print_autobuild_config"/>
         <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS -Config XERCES3 -Config CXX11 -Config RAPIDJSON -Config WIRESHARK --java --modeling --cmake"/>
         <command name="log" options="off"/>
-        <command name="process_logs" options="prettify index"/>
+        <command name="process_logs" options="move prettify index"/>
         </autobuild>
         EOF
         $GITHUB_WORKSPACE/autobuild/autobuild.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/config.xml"
@@ -3442,7 +3402,7 @@ jobs:
     - name: upload to Google Cloud
       uses: 'google-github-actions/upload-cloud-storage@v1'
       with:
-        path: OpenDDS/${{ github.job }}_autobuild_workspace
+        path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
         destination: opendds-gha-scoreboard-uploads/${{ github.job }}
         parent: false
         process_gcloudignore: false
@@ -3450,9 +3410,9 @@ jobs:
     - name: check results
       shell: bash
       run: |
-        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/${LOG_NAME}_Brief.html"
-        cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
-        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
+        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/"*_Brief.html
+        cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
+        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
 
   ACE_TAO_u20_p1_asan:
 
@@ -3692,10 +3652,6 @@ jobs:
         sudo sysctl -w kernel.core_pattern=core.%e.%p
         echo Core file pattern set to:
         cat /proc/sys/kernel/core_pattern
-    - name: set log name
-      shell: bash
-      run: |
-        echo "LOG_NAME=$(date '+%Y_%m_%d_%H_%M')" >> "$GITHUB_ENV"
     - name: run OpenDDS tests
       shell: bash
       run: |
@@ -3711,8 +3667,8 @@ jobs:
         cat > config.xml <<EOF
         <autobuild>
         <configuration>
-        <variable name="log_file" value="${LOG_NAME}"/>
-        <variable name="log_root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace"/>
+        <variable name="log_file" value="output"/>
+        <variable name="log_root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace/logs"/>
         <variable name="project_root" value="$DDS_ROOT"/>
         <variable name="root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace"/>
         <variable name="junit_xml_output" value="Tests"/>
@@ -3728,7 +3684,7 @@ jobs:
         <command name="print_autobuild_config"/>
         <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS -Config IPV6 -Config XERCES3 -Config OPENDDS_SECURITY -Config CXX11 -Config RAPIDJSON --security -Config GH_ACTIONS_ASAN --cmake"/>
         <command name="log" options="off"/>
-        <command name="process_logs" options="prettify index"/>
+        <command name="process_logs" options="move prettify index"/>
         </autobuild>
         EOF
         $GITHUB_WORKSPACE/autobuild/autobuild.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/config.xml"
@@ -3746,7 +3702,7 @@ jobs:
     - name: upload to Google Cloud
       uses: 'google-github-actions/upload-cloud-storage@v1'
       with:
-        path: OpenDDS/${{ github.job }}_autobuild_workspace
+        path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
         destination: opendds-gha-scoreboard-uploads/${{ github.job }}
         parent: false
         process_gcloudignore: false
@@ -3754,9 +3710,9 @@ jobs:
     - name: check results
       shell: bash
       run: |
-        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/${LOG_NAME}_Brief.html"
-        cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
-        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
+        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/"*_Brief.html
+        cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
+        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
 
   ACE_TAO_u20_p1_tsan:
 
@@ -3986,10 +3942,6 @@ jobs:
         sudo sysctl -w kernel.core_pattern=core.%e.%p
         echo Core file pattern set to:
         cat /proc/sys/kernel/core_pattern
-    - name: set log name
-      shell: bash
-      run: |
-        echo "LOG_NAME=$(date '+%Y_%m_%d_%H_%M')" >> "$GITHUB_ENV"
     - name: run OpenDDS tests
       shell: bash
       run: |
@@ -4005,8 +3957,8 @@ jobs:
         cat > config.xml <<EOF
         <autobuild>
         <configuration>
-        <variable name="log_file" value="${LOG_NAME}"/>
-        <variable name="log_root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace"/>
+        <variable name="log_file" value="output"/>
+        <variable name="log_root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace/logs"/>
         <variable name="project_root" value="$DDS_ROOT"/>
         <variable name="root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace"/>
         <variable name="junit_xml_output" value="Tests"/>
@@ -4022,7 +3974,7 @@ jobs:
         <command name="print_autobuild_config"/>
         <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS -Config IPV6 -Config XERCES3 -Config OPENDDS_SECURITY -Config CXX11 -Config RAPIDJSON --no-dcps tests/tsan_tests.lst"/>
         <command name="log" options="off"/>
-        <command name="process_logs" options="prettify index"/>
+        <command name="process_logs" options="move prettify index"/>
         </autobuild>
         EOF
         $GITHUB_WORKSPACE/autobuild/autobuild.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/config.xml"
@@ -4040,7 +3992,7 @@ jobs:
     - name: upload to Google Cloud
       uses: 'google-github-actions/upload-cloud-storage@v1'
       with:
-        path: OpenDDS/${{ github.job }}_autobuild_workspace
+        path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
         destination: opendds-gha-scoreboard-uploads/${{ github.job }}
         parent: false
         process_gcloudignore: false
@@ -4048,9 +4000,9 @@ jobs:
     - name: check results
       shell: bash
       run: |
-        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/${LOG_NAME}_Brief.html"
-        cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
-        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
+        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/"*_Brief.html
+        cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
+        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
 
   ACE_TAO_u20_p1_ubsan:
 
@@ -4291,10 +4243,6 @@ jobs:
         sudo sysctl -w kernel.core_pattern=core.%e.%p
         echo Core file pattern set to:
         cat /proc/sys/kernel/core_pattern
-    - name: set log name
-      shell: bash
-      run: |
-        echo "LOG_NAME=$(date '+%Y_%m_%d_%H_%M')" >> "$GITHUB_ENV"
     - name: run OpenDDS tests
       shell: bash
       run: |
@@ -4310,8 +4258,8 @@ jobs:
         cat > config.xml <<EOF
         <autobuild>
         <configuration>
-        <variable name="log_file" value="${LOG_NAME}"/>
-        <variable name="log_root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace"/>
+        <variable name="log_file" value="output"/>
+        <variable name="log_root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace/logs"/>
         <variable name="project_root" value="$DDS_ROOT"/>
         <variable name="root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace"/>
         <variable name="junit_xml_output" value="Tests"/>
@@ -4327,7 +4275,7 @@ jobs:
         <command name="print_autobuild_config"/>
         <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS -Config IPV6 -Config XERCES3 -Config OPENDDS_SECURITY -Config CXX11 -Config RAPIDJSON --no-dcps tests/ubsan_tests.lst"/>
         <command name="log" options="off"/>
-        <command name="process_logs" options="prettify index"/>
+        <command name="process_logs" options="move prettify index"/>
         </autobuild>
         EOF
         $GITHUB_WORKSPACE/autobuild/autobuild.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/config.xml"
@@ -4345,7 +4293,7 @@ jobs:
     - name: upload to Google Cloud
       uses: 'google-github-actions/upload-cloud-storage@v1'
       with:
-        path: OpenDDS/${{ github.job }}_autobuild_workspace
+        path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
         destination: opendds-gha-scoreboard-uploads/${{ github.job }}
         parent: false
         process_gcloudignore: false
@@ -4353,9 +4301,9 @@ jobs:
     - name: check results
       shell: bash
       run: |
-        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/${LOG_NAME}_Brief.html"
-        cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
-        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
+        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/"*_Brief.html
+        cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
+        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
 
   ACE_TAO_u20_p1:
 
@@ -4613,10 +4561,6 @@ jobs:
         sudo sysctl -w kernel.core_pattern=core.%e.%p
         echo Core file pattern set to:
         cat /proc/sys/kernel/core_pattern
-    - name: set log name
-      shell: bash
-      run: |
-        echo "LOG_NAME=$(date '+%Y_%m_%d_%H_%M')" >> "$GITHUB_ENV"
     - name: run OpenDDS tests
       shell: bash
       run: |
@@ -4631,8 +4575,8 @@ jobs:
         cat > config.xml <<EOF
         <autobuild>
         <configuration>
-        <variable name="log_file" value="${LOG_NAME}"/>
-        <variable name="log_root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace"/>
+        <variable name="log_file" value="output"/>
+        <variable name="log_root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace/logs"/>
         <variable name="project_root" value="$DDS_ROOT"/>
         <variable name="root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace"/>
         <variable name="junit_xml_output" value="Tests"/>
@@ -4648,7 +4592,7 @@ jobs:
         <command name="print_autobuild_config"/>
         <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS -Config IPV6 -Config XERCES3 -Config OPENDDS_SECURITY -Config CXX11 -Config RAPIDJSON --security --cmake"/>
         <command name="log" options="off"/>
-        <command name="process_logs" options="prettify index"/>
+        <command name="process_logs" options="move prettify index"/>
         </autobuild>
         EOF
         $GITHUB_WORKSPACE/autobuild/autobuild.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/config.xml"
@@ -4666,7 +4610,7 @@ jobs:
     - name: upload to Google Cloud
       uses: 'google-github-actions/upload-cloud-storage@v1'
       with:
-        path: OpenDDS/${{ github.job }}_autobuild_workspace
+        path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
         destination: opendds-gha-scoreboard-uploads/${{ github.job }}
         parent: false
         process_gcloudignore: false
@@ -4674,9 +4618,9 @@ jobs:
     - name: check results
       shell: bash
       run: |
-        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/${LOG_NAME}_Brief.html"
-        cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
-        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
+        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/"*_Brief.html
+        cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
+        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
 
   valgrind_u20_p1_sec:
 
@@ -4749,10 +4693,6 @@ jobs:
         cd OpenDDS
         . setenv.sh
         tools/scripts/show_build_config.pl
-    - name: set log name
-      shell: bash
-      run: |
-        echo "LOG_NAME=$(date '+%Y_%m_%d_%H_%M')" >> "$GITHUB_ENV"
     - name: run OpenDDS tests
       shell: bash
       run: |
@@ -4770,8 +4710,8 @@ jobs:
         cat > config.xml <<EOF
         <autobuild>
         <configuration>
-        <variable name="log_file" value="${LOG_NAME}"/>
-        <variable name="log_root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace"/>
+        <variable name="log_file" value="output"/>
+        <variable name="log_root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace/logs"/>
         <variable name="project_root" value="$DDS_ROOT"/>
         <variable name="root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace"/>
         <variable name="junit_xml_output" value="Tests"/>
@@ -4787,7 +4727,7 @@ jobs:
         <command name="print_autobuild_config"/>
         <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS -Config IPV6 -Config XERCES3 -Config OPENDDS_SECURITY -Config CXX11 -Config RAPIDJSON --no-dcps tests/valgrind_tests.lst"/>
         <command name="log" options="off"/>
-        <command name="process_logs" options="prettify index"/>
+        <command name="process_logs" options="move prettify index"/>
         </autobuild>
         EOF
         $GITHUB_WORKSPACE/autobuild/autobuild.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/config.xml"
@@ -4805,7 +4745,7 @@ jobs:
     - name: upload to Google Cloud
       uses: 'google-github-actions/upload-cloud-storage@v1'
       with:
-        path: OpenDDS/${{ github.job }}_autobuild_workspace
+        path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
         destination: opendds-gha-scoreboard-uploads/${{ github.job }}
         parent: false
         process_gcloudignore: false
@@ -4813,9 +4753,9 @@ jobs:
     - name: check results
       shell: bash
       run: |
-        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/${LOG_NAME}_Brief.html"
-        cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
-        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
+        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/"*_Brief.html
+        cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
+        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
 
   build_u20_p1_j8_FM-1f:
 
@@ -4978,10 +4918,6 @@ jobs:
         sudo sysctl -w kernel.core_pattern=core.%e.%p
         echo Core file pattern set to:
         cat /proc/sys/kernel/core_pattern
-    - name: set log name
-      shell: bash
-      run: |
-        echo "LOG_NAME=$(date '+%Y_%m_%d_%H_%M')" >> "$GITHUB_ENV"
     - name: run OpenDDS tests
       shell: bash
       run: |
@@ -4996,8 +4932,8 @@ jobs:
         cat > config.xml <<EOF
         <autobuild>
         <configuration>
-        <variable name="log_file" value="${LOG_NAME}"/>
-        <variable name="log_root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace"/>
+        <variable name="log_file" value="output"/>
+        <variable name="log_root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace/logs"/>
         <variable name="project_root" value="$DDS_ROOT"/>
         <variable name="root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace"/>
         <variable name="junit_xml_output" value="Tests"/>
@@ -5013,7 +4949,7 @@ jobs:
         <command name="print_autobuild_config"/>
         <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS -Config IPV6 -Config CXX11 -Config RAPIDJSON -Config NO_BUILT_IN_TOPICS -Config NO_UNIT_TESTS --modeling --cmake"/>
         <command name="log" options="off"/>
-        <command name="process_logs" options="prettify index"/>
+        <command name="process_logs" options="move prettify index"/>
         </autobuild>
         EOF
         $GITHUB_WORKSPACE/autobuild/autobuild.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/config.xml"
@@ -5031,7 +4967,7 @@ jobs:
     - name: upload to Google Cloud
       uses: 'google-github-actions/upload-cloud-storage@v1'
       with:
-        path: OpenDDS/${{ github.job }}_autobuild_workspace
+        path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
         destination: opendds-gha-scoreboard-uploads/${{ github.job }}
         parent: false
         process_gcloudignore: false
@@ -5039,9 +4975,9 @@ jobs:
     - name: check results
       shell: bash
       run: |
-        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/${LOG_NAME}_Brief.html"
-        cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
-        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
+        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/"*_Brief.html
+        cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
+        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
 
   ACE_TAO_u22_w1:
 
@@ -5266,10 +5202,6 @@ jobs:
         sudo sysctl -w kernel.core_pattern=core.%e.%p
         echo Core file pattern set to:
         cat /proc/sys/kernel/core_pattern
-    - name: set log name
-      shell: bash
-      run: |
-        echo "LOG_NAME=$(date '+%Y_%m_%d_%H_%M')" >> "$GITHUB_ENV"
     - name: run OpenDDS tests
       shell: bash
       run: |
@@ -5284,8 +5216,8 @@ jobs:
         cat > config.xml <<EOF
         <autobuild>
         <configuration>
-        <variable name="log_file" value="${LOG_NAME}"/>
-        <variable name="log_root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace"/>
+        <variable name="log_file" value="output"/>
+        <variable name="log_root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace/logs"/>
         <variable name="project_root" value="$DDS_ROOT"/>
         <variable name="root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace"/>
         <variable name="junit_xml_output" value="Tests"/>
@@ -5301,7 +5233,7 @@ jobs:
         <command name="print_autobuild_config"/>
         <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS -Config WCHAR -Config XERCES3 -Config OPENDDS_SECURITY -Config CXX11 -Config RAPIDJSON -Config NO_UNIT_TESTS --security --cmake"/>
         <command name="log" options="off"/>
-        <command name="process_logs" options="prettify index"/>
+        <command name="process_logs" options="move prettify index"/>
         </autobuild>
         EOF
         $GITHUB_WORKSPACE/autobuild/autobuild.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/config.xml"
@@ -5319,7 +5251,7 @@ jobs:
     - name: upload to Google Cloud
       uses: 'google-github-actions/upload-cloud-storage@v1'
       with:
-        path: OpenDDS/${{ github.job }}_autobuild_workspace
+        path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
         destination: opendds-gha-scoreboard-uploads/${{ github.job }}
         parent: false
         process_gcloudignore: false
@@ -5327,9 +5259,9 @@ jobs:
     - name: check results
       shell: bash
       run: |
-        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/${LOG_NAME}_Brief.html"
-        cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
-        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
+        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/"*_Brief.html
+        cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
+        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
 
   build_u22_w1_j_FM-2f:
 
@@ -5492,10 +5424,6 @@ jobs:
         sudo sysctl -w kernel.core_pattern=core.%e.%p
         echo Core file pattern set to:
         cat /proc/sys/kernel/core_pattern
-    - name: set log name
-      shell: bash
-      run: |
-        echo "LOG_NAME=$(date '+%Y_%m_%d_%H_%M')" >> "$GITHUB_ENV"
     - name: run OpenDDS tests
       shell: bash
       run: |
@@ -5510,8 +5438,8 @@ jobs:
         cat > config.xml <<EOF
         <autobuild>
         <configuration>
-        <variable name="log_file" value="${LOG_NAME}"/>
-        <variable name="log_root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace"/>
+        <variable name="log_file" value="output"/>
+        <variable name="log_root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace/logs"/>
         <variable name="project_root" value="$DDS_ROOT"/>
         <variable name="root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace"/>
         <variable name="junit_xml_output" value="Tests"/>
@@ -5527,7 +5455,7 @@ jobs:
         <command name="print_autobuild_config"/>
         <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS -Config WCHAR -Config CXX11 -Config RAPIDJSON -Config DDS_NO_CONTENT_SUBSCRIPTION -Config NO_UNIT_TESTS --java --modeling --cmake"/>
         <command name="log" options="off"/>
-        <command name="process_logs" options="prettify index"/>
+        <command name="process_logs" options="move prettify index"/>
         </autobuild>
         EOF
         $GITHUB_WORKSPACE/autobuild/autobuild.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/config.xml"
@@ -5545,7 +5473,7 @@ jobs:
     - name: upload to Google Cloud
       uses: 'google-github-actions/upload-cloud-storage@v1'
       with:
-        path: OpenDDS/${{ github.job }}_autobuild_workspace
+        path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
         destination: opendds-gha-scoreboard-uploads/${{ github.job }}
         parent: false
         process_gcloudignore: false
@@ -5553,9 +5481,9 @@ jobs:
     - name: check results
       shell: bash
       run: |
-        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/${LOG_NAME}_Brief.html"
-        cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
-        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
+        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/"*_Brief.html
+        cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
+        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
 
   ACE_TAO_u22_stat_qt_ws_sec:
 
@@ -5792,10 +5720,6 @@ jobs:
         cd OpenDDS/tests/cmake/build
         cmake ..
         cmake --build . -- -j4
-    - name: set log name
-      shell: bash
-      run: |
-        echo "LOG_NAME=$(date '+%Y_%m_%d_%H_%M')" >> "$GITHUB_ENV"
     - name: run OpenDDS tests
       shell: bash
       run: |
@@ -5810,8 +5734,8 @@ jobs:
         cat > config.xml <<EOF
         <autobuild>
         <configuration>
-        <variable name="log_file" value="${LOG_NAME}"/>
-        <variable name="log_root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace"/>
+        <variable name="log_file" value="output"/>
+        <variable name="log_root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace/logs"/>
         <variable name="project_root" value="$DDS_ROOT"/>
         <variable name="root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace"/>
         <variable name="junit_xml_output" value="Tests"/>
@@ -5827,7 +5751,7 @@ jobs:
         <command name="print_autobuild_config"/>
         <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS --no-dcps --cmake"/>
         <command name="log" options="off"/>
-        <command name="process_logs" options="prettify index"/>
+        <command name="process_logs" options="move prettify index"/>
         </autobuild>
         EOF
         $GITHUB_WORKSPACE/autobuild/autobuild.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/config.xml"
@@ -5845,7 +5769,7 @@ jobs:
     - name: upload to Google Cloud
       uses: 'google-github-actions/upload-cloud-storage@v1'
       with:
-        path: OpenDDS/${{ github.job }}_autobuild_workspace
+        path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
         destination: opendds-gha-scoreboard-uploads/${{ github.job }}
         parent: false
         process_gcloudignore: false
@@ -5853,9 +5777,9 @@ jobs:
     - name: check results
       shell: bash
       run: |
-        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/${LOG_NAME}_Brief.html"
-        cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
-        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
+        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/"*_Brief.html
+        cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
+        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
 
   messenger_u22_stat_qt_ws_sec:
 
@@ -5974,10 +5898,6 @@ jobs:
         . setenv.sh
         cd tests/DCPS/C++11
         make
-    - name: set log name
-      shell: bash
-      run: |
-        echo "LOG_NAME=$(date '+%Y_%m_%d_%H_%M')" >> "$GITHUB_ENV"
     - name: run OpenDDS tests
       shell: bash
       run: |
@@ -5992,8 +5912,8 @@ jobs:
         cat > config.xml <<EOF
         <autobuild>
         <configuration>
-        <variable name="log_file" value="${LOG_NAME}"/>
-        <variable name="log_root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace"/>
+        <variable name="log_file" value="output"/>
+        <variable name="log_root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace/logs"/>
         <variable name="project_root" value="$DDS_ROOT"/>
         <variable name="root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace"/>
         <variable name="junit_xml_output" value="Tests"/>
@@ -6008,7 +5928,7 @@ jobs:
         <command name="print_autobuild_config"/>
         <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS tests/core_ci_tests.lst -Config STATIC_MESSENGER -Config STATIC -Config XERCES3 -Config OPENDDS_SECURITY -Config RAPIDJSON -Config CXX11 -Config NO_UNIT_TESTS"/>
         <command name="log" options="off"/>
-        <command name="process_logs" options="prettify index"/>
+        <command name="process_logs" options="move prettify index"/>
         </autobuild>
         EOF
         $GITHUB_WORKSPACE/autobuild/autobuild.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/config.xml"
@@ -6026,7 +5946,7 @@ jobs:
     - name: upload to Google Cloud
       uses: 'google-github-actions/upload-cloud-storage@v1'
       with:
-        path: OpenDDS/${{ github.job }}_autobuild_workspace
+        path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
         destination: opendds-gha-scoreboard-uploads/${{ github.job }}
         parent: false
         process_gcloudignore: false
@@ -6034,9 +5954,9 @@ jobs:
     - name: check results
       shell: bash
       run: |
-        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/${LOG_NAME}_Brief.html"
-        cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
-        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
+        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/"*_Brief.html
+        cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
+        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
 
   compiler_u22_stat_qt_ws_sec:
 
@@ -6141,10 +6061,6 @@ jobs:
         . setenv.sh
         cd tests/DCPS/Compiler
         make
-    - name: set log name
-      shell: bash
-      run: |
-        echo "LOG_NAME=$(date '+%Y_%m_%d_%H_%M')" >> "$GITHUB_ENV"
     - name: run OpenDDS tests
       shell: bash
       run: |
@@ -6159,8 +6075,8 @@ jobs:
         cat > config.xml <<EOF
         <autobuild>
         <configuration>
-        <variable name="log_file" value="${LOG_NAME}"/>
-        <variable name="log_root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace"/>
+        <variable name="log_file" value="output"/>
+        <variable name="log_root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace/logs"/>
         <variable name="project_root" value="$DDS_ROOT"/>
         <variable name="root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace"/>
         <variable name="junit_xml_output" value="Tests"/>
@@ -6175,7 +6091,7 @@ jobs:
         <command name="print_autobuild_config"/>
         <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS tests/core_ci_tests.lst -Config STATIC_COMPILER -Config STATIC_COMPILER2 -Config STATIC -Config XERCES3 -Config OPENDDS_SECURITY -Config RAPIDJSON -Config CXX11 -Config NO_UNIT_TESTS"/>
         <command name="log" options="off"/>
-        <command name="process_logs" options="prettify index"/>
+        <command name="process_logs" options="move prettify index"/>
         </autobuild>
         EOF
         $GITHUB_WORKSPACE/autobuild/autobuild.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/config.xml"
@@ -6193,7 +6109,7 @@ jobs:
     - name: upload to Google Cloud
       uses: 'google-github-actions/upload-cloud-storage@v1'
       with:
-        path: OpenDDS/${{ github.job }}_autobuild_workspace
+        path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
         destination: opendds-gha-scoreboard-uploads/${{ github.job }}
         parent: false
         process_gcloudignore: false
@@ -6201,9 +6117,9 @@ jobs:
     - name: check results
       shell: bash
       run: |
-        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/${LOG_NAME}_Brief.html"
-        cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
-        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
+        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/"*_Brief.html
+        cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
+        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
 
   unit_u22_stat_qt_ws_sec:
 
@@ -6308,10 +6224,6 @@ jobs:
         . setenv.sh
         cd tests/unit-tests
         make
-    - name: set log name
-      shell: bash
-      run: |
-        echo "LOG_NAME=$(date '+%Y_%m_%d_%H_%M')" >> "$GITHUB_ENV"
     - name: run OpenDDS tests
       shell: bash
       run: |
@@ -6326,8 +6238,8 @@ jobs:
         cat > config.xml <<EOF
         <autobuild>
         <configuration>
-        <variable name="log_file" value="${LOG_NAME}"/>
-        <variable name="log_root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace"/>
+        <variable name="log_file" value="output"/>
+        <variable name="log_root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace/logs"/>
         <variable name="project_root" value="$DDS_ROOT"/>
         <variable name="root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace"/>
         <variable name="junit_xml_output" value="Tests"/>
@@ -6342,7 +6254,7 @@ jobs:
         <command name="print_autobuild_config"/>
         <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS tests/core_ci_tests.lst -Config STATIC_UNIT_TESTS -Config STATIC -Config XERCES3 -Config OPENDDS_SECURITY -Config RAPIDJSON -Config CXX11"/>
         <command name="log" options="off"/>
-        <command name="process_logs" options="prettify index"/>
+        <command name="process_logs" options="move prettify index"/>
         </autobuild>
         EOF
         $GITHUB_WORKSPACE/autobuild/autobuild.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/config.xml"
@@ -6360,7 +6272,7 @@ jobs:
     - name: upload to Google Cloud
       uses: 'google-github-actions/upload-cloud-storage@v1'
       with:
-        path: OpenDDS/${{ github.job }}_autobuild_workspace
+        path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
         destination: opendds-gha-scoreboard-uploads/${{ github.job }}
         parent: false
         process_gcloudignore: false
@@ -6368,9 +6280,9 @@ jobs:
     - name: check results
       shell: bash
       run: |
-        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/${LOG_NAME}_Brief.html"
-        cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
-        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
+        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/"*_Brief.html
+        cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
+        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
 
   security_u22_stat_qt_ws_sec:
 
@@ -6466,10 +6378,6 @@ jobs:
         . setenv.sh
         cd tests/security/attributes
         make -j $(getconf _NPROCESSORS_ONLN)
-    - name: set log name
-      shell: bash
-      run: |
-        echo "LOG_NAME=$(date '+%Y_%m_%d_%H_%M')" >> "$GITHUB_ENV"
     - name: run security tests
       shell: bash
       run: |
@@ -6483,8 +6391,8 @@ jobs:
         cat > config.xml <<EOF
         <autobuild>
         <configuration>
-        <variable name="log_file" value="${LOG_NAME}"/>
-        <variable name="log_root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace"/>
+        <variable name="log_file" value="output"/>
+        <variable name="log_root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace/logs"/>
         <variable name="project_root" value="$DDS_ROOT"/>
         <variable name="root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace"/>
         <variable name="junit_xml_output" value="Tests"/>
@@ -6499,7 +6407,7 @@ jobs:
         <command name="print_autobuild_config"/>
         <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS tests/core_ci_tests.lst -Config STATIC_SECURITY"/>
         <command name="log" options="off"/>
-        <command name="process_logs" options="prettify index"/>
+        <command name="process_logs" options="move prettify index"/>
         </autobuild>
         EOF
         $GITHUB_WORKSPACE/autobuild/autobuild.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/config.xml"
@@ -6517,7 +6425,7 @@ jobs:
     - name: upload to Google Cloud
       uses: 'google-github-actions/upload-cloud-storage@v1'
       with:
-        path: OpenDDS/${{ github.job }}_autobuild_workspace
+        path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
         destination: opendds-gha-scoreboard-uploads/${{ github.job }}
         parent: false
         process_gcloudignore: false
@@ -6525,9 +6433,9 @@ jobs:
     - name: check results
       shell: bash
       run: |
-        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/${LOG_NAME}_Brief.html"
-        cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
-        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
+        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/"*_Brief.html
+        cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
+        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
 
   ACE_TAO_u22_j_cft0_FM-37:
 
@@ -6767,10 +6675,6 @@ jobs:
         sudo sysctl -w kernel.core_pattern=core.%e.%p
         echo Core file pattern set to:
         cat /proc/sys/kernel/core_pattern
-    - name: set log name
-      shell: bash
-      run: |
-        echo "LOG_NAME=$(date '+%Y_%m_%d_%H_%M')" >> "$GITHUB_ENV"
     - name: run OpenDDS tests
       shell: bash
       run: |
@@ -6785,8 +6689,8 @@ jobs:
         cat > config.xml <<EOF
         <autobuild>
         <configuration>
-        <variable name="log_file" value="${LOG_NAME}"/>
-        <variable name="log_root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace"/>
+        <variable name="log_file" value="output"/>
+        <variable name="log_root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace/logs"/>
         <variable name="project_root" value="$DDS_ROOT"/>
         <variable name="root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace"/>
         <variable name="junit_xml_output" value="Tests"/>
@@ -6802,7 +6706,7 @@ jobs:
         <command name="print_autobuild_config"/>
         <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS -Config RAPIDJSON -Config DDS_NO_CONTENT_FILTERED_TOPIC --modeling --cmake"/>
         <command name="log" options="off"/>
-        <command name="process_logs" options="prettify index"/>
+        <command name="process_logs" options="move prettify index"/>
         </autobuild>
         EOF
         $GITHUB_WORKSPACE/autobuild/autobuild.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/config.xml"
@@ -6820,7 +6724,7 @@ jobs:
     - name: upload to Google Cloud
       uses: 'google-github-actions/upload-cloud-storage@v1'
       with:
-        path: OpenDDS/${{ github.job }}_autobuild_workspace
+        path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
         destination: opendds-gha-scoreboard-uploads/${{ github.job }}
         parent: false
         process_gcloudignore: false
@@ -6828,9 +6732,9 @@ jobs:
     - name: check results
       shell: bash
       run: |
-        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/${LOG_NAME}_Brief.html"
-        cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
-        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
+        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/"*_Brief.html
+        cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
+        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
 
   ACE_TAO_w19_p1_stat_js0:
 
@@ -7087,10 +6991,6 @@ jobs:
         cd OpenDDS
         call setenv.cmd
         perl tools\scripts\show_build_config.pl
-    - name: set log name
-      shell: bash
-      run: |
-        echo "LOG_NAME=$(date '+%Y_%m_%d_%H_%M')" >> "$GITHUB_ENV"
     - name: create autobuild config
       shell: bash
       run: |
@@ -7103,8 +7003,8 @@ jobs:
         cat > config.xml <<EOF
         <autobuild>
         <configuration>
-        <variable name="log_file" value="${LOG_NAME}"/>
-        <variable name="log_root" value="$FS_GHW/OpenDDS/${{ github.job }}_autobuild_workspace"/>
+        <variable name="log_file" value="output"/>
+        <variable name="log_root" value="$FS_GHW/OpenDDS/${{ github.job }}_autobuild_workspace/logs"/>
         <variable name="project_root" value="$FS_GHW/OpenDDS"/>
         <variable name="root" value="$FS_GHW/OpenDDS/${{ github.job }}_autobuild_workspace"/>
         <variable name="junit_xml_output" value="Tests"/>
@@ -7120,7 +7020,7 @@ jobs:
         <command name="print_autobuild_config"/>
         <command name="auto_run_tests" options="script_path=tests dir=$FS_GHW/OpenDDS --no-dcps --cmake"/>
         <command name="log" options="off"/>
-        <command name="process_logs" options="prettify index"/>
+        <command name="process_logs" options="move prettify index"/>
         </autobuild>
         EOF
         cat config.xml
@@ -7145,7 +7045,7 @@ jobs:
     - name: upload to Google Cloud
       uses: 'google-github-actions/upload-cloud-storage@v1'
       with:
-        path: OpenDDS/${{ github.job }}_autobuild_workspace
+        path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
         destination: opendds-gha-scoreboard-uploads/${{ github.job }}
         parent: false
         process_gcloudignore: false
@@ -7153,9 +7053,9 @@ jobs:
     - name: check results
       shell: bash
       run: |
-        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/${LOG_NAME}_Brief.html"
-        cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
-        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
+        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/"*_Brief.html
+        cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
+        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
 
   messenger_w19_p1_stat_js0:
 
@@ -7268,10 +7168,6 @@ jobs:
         call setenv.cmd
         cd tests\DCPS\C++11
         msbuild -p:Configuration=Debug,Platform=x64 -m C++11.sln
-    - name: set log name
-      shell: bash
-      run: |
-        echo "LOG_NAME=$(date '+%Y_%m_%d_%H_%M')" >> "$GITHUB_ENV"
     - name: create autobuild config
       shell: bash
       run: |
@@ -7284,8 +7180,8 @@ jobs:
         cat > config.xml <<EOF
         <autobuild>
         <configuration>
-        <variable name="log_file" value="${LOG_NAME}"/>
-        <variable name="log_root" value="$FS_GHW/OpenDDS/${{ github.job }}_autobuild_workspace"/>
+        <variable name="log_file" value="output"/>
+        <variable name="log_root" value="$FS_GHW/OpenDDS/${{ github.job }}_autobuild_workspace/logs"/>
         <variable name="project_root" value="$FS_GHW/OpenDDS"/>
         <variable name="root" value="$FS_GHW/OpenDDS/${{ github.job }}_autobuild_workspace"/>
         <variable name="junit_xml_output" value="Tests"/>
@@ -7300,7 +7196,7 @@ jobs:
         <command name="print_autobuild_config"/>
         <command name="auto_run_tests" options="script_path=tests dir=$FS_GHW/OpenDDS tests\core_ci_tests.lst -ExeSubDir Static_Debug -Config STATIC_MESSENGER -Config IPV6 -Config XERCES3 -Config CXX11 -Config NO_UNIT_TESTS"/>
         <command name="log" options="off"/>
-        <command name="process_logs" options="prettify index"/>
+        <command name="process_logs" options="move prettify index"/>
         </autobuild>
         EOF
         cat config.xml
@@ -7325,7 +7221,7 @@ jobs:
     - name: upload to Google Cloud
       uses: 'google-github-actions/upload-cloud-storage@v1'
       with:
-        path: OpenDDS/${{ github.job }}_autobuild_workspace
+        path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
         destination: opendds-gha-scoreboard-uploads/${{ github.job }}
         parent: false
         process_gcloudignore: false
@@ -7333,9 +7229,9 @@ jobs:
     - name: check results
       shell: bash
       run: |
-        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/${LOG_NAME}_Brief.html"
-        cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
-        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
+        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/"*_Brief.html
+        cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
+        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
 
   compiler_w19_p1_stat_js0:
 
@@ -7437,10 +7333,6 @@ jobs:
         cd tests\DCPS\Compiler
         dir
         msbuild -p:Configuration=Debug,Platform=x64 -m Compiler.sln
-    - name: set log name
-      shell: bash
-      run: |
-        echo "LOG_NAME=$(date '+%Y_%m_%d_%H_%M')" >> "$GITHUB_ENV"
     - name: create autobuild config
       shell: bash
       run: |
@@ -7453,8 +7345,8 @@ jobs:
         cat > config.xml <<EOF
         <autobuild>
         <configuration>
-        <variable name="log_file" value="${LOG_NAME}"/>
-        <variable name="log_root" value="$FS_GHW/OpenDDS/${{ github.job }}_autobuild_workspace"/>
+        <variable name="log_file" value="output"/>
+        <variable name="log_root" value="$FS_GHW/OpenDDS/${{ github.job }}_autobuild_workspace/logs"/>
         <variable name="project_root" value="$FS_GHW/OpenDDS"/>
         <variable name="root" value="$FS_GHW/OpenDDS/${{ github.job }}_autobuild_workspace"/>
         <variable name="junit_xml_output" value="Tests"/>
@@ -7469,7 +7361,7 @@ jobs:
         <command name="print_autobuild_config"/>
         <command name="auto_run_tests" options="script_path=tests dir=$FS_GHW/OpenDDS tests\core_ci_tests.lst -ExeSubDir Static_Debug -Config STATIC_COMPILER -Config IPV6 -Config XERCES3 -Config CXX11 -Config NO_UNIT_TESTS"/>
         <command name="log" options="off"/>
-        <command name="process_logs" options="prettify index"/>
+        <command name="process_logs" options="move prettify index"/>
         </autobuild>
         EOF
         cat config.xml
@@ -7494,7 +7386,7 @@ jobs:
     - name: upload to Google Cloud
       uses: 'google-github-actions/upload-cloud-storage@v1'
       with:
-        path: OpenDDS/${{ github.job }}_autobuild_workspace
+        path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
         destination: opendds-gha-scoreboard-uploads/${{ github.job }}
         parent: false
         process_gcloudignore: false
@@ -7502,9 +7394,9 @@ jobs:
     - name: check results
       shell: bash
       run: |
-        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/${LOG_NAME}_Brief.html"
-        cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
-        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
+        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/"*_Brief.html
+        cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
+        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
 
   compiler2_w19_p1_stat_js0:
 
@@ -7608,10 +7500,6 @@ jobs:
         cd tests\DCPS\Compiler
         dir
         msbuild -p:Configuration=Debug,Platform=x64 -m Compiler.sln
-    - name: set log name
-      shell: bash
-      run: |
-        echo "LOG_NAME=$(date '+%Y_%m_%d_%H_%M')" >> "$GITHUB_ENV"
     - name: create autobuild config
       shell: bash
       run: |
@@ -7624,8 +7512,8 @@ jobs:
         cat > config.xml <<EOF
         <autobuild>
         <configuration>
-        <variable name="log_file" value="${LOG_NAME}"/>
-        <variable name="log_root" value="$FS_GHW/OpenDDS/${{ github.job }}_autobuild_workspace"/>
+        <variable name="log_file" value="output"/>
+        <variable name="log_root" value="$FS_GHW/OpenDDS/${{ github.job }}_autobuild_workspace/logs"/>
         <variable name="project_root" value="$FS_GHW/OpenDDS"/>
         <variable name="root" value="$FS_GHW/OpenDDS/${{ github.job }}_autobuild_workspace"/>
         <variable name="junit_xml_output" value="Tests"/>
@@ -7640,7 +7528,7 @@ jobs:
         <command name="print_autobuild_config"/>
         <command name="auto_run_tests" options="script_path=tests dir=$FS_GHW/OpenDDS tests\core_ci_tests.lst -ExeSubDir Static_Debug -Config STATIC_COMPILER2 -Config IPV6 -Config XERCES3 -Config CXX11 -Config NO_UNIT_TESTS"/>
         <command name="log" options="off"/>
-        <command name="process_logs" options="prettify index"/>
+        <command name="process_logs" options="move prettify index"/>
         </autobuild>
         EOF
         cat config.xml
@@ -7665,7 +7553,7 @@ jobs:
     - name: upload to Google Cloud
       uses: 'google-github-actions/upload-cloud-storage@v1'
       with:
-        path: OpenDDS/${{ github.job }}_autobuild_workspace
+        path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
         destination: opendds-gha-scoreboard-uploads/${{ github.job }}
         parent: false
         process_gcloudignore: false
@@ -7673,9 +7561,9 @@ jobs:
     - name: check results
       shell: bash
       run: |
-        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/${LOG_NAME}_Brief.html"
-        cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
-        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
+        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/"*_Brief.html
+        cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
+        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
 
   unit_w19_p1_stat_js0:
 
@@ -7774,10 +7662,6 @@ jobs:
         call setenv.cmd
         cd tests\unit-tests
         msbuild -p:Configuration=Debug,Platform=x64 -m unit_tests.sln
-    - name: set log name
-      shell: bash
-      run: |
-        echo "LOG_NAME=$(date '+%Y_%m_%d_%H_%M')" >> "$GITHUB_ENV"
     - name: create autobuild config
       shell: bash
       run: |
@@ -7790,8 +7674,8 @@ jobs:
         cat > config.xml <<EOF
         <autobuild>
         <configuration>
-        <variable name="log_file" value="${LOG_NAME}"/>
-        <variable name="log_root" value="$FS_GHW/OpenDDS/${{ github.job }}_autobuild_workspace"/>
+        <variable name="log_file" value="output"/>
+        <variable name="log_root" value="$FS_GHW/OpenDDS/${{ github.job }}_autobuild_workspace/logs"/>
         <variable name="project_root" value="$FS_GHW/OpenDDS"/>
         <variable name="root" value="$FS_GHW/OpenDDS/${{ github.job }}_autobuild_workspace"/>
         <variable name="junit_xml_output" value="Tests"/>
@@ -7806,7 +7690,7 @@ jobs:
         <command name="print_autobuild_config"/>
         <command name="auto_run_tests" options="script_path=tests dir=$FS_GHW/OpenDDS tests\core_ci_tests.lst -ExeSubDir Static_Debug -Config STATIC_UNIT_TESTS -Config IPV6 -Config XERCES3 -Config CXX11"/>
         <command name="log" options="off"/>
-        <command name="process_logs" options="prettify index"/>
+        <command name="process_logs" options="move prettify index"/>
         </autobuild>
         EOF
         cat config.xml
@@ -7831,7 +7715,7 @@ jobs:
     - name: upload to Google Cloud
       uses: 'google-github-actions/upload-cloud-storage@v1'
       with:
-        path: OpenDDS/${{ github.job }}_autobuild_workspace
+        path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
         destination: opendds-gha-scoreboard-uploads/${{ github.job }}
         parent: false
         process_gcloudignore: false
@@ -7839,9 +7723,9 @@ jobs:
     - name: check results
       shell: bash
       run: |
-        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/${LOG_NAME}_Brief.html"
-        cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
-        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
+        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/"*_Brief.html
+        cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
+        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
 
   ACE_TAO_w19_re_p1_stat_FM-08:
 
@@ -8098,10 +7982,6 @@ jobs:
         cd OpenDDS
         call setenv.cmd
         perl tools\scripts\show_build_config.pl
-    - name: set log name
-      shell: bash
-      run: |
-        echo "LOG_NAME=$(date '+%Y_%m_%d_%H_%M')" >> "$GITHUB_ENV"
     - name: create autobuild config
       shell: bash
       run: |
@@ -8114,8 +7994,8 @@ jobs:
         cat > config.xml <<EOF
         <autobuild>
         <configuration>
-        <variable name="log_file" value="${LOG_NAME}"/>
-        <variable name="log_root" value="$FS_GHW/OpenDDS/${{ github.job }}_autobuild_workspace"/>
+        <variable name="log_file" value="output"/>
+        <variable name="log_root" value="$FS_GHW/OpenDDS/${{ github.job }}_autobuild_workspace/logs"/>
         <variable name="project_root" value="$FS_GHW/OpenDDS"/>
         <variable name="root" value="$FS_GHW/OpenDDS/${{ github.job }}_autobuild_workspace"/>
         <variable name="junit_xml_output" value="Tests"/>
@@ -8131,7 +8011,7 @@ jobs:
         <command name="print_autobuild_config"/>
         <command name="auto_run_tests" options="script_path=tests dir=$FS_GHW/OpenDDS --no-dcps --cmake --cmake-build-cfg Release"/>
         <command name="log" options="off"/>
-        <command name="process_logs" options="prettify index"/>
+        <command name="process_logs" options="move prettify index"/>
         </autobuild>
         EOF
         cat config.xml
@@ -8156,7 +8036,7 @@ jobs:
     - name: upload to Google Cloud
       uses: 'google-github-actions/upload-cloud-storage@v1'
       with:
-        path: OpenDDS/${{ github.job }}_autobuild_workspace
+        path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
         destination: opendds-gha-scoreboard-uploads/${{ github.job }}
         parent: false
         process_gcloudignore: false
@@ -8164,9 +8044,9 @@ jobs:
     - name: check results
       shell: bash
       run: |
-        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/${LOG_NAME}_Brief.html"
-        cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
-        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
+        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/"*_Brief.html
+        cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
+        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
 
   messenger_w19_re_p1_stat_FM-08:
 
@@ -8279,10 +8159,6 @@ jobs:
         call setenv.cmd
         cd tests\DCPS\C++11
         msbuild -p:Configuration=Release,Platform=x64 -m C++11.sln
-    - name: set log name
-      shell: bash
-      run: |
-        echo "LOG_NAME=$(date '+%Y_%m_%d_%H_%M')" >> "$GITHUB_ENV"
     - name: create autobuild config
       shell: bash
       run: |
@@ -8295,8 +8171,8 @@ jobs:
         cat > config.xml <<EOF
         <autobuild>
         <configuration>
-        <variable name="log_file" value="${LOG_NAME}"/>
-        <variable name="log_root" value="$FS_GHW/OpenDDS/${{ github.job }}_autobuild_workspace"/>
+        <variable name="log_file" value="output"/>
+        <variable name="log_root" value="$FS_GHW/OpenDDS/${{ github.job }}_autobuild_workspace/logs"/>
         <variable name="project_root" value="$FS_GHW/OpenDDS"/>
         <variable name="root" value="$FS_GHW/OpenDDS/${{ github.job }}_autobuild_workspace"/>
         <variable name="junit_xml_output" value="Tests"/>
@@ -8311,7 +8187,7 @@ jobs:
         <command name="print_autobuild_config"/>
         <command name="auto_run_tests" options="script_path=tests dir=$FS_GHW/OpenDDS tests\core_ci_tests.lst -ExeSubDir Static_Release -Config STATIC -Config STATIC_MESSENGER -Config NO_BUILT_IN_TOPICS -Config DDS_NO_OBJECT_MODEL_PROFILE -Config DDS_NO_OWNERSHIP_PROFILE -Config DDS_NO_PERSISTENCE_PROFILE -Config DDS_NO_CONTENT_SUBSCRIPTION -Config IPV6 -Config CXX11 -Config OPENDDS_SECURITY -Config RAPIDJSON -Config NO_UNIT_TESTS"/>
         <command name="log" options="off"/>
-        <command name="process_logs" options="prettify index"/>
+        <command name="process_logs" options="move prettify index"/>
         </autobuild>
         EOF
         cat config.xml
@@ -8336,7 +8212,7 @@ jobs:
     - name: upload to Google Cloud
       uses: 'google-github-actions/upload-cloud-storage@v1'
       with:
-        path: OpenDDS/${{ github.job }}_autobuild_workspace
+        path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
         destination: opendds-gha-scoreboard-uploads/${{ github.job }}
         parent: false
         process_gcloudignore: false
@@ -8344,9 +8220,9 @@ jobs:
     - name: check results
       shell: bash
       run: |
-        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/${LOG_NAME}_Brief.html"
-        cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
-        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
+        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/"*_Brief.html
+        cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
+        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
 
   compiler_w19_re_p1_stat_FM-08:
 
@@ -8447,10 +8323,6 @@ jobs:
         call setenv.cmd
         cd tests\DCPS\Compiler
         msbuild -p:Configuration=Release,Platform=x64 -m Compiler.sln
-    - name: set log name
-      shell: bash
-      run: |
-        echo "LOG_NAME=$(date '+%Y_%m_%d_%H_%M')" >> "$GITHUB_ENV"
     - name: create autobuild config
       shell: bash
       run: |
@@ -8463,8 +8335,8 @@ jobs:
         cat > config.xml <<EOF
         <autobuild>
         <configuration>
-        <variable name="log_file" value="${LOG_NAME}"/>
-        <variable name="log_root" value="$FS_GHW/OpenDDS/${{ github.job }}_autobuild_workspace"/>
+        <variable name="log_file" value="output"/>
+        <variable name="log_root" value="$FS_GHW/OpenDDS/${{ github.job }}_autobuild_workspace/logs"/>
         <variable name="project_root" value="$FS_GHW/OpenDDS"/>
         <variable name="root" value="$FS_GHW/OpenDDS/${{ github.job }}_autobuild_workspace"/>
         <variable name="junit_xml_output" value="Tests"/>
@@ -8479,7 +8351,7 @@ jobs:
         <command name="print_autobuild_config"/>
         <command name="auto_run_tests" options="script_path=tests dir=$FS_GHW/OpenDDS tests\core_ci_tests.lst -ExeSubDir Static_Release -Config STATIC_COMPILER -Config STATIC -Config NO_BUILT_IN_TOPICS -Config DDS_NO_OBJECT_MODEL_PROFILE -Config DDS_NO_OWNERSHIP_PROFILE -Config DDS_NO_PERSISTENCE_PROFILE -Config DDS_NO_CONTENT_SUBSCRIPTION -Config IPV6 -Config OPENDDS_SECURITY -Config RAPIDJSON -Config CXX11 -Config NO_UNIT_TESTS"/>
         <command name="log" options="off"/>
-        <command name="process_logs" options="prettify index"/>
+        <command name="process_logs" options="move prettify index"/>
         </autobuild>
         EOF
         cat config.xml
@@ -8504,7 +8376,7 @@ jobs:
     - name: upload to Google Cloud
       uses: 'google-github-actions/upload-cloud-storage@v1'
       with:
-        path: OpenDDS/${{ github.job }}_autobuild_workspace
+        path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
         destination: opendds-gha-scoreboard-uploads/${{ github.job }}
         parent: false
         process_gcloudignore: false
@@ -8512,9 +8384,9 @@ jobs:
     - name: check results
       shell: bash
       run: |
-        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/${LOG_NAME}_Brief.html"
-        cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
-        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
+        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/"*_Brief.html
+        cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
+        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
 
   compiler2_w19_re_p1_stat_FM-08:
 
@@ -8617,10 +8489,6 @@ jobs:
         call setenv.cmd
         cd tests\DCPS\Compiler
         msbuild -p:Configuration=Release,Platform=x64 -m Compiler.sln
-    - name: set log name
-      shell: bash
-      run: |
-        echo "LOG_NAME=$(date '+%Y_%m_%d_%H_%M')" >> "$GITHUB_ENV"
     - name: create autobuild config
       shell: bash
       run: |
@@ -8633,8 +8501,8 @@ jobs:
         cat > config.xml <<EOF
         <autobuild>
         <configuration>
-        <variable name="log_file" value="${LOG_NAME}"/>
-        <variable name="log_root" value="$FS_GHW/OpenDDS/${{ github.job }}_autobuild_workspace"/>
+        <variable name="log_file" value="output"/>
+        <variable name="log_root" value="$FS_GHW/OpenDDS/${{ github.job }}_autobuild_workspace/logs"/>
         <variable name="project_root" value="$FS_GHW/OpenDDS"/>
         <variable name="root" value="$FS_GHW/OpenDDS/${{ github.job }}_autobuild_workspace"/>
         <variable name="junit_xml_output" value="Tests"/>
@@ -8649,7 +8517,7 @@ jobs:
         <command name="print_autobuild_config"/>
         <command name="auto_run_tests" options="script_path=tests dir=$FS_GHW/OpenDDS tests\core_ci_tests.lst -ExeSubDir Static_Release -Config STATIC_COMPILER2 -Config STATIC -Config NO_BUILT_IN_TOPICS -Config DDS_NO_OBJECT_MODEL_PROFILE -Config DDS_NO_OWNERSHIP_PROFILE -Config DDS_NO_PERSISTENCE_PROFILE -Config DDS_NO_CONTENT_SUBSCRIPTION -Config IPV6 -Config OPENDDS_SECURITY -Config RAPIDJSON -Config CXX11 -Config NO_UNIT_TESTS"/>
         <command name="log" options="off"/>
-        <command name="process_logs" options="prettify index"/>
+        <command name="process_logs" options="move prettify index"/>
         </autobuild>
         EOF
         cat config.xml
@@ -8674,7 +8542,7 @@ jobs:
     - name: upload to Google Cloud
       uses: 'google-github-actions/upload-cloud-storage@v1'
       with:
-        path: OpenDDS/${{ github.job }}_autobuild_workspace
+        path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
         destination: opendds-gha-scoreboard-uploads/${{ github.job }}
         parent: false
         process_gcloudignore: false
@@ -8682,9 +8550,9 @@ jobs:
     - name: check results
       shell: bash
       run: |
-        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/${LOG_NAME}_Brief.html"
-        cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
-        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
+        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/"*_Brief.html
+        cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
+        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
 
   unit_w19_re_p1_stat_FM-08:
 
@@ -8783,10 +8651,6 @@ jobs:
         call setenv.cmd
         cd tests\unit-tests
         msbuild -p:Configuration=Release,Platform=x64 -m unit_tests.sln
-    - name: set log name
-      shell: bash
-      run: |
-        echo "LOG_NAME=$(date '+%Y_%m_%d_%H_%M')" >> "$GITHUB_ENV"
     - name: create autobuild config
       shell: bash
       run: |
@@ -8799,8 +8663,8 @@ jobs:
         cat > config.xml <<EOF
         <autobuild>
         <configuration>
-        <variable name="log_file" value="${LOG_NAME}"/>
-        <variable name="log_root" value="$FS_GHW/OpenDDS/${{ github.job }}_autobuild_workspace"/>
+        <variable name="log_file" value="output"/>
+        <variable name="log_root" value="$FS_GHW/OpenDDS/${{ github.job }}_autobuild_workspace/logs"/>
         <variable name="project_root" value="$FS_GHW/OpenDDS"/>
         <variable name="root" value="$FS_GHW/OpenDDS/${{ github.job }}_autobuild_workspace"/>
         <variable name="junit_xml_output" value="Tests"/>
@@ -8815,7 +8679,7 @@ jobs:
         <command name="print_autobuild_config"/>
         <command name="auto_run_tests" options="script_path=tests dir=$FS_GHW/OpenDDS tests\core_ci_tests.lst -ExeSubDir Static_Release -Config STATIC_UNIT_TESTS -Config STATIC -Config NO_BUILT_IN_TOPICS -Config DDS_NO_OBJECT_MODEL_PROFILE -Config DDS_NO_OWNERSHIP_PROFILE -Config DDS_NO_PERSISTENCE_PROFILE -Config DDS_NO_CONTENT_SUBSCRIPTION -Config IPV6 -Config OPENDDS_SECURITY -Config RAPIDJSON -Config CXX11"/>
         <command name="log" options="off"/>
-        <command name="process_logs" options="prettify index"/>
+        <command name="process_logs" options="move prettify index"/>
         </autobuild>
         EOF
         cat config.xml
@@ -8840,7 +8704,7 @@ jobs:
     - name: upload to Google Cloud
       uses: 'google-github-actions/upload-cloud-storage@v1'
       with:
-        path: OpenDDS/${{ github.job }}_autobuild_workspace
+        path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
         destination: opendds-gha-scoreboard-uploads/${{ github.job }}
         parent: false
         process_gcloudignore: false
@@ -8848,9 +8712,9 @@ jobs:
     - name: check results
       shell: bash
       run: |
-        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/${LOG_NAME}_Brief.html"
-        cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
-        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
+        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/"*_Brief.html
+        cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
+        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
 
   ACE_TAO_w19_re_o1p1_sec:
 
@@ -9157,10 +9021,6 @@ jobs:
         cd OpenDDS
         call setenv.cmd
         perl tools\scripts\show_build_config.pl
-    - name: set log name
-      shell: bash
-      run: |
-        echo "LOG_NAME=$(date '+%Y_%m_%d_%H_%M')" >> "$GITHUB_ENV"
     - name: create autobuild config
       shell: bash
       run: |
@@ -9173,8 +9033,8 @@ jobs:
         cat > config.xml <<EOF
         <autobuild>
         <configuration>
-        <variable name="log_file" value="${LOG_NAME}"/>
-        <variable name="log_root" value="$FS_GHW/OpenDDS/${{ github.job }}_autobuild_workspace"/>
+        <variable name="log_file" value="output"/>
+        <variable name="log_root" value="$FS_GHW/OpenDDS/${{ github.job }}_autobuild_workspace/logs"/>
         <variable name="project_root" value="$FS_GHW/OpenDDS"/>
         <variable name="root" value="$FS_GHW/OpenDDS/${{ github.job }}_autobuild_workspace"/>
         <variable name="junit_xml_output" value="Tests"/>
@@ -9190,7 +9050,7 @@ jobs:
         <command name="print_autobuild_config"/>
         <command name="auto_run_tests" options="script_path=tests dir=$FS_GHW/OpenDDS --no-dcps --cmake --cmake-build-cfg Release"/>
         <command name="log" options="off"/>
-        <command name="process_logs" options="prettify index"/>
+        <command name="process_logs" options="move prettify index"/>
         </autobuild>
         EOF
         cat config.xml
@@ -9215,7 +9075,7 @@ jobs:
     - name: upload to Google Cloud
       uses: 'google-github-actions/upload-cloud-storage@v1'
       with:
-        path: OpenDDS/${{ github.job }}_autobuild_workspace
+        path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
         destination: opendds-gha-scoreboard-uploads/${{ github.job }}
         parent: false
         process_gcloudignore: false
@@ -9223,9 +9083,9 @@ jobs:
     - name: check results
       shell: bash
       run: |
-        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/${LOG_NAME}_Brief.html"
-        cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
-        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
+        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/"*_Brief.html
+        cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
+        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
 
   messenger_w19_re_o1p1_sec:
 
@@ -9347,10 +9207,6 @@ jobs:
         call setenv.cmd
         cd tests\DCPS\C++11
         msbuild -p:Configuration=Release,Platform=x64 -m C++11.sln
-    - name: set log name
-      shell: bash
-      run: |
-        echo "LOG_NAME=$(date '+%Y_%m_%d_%H_%M')" >> "$GITHUB_ENV"
     - name: create autobuild config
       shell: bash
       run: |
@@ -9363,8 +9219,8 @@ jobs:
         cat > config.xml <<EOF
         <autobuild>
         <configuration>
-        <variable name="log_file" value="${LOG_NAME}"/>
-        <variable name="log_root" value="$FS_GHW/OpenDDS/${{ github.job }}_autobuild_workspace"/>
+        <variable name="log_file" value="output"/>
+        <variable name="log_root" value="$FS_GHW/OpenDDS/${{ github.job }}_autobuild_workspace/logs"/>
         <variable name="project_root" value="$FS_GHW/OpenDDS"/>
         <variable name="root" value="$FS_GHW/OpenDDS/${{ github.job }}_autobuild_workspace"/>
         <variable name="junit_xml_output" value="Tests"/>
@@ -9379,7 +9235,7 @@ jobs:
         <command name="print_autobuild_config"/>
         <command name="auto_run_tests" options="script_path=tests dir=$FS_GHW/OpenDDS tests\core_ci_tests.lst -ExeSubDir Release -Config STATIC_MESSENGER -Config IPV6 -Config XERCES3 -Config OPENDDS_SECURITY -Config CXX11 -Config RAPIDJSON -Config NO_UNIT_TESTS"/>
         <command name="log" options="off"/>
-        <command name="process_logs" options="prettify index"/>
+        <command name="process_logs" options="move prettify index"/>
         </autobuild>
         EOF
         cat config.xml
@@ -9404,7 +9260,7 @@ jobs:
     - name: upload to Google Cloud
       uses: 'google-github-actions/upload-cloud-storage@v1'
       with:
-        path: OpenDDS/${{ github.job }}_autobuild_workspace
+        path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
         destination: opendds-gha-scoreboard-uploads/${{ github.job }}
         parent: false
         process_gcloudignore: false
@@ -9412,9 +9268,9 @@ jobs:
     - name: check results
       shell: bash
       run: |
-        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/${LOG_NAME}_Brief.html"
-        cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
-        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
+        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/"*_Brief.html
+        cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
+        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
 
   compiler_w19_re_o1p1_sec:
 
@@ -9513,10 +9369,6 @@ jobs:
         call setenv.cmd
         cd tests\DCPS\Compiler
         msbuild -p:Configuration=Release,Platform=x64 -m Compiler.sln
-    - name: set log name
-      shell: bash
-      run: |
-        echo "LOG_NAME=$(date '+%Y_%m_%d_%H_%M')" >> "$GITHUB_ENV"
     - name: create autobuild config
       shell: bash
       run: |
@@ -9529,8 +9381,8 @@ jobs:
         cat > config.xml <<EOF
         <autobuild>
         <configuration>
-        <variable name="log_file" value="${LOG_NAME}"/>
-        <variable name="log_root" value="$FS_GHW/OpenDDS/${{ github.job }}_autobuild_workspace"/>
+        <variable name="log_file" value="output"/>
+        <variable name="log_root" value="$FS_GHW/OpenDDS/${{ github.job }}_autobuild_workspace/logs"/>
         <variable name="project_root" value="$FS_GHW/OpenDDS"/>
         <variable name="root" value="$FS_GHW/OpenDDS/${{ github.job }}_autobuild_workspace"/>
         <variable name="junit_xml_output" value="Tests"/>
@@ -9545,7 +9397,7 @@ jobs:
         <command name="print_autobuild_config"/>
         <command name="auto_run_tests" options="script_path=tests dir=$FS_GHW/OpenDDS tests\core_ci_tests.lst -ExeSubDir Release -Config STATIC_COMPILER -Config IPV6 -Config XERCES3 -Config OPENDDS_SECURITY -Config CXX11 -Config RAPIDJSON -Config NO_UNIT_TESTS"/>
         <command name="log" options="off"/>
-        <command name="process_logs" options="prettify index"/>
+        <command name="process_logs" options="move prettify index"/>
         </autobuild>
         EOF
         cat config.xml
@@ -9570,7 +9422,7 @@ jobs:
     - name: upload to Google Cloud
       uses: 'google-github-actions/upload-cloud-storage@v1'
       with:
-        path: OpenDDS/${{ github.job }}_autobuild_workspace
+        path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
         destination: opendds-gha-scoreboard-uploads/${{ github.job }}
         parent: false
         process_gcloudignore: false
@@ -9578,9 +9430,9 @@ jobs:
     - name: check results
       shell: bash
       run: |
-        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/${LOG_NAME}_Brief.html"
-        cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
-        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
+        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/"*_Brief.html
+        cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
+        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
 
   unit_w19_re_o1p1_sec:
 
@@ -9688,10 +9540,6 @@ jobs:
         call setenv.cmd
         cd tests\unit-tests
         msbuild -p:Configuration=Release,Platform=x64 -m unit_tests.sln
-    - name: set log name
-      shell: bash
-      run: |
-        echo "LOG_NAME=$(date '+%Y_%m_%d_%H_%M')" >> "$GITHUB_ENV"
     - name: create autobuild config
       shell: bash
       run: |
@@ -9704,8 +9552,8 @@ jobs:
         cat > config.xml <<EOF
         <autobuild>
         <configuration>
-        <variable name="log_file" value="${LOG_NAME}"/>
-        <variable name="log_root" value="$FS_GHW/OpenDDS/${{ github.job }}_autobuild_workspace"/>
+        <variable name="log_file" value="output"/>
+        <variable name="log_root" value="$FS_GHW/OpenDDS/${{ github.job }}_autobuild_workspace/logs"/>
         <variable name="project_root" value="$FS_GHW/OpenDDS"/>
         <variable name="root" value="$FS_GHW/OpenDDS/${{ github.job }}_autobuild_workspace"/>
         <variable name="junit_xml_output" value="Tests"/>
@@ -9720,7 +9568,7 @@ jobs:
         <command name="print_autobuild_config"/>
         <command name="auto_run_tests" options="script_path=tests dir=$FS_GHW/OpenDDS tests\core_ci_tests.lst -ExeSubDir Release -Config STATIC_UNIT_TESTS -Config IPV6 -Config XERCES3 -Config OPENDDS_SECURITY -Config CXX11 -Config RAPIDJSON"/>
         <command name="log" options="off"/>
-        <command name="process_logs" options="prettify index"/>
+        <command name="process_logs" options="move prettify index"/>
         </autobuild>
         EOF
         cat config.xml
@@ -9745,7 +9593,7 @@ jobs:
     - name: upload to Google Cloud
       uses: 'google-github-actions/upload-cloud-storage@v1'
       with:
-        path: OpenDDS/${{ github.job }}_autobuild_workspace
+        path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
         destination: opendds-gha-scoreboard-uploads/${{ github.job }}
         parent: false
         process_gcloudignore: false
@@ -9753,9 +9601,9 @@ jobs:
     - name: check results
       shell: bash
       run: |
-        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/${LOG_NAME}_Brief.html"
-        cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
-        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
+        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/"*_Brief.html
+        cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
+        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
 
   wireshark_w19-release:
 
@@ -10093,10 +9941,6 @@ jobs:
         cd OpenDDS
         call setenv.cmd
         perl tools\scripts\show_build_config.pl
-    - name: set log name
-      shell: bash
-      run: |
-        echo "LOG_NAME=$(date '+%Y_%m_%d_%H_%M')" >> "$GITHUB_ENV"
     - name: create autobuild config
       shell: bash
       run: |
@@ -10109,8 +9953,8 @@ jobs:
         cat > config.xml <<EOF
         <autobuild>
         <configuration>
-        <variable name="log_file" value="${LOG_NAME}"/>
-        <variable name="log_root" value="$FS_GHW/OpenDDS/${{ github.job }}_autobuild_workspace"/>
+        <variable name="log_file" value="output"/>
+        <variable name="log_root" value="$FS_GHW/OpenDDS/${{ github.job }}_autobuild_workspace/logs"/>
         <variable name="project_root" value="$FS_GHW/OpenDDS"/>
         <variable name="root" value="$FS_GHW/OpenDDS/${{ github.job }}_autobuild_workspace"/>
         <variable name="junit_xml_output" value="Tests"/>
@@ -10126,7 +9970,7 @@ jobs:
         <command name="print_autobuild_config"/>
         <command name="auto_run_tests" options="script_path=tests dir=$FS_GHW/OpenDDS --no-dcps --cmake --cmake-build-cfg Release"/>
         <command name="log" options="off"/>
-        <command name="process_logs" options="prettify index"/>
+        <command name="process_logs" options="move prettify index"/>
         </autobuild>
         EOF
         cat config.xml
@@ -10151,7 +9995,7 @@ jobs:
     - name: upload to Google Cloud
       uses: 'google-github-actions/upload-cloud-storage@v1'
       with:
-        path: OpenDDS/${{ github.job }}_autobuild_workspace
+        path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
         destination: opendds-gha-scoreboard-uploads/${{ github.job }}
         parent: false
         process_gcloudignore: false
@@ -10159,9 +10003,9 @@ jobs:
     - name: check results
       shell: bash
       run: |
-        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/${LOG_NAME}_Brief.html"
-        cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
-        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
+        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/"*_Brief.html
+        cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
+        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
 
   messenger_w19_re_j_ws_FM-1f:
 
@@ -10274,10 +10118,6 @@ jobs:
         call setenv.cmd
         cd tests\DCPS\C++11
         msbuild -p:Configuration=Release,Platform=x64 -m C++11.sln
-    - name: set log name
-      shell: bash
-      run: |
-        echo "LOG_NAME=$(date '+%Y_%m_%d_%H_%M')" >> "$GITHUB_ENV"
     - name: create autobuild config
       shell: bash
       run: |
@@ -10290,8 +10130,8 @@ jobs:
         cat > config.xml <<EOF
         <autobuild>
         <configuration>
-        <variable name="log_file" value="${LOG_NAME}"/>
-        <variable name="log_root" value="$FS_GHW/OpenDDS/${{ github.job }}_autobuild_workspace"/>
+        <variable name="log_file" value="output"/>
+        <variable name="log_root" value="$FS_GHW/OpenDDS/${{ github.job }}_autobuild_workspace/logs"/>
         <variable name="project_root" value="$FS_GHW/OpenDDS"/>
         <variable name="root" value="$FS_GHW/OpenDDS/${{ github.job }}_autobuild_workspace"/>
         <variable name="junit_xml_output" value="Tests"/>
@@ -10306,7 +10146,7 @@ jobs:
         <command name="print_autobuild_config"/>
         <command name="auto_run_tests" options="script_path=tests dir=$FS_GHW/OpenDDS tests\core_ci_tests.lst -ExeSubDir Release -Config STATIC_MESSENGER -Config XERCES3 -Config CXX11 -Config RAPIDJSON -Config NO_BUILT_IN_TOPICS -Config NO_UNIT_TESTS"/>
         <command name="log" options="off"/>
-        <command name="process_logs" options="prettify index"/>
+        <command name="process_logs" options="move prettify index"/>
         </autobuild>
         EOF
         cat config.xml
@@ -10331,7 +10171,7 @@ jobs:
     - name: upload to Google Cloud
       uses: 'google-github-actions/upload-cloud-storage@v1'
       with:
-        path: OpenDDS/${{ github.job }}_autobuild_workspace
+        path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
         destination: opendds-gha-scoreboard-uploads/${{ github.job }}
         parent: false
         process_gcloudignore: false
@@ -10339,9 +10179,9 @@ jobs:
     - name: check results
       shell: bash
       run: |
-        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/${LOG_NAME}_Brief.html"
-        cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
-        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
+        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/"*_Brief.html
+        cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
+        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
 
   compiler_w19_re_j_ws_FM-1f:
 
@@ -10440,10 +10280,6 @@ jobs:
         call setenv.cmd
         cd tests\DCPS\Compiler
         msbuild -p:Configuration=Release,Platform=x64 -m Compiler.sln
-    - name: set log name
-      shell: bash
-      run: |
-        echo "LOG_NAME=$(date '+%Y_%m_%d_%H_%M')" >> "$GITHUB_ENV"
     - name: create autobuild config
       shell: bash
       run: |
@@ -10456,8 +10292,8 @@ jobs:
         cat > config.xml <<EOF
         <autobuild>
         <configuration>
-        <variable name="log_file" value="${LOG_NAME}"/>
-        <variable name="log_root" value="$FS_GHW/OpenDDS/${{ github.job }}_autobuild_workspace"/>
+        <variable name="log_file" value="output"/>
+        <variable name="log_root" value="$FS_GHW/OpenDDS/${{ github.job }}_autobuild_workspace/logs"/>
         <variable name="project_root" value="$FS_GHW/OpenDDS"/>
         <variable name="root" value="$FS_GHW/OpenDDS/${{ github.job }}_autobuild_workspace"/>
         <variable name="junit_xml_output" value="Tests"/>
@@ -10472,7 +10308,7 @@ jobs:
         <command name="print_autobuild_config"/>
         <command name="auto_run_tests" options="script_path=tests dir=$FS_GHW/OpenDDS tests\core_ci_tests.lst -ExeSubDir Release -Config STATIC_COMPILER -Config XERCES3 -Config CXX11 -Config RAPIDJSON -Config NO_BUILT_IN_TOPICS -Config NO_UNIT_TESTS"/>
         <command name="log" options="off"/>
-        <command name="process_logs" options="prettify index"/>
+        <command name="process_logs" options="move prettify index"/>
         </autobuild>
         EOF
         cat config.xml
@@ -10497,7 +10333,7 @@ jobs:
     - name: upload to Google Cloud
       uses: 'google-github-actions/upload-cloud-storage@v1'
       with:
-        path: OpenDDS/${{ github.job }}_autobuild_workspace
+        path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
         destination: opendds-gha-scoreboard-uploads/${{ github.job }}
         parent: false
         process_gcloudignore: false
@@ -10505,9 +10341,9 @@ jobs:
     - name: check results
       shell: bash
       run: |
-        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/${LOG_NAME}_Brief.html"
-        cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
-        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
+        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/"*_Brief.html
+        cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
+        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
 
   unit_w19_re_j_ws_FM-1f:
 
@@ -10613,10 +10449,6 @@ jobs:
         call setenv.cmd
         cd tests\unit-tests
         msbuild -p:Configuration=Release,Platform=x64 -m unit_tests.sln
-    - name: set log name
-      shell: bash
-      run: |
-        echo "LOG_NAME=$(date '+%Y_%m_%d_%H_%M')" >> "$GITHUB_ENV"
     - name: create autobuild config
       shell: bash
       run: |
@@ -10629,8 +10461,8 @@ jobs:
         cat > config.xml <<EOF
         <autobuild>
         <configuration>
-        <variable name="log_file" value="${LOG_NAME}"/>
-        <variable name="log_root" value="$FS_GHW/OpenDDS/${{ github.job }}_autobuild_workspace"/>
+        <variable name="log_file" value="output"/>
+        <variable name="log_root" value="$FS_GHW/OpenDDS/${{ github.job }}_autobuild_workspace/logs"/>
         <variable name="project_root" value="$FS_GHW/OpenDDS"/>
         <variable name="root" value="$FS_GHW/OpenDDS/${{ github.job }}_autobuild_workspace"/>
         <variable name="junit_xml_output" value="Tests"/>
@@ -10645,7 +10477,7 @@ jobs:
         <command name="print_autobuild_config"/>
         <command name="auto_run_tests" options="script_path=tests dir=$FS_GHW/OpenDDS tests\core_ci_tests.lst -ExeSubDir Release -Config STATIC_UNIT_TESTS -Config XERCES3 -Config CXX11 -Config RAPIDJSON -Config NO_BUILT_IN_TOPICS"/>
         <command name="log" options="off"/>
-        <command name="process_logs" options="prettify index"/>
+        <command name="process_logs" options="move prettify index"/>
         </autobuild>
         EOF
         cat config.xml
@@ -10670,7 +10502,7 @@ jobs:
     - name: upload to Google Cloud
       uses: 'google-github-actions/upload-cloud-storage@v1'
       with:
-        path: OpenDDS/${{ github.job }}_autobuild_workspace
+        path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
         destination: opendds-gha-scoreboard-uploads/${{ github.job }}
         parent: false
         process_gcloudignore: false
@@ -10678,9 +10510,9 @@ jobs:
     - name: check results
       shell: bash
       run: |
-        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/${LOG_NAME}_Brief.html"
-        cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
-        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
+        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/"*_Brief.html
+        cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
+        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
 
   ACE_TAO_w22_x86_i0:
 
@@ -10952,10 +10784,6 @@ jobs:
         cd /d C:\OpenDDS
         call setenv.cmd
         perl tools\scripts\show_build_config.pl
-    - name: set log name
-      shell: bash
-      run: |
-        echo "LOG_NAME=$(date '+%Y_%m_%d_%H_%M')" >> "$GITHUB_ENV"
     - name: create autobuild config
       shell: bash
       run: |
@@ -10967,8 +10795,8 @@ jobs:
         cat > config.xml <<EOF
         <autobuild>
         <configuration>
-        <variable name="log_file" value="${LOG_NAME}"/>
-        <variable name="log_root" value="C:/OpenDDS/${{ github.job }}_autobuild_workspace"/>
+        <variable name="log_file" value="output"/>
+        <variable name="log_root" value="C:/OpenDDS/${{ github.job }}_autobuild_workspace/logs"/>
         <variable name="project_root" value="C:/OpenDDS"/>
         <variable name="root" value="C:/OpenDDS/${{ github.job }}_autobuild_workspace"/>
         <variable name="junit_xml_output" value="Tests"/>
@@ -10984,7 +10812,7 @@ jobs:
         <command name="print_autobuild_config"/>
         <command name="auto_run_tests" options="script_path=tests dir=C:/OpenDDS --no-dcps --cmake"/>
         <command name="log" options="off"/>
-        <command name="process_logs" options="prettify index"/>
+        <command name="process_logs" options="move prettify index"/>
         </autobuild>
         EOF
     - name: run OpenDDS CMake tests
@@ -11008,7 +10836,7 @@ jobs:
     - name: upload to Google Cloud
       uses: 'google-github-actions/upload-cloud-storage@v1'
       with:
-        path: C:\OpenDDS\${{ github.job }}_autobuild_workspace
+        path: C:\OpenDDS\${{ github.job }}_autobuild_workspace/logs
         destination: opendds-gha-scoreboard-uploads/${{ github.job }}
         parent: false
         process_gcloudignore: false
@@ -11016,9 +10844,9 @@ jobs:
     - name: check results
       shell: bash
       run: |
-        /c/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "/c/OpenDDS/${{ github.job }}_autobuild_workspace/${LOG_NAME}_Brief.html"
-        cat "/c/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
-        grep -q 'Failures: 0' "/c/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
+        /c/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "/c/OpenDDS/${{ github.job }}_autobuild_workspace/logs/"*_Brief.html
+        cat "/c/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
+        grep -q 'Failures: 0' "/c/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
 
   test_w22_x86_i0_sec:
 
@@ -11107,10 +10935,6 @@ jobs:
         cd /d C:\OpenDDS
         call setenv.cmd
         perl tools\scripts\show_build_config.pl
-    - name: set log name
-      shell: bash
-      run: |
-        echo "LOG_NAME=$(date '+%Y_%m_%d_%H_%M')" >> "$GITHUB_ENV"
     - name: create autobuild config
       shell: bash
       run: |
@@ -11122,8 +10946,8 @@ jobs:
         cat > config.xml <<EOF
         <autobuild>
         <configuration>
-        <variable name="log_file" value="${LOG_NAME}"/>
-        <variable name="log_root" value="C:/OpenDDS/${{ github.job }}_autobuild_workspace"/>
+        <variable name="log_file" value="output"/>
+        <variable name="log_root" value="C:/OpenDDS/${{ github.job }}_autobuild_workspace/logs"/>
         <variable name="project_root" value="C:/OpenDDS"/>
         <variable name="root" value="C:/OpenDDS/${{ github.job }}_autobuild_workspace"/>
         <variable name="junit_xml_output" value="Tests"/>
@@ -11139,7 +10963,7 @@ jobs:
         <command name="print_autobuild_config"/>
         <command name="auto_run_tests" options="script_path=tests dir=C:/OpenDDS -Config DCPS_MIN"/>
         <command name="log" options="off"/>
-        <command name="process_logs" options="prettify index"/>
+        <command name="process_logs" options="move prettify index"/>
         </autobuild>
         EOF
     - name: run OpenDDS tests
@@ -11163,7 +10987,7 @@ jobs:
     - name: upload to Google Cloud
       uses: 'google-github-actions/upload-cloud-storage@v1'
       with:
-        path: C:\OpenDDS\${{ github.job }}_autobuild_workspace
+        path: C:\OpenDDS\${{ github.job }}_autobuild_workspace/logs
         destination: opendds-gha-scoreboard-uploads/${{ github.job }}
         parent: false
         process_gcloudignore: false
@@ -11171,9 +10995,9 @@ jobs:
     - name: check results
       shell: bash
       run: |
-        /c/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "/c/OpenDDS/${{ github.job }}_autobuild_workspace/${LOG_NAME}_Brief.html"
-        cat "/c/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
-        grep -q 'Failures: 0' "/c/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
+        /c/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "/c/OpenDDS/${{ github.job }}_autobuild_workspace/logs/"*_Brief.html
+        cat "/c/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
+        grep -q 'Failures: 0' "/c/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
 
   build_w22_x86_i0_j_FM-1f:
 
@@ -11346,26 +11170,21 @@ jobs:
         cd /d C:\tests\cmake\build
         cmake -A Win32 %DDS_ROOT%\tests\cmake
         cmake --build .
-    - name: set log name
-      shell: bash
-      run: |
-        echo "LOG_NAME=$(date '+%Y_%m_%d_%H_%M')" >> "$GITHUB_ENV"
     - name: create autobuild config
       shell: bash
       run: |
         cd /c/OpenDDS
         mkdir ${{ github.job }}_autobuild_workspace
         cd ${{ github.job }}_autobuild_workspace
-        export FS_GHW=$(echo $GITHUB_WORKSPACE | sed 's/\\/\//g')
         echo using commit $TRIGGERING_COMMIT for SHA
         echo $TRIGGERING_COMMIT >> ./SHA
         cat > config.xml <<EOF
         <autobuild>
         <configuration>
-        <variable name="log_file" value="${LOG_NAME}"/>
-        <variable name="log_root" value="$FS_GHW/OpenDDS/${{ github.job }}_autobuild_workspace"/>
-        <variable name="project_root" value="$FS_GHW/OpenDDS"/>
-        <variable name="root" value="$FS_GHW/OpenDDS/${{ github.job }}_autobuild_workspace"/>
+        <variable name="log_file" value="output"/>
+        <variable name="log_root" value="c:/OpenDDS/${{ github.job }}_autobuild_workspace/logs"/>
+        <variable name="project_root" value="c:/OpenDDS"/>
+        <variable name="root" value="c:/OpenDDS/${{ github.job }}_autobuild_workspace"/>
         <variable name="junit_xml_output" value="Tests"/>
         </configuration>
         <command name="log" options="on"/>
@@ -11377,9 +11196,9 @@ jobs:
         <command name="check_compiler" options="msvc"/>
         <command name="print_perl_version"/>
         <command name="print_autobuild_config"/>
-        <command name="auto_run_tests" options="script_path=tests dir=$FS_GHW/OpenDDS --no-dcps --cmake --cmake-build-dir=c:/tests/cmake/build -Config OPENDDS_TESTING_FEATURES"/>
+        <command name="auto_run_tests" options="script_path=tests dir=c:/OpenDDS --no-dcps --cmake --cmake-build-dir=c:/tests/cmake/build -Config OPENDDS_TESTING_FEATURES"/>
         <command name="log" options="off"/>
-        <command name="process_logs" options="prettify index"/>
+        <command name="process_logs" options="move prettify index"/>
         </autobuild>
         EOF
         cat config.xml
@@ -11394,7 +11213,7 @@ jobs:
       uses: actions/upload-artifact@v3
       with:
         name: ${{ github.job }}_autobuild_output
-        path: OpenDDS\${{ github.job }}_autobuild_workspace
+        path: c:/OpenDDS/${{ github.job }}_autobuild_workspace
     - name: Authenticate to Google Cloud
       uses: google-github-actions/auth@v2
       with:
@@ -11404,7 +11223,7 @@ jobs:
     - name: upload to Google Cloud
       uses: 'google-github-actions/upload-cloud-storage@v1'
       with:
-        path: OpenDDS/${{ github.job }}_autobuild_workspace
+        path: c:/OpenDDS/${{ github.job }}_autobuild_workspace/logs
         destination: opendds-gha-scoreboard-uploads/${{ github.job }}
         parent: false
         process_gcloudignore: false
@@ -11412,9 +11231,9 @@ jobs:
     - name: check results
       shell: bash
       run: |
-        /c/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "/c/OpenDDS/${{ github.job }}_autobuild_workspace/${LOG_NAME}_Brief.html"
-        cat "/c/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
-        grep -q 'Failures: 0' "/c/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
+        /c/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "c:/OpenDDS/${{ github.job }}_autobuild_workspace/logs/"*_Brief.html
+        cat "c:/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
+        grep -q 'Failures: 0' "c:/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
 
   ACE_TAO_w22_p1:
 
@@ -11671,10 +11490,6 @@ jobs:
         cd OpenDDS
         call setenv.cmd
         perl tools\scripts\show_build_config.pl
-    - name: set log name
-      shell: bash
-      run: |
-        echo "LOG_NAME=$(date '+%Y_%m_%d_%H_%M')" >> "$GITHUB_ENV"
     - name: create autobuild config
       shell: bash
       run: |
@@ -11687,8 +11502,8 @@ jobs:
         cat > config.xml <<EOF
         <autobuild>
         <configuration>
-        <variable name="log_file" value="${LOG_NAME}"/>
-        <variable name="log_root" value="$FS_GHW/OpenDDS/${{ github.job }}_autobuild_workspace"/>
+        <variable name="log_file" value="output"/>
+        <variable name="log_root" value="$FS_GHW/OpenDDS/${{ github.job }}_autobuild_workspace/logs"/>
         <variable name="project_root" value="$FS_GHW/OpenDDS"/>
         <variable name="root" value="$FS_GHW/OpenDDS/${{ github.job }}_autobuild_workspace"/>
         <variable name="junit_xml_output" value="Tests"/>
@@ -11704,7 +11519,7 @@ jobs:
         <command name="print_autobuild_config"/>
         <command name="auto_run_tests" options="script_path=tests dir=$FS_GHW/OpenDDS --no-dcps --cmake"/>
         <command name="log" options="off"/>
-        <command name="process_logs" options="prettify index"/>
+        <command name="process_logs" options="move prettify index"/>
         </autobuild>
         EOF
         cat config.xml
@@ -11729,7 +11544,7 @@ jobs:
     - name: upload to Google Cloud
       uses: 'google-github-actions/upload-cloud-storage@v1'
       with:
-        path: OpenDDS/${{ github.job }}_autobuild_workspace
+        path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
         destination: opendds-gha-scoreboard-uploads/${{ github.job }}
         parent: false
         process_gcloudignore: false
@@ -11737,9 +11552,9 @@ jobs:
     - name: check results
       shell: bash
       run: |
-        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/${LOG_NAME}_Brief.html"
-        cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
-        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
+        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/"*_Brief.html
+        cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
+        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
 
   messenger_w22_p1:
 
@@ -11841,10 +11656,6 @@ jobs:
         call setenv.cmd
         cd tests\DCPS\C++11
         msbuild -p:Configuration=Debug,Platform=x64 -m C++11.sln
-    - name: set log name
-      shell: bash
-      run: |
-        echo "LOG_NAME=$(date '+%Y_%m_%d_%H_%M')" >> "$GITHUB_ENV"
     - name: create autobuild config
       shell: bash
       run: |
@@ -11857,8 +11668,8 @@ jobs:
         cat > config.xml <<EOF
         <autobuild>
         <configuration>
-        <variable name="log_file" value="${LOG_NAME}"/>
-        <variable name="log_root" value="$FS_GHW/OpenDDS/${{ github.job }}_autobuild_workspace"/>
+        <variable name="log_file" value="output"/>
+        <variable name="log_root" value="$FS_GHW/OpenDDS/${{ github.job }}_autobuild_workspace/logs"/>
         <variable name="project_root" value="$FS_GHW/OpenDDS"/>
         <variable name="root" value="$FS_GHW/OpenDDS/${{ github.job }}_autobuild_workspace"/>
         <variable name="junit_xml_output" value="Tests"/>
@@ -11873,7 +11684,7 @@ jobs:
         <command name="print_autobuild_config"/>
         <command name="auto_run_tests" options="script_path=tests dir=$FS_GHW/OpenDDS tests\core_ci_tests.lst -ExeSubDir Debug -Config STATIC_MESSENGER -Config IPV6 -Config XERCES3 -Config CXX11 -Config NO_UNIT_TESTS -Config RAPIDJSON"/>
         <command name="log" options="off"/>
-        <command name="process_logs" options="prettify index"/>
+        <command name="process_logs" options="move prettify index"/>
         </autobuild>
         EOF
         cat config.xml
@@ -11898,7 +11709,7 @@ jobs:
     - name: upload to Google Cloud
       uses: 'google-github-actions/upload-cloud-storage@v1'
       with:
-        path: OpenDDS/${{ github.job }}_autobuild_workspace
+        path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
         destination: opendds-gha-scoreboard-uploads/${{ github.job }}
         parent: false
         process_gcloudignore: false
@@ -11906,9 +11717,9 @@ jobs:
     - name: check results
       shell: bash
       run: |
-        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/${LOG_NAME}_Brief.html"
-        cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
-        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
+        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/"*_Brief.html
+        cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
+        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
 
   compiler_w22_p1:
 
@@ -12007,10 +11818,6 @@ jobs:
         call setenv.cmd
         cd tests\DCPS\Compiler
         msbuild -p:Configuration=Debug,Platform=x64 -m Compiler.sln
-    - name: set log name
-      shell: bash
-      run: |
-        echo "LOG_NAME=$(date '+%Y_%m_%d_%H_%M')" >> "$GITHUB_ENV"
     - name: create autobuild config
       shell: bash
       run: |
@@ -12023,8 +11830,8 @@ jobs:
         cat > config.xml <<EOF
         <autobuild>
         <configuration>
-        <variable name="log_file" value="${LOG_NAME}"/>
-        <variable name="log_root" value="$FS_GHW/OpenDDS/${{ github.job }}_autobuild_workspace"/>
+        <variable name="log_file" value="output"/>
+        <variable name="log_root" value="$FS_GHW/OpenDDS/${{ github.job }}_autobuild_workspace/logs"/>
         <variable name="project_root" value="$FS_GHW/OpenDDS"/>
         <variable name="root" value="$FS_GHW/OpenDDS/${{ github.job }}_autobuild_workspace"/>
         <variable name="junit_xml_output" value="Tests"/>
@@ -12039,7 +11846,7 @@ jobs:
         <command name="print_autobuild_config"/>
         <command name="auto_run_tests" options="script_path=tests dir=$FS_GHW/OpenDDS tests\core_ci_tests.lst -ExeSubDir Debug -Config STATIC_COMPILER -Config STATIC_COMPILER2 -Config IPV6 -Config XERCES3 -Config CXX11 -Config NO_UNIT_TESTS -Config RAPIDJSON"/>
         <command name="log" options="off"/>
-        <command name="process_logs" options="prettify index"/>
+        <command name="process_logs" options="move prettify index"/>
         </autobuild>
         EOF
         cat config.xml
@@ -12064,7 +11871,7 @@ jobs:
     - name: upload to Google Cloud
       uses: 'google-github-actions/upload-cloud-storage@v1'
       with:
-        path: OpenDDS/${{ github.job }}_autobuild_workspace
+        path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
         destination: opendds-gha-scoreboard-uploads/${{ github.job }}
         parent: false
         process_gcloudignore: false
@@ -12072,9 +11879,9 @@ jobs:
     - name: check results
       shell: bash
       run: |
-        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/${LOG_NAME}_Brief.html"
-        cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
-        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
+        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/"*_Brief.html
+        cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
+        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
 
   unit_w22_p1:
 
@@ -12173,10 +11980,6 @@ jobs:
         call setenv.cmd
         cd tests\unit-tests
         msbuild -p:Configuration=Debug,Platform=x64 -m unit_tests.sln
-    - name: set log name
-      shell: bash
-      run: |
-        echo "LOG_NAME=$(date '+%Y_%m_%d_%H_%M')" >> "$GITHUB_ENV"
     - name: create autobuild config
       shell: bash
       run: |
@@ -12189,8 +11992,8 @@ jobs:
         cat > config.xml <<EOF
         <autobuild>
         <configuration>
-        <variable name="log_file" value="${LOG_NAME}"/>
-        <variable name="log_root" value="$FS_GHW/OpenDDS/${{ github.job }}_autobuild_workspace"/>
+        <variable name="log_file" value="output"/>
+        <variable name="log_root" value="$FS_GHW/OpenDDS/${{ github.job }}_autobuild_workspace/logs"/>
         <variable name="project_root" value="$FS_GHW/OpenDDS"/>
         <variable name="root" value="$FS_GHW/OpenDDS/${{ github.job }}_autobuild_workspace"/>
         <variable name="junit_xml_output" value="Tests"/>
@@ -12205,7 +12008,7 @@ jobs:
         <command name="print_autobuild_config"/>
         <command name="auto_run_tests" options="script_path=tests dir=$FS_GHW/OpenDDS tests\core_ci_tests.lst -ExeSubDir Debug -Config STATIC_UNIT_TESTS -Config IPV6 -Config XERCES3 -Config CXX11 -Config RAPIDJSON"/>
         <command name="log" options="off"/>
-        <command name="process_logs" options="prettify index"/>
+        <command name="process_logs" options="move prettify index"/>
         </autobuild>
         EOF
         cat config.xml
@@ -12230,7 +12033,7 @@ jobs:
     - name: upload to Google Cloud
       uses: 'google-github-actions/upload-cloud-storage@v1'
       with:
-        path: OpenDDS/${{ github.job }}_autobuild_workspace
+        path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
         destination: opendds-gha-scoreboard-uploads/${{ github.job }}
         parent: false
         process_gcloudignore: false
@@ -12238,9 +12041,9 @@ jobs:
     - name: check results
       shell: bash
       run: |
-        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/${LOG_NAME}_Brief.html"
-        cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
-        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
+        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/"*_Brief.html
+        cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
+        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
 
   # macOS 11.0
 
@@ -12460,10 +12263,6 @@ jobs:
         cd OpenDDS
         . setenv.sh
         tools/scripts/show_build_config.pl
-    - name: set log name
-      shell: bash
-      run: |
-        echo "LOG_NAME=$(date '+%Y_%m_%d_%H_%M')" >> "$GITHUB_ENV"
     - name: run OpenDDS tests
       shell: bash
       run: |
@@ -12477,8 +12276,8 @@ jobs:
         cat > config.xml <<EOF
         <autobuild>
         <configuration>
-        <variable name="log_file" value="${LOG_NAME}"/>
-        <variable name="log_root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace"/>
+        <variable name="log_file" value="output"/>
+        <variable name="log_root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace/logs"/>
         <variable name="project_root" value="$DDS_ROOT"/>
         <variable name="root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace"/>
         <variable name="junit_xml_output" value="Tests"/>
@@ -12493,7 +12292,7 @@ jobs:
         <command name="print_autobuild_config"/>
         <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS -Config STATIC_MESSENGER -Config STATIC_COMPILER -Config STATIC_COMPILER2 -Config STATIC_UNIT_TESTS -Config XERCES3 -Config OPENDDS_SECURITY -Config CXX11 -Config RAPIDJSON -Config NO_SHMEM -Config DDS_NO_ORBSVCS --no-dcps tests/core_ci_tests.lst"/>
         <command name="log" options="off"/>
-        <command name="process_logs" options="prettify index"/>
+        <command name="process_logs" options="move prettify index"/>
         </autobuild>
         EOF
         $GITHUB_WORKSPACE/autobuild/autobuild.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/config.xml"
@@ -12511,7 +12310,7 @@ jobs:
     - name: upload to Google Cloud
       uses: 'google-github-actions/upload-cloud-storage@v1'
       with:
-        path: OpenDDS/${{ github.job }}_autobuild_workspace
+        path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
         destination: opendds-gha-scoreboard-uploads/${{ github.job }}
         parent: false
         process_gcloudignore: false
@@ -12519,9 +12318,9 @@ jobs:
     - name: check results
       shell: bash
       run: |
-        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/${LOG_NAME}_Brief.html"
-        cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
-        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
+        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/"*_Brief.html
+        cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
+        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
 
   cmake_m11_sec:
 
@@ -12584,10 +12383,6 @@ jobs:
         cd OpenDDS
         . setenv.sh
         tools/scripts/show_build_config.pl
-    - name: set log name
-      shell: bash
-      run: |
-        echo "LOG_NAME=$(date '+%Y_%m_%d_%H_%M')" >> "$GITHUB_ENV"
     - name: run OpenDDS tests
       shell: bash
       run: |
@@ -12601,8 +12396,8 @@ jobs:
         cat > config.xml <<EOF
         <autobuild>
         <configuration>
-        <variable name="log_file" value="${LOG_NAME}"/>
-        <variable name="log_root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace"/>
+        <variable name="log_file" value="output"/>
+        <variable name="log_root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace/logs"/>
         <variable name="project_root" value="$DDS_ROOT"/>
         <variable name="root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace"/>
         <variable name="junit_xml_output" value="Tests"/>
@@ -12617,7 +12412,7 @@ jobs:
         <command name="print_autobuild_config"/>
         <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS --no-dcps --cmake"/>
         <command name="log" options="off"/>
-        <command name="process_logs" options="prettify index"/>
+        <command name="process_logs" options="move prettify index"/>
         </autobuild>
         EOF
         $GITHUB_WORKSPACE/autobuild/autobuild.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/config.xml"
@@ -12635,7 +12430,7 @@ jobs:
     - name: upload to Google Cloud
       uses: 'google-github-actions/upload-cloud-storage@v1'
       with:
-        path: OpenDDS/${{ github.job }}_autobuild_workspace
+        path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
         destination: opendds-gha-scoreboard-uploads/${{ github.job }}
         parent: false
         process_gcloudignore: false
@@ -12643,9 +12438,9 @@ jobs:
     - name: check results
       shell: bash
       run: |
-        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/${LOG_NAME}_Brief.html"
-        cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
-        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
+        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/"*_Brief.html
+        cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
+        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
 
   build_m11_j_FM-1f:
 
@@ -12798,10 +12593,6 @@ jobs:
         cd OpenDDS
         . setenv.sh
         tools/scripts/show_build_config.pl
-    - name: set log name
-      shell: bash
-      run: |
-        echo "LOG_NAME=$(date '+%Y_%m_%d_%H_%M')" >> "$GITHUB_ENV"
     - name: run OpenDDS tests
       shell: bash
       run: |
@@ -12815,8 +12606,8 @@ jobs:
         cat > config.xml <<EOF
         <autobuild>
         <configuration>
-        <variable name="log_file" value="${LOG_NAME}"/>
-        <variable name="log_root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace"/>
+        <variable name="log_file" value="output"/>
+        <variable name="log_root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace/logs"/>
         <variable name="project_root" value="$DDS_ROOT"/>
         <variable name="root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace"/>
         <variable name="junit_xml_output" value="Tests"/>
@@ -12831,7 +12622,7 @@ jobs:
         <command name="print_autobuild_config"/>
         <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS -Config STATIC_MESSENGER -Config STATIC_COMPILER -Config STATIC_COMPILER2 -Config STATIC_UNIT_TESTS -Config CXX11 -Config RAPIDJSON -Config NO_SHMEM -Config DDS_NO_ORBSVCS -Config NO_BUILT_IN_TOPICS --no-dcps tests/core_ci_tests.lst"/>
         <command name="log" options="off"/>
-        <command name="process_logs" options="prettify index"/>
+        <command name="process_logs" options="move prettify index"/>
         </autobuild>
         EOF
         $GITHUB_WORKSPACE/autobuild/autobuild.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/config.xml"
@@ -12849,7 +12640,7 @@ jobs:
     - name: upload to Google Cloud
       uses: 'google-github-actions/upload-cloud-storage@v1'
       with:
-        path: OpenDDS/${{ github.job }}_autobuild_workspace
+        path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
         destination: opendds-gha-scoreboard-uploads/${{ github.job }}
         parent: false
         process_gcloudignore: false
@@ -12857,9 +12648,9 @@ jobs:
     - name: check results
       shell: bash
       run: |
-        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/${LOG_NAME}_Brief.html"
-        cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
-        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
+        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/"*_Brief.html
+        cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
+        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
 
   cmake_modeling_m11_j_FM-1f:
 
@@ -12922,10 +12713,6 @@ jobs:
         cd OpenDDS
         . setenv.sh
         tools/scripts/show_build_config.pl
-    - name: set log name
-      shell: bash
-      run: |
-        echo "LOG_NAME=$(date '+%Y_%m_%d_%H_%M')" >> "$GITHUB_ENV"
     - name: run OpenDDS tests
       shell: bash
       run: |
@@ -12939,8 +12726,8 @@ jobs:
         cat > config.xml <<EOF
         <autobuild>
         <configuration>
-        <variable name="log_file" value="${LOG_NAME}"/>
-        <variable name="log_root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace"/>
+        <variable name="log_file" value="output"/>
+        <variable name="log_root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace/logs"/>
         <variable name="project_root" value="$DDS_ROOT"/>
         <variable name="root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace"/>
         <variable name="junit_xml_output" value="Tests"/>
@@ -12955,7 +12742,7 @@ jobs:
         <command name="print_autobuild_config"/>
         <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS --no-dcps -Config CXX11 -Config RAPIDJSON -Config NO_SHMEM -Config DDS_NO_ORBSVCS -Config NO_BUILT_IN_TOPICS --java --cmake --modeling"/>
         <command name="log" options="off"/>
-        <command name="process_logs" options="prettify index"/>
+        <command name="process_logs" options="move prettify index"/>
         </autobuild>
         EOF
         $GITHUB_WORKSPACE/autobuild/autobuild.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/config.xml"
@@ -12973,7 +12760,7 @@ jobs:
     - name: upload to Google Cloud
       uses: 'google-github-actions/upload-cloud-storage@v1'
       with:
-        path: OpenDDS/${{ github.job }}_autobuild_workspace
+        path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
         destination: opendds-gha-scoreboard-uploads/${{ github.job }}
         parent: false
         process_gcloudignore: false
@@ -12981,9 +12768,9 @@ jobs:
     - name: check results
       shell: bash
       run: |
-        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/${LOG_NAME}_Brief.html"
-        cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
-        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
+        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/"*_Brief.html
+        cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
+        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
 
   # macOS 12.5
 
@@ -13200,10 +12987,6 @@ jobs:
         cd OpenDDS
         . setenv.sh
         tools/scripts/show_build_config.pl
-    - name: set log name
-      shell: bash
-      run: |
-        echo "LOG_NAME=$(date '+%Y_%m_%d_%H_%M')" >> "$GITHUB_ENV"
     - name: run OpenDDS tests
       shell: bash
       run: |
@@ -13219,8 +13002,8 @@ jobs:
         cat > config.xml <<EOF
         <autobuild>
         <configuration>
-        <variable name="log_file" value="${LOG_NAME}"/>
-        <variable name="log_root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace"/>
+        <variable name="log_file" value="output"/>
+        <variable name="log_root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace/logs"/>
         <variable name="project_root" value="$DDS_ROOT"/>
         <variable name="root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace"/>
         <variable name="junit_xml_output" value="Tests"/>
@@ -13236,7 +13019,7 @@ jobs:
         <command name="print_autobuild_config"/>
         <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS -Config STATIC_MESSENGER -Config STATIC_COMPILER -Config STATIC_COMPILER2 -Config STATIC_UNIT_TESTS -Config XERCES3 -Config OPENDDS_SECURITY -Config CXX11 -Config RAPIDJSON -Config NO_SHMEM -Config DDS_NO_ORBSVCS -Config GH_ACTIONS_M12 --no-dcps tests/core_ci_tests.lst"/>
         <command name="log" options="off"/>
-        <command name="process_logs" options="prettify index"/>
+        <command name="process_logs" options="move prettify index"/>
         </autobuild>
         EOF
         $GITHUB_WORKSPACE/autobuild/autobuild.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/config.xml"
@@ -13254,7 +13037,7 @@ jobs:
     - name: upload to Google Cloud
       uses: 'google-github-actions/upload-cloud-storage@v1'
       with:
-        path: OpenDDS/${{ github.job }}_autobuild_workspace
+        path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
         destination: opendds-gha-scoreboard-uploads/${{ github.job }}
         parent: false
         process_gcloudignore: false
@@ -13262,9 +13045,9 @@ jobs:
     - name: check results
       shell: bash
       run: |
-        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/${LOG_NAME}_Brief.html"
-        cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
-        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
+        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/"*_Brief.html
+        cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
+        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
 
   cmake_m12_o1d0_sec:
 
@@ -13327,10 +13110,6 @@ jobs:
         cd OpenDDS
         . setenv.sh
         tools/scripts/show_build_config.pl
-    - name: set log name
-      shell: bash
-      run: |
-        echo "LOG_NAME=$(date '+%Y_%m_%d_%H_%M')" >> "$GITHUB_ENV"
     - name: run OpenDDS tests
       shell: bash
       run: |
@@ -13346,8 +13125,8 @@ jobs:
         cat > config.xml <<EOF
         <autobuild>
         <configuration>
-        <variable name="log_file" value="${LOG_NAME}"/>
-        <variable name="log_root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace"/>
+        <variable name="log_file" value="output"/>
+        <variable name="log_root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace/logs"/>
         <variable name="project_root" value="$DDS_ROOT"/>
         <variable name="root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace"/>
         <variable name="junit_xml_output" value="Tests"/>
@@ -13363,7 +13142,7 @@ jobs:
         <command name="print_autobuild_config"/>
         <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS --no-dcps --cmake"/>
         <command name="log" options="off"/>
-        <command name="process_logs" options="prettify index"/>
+        <command name="process_logs" options="move prettify index"/>
         </autobuild>
         EOF
         $GITHUB_WORKSPACE/autobuild/autobuild.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/config.xml"
@@ -13381,7 +13160,7 @@ jobs:
     - name: upload to Google Cloud
       uses: 'google-github-actions/upload-cloud-storage@v1'
       with:
-        path: OpenDDS/${{ github.job }}_autobuild_workspace
+        path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
         destination: opendds-gha-scoreboard-uploads/${{ github.job }}
         parent: false
         process_gcloudignore: false
@@ -13389,9 +13168,9 @@ jobs:
     - name: check results
       shell: bash
       run: |
-        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/${LOG_NAME}_Brief.html"
-        cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
-        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
+        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/"*_Brief.html
+        cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
+        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
 
   ACE_TAO_m12_i0_j_FM-1f:
 
@@ -13626,10 +13405,6 @@ jobs:
         cd OpenDDS
         . setenv.sh
         tools/scripts/show_build_config.pl
-    - name: set log name
-      shell: bash
-      run: |
-        echo "LOG_NAME=$(date '+%Y_%m_%d_%H_%M')" >> "$GITHUB_ENV"
     - name: run OpenDDS tests
       shell: bash
       run: |
@@ -13645,8 +13420,8 @@ jobs:
         cat > config.xml <<EOF
         <autobuild>
         <configuration>
-        <variable name="log_file" value="${LOG_NAME}"/>
-        <variable name="log_root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace"/>
+        <variable name="log_file" value="output"/>
+        <variable name="log_root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace/logs"/>
         <variable name="project_root" value="$DDS_ROOT"/>
         <variable name="root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace"/>
         <variable name="junit_xml_output" value="Tests"/>
@@ -13662,7 +13437,7 @@ jobs:
         <command name="print_autobuild_config"/>
         <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS -Config STATIC_MESSENGER -Config STATIC_COMPILER -Config STATIC_COMPILER2 -Config STATIC_UNIT_TESTS -Config CXX11 -Config RAPIDJSON -Config NO_SHMEM -Config DDS_NO_ORBSVCS -Config NO_BUILT_IN_TOPICS -Config NO_UNIT_TESTS -Config GH_ACTIONS_M12 --no-dcps tests/core_ci_tests.lst"/>
         <command name="log" options="off"/>
-        <command name="process_logs" options="prettify index"/>
+        <command name="process_logs" options="move prettify index"/>
         </autobuild>
         EOF
         $GITHUB_WORKSPACE/autobuild/autobuild.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/config.xml"
@@ -13680,7 +13455,7 @@ jobs:
     - name: upload to Google Cloud
       uses: 'google-github-actions/upload-cloud-storage@v1'
       with:
-        path: OpenDDS/${{ github.job }}_autobuild_workspace
+        path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
         destination: opendds-gha-scoreboard-uploads/${{ github.job }}
         parent: false
         process_gcloudignore: false
@@ -13688,9 +13463,9 @@ jobs:
     - name: check results
       shell: bash
       run: |
-        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/${LOG_NAME}_Brief.html"
-        cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
-        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
+        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/"*_Brief.html
+        cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
+        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
 
   cmake_modeling_m12_i0_j_FM-1f:
 
@@ -13753,10 +13528,6 @@ jobs:
         cd OpenDDS
         . setenv.sh
         tools/scripts/show_build_config.pl
-    - name: set log name
-      shell: bash
-      run: |
-        echo "LOG_NAME=$(date '+%Y_%m_%d_%H_%M')" >> "$GITHUB_ENV"
     - name: run OpenDDS tests
       shell: bash
       run: |
@@ -13772,8 +13543,8 @@ jobs:
         cat > config.xml <<EOF
         <autobuild>
         <configuration>
-        <variable name="log_file" value="${LOG_NAME}"/>
-        <variable name="log_root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace"/>
+        <variable name="log_file" value="output"/>
+        <variable name="log_root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace/logs"/>
         <variable name="project_root" value="$DDS_ROOT"/>
         <variable name="root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace"/>
         <variable name="junit_xml_output" value="Tests"/>
@@ -13789,7 +13560,7 @@ jobs:
         <command name="print_autobuild_config"/>
         <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS --no-dcps -Config CXX11 -Config RAPIDJSON -Config NO_SHMEM -Config DDS_NO_ORBSVCS -Config NO_BUILT_IN_TOPICS -Config NO_UNIT_TESTS -Config GH_ACTIONS_M12 --modeling --cmake"/>
         <command name="log" options="off"/>
-        <command name="process_logs" options="prettify index"/>
+        <command name="process_logs" options="move prettify index"/>
         </autobuild>
         EOF
         $GITHUB_WORKSPACE/autobuild/autobuild.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/config.xml"
@@ -13807,7 +13578,7 @@ jobs:
     - name: upload to Google Cloud
       uses: 'google-github-actions/upload-cloud-storage@v1'
       with:
-        path: OpenDDS/${{ github.job }}_autobuild_workspace
+        path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
         destination: opendds-gha-scoreboard-uploads/${{ github.job }}
         parent: false
         process_gcloudignore: false
@@ -13815,9 +13586,9 @@ jobs:
     - name: check results
       shell: bash
       run: |
-        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/${LOG_NAME}_Brief.html"
-        cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
-        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
+        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/"*_Brief.html
+        cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
+        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
 
   build_u14_gcc4:
 
