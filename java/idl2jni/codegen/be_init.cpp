@@ -40,5 +40,6 @@ BE_post_init(char *[], long)
 
   DRV_cpp_putarg("-D__OPENDDS_IDL_HAS_ANNOTATIONS");
 
-  idl_global->eval("module OpenDDS {@annotation hidden_op_in_java {string impl;};};\n");
+  idl_global->eval(
+    "module OpenDDS {module internal {@annotation hidden_op_in_java {string impl;};};};\n");
 }

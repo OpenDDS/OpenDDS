@@ -74,7 +74,7 @@ module DDS {
         // valuetype isn't supported in Java. This will exclude this operation
         // from the generated Java code and return null in get_type method of
         // the TAOPeer generated C++ class so it isn't a pure virtual function.
-        @OpenDDS::hidden_op_in_java("return 0;")
+        @OpenDDS::internal::hidden_op_in_java("return 0;")
         DynamicType get_type();
 #endif
     };
