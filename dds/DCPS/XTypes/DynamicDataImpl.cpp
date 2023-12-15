@@ -4828,8 +4828,7 @@ bool serialized_size_dynamic_member(DDS::DynamicData_ptr data, const Encoding& e
   default:
     if (log_level >= LogLevel::Notice) {
       ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: serialized_size_dynamic_member:"
-                 " Unsupported member type %C at ID %u\n",
-                 XTypes::typekind_to_string(member_tk), member_id));
+                 " Unsupported member type %C at ID %u\n", typekind_to_string(member_tk), member_id));
     }
   }
   return false;
