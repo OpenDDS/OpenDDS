@@ -235,6 +235,9 @@ public:
   // This is used to create objects of different types.
   StringList get_section_names(const String& prefix) const;
 
+  typedef OPENDDS_MAP(String, String) StringMap;
+  StringMap get_section_values(const String& prefix) const;
+
   static DDS::DataWriterQos datawriter_qos();
   static DDS::DataReaderQos datareader_qos();
 
