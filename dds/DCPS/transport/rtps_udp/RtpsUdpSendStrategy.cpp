@@ -101,7 +101,7 @@ RtpsUdpSendStrategy::send_bytes_i_helper(const iovec iov[], int n)
     return -1;
   }
 
-  AddrSet addrs;
+  NetworkAddressSet addrs;
   if (elem->subscription_id() != GUID_UNKNOWN) {
     addrs = link_->get_addresses(elem->publication_id(), elem->subscription_id());
 
@@ -128,7 +128,7 @@ RtpsUdpSendStrategy::override_destinations(const NetworkAddress& destination)
 }
 
 RtpsUdpSendStrategy::OverrideToken
-RtpsUdpSendStrategy::override_destinations(const AddrSet& dest)
+RtpsUdpSendStrategy::override_destinations(const NetworkAddressSet& dest)
 {
   override_dest_ = &dest;
   return OverrideToken(this);
@@ -201,7 +201,7 @@ RtpsUdpSendStrategy::send_rtps_control(RTPS::Message& message,
 void
 RtpsUdpSendStrategy::send_rtps_control(RTPS::Message& message,
                                        ACE_Message_Block& submessages,
-                                       const AddrSet& addrs)
+                                       const NetworkAddressSet& addrs)
 {
   {
     ACE_GUARD(ACE_Thread_Mutex, g, rtps_message_mutex_);
@@ -249,10 +249,10 @@ RtpsUdpSendStrategy::append_submessages(const RTPS::SubmessageSeq& submessages)
 
 ssize_t
 RtpsUdpSendStrategy::send_multi_i(const iovec iov[], int n,
-                                  const AddrSet& addrs)
+                                  const NetworkAddressSet& addrs)
 {
   ssize_t result = -1;
-  typedef AddrSet::const_iterator iter_t;
+  typedef NetworkAddressSet::const_iterator iter_t;
   for (iter_t iter = addrs.begin(); iter != addrs.end(); ++iter) {
     if (!*iter) {
       continue;

@@ -43,15 +43,14 @@ public:
   friend struct OverrideToken;
 
   OverrideToken override_destinations(const NetworkAddress& destination);
-  OverrideToken override_destinations(
-    const AddrSet& destinations);
+  OverrideToken override_destinations(const NetworkAddressSet& destinations);
 
   void send_rtps_control(RTPS::Message& message,
                          ACE_Message_Block& submessages,
                          const NetworkAddress& destination);
   void send_rtps_control(RTPS::Message& message,
                          ACE_Message_Block& submessages,
-                         const AddrSet& destinations);
+                         const NetworkAddressSet& destinations);
   void append_submessages(const RTPS::SubmessageSeq& submessages);
 
 #if defined(OPENDDS_SECURITY)
@@ -91,7 +90,7 @@ protected:
 private:
   bool marshal_transport_header(ACE_Message_Block* mb);
   ssize_t send_multi_i(const iovec iov[], int n,
-                       const AddrSet& addrs);
+                       const NetworkAddressSet& addrs);
   const ACE_SOCK_Dgram& choose_send_socket(const NetworkAddress& addr) const;
   ssize_t send_single_i(const iovec iov[], int n,
                         const NetworkAddress& addr);
@@ -133,7 +132,7 @@ private:
 #endif
 
   RtpsUdpDataLink* link_;
-  const AddrSet* override_dest_;
+  const NetworkAddressSet* override_dest_;
   const NetworkAddress* override_single_dest_;
 
   const size_t max_message_size_;

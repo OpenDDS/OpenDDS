@@ -541,10 +541,10 @@ namespace {
     switch (tk) {
     case TK_BOOLEAN:
       {
-        DDS::Boolean a_value;
+        DDS::Boolean a_value = false;
         a_rc = a_data->get_boolean_value(a_value, a_id);
         if (a_rc == DDS::RETCODE_OK) {
-          DDS::Boolean b_value;
+          DDS::Boolean b_value = false;
           b_rc = b_data->get_boolean_value(b_value, b_id);
           if (b_rc == DDS::RETCODE_OK) {
             cmp(result, a_value, b_value);
@@ -750,8 +750,7 @@ namespace {
                 const DDS::UInt32 a_count = a_value->get_item_count();
                 const DDS::UInt32 b_count = b_value->get_item_count();
                 const DDS::UInt32 count = std::min(a_count, b_count);
-                for (DDS::UInt32 i = 0;
-                    a_rc == DDS::RETCODE_OK && i < count && result == 0; ++i) {
+                for (DDS::UInt32 i = 0; a_rc == DDS::RETCODE_OK && i < count && result == 0; ++i) {
                   a_rc = b_rc = member_compare(result,
                     a_value, a_value->get_member_id_at_index(i),
                     b_value, b_value->get_member_id_at_index(i));
@@ -1204,52 +1203,52 @@ DDS::ReturnCode_t copy_member(
   }
 
   const DDS::DynamicType_var dest_type = dest->type();
-  DDS::DynamicType_var use_dest_type;
+  DDS::DynamicType_var dest_member_type;
   if (dest_id != MEMBER_ID_INVALID) {
-    rc = get_member_type(use_dest_type, dest_type, dest_id);
+    rc = get_member_type(dest_member_type, dest_type, dest_id);
     if (rc != DDS::RETCODE_OK) {
       return rc;
     }
   } else {
-    use_dest_type = get_base_type(dest_type);
+    dest_member_type = get_base_type(dest_type);
   }
-  const DDS::TypeKind dest_tk = use_dest_type->get_kind();
+  const DDS::TypeKind dest_member_tk = dest_member_type->get_kind();
 
   const DDS::DynamicType_var src_type = src->type();
-  DDS::DynamicType_var use_src_type;
+  DDS::DynamicType_var src_member_type;
   if (src_id != MEMBER_ID_INVALID) {
-    rc = get_member_type(use_src_type, src_type, src_id);
+    rc = get_member_type(src_member_type, src_type, src_id);
     if (rc != DDS::RETCODE_OK) {
       return rc;
     }
   } else {
-    use_src_type = get_base_type(src_type);
+    src_member_type = get_base_type(src_type);
   }
-  const DDS::TypeKind src_tk = use_src_type->get_kind();
+  const DDS::TypeKind src_member_tk = src_member_type->get_kind();
 
+  const CORBA::String_var src_type_name = src_type->get_name();
+  const CORBA::String_var dest_type_name = dest_type->get_name();
   if (DCPS::DCPS_debug_level >= 8) {
-    const CORBA::String_var src_type_name = src_type->get_name();
-    const CORBA::String_var dest_type_name = dest_type->get_name();
     ACE_DEBUG((LM_DEBUG, "(%P|%t) copy_member(DynamicData): "
       "type %C from %C id %u to %C id %u\n",
-      typekind_to_string(src_tk), src_type_name.in(), src_id, dest_type_name.in(), dest_id));
+      typekind_to_string(src_member_tk), src_type_name.in(), src_id, dest_type_name.in(), dest_id));
   }
 
-  if (src_tk != dest_tk) {
+  if (src_member_tk != dest_member_tk) {
     if (log_level >= LogLevel::Warning) {
       ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: copy_member(DynamicData): "
         "Can not copy member type %C id %u to type %C id %u\n",
-        typekind_to_string(src_tk), src_id, typekind_to_string(dest_tk), dest_id));
+        typekind_to_string(src_member_tk), src_id, typekind_to_string(dest_member_tk), dest_id));
     }
     return DDS::RETCODE_OK;
   }
 
   DDS::ReturnCode_t get_rc = DDS::RETCODE_OK;
   DDS::ReturnCode_t set_rc = DDS::RETCODE_OK;
-  switch (src_tk) {
+  switch (src_member_tk) {
   case TK_BOOLEAN:
     {
-      DDS::Boolean value;
+      DDS::Boolean value = false;
       get_rc = src->get_boolean_value(value, src_id);
       if (get_rc == DDS::RETCODE_OK) {
         set_rc = dest->set_boolean_value(dest_id, value);
@@ -1273,9 +1272,9 @@ DDS::ReturnCode_t copy_member(
   case TK_INT64:
     {
       DDS::Int64 value;
-      get_rc = get_int_value(value, src, src_id, src_tk);
+      get_rc = get_int_value(value, src, src_id, src_member_tk);
       if (get_rc == DDS::RETCODE_OK) {
-        set_rc = set_int_value(dest, dest_id, dest_tk, value);
+        set_rc = set_int_value(dest, dest_id, dest_member_tk, value);
       }
     }
     break;
@@ -1286,9 +1285,9 @@ DDS::ReturnCode_t copy_member(
   case TK_UINT64:
     {
       DDS::UInt64 value;
-      get_rc = get_uint_value(value, src, src_id, src_tk);
+      get_rc = get_uint_value(value, src, src_id, src_member_tk);
       if (get_rc == DDS::RETCODE_OK) {
-        set_rc = set_uint_value(dest, dest_id, dest_tk, value);
+        set_rc = set_uint_value(dest, dest_id, dest_member_tk, value);
       }
     }
     break;
@@ -1366,25 +1365,45 @@ DDS::ReturnCode_t copy_member(
   case TK_ENUM:
     {
       DDS::Int32 value;
-      get_rc = get_enum_value(value, use_src_type, src, src_id);
+      get_rc = get_enum_value(value, src_member_type, src, src_id);
       if (get_rc == DDS::RETCODE_OK) {
-        set_rc = set_enum_value(use_dest_type, dest, dest_id, value);
+        set_rc = set_enum_value(dest_member_type, dest, dest_id, value);
       }
     }
     break;
 
-  case TK_STRUCTURE:
-  case TK_UNION:
   case TK_SEQUENCE:
   case TK_ARRAY:
+  case TK_STRUCTURE:
+  case TK_UNION:
     {
       DDS::DynamicData_var subsrc;
       get_rc = src->get_complex_value(subsrc, src_id);
       if (get_rc == DDS::RETCODE_OK) {
-        DDS::DynamicType_var parent_dest_type = get_base_type(dest_type);
-        if (parent_dest_type->get_kind() == TK_UNION) {
-          DDS::DynamicData_var temp = new DynamicDataImpl(use_dest_type);
-          set_rc = dest->set_complex_value(dest_id, temp);
+        DDS::DynamicType_var base_dest_type = get_base_type(dest_type);
+        const DDS::TypeKind base_dest_tk = base_dest_type->get_kind();
+        const DDS::UInt32 dest_count = dest->get_item_count();
+        bool dest_member_optional = false;
+        if (base_dest_tk == TK_STRUCTURE || base_dest_tk == TK_UNION) {
+          DDS::DynamicTypeMember_var dest_dtm;
+          rc = dest_type->get_member(dest_dtm, dest_id);
+          if (rc != DDS::RETCODE_OK) {
+            return rc;
+          }
+          DDS::MemberDescriptor_var dest_md;
+          rc = dest_dtm->get_descriptor(dest_md);
+          if (rc != DDS::RETCODE_OK) {
+            return rc;
+          }
+          dest_member_optional = dest_md->is_optional();
+        }
+
+        // TODO: The sequence index check assumes that ID is mapped exactly to index.
+        // This is an internal detail and should be removed.
+        if ((base_dest_tk == TK_SEQUENCE && dest_id == dest_count) ||
+            base_dest_tk == TK_UNION || dest_member_optional) {
+          DDS::DynamicData_var tmp = new DynamicDataImpl(dest_member_type);
+          set_rc = dest->set_complex_value(dest_id, tmp);
         }
         if (set_rc == DDS::RETCODE_OK) {
           DDS::DynamicData_var subdest;
@@ -1404,18 +1423,16 @@ DDS::ReturnCode_t copy_member(
   default:
     if (log_level >= LogLevel::Warning) {
       ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: copy(DynamicData): "
-        "member has unexpected TypeKind %C\n", typekind_to_string(src_tk)));
+        "member has unexpected TypeKind %C\n", typekind_to_string(src_member_tk)));
     }
     get_rc = DDS::RETCODE_UNSUPPORTED;
   }
 
   if (get_rc == DDS::RETCODE_NO_DATA) {
     if (DCPS::DCPS_debug_level >= 8) {
-      const CORBA::String_var src_type_name = src_type->get_name();
-      const CORBA::String_var dest_type_name = dest_type->get_name();
       ACE_DEBUG((LM_DEBUG, "(%P|%t) copy(DynamicData): "
         "Did not copy member type %C from %C id %u to %C id %u: get returned %C\n",
-        typekind_to_string(src_tk), src_type_name.in(), src_id, dest_type_name.in(), dest_id,
+        typekind_to_string(src_member_tk), src_type_name.in(), src_id, dest_type_name.in(), dest_id,
         retcode_to_string(get_rc)));
     }
     return DDS::RETCODE_OK;
@@ -1423,8 +1440,6 @@ DDS::ReturnCode_t copy_member(
 
   if (get_rc != DDS::RETCODE_OK || set_rc != DDS::RETCODE_OK) {
     if (log_level >= LogLevel::Warning) {
-      const CORBA::String_var src_type_name = src_type->get_name();
-      const CORBA::String_var dest_type_name = dest_type->get_name();
       const DDS::TypeKind tk = src_type->get_kind();
       if (tk == TK_STRUCTURE || tk == TK_UNION) {
         CORBA::String_var src_member_name;
@@ -1441,14 +1456,14 @@ DDS::ReturnCode_t copy_member(
         }
         ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: copy(DynamicData): "
           "Could not copy member type %C from %C.%C id %u to %C.%C id %u: get: %C set: %C\n",
-          typekind_to_string(src_tk),
+          typekind_to_string(src_member_tk),
           src_type_name.in(), src_member_name.in() ? src_member_name.in() : "?", src_id,
           dest_type_name.in(), dest_member_name.in() ? dest_member_name.in() : "?", dest_id,
           retcode_to_string(get_rc), retcode_to_string(set_rc)));
       } else {
         ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: copy(DynamicData): "
           "Could not copy member type %C from %C id %u to %C id %u: get: %C set: %C\n",
-          typekind_to_string(src_tk), src_type_name.in(), src_id, dest_type_name.in(), dest_id,
+          typekind_to_string(src_member_tk), src_type_name.in(), src_id, dest_type_name.in(), dest_id,
           retcode_to_string(get_rc), retcode_to_string(set_rc)));
       }
     }
@@ -1543,7 +1558,7 @@ DDS::ReturnCode_t copy(DDS::DynamicData_ptr dest, DDS::DynamicData_ptr src)
         dynamic_cast<DynamicTypeMembersByIdImpl*>(dest_members_var.in());
 
       for (DynamicTypeMembersByIdImpl::const_iterator src_it = src_members->begin();
-          src_it != src_members->end(); ++src_it) {
+           src_it != src_members->end(); ++src_it) {
         const DDS::MemberId id = src_it->first;
         const DynamicTypeMembersByIdImpl::const_iterator dest_it = dest_members->find(id);
         if (dest_it == dest_members->end()) {
@@ -1586,6 +1601,83 @@ DDS::ReturnCode_t copy(DDS::DynamicData_ptr dest, DDS::DynamicData_ptr src)
   }
 
   return rc;
+}
+
+DDS::ReturnCode_t get_selected_union_branch(
+  DDS::DynamicType_var union_type, DDS::Int32 disc,
+  bool& found_selected_member, DDS::MemberDescriptor_var& selected_md)
+{
+  found_selected_member = false;
+  bool has_default = false;
+  DDS::ReturnCode_t rc = DDS::RETCODE_OK;
+  DDS::MemberDescriptor_var default_md;
+  for (DDS::UInt32 i = 0; i < union_type->get_member_count(); ++i) {
+    DDS::DynamicTypeMember_var dtm;
+    rc = union_type->get_member_by_index(dtm, i);
+    if (rc != DDS::RETCODE_OK) {
+      return rc;
+    }
+    if (dtm->get_id() == DISCRIMINATOR_ID) {
+      continue;
+    }
+    DDS::MemberDescriptor_var md;
+    rc = dtm->get_descriptor(md);
+    if (rc != DDS::RETCODE_OK) {
+      return rc;
+    }
+    bool found_matched_label = false;
+    const DDS::UnionCaseLabelSeq labels = md->label();
+    for (DDS::UInt32 j = 0; !found_matched_label && j < labels.length(); ++j) {
+      if (disc == labels[j]) {
+        found_matched_label = true;
+      }
+    }
+    if (found_matched_label) {
+      selected_md = md;
+      found_selected_member = true;
+      break;
+    }
+    if (md->is_default_label()) {
+      default_md = md;
+      has_default = true;
+    }
+  }
+  if (!found_selected_member && has_default) {
+    selected_md = default_md;
+    found_selected_member = true;
+  }
+  return rc;
+}
+
+bool has_explicit_keys(DDS::DynamicType* dt)
+{
+  // see dds_generator.h struct_has_explicit_keys() in opendds_idl
+  DDS::TypeDescriptor_var type_descriptor;
+  DDS::ReturnCode_t ret = dt->get_descriptor(type_descriptor);
+  if (ret != DDS::RETCODE_OK) {
+    return false;
+  }
+  DDS::DynamicType* const base = type_descriptor->base_type();
+  if (base && has_explicit_keys(base)) {
+    return true;
+  }
+
+  for (ACE_CDR::ULong i = 0; i < dt->get_member_count(); ++i) {
+    DDS::DynamicTypeMember_var member;
+    ret = dt->get_member_by_index(member, i);
+    if (ret != DDS::RETCODE_OK) {
+      return false;
+    }
+    DDS::MemberDescriptor_var descriptor;
+    ret = member->get_descriptor(descriptor);
+    if (ret != DDS::RETCODE_OK) {
+      return false;
+    }
+    if (descriptor->is_key()) {
+      return true;
+    }
+  }
+  return false;
 }
 
 } // namespace XTypes

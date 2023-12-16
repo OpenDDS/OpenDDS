@@ -54,8 +54,6 @@ const char RTPS_REFLECT_HEARTBEAT_COUNT[] = "OpenDDS.Rtps.ReflectHeartbeatCount"
  */
 class OpenDDS_Rtps_Export RtpsDiscovery : public DCPS::Discovery {
 public:
-  typedef RtpsDiscoveryConfig::AddrVec AddrVec;
-
   explicit RtpsDiscovery(const RepoKey& key);
   ~RtpsDiscovery();
 
@@ -124,11 +122,11 @@ public:
   unsigned char ttl() const { return config_->ttl(); }
   void ttl(unsigned char time_to_live) { config_->ttl(time_to_live); }
 
-  ACE_INET_Addr sedp_local_address() const { return config_->sedp_local_address(); }
-  void sedp_local_address(const ACE_INET_Addr& mi) { config_->sedp_local_address(mi); }
+  DCPS::NetworkAddress sedp_local_address() const { return config_->sedp_local_address(); }
+  void sedp_local_address(const DCPS::NetworkAddress& mi) { config_->sedp_local_address(mi); }
 
-  ACE_INET_Addr spdp_local_address() const { return config_->spdp_local_address(); }
-  void spdp_local_address(const ACE_INET_Addr& mi) { config_->spdp_local_address(mi); }
+  DCPS::NetworkAddress spdp_local_address() const { return config_->spdp_local_address(); }
+  void spdp_local_address(const DCPS::NetworkAddress& mi) { config_->spdp_local_address(mi); }
 
   bool sedp_multicast() const { return config_->sedp_multicast(); }
   void sedp_multicast(bool sm) { config_->sedp_multicast(sm); }
@@ -136,11 +134,11 @@ public:
   OPENDDS_STRING multicast_interface() const { return config_->multicast_interface(); }
   void multicast_interface(const OPENDDS_STRING& mi) { config_->multicast_interface(mi); }
 
-  ACE_INET_Addr default_multicast_group() const { return config_->default_multicast_group(); }
-  void default_multicast_group(const ACE_INET_Addr& group) { config_->default_multicast_group(group); }
+  DCPS::NetworkAddress default_multicast_group() const { return config_->default_multicast_group(); }
+  void default_multicast_group(const DCPS::NetworkAddress& group) { config_->default_multicast_group(group); }
 
-  AddrVec spdp_send_addrs() const { return config_->spdp_send_addrs(); }
-  void spdp_send_addrs(const AddrVec& addrs) { return config_->spdp_send_addrs(addrs); }
+  DCPS::NetworkAddressSet spdp_send_addrs() const { return config_->spdp_send_addrs(); }
+  void spdp_send_addrs(const DCPS::NetworkAddressSet& addrs) { return config_->spdp_send_addrs(addrs); }
 
   OPENDDS_STRING guid_interface() const { return config_->guid_interface(); }
   void guid_interface(const OPENDDS_STRING& gi) { config_->guid_interface(gi); }
@@ -160,8 +158,10 @@ public:
   bool use_rtps_relay() const { return config_->use_rtps_relay(); }
   void use_rtps_relay_now(bool f);
 
+#ifdef OPENDDS_SECURITY
   bool use_ice() const { return config_->use_ice(); }
   void use_ice_now(bool f);
+#endif
 
   bool secure_participant_user_data() const
   {
@@ -194,10 +194,10 @@ public:
   u_short get_ipv6_sedp_port(DDS::DomainId_t domain,
                              const DCPS::GUID_t& local_participant) const;
 #endif
-  void spdp_rtps_relay_address(const ACE_INET_Addr& address);
-  void sedp_rtps_relay_address(const ACE_INET_Addr& address);
-  void spdp_stun_server_address(const ACE_INET_Addr& address);
-  void sedp_stun_server_address(const ACE_INET_Addr& address);
+  void spdp_rtps_relay_address(const DCPS::NetworkAddress& address);
+  void sedp_rtps_relay_address(const DCPS::NetworkAddress& address);
+  void spdp_stun_server_address(const DCPS::NetworkAddress& address);
+  void sedp_stun_server_address(const DCPS::NetworkAddress& address);
 
   void append_transport_statistics(DDS::DomainId_t domain,
                                    const DCPS::GUID_t& local_participant,

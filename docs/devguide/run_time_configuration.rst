@@ -1054,7 +1054,7 @@ Those properties, along with options specific to OpenDDS's RTPS Discovery implem
 
      - Address of a local interface, which will be used by SPDP to bind to that specific interface.
 
-     - ``DCPSDefaultAddress, or IPADDR_ANY``
+     - DCPSDefaultAddress or ``0.0.0.0``
 
    * - ``SedpAdvertisedLocalAddress= addr:[port]``
 
@@ -1123,9 +1123,7 @@ Those properties, along with options specific to OpenDDS's RTPS Discovery implem
 
      - ``1``
 
-   * - InteropMulticastOverride=
-
-       group_address
+   * - ``InteropMulticastOverride=group_address``
 
      - A network address specifying the multicast group to be used for SPDP discovery.
        This overrides the interoperability group of the specification.

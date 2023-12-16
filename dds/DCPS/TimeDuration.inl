@@ -91,6 +91,13 @@ TimeDuration::to_dds_duration() const
 }
 
 ACE_INLINE
+double
+TimeDuration::to_double() const
+{
+  return time_value_to_double(value());
+}
+
+ACE_INLINE
 TimeDuration&
 TimeDuration::operator+=(const TimeDuration& other)
 {

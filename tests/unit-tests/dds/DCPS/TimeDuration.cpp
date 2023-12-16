@@ -59,3 +59,9 @@ TEST(dds_DCPS_TimeDuration, double_ctor)
   EXPECT_EQ(td.value().sec(), 1);
   EXPECT_EQ(td.value().usec(), 100000);
 }
+
+TEST(dds_DCPS_TimeDuration, to_double)
+{
+  const TimeDuration td = TimeDuration::from_double(1.5);
+  EXPECT_EQ(td.to_double(), 1.5);
+}
