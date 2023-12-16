@@ -1239,19 +1239,6 @@ namespace {
           "  }\n";
       }
 
-      //   AST_PredefinedType* predef = dynamic_cast<AST_PredefinedType*>(elem);
-      //   string bound;
-      //   if (!seq->unbounded()) {
-      //     bound = use_cxx11 ? bounded_arg(seq) : value_access + ".maximum()";
-      //   }
-      //   //create a variable called newlength which tells us how long we need to copy to
-      //   //for an unbounded sequence this is just our length
-      //   //for a bounded sequence this is our maximum
-      //   //we save the old length so we know how far we need to read until
-      //   if ((elem_cls & CL_INTERFACE) == 0) {
-      //     be_global->impl_ << "  CORBA::ULong new_length = length;\n";
-      //   }
-
       be_global->impl_ <<
         "  for (CORBA::ULong i = 0; i < length; ++i) {\n";
 
@@ -1300,33 +1287,9 @@ namespace {
           be_global->impl_ <<
             type_to_default("        ", val, value_access) <<
             "        strm.set_construction_status(Serializer::ConstructionSuccessful);\n";
-        } else if ((val_try_construct == tryconstructfailaction_trim) && (val_cls & CL_BOUNDED) &&
-                   (val_cls & (CL_STRING | CL_SEQUENCE))) {
-
-          // if (val_cls & CL_STRING) {
-          //   const std::string check_not_empty = "!" + value_access + ".empty()";
-          //   const std::string get_length = value_access + ".length()";
-          //   be_global->impl_ <<
-          //     "        if (" + construct_bound_fail + " && " << check_not_empty << " && (" <<
-          //     bounded_arg(val) << " < " << get_length << ")) {\n"
-          //     "          "  << value_access <<
-          //     (use_cxx11 ? (".resize(" + bounded_arg(val) +  ");\n") : ("[" + bounded_arg(val) + "] = 0;\n")) <<
-          //     "          strm.set_construction_status(Serializer::ConstructionSuccessful);\n"
-          //     "        } else {\n"
-          //     "          strm.set_construction_status(Serializer::ElementConstructionFailure);\n";
-          //   skip_to_end_map("          ", "i", "length", named_as, use_cxx11, val_cls, map);
-          //   be_global->impl_ <<
-          //     "        return false;\n"
-          //     "      }\n";
-          // } else if (val_cls & CL_SEQUENCE) {
-          //   be_global->impl_ <<
-          //     "      if (" + construct_elem_fail + ") {\n";
-          //   skip_to_end_map("          ", "i", "length", named_as, use_cxx11, val_cls, map);
-          //   be_global->impl_ <<
-          //     "        return false;\n"
-          //     "      }\n"
-          //     "      strm.set_construction_status(Serializer::ConstructionSuccessful);\n";
-          // }
+        } else if ((val_try_construct == tryconstructfailaction_trim)) {
+          // TODO Skip this for now
+          be_global->warning("TryConstruct::Trim not currently supported");
         } else {
           //discard/default
           be_global->impl_ <<
