@@ -342,7 +342,7 @@ jobs:
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
       if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
     - name: upload to Google Cloud
-      uses: 'google-github-actions/upload-cloud-storage@v1'
+      uses: 'google-github-actions/upload-cloud-storage@v2'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace
         destination: opendds-gha-scoreboard-uploads/${{ github.job }}
@@ -841,7 +841,7 @@ jobs:
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
       if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
     - name: upload to Google Cloud
-      uses: 'google-github-actions/upload-cloud-storage@v1'
+      uses: 'google-github-actions/upload-cloud-storage@v2'
       with:
         path: OpenDDS/build/target/${{ github.job }}_autobuild_workspace
         destination: opendds-gha-scoreboard-uploads/${{ github.job }}
@@ -1173,7 +1173,7 @@ jobs:
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
       if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
     - name: upload to Google Cloud
-      uses: 'google-github-actions/upload-cloud-storage@v1'
+      uses: 'google-github-actions/upload-cloud-storage@v2'
       with:
         path: OpenDDS/build/target/${{ github.job }}_autobuild_workspace
         destination: opendds-gha-scoreboard-uploads/${{ github.job }}
@@ -1456,7 +1456,7 @@ jobs:
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
       if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
     - name: upload to Google Cloud
-      uses: 'google-github-actions/upload-cloud-storage@v1'
+      uses: 'google-github-actions/upload-cloud-storage@v2'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace
         destination: opendds-gha-scoreboard-uploads/${{ github.job }}
@@ -1759,7 +1759,7 @@ jobs:
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
       if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
     - name: upload to Google Cloud
-      uses: 'google-github-actions/upload-cloud-storage@v1'
+      uses: 'google-github-actions/upload-cloud-storage@v2'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace
         destination: opendds-gha-scoreboard-uploads/${{ github.job }}
@@ -2060,7 +2060,7 @@ jobs:
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
       if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
     - name: upload to Google Cloud
-      uses: 'google-github-actions/upload-cloud-storage@v1'
+      uses: 'google-github-actions/upload-cloud-storage@v2'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace
         destination: opendds-gha-scoreboard-uploads/${{ github.job }}
@@ -2358,7 +2358,7 @@ jobs:
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
       if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
     - name: upload to Google Cloud
-      uses: 'google-github-actions/upload-cloud-storage@v1'
+      uses: 'google-github-actions/upload-cloud-storage@v2'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace
         destination: opendds-gha-scoreboard-uploads/${{ github.job }}
@@ -2650,7 +2650,7 @@ jobs:
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
       if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
     - name: upload to Google Cloud
-      uses: 'google-github-actions/upload-cloud-storage@v1'
+      uses: 'google-github-actions/upload-cloud-storage@v2'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace
         destination: opendds-gha-scoreboard-uploads/${{ github.job }}
@@ -2932,7 +2932,7 @@ jobs:
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
       if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
     - name: upload to Google Cloud
-      uses: 'google-github-actions/upload-cloud-storage@v1'
+      uses: 'google-github-actions/upload-cloud-storage@v2'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace
         destination: opendds-gha-scoreboard-uploads/${{ github.job }}
@@ -3440,7 +3440,7 @@ jobs:
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
       if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
     - name: upload to Google Cloud
-      uses: 'google-github-actions/upload-cloud-storage@v1'
+      uses: 'google-github-actions/upload-cloud-storage@v2'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace
         destination: opendds-gha-scoreboard-uploads/${{ github.job }}
@@ -3744,7 +3744,7 @@ jobs:
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
       if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
     - name: upload to Google Cloud
-      uses: 'google-github-actions/upload-cloud-storage@v1'
+      uses: 'google-github-actions/upload-cloud-storage@v2'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace
         destination: opendds-gha-scoreboard-uploads/${{ github.job }}
@@ -4038,7 +4038,7 @@ jobs:
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
       if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
     - name: upload to Google Cloud
-      uses: 'google-github-actions/upload-cloud-storage@v1'
+      uses: 'google-github-actions/upload-cloud-storage@v2'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace
         destination: opendds-gha-scoreboard-uploads/${{ github.job }}
@@ -4343,7 +4343,7 @@ jobs:
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
       if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
     - name: upload to Google Cloud
-      uses: 'google-github-actions/upload-cloud-storage@v1'
+      uses: 'google-github-actions/upload-cloud-storage@v2'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace
         destination: opendds-gha-scoreboard-uploads/${{ github.job }}
@@ -4664,7 +4664,7 @@ jobs:
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
       if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
     - name: upload to Google Cloud
-      uses: 'google-github-actions/upload-cloud-storage@v1'
+      uses: 'google-github-actions/upload-cloud-storage@v2'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace
         destination: opendds-gha-scoreboard-uploads/${{ github.job }}
@@ -4803,7 +4803,7 @@ jobs:
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
       if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
     - name: upload to Google Cloud
-      uses: 'google-github-actions/upload-cloud-storage@v1'
+      uses: 'google-github-actions/upload-cloud-storage@v2'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace
         destination: opendds-gha-scoreboard-uploads/${{ github.job }}
@@ -5029,7 +5029,7 @@ jobs:
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
       if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
     - name: upload to Google Cloud
-      uses: 'google-github-actions/upload-cloud-storage@v1'
+      uses: 'google-github-actions/upload-cloud-storage@v2'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace
         destination: opendds-gha-scoreboard-uploads/${{ github.job }}
@@ -5317,7 +5317,7 @@ jobs:
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
       if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
     - name: upload to Google Cloud
-      uses: 'google-github-actions/upload-cloud-storage@v1'
+      uses: 'google-github-actions/upload-cloud-storage@v2'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace
         destination: opendds-gha-scoreboard-uploads/${{ github.job }}
@@ -5543,7 +5543,7 @@ jobs:
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
       if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
     - name: upload to Google Cloud
-      uses: 'google-github-actions/upload-cloud-storage@v1'
+      uses: 'google-github-actions/upload-cloud-storage@v2'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace
         destination: opendds-gha-scoreboard-uploads/${{ github.job }}
@@ -5843,7 +5843,7 @@ jobs:
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
       if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
     - name: upload to Google Cloud
-      uses: 'google-github-actions/upload-cloud-storage@v1'
+      uses: 'google-github-actions/upload-cloud-storage@v2'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace
         destination: opendds-gha-scoreboard-uploads/${{ github.job }}
@@ -6024,7 +6024,7 @@ jobs:
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
       if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
     - name: upload to Google Cloud
-      uses: 'google-github-actions/upload-cloud-storage@v1'
+      uses: 'google-github-actions/upload-cloud-storage@v2'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace
         destination: opendds-gha-scoreboard-uploads/${{ github.job }}
@@ -6191,7 +6191,7 @@ jobs:
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
       if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
     - name: upload to Google Cloud
-      uses: 'google-github-actions/upload-cloud-storage@v1'
+      uses: 'google-github-actions/upload-cloud-storage@v2'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace
         destination: opendds-gha-scoreboard-uploads/${{ github.job }}
@@ -6358,7 +6358,7 @@ jobs:
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
       if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
     - name: upload to Google Cloud
-      uses: 'google-github-actions/upload-cloud-storage@v1'
+      uses: 'google-github-actions/upload-cloud-storage@v2'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace
         destination: opendds-gha-scoreboard-uploads/${{ github.job }}
@@ -6515,7 +6515,7 @@ jobs:
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
       if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
     - name: upload to Google Cloud
-      uses: 'google-github-actions/upload-cloud-storage@v1'
+      uses: 'google-github-actions/upload-cloud-storage@v2'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace
         destination: opendds-gha-scoreboard-uploads/${{ github.job }}
@@ -6818,7 +6818,7 @@ jobs:
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
       if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
     - name: upload to Google Cloud
-      uses: 'google-github-actions/upload-cloud-storage@v1'
+      uses: 'google-github-actions/upload-cloud-storage@v2'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace
         destination: opendds-gha-scoreboard-uploads/${{ github.job }}
@@ -7143,7 +7143,7 @@ jobs:
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
       if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
     - name: upload to Google Cloud
-      uses: 'google-github-actions/upload-cloud-storage@v1'
+      uses: 'google-github-actions/upload-cloud-storage@v2'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace
         destination: opendds-gha-scoreboard-uploads/${{ github.job }}
@@ -7323,7 +7323,7 @@ jobs:
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
       if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
     - name: upload to Google Cloud
-      uses: 'google-github-actions/upload-cloud-storage@v1'
+      uses: 'google-github-actions/upload-cloud-storage@v2'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace
         destination: opendds-gha-scoreboard-uploads/${{ github.job }}
@@ -7492,7 +7492,7 @@ jobs:
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
       if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
     - name: upload to Google Cloud
-      uses: 'google-github-actions/upload-cloud-storage@v1'
+      uses: 'google-github-actions/upload-cloud-storage@v2'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace
         destination: opendds-gha-scoreboard-uploads/${{ github.job }}
@@ -7663,7 +7663,7 @@ jobs:
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
       if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
     - name: upload to Google Cloud
-      uses: 'google-github-actions/upload-cloud-storage@v1'
+      uses: 'google-github-actions/upload-cloud-storage@v2'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace
         destination: opendds-gha-scoreboard-uploads/${{ github.job }}
@@ -7829,7 +7829,7 @@ jobs:
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
       if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
     - name: upload to Google Cloud
-      uses: 'google-github-actions/upload-cloud-storage@v1'
+      uses: 'google-github-actions/upload-cloud-storage@v2'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace
         destination: opendds-gha-scoreboard-uploads/${{ github.job }}
@@ -8154,7 +8154,7 @@ jobs:
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
       if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
     - name: upload to Google Cloud
-      uses: 'google-github-actions/upload-cloud-storage@v1'
+      uses: 'google-github-actions/upload-cloud-storage@v2'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace
         destination: opendds-gha-scoreboard-uploads/${{ github.job }}
@@ -8334,7 +8334,7 @@ jobs:
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
       if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
     - name: upload to Google Cloud
-      uses: 'google-github-actions/upload-cloud-storage@v1'
+      uses: 'google-github-actions/upload-cloud-storage@v2'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace
         destination: opendds-gha-scoreboard-uploads/${{ github.job }}
@@ -8502,7 +8502,7 @@ jobs:
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
       if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
     - name: upload to Google Cloud
-      uses: 'google-github-actions/upload-cloud-storage@v1'
+      uses: 'google-github-actions/upload-cloud-storage@v2'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace
         destination: opendds-gha-scoreboard-uploads/${{ github.job }}
@@ -8672,7 +8672,7 @@ jobs:
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
       if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
     - name: upload to Google Cloud
-      uses: 'google-github-actions/upload-cloud-storage@v1'
+      uses: 'google-github-actions/upload-cloud-storage@v2'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace
         destination: opendds-gha-scoreboard-uploads/${{ github.job }}
@@ -8838,7 +8838,7 @@ jobs:
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
       if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
     - name: upload to Google Cloud
-      uses: 'google-github-actions/upload-cloud-storage@v1'
+      uses: 'google-github-actions/upload-cloud-storage@v2'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace
         destination: opendds-gha-scoreboard-uploads/${{ github.job }}
@@ -9213,7 +9213,7 @@ jobs:
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
       if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
     - name: upload to Google Cloud
-      uses: 'google-github-actions/upload-cloud-storage@v1'
+      uses: 'google-github-actions/upload-cloud-storage@v2'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace
         destination: opendds-gha-scoreboard-uploads/${{ github.job }}
@@ -9402,7 +9402,7 @@ jobs:
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
       if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
     - name: upload to Google Cloud
-      uses: 'google-github-actions/upload-cloud-storage@v1'
+      uses: 'google-github-actions/upload-cloud-storage@v2'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace
         destination: opendds-gha-scoreboard-uploads/${{ github.job }}
@@ -9568,7 +9568,7 @@ jobs:
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
       if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
     - name: upload to Google Cloud
-      uses: 'google-github-actions/upload-cloud-storage@v1'
+      uses: 'google-github-actions/upload-cloud-storage@v2'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace
         destination: opendds-gha-scoreboard-uploads/${{ github.job }}
@@ -9743,7 +9743,7 @@ jobs:
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
       if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
     - name: upload to Google Cloud
-      uses: 'google-github-actions/upload-cloud-storage@v1'
+      uses: 'google-github-actions/upload-cloud-storage@v2'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace
         destination: opendds-gha-scoreboard-uploads/${{ github.job }}
@@ -10149,7 +10149,7 @@ jobs:
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
       if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
     - name: upload to Google Cloud
-      uses: 'google-github-actions/upload-cloud-storage@v1'
+      uses: 'google-github-actions/upload-cloud-storage@v2'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace
         destination: opendds-gha-scoreboard-uploads/${{ github.job }}
@@ -10329,7 +10329,7 @@ jobs:
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
       if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
     - name: upload to Google Cloud
-      uses: 'google-github-actions/upload-cloud-storage@v1'
+      uses: 'google-github-actions/upload-cloud-storage@v2'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace
         destination: opendds-gha-scoreboard-uploads/${{ github.job }}
@@ -10495,7 +10495,7 @@ jobs:
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
       if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
     - name: upload to Google Cloud
-      uses: 'google-github-actions/upload-cloud-storage@v1'
+      uses: 'google-github-actions/upload-cloud-storage@v2'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace
         destination: opendds-gha-scoreboard-uploads/${{ github.job }}
@@ -10668,7 +10668,7 @@ jobs:
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
       if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
     - name: upload to Google Cloud
-      uses: 'google-github-actions/upload-cloud-storage@v1'
+      uses: 'google-github-actions/upload-cloud-storage@v2'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace
         destination: opendds-gha-scoreboard-uploads/${{ github.job }}
@@ -11006,7 +11006,7 @@ jobs:
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
       if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
     - name: upload to Google Cloud
-      uses: 'google-github-actions/upload-cloud-storage@v1'
+      uses: 'google-github-actions/upload-cloud-storage@v2'
       with:
         path: C:\OpenDDS\${{ github.job }}_autobuild_workspace
         destination: opendds-gha-scoreboard-uploads/${{ github.job }}
@@ -11161,7 +11161,7 @@ jobs:
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
       if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
     - name: upload to Google Cloud
-      uses: 'google-github-actions/upload-cloud-storage@v1'
+      uses: 'google-github-actions/upload-cloud-storage@v2'
       with:
         path: C:\OpenDDS\${{ github.job }}_autobuild_workspace
         destination: opendds-gha-scoreboard-uploads/${{ github.job }}
@@ -11402,7 +11402,7 @@ jobs:
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
       if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
     - name: upload to Google Cloud
-      uses: 'google-github-actions/upload-cloud-storage@v1'
+      uses: 'google-github-actions/upload-cloud-storage@v2'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace
         destination: opendds-gha-scoreboard-uploads/${{ github.job }}
@@ -11727,7 +11727,7 @@ jobs:
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
       if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
     - name: upload to Google Cloud
-      uses: 'google-github-actions/upload-cloud-storage@v1'
+      uses: 'google-github-actions/upload-cloud-storage@v2'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace
         destination: opendds-gha-scoreboard-uploads/${{ github.job }}
@@ -11896,7 +11896,7 @@ jobs:
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
       if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
     - name: upload to Google Cloud
-      uses: 'google-github-actions/upload-cloud-storage@v1'
+      uses: 'google-github-actions/upload-cloud-storage@v2'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace
         destination: opendds-gha-scoreboard-uploads/${{ github.job }}
@@ -12062,7 +12062,7 @@ jobs:
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
       if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
     - name: upload to Google Cloud
-      uses: 'google-github-actions/upload-cloud-storage@v1'
+      uses: 'google-github-actions/upload-cloud-storage@v2'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace
         destination: opendds-gha-scoreboard-uploads/${{ github.job }}
@@ -12228,7 +12228,7 @@ jobs:
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
       if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
     - name: upload to Google Cloud
-      uses: 'google-github-actions/upload-cloud-storage@v1'
+      uses: 'google-github-actions/upload-cloud-storage@v2'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace
         destination: opendds-gha-scoreboard-uploads/${{ github.job }}
@@ -12509,7 +12509,7 @@ jobs:
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
       if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
     - name: upload to Google Cloud
-      uses: 'google-github-actions/upload-cloud-storage@v1'
+      uses: 'google-github-actions/upload-cloud-storage@v2'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace
         destination: opendds-gha-scoreboard-uploads/${{ github.job }}
@@ -12633,7 +12633,7 @@ jobs:
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
       if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
     - name: upload to Google Cloud
-      uses: 'google-github-actions/upload-cloud-storage@v1'
+      uses: 'google-github-actions/upload-cloud-storage@v2'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace
         destination: opendds-gha-scoreboard-uploads/${{ github.job }}
@@ -12847,7 +12847,7 @@ jobs:
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
       if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
     - name: upload to Google Cloud
-      uses: 'google-github-actions/upload-cloud-storage@v1'
+      uses: 'google-github-actions/upload-cloud-storage@v2'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace
         destination: opendds-gha-scoreboard-uploads/${{ github.job }}
@@ -12971,7 +12971,7 @@ jobs:
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
       if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
     - name: upload to Google Cloud
-      uses: 'google-github-actions/upload-cloud-storage@v1'
+      uses: 'google-github-actions/upload-cloud-storage@v2'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace
         destination: opendds-gha-scoreboard-uploads/${{ github.job }}
@@ -13252,7 +13252,7 @@ jobs:
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
       if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
     - name: upload to Google Cloud
-      uses: 'google-github-actions/upload-cloud-storage@v1'
+      uses: 'google-github-actions/upload-cloud-storage@v2'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace
         destination: opendds-gha-scoreboard-uploads/${{ github.job }}
@@ -13379,7 +13379,7 @@ jobs:
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
       if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
     - name: upload to Google Cloud
-      uses: 'google-github-actions/upload-cloud-storage@v1'
+      uses: 'google-github-actions/upload-cloud-storage@v2'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace
         destination: opendds-gha-scoreboard-uploads/${{ github.job }}
@@ -13678,7 +13678,7 @@ jobs:
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
       if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
     - name: upload to Google Cloud
-      uses: 'google-github-actions/upload-cloud-storage@v1'
+      uses: 'google-github-actions/upload-cloud-storage@v2'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace
         destination: opendds-gha-scoreboard-uploads/${{ github.job }}
@@ -13805,7 +13805,7 @@ jobs:
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
       if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
     - name: upload to Google Cloud
-      uses: 'google-github-actions/upload-cloud-storage@v1'
+      uses: 'google-github-actions/upload-cloud-storage@v2'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace
         destination: opendds-gha-scoreboard-uploads/${{ github.job }}
