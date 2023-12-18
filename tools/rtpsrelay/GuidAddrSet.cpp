@@ -14,7 +14,7 @@ GuidAddrSet::record_activity(const Proxy& proxy,
                              const OpenDDS::DCPS::GUID_t& src_guid,
                              MessageType msg_type,
                              const size_t& msg_len,
-                             RelayHandler& handler)
+                             const RelayHandler& handler)
 {
   const auto expiration = now + config_.lifespan();
   const auto deactivation = now + config_.inactive_period();

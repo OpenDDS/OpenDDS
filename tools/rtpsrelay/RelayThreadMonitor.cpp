@@ -52,17 +52,16 @@ int RelayThreadMonitor::svc()
   int count = 0;
 
   while (running_) {
-    const MonotonicTimePoint expire = MonotonicTimePoint::now() + thread_status_interval;
-    condition_.wait_until(expire, thread_status_manager);
+    condition_.wait_until(MonotonicTimePoint::now() + thread_status_interval, thread_status_manager);
     if (running_) {
       OpenDDS::DCPS::InternalThreadBuiltinTopicDataSeq datas;
       DDS::SampleInfoSeq infos;
-      DDS::ReturnCode_t ret = thread_status_reader_->read(datas,
-                                                          infos,
-                                                          DDS::LENGTH_UNLIMITED,
-                                                          DDS::ANY_SAMPLE_STATE,
-                                                          DDS::ANY_VIEW_STATE,
-                                                          DDS::ANY_INSTANCE_STATE);
+      const DDS::ReturnCode_t ret = thread_status_reader_->read(datas,
+                                                                infos,
+                                                                DDS::LENGTH_UNLIMITED,
+                                                                DDS::ANY_SAMPLE_STATE,
+                                                                DDS::ANY_VIEW_STATE,
+                                                                DDS::ANY_INSTANCE_STATE);
       if (ret != DDS::RETCODE_OK) {
         ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: RelayThreadMonitor::svc failed to read %C\n"), OpenDDS::DCPS::retcode_to_string(ret)));
         continue;
@@ -105,12 +104,12 @@ void RelayThreadMonitor::on_data_available(DDS::DataReader_ptr /*reader*/)
 
   OpenDDS::DCPS::InternalThreadBuiltinTopicDataSeq datas;
   DDS::SampleInfoSeq infos;
-  DDS::ReturnCode_t ret = thread_status_reader_->read(datas,
-                                                      infos,
-                                                      DDS::LENGTH_UNLIMITED,
-                                                      DDS::NOT_READ_SAMPLE_STATE,
-                                                      DDS::ANY_VIEW_STATE,
-                                                      DDS::ANY_INSTANCE_STATE);
+  const DDS::ReturnCode_t ret = thread_status_reader_->read(datas,
+                                                            infos,
+                                                            DDS::LENGTH_UNLIMITED,
+                                                            DDS::NOT_READ_SAMPLE_STATE,
+                                                            DDS::ANY_VIEW_STATE,
+                                                            DDS::ANY_INSTANCE_STATE);
 
   if (ret == DDS::RETCODE_NO_DATA) {
     return;

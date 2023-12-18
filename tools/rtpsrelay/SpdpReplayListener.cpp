@@ -21,12 +21,12 @@ void SpdpReplayListener::on_data_available(DDS::DataReader_ptr reader)
 
   SpdpReplaySeq data;
   DDS::SampleInfoSeq infos;
-  DDS::ReturnCode_t ret = dr->take(data,
-                                   infos,
-                                   DDS::LENGTH_UNLIMITED,
-                                   DDS::NOT_READ_SAMPLE_STATE,
-                                   DDS::ANY_VIEW_STATE,
-                                   DDS::ANY_INSTANCE_STATE);
+  const DDS::ReturnCode_t ret = dr->take(data,
+                                         infos,
+                                         DDS::LENGTH_UNLIMITED,
+                                         DDS::NOT_READ_SAMPLE_STATE,
+                                         DDS::ANY_VIEW_STATE,
+                                         DDS::ANY_INSTANCE_STATE);
   if (ret != DDS::RETCODE_OK) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: SpdpReplayListener::on_data_available failed to take %C\n"), OpenDDS::DCPS::retcode_to_string(ret)));
     return;
