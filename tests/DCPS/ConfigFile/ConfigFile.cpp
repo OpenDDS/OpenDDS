@@ -233,9 +233,9 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
       
       TEST_CHECK(rd->spdp_send_addrs().count(NetworkAddress("10.6.6.6:10006")) == 1);
       
-      // Specifying 10.7.7.7:10007:3:3 gives three ports, with interval of three       
-      TEST_CHECK(rd->spdp_send_addrs().count(NetworkAddress("10.7.7.7:10007")) == 1);      
-      TEST_CHECK(rd->spdp_send_addrs().count(NetworkAddress("10.7.7.7:10010")) == 1);      
+      // Specifying 10.7.7.7:10007:3:3 gives three ports, with interval of three    
+      TEST_CHECK(rd->spdp_send_addrs().count(NetworkAddress("10.7.7.7:10007")) == 1);
+      TEST_CHECK(rd->spdp_send_addrs().count(NetworkAddress("10.7.7.7:10010")) == 1);
       TEST_CHECK(rd->spdp_send_addrs().count(NetworkAddress("10.7.7.7:10013")) == 1);
     }
     {
