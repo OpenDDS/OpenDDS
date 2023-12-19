@@ -5966,43 +5966,53 @@ bool operator<<(Serializer& ser, const KeyOnly<DDS::DynamicData_ptr>& key)
 
 namespace DCPS {
 
+bool check_rc(DDS::ReturnCode_t rc, DDS::MemberId id, DDS::TypeKind tk, const char* fn_name)
+{
+  if (rc != DDS::RETCODE_OK && rc != DDS::RETCODE_NO_DATA) {
+    if (log_level >= LogLevel::Warning) {
+      ACE_ERROR((LM_WARNING, "(%P|t) WARNING: %C: Failed to get %C member ID %u: %C\n",
+                 fn_name, XTypes::typekind_to_string(tk), id, retcode_to_string(rc)));
+    }
+    return false;
+  }
+  return true;
+}
+
 void vwrite(ValueWriter& vw, DDS::DynamicData_ptr value);
 
-void vwrite_member(ValueWriter& vw, DDS::DynamicData_ptr value, const DDS::MemberDescriptor_var& md)
+void vwrite_item(ValueWriter& vw, DDS::DynamicData_ptr value,
+                 DDS::MemberId id, const DDS::DynamicType_var& item_type)
 {
-  using namespace OpenDDS::XTypes;
-  const DDS::MemberId id = md->id();
-  const DDS::DynamicType_var member_type = get_base_type(md->type());
-  const DDS::TypeKind member_tk = member_type->get_kind();
-  DDS::TypeKind treat_member_as = member_tk;
+  const DDS::TypeKind item_tk = item_type->get_kind();
+  DDS::TypeKind tk = item_tk;
 
-  DDS::ReturnCode_t rc;
-  if (member_tk == TK_ENUM) {
-    rc = enum_bound(member_type, treat_member_as);
+  DDS::ReturnCode_t rc = DDS::RETCODE_OK;
+  if (item_tk == TK_ENUM) {
+    rc = enum_bound(item_type, tk);
     if (rc != DDS::RETCODE_OK) {
       if (log_level >= LogLevel::Warning) {
-        ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: vwrite_member: enum_bound failed (%C)\n",
+        ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: vwrite_item: enum_bound failed (%C)\n",
                    retcode_to_string(rc)));
       }
       return;
     }
   }
-  if (member_tk == TK_BITMASK) {
-    rc = bitmask_bound(member_type, treat_member_as);
+  if (item_tk == TK_BITMASK) {
+    rc = bitmask_bound(item_type, tk);
     if (rc != DDS::RETCODE_OK) {
       if (log_level >= LogLevel::Warning) {
-        ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: vwrite_member: bitmask_bound failed (%C)\n",
+        ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: vwrite_item: bitmask_bound failed (%C)\n",
                    retcode_to_string(rc)));
       }
       return;
     }
   }
 
-  switch (treat_member_as) {
+  switch (tk) {
   case TK_INT8: {
-    CORBA::Int8 val;
+    CORBA::Int8 val = 0;
     rc = value->get_int8_value(val, id);
-    if (!check_rc_from_get(rc, id, member_tk, "vwrite_member")) {
+    if (!check_rc(rc, id, tk, "vwrite_item")) {
       return;
     }
     if (rc == DDS::RETCODE_OK) {
@@ -6011,9 +6021,9 @@ void vwrite_member(ValueWriter& vw, DDS::DynamicData_ptr value, const DDS::Membe
     break;
   }
   case TK_UINT8: {
-    CORBA::UInt8 val;
+    CORBA::UInt8 val = 0;
     rc = value->get_uint8_value(val, id);
-    if (!check_rc_from_get(rc, id, member_tk, "vwrite_member")) {
+    if (!check_rc(rc, id, tk, "vwrite_item")) {
       return;
     }
     if (rc == DDS::RETCODE_OK) {
@@ -6022,9 +6032,9 @@ void vwrite_member(ValueWriter& vw, DDS::DynamicData_ptr value, const DDS::Membe
     break;
   }
   case TK_INT16: {
-    CORBA::Short val;
+    CORBA::Short val = 0;
     rc = value->get_int16_value(val, id);
-    if (!check_rc_from_get(rc, id, member_tk, "vwrite_member")) {
+    if (!check_rc(rc, id, tk, "vwrite_item")) {
       return;
     }
     if (rc == DDS::RETCODE_OK) {
@@ -6033,9 +6043,9 @@ void vwrite_member(ValueWriter& vw, DDS::DynamicData_ptr value, const DDS::Membe
     break;
   }
   case TK_UINT16: {
-    CORBA::UShort val;
+    CORBA::UShort val = 0;
     rc = value->get_uint16_value(val, id);
-    if (!check_rc_from_get(rc, id, member_tk, "vwrite_member")) {
+    if (!check_rc(rc, id, tk, "vwrite_item")) {
       return;
     }
     if (rc == DDS::RETCODE_OK) {
@@ -6044,9 +6054,9 @@ void vwrite_member(ValueWriter& vw, DDS::DynamicData_ptr value, const DDS::Membe
     break;
   }
   case TK_INT32: {
-    CORBA::Long val;
+    CORBA::Long val = 0;
     rc = value->get_int32_value(val, id);
-    if (!check_rc_from_get(rc, id, member_tk, "vwrite_member")) {
+    if (!check_rc(rc, id, tk, "vwrite_item")) {
       return;
     }
     if (rc == DDS::RETCODE_OK) {
@@ -6055,9 +6065,9 @@ void vwrite_member(ValueWriter& vw, DDS::DynamicData_ptr value, const DDS::Membe
     break;
   }
   case TK_UINT32: {
-    CORBA::ULong val;
+    CORBA::ULong val = 0;
     rc = value->get_uint32_value(val, id);
-    if (!check_rc_from_get(rc, id, member_tk, "vwrite_member")) {
+    if (!check_rc(rc, id, tk, "vwrite_item")) {
       return;
     }
     if (rc == DDS::RETCODE_OK) {
@@ -6066,9 +6076,9 @@ void vwrite_member(ValueWriter& vw, DDS::DynamicData_ptr value, const DDS::Membe
     break;
   }
   case TK_INT64: {
-    CORBA::LongLong val;
+    CORBA::LongLong val = 0;
     rc =  value->get_int64_value(val, id);
-    if (!check_rc_from_get(rc, id, member_tk, "vwrite_member")) {
+    if (!check_rc(rc, id, tk, "vwrite_item")) {
       return;
     }
     if (rc == DDS::RETCODE_OK) {
@@ -6077,9 +6087,9 @@ void vwrite_member(ValueWriter& vw, DDS::DynamicData_ptr value, const DDS::Membe
     break;
   }
   case TK_UINT64: {
-    CORBA::ULongLong val;
+    CORBA::ULongLong val = 0;
     rc = value->get_uint64_value(val, id);
-    if (!check_rc_from_get(rc, id, member_tk, "vwrite_member")) {
+    if (!check_rc(rc, id, tk, "vwrite_item")) {
       return;
     }
     if (rc == DDS::RETCODE_OK) {
@@ -6088,9 +6098,9 @@ void vwrite_member(ValueWriter& vw, DDS::DynamicData_ptr value, const DDS::Membe
     break;
   }
   case TK_FLOAT32: {
-    CORBA::Float val;
+    CORBA::Float val = 0.0f;
     rc = value->get_float32_value(val, id);
-    if (!check_rc_from_get(rc, id, member_tk, "vwrite_member")) {
+    if (!check_rc(rc, id, tk, "vwrite_item")) {
       return;
     }
     if (rc == DDS::RETCODE_OK) {
@@ -6099,9 +6109,9 @@ void vwrite_member(ValueWriter& vw, DDS::DynamicData_ptr value, const DDS::Membe
     break;
   }
   case TK_FLOAT64: {
-    CORBA::Double val;
+    CORBA::Double val = 0.0;
     rc = value->get_float64_value(val, id);
-    if (!check_rc_from_get(rc, id, member_tk, "vwrite_member")) {
+    if (!check_rc(rc, id, tk, "vwrite_item")) {
       return;
     }
     if (rc == DDS::RETCODE_OK) {
@@ -6110,9 +6120,9 @@ void vwrite_member(ValueWriter& vw, DDS::DynamicData_ptr value, const DDS::Membe
     break;
   }
   case TK_FLOAT128: {
-    CORBA::LongDouble val;
+    CORBA::LongDouble val = 0.0l;
     rc = value->get_float128_value(val, id);
-    if (!check_rc_from_get(rc, id, member_tk, "vwrite_member")) {
+    if (!check_rc(rc, id, tk, "vwrite_item")) {
       return;
     }
     if (rc == DDS::RETCODE_OK) {
@@ -6121,9 +6131,9 @@ void vwrite_member(ValueWriter& vw, DDS::DynamicData_ptr value, const DDS::Membe
     break;
   }
   case TK_CHAR8: {
-    CORBA::Char val;
+    CORBA::Char val = '\0';
     rc = value->get_char8_value(val, id);
-    if (!check_rc_from_get(rc, id, member_tk, "vwrite_member")) {
+    if (!check_rc(rc, id, tk, "vwrite_item")) {
       return;
     }
     if (rc == DDS::RETCODE_OK) {
@@ -6133,9 +6143,9 @@ void vwrite_member(ValueWriter& vw, DDS::DynamicData_ptr value, const DDS::Membe
   }
 #ifdef DDS_HAS_WCHAR
   case TK_CHAR16: {
-    CORBA::WChar val;
+    CORBA::WChar val = L'\0';
     rc = value->get_char16_value(val, id);
-    if (!check_rc_from_get(rc, id, member_tk, "vwrite_member")) {
+    if (!check_rc(rc, id, tk, "vwrite_item")) {
       return;
     }
     if (rc == DDS::RETCODE_OK) {
@@ -6145,9 +6155,9 @@ void vwrite_member(ValueWriter& vw, DDS::DynamicData_ptr value, const DDS::Membe
   }
 #endif
   case TK_BYTE: {
-    CORBA::Octet val;
+    CORBA::Octet val = 0x00;
     rc = value->get_byte_value(val, id);
-    if (!check_rc_from_get(rc, id, member_tk, "vwrite_member")) {
+    if (!check_rc(rc, id, tk, "vwrite_item")) {
       return;
     }
     if (rc == DDS::RETCODE_OK) {
@@ -6156,9 +6166,9 @@ void vwrite_member(ValueWriter& vw, DDS::DynamicData_ptr value, const DDS::Membe
     break;
   }
   case TK_BOOLEAN: {
-    CORBA::Boolean val;
+    CORBA::Boolean val = false;
     rc = value->get_boolean_value(val, id);
-    if (!check_rc_from_get(rc, id, member_tk, "vwrite_member")) {
+    if (!check_rc(rc, id, tk, "vwrite_item")) {
       return;
     }
     if (rc == DDS::RETCODE_OK) {
@@ -6169,7 +6179,7 @@ void vwrite_member(ValueWriter& vw, DDS::DynamicData_ptr value, const DDS::Membe
   case TK_STRING8: {
     CORBA::String_var val;
     rc = value->get_string_value(val, id);
-    if (!check_rc_from_get(rc, id, member_tk, "vwrite_member")) {
+    if (!check_rc(rc, id, tk, "vwrite_item")) {
       return;
     }
     if (rc == DDS::RETCODE_OK) {
@@ -6181,7 +6191,7 @@ void vwrite_member(ValueWriter& vw, DDS::DynamicData_ptr value, const DDS::Membe
   case TK_STRING16: {
     CORBA::WString_var val;
     rc = value->get_wstring_value(val, id);
-    if (!check_rc_from_get(rc, id, member_tk, "vwrite_member")) {
+    if (!check_rc(rc, id, tk, "vwrite_item")) {
       return;
     }
     if (rc == DDS::RETCODE_OK) {
@@ -6196,7 +6206,7 @@ void vwrite_member(ValueWriter& vw, DDS::DynamicData_ptr value, const DDS::Membe
   case TK_SEQUENCE: {
     DDS::DynamicData_var member_data;
     rc = value->get_complex_value(member_data, id);
-    if (!check_rc_from_get(rc, id, member_tk, "vwrite_member")) {
+    if (!check_rc(rc, id, tk, "vwrite_item")) {
       return;
     }
     if (rc == DDS::RETCODE_OK) {
@@ -6206,10 +6216,18 @@ void vwrite_member(ValueWriter& vw, DDS::DynamicData_ptr value, const DDS::Membe
   }
   default:
     if (log_level >= LogLevel::Warning) {
-      ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: vwrite_member: Unsupported type %C\n",
-                 typekind_to_string(member_tk)));
+      ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: vwrite_item: Unsupported type %C\n",
+                 typekind_to_string(tk)));
     }
   }
+}
+
+void vwrite_member(ValueWriter& vw, DDS::DynamicData_ptr value, const DDS::MemberDescriptor_var& md)
+{
+  using namespace OpenDDS::XTypes;
+  const DDS::MemberId id = md->id();
+  const DDS::DynamicType_var member_type = get_base_type(md->type());
+  vwrite_item(vw, value, id, member_type);
 }
 
 void vwrite_struct(ValueWriter& vw, DDS::DynamicData_ptr value, const DDS::DynamicType_var& dt)
@@ -6220,8 +6238,8 @@ void vwrite_struct(ValueWriter& vw, DDS::DynamicData_ptr value, const DDS::Dynam
     DDS::ReturnCode_t rc = dt->get_member_by_index(dtm, i);
     if (rc != DDS::RETCODE_OK) {
       if (log_level >= LogLevel::Warning) {
-        ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: vwrite_struct: get_member_by_index failed (%C)\n",
-                   retcode_to_string(rc)));
+        ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: vwrite_struct: get_member_by_index %u failed (%C)\n",
+                   i, retcode_to_string(rc)));
       }
       return;
     }
@@ -6229,8 +6247,8 @@ void vwrite_struct(ValueWriter& vw, DDS::DynamicData_ptr value, const DDS::Dynam
     rc = dtm->get_descriptor(md);
     if (rc != DDS::RETCODE_OK) {
       if (log_level >= LogLevel::Warning) {
-        ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: vwrite_struct: get_descriptor failed (%C)\n",
-                   retcode_to_string(rc)));
+        ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: vwrite_struct:"
+                   " get_descriptor for member at index %u failed (%C)\n", i, retcode_to_string(rc)));
       }
       return;
     }
@@ -6267,7 +6285,7 @@ void vwrite_discriminator(ValueWriter& vw, DDS::DynamicData_ptr value,
   case TK_BOOLEAN: {
     CORBA::Boolean val = false;
     rc = value->get_boolean_value(val, id);
-    if (!check_rc_from_get(rc, id, disc_tk, "vwrite_discriminator")) {
+    if (!check_rc(rc, id, disc_tk, "vwrite_discriminator")) {
       return;
     }
     disc_val = static_cast<CORBA::Long>(val);
@@ -6277,7 +6295,7 @@ void vwrite_discriminator(ValueWriter& vw, DDS::DynamicData_ptr value,
   case TK_BYTE: {
     CORBA::Octet val = 0x00;
     rc = value->get_byte_value(val, id);
-    if (!check_rc_from_get(rc, id, disc_tk, "vwrite_discriminator")) {
+    if (!check_rc(rc, id, disc_tk, "vwrite_discriminator")) {
       return;
     }
     disc_val = static_cast<CORBA::Long>(val);
@@ -6287,7 +6305,7 @@ void vwrite_discriminator(ValueWriter& vw, DDS::DynamicData_ptr value,
   case TK_CHAR8: {
     CORBA::Char val = '\0';
     rc = value->get_char8_value(val, id);
-    if (!check_rc_from_get(rc, id, disc_tk, "vwrite_discriminator")) {
+    if (!check_rc(rc, id, disc_tk, "vwrite_discriminator")) {
       return;
     }
     disc_val = static_cast<CORBA::Long>(val);
@@ -6298,7 +6316,7 @@ void vwrite_discriminator(ValueWriter& vw, DDS::DynamicData_ptr value,
   case TK_CHAR16: {
     CORBA::WChar val;
     rc = value->get_char16_value(val, id);
-    if (!check_rc_from_get(rc, id, disc_tk, "vwrite_discriminator")) {
+    if (!check_rc(rc, id, disc_tk, "vwrite_discriminator")) {
       return;
     }
     disc_val = static_cast<CORBA::Long>(val);
@@ -6309,7 +6327,7 @@ void vwrite_discriminator(ValueWriter& vw, DDS::DynamicData_ptr value,
   case TK_INT8: {
     CORBA::Int8 val = 0;
     rc = value->get_int8_value(val, id);
-    if (!check_rc_from_get(rc, id, disc_tk, "vwrite_discriminator")) {
+    if (!check_rc(rc, id, disc_tk, "vwrite_discriminator")) {
       return;
     }
     disc_val = static_cast<CORBA::Long>(val);
@@ -6319,7 +6337,7 @@ void vwrite_discriminator(ValueWriter& vw, DDS::DynamicData_ptr value,
   case TK_UINT8: {
     CORBA::UInt8 val = 0;
     rc = value->get_uint8_value(val, id);
-    if (!check_rc_from_get(rc, id, disc_tk, "vwrite_discriminator")) {
+    if (!check_rc(rc, id, disc_tk, "vwrite_discriminator")) {
       return;
     }
     disc_val = static_cast<CORBA::Long>(val);
@@ -6329,7 +6347,7 @@ void vwrite_discriminator(ValueWriter& vw, DDS::DynamicData_ptr value,
   case TK_INT16: {
     CORBA::Short val;
     rc = value->get_int16_value(val, id);
-    if (!check_rc_from_get(rc, id, disc_tk, "vwrite_discriminator")) {
+    if (!check_rc(rc, id, disc_tk, "vwrite_discriminator")) {
       return;
     }
     disc_val = static_cast<CORBA::Long>(val);
@@ -6339,7 +6357,7 @@ void vwrite_discriminator(ValueWriter& vw, DDS::DynamicData_ptr value,
   case TK_UINT16: {
     CORBA::UShort val;
     rc = value->get_uint16_value(val, id);
-    if (!check_rc_from_get(rc, id, disc_tk, "vwrite_discriminator")) {
+    if (!check_rc(rc, id, disc_tk, "vwrite_discriminator")) {
       return;
     }
     disc_val = static_cast<CORBA::Long>(val);
@@ -6348,7 +6366,7 @@ void vwrite_discriminator(ValueWriter& vw, DDS::DynamicData_ptr value,
   }
   case TK_INT32: {
     rc = value->get_int32_value(disc_val, id);
-    if (!check_rc_from_get(rc, id, disc_tk, "vwrite_discriminator")) {
+    if (!check_rc(rc, id, disc_tk, "vwrite_discriminator")) {
       return;
     }
     vw.write_int32(disc_val);
@@ -6357,7 +6375,7 @@ void vwrite_discriminator(ValueWriter& vw, DDS::DynamicData_ptr value,
   case TK_UINT32: {
     CORBA::ULong val;
     rc = value->get_uint32_value(val, id);
-    if (!check_rc_from_get(rc, id, disc_tk, "vwrite_discriminator")) {
+    if (!check_rc(rc, id, disc_tk, "vwrite_discriminator")) {
       return;
     }
     disc_val = static_cast<CORBA::Long>(val);
@@ -6367,7 +6385,7 @@ void vwrite_discriminator(ValueWriter& vw, DDS::DynamicData_ptr value,
   case TK_INT64: {
     CORBA::LongLong val;
     rc = value->get_int64_value(val, id);
-    if (!check_rc_from_get(rc, id, disc_tk, "vwrite_discriminator")) {
+    if (!check_rc(rc, id, disc_tk, "vwrite_discriminator")) {
       return;
     }
     disc_val = static_cast<CORBA::Long>(val);
@@ -6377,7 +6395,7 @@ void vwrite_discriminator(ValueWriter& vw, DDS::DynamicData_ptr value,
   case TK_UINT64: {
     CORBA::ULongLong val;
     rc = value->get_uint64_value(val, id);
-    if (!check_rc_from_get(rc, id, disc_tk, "vwrite_discriminator")) {
+    if (!check_rc(rc, id, disc_tk, "vwrite_discriminator")) {
       return;
     }
     disc_val = static_cast<CORBA::Long>(val);
@@ -6416,19 +6434,88 @@ void vwrite_union(ValueWrite& vw, DDS::DynamicData_ptr value, const DDS::Dynamic
     return;
   }
   vw.begin_discriminator();
-  vwrite_discriminator(vw, value, disc_md);
+  CORBA::Long disc_val = 0;
+  vwrite_discriminator(vw, value, disc_md, disc_val);
   vw.end_discriminator();
 
-  // TODO(sonndinh): Selected branch
+  // Selected branch
+  bool has_branch = false;
+  DDS::MemberDescriptor_var selected_md;
+  rc = XTypes::get_selected_union_branch(dt, disc_val, has_branch, selected_md);
+  if (rc != DDS::RETCODE_OK) {
+    if (log_level >= LogLevel::Warning) {
+      ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: vwrite_union: get_selected_union_branch failed (%C)\n",
+                 retcode_to_string(rc)));
+    }
+    return;
+  }
+  if (has_branch) {
+    vw.begin_union_member(md->name());
+    vwrite_member(vw, value, selected_md);
+    vw.end_union_member();
+  }
+
   vw.end_union();
 }
 
+void vwrite_element(ValueWriter& vw, DDS::DynamicData_ptr value,
+                    const DDS::DynamicType_var& elem_dt, CORBA::ULong idx)
+{
+  const DDS::MemberId id = value->get_member_id_at_index(idx);
+  if (id == MEMBER_ID_INVALID) {
+    if (log_level >= LogLevel::Warning) {
+      ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: vwrite_element: get_member_id_at_index %u failed\n", idx));
+    }
+    return;
+  }
+  vwrite_item(vw, value, id, elem_dt);
+}
+
+// When we're sure that the concrete DynamicData class has implemented get_*_values operations
+// for primitive sequences, we can use ValueWriter's write_*_array functions.
+// For now, vwrite for array and sequence will write elements one by one.
 void vwrite_array(ValueWrite& vw, DDS::DynamicData_ptr value, const DDS::DynamicType_var& dt)
 {
+  DDS::TypeDescriptor_var td;
+  DDS::ReturnCode_t rc = dt->get_descriptor(td);
+  if (rc != DDS::RETCODE_OK) {
+    if (log_level >= LogLevel::Warning) {
+      ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: vwrite_array: get_descriptor failed (%C)\n",
+                 retcode_to_string(rc)));
+    }
+    return;
+  }
+  DDS::DynamicType_var elem_type = XTypes::get_base_type(td->element_type());
+
+  vw.begin_array();
+  for (CORBA::ULong i = 0; i < value->get_item_count(); ++i) {
+    vw.begin_element(i);
+    vwrite_element(vw, value, elem_type, i);
+    vw.end_element();
+  }
+  vw.end_array();
 }
 
 void vwrite_sequence(ValueWrite& vw, DDS::DynamicData_ptr value, const DDS::DynamicType_var& dt)
 {
+  DDS::TypeDescriptor_var td;
+  DDS::ReturnCode_t rc = dt->get_descriptor(td);
+  if (rc != DDS::RETCODE_OK) {
+    if (log_level >= LogLevel::Warning) {
+      ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: vwrite_sequence: get_descriptor failed (%C)\n",
+                 retcode_to_string(rc)));
+    }
+    return;
+  }
+  DDS::DynamicType_var elem_type = XTypes::get_base_type(td->element_type());
+
+  vw.begin_sequence();
+  for (CORBA::ULong i = 0; i < value->get_item_count(); ++i) {
+    vw.begin_element(i);
+    vwrite_element(vw, value, elem_type, i);
+    vw.end_element();
+  }
+  vw.end_sequence();
 }
 
 void vwrite(ValueWriter& vw, DDS::DynamicData_ptr value)
