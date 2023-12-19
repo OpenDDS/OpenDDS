@@ -139,9 +139,10 @@ public:
 
 private:
   friend class RtpsUdpType;
-  template <typename T, typename U>
-  friend RcHandle<T> OpenDDS::DCPS::make_rch(U const&);
-  explicit RtpsUdpInst(const OPENDDS_STRING& name);
+  template <typename T, typename U0, typename U1>
+  friend RcHandle<T> OpenDDS::DCPS::make_rch(U0 const&, U1 const&);
+  explicit RtpsUdpInst(const OPENDDS_STRING& name,
+                       bool is_template);
 
   TransportImpl_rch new_impl();
 

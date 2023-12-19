@@ -25,9 +25,10 @@ class RtpsUdpType : public TransportType {
 public:
   const char* name() { return RTPS_UDP_NAME; }
 
-  TransportInst_rch new_inst(const OPENDDS_STRING& name)
+  TransportInst_rch new_inst(const OPENDDS_STRING& name,
+                             bool is_template)
   {
-    return make_rch<RtpsUdpInst>(name);
+    return make_rch<RtpsUdpInst>(name, is_template);
   }
 };
 

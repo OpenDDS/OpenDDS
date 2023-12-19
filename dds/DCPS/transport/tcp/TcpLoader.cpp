@@ -37,7 +37,8 @@ class TcpType : public TransportType {
 public:
   const char* name() { return TCP_NAME; }
 
-  TransportInst_rch new_inst(const std::string& name)
+  TransportInst_rch new_inst(const std::string& name,
+                             bool)
   {
     return make_rch<TcpInst>(name);
   }

@@ -26,8 +26,9 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-RtpsUdpInst::RtpsUdpInst(const OPENDDS_STRING& name)
-  : TransportInst("rtps_udp", name)
+RtpsUdpInst::RtpsUdpInst(const OPENDDS_STRING& name,
+                         bool is_template)
+  : TransportInst("rtps_udp", name, is_template)
   , send_buffer_size_(*this, &RtpsUdpInst::send_buffer_size, &RtpsUdpInst::send_buffer_size)
   , rcv_buffer_size_(*this, &RtpsUdpInst::rcv_buffer_size, &RtpsUdpInst::rcv_buffer_size)
   , use_multicast_(*this, &RtpsUdpInst::use_multicast, &RtpsUdpInst::use_multicast)

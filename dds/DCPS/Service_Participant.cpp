@@ -1574,7 +1574,7 @@ Service_Participant::load_configuration(
   }
 
   // load any transport configuration templates before the transport config
-  status = TransportRegistry::instance()->load_transport_templates(config);
+  status = TransportRegistry::instance()->load_transport_templates();
 
   if (status != 0) {
     ACE_ERROR_RETURN((LM_ERROR,
@@ -1622,14 +1622,6 @@ Service_Participant::load_configuration(
   // Also loaded after the transport configuration so that
   // DefaultTransportConfig within [domain/*] can use TransportConfig objects.
   status = this->load_domain_configuration(config, filename);
-
-  if (status != 0) {
-    ACE_ERROR_RETURN((LM_ERROR,
-                      ACE_TEXT("(%P|%t) ERROR: Service_Participant::load_configuration ")
-                      ACE_TEXT("load_domain_configuration () returned %d\n"),
-                      status),
-                     -1);
-  }
 
   if (status != 0) {
     ACE_ERROR_RETURN((LM_ERROR,
@@ -2243,8 +2235,12 @@ Service_Participant::process_customizations(DDS::DomainId_t id, const OPENDDS_ST
     // update customs valuemap with any customizations
     const DCPS::ConfigStoreImpl::StringMap customizations = dit->customizations(config_store_);
     for (ValueMap::const_iterator i = customizations.begin(); i != customizations.end(); ++i) {
-      if (i->first == "InteropMulticastOverride" && i->second == "AddDomainId") {
-        OPENDDS_STRING addr = customs["InteropMulticastOverride"];
+      if (i->first == "INTEROP_MULTICAST_OVERRIDE" && i->second == "AddDomainId") {
+        DCPS::ConfigStoreImpl::StringMap::const_iterator pos2 = customs.find("INTEROP_MULTICAST_OVERRIDE");
+        if (pos2 == customs.end()) {
+          pos2 = customs.find("InteropMulticastOverride");
+        }
+        OPENDDS_STRING addr = pos2 != customs.end() ? pos2->second : "";
         size_t pos = addr.find_last_of(".");
         if (pos != OPENDDS_STRING::npos) {
           OPENDDS_STRING custom = addr.substr(pos + 1);
