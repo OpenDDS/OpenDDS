@@ -928,8 +928,39 @@ ConfigStoreImpl::get(const char* key,
       if (!sample.value().empty()) {
         typedef OPENDDS_VECTOR(String) Vector;
         const Vector vec = split(sample.value(), " ,", true, true);
+
+        // Expand any addresses specified with optional :quantity:interval
+        Vector expandedVec;
+        for (Vector::const_iterator i = vec.begin(); i != vec.end(); ++i){
+          const Vector parts = split(*i, ":", true, true);
+          String baseAddress = parts[0];
+          if (parts.size() > 1){
+            baseAddress.append(":");
+            baseAddress.append(parts[1]);
+          }
+          expandedVec.push_back(baseAddress);
+
+          if (parts.size() > 2){
+            // quantity has been specified
+            int basePort = std::stoi(parts[1]);
+            int numPorts = std::stoi(parts[2]);
+            // default of 2 for specifying multiple SpdpSendAddrs endpoints.
+            int interval = 2;
+            if (parts.size() == 4)
+              interval = std::stoi(parts[3]);
+
+            if (numPorts){
+              for (int j=1; j < numPorts; ++j){
+                String additionalAddr = parts[0];
+                additionalAddr.append(":");
+                additionalAddr.append(std::to_string(basePort + (j*interval)));
+                expandedVec.push_back(additionalAddr);
+              }
+            }
+          }
+        }
         bool err = false;
-        for (Vector::const_iterator pos = vec.begin(), limit = vec.end(); !err && pos != limit; ++pos) {
+        for (Vector::const_iterator pos = expandedVec.begin(), limit = expandedVec.end(); !err && pos != limit; ++pos) {
           NetworkAddress addr;
           switch (format) {
           case Format_No_Port:
