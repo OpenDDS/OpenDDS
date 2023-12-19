@@ -1522,11 +1522,11 @@ Service_Participant::load_configuration(
   process_section(*config_store_, config_reader_, config_reader_listener_, "OPENDDS", config, config.root_section(), ACE_TEXT_ALWAYS_CHAR(filename), false);
 
   // Register static discovery.
-  this->add_discovery(static_rchandle_cast<Discovery>(StaticDiscovery::instance()));
+  add_discovery(static_rchandle_cast<Discovery>(StaticDiscovery::instance()));
 
   // load any discovery configuration templates before rtps discovery
   // this will populate the domain_range_templates_
-  int status = this->load_domain_ranges();
+  int status = load_domain_ranges();
 
   if (status != 0) {
     if (log_level >= LogLevel::Error) {
@@ -1543,7 +1543,7 @@ Service_Participant::load_configuration(
   // for config templates before loading any config information.
 
   // load any rtps_discovery templates
-  status = this->load_discovery_templates(config);
+  status = load_discovery_templates();
 
   if (status != 0) {
     ACE_ERROR_RETURN((LM_ERROR,
@@ -2065,91 +2065,14 @@ Service_Participant::configure_discovery_template(DDS::DomainId_t domainId, cons
 
 
 int
-Service_Participant::load_discovery_templates(ACE_Configuration_Heap& cf)
+Service_Participant::load_discovery_templates()
 {
-  // open the rtps_discovery config sections
-  cf.open();
-  const ACE_Configuration_Section_Key& root = cf.root_section();
-  ACE_Configuration_Section_Key rtps_sect;
+  const DCPS::ConfigStoreImpl::StringList sections = config_store_->get_section_names("OPENDDS_RTPS_DISCOVERY");
 
-  if (cf.open_section(root, RTPS_SECTION_NAME, false, rtps_sect) == 0) {
-    ValueMap vm;
-    if (pullValues(cf, rtps_sect, vm) > 0) {
-    // There are values inside [rtps_discovery]
-    ACE_ERROR_RETURN((LM_ERROR,
-                      ACE_TEXT("(%P|%t) Service_Participant::load_discovery_templates(): ")
-                      ACE_TEXT("rtps_discovery sections must have a subsection name\n")),
-                     -1);
-    }
-
-    // Process the subsections of this section (the individual domains)
-    KeyList keys;
-    if (processSections(cf, rtps_sect, keys) != 0) {
-      ACE_ERROR_RETURN((LM_ERROR,
-                        ACE_TEXT("(%P|%t) Service_Participant::load_discovery_templates(): ")
-                        ACE_TEXT("too many nesting layers in the [rtps_discovery] section.\n")),
-                       -1);
-    }
-
-    // store the discovery information
-    for (KeyList::const_iterator disc_it = keys.begin(); disc_it != keys.end(); ++disc_it) {
-      DiscoveryInfo dinfo;
-      dinfo.discovery_name = disc_it->first;
-
-      ValueMap values;
-      if (pullValues(cf, disc_it->second, values) > 0) {
-        for (ValueMap::const_iterator it = values.begin(); it != values.end(); ++it) {
-          // check for customizations
-          if (it->first == ACE_TEXT_ALWAYS_CHAR(CUSTOMIZATION_SECTION_NAME)) {
-            OPENDDS_STRING customization = it->second;
-            if (DCPS_debug_level > 0) {
-              ACE_DEBUG((LM_DEBUG,
-                         ACE_TEXT("(%P|%t) Service_Participant::load_discovery_templates(): ")
-                         ACE_TEXT("loading customizations [%s/%C]\n"),
-                         CUSTOMIZATION_SECTION_NAME,
-                         customization.c_str()));
-            }
-
-            ACE_Configuration_Section_Key custom_sect;
-            if (cf.open_section(root, CUSTOMIZATION_SECTION_NAME, false, custom_sect) == 0) {
-              ValueMap vcm;
-              if (pullValues(cf, custom_sect, vcm) > 0) {
-                ACE_ERROR_RETURN((LM_ERROR,
-                                  ACE_TEXT("(%P|%t) Service_Participant::load_discovery_templates(): ")
-                                  ACE_TEXT("%s sections must have a subsection name\n"),
-                                  CUSTOMIZATION_SECTION_NAME),
-                                 -1);
-              }
-
-              // Process the subsections of the custom section
-              KeyList keys;
-              if (processSections(cf, custom_sect, keys) != 0) {
-                ACE_ERROR_RETURN((LM_ERROR,
-                                  ACE_TEXT("(%P|%t) Service_Participant::load_discovery_templates(): ")
-                                  ACE_TEXT("too many nesting layers in the [%s] section.\n"),
-                                  CUSTOMIZATION_SECTION_NAME),
-                                 -1);
-              }
-
-              // add customizations to domain range
-              for (KeyList::const_iterator iter = keys.begin(); iter != keys.end(); ++iter) {
-                if (customization == iter->first) {
-                  ValueMap values;
-                  pullValues(cf, iter->second, values);
-                  for (ValueMap::const_iterator it = values.begin(); it != values.end(); ++it) {
-                    dinfo.customizations[it->first] = it->second;
-                  }
-                }
-              }
-            }
-          } else {
-              dinfo.disc_info[it->first] = it->second;
-          }
-        }
-      }
-
-      discovery_infos_.push_back(dinfo);
-    }
+  // Loop through the [rtps_discovery/*] sections
+  for (DCPS::ConfigStoreImpl::StringList::const_iterator pos = sections.begin(), limit = sections.end();
+       pos != limit; ++pos) {
+    discovery_infos_.push_back(DiscoveryInfo(*pos));
   }
 
   // return 0 even if no templates were loaded
@@ -2245,6 +2168,25 @@ Service_Participant::DomainRange::domain_info(RcHandle<ConfigStoreImpl> config_s
   return config_store->get_section_values(config_prefix_);
 }
 
+DCPS::ConfigStoreImpl::StringMap
+Service_Participant::DiscoveryInfo::customizations(RcHandle<ConfigStoreImpl> config_store) const
+{
+  if (config_store->has(config_key("Customization").c_str())) {
+    const String c = config_store->get(config_key("Customization").c_str(), "");
+    if (!c.empty()) {
+      return config_store->get_section_values("OPENDDS_CUSTOMIZATION_" + c);
+    }
+  }
+
+  return DCPS::ConfigStoreImpl::StringMap();
+}
+
+DCPS::ConfigStoreImpl::StringMap
+Service_Participant::DiscoveryInfo::disc_info(RcHandle<ConfigStoreImpl> config_store) const
+{
+  return config_store->get_section_values(config_prefix_);
+}
+
 bool
 Service_Participant::has_domain_range() const
 {
@@ -2280,14 +2222,15 @@ Service_Participant::process_customizations(DDS::DomainId_t id, const OPENDDS_ST
   // get the discovery info
   OPENDDS_VECTOR(DiscoveryInfo)::const_iterator dit;
   for (dit = discovery_infos_.begin(); dit != discovery_infos_.end(); ++dit) {
-    if (discovery_name == dit->discovery_name) {
+    if (discovery_name == dit->discovery_name()) {
       break;
     }
   }
 
   if (dit != discovery_infos_.end()) {
     // add discovery info to customs
-    for (ValueMap::const_iterator i = dit->disc_info.begin(); i != dit->disc_info.end(); ++i) {
+    const DCPS::ConfigStoreImpl::StringMap disc_info = dit->disc_info(config_store_);
+    for (DCPS::ConfigStoreImpl::StringMap::const_iterator i = disc_info.begin(); i != disc_info.end(); ++i) {
       customs[i->first] = i->second;
       if (DCPS_debug_level > 0) {
         ACE_DEBUG((LM_DEBUG,
@@ -2298,7 +2241,8 @@ Service_Participant::process_customizations(DDS::DomainId_t id, const OPENDDS_ST
     }
 
     // update customs valuemap with any customizations
-    for (ValueMap::const_iterator i = dit->customizations.begin(); i != dit->customizations.end(); ++i) {
+    const DCPS::ConfigStoreImpl::StringMap customizations = dit->customizations(config_store_);
+    for (ValueMap::const_iterator i = customizations.begin(); i != customizations.end(); ++i) {
       if (i->first == "InteropMulticastOverride" && i->second == "AddDomainId") {
         OPENDDS_STRING addr = customs["InteropMulticastOverride"];
         size_t pos = addr.find_last_of(".");
@@ -2346,7 +2290,7 @@ Service_Participant::is_discovery_template(const OPENDDS_STRING& name)
 {
   OPENDDS_VECTOR(DiscoveryInfo)::const_iterator i;
   for (i = discovery_infos_.begin(); i != discovery_infos_.end(); ++i) {
-    if (i->discovery_name == name && !i->customizations.empty()) {
+    if (i->discovery_name() == name && !i->customizations(config_store_).empty()) {
       return true;
     }
   }
