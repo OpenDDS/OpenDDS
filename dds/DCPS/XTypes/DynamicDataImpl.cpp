@@ -5983,6 +5983,7 @@ void vwrite(ValueWriter& vw, DDS::DynamicData_ptr value);
 void vwrite_item(ValueWriter& vw, DDS::DynamicData_ptr value,
                  DDS::MemberId id, const DDS::DynamicType_var& item_type)
 {
+  using namespace XTypes;
   const DDS::TypeKind item_tk = item_type->get_kind();
   DDS::TypeKind tk = item_tk;
 
@@ -6314,7 +6315,7 @@ void vwrite_discriminator(ValueWriter& vw, DDS::DynamicData_ptr value,
   }
 #ifdef DDS_HAS_WCHAR
   case TK_CHAR16: {
-    CORBA::WChar val;
+    CORBA::WChar val = L'\0';
     rc = value->get_char16_value(val, id);
     if (!check_rc(rc, id, disc_tk, "vwrite_discriminator")) {
       return;
@@ -6345,7 +6346,7 @@ void vwrite_discriminator(ValueWriter& vw, DDS::DynamicData_ptr value,
     break;
   }
   case TK_INT16: {
-    CORBA::Short val;
+    CORBA::Short val = 0;
     rc = value->get_int16_value(val, id);
     if (!check_rc(rc, id, disc_tk, "vwrite_discriminator")) {
       return;
@@ -6355,7 +6356,7 @@ void vwrite_discriminator(ValueWriter& vw, DDS::DynamicData_ptr value,
     break;
   }
   case TK_UINT16: {
-    CORBA::UShort val;
+    CORBA::UShort val = 0;
     rc = value->get_uint16_value(val, id);
     if (!check_rc(rc, id, disc_tk, "vwrite_discriminator")) {
       return;
@@ -6373,7 +6374,7 @@ void vwrite_discriminator(ValueWriter& vw, DDS::DynamicData_ptr value,
     break;
   }
   case TK_UINT32: {
-    CORBA::ULong val;
+    CORBA::ULong val = 0;
     rc = value->get_uint32_value(val, id);
     if (!check_rc(rc, id, disc_tk, "vwrite_discriminator")) {
       return;
@@ -6383,7 +6384,7 @@ void vwrite_discriminator(ValueWriter& vw, DDS::DynamicData_ptr value,
     break;
   }
   case TK_INT64: {
-    CORBA::LongLong val;
+    CORBA::LongLong val = 0;
     rc = value->get_int64_value(val, id);
     if (!check_rc(rc, id, disc_tk, "vwrite_discriminator")) {
       return;
@@ -6393,7 +6394,7 @@ void vwrite_discriminator(ValueWriter& vw, DDS::DynamicData_ptr value,
     break;
   }
   case TK_UINT64: {
-    CORBA::ULongLong val;
+    CORBA::ULongLong val = 0;
     rc = value->get_uint64_value(val, id);
     if (!check_rc(rc, id, disc_tk, "vwrite_discriminator")) {
       return;
@@ -6410,13 +6411,13 @@ void vwrite_discriminator(ValueWriter& vw, DDS::DynamicData_ptr value,
   }
 }
 
-void vwrite_union(ValueWrite& vw, DDS::DynamicData_ptr value, const DDS::DynamicType_var& dt)
+void vwrite_union(ValueWriter& vw, DDS::DynamicData_ptr value, const DDS::DynamicType_var& dt)
 {
   vw.begin_union();
 
   // Discriminator
   DDS::DynamicTypeMember_var dtm;
-  DDS::ReturnCode_t rc = dt->get_member(dtm, DISCRIMINATOR_ID);
+  DDS::ReturnCode_t rc = dt->get_member(dtm, XTypes::DISCRIMINATOR_ID);
   if (rc != DDS::RETCODE_OK) {
     if (log_level >= LogLevel::Warning) {
       ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: vwrite_union: get_member failed (%C)\n",
@@ -6450,7 +6451,7 @@ void vwrite_union(ValueWrite& vw, DDS::DynamicData_ptr value, const DDS::Dynamic
     return;
   }
   if (has_branch) {
-    vw.begin_union_member(md->name());
+    vw.begin_union_member(selected_md->name());
     vwrite_member(vw, value, selected_md);
     vw.end_union_member();
   }
@@ -6462,7 +6463,7 @@ void vwrite_element(ValueWriter& vw, DDS::DynamicData_ptr value,
                     const DDS::DynamicType_var& elem_dt, CORBA::ULong idx)
 {
   const DDS::MemberId id = value->get_member_id_at_index(idx);
-  if (id == MEMBER_ID_INVALID) {
+  if (id == XTypes::MEMBER_ID_INVALID) {
     if (log_level >= LogLevel::Warning) {
       ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: vwrite_element: get_member_id_at_index %u failed\n", idx));
     }
@@ -6474,7 +6475,7 @@ void vwrite_element(ValueWriter& vw, DDS::DynamicData_ptr value,
 // When we're sure that the concrete DynamicData class has implemented get_*_values operations
 // for primitive sequences, we can use ValueWriter's write_*_array functions.
 // For now, vwrite for array and sequence will write elements one by one.
-void vwrite_array(ValueWrite& vw, DDS::DynamicData_ptr value, const DDS::DynamicType_var& dt)
+void vwrite_array(ValueWriter& vw, DDS::DynamicData_ptr value, const DDS::DynamicType_var& dt)
 {
   DDS::TypeDescriptor_var td;
   DDS::ReturnCode_t rc = dt->get_descriptor(td);
@@ -6496,7 +6497,7 @@ void vwrite_array(ValueWrite& vw, DDS::DynamicData_ptr value, const DDS::Dynamic
   vw.end_array();
 }
 
-void vwrite_sequence(ValueWrite& vw, DDS::DynamicData_ptr value, const DDS::DynamicType_var& dt)
+void vwrite_sequence(ValueWriter& vw, DDS::DynamicData_ptr value, const DDS::DynamicType_var& dt)
 {
   DDS::TypeDescriptor_var td;
   DDS::ReturnCode_t rc = dt->get_descriptor(td);
@@ -6520,6 +6521,7 @@ void vwrite_sequence(ValueWrite& vw, DDS::DynamicData_ptr value, const DDS::Dyna
 
 void vwrite(ValueWriter& vw, DDS::DynamicData_ptr value)
 {
+  using namespace XTypes;
   const DDS::DynamicType_var type = value->type();
   const DDS::DynamicType_var base_type = XTypes::get_base_type(type);
   const DDS::TypeKind tk = base_type->get_kind();
@@ -6541,7 +6543,6 @@ void vwrite(ValueWriter& vw, DDS::DynamicData_ptr value)
 }
 
 } // namespace DCPS
-
 } // namespace OpenDDS
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL

@@ -707,6 +707,9 @@ bool serialized_size(const Encoding& encoding, size_t& size, const KeyOnly<DDS::
 
 OpenDDS_Dcps_Export
 bool operator<<(Serializer& ser, const KeyOnly<DDS::DynamicData_ptr>& key);
+
+OpenDDS_Dcps_Export
+void vwrite(ValueWriter& vw, DDS::DynamicData_ptr value);
 }
 
 } // namespace OpenDDS
