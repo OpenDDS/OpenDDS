@@ -343,6 +343,7 @@ function(_opendds_import_group_targets group libs exes)
           "IMPORTED_LINK_INTERFACE_LANGUAGES_${config}" "CXX"
           "IMPORTED_LOCATION_${config}" "${imploc}"
       )
+    _opendds_target_compile_features(${target} INTERFACE)
     endif()
   endmacro()
 

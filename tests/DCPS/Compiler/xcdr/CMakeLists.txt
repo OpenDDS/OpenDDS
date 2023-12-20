@@ -17,7 +17,7 @@ opendds_target_sources(${PROJECT_NAME}
   OPENDDS_IDL_OPTIONS --no-default-nested -Gxtypes-complete
 )
 _opendds_msvc_bigobj(${PROJECT_NAME})
-target_link_libraries(${PROJECT_NAME} PUBLIC OpenDDS::Dcps gtest)
+target_link_libraries(${PROJECT_NAME} PUBLIC OpenDDS::Dcps OpenDDS_GoogleTest)
 
 opendds_add_test(NAME static)
 if(OPENDDS_CONTENT_SUBSCRIPTION)

@@ -28,6 +28,7 @@ function(_opendds_library target)
     "${no_value_options}" "${single_value_options}" "${multi_value_options}" ${ARGN})
 
   _opendds_alias(${target})
+  _opendds_target_compile_features(${target} PUBLIC)
 
   # Put library in BINARY_DIR/lib
   set_target_properties(${target} PROPERTIES
@@ -82,6 +83,7 @@ function(_opendds_executable target)
     "${no_value_options}" "${single_value_options}" "${multi_value_options}" ${ARGN})
 
   _opendds_alias(${target})
+  _opendds_target_compile_features(${target} PRIVATE)
   set_target_properties(${target} PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${OPENDDS_BIN_DIR}")
 
   if(NOT arg_NO_INSTALL)

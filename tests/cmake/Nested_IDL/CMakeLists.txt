@@ -48,7 +48,6 @@ set_target_properties(${ecu_exe}
 target_link_libraries(${ecu_exe} OpenDDS::Dcps ${ecu_lib})
 
 # Testing
-configure_file("run_test.pl" "." COPYONLY)
 opendds_add_test()
 
 _opendds_restore_cache()

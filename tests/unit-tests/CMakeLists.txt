@@ -121,7 +121,7 @@ opendds_target_sources(${PROJECT_NAME}
 target_link_libraries(${PROJECT_NAME} PUBLIC
   OpenDDS::Dcps
   OpenDDS::Rtps_Udp
-  gtest
+  OpenDDS_GoogleTest
   gmock
 )
 if(TARGET OpenDDS::Security)

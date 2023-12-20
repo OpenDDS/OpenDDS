@@ -26,6 +26,6 @@ set_target_properties(${exe} PROPERTIES
   OUTPUT_NAME char-literals-cpp11
   RUNTIME_OUTPUT_DIRECTORY "${dst}/cpp11"
 )
-target_link_libraries(${exe} OpenDDS::Dcps ${idl} gtest)
+target_link_libraries(${exe} OpenDDS::Dcps ${idl} OpenDDS_GoogleTest)
 
 opendds_add_test(ARGS cpp11 EXTRA_LIB_DIRS "${idl_dir}")

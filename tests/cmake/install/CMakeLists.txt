@@ -3,6 +3,7 @@ project(opendds_install_test)
 enable_testing()
 
 find_package(OpenDDS REQUIRED)
+include(opendds_testing)
 
 include(ExternalProject)
 
@@ -44,13 +45,8 @@ ExternalProject_Add(
   DEPENDS ${lib}
 )
 
-# Testing
-configure_file("run_test.pl" "." COPYONLY)
-
 # Test in current environment
-add_test(NAME "${PROJECT_NAME}_current_env"
-  COMMAND perl run_test.pl
-)
+opendds_add_test(NAME current_env)
 
 if(UNIX AND INSTALL_IMPORTED_RUNTIME_ARTIFACTS)
   # IMPORTED_RUNTIME_ARTIFACTS was introduced in CMake 3.21, and to test it we
@@ -65,7 +61,6 @@ if(UNIX AND INSTALL_IMPORTED_RUNTIME_ARTIFACTS)
   if(NOT rc STREQUAL "0")
     message(FATAL_ERROR "install_test_framework.pl failed: ${rc}")
   endif()
-  add_test(NAME "${PROJECT_NAME}_clean_env"
-    COMMAND perl run_test.pl clean-env
-  )
+
+  opendds_add_test(NAME clean_env ARGS clean-env)
 endif()
