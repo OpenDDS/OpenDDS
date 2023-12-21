@@ -189,28 +189,8 @@ void initialize_sample(Mod::Sample& sample)
   sample.sa[3] = "west";
 }
 
-TEST(VreadVwriteTest, StaticSerializeTest)
+void verify_parse_result(const rapidjson::Value& val)
 {
-  Mod::Sample sample;
-  initialize_sample(sample);
-
-  // Serialize to JSON string.
-  Mod::SampleTypeSupport_var ts = new Mod::SampleTypeSupportImpl;
-  OpenDDS::DCPS::RepresentationFormat_var format = ts->make_format(OpenDDS::DCPS::JSON_DATA_REPRESENTATION);
-  CORBA::String_var buffer;
-  ASSERT_EQ(DDS::RETCODE_OK, ts->encode_to_string(sample, buffer, format));
-
-  DDS::OctetSeq_var bytes;
-  ASSERT_EQ(DDS::RETCODE_OK, ts->encode_to_bytes(sample, bytes, format));
-  const unsigned int n = bytes->length();
-  ASSERT_EQ(n, std::strlen(buffer));
-  ASSERT_EQ(0, std::memcmp(buffer.in(), bytes->get_buffer(), n));
-
-  // Then parse.
-  rapidjson::Document document;
-  document.Parse(buffer.in());
-  rapidjson::Value& val = document;
-
   ASSERT_EQ(val.IsObject(), true);
   ASSERT_EQ(val["id"], 5);
   ASSERT_EQ(val["data"], "The most rapid of JSONs");
@@ -281,6 +261,30 @@ TEST(VreadVwriteTest, StaticSerializeTest)
   ASSERT_EQ(val["sa"][1], "east");
   ASSERT_EQ(val["sa"][2], "south");
   ASSERT_EQ(val["sa"][3], "west");
+}
+
+TEST(VreadVwriteTest, StaticSerializeTest)
+{
+  Mod::Sample sample;
+  initialize_sample(sample);
+
+  // Serialize to JSON string.
+  Mod::SampleTypeSupport_var ts = new Mod::SampleTypeSupportImpl;
+  OpenDDS::DCPS::RepresentationFormat_var format = ts->make_format(OpenDDS::DCPS::JSON_DATA_REPRESENTATION);
+  CORBA::String_var buffer;
+  ASSERT_EQ(DDS::RETCODE_OK, ts->encode_to_string(sample, buffer, format));
+
+  DDS::OctetSeq_var bytes;
+  ASSERT_EQ(DDS::RETCODE_OK, ts->encode_to_bytes(sample, bytes, format));
+  const unsigned int n = bytes->length();
+  ASSERT_EQ(n, std::strlen(buffer));
+  ASSERT_EQ(0, std::memcmp(buffer.in(), bytes->get_buffer(), n));
+
+  // Then parse.
+  rapidjson::Document document;
+  document.Parse(buffer.in());
+  rapidjson::Value& val = document;
+  verify_parse_result(val);
 
   //rapidjson::StringBuffer buffer;
   //rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
@@ -301,6 +305,7 @@ TEST(VreadVwriteTest, DynamicSerializeTest)
   tls.add(type_map.begin(), type_map.end());
   DDS::DynamicType_var dt = tls.complete_to_dynamic(it->second.complete, DCPS::GUID_t());
 
+  // Set up the dynamic data object
   Mod::Sample sample;
   initialize_sample(sample);
 
@@ -435,11 +440,17 @@ TEST(VreadVwriteTest, DynamicSerializeTest)
   ASSERT_EQ(DDS::RETCODE_OK, sa_dd->set_string_value(sa_dd->get_member_id_at_index(2), sample.sa[2]));
   ASSERT_EQ(DDS::RETCODE_OK, sa_dd->set_string_value(sa_dd->get_member_id_at_index(3), sample.sa[3]));
 
+  // Serialize to JSON format
   rapidjson::StringBuffer buffer;
   rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
   OpenDDS::DCPS::JsonValueWriter<rapidjson::Writer<rapidjson::StringBuffer> > jvw(writer);
   vwrite(jvw, &dd);
-  ACE_DEBUG((LM_DEBUG, "%C\n", buffer.GetString()));
+
+  // Parse the result string and compare with the original data
+  rapidjson::Document document;
+  document.Parse(buffer.GetString());
+  rapidjson::Value& val = document;
+  verify_parse_result(val);
 }
 
 #endif

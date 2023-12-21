@@ -6017,7 +6017,11 @@ void vwrite_item(ValueWriter& vw, DDS::DynamicData_ptr value,
       return;
     }
     if (rc == DDS::RETCODE_OK) {
-      vw.write_int8(val);
+      if (item_tk == TK_ENUM) {
+        write_enum(vw, item_type, val);
+      } else {
+        vw.write_int8(val);
+      }
     }
     break;
   }
@@ -6039,7 +6043,11 @@ void vwrite_item(ValueWriter& vw, DDS::DynamicData_ptr value,
       return;
     }
     if (rc == DDS::RETCODE_OK) {
-      vw.write_int16(val);
+      if (item_tk == TK_ENUM) {
+        write_enum(vw, item_type, val);
+      } else {
+        vw.write_int16(val);
+      }
     }
     break;
   }
@@ -6061,7 +6069,11 @@ void vwrite_item(ValueWriter& vw, DDS::DynamicData_ptr value,
       return;
     }
     if (rc == DDS::RETCODE_OK) {
-      vw.write_int32(val);
+      if (item_tk == TK_ENUM) {
+        write_enum(vw, item_type, val);
+      } else {
+        vw.write_int32(val);
+      }
     }
     break;
   }
@@ -6265,7 +6277,7 @@ void vwrite_discriminator(ValueWriter& vw, DDS::DynamicData_ptr value,
                           const DDS::MemberDescriptor_var& md, CORBA::Long& disc_val)
 {
   using namespace OpenDDS::XTypes;
-  const DDS::MemberId id = 0;
+  const DDS::MemberId id = DISCRIMINATOR_ID;
   const DDS::DynamicType_var disc_type = get_base_type(md->type());
   const DDS::TypeKind disc_tk = disc_type->get_kind();
   DDS::TypeKind treat_disc_as = disc_tk;
@@ -6332,7 +6344,11 @@ void vwrite_discriminator(ValueWriter& vw, DDS::DynamicData_ptr value,
       return;
     }
     disc_val = static_cast<CORBA::Long>(val);
-    vw.write_int8(val);
+    if (disc_tk == TK_ENUM) {
+      write_enum(vw, disc_type, val);
+    } else {
+      vw.write_int8(val);
+    }
     break;
   }
   case TK_UINT8: {
@@ -6352,7 +6368,11 @@ void vwrite_discriminator(ValueWriter& vw, DDS::DynamicData_ptr value,
       return;
     }
     disc_val = static_cast<CORBA::Long>(val);
-    vw.write_int16(val);
+    if (disc_tk == TK_ENUM) {
+      write_enum(vw, disc_type, val);
+    } else {
+      vw.write_int16(val);
+    }
     break;
   }
   case TK_UINT16: {
@@ -6370,7 +6390,11 @@ void vwrite_discriminator(ValueWriter& vw, DDS::DynamicData_ptr value,
     if (!check_rc(rc, id, disc_tk, "vwrite_discriminator")) {
       return;
     }
-    vw.write_int32(disc_val);
+    if (disc_tk == TK_ENUM) {
+      write_enum(vw, disc_type, disc_val);
+    } else {
+      vw.write_int32(disc_val);
+    }
     break;
   }
   case TK_UINT32: {
