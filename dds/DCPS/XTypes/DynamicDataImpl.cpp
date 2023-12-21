@@ -6133,7 +6133,8 @@ void vwrite_item(ValueWriter& vw, DDS::DynamicData_ptr value,
     break;
   }
   case TK_FLOAT128: {
-    CORBA::LongDouble val = 0.0l;
+    CORBA::LongDouble val;
+    ACE_CDR_LONG_DOUBLE_ASSIGNMENT(val, 0.0l);
     rc = value->get_float128_value(val, id);
     if (!check_rc(rc, id, tk, "vwrite_item")) {
       return;
