@@ -459,6 +459,82 @@ TEST(VreadVwriteTest, DynamicSerializeTest)
   verify_parse_result(val);
 }
 
+TEST(VreadVwriteTest, DynamicWithOptionalTest)
+{
+  Mod::Sample sample;
+  initialize_sample(sample);
+
+  using namespace OpenDDS;
+  const XTypes::TypeIdentifier& ti = DCPS::getCompleteTypeIdentifier<DCPS::Mod_Sample_xtag>();
+  const XTypes::TypeMap& type_map = DCPS::getCompleteTypeMap<DCPS::Mod_Sample_xtag>();
+  const XTypes::TypeMap::const_iterator it = type_map.find(ti);
+  EXPECT_TRUE(it != type_map.end());
+
+  XTypes::TypeLookupService tls;
+  tls.add(type_map.begin(), type_map.end());
+  XTypes::CompleteTypeObject cto = it->second.complete;
+
+  // Manually mark members as optional
+  cto.struct_type.member_seq[1].common.member_flags |= XTypes::IS_OPTIONAL; // data
+  cto.struct_type.member_seq[3].common.member_flags |= XTypes::IS_OPTIONAL; // enu2
+  cto.struct_type.member_seq[4].common.member_flags |= XTypes::IS_OPTIONAL; // bt
+  cto.struct_type.member_seq[5].common.member_flags |= XTypes::IS_OPTIONAL; // seq1
+  cto.struct_type.member_seq[6].common.member_flags |= XTypes::IS_OPTIONAL; // seq2
+  cto.struct_type.member_seq[7].common.member_flags |= XTypes::IS_OPTIONAL; // seq3
+  cto.struct_type.member_seq[8].common.member_flags |= XTypes::IS_OPTIONAL; // ns
+  cto.struct_type.member_seq[9].common.member_flags |= XTypes::IS_OPTIONAL; // mu
+  cto.struct_type.member_seq[11].common.member_flags |= XTypes::IS_OPTIONAL; // sa
+
+  DDS::DynamicType_var dt = tls.complete_to_dynamic(cto, DCPS::GUID_t());
+  XTypes::DynamicDataImpl dd(dt);
+  DDS::DynamicTypeMember_var dtm;
+  ASSERT_EQ(DDS::RETCODE_OK, dt->get_member_by_name(dtm, "id"));
+  ASSERT_EQ(DDS::RETCODE_OK, dd.set_int32_value(dtm->get_id(), sample.id));
+  ASSERT_EQ(DDS::RETCODE_OK, dt->get_member_by_name(dtm, "enu"));
+  ASSERT_EQ(DDS::RETCODE_OK, dd.set_int32_value(dtm->get_id(), sample.enu));
+
+  // ca
+  ASSERT_EQ(DDS::RETCODE_OK, dt->get_member_by_name(dtm, "ca"));
+  DDS::DynamicData_var ca_dd;
+  ASSERT_EQ(DDS::RETCODE_OK, dd.get_complex_value(ca_dd, dtm->get_id()));
+  ASSERT_EQ(DDS::RETCODE_OK, ca_dd->set_char8_value(ca_dd->get_member_id_at_index(0), sample.ca[0]));
+  ASSERT_EQ(DDS::RETCODE_OK, ca_dd->set_char8_value(ca_dd->get_member_id_at_index(1), sample.ca[1]));
+  ASSERT_EQ(DDS::RETCODE_OK, ca_dd->set_char8_value(ca_dd->get_member_id_at_index(2), sample.ca[2]));
+  ASSERT_EQ(DDS::RETCODE_OK, ca_dd->set_char8_value(ca_dd->get_member_id_at_index(3), sample.ca[3]));
+  ASSERT_EQ(DDS::RETCODE_OK, ca_dd->set_char8_value(ca_dd->get_member_id_at_index(4), sample.ca[4]));
+  ASSERT_EQ(DDS::RETCODE_OK, ca_dd->set_char8_value(ca_dd->get_member_id_at_index(5), sample.ca[5]));
+
+  // Serialize to JSON string
+  rapidjson::StringBuffer buffer;
+  rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
+  OpenDDS::DCPS::JsonValueWriter<rapidjson::Writer<rapidjson::StringBuffer> > jvw(writer);
+  vwrite(jvw, &dd);
+
+  // Parse the result
+  rapidjson::Document document;
+  document.Parse(buffer.GetString());
+  rapidjson::Value& val = document;
+
+  ASSERT_TRUE(val.IsObject());
+  ASSERT_EQ(val["id"], 5);
+  ASSERT_TRUE(val["data"].IsNull());
+  ASSERT_EQ(val["enu"], "three");
+  ASSERT_TRUE(val["enu2"].IsNull());
+  ASSERT_TRUE(val["bt"].IsNull());
+  ASSERT_TRUE(val["seq1"].IsNull());
+  ASSERT_TRUE(val["seq2"].IsNull());
+  ASSERT_TRUE(val["seq3"].IsNull());
+  ASSERT_TRUE(val["ns"].IsNull());
+  ASSERT_TRUE(val["mu"].IsNull());
+  ASSERT_EQ(val["ca"][0], "f");
+  ASSERT_EQ(val["ca"][1], "e");
+  ASSERT_EQ(val["ca"][2], "d");
+  ASSERT_EQ(val["ca"][3], "C");
+  ASSERT_EQ(val["ca"][4], "B");
+  ASSERT_EQ(val["ca"][5], "A");
+  ASSERT_TRUE(val["sa"].IsNull());
+}
+
 #if OPENDDS_HAS_DYNAMIC_DATA_ADAPTER
 
 TEST(VreadVwriteTest, DynamicAdapterSerializeTest)

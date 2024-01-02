@@ -4654,12 +4654,50 @@ void serialized_size_wstring_value(const Encoding& encoding, size_t& size, const
 }
 #endif
 
-bool check_rc_from_get(DDS::ReturnCode_t rc, DDS::MemberId id, DDS::TypeKind tk, const char* fn_name)
+const char* log_level_to_string(LogLevel::Value log_level)
+{
+  switch (log_level) {
+  case LogLevel::Error:
+    return "ERROR";
+  case LogLevel::Warning:
+    return "WARNING";
+  case LogLevel::Notice:
+    return "NOTICE";
+  case LogLevel::Info:
+    return "INFO";
+  case LogLevel::Debug:
+    return "DEBUG";
+  default:
+    return "NONE";
+  }
+}
+
+ACE_Log_Priority log_priority(LogLevel::Value log_level)
+{
+  switch (log_level) {
+  case LogLevel::Error:
+    return LM_ERROR;
+  case LogLevel::Warning:
+    return LM_WARNING;
+  case LogLevel::Notice:
+    return LM_NOTICE;
+  case LogLevel::Info:
+    return LM_INFO;
+  case LogLevel::Debug:
+    return LM_DEBUG;
+  default:
+    return LM_SHUTDOWN;
+  }
+}
+
+bool check_rc_from_get(DDS::ReturnCode_t rc, DDS::MemberId id, DDS::TypeKind tk,
+                       const char* fn_name, LogLevel::Value LOG_THRES = LogLevel::Notice)
 {
   if (rc != DDS::RETCODE_OK && rc != DDS::RETCODE_NO_DATA) {
-    if (log_level >= LogLevel::Notice) {
-      ACE_ERROR((LM_NOTICE, "(%P|t) NOTICE: %C: Failed to get %C member ID %u: %C\n",
-                 fn_name, XTypes::typekind_to_string(tk), id, retcode_to_string(rc)));
+    if (log_level >= LOG_THRES) {
+      ACE_ERROR((log_priority(LOG_THRES), "(%P|t) %C: %C: Failed to get %C member ID %u: %C\n",
+                 log_level_to_string(LOG_THRES), fn_name,
+                 XTypes::typekind_to_string(tk), id, retcode_to_string(rc)));
     }
     return false;
   }
@@ -5968,14 +6006,7 @@ namespace DCPS {
 
 bool check_rc(DDS::ReturnCode_t rc, DDS::MemberId id, DDS::TypeKind tk, const char* fn_name)
 {
-  if (rc != DDS::RETCODE_OK && rc != DDS::RETCODE_NO_DATA) {
-    if (log_level >= LogLevel::Warning) {
-      ACE_ERROR((LM_WARNING, "(%P|t) WARNING: %C: Failed to get %C member ID %u: %C\n",
-                 fn_name, XTypes::typekind_to_string(tk), id, retcode_to_string(rc)));
-    }
-    return false;
-  }
-  return true;
+  return check_rc_from_get(rc, id, tk, fn_name, LogLevel::Warning);
 }
 
 void vwrite(ValueWriter& vw, DDS::DynamicData_ptr value);
@@ -6022,6 +6053,8 @@ void vwrite_item(ValueWriter& vw, DDS::DynamicData_ptr value,
       } else {
         vw.write_int8(val);
       }
+    } else {
+      vw.write_absent_value();
     }
     break;
   }
@@ -6033,6 +6066,8 @@ void vwrite_item(ValueWriter& vw, DDS::DynamicData_ptr value,
     }
     if (rc == DDS::RETCODE_OK) {
       vw.write_uint8(val);
+    } else {
+      vw.write_absent_value();
     }
     break;
   }
@@ -6048,6 +6083,8 @@ void vwrite_item(ValueWriter& vw, DDS::DynamicData_ptr value,
       } else {
         vw.write_int16(val);
       }
+    } else {
+      vw.write_absent_value();
     }
     break;
   }
@@ -6059,6 +6096,8 @@ void vwrite_item(ValueWriter& vw, DDS::DynamicData_ptr value,
     }
     if (rc == DDS::RETCODE_OK) {
       vw.write_uint16(val);
+    } else {
+      vw.write_absent_value();
     }
     break;
   }
@@ -6074,6 +6113,8 @@ void vwrite_item(ValueWriter& vw, DDS::DynamicData_ptr value,
       } else {
         vw.write_int32(val);
       }
+    } else {
+      vw.write_absent_value();
     }
     break;
   }
@@ -6085,6 +6126,8 @@ void vwrite_item(ValueWriter& vw, DDS::DynamicData_ptr value,
     }
     if (rc == DDS::RETCODE_OK) {
       vw.write_uint32(val);
+    } else {
+      vw.write_absent_value();
     }
     break;
   }
@@ -6096,6 +6139,8 @@ void vwrite_item(ValueWriter& vw, DDS::DynamicData_ptr value,
     }
     if (rc == DDS::RETCODE_OK) {
       vw.write_int64(val);
+    } else {
+      vw.write_absent_value();
     }
     break;
   }
@@ -6107,6 +6152,8 @@ void vwrite_item(ValueWriter& vw, DDS::DynamicData_ptr value,
     }
     if (rc == DDS::RETCODE_OK) {
       vw.write_uint64(val);
+    } else {
+      vw.write_absent_value();
     }
     break;
   }
@@ -6118,6 +6165,8 @@ void vwrite_item(ValueWriter& vw, DDS::DynamicData_ptr value,
     }
     if (rc == DDS::RETCODE_OK) {
       vw.write_float32(val);
+    } else {
+      vw.write_absent_value();
     }
     break;
   }
@@ -6129,6 +6178,8 @@ void vwrite_item(ValueWriter& vw, DDS::DynamicData_ptr value,
     }
     if (rc == DDS::RETCODE_OK) {
       vw.write_float64(val);
+    } else {
+      vw.write_absent_value();
     }
     break;
   }
@@ -6141,6 +6192,8 @@ void vwrite_item(ValueWriter& vw, DDS::DynamicData_ptr value,
     }
     if (rc == DDS::RETCODE_OK) {
       vw.write_float128(val);
+    } else {
+      vw.write_absent_value();
     }
     break;
   }
@@ -6152,6 +6205,8 @@ void vwrite_item(ValueWriter& vw, DDS::DynamicData_ptr value,
     }
     if (rc == DDS::RETCODE_OK) {
       vw.write_char8(val);
+    } else {
+      vw.write_absent_value();
     }
     break;
   }
@@ -6164,6 +6219,8 @@ void vwrite_item(ValueWriter& vw, DDS::DynamicData_ptr value,
     }
     if (rc == DDS::RETCODE_OK) {
       vw.write_char16(val);
+    } else {
+      vw.write_absent_value();
     }
     break;
   }
@@ -6176,6 +6233,8 @@ void vwrite_item(ValueWriter& vw, DDS::DynamicData_ptr value,
     }
     if (rc == DDS::RETCODE_OK) {
       vw.write_byte(val);
+    } else {
+      vw.write_absent_value();
     }
     break;
   }
@@ -6187,6 +6246,8 @@ void vwrite_item(ValueWriter& vw, DDS::DynamicData_ptr value,
     }
     if (rc == DDS::RETCODE_OK) {
       vw.write_boolean(val);
+    } else {
+      vw.write_absent_value();
     }
     break;
   }
@@ -6198,6 +6259,8 @@ void vwrite_item(ValueWriter& vw, DDS::DynamicData_ptr value,
     }
     if (rc == DDS::RETCODE_OK) {
       vw.write_string(val.in());
+    } else {
+      vw.write_absent_value();
     }
     break;
   }
@@ -6210,6 +6273,8 @@ void vwrite_item(ValueWriter& vw, DDS::DynamicData_ptr value,
     }
     if (rc == DDS::RETCODE_OK) {
       vw.write_wstring(val.in());
+    } else {
+      vw.write_absent_value();
     }
     break;
   }
@@ -6225,6 +6290,8 @@ void vwrite_item(ValueWriter& vw, DDS::DynamicData_ptr value,
     }
     if (rc == DDS::RETCODE_OK) {
       vwrite(vw, member_data);
+    } else {
+      vw.write_absent_value();
     }
     break;
   }
