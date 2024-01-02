@@ -293,7 +293,9 @@ TEST(VreadVwriteTest, StaticSerializeTest)
   //std::cout << output << std::endl;
 }
 
-TEST(VreadVwriteTest, DynamicSerializeTest)
+#ifndef OPENDDS_SAFETY_PROFILE
+
+DDS::DynamicType_var get_dynamic_type(OpenDDS::XTypes::TypeLookupService& tls)
 {
   using namespace OpenDDS;
   const XTypes::TypeIdentifier& ti = DCPS::getCompleteTypeIdentifier<DCPS::Mod_Sample_xtag>();
@@ -301,15 +303,19 @@ TEST(VreadVwriteTest, DynamicSerializeTest)
   const XTypes::TypeMap::const_iterator it = type_map.find(ti);
   EXPECT_TRUE(it != type_map.end());
 
-  XTypes::TypeLookupService tls;
   tls.add(type_map.begin(), type_map.end());
-  DDS::DynamicType_var dt = tls.complete_to_dynamic(it->second.complete, DCPS::GUID_t());
+  return tls.complete_to_dynamic(it->second.complete, DCPS::GUID_t());
+}
 
+TEST(VreadVwriteTest, DynamicSerializeTest)
+{
   // Set up the dynamic data object
   Mod::Sample sample;
   initialize_sample(sample);
 
-  XTypes::DynamicDataImpl dd(dt);
+  OpenDDS::XTypes::TypeLookupService tls;
+  DDS::DynamicType_var dt = get_dynamic_type(tls);
+  OpenDDS::XTypes::DynamicDataImpl dd(dt);
   DDS::DynamicTypeMember_var dtm;
   ASSERT_EQ(DDS::RETCODE_OK, dt->get_member_by_name(dtm, "id"));
   ASSERT_EQ(DDS::RETCODE_OK, dd.set_int32_value(dtm->get_id(), sample.id));
@@ -417,7 +423,7 @@ TEST(VreadVwriteTest, DynamicSerializeTest)
   ASSERT_EQ(DDS::RETCODE_OK, mu_dt->get_member_by_name(dtm, "d"));
   ASSERT_EQ(DDS::RETCODE_OK, mu_dd->set_float64_value(dtm->get_id(), sample.mu.d()));
   CORBA::Long disc = 0;
-  ASSERT_EQ(DDS::RETCODE_OK, mu_dd->get_int32_value(disc, XTypes::DISCRIMINATOR_ID));
+  ASSERT_EQ(DDS::RETCODE_OK, mu_dd->get_int32_value(disc, OpenDDS::XTypes::DISCRIMINATOR_ID));
   ASSERT_EQ(Mod::three, disc);
 
   // ca
@@ -453,4 +459,32 @@ TEST(VreadVwriteTest, DynamicSerializeTest)
   verify_parse_result(val);
 }
 
-#endif
+#if OPENDDS_HAS_DYNAMIC_DATA_ADAPTER
+
+TEST(VreadVwriteTest, DynamicAdapterSerializeTest)
+{
+  // Set up the dynamic data adapter object
+  OpenDDS::XTypes::TypeLookupService tls;
+  DDS::DynamicType_var dt = get_dynamic_type(tls);
+  Mod::Sample sample;
+  initialize_sample(sample);
+  DDS::DynamicData_var dd = OpenDDS::XTypes::get_dynamic_data_adapter<Mod::Sample, Mod::Sample>(dt, sample);
+
+  // Serialize to JSON
+  rapidjson::StringBuffer buffer;
+  rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
+  OpenDDS::DCPS::JsonValueWriter<rapidjson::Writer<rapidjson::StringBuffer> > jvw(writer);
+  vwrite(jvw, dd.in());
+
+  // Parse the result string
+  rapidjson::Document document;
+  document.Parse(buffer.GetString());
+  rapidjson::Value& val = document;
+  verify_parse_result(val);
+}
+
+#endif // OPENDDS_HAS_DYNAMIC_DATA_ADAPTER
+
+#endif // OPENDDS_SAFETY_PROFILE
+
+#endif // OPENDDS_HAS_JSON_VALUE_WRITER
