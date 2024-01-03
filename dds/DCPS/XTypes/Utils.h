@@ -238,6 +238,42 @@ inline DCPS::Sample::Extent nested(DCPS::Sample::Extent ext)
   return ext == DCPS::Sample::KeyOnly ? DCPS::Sample::NestedKeyOnly : ext;
 }
 
+const char* log_level_to_string(DCPS::LogLevel::Value log_level)
+{
+  switch (log_level) {
+  case DCPS::LogLevel::Error:
+    return "ERROR";
+  case DCPS::LogLevel::Warning:
+    return "WARNING";
+  case DCPS::LogLevel::Notice:
+    return "NOTICE";
+  case DCPS::LogLevel::Info:
+    return "INFO";
+  case DCPS::LogLevel::Debug:
+    return "DEBUG";
+  default:
+    return "NONE";
+  }
+}
+
+ACE_Log_Priority log_priority(DCPS::LogLevel::Value log_level)
+{
+  switch (log_level) {
+  case DCPS::LogLevel::Error:
+    return LM_ERROR;
+  case DCPS::LogLevel::Warning:
+    return LM_WARNING;
+  case DCPS::LogLevel::Notice:
+    return LM_NOTICE;
+  case DCPS::LogLevel::Info:
+    return LM_INFO;
+  case DCPS::LogLevel::Debug:
+    return LM_DEBUG;
+  default:
+    return LM_SHUTDOWN;
+  }
+}
+
 } // namespace XTypes
 } // namespace OpenDDS
 OPENDDS_END_VERSIONED_NAMESPACE_DECL

@@ -451,6 +451,7 @@ TEST(VreadVwriteTest, DynamicSerializeTest)
   rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
   OpenDDS::DCPS::JsonValueWriter<rapidjson::Writer<rapidjson::StringBuffer> > jvw(writer);
   vwrite(jvw, &dd);
+  ACE_DEBUG((LM_DEBUG, "%C\n", buffer.GetString()));
 
   // Parse the result string and compare with the original data
   rapidjson::Document document;

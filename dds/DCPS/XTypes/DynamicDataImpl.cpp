@@ -4654,49 +4654,13 @@ void serialized_size_wstring_value(const Encoding& encoding, size_t& size, const
 }
 #endif
 
-const char* log_level_to_string(LogLevel::Value log_level)
-{
-  switch (log_level) {
-  case LogLevel::Error:
-    return "ERROR";
-  case LogLevel::Warning:
-    return "WARNING";
-  case LogLevel::Notice:
-    return "NOTICE";
-  case LogLevel::Info:
-    return "INFO";
-  case LogLevel::Debug:
-    return "DEBUG";
-  default:
-    return "NONE";
-  }
-}
-
-ACE_Log_Priority log_priority(LogLevel::Value log_level)
-{
-  switch (log_level) {
-  case LogLevel::Error:
-    return LM_ERROR;
-  case LogLevel::Warning:
-    return LM_WARNING;
-  case LogLevel::Notice:
-    return LM_NOTICE;
-  case LogLevel::Info:
-    return LM_INFO;
-  case LogLevel::Debug:
-    return LM_DEBUG;
-  default:
-    return LM_SHUTDOWN;
-  }
-}
-
 bool check_rc_from_get(DDS::ReturnCode_t rc, DDS::MemberId id, DDS::TypeKind tk,
                        const char* fn_name, LogLevel::Value LOG_THRES = LogLevel::Notice)
 {
   if (rc != DDS::RETCODE_OK && rc != DDS::RETCODE_NO_DATA) {
     if (log_level >= LOG_THRES) {
-      ACE_ERROR((log_priority(LOG_THRES), "(%P|t) %C: %C: Failed to get %C member ID %u: %C\n",
-                 log_level_to_string(LOG_THRES), fn_name,
+      ACE_ERROR((XTypes::log_priority(LOG_THRES), "(%P|t) %C: %C: Failed to get %C member ID %u: %C\n",
+                 XTypes::log_level_to_string(LOG_THRES), fn_name,
                  XTypes::typekind_to_string(tk), id, retcode_to_string(rc)));
     }
     return false;
@@ -6000,9 +5964,7 @@ bool operator<<(Serializer& ser, const KeyOnly<DDS::DynamicData_ptr>& key)
   return serialize(ser, key.value, Sample::KeyOnly);
 }
 
-} // namespace DCPS
-
-namespace DCPS {
+// vwrite function for dynamic data.
 
 bool check_rc(DDS::ReturnCode_t rc, DDS::MemberId id, DDS::TypeKind tk, const char* fn_name)
 {
@@ -6028,8 +5990,7 @@ void vwrite_item(ValueWriter& vw, DDS::DynamicData_ptr value,
       }
       return;
     }
-  }
-  if (item_tk == TK_BITMASK) {
+  } else if (item_tk == TK_BITMASK) {
     rc = bitmask_bound(item_type, tk);
     if (rc != DDS::RETCODE_OK) {
       if (log_level >= LogLevel::Warning) {
@@ -6564,9 +6525,9 @@ void vwrite_element(ValueWriter& vw, DDS::DynamicData_ptr value,
   vwrite_item(vw, value, id, elem_dt);
 }
 
-// When we're sure that the concrete DynamicData class has implemented get_*_values operations
-// for primitive sequences, we can use ValueWriter's write_*_array functions.
-// For now, vwrite for array and sequence will write elements one by one.
+// Note: Writing primitive sequence/array to XCDR can be optimized by getting the whole
+// sequence/array from the dynamic data object and write it with the ValueWriter's write_*_array
+// functions, assuming they use Serializer's write_*_array functions.
 void vwrite_array(ValueWriter& vw, DDS::DynamicData_ptr value, const DDS::DynamicType_var& dt)
 {
   DDS::TypeDescriptor_var td;
