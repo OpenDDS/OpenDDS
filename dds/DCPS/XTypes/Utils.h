@@ -238,7 +238,7 @@ inline DCPS::Sample::Extent nested(DCPS::Sample::Extent ext)
   return ext == DCPS::Sample::KeyOnly ? DCPS::Sample::NestedKeyOnly : ext;
 }
 
-const char* log_level_to_string(DCPS::LogLevel::Value log_level)
+inline const char* log_level_to_string(DCPS::LogLevel::Value log_level)
 {
   switch (log_level) {
   case DCPS::LogLevel::Error:
@@ -256,7 +256,7 @@ const char* log_level_to_string(DCPS::LogLevel::Value log_level)
   }
 }
 
-ACE_Log_Priority log_priority(DCPS::LogLevel::Value log_level)
+inline ACE_Log_Priority log_priority(DCPS::LogLevel::Value log_level)
 {
   switch (log_level) {
   case DCPS::LogLevel::Error:
