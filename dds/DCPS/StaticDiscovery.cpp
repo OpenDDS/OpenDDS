@@ -1724,7 +1724,7 @@ namespace {
 }
 
 int
-StaticDiscovery::load_configuration(ACE_Configuration_Heap&)
+StaticDiscovery::load_configuration()
 {
   if (parse_topics() ||
       parse_datawriterqos() ||
