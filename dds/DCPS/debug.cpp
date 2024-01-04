@@ -61,12 +61,12 @@ namespace {
     const LogLevel::Value value;
   };
   static const LogLevelNameValue log_levels[] = {
-    {"none", LogLevel::None},
-    {"error", LogLevel::Error},
-    {"warning", LogLevel::Warning},
-    {"notice", LogLevel::Notice},
-    {"info", LogLevel::Info},
-    {"debug", LogLevel::Debug}
+    {"NONE", LogLevel::None},
+    {"ERROR", LogLevel::Error},
+    {"WARNING", LogLevel::Warning},
+    {"NOTICE", LogLevel::Notice},
+    {"INFO", LogLevel::Info},
+    {"DEBUG", LogLevel::Debug}
   };
 };
 
@@ -93,6 +93,35 @@ const char* LogLevel::get_as_string() const
     return "invalid";
   }
   return log_levels[index].name;
+}
+
+const char* LogLevel::to_string(Value val)
+{
+  const unsigned index = static_cast<unsigned>(val);
+  if (index >= array_count(log_levels)) {
+    ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: LogLevel::to_string: "
+      "Invalid log level value: %u\n", index));
+    return "INVALID";
+  }
+  return log_levels[index].name;
+}
+
+ACE_Log_Priority LogLevel::to_priority(Value val)
+{
+  switch (val) {
+  case Error:
+    return LM_ERROR;
+  case Warning:
+    return LM_WARNING;
+  case Notice:
+    return LM_NOTICE;
+  case Info:
+    return LM_INFO;
+  case Debug:
+    return LM_DEBUG;
+  default:
+    return LM_SHUTDOWN;
+  }
 }
 
 OpenDDS_Dcps_Export void set_DCPS_debug_level(unsigned int lvl)

@@ -4655,12 +4655,12 @@ void serialized_size_wstring_value(const Encoding& encoding, size_t& size, const
 #endif
 
 bool check_rc_from_get(DDS::ReturnCode_t rc, DDS::MemberId id, DDS::TypeKind tk,
-                       const char* fn_name, LogLevel::Value LOG_THRES = LogLevel::Notice)
+                       const char* fn_name, LogLevel::Value log_thres = LogLevel::Notice)
 {
   if (rc != DDS::RETCODE_OK && rc != DDS::RETCODE_NO_DATA) {
-    if (log_level >= LOG_THRES) {
-      ACE_ERROR((XTypes::log_priority(LOG_THRES), "(%P|t) %C: %C: Failed to get %C member ID %u: %C\n",
-                 XTypes::log_level_to_string(LOG_THRES), fn_name,
+    if (log_level >= log_thres) {
+      ACE_ERROR((LogLevel::to_priority(log_thres), "(%P|t) %C: %C: Failed to get %C member ID %u: %C\n",
+                 LogLevel::to_string(log_thres), fn_name,
                  XTypes::typekind_to_string(tk), id, retcode_to_string(rc)));
     }
     return false;
