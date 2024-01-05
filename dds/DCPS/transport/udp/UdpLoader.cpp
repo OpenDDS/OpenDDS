@@ -28,7 +28,8 @@ class UdpType : public TransportType {
 public:
   const char* name() { return UDP_NAME; }
 
-  TransportInst_rch new_inst(const std::string& name)
+  TransportInst_rch new_inst(const std::string& name,
+                             bool)
   {
     return make_rch<UdpInst>(name);
   }
