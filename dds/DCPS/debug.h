@@ -54,7 +54,7 @@ public:
   }
   const char* get_as_string() const;
 
-  static const char* to_string(Value val);
+  static const char* to_string(Value val, bool uppercase = true);
   static ACE_Log_Priority to_priority(Value val);
 
 private:
