@@ -38,9 +38,7 @@ struct AddrSetStats {
   OpenDDS::DCPS::MonotonicTimePoint session_start;
   OpenDDS::DCPS::MonotonicTimePoint deactivation;
   RelayStatisticsReporter& relay_stats_reporter_;
-#ifdef OPENDDS_SECURITY
   std::string common_name;
-#endif
 
   AddrSetStats(const OpenDDS::DCPS::GUID_t& guid,
                const OpenDDS::DCPS::MonotonicTimePoint& a_session_start,
@@ -304,7 +302,7 @@ public:
                     const OpenDDS::DCPS::GUID_t& src_guid,
                     MessageType msg_type,
                     const size_t& msg_len,
-                    RelayHandler& handler)
+                    const RelayHandler& handler)
     {
       return gas_.record_activity(*this, remote_address, now, src_guid, msg_type, msg_len, handler);
     }
@@ -366,7 +364,11 @@ public:
 
   private:
     GuidAddrSet& gas_;
-    OPENDDS_DELETED_COPY_MOVE_CTOR_ASSIGN(Proxy)
+
+    Proxy(const Proxy&) = delete;
+    Proxy(Proxy&&) = delete;
+    Proxy& operator=(const Proxy&) = delete;
+    Proxy& operator=(Proxy&&) = delete;
   };
 
 private:
@@ -390,7 +392,7 @@ private:
                   const OpenDDS::DCPS::GUID_t& src_guid,
                   MessageType msg_type,
                   const size_t& msg_len,
-                  RelayHandler& handler);
+                  const RelayHandler& handler);
 
   void process_expirations(const Proxy& proxy,
                            const OpenDDS::DCPS::MonotonicTimePoint& now);
@@ -454,7 +456,7 @@ private:
   typedef std::list<std::pair<OpenDDS::DCPS::MonotonicTimePoint, GuidAddr> > ExpirationGuidAddrQueue;
   ExpirationGuidAddrQueue expiration_guid_addr_queue_;
   AdmissionControlQueue admission_control_queue_;
-  typedef OPENDDS_UNORDERED_MAP_T(OpenDDS::DCPS::NetworkAddress, OpenDDS::DCPS::MonotonicTimePoint) RejectedAddressMapType;
+  typedef std::unordered_map<OpenDDS::DCPS::NetworkAddress, OpenDDS::DCPS::MonotonicTimePoint> RejectedAddressMapType;
   RejectedAddressMapType rejected_address_map_;
   typedef std::list<RejectedAddressMapType::iterator> RejectedAddressExpirationQueue;
   RejectedAddressExpirationQueue rejected_address_expiration_queue_;

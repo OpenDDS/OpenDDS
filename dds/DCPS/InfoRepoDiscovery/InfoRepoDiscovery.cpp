@@ -1028,7 +1028,8 @@ class InfoRepoType : public TransportType {
 public:
   const char* name() { return "repository"; }
 
-  TransportInst_rch new_inst(const std::string&)
+  TransportInst_rch new_inst(const std::string&,
+                             bool)
   {
     return TransportInst_rch();
   }

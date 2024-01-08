@@ -647,7 +647,7 @@ private:
   /**
    * Load the discovery template information
    */
-  int load_discovery_templates(ACE_Configuration_Heap& cf);
+  int load_discovery_templates();
 
   /**
    * Process the domain range template and activate the
@@ -761,11 +761,25 @@ private:
     DDS::DomainId_t range_end_;
   };
 
-  struct DiscoveryInfo
-  {
-    OPENDDS_STRING discovery_name;
-    ValueMap customizations;
-    ValueMap disc_info;
+  class DiscoveryInfo {
+  public:
+    DiscoveryInfo(const String& name)
+      : discovery_name_(name)
+      , config_prefix_(ConfigPair::canonicalize(String("OPENDDS_RTPS_DISCOVERY_") + name))
+    {}
+
+    const String& discovery_name() const { return discovery_name_; }
+    DCPS::ConfigStoreImpl::StringMap customizations(RcHandle<ConfigStoreImpl> config_store) const;
+    DCPS::ConfigStoreImpl::StringMap disc_info(RcHandle<ConfigStoreImpl> config_store) const;
+
+  private:
+    String config_key(const String& key) const
+    {
+      return ConfigPair::canonicalize(config_prefix_ + "_" + key);
+    }
+
+    String discovery_name_;
+    String config_prefix_;
   };
 
   OPENDDS_MAP(DDS::DomainId_t, OPENDDS_STRING) domain_to_transport_name_map_;
