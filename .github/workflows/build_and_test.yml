@@ -137,7 +137,7 @@ jobs:
         git clean -xdfn | cut -d ' ' -f 3- | xargs tar uvf ../../${{ github.job }}.tar
         xz -3 ../../${{ github.job }}.tar
     - name: upload ACE_TAO artifact
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
@@ -161,7 +161,7 @@ jobs:
         ref: ace6tao2
         path: ACE_TAO
     - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: ACE_TAO_u20_i0_xer0_artifact
         path: ACE_TAO
@@ -216,7 +216,7 @@ jobs:
         git clean -xdfn | cut -d ' ' -f 3- | xargs tar uvf ../${{ github.job }}.tar
         xz -3 ../${{ github.job }}.tar
     - name: upload OpenDDS artifact
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
@@ -249,7 +249,7 @@ jobs:
         ref: ace6tao2
         path: ACE_TAO
     - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: ACE_TAO_u20_i0_xer0_artifact
         path: ACE_TAO
@@ -264,7 +264,7 @@ jobs:
         path: OpenDDS
         submodules: true
     - name: download OpenDDS artifact
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: build_u20_i0_xer0_js0_j17_artifact
         path: OpenDDS
@@ -327,7 +327,7 @@ jobs:
         EOF
         $GITHUB_WORKSPACE/autobuild/autobuild.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/config.xml"
     - name: upload autobuild output
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: ${{ github.job }}_autobuild_output
         path: OpenDDS/${{ github.job }}_autobuild_workspace
@@ -456,7 +456,7 @@ jobs:
         git clean -xdfn | cut -d ' ' -f 3- | xargs tar uvf ../${{ github.job }}.tar
         xz -3 ../${{ github.job }}.tar
     - name: upload OpenDDS artifact
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
@@ -484,7 +484,7 @@ jobs:
         path: OpenDDS
         submodules: true
     - name: download OpenDDS artifact
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: build_u22_o1d0v1_xer0_j11_artifact
         path: OpenDDS
@@ -611,7 +611,7 @@ jobs:
         tar cvf ../${{ github.job }}.tar build/host/ACE_TAO build/target/ACE_TAO build/host/setenv.sh build/host/VERSION.txt
         xz -3 ../${{ github.job }}.tar
     - name: upload ACE_TAO artifact
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
@@ -662,7 +662,7 @@ jobs:
           --safety-profile \
           --tests
     - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: ACE_TAO_u22_esafe_js0_artifact
         path: OpenDDS
@@ -710,7 +710,7 @@ jobs:
         tar --exclude='ACE_TAO' -uvf ../../${{ github.job }}.tar target
         xz -3 ../../${{ github.job }}.tar
     - name: upload OpenDDS artifact
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
@@ -743,7 +743,7 @@ jobs:
         ref: ace6tao2
         path: OpenDDS/ACE_TAO
     - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: ACE_TAO_u22_esafe_js0_artifact
         path: OpenDDS
@@ -753,7 +753,7 @@ jobs:
         cd OpenDDS
         tar xvfJ ACE_TAO_u22_esafe_js0.tar.xz
     - name: download OpenDDS artifact
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: build_u22_esafe_js0_artifact
         path: OpenDDS/build
@@ -822,7 +822,7 @@ jobs:
         EOF
         $GITHUB_WORKSPACE/autobuild/autobuild.pl "$GITHUB_WORKSPACE/OpenDDS/build/target/${{ github.job }}_autobuild_workspace/config.xml"
     - name: upload autobuild output
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: ${{ github.job }}_autobuild_output
         path: OpenDDS/build/target/${{ github.job }}_autobuild_workspace
@@ -938,7 +938,7 @@ jobs:
         tar cvf ../${{ github.job }}.tar build/host/ACE_TAO build/target/ACE_TAO build/host/setenv.sh build/host/VERSION.txt
         xz -3 ../${{ github.job }}.tar
     - name: upload ACE_TAO artifact
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
@@ -990,7 +990,7 @@ jobs:
           --no-built-in-topics \
           --tests
     - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: ACE_TAO_u22_bsafe_js0_FM-1f_artifact
         path: OpenDDS
@@ -1038,7 +1038,7 @@ jobs:
         tar --exclude='ACE_TAO' -uvf ../../${{ github.job }}.tar target
         xz -3 ../../${{ github.job }}.tar
     - name: upload OpenDDS artifact
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
@@ -1071,7 +1071,7 @@ jobs:
         ref: ace6tao2
         path: OpenDDS/ACE_TAO
     - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: ACE_TAO_u22_bsafe_js0_FM-1f_artifact
         path: OpenDDS
@@ -1081,7 +1081,7 @@ jobs:
         cd OpenDDS
         tar xvfJ ACE_TAO_u22_bsafe_js0_FM-1f.tar.xz
     - name: download OpenDDS artifact
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: build_u22_bsafe_js0_FM-1f_artifact
         path: OpenDDS/build
@@ -1150,7 +1150,7 @@ jobs:
         EOF
         $GITHUB_WORKSPACE/autobuild/autobuild.pl "$GITHUB_WORKSPACE/OpenDDS/build/target/${{ github.job }}_autobuild_workspace/config.xml"
     - name: upload autobuild output
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: ${{ github.job }}_autobuild_output
         path: OpenDDS/build/target/${{ github.job }}_autobuild_workspace
@@ -1242,7 +1242,7 @@ jobs:
         git clean -xdfn | cut -d ' ' -f 3- | xargs tar uvf ../../${{ github.job }}.tar
         xz -3 ../../${{ github.job }}.tar
     - name: upload ACE_TAO artifact
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
@@ -1268,7 +1268,7 @@ jobs:
         ref: ace6tao2
         path: ACE_TAO
     - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: ACE_TAO_u22_d0i0v1_sec_js0_FM-08_artifact
         path: ACE_TAO
@@ -1316,7 +1316,7 @@ jobs:
         git clean -xdfn | cut -d ' ' -f 3- | xargs tar uvf ../${{ github.job }}.tar
         xz -3 ../${{ github.job }}.tar
     - name: upload OpenDDS artifact
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
@@ -1351,7 +1351,7 @@ jobs:
         ref: ace6tao2
         path: ACE_TAO
     - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: ACE_TAO_u22_d0i0v1_sec_js0_FM-08_artifact
         path: ACE_TAO
@@ -1366,7 +1366,7 @@ jobs:
         path: OpenDDS
         submodules: true
     - name: download OpenDDS artifact
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: build_u22_d0i0v1_sec_js0_FM-08_artifact
         path: OpenDDS
@@ -1429,7 +1429,7 @@ jobs:
         EOF
         $GITHUB_WORKSPACE/autobuild/autobuild.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/config.xml"
     - name: upload autobuild output
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: ${{ github.job }}_autobuild_output
         path: OpenDDS/${{ github.job }}_autobuild_workspace
@@ -1530,7 +1530,7 @@ jobs:
         git clean -xdfn | cut -d ' ' -f 3- | xargs tar uvf ../../${{ github.job }}.tar
         xz -3 ../../${{ github.job }}.tar
     - name: upload ACE_TAO artifact
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
@@ -1556,7 +1556,7 @@ jobs:
         ref: ace6tao2
         path: ACE_TAO
     - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: ACE_TAO_u20_clang12_i0w1_sec_artifact
         path: ACE_TAO
@@ -1614,7 +1614,7 @@ jobs:
         git clean -xdfn | cut -d ' ' -f 3- | xargs tar uvf ../${{ github.job }}.tar
         xz -3 ../${{ github.job }}.tar
     - name: upload OpenDDS artifact
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
@@ -1649,7 +1649,7 @@ jobs:
         ref: ace6tao2
         path: ACE_TAO
     - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: ACE_TAO_u20_clang12_i0w1_sec_artifact
         path: ACE_TAO
@@ -1664,7 +1664,7 @@ jobs:
         path: OpenDDS
         submodules: true
     - name: download OpenDDS artifact
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: build_u20_clang12_i0w1_sec_artifact
         path: OpenDDS
@@ -1728,7 +1728,7 @@ jobs:
         EOF
         $GITHUB_WORKSPACE/autobuild/autobuild.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/config.xml"
     - name: upload autobuild output
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: ${{ github.job }}_autobuild_output
         path: OpenDDS/${{ github.job }}_autobuild_workspace
@@ -1828,7 +1828,7 @@ jobs:
         git clean -xdfn | cut -d ' ' -f 3- | xargs tar uvf ../../${{ github.job }}.tar
         xz -3 ../../${{ github.job }}.tar
     - name: upload ACE_TAO artifact
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
@@ -1854,7 +1854,7 @@ jobs:
         ref: ace6tao2
         path: ACE_TAO
     - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: ACE_TAO_u20_clang10_sec_js0_artifact
         path: ACE_TAO
@@ -1911,7 +1911,7 @@ jobs:
         git clean -xdfn | cut -d ' ' -f 3- | xargs tar uvf ../${{ github.job }}.tar
         xz -3 ../${{ github.job }}.tar
     - name: upload OpenDDS artifact
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
@@ -1946,7 +1946,7 @@ jobs:
         ref: ace6tao2
         path: ACE_TAO
     - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: ACE_TAO_u20_clang10_sec_js0_artifact
         path: ACE_TAO
@@ -1961,7 +1961,7 @@ jobs:
         path: OpenDDS
         submodules: true
     - name: download OpenDDS artifact
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: build_u20_clang10_sec_js0_artifact
         path: OpenDDS
@@ -2025,7 +2025,7 @@ jobs:
         EOF
         $GITHUB_WORKSPACE/autobuild/autobuild.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/config.xml"
     - name: upload autobuild output
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: ${{ github.job }}_autobuild_output
         path: OpenDDS/${{ github.job }}_autobuild_workspace
@@ -2125,7 +2125,7 @@ jobs:
         git clean -xdfn | cut -d ' ' -f 3- | xargs tar uvf ../../${{ github.job }}.tar
         xz -3 ../../${{ github.job }}.tar
     - name: upload ACE_TAO artifact
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
@@ -2151,7 +2151,7 @@ jobs:
         ref: ace6tao2
         path: ACE_TAO
     - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: ACE_TAO_u20_gcc9_d0w1_cpp03_artifact
         path: ACE_TAO
@@ -2208,7 +2208,7 @@ jobs:
         git clean -xdfn | cut -d ' ' -f 3- | xargs tar uvf ../${{ github.job }}.tar
         xz -3 ../${{ github.job }}.tar
     - name: upload OpenDDS artifact
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
@@ -2241,7 +2241,7 @@ jobs:
         ref: ace6tao2
         path: ACE_TAO
     - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: ACE_TAO_u20_gcc9_d0w1_cpp03_artifact
         path: ACE_TAO
@@ -2256,7 +2256,7 @@ jobs:
         path: OpenDDS
         submodules: true
     - name: download OpenDDS artifact
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: build_u20_gcc9_d0w1_cpp03_artifact
         path: OpenDDS
@@ -2319,7 +2319,7 @@ jobs:
         EOF
         $GITHUB_WORKSPACE/autobuild/autobuild.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/config.xml"
     - name: upload autobuild output
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: ${{ github.job }}_autobuild_output
         path: OpenDDS/${{ github.job }}_autobuild_workspace
@@ -2419,7 +2419,7 @@ jobs:
         git clean -xdfn | cut -d ' ' -f 3- | xargs tar uvf ../../${{ github.job }}.tar
         xz -3 ../../${{ github.job }}.tar
     - name: upload ACE_TAO artifact
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
@@ -2448,7 +2448,7 @@ jobs:
         ref: ace6tao2
         path: ACE_TAO
     - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: ACE_TAO_u20_gcc8_i0_js0_j_artifact
         path: ACE_TAO
@@ -2496,7 +2496,7 @@ jobs:
         git clean -xdfn | cut -d ' ' -f 3- | xargs tar uvf ../${{ github.job }}.tar
         xz -3 ../${{ github.job }}.tar
     - name: upload OpenDDS artifact
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
@@ -2529,7 +2529,7 @@ jobs:
         ref: ace6tao2
         path: ACE_TAO
     - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: ACE_TAO_u20_gcc8_i0_js0_j_artifact
         path: ACE_TAO
@@ -2544,7 +2544,7 @@ jobs:
         path: OpenDDS
         submodules: true
     - name: download OpenDDS artifact
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: build_u20_gcc8_i0_js0_j_artifact
         path: OpenDDS
@@ -2607,7 +2607,7 @@ jobs:
         EOF
         $GITHUB_WORKSPACE/autobuild/autobuild.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/config.xml"
     - name: upload autobuild output
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: ${{ github.job }}_autobuild_output
         path: OpenDDS/${{ github.job }}_autobuild_workspace
@@ -2699,7 +2699,7 @@ jobs:
         git clean -xdfn | cut -d ' ' -f 3- | xargs tar uvf ../../${{ github.job }}.tar
         xz -3 ../../${{ github.job }}.tar
     - name: upload ACE_TAO artifact
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
@@ -2726,7 +2726,7 @@ jobs:
         ref: ace6tao2
         path: ACE_TAO
     - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: ACE_TAO_u22_gcc11_i0_xer0_artifact
         path: ACE_TAO
@@ -2774,7 +2774,7 @@ jobs:
         git clean -xdfn | cut -d ' ' -f 3- | xargs tar uvf ../${{ github.job }}.tar
         xz -3 ../${{ github.job }}.tar
     - name: upload OpenDDS artifact
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
@@ -2807,7 +2807,7 @@ jobs:
         ref: ace6tao2
         path: ACE_TAO
     - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: ACE_TAO_u22_gcc11_i0_xer0_artifact
         path: ACE_TAO
@@ -2822,7 +2822,7 @@ jobs:
         path: OpenDDS
         submodules: true
     - name: download OpenDDS artifact
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: build_u22_gcc11_i0_xer0_artifact
         path: OpenDDS
@@ -2885,7 +2885,7 @@ jobs:
         EOF
         $GITHUB_WORKSPACE/autobuild/autobuild.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/config.xml"
     - name: upload autobuild output
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: ${{ github.job }}_autobuild_output
         path: OpenDDS/${{ github.job }}_autobuild_workspace
@@ -3006,7 +3006,7 @@ jobs:
         tar cvf ../${{ github.job }}.tar build/host/ACE_TAO build/target/ACE_TAO build/host/setenv.sh build/host/VERSION.txt
         xz -3 ../${{ github.job }}.tar
     - name: upload ACE_TAO artifact
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
@@ -3061,7 +3061,7 @@ jobs:
           --no-persistence-profile \
           --tests
     - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: ACE_TAO_u20_gcc10_bsafe_js0_FM-2c_artifact
         path: OpenDDS
@@ -3109,7 +3109,7 @@ jobs:
         tar --exclude='ACE_TAO' -uvf ../../${{ github.job }}.tar target
         xz -3 ../../${{ github.job }}.tar
     - name: upload OpenDDS artifact
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
@@ -3185,7 +3185,7 @@ jobs:
         git clean -xdfn | cut -d ' ' -f 3- | xargs tar uvf ../../${{ github.job }}.tar
         xz -3 ../../${{ github.job }}.tar
     - name: upload ACE_TAO artifact
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
@@ -3212,7 +3212,7 @@ jobs:
         repository: DOCGroup/ACE_TAO
         path: ACE_TAO
     - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: ACE_TAO_u20_ace7_j_qt_ws_sec_artifact
         path: ACE_TAO
@@ -3275,7 +3275,7 @@ jobs:
         git clean -xdfn | cut -d ' ' -f 3- | xargs tar uvf ../${{ github.job }}.tar
         xz -3 ../${{ github.job }}.tar
     - name: upload OpenDDS artifact
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
@@ -3311,7 +3311,7 @@ jobs:
         repository: DOCGroup/ACE_TAO
         path: ACE_TAO
     - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: ACE_TAO_u20_ace7_j_qt_ws_sec_artifact
         path: ACE_TAO
@@ -3326,7 +3326,7 @@ jobs:
         path: OpenDDS
         submodules: true
     - name: download OpenDDS artifact
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: build_u20_ace7_j_qt_ws_sec_artifact
         path: OpenDDS
@@ -3389,7 +3389,7 @@ jobs:
         EOF
         $GITHUB_WORKSPACE/autobuild/autobuild.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/config.xml"
     - name: upload autobuild output
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: ${{ github.job }}_autobuild_output
         path: OpenDDS/${{ github.job }}_autobuild_workspace
@@ -3491,7 +3491,7 @@ jobs:
         git clean -xdfn | cut -d ' ' -f 3- | xargs tar uvf ../../${{ github.job }}.tar
         xz -3 ../../${{ github.job }}.tar
     - name: upload ACE_TAO artifact
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
@@ -3517,7 +3517,7 @@ jobs:
         ref: ace6tao2
         path: ACE_TAO
     - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: ACE_TAO_u20_p1_asan_artifact
         path: ACE_TAO
@@ -3575,7 +3575,7 @@ jobs:
         git clean -xdfn | cut -d ' ' -f 3- | xargs tar uvf ../${{ github.job }}.tar
         xz -3 ../${{ github.job }}.tar
     - name: upload OpenDDS artifact
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
@@ -3610,7 +3610,7 @@ jobs:
         ref: ace6tao2
         path: ACE_TAO
     - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: ACE_TAO_u20_p1_asan_artifact
         path: ACE_TAO
@@ -3625,7 +3625,7 @@ jobs:
         path: OpenDDS
         submodules: true
     - name: download OpenDDS artifact
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: build_u20_p1_asan_sec_artifact
         path: OpenDDS
@@ -3689,7 +3689,7 @@ jobs:
         EOF
         $GITHUB_WORKSPACE/autobuild/autobuild.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/config.xml"
     - name: upload autobuild output
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: ${{ github.job }}_autobuild_output
         path: OpenDDS/${{ github.job }}_autobuild_workspace
@@ -3789,7 +3789,7 @@ jobs:
         git clean -xdfn | cut -d ' ' -f 3- | xargs tar uvf ../../${{ github.job }}.tar
         xz -3 ../../${{ github.job }}.tar
     - name: upload ACE_TAO artifact
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
@@ -3815,7 +3815,7 @@ jobs:
         ref: ace6tao2
         path: ACE_TAO
     - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: ACE_TAO_u20_p1_tsan_artifact
         path: ACE_TAO
@@ -3865,7 +3865,7 @@ jobs:
         git clean -xdfn | cut -d ' ' -f 3- | xargs tar uvf ../${{ github.job }}.tar
         xz -3 ../${{ github.job }}.tar
     - name: upload OpenDDS artifact
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
@@ -3900,7 +3900,7 @@ jobs:
         ref: ace6tao2
         path: ACE_TAO
     - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: ACE_TAO_u20_p1_tsan_artifact
         path: ACE_TAO
@@ -3915,7 +3915,7 @@ jobs:
         path: OpenDDS
         submodules: true
     - name: download OpenDDS artifact
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: build_u20_p1_tsan_sec_artifact
         path: OpenDDS
@@ -3979,7 +3979,7 @@ jobs:
         EOF
         $GITHUB_WORKSPACE/autobuild/autobuild.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/config.xml"
     - name: upload autobuild output
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: ${{ github.job }}_autobuild_output
         path: OpenDDS/${{ github.job }}_autobuild_workspace
@@ -4081,7 +4081,7 @@ jobs:
         git clean -xdfn | cut -d ' ' -f 3- | xargs tar uvf ../../${{ github.job }}.tar
         xz -3 ../../${{ github.job }}.tar
     - name: upload ACE_TAO artifact
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
@@ -4107,7 +4107,7 @@ jobs:
         ref: ace6tao2
         path: ACE_TAO
     - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: ACE_TAO_u20_p1_ubsan_artifact
         path: ACE_TAO
@@ -4166,7 +4166,7 @@ jobs:
         git clean -xdfn | cut -d ' ' -f 3- | xargs tar uvf ../${{ github.job }}.tar
         xz -3 ../${{ github.job }}.tar
     - name: upload OpenDDS artifact
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
@@ -4201,7 +4201,7 @@ jobs:
         ref: ace6tao2
         path: ACE_TAO
     - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: ACE_TAO_u20_p1_ubsan_artifact
         path: ACE_TAO
@@ -4216,7 +4216,7 @@ jobs:
         path: OpenDDS
         submodules: true
     - name: download OpenDDS artifact
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: build_u20_p1_ubsan_sec_artifact
         path: OpenDDS
@@ -4280,7 +4280,7 @@ jobs:
         EOF
         $GITHUB_WORKSPACE/autobuild/autobuild.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/config.xml"
     - name: upload autobuild output
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: ${{ github.job }}_autobuild_output
         path: OpenDDS/${{ github.job }}_autobuild_workspace
@@ -4313,7 +4313,7 @@ jobs:
 
     steps:
     - name: download openssl artifact
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: openssl3_u20_artifact
     - name: extract openssl artifact
@@ -4389,7 +4389,7 @@ jobs:
         git clean -xdfn | cut -d ' ' -f 3- | xargs tar uvf ../../${{ github.job }}.tar
         xz -3 ../../${{ github.job }}.tar
     - name: upload ACE_TAO artifact
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
@@ -4402,7 +4402,7 @@ jobs:
 
     steps:
     - name: download openssl artifact
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: openssl3_u20_artifact
     - name: extract openssl artifact
@@ -4424,7 +4424,7 @@ jobs:
         ref: ace6tao2
         path: ACE_TAO
     - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: ACE_TAO_u20_p1_artifact
         path: ACE_TAO
@@ -4475,7 +4475,7 @@ jobs:
         git clean -xdfn | cut -d ' ' -f 3- | xargs tar uvf ../${{ github.job }}.tar
         xz -3 ../${{ github.job }}.tar
     - name: upload OpenDDS artifact
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
@@ -4492,7 +4492,7 @@ jobs:
 
     steps:
     - name: download openssl artifact
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: openssl3_u20_artifact
     - name: extract openssl artifact
@@ -4519,7 +4519,7 @@ jobs:
         ref: ace6tao2
         path: ACE_TAO
     - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: ACE_TAO_u20_p1_artifact
         path: ACE_TAO
@@ -4534,7 +4534,7 @@ jobs:
         path: OpenDDS
         submodules: true
     - name: download OpenDDS artifact
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: build_u20_p1_sec_artifact
         path: OpenDDS
@@ -4597,7 +4597,7 @@ jobs:
         EOF
         $GITHUB_WORKSPACE/autobuild/autobuild.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/config.xml"
     - name: upload autobuild output
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: ${{ github.job }}_autobuild_output
         path: OpenDDS/${{ github.job }}_autobuild_workspace
@@ -4634,7 +4634,7 @@ jobs:
 
     steps:
     - name: download openssl artifact
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: openssl3_u20_artifact
     - name: extract openssl artifact
@@ -4663,7 +4663,7 @@ jobs:
         ref: ace6tao2
         path: ACE_TAO
     - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: ACE_TAO_u20_p1_artifact
         path: ACE_TAO
@@ -4678,7 +4678,7 @@ jobs:
         path: OpenDDS
         submodules: true
     - name: download OpenDDS artifact
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: build_u20_p1_sec_artifact
         path: OpenDDS
@@ -4732,7 +4732,7 @@ jobs:
         EOF
         $GITHUB_WORKSPACE/autobuild/autobuild.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/config.xml"
     - name: upload autobuild output
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: ${{ github.job }}_autobuild_output
         path: OpenDDS/${{ github.job }}_autobuild_workspace
@@ -4778,7 +4778,7 @@ jobs:
         ref: ace6tao2
         path: ACE_TAO
     - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: ACE_TAO_u20_p1_artifact
         path: ACE_TAO
@@ -4841,7 +4841,7 @@ jobs:
         git clean -xdfn | cut -d ' ' -f 3- | xargs tar uvf ../${{ github.job }}.tar
         xz -3 ../${{ github.job }}.tar
     - name: upload OpenDDS artifact
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
@@ -4876,7 +4876,7 @@ jobs:
         ref: ace6tao2
         path: ACE_TAO
     - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: ACE_TAO_u20_p1_artifact
         path: ACE_TAO
@@ -4891,7 +4891,7 @@ jobs:
         path: OpenDDS
         submodules: true
     - name: download OpenDDS artifact
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: build_u20_p1_j8_FM-1f_artifact
         path: OpenDDS
@@ -4954,7 +4954,7 @@ jobs:
         EOF
         $GITHUB_WORKSPACE/autobuild/autobuild.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/config.xml"
     - name: upload autobuild output
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: ${{ github.job }}_autobuild_output
         path: OpenDDS/${{ github.job }}_autobuild_workspace
@@ -5051,7 +5051,7 @@ jobs:
         git clean -xdfn | cut -d ' ' -f 3- | xargs tar uvf ../../${{ github.job }}.tar
         xz -3 ../../${{ github.job }}.tar
     - name: upload ACE_TAO artifact
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
@@ -5077,7 +5077,7 @@ jobs:
         ref: ace6tao2
         path: ACE_TAO
     - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: ACE_TAO_u22_w1_artifact
         path: ACE_TAO
@@ -5125,7 +5125,7 @@ jobs:
         git clean -xdfn | cut -d ' ' -f 3- | xargs tar uvf ../${{ github.job }}.tar
         xz -3 ../${{ github.job }}.tar
     - name: upload OpenDDS artifact
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
@@ -5160,7 +5160,7 @@ jobs:
         ref: ace6tao2
         path: ACE_TAO
     - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: ACE_TAO_u22_w1_artifact
         path: ACE_TAO
@@ -5175,7 +5175,7 @@ jobs:
         path: OpenDDS
         submodules: true
     - name: download OpenDDS artifact
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: build_u22_w1a1_sec_artifact
         path: OpenDDS
@@ -5238,7 +5238,7 @@ jobs:
         EOF
         $GITHUB_WORKSPACE/autobuild/autobuild.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/config.xml"
     - name: upload autobuild output
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: ${{ github.job }}_autobuild_output
         path: OpenDDS/${{ github.job }}_autobuild_workspace
@@ -5284,7 +5284,7 @@ jobs:
         ref: ace6tao2
         path: ACE_TAO
     - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: ACE_TAO_u22_w1_artifact
         path: ACE_TAO
@@ -5347,7 +5347,7 @@ jobs:
         git clean -xdfn | cut -d ' ' -f 3- | xargs tar uvf ../${{ github.job }}.tar
         xz -3 ../${{ github.job }}.tar
     - name: upload OpenDDS artifact
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
@@ -5382,7 +5382,7 @@ jobs:
         ref: ace6tao2
         path: ACE_TAO
     - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: ACE_TAO_u22_w1_artifact
         path: ACE_TAO
@@ -5397,7 +5397,7 @@ jobs:
         path: OpenDDS
         submodules: true
     - name: download OpenDDS artifact
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: build_u22_w1_j_FM-2f_artifact
         path: OpenDDS
@@ -5460,7 +5460,7 @@ jobs:
         EOF
         $GITHUB_WORKSPACE/autobuild/autobuild.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/config.xml"
     - name: upload autobuild output
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: ${{ github.job }}_autobuild_output
         path: OpenDDS/${{ github.job }}_autobuild_workspace
@@ -5551,7 +5551,7 @@ jobs:
         git clean -xdfn | cut -d ' ' -f 3- | xargs tar uvf ../../${{ github.job }}.tar
         xz -3 ../../${{ github.job }}.tar
     - name: upload ACE_TAO artifact
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
@@ -5579,7 +5579,7 @@ jobs:
         ref: ace6tao2
         path: ACE_TAO
     - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: ACE_TAO_u22_stat_qt_ws_sec_artifact
         path: ACE_TAO
@@ -5631,7 +5631,7 @@ jobs:
         git clean -xdfn | cut -d ' ' -f 3- | xargs tar uvf ../${{ github.job }}.tar
         xz -3 ../${{ github.job }}.tar
     - name: upload OpenDDS artifact
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
@@ -5668,7 +5668,7 @@ jobs:
         ref: ace6tao2
         path: ACE_TAO
     - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: ACE_TAO_u22_stat_qt_ws_sec_artifact
         path: ACE_TAO
@@ -5684,7 +5684,7 @@ jobs:
         path: OpenDDS
         submodules: true
     - name: download OpenDDS artifact
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: build_u22_stat_qt_ws_sec_artifact
         path: OpenDDS
@@ -5756,7 +5756,7 @@ jobs:
         EOF
         $GITHUB_WORKSPACE/autobuild/autobuild.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/config.xml"
     - name: upload autobuild output
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: ${{ github.job }}_autobuild_output
         path: OpenDDS/${{ github.job }}_autobuild_workspace
@@ -5820,7 +5820,7 @@ jobs:
         ref: ace6tao2
         path: ACE_TAO
     - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: ACE_TAO_u22_stat_qt_ws_sec_artifact
         path: ACE_TAO
@@ -5831,7 +5831,7 @@ jobs:
         tar xvfJ ACE_TAO_u22_stat_qt_ws_sec.tar.xz
         rm ACE_TAO_u22_stat_qt_ws_sec.tar.xz
     - name: download OpenDDS artifact
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: build_u22_stat_qt_ws_sec_artifact
         path: OpenDDS
@@ -5933,7 +5933,7 @@ jobs:
         EOF
         $GITHUB_WORKSPACE/autobuild/autobuild.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/config.xml"
     - name: upload autobuild output
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: ${{ github.job }}_autobuild_output
         path: OpenDDS/${{ github.job }}_autobuild_workspace
@@ -5997,7 +5997,7 @@ jobs:
         ref: ace6tao2
         path: ACE_TAO
     - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: ACE_TAO_u22_stat_qt_ws_sec_artifact
         path: ACE_TAO
@@ -6008,7 +6008,7 @@ jobs:
         tar xvfJ ACE_TAO_u22_stat_qt_ws_sec.tar.xz
         rm ACE_TAO_u22_stat_qt_ws_sec.tar.xz
     - name: download OpenDDS artifact
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: build_u22_stat_qt_ws_sec_artifact
         path: OpenDDS
@@ -6096,7 +6096,7 @@ jobs:
         EOF
         $GITHUB_WORKSPACE/autobuild/autobuild.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/config.xml"
     - name: upload autobuild output
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: ${{ github.job }}_autobuild_output
         path: OpenDDS/${{ github.job }}_autobuild_workspace
@@ -6160,7 +6160,7 @@ jobs:
         ref: ace6tao2
         path: ACE_TAO
     - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: ACE_TAO_u22_stat_qt_ws_sec_artifact
         path: ACE_TAO
@@ -6171,7 +6171,7 @@ jobs:
         tar xvfJ ACE_TAO_u22_stat_qt_ws_sec.tar.xz
         rm ACE_TAO_u22_stat_qt_ws_sec.tar.xz
     - name: download OpenDDS artifact
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: build_u22_stat_qt_ws_sec_artifact
         path: OpenDDS
@@ -6259,7 +6259,7 @@ jobs:
         EOF
         $GITHUB_WORKSPACE/autobuild/autobuild.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/config.xml"
     - name: upload autobuild output
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: ${{ github.job }}_autobuild_output
         path: OpenDDS/${{ github.job }}_autobuild_workspace
@@ -6319,7 +6319,7 @@ jobs:
         ref: ace6tao2
         path: ACE_TAO
     - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: ACE_TAO_u22_stat_qt_ws_sec_artifact
         path: ACE_TAO
@@ -6335,7 +6335,7 @@ jobs:
         path: OpenDDS
         submodules: true
     - name: download OpenDDS artifact
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: build_u22_stat_qt_ws_sec_artifact
         path: OpenDDS
@@ -6412,7 +6412,7 @@ jobs:
         EOF
         $GITHUB_WORKSPACE/autobuild/autobuild.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/config.xml"
     - name: upload autobuild output
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: ${{ github.job }}_autobuild_output
         path: OpenDDS/${{ github.job }}_autobuild_workspace
@@ -6509,7 +6509,7 @@ jobs:
         git clean -xdfn | cut -d ' ' -f 3- | xargs tar uvf ../../${{ github.job }}.tar
         xz -3 ../../${{ github.job }}.tar
     - name: upload ACE_TAO artifact
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
@@ -6535,7 +6535,7 @@ jobs:
         ref: ace6tao2
         path: ACE_TAO
     - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: ACE_TAO_u22_j_cft0_FM-37_artifact
         path: ACE_TAO
@@ -6598,7 +6598,7 @@ jobs:
         git clean -xdfn | cut -d ' ' -f 3- | xargs tar uvf ../${{ github.job }}.tar
         xz -3 ../${{ github.job }}.tar
     - name: upload OpenDDS artifact
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
@@ -6633,7 +6633,7 @@ jobs:
         ref: ace6tao2
         path: ACE_TAO
     - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: ACE_TAO_u22_j_cft0_FM-37_artifact
         path: ACE_TAO
@@ -6648,7 +6648,7 @@ jobs:
         path: OpenDDS
         submodules: true
     - name: download OpenDDS artifact
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: build_u22_j_cft0_FM-37_artifact
         path: OpenDDS
@@ -6711,7 +6711,7 @@ jobs:
         EOF
         $GITHUB_WORKSPACE/autobuild/autobuild.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/config.xml"
     - name: upload autobuild output
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: ${{ github.job }}_autobuild_output
         path: OpenDDS/${{ github.job }}_autobuild_workspace
@@ -6816,7 +6816,7 @@ jobs:
         git clean -xdfn | cut -d ' ' -f 3- | xargs tar uvf ../../${{ github.job }}.tar
         xz -3 ../../${{ github.job }}.tar
     - name: upload ACE_TAO artifact
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
@@ -6854,7 +6854,7 @@ jobs:
         ref: ace6tao2
         path: OpenDDS/ACE_TAO
     - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: ACE_TAO_w19_p1_stat_js0_artifact
         path: OpenDDS/ACE_TAO
@@ -6905,7 +6905,7 @@ jobs:
         git clean -xdfn | cut -d ' ' -f 3- | xargs tar uvf ../${{ github.job }}.tar
         xz -3 ../${{ github.job }}.tar
     - name: upload OpenDDS artifact
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
@@ -6952,7 +6952,7 @@ jobs:
         ref: ace6tao2
         path: OpenDDS/ACE_TAO
     - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: ACE_TAO_w19_p1_stat_js0_artifact
         path: OpenDDS/ACE_TAO
@@ -6963,7 +6963,7 @@ jobs:
         tar xvfJ ACE_TAO_w19_p1_stat_js0.tar.xz
         rm -f ACE_TAO_w19_p1_stat_js0.tar.xz
     - name: download OpenDDS artifact
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: build_w19_p1_stat_js0_artifact
         path: OpenDDS
@@ -7032,7 +7032,7 @@ jobs:
         cd ${{ github.job }}_autobuild_workspace
         perl "${{ github.workspace }}\autobuild\autobuild.pl" "${{ github.workspace }}\OpenDDS\${{ github.job }}_autobuild_workspace\config.xml"
     - name: upload autobuild output
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: ${{ github.job }}_autobuild_output
         path: OpenDDS\${{ github.job }}_autobuild_workspace
@@ -7099,7 +7099,7 @@ jobs:
         ref: ace6tao2
         path: OpenDDS/ACE_TAO
     - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: ACE_TAO_w19_p1_stat_js0_artifact
         path: OpenDDS/ACE_TAO
@@ -7110,7 +7110,7 @@ jobs:
         tar xvfJ ACE_TAO_w19_p1_stat_js0.tar.xz
         rm -f ACE_TAO_w19_p1_stat_js0.tar.xz
     - name: download OpenDDS artifact
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: build_w19_p1_stat_js0_artifact
         path: OpenDDS
@@ -7208,7 +7208,7 @@ jobs:
         cd ${{ github.job }}_autobuild_workspace
         perl "${{ github.workspace }}\autobuild\autobuild.pl" "${{ github.workspace }}\OpenDDS\${{ github.job }}_autobuild_workspace\config.xml"
     - name: upload autobuild output
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: ${{ github.job }}_autobuild_output
         path: OpenDDS\${{ github.job }}_autobuild_workspace
@@ -7266,7 +7266,7 @@ jobs:
         ref: ace6tao2
         path: OpenDDS/ACE_TAO
     - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: ACE_TAO_w19_p1_stat_js0_artifact
         path: OpenDDS/ACE_TAO
@@ -7277,7 +7277,7 @@ jobs:
         tar xvfJ ACE_TAO_w19_p1_stat_js0.tar.xz
         rm -f ACE_TAO_w19_p1_stat_js0.tar.xz
     - name: download OpenDDS artifact
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: build_w19_p1_stat_js0_artifact
         path: OpenDDS
@@ -7373,7 +7373,7 @@ jobs:
         cd ${{ github.job }}_autobuild_workspace
         perl "${{ github.workspace }}\autobuild\autobuild.pl" "${{ github.workspace }}\OpenDDS\${{ github.job }}_autobuild_workspace\config.xml"
     - name: upload autobuild output
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: ${{ github.job }}_autobuild_output
         path: OpenDDS\${{ github.job }}_autobuild_workspace
@@ -7431,7 +7431,7 @@ jobs:
         ref: ace6tao2
         path: OpenDDS/ACE_TAO
     - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: ACE_TAO_w19_p1_stat_js0_artifact
         path: OpenDDS/ACE_TAO
@@ -7442,7 +7442,7 @@ jobs:
         tar xvfJ ACE_TAO_w19_p1_stat_js0.tar.xz
         rm -f ACE_TAO_w19_p1_stat_js0.tar.xz
     - name: download OpenDDS artifact
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: build_w19_p1_stat_js0_artifact
         path: OpenDDS
@@ -7540,7 +7540,7 @@ jobs:
         cd ${{ github.job }}_autobuild_workspace
         perl "${{ github.workspace }}\autobuild\autobuild.pl" "${{ github.workspace }}\OpenDDS\${{ github.job }}_autobuild_workspace\config.xml"
     - name: upload autobuild output
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: ${{ github.job }}_autobuild_output
         path: OpenDDS\${{ github.job }}_autobuild_workspace
@@ -7607,7 +7607,7 @@ jobs:
         ref: ace6tao2
         path: OpenDDS/ACE_TAO
     - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: ACE_TAO_w19_p1_stat_js0_artifact
         path: OpenDDS/ACE_TAO
@@ -7618,7 +7618,7 @@ jobs:
         tar xvfJ ACE_TAO_w19_p1_stat_js0.tar.xz
         rm -f ACE_TAO_w19_p1_stat_js0.tar.xz
     - name: download OpenDDS artifact
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: build_w19_p1_stat_js0_artifact
         path: OpenDDS
@@ -7702,7 +7702,7 @@ jobs:
         cd ${{ github.job }}_autobuild_workspace
         perl "${{ github.workspace }}\autobuild\autobuild.pl" "${{ github.workspace }}\OpenDDS\${{ github.job }}_autobuild_workspace\config.xml"
     - name: upload autobuild output
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: ${{ github.job }}_autobuild_output
         path: OpenDDS\${{ github.job }}_autobuild_workspace
@@ -7807,7 +7807,7 @@ jobs:
         git clean -xdfn | cut -d ' ' -f 3- | xargs tar uvf ../../${{ github.job }}.tar
         xz -3 ../../${{ github.job }}.tar
     - name: upload ACE_TAO artifact
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
@@ -7845,7 +7845,7 @@ jobs:
         ref: ace6tao2
         path: OpenDDS/ACE_TAO
     - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: ACE_TAO_w19_re_p1_stat_FM-08_artifact
         path: OpenDDS/ACE_TAO
@@ -7896,7 +7896,7 @@ jobs:
         git clean -xdfn | cut -d ' ' -f 3- | xargs tar uvf ../${{ github.job }}.tar
         xz -3 ../${{ github.job }}.tar
     - name: upload OpenDDS artifact
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
@@ -7943,7 +7943,7 @@ jobs:
         ref: ace6tao2
         path: OpenDDS/ACE_TAO
     - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: ACE_TAO_w19_re_p1_stat_FM-08_artifact
         path: OpenDDS/ACE_TAO
@@ -7954,7 +7954,7 @@ jobs:
         tar xvfJ ACE_TAO_w19_re_p1_stat_FM-08.tar.xz
         rm -f ACE_TAO_w19_re_p1_stat_FM-08.tar.xz
     - name: download OpenDDS artifact
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: build_w19_re_p1_stat_FM-08_artifact
         path: OpenDDS
@@ -8023,7 +8023,7 @@ jobs:
         cd ${{ github.job }}_autobuild_workspace
         perl "${{ github.workspace }}\autobuild\autobuild.pl" "${{ github.workspace }}\OpenDDS\${{ github.job }}_autobuild_workspace\config.xml"
     - name: upload autobuild output
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: ${{ github.job }}_autobuild_output
         path: OpenDDS\${{ github.job }}_autobuild_workspace
@@ -8090,7 +8090,7 @@ jobs:
         ref: ace6tao2
         path: OpenDDS/ACE_TAO
     - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: ACE_TAO_w19_re_p1_stat_FM-08_artifact
         path: OpenDDS/ACE_TAO
@@ -8101,7 +8101,7 @@ jobs:
         tar xvfJ ACE_TAO_w19_re_p1_stat_FM-08.tar.xz
         rm -f ACE_TAO_w19_re_p1_stat_FM-08.tar.xz
     - name: download OpenDDS artifact
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: build_w19_re_p1_stat_FM-08_artifact
         path: OpenDDS
@@ -8199,7 +8199,7 @@ jobs:
         cd ${{ github.job }}_autobuild_workspace
         perl "${{ github.workspace }}\autobuild\autobuild.pl" "${{ github.workspace }}\OpenDDS\${{ github.job }}_autobuild_workspace\config.xml"
     - name: upload autobuild output
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: ${{ github.job }}_autobuild_output
         path: OpenDDS\${{ github.job }}_autobuild_workspace
@@ -8257,7 +8257,7 @@ jobs:
         ref: ace6tao2
         path: OpenDDS/ACE_TAO
     - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: ACE_TAO_w19_re_p1_stat_FM-08_artifact
         path: OpenDDS/ACE_TAO
@@ -8268,7 +8268,7 @@ jobs:
         tar xvfJ ACE_TAO_w19_re_p1_stat_FM-08.tar.xz
         rm -f ACE_TAO_w19_re_p1_stat_FM-08.tar.xz
     - name: download OpenDDS artifact
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: build_w19_re_p1_stat_FM-08_artifact
         path: OpenDDS
@@ -8363,7 +8363,7 @@ jobs:
         cd ${{ github.job }}_autobuild_workspace
         perl "${{ github.workspace }}\autobuild\autobuild.pl" "${{ github.workspace }}\OpenDDS\${{ github.job }}_autobuild_workspace\config.xml"
     - name: upload autobuild output
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: ${{ github.job }}_autobuild_output
         path: OpenDDS\${{ github.job }}_autobuild_workspace
@@ -8421,7 +8421,7 @@ jobs:
         ref: ace6tao2
         path: OpenDDS/ACE_TAO
     - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: ACE_TAO_w19_re_p1_stat_FM-08_artifact
         path: OpenDDS/ACE_TAO
@@ -8432,7 +8432,7 @@ jobs:
         tar xvfJ ACE_TAO_w19_re_p1_stat_FM-08.tar.xz
         rm -f ACE_TAO_w19_re_p1_stat_FM-08.tar.xz
     - name: download OpenDDS artifact
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: build_w19_re_p1_stat_FM-08_artifact
         path: OpenDDS
@@ -8529,7 +8529,7 @@ jobs:
         cd ${{ github.job }}_autobuild_workspace
         perl "${{ github.workspace }}\autobuild\autobuild.pl" "${{ github.workspace }}\OpenDDS\${{ github.job }}_autobuild_workspace\config.xml"
     - name: upload autobuild output
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: ${{ github.job }}_autobuild_output
         path: OpenDDS\${{ github.job }}_autobuild_workspace
@@ -8596,7 +8596,7 @@ jobs:
         ref: ace6tao2
         path: OpenDDS/ACE_TAO
     - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: ACE_TAO_w19_re_p1_stat_FM-08_artifact
         path: OpenDDS/ACE_TAO
@@ -8607,7 +8607,7 @@ jobs:
         tar xvfJ ACE_TAO_w19_re_p1_stat_FM-08.tar.xz
         rm -f ACE_TAO_w19_re_p1_stat_FM-08.tar.xz
     - name: download OpenDDS artifact
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: build_w19_re_p1_stat_FM-08_artifact
         path: OpenDDS
@@ -8691,7 +8691,7 @@ jobs:
         cd ${{ github.job }}_autobuild_workspace
         perl "${{ github.workspace }}\autobuild\autobuild.pl" "${{ github.workspace }}\OpenDDS\${{ github.job }}_autobuild_workspace\config.xml"
     - name: upload autobuild output
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: ${{ github.job }}_autobuild_output
         path: OpenDDS\${{ github.job }}_autobuild_workspace
@@ -8724,7 +8724,7 @@ jobs:
 
     steps:
     - name: download openssl artifact
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: openssl3_w19_artifact
     - name: extract openssl artifact
@@ -8809,7 +8809,7 @@ jobs:
         git clean -xdfn | cut -d ' ' -f 3- | xargs tar uvf ../../${{ github.job }}.tar
         xz -3 ../../${{ github.job }}.tar
     - name: upload ACE_TAO artifact
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
@@ -8822,7 +8822,7 @@ jobs:
 
     steps:
     - name: download openssl artifact
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: openssl3_w19_artifact
     - name: extract openssl artifact
@@ -8856,7 +8856,7 @@ jobs:
         ref: ace6tao2
         path: OpenDDS/ACE_TAO
     - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: ACE_TAO_w19_re_o1p1_sec_artifact
         path: OpenDDS/ACE_TAO
@@ -8925,7 +8925,7 @@ jobs:
         git clean -xdfn | cut -d ' ' -f 3- | xargs tar uvf ../${{ github.job }}.tar
         xz -3 ../${{ github.job }}.tar
     - name: upload OpenDDS artifact
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
@@ -8942,7 +8942,7 @@ jobs:
 
     steps:
     - name: download openssl artifact
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: openssl3_w19_artifact
     - name: extract openssl artifact
@@ -8981,7 +8981,7 @@ jobs:
         ref: ace6tao2
         path: OpenDDS/ACE_TAO
     - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: ACE_TAO_w19_re_o1p1_sec_artifact
         path: OpenDDS/ACE_TAO
@@ -8992,7 +8992,7 @@ jobs:
         tar xvfJ ACE_TAO_w19_re_o1p1_sec.tar.xz
         rm -f ACE_TAO_w19_re_o1p1_sec.tar.xz
     - name: download OpenDDS artifact
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: build_w19_re_o1p1_sec_artifact
         path: OpenDDS
@@ -9062,7 +9062,7 @@ jobs:
         cd ${{ github.job }}_autobuild_workspace
         perl "${{ github.workspace }}\autobuild\autobuild.pl" "${{ github.workspace }}\OpenDDS\${{ github.job }}_autobuild_workspace\config.xml"
     - name: upload autobuild output
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: ${{ github.job }}_autobuild_output
         path: OpenDDS\${{ github.job }}_autobuild_workspace
@@ -9099,7 +9099,7 @@ jobs:
 
     steps:
     - name: download openssl artifact
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: openssl3_w19_artifact
     - name: extract openssl artifact
@@ -9138,7 +9138,7 @@ jobs:
         ref: ace6tao2
         path: OpenDDS/ACE_TAO
     - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: ACE_TAO_w19_re_o1p1_sec_artifact
         path: OpenDDS/ACE_TAO
@@ -9149,7 +9149,7 @@ jobs:
         tar xvfJ ACE_TAO_w19_re_o1p1_sec.tar.xz
         rm -f ACE_TAO_w19_re_o1p1_sec.tar.xz
     - name: download OpenDDS artifact
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: build_w19_re_o1p1_sec_artifact
         path: OpenDDS
@@ -9247,7 +9247,7 @@ jobs:
         cd ${{ github.job }}_autobuild_workspace
         perl "${{ github.workspace }}\autobuild\autobuild.pl" "${{ github.workspace }}\OpenDDS\${{ github.job }}_autobuild_workspace\config.xml"
     - name: upload autobuild output
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: ${{ github.job }}_autobuild_output
         path: OpenDDS\${{ github.job }}_autobuild_workspace
@@ -9314,7 +9314,7 @@ jobs:
         ref: ace6tao2
         path: OpenDDS/ACE_TAO
     - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: ACE_TAO_w19_re_o1p1_sec_artifact
         path: OpenDDS/ACE_TAO
@@ -9325,7 +9325,7 @@ jobs:
         tar xvfJ ACE_TAO_w19_re_o1p1_sec.tar.xz
         rm -f ACE_TAO_w19_re_o1p1_sec.tar.xz
     - name: download OpenDDS artifact
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: build_w19_re_o1p1_sec_artifact
         path: OpenDDS
@@ -9409,7 +9409,7 @@ jobs:
         cd ${{ github.job }}_autobuild_workspace
         perl "${{ github.workspace }}\autobuild\autobuild.pl" "${{ github.workspace }}\OpenDDS\${{ github.job }}_autobuild_workspace\config.xml"
     - name: upload autobuild output
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: ${{ github.job }}_autobuild_output
         path: OpenDDS\${{ github.job }}_autobuild_workspace
@@ -9446,7 +9446,7 @@ jobs:
 
     steps:
     - name: download openssl artifact
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: openssl3_w19_artifact
     - name: extract openssl artifact
@@ -9485,7 +9485,7 @@ jobs:
         ref: ace6tao2
         path: OpenDDS/ACE_TAO
     - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: ACE_TAO_w19_re_o1p1_sec_artifact
         path: OpenDDS/ACE_TAO
@@ -9498,7 +9498,7 @@ jobs:
     - name: set up msvc env
       uses: ilammy/msvc-dev-cmd@v1
     - name: download OpenDDS artifact
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: build_w19_re_o1p1_sec_artifact
         path: OpenDDS
@@ -9580,7 +9580,7 @@ jobs:
         cd ${{ github.job }}_autobuild_workspace
         perl "${{ github.workspace }}\autobuild\autobuild.pl" "${{ github.workspace }}\OpenDDS\${{ github.job }}_autobuild_workspace\config.xml"
     - name: upload autobuild output
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: ${{ github.job }}_autobuild_output
         path: OpenDDS\${{ github.job }}_autobuild_workspace
@@ -9688,7 +9688,7 @@ jobs:
         tar cvhf ${{ github.job }}.tar wireshark wsbuild wireshark-win64-libs-3.6
         xz -3 ${{ github.job }}.tar
     - name: upload Wireshark artifact
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
@@ -9778,7 +9778,7 @@ jobs:
         git clean -xdfn | cut -d ' ' -f 3- | xargs tar uvf ../../${{ github.job }}.tar
         xz -3 ../../${{ github.job }}.tar
     - name: upload ACE_TAO artifact
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
@@ -9791,7 +9791,7 @@ jobs:
 
     steps:
     - name: download Wireshark artifact
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: wireshark_w19-release_artifact
     - name: extract Wireshark artifact
@@ -9825,7 +9825,7 @@ jobs:
         ref: ace6tao2
         path: OpenDDS/ACE_TAO
     - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: ACE_TAO_w19_re_j_ws_FM-1f_artifact
         path: OpenDDS/ACE_TAO
@@ -9885,7 +9885,7 @@ jobs:
         git clean -xdfn | cut -d ' ' -f 3- | xargs tar uvf ../${{ github.job }}.tar
         xz -3 ../${{ github.job }}.tar
     - name: upload OpenDDS artifact
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
@@ -9923,7 +9923,7 @@ jobs:
         ref: ace6tao2
         path: OpenDDS/ACE_TAO
     - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: ACE_TAO_w19_re_j_ws_FM-1f_artifact
         path: OpenDDS/ACE_TAO
@@ -9934,7 +9934,7 @@ jobs:
         tar xvfJ ACE_TAO_w19_re_j_ws_FM-1f.tar.xz
         rm -f ACE_TAO_w19_re_j_ws_FM-1f.tar.xz
     - name: download OpenDDS artifact
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: build_w19_re_j_ws_FM-1f_artifact
         path: OpenDDS
@@ -9993,7 +9993,7 @@ jobs:
         cd ${{ github.job }}_autobuild_workspace
         perl "${{ github.workspace }}\autobuild\autobuild.pl" "${{ github.workspace }}\OpenDDS\${{ github.job }}_autobuild_workspace\config.xml"
     - name: upload autobuild output
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: ${{ github.job }}_autobuild_output
         path: OpenDDS\${{ github.job }}_autobuild_workspace
@@ -10060,7 +10060,7 @@ jobs:
         ref: ace6tao2
         path: OpenDDS/ACE_TAO
     - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: ACE_TAO_w19_re_j_ws_FM-1f_artifact
         path: OpenDDS/ACE_TAO
@@ -10071,7 +10071,7 @@ jobs:
         tar xvfJ ACE_TAO_w19_re_j_ws_FM-1f.tar.xz
         rm -f ACE_TAO_w19_re_j_ws_FM-1f.tar.xz
     - name: download OpenDDS artifact
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: build_w19_re_j_ws_FM-1f_artifact
         path: OpenDDS
@@ -10169,7 +10169,7 @@ jobs:
         cd ${{ github.job }}_autobuild_workspace
         perl "${{ github.workspace }}\autobuild\autobuild.pl" "${{ github.workspace }}\OpenDDS\${{ github.job }}_autobuild_workspace\config.xml"
     - name: upload autobuild output
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: ${{ github.job }}_autobuild_output
         path: OpenDDS\${{ github.job }}_autobuild_workspace
@@ -10236,7 +10236,7 @@ jobs:
         ref: ace6tao2
         path: OpenDDS/ACE_TAO
     - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: ACE_TAO_w19_re_j_ws_FM-1f_artifact
         path: OpenDDS/ACE_TAO
@@ -10247,7 +10247,7 @@ jobs:
         tar xvfJ ACE_TAO_w19_re_j_ws_FM-1f.tar.xz
         rm -f ACE_TAO_w19_re_j_ws_FM-1f.tar.xz
     - name: download OpenDDS artifact
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: build_w19_re_j_ws_FM-1f_artifact
         path: OpenDDS
@@ -10331,7 +10331,7 @@ jobs:
         cd ${{ github.job }}_autobuild_workspace
         perl "${{ github.workspace }}\autobuild\autobuild.pl" "${{ github.workspace }}\OpenDDS\${{ github.job }}_autobuild_workspace\config.xml"
     - name: upload autobuild output
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: ${{ github.job }}_autobuild_output
         path: OpenDDS\${{ github.job }}_autobuild_workspace
@@ -10398,7 +10398,7 @@ jobs:
         ref: ace6tao2
         path: OpenDDS/ACE_TAO
     - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: ACE_TAO_w19_re_j_ws_FM-1f_artifact
         path: OpenDDS/ACE_TAO
@@ -10409,7 +10409,7 @@ jobs:
         tar xvfJ ACE_TAO_w19_re_j_ws_FM-1f.tar.xz
         rm -f ACE_TAO_w19_re_j_ws_FM-1f.tar.xz
     - name: download OpenDDS artifact
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: build_w19_re_j_ws_FM-1f_artifact
         path: OpenDDS
@@ -10500,7 +10500,7 @@ jobs:
         cd ${{ github.job }}_autobuild_workspace
         perl "${{ github.workspace }}\autobuild\autobuild.pl" "${{ github.workspace }}\OpenDDS\${{ github.job }}_autobuild_workspace\config.xml"
     - name: upload autobuild output
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: ${{ github.job }}_autobuild_output
         path: OpenDDS\${{ github.job }}_autobuild_workspace
@@ -10614,7 +10614,7 @@ jobs:
         git clean -xdfn | cut -d ' ' -f 3- | xargs tar uvf ../../${{ github.job }}.tar
         xz -3 ../../${{ github.job }}.tar
     - name: upload ACE_TAO artifact
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
@@ -10658,7 +10658,7 @@ jobs:
         ref: ace6tao2
         path: ACE_TAO
     - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: ACE_TAO_w22_x86_i0_artifact
         path: ACE_TAO
@@ -10704,7 +10704,7 @@ jobs:
         xz -3 ../${{ github.job }}.tar
         mv ../${{ github.job }}.tar.xz $GITHUB_WORKSPACE
     - name: upload OpenDDS artifact
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
@@ -10752,7 +10752,7 @@ jobs:
         ref: ace6tao2
         path: ACE_TAO
     - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: ACE_TAO_w22_x86_i0_artifact
         path: ACE_TAO
@@ -10763,7 +10763,7 @@ jobs:
         tar xvfJ ACE_TAO_w22_x86_i0.tar.xz
         rm -f ACE_TAO_w22_x86_i0.tar.xz
     - name: download OpenDDS artifact
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: build_w22_x86_i0_sec_artifact
         path: OpenDDS
@@ -10834,7 +10834,7 @@ jobs:
         cd ${{ github.job }}_autobuild_workspace
         perl "${{ github.workspace }}\autobuild\autobuild.pl" "C:\OpenDDS\${{ github.job }}_autobuild_workspace\config.xml"
     - name: upload autobuild output
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: ${{ github.job }}_autobuild_output
         path: C:\OpenDDS\${{ github.job }}_autobuild_workspace
@@ -10902,7 +10902,7 @@ jobs:
         ref: ace6tao2
         path: ACE_TAO
     - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: ACE_TAO_w22_x86_i0_artifact
         path: ACE_TAO
@@ -10913,7 +10913,7 @@ jobs:
         tar xvfJ ACE_TAO_w22_x86_i0.tar.xz
         rm -f ACE_TAO_w22_x86_i0.tar.xz
     - name: download OpenDDS artifact
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: build_w22_x86_i0_sec_artifact
         path: OpenDDS
@@ -10985,7 +10985,7 @@ jobs:
         cd ${{ github.job }}_autobuild_workspace
         perl "${{ github.workspace }}\autobuild\autobuild.pl" "C:\OpenDDS\${{ github.job }}_autobuild_workspace\config.xml"
     - name: upload autobuild output
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: ${{ github.job }}_autobuild_output
         path: C:\OpenDDS\${{ github.job }}_autobuild_workspace
@@ -11044,7 +11044,7 @@ jobs:
         ref: ace6tao2
         path: OpenDDS/ACE_TAO
     - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: ACE_TAO_w22_x86_i0_artifact
         path: OpenDDS/ACE_TAO
@@ -11090,7 +11090,7 @@ jobs:
         xz -3 ../${{ github.job }}.tar
         mv ../${{ github.job }}.tar.xz $GITHUB_WORKSPACE
     - name: upload OpenDDS artifact
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
@@ -11138,7 +11138,7 @@ jobs:
         ref: ace6tao2
         path: OpenDDS/ACE_TAO
     - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: ACE_TAO_w22_x86_i0_artifact
         path: OpenDDS/ACE_TAO
@@ -11149,7 +11149,7 @@ jobs:
         tar xvfJ ACE_TAO_w22_x86_i0.tar.xz
         rm -f ACE_TAO_w22_x86_i0.tar.xz
     - name: download OpenDDS artifact
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: build_w22_x86_i0_j_FM-1f_artifact
         path: OpenDDS
@@ -11221,7 +11221,7 @@ jobs:
         cd ${{ github.job }}_autobuild_workspace
         perl "${{ github.workspace }}\autobuild\autobuild.pl" "C:\OpenDDS\${{ github.job }}_autobuild_workspace\config.xml"
     - name: upload autobuild output
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: ${{ github.job }}_autobuild_output
         path: c:/OpenDDS/${{ github.job }}_autobuild_workspace
@@ -11326,7 +11326,7 @@ jobs:
         git clean -xdfn | cut -d ' ' -f 3- | xargs tar uvf ../../${{ github.job }}.tar
         xz -3 ../../${{ github.job }}.tar
     - name: upload ACE_TAO artifact
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
@@ -11364,7 +11364,7 @@ jobs:
         ref: ace6tao2
         path: OpenDDS/ACE_TAO
     - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: ACE_TAO_w22_p1_artifact
         path: OpenDDS/ACE_TAO
@@ -11415,7 +11415,7 @@ jobs:
         git clean -xdfn | cut -d ' ' -f 3- | xargs tar uvf ../${{ github.job }}.tar
         xz -3 ../${{ github.job }}.tar
     - name: upload OpenDDS artifact
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
@@ -11462,7 +11462,7 @@ jobs:
         ref: ace6tao2
         path: OpenDDS/ACE_TAO
     - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: ACE_TAO_w22_p1_artifact
         path: OpenDDS/ACE_TAO
@@ -11473,7 +11473,7 @@ jobs:
         tar xvfJ ACE_TAO_w22_p1.tar.xz
         rm -f ACE_TAO_w22_p1.tar.xz
     - name: download OpenDDS artifact
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: build_w22_p1_artifact
         path: OpenDDS
@@ -11542,7 +11542,7 @@ jobs:
         cd ${{ github.job }}_autobuild_workspace
         perl "${{ github.workspace }}\autobuild\autobuild.pl" "${{ github.workspace }}\OpenDDS\${{ github.job }}_autobuild_workspace\config.xml"
     - name: upload autobuild output
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: ${{ github.job }}_autobuild_output
         path: OpenDDS\${{ github.job }}_autobuild_workspace
@@ -11609,7 +11609,7 @@ jobs:
         ref: ace6tao2
         path: OpenDDS/ACE_TAO
     - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: ACE_TAO_w22_p1_artifact
         path: OpenDDS/ACE_TAO
@@ -11620,7 +11620,7 @@ jobs:
         tar xvfJ ACE_TAO_w22_p1.tar.xz
         rm -f ACE_TAO_w22_p1.tar.xz
     - name: download OpenDDS artifact
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: build_w22_p1_artifact
         path: OpenDDS
@@ -11707,7 +11707,7 @@ jobs:
         cd ${{ github.job }}_autobuild_workspace
         perl "${{ github.workspace }}\autobuild\autobuild.pl" "${{ github.workspace }}\OpenDDS\${{ github.job }}_autobuild_workspace\config.xml"
     - name: upload autobuild output
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: ${{ github.job }}_autobuild_output
         path: OpenDDS\${{ github.job }}_autobuild_workspace
@@ -11774,7 +11774,7 @@ jobs:
         ref: ace6tao2
         path: OpenDDS/ACE_TAO
     - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: ACE_TAO_w22_p1_artifact
         path: OpenDDS/ACE_TAO
@@ -11785,7 +11785,7 @@ jobs:
         tar xvfJ ACE_TAO_w22_p1.tar.xz
         rm -f ACE_TAO_w22_p1.tar.xz
     - name: download OpenDDS artifact
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: build_w22_p1_artifact
         path: OpenDDS
@@ -11869,7 +11869,7 @@ jobs:
         cd ${{ github.job }}_autobuild_workspace
         perl "${{ github.workspace }}\autobuild\autobuild.pl" "${{ github.workspace }}\OpenDDS\${{ github.job }}_autobuild_workspace\config.xml"
     - name: upload autobuild output
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: ${{ github.job }}_autobuild_output
         path: OpenDDS\${{ github.job }}_autobuild_workspace
@@ -11936,7 +11936,7 @@ jobs:
         ref: ace6tao2
         path: OpenDDS/ACE_TAO
     - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: ACE_TAO_w22_p1_artifact
         path: OpenDDS/ACE_TAO
@@ -11949,7 +11949,7 @@ jobs:
     - name: set up msvc env
       uses: ilammy/msvc-dev-cmd@v1
     - name: download OpenDDS artifact
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: build_w22_p1_artifact
         path: OpenDDS
@@ -12031,7 +12031,7 @@ jobs:
         cd ${{ github.job }}_autobuild_workspace
         perl "${{ github.workspace }}\autobuild\autobuild.pl" "${{ github.workspace }}\OpenDDS\${{ github.job }}_autobuild_workspace\config.xml"
     - name: upload autobuild output
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: ${{ github.job }}_autobuild_output
         path: OpenDDS\${{ github.job }}_autobuild_workspace
@@ -12132,7 +12132,7 @@ jobs:
         git clean -xdfn | cut -d ' ' -f 3- | xargs gtar uvf ../../${{ github.job }}.tar
         xz -3 ../../${{ github.job }}.tar
     - name: upload ACE_TAO artifact
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
@@ -12159,7 +12159,7 @@ jobs:
         ref: ace6tao2
         path: ACE_TAO
     - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: ACE_TAO_m11_sec_artifact
         path: ACE_TAO
@@ -12208,7 +12208,7 @@ jobs:
         git clean -xdfn | cut -d ' ' -f 3- | xargs gtar uvf ../${{ github.job }}.tar
         xz -3 ../${{ github.job }}.tar
     - name: upload OpenDDS artifact
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
@@ -12244,7 +12244,7 @@ jobs:
         ref: ace6tao2
         path: ACE_TAO
     - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: ACE_TAO_m11_sec_artifact
         path: ACE_TAO
@@ -12259,7 +12259,7 @@ jobs:
         path: OpenDDS
         submodules: true
     - name: download OpenDDS artifact
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: build_m11_sec_artifact
         path: OpenDDS
@@ -12308,7 +12308,7 @@ jobs:
         EOF
         $GITHUB_WORKSPACE/autobuild/autobuild.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/config.xml"
     - name: upload autobuild output
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: ${{ github.job }}_autobuild_output
         path: OpenDDS/${{ github.job }}_autobuild_workspace
@@ -12364,7 +12364,7 @@ jobs:
         ref: ace6tao2
         path: ACE_TAO
     - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: ACE_TAO_m11_sec_artifact
         path: ACE_TAO
@@ -12379,7 +12379,7 @@ jobs:
         path: OpenDDS
         submodules: true
     - name: download OpenDDS artifact
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: build_m11_sec_artifact
         path: OpenDDS
@@ -12428,7 +12428,7 @@ jobs:
         EOF
         $GITHUB_WORKSPACE/autobuild/autobuild.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/config.xml"
     - name: upload autobuild output
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: ${{ github.job }}_autobuild_output
         path: OpenDDS/${{ github.job }}_autobuild_workspace
@@ -12475,7 +12475,7 @@ jobs:
         ref: ace6tao2
         path: ACE_TAO
     - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: ACE_TAO_m11_sec_artifact
         path: ACE_TAO
@@ -12538,7 +12538,7 @@ jobs:
         git clean -xdfn | cut -d ' ' -f 3- | xargs gtar uvf ../${{ github.job }}.tar
         xz -3 ../${{ github.job }}.tar
     - name: upload OpenDDS artifact
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
@@ -12574,7 +12574,7 @@ jobs:
         ref: ace6tao2
         path: ACE_TAO
     - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: ACE_TAO_m11_sec_artifact
         path: ACE_TAO
@@ -12589,7 +12589,7 @@ jobs:
         path: OpenDDS
         submodules: true
     - name: download OpenDDS artifact
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: build_m11_j_FM-1f_artifact
         path: OpenDDS
@@ -12638,7 +12638,7 @@ jobs:
         EOF
         $GITHUB_WORKSPACE/autobuild/autobuild.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/config.xml"
     - name: upload autobuild output
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: ${{ github.job }}_autobuild_output
         path: OpenDDS/${{ github.job }}_autobuild_workspace
@@ -12694,7 +12694,7 @@ jobs:
         ref: ace6tao2
         path: ACE_TAO
     - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: ACE_TAO_m11_sec_artifact
         path: ACE_TAO
@@ -12709,7 +12709,7 @@ jobs:
         path: OpenDDS
         submodules: true
     - name: download OpenDDS artifact
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: build_m11_j_FM-1f_artifact
         path: OpenDDS
@@ -12758,7 +12758,7 @@ jobs:
         EOF
         $GITHUB_WORKSPACE/autobuild/autobuild.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/config.xml"
     - name: upload autobuild output
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: ${{ github.job }}_autobuild_output
         path: OpenDDS/${{ github.job }}_autobuild_workspace
@@ -12854,7 +12854,7 @@ jobs:
         git clean -xdfn | cut -d ' ' -f 3- | xargs gtar uvf ../../${{ github.job }}.tar
         xz -3 ../../${{ github.job }}.tar
     - name: upload ACE_TAO artifact
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
@@ -12886,7 +12886,7 @@ jobs:
         ref: ace6tao2
         path: OpenDDS/ACE_TAO
     - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: ACE_TAO_m12_o1d0_sec_artifact
         path: OpenDDS/ACE_TAO
@@ -12932,7 +12932,7 @@ jobs:
         git clean -xdfn | cut -d ' ' -f 3- | xargs gtar uvf ../${{ github.job }}.tar
         xz -3 ../${{ github.job }}.tar
     - name: upload OpenDDS artifact
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
@@ -12973,7 +12973,7 @@ jobs:
         ref: ace6tao2
         path: OpenDDS/ACE_TAO
     - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: ACE_TAO_m12_o1d0_sec_artifact
         path: OpenDDS/ACE_TAO
@@ -12983,7 +12983,7 @@ jobs:
         cd OpenDDS/ACE_TAO
         gtar xvfJ ACE_TAO_m12_o1d0_sec.tar.xz
     - name: download OpenDDS artifact
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: build_m12_o1d0_sec_artifact
         path: OpenDDS
@@ -13035,7 +13035,7 @@ jobs:
         EOF
         $GITHUB_WORKSPACE/autobuild/autobuild.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/config.xml"
     - name: upload autobuild output
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: ${{ github.job }}_autobuild_output
         path: OpenDDS/${{ github.job }}_autobuild_workspace
@@ -13096,7 +13096,7 @@ jobs:
         ref: ace6tao2
         path: OpenDDS/ACE_TAO
     - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: ACE_TAO_m12_o1d0_sec_artifact
         path: OpenDDS/ACE_TAO
@@ -13106,7 +13106,7 @@ jobs:
         cd OpenDDS/ACE_TAO
         gtar xvfJ ACE_TAO_m12_o1d0_sec.tar.xz
     - name: download OpenDDS artifact
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: build_m12_o1d0_sec_artifact
         path: OpenDDS
@@ -13158,7 +13158,7 @@ jobs:
         EOF
         $GITHUB_WORKSPACE/autobuild/autobuild.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/config.xml"
     - name: upload autobuild output
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: ${{ github.job }}_autobuild_output
         path: OpenDDS/${{ github.job }}_autobuild_workspace
@@ -13257,7 +13257,7 @@ jobs:
         git clean -xdfn | cut -d ' ' -f 3- | xargs gtar uvf ../../${{ github.job }}.tar
         xz -3 ../../${{ github.job }}.tar
     - name: upload ACE_TAO artifact
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
@@ -13290,7 +13290,7 @@ jobs:
         ref: ace6tao2
         path: OpenDDS/ACE_TAO
     - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: ACE_TAO_m12_i0_j_FM-1f_artifact
         path: OpenDDS/ACE_TAO
@@ -13350,7 +13350,7 @@ jobs:
         git clean -xdfn | cut -d ' ' -f 3- | xargs gtar uvf ../${{ github.job }}.tar
         xz -3 ../${{ github.job }}.tar
     - name: upload OpenDDS artifact
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
@@ -13391,7 +13391,7 @@ jobs:
         ref: ace6tao2
         path: OpenDDS/ACE_TAO
     - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: ACE_TAO_m12_i0_j_FM-1f_artifact
         path: OpenDDS/ACE_TAO
@@ -13401,7 +13401,7 @@ jobs:
         cd OpenDDS/ACE_TAO
         gtar xvfJ ACE_TAO_m12_i0_j_FM-1f.tar.xz
     - name: download OpenDDS artifact
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: build_m12_i0_j_FM-1f_artifact
         path: OpenDDS
@@ -13453,7 +13453,7 @@ jobs:
         EOF
         $GITHUB_WORKSPACE/autobuild/autobuild.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/config.xml"
     - name: upload autobuild output
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: ${{ github.job }}_autobuild_output
         path: OpenDDS/${{ github.job }}_autobuild_workspace
@@ -13514,7 +13514,7 @@ jobs:
         ref: ace6tao2
         path: OpenDDS/ACE_TAO
     - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: ACE_TAO_m12_i0_j_FM-1f_artifact
         path: OpenDDS/ACE_TAO
@@ -13524,7 +13524,7 @@ jobs:
         cd OpenDDS/ACE_TAO
         gtar xvfJ ACE_TAO_m12_i0_j_FM-1f.tar.xz
     - name: download OpenDDS artifact
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: build_m12_i0_j_FM-1f_artifact
         path: OpenDDS
@@ -13576,7 +13576,7 @@ jobs:
         EOF
         $GITHUB_WORKSPACE/autobuild/autobuild.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/config.xml"
     - name: upload autobuild output
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: ${{ github.job }}_autobuild_output
         path: OpenDDS/${{ github.job }}_autobuild_workspace
@@ -13647,7 +13647,7 @@ jobs:
         tar cvf ${{ github.job }}.tar openssl_install
         xz -3 ${{ github.job }}.tar
     - name: upload openssl artifact
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
@@ -13702,7 +13702,7 @@ jobs:
         tar cvhf ${{ github.job }}.tar openssl3
         xz -3 ${{ github.job }}.tar
     - name: upload openssl artifact
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
@@ -13928,7 +13928,7 @@ jobs:
         ref: ace6tao2
         path: OpenDDS/ACE_TAO
     - name: Download ACE_TAO artifact
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: ACE_TAO_w22_p1_artifact
         path: OpenDDS/ACE_TAO
