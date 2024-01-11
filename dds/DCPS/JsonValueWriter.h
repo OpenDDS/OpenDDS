@@ -90,6 +90,7 @@ public:
   void write_string(const ACE_CDR::Char* value, size_t length);
   void write_wstring(const ACE_CDR::WChar* value, size_t length);
   void write_enum(const char* /*name*/, ACE_CDR::Long value);
+  void write_absent_value();
 
 private:
   Writer& writer_;
@@ -351,6 +352,12 @@ void JsonValueWriter<Writer>::write_enum(const char* name,
                                          ACE_CDR::Long /*value*/)
 {
   writer_.String(name);
+}
+
+template <typename Writer>
+void JsonValueWriter<Writer>::write_absent_value()
+{
+  writer_.Null();
 }
 
 template<typename T>

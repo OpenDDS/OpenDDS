@@ -24,7 +24,8 @@ class MulticastType : public TransportType {
 public:
   const char* name() { return MULTICAST_NAME; }
 
-  TransportInst_rch new_inst(const std::string& name)
+  TransportInst_rch new_inst(const std::string& name,
+                             bool)
   {
     return make_rch<MulticastInst>(name);
   }

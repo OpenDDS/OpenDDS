@@ -25,11 +25,13 @@ namespace OpenDDS {
 namespace DCPS {
 
 TransportInst::TransportInst(const char* type,
-                             const OPENDDS_STRING& name)
+                             const OPENDDS_STRING& name,
+                             bool is_template)
   : transport_type_(type)
   , shutting_down_(false)
   , name_(name)
   , config_prefix_(ConfigPair::canonicalize("OPENDDS_TRANSPORT_" + name_))
+  , is_template_(is_template)
 {
   DBG_ENTRY_LVL("TransportInst", "TransportInst", 6);
 }
