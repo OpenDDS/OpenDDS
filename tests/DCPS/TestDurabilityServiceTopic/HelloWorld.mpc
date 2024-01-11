@@ -1,0 +1,10 @@
+project(*Subscriber) : dcpsexe, dcps_test, dcps_transports_for_test, dcps_qos_xml_handler {
+  exename = subscriber
+  TypeSupport_Files {
+    HelloWorld.idl
+  }
+
+  Source_Files {
+    subscriber.cpp
+  }
+}
