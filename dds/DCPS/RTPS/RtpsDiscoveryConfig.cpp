@@ -391,13 +391,51 @@ RtpsDiscoveryConfig::multicast_interface(const OPENDDS_STRING& mi)
 }
 
 DCPS::NetworkAddress
-RtpsDiscoveryConfig::default_multicast_group() const
+RtpsDiscoveryConfig::default_multicast_group(DDS::DomainId_t domain) const
 {
   // RTPS v2.1 9.6.1.4.1
-  return TheServiceParticipant->config_store()->get(config_key("INTEROP_MULTICAST_OVERRIDE").c_str(),
-                                                    DCPS::NetworkAddress("239.255.0.1:0"),
-                                                    DCPS::ConfigStoreImpl::Format_No_Port,
-                                                    DCPS::ConfigStoreImpl::Kind_IPV4);
+  DCPS::NetworkAddress na =
+    TheServiceParticipant->config_store()->get(config_key("INTEROP_MULTICAST_OVERRIDE").c_str(),
+                                               DCPS::NetworkAddress("239.255.0.1:0"),
+                                               DCPS::ConfigStoreImpl::Format_No_Port,
+                                               DCPS::ConfigStoreImpl::Kind_IPV4);
+  // Customize.
+  const String customization_name = TheServiceParticipant->config_store()->get(config_key("CUSTOMIZATION").c_str(), "");
+  if (!customization_name.empty()) {
+    const String directive = TheServiceParticipant->config_store()->get(String("OPENDDS_CUSTOMIZATION_" + customization_name + "_INTEROP_MULTICAST_OVERRIDE").c_str(), "");
+    if (directive == "AddDomainId") {
+      String addr = DCPS::LogAddr(na, DCPS::LogAddr::Ip).str();
+      const size_t pos = addr.find_last_of(".");
+      if (pos != String::npos) {
+        String custom = addr.substr(pos + 1);
+        int val = 0;
+        if (!DCPS::convertToInteger(custom, val)) {
+          if (log_level >= DCPS::LogLevel::Error) {
+            ACE_ERROR((LM_ERROR,
+                       "(%P|%t) ERROR: RtpsDiscoveryConfig::default_multicast_group: "
+                       "could not convert %C to integer\n",
+                       custom.c_str()));
+          }
+          return na;
+        }
+        val += domain;
+        addr = addr.substr(0, pos);
+        addr += "." + DCPS::to_dds_string(val);
+      } else {
+        if (log_level >= DCPS::LogLevel::Error) {
+          ACE_ERROR((LM_ERROR,
+                     "(%P|%t) ERROR: RtpsDiscoveryConfig::default_multicast_group: "
+                     "could not AddDomainId for %s\n",
+                     addr.c_str()));
+        }
+        return na;
+      }
+
+      na = DCPS::NetworkAddress(0, addr.c_str());
+    }
+  }
+
+  return na;
 }
 
 void
@@ -417,9 +455,10 @@ RtpsDiscoveryConfig::port_common(DDS::DomainId_t domain) const
 }
 
 DCPS::NetworkAddress
-RtpsDiscoveryConfig::multicast_address(u_short port_common) const
+RtpsDiscoveryConfig::multicast_address(u_short port_common,
+                                       DDS::DomainId_t domain) const
 {
-  DCPS::NetworkAddress addr = default_multicast_group();
+  DCPS::NetworkAddress addr = default_multicast_group(domain);
   // Ports are set by the formulas in RTPS v2.1 Table 9.8
   addr.set_port_number(port_common + d0());
   return addr;

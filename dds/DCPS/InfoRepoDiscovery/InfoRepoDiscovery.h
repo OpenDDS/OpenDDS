@@ -270,7 +270,7 @@ private:
 public:
   class Config : public Discovery::Config {
   public:
-    int discovery_config(ACE_Configuration_Heap& cf);
+    int discovery_config();
   };
 
   class OpenDDS_InfoRepoDiscovery_Export StaticInitializer {
