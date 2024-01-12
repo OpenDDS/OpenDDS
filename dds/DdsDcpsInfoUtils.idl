@@ -16,7 +16,7 @@ module OpenDDS
   module DCPS
   {
     struct MonotonicTime_t {
-      long sec;
+      long long sec;
       unsigned long nanosec;
     };
 
