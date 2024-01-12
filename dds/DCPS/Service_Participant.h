@@ -645,15 +645,11 @@ private:
   int load_domain_ranges();
 
   /**
-   * Load the discovery template information
-   */
-  int load_discovery_templates();
-
-  /**
    * Process the domain range template and activate the
    * domain for the given domain ID
    */
-  int configure_domain_range_instance(DDS::DomainId_t domainId);
+  int configure_domain_range_instance(DDS::DomainId_t domainId,
+                                      const Discovery::RepoKey& name);
 
   /**
    * Load the discovery configuration to the Service_Participant
@@ -661,12 +657,6 @@ private:
    */
   int load_discovery_configuration(ACE_Configuration_Heap& cf,
                                    const ACE_TCHAR* section_name);
-
-  /**
-   * Create and load a discovery config from a discovery template
-   */
-  int configure_discovery_template(DDS::DomainId_t domainId,
-                                   const OPENDDS_STRING& discovery_name);
 
   typedef OPENDDS_MAP(OPENDDS_STRING, container_supported_unique_ptr<Discovery::Config>) DiscoveryTypes;
   DiscoveryTypes discovery_types_;
@@ -740,7 +730,8 @@ private:
 
     const String& name() const { return name_; }
     const String& config_prefix() const { return config_prefix_; }
-    String discovery_template_name(RcHandle<ConfigStoreImpl> config_store) const;
+    String discovery_template_name(RcHandle<ConfigStoreImpl> config_store,
+                                   const String& default_name) const;
     String transport_config_name(RcHandle<ConfigStoreImpl> config_store) const;
     DCPS::ConfigStoreImpl::StringMap domain_info(RcHandle<ConfigStoreImpl> config_store) const;
 
@@ -761,42 +752,13 @@ private:
     DDS::DomainId_t range_end_;
   };
 
-  class DiscoveryInfo {
-  public:
-    DiscoveryInfo(const String& name)
-      : discovery_name_(name)
-      , config_prefix_(ConfigPair::canonicalize(String("OPENDDS_RTPS_DISCOVERY_") + name))
-    {}
-
-    const String& discovery_name() const { return discovery_name_; }
-    DCPS::ConfigStoreImpl::StringMap customizations(RcHandle<ConfigStoreImpl> config_store) const;
-    DCPS::ConfigStoreImpl::StringMap disc_info(RcHandle<ConfigStoreImpl> config_store) const;
-
-  private:
-    String config_key(const String& key) const
-    {
-      return ConfigPair::canonicalize(config_prefix_ + "_" + key);
-    }
-
-    String discovery_name_;
-    String config_prefix_;
-  };
-
   OPENDDS_MAP(DDS::DomainId_t, OPENDDS_STRING) domain_to_transport_name_map_;
 
   OPENDDS_VECTOR(DomainRange) domain_ranges_;
 
-  OPENDDS_VECTOR(DiscoveryInfo) discovery_infos_;
-
   bool has_domain_range() const;
 
   bool get_domain_range_info(DDS::DomainId_t id, DomainRange& inst);
-
-  bool process_customizations(DDS::DomainId_t id, const OPENDDS_STRING& discovery_name, ValueMap& customs);
-
-  OpenDDS::DCPS::Discovery::RepoKey get_discovery_template_instance_name(DDS::DomainId_t id);
-
-  bool is_discovery_template(const OPENDDS_STRING& name);
 
 public:
   /// getter for lock that protects the static initialization of XTypes related data structures

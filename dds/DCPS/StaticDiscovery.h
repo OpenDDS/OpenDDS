@@ -865,7 +865,7 @@ public:
 
   RepoKey key() const { return key_; }
 
-  int load_configuration(ACE_Configuration_Heap& config);
+  int load_configuration();
 
   virtual GUID_t generate_participant_guid();
 

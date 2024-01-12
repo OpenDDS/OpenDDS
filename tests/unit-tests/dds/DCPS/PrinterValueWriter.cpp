@@ -446,3 +446,17 @@ TEST(dds_DCPS_PrinterValueWriter, write_enum)
   pvw.write_enum("label", 5);
   EXPECT_STREQ(pvw.str().c_str(), "label (5)");
 }
+
+TEST(dds_DCPS_PrinterValueWriter, write_absent_value)
+{
+  PrinterValueWriter pvw;
+  pvw.begin_struct();
+  pvw.begin_struct_member(OpenDDS::XTypes::MemberDescriptorImpl("Int32Field", false));
+  pvw.write_int32(10);
+  pvw.end_struct_member();
+  pvw.begin_struct_member(OpenDDS::XTypes::MemberDescriptorImpl("NullField", false));
+  pvw.write_absent_value();
+  pvw.end_struct_member();
+  pvw.end_struct();
+  EXPECT_STREQ(pvw.str().c_str(), "    Int32Field: 10\n    NullField: null");
+}

@@ -110,6 +110,8 @@ public:
     write_enum(name, static_cast<ACE_CDR::Long>(value));
   }
 
+  virtual void write_absent_value() = 0;
+
   /// Array write operations
   /// Note: the portion written starts at x and ends
   ///    at x + length.

@@ -134,7 +134,7 @@ public:
   OPENDDS_STRING multicast_interface() const { return config_->multicast_interface(); }
   void multicast_interface(const OPENDDS_STRING& mi) { config_->multicast_interface(mi); }
 
-  DCPS::NetworkAddress default_multicast_group() const { return config_->default_multicast_group(); }
+  DCPS::NetworkAddress default_multicast_group(DDS::DomainId_t domain) const { return config_->default_multicast_group(domain); }
   void default_multicast_group(const DCPS::NetworkAddress& group) { config_->default_multicast_group(group); }
 
   DCPS::NetworkAddressSet spdp_send_addrs() const { return config_->spdp_send_addrs(); }
@@ -354,7 +354,7 @@ private:
 public:
   class Config : public Discovery::Config {
   public:
-    int discovery_config(ACE_Configuration_Heap& cf);
+    int discovery_config();
   };
 
   class OpenDDS_Rtps_Export StaticInitializer {

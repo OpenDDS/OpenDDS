@@ -28,10 +28,6 @@
 #  pragma once
 #endif
 
-ACE_BEGIN_VERSIONED_NAMESPACE_DECL
-class ACE_Configuration_Heap;
-ACE_END_VERSIONED_NAMESPACE_DECL
-
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
@@ -98,7 +94,7 @@ public:
     , public EnableContainerSupportedUniquePtr<Config> {
   public:
     virtual ~Config();
-    virtual int discovery_config(ACE_Configuration_Heap& cf) = 0;
+    virtual int discovery_config() = 0;
   };
 
   virtual bool attach_participant(
