@@ -942,12 +942,12 @@ ConfigStoreImpl::get(const char* key,
 
           if (parts.size() > 2){
             // quantity has been specified
-            int basePort = std::stoi(parts[1]);
-            int numPorts = std::stoi(parts[2]);
+            int basePort = atoi(parts[1].c_str());
+            int numPorts = atoi(parts[2].c_str());
             // default of 2 for specifying multiple SpdpSendAddrs endpoints.
             int interval = 2;
             if (parts.size() == 4)
-              interval = std::stoi(parts[3]);
+              interval = atoi(parts[3].c_str());
 
             if (numPorts){
               for (int j=1; j < numPorts; ++j){
