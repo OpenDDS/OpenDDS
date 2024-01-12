@@ -508,13 +508,13 @@ Sedp::init(const GUID_t& guid,
   const_cast<bool&>(use_xtypes_) = disco.use_xtypes();
   const_cast<bool&>(use_xtypes_complete_) = disco.use_xtypes_complete();
 
-  reactor_task_ = transport_inst_->reactor_task();
+  reactor_task_ = transport_inst_->reactor_task(domainId, 0);
   // One should assume that the transport is configured after this
   // point.  Changes to transport_inst_ or rtps_inst after this line
   // may not be reflected.
   ACE_Reactor* reactor = reactor_task_->get_reactor();
   job_queue_ = DCPS::make_rch<DCPS::JobQueue>(reactor);
-  event_dispatcher_ = transport_inst_->event_dispatcher();
+  event_dispatcher_ = transport_inst_->event_dispatcher(domainId, 0);
   type_lookup_init(reactor_task_->interceptor());
 
   // Configure and enable each reader/writer
@@ -533,91 +533,91 @@ Sedp::init(const GUID_t& guid,
 #endif
 
   if (bep & DISC_BUILTIN_ENDPOINT_PUBLICATION_ANNOUNCER) {
-    publications_writer_->enable_transport_using_config(reliable, durable, transport_cfg_);
+    publications_writer_->enable_transport_using_config(reliable, durable, transport_cfg_, 0);
   }
-  publications_reader_->enable_transport_using_config(reliable, durable, transport_cfg_);
+  publications_reader_->enable_transport_using_config(reliable, durable, transport_cfg_, 0);
 
 #ifdef OPENDDS_SECURITY
   publications_secure_writer_->set_crypto_handles(spdp_.crypto_handle());
   publications_secure_reader_->set_crypto_handles(spdp_.crypto_handle());
   if (bep & DDS::Security::SEDP_BUILTIN_PUBLICATIONS_SECURE_WRITER) {
-    publications_secure_writer_->enable_transport_using_config(reliable, durable, transport_cfg_);
+    publications_secure_writer_->enable_transport_using_config(reliable, durable, transport_cfg_, 0);
   }
-  publications_secure_reader_->enable_transport_using_config(reliable, durable, transport_cfg_);
+  publications_secure_reader_->enable_transport_using_config(reliable, durable, transport_cfg_, 0);
 #endif
 
   if (bep & DISC_BUILTIN_ENDPOINT_SUBSCRIPTION_ANNOUNCER) {
-    subscriptions_writer_->enable_transport_using_config(reliable, durable, transport_cfg_);
+    subscriptions_writer_->enable_transport_using_config(reliable, durable, transport_cfg_, 0);
   }
-  subscriptions_reader_->enable_transport_using_config(reliable, durable, transport_cfg_);
+  subscriptions_reader_->enable_transport_using_config(reliable, durable, transport_cfg_, 0);
 
 #ifdef OPENDDS_SECURITY
   subscriptions_secure_writer_->set_crypto_handles(spdp_.crypto_handle());
   subscriptions_secure_reader_->set_crypto_handles(spdp_.crypto_handle());
   if (bep & DDS::Security::SEDP_BUILTIN_SUBSCRIPTIONS_SECURE_WRITER) {
-    subscriptions_secure_writer_->enable_transport_using_config(reliable, durable, transport_cfg_);
+    subscriptions_secure_writer_->enable_transport_using_config(reliable, durable, transport_cfg_, 0);
   }
-  subscriptions_secure_reader_->enable_transport_using_config(reliable, durable, transport_cfg_);
+  subscriptions_secure_reader_->enable_transport_using_config(reliable, durable, transport_cfg_, 0);
 #endif
 
   if (bep & BUILTIN_ENDPOINT_PARTICIPANT_MESSAGE_DATA_WRITER) {
-    participant_message_writer_->enable_transport_using_config(reliable, durable, transport_cfg_);
+    participant_message_writer_->enable_transport_using_config(reliable, durable, transport_cfg_, 0);
   }
-  participant_message_reader_->enable_transport_using_config(reliable, durable, transport_cfg_);
+  participant_message_reader_->enable_transport_using_config(reliable, durable, transport_cfg_, 0);
 
 #ifdef OPENDDS_SECURITY
   participant_message_secure_writer_->set_crypto_handles(spdp_.crypto_handle());
   participant_message_secure_reader_->set_crypto_handles(spdp_.crypto_handle());
   if (bep & DDS::Security::BUILTIN_PARTICIPANT_MESSAGE_SECURE_WRITER) {
-    participant_message_secure_writer_->enable_transport_using_config(reliable, durable, transport_cfg_);
+    participant_message_secure_writer_->enable_transport_using_config(reliable, durable, transport_cfg_, 0);
   }
-  participant_message_secure_reader_->enable_transport_using_config(reliable, durable, transport_cfg_);
+  participant_message_secure_reader_->enable_transport_using_config(reliable, durable, transport_cfg_, 0);
 
-  participant_stateless_message_writer_->enable_transport_using_config(besteffort, nondurable, transport_cfg_);
-  participant_stateless_message_reader_->enable_transport_using_config(besteffort, nondurable, transport_cfg_);
+  participant_stateless_message_writer_->enable_transport_using_config(besteffort, nondurable, transport_cfg_, 0);
+  participant_stateless_message_reader_->enable_transport_using_config(besteffort, nondurable, transport_cfg_, 0);
 
   participant_volatile_message_secure_writer_->set_crypto_handles(spdp_.crypto_handle());
   participant_volatile_message_secure_reader_->set_crypto_handles(spdp_.crypto_handle());
-  participant_volatile_message_secure_writer_->enable_transport_using_config(reliable, nondurable, transport_cfg_);
-  participant_volatile_message_secure_reader_->enable_transport_using_config(reliable, nondurable, transport_cfg_);
+  participant_volatile_message_secure_writer_->enable_transport_using_config(reliable, nondurable, transport_cfg_, 0);
+  participant_volatile_message_secure_reader_->enable_transport_using_config(reliable, nondurable, transport_cfg_, 0);
 
   dcps_participant_secure_writer_->set_crypto_handles(spdp_.crypto_handle());
   dcps_participant_secure_reader_->set_crypto_handles(spdp_.crypto_handle());
-  dcps_participant_secure_writer_->enable_transport_using_config(reliable, durable, transport_cfg_);
-  dcps_participant_secure_reader_->enable_transport_using_config(reliable, durable, transport_cfg_);
+  dcps_participant_secure_writer_->enable_transport_using_config(reliable, durable, transport_cfg_, 0);
+  dcps_participant_secure_reader_->enable_transport_using_config(reliable, durable, transport_cfg_, 0);
 #endif
 
   if (bep & BUILTIN_ENDPOINT_TYPE_LOOKUP_REQUEST_DATA_WRITER) {
-    type_lookup_request_writer_->enable_transport_using_config(reliable, nondurable, transport_cfg_);
+    type_lookup_request_writer_->enable_transport_using_config(reliable, nondurable, transport_cfg_, 0);
   }
   if (bep & BUILTIN_ENDPOINT_TYPE_LOOKUP_REQUEST_DATA_READER) {
-    type_lookup_request_reader_->enable_transport_using_config(reliable, nondurable, transport_cfg_);
+    type_lookup_request_reader_->enable_transport_using_config(reliable, nondurable, transport_cfg_, 0);
   }
 
   if (bep & BUILTIN_ENDPOINT_TYPE_LOOKUP_REPLY_DATA_WRITER) {
-    type_lookup_reply_writer_->enable_transport_using_config(reliable, nondurable, transport_cfg_);
+    type_lookup_reply_writer_->enable_transport_using_config(reliable, nondurable, transport_cfg_, 0);
   }
   if (bep & BUILTIN_ENDPOINT_TYPE_LOOKUP_REPLY_DATA_READER) {
-    type_lookup_reply_reader_->enable_transport_using_config(reliable, nondurable, transport_cfg_);
+    type_lookup_reply_reader_->enable_transport_using_config(reliable, nondurable, transport_cfg_, 0);
   }
 
 #ifdef OPENDDS_SECURITY
   if (xbep & DDS::Security::TYPE_LOOKUP_SERVICE_REQUEST_WRITER_SECURE) {
     type_lookup_request_secure_writer_->set_crypto_handles(spdp_.crypto_handle());
-    type_lookup_request_secure_writer_->enable_transport_using_config(reliable, nondurable, transport_cfg_);
+    type_lookup_request_secure_writer_->enable_transport_using_config(reliable, nondurable, transport_cfg_, 0);
   }
   if (xbep & DDS::Security::TYPE_LOOKUP_SERVICE_REQUEST_READER_SECURE) {
     type_lookup_request_secure_reader_->set_crypto_handles(spdp_.crypto_handle());
-    type_lookup_request_secure_reader_->enable_transport_using_config(reliable, nondurable, transport_cfg_);
+    type_lookup_request_secure_reader_->enable_transport_using_config(reliable, nondurable, transport_cfg_, 0);
   }
 
   if (xbep & DDS::Security::TYPE_LOOKUP_SERVICE_REPLY_WRITER_SECURE) {
     type_lookup_reply_secure_writer_->set_crypto_handles(spdp_.crypto_handle());
-    type_lookup_reply_secure_writer_->enable_transport_using_config(reliable, nondurable, transport_cfg_);
+    type_lookup_reply_secure_writer_->enable_transport_using_config(reliable, nondurable, transport_cfg_, 0);
   }
   if (xbep & DDS::Security::TYPE_LOOKUP_SERVICE_REPLY_READER_SECURE) {
     type_lookup_reply_secure_reader_->set_crypto_handles(spdp_.crypto_handle());
-    type_lookup_reply_secure_reader_->enable_transport_using_config(reliable, nondurable, transport_cfg_);
+    type_lookup_reply_secure_reader_->enable_transport_using_config(reliable, nondurable, transport_cfg_, 0);
   }
 #endif
 
@@ -933,7 +933,7 @@ DCPS::LocatorSeq
 Sedp::unicast_locators() const
 {
   DCPS::TransportLocator trans_info;
-  transport_inst_->populate_locator(trans_info, DCPS::CONNINFO_UNICAST);
+  transport_inst_->populate_locator(trans_info, DCPS::CONNINFO_UNICAST, get_domain_id());
   return transport_locator_to_locator_seq(trans_info);
 }
 
@@ -941,7 +941,7 @@ DCPS::LocatorSeq
 Sedp::multicast_locators() const
 {
   DCPS::TransportLocator trans_info;
-  transport_inst_->populate_locator(trans_info, DCPS::CONNINFO_MULTICAST);
+  transport_inst_->populate_locator(trans_info, DCPS::CONNINFO_MULTICAST, get_domain_id());
   return transport_locator_to_locator_seq(trans_info);
 }
 
@@ -1694,101 +1694,101 @@ Sedp::update_locators(const ParticipantData_t& pdata)
 
   if (avail & DISC_BUILTIN_ENDPOINT_PARTICIPANT_ANNOUNCER) {
     remote_id.entityId = ENTITYID_SPDP_BUILTIN_PARTICIPANT_WRITER;
-    transport_inst_->update_locators(remote_id, remote_data);
+    transport_inst_->update_locators(remote_id, remote_data, get_domain_id(), 0);
   }
   if (avail & DISC_BUILTIN_ENDPOINT_PARTICIPANT_DETECTOR) {
     remote_id.entityId = ENTITYID_SPDP_BUILTIN_PARTICIPANT_READER;
-    transport_inst_->update_locators(remote_id, remote_data);
+    transport_inst_->update_locators(remote_id, remote_data, get_domain_id(), 0);
   }
   if (avail & DISC_BUILTIN_ENDPOINT_PUBLICATION_ANNOUNCER) {
     remote_id.entityId = ENTITYID_SEDP_BUILTIN_PUBLICATIONS_WRITER;
-    transport_inst_->update_locators(remote_id, remote_data);
+    transport_inst_->update_locators(remote_id, remote_data, get_domain_id(), 0);
   }
   if (avail & DISC_BUILTIN_ENDPOINT_PUBLICATION_DETECTOR) {
     remote_id.entityId = ENTITYID_SEDP_BUILTIN_PUBLICATIONS_READER;
-    transport_inst_->update_locators(remote_id, remote_data);
+    transport_inst_->update_locators(remote_id, remote_data, get_domain_id(), 0);
   }
   if (avail & DISC_BUILTIN_ENDPOINT_SUBSCRIPTION_ANNOUNCER) {
     remote_id.entityId = ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_WRITER;
-    transport_inst_->update_locators(remote_id, remote_data);
+    transport_inst_->update_locators(remote_id, remote_data, get_domain_id(), 0);
   }
   if (avail & DISC_BUILTIN_ENDPOINT_SUBSCRIPTION_DETECTOR) {
     remote_id.entityId = ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_READER;
-    transport_inst_->update_locators(remote_id, remote_data);
+    transport_inst_->update_locators(remote_id, remote_data, get_domain_id(), 0);
   }
   if (avail & BUILTIN_ENDPOINT_PARTICIPANT_MESSAGE_DATA_WRITER) {
     remote_id.entityId = ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_WRITER;
-    transport_inst_->update_locators(remote_id, remote_data);
+    transport_inst_->update_locators(remote_id, remote_data, get_domain_id(), 0);
   }
   if (avail & BUILTIN_ENDPOINT_PARTICIPANT_MESSAGE_DATA_READER) {
     remote_id.entityId = ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_READER;
-    transport_inst_->update_locators(remote_id, remote_data);
+    transport_inst_->update_locators(remote_id, remote_data, get_domain_id(), 0);
   }
   if (avail & BUILTIN_ENDPOINT_TYPE_LOOKUP_REQUEST_DATA_WRITER) {
     remote_id.entityId = ENTITYID_TL_SVC_REQ_WRITER;
-    transport_inst_->update_locators(remote_id, remote_data);
+    transport_inst_->update_locators(remote_id, remote_data, get_domain_id(), 0);
   }
   if (avail & BUILTIN_ENDPOINT_TYPE_LOOKUP_REQUEST_DATA_READER) {
     remote_id.entityId = ENTITYID_TL_SVC_REQ_READER;
-    transport_inst_->update_locators(remote_id, remote_data);
+    transport_inst_->update_locators(remote_id, remote_data, get_domain_id(), 0);
   }
   if (avail & BUILTIN_ENDPOINT_TYPE_LOOKUP_REPLY_DATA_WRITER) {
     remote_id.entityId = ENTITYID_TL_SVC_REPLY_WRITER;
-    transport_inst_->update_locators(remote_id, remote_data);
+    transport_inst_->update_locators(remote_id, remote_data, get_domain_id(), 0);
   }
   if (avail & BUILTIN_ENDPOINT_TYPE_LOOKUP_REPLY_DATA_READER) {
     remote_id.entityId = ENTITYID_TL_SVC_REPLY_READER;
-    transport_inst_->update_locators(remote_id, remote_data);
+    transport_inst_->update_locators(remote_id, remote_data, get_domain_id(), 0);
   }
 
 #ifdef OPENDDS_SECURITY
   if (avail & DDS::Security::SEDP_BUILTIN_PUBLICATIONS_SECURE_WRITER) {
     remote_id.entityId = ENTITYID_SEDP_BUILTIN_PUBLICATIONS_SECURE_WRITER;
-    transport_inst_->update_locators(remote_id, remote_data);
+    transport_inst_->update_locators(remote_id, remote_data, get_domain_id(), 0);
   }
   if (avail & DDS::Security::SEDP_BUILTIN_PUBLICATIONS_SECURE_READER) {
     remote_id.entityId = ENTITYID_SEDP_BUILTIN_PUBLICATIONS_SECURE_READER;
-    transport_inst_->update_locators(remote_id, remote_data);
+    transport_inst_->update_locators(remote_id, remote_data, get_domain_id(), 0);
   }
   if (avail & DDS::Security::SEDP_BUILTIN_SUBSCRIPTIONS_SECURE_WRITER) {
     remote_id.entityId = ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_SECURE_WRITER;
-    transport_inst_->update_locators(remote_id, remote_data);
+    transport_inst_->update_locators(remote_id, remote_data, get_domain_id(), 0);
   }
   if (avail & DDS::Security::SEDP_BUILTIN_SUBSCRIPTIONS_SECURE_READER) {
     remote_id.entityId = ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_SECURE_READER;
-    transport_inst_->update_locators(remote_id, remote_data);
+    transport_inst_->update_locators(remote_id, remote_data, get_domain_id(), 0);
   }
   if (avail & DDS::Security::BUILTIN_PARTICIPANT_MESSAGE_SECURE_WRITER) {
     remote_id.entityId = ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_SECURE_WRITER;
-    transport_inst_->update_locators(remote_id, remote_data);
+    transport_inst_->update_locators(remote_id, remote_data, get_domain_id(), 0);
   }
   if (avail & DDS::Security::BUILTIN_PARTICIPANT_MESSAGE_SECURE_READER) {
     remote_id.entityId = ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_SECURE_READER;
-    transport_inst_->update_locators(remote_id, remote_data);
+    transport_inst_->update_locators(remote_id, remote_data, get_domain_id(), 0);
   }
   if (avail & DDS::Security::BUILTIN_PARTICIPANT_STATELESS_MESSAGE_WRITER) {
     remote_id.entityId = ENTITYID_P2P_BUILTIN_PARTICIPANT_STATELESS_WRITER;
-    transport_inst_->update_locators(remote_id, remote_data);
+    transport_inst_->update_locators(remote_id, remote_data, get_domain_id(), 0);
   }
   if (avail & DDS::Security::BUILTIN_PARTICIPANT_STATELESS_MESSAGE_READER) {
     remote_id.entityId = ENTITYID_P2P_BUILTIN_PARTICIPANT_STATELESS_READER;
-    transport_inst_->update_locators(remote_id, remote_data);
+    transport_inst_->update_locators(remote_id, remote_data, get_domain_id(), 0);
   }
   if (avail & DDS::Security::BUILTIN_PARTICIPANT_VOLATILE_MESSAGE_SECURE_WRITER) {
     remote_id.entityId = ENTITYID_P2P_BUILTIN_PARTICIPANT_VOLATILE_SECURE_WRITER;
-    transport_inst_->update_locators(remote_id, remote_data);
+    transport_inst_->update_locators(remote_id, remote_data, get_domain_id(), 0);
   }
   if (avail & DDS::Security::BUILTIN_PARTICIPANT_VOLATILE_MESSAGE_SECURE_READER) {
     remote_id.entityId = ENTITYID_P2P_BUILTIN_PARTICIPANT_VOLATILE_SECURE_READER;
-    transport_inst_->update_locators(remote_id, remote_data);
+    transport_inst_->update_locators(remote_id, remote_data, get_domain_id(), 0);
   }
   if (avail & DDS::Security::SPDP_BUILTIN_PARTICIPANT_SECURE_WRITER) {
     remote_id.entityId = ENTITYID_SPDP_RELIABLE_BUILTIN_PARTICIPANT_SECURE_WRITER;
-    transport_inst_->update_locators(remote_id, remote_data);
+    transport_inst_->update_locators(remote_id, remote_data, get_domain_id(), 0);
   }
   if (avail & DDS::Security::SPDP_BUILTIN_PARTICIPANT_SECURE_READER) {
     remote_id.entityId = ENTITYID_SPDP_RELIABLE_BUILTIN_PARTICIPANT_SECURE_READER;
-    transport_inst_->update_locators(remote_id, remote_data);
+    transport_inst_->update_locators(remote_id, remote_data, get_domain_id(), 0);
   }
 
   const DDS::Security::ExtendedBuiltinEndpointSet_t& extended_avail =
@@ -1796,19 +1796,19 @@ Sedp::update_locators(const ParticipantData_t& pdata)
 
   if (extended_avail & DDS::Security::TYPE_LOOKUP_SERVICE_REQUEST_WRITER_SECURE) {
     remote_id.entityId = ENTITYID_TL_SVC_REQ_WRITER_SECURE;
-    transport_inst_->update_locators(remote_id, remote_data);
+    transport_inst_->update_locators(remote_id, remote_data, get_domain_id(), 0);
   }
   if (extended_avail & DDS::Security::TYPE_LOOKUP_SERVICE_REQUEST_READER_SECURE) {
     remote_id.entityId = ENTITYID_TL_SVC_REQ_READER_SECURE;
-    transport_inst_->update_locators(remote_id, remote_data);
+    transport_inst_->update_locators(remote_id, remote_data, get_domain_id(), 0);
   }
   if (extended_avail & DDS::Security::TYPE_LOOKUP_SERVICE_REPLY_WRITER_SECURE) {
     remote_id.entityId = ENTITYID_TL_SVC_REPLY_WRITER_SECURE;
-    transport_inst_->update_locators(remote_id, remote_data);
+    transport_inst_->update_locators(remote_id, remote_data, get_domain_id(), 0);
   }
   if (extended_avail & DDS::Security::TYPE_LOOKUP_SERVICE_REPLY_READER_SECURE) {
     remote_id.entityId = ENTITYID_TL_SVC_REPLY_READER_SECURE;
-    transport_inst_->update_locators(remote_id, remote_data);
+    transport_inst_->update_locators(remote_id, remote_data, get_domain_id(), 0);
   }
 #endif
 }
@@ -3171,7 +3171,7 @@ Sedp::signal_liveliness_secure(DDS::LivelinessQosPolicyKind kind)
 #endif
 
 DCPS::WeakRcHandle<ICE::Endpoint> Sedp::get_ice_endpoint() {
-  return transport_inst_->get_ice_endpoint();
+  return transport_inst_->get_ice_endpoint(get_domain_id(), 0);
 }
 
 Sedp::Endpoint::~Endpoint()
@@ -5591,10 +5591,6 @@ Sedp::handle_datareader_crypto_tokens(const DDS::Security::ParticipantVolatileMe
   return true;
 }
 
-DDS::DomainId_t Sedp::get_domain_id() const {
-  return spdp_.get_domain_id();
-}
-
 void Sedp::resend_user_crypto_tokens(const GUID_t& id)
 {
   const GUID_t remote_participant = make_id(id, ENTITYID_PARTICIPANT);
@@ -5667,6 +5663,10 @@ void Sedp::resend_user_crypto_tokens(const GUID_t& id)
   }
 }
 #endif
+
+DDS::DomainId_t Sedp::get_domain_id() const {
+  return spdp_.get_domain_id();
+}
 
 void
 Sedp::add_assoc_i(const DCPS::GUID_t& local_guid, const LocalPublication& lpub,
@@ -6029,7 +6029,7 @@ Sedp::stun_server_address(const NetworkAddress& address)
 void
 Sedp::append_transport_statistics(DCPS::TransportStatisticsSequence& seq)
 {
-  transport_inst_->append_transport_statistics(seq);
+  transport_inst_->append_transport_statistics(seq, get_domain_id(), 0);
 }
 
 bool locators_changed(const ParticipantProxy_t& x,
@@ -7098,9 +7098,9 @@ void Sedp::populate_origination_locator(const GUID_t& id, DCPS::TransportLocator
     RTPS::message_block_to_sequence(mb_locator, tl.data);
   } else {
     if (conv.isReader()) {
-      transport_inst_->get_last_recv_locator(make_id(id, ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_WRITER), tl);
+      transport_inst_->get_last_recv_locator(make_id(id, ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_WRITER), tl, get_domain_id(), 0);
     } else {
-      transport_inst_->get_last_recv_locator(make_id(id, ENTITYID_SEDP_BUILTIN_PUBLICATIONS_WRITER), tl);
+      transport_inst_->get_last_recv_locator(make_id(id, ENTITYID_SEDP_BUILTIN_PUBLICATIONS_WRITER), tl, get_domain_id(), 0);
     }
   }
 }

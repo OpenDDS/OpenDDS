@@ -45,8 +45,9 @@ RtpsUdpCore::RtpsUdpCore(const RtpsUdpInst_rch& inst)
   , relay_stun_task_falloff_(TimeDuration::zero_value)
 {}
 
-RtpsUdpTransport::RtpsUdpTransport(const RtpsUdpInst_rch& inst)
-  : TransportImpl(inst)
+RtpsUdpTransport::RtpsUdpTransport(const RtpsUdpInst_rch& inst,
+                                   DDS::DomainId_t domain)
+  : TransportImpl(inst, domain)
 #if defined(OPENDDS_SECURITY)
   , local_crypto_handle_(DDS::HANDLE_NIL)
 #endif
@@ -341,7 +342,7 @@ RtpsUdpTransport::connection_info_i(TransportLocator& info, ConnectionInfoFlags 
 {
   RtpsUdpInst_rch cfg = config();
   if (cfg) {
-    cfg->populate_locator(info, flags);
+    cfg->populate_locator(info, flags, domain_);
     return true;
   }
   return false;
