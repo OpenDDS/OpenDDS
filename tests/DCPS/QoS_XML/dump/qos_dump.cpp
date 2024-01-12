@@ -101,7 +101,7 @@ int ACE_TMAIN (int, ACE_TCHAR *[])
               ++retval;
             }
 
-          if (tp_qos.durability_service.history_kind != 1)
+          if (tp_qos.durability_service.history_kind != DDS::KEEP_LAST_HISTORY_QOS)
           {
             ACE_ERROR ((LM_ERROR, "PARSEXML - "
                   "get_topic_qos returned an invalid type durability_service history_kind.\n"));
