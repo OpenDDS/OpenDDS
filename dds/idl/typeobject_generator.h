@@ -80,6 +80,7 @@ private:
 #endif
   void generate_alias_type_identifier(AST_Type* type);
   void generate_primitive_type_identifier(AST_Type* type);
+
   void update_maps(AST_Type* type,
                    const OpenDDS::XTypes::TypeObject& minimal_to,
                    const OpenDDS::XTypes::TypeObject& complete_to);
