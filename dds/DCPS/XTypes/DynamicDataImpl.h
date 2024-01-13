@@ -11,6 +11,7 @@
 
 #  include <dds/DCPS/FilterEvaluator.h>
 #  include <dds/DCPS/Sample.h>
+#  include <dds/DCPS/ValueWriter.h>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -707,6 +708,24 @@ bool serialized_size(const Encoding& encoding, size_t& size, const KeyOnly<DDS::
 
 OpenDDS_Dcps_Export
 bool operator<<(Serializer& ser, const KeyOnly<DDS::DynamicData_ptr>& key);
+
+template <typename T>
+void write_enum(ValueWriter& vw, const DDS::DynamicType_var& enum_type, T enum_val)
+{
+  const DDS::MemberId enumerator_id = static_cast<DDS::MemberId>(enum_val);
+  DDS::DynamicTypeMember_var dtm;
+  if (enum_type->get_member(dtm, enumerator_id) != DDS::RETCODE_OK) {
+    return;
+  }
+  DDS::MemberDescriptor_var md;
+  if (dtm->get_descriptor(md) != DDS::RETCODE_OK) {
+    return;
+  }
+  vw.write_enum(md->name(), enum_val);
+}
+
+OpenDDS_Dcps_Export
+void vwrite(ValueWriter& vw, DDS::DynamicData_ptr value);
 }
 
 } // namespace OpenDDS

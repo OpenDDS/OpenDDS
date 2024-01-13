@@ -1457,7 +1457,7 @@ TEST(dds_DCPS_Qos_Helper, DataWriterQosBuilder_Publisher_ctor)
   qos.reliability_best_effort();
   OpenDDS::DCPS::RcHandle<OpenDDS::Test::MockPublisher> publisher = OpenDDS::DCPS::make_rch<OpenDDS::Test::MockPublisher>();
   EXPECT_CALL(*publisher, get_default_datawriter_qos(testing::_))
-    .WillOnce(DoAll(testing::SetArgReferee<0>(qos.qos()), testing::Return(DDS::RETCODE_OK)));
+    .WillOnce(testing::DoAll(testing::SetArgReferee<0>(qos.qos()), testing::Return(DDS::RETCODE_OK)));
   DDS::Publisher_var publisher_var = DDS::Publisher::_duplicate(publisher.in());
   OpenDDS::DCPS::DataWriterQosBuilder uut(publisher_var);
   EXPECT_EQ(qos, uut);
@@ -1513,12 +1513,12 @@ TEST(dds_DCPS_Qos_Helper, DataWriterQosBuilder_Topic_ctor)
 
   OpenDDS::DCPS::RcHandle<OpenDDS::Test::MockTopic> topic = OpenDDS::DCPS::make_rch<OpenDDS::Test::MockTopic>();
   EXPECT_CALL(*topic, get_qos(testing::_))
-    .WillOnce(DoAll(testing::SetArgReferee<0>(topic_qos.qos()), testing::Return(DDS::RETCODE_OK)));
+    .WillOnce(testing::DoAll(testing::SetArgReferee<0>(topic_qos.qos()), testing::Return(DDS::RETCODE_OK)));
   DDS::Topic_var topic_var = DDS::Topic::_duplicate(topic.in());
 
   OpenDDS::DCPS::RcHandle<OpenDDS::Test::MockPublisher> publisher = OpenDDS::DCPS::make_rch<OpenDDS::Test::MockPublisher>();
   EXPECT_CALL(*publisher, get_default_datawriter_qos(testing::_))
-    .WillOnce(DoAll(testing::SetArgReferee<0>(datawriter_qos.qos()), testing::Return(DDS::RETCODE_OK)));
+    .WillOnce(testing::DoAll(testing::SetArgReferee<0>(datawriter_qos.qos()), testing::Return(DDS::RETCODE_OK)));
   EXPECT_CALL(*publisher, copy_from_topic_qos(testing::_, testing::_))
     .WillOnce(testing::DoAll(testing::Invoke(copy_from_topic1), testing::Return(DDS::RETCODE_OK)));
   DDS::Publisher_var publisher_var = DDS::Publisher::_duplicate(publisher.in());
@@ -1927,7 +1927,7 @@ TEST(dds_DCPS_Qos_Helper, DataReaderQosBuilder_Subscriber_ctor)
   qos.reliability_best_effort();
   OpenDDS::DCPS::RcHandle<OpenDDS::Test::MockSubscriber> subscriber = OpenDDS::DCPS::make_rch<OpenDDS::Test::MockSubscriber>();
   EXPECT_CALL(*subscriber, get_default_datareader_qos(testing::_))
-    .WillOnce(DoAll(testing::SetArgReferee<0>(qos.qos()), testing::Return(DDS::RETCODE_OK)));
+    .WillOnce(testing::DoAll(testing::SetArgReferee<0>(qos.qos()), testing::Return(DDS::RETCODE_OK)));
   DDS::Subscriber_var subscriber_var = DDS::Subscriber::_duplicate(subscriber.in());
   OpenDDS::DCPS::DataReaderQosBuilder uut(subscriber_var);
   EXPECT_EQ(qos, uut);
@@ -1979,12 +1979,12 @@ TEST(dds_DCPS_Qos_Helper, DataReaderQosBuilder_Topic_ctor)
 
   OpenDDS::DCPS::RcHandle<OpenDDS::Test::MockTopic> topic = OpenDDS::DCPS::make_rch<OpenDDS::Test::MockTopic>();
   EXPECT_CALL(*topic, get_qos(testing::_))
-    .WillOnce(DoAll(testing::SetArgReferee<0>(topic_qos.qos()), testing::Return(DDS::RETCODE_OK)));
+    .WillOnce(testing::DoAll(testing::SetArgReferee<0>(topic_qos.qos()), testing::Return(DDS::RETCODE_OK)));
   DDS::Topic_var topic_var = DDS::Topic::_duplicate(topic.in());
 
   OpenDDS::DCPS::RcHandle<OpenDDS::Test::MockSubscriber> subscriber = OpenDDS::DCPS::make_rch<OpenDDS::Test::MockSubscriber>();
   EXPECT_CALL(*subscriber, get_default_datareader_qos(testing::_))
-    .WillOnce(DoAll(testing::SetArgReferee<0>(datareader_qos.qos()), testing::Return(DDS::RETCODE_OK)));
+    .WillOnce(testing::DoAll(testing::SetArgReferee<0>(datareader_qos.qos()), testing::Return(DDS::RETCODE_OK)));
   EXPECT_CALL(*subscriber, copy_from_topic_qos(testing::_, testing::_))
     .WillOnce(testing::DoAll(testing::Invoke(copy_from_topic2), testing::Return(DDS::RETCODE_OK)));
   DDS::Subscriber_var subscriber_var = DDS::Subscriber::_duplicate(subscriber.in());

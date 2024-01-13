@@ -58,7 +58,8 @@ public:
   void release();
 
   TransportInst_rch create_inst(const OPENDDS_STRING& name,
-                                const OPENDDS_STRING& transport_type);
+                                const OPENDDS_STRING& transport_type,
+                                bool is_template = false);
   TransportInst_rch get_inst(const OPENDDS_STRING& name) const;
 
   /// Removing a TransportInst from the registry shuts down the underlying
@@ -104,10 +105,9 @@ public:
                                    ACE_Configuration_Heap& cf);
 
   /// For internal use by OpenDDS DCPS layer:
-  /// Process the transport_template configuration in the
-  /// ACE_Configuration_Heap object.
+  /// Process the transport_template configuration.
   /// Called by the Service_Participant at initialization time.
-  int load_transport_templates(ACE_Configuration_Heap& cf);
+  int load_transport_templates();
 
   /// For internal use by OpenDDS DCPS layer:
   /// If the default config is empty when it's about to be used, allow the
@@ -165,13 +165,27 @@ private:
   static const OPENDDS_STRING CUSTOM_ADD_DOMAIN_TO_IP;
   static const OPENDDS_STRING CUSTOM_ADD_DOMAIN_TO_PORT;
 
-  struct TransportTemplate
-  {
-    OPENDDS_STRING transport_template_name;
-    OPENDDS_STRING config_name;
-    bool instantiate_per_participant;
-    ValueMap customizations;
-    ValueMap transport_info;
+  class TransportTemplate {
+  public:
+    TransportTemplate(const String& transport_template_name)
+      : transport_template_name_(transport_template_name)
+      , config_prefix_(ConfigPair::canonicalize(String("OPENDDS_TRANSPORT_TEMPLATE_") + transport_template_name))
+    {}
+
+    const String& transport_template_name() const { return transport_template_name_; }
+    const String& config_prefix() const { return config_prefix_; }
+    bool instantiate_per_participant(RcHandle<ConfigStoreImpl> config_store) const;
+    DCPS::ConfigStoreImpl::StringMap customizations(RcHandle<ConfigStoreImpl> config_store) const;
+    DCPS::ConfigStoreImpl::StringMap transport_info(RcHandle<ConfigStoreImpl> config_store) const;
+
+  private:
+    String config_key(const String& key) const
+    {
+      return ConfigPair::canonicalize(config_prefix_ + "_" + key);
+    }
+
+    String transport_template_name_;
+    String config_prefix_;
   };
 
   TransportType_rch load_transport_lib_i(const OPENDDS_STRING& transport_type);

@@ -75,6 +75,8 @@ public:
     return ConfigPair::canonicalize(config_prefix_ + "_" + key);
   }
 
+  bool is_template() const { return is_template_; }
+
   /// Overwrite the default configurations with the configuration from the
   /// given section in the ACE_Configuration_Heap object.
   virtual int load(ACE_Configuration_Heap& cf,
@@ -199,7 +201,8 @@ public:
 protected:
 
   TransportInst(const char* type,
-                const OPENDDS_STRING& name);
+                const OPENDDS_STRING& name,
+                bool is_template = false);
 
   virtual ~TransportInst();
 
@@ -220,6 +223,7 @@ private:
 
   const String name_;
   const String config_prefix_;
+  const bool is_template_;
 
   TransportImpl_rch impl_;
 };

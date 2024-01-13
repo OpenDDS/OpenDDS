@@ -1,5 +1,6 @@
 project: dcpsexe, dcps_test, googletest, rapidjson {
 
+  dcps_ts_flags += -Gxtypes-complete
   exename = *
 
   requires += no_opendds_safety_profile
