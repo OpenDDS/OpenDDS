@@ -1287,8 +1287,8 @@ namespace {
           be_global->impl_ <<
             type_to_default("        ", val, value_access) <<
             "        strm.set_construction_status(Serializer::ConstructionSuccessful);\n";
-        } else if ((val_try_construct == tryconstructfailaction_trim)) {
-          // TODO Skip this for now
+        } else if (val_try_construct == tryconstructfailaction_trim) {
+          // Skip this for now
           be_global->warning("TryConstruct::Trim not currently supported");
         } else {
           //discard/default

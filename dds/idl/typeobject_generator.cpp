@@ -1362,52 +1362,56 @@ typeobject_generator::generate_array_type_identifier(AST_Type* type, bool force_
   }
 }
 
+#if OPENDDS_HAS_MAP
 void
 typeobject_generator::generate_map_type_identifier(AST_Type* type, bool force_type_object)
 {
-#if OPENDDS_HAS_MAP
   AST_Map* const n = dynamic_cast<AST_Map*>(type);
-  // TODO (tyler) This needs to be completed
 
-  // const TryConstructFailAction trycon = be_global->try_construct(n->key_type());
-  // OpenDDS::XTypes::CollectionElementFlag cef = try_construct_to_member_flag(trycon);
-  // if (be_global->is_external(n->key_type())) {
-  //   cef |= OpenDDS::XTypes::IS_EXTERNAL;
-  // }
+  // I'm not sure if this is setup for maps
+  ACE_CDR::ULong bound = 0;
+  if (!n->unbounded()) {
+    bound = n->max_size()->ev()->u.ulval;
+  }
+
+  const TryConstructFailAction trykey = be_global->try_construct(n->key_type());
+  const TryConstructFailAction tryval = be_global->try_construct(n->value_type());
+  OpenDDS::XTypes::CollectionElementFlag cef_key = try_construct_to_member_flag(trykey);
+  if (be_global->is_external(n->key_type())) {
+    cef_key |= OpenDDS::XTypes::IS_EXTERNAL;
+  }
+  OpenDDS::XTypes::CollectionElementFlag cef_val = try_construct_to_member_flag(tryval);
+  if (be_global->is_external(n->value_type())) {
+    cef_val |= OpenDDS::XTypes::IS_EXTERNAL;
+  }
+
   const OpenDDS::XTypes::TypeIdentifier minimal_key_ti = get_minimal_type_identifier(n->key_type());
+  const OpenDDS::XTypes::TypeIdentifier minimal_val_ti = get_minimal_type_identifier(n->value_type());
   const OpenDDS::XTypes::TypeIdentifier complete_key_ti = get_complete_type_identifier(n->key_type());
+  const OpenDDS::XTypes::TypeIdentifier complete_val_ti = get_complete_type_identifier(n->value_type());
 
   if (be_global->is_plain(type) && !force_type_object) {
-    const OpenDDS::XTypes::EquivalenceKind key_minimal_ek =
-      OpenDDS::XTypes::is_fully_descriptive(minimal_key_ti) ? OpenDDS::XTypes::EK_BOTH : OpenDDS::XTypes::EK_MINIMAL;
-    const OpenDDS::XTypes::EquivalenceKind key_complete_ek =
-    key_minimal_ek == OpenDDS::XTypes::EK_BOTH ? key_minimal_ek : OpenDDS::XTypes::EK_COMPLETE;
-    OpenDDS::XTypes::TypeIdentifier complete_ti(OpenDDS::XTypes::TI_PLAIN_MAP_SMALL);
-    // complete_ti.map_sdefn().header.equiv_kind = key_complete_ek;
-    // complete_ti.map_sdefn().header.element_flags = cef;
-    // complete_ti.map_sdefn().bound = bound;
-    // complete_ti.map_sdefn().element_identifier = complete_elem_ti;
-
-    const TypeIdentifierPair ti_pair = {minimal_key_ti, complete_key_ti};
-    hash_type_identifier_map_[type] = ti_pair;
+    // TODO(tmayoff)
   } else {
     OpenDDS::XTypes::TypeObject minimal_to, complete_to;
-  //   minimal_to.kind = OpenDDS::XTypes::EK_MINIMAL;
-  //   minimal_to.minimal.kind = OpenDDS::XTypes::TK_SEQUENCE;
-  //   minimal_to.minimal.sequence_type.header.common.bound = bound;
-  //   minimal_to.minimal.sequence_type.element.common.element_flags = cef;
-  //   minimal_to.minimal.sequence_type.element.common.type = minimal_elem_ti;
+    minimal_to.kind = OpenDDS::XTypes::EK_MINIMAL;
+    minimal_to.minimal.kind = OpenDDS::XTypes::TK_MAP;
+    minimal_to.minimal.map_type.key.common.type = minimal_key_ti;
+    minimal_to.minimal.map_type.key.common.element_flags = cef_key;
+    minimal_to.minimal.map_type.element.common.type = minimal_val_ti;
+    minimal_to.minimal.map_type.element.common.element_flags = cef_val;
 
-  //   complete_to.kind = OpenDDS::XTypes::EK_COMPLETE;
-  //   complete_to.complete.kind = OpenDDS::XTypes::TK_SEQUENCE;
-  //   complete_to.complete.sequence_type.header.common.bound = bound;
-  //   complete_to.complete.sequence_type.element.common.element_flags = cef;
-  //   complete_to.complete.sequence_type.element.common.type = complete_elem_ti;
+    complete_to.kind = OpenDDS::XTypes::EK_COMPLETE;
+    complete_to.complete.kind = OpenDDS::XTypes::TK_MAP;
+    complete_to.complete.map_type.key.common.element_flags = cef_key;
+    complete_to.complete.map_type.key.common.type = complete_key_ti;
+    complete_to.complete.map_type.element.common.element_flags = cef_val;
+    complete_to.complete.map_type.element.common.type = complete_val_ti;
 
     update_maps(type, minimal_to, complete_to);
   }
-#endif
 }
+#endif
 
 void
 typeobject_generator::generate_sequence_type_identifier(AST_Type* type, bool force_type_object)
