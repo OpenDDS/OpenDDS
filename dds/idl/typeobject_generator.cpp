@@ -1369,10 +1369,10 @@ typeobject_generator::generate_map_type_identifier(AST_Type* type, bool force_ty
   AST_Map* const n = dynamic_cast<AST_Map*>(type);
 
   // I'm not sure if this is setup for maps
-  ACE_CDR::ULong bound = 0;
-  if (!n->unbounded()) {
-    bound = n->max_size()->ev()->u.ulval;
-  }
+  // ACE_CDR::ULong bound = 0;
+  // if (!n->unbounded()) {
+  //   bound = n->max_size()->ev()->u.ulval;
+  // }
 
   const TryConstructFailAction trykey = be_global->try_construct(n->key_type());
   const TryConstructFailAction tryval = be_global->try_construct(n->value_type());
@@ -1400,8 +1400,8 @@ typeobject_generator::generate_map_type_identifier(AST_Type* type, bool force_ty
 
     const OpenDDS::XTypes::EquivalenceKind key_complete_ek =
       key_minimal_ek == OpenDDS::XTypes::EK_BOTH ? key_minimal_ek : OpenDDS::XTypes::EK_COMPLETE;
-    const OpenDDS::XTypes::EquivalenceKind val_complete_ek =
-      val_minimal_ek == OpenDDS::XTypes::EK_BOTH ? val_minimal_ek : OpenDDS::XTypes::EK_COMPLETE;
+    //const OpenDDS::XTypes::EquivalenceKind val_complete_ek =
+      //val_minimal_ek == OpenDDS::XTypes::EK_BOTH ? val_minimal_ek : OpenDDS::XTypes::EK_COMPLETE;
 
     OpenDDS::XTypes::TypeIdentifier minimal_ti(OpenDDS::XTypes::TI_PLAIN_MAP_LARGE);
     minimal_ti.map_sdefn().header.element_flags = cef_key;
@@ -1415,7 +1415,8 @@ typeobject_generator::generate_map_type_identifier(AST_Type* type, bool force_ty
     complete_ti.map_sdefn().key_identifier = complete_key_ti;
     complete_ti.map_sdefn().element_identifier = complete_val_ti;
 
-    hash_type_identifier_map_[type] = {minimal_ti, complete_ti};
+    const TypeIdentifierPair ti_pair = {minimal_ti, complete_ti};
+    hash_type_identifier_map_[type] = ti_pair;
 
   } else {
     OpenDDS::XTypes::TypeObject minimal_to, complete_to;

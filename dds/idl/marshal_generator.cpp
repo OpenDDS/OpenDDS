@@ -924,11 +924,11 @@ namespace {
       }
     }
 
-    std::string tempvar = "tempvar";
-    // be_global->impl_ <<
-    //   indent << "if (encoding.xcdr_version() == Encoding::XCDR_VERSION_2) {\n" <<
-    //   indent << "  strm.skip(end_of_map - strm.rpos());\n" <<
-    //   indent << "} else {\n";
+   std::string tempvar = "tempvar";
+   // be_global->impl_ <<
+   //    indent << "if (encoding.xcdr_version() == Encoding::XCDR_VERSION_2) {\n" <<
+   //    indent << "  strm.skip(end_of_map - strm.rpos());\n" <<
+   //    indent << "} else {\n";
 
     const bool classic_array_copy = !use_cxx11 && (cls & CL_ARRAY);
 
