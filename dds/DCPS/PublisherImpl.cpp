@@ -99,6 +99,27 @@ PublisherImpl::create_datawriter(
     DDS::DataWriterListener_ptr a_listener,
     DDS::StatusMask             mask)
 {
+  if (!a_topic) {
+    if (log_level >= LogLevel::Notice) {
+      ACE_ERROR((LM_NOTICE,
+                 "(%P|%t) NOTICE: PublisherImpl::create_datawriter: "
+                 "topic is nil\n"));
+    }
+    return 0;
+  }
+
+  DDS::DomainParticipant_var my_participant = get_participant();
+  DDS::DomainParticipant_var topic_participant = a_topic->get_participant();
+
+  if (my_participant != topic_participant) {
+    if (log_level >= LogLevel::Notice) {
+      ACE_ERROR((LM_NOTICE,
+                 "(%P|%t) NOTICE: PublisherImpl::create_datawriter: "
+                 "topic does not belong to same participant\n"));
+    }
+    return 0;
+  }
+
   DDS::DataWriterQos dw_qos;
 
   if (!validate_datawriter_qos(qos, default_datawriter_qos_, a_topic, dw_qos)) {

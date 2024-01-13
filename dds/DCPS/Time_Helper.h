@@ -43,6 +43,9 @@ ACE_INLINE OpenDDS_Dcps_Export
 DDS::Duration_t time_value_to_duration(const ACE_Time_Value& tv);
 
 ACE_INLINE OpenDDS_Dcps_Export
+double time_value_to_double(const ACE_Time_Value& tv);
+
+ACE_INLINE OpenDDS_Dcps_Export
 DDS::Duration_t time_to_duration(const DDS::Time_t& t);
 
 /// Validate DDS::Duration_t value (infinite or positive and

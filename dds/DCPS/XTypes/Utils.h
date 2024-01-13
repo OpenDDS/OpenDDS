@@ -8,6 +8,7 @@
 
 #ifndef OPENDDS_SAFETY_PROFILE
 #  include <dds/DCPS/Serializer.h>
+#  include <dds/DCPS/Sample.h>
 
 #  include <dds/DdsDynamicDataC.h>
 
@@ -219,6 +220,23 @@ OpenDDS_Dcps_Export DDS::ReturnCode_t copy_member(
   DDS::DynamicData_ptr dest, DDS::MemberId dest_id,
   DDS::DynamicData_ptr src, DDS::MemberId src_id);
 OpenDDS_Dcps_Export DDS::ReturnCode_t copy(DDS::DynamicData_ptr dest, DDS::DynamicData_ptr src);
+
+DDS::ReturnCode_t get_selected_union_branch(
+  DDS::DynamicType_var union_type, DDS::Int32 disc, bool& found_selected_member,
+  DDS::MemberDescriptor_var& selected_md);
+bool has_explicit_keys(DDS::DynamicType* dt);
+
+inline bool exclude_member(DCPS::Sample::Extent ext, bool is_key, bool has_explicit_keys)
+{
+  // see Fields::Iterator and explicit_keys_only() in opendds_idl's dds_generator.h
+  const bool explicit_keys_only = ext == DCPS::Sample::KeyOnly || (ext == DCPS::Sample::NestedKeyOnly && has_explicit_keys);
+  return explicit_keys_only && !is_key;
+}
+
+inline DCPS::Sample::Extent nested(DCPS::Sample::Extent ext)
+{
+  return ext == DCPS::Sample::KeyOnly ? DCPS::Sample::NestedKeyOnly : ext;
+}
 
 } // namespace XTypes
 } // namespace OpenDDS

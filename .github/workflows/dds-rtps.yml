@@ -10,7 +10,7 @@ concurrency:
 jobs:
 
   Linux:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     steps:
     - name: checkout OpenDDS
       uses: actions/checkout@v4
@@ -49,7 +49,7 @@ jobs:
         cd OpenDDS
         ./configure --optimize --no-debug --static --no-inline
         tools/scripts/show_build_config.pl
-    - uses: ammaraskar/gcc-problem-matcher@0.1
+    - uses: ammaraskar/gcc-problem-matcher@0.2.0
     - name: build OpenDDS
       shell: bash
       run: |
@@ -63,7 +63,7 @@ jobs:
         mwc.pl -type gnuace
         make -sj4
     - name: upload shape_main artifact
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: ${{ github.job }}_artifact
         path: dds-rtps/srcCxx/shape_main

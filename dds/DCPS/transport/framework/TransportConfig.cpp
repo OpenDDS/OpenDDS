@@ -51,6 +51,19 @@ TransportConfig::populate_locators(TransportLocatorSeq& trans_info) const
   }
 }
 
+bool
+TransportConfig::uses_template() const
+{
+  for (InstancesType::const_iterator pos = instances_.begin(), limit = instances_.end();
+       pos != limit;
+       ++pos) {
+    if ((*pos)->is_template()) {
+      return true;
+    }
+  }
+  return false;
+}
+
 }
 }
 

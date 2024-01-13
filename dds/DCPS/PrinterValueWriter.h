@@ -76,6 +76,7 @@ public:
   void write_string(const ACE_CDR::Char* value, size_t length);
   void write_wstring(const ACE_CDR::WChar* value, size_t length);
   void write_enum(const char* /*name*/, ACE_CDR::Long value);
+  void write_absent_value();
 
   std::string str() const
   {
@@ -273,6 +274,11 @@ void PrinterValueWriter::write_enum(const char* name,
                                     ACE_CDR::Long value)
 {
   stream_ << name << " (" << value << ")";
+}
+
+void PrinterValueWriter::write_absent_value()
+{
+  stream_ << "null";
 }
 
 } // namespace DCPS

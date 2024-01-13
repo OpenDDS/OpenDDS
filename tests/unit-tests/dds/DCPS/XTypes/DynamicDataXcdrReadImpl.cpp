@@ -601,8 +601,7 @@ void verify_int32_union(DDS::DynamicData_ptr data)
   DDS::DynamicData_var disc_data;
   ret = data->get_complex_value(disc_data, disc_id);
   ASSERT_RC_OK(ret);
-  const XTypes::MemberId any_id = 100;
-  ret = disc_data->get_int32_value(disc_val, any_id);
+  ret = disc_data->get_int32_value(disc_val, XTypes::MEMBER_ID_INVALID);
   ASSERT_RC_OK(ret);
   EXPECT_EQ(disc_val, E_INT32);
 }
@@ -627,8 +626,7 @@ void verify_uint32_union(DDS::DynamicData_ptr data)
   DDS::DynamicData_var disc_data;
   ret = data->get_complex_value(disc_data, disc_id);
   ASSERT_RC_OK(ret);
-  const XTypes::MemberId any_id = 100;
-  ret = disc_data->get_int32_value(disc_val, any_id);
+  ret = disc_data->get_int32_value(disc_val, XTypes::MEMBER_ID_INVALID);
   ASSERT_RC_OK(ret);
   EXPECT_EQ(disc_val, E_UINT32);
 }
@@ -878,7 +876,7 @@ TEST(dds_DCPS_XTypes_DynamicDataXcdrReadImpl, Mutable_ReadValueFromStruct)
     0x00,0x00,0x00,0x06, 0,0x61,0,0x62,0,0x63 // +4+4+10=198 wstr
   };
   ACE_Message_Block msg(1024);
-  msg.copy((const char*)single_value_struct, sizeof(single_value_struct));
+  msg.copy((const char*)single_value_struct, sizeof single_value_struct);
   XTypes::DynamicDataXcdrReadImpl data(&msg, xcdr2, dt);
 
   verify_single_value_struct<MutableSingleValueStruct>(&data);

@@ -49,6 +49,8 @@ public:
 
   void populate_locators(OpenDDS::DCPS::TransportLocatorSeq& trans_info) const;
 
+  bool uses_template() const;
+
 private:
   friend class TransportRegistry;
   template <typename T, typename U>

@@ -71,6 +71,14 @@ public:
     Identifier
   };
 
+  IdlToken()
+  : kind_(Error)
+  , signed_(false)
+  , integer_value_(0)
+  , exponent_signed_(false)
+  , exponent_value_(0)
+  {}
+
   static IdlToken make_error()
   {
     IdlToken token;

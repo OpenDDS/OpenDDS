@@ -138,7 +138,7 @@ Embedded/Mobile/IoT:
 
 We have built OpenDDS for VxWorks 6.9, 7, and 21.03 and have run basic
 system and performance tests (but not the entire regression test suite).
-Please contact sales@objectcomputing.com or opendds-main@lists.sourceforge.net
+Please see the [OpenDDS Support page](https://opendds.org/support.html)
 for more information on support for ACE, TAO, and OpenDDS on VxWorks.
 Download VxWorks RPM packages for ACE, TAO, and OpenDDS [here](https://objectcomputing.com/products/opendds/vxworks).
 

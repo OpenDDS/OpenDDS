@@ -41,10 +41,6 @@ public:
   DDS::ReturnCode_t get_uint64_value(DDS::UInt64& value, DDS::MemberId id);
   virtual DDS::ReturnCode_t get_uint64_value_impl(DDS::UInt64& value, DDS::MemberId id) = 0;
 
-  static bool has_explicit_keys(DDS::DynamicType* dt);
-  static bool exclude_member(DCPS::Sample::Extent ext, bool is_key, bool has_explicit_keys);
-  static DCPS::Sample::Extent nested(DCPS::Sample::Extent ext);
-
 #ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
   virtual DDS::ReturnCode_t get_simple_value(DCPS::Value& value, DDS::MemberId id);
 #endif
@@ -73,8 +69,6 @@ protected:
 
   static DDS::MemberId get_union_default_member(DDS::DynamicType* type);
   DDS::ReturnCode_t get_selected_union_branch(
-    DDS::Int32 disc, bool& found_selected_member, DDS::MemberDescriptor_var& selected_md) const;
-  DDS::ReturnCode_t get_selected_union_branch(
     bool& found_selected_member, DDS::MemberDescriptor_var& selected_md);
   bool discriminator_selects_no_member(DDS::Int32 disc) const;
 
@@ -89,18 +83,6 @@ protected:
   DDS::DynamicType_var type_;
   DDS::TypeDescriptor_var type_desc_;
 };
-
-inline bool DynamicDataBase::exclude_member(DCPS::Sample::Extent ext, bool is_key, bool has_explicit_keys)
-{
-  // see Fields::Iterator and explicit_keys_only() in opendds_idl's dds_generator.h
-  const bool explicit_keys_only = ext == DCPS::Sample::KeyOnly || (ext == DCPS::Sample::NestedKeyOnly && has_explicit_keys);
-  return explicit_keys_only && !is_key;
-}
-
-inline DCPS::Sample::Extent DynamicDataBase::nested(DCPS::Sample::Extent ext)
-{
-  return ext == DCPS::Sample::KeyOnly ? DCPS::Sample::NestedKeyOnly : ext;
-}
 
 } // namespace XTypes
 } // namespace OpenDDS

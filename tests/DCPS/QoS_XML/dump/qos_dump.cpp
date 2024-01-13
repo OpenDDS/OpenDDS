@@ -101,6 +101,13 @@ int ACE_TMAIN (int, ACE_TCHAR *[])
               ++retval;
             }
 
+          if (tp_qos.durability_service.history_kind != DDS::KEEP_LAST_HISTORY_QOS)
+          {
+            ACE_ERROR ((LM_ERROR, "PARSEXML - "
+                  "get_topic_qos returned an invalid type durability_service history_kind.\n"));
+            ++retval;
+          }
+
           ::DDS::PublisherQos pub_qos;
           retcode_qos = xml_loader.get_publisher_qos (
                                 pub_qos,

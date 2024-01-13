@@ -57,9 +57,6 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     DDS::DomainParticipantQos part_qos;
     dpf->get_default_participant_qos(part_qos);
 
-    DDS::PropertySeq& props = part_qos.property.value;
-    append(props, "OpenDDS.RtpsRelay.Groups", "Messenger", true);
-
 #ifdef OPENDDS_SECURITY
     if (TheServiceParticipant->get_security()) {
       // Determine the path to the keys
@@ -77,6 +74,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
       const String identity = certs + "identity/";
       const String messenger = path_to_tests + "DCPS/Messenger/";
       using namespace DDS::Security::Properties;
+      DDS::PropertySeq& props = part_qos.property.value;
       append(props, AuthIdentityCA, identity + "identity_ca_cert.pem");
       append(props, AuthIdentityCertificate, identity + "test_participant_02_cert.pem");
       append(props, AuthPrivateKey, identity + "test_participant_02_private_key.pem");

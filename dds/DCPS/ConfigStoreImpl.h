@@ -27,6 +27,12 @@ namespace DCPS {
 const char OPENDDS_CONFIG_DEBUG_LOGGING[] = "OPENDDS_CONFIG_DEBUG_LOGGING";
 const bool OPENDDS_CONFIG_DEBUG_LOGGING_default = false;
 
+OpenDDS_Dcps_Export
+OPENDDS_VECTOR(String) split(const String& str,
+                             const String& delims,
+                             bool skip_leading,
+                             bool skip_consecutive);
+
 /**
  * @class ConfigPair
  *
@@ -90,9 +96,10 @@ struct EnumList {
 
 class OpenDDS_Dcps_Export ConfigStoreImpl : public ConfigStore {
 public:
-  enum IntegerTimeFormat {
+  enum TimeFormat {
     Format_IntegerSeconds,
-    Format_IntegerMilliseconds
+    Format_IntegerMilliseconds,
+    Format_FractionalSeconds
   };
 
   enum NetworkAddressFormat {
@@ -200,10 +207,10 @@ public:
 
   void set(const char* key,
            const TimeDuration& value,
-           IntegerTimeFormat format);
+           TimeFormat format);
   TimeDuration get(const char* key,
                    const TimeDuration& value,
-                   IntegerTimeFormat format) const;
+                   TimeFormat format) const;
 
   void set(const char* key,
            const NetworkAddress& value,
@@ -214,10 +221,22 @@ public:
                      NetworkAddressFormat format,
                      NetworkAddressKind kind) const;
 
+  void set(const char* key,
+           const NetworkAddressSet& value,
+           NetworkAddressFormat format,
+           NetworkAddressKind kind);
+  NetworkAddressSet get(const char* key,
+                        const NetworkAddressSet& value,
+                        NetworkAddressFormat format,
+                        NetworkAddressKind kind) const;
+
   // Section names are identified as values starting with '@' and
   // having the original text of the last part of the section name.
   // This is used to create objects of different types.
   StringList get_section_names(const String& prefix) const;
+
+  typedef OPENDDS_MAP(String, String) StringMap;
+  StringMap get_section_values(const String& prefix) const;
 
   static DDS::DataWriterQos datawriter_qos();
   static DDS::DataReaderQos datareader_qos();

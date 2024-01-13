@@ -228,14 +228,14 @@ void amalgam_serializer_test_base(
       DDS::DynamicData_var dd = DDS::DynamicDataFactory::get_instance()->create_data(type);
       ASSERT_RC_OK(copy(dd, dda));
 
-      DynamicDataImpl& ddi = *dynamic_cast<DynamicDataImpl*>(dd.in());
+      DDS::DynamicData_ptr dd_ptr = dd.in();
       if (key_only) {
-        const KeyOnly<const DynamicDataImpl> key_only(ddi);
+        const KeyOnly<DDS::DynamicData_ptr> key_only(dd_ptr);
         EXPECT_EQ(serialized_size(encoding, key_only), expected_cdr.size);
         ASSERT_TRUE(serializer << key_only);
       } else {
-        EXPECT_EQ(serialized_size(encoding, ddi), expected_cdr.size);
-        ASSERT_TRUE(serializer << ddi);
+        EXPECT_EQ(serialized_size(encoding, dd_ptr), expected_cdr.size);
+        ASSERT_TRUE(serializer << dd_ptr);
       }
 #else
       ASSERT_TRUE(false);
@@ -333,7 +333,7 @@ template<typename Type>
 void baseline_checks_union(const Encoding& encoding, const DataView& expected_cdr, UnionDisc disc)
 {
   Type value;
-  value._d(disc);
+  set_values_union(value, disc);
   EXPECT_EQ(serialized_size(encoding, value), expected_cdr.size);
   serializer_test_union<Type>(encoding, expected_cdr, disc);
 }

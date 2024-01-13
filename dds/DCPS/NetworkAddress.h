@@ -91,11 +91,11 @@ private:
   } inet_addr_;
 };
 
-typedef OPENDDS_SET(NetworkAddress) AddrSet;
+typedef OPENDDS_SET(NetworkAddress) NetworkAddressSet;
 
 #if defined ACE_HAS_CPP11
 OpenDDS_Dcps_Export
-size_t calculate_hash(const AddrSet& addrs, size_t start_hash = 0);
+size_t calculate_hash(const NetworkAddressSet& addrs, size_t start_hash = 0);
 #endif
 
 OpenDDS_Dcps_Export

@@ -131,11 +131,11 @@ struct DiscoveredParticipant {
 
   struct LocationUpdate {
     DCPS::ParticipantLocation mask_;
-    ACE_INET_Addr from_;
+    DCPS::NetworkAddress from_;
     DCPS::SystemTimePoint timestamp_;
     LocationUpdate() {}
     LocationUpdate(DCPS::ParticipantLocation mask,
-                   const ACE_INET_Addr& from,
+                   const DCPS::NetworkAddress& from,
                    const DCPS::SystemTimePoint& timestamp)
       : mask_(mask), from_(from), timestamp_(timestamp) {}
   };
@@ -144,7 +144,7 @@ struct DiscoveredParticipant {
   DCPS::ParticipantLocationBuiltinTopicData location_data_;
   DDS::InstanceHandle_t location_ih_;
 
-  ACE_INET_Addr last_recv_address_;
+  DCPS::NetworkAddress last_recv_address_;
   DCPS::MonotonicTimePoint discovered_at_;
   DCPS::MonotonicTimePoint lease_expiration_;
   DDS::InstanceHandle_t bit_ih_;
