@@ -953,7 +953,9 @@ ConfigStoreImpl::get(const char* key,
               for (int j=1; j < numPorts; ++j){
                 String additionalAddr = parts[0];
                 additionalAddr.append(":");
-                additionalAddr.append(std::to_string(basePort + (j*interval)));
+                char portString[10];
+                ACE_OS::itoa(basePort + (j*interval), portString, 10);
+                additionalAddr.append(portString);
                 expandedVec.push_back(additionalAddr);
               }
             }
