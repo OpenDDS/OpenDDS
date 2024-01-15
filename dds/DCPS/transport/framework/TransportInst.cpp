@@ -41,30 +41,6 @@ TransportInst::~TransportInst()
   DBG_ENTRY_LVL("TransportInst","~TransportInst",6);
 }
 
-int
-TransportInst::load(ACE_Configuration_Heap& cf,
-                    ACE_Configuration_Section_Key& sect)
-{
-  process_section(*TheServiceParticipant->config_store(),
-                  ConfigReader_rch(),
-                  ConfigReaderListener_rch(),
-                  config_prefix_,
-                  cf,
-                  sect,
-                  "",
-                  false);
-
-  ACE_TString stringvalue;
-  if (cf.get_string_value (sect, ACE_TEXT("passive_connect_duration"), stringvalue) == 0) {
-    ACE_DEBUG ((LM_WARNING,
-                ACE_TEXT ("(%P|%t) WARNING: passive_connect_duration option ")
-                ACE_TEXT ("is deprecated in the transport inst, must be ")
-                ACE_TEXT ("defined in transport config.\n")));
-  }
-
-  return 0;
-}
-
 void
 TransportInst::dump(DDS::DomainId_t domain) const
 {

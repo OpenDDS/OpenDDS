@@ -175,7 +175,6 @@ TransportRegistry::load_transport_configuration(const OPENDDS_STRING& file_name,
             }
 
             instances.push_back(inst);
-            inst->load(cf, inst_sect);
 
             // store the transport info
             TransportEntry entry;

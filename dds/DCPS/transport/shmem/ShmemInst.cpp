@@ -37,14 +37,6 @@ ShmemInst::new_impl(DDS::DomainId_t domain)
   return make_rch<ShmemTransport>(rchandle_from(this), domain);
 }
 
-int
-ShmemInst::load(ACE_Configuration_Heap& cf,
-                ACE_Configuration_Section_Key& sect)
-{
-  TransportInst::load(cf, sect);
-  return 0;
-}
-
 OPENDDS_STRING
 ShmemInst::dump_to_str(DDS::DomainId_t domain) const
 {

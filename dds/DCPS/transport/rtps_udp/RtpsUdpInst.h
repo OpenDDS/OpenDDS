@@ -86,9 +86,6 @@ public:
   void send_delay(const TimeDuration& sd);
   TimeDuration send_delay() const;
 
-  virtual int load(ACE_Configuration_Heap& cf,
-                   ACE_Configuration_Section_Key& sect);
-
   /// Diagnostic aid.
   virtual OPENDDS_STRING dump_to_str(DDS::DomainId_t domain) const;
 
