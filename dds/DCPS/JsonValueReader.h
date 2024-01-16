@@ -401,7 +401,8 @@ bool JsonValueReader<InputStream>::end_pair()
 }
 
 template <typename InputStream>
-bool JsonValueReader<InputStream>::end_map() {
+bool JsonValueReader<InputStream>::end_map()
+{
   peek();
   return consume(kEndArray);
 }
