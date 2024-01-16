@@ -343,7 +343,8 @@ bool JsonValueReader<InputStream>::end_element()
 }
 
 template <typename InputStream>
-bool JsonValueReader<InputStream>::begin_map() {
+bool JsonValueReader<InputStream>::begin_map()
+{
   peek();
   return consume(kStartArray);
 }
