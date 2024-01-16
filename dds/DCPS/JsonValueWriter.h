@@ -187,12 +187,14 @@ void JsonValueWriter<Writer>::end_map()
 }
 
 template <typename Writer>
-void JsonValueWriter<Writer>::begin_pair() {
+void JsonValueWriter<Writer>::begin_pair()
+{
   writer_.StartObject();
 }
 
 template <typename Writer>
-void JsonValueWriter<Writer>::end_pair() {
+void JsonValueWriter<Writer>::end_pair()
+{
   writer_.EndObject();
 }
 
