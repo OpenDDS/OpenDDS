@@ -63,36 +63,30 @@ private:
   const Encoding& encoding_;
   size_t size_;
 
-  // States needed when computing the size of a nested member.
+  // Maintain the states necessary to compute and cache the sizes of the top-level type
+  // or its nested members. 
   struct Metadata {
     explicit Metadata(DDS::ExtensibilityKind ek)
       : extensibility(ek)
+      , total_size(0)
       , mutable_running_total(0)
       , cache_pos(0)
     {}
 
+    // Extensibility of the type that we are currently working on.
     DDS::ExtensibilityKind extensibility;
+
+    // The total size of the corresponding type. This includes delimiter if required.
+    size_t total_size;
+
+    // Only used when extensibility is mutable.
     size_t mutable_running_total;
+
+    // Index in the size cache to which the total size of this type will be stored.
     size_t cache_pos;
   };
 
   std::stack<Metadata> state_;
-
-  // struct ComponentSize {};
-
-  // struct DheaderContents : public ComponentSize {
-  //   explicit DheaderContents(size_t val) : value(val) {}
-  //   size_t value;
-  // };
-
-  // struct NonNestedSize : public ComponentSize {
-  //   explicit NonNestedSize(size_t val) : value(val) {}
-  //   size_t value;
-  // };
-
-  // struct NestedSize : public ComponentSize {
-  //   vector<ComponentSize> values;
-  // }
 
   // Record the sizes of the components in the byte stream.
   // The following components will be recorded:
