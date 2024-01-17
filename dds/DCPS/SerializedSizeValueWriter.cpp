@@ -5,7 +5,8 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-void SerializedSizeValueWriter::begin_aggregated(DDS::ExtensibilityKind extensibility)
+void SerializedSizeValueWriter::begin_complex(DDS::ExtensibilityKind extensibility,
+                                              bool is_sequence)
 {
   // This is where we keep a bookmark for when the aggregated value starts in the stream.
   // To derive the size of the whole struct or union, we need to
@@ -47,6 +48,10 @@ void SerializedSizeValueWriter::begin_aggregated(DDS::ExtensibilityKind extensib
         // in the deeper nesting levels.
         Metadata metadata(extensibility);
         metadata.total_size = state_.top().total_size;
+        if (is_sequence) {
+          // For sequence length
+          primitive_serialized_size_ulong(encoding_, metadata.total_size);
+        }
         state_.push(metadata);
         return;
       } else {
@@ -55,6 +60,10 @@ void SerializedSizeValueWriter::begin_aggregated(DDS::ExtensibilityKind extensib
         encoding_.align(state_.top().total_size, uint32_cdr_size);
         state_.push(Metadata(extensibility));
         serialized_size_delimiter(encoding_, state_.top().total_size);
+        if (is_sequence) {
+          // For sequence length
+          primitive_serialized_size_ulong(encoding_, state_.top().total_size);
+        }
 
         // Preserve a slot to cache the size of this struct.
         // The actual size will be written in end_struct.
@@ -72,11 +81,15 @@ void SerializedSizeValueWriter::begin_aggregated(DDS::ExtensibilityKind extensib
       if (extensibility == DDS::APPENDABLE || extensibility == DDS::MUTABLE) {
         serialized_size_delimiter(encoding_, state_.top().total_size);
       }
+      if (is_sequence) {
+        // Sequence length
+        primitive_serialized_size(encoding_, state_.top().total_size);
+      }
       size_cache_.push_back(0);
       state_.top().cache_pos = size_cache_.size() - 1;
     }
   } else {
-    // Top-level type
+    // Top-level type can only be struct or union.
     state_.push(Metadata(extensibility));
     if (extensibility == DDS::APPENDABLE || extensibility == DDS::MUTABLE) {
       serialized_size_delimiter(encoding_, state_.top().total_size);
@@ -87,7 +100,7 @@ void SerializedSizeValueWriter::begin_aggregated(DDS::ExtensibilityKind extensib
   }
 }
 
-void SerializedSizeValueWriter::end_aggregated()
+void SerializedSizeValueWriter::end_complex()
 {
   Metadata& state = state_.top();
   const DDS::ExtensibilityKind extensibility = state.extensibility;
@@ -123,7 +136,7 @@ void SerializedSizeValueWriter::end_aggregated()
   }
 }
 
-void SerializedSizeValueWriter::begin_aggregated_member(bool optional, bool present = true)
+void SerializedSizeValueWriter::begin_aggregated_member(bool optional, bool present)
 {
   Metadata& state = state_.top();
   const DDS::ExtensibilityKind extensibility = state.extensibility;
@@ -141,16 +154,16 @@ void SerializedSizeValueWriter::begin_aggregated_member(bool optional, bool pres
 
 void SerializedSizeValueWriter::begin_struct(DDS::ExtensibilityKind extensibility)
 {
-  begin_aggregated(extensibility);
+  begin_complex(extensibility);
 }
 
 void SerializedSizeValueWriter::end_struct()
 {
-  end_aggregated();
+  end_complex();
 }
 
 void SerializedSizeValueWriter::begin_struct_member(const char* /*name*/, bool optional,
-                                                    bool present = true)
+                                                    bool present)
 {
   begin_aggregated_member(optional, present);
 }
@@ -162,17 +175,17 @@ void SerializedSizeValueWriter::end_struct_member()
 
 void SerializedSizeValueWriter::begin_union(DDS::ExtensibilityKind extensibility)
 {
-  begin_aggregated(extensibility);
+  begin_complex(extensibility);
 }
 
 void SerializedSizeValueWriter::end_union()
 {
-  end_aggregated();
+  end_complex();
 }
 
 void SerializedSizeValueWriter::begin_discriminator()
 {
-  begin_aggregated_member(0, false);
+  begin_aggregated_member(false /*optional*/);
 }
 
 void SerializedSizeValueWriter::end_discriminator()
@@ -181,9 +194,9 @@ void SerializedSizeValueWriter::end_discriminator()
 }
 
 void SerializedSizeValueWriter::begin_union_member(const char* /*name*/, bool optional,
-                                                   bool present = true)
+                                                   bool present)
 {
-  begin_aggregated_member(0, optional, present);
+  begin_aggregated_member(optional, present);
 }
 
 void SerializedSizeValueWriter::end_union_member()
@@ -196,14 +209,17 @@ void SerializedSizeValueWriter::end_union_member()
 // If the element type is not primitive, it is similar to appendable struct with Dheader.
 void SerializedSizeValueWriter::begin_array(DDS::TypeKind elem_tk)
 {
+  DDS::TypeKind treat_arr_as = DDS::FINAL;
   if (!is_primitive(elem_tk)) {
-    serialized_size_delimiter(encoding_, size_); // Dheader
+    treat_arr_as = DDS::APPENDABLE;
   }
+
+  begin_complex(treat_arr_as);
 }
 
 void SerializedSizeValueWriter::end_array()
 {
-  return;
+  end_complex();
 }
 
 // Sequence is similar to final or appendable struct with each element is a member.
@@ -213,18 +229,20 @@ void SerializedSizeValueWriter::end_array()
 // One difference is that sequence has length ahead of all the elements.
 void SerializedSizeValueWriter::begin_sequence(DDS::TypeKind elem_tk)
 {
+  DDS::TypeKind treat_seq_as = DDS::FINAL;
   if (!is_primitive(elem_tk)) {
-    serialized_size_delimiter(encoding_, size_); // Dheader
+    treat_seq_as = DDS::APPENDABLE;
   }
-  primitive_serialized_size_ulong(encoding_, size_); // Length
+
+  begin_complex(treat_seq_as, true /*is_sequence*/);
 }
 
 void SerializedSizeValueWriter::end_sequence()
 {
-  return;
+  end_complex();
 }
 
-void SerializedSizeValueWriter::begin_element()
+void SerializedSizeValueWriter::begin_element(size_t /*idx*/)
 {
   return;
 }

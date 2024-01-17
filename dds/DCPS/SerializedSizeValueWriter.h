@@ -10,26 +10,25 @@ namespace DCPS {
 
 class SerializedSizeValueWriter : public ValueWriter {
 public:
-  explicit SerializedSizeValueWriter(Serializer& ser)
-    : encoding_(ser.encoding())
-    , size_(0)
+  explicit SerializedSizeValueWriter(Encoding& encoding)
+    : encoding_(encoding)
   {}
 
-  void begin_struct(DDS::ExtensibilityKind ek);
+  void begin_struct(DDS::ExtensibilityKind extensibility);
   void end_struct();
-  void begin_struct_member(const DDS::MemberDescriptor& descriptor, bool present = true);
+  void begin_struct_member(const char* name, bool optional, bool present = true);
   void end_struct_member();
 
-  void begin_union();
+  void begin_union(DDS::ExtensibilityKind extensibility);
   void end_union();
   void begin_discriminator();
   void end_discriminator();
-  void begin_union_member(const char* name);
+  void begin_union_member(const char* name, bool optional, bool present = true);
   void end_union_member();
 
-  void begin_array();
+  void begin_array(DDS::TypeKind elem_kind);
   void end_array();
-  void begin_sequence();
+  void begin_sequence(DDS::TypeKind elem_kind);
   void end_sequence();
   void begin_element(size_t idx);
   void end_element();
@@ -60,8 +59,11 @@ public:
   size_t get_serialized_size() { return size_; }
 
 private:
+  void begin_complex(DDS::ExtensibilityKind extensiblity, bool is_sequence = false);
+  void end_complex();
+  void begin_aggregated_member(bool optional, bool present = true);
+  
   const Encoding& encoding_;
-  size_t size_;
 
   // Maintain the states necessary to compute and cache the sizes of the top-level type
   // or its nested members. 
