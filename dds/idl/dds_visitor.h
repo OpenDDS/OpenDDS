@@ -92,7 +92,7 @@ public:
 
   virtual int visit_sequence(AST_Sequence* node);
 
-#if OPENDDS_HAS_MAP
+#if OPENDDS_HAS_IDL_MAP
   virtual int visit_map(AST_Map* node);
 #endif
 

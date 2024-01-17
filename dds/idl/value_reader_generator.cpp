@@ -103,7 +103,7 @@ namespace {
     }
   }
 
-#if OPENDDS_HAS_MAP
+#if OPENDDS_HAS_IDL_MAP
   void map_helper(const std::string& expression, AST_Map* map,
                        const std::string& idx, int level)
   {
@@ -195,7 +195,7 @@ namespace {
       array_helper(expression + accessor, array, 0, idx, level);
       return;
     }
-#if OPENDDS_HAS_MAP
+#if OPENDDS_HAS_IDL_MAP
     if (c & CL_MAP) {
       AST_Map* const map = dynamic_cast<AST_Map*>(actual);
       map_helper(expression + accessor, map, idx, level);

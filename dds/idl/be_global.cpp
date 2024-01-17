@@ -980,7 +980,7 @@ TryConstructFailAction BE_GlobalData::union_discriminator_try_construct(AST_Unio
   return try_construct_annotation->union_value(node);
 }
 
-#if OPENDDS_HAS_MAP
+#if OPENDDS_HAS_IDL_MAP
 TryConstructFailAction BE_GlobalData::map_key_try_construct(AST_Map* node)
 {
   TryConstructAnnotation* try_construct_annotation =

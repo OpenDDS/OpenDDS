@@ -4,7 +4,7 @@
 
 #include <gtest/gtest.h>
 
-#if OPENDDS_HAS_MAP
+#if OPENDDS_HAS_IDL_MAP
 
 const OpenDDS::DCPS::Encoding encoding(OpenDDS::DCPS::Encoding::KIND_UNALIGNED_CDR);
 

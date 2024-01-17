@@ -8,7 +8,7 @@
 #include <ast_annotation_member.h>
 #include <ast_sequence.h>
 #include <ast_array.h>
-#if OPENDDS_HAS_MAP
+#if OPENDDS_HAS_IDL_MAP
 #include <ast_map.h>
 #endif
 #include <ast_union.h>
@@ -432,7 +432,7 @@ TryConstructFailAction TryConstructAnnotation::union_value(AST_Union* node) cons
   return value_from_appl(appl);
 }
 
-#if OPENDDS_HAS_MAP
+#if OPENDDS_HAS_IDL_MAP
 TryConstructFailAction TryConstructAnnotation::map_key(AST_Map* node) const
 {
   AST_Annotation_Appl* appl = node->key_type_annotations().find(declaration());

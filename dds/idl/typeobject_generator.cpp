@@ -820,7 +820,7 @@ typeobject_generator::strong_connect(AST_Type* type, const std::string& anonymou
       consider(v, n->base_type(), v.name);
       break;
     }
-#if OPENDDS_HAS_MAP
+#if OPENDDS_HAS_IDL_MAP
   case AST_ConcreteType::NT_map:
     {
       AST_Map* const n = dynamic_cast<AST_Map*>(type);
@@ -1362,7 +1362,7 @@ typeobject_generator::generate_array_type_identifier(AST_Type* type, bool force_
   }
 }
 
-#if OPENDDS_HAS_MAP
+#if OPENDDS_HAS_IDL_MAP
 void
 typeobject_generator::generate_map_type_identifier(AST_Type* type, bool force_type_object)
 {
@@ -1661,7 +1661,7 @@ typeobject_generator::generate_type_identifier(AST_Type* type, bool force_type_o
       break;
     }
 
-#if OPENDDS_HAS_MAP
+#if OPENDDS_HAS_IDL_MAP
   case AST_ConcreteType::NT_map:
     {
       generate_map_type_identifier(type, force_type_object);

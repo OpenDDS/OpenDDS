@@ -34,7 +34,7 @@
 #include <ast_predefined_type.h>
 #include <ast_root.h>
 #include <ast_sequence.h>
-#if OPENDDS_HAS_MAP
+#if OPENDDS_HAS_IDL_MAP
 #include <ast_map.h>
 #endif
 #include <ast_structure.h>
@@ -485,7 +485,7 @@ dds_visitor::visit_sequence(AST_Sequence*)
   return 0;
 }
 
-#if OPENDDS_HAS_MAP
+#if OPENDDS_HAS_IDL_MAP
 int
 dds_visitor::visit_map(AST_Map*)
 {

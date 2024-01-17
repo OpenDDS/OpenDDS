@@ -142,7 +142,7 @@ namespace {
       indent << "value_writer.end_sequence();\n";
   }
 
-#if OPENDDS_HAS_MAP
+#if OPENDDS_HAS_IDL_MAP
   void map_helper(const std::string& expression, AST_Map* map, const std::string& idx, int level)
   {
     // const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
@@ -184,7 +184,7 @@ namespace {
       array_helper(expression, array, 0, idx, level);
       return;
     }
-#if OPENDDS_HAS_MAP
+#if OPENDDS_HAS_IDL_MAP
     if (c & CL_MAP) {
       AST_Map * const map = dynamic_cast<AST_Map*>(actual);
       map_helper(expression, map, idx, level);
