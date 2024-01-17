@@ -129,8 +129,7 @@ struct GeneratorBase
     }
 
 #if OPENDDS_HAS_IDL_MAP
-    if (af.map_)
-    {
+    if (af.map_) {
       return af.type_name_;
     }
 #endif
