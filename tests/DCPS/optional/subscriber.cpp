@@ -2,7 +2,6 @@
 #include "optionalC.h"
 #include "optionalTypeSupportImpl.h"
 
-#include <ace/Assert.h>
 #include <tests/Utils/DistributedConditionSet.h>
 #include <tests/Utils/StatusMatching.h>
 
@@ -24,7 +23,6 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
                                                    PARTICIPANT_QOS_DEFAULT,
                                                    0,
                                                    0);
-  ACE_ASSERT(participant != 0);
 
   OptionalTest::MessageTypeSupport_var type_support = new OptionalTest::MessageTypeSupportImpl;
   type_support->register_type(participant, "");

@@ -2,7 +2,6 @@
 #include "optionalC.h"
 #include "optionalTypeSupportImpl.h"
 
-#include <ace/Assert.h>
 #include <ace/Log_Msg.h>
 #include <tests/Utils/DistributedConditionSet.h>
 
@@ -24,8 +23,6 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
                                                    PARTICIPANT_QOS_DEFAULT,
                                                    0,
                                                    0);
-  ACE_ASSERT(participant != 0);
-
   OptionalTest::MessageTypeSupport_var type_support = new OptionalTest::MessageTypeSupportImpl();
   type_support->register_type(participant, "");
   CORBA::String_var type_name = type_support->get_type_name();
