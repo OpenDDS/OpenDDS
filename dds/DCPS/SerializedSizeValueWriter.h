@@ -3,6 +3,9 @@
 
 #include "ValueWriter.h"
 
+#include <vector>
+#include <stack>
+
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
@@ -56,7 +59,7 @@ public:
   void write_enum(const char* name, ACE_CDR::Long value);
   void write_absent_value();
 
-  size_t get_serialized_size() { return size_; }
+  size_t get_serialized_size();
 
 private:
   void begin_complex(DDS::ExtensibilityKind extensiblity, bool is_sequence = false);
@@ -99,7 +102,7 @@ private:
   //   + If the member is not nested (e.g., scalar types), its size is recorded directly.
   //   + If the member is nested (i.e., struct, union, sequence, array), the component sizes
   //     for this member is recorded recursively using these two kinds of components above.
-  vector<size_t> size_cache_;
+  std::vector<size_t> size_cache_;
 };
 
 }

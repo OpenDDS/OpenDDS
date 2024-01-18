@@ -36,21 +36,21 @@ public:
     , at_newline_(true)
   {}
 
-  void begin_struct();
+  void begin_struct(DDS::ExtensibilityKind extensibility);
   void end_struct();
-  void begin_struct_member(const DDS::MemberDescriptor& /*descriptor*/);
+  void begin_struct_member(const char* name, bool optional, bool present);
   void end_struct_member();
 
-  void begin_union();
+  void begin_union(DDS::ExtensibilityKind extensibility);
   void end_union();
   void begin_discriminator();
   void end_discriminator();
-  void begin_union_member(const char* name);
+  void begin_union_member(const char* name, bool optional, bool present);
   void end_union_member();
 
-  void begin_array();
+  void begin_array(DDS::TypeKind elem_tk);
   void end_array();
-  void begin_sequence();
+  void begin_sequence(DDS::TypeKind elem_tk);
   void end_sequence();
   void begin_element(size_t idx);
   void end_element();
@@ -100,7 +100,7 @@ private:
   bool at_newline_;
 };
 
-void PrinterValueWriter::begin_struct()
+void PrinterValueWriter::begin_struct(DDS::ExtensibilityKind)
 {
   current_indent_ += indent_;
 }
@@ -110,16 +110,16 @@ void PrinterValueWriter::end_struct()
   current_indent_ -= indent_;
 }
 
-void PrinterValueWriter::begin_struct_member(const DDS::MemberDescriptor& descriptor)
+void PrinterValueWriter::begin_struct_member(const char* name, bool /*optional*/, bool /*present*/)
 {
-  stream_ << newline() << std::string(current_indent_, ' ') << descriptor.name() << ": ";
+  stream_ << newline() << std::string(current_indent_, ' ') << name << ": ";
   at_newline_ = false;
 }
 
 void PrinterValueWriter::end_struct_member()
 {}
 
-void PrinterValueWriter::begin_union()
+void PrinterValueWriter::begin_union(DDS::ExtensibilityKind)
 {
   current_indent_ += indent_;
 }
@@ -138,7 +138,7 @@ void PrinterValueWriter::begin_discriminator()
 void PrinterValueWriter::end_discriminator()
 {}
 
-void PrinterValueWriter::begin_union_member(const char* name)
+void PrinterValueWriter::begin_union_member(const char* name, bool /*optional*/, bool /*present*/)
 {
   stream_ << newline() << std::string(current_indent_, ' ') << name << ": ";
   at_newline_ = false;
@@ -147,7 +147,7 @@ void PrinterValueWriter::begin_union_member(const char* name)
 void PrinterValueWriter::end_union_member()
 {}
 
-void PrinterValueWriter::begin_array()
+void PrinterValueWriter::begin_array(DDS::TypeKind /*elem_tk*/)
 {
   current_indent_ += indent_;
 }
@@ -157,7 +157,7 @@ void PrinterValueWriter::end_array()
   current_indent_ -= indent_;
 }
 
-void PrinterValueWriter::begin_sequence()
+void PrinterValueWriter::begin_sequence(DDS::TypeKind /*elem_tk*/)
 {
   current_indent_ += indent_;
 }

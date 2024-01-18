@@ -6271,10 +6271,20 @@ void vwrite_member(ValueWriter& vw, DDS::DynamicData_ptr value, const DDS::Membe
 
 void vwrite_struct(ValueWriter& vw, DDS::DynamicData_ptr value, const DDS::DynamicType_var& dt)
 {
-  vw.begin_struct();
+  DDS::TypeDescriptor_var type_desc;
+  DDS::ReturnCode_t rc = dt->get_descriptor(type_desc);
+  if (rc != DDS::RETCODE_OK) {
+    if (log_level >= LogLevel::Warning) {
+      ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: vwrite_struct: get_descriptor failed (%C)\n",
+                 retcode_to_string(rc)));
+    }
+    return;
+  }
+
+  vw.begin_struct(type_desc->extensibility_kind());
   for (CORBA::ULong i = 0; i < dt->get_member_count(); ++i) {
     DDS::DynamicTypeMember_var dtm;
-    DDS::ReturnCode_t rc = dt->get_member_by_index(dtm, i);
+    rc = dt->get_member_by_index(dtm, i);
     if (rc != DDS::RETCODE_OK) {
       if (log_level >= LogLevel::Warning) {
         ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: vwrite_struct: get_member_by_index %u failed (%C)\n",
@@ -6292,7 +6302,8 @@ void vwrite_struct(ValueWriter& vw, DDS::DynamicData_ptr value, const DDS::Dynam
       return;
     }
 
-    vw.begin_struct_member(*md.in());
+    // TODO(sonndinh): Update the argument to begin_struct_member
+    vw.begin_struct_member(md->name(), md->is_optional(), true);
     vwrite_member(vw, value, md);
     vw.end_struct_member();
   }
@@ -6463,11 +6474,21 @@ void vwrite_discriminator(ValueWriter& vw, DDS::DynamicData_ptr value,
 
 void vwrite_union(ValueWriter& vw, DDS::DynamicData_ptr value, const DDS::DynamicType_var& dt)
 {
-  vw.begin_union();
+  DDS::TypeDescriptor_var type_desc;
+  DDS::ReturnCode_t rc = dt->get_descriptor(type_desc);
+  if (rc != DDS::RETCODE_OK) {
+    if (log_level >= LogLevel::Warning) {
+      ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: vwrite_union: get_descriptor failed (%C)\n",
+                 retcode_to_string(rc)));
+    }
+    return;
+  }
+
+  vw.begin_union(type_desc->extensibility_kind());
 
   // Discriminator
   DDS::DynamicTypeMember_var dtm;
-  DDS::ReturnCode_t rc = dt->get_member(dtm, XTypes::DISCRIMINATOR_ID);
+  rc = dt->get_member(dtm, XTypes::DISCRIMINATOR_ID);
   if (rc != DDS::RETCODE_OK) {
     if (log_level >= LogLevel::Warning) {
       ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: vwrite_union: get_member failed (%C)\n",
@@ -6501,7 +6522,8 @@ void vwrite_union(ValueWriter& vw, DDS::DynamicData_ptr value, const DDS::Dynami
     return;
   }
   if (has_branch) {
-    vw.begin_union_member(selected_md->name());
+    // TODO(sonndinh): Update the argument to begin_union_member.
+    vw.begin_union_member(selected_md->name(), selected_md->is_optional(), true);
     vwrite_member(vw, value, selected_md);
     vw.end_union_member();
   }
@@ -6538,7 +6560,7 @@ void vwrite_array(ValueWriter& vw, DDS::DynamicData_ptr value, const DDS::Dynami
   }
   DDS::DynamicType_var elem_type = XTypes::get_base_type(td->element_type());
 
-  vw.begin_array();
+  vw.begin_array(elem_type->get_kind());
   for (CORBA::ULong i = 0; i < value->get_item_count(); ++i) {
     vw.begin_element(i);
     vwrite_element(vw, value, elem_type, i);
@@ -6560,7 +6582,7 @@ void vwrite_sequence(ValueWriter& vw, DDS::DynamicData_ptr value, const DDS::Dyn
   }
   DDS::DynamicType_var elem_type = XTypes::get_base_type(td->element_type());
 
-  vw.begin_sequence();
+  vw.begin_sequence(elem_type->get_kind());
   for (CORBA::ULong i = 0; i < value->get_item_count(); ++i) {
     vw.begin_element(i);
     vwrite_element(vw, value, elem_type, i);

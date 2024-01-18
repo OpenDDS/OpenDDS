@@ -60,6 +60,7 @@ namespace {
     }
   }
 
+  // TODO(sonndinh): Fix calls to begin_array
   void array_helper(const std::string& expression, AST_Array* array,
                     size_t dim_idx, const std::string& idx, int level)
   {
@@ -73,7 +74,7 @@ namespace {
     if ((primitive && (dim_idx < array->n_dims() - 1)) || (!primitive && (dim_idx < array->n_dims()))) {
       const size_t dim = array->dims()[dim_idx]->ev()->u.ulval;
       be_global->impl_ <<
-        indent << "value_writer.begin_array();\n";
+        indent << "value_writer.begin_array(XTypes::TK_NONE);\n";
       be_global->impl_ <<
         indent << "for (" << (use_cxx11 ? "size_t " : "::CORBA::ULong ") << idx << " = 0; "
         << idx << " != " << dim << "; ++" << idx << ") {\n" <<
@@ -90,7 +91,7 @@ namespace {
         const AST_PredefinedType::PredefinedType pt =
           dynamic_cast<AST_PredefinedType*>(actual)->pt();
         be_global->impl_ <<
-          indent << "value_writer.begin_array();\n";
+          indent << "value_writer.begin_array(XTypes::TK_NONE);\n";
         be_global->impl_ << indent <<
           "value_writer.write_" << primitive_type(pt) << "_array (" << expression << (use_cxx11 ? ".data()" : "") << ", " << dim << ");\n";
         be_global->impl_ <<
@@ -102,13 +103,14 @@ namespace {
     }
   }
 
+  // TODO(sonndinh): Fix the call to begin_sequence.
   void sequence_helper(const std::string& expression, AST_Sequence* sequence,
                        const std::string& idx, int level)
   {
     const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
     const char* const length_func = use_cxx11 ? "size" : "length";
     const std::string indent(level * 2, ' ');
-    be_global->impl_ << indent << "value_writer.begin_sequence();\n";
+    be_global->impl_ << indent << "value_writer.begin_sequence(XTypes::TK_NONE);\n";
 
     const Classification c = classify(sequence->base_type());
     AST_Type* const actual = resolveActualType(sequence->base_type());
@@ -189,8 +191,9 @@ namespace {
                             Intro&,
                             const std::string&)
   {
+    // TODO: Update the arguments when @optional is available.
     be_global->impl_ <<
-      "    value_writer.begin_union_member(\"" << canonical_name(branch) << "\");\n";
+      "    value_writer.begin_union_member(\"" << canonical_name(branch) << "\", false, true);\n";
     generate_write("value." + field_name + "()", type, "i", 2);
     be_global->impl_ <<
       "    value_writer.end_union_member();\n";
@@ -242,7 +245,7 @@ bool value_writer_generator::gen_typedef(AST_Typedef*,
   return true;
 }
 
-bool value_writer_generator::gen_struct(AST_Structure*,
+bool value_writer_generator::gen_struct(AST_Structure* node,
                                         UTL_ScopedName* name,
                                         const std::vector<AST_Field*>& fields,
                                         AST_Type::SIZE_TYPE,
@@ -262,16 +265,19 @@ bool value_writer_generator::gen_struct(AST_Structure*,
     write.addArg("value", "const " + type_name + "&");
     write.endArgs();
 
+    const ExtensibilityKind ek = be_global->extensibility(node);
     be_global->impl_ <<
-      "  value_writer.begin_struct();\n";
+      "  value_writer.begin_struct(" <<
+      (ek == extensibilitykind_final ? "DDS::FINAL" :
+       ek == extensibilitykind_appendable ? "DDS::APPENDABLE" : "DDS::MUTABLE") << ");\n";
     for (std::vector<AST_Field*>::const_iterator pos = fields.begin(), limit = fields.end();
          pos != limit; ++pos) {
       AST_Field* const field = *pos;
       const std::string field_name = field->local_name()->get_string();
       const std::string idl_name = canonical_name(field);
+      // TODO: Update the arguments when @optional is available.
       be_global->impl_ <<
-        "  value_writer.begin_struct_member(XTypes::MemberDescriptorImpl(\"" << idl_name << "\", "
-        << (be_global->is_key(field) ? "true" : "false") <<  "));\n";
+        "  value_writer.begin_struct_member(\"" << idl_name << "\", false, true);\n";
       generate_write("value." + field_name + accessor_suffix, field->field_type(), "i");
       be_global->impl_ <<
         "  value_writer.end_struct_member();\n";
@@ -302,8 +308,12 @@ bool value_writer_generator::gen_union(AST_Union* u,
     write.addArg("value", "const " + type_name + "&");
     write.endArgs();
 
+    const ExtensibilityKind ek = be_global->extensibility(u);
     be_global->impl_ <<
-      "  value_writer.begin_union();\n"
+      "  value_writer.begin_union(" <<
+      (ek == extensibilitykind_final ? "DDS::FINAL" :
+       ek == extensibilitykind_appendable ? "DDS::APPENDABLE" : "DDS::MUTABLE") << ");\n";
+    be_global->impl_ <<
       "  value_writer.begin_discriminator();\n";
     generate_write("value._d()" , discriminator, "i");
     be_global->impl_ <<

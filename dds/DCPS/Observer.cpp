@@ -50,20 +50,21 @@ Observer::~Observer() {}
 void
 vwrite(ValueWriter& vw, const Observer::Sample& sample)
 {
-  vw.begin_struct();
-  vw.begin_struct_member(XTypes::MemberDescriptorImpl("instance", false));
+  // TODO(sonndinh): Fix the arguments to begin_struct and begin_struct_member.
+  vw.begin_struct(DDS::FINAL);
+  vw.begin_struct_member("instance", false, true);
   vw.write_int32(sample.instance);
   vw.end_struct_member();
-  vw.begin_struct_member(XTypes::MemberDescriptorImpl("instance_state", false));
+  vw.begin_struct_member("instance_state", false, true);
   vw.write_uint32(sample.instance_state);
   vw.end_struct_member();
-  vw.begin_struct_member(XTypes::MemberDescriptorImpl("timestamp", false));
+  vw.begin_struct_member("timestamp", false, true);
   vwrite(vw, sample.timestamp);
   vw.end_struct_member();
-  vw.begin_struct_member(XTypes::MemberDescriptorImpl("sequence_number", false));
+  vw.begin_struct_member("sequence_number", false, true);
   vw.write_int64(sample.sequence_number.getValue());
   vw.end_struct_member();
-  vw.begin_struct_member(XTypes::MemberDescriptorImpl("data", false));
+  vw.begin_struct_member("data", false, true);
   sample.data_dispatcher.write(vw, sample.data);
   vw.end_struct_member();
   vw.end_struct();

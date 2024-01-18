@@ -43,21 +43,21 @@ public:
     : writer_(writer)
   {}
 
-  void begin_struct();
+  void begin_struct(DDS::ExtensibilityKind extensibility);
   void end_struct();
-  void begin_struct_member(const DDS::MemberDescriptor& /*descriptor*/);
+  void begin_struct_member(const char* name, bool optional, bool present = true);
   void end_struct_member();
 
-  void begin_union();
+  void begin_union(DDS::ExtensibilityKind extensibility);
   void end_union();
   void begin_discriminator();
   void end_discriminator();
-  void begin_union_member(const char* name);
+  void begin_union_member(const char* name, bool optional, bool present = true);
   void end_union_member();
 
-  void begin_array();
+  void begin_array(DDS::TypeKind elem_kind);
   void end_array();
-  void begin_sequence();
+  void begin_sequence(DDS::TypeKind elem_kind);
   void end_sequence();
   void begin_element(size_t idx);
   void end_element();
@@ -90,7 +90,7 @@ private:
 };
 
 template <typename Writer>
-void JsonValueWriter<Writer>::begin_struct()
+void JsonValueWriter<Writer>::begin_struct(DDS::ExtensibilityKind)
 {
   writer_.StartObject();
 }
@@ -102,9 +102,9 @@ void JsonValueWriter<Writer>::end_struct()
 }
 
 template <typename Writer>
-void JsonValueWriter<Writer>::begin_struct_member(const DDS::MemberDescriptor& descriptor)
+void JsonValueWriter<Writer>::begin_struct_member(const char* name, bool /*optional*/, bool /*present*/)
 {
-  writer_.Key(descriptor.name());
+  writer_.Key(name);
 }
 
 template <typename Writer>
@@ -112,7 +112,7 @@ void JsonValueWriter<Writer>::end_struct_member()
 {}
 
 template <typename Writer>
-void JsonValueWriter<Writer>::begin_union()
+void JsonValueWriter<Writer>::begin_union(DDS::ExtensibilityKind)
 {
   writer_.StartObject();
 }
@@ -134,7 +134,7 @@ void JsonValueWriter<Writer>::end_discriminator()
 {}
 
 template <typename Writer>
-void JsonValueWriter<Writer>::begin_union_member(const char* name)
+void JsonValueWriter<Writer>::begin_union_member(const char* name, bool /*optional*/, bool /*present*/)
 {
   writer_.Key(name);
 }
@@ -144,7 +144,7 @@ void JsonValueWriter<Writer>::end_union_member()
 {}
 
 template <typename Writer>
-void JsonValueWriter<Writer>::begin_array()
+void JsonValueWriter<Writer>::begin_array(DDS::TypeKind /*elem_tk*/)
 {
   writer_.StartArray();
 }
@@ -156,7 +156,7 @@ void JsonValueWriter<Writer>::end_array()
 }
 
 template <typename Writer>
-void JsonValueWriter<Writer>::begin_sequence()
+void JsonValueWriter<Writer>::begin_sequence(DDS::TypeKind /*elem_tk*/)
 {
   writer_.StartArray();
 }
@@ -344,23 +344,24 @@ std::string to_json(const DDS::TopicDescription_ptr topic,
   rapidjson::StringBuffer buffer;
   rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
   JsonValueWriter<rapidjson::Writer<rapidjson::StringBuffer> > jvw(writer);
-  jvw.begin_struct();
-  jvw.begin_struct_member(XTypes::MemberDescriptorImpl("topic", false));
-  jvw.begin_struct();
-  jvw.begin_struct_member(XTypes::MemberDescriptorImpl("name", false));
+  // TODO(sonndinh): Make sure the arguments make sense.
+  jvw.begin_struct(DDS::FINAL);
+  jvw.begin_struct_member("topic", false);
+  jvw.begin_struct(DDS::FINAL);
+  jvw.begin_struct_member("name", false);
   CORBA::String_var topic_name = topic->get_name();
   static_cast<ValueWriter&>(jvw).write_string(topic_name);
   jvw.end_struct_member();
-  jvw.begin_struct_member(XTypes::MemberDescriptorImpl("type_name", false));
+  jvw.begin_struct_member("type_name", false);
   CORBA::String_var type_name = topic->get_type_name();
   static_cast<ValueWriter&>(jvw).write_string(type_name);
   jvw.end_struct_member();
   jvw.end_struct();
   jvw.end_struct_member();
-  jvw.begin_struct_member(XTypes::MemberDescriptorImpl("sample", false));
+  jvw.begin_struct_member("sample", false);
   vwrite(jvw, sample);
   jvw.end_struct_member();
-  jvw.begin_struct_member(XTypes::MemberDescriptorImpl("sample_info", false));
+  jvw.begin_struct_member("sample_info", false);
   vwrite(jvw, sample_info);
   jvw.end_struct_member();
   jvw.end_struct();

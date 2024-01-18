@@ -40,21 +40,21 @@ public:
   ValueWriter()  {}
   virtual ~ValueWriter() {}
 
-  virtual void begin_struct() {}
+  virtual void begin_struct(DDS::ExtensibilityKind /*extensibility*/) {}
   virtual void end_struct() {}
-  virtual void begin_struct_member(const DDS::MemberDescriptor& /*descriptor*/) {}
+  virtual void begin_struct_member(const char* /*name*/, bool /*optional*/, bool /*present*/) {}
   virtual void end_struct_member() {}
 
-  virtual void begin_union() {}
+  virtual void begin_union(DDS::ExtensibilityKind /*extensibility*/) {}
   virtual void end_union() {}
   virtual void begin_discriminator() {}
   virtual void end_discriminator() {}
-  virtual void begin_union_member(const char* /*name*/) {}
+  virtual void begin_union_member(const char* /*name*/, bool /*optional*/, bool /*present*/) {}
   virtual void end_union_member() {}
 
-  virtual void begin_array() {}
+  virtual void begin_array(DDS::TypeKind /*elem_kind*/) {}
   virtual void end_array() {}
-  virtual void begin_sequence() {}
+  virtual void begin_sequence(DDS::TypeKind /*elem_kind*/) {}
   virtual void end_sequence() {}
   virtual void begin_element(size_t /*idx*/) {}
   virtual void end_element() {}
