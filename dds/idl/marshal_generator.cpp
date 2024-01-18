@@ -1628,7 +1628,7 @@ namespace {
   {
     std::string line = "";
     std::string field_name = field->local_name()->get_string();;
-    bool is_optional = be_global->is_optional(field);
+    const bool is_optional = be_global->is_optional(field);
     if (is_optional) {
       line += indent + "primitive_serialized_size(encoding, size, ACE_OutputCDR::from_boolean(" + prefix + "." + field_name + "().has_value()));\n";
       line += indent + "if (" + prefix + "." + field_name + "().has_value()) {\n";
@@ -1723,7 +1723,7 @@ namespace {
       return "(strm " + wrapper.stream() + ")";
     }
     std::string field_name = field->local_name()->get_string();
-    if (be_global->is_optional(field)) {
+    if (is_optional) {
       field_name += ".value";
     }
     return streamCommon(

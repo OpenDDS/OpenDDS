@@ -1,4 +1,5 @@
 cmake_minimum_required(VERSION 3.8...3.27)
+
 project(opendds_optional CXX)
 enable_testing()
 
@@ -22,11 +23,13 @@ set(subscriber ${PROJECT_NAME}_subscriber)
 add_executable(${subscriber} "subscriber.cpp")
 target_link_libraries(${subscriber} ${opendds_libs})
 set_target_properties(${subscriber} PROPERTIES OUTPUT_NAME subscriber)
+target_compile_features(${subscriber} PUBLIC cxx_std_17)
 
 set(publisher ${PROJECT_NAME}_publisher)
 add_executable(${publisher} "publisher.cpp")
 target_link_libraries(${publisher} ${opendds_libs})
 set_target_properties(${publisher} PROPERTIES OUTPUT_NAME publisher)
+target_compile_features(${publisher} PUBLIC cxx_std_17)
 
 configure_file(run_test.pl . COPYONLY)
 configure_file(rtps.ini . COPYONLY)
