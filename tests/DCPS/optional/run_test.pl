@@ -15,10 +15,8 @@ use strict;
 my $test = new PerlDDS::TestFramework();
 $test->setup_discovery();
 
-my $opts .= " -DCPSConfigFile rtps.ini";
-
-$test->process('subscriber', 'subscriber', $opts);
-$test->process('publisher', 'publisher', $opts);
+$test->process('subscriber', 'subscriber');
+$test->process('publisher', 'publisher');
 
 rmtree './DCS';
 
