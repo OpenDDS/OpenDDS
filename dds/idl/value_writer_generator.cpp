@@ -186,7 +186,7 @@ namespace {
     }
 #if OPENDDS_HAS_IDL_MAP
     if (c & CL_MAP) {
-      AST_Map * const map = dynamic_cast<AST_Map*>(actual);
+      AST_Map* const map = dynamic_cast<AST_Map*>(actual);
       map_helper(expression, map, idx, level);
       return;
     }

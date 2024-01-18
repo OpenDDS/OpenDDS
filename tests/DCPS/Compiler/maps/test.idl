@@ -10,7 +10,7 @@
 
     typedef sequence<TestStruct> TestStructSeq;
     typedef map<int32, TestStruct> TestStructMap;
-    // typedef map<int32, string> TestIntStringMap; //TODO Not compiling
+    typedef map<int32, string> TestIntStringMap; //TODO Not compiling
 
     @topic
     struct Data {
@@ -28,7 +28,7 @@
 
       map<string, TestStructMap> stringMapMap;
 
-      // map<TestIntStringMap, string> mapStringMap;
+      map<TestIntStringMap, string> mapStringMap;
     };
   #endif
 #endif
