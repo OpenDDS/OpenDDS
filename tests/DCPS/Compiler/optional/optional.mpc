@@ -1,4 +1,4 @@
-project(*): opendds_cxx17 dcps_test, opendds_cxx11, googletest, msvc_bigobj {
+project(*): opendds_cxx17, dcps_test, opendds_cxx11, googletest, msvc_bigobj {
   exename = optional_annotation
   exeout = .
   macros += CPP11_MAPPING=1
