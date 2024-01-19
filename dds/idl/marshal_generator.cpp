@@ -2632,13 +2632,13 @@ namespace {
           }
           expr +=
             "  if (reached_end_of_struct) {\n" +
-            type_to_default("    ", type, stru_field_name, type->anonymous(), is_optional) +
+            type_to_default("    ", type, stru_field_name, type->anonymous(), false, is_optional) +
             "  } else {\n";
           if (is_optional) {
             const std::string has_value_name = field_name + "_has_value";
             expr += "    bool " + field_name + "_has_value = false;\n";
             expr += "    strm >> ACE_InputCDR::to_boolean(" + has_value_name + ");\n";
-            expr += "    if (" + has_value_name + ") " + type_to_default("", type, stru_field_name, type->anonymous(), is_optional);
+            expr += "    if (" + has_value_name + ") " + type_to_default("", type, stru_field_name, type->anonymous(), false, is_optional);
             expr += "    if (" + has_value_name + " && !";
           } else {
             expr += "    if (!";
@@ -2886,7 +2886,7 @@ bool marshal_generator::gen_struct(AST_Structure* node,
       if (use_cxx11) {
         field_name += "()";
       }
-      contents << type_to_default("  ", type, field_name, type->anonymous(), be_global->is_optional(field));
+      contents << type_to_default("  ", type, field_name, type->anonymous(), false, be_global->is_optional(field));
     }
     intro.join(be_global->impl_, "  ");
     be_global->impl_ << contents.str();

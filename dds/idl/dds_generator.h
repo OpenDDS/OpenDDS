@@ -707,7 +707,7 @@ inline std::string bounded_arg(AST_Type* type)
 }
 
 std::string type_to_default(const std::string& indent, AST_Type* type,
-  const std::string& name, bool is_anonymous = false, bool is_optional = false, bool is_union = false);
+  const std::string& name, bool is_anonymous = false, bool is_union = false, bool is_optional = false);
 
 inline
 void generateBranchLabels(AST_UnionBranch* branch, AST_Type* discriminator,
@@ -864,7 +864,7 @@ void generateCaseBody(
 
     if (be_global->try_construct(branch) == tryconstructfailaction_use_default) {
       be_global->impl_ <<
-        type_to_default("        ", br, "uni." + name, branch->anonymous(), false, true) <<
+        type_to_default("        ", br, "uni." + name, branch->anonymous(), true) <<
         "        strm.set_construction_status(Serializer::ConstructionSuccessful);\n"
         "        return true;\n";
     } else if ((be_global->try_construct(branch) == tryconstructfailaction_trim) && (br_cls & CL_BOUNDED) &&
