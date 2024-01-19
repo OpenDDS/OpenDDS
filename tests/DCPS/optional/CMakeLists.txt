@@ -11,6 +11,7 @@ set(idl ${PROJECT_NAME}_idl)
 add_library(${idl})
 opendds_target_sources(${idl} PUBLIC "optional.idl" OPENDDS_IDL_OPTIONS "-Lc++11")
 target_link_libraries(${idl} PUBLIC OpenDDS::Dcps)
+target_compile_features(${idl} PUBLIC cxx_std_17)
 
 set(opendds_libs
   OpenDDS::Dcps # Core OpenDDS Library

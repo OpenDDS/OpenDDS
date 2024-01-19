@@ -1,4 +1,4 @@
-project(*Publisher) : dcpsexe, dcps_test, dcps_transports_for_test {
+project(*Publisher) : opendds_cxx17, dcpsexe, dcps_test, dcps_transports_for_test {
   exename = publisher
 
   TypeSupport_Files {
@@ -10,7 +10,7 @@ project(*Publisher) : dcpsexe, dcps_test, dcps_transports_for_test {
   }
 }
 
-project(*Subscriber) : dcpsexe, dcps_test, dcps_transports_for_test {
+project(*Subscriber) : opendds_cxx17, dcpsexe, dcps_test, dcps_transports_for_test {
   exename = subscriber
   after += *Publisher
   TypeSupport_Files {
