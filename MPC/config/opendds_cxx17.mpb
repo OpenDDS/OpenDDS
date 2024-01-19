@@ -1,0 +1,16 @@
+project: dcps, dcps_ts_defaults {
+
+  avoids += no_cxx17
+  requires += no_opendds_safety_profile
+  macros += OPENDDS_HAS_CXX17
+  dcps_ts_flags += -Lc++11
+  idlflags += -SS -Sa -St
+
+  // Do not include *.idl files as inputs to tao_idl
+  IDL_Files {
+  }
+
+  Modify_Custom(TypeSupport) {
+    header_pre_extension += C
+  }
+}
