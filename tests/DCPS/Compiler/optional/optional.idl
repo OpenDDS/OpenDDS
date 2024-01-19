@@ -3,6 +3,8 @@ module optional {
   @topic
   struct OptionalMembers {
     @optional long opt;
+    @optional string strOpt;
+    @optional sequence<int32> seqOpt;
   };
 
 };

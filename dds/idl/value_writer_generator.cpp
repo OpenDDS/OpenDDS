@@ -142,15 +142,16 @@ namespace {
       indent << "value_writer.end_sequence();\n";
   }
 
-  void optional_helper(const std::string& expression, AST_Type* type, const std::string& idx, int level = 1)
+  void optional_helper(const std::string& field_name, const std::string& expression, AST_Type* type, const std::string& idx, int level = 1)
   {
     const std::string indent(level * 2, ' ');
+    const std::string field_has_value = field_name + "_has_value";
     be_global->impl_ << indent << "value_writer.begin_optional();\n";
 
-    be_global->impl_ << indent << "bool has_value = " << expression << ".has_value();\n";
-    be_global->impl_ << indent << "value_writer.write_boolean(has_value);\n";
-    be_global->impl_ << indent << "if (has_value) {\n";
-    generate_write(expression + ".value()", type, "i", level + 6);
+    be_global->impl_ << indent << "bool " << field_has_value << " = " << expression << ".has_value();\n";
+    be_global->impl_ << indent << "value_writer.write_boolean(" << field_has_value << ");\n";
+    be_global->impl_ << indent << "if (" << field_has_value << ") {\n";
+    generate_write(expression + ".value()", type, idx + "i", level + 1);
     be_global->impl_ << indent << "}\n";
 
     be_global->impl_ << indent << "value_writer.end_optional();\n";
@@ -288,7 +289,7 @@ bool value_writer_generator::gen_struct(AST_Structure*,
         << (be_global->is_key(field) ? "true" : "false") <<  "));\n";
 
       if (be_global->is_optional(field)) {
-        optional_helper("value." + field_name + "()", field->field_type(), "i");
+        optional_helper(field_name, "value." + field_name + "()", field->field_type(), "i");
       } else {
         generate_write("value." + field_name + accessor_suffix, field->field_type(), "i");
       }

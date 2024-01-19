@@ -707,7 +707,7 @@ inline std::string bounded_arg(AST_Type* type)
 }
 
 std::string type_to_default(const std::string& indent, AST_Type* type,
-  const std::string& name, bool is_anonymous = false, bool is_union = false);
+  const std::string& name, bool is_anonymous = false, bool is_optional = false, bool is_union = false);
 
 inline
 void generateBranchLabels(AST_UnionBranch* branch, AST_Type* discriminator,
