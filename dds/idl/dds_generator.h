@@ -864,7 +864,7 @@ void generateCaseBody(
 
     if (be_global->try_construct(branch) == tryconstructfailaction_use_default) {
       be_global->impl_ <<
-        type_to_default("        ", br, "uni." + name, branch->anonymous(), true) <<
+        type_to_default("        ", br, "uni." + name, branch->anonymous(), false, true) <<
         "        strm.set_construction_status(Serializer::ConstructionSuccessful);\n"
         "        return true;\n";
     } else if ((be_global->try_construct(branch) == tryconstructfailaction_trim) && (br_cls & CL_BOUNDED) &&
