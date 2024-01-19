@@ -1,10 +1,17 @@
 module optional {
 
+  typedef sequence<int32> seq_int_t;
+
   @topic
   struct OptionalMembers {
     @optional long opt;
     @optional string strOpt;
-    @optional sequence<int32> seqOpt;
+    @optional seq_int_t seqOpt;
+
+
+    // TODO(tyler) should this be possible
+    // Code generates a IDL::DistinctType<...>
+    // @optional sequence<int32> seqInt;
   };
 
 };

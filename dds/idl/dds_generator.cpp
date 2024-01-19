@@ -369,10 +369,10 @@ string type_to_default(const std::string& indent, AST_Type* type, const string& 
     pre = "(";
     post = ")";
   }
+
   if (is_optional) {
     return indent + name + " = std::nullopt;\n";
-  }
-  else if (fld_cls & (CL_STRUCTURE | CL_UNION)) {
+  } else if (fld_cls & (CL_STRUCTURE | CL_UNION)) {
     return indent + "set_default(" + name + (is_union ? "()" : "") + ");\n";
   } else if (fld_cls & CL_ARRAY) {
     return type_to_default_array(
