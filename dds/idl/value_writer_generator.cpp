@@ -60,6 +60,66 @@ namespace {
     }
   }
 
+  std::string type_kind(AST_Type* type)
+  {
+    type = resolveActualType(type);
+    switch (type->node_type()) {
+    case AST_Decl::NT_pre_defined: {
+      AST_PredefinedType* pt_type = dynamic_cast<AST_PredefinedType*>(type);
+      switch (pt_type->pt()) {
+      case AST_PredefinedType::PT_long:
+        return "XTypes::TK_INT32";
+      case AST_PredefinedType::PT_ulong:
+        return "XTypes::TK_UINT32";
+      case AST_PredefinedType::PT_longlong:
+        return "XTypes::TK_INT64";
+      case AST_PredefinedType::PT_ulonglong:
+        return "XTypes::TK_UINT64";
+      case AST_PredefinedType::PT_short:
+        return "XTypes::TK_INT16";
+      case AST_PredefinedType::PT_ushort:
+        return "XTypes::TK_UINT16";
+      case AST_PredefinedType::PT_float:
+        return "XTypes::TK_FLOAT32";
+      case AST_PredefinedType::PT_double:
+        return "XTypes::TK_FLOAT64";
+      case AST_PredefinedType::PT_longdouble:
+        return "XTypes::TK_FLOAT128";
+      case AST_PredefinedType::PT_char:
+        return "XTypes::TK_CHAR8";
+      case AST_PredefinedType::PT_wchar:
+        return "XTypes::TK_CHAR16";
+      case AST_PredefinedType::PT_boolean:
+        return "XTypes::TK_BOOLEAN";
+      case AST_PredefinedType::PT_octet:
+        return "XTypes::TK_BYTE";
+      case AST_PredefinedType::PT_int8:
+        return "XTypes::TK_INT8";
+      case AST_PredefinedType::PT_uint8:
+        return "XTypes::TK_UINT8";
+      default:
+        return "XTypes::TK_NONE";
+      }
+    }
+    case AST_Decl::NT_string:
+      return "XTypes::TK_STRING8";
+    case AST_Decl::NT_wstring:
+      return "XTypes::TK_STRING16";
+    case AST_Decl::NT_array:
+      return "XTypes::TK_ARRAY";
+    case AST_Decl::NT_sequence:
+      return "XTypes::TK_SEQUENCE";
+    case AST_Decl::NT_union:
+      return "XTypes::TK_UNION";
+    case AST_Decl::NT_struct:
+      return "XTypes::TK_STRUCTURE";
+    case AST_Decl::NT_enum:
+      return "XTypes::TK_ENUM";
+    default:
+      return "XTypes::TK_NONE";
+    }
+  }
+
   // TODO(sonndinh): Fix calls to begin_array
   void array_helper(const std::string& expression, AST_Array* array,
                     size_t dim_idx, const std::string& idx, int level)
@@ -103,17 +163,18 @@ namespace {
     }
   }
 
-  // TODO(sonndinh): Fix the call to begin_sequence.
   void sequence_helper(const std::string& expression, AST_Sequence* sequence,
                        const std::string& idx, int level)
   {
     const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
     const char* const length_func = use_cxx11 ? "size" : "length";
     const std::string indent(level * 2, ' ');
-    be_global->impl_ << indent << "value_writer.begin_sequence(XTypes::TK_NONE);\n";
+    AST_Type* const base_type = sequence->base_type();
+    const std::string elem_tk = type_kind(base_type);
+    be_global->impl_ << indent << "value_writer.begin_sequence(" << elem_tk << ");\n";
 
-    const Classification c = classify(sequence->base_type());
-    AST_Type* const actual = resolveActualType(sequence->base_type());
+    const Classification c = classify(base_type);
+    AST_Type* const actual = resolveActualType(base_type);
     bool use_optimized_write_ = false;
     if (c & CL_PRIMITIVE) {
       if (use_cxx11) {
@@ -134,7 +195,7 @@ namespace {
         indent << "for (" << (use_cxx11 ? "size_t " : "::CORBA::ULong ") << idx << " = 0; "
         << idx << " != " << expression << "." << length_func << "(); ++" << idx << ") {\n" <<
         indent << "  value_writer.begin_element(" << idx << ");\n";
-      generate_write(expression + "[" + idx + "]", sequence->base_type(), idx + "i", level + 1);
+      generate_write(expression + "[" + idx + "]", base_type, idx + "i", level + 1);
       be_global->impl_ <<
         indent << "  value_writer.end_element();\n" <<
         indent << "}\n";
@@ -199,6 +260,7 @@ namespace {
       "    value_writer.end_union_member();\n";
     return "";
   }
+
 }
 
 bool value_writer_generator::gen_enum(AST_Enum*,

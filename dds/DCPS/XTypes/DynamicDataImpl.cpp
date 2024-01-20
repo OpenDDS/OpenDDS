@@ -6544,6 +6544,41 @@ void vwrite_element(ValueWriter& vw, DDS::DynamicData_ptr value,
   vwrite_item(vw, value, id, elem_dt);
 }
 
+// TODO(sonndinh): Optimize to write array for primitive element type.
+void vwrite_array_helper(ValueWriter& vw, CORBA::ULong dim_idx, const DDS::BoundSeq& dims,
+                         std::vector<CORBA::ULong> idx_vec, const DDS::DynamicType_var& elem_type,
+                         DDS::DynamicData_ptr value)
+{
+  DDS::TypeKind elem_kind = XTypes::TK_ARRAY;
+  if (dim_idx == dims.length() - 1) {
+    elem_kind = elem_type->get_kind();
+  }
+
+  if (dim_idx < dims.length()) {
+    vw.begin_array(elem_kind);
+    for (CORBA::ULong i = 0; i < dims[dim_idx]; ++i) {
+      vw.begin_element(i);
+      idx_vec[dim_idx] = i;
+      if (dim_idx == dims.length() - 1) {
+        CORBA::ULong flat_idx = 0;
+        const DDS::ReturnCode_t rc = XTypes::flat_index(flat_idx, idx_vec, dims);
+        if (rc != DDS::RETCODE_OK) {
+          if (log_level >= LogLevel::Warning) {
+            ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: vwrite_array_helper: flat_index failed (%C)\n",
+                       retcode_to_string(rc)));
+          }
+          return;
+        }
+        vwrite_element(vw, value, elem_type, flat_idx);
+      } else {
+        vwrite_array_helper(vw, dim_idx+1, dims, idx_vec, elem_type, value);
+      }
+      vw.end_element();
+    }
+    vw.end_array();
+  }
+}
+
 // Note: Writing primitive sequence/array to XCDR can be optimized by getting the whole
 // sequence/array from the dynamic data object and write it with the ValueWriter's write_*_array
 // functions, assuming they use Serializer's write_*_array functions.
@@ -6560,13 +6595,26 @@ void vwrite_array(ValueWriter& vw, DDS::DynamicData_ptr value, const DDS::Dynami
   }
   DDS::DynamicType_var elem_type = XTypes::get_base_type(td->element_type());
 
-  vw.begin_array(elem_type->get_kind());
-  for (CORBA::ULong i = 0; i < value->get_item_count(); ++i) {
-    vw.begin_element(i);
-    vwrite_element(vw, value, elem_type, i);
-    vw.end_element();
-  }
-  vw.end_array();
+  // TODO(sonndinh): This probably is not the right way to write multidimensional array.
+  // XCDR serialization of array must be in hierarchy manner (XTypes spec, page 139) whereas
+  // here we flatten out the hierarchy. This only works if the flatten indexes (the i in the
+  // for-loop below) correspond to the correct elements for serialization.
+  // It is currently up to the user to convert the multi-dim index to the flatten index
+  // and pass it to get_member_id_at_index to get the corresponding Id. So the user can
+  // use a mapping that is not correct for XCDR serialization purpose using this loop.
+  // So 2 things: (1) we should have a function in DynamicData that the user can use to
+  // convert from the multi-dim index to the flatten index.
+  // (2) Replace this single-loop with nested loops like so
+  // for items in the first dimension:
+  //   for items in the second dimension:
+  //     write_element()
+  //   done
+  // done
+  // The innermost loop can be optimized for primitive element types.
+  const DDS::BoundSeq& dims = td->bound();
+  std::vector<CORBA::ULong> idx_vec(dims.length());
+
+  vwrite_array_helper(vw, 0, dims, idx_vec, elem_type, value);
 }
 
 void vwrite_sequence(ValueWriter& vw, DDS::DynamicData_ptr value, const DDS::DynamicType_var& dt)

@@ -238,6 +238,11 @@ inline DCPS::Sample::Extent nested(DCPS::Sample::Extent ext)
   return ext == DCPS::Sample::KeyOnly ? DCPS::Sample::NestedKeyOnly : ext;
 }
 
+// Convert the index vector to an element in a multi-dimensional array into a flat index.
+// See description for ARRAY_TYPE in XTypes 1.3, page 139.
+DDS::ReturnCode_t flat_index(
+  CORBA::ULong& flat_idx, const std::vector<CORBA::ULong>& idx_vec, const DDS::BoundSeq& dims);
+
 } // namespace XTypes
 } // namespace OpenDDS
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
