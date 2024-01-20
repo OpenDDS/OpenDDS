@@ -141,7 +141,7 @@ namespace {
     be_global->impl_ << indent << "bool has_value = false;\n";
     be_global->impl_ << indent << "value_reader.read_boolean(has_value);\n";
     be_global->impl_ << indent << "if (has_value) {\n";
-    generate_read(expression + "().value()", "", type, "i", 4);
+    generate_read(expression + "().value()", "", type, idx + "i", 4);
     be_global->impl_ << indent << "}\n";
 
     be_global->impl_ << indent << "if (!value_reader.end_optional()) return false;\n";
