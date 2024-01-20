@@ -2634,19 +2634,20 @@ namespace {
           }
         }
 
-        // TODO(tyler) This feels kind of like a hack
+        // TODO(tyler) This feels kind of hacky
+        // Can the optional branch be isolated completely
+        // Assigns strm value to temporary values
         if (is_optional) {
             //TODO(tyler) Is there an easier way to deal with strings here
-            const std::string type_name = field->field_type()->full_name();
+            AST_Type* const field_type = resolveActualType(field->field_type());
+            Classification fld_cls = classify(field_type);
+            const std::string type_name = fld_cls & CL_STRING ? "String" : field->field_type()->full_name();
             const std::string has_value_name = field_name + "_has_value";
             expr += "    bool " + field_name + "_has_value = false;\n";
             expr += "    strm >> ACE_InputCDR::to_boolean(" + has_value_name + ");\n";
             expr += "    " + type_name + " " + field_name + "_tmp;\n";
-            //expr += "    if (" + has_value_name + ") " + type_to_default("", type, stru_field_name, type->anonymous(), false, is_optional);
             expr += "    if (" + has_value_name + " && !";
             expr += "(strm >> " + field_name + "_tmp)";
-            // expr += generate_field_stream(
-              //indent, field, ">> ", wrap_nested_key_only, intro);
         } else {
           expr += generate_field_stream(
             indent, field, ">> stru" + value_access, field->local_name()->get_string(), wrap_nested_key_only, intro);
@@ -2655,6 +2656,15 @@ namespace {
           expr += ") {\n"
             "      return false;\n"
             "    }\n";
+
+          // Copy temporaries to the struct
+          if (is_optional) {
+            string stru_field_name = "stru" + value_access + "." + field_name;
+            if (use_cxx11) {
+              stru_field_name += "()";
+            }
+            expr += "    if (" + field_name + "_has_value) " + stru_field_name + " = " + field_name + "_tmp;\n";
+          }
           if (cond.empty()) {
             expr +=
             "  }\n";

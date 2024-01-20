@@ -40,12 +40,14 @@ TEST(OptionalTests, Serialization)
 
   optional::OptionalMembers msg;
   msg.opt(12);
+  msg.strOpt("Hello World");
   EXPECT_TRUE(strm << msg);
 
  optional::OptionalMembers msg2;
  EXPECT_TRUE(strm >> msg2);
- // EXPECT_TRUE(msg2.opt().has_value());
- // EXPECT_EQ(msg.opt().value(), msg2.opt().value());
+ EXPECT_TRUE(msg2.opt().has_value());
+ EXPECT_EQ(msg.opt().value(), msg2.opt().value());
+ EXPECT_FALSE(msg2.seqOpt().has_value());
 }
 
 int main(int argc, char ** argv)
