@@ -6593,24 +6593,8 @@ void vwrite_array(ValueWriter& vw, DDS::DynamicData_ptr value, const DDS::Dynami
     }
     return;
   }
-  DDS::DynamicType_var elem_type = XTypes::get_base_type(td->element_type());
 
-  // TODO(sonndinh): This probably is not the right way to write multidimensional array.
-  // XCDR serialization of array must be in hierarchy manner (XTypes spec, page 139) whereas
-  // here we flatten out the hierarchy. This only works if the flatten indexes (the i in the
-  // for-loop below) correspond to the correct elements for serialization.
-  // It is currently up to the user to convert the multi-dim index to the flatten index
-  // and pass it to get_member_id_at_index to get the corresponding Id. So the user can
-  // use a mapping that is not correct for XCDR serialization purpose using this loop.
-  // So 2 things: (1) we should have a function in DynamicData that the user can use to
-  // convert from the multi-dim index to the flatten index.
-  // (2) Replace this single-loop with nested loops like so
-  // for items in the first dimension:
-  //   for items in the second dimension:
-  //     write_element()
-  //   done
-  // done
-  // The innermost loop can be optimized for primitive element types.
+  DDS::DynamicType_var elem_type = XTypes::get_base_type(td->element_type());
   const DDS::BoundSeq& dims = td->bound();
   std::vector<CORBA::ULong> idx_vec(dims.length());
 

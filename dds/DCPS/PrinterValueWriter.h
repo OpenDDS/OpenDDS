@@ -36,21 +36,21 @@ public:
     , at_newline_(true)
   {}
 
-  void begin_struct(DDS::ExtensibilityKind extensibility);
+  void begin_struct(DDS::ExtensibilityKind extensibility = DDS::FINAL);
   void end_struct();
-  void begin_struct_member(const char* name, bool optional, bool present);
+  void begin_struct_member(const char* name, bool optional = false, bool present = true);
   void end_struct_member();
 
-  void begin_union(DDS::ExtensibilityKind extensibility);
+  void begin_union(DDS::ExtensibilityKind extensibility = DDS::FINAL);
   void end_union();
   void begin_discriminator();
   void end_discriminator();
-  void begin_union_member(const char* name, bool optional, bool present);
+  void begin_union_member(const char* name, bool optional = false, bool present = true);
   void end_union_member();
 
-  void begin_array(DDS::TypeKind elem_tk);
+  void begin_array(DDS::TypeKind elem_tk = XTypes::TK_NONE);
   void end_array();
-  void begin_sequence(DDS::TypeKind elem_tk);
+  void begin_sequence(DDS::TypeKind elem_tk = XTypes::TK_NONE);
   void end_sequence();
   void begin_element(size_t idx);
   void end_element();
@@ -100,7 +100,7 @@ private:
   bool at_newline_;
 };
 
-void PrinterValueWriter::begin_struct(DDS::ExtensibilityKind)
+void PrinterValueWriter::begin_struct(DDS::ExtensibilityKind /*extensibility*/)
 {
   current_indent_ += indent_;
 }
@@ -119,7 +119,7 @@ void PrinterValueWriter::begin_struct_member(const char* name, bool /*optional*/
 void PrinterValueWriter::end_struct_member()
 {}
 
-void PrinterValueWriter::begin_union(DDS::ExtensibilityKind)
+void PrinterValueWriter::begin_union(DDS::ExtensibilityKind /*extensibility*/)
 {
   current_indent_ += indent_;
 }

@@ -50,7 +50,6 @@ Observer::~Observer() {}
 void
 vwrite(ValueWriter& vw, const Observer::Sample& sample)
 {
-  // TODO(sonndinh): Fix the arguments to begin_struct and begin_struct_member.
   vw.begin_struct(DDS::FINAL);
   vw.begin_struct_member("instance", false, true);
   vw.write_int32(sample.instance);

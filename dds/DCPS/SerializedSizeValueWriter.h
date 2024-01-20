@@ -19,14 +19,14 @@ public:
 
   void begin_struct(DDS::ExtensibilityKind extensibility);
   void end_struct();
-  void begin_struct_member(const char* name, bool optional, bool present = true);
+  void begin_struct_member(const char* name, bool optional = false, bool present = true);
   void end_struct_member();
 
   void begin_union(DDS::ExtensibilityKind extensibility);
   void end_union();
   void begin_discriminator();
   void end_discriminator();
-  void begin_union_member(const char* name, bool optional, bool present = true);
+  void begin_union_member(const char* name, bool optional = false, bool present = true);
   void end_union_member();
 
   void begin_array(DDS::TypeKind elem_kind);

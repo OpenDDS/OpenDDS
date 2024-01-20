@@ -43,21 +43,21 @@ public:
     : writer_(writer)
   {}
 
-  void begin_struct(DDS::ExtensibilityKind extensibility);
+  void begin_struct(DDS::ExtensibilityKind extensibility = DDS::FINAL);
   void end_struct();
-  void begin_struct_member(const char* name, bool optional, bool present = true);
+  void begin_struct_member(const char* name, bool optional = false, bool present = true);
   void end_struct_member();
 
-  void begin_union(DDS::ExtensibilityKind extensibility);
+  void begin_union(DDS::ExtensibilityKind extensibility = DDS::FINAL);
   void end_union();
   void begin_discriminator();
   void end_discriminator();
-  void begin_union_member(const char* name, bool optional, bool present = true);
+  void begin_union_member(const char* name, bool optional = false, bool present = true);
   void end_union_member();
 
-  void begin_array(DDS::TypeKind elem_kind);
+  void begin_array(DDS::TypeKind elem_kind = XTypes::TK_NONE);
   void end_array();
-  void begin_sequence(DDS::TypeKind elem_kind);
+  void begin_sequence(DDS::TypeKind elem_kind = XTypes::TK_NONE);
   void end_sequence();
   void begin_element(size_t idx);
   void end_element();
@@ -344,24 +344,23 @@ std::string to_json(const DDS::TopicDescription_ptr topic,
   rapidjson::StringBuffer buffer;
   rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
   JsonValueWriter<rapidjson::Writer<rapidjson::StringBuffer> > jvw(writer);
-  // TODO(sonndinh): Make sure the arguments make sense.
-  jvw.begin_struct(DDS::FINAL);
-  jvw.begin_struct_member("topic", false);
-  jvw.begin_struct(DDS::FINAL);
-  jvw.begin_struct_member("name", false);
+  jvw.begin_struct();
+  jvw.begin_struct_member("topic");
+  jvw.begin_struct();
+  jvw.begin_struct_member("name");
   CORBA::String_var topic_name = topic->get_name();
   static_cast<ValueWriter&>(jvw).write_string(topic_name);
   jvw.end_struct_member();
-  jvw.begin_struct_member("type_name", false);
+  jvw.begin_struct_member("type_name");
   CORBA::String_var type_name = topic->get_type_name();
   static_cast<ValueWriter&>(jvw).write_string(type_name);
   jvw.end_struct_member();
   jvw.end_struct();
   jvw.end_struct_member();
-  jvw.begin_struct_member("sample", false);
+  jvw.begin_struct_member("sample");
   vwrite(jvw, sample);
   jvw.end_struct_member();
-  jvw.begin_struct_member("sample_info", false);
+  jvw.begin_struct_member("sample_info");
   vwrite(jvw, sample_info);
   jvw.end_struct_member();
   jvw.end_struct();
