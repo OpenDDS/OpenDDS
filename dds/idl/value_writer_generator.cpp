@@ -120,7 +120,6 @@ namespace {
     }
   }
 
-  // TODO(sonndinh): Fix calls to begin_array
   void array_helper(const std::string& expression, AST_Array* array,
                     size_t dim_idx, const std::string& idx, int level)
   {
@@ -133,8 +132,13 @@ namespace {
     // in a loop in the generated code
     if ((primitive && (dim_idx < array->n_dims() - 1)) || (!primitive && (dim_idx < array->n_dims()))) {
       const size_t dim = array->dims()[dim_idx]->ev()->u.ulval;
+      std::string elem_kind = "XTypes::TK_ARRAY";
+      if (!primitive && (dim_idx == array->n_dims() - 1)) {
+        AST_Type* const base_type = array->base_type();
+        elem_kind = type_kind(base_type);
+      }
       be_global->impl_ <<
-        indent << "value_writer.begin_array(XTypes::TK_NONE);\n";
+        indent << "value_writer.begin_array(" << elem_kind << ");\n";
       be_global->impl_ <<
         indent << "for (" << (use_cxx11 ? "size_t " : "::CORBA::ULong ") << idx << " = 0; "
         << idx << " != " << dim << "; ++" << idx << ") {\n" <<
@@ -150,8 +154,9 @@ namespace {
         AST_Type* const actual = resolveActualType(array->base_type());
         const AST_PredefinedType::PredefinedType pt =
           dynamic_cast<AST_PredefinedType*>(actual)->pt();
+
         be_global->impl_ <<
-          indent << "value_writer.begin_array(XTypes::TK_NONE);\n";
+          indent << "value_writer.begin_array(" << type_kind(array->base_type()) << ");\n";
         be_global->impl_ << indent <<
           "value_writer.write_" << primitive_type(pt) << "_array (" << expression << (use_cxx11 ? ".data()" : "") << ", " << dim << ");\n";
         be_global->impl_ <<

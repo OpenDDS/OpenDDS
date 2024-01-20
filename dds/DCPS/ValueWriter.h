@@ -10,6 +10,7 @@
 #include "XTypes/MemberDescriptorImpl.h"
 
 #include <dds/Versioned_Namespace.h>
+#include <dds/DdsDynamicDataC.h>
 #include <FACE/Fixed.h>
 
 #include <ace/CDR_Base.h>

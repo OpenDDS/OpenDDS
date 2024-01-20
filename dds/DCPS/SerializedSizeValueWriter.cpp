@@ -465,7 +465,7 @@ size_t SerializedSizeValueWriter::get_serialized_size()
     return size_cache_[0];
   }
 
-  if (log_level >= LogLevel::Warning) {
+  if (DCPS::log_level >= DCPS::LogLevel::Warning) {
     ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: SerializedSizeValueWriter::get_serialized_size:"
                " serialized size has not been computed yet!\n"));
   }
