@@ -65,11 +65,11 @@ private:
   void begin_complex(Extensibility extensiblity, bool is_sequence = false);
   void end_complex();
   void begin_aggregated_member(bool optional, bool present = true);
-  
+
   const Encoding& encoding_;
 
   // Maintain the states necessary to compute and cache the sizes of the top-level type
-  // or its nested members. 
+  // or its nested members.
   struct Metadata {
     explicit Metadata(Extensibility exten)
       : extensibility(exten)

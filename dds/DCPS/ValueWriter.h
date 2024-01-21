@@ -8,6 +8,7 @@
 
 #include "Definitions.h"
 #include "XTypes/MemberDescriptorImpl.h"
+#include "XTypes/TypeObject.h"
 
 #include <dds/Versioned_Namespace.h>
 #include <FACE/Fixed.h>
