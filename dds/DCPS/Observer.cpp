@@ -50,7 +50,7 @@ Observer::~Observer() {}
 void
 vwrite(ValueWriter& vw, const Observer::Sample& sample)
 {
-  vw.begin_struct(DDS::FINAL);
+  vw.begin_struct(FINAL);
   vw.begin_struct_member("instance", false, true);
   vw.write_int32(sample.instance);
   vw.end_struct_member();

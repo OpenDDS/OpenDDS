@@ -43,21 +43,21 @@ public:
     : writer_(writer)
   {}
 
-  void begin_struct(DDS::ExtensibilityKind extensibility = DDS::FINAL);
+  void begin_struct(Extensibility extensibility = FINAL);
   void end_struct();
   void begin_struct_member(const char* name, bool optional = false, bool present = true);
   void end_struct_member();
 
-  void begin_union(DDS::ExtensibilityKind extensibility = DDS::FINAL);
+  void begin_union(Extensibility extensibility = FINAL);
   void end_union();
   void begin_discriminator();
   void end_discriminator();
   void begin_union_member(const char* name, bool optional = false, bool present = true);
   void end_union_member();
 
-  void begin_array(DDS::TypeKind elem_kind = XTypes::TK_NONE);
+  void begin_array(XTypes::TypeKind elem_kind = XTypes::TK_NONE);
   void end_array();
-  void begin_sequence(DDS::TypeKind elem_kind = XTypes::TK_NONE);
+  void begin_sequence(XTypes::TypeKind elem_kind = XTypes::TK_NONE);
   void end_sequence();
   void begin_element(size_t idx);
   void end_element();
@@ -90,7 +90,7 @@ private:
 };
 
 template <typename Writer>
-void JsonValueWriter<Writer>::begin_struct(DDS::ExtensibilityKind)
+void JsonValueWriter<Writer>::begin_struct(Extensibility)
 {
   writer_.StartObject();
 }
@@ -112,7 +112,7 @@ void JsonValueWriter<Writer>::end_struct_member()
 {}
 
 template <typename Writer>
-void JsonValueWriter<Writer>::begin_union(DDS::ExtensibilityKind)
+void JsonValueWriter<Writer>::begin_union(Extensibility)
 {
   writer_.StartObject();
 }
@@ -144,7 +144,7 @@ void JsonValueWriter<Writer>::end_union_member()
 {}
 
 template <typename Writer>
-void JsonValueWriter<Writer>::begin_array(DDS::TypeKind /*elem_tk*/)
+void JsonValueWriter<Writer>::begin_array(XTypes::TypeKind /*elem_tk*/)
 {
   writer_.StartArray();
 }
@@ -156,7 +156,7 @@ void JsonValueWriter<Writer>::end_array()
 }
 
 template <typename Writer>
-void JsonValueWriter<Writer>::begin_sequence(DDS::TypeKind /*elem_tk*/)
+void JsonValueWriter<Writer>::begin_sequence(XTypes::TypeKind /*elem_tk*/)
 {
   writer_.StartArray();
 }

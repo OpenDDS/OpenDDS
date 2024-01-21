@@ -17,21 +17,21 @@ public:
     : encoding_(encoding)
   {}
 
-  void begin_struct(DDS::ExtensibilityKind extensibility);
+  void begin_struct(Extensibility extensibility);
   void end_struct();
   void begin_struct_member(const char* name, bool optional = false, bool present = true);
   void end_struct_member();
 
-  void begin_union(DDS::ExtensibilityKind extensibility);
+  void begin_union(Extensibility extensibility);
   void end_union();
   void begin_discriminator();
   void end_discriminator();
   void begin_union_member(const char* name, bool optional = false, bool present = true);
   void end_union_member();
 
-  void begin_array(DDS::TypeKind elem_kind);
+  void begin_array(XTypes::TypeKind elem_kind);
   void end_array();
-  void begin_sequence(DDS::TypeKind elem_kind);
+  void begin_sequence(XTypes::TypeKind elem_kind);
   void end_sequence();
   void begin_element(size_t idx);
   void end_element();
@@ -62,7 +62,7 @@ public:
   size_t get_serialized_size();
 
 private:
-  void begin_complex(DDS::ExtensibilityKind extensiblity, bool is_sequence = false);
+  void begin_complex(Extensibility extensiblity, bool is_sequence = false);
   void end_complex();
   void begin_aggregated_member(bool optional, bool present = true);
   
@@ -71,15 +71,15 @@ private:
   // Maintain the states necessary to compute and cache the sizes of the top-level type
   // or its nested members. 
   struct Metadata {
-    explicit Metadata(DDS::ExtensibilityKind ek)
-      : extensibility(ek)
+    explicit Metadata(Extensibility exten)
+      : extensibility(exten)
       , total_size(0)
       , mutable_running_total(0)
       , cache_pos(0)
     {}
 
     // Extensibility of the type that we are currently working on.
-    DDS::ExtensibilityKind extensibility;
+    Extensibility extensibility;
 
     // The total size of the corresponding type. This includes delimiter if required.
     size_t total_size;

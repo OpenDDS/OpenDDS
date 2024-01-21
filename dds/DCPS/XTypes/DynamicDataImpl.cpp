@@ -6281,7 +6281,8 @@ void vwrite_struct(ValueWriter& vw, DDS::DynamicData_ptr value, const DDS::Dynam
     return;
   }
 
-  vw.begin_struct(type_desc->extensibility_kind());
+  const Extensibility extensibility = XTypes::dds_to_opendds_ext(type_desc->extensibility_kind());
+  vw.begin_struct(extensibility);
   for (CORBA::ULong i = 0; i < dt->get_member_count(); ++i) {
     DDS::DynamicTypeMember_var dtm;
     rc = dt->get_member_by_index(dtm, i);
@@ -6484,7 +6485,8 @@ void vwrite_union(ValueWriter& vw, DDS::DynamicData_ptr value, const DDS::Dynami
     return;
   }
 
-  vw.begin_union(type_desc->extensibility_kind());
+  const Extensibility extensibility = XTypes::dds_to_opendds_ext(type_desc->extensibility_kind());
+  vw.begin_union(extensibility);
 
   // Discriminator
   DDS::DynamicTypeMember_var dtm;
@@ -6549,7 +6551,7 @@ void vwrite_array_helper(ValueWriter& vw, CORBA::ULong dim_idx, const DDS::Bound
                          std::vector<CORBA::ULong> idx_vec, const DDS::DynamicType_var& elem_type,
                          DDS::DynamicData_ptr value)
 {
-  DDS::TypeKind elem_kind = XTypes::TK_ARRAY;
+  XTypes::TypeKind elem_kind = XTypes::TK_ARRAY;
   if (dim_idx == dims.length() - 1) {
     elem_kind = elem_type->get_kind();
   }

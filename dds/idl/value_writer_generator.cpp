@@ -266,6 +266,19 @@ namespace {
     return "";
   }
 
+  std::string extensibility_kind(ExtensibilityKind ek)
+  {
+    switch (ek) {
+    case extensibilitykind_final:
+      return "OpenDDS::DCPS::FINAL";
+    case extensibilitykind_appendable:
+      return "OpenDDS::DCPS::APPENDABLE";
+    case extensibilitykind_mutable:
+      return "OpenDDS::DCPS::MUTABLE";
+    default:
+      return "invalid";
+    }
+  }
 }
 
 bool value_writer_generator::gen_enum(AST_Enum*,
@@ -333,10 +346,7 @@ bool value_writer_generator::gen_struct(AST_Structure* node,
     write.endArgs();
 
     const ExtensibilityKind ek = be_global->extensibility(node);
-    be_global->impl_ <<
-      "  value_writer.begin_struct(" <<
-      (ek == extensibilitykind_final ? "DDS::FINAL" :
-       ek == extensibilitykind_appendable ? "DDS::APPENDABLE" : "DDS::MUTABLE") << ");\n";
+    be_global->impl_ << "  value_writer.begin_struct(" << extensibility_kind(ek) << ");\n";
     for (std::vector<AST_Field*>::const_iterator pos = fields.begin(), limit = fields.end();
          pos != limit; ++pos) {
       AST_Field* const field = *pos;
@@ -376,10 +386,7 @@ bool value_writer_generator::gen_union(AST_Union* u,
     write.endArgs();
 
     const ExtensibilityKind ek = be_global->extensibility(u);
-    be_global->impl_ <<
-      "  value_writer.begin_union(" <<
-      (ek == extensibilitykind_final ? "DDS::FINAL" :
-       ek == extensibilitykind_appendable ? "DDS::APPENDABLE" : "DDS::MUTABLE") << ");\n";
+    be_global->impl_ << "  value_writer.begin_union(" << extensibility_kind(ek) << ");\n";
     be_global->impl_ <<
       "  value_writer.begin_discriminator();\n";
     generate_write("value._d()" , discriminator, "i");

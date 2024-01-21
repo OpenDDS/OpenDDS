@@ -1,11 +1,13 @@
 #include "SerializedSizeValueWriter.h"
 
+#include <dds/DCPS/debug.h>
+
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
 namespace DCPS {
 
-void SerializedSizeValueWriter::begin_complex(DDS::ExtensibilityKind extensibility,
+void SerializedSizeValueWriter::begin_complex(Extensibility extensibility,
                                               bool is_sequence)
 {
   // This is where we keep a bookmark for when the aggregated value starts in the stream.
@@ -38,9 +40,9 @@ void SerializedSizeValueWriter::begin_complex(DDS::ExtensibilityKind extensibili
   // Also, for mutable struct, each of its members has its size cached,
   // regardless of whether it is a nested member or not.
   if (!state_.empty()) {
-    const DDS::ExtensibilityKind enclosing_ek = state_.top().extensibility;
-    if (enclosing_ek == DDS::FINAL || enclosing_ek == DDS::APPENDABLE) {
-      if (extensibility == DDS::FINAL) {
+    const Extensibility enclosing_ek = state_.top().extensibility;
+    if (enclosing_ek == FINAL || enclosing_ek == APPENDABLE) {
+      if (extensibility == FINAL) {
         // We don't need to compute and cache the size for this struct.
         // Instead, what we need is the total size of the closest ancestor type for which
         // the size is required by a Dheader or a Emheader.
@@ -78,7 +80,7 @@ void SerializedSizeValueWriter::begin_complex(DDS::ExtensibilityKind extensibili
       // serialized_size_parameter_id before this which already accounts for any alignment
       // ahead of this struct (more precisely, the alignment happens after the previous member).
       state_.push(Metadata(extensibility));
-      if (extensibility == DDS::APPENDABLE || extensibility == DDS::MUTABLE) {
+      if (extensibility == APPENDABLE || extensibility == MUTABLE) {
         serialized_size_delimiter(encoding_, state_.top().total_size);
       }
       if (is_sequence) {
@@ -91,7 +93,7 @@ void SerializedSizeValueWriter::begin_complex(DDS::ExtensibilityKind extensibili
   } else {
     // Top-level type can only be struct or union.
     state_.push(Metadata(extensibility));
-    if (extensibility == DDS::APPENDABLE || extensibility == DDS::MUTABLE) {
+    if (extensibility == APPENDABLE || extensibility == MUTABLE) {
       serialized_size_delimiter(encoding_, state_.top().total_size);
     }
 
@@ -103,9 +105,9 @@ void SerializedSizeValueWriter::begin_complex(DDS::ExtensibilityKind extensibili
 void SerializedSizeValueWriter::end_complex()
 {
   Metadata& state = state_.top();
-  const DDS::ExtensibilityKind extensibility = state.extensibility;
+  const Extensibility extensibility = state.extensibility;
 
-  if (extensibility == DDS::MUTABLE) {
+  if (extensibility == MUTABLE) {
     serialized_size_list_end_parameter_id(encoding_, state.total_size, state.mutable_running_total);
   }
 
@@ -114,9 +116,9 @@ void SerializedSizeValueWriter::end_complex()
   state_.pop();
 
   if (!state_.empty()) {
-    const DDS::ExtensibilityKind enclosing_ek = state_.top().extensibility;
-    if (enclosing_ek == DDS::FINAL || enclosing_ek == DDS::APPENDABLE) {
-      if (extensibility == DDS::FINAL) {
+    const Extensibility enclosing_ek = state_.top().extensibility;
+    if (enclosing_ek == FINAL || enclosing_ek == APPENDABLE) {
+      if (extensibility == FINAL) {
         // Copy the accumulated size back to the entry for the containing type.
         state_.top().total_size = total_size;
         return;
@@ -139,20 +141,20 @@ void SerializedSizeValueWriter::end_complex()
 void SerializedSizeValueWriter::begin_aggregated_member(bool optional, bool present)
 {
   Metadata& state = state_.top();
-  const DDS::ExtensibilityKind extensibility = state.extensibility;
+  const Extensibility extensibility = state.extensibility;
   size_t& total_size = state.total_size;
   size_t& mutable_running_total = state.mutable_running_total;
 
-  if (optional && (extensibility == DDS::FINAL || extensibility == DDS::APPENDABLE)) {
+  if (optional && (extensibility == FINAL || extensibility == APPENDABLE)) {
     primitive_serialized_size_boolean(encoding_, total_size);
     return;
   }
-  if (extensibility == DDS::MUTABLE && present) {
+  if (extensibility == MUTABLE && present) {
     serialized_size_parameter_id(encoding_, total_size, mutable_running_total);
   }
 }
 
-void SerializedSizeValueWriter::begin_struct(DDS::ExtensibilityKind extensibility)
+void SerializedSizeValueWriter::begin_struct(Extensibility extensibility)
 {
   begin_complex(extensibility);
 }
@@ -173,7 +175,7 @@ void SerializedSizeValueWriter::end_struct_member()
   return;
 }
 
-void SerializedSizeValueWriter::begin_union(DDS::ExtensibilityKind extensibility)
+void SerializedSizeValueWriter::begin_union(Extensibility extensibility)
 {
   begin_complex(extensibility);
 }
@@ -207,11 +209,11 @@ void SerializedSizeValueWriter::end_union_member()
 // Array can be treated similar to final/appendable struct with each element is a member.
 // If the element type is primitive, it is similar to final struct.
 // If the element type is not primitive, it is similar to appendable struct with Dheader.
-void SerializedSizeValueWriter::begin_array(DDS::TypeKind elem_tk)
+void SerializedSizeValueWriter::begin_array(XTypes::TypeKind elem_tk)
 {
-  DDS::ExtensibilityKind arr_exten = DDS::FINAL;
+  Extensibility arr_exten = FINAL;
   if (!XTypes::is_primitive(elem_tk)) {
-    arr_exten = DDS::APPENDABLE;
+    arr_exten = APPENDABLE;
   }
 
   begin_complex(arr_exten);
@@ -227,11 +229,11 @@ void SerializedSizeValueWriter::end_array()
 // If element type is not primitive, it can be treated as appendable struct which has Dheader.
 // In both case, elements are serialized back-to-back similarly to final/appendable struct.
 // One difference is that sequence has length ahead of all the elements.
-void SerializedSizeValueWriter::begin_sequence(DDS::TypeKind elem_tk)
+void SerializedSizeValueWriter::begin_sequence(XTypes::TypeKind elem_tk)
 {
-  DDS::ExtensibilityKind seq_exten = DDS::FINAL;
+  Extensibility seq_exten = FINAL;
   if (!XTypes::is_primitive(elem_tk)) {
-    seq_exten = DDS::APPENDABLE;
+    seq_exten = APPENDABLE;
   }
 
   begin_complex(seq_exten, true /*is_sequence*/);
@@ -258,7 +260,7 @@ void SerializedSizeValueWriter::write_boolean(ACE_CDR::Boolean /*value*/)
 {
   primitive_serialized_size_boolean(encoding_, state_.top().total_size);
 
-  if (state_.top().extensibility == DDS::MUTABLE) {
+  if (state_.top().extensibility == MUTABLE) {
     size_cache_.push_back(boolean_cdr_size);
   }
 }
@@ -267,7 +269,7 @@ void SerializedSizeValueWriter::write_byte(ACE_CDR::Octet /*value*/)
 {
   primitive_serialized_size_octet(encoding_, state_.top().total_size);
 
-  if (state_.top().extensibility == DDS::MUTABLE) {
+  if (state_.top().extensibility == MUTABLE) {
     size_cache_.push_back(byte_cdr_size);
   }
 }
@@ -277,7 +279,7 @@ void SerializedSizeValueWriter::write_int8(ACE_CDR::Int8 /*value*/)
 {
   primitive_serialized_size_int8(encoding_, state_.top().total_size);
 
-  if (state_.top().extensibility == DDS::MUTABLE) {
+  if (state_.top().extensibility == MUTABLE) {
     size_cache_.push_back(int8_cdr_size);
   }
 }
@@ -286,7 +288,7 @@ void SerializedSizeValueWriter::write_uint8(ACE_CDR::UInt8 /*value*/)
 {
   primitive_serialized_size_uint8(encoding_, state_.top().total_size);
 
-  if (state_.top().extensibility == DDS::MUTABLE) {
+  if (state_.top().extensibility == MUTABLE) {
     size_cache_.push_back(uint8_cdr_size);
   }
 }
@@ -296,7 +298,7 @@ void SerializedSizeValueWriter::write_int16(ACE_CDR::Short value)
 {
   primitive_serialized_size(encoding_, state_.top().total_size, value);
 
-  if (state_.top().extensibility == DDS::MUTABLE) {
+  if (state_.top().extensibility == MUTABLE) {
     size_cache_.push_back(int16_cdr_size);
   }
 }
@@ -305,7 +307,7 @@ void SerializedSizeValueWriter::write_uint16(ACE_CDR::UShort value)
 {
   primitive_serialized_size(encoding_, state_.top().total_size, value);
 
-  if (state_.top().extensibility == DDS::MUTABLE) {
+  if (state_.top().extensibility == MUTABLE) {
     size_cache_.push_back(uint16_cdr_size);
   }
 }
@@ -314,7 +316,7 @@ void SerializedSizeValueWriter::write_int32(ACE_CDR::Long value)
 {
   primitive_serialized_size(encoding_, state_.top().total_size, value);
 
-  if (state_.top().extensibility == DDS::MUTABLE) {
+  if (state_.top().extensibility == MUTABLE) {
     size_cache_.push_back(int32_cdr_size);
   }
 }
@@ -323,7 +325,7 @@ void SerializedSizeValueWriter::write_uint32(ACE_CDR::ULong value)
 {
   primitive_serialized_size(encoding_, state_.top().total_size, value);
 
-  if (state_.top().extensibility == DDS::MUTABLE) {
+  if (state_.top().extensibility == MUTABLE) {
     size_cache_.push_back(uint32_cdr_size);
   }
 }
@@ -332,7 +334,7 @@ void SerializedSizeValueWriter::write_int64(ACE_CDR::LongLong value)
 {
   primitive_serialized_size(encoding_, state_.top().total_size, value);
 
-  if (state_.top().extensibility == DDS::MUTABLE) {
+  if (state_.top().extensibility == MUTABLE) {
     size_cache_.push_back(int64_cdr_size);
   }
 }
@@ -341,7 +343,7 @@ void SerializedSizeValueWriter::write_uint64(ACE_CDR::ULongLong value)
 {
   primitive_serialized_size(encoding_, state_.top().total_size, value);
 
-  if (state_.top().extensibility == DDS::MUTABLE) {
+  if (state_.top().extensibility == MUTABLE) {
     size_cache_.push_back(uint64_cdr_size);
   }
 }
@@ -350,7 +352,7 @@ void SerializedSizeValueWriter::write_float32(ACE_CDR::Float value)
 {
   primitive_serialized_size(encoding_, state_.top().total_size, value);
 
-  if (state_.top().extensibility == DDS::MUTABLE) {
+  if (state_.top().extensibility == MUTABLE) {
     size_cache_.push_back(float32_cdr_size);
   }
 }
@@ -359,7 +361,7 @@ void SerializedSizeValueWriter::write_float64(ACE_CDR::Double value)
 {
   primitive_serialized_size(encoding_, state_.top().total_size, value);
 
-  if (state_.top().extensibility == DDS::MUTABLE) {
+  if (state_.top().extensibility == MUTABLE) {
     size_cache_.push_back(float64_cdr_size);
   }
 }
@@ -368,7 +370,7 @@ void SerializedSizeValueWriter::write_float128(ACE_CDR::LongDouble value)
 {
   primitive_serialized_size(encoding_, state_.top().total_size, value);
 
-  if (state_.top().extensibility == DDS::MUTABLE) {
+  if (state_.top().extensibility == MUTABLE) {
     size_cache_.push_back(float128_cdr_size);
   }
 }
@@ -382,7 +384,7 @@ void SerializedSizeValueWriter::write_char8(ACE_CDR::Char /*value*/)
 {
   primitive_serialized_size_char(encoding_, state_.top().total_size);
 
-  if (state_.top().extensibility == DDS::MUTABLE) {
+  if (state_.top().extensibility == MUTABLE) {
     size_cache_.push_back(char8_cdr_size);
   }
 }
@@ -391,7 +393,7 @@ void SerializedSizeValueWriter::write_char16(ACE_CDR::WChar /*value*/)
 {
   primitive_serialized_size_wchar(encoding_, state_.top().total_size);
 
-  if (state_.top().extensibility == DDS::MUTABLE) {
+  if (state_.top().extensibility == MUTABLE) {
     size_cache_.push_back(char16_cdr_size);
   }
 }
@@ -404,7 +406,7 @@ void SerializedSizeValueWriter::write_string(const ACE_CDR::Char* value, size_t 
     size += length + 1; // Include null termination
   }
 
-  if (state_.top().extensibility == DDS::MUTABLE) {
+  if (state_.top().extensibility == MUTABLE) {
     // It's safe to do this since before every member of a mutable type,
     // the total_size variable is set to zero.
     size_cache_.push_back(size);
@@ -419,7 +421,7 @@ void SerializedSizeValueWriter::write_wstring(const ACE_CDR::WChar* value, size_
     size += length * char16_cdr_size; // Not include null termination
   }
 
-  if (state_.top().extensibility == DDS::MUTABLE) {
+  if (state_.top().extensibility == MUTABLE) {
     size_cache_.push_back(size);
   }
 }
@@ -465,7 +467,7 @@ size_t SerializedSizeValueWriter::get_serialized_size()
     return size_cache_[0];
   }
 
-  if (DCPS::log_level >= DCPS::LogLevel::Warning) {
+  if (log_level >= LogLevel::Warning) {
     ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: SerializedSizeValueWriter::get_serialized_size:"
                " serialized size has not been computed yet!\n"));
   }
