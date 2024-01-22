@@ -1542,6 +1542,8 @@ jobs:
     needs: ACE_TAO_u20_clang12_i0w1_sec
 
     steps:
+    - name: Update apt indexes
+      run: sudo apt-get -y update
     - name: install xerces
       run: sudo apt-get -y install libxerces-c-dev
     - name: checkout MPC
@@ -1840,6 +1842,8 @@ jobs:
     needs: ACE_TAO_u20_clang10_sec_js0
 
     steps:
+    - name: Update apt indexes
+      run: sudo apt-get -y update
     - name: install xerces
       run: sudo apt-get -y install libxerces-c-dev
     - name: checkout MPC
@@ -2137,6 +2141,8 @@ jobs:
     needs: ACE_TAO_u20_gcc9_d0w1_cpp03
 
     steps:
+    - name: Update apt indexes
+      run: sudo apt-get -y update
     - name: install xerces
       run: sudo apt-get -y install libxerces-c-dev
     - name: checkout MPC
@@ -2431,6 +2437,8 @@ jobs:
     needs: ACE_TAO_u20_gcc8_i0_js0_j
 
     steps:
+    - name: Update apt indexes
+      run: sudo apt-get -y update
     - name: install gcc and g++
       run: |
         sudo apt-get install g++-8
@@ -2915,6 +2923,8 @@ jobs:
     runs-on: ubuntu-20.04
 
     steps:
+    - name: Update apt indexes
+      run: sudo apt-get -y update
     - name: install xerces
       run: sudo apt-get -y install libxerces-c-dev
     - name: checkout OpenDDS
@@ -3503,6 +3513,8 @@ jobs:
     needs: ACE_TAO_u20_p1_asan
 
     steps:
+    - name: Update apt indexes
+      run: sudo apt-get -y update
     - name: install xerces
       run: sudo apt-get -y install libxerces-c-dev
     - name: checkout MPC
@@ -3801,6 +3813,8 @@ jobs:
     needs: ACE_TAO_u20_p1_tsan
 
     steps:
+    - name: Update apt indexes
+      run: sudo apt-get -y update
     - name: install xerces
       run: sudo apt-get -y install libxerces-c-dev
     - name: checkout MPC
@@ -4093,6 +4107,8 @@ jobs:
     needs: ACE_TAO_u20_p1_ubsan
 
     steps:
+    - name: Update apt indexes
+      run: sudo apt-get -y update
     - name: install xerces
       run: sudo apt-get -y install libxerces-c-dev
     - name: checkout MPC
@@ -4410,6 +4426,8 @@ jobs:
       run: |
         tar xvJf openssl3_u20.tar.xz
         rm -f openssl3_u20.tar.xz
+    - name: Update apt indexes
+      run: sudo apt-get -y update
     - name: install xerces
       run: sudo apt-get -y install libxerces-c-dev
     - name: checkout MPC
@@ -4764,6 +4782,8 @@ jobs:
     needs: ACE_TAO_u20_p1
 
     steps:
+    - name: Update apt indexes
+      run: sudo apt-get -y update
     - name: install xerces
       run: sudo apt-get -y install libxerces-c-dev
     - name: checkout MPC
