@@ -1632,6 +1632,8 @@ jobs:
       id-token: write
 
     steps:
+    - name: Update apt indexes
+      run: sudo apt-get -y update
     - name: install xerces
       run: sudo apt-get -y install libxerces-c-dev
     - name: checkout MPC
@@ -1931,6 +1933,8 @@ jobs:
       id-token: write
 
     steps:
+    - name: Update apt indexes
+      run: sudo apt-get -y update
     - name: install xerces
       run: sudo apt-get -y install libxerces-c-dev
     - name: checkout MPC
@@ -3028,6 +3032,8 @@ jobs:
     needs: ACE_TAO_u20_gcc10_bsafe_js0_FM-2c
 
     steps:
+    - name: Update apt indexes
+      run: sudo apt-get -y update
     - name: install xerces
       run: sudo apt-get -y install libxerces-c-dev
     - name: checkout MPC
@@ -3603,6 +3609,8 @@ jobs:
       id-token: write
 
     steps:
+    - name: Update apt indexes
+      run: sudo apt-get -y update
     - name: install xerces
       run: sudo apt-get -y install libxerces-c-dev
     - name: checkout MPC
@@ -3895,6 +3903,8 @@ jobs:
       id-token: write
 
     steps:
+    - name: Update apt indexes
+      run: sudo apt-get -y update
     - name: install xerces
       run: sudo apt-get -y install libxerces-c-dev
     - name: checkout MPC
@@ -4198,6 +4208,8 @@ jobs:
       id-token: write
 
     steps:
+    - name: Update apt indexes
+      run: sudo apt-get -y update
     - name: install xerces
       run: sudo apt-get -y install libxerces-c-dev
     - name: checkout MPC
@@ -4518,6 +4530,8 @@ jobs:
       run: |
         tar xvJf openssl3_u20.tar.xz
         rm -f openssl3_u20.tar.xz
+    - name: Update apt indexes
+      run: sudo apt-get -y update
     - name: install xerces
       run: sudo apt-get -y install libxerces-c-dev
     - name: checkout MPC
@@ -4877,6 +4891,8 @@ jobs:
       id-token: write
 
     steps:
+    - name: Update apt indexes
+      run: sudo apt-get -y update
     - name: install xerces
       run: sudo apt-get -y install libxerces-c-dev
     - name: checkout MPC
