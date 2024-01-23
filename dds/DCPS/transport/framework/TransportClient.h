@@ -60,14 +60,15 @@ public:
 
   // Local setup:
 
-  void enable_transport(bool reliable, bool durable);
+  void enable_transport(bool reliable, bool durable, DomainParticipantImpl* dpi);
   void enable_transport_using_config(bool reliable, bool durable,
-                                     const TransportConfig_rch& tc);
+                                     const TransportConfig_rch& tc,
+                                     DomainParticipantImpl* dpi);
 
   bool swap_bytes() const { return swap_bytes_; }
   bool cdr_encapsulation() const { return cdr_encapsulation_; }
   const TransportLocatorSeq& connection_info() const { return conn_info_; }
-  void populate_connection_info();
+  void populate_connection_info(DomainParticipantImpl* dpi);
   bool is_reliable() const { return reliable_; }
 
   // Managing associations to remote peers:

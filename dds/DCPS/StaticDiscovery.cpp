@@ -2230,7 +2230,7 @@ StaticDiscovery::parse_endpoints()
 
     TransportLocatorSeq trans_info;
     try {
-      config->populate_locators(trans_info);
+      config->populate_locators(trans_info, domain);
     }
     catch (const CORBA::Exception& ex) {
       ACE_ERROR_RETURN((LM_ERROR,

@@ -28,8 +28,9 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-MulticastTransport::MulticastTransport(const MulticastInst_rch& inst)
-  : TransportImpl(inst)
+MulticastTransport::MulticastTransport(const MulticastInst_rch& inst,
+                                       DDS::DomainId_t domain)
+  : TransportImpl(inst, domain)
 {
   if (! (configure_i(inst) && open())) {
     throw Transport::UnableToCreate();
@@ -408,11 +409,12 @@ MulticastTransport::shutdown_i()
 }
 
 bool
-MulticastTransport::connection_info_i(TransportLocator& info, ConnectionInfoFlags flags) const
+MulticastTransport::connection_info_i(TransportLocator& info,
+                                      ConnectionInfoFlags flags) const
 {
   MulticastInst_rch cfg = config();
   if (cfg) {
-    cfg->populate_locator(info, flags);
+    cfg->populate_locator(info, flags, domain_);
     return true;
   }
   return false;

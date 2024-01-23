@@ -433,12 +433,14 @@ void RtpsUdpDataLink::on_data_available(RcHandle<InternalDataReader<NetworkInter
     return;
   }
 
+  RtpsUdpTransport_rch tport = transport();
+
   multicast_manager_.process(samples,
                              infos,
                              cfg->multicast_interface(),
                              get_reactor(),
                              receive_strategy().in(),
-                             cfg->multicast_group_address(),
+                             cfg->multicast_group_address(tport->domain()),
                              multicast_socket_
 #ifdef ACE_HAS_IPV6
                              , cfg->ipv6_multicast_group_address(),
