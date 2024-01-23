@@ -1,0 +1,94 @@
+module ValueWriter {
+
+#define NESTED_MEMBERS                          \
+  boolean b_field; \
+  float f_field; \
+  octet o_field;
+
+#define TOP_MEMBERS \
+  short s_field; \
+  long l_field;
+
+#define BOTTOM_MEMBERS \
+  string str_field; \
+  unsigned long long ull_field;
+
+@final
+struct FinalStruct {
+  NESTED_MEMBERS
+};
+
+@appendable
+struct AppendableStruct {
+  NESTED_MEMBERS
+};
+
+@mutable
+struct MutableStruct {
+  NESTED_MEMBERS
+};
+
+@final
+struct FinalFinalStruct {
+  TOP_MEMBERS
+  FinalStruct nested_field;
+  BOTTOM_MEMBERS
+};
+
+@final
+struct FinalAppendableStruct {
+  TOP_MEMBERS
+  AppendableStruct nested_field;
+  BOTTOM_MEMBERS
+};
+
+@final
+struct FinalMutableStruct {
+  TOP_MEMBERS
+  MutableStruct nested_field;
+  BOTTOM_MEMBERS
+};
+
+@appendable
+struct AppendableFinalStruct {
+  TOP_MEMBERS
+  FinalStruct nested_field;
+  BOTTOM_MEMBERS
+};
+
+@appendable
+struct AppendableAppendableStruct {
+  TOP_MEMBERS
+  AppendableStruct nested_field;
+  BOTTOM_MEMBERS
+};
+
+@appendable
+struct AppendableMutableStruct {
+  TOP_MEMBERS
+  MutableStruct nested_field;
+  BOTTOM_MEMBERS
+};
+
+@mutable
+struct MutableFinalStruct {
+  TOP_MEMBERS
+  FinalStruct nested_field;
+  BOTTOM_MEMBERS
+};
+
+@mutable
+struct MutableAppendableStruct {
+  TOP_MEMBERS
+  AppendableStruct nested_field;
+  BOTTOM_MEMBERS
+};
+
+@mutable
+struct MutableMutableStruct {
+  TOP_MEMBERS
+  MutableStruct nested_field;
+  BOTTOM_MEMBERS
+};
+
+}; // module ValueWriter

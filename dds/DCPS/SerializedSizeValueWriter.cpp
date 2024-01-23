@@ -91,6 +91,8 @@ void SerializedSizeValueWriter::begin_complex(Extensibility extensibility,
     }
   } else {
     // Top-level type can only be struct or union.
+    // Clear the cache so that we can reuse the same object in another vwrite call.
+    size_cache_.clear();
     state_.push(Metadata(extensibility));
     if (extensibility == APPENDABLE || extensibility == MUTABLE) {
       serialized_size_delimiter(encoding_, state_.top().total_size);
@@ -460,7 +462,7 @@ void SerializedSizeValueWriter::write_absent_value()
   return;
 }
 
-size_t SerializedSizeValueWriter::get_serialized_size()
+size_t SerializedSizeValueWriter::get_serialized_size() const
 {
   if (!size_cache_.empty()) {
     return size_cache_[0];
@@ -471,6 +473,11 @@ size_t SerializedSizeValueWriter::get_serialized_size()
                " serialized size has not been computed yet!\n"));
   }
   return 0;
+}
+
+const std::vector<size_t>& SerializedSizeValueWriter::get_serialized_sizes() const
+{
+  return size_cache_;
 }
 
 }

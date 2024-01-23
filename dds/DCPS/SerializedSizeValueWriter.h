@@ -59,7 +59,8 @@ public:
   void write_enum(const char* name, ACE_CDR::Long value);
   void write_absent_value();
 
-  size_t get_serialized_size();
+  size_t get_serialized_size() const;
+  const std::vector<size_t>& get_serialized_sizes() const;
 
 private:
   void begin_complex(Extensibility extensiblity, bool is_sequence = false);
