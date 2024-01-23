@@ -440,7 +440,7 @@ Sedp::init(const GUID_t& guid,
     // Bind to a specific multicast group
     const u_short mc_port = disco.pb() + disco.dg() * domainId + disco.dx();
 
-    DCPS::NetworkAddress mc_addr = disco.default_multicast_group();
+    DCPS::NetworkAddress mc_addr = disco.default_multicast_group(domainId);
     mc_addr.set_port_number(mc_port);
     config_store_->set(transport_inst_->config_key("MULTICAST_GROUP_ADDRESS").c_str(),
                        NetworkAddress(mc_addr),

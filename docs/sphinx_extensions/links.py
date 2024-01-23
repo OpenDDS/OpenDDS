@@ -258,7 +258,10 @@ def add_omg_spec(app, slug, version, our_name=None, display_name=None):
             if kind == fitz.LINK_GOTO:
                 loc = 'page={}&view=FitH,{}'.format(page, dest['to'].y)
             elif kind == fitz.LINK_NAMED:
-                loc = dest['name']
+                if 'name' in dest:
+                    loc = dest['name']
+                else:
+                    loc = dest['nameddest']
             else:
                 continue
 

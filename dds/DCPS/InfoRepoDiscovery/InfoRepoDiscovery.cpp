@@ -946,7 +946,7 @@ InfoRepoDiscovery::removeDataWriterRemote(const GUID_t& publicationId)
 }
 
 int
-InfoRepoDiscovery::Config::discovery_config(ACE_Configuration_Heap&)
+InfoRepoDiscovery::Config::discovery_config()
 {
   const Service_Participant::RepoKeyDiscoveryMap& discoveryMap = TheServiceParticipant->discoveryMap();
 
