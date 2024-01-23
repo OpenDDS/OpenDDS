@@ -961,6 +961,31 @@ namespace {
       indent << "}\n";
   }
 
+  void generate_serialized_size_for_map(const std::string& indent, AST_Type* type, const std::string& cxx_elem, bool key, bool nested_key_only) {
+    const Classification cls = classify(type);
+
+    const std::string& accessor = key ? "it->first" : "it->second";
+
+    // String, Struct, Array, Sequence, Union
+    if (cls & CL_STRING) {
+      be_global->impl_ << indent <<
+        "primitive_serialized_size_ulong(encoding, size);\n";
+      const string strlen_suffix = (cls & CL_WIDE)
+        ? " * char16_cdr_size;\n" : " + 1;\n";
+      be_global->impl_ << indent <<
+        "size += " << accessor << ".size()" << strlen_suffix;
+    } else {
+      RefWrapper elem_wrapper(type, cxx_elem, accessor);
+      elem_wrapper.nested_key_only_ = nested_key_only;
+      Intro intro;
+      elem_wrapper.done(&intro);
+      const std::string indent = "    ";
+      intro.join(be_global->impl_, indent);
+      be_global->impl_ <<
+        indent << "serialized_size(encoding, size, " << elem_wrapper.ref() << ");\n";
+   }
+  }
+
   void gen_map_i(
     UTL_ScopedName* tdname, AST_Map* map, bool nested_key_only, const FieldInfo* anonymous = 0)
   {
@@ -984,6 +1009,15 @@ namespace {
     Classification val_cls = classify(val);
     const bool val_primitive = val_cls & CL_PRIMITIVE;
 
+    if (key_cls & CL_INTERFACE || val_cls & CL_INTERFACE) {
+      be_global->error("map with either a key or value of objrefs is not marshaled");
+      return;
+    } else if (key_cls & CL_UNKNOWN || val_cls & CL_UNKNOWN) {
+      be_global->error("map with either key or value of unknown/unsupported type");
+      return;
+    }
+
+    // TODO(tyler) Can we assume this will always be true with maps
     const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
     std::string key_cxx_elem;
     std::string val_cxx_elem;
@@ -1022,95 +1056,45 @@ namespace {
           "  }\n";
       }
 
-      if (key_cls & CL_INTERFACE || val_cls & CL_INTERFACE) {
+      // Simple Types
+      bool key_generated = false;
+      if (key_cls & CL_ENUM) {
         be_global->impl_ <<
-          "  // map with either a key or value of objrefs is not marshaled\n";
-      } else if (key_cls & CL_UNKNOWN || val_cls & CL_UNKNOWN) {
+          "  primitive_serialized_size_ulong(encoding, size, " + get_length + ");\n";
+        key_generated = true;
+      } else if (key_cls & CL_PRIMITIVE) {
+        be_global->impl_ << checkAlignment(key) <<
+          "  " + getSizeExprPrimitive(key, get_length) << ";\n";
+        key_generated = true;
+      }
+
+      bool val_generated = false;
+      if (val_cls & CL_ENUM) {
         be_global->impl_ <<
-          "  // map with either key or value of unknown/unsupported type\n";
-      } else {
+          "  primitive_serialized_size_ulong(encoding, size, " + get_length + ");\n";
+        val_generated = true;
+      } else if (val_cls & CL_PRIMITIVE) {
+        be_global->impl_ << checkAlignment(val) <<
+          "  " + getSizeExprPrimitive(val, get_length) << ";\n";
+        val_generated = true;
+      }
 
-        // Simple Types
-        bool key_generated = false;
-        if (key_cls & CL_ENUM) {
-          be_global->impl_ <<
-            "  primitive_serialized_size_ulong(encoding, size, " + get_length + ");\n";
-          key_generated = true;
-        } else if (key_cls & CL_PRIMITIVE) {
-          be_global->impl_ << checkAlignment(key) <<
-            "  " + getSizeExprPrimitive(key, get_length) << ";\n";
-          key_generated = true;
+      // Complex Types
+      if (!key_generated || !val_generated) {
+        be_global->impl_ <<
+          "  for (auto it = " << value_access << ".begin(); it != " << value_access << ".end(); ++it) {\n";
+        const std::string indent = "    ";
+
+        if (!key_generated) {
+          generate_serialized_size_for_map(indent, key, key_cxx_elem, true, nested_key_only);
         }
 
-        bool val_generated = false;
-        if (val_cls & CL_ENUM) {
-          be_global->impl_ <<
-            "  primitive_serialized_size_ulong(encoding, size, " + get_length + ");\n";
-          val_generated = true;
-        } else if (val_cls & CL_PRIMITIVE) {
-          be_global->impl_ << checkAlignment(val) <<
-            "  " + getSizeExprPrimitive(val, get_length) << ";\n";
-          val_generated = true;
+        if (!val_generated) {
+          generate_serialized_size_for_map(indent, val, val_cxx_elem, false, nested_key_only);
         }
 
-        // Complex Types
-        if (!key_generated || !val_generated) {
-          be_global->impl_ <<
-            "  for (auto it = " << value_access << ".begin(); it != " << value_access << ".end(); ++it) {\n";
-          const std::string indent = "    ";
-
-          if (!key_generated) { // Key
-            // String, Struct, Array, Sequence, Union
-            if (key_cls & CL_STRING) {
-              be_global->impl_ << indent <<
-                "primitive_serialized_size_ulong(encoding, size);\n";
-              const string strlen_suffix = (key_cls & CL_WIDE)
-                ? " * char16_cdr_size;\n" : " + 1;\n";
-              if (use_cxx11) {
-                be_global->impl_ << indent <<
-                  "size += it->first.size()" << strlen_suffix;
-              } else {
-                be_global->impl_ << indent <<
-                  "if (it->first) {\n" << indent <<
-                  "  size += ACE_OS::strlen(it->first)" << strlen_suffix <<
-                  "}\n";
-              }
-            } else {
-              RefWrapper elem_wrapper(key, key_cxx_elem, "it->first");
-              elem_wrapper.nested_key_only_ = nested_key_only;
-              Intro intro;
-              elem_wrapper.done(&intro);
-              const std::string indent = "    ";
-              intro.join(be_global->impl_, indent);
-              be_global->impl_ <<
-                indent << "serialized_size(encoding, size, " << elem_wrapper.ref() << ");\n";
-            }
-          }
-
-          if (!val_generated) { // Value
-            // String, Struct, Array, Sequence, Union
-            if (val_cls & CL_STRING) {
-              be_global->impl_ << indent <<
-                "primitive_serialized_size_ulong(encoding, size);\n";
-              const string strlen_suffix = (val_cls & CL_WIDE)
-                ? " * char16_cdr_size;\n" : " + 1;\n";
-              be_global->impl_ << indent <<
-                "size += it->second.size()" << strlen_suffix;
-            } else {
-              RefWrapper elem_wrapper(key, key_cxx_elem, "it->second");
-              elem_wrapper.nested_key_only_ = nested_key_only;
-              Intro intro;
-              elem_wrapper.done(&intro);
-              const std::string indent = "    ";
-              intro.join(be_global->impl_, indent);
-              be_global->impl_ <<
-                indent << "serialized_size(encoding, size, " << elem_wrapper.ref() << ");\n";
-            }
-          }
-
-          be_global->impl_ <<
-            "  }\n";
-        }
+        be_global->impl_ <<
+          "  }\n";
       }
     }
 
@@ -1151,6 +1135,7 @@ namespace {
       be_global->impl_ <<
         "  for (auto it = " << value_access <<  ".begin(); it != " << value_access << ".end(); ++it) {\n";
 
+      // TODO(tyler) Can these just be errors, and skip code generation completely? See line 1012
       if (key_cls & CL_INTERFACE || val_cls & CL_INTERFACE) {
         be_global->impl_ <<
           "  return false; // map with either a key or value of objrefs is not marshaled\n";
@@ -1242,67 +1227,58 @@ namespace {
       be_global->impl_ <<
         "  for (CORBA::ULong i = 0; i < length; ++i) {\n";
 
-      if (key_cls & CL_INTERFACE || val_cls & CL_INTERFACE) {
+      // Key
+      if (key_cls & CL_STRING) {
         be_global->impl_ <<
-          "    return false; // map with either a key or value of objrefs is not marshaled\n";
-      } else if (key_cls & CL_UNKNOWN || val_cls & CL_UNKNOWN) {
-        be_global->impl_ <<
-          "    return false; // map with either key or value of unknown/unsupported type\n";
+          "    std::string key;\n" <<
+          "    if (!(strm >> key)) {\n";
       } else {
-        // Key
-        if (key_cls & CL_STRING) {
-          be_global->impl_ <<
-              "    std::string key;\n" <<
-              "    if (!(strm >> key)) {\n";
-        } else {
-          be_global->impl_ <<
-            "   " << key_cxx_elem << " key;\n" <<
-            "    if(!(strm >> key)) {\n";
-        }
-
-        if (key_try_construct == tryconstructfailaction_use_default) {
-          be_global->impl_ <<
-            type_to_default("        ", val, "key") <<
-            "        strm.set_construction_status(Serializer::ConstructionSuccessful);\n";
-        } else {
-          //discard/default
-          be_global->impl_ <<
-            "      strm.set_construction_status(Serializer::ElementConstructionFailure);\n";
-          skip_to_end_map("      ", "i", "length", named_as, use_cxx11, key_cls, map);
-          be_global->impl_ <<
-            "      return false;\n";
-        }
-
-        be_global->impl_ << "    }\n";
-
-        // Value
-        const std::string stream_to = value_access + "[key]";
-
-        const std::string indent = "    ";
-        intro.join(be_global->impl_, indent);
         be_global->impl_ <<
-          indent << "if (!(strm >> " << stream_to << ")) {\n";
-
-        if (val_try_construct == tryconstructfailaction_use_default) {
-          be_global->impl_ <<
-            type_to_default("        ", val, value_access) <<
-            "        strm.set_construction_status(Serializer::ConstructionSuccessful);\n";
-        } else if (val_try_construct == tryconstructfailaction_trim) {
-          // Skip this for now
-          be_global->warning("TryConstruct::Trim not currently supported");
-        } else {
-          //discard/default
-          be_global->impl_ <<
-            "     strm.set_construction_status(Serializer::ElementConstructionFailure);\n";
-          skip_to_end_map("      ", "i", "length", named_as, use_cxx11, val_cls, map);
-          be_global->impl_ <<
-            "     return false;\n";
+          "   " << key_cxx_elem << " key;\n" <<
+          "    if(!(strm >> key)) {\n";
       }
+
+      if (key_try_construct == tryconstructfailaction_use_default) {
+        be_global->impl_ <<
+          type_to_default("        ", val, "key") <<
+          "        strm.set_construction_status(Serializer::ConstructionSuccessful);\n";
+      } else {
+        //discard/default
+        be_global->impl_ <<
+          "      strm.set_construction_status(Serializer::ElementConstructionFailure);\n";
+        skip_to_end_map("      ", "i", "length", named_as, use_cxx11, key_cls, map);
+        be_global->impl_ <<
+          "      return false;\n";
+      }
+
+      be_global->impl_ << "    }\n";
+
+      // Value
+      const std::string stream_to = value_access + "[key]";
+
+      const std::string indent = "    ";
+      intro.join(be_global->impl_, indent);
       be_global->impl_ <<
-        "   }\n";
-    }
+        indent << "if (!(strm >> " << stream_to << ")) {\n";
+
+      if (val_try_construct == tryconstructfailaction_use_default) {
+        be_global->impl_ <<
+          type_to_default("        ", val, value_access) <<
+          "        strm.set_construction_status(Serializer::ConstructionSuccessful);\n";
+      } else if (val_try_construct == tryconstructfailaction_trim) {
+        // Skip this for now
+        be_global->warning("TryConstruct::Trim not currently supported");
+      } else {
+        //discard/default
+        be_global->impl_ <<
+          "     strm.set_construction_status(Serializer::ElementConstructionFailure);\n";
+        skip_to_end_map("      ", "i", "length", named_as, use_cxx11, val_cls, map);
+        be_global->impl_ <<
+          "     return false;\n";
+      }
 
       be_global->impl_ <<
+        "  }\n"
         "  }\n"
         "  return true;\n";
     }
