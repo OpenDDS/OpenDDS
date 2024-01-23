@@ -4227,8 +4227,10 @@ Sedp::Reader::data_received(const DCPS::ReceivedDataSample& sample)
     Serializer ser(payload.get(), encoding);
     DCPS::EncapsulationHeader encap;
     if (!(ser >> encap)) {
-      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Sedp::Reader::data_received - ")
-        ACE_TEXT("failed to deserialize encapsulation header\n")));
+      if (log_level >= LogLevel::Warning) {
+        ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: Sedp::Reader::data_received - "
+                   "failed to deserialize encapsulation header\n"));
+      }
       return;
     }
     if (!encap.to_encoding(encoding, extensibility)) {
@@ -4257,8 +4259,10 @@ Sedp::LivelinessReader::data_received_i(const DCPS::ReceivedDataSample& sample,
   if (entity_id == ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_WRITER && full_message) {
     ParticipantMessageData data;
     if (!(ser >> data)) {
-      ACE_ERROR((LM_ERROR, ACE_TEXT("ERROR: Sedp::LivelinessReader::data_received_i - ")
-                 ACE_TEXT("failed to deserialize data\n")));
+      if (log_level >= LogLevel::Warning) {
+        ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: Sedp::LivelinessReader::data_received_i - "
+                   "failed to deserialize PARTICIPANT_MESSAGE_WRITER data\n"));
+      }
       return;
     }
     sedp_.data_received(id, data);
@@ -4267,8 +4271,10 @@ Sedp::LivelinessReader::data_received_i(const DCPS::ReceivedDataSample& sample,
   } else if (entity_id == ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_SECURE_WRITER && full_message) {
     ParticipantMessageData data;
     if (!(ser >> data)) {
-      ACE_ERROR((LM_ERROR, ACE_TEXT("ERROR: Sedp::LivelinessReader::data_received_i - ")
-                 ACE_TEXT("failed to deserialize data\n")));
+      if (log_level >= LogLevel::Warning) {
+        ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: Sedp::LivelinessReader::data_received_i - "
+                   "failed to deserialize PARTICIPANT_MESSAGE_SECURE_WRITER data\n"));
+      }
       return;
     }
     sedp_.received_participant_message_data_secure(id, data);
@@ -4289,16 +4295,20 @@ Sedp::SecurityReader::data_received_i(const DCPS::ReceivedDataSample& sample,
     DDS::Security::ParticipantStatelessMessage data;
     ser.reset_alignment(); // https://issues.omg.org/browse/DDSIRTP23-63
     if (!(ser >> data)) {
-      ACE_ERROR((LM_ERROR, ACE_TEXT("ERROR: Sedp::SecurityReader::data_received_i - ")
-                 ACE_TEXT("failed to deserialize data\n")));
+      if (log_level >= LogLevel::Warning) {
+        ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: Sedp::SecurityReader::data_received_i - "
+                   "failed to deserialize PARTICIPANT_STATELESS_WRITER data\n"));
+      }
       return;
     }
     sedp_.received_stateless_message(id, data);
   } else if (entity_id == ENTITYID_P2P_BUILTIN_PARTICIPANT_VOLATILE_SECURE_WRITER) {
     DDS::Security::ParticipantVolatileMessageSecure data;
     if (!(ser >> data)) {
-      ACE_ERROR((LM_ERROR, ACE_TEXT("ERROR: Sedp::SecurityReader::data_received_i - ")
-                 ACE_TEXT("failed to deserialize data\n")));
+      if (log_level >= LogLevel::Warning) {
+        ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: Sedp::SecurityReader::data_received_i - "
+                   "failed to deserialize PARTICIPANT_VOLATILE_SECURE_WRITER data\n"));
+      }
       return;
     }
     sedp_.received_volatile_message_secure(id, data);
@@ -4321,30 +4331,32 @@ Sedp::DiscoveryReader::data_received_i(const DCPS::ReceivedDataSample& sample,
   if (entity_id == ENTITYID_SEDP_BUILTIN_PUBLICATIONS_WRITER) {
     ParameterList data;
     if (!decode_parameter_list(sample, ser, extensibility, data)) {
-      ACE_ERROR((LM_ERROR, ACE_TEXT("ERROR: Sedp::DiscoveryReader::data_received_i - ")
-        ACE_TEXT("failed to deserialize data\n")));
+      if (log_level >= LogLevel::Warning) {
+        ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: Sedp::DiscoveryReader::data_received_i - "
+                   "failed to deserialize data\n"));
+      }
       return;
     }
 
     DiscoveredPublication wdata;
     if (!ParameterListConverter::from_param_list(data, wdata.writer_data_, sedp_.use_xtypes_, wdata.type_info_)) {
-      ACE_ERROR((LM_ERROR,
-                 ACE_TEXT("(%P|%t) ERROR: Sedp::DiscoveryReader::data_received_i - ")
-                 ACE_TEXT("failed to convert from ParameterList ")
-                 ACE_TEXT("to DiscoveredWriterData\n")));
+      if (log_level >= LogLevel::Warning) {
+        ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: Sedp::DiscoveryReader::data_received_i - "
+                   "failed to convert from ParameterList to DiscoveredWriterData\n"));
+      }
       return;
     }
 #ifdef OPENDDS_SECURITY
     wdata.have_ice_agent_info_ = false;
     ICE::AgentInfoMap ai_map;
     if (!ParameterListConverter::from_param_list(data, ai_map)) {
-      ACE_ERROR((LM_ERROR,
-        ACE_TEXT("(%P|%t) ERROR: Sedp::DiscoveryReader::data_received_i - ")
-        ACE_TEXT("failed to convert from ParameterList ")
-        ACE_TEXT("to ICE Agent info\n")));
+      if (log_level >= LogLevel::Warning) {
+        ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: Sedp::DiscoveryReader::data_received_i - "
+                   "failed to convert from ParameterList to ICE Agent info\n"));
+      }
       return;
     }
-    ICE::AgentInfoMap::const_iterator pos = ai_map.find("DATA");
+    const ICE::AgentInfoMap::const_iterator pos = ai_map.find("DATA");
     if (pos != ai_map.end()) {
       wdata.have_ice_agent_info_ = true;
       wdata.ice_agent_info_ = pos->second;
@@ -4354,7 +4366,7 @@ Sedp::DiscoveryReader::data_received_i(const DCPS::ReceivedDataSample& sample,
     if (wdata.type_info_.minimal.typeid_with_size.type_id.kind() != XTypes::TK_NONE ||
         wdata.type_info_.complete.typeid_with_size.type_id.kind() != XTypes::TK_NONE) {
       const GUID_t& remote_guid = wdata.writer_data_.writerProxy.remoteWriterGuid;
-      DDS::BuiltinTopicKey_t key = DCPS::guid_to_bit_key(remote_guid);
+      const DDS::BuiltinTopicKey_t key = DCPS::guid_to_bit_key(remote_guid);
       sedp_.type_lookup_service_->cache_type_info(key, wdata.type_info_);
     }
 
@@ -4364,31 +4376,33 @@ Sedp::DiscoveryReader::data_received_i(const DCPS::ReceivedDataSample& sample,
   } else if (entity_id == ENTITYID_SEDP_BUILTIN_PUBLICATIONS_SECURE_WRITER) {
     ParameterList data;
     if (!decode_parameter_list(sample, ser, extensibility, data)) {
-      ACE_ERROR((LM_ERROR, ACE_TEXT("ERROR: Sedp::DiscoveryReader::data_received_i - ")
-        ACE_TEXT("failed to deserialize data\n")));
+      if (log_level >= LogLevel::Warning) {
+        ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: Sedp::DiscoveryReader::data_received_i - "
+                   "failed to deserialize PUBLICATIONS_SECURE_WRITER data\n"));
+      }
       return;
     }
 
     ParameterListConverter::DiscoveredPublication_SecurityWrapper wdata_secure = ParameterListConverter::DiscoveredPublication_SecurityWrapper();
 
     if (!ParameterListConverter::from_param_list(data, wdata_secure, sedp_.use_xtypes_, wdata_secure.type_info)) {
-      ACE_ERROR((LM_ERROR,
-                 ACE_TEXT("(%P|%t) ERROR: Sedp::DiscoveryReader::data_received_i - ")
-                 ACE_TEXT("failed to convert from ParameterList ")
-                 ACE_TEXT("to DiscoveredPublication_SecurityWrapper\n")));
+      if (log_level >= LogLevel::Warning) {
+        ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: Sedp::DiscoveryReader::data_received_i - "
+                   "failed to convert from ParameterList to DiscoveredPublication_SecurityWrapper\n"));
+      }
       return;
     }
 
     wdata_secure.have_ice_agent_info = false;
     ICE::AgentInfoMap ai_map;
     if (!ParameterListConverter::from_param_list(data, ai_map)) {
-      ACE_ERROR((LM_ERROR,
-        ACE_TEXT("(%P|%t) ERROR: Sedp::DiscoveryReader::data_received_i - ")
-        ACE_TEXT("failed to convert from ParameterList ")
-        ACE_TEXT("to ICE Agent info\n")));
+      if (log_level >= LogLevel::Warning) {
+        ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: Sedp::DiscoveryReader::data_received_i - "
+                   "failed to convert from ParameterList to ICE Agent info\n"));
+      }
       return;
     }
-    ICE::AgentInfoMap::const_iterator pos = ai_map.find("DATA");
+    const ICE::AgentInfoMap::const_iterator pos = ai_map.find("DATA");
     if (pos != ai_map.end()) {
       wdata_secure.have_ice_agent_info = true;
       wdata_secure.ice_agent_info = pos->second;
@@ -4397,7 +4411,7 @@ Sedp::DiscoveryReader::data_received_i(const DCPS::ReceivedDataSample& sample,
     if (wdata_secure.type_info.minimal.typeid_with_size.type_id.kind() != XTypes::TK_NONE ||
         wdata_secure.type_info.complete.typeid_with_size.type_id.kind() != XTypes::TK_NONE) {
       const GUID_t& remote_guid = wdata_secure.data.writerProxy.remoteWriterGuid;
-      DDS::BuiltinTopicKey_t key = DCPS::guid_to_bit_key(remote_guid);
+      const DDS::BuiltinTopicKey_t key = DCPS::guid_to_bit_key(remote_guid);
       sedp_.type_lookup_service_->cache_type_info(key, wdata_secure.type_info);
     }
 
@@ -4406,30 +4420,32 @@ Sedp::DiscoveryReader::data_received_i(const DCPS::ReceivedDataSample& sample,
   } else if (entity_id == ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_WRITER) {
     ParameterList data;
     if (!decode_parameter_list(sample, ser, extensibility, data)) {
-      ACE_ERROR((LM_ERROR, ACE_TEXT("ERROR: Sedp::DiscoveryReader::data_received_i - ")
-        ACE_TEXT("failed to deserialize data\n")));
+      if (log_level >= LogLevel::Warning) {
+        ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: Sedp::DiscoveryReader::data_received_i - "
+                   "failed to deserialize SUBSCRIPTIONS_WRITER data\n"));
+      }
       return;
     }
 
     DiscoveredSubscription rdata;
     if (!ParameterListConverter::from_param_list(data, rdata.reader_data_, sedp_.use_xtypes_, rdata.type_info_)) {
-      ACE_ERROR((LM_ERROR,
-                 ACE_TEXT("(%P|%t) ERROR Sedp::DiscoveryReader::data_received_i - ")
-                 ACE_TEXT("failed to convert from ParameterList ")
-                 ACE_TEXT("to DiscoveredReaderData\n")));
+      if (log_level >= LogLevel::Warning) {
+        ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: Sedp::DiscoveryReader::data_received_i - "
+                   "failed to convert from ParameterList to DiscoveredReaderData\n"));
+      }
       return;
     }
 #ifdef OPENDDS_SECURITY
     rdata.have_ice_agent_info_ = false;
     ICE::AgentInfoMap ai_map;
     if (!ParameterListConverter::from_param_list(data, ai_map)) {
-      ACE_ERROR((LM_ERROR,
-        ACE_TEXT("(%P|%t) ERROR: Sedp::DiscoveryReader::data_received_i - ")
-        ACE_TEXT("failed to convert from ParameterList ")
-        ACE_TEXT("to ICE Agent info\n")));
+      if (log_level >= LogLevel::Warning) {
+        ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: Sedp::DiscoveryReader::data_received_i - "
+                   "failed to convert from ParameterList to ICE Agent info\n"));
+      }
       return;
     }
-    ICE::AgentInfoMap::const_iterator pos = ai_map.find("DATA");
+    const ICE::AgentInfoMap::const_iterator pos = ai_map.find("DATA");
     if (pos != ai_map.end()) {
       rdata.have_ice_agent_info_ = true;
       rdata.ice_agent_info_ = pos->second;
@@ -4442,7 +4458,7 @@ Sedp::DiscoveryReader::data_received_i(const DCPS::ReceivedDataSample& sample,
     if (rdata.type_info_.minimal.typeid_with_size.type_id.kind() != XTypes::TK_NONE ||
         rdata.type_info_.complete.typeid_with_size.type_id.kind() != XTypes::TK_NONE) {
       const GUID_t& remote_guid = rdata.reader_data_.readerProxy.remoteReaderGuid;
-      DDS::BuiltinTopicKey_t key = DCPS::guid_to_bit_key(remote_guid);
+      const DDS::BuiltinTopicKey_t key = DCPS::guid_to_bit_key(remote_guid);
       sedp_.type_lookup_service_->cache_type_info(key, rdata.type_info_);
     }
 
@@ -4452,30 +4468,32 @@ Sedp::DiscoveryReader::data_received_i(const DCPS::ReceivedDataSample& sample,
   } else if (entity_id == ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_SECURE_WRITER) {
     ParameterList data;
     if (!decode_parameter_list(sample, ser, extensibility, data)) {
-      ACE_ERROR((LM_ERROR, ACE_TEXT("ERROR: Sedp::DiscoveryReader::data_received_i - ")
-        ACE_TEXT("failed to deserialize data\n")));
+      if (log_level >= LogLevel::Warning) {
+        ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: Sedp::DiscoveryReader::data_received_i - "
+                   "failed to deserialize SUBSCRIPTIONS_SECURE_WRITER data\n"));
+      }
       return;
     }
 
     ParameterListConverter::DiscoveredSubscription_SecurityWrapper rdata_secure;
     if (!ParameterListConverter::from_param_list(data, rdata_secure, sedp_.use_xtypes_, rdata_secure.type_info)) {
-      ACE_ERROR((LM_ERROR,
-                 ACE_TEXT("(%P|%t) ERROR Sedp::DiscoveryReader::data_received_i - ")
-                 ACE_TEXT("failed to convert from ParameterList ")
-                 ACE_TEXT("to DiscoveredSubscription_SecurityWrapper\n")));
+      if (log_level >= LogLevel::Warning) {
+        ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: Sedp::DiscoveryReader::data_received_i - "
+                   "failed to convert from ParameterList to DiscoveredSubscription_SecurityWrapper\n"));
+      }
       return;
     }
 
     rdata_secure.have_ice_agent_info = false;
     ICE::AgentInfoMap ai_map;
     if (!ParameterListConverter::from_param_list(data, ai_map)) {
-      ACE_ERROR((LM_ERROR,
-        ACE_TEXT("(%P|%t) ERROR: Sedp::DiscoveryReader::data_received_i - ")
-        ACE_TEXT("failed to convert from ParameterList ")
-        ACE_TEXT("to ICE Agent info\n")));
+      if (log_level >= LogLevel::Warning) {
+        ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: Sedp::DiscoveryReader::data_received_i - "
+                   "failed to convert from ParameterList to ICE Agent info\n"));
+      }
       return;
     }
-    ICE::AgentInfoMap::const_iterator pos = ai_map.find("DATA");
+    const ICE::AgentInfoMap::const_iterator pos = ai_map.find("DATA");
     if (pos != ai_map.end()) {
       rdata_secure.have_ice_agent_info = true;
       rdata_secure.ice_agent_info = pos->second;
@@ -4488,18 +4506,19 @@ Sedp::DiscoveryReader::data_received_i(const DCPS::ReceivedDataSample& sample,
     if (rdata_secure.type_info.minimal.typeid_with_size.type_id.kind() != XTypes::TK_NONE ||
         rdata_secure.type_info.complete.typeid_with_size.type_id.kind() != XTypes::TK_NONE) {
       const GUID_t& remote_guid = rdata_secure.data.readerProxy.remoteReaderGuid;
-      DDS::BuiltinTopicKey_t key = DCPS::guid_to_bit_key(remote_guid);
+      const DDS::BuiltinTopicKey_t key = DCPS::guid_to_bit_key(remote_guid);
       sedp_.type_lookup_service_->cache_type_info(key, rdata_secure.type_info);
     }
 
     sedp_.data_received(id, rdata_secure);
 
   } else if (entity_id == ENTITYID_SPDP_RELIABLE_BUILTIN_PARTICIPANT_SECURE_WRITER) {
-
     ParameterList data;
     if (!decode_parameter_list(sample, ser, extensibility, data)) {
-      ACE_ERROR((LM_ERROR, ACE_TEXT("ERROR: Sedp::DiscoveryReader::data_received_i - ")
-        ACE_TEXT("failed to deserialize data\n")));
+      if (log_level >= LogLevel::Warning) {
+        ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: Sedp::DiscoveryReader::data_received_i - "
+                   "failed to deserialize RELIABLE_BUILTIN_PARTICIPANT_SECURE_WRITER data\n"));
+      }
       return;
     }
 
@@ -4508,10 +4527,10 @@ Sedp::DiscoveryReader::data_received_i(const DCPS::ReceivedDataSample& sample,
     pdata.discoveredAt = MTZERO;
 
     if (!ParameterListConverter::from_param_list(data, pdata)) {
-      ACE_ERROR((LM_ERROR,
-                 ACE_TEXT("(%P|%t) ERROR: Sedp::DiscoveryReader::data_received_i - ")
-                 ACE_TEXT("failed to convert from ParameterList ")
-                 ACE_TEXT("to Security::SPDPdiscoveredParticipantData\n")));
+      if (log_level >= LogLevel::Warning) {
+        ACE_ERROR((LM_WARNING, "(%P|%t) ERROR: Sedp::DiscoveryReader::data_received_i - "
+                   "failed to convert from ParameterList to Security::SPDPdiscoveredParticipantData\n"));
+      }
       return;
     }
     const GUID_t guid = make_part_guid(sample.header_.publication_id_);
