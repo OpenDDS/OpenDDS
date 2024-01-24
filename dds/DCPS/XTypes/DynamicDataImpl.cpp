@@ -6007,7 +6007,7 @@ void vwrite_item(ValueWriter& vw, DDS::DynamicData_ptr value,
     }
     if (rc == DDS::RETCODE_OK) {
       if (item_tk == TK_ENUM) {
-        write_enum(vw, item_type, val);
+        write_enum(vw, item_type, val, tk);
       } else {
         vw.write_int8(val);
       }
@@ -6037,7 +6037,7 @@ void vwrite_item(ValueWriter& vw, DDS::DynamicData_ptr value,
     }
     if (rc == DDS::RETCODE_OK) {
       if (item_tk == TK_ENUM) {
-        write_enum(vw, item_type, val);
+        write_enum(vw, item_type, val, tk);
       } else {
         vw.write_int16(val);
       }
@@ -6067,7 +6067,7 @@ void vwrite_item(ValueWriter& vw, DDS::DynamicData_ptr value,
     }
     if (rc == DDS::RETCODE_OK) {
       if (item_tk == TK_ENUM) {
-        write_enum(vw, item_type, val);
+        write_enum(vw, item_type, val, tk);
       } else {
         vw.write_int32(val);
       }
@@ -6383,7 +6383,7 @@ void vwrite_discriminator(ValueWriter& vw, DDS::DynamicData_ptr value,
     }
     disc_val = static_cast<CORBA::Long>(val);
     if (disc_tk == TK_ENUM) {
-      write_enum(vw, disc_type, val);
+      write_enum(vw, disc_type, val, treat_disc_as);
     } else {
       vw.write_int8(val);
     }
@@ -6407,7 +6407,7 @@ void vwrite_discriminator(ValueWriter& vw, DDS::DynamicData_ptr value,
     }
     disc_val = static_cast<CORBA::Long>(val);
     if (disc_tk == TK_ENUM) {
-      write_enum(vw, disc_type, val);
+      write_enum(vw, disc_type, val, treat_disc_as);
     } else {
       vw.write_int16(val);
     }
@@ -6429,7 +6429,7 @@ void vwrite_discriminator(ValueWriter& vw, DDS::DynamicData_ptr value,
       return;
     }
     if (disc_tk == TK_ENUM) {
-      write_enum(vw, disc_type, disc_val);
+      write_enum(vw, disc_type, disc_val, treat_disc_as);
     } else {
       vw.write_int32(disc_val);
     }

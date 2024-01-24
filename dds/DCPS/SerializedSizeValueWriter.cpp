@@ -427,35 +427,32 @@ void SerializedSizeValueWriter::write_wstring(const ACE_CDR::WChar* value, size_
   }
 }
 
-// TODO(sonndinh): Replace this placeholder.
-void SerializedSizeValueWriter::write_enum(const char* /*name*/, ACE_CDR::Long /*value*/)
+void SerializedSizeValueWriter::write_enum(const char* /*name*/, ACE_CDR::Long /*value*/,
+                                           XTypes::TypeKind as_int)
 {
-  size_t size;
-  primitive_serialized_size(encoding_, size, ACE_CDR::Long());
+  size_t& size = state_.top().total_size;
+  switch (as_int) {
+  case XTypes::TK_INT8:
+    primitive_serialized_size_int8(encoding_, size);
+    break;
+  case XTypes::TK_INT16:
+    primitive_serialized_size(encoding_, size, ACE_CDR::Short());
+    break;
+  case XTypes::TK_INT32:
+    primitive_serialized_size(encoding_, size, ACE_CDR::Long());
+    break;
+  default:
+    if (log_level >= LogLevel::Warning) {
+      ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: SerializedSizeValueWriter::writer_enum:"
+                 " Enum cannot be serialized as %C\n", XTypes::typekind_to_string(as_int)));
+    }
+    return;
+  }
+
+  if (state_.top().extensibility == MUTABLE) {
+    size_cache_.push_back(size);
+  }
 }
-
-// void SerializedSizeValueWriter::write_enum(const char* /*name*/, ACE_CDR::Long /*value*/,
-//                                            DDS::TypeKind treat_as = TK_INT32)
-// {
-//   size_t& size = state_.top().total_size;
-//   switch (treat_as) {
-//   case XTypes::TK_INT8:
-//     primitive_serialized_size_int8(encoding_, size);
-//     break;
-//   case XTypes::TK_INT16:
-//     primitive_serialized_size(encoding_, size, ACE_CDR::Short());
-//     break;
-//   case XTypes::TK_INT32:
-//     primitive_serialized_size(encoding_, size, ACE_CDR::Long());
-//     break;
-//   default:
-//     return;
-//   }
-
-//   if (state_.top().extensibility == DDS::MUTABLE) {
-//     size_cache_.push_back(size);
-//   }
-// }
 
 void SerializedSizeValueWriter::write_absent_value()
 {

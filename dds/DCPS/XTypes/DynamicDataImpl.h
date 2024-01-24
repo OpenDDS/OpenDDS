@@ -710,7 +710,8 @@ OpenDDS_Dcps_Export
 bool operator<<(Serializer& ser, const KeyOnly<DDS::DynamicData_ptr>& key);
 
 template <typename T>
-void write_enum(ValueWriter& vw, const DDS::DynamicType_var& enum_type, T enum_val)
+void write_enum(ValueWriter& vw, const DDS::DynamicType_var& enum_type,
+                T enum_val, XTypes::TypeKind as_int)
 {
   const DDS::MemberId enumerator_id = static_cast<DDS::MemberId>(enum_val);
   DDS::DynamicTypeMember_var dtm;
@@ -721,7 +722,7 @@ void write_enum(ValueWriter& vw, const DDS::DynamicType_var& enum_type, T enum_v
   if (dtm->get_descriptor(md) != DDS::RETCODE_OK) {
     return;
   }
-  vw.write_enum(md->name(), enum_val);
+  vw.write_enum(md->name(), enum_val, as_int);
 }
 
 OpenDDS_Dcps_Export

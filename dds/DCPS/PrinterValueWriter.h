@@ -75,7 +75,7 @@ public:
   void write_char16(ACE_CDR::WChar value);
   void write_string(const ACE_CDR::Char* value, size_t length);
   void write_wstring(const ACE_CDR::WChar* value, size_t length);
-  void write_enum(const char* /*name*/, ACE_CDR::Long value);
+  void write_enum(const char* /*name*/, ACE_CDR::Long value, XTypes::TypeKind as_int = XTypes::TK_INT32);
   void write_absent_value();
 
   std::string str() const
@@ -270,8 +270,7 @@ void PrinterValueWriter::write_wstring(const ACE_CDR::WChar* value, size_t lengt
   string_helper(stream_, value, length);
 }
 
-void PrinterValueWriter::write_enum(const char* name,
-                                    ACE_CDR::Long value)
+void PrinterValueWriter::write_enum(const char* name, ACE_CDR::Long value, XTypes::TypeKind /*as_int*/)
 {
   stream_ << name << " (" << value << ")";
 }

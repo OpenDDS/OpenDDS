@@ -7,6 +7,7 @@
 #include <gtest/gtest.h>
 
 using namespace OpenDDS;
+using namespace Test;
 
 DCPS::Encoding xcdr2(DCPS::Encoding::KIND_XCDR2, DCPS::ENDIAN_BIG);
 
@@ -19,14 +20,20 @@ void dump_sizes(const std::vector<size_t>& sizes)
   std::cout << "]" << std::endl;
 }
 
+template <typename BaseStructType>
+void init_base_struct(BaseStructType& bst)
+{
+  bst.b_field = true;
+  bst.f_field = 1.0f;
+  bst.o_field = 0x01;
+}
+
 template <typename StructType>
 void init(StructType& st)
 {
   st.s_field = 10;
   st.l_field = 20;
-  st.nested_field.b_field = true;
-  st.nested_field.f_field = 1.0f;
-  st.nested_field.o_field = 0x01;
+  init_base_struct(st.nested_field);
   st.str_field = "hello";
   st.ull_field = 30;
 }
@@ -65,10 +72,10 @@ void check_component_sizes(DCPS::SerializedSizeValueWriter& value_writer, const 
 
 TEST(dds_DCPS_SerializedSizeValueWriter, FinalFinalStruct)
 {
-  ValueWriter::FinalFinalStruct ffs;
+  FinalFinalStruct ffs;
   init(ffs);
   DCPS::SerializedSizeValueWriter value_writer(xcdr2);
-  check_total_size<DCPS::ValueWriter_FinalFinalStruct_xtag>(value_writer, ffs);
+  check_total_size<DCPS::Test_FinalFinalStruct_xtag>(value_writer, ffs);
 
   // Layout           Total size
   // 2: s_field       2
@@ -86,10 +93,10 @@ TEST(dds_DCPS_SerializedSizeValueWriter, FinalFinalStruct)
 
 TEST(dds_DCPS_SerializedSizeValueWriter, FinalAppendableStruct)
 {
-  ValueWriter::FinalAppendableStruct fas;
+  FinalAppendableStruct fas;
   init(fas);
   DCPS::SerializedSizeValueWriter value_writer(xcdr2);
-  check_total_size<DCPS::ValueWriter_FinalAppendableStruct_xtag>(value_writer, fas);
+  check_total_size<DCPS::Test_FinalAppendableStruct_xtag>(value_writer, fas);
 
   // Layout           Nested    Total size
   // 2: s_field                 2
@@ -108,10 +115,10 @@ TEST(dds_DCPS_SerializedSizeValueWriter, FinalAppendableStruct)
 
 TEST(dds_DCPS_SerializedSizeValueWriter, FinalMutableStruct)
 {
-  ValueWriter::FinalMutableStruct fms;
+  FinalMutableStruct fms;
   init(fms);
   DCPS::SerializedSizeValueWriter value_writer(xcdr2);
-  check_total_size<DCPS::ValueWriter_FinalMutableStruct_xtag>(value_writer, fms);
+  check_total_size<DCPS::Test_FinalMutableStruct_xtag>(value_writer, fms);
 
   // Layout           Nested    Total size
   // 2: s_field                 2
@@ -133,10 +140,10 @@ TEST(dds_DCPS_SerializedSizeValueWriter, FinalMutableStruct)
 
 TEST(dds_DCPS_SerializedSizeValueWriter, AppendableFinalStruct)
 {
-  ValueWriter::AppendableFinalStruct afs;
+  AppendableFinalStruct afs;
   init(afs);
   DCPS::SerializedSizeValueWriter value_writer(xcdr2);
-  check_total_size<DCPS::ValueWriter_AppendableFinalStruct_xtag>(value_writer, afs);
+  check_total_size<DCPS::Test_AppendableFinalStruct_xtag>(value_writer, afs);
 
   // Layout           Total size
   // 4: Dheader       4
@@ -155,10 +162,10 @@ TEST(dds_DCPS_SerializedSizeValueWriter, AppendableFinalStruct)
 
 TEST(dds_DCPS_SerializedSizeValueWriter, AppendableAppendableStruct)
 {
-  ValueWriter::AppendableAppendableStruct aas;
+  AppendableAppendableStruct aas;
   init(aas);
   DCPS::SerializedSizeValueWriter value_writer(xcdr2);
-  check_total_size<DCPS::ValueWriter_AppendableAppendableStruct_xtag>(value_writer, aas);
+  check_total_size<DCPS::Test_AppendableAppendableStruct_xtag>(value_writer, aas);
 
   // Layout           Nested    Total size
   // 4: Dheader                 4
@@ -178,10 +185,10 @@ TEST(dds_DCPS_SerializedSizeValueWriter, AppendableAppendableStruct)
 
 TEST(dds_DCPS_SerializedSizeValueWriter, AppendableMutableStruct)
 {
-  ValueWriter::AppendableMutableStruct ams;
+  AppendableMutableStruct ams;
   init(ams);
   DCPS::SerializedSizeValueWriter value_writer(xcdr2);
-  check_total_size<DCPS::ValueWriter_AppendableMutableStruct_xtag>(value_writer, ams);
+  check_total_size<DCPS::Test_AppendableMutableStruct_xtag>(value_writer, ams);
 
   // Layout           Nested    Total size
   // 4: Dheader                 4
@@ -204,10 +211,10 @@ TEST(dds_DCPS_SerializedSizeValueWriter, AppendableMutableStruct)
 
 TEST(dds_DCPS_SerializedSizeValueWriter, MutableFinalStruct)
 {
-  ValueWriter::MutableFinalStruct mfs;
+  MutableFinalStruct mfs;
   init(mfs);
   DCPS::SerializedSizeValueWriter value_writer(xcdr2);
-  check_total_size<DCPS::ValueWriter_MutableFinalStruct_xtag>(value_writer, mfs);
+  check_total_size<DCPS::Test_MutableFinalStruct_xtag>(value_writer, mfs);
 
   // Layout           Nested    Total size
   // 4: Dheader                 4
@@ -233,10 +240,10 @@ TEST(dds_DCPS_SerializedSizeValueWriter, MutableFinalStruct)
 
 TEST(dds_DCPS_SerializedSizeValueWriter, MutableAppendableStruct)
 {
-  ValueWriter::MutableAppendableStruct mas;
+  MutableAppendableStruct mas;
   init(mas);
   DCPS::SerializedSizeValueWriter value_writer(xcdr2);
-  check_total_size<DCPS::ValueWriter_MutableAppendableStruct_xtag>(value_writer, mas);
+  check_total_size<DCPS::Test_MutableAppendableStruct_xtag>(value_writer, mas);
 
   // Layout           Nested    Total size
   // 4: Dheader                 4
@@ -263,10 +270,10 @@ TEST(dds_DCPS_SerializedSizeValueWriter, MutableAppendableStruct)
 
 TEST(dds_DCPS_SerializedSizeValueWriter, MutableMutableStruct)
 {
-  ValueWriter::MutableMutableStruct mms;
+  MutableMutableStruct mms;
   init(mms);
   DCPS::SerializedSizeValueWriter value_writer(xcdr2);
-  check_total_size<DCPS::ValueWriter_MutableMutableStruct_xtag>(value_writer, mms);
+  check_total_size<DCPS::Test_MutableMutableStruct_xtag>(value_writer, mms);
 
   // Layout           Nested    Total size
   // 4: Dheader                 4
@@ -292,4 +299,103 @@ TEST(dds_DCPS_SerializedSizeValueWriter, MutableMutableStruct)
   // 8: ull_field               (88)
   const size_t arr[] = {88, 2, 4, 25, 1, 4, 1, 10, 8};
   check_component_sizes(value_writer, arr, sizeof(arr) / sizeof(arr[0]));
+}
+
+// TODO(sonndinh): Check component sizes
+
+void init(FinalUnion& fu)
+{
+  AppendableMutableStruct ams;
+  init(ams);
+  fu.nested_field(ams);
+}
+
+void init(AppendableUnion& au)
+{
+  MutableFinalStruct mfs;
+  init(mfs);
+  au.nested_field(mfs);
+}
+
+void init(MutableUnion& mu)
+{
+  FinalAppendableStruct fas;
+  init(fas);
+  mu.nested_field(fas);
+}
+
+TEST(dds_DCPS_SerializedSizeValueWriter, FinalUnion)
+{
+  FinalUnion fu;
+  init(fu);
+  DCPS::SerializedSizeValueWriter value_writer(xcdr2);
+  check_total_size<DCPS::Test_FinalUnion_xtag>(value_writer, fu);
+}
+
+
+TEST(dds_DCPS_SerializedSizeValueWriter, AppendableUnion)
+{
+  AppendableUnion au;
+  init(au);
+  DCPS::SerializedSizeValueWriter value_writer(xcdr2);
+  check_total_size<DCPS::Test_AppendableUnion_xtag>(value_writer, au);
+}
+
+TEST(dds_DCPS_SerializedSizeValueWriter, MutableUnion)
+{
+  MutableUnion mu;
+  init(mu);
+  DCPS::SerializedSizeValueWriter value_writer(xcdr2);
+  check_total_size<DCPS::Test_MutableUnion_xtag>(value_writer, mu);
+}
+
+TEST(dds_DCPS_SerializedSizeValueWriter, FinalComplexStruct)
+{
+  FinalComplexStruct fcs;
+  fcs.c_field = 'd';
+
+  FinalUnion fu;
+  init(fu);
+  fcs.nested_union = fu;
+
+  fcs.ll_field = 123;
+  init_base_struct(fcs.nested_struct);
+  init(fcs.nnested_struct);
+  fcs.str_field = "my string";
+
+  fcs.seq_field.length(2);
+  fcs.seq_field[0] = 0;
+  fcs.seq_field[1] = 1;
+
+  fcs.arr_field[0] = 10;
+  fcs.arr_field[1] = 20;
+
+  fcs.md_arr_field[0][0] = 0;
+  fcs.md_arr_field[0][1] = 1;
+  fcs.md_arr_field[1][0] = 10;
+  fcs.md_arr_field[1][1] = 11;
+
+  fcs.nested_seq.length(2);
+  AppendableStruct as;
+  init_base_struct(as);
+  fcs.nested_seq[0] = as;
+  fcs.nested_seq[1] = as;
+
+  MutableStruct ms;
+  init_base_struct(ms);
+  fcs.nested_arr[0] = ms;
+  fcs.nested_arr[1] = ms;
+
+  fcs.f_field = 2.0f;
+
+  DCPS::SerializedSizeValueWriter value_writer(xcdr2);
+  check_total_size<DCPS::Test_FinalComplexStruct_xtag>(value_writer, fcs);
+}
+
+TEST(dds_DCPS_SerializedSizeValueWriter, AppendableComplexStruct)
+{
+}
+
+TEST(dds_DCPS_SerializedSizeValueWriter, MutableComplexStruct)
+{
 }

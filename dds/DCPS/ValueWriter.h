@@ -104,11 +104,11 @@ public:
 #endif
   }
 
-  virtual void write_enum(const char* /*name*/, ACE_CDR::Long /*value*/) = 0;
+  virtual void write_enum(const char* /*name*/, ACE_CDR::Long /*value*/, XTypes::TypeKind /*as_int*/) = 0;
   template <typename T>
-  void write_enum(const char* name, const T& value)
+  void write_enum(const char* name, const T& value, XTypes::TypeKind as_int = XTypes::TK_INT32)
   {
-    write_enum(name, static_cast<ACE_CDR::Long>(value));
+    write_enum(name, static_cast<ACE_CDR::Long>(value), as_int);
   }
 
   virtual void write_absent_value() = 0;
