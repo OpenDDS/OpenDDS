@@ -310,10 +310,11 @@ sub new_pithub {
 sub check_pithub_response {
   my $response = shift();
   my $extra_msg = shift();
+  my $url = shift() // 'no url';
 
   unless ($response->is_success) {
-    die_with_stack_trace(
-      "HTTP issue while using PitHub: \"", $response->status_line(), "\"$extra_msg\n");
+    die_with_stack_trace("HTTP issue while using PitHub (", $url, "): \"",
+      $response->status_line(), "\"$extra_msg\n");
   }
 }
 
@@ -322,10 +323,12 @@ sub check_pithub_result {
   my $extra_msg = shift() // '';
 
   if ($result->isa('Pithub::Result')) {
-    check_pithub_response($result->response, $extra_msg);
-  } elsif ($result->isa('Pithub::Response')) {
+    check_pithub_response($result->response, $extra_msg, $result->request->uri());
+  }
+  elsif ($result->isa('Pithub::Response')) {
     check_pithub_response($result, $extra_msg);
-  } else {
+  }
+  else {
     die_with_stack_trace('Argument is not a Pithub::Result or Pithub::Response');
   }
 }
@@ -746,6 +749,9 @@ sub new_sftp {
   return $sftp;
 }
 
+my $shapes_workflow = 'ishapes';
+my $rtps_interop_test_workflow = 'dds-rtps';
+
 sub get_actions_url {
   my $settings = shift();
 
@@ -753,44 +759,54 @@ sub get_actions_url {
   return "/repos/$ph->{user}/$ph->{repo}/actions";
 }
 
-sub is_shapes_workflow_path {
-  my $path = shift();
-  return $path =~ /ishapes/;
+sub get_run_url {
+  my $settings = shift();
+  my $name = shift();
+
+  return get_actions_url($settings) . "/workflows/$name.yml";
 }
 
-sub trigger_shapes_run {
+sub trigger_workflow_run {
   my $settings = shift();
+  my $name = shift();
 
   # https://docs.github.com/en/rest/actions/workflows#create-a-workflow-dispatch-event
   my $response = $settings->{pithub}->request(
     method => 'POST',
-    path => get_actions_url($settings) . "/workflows/ishapes.yml/dispatches",
+    path => get_run_url($settings, $name) . '/dispatches',
     data => {
       ref => $settings->{git_tag},
     },
   );
   check_pithub_result($response);
+
+  # This isn't mandated anywhere, it's just a precaution.
+  print("Giving GitHub time to process...\n");
+  sleep(5);
 }
 
-sub get_last_shapes_run {
+sub get_last_workflow_run {
   my $settings = shift();
+  my $name = shift();
 
+  # https://docs.github.com/en/rest/actions/workflow-runs?apiVersion=2022-11-28#list-workflow-runs-for-a-workflow
   my $response = $settings->{pithub}->request(
     method => 'GET',
-    path => get_actions_url($settings) . '/runs',
+    path => get_run_url($settings, $name) . '/runs',
     params => {
       branch => $settings->{git_tag},
     },
   );
   check_pithub_result($response);
-  for my $run (@{$response->content->{workflow_runs}}) {
-    if (is_shapes_workflow_path($run->{path})) {
-      print("Last workflow run for $settings->{git_tag} was $run->{html_url}\n");
-      return $run;
-    }
-  }
 
-  return undef;
+  my $run = $response->content->{workflow_runs}->[0];
+  if ($run) {
+    print("Last workflow run for $name on $settings->{git_tag} was $run->{html_url}\n");
+  }
+  else {
+    print("No workflow run found for $name on $settings->{git_tag}!\n");
+  }
+  return $run;
 }
 
 sub upload_shapes_demo {
@@ -805,8 +821,8 @@ sub upload_shapes_demo {
   my $ph = $settings->{pithub};
   my $actions_url = get_actions_url($settings);
 
-  # Get the last successful shapes run
-  my $run = get_last_shapes_run($settings);
+  # Get the last shapes run, but only if it was successful
+  my $run = get_last_workflow_run($settings, $shapes_workflow);
   if (!defined($run)) {
     die("No shapes demo run found!");
   }
@@ -2883,9 +2899,8 @@ sub remedy_rtd_activate {
 sub verify_trigger_shapes_demo_build {
   my $settings = shift();
 
-  my $run = get_last_shapes_run($settings);
+  my $run = get_last_workflow_run($settings, $shapes_workflow);
   if (!defined($run)) {
-    print("No shapes demo build runs for $settings->{git_tag} found\n");
     return 0;
   }
   return 1;
@@ -2893,16 +2908,38 @@ sub verify_trigger_shapes_demo_build {
 
 sub message_trigger_shapes_demo_build {
   my $settings = shift();
-  return "Shapes demo GitHub Action workflow has to be trigged";
+  return "Shapes demo GitHub Actions workflow has to be triggered";
 }
 
 sub remedy_trigger_shapes_demo_build {
   my $settings = shift();
 
-  trigger_shapes_run($settings);
+  trigger_workflow_run($settings, $shapes_workflow);
 
-  print("Giving GitHub time to process...\n");
-  sleep(5);
+  return 1;
+}
+
+############################################################################
+
+sub verify_trigger_rtps_interop_test_build {
+  my $settings = shift();
+
+  my $run = get_last_workflow_run($settings, $rtps_interop_test_workflow);
+  if (!defined($run)) {
+    return 0;
+  }
+  return 1;
+}
+
+sub message_trigger_rtps_interop_test_build {
+  my $settings = shift();
+  return "RTPS Interop Test GitHub Actions workflow has to be triggered";
+}
+
+sub remedy_trigger_rtps_interop_test_build {
+  my $settings = shift();
+
+  trigger_workflow_run($settings, $rtps_interop_test_workflow);
 
   return 1;
 }
@@ -3441,6 +3478,14 @@ my @release_steps = (
     verify => sub{verify_trigger_shapes_demo_build(@_)},
     message => sub{message_trigger_shapes_demo_build(@_)},
     remedy => sub{remedy_trigger_shapes_demo_build(@_)},
+    post_release => 1,
+    skip => $global_settings{skip_github} || !$global_settings{is_highest_version},
+  },
+  {
+    name => 'Trigger RTPS Interop Test Build',
+    verify => sub{verify_trigger_rtps_interop_test_build(@_)},
+    message => sub{message_trigger_rtps_interop_test_build(@_)},
+    remedy => sub{remedy_trigger_rtps_interop_test_build(@_)},
     post_release => 1,
     skip => $global_settings{skip_github} || !$global_settings{is_highest_version},
   },
