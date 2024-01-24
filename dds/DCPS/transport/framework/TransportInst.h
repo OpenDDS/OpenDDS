@@ -46,6 +46,8 @@ namespace ICE {
 
 namespace DCPS {
 
+class DomainParticipantImpl;
+
 /**
  * @class TransportInst
  *
@@ -83,8 +85,8 @@ public:
                    ACE_Configuration_Section_Key& sect);
 
   /// Diagnostic aid.
-  void dump() const;
-  virtual OPENDDS_STRING dump_to_str() const;
+  void dump(DDS::DomainId_t domain) const;
+  virtual OPENDDS_STRING dump_to_str(DDS::DomainId_t domain) const;
 
   /// Format name of transport configuration parameter for use in
   /// conjunction with dump(std::ostream& os).
@@ -141,21 +143,30 @@ public:
   virtual bool requires_cdr_encapsulation() const { return false; }
 
   /// Populate a transport locator sequence.  Return the number of "locators."
-  virtual size_t populate_locator(OpenDDS::DCPS::TransportLocator& trans_info, ConnectionInfoFlags flags) const = 0;
+  virtual size_t populate_locator(OpenDDS::DCPS::TransportLocator& trans_info,
+                                  ConnectionInfoFlags flags,
+                                  DDS::DomainId_t domain) const = 0;
 
-  DCPS::WeakRcHandle<ICE::Endpoint> get_ice_endpoint();
+  DCPS::WeakRcHandle<ICE::Endpoint> get_ice_endpoint(DDS::DomainId_t domain,
+                                                     DomainParticipantImpl* participant);
   void rtps_relay_only_now(bool flag);
   void use_rtps_relay_now(bool flag);
   void use_ice_now(bool flag);
 
   virtual void update_locators(const GUID_t& /*remote_id*/,
-                               const TransportLocatorSeq& /*locators*/) {}
+                               const TransportLocatorSeq& /*locators*/,
+                               DDS::DomainId_t /*domain*/,
+                               DomainParticipantImpl* /*participant*/) {}
 
   virtual void get_last_recv_locator(const GUID_t& /*remote_id*/,
-                                     TransportLocator& /*locators*/) {}
+                                     TransportLocator& /*locators*/,
+                                     DDS::DomainId_t /*domain*/,
+                                     DomainParticipantImpl* /*participant*/) {}
 
-  ReactorTask_rch reactor_task();
-  EventDispatcher_rch event_dispatcher();
+  ReactorTask_rch reactor_task(DDS::DomainId_t domain,
+                               DomainParticipantImpl* participant);
+  EventDispatcher_rch event_dispatcher(DDS::DomainId_t domain,
+                                       DomainParticipantImpl* participant);
 
   /**
    * @{
@@ -194,9 +205,14 @@ public:
   void count_messages(bool flag);
   bool count_messages() const;
 
-  virtual void append_transport_statistics(TransportStatisticsSequence& /*seq*/) {}
+  virtual void append_transport_statistics(TransportStatisticsSequence& /*seq*/,
+                                           DDS::DomainId_t /*domain*/,
+                                           DomainParticipantImpl* /*participant*/) {}
 
   static void set_port_in_addr_string(OPENDDS_STRING& addr_str, u_short port_number);
+
+  void remove_participant(DDS::DomainId_t domain,
+                          DomainParticipantImpl* participant);
 
 protected:
 
@@ -216,16 +232,22 @@ private:
 
   friend class TransportClient;
  protected:
-  TransportImpl_rch get_or_create_impl();
-  TransportImpl_rch get_impl();
+  TransportImpl_rch get_or_create_impl(DDS::DomainId_t domain,
+                                       DomainParticipantImpl* participant);
+  TransportImpl_rch get_impl(DDS::DomainId_t domain,
+                             DomainParticipantImpl* participant);
  private:
-  virtual TransportImpl_rch new_impl() = 0;
+  virtual TransportImpl_rch new_impl(DDS::DomainId_t domain) = 0;
+
+  String instantiation_rule() const;
 
   const String name_;
   const String config_prefix_;
   const bool is_template_;
 
-  TransportImpl_rch impl_;
+  typedef OPENDDS_MAP(DomainParticipantImpl*, TransportImpl_rch) ParticipantMap;
+  typedef OPENDDS_MAP(DDS::DomainId_t, ParticipantMap) DomainMap;
+  DomainMap domain_map_;
 };
 
 // Helper to turn a raw value into getters and setters.

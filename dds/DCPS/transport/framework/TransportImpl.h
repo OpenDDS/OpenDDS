@@ -177,8 +177,11 @@ public:
 
   EventDispatcher_rch event_dispatcher() { return event_dispatcher_; }
 
+  DDS::DomainId_t domain() const { return domain_; }
+
 protected:
-  TransportImpl(TransportInst_rch config);
+  TransportImpl(TransportInst_rch config,
+                DDS::DomainId_t domain);
 
   bool open();
 
@@ -317,6 +320,7 @@ public:
 protected:
   /// Id of the last link established.
   AtomicBool is_shut_down_;
+  DDS::DomainId_t domain_;
 };
 
 } // namespace DCPS

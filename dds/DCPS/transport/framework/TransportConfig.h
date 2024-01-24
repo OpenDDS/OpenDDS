@@ -47,7 +47,8 @@ public:
   /// to have the sorted order make sense.
   void sorted_insert(const TransportInst_rch& inst);
 
-  void populate_locators(OpenDDS::DCPS::TransportLocatorSeq& trans_info) const;
+  void populate_locators(OpenDDS::DCPS::TransportLocatorSeq& trans_info,
+                         DDS::DomainId_t domain) const;
 
   bool uses_template() const;
 

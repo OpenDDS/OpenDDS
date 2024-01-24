@@ -245,12 +245,84 @@ RtpsUdpInst::multicast_group_address(const NetworkAddress& addr)
 }
 
 NetworkAddress
-RtpsUdpInst::multicast_group_address() const
+RtpsUdpInst::multicast_group_address(DDS::DomainId_t domain) const
 {
-  return TheServiceParticipant->config_store()->get(config_key("MULTICAST_GROUP_ADDRESS").c_str(),
-                                                    NetworkAddress(7401, "239.255.0.2"),
-                                                    ConfigStoreImpl::Format_Optional_Port,
-                                                    ConfigStoreImpl::Kind_IPV4);
+  NetworkAddress na = TheServiceParticipant->config_store()->get(config_key("MULTICAST_GROUP_ADDRESS").c_str(),
+                                                                 NetworkAddress(7401, "239.255.0.2"),
+                                                                 ConfigStoreImpl::Format_Optional_Port,
+                                                                 ConfigStoreImpl::Kind_IPV4);
+  const NetworkAddress na_original = na;
+
+  if (is_template()) {
+    // Customize.
+    const String customization_name = TheServiceParticipant->config_store()->get(config_key("CUSTOMIZATION").c_str(), "");
+    if (!customization_name.empty()) {
+      const String directive = TheServiceParticipant->config_store()->get(String("OPENDDS_CUSTOMIZATION_" + customization_name + "_MULTICAST_GROUP_ADDRESS").c_str(), "");
+
+      // only add_domain_id_to_ip_addr and add_domain_id_to_port are supported at this time.
+      if (directive.find("add_domain_id_to_ip_addr") != directive.npos) {
+        String addr = LogAddr(na, LogAddr::Ip).str();
+        size_t pos = addr.find_last_of(".");
+        if (pos != String::npos) {
+          const String last_octet = addr.substr(pos + 1);
+
+          int val = 0;
+
+          if (!convertToInteger(last_octet, val)) {
+            if (log_level >= LogLevel::Error) {
+              ACE_ERROR((LM_ERROR,
+                         "(%P|%t) ERROR: RtpsUdpInst::multicast_group_address: "
+                         "could not convert %C to integer\n",
+                         last_octet.c_str()));
+            }
+            return na;
+          }
+
+          val += domain;
+          addr = addr.substr(0, pos);
+          addr += "." + to_dds_string(val);
+          na = NetworkAddress(na.get_port_number(), addr.c_str());
+        } else {
+          if (log_level >= LogLevel::Error) {
+            ACE_ERROR((LM_ERROR,
+                       "(%P|%t) ERROR: RtpsUdpInst::multicast_group_address: "
+                       "could not add_domain_id_to_ip_addr for address %C\n",
+                       addr.c_str()));
+          }
+          return na;
+        }
+
+        if (log_level >= LogLevel::Debug && DCPS_debug_level > 0) {
+          ACE_DEBUG((LM_DEBUG,
+                     "(%P|%t) DEBUG: RtpsUdpInst::multicast_group_address: "
+                     "processing add_domain_id_to_ip_addr: %C=%C => %C\n",
+                     directive.c_str(), LogAddr(na_original).c_str(), LogAddr(na).c_str()));
+        }
+      }
+
+      if (directive.find("add_domain_id_to_port") != directive.npos) {
+        if (na.get_port_number() == 0) {
+          // use default port + domainId. See 9.6.1.3 in the RTPS 2.2 protocol specification.
+          const int PB = 7400;
+          const int DG = 250;
+          const int D2 = 1;
+          na.set_port_number(PB + DG * domain + D2 + domain);
+        } else {
+          // address has a port supplied
+          na.set_port_number(na.get_port_number() + domain);
+        }
+
+        if (log_level >= LogLevel::Debug && DCPS_debug_level > 0) {
+          ACE_DEBUG((LM_DEBUG,
+                     "(%P|%t) DEBUG: RtpsUdpInst::multicast_group_address: "
+                     "processing add_domain_id_to_port: %C=%C => %C\n",
+                     directive.c_str(), LogAddr(na_original).c_str(), LogAddr(na).c_str()));
+        }
+      }
+    }
+  }
+
+  return na;
 }
 
 void
@@ -418,9 +490,9 @@ RtpsUdpInst::stun_server_address() const
 }
 
 TransportImpl_rch
-RtpsUdpInst::new_impl()
+RtpsUdpInst::new_impl(DDS::DomainId_t domain)
 {
-  return make_rch<RtpsUdpTransport>(rchandle_from(this));
+  return make_rch<RtpsUdpTransport>(rchandle_from(this), domain);
 }
 
 int
@@ -432,9 +504,9 @@ RtpsUdpInst::load(ACE_Configuration_Heap& cf,
 }
 
 OPENDDS_STRING
-RtpsUdpInst::dump_to_str() const
+RtpsUdpInst::dump_to_str(DDS::DomainId_t domain) const
 {
-  OPENDDS_STRING ret = TransportInst::dump_to_str();
+  OPENDDS_STRING ret = TransportInst::dump_to_str(domain);
   ret += formatNameForDump("send_buffer_size") + to_dds_string(send_buffer_size()) + '\n';
   ret += formatNameForDump("rcv_buffer_size") + to_dds_string(rcv_buffer_size()) + '\n';
   ret += formatNameForDump("use_multicast") + (use_multicast() ? "true" : "false") + '\n';
@@ -446,7 +518,7 @@ RtpsUdpInst::dump_to_str() const
   ret += formatNameForDump("nak_response_delay") + nak_response_delay().str() + '\n';
   ret += formatNameForDump("heartbeat_period") + heartbeat_period().str() + '\n';
   ret += formatNameForDump("responsive_mode") + (responsive_mode() ? "true" : "false") + '\n';
-  ret += formatNameForDump("multicast_group_address") + LogAddr(multicast_group_address()).str() + '\n';
+  ret += formatNameForDump("multicast_group_address") + LogAddr(multicast_group_address(domain)).str() + '\n';
   ret += formatNameForDump("local_address") + LogAddr(local_address()).str() + '\n';
   ret += formatNameForDump("advertised_address") + LogAddr(advertised_address()).str() + '\n';
 #ifdef ACE_HAS_IPV6
@@ -458,7 +530,9 @@ RtpsUdpInst::dump_to_str() const
 }
 
 size_t
-RtpsUdpInst::populate_locator(TransportLocator& info, ConnectionInfoFlags flags) const
+RtpsUdpInst::populate_locator(TransportLocator& info,
+                              ConnectionInfoFlags flags,
+                              DDS::DomainId_t domain) const
 {
   using namespace OpenDDS::RTPS;
 
@@ -466,7 +540,7 @@ RtpsUdpInst::populate_locator(TransportLocator& info, ConnectionInfoFlags flags)
   CORBA::ULong idx = 0;
 
   // multicast first so it's preferred by remote peers
-  const NetworkAddress multicast_group_addr = multicast_group_address();
+  const NetworkAddress multicast_group_addr = multicast_group_address(domain);
   if ((flags & CONNINFO_MULTICAST) && use_multicast() && multicast_group_addr != NetworkAddress::default_IPV4) {
     grow(locators);
     address_to_locator(locators[idx++], multicast_group_addr.to_addr());
@@ -556,9 +630,11 @@ RtpsUdpInst::get_blob(const TransportLocatorSeq& trans_info) const
 
 void
 RtpsUdpInst::update_locators(const GUID_t& remote_id,
-                             const TransportLocatorSeq& locators)
+                             const TransportLocatorSeq& locators,
+                             DDS::DomainId_t domain,
+                             DomainParticipantImpl* participant)
 {
-  TransportImpl_rch imp = get_or_create_impl();
+  TransportImpl_rch imp = get_or_create_impl(domain, participant);
   if (imp) {
     RtpsUdpTransport_rch rtps_impl = static_rchandle_cast<RtpsUdpTransport>(imp);
     rtps_impl->update_locators(remote_id, locators);
@@ -567,9 +643,11 @@ RtpsUdpInst::update_locators(const GUID_t& remote_id,
 
 void
 RtpsUdpInst::get_last_recv_locator(const GUID_t& remote_id,
-                                   TransportLocator& locator)
+                                   TransportLocator& locator,
+                                   DDS::DomainId_t domain,
+                                   DomainParticipantImpl* participant)
 {
-  TransportImpl_rch imp = get_or_create_impl();
+  TransportImpl_rch imp = get_or_create_impl(domain, participant);
   if (imp) {
     RtpsUdpTransport_rch rtps_impl = static_rchandle_cast<RtpsUdpTransport>(imp);
     rtps_impl->get_last_recv_locator(remote_id, locator);
@@ -577,9 +655,11 @@ RtpsUdpInst::get_last_recv_locator(const GUID_t& remote_id,
 }
 
 void
-RtpsUdpInst::append_transport_statistics(TransportStatisticsSequence& seq)
+RtpsUdpInst::append_transport_statistics(TransportStatisticsSequence& seq,
+                                         DDS::DomainId_t domain,
+                                         DomainParticipantImpl* participant)
 {
-  TransportImpl_rch imp = get_or_create_impl();
+  TransportImpl_rch imp = get_or_create_impl(domain, participant);
   if (imp) {
     RtpsUdpTransport_rch rtps_impl = static_rchandle_cast<RtpsUdpTransport>(imp);
     rtps_impl->append_transport_statistics(seq);

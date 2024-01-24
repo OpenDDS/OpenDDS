@@ -215,7 +215,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
         std::cout << "Publisher Guid: " << OpenDDS::DCPS::LogGuid(guid).c_str() << std::endl;
         OpenDDS::DCPS::TransportStatisticsSequence stats;
         disc->append_transport_statistics(42, guid, stats);
-        transport_inst->append_transport_statistics(stats);
+        transport_inst->append_transport_statistics(stats, 42, dp_impl);
 
         for (unsigned int i = 0; i != stats.length(); ++i) {
           std::cout << "Publisher Transport Statistics: " << OpenDDS::DCPS::to_json(stats[i]) << std::endl;

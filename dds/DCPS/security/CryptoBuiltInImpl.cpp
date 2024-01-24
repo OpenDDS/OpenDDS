@@ -257,9 +257,9 @@ namespace {
     ~DigestContext() { EVP_MD_CTX_free(ctx_); }
   };
 
-  void hkdf(KeyOctetSeq& result, const DDS::OctetSeq_var& prefix,
+  bool hkdf(KeyOctetSeq& result, const DDS::OctetSeq_var& prefix,
             const char (&cookie)[17], const DDS::OctetSeq_var& suffix,
-            const DDS::OctetSeq_var& data)
+            const DDS::OctetSeq_var& data, SecurityException& ex)
   {
     char* const cookie_buffer = const_cast<char*>(cookie); // OctetSeq has no const
     DDS::OctetSeq cookieSeq(16, 16, reinterpret_cast<CORBA::Octet*>(cookie_buffer));
@@ -269,39 +269,42 @@ namespace {
     input[2] = suffix.ptr();
     DDS::OctetSeq key;
     if (SSL::hash(input, key) != 0) {
-      return;
+      return CommonUtilities::set_security_error(ex, -1, 0, "hkdf - SSL::hash");
     }
 
     PrivateKey pkey(key);
     DigestContext ctx;
     const EVP_MD* const md = EVP_get_digestbyname("SHA256");
     if (EVP_DigestInit_ex(ctx, md, 0) != 1) {
-      return;
+      return CommonUtilities::set_security_error(ex, -1, 0, "hkdf - EVP_DigestInit_ex", ERR_peek_last_error());
     }
 
     if (EVP_DigestSignInit(ctx, 0, md, 0, pkey) != 1) {
-      return;
+      return CommonUtilities::set_security_error(ex, -1, 0, "hkdf - EVP_DigestSignInit", ERR_peek_last_error());
     }
 
     if (EVP_DigestSignUpdate(ctx, data->get_buffer(), data->length()) != 1) {
-      return;
+      return CommonUtilities::set_security_error(ex, -1, 0, "hkdf - EVP_DigestSignUpdate", ERR_peek_last_error());
     }
 
     size_t req = 0;
     if (EVP_DigestSignFinal(ctx, 0, &req) != 1) {
-      return;
+      return CommonUtilities::set_security_error(ex, -1, 0, "hkdf - EVP_DigestSignFinal get length", ERR_peek_last_error());
     }
 
     result.length(static_cast<unsigned int>(req));
-    if (EVP_DigestSignFinal(ctx, result.get_buffer(), &req) != 1) {
-      result.length(0);
+    if (EVP_DigestSignFinal(ctx, result.get_buffer(), &req) == 1) {
+      return true;
     }
+    result.length(0);
+    return CommonUtilities::set_security_error(ex, -1, 0, "hkdf - EVP_DigestSignFinal", ERR_peek_last_error());
   }
 
   KeyMaterial_AES_GCM_GMAC
   make_volatile_key(const DDS::OctetSeq_var& challenge1,
                     const DDS::OctetSeq_var& challenge2,
-                    const DDS::OctetSeq_var& sharedSec)
+                    const DDS::OctetSeq_var& sharedSec,
+                    SecurityException& ex)
   {
     static const char KxSaltCookie[] = "keyexchange salt";
     static const char KxKeyCookie[] = "key exchange key";
@@ -309,8 +312,9 @@ namespace {
       {0, 0, 0, CRYPTO_TRANSFORMATION_KIND_AES256_GCM},
       KeyOctetSeq(), {0, 0, 0, 0}, KeyOctetSeq(), {0, 0, 0, 0}, KeyOctetSeq()
     };
-    hkdf(k.master_salt, challenge1, KxSaltCookie, challenge2, sharedSec);
-    hkdf(k.master_sender_key, challenge2, KxKeyCookie, challenge1, sharedSec);
+    if (hkdf(k.master_salt, challenge1, KxSaltCookie, challenge2, sharedSec, ex)) {
+      hkdf(k.master_sender_key, challenge2, KxKeyCookie, challenge1, sharedSec, ex);
+    }
     return k;
   }
 }
@@ -435,11 +439,9 @@ DatareaderCryptoHandle CryptoBuiltInImpl::register_matched_remote_datareader(
     dr_keys.length(1);
     dr_keys[0] = make_volatile_key(shared_secret->challenge1(),
                                    shared_secret->challenge2(),
-                                   shared_secret->sharedSecret());
+                                   shared_secret->sharedSecret(), ex);
     if (!dr_keys[0].master_salt.length()
         || !dr_keys[0].master_sender_key.length()) {
-      CommonUtilities::set_security_error(ex, -1, 0, "Couldn't create key for "
-                                          "volatile remote reader");
       return DDS::HANDLE_NIL;
     }
     if (security_debug.bookkeeping && !security_debug.showkeys) {
@@ -589,11 +591,9 @@ DatawriterCryptoHandle CryptoBuiltInImpl::register_matched_remote_datawriter(
     dw_keys.length(1);
     dw_keys[0] = make_volatile_key(shared_secret->challenge1(),
                                    shared_secret->challenge2(),
-                                   shared_secret->sharedSecret());
+                                   shared_secret->sharedSecret(), ex);
     if (!dw_keys[0].master_salt.length()
         || !dw_keys[0].master_sender_key.length()) {
-      CommonUtilities::set_security_error(ex, -1, 0, "Couldn't create key for "
-                                          "volatile remote writer");
       return DDS::HANDLE_NIL;
     }
     if (security_debug.bookkeeping && !security_debug.showkeys) {
@@ -1176,21 +1176,23 @@ bool CryptoBuiltInImpl::encode_serialized_payload(
   return ser.good_bit();
 }
 
-void CryptoBuiltInImpl::Session::create_key(const KeyMaterial& master)
+bool CryptoBuiltInImpl::Session::create_key(const KeyMaterial& master, SecurityException& ex)
 {
   RAND_bytes(id_, sizeof id_);
   RAND_bytes(iv_suffix_, sizeof iv_suffix_);
-  derive_key(master);
+  const bool result = derive_key(master, ex);
   counter_ = 0;
+  return result;
 }
 
-void CryptoBuiltInImpl::Session::next_id(const KeyMaterial& master)
+bool CryptoBuiltInImpl::Session::next_id(const KeyMaterial& master, SecurityException& ex)
 {
   inc32(id_);
   RAND_bytes(iv_suffix_, sizeof iv_suffix_);
   key_.length(0);
-  derive_key(master);
+  const bool result = derive_key(master, ex);
   counter_ = 0;
+  return result;
 }
 
 void CryptoBuiltInImpl::Session::inc_iv()
@@ -1200,18 +1202,23 @@ void CryptoBuiltInImpl::Session::inc_iv()
   }
 }
 
-void CryptoBuiltInImpl::encauth_setup(const KeyMaterial& master, Session& sess,
+bool CryptoBuiltInImpl::encauth_setup(const KeyMaterial& master, Session& sess,
                                       const DDS::OctetSeq& plain,
-                                      CryptoHeader& header)
+                                      CryptoHeader& header,
+                                      SecurityException& ex)
 {
   const unsigned int blocks =
     (plain.length() + BLOCK_LEN_BYTES - 1) / BLOCK_LEN_BYTES;
 
   if (!sess.key_.length()) {
-    sess.create_key(master);
+    if (!sess.create_key(master, ex)) {
+      return false;
+    }
 
   } else if (sess.counter_ + blocks > MAX_BLOCKS_PER_SESSION) {
-    sess.next_id(master);
+    if (!sess.next_id(master, ex)) {
+      return false;
+    }
 
   } else {
     sess.inc_iv();
@@ -1224,6 +1231,7 @@ void CryptoBuiltInImpl::encauth_setup(const KeyMaterial& master, Session& sess,
               &master.sender_key_id, sizeof master.sender_key_id);
   std::memcpy(&header.session_id, &sess.id_, sizeof sess.id_);
   std::memcpy(&header.initialization_vector_suffix, &sess.iv_suffix_, sizeof sess.iv_suffix_);
+  return true;
 }
 
 bool CryptoBuiltInImpl::encrypt(const KeyMaterial& master, Session& sess,
@@ -1237,7 +1245,9 @@ bool CryptoBuiltInImpl::encrypt(const KeyMaterial& master, Session& sess,
       to_dds_string(master).c_str()));
   }
 
-  encauth_setup(master, sess, plain, header);
+  if (!encauth_setup(master, sess, plain, header, ex)) {
+    return false;
+  }
   static const int IV_LEN = 12, IV_SUFFIX_IDX = 4;
   unsigned char iv[IV_LEN];
   std::memcpy(iv, &sess.id_, sizeof sess.id_);
@@ -1251,7 +1261,7 @@ bool CryptoBuiltInImpl::encrypt(const KeyMaterial& master, Session& sess,
   CipherContext ctx;
   const unsigned char* const key = sess.key_.get_buffer();
   if (EVP_EncryptInit_ex(ctx, EVP_aes_256_gcm(), 0, key, iv) != 1) {
-    return CommonUtilities::set_security_error(ex, -1, 0, "EVP_EncryptInit_ex");
+    return CommonUtilities::set_security_error(ex, -1, 0, "CryptoBuiltInImpl::encrypt - EVP_EncryptInit_ex", ERR_peek_last_error());
   }
 
   int len;
@@ -1259,22 +1269,22 @@ bool CryptoBuiltInImpl::encrypt(const KeyMaterial& master, Session& sess,
   unsigned char* const out_buffer = out.get_buffer();
   if (EVP_EncryptUpdate(ctx, out_buffer, &len,
                         plain.get_buffer(), plain.length()) != 1) {
-    return CommonUtilities::set_security_error(ex, -1, 0, "EVP_EncryptUpdate");
+    return CommonUtilities::set_security_error(ex, -1, 0, "CryptoBuiltInImpl::encrypt - EVP_EncryptUpdate", ERR_peek_last_error());
   }
 
   int padLen;
   if (EVP_EncryptFinal_ex(ctx, out_buffer + len, &padLen) != 1) {
-    return CommonUtilities::set_security_error(ex, -1, 0, "EVP_EncryptFinal_ex");
+    return CommonUtilities::set_security_error(ex, -1, 0, "CryptoBuiltInImpl::encrypt - EVP_EncryptFinal_ex", ERR_peek_last_error());
   }
 
   out.length(len + padLen);
 
   if (EVP_CIPHER_CTX_ctrl(ctx, EVP_CTRL_AEAD_GET_TAG, sizeof footer.common_mac,
-                          &footer.common_mac) != 1) {
-    return CommonUtilities::set_security_error(ex, -1, 0, "EVP_CIPHER_CTX_ctrl");
+                          &footer.common_mac) == 1) {
+    return true;
   }
-
-  return true;
+  out.length(0);
+  return CommonUtilities::set_security_error(ex, -1, 0, "CryptoBuiltInImpl::encrypt - EVP_CIPHER_CTX_ctrl", ERR_peek_last_error());
 }
 
 bool CryptoBuiltInImpl::authtag(const KeyMaterial& master, Session& sess,
@@ -1283,7 +1293,9 @@ bool CryptoBuiltInImpl::authtag(const KeyMaterial& master, Session& sess,
                                 CryptoFooter& footer,
                                 SecurityException& ex)
 {
-  encauth_setup(master, sess, plain, header);
+  if (!encauth_setup(master, sess, plain, header, ex)) {
+    return false;
+  }
   static const int IV_LEN = 12, IV_SUFFIX_IDX = 4;
   unsigned char iv[IV_LEN];
   std::memcpy(iv, &sess.id_, sizeof sess.id_);
@@ -1292,21 +1304,21 @@ bool CryptoBuiltInImpl::authtag(const KeyMaterial& master, Session& sess,
   CipherContext ctx;
   const unsigned char* const key = sess.key_.get_buffer();
   if (EVP_EncryptInit_ex(ctx, EVP_aes_256_gcm(), 0, key, iv) != 1) {
-    return CommonUtilities::set_security_error(ex, -1, 0, "EVP_EncryptInit_ex");
+    return CommonUtilities::set_security_error(ex, -1, 0, "CryptoBuiltInImpl::authtag - EVP_EncryptInit_ex", ERR_peek_last_error());
   }
 
   int n;
   if (EVP_EncryptUpdate(ctx, 0, &n, plain.get_buffer(), plain.length()) != 1) {
-    return CommonUtilities::set_security_error(ex, -1, 0, "EVP_EncryptUpdate");
+    return CommonUtilities::set_security_error(ex, -1, 0, "CryptoBuiltInImpl::authtag - EVP_EncryptUpdate", ERR_peek_last_error());
   }
 
   if (EVP_EncryptFinal_ex(ctx, 0, &n) != 1) {
-    return CommonUtilities::set_security_error(ex, -1, 0, "EVP_EncryptFinal_ex");
+    return CommonUtilities::set_security_error(ex, -1, 0, "CryptoBuiltInImpl::authtag - EVP_EncryptFinal_ex", ERR_peek_last_error());
   }
 
   if (EVP_CIPHER_CTX_ctrl(ctx, EVP_CTRL_AEAD_GET_TAG, sizeof footer.common_mac,
                           &footer.common_mac) != 1) {
-    return CommonUtilities::set_security_error(ex, -1, 0, "EVP_CIPHER_CTX_ctrl");
+    return CommonUtilities::set_security_error(ex, -1, 0, "CryptoBuiltInImpl::authtag - EVP_CIPHER_CTX_ctrl", ERR_peek_last_error());
   }
 
   return true;
@@ -1773,54 +1785,57 @@ bool CryptoBuiltInImpl::preprocess_secure_submsg(
 
 KeyOctetSeq
 CryptoBuiltInImpl::Session::get_key(const KeyMaterial& master,
-                                    const CryptoHeader& header)
+                                    const CryptoHeader& header,
+                                    SecurityException& ex)
 {
   if (key_.length() && 0 == std::memcmp(&id_, &header.session_id, sizeof id_)) {
     return key_;
   }
   std::memcpy(&id_, &header.session_id, sizeof id_);
   key_.length(0);
-  derive_key(master);
+  derive_key(master, ex);
   return key_;
 }
 
-void CryptoBuiltInImpl::Session::derive_key(const KeyMaterial& master)
+bool CryptoBuiltInImpl::Session::derive_key(const KeyMaterial& master, SecurityException& ex)
 {
   PrivateKey pkey(master.master_sender_key);
   DigestContext ctx;
   const EVP_MD* md = EVP_get_digestbyname("SHA256");
 
   if (EVP_DigestInit_ex(ctx, md, 0) < 1) {
-    return;
+    return CommonUtilities::set_security_error(ex, -1, 0, "CryptoBuiltInImpl::Session::derive_key - EVP_DigestInit_ex", ERR_peek_last_error());
   }
 
   if (EVP_DigestSignInit(ctx, 0, md, 0, pkey) < 1) {
-    return;
+    return CommonUtilities::set_security_error(ex, -1, 0, "CryptoBuiltInImpl::Session::derive_key - EVP_DigestSignInit", ERR_peek_last_error());
   }
 
   static const char cookie[] = "SessionKey"; // DDSSEC12-53: NUL excluded
   if (EVP_DigestSignUpdate(ctx, cookie, (sizeof cookie) - 1) < 1) {
-    return;
+    return CommonUtilities::set_security_error(ex, -1, 0, "CryptoBuiltInImpl::Session::derive_key - EVP_DigestSignUpdate cookie", ERR_peek_last_error());
   }
 
   const KeyOctetSeq& salt = master.master_salt;
   if (EVP_DigestSignUpdate(ctx, salt.get_buffer(), salt.length()) < 1) {
-    return;
+    return CommonUtilities::set_security_error(ex, -1, 0, "CryptoBuiltInImpl::Session::derive_key - EVP_DigestSignUpdate salt", ERR_peek_last_error());
   }
 
   if (EVP_DigestSignUpdate(ctx, id_, sizeof id_) < 1) {
-    return;
+    return CommonUtilities::set_security_error(ex, -1, 0, "CryptoBuiltInImpl::Session::derive_key - EVP_DigestSignUpdate id", ERR_peek_last_error());
   }
 
   size_t req = 0;
   if (EVP_DigestSignFinal(ctx, 0, &req) < 1) {
-    return;
+    return CommonUtilities::set_security_error(ex, -1, 0, "CryptoBuiltInImpl::Session::derive_key - EVP_DigestSignFinal get length", ERR_peek_last_error());
   }
 
   key_.length(static_cast<unsigned int>(req));
-  if (EVP_DigestSignFinal(ctx, key_.get_buffer(), &req) < 1) {
-    key_.length(0);
+  if (EVP_DigestSignFinal(ctx, key_.get_buffer(), &req) >= 1) {
+    return true;
   }
+  key_.length(0);
+  return CommonUtilities::set_security_error(ex, -1, 0, "CryptoBuiltInImpl::Session::derive_key - EVP_DigestSignFinal key", ERR_peek_last_error());
 }
 
 bool CryptoBuiltInImpl::decrypt(const KeyMaterial& master, Session& sess,
@@ -1828,7 +1843,6 @@ bool CryptoBuiltInImpl::decrypt(const KeyMaterial& master, Session& sess,
                                 const CryptoHeader& header,
                                 const CryptoFooter& footer, DDS::OctetSeq& out,
                                 SecurityException& ex)
-
 {
   if (security_debug.showkeys) {
     ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {showkeys} CryptoBuiltInImpl::decrypt ")
@@ -1836,9 +1850,9 @@ bool CryptoBuiltInImpl::decrypt(const KeyMaterial& master, Session& sess,
       to_dds_string(master).c_str()));
   }
 
-  const KeyOctetSeq sess_key = sess.get_key(master, header);
+  const KeyOctetSeq sess_key = sess.get_key(master, header, ex);
   if (!sess_key.length()) {
-    return CommonUtilities::set_security_error(ex, -1, 0, "no session key");
+    return false;
   }
 
   if (master.transformation_kind[TransformKindIndex] !=
@@ -1859,9 +1873,7 @@ bool CryptoBuiltInImpl::decrypt(const KeyMaterial& master, Session& sess,
   // session_id is start of IV contiguous bytes
   if (EVP_DecryptInit_ex(ctx, EVP_aes_256_gcm(), 0, sess_key.get_buffer(),
                          header.session_id) != 1) {
-    ACE_ERROR((LM_ERROR, "(%P|%t) CryptoBuiltInImpl::decrypt - ERROR "
-               "EVP_DecryptInit_ex %Ld\n", ERR_peek_last_error()));
-    return CommonUtilities::set_security_error(ex, -1, 0, "EVP_DecryptInit_ex");
+    return CommonUtilities::set_security_error(ex, -1, 0, "CryptoBuiltInImpl::decrypt - EVP_DecryptInit_ex", ERR_peek_last_error());
   }
 
   out.length(n + KEY_LEN_BYTES);
@@ -1870,16 +1882,12 @@ bool CryptoBuiltInImpl::decrypt(const KeyMaterial& master, Session& sess,
   if (EVP_DecryptUpdate(ctx, out_buffer, &len,
                         reinterpret_cast<const unsigned char*>(ciphertext), n)
       != 1) {
-    ACE_ERROR((LM_ERROR, "(%P|%t) CryptoBuiltInImpl::decrypt - ERROR "
-               "EVP_DecryptUpdate %Ld\n", ERR_peek_last_error()));
-    return CommonUtilities::set_security_error(ex, -1, 0, "EVP_DecryptUpdate");
+    return CommonUtilities::set_security_error(ex, -1, 0, "CryptoBuiltInImpl::decrypt - EVP_DecryptUpdate", ERR_peek_last_error());
   }
 
   void* tag = const_cast<void*>(static_cast<const void*>(footer.common_mac));
   if (!EVP_CIPHER_CTX_ctrl(ctx, EVP_CTRL_GCM_SET_TAG, 16, tag)) {
-    ACE_ERROR((LM_ERROR, "(%P|%t) CryptoBuiltInImpl::decrypt - ERROR "
-               "EVP_CIPHER_CTX_ctrl %Ld\n", ERR_peek_last_error()));
-    return CommonUtilities::set_security_error(ex, -1, 0, "EVP_CIPHER_CTX_ctrl");
+    return CommonUtilities::set_security_error(ex, -1, 0, "CryptoBuiltInImpl::decrypt - EVP_CIPHER_CTX_ctrl", ERR_peek_last_error());
   }
 
   int len2;
@@ -1887,9 +1895,7 @@ bool CryptoBuiltInImpl::decrypt(const KeyMaterial& master, Session& sess,
     out.length(len + len2);
     return true;
   }
-  ACE_ERROR((LM_ERROR, "(%P|%t) CryptoBuiltInImpl::decrypt - ERROR "
-             "EVP_DecryptFinal_ex %Ld\n", ERR_peek_last_error()));
-  return CommonUtilities::set_security_error(ex, -1, 0, "EVP_DecryptFinal_ex");
+  return CommonUtilities::set_security_error(ex, -1, 0, "CryptoBuiltInImpl::decrypt - EVP_DecryptFinal_ex", ERR_peek_last_error());
 }
 
 bool CryptoBuiltInImpl::verify(const KeyMaterial& master, Session& sess,
@@ -1899,9 +1905,9 @@ bool CryptoBuiltInImpl::verify(const KeyMaterial& master, Session& sess,
                                SecurityException& ex)
 
 {
-  const KeyOctetSeq sess_key = sess.get_key(master, header);
+  const KeyOctetSeq sess_key = sess.get_key(master, header, ex);
   if (!sess_key.length()) {
-    return CommonUtilities::set_security_error(ex, -1, 0, "no session key");
+    return false;
   }
 
   if (master.transformation_kind[TransformKindIndex] !=
@@ -1916,24 +1922,18 @@ bool CryptoBuiltInImpl::verify(const KeyMaterial& master, Session& sess,
   // session_id is start of IV contiguous bytes
   if (EVP_DecryptInit_ex(ctx, EVP_aes_256_gcm(), 0, sess_key.get_buffer(),
                          header.session_id) != 1) {
-    ACE_ERROR((LM_ERROR, "(%P|%t) CryptoBuiltInImpl::verify - ERROR "
-               "EVP_DecryptInit_ex %Ld\n", ERR_peek_last_error()));
-    return CommonUtilities::set_security_error(ex, -1, 0, "EVP_DecryptInit_ex");
+    return CommonUtilities::set_security_error(ex, -1, 0, "CryptoBuiltInImpl::verify - EVP_DecryptInit_ex", ERR_peek_last_error());
   }
 
   int len;
   if (EVP_DecryptUpdate(ctx, 0, &len,
                         reinterpret_cast<const unsigned char*>(in), n) != 1) {
-    ACE_ERROR((LM_ERROR, "(%P|%t) CryptoBuiltInImpl::verify - ERROR "
-               "EVP_DecryptUpdate %Ld\n", ERR_peek_last_error()));
-    return CommonUtilities::set_security_error(ex, -1, 0, "EVP_DecryptUpdate");
+    return CommonUtilities::set_security_error(ex, -1, 0, "CryptoBuiltInImpl::verify - EVP_DecryptUpdate", ERR_peek_last_error());
   }
 
   void* tag = const_cast<void*>(static_cast<const void*>(footer.common_mac));
   if (!EVP_CIPHER_CTX_ctrl(ctx, EVP_CTRL_GCM_SET_TAG, 16, tag)) {
-    ACE_ERROR((LM_ERROR, "(%P|%t) CryptoBuiltInImpl::verify - ERROR "
-               "EVP_CIPHER_CTX_ctrl %Ld\n", ERR_peek_last_error()));
-    return CommonUtilities::set_security_error(ex, -1, 0, "EVP_CIPHER_CTX_ctrl");
+    return CommonUtilities::set_security_error(ex, -1, 0, "CryptoBuiltInImpl::verify - EVP_CIPHER_CTX_ctrl", ERR_peek_last_error());
   }
 
   int len2;
@@ -1942,9 +1942,7 @@ bool CryptoBuiltInImpl::verify(const KeyMaterial& master, Session& sess,
     std::memcpy(out.get_buffer(), in, n);
     return true;
   }
-  ACE_ERROR((LM_ERROR, "(%P|%t) CryptoBuiltInImpl::verify - ERROR "
-             "EVP_DecryptFinal_ex %Ld\n", ERR_peek_last_error()));
-  return CommonUtilities::set_security_error(ex, -1, 0, "EVP_DecryptFinal_ex");
+  return CommonUtilities::set_security_error(ex, -1, 0, "CryptoBuiltInImpl::verify - EVP_DecryptFinal_ex", ERR_peek_last_error());
 }
 
 bool CryptoBuiltInImpl::decode_rtps_message(

@@ -158,7 +158,7 @@ Parser::parse(const char* filename)
           config = TheTransportRegistry->global_config();
         }
 
-        config->populate_locators(trans_info);
+        config->populate_locators(trans_info, conn.domain_id_);
 
         // Typically, we would ensure that trans_info is not empty.
         // However, when using RTPS, trans_info will be empty so don't check.
@@ -233,7 +233,7 @@ Parser::parse(const char* filename)
           config = TheTransportRegistry->global_config();
         }
 
-        config->populate_locators(trans_info);
+        config->populate_locators(trans_info, conn.domain_id_);
 
         // Typically, we would ensure that trans_info is not empty.
         // However, when using RTPS, trans_info will be empty so don't check.
