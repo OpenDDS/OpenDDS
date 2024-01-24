@@ -595,7 +595,7 @@ Some additional nodes and exceptions:
     if (x) {
     }
     elsif (y) {
-    {
+    }
     else {
     }
 
