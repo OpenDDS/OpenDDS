@@ -5,7 +5,6 @@
 
 #include "marshal_generator.h"
 
-#include "be_extern.h"
 #include "dds_generator.h"
 #include "field_info.h"
 #include "topic_keys.h"
@@ -1661,7 +1660,6 @@ namespace {
   {
     const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
     const bool is_union_member = prefix.substr(3) == "uni";
-    const bool is_optional = be_global->is_optional(field);
 
     AST_Type* const actual_type = resolveActualType(type);
     const Classification fld_cls = classify(actual_type);
@@ -1673,10 +1671,6 @@ namespace {
     }
     const string shift = prefix.substr(0, 2),
                  expr = qual.substr(3);
-    // TODO(tyler) Can this be put into the insert_cxx11_accessor_parens
-    if (is_optional) {
-      qual += "()";
-    }
 
     WrapDirection dir = (shift == ">>") ? WD_INPUT : WD_OUTPUT;
     if ((fld_cls & CL_STRING) && (dir == WD_INPUT)) {
