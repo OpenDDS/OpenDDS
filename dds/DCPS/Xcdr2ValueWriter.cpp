@@ -6,101 +6,69 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-void Xcdr2ValueWriter::begin_complex(Extensibility extensibility,
-                                     CollectionKind coll_kind)
+// Called whenever we encounter a struct, union, sequence, or array.
+// When that happens, create a new instance of Metadata that stores the states of
+// the byte stream and the information of the type encountered, including its kind
+// and extensibility that helps decide when a header, e.g. Dheader or Emheader, is
+// required. If a header is needed, a position in the size cache is also stored so
+// that the actual size will be written when it is determined (see end_complex).
+void Xcdr2ValueWriter::begin_complex(Extensibility extensibility, CollectionKind coll_kind)
 {
-  // This is where we keep a bookmark for when the aggregated value starts in the stream.
-  // To derive the size of the whole struct or union, we need to
-  // find out the size of paddings in front of the Dheader.
-  //
-  // - If this is the top-level type:
-  //   + There is NO padding regardless whether it is appendable or mutable.
-  //   + If this type is final, there is no Dheader for the top-level type.
-  //     The nested members still need to compute the total size if they are appendable or mutable.
-  //
-  // - If this is a member of a mutable containing type, there is NO padding ahead of the Dheader
-  //   since it is preceded by the Emheader or Nextint which is already aligned.
-  //
-  // - If this is a member of final or appendable type, there CAN BE paddings before it begins,
-  //   i.e., before its Dheader in case it's appendable or mutable, or before its first member
-  //   in case it's final.
-  //   Figuring out the total size of the struct without the paddings in front of the Dheaher may
-  //   require a different scheme than currently provided by Serializer.
-  //
-  // For mutable struct, each member needs its own entry in state_ and its size cached,
-  // even if the member is not nested type. This is because its size is needed for Emheader.
-  // For final or appendable struct, only member which is an appendable or mutable struct (or
-  // in general type that requires Dheader) will need its own entry in state_ and in the cache.
+  Metadata metadata(extensibility, coll_kind);
+  bool must_cache_size = true;
 
-  // Always create a new Metadata instance when encountering a struct.
-  // But only struct whose size is needed, in order to fill its Dheader or
-  // the Emheader (and possibly Nextint) in case it's a member of a mutable
-  // struct, has a cache entry for its size.
-  // Also, for mutable struct, each of its members has its size cached,
-  // regardless of whether it is a nested member or not.
   if (!state_.empty()) {
     const Extensibility enclosing_ek = state_.top().extensibility;
     if (enclosing_ek == FINAL || enclosing_ek == APPENDABLE) {
       if (extensibility == FINAL) {
-        // We don't need to compute and cache the size for this struct.
-        // Instead, what we need is the total size of the closest ancestor type for which
-        // the size is required by a Dheader or a Emheader.
-        // Copy the current size so that the total size can be built up continuously
-        // in the deeper nesting levels.
-        Metadata metadata(extensibility, coll_kind);
+        // We don't need to compute and cache the size for final extensibility type.
+        // Instead, what we need is the total size of the closest ancestor type
+        // for which the size is required, for example, by a Dheader or a Emheader.
+        // Copy the current size from the enclosing type so that the total size
+        // can be built up cumulatively by this type.
         metadata.total_size = state_.top().total_size;
-        if (coll_kind == SEQUENCE) {
-          // For sequence length
+        if (coll_kind == SEQUENCE) { // Sequence length
           primitive_serialized_size_ulong(encoding_, metadata.total_size);
         }
-        state_.push(metadata);
-        return;
+        must_cache_size = false;
       } else {
-        // The alignment before the Dheader is accounted in size of the containing type.
-        // And then we can compute the size of this struct separately.
+        // The alignment in front of the Dheader is accounted to the size of the
+        // containing type. Then we can compute the size of this type separately.
         encoding_.align(state_.top().total_size, uint32_cdr_size);
-        state_.push(Metadata(extensibility, coll_kind));
-        serialized_size_delimiter(encoding_, state_.top().total_size);
-        if (coll_kind == SEQUENCE) {
-          // For sequence length
-          primitive_serialized_size_ulong(encoding_, state_.top().total_size);
+        serialized_size_delimiter(encoding_, metadata.total_size);
+        if (coll_kind == SEQUENCE) { // Sequence length
+          primitive_serialized_size_ulong(encoding_, metadata.total_size);
         }
-
-        // Preserve a slot to cache the size of this struct.
-        // The actual size will be written in end_struct.
-        size_cache_.push_back(0);
-        state_.top().cache_pos = size_cache_.size() - 1;
-        return;
       }
-    } else { // Enclosing struct is MUTABLE.
-      // Regardless of the extensibility of this struct, we must track its size for the
-      // corresponding Emheader in the enclosing struct.
-      // Since this is a member of a mutable struct, there was a call to
-      // serialized_size_parameter_id before this which already accounts for any alignment
-      // ahead of this struct (more precisely, the alignment happens after the previous member).
-      state_.push(Metadata(extensibility, coll_kind));
+    } else { // Enclosing type is mutable.
+      // Regardless of the extensibility of this type, we must track its size
+      // for the corresponding Emheader/Nextint in the enclosing type.
+      // Since this is a member of a mutable type, there was a call to
+      // serialized_size_parameter_id before this which already accounts for
+      // any alignment in front of the Emheader for this member.
+      // For members which are not struct, union, sequence, or array, the size
+      // of the member is cached directly in the write_* methods.
       if (extensibility == APPENDABLE || extensibility == MUTABLE) {
-        serialized_size_delimiter(encoding_, state_.top().total_size);
+        serialized_size_delimiter(encoding_, metadata.total_size);
       }
-      if (coll_kind == SEQUENCE) {
-        // Sequence length
-        primitive_serialized_size_ulong(encoding_, state_.top().total_size);
+      if (coll_kind == SEQUENCE) { // Sequence length
+        primitive_serialized_size_ulong(encoding_, metadata.total_size);
       }
-      size_cache_.push_back(0);
-      state_.top().cache_pos = size_cache_.size() - 1;
     }
   } else {
-    // Top-level type can only be struct or union.
-    // Clear the cache so that we can reuse the same object in another vwrite call.
+    // We are starting from the top-level type.
+    // Clear the size cache in case it has data from a previous vwrite call.
     size_cache_.clear();
-    state_.push(Metadata(extensibility, coll_kind));
     if (extensibility == APPENDABLE || extensibility == MUTABLE) {
-      serialized_size_delimiter(encoding_, state_.top().total_size);
+      serialized_size_delimiter(encoding_, metadata.total_size);
     }
-
-    size_cache_.push_back(0);
-    state_.top().cache_pos = size_cache_.size() - 1;
   }
+
+  if (must_cache_size) {
+    size_cache_.push_back(0);
+    metadata.cache_pos = size_cache_.size() - 1;
+  }
+  state_.push(metadata);
 }
 
 void Xcdr2ValueWriter::end_complex()
@@ -120,21 +88,21 @@ void Xcdr2ValueWriter::end_complex()
     const Extensibility enclosing_ek = state_.top().extensibility;
     if (enclosing_ek == FINAL || enclosing_ek == APPENDABLE) {
       if (extensibility == FINAL) {
-        // Copy the accumulated size back to the entry for the containing type.
+        // Since the computed total size was built on top of the size of the
+        // containing type, we can now copy it back to the entry of the containing type.
         state_.top().total_size = total_size;
-        return;
       } else {
-        // The total size of this struct is ready, now update the total size of
-        // the containing struct. Also update the cached size for this struct.
+        // The total size is ready, now update the total size of the containing type.
+        // Also update the size of this type in the size cache.
         size_cache_[pos] = total_size;
         state_.top().total_size += total_size;
       }
-    } else { // Enclosing struct is MUTABLE.
+    } else { // Enclosing type is mutable.
       size_cache_[pos] = total_size;
       state_.top().total_size += total_size;
     }
   } else {
-    // We have done working through the whole thing.
+    // We have finished working through the whole thing.
     size_cache_[pos] = total_size;
   }
 }
@@ -255,7 +223,7 @@ void Xcdr2ValueWriter::end_element()
   return;
 }
 
-// When this is a member of a mutable struct, its size needs to be recorded
+// When this is a member of a mutable type, its size needs to be recorded
 // so that we can write the Emheader (and Nextint) later.
 void Xcdr2ValueWriter::write_boolean(ACE_CDR::Boolean /*value*/)
 {

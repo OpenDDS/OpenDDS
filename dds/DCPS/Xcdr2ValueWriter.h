@@ -71,8 +71,8 @@ private:
 
   const Encoding& encoding_;
 
-  // Maintain the states necessary to compute and cache the sizes of the top-level type
-  // or its nested members.
+  // Maintain the states necessary to compute and cache the sizes of
+  // the top-level type or its nested members.
   struct Metadata {
     Metadata(Extensibility exten, CollectionKind ck)
       : extensibility(exten)
@@ -82,33 +82,29 @@ private:
       , cache_pos(0)
     {}
 
-    // Extensibility of the type that we are currently working on.
+    // Extensibility of the corresponding member.
     Extensibility extensibility;
 
-    // The total size of the corresponding type. This includes delimiter if required.
+    // The total size of the corresponding member, including delimiter if any.
     size_t total_size;
 
-    // Only used when extensibility is mutable.
+    // Only used for mutable members.
     size_t mutable_running_total;
 
     // Help determine whether we encounter the outermost dimension of an array.
     CollectionKind collection_kind;
 
-    // Index in the size cache to which the total size of this type will be stored.
+    // Position in the size cache to store the size of this member.
     size_t cache_pos;
   };
 
   std::stack<Metadata> state_;
 
-  // Record the sizes of the components in the byte stream.
-  // The following components will be recorded:
-  // - The total size of a struct, union, sequence, array, including the size for Dheader.
-  //   (The write_delimiter function in Serializer will subtract the size for the Dheader itself.)
-  //   This is used to write the Dheader.
-  // - Size of each individual member.
-  //   + If the member is not nested (e.g., scalar types), its size is recorded directly.
-  //   + If the member is nested (i.e., struct, union, sequence, array), the component sizes
-  //     for this member is recorded recursively using these two kinds of components above.
+  // Record the total size of the top-level type and its members if needed.
+  // The size of a member is only recorded if it is required by a header,
+  // either a Dheader or an Emheader/Nextint. The total size of the top-level
+  // type is at index zero. The subsequent values are in the same order as
+  // the order that the members are serialized in the byte stream.
   std::vector<size_t> size_cache_;
 };
 
