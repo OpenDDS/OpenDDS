@@ -1,5 +1,5 @@
-#ifndef OPENDDS_DCPS_SERIALIZED_SIZE_VALUE_WRITER_H
-#define OPENDDS_DCPS_SERIALIZED_SIZE_VALUE_WRITER_H
+#ifndef OPENDDS_DCPS_XCDR2_VALUE_WRITER_H
+#define OPENDDS_DCPS_XCDR2_VALUE_WRITER_H
 
 #include "ValueWriter.h"
 
@@ -11,9 +11,9 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-class SerializedSizeValueWriter : public ValueWriter {
+class Xcdr2ValueWriter : public ValueWriter {
 public:
-  explicit SerializedSizeValueWriter(Encoding& encoding)
+  explicit Xcdr2ValueWriter(Encoding& encoding)
     : encoding_(encoding)
   {}
 
@@ -117,4 +117,4 @@ private:
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
-#endif // OPENDDS_DCPS_SERIALIZED_SIZE_VALUE_WRITER_H
+#endif // OPENDDS_DCPS_XCDR2_VALUE_WRITER_H

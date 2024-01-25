@@ -1,4 +1,4 @@
-#include "SerializedSizeValueWriter.h"
+#include "Xcdr2ValueWriter.h"
 #include "debug.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
@@ -6,8 +6,8 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-void SerializedSizeValueWriter::begin_complex(Extensibility extensibility,
-                                              CollectionKind coll_kind)
+void Xcdr2ValueWriter::begin_complex(Extensibility extensibility,
+                                     CollectionKind coll_kind)
 {
   // This is where we keep a bookmark for when the aggregated value starts in the stream.
   // To derive the size of the whole struct or union, we need to
@@ -103,7 +103,7 @@ void SerializedSizeValueWriter::begin_complex(Extensibility extensibility,
   }
 }
 
-void SerializedSizeValueWriter::end_complex()
+void Xcdr2ValueWriter::end_complex()
 {
   Metadata& state = state_.top();
   const Extensibility extensibility = state.extensibility;
@@ -139,7 +139,7 @@ void SerializedSizeValueWriter::end_complex()
   }
 }
 
-void SerializedSizeValueWriter::begin_aggregated_member(bool optional, bool present)
+void Xcdr2ValueWriter::begin_aggregated_member(bool optional, bool present)
 {
   Metadata& state = state_.top();
   const Extensibility extensibility = state.extensibility;
@@ -155,54 +155,52 @@ void SerializedSizeValueWriter::begin_aggregated_member(bool optional, bool pres
   }
 }
 
-void SerializedSizeValueWriter::begin_struct(Extensibility extensibility)
+void Xcdr2ValueWriter::begin_struct(Extensibility extensibility)
 {
   begin_complex(extensibility);
 }
 
-void SerializedSizeValueWriter::end_struct()
+void Xcdr2ValueWriter::end_struct()
 {
   end_complex();
 }
 
-void SerializedSizeValueWriter::begin_struct_member(const char* /*name*/, bool optional,
-                                                    bool present)
+void Xcdr2ValueWriter::begin_struct_member(const char* /*name*/, bool optional, bool present)
 {
   begin_aggregated_member(optional, present);
 }
 
-void SerializedSizeValueWriter::end_struct_member()
+void Xcdr2ValueWriter::end_struct_member()
 {
   return;
 }
 
-void SerializedSizeValueWriter::begin_union(Extensibility extensibility)
+void Xcdr2ValueWriter::begin_union(Extensibility extensibility)
 {
   begin_complex(extensibility);
 }
 
-void SerializedSizeValueWriter::end_union()
+void Xcdr2ValueWriter::end_union()
 {
   end_complex();
 }
 
-void SerializedSizeValueWriter::begin_discriminator()
+void Xcdr2ValueWriter::begin_discriminator()
 {
   begin_aggregated_member(false /*optional*/);
 }
 
-void SerializedSizeValueWriter::end_discriminator()
+void Xcdr2ValueWriter::end_discriminator()
 {
   return;
 }
 
-void SerializedSizeValueWriter::begin_union_member(const char* /*name*/, bool optional,
-                                                   bool present)
+void Xcdr2ValueWriter::begin_union_member(const char* /*name*/, bool optional, bool present)
 {
   begin_aggregated_member(optional, present);
 }
 
-void SerializedSizeValueWriter::end_union_member()
+void Xcdr2ValueWriter::end_union_member()
 {
   return;
 }
@@ -210,7 +208,7 @@ void SerializedSizeValueWriter::end_union_member()
 // Array can be treated similar to final/appendable struct with each element is a member.
 // If the element type is primitive, it is similar to final struct.
 // If the element type is not primitive, it is similar to appendable struct with Dheader.
-void SerializedSizeValueWriter::begin_array(XTypes::TypeKind elem_tk)
+void Xcdr2ValueWriter::begin_array(XTypes::TypeKind elem_tk)
 {
   Extensibility arr_exten = FINAL;
   // In case the element type is not primitive, account for the Dheader only when this is
@@ -222,7 +220,7 @@ void SerializedSizeValueWriter::begin_array(XTypes::TypeKind elem_tk)
   begin_complex(arr_exten, ARRAY);
 }
 
-void SerializedSizeValueWriter::end_array()
+void Xcdr2ValueWriter::end_array()
 {
   end_complex();
 }
@@ -232,7 +230,7 @@ void SerializedSizeValueWriter::end_array()
 // If element type is not primitive, it can be treated as appendable struct which has Dheader.
 // In both case, elements are serialized back-to-back similarly to final/appendable struct.
 // One difference is that sequence has length ahead of all the elements.
-void SerializedSizeValueWriter::begin_sequence(XTypes::TypeKind elem_tk)
+void Xcdr2ValueWriter::begin_sequence(XTypes::TypeKind elem_tk)
 {
   Extensibility seq_exten = FINAL;
   if (!XTypes::is_primitive(elem_tk)) {
@@ -242,24 +240,24 @@ void SerializedSizeValueWriter::begin_sequence(XTypes::TypeKind elem_tk)
   begin_complex(seq_exten, SEQUENCE);
 }
 
-void SerializedSizeValueWriter::end_sequence()
+void Xcdr2ValueWriter::end_sequence()
 {
   end_complex();
 }
 
-void SerializedSizeValueWriter::begin_element(size_t /*idx*/)
+void Xcdr2ValueWriter::begin_element(size_t /*idx*/)
 {
   return;
 }
 
-void SerializedSizeValueWriter::end_element()
+void Xcdr2ValueWriter::end_element()
 {
   return;
 }
 
 // When this is a member of a mutable struct, its size needs to be recorded
 // so that we can write the Emheader (and Nextint) later.
-void SerializedSizeValueWriter::write_boolean(ACE_CDR::Boolean /*value*/)
+void Xcdr2ValueWriter::write_boolean(ACE_CDR::Boolean /*value*/)
 {
   primitive_serialized_size_boolean(encoding_, state_.top().total_size);
 
@@ -268,7 +266,7 @@ void SerializedSizeValueWriter::write_boolean(ACE_CDR::Boolean /*value*/)
   }
 }
 
-void SerializedSizeValueWriter::write_byte(ACE_CDR::Octet /*value*/)
+void Xcdr2ValueWriter::write_byte(ACE_CDR::Octet /*value*/)
 {
   primitive_serialized_size_octet(encoding_, state_.top().total_size);
 
@@ -278,7 +276,7 @@ void SerializedSizeValueWriter::write_byte(ACE_CDR::Octet /*value*/)
 }
 
 #if OPENDDS_HAS_EXPLICIT_INTS
-void SerializedSizeValueWriter::write_int8(ACE_CDR::Int8 /*value*/)
+void Xcdr2ValueWriter::write_int8(ACE_CDR::Int8 /*value*/)
 {
   primitive_serialized_size_int8(encoding_, state_.top().total_size);
 
@@ -287,7 +285,7 @@ void SerializedSizeValueWriter::write_int8(ACE_CDR::Int8 /*value*/)
   }
 }
 
-void SerializedSizeValueWriter::write_uint8(ACE_CDR::UInt8 /*value*/)
+void Xcdr2ValueWriter::write_uint8(ACE_CDR::UInt8 /*value*/)
 {
   primitive_serialized_size_uint8(encoding_, state_.top().total_size);
 
@@ -297,7 +295,7 @@ void SerializedSizeValueWriter::write_uint8(ACE_CDR::UInt8 /*value*/)
 }
 #endif
 
-void SerializedSizeValueWriter::write_int16(ACE_CDR::Short value)
+void Xcdr2ValueWriter::write_int16(ACE_CDR::Short value)
 {
   primitive_serialized_size(encoding_, state_.top().total_size, value);
 
@@ -306,7 +304,7 @@ void SerializedSizeValueWriter::write_int16(ACE_CDR::Short value)
   }
 }
 
-void SerializedSizeValueWriter::write_uint16(ACE_CDR::UShort value)
+void Xcdr2ValueWriter::write_uint16(ACE_CDR::UShort value)
 {
   primitive_serialized_size(encoding_, state_.top().total_size, value);
 
@@ -315,7 +313,7 @@ void SerializedSizeValueWriter::write_uint16(ACE_CDR::UShort value)
   }
 }
 
-void SerializedSizeValueWriter::write_int32(ACE_CDR::Long value)
+void Xcdr2ValueWriter::write_int32(ACE_CDR::Long value)
 {
   primitive_serialized_size(encoding_, state_.top().total_size, value);
 
@@ -324,7 +322,7 @@ void SerializedSizeValueWriter::write_int32(ACE_CDR::Long value)
   }
 }
 
-void SerializedSizeValueWriter::write_uint32(ACE_CDR::ULong value)
+void Xcdr2ValueWriter::write_uint32(ACE_CDR::ULong value)
 {
   primitive_serialized_size(encoding_, state_.top().total_size, value);
 
@@ -333,7 +331,7 @@ void SerializedSizeValueWriter::write_uint32(ACE_CDR::ULong value)
   }
 }
 
-void SerializedSizeValueWriter::write_int64(ACE_CDR::LongLong value)
+void Xcdr2ValueWriter::write_int64(ACE_CDR::LongLong value)
 {
   primitive_serialized_size(encoding_, state_.top().total_size, value);
 
@@ -342,7 +340,7 @@ void SerializedSizeValueWriter::write_int64(ACE_CDR::LongLong value)
   }
 }
 
-void SerializedSizeValueWriter::write_uint64(ACE_CDR::ULongLong value)
+void Xcdr2ValueWriter::write_uint64(ACE_CDR::ULongLong value)
 {
   primitive_serialized_size(encoding_, state_.top().total_size, value);
 
@@ -351,7 +349,7 @@ void SerializedSizeValueWriter::write_uint64(ACE_CDR::ULongLong value)
   }
 }
 
-void SerializedSizeValueWriter::write_float32(ACE_CDR::Float value)
+void Xcdr2ValueWriter::write_float32(ACE_CDR::Float value)
 {
   primitive_serialized_size(encoding_, state_.top().total_size, value);
 
@@ -360,7 +358,7 @@ void SerializedSizeValueWriter::write_float32(ACE_CDR::Float value)
   }
 }
 
-void SerializedSizeValueWriter::write_float64(ACE_CDR::Double value)
+void Xcdr2ValueWriter::write_float64(ACE_CDR::Double value)
 {
   primitive_serialized_size(encoding_, state_.top().total_size, value);
 
@@ -369,7 +367,7 @@ void SerializedSizeValueWriter::write_float64(ACE_CDR::Double value)
   }
 }
 
-void SerializedSizeValueWriter::write_float128(ACE_CDR::LongDouble value)
+void Xcdr2ValueWriter::write_float128(ACE_CDR::LongDouble value)
 {
   primitive_serialized_size(encoding_, state_.top().total_size, value);
 
@@ -378,12 +376,12 @@ void SerializedSizeValueWriter::write_float128(ACE_CDR::LongDouble value)
   }
 }
 
-void SerializedSizeValueWriter::write_fixed(const OpenDDS::FaceTypes::Fixed& /*value*/)
+void Xcdr2ValueWriter::write_fixed(const OpenDDS::FaceTypes::Fixed& /*value*/)
 {
   return;
 }
 
-void SerializedSizeValueWriter::write_char8(ACE_CDR::Char /*value*/)
+void Xcdr2ValueWriter::write_char8(ACE_CDR::Char /*value*/)
 {
   primitive_serialized_size_char(encoding_, state_.top().total_size);
 
@@ -392,7 +390,7 @@ void SerializedSizeValueWriter::write_char8(ACE_CDR::Char /*value*/)
   }
 }
 
-void SerializedSizeValueWriter::write_char16(ACE_CDR::WChar /*value*/)
+void Xcdr2ValueWriter::write_char16(ACE_CDR::WChar /*value*/)
 {
   primitive_serialized_size_wchar(encoding_, state_.top().total_size);
 
@@ -401,7 +399,7 @@ void SerializedSizeValueWriter::write_char16(ACE_CDR::WChar /*value*/)
   }
 }
 
-void SerializedSizeValueWriter::write_string(const ACE_CDR::Char* value, size_t length)
+void Xcdr2ValueWriter::write_string(const ACE_CDR::Char* value, size_t length)
 {
   size_t& size = state_.top().total_size;
   primitive_serialized_size_ulong(encoding_, size);
@@ -416,7 +414,7 @@ void SerializedSizeValueWriter::write_string(const ACE_CDR::Char* value, size_t 
   }
 }
 
-void SerializedSizeValueWriter::write_wstring(const ACE_CDR::WChar* value, size_t length)
+void Xcdr2ValueWriter::write_wstring(const ACE_CDR::WChar* value, size_t length)
 {
   size_t& size = state_.top().total_size;
   primitive_serialized_size_ulong(encoding_, size);
@@ -429,7 +427,7 @@ void SerializedSizeValueWriter::write_wstring(const ACE_CDR::WChar* value, size_
   }
 }
 
-void SerializedSizeValueWriter::write_enum(const char* /*name*/, ACE_CDR::Long /*value*/,
+void Xcdr2ValueWriter::write_enum(const char* /*name*/, ACE_CDR::Long /*value*/,
                                            XTypes::TypeKind as_int)
 {
   size_t& size = state_.top().total_size;
@@ -445,7 +443,7 @@ void SerializedSizeValueWriter::write_enum(const char* /*name*/, ACE_CDR::Long /
     break;
   default:
     if (log_level >= LogLevel::Warning) {
-      ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: SerializedSizeValueWriter::writer_enum:"
+      ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: Xcdr2ValueWriter::writer_enum:"
                  " Enum cannot be serialized as %C\n", XTypes::typekind_to_string(as_int)));
     }
     return;
@@ -456,25 +454,25 @@ void SerializedSizeValueWriter::write_enum(const char* /*name*/, ACE_CDR::Long /
   }
 }
 
-void SerializedSizeValueWriter::write_absent_value()
+void Xcdr2ValueWriter::write_absent_value()
 {
   return;
 }
 
-size_t SerializedSizeValueWriter::get_serialized_size() const
+size_t Xcdr2ValueWriter::get_serialized_size() const
 {
   if (!size_cache_.empty()) {
     return size_cache_[0];
   }
 
   if (log_level >= LogLevel::Warning) {
-    ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: SerializedSizeValueWriter::get_serialized_size:"
+    ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: Xcdr2ValueWriter::get_serialized_size:"
                " serialized size has not been computed yet!\n"));
   }
   return 0;
 }
 
-const std::vector<size_t>& SerializedSizeValueWriter::get_serialized_sizes() const
+const std::vector<size_t>& Xcdr2ValueWriter::get_serialized_sizes() const
 {
   return size_cache_;
 }
