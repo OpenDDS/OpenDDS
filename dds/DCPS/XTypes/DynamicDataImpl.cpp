@@ -6551,10 +6551,7 @@ void vwrite_array_helper(ValueWriter& vw, CORBA::ULong dim_idx, const DDS::Bound
                          std::vector<CORBA::ULong> idx_vec, const DDS::DynamicType_var& elem_type,
                          DDS::DynamicData_ptr value)
 {
-  XTypes::TypeKind elem_kind = XTypes::TK_ARRAY;
-  if (dim_idx == dims.length() - 1) {
-    elem_kind = elem_type->get_kind();
-  }
+  const XTypes::TypeKind elem_kind = elem_type->get_kind();
 
   if (dim_idx < dims.length()) {
     vw.begin_array(elem_kind);

@@ -7,7 +7,7 @@ namespace OpenDDS {
 namespace DCPS {
 
 void SerializedSizeValueWriter::begin_complex(Extensibility extensibility,
-                                              bool is_sequence)
+                                              CollectionKind coll_kind)
 {
   // This is where we keep a bookmark for when the aggregated value starts in the stream.
   // To derive the size of the whole struct or union, we need to
@@ -47,9 +47,9 @@ void SerializedSizeValueWriter::begin_complex(Extensibility extensibility,
         // the size is required by a Dheader or a Emheader.
         // Copy the current size so that the total size can be built up continuously
         // in the deeper nesting levels.
-        Metadata metadata(extensibility);
+        Metadata metadata(extensibility, coll_kind);
         metadata.total_size = state_.top().total_size;
-        if (is_sequence) {
+        if (coll_kind == SEQUENCE) {
           // For sequence length
           primitive_serialized_size_ulong(encoding_, metadata.total_size);
         }
@@ -59,9 +59,9 @@ void SerializedSizeValueWriter::begin_complex(Extensibility extensibility,
         // The alignment before the Dheader is accounted in size of the containing type.
         // And then we can compute the size of this struct separately.
         encoding_.align(state_.top().total_size, uint32_cdr_size);
-        state_.push(Metadata(extensibility));
+        state_.push(Metadata(extensibility, coll_kind));
         serialized_size_delimiter(encoding_, state_.top().total_size);
-        if (is_sequence) {
+        if (coll_kind == SEQUENCE) {
           // For sequence length
           primitive_serialized_size_ulong(encoding_, state_.top().total_size);
         }
@@ -78,11 +78,11 @@ void SerializedSizeValueWriter::begin_complex(Extensibility extensibility,
       // Since this is a member of a mutable struct, there was a call to
       // serialized_size_parameter_id before this which already accounts for any alignment
       // ahead of this struct (more precisely, the alignment happens after the previous member).
-      state_.push(Metadata(extensibility));
+      state_.push(Metadata(extensibility, coll_kind));
       if (extensibility == APPENDABLE || extensibility == MUTABLE) {
         serialized_size_delimiter(encoding_, state_.top().total_size);
       }
-      if (is_sequence) {
+      if (coll_kind == SEQUENCE) {
         // Sequence length
         primitive_serialized_size_ulong(encoding_, state_.top().total_size);
       }
@@ -93,7 +93,7 @@ void SerializedSizeValueWriter::begin_complex(Extensibility extensibility,
     // Top-level type can only be struct or union.
     // Clear the cache so that we can reuse the same object in another vwrite call.
     size_cache_.clear();
-    state_.push(Metadata(extensibility));
+    state_.push(Metadata(extensibility, coll_kind));
     if (extensibility == APPENDABLE || extensibility == MUTABLE) {
       serialized_size_delimiter(encoding_, state_.top().total_size);
     }
@@ -213,11 +213,13 @@ void SerializedSizeValueWriter::end_union_member()
 void SerializedSizeValueWriter::begin_array(XTypes::TypeKind elem_tk)
 {
   Extensibility arr_exten = FINAL;
-  if (!XTypes::is_primitive(elem_tk)) {
+  // In case the element type is not primitive, account for the Dheader only when this is
+  // called for the outermost dimension of the array.
+  if (state_.top().collection_kind != ARRAY && !XTypes::is_primitive(elem_tk)) {
     arr_exten = APPENDABLE;
   }
 
-  begin_complex(arr_exten);
+  begin_complex(arr_exten, ARRAY);
 }
 
 void SerializedSizeValueWriter::end_array()
@@ -237,7 +239,7 @@ void SerializedSizeValueWriter::begin_sequence(XTypes::TypeKind elem_tk)
     seq_exten = APPENDABLE;
   }
 
-  begin_complex(seq_exten, true /*is_sequence*/);
+  begin_complex(seq_exten, SEQUENCE);
 }
 
 void SerializedSizeValueWriter::end_sequence()

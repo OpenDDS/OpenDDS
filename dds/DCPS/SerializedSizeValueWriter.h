@@ -63,7 +63,9 @@ public:
   const std::vector<size_t>& get_serialized_sizes() const;
 
 private:
-  void begin_complex(Extensibility extensiblity, bool is_sequence = false);
+  enum CollectionKind { SEQUENCE, ARRAY, NONE };
+
+  void begin_complex(Extensibility extensiblity, CollectionKind coll_kind = NONE);
   void end_complex();
   void begin_aggregated_member(bool optional, bool present = true);
 
@@ -72,10 +74,11 @@ private:
   // Maintain the states necessary to compute and cache the sizes of the top-level type
   // or its nested members.
   struct Metadata {
-    explicit Metadata(Extensibility exten)
+    Metadata(Extensibility exten, CollectionKind ck)
       : extensibility(exten)
       , total_size(0)
       , mutable_running_total(0)
+      , collection_kind(ck)
       , cache_pos(0)
     {}
 
@@ -87,6 +90,9 @@ private:
 
     // Only used when extensibility is mutable.
     size_t mutable_running_total;
+
+    // Help determine whether we encounter the outermost dimension of an array.
+    CollectionKind collection_kind;
 
     // Index in the size cache to which the total size of this type will be stored.
     size_t cache_pos;

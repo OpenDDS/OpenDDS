@@ -130,13 +130,9 @@ namespace {
     // When we have a primitive type the last dimension is written using the write_*_array
     // operation, when we have a not primitive type the last dimension is written element by element
     // in a loop in the generated code
+    const std::string elem_kind = type_kind(array->base_type());
     if ((primitive && (dim_idx < array->n_dims() - 1)) || (!primitive && (dim_idx < array->n_dims()))) {
       const size_t dim = array->dims()[dim_idx]->ev()->u.ulval;
-      std::string elem_kind = "XTypes::TK_ARRAY";
-      if (!primitive && (dim_idx == array->n_dims() - 1)) {
-        AST_Type* const base_type = array->base_type();
-        elem_kind = type_kind(base_type);
-      }
       be_global->impl_ <<
         indent << "value_writer.begin_array(" << elem_kind << ");\n";
       be_global->impl_ <<
@@ -156,7 +152,7 @@ namespace {
           dynamic_cast<AST_PredefinedType*>(actual)->pt();
 
         be_global->impl_ <<
-          indent << "value_writer.begin_array(" << type_kind(array->base_type()) << ");\n";
+          indent << "value_writer.begin_array(" << elem_kind << ");\n";
         be_global->impl_ << indent <<
           "value_writer.write_" << primitive_type(pt) << "_array (" << expression << (use_cxx11 ? ".data()" : "") << ", " << dim << ");\n";
         be_global->impl_ <<
