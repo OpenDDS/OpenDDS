@@ -1548,33 +1548,13 @@ Service_Participant::load_configuration(
                      -1);
   }
 
-  // load any transport configuration templates before the transport config
-  status = TransportRegistry::instance()->load_transport_templates();
-
-  if (status != 0) {
-    ACE_ERROR_RETURN((LM_ERROR,
-                      ACE_TEXT("(%P|%t) ERROR: Service_Participant::load_configuration ")
-                      ACE_TEXT("load_transport_templates() returned %d\n"),
-                      status),
-                     -1);
-  }
-
-  status = TransportRegistry::instance()->load_transport_configuration(
-             ACE_TEXT_ALWAYS_CHAR(filename), config);
+  status = TransportRegistry::instance()->load_transport_configuration(ACE_TEXT_ALWAYS_CHAR(filename), config);
   const String global_transport_config = config_store_->get(OPENDDS_COMMON_DCPS_GLOBAL_TRANSPORT_CONFIG,
-                                                           OPENDDS_COMMON_DCPS_GLOBAL_TRANSPORT_CONFIG_default);
+                                                            OPENDDS_COMMON_DCPS_GLOBAL_TRANSPORT_CONFIG_default);
   if (!global_transport_config.empty()) {
     TransportConfig_rch config = TransportRegistry::instance()->get_config(global_transport_config);
     if (config) {
       TransportRegistry::instance()->global_config(config);
-    } else if (TheTransportRegistry->config_has_transport_template(global_transport_config)) {
-      if (DCPS_debug_level > 0) {
-        // This is not an error.
-        ACE_DEBUG((LM_NOTICE,
-                   ACE_TEXT("(%P|%t) NOTICE: Service_Participant::load_configuration ")
-                   ACE_TEXT("DCPSGlobalTransportConfig %C is a transport_template\n"),
-                   global_transport_config.c_str()));
-      }
     } else {
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("(%P|%t) ERROR: Service_Participant::load_configuration ")
@@ -1829,30 +1809,6 @@ int Service_Participant::configure_domain_range_instance(DDS::DomainId_t domainI
         }
       }
 
-      String cfg_name;
-      if (get_transport_base_config_name(domainId, cfg_name)) {
-        if (TransportRegistry::instance()->config_has_transport_template(cfg_name)) {
-          // create transport instance add default transport config
-          TransportRegistry::instance()->create_transport_template_instance(domainId, cfg_name);
-          const OPENDDS_STRING config_instance_name = TransportRegistry::instance()->get_config_instance_name(domainId);
-          dcf.set_string_value(dsub_sect, ACE_TEXT("DefaultTransportConfig"),
-                               ACE_TEXT_CHAR_TO_TCHAR(config_instance_name.c_str()));
-          if (DCPS_debug_level > 0) {
-            ACE_DEBUG((LM_DEBUG,
-                       ACE_TEXT("(%P|%t) Service_Participant::")
-                       ACE_TEXT("configure_domain_range_instance(): setting DefaultTransportConfig=%C\n"),
-                       config_instance_name.c_str()));
-          }
-        }
-      } else {
-        ACE_ERROR_RETURN((LM_ERROR,
-                          ACE_TEXT("(%P|%t) ERROR: Service_Participant::")
-                          ACE_TEXT("configure_domain_range_instance(): ")
-                          ACE_TEXT("transport config not found for domain %d\n"),
-                          domainId),
-                         -1);
-      }
-
       // load domain config
       int status = this->load_domain_configuration(dcf, 0);
 
@@ -1895,23 +1851,6 @@ Service_Participant::belongs_to_domain_range(DDS::DomainId_t domainId) const
   }
 
   return false;
-}
-
-bool
-Service_Participant::get_transport_base_config_name(DDS::DomainId_t domainId, String& name) const
-{
-  const String global_transport_config = config_store_->get(OPENDDS_COMMON_DCPS_GLOBAL_TRANSPORT_CONFIG,
-                                                            OPENDDS_COMMON_DCPS_GLOBAL_TRANSPORT_CONFIG_default);
-  OPENDDS_MAP(DDS::DomainId_t, OPENDDS_STRING)::const_iterator it = domain_to_transport_name_map_.find(domainId);
-  if ( it != domain_to_transport_name_map_.end()) {
-    name = it->second;
-    return true;
-  } else if (!global_transport_config.empty()) {
-    name = global_transport_config;
-    return true;
-  } else {
-    return false;
-  }
 }
 
 int

@@ -39,13 +39,14 @@ TransportConfig::sorted_insert(const TransportInst_rch& inst)
 }
 
 void
-TransportConfig::populate_locators(TransportLocatorSeq& trans_info) const
+TransportConfig::populate_locators(TransportLocatorSeq& trans_info,
+                                   DDS::DomainId_t domain) const
 {
   for (InstancesType::const_iterator pos = instances_.begin(), limit = instances_.end();
        pos != limit;
        ++pos) {
     const CORBA::ULong idx = DCPS::grow(trans_info) - 1;
-    if ((*pos)->populate_locator(trans_info[idx], CONNINFO_ALL) == 0) {
+    if ((*pos)->populate_locator(trans_info[idx], CONNINFO_ALL, domain) == 0) {
       trans_info.length(idx);
     }
   }

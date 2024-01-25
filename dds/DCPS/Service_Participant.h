@@ -542,8 +542,6 @@ public:
    */
   bool belongs_to_domain_range(DDS::DomainId_t domainId) const;
 
-  bool get_transport_base_config_name(DDS::DomainId_t domainId, String& name) const;
-
 #ifdef OPENDDS_SAFETY_PROFILE
   /**
    * Configure the safety profile pool

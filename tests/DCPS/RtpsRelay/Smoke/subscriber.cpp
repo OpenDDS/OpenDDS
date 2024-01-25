@@ -232,7 +232,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       OpenDDS::DCPS::TransportStatisticsSequence stats;
       disc->append_transport_statistics(42, guid, stats);
       if (transport_inst) {
-        transport_inst->append_transport_statistics(stats);
+        transport_inst->append_transport_statistics(stats, 42, dp_impl);
       }
 
       for (unsigned int i = 0; i != stats.length(); ++i) {

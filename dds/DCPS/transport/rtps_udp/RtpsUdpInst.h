@@ -90,16 +90,18 @@ public:
                    ACE_Configuration_Section_Key& sect);
 
   /// Diagnostic aid.
-  virtual OPENDDS_STRING dump_to_str() const;
+  virtual OPENDDS_STRING dump_to_str(DDS::DomainId_t domain) const;
 
   bool is_reliable() const { return true; }
   bool requires_cdr_encapsulation() const { return true; }
 
-  virtual size_t populate_locator(OpenDDS::DCPS::TransportLocator& trans_info, ConnectionInfoFlags flags) const;
+  virtual size_t populate_locator(OpenDDS::DCPS::TransportLocator& trans_info,
+                                  ConnectionInfoFlags flags,
+                                  DDS::DomainId_t domain) const;
   const TransportBLOB* get_blob(const OpenDDS::DCPS::TransportLocatorSeq& trans_info) const;
 
   void multicast_group_address(const NetworkAddress& addr);
-  NetworkAddress multicast_group_address() const;
+  NetworkAddress multicast_group_address(DDS::DomainId_t domain) const;
 
   void local_address(const NetworkAddress& addr);
   NetworkAddress local_address() const;
@@ -130,12 +132,18 @@ public:
   NetworkAddress stun_server_address() const;
 
   void update_locators(const GUID_t& remote_id,
-                       const TransportLocatorSeq& locators);
+                       const TransportLocatorSeq& locators,
+                       DDS::DomainId_t domain,
+                       DomainParticipantImpl* participant);
 
   void get_last_recv_locator(const GUID_t& /*remote_id*/,
-                             TransportLocator& /*locators*/);
+                             TransportLocator& /*locators*/,
+                             DDS::DomainId_t domain,
+                             DomainParticipantImpl* participant);
 
-  void append_transport_statistics(TransportStatisticsSequence& seq);
+  void append_transport_statistics(TransportStatisticsSequence& seq,
+                                   DDS::DomainId_t domain,
+                                   DomainParticipantImpl* participant);
 
 private:
   friend class RtpsUdpType;
@@ -144,7 +152,7 @@ private:
   explicit RtpsUdpInst(const OPENDDS_STRING& name,
                        bool is_template);
 
-  TransportImpl_rch new_impl();
+  TransportImpl_rch new_impl(DDS::DomainId_t domain);
 
   friend class RTPS::Sedp;
   friend class RtpsUdpTransport;

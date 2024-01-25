@@ -264,7 +264,7 @@ int DDS_TEST::test(ACE_TString host, u_short port)
   }
 
   SimpleDataWriter sdw(local_guid);
-  sdw.enable_transport(true /*reliable*/, false /*durable*/);
+  sdw.enable_transport(true /*reliable*/, false /*durable*/, 0);
   AssociationData subscription;
   subscription.remote_id_ = remote;
   subscription.remote_reliable_ = false;

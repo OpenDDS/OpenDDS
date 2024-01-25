@@ -25,8 +25,9 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-ShmemTransport::ShmemTransport(const ShmemInst_rch& inst)
-  : TransportImpl(inst)
+ShmemTransport::ShmemTransport(const ShmemInst_rch& inst,
+                                 DDS::DomainId_t domain)
+  : TransportImpl(inst, domain)
 {
   if (!(configure_i(inst) && open())) {
     throw Transport::UnableToCreate();
@@ -254,7 +255,7 @@ ShmemTransport::connection_info_i(TransportLocator& info, ConnectionInfoFlags fl
 {
   ShmemInst_rch cfg = config();
   if (cfg) {
-    cfg->populate_locator(info, flags);
+    cfg->populate_locator(info, flags, domain_);
     return true;
   }
   return false;
