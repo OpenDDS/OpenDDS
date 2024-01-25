@@ -732,8 +732,6 @@ EOF
 
     if ($ver >= 19) {
       push(@{$opts{'features'}}, 'no_cxx11=0');
-      # TODO check which MSVC versions support C++17
-      push(@{$opts{'features'}}, 'no_cxx17=0');
       print "Visual C++ has C++11 support\n" if $opts{'verbose'};
     }
     $ENV{'PATH'} = $savepath;
