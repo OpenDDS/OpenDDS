@@ -640,8 +640,8 @@ private:
    * Load the discovery configuration to the Service_Participant
    * singleton.
    */
-  int load_discovery_configuration(ACE_Configuration_Heap& cf,
-                                   const ACE_TCHAR* section_name);
+  int load_discovery_configuration(const String& discovery_type,
+                                   bool force);
 
   typedef OPENDDS_MAP(OPENDDS_STRING, container_supported_unique_ptr<Discovery::Config>) DiscoveryTypes;
   DiscoveryTypes discovery_types_;
