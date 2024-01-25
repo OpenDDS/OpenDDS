@@ -1709,11 +1709,10 @@ namespace {
   }
 
   std::string generate_field_stream(
-    const std::string& indent, AST_Field* field, const std::string& prefix,
+    const std::string& indent, AST_Field* field, const std::string& prefix, const std::string& field_name,
     bool wrap_nested_key_only, Intro& intro)
   {
     FieldInfo af(*field);
-    const bool is_optional = be_global->is_optional(field);
 
     if (af.anonymous()) {
       RefWrapper wrapper(af.type_, af.scoped_type_,
@@ -1721,10 +1720,6 @@ namespace {
       wrapper.nested_key_only_ = wrap_nested_key_only;
       wrapper.done(&intro);
       return "(strm " + wrapper.stream() + ")";
-    }
-    std::string field_name = field->local_name()->get_string();
-    if (is_optional) {
-      field_name += ".value";
     }
     return streamCommon(
       indent, field, field_name, field->field_type(), prefix,
@@ -2502,7 +2497,7 @@ namespace {
           cases <<
             "      case " << id << ": {\n"
             "        if (!" << generate_field_stream(
-            indent, field, ">> stru" + value_access, wrap_nested_key_only, intro) << ") {\n";
+            indent, field, ">> stru" + value_access, field->local_name()->get_string(), wrap_nested_key_only, intro) << ") {\n";
           AST_Type* const field_type = resolveActualType(field->field_type());
           Classification fld_cls = classify(field_type);
 
@@ -2634,22 +2629,42 @@ namespace {
             "  if (reached_end_of_struct) {\n" +
             type_to_default("    ", type, stru_field_name, type->anonymous(), false, is_optional) +
             "  } else {\n";
-          if (is_optional) {
-            const std::string has_value_name = field_name + "_has_value";
-            expr += "    bool " + field_name + "_has_value = false;\n";
-            expr += "    strm >> ACE_InputCDR::to_boolean(" + has_value_name + ");\n";
-            expr += "    if (" + has_value_name + ") " + type_to_default("", type, stru_field_name, type->anonymous(), false, is_optional);
-            expr += "    if (" + has_value_name + " && !";
-          } else {
+          if (!is_optional) {
             expr += "    if (!";
           }
         }
-        expr += generate_field_stream(
-          indent, field, ">> stru" + value_access, wrap_nested_key_only, intro);
+
+        // TODO(tyler) This feels kind of hacky
+        // Can the optional branch be isolated completely
+        // Assigns strm value to temporary values
+        if (is_optional) {
+            //TODO(tyler) Is there an easier way to deal with strings here
+            AST_Type* const field_type = resolveActualType(field->field_type());
+            Classification fld_cls = classify(field_type);
+            const std::string type_name = fld_cls & CL_STRING ? "String" : field->field_type()->full_name();
+            const std::string has_value_name = field_name + "_has_value";
+            expr += "    bool " + field_name + "_has_value = false;\n";
+            expr += "    strm >> ACE_InputCDR::to_boolean(" + has_value_name + ");\n";
+            expr += "    " + type_name + " " + field_name + "_tmp;\n";
+            expr += "    if (" + has_value_name + " && !";
+            expr += "(strm >> " + field_name + "_tmp)";
+        } else {
+          expr += generate_field_stream(
+            indent, field, ">> stru" + value_access, field->local_name()->get_string(), wrap_nested_key_only, intro);
+        }
         if (is_appendable) {
           expr += ") {\n"
             "      return false;\n"
             "    }\n";
+
+          // Copy temporaries to the struct
+          if (is_optional) {
+            string stru_field_name = "stru" + value_access + "." + field_name;
+            if (use_cxx11) {
+              stru_field_name += "()";
+            }
+            expr += "    if (" + field_name + "_has_value) " + stru_field_name + " = " + field_name + "_tmp;\n";
+          }
           if (cond.empty()) {
             expr +=
             "  }\n";
@@ -2793,7 +2808,7 @@ namespace {
             "    }\n"
             "    size = 0;\n"
             "    if (!" << generate_field_stream(
-              mutable_indent, field, "<< stru" + value_access, wrap_nested_key_only, intro)
+              mutable_indent, field, "<< stru" + value_access, field->local_name()->get_string(), wrap_nested_key_only, intro)
             << ") {\n"
             "      return false;\n"
             "    }\n";
@@ -2822,13 +2837,13 @@ namespace {
         if (is_optional) {
           expr += "(strm << ACE_OutputCDR::from_boolean(stru" + value_access + "." + field_name + "().has_value())) && ";
           expr += "stru" + value_access + "." + field_name + "().has_value() ? ";
+          expr += generate_field_stream(
+            indent, field, "<< stru" + value_access, field_name + ".value", wrap_nested_key_only, intro);
+          expr += " : true";
+        } else {
+          expr += generate_field_stream(
+            indent, field, "<< stru" + value_access, field->local_name()->get_string(), wrap_nested_key_only, intro);
         }
-
-        expr += generate_field_stream(
-          indent, field, "<< stru" + value_access, wrap_nested_key_only, intro);
-
-        if (is_optional)
-          expr += " : true\n";
 
         if (!cond.empty()) {
           expr += ")";

@@ -172,31 +172,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
         // bind participants to the secondary config
         if (!new_config.empty()) {
-          OPENDDS_STRING cfg_name = new_config;
-          if (domain == 50) {
-            // not part of a domain range
-            // create a new transport instance since one is not created automatically
-            OPENDDS_STRING inst_name = "sub_inst_d50_" + to_dds_string(x);
-            // cfg_name and inst_name will be updated with the unique names of the new config and inst
-            TheTransportRegistry->create_new_transport_instance_for_participant(50, cfg_name, inst_name);
-
-            // check that the instance has the correct mcast group
-            TransportInst_rch inst = TheTransportRegistry->get_inst(inst_name);
-            RtpsUdpInst_rch rtps_inst = dynamic_rchandle_cast<RtpsUdpInst>(inst);
-
-            ACE_INET_Addr mcga = rtps_inst->multicast_group_address().to_addr();
-            if (LogAddr::ip(mcga).compare("239.255.20.0") != 0) {
-              ACE_ERROR_RETURN((LM_ERROR,
-                                ACE_TEXT("ERROR: %N:%l: main() -")
-                                ACE_TEXT(" multicast group address is does not match! %C != 239.255.20.0\n"),
-                                LogAddr::ip(mcga).c_str()),
-                               -1);
-            }
-            else {
-              ACE_DEBUG((LM_DEBUG, "(%P|%t) multicast group address is correct\n"));
-            }
-          }
-          TheTransportRegistry->bind_config(cfg_name, sub_participant);
+          TheTransportRegistry->bind_config(new_config, sub_participant);
         }
 
         // Register TypeSupport
@@ -280,15 +256,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
       // bind pub participant to the secondary config
       if (!new_config.empty()) {
-        OPENDDS_STRING cfg_name = new_config;
-        if (domain == 50) {
-          // not part of a domain range
-          // create a new transport instance since one is not created automatically
-          OPENDDS_STRING inst_name = "pub_inst_d50";
-          // cfg_name and inst_name will be updated with the unique names of the new config and inst
-          TheTransportRegistry->create_new_transport_instance_for_participant(50, cfg_name, inst_name);
-        }
-          TheTransportRegistry->bind_config(cfg_name, pub_participant);
+        TheTransportRegistry->bind_config(new_config, pub_participant);
       }
 
       // Register TypeSupport

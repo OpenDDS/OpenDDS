@@ -40,7 +40,7 @@ public:
                    ACE_Configuration_Section_Key& sect);
 
   /// Diagnostic aid.
-  virtual OPENDDS_STRING dump_to_str() const;
+  virtual OPENDDS_STRING dump_to_str(DDS::DomainId_t domain) const;
 
   /// The address string provided to DCPSInfoRepo for connectors.
   /// This string is either from configuration file or defaults
@@ -145,7 +145,9 @@ public:
     return (pub_addr == "") ? locator_address_ : pub_addr;
   }
 
-  virtual size_t populate_locator(OpenDDS::DCPS::TransportLocator& trans_info, ConnectionInfoFlags flags) const;
+  virtual size_t populate_locator(OpenDDS::DCPS::TransportLocator& trans_info,
+                                  ConnectionInfoFlags flags,
+                                  DDS::DomainId_t domain) const;
 
 private:
   friend class TcpType;
@@ -156,7 +158,7 @@ private:
   explicit TcpInst(const OPENDDS_STRING& name);
   virtual ~TcpInst();
 
-  TransportImpl_rch new_impl();
+  TransportImpl_rch new_impl(DDS::DomainId_t domain);
 
   std::string locator_address_;
 };

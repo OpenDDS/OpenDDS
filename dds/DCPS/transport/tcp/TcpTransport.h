@@ -50,7 +50,8 @@ class OpenDDS_Tcp_Export TcpTransport
 {
 public:
 
-  explicit TcpTransport(const TcpInst_rch& inst);
+  TcpTransport(const TcpInst_rch& inst,
+               DDS::DomainId_t domain);
   virtual ~TcpTransport();
 
   int fresh_link(TcpConnection_rch connection);

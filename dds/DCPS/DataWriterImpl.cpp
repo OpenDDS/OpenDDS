@@ -1463,7 +1463,7 @@ DataWriterImpl::enable()
 
   try {
     this->enable_transport(reliable,
-                           this->qos_.durability.kind > DDS::VOLATILE_DURABILITY_QOS);
+                           this->qos_.durability.kind > DDS::VOLATILE_DURABILITY_QOS, participant.get());
 
   } catch (const Transport::Exception&) {
     ACE_ERROR((LM_ERROR,
@@ -2820,7 +2820,8 @@ void DataWriterImpl::set_wait_pending_deadline(const MonotonicTimePoint& deadlin
 
 void DataWriterImpl::transport_discovery_change()
 {
-  populate_connection_info();
+  RcHandle<DomainParticipantImpl> participant = participant_servant_.lock();
+  populate_connection_info(participant.get());
   const TransportLocatorSeq& trans_conf_info = connection_info();
 
   ACE_Guard<ACE_Recursive_Thread_Mutex> guard(lock_);

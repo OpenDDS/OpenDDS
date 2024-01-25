@@ -729,10 +729,10 @@ bool run_test()
   part1_addr.set(part1_addr.get_port_number(), "localhost");
 #endif
   SimpleDataWriter sdw2(writer2);
-  sdw2.enable_transport(true /*reliable*/, false /*durable*/);
+  sdw2.enable_transport(true /*reliable*/, false /*durable*/, 0);
 
   SimpleDataReader sdr2(reader2);
-  sdr2.enable_transport(true /*reliable*/, true /*durable*/);
+  sdr2.enable_transport(true /*reliable*/, true /*durable*/, 0);
 
 
   // "local" setup is now done, start making associations

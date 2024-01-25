@@ -170,7 +170,7 @@ namespace {
         value += (use_cxx11 ? "_" : "") + cpp_field_name;
       }
 
-      if (field != 0){
+      if (field != 0) {
         const bool is_optional = be_global->is_optional(field);
         if (is_optional) value += ".value()";
       }
