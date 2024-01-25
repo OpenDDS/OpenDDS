@@ -76,8 +76,6 @@ public:
   void remove_config(const TransportConfig_rch& cfg);
   void remove_config(const OPENDDS_STRING& config_name);
 
-  void remove_transport_template_instance(const OPENDDS_STRING& config_name);
-
   TransportConfig_rch global_config() const;
   void global_config(const TransportConfig_rch& cfg);
 
@@ -105,11 +103,6 @@ public:
                                    ACE_Configuration_Heap& cf);
 
   /// For internal use by OpenDDS DCPS layer:
-  /// Process the transport_template configuration.
-  /// Called by the Service_Participant at initialization time.
-  int load_transport_templates();
-
-  /// For internal use by OpenDDS DCPS layer:
   /// If the default config is empty when it's about to be used, allow the
   /// TransportRegistry to attempt to load a fallback option.
   TransportConfig_rch fix_empty_default();
@@ -120,18 +113,8 @@ public:
 
   bool released() const;
 
-  bool config_has_transport_template(const String& config_name) const;
-
-  int create_transport_template_instance(DDS::DomainId_t domain, const String& config_name);
-
-  OPENDDS_STRING get_transport_template_instance_name(DDS::DomainId_t id);
-
-  OPENDDS_STRING get_config_instance_name(DDS::DomainId_t id);
-
-  // the new config and instance names are returned by reference.
-  bool create_new_transport_instance_for_participant(DDS::DomainId_t id, OPENDDS_STRING& transport_config_name, OPENDDS_STRING& transport_instance_name);
-
-  void update_config_template_instance_info(const OPENDDS_STRING& config_name, const OPENDDS_STRING& inst_name);
+  void remove_participant(DDS::DomainId_t domain,
+                          DomainParticipantImpl* participant);
 
 private:
   friend class ACE_Singleton<TransportRegistry, ACE_Recursive_Thread_Mutex>;
@@ -144,7 +127,6 @@ private:
   typedef OPENDDS_MAP(OPENDDS_STRING, TransportInst_rch) InstMap;
   typedef OPENDDS_MAP(OPENDDS_STRING, OPENDDS_STRING) LibDirectiveMap;
   typedef OPENDDS_MAP(DDS::DomainId_t, TransportConfig_rch) DomainConfigMap;
-  typedef OPENDDS_MAP(OPENDDS_STRING, OPENDDS_STRING) ConfigTemplateToInstanceMap;
 
   typedef ACE_SYNCH_MUTEX LockType;
   typedef ACE_Guard<LockType> GuardType;
@@ -154,7 +136,6 @@ private:
   InstMap inst_map_;
   LibDirectiveMap lib_directive_map_;
   DomainConfigMap domain_default_config_map_;
-  ConfigTemplateToInstanceMap config_template_to_instance_map_;
 
   TransportConfig_rch global_config_;
   bool released_;
@@ -165,38 +146,7 @@ private:
   static const OPENDDS_STRING CUSTOM_ADD_DOMAIN_TO_IP;
   static const OPENDDS_STRING CUSTOM_ADD_DOMAIN_TO_PORT;
 
-  class TransportTemplate {
-  public:
-    TransportTemplate(const String& transport_template_name)
-      : transport_template_name_(transport_template_name)
-      , config_prefix_(ConfigPair::canonicalize(String("OPENDDS_TRANSPORT_TEMPLATE_") + transport_template_name))
-    {}
-
-    const String& transport_template_name() const { return transport_template_name_; }
-    const String& config_prefix() const { return config_prefix_; }
-    bool instantiate_per_participant(RcHandle<ConfigStoreImpl> config_store) const;
-    DCPS::ConfigStoreImpl::StringMap customizations(RcHandle<ConfigStoreImpl> config_store) const;
-    DCPS::ConfigStoreImpl::StringMap transport_info(RcHandle<ConfigStoreImpl> config_store) const;
-
-  private:
-    String config_key(const String& key) const
-    {
-      return ConfigPair::canonicalize(config_prefix_ + "_" + key);
-    }
-
-    String transport_template_name_;
-    String config_prefix_;
-  };
-
   TransportType_rch load_transport_lib_i(const OPENDDS_STRING& transport_type);
-
-  OPENDDS_VECTOR(TransportTemplate) transport_templates_;
-
-  bool get_transport_template_info(const String& config_name, TransportTemplate& inst);
-
-  bool process_customizations(const DDS::DomainId_t id, const TransportTemplate& tr_inst, ValueMap& customs);
-
-  bool has_transport_templates() const;
 
   struct TransportEntry
   {

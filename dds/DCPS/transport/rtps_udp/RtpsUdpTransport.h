@@ -250,7 +250,8 @@ private:
 
 class OpenDDS_Rtps_Udp_Export RtpsUdpTransport : public TransportImpl, public ConfigListener {
 public:
-  RtpsUdpTransport(const RtpsUdpInst_rch& inst);
+  RtpsUdpTransport(const RtpsUdpInst_rch& inst,
+                   DDS::DomainId_t domain);
   RtpsUdpInst_rch config() const;
 #ifdef OPENDDS_SECURITY
   DCPS::RcHandle<ICE::Agent> get_ice_agent() const;

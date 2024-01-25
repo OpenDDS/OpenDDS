@@ -52,6 +52,13 @@ OpenDDS_Security_Export
 bool set_security_error(DDS::Security::SecurityException& ex,
                         int code,
                         int minor_code,
+                        const char* message_prefix,
+                        unsigned long openssl_error);
+
+OpenDDS_Security_Export
+bool set_security_error(DDS::Security::SecurityException& ex,
+                        int code,
+                        int minor_code,
                         const char* message,
                         const unsigned char (&a1)[4],
                         const unsigned char (&a2)[4]);

@@ -413,7 +413,7 @@ void verify_modified_single_value_struct(XTypes::DynamicDataImpl& ddi)
   EXPECT_EQ(DDS::RETCODE_OK, ddi.set_boolean_value(15, false));
   CORBA::Boolean bool_val = false;
   EXPECT_EQ(DDS::RETCODE_OK, ddi.get_boolean_value(bool_val, 15));
-  EXPECT_EQ(false, bool_val);
+  EXPECT_FALSE(bool_val);
 
   DDS::DynamicType_var dt = ddi.type();
   DDS::DynamicTypeMember_var dtm;
@@ -494,7 +494,7 @@ void verify_default_single_value_struct(DDS::DynamicType_var type, const DataVie
     EXPECT_EQ(CORBA::Octet(0), byte_val);
     CORBA::Boolean bool_val = false;
     EXPECT_EQ(DDS::RETCODE_OK, data.get_boolean_value(bool_val, 15));
-    EXPECT_EQ(CORBA::Boolean(false), bool_val);
+    EXPECT_FALSE(bool_val);
     DDS::DynamicData_var nested_dd;
     EXPECT_EQ(DDS::RETCODE_OK, data.get_complex_value(nested_dd, 16));
     CORBA::Long nested_long_val;
@@ -1744,7 +1744,7 @@ void verify_reading_sequence_value_struct(XTypes::DynamicDataImpl& ddi)
   CORBA::Boolean bool_val = false;
   id = nested_dd->get_member_id_at_index(0);
   EXPECT_EQ(DDS::RETCODE_OK, nested_dd->get_boolean_value(bool_val, id));
-  EXPECT_EQ(true, bool_val);
+  EXPECT_TRUE(bool_val);
 
   // str_s
   EXPECT_EQ(DDS::RETCODE_OK, ddi.get_complex_value(nested_dd, 16));

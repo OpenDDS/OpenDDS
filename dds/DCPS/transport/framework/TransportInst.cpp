@@ -30,7 +30,7 @@ TransportInst::TransportInst(const char* type,
   : transport_type_(type)
   , shutting_down_(false)
   , name_(name)
-  , config_prefix_(ConfigPair::canonicalize("OPENDDS_TRANSPORT_" + name_))
+  , config_prefix_(is_template ? ConfigPair::canonicalize("OPENDDS_TRANSPORT_TEMPLATE_" + name_) : ConfigPair::canonicalize("OPENDDS_TRANSPORT_" + name_))
   , is_template_(is_template)
 {
   DBG_ENTRY_LVL("TransportInst", "TransportInst", 6);
@@ -66,11 +66,11 @@ TransportInst::load(ACE_Configuration_Heap& cf,
 }
 
 void
-TransportInst::dump() const
+TransportInst::dump(DDS::DomainId_t domain) const
 {
   ACE_DEBUG((LM_DEBUG,
              ACE_TEXT("\n(%P|%t) TransportInst::dump() -\n%C"),
-             dump_to_str().c_str()));
+             dump_to_str(domain).c_str()));
 }
 
 namespace {
@@ -93,7 +93,7 @@ TransportInst::formatNameForDump(const char* name)
 }
 
 OPENDDS_STRING
-TransportInst::dump_to_str() const
+TransportInst::dump_to_str(DDS::DomainId_t) const
 {
   OPENDDS_STRING ret;
   ret += formatNameForDump("transport_type")          + transport_type_ + '\n';
@@ -286,36 +286,110 @@ TransportInst::count_messages() const
 void
 TransportInst::shutdown()
 {
-  TransportImpl_rch impl;
+  DomainMap impl;
   {
     ACE_GUARD(ACE_SYNCH_MUTEX, g, lock_);
-    impl_.swap(impl);
+    domain_map_.swap(impl);
     shutting_down_ = true;
   }
-  if (impl) {
-    impl->shutdown();
+  for (DomainMap::const_iterator pos = impl.begin(), limit = impl.end(); pos != limit; ++pos) {
+    for (ParticipantMap::const_iterator pos2 = pos->second.begin(), limit2 = pos->second.end(); pos2 != limit2; ++pos2) {
+      pos2->second->shutdown();
+    }
   }
 }
 
+String
+TransportInst::instantiation_rule() const
+{
+  return TheServiceParticipant->config_store()->get(config_key("INSTANTIATION_RULE").c_str(), "");
+}
+
 TransportImpl_rch
-TransportInst::get_or_create_impl()
+TransportInst::get_or_create_impl(DDS::DomainId_t domain,
+                                  DomainParticipantImpl* participant)
 {
   ACE_GUARD_RETURN(ACE_SYNCH_MUTEX, g, lock_, TransportImpl_rch());
-  if (!impl_ && !shutting_down_) {
+
+  // Only use the domain if the inst is a template.
+  // Furthermore, only use the client if the instantiation rule is per_participant.
+
+  if (is_template_) {
+    if (instantiation_rule() != "per_participant") {
+      participant = 0;
+    }
+  } else {
+    domain = 0;
+    participant = 0;
+  }
+
+  if (!shutting_down_) {
     try {
-      impl_ = new_impl();
+      DomainMap::iterator pos = domain_map_.find(domain);
+      if (pos == domain_map_.end()) {
+        pos = domain_map_.insert(std::make_pair(domain, ParticipantMap())).first;
+      }
+      ParticipantMap::iterator pos2 = pos->second.find(participant);
+      if (pos2 == pos->second.end()) {
+        pos2 = pos->second.insert(std::make_pair(participant, new_impl(domain))).first;
+      }
+      return pos2->second;
     } catch (const Transport::UnableToCreate&) {
       return TransportImpl_rch();
     }
   }
-  return impl_;
+
+  return TransportImpl_rch();
+}
+
+void
+TransportInst::remove_participant(DDS::DomainId_t domain,
+                                  DomainParticipantImpl* participant)
+{
+  ACE_GUARD(ACE_SYNCH_MUTEX, g, lock_);
+
+  // This is a no-op for non-templates and per-domain templates.
+  if (is_template_ && instantiation_rule() == "per_participant") {
+    DomainMap::iterator pos = domain_map_.find(domain);
+    if (pos == domain_map_.end()) {
+      return;
+    }
+    ParticipantMap::iterator pos2 = pos->second.find(participant);
+    if (pos2 == pos->second.end()) {
+      return;
+    }
+    pos2->second->shutdown();
+    pos->second.erase(pos2);
+    if (pos->second.empty()) {
+      domain_map_.erase(pos);
+    }
+  }
 }
 
 TransportImpl_rch
-TransportInst::get_impl()
+TransportInst::get_impl(DDS::DomainId_t domain,
+                        DomainParticipantImpl* participant)
 {
   ACE_GUARD_RETURN(ACE_SYNCH_MUTEX, g, lock_, TransportImpl_rch());
-  return impl_;
+
+  if (is_template_) {
+    if (instantiation_rule() != "per_participant") {
+      participant = 0;
+    }
+  } else {
+    domain = 0;
+    participant = 0;
+  }
+
+  DomainMap::const_iterator pos = domain_map_.find(domain);
+  if (pos != domain_map_.end()) {
+    ParticipantMap::const_iterator pos2 = pos->second.find(participant);
+    if (pos2 != pos->second.end()) {
+      return pos2->second;
+    }
+  }
+
+  return TransportImpl_rch();
 }
 
 void
@@ -345,9 +419,10 @@ TransportInst::set_port_in_addr_string(OPENDDS_STRING& addr_str, u_short port_nu
 }
 
 WeakRcHandle<OpenDDS::ICE::Endpoint>
-TransportInst::get_ice_endpoint()
+TransportInst::get_ice_endpoint(DDS::DomainId_t domain,
+                                DomainParticipantImpl* participant)
 {
-  const TransportImpl_rch temp = get_or_create_impl();
+  const TransportImpl_rch temp = get_or_create_impl(domain, participant);
   return temp ? temp->get_ice_endpoint() : WeakRcHandle<OpenDDS::ICE::Endpoint>();
 }
 
@@ -370,16 +445,18 @@ TransportInst::use_ice_now(bool flag)
 }
 
 ReactorTask_rch
-TransportInst::reactor_task()
+TransportInst::reactor_task(DDS::DomainId_t domain,
+                            DomainParticipantImpl* participant)
 {
-  const TransportImpl_rch temp = get_or_create_impl();
+  const TransportImpl_rch temp = get_or_create_impl(domain, participant);
   return temp ? temp->reactor_task() : ReactorTask_rch();
 }
 
 EventDispatcher_rch
-TransportInst::event_dispatcher()
+TransportInst::event_dispatcher(DDS::DomainId_t domain,
+                                DomainParticipantImpl* participant)
 {
-  const TransportImpl_rch temp = get_or_create_impl();
+  const TransportImpl_rch temp = get_or_create_impl(domain, participant);
   return temp ? temp->event_dispatcher() : EventDispatcher_rch();
 }
 

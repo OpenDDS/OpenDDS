@@ -2357,7 +2357,7 @@ Spdp::SpdpTransport::SpdpTransport(DCPS::RcHandle<Spdp> outer)
   multicast_interface_ = outer->disco_->multicast_interface();
 
   const u_short port_common = outer->config_->port_common(outer->domain_);
-  multicast_address_ = outer->config_->multicast_address(port_common);
+  multicast_address_ = outer->config_->multicast_address(port_common, outer->domain_);
 
 #ifdef ACE_HAS_IPV6
   multicast_ipv6_address_ = outer->config_->ipv6_multicast_address(port_common);

@@ -1097,10 +1097,10 @@ void JNICALL Java_OpenDDS_DCPS_transport_RtpsUdpInst_setUseMulticast
 
 // RtpsUdpInst::getMulticastGroupAddress
 jstring JNICALL Java_OpenDDS_DCPS_transport_RtpsUdpInst_getMulticastGroupAddress
-(JNIEnv * jni, jobject jthis)
+(JNIEnv * jni, jobject jthis, jint domain)
 {
   OpenDDS::DCPS::RtpsUdpInst_rch inst = OpenDDS::DCPS::rchandle_from(recoverCppObj<OpenDDS::DCPS:: RtpsUdpInst>(jni, jthis));
-  return jni->NewStringUTF(OpenDDS::DCPS::LogAddr(inst->multicast_group_address()).c_str());
+  return jni->NewStringUTF(OpenDDS::DCPS::LogAddr(inst->multicast_group_address(domain)).c_str());
 }
 
 // RtpsUdpInst::setMulticastGroupAddress

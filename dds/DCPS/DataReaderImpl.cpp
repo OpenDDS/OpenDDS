@@ -339,8 +339,10 @@ DataReaderImpl::add_association(const WriterAssociation& writer,
   } else {
     if (DCPS_debug_level) {
       ACE_ERROR((LM_ERROR,
-          ACE_TEXT("(%P|%t) DataReaderImpl::add_association: ")
-          ACE_TEXT("ERROR: transport layer failed to associate.\n")));
+                 ACE_TEXT("(%P|%t) DataReaderImpl::add_association: ")
+                 ACE_TEXT("ERROR: transport layer failed to associate local reader %C remote writer %C\n"),
+                 LogGuid(get_guid()).c_str(),
+                 LogGuid(writer.writerId).c_str()));
     }
   }
 }
@@ -351,9 +353,10 @@ DataReaderImpl::transport_assoc_done(int flags, const GUID_t& remote_id)
   if (!(flags & ASSOC_OK)) {
     if (DCPS_debug_level) {
       ACE_ERROR((LM_ERROR,
-          ACE_TEXT("(%P|%t) DataReaderImpl::transport_assoc_done: ")
-          ACE_TEXT("ERROR: transport layer failed to associate %C\n"),
-          LogGuid(remote_id).c_str()));
+                 ACE_TEXT("(%P|%t) DataReaderImpl::transport_assoc_done: ")
+                 ACE_TEXT("ERROR: transport layer failed to associate local reader %C remote writer %C\n"),
+                 LogGuid(get_guid()).c_str(),
+                 LogGuid(remote_id).c_str()));
     }
     return;
   }
@@ -1205,7 +1208,7 @@ DataReaderImpl::enable()
   if (topic_servant_ && !transport_disabled_) {
     try {
       this->enable_transport(this->qos_.reliability.kind == DDS::RELIABLE_RELIABILITY_QOS,
-          this->qos_.durability.kind > DDS::VOLATILE_DURABILITY_QOS);
+                             this->qos_.durability.kind > DDS::VOLATILE_DURABILITY_QOS, participant.get());
     } catch (const Transport::Exception&) {
       ACE_ERROR((LM_ERROR,
           ACE_TEXT("(%P|%t) ERROR: DataReaderImpl::enable, ")
@@ -3473,7 +3476,8 @@ void EndHistoricSamplesMissedSweeper::CancelCommand::execute()
 
 void DataReaderImpl::transport_discovery_change()
 {
-  populate_connection_info();
+  RcHandle<DomainParticipantImpl> participant = participant_servant_.lock();
+  populate_connection_info(participant.get());
   const TransportLocatorSeq& trans_conf_info = connection_info();
   const GUID_t dp_id_copy = dp_id_;
   Discovery_rch disco = TheServiceParticipant->get_discovery(domain_id_);

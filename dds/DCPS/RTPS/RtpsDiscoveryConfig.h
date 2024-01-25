@@ -101,12 +101,13 @@ public:
   OPENDDS_STRING multicast_interface() const;
   void multicast_interface(const OPENDDS_STRING& mi);
 
-  DCPS::NetworkAddress default_multicast_group() const;
+  DCPS::NetworkAddress default_multicast_group(DDS::DomainId_t domain) const;
   void default_multicast_group(const DCPS::NetworkAddress& group);
 
   u_short port_common(DDS::DomainId_t domain) const;
 
-  DCPS::NetworkAddress multicast_address(u_short port_common) const;
+  DCPS::NetworkAddress multicast_address(u_short port_common,
+                                         DDS::DomainId_t domain) const;
 
 #ifdef ACE_HAS_IPV6
   DCPS::NetworkAddress ipv6_spdp_local_address() const;
