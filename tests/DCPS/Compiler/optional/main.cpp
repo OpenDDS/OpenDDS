@@ -9,6 +9,7 @@
 #include <ace/Log_Msg.h>
 #include <gtest/gtest.h>
 
+// Ensure opendds_idl is generating std::optional
 TEST(OptionalTests, Empty)
 {
   optional::OptionalMembers empty;
@@ -17,23 +18,58 @@ TEST(OptionalTests, Empty)
   EXPECT_TRUE(empty.opt().has_value());
 }
 
-TEST(OptionalTests, SerializationSize)
+TEST(OptionalTests, SerializationSizeXCDR1)
 {
   optional::OptionalMembers empty;
   OpenDDS::DCPS::Encoding encoding;
   encoding.kind(OpenDDS::DCPS::Encoding::KIND_XCDR1);
+  EXPECT_EQ(12, OpenDDS::DCPS::serialized_size(encoding, empty)); // TODO this is probably incorrect
 
-  EXPECT_EQ(3, OpenDDS::DCPS::serialized_size(encoding, empty));
-  empty.opt(12);
-  empty.strOpt("Hello World");
-  empty.seqOpt(std::vector{123, 456});
-  EXPECT_EQ(44, OpenDDS::DCPS::serialized_size(encoding, empty));
+  optional::OptionalMembers notEmpty;
+  notEmpty.opt(12);
+  notEmpty.strOpt("Hello World");
+  notEmpty.seqOpt(std::vector{123, 456});
+  EXPECT_EQ(44, OpenDDS::DCPS::serialized_size(encoding, empty)); // TODO this is probably incorrect
 }
 
-TEST(OptionalTests, Serialization)
+TEST(OptionalTests, SerializationSizeXCDR2)
+{
+  optional::OptionalMembers empty{};
+  OpenDDS::DCPS::Encoding encoding;
+  encoding.kind(OpenDDS::DCPS::Encoding::KIND_XCDR2);
+  EXPECT_EQ(3, OpenDDS::DCPS::serialized_size(encoding, empty));
+
+  optional::OptionalMembers notEmpty;
+  notEmpty.opt(12);
+  notEmpty.strOpt("Hello World");
+  notEmpty.seqOpt(std::vector{123, 456});
+  EXPECT_EQ(44, OpenDDS::DCPS::serialized_size(encoding, empty)); // TODO this is probably incorrect
+}
+
+TEST(OptionalTests, SerializationXCDR1)
 {
   OpenDDS::DCPS::Encoding encoding;
   encoding.kind(OpenDDS::DCPS::Encoding::KIND_XCDR1);
+
+  OpenDDS::DCPS::Message_Block_Ptr b(new ACE_Message_Block(100000));
+  OpenDDS::DCPS::Serializer strm(b.get(), encoding);
+
+  optional::OptionalMembers msg;
+  msg.opt(12);
+  msg.strOpt("Hello World");
+  EXPECT_TRUE(strm << msg);
+
+ optional::OptionalMembers msg2;
+ EXPECT_TRUE(strm >> msg2);
+ EXPECT_TRUE(msg2.opt().has_value());
+ EXPECT_EQ(msg.opt().value(), msg2.opt().value());
+ EXPECT_FALSE(msg2.seqOpt().has_value());
+}
+
+TEST(OptionalTests, SerializationXCDR2)
+{
+  OpenDDS::DCPS::Encoding encoding;
+  encoding.kind(OpenDDS::DCPS::Encoding::KIND_XCDR2);
 
   OpenDDS::DCPS::Message_Block_Ptr b(new ACE_Message_Block(100000));
   OpenDDS::DCPS::Serializer strm(b.get(), encoding);
