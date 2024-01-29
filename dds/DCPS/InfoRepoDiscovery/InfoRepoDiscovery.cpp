@@ -12,7 +12,6 @@
 #include "FailoverListener.h"
 #include "dds/DCPS/Service_Participant.h"
 #include "dds/DCPS/RepoIdBuilder.h"
-#include "dds/DCPS/ConfigUtils.h"
 #include "dds/DCPS/DCPS_Utils.h"
 #include "dds/DCPS/BuiltInTopicUtils.h"
 

@@ -9,7 +9,6 @@
 
 #include <dds/DCPS/LogAddr.h>
 #include <dds/DCPS/Service_Participant.h>
-#include <dds/DCPS/ConfigUtils.h>
 #include <dds/DCPS/DomainParticipantImpl.h>
 #include <dds/DCPS/SubscriberImpl.h>
 #include <dds/DCPS/Marked_Default_Qos.h>

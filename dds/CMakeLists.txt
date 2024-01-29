@@ -18,7 +18,6 @@ add_library(OpenDDS_Dcps
   DCPS/CoherentChangeControl.cpp
   DCPS/ConditionImpl.cpp
   DCPS/ConfigStoreImpl.cpp
-  DCPS/ConfigUtils.cpp
   DCPS/ConnectionRecords.cpp
   DCPS/ContentFilteredTopicImpl.cpp
   DCPS/DCPS_Utils.cpp
@@ -215,7 +214,6 @@ target_sources(OpenDDS_Dcps
     DCPS/ConditionImpl.h
     DCPS/ConditionVariable.h
     DCPS/ConfigStoreImpl.h
-    DCPS/ConfigUtils.h
     DCPS/ConnectionRecords.h
     DCPS/ContentFilteredTopicImpl.h
     DCPS/DCPS_Utils.h

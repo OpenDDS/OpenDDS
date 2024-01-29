@@ -14,11 +14,8 @@
 
 #include <dds/DCPS/dcps_export.h>
 #include <dds/DCPS/PoolAllocator.h>
+#include <dds/DCPS/ConfigStoreImpl.h>
 #include <dds/DdsDcpsDomainC.h>
-
-ACE_BEGIN_VERSIONED_NAMESPACE_DECL
-class ACE_Configuration_Heap;
-ACE_END_VERSIONED_NAMESPACE_DECL
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -77,19 +74,17 @@ public:
   void builtin_config(const SecurityConfig_rch& cfg);
 
   /// For internal use by OpenDDS DCPS layer:
-  /// Transfer the configuration in ACE_Configuration_Heap object to
+  /// Transfer the configuration in the ConfigStore to
   /// the SecurityRegistry.  This is called by the Service_Participant
-  /// at initialization time. This function iterates each section in
-  /// the configuration file, and creates SecurityConfigEntry
+  /// at initialization time. This function creates SecurityConfigEntry
   /// objects and adds them to the registry.
-  int load_security_configuration(ACE_Configuration_Heap& cf);
+  int load_security_configuration();
 
 private:
   friend class ACE_Singleton<SecurityRegistry, ACE_Recursive_Thread_Mutex>;
 
   static const char* DEFAULT_INST_PREFIX;
   static const char* DEFAULT_PLUGIN_NAME;
-  static const char* SECURITY_SECTION_NAME;
   static const char* ACCESS_CTRL_PLUGIN_NAME;
   static const char* AUTHENTICATION_PLUGIN_NAME;
   static const char* CRYPTO_PLUGIN_NAME;
@@ -99,25 +94,26 @@ private:
   {
   public:
 
-    SecurityConfigEntry(const OPENDDS_STRING& entryNamee);
+    SecurityConfigEntry(const DCPS::String& name);
     ~SecurityConfigEntry();
 
-    void add_property(const OPENDDS_STRING& name, const OPENDDS_STRING& value);
+    const DCPS::String& name() const { return name_; }
+    const DCPS::String& config_prefix() const { return config_prefix_; }
+    DCPS::String config_key(const DCPS::String& key) const
+    {
+      return DCPS::ConfigPair::canonicalize(config_prefix_ + "_" + key);
+    }
 
-    const OPENDDS_STRING& get_entry_name() const { return entry_name_; }
-    const OPENDDS_STRING& get_auth_name() const { return auth_name_; }
-    const OPENDDS_STRING& get_access_control_name() const { return access_ctrl_name_; }
-    const OPENDDS_STRING& get_crypto_name() const { return crypto_name_; }
+    const DCPS::String& get_entry_name() const { return name_; }
+    DCPS::String get_auth_name() const;
+    DCPS::String get_access_control_name() const;
+    DCPS::String get_crypto_name() const;
 
-    const ConfigPropertyList& get_properties() const { return properties_; }
+    ConfigPropertyList get_properties() const;
 
   private:
-    const OPENDDS_STRING entry_name_;
-
-    OPENDDS_STRING auth_name_;
-    OPENDDS_STRING access_ctrl_name_;
-    OPENDDS_STRING crypto_name_;
-    ConfigPropertyList properties_;
+    const DCPS::String name_;
+    const DCPS::String config_prefix_;
   };
 
   typedef DCPS::RcHandle<SecurityConfigEntry> SecurityConfigEntry_rch;

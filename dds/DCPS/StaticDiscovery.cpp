@@ -3,7 +3,6 @@
 #include "StaticDiscovery.h"
 
 #include "debug.h"
-#include "ConfigUtils.h"
 #include "DomainParticipantImpl.h"
 #include "Marked_Default_Qos.h"
 #include "SubscriberImpl.h"
