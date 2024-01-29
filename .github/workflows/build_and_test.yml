@@ -6924,7 +6924,7 @@ jobs:
         cd OpenDDS
         call setenv.cmd
         perl tools\scripts\show_build_config.pl
-    - uses: ammaraskar/msvc-problem-matcher@0.2.0
+    - uses: ammaraskar/msvc-problem-matcher@0.3.0
     - name: build OpenDDS
       shell: cmd
       run: |
@@ -7011,7 +7011,7 @@ jobs:
         rm -f build_w19_p1_stat_js0.tar.xz
     - name: set up msvc env
       uses: ilammy/msvc-dev-cmd@v1
-    - uses: ammaraskar/msvc-problem-matcher@0.2.0
+    - uses: ammaraskar/msvc-problem-matcher@0.3.0
     - name: Build CMake Tests
       shell: cmd
       run: |
@@ -7182,7 +7182,7 @@ jobs:
         call setenv.cmd
         cd tests\DCPS\Messenger
         perl %ACE_ROOT%\bin\mwc.pl -type vs2019 -static -features no_rapidjson=1 -features ipv6=1 -features ssl=1 -features no_cxx11=0
-    - uses: ammaraskar/msvc-problem-matcher@0.2.0
+    - uses: ammaraskar/msvc-problem-matcher@0.3.0
     - name: make messenger tests
       shell: cmd
       run: |
@@ -7360,7 +7360,7 @@ jobs:
         rm -rf xcdr
         rm -rf XTypesExtensibility
         perl %ACE_ROOT%\bin\mwc.pl -type vs2019 -static -features no_rapidjson=1 -features ipv6=1 -features no_cxx11=0
-    - uses: ammaraskar/msvc-problem-matcher@0.2.0
+    - uses: ammaraskar/msvc-problem-matcher@0.3.0
     - name: make compiler tests
       shell: cmd
       run: |
@@ -7527,7 +7527,7 @@ jobs:
         rm -rf isolated_types
         rm -rf is_topic_type
         perl %ACE_ROOT%\bin\mwc.pl -type vs2019 -static -features no_rapidjson=1 -features ipv6=1 -features no_cxx11=0
-    - uses: ammaraskar/msvc-problem-matcher@0.2.0
+    - uses: ammaraskar/msvc-problem-matcher@0.3.0
     - name: make compiler tests
       shell: cmd
       run: |
@@ -7690,7 +7690,7 @@ jobs:
         call setenv.cmd
         cd tests\unit-tests
         perl %ACE_ROOT%\bin\mwc.pl -type vs2019 -static -features no_rapidjson=1 -features ipv6=1 -features ssl=1 -features no_cxx11=0
-    - uses: ammaraskar/msvc-problem-matcher@0.2.0
+    - uses: ammaraskar/msvc-problem-matcher@0.3.0
     - name: make unit tests
       shell: cmd
       run: |
@@ -7915,7 +7915,7 @@ jobs:
         cd OpenDDS
         call setenv.cmd
         perl tools\scripts\show_build_config.pl
-    - uses: ammaraskar/msvc-problem-matcher@0.2.0
+    - uses: ammaraskar/msvc-problem-matcher@0.3.0
     - name: build OpenDDS
       shell: cmd
       run: |
@@ -8002,7 +8002,7 @@ jobs:
         rm -f build_w19_re_p1_stat_FM-08.tar.xz
     - name: set up msvc env
       uses: ilammy/msvc-dev-cmd@v1
-    - uses: ammaraskar/msvc-problem-matcher@0.2.0
+    - uses: ammaraskar/msvc-problem-matcher@0.3.0
     - name: Build CMake Tests
       shell: cmd
       run: |
@@ -8173,7 +8173,7 @@ jobs:
         call setenv.cmd
         cd tests\DCPS\Messenger
         perl %ACE_ROOT%\bin\mwc.pl -type vs2019 -static -features ipv6=1 -features no_cxx11=0 -features xerces3=1 -features no_rapidjson=0 -features ssl=1 -features openssl11=1 -features built_in_topics=0 -features ownership_profile=0 -features content_subscription=0 -features object_model_profile=0 -features persistence_profile=0
-    - uses: ammaraskar/msvc-problem-matcher@0.2.0
+    - uses: ammaraskar/msvc-problem-matcher@0.3.0
     - name: make messenger tests
       shell: cmd
       run: |
@@ -8351,7 +8351,7 @@ jobs:
         rm -rf xcdr
         rm -rf XTypesExtensibility
         perl %ACE_ROOT%\bin\mwc.pl -type vs2019 -static -features ipv6=1 -features no_cxx11=0 -features no_rapidjson=0 -features openssl11=1 -features built_in_topics=0 -features ownership_profile=0 -features content_subscription=0 -features object_model_profile=0 -features persistence_profile=0
-    - uses: ammaraskar/msvc-problem-matcher@0.2.0
+    - uses: ammaraskar/msvc-problem-matcher@0.3.0
     - name: make compiler tests
       shell: cmd
       run: |
@@ -8517,7 +8517,7 @@ jobs:
         rm -rf isolated_types
         rm -rf is_topic_type
         perl %ACE_ROOT%\bin\mwc.pl -type vs2019 -static -features ipv6=1 -features no_cxx11=0 -features no_rapidjson=0 -features openssl11=1 -features built_in_topics=0 -features ownership_profile=0 -features content_subscription=0 -features object_model_profile=0 -features persistence_profile=0
-    - uses: ammaraskar/msvc-problem-matcher@0.2.0
+    - uses: ammaraskar/msvc-problem-matcher@0.3.0
     - name: make compiler tests
       shell: cmd
       run: |
@@ -8679,7 +8679,7 @@ jobs:
         call setenv.cmd
         cd tests\unit-tests
         perl %ACE_ROOT%\bin\mwc.pl -type vs2019 -static -features ipv6=1 -features no_cxx11=0 -features xerces3=1 -features no_rapidjson=0 -features ssl=1 -features openssl11=1 -features built_in_topics=0 -features ownership_profile=0 -features content_subscription=0 -features object_model_profile=0 -features persistence_profile=0
-    - uses: ammaraskar/msvc-problem-matcher@0.2.0
+    - uses: ammaraskar/msvc-problem-matcher@0.3.0
     - name: make unit tests
       shell: cmd
       run: |
@@ -8928,7 +8928,7 @@ jobs:
         cd OpenDDS
         call setenv.cmd
         perl tools\scripts\show_build_config.pl
-    - uses: ammaraskar/msvc-problem-matcher@0.2.0
+    - uses: ammaraskar/msvc-problem-matcher@0.3.0
     - name: build OpenDDS
       shell: cmd
       run: |
@@ -9221,7 +9221,7 @@ jobs:
         call setenv.cmd
         cd tests\DCPS\Messenger
         perl %ACE_ROOT%\bin\mwc.pl -type vs2019 -features ipv6=1 -features no_cxx11=0 -features xerces3=1 -features no_rapidjson=0 -features ssl=1 -features openssl11=1 -features no_opendds_security=0
-    - uses: ammaraskar/msvc-problem-matcher@0.2.0
+    - uses: ammaraskar/msvc-problem-matcher@0.3.0
     - name: make messenger tests
       shell: cmd
       run: |
@@ -9397,7 +9397,7 @@ jobs:
         call setenv.cmd
         cd tests\DCPS\Compiler
         perl %ACE_ROOT%\bin\mwc.pl -type vs2019 -features ipv6=1 -features no_cxx11=0 -features xerces3=1 -features no_rapidjson=0 -features ssl=1 -features openssl11=1 -features no_opendds_security=0
-    - uses: ammaraskar/msvc-problem-matcher@0.2.0
+    - uses: ammaraskar/msvc-problem-matcher@0.3.0
     - name: make compiler tests
       shell: cmd
       run: |
@@ -9568,7 +9568,7 @@ jobs:
         call setenv.cmd
         cd tests\unit-tests
         perl %ACE_ROOT%\bin\mwc.pl -type vs2019 -features ipv6=1 -features no_cxx11=0 -features xerces3=1 -features no_rapidjson=0 -features ssl=1 -features openssl11=1 -features no_opendds_security=0 -value_project macros+=GTEST_LINKED_AS_SHARED_LIBRARY
-    - uses: ammaraskar/msvc-problem-matcher@0.2.0
+    - uses: ammaraskar/msvc-problem-matcher@0.3.0
     - name: make unit tests
       shell: cmd
       run: |
@@ -9895,7 +9895,7 @@ jobs:
         cd OpenDDS
         call setenv.cmd
         perl tools\scripts\show_build_config.pl
-    - uses: ammaraskar/msvc-problem-matcher@0.2.0
+    - uses: ammaraskar/msvc-problem-matcher@0.3.0
     - name: build OpenDDS
       shell: cmd
       run: |
@@ -10143,7 +10143,7 @@ jobs:
         call setenv.cmd
         cd tests\DCPS\Messenger
         perl %ACE_ROOT%\bin\mwc.pl -type vs2019 -features no_cxx11=0 -features java=1 -features xerces3=1 -features no_rapidjson=0 -features ssl=1 -features openssl11=1 -features built_in_topics=0
-    - uses: ammaraskar/msvc-problem-matcher@0.2.0
+    - uses: ammaraskar/msvc-problem-matcher@0.3.0
     - name: make messenger tests
       shell: cmd
       run: |
@@ -10319,7 +10319,7 @@ jobs:
         call setenv.cmd
         cd tests\DCPS\Compiler
         perl %ACE_ROOT%\bin\mwc.pl -type vs2019 -features no_cxx11=0 -features java=1 -features xerces3=1 -features no_rapidjson=0 -features ssl=1 -features openssl11=1 -features built_in_topics=0
-    - uses: ammaraskar/msvc-problem-matcher@0.2.0
+    - uses: ammaraskar/msvc-problem-matcher@0.3.0
     - name: make compiler tests
       shell: cmd
       run: |
@@ -10488,7 +10488,7 @@ jobs:
         call setenv.cmd
         cd tests\unit-tests
         perl %ACE_ROOT%\bin\mwc.pl -type vs2019 -features no_cxx11=0 -features java=1 -features xerces3=1 -features no_rapidjson=0 -features ssl=1 -features openssl11=1 -features built_in_topics=0 -value_project macros+=GTEST_LINKED_AS_SHARED_LIBRARY
-    - uses: ammaraskar/msvc-problem-matcher@0.2.0
+    - uses: ammaraskar/msvc-problem-matcher@0.3.0
     - name: make unit tests
       shell: cmd
       run: |
@@ -10723,7 +10723,7 @@ jobs:
         cd /d C:\OpenDDS
         call setenv.cmd
         perl tools\scripts\show_build_config.pl
-    - uses: ammaraskar/msvc-problem-matcher@0.2.0
+    - uses: ammaraskar/msvc-problem-matcher@0.3.0
     - name: build OpenDDS
       shell: cmd
       run: |
@@ -10815,7 +10815,7 @@ jobs:
         mv OpenDDS /c/
     - name: set up msvc env
       uses: ilammy/msvc-dev-cmd@v1
-    - uses: ammaraskar/msvc-problem-matcher@0.2.0
+    - uses: ammaraskar/msvc-problem-matcher@0.3.0
     - name: Build CMake Tests
       shell: cmd
       run: |
@@ -11094,7 +11094,7 @@ jobs:
       shell: bash
       run: |
         mv OpenDDS /c/
-    - uses: ammaraskar/msvc-problem-matcher@0.2.0
+    - uses: ammaraskar/msvc-problem-matcher@0.3.0
     - name: set up msvc env
       uses: ilammy/msvc-dev-cmd@v1
       with:
@@ -11201,7 +11201,7 @@ jobs:
         mv OpenDDS /c/
     - name: set up msvc env
       uses: ilammy/msvc-dev-cmd@v1
-    - uses: ammaraskar/msvc-problem-matcher@0.2.0
+    - uses: ammaraskar/msvc-problem-matcher@0.3.0
     - name: check build configuration
       shell: cmd
       run: |
@@ -11434,7 +11434,7 @@ jobs:
         cd OpenDDS
         call setenv.cmd
         perl tools\scripts\show_build_config.pl
-    - uses: ammaraskar/msvc-problem-matcher@0.2.0
+    - uses: ammaraskar/msvc-problem-matcher@0.3.0
     - name: build OpenDDS
       shell: cmd
       run: |
@@ -11521,7 +11521,7 @@ jobs:
         rm -f build_w22_p1.tar.xz
     - name: set up msvc env
       uses: ilammy/msvc-dev-cmd@v1
-    - uses: ammaraskar/msvc-problem-matcher@0.2.0
+    - uses: ammaraskar/msvc-problem-matcher@0.3.0
     - name: Build CMake Tests
       shell: cmd
       run: |
@@ -11681,7 +11681,7 @@ jobs:
         call setenv.cmd
         cd tests\DCPS\Messenger
         perl %ACE_ROOT%\bin\mwc.pl -type vs2022 -features no_rapidjson=0 -features ipv6=1 -features ssl=1 -features no_cxx11=0
-    - uses: ammaraskar/msvc-problem-matcher@0.2.0
+    - uses: ammaraskar/msvc-problem-matcher@0.3.0
     - name: make messenger tests
       shell: cmd
       run: |
@@ -11857,7 +11857,7 @@ jobs:
         call setenv.cmd
         cd tests\DCPS\Compiler
         perl %ACE_ROOT%\bin\mwc.pl -type vs2022 -features ipv6=1 -features no_cxx11=0 -features no_rapidjson=0 -features ssl=1 -value_project macros+=GTEST_LINKED_AS_SHARED_LIBRARY
-    - uses: ammaraskar/msvc-problem-matcher@0.2.0
+    - uses: ammaraskar/msvc-problem-matcher@0.3.0
     - name: make compiler tests
       shell: cmd
       run: |
@@ -12019,7 +12019,7 @@ jobs:
         call setenv.cmd
         cd tests\unit-tests
         perl %ACE_ROOT%\bin\mwc.pl -type vs2022 -features ipv6=1 -features no_cxx11=0 -features no_rapidjson=0 -features ssl=1 -value_project macros+=GTEST_LINKED_AS_SHARED_LIBRARY
-    - uses: ammaraskar/msvc-problem-matcher@0.2.0
+    - uses: ammaraskar/msvc-problem-matcher@0.3.0
     - name: make unit tests
       shell: cmd
       run: |
@@ -13987,7 +13987,7 @@ jobs:
           -DOPENDDS_MPC=${{ github.workspace }}\MPC^
           -DOPENDDS_BUILD_TESTS=TRUE^
           -DOPENDDS_CMAKE_VERBOSE=all
-    - uses: ammaraskar/msvc-problem-matcher@0.2.0
+    - uses: ammaraskar/msvc-problem-matcher@0.3.0
     - name: Build
       shell: cmd
       run: |
@@ -14033,7 +14033,7 @@ jobs:
           -DOPENDDS_MPC=${{ github.workspace }}\MPC^
           -DOPENDDS_BUILD_TESTS=TRUE^
           -DOPENDDS_CMAKE_VERBOSE=all
-    - uses: ammaraskar/msvc-problem-matcher@0.2.0
+    - uses: ammaraskar/msvc-problem-matcher@0.3.0
     - name: Build
       shell: cmd
       run: |
