@@ -60,7 +60,7 @@ OpenDDS::DCPS::TcpInst::dump_to_str(DDS::DomainId_t domain) const
 size_t
 OpenDDS::DCPS::TcpInst::populate_locator(OpenDDS::DCPS::TransportLocator& local_info,
                                          ConnectionInfoFlags,
-                                         DDS::DomainId_t domain) const
+                                         DDS::DomainId_t) const
 {
   const std::string local_addr = local_address();
   const std::string locator_addr = get_locator_address();
