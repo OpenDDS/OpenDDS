@@ -14,12 +14,16 @@ namespace DCPS {
 class Xcdr2ValueWriter : public ValueWriter {
 public:
   explicit Xcdr2ValueWriter(Encoding& encoding)
-    : encoding_(encoding)
+    : mode_(SERIALIZATION_SIZE_MODE)
+    , encoding_(encoding)
+    , pos_(0)
+    , ser_(0)
   {}
 
   void begin_struct(Extensibility extensibility);
   void end_struct();
-  void begin_struct_member(const char* name, bool optional = false, bool present = true);
+  void begin_struct_member(unsigned id, bool must_understand,
+                           const char* name, bool optional = false, bool present = true);
   void end_struct_member();
 
   void begin_union(Extensibility extensibility);
@@ -62,12 +66,42 @@ public:
   size_t get_serialized_size() const;
   const std::vector<size_t>& get_serialized_sizes() const;
 
-private:
-  enum CollectionKind { SEQUENCE, ARRAY, NONE };
+  // Reset the operation mode to only computing serialization size.
+  void reset()
+  {
+    mode_ = SERIALIZATION_SIZE_MODE;
+    pos_ = 0;
+    ser_ = 0;
+  }
 
-  void begin_complex(Extensibility extensiblity, CollectionKind coll_kind = NONE);
+  // Switch the operation mode to serializing to a byte stream.
+  void set_serializer(Serializer* ser)
+  {
+    mode_ = SERIALIZATION_MODE;
+    pos_ = 0;
+    ser_ = ser;
+  }
+
+private:
+  enum CollectionKind { SEQUENCE_KIND, ARRAY_KIND, NOT_COLLECTION_KIND };
+
+  // Common internal methods for computing serialized sizes.
+  void begin_ssize_complex(Extensibility extensiblity, CollectionKind coll_kind = NOT_COLLECTION_KIND);
+  void end_ssize_complex();
+  void begin_ssize_aggregated_member(bool optional, bool present);
+
+  // Common internal methods for serialization.
+  void begin_serialize_complex(Extensibility extensibility);
+  void end_serialize_complex();
+  void begin_serialize_aggregated_member(unsigned id, bool must_understand, bool optional, bool present);
+
+  void begin_complex(Extensibility extensibility);
   void end_complex();
-  void begin_aggregated_member(bool optional, bool present = true);
+  void begin_aggregated_member(unsigned id, bool must_understand, bool optional, bool present);
+
+  enum OperationMode { SERIALIZATION_SIZE_MODE, SERIALIZATION_MODE };
+
+  OperationMode mode_;
 
   const Encoding& encoding_;
 
@@ -106,6 +140,14 @@ private:
   // type is at index zero. The subsequent values are in the same order as
   // the order that the members are serialized in the byte stream.
   std::vector<size_t> size_cache_;
+
+  // Current position in the size cache from which the size
+  // can be obtained to write to the byte stream.
+  size_t pos_;
+
+  std::stack<Extensibility> nested_extens_;
+
+  Serializer* ser_;
 };
 
 }
