@@ -82,7 +82,7 @@ my %platforminfo =
                                  'specify how the target', 'build should work'],
                     },
    'linux' => {
-               'compilers' => ['g++', 'clang', 'clang++'],
+               'compilers' => ['g++', 'clang++', 'clang'],
                'libpath' => 'LD_LIBRARY_PATH',
                'aceplatform' => 'linux_$NONSTDCOMP', # $NONSTDCOMP = clang
               },
@@ -739,8 +739,9 @@ EOF
     print "Detected Visual C++ version: $opts{'compiler_version'}\n"
       if $opts{'verbose'};
   }
-  elsif ($opts{'compiler'} =~ /g\+\+/) { # GCC or Clang
+  elsif ($opts{'compiler'} =~ /g\+\+|clang/) {
     my $version_string = `$opts{'compiler'} --version`;
+    print "Compiler version: $version_string\n" if $opts{'verbose'};
     if ($opts{'std'}) {
       push(@{$opts{'macros'}}, 'CCFLAGS += -std=' . $opts{'std'});
       print "Added platform_macros for -std=$opts{std}\n" if $opts{'verbose'};
