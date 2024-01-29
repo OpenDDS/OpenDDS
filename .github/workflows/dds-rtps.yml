@@ -49,7 +49,7 @@ jobs:
         cd OpenDDS
         ./configure --optimize --no-debug --static --no-inline
         tools/scripts/show_build_config.pl
-    - uses: ammaraskar/gcc-problem-matcher@0.2.0
+    - uses: ammaraskar/gcc-problem-matcher@0.3.0
     - name: build OpenDDS
       shell: bash
       run: |

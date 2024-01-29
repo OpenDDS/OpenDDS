@@ -185,7 +185,7 @@ jobs:
         cd OpenDDS
         . setenv.sh
         tools/scripts/show_build_config.pl
-    - uses: ammaraskar/gcc-problem-matcher@0.2.0
+    - uses: ammaraskar/gcc-problem-matcher@0.3.0
     - name: build OpenDDS
       shell: bash
       run: |
@@ -373,7 +373,7 @@ jobs:
           --no-debug \
           --features=versioned_namespace=1 \
           --tests
-    - uses: ammaraskar/gcc-problem-matcher@0.2.0
+    - uses: ammaraskar/gcc-problem-matcher@0.3.0
     - name: make OpenDDS
       run: |
         cd OpenDDS
@@ -671,7 +671,7 @@ jobs:
       run: |
         cd OpenDDS
         tar xvfJ ACE_TAO_u22_esafe_js0.tar.xz
-    - uses: ammaraskar/gcc-problem-matcher@0.2.0
+    - uses: ammaraskar/gcc-problem-matcher@0.3.0
     - name: build OpenDDS_Util lib and opendds_idl in host
       shell: bash
       run: |
@@ -999,7 +999,7 @@ jobs:
       run: |
         cd OpenDDS
         tar xvfJ ACE_TAO_u22_bsafe_js0_FM-1f.tar.xz
-    - uses: ammaraskar/gcc-problem-matcher@0.2.0
+    - uses: ammaraskar/gcc-problem-matcher@0.3.0
     - name: build OpenDDS_Util lib and opendds_idl in host
       shell: bash
       run: |
@@ -1292,7 +1292,7 @@ jobs:
         cd OpenDDS
         . setenv.sh
         tools/scripts/show_build_config.pl
-    - uses: ammaraskar/gcc-problem-matcher@0.2.0
+    - uses: ammaraskar/gcc-problem-matcher@0.3.0
     - name: build OpenDDS
       shell: bash
       run: |
@@ -1592,7 +1592,7 @@ jobs:
         cd OpenDDS
         . setenv.sh
         tools/scripts/show_build_config.pl
-    - uses: ammaraskar/gcc-problem-matcher@0.2.0
+    - uses: ammaraskar/gcc-problem-matcher@0.3.0
     - name: build OpenDDS
       shell: bash
       run: |
@@ -1893,7 +1893,7 @@ jobs:
         cd OpenDDS
         . setenv.sh
         tools/scripts/show_build_config.pl
-    - uses: ammaraskar/gcc-problem-matcher@0.2.0
+    - uses: ammaraskar/gcc-problem-matcher@0.3.0
     - name: build OpenDDS
       shell: bash
       run: |
@@ -2194,7 +2194,7 @@ jobs:
         cd OpenDDS
         . setenv.sh
         tools/scripts/show_build_config.pl
-    - uses: ammaraskar/gcc-problem-matcher@0.2.0
+    - uses: ammaraskar/gcc-problem-matcher@0.3.0
     - name: build OpenDDS
       shell: bash
       run: |
@@ -2484,7 +2484,7 @@ jobs:
         cd OpenDDS
         . setenv.sh
         tools/scripts/show_build_config.pl
-    - uses: ammaraskar/gcc-problem-matcher@0.2.0
+    - uses: ammaraskar/gcc-problem-matcher@0.3.0
     - name: build OpenDDS
       shell: bash
       run: |
@@ -2762,7 +2762,7 @@ jobs:
         cd OpenDDS
         . setenv.sh
         tools/scripts/show_build_config.pl
-    - uses: ammaraskar/gcc-problem-matcher@0.2.0
+    - uses: ammaraskar/gcc-problem-matcher@0.3.0
     - name: build OpenDDS
       shell: bash
       run: |
@@ -3086,7 +3086,7 @@ jobs:
       run: |
         cd OpenDDS
         tar xvfJ ACE_TAO_u20_gcc10_bsafe_js0_FM-2c.tar.xz
-    - uses: ammaraskar/gcc-problem-matcher@0.2.0
+    - uses: ammaraskar/gcc-problem-matcher@0.3.0
     - name: build OpenDDS_Util lib and opendds_idl in host
       shell: bash
       run: |
@@ -3252,7 +3252,7 @@ jobs:
         cd OpenDDS
         . setenv.sh
         tools/scripts/show_build_config.pl
-    - uses: ammaraskar/gcc-problem-matcher@0.2.0
+    - uses: ammaraskar/gcc-problem-matcher@0.3.0
     - name: build OpenDDS
       shell: bash
       run: |
@@ -3569,7 +3569,7 @@ jobs:
         cd OpenDDS
         . setenv.sh
         tools/scripts/show_build_config.pl
-    - uses: ammaraskar/gcc-problem-matcher@0.2.0
+    - uses: ammaraskar/gcc-problem-matcher@0.3.0
     - name: build OpenDDS
       shell: bash
       run: |
@@ -3870,7 +3870,7 @@ jobs:
         cd OpenDDS
         . setenv.sh
         tools/scripts/show_build_config.pl
-    - uses: ammaraskar/gcc-problem-matcher@0.2.0
+    - uses: ammaraskar/gcc-problem-matcher@0.3.0
     - name: build OpenDDS
       shell: bash
       run: |
@@ -4169,7 +4169,7 @@ jobs:
         cd OpenDDS
         . setenv.sh
         tools/scripts/show_build_config.pl
-    - uses: ammaraskar/gcc-problem-matcher@0.2.0
+    - uses: ammaraskar/gcc-problem-matcher@0.3.0
     - name: build OpenDDS
       shell: bash
       run: |
@@ -4481,7 +4481,7 @@ jobs:
         cd OpenDDS
         . setenv.sh
         tools/scripts/show_build_config.pl
-    - uses: ammaraskar/gcc-problem-matcher@0.2.0
+    - uses: ammaraskar/gcc-problem-matcher@0.3.0
     - name: build OpenDDS
       shell: bash
       run: |
@@ -4836,7 +4836,7 @@ jobs:
         cd OpenDDS
         . setenv.sh
         tools/scripts/show_build_config.pl
-    - uses: ammaraskar/gcc-problem-matcher@0.2.0
+    - uses: ammaraskar/gcc-problem-matcher@0.3.0
     - name: build OpenDDS
       shell: bash
       run: |
@@ -5137,7 +5137,7 @@ jobs:
         cd OpenDDS
         . setenv.sh
         tools/scripts/show_build_config.pl
-    - uses: ammaraskar/gcc-problem-matcher@0.2.0
+    - uses: ammaraskar/gcc-problem-matcher@0.3.0
     - name: build OpenDDS
       shell: bash
       run: |
@@ -5344,7 +5344,7 @@ jobs:
         cd OpenDDS
         . setenv.sh
         tools/scripts/show_build_config.pl
-    - uses: ammaraskar/gcc-problem-matcher@0.2.0
+    - uses: ammaraskar/gcc-problem-matcher@0.3.0
     - name: build OpenDDS
       shell: bash
       run: |
@@ -5650,7 +5650,7 @@ jobs:
         cd OpenDDS
         . setenv.sh
         tools/scripts/show_build_config.pl
-    - uses: ammaraskar/gcc-problem-matcher@0.2.0
+    - uses: ammaraskar/gcc-problem-matcher@0.3.0
     - name: build OpenDDS
       shell: bash
       run: |
@@ -5748,7 +5748,7 @@ jobs:
         sudo sysctl -w kernel.core_pattern=core.%e.%p
         echo Core file pattern set to:
         cat /proc/sys/kernel/core_pattern
-    - uses: ammaraskar/gcc-problem-matcher@0.2.0
+    - uses: ammaraskar/gcc-problem-matcher@0.3.0
     - name: Build CMake Tests
       run: |
         source OpenDDS/setenv.sh
@@ -5912,7 +5912,7 @@ jobs:
         . setenv.sh
         cd tests/DCPS/Messenger
         perl $ACE_ROOT/bin/mwc.pl -type gnuace -static
-    - uses: ammaraskar/gcc-problem-matcher@0.2.0
+    - uses: ammaraskar/gcc-problem-matcher@0.3.0
     - name: make messenger tests
       shell: bash
       run: |
@@ -6089,7 +6089,7 @@ jobs:
         . setenv.sh
         cd tests/DCPS/Compiler
         perl $ACE_ROOT/bin/mwc.pl -type gnuace -static
-    - uses: ammaraskar/gcc-problem-matcher@0.2.0
+    - uses: ammaraskar/gcc-problem-matcher@0.3.0
     - name: make compiler tests
       shell: bash
       run: |
@@ -6252,7 +6252,7 @@ jobs:
         . setenv.sh
         cd tests/unit-tests
         perl $ACE_ROOT/bin/mwc.pl -type gnuace -static
-    - uses: ammaraskar/gcc-problem-matcher@0.2.0
+    - uses: ammaraskar/gcc-problem-matcher@0.3.0
     - name: make unit tests
       shell: bash
       run: |
@@ -6406,7 +6406,7 @@ jobs:
         . setenv.sh
         cd tests/security/attributes
         perl $ACE_ROOT/bin/mwc.pl -type gnuace -static
-    - uses: ammaraskar/gcc-problem-matcher@0.2.0
+    - uses: ammaraskar/gcc-problem-matcher@0.3.0
     - name: build security tests
       shell: bash
       run: |
@@ -6595,7 +6595,7 @@ jobs:
         cd OpenDDS
         . setenv.sh
         tools/scripts/show_build_config.pl
-    - uses: ammaraskar/gcc-problem-matcher@0.2.0
+    - uses: ammaraskar/gcc-problem-matcher@0.3.0
     - name: build OpenDDS
       shell: bash
       run: |
@@ -12220,7 +12220,7 @@ jobs:
         cd OpenDDS
         . setenv.sh
         tools/scripts/show_build_config.pl
-    - uses: ammaraskar/gcc-problem-matcher@0.2.0
+    - uses: ammaraskar/gcc-problem-matcher@0.3.0
     - name: build OpenDDS
       shell: bash
       run: |
@@ -12535,7 +12535,7 @@ jobs:
         cd OpenDDS
         . setenv.sh
         tools/scripts/show_build_config.pl
-    - uses: ammaraskar/gcc-problem-matcher@0.2.0
+    - uses: ammaraskar/gcc-problem-matcher@0.3.0
     - name: build OpenDDS
       shell: bash
       run: |
@@ -12943,7 +12943,7 @@ jobs:
         cd OpenDDS
         . setenv.sh
         tools/scripts/show_build_config.pl
-    - uses: ammaraskar/gcc-problem-matcher@0.2.0
+    - uses: ammaraskar/gcc-problem-matcher@0.3.0
     - name: build OpenDDS
       shell: bash
       run: |
@@ -13346,7 +13346,7 @@ jobs:
         cd OpenDDS
         . setenv.sh
         tools/scripts/show_build_config.pl
-    - uses: ammaraskar/gcc-problem-matcher@0.2.0
+    - uses: ammaraskar/gcc-problem-matcher@0.3.0
     - name: build OpenDDS
       shell: bash
       run: |
@@ -13647,7 +13647,7 @@ jobs:
       with:
         path: OpenDDS
         submodules: true
-    - uses: ammaraskar/gcc-problem-matcher@0.2.0
+    - uses: ammaraskar/gcc-problem-matcher@0.3.0
     - name: Build
       run: cd OpenDDS && docker build -f .github/workflows/build_u14_gcc4.Dockerfile .
 
@@ -13777,7 +13777,7 @@ jobs:
           -DOPENDDS_MPC=$GITHUB_WORKSPACE/MPC \
           -DOPENDDS_BUILD_TESTS=TRUE \
           -DOPENDDS_CMAKE_VERBOSE=all
-    - uses: ammaraskar/gcc-problem-matcher@0.2.0
+    - uses: ammaraskar/gcc-problem-matcher@0.3.0
     - name: Build
       run: |
         cd OpenDDS
@@ -13818,7 +13818,7 @@ jobs:
           -DOPENDDS_MPC=$GITHUB_WORKSPACE/MPC \
           -DOPENDDS_BUILD_TESTS=TRUE \
           -DOPENDDS_CMAKE_VERBOSE=all
-    - uses: ammaraskar/gcc-problem-matcher@0.2.0
+    - uses: ammaraskar/gcc-problem-matcher@0.3.0
     - name: Build
       run: |
         cd OpenDDS
@@ -13867,7 +13867,7 @@ jobs:
           -DOPENDDS_OWNERSHIP_PROFILE=FALSE \
           -DOPENDDS_CONTENT_SUBSCRIPTION=FALSE \
           -DOPENDDS_CMAKE_VERBOSE=all
-    - uses: ammaraskar/gcc-problem-matcher@0.2.0
+    - uses: ammaraskar/gcc-problem-matcher@0.3.0
     - name: Build
       run: |
         cd OpenDDS
@@ -13911,7 +13911,7 @@ jobs:
           -G Ninja \
           -DBUILD_SHARED_LIBS=FALSE \
           -DOPENDDS_JUST_BUILD_HOST_TOOLS=TRUE
-    - uses: ammaraskar/gcc-problem-matcher@0.2.0
+    - uses: ammaraskar/gcc-problem-matcher@0.3.0
     - name: Build Host Tools
       run: |
         cd OpenDDS
