@@ -322,8 +322,8 @@ DCPS::NetworkAddress
 RtpsDiscoveryConfig::sedp_local_address() const
 {
   return TheServiceParticipant->config_store()->get(config_key("SEDP_LOCAL_ADDRESS").c_str(),
-                                                    DCPS::NetworkAddress::default_IPV4,
-                                                    DCPS::ConfigStoreImpl::Format_Required_Port,
+                                                    TheServiceParticipant->default_address(),
+                                                    DCPS::ConfigStoreImpl::Format_Optional_Port,
                                                     DCPS::ConfigStoreImpl::Kind_IPV4);
 }
 
@@ -332,7 +332,7 @@ RtpsDiscoveryConfig::sedp_local_address(const DCPS::NetworkAddress& mi)
 {
   TheServiceParticipant->config_store()->set(config_key("SEDP_LOCAL_ADDRESS").c_str(),
                                              mi,
-                                             DCPS::ConfigStoreImpl::Format_Required_Port,
+                                             DCPS::ConfigStoreImpl::Format_Optional_Port,
                                              DCPS::ConfigStoreImpl::Kind_IPV4);
 }
 
@@ -357,11 +357,8 @@ RtpsDiscoveryConfig::sedp_advertised_local_address(const DCPS::NetworkAddress& m
 DCPS::NetworkAddress
 RtpsDiscoveryConfig::spdp_local_address() const
 {
-  const DCPS::NetworkAddress d1(TheServiceParticipant->default_address());
-  const DCPS::NetworkAddress d2("0.0.0.0:0");
-
   return TheServiceParticipant->config_store()->get(config_key("SPDP_LOCAL_ADDRESS").c_str(),
-                                                    d1 ? d1 : d2,
+                                                    TheServiceParticipant->default_address(),
                                                     DCPS::ConfigStoreImpl::Format_Optional_Port,
                                                     DCPS::ConfigStoreImpl::Kind_IPV4);
 }
