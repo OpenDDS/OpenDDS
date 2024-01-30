@@ -22,15 +22,14 @@ public:
 
   void begin_struct(Extensibility extensibility);
   void end_struct();
-  void begin_struct_member(unsigned id, bool must_understand,
-                           const char* name, bool optional = false, bool present = true);
+  void begin_struct_member(VWriterMemberParam params);
   void end_struct_member();
 
   void begin_union(Extensibility extensibility);
   void end_union();
-  void begin_discriminator();
+  void begin_discriminator(VWriterMemberParam params);
   void end_discriminator();
-  void begin_union_member(const char* name, bool optional = false, bool present = true);
+  void begin_union_member(VWriterMemberParam params);
   void end_union_member();
 
   void begin_array(XTypes::TypeKind elem_kind);
@@ -86,7 +85,7 @@ private:
   enum CollectionKind { SEQUENCE_KIND, ARRAY_KIND, NOT_COLLECTION_KIND };
 
   // Common internal methods for computing serialized sizes.
-  void begin_ssize_complex(Extensibility extensiblity, CollectionKind coll_kind = NOT_COLLECTION_KIND);
+  void begin_ssize_complex(Extensibility extensiblity, CollectionKind ck);
   void end_ssize_complex();
   void begin_ssize_aggregated_member(bool optional, bool present);
 
@@ -95,7 +94,7 @@ private:
   void end_serialize_complex();
   void begin_serialize_aggregated_member(unsigned id, bool must_understand, bool optional, bool present);
 
-  void begin_complex(Extensibility extensibility);
+  void begin_complex(Extensibility extensibility, CollectionKind ck = NOT_COLLECTION_KIND);
   void end_complex();
   void begin_aggregated_member(unsigned id, bool must_understand, bool optional, bool present);
 

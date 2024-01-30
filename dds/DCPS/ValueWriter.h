@@ -25,6 +25,47 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
+struct VWriterMemberParam {
+  VWriterMemberParam()
+    : id()
+    , must_understand(0)
+    , name(0)
+    , optional(false)
+    , present(true)
+  {}
+
+  VWriterMemberParam(unsigned m_id, bool m_must_understand)
+    : id(m_id)
+    , must_understand(m_must_understand)
+    , name(0)
+    , optional(false)
+    , present(true)
+  {}
+
+  VWriterMemberParam(const char* m_name)
+    : id(0)
+    , must_understand(false)
+    , name(m_name)
+    , optional(false)
+    , present(true)
+  {}
+
+  VWriterMemberParam(unsigned m_id, bool m_must_understand,
+                     const char* m_name, bool m_optional, bool m_present)
+    : id(m_id)
+    , must_understand(m_must_understand)
+    , name(m_name)
+    , optional(m_optional)
+    , present(m_present)
+  {}
+
+  unsigned id;
+  bool must_understand;
+  const char* name;
+  bool optional;
+  bool present;
+};
+
 /// A ValueWriter receives events and values from the recitation of a
 /// value.  Typical examples of value recitation are serializing an
 /// object for transmission, formatting an object for printing, or
@@ -43,14 +84,14 @@ public:
 
   virtual void begin_struct(Extensibility /*extensibility*/) {}
   virtual void end_struct() {}
-  virtual void begin_struct_member(const char* /*name*/, bool /*optional*/, bool /*present*/) {}
+  virtual void begin_struct_member(VWriterMemberParam /*params*/) {}
   virtual void end_struct_member() {}
 
   virtual void begin_union(Extensibility /*extensibility*/) {}
   virtual void end_union() {}
-  virtual void begin_discriminator() {}
+  virtual void begin_discriminator(VWriterMemberParam /*params*/) {}
   virtual void end_discriminator() {}
-  virtual void begin_union_member(const char* /*name*/, bool /*optional*/, bool /*present*/) {}
+  virtual void begin_union_member(VWriterMemberParam /*params*/) {}
   virtual void end_union_member() {}
 
   virtual void begin_array(XTypes::TypeKind /*elem_kind*/) {}

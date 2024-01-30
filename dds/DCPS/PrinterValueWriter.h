@@ -38,14 +38,14 @@ public:
 
   void begin_struct(Extensibility extensibility = FINAL);
   void end_struct();
-  void begin_struct_member(const char* name, bool optional = false, bool present = true);
+  void begin_struct_member(VWriterMemberParam params);
   void end_struct_member();
 
   void begin_union(Extensibility extensibility = FINAL);
   void end_union();
-  void begin_discriminator();
+  void begin_discriminator(VWriterMemberParam params);
   void end_discriminator();
-  void begin_union_member(const char* name, bool optional = false, bool present = true);
+  void begin_union_member(VWriterMemberParam params);
   void end_union_member();
 
   void begin_array(XTypes::TypeKind elem_tk = XTypes::TK_NONE);
@@ -110,9 +110,9 @@ void PrinterValueWriter::end_struct()
   current_indent_ -= indent_;
 }
 
-void PrinterValueWriter::begin_struct_member(const char* name, bool /*optional*/, bool /*present*/)
+void PrinterValueWriter::begin_struct_member(VWriterMemberParam params)
 {
-  stream_ << newline() << std::string(current_indent_, ' ') << name << ": ";
+  stream_ << newline() << std::string(current_indent_, ' ') << params.name << ": ";
   at_newline_ = false;
 }
 
@@ -129,7 +129,7 @@ void PrinterValueWriter::end_union()
   current_indent_ -= indent_;
 }
 
-void PrinterValueWriter::begin_discriminator()
+void PrinterValueWriter::begin_discriminator(VWriterMemberParam /*params*/)
 {
   stream_ << newline() << std::string(current_indent_, ' ') << "$discriminator: ";
   at_newline_ = false;
@@ -138,9 +138,9 @@ void PrinterValueWriter::begin_discriminator()
 void PrinterValueWriter::end_discriminator()
 {}
 
-void PrinterValueWriter::begin_union_member(const char* name, bool /*optional*/, bool /*present*/)
+void PrinterValueWriter::begin_union_member(VWriterMemberParam params)
 {
-  stream_ << newline() << std::string(current_indent_, ' ') << name << ": ";
+  stream_ << newline() << std::string(current_indent_, ' ') << params.name << ": ";
   at_newline_ = false;
 }
 

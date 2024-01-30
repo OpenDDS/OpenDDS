@@ -184,10 +184,10 @@ void Xcdr2ValueWriter::begin_serialize_aggregated_member(unsigned id, bool must_
   }
 }
 
-void Xcdr2ValueWriter::begin_complex(Extensibility extensibility)
+void Xcdr2ValueWriter::begin_complex(Extensibility extensibility, CollectionKind ck)
 {
   if (mode_ == SERIALIZATION_SIZE_MODE) {
-    begin_ssize_complex(extensibility);
+    begin_ssize_complex(extensibility, ck);
   } else {
     begin_serialize_complex(extensibility);
   }
@@ -222,10 +222,9 @@ void Xcdr2ValueWriter::end_struct()
   end_complex();
 }
 
-void Xcdr2ValueWriter::begin_struct_member(unsigned id, bool must_understand,
-                                           const char* /*name*/, bool optional, bool present)
+void Xcdr2ValueWriter::begin_struct_member(VWriterMemberParam params)
 {
-  begin_aggregated_member(id, must_understand, optional, present);
+  begin_aggregated_member(params.id, params.must_understand, params.optional, params.present);
 }
 
 void Xcdr2ValueWriter::end_struct_member()
@@ -243,9 +242,9 @@ void Xcdr2ValueWriter::end_union()
   end_complex();
 }
 
-void Xcdr2ValueWriter::begin_discriminator(unsigned id, bool must_understand)
+void Xcdr2ValueWriter::begin_discriminator(VWriterMemberParam params)
 {
-  begin_aggregated_member(id, must_understand, false);
+  begin_aggregated_member(params.id, params.must_understand, params.optional, params.present);
 }
 
 void Xcdr2ValueWriter::end_discriminator()
@@ -253,11 +252,10 @@ void Xcdr2ValueWriter::end_discriminator()
   return;
 }
 
-void Xcdr2ValueWriter::begin_union_member(unsigned id, bool must_understand,
-                                          const char* /*name*/, bool optional, bool present)
+void Xcdr2ValueWriter::begin_union_member(VWriterMemberParam params)
 
 {
-  begin_aggregated_member(id, must_understand, optional, present);
+  begin_aggregated_member(params.id, params.must_understand, params.optional, params.present);
 }
 
 void Xcdr2ValueWriter::end_union_member()

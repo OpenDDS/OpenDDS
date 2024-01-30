@@ -45,14 +45,14 @@ public:
 
   void begin_struct(Extensibility extensibility = FINAL);
   void end_struct();
-  void begin_struct_member(const char* name, bool optional = false, bool present = true);
+  void begin_struct_member(VWriterMemberParam params);
   void end_struct_member();
 
   void begin_union(Extensibility extensibility = FINAL);
   void end_union();
-  void begin_discriminator();
+  void begin_discriminator(VWriterMemberParam params);
   void end_discriminator();
-  void begin_union_member(const char* name, bool optional = false, bool present = true);
+  void begin_union_member(VWriterMemberParam params);
   void end_union_member();
 
   void begin_array(XTypes::TypeKind elem_kind = XTypes::TK_NONE);
@@ -102,9 +102,9 @@ void JsonValueWriter<Writer>::end_struct()
 }
 
 template <typename Writer>
-void JsonValueWriter<Writer>::begin_struct_member(const char* name, bool /*optional*/, bool /*present*/)
+void JsonValueWriter<Writer>::begin_struct_member(VWriterMemberParam params)
 {
-  writer_.Key(name);
+  writer_.Key(params.name);
 }
 
 template <typename Writer>
@@ -124,7 +124,7 @@ void JsonValueWriter<Writer>::end_union()
 }
 
 template <typename Writer>
-void JsonValueWriter<Writer>::begin_discriminator()
+void JsonValueWriter<Writer>::begin_discriminator(VWriterMemberParam)
 {
   writer_.Key("$discriminator");
 }
@@ -134,9 +134,9 @@ void JsonValueWriter<Writer>::end_discriminator()
 {}
 
 template <typename Writer>
-void JsonValueWriter<Writer>::begin_union_member(const char* name, bool /*optional*/, bool /*present*/)
+void JsonValueWriter<Writer>::begin_union_member(VWriterMemberParam params)
 {
-  writer_.Key(name);
+  writer_.Key(params.name);
 }
 
 template <typename Writer>

@@ -254,8 +254,11 @@ namespace {
                             const std::string&)
   {
     // TODO: Update the arguments when @optional is available.
+    const OpenDDS::XTypes::MemberId id = be_global->get_id(dynamic_cast<AST_UnionBranch*>(branch));
+    const bool must_understand = be_global->is_effectively_must_understand(branch);
     be_global->impl_ <<
-      "    value_writer.begin_union_member(\"" << canonical_name(branch) << "\", false, true);\n";
+      "    value_writer.begin_union_member(VWriterMemberParam(" << id << ", " <<
+      (must_understand ? "true" : "false") << ", \"" << canonical_name(branch) << "\", false, true));\n";
     generate_write("value." + field_name + "()", type, "i", 2);
     be_global->impl_ <<
       "    value_writer.end_union_member();\n";
@@ -349,8 +352,11 @@ bool value_writer_generator::gen_struct(AST_Structure* node,
       const std::string field_name = field->local_name()->get_string();
       const std::string idl_name = canonical_name(field);
       // TODO: Update the arguments when @optional is available.
+      const OpenDDS::XTypes::MemberId id = be_global->get_id(field);
+      const bool must_understand = be_global->is_effectively_must_understand(field);
       be_global->impl_ <<
-        "  value_writer.begin_struct_member(\"" << idl_name << "\", false, true);\n";
+        "  value_writer.begin_struct_member(VWriterMemberParam(" << id << ", " <<
+        (must_understand ? "true" : "false") << ", \"" << idl_name << "\", false, true));\n";
       generate_write("value." + field_name + accessor_suffix, field->field_type(), "i");
       be_global->impl_ <<
         "  value_writer.end_struct_member();\n";
@@ -383,8 +389,10 @@ bool value_writer_generator::gen_union(AST_Union* u,
 
     const ExtensibilityKind ek = be_global->extensibility(u);
     be_global->impl_ << "  value_writer.begin_union(" << extensibility_kind(ek) << ");\n";
+    const bool must_understand = be_global->is_effectively_must_understand(discriminator);
     be_global->impl_ <<
-      "  value_writer.begin_discriminator();\n";
+      "  value_writer.begin_discriminator(VWriterMemberParam(0, " <<
+      (must_understand ? "true" : "false") << "));\n";
     generate_write("value._d()" , discriminator, "i");
     be_global->impl_ <<
       "  value_writer.end_discriminator();\n";

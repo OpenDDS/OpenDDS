@@ -51,19 +51,19 @@ void
 vwrite(ValueWriter& vw, const Observer::Sample& sample)
 {
   vw.begin_struct(FINAL);
-  vw.begin_struct_member("instance", false, true);
+  vw.begin_struct_member(VWriterMemberParam("instance"));
   vw.write_int32(sample.instance);
   vw.end_struct_member();
-  vw.begin_struct_member("instance_state", false, true);
+  vw.begin_struct_member(VWriterMemberParam("instance_state"));
   vw.write_uint32(sample.instance_state);
   vw.end_struct_member();
-  vw.begin_struct_member("timestamp", false, true);
+  vw.begin_struct_member(VWriterMemberParam("timestamp"));
   vwrite(vw, sample.timestamp);
   vw.end_struct_member();
-  vw.begin_struct_member("sequence_number", false, true);
+  vw.begin_struct_member(VWriterMemberParam("sequence_number"));
   vw.write_int64(sample.sequence_number.getValue());
   vw.end_struct_member();
-  vw.begin_struct_member("data", false, true);
+  vw.begin_struct_member(VWriterMemberParam("data"));
   sample.data_dispatcher.write(vw, sample.data);
   vw.end_struct_member();
   vw.end_struct();

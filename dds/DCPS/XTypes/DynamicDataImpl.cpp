@@ -6303,8 +6303,10 @@ void vwrite_struct(ValueWriter& vw, DDS::DynamicData_ptr value, const DDS::Dynam
       return;
     }
 
-    // TODO(sonndinh): Update the argument to begin_struct_member
-    vw.begin_struct_member(md->name(), md->is_optional(), true);
+    // TODO(sonndinh): Update the argument to begin_struct_member as the member can be missing optional
+    VWriterMemberParam params(md->id(), md->is_must_understand() || md->is_key(),
+                              md->name(), md->is_optional(), true);
+    vw.begin_struct_member(params);
     vwrite_member(vw, value, md);
     vw.end_struct_member();
   }
@@ -6507,7 +6509,10 @@ void vwrite_union(ValueWriter& vw, DDS::DynamicData_ptr value, const DDS::Dynami
     }
     return;
   }
-  vw.begin_discriminator();
+  // Discriminator Id is always 0?
+  VWriterMemberParam params(0, disc_md->is_must_understand() || disc_md->is_key(),
+                            disc_md->name(), disc_md->is_optional(), true);
+  vw.begin_discriminator(params);
   CORBA::Long disc_val = 0;
   vwrite_discriminator(vw, value, disc_md, disc_val);
   vw.end_discriminator();
@@ -6524,8 +6529,10 @@ void vwrite_union(ValueWriter& vw, DDS::DynamicData_ptr value, const DDS::Dynami
     return;
   }
   if (has_branch) {
-    // TODO(sonndinh): Update the argument to begin_union_member.
-    vw.begin_union_member(selected_md->name(), selected_md->is_optional(), true);
+    // TODO(sonndinh): Update the argument to begin_union_member as the member can be missing optional
+    VWriterMemberParam params(selected_md->id(), selected_md->is_must_understand() || selected_md->is_key(),
+                              selected_md->name(), selected_md->is_optional(), true);
+    vw.begin_union_member(params);
     vwrite_member(vw, value, selected_md);
     vw.end_union_member();
   }
