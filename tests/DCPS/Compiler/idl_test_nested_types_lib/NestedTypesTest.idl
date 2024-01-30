@@ -47,4 +47,22 @@ module NestedTypesTest {
   struct TypedefStructKeyStruct {
     MyStructTypedef my_struct_typedef_key;
   };
+
+  enum msgType_t {
+    val1,
+    val2
+  };
+
+  union msgUnion_t switch (msgType_t) {
+    case val1:
+      string someString;
+    case val2:
+      float someFloat;
+  };
+
+  @topic
+  struct Message {
+    @key long subject_id;
+    msgUnion_t msgUnion;
+  };
 };
