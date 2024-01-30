@@ -61,7 +61,7 @@ TEST(dds_DCPS_PrinterValueWriter, begin_discriminator)
 {
   PrinterValueWriter pvw;
   pvw.begin_union();
-  pvw.begin_discriminator(VWriterMembeParam());
+  pvw.begin_discriminator(VWriterMemberParam());
   pvw.write_int16(5);
   EXPECT_STREQ(pvw.str().c_str(), "    $discriminator: 5");
 }
