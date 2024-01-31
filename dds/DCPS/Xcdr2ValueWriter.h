@@ -108,8 +108,8 @@ private:
 
   // Maintain the states necessary to compute and cache the sizes of
   // the top-level type or its nested members.
-  struct Metadata {
-    Metadata(Extensibility exten, CollectionKind ck)
+  struct SerializedSizeState {
+    SerializedSizeState(Extensibility exten, CollectionKind ck)
       : extensibility(exten)
       , total_size(0)
       , mutable_running_total(0)
@@ -133,7 +133,7 @@ private:
     size_t cache_pos;
   };
 
-  std::stack<Metadata> state_;
+  std::stack<SerializedSizeState> size_states_;
 
   // Record the total size of the top-level type and its members if needed.
   // The size of a member is only recorded if it is required by a header,
