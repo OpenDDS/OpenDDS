@@ -57,7 +57,7 @@ public:
 
   void begin_array(XTypes::TypeKind elem_kind = XTypes::TK_NONE);
   void end_array();
-  void begin_sequence(XTypes::TypeKind elem_kind = XTypes::TK_NONE);
+  void begin_sequence(XTypes::TypeKind elem_kind = XTypes::TK_NONE, ACE_CDR::ULong length = 0);
   void end_sequence();
   void begin_element(size_t idx);
   void end_element();
@@ -156,7 +156,7 @@ void JsonValueWriter<Writer>::end_array()
 }
 
 template <typename Writer>
-void JsonValueWriter<Writer>::begin_sequence(XTypes::TypeKind /*elem_tk*/)
+void JsonValueWriter<Writer>::begin_sequence(XTypes::TypeKind /*elem_tk*/, ACE_CDR::ULong /*length*/)
 {
   writer_.StartArray();
 }

@@ -96,7 +96,7 @@ public:
 
   virtual void begin_array(XTypes::TypeKind /*elem_kind*/) {}
   virtual void end_array() {}
-  virtual void begin_sequence(XTypes::TypeKind /*elem_kind*/) {}
+  virtual void begin_sequence(XTypes::TypeKind /*elem_kind*/, ACE_CDR::ULong /*length*/) {}
   virtual void end_sequence() {}
   virtual void begin_element(size_t /*idx*/) {}
   virtual void end_element() {}

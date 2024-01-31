@@ -123,7 +123,8 @@ void Xcdr2ValueWriter::begin_ssize_aggregated_member(bool optional, bool present
   }
 }
 
-void Xcdr2ValueWriter::begin_serialize_complex(Extensibility extensibility)
+void Xcdr2ValueWriter::begin_serialize_complex(Extensibility extensibility, CollectionKind ck,
+                                               ACE_CDR::ULong seq_length)
 {
   if (!ser_) {
     if (log_level >= LogLevel::Warning) {
@@ -133,8 +134,13 @@ void Xcdr2ValueWriter::begin_serialize_complex(Extensibility extensibility)
     return;
   }
 
-  if (!nested_extens_.empty()) {
-    const Extensibility enclosing_ek = nested_extens_.top();
+  if (serialize_states_.empty() && extensibility == FINAL) {
+    // The first entry is the total size and does not correspond to any header.
+    ++pos_;
+  }
+
+  if (!serialize_states_.empty()) {
+    const Extensibility enclosing_ek = serialize_states_.top().extensibility;
     if (extensibility == APPENDABLE || extensibility == MUTABLE) {
       if (enclosing_ek == MUTABLE) {
         // The same size is used for both the member header of the enclosing mutable type
@@ -159,22 +165,26 @@ void Xcdr2ValueWriter::begin_serialize_complex(Extensibility extensibility)
     ++pos_;
   }
 
-  nested_extens_.push(extensibility);
+  if (ck == SEQUENCE_KIND) {
+    *ser_ << seq_length;
+  }
+
+  serialize_states_.push(SerializeState(extensibility, ck));
 }
 
 void Xcdr2ValueWriter::end_serialize_complex()
 {
-  if (nested_extens_.top() == MUTABLE) {
+  if (serialize_states_.top().extensibility == MUTABLE) {
     ser_->write_list_end_parameter_id();
   }
-  nested_extens_.pop();
+  serialize_states_.pop();
 }
 
 void Xcdr2ValueWriter::begin_serialize_aggregated_member(unsigned id, bool must_understand,
                                                          bool optional, bool present)
 
 {
-  const Extensibility extensibility = nested_extens_.top();
+  const Extensibility extensibility = serialize_states_.top().extensibility;
   if (optional && (extensibility == FINAL || extensibility == APPENDABLE)) {
     *ser_ << ACE_OutputCDR::from_boolean(present);
   }
@@ -184,12 +194,12 @@ void Xcdr2ValueWriter::begin_serialize_aggregated_member(unsigned id, bool must_
   }
 }
 
-void Xcdr2ValueWriter::begin_complex(Extensibility extensibility, CollectionKind ck)
+void Xcdr2ValueWriter::begin_complex(Extensibility extensibility, CollectionKind ck, ACE_CDR::ULong seq_length)
 {
   if (mode_ == SERIALIZATION_SIZE_MODE) {
     begin_ssize_complex(extensibility, ck);
   } else {
-    begin_serialize_complex(extensibility);
+    begin_serialize_complex(extensibility, ck, seq_length);
   }
 }
 
@@ -268,18 +278,24 @@ void Xcdr2ValueWriter::end_union_member()
 // If the element type is not primitive, it is similar to appendable struct with Dheader.
 void Xcdr2ValueWriter::begin_array(XTypes::TypeKind elem_tk)
 {
-  // TODO(sonndinh): make sure this works for both of these cases:
+  // TODO(sonndinh): Make sure this works for both of these cases:
   // 1. Multidim array of non-primitive types: e.g. StructA[2][3]
   // 2. Array of a type which is an array of a non primitive type: e.g. TypeA[2] where
   //    TypeA is StructA[3].
-  // Binary representation for objects of these types are different?
   // The current code seems to work with the first case but not the second?
 
   Extensibility arr_exten = FINAL;
   // In case the element type is not primitive, account for the Dheader only when this is
   // called for the outermost dimension of the array.
-  if (state_.top().collection_kind != ARRAY_KIND && !XTypes::is_primitive(elem_tk)) {
-    arr_exten = APPENDABLE;
+  const bool primitive_elem_kind = XTypes::is_primitive(elem_tk);
+  if (mode_ == SERIALIZATION_SIZE_MODE) {
+    if (state_.top().collection_kind != ARRAY_KIND && !primitive_elem_kind) {
+      arr_exten = APPENDABLE;
+    }
+  } else {
+    if (serialize_states_.top().collection_kind != ARRAY_KIND && !primitive_elem_kind) {
+      arr_exten = APPENDABLE;
+    }
   }
 
   begin_complex(arr_exten, ARRAY_KIND);
@@ -295,14 +311,14 @@ void Xcdr2ValueWriter::end_array()
 // If element type is not primitive, it can be treated as appendable struct which has Dheader.
 // In both case, elements are serialized back-to-back similarly to final/appendable struct.
 // One difference is that sequence has length ahead of all the elements.
-void Xcdr2ValueWriter::begin_sequence(XTypes::TypeKind elem_tk)
+void Xcdr2ValueWriter::begin_sequence(XTypes::TypeKind elem_tk, ACE_CDR::ULong length)
 {
   Extensibility seq_exten = FINAL;
   if (!XTypes::is_primitive(elem_tk)) {
     seq_exten = APPENDABLE;
   }
 
-  begin_complex(seq_exten, SEQUENCE_KIND);
+  begin_complex(seq_exten, SEQUENCE_KIND, length);
 }
 
 void Xcdr2ValueWriter::end_sequence()

@@ -6620,8 +6620,9 @@ void vwrite_sequence(ValueWriter& vw, DDS::DynamicData_ptr value, const DDS::Dyn
   }
   DDS::DynamicType_var elem_type = XTypes::get_base_type(td->element_type());
 
-  vw.begin_sequence(elem_type->get_kind());
-  for (CORBA::ULong i = 0; i < value->get_item_count(); ++i) {
+  const CORBA::ULong length = value->get_item_count();
+  vw.begin_sequence(elem_type->get_kind(), length);
+  for (CORBA::ULong i = 0; i < length; ++i) {
     vw.begin_element(i);
     vwrite_element(vw, value, elem_type, i);
     vw.end_element();

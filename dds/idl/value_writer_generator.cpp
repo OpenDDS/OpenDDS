@@ -172,7 +172,8 @@ namespace {
     const std::string indent(level * 2, ' ');
     AST_Type* const base_type = sequence->base_type();
     const std::string elem_tk = type_kind(base_type);
-    be_global->impl_ << indent << "value_writer.begin_sequence(" << elem_tk << ");\n";
+    be_global->impl_ << indent << "value_writer.begin_sequence(" << elem_tk <<
+      ", " << expression << "." << length_func << "());\n";
 
     const Classification c = classify(base_type);
     AST_Type* const actual = resolveActualType(base_type);

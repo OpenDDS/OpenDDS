@@ -1,5 +1,5 @@
-#ifndef OPENDDS_DCPS_XCDR2_VALUE_WRITER_H
-#define OPENDDS_DCPS_XCDR2_VALUE_WRITER_H
+#ifndef OPENDDS_DCPS_XCDR2VALUEWRITER_H
+#define OPENDDS_DCPS_XCDR2VALUEWRITER_H
 
 #include "ValueWriter.h"
 
@@ -34,7 +34,7 @@ public:
 
   void begin_array(XTypes::TypeKind elem_kind);
   void end_array();
-  void begin_sequence(XTypes::TypeKind elem_kind);
+  void begin_sequence(XTypes::TypeKind elem_kind, ACE_CDR::ULong length);
   void end_sequence();
   void begin_element(size_t idx);
   void end_element();
@@ -90,11 +90,13 @@ private:
   void begin_ssize_aggregated_member(bool optional, bool present);
 
   // Common internal methods for serialization.
-  void begin_serialize_complex(Extensibility extensibility);
+  void begin_serialize_complex(Extensibility extensibility, CollectionKind ck, ACE_CDR::ULong seq_length);
   void end_serialize_complex();
   void begin_serialize_aggregated_member(unsigned id, bool must_understand, bool optional, bool present);
 
-  void begin_complex(Extensibility extensibility, CollectionKind ck = NOT_COLLECTION_KIND);
+  // Argument seq_length is only used if the type that triggers this call is a sequence.
+  void begin_complex(Extensibility extensibility, CollectionKind ck = NOT_COLLECTION_KIND,
+                     ACE_CDR::ULong seq_length = 0);
   void end_complex();
   void begin_aggregated_member(unsigned id, bool must_understand, bool optional, bool present);
 
@@ -144,7 +146,17 @@ private:
   // can be obtained to write to the byte stream.
   size_t pos_;
 
-  std::stack<Extensibility> nested_extens_;
+  struct SerializeState {
+    SerializeState(Extensibility exten, CollectionKind ck)
+      : extensibility(exten)
+      , collection_kind(ck)
+    {}
+
+    Extensibility extensibility;
+    CollectionKind collection_kind;
+  };
+
+  std::stack<SerializeState> serialize_states_;
 
   Serializer* ser_;
 };

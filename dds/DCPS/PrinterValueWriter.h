@@ -50,7 +50,7 @@ public:
 
   void begin_array(XTypes::TypeKind elem_tk = XTypes::TK_NONE);
   void end_array();
-  void begin_sequence(XTypes::TypeKind elem_tk = XTypes::TK_NONE);
+  void begin_sequence(XTypes::TypeKind elem_tk = XTypes::TK_NONE, ACE_CDR::ULong length = 0);
   void end_sequence();
   void begin_element(size_t idx);
   void end_element();
@@ -157,7 +157,7 @@ void PrinterValueWriter::end_array()
   current_indent_ -= indent_;
 }
 
-void PrinterValueWriter::begin_sequence(XTypes::TypeKind /*elem_tk*/)
+void PrinterValueWriter::begin_sequence(XTypes::TypeKind /*elem_tk*/, ACE_CDR::ULong /*length*/)
 {
   current_indent_ += indent_;
 }
