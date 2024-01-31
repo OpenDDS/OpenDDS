@@ -45,7 +45,7 @@ RtpsDiscovery::Config::discovery_config()
 {
   RcHandle<DCPS::ConfigStoreImpl> config_store = TheServiceParticipant->config_store();
 
-  const DCPS::ConfigStoreImpl::StringList sections = config_store->get_section_names("OPENDDS_RTPS_DISCOVERY");
+  const DCPS::ConfigStoreImpl::StringList sections = config_store->get_section_names("RTPS_DISCOVERY");
 
   // Loop through the [rtps_discovery/*] sections
   for (DCPS::ConfigStoreImpl::StringList::const_iterator pos = sections.begin(), limit = sections.end();
@@ -62,7 +62,7 @@ RtpsDiscovery::Config::discovery_config()
                    "(%P|%t) RtpsDiscovery::Config::discovery_config: "
                    "IceTa is deprecated.  Use Ta in [ice]\n"));
       }
-      config_store->set("OPENDDS_IceTa", config_store->get(config->config_key("IceTa").c_str(), ""));
+      config_store->set("IceTa", config_store->get(config->config_key("IceTa").c_str(), ""));
     }
     if (config_store->has(config->config_key("IceConnectivityCheckTTL").c_str())) {
       if (log_level >= DCPS::LogLevel::Warning) {
@@ -70,7 +70,7 @@ RtpsDiscovery::Config::discovery_config()
                    "(%P|%t) RtpsDiscovery::Config::discovery_config: "
                    "IceConnectivityCheckTTL is deprecated.  Use ConnectivityCheckTTL in [ice]\n"));
       }
-      config_store->set("OPENDDS_IceConnectivityCheckTTL", config_store->get(config->config_key("IceConnectivityCheckTTL").c_str(), ""));
+      config_store->set("IceConnectivityCheckTTL", config_store->get(config->config_key("IceConnectivityCheckTTL").c_str(), ""));
     }
     if (config_store->has(config->config_key("IceChecklistPeriod").c_str())) {
       if (log_level >= DCPS::LogLevel::Warning) {
@@ -78,7 +78,7 @@ RtpsDiscovery::Config::discovery_config()
                    "(%P|%t) RtpsDiscovery::Config::discovery_config: "
                    "IceChecklistPeriod is deprecated.  Use ChecklistPeriod in [ice]\n"));
       }
-      config_store->set("OPENDDS_IceChecklistPeriod", config_store->get(config->config_key("IceChecklistPeriod").c_str(), ""));
+      config_store->set("IceChecklistPeriod", config_store->get(config->config_key("IceChecklistPeriod").c_str(), ""));
     }
     if (config_store->has(config->config_key("IceIndicationPeriod").c_str())) {
       if (log_level >= DCPS::LogLevel::Warning) {
@@ -86,7 +86,7 @@ RtpsDiscovery::Config::discovery_config()
                    "(%P|%t) RtpsDiscovery::Config::discovery_config: "
                    "IceIndicationPeriod is deprecated.  Use IndicationPeriod in [ice]\n"));
       }
-      config_store->set("OPENDDS_IceIndicationPeriod", config_store->get(config->config_key("IceIndicationPeriod").c_str(), ""));
+      config_store->set("IceIndicationPeriod", config_store->get(config->config_key("IceIndicationPeriod").c_str(), ""));
     }
     if (config_store->has(config->config_key("IceNominatedTTL").c_str())) {
       if (log_level >= DCPS::LogLevel::Warning) {
@@ -94,7 +94,7 @@ RtpsDiscovery::Config::discovery_config()
                    "(%P|%t) RtpsDiscovery::Config::discovery_config: "
                    "IceNominatedTTL is deprecated.  Use NominatedTTL in [ice]\n"));
       }
-      config_store->set("OPENDDS_IceNominatedTTL", config_store->get(config->config_key("IceNominatedTTL").c_str(), ""));
+      config_store->set("IceNominatedTTL", config_store->get(config->config_key("IceNominatedTTL").c_str(), ""));
     }
     if (config_store->has(config->config_key("IceServerReflexiveAddressPeriod").c_str())) {
       if (log_level >= DCPS::LogLevel::Warning) {
@@ -102,7 +102,7 @@ RtpsDiscovery::Config::discovery_config()
                    "(%P|%t) RtpsDiscovery::Config::discovery_config: "
                    "IceServerReflexiveAddressPeriod is deprecated.  Use ServerReflexiveAddressPeriod in [ice]\n"));
       }
-      config_store->set("OPENDDS_IceServerReflexiveAddressPeriod", config_store->get(config->config_key("IceServerReflexiveAddressPeriod").c_str(), ""));
+      config_store->set("IceServerReflexiveAddressPeriod", config_store->get(config->config_key("IceServerReflexiveAddressPeriod").c_str(), ""));
     }
     if (config_store->has(config->config_key("IceServerReflexiveIndicationCount").c_str())) {
       if (log_level >= DCPS::LogLevel::Warning) {
@@ -110,7 +110,7 @@ RtpsDiscovery::Config::discovery_config()
                    "(%P|%t) RtpsDiscovery::Config::discovery_config: "
                    "IceServerReflexiveIndicationCount is deprecated.  Use ServerReflexiveIndicationCount in [ice]\n"));
       }
-      config_store->set("OPENDDS_IceServerReflexiveIndicationCount", config_store->get(config->config_key("IceServerReflexiveIndicationCount").c_str(), ""));
+      config_store->set("IceServerReflexiveIndicationCount", config_store->get(config->config_key("IceServerReflexiveIndicationCount").c_str(), ""));
     }
     if (config_store->has(config->config_key("IceDeferredTriggeredCheckTTL").c_str())) {
       if (log_level >= DCPS::LogLevel::Warning) {
@@ -118,7 +118,7 @@ RtpsDiscovery::Config::discovery_config()
                    "(%P|%t) RtpsDiscovery::Config::discovery_config: "
                    "IceDeferredTriggeredCheckTTL is deprecated.  Use DeferredTriggeredCheckTTL in [ice]\n"));
       }
-      config_store->set("OPENDDS_IceDeferredTriggeredCheckTTL", config_store->get(config->config_key("IceDeferredTriggeredCheckTTL").c_str(), ""));
+      config_store->set("IceDeferredTriggeredCheckTTL", config_store->get(config->config_key("IceDeferredTriggeredCheckTTL").c_str(), ""));
     }
     if (config_store->has(config->config_key("IceChangePasswordPeriod").c_str())) {
       if (log_level >= DCPS::LogLevel::Warning) {
@@ -126,7 +126,7 @@ RtpsDiscovery::Config::discovery_config()
                    "(%P|%t) RtpsDiscovery::Config::discovery_config: "
                    "IceChangePasswordPeriod is deprecated.  Use ChangePasswordPeriod in [ice]\n"));
       }
-      config_store->set("OPENDDS_IceChangePasswordPeriod", config_store->get(config->config_key("IceChangePasswordPeriod").c_str(), ""));
+      config_store->set("IceChangePasswordPeriod", config_store->get(config->config_key("IceChangePasswordPeriod").c_str(), ""));
     }
 #endif /* OPENDDS_SECURITY */
 

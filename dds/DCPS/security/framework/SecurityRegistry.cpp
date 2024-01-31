@@ -39,7 +39,7 @@ const char* SecurityRegistry::CRYPTO_PLUGIN_NAME = "crypto_plugin";
 
 SecurityRegistry::SecurityConfigEntry::SecurityConfigEntry(const DCPS::String& name)
   : name_(name)
-  , config_prefix_(DCPS::ConfigPair::canonicalize("OPENDDS_SECURITY_" + name_))
+  , config_prefix_(DCPS::ConfigPair::canonicalize("SECURITY_" + name_))
 {
 }
 
@@ -306,7 +306,7 @@ int
 SecurityRegistry::load_security_configuration()
 {
   const DCPS::ConfigStoreImpl::StringList keys =
-    TheServiceParticipant->config_store()->get_section_names("OPENDDS_SECURITY");
+    TheServiceParticipant->config_store()->get_section_names("SECURITY");
 
   // Save the properties configured for each security entry
   for (DCPS::ConfigStoreImpl::StringList::const_iterator pos = keys.begin(), limit = keys.end();

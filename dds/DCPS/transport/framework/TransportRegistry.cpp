@@ -92,7 +92,7 @@ bool TransportRegistry::process_transport(const String& transport_id,
 {
   // Get the factory_id for the transport.
   const String transport_type =
-    TheServiceParticipant->config_store()->get(String((is_template ? "OPENDDS_TRANSPORT_TEMPLATE_" : "OPENDDS_TRANSPORT_") + transport_id + "_TRANSPORT_TYPE").c_str(), "");
+    TheServiceParticipant->config_store()->get(String((is_template ? "TRANSPORT_TEMPLATE_" : "TRANSPORT_") + transport_id + "_TRANSPORT_TYPE").c_str(), "");
 
   if (transport_type.empty()) {
     if (log_level >= LogLevel::Error) {
@@ -174,7 +174,7 @@ TransportRegistry::load_transport_configuration(const String& file_name)
 
   {
     const ConfigStoreImpl::StringList transports =
-      TheServiceParticipant->config_store()->get_section_names("OPENDDS_TRANSPORT");
+      TheServiceParticipant->config_store()->get_section_names("TRANSPORT");
     for (ConfigStoreImpl::StringList::const_iterator pos = transports.begin(), limit = transports.end();
          pos != limit; ++pos) {
       if (!process_transport(*pos, false, instances)) {
@@ -185,7 +185,7 @@ TransportRegistry::load_transport_configuration(const String& file_name)
 
   {
     const ConfigStoreImpl::StringList transports =
-      TheServiceParticipant->config_store()->get_section_names("OPENDDS_TRANSPORT_TEMPLATE");
+      TheServiceParticipant->config_store()->get_section_names("TRANSPORT_TEMPLATE");
     for (ConfigStoreImpl::StringList::const_iterator pos = transports.begin(), limit = transports.end();
          pos != limit; ++pos) {
       if (!process_transport(*pos, true, instances)) {
@@ -196,7 +196,7 @@ TransportRegistry::load_transport_configuration(const String& file_name)
 
   {
     const ConfigStoreImpl::StringList configs =
-      TheServiceParticipant->config_store()->get_section_names("OPENDDS_CONFIG");
+      TheServiceParticipant->config_store()->get_section_names("CONFIG");
     for (ConfigStoreImpl::StringList::const_iterator pos = configs.begin(), limit = configs.end();
          pos != limit; ++pos) {
       if (!process_config(*pos)) {

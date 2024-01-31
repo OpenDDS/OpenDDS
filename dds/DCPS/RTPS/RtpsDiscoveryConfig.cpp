@@ -28,7 +28,7 @@ namespace RTPS {
 using DCPS::TimeDuration;
 
 RtpsDiscoveryConfig::RtpsDiscoveryConfig(const String& name)
-  : config_prefix_(DCPS::ConfigPair::canonicalize("OPENDDS_RTPS_DISCOVERY_" + name))
+  : config_prefix_(DCPS::ConfigPair::canonicalize("RTPS_DISCOVERY_" + name))
 {}
 
 String
@@ -399,7 +399,7 @@ RtpsDiscoveryConfig::default_multicast_group(DDS::DomainId_t domain) const
   // Customize.
   const String customization_name = TheServiceParticipant->config_store()->get(config_key("CUSTOMIZATION").c_str(), "");
   if (!customization_name.empty()) {
-    const String directive = TheServiceParticipant->config_store()->get(String("OPENDDS_CUSTOMIZATION_" + customization_name + "_INTEROP_MULTICAST_OVERRIDE").c_str(), "");
+    const String directive = TheServiceParticipant->config_store()->get(String("CUSTOMIZATION_" + customization_name + "_INTEROP_MULTICAST_OVERRIDE").c_str(), "");
     if (directive == "AddDomainId") {
       String addr = DCPS::LogAddr(na, DCPS::LogAddr::Ip).str();
       const size_t pos = addr.find_last_of(".");
