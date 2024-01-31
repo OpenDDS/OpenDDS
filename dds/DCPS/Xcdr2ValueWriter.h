@@ -11,7 +11,7 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-class Xcdr2ValueWriter : public ValueWriter {
+class OpenDDS_Dcps_Export Xcdr2ValueWriter : public ValueWriter {
 public:
   explicit Xcdr2ValueWriter(Encoding& encoding)
     : mode_(SERIALIZATION_SIZE_MODE)

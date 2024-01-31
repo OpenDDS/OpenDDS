@@ -174,7 +174,7 @@ void Xcdr2ValueWriter::begin_serialize_aggregated_member(unsigned id, bool must_
                                                          bool optional, bool present)
 
 {
-  const Extensibility extensibility = state_.top().extensibility;
+  const Extensibility extensibility = nested_extens_.top();
   if (optional && (extensibility == FINAL || extensibility == APPENDABLE)) {
     *ser_ << ACE_OutputCDR::from_boolean(present);
   }

@@ -1,5 +1,7 @@
 #include <Xcdr2ValueWriterTypeSupportImpl.h>
 
+#include "../../../Utils/DataView.h"
+
 #include <dds/DCPS/Xcdr2ValueWriter.h>
 #include <dds/DCPS/XTypes/DynamicDataImpl.h>
 #include <dds/DCPS/XTypes/DynamicDataAdapter.h>
@@ -38,6 +40,17 @@ void init(StructType& st)
   st.ull_field = 30;
 }
 
+template <typename Xtag>
+DDS::DynamicType_var get_dynamic_type(XTypes::TypeLookupService& tls)
+{
+  const XTypes::TypeIdentifier& ti = DCPS::getCompleteTypeIdentifier<Xtag>();
+  const XTypes::TypeMap& type_map = DCPS::getCompleteTypeMap<Xtag>();
+  const XTypes::TypeMap::const_iterator it = type_map.find(ti);
+  EXPECT_TRUE(it != type_map.end());
+  tls.add(type_map.begin(), type_map.end());
+  return tls.complete_to_dynamic(it->second.complete, DCPS::GUID_t());
+}
+
 template <typename Xtag, typename Type>
 void check_total_size(DCPS::Xcdr2ValueWriter& value_writer, const Type& sample)
 {
@@ -50,15 +63,9 @@ void check_total_size(DCPS::Xcdr2ValueWriter& value_writer, const Type& sample)
   EXPECT_EQ(expected_size, value_writer.get_serialized_size());
 
   // Serialized size computed by vwrite with a dynamic data object.
-  const XTypes::TypeIdentifier& ti = DCPS::getCompleteTypeIdentifier<Xtag>();
-  const XTypes::TypeMap& type_map = DCPS::getCompleteTypeMap<Xtag>();
-  const XTypes::TypeMap::const_iterator it = type_map.find(ti);
-  EXPECT_TRUE(it != type_map.end());
   XTypes::TypeLookupService tls;
-  tls.add(type_map.begin(), type_map.end());
-  DDS::DynamicType_var dt = tls.complete_to_dynamic(it->second.complete, DCPS::GUID_t());
+  DDS::DynamicType_var dt = get_dynamic_type<Xtag>(tls);
   DDS::DynamicData_var dd = XTypes::get_dynamic_data_adapter<Type, Type>(dt, sample);
-
   vwrite(value_writer, dd.in());
   EXPECT_EQ(expected_size, value_writer.get_serialized_size());
 }
@@ -68,6 +75,38 @@ void check_component_sizes(DCPS::Xcdr2ValueWriter& value_writer, const size_t* a
   std::vector<size_t> expected_sizes(arr, arr + length);
   const std::vector<size_t>& sizes = value_writer.get_serialized_sizes();
   EXPECT_TRUE(expected_sizes == sizes);
+}
+
+template <typename Xtag, typename Type>
+void check_serialized_data(DCPS::Xcdr2ValueWriter& value_writer, const Type& sample)
+{
+  // Use generated marshal code on C++ object.
+  ACE_Message_Block expected_cdr(value_writer.get_serialized_size());
+  {
+    DCPS::Serializer ser(&expected_cdr, xcdr2);
+    ser << sample;
+  }
+
+  // Serialize using generated vwrite on C++ object.
+  {
+    ACE_Message_Block buffer(value_writer.get_serialized_size());
+    DCPS::Serializer ser(&buffer, xcdr2);
+    value_writer.set_serializer(&ser);
+    vwrite(value_writer, sample);
+    EXPECT_PRED_FORMAT2(assert_DataView, expected_cdr, buffer);
+  }
+
+  // Serialize using vwrite on a dynamic data object.
+  {
+    ACE_Message_Block buffer(value_writer.get_serialized_size());
+    DCPS::Serializer ser(&buffer, xcdr2);
+    XTypes::TypeLookupService tls;
+    DDS::DynamicType_var dt = get_dynamic_type<Xtag>(tls);
+    DDS::DynamicData_var dd = XTypes::get_dynamic_data_adapter<Type, Type>(dt, sample);
+    value_writer.set_serializer(&ser);
+    vwrite(value_writer, dd.in());
+    EXPECT_PRED_FORMAT2(assert_DataView, expected_cdr, buffer);
+  }
 }
 
 TEST(dds_DCPS_Xcdr2ValueWriter, FinalFinalStruct)
@@ -89,6 +128,8 @@ TEST(dds_DCPS_Xcdr2ValueWriter, FinalFinalStruct)
   // 2+8: ull_field   (40)
   const size_t arr[] = {40};
   check_component_sizes(value_writer, arr, sizeof(arr) / sizeof(arr[0]));
+
+  check_serialized_data<DCPS::Test_FinalFinalStruct_xtag>(value_writer, ffs);
 }
 
 TEST(dds_DCPS_Xcdr2ValueWriter, FinalAppendableStruct)
@@ -111,6 +152,8 @@ TEST(dds_DCPS_Xcdr2ValueWriter, FinalAppendableStruct)
   // 2+8: ull_field             (44)
   const size_t arr[] = {44, 13};
   check_component_sizes(value_writer, arr, sizeof(arr) / sizeof(arr[0]));
+
+  check_serialized_data<DCPS::Test_FinalAppendableStruct_xtag>(value_writer, fas);
 }
 
 TEST(dds_DCPS_Xcdr2ValueWriter, FinalMutableStruct)
@@ -136,6 +179,8 @@ TEST(dds_DCPS_Xcdr2ValueWriter, FinalMutableStruct)
   // 2+8: ull_field             (56)
   const size_t arr[] = {56, 25, 1, 4, 1};
   check_component_sizes(value_writer, arr, sizeof(arr) / sizeof(arr[0]));
+
+  check_serialized_data<DCPS::Test_FinalMutableStruct_xtag>(value_writer, fms);
 }
 
 TEST(dds_DCPS_Xcdr2ValueWriter, AppendableFinalStruct)
@@ -158,6 +203,8 @@ TEST(dds_DCPS_Xcdr2ValueWriter, AppendableFinalStruct)
   // 2+8: ull_field   (44)
   const size_t arr[] = {44};
   check_component_sizes(value_writer, arr, sizeof(arr) / sizeof(arr[0]));
+
+  check_serialized_data<DCPS::Test_AppendableFinalStruct_xtag>(value_writer, afs);
 }
 
 TEST(dds_DCPS_Xcdr2ValueWriter, AppendableAppendableStruct)
@@ -181,6 +228,8 @@ TEST(dds_DCPS_Xcdr2ValueWriter, AppendableAppendableStruct)
   // 2+8: ull_field             (48)
   const size_t arr[] = {48, 13};
   check_component_sizes(value_writer, arr, sizeof(arr) / sizeof(arr[0]));
+
+  check_serialized_data<DCPS::Test_AppendableAppendableStruct_xtag>(value_writer, aas);
 }
 
 TEST(dds_DCPS_Xcdr2ValueWriter, AppendableMutableStruct)
@@ -207,6 +256,8 @@ TEST(dds_DCPS_Xcdr2ValueWriter, AppendableMutableStruct)
   // 2+8: ull_field             (60)
   const size_t arr[] = {60, 25, 1, 4, 1};
   check_component_sizes(value_writer, arr, sizeof(arr) / sizeof(arr[0]));
+
+  check_serialized_data<DCPS::Test_AppendableMutableStruct_xtag>(value_writer, ams);
 }
 
 TEST(dds_DCPS_Xcdr2ValueWriter, MutableFinalStruct)
@@ -236,6 +287,8 @@ TEST(dds_DCPS_Xcdr2ValueWriter, MutableFinalStruct)
   // 8: ull_field               (72)
   const size_t arr[] = {72, 2, 4, 9, 10, 8};
   check_component_sizes(value_writer, arr, sizeof(arr) / sizeof(arr[0]));
+
+  check_serialized_data<DCPS::Test_MutableFinalStruct_xtag>(value_writer, mfs);
 }
 
 TEST(dds_DCPS_Xcdr2ValueWriter, MutableAppendableStruct)
@@ -266,6 +319,8 @@ TEST(dds_DCPS_Xcdr2ValueWriter, MutableAppendableStruct)
   // 8: ull_field               (76)
   const size_t arr[] = {76, 2, 4, 13, 10, 8};
   check_component_sizes(value_writer, arr, sizeof(arr) / sizeof(arr[0]));
+
+  check_serialized_data<DCPS::Test_MutableAppendableStruct_xtag>(value_writer, mas);
 }
 
 TEST(dds_DCPS_Xcdr2ValueWriter, MutableMutableStruct)
@@ -299,6 +354,8 @@ TEST(dds_DCPS_Xcdr2ValueWriter, MutableMutableStruct)
   // 8: ull_field               (88)
   const size_t arr[] = {88, 2, 4, 25, 1, 4, 1, 10, 8};
   check_component_sizes(value_writer, arr, sizeof(arr) / sizeof(arr[0]));
+
+  check_serialized_data<DCPS::Test_MutableMutableStruct_xtag>(value_writer, mms);
 }
 
 void init(FinalUnion& fu)
@@ -328,6 +385,8 @@ TEST(dds_DCPS_Xcdr2ValueWriter, FinalUnion)
   init(fu);
   DCPS::Xcdr2ValueWriter value_writer(xcdr2);
   check_total_size<DCPS::Test_FinalUnion_xtag>(value_writer, fu);
+
+  check_serialized_data<DCPS::Test_FinalUnion_xtag>(value_writer, fu);
 }
 
 
@@ -337,6 +396,8 @@ TEST(dds_DCPS_Xcdr2ValueWriter, AppendableUnion)
   init(au);
   DCPS::Xcdr2ValueWriter value_writer(xcdr2);
   check_total_size<DCPS::Test_AppendableUnion_xtag>(value_writer, au);
+
+  check_serialized_data<DCPS::Test_AppendableUnion_xtag>(value_writer, au);
 }
 
 TEST(dds_DCPS_Xcdr2ValueWriter, MutableUnion)
@@ -345,6 +406,8 @@ TEST(dds_DCPS_Xcdr2ValueWriter, MutableUnion)
   init(mu);
   DCPS::Xcdr2ValueWriter value_writer(xcdr2);
   check_total_size<DCPS::Test_MutableUnion_xtag>(value_writer, mu);
+
+  check_serialized_data<DCPS::Test_MutableUnion_xtag>(value_writer, mu);
 }
 
 TEST(dds_DCPS_Xcdr2ValueWriter, FinalComplexStruct)
@@ -455,6 +518,8 @@ TEST(dds_DCPS_Xcdr2ValueWriter, FinalComplexStruct)
   // 3+4: f_field                  276
   const size_t arr[] = {276, 60, 25, 1, 4, 1, 13, 13, 37, 13, 13, 57, 25, 1, 4, 1, 25, 1, 4, 1};
   check_component_sizes(value_writer, arr, sizeof(arr) / sizeof(arr[0]));
+
+  check_serialized_data<DCPS::Test_FinalComplexStruct_xtag>(value_writer, fcs);
 }
 
 TEST(dds_DCPS_Xcdr2ValueWriter, AppendableComplexStruct)
@@ -592,6 +657,8 @@ TEST(dds_DCPS_Xcdr2ValueWriter, AppendableComplexStruct)
   // 3+8: d_field                  328
   const size_t arr[] = {332,80,72,2,4,9,10,8,25,1,4,1,60,25,1,4,1,12,61,25,1,4,1,25,1,4,1,21};
   check_component_sizes(value_writer, arr, sizeof(arr) / sizeof(arr[0]));
+
+  check_serialized_data<DCPS::Test_AppendableComplexStruct_xtag>(value_writer, acs);
 }
 
 TEST(dds_DCPS_Xcdr2ValueWriter, MutableComplexStruct)
@@ -734,4 +801,6 @@ TEST(dds_DCPS_Xcdr2ValueWriter, MutableComplexStruct)
   // 4: l_field             356             (4)
   const size_t arr[] = {356,14,64,4,44,13,2,9,72,2,4,9,10,8,15,8,8,8,25,33,13,13,4};
   check_component_sizes(value_writer, arr, sizeof(arr) / sizeof(arr[0]));
+
+  check_serialized_data<DCPS::Test_MutableComplexStruct_xtag>(value_writer, mcs);
 }
