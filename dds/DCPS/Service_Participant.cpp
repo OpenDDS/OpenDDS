@@ -54,6 +54,10 @@
 #include "Service_Participant.inl"
 #endif /* __ACE_INLINE__ */
 
+#if !defined (ACE_WIN32)
+extern char **environ;
+#endif
+
 namespace {
 
 void set_log_file_name(const char* fname)
@@ -388,6 +392,8 @@ Service_Participant::get_domain_participant_factory(int &argc,
         }
       }
 
+      parse_env();
+
       if (parse_args(argc, argv) != 0) {
         return DDS::DomainParticipantFactory::_nil();
       }
@@ -576,6 +582,56 @@ Service_Participant::get_domain_participant_factory(int &argc,
   }
 
   return DDS::DomainParticipantFactory::_duplicate(dp_factory_servant_.in());
+}
+
+
+
+void Service_Participant::parse_env()
+{
+#if defined (ACE_WIN32)
+  LPTCH env_strings = GetEnvironmentStrings();
+
+  // If the returned pointer is NULL, exit.
+  if (!env_strings) {
+    if (log_level >= LogLevel::Error) {
+      ACE_ERROR((LM_ERROR,
+                 "(%P|%t) ERROR: Service_Participant::parse_env: Could not get environment strings\n"));
+    }
+    return;
+  }
+
+  LPTSTR env_string = (LPTSTR) env_strings;
+
+  while (*env_string) {
+    parse_env(ACE_TEXT_ALWAYS_CHAR(env_string));
+    env_string += lstrlen(env_string) + 1;
+  }
+  FreeEnvironmentStrings(env_strings);
+
+#else
+
+  for (char** e = environ; *e; ++e) {
+    parse_env(*e);
+  }
+
+#endif
+}
+
+void Service_Participant::parse_env(const String& p)
+{
+  // Only parse environment variables starting with OPENDDS_.
+  if (p.substr(0, 8) == "OPENDDS_") {
+    // Extract everything after OPENDDS_.
+    const String q = p.substr(8);
+    // q should have the form key=value
+    String::size_type pos = q.find('=');
+    if (pos != String::npos) {
+      // Split into key and value.
+      const String key = q.substr(0, pos);
+      const String value = q.substr(pos + 1);
+      config_store_->set(key.c_str(), value);
+    }
+  }
 }
 
 int Service_Participant::parse_args(int& argc, ACE_TCHAR* argv[])

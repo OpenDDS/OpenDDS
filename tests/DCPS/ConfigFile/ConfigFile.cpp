@@ -40,6 +40,10 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
       TheParticipantFactoryWithArgs(argc, argv);
     TEST_CHECK(dpf.in() != 0);
 
+    // From commandline
+    TEST_CHECK(TheServiceParticipant->config_store()->get("MY_CONFIG_KEY1", "") == "value1");
+    // From environment variable
+    TEST_CHECK(TheServiceParticipant->config_store()->get("MY_CONFIG_KEY2", "") == "value2");
     TEST_CHECK(OpenDDS::DCPS::DCPS_debug_level == 1);
     TEST_CHECK(TheServiceParticipant->n_chunks() == 10);
     TEST_CHECK(TheServiceParticipant->association_chunk_multiplier() == 5);
