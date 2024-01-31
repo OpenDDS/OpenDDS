@@ -31,14 +31,6 @@ OpenDDS::DCPS::TcpInst::new_impl(DDS::DomainId_t domain)
   return make_rch<TcpTransport>(rchandle_from(this), domain);
 }
 
-int
-OpenDDS::DCPS::TcpInst::load(ACE_Configuration_Heap& cf,
-                             ACE_Configuration_Section_Key& trans_sect)
-{
-  TransportInst::load(cf, trans_sect);
-  return 0;
-}
-
 OPENDDS_STRING
 OpenDDS::DCPS::TcpInst::dump_to_str(DDS::DomainId_t domain) const
 {

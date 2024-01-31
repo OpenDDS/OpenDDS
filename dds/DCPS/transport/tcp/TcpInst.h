@@ -36,9 +36,6 @@ public:
   static const int DEFAULT_PASSIVE_RECONNECT_DURATION = 2000;
   static const int DEFAULT_ACTIVE_CONN_TIMEOUT_PERIOD = 5000;
 
-  virtual int load(ACE_Configuration_Heap& cf,
-                   ACE_Configuration_Section_Key& sect);
-
   /// Diagnostic aid.
   virtual OPENDDS_STRING dump_to_str(DDS::DomainId_t domain) const;
 

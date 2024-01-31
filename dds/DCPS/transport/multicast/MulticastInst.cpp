@@ -63,15 +63,6 @@ MulticastInst::MulticastInst(const std::string& name)
   , async_send_(*this, &MulticastInst::async_send, &MulticastInst::async_send)
 {}
 
-int
-MulticastInst::load(ACE_Configuration_Heap& cf,
-                    ACE_Configuration_Section_Key& sect)
-{
-  TransportInst::load(cf, sect); // delegate to parent
-
-  return 0;
-}
-
 TransportImpl_rch
 MulticastInst::new_impl(DDS::DomainId_t domain)
 {

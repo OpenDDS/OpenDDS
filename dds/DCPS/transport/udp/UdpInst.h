@@ -30,9 +30,6 @@ public:
   void rcv_buffer_size(ACE_INT32 rbs);
   ACE_INT32 rcv_buffer_size() const;
 
-  virtual int load(ACE_Configuration_Heap& cf,
-                   ACE_Configuration_Section_Key& sect);
-
   /// Diagnostic aid.
   virtual OPENDDS_STRING dump_to_str(DDS::DomainId_t) const;
 
