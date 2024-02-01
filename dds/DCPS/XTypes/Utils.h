@@ -10,6 +10,7 @@
 #  include <dds/DCPS/Serializer.h>
 #  include <dds/DCPS/Sample.h>
 #  include <dds/DCPS/DCPS_Utils.h>
+#  include <dds/DCPS/debug.h>
 
 #  include <dds/DdsDynamicDataC.h>
 
