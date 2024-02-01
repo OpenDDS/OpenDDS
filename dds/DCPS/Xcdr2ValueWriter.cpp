@@ -1,3 +1,5 @@
+#include <DCPS/DdsDcps_pch.h>
+
 #include "Xcdr2ValueWriter.h"
 #include "debug.h"
 

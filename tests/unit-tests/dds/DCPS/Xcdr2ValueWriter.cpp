@@ -5,7 +5,7 @@
 #include <dds/DCPS/Xcdr2ValueWriter.h>
 
 #ifndef OPENDDS_SAFETY_PROFILE
-#  include <dds/DCPS/XTypes/DynamicDataImpl.h>
+#  include <dds/DCPS/XTypes/DynamicVwrite.h>
 #  include <dds/DCPS/XTypes/DynamicDataAdapter.h>
 #endif
 

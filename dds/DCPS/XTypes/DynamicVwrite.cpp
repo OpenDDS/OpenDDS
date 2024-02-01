@@ -10,11 +10,11 @@
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
-namespace XTypes {
+namespace DCPS {
 
 bool check_rc(DDS::ReturnCode_t rc, DDS::MemberId id, DDS::TypeKind tk, const char* fn_name)
 {
-  return check_rc_from_get(rc, id, tk, fn_name, LogLevel::Warning);
+  return XTypes::check_rc_from_get(rc, id, tk, fn_name, LogLevel::Warning);
 }
 
 void vwrite_item(ValueWriter& vw, DDS::DynamicData_ptr value,
