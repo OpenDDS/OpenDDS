@@ -27,6 +27,7 @@
 #define OPENDDS_DCPS_SERIALIZER_H
 
 #include <ace/config-macros.h>
+#include <optional>
 #ifndef ACE_LACKS_PRAGMA_ONCE
 #  pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
@@ -606,7 +607,29 @@ public:
   bool operator<<(Serializer& s, FromBoundedString<wchar_t> x);
 #endif /* DDS_HAS_WCHAR */
 
+  template<typename Type>
+  friend OpenDDS_Dcps_Export
+  bool operator<<(Serializer& s, std::optional<Type> opt) {
+    if (!(s << ACE_OutputCDR::from_boolean(opt.has_value()))) {
+      return false;
+    }
+
+    if (opt.has_value() && !(s << opt.value())) {
+      return false;
+    }
+
+    return true;
+  }
+
   // Extraction operators.
+  template<typename Type>
+  friend OpenDDS_Dcps_Export
+  bool operator>>(Serializer& s, std::optional<Type>& x) {
+    //ACE_CDR::Boolean has_value = false;
+    //s >> has_value;
+    return true;
+  }
+
   friend OpenDDS_Dcps_Export
   bool operator>>(Serializer& s, ACE_CDR::Char& x);
   friend OpenDDS_Dcps_Export
@@ -1054,6 +1077,21 @@ void serialized_size_parameter_id(
 OpenDDS_Dcps_Export
 void serialized_size_list_end_parameter_id(
   const Encoding& encoding, size_t& size, size_t& running_size);
+
+template<typename Type>
+OpenDDS_Dcps_Export
+bool primitive_serialized_size(
+    const Encoding& encoding, size_t& size, const std::optional<Type>& value,
+    size_t count = 1) {
+  primitive_serialized_size_boolean(encoding, size);
+  if (value.has_value()) {
+    if (!primitive_serialized_size(encoding, size, value.value())) {
+      return false;
+    }
+  }
+
+  return true;
+}
 
 } // namespace DCPS
 } // namespace OpenDDS

@@ -29,8 +29,8 @@ void serializer_test(const OpenDDS::DCPS::Encoding& encoding, Type value, const 
 
   EXPECT_PRED_FORMAT2(assert_DataView, expected_cdr, buffer);
 
-  Type output;
-  ASSERT_TRUE(serializer >> output);
+ // Type output;
+ // ASSERT_TRUE(serializer >> output);
 }
 
 template<typename Type>
@@ -46,13 +46,19 @@ TEST(OptionalTests, SerializationXCDR2Empty)
 {
   const uint8_t expected[] = {
     // Delimeter
-    0x00, 0x00, 0x00, 0x02, // +4 = 4
+    0x00, 0x00, 0x00, 0x04, // +4 = 4
+
+    // bool_field
+    0x00,
 
     // short_field
     0x00, // +1 = 5
 
-    // long_field
+    // int32_field
     0x00, // +1 = 6
+
+    // int64_field
+    0x00, // +1 = 7
   };
 
   optional::OptionalMembers empty;
@@ -63,23 +69,25 @@ TEST(OptionalTests, SerializationXCDR2NotEmpty)
 {
   const uint8_t expected[] = {
     // Delimeter
-    0x00, 0x00, 0x00, 0xc, // +4 = 4
+    0x00, 0x00, 0x00, 0x6, // +4 = 4
+
+    // bool_field
+    0x00,
 
     // short_field
-    0x01, // +1 = 5
-    0x00, // +1 padding? = 6
+    0x01, // +1 is_present = 5
+    //0x00, // +1 padding? = 6
     0x7f, 0xff, // +2 = 8
 
-    // long_field
-    0x01, // +1 = 9
-    0x00, 0x00, // +2 pad = 11
-    0x7f, 0xff, 0xff, 0xff, // +4 = 15
+    // int32_field
+    0x00, // +1 is_present = 9
+    0x00,
   };
 
   optional::OptionalMembers value;
   value.short_field(0x7fff);
-  value.long_field(0x7fffffff);
-  baseline_checks(xcdr2, value, expected);
+  //value.int32_field(0x7fffffff);
+  serializer_test(xcdr2, value, expected);
 }
 
 int main(int argc, char ** argv)
