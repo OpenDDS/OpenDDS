@@ -304,7 +304,7 @@ bool value_writer_generator::gen_enum(AST_Enum*,
     for (std::vector<AST_EnumVal*>::const_iterator pos = contents.begin(), limit = contents.end();
          pos != limit; ++pos) {
       AST_EnumVal* const val = *pos;
-      const std::string value_name = (use_cxx11 ? (type_name + "::") : module_scope(name))
+      const std::string value_name = (use_cxx11 ? (type_name + "::") : ("::" + module_scope(name)))
         + val->local_name()->get_string();
       be_global->impl_ <<
         "  case " << value_name << ":\n"
