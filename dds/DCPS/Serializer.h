@@ -624,7 +624,6 @@ public:
 
     return true;
   }
-#endif
 
   // Extraction operators.
   template<typename Type>
@@ -634,6 +633,7 @@ public:
     //s >> has_value;
     return true;
   }
+#endif
 
   friend OpenDDS_Dcps_Export
   bool operator>>(Serializer& s, ACE_CDR::Char& x);
