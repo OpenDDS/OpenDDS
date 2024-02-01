@@ -46,19 +46,22 @@ TEST(OptionalTests, SerializationXCDR2Empty)
 {
   const uint8_t expected[] = {
     // Delimeter
-    0x00, 0x00, 0x00, 0x04, // +4 = 4
+    0x00, 0x00, 0x00, 0x05, // +4 = 4
 
     // bool_field
-    0x00,
-
-    // short_field
     0x00, // +1 = 5
 
-    // int32_field
+    // short_field
     0x00, // +1 = 6
 
-    // int64_field
+    // int32_field
     0x00, // +1 = 7
+
+    // int64_field
+    0x00, // +1 = 8
+
+    // str_field
+    0x00, // +1 = 9
   };
 
   optional::OptionalMembers empty;
@@ -69,24 +72,30 @@ TEST(OptionalTests, SerializationXCDR2NotEmpty)
 {
   const uint8_t expected[] = {
     // Delimeter
-    0x00, 0x00, 0x00, 0x6, // +4 = 4
+    0x00, 0x00, 0x00, 0x18, // +4 = 4
 
     // bool_field
     0x00,
 
     // short_field
     0x01, // +1 is_present = 5
-    //0x00, // +1 padding? = 6
     0x7f, 0xff, // +2 = 8
 
     // int32_field
     0x00, // +1 is_present = 9
     0x00,
+
+    // str_field
+    0x01, // +1 = 10
+    0x00, // ?
+    0x00, 0x00, 0x00, 0x0c, // +4 = 14
+    'H', 'e', 'l', 'l', 'o', ' ', 'W', 'o', 'r', 'l', 'd', '\0', // +12 = 26
   };
 
   optional::OptionalMembers value;
   value.short_field(0x7fff);
   //value.int32_field(0x7fffffff);
+  value.str_field("Hello World");
   serializer_test(xcdr2, value, expected);
 }
 

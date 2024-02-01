@@ -27,7 +27,6 @@
 #define OPENDDS_DCPS_SERIALIZER_H
 
 #include <ace/config-macros.h>
-#include <optional>
 #ifndef ACE_LACKS_PRAGMA_ONCE
 #  pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
@@ -39,6 +38,10 @@
 
 #include <ace/CDR_Base.h>
 #include <ace/CDR_Stream.h>
+
+#if __cplusplus >= 201703L
+# include <optional>
+#endif
 
 #include <limits>
 #include <string>
@@ -607,6 +610,7 @@ public:
   bool operator<<(Serializer& s, FromBoundedString<wchar_t> x);
 #endif /* DDS_HAS_WCHAR */
 
+#if __cplusplus >= 201703L
   template<typename Type>
   friend OpenDDS_Dcps_Export
   bool operator<<(Serializer& s, std::optional<Type> opt) {
@@ -620,6 +624,7 @@ public:
 
     return true;
   }
+#endif
 
   // Extraction operators.
   template<typename Type>
@@ -1078,6 +1083,7 @@ OpenDDS_Dcps_Export
 void serialized_size_list_end_parameter_id(
   const Encoding& encoding, size_t& size, size_t& running_size);
 
+#if __cplusplus >= 201703L
 template<typename Type>
 OpenDDS_Dcps_Export
 bool primitive_serialized_size(
@@ -1092,6 +1098,7 @@ bool primitive_serialized_size(
 
   return true;
 }
+#endif
 
 } // namespace DCPS
 } // namespace OpenDDS
