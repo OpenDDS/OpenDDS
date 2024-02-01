@@ -2,11 +2,12 @@ module optional {
 
   typedef sequence<int32> seq_int_t;
 
-  @topic
   struct OptionalMembers {
-    @optional long opt;
-    @optional string strOpt;
-    @optional seq_int_t seqOpt;
+    @optional short short_field;
+    @optional long long_field;
+
+    // string strOpt;
+    //seq_int_t seqOpt;
 
 
     // TODO(tyler) should this be possible

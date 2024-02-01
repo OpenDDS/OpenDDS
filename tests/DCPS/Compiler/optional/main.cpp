@@ -1,89 +1,85 @@
 #include "optionalC.h"
 #include "optionalTypeSupportImpl.h"
+#include "tests/Utils/DataView.h"
 
+#include "gtest/gtest.h"
 #include <dds/DCPS/Serializer.h>
 #include <dds/DCPS/TypeSupportImpl.h>
 #include <dds/DCPS/FilterEvaluator.h>
 
+#include <vector>
 #include <ace/ACE.h>
 #include <ace/Log_Msg.h>
 #include <gtest/gtest.h>
+#include <tests/Utils/DataView.h>
 
-// Ensure opendds_idl is generating std::optional
-TEST(OptionalTests, Empty)
+using namespace OpenDDS::DCPS;
+using namespace OpenDDS::XTypes;
+
+const Encoding xcdr1(Encoding::KIND_XCDR1, ENDIAN_BIG);
+const Encoding xcdr2(Encoding::KIND_XCDR2, ENDIAN_BIG);
+const Encoding xcdr2_le(Encoding::KIND_XCDR2, ENDIAN_LITTLE);
+
+template<typename Type>
+void serializer_test(const OpenDDS::DCPS::Encoding& encoding, Type value, const DataView& expected_cdr) {
+  ACE_Message_Block buffer(1024);
+  OpenDDS::DCPS::Serializer serializer(&buffer, encoding);
+
+  ASSERT_TRUE(serializer << value);
+
+  EXPECT_PRED_FORMAT2(assert_DataView, expected_cdr, buffer);
+
+  Type output;
+  ASSERT_TRUE(serializer >> output);
+}
+
+template<typename Type>
+void baseline_checks(const Encoding& encoding, Type value, const DataView& expected_cdr,
+  SerializedSizeBound bound = SerializedSizeBound())
 {
+  EXPECT_EQ(serialized_size(encoding, value), expected_cdr.size);
+
+  serializer_test<Type>(encoding, value, expected_cdr);
+}
+
+TEST(OptionalTests, SerializationXCDR2Empty)
+{
+  const uint8_t expected[] = {
+    // Delimeter
+    0x00, 0x00, 0x00, 0x02, // +4 = 4
+
+    // short_field
+    0x00, // +1 = 5
+
+    // long_field
+    0x00, // +1 = 6
+  };
+
   optional::OptionalMembers empty;
-  EXPECT_FALSE(empty.opt().has_value());
-  empty.opt(12);
-  EXPECT_TRUE(empty.opt().has_value());
+  baseline_checks(xcdr2, empty, expected);
 }
 
-TEST(OptionalTests, SerializationSizeXCDR1)
+TEST(OptionalTests, SerializationXCDR2NotEmpty)
 {
-  optional::OptionalMembers empty;
-  OpenDDS::DCPS::Encoding encoding;
-  encoding.kind(OpenDDS::DCPS::Encoding::KIND_XCDR1);
-  EXPECT_EQ(12, OpenDDS::DCPS::serialized_size(encoding, empty)); // TODO this is probably incorrect
+  const uint8_t expected[] = {
+    // Delimeter
+    0x00, 0x00, 0x00, 0xc, // +4 = 4
 
-  optional::OptionalMembers notEmpty;
-  notEmpty.opt(12);
-  notEmpty.strOpt("Hello World");
-  notEmpty.seqOpt(std::vector{123, 456});
-  EXPECT_EQ(44, OpenDDS::DCPS::serialized_size(encoding, empty)); // TODO this is probably incorrect
-}
+    // short_field
+    0x01, // +1 = 5
+    0x00, // +1 padding? = 6
+    0x7f, 0xff, // +2 = 8
 
-TEST(OptionalTests, SerializationSizeXCDR2)
-{
-  optional::OptionalMembers empty{};
-  OpenDDS::DCPS::Encoding encoding;
-  encoding.kind(OpenDDS::DCPS::Encoding::KIND_XCDR2);
-  EXPECT_EQ(3, OpenDDS::DCPS::serialized_size(encoding, empty));
+    // long_field
+    0x01, // +1 = 9
+    0x00, 0x00, // +2 pad = 11
+    0x7f, 0xff, 0xff, 0xff, // +4 = 15
+  };
 
-  optional::OptionalMembers notEmpty;
-  notEmpty.opt(12);
-  notEmpty.strOpt("Hello World");
-  notEmpty.seqOpt(std::vector{123, 456});
-  EXPECT_EQ(44, OpenDDS::DCPS::serialized_size(encoding, empty)); // TODO this is probably incorrect
-}
-
-TEST(OptionalTests, SerializationXCDR1)
-{
-  OpenDDS::DCPS::Encoding encoding;
-  encoding.kind(OpenDDS::DCPS::Encoding::KIND_XCDR1);
-
-  OpenDDS::DCPS::Message_Block_Ptr b(new ACE_Message_Block(100000));
-  OpenDDS::DCPS::Serializer strm(b.get(), encoding);
-
-  optional::OptionalMembers msg;
-  msg.opt(12);
-  msg.strOpt("Hello World");
-  EXPECT_TRUE(strm << msg);
-
- optional::OptionalMembers msg2;
- EXPECT_TRUE(strm >> msg2);
- EXPECT_TRUE(msg2.opt().has_value());
- EXPECT_EQ(msg.opt().value(), msg2.opt().value());
- EXPECT_FALSE(msg2.seqOpt().has_value());
-}
-
-TEST(OptionalTests, SerializationXCDR2)
-{
-  OpenDDS::DCPS::Encoding encoding;
-  encoding.kind(OpenDDS::DCPS::Encoding::KIND_XCDR2);
-
-  OpenDDS::DCPS::Message_Block_Ptr b(new ACE_Message_Block(100000));
-  OpenDDS::DCPS::Serializer strm(b.get(), encoding);
-
-  optional::OptionalMembers msg;
-  msg.opt(12);
-  msg.strOpt("Hello World");
-  EXPECT_TRUE(strm << msg);
-
- optional::OptionalMembers msg2;
- EXPECT_TRUE(strm >> msg2);
- EXPECT_TRUE(msg2.opt().has_value());
- EXPECT_EQ(msg.opt().value(), msg2.opt().value());
- EXPECT_FALSE(msg2.seqOpt().has_value());
+  optional::OptionalMembers value;
+  value.short_field(0x7fff);
+  value.long_field(0x7fffffff);
+  baseline_checks(xcdr2, value, expected);
 }
 
 int main(int argc, char ** argv)
