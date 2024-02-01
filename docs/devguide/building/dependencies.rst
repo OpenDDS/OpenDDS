@@ -220,7 +220,7 @@ Python
 `Python <https://www.python.org/>`__ is used for some scripts where Perl isn't as suitable.
 Most notably this includes :doc:`this Sphinx-based documentation </internal/docs>` and processing the results of the CMake tests in :ghfile:`tests/auto_run_tests.pl` if ``--cmake`` is passed.
 
-Unless noted otherwise, Python should be version 3.6 or later.
+Unless noted otherwise, Python should be version 3.10 or later.
 
 Because it's an optional dependency, Python should not be required for any script used for building and testing the core functionality of OpenDDS.
 Right now only Perl can be used for situations like that.
