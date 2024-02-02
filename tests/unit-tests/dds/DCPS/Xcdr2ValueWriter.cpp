@@ -813,3 +813,98 @@ TEST(dds_DCPS_Xcdr2ValueWriter, MutableComplexStruct)
 
   check_serialized_data<DCPS::Test_MutableComplexStruct_xtag>(value_writer, mcs);
 }
+
+#include <time.h>
+
+void get_time( timespec* ts ){
+	clock_gettime( CLOCK_MONOTONIC, ts);
+}
+
+void timespec_to_ms(const timespec& ts, unsigned& ms){
+	ms = ts.tv_sec * 1000;
+	ms += ts.tv_nsec / 1000000;
+	ms += (ts.tv_nsec % 1000000) > 500000 ? 1 : 0;
+}
+
+void get_curr_time_ms(unsigned& ms){
+	timespec ts;
+	get_time(&ts);
+	timespec_to_ms(ts,ms);
+}
+
+unsigned timespec_to_ms(const timespec& ts){
+	unsigned ms;
+	ms = ts.tv_sec * 1000;
+	ms += ts.tv_nsec / 1000000;
+	ms += (ts.tv_nsec % 1000000) > 500000 ? 1 : 0;
+	return ms;
+}
+
+TEST(dds_DCPS_Xcdr2ValueWriter, PerfTest)
+{
+  MutableComplexStruct mcs;
+  mcs.str_field = "my string";
+  init(mcs.nested_union);
+  mcs.s_field = 1;
+  init_base_struct(mcs.nested_struct);
+  init(mcs.nnested_struct);
+  mcs.str2_field = "my string2";
+
+  mcs.seq_field.length(2);
+  mcs.seq_field[0] = 0;
+  mcs.seq_field[1] = 1;
+
+  mcs.arr_field[0] = 10;
+  mcs.arr_field[1] = 20;
+
+  mcs.md_arr_field[0][0] = 0;
+  mcs.md_arr_field[0][1] = 1;
+  mcs.md_arr_field[1][0] = 10;
+  mcs.md_arr_field[1][1] = 11;
+
+  mcs.nested_seq.length(2);
+  FinalStruct fs;
+  init_base_struct(fs);
+  mcs.nested_seq[0] = fs;
+  mcs.nested_seq[1] = fs;
+
+  AppendableStruct as;
+  init_base_struct(as);
+  mcs.nested_arr[0] = as;
+  mcs.nested_arr[1] = as;
+  mcs.l_field = 11;
+
+  DCPS::Xcdr2ValueWriter value_writer(xcdr2);
+  vwrite(value_writer, mcs);
+
+  const unsigned REPS = 10000;
+  // Use generated marshal code on C++ object.
+  {
+    ACE_Message_Block expected_cdr(value_writer.get_serialized_size());
+    DCPS::Serializer ser(&expected_cdr, xcdr2);
+    unsigned start = 0, stop = 0;
+    get_curr_time_ms(start);
+    for (unsigned i = 0; i < REPS; ++i) {
+      ser << mcs;
+      expected_cdr.reset();
+    }
+    get_curr_time_ms(stop);
+    ACE_DEBUG((LM_DEBUG, "Generated marshal: %u ms\n", stop - start));
+  }
+
+  // Serialize using generated vwrite on C++ object.
+  {
+    ACE_Message_Block buffer(value_writer.get_serialized_size());
+    DCPS::Serializer ser(&buffer, xcdr2);
+    value_writer.set_serializer(&ser);
+
+    unsigned start = 0, stop = 0;
+    get_curr_time_ms(start);
+    for (unsigned i = 0; i < REPS; ++i) {
+      vwrite(value_writer, mcs);
+      buffer.reset();
+    }
+    get_curr_time_ms(stop);
+    ACE_DEBUG((LM_DEBUG, "Xcdr2 vwrite: %u ms\n", stop - start));
+  }
+}

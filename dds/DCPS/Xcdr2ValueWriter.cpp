@@ -185,11 +185,15 @@ void Xcdr2ValueWriter::end_serialize_complex()
     ser_->write_list_end_parameter_id();
   }
   serialize_states_.pop();
+
+  // This is needed if the same sample is serialized more than once.
+  if (serialize_states_.empty()) {
+    pos_ = 0;
+  }
 }
 
 void Xcdr2ValueWriter::begin_serialize_aggregated_member(unsigned id, bool must_understand,
                                                          bool optional, bool present)
-
 {
   const Extensibility extensibility = serialize_states_.top().extensibility;
   if (optional && (extensibility == FINAL || extensibility == APPENDABLE)) {
@@ -287,11 +291,11 @@ void Xcdr2ValueWriter::end_union_member()
 // One difference is that sequence has a length field ahead of the elements.
 void Xcdr2ValueWriter::begin_array(XTypes::TypeKind elem_tk)
 {
-  // TODO(sonndinh): Make sure this works for both of these cases:
-  // 1. Multidim array of non-primitive types: e.g. StructA[2][3]
-  // 2. Array of a type which is an array of a non primitive type: e.g. TypeA[2] where
-  //    TypeA is StructA[3].
-  // The current code seems to work with the first case but not the second?
+  // TODO: Revisit for multi-dimensional array with typedef.
+  // See https://github.com/OpenDDS/OpenDDS/issues/4453 for related issue in opendds_idl.
+  // Potential solution: resolve all the intermediary typedefs to get the actual final
+  // element type and at the same time keep track the dimensions of the array in the
+  // vwrite_array function in DynamicVwrite.cpp.
 
   Extensibility arr_exten = FINAL;
   // In case the element type is not primitive, account for the Dheader only when this is

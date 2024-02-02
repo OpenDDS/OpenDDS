@@ -646,6 +646,10 @@ void vwrite_array_helper(ValueWriter& vw, CORBA::ULong dim_idx, const DDS::Bound
 
   if (dim_idx < dims.length()) {
     vw.begin_array(elem_kind);
+    if (is_primitive(elem_kind) && dim_idx == dims.length() - 1) {
+      
+    }
+
     for (CORBA::ULong i = 0; i < dims[dim_idx]; ++i) {
       vw.begin_element(i);
       idx_vec[dim_idx] = i;
