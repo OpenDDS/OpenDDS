@@ -11269,7 +11269,7 @@ jobs:
       uses: actions/cache@v4
       with:
         path: ${{ github.job }}.tar.xz
-        key: c01_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}
+        key: c02_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}
     - name: setup for run-vcpkg
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       shell: bash
@@ -11295,7 +11295,7 @@ jobs:
       shell: cmd
       run: |
         cd OpenDDS
-        configure --tests --ipv6 --rapidjson --ace=${{ github.workspace }}/OpenDDS/ACE_TAO/ACE --tao=${{ github.workspace }}/OpenDDS/ACE_TAO/TAO --mpc=${{ github.workspace }}/MPC --xerces3=${{ env.VCPKG_INSTALLED_DIR }}/x64-windows --openssl=${{ env.VCPKG_INSTALLED_DIR }}/x64-windows --mpcopts=-hierarchy
+        configure --std=c++20 --tests --ipv6 --rapidjson --ace=${{ github.workspace }}/OpenDDS/ACE_TAO/ACE --tao=${{ github.workspace }}/OpenDDS/ACE_TAO/TAO --mpc=${{ github.workspace }}/MPC --xerces3=${{ env.VCPKG_INSTALLED_DIR }}/x64-windows --openssl=${{ env.VCPKG_INSTALLED_DIR }}/x64-windows --mpcopts=-hierarchy
     - name: build ACE & TAO
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       shell: cmd
@@ -11382,7 +11382,7 @@ jobs:
       shell: cmd
       run: |
         cd OpenDDS
-        configure --ipv6 --rapidjson --gtest=${{ github.workspace }}/OpenDDS/tests/googletest/build/install --ace=${{ github.workspace }}/OpenDDS/ACE_TAO/ACE --tao=${{ github.workspace }}/OpenDDS/ACE_TAO/TAO --mpc=${{ github.workspace }}/MPC --xerces3=${{ env.VCPKG_INSTALLED_DIR }}/x64-windows --openssl=${{ env.VCPKG_INSTALLED_DIR }}/x64-windows
+        configure --std=c++20 --ipv6 --rapidjson --gtest=${{ github.workspace }}/OpenDDS/tests/googletest/build/install --ace=${{ github.workspace }}/OpenDDS/ACE_TAO/ACE --tao=${{ github.workspace }}/OpenDDS/ACE_TAO/TAO --mpc=${{ github.workspace }}/MPC --xerces3=${{ env.VCPKG_INSTALLED_DIR }}/x64-windows --openssl=${{ env.VCPKG_INSTALLED_DIR }}/x64-windows
     - name: check build configuration
       shell: cmd
       run: |
@@ -11634,7 +11634,7 @@ jobs:
         cd OpenDDS
         call setenv.cmd
         cd tests\DCPS\Messenger
-        perl %ACE_ROOT%\bin\mwc.pl -type vs2022 -features no_rapidjson=0 -features ipv6=1 -features ssl=1 -features no_cxx11=0
+        perl %DDS_ROOT%\bin\opendds_mwc.pl
     - uses: ammaraskar/msvc-problem-matcher@0.3.0
     - name: make messenger tests
       shell: cmd
@@ -11649,7 +11649,7 @@ jobs:
         cd OpenDDS
         call setenv.cmd
         cd tests\DCPS\C++11
-        perl %ACE_ROOT%\bin\mwc.pl -type vs2022 -features no_rapidjson=0 -features ipv6=1 -features ssl=1 -features no_cxx11=0
+        perl %DDS_ROOT%\bin\opendds_mwc.pl
     - name: make C++11 messenger test
       shell: cmd
       run: |
@@ -11809,7 +11809,7 @@ jobs:
         cd OpenDDS
         call setenv.cmd
         cd tests\DCPS\Compiler
-        perl %ACE_ROOT%\bin\mwc.pl -type vs2022 -features ipv6=1 -features no_cxx11=0 -features no_rapidjson=0 -features ssl=1 -value_project macros+=GTEST_LINKED_AS_SHARED_LIBRARY
+        perl %DDS_ROOT%\bin\opendds_mwc.pl -value_project macros+=GTEST_LINKED_AS_SHARED_LIBRARY
     - uses: ammaraskar/msvc-problem-matcher@0.3.0
     - name: make compiler tests
       shell: cmd
@@ -11970,7 +11970,7 @@ jobs:
         cd OpenDDS
         call setenv.cmd
         cd tests\unit-tests
-        perl %ACE_ROOT%\bin\mwc.pl -type vs2022 -features ipv6=1 -features no_cxx11=0 -features no_rapidjson=0 -features ssl=1 -value_project macros+=GTEST_LINKED_AS_SHARED_LIBRARY
+        perl %DDS_ROOT%\bin\opendds_mwc.pl -value_project macros+=GTEST_LINKED_AS_SHARED_LIBRARY
     - uses: ammaraskar/msvc-problem-matcher@0.3.0
     - name: make unit tests
       shell: cmd

@@ -430,7 +430,7 @@ ReplayerImpl::add_association(const ReaderAssociation& reader,
   {
     ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, this->lock_);
     reader_info_.insert(std::make_pair(reader.readerId,
-                                       ReaderInfo(TheServiceParticipant->publisher_content_filter() ? reader.filterExpression : "",
+                                       ReaderInfo(TheServiceParticipant->publisher_content_filter() ? reader.filterExpression.in() : "",
                                                   reader.exprParams, participant_servant_,
                                                   reader.readerQos.durability.kind > DDS::VOLATILE_DURABILITY_QOS)));
   }

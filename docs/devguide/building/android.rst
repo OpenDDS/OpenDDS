@@ -578,12 +578,12 @@ Failure to do so will result in ACE failing to access any sockets and OpenDDS wi
 Network Availability
 --------------------
 
-When not running in an application targeting API 30 later on Android 10 or later, Android builds of OpenDDS use the ``LinuxNetworkConfigMonitor`` to reconfigure OpenDDS connections automatically when the device switches from one network (cellular or wifi) to another.
+When not running in an application targeting API 30 or later on Android 10 or later, Android builds of OpenDDS use the ``LinuxNetworkConfigMonitor`` to reconfigure OpenDDS connections automatically when the device switches from one network (cellular or WiFi) to another.
 
-When running in an application targeting API 30 later on Android 10, ``LinuxNetworkConfigMonitor`` can no longer be used, as Netlink sockets are blocked by the OS for security reasons.
-In the logs this error show up as:
+When running in an application targeting API 30 or later on Android 10, ``LinuxNetworkConfigMonitor`` can no longer be used, as Netlink sockets are blocked by the OS for security reasons.
+In the logs this warning shows up as:
 
-  ERROR: LinuxNetworkConfigMonitor::open: could not open socket: Permission denied
+  WARNING: LinuxNetworkConfigMonitor::open_i: could not open Netlink socket (this is expected for API>=30, see Android section in the Developer's Guide)
 
 Instead, ``NetworkConfigModifier`` is utilized.
 As a consequence of this, two variables are required from the user, :ref:`android_sdk`, and :ref:`android_target_api`.
