@@ -611,20 +611,6 @@ public:
 #endif /* DDS_HAS_WCHAR */
 
 #if __cplusplus >= 201703L
-  template<typename Type>
-  friend OpenDDS_Dcps_Export
-  bool operator<<(Serializer& s, std::optional<Type> opt) {
-    if (!(s << ACE_OutputCDR::from_boolean(opt.has_value()))) {
-      return false;
-    }
-
-    if (opt.has_value() && !(s << opt.value())) {
-      return false;
-    }
-
-    return true;
-  }
-
   // Extraction operators.
   template<typename Type>
   friend OpenDDS_Dcps_Export
@@ -1082,23 +1068,6 @@ void serialized_size_parameter_id(
 OpenDDS_Dcps_Export
 void serialized_size_list_end_parameter_id(
   const Encoding& encoding, size_t& size, size_t& running_size);
-
-#if __cplusplus >= 201703L
-template<typename Type>
-OpenDDS_Dcps_Export
-bool primitive_serialized_size(
-    const Encoding& encoding, size_t& size, const std::optional<Type>& value,
-    size_t count = 1) {
-  primitive_serialized_size_boolean(encoding, size);
-  if (value.has_value()) {
-    if (!primitive_serialized_size(encoding, size, value.value())) {
-      return false;
-    }
-  }
-
-  return true;
-}
-#endif
 
 } // namespace DCPS
 } // namespace OpenDDS
