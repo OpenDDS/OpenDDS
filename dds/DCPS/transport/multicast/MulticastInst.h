@@ -144,9 +144,6 @@ public:
   void async_send(bool as);
   bool async_send() const;
 
-  virtual int load(ACE_Configuration_Heap& cf,
-                   ACE_Configuration_Section_Key& sect);
-
   /// Diagnostic aid.
   virtual OPENDDS_STRING dump_to_str(DDS::DomainId_t) const;
 

@@ -495,14 +495,6 @@ RtpsUdpInst::new_impl(DDS::DomainId_t domain)
   return make_rch<RtpsUdpTransport>(rchandle_from(this), domain);
 }
 
-int
-RtpsUdpInst::load(ACE_Configuration_Heap& cf,
-                  ACE_Configuration_Section_Key& sect)
-{
-  TransportInst::load(cf, sect); // delegate to parent
-  return 0;
-}
-
 OPENDDS_STRING
 RtpsUdpInst::dump_to_str(DDS::DomainId_t domain) const
 {

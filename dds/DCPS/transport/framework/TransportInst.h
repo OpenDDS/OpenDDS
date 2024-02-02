@@ -31,11 +31,6 @@
 
 #include <ace/Synch_Traits.h>
 
-ACE_BEGIN_VERSIONED_NAMESPACE_DECL
-class ACE_Configuration_Heap;
-class ACE_Configuration_Section_Key;
-ACE_END_VERSIONED_NAMESPACE_DECL
-
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
@@ -78,11 +73,6 @@ public:
   }
 
   bool is_template() const { return is_template_; }
-
-  /// Overwrite the default configurations with the configuration from the
-  /// given section in the ACE_Configuration_Heap object.
-  virtual int load(ACE_Configuration_Heap& cf,
-                   ACE_Configuration_Section_Key& sect);
 
   /// Diagnostic aid.
   void dump(DDS::DomainId_t domain) const;
