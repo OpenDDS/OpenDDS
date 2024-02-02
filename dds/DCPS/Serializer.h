@@ -39,10 +39,6 @@
 #include <ace/CDR_Base.h>
 #include <ace/CDR_Stream.h>
 
-#if __cplusplus >= 201703L
-# include <optional>
-#endif
-
 #include <limits>
 #include <string>
 
@@ -609,17 +605,6 @@ public:
   friend OpenDDS_Dcps_Export
   bool operator<<(Serializer& s, FromBoundedString<wchar_t> x);
 #endif /* DDS_HAS_WCHAR */
-
-#if __cplusplus >= 201703L
-  // Extraction operators.
-  template<typename Type>
-  friend OpenDDS_Dcps_Export
-  bool operator>>(Serializer& s, std::optional<Type>& x) {
-    //ACE_CDR::Boolean has_value = false;
-    //s >> has_value;
-    return true;
-  }
-#endif
 
   friend OpenDDS_Dcps_Export
   bool operator>>(Serializer& s, ACE_CDR::Char& x);
