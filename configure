@@ -82,7 +82,7 @@ my %platforminfo =
                                  'specify how the target', 'build should work'],
                     },
    'linux' => {
-               'compilers' => ['g++', 'clang', 'clang++'],
+               'compilers' => ['g++', 'clang++', 'clang'],
                'libpath' => 'LD_LIBRARY_PATH',
                'aceplatform' => 'linux_$NONSTDCOMP', # $NONSTDCOMP = clang
               },
@@ -185,7 +185,7 @@ my @specs = # Array of array-refs, each inner array is an option group which
    ['Build platform and compiler:',
     'host=s', 'Host (auto detect: linux, win32, macosx)',
     'compiler=s', 'Compiler (auto detect / guess by searching PATH)',
-    'std=s', 'C++ standard version (for compilers that use -std)',
+    'std=s', 'C++ standard version (compiler default)',
     'target=s', 'Cross-compile target (none): see --target-help',
     'target-arch=s', 'Architecture for target (none): see --target-help',
     'target-compiler=s', 'Compiler for target (if req\'d): see --target-help',
@@ -733,14 +733,26 @@ EOF
 
     if ($ver >= 19) {
       push(@{$opts{'features'}}, 'no_cxx11=0');
-      print "Visual C++ has C++11 support\n" if $opts{'verbose'};
+      print "Visual C++ has >= C++11 support\n" if $opts{'verbose'};
+    }
+    if ($opts{'std'}) {
+      # Accept any of --std=17, --std=stdcpp17, --std=c++17, etc.
+      $opts{'std'} =~ s/^(std)?(cpp|c\+\+)//;
+      my $prefix = 'stdcpp';
+      push(@{$opts{'mpcopts'}}, "-value_template LanguageStandard=$prefix$opts{'std'}");
+      print "Setting Visual C++ LanguageStandard to $prefix$opts{'std'}\n" if $opts{'verbose'};
+      if ($opts{'std'} eq 'latest' || $opts{'std'} >= 17) {
+        push(@{$opts{'features'}}, 'no_cxx17=0');
+        print "Visual C++ has >= C++17 support\n" if $opts{'verbose'};
+      }
     }
     $ENV{'PATH'} = $savepath;
     print "Detected Visual C++ version: $opts{'compiler_version'}\n"
       if $opts{'verbose'};
   }
-  elsif ($opts{'compiler'} =~ /g\+\+/) { # GCC or Clang
+  elsif ($opts{'compiler'} =~ /g\+\+|clang/) {
     my $version_string = `$opts{'compiler'} --version`;
+    print "Compiler version: $version_string\n" if $opts{'verbose'};
     if ($opts{'std'}) {
       push(@{$opts{'macros'}}, 'CCFLAGS += -std=' . $opts{'std'});
       print "Added platform_macros for -std=$opts{std}\n" if $opts{'verbose'};
@@ -2123,8 +2135,8 @@ sub write_opendds_mwc {
 if (!defined(\$ENV{ACE_ROOT}) || !defined(\$ENV{MPC_ROOT})) {
   die("The enviroment needs to be setup.");
 }
-exec('perl', "\$ENV{ACE_ROOT}/bin/mwc.pl", $args, \@ARGV)
-  or die("Failed to exec mwc: \$!");
+system('perl', "\$ENV{ACE_ROOT}/bin/mwc.pl", $args, \@ARGV) == 0
+  or die("Failed to run mwc: \$!");
 EOF
   $fd->close();
   print "Wrote $path\n" if $opts{'verbose'};

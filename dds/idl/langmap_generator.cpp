@@ -1762,6 +1762,7 @@ struct Cxx11Generator : GeneratorBase
                  const std::vector<AST_UnionBranch*>& branches, AST_Type* discriminator)
   {
     const ScopedNamespaceGuard namespaces(name, be_global->lang_header_);
+    const ScopedNamespaceGuard namespacesCpp(name, be_global->impl_);
     const char* const nm = name->last_component()->get_string();
     const std::string d_type = generator_->map_type(discriminator);
     const std::string defVal = generateDefaultValue(u);
@@ -1818,7 +1819,6 @@ struct Cxx11Generator : GeneratorBase
     gen_common_strunion_post(nm);
     gen_union_pragma_post();
 
-    const ScopedNamespaceGuard namespacesCpp(name, be_global->impl_);
     be_global->impl_ <<
       nm << "::" << nm << "(const " << nm << "& rhs)\n"
       "{\n"

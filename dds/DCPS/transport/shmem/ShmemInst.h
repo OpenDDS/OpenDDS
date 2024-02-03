@@ -21,9 +21,6 @@ class OpenDDS_Shmem_Export ShmemInst : public TransportInst {
 public:
   static const TimeDuration default_association_resend_period;
 
-  virtual int load(ACE_Configuration_Heap& cf,
-                   ACE_Configuration_Section_Key& sect);
-
   virtual OPENDDS_STRING dump_to_str(DDS::DomainId_t domain) const;
 
   /// Size (in bytes) of the single shared-memory pool allocated by this
