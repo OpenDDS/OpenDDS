@@ -1680,20 +1680,30 @@ bool has_explicit_keys(DDS::DynamicType* dt)
   return false;
 }
 
-DDS::ReturnCode_t flat_index(
-  CORBA::ULong& flat_idx, const std::vector<CORBA::ULong>& idx_vec, const DDS::BoundSeq& dims)
+// Convert to a flat index using a given number of dimensions starting from the outermost dimension.
+DDS::ReturnCode_t flat_index(CORBA::ULong& flat_idx, const std::vector<CORBA::ULong>& idx_vec,
+                             const DDS::BoundSeq& dims, CORBA::ULong up_to_ndims)
 {
-  if (idx_vec.size() != dims.length()) {
+  const CORBA::ULong dims_len = dims.length();
+  if (idx_vec.size() != dims_len) {
     if (DCPS::log_level >= DCPS::LogLevel::Notice) {
       ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: flat_index: Number of dimensions (%u) != "
-                 " size of the index vector (%u)\n", dims.length(), idx_vec.size()));
+                 " size of the index vector (%u)\n", dims_len, idx_vec.size()));
     }
     return DDS::RETCODE_BAD_PARAMETER;
   }
 
-  CORBA::ULong ret_val = 0;
+  if (up_to_ndims > dims_len) {
+    up_to_ndims = dims_len;
+  }
+
+  flat_idx = 0;
+  if (up_to_ndims == 0) {
+    return DDS::RETCODE_OK;
+  }
+
   CORBA::ULong factor = 1;
-  for (CORBA::ULong i = dims.length() - 1; i > 0; --i) {
+  for (CORBA::ULong i = up_to_ndims - 1; i > 0; --i) {
     const CORBA::ULong dim = dims[i];
     if (idx_vec[i] >= dim) {
       if (DCPS::log_level >= DCPS::LogLevel::Notice) {
@@ -1702,10 +1712,11 @@ DDS::ReturnCode_t flat_index(
       }
       return DDS::RETCODE_BAD_PARAMETER;
     }
-    ret_val += factor * idx_vec[i];
+    flat_idx += factor * idx_vec[i];
     factor *= dim;
   }
-  flat_idx = ret_val + factor * idx_vec[0];
+  flat_idx += factor * idx_vec[0];
+
   return DDS::RETCODE_OK;
 }
 

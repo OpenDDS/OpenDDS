@@ -639,6 +639,143 @@ void Xcdr2ValueWriter::write_absent_value()
   return;
 }
 
+void Xcdr2ValueWriter::write_boolean_array(const ACE_CDR::Boolean* x, size_t length)
+{
+  if (mode_ == SERIALIZATION_SIZE_MODE) {
+    primitive_serialized_size_boolean(encoding_, size_states_.top().total_size, length);
+  } else {
+    ser_->write_boolean_array(x, length);
+  }
+}
+
+void Xcdr2ValueWriter::write_byte_array(const ACE_CDR::Octet* x, size_t length)
+{
+  if (mode_ == SERIALIZATION_SIZE_MODE) {
+    primitive_serialized_size_octet(encoding_, size_states_.top().total_size, length);
+  } else {
+    ser_->write_octet_array(x, length);
+  }
+}
+
+#if OPENDDS_HAS_EXPLICIT_INTS
+void Xcdr2ValueWriter::write_int8_array(const ACE_CDR::Int8* x, size_t length)
+{
+  if (mode_ == SERIALIZATION_SIZE_MODE) {
+    primitive_serialized_size_int8(encoding_, size_states_.top().total_size, length);
+  } else {
+    ser_->write_int8_array(x, length);
+  }
+}
+
+void Xcdr2ValueWriter::write_uint8_array(const ACE_CDR::UInt8* x, size_t length)
+{
+  if (mode_ == SERIALIZATION_SIZE_MODE) {
+    primitive_serialized_size_uint8(encoding_, size_states_.top().total_size, length);
+  } else {
+    ser_->write_uint8_array(x, length);
+  }
+}
+#endif
+
+void Xcdr2ValueWriter::write_int16_array(const ACE_CDR::Short* x, size_t length)
+{
+  if (mode_ == SERIALIZATION_SIZE_MODE) {
+    primitive_serialized_size(encoding_, size_states_.top().total_size, ACE_CDR::Short(), length);
+  } else {
+    ser_->write_short_array(x, length);
+  }
+}
+
+void Xcdr2ValueWriter::write_uint16_array(const ACE_CDR::UShort* x, size_t length)
+{
+  if (mode_ == SERIALIZATION_SIZE_MODE) {
+    primitive_serialized_size(encoding_, size_states_.top().total_size, ACE_CDR::UShort(), length);
+  } else {
+    ser_->write_ushort_array(x, length);
+  }
+}
+
+void Xcdr2ValueWriter::write_int32_array(const ACE_CDR::Long* x, size_t length)
+{
+  if (mode_ == SERIALIZATION_SIZE_MODE) {
+    primitive_serialized_size(encoding_, size_states_.top().total_size, ACE_CDR::Long(), length);
+  } else {
+    ser_->write_long_array(x, length);
+  }
+}
+
+void Xcdr2ValueWriter::write_uint32_array(const ACE_CDR::ULong* x, size_t length)
+{
+  if (mode_ == SERIALIZATION_SIZE_MODE) {
+    primitive_serialized_size(encoding_, size_states_.top().total_size, ACE_CDR::ULong(), length);
+  } else {
+    ser_->write_ulong_array(x, length);
+  }
+}
+
+void Xcdr2ValueWriter::write_int64_array(const ACE_CDR::LongLong* x, size_t length)
+{
+  if (mode_ == SERIALIZATION_SIZE_MODE) {
+    primitive_serialized_size(encoding_, size_states_.top().total_size, ACE_CDR::LongLong(), length);
+  } else {
+    ser_->write_longlong_array(x, length);
+  }
+}
+
+void Xcdr2ValueWriter::write_uint64_array(const ACE_CDR::ULongLong* x, size_t length)
+{
+  if (mode_ == SERIALIZATION_SIZE_MODE) {
+    primitive_serialized_size(encoding_, size_states_.top().total_size, ACE_CDR::ULongLong(), length);
+  } else {
+    ser_->write_ulonglong_array(x, length);
+  }
+}
+
+void Xcdr2ValueWriter::write_float32_array(const ACE_CDR::Float* x, size_t length)
+{
+  if (mode_ == SERIALIZATION_SIZE_MODE) {
+    primitive_serialized_size(encoding_, size_states_.top().total_size, ACE_CDR::Float(), length);
+  } else {
+    ser_->write_float_array(x, length);
+  }
+}
+
+void Xcdr2ValueWriter::write_float64_array(const ACE_CDR::Double* x, size_t length)
+{
+  if (mode_ == SERIALIZATION_SIZE_MODE) {
+    primitive_serialized_size(encoding_, size_states_.top().total_size, ACE_CDR::Double(), length);
+  } else {
+    ser_->write_double_array(x, length);
+  }
+}
+
+void Xcdr2ValueWriter::write_float128_array(const ACE_CDR::LongDouble* x, size_t length)
+{
+  if (mode_ == SERIALIZATION_SIZE_MODE) {
+    primitive_serialized_size(encoding_, size_states_.top().total_size, ACE_CDR::LongDouble(), length);
+  } else {
+    ser_->write_longdouble_array(x, length);
+  }
+}
+
+void Xcdr2ValueWriter::write_char8_array(const ACE_CDR::Char* x, size_t length)
+{
+  if (mode_ == SERIALIZATION_SIZE_MODE) {
+    primitive_serialized_size_char(encoding_, size_states_.top().total_size, length);
+  } else {
+    ser_->write_char_array(x, length);
+  }
+}
+
+void Xcdr2ValueWriter::write_char16_array(const ACE_CDR::WChar* x, size_t length)
+{
+  if (mode_ == SERIALIZATION_SIZE_MODE) {
+    primitive_serialized_size_wchar(encoding_, size_states_.top().total_size, length);
+  } else {
+    ser_->write_wchar_array(x, length);
+  }
+}
+
 size_t Xcdr2ValueWriter::get_serialized_size() const
 {
   if (!size_cache_.empty()) {

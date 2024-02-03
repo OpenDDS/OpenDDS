@@ -35,6 +35,262 @@ void begin_member_helper(ValueWriter& vw, VWriterMemberParam* params,
   }
 }
 
+DDS::ReturnCode_t get_equivalent_kind(const DDS::DynamicType_var& type, XTypes::TypeKind& treat_as)
+{
+  const DDS::TypeKind tk = type->get_kind();
+  treat_as = tk;
+
+  DDS::ReturnCode_t rc = DDS::RETCODE_OK;
+  if (tk == XTypes::TK_ENUM) {
+    rc = XTypes::enum_bound(type, treat_as);
+    if (rc != DDS::RETCODE_OK) {
+      if (log_level >= LogLevel::Notice) {
+        ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: get_equivalent_kind: enum_bound failed (%C)\n",
+                   retcode_to_string(rc)));
+      }
+      return rc;
+    }
+  } else if (tk == XTypes::TK_BITMASK) {
+    rc = XTypes::bitmask_bound(type, treat_as);
+    if (rc != DDS::RETCODE_OK) {
+      if (log_level >= LogLevel::Notice) {
+        ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: get_equivalent_kind: bitmask_bound failed (%C)\n",
+                   retcode_to_string(rc)));
+      }
+      return rc;
+    }
+  }
+  return DDS::RETCODE_OK;
+}
+
+DDS::ReturnCode_t vwrite_primitive_array_i(ValueWriter& vw, DDS::DynamicData_ptr value, DDS::MemberId id,
+                                           XTypes::TypeKind elem_kind, XTypes::TypeKind orig_elem_kind, bool for_sequence)
+{
+  using namespace XTypes;
+  DDS::ReturnCode_t rc = DDS::RETCODE_OK;
+  switch (elem_kind) {
+  case TK_INT8: {
+    DDS::Int8Seq val;
+    rc = value->get_int8_values(val, id);
+    if (rc == DDS::RETCODE_OK) {
+      if (for_sequence) {
+        vw.begin_sequence(orig_elem_kind, val.length());
+      }
+      vw.write_int8_array(val.get_buffer(), val.length());
+      if (for_sequence) {
+        vw.end_sequence();
+      }
+    }
+    break;
+  }
+  case TK_UINT8: {
+    DDS::UInt8Seq val;
+    rc = value->get_uint8_values(val, id);
+    if (rc == DDS::RETCODE_OK) {
+      if (for_sequence) {
+        vw.begin_sequence(orig_elem_kind, val.length());
+      }
+      vw.write_uint8_array(val.get_buffer(), val.length());
+      if (for_sequence) {
+        vw.end_sequence();
+      }
+    }
+    break;
+  }
+  case TK_INT16: {
+    DDS::Int16Seq val;
+    rc = value->get_int16_values(val, id);
+    if (rc == DDS::RETCODE_OK) {
+      if (for_sequence) {
+        vw.begin_sequence(orig_elem_kind, val.length());
+      }
+      vw.write_int16_array(val.get_buffer(), val.length());
+      if (for_sequence) {
+        vw.end_sequence();
+      }
+    }
+    break;
+  }
+  case TK_UINT16: {
+    DDS::UInt16Seq val;
+    rc = value->get_uint16_values(val, id);
+    if (rc == DDS::RETCODE_OK) {
+      if (for_sequence) {
+        vw.begin_sequence(orig_elem_kind, val.length());
+      }
+      vw.write_uint16_array(val.get_buffer(), val.length());
+      if (for_sequence) {
+        vw.end_sequence();
+      }
+    }
+    break;
+  }
+  case TK_INT32: {
+    DDS::Int32Seq val;
+    rc = value->get_int32_values(val, id);
+    if (rc == DDS::RETCODE_OK) {
+      if (for_sequence) {
+        vw.begin_sequence(orig_elem_kind, val.length());
+      }
+      vw.write_int32_array(val.get_buffer(), val.length());
+      if (for_sequence) {
+        vw.end_sequence();
+      }
+    }
+    break;
+  }
+  case TK_UINT32: {
+    DDS::UInt32Seq val;
+    rc = value->get_uint32_values(val, id);
+    if (rc == DDS::RETCODE_OK) {
+      if (for_sequence) {
+        vw.begin_sequence(orig_elem_kind, val.length());
+      }
+      vw.write_uint32_array(val.get_buffer(), val.length());
+      if (for_sequence) {
+        vw.end_sequence();
+      }
+    }
+    break;
+  }
+  case TK_INT64: {
+    DDS::Int64Seq val;
+    rc = value->get_int64_values(val, id);
+    if (rc == DDS::RETCODE_OK) {
+      if (for_sequence) {
+        vw.begin_sequence(orig_elem_kind, val.length());
+      }
+      vw.write_int64_array(val.get_buffer(), val.length());
+      if (for_sequence) {
+        vw.end_sequence();
+      }
+    }
+    break;
+  }
+  case TK_UINT64: {
+    DDS::UInt64Seq val;
+    rc = value->get_uint64_values(val, id);
+    if (rc == DDS::RETCODE_OK) {
+      if (for_sequence) {
+        vw.begin_sequence(orig_elem_kind, val.length());
+      }
+      vw.write_uint64_array(val.get_buffer(), val.length());
+      if (for_sequence) {
+        vw.end_sequence();
+      }
+    }
+    break;
+  }
+  case TK_FLOAT32: {
+    DDS::Float32Seq val;
+    rc = value->get_float32_values(val, id);
+    if (rc == DDS::RETCODE_OK) {
+      if (for_sequence) {
+        vw.begin_sequence(orig_elem_kind, val.length());
+      }
+      vw.write_float32_array(val.get_buffer(), val.length());
+      if (for_sequence) {
+        vw.end_sequence();
+      }
+    }
+    break;
+  }
+  case TK_FLOAT64: {
+    DDS::Float64Seq val;
+    rc = value->get_float64_values(val, id);
+    if (rc == DDS::RETCODE_OK) {
+      if (for_sequence) {
+        vw.begin_sequence(orig_elem_kind, val.length());
+      }
+      vw.write_float64_array(val.get_buffer(), val.length());
+      if (for_sequence) {
+        vw.end_sequence();
+      }
+    }
+    break;
+  }
+  case TK_FLOAT128: {
+    DDS::Float128Seq val;
+    rc = value->get_float128_values(val, id);
+    if (rc == DDS::RETCODE_OK) {
+      if (for_sequence) {
+        vw.begin_sequence(orig_elem_kind, val.length());
+      }
+      vw.write_float128_array(val.get_buffer(), val.length());
+      if (for_sequence) {
+        vw.end_sequence();
+      }
+    }
+    break;
+  }
+  case TK_CHAR8: {
+    DDS::CharSeq val;
+    rc = value->get_char8_values(val, id);
+    if (rc == DDS::RETCODE_OK) {
+      if (for_sequence) {
+        vw.begin_sequence(orig_elem_kind, val.length());
+      }
+      vw.write_char8_array(val.get_buffer(), val.length());
+      if (for_sequence) {
+        vw.end_sequence();
+      }
+    }
+    break;
+  }
+#ifdef DDS_HAS_WCHAR
+  case TK_CHAR16: {
+    DDS::WcharSeq val;
+    rc = value->get_char16_values(val, id);
+    if (rc == DDS::RETCODE_OK) {
+      if (for_sequence) {
+        vw.begin_sequence(orig_elem_kind, val.length());
+      }
+      vw.write_char16_array(val.get_buffer(), val.length());
+      if (for_sequence) {
+        vw.end_sequence();
+      }
+    }
+    break;
+  }
+#endif
+  case TK_BYTE: {
+    DDS::ByteSeq val;
+    rc = value->get_byte_values(val, id);
+    if (rc == DDS::RETCODE_OK) {
+      if (for_sequence) {
+        vw.begin_sequence(orig_elem_kind, val.length());
+      }
+      vw.write_byte_array(val.get_buffer(), val.length());
+      if (for_sequence) {
+        vw.end_sequence();
+      }
+    }
+    break;
+  }
+  case TK_BOOLEAN: {
+    DDS::BooleanSeq val;
+    rc = value->get_boolean_values(val, id);
+    if (rc == DDS::RETCODE_OK) {
+      if (for_sequence) {
+        vw.begin_sequence(orig_elem_kind, val.length());
+      }
+      vw.write_boolean_array(val.get_buffer(), val.length());
+      if (for_sequence) {
+        vw.end_sequence();
+      }
+    }
+    break;
+  }
+  default:
+    if (log_level >= LogLevel::Notice) {
+      ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: vwrite_primitive_array_i:"
+                 " Expect a primitive type, receive %C\n", XTypes::typekind_to_string(elem_kind)));
+    }
+    return DDS::RETCODE_BAD_PARAMETER;
+  }
+  return rc;
+}
+
 // Argument containing_tk and params only apply when this is a member of a struct or union,
 // and is ignored when this is an element of a sequence or array.
 void vwrite_item(ValueWriter& vw, DDS::DynamicData_ptr value, DDS::MemberId id,
@@ -43,29 +299,12 @@ void vwrite_item(ValueWriter& vw, DDS::DynamicData_ptr value, DDS::MemberId id,
 {
   using namespace OpenDDS::XTypes;
   const DDS::TypeKind item_tk = item_type->get_kind();
-  DDS::TypeKind treat_as = item_tk;
-
-  DDS::ReturnCode_t rc = DDS::RETCODE_OK;
-  if (item_tk == TK_ENUM) {
-    rc = enum_bound(item_type, treat_as);
-    if (rc != DDS::RETCODE_OK) {
-      if (log_level >= LogLevel::Warning) {
-        ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: vwrite_item: enum_bound failed (%C)\n",
-                   retcode_to_string(rc)));
-      }
-      return;
-    }
-  } else if (item_tk == TK_BITMASK) {
-    rc = bitmask_bound(item_type, treat_as);
-    if (rc != DDS::RETCODE_OK) {
-      if (log_level >= LogLevel::Warning) {
-        ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: vwrite_item: bitmask_bound failed (%C)\n",
-                   retcode_to_string(rc)));
-      }
-      return;
-    }
+  DDS::TypeKind treat_as;
+  if (get_equivalent_kind(item_type, treat_as) != DDS::RETCODE_OK) {
+    return;
   }
 
+  DDS::ReturnCode_t rc = DDS::RETCODE_OK;
   switch (treat_as) {
   case TK_INT8: {
     CORBA::Int8 val = 0;
@@ -322,10 +561,31 @@ void vwrite_item(ValueWriter& vw, DDS::DynamicData_ptr value, DDS::MemberId id,
     break;
   }
 #endif
+  case TK_SEQUENCE: {
+    DDS::TypeDescriptor_var seq_td;
+    rc = item_type->get_descriptor(seq_td);
+    if (rc != DDS::RETCODE_OK) {
+      if (log_level >= LogLevel::Warning) {
+        ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: vwrite_item: get_descriptor for sequence failed (%C)\n",
+                   retcode_to_string(rc)));
+      }
+      return;
+    }
+    DDS::DynamicType_var elem_type = get_base_type(seq_td->element_type());
+    const TypeKind elem_kind = elem_type->get_kind();
+    TypeKind treat_elem_as;
+    if (get_equivalent_kind(elem_type, treat_elem_as) != DDS::RETCODE_OK) {
+      return;
+    }
+    // Try writing the whole primitive sequence. If fails, fall back to write element one by one.
+    if (is_primitive(treat_elem_as) &&
+        vwrite_primitive_array_i(vw, value, id, treat_elem_as, elem_kind, true) == DDS::RETCODE_OK) {
+      break;
+    }
+  }
   case TK_STRUCTURE:
   case TK_UNION:
-  case TK_ARRAY:
-  case TK_SEQUENCE: {
+  case TK_ARRAY: {
     DDS::DynamicData_var member_data;
     rc = value->get_complex_value(member_data, id);
     if (!check_rc(rc, id, treat_as, "vwrite_item")) {
@@ -637,25 +897,61 @@ void vwrite_element(ValueWriter& vw, DDS::DynamicData_ptr value,
   vwrite_item(vw, value, id, elem_dt);
 }
 
-// TODO(sonndinh): Optimize to write array for primitive element type.
+DDS::ReturnCode_t vwrite_primitive_array(ValueWriter& vw, DDS::DynamicData_ptr value,
+                                         XTypes::TypeKind prim_kind, XTypes::TypeKind orig_kind, CORBA::ULong arr_flat_idx)
+{
+  // TODO: To support this optimization for dynamic data, we need to have the semantics
+  // of the MemberId argument dependent on whether get_*_value or get_*_values is called
+  // on the dynamic data object. In particular, in get_*_value, id is the Id of the final
+  // element type; in get_*_values, id is the Id of the innermost single-dimension array
+  // in relative to the whole original array.
+  const DDS::MemberId id = value->get_member_id_at_index(arr_flat_idx);
+  if (id == XTypes::MEMBER_ID_INVALID) {
+    if (log_level >= LogLevel::Warning) {
+      ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: vwrite_primitive_array: get_member_id_at_index %u failed\n", arr_flat_idx));
+    }
+    return DDS::RETCODE_BAD_PARAMETER;
+  }
+
+  return vwrite_primitive_array_i(vw, value, id, prim_kind, orig_kind, false /*for_sequence*/);
+}
+
 void vwrite_array_helper(ValueWriter& vw, CORBA::ULong dim_idx, const DDS::BoundSeq& dims,
                          std::vector<CORBA::ULong> idx_vec, const DDS::DynamicType_var& elem_type,
                          DDS::DynamicData_ptr value)
 {
   const XTypes::TypeKind elem_kind = elem_type->get_kind();
+  const CORBA::ULong dims_len = dims.length();
+  XTypes::TypeKind treat_elem_as;
+  if (get_equivalent_kind(elem_type, treat_elem_as) != DDS::RETCODE_OK) {
+    return;
+  }
 
-  if (dim_idx < dims.length()) {
-    vw.begin_array(elem_kind);
-    if (is_primitive(elem_kind) && dim_idx == dims.length() - 1) {
-      
+  const bool try_optimize = XTypes::is_primitive(treat_elem_as) && dim_idx == dims_len - 1;
+  bool optimize_failed = false;
+  vw.begin_array(elem_kind);
+  if (try_optimize) {
+    // Try writing the innermost arrays using write_*_array.
+    // Fall back to write elements one by one if fails.
+    CORBA::ULong arr_flat_idx = 0;
+    const DDS::ReturnCode_t rc = XTypes::flat_index(arr_flat_idx, idx_vec, dims, dim_idx);
+    if (rc != DDS::RETCODE_OK) {
+      if (log_level >= LogLevel::Warning) {
+        ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: vwrite_array_helper: flat_index failed (%C)\n",
+                   retcode_to_string(rc)));
+      }
+      return;
     }
+    optimize_failed = vwrite_primitive_array(vw, value, treat_elem_as, elem_kind, arr_flat_idx) != DDS::RETCODE_OK;
+  }
 
+  if (!try_optimize || optimize_failed) {
     for (CORBA::ULong i = 0; i < dims[dim_idx]; ++i) {
       vw.begin_element(i);
       idx_vec[dim_idx] = i;
-      if (dim_idx == dims.length() - 1) {
+      if (dim_idx == dims_len - 1) {
         CORBA::ULong flat_idx = 0;
-        const DDS::ReturnCode_t rc = XTypes::flat_index(flat_idx, idx_vec, dims);
+        const DDS::ReturnCode_t rc = XTypes::flat_index(flat_idx, idx_vec, dims, dims_len);
         if (rc != DDS::RETCODE_OK) {
           if (log_level >= LogLevel::Warning) {
             ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: vwrite_array_helper: flat_index failed (%C)\n",
@@ -669,13 +965,10 @@ void vwrite_array_helper(ValueWriter& vw, CORBA::ULong dim_idx, const DDS::Bound
       }
       vw.end_element();
     }
-    vw.end_array();
   }
+  vw.end_array();
 }
 
-// Note: Writing primitive sequence/array to XCDR can be optimized by getting the whole
-// sequence/array from the dynamic data object and write it with the ValueWriter's write_*_array
-// functions, assuming they use Serializer's write_*_array functions.
 void vwrite_array(ValueWriter& vw, DDS::DynamicData_ptr value, const DDS::DynamicType_var& dt)
 {
   DDS::TypeDescriptor_var td;

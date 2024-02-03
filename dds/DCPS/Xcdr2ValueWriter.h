@@ -62,6 +62,24 @@ public:
   void write_enum(const char* name, ACE_CDR::Long value, XTypes::TypeKind as_int = XTypes::TK_INT32);
   void write_absent_value();
 
+  void write_boolean_array(const ACE_CDR::Boolean* x, size_t length);
+  void write_byte_array(const ACE_CDR::Octet* x, size_t length);
+#if OPENDDS_HAS_EXPLICIT_INTS
+  void write_int8_array(const ACE_CDR::Int8* x, size_t length);
+  void write_uint8_array(const ACE_CDR::UInt8* x, size_t length);
+#endif
+  void write_int16_array(const ACE_CDR::Short* x, size_t length);
+  void write_uint16_array(const ACE_CDR::UShort* x, size_t length);
+  void write_int32_array(const ACE_CDR::Long* x, size_t length);
+  void write_uint32_array(const ACE_CDR::ULong* x, size_t length);
+  void write_int64_array(const ACE_CDR::LongLong* x, size_t length);
+  void write_uint64_array(const ACE_CDR::ULongLong* x, size_t length);
+  void write_float32_array(const ACE_CDR::Float* x, size_t length);
+  void write_float64_array(const ACE_CDR::Double* x, size_t length);
+  void write_float128_array(const ACE_CDR::LongDouble* x, size_t length);
+  void write_char8_array(const ACE_CDR::Char* x, size_t length);
+  void write_char16_array(const ACE_CDR::WChar* x, size_t length);
+
   size_t get_serialized_size() const;
   const std::vector<size_t>& get_serialized_sizes() const;
 
