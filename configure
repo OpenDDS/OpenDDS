@@ -773,7 +773,7 @@ EOF
 
     if ($opts{'std'}) {
       my $cpp17 = qr/(17|2a|20|2b|23)/;
-      if ($opts{'std'} && $opts{'std'} =~ /(0x|11|1y|14|1z|$cpp17)$/) {
+      if ($opts{'std'} =~ /(0x|11|1y|14|1z|$cpp17)$/) {
         push(@{$opts{'features'}}, 'no_cxx11=0');
         print "Compiler has >= C++11 support\n" if $opts{'verbose'};
       }
