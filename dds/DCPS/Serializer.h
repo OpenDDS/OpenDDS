@@ -606,6 +606,7 @@ public:
   bool operator<<(Serializer& s, FromBoundedString<wchar_t> x);
 #endif /* DDS_HAS_WCHAR */
 
+  // Extraction operators.
   friend OpenDDS_Dcps_Export
   bool operator>>(Serializer& s, ACE_CDR::Char& x);
   friend OpenDDS_Dcps_Export
