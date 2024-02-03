@@ -813,29 +813,3 @@ TEST(dds_DCPS_Xcdr2ValueWriter, MutableComplexStruct)
 
   check_serialized_data<DCPS::Test_MutableComplexStruct_xtag>(value_writer, mcs);
 }
-
-#include <time.h>
-
-void get_time( timespec* ts ){
-	clock_gettime( CLOCK_MONOTONIC, ts);
-}
-
-void timespec_to_ms(const timespec& ts, unsigned& ms){
-	ms = ts.tv_sec * 1000;
-	ms += ts.tv_nsec / 1000000;
-	ms += (ts.tv_nsec % 1000000) > 500000 ? 1 : 0;
-}
-
-void get_curr_time_ms(unsigned& ms){
-	timespec ts;
-	get_time(&ts);
-	timespec_to_ms(ts,ms);
-}
-
-unsigned timespec_to_ms(const timespec& ts){
-	unsigned ms;
-	ms = ts.tv_sec * 1000;
-	ms += ts.tv_nsec / 1000000;
-	ms += (ts.tv_nsec % 1000000) > 500000 ? 1 : 0;
-	return ms;
-}
