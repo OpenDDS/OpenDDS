@@ -1,3 +1,6 @@
+#include <tao/LongSeq.pidl>
+#include <tao/ShortSeq.pidl>
+
 module Test {
 
 // Basic types that cover all extensibilities
