@@ -39,6 +39,7 @@ BE_post_init(char *[], long)
   idl_global->unknown_annotations_ = IDL_GlobalData::UNKNOWN_ANNOTATIONS_IGNORE;
 
   DRV_cpp_putarg("-D__OPENDDS_IDL_HAS_ANNOTATIONS");
+  DRV_cpp_putarg("-DOPENDDS_HIDE_DYNMIC_DATA");
 
   idl_global->eval(
     "module OpenDDS {module internal {@annotation hidden_op_in_java {string impl;};};};\n");

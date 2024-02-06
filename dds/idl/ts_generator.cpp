@@ -161,7 +161,8 @@ bool ts_generator::generate_ts(AST_Type* node, UTL_ScopedName* name)
     "dds/DdsDcpsTopic.idl",
     "dds/DdsDcpsPublication.idl",
     "dds/DdsDcpsSubscriptionExt.idl",
-    "dds/DdsDcpsTypeSupportExt.idl"
+    "dds/DdsDcpsTypeSupportExt.idl",
+    "dds/DdsDynamicData.idl"
   };
   add_includes(idl_includes, BE_GlobalData::STREAM_IDL);
 
@@ -186,16 +187,6 @@ bool ts_generator::generate_ts(AST_Type* node, UTL_ScopedName* name)
     "dds/DCPS/DataReaderImpl_T.h", "dds/DCPS/XTypes/TypeObject.h"
   };
   add_includes(cpp_includes, BE_GlobalData::STREAM_CPP);
-
-  // This is for Java because we can't include DynamicData.idl. In addition, MPC
-  // will make invalid rules in a Java build based on this forward declaration.
-  be_global->idl_ <<
-    "#if !defined OPENDDS_SAFETY_PROFILE && !defined __OPENDDS_MPC\n"
-    "module DDS {\n"
-    "    local interface DynamicData;\n"
-    "};\n"
-    "#endif\n"
-    "\n";
 
   std::map<std::string, std::string> replacements;
   replacements["SCOPED"] = scoped(name, EscapeContext_ForGenIdl);
