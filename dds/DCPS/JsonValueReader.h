@@ -86,7 +86,7 @@ public:
   bool read_float32(ACE_CDR::Float& value);
   bool read_float64(ACE_CDR::Double& value);
   bool read_float128(ACE_CDR::LongDouble& value);
-  bool read_fixed(OpenDDS::FaceTypes::Fixed& value);
+  bool read_fixed(ACE_CDR::Fixed& value);
   bool read_char8(ACE_CDR::Char& value);
   bool read_char16(ACE_CDR::WChar& value);
   bool read_string(std::string& value);
@@ -551,10 +551,10 @@ bool JsonValueReader<InputStream>::read_float128(ACE_CDR::LongDouble& value)
 }
 
 template <typename InputStream>
-bool JsonValueReader<InputStream>::read_fixed(OpenDDS::FaceTypes::Fixed& /*value*/)
+bool JsonValueReader<InputStream>::read_fixed(ACE_CDR::Fixed& value)
 {
-  // TODO
   if (peek() == kString) {
+    value = ACE_CDR::Fixed::from_string(string_value_.c_str());
     return consume(kString);
   }
   return false;
