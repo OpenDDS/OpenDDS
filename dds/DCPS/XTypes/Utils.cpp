@@ -1720,6 +1720,12 @@ DDS::ReturnCode_t flat_index(CORBA::ULong& flat_idx, const std::vector<CORBA::UL
   return DDS::RETCODE_OK;
 }
 
+DDS::ReturnCode_t flat_index(CORBA::ULong& flat_idx, const std::vector<CORBA::ULong>& idx_vec,
+                             const DDS::BoundSeq& dims)
+{
+  return flat_index(flat_idx, idx_vec, dims, dims.length());
+}
+
 } // namespace XTypes
 } // namespace OpenDDS
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
