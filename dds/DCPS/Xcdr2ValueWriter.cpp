@@ -334,7 +334,7 @@ void Xcdr2ValueWriter::end_sequence()
   end_complex();
 }
 
-void Xcdr2ValueWriter::begin_element(size_t /*idx*/)
+void Xcdr2ValueWriter::begin_element(ACE_CDR::ULong /*idx*/)
 {
   return;
 }

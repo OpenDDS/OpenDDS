@@ -5,6 +5,7 @@
 
 #include <vector>
 #include <stack>
+#include <stdexcept>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -18,7 +19,11 @@ public:
     , encoding_(encoding)
     , pos_(0)
     , ser_(0)
-  {}
+  {
+    if (encoding.xcdr_version() != Encoding::XCDR_VERSION_2) {
+      throw std::runtime_error("Xcdr2ValueWriter only supports XCDR2");
+    }
+  }
 
   void begin_struct(Extensibility extensibility);
   void end_struct();
@@ -36,7 +41,7 @@ public:
   void end_array();
   void begin_sequence(XTypes::TypeKind elem_kind, ACE_CDR::ULong length);
   void end_sequence();
-  void begin_element(size_t idx);
+  void begin_element(ACE_CDR::ULong idx);
   void end_element();
 
   void write_boolean(ACE_CDR::Boolean value);

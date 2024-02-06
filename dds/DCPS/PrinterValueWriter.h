@@ -52,7 +52,7 @@ public:
   void end_array();
   void begin_sequence(XTypes::TypeKind elem_tk = XTypes::TK_NONE, ACE_CDR::ULong length = 0);
   void end_sequence();
-  void begin_element(size_t idx);
+  void begin_element(ACE_CDR::ULong idx);
   void end_element();
 
   void write_boolean(ACE_CDR::Boolean value);
@@ -167,7 +167,7 @@ void PrinterValueWriter::end_sequence()
   current_indent_ -= indent_;
 }
 
-void PrinterValueWriter::begin_element(size_t idx)
+void PrinterValueWriter::begin_element(ACE_CDR::ULong idx)
 {
   stream_ << newline() << std::string(current_indent_, ' ') << '[' << idx << "]: ";
   at_newline_ = false;

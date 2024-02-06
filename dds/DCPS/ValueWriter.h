@@ -29,41 +29,41 @@ struct VWriterMemberParam {
   VWriterMemberParam()
     : id()
     , must_understand(0)
-    , name(0)
     , optional(false)
     , present(true)
+    , name(0)
   {}
 
   VWriterMemberParam(unsigned m_id, bool m_must_understand)
     : id(m_id)
     , must_understand(m_must_understand)
-    , name(0)
     , optional(false)
     , present(true)
+    , name(0)
   {}
 
   VWriterMemberParam(const char* m_name)
     : id(0)
     , must_understand(false)
-    , name(m_name)
     , optional(false)
     , present(true)
+    , name(m_name)
   {}
 
   VWriterMemberParam(unsigned m_id, bool m_must_understand,
                      const char* m_name, bool m_optional, bool m_present)
     : id(m_id)
     , must_understand(m_must_understand)
-    , name(m_name)
     , optional(m_optional)
     , present(m_present)
+    , name(m_name)
   {}
 
   unsigned id;
   bool must_understand;
-  const char* name;
   bool optional;
   bool present;
+  const char* name;
 };
 
 /// A ValueWriter receives events and values from the recitation of a
@@ -98,7 +98,7 @@ public:
   virtual void end_array() {}
   virtual void begin_sequence(XTypes::TypeKind /*elem_kind*/, ACE_CDR::ULong /*length*/) {}
   virtual void end_sequence() {}
-  virtual void begin_element(size_t /*idx*/) {}
+  virtual void begin_element(ACE_CDR::ULong /*idx*/) {}
   virtual void end_element() {}
 
   virtual void write_boolean(ACE_CDR::Boolean /*value*/) = 0;
@@ -145,7 +145,7 @@ public:
 #endif
   }
 
-  virtual void write_enum(const char* /*name*/, ACE_CDR::Long /*value*/, XTypes::TypeKind /*as_int*/) = 0;
+  virtual void write_enum(const char* name, ACE_CDR::Long value, XTypes::TypeKind as_int) = 0;
   template <typename T>
   void write_enum(const char* name, const T& value, XTypes::TypeKind as_int = XTypes::TK_INT32)
   {

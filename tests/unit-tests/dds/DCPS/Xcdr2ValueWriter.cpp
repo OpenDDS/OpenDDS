@@ -81,7 +81,7 @@ void check_component_sizes(DCPS::Xcdr2ValueWriter& value_writer, const size_t* a
 {
   std::vector<size_t> expected_sizes(arr, arr + length);
   const std::vector<size_t>& sizes = value_writer.get_serialized_sizes();
-  EXPECT_TRUE(expected_sizes == sizes);
+  EXPECT_EQ(expected_sizes, sizes);
 }
 
 template <typename Xtag, typename Type>
