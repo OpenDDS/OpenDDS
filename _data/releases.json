@@ -2,6 +2,30 @@
    {
       "assets" : [
          {
+            "browser_download_url" : "https://github.com/OpenDDS/OpenDDS/releases/download/DDS-3.27/OpenDDS-3.27.zip",
+            "name" : "OpenDDS-3.27.zip"
+         },
+         {
+            "browser_download_url" : "https://github.com/OpenDDS/OpenDDS/releases/download/DDS-3.27/OpenDDS-3.27.tar.gz",
+            "name" : "OpenDDS-3.27.tar.gz"
+         }
+      ],
+      "html_url" : "https://github.com/OpenDDS/OpenDDS/releases/tag/DDS-3.27",
+      "latest_in_series" : 1,
+      "published_at" : "2024-02-07T21:33:29Z",
+      "version" : "3.27.0"
+   },
+   {
+      "assets" : [
+         {
+            "browser_download_url" : "https://github.com/OpenDDS/OpenDDS/releases/download/DDS-3.26.1/ShapesDemo-OpenDDS-3.26.1-Windows.zip",
+            "name" : "ShapesDemo-OpenDDS-3.26.1-Windows.zip"
+         },
+         {
+            "browser_download_url" : "https://github.com/OpenDDS/OpenDDS/releases/download/DDS-3.26.1/ShapesDemo-OpenDDS-3.26.1-Linux.tar.gz",
+            "name" : "ShapesDemo-OpenDDS-3.26.1-Linux.tar.gz"
+         },
+         {
             "browser_download_url" : "https://github.com/OpenDDS/OpenDDS/releases/download/DDS-3.26.1/OpenDDS-3.26.1.zip",
             "name" : "OpenDDS-3.26.1.zip"
          },
