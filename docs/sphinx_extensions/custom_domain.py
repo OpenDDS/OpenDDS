@@ -11,9 +11,67 @@ from sphinx.addnodes import desc_signature, pending_xref
 from sphinx.directives import ObjectDescription
 from sphinx.util.nodes import make_id, make_refnode, process_index_entry
 from sphinx.util.typing import OptionSpec
-from sphinx.domains import Domain
+from sphinx.domains import Domain, ObjType
 from sphinx.environment import BuildEnvironment
 from sphinx.builders import Builder
+from sphinx.roles import XRefRole
+
+
+class ContextWrapper:
+    def __init__(self, env, domain):
+        self.ctx = env.ref_context.setdefault(f'{domain}-context', dict(
+            stack=[],
+            needs_push=True,
+        ))
+
+    def needs_push(self):
+        return self.ctx['needs_push']
+
+    def reset_needs_push(self):
+        self.ctx['needs_push'] = True
+
+    @property
+    def stack(self):
+        return self.ctx['stack']
+
+    def push(self, obj, name, full_name=None, **kw):
+        data = dict(
+            obj=obj,
+            name=name,
+            full_name=name if full_name is None else full_name,
+            index_text=None,
+            **kw
+        )
+        self.stack.append(data)
+        self.ctx['needs_push'] = False
+        data['index_text'] = obj.get_index_text(name, full_name)
+        return data
+
+    def pop(self):
+        self.stack.pop()
+        self.reset_needs_push()
+
+    def get_all_names(self):
+        return [scope['name'] for scope in self.stack]
+
+    def get(self, index, key=None):
+        try:
+            frame = self.stack[index]
+        except IndexError:
+            return None
+        return frame if key is None else frame[key]
+
+    def get_parent(self, index=-2):
+        return self.get(index)
+
+    def get_name(self, index=-1):
+        return self.get(index, 'name')
+
+    def get_full_name(self, index=-1):
+        return self.get(index, 'full_name')
+
+    def get_index_text(self, index=-1):
+        return self.get(index, 'index_text')
 
 
 class CustomDomainObject(ObjectDescription[str]):
@@ -23,126 +81,100 @@ class CustomDomainObject(ObjectDescription[str]):
         'no-contents-entry': directives.flag, # This is implemented by Sphinx
     }
 
-    @classmethod
-    def domain_name(cls):
-        raise NotImplementedError()
+    our_name = None
+    our_index_discriminator = None
+    our_parent_required = False
+    our_parent_type = None
+    our_ref_role_type = XRefRole
+    our_role_name = None
+    _full_name = None
+    _domain_name = None
 
-    @classmethod
-    def use_name(cls):
-        raise NotImplementedError()
+    def get_index_text(self, name, full_name):
+        t = name
+        if self.our_index_discriminator is None:
+            t += f' ({self.index_discriminator})'
+        return t
 
-    @classmethod
-    def index_discriminator(cls):
-        raise NotImplementedError()
+    def get_context(self):
+        return ContextWrapper(self.env, self._domain_name)
 
-    @classmethod
-    def parent_class(cls):
-        '''Returns if the parent is required and the class
-        '''
-        return False, None
-
-    def link_name(cls, name, parents):
-        '''Returns the default text used when linking
-        '''
-        return name
-
-    def handle_signature(self, sig: str, signode: desc_signature) -> str:
-        '''Returns the header node for the defintion. It can be modifed to
-        serperate things like arguments.
-        '''
-        name = sig.strip()
-        signode['fullname'] = name
-        signode += addnodes.desc_name(name, name)
-        return name
-
-    @classmethod
-    def use_full_name(cls):
-        return cls.domain_name() + ':' + cls.use_name()
-
-    def get_context(self, key):
-        return self.env.ref_context.setdefault(key, [])
-
-    def get_parents(self):
-        required, parent_class = self.parent_class()
-        if parent_class is None:
-            parents = []
-        else:
-            parents = self.get_context(parent_class.parents_key())
-        if required and parent_class and not parents:
-            domain = self.env.get_domain(self.domain_name())
-            e = ValueError('Domain object is required to be in a ' + parent_class.use_full_name())
+    def check_parentage(self):
+        domain = self.env.get_domain(self._domain_name)
+        parent = self.get_context().get_parent()
+        if self.our_parent_required and (parent is None or
+                not isinstance(parent['obj'], self.our_parent_type)):
+            e = ValueError(f'{self._full_name} must be in a {self.our_parent_type._full_name}')
             domain.logger.warning(e, location=self.get_location())
             raise e
-        return parents
 
-    def get_index_text(self, objectname: str, name: str) -> str:
-        return _('{} ({})').format(name, self.index_discriminator())
+    def parse_sig(self, ctx, sig):
+        ctx.push(self, sig)
+        return ()
+
+    def create_signode(self, ctx, name, signode):
+        signode += addnodes.desc_name(name, name)
+
+    def handle_signature(self, sig: str, signode: desc_signature) -> str:
+        domain = self.env.get_domain(self._domain_name)
+        ctx = self.get_context()
+
+        try:
+            extra = self.parse_sig(ctx, sig.strip())
+        except Exception as e:
+            domain.logger.exception('Exception in parse_sig:', location=self.get_location())
+            raise e
+
+        self.check_parentage()
+        signode['fullname'] = ctx.get_full_name()
+        name = ctx.get_name()
+        try:
+            self.create_signode(ctx, name, signode, *extra)
+        except Exception as e:
+            domain.logger.exception('Exception in create_signode:', location=self.get_location())
+            raise e
+
+        return name
+
+    def _object_hierarchy_parts(self, signode: desc_signature) -> tuple[str, ...]:
+        return tuple(self.get_context().get_all_names())
+
+    def _toc_entry_name(self, signode: desc_signature) -> str:
+        *parents, name = signode['_toc_parts']
+        return name
 
     def add_target_and_index(self, name: str, sig: str, signode: desc_signature) -> None:
-        domain = self.env.get_domain(self.domain_name())
+        domain = self.env.get_domain(self._domain_name)
+        ctx = self.get_context()
 
         # Create the reference target
-        parents = self.get_parents()
-        prefix_list = [self.objtype]
-        prefix_list.extend([x[0] for x in parents])
+        prefix_list = [self._domain_name, self.objtype]
+        prefix_list.extend(ctx.get_all_names())
+        prefix_list.pop()
         prefix = '-'.join(prefix_list)
         node_id = make_id(self.env, self.state.document, prefix, name)
 
         # Register reference target
         signode['ids'].append(node_id)
         self.state.document.note_explicit_target(signode)
-        domain.note_object(self.objtype, self.link_name(name, parents), node_id, location=signode)
+        full_name = ctx.get_full_name()
+        domain.note_object(self.objtype, full_name, node_id, location=signode)
         if 'no-index-entry' not in self.options:
-            indextext = self.get_index_text(self.objtype, name)
+            indextext = ctx.get_index_text()
             if indextext:
-                if parents:
-                    parent_name = parents[-1][0]
-                    parent = parents[-1][1]
-                    parent_indextext = parent.get_index_text(parent_name, parent_name)
+                parent = ctx.get_parent()
+                if parent:
+                    parent_indextext = parent['index_text']
                     entry = process_index_entry(f'pair: {indextext}; {parent_indextext}', node_id)
                 else:
                     entry = process_index_entry(indextext, node_id)
                 self.indexnode['entries'].extend(entry)
 
-    def _object_hierarchy_parts(self, sig_node: desc_signature) -> tuple[str, ...]:
-        if 'fullname' not in sig_node:
-            return ()
-        parts = [x[0] for x in self.get_parents()]
-        parts.append(sig_node['fullname'])
-        return tuple(parts)
-
-    def _toc_entry_name(self, sig_node: desc_signature) -> str:
-        if not sig_node.get('_toc_parts'):
-            return ''
-
-        config = self.env.app.config
-        objtype = sig_node.parent.get('objtype')
-        *parents, name = sig_node['_toc_parts']
-        return name
-
-
-class CustomDomainParentObject(CustomDomainObject):
-    @classmethod
-    def parent_category(cls):
-        raise NotImplementedError()
-
-    @classmethod
-    def parents_key(cls):
-        return cls.domain_name() + ':' + cls.parent_category()
-
-    def get_parents(self):
-        return self.get_context(self.parents_key())
-
-    def handle_signature(self, sig: str, signode: desc_signature) -> str:
-        name = super().handle_signature(sig, signode)
-        self._append_parents_in_before_content = (name, self)
-        return name
-
     def before_content(self) -> None:
-        self.get_parents().append(self._append_parents_in_before_content)
+        self.get_context().reset_needs_push()
 
     def after_content(self) -> None:
-        self.get_parents().pop()
+        self.get_context().pop()
 
 
 class CustomDomain(Domain):
@@ -212,3 +244,25 @@ class CustomDomain(Domain):
     def get_objects(self) -> Iterator[tuple[str, str, str, str, str, int]]:
         for (typ, name), (docname, node_id) in self.data['objects'].items():
             yield name, name, typ, docname, node_id, 1
+
+    @classmethod
+    def add_type(cls, Type):
+        if Type.our_name is None:
+            raise ValueError(f'{Type.__name__} is missing our_name')
+        if Type.our_parent_required and Type.our_parent_type is None:
+            raise ValueError(
+                f'{Type.__name__} has our_parent_required = True, but our_parent_type = None')
+
+        Type._full_name = f'{cls.name}:{Type.our_name}'
+        Type._domain_name = cls.name
+        cls.directives[Type.our_name] = Type
+        if Type.our_ref_role_type is not None:
+            cls.roles[Type.our_name] = Type.our_ref_role_type()
+        if Type.our_role_name is None:
+            role_name = Type.our_name
+        else:
+            role_name = Type.our_role_name
+        obj_type = ObjType(Type.our_name.replace(':', '-'), role_name)
+        cls.object_types[Type.our_name] = obj_type
+
+        return Type
