@@ -163,7 +163,7 @@ if is_release:
     markdown_http_base += opendds_version_info.tag.lower()
 else:
     markdown_http_base += os.getenv('MD_RTD_BRANCH', github_main_branch)
-markdown_target_ext = '.html'
+markdown_uri_doc_suffix = '.html'
 
 
 # -- Options for HTML output -------------------------------------------------

@@ -1,5 +1,46 @@
 # OpenDDS Releases
 
+## Version 3.27.0 of OpenDDS
+
+Released 2024-02-07
+
+Download [this release on GitHub](https://github.com/OpenDDS/OpenDDS/releases/tag/DDS-3.27).
+
+Read [the documentation for this release on Read the Docs](https://opendds.readthedocs.io/en/dds-3.27).
+
+### Additions
+
+- Complete interfaces for dealing with DynamicData and DynamicTypes. ([PR #4320](https://github.com/OpenDDS/OpenDDS/pull/4320), [PR #4339](https://github.com/OpenDDS/OpenDDS/pull/4339))
+- It is now possible to specify the [validity for individual publish/subscribe actions](https://opendds.readthedocs.io/en/dds-3.27/devguide/dds_security.html#dds-security-psr-validity) in DDS Security Permission documents.  This is an OpenDDS extension. ([PR #4344](https://github.com/OpenDDS/OpenDDS/pull/4344))
+- Building with CMake
+  - Added new options for [how to get ACE/TAO](https://opendds.readthedocs.io/en/dds-3.27/devguide/building/index.html#cmake-building-ace-tao). ([PR #4346](https://github.com/OpenDDS/OpenDDS/pull/4346))
+- CMake Config Package
+  - Added [`OPENDDS_ACE_VERSION`](https://opendds.readthedocs.io/en/dds-3.27/devguide/building/cmake.html#var-OPENDDS_ACE_VERSION) and [`OPENDDS_TAO_VERSION`](https://opendds.readthedocs.io/en/dds-3.27/devguide/building/cmake.html#var-OPENDDS_TAO_VERSION). ([PR #4346](https://github.com/OpenDDS/OpenDDS/pull/4346))
+- Add a warning that `@optional` is not supported. ([PR #4355](https://github.com/OpenDDS/OpenDDS/pull/4355))
+- Convert discovery configurations (`repository`, static discovery, `rtps_discovery` including templates) to key-value store. ([PR #4360](https://github.com/OpenDDS/OpenDDS/pull/4360), [PR #4361](https://github.com/OpenDDS/OpenDDS/pull/4361), [PR #4426](https://github.com/OpenDDS/OpenDDS/pull/4426), [PR #4411](https://github.com/OpenDDS/OpenDDS/pull/4411), [PR #4276](https://github.com/OpenDDS/OpenDDS/pull/4276), [PR #4347](https://github.com/OpenDDS/OpenDDS/pull/4347))
+- Convert ICE configuration to key-value store. ([PR #4360](https://github.com/OpenDDS/OpenDDS/pull/4360), [PR #4361](https://github.com/OpenDDS/OpenDDS/pull/4361), [PR #4426](https://github.com/OpenDDS/OpenDDS/pull/4426), [PR #4411](https://github.com/OpenDDS/OpenDDS/pull/4411), [PR #4276](https://github.com/OpenDDS/OpenDDS/pull/4276), [PR #4347](https://github.com/OpenDDS/OpenDDS/pull/4347))
+- Change `transport_template` and `rtps_discovery` template processing to not generate new keys. ([PR #4360](https://github.com/OpenDDS/OpenDDS/pull/4360), [PR #4361](https://github.com/OpenDDS/OpenDDS/pull/4361), [PR #4426](https://github.com/OpenDDS/OpenDDS/pull/4426), [PR #4411](https://github.com/OpenDDS/OpenDDS/pull/4411), [PR #4276](https://github.com/OpenDDS/OpenDDS/pull/4276), [PR #4347](https://github.com/OpenDDS/OpenDDS/pull/4347))
+
+### Platform Support and Dependencies
+
+- Improved support for configure script detection of clang on Linux ([PR #4449](https://github.com/OpenDDS/OpenDDS/pull/4449))
+- When using Visual C++, OpenDDS can now be configured using `--std=c++NN` (NN = 17 or 20). ([PR #4452](https://github.com/OpenDDS/OpenDDS/pull/4452))
+
+### Fixes
+
+- Updated the [read](https://opendds.readthedocs.io/en/dds-3.27/devguide/xtypes.html#xtypes-interpreting-data-samples-with-dynamicdata) and [write](https://opendds.readthedocs.io/en/dds-3.27/devguide/xtypes.html#xtypes-populating-data-samples-with-dynamicdata) semantics of DynamicData for union, expandable collections (sequence and string), and optional member of an aggregated type. ([PR #4278](https://github.com/OpenDDS/OpenDDS/pull/4278))
+- Fixed memory leak where instances were not cleaned up with exlusive ownership. ([PR #4343](https://github.com/OpenDDS/OpenDDS/pull/4343))
+- Removed the special handling for sequence members with length code of 5,6, or 7. ([PR #4376](https://github.com/OpenDDS/OpenDDS/pull/4376))
+- Reading data from a dynamic data object for a primitive type now must use MEMBER_ID_INVALID id. ([PR #4376](https://github.com/OpenDDS/OpenDDS/pull/4376))
+- `create_datawriter` and `create_datareader` check if the topic belongs to the same participant as the publisher/subscriber. ([PR #4398](https://github.com/OpenDDS/OpenDDS/pull/4398))
+- Fixed uninitialized `durability_service` in Topic QoS when using QoS-XML. ([PR #4424](https://github.com/OpenDDS/OpenDDS/pull/4424))
+- Fixed a bug where compiling IDL with `-Lc++11 -Gequality` produced code outside of a namespace that didn't compile. ([PR #4450](https://github.com/OpenDDS/OpenDDS/pull/4450))
+- `SedpLocalAddress` now defaults to `DCPSDefaultAddress` to behave like `SpdpLocalAddress` and `local_address`. ([PR #4451](https://github.com/OpenDDS/OpenDDS/pull/4451))
+
+### Notes
+
+- `TheParticipantFactory*` will now return a null pointer when `DCPSConfigFile` doesn't exist. ([PR #4372](https://github.com/OpenDDS/OpenDDS/pull/4372))
+
 ## Version 3.26.1 of OpenDDS
 
 Released 2023-11-14
