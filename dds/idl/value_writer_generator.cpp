@@ -258,7 +258,7 @@ namespace {
     const OpenDDS::XTypes::MemberId id = be_global->get_id(dynamic_cast<AST_UnionBranch*>(branch));
     const bool must_understand = be_global->is_effectively_must_understand(branch);
     be_global->impl_ <<
-      "    value_writer.begin_union_member(VWriterMemberParam(" << id << ", " <<
+      "    value_writer.begin_union_member(MemberParam(" << id << ", " <<
       (must_understand ? "true" : "false") << ", \"" << canonical_name(branch) << "\", false, true));\n";
     generate_write("value." + field_name + "()", type, "i", 2);
     be_global->impl_ <<
@@ -356,7 +356,7 @@ bool value_writer_generator::gen_struct(AST_Structure* node,
       const OpenDDS::XTypes::MemberId id = be_global->get_id(field);
       const bool must_understand = be_global->is_effectively_must_understand(field);
       be_global->impl_ <<
-        "  value_writer.begin_struct_member(VWriterMemberParam(" << id << ", " <<
+        "  value_writer.begin_struct_member(MemberParam(" << id << ", " <<
         (must_understand ? "true" : "false") << ", \"" << idl_name << "\", false, true));\n";
       generate_write("value." + field_name + accessor_suffix, field->field_type(), "i");
       be_global->impl_ <<
@@ -392,7 +392,7 @@ bool value_writer_generator::gen_union(AST_Union* u,
     be_global->impl_ << "  value_writer.begin_union(" << extensibility_kind(ek) << ");\n";
     const bool must_understand = be_global->is_effectively_must_understand(discriminator);
     be_global->impl_ <<
-      "  value_writer.begin_discriminator(VWriterMemberParam(0, " <<
+      "  value_writer.begin_discriminator(MemberParam(0, " <<
       (must_understand ? "true" : "false") << "));\n";
     generate_write("value._d()" , discriminator, "i");
     be_global->impl_ <<

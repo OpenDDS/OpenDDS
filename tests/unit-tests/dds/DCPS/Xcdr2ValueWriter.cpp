@@ -64,7 +64,7 @@ void check_total_size(DCPS::Xcdr2ValueWriter& value_writer, const Type& sample)
   DCPS::serialized_size(xcdr2, expected_size, sample);
 
   // Serialized size computed by vwrite with the C++ object.
-  vwrite(value_writer, sample);
+  EXPECT_TRUE(vwrite(value_writer, sample));
   EXPECT_EQ(expected_size, value_writer.get_serialized_size());
 
 #ifndef OPENDDS_SAFETY_PROFILE
@@ -72,7 +72,7 @@ void check_total_size(DCPS::Xcdr2ValueWriter& value_writer, const Type& sample)
   XTypes::TypeLookupService tls;
   DDS::DynamicType_var dt = get_dynamic_type<Xtag>(tls);
   DDS::DynamicData_var dd = XTypes::get_dynamic_data_adapter<Type, Type>(dt, sample);
-  vwrite(value_writer, dd.in());
+  EXPECT_TRUE(vwrite(value_writer, dd.in()));
   EXPECT_EQ(expected_size, value_writer.get_serialized_size());
 #endif
 }
@@ -99,7 +99,7 @@ void check_serialized_data(DCPS::Xcdr2ValueWriter& value_writer, const Type& sam
     ACE_Message_Block buffer(value_writer.get_serialized_size());
     DCPS::Serializer ser(&buffer, xcdr2);
     value_writer.set_serializer(&ser);
-    vwrite(value_writer, sample);
+    EXPECT_TRUE(vwrite(value_writer, sample));
     EXPECT_PRED_FORMAT2(assert_DataView, expected_cdr, buffer);
   }
 
@@ -112,7 +112,7 @@ void check_serialized_data(DCPS::Xcdr2ValueWriter& value_writer, const Type& sam
     DDS::DynamicType_var dt = get_dynamic_type<Xtag>(tls);
     DDS::DynamicData_var dd = XTypes::get_dynamic_data_adapter<Type, Type>(dt, sample);
     value_writer.set_serializer(&ser);
-    vwrite(value_writer, dd.in());
+    EXPECT_TRUE(vwrite(value_writer, dd.in()));
     EXPECT_PRED_FORMAT2(assert_DataView, expected_cdr, buffer);
   }
 #endif

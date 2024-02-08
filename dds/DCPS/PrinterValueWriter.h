@@ -36,47 +36,47 @@ public:
     , at_newline_(true)
   {}
 
-  void begin_struct(Extensibility extensibility = FINAL);
-  void end_struct();
-  void begin_struct_member(VWriterMemberParam params);
-  void end_struct_member();
+  bool begin_struct(Extensibility extensibility = FINAL);
+  bool end_struct();
+  bool begin_struct_member(MemberParam params);
+  bool end_struct_member();
 
-  void begin_union(Extensibility extensibility = FINAL);
-  void end_union();
-  void begin_discriminator(VWriterMemberParam params);
-  void end_discriminator();
-  void begin_union_member(VWriterMemberParam params);
-  void end_union_member();
+  bool begin_union(Extensibility extensibility = FINAL);
+  bool end_union();
+  bool begin_discriminator(MemberParam params);
+  bool end_discriminator();
+  bool begin_union_member(MemberParam params);
+  bool end_union_member();
 
-  void begin_array(XTypes::TypeKind elem_tk = XTypes::TK_NONE);
-  void end_array();
-  void begin_sequence(XTypes::TypeKind elem_tk = XTypes::TK_NONE, ACE_CDR::ULong length = 0);
-  void end_sequence();
-  void begin_element(ACE_CDR::ULong idx);
-  void end_element();
+  bool begin_array(XTypes::TypeKind elem_tk = XTypes::TK_NONE);
+  bool end_array();
+  bool begin_sequence(XTypes::TypeKind elem_tk = XTypes::TK_NONE, ACE_CDR::ULong length = 0);
+  bool end_sequence();
+  bool begin_element(ACE_CDR::ULong idx);
+  bool end_element();
 
-  void write_boolean(ACE_CDR::Boolean value);
-  void write_byte(ACE_CDR::Octet value);
+  bool write_boolean(ACE_CDR::Boolean value);
+  bool write_byte(ACE_CDR::Octet value);
 #if OPENDDS_HAS_EXPLICIT_INTS
-  void write_int8(ACE_CDR::Int8 value);
-  void write_uint8(ACE_CDR::UInt8 value);
+  bool write_int8(ACE_CDR::Int8 value);
+  bool write_uint8(ACE_CDR::UInt8 value);
 #endif
-  void write_int16(ACE_CDR::Short value);
-  void write_uint16(ACE_CDR::UShort value);
-  void write_int32(ACE_CDR::Long value);
-  void write_uint32(ACE_CDR::ULong value);
-  void write_int64(ACE_CDR::LongLong value);
-  void write_uint64(ACE_CDR::ULongLong value);
-  void write_float32(ACE_CDR::Float value);
-  void write_float64(ACE_CDR::Double value);
-  void write_float128(ACE_CDR::LongDouble value);
-  void write_fixed(const OpenDDS::FaceTypes::Fixed& value);
-  void write_char8(ACE_CDR::Char value);
-  void write_char16(ACE_CDR::WChar value);
-  void write_string(const ACE_CDR::Char* value, size_t length);
-  void write_wstring(const ACE_CDR::WChar* value, size_t length);
-  void write_enum(const char* /*name*/, ACE_CDR::Long value, XTypes::TypeKind as_int = XTypes::TK_INT32);
-  void write_absent_value();
+  bool write_int16(ACE_CDR::Short value);
+  bool write_uint16(ACE_CDR::UShort value);
+  bool write_int32(ACE_CDR::Long value);
+  bool write_uint32(ACE_CDR::ULong value);
+  bool write_int64(ACE_CDR::LongLong value);
+  bool write_uint64(ACE_CDR::ULongLong value);
+  bool write_float32(ACE_CDR::Float value);
+  bool write_float64(ACE_CDR::Double value);
+  bool write_float128(ACE_CDR::LongDouble value);
+  bool write_fixed(const OpenDDS::FaceTypes::Fixed& value);
+  bool write_char8(ACE_CDR::Char value);
+  bool write_char16(ACE_CDR::WChar value);
+  bool write_string(const ACE_CDR::Char* value, size_t length);
+  bool write_wstring(const ACE_CDR::WChar* value, size_t length);
+  bool write_enum(const char* /*name*/, ACE_CDR::Long value, XTypes::TypeKind as_int = XTypes::TK_INT32);
+  bool write_absent_value();
 
   std::string str() const
   {
@@ -100,184 +100,224 @@ private:
   bool at_newline_;
 };
 
-void PrinterValueWriter::begin_struct(Extensibility /*extensibility*/)
+bool PrinterValueWriter::begin_struct(Extensibility /*extensibility*/)
 {
   current_indent_ += indent_;
+  return true;
 }
 
-void PrinterValueWriter::end_struct()
+bool PrinterValueWriter::end_struct()
 {
   current_indent_ -= indent_;
+  return true;
 }
 
-void PrinterValueWriter::begin_struct_member(VWriterMemberParam params)
+bool PrinterValueWriter::begin_struct_member(MemberParam params)
 {
   stream_ << newline() << std::string(current_indent_, ' ') << params.name << ": ";
   at_newline_ = false;
+  return true;
 }
 
-void PrinterValueWriter::end_struct_member()
-{}
+bool PrinterValueWriter::end_struct_member()
+{
+  return true;
+}
 
-void PrinterValueWriter::begin_union(Extensibility /*extensibility*/)
+bool PrinterValueWriter::begin_union(Extensibility /*extensibility*/)
 {
   current_indent_ += indent_;
+  return true;
 }
 
-void PrinterValueWriter::end_union()
+bool PrinterValueWriter::end_union()
 {
   current_indent_ -= indent_;
+  return true;
 }
 
-void PrinterValueWriter::begin_discriminator(VWriterMemberParam /*params*/)
+bool PrinterValueWriter::begin_discriminator(MemberParam /*params*/)
 {
   stream_ << newline() << std::string(current_indent_, ' ') << "$discriminator: ";
   at_newline_ = false;
+  return true;
 }
 
-void PrinterValueWriter::end_discriminator()
-{}
+bool PrinterValueWriter::end_discriminator()
+{
+  return true;
+}
 
-void PrinterValueWriter::begin_union_member(VWriterMemberParam params)
+bool PrinterValueWriter::begin_union_member(MemberParam params)
 {
   stream_ << newline() << std::string(current_indent_, ' ') << params.name << ": ";
   at_newline_ = false;
+  return true;
 }
 
-void PrinterValueWriter::end_union_member()
-{}
+bool PrinterValueWriter::end_union_member()
+{
+  return true;
+}
 
-void PrinterValueWriter::begin_array(XTypes::TypeKind /*elem_tk*/)
+bool PrinterValueWriter::begin_array(XTypes::TypeKind /*elem_tk*/)
 {
   current_indent_ += indent_;
+  return true;
 }
 
-void PrinterValueWriter::end_array()
+bool PrinterValueWriter::end_array()
 {
   current_indent_ -= indent_;
+  return true;
 }
 
-void PrinterValueWriter::begin_sequence(XTypes::TypeKind /*elem_tk*/, ACE_CDR::ULong /*length*/)
+bool PrinterValueWriter::begin_sequence(XTypes::TypeKind /*elem_tk*/, ACE_CDR::ULong /*length*/)
 {
   current_indent_ += indent_;
+  return true;
 }
 
-void PrinterValueWriter::end_sequence()
+bool PrinterValueWriter::end_sequence()
 {
   current_indent_ -= indent_;
+  return true;
 }
 
-void PrinterValueWriter::begin_element(ACE_CDR::ULong idx)
+bool PrinterValueWriter::begin_element(ACE_CDR::ULong idx)
 {
   stream_ << newline() << std::string(current_indent_, ' ') << '[' << idx << "]: ";
   at_newline_ = false;
+  return true;
 }
 
-void PrinterValueWriter::end_element()
-{}
+bool PrinterValueWriter::end_element()
+{
+  return true;
+}
 
-void PrinterValueWriter::write_boolean(ACE_CDR::Boolean value)
+bool PrinterValueWriter::write_boolean(ACE_CDR::Boolean value)
 {
   stream_ << (value ? "true" : "false");
+  return true;
 }
 
-void PrinterValueWriter::write_byte(ACE_CDR::Octet value)
+bool PrinterValueWriter::write_byte(ACE_CDR::Octet value)
 {
   stream_ << std::hex << "0x" << static_cast<unsigned int>(value) << std::dec;
+  return true;
 }
 
 #if OPENDDS_HAS_EXPLICIT_INTS
 
-void PrinterValueWriter::write_int8(ACE_CDR::Int8 value)
+bool PrinterValueWriter::write_int8(ACE_CDR::Int8 value)
 {
   stream_ << static_cast<int>(value);
+  return true;
 }
 
-void PrinterValueWriter::write_uint8(ACE_CDR::UInt8 value)
+bool PrinterValueWriter::write_uint8(ACE_CDR::UInt8 value)
 {
   stream_ << static_cast<unsigned int>(value);
+  return true;
 }
 #endif
 
-void PrinterValueWriter::write_int16(ACE_CDR::Short value)
+bool PrinterValueWriter::write_int16(ACE_CDR::Short value)
 {
   stream_ << value;
+  return true;
 }
 
-void PrinterValueWriter::write_uint16(ACE_CDR::UShort value)
+bool PrinterValueWriter::write_uint16(ACE_CDR::UShort value)
 {
   stream_ << value;
+  return true;
 }
 
-void PrinterValueWriter::write_int32(ACE_CDR::Long value)
+bool PrinterValueWriter::write_int32(ACE_CDR::Long value)
 {
   stream_ << value;
+  return true;
 }
 
-void PrinterValueWriter::write_uint32(ACE_CDR::ULong value)
+bool PrinterValueWriter::write_uint32(ACE_CDR::ULong value)
 {
   stream_ << value;
+  return true;
 }
 
-void PrinterValueWriter::write_int64(ACE_CDR::LongLong value)
+bool PrinterValueWriter::write_int64(ACE_CDR::LongLong value)
 {
   stream_ << value;
+  return true;
 }
 
-void PrinterValueWriter::write_uint64(ACE_CDR::ULongLong value)
+bool PrinterValueWriter::write_uint64(ACE_CDR::ULongLong value)
 {
   stream_ << value;
+  return true;
 }
 
-void PrinterValueWriter::write_float32(ACE_CDR::Float value)
+bool PrinterValueWriter::write_float32(ACE_CDR::Float value)
 {
   stream_ << value;
+  return true;
 }
 
-void PrinterValueWriter::write_float64(ACE_CDR::Double value)
+bool PrinterValueWriter::write_float64(ACE_CDR::Double value)
 {
   stream_ << value;
+  return true;
 }
 
-void PrinterValueWriter::write_float128(ACE_CDR::LongDouble value)
+bool PrinterValueWriter::write_float128(ACE_CDR::LongDouble value)
 {
   stream_ << value;
+  return true;
 }
 
-void PrinterValueWriter::write_fixed(const OpenDDS::FaceTypes::Fixed& /*value*/)
+bool PrinterValueWriter::write_fixed(const OpenDDS::FaceTypes::Fixed& /*value*/)
 {
   // FUTURE
   stream_ << "fixed";
+  return true;
 }
 
-void PrinterValueWriter::write_char8(ACE_CDR::Char value)
+bool PrinterValueWriter::write_char8(ACE_CDR::Char value)
 {
   char_helper(stream_, value);
+  return true;
 }
 
-void PrinterValueWriter::write_char16(ACE_CDR::WChar value)
+bool PrinterValueWriter::write_char16(ACE_CDR::WChar value)
 {
   char_helper(stream_, value);
+  return true;
 }
 
-void PrinterValueWriter::write_string(const ACE_CDR::Char* value, size_t length)
+bool PrinterValueWriter::write_string(const ACE_CDR::Char* value, size_t length)
 {
   string_helper(stream_, value, length);
+  return true;
 }
 
-void PrinterValueWriter::write_wstring(const ACE_CDR::WChar* value, size_t length)
+bool PrinterValueWriter::write_wstring(const ACE_CDR::WChar* value, size_t length)
 {
   string_helper(stream_, value, length);
+  return true;
 }
 
-void PrinterValueWriter::write_enum(const char* name, ACE_CDR::Long value, XTypes::TypeKind /*as_int*/)
+bool PrinterValueWriter::write_enum(const char* name, ACE_CDR::Long value, XTypes::TypeKind /*as_int*/)
 {
   stream_ << name << " (" << value << ")";
+  return true;
 }
 
-void PrinterValueWriter::write_absent_value()
+bool PrinterValueWriter::write_absent_value()
 {
   stream_ << "null";
+  return true;
 }
 
 } // namespace DCPS

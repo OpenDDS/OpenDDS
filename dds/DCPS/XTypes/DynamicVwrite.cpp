@@ -19,20 +19,25 @@ bool check_rc(DDS::ReturnCode_t rc, DDS::MemberId id, DDS::TypeKind tk, const ch
   return XTypes::check_rc_from_get(rc, id, tk, fn_name, LogLevel::Warning);
 }
 
-void begin_member_helper(ValueWriter& vw, VWriterMemberParam* params,
+bool begin_member_helper(ValueWriter& vw, MemberParam* params,
                          DDS::ReturnCode_t rc, DDS::TypeKind containing_tk)
 {
   if (containing_tk != XTypes::TK_STRUCTURE && containing_tk != XTypes::TK_UNION) {
-    return;
+    return false;
   }
   if (rc == DDS::RETCODE_NO_DATA) {
     params->present = false;
   }
   if (containing_tk == XTypes::TK_STRUCTURE) {
-    vw.begin_struct_member(*params);
+    if (!vw.begin_struct_member(*params)) {
+      return false;
+    }
   } else {
-    vw.begin_union_member(*params);
+    if (!vw.begin_union_member(*params)) {
+      return false;
+    }
   }
+  return true;
 }
 
 DDS::ReturnCode_t get_equivalent_kind(const DDS::DynamicType_var& type, XTypes::TypeKind& treat_as)
@@ -73,12 +78,16 @@ DDS::ReturnCode_t vwrite_primitive_array_i(ValueWriter& vw, DDS::DynamicData_ptr
     DDS::Int8Seq val;
     rc = value->get_int8_values(val, id);
     if (rc == DDS::RETCODE_OK) {
-      if (for_sequence) {
-        vw.begin_sequence(orig_elem_kind, val.length());
+      if (for_sequence && !vw.begin_sequence(orig_elem_kind, val.length())) {
+        rc = DDS::RETCODE_ERROR;
+        break;
       }
-      vw.write_int8_array(val.get_buffer(), val.length());
-      if (for_sequence) {
-        vw.end_sequence();
+      if (!vw.write_int8_array(val.get_buffer(), val.length())) {
+        rc = DDS::RETCODE_ERROR;
+        break;
+      }
+      if (for_sequence && !vw.end_sequence()) {
+        rc = DDS::RETCODE_ERROR;
       }
     }
     break;
@@ -87,12 +96,16 @@ DDS::ReturnCode_t vwrite_primitive_array_i(ValueWriter& vw, DDS::DynamicData_ptr
     DDS::UInt8Seq val;
     rc = value->get_uint8_values(val, id);
     if (rc == DDS::RETCODE_OK) {
-      if (for_sequence) {
-        vw.begin_sequence(orig_elem_kind, val.length());
+      if (for_sequence && !vw.begin_sequence(orig_elem_kind, val.length())) {
+        rc = DDS::RETCODE_ERROR;
+        break;
       }
-      vw.write_uint8_array(val.get_buffer(), val.length());
-      if (for_sequence) {
-        vw.end_sequence();
+      if (!vw.write_uint8_array(val.get_buffer(), val.length())) {
+        rc = DDS::RETCODE_ERROR;
+        break;
+      }
+      if (for_sequence && !vw.end_sequence()) {
+        rc = DDS::RETCODE_ERROR;
       }
     }
     break;
@@ -101,12 +114,16 @@ DDS::ReturnCode_t vwrite_primitive_array_i(ValueWriter& vw, DDS::DynamicData_ptr
     DDS::Int16Seq val;
     rc = value->get_int16_values(val, id);
     if (rc == DDS::RETCODE_OK) {
-      if (for_sequence) {
-        vw.begin_sequence(orig_elem_kind, val.length());
+      if (for_sequence && !vw.begin_sequence(orig_elem_kind, val.length())) {
+        rc = DDS::RETCODE_ERROR;
+        break;
       }
-      vw.write_int16_array(val.get_buffer(), val.length());
-      if (for_sequence) {
-        vw.end_sequence();
+      if (!vw.write_int16_array(val.get_buffer(), val.length())) {
+        rc = DDS::RETCODE_ERROR;
+        break;
+      }
+      if (for_sequence && !vw.end_sequence()) {
+        rc = DDS::RETCODE_ERROR;
       }
     }
     break;
@@ -115,12 +132,16 @@ DDS::ReturnCode_t vwrite_primitive_array_i(ValueWriter& vw, DDS::DynamicData_ptr
     DDS::UInt16Seq val;
     rc = value->get_uint16_values(val, id);
     if (rc == DDS::RETCODE_OK) {
-      if (for_sequence) {
-        vw.begin_sequence(orig_elem_kind, val.length());
+      if (for_sequence && !vw.begin_sequence(orig_elem_kind, val.length())) {
+        rc = DDS::RETCODE_ERROR;
+        break;
       }
-      vw.write_uint16_array(val.get_buffer(), val.length());
-      if (for_sequence) {
-        vw.end_sequence();
+      if (!vw.write_uint16_array(val.get_buffer(), val.length())) {
+        rc = DDS::RETCODE_ERROR;
+        break;
+      }
+      if (for_sequence && !vw.end_sequence()) {
+        rc = DDS::RETCODE_ERROR;
       }
     }
     break;
@@ -129,12 +150,16 @@ DDS::ReturnCode_t vwrite_primitive_array_i(ValueWriter& vw, DDS::DynamicData_ptr
     DDS::Int32Seq val;
     rc = value->get_int32_values(val, id);
     if (rc == DDS::RETCODE_OK) {
-      if (for_sequence) {
-        vw.begin_sequence(orig_elem_kind, val.length());
+      if (for_sequence && !vw.begin_sequence(orig_elem_kind, val.length())) {
+        rc = DDS::RETCODE_ERROR;
+        break;
       }
-      vw.write_int32_array(val.get_buffer(), val.length());
-      if (for_sequence) {
-        vw.end_sequence();
+      if (!vw.write_int32_array(val.get_buffer(), val.length())) {
+        rc = DDS::RETCODE_ERROR;
+        break;
+      }
+      if (for_sequence && !vw.end_sequence()) {
+        rc = DDS::RETCODE_ERROR;
       }
     }
     break;
@@ -143,12 +168,16 @@ DDS::ReturnCode_t vwrite_primitive_array_i(ValueWriter& vw, DDS::DynamicData_ptr
     DDS::UInt32Seq val;
     rc = value->get_uint32_values(val, id);
     if (rc == DDS::RETCODE_OK) {
-      if (for_sequence) {
-        vw.begin_sequence(orig_elem_kind, val.length());
+      if (for_sequence && !vw.begin_sequence(orig_elem_kind, val.length())) {
+        rc = DDS::RETCODE_ERROR;
+        break;
       }
-      vw.write_uint32_array(val.get_buffer(), val.length());
-      if (for_sequence) {
-        vw.end_sequence();
+      if (!vw.write_uint32_array(val.get_buffer(), val.length())) {
+        rc = DDS::RETCODE_ERROR;
+        break;
+      }
+      if (for_sequence && !vw.end_sequence()) {
+        rc = DDS::RETCODE_ERROR;
       }
     }
     break;
@@ -157,12 +186,16 @@ DDS::ReturnCode_t vwrite_primitive_array_i(ValueWriter& vw, DDS::DynamicData_ptr
     DDS::Int64Seq val;
     rc = value->get_int64_values(val, id);
     if (rc == DDS::RETCODE_OK) {
-      if (for_sequence) {
-        vw.begin_sequence(orig_elem_kind, val.length());
+      if (for_sequence && !vw.begin_sequence(orig_elem_kind, val.length())) {
+        rc = DDS::RETCODE_ERROR;
+        break;
       }
-      vw.write_int64_array(val.get_buffer(), val.length());
-      if (for_sequence) {
-        vw.end_sequence();
+      if (!vw.write_int64_array(val.get_buffer(), val.length())) {
+        rc = DDS::RETCODE_ERROR;
+        break;
+      }
+      if (for_sequence && !vw.end_sequence()) {
+        rc = DDS::RETCODE_ERROR;
       }
     }
     break;
@@ -171,12 +204,16 @@ DDS::ReturnCode_t vwrite_primitive_array_i(ValueWriter& vw, DDS::DynamicData_ptr
     DDS::UInt64Seq val;
     rc = value->get_uint64_values(val, id);
     if (rc == DDS::RETCODE_OK) {
-      if (for_sequence) {
-        vw.begin_sequence(orig_elem_kind, val.length());
+      if (for_sequence && !vw.begin_sequence(orig_elem_kind, val.length())) {
+        rc = DDS::RETCODE_ERROR;
+        break;
       }
-      vw.write_uint64_array(val.get_buffer(), val.length());
-      if (for_sequence) {
-        vw.end_sequence();
+      if (!vw.write_uint64_array(val.get_buffer(), val.length())) {
+        rc = DDS::RETCODE_ERROR;
+        break;
+      }
+      if (for_sequence && !vw.end_sequence()) {
+        rc = DDS::RETCODE_ERROR;
       }
     }
     break;
@@ -185,12 +222,16 @@ DDS::ReturnCode_t vwrite_primitive_array_i(ValueWriter& vw, DDS::DynamicData_ptr
     DDS::Float32Seq val;
     rc = value->get_float32_values(val, id);
     if (rc == DDS::RETCODE_OK) {
-      if (for_sequence) {
-        vw.begin_sequence(orig_elem_kind, val.length());
+      if (for_sequence && !vw.begin_sequence(orig_elem_kind, val.length())) {
+        rc = DDS::RETCODE_ERROR;
+        break;
       }
-      vw.write_float32_array(val.get_buffer(), val.length());
-      if (for_sequence) {
-        vw.end_sequence();
+      if (!vw.write_float32_array(val.get_buffer(), val.length())) {
+        rc = DDS::RETCODE_ERROR;
+        break;
+      }
+      if (for_sequence && !vw.end_sequence()) {
+        rc = DDS::RETCODE_ERROR;
       }
     }
     break;
@@ -199,12 +240,16 @@ DDS::ReturnCode_t vwrite_primitive_array_i(ValueWriter& vw, DDS::DynamicData_ptr
     DDS::Float64Seq val;
     rc = value->get_float64_values(val, id);
     if (rc == DDS::RETCODE_OK) {
-      if (for_sequence) {
-        vw.begin_sequence(orig_elem_kind, val.length());
+      if (for_sequence && !vw.begin_sequence(orig_elem_kind, val.length())) {
+        rc = DDS::RETCODE_ERROR;
+        break;
       }
-      vw.write_float64_array(val.get_buffer(), val.length());
-      if (for_sequence) {
-        vw.end_sequence();
+      if (!vw.write_float64_array(val.get_buffer(), val.length())) {
+        rc = DDS::RETCODE_ERROR;
+        break;
+      }
+      if (for_sequence && !vw.end_sequence()) {
+        rc = DDS::RETCODE_ERROR;
       }
     }
     break;
@@ -213,12 +258,16 @@ DDS::ReturnCode_t vwrite_primitive_array_i(ValueWriter& vw, DDS::DynamicData_ptr
     DDS::Float128Seq val;
     rc = value->get_float128_values(val, id);
     if (rc == DDS::RETCODE_OK) {
-      if (for_sequence) {
-        vw.begin_sequence(orig_elem_kind, val.length());
+      if (for_sequence && !vw.begin_sequence(orig_elem_kind, val.length())) {
+        rc = DDS::RETCODE_ERROR;
+        break;
       }
-      vw.write_float128_array(val.get_buffer(), val.length());
-      if (for_sequence) {
-        vw.end_sequence();
+      if (!vw.write_float128_array(val.get_buffer(), val.length())) {
+        rc = DDS::RETCODE_ERROR;
+        break;
+      }
+      if (for_sequence && !vw.end_sequence()) {
+        rc = DDS::RETCODE_ERROR;
       }
     }
     break;
@@ -227,12 +276,16 @@ DDS::ReturnCode_t vwrite_primitive_array_i(ValueWriter& vw, DDS::DynamicData_ptr
     DDS::CharSeq val;
     rc = value->get_char8_values(val, id);
     if (rc == DDS::RETCODE_OK) {
-      if (for_sequence) {
-        vw.begin_sequence(orig_elem_kind, val.length());
+      if (for_sequence && !vw.begin_sequence(orig_elem_kind, val.length())) {
+        rc = DDS::RETCODE_ERROR;
+        break;
       }
-      vw.write_char8_array(val.get_buffer(), val.length());
-      if (for_sequence) {
-        vw.end_sequence();
+      if (!vw.write_char8_array(val.get_buffer(), val.length())) {
+        rc = DDS::RETCODE_ERROR;
+        break;
+      }
+      if (for_sequence && !vw.end_sequence()) {
+        rc = DDS::RETCODE_ERROR;
       }
     }
     break;
@@ -242,12 +295,16 @@ DDS::ReturnCode_t vwrite_primitive_array_i(ValueWriter& vw, DDS::DynamicData_ptr
     DDS::WcharSeq val;
     rc = value->get_char16_values(val, id);
     if (rc == DDS::RETCODE_OK) {
-      if (for_sequence) {
-        vw.begin_sequence(orig_elem_kind, val.length());
+      if (for_sequence && !vw.begin_sequence(orig_elem_kind, val.length())) {
+        rc = DDS::RETCODE_ERROR;
+        break;
       }
-      vw.write_char16_array(val.get_buffer(), val.length());
-      if (for_sequence) {
-        vw.end_sequence();
+      if (!vw.write_char16_array(val.get_buffer(), val.length())) {
+        rc = DDS::RETCODE_ERROR;
+        break;
+      }
+      if (for_sequence && !vw.end_sequence()) {
+        rc = DDS::RETCODE_ERROR;
       }
     }
     break;
@@ -257,12 +314,16 @@ DDS::ReturnCode_t vwrite_primitive_array_i(ValueWriter& vw, DDS::DynamicData_ptr
     DDS::ByteSeq val;
     rc = value->get_byte_values(val, id);
     if (rc == DDS::RETCODE_OK) {
-      if (for_sequence) {
-        vw.begin_sequence(orig_elem_kind, val.length());
+      if (for_sequence && !vw.begin_sequence(orig_elem_kind, val.length())) {
+        rc = DDS::RETCODE_ERROR;
+        break;
       }
-      vw.write_byte_array(val.get_buffer(), val.length());
-      if (for_sequence) {
-        vw.end_sequence();
+      if (!vw.write_byte_array(val.get_buffer(), val.length())) {
+        rc = DDS::RETCODE_ERROR;
+        break;
+      }
+      if (for_sequence && !vw.end_sequence()) {
+        rc = DDS::RETCODE_ERROR;
       }
     }
     break;
@@ -271,12 +332,16 @@ DDS::ReturnCode_t vwrite_primitive_array_i(ValueWriter& vw, DDS::DynamicData_ptr
     DDS::BooleanSeq val;
     rc = value->get_boolean_values(val, id);
     if (rc == DDS::RETCODE_OK) {
-      if (for_sequence) {
-        vw.begin_sequence(orig_elem_kind, val.length());
+      if (for_sequence && !vw.begin_sequence(orig_elem_kind, val.length())) {
+        rc = DDS::RETCODE_ERROR;
+        break;
       }
-      vw.write_boolean_array(val.get_buffer(), val.length());
-      if (for_sequence) {
-        vw.end_sequence();
+      if (!vw.write_boolean_array(val.get_buffer(), val.length())) {
+        rc = DDS::RETCODE_ERROR;
+        break;
+      }
+      if (for_sequence && !vw.end_sequence()) {
+        rc = DDS::RETCODE_ERROR;
       }
     }
     break;
@@ -293,15 +358,15 @@ DDS::ReturnCode_t vwrite_primitive_array_i(ValueWriter& vw, DDS::DynamicData_ptr
 
 // Argument containing_tk and params only apply when this is a member of a struct or union,
 // and is ignored when this is an element of a sequence or array.
-void vwrite_item(ValueWriter& vw, DDS::DynamicData_ptr value, DDS::MemberId id,
+bool vwrite_item(ValueWriter& vw, DDS::DynamicData_ptr value, DDS::MemberId id,
                  const DDS::DynamicType_var& item_type, DDS::TypeKind containing_tk = XTypes::TK_NONE,
-                 VWriterMemberParam* params = 0)
+                 MemberParam* params = 0)
 {
   using namespace OpenDDS::XTypes;
   const DDS::TypeKind item_tk = item_type->get_kind();
   DDS::TypeKind treat_as;
   if (get_equivalent_kind(item_type, treat_as) != DDS::RETCODE_OK) {
-    return;
+    return false;
   }
 
   DDS::ReturnCode_t rc = DDS::RETCODE_OK;
@@ -310,17 +375,21 @@ void vwrite_item(ValueWriter& vw, DDS::DynamicData_ptr value, DDS::MemberId id,
     CORBA::Int8 val = 0;
     rc = value->get_int8_value(val, id);
     if (!check_rc(rc, id, treat_as, "vwrite_item")) {
-      return;
+      return false;
     }
-    begin_member_helper(vw, params, rc, containing_tk);
+    if (!begin_member_helper(vw, params, rc, containing_tk)) {
+      return false;
+    }
     if (rc == DDS::RETCODE_OK) {
       if (item_tk == TK_ENUM) {
-        write_enum(vw, item_type, val, treat_as);
-      } else {
-        vw.write_int8(val);
+        if (!write_enum(vw, item_type, val, treat_as)) {
+          return false;
+        }
+      } else if (!vw.write_int8(val)) {
+        return false;
       }
-    } else {
-      vw.write_absent_value();
+    } else if (!vw.write_absent_value()) {
+      return false;
     }
     break;
   }
@@ -328,13 +397,17 @@ void vwrite_item(ValueWriter& vw, DDS::DynamicData_ptr value, DDS::MemberId id,
     CORBA::UInt8 val = 0;
     rc = value->get_uint8_value(val, id);
     if (!check_rc(rc, id, treat_as, "vwrite_item")) {
-      return;
+      return false;
     }
-    begin_member_helper(vw, params, rc, containing_tk);
+    if (!begin_member_helper(vw, params, rc, containing_tk)) {
+      return false;
+    }
     if (rc == DDS::RETCODE_OK) {
-      vw.write_uint8(val);
-    } else {
-      vw.write_absent_value();
+      if (!vw.write_uint8(val)) {
+        return false;
+      }
+    } else if (!vw.write_absent_value()) {
+      return false;
     }
     break;
   }
@@ -342,17 +415,21 @@ void vwrite_item(ValueWriter& vw, DDS::DynamicData_ptr value, DDS::MemberId id,
     CORBA::Short val = 0;
     rc = value->get_int16_value(val, id);
     if (!check_rc(rc, id, treat_as, "vwrite_item")) {
-      return;
+      return false;
     }
-    begin_member_helper(vw, params, rc, containing_tk);
+    if (!begin_member_helper(vw, params, rc, containing_tk)) {
+      return false;
+    }
     if (rc == DDS::RETCODE_OK) {
       if (item_tk == TK_ENUM) {
-        write_enum(vw, item_type, val, treat_as);
-      } else {
-        vw.write_int16(val);
+        if (!write_enum(vw, item_type, val, treat_as)) {
+          return false;
+        }
+      } else if (!vw.write_int16(val)) {
+        return false;
       }
-    } else {
-      vw.write_absent_value();
+    } else if (!vw.write_absent_value()) {
+      return false;
     }
     break;
   }
@@ -360,13 +437,17 @@ void vwrite_item(ValueWriter& vw, DDS::DynamicData_ptr value, DDS::MemberId id,
     CORBA::UShort val = 0;
     rc = value->get_uint16_value(val, id);
     if (!check_rc(rc, id, treat_as, "vwrite_item")) {
-      return;
+      return false;
     }
-    begin_member_helper(vw, params, rc, containing_tk);
+    if (!begin_member_helper(vw, params, rc, containing_tk)) {
+      return false;
+    }
     if (rc == DDS::RETCODE_OK) {
-      vw.write_uint16(val);
-    } else {
-      vw.write_absent_value();
+      if (!vw.write_uint16(val)) {
+        return false;
+      }
+    } else if (!vw.write_absent_value()) {
+      return false;
     }
     break;
   }
@@ -374,17 +455,21 @@ void vwrite_item(ValueWriter& vw, DDS::DynamicData_ptr value, DDS::MemberId id,
     CORBA::Long val = 0;
     rc = value->get_int32_value(val, id);
     if (!check_rc(rc, id, treat_as, "vwrite_item")) {
-      return;
+      return false;
     }
-    begin_member_helper(vw, params, rc, containing_tk);
+    if (!begin_member_helper(vw, params, rc, containing_tk)) {
+      return false;
+    }
     if (rc == DDS::RETCODE_OK) {
       if (item_tk == TK_ENUM) {
-        write_enum(vw, item_type, val, treat_as);
-      } else {
-        vw.write_int32(val);
+        if (!write_enum(vw, item_type, val, treat_as)) {
+          return false;
+        }
+      } else if (!vw.write_int32(val)) {
+        return false;
       }
-    } else {
-      vw.write_absent_value();
+    } else if (!vw.write_absent_value()) {
+      return false;
     }
     break;
   }
@@ -392,13 +477,17 @@ void vwrite_item(ValueWriter& vw, DDS::DynamicData_ptr value, DDS::MemberId id,
     CORBA::ULong val = 0;
     rc = value->get_uint32_value(val, id);
     if (!check_rc(rc, id, treat_as, "vwrite_item")) {
-      return;
+      return false;
     }
-    begin_member_helper(vw, params, rc, containing_tk);
+    if (!begin_member_helper(vw, params, rc, containing_tk)) {
+      return false;
+    }
     if (rc == DDS::RETCODE_OK) {
-      vw.write_uint32(val);
-    } else {
-      vw.write_absent_value();
+      if (!vw.write_uint32(val)) {
+        return false;
+      }
+    } else if (!vw.write_absent_value()) {
+      return false;
     }
     break;
   }
@@ -406,13 +495,17 @@ void vwrite_item(ValueWriter& vw, DDS::DynamicData_ptr value, DDS::MemberId id,
     CORBA::LongLong val = 0;
     rc =  value->get_int64_value(val, id);
     if (!check_rc(rc, id, treat_as, "vwrite_item")) {
-      return;
+      return false;
     }
-    begin_member_helper(vw, params, rc, containing_tk);
+    if (!begin_member_helper(vw, params, rc, containing_tk)) {
+      return false;
+    }
     if (rc == DDS::RETCODE_OK) {
-      vw.write_int64(val);
-    } else {
-      vw.write_absent_value();
+      if (!vw.write_int64(val)) {
+        return false;
+      }
+    } else if (!vw.write_absent_value()) {
+      return false;
     }
     break;
   }
@@ -420,13 +513,17 @@ void vwrite_item(ValueWriter& vw, DDS::DynamicData_ptr value, DDS::MemberId id,
     CORBA::ULongLong val = 0;
     rc = value->get_uint64_value(val, id);
     if (!check_rc(rc, id, treat_as, "vwrite_item")) {
-      return;
+      return false;
     }
-    begin_member_helper(vw, params, rc, containing_tk);
+    if (!begin_member_helper(vw, params, rc, containing_tk)) {
+      return false;
+    }
     if (rc == DDS::RETCODE_OK) {
-      vw.write_uint64(val);
-    } else {
-      vw.write_absent_value();
+      if (!vw.write_uint64(val)) {
+        return false;
+      }
+    } else if (!vw.write_absent_value()) {
+      return false;
     }
     break;
   }
@@ -434,13 +531,17 @@ void vwrite_item(ValueWriter& vw, DDS::DynamicData_ptr value, DDS::MemberId id,
     CORBA::Float val = 0.0f;
     rc = value->get_float32_value(val, id);
     if (!check_rc(rc, id, treat_as, "vwrite_item")) {
-      return;
+      return false;
     }
-    begin_member_helper(vw, params, rc, containing_tk);
+    if (!begin_member_helper(vw, params, rc, containing_tk)) {
+      return false;
+    }
     if (rc == DDS::RETCODE_OK) {
-      vw.write_float32(val);
-    } else {
-      vw.write_absent_value();
+      if (!vw.write_float32(val)) {
+        return false;
+      }
+    } else if (!vw.write_absent_value()) {
+      return false;
     }
     break;
   }
@@ -448,13 +549,17 @@ void vwrite_item(ValueWriter& vw, DDS::DynamicData_ptr value, DDS::MemberId id,
     CORBA::Double val = 0.0;
     rc = value->get_float64_value(val, id);
     if (!check_rc(rc, id, treat_as, "vwrite_item")) {
-      return;
+      return false;
     }
-    begin_member_helper(vw, params, rc, containing_tk);
+    if (!begin_member_helper(vw, params, rc, containing_tk)) {
+      return false;
+    }
     if (rc == DDS::RETCODE_OK) {
-      vw.write_float64(val);
-    } else {
-      vw.write_absent_value();
+      if (!vw.write_float64(val)) {
+        return false;
+      }
+    } else if (!vw.write_absent_value()) {
+      return false;
     }
     break;
   }
@@ -463,13 +568,17 @@ void vwrite_item(ValueWriter& vw, DDS::DynamicData_ptr value, DDS::MemberId id,
     ACE_CDR_LONG_DOUBLE_ASSIGNMENT(val, 0.0l);
     rc = value->get_float128_value(val, id);
     if (!check_rc(rc, id, treat_as, "vwrite_item")) {
-      return;
+      return false;
     }
-    begin_member_helper(vw, params, rc, containing_tk);
+    if (!begin_member_helper(vw, params, rc, containing_tk)) {
+      return false;
+    }
     if (rc == DDS::RETCODE_OK) {
-      vw.write_float128(val);
-    } else {
-      vw.write_absent_value();
+      if (!vw.write_float128(val)) {
+        return false;
+      }
+    } else if (!vw.write_absent_value()) {
+      return false;
     }
     break;
   }
@@ -477,13 +586,17 @@ void vwrite_item(ValueWriter& vw, DDS::DynamicData_ptr value, DDS::MemberId id,
     CORBA::Char val = '\0';
     rc = value->get_char8_value(val, id);
     if (!check_rc(rc, id, treat_as, "vwrite_item")) {
-      return;
+      return false;
     }
-    begin_member_helper(vw, params, rc, containing_tk);
+    if (!begin_member_helper(vw, params, rc, containing_tk)) {
+      return false;
+    }
     if (rc == DDS::RETCODE_OK) {
-      vw.write_char8(val);
-    } else {
-      vw.write_absent_value();
+      if (!vw.write_char8(val)) {
+        return false;
+      }
+    } else if (!vw.write_absent_value()) {
+      return false;
     }
     break;
   }
@@ -492,13 +605,17 @@ void vwrite_item(ValueWriter& vw, DDS::DynamicData_ptr value, DDS::MemberId id,
     CORBA::WChar val = L'\0';
     rc = value->get_char16_value(val, id);
     if (!check_rc(rc, id, treat_as, "vwrite_item")) {
-      return;
+      return false;
     }
-    begin_member_helper(vw, params, rc, containing_tk);
+    if (!begin_member_helper(vw, params, rc, containing_tk)) {
+      return false;
+    }
     if (rc == DDS::RETCODE_OK) {
-      vw.write_char16(val);
-    } else {
-      vw.write_absent_value();
+      if (!vw.write_char16(val)) {
+        return false;
+      }
+    } else if (!vw.write_absent_value()) {
+      return false;
     }
     break;
   }
@@ -507,13 +624,17 @@ void vwrite_item(ValueWriter& vw, DDS::DynamicData_ptr value, DDS::MemberId id,
     CORBA::Octet val = 0x00;
     rc = value->get_byte_value(val, id);
     if (!check_rc(rc, id, treat_as, "vwrite_item")) {
-      return;
+      return false;
     }
-    begin_member_helper(vw, params, rc, containing_tk);
+    if (!begin_member_helper(vw, params, rc, containing_tk)) {
+      return false;
+    }
     if (rc == DDS::RETCODE_OK) {
-      vw.write_byte(val);
-    } else {
-      vw.write_absent_value();
+      if (!vw.write_byte(val)) {
+        return false;
+      }
+    } else if (!vw.write_absent_value()) {
+      return false;
     }
     break;
   }
@@ -521,13 +642,17 @@ void vwrite_item(ValueWriter& vw, DDS::DynamicData_ptr value, DDS::MemberId id,
     CORBA::Boolean val = false;
     rc = value->get_boolean_value(val, id);
     if (!check_rc(rc, id, treat_as, "vwrite_item")) {
-      return;
+      return false;
     }
-    begin_member_helper(vw, params, rc, containing_tk);
+    if (!begin_member_helper(vw, params, rc, containing_tk)) {
+      return false;
+    }
     if (rc == DDS::RETCODE_OK) {
-      vw.write_boolean(val);
-    } else {
-      vw.write_absent_value();
+      if (!vw.write_boolean(val)) {
+        return false;
+      }
+    } else if (!vw.write_absent_value()) {
+      return false;
     }
     break;
   }
@@ -535,13 +660,17 @@ void vwrite_item(ValueWriter& vw, DDS::DynamicData_ptr value, DDS::MemberId id,
     CORBA::String_var val;
     rc = value->get_string_value(val, id);
     if (!check_rc(rc, id, treat_as, "vwrite_item")) {
-      return;
+      return false;
     }
-    begin_member_helper(vw, params, rc, containing_tk);
+    if (!begin_member_helper(vw, params, rc, containing_tk)) {
+      return false;
+    }
     if (rc == DDS::RETCODE_OK) {
-      vw.write_string(val.in());
-    } else {
-      vw.write_absent_value();
+      if (!vw.write_string(val.in())) {
+        return false;
+      }
+    } else if (!vw.write_absent_value()) {
+      return false;
     }
     break;
   }
@@ -550,13 +679,17 @@ void vwrite_item(ValueWriter& vw, DDS::DynamicData_ptr value, DDS::MemberId id,
     CORBA::WString_var val;
     rc = value->get_wstring_value(val, id);
     if (!check_rc(rc, id, treat_as, "vwrite_item")) {
-      return;
+      return false;
     }
-    begin_member_helper(vw, params, rc, containing_tk);
+    if (!begin_member_helper(vw, params, rc, containing_tk)) {
+      return false;
+    }
     if (rc == DDS::RETCODE_OK) {
-      vw.write_wstring(val.in());
-    } else {
-      vw.write_absent_value();
+      if (!vw.write_wstring(val.in())) {
+        return false;
+      }
+    } else if (!vw.write_absent_value()) {
+      return false;
     }
     break;
   }
@@ -565,17 +698,17 @@ void vwrite_item(ValueWriter& vw, DDS::DynamicData_ptr value, DDS::MemberId id,
     DDS::TypeDescriptor_var seq_td;
     rc = item_type->get_descriptor(seq_td);
     if (rc != DDS::RETCODE_OK) {
-      if (log_level >= LogLevel::Warning) {
-        ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: vwrite_item: get_descriptor for sequence failed (%C)\n",
+      if (log_level >= LogLevel::Notice) {
+        ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: vwrite_item: get_descriptor for sequence failed (%C)\n",
                    retcode_to_string(rc)));
       }
-      return;
+      return false;
     }
     DDS::DynamicType_var elem_type = get_base_type(seq_td->element_type());
     const TypeKind elem_kind = elem_type->get_kind();
     TypeKind treat_elem_as;
     if (get_equivalent_kind(elem_type, treat_elem_as) != DDS::RETCODE_OK) {
-      return;
+      return false;
     }
     // Try writing the whole primitive sequence. If fails, fall back to write element one by one.
     if (is_primitive(treat_elem_as) &&
@@ -589,129 +722,139 @@ void vwrite_item(ValueWriter& vw, DDS::DynamicData_ptr value, DDS::MemberId id,
     DDS::DynamicData_var member_data;
     rc = value->get_complex_value(member_data, id);
     if (!check_rc(rc, id, treat_as, "vwrite_item")) {
-      return;
+      return false;
     }
-    begin_member_helper(vw, params, rc, containing_tk);
+    if (!begin_member_helper(vw, params, rc, containing_tk)) {
+      return false;
+    }
     if (rc == DDS::RETCODE_OK) {
-      vwrite(vw, member_data);
-    } else {
-      vw.write_absent_value();
+      if (!vwrite(vw, member_data)) {
+        return false;
+      }
+    } else if (!vw.write_absent_value()) {
+      return false;
     }
     break;
   }
   default:
-    if (log_level >= LogLevel::Warning) {
-      ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: vwrite_item: Unsupported type %C\n",
+    if (log_level >= LogLevel::Notice) {
+      ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: vwrite_item: Unsupported type %C\n",
                  typekind_to_string(treat_as)));
     }
-    return;
+    return false;
   }
 
   if (containing_tk == TK_STRUCTURE) {
-    vw.end_struct_member();
+    if (!vw.end_struct_member()) {
+      return false;
+    }
   } else if (containing_tk == TK_UNION) {
-    vw.end_union_member();
+    if (!vw.end_union_member()) {
+      return false;
+    }
   }
+  return true;
 }
 
-void vwrite_member(ValueWriter&vw, DDS::DynamicData_ptr value,
+bool vwrite_member(ValueWriter&vw, DDS::DynamicData_ptr value,
                    const DDS::MemberDescriptor_var& md, DDS::TypeKind containing_tk)
 {
   const DDS::MemberId id = md->id();
   const DDS::DynamicType_var member_type = XTypes::get_base_type(md->type());
-  VWriterMemberParam params(id, md->is_must_understand() || md->is_key(), md->name(),
-                            md->is_optional(), true);
-  vwrite_item(vw, value, id, member_type, containing_tk, &params);
+  MemberParam params(id, md->is_must_understand() || md->is_key(), md->name(), md->is_optional(), true);
+  return vwrite_item(vw, value, id, member_type, containing_tk, &params);
 }
 
-void vwrite_struct(ValueWriter& vw, DDS::DynamicData_ptr value, const DDS::DynamicType_var& dt)
+bool vwrite_struct(ValueWriter& vw, DDS::DynamicData_ptr value, const DDS::DynamicType_var& dt)
 {
   DDS::TypeDescriptor_var type_desc;
   DDS::ReturnCode_t rc = dt->get_descriptor(type_desc);
   if (rc != DDS::RETCODE_OK) {
-    if (log_level >= LogLevel::Warning) {
-      ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: vwrite_struct: get_descriptor failed (%C)\n",
+    if (log_level >= LogLevel::Notice) {
+      ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: vwrite_struct: get_descriptor failed (%C)\n",
                  retcode_to_string(rc)));
     }
-    return;
+    return false;
   }
 
   const Extensibility extensibility = XTypes::dds_to_opendds_ext(type_desc->extensibility_kind());
-  vw.begin_struct(extensibility);
+  if (!vw.begin_struct(extensibility)) {
+    return false;
+  }
   for (CORBA::ULong i = 0; i < dt->get_member_count(); ++i) {
     DDS::DynamicTypeMember_var dtm;
     rc = dt->get_member_by_index(dtm, i);
     if (rc != DDS::RETCODE_OK) {
-      if (log_level >= LogLevel::Warning) {
-        ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: vwrite_struct: get_member_by_index %u failed (%C)\n",
+      if (log_level >= LogLevel::Notice) {
+        ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: vwrite_struct: get_member_by_index %u failed (%C)\n",
                    i, retcode_to_string(rc)));
       }
-      return;
+      return false;
     }
     DDS::MemberDescriptor_var md;
     rc = dtm->get_descriptor(md);
     if (rc != DDS::RETCODE_OK) {
-      if (log_level >= LogLevel::Warning) {
-        ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: vwrite_struct:"
+      if (log_level >= LogLevel::Notice) {
+        ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: vwrite_struct:"
                    " get_descriptor for member at index %u failed (%C)\n", i, retcode_to_string(rc)));
       }
-      return;
+      return false;
     }
-    vwrite_member(vw, value, md, XTypes::TK_STRUCTURE);
+    if (!vwrite_member(vw, value, md, XTypes::TK_STRUCTURE)) {
+      return false;
+    }
   }
-  vw.end_struct();
+  return vw.end_struct();
 }
 
-void vwrite_discriminator(ValueWriter& vw, DDS::DynamicData_ptr value,
+bool vwrite_discriminator(ValueWriter& vw, DDS::DynamicData_ptr value,
                           const DDS::MemberDescriptor_var& md, CORBA::Long& disc_val)
 {
   using namespace OpenDDS::XTypes;
   const DDS::MemberId id = DISCRIMINATOR_ID;
   const DDS::DynamicType_var disc_type = get_base_type(md->type());
   const DDS::TypeKind disc_tk = disc_type->get_kind();
-  DDS::TypeKind treat_disc_as = disc_tk;
-
-  DDS::ReturnCode_t rc;
-  if (disc_tk == TK_ENUM) {
-    rc = enum_bound(disc_type, treat_disc_as);
-    if (rc != DDS::RETCODE_OK) {
-      if (log_level >= LogLevel::Warning) {
-        ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: vwrite_discriminator: enum_bound failed (%C)\n",
-                   retcode_to_string(rc)));
-      }
-      return;
-    }
+  DDS::TypeKind treat_disc_as;
+  if (get_equivalent_kind(disc_type, treat_disc_as) != DDS::RETCODE_OK) {
+    return false;
   }
 
+  DDS::ReturnCode_t rc = DDS::RETCODE_OK;
   switch (treat_disc_as) {
   case TK_BOOLEAN: {
     CORBA::Boolean val = false;
     rc = value->get_boolean_value(val, id);
     if (!check_rc(rc, id, disc_tk, "vwrite_discriminator")) {
-      return;
+      return false;
     }
     disc_val = static_cast<CORBA::Long>(val);
-    vw.write_boolean(val);
+    if (!vw.write_boolean(val)) {
+      return false;
+    }
     break;
   }
   case TK_BYTE: {
     CORBA::Octet val = 0x00;
     rc = value->get_byte_value(val, id);
     if (!check_rc(rc, id, disc_tk, "vwrite_discriminator")) {
-      return;
+      return false;
     }
     disc_val = static_cast<CORBA::Long>(val);
-    vw.write_byte(val);
+    if (!vw.write_byte(val)) {
+      return false;
+    }
     break;
   }
   case TK_CHAR8: {
     CORBA::Char val = '\0';
     rc = value->get_char8_value(val, id);
     if (!check_rc(rc, id, disc_tk, "vwrite_discriminator")) {
-      return;
+      return false;
     }
     disc_val = static_cast<CORBA::Long>(val);
-    vw.write_char8(val);
+    if (!vw.write_char8(val)) {
+      return false;
+    }
     break;
   }
 #ifdef DDS_HAS_WCHAR
@@ -719,10 +862,12 @@ void vwrite_discriminator(ValueWriter& vw, DDS::DynamicData_ptr value,
     CORBA::WChar val = L'\0';
     rc = value->get_char16_value(val, id);
     if (!check_rc(rc, id, disc_tk, "vwrite_discriminator")) {
-      return;
+      return false;
     }
     disc_val = static_cast<CORBA::Long>(val);
-    vw.write_char16(val);
+    if (!vw.write_char16(val)) {
+      return false;
+    }
     break;
   }
 #endif
@@ -730,13 +875,17 @@ void vwrite_discriminator(ValueWriter& vw, DDS::DynamicData_ptr value,
     CORBA::Int8 val = 0;
     rc = value->get_int8_value(val, id);
     if (!check_rc(rc, id, disc_tk, "vwrite_discriminator")) {
-      return;
+      return false;
     }
     disc_val = static_cast<CORBA::Long>(val);
     if (disc_tk == TK_ENUM) {
-      write_enum(vw, disc_type, val, treat_disc_as);
+      if (!write_enum(vw, disc_type, val, treat_disc_as)) {
+        return false;
+      }
     } else {
-      vw.write_int8(val);
+      if (!vw.write_int8(val)) {
+        return false;
+      }
     }
     break;
   }
@@ -744,23 +893,29 @@ void vwrite_discriminator(ValueWriter& vw, DDS::DynamicData_ptr value,
     CORBA::UInt8 val = 0;
     rc = value->get_uint8_value(val, id);
     if (!check_rc(rc, id, disc_tk, "vwrite_discriminator")) {
-      return;
+      return false;
     }
     disc_val = static_cast<CORBA::Long>(val);
-    vw.write_uint8(val);
+    if (!vw.write_uint8(val)) {
+      return false;
+    }
     break;
   }
   case TK_INT16: {
     CORBA::Short val = 0;
     rc = value->get_int16_value(val, id);
     if (!check_rc(rc, id, disc_tk, "vwrite_discriminator")) {
-      return;
+      return false;
     }
     disc_val = static_cast<CORBA::Long>(val);
     if (disc_tk == TK_ENUM) {
-      write_enum(vw, disc_type, val, treat_disc_as);
+      if (!write_enum(vw, disc_type, val, treat_disc_as)) {
+        return false;
+      }
     } else {
-      vw.write_int16(val);
+      if (!vw.write_int16(val)) {
+        return false;
+      }
     }
     break;
   }
@@ -768,21 +923,27 @@ void vwrite_discriminator(ValueWriter& vw, DDS::DynamicData_ptr value,
     CORBA::UShort val = 0;
     rc = value->get_uint16_value(val, id);
     if (!check_rc(rc, id, disc_tk, "vwrite_discriminator")) {
-      return;
+      return false;
     }
     disc_val = static_cast<CORBA::Long>(val);
-    vw.write_uint16(val);
+    if (!vw.write_uint16(val)) {
+      return false;
+    }
     break;
   }
   case TK_INT32: {
     rc = value->get_int32_value(disc_val, id);
     if (!check_rc(rc, id, disc_tk, "vwrite_discriminator")) {
-      return;
+      return false;
     }
     if (disc_tk == TK_ENUM) {
-      write_enum(vw, disc_type, disc_val, treat_disc_as);
+      if (!write_enum(vw, disc_type, disc_val, treat_disc_as)) {
+        return false;
+      }
     } else {
-      vw.write_int32(disc_val);
+      if (!vw.write_int32(disc_val)) {
+        return false;
+      }
     }
     break;
   }
@@ -790,111 +951,127 @@ void vwrite_discriminator(ValueWriter& vw, DDS::DynamicData_ptr value,
     CORBA::ULong val = 0;
     rc = value->get_uint32_value(val, id);
     if (!check_rc(rc, id, disc_tk, "vwrite_discriminator")) {
-      return;
+      return false;
     }
     disc_val = static_cast<CORBA::Long>(val);
-    vw.write_uint32(val);
+    if (!vw.write_uint32(val)) {
+      return false;
+    }
     break;
   }
   case TK_INT64: {
     CORBA::LongLong val = 0;
     rc = value->get_int64_value(val, id);
     if (!check_rc(rc, id, disc_tk, "vwrite_discriminator")) {
-      return;
+      return false;
     }
     disc_val = static_cast<CORBA::Long>(val);
-    vw.write_int64(val);
+    if (!vw.write_int64(val)) {
+      return false;
+    }
     break;
   }
   case TK_UINT64: {
     CORBA::ULongLong val = 0;
     rc = value->get_uint64_value(val, id);
     if (!check_rc(rc, id, disc_tk, "vwrite_discriminator")) {
-      return;
+      return false;
     }
     disc_val = static_cast<CORBA::Long>(val);
-    vw.write_uint64(val);
+    if (!vw.write_uint64(val)) {
+      return false;
+    }
     break;
   }
   default:
-    if (log_level >= LogLevel::Warning) {
-      ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: vwrite_discriminator: Invalid discriminator type %C\n",
+    if (log_level >= LogLevel::Notice) {
+      ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: vwrite_discriminator: Invalid discriminator type %C\n",
                  typekind_to_string(disc_tk)));
     }
+    return false;
   }
+  return true;
 }
 
-void vwrite_union(ValueWriter& vw, DDS::DynamicData_ptr value, const DDS::DynamicType_var& dt)
+bool vwrite_union(ValueWriter& vw, DDS::DynamicData_ptr value, const DDS::DynamicType_var& dt)
 {
   DDS::TypeDescriptor_var type_desc;
   DDS::ReturnCode_t rc = dt->get_descriptor(type_desc);
   if (rc != DDS::RETCODE_OK) {
-    if (log_level >= LogLevel::Warning) {
-      ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: vwrite_union: get_descriptor failed (%C)\n",
+    if (log_level >= LogLevel::Notice) {
+      ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: vwrite_union: get_descriptor failed (%C)\n",
                  retcode_to_string(rc)));
     }
-    return;
+    return false;
   }
 
   const Extensibility extensibility = XTypes::dds_to_opendds_ext(type_desc->extensibility_kind());
-  vw.begin_union(extensibility);
+  if (!vw.begin_union(extensibility)) {
+    return false;
+  }
 
   // Discriminator
   DDS::DynamicTypeMember_var dtm;
   rc = dt->get_member(dtm, XTypes::DISCRIMINATOR_ID);
   if (rc != DDS::RETCODE_OK) {
-    if (log_level >= LogLevel::Warning) {
-      ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: vwrite_union: get_member failed (%C)\n",
+    if (log_level >= LogLevel::Notice) {
+      ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: vwrite_union: get_member failed (%C)\n",
                  retcode_to_string(rc)));
     }
-    return;
+    return false;
   }
   DDS::MemberDescriptor_var disc_md;
   rc = dtm->get_descriptor(disc_md);
   if (rc != DDS::RETCODE_OK) {
-    if (log_level >= LogLevel::Warning) {
-      ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: vwrite_union: get_descriptor failed (%C)\n",
+    if (log_level >= LogLevel::Notice) {
+      ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: vwrite_union: get_descriptor failed (%C)\n",
                  retcode_to_string(rc)));
     }
-    return;
+    return false;
   }
   // Discriminator Id is always 0?
-  VWriterMemberParam params(0, disc_md->is_must_understand() || disc_md->is_key(),
-                            disc_md->name(), disc_md->is_optional(), true);
-  vw.begin_discriminator(params);
+  MemberParam params(0, disc_md->is_must_understand() || disc_md->is_key(),
+                     disc_md->name(), disc_md->is_optional(), true);
+  if (!vw.begin_discriminator(params)) {
+    return false;
+  }
   CORBA::Long disc_val = 0;
-  vwrite_discriminator(vw, value, disc_md, disc_val);
-  vw.end_discriminator();
+  if (!vwrite_discriminator(vw, value, disc_md, disc_val)) {
+    return false;
+  }
+  if (!vw.end_discriminator()) {
+    return false;
+  }
 
   // Selected branch
   bool has_branch = false;
   DDS::MemberDescriptor_var selected_md;
   rc = XTypes::get_selected_union_branch(dt, disc_val, has_branch, selected_md);
   if (rc != DDS::RETCODE_OK) {
-    if (log_level >= LogLevel::Warning) {
-      ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: vwrite_union: get_selected_union_branch failed (%C)\n",
+    if (log_level >= LogLevel::Notice) {
+      ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: vwrite_union: get_selected_union_branch failed (%C)\n",
                  retcode_to_string(rc)));
     }
-    return;
+    return false;
   }
-  if (has_branch) {
-    vwrite_member(vw, value, selected_md, XTypes::TK_UNION);
+  if (has_branch && !vwrite_member(vw, value, selected_md, XTypes::TK_UNION)) {
+    return false;
   }
 
-  vw.end_union();
+  return vw.end_union();
 }
 
-void vwrite_element(ValueWriter& vw, DDS::DynamicData_ptr value,
+bool vwrite_element(ValueWriter& vw, DDS::DynamicData_ptr value,
                     const DDS::DynamicType_var& elem_dt, CORBA::ULong idx)
 {
   const DDS::MemberId id = value->get_member_id_at_index(idx);
   if (id == XTypes::MEMBER_ID_INVALID) {
-    if (log_level >= LogLevel::Warning) {
-      ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: vwrite_element: get_member_id_at_index %u failed\n", idx));
+    if (log_level >= LogLevel::Notice) {
+      ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: vwrite_element: get_member_id_at_index %u failed\n", idx));
     }
-    return;
+    return false;
   }
-  vwrite_item(vw, value, id, elem_dt);
+  return vwrite_item(vw, value, id, elem_dt);
 }
 
 DDS::ReturnCode_t vwrite_primitive_array(ValueWriter& vw, DDS::DynamicData_ptr value,
@@ -907,8 +1084,8 @@ DDS::ReturnCode_t vwrite_primitive_array(ValueWriter& vw, DDS::DynamicData_ptr v
   // in relative to the whole original array.
   const DDS::MemberId id = value->get_member_id_at_index(arr_flat_idx);
   if (id == XTypes::MEMBER_ID_INVALID) {
-    if (log_level >= LogLevel::Warning) {
-      ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: vwrite_primitive_array: get_member_id_at_index %u failed\n", arr_flat_idx));
+    if (log_level >= LogLevel::Notice) {
+      ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: vwrite_primitive_array: get_member_id_at_index %u failed\n", arr_flat_idx));
     }
     return DDS::RETCODE_BAD_PARAMETER;
   }
@@ -916,7 +1093,7 @@ DDS::ReturnCode_t vwrite_primitive_array(ValueWriter& vw, DDS::DynamicData_ptr v
   return vwrite_primitive_array_i(vw, value, id, prim_kind, orig_kind, false /*for_sequence*/);
 }
 
-void vwrite_array_helper(ValueWriter& vw, CORBA::ULong dim_idx, const DDS::BoundSeq& dims,
+bool vwrite_array_helper(ValueWriter& vw, CORBA::ULong dim_idx, const DDS::BoundSeq& dims,
                          std::vector<CORBA::ULong> idx_vec, const DDS::DynamicType_var& elem_type,
                          DDS::DynamicData_ptr value)
 {
@@ -924,94 +1101,108 @@ void vwrite_array_helper(ValueWriter& vw, CORBA::ULong dim_idx, const DDS::Bound
   const CORBA::ULong dims_len = dims.length();
   XTypes::TypeKind treat_elem_as;
   if (get_equivalent_kind(elem_type, treat_elem_as) != DDS::RETCODE_OK) {
-    return;
+    return false;
   }
 
   const bool try_optimize = XTypes::is_primitive(treat_elem_as) && dim_idx == dims_len - 1;
   bool optimize_failed = false;
-  vw.begin_array(elem_kind);
+
+  if (!vw.begin_array(elem_kind)) {
+    return false;
+  }
   if (try_optimize) {
     // Try writing the innermost arrays using write_*_array.
     // Fall back to write elements one by one if fails.
     CORBA::ULong arr_flat_idx = 0;
     const DDS::ReturnCode_t rc = XTypes::flat_index(arr_flat_idx, idx_vec, dims, dim_idx);
     if (rc != DDS::RETCODE_OK) {
-      if (log_level >= LogLevel::Warning) {
-        ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: vwrite_array_helper: flat_index failed (%C)\n",
+      if (log_level >= LogLevel::Notice) {
+        ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: vwrite_array_helper: flat_index failed (%C)\n",
                    retcode_to_string(rc)));
       }
-      return;
+      return false;
     }
     optimize_failed = vwrite_primitive_array(vw, value, treat_elem_as, elem_kind, arr_flat_idx) != DDS::RETCODE_OK;
   }
 
   if (!try_optimize || optimize_failed) {
     for (CORBA::ULong i = 0; i < dims[dim_idx]; ++i) {
-      vw.begin_element(i);
+      if (!vw.begin_element(i)) {
+        return false;
+      }
       idx_vec[dim_idx] = i;
       if (dim_idx == dims_len - 1) {
         CORBA::ULong flat_idx = 0;
         const DDS::ReturnCode_t rc = XTypes::flat_index(flat_idx, idx_vec, dims, dims_len);
         if (rc != DDS::RETCODE_OK) {
-          if (log_level >= LogLevel::Warning) {
-            ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: vwrite_array_helper: flat_index failed (%C)\n",
+          if (log_level >= LogLevel::Notice) {
+            ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: vwrite_array_helper: flat_index failed (%C)\n",
                        retcode_to_string(rc)));
           }
-          return;
+          return false;
         }
-        vwrite_element(vw, value, elem_type, flat_idx);
-      } else {
-        vwrite_array_helper(vw, dim_idx+1, dims, idx_vec, elem_type, value);
+        if (!vwrite_element(vw, value, elem_type, flat_idx)) {
+          return false;
+        }
+      } else if (!vwrite_array_helper(vw, dim_idx+1, dims, idx_vec, elem_type, value)) {
+        return false;
       }
-      vw.end_element();
+      if (!vw.end_element()) {
+        return false;
+      }
     }
   }
-  vw.end_array();
+
+  return vw.end_array();
 }
 
-void vwrite_array(ValueWriter& vw, DDS::DynamicData_ptr value, const DDS::DynamicType_var& dt)
+bool vwrite_array(ValueWriter& vw, DDS::DynamicData_ptr value, const DDS::DynamicType_var& dt)
 {
   DDS::TypeDescriptor_var td;
   DDS::ReturnCode_t rc = dt->get_descriptor(td);
   if (rc != DDS::RETCODE_OK) {
-    if (log_level >= LogLevel::Warning) {
-      ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: vwrite_array: get_descriptor failed (%C)\n",
+    if (log_level >= LogLevel::Notice) {
+      ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: vwrite_array: get_descriptor failed (%C)\n",
                  retcode_to_string(rc)));
     }
-    return;
+    return false;
   }
 
   DDS::DynamicType_var elem_type = XTypes::get_base_type(td->element_type());
   const DDS::BoundSeq& dims = td->bound();
   std::vector<CORBA::ULong> idx_vec(dims.length());
 
-  vwrite_array_helper(vw, 0, dims, idx_vec, elem_type, value);
+  return vwrite_array_helper(vw, 0, dims, idx_vec, elem_type, value);
 }
 
-void vwrite_sequence(ValueWriter& vw, DDS::DynamicData_ptr value, const DDS::DynamicType_var& dt)
+bool vwrite_sequence(ValueWriter& vw, DDS::DynamicData_ptr value, const DDS::DynamicType_var& dt)
 {
   DDS::TypeDescriptor_var td;
   DDS::ReturnCode_t rc = dt->get_descriptor(td);
   if (rc != DDS::RETCODE_OK) {
-    if (log_level >= LogLevel::Warning) {
-      ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: vwrite_sequence: get_descriptor failed (%C)\n",
+    if (log_level >= LogLevel::Notice) {
+      ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: vwrite_sequence: get_descriptor failed (%C)\n",
                  retcode_to_string(rc)));
     }
-    return;
+    return false;
   }
   DDS::DynamicType_var elem_type = XTypes::get_base_type(td->element_type());
-
   const CORBA::ULong length = value->get_item_count();
-  vw.begin_sequence(elem_type->get_kind(), length);
-  for (CORBA::ULong i = 0; i < length; ++i) {
-    vw.begin_element(i);
-    vwrite_element(vw, value, elem_type, i);
-    vw.end_element();
+
+  if (!vw.begin_sequence(elem_type->get_kind(), length)) {
+    return false;
   }
-  vw.end_sequence();
+  for (CORBA::ULong i = 0; i < length; ++i) {
+    if (!vw.begin_element(i) ||
+        !vwrite_element(vw, value, elem_type, i) ||
+        !vw.end_element()) {
+      return false;
+    }
+  }
+  return vw.end_sequence();
 }
 
-void vwrite(ValueWriter& vw, DDS::DynamicData_ptr value)
+bool vwrite(ValueWriter& vw, DDS::DynamicData_ptr value)
 {
   using namespace XTypes;
   const DDS::DynamicType_var type = value->type();
@@ -1032,6 +1223,7 @@ void vwrite(ValueWriter& vw, DDS::DynamicData_ptr value)
                  XTypes::typekind_to_string(tk)));
     }
   }
+  return false;
 }
 
 }
