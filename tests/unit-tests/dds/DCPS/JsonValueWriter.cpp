@@ -21,10 +21,10 @@ public:
     : JsonValueWriter(writer)
     , elements_(0)
   {}
-  virtual void write_int16_array(const ACE_CDR::Short* x, size_t length)
+  virtual bool write_int16_array(const ACE_CDR::Short* x, size_t length)
   {
     elements_ += length;
-    JsonValueWriter<Writer>::write_int16_array(x, length);
+    return JsonValueWriter<Writer>::write_int16_array(x, length);
   }
   size_t elements_;
 };
@@ -54,7 +54,7 @@ TEST(dds_DCPS_JsonValueWriter, begin_struct_member)
   Writer writer(buffer);
   JsonValueWriter<Writer> jvw(writer);
   jvw.begin_struct();
-  jvw.begin_struct_member(VWriterMemberParam("aField"));
+  jvw.begin_struct_member(MemberParam("aField"));
   EXPECT_STREQ(buffer.GetString(), "{\"aField\"");
 }
 
@@ -64,7 +64,7 @@ TEST(dds_DCPS_JsonValueWriter, end_struct_member)
   Writer writer(buffer);
   JsonValueWriter<Writer> jvw(writer);
   jvw.begin_struct();
-  jvw.begin_struct_member(VWriterMemberParam("aField"));
+  jvw.begin_struct_member(MemberParam("aField"));
   jvw.write_int16(5);
   jvw.end_struct_member();
   EXPECT_STREQ(buffer.GetString(), "{\"aField\":5");
@@ -95,7 +95,7 @@ TEST(dds_DCPS_JsonValueWriter, begin_discriminator)
   Writer writer(buffer);
   JsonValueWriter<Writer> jvw(writer);
   jvw.begin_union();
-  jvw.begin_discriminator(VWriterMemberParam());
+  jvw.begin_discriminator(MemberParam());
   jvw.write_int16(5);
   EXPECT_STREQ(buffer.GetString(), "{\"$discriminator\":5");
 }
@@ -106,7 +106,7 @@ TEST(dds_DCPS_JsonValueWriter, end_discriminator)
   Writer writer(buffer);
   JsonValueWriter<Writer> jvw(writer);
   jvw.begin_union();
-  jvw.begin_discriminator(VWriterMemberParam());
+  jvw.begin_discriminator(MemberParam());
   jvw.write_int16(5);
   jvw.end_discriminator();
   EXPECT_STREQ(buffer.GetString(), "{\"$discriminator\":5");
@@ -118,7 +118,7 @@ TEST(dds_DCPS_JsonValueWriter, begin_union_member)
   Writer writer(buffer);
   JsonValueWriter<Writer> jvw(writer);
   jvw.begin_union();
-  jvw.begin_union_member(VWriterMemberParam("aField"));
+  jvw.begin_union_member(MemberParam("aField"));
   EXPECT_STREQ(buffer.GetString(), "{\"aField\"");
 }
 
@@ -128,7 +128,7 @@ TEST(dds_DCPS_JsonValueWriter, end_union_member)
   Writer writer(buffer);
   JsonValueWriter<Writer> jvw(writer);
   jvw.begin_union();
-  jvw.begin_union_member(VWriterMemberParam("aField"));
+  jvw.begin_union_member(MemberParam("aField"));
   jvw.write_int16(5);
   jvw.end_union_member();
   EXPECT_STREQ(buffer.GetString(), "{\"aField\":5");
@@ -140,10 +140,10 @@ TEST(dds_DCPS_JsonValueWriter, complete_struct)
   Writer writer(buffer);
   JsonValueWriter<Writer> jvw(writer);
   jvw.begin_struct();
-  jvw.begin_struct_member(VWriterMemberParam("aField"));
+  jvw.begin_struct_member(MemberParam("aField"));
   jvw.write_int16(5);
   jvw.end_struct_member();
-  jvw.begin_struct_member(VWriterMemberParam("bField"));
+  jvw.begin_struct_member(MemberParam("bField"));
   jvw.write_int16(6);
   jvw.end_struct_member();
   jvw.end_struct();
@@ -275,7 +275,7 @@ TEST(dds_DCPS_JsonValueWriter, complete_struct_with_complete_array)
   Writer writer(buffer);
   TestWriter jvw(writer);
   jvw.begin_struct();
-  jvw.begin_struct_member(VWriterMemberParam("a"));
+  jvw.begin_struct_member(MemberParam("a"));
   jvw.begin_array();
   jvw.begin_element(0);
   jvw.write_int16(5);

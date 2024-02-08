@@ -28,7 +28,7 @@ TEST(dds_DCPS_PrinterValueWriter, begin_struct_member)
 {
   PrinterValueWriter pvw;
   pvw.begin_struct();
-  pvw.begin_struct_member(VWriterMemberParam("aField"));
+  pvw.begin_struct_member(MemberParam("aField"));
   EXPECT_STREQ(pvw.str().c_str(), "    aField: ");
 }
 
@@ -36,7 +36,7 @@ TEST(dds_DCPS_PrinterValueWriter, end_struct_member)
 {
   PrinterValueWriter pvw;
   pvw.begin_struct();
-  pvw.begin_struct_member(VWriterMemberParam("aField"));
+  pvw.begin_struct_member(MemberParam("aField"));
   pvw.write_int16(5);
   pvw.end_struct_member();
   EXPECT_STREQ(pvw.str().c_str(), "    aField: 5");
@@ -61,7 +61,7 @@ TEST(dds_DCPS_PrinterValueWriter, begin_discriminator)
 {
   PrinterValueWriter pvw;
   pvw.begin_union();
-  pvw.begin_discriminator(VWriterMemberParam());
+  pvw.begin_discriminator(MemberParam());
   pvw.write_int16(5);
   EXPECT_STREQ(pvw.str().c_str(), "    $discriminator: 5");
 }
@@ -70,7 +70,7 @@ TEST(dds_DCPS_PrinterValueWriter, end_discriminator)
 {
   PrinterValueWriter pvw;
   pvw.begin_union();
-  pvw.begin_discriminator(VWriterMemberParam());
+  pvw.begin_discriminator(MemberParam());
   pvw.write_int16(5);
   pvw.end_discriminator();
   EXPECT_STREQ(pvw.str().c_str(), "    $discriminator: 5");
@@ -80,7 +80,7 @@ TEST(dds_DCPS_PrinterValueWriter, begin_union_member)
 {
   PrinterValueWriter pvw;
   pvw.begin_union();
-  pvw.begin_union_member(VWriterMemberParam("aField"));
+  pvw.begin_union_member(MemberParam("aField"));
   EXPECT_STREQ(pvw.str().c_str(), "    aField: ");
 }
 
@@ -88,7 +88,7 @@ TEST(dds_DCPS_PrinterValueWriter, end_union_member)
 {
   PrinterValueWriter pvw;
   pvw.begin_union();
-  pvw.begin_union_member(VWriterMemberParam("aField"));
+  pvw.begin_union_member(MemberParam("aField"));
   pvw.write_int16(5);
   pvw.end_union_member();
   EXPECT_STREQ(pvw.str().c_str(), "    aField: 5");
@@ -98,10 +98,10 @@ TEST(dds_DCPS_PrinterValueWriter, complete_struct)
 {
   PrinterValueWriter pvw;
   pvw.begin_struct();
-  pvw.begin_struct_member(VWriterMemberParam("aField"));
+  pvw.begin_struct_member(MemberParam("aField"));
   pvw.write_int16(5);
   pvw.end_struct_member();
-  pvw.begin_struct_member(VWriterMemberParam("bField"));
+  pvw.begin_struct_member(MemberParam("bField"));
   pvw.write_int16(6);
   pvw.end_struct_member();
   pvw.end_struct();
@@ -208,7 +208,7 @@ TEST(dds_DCPS_PrinterValueWriter, complete_struct_with_complete_array)
 {
   PrinterValueWriter pvw;
   pvw.begin_struct();
-  pvw.begin_struct_member(VWriterMemberParam("a"));
+  pvw.begin_struct_member(MemberParam("a"));
   pvw.begin_array();
   pvw.begin_element(0);
   pvw.write_int16(5);
@@ -451,10 +451,10 @@ TEST(dds_DCPS_PrinterValueWriter, write_absent_value)
 {
   PrinterValueWriter pvw;
   pvw.begin_struct();
-  pvw.begin_struct_member(VWriterMemberParam("Int32Field"));
+  pvw.begin_struct_member(MemberParam("Int32Field"));
   pvw.write_int32(10);
   pvw.end_struct_member();
-  pvw.begin_struct_member(VWriterMemberParam("NullField"));
+  pvw.begin_struct_member(MemberParam("NullField"));
   pvw.write_absent_value();
   pvw.end_struct_member();
   pvw.end_struct();

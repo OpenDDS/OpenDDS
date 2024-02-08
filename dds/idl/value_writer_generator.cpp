@@ -294,7 +294,7 @@ bool value_writer_generator::gen_enum(AST_Enum*,
   {
     NamespaceGuard guard;
 
-    Function write("vwrite", "void");
+    Function write("vwrite", "bool");
     write.addArg("value_writer", "OpenDDS::DCPS::ValueWriter&");
     write.addArg("value", "const " + type_name + "&");
     write.endArgs();
@@ -311,7 +311,9 @@ bool value_writer_generator::gen_enum(AST_Enum*,
         "    value_writer.write_enum(\"" << canonical_name(val) << "\", " << value_name << ");\n"
         "    break;\n";
     }
-    be_global->impl_ << "  }\n";
+    be_global->impl_ <<
+      "  }\n"
+      "  return true;\n";
   }
 
   return true;
@@ -340,7 +342,7 @@ bool value_writer_generator::gen_struct(AST_Structure* node,
   {
     NamespaceGuard guard;
 
-    Function write("vwrite", "void");
+    Function write("vwrite", "bool");
     write.addArg("value_writer", "OpenDDS::DCPS::ValueWriter&");
     write.addArg("value", "const " + type_name + "&");
     write.endArgs();
@@ -363,7 +365,8 @@ bool value_writer_generator::gen_struct(AST_Structure* node,
         "  value_writer.end_struct_member();\n";
     }
     be_global->impl_ <<
-      "  value_writer.end_struct();\n";
+      "  value_writer.end_struct();\n"
+      "  return true;\n";
   }
 
   return true;
@@ -383,7 +386,7 @@ bool value_writer_generator::gen_union(AST_Union* u,
   {
     NamespaceGuard guard;
 
-    Function write("vwrite", "void");
+    Function write("vwrite", "bool");
     write.addArg("value_writer", "OpenDDS::DCPS::ValueWriter&");
     write.addArg("value", "const " + type_name + "&");
     write.endArgs();
@@ -402,7 +405,8 @@ bool value_writer_generator::gen_union(AST_Union* u,
                            discriminator, "", "", type_name.c_str(),
                            false, false);
     be_global->impl_ <<
-      "  value_writer.end_union();\n";
+      "  value_writer.end_union();\n"
+      "  return true;\n";
   }
 
   return true;
