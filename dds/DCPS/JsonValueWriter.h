@@ -273,7 +273,7 @@ bool JsonValueWriter<Writer>::write_fixed(const ACE_CDR::Fixed& value)
 {
   char buffer[ACE_CDR::Fixed::MAX_STRING_SIZE];
   if (value.to_string(buffer, sizeof buffer)) {
-    return writer_.String(buffer);
+    writer_.String(buffer);
   }
   return false;
 }

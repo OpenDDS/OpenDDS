@@ -10,9 +10,7 @@
 
 #include <dds/DCPS/Definitions.h>
 
-#ifdef ACE_HAS_CDR_FIXED
-#  include <ast_fixed.h>
-#endif
+#include <ast_fixed.h>
 #include <utl_identifier.h>
 
 #include <ace/CDR_Base.h>
@@ -152,11 +150,9 @@ struct GeneratorBase {
     case AST_Expression::EV_bool: pt = AST_PredefinedType::PT_boolean; break;
     case AST_Expression::EV_string: pt = AST_PredefinedType::PT_char; break;
     case AST_Expression::EV_wstring: pt = AST_PredefinedType::PT_wchar; break;
-#ifdef ACE_HAS_CDR_FIXED
     case AST_Expression::EV_fixed:
       be_global->add_include("FACE/Fixed.h", BE_GlobalData::STREAM_LANG_H);
       return helpers_[HLP_FIXED_CONSTANT];
-#endif
     default:
       be_util::misc_error_and_abort("Unhandled ExprType value in map_type");
     }
@@ -1847,8 +1843,6 @@ bool langmap_generator::gen_struct(AST_Structure* s, UTL_ScopedName* name,
 }
 
 namespace {
-
-#ifdef ACE_HAS_CDR_FIXED
   void gen_fixed(UTL_ScopedName* name, AST_Fixed* fixed)
   {
     be_global->add_include("FACE/Fixed.h", BE_GlobalData::STREAM_LANG_H);
@@ -1858,7 +1852,6 @@ namespace {
       << ", " << *fixed->scale()->ev() << "> " << nm << ";\n"
       "typedef " << nm << "& " << nm << "_out;\n";
   }
-#endif
 }
 
 bool langmap_generator::gen_typedef(AST_Typedef*, UTL_ScopedName* name, AST_Type* base,
@@ -1877,14 +1870,8 @@ bool langmap_generator::gen_typedef(AST_Typedef*, UTL_ScopedName* name, AST_Type
       generator_->gen_array(name, arr = dynamic_cast<AST_Array*>(base));
       break;
     case AST_Decl::NT_fixed:
-# ifdef ACE_HAS_CDR_FIXED
       gen_fixed(name, dynamic_cast<AST_Fixed*>(base));
       break;
-# else
-      std::cerr << "ERROR: fixed data type (for " << nm << ") is not supported"
-        " with this version of ACE+TAO\n";
-      return false;
-# endif
     default:
       if (be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11) {
         be_global->lang_header_ <<

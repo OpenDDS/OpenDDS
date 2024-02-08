@@ -282,8 +282,10 @@ bool PrinterValueWriter::write_float128(ACE_CDR::LongDouble value)
 
 bool PrinterValueWriter::write_fixed(const ACE_CDR::Fixed& value)
 {
-  // FUTURE
-  stream_ << "fixed";
+  char buffer[ACE_CDR::Fixed::MAX_STRING_SIZE];
+  if (value.to_string(buffer, sizeof buffer)) {
+    stream_ << buffer;
+  }
   return true;
 }
 
