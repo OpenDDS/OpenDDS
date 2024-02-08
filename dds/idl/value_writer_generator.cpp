@@ -162,7 +162,7 @@ namespace {
 
     if (c & CL_FIXED) {
       be_global->impl_ <<
-        "value_writer.write_fixed(" << expression << ");\n";
+        "value_writer.write_fixed(" << expression << ".to_ace_fixed());\n";
 
     } else if (c & CL_STRING) {
       be_global->impl_ <<

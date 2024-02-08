@@ -401,8 +401,8 @@ TEST(dds_DCPS_PrinterValueWriter, write_float128)
 TEST(dds_DCPS_PrinterValueWriter, write_fixed)
 {
   PrinterValueWriter pvw;
-  pvw.write_fixed(OpenDDS::FaceTypes::Fixed());
-  EXPECT_STREQ(pvw.str().c_str(), "fixed");
+  pvw.write_fixed(ACE_CDR::Fixed::from_string("1.0"));
+  EXPECT_STREQ(pvw.str().c_str(), "1.0");
 }
 
 TEST(dds_DCPS_PrinterValueWriter, write_char8)

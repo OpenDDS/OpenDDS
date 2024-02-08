@@ -154,7 +154,9 @@ namespace {
     const std::string indent(level * 2, ' ');
     if (c & CL_FIXED) {
       be_global->impl_ <<
-        indent << "if (!value_reader.read_fixed(" << expression << ")) return false;\n";
+        indent << "::ACE_CDR::Fixed fixed;\n" <<
+        indent << "if (!value_reader.read_fixed(fixed)) return false;\n" <<
+        indent << expression << " = ::OpenDDS::FaceTypes::Fixed(fixed);\n";
 
     } else if (c & CL_STRING) {
       be_global->impl_ <<

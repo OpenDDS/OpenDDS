@@ -145,7 +145,7 @@ public:
   bool read_float128(long double& value);
 #endif
 
-  virtual bool read_fixed(OpenDDS::FaceTypes::Fixed& value) = 0;
+  virtual bool read_fixed(ACE_CDR::Fixed& value) = 0;
   virtual bool read_char8(ACE_CDR::Char& value) = 0;
   virtual bool read_char16(ACE_CDR::WChar& value) = 0;
   virtual bool read_string(String& value) = 0;
