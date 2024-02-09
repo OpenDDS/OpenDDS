@@ -79,7 +79,7 @@ public:
   void write_float128(long double value);
 #endif
 
-  virtual void write_fixed(const OpenDDS::FaceTypes::Fixed& /*value*/) = 0;
+  virtual void write_fixed(const ACE_CDR::Fixed& /*value*/) = 0;
   virtual void write_char8(ACE_CDR::Char /*value*/) = 0;
   virtual void write_char16(ACE_CDR::WChar /*value*/) = 0;
   virtual void write_string(const ACE_CDR::Char* /*value*/, size_t /*length*/) = 0;

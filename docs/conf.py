@@ -102,7 +102,7 @@ with (docs_path / 'this-release.rst').open('w') as f:
 extensions = [
     # Custom ones
     'links',
-    'cmake',
+    'cmake_domain',
 
     # Official ones
     'sphinx.ext.ifconfig',
@@ -163,7 +163,7 @@ if is_release:
     markdown_http_base += opendds_version_info.tag.lower()
 else:
     markdown_http_base += os.getenv('MD_RTD_BRANCH', github_main_branch)
-markdown_target_ext = '.html'
+markdown_uri_doc_suffix = '.html'
 
 
 # -- Options for HTML output -------------------------------------------------
@@ -213,5 +213,20 @@ html_favicon = 'logo_32_32.ico'
 # -- LaTeX (PDF) output ------------------------------------------------------
 
 latex_logo = 'logo_276_186.png'
+
+latex_elements = {
+    # This seems to fix "LaTeX Error: Too deeply nested." on local PDF builds
+    # https://stackoverflow.com/questions/57945414
+    'preamble': r'''
+\usepackage{enumitem}
+\setlistdepth{20}
+\renewlist{itemize}{itemize}{20}
+\renewlist{enumerate}{enumerate}{20}
+\setlist[itemize]{label=$\cdot$}
+\setlist[itemize,1]{label=\textbullet}
+\setlist[itemize,2]{label=--}
+\setlist[itemize,3]{label=*}
+''',
+}
 
 # vim: expandtab:ts=4:sw=4

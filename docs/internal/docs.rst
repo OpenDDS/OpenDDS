@@ -18,8 +18,8 @@ Multiple kinds can be passed, and they are documented in the following sections.
 Requirements
 ============
 
-The script requires `Python 3.6 or later <https://www.python.org/downloads/>`__ and an internet connection if the script needs to download dependencies or check the validity of external links.
-It will also try to download extra information for things like :rst:role:`omgspec`, but it shouldn't be a fatal error if there's not internet.
+The script requires `Python 3.10 or later <https://www.python.org/downloads/>`__ and an internet connection if the script needs to download dependencies or check the validity of external links.
+It will also try to download extra information for things like :rst:role:`omgspec`, but it shouldn't be a fatal error if there's not an internet connection.
 
 You might receive a message like this when running for the first time::
 
@@ -41,20 +41,22 @@ If it was built successfully, then the front page will be at ``docs/_build/html/
 A single page variant is also available using ``docs/build.py singlehtml -o``
 If it was built successfully, then the page will be at ``docs/_build/singlehtml/index.html``.
 
-PDF
-===
-
-.. note:: This has additional dependencies on LaTeX that are documented `here <https://www.sphinx-doc.org/en/master/usage/builders/index.html#sphinx.builders.latex.LaTeXBuilder>`__.
-
-PDF documentation can be built and viewed using ``docs/build.py pdf -o``.
-If it was built successfully, then the PDF file will be at ``docs/_build/latex/opendds.pdf``.
-
 Dash
 ====
 
 Documentation can be built for `Dash <https://kapeli.com/dash>`_, `Zeal <https://zealdocs.org/>`_, and other Dash-compatible applications using `doc2dash <https://github.com/hynek/doc2dash>`_.
 The command for this is ``docs/build.py dash``.
 This will create a ``docs/_build/OpenDDS.docset`` directory that must be manually moved to where other docsets are stored.
+
+PDF
+===
+
+.. note:: The PDF output is currently much less optimized than the HTML-based outputs.
+
+.. note:: The Sphinx PDF builder has additional dependencies on LaTeX that are documented :py:class:`here <sphinx:sphinx.builders.latex.LaTeXBuilder>`.
+
+PDF documentation can be built and viewed using ``docs/build.py pdf -o``.
+If it was built successfully, then the PDF file will be at ``docs/_build/latex/opendds.pdf``.
 
 Strict Checks
 =============
@@ -88,7 +90,7 @@ For example to build the HTML documentation::
 RST/Sphinx Usage
 ****************
 
-* See `Sphinx reStructuredText Primer <https://www.sphinx-doc.org/en/master/usage/restructuredtext/basics.html>`__ for basic RST usage.
+* See :ref:`Sphinx reStructuredText Primer <sphinx:rst-primer>` for basic RST usage.
 * Inline code such as class names like ``DataReader`` and other symbolic text such as commands like ``ls`` should use double backticks: ````TEXT````.
   This distinguishes it as code, makes it easier to distinguish characters, and reduces the chance of needing to escape characters if they happen to be special for RST.
 * `One sentence per line should be perfered. <https://rhodesmill.org/brandon/2012/one-sentence-per-line/>`__
@@ -289,61 +291,180 @@ These come in the form of `RST roles <https://docutils.sourceforge.io/docs/ref/r
 
   See :doc:`here <omg_spec_links>` for all the possible sections.
 
-CMake Domain
-============
+Custom Domains
+==============
 
-For :doc:`/devguide/building/cmake` there's a custom CMake `Sphinx domain <https://www.sphinx-doc.org/en/master/usage/restructuredtext/domains.html>`__ in :ghfile:`docs/sphinx_extensions/cmake.py`.
-All of the directives can and should have RST content nested in them.
+:doc:`Sphinx domains <sphinx:usage/domains/index>` are a way to document collections of hierarchical definitions such as APIs.
+Sphinx has a number of built-in domains such as Python and C++, but it helps to have custom ones.
+Custom domains in OpenDDS should use classes derived from the ones in :ghfile:`docs/sphinx_extensions/custom_domain.py`.
+
+All of the custom domain directives can and should have RST content nested in them.
+They all support the ``:no-index:``, ``:no-index-entry:``, and ``:no-contents-entry:`` directive options.
+See :ref:`sphinx:basic-domain-markup` for more information.
+
+CMake Domain
+------------
+
+For :doc:`/devguide/building/cmake` there's a custom CMake Sphinx domain in :ghfile:`docs/sphinx_extensions/cmake_domain.py`.
+There is an official CMake domain used by CMake for their own documentation, but it would be impractical for us to use because it requires a separate RST file for every property and variable.
 
 .. rst:directive:: .. cmake:func:: NAME
 
-  For public CMake functions.
+  Use to document public CMake functions.
+
+  .. code-block:: rst
+
+    .. cmake:func:: opendds_cmake_function
+
+      ::
+
+        opendds_cmake_function(<target> [ARG <value>])
+
+      This is a function.
+
+      .. cmake:func:arg:: target
+
+        This is a positional argument
+
+      .. cmake:func:arg:: ARG <value>
+
+        This is a keyword argument
+
+  Turns into:
+
+    .. cmake:func:: opendds_cmake_function
+      :no-contents-entry:
+      :no-index-entry:
+
+      ::
+
+        opendds_cmake_function(<target> [ARG <value>])
+
+      This is a function.
+
+      .. cmake:func:arg:: target
+
+        This is a positional argument
+
+      .. cmake:func:arg:: ARG <value>
+
+        This is a keyword argument
 
 .. rst:directive:: .. cmake:func:arg:: NAME [SIGNATURE]
 
-  For arguments and options for public CMake functions.
+  Use to document arguments and options for public CMake functions.
   Should be nested in :rst:dir:`cmake:func` of the function the argument belongs to.
 
 .. rst:role:: cmake:func
 
-  Reference a :rst:dir:`cmake:func` by name or reference a :rst:dir:`cmake:func:arg` by function name followed by argument name in parentheses.
+  Use to reference a :rst:dir:`cmake:func` by name or reference a :rst:dir:`cmake:func:arg` by function name followed by argument name in parentheses.
   For example:
 
   .. code-block:: rst
 
-    :cmake:func:`opendds_target_sources`
+    :cmake:func:`opendds_cmake_function`
 
-    :cmake:func:`opendds_target_sources(OPENDDS_IDL_OPTIONS)`
+    :cmake:func:`opendds_cmake_function(target)`
+
+    :cmake:func:`opendds_cmake_function(ARG)`
 
   Turns into:
 
-    :cmake:func:`opendds_target_sources`
+    :cmake:func:`opendds_cmake_function`
 
-    :cmake:func:`opendds_target_sources(OPENDDS_IDL_OPTIONS)`
+    :cmake:func:`opendds_cmake_function(target)`
+
+    :cmake:func:`opendds_cmake_function(ARG)`
 
 .. rst:directive:: .. cmake:var:: NAME
 
-  For public variables
+  Use to document public variables.
+
+  .. code-block:: rst
+
+    .. cmake:var:: OPENDDS_CMAKE_VARIABLE
+
+      This is a variable
+
+  Turns into:
+
+    .. cmake:var:: OPENDDS_CMAKE_VARIABLE
+      :no-contents-entry:
+      :no-index-entry:
+
+      This is a variable
 
 .. rst:role:: cmake:var
 
-  Reference a :rst:dir:`cmake:var` by name.
+  Use to reference a :rst:dir:`cmake:var` by name.
+
+  .. code-block:: rst
+
+    :cmake:var:`OPENDDS_CMAKE_VARIABLE`
+
+  Turns into:
+
+    :cmake:var:`OPENDDS_CMAKE_VARIABLE`
 
 .. rst:directive:: .. cmake:prop:: NAME
 
-  For properties on CMake targets, or possibly other kinds of properties, that we're looking for or creating for the user.
+  Use to document properties on CMake targets, or possibly other kinds of properties, that we're looking for or creating for the user.
+
+  .. code-block:: rst
+
+    .. cmake:prop:: OPENDDS_CMAKE_PROPERTY
+
+      This is a property
+
+  Turns into:
+
+    .. cmake:prop:: OPENDDS_CMAKE_PROPERTY
+      :no-contents-entry:
+      :no-index-entry:
+
+      This is a property
 
 .. rst:role:: cmake:prop
 
-  Reference a :rst:dir:`cmake:prop` by name.
+  Use to reference a :rst:dir:`cmake:prop` by name.
+
+  .. code-block:: rst
+
+    :cmake:prop:`OPENDDS_CMAKE_PROPERTY`
+
+  Turns into:
+
+    :cmake:prop:`OPENDDS_CMAKE_PROPERTY`
 
 .. rst:directive:: .. cmake:tgt:: NAME
 
-  A target meant for users that be a library or executable that is imported or exported.
+  Use to document a library or executable CMake target meant to users that can be imported or exported.
+
+  .. code-block:: rst
+
+    .. cmake:tgt:: OpenDDS::MessengerPigeonTransport
+
+      Transport for IP over messenger pigeon (:rfc:`1149`)
+
+  Turns into:
+
+    .. cmake:tgt:: OpenDDS::MessengerPigeonTransport
+      :no-contents-entry:
+      :no-index-entry:
+
+      Transport for IP over messenger pigeon (:rfc:`1149`)
 
 .. rst:role:: cmake:tgt
 
-  Reference a :rst:dir:`cmake:tgt` by name.
+  Use to reference a :rst:dir:`cmake:tgt` by name.
+
+  .. code-block:: rst
+
+    :cmake:tgt:`OpenDDS::MessengerPigeonTransport`
+
+  Turns into:
+
+    :cmake:tgt:`OpenDDS::MessengerPigeonTransport`
 
 .. _docs-news:
 

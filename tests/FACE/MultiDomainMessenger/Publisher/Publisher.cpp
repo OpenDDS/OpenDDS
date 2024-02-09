@@ -36,7 +36,6 @@ int ACE_TMAIN(int, ACE_TCHAR*[])
 
   Messenger::Message msg = {"Hello, world.", 0, 0};
 
-#ifdef ACE_HAS_CDR_FIXED
   try {
     msg.deci = FACE::Fixed("987.654");
   } catch (const CORBA::DATA_CONVERSION& ex) {
@@ -44,7 +43,6 @@ int ACE_TMAIN(int, ACE_TCHAR*[])
       "trying to create FACE::Fixed failed");
     return EXIT_FAILURE;
   }
-#endif
 
   FACE::TRANSACTION_ID_TYPE txn;
   ACE_DEBUG((LM_INFO, "Publisher1: about to Send_Message()\n"));

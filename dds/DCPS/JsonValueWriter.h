@@ -77,7 +77,7 @@ public:
   void write_float32(ACE_CDR::Float value);
   void write_float64(ACE_CDR::Double value);
   void write_float128(ACE_CDR::LongDouble value);
-  void write_fixed(const OpenDDS::FaceTypes::Fixed& value);
+  void write_fixed(const ACE_CDR::Fixed& value);
   void write_char8(ACE_CDR::Char value);
   void write_char16(ACE_CDR::WChar value);
   void write_string(const ACE_CDR::Char* value, size_t length);
@@ -257,10 +257,12 @@ void JsonValueWriter<Writer>::write_float128(ACE_CDR::LongDouble value)
 }
 
 template <typename Writer>
-void JsonValueWriter<Writer>::write_fixed(const OpenDDS::FaceTypes::Fixed& /*value*/)
+void JsonValueWriter<Writer>::write_fixed(const ACE_CDR::Fixed& value)
 {
-  // TODO
-  writer_.String("fixed");
+  char buffer[ACE_CDR::Fixed::MAX_STRING_SIZE];
+  if (value.to_string(buffer, sizeof buffer)) {
+    writer_.String(buffer);
+  }
 }
 
 template <typename Writer>
