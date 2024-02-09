@@ -826,7 +826,7 @@ ACE_INET_Addr choose_single_coherent_address(const String& address, bool prefer_
       addr.in6_.sin6_port = ACE_NTOHS(port_number);
     } else {
 #endif /* ACE_HAS_IPV6 */
-      addr.in4_.sin_port = ACE_NTOHS(port_number);;
+      addr.in4_.sin_port = ACE_NTOHS(port_number);
 #ifdef ACE_HAS_IPV6
     }
 #endif /* ACE_HAS_IPV6 */
