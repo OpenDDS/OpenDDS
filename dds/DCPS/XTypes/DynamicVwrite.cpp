@@ -22,19 +22,18 @@ bool check_rc(DDS::ReturnCode_t rc, DDS::MemberId id, DDS::TypeKind tk, const ch
 bool begin_member_helper(ValueWriter& vw, MemberParam* params,
                          DDS::ReturnCode_t rc, DDS::TypeKind containing_tk)
 {
-  if (containing_tk != XTypes::TK_STRUCTURE && containing_tk != XTypes::TK_UNION) {
-    return false;
-  }
-  if (rc == DDS::RETCODE_NO_DATA) {
-    params->present = false;
-  }
-  if (containing_tk == XTypes::TK_STRUCTURE) {
-    if (!vw.begin_struct_member(*params)) {
-      return false;
+  if (containing_tk == XTypes::TK_STRUCTURE || containing_tk == XTypes::TK_UNION) {
+    if (rc == DDS::RETCODE_NO_DATA) {
+      params->present = false;
     }
-  } else {
-    if (!vw.begin_union_member(*params)) {
-      return false;
+    if (containing_tk == XTypes::TK_STRUCTURE) {
+      if (!vw.begin_struct_member(*params)) {
+        return false;
+      }
+    } else {
+      if (!vw.begin_union_member(*params)) {
+        return false;
+      }
     }
   }
   return true;
@@ -68,8 +67,146 @@ DDS::ReturnCode_t get_equivalent_kind(const DDS::DynamicType_var& type, XTypes::
   return DDS::RETCODE_OK;
 }
 
-DDS::ReturnCode_t vwrite_primitive_array_i(ValueWriter& vw, DDS::DynamicData_ptr value, DDS::MemberId id,
-                                           XTypes::TypeKind elem_kind, XTypes::TypeKind orig_elem_kind, bool for_sequence)
+bool vwrite_primitive_array_helper(
+  ValueWriter& vw, void* buffer, XTypes::TypeKind elem_kind, XTypes::TypeKind orig_elem_kind,
+  const DDS::BoundSeq& dims, CORBA::ULong dim_idx, CORBA::ULong start_blk_idx, CORBA::ULong blk_len)
+{
+  using namespace XTypes;
+  if (!vw.begin_array(orig_elem_kind)) {
+    return false;
+  }
+
+  if (dim_idx == dims.length() - 1) {
+    switch (elem_kind) {
+    case TK_INT8: {
+      const CORBA::Int8* typed_buffer = static_cast<const CORBA::Int8*>(buffer);
+      if (!vw.write_int8_array(typed_buffer + start_blk_idx, blk_len)) {
+        return false;
+      }
+      break;
+    }
+    case TK_UINT8: {
+      const CORBA::UInt8* typed_buffer = static_cast<const CORBA::UInt8*>(buffer);
+      if (!vw.write_uint8_array(typed_buffer + start_blk_idx, blk_len)) {
+        return false;
+      }
+      break;
+    }
+    case TK_INT16: {
+      const CORBA::Short* typed_buffer = static_cast<const CORBA::Short*>(buffer);
+      if (!vw.write_int16_array(typed_buffer + start_blk_idx, blk_len)) {
+        return false;
+      }
+      break;
+    }
+    case TK_UINT16: {
+      const CORBA::UShort* typed_buffer = static_cast<const CORBA::UShort*>(buffer);
+      if (!vw.write_uint16_array(typed_buffer + start_blk_idx, blk_len)) {
+        return false;
+      }
+      break;
+    }
+    case TK_INT32: {
+      const CORBA::Long* typed_buffer = static_cast<const CORBA::Long*>(buffer);
+      if (!vw.write_int32_array(typed_buffer + start_blk_idx, blk_len)) {
+        return false;
+      }
+      break;
+    }
+    case TK_UINT32: {
+      const CORBA::ULong* typed_buffer = static_cast<const CORBA::ULong*>(buffer);
+      if (!vw.write_uint32_array(typed_buffer + start_blk_idx, blk_len)) {
+        return false;
+      }
+      break;
+    }
+    case TK_INT64: {
+      const CORBA::LongLong* typed_buffer = static_cast<const CORBA::LongLong*>(buffer);
+      if (!vw.write_int64_array(typed_buffer + start_blk_idx, blk_len)) {
+        return false;
+      }
+      break;
+    }
+    case TK_UINT64: {
+      const CORBA::ULongLong* typed_buffer = static_cast<const CORBA::ULongLong*>(buffer);
+      if (!vw.write_uint64_array(typed_buffer + start_blk_idx, blk_len)) {
+        return false;
+      }
+      break;
+    }
+    case TK_FLOAT32: {
+      const CORBA::Float* typed_buffer = static_cast<const CORBA::Float*>(buffer);
+      if (!vw.write_float32_array(typed_buffer + start_blk_idx, blk_len)) {
+        return false;
+      }
+      break;
+    }
+    case TK_FLOAT64: {
+      const CORBA::Double* typed_buffer = static_cast<const CORBA::Double*>(buffer);
+      if (!vw.write_float64_array(typed_buffer + start_blk_idx, blk_len)) {
+        return false;
+      }
+      break;
+    }
+    case TK_FLOAT128: {
+      const CORBA::LongDouble* typed_buffer = static_cast<const CORBA::LongDouble*>(buffer);
+      if (!vw.write_float128_array(typed_buffer + start_blk_idx, blk_len)) {
+        return false;
+      }
+      break;
+    }
+    case TK_CHAR8: {
+      const CORBA::Char* typed_buffer = static_cast<const CORBA::Char*>(buffer);
+      if (!vw.write_char8_array(typed_buffer + start_blk_idx, blk_len)) {
+        return false;
+      }
+      break;
+    }
+#ifdef DDS_HAS_WCHAR
+    case TK_CHAR16: {
+      const CORBA::WChar* typed_buffer = static_cast<const CORBA::WChar*>(buffer);
+      if (!vw.write_char16_array(typed_buffer + start_blk_idx, blk_len)) {
+        return false;
+      }
+      break;
+    }
+#endif
+    case TK_BYTE: {
+      const CORBA::Octet* typed_buffer = static_cast<const CORBA::Octet*>(buffer);
+      if (!vw.write_byte_array(typed_buffer + start_blk_idx, blk_len)) {
+        return false;
+      }
+      break;
+    }
+    case TK_BOOLEAN: {
+      const CORBA::Boolean* typed_buffer = static_cast<const CORBA::Boolean*>(buffer);
+      if (!vw.write_boolean_array(typed_buffer + start_blk_idx, blk_len)) {
+        return false;
+      }
+      break;
+    }
+    }
+  } else {
+    const CORBA::ULong dim = dims[dim_idx];
+    const CORBA::ULong subblk_len = blk_len / dim;
+    for (CORBA::ULong i = 0; i < dim; ++i) {
+      start_blk_idx += i * subblk_len;
+      if (!vw.begin_element(i) ||
+          !vwrite_primitive_array_helper(vw, buffer, elem_kind, orig_elem_kind, dims,
+                                         dim_idx + 1, start_blk_idx, subblk_len) ||
+          !vw.end_element()) {
+        return false;
+      }
+    }
+  }
+
+  return vw.end_array();
+}
+
+DDS::ReturnCode_t vwrite_primitive_collection(
+  ValueWriter& vw, DDS::DynamicData_ptr value, DDS::MemberId id,
+  XTypes::TypeKind elem_kind, XTypes::TypeKind orig_elem_kind, XTypes::TypeKind col_tk,
+  const DDS::BoundSeq& dims, XTypes::TypeKind containing_tk, MemberParam* params)
 {
   using namespace XTypes;
   DDS::ReturnCode_t rc = DDS::RETCODE_OK;
@@ -77,216 +214,336 @@ DDS::ReturnCode_t vwrite_primitive_array_i(ValueWriter& vw, DDS::DynamicData_ptr
   case TK_INT8: {
     DDS::Int8Seq val;
     rc = value->get_int8_values(val, id);
+    if (!check_rc(rc, id, col_tk, "vwrite_primitive_collection")) {
+      break;
+    }
+    if (!begin_member_helper(vw, params, rc, containing_tk)) {
+      rc = DDS::RETCODE_ERROR;
+      break;
+    }
     if (rc == DDS::RETCODE_OK) {
-      if (for_sequence && !vw.begin_sequence(orig_elem_kind, val.length())) {
-        rc = DDS::RETCODE_ERROR;
-        break;
+      if (col_tk == TK_SEQUENCE) {
+        if (!vw.begin_sequence(orig_elem_kind, val.length()) ||
+            !vw.write_int8_array(val.get_buffer(), val.length()) ||
+            !vw.end_sequence()) {
+          rc = DDS::RETCODE_ERROR;
+        }
+      } else if (col_tk == TK_ARRAY) {
+        if (!vwrite_primitive_array_helper(vw, val.get_buffer(), elem_kind, orig_elem_kind,
+                                           dims, 0, 0, val.length())) {
+          rc = DDS::RETCODE_ERROR;
+        }
       }
-      if (!vw.write_int8_array(val.get_buffer(), val.length())) {
-        rc = DDS::RETCODE_ERROR;
-        break;
-      }
-      if (for_sequence && !vw.end_sequence()) {
-        rc = DDS::RETCODE_ERROR;
-      }
+    } else if (!vw.write_absent_value()) {
+      rc = DDS::RETCODE_ERROR;
     }
     break;
   }
   case TK_UINT8: {
     DDS::UInt8Seq val;
     rc = value->get_uint8_values(val, id);
+    if (!check_rc(rc, id, col_tk, "vwrite_primitive_collection")) {
+      break;
+    }
+    if (!begin_member_helper(vw, params, rc, containing_tk)) {
+      rc = DDS::RETCODE_ERROR;
+      break;
+    }
     if (rc == DDS::RETCODE_OK) {
-      if (for_sequence && !vw.begin_sequence(orig_elem_kind, val.length())) {
-        rc = DDS::RETCODE_ERROR;
-        break;
+      if (col_tk == TK_SEQUENCE) {
+        if (!vw.begin_sequence(orig_elem_kind, val.length()) ||
+            !vw.write_uint8_array(val.get_buffer(), val.length()) ||
+            !vw.end_sequence()) {
+          rc = DDS::RETCODE_ERROR;
+        }
+      } else if (col_tk == TK_ARRAY) {
+        if (!vwrite_primitive_array_helper(vw, val.get_buffer(), elem_kind, orig_elem_kind,
+                                           dims, 0, 0, val.length())) {
+          rc = DDS::RETCODE_ERROR;
+        }
       }
-      if (!vw.write_uint8_array(val.get_buffer(), val.length())) {
-        rc = DDS::RETCODE_ERROR;
-        break;
-      }
-      if (for_sequence && !vw.end_sequence()) {
-        rc = DDS::RETCODE_ERROR;
-      }
+    } else if (!vw.write_absent_value()) {
+      rc = DDS::RETCODE_ERROR;
     }
     break;
   }
   case TK_INT16: {
     DDS::Int16Seq val;
     rc = value->get_int16_values(val, id);
+    if (!check_rc(rc, id, col_tk, "vwrite_primitive_collection")) {
+      break;
+    }
+    if (!begin_member_helper(vw, params, rc, containing_tk)) {
+      rc = DDS::RETCODE_ERROR;
+      break;
+    }
     if (rc == DDS::RETCODE_OK) {
-      if (for_sequence && !vw.begin_sequence(orig_elem_kind, val.length())) {
-        rc = DDS::RETCODE_ERROR;
-        break;
+      if (col_tk == TK_SEQUENCE) {
+        if (!vw.begin_sequence(orig_elem_kind, val.length()) ||
+            !vw.write_int16_array(val.get_buffer(), val.length()) ||
+            !vw.end_sequence()) {
+          rc = DDS::RETCODE_ERROR;
+        }
+      } else if (col_tk == TK_ARRAY) {
+        if (!vwrite_primitive_array_helper(vw, val.get_buffer(), elem_kind, orig_elem_kind,
+                                           dims, 0, 0, val.length())) {
+          rc = DDS::RETCODE_ERROR;
+        }
       }
-      if (!vw.write_int16_array(val.get_buffer(), val.length())) {
-        rc = DDS::RETCODE_ERROR;
-        break;
-      }
-      if (for_sequence && !vw.end_sequence()) {
-        rc = DDS::RETCODE_ERROR;
-      }
+    } else if (!vw.write_absent_value()) {
+      rc = DDS::RETCODE_ERROR;
     }
     break;
   }
   case TK_UINT16: {
     DDS::UInt16Seq val;
     rc = value->get_uint16_values(val, id);
+    if (!check_rc(rc, id, col_tk, "vwrite_primitive_collection")) {
+      break;
+    }
+    if (!begin_member_helper(vw, params, rc, containing_tk)) {
+      rc = DDS::RETCODE_ERROR;
+      break;
+    }
     if (rc == DDS::RETCODE_OK) {
-      if (for_sequence && !vw.begin_sequence(orig_elem_kind, val.length())) {
-        rc = DDS::RETCODE_ERROR;
-        break;
+      if (col_tk == TK_SEQUENCE) {
+        if (!vw.begin_sequence(orig_elem_kind, val.length()) ||
+            !vw.write_uint16_array(val.get_buffer(), val.length()) ||
+            !vw.end_sequence()) {
+          rc = DDS::RETCODE_ERROR;
+        }
+      } else if (col_tk == TK_ARRAY) {
+        if (!vwrite_primitive_array_helper(vw, val.get_buffer(), elem_kind, orig_elem_kind,
+                                           dims, 0, 0, val.length())) {
+          rc = DDS::RETCODE_ERROR;
+        }
       }
-      if (!vw.write_uint16_array(val.get_buffer(), val.length())) {
-        rc = DDS::RETCODE_ERROR;
-        break;
-      }
-      if (for_sequence && !vw.end_sequence()) {
-        rc = DDS::RETCODE_ERROR;
-      }
+    } else if (!vw.write_absent_value()) {
+      rc = DDS::RETCODE_ERROR;
     }
     break;
   }
   case TK_INT32: {
     DDS::Int32Seq val;
     rc = value->get_int32_values(val, id);
+    if (!check_rc(rc, id, col_tk, "vwrite_primitive_collection")) {
+      break;
+    }
+    if (!begin_member_helper(vw, params, rc, containing_tk)) {
+      rc = DDS::RETCODE_ERROR;
+      break;
+    }
     if (rc == DDS::RETCODE_OK) {
-      if (for_sequence && !vw.begin_sequence(orig_elem_kind, val.length())) {
-        rc = DDS::RETCODE_ERROR;
-        break;
+      if (col_tk == TK_SEQUENCE) {
+        if (!vw.begin_sequence(orig_elem_kind, val.length()) ||
+            !vw.write_int32_array(val.get_buffer(), val.length()) ||
+            !vw.end_sequence()) {
+          rc = DDS::RETCODE_ERROR;
+        }
+      } else if (col_tk == TK_ARRAY) {
+        if (!vwrite_primitive_array_helper(vw, val.get_buffer(), elem_kind, orig_elem_kind,
+                                           dims, 0, 0, val.length())) {
+          rc = DDS::RETCODE_ERROR;
+        }
       }
-      if (!vw.write_int32_array(val.get_buffer(), val.length())) {
-        rc = DDS::RETCODE_ERROR;
-        break;
-      }
-      if (for_sequence && !vw.end_sequence()) {
-        rc = DDS::RETCODE_ERROR;
-      }
+    } else if (!vw.write_absent_value()) {
+      rc = DDS::RETCODE_ERROR;
     }
     break;
   }
   case TK_UINT32: {
     DDS::UInt32Seq val;
     rc = value->get_uint32_values(val, id);
+    if (!check_rc(rc, id, col_tk, "vwrite_primitive_collection")) {
+      break;
+    }
+    if (!begin_member_helper(vw, params, rc, containing_tk)) {
+      rc = DDS::RETCODE_ERROR;
+      break;
+    }
     if (rc == DDS::RETCODE_OK) {
-      if (for_sequence && !vw.begin_sequence(orig_elem_kind, val.length())) {
-        rc = DDS::RETCODE_ERROR;
-        break;
+      if (col_tk == TK_SEQUENCE) {
+        if (!vw.begin_sequence(orig_elem_kind, val.length()) ||
+            !vw.write_uint32_array(val.get_buffer(), val.length()) ||
+            !vw.end_sequence()) {
+          rc = DDS::RETCODE_ERROR;
+        }
+      } else if (col_tk == TK_ARRAY) {
+        if (!vwrite_primitive_array_helper(vw, val.get_buffer(), elem_kind, orig_elem_kind,
+                                           dims, 0, 0, val.length())) {
+          rc = DDS::RETCODE_ERROR;
+        }
       }
-      if (!vw.write_uint32_array(val.get_buffer(), val.length())) {
-        rc = DDS::RETCODE_ERROR;
-        break;
-      }
-      if (for_sequence && !vw.end_sequence()) {
-        rc = DDS::RETCODE_ERROR;
-      }
+    } else if (!vw.write_absent_value()) {
+      rc = DDS::RETCODE_ERROR;
     }
     break;
   }
   case TK_INT64: {
     DDS::Int64Seq val;
     rc = value->get_int64_values(val, id);
+    if (!check_rc(rc, id, col_tk, "vwrite_primitive_collection")) {
+      break;
+    }
+    if (!begin_member_helper(vw, params, rc, containing_tk)) {
+      rc = DDS::RETCODE_ERROR;
+      break;
+    }
     if (rc == DDS::RETCODE_OK) {
-      if (for_sequence && !vw.begin_sequence(orig_elem_kind, val.length())) {
-        rc = DDS::RETCODE_ERROR;
-        break;
+      if (col_tk == TK_SEQUENCE) {
+        if (!vw.begin_sequence(orig_elem_kind, val.length()) ||
+            !vw.write_int64_array(val.get_buffer(), val.length()) ||
+            !vw.end_sequence()) {
+          rc = DDS::RETCODE_ERROR;
+        }
+      } else if (col_tk == TK_ARRAY) {
+        if (!vwrite_primitive_array_helper(vw, val.get_buffer(), elem_kind, orig_elem_kind,
+                                           dims, 0, 0, val.length())) {
+          rc = DDS::RETCODE_ERROR;
+        }
       }
-      if (!vw.write_int64_array(val.get_buffer(), val.length())) {
-        rc = DDS::RETCODE_ERROR;
-        break;
-      }
-      if (for_sequence && !vw.end_sequence()) {
-        rc = DDS::RETCODE_ERROR;
-      }
+    } else if (!vw.write_absent_value()) {
+      rc = DDS::RETCODE_ERROR;
     }
     break;
   }
   case TK_UINT64: {
     DDS::UInt64Seq val;
     rc = value->get_uint64_values(val, id);
+    if (!check_rc(rc, id, col_tk, "vwrite_primitive_collection")) {
+      break;
+    }
+    if (!begin_member_helper(vw, params, rc, containing_tk)) {
+      rc = DDS::RETCODE_ERROR;
+      break;
+    }
     if (rc == DDS::RETCODE_OK) {
-      if (for_sequence && !vw.begin_sequence(orig_elem_kind, val.length())) {
-        rc = DDS::RETCODE_ERROR;
-        break;
+      if (col_tk == TK_SEQUENCE) {
+        if (!vw.begin_sequence(orig_elem_kind, val.length()) ||
+            !vw.write_uint64_array(val.get_buffer(), val.length()) ||
+            !vw.end_sequence()) {
+          rc = DDS::RETCODE_ERROR;
+        }
+      } else if (col_tk == TK_ARRAY) {
+        if (!vwrite_primitive_array_helper(vw, val.get_buffer(), elem_kind, orig_elem_kind,
+                                           dims, 0, 0, val.length())) {
+          rc = DDS::RETCODE_ERROR;
+        }
       }
-      if (!vw.write_uint64_array(val.get_buffer(), val.length())) {
-        rc = DDS::RETCODE_ERROR;
-        break;
-      }
-      if (for_sequence && !vw.end_sequence()) {
-        rc = DDS::RETCODE_ERROR;
-      }
+    } else if (!vw.write_absent_value()) {
+      rc = DDS::RETCODE_ERROR;
     }
     break;
   }
   case TK_FLOAT32: {
     DDS::Float32Seq val;
     rc = value->get_float32_values(val, id);
+    if (!check_rc(rc, id, col_tk, "vwrite_primitive_collection")) {
+      break;
+    }
+    if (!begin_member_helper(vw, params, rc, containing_tk)) {
+      rc = DDS::RETCODE_ERROR;
+      break;
+    }
     if (rc == DDS::RETCODE_OK) {
-      if (for_sequence && !vw.begin_sequence(orig_elem_kind, val.length())) {
-        rc = DDS::RETCODE_ERROR;
-        break;
+      if (col_tk == TK_SEQUENCE) {
+        if (!vw.begin_sequence(orig_elem_kind, val.length()) ||
+            !vw.write_float32_array(val.get_buffer(), val.length()) ||
+            !vw.end_sequence()) {
+          rc = DDS::RETCODE_ERROR;
+        }
+      } else if (col_tk == TK_ARRAY) {
+        if (!vwrite_primitive_array_helper(vw, val.get_buffer(), elem_kind, orig_elem_kind,
+                                           dims, 0, 0, val.length())) {
+          rc = DDS::RETCODE_ERROR;
+        }
       }
-      if (!vw.write_float32_array(val.get_buffer(), val.length())) {
-        rc = DDS::RETCODE_ERROR;
-        break;
-      }
-      if (for_sequence && !vw.end_sequence()) {
-        rc = DDS::RETCODE_ERROR;
-      }
+    } else if (!vw.write_absent_value()) {
+      rc = DDS::RETCODE_ERROR;
     }
     break;
   }
   case TK_FLOAT64: {
     DDS::Float64Seq val;
+    if (!check_rc(rc, id, col_tk, "vwrite_primitive_collection")) {
+      break;
+    }
+    if (!begin_member_helper(vw, params, rc, containing_tk)) {
+      rc = DDS::RETCODE_ERROR;
+      break;
+    }
     rc = value->get_float64_values(val, id);
     if (rc == DDS::RETCODE_OK) {
-      if (for_sequence && !vw.begin_sequence(orig_elem_kind, val.length())) {
-        rc = DDS::RETCODE_ERROR;
-        break;
+      if (col_tk == TK_SEQUENCE) {
+        if (!vw.begin_sequence(orig_elem_kind, val.length()) ||
+            !vw.write_float64_array(val.get_buffer(), val.length()) ||
+            !vw.end_sequence()) {
+          rc = DDS::RETCODE_ERROR;
+        }
+      } else if (col_tk == TK_ARRAY) {
+        if (!vwrite_primitive_array_helper(vw, val.get_buffer(), elem_kind, orig_elem_kind,
+                                           dims, 0, 0, val.length())) {
+          rc = DDS::RETCODE_ERROR;
+        }
       }
-      if (!vw.write_float64_array(val.get_buffer(), val.length())) {
-        rc = DDS::RETCODE_ERROR;
-        break;
-      }
-      if (for_sequence && !vw.end_sequence()) {
-        rc = DDS::RETCODE_ERROR;
-      }
+    } else if (!vw.write_absent_value()) {
+      rc = DDS::RETCODE_ERROR;
     }
     break;
   }
   case TK_FLOAT128: {
     DDS::Float128Seq val;
     rc = value->get_float128_values(val, id);
+    if (!check_rc(rc, id, col_tk, "vwrite_primitive_collection")) {
+      break;
+    }
+    if (!begin_member_helper(vw, params, rc, containing_tk)) {
+      rc = DDS::RETCODE_ERROR;
+      break;
+    }
     if (rc == DDS::RETCODE_OK) {
-      if (for_sequence && !vw.begin_sequence(orig_elem_kind, val.length())) {
-        rc = DDS::RETCODE_ERROR;
-        break;
+      if (col_tk == TK_SEQUENCE) {
+        if (!vw.begin_sequence(orig_elem_kind, val.length()) ||
+            !vw.write_float128_array(val.get_buffer(), val.length()) ||
+            !vw.end_sequence()) {
+          rc = DDS::RETCODE_ERROR;
+        }
+      } else if (col_tk == TK_ARRAY) {
+        if (!vwrite_primitive_array_helper(vw, val.get_buffer(), elem_kind, orig_elem_kind,
+                                           dims, 0, 0, val.length())) {
+          rc = DDS::RETCODE_ERROR;
+        }
       }
-      if (!vw.write_float128_array(val.get_buffer(), val.length())) {
-        rc = DDS::RETCODE_ERROR;
-        break;
-      }
-      if (for_sequence && !vw.end_sequence()) {
-        rc = DDS::RETCODE_ERROR;
-      }
+    } else if (!vw.write_absent_value()) {
+      rc = DDS::RETCODE_ERROR;
     }
     break;
   }
   case TK_CHAR8: {
     DDS::CharSeq val;
     rc = value->get_char8_values(val, id);
+    if (!check_rc(rc, id, col_tk, "vwrite_primitive_collection")) {
+      break;
+    }
+    if (!begin_member_helper(vw, params, rc, containing_tk)) {
+      rc = DDS::RETCODE_ERROR;
+      break;
+    }
     if (rc == DDS::RETCODE_OK) {
-      if (for_sequence && !vw.begin_sequence(orig_elem_kind, val.length())) {
-        rc = DDS::RETCODE_ERROR;
-        break;
+      if (col_tk == TK_SEQUENCE) {
+        if (!vw.begin_sequence(orig_elem_kind, val.length()) ||
+            !vw.write_char8_array(val.get_buffer(), val.length()) ||
+            !vw.end_sequence()) {
+          rc = DDS::RETCODE_ERROR;
+        }
+      } else if (col_tk == TK_ARRAY) {
+        if (!vwrite_primitive_array_helper(vw, val.get_buffer(), elem_kind, orig_elem_kind,
+                                           dims, 0, 0, val.length())) {
+          rc = DDS::RETCODE_ERROR;
+        }
       }
-      if (!vw.write_char8_array(val.get_buffer(), val.length())) {
-        rc = DDS::RETCODE_ERROR;
-        break;
-      }
-      if (for_sequence && !vw.end_sequence()) {
-        rc = DDS::RETCODE_ERROR;
-      }
+    } else if (!vw.write_absent_value()) {
+      rc = DDS::RETCODE_ERROR;
     }
     break;
   }
@@ -294,18 +551,28 @@ DDS::ReturnCode_t vwrite_primitive_array_i(ValueWriter& vw, DDS::DynamicData_ptr
   case TK_CHAR16: {
     DDS::WcharSeq val;
     rc = value->get_char16_values(val, id);
+    if (!check_rc(rc, id, col_tk, "vwrite_primitive_collection")) {
+      break;
+    }
+    if (!begin_member_helper(vw, params, rc, containing_tk)) {
+      rc = DDS::RETCODE_ERROR;
+      break;
+    }
     if (rc == DDS::RETCODE_OK) {
-      if (for_sequence && !vw.begin_sequence(orig_elem_kind, val.length())) {
-        rc = DDS::RETCODE_ERROR;
-        break;
+      if (col_tk == TK_SEQUENCE) {
+        if (!vw.begin_sequence(orig_elem_kind, val.length()) ||
+            !vw.write_char16_array(val.get_buffer(), val.length()) ||
+            !vw.end_sequence()) {
+          rc = DDS::RETCODE_ERROR;
+        }
+      } else if (col_tk == TK_ARRAY) {
+        if (!vwrite_primitive_array_helper(vw, val.get_buffer(), elem_kind, orig_elem_kind,
+                                           dims, 0, 0, val.length())) {
+          rc = DDS::RETCODE_ERROR;
+        }
       }
-      if (!vw.write_char16_array(val.get_buffer(), val.length())) {
-        rc = DDS::RETCODE_ERROR;
-        break;
-      }
-      if (for_sequence && !vw.end_sequence()) {
-        rc = DDS::RETCODE_ERROR;
-      }
+    } else if (!vw.write_absent_value()) {
+      rc = DDS::RETCODE_ERROR;
     }
     break;
   }
@@ -313,42 +580,62 @@ DDS::ReturnCode_t vwrite_primitive_array_i(ValueWriter& vw, DDS::DynamicData_ptr
   case TK_BYTE: {
     DDS::ByteSeq val;
     rc = value->get_byte_values(val, id);
+    if (!check_rc(rc, id, col_tk, "vwrite_primitive_collection")) {
+      break;
+    }
+    if (!begin_member_helper(vw, params, rc, containing_tk)) {
+      rc = DDS::RETCODE_ERROR;
+      break;
+    }
     if (rc == DDS::RETCODE_OK) {
-      if (for_sequence && !vw.begin_sequence(orig_elem_kind, val.length())) {
-        rc = DDS::RETCODE_ERROR;
-        break;
+      if (col_tk == TK_SEQUENCE) {
+        if (!vw.begin_sequence(orig_elem_kind, val.length()) ||
+            !vw.write_byte_array(val.get_buffer(), val.length()) ||
+            !vw.end_sequence()) {
+          rc = DDS::RETCODE_ERROR;
+        }
+      } else if (col_tk == TK_ARRAY) {
+        if (!vwrite_primitive_array_helper(vw, val.get_buffer(), elem_kind, orig_elem_kind,
+                                           dims, 0, 0, val.length())) {
+          rc = DDS::RETCODE_ERROR;
+        }
       }
-      if (!vw.write_byte_array(val.get_buffer(), val.length())) {
-        rc = DDS::RETCODE_ERROR;
-        break;
-      }
-      if (for_sequence && !vw.end_sequence()) {
-        rc = DDS::RETCODE_ERROR;
-      }
+    } else if (!vw.write_absent_value()) {
+      rc = DDS::RETCODE_ERROR;
     }
     break;
   }
   case TK_BOOLEAN: {
     DDS::BooleanSeq val;
     rc = value->get_boolean_values(val, id);
+    if (!check_rc(rc, id, col_tk, "vwrite_primitive_collection")) {
+      break;
+    }
+    if (!begin_member_helper(vw, params, rc, containing_tk)) {
+      rc = DDS::RETCODE_ERROR;
+      break;
+    }
     if (rc == DDS::RETCODE_OK) {
-      if (for_sequence && !vw.begin_sequence(orig_elem_kind, val.length())) {
-        rc = DDS::RETCODE_ERROR;
-        break;
+      if (col_tk == TK_SEQUENCE) {
+        if (!vw.begin_sequence(orig_elem_kind, val.length()) ||
+            !vw.write_boolean_array(val.get_buffer(), val.length()) ||
+            !vw.end_sequence()) {
+          rc = DDS::RETCODE_ERROR;
+        }
+      } else if (col_tk == TK_ARRAY) {
+        if (!vwrite_primitive_array_helper(vw, val.get_buffer(), elem_kind, orig_elem_kind,
+                                           dims, 0, 0, val.length())) {
+          rc = DDS::RETCODE_ERROR;
+        }
       }
-      if (!vw.write_boolean_array(val.get_buffer(), val.length())) {
-        rc = DDS::RETCODE_ERROR;
-        break;
-      }
-      if (for_sequence && !vw.end_sequence()) {
-        rc = DDS::RETCODE_ERROR;
-      }
+    } else if (!vw.write_absent_value()) {
+      rc = DDS::RETCODE_ERROR;
     }
     break;
   }
   default:
     if (log_level >= LogLevel::Notice) {
-      ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: vwrite_primitive_array_i:"
+      ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: vwrite_primitive_collection:"
                  " Expect a primitive type, receive %C\n", XTypes::typekind_to_string(elem_kind)));
     }
     return DDS::RETCODE_BAD_PARAMETER;
@@ -694,31 +981,38 @@ bool vwrite_item(ValueWriter& vw, DDS::DynamicData_ptr value, DDS::MemberId id,
     break;
   }
 #endif
-  case TK_SEQUENCE: {
-    DDS::TypeDescriptor_var seq_td;
-    rc = item_type->get_descriptor(seq_td);
+  case TK_SEQUENCE:
+  case TK_ARRAY: {
+    DDS::TypeDescriptor_var col_td;
+    rc = item_type->get_descriptor(col_td);
     if (rc != DDS::RETCODE_OK) {
       if (log_level >= LogLevel::Notice) {
-        ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: vwrite_item: get_descriptor for sequence failed (%C)\n",
-                   retcode_to_string(rc)));
+        ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: vwrite_item: get_descriptor for %C failed (%C)\n",
+                   typekind_to_string(treat_as), retcode_to_string(rc)));
       }
       return false;
     }
-    DDS::DynamicType_var elem_type = get_base_type(seq_td->element_type());
+    DDS::DynamicType_var elem_type = get_base_type(col_td->element_type());
     const TypeKind elem_kind = elem_type->get_kind();
     TypeKind treat_elem_as;
     if (get_equivalent_kind(elem_type, treat_elem_as) != DDS::RETCODE_OK) {
       return false;
     }
-    // Try writing the whole primitive sequence. If fails, fall back to write element one by one.
-    if (is_primitive(treat_elem_as) &&
-        vwrite_primitive_array_i(vw, value, id, treat_elem_as, elem_kind, true) == DDS::RETCODE_OK) {
-      break;
+    // Try writing the whole primitive collection. If the get sequence operations
+    // are not supported by the dynamic data object, fall back to write element one by one.
+    if (is_primitive(treat_elem_as)) {
+      rc = vwrite_primitive_collection(vw, value, id, treat_elem_as, elem_kind,
+                                       treat_as, col_td->bound(), containing_tk, params);
+      if (rc == DDS::RETCODE_OK || rc == DDS::RETCODE_NO_DATA) {
+        break;
+      }
+      if (rc != DDS::RETCODE_UNSUPPORTED) {
+        return false;
+      }
     }
   }
   case TK_STRUCTURE:
-  case TK_UNION:
-  case TK_ARRAY: {
+  case TK_UNION: {
     DDS::DynamicData_var member_data;
     rc = value->get_complex_value(member_data, id);
     if (!check_rc(rc, id, treat_as, "vwrite_item")) {
@@ -1090,9 +1384,14 @@ DDS::ReturnCode_t vwrite_primitive_array(ValueWriter& vw, DDS::DynamicData_ptr v
     return DDS::RETCODE_BAD_PARAMETER;
   }
 
-  return vwrite_primitive_array_i(vw, value, id, prim_kind, orig_kind, false /*for_sequence*/);
+  //  return vwrite_primitive_collection(vw, value, id, prim_kind, orig_kind, XTypes::TK_ARRAY);
+  return true;
 }
 
+// TODO(sonndinh): Don't need to optimize here anymore since we already attempt to do it
+// one level up when writing this array as a member of a struct or union.
+// When it reach this function, it means the attempt failed and we fall back to write
+// elements one by one even if the element type is primitive.
 bool vwrite_array_helper(ValueWriter& vw, CORBA::ULong dim_idx, const DDS::BoundSeq& dims,
                          std::vector<CORBA::ULong> idx_vec, const DDS::DynamicType_var& elem_type,
                          DDS::DynamicData_ptr value)
