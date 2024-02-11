@@ -242,9 +242,9 @@ inline DCPS::Sample::Extent nested(DCPS::Sample::Extent ext)
 
 // Convert the index vector to an element in a multi-dimensional array into a flat index.
 // See description for ARRAY_TYPE in XTypes 1.3, page 139.
-DDS::ReturnCode_t flat_index(CORBA::ULong& flat_idx, const std::vector<CORBA::ULong>& idx_vec,
+DDS::ReturnCode_t flat_index(CORBA::ULong& flat_idx, const DDS::BoundSeq& idx_vec,
                              const DDS::BoundSeq& dims, CORBA::ULong up_to_ndims);
-OpenDDS_Dcps_Export DDS::ReturnCode_t flat_index(CORBA::ULong& flat_idx, const std::vector<CORBA::ULong>& idx_vec,
+OpenDDS_Dcps_Export DDS::ReturnCode_t flat_index(CORBA::ULong& flat_idx, const DDS::BoundSeq& idx_vec,
                                                  const DDS::BoundSeq& dims);
 
 inline bool check_rc_from_get(DDS::ReturnCode_t rc, DDS::MemberId id, DDS::TypeKind tk,

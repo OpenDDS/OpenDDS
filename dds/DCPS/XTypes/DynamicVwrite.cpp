@@ -16,7 +16,7 @@ namespace DCPS {
 
 bool check_rc(DDS::ReturnCode_t rc, DDS::MemberId id, DDS::TypeKind tk, const char* fn_name)
 {
-  return XTypes::check_rc_from_get(rc, id, tk, fn_name, LogLevel::Warning);
+  return XTypes::check_rc_from_get(rc, id, tk, fn_name, LogLevel::Notice);
 }
 
 bool begin_member_helper(ValueWriter& vw, MemberParam* params,
@@ -1368,87 +1368,40 @@ bool vwrite_element(ValueWriter& vw, DDS::DynamicData_ptr value,
   return vwrite_item(vw, value, id, elem_dt);
 }
 
-DDS::ReturnCode_t vwrite_primitive_array(ValueWriter& vw, DDS::DynamicData_ptr value,
-                                         XTypes::TypeKind prim_kind, XTypes::TypeKind orig_kind, CORBA::ULong arr_flat_idx)
-{
-  // TODO: To support this optimization for dynamic data, we need to have the semantics
-  // of the MemberId argument dependent on whether get_*_value or get_*_values is called
-  // on the dynamic data object. In particular, in get_*_value, id is the Id of the final
-  // element type; in get_*_values, id is the Id of the innermost single-dimension array
-  // in relative to the whole original array.
-  const DDS::MemberId id = value->get_member_id_at_index(arr_flat_idx);
-  if (id == XTypes::MEMBER_ID_INVALID) {
-    if (log_level >= LogLevel::Notice) {
-      ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: vwrite_primitive_array: get_member_id_at_index %u failed\n", arr_flat_idx));
-    }
-    return DDS::RETCODE_BAD_PARAMETER;
-  }
-
-  //  return vwrite_primitive_collection(vw, value, id, prim_kind, orig_kind, XTypes::TK_ARRAY);
-  return true;
-}
-
-// TODO(sonndinh): Don't need to optimize here anymore since we already attempt to do it
-// one level up when writing this array as a member of a struct or union.
-// When it reach this function, it means the attempt failed and we fall back to write
-// elements one by one even if the element type is primitive.
 bool vwrite_array_helper(ValueWriter& vw, CORBA::ULong dim_idx, const DDS::BoundSeq& dims,
-                         std::vector<CORBA::ULong> idx_vec, const DDS::DynamicType_var& elem_type,
+                         DDS::BoundSeq& idx_vec, const DDS::DynamicType_var& elem_type,
                          DDS::DynamicData_ptr value)
 {
   const XTypes::TypeKind elem_kind = elem_type->get_kind();
   const CORBA::ULong dims_len = dims.length();
-  XTypes::TypeKind treat_elem_as;
-  if (get_equivalent_kind(elem_type, treat_elem_as) != DDS::RETCODE_OK) {
-    return false;
-  }
-
-  const bool try_optimize = XTypes::is_primitive(treat_elem_as) && dim_idx == dims_len - 1;
-  bool optimize_failed = false;
 
   if (!vw.begin_array(elem_kind)) {
     return false;
   }
-  if (try_optimize) {
-    // Try writing the innermost arrays using write_*_array.
-    // Fall back to write elements one by one if fails.
-    CORBA::ULong arr_flat_idx = 0;
-    const DDS::ReturnCode_t rc = XTypes::flat_index(arr_flat_idx, idx_vec, dims, dim_idx);
-    if (rc != DDS::RETCODE_OK) {
-      if (log_level >= LogLevel::Notice) {
-        ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: vwrite_array_helper: flat_index failed (%C)\n",
-                   retcode_to_string(rc)));
-      }
+
+  for (CORBA::ULong i = 0; i < dims[dim_idx]; ++i) {
+    if (!vw.begin_element(i)) {
       return false;
     }
-    optimize_failed = vwrite_primitive_array(vw, value, treat_elem_as, elem_kind, arr_flat_idx) != DDS::RETCODE_OK;
-  }
-
-  if (!try_optimize || optimize_failed) {
-    for (CORBA::ULong i = 0; i < dims[dim_idx]; ++i) {
-      if (!vw.begin_element(i)) {
-        return false;
-      }
-      idx_vec[dim_idx] = i;
-      if (dim_idx == dims_len - 1) {
-        CORBA::ULong flat_idx = 0;
-        const DDS::ReturnCode_t rc = XTypes::flat_index(flat_idx, idx_vec, dims, dims_len);
-        if (rc != DDS::RETCODE_OK) {
-          if (log_level >= LogLevel::Notice) {
-            ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: vwrite_array_helper: flat_index failed (%C)\n",
-                       retcode_to_string(rc)));
-          }
-          return false;
+    idx_vec[dim_idx] = i;
+    if (dim_idx == dims_len - 1) {
+      CORBA::ULong flat_idx = 0;
+      const DDS::ReturnCode_t rc = XTypes::flat_index(flat_idx, idx_vec, dims, dims_len);
+      if (rc != DDS::RETCODE_OK) {
+        if (log_level >= LogLevel::Notice) {
+          ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: vwrite_array_helper: flat_index failed (%C)\n",
+                     retcode_to_string(rc)));
         }
-        if (!vwrite_element(vw, value, elem_type, flat_idx)) {
-          return false;
-        }
-      } else if (!vwrite_array_helper(vw, dim_idx+1, dims, idx_vec, elem_type, value)) {
         return false;
       }
-      if (!vw.end_element()) {
+      if (!vwrite_element(vw, value, elem_type, flat_idx)) {
         return false;
       }
+    } else if (!vwrite_array_helper(vw, dim_idx+1, dims, idx_vec, elem_type, value)) {
+      return false;
+    }
+    if (!vw.end_element()) {
+      return false;
     }
   }
 
@@ -1469,7 +1422,8 @@ bool vwrite_array(ValueWriter& vw, DDS::DynamicData_ptr value, const DDS::Dynami
 
   DDS::DynamicType_var elem_type = XTypes::get_base_type(td->element_type());
   const DDS::BoundSeq& dims = td->bound();
-  std::vector<CORBA::ULong> idx_vec(dims.length());
+  DDS::BoundSeq idx_vec;
+  idx_vec.length(dims.length());
 
   return vwrite_array_helper(vw, 0, dims, idx_vec, elem_type, value);
 }

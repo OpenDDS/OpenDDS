@@ -1681,14 +1681,14 @@ bool has_explicit_keys(DDS::DynamicType* dt)
 }
 
 // Convert to a flat index using a given number of dimensions starting from the outermost dimension.
-DDS::ReturnCode_t flat_index(CORBA::ULong& flat_idx, const std::vector<CORBA::ULong>& idx_vec,
+DDS::ReturnCode_t flat_index(CORBA::ULong& flat_idx, const DDS::BoundSeq& idx_vec,
                              const DDS::BoundSeq& dims, CORBA::ULong up_to_ndims)
 {
   const CORBA::ULong dims_len = dims.length();
-  if (idx_vec.size() != dims_len) {
+  if (idx_vec.length() != dims_len) {
     if (DCPS::log_level >= DCPS::LogLevel::Notice) {
       ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: flat_index: Number of dimensions (%u) != "
-                 " size of the index vector (%u)\n", dims_len, idx_vec.size()));
+                 " size of the index vector (%u)\n", dims_len, idx_vec.length()));
     }
     return DDS::RETCODE_BAD_PARAMETER;
   }
@@ -1720,8 +1720,7 @@ DDS::ReturnCode_t flat_index(CORBA::ULong& flat_idx, const std::vector<CORBA::UL
   return DDS::RETCODE_OK;
 }
 
-DDS::ReturnCode_t flat_index(CORBA::ULong& flat_idx, const std::vector<CORBA::ULong>& idx_vec,
-                             const DDS::BoundSeq& dims)
+DDS::ReturnCode_t flat_index(CORBA::ULong& flat_idx, const DDS::BoundSeq& idx_vec, const DDS::BoundSeq& dims)
 {
   return flat_index(flat_idx, idx_vec, dims, dims.length());
 }
