@@ -126,7 +126,7 @@ OpenDDS_Rtps_Export
 Attribute make_priority(ACE_UINT32 priority);
 
 OpenDDS_Rtps_Export
-Attribute make_use_candidate();;
+Attribute make_use_candidate();
 
 OpenDDS_Rtps_Export
 Attribute make_fingerprint();
