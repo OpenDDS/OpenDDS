@@ -1323,8 +1323,8 @@ bool vwrite_union(ValueWriter& vw, DDS::DynamicData_ptr value, const DDS::Dynami
     }
     return false;
   }
-  // Discriminator Id is always 0?
-  MemberParam params(0, disc_md->is_must_understand() || disc_md->is_key(),
+  MemberParam params(XTypes::DISCRIMINATOR_SERIALIZED_ID,
+                     disc_md->is_must_understand() || disc_md->is_key(),
                      disc_md->name(), disc_md->is_optional(), true);
   if (!vw.begin_discriminator(params)) {
     return false;

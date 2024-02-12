@@ -5579,8 +5579,7 @@ bool serialize_dynamic_discriminator(Serializer& ser, DDS::DynamicData_ptr union
   const DDS::MemberDescriptor_var disc_md, DDS::ExtensibilityKind extensibility, CORBA::Long& disc_val)
 {
   using namespace OpenDDS::XTypes;
-  // What is the actual Id of the discriminator? Use 0 for serialization for now.
-  const DDS::MemberId disc_id = 0;
+  const DDS::MemberId disc_id = DISCRIMINATOR_SERIALIZED_ID;
   const CORBA::Boolean optional = disc_md->is_optional(); // Discriminator must be non-optional.
   const CORBA::Boolean must_understand = disc_md->is_must_understand() || disc_md->is_key();
   const DDS::DynamicType_var disc_type = get_base_type(disc_md->type());
