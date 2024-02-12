@@ -14,7 +14,7 @@ namespace DCPS {
 
 class OpenDDS_Dcps_Export Xcdr2ValueWriter : public ValueWriter {
 public:
-  explicit Xcdr2ValueWriter(Encoding& encoding)
+  explicit Xcdr2ValueWriter(const Encoding& encoding)
     : mode_(SERIALIZATION_SIZE_MODE)
     , encoding_(encoding)
     , pos_(0)
