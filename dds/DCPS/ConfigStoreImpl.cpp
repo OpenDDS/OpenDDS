@@ -990,7 +990,10 @@ ConfigStoreImpl::get_section_names(const String& prefix) const
         pos->key() != cprefix &&
         !pos->value().empty() &&
         pos->value().substr(0, 1) == "@") {
-      retval.push_back(pos->value().substr(1));
+      const String name = pos->value().substr(1);
+      if (ConfigPair::canonicalize(prefix + "_" + name) == pos->key()) {
+        retval.push_back(name);
+      }
     }
   }
 

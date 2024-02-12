@@ -520,8 +520,8 @@ TEST(dds_DCPS_JsonValueWriter, write_fixed)
   Buffer buffer;
   Writer writer(buffer);
   JsonValueWriter<Writer> jvw(writer);
-  jvw.write_fixed(OpenDDS::FaceTypes::Fixed());
-  EXPECT_STREQ(buffer.GetString(), "\"fixed\"");
+  jvw.write_fixed(ACE_CDR::Fixed::from_integer(ACE_CDR::LongLong(1)));
+  EXPECT_STREQ(buffer.GetString(), "\"1\"");
 }
 
 TEST(dds_DCPS_JsonValueWriter, write_char8)

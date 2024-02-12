@@ -545,7 +545,7 @@ bool Xcdr2ValueWriter::write_float128(ACE_CDR::LongDouble value)
   }
 }
 
-bool Xcdr2ValueWriter::write_fixed(const OpenDDS::FaceTypes::Fixed& /*value*/)
+bool Xcdr2ValueWriter::write_fixed(const ACE_CDR::Fixed& /*value*/)
 {
   return true;
 }

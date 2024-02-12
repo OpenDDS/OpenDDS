@@ -931,7 +931,7 @@ DDS::MemberDescriptor* DynamicDataXcdrReadImpl::get_union_selected_member()
   }
 
   if (has_default) {
-    return default_member._retn();;
+    return default_member._retn();
   }
 
   // The union has no selected member.

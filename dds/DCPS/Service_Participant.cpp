@@ -109,7 +109,6 @@ int Service_Participant::zero_argc = 0;
 
 static const ACE_TCHAR DEFAULT_REPO_IOR[] = ACE_TEXT("file://repo.ior");
 
-static const ACE_TCHAR DOMAIN_SECTION_NAME[] = ACE_TEXT("domain");
 static const ACE_TCHAR REPO_SECTION_NAME[]   = ACE_TEXT("repository");
 static const ACE_TCHAR RTPS_SECTION_NAME[]   = ACE_TEXT("rtps_discovery");
 
@@ -1109,11 +1108,12 @@ Service_Participant::get_discovery(const DDS::DomainId_t domain)
   Discovery::RepoKey repo = get_default_discovery();
 
   // Override with the discovery for the domain range.
-  DomainRange dr_inst("");
-  bool in_range = false;
-  if (get_domain_range_info(domain, dr_inst)) {
-    repo = dr_inst.discovery_template_name(config_store_, repo);
-    in_range = true;
+  DomainRanges::const_iterator dr_pos = domain_ranges_.begin();
+  for (DomainRanges::const_iterator limit = domain_ranges_.end(); dr_pos != limit; ++dr_pos) {
+    if (dr_pos->belongs_to_domain_range(domain)) {
+      repo = dr_pos->discovery_template(config_store_, repo);
+      break;
+    }
   }
 
   // Override with the discovery for the domain.
@@ -1125,8 +1125,8 @@ Service_Participant::get_discovery(const DDS::DomainId_t domain)
   RepoKeyDiscoveryMap::const_iterator location = discoveryMap_.find(repo);
 
   if (location == discoveryMap_.end()) {
-    if (in_range) {
-      const int ret = configure_domain_range_instance(domain, repo);
+    if (dr_pos != domain_ranges_.end()) {
+      const int ret = configure_domain_range_instance(dr_pos, domain, repo);
 
       // return the newly configured domain and return it
       if (!ret) {
@@ -1576,7 +1576,7 @@ Service_Participant::load_configuration(
   // sections to allow error reporting on bad discovery config names.
   // Also loaded after the transport configuration so that
   // DefaultTransportConfig within [domain/*] can use TransportConfig objects.
-  status = this->load_domain_configuration(config, filename);
+  status = load_domain_configuration();
 
   if (status != 0) {
     ACE_ERROR_RETURN((LM_ERROR,
@@ -1606,145 +1606,108 @@ Service_Participant::load_configuration(
   return 0;
 }
 
-int
-Service_Participant::load_domain_configuration(ACE_Configuration_Heap& cf,
-                                               const ACE_TCHAR* filename)
+DDS::DomainId_t
+Service_Participant::DomainConfig::domain_id(RcHandle<ConfigStoreImpl> config_store) const
 {
-  const ACE_Configuration_Section_Key& root = cf.root_section();
-  ACE_Configuration_Section_Key domain_sect;
+  DDS::DomainId_t di = -1;
 
-  if (cf.open_section(root, DOMAIN_SECTION_NAME, false, domain_sect) != 0) {
-    if (DCPS_debug_level > 0) {
-      // This is not an error if the configuration file does not have
-      // any domain (sub)section. The code default configuration will be used.
-      ACE_DEBUG((LM_NOTICE,
-                 ACE_TEXT("(%P|%t) NOTICE: Service_Participant::load_domain_configuration(): ")
-                 ACE_TEXT("failed to open [%s] section - using code default.\n"),
-                 DOMAIN_SECTION_NAME));
-    }
+  // Try using the domain name as an ID
+  if (!convertToInteger(name_, di)) {
+    di = -1;
+  }
 
-    return 0;
+  return config_store->get_int32(config_key("DOMAIN_ID").c_str(), di);
+}
 
-  } else {
-    // Ensure there are no properties in this section
-    ValueMap vm;
-    if (pullValues(cf, domain_sect, vm) > 0) {
-      // There are values inside [domain]
-      ACE_ERROR_RETURN((LM_ERROR,
-                        ACE_TEXT("(%P|%t) Service_Participant::load_domain_configuration(): ")
-                        ACE_TEXT("domain sections must have a subsection name\n")),
-                       -1);
-    }
-    // Process the subsections of this section (the individual domains)
-    KeyList keys;
-    if (processSections(cf, domain_sect, keys) != 0) {
-      ACE_ERROR_RETURN((LM_ERROR,
-                        ACE_TEXT("(%P|%t) Service_Participant::load_domain_configuration(): ")
-                        ACE_TEXT("too many nesting layers in the [domain] section.\n")),
-                       -1);
-    }
+String
+Service_Participant::DomainConfig::discovery_config(RcHandle<ConfigStoreImpl> config_store) const
+{
+  const String r = config_store->get(OPENDDS_COMMON_DCPS_DEFAULT_DISCOVERY,
+                                     OPENDDS_COMMON_DCPS_DEFAULT_DISCOVERY_default);
+  String s = config_store->get(config_key("DOMAIN_REPO_KEY").c_str(), r);
+  if (s == "-1") {
+    s = r;
+  }
 
-    // Loop through the [domain/*] sections
-    for (KeyList::const_iterator it = keys.begin(); it != keys.end(); ++it) {
-      OPENDDS_STRING domain_name = it->first;
+  return config_store->get(config_key("DISCOVERY_CONFIG").c_str(), s);
+}
 
-      ValueMap values;
-      pullValues(cf, it->second, values);
-      DDS::DomainId_t domainId = -1;
-      Discovery::RepoKey repoKey;
-      OPENDDS_STRING perDomainDefaultTportConfig;
-      for (ValueMap::const_iterator it = values.begin(); it != values.end(); ++it) {
-        OPENDDS_STRING name = it->first;
-        if (name == "DomainId") {
-          OPENDDS_STRING value = it->second;
-          if (!convertToInteger(value, domainId)) {
-            ACE_ERROR_RETURN((LM_ERROR,
-                              ACE_TEXT("(%P|%t) Service_Participant::load_domain_configuration(): ")
-                              ACE_TEXT("Illegal integer value for DomainId (%C) in [domain/%C] section.\n"),
-                              value.c_str(), domain_name.c_str()),
-                             -1);
-          }
-          if (DCPS_debug_level > 0) {
-            ACE_DEBUG((LM_DEBUG,
-                       ACE_TEXT("(%P|%t) [domain/%C]: DomainId == %d\n"),
-                       domain_name.c_str(), domainId));
-          }
-        } else if (name == "DomainRepoKey") {
-          // We will still process this for backward compatibility, but
-          // it can now be replaced by "DiscoveryConfig=REPO:<key>"
-          repoKey = it->second;
-          if (repoKey == "-1") {
-            repoKey = Discovery::DEFAULT_REPO;
-          }
+String
+Service_Participant::DomainConfig::default_transport_config(RcHandle<ConfigStoreImpl> config_store) const
+{
+  return config_store->get(config_key("DEFAULT_TRANSPORT_CONFIG").c_str(), "");
+}
 
-          if (DCPS_debug_level > 0) {
-            ACE_DEBUG((LM_DEBUG,
-                       ACE_TEXT("(%P|%t) [domain/%C]: DomainRepoKey == %C\n"),
-                       domain_name.c_str(), repoKey.c_str()));
-          }
-        } else if (name == "DiscoveryConfig") {
-           repoKey = it->second;
-        } else if (name == "DefaultTransportConfig") {
-          if (it->second == "$file") {
-            // When the special string of "$file" is used, substitute the file name
-            perDomainDefaultTportConfig = ACE_TEXT_ALWAYS_CHAR(filename);
-
-          } else {
-            perDomainDefaultTportConfig = it->second;
-          }
-
-        } else {
-          ACE_ERROR_RETURN((LM_ERROR,
-                            ACE_TEXT("(%P|%t) Service_Participant::load_domain_configuration(): ")
-                            ACE_TEXT("Unexpected entry (%C) in [domain/%C] section.\n"),
-                            name.c_str(), domain_name.c_str()),
-                           -1);
-        }
-      }
-
-      if (domainId == -1) {
-        // DomainId parameter is not set, try using the domain name as an ID
-        if (!convertToInteger(domain_name, domainId)) {
-          ACE_ERROR_RETURN((LM_ERROR,
-                            ACE_TEXT("(%P|%t) Service_Participant::load_domain_configuration(): ")
-                            ACE_TEXT("Missing DomainId value in [domain/%C] section.\n"),
-                            domain_name.c_str()),
-                           -1);
-        }
-      }
-
-      if (!perDomainDefaultTportConfig.empty()) {
-        TransportRegistry* const reg = TransportRegistry::instance();
-        TransportConfig_rch tc = reg->get_config(perDomainDefaultTportConfig);
-        if (tc.is_nil()) {
-          ACE_ERROR_RETURN((LM_ERROR,
-            ACE_TEXT("(%P|%t) Service_Participant::load_domain_configuration(): ")
-            ACE_TEXT("Unknown transport config %C in [domain/%C] section.\n"),
-            perDomainDefaultTportConfig.c_str(), domain_name.c_str()), -1);
-        } else {
-          reg->domain_default_config(domainId, tc);
-        }
-      }
-
-      // Check to see if the specified discovery configuration has been defined
-      if (!repoKey.empty()) {
-        if ((repoKey != Discovery::DEFAULT_REPO) &&
-            (repoKey != Discovery::DEFAULT_RTPS) &&
-            (repoKey != Discovery::DEFAULT_STATIC) &&
-            (this->discoveryMap_.find(repoKey) == this->discoveryMap_.end())) {
-          ACE_ERROR_RETURN((LM_ERROR,
-                            ACE_TEXT("(%P|%t) Service_Participant::load_domain_configuration(): ")
-                            ACE_TEXT("Specified configuration (%C) not found.  Referenced in [domain/%C] section.\n"),
-                            repoKey.c_str(), domain_name.c_str()),
-                           -1);
-        }
-        this->set_repo_domain(domainId, repoKey);
-      }
+int
+Service_Participant::load_domain_configuration()
+{
+  const DCPS::ConfigStoreImpl::StringList sections = config_store_->get_section_names("OPENDDS_DOMAIN");
+  for (DCPS::ConfigStoreImpl::StringList::const_iterator pos = sections.begin(), limit = sections.end();
+       pos != limit; ++pos) {
+    const DomainConfig dc(*pos);
+    if (!process_domain(dc.to_domain(config_store_))) {
+      return -1;
     }
   }
 
   return 0;
 }
+
+bool
+Service_Participant::process_domain(const Domain& domain)
+{
+  if (domain.domain_id() == -1) {
+    // DomainId parameter is not set.
+    if (log_level >= LogLevel::Error) {
+      ACE_ERROR((LM_ERROR,
+                 "(%P|%t) ERROR: Service_Participant::process_domain: "
+                 "Missing DomainId value in [domain/%C] section.\n",
+                 domain.name().c_str()));
+    }
+    return false;
+  }
+
+  const String& default_transport_config = domain.default_transport_config();
+  if (!default_transport_config.empty()) {
+    TransportRegistry* const reg = TransportRegistry::instance();
+    TransportConfig_rch tc = reg->get_config(default_transport_config);
+    if (tc.is_nil()) {
+      if (log_level >= LogLevel::Error) {
+        ACE_ERROR((LM_ERROR,
+                   "(%P|%t) ERROR: Service_Participant::process_domain: "
+                   "Unknown transport config %C in [domain/%C] section.\n",
+                   default_transport_config.c_str(),
+                   domain.name().c_str()));
+      }
+      return false;
+    } else {
+      reg->domain_default_config(domain.domain_id(), tc);
+    }
+  }
+
+  // Check to see if the specified discovery configuration has been defined
+  const Discovery::RepoKey& discovery_config = domain.discovery_config();
+  if (!discovery_config.empty()) {
+    if ((discovery_config != Discovery::DEFAULT_REPO) &&
+        (discovery_config != Discovery::DEFAULT_RTPS) &&
+        (discovery_config != Discovery::DEFAULT_STATIC) &&
+        (discoveryMap_.find(discovery_config) == discoveryMap_.end())) {
+      if (log_level >= LogLevel::Error) {
+        ACE_ERROR((LM_ERROR,
+                   "(%P|%t) ERROR: Service_Participant::process_domain: "
+                   "Specified configuration (%C) not found.  Referenced in [domain/%C] section.\n",
+                   discovery_config.c_str(),
+                   domain.name().c_str()));
+      }
+      return false;
+    }
+
+    set_repo_domain(domain.domain_id(), discovery_config);
+  }
+
+  return true;
+}
+
 
 int
 Service_Participant::load_domain_ranges()
@@ -1772,63 +1735,11 @@ Service_Participant::load_domain_ranges()
   return 0;
 }
 
-int Service_Participant::configure_domain_range_instance(DDS::DomainId_t domainId,
+int Service_Participant::configure_domain_range_instance(DomainRanges::const_iterator dr_pos,
+                                                         DDS::DomainId_t domainId,
                                                          const Discovery::RepoKey& name)
 {
-  if (discoveryMap_.find(name) == discoveryMap_.end()) {
-    // create a cf that has [rtps_discovery/name+domainId]
-    // copy sections adding customization
-    DomainRange dr_inst("");
-
-    if (get_domain_range_info(domainId, dr_inst)) {
-      ACE_Configuration_Heap dcf;
-      dcf.open();
-      const ACE_Configuration_Section_Key& root = dcf.root_section();
-
-      // set the transport_config_name
-      domain_to_transport_name_map_[domainId] = dr_inst.transport_config_name(config_store_);
-
-      // create domain instance
-      ACE_Configuration_Section_Key dsect;
-      dcf.open_section(root, DOMAIN_SECTION_NAME, true /* create */, dsect);
-      ACE_Configuration_Section_Key dsub_sect;
-      dcf.open_section(dsect, ACE_TEXT_CHAR_TO_TCHAR(to_dds_string(domainId).c_str()), true /* create */, dsub_sect);
-      dcf.set_string_value(dsub_sect, ACE_TEXT("DiscoveryConfig"), ACE_TEXT_CHAR_TO_TCHAR(name.c_str()));
-      const DCPS::ConfigStoreImpl::StringMap domain_info = dr_inst.domain_info(config_store_);
-      for (DCPS::ConfigStoreImpl::StringMap::const_iterator it = domain_info.begin();
-           it != domain_info.end();
-           ++it) {
-        if (it->first != "DISCOVERY_TEMPLATE") {
-          dcf.set_string_value(dsub_sect, ACE_TEXT_CHAR_TO_TCHAR(it->first.c_str()), ACE_TEXT_CHAR_TO_TCHAR(it->second.c_str()));
-        }
-        if (DCPS_debug_level > 0) {
-          ACE_DEBUG((LM_DEBUG,
-                     ACE_TEXT("(%P|%t) Service_Participant::")
-                     ACE_TEXT("configure_domain_range_instance(): adding %C=%C\n"),
-                     it->first.c_str(), it->second.c_str()));
-        }
-      }
-
-      // load domain config
-      int status = this->load_domain_configuration(dcf, 0);
-
-      if (status != 0) {
-        ACE_ERROR_RETURN((LM_ERROR,
-                          ACE_TEXT("(%P|%t) ERROR: Service_Participant::configure_domain_range_instance(): ")
-                          ACE_TEXT("load_domain_configuration() returned %d\n"),
-                          status),
-                         -1);
-      }
-
-      if (DCPS_debug_level > 4) {
-        ACE_DEBUG((LM_DEBUG,
-                 ACE_TEXT("(%P|%t) Service_Participant::configure_domain_range_instance(): ")
-                 ACE_TEXT("configure domain %d.\n"),
-                 domainId));
-      }
-    }
-
-  } else {
+  if (discoveryMap_.find(name) != discoveryMap_.end()) {
     // > 9 to limit number of messages.
     if (DCPS_debug_level > 9) {
       ACE_DEBUG((LM_DEBUG,
@@ -1836,21 +1747,25 @@ int Service_Participant::configure_domain_range_instance(DDS::DomainId_t domainI
                  ACE_TEXT("domain %d already configured.\n"),
                  domainId));
     }
+    return 0;
   }
+
+  Domain domain(to_dds_string(domainId),
+                domainId,
+                name,
+                dr_pos->default_transport_config(config_store_));
+  if (!process_domain(domain)) {
+    return -1;
+  }
+
+  if (DCPS_debug_level > 4) {
+    ACE_DEBUG((LM_DEBUG,
+               ACE_TEXT("(%P|%t) Service_Participant::configure_domain_range_instance(): ")
+               ACE_TEXT("configure domain %d.\n"),
+               domainId));
+  }
+
   return 0;
-}
-
-
-bool
-Service_Participant::belongs_to_domain_range(DDS::DomainId_t domainId) const
-{
-  for (OPENDDS_VECTOR(DomainRange)::const_iterator i = domain_ranges_.begin(); i != domain_ranges_.end(); ++i) {
-    if (i->belongs_to_domain_range(domainId)) {
-      return true;
-    }
-  }
-
-  return false;
 }
 
 int
@@ -1957,53 +1872,18 @@ int Service_Participant::DomainRange::parse_domain_range()
 }
 
 String
-Service_Participant::DomainRange::discovery_template_name(RcHandle<ConfigStoreImpl> config_store,
-                                                          const String& default_name) const
+Service_Participant::DomainRange::discovery_template(RcHandle<ConfigStoreImpl> config_store,
+                                                     const String& default_name) const
 {
   return config_store->get(config_key("DiscoveryTemplate").c_str(), default_name);
 }
 
 String
-Service_Participant::DomainRange::transport_config_name(RcHandle<ConfigStoreImpl> config_store) const
+Service_Participant::DomainRange::default_transport_config(RcHandle<ConfigStoreImpl> config_store) const
 {
   const String global_transport_config = config_store->get(OPENDDS_COMMON_DCPS_GLOBAL_TRANSPORT_CONFIG,
                                                            OPENDDS_COMMON_DCPS_GLOBAL_TRANSPORT_CONFIG_default);
   return config_store->get(config_key("DefaultTransportConfig").c_str(), global_transport_config);
-}
-
-DCPS::ConfigStoreImpl::StringMap
-Service_Participant::DomainRange::domain_info(RcHandle<ConfigStoreImpl> config_store) const
-{
-  return config_store->get_section_values(config_prefix_);
-}
-
-bool
-Service_Participant::has_domain_range() const
-{
-  return !domain_ranges_.empty();
-}
-
-bool
-Service_Participant::get_domain_range_info(const DDS::DomainId_t id, DomainRange& inst)
-{
-  if (has_domain_range()) {
-    for (OPENDDS_VECTOR(DomainRange)::iterator it = domain_ranges_.begin();
-         it != domain_ranges_.end(); ++it) {
-      if (it->belongs_to_domain_range(id)) {
-        inst = *it;
-
-        if (DCPS_debug_level > 0) {
-          ACE_DEBUG((LM_DEBUG,
-                     "(%P|%t) DEBUG: Service_Participant::get_domain_range_info: "
-                     "Domain %d is in %C\n",
-                     id, it->config_prefix().c_str()));
-        }
-
-        return true;
-      }
-    }
-  }
-  return false;
 }
 
 #if OPENDDS_POOL_ALLOCATOR

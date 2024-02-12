@@ -70,7 +70,7 @@ public:
   bool write_float32(ACE_CDR::Float value);
   bool write_float64(ACE_CDR::Double value);
   bool write_float128(ACE_CDR::LongDouble value);
-  bool write_fixed(const OpenDDS::FaceTypes::Fixed& value);
+  bool write_fixed(const ACE_CDR::Fixed& value);
   bool write_char8(ACE_CDR::Char value);
   bool write_char16(ACE_CDR::WChar value);
   bool write_string(const ACE_CDR::Char* value, size_t length);
@@ -277,10 +277,12 @@ bool PrinterValueWriter::write_float128(ACE_CDR::LongDouble value)
   return true;
 }
 
-bool PrinterValueWriter::write_fixed(const OpenDDS::FaceTypes::Fixed& /*value*/)
+bool PrinterValueWriter::write_fixed(const ACE_CDR::Fixed& value)
 {
-  // FUTURE
-  stream_ << "fixed";
+  char buffer[ACE_CDR::Fixed::MAX_STRING_SIZE];
+  if (value.to_string(buffer, sizeof buffer)) {
+    stream_ << buffer;
+  }
   return true;
 }
 

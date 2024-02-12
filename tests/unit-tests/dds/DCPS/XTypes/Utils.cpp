@@ -746,7 +746,7 @@ TEST_F(dds_DCPS_XTypes_Utils, MultidimArray)
   mdim_struct.arr[1][0] = 40;
   mdim_struct.arr[1][1] = 50;
   mdim_struct.arr[1][2] = 60;
-  std::vector<CORBA::ULong> idx_vec(2);
+  DDS::BoundSeq idx_vec(2);
   for (CORBA::ULong i = 0; i < arr_td->bound()[0]; ++i) {
     idx_vec[0] = i;
     for (CORBA::ULong j = 0; j < arr_td->bound()[1]; ++j) {

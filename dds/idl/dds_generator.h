@@ -454,10 +454,8 @@ namespace AstTypeClassification {
       return CL_SCALAR | CL_ENUM;
     case AST_Decl::NT_interface:
       return CL_INTERFACE;
-#ifdef ACE_HAS_CDR_FIXED
     case AST_Decl::NT_fixed:
       return CL_FIXED;
-#endif
     default:
       return CL_UNKNOWN;
     }
@@ -670,13 +668,11 @@ std::ostream& operator<<(std::ostream& o,
     return o << "L\"" << ev.u.wstrval << '"';
   case AST_Expression::EV_string:
     return o << '"' << ev.u.strval->get_string() << '"';
-#ifdef ACE_HAS_CDR_FIXED
   case AST_Expression::EV_fixed: {
     char buf[ACE_CDR::Fixed::MAX_STRING_SIZE];
     ev.u.fixedval.to_string(buf, sizeof buf);
     return o << "\"" << buf << "\"";
   }
-#endif
   case AST_Expression::EV_enum:
   case AST_Expression::EV_longdouble:
   case AST_Expression::EV_any:

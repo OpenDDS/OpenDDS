@@ -74,11 +74,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 
   ACE_OS::sleep(5); // connection established with Subscriber
 
-  Messenger::Message msg = {"Hello, world.", 0, 0};
-
-#ifdef ACE_HAS_CDR_FIXED
-  msg.deci = FACE::Fixed("987.654");
-#endif
+  Messenger::Message msg = { "Hello, world.", 0, FACE::Fixed("987.654") };
 
   FACE::TRANSACTION_ID_TYPE txn;
   ACE_DEBUG((LM_INFO, "Publisher: about to Send_Message()\n"));
