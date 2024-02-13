@@ -669,7 +669,7 @@ bool Xcdr2ValueWriter::write_absent_value()
   return true;
 }
 
-bool Xcdr2ValueWriter::write_boolean_array(const ACE_CDR::Boolean* x, size_t length)
+bool Xcdr2ValueWriter::write_boolean_array(const ACE_CDR::Boolean* x, ACE_CDR::ULong length)
 {
   if (mode_ == SERIALIZATION_SIZE_MODE) {
     primitive_serialized_size_boolean(encoding_, size_states_.top().total_size, length);
@@ -679,7 +679,7 @@ bool Xcdr2ValueWriter::write_boolean_array(const ACE_CDR::Boolean* x, size_t len
   }
 }
 
-bool Xcdr2ValueWriter::write_byte_array(const ACE_CDR::Octet* x, size_t length)
+bool Xcdr2ValueWriter::write_byte_array(const ACE_CDR::Octet* x, ACE_CDR::ULong length)
 {
   if (mode_ == SERIALIZATION_SIZE_MODE) {
     primitive_serialized_size_octet(encoding_, size_states_.top().total_size, length);
@@ -690,7 +690,7 @@ bool Xcdr2ValueWriter::write_byte_array(const ACE_CDR::Octet* x, size_t length)
 }
 
 #if OPENDDS_HAS_EXPLICIT_INTS
-bool Xcdr2ValueWriter::write_int8_array(const ACE_CDR::Int8* x, size_t length)
+bool Xcdr2ValueWriter::write_int8_array(const ACE_CDR::Int8* x, ACE_CDR::ULong length)
 {
   if (mode_ == SERIALIZATION_SIZE_MODE) {
     primitive_serialized_size_int8(encoding_, size_states_.top().total_size, length);
@@ -700,7 +700,7 @@ bool Xcdr2ValueWriter::write_int8_array(const ACE_CDR::Int8* x, size_t length)
   }
 }
 
-bool Xcdr2ValueWriter::write_uint8_array(const ACE_CDR::UInt8* x, size_t length)
+bool Xcdr2ValueWriter::write_uint8_array(const ACE_CDR::UInt8* x, ACE_CDR::ULong length)
 {
   if (mode_ == SERIALIZATION_SIZE_MODE) {
     primitive_serialized_size_uint8(encoding_, size_states_.top().total_size, length);
@@ -711,7 +711,7 @@ bool Xcdr2ValueWriter::write_uint8_array(const ACE_CDR::UInt8* x, size_t length)
 }
 #endif
 
-bool Xcdr2ValueWriter::write_int16_array(const ACE_CDR::Short* x, size_t length)
+bool Xcdr2ValueWriter::write_int16_array(const ACE_CDR::Short* x, ACE_CDR::ULong length)
 {
   if (mode_ == SERIALIZATION_SIZE_MODE) {
     return primitive_serialized_size(encoding_, size_states_.top().total_size, ACE_CDR::Short(), length);
@@ -720,7 +720,7 @@ bool Xcdr2ValueWriter::write_int16_array(const ACE_CDR::Short* x, size_t length)
   }
 }
 
-bool Xcdr2ValueWriter::write_uint16_array(const ACE_CDR::UShort* x, size_t length)
+bool Xcdr2ValueWriter::write_uint16_array(const ACE_CDR::UShort* x, ACE_CDR::ULong length)
 {
   if (mode_ == SERIALIZATION_SIZE_MODE) {
     return primitive_serialized_size(encoding_, size_states_.top().total_size, ACE_CDR::UShort(), length);
@@ -729,7 +729,7 @@ bool Xcdr2ValueWriter::write_uint16_array(const ACE_CDR::UShort* x, size_t lengt
   }
 }
 
-bool Xcdr2ValueWriter::write_int32_array(const ACE_CDR::Long* x, size_t length)
+bool Xcdr2ValueWriter::write_int32_array(const ACE_CDR::Long* x, ACE_CDR::ULong length)
 {
   if (mode_ == SERIALIZATION_SIZE_MODE) {
     return primitive_serialized_size(encoding_, size_states_.top().total_size, ACE_CDR::Long(), length);
@@ -738,7 +738,7 @@ bool Xcdr2ValueWriter::write_int32_array(const ACE_CDR::Long* x, size_t length)
   }
 }
 
-bool Xcdr2ValueWriter::write_uint32_array(const ACE_CDR::ULong* x, size_t length)
+bool Xcdr2ValueWriter::write_uint32_array(const ACE_CDR::ULong* x, ACE_CDR::ULong length)
 {
   if (mode_ == SERIALIZATION_SIZE_MODE) {
     return primitive_serialized_size(encoding_, size_states_.top().total_size, ACE_CDR::ULong(), length);
@@ -747,7 +747,7 @@ bool Xcdr2ValueWriter::write_uint32_array(const ACE_CDR::ULong* x, size_t length
   }
 }
 
-bool Xcdr2ValueWriter::write_int64_array(const ACE_CDR::LongLong* x, size_t length)
+bool Xcdr2ValueWriter::write_int64_array(const ACE_CDR::LongLong* x, ACE_CDR::ULong length)
 {
   if (mode_ == SERIALIZATION_SIZE_MODE) {
     return primitive_serialized_size(encoding_, size_states_.top().total_size, ACE_CDR::LongLong(), length);
@@ -756,7 +756,7 @@ bool Xcdr2ValueWriter::write_int64_array(const ACE_CDR::LongLong* x, size_t leng
   }
 }
 
-bool Xcdr2ValueWriter::write_uint64_array(const ACE_CDR::ULongLong* x, size_t length)
+bool Xcdr2ValueWriter::write_uint64_array(const ACE_CDR::ULongLong* x, ACE_CDR::ULong length)
 {
   if (mode_ == SERIALIZATION_SIZE_MODE) {
     return primitive_serialized_size(encoding_, size_states_.top().total_size, ACE_CDR::ULongLong(), length);
@@ -765,7 +765,7 @@ bool Xcdr2ValueWriter::write_uint64_array(const ACE_CDR::ULongLong* x, size_t le
   }
 }
 
-bool Xcdr2ValueWriter::write_float32_array(const ACE_CDR::Float* x, size_t length)
+bool Xcdr2ValueWriter::write_float32_array(const ACE_CDR::Float* x, ACE_CDR::ULong length)
 {
   if (mode_ == SERIALIZATION_SIZE_MODE) {
     return primitive_serialized_size(encoding_, size_states_.top().total_size, ACE_CDR::Float(), length);
@@ -774,7 +774,7 @@ bool Xcdr2ValueWriter::write_float32_array(const ACE_CDR::Float* x, size_t lengt
   }
 }
 
-bool Xcdr2ValueWriter::write_float64_array(const ACE_CDR::Double* x, size_t length)
+bool Xcdr2ValueWriter::write_float64_array(const ACE_CDR::Double* x, ACE_CDR::ULong length)
 {
   if (mode_ == SERIALIZATION_SIZE_MODE) {
     return primitive_serialized_size(encoding_, size_states_.top().total_size, ACE_CDR::Double(), length);
@@ -783,7 +783,7 @@ bool Xcdr2ValueWriter::write_float64_array(const ACE_CDR::Double* x, size_t leng
   }
 }
 
-bool Xcdr2ValueWriter::write_float128_array(const ACE_CDR::LongDouble* x, size_t length)
+bool Xcdr2ValueWriter::write_float128_array(const ACE_CDR::LongDouble* x, ACE_CDR::ULong length)
 {
   if (mode_ == SERIALIZATION_SIZE_MODE) {
     return primitive_serialized_size(encoding_, size_states_.top().total_size, ACE_CDR::LongDouble(), length);
@@ -792,7 +792,7 @@ bool Xcdr2ValueWriter::write_float128_array(const ACE_CDR::LongDouble* x, size_t
   }
 }
 
-bool Xcdr2ValueWriter::write_char8_array(const ACE_CDR::Char* x, size_t length)
+bool Xcdr2ValueWriter::write_char8_array(const ACE_CDR::Char* x, ACE_CDR::ULong length)
 {
   if (mode_ == SERIALIZATION_SIZE_MODE) {
     primitive_serialized_size_char(encoding_, size_states_.top().total_size, length);
@@ -802,7 +802,7 @@ bool Xcdr2ValueWriter::write_char8_array(const ACE_CDR::Char* x, size_t length)
   }
 }
 
-bool Xcdr2ValueWriter::write_char16_array(const ACE_CDR::WChar* x, size_t length)
+bool Xcdr2ValueWriter::write_char16_array(const ACE_CDR::WChar* x, ACE_CDR::ULong length)
 {
   if (mode_ == SERIALIZATION_SIZE_MODE) {
     primitive_serialized_size_wchar(encoding_, size_states_.top().total_size, length);

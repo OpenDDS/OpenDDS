@@ -2,8 +2,8 @@
 #define OPENDDS_DCPS_XCDR2VALUEWRITER_H
 
 #include "ValueWriter.h"
+#include "PoolAllocator.h"
 
-#include <vector>
 #include <stack>
 #include <stdexcept>
 
@@ -67,23 +67,23 @@ public:
   bool write_enum(const char* name, ACE_CDR::Long value, XTypes::TypeKind as_int = XTypes::TK_INT32);
   bool write_absent_value();
 
-  bool write_boolean_array(const ACE_CDR::Boolean* x, size_t length);
-  bool write_byte_array(const ACE_CDR::Octet* x, size_t length);
+  bool write_boolean_array(const ACE_CDR::Boolean* x, ACE_CDR::ULong length);
+  bool write_byte_array(const ACE_CDR::Octet* x, ACE_CDR::ULong length);
 #if OPENDDS_HAS_EXPLICIT_INTS
-  bool write_int8_array(const ACE_CDR::Int8* x, size_t length);
-  bool write_uint8_array(const ACE_CDR::UInt8* x, size_t length);
+  bool write_int8_array(const ACE_CDR::Int8* x, ACE_CDR::ULong length);
+  bool write_uint8_array(const ACE_CDR::UInt8* x, ACE_CDR::ULong length);
 #endif
-  bool write_int16_array(const ACE_CDR::Short* x, size_t length);
-  bool write_uint16_array(const ACE_CDR::UShort* x, size_t length);
-  bool write_int32_array(const ACE_CDR::Long* x, size_t length);
-  bool write_uint32_array(const ACE_CDR::ULong* x, size_t length);
-  bool write_int64_array(const ACE_CDR::LongLong* x, size_t length);
-  bool write_uint64_array(const ACE_CDR::ULongLong* x, size_t length);
-  bool write_float32_array(const ACE_CDR::Float* x, size_t length);
-  bool write_float64_array(const ACE_CDR::Double* x, size_t length);
-  bool write_float128_array(const ACE_CDR::LongDouble* x, size_t length);
-  bool write_char8_array(const ACE_CDR::Char* x, size_t length);
-  bool write_char16_array(const ACE_CDR::WChar* x, size_t length);
+  bool write_int16_array(const ACE_CDR::Short* x, ACE_CDR::ULong length);
+  bool write_uint16_array(const ACE_CDR::UShort* x, ACE_CDR::ULong length);
+  bool write_int32_array(const ACE_CDR::Long* x, ACE_CDR::ULong length);
+  bool write_uint32_array(const ACE_CDR::ULong* x, ACE_CDR::ULong length);
+  bool write_int64_array(const ACE_CDR::LongLong* x, ACE_CDR::ULong length);
+  bool write_uint64_array(const ACE_CDR::ULongLong* x, ACE_CDR::ULong length);
+  bool write_float32_array(const ACE_CDR::Float* x, ACE_CDR::ULong length);
+  bool write_float64_array(const ACE_CDR::Double* x, ACE_CDR::ULong length);
+  bool write_float128_array(const ACE_CDR::LongDouble* x, ACE_CDR::ULong length);
+  bool write_char8_array(const ACE_CDR::Char* x, ACE_CDR::ULong length);
+  bool write_char16_array(const ACE_CDR::WChar* x, ACE_CDR::ULong length);
 
   size_t get_serialized_size() const;
   const std::vector<size_t>& get_serialized_sizes() const;
@@ -155,7 +155,7 @@ private:
   // either a Dheader or an Emheader/Nextint. The total size of the top-level
   // type is at index zero. The subsequent values are in the same order as
   // the order that the members are serialized in the byte stream.
-  std::vector<size_t> size_cache_;
+  OPENDDS_VECTOR(size_t) size_cache_;
 
   // Current position in the size cache from which the size
   // can be obtained to write to the byte stream.

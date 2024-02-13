@@ -1680,30 +1680,20 @@ bool has_explicit_keys(DDS::DynamicType* dt)
   return false;
 }
 
-// Convert to a flat index using a given number of dimensions starting from the outermost dimension.
 DDS::ReturnCode_t flat_index(CORBA::ULong& flat_idx, const DDS::BoundSeq& idx_vec,
-                             const DDS::BoundSeq& dims, CORBA::ULong up_to_ndims)
+                             const DDS::BoundSeq& dims)
 {
-  const CORBA::ULong dims_len = dims.length();
-  if (idx_vec.length() != dims_len) {
+  if (idx_vec.length() != dims.length()) {
     if (DCPS::log_level >= DCPS::LogLevel::Notice) {
       ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: flat_index: Number of dimensions (%u) != "
-                 " size of the index vector (%u)\n", dims_len, idx_vec.length()));
+                 " size of the index vector (%u)\n", dims.length(), idx_vec.length()));
     }
     return DDS::RETCODE_BAD_PARAMETER;
   }
 
-  if (up_to_ndims > dims_len) {
-    up_to_ndims = dims_len;
-  }
-
-  flat_idx = 0;
-  if (up_to_ndims == 0) {
-    return DDS::RETCODE_OK;
-  }
-
+  CORBA::ULong ret_val = 0;
   CORBA::ULong factor = 1;
-  for (CORBA::ULong i = up_to_ndims - 1; i > 0; --i) {
+  for (CORBA::ULong i = dims.length() - 1; i > 0; --i) {
     const CORBA::ULong dim = dims[i];
     if (idx_vec[i] >= dim) {
       if (DCPS::log_level >= DCPS::LogLevel::Notice) {
@@ -1712,17 +1702,11 @@ DDS::ReturnCode_t flat_index(CORBA::ULong& flat_idx, const DDS::BoundSeq& idx_ve
       }
       return DDS::RETCODE_BAD_PARAMETER;
     }
-    flat_idx += factor * idx_vec[i];
+    ret_val += factor * idx_vec[i];
     factor *= dim;
   }
-  flat_idx += factor * idx_vec[0];
-
+  flat_idx = ret_val + factor * idx_vec[0];
   return DDS::RETCODE_OK;
-}
-
-DDS::ReturnCode_t flat_index(CORBA::ULong& flat_idx, const DDS::BoundSeq& idx_vec, const DDS::BoundSeq& dims)
-{
-  return flat_index(flat_idx, idx_vec, dims, dims.length());
 }
 
 } // namespace XTypes
