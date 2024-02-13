@@ -471,7 +471,7 @@ Config Domain
 
 For :doc:`/devguide/run_time_configuration` there's a custom configuration Sphinx domain in :ghfile:`docs/sphinx_extensions/config_domain.py`.
 
-.. rst:directive:: .. cfg:sec:: <name>[:<discriminator>][/<argument>]
+.. rst:directive:: .. cfg:sec:: <name>[@<discriminator>][/<argument>]
 
   Use to document a configuration section that can contain :rst:dir:`cfg:key` and most other RST content.
   ``<discriminator>`` is an optional extension of the name to document cases where the available keys depend on something.
@@ -481,12 +481,14 @@ For :doc:`/devguide/run_time_configuration` there's a custom configuration Sphin
 .. rst:role:: cfg:sec
 
   Use to reference a :rst:dir:`cfg:sec` by name and optional discriminator.
-  If the section has a discriminator, it must be separated by a colon.
+  If the section has a discriminator, it must be separated by a ``@`` symbol.
   Do not include arguments if it has arguments in the directive.
+  The possible formats are ``<sect_name>`` and ``<sect_name>@<disc_name>``.
 
 .. rst:directive:: .. cfg:key:: <name>=<values>
 
   Use to document a configuration key that can contain :rst:dir:`cfg:val` and most other RST content.
+  Must be in a :rst:dir:`cfg:sec`.
   ``<values>`` describe what sort of text is accepted.
   It is just for display and has no restrictions on the contents, but should follow the following syntax conventions to describe the accepted values:
 
@@ -498,20 +500,51 @@ For :doc:`/devguide/run_time_configuration` there's a custom configuration Sphin
 
   For example: ``log_level=none|error|warn|debug``, ``memory_limit=<uint64>``, ``addresses=<ip>[:<port>],...``.
 
+  .. rst:directive:option:: required
+
+    Indicates the key is required for the section
+
+  .. rst:directive:option:: default
+
+    The default value of the key if ommitted
+
 .. rst:role:: cfg:key
 
-  Use to reference a :rst:dir:`cfg:val` by name.
+  Use to reference a :rst:dir:`cfg:key` by name.
   Do not include values if it has values in the directive.
+  The possible formats are:
+
+  - ``<key_name>``
+
+    Inside of a :rst:dir:`cfg:sec`, it refers to a key in that section.
+    Outside of a :rst:dir:`cfg:sec`, the key is assumed to be ``common``.
+
+  - ``[<sect_name>]<key_name>``
+  - ``[<sect_name>@<disc_name>]<key_name>``
 
 .. rst:directive:: .. cfg:val:: [<]<name>[>]
 
   Use to document a part of what a configuration key accepts.
+  Must be in a :rst:dir:`cfg:key`.
   The optional angle brackets (``<>``) are just for display and are meant to help distinguish between the value being a literal and a placeholder.
 
 .. rst:role:: cfg:val
 
   Use to reference a :rst:dir:`cfg:val` by name.
   Do not include brackets if it has brackets in the directive.
+  The possible formats are:
+
+  - ``<val_name>``
+
+    This must be inside a :rst:dir:`cfg:key`.
+
+  - ``<key_name>:<val_name>``
+
+    Inside of a :rst:dir:`cfg:sec`, it refers to a value of a key in that section.
+    Outside of a :rst:dir:`cfg:sec`, the key is assumed to be ``common``.
+
+  - ``[<sect_name>]<key_name>:<val_name>``
+  - ``[<sect_name>@<disc_name>]<key_name>:<val_name>``
 
 Example
 ^^^^^^^
@@ -529,39 +562,46 @@ This is a example made up for the following INI file:
 
 .. code-block:: rst
 
-  Outside their sections, references to keys and values must be complete: :cfg:val:`server.os.linux`, :cfg:key:`server:linux.distro`
+  Outside their sections, references to keys and values must be complete: :cfg:val:`[server]os:linux`, :cfg:key:`[server@linux]distro`
+
+  Otherwise the ``common`` section will be assumed.
 
   .. cfg:sec:: server/<name>
 
-    A key or value's section can be omitted from references within their sections: :cfg:key:`os`, :cfg:val:`os.windows`
+    A key or value's section can be omitted from references within their sections: :cfg:key:`os`, :cfg:val:`os:windows`
 
     .. cfg:key:: os=windows|linux
+      :required:
 
       A value's key can be omitted from references within their keys: :cfg:val:`linux`
 
       .. cfg:val:: windows
 
-        Implied titles will be shortened within their scopes: :cfg:key:`server.os`, :cfg:val:`server.os.windows`
+        Implied titles will be shortened within their scopes: :cfg:key:`[server]os`, :cfg:val:`[server]os:windows`
 
       .. cfg:val:: linux
 
-        Sections with discriminators require them in the reference targets: cfg:sec:`server:linux`, :cfg:key:`server:linux.distro`
+        Sections with discriminators require them in the reference targets: cfg:sec:`server@linux`, :cfg:key:`[server@linux]distro`
 
-  .. cfg:sec:: server:linux/<name>
+  .. cfg:sec:: server@linux/<name>
 
     .. cfg:key:: distro=<name>
+      :default: ``Ubuntu``
 
 Turns into:
 
-  Outside their sections, references to keys and values must be complete: :cfg:val:`server.os.linux`, :cfg:key:`server:linux.distro`
+  Outside their sections, references to keys and values must be complete: :cfg:val:`[server]os:linux`, :cfg:key:`[server@linux]distro`
+
+  Otherwise the ``common`` section will be assumed.
 
   .. cfg:sec:: server/<name>
     :no-contents-entry:
     :no-index-entry:
 
-    A key or value's section can be omitted from references within their sections: :cfg:key:`os`, :cfg:val:`os.windows`
+    A key or value's section can be omitted from references within their sections: :cfg:key:`os`, :cfg:val:`os:windows`
 
     .. cfg:key:: os=windows|linux
+      :required:
       :no-contents-entry:
       :no-index-entry:
 
@@ -571,19 +611,20 @@ Turns into:
         :no-contents-entry:
         :no-index-entry:
 
-        Implied titles will be shortened within their scopes: :cfg:key:`server.os`, :cfg:val:`server.os.windows`
+        Implied titles will be shortened within their scopes: :cfg:key:`[server]os`, :cfg:val:`[server]os:windows`
 
       .. cfg:val:: linux
         :no-contents-entry:
         :no-index-entry:
 
-        Sections with discriminators require them in the reference targets: :cfg:sec:`server:linux`, :cfg:key:`server:linux.distro`
+        Sections with discriminators require them in the reference targets: cfg:sec:`server@linux`, :cfg:key:`[server@linux]distro`
 
-  .. cfg:sec:: server:linux/<name>
+  .. cfg:sec:: server@linux/<name>
     :no-contents-entry:
     :no-index-entry:
 
     .. cfg:key:: distro=<name>
+      :default: ``Ubuntu``
       :no-contents-entry:
       :no-index-entry:
 
