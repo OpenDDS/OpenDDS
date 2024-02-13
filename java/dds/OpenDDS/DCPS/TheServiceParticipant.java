@@ -24,4 +24,6 @@ public final class TheServiceParticipant {
     public static native String get_unique_id(DomainParticipant participant);
 
     public static native NetworkConfigModifier network_config_modifier();
+
+    public static native ConfigStore config_store();
 }
