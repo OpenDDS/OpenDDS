@@ -1011,6 +1011,7 @@ bool vwrite_item(ValueWriter& vw, DDS::DynamicData_ptr value, DDS::MemberId id,
       }
     }
   }
+    // fallthrough
   case TK_STRUCTURE:
   case TK_UNION: {
     DDS::DynamicData_var member_data;
@@ -1386,7 +1387,7 @@ bool vwrite_array_helper(ValueWriter& vw, CORBA::ULong dim_idx, const DDS::Bound
     idx_vec[dim_idx] = i;
     if (dim_idx == dims_len - 1) {
       CORBA::ULong flat_idx = 0;
-      const DDS::ReturnCode_t rc = XTypes::flat_index(flat_idx, idx_vec, dims, dims_len);
+      const DDS::ReturnCode_t rc = XTypes::flat_index(flat_idx, idx_vec, dims);
       if (rc != DDS::RETCODE_OK) {
         if (log_level >= LogLevel::Notice) {
           ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: vwrite_array_helper: flat_index failed (%C)\n",

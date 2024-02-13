@@ -148,7 +148,7 @@ private:
     size_t cache_pos;
   };
 
-  std::stack<SerializedSizeState> size_states_;
+  OPENDDS_STACK(SerializedSizeState) size_states_;
 
   // Record the total size of the top-level type and its members if needed.
   // The size of a member is only recorded if it is required by a header,
