@@ -173,8 +173,13 @@ class CustomDomainObject(ObjectDescription[str]):
     def before_content(self) -> None:
         self.get_context().reset_needs_push()
 
+    def our_after_content(self, ctx):
+        pass
+
     def after_content(self) -> None:
-        self.get_context().pop()
+        ctx = self.get_context()
+        self.our_after_content(ctx)
+        ctx.pop()
 
 
 class CustomDomain(Domain):
