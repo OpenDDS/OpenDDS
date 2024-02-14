@@ -109,8 +109,8 @@ int Service_Participant::zero_argc = 0;
 
 static const ACE_TCHAR DEFAULT_REPO_IOR[] = ACE_TEXT("file://repo.ior");
 
-static const ACE_TCHAR REPO_SECTION_NAME[]   = ACE_TEXT("repository");
-static const ACE_TCHAR RTPS_SECTION_NAME[]   = ACE_TEXT("rtps_discovery");
+static const String REPO_DISCOVERY_TYPE("repository");
+static const String RTPS_DISCOVERY_TYPE("rtps_discovery");
 
 namespace {
 
@@ -832,15 +832,14 @@ Service_Participant::set_repo_ior(const char* ior,
                key.c_str(), ior));
   }
 
-  const OPENDDS_STRING repo_type = ACE_TEXT_ALWAYS_CHAR(REPO_SECTION_NAME);
-  if (!discovery_types_.count(repo_type)) {
+  if (!discovery_types_.count(REPO_DISCOVERY_TYPE)) {
     // Re-use a transport registry function to attempt a dynamic load of the
     // library that implements the 'repo_type' (InfoRepoDiscovery)
-    TheTransportRegistry->load_transport_lib(repo_type);
+    TheTransportRegistry->load_transport_lib(REPO_DISCOVERY_TYPE);
   }
 
-  if (discovery_types_.count(repo_type)) {
-    discovery_types_[repo_type]->discovery_config();
+  if (discovery_types_.count(REPO_DISCOVERY_TYPE)) {
+    discovery_types_[REPO_DISCOVERY_TYPE]->discovery_config();
     this->remap_domains(key, key, attach_participant);
     return true;
   }
@@ -1169,12 +1168,7 @@ Service_Participant::get_discovery(const DDS::DomainId_t domain)
 
     } else if (repo == Discovery::DEFAULT_RTPS) {
 
-      ACE_Configuration_Heap cf;
-      cf.open();
-      ACE_Configuration_Section_Key k;
-      cf.open_section(cf.root_section(), RTPS_SECTION_NAME, true /*create*/, k);
-
-      int status = load_discovery_configuration(cf, RTPS_SECTION_NAME);
+      int status = load_discovery_configuration(RTPS_DISCOVERY_TYPE, true);
 
       if (status != 0) {
         ACE_ERROR((LM_ERROR,
@@ -1528,7 +1522,7 @@ Service_Participant::load_configuration(
   // could be a domain_range that specifies the DiscoveryTemplate, check
   // for config templates before loading any config information.
 
-  status = this->load_discovery_configuration(config, RTPS_SECTION_NAME);
+  status = this->load_discovery_configuration(RTPS_DISCOVERY_TYPE, false);
 
   if (status != 0) {
     ACE_ERROR_RETURN((LM_ERROR,
@@ -1538,7 +1532,7 @@ Service_Participant::load_configuration(
                      -1);
   }
 
-  status = this->load_discovery_configuration(config, REPO_SECTION_NAME);
+  status = this->load_discovery_configuration(REPO_DISCOVERY_TYPE, false);
 
   if (status != 0) {
     ACE_ERROR_RETURN((LM_ERROR,
@@ -1769,37 +1763,34 @@ int Service_Participant::configure_domain_range_instance(DomainRanges::const_ite
 }
 
 int
-Service_Participant::load_discovery_configuration(ACE_Configuration_Heap& cf,
-                                                  const ACE_TCHAR* section_name)
+Service_Participant::load_discovery_configuration(const String& discovery_type,
+                                                  bool force)
 {
-  const ACE_Configuration_Section_Key &root = cf.root_section();
-  ACE_Configuration_Section_Key sect;
-  if (cf.open_section(root, section_name, false, sect) == 0) {
-
-    const OPENDDS_STRING sect_name = ACE_TEXT_ALWAYS_CHAR(section_name);
-    DiscoveryTypes::iterator iter =
-      this->discovery_types_.find(sect_name);
-
-    if (iter == this->discovery_types_.end()) {
-      // See if we can dynamically load the required libraries
-      TheTransportRegistry->load_transport_lib(sect_name);
-      iter = this->discovery_types_.find(sect_name);
-    }
-
-    if (iter != this->discovery_types_.end()) {
-      // discovery code is loaded, process options
-      return iter->second->discovery_config();
-    } else {
-      // No discovery code can be loaded, report an error
-      ACE_ERROR_RETURN((LM_ERROR,
-                        ACE_TEXT("(%P|%t) ERROR: Service_Participant::")
-                        ACE_TEXT("load_discovery_configuration(): ")
-                        ACE_TEXT("Unable to load libraries for %s\n"),
-                        section_name),
-                       -1);
-    }
+  if (!force && !config_store_->has(("OPENDDS_" + discovery_type).c_str())) {
+    return 0;
   }
-  return 0;
+
+  DiscoveryTypes::iterator iter = discovery_types_.find(discovery_type);
+
+  if (iter == discovery_types_.end()) {
+    // See if we can dynamically load the required libraries
+    TheTransportRegistry->load_transport_lib(discovery_type);
+    iter = discovery_types_.find(discovery_type);
+  }
+
+  if (iter != discovery_types_.end()) {
+    // discovery code is loaded, process options
+    return iter->second->discovery_config();
+  } else {
+    // No discovery code can be loaded, report an error
+    if (log_level >= LogLevel::Error) {
+      ACE_ERROR((LM_ERROR,
+                "(%P|%t) ERROR: Service_Participant::load_discovery_configuration: "
+                 "Unable to load libraries for %C\n",
+                 discovery_type.c_str()));
+    }
+    return -1;
+  }
 }
 
 int Service_Participant::DomainRange::parse_domain_range()
