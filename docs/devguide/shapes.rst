@@ -1,3 +1,5 @@
+.. _shapes-demo:
+
 ###########
 Shapes Demo
 ###########

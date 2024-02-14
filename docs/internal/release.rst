@@ -161,6 +161,8 @@ To do this follow these steps:
 
 The release script will merge ``website-next-release`` into ``gh-pages`` on the ``OpenDDS/OpenDDS`` repository during the release process.
 
+.. _release-workflows:
+
 Check if GHA Workflows need Updating
 ====================================
 
@@ -176,14 +178,14 @@ Then manually trigger them to make sure they work.
 
 The workflows are:
 
-- Shapes Demo:
+- :ref:`shapes-demo`:
   :ghfile:`(file) <.github/workflows/ishapes.yml>`,
   `(runs) <https://github.com/OpenDDS/OpenDDS/actions/workflows/ishapes.yml>`__,
-  :ref:`(instructions) <release-shapes-postrelease>`,
-- RTPS Interop Test:
+- `OMG RTPS interoperability test <https://github.com/omg-dds/dds-rtps>`__:
   :ghfile:`(file) <.github/workflows/dds-rtps.yml>`,
   `(runs) <https://github.com/OpenDDS/OpenDDS/actions/workflows/dds-rtps.yml>`__,
-  :ref:`(instructions) <release-rtps-postrelease>`,
+
+These will be triggered by the release script, then must be :ref:`uploaded after release <release-upload-artifacts>`.
 
 ****************
 Making a Release
@@ -208,8 +210,10 @@ Before Running the Release Script
     - Git version 2.5 or later
     - :ref:`Python 3 for News Generation <docs-requirements>`
 
-  - Your GitHub account has been added as a member of the `OpenDDS organization <https://github.com/OpenDDS>`__ with the appropriate permissions.
+  - Your GitHub account meets the following requirements:
 
+    - It has been added as a member of the `OpenDDS organization <https://github.com/OpenDDS>`__ with the appropriate permissions.
+    - It has permissions to update the release artifacts for the `OMG RTPS Interop repo <https://github.com/omg-dds/dds-rtps>`__ for :ref:`release-upload-artifacts`.
     - `You have uploaded your SSH public key to your GitHub account <https://help.github.com/articles/generating-an-ssh-key>`__
     - `You have created a Personal Access Token for your GitHub account <https://help.github.com/articles/creating-an-access-token-for-command-line-use/>`__
 
@@ -363,36 +367,19 @@ Updating the news consists of:
 - Copy the micro release file in :ghfile:`docs/news.d/_releases`.
 - Remove the :ref:`news fragments <docs-news>` in :ghfile:`docs/news.d` for the PRs that were backported.
 
-.. _release-shapes-postrelease:
+.. _release-upload-artifacts:
 
-Upload the Shapes Demo Binaries
--------------------------------
-
-.. note::
-
-    This should only be done for the :ref:`latest release <release-latest-release>`.
-
-During the release script there’s a step called "Trigger Shapes Demo Build" that triggers a workflow on GitHub to build the shapes demo for the new release.
-If it was successful it will print out the link to the run so it can be monitored.
-
-After it has finished successfully, run the release script with the version and workspace arguments and the ``--upload-shapes-demo`` option.
-If the workflow is still in progress it will say so and give the link again.
-If the workflow is successful it will download the shapes demo binaries, package them, and upload them to GitHub.
-
-.. _release-rtps-postrelease:
-
-Upload the RTPS Interop Test
-----------------------------
+Upload Artifacts from Release Workflows
+---------------------------------------
 
 .. note::
 
     This should only be done for the :ref:`latest release <release-latest-release>`.
 
-During the release script there’s a step called "Trigger RTPS Interop Test Build" that triggers a workflow on GitHub to build the `OMG RTPS interoperability test <https://github.com/omg-dds/dds-rtps>`__ for the new release.
-If it was successful it will print out the link to the run so it can be monitored.
-
-After it has finished successfully, take the Linux executable from it and `upload it as a release artifact on the OMG repo <https://github.com/omg-dds/dds-rtps#upload-executable>`__.
-Request access to upload a release artifact if needed.
+During the release script there are steps that trigger :ref:`release workflows <release-workflows>` on GitHub Actions and print out links to the runs.
+After they have finished successfully, run the release script with the version and workspace arguments and the ``--upload-artifacts`` option.
+If the workflows are still in progress it will say so and give the links again.
+If the workflows were successful, it will download the artifacts, package them, and upload them to GitHub.
 
 Remove Files Used for Release
 -----------------------------
