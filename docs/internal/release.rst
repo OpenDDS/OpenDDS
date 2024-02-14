@@ -376,7 +376,7 @@ Upload Artifacts from Release Workflows
 
     This should only be done for the :ref:`latest release <release-latest-release>`.
 
-During the release script there are steps that trigger :ref:`release workflows <release-workflows>` on GitHub Actions and print out links to the runs.
+The release script has steps that trigger :ref:`release workflows <release-workflows>` on GitHub Actions and print out links to the runs.
 After they have finished successfully, run the release script with the version and workspace arguments and the ``--upload-artifacts`` option.
 If the workflows are still in progress it will say so and give the links again.
 If the workflows were successful, it will download the artifacts, package them, and upload them to GitHub.

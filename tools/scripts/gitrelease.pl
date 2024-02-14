@@ -507,7 +507,7 @@ sub download {
   }
 
   my @redirects = $response->redirects();
-  if (!$response->is_success() && scalar(@redirects) && $args{redirect_retry_no_auth}) {
+  if ($response->code() == 403 && scalar(@redirects) && $args{redirect_retry_no_auth}) {
     # Workaround redirect to real artifact URL failing because of authorization:
     # https://github.com/orgs/community/discussions/88698
     $request->remove_header('Authorization');
