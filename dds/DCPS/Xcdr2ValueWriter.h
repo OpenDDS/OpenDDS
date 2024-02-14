@@ -86,7 +86,7 @@ public:
   bool write_char16_array(const ACE_CDR::WChar* x, ACE_CDR::ULong length);
 
   size_t get_serialized_size() const;
-  const std::vector<size_t>& get_serialized_sizes() const;
+  const OPENDDS_VECTOR(size_t)& get_serialized_sizes() const;
 
   // Switch the operation mode to serializing to a byte stream.
   void set_serializer(Serializer* ser)
