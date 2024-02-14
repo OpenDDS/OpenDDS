@@ -825,7 +825,7 @@ size_t Xcdr2ValueWriter::get_serialized_size() const
   return 0;
 }
 
-const std::vector<size_t>& Xcdr2ValueWriter::get_serialized_sizes() const
+const OPENDDS_VECTOR(size_t)& Xcdr2ValueWriter::get_serialized_sizes() const
 {
   return size_cache_;
 }

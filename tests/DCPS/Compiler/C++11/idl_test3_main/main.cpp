@@ -33,7 +33,7 @@ public:
     , elements_(0)
   {}
 
-  virtual bool write_int16_array(const ACE_CDR::Short* x, size_t length)
+  virtual bool write_int16_array(const ACE_CDR::Short* x, ACE_CDR::ULong length)
   {
     elements_ += length;
     return JsonValueWriter<Writer>::write_int16_array(x, length);
