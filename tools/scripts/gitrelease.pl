@@ -161,11 +161,12 @@ sub help {
     "                         be assumed it's always the highest version. Passing 0\n" .
     "                         forces it to consider this to be a update to an earlier\n" .
     "                         micro series.\n" .
-    "  --upload-shapes-demo   Check GitHub for a finished shapes demo build workflow\n" .
-    "                         run. Then download, repackage, and upload the results\n" .
-    "                         to the download server and Github. This doesn't run any\n" .
-    "                         steps, but still requires the WORKSPACE and VERSION\n" .
-    "                         arguments and accepts and uses other relevant options.\n" .
+    "  --upload-artifacts     Check GitHub for finished workflows started during the\n" .
+    "                         release. If any workflows are finished, download,\n" .
+    "                         repackage, and upload the results to Github. This\n" .
+    "                         doesn't run any steps, but still requires the WORKSPACE\n" .
+    "                         and VERSION arguments and accepts and uses other\n" .
+    "                         relevant options.\n" .
     "  --update-authors       Just update the AUTHORS files like in a release.\n" .
     "                         This doesn't run any release steps and doesn't require\n" .
     "                         the WORKSPACE or VERSION arguments.\n" .
@@ -888,6 +889,22 @@ sub upload_artifacts_from_workflow {
     ) or trace("Could not download $artifact->{name}");
   }
 
+  # TODO: This probably shouldn't assume we will always want the first release.
+  my $release = get_github_releases($settings)->first;
+
+  # Get existing aritfacts in the release
+  my $upload_settings = $settings;
+  if (defined($workflow->{pithub_override})) {
+    $upload_settings = new_pithub($settings, %{$workflow->{pithub_override}}, needs_token => 1);
+  }
+  my $assets_ph = $upload_settings->{pithub}->repos->releases->assets;
+  my $assets_result = $assets_ph->list(release_id => $release->{id});
+  check_pithub_result($assets_result);
+  my @existing_assets = ();
+  while (my $existing_asset = $assets_result->next) {
+    push(@existing_assets, $existing_asset->{name});
+  }
+
   # Prepare and archive
   my @to_upload = ();
   for my $artifact (@artifacts) {
@@ -922,21 +939,22 @@ sub upload_artifacts_from_workflow {
       trace("Can't derive archive type from artifact name: $os_name (new OS?)");
     }
     my $arc = $dir_path . $arc_ext;
-    push(@to_upload, $arc);
-    create_archive($dir_path, $arc, no_dir => $workflow->{no_dir}) or
-      trace("Failed to create archive $arc");
+    my $filename = "$name$arc_ext";
+    my $filename_re = quotemeta($filename);
+    if (grep(/^$filename_re$/, @existing_assets)) {
+      print("Skipping $filename it's already uploaded\n");
+    } else {
+      create_archive($dir_path, $arc, no_dir => $workflow->{no_dir}) or
+        trace("Failed to create archive $arc");
+      push(@to_upload, $arc);
+    }
   }
 
   print("Upload to Github\n");
   my %asset_details;
-  get_assets($settings, \@to_upload, \%asset_details);
-  if (defined($workflow->{pithub_override})) {
-    $settings = new_pithub($settings, %{$workflow->{pithub_override}}, needs_token => 1);
-  }
-  # TODO: This probably shouldn't assume we will always want the first release.
-  my $release = get_github_releases($settings)->first;
+  read_assets($settings, \@to_upload, \%asset_details);
   if (defined($workflow->{before_upload})) {
-    $workflow->{before_upload}($settings, $workflow,
+    $workflow->{before_upload}($upload_settings, $workflow,
       \@to_upload, \%asset_details, $release->{id});
   }
   github_upload_assets($settings, \@to_upload, \%asset_details, $release->{id},
@@ -2660,7 +2678,7 @@ sub remedy_sftp_upload {
 
 ############################################################################
 
-sub get_assets {
+sub read_assets {
   my $settings = shift();
   my $assets = shift();
   my $asset_details = shift();
@@ -2742,7 +2760,7 @@ sub remedy_github_upload {
   # manually deleted on GitHub before this step can be run again.
   my @assets = get_github_release_files($settings);
   my %asset_details;
-  get_assets($settings, \@assets, \%asset_details);
+  read_assets($settings, \@assets, \%asset_details);
 
   my $releases = $settings->{pithub}->repos->releases;
   my $release_notes_path = 'docs/gh-release-notes.md';
