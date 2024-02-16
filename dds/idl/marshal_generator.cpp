@@ -1588,7 +1588,6 @@ namespace {
                         + (is_optional ? ".value()" : "");
 
     std::string line = "";
-
     if (is_optional) {
       line += indent + "primitive_serialized_size_boolean(encoding, size);\n"
             + indent + "if (" + field_name + ") {\n";
@@ -1644,24 +1643,17 @@ namespace {
     const std::string& indent, AST_Field* field, const std::string& prefix,
     bool wrap_nested_key_only, Intro& intro)
   {
-    std::string line = "";
-    std::string field_name = field->local_name()->get_string();;
-    const bool is_optional = be_global->is_optional(field);
-
     FieldInfo af(*field);
     if (af.anonymous()) {
       RefWrapper wrapper(af.type_, af.scoped_type_,
         prefix + "." + insert_cxx11_accessor_parens(af.name_));
       wrapper.nested_key_only_ = wrap_nested_key_only;
       wrapper.done(&intro);
-      line += indent + "serialized_size(encoding, size, " + wrapper.ref() + ");\n";
-    } else {
-      line += findSizeCommon(
-        indent, field, field_name, field->field_type(), prefix,
-        wrap_nested_key_only, intro);
+      return indent + "serialized_size(encoding, size, " + wrapper.ref() + ");\n";
     }
-
-    return line;
+    return findSizeCommon(
+        indent, field, field->local_name()->get_string(), field->field_type(), prefix,
+        wrap_nested_key_only, intro);
   }
 
   // common to both fields (in structs) and branches (in unions)
