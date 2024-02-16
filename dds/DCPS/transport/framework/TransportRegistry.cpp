@@ -157,7 +157,7 @@ bool TransportRegistry::process_config(const String& config_id)
                    "The inst (%C) in [config/%C] section is undefined.\n",
                    pos->c_str(), config->name().c_str()));
       }
-      return -1;
+      return false;
     }
     config->instances_.push_back(inst);
   }
