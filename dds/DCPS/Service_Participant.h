@@ -537,12 +537,6 @@ public:
   int load_configuration(ACE_Configuration_Heap& cf,
                          const ACE_TCHAR* filename);
 
-  /**
-   * Used by TransportRegistry to determine if a domain ID
-   * is part of a [DomainRange]
-   */
-  bool belongs_to_domain_range(DDS::DomainId_t domainId) const;
-
 #ifdef OPENDDS_SAFETY_PROFILE
   /**
    * Configure the safety profile pool
@@ -634,8 +628,7 @@ private:
    * Load the domain configuration to the Service_Participant
    * singleton.
    */
-  int load_domain_configuration(ACE_Configuration_Heap& cf,
-                                const ACE_TCHAR* filename);
+  int load_domain_configuration();
 
   /**
    * Load the domain range template configuration
@@ -644,18 +637,11 @@ private:
   int load_domain_ranges();
 
   /**
-   * Process the domain range template and activate the
-   * domain for the given domain ID
-   */
-  int configure_domain_range_instance(DDS::DomainId_t domainId,
-                                      const Discovery::RepoKey& name);
-
-  /**
    * Load the discovery configuration to the Service_Participant
    * singleton.
    */
-  int load_discovery_configuration(ACE_Configuration_Heap& cf,
-                                   const ACE_TCHAR* section_name);
+  int load_discovery_configuration(const String& discovery_type,
+                                   bool force);
 
   typedef OPENDDS_MAP(OPENDDS_STRING, container_supported_unique_ptr<Discovery::Config>) DiscoveryTypes;
   DiscoveryTypes discovery_types_;
@@ -715,6 +701,65 @@ private:
   DDS::DomainParticipantFactoryQos    initial_DomainParticipantFactoryQos_;
   DDS::TypeConsistencyEnforcementQosPolicy initial_TypeConsistencyEnforcementQosPolicy_;
 
+  class Domain {
+  public:
+    const String& name() const { return name_; }
+    DDS::DomainId_t domain_id() const { return domain_id_; }
+    const Discovery::RepoKey& discovery_config() const { return discovery_config_; }
+    const String& default_transport_config() const { return default_transport_config_; }
+
+    Domain(const String& name,
+           DDS::DomainId_t domain_id,
+           const Discovery::RepoKey& discovery_config,
+           const String& default_transport_config)
+      : name_(name)
+      , domain_id_(domain_id)
+      , discovery_config_(discovery_config)
+      , default_transport_config_(default_transport_config)
+    {}
+
+  private:
+    const String name_;
+    const DDS::DomainId_t domain_id_;
+    const Discovery::RepoKey discovery_config_;
+    const String default_transport_config_;
+  };
+
+  class DomainConfig {
+  public:
+    DomainConfig(const String& name)
+      : name_(name)
+      , config_prefix_(ConfigPair::canonicalize(String("OPENDDS_DOMAIN_") + name))
+    {}
+
+    const String& name() const { return name_; }
+    const String& config_prefix() const { return config_prefix_; }
+
+    DDS::DomainId_t domain_id(RcHandle<ConfigStoreImpl> config_store) const;
+    String discovery_config(RcHandle<ConfigStoreImpl> config_store) const;
+    String default_transport_config(RcHandle<ConfigStoreImpl> config_store) const;
+
+    Domain to_domain(RcHandle<ConfigStoreImpl> config_store) const
+    {
+      return Domain(name_,
+                    domain_id(config_store),
+                    discovery_config(config_store),
+                    default_transport_config(config_store));
+    }
+
+  private:
+
+    String config_key(const String& key) const
+    {
+      return ConfigPair::canonicalize(config_prefix_ + "_" + key);
+    }
+
+    const String name_;
+    const String config_prefix_;
+  };
+
+  bool process_domain(const Domain& domain);
+
   // domain range template support
   class DomainRange {
   public:
@@ -729,10 +774,9 @@ private:
 
     const String& name() const { return name_; }
     const String& config_prefix() const { return config_prefix_; }
-    String discovery_template_name(RcHandle<ConfigStoreImpl> config_store,
-                                   const String& default_name) const;
-    String transport_config_name(RcHandle<ConfigStoreImpl> config_store) const;
-    DCPS::ConfigStoreImpl::StringMap domain_info(RcHandle<ConfigStoreImpl> config_store) const;
+    String discovery_template(RcHandle<ConfigStoreImpl> config_store,
+                              const String& default_name) const;
+    String default_transport_config(RcHandle<ConfigStoreImpl> config_store) const;
 
     bool belongs_to_domain_range(DDS::DomainId_t domain_id) const
     {
@@ -751,13 +795,16 @@ private:
     DDS::DomainId_t range_end_;
   };
 
-  OPENDDS_MAP(DDS::DomainId_t, OPENDDS_STRING) domain_to_transport_name_map_;
+  typedef OPENDDS_VECTOR(DomainRange) DomainRanges;
+  DomainRanges domain_ranges_;
 
-  OPENDDS_VECTOR(DomainRange) domain_ranges_;
-
-  bool has_domain_range() const;
-
-  bool get_domain_range_info(DDS::DomainId_t id, DomainRange& inst);
+  /**
+   * Process the domain range template and activate the
+   * domain for the given domain ID
+   */
+  int configure_domain_range_instance(DomainRanges::const_iterator dr_pos,
+                                      DDS::DomainId_t domainId,
+                                      const Discovery::RepoKey& name);
 
 public:
   /// getter for lock that protects the static initialization of XTypes related data structures

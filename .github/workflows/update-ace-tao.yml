@@ -37,7 +37,7 @@ jobs:
         perl tools/scripts/modules/ini.pm acetao.ini --join ', ' '.*/url' > ../acevers_urls
         echo "ACEVERS_URLS=$(cat ../acevers_urls)" >> $GITHUB_ENV
     - name: Create Pull Request
-      uses: peter-evans/create-pull-request@v5
+      uses: peter-evans/create-pull-request@v6
       id: cpr
       with:
         path: OpenDDS
