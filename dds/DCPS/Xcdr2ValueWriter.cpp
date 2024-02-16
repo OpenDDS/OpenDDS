@@ -583,9 +583,7 @@ bool Xcdr2ValueWriter::write_string(const ACE_CDR::Char* value, size_t length)
   if (mode_ == SERIALIZATION_SIZE_MODE) {
     size_t& size = size_states_.top().total_size;
     primitive_serialized_size_ulong(encoding_, size);
-    if (value) {
-      size += length + 1; // Include null termination
-    }
+    size += length + 1; // Include null termination
 
     if (size_states_.top().extensibility == MUTABLE) {
       // It's safe to do this since before every member of a mutable type,
@@ -603,9 +601,7 @@ bool Xcdr2ValueWriter::write_wstring(const ACE_CDR::WChar* value, size_t length)
   if (mode_ == SERIALIZATION_SIZE_MODE) {
     size_t& size = size_states_.top().total_size;
     primitive_serialized_size_ulong(encoding_, size);
-    if (value) {
-      size += length * char16_cdr_size; // Not include null termination
-    }
+    size += length * char16_cdr_size; // Not include null termination
 
     if (size_states_.top().extensibility == MUTABLE) {
       size_cache_.push_back(size);

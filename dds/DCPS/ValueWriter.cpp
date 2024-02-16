@@ -22,13 +22,12 @@ ValueWriter::write_float128(long double value)
 }
 #endif
 
-bool
-ValueWriter::write_boolean_array(const ACE_CDR::Boolean* x, ACE_CDR::ULong length)
+template <typename T>
+bool ValueWriter::write_array_common(const T* buffer, ACE_CDR::ULong length, bool (ValueWriter::*pmf)(T))
 {
+  using namespace XTypes;
   for (ACE_CDR::ULong i = 0; i != length; ++i) {
-    if (!begin_element(i) ||
-        !write_boolean(x[i]) ||
-        !end_element()) {
+    if (!begin_element(i) || !(this->*pmf)(buffer[i]) || !end_element()) {
       return false;
     }
   }
@@ -36,187 +35,95 @@ ValueWriter::write_boolean_array(const ACE_CDR::Boolean* x, ACE_CDR::ULong lengt
 }
 
 bool
+ValueWriter::write_boolean_array(const ACE_CDR::Boolean* x, ACE_CDR::ULong length)
+{
+  return write_array_common(x, length, &ValueWriter::write_boolean);
+}
+
+bool
 ValueWriter::write_byte_array(const ACE_CDR::Octet* x, ACE_CDR::ULong length)
 {
-  for (ACE_CDR::ULong i = 0; i != length; ++i) {
-    if (!begin_element(i) ||
-        !write_byte(x[i]) ||
-        !end_element()) {
-      return false;
-    }
-  }
-  return true;
+  return write_array_common(x, length, &ValueWriter::write_byte);
 }
 
 #if OPENDDS_HAS_EXPLICIT_INTS
 bool
 ValueWriter::write_int8_array(const ACE_CDR::Int8* x, ACE_CDR::ULong length)
 {
-  for (ACE_CDR::ULong i = 0; i != length; ++i) {
-    if (!begin_element(i) ||
-        !write_int8(x[i]) ||
-        !end_element()) {
-      return false;
-    }
-  }
-  return true;
+  return write_array_common(x, length, &ValueWriter::write_int8);
 }
 
 bool
 ValueWriter::write_uint8_array(const ACE_CDR::UInt8* x, ACE_CDR::ULong length)
 {
-  for (ACE_CDR::ULong i = 0; i != length; ++i) {
-    if (!begin_element(i) ||
-        !write_uint8(x[i]) ||
-        !end_element()) {
-      return false;
-    }
-  }
-  return true;
+  return write_array_common(x, length, &ValueWriter::write_uint8);
 }
 #endif
 
 bool
 ValueWriter::write_int16_array(const ACE_CDR::Short* x, ACE_CDR::ULong length)
 {
-  for (ACE_CDR::ULong i = 0; i != length; ++i) {
-    if (!begin_element(i) ||
-        !write_int16(x[i])||
-        !end_element()) {
-      return false;
-    }
-  }
-  return true;
+  return write_array_common(x, length, &ValueWriter::write_int16);
 }
 
 bool
 ValueWriter::write_uint16_array(const ACE_CDR::UShort* x, ACE_CDR::ULong length)
 {
-  for (ACE_CDR::ULong i = 0; i != length; ++i) {
-    if (!begin_element(i) ||
-        !write_uint16(x[i]) ||
-        !end_element()) {
-      return false;
-    }
-  }
-  return true;
+  return write_array_common(x, length, &ValueWriter::write_uint16);
 }
 
 bool
 ValueWriter::write_int32_array(const ACE_CDR::Long* x, ACE_CDR::ULong length)
 {
-  for (ACE_CDR::ULong i = 0; i != length; ++i) {
-    if (!begin_element(i) ||
-        !write_int32(x[i]) ||
-        !end_element()) {
-      return false;
-    }
-  }
-  return true;
+  return write_array_common(x, length, &ValueWriter::write_int32);
 }
 
 bool
 ValueWriter::write_uint32_array(const ACE_CDR::ULong* x, ACE_CDR::ULong length)
 {
-  for (ACE_CDR::ULong i = 0; i != length; ++i) {
-    if (!begin_element(i) ||
-        !write_uint32(x[i]) ||
-        !end_element()) {
-      return false;
-    }
-  }
-  return true;
+  return write_array_common(x, length, &ValueWriter::write_uint32);
 }
 
 bool
 ValueWriter::write_int64_array(const ACE_CDR::LongLong* x, ACE_CDR::ULong length)
 {
-  for (ACE_CDR::ULong i = 0; i != length; ++i) {
-    if (!begin_element(i) ||
-        !write_int64(x[i]) ||
-        !end_element()) {
-      return false;
-    }
-  }
-  return true;
+  return write_array_common(x, length, &ValueWriter::write_int64);
 }
 
 bool
 ValueWriter::write_uint64_array(const ACE_CDR::ULongLong* x, ACE_CDR::ULong length)
 {
-  for (ACE_CDR::ULong i = 0; i != length; ++i) {
-    if (!begin_element(i) ||
-        !write_uint64(x[i]) ||
-        !end_element()) {
-      return false;
-    }
-  }
-  return true;
+  return write_array_common(x, length, &ValueWriter::write_uint64);
 }
 
 bool
 ValueWriter::write_float32_array(const ACE_CDR::Float* x, ACE_CDR::ULong length)
 {
-  for (ACE_CDR::ULong i = 0; i != length; ++i) {
-    if (!begin_element(i) ||
-        !write_float32(x[i]) ||
-        !end_element()) {
-      return false;
-    }
-  }
-  return true;
+  return write_array_common(x, length, &ValueWriter::write_float32);
 }
 
 bool
 ValueWriter::write_float64_array(const ACE_CDR::Double* x, ACE_CDR::ULong length)
 {
-  for (ACE_CDR::ULong i = 0; i != length; ++i) {
-    if (!begin_element(i) ||
-        !write_float64(x[i]) ||
-        !end_element()) {
-      return false;
-    }
-  }
-  return true;
+  return write_array_common(x, length, &ValueWriter::write_float64);
 }
 
 bool
 ValueWriter::write_float128_array(const ACE_CDR::LongDouble* x, ACE_CDR::ULong length)
 {
-  for (ACE_CDR::ULong i = 0; i != length; ++i) {
-    if (!begin_element(i) ||
-        !write_float128(x[i]) ||
-        !end_element()) {
-      return false;
-    }
-  }
-  return true;
+  return write_array_common(x, length, &ValueWriter::write_float128);
 }
 
 bool
 ValueWriter::write_char8_array(const ACE_CDR::Char* x, ACE_CDR::ULong length)
 {
-  for (ACE_CDR::ULong i = 0; i != length; ++i) {
-    if (!begin_element(i) ||
-        !write_char8(x[i]) ||
-        !end_element()) {
-      return false;
-    }
-  }
-  return true;
+  return write_array_common(x, length, &ValueWriter::write_char8);
 }
 
 bool
 ValueWriter::write_char16_array(const ACE_CDR::WChar* x, ACE_CDR::ULong length)
 {
-  for (ACE_CDR::ULong i = 0; i != length; ++i) {
-    if (!begin_element(i) ||
-        !write_char16(x[i]) ||
-        !end_element()) {
-      return false;
-    }
-  }
-  return true;
+  return write_array_common(x, length, &ValueWriter::write_char16);
 }
 
 } // namespace DCPS

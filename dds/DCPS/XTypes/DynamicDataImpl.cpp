@@ -2092,6 +2092,13 @@ DDS::ReturnCode_t DynamicDataImpl::set_boolean_value(DDS::MemberId id, CORBA::Bo
 
 DDS::ReturnCode_t DynamicDataImpl::set_string_value(DDS::MemberId id, const char* value)
 {
+  if (!value) {
+    if (log_level >= LogLevel::Notice) {
+      ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicDataImpl::set_string_value: Input string is null!\n"));
+    }
+    return DDS::RETCODE_BAD_PARAMETER;
+  }
+
   DDS::DynamicType_var mtype;
   DDS::ReturnCode_t rc = get_member_type(mtype, type_, id);
   if (rc != DDS::RETCODE_OK) {
@@ -2111,6 +2118,12 @@ DDS::ReturnCode_t DynamicDataImpl::set_string_value(DDS::MemberId id, const char
 DDS::ReturnCode_t DynamicDataImpl::set_wstring_value(DDS::MemberId id, const CORBA::WChar* value)
 {
 #ifdef DDS_HAS_WCHAR
+  if (!value) {
+    if (log_level >= LogLevel::Notice) {
+      ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicDataImpl::set_wstring_value: Input wstring is null!\n"));
+    }
+    return DDS::RETCODE_BAD_PARAMETER;
+  }
   return set_single_value<TK_STRING16>(id, value);
 #else
   return DDS::RETCODE_UNSUPPORTED;

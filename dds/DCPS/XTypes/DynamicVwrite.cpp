@@ -11,8 +11,9 @@
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
-namespace OpenDDS {
-namespace DCPS {
+namespace {
+using namespace OpenDDS;
+using namespace OpenDDS::DCPS;
 
 bool check_rc(DDS::ReturnCode_t rc, DDS::MemberId id, DDS::TypeKind tk, const char* fn_name)
 {
@@ -67,9 +68,11 @@ DDS::ReturnCode_t get_equivalent_kind(const DDS::DynamicType_var& type, XTypes::
   return DDS::RETCODE_OK;
 }
 
+template <typename T>
 bool vwrite_primitive_array_helper(
-  ValueWriter& vw, void* buffer, XTypes::TypeKind elem_kind, XTypes::TypeKind orig_elem_kind,
-  const DDS::BoundSeq& dims, CORBA::ULong dim_idx, CORBA::ULong start_blk_idx, CORBA::ULong blk_len)
+  ValueWriter& vw, const T* buffer, bool (ValueWriter::*pmf)(const T*, ACE_CDR::ULong),
+  XTypes::TypeKind orig_elem_kind, const DDS::BoundSeq& dims, CORBA::ULong dim_idx,
+  CORBA::ULong start_blk_idx, CORBA::ULong blk_len)
 {
   using namespace XTypes;
   if (!vw.begin_array(orig_elem_kind)) {
@@ -77,114 +80,8 @@ bool vwrite_primitive_array_helper(
   }
 
   if (dim_idx == dims.length() - 1) {
-    switch (elem_kind) {
-    case TK_INT8: {
-      const CORBA::Int8* typed_buffer = static_cast<const CORBA::Int8*>(buffer);
-      if (!vw.write_int8_array(typed_buffer + start_blk_idx, blk_len)) {
-        return false;
-      }
-      break;
-    }
-    case TK_UINT8: {
-      const CORBA::UInt8* typed_buffer = static_cast<const CORBA::UInt8*>(buffer);
-      if (!vw.write_uint8_array(typed_buffer + start_blk_idx, blk_len)) {
-        return false;
-      }
-      break;
-    }
-    case TK_INT16: {
-      const CORBA::Short* typed_buffer = static_cast<const CORBA::Short*>(buffer);
-      if (!vw.write_int16_array(typed_buffer + start_blk_idx, blk_len)) {
-        return false;
-      }
-      break;
-    }
-    case TK_UINT16: {
-      const CORBA::UShort* typed_buffer = static_cast<const CORBA::UShort*>(buffer);
-      if (!vw.write_uint16_array(typed_buffer + start_blk_idx, blk_len)) {
-        return false;
-      }
-      break;
-    }
-    case TK_INT32: {
-      const CORBA::Long* typed_buffer = static_cast<const CORBA::Long*>(buffer);
-      if (!vw.write_int32_array(typed_buffer + start_blk_idx, blk_len)) {
-        return false;
-      }
-      break;
-    }
-    case TK_UINT32: {
-      const CORBA::ULong* typed_buffer = static_cast<const CORBA::ULong*>(buffer);
-      if (!vw.write_uint32_array(typed_buffer + start_blk_idx, blk_len)) {
-        return false;
-      }
-      break;
-    }
-    case TK_INT64: {
-      const CORBA::LongLong* typed_buffer = static_cast<const CORBA::LongLong*>(buffer);
-      if (!vw.write_int64_array(typed_buffer + start_blk_idx, blk_len)) {
-        return false;
-      }
-      break;
-    }
-    case TK_UINT64: {
-      const CORBA::ULongLong* typed_buffer = static_cast<const CORBA::ULongLong*>(buffer);
-      if (!vw.write_uint64_array(typed_buffer + start_blk_idx, blk_len)) {
-        return false;
-      }
-      break;
-    }
-    case TK_FLOAT32: {
-      const CORBA::Float* typed_buffer = static_cast<const CORBA::Float*>(buffer);
-      if (!vw.write_float32_array(typed_buffer + start_blk_idx, blk_len)) {
-        return false;
-      }
-      break;
-    }
-    case TK_FLOAT64: {
-      const CORBA::Double* typed_buffer = static_cast<const CORBA::Double*>(buffer);
-      if (!vw.write_float64_array(typed_buffer + start_blk_idx, blk_len)) {
-        return false;
-      }
-      break;
-    }
-    case TK_FLOAT128: {
-      const CORBA::LongDouble* typed_buffer = static_cast<const CORBA::LongDouble*>(buffer);
-      if (!vw.write_float128_array(typed_buffer + start_blk_idx, blk_len)) {
-        return false;
-      }
-      break;
-    }
-    case TK_CHAR8: {
-      const CORBA::Char* typed_buffer = static_cast<const CORBA::Char*>(buffer);
-      if (!vw.write_char8_array(typed_buffer + start_blk_idx, blk_len)) {
-        return false;
-      }
-      break;
-    }
-#ifdef DDS_HAS_WCHAR
-    case TK_CHAR16: {
-      const CORBA::WChar* typed_buffer = static_cast<const CORBA::WChar*>(buffer);
-      if (!vw.write_char16_array(typed_buffer + start_blk_idx, blk_len)) {
-        return false;
-      }
-      break;
-    }
-#endif
-    case TK_BYTE: {
-      const CORBA::Octet* typed_buffer = static_cast<const CORBA::Octet*>(buffer);
-      if (!vw.write_byte_array(typed_buffer + start_blk_idx, blk_len)) {
-        return false;
-      }
-      break;
-    }
-    case TK_BOOLEAN: {
-      const CORBA::Boolean* typed_buffer = static_cast<const CORBA::Boolean*>(buffer);
-      if (!vw.write_boolean_array(typed_buffer + start_blk_idx, blk_len)) {
-        return false;
-      }
-      break;
-    }
+    if (!(vw.*pmf)(buffer + start_blk_idx, blk_len)) {
+      return false;
     }
   } else {
     const CORBA::ULong dim = dims[dim_idx];
@@ -192,7 +89,7 @@ bool vwrite_primitive_array_helper(
     for (CORBA::ULong i = 0; i < dim; ++i) {
       start_blk_idx += i * subblk_len;
       if (!vw.begin_element(i) ||
-          !vwrite_primitive_array_helper(vw, buffer, elem_kind, orig_elem_kind, dims,
+          !vwrite_primitive_array_helper(vw, buffer, pmf, orig_elem_kind, dims,
                                          dim_idx + 1, start_blk_idx, subblk_len) ||
           !vw.end_element()) {
         return false;
@@ -229,8 +126,8 @@ DDS::ReturnCode_t vwrite_primitive_collection(
           rc = DDS::RETCODE_ERROR;
         }
       } else if (col_tk == TK_ARRAY) {
-        if (!vwrite_primitive_array_helper(vw, val.get_buffer(), elem_kind, orig_elem_kind,
-                                           dims, 0, 0, val.length())) {
+        if (!vwrite_primitive_array_helper(vw, val.get_buffer(), &ValueWriter::write_int8_array,
+                                           orig_elem_kind, dims, 0, 0, val.length())) {
           rc = DDS::RETCODE_ERROR;
         }
       }
@@ -257,8 +154,8 @@ DDS::ReturnCode_t vwrite_primitive_collection(
           rc = DDS::RETCODE_ERROR;
         }
       } else if (col_tk == TK_ARRAY) {
-        if (!vwrite_primitive_array_helper(vw, val.get_buffer(), elem_kind, orig_elem_kind,
-                                           dims, 0, 0, val.length())) {
+        if (!vwrite_primitive_array_helper(vw, val.get_buffer(), &ValueWriter::write_uint8_array,
+                                           orig_elem_kind, dims, 0, 0, val.length())) {
           rc = DDS::RETCODE_ERROR;
         }
       }
@@ -285,8 +182,8 @@ DDS::ReturnCode_t vwrite_primitive_collection(
           rc = DDS::RETCODE_ERROR;
         }
       } else if (col_tk == TK_ARRAY) {
-        if (!vwrite_primitive_array_helper(vw, val.get_buffer(), elem_kind, orig_elem_kind,
-                                           dims, 0, 0, val.length())) {
+        if (!vwrite_primitive_array_helper(vw, val.get_buffer(), &ValueWriter::write_int16_array,
+                                           orig_elem_kind, dims, 0, 0, val.length())) {
           rc = DDS::RETCODE_ERROR;
         }
       }
@@ -313,8 +210,8 @@ DDS::ReturnCode_t vwrite_primitive_collection(
           rc = DDS::RETCODE_ERROR;
         }
       } else if (col_tk == TK_ARRAY) {
-        if (!vwrite_primitive_array_helper(vw, val.get_buffer(), elem_kind, orig_elem_kind,
-                                           dims, 0, 0, val.length())) {
+        if (!vwrite_primitive_array_helper(vw, val.get_buffer(), &ValueWriter::write_uint16_array,
+                                           orig_elem_kind, dims, 0, 0, val.length())) {
           rc = DDS::RETCODE_ERROR;
         }
       }
@@ -341,8 +238,8 @@ DDS::ReturnCode_t vwrite_primitive_collection(
           rc = DDS::RETCODE_ERROR;
         }
       } else if (col_tk == TK_ARRAY) {
-        if (!vwrite_primitive_array_helper(vw, val.get_buffer(), elem_kind, orig_elem_kind,
-                                           dims, 0, 0, val.length())) {
+        if (!vwrite_primitive_array_helper(vw, val.get_buffer(), &ValueWriter::write_int32_array,
+                                           orig_elem_kind, dims, 0, 0, val.length())) {
           rc = DDS::RETCODE_ERROR;
         }
       }
@@ -369,8 +266,8 @@ DDS::ReturnCode_t vwrite_primitive_collection(
           rc = DDS::RETCODE_ERROR;
         }
       } else if (col_tk == TK_ARRAY) {
-        if (!vwrite_primitive_array_helper(vw, val.get_buffer(), elem_kind, orig_elem_kind,
-                                           dims, 0, 0, val.length())) {
+        if (!vwrite_primitive_array_helper(vw, val.get_buffer(), &ValueWriter::write_uint32_array,
+                                           orig_elem_kind, dims, 0, 0, val.length())) {
           rc = DDS::RETCODE_ERROR;
         }
       }
@@ -397,8 +294,8 @@ DDS::ReturnCode_t vwrite_primitive_collection(
           rc = DDS::RETCODE_ERROR;
         }
       } else if (col_tk == TK_ARRAY) {
-        if (!vwrite_primitive_array_helper(vw, val.get_buffer(), elem_kind, orig_elem_kind,
-                                           dims, 0, 0, val.length())) {
+        if (!vwrite_primitive_array_helper(vw, val.get_buffer(), &ValueWriter::write_int64_array,
+                                           orig_elem_kind, dims, 0, 0, val.length())) {
           rc = DDS::RETCODE_ERROR;
         }
       }
@@ -425,8 +322,8 @@ DDS::ReturnCode_t vwrite_primitive_collection(
           rc = DDS::RETCODE_ERROR;
         }
       } else if (col_tk == TK_ARRAY) {
-        if (!vwrite_primitive_array_helper(vw, val.get_buffer(), elem_kind, orig_elem_kind,
-                                           dims, 0, 0, val.length())) {
+        if (!vwrite_primitive_array_helper(vw, val.get_buffer(), &ValueWriter::write_uint64_array,
+                                           orig_elem_kind, dims, 0, 0, val.length())) {
           rc = DDS::RETCODE_ERROR;
         }
       }
@@ -453,8 +350,8 @@ DDS::ReturnCode_t vwrite_primitive_collection(
           rc = DDS::RETCODE_ERROR;
         }
       } else if (col_tk == TK_ARRAY) {
-        if (!vwrite_primitive_array_helper(vw, val.get_buffer(), elem_kind, orig_elem_kind,
-                                           dims, 0, 0, val.length())) {
+        if (!vwrite_primitive_array_helper(vw, val.get_buffer(), &ValueWriter::write_float32_array,
+                                           orig_elem_kind, dims, 0, 0, val.length())) {
           rc = DDS::RETCODE_ERROR;
         }
       }
@@ -481,8 +378,8 @@ DDS::ReturnCode_t vwrite_primitive_collection(
           rc = DDS::RETCODE_ERROR;
         }
       } else if (col_tk == TK_ARRAY) {
-        if (!vwrite_primitive_array_helper(vw, val.get_buffer(), elem_kind, orig_elem_kind,
-                                           dims, 0, 0, val.length())) {
+        if (!vwrite_primitive_array_helper(vw, val.get_buffer(), &ValueWriter::write_float64_array,
+                                           orig_elem_kind, dims, 0, 0, val.length())) {
           rc = DDS::RETCODE_ERROR;
         }
       }
@@ -509,8 +406,8 @@ DDS::ReturnCode_t vwrite_primitive_collection(
           rc = DDS::RETCODE_ERROR;
         }
       } else if (col_tk == TK_ARRAY) {
-        if (!vwrite_primitive_array_helper(vw, val.get_buffer(), elem_kind, orig_elem_kind,
-                                           dims, 0, 0, val.length())) {
+        if (!vwrite_primitive_array_helper(vw, val.get_buffer(), &ValueWriter::write_float128_array,
+                                           orig_elem_kind, dims, 0, 0, val.length())) {
           rc = DDS::RETCODE_ERROR;
         }
       }
@@ -537,8 +434,8 @@ DDS::ReturnCode_t vwrite_primitive_collection(
           rc = DDS::RETCODE_ERROR;
         }
       } else if (col_tk == TK_ARRAY) {
-        if (!vwrite_primitive_array_helper(vw, val.get_buffer(), elem_kind, orig_elem_kind,
-                                           dims, 0, 0, val.length())) {
+        if (!vwrite_primitive_array_helper(vw, val.get_buffer(), &ValueWriter::write_char8_array,
+                                           orig_elem_kind, dims, 0, 0, val.length())) {
           rc = DDS::RETCODE_ERROR;
         }
       }
@@ -566,8 +463,8 @@ DDS::ReturnCode_t vwrite_primitive_collection(
           rc = DDS::RETCODE_ERROR;
         }
       } else if (col_tk == TK_ARRAY) {
-        if (!vwrite_primitive_array_helper(vw, val.get_buffer(), elem_kind, orig_elem_kind,
-                                           dims, 0, 0, val.length())) {
+        if (!vwrite_primitive_array_helper(vw, val.get_buffer(), &ValueWriter::write_char16_array,
+                                           orig_elem_kind, dims, 0, 0, val.length())) {
           rc = DDS::RETCODE_ERROR;
         }
       }
@@ -595,8 +492,8 @@ DDS::ReturnCode_t vwrite_primitive_collection(
           rc = DDS::RETCODE_ERROR;
         }
       } else if (col_tk == TK_ARRAY) {
-        if (!vwrite_primitive_array_helper(vw, val.get_buffer(), elem_kind, orig_elem_kind,
-                                           dims, 0, 0, val.length())) {
+        if (!vwrite_primitive_array_helper(vw, val.get_buffer(), &ValueWriter::write_byte_array,
+                                           orig_elem_kind, dims, 0, 0, val.length())) {
           rc = DDS::RETCODE_ERROR;
         }
       }
@@ -623,8 +520,8 @@ DDS::ReturnCode_t vwrite_primitive_collection(
           rc = DDS::RETCODE_ERROR;
         }
       } else if (col_tk == TK_ARRAY) {
-        if (!vwrite_primitive_array_helper(vw, val.get_buffer(), elem_kind, orig_elem_kind,
-                                           dims, 0, 0, val.length())) {
+        if (!vwrite_primitive_array_helper(vw, val.get_buffer(), &ValueWriter::write_boolean_array,
+                                           orig_elem_kind, dims, 0, 0, val.length())) {
           rc = DDS::RETCODE_ERROR;
         }
       }
@@ -1305,7 +1202,6 @@ bool vwrite_union(ValueWriter& vw, DDS::DynamicData_ptr value, const DDS::Dynami
     return false;
   }
 
-  // Discriminator
   DDS::DynamicTypeMember_var dtm;
   rc = dt->get_member(dtm, XTypes::DISCRIMINATOR_ID);
   if (rc != DDS::RETCODE_OK) {
@@ -1338,7 +1234,6 @@ bool vwrite_union(ValueWriter& vw, DDS::DynamicData_ptr value, const DDS::Dynami
     return false;
   }
 
-  // Selected branch
   bool has_branch = false;
   DDS::MemberDescriptor_var selected_md;
   rc = XTypes::get_selected_union_branch(dt, disc_val, has_branch, selected_md);
@@ -1398,7 +1293,7 @@ bool vwrite_array_helper(ValueWriter& vw, CORBA::ULong dim_idx, const DDS::Bound
       if (!vwrite_element(vw, value, elem_type, flat_idx)) {
         return false;
       }
-    } else if (!vwrite_array_helper(vw, dim_idx+1, dims, idx_vec, elem_type, value)) {
+    } else if (!vwrite_array_helper(vw, dim_idx + 1, dims, idx_vec, elem_type, value)) {
       return false;
     }
     if (!vw.end_element()) {
@@ -1455,6 +1350,11 @@ bool vwrite_sequence(ValueWriter& vw, DDS::DynamicData_ptr value, const DDS::Dyn
   }
   return vw.end_sequence();
 }
+
+}
+
+namespace OpenDDS {
+namespace DCPS {
 
 bool vwrite(ValueWriter& vw, DDS::DynamicData_ptr value)
 {

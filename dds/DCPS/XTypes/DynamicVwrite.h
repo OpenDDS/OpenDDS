@@ -12,11 +12,10 @@
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
-namespace OpenDDS {
-namespace DCPS {
+namespace {
 
 template <typename T>
-bool write_enum(ValueWriter& vw, const DDS::DynamicType_var& enum_type,
+bool write_enum(OpenDDS::DCPS::ValueWriter& vw, const DDS::DynamicType_var& enum_type,
                 T enum_val, DDS::TypeKind as_int)
 {
   const DDS::MemberId enumerator_id = static_cast<DDS::MemberId>(enum_val);
@@ -30,6 +29,11 @@ bool write_enum(ValueWriter& vw, const DDS::DynamicType_var& enum_type,
   }
   return vw.write_enum(md->name(), enum_val, as_int);
 }
+
+}
+
+namespace OpenDDS {
+namespace DCPS {
 
 OpenDDS_Dcps_Export
 bool vwrite(ValueWriter& vw, DDS::DynamicData_ptr value);

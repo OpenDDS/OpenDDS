@@ -185,6 +185,10 @@ public:
   virtual bool write_char8_array(const ACE_CDR::Char* x, ACE_CDR::ULong length);
   virtual bool write_char16_array(const ACE_CDR::WChar* x, ACE_CDR::ULong length);
   ///@}
+
+private:
+  template <typename T>
+  bool write_array_common(const T* buffer, ACE_CDR::ULong length, bool (ValueWriter::*pmf)(T));
 };
 
 } // namespace DCPS

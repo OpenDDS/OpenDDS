@@ -1697,8 +1697,8 @@ DDS::ReturnCode_t flat_index(CORBA::ULong& flat_idx, const DDS::BoundSeq& idx_ve
     const CORBA::ULong dim = dims[i];
     if (idx_vec[i] >= dim) {
       if (DCPS::log_level >= DCPS::LogLevel::Notice) {
-        ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: flat_index: Index %u-th is invalid for"
-                   " the %u-th dimension (%u)", i, i, dim));
+        ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: flat_index: %u-th index (%u) is invalid for"
+                   " the %u-th dimension (%u)", i, idx_vec[i], i, dim));
       }
       return DDS::RETCODE_BAD_PARAMETER;
     }

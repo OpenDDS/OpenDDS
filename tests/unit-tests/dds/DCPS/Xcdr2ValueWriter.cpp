@@ -80,7 +80,7 @@ void check_total_size(DCPS::Xcdr2ValueWriter& value_writer, const Type& sample)
 void check_component_sizes(DCPS::Xcdr2ValueWriter& value_writer, const size_t* arr, size_t length)
 {
   std::vector<size_t> expected_sizes(arr, arr + length);
-  const std::vector<size_t>& sizes = value_writer.get_serialized_sizes();
+  const OPENDDS_VECTOR(size_t)& sizes = value_writer.get_serialized_sizes();
   EXPECT_EQ(expected_sizes, sizes);
 }
 

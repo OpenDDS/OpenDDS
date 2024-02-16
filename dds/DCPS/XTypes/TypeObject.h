@@ -909,9 +909,9 @@ namespace XTypes {
   // ID of a type member
   typedef ACE_CDR::ULong MemberId;
   const ACE_CDR::ULong MEMBER_ID_INVALID = ACE_UINT32_MAX;
-  /// Union discriminator does not have an Id specified in TypeObject or DynamicType.
-  /// OpenDDS uses the following sentinels for interacting with DynamicData and
-  /// for serialization, respectively.
+  // Union discriminator does not have an Id specified in TypeObject or DynamicType.
+  // OpenDDS uses the following sentinels for interacting with DynamicData and
+  // for serialization, respectively.
   const ACE_CDR::ULong DISCRIMINATOR_ID = MEMBER_ID_INVALID - 1;
   const ACE_CDR::ULong DISCRIMINATOR_SERIALIZED_ID = 0;
   const ACE_CDR::ULong ANNOTATION_STR_VALUE_MAX_LEN = 128;
