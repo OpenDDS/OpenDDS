@@ -3,6 +3,8 @@ project(*): opendds_uses_cxx17, dcps_test, googletest, msvc_bigobj {
   exeout = .
   macros += CPP11_MAPPING=1
 
+  dcps_ts_flags += -Lc++11
+
   Source_Files {
     main.cpp
   }
