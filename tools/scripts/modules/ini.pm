@@ -14,15 +14,9 @@ our @EXPORT_OK = qw(
   get_ini_value
 );
 
-sub die_with_stack_trace {
-  my $i = 1;
-  print STDERR ("ERROR: ", @_, " STACK TRACE:\n");
-  while (my @call_details = (caller($i++)) ){
-      print STDERR ("ERROR: STACK TRACE[", $i - 2, "] " .
-        "$call_details[1]:$call_details[2] in function $call_details[3]\n");
-  }
-  die();
-}
+use FindBin;
+use lib "$FindBin::RealBin";
+use misc_utils qw/trace/;
 
 sub print_usage {
   my $fh = shift() // *STDERR;
@@ -46,7 +40,7 @@ sub read_ini_file {
   my @section_names;
   my %sections;
   my $section;
-  open(my $fh, $path) or die_with_stack_trace("Couldn't open \"$path\": $!\nStopped");
+  open(my $fh, $path) or trace("Couldn't open \"$path\": $!");
   while (my $line = <$fh>) {
     $line =~ s/\s$//;
     if ($line =~ /\[(\w+)\]/) {
