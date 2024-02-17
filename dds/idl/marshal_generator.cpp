@@ -1696,11 +1696,11 @@ namespace {
       string fieldref = prefix, local = insert_cxx11_accessor_parens(name, is_union_member);
       const bool accessor = local.size() > 2 && local.substr(local.size() - 2) == "()";
       if (fld_cls & CL_STRING) {
-        if (is_optional) {
-          local += ".value()";
-        }
-
         if (!accessor && !use_cxx11) {
+          if (is_optional) {
+            local += ".value()";
+          }
+
           local += ".in()";
         }
         if ((fld_cls & CL_BOUNDED)) {
