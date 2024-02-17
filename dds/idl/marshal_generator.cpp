@@ -5,6 +5,7 @@
 
 #include "marshal_generator.h"
 
+#include "dds/idl/be_extern.h"
 #include "dds_generator.h"
 #include "field_info.h"
 #include "topic_keys.h"
@@ -1663,6 +1664,7 @@ namespace {
   {
     const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
     const bool is_union_member = prefix.substr(3) == "uni";
+    const bool is_optional = be_global->is_optional(field);
 
     AST_Type* const actual_type = resolveActualType(type);
     const Classification fld_cls = classify(actual_type);
@@ -1695,6 +1697,10 @@ namespace {
       string fieldref = prefix, local = insert_cxx11_accessor_parens(name, is_union_member);
       const bool accessor = local.size() > 2 && local.substr(local.size() - 2) == "()";
       if (fld_cls & CL_STRING) {
+        if (is_optional) {
+          local += ".value()";
+        }
+
         if (!accessor && !use_cxx11) {
           local += ".in()";
         }
