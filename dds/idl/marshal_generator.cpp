@@ -1663,7 +1663,7 @@ namespace {
   {
     const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
     const bool is_union_member = prefix.substr(3) == "uni";
-    const bool is_optional = be_global->is_optional(field);
+    const bool is_optional = field != 0 ? be_global->is_optional(field) : false;
 
     AST_Type* const actual_type = resolveActualType(type);
     const Classification fld_cls = classify(actual_type);
