@@ -1,8 +1,0 @@
-#ifndef OPENDDS_DCPS_CONFIG_EXPORT_H
-#define OPENDDS_DCPS_CONFIG_EXPORT_H
-
-#include <ace/config-all.h>
-
-#define OPENDDS_USES_AUTO_STATIC_INCLUDES 1
-
-#endif

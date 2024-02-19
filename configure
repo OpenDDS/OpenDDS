@@ -928,7 +928,7 @@ if (!$ace_src || !$tao_src) {
     }
 
     if (!-r $file) {
-      my $dl_msg = "Downloading $file from using";
+      my $dl_msg = "Downloading $file from $url using";
       $would_download = 1;
       eval {
         require LWP::UserAgent;
@@ -1336,6 +1336,30 @@ EOT
       if $opts{'verbose'};
     dump_and_unlink($PMG) if $opts{'dry-run'};
   }
+}
+
+sub write_opendds_configh {
+  my %buildEnv = %{shift()};
+  my $CFGH = backup_and_open("$buildEnv{'DDS_ROOT'}/dds/config/OpenDDSConfig.h");
+  my $CFGIN = new FileHandle;
+  open($CFGIN, 'dds/config/OpenDDSConfig.h.in') or die("Can't open OpenDDSConfig.h.in for reading: $!\nStopped");
+
+  sub replace_value {
+    my $var = shift;
+    return '0' if $var eq 'OPENDDS_USES_AUTO_STATIC_INCLUDES';
+    return 'UNDEFINED';
+  }
+
+  while (<$CFGIN>) {
+    s/@(\w+)@/replace_value($1)/e;
+    print $CFGH $_;
+  }
+
+  $CFGIN->close;
+  $CFGH->close;
+  print "Wrote $buildEnv{'DDS_ROOT'}/dds/config/OpenDDSConfig.h\n"
+    if $opts{'verbose'};
+  dump_and_unlink($CFGH) if $opts{'dry-run'};
 }
 
 ## Optional OpenDDS dependencies
@@ -2495,6 +2519,7 @@ sub configure_build {
     write_config_h($buildEnvRef);
     write_default_features($buildEnvRef);
     write_platform_macros($buildEnvRef);
+    write_opendds_configh($buildEnvRef);
   }
   generate_workspace($buildEnvRef);
   write_environment($buildEnvRef, $buildEnvRef->{'DDS_ROOT'});

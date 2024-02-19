@@ -1,0 +1,14 @@
+#ifndef OPENDDS_USER_CONFIG_H
+#define OPENDDS_USER_CONFIG_H
+
+// OpenDDSConfig.h.in is an input file that will be transformed to
+// OpenDDSConfig.h by the configure script or the CMake configure_file command.
+// Only variables of the form (at-sign)IDENTIFIER(at-sign) are supported.
+
+// This file should not #include any other files.
+
+// To add variables to this file, update both dds/CMakeLists.txt and configure.
+
+#define OPENDDS_USES_AUTO_STATIC_INCLUDES @OPENDDS_USES_AUTO_STATIC_INCLUDES@
+
+#endif

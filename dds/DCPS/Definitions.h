@@ -9,8 +9,8 @@
 #include <ace/config-lite.h>
 
 #ifdef __has_include
-#  if __has_include(<dds/DCPS/config.h>)
-#    include <dds/DCPS/config.h>
+#  if __has_include(<dds/config/OpenDDSConfig.h>)
+#    include <dds/config/OpenDDSConfig.h>
 #  endif
 #endif
 
