@@ -447,6 +447,13 @@ TEST(dds_DCPS_PrinterValueWriter, write_enum)
   EXPECT_STREQ(pvw.str().c_str(), "label (5)");
 }
 
+TEST(dds_DCPS_PrinterValueWriter, write_bitmask)
+{
+  PrinterValueWriter pvw;
+  pvw.write_bitmask(0x6b, 7);
+  EXPECT_STREQ(pvw.str().c_str(), "1101011");
+}
+
 TEST(dds_DCPS_PrinterValueWriter, write_absent_value)
 {
   PrinterValueWriter pvw;

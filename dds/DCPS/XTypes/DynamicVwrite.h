@@ -30,6 +30,16 @@ bool write_enum(OpenDDS::DCPS::ValueWriter& vw, const DDS::DynamicType_var& enum
   return vw.write_enum(md->name(), enum_val, as_int);
 }
 
+template <typename T>
+bool write_bitmask(OpenDDS::DCPS::ValueWriter& vw, const DDS::DynamicType_var& bitmask_type, T bitmask_val)
+{
+  DDS::TypeDescriptor_var td;
+  if (bitmask_type->get_descriptor(td) != DDS::RETCODE_OK) {
+    return false;
+  }
+  return vw.write_bitmask(bitmask_val, td->bound()[0]);
+}
+
 }
 
 namespace OpenDDS {

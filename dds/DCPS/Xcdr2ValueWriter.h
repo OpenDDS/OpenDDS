@@ -65,6 +65,7 @@ public:
   bool write_string(const ACE_CDR::Char* value, size_t length);
   bool write_wstring(const ACE_CDR::WChar* value, size_t length);
   bool write_enum(const char* name, ACE_CDR::Long value, XTypes::TypeKind as_int = XTypes::TK_INT32);
+  bool write_bitmask(ACE_CDR::ULongLong value, ACE_CDR::ULong bitbound);
   bool write_absent_value();
 
   bool write_boolean_array(const ACE_CDR::Boolean* x, ACE_CDR::ULong length);

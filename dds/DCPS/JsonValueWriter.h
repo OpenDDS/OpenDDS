@@ -15,6 +15,7 @@
 #if OPENDDS_HAS_JSON_VALUE_WRITER
 
 #include "ValueWriter.h"
+#include "ValueHelper.h"
 #include "RapidJsonWrapper.h"
 #include "dcps_export.h"
 #include "Definitions.h"
@@ -83,6 +84,7 @@ public:
   bool write_string(const ACE_CDR::Char* value, size_t length);
   bool write_wstring(const ACE_CDR::WChar* value, size_t length);
   bool write_enum(const char* /*name*/, ACE_CDR::Long value, XTypes::TypeKind as_int = XTypes::TK_INT32);
+  bool write_bitmask(ACE_CDR::ULongLong value, ACE_CDR::ULong bitbound);
   bool write_absent_value();
 
 private:
@@ -324,6 +326,12 @@ bool JsonValueWriter<Writer>::write_enum(const char* name, ACE_CDR::Long /*value
                                          XTypes::TypeKind /*as_int*/)
 {
   return writer_.String(name);
+}
+
+template <typename Writer>
+bool JsonValueWriter<Writer>::write_bitmask(ACE_CDR::ULongLong value, ACE_CDR::ULong bitbound)
+{
+  return writer_.String(bit_string(value, bitbound).c_str());
 }
 
 template <typename Writer>

@@ -161,6 +161,8 @@ public:
     return write_enum(name, static_cast<ACE_CDR::Long>(value), as_int);
   }
 
+  virtual bool write_bitmask(ACE_CDR::ULongLong value, ACE_CDR::ULong bitbound) = 0;
+
   virtual bool write_absent_value() = 0;
 
   /// Array write operations

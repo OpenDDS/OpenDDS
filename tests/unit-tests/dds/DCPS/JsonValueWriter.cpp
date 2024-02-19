@@ -578,4 +578,13 @@ TEST(dds_DCPS_JsonValueWriter, write_enum)
   EXPECT_STREQ(buffer.GetString(), "\"label\"");
 }
 
+TEST(dds_DCPS_JsonValueWriter, write_bitmask)
+{
+  Buffer buffer;
+  Writer writer(buffer);
+  JsonValueWriter<Writer> jvw(writer);
+  jvw.write_bitmask(0x6b, 7);
+  EXPECT_STREQ(buffer.GetString(), "\"1101011\"");
+}
+
 #endif

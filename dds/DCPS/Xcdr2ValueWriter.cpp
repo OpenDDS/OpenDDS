@@ -660,6 +660,51 @@ bool Xcdr2ValueWriter::write_enum(const char* /*name*/, ACE_CDR::Long value, XTy
   return true;
 }
 
+bool Xcdr2ValueWriter::write_bitmask(ACE_CDR::ULongLong value, ACE_CDR::ULong bitbound)
+{
+  bool invalid_bitbound = false;
+  if (mode_ == SERIALIZATION_SIZE_MODE) {
+    size_t& size = size_states_.top().total_size;
+    if (bitbound >= 1 && bitbound <= 8) {
+      primitive_serialized_size_uint8(encoding_, size);
+    } else if (bitbound >= 9 && bitbound <= 16) {
+      primitive_serialized_size(encoding_, size, ACE_CDR::UShort());
+    } else if (bitbound >= 17 && bitbound <= 32) {
+      primitive_serialized_size(encoding_, size, ACE_CDR::ULong());
+    } else if (bitbound >= 33 && bitbound <= 64) {
+      primitive_serialized_size(encoding_, size, ACE_CDR::ULongLong());
+    } else {
+      invalid_bitbound = true;
+    }
+    if (!invalid_bitbound) {
+      if (size_states_.top().extensibility == MUTABLE) {
+        size_cache_.push_back(size);
+      }
+    }
+  } else {
+    if (bitbound >= 1 && bitbound <= 8) {
+      return *ser_ << ACE_OutputCDR::from_uint8(static_cast<ACE_CDR::UInt8>(value));
+    } else if (bitbound >= 9 && bitbound <= 16) {
+      return *ser_ << static_cast<ACE_CDR::UShort>(value);
+    } else if (bitbound >= 17 && bitbound <= 32) {
+      return *ser_ << static_cast<ACE_CDR::ULong>(value);
+    } else if (bitbound >= 33 && bitbound <= 64) {
+      return *ser_ << value;
+    } else {
+      invalid_bitbound = true;
+    }
+  }
+
+  if (invalid_bitbound) {
+    if (log_level >= LogLevel::Notice) {
+      ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: Xcdr2ValueWriter::write_bitmask:"
+                 " Invalid bitbound: %u\n", bitbound));
+    }
+    return false;
+  }
+  return true;
+}
+
 bool Xcdr2ValueWriter::write_absent_value()
 {
   return true;

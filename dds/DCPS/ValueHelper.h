@@ -12,8 +12,22 @@
 #include <ostream>
 #include <iostream>
 #include <iomanip>
+#include <string>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
+namespace {
+
+std::string bit_string(ACE_CDR::ULongLong value, ACE_CDR::ULong bitbound)
+{
+  std::string rtn(bitbound, '0');
+  for (ACE_CDR::ULong i = 0; i < bitbound; ++i) {
+    rtn[bitbound - 1 - i] = value & (1 << i) ? '1' : '0';
+  }
+  return rtn;
+}
+
+}
 
 namespace OpenDDS {
 namespace DCPS {
