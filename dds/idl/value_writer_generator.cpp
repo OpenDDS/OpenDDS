@@ -140,7 +140,7 @@ namespace {
       be_global->impl_ <<
         indent << "for (" << (use_cxx11 ? "size_t " : "::CORBA::ULong ") << idx << " = 0; "
         << idx << " != " << dim << "; ++" << idx << ") {\n" <<
-        indent << "  if (!value_writer.begin_element(" << idx << ")) {\n" <<
+        indent << "  if (!value_writer.begin_element(static_cast<ACE_CDR::ULong>(" << idx << "))) {\n" <<
         indent << "    return false;\n" <<
         indent << "  }\n";
       array_helper(expression + "[" + idx + "]", array, dim_idx + 1, idx + "i", level + 1);
@@ -189,7 +189,7 @@ namespace {
     const std::string elem_tk = type_kind(base_type);
     be_global->impl_ <<
       indent << "if (!value_writer.begin_sequence(" << elem_tk <<
-      ", " << expression << "." << length_func << "())) {\n" <<
+      ", static_cast<ACE_CDR::ULong>(" << expression << "." << length_func << "()))) {\n" <<
       indent << "  return false;\n" <<
       indent << "}\n";
 
@@ -216,7 +216,7 @@ namespace {
       be_global->impl_ <<
         indent << "for (" << (use_cxx11 ? "size_t " : "::CORBA::ULong ") << idx << " = 0; "
         << idx << " != " << expression << "." << length_func << "(); ++" << idx << ") {\n" <<
-        indent << "  if (!value_writer.begin_element(" << idx << ")) {\n" <<
+        indent << "  if (!value_writer.begin_element(static_cast<ACE_CDR::ULong>(" << idx << "))) {\n" <<
         indent << "    return false;\n" <<
         indent << "  }\n";
       generate_write(expression + "[" + idx + "]", base_type, idx + "i", level + 1);

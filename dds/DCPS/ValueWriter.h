@@ -188,6 +188,9 @@ public:
   virtual bool write_char16_array(const ACE_CDR::WChar* x, ACE_CDR::ULong length);
   ///@}
 
+protected:
+  std::string bit_string(ACE_CDR::ULongLong value, ACE_CDR::ULong bitbound);
+
 private:
   template <typename T>
   bool write_array_common(const T* buffer, ACE_CDR::ULong length, bool (ValueWriter::*pmf)(T));
