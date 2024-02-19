@@ -140,8 +140,16 @@
         '&quot;);', $newline
     )"/>
     <xsl:for-each select="*[name() != 'transportRef']">
-      <xsl:value-of select="concat('    ', $config-varname, '->', name(), '_ = ',
-                                   @value, ';', $newline)"/>
+      <xsl:choose>
+        <xsl:when test="name() = 'passive_connect_duration'">
+          <xsl:value-of select="concat('    ', $config-varname, '->', name(), '(OpenDDS::DCPS::TimeDuration::from_msec(',
+                                @value, '));', $newline)"/>
+        </xsl:when>
+        <xsl:otherwise>
+          <xsl:value-of select="concat('    ', $config-varname, '->', name(), '_ = ',
+                                @value, ';', $newline)"/>
+        </xsl:otherwise>
+      </xsl:choose>
     </xsl:for-each>
 
     <xsl:for-each select="transportRef">

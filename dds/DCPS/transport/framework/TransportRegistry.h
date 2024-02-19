@@ -99,8 +99,7 @@ public:
   /// at initialization time. This function iterates each section in
   /// the configuration file, and creates TransportInst and
   /// TransportConfig objects and adds them to the registry.
-  int load_transport_configuration(const OPENDDS_STRING& file_name,
-                                   ACE_Configuration_Heap& cf);
+  int load_transport_configuration(const String& file_name);
 
   /// For internal use by OpenDDS DCPS layer:
   /// If the default config is empty when it's about to be used, allow the
@@ -148,18 +147,11 @@ private:
 
   TransportType_rch load_transport_lib_i(const OPENDDS_STRING& transport_type);
 
-  struct TransportEntry
-  {
-    ACE_TString transport_name;
-    ACE_TString config_name;
-    ValueMap transport_info;
-  };
+  bool process_transport(const String& transport_id,
+                         bool is_template,
+                         OPENDDS_LIST(TransportInst_rch)& instances);
 
-  OPENDDS_VECTOR(TransportEntry) transports_;
-
-  bool get_transport_info(const ACE_TString& config_name, TransportEntry& inst);
-
-  bool has_transports() const;
+  bool process_config(const String& config_id);
 };
 
 } // namespace DCPS
