@@ -1542,7 +1542,7 @@ Service_Participant::load_configuration(
                      -1);
   }
 
-  status = TransportRegistry::instance()->load_transport_configuration(ACE_TEXT_ALWAYS_CHAR(filename), config);
+  status = TransportRegistry::instance()->load_transport_configuration(ACE_TEXT_ALWAYS_CHAR(filename));
   const String global_transport_config = config_store_->get(OPENDDS_COMMON_DCPS_GLOBAL_TRANSPORT_CONFIG,
                                                             OPENDDS_COMMON_DCPS_GLOBAL_TRANSPORT_CONFIG_default);
   if (!global_transport_config.empty()) {

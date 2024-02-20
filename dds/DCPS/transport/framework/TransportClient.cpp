@@ -129,9 +129,9 @@ TransportClient::enable_transport_using_config(bool reliable, bool durable,
   swap_bytes_ = tc->swap_bytes_;
   reliable_ = reliable;
   durable_ = durable;
-  unsigned long duration = tc->passive_connect_duration_;
-  if (duration == 0) {
-    duration = TransportConfig::DEFAULT_PASSIVE_CONNECT_DURATION;
+  passive_connect_duration_ = tc->passive_connect_duration_;
+  if (passive_connect_duration_ == 0) {
+    passive_connect_duration_ = TimeDuration::from_msec(TransportConfig::DEFAULT_PASSIVE_CONNECT_DURATION);
     if (DCPS_debug_level) {
       ACE_DEBUG((LM_WARNING,
         ACE_TEXT("(%P|%t) TransportClient::enable_transport_using_config ")
@@ -139,7 +139,6 @@ TransportClient::enable_transport_using_config(bool reliable, bool durable,
         ACE_TEXT("default value\n")));
     }
   }
-  passive_connect_duration_ = TimeDuration::from_msec(duration);
 
   populate_connection_info(dpi);
 
