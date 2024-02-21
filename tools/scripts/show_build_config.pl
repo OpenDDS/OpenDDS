@@ -74,10 +74,11 @@ sub show_config {
 
   my $dds_dir = $dds_root eq '.' ? '' : "$dds_root/";
   show_file("${dds_dir}VERSION.txt");
+  # use 'optional' for the following files, they may not be in the host side of cross-compile
   show_file("${dds_dir}user_macros.GNU", {optional => 1});
-  show_file("${dds_dir}dds/config/OpenDDSConfig.h");
-  show_file("${dds_dir}bin/opendds_mwc.pl");
-  show_file("${dds_dir}cmake/config.cmake", {optional => 1}); # not used for cross-compile
+  show_file("${dds_dir}dds/config/OpenDDSConfig.h", {optional => 1});
+  show_file("${dds_dir}bin/opendds_mwc.pl", {optional => 1});
+  show_file("${dds_dir}cmake/config.cmake", {optional => 1});
 
   show_file("$ace_root/ace/Version.h");
   show_file("$ace_root/bin/MakeProjectCreator/config/default.features", {optional => 1});
