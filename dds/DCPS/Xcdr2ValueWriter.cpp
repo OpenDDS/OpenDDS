@@ -614,8 +614,8 @@ bool Xcdr2ValueWriter::write_wstring(const ACE_CDR::WChar* value, size_t length)
 
 bool Xcdr2ValueWriter::write_enum(ACE_CDR::Long value, const EnumHelper& helper)
 {
-  bool invalid_int_type = false;
   XTypes::TypeKind as_int = helper.get_equivalent_int();
+  bool invalid_int_type = false;
 
   if (mode_ == SERIALIZATION_SIZE_MODE) {
     size_t& size = size_states_.top().total_size;
@@ -662,46 +662,55 @@ bool Xcdr2ValueWriter::write_enum(ACE_CDR::Long value, const EnumHelper& helper)
   return true;
 }
 
-// TODO(sonndinh): update this.
 bool Xcdr2ValueWriter::write_bitmask(ACE_CDR::ULongLong value, const BitmaskHelper& helper)
 {
-  bool invalid_bitbound = false;
+  XTypes::TypeKind as_uint = helper.get_equivalent_uint();
+  bool invalid_uint_type = false;
+
   if (mode_ == SERIALIZATION_SIZE_MODE) {
     size_t& size = size_states_.top().total_size;
-    if (bitbound >= 1 && bitbound <= 8) {
+    switch (as_uint) {
+    case XTypes::TK_UINT8:
       primitive_serialized_size_uint8(encoding_, size);
-    } else if (bitbound >= 9 && bitbound <= 16) {
+      break;
+    case XTypes::TK_UINT16:
       primitive_serialized_size(encoding_, size, ACE_CDR::UShort());
-    } else if (bitbound >= 17 && bitbound <= 32) {
+      break;
+    case XTypes::TK_UINT32:
       primitive_serialized_size(encoding_, size, ACE_CDR::ULong());
-    } else if (bitbound >= 33 && bitbound <= 64) {
+      break;
+    case XTypes::TK_UINT64:
       primitive_serialized_size(encoding_, size, ACE_CDR::ULongLong());
-    } else {
-      invalid_bitbound = true;
+      break;
+    default:
+      invalid_uint_type = true;
+      break;
     }
-    if (!invalid_bitbound) {
+    if (!invalid_uint_type) {
       if (size_states_.top().extensibility == MUTABLE) {
         size_cache_.push_back(size);
       }
     }
   } else {
-    if (bitbound >= 1 && bitbound <= 8) {
+    switch (as_uint) {
+    case XTypes::TK_UINT8:
       return *ser_ << ACE_OutputCDR::from_uint8(static_cast<ACE_CDR::UInt8>(value));
-    } else if (bitbound >= 9 && bitbound <= 16) {
+    case XTypes::TK_UINT16:
       return *ser_ << static_cast<ACE_CDR::UShort>(value);
-    } else if (bitbound >= 17 && bitbound <= 32) {
+    case XTypes::TK_UINT32:
       return *ser_ << static_cast<ACE_CDR::ULong>(value);
-    } else if (bitbound >= 33 && bitbound <= 64) {
+    case XTypes::TK_UINT64:
       return *ser_ << value;
-    } else {
-      invalid_bitbound = true;
+    default:
+      invalid_uint_type = true;
+      break;
     }
   }
 
-  if (invalid_bitbound) {
+  if (invalid_uint_type) {
     if (log_level >= LogLevel::Notice) {
       ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: Xcdr2ValueWriter::write_bitmask:"
-                 " Invalid bitbound: %u\n", bitbound));
+                 " Bitmask cannot be serialized as %C\n", XTypes::typekind_to_string(as_uint)));
     }
     return false;
   }

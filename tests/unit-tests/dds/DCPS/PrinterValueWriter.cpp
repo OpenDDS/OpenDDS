@@ -443,8 +443,14 @@ TEST(dds_DCPS_PrinterValueWriter, write_string)
 TEST(dds_DCPS_PrinterValueWriter, write_enum)
 {
   PrinterValueWriter pvw;
-  pvw.write_enum("label", 5);
-  EXPECT_STREQ(pvw.str().c_str(), "label (5)");
+  const ListEnumHelper::Pair enum_pairs[] = {
+    {"label_1", 5},
+    {"label_2", 6},
+    {0, 0}
+  };
+  const ListEnumHelper enum_helper(enum_pairs);
+  pvw.write_enum(5, enum_helper);
+  EXPECT_STREQ(pvw.str().c_str(), "label_1 (5)");
 }
 
 TEST(dds_DCPS_PrinterValueWriter, write_bitmask)

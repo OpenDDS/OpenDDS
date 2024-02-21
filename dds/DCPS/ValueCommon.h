@@ -34,10 +34,18 @@ public:
     : as_int_(as_int)
   {}
 
-  ListEnumHelper(const OPENDDS_VECTOR(Pair)& pairs, XTypes::TypeKind as_int)
-    : pairs_(pairs)
-    , as_int_(as_int)
-  {}
+  // ListEnumHelper(const OPENDDS_VECTOR(Pair)& pairs, XTypes::TypeKind as_int)
+  //   : pairs_(pairs)
+  //   , as_int_(as_int)
+  // {}
+
+  ListEnumHelper(const Pair* pairs, XTypes::TypeKind as_int = XTypes::TK_INT32)
+    : as_int_(as_int)
+  {
+    for (const Pair* ptr = pairs; ptr->name; ++ptr) {
+      pairs_.push_back(*ptr);
+    }
+  }
 
   void pairs(const OPENDDS_VECTOR(Pair)& pairs)
   {
@@ -72,7 +80,7 @@ public:
   }
 
 private:
-  OPENDDS_VECTOR(Pair) pairs_;
+  OPENDDS_VECTOR(Pair) pairs;
   XTypes::TypeKind as_int_;
 };
 

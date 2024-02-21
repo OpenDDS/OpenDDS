@@ -574,8 +574,14 @@ TEST(dds_DCPS_JsonValueWriter, write_enum)
   Buffer buffer;
   Writer writer(buffer);
   JsonValueWriter<Writer> jvw(writer);
-  jvw.write_enum("label", 5);
-  EXPECT_STREQ(buffer.GetString(), "\"label\"");
+  const ListEnumHelper::Pair enum_pairs[] = {
+    {"label_1", 5},
+    {"label_2", 6},
+    {0, 0}
+  };
+  const ListEnumHelper enum_helper(enum_pairs);
+  jvw.write_enum(5, enum_helper);
+  EXPECT_STREQ(buffer.GetString(), "\"label_1\"");
 }
 
 TEST(dds_DCPS_JsonValueWriter, write_bitmask)
