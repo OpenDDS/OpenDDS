@@ -589,8 +589,19 @@ TEST(dds_DCPS_JsonValueWriter, write_bitmask)
   Buffer buffer;
   Writer writer(buffer);
   JsonValueWriter<Writer> jvw(writer);
-  jvw.write_bitmask(0x6b, 7);
-  EXPECT_STREQ(buffer.GetString(), "\"1101011\"");
+  const MapBitmaskHelper::Pair bitmask_pairs[] = {
+    {"flag0", 0},
+    {"flag1", 1},
+    {"flag2", 2},
+    {"flag3", 3},
+    {"flag4", 4},
+    {"flag5", 5},
+    {"flag6", 6},
+    {0, 0}
+  };
+  const MapBitmaskHelper bitmask_helper(bitmask_pairs, 7, OpenDDS::XTypes::TK_UINT8);
+  jvw.write_bitmask(1 << 1 | 1 << 3 | 1 << 5, bitmask_helper);
+  EXPECT_STREQ(buffer.GetString(), "\"flag1|flag3|flag5\"");
 }
 
 #endif

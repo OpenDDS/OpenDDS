@@ -337,8 +337,6 @@ bool value_writer_generator::gen_enum(AST_Enum*,
     write.addArg("value", "const " + type_name + "&");
     write.endArgs();
 
-    // be_global->impl_ <<
-    //   "  switch (value) {\n";
     be_global->impl_ <<
       "  static const ListEnumHelper::Pair pairs[] = {";
     for (std::vector<AST_EnumVal*>::const_iterator pos = contents.begin(), limit = contents.end();
@@ -347,24 +345,15 @@ bool value_writer_generator::gen_enum(AST_Enum*,
       const std::string value_name = (use_cxx11 ? (type_name + "::") : ("::" + module_scope(name)))
         + val->local_name()->get_string();
       if (pos != contents.begin()) {
-        be_global->impl_ << " ,";
+        be_global->impl_ << ",";
       }
       be_global->impl_ <<
-        '{' << '"' << canonical_name(val) << "\", " << value_name << '}';
-      // be_global->impl_ <<
-      //   "  case " << value_name << ":\n"
-      //   "    if (!value_writer.write_enum(\"" << canonical_name(val) << "\", " << value_name << ")) {\n"
-      //   "      return false;\n"
-      //   "    }\n"
-      //   "    break;\n";
+        '{' << '"' << canonical_name(val) << "\"," << value_name << '}';
     }
     be_global->impl_ <<
-      " ,{0, 0}};\n"
+      ",{0, 0}};\n"
       "  ListEnumHelper helper(pairs);\n"
       "  return value_writer.write_enum(value, helper);\n";
-    // be_global->impl_ <<
-    //   "  }\n"
-    //   "  return true;\n";
   }
 
   return true;

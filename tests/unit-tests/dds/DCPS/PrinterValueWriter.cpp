@@ -456,8 +456,19 @@ TEST(dds_DCPS_PrinterValueWriter, write_enum)
 TEST(dds_DCPS_PrinterValueWriter, write_bitmask)
 {
   PrinterValueWriter pvw;
-  pvw.write_bitmask(0x6b, 7);
-  EXPECT_STREQ(pvw.str().c_str(), "1101011");
+  const MapBitmaskHelper::Pair bitmask_pairs[] = {
+    {"flag0", 0},
+    {"flag1", 1},
+    {"flag2", 2},
+    {"flag3", 3},
+    {"flag4", 4},
+    {"flag5", 5},
+    {"flag6", 6},
+    {0, 0}
+  };
+  const MapBitmaskHelper bitmask_helper(bitmask_pairs, 10, OpenDDS::XTypes::TK_UINT16);
+  pvw.write_bitmask(1 << 2 | 1 << 4 | 1 << 6, bitmask_helper);
+  EXPECT_STREQ(pvw.str().c_str(), "flag2|flag4|flag6");
 }
 
 TEST(dds_DCPS_PrinterValueWriter, write_absent_value)

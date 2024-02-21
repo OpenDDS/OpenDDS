@@ -34,11 +34,6 @@ public:
     : as_int_(as_int)
   {}
 
-  // ListEnumHelper(const OPENDDS_VECTOR(Pair)& pairs, XTypes::TypeKind as_int)
-  //   : pairs_(pairs)
-  //   , as_int_(as_int)
-  // {}
-
   ListEnumHelper(const Pair* pairs, XTypes::TypeKind as_int = XTypes::TK_INT32)
     : as_int_(as_int)
   {
@@ -80,7 +75,7 @@ public:
   }
 
 private:
-  OPENDDS_VECTOR(Pair) pairs;
+  OPENDDS_VECTOR(Pair) pairs_;
   XTypes::TypeKind as_int_;
 };
 
@@ -88,7 +83,7 @@ class BitmaskHelper {
 public:
   virtual ~BitmaskHelper() {}
   virtual bool get_value(ACE_CDR::ULongLong& value, const OPENDDS_VECTOR(const char*)& names) const = 0;
-  virtual size_t get_name(OPENDDS_VECTOR(const char*)& names, ACE_CDR::ULongLong value) const = 0;
+  virtual size_t get_names(OPENDDS_VECTOR(const char*)& names, ACE_CDR::ULongLong value) const = 0;
   virtual XTypes::TypeKind get_equivalent_uint() const = 0;
 };
 
@@ -104,16 +99,13 @@ public:
   typedef PosToNameMap::const_iterator ptn_iterator;
   typedef NameToPosMap::const_iterator ntp_iterator;
 
-  MapBitmaskHelper(XTypes::TypeKind as_uint)
-    : bit_bound_(as_uint == XTypes::TK_UINT8 ? 8 :
-                 (as_uint == XTypes::TK_UINT16 ? 16 :
-                  (as_uint == XTypes::TK_UINT32 ? 32 :
-                   (as_uint == XTypes::TK_UINT64 ? 64 : 0))))
+  MapBitmaskHelper(ACE_CDR::UShort bit_bound, XTypes::TypeKind as_uint)
+    : bit_bound_(bit_bound)
     , as_uint_(as_uint)
   {}
 
-  MapBitmaskHelper(const Pair* pairs, ACE_CDR::UShort bound, XTypes::TypeKind as_uint)
-    : bit_bound_(bound)
+  MapBitmaskHelper(const Pair* pairs, ACE_CDR::UShort bit_bound, XTypes::TypeKind as_uint)
+    : bit_bound_(bit_bound)
     , as_uint_(as_uint)
   {
     for (const Pair* ptr = pairs; ptr->name; ++ptr) {
@@ -130,11 +122,6 @@ public:
     }
   }
 
-  void bit_bound(ACE_CDR::UShort bit_bound)
-  {
-    bit_bound_ = bit_bound;
-  }
-
   bool get_value(ACE_CDR::ULongLong& value, const OPENDDS_VECTOR(const char*)& names) const
   {
     ACE_CDR::ULongLong rtn = 0;
@@ -143,7 +130,7 @@ public:
       if (it == name_to_pos_.end()) {
         return false;
       }
-      rtn |= 1 << it->position;
+      rtn |= 1 << it->second;
     }
     value = rtn;
     return true;
@@ -158,8 +145,8 @@ public:
     for (ACE_CDR::UShort i = 0; i < bit_bound_; ++i) {
       const ptn_iterator it = pos_to_name_.find(i);
       if ((it != pos_to_name_.end()) && (value & 1 << i)) {
-        rtn.push_back(it->name);
-        rtn_size += std::strlen(it->name) + 1; // +1 for a delimiter like a pipe ('|') character
+        rtn.push_back(it->second);
+        rtn_size += std::strlen(it->second) + 1; // +1 for a delimiter like a pipe ('|') character
       }
     }
     names = rtn;
