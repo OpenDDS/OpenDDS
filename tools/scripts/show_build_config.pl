@@ -77,7 +77,7 @@ sub show_config {
   show_file("${dds_dir}user_macros.GNU", {optional => 1});
   show_file("${dds_dir}dds/config/OpenDDSConfig.h");
   show_file("${dds_dir}bin/opendds_mwc.pl");
-  show_file("${dds_dir}cmake/config.cmake");
+  show_file("${dds_dir}cmake/config.cmake", {optional => 1}); # not used for cross-compile
 
   show_file("$ace_root/ace/Version.h");
   show_file("$ace_root/bin/MakeProjectCreator/config/default.features", {optional => 1});
