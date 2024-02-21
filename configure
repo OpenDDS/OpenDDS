@@ -2519,8 +2519,8 @@ sub configure_build {
     write_config_h($buildEnvRef);
     write_default_features($buildEnvRef);
     write_platform_macros($buildEnvRef);
-    write_opendds_configh($buildEnvRef);
   }
+  write_opendds_configh($buildEnvRef);
   generate_workspace($buildEnvRef);
   write_environment($buildEnvRef, $buildEnvRef->{'DDS_ROOT'});
 
