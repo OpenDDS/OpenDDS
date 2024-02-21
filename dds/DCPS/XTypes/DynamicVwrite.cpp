@@ -540,6 +540,61 @@ DDS::ReturnCode_t vwrite_primitive_collection(
   return rc;
 }
 
+bool set_enum_helper(const DDS::DynamicType_var& enum_type, ListEnumHelper& helper)
+{
+  DDS::DynamicTypeMembersById_var members_var;
+  if (enum_type->get_all_members(members_var) != DDS::RETCODE_OK) {
+    return false;
+  }
+  DynamicTypeMembersByIdImpl* members = dynamic_cast<DynamicTypeMembersByIdImpl*>(members_var.in());
+  if (!members) {
+    return false;
+  }
+
+  OPENDDS_VECTOR(ListEnumHelper::Pair) pairs(members.size());
+  for (DynamicTypeMembersByIdImpl::const_iterator it = members->begin(), size_t i = 0;
+       it != members->end(); ++it, ++i) {
+    DDS::MemberDescriptor_var md;
+    if (it->second->get_descriptor(md) != DDS::RETCODE_OK) {
+      return false;
+    }
+    pairs[i].name = md->name();
+    pairs[i].value = static_cast<ACE_CDR::Long>(md->id());
+  }
+  helper.pairs(pairs);
+  return true;
+}
+
+bool set_bitmask_helper(const DDS::DynamicType_var& bitmask_type, MapBitmaskHelper& helper)
+{
+  DDS::DynamicTypeMembersById_var members_var;
+  if (bitmask_type->get_all_members(members_var) != DDS::RETCODE_OK) {
+    return false;
+  }
+  DynamicTypeMembersByIdImpl* members = dynamic_cast<DynamicTypeMembersByIdImpl*>(members_var.in());
+  if (!members) {
+    return false;
+  }
+
+  OPENDDS_VECTOR(MapBitmaskHelper::Pair) pairs(members.size());
+  for (DynamicTypeMembersByIdImpl::const_iterator it = members->begin(), size_t i = 0;
+       it != members->end(); ++it, ++i) {
+    DDS::MemberDescriptor_var md;
+    if (it->second->get_descriptor(md) != DDS::RETCODE_OK) {
+      return false;
+    }
+    pairs[i].name = md->name();
+    pairs[i].position = static_cast<ACE_CDR::UShort>(md->id());
+  }
+  DDS::TypeDescriptor_var td;
+  if (bitmask_type->get_descriptor(td) != DDS::RETCODE_OK) {
+    return false;
+  }
+  helper.pairs(pairs);
+  helper.bit_bound(td->bound()[0]);
+  return true;
+}
+
 // Argument containing_tk and params only apply when this is a member of a struct or union,
 // and is ignored when this is an element of a sequence or array.
 bool vwrite_item(ValueWriter& vw, DDS::DynamicData_ptr value, DDS::MemberId id,
@@ -550,6 +605,13 @@ bool vwrite_item(ValueWriter& vw, DDS::DynamicData_ptr value, DDS::MemberId id,
   const DDS::TypeKind item_tk = item_type->get_kind();
   DDS::TypeKind treat_as;
   if (get_equivalent_kind(item_type, treat_as) != DDS::RETCODE_OK) {
+    return false;
+  }
+
+  ListEnumHelper enum_helper(treat_as);
+  MapBitmaskHelper bitmask_helper(treat_as);
+  if ((item_tk == TK_ENUM && !set_enum_helper(item_type, enum_helper)) ||
+      (item_tk == TK_BITMASK && !set_bitmask_helper(item_type, bitmask_helper))) {
     return false;
   }
 
@@ -566,7 +628,7 @@ bool vwrite_item(ValueWriter& vw, DDS::DynamicData_ptr value, DDS::MemberId id,
     }
     if (rc == DDS::RETCODE_OK) {
       if (item_tk == TK_ENUM) {
-        if (!write_enum(vw, item_type, val, treat_as)) {
+        if (!vw.write_enum(val, enum_helper)) {
           return false;
         }
       } else if (!vw.write_int8(val)) {
@@ -588,7 +650,7 @@ bool vwrite_item(ValueWriter& vw, DDS::DynamicData_ptr value, DDS::MemberId id,
     }
     if (rc == DDS::RETCODE_OK) {
       if (item_tk == TK_BITMASK) {
-        if (!write_bitmask(vw, item_type, val)) {
+        if (!vw.write_bitmask(val, bitmask_helper)) {
           return false;
         }
       } else if (!vw.write_uint8(val)) {
@@ -610,7 +672,7 @@ bool vwrite_item(ValueWriter& vw, DDS::DynamicData_ptr value, DDS::MemberId id,
     }
     if (rc == DDS::RETCODE_OK) {
       if (item_tk == TK_ENUM) {
-        if (!write_enum(vw, item_type, val, treat_as)) {
+        if (!vw.write_enum(val, enum_helper)) {
           return false;
         }
       } else if (!vw.write_int16(val)) {
@@ -632,7 +694,7 @@ bool vwrite_item(ValueWriter& vw, DDS::DynamicData_ptr value, DDS::MemberId id,
     }
     if (rc == DDS::RETCODE_OK) {
       if (item_tk == TK_BITMASK) {
-        if (!write_bitmask(vw, item_type, val)) {
+        if (!vw.write_bitmask(val, bitmask_helper)) {
           return false;
         }
       } else if (!vw.write_uint16(val)) {
@@ -654,7 +716,7 @@ bool vwrite_item(ValueWriter& vw, DDS::DynamicData_ptr value, DDS::MemberId id,
     }
     if (rc == DDS::RETCODE_OK) {
       if (item_tk == TK_ENUM) {
-        if (!write_enum(vw, item_type, val, treat_as)) {
+        if (!vw.write_enum(val, enum_helper)) {
           return false;
         }
       } else if (!vw.write_int32(val)) {
@@ -676,7 +738,7 @@ bool vwrite_item(ValueWriter& vw, DDS::DynamicData_ptr value, DDS::MemberId id,
     }
     if (rc == DDS::RETCODE_OK) {
       if (item_tk == TK_BITMASK) {
-        if (!write_bitmask(vw, item_type, val)) {
+        if (!vw.write_bitmask(val, bitmask_helper)) {
           return false;
         }
       } else if (!vw.write_uint32(val)) {
@@ -716,7 +778,7 @@ bool vwrite_item(ValueWriter& vw, DDS::DynamicData_ptr value, DDS::MemberId id,
     }
     if (rc == DDS::RETCODE_OK) {
       if (item_tk == TK_BITMASK) {
-        if (!write_bitmask(vw, item_type, val)) {
+        if (!vw.write_bitmask(val, bitmask_helper)) {
           return false;
         }
       } else if (!vw.write_uint64(val)) {
@@ -1027,6 +1089,11 @@ bool vwrite_discriminator(ValueWriter& vw, DDS::DynamicData_ptr value,
     return false;
   }
 
+  ListEnumHelper enum_helper(treat_disc_as);
+  if (disc_tk == TK_ENUM && !set_enum_helper(disc_type, enum_helper)) {
+    return false;
+  }
+
   DDS::ReturnCode_t rc = DDS::RETCODE_OK;
   switch (treat_disc_as) {
   case TK_BOOLEAN: {
@@ -1087,7 +1154,7 @@ bool vwrite_discriminator(ValueWriter& vw, DDS::DynamicData_ptr value,
     }
     disc_val = static_cast<CORBA::Long>(val);
     if (disc_tk == TK_ENUM) {
-      if (!write_enum(vw, disc_type, val, treat_disc_as)) {
+      if (!vw.write_enum(val, enum_helper)) {
         return false;
       }
     } else {
@@ -1117,7 +1184,7 @@ bool vwrite_discriminator(ValueWriter& vw, DDS::DynamicData_ptr value,
     }
     disc_val = static_cast<CORBA::Long>(val);
     if (disc_tk == TK_ENUM) {
-      if (!write_enum(vw, disc_type, val, treat_disc_as)) {
+      if (!vw.write_enum(val, enum_helper)) {
         return false;
       }
     } else {
@@ -1145,7 +1212,7 @@ bool vwrite_discriminator(ValueWriter& vw, DDS::DynamicData_ptr value,
       return false;
     }
     if (disc_tk == TK_ENUM) {
-      if (!write_enum(vw, disc_type, disc_val, treat_disc_as)) {
+      if (!vw.write_enum(disc_val, enum_helper)) {
         return false;
       }
     } else {

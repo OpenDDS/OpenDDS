@@ -6,6 +6,7 @@
 #ifndef OPENDDS_DCPS_VALUE_WRITER_H
 #define OPENDDS_DCPS_VALUE_WRITER_H
 
+#include "ValueCommon.h"
 #include "Definitions.h"
 #include "XTypes/MemberDescriptorImpl.h"
 #include "XTypes/TypeObject.h"
@@ -154,14 +155,19 @@ public:
 #endif
   }
 
-  virtual bool write_enum(const char* name, ACE_CDR::Long value, XTypes::TypeKind as_int) = 0;
+  virtual bool write_enum(ACE_CDR::Long value, const EnumHelper& helper) = 0;
   template <typename T>
-  bool write_enum(const char* name, const T& value, XTypes::TypeKind as_int = XTypes::TK_INT32)
+  bool write_enum(const T& value, const EnumHelper& helper)
   {
-    return write_enum(name, static_cast<ACE_CDR::Long>(value), as_int);
+    return write_enum(static_cast<ACE_CDR::Long>(value), helper);
   }
 
-  virtual bool write_bitmask(ACE_CDR::ULongLong value, ACE_CDR::ULong bitbound) = 0;
+  virtual bool write_bitmask(ACE_CDR::ULongLong value, const BitmaskHelper& helper) = 0;
+  template <typename T>
+  bool write_bitmask(const T& value, const BitmaskHelper& helper)
+  {
+    return write_bitmask(static_cast<ACE_CDR::ULongLong>(value), helper);
+  }
 
   virtual bool write_absent_value() = 0;
 
@@ -189,7 +195,7 @@ public:
   ///@}
 
 protected:
-  std::string bit_string(ACE_CDR::ULongLong value, ACE_CDR::ULong bitbound);
+  String bitflag_string(ACE_CDR::ULongLong value, const BitmaskHelper& helper);
 
 private:
   template <typename T>

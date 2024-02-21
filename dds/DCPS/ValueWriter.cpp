@@ -126,12 +126,19 @@ ValueWriter::write_char16_array(const ACE_CDR::WChar* x, ACE_CDR::ULong length)
   return write_array_common(x, length, &ValueWriter::write_char16);
 }
 
-std::string
-ValueWriter::bit_string(ACE_CDR::ULongLong value, ACE_CDR::ULong bitbound)
+String
+ValueWriter::bitflag_string(ACE_CDR::ULongLong value, const BitmaskHelper& helper)
 {
-  std::string rtn(bitbound, '0');
-  for (ACE_CDR::ULong i = 0; i < bitbound; ++i) {
-    rtn[bitbound - 1 - i] = value & (1 << i) ? '1' : '0';
+  String rtn;
+  OPENDDS_VECTOR(const char*) names;
+  const size_t size = helper.get_names(names, value);
+  rtn.reserve(size);
+
+  for (size_t i = 0; i < names.size(); ++i) {
+    rtn += names[i];
+    if (i < names.size() - 1) {
+      rtn += '|';
+    }
   }
   return rtn;
 }

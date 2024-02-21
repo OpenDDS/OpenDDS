@@ -612,9 +612,11 @@ bool Xcdr2ValueWriter::write_wstring(const ACE_CDR::WChar* value, size_t length)
   }
 }
 
-bool Xcdr2ValueWriter::write_enum(const char* /*name*/, ACE_CDR::Long value, XTypes::TypeKind as_int)
+bool Xcdr2ValueWriter::write_enum(ACE_CDR::Long value, const EnumHelper& helper)
 {
   bool invalid_int_type = false;
+  XTypes::TypeKind as_int = helper.get_equivalent_int();
+
   if (mode_ == SERIALIZATION_SIZE_MODE) {
     size_t& size = size_states_.top().total_size;
     switch (as_int) {
@@ -660,7 +662,8 @@ bool Xcdr2ValueWriter::write_enum(const char* /*name*/, ACE_CDR::Long value, XTy
   return true;
 }
 
-bool Xcdr2ValueWriter::write_bitmask(ACE_CDR::ULongLong value, ACE_CDR::ULong bitbound)
+// TODO(sonndinh): update this.
+bool Xcdr2ValueWriter::write_bitmask(ACE_CDR::ULongLong value, const BitmaskHelper& helper)
 {
   bool invalid_bitbound = false;
   if (mode_ == SERIALIZATION_SIZE_MODE) {

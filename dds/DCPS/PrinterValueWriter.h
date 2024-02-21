@@ -75,8 +75,8 @@ public:
   bool write_char16(ACE_CDR::WChar value);
   bool write_string(const ACE_CDR::Char* value, size_t length);
   bool write_wstring(const ACE_CDR::WChar* value, size_t length);
-  bool write_enum(const char* /*name*/, ACE_CDR::Long value, XTypes::TypeKind as_int = XTypes::TK_INT32);
-  bool write_bitmask(ACE_CDR::ULongLong value, ACE_CDR::ULong bitbound);
+  bool write_enum(ACE_CDR::Long value, const EnumHelper& helper);
+  bool write_bitmask(ACE_CDR::ULongLong value, const BitmaskHelper& helper);
   bool write_absent_value();
 
   std::string str() const
@@ -311,15 +311,19 @@ bool PrinterValueWriter::write_wstring(const ACE_CDR::WChar* value, size_t lengt
   return true;
 }
 
-bool PrinterValueWriter::write_enum(const char* name, ACE_CDR::Long value, XTypes::TypeKind /*as_int*/)
+bool PrinterValueWriter::write_enum(ACE_CDR::Long value, const EnumHelper& helper)
 {
-  stream_ << name << " (" << value << ")";
-  return true;
+  const char* name = 0;
+  if (helper.get_name(name, value)) {
+    stream_ << name << " (" << value << ")";
+    return true;
+  }
+  return false;
 }
 
-bool PrinterValueWriter::write_bitmask(ACE_CDR::ULongLong value, ACE_CDR::ULong bitbound)
+bool PrinterValueWriter::write_bitmask(ACE_CDR::ULongLong value, const BitmaskHelper& helper)
 {
-  stream_ << bit_string(value, bitbound);
+  stream_ << bitflag_string(value, helper);
   return true;
 }
 

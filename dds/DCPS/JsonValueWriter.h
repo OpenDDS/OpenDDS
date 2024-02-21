@@ -83,8 +83,8 @@ public:
   bool write_char16(ACE_CDR::WChar value);
   bool write_string(const ACE_CDR::Char* value, size_t length);
   bool write_wstring(const ACE_CDR::WChar* value, size_t length);
-  bool write_enum(const char* /*name*/, ACE_CDR::Long value, XTypes::TypeKind as_int = XTypes::TK_INT32);
-  bool write_bitmask(ACE_CDR::ULongLong value, ACE_CDR::ULong bitbound);
+  bool write_enum(ACE_CDR::Long value, const EnumHelper& helper);
+  bool write_bitmask(ACE_CDR::ULongLong value, const BitmaskHelper& helper);
   bool write_absent_value();
 
 private:
@@ -322,16 +322,19 @@ bool JsonValueWriter<Writer>::write_wstring(const ACE_CDR::WChar* value, size_t 
 }
 
 template <typename Writer>
-bool JsonValueWriter<Writer>::write_enum(const char* name, ACE_CDR::Long /*value*/,
-                                         XTypes::TypeKind /*as_int*/)
+bool JsonValueWriter<Writer>::write_enum(ACE_CDR::Long value, const EnumHelper& helper)
 {
-  return writer_.String(name);
+  const char* name = 0;
+  if (helper.get_name(name, value)) {
+    return writer_.String(name);
+  }
+  return false;
 }
 
 template <typename Writer>
-bool JsonValueWriter<Writer>::write_bitmask(ACE_CDR::ULongLong value, ACE_CDR::ULong bitbound)
+bool JsonValueWriter<Writer>::write_bitmask(ACE_CDR::ULongLong value, const BitmaskHelper& helper)
 {
-  return writer_.String(bit_string(value, bitbound).c_str());
+  return writer_.String(bitflag_string(value, helper).c_str());
 }
 
 template <typename Writer>

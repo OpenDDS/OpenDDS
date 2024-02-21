@@ -12,36 +12,6 @@
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
-namespace {
-
-template <typename T>
-bool write_enum(OpenDDS::DCPS::ValueWriter& vw, const DDS::DynamicType_var& enum_type,
-                T enum_val, DDS::TypeKind as_int)
-{
-  const DDS::MemberId enumerator_id = static_cast<DDS::MemberId>(enum_val);
-  DDS::DynamicTypeMember_var dtm;
-  if (enum_type->get_member(dtm, enumerator_id) != DDS::RETCODE_OK) {
-    return false;
-  }
-  DDS::MemberDescriptor_var md;
-  if (dtm->get_descriptor(md) != DDS::RETCODE_OK) {
-    return false;
-  }
-  return vw.write_enum(md->name(), enum_val, as_int);
-}
-
-template <typename T>
-bool write_bitmask(OpenDDS::DCPS::ValueWriter& vw, const DDS::DynamicType_var& bitmask_type, T bitmask_val)
-{
-  DDS::TypeDescriptor_var td;
-  if (bitmask_type->get_descriptor(td) != DDS::RETCODE_OK) {
-    return false;
-  }
-  return vw.write_bitmask(bitmask_val, td->bound()[0]);
-}
-
-}
-
 namespace OpenDDS {
 namespace DCPS {
 
