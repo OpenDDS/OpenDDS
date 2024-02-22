@@ -23,7 +23,7 @@ public:
   virtual XTypes::TypeKind get_equivalent_int() const = 0;
 };
 
-class ListEnumHelper : public EnumHelper {
+class OpenDDS_Dcps_Export ListEnumHelper : public EnumHelper {
 public:
   struct Pair {
     const char* name;
@@ -72,7 +72,7 @@ public:
   virtual XTypes::TypeKind get_equivalent_uint() const = 0;
 };
 
-class MapBitmaskHelper : public BitmaskHelper {
+class OpenDDS_Dcps_Export MapBitmaskHelper : public BitmaskHelper {
 public:
   struct Pair {
     const char* name;
