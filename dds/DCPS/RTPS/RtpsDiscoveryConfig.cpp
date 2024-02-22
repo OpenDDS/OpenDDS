@@ -618,7 +618,7 @@ RtpsDiscoveryConfig::auth_resend_period() const
 void
 RtpsDiscoveryConfig::auth_resend_period(const DCPS::TimeDuration& x)
 {
-  TheServiceParticipant->config_store()->get(config_key("AUTH_RESEND_PERIOD").c_str(),
+  TheServiceParticipant->config_store()->set(config_key("AUTH_RESEND_PERIOD").c_str(),
                                              x,
                                              DCPS::ConfigStoreImpl::Format_FractionalSeconds);
 }
@@ -649,7 +649,7 @@ RtpsDiscoveryConfig::spdp_rtps_relay_address() const
 void
 RtpsDiscoveryConfig::spdp_rtps_relay_address(const DCPS::NetworkAddress& address)
 {
-  TheServiceParticipant->config_store()->get(config_key("SPDP_RTPS_RELAY_ADDRESS").c_str(),
+  TheServiceParticipant->config_store()->set(config_key("SPDP_RTPS_RELAY_ADDRESS").c_str(),
                                              address,
                                              DCPS::ConfigStoreImpl::Format_Required_Port,
                                              DCPS::ConfigStoreImpl::Kind_IPV4);
@@ -666,7 +666,7 @@ RtpsDiscoveryConfig::spdp_rtps_relay_send_period() const
 void
 RtpsDiscoveryConfig::spdp_rtps_relay_send_period(const DCPS::TimeDuration& period)
 {
-  TheServiceParticipant->config_store()->get(config_key("SPDP_RTPS_RELAY_SEND_PERIOD").c_str(),
+  TheServiceParticipant->config_store()->set(config_key("SPDP_RTPS_RELAY_SEND_PERIOD").c_str(),
                                              period,
                                              DCPS::ConfigStoreImpl::Format_IntegerSeconds);
 }
@@ -683,7 +683,7 @@ RtpsDiscoveryConfig::sedp_rtps_relay_address() const
 void
 RtpsDiscoveryConfig::sedp_rtps_relay_address(const DCPS::NetworkAddress& address)
 {
-  TheServiceParticipant->config_store()->get(config_key("SEDP_RTPS_RELAY_ADDRESS").c_str(),
+  TheServiceParticipant->config_store()->set(config_key("SEDP_RTPS_RELAY_ADDRESS").c_str(),
                                              address,
                                              DCPS::ConfigStoreImpl::Format_Required_Port,
                                              DCPS::ConfigStoreImpl::Kind_IPV4);
