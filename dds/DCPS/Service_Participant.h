@@ -11,7 +11,6 @@
 #include "Discovery.h"
 #include "PoolAllocator.h"
 #include "DomainParticipantFactoryImpl.h"
-#include "ConfigUtils.h"
 #include "unique_ptr.h"
 #include "ReactorTask.h"
 #include "JobQueue.h"
