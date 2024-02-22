@@ -86,236 +86,122 @@ TransportRegistry::TransportRegistry()
   lib_directive_map_["repository"] = "dynamic OpenDDS_InfoRepoDiscovery Service_Object * OpenDDS_InfoRepoDiscovery:_make_IRDiscoveryLoader()";
 }
 
-int
-TransportRegistry::load_transport_configuration(const OPENDDS_STRING& file_name,
-                                                ACE_Configuration_Heap& cf)
+bool TransportRegistry::process_transport(const String& transport_id,
+                                          bool is_template,
+                                          OPENDDS_LIST(TransportInst_rch)& instances)
 {
-  const ACE_Configuration_Section_Key& root = cf.root_section();
+  // Get the factory_id for the transport.
+  const String transport_type =
+    TheServiceParticipant->config_store()->get(String((is_template ? "OPENDDS_TRANSPORT_TEMPLATE_" : "OPENDDS_TRANSPORT_") + transport_id + "_TRANSPORT_TYPE").c_str(), "");
 
-  // Create a vector to hold configuration information so we can populate
-  // them after the transports instances are created.
-  typedef std::pair<TransportConfig_rch, OPENDDS_VECTOR(OPENDDS_STRING) > ConfigInfo;
-  OPENDDS_VECTOR(ConfigInfo) configInfoVec;
+  if (transport_type.empty()) {
+    if (log_level >= LogLevel::Error) {
+      ACE_ERROR((LM_ERROR,
+                 "(%P|%t) TransportRegistry::process_transport: "
+                 "missing transport_type in [transport/%C] section.\n",
+                 transport_id.c_str()));
+    }
+    return false;
+  }
 
+  // Create the TransportInst object and load the transport
+  // configuration.
+  TransportInst_rch inst = create_inst(transport_id, transport_type, is_template);
+  if (!inst) {
+    if (log_level >= LogLevel::Error) {
+      ACE_ERROR((LM_ERROR,
+                 "(%P|%t) TransportRegistry::process_transport: "
+                 "Unable to create transport instance in [transport/%C] section.\n",
+                 transport_id.c_str()));
+    }
+    return false;
+  }
+
+  instances.push_back(inst);
+
+  return true;
+}
+
+bool TransportRegistry::process_config(const String& config_id)
+{
+  // Create a TransportConfig object.
+  TransportConfig_rch config = create_config(config_id);
+  if (!config) {
+    if (log_level >= LogLevel::Error) {
+      ACE_ERROR((LM_ERROR,
+                 "(%P|%t) TransportRegistry::process_config: "
+                 "Unable to create transport config in [config/%C] section.\n",
+                 config_id.c_str()));
+    }
+    return false;
+  }
+
+  if (config->transports().empty()) {
+    if (log_level >= LogLevel::Error) {
+      ACE_ERROR((LM_ERROR,
+                 "(%P|%t) TransportRegistry::process_config: "
+                 "No transport instances listed in [config/%C] section.\n",
+                 config_id.c_str()));
+    }
+    return false;
+  }
+
+  const ConfigStoreImpl::StringList transports = config->transports();
+  for (ConfigStoreImpl::StringList::const_iterator pos = transports.begin(), limit = transports.end();
+       pos != limit; ++pos) {
+    TransportInst_rch inst = get_inst(*pos);
+    if (!inst) {
+      if (log_level >= LogLevel::Error) {
+        ACE_ERROR((LM_ERROR,
+                   "(%P|%t) TransportRegistry::load_transport_configuration: "
+                   "The inst (%C) in [config/%C] section is undefined.\n",
+                   pos->c_str(), config->name().c_str()));
+      }
+      return false;
+    }
+    config->instances_.push_back(inst);
+  }
+
+  return true;
+}
+
+int
+TransportRegistry::load_transport_configuration(const String& file_name)
+{
   // Record the transport instances created, so we can place them
   // in the implicit transport configuration for this file.
   OPENDDS_LIST(TransportInst_rch) instances;
 
-  ACE_TString sect_name;
-
-  for (int index = 0;
-       cf.enumerate_sections(root, index, sect_name) == 0;
-       ++index) {
-    const bool is_template = ACE_OS::strcmp(sect_name.c_str(), TRANSPORT_TEMPLATE_SECTION_NAME) == 0;
-    if (ACE_OS::strcmp(sect_name.c_str(), TRANSPORT_SECTION_NAME) == 0 ||
-        is_template) {
-      // found the [transport/*] or [transport_template/*] section,
-      // now iterate through subsections...
-      ACE_Configuration_Section_Key sect;
-      if (cf.open_section(root, sect_name.c_str(), false, sect) != 0) {
-        ACE_ERROR_RETURN((LM_ERROR,
-                          ACE_TEXT("(%P|%t) TransportRegistry::load_transport_configuration: ")
-                          ACE_TEXT("failed to open section %C\n"),
-                          sect_name.c_str()),
-                         -1);
-      } else {
-        // Ensure there are no properties in this section
-        ValueMap vm;
-        if (pullValues(cf, sect, vm) > 0) {
-          // There are values inside [transport]
-          ACE_ERROR_RETURN((LM_ERROR,
-                            ACE_TEXT("(%P|%t) TransportRegistry::load_transport_configuration: ")
-                            ACE_TEXT("transport sections must have a section name\n"),
-                            sect_name.c_str()),
-                           -1);
-        }
-        // Process the subsections of this section (the individual transport
-        // impls).
-        KeyList keys;
-        if (processSections(cf, sect, keys) != 0) {
-          ACE_ERROR_RETURN((LM_ERROR,
-                            ACE_TEXT("(%P|%t) TransportRegistry::load_transport_configuration: ")
-                            ACE_TEXT("too many nesting layers in [%C] section.\n"),
-                            sect_name.c_str()),
-                           -1);
-        }
-        for (KeyList::const_iterator it = keys.begin(); it != keys.end(); ++it) {
-          ACE_TString transport_id = ACE_TEXT_CHAR_TO_TCHAR(it->first.c_str());
-          ACE_Configuration_Section_Key inst_sect = it->second;
-
-          ValueMap values;
-          if (pullValues(cf, it->second, values) != 0) {
-            // Get the factory_id for the transport.
-            OPENDDS_STRING transport_type;
-            ValueMap::const_iterator vm_it = values.find("TRANSPORT_TYPE");
-            if (vm_it == values.end()) {
-              vm_it = values.find("transport_type");
-            }
-            if (vm_it != values.end()) {
-              transport_type = vm_it->second;
-            } else {
-              ACE_ERROR_RETURN((LM_ERROR,
-                                ACE_TEXT("(%P|%t) TransportRegistry::load_transport_configuration: ")
-                                ACE_TEXT("missing transport_type in [transport/%C] section.\n"),
-                                transport_id.c_str()),
-                               -1);
-            }
-
-            // Create the TransportInst object and load the transport
-            // configuration in ACE_Configuration_Heap to the TransportInst
-            // object.
-            const OPENDDS_STRING tid_str = transport_id.c_str() ? ACE_TEXT_ALWAYS_CHAR(transport_id.c_str()) : "";
-            TransportInst_rch inst = create_inst(tid_str, transport_type, is_template);
-            if (!inst) {
-              ACE_ERROR_RETURN((LM_ERROR,
-                                ACE_TEXT("(%P|%t) TransportRegistry::load_transport_configuration: ")
-                                ACE_TEXT("Unable to create transport instance in [transport/%C] section.\n"),
-                                transport_id.c_str()),
-                               -1);
-            }
-
-            instances.push_back(inst);
-
-            // store the transport info
-            TransportEntry entry;
-            entry.transport_name = transport_id;
-            entry.transport_info = values;
-            transports_.push_back(entry);
-          } else {
-            ACE_ERROR_RETURN((LM_ERROR,
-                              ACE_TEXT("(%P|%t) TransportRegistry::load_transport_configuration: ")
-                              ACE_TEXT("missing transport_type in [transport/%C] section.\n"),
-                              transport_id.c_str()),
-                             -1);
-          }
-        }
-      }
-    } else if (ACE_OS::strcmp(sect_name.c_str(), CONFIG_SECTION_NAME) == 0) {
-      // found the [config/*] section, now iterate through subsections...
-      ACE_Configuration_Section_Key sect;
-      if (cf.open_section(root, sect_name.c_str(), false, sect) != 0) {
-        ACE_ERROR_RETURN((LM_ERROR,
-                          ACE_TEXT("(%P|%t) TransportRegistry::load_transport_configuration: ")
-                          ACE_TEXT("failed to open section [%C]\n"),
-                          sect_name.c_str()),
-                         -1);
-      } else {
-        // Ensure there are no properties in this section
-        ValueMap vm;
-        if (pullValues(cf, sect, vm) > 0) {
-          // There are values inside [config]
-          ACE_ERROR_RETURN((LM_ERROR,
-                            ACE_TEXT("(%P|%t) TransportRegistry::load_transport_configuration: ")
-                            ACE_TEXT("config sections must have a section name\n"),
-                            sect_name.c_str()),
-                           -1);
-        }
-        // Process the subsections of this section (the individual config
-        // impls).
-        KeyList keys;
-        if (processSections(cf, sect, keys) != 0) {
-          // Don't allow multiple layers of nesting ([config/x/y]).
-          ACE_ERROR_RETURN((LM_ERROR,
-                            ACE_TEXT("(%P|%t) TransportRegistry::load_transport_configuration: ")
-                            ACE_TEXT("too many nesting layers in [%C] section.\n"),
-                            sect_name.c_str()),
-                           -1);
-        }
-        for (KeyList::const_iterator it = keys.begin(); it != keys.end(); ++it) {
-          OPENDDS_STRING config_id = it->first;
-
-          // Create a TransportConfig object.
-          TransportConfig_rch config = create_config(config_id);
-          if (!config) {
-            ACE_ERROR_RETURN((LM_ERROR,
-                              ACE_TEXT("(%P|%t) TransportRegistry::load_transport_configuration: ")
-                              ACE_TEXT("Unable to create transport config in [config/%C] section.\n"),
-                              config_id.c_str()),
-                             -1);
-          }
-
-          ValueMap values;
-          pullValues(cf, it->second, values);
-
-          ConfigInfo configInfo;
-          configInfo.first = config;
-          for (ValueMap::const_iterator it = values.begin(); it != values.end(); ++it) {
-            OPENDDS_STRING name = it->first;
-            OPENDDS_STRING value = it->second;
-            if (name == "transports") {
-              char delim = ',';
-              size_t pos = 0;
-              OPENDDS_STRING token;
-              while ((pos = value.find(delim)) != OPENDDS_STRING::npos) {
-                token = value.substr(0, pos);
-                configInfo.second.push_back(token);
-                value.erase(0, pos + 1);
-              }
-
-              // store the config name for the transport entry
-              for (OPENDDS_VECTOR(TransportEntry)::iterator it = transports_.begin(); it != transports_.end(); ++it) {
-                if (!ACE_OS::strcmp(ACE_TEXT_ALWAYS_CHAR(it->transport_name.c_str()), value.c_str())) {
-                  it->config_name = ACE_TEXT_CHAR_TO_TCHAR(config_id.c_str());
-                  break;
-                }
-              }
-
-              configInfo.second.push_back(value);
-
-              configInfoVec.push_back(configInfo);
-            } else if (name == "swap_bytes") {
-              if ((value == "1") || (value == "true")) {
-                config->swap_bytes_ = true;
-              } else if ((value != "0") && (value != "false")) {
-                ACE_ERROR_RETURN((LM_ERROR,
-                                  ACE_TEXT("(%P|%t) TransportRegistry::load_transport_configuration: ")
-                                  ACE_TEXT("Illegal value for swap_bytes (%C) in [config/%C] section.\n"),
-                                  value.c_str(), config_id.c_str()),
-                                 -1);
-              }
-            } else if (name == "passive_connect_duration") {
-              if (!convertToInteger(value,
-                                    config->passive_connect_duration_)) {
-                ACE_ERROR_RETURN((LM_ERROR,
-                                  ACE_TEXT("(%P|%t) TransportRegistry::load_transport_configuration: ")
-                                  ACE_TEXT("Illegal integer value for passive_connect_duration (%C) in [config/%C] section.\n"),
-                                  value.c_str(), config_id.c_str()),
-                                 -1);
-              }
-            } else {
-              ACE_ERROR_RETURN((LM_ERROR,
-                                ACE_TEXT("(%P|%t) TransportRegistry::load_transport_configuration: ")
-                                ACE_TEXT("Unexpected entry (%C) in [config/%C] section.\n"),
-                                name.c_str(), config_id.c_str()),
-                               -1);
-            }
-          }
-          if (configInfo.second.empty()) {
-            ACE_ERROR_RETURN((LM_ERROR,
-                              ACE_TEXT("(%P|%t) TransportRegistry::load_transport_configuration: ")
-                              ACE_TEXT("No transport instances listed in [config/%C] section.\n"),
-                              config_id.c_str()),
-                             -1);
-          }
-        }
+  {
+    const ConfigStoreImpl::StringList transports =
+      TheServiceParticipant->config_store()->get_section_names("OPENDDS_TRANSPORT");
+    for (ConfigStoreImpl::StringList::const_iterator pos = transports.begin(), limit = transports.end();
+         pos != limit; ++pos) {
+      if (!process_transport(*pos, false, instances)) {
+        return -1;
       }
     }
   }
 
-  // Populate the configurations with instances
-  for (unsigned int i = 0; i < configInfoVec.size(); ++i) {
-    TransportConfig_rch config = configInfoVec[i].first;
-    OPENDDS_VECTOR(OPENDDS_STRING)& insts = configInfoVec[i].second;
-    for (unsigned int j = 0; j < insts.size(); ++j) {
-      TransportInst_rch inst = get_inst(insts[j]);
-      if (!inst) {
-        ACE_ERROR_RETURN((LM_ERROR,
-                          ACE_TEXT("(%P|%t) TransportRegistry::load_transport_configuration: ")
-                          ACE_TEXT("The inst (%C) in [config/%C] section is undefined.\n"),
-                          insts[j].c_str(), config->name().c_str()),
-                         -1);
+  {
+    const ConfigStoreImpl::StringList transports =
+      TheServiceParticipant->config_store()->get_section_names("OPENDDS_TRANSPORT_TEMPLATE");
+    for (ConfigStoreImpl::StringList::const_iterator pos = transports.begin(), limit = transports.end();
+         pos != limit; ++pos) {
+      if (!process_transport(*pos, true, instances)) {
+        return -1;
       }
-      config->instances_.push_back(inst);
+    }
+  }
+
+  {
+    const ConfigStoreImpl::StringList configs =
+      TheServiceParticipant->config_store()->get_section_names("OPENDDS_CONFIG");
+    for (ConfigStoreImpl::StringList::const_iterator pos = configs.begin(), limit = configs.end();
+         pos != limit; ++pos) {
+      if (!process_config(*pos)) {
+        return -1;
+      }
     }
   }
 
@@ -324,11 +210,13 @@ TransportRegistry::load_transport_configuration(const OPENDDS_STRING& file_name,
   if (!instances.empty()) {
     TransportConfig_rch config = create_config(file_name);
     if (!config) {
-      ACE_ERROR_RETURN((LM_ERROR,
-                        ACE_TEXT("(%P|%t) TransportRegistry::load_transport_configuration: ")
-                        ACE_TEXT("Unable to create default transport config.\n"),
-                        file_name.c_str()),
-                       -1);
+      if (log_level >= LogLevel::Error) {
+        ACE_ERROR((LM_ERROR,
+                   "(%P|%t) TransportRegistry::load_transport_configuration: "
+                   "Unable to create default transport config.\n",
+                   file_name.c_str()));
+      }
+      return -1;
     }
     instances.sort(predicate);
     for (OPENDDS_LIST(TransportInst_rch)::const_iterator it = instances.begin();
@@ -532,7 +420,6 @@ TransportRegistry::release()
     }
   }
 
-  transports_.clear();
   type_map_.clear();
   config_map_.clear();
   domain_default_config_map_.clear();
@@ -544,38 +431,6 @@ TransportRegistry::released() const
 {
   GuardType guard(lock_);
   return released_;
-}
-
-bool
-TransportRegistry::get_transport_info(const ACE_TString& config_name, TransportEntry& inst)
-{
-  bool ret = false;
-  if (has_transports()) {
-    for (OPENDDS_VECTOR(TransportEntry)::const_iterator i = transports_.begin(); i != transports_.end(); ++i) {
-      if (!ACE_OS::strcmp(ACE_TEXT_ALWAYS_CHAR(config_name.c_str()), ACE_TEXT_ALWAYS_CHAR(i->config_name.c_str()))) {
-        inst.transport_name = i->transport_name;
-        inst.config_name = i->config_name;
-        inst.transport_info = i->transport_info;
-
-        ret = true;
-        break;
-      }
-    }
-  }
-
-  if (DCPS_debug_level > 0) {
-    ACE_DEBUG((LM_DEBUG,
-               ACE_TEXT("(%P|%t) TransportRegistry::get_transport_info: ")
-               ACE_TEXT("%C config %s\n"),
-               ret ? "found" : "did not find", config_name.c_str()));
-  }
-
-  return ret;
-}
-
-bool TransportRegistry::has_transports() const
-{
-  return !transports_.empty();
 }
 
 void
