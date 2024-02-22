@@ -1,9 +1,7 @@
-project(*): opendds_uses_cxx17, dcps_test, googletest, msvc_bigobj {
+project(*): opendds_cxx11, opendds_uses_cxx17, dcps_test, googletest, msvc_bigobj {
   exename = optional_annotation
   exeout = .
   macros += CPP11_MAPPING=1
-
-  dcps_ts_flags += -Lc++11
 
   Source_Files {
     main.cpp
