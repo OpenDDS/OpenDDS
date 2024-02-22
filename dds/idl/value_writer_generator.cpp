@@ -209,7 +209,9 @@ namespace {
       const AST_PredefinedType::PredefinedType pt =
         dynamic_cast<AST_PredefinedType*>(actual)->pt();
       be_global->impl_ << indent <<
-        "if (!value_writer.write_" << primitive_type(pt) << "_array (" << expression << (use_cxx11 ? ".data()" : ".get_buffer()") << ", " << expression << "." << length_func << "())) {\n" <<
+        "if (!value_writer.write_" << primitive_type(pt) << "_array (" <<
+        expression << (use_cxx11 ? ".data()" : ".get_buffer()") <<
+        ", static_cast<ACE_CDR::ULong>(" << expression << "." << length_func << "()))) {\n" <<
         indent << "  return false;\n" <<
         indent << "}\n";
     } else {
@@ -327,8 +329,6 @@ bool value_writer_generator::gen_enum(AST_Enum*,
   be_global->add_include("dds/DCPS/ValueWriter.h", BE_GlobalData::STREAM_H);
 
   const std::string type_name = scoped(name);
-  const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
-
   {
     NamespaceGuard guard;
 
@@ -339,16 +339,13 @@ bool value_writer_generator::gen_enum(AST_Enum*,
 
     be_global->impl_ <<
       "  static const ListEnumHelper::Pair pairs[] = {";
-    for (std::vector<AST_EnumVal*>::const_iterator pos = contents.begin(), limit = contents.end();
-         pos != limit; ++pos) {
-      AST_EnumVal* const val = *pos;
-      const std::string value_name = (use_cxx11 ? (type_name + "::") : ("::" + module_scope(name)))
-        + val->local_name()->get_string();
-      if (pos != contents.begin()) {
-        be_global->impl_ << ",";
+    for (size_t i = 0; i != contents.size(); ++i) {
+      if (i) {
+        be_global->impl_ << ',';
       }
+      const std::string idl_name = canonical_name(contents[i]);
       be_global->impl_ <<
-        '{' << '"' << canonical_name(val) << "\"," << value_name << '}';
+        '{' << '"' << idl_name << '"' << ',' << contents[i]->constant_value()->ev()->u.eval << '}';
     }
     be_global->impl_ <<
       ",{0, 0}};\n"
