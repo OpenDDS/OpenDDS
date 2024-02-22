@@ -585,7 +585,10 @@ bool vwrite_item(ValueWriter& vw, DDS::DynamicData_ptr value, DDS::MemberId id,
   if (item_type->get_descriptor(td) != DDS::RETCODE_OK) {
     return false;
   }
-  MapBitmaskHelper bitmask_helper(td->bound()[0], treat_as);
+  MapBitmaskHelper bitmask_helper(treat_as);
+  if (item_tk == TK_BITMASK) {
+    bitmask_helper.bit_bound(td->bound()[0]);
+  }
   if ((item_tk == TK_ENUM && !set_enumerated_helper<ACE_CDR::Long>(item_type, enum_helper)) ||
       (item_tk == TK_BITMASK && !set_enumerated_helper<ACE_CDR::UShort>(item_type, bitmask_helper))) {
     return false;

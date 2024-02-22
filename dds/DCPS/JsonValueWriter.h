@@ -334,7 +334,7 @@ bool JsonValueWriter<Writer>::write_enum(ACE_CDR::Long value, const EnumHelper& 
 template <typename Writer>
 bool JsonValueWriter<Writer>::write_bitmask(ACE_CDR::ULongLong value, const BitmaskHelper& helper)
 {
-  return writer_.String(bitflag_string(value, helper).c_str());
+  return writer_.String(bitmask_to_string(value, helper).c_str());
 }
 
 template <typename Writer>

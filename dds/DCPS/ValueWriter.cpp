@@ -127,7 +127,7 @@ ValueWriter::write_char16_array(const ACE_CDR::WChar* x, ACE_CDR::ULong length)
 }
 
 String
-ValueWriter::bitflag_string(ACE_CDR::ULongLong value, const BitmaskHelper& helper)
+ValueWriter::bitmask_to_string(ACE_CDR::ULongLong value, const BitmaskHelper& helper)
 {
   String rtn;
   OPENDDS_VECTOR(const char*) names;

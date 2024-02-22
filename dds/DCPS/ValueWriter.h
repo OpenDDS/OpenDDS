@@ -156,6 +156,7 @@ public:
   }
 
   virtual bool write_enum(ACE_CDR::Long value, const EnumHelper& helper) = 0;
+
   template <typename T>
   bool write_enum(const T& value, const EnumHelper& helper)
   {
@@ -163,6 +164,7 @@ public:
   }
 
   virtual bool write_bitmask(ACE_CDR::ULongLong value, const BitmaskHelper& helper) = 0;
+
   template <typename T>
   bool write_bitmask(const T& value, const BitmaskHelper& helper)
   {
@@ -195,7 +197,7 @@ public:
   ///@}
 
 protected:
-  String bitflag_string(ACE_CDR::ULongLong value, const BitmaskHelper& helper);
+  String bitmask_to_string(ACE_CDR::ULongLong value, const BitmaskHelper& helper);
 
 private:
   template <typename T>

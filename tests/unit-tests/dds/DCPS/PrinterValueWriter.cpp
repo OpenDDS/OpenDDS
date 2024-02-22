@@ -7,6 +7,8 @@
 
 #include <gtest/gtest.h>
 
+#ifndef OPENDDS_SAFETY_PROFILE
+
 using namespace OpenDDS::DCPS;
 
 TEST(dds_DCPS_PrinterValueWriter, begin_struct)
@@ -484,3 +486,5 @@ TEST(dds_DCPS_PrinterValueWriter, write_absent_value)
   pvw.end_struct();
   EXPECT_STREQ(pvw.str().c_str(), "    Int32Field: 10\n    NullField: null");
 }
+
+#endif

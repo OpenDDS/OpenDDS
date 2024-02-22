@@ -6,6 +6,8 @@
 #ifndef OPENDDS_DCPS_PRINTER_VALUE_WRITER_H
 #define OPENDDS_DCPS_PRINTER_VALUE_WRITER_H
 
+#ifndef OPENDDS_SAFETY_PROFILE
+
 #include "ValueWriter.h"
 #include "ValueHelper.h"
 #include "dcps_export.h"
@@ -323,7 +325,7 @@ bool PrinterValueWriter::write_enum(ACE_CDR::Long value, const EnumHelper& helpe
 
 bool PrinterValueWriter::write_bitmask(ACE_CDR::ULongLong value, const BitmaskHelper& helper)
 {
-  stream_ << bitflag_string(value, helper);
+  stream_ << bitmask_to_string(value, helper);
   return true;
 }
 
@@ -337,5 +339,7 @@ bool PrinterValueWriter::write_absent_value()
 } // namespace OpenDDS
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
+
+#endif
 
 #endif  /* OPENDDS_DCPS_PRINTER_VALUE_WRITER_H */
