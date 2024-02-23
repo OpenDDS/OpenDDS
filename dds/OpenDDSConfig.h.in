@@ -7,7 +7,7 @@
 
 // This file should not #include any other files.
 
-// To add variables to this file, update both dds/CMakeLists.txt and configure.
+// To add variables to this file, update both CMakeLists.txt and configure.
 
 #define OPENDDS_CONFIG_AUTO_STATIC_INCLUDES @OPENDDS_CONFIG_AUTO_STATIC_INCLUDES@
 
