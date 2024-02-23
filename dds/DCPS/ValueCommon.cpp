@@ -60,7 +60,7 @@ bool MapBitmaskHelper::get_value(ACE_CDR::ULongLong& value, const OPENDDS_VECTOR
     if (it == name_to_pos_.end()) {
       return false;
     }
-    rtn |= 1 << it->second;
+    rtn |= 1ull << it->second;
   }
   value = rtn;
   return true;
@@ -72,7 +72,7 @@ size_t MapBitmaskHelper::get_names(OPENDDS_VECTOR(const char*)& names, ACE_CDR::
   OPENDDS_VECTOR(const char*) rtn;
   for (ACE_CDR::UShort i = 0; i < bit_bound_; ++i) {
     const ptn_iterator it = pos_to_name_.find(i);
-    if ((it != pos_to_name_.end()) && (value & 1 << i)) {
+    if ((it != pos_to_name_.end()) && (value & 1ull << i)) {
       rtn.push_back(it->second);
       rtn_size += std::strlen(it->second) + 1; // +1 for a delimiter like a pipe ('|') character
     }
