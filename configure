@@ -227,6 +227,7 @@ my @specs = # Array of array-refs, each inner array is an option group which
     'macros=s@', 'Extra text for platform_macros.GNU',
     'features=s@', 'Extra text for default.features',
     'mpcopts=s@', 'Extra command-line args for MPC',
+    'boottime|boottime!', 'Use CLOCK_BOOTTIME as the monotonic time source',
    ],
    ['Optional dependencies for OpenDDS (disabled by default unless noted otherwise):',
     'java:s', 'Java development kit (use JAVA_HOME)',
@@ -1344,10 +1345,15 @@ sub write_opendds_configh {
   my $CFGIN = new FileHandle;
   open($CFGIN, 'dds/OpenDDSConfig.h.in') or die("Can't open OpenDDSConfig.h.in for reading: $!\nStopped");
 
+  my %config = (
+    'OPENDDS_CONFIG_AUTO_STATIC_INCLUDES' => 0,
+    'OPENDDS_CONFIG_MONOTONIC_USES_BOOTTIME' => $opts{'boottime'} // 0,
+  );
+
   sub replace_value {
     my $var = shift;
-    return '0' if $var eq 'OPENDDS_CONFIG_AUTO_STATIC_INCLUDES';
-    return 'UNDEFINED';
+    return 'UNDEFINED_NEED_TO_UPDATE_CONFIGURE_SCRIPT' unless exists $config{$var};
+    return $config{$var};
   }
 
   while (<$CFGIN>) {
