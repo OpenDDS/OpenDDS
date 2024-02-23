@@ -76,7 +76,7 @@ sub show_config {
   show_file("${dds_dir}VERSION.txt");
   # use 'optional' for the following files, they may not be in the host side of cross-compile
   show_file("${dds_dir}user_macros.GNU", {optional => 1});
-  show_file("${dds_dir}dds/config/OpenDDSConfig.h", {optional => 1});
+  show_file("${dds_dir}dds/OpenDDSConfig.h", {optional => 1});
   show_file("${dds_dir}bin/opendds_mwc.pl", {optional => 1});
   show_file("${dds_dir}cmake/config.cmake", {optional => 1});
 

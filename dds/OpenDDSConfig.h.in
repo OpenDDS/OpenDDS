@@ -1,5 +1,5 @@
-#ifndef OPENDDS_DDS_CONFIG_OPENDDSCONFIG_H
-#define OPENDDS_DDS_CONFIG_OPENDDSCONFIG_H
+#ifndef OPENDDS_DDS_OPENDDSCONFIG_H
+#define OPENDDS_DDS_OPENDDSCONFIG_H
 
 // OpenDDSConfig.h.in is an input file that will be transformed to
 // OpenDDSConfig.h by the configure script or the CMake configure_file command.

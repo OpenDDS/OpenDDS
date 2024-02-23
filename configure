@@ -1340,9 +1340,9 @@ EOT
 
 sub write_opendds_configh {
   my %buildEnv = %{shift()};
-  my $CFGH = backup_and_open("$buildEnv{'DDS_ROOT'}/dds/config/OpenDDSConfig.h");
+  my $CFGH = backup_and_open("$buildEnv{'DDS_ROOT'}/dds/OpenDDSConfig.h");
   my $CFGIN = new FileHandle;
-  open($CFGIN, 'dds/config/OpenDDSConfig.h.in') or die("Can't open OpenDDSConfig.h.in for reading: $!\nStopped");
+  open($CFGIN, 'dds/OpenDDSConfig.h.in') or die("Can't open OpenDDSConfig.h.in for reading: $!\nStopped");
 
   sub replace_value {
     my $var = shift;
@@ -1357,7 +1357,7 @@ sub write_opendds_configh {
 
   $CFGIN->close;
   $CFGH->close;
-  print "Wrote $buildEnv{'DDS_ROOT'}/dds/config/OpenDDSConfig.h\n"
+  print "Wrote $buildEnv{'DDS_ROOT'}/dds/OpenDDSConfig.h\n"
     if $opts{'verbose'};
   dump_and_unlink($CFGH) if $opts{'dry-run'};
 }
