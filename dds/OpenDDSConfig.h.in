@@ -9,6 +9,6 @@
 
 // To add variables to this file, update both dds/CMakeLists.txt and configure.
 
-#define OPENDDS_USES_AUTO_STATIC_INCLUDES @OPENDDS_USES_AUTO_STATIC_INCLUDES@
+#define OPENDDS_CONFIG_AUTO_STATIC_INCLUDES @OPENDDS_CONFIG_AUTO_STATIC_INCLUDES@
 
 #endif

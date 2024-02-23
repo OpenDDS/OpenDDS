@@ -1346,7 +1346,7 @@ sub write_opendds_configh {
 
   sub replace_value {
     my $var = shift;
-    return '0' if $var eq 'OPENDDS_USES_AUTO_STATIC_INCLUDES';
+    return '0' if $var eq 'OPENDDS_CONFIG_AUTO_STATIC_INCLUDES';
     return 'UNDEFINED';
   }
 

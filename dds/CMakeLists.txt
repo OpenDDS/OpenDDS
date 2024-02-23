@@ -633,7 +633,7 @@ opendds_target_sources(OpenDDS_Dcps
 )
 
 # Used in OpenDDSConfig.h.in, always true for CMake builds
-set(OPENDDS_USES_AUTO_STATIC_INCLUDES 1)
+set(OPENDDS_CONFIG_AUTO_STATIC_INCLUDES 1)
 
 get_target_property(gendir OpenDDS_Dcps OPENDDS_GENERATED_DIRECTORY)
 set(config_file "${gendir}/dds/OpenDDSConfig.h")
