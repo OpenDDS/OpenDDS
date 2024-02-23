@@ -50,7 +50,6 @@ project(OpenDDS_Dcps): core, coverage_optional, \
   Header_Files {
     Version.h
     Versioned_Namespace.h
-    config
     DCPS
     DCPS/transport/framework
     DCPS/security/framework
