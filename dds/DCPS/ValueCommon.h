@@ -30,11 +30,11 @@ public:
     ACE_CDR::Long value;
   };
 
-  ListEnumHelper(XTypes::TypeKind as_int)
+  explicit ListEnumHelper(XTypes::TypeKind as_int)
     : as_int_(as_int)
   {}
 
-  ListEnumHelper(const Pair* pairs, XTypes::TypeKind as_int = XTypes::TK_INT32)
+  explicit ListEnumHelper(const Pair* pairs, XTypes::TypeKind as_int = XTypes::TK_INT32)
     : as_int_(as_int)
   {
     for (const Pair* ptr = pairs; ptr->name; ++ptr) {
@@ -84,7 +84,7 @@ public:
   typedef PosToNameMap::const_iterator ptn_iterator;
   typedef NameToPosMap::const_iterator ntp_iterator;
 
-  MapBitmaskHelper(XTypes::TypeKind as_uint)
+  explicit MapBitmaskHelper(XTypes::TypeKind as_uint)
     : as_uint_(as_uint)
   {}
 

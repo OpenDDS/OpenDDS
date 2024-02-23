@@ -561,7 +561,8 @@ bool set_enumerated_helper(const DDS::DynamicType_var& type, HelperT& helper)
     if (it->second->get_descriptor(md) != DDS::RETCODE_OK) {
       return false;
     }
-    pairs[i] = (typename HelperT::Pair){ md->name(), static_cast<ValueT>(md->id()) };
+    typename HelperT::Pair tmp = { md->name(), static_cast<ValueT>(md->id()) };
+    pairs[i] = tmp;
   }
   helper.pairs(pairs);
   return true;
