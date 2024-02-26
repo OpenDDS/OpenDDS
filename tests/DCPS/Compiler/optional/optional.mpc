@@ -1,4 +1,4 @@
-project(*): opendds_cxx11, opendds_uses_cxx17, dcps_test, googletest, msvc_bigobj {
+project(*): opendds_uses_cxx17, dcps_test, googletest, msvc_bigobj {
   exename = optional_annotation
   exeout = .
   macros += CPP11_MAPPING=1
@@ -9,10 +9,5 @@ project(*): opendds_cxx11, opendds_uses_cxx17, dcps_test, googletest, msvc_bigob
 
   TypeSupport_Files {
     optional.idl
-  }
-
-  IDL_Files {
-    optional.idl
-    optionalTypeSupport.idl
   }
 }
