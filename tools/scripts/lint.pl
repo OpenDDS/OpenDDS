@@ -456,7 +456,7 @@ my %all_checks = (
 
   gettimeofday => {
     path_matches_all_of => ['cpp_file', 'in_dds_dcps'],
-    line_matches => qr/(gettimeofday|ACE_Time_Value\(\)\.now\(\))/,
+    line_matches => qr/(\bgettimeofday\b|ACE_Time_Value\(\)\.now\(\))/,
     message => [
       'ACE_OS::gettimeofday() and "ACE_Time_Value().now()" are forbidden in the core libraries.',
       'See https://opendds.readthedocs.io/en/master/internal/dev_guidelines.html#time for details.',
