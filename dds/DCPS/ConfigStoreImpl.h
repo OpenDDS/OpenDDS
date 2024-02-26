@@ -24,8 +24,8 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-const char OPENDDS_CONFIG_DEBUG_LOGGING[] = "OPENDDS_CONFIG_DEBUG_LOGGING";
-const bool OPENDDS_CONFIG_DEBUG_LOGGING_default = false;
+const char CONFIG_DEBUG_LOGGING[] = "CONFIG_DEBUG_LOGGING";
+const bool CONFIG_DEBUG_LOGGING_default = false;
 
 OpenDDS_Dcps_Export
 OPENDDS_VECTOR(String) split(const String& str,
