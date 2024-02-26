@@ -77,7 +77,7 @@ set(_OPENDDS_ALL_FEATURES)
 set(_OPENDDS_FEATURE_VARS)
 set(_OPENDDS_MPC_FEATURES)
 function(_opendds_feature name default_value)
-  set(no_value_options MPC MPC_INVERTED)
+  set(no_value_options MPC MPC_INVERTED CONFIG)
   set(single_value_options MPC_NAME DOC TYPE)
   set(multi_value_options)
   cmake_parse_arguments(arg
@@ -88,8 +88,10 @@ function(_opendds_feature name default_value)
 
   string(TOLOWER "${name}" lowercase_name)
   list(APPEND _OPENDDS_ALL_FEATURES "${lowercase_name}")
+  set(config_name "OPENDDS_CONFIG_${name}")
   set(name "OPENDDS_${name}")
   set("${name}" "${default_value}" CACHE "${arg_TYPE}" "${arg_DOC}")
+  set(value ${${name}})
   list(APPEND _OPENDDS_FEATURE_VARS "${name}")
   if(arg_MPC OR arg_MPC_INVERTED)
     if(NOT DEFINED arg_MPC_NAME)
@@ -102,12 +104,25 @@ function(_opendds_feature name default_value)
       set(mpc_true 1)
       set(mpc_false 0)
     endif()
-    if(${${name}})
+    if(value)
       set(mpc_feature "${arg_MPC_NAME}=${mpc_true}")
     else()
       set(mpc_feature "${arg_MPC_NAME}=${mpc_false}")
     endif()
     list(APPEND _OPENDDS_MPC_FEATURES "${mpc_feature}")
+  endif()
+
+  if(arg_CONFIG)
+    if(arg_TYPE STREQUAL BOOL)
+      if(value)
+        set(config_value 1)
+      else()
+        set(config_value 0)
+      endif()
+    else()
+      set(config_value "${value}")
+    endif()
+    set("${config_name}" "${config_value}" CACHE INTERNAL "" FORCE)
   endif()
 
   set(_OPENDDS_ALL_FEATURES "${_OPENDDS_ALL_FEATURES}" PARENT_SCOPE)
@@ -116,23 +131,24 @@ function(_opendds_feature name default_value)
 endfunction()
 
 # OpenDDS Features
-_opendds_feature(BUILT_IN_TOPICS ON DOC "Enables built-in-topics (BITs)")
-_opendds_feature(OBJECT_MODEL_PROFILE ON DOC "Allows using presentation group QoS")
-_opendds_feature(PERSISTENCE_PROFILE ON
+_opendds_feature(BUILT_IN_TOPICS ON CONFIG DOC "Enables built-in-topics (BITs)")
+_opendds_feature(OBJECT_MODEL_PROFILE ON CONFIG DOC "Allows using presentation group QoS")
+_opendds_feature(PERSISTENCE_PROFILE ON CONFIG
   DOC "Allows using the durability and durability service QoS")
-_opendds_feature(OWNERSHIP_PROFILE ON
+_opendds_feature(OWNERSHIP_PROFILE ON CONFIG
   DOC "Allows history depth QoS and implies OPENDDS_OWNERSHIP_KIND_EXCLUSIVE")
-_opendds_feature(OWNERSHIP_KIND_EXCLUSIVE ${OPENDDS_OWNERSHIP_PROFILE}
+_opendds_feature(OWNERSHIP_KIND_EXCLUSIVE "${OPENDDS_OWNERSHIP_PROFILE}" CONFIG
   DOC "Allows the EXCLUSIVE ownership QoS")
-_opendds_feature(CONTENT_SUBSCRIPTION ON
+_opendds_feature(CONTENT_SUBSCRIPTION ON CONFIG
   DOC "Implies OPENDDS_CONTENT_FILTERED_TOPIC, OPENDDS_MULTI_TOPIC, and OPENDDS_QUERY_CONDITION")
-_opendds_feature(CONTENT_FILTERED_TOPIC ${OPENDDS_CONTENT_SUBSCRIPTION}
+_opendds_feature(CONTENT_FILTERED_TOPIC "${OPENDDS_CONTENT_SUBSCRIPTION}" CONFIG
   DOC "Allows using ContentFilteredTopic")
-_opendds_feature(MULTI_TOPIC ${OPENDDS_CONTENT_SUBSCRIPTION} DOC "Allows using MultiTopic")
-_opendds_feature(QUERY_CONDITION ${OPENDDS_CONTENT_SUBSCRIPTION} DOC "Allows using QueryCondition")
-_opendds_feature(SUPPRESS_ANYS ON DOC "Default for opendds_target_sources(SUPPRESS_ANYS)")
-_opendds_feature(SECURITY OFF DOC "Build with RTPS Security support")
-_opendds_feature(SAFETY_PROFILE OFF DOC "Build using Safety Profile (Not for CMake-built OpenDDS)")
+_opendds_feature(MULTI_TOPIC "${OPENDDS_CONTENT_SUBSCRIPTION}" CONFIG DOC "Allows using MultiTopic")
+_opendds_feature(QUERY_CONDITION "${OPENDDS_CONTENT_SUBSCRIPTION}" CONFIG
+  DOC "Allows using QueryCondition")
+_opendds_feature(SUPPRESS_ANYS ON CONFIG DOC "Default for opendds_target_sources(SUPPRESS_ANYS)")
+_opendds_feature(SECURITY OFF CONFIG DOC "Build with RTPS Security support")
+_opendds_feature(SAFETY_PROFILE OFF CONFIG DOC "Build using Safety Profile (Not for CMake-built OpenDDS)")
 
 # ACE Features
 if(NOT CMAKE_BUILD_TYPE OR CMAKE_BUILD_TYPE STREQUAL "Debug")
