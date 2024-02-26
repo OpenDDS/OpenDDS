@@ -28,6 +28,7 @@ function(_opendds_library target)
     "${no_value_options}" "${single_value_options}" "${multi_value_options}" ${ARGN})
 
   _opendds_alias(${target})
+  target_link_libraries(${target} PUBLIC OpenDDS_Config)
 
   if(OPENDDS_CXX_STD)
     target_compile_features(${target} PUBLIC "cxx_std_${OPENDDS_CXX_STD}")
@@ -86,6 +87,7 @@ function(_opendds_executable target)
     "${no_value_options}" "${single_value_options}" "${multi_value_options}" ${ARGN})
 
   _opendds_alias(${target})
+  target_link_libraries(${target} PRIVATE OpenDDS_Config)
   set_target_properties(${target} PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${OPENDDS_BIN_DIR}")
 
   if(OPENDDS_CXX_STD)

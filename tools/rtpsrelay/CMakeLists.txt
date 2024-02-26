@@ -27,4 +27,4 @@ add_executable(RtpsRelay
   SubscriptionListener.cpp
 )
 _opendds_executable(RtpsRelay)
-target_link_libraries(RtpsRelay ${dep_libs})
+target_link_libraries(RtpsRelay PRIVATE ${dep_libs})

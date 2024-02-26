@@ -3,7 +3,7 @@
 
 #include "Definitions.h"
 
-#if OPENDDS_USES_AUTO_STATIC_INCLUDES
+#if OPENDDS_CONFIG_AUTO_STATIC_INCLUDES
 // Explict checks depend on *_HAS_DLL macros being set to 0 to initialize static
 // plugins.
 

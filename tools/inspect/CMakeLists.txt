@@ -9,4 +9,4 @@ include(opendds_build_helpers)
 
 add_executable(inspect Inspect.cpp)
 _opendds_executable(inspect)
-target_link_libraries(inspect ${dep_libs})
+target_link_libraries(inspect PRIVATE ${dep_libs})
