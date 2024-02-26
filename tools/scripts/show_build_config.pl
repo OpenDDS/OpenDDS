@@ -1,5 +1,12 @@
 #!/usr/bin/env perl
 
+# Outputs the contents of files in ACE and OpenDDS that are written by configure
+
+# After running configure (or manually configuring a build) run this script
+# with the root of the OpenDDS source tree as the current directory.
+# No environment variables need to be set to run this script.
+# Cross-compile builds are supported when using $SOURCE_DIR/build/{host,target}
+
 use strict;
 use warnings;
 
@@ -65,14 +72,15 @@ sub show_config {
   die "ACE_ROOT not found in setenv" unless $ace_root;
   die "ACE_ROOT in setenv doesn't exist: \"$ace_root\"" unless -d $ace_root;
 
-  my $user_macros = ($dds_root eq '.' ? '' : "$dds_root/") . 'user_macros.GNU';
-  show_file($user_macros, {optional => 1});
-
-  my $opendds_version = ($dds_root eq '.' ? '' : "$dds_root/") . 'VERSION.txt';
-  show_file($opendds_version);
+  my $dds_dir = $dds_root eq '.' ? '' : "$dds_root/";
+  show_file("${dds_dir}VERSION.txt");
+  # use 'optional' for the following files, they may not be in the host side of cross-compile
+  show_file("${dds_dir}user_macros.GNU", {optional => 1});
+  show_file("${dds_dir}dds/OpenDDSConfig.h", {optional => 1});
+  show_file("${dds_dir}bin/opendds_mwc.pl", {optional => 1});
+  show_file("${dds_dir}cmake/config.cmake", {optional => 1});
 
   show_file("$ace_root/ace/Version.h");
-
   show_file("$ace_root/bin/MakeProjectCreator/config/default.features", {optional => 1});
   show_file("$ace_root/include/makeinclude/platform_macros.GNU", {optional => 1});
   show_file("$ace_root/ace/config.h");

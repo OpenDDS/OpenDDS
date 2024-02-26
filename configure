@@ -1183,6 +1183,30 @@ EOT
   }
 }
 
+sub write_opendds_configh {
+  my %buildEnv = %{shift()};
+  my $CFGH = backup_and_open("$buildEnv{'DDS_ROOT'}/dds/OpenDDSConfig.h");
+  my $CFGIN = new FileHandle;
+  open($CFGIN, 'dds/OpenDDSConfig.h.in') or die("Can't open OpenDDSConfig.h.in for reading: $!\nStopped");
+
+  sub replace_value {
+    my $var = shift;
+    return '0' if $var eq 'OPENDDS_CONFIG_AUTO_STATIC_INCLUDES';
+    return 'UNDEFINED';
+  }
+
+  while (<$CFGIN>) {
+    s/@(\w+)@/replace_value($1)/e;
+    print $CFGH $_;
+  }
+
+  $CFGIN->close;
+  $CFGH->close;
+  print "Wrote $buildEnv{'DDS_ROOT'}/dds/OpenDDSConfig.h\n"
+    if $opts{'verbose'};
+  dump_and_unlink($CFGH) if $opts{'dry-run'};
+}
+
 ## Optional OpenDDS dependencies
 my %optdep = (
   'java' => {env => 'JAVA_HOME', sanity => 'include/jni.h', mpc => 'java'},
@@ -2293,6 +2317,7 @@ sub configure_build {
     write_default_features($buildEnvRef);
     write_platform_macros($buildEnvRef);
   }
+  write_opendds_configh($buildEnvRef);
   generate_workspace($buildEnvRef);
   write_environment($buildEnvRef, $buildEnvRef->{'DDS_ROOT'});
 
