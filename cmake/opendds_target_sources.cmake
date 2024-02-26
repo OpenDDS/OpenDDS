@@ -208,7 +208,9 @@ function(opendds_export_header target)
     return()
   endif()
 
-  _opendds_get_generated_file_path(${target} "${arg_INCLUDE_BASE}" "${target}_export.h" export_header)
+  _opendds_get_generated_output(${target} "${target}_export.h"
+    GENERATED INCLUDE_BASE "${arg_INCLUDE_BASE}"
+    MKDIR FILE_PATH_VAR export_header)
 
   string(TOUPPER "${target}" uppercase_target)
   if(NOT EXISTS ${export_header})
@@ -235,8 +237,8 @@ function(opendds_target_sources target)
   if(opendds_target_sources IN_LIST OPENDDS_CMAKE_VERBOSE)
     message(STATUS "opendds_target_sources(${target} ${ARGN}) called from ${PROJECT_NAME}")
     set(debug TRUE)
+    list(APPEND CMAKE_MESSAGE_INDENT "  ")
   endif()
-  list(APPEND CMAKE_MESSAGE_INDENT "  ")
 
   if(NOT TARGET ${target})
     message(FATAL_ERROR "Invalid target '${target}' passed into opendds_target_sources")

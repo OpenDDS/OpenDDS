@@ -207,17 +207,25 @@ function(_opendds_target_idl_sources target)
     set(rel_path_to_source_tree "${rel_path_to_source_tree}/")
   endif()
 
+  set(set_o_opt FALSE)
+  set(o_opt)
   foreach(flag ${arg_DDS_IDL_FLAGS})
     if("${flag}" MATCHES "^-I(\\.\\..*)")
       list(APPEND opendds_idl_opts "-I${rel_path_to_source_tree}${CMAKE_MATCH_1}")
+    elseif("${flag}" STREQUAL "-o")
+      # Omit orignal -o* options because of https://github.com/DOCGroup/ACE_TAO/issues/2202
+      set(set_o_opt TRUE)
+    elseif(set_o_opt)
+      set(o_opt "${flag}")
+      set(set_o_opt FALSE)
     else()
-      list(APPEND opendds_idl_opts ${flag})
+      list(APPEND opendds_idl_opts "${flag}")
     endif()
   endforeach()
 
   set(opendds_idl_opt_var_prefix "opendds_idl_opt")
   set(opendds_idl_no_value_opts "-SI" "-GfaceTS" "-Wb,java" "-Lc++11" "-Lface")
-  set(opendds_idl_one_value_opts "-o")
+  set(opendds_idl_one_value_opts "")
   set(opendds_idl_multi_value_opts)
   foreach(opt ${opendds_idl_all_opts})
     unset("${opendds_idl_opt_var_prefix}_${opt}")
@@ -234,14 +242,14 @@ function(_opendds_target_idl_sources target)
   if(debug)
     message(STATUS "gen out: ${gen_out}")
     message(STATUS "IDL files:")
+    list(APPEND CMAKE_MESSAGE_INDENT "  ")
   endif()
-  list(APPEND CMAKE_MESSAGE_INDENT "  ")
   foreach(input ${non_generated_idl_files})
     if(debug)
       string(REPLACE "${CMAKE_CURRENT_SOURCE_DIR}/" "" show_idl "${input}")
       message(STATUS "${show_idl}")
+      list(APPEND CMAKE_MESSAGE_INDENT "  ")
     endif()
-    list(APPEND CMAKE_MESSAGE_INDENT "  ")
     get_filename_component(abs_filename ${input} ABSOLUTE)
     get_filename_component(file_ext ${input} EXT)
     get_filename_component(idl_file_dir ${abs_filename} DIRECTORY)
@@ -262,9 +270,10 @@ function(_opendds_target_idl_sources target)
         message(STATUS "SKIP_OPENDDS_IDL")
       endif()
     else()
-      _opendds_get_generated_idl_output(
-        ${target} "${arg_INCLUDE_BASE}" "${input}" "${opendds_idl_opt_-o}" output_prefix output_dir)
-      _opendds_get_generated_output_dir(${target} file_auto_includes O_OPT "${opendds_idl_opt_-o}")
+      _opendds_get_generated_output(${target} "${input}"
+        INCLUDE_BASE "${arg_INCLUDE_BASE}" O_OPT "${o_opt}" MKDIR
+        PREFIX_PATH_VAR output_prefix DIR_PATH_VAR output_dir)
+      _opendds_get_generated_output_dir(${target} file_auto_includes O_OPT "${o_opt}")
       if(arg_INCLUDE_BASE)
         list(APPEND file_auto_includes "${arg_INCLUDE_BASE}")
       endif()
@@ -308,10 +317,16 @@ function(_opendds_target_idl_sources target)
 
       _opendds_tao_append_runtime_lib_dir_to_path(extra_lib_dirs)
 
+      set(opendds_idl_args
+        "-I${idl_file_dir}"
+        ${opendds_idl_opts} ${extra_options}
+        ${abs_filename} -o "${output_dir}"
+      )
       if(debug)
+        message(STATUS "opendds_idl ${opendds_idl_args}")
         foreach(generated_file ${generated_files})
           string(REPLACE "${output_dir}/" "" generated_file "${generated_file}")
-          message(STATUS "opendds_idl: ${generated_file}")
+          message(STATUS "${generated_file}")
         endforeach()
       endif()
       add_custom_command(
@@ -320,9 +335,7 @@ function(_opendds_target_idl_sources target)
         MAIN_DEPENDENCY ${abs_filename}
         COMMAND
           ${CMAKE_COMMAND} -E env "DDS_ROOT=${DDS_ROOT}" "TAO_ROOT=${TAO_INCLUDE_DIR}"
-          "${extra_lib_dirs}"
-          $<TARGET_FILE:OpenDDS::opendds_idl> "-I${idl_file_dir}"
-          ${opendds_idl_opts} ${extra_options} ${abs_filename} -o "${output_dir}"
+          "${extra_lib_dirs}" $<TARGET_FILE:OpenDDS::opendds_idl> ${opendds_idl_args}
       )
 
       list(APPEND tao_idl_opts
@@ -374,9 +387,13 @@ function(_opendds_target_idl_sources target)
     list(APPEND all_mappings ${file_mappings})
     list(REMOVE_DUPLICATES all_mappings)
 
-    _opendds_pop_list(CMAKE_MESSAGE_INDENT)
+    if(debug)
+      _opendds_pop_list(CMAKE_MESSAGE_INDENT)
+    endif()
   endforeach()
-  _opendds_pop_list(CMAKE_MESSAGE_INDENT)
+  if(debug)
+    _opendds_pop_list(CMAKE_MESSAGE_INDENT)
+  endif()
 
   set_property(TARGET ${target}
     PROPERTY "OPENDDS_LANGUAGE_MAPPINGS" ${all_mappings})
