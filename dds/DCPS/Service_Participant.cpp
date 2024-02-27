@@ -141,7 +141,7 @@ Service_Participant::Service_Participant()
   , config_store_(make_rch<ConfigStoreImpl>(config_topic_))
   , config_reader_(make_rch<InternalDataReader<ConfigPair> >(DataReaderQosBuilder().reliability_reliable().durability_transient_local()))
   , config_reader_listener_(make_rch<ConfigReaderListener>(ref(*this)))
-  , pending_timeout_(0,0) // Can't use OPENDDS_COMMON_DCPS_PENDING_TIMEOUT_default due to initialization order.
+  , pending_timeout_(0,0) // Can't use COMMON_DCPS_PENDING_TIMEOUT_default due to initialization order.
 #ifdef DDS_DEFAULT_DISCOVERY_METHOD
   , default_discovery_(DDS_DEFAULT_DISCOVERY_METHOD)
 #else
@@ -392,10 +392,10 @@ Service_Participant::get_domain_participant_factory(int &argc,
         return DDS::DomainParticipantFactory::_nil();
       }
 
-      String config_fname = config_store_->get(OPENDDS_COMMON_DCPS_CONFIG_FILE,
-                                               OPENDDS_COMMON_DCPS_CONFIG_FILE_default);
-      const String default_configuration_file = config_store_->get(OPENDDS_DEFAULT_CONFIGURATION_FILE,
-                                                                   OPENDDS_DEFAULT_CONFIGURATION_FILE_default);
+      String config_fname = config_store_->get(COMMON_DCPS_CONFIG_FILE,
+                                               COMMON_DCPS_CONFIG_FILE_default);
+      const String default_configuration_file = config_store_->get(DEFAULT_CONFIGURATION_FILE,
+                                                                   DEFAULT_CONFIGURATION_FILE_default);
 
       if (config_fname.empty() && !default_configuration_file.empty()) {
         config_fname = default_configuration_file;
@@ -495,8 +495,8 @@ Service_Participant::get_domain_participant_factory(int &argc,
 
       job_queue_ = make_rch<JobQueue>(reactor_task_.get_reactor());
 
-      const bool monitor_enabled = config_store_->get_boolean(OPENDDS_COMMON_DCPS_MONITOR,
-                                                              OPENDDS_COMMON_DCPS_MONITOR_default);
+      const bool monitor_enabled = config_store_->get_boolean(COMMON_DCPS_MONITOR,
+                                                              COMMON_DCPS_MONITOR_default);
 
       if (monitor_enabled) {
 #if !defined(ACE_AS_STATIC_LIBS)
@@ -587,12 +587,12 @@ int Service_Participant::parse_args(int& argc, ACE_TCHAR* argv[])
     const ACE_TCHAR* currentArg = 0;
 
     if ((currentArg = log_arg_shifter.get_the_parameter(ACE_TEXT("-ORBLogFile"))) != 0) {
-      config_store_->set_string(OPENDDS_COMMON_ORB_LOG_FILE, ACE_TEXT_ALWAYS_CHAR(currentArg));
+      config_store_->set_string(COMMON_ORB_LOG_FILE, ACE_TEXT_ALWAYS_CHAR(currentArg));
       config_reader_listener_->on_data_available(config_reader_);
       log_arg_shifter.consume_arg();
 
     } else if ((currentArg = log_arg_shifter.get_the_parameter(ACE_TEXT("-ORBVerboseLogging"))) != 0) {
-      config_store_->set_string(OPENDDS_COMMON_ORB_VERBOSE_LOGGING, ACE_TEXT_ALWAYS_CHAR(currentArg));
+      config_store_->set_string(COMMON_ORB_VERBOSE_LOGGING, ACE_TEXT_ALWAYS_CHAR(currentArg));
       config_reader_listener_->on_data_available(config_reader_);
       log_arg_shifter.consume_arg();
 
@@ -610,7 +610,7 @@ int Service_Participant::parse_args(int& argc, ACE_TCHAR* argv[])
       if (!arg_shifter.is_anything_left()) {
         break;
       }
-      const String key = "OPENDDS_COMMON" + current;
+      const String key = "COMMON" + current;
       if (arg_shifter.is_parameter_next()) {
         config_store_->set_string(key.c_str(), ACE_TEXT_ALWAYS_CHAR(arg_shifter.get_current()));
         config_reader_listener_->on_data_available(config_reader_);
@@ -623,7 +623,7 @@ int Service_Participant::parse_args(int& argc, ACE_TCHAR* argv[])
       if (!arg_shifter.is_anything_left()) {
         break;
       }
-      const String key = "OPENDDS_" + current.substr(8);
+      const String key = current.substr(8);
       if (arg_shifter.is_parameter_next()) {
         config_store_->set_string(key.c_str(), ACE_TEXT_ALWAYS_CHAR(arg_shifter.get_current()));
         config_reader_listener_->on_data_available(config_reader_);
@@ -711,11 +711,11 @@ Service_Participant::initializeScheduling()
   //
   // Establish the scheduler if specified.
   //
-  const String scheduler_str = config_store_->get(OPENDDS_COMMON_SCHEDULER,
-                                                 OPENDDS_COMMON_SCHEDULER_default);
+  const String scheduler_str = config_store_->get(COMMON_SCHEDULER,
+                                                  COMMON_SCHEDULER_default);
 
-  suseconds_t usec = config_store_->get_int32(OPENDDS_COMMON_SCHEDULER_SLICE,
-                                             OPENDDS_COMMON_SCHEDULER_SLICE_default);
+  suseconds_t usec = config_store_->get_int32(COMMON_SCHEDULER_SLICE,
+                                              COMMON_SCHEDULER_SLICE_default);
   if (usec < 0) {
     usec = 0;
   }
@@ -819,8 +819,8 @@ Service_Participant::set_repo_ior(const char* ior,
   }
 
   // Create the repository.
-  config_store_->set((String("OPENDDS_REPOSITORY_") + key).c_str(), String("@") + key);
-  const String k = String("OPENDDS_REPOSITORY_") + key + "_RepositoryIor";
+  config_store_->set((String("REPOSITORY_") + key).c_str(), String("@") + key);
+  const String k = String("REPOSITORY_") + key + "_RepositoryIor";
   if (overwrite) {
     config_store_->set(k.c_str(), ior);
   }
@@ -854,7 +854,7 @@ Service_Participant::set_repo_ior(const char* ior,
 bool
 Service_Participant::use_bidir_giop() const
 {
-  return config_store_->get_boolean(OPENDDS_COMMON_DCPS_BIDIR_GIOP, OPENDDS_COMMON_DCPS_BIDIR_GIOP_default);
+  return config_store_->get_boolean(COMMON_DCPS_BIDIR_GIOP, COMMON_DCPS_BIDIR_GIOP_default);
 }
 
 void
@@ -1088,13 +1088,13 @@ Service_Participant::set_default_discovery(const Discovery::RepoKey& key)
     ACE_GUARD(ACE_Thread_Mutex, guard, cached_config_mutex_);
     default_discovery_ = key;
   }
-  config_store_->set_string(OPENDDS_COMMON_DCPS_DEFAULT_DISCOVERY, key.c_str());
+  config_store_->set_string(COMMON_DCPS_DEFAULT_DISCOVERY, key.c_str());
 }
 
 Discovery::RepoKey
 Service_Participant::get_default_discovery()
 {
-  ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, cached_config_mutex_, OPENDDS_COMMON_DCPS_DEFAULT_DISCOVERY_default);
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, cached_config_mutex_, COMMON_DCPS_DEFAULT_DISCOVERY_default);
   return default_discovery_;
 }
 
@@ -1231,52 +1231,52 @@ Service_Participant::get_discovery(const DDS::DomainId_t domain)
 void
 Service_Participant::federation_recovery_duration(int duration)
 {
-  config_store_->set_int32(OPENDDS_COMMON_FEDERATION_RECOVERY_DURATION, duration);
+  config_store_->set_int32(COMMON_FEDERATION_RECOVERY_DURATION, duration);
 }
 
 int
 Service_Participant::federation_recovery_duration() const
 {
-  return config_store_->get_int32(OPENDDS_COMMON_FEDERATION_RECOVERY_DURATION,
-                                 OPENDDS_COMMON_FEDERATION_RECOVERY_DURATION_default);
+  return config_store_->get_int32(COMMON_FEDERATION_RECOVERY_DURATION,
+                                  COMMON_FEDERATION_RECOVERY_DURATION_default);
 }
 
 void
 Service_Participant::federation_initial_backoff_seconds(int value)
 {
-  config_store_->set_int32(OPENDDS_COMMON_FEDERATION_INITIAL_BACKOFF_SECONDS, value);
+  config_store_->set_int32(COMMON_FEDERATION_INITIAL_BACKOFF_SECONDS, value);
 }
 
 int
 Service_Participant::federation_initial_backoff_seconds() const
 {
-  return config_store_->get_int32(OPENDDS_COMMON_FEDERATION_INITIAL_BACKOFF_SECONDS,
-                                 OPENDDS_COMMON_FEDERATION_INITIAL_BACKOFF_SECONDS_default);
+  return config_store_->get_int32(COMMON_FEDERATION_INITIAL_BACKOFF_SECONDS,
+                                  COMMON_FEDERATION_INITIAL_BACKOFF_SECONDS_default);
 }
 
 void
 Service_Participant::federation_backoff_multiplier(int value)
 {
-  config_store_->set_int32(OPENDDS_COMMON_FEDERATION_BACKOFF_MULTIPLIER, value);
+  config_store_->set_int32(COMMON_FEDERATION_BACKOFF_MULTIPLIER, value);
 }
 
 int
 Service_Participant::federation_backoff_multiplier() const
 {
-  return config_store_->get_int32(OPENDDS_COMMON_FEDERATION_BACKOFF_MULTIPLIER,
-                                 OPENDDS_COMMON_FEDERATION_BACKOFF_MULTIPLIER_default);
+  return config_store_->get_int32(COMMON_FEDERATION_BACKOFF_MULTIPLIER,
+                                  COMMON_FEDERATION_BACKOFF_MULTIPLIER_default);
 }
 
 void
 Service_Participant::federation_liveliness(int value)
 {
-  config_store_->set_int32(OPENDDS_COMMON_FEDERATION_LIVELINESS_DURATION, value);
+  config_store_->set_int32(COMMON_FEDERATION_LIVELINESS_DURATION, value);
 }
 
 int
 Service_Participant::federation_liveliness() const
 {
-  return config_store_->get_int32(OPENDDS_COMMON_FEDERATION_LIVELINESS_DURATION, OPENDDS_COMMON_FEDERATION_LIVELINESS_DURATION_default);
+  return config_store_->get_int32(COMMON_FEDERATION_LIVELINESS_DURATION, COMMON_FEDERATION_LIVELINESS_DURATION_default);
 }
 
 void
@@ -1284,25 +1284,25 @@ Service_Participant::scheduler(long value)
 {
   // Using a switch results in a compilation error since THR_SCHED_DEFAULT could be THR_SCHED_RR or THR_SCHED_FIFO.
   if (value == THR_SCHED_DEFAULT) {
-    config_store_->set(OPENDDS_COMMON_SCHEDULER, "SCHED_OTHER");
+    config_store_->set(COMMON_SCHEDULER, "SCHED_OTHER");
   } else if (value == THR_SCHED_RR) {
-    config_store_->set(OPENDDS_COMMON_SCHEDULER, "SCHED_RR");
+    config_store_->set(COMMON_SCHEDULER, "SCHED_RR");
   } else if (value == THR_SCHED_FIFO) {
-    config_store_->set(OPENDDS_COMMON_SCHEDULER, "SCHED_FIFO");
+    config_store_->set(COMMON_SCHEDULER, "SCHED_FIFO");
   } else {
     if (log_level >= LogLevel::Warning) {
       ACE_ERROR((LM_WARNING,
                  "(%P|%t) WARNING: Service_Participant::scheduler: cannot translate scheduler value %d\n",
                  value));
     }
-    config_store_->set(OPENDDS_COMMON_SCHEDULER, "");
+    config_store_->set(COMMON_SCHEDULER, "");
   }
 }
 
 long
 Service_Participant::scheduler() const
 {
-  const String str = config_store_->get(OPENDDS_COMMON_SCHEDULER, "");
+  const String str = config_store_->get(COMMON_SCHEDULER, "");
   if (str == "SCHED_RR") {
     return THR_SCHED_RR;
   } else if (str == "SCHED_FIFO") {
@@ -1317,20 +1317,20 @@ Service_Participant::scheduler() const
 void
 Service_Participant::publisher_content_filter(bool flag)
 {
-  config_store_->set_boolean(OPENDDS_COMMON_DCPS_PUBLISHER_CONTENT_FILTER, flag);
+  config_store_->set_boolean(COMMON_DCPS_PUBLISHER_CONTENT_FILTER, flag);
 }
 
 bool
 Service_Participant::publisher_content_filter() const
 {
-  return config_store_->get_boolean(OPENDDS_COMMON_DCPS_PUBLISHER_CONTENT_FILTER,
-                                   OPENDDS_COMMON_DCPS_PUBLISHER_CONTENT_FILTER_default);
+  return config_store_->get_boolean(COMMON_DCPS_PUBLISHER_CONTENT_FILTER,
+                                    COMMON_DCPS_PUBLISHER_CONTENT_FILTER_default);
 }
 
 TimeDuration
 Service_Participant::pending_timeout() const
 {
-  ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, cached_config_mutex_, OPENDDS_COMMON_DCPS_PENDING_TIMEOUT_default);
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, cached_config_mutex_, COMMON_DCPS_PENDING_TIMEOUT_default);
   return pending_timeout_;
 }
 
@@ -1340,7 +1340,7 @@ void Service_Participant::pending_timeout(const TimeDuration& value)
     ACE_GUARD(ACE_Thread_Mutex, guard, cached_config_mutex_);
     pending_timeout_ = value;
   }
-  config_store_->set(OPENDDS_COMMON_DCPS_PENDING_TIMEOUT, value, ConfigStoreImpl::Format_IntegerSeconds);
+  config_store_->set(COMMON_DCPS_PENDING_TIMEOUT, value, ConfigStoreImpl::Format_IntegerSeconds);
 }
 
 MonotonicTimePoint
@@ -1355,66 +1355,66 @@ Service_Participant::new_pending_timeout_deadline() const
 OPENDDS_STRING
 Service_Participant::bit_transport_ip() const
 {
-  return config_store_->get(OPENDDS_COMMON_DCPS_BIT_TRANSPORT_IP_ADDRESS,
-                           OPENDDS_COMMON_DCPS_BIT_TRANSPORT_IP_ADDRESS_default);
+  return config_store_->get(COMMON_DCPS_BIT_TRANSPORT_IP_ADDRESS,
+                            COMMON_DCPS_BIT_TRANSPORT_IP_ADDRESS_default);
 }
 
 int
 Service_Participant::bit_transport_port() const
 {
-  return config_store_->get_int32(OPENDDS_COMMON_DCPS_BIT_TRANSPORT_PORT,
-                                 OPENDDS_COMMON_DCPS_BIT_TRANSPORT_PORT_default);
+  return config_store_->get_int32(COMMON_DCPS_BIT_TRANSPORT_PORT,
+                                  COMMON_DCPS_BIT_TRANSPORT_PORT_default);
 }
 
 void
 Service_Participant::bit_transport_port(int port)
 {
-  config_store_->set_int32(OPENDDS_COMMON_DCPS_BIT_TRANSPORT_PORT, port);
+  config_store_->set_int32(COMMON_DCPS_BIT_TRANSPORT_PORT, port);
 }
 
 int
 Service_Participant::bit_lookup_duration_msec() const
 {
-  return config_store_->get_int32(OPENDDS_COMMON_DCPS_BIT_LOOKUP_DURATION_MSEC, OPENDDS_COMMON_DCPS_BIT_LOOKUP_DURATION_MSEC_default);
+  return config_store_->get_int32(COMMON_DCPS_BIT_LOOKUP_DURATION_MSEC, COMMON_DCPS_BIT_LOOKUP_DURATION_MSEC_default);
 }
 
 void
 Service_Participant::bit_lookup_duration_msec(int msec)
 {
-  config_store_->set_int32(OPENDDS_COMMON_DCPS_BIT_LOOKUP_DURATION_MSEC, msec);
+  config_store_->set_int32(COMMON_DCPS_BIT_LOOKUP_DURATION_MSEC, msec);
 }
 
 #ifdef OPENDDS_SECURITY
 bool
 Service_Participant::get_security() const
 {
-  return config_store_->get_boolean(OPENDDS_COMMON_DCPS_SECURITY, OPENDDS_COMMON_DCPS_SECURITY_default);
+  return config_store_->get_boolean(COMMON_DCPS_SECURITY, COMMON_DCPS_SECURITY_default);
 }
 
 void
 Service_Participant::set_security(bool b)
 {
-  config_store_->set_boolean(OPENDDS_COMMON_DCPS_SECURITY, b);
+  config_store_->set_boolean(COMMON_DCPS_SECURITY, b);
 }
 #endif
 
 bool
 Service_Participant::get_BIT() const
 {
-  return config_store_->get_boolean(OPENDDS_COMMON_DCPS_BIT, OPENDDS_COMMON_DCPS_BIT_default);
+  return config_store_->get_boolean(COMMON_DCPS_BIT, COMMON_DCPS_BIT_default);
 }
 
 void
 Service_Participant::set_BIT(bool b)
 {
-  config_store_->set_boolean(OPENDDS_COMMON_DCPS_BIT, b);
+  config_store_->set_boolean(COMMON_DCPS_BIT, b);
 }
 
 NetworkAddress
 Service_Participant::default_address() const
 {
-  return config_store_->get(OPENDDS_COMMON_DCPS_DEFAULT_ADDRESS,
-                            OPENDDS_COMMON_DCPS_DEFAULT_ADDRESS_default,
+  return config_store_->get(COMMON_DCPS_DEFAULT_ADDRESS,
+                            COMMON_DCPS_DEFAULT_ADDRESS_default,
                             ConfigStoreImpl::Format_No_Port,
                             ConfigStoreImpl::Kind_IPV4);
 }
@@ -1422,40 +1422,40 @@ Service_Participant::default_address() const
 size_t
 Service_Participant::n_chunks() const
 {
-  return config_store_->get_uint32(OPENDDS_COMMON_DCPS_CHUNKS, OPENDDS_COMMON_DCPS_CHUNKS_default);
+  return config_store_->get_uint32(COMMON_DCPS_CHUNKS, COMMON_DCPS_CHUNKS_default);
 }
 
 void
 Service_Participant::n_chunks(size_t chunks)
 {
-  config_store_->set_uint32(OPENDDS_COMMON_DCPS_CHUNKS, static_cast<DDS::UInt32>(chunks));
+  config_store_->set_uint32(COMMON_DCPS_CHUNKS, static_cast<DDS::UInt32>(chunks));
 }
 
 size_t
 Service_Participant::association_chunk_multiplier() const
 {
-  return config_store_->get_uint32(OPENDDS_COMMON_DCPS_CHUNK_ASSOCIATION_MULTIPLIER,
-                                  config_store_->get_uint32(OPENDDS_COMMON_DCPS_CHUNK_ASSOCIATION_MUTLTIPLIER,
-                                                           OPENDDS_COMMON_DCPS_CHUNK_ASSOCIATION_MULTIPLIER_default));
+  return config_store_->get_uint32(COMMON_DCPS_CHUNK_ASSOCIATION_MULTIPLIER,
+                                  config_store_->get_uint32(COMMON_DCPS_CHUNK_ASSOCIATION_MUTLTIPLIER,
+                                                            COMMON_DCPS_CHUNK_ASSOCIATION_MULTIPLIER_default));
 }
 
 void
 Service_Participant::association_chunk_multiplier(size_t multiplier)
 {
-  config_store_->set_uint32(OPENDDS_COMMON_DCPS_CHUNK_ASSOCIATION_MULTIPLIER, static_cast<DDS::UInt32>(multiplier));
+  config_store_->set_uint32(COMMON_DCPS_CHUNK_ASSOCIATION_MULTIPLIER, static_cast<DDS::UInt32>(multiplier));
 }
 
 void
 Service_Participant::liveliness_factor(int factor)
 {
-  config_store_->set_int32(OPENDDS_COMMON_DCPS_LIVELINESS_FACTOR, factor);
+  config_store_->set_int32(COMMON_DCPS_LIVELINESS_FACTOR, factor);
 }
 
 int
 Service_Participant::liveliness_factor() const
 {
-  return config_store_->get_int32(OPENDDS_COMMON_DCPS_LIVELINESS_FACTOR,
-                                 OPENDDS_COMMON_DCPS_LIVELINESS_FACTOR_default);
+  return config_store_->get_int32(COMMON_DCPS_LIVELINESS_FACTOR,
+                                  COMMON_DCPS_LIVELINESS_FACTOR_default);
 }
 
 void
@@ -1499,7 +1499,7 @@ Service_Participant::load_configuration(
   ACE_Configuration_Heap& config,
   const ACE_TCHAR* filename)
 {
-  process_section(*config_store_, config_reader_, config_reader_listener_, "OPENDDS", config, config.root_section(), ACE_TEXT_ALWAYS_CHAR(filename), false);
+  process_section(*config_store_, config_reader_, config_reader_listener_, "", config, config.root_section(), ACE_TEXT_ALWAYS_CHAR(filename), false);
 
   // Register static discovery.
   add_discovery(static_rchandle_cast<Discovery>(StaticDiscovery::instance()));
@@ -1543,8 +1543,8 @@ Service_Participant::load_configuration(
   }
 
   status = TransportRegistry::instance()->load_transport_configuration(ACE_TEXT_ALWAYS_CHAR(filename));
-  const String global_transport_config = config_store_->get(OPENDDS_COMMON_DCPS_GLOBAL_TRANSPORT_CONFIG,
-                                                            OPENDDS_COMMON_DCPS_GLOBAL_TRANSPORT_CONFIG_default);
+  const String global_transport_config = config_store_->get(COMMON_DCPS_GLOBAL_TRANSPORT_CONFIG,
+                                                            COMMON_DCPS_GLOBAL_TRANSPORT_CONFIG_default);
   if (!global_transport_config.empty()) {
     TransportConfig_rch config = TransportRegistry::instance()->get_config(global_transport_config);
     if (config) {
@@ -1616,8 +1616,8 @@ Service_Participant::DomainConfig::domain_id(RcHandle<ConfigStoreImpl> config_st
 String
 Service_Participant::DomainConfig::discovery_config(RcHandle<ConfigStoreImpl> config_store) const
 {
-  const String r = config_store->get(OPENDDS_COMMON_DCPS_DEFAULT_DISCOVERY,
-                                     OPENDDS_COMMON_DCPS_DEFAULT_DISCOVERY_default);
+  const String r = config_store->get(COMMON_DCPS_DEFAULT_DISCOVERY,
+                                     COMMON_DCPS_DEFAULT_DISCOVERY_default);
   String s = config_store->get(config_key("DOMAIN_REPO_KEY").c_str(), r);
   if (s == "-1") {
     s = r;
@@ -1635,7 +1635,7 @@ Service_Participant::DomainConfig::default_transport_config(RcHandle<ConfigStore
 int
 Service_Participant::load_domain_configuration()
 {
-  const DCPS::ConfigStoreImpl::StringList sections = config_store_->get_section_names("OPENDDS_DOMAIN");
+  const DCPS::ConfigStoreImpl::StringList sections = config_store_->get_section_names("DOMAIN");
   for (DCPS::ConfigStoreImpl::StringList::const_iterator pos = sections.begin(), limit = sections.end();
        pos != limit; ++pos) {
     const DomainConfig dc(*pos);
@@ -1706,7 +1706,7 @@ Service_Participant::process_domain(const Domain& domain)
 int
 Service_Participant::load_domain_ranges()
 {
-  const DCPS::ConfigStoreImpl::StringList sections = config_store_->get_section_names("OPENDDS_DOMAIN_RANGE");
+  const DCPS::ConfigStoreImpl::StringList sections = config_store_->get_section_names("DOMAIN_RANGE");
 
   // Loop through the [DomainRange/*] sections
   for (DCPS::ConfigStoreImpl::StringList::const_iterator pos = sections.begin(), limit = sections.end();
@@ -1766,7 +1766,7 @@ int
 Service_Participant::load_discovery_configuration(const String& discovery_type,
                                                   bool force)
 {
-  if (!force && !config_store_->has(("OPENDDS_" + discovery_type).c_str())) {
+  if (!force && !config_store_->has(discovery_type.c_str())) {
     return 0;
   }
 
@@ -1872,8 +1872,8 @@ Service_Participant::DomainRange::discovery_template(RcHandle<ConfigStoreImpl> c
 String
 Service_Participant::DomainRange::default_transport_config(RcHandle<ConfigStoreImpl> config_store) const
 {
-  const String global_transport_config = config_store->get(OPENDDS_COMMON_DCPS_GLOBAL_TRANSPORT_CONFIG,
-                                                           OPENDDS_COMMON_DCPS_GLOBAL_TRANSPORT_CONFIG_default);
+  const String global_transport_config = config_store->get(COMMON_DCPS_GLOBAL_TRANSPORT_CONFIG,
+                                                           COMMON_DCPS_GLOBAL_TRANSPORT_CONFIG_default);
   return config_store->get(config_key("DefaultTransportConfig").c_str(), global_transport_config);
 }
 
@@ -1881,10 +1881,10 @@ Service_Participant::DomainRange::default_transport_config(RcHandle<ConfigStoreI
 void
 Service_Participant::configure_pool()
 {
-  const size_t pool_size = config_store_->get_uint32(OPENDDS_COMMON_POOL_SIZE,
-                                                     OPENDDS_COMMON_POOL_SIZE_default);
-  const size_t pool_granularity = config_store_->get_uint32(OPENDDS_COMMON_POOL_GRANULARITY,
-                                                            OPENDDS_COMMON_POOL_GRANULARITY_default);
+  const size_t pool_size = config_store_->get_uint32(COMMON_POOL_SIZE,
+                                                     COMMON_POOL_SIZE_default);
+  const size_t pool_granularity = config_store_->get_uint32(COMMON_POOL_GRANULARITY,
+                                                            COMMON_POOL_GRANULARITY_default);
   if (pool_size) {
     SafetyProfilePool::instance()->configure_pool(pool_size, pool_granularity);
     SafetyProfilePool::instance()->install();
@@ -1920,8 +1920,8 @@ Service_Participant::get_data_durability_cache(
       try {
         if (!this->persistent_data_cache_) {
           const String persistent_data_dir =
-            config_store_->get(OPENDDS_COMMON_DCPS_PERSISTENT_DATA_DIR,
-                              OPENDDS_COMMON_DCPS_PERSISTENT_DATA_DIR_default);
+            config_store_->get(COMMON_DCPS_PERSISTENT_DATA_DIR,
+                               COMMON_DCPS_PERSISTENT_DATA_DIR_default);
           this->persistent_data_cache_.reset(new DataDurabilityCache(kind, persistent_data_dir));
         }
 
@@ -2041,7 +2041,7 @@ DDS::Topic_ptr Service_Participant::create_typeless_topic(
 
 void Service_Participant::default_configuration_file(const ACE_TCHAR* path)
 {
-  config_store_->set_string(OPENDDS_DEFAULT_CONFIGURATION_FILE, ACE_TEXT_ALWAYS_CHAR(path));
+  config_store_->set_string(DEFAULT_CONFIGURATION_FILE, ACE_TEXT_ALWAYS_CHAR(path));
 }
 
 ThreadStatusManager& Service_Participant::get_thread_status_manager()
@@ -2064,27 +2064,27 @@ NetworkConfigModifier* Service_Participant::network_config_modifier()
 DDS::Duration_t
 Service_Participant::bit_autopurge_nowriter_samples_delay() const
 {
-  return config_store_->get_duration(OPENDDS_COMMON_BIT_AUTOPURGE_NOWRITER_SAMPLES_DELAY,
-                                    OPENDDS_COMMON_BIT_AUTOPURGE_NOWRITER_SAMPLES_DELAY_default);
+  return config_store_->get_duration(COMMON_BIT_AUTOPURGE_NOWRITER_SAMPLES_DELAY,
+                                     COMMON_BIT_AUTOPURGE_NOWRITER_SAMPLES_DELAY_default);
 }
 
 void
 Service_Participant::bit_autopurge_nowriter_samples_delay(const DDS::Duration_t& delay)
 {
-  config_store_->set_duration(OPENDDS_COMMON_BIT_AUTOPURGE_NOWRITER_SAMPLES_DELAY, delay);
+  config_store_->set_duration(COMMON_BIT_AUTOPURGE_NOWRITER_SAMPLES_DELAY, delay);
 }
 
 DDS::Duration_t
 Service_Participant::bit_autopurge_disposed_samples_delay() const
 {
-  return config_store_->get_duration(OPENDDS_COMMON_BIT_AUTOPURGE_DISPOSED_SAMPLES_DELAY,
-                                    OPENDDS_COMMON_BIT_AUTOPURGE_DISPOSED_SAMPLES_DELAY_default);
+  return config_store_->get_duration(COMMON_BIT_AUTOPURGE_DISPOSED_SAMPLES_DELAY,
+                                     COMMON_BIT_AUTOPURGE_DISPOSED_SAMPLES_DELAY_default);
 }
 
 void
 Service_Participant::bit_autopurge_disposed_samples_delay(const DDS::Duration_t& delay)
 {
-  config_store_->set_duration(OPENDDS_COMMON_BIT_AUTOPURGE_DISPOSED_SAMPLES_DELAY, delay);
+  config_store_->set_duration(COMMON_BIT_AUTOPURGE_DISPOSED_SAMPLES_DELAY, delay);
 }
 
 XTypes::TypeInformation
@@ -2129,7 +2129,7 @@ Service_Participant::TypeObjectEncoding
 Service_Participant::type_object_encoding() const
 {
   String encoding_str = "Normal";
-  config_store_->get(OPENDDS_COMMON_DCPS_TYPE_OBJECT_ENCODING, encoding_str);
+  config_store_->get(COMMON_DCPS_TYPE_OBJECT_ENCODING, encoding_str);
 
   struct NameValue {
     const char* name;
@@ -2155,13 +2155,13 @@ void Service_Participant::type_object_encoding(TypeObjectEncoding encoding)
 {
   switch (encoding) {
   case Encoding_Normal:
-    config_store_->set_string(OPENDDS_COMMON_DCPS_TYPE_OBJECT_ENCODING, "Normal");
+    config_store_->set_string(COMMON_DCPS_TYPE_OBJECT_ENCODING, "Normal");
     break;
   case Encoding_WriteOldFormat:
-    config_store_->set_string(OPENDDS_COMMON_DCPS_TYPE_OBJECT_ENCODING, "WriteOldFormat");
+    config_store_->set_string(COMMON_DCPS_TYPE_OBJECT_ENCODING, "WriteOldFormat");
     break;
   case Encoding_ReadOldFormat:
-    config_store_->set_string(OPENDDS_COMMON_DCPS_TYPE_OBJECT_ENCODING, "ReadOldFormat");
+    config_store_->set_string(COMMON_DCPS_TYPE_OBJECT_ENCODING, "ReadOldFormat");
     break;
   }
 }
@@ -2169,20 +2169,20 @@ void Service_Participant::type_object_encoding(TypeObjectEncoding encoding)
 void
 Service_Participant::type_object_encoding(const char* encoding)
 {
-  config_store_->set_string(OPENDDS_COMMON_DCPS_TYPE_OBJECT_ENCODING, encoding);
+  config_store_->set_string(COMMON_DCPS_TYPE_OBJECT_ENCODING, encoding);
 }
 
 unsigned int
 Service_Participant::printer_value_writer_indent() const
 {
-  return config_store_->get_uint32(OPENDDS_COMMON_PRINTER_VALUE_WRITER_INDENT,
-                                  OPENDDS_COMMON_PRINTER_VALUE_WRITER_INDENT_default);
+  return config_store_->get_uint32(COMMON_PRINTER_VALUE_WRITER_INDENT,
+                                   COMMON_PRINTER_VALUE_WRITER_INDENT_default);
 }
 
 void
 Service_Participant::printer_value_writer_indent(unsigned int value)
 {
-  config_store_->set_uint32(OPENDDS_COMMON_PRINTER_VALUE_WRITER_INDENT, value);
+  config_store_->set_uint32(COMMON_PRINTER_VALUE_WRITER_INDENT, value);
 }
 
 void
@@ -2196,46 +2196,46 @@ Service_Participant::ConfigReaderListener::on_data_available(InternalDataReader_
     const ConfigPair& p = samples[idx];
     const DDS::SampleInfo& info = infos[idx];
     if (info.valid_data) {
-      if (p.key() == OPENDDS_COMMON_ORB_LOG_FILE) {
+      if (p.key() == COMMON_ORB_LOG_FILE) {
         set_log_file_name(p.value().c_str());
-      } else if (p.key() == OPENDDS_COMMON_ORB_VERBOSE_LOGGING) {
+      } else if (p.key() == COMMON_ORB_VERBOSE_LOGGING) {
         set_log_verbose(ACE_OS::atoi(p.value().c_str()));
-      } else if (p.key() == OPENDDS_COMMON_DCPS_DEBUG_LEVEL) {
+      } else if (p.key() == COMMON_DCPS_DEBUG_LEVEL) {
         set_DCPS_debug_level(ACE_OS::atoi(p.value().c_str()));
-      } else if (p.key() == OPENDDS_COMMON_DCPSRTI_SERIALIZATION) {
+      } else if (p.key() == COMMON_DCPSRTI_SERIALIZATION) {
         if (ACE_OS::atoi(p.value().c_str()) == 0 && log_level >= LogLevel::Warning) {
           ACE_ERROR((LM_WARNING,
                      ACE_TEXT("(%P|%t) WARNING: ConfigReaderListener::on_data_available: ")
                      ACE_TEXT("Argument ignored: DCPSRTISerialization is required to be enabled\n")));
         }
-      } else if (p.key() == OPENDDS_COMMON_DCPS_TRANSPORT_DEBUG_LEVEL) {
+      } else if (p.key() == COMMON_DCPS_TRANSPORT_DEBUG_LEVEL) {
         OpenDDS::DCPS::Transport_debug_level = ACE_OS::atoi(p.value().c_str());
-      } else if (p.key() == OPENDDS_COMMON_DCPS_THREAD_STATUS_INTERVAL) {
+      } else if (p.key() == COMMON_DCPS_THREAD_STATUS_INTERVAL) {
         service_participant_.thread_status_manager_.thread_status_interval(TimeDuration(ACE_OS::atoi(p.value().c_str())));
 #ifdef OPENDDS_SECURITY
-      } else if (p.key() == OPENDDS_COMMON_DCPS_SECURITY_DEBUG_LEVEL) {
+      } else if (p.key() == COMMON_DCPS_SECURITY_DEBUG_LEVEL) {
         security_debug.set_debug_level(ACE_OS::atoi(p.value().c_str()));
-      } else if (p.key() == OPENDDS_COMMON_DCPS_SECURITY_DEBUG) {
+      } else if (p.key() == COMMON_DCPS_SECURITY_DEBUG) {
         security_debug.parse_flags(p.value().c_str());
-      } else if (p.key() == OPENDDS_COMMON_DCPS_SECURITY_FAKE_ENCRYPTION) {
+      } else if (p.key() == COMMON_DCPS_SECURITY_FAKE_ENCRYPTION) {
         security_debug.fake_encryption = ACE_OS::atoi(p.value().c_str());
 #endif
-      } else if (p.key() == OPENDDS_COMMON_DCPS_LOG_LEVEL) {
+      } else if (p.key() == COMMON_DCPS_LOG_LEVEL) {
         log_level.set_from_string(p.value().c_str());
-      } else if (p.key() == OPENDDS_COMMON_DCPS_PENDING_TIMEOUT) {
+      } else if (p.key() == COMMON_DCPS_PENDING_TIMEOUT) {
         ACE_GUARD(ACE_Thread_Mutex, guard, service_participant_.cached_config_mutex_);
         service_participant_.pending_timeout_ =
-          service_participant_.config_store_->get(OPENDDS_COMMON_DCPS_PENDING_TIMEOUT,
-                                                  OPENDDS_COMMON_DCPS_PENDING_TIMEOUT_default,
+          service_participant_.config_store_->get(COMMON_DCPS_PENDING_TIMEOUT,
+                                                  COMMON_DCPS_PENDING_TIMEOUT_default,
                                                   ConfigStoreImpl::Format_IntegerSeconds);
-      } else if (p.key() == OPENDDS_COMMON_DCPS_DEFAULT_DISCOVERY) {
+      } else if (p.key() == COMMON_DCPS_DEFAULT_DISCOVERY) {
         ACE_GUARD(ACE_Thread_Mutex, guard, service_participant_.cached_config_mutex_);
         service_participant_.default_discovery_ =
-          service_participant_.config_store_->get(OPENDDS_COMMON_DCPS_DEFAULT_DISCOVERY,
-                                                  OPENDDS_COMMON_DCPS_DEFAULT_DISCOVERY_default);
-      } else if (p.key() == OPENDDS_CONFIG_DEBUG_LOGGING) {
-        const bool flag = service_participant_.config_store_->get_boolean(OPENDDS_CONFIG_DEBUG_LOGGING,
-                                                                          OPENDDS_CONFIG_DEBUG_LOGGING_default);
+          service_participant_.config_store_->get(COMMON_DCPS_DEFAULT_DISCOVERY,
+                                                  COMMON_DCPS_DEFAULT_DISCOVERY_default);
+      } else if (p.key() == CONFIG_DEBUG_LOGGING) {
+        const bool flag = service_participant_.config_store_->get_boolean(CONFIG_DEBUG_LOGGING,
+                                                                          CONFIG_DEBUG_LOGGING_default);
         service_participant_.config_store_->debug_logging = flag;
       }
     }

@@ -30,7 +30,7 @@ TransportInst::TransportInst(const char* type,
   : transport_type_(type)
   , shutting_down_(false)
   , name_(name)
-  , config_prefix_(is_template ? ConfigPair::canonicalize("OPENDDS_TRANSPORT_TEMPLATE_" + name_) : ConfigPair::canonicalize("OPENDDS_TRANSPORT_" + name_))
+  , config_prefix_(is_template ? ConfigPair::canonicalize("TRANSPORT_TEMPLATE_" + name_) : ConfigPair::canonicalize("TRANSPORT_" + name_))
   , is_template_(is_template)
 {
   DBG_ENTRY_LVL("TransportInst", "TransportInst", 6);

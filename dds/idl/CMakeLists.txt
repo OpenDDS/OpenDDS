@@ -32,7 +32,7 @@ add_executable(opendds_idl
   value_writer_generator.cpp
 )
 _opendds_executable(opendds_idl)
-target_link_libraries(opendds_idl ${deps} OpenDDS_Util)
+target_link_libraries(opendds_idl PRIVATE ${deps} OpenDDS_Util)
 set_target_properties(opendds_idl PROPERTIES
   # opendds_idl doesn't play nice with bundling the cpp files together
   UNITY_BUILD FALSE

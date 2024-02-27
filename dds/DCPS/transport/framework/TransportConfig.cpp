@@ -23,7 +23,7 @@ TransportConfig::TransportConfig(const OPENDDS_STRING& name)
   , passive_connect_duration_(*this, &TransportConfig::passive_connect_duration, &TransportConfig::passive_connect_duration)
   , transports_(*this, &TransportConfig::transports, &TransportConfig::transports)
   , name_(name)
-  , config_prefix_(ConfigPair::canonicalize("OPENDDS_CONFIG_" + name_))
+  , config_prefix_(ConfigPair::canonicalize("CONFIG_" + name_))
 {}
 
 TransportConfig::~TransportConfig()

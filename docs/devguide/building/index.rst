@@ -694,7 +694,7 @@ A few things to note:
 
 - Native-built host tools, like :term:`opendds_idl`, have to be configured and built separately and provided to the target build using :cmake:var:`OPENDDS_HOST_TOOLS`.
 - The host tools will build its own ACE/TAO for the host system, but this can be overridden using :cmake:var:`OPENDDS_ACE` on the host build and :cmake:var:`OPENDDS_ACE_TAO_HOST_TOOLS` on the target build.
-- If the target platform isn't automatically supported, then ACE/TAO will have to be :ref:`built serperatly <cmake-ace-tao-manual>`.
+- If the target platform isn't automatically supported, then ACE/TAO will have to be :ref:`built separately <cmake-ace-tao-manual>`.
 
 Android
 ^^^^^^^

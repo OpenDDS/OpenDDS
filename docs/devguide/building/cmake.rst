@@ -826,6 +826,16 @@ Features
   Default depends on the compiler being used.
   Has no effect when building OpenDDS using CMake.
 
+.. cmake:var:: OPENDDS_CXX_STD
+
+  .. versionadded:: 3.28
+
+  If defined, then this value is prefixed with ``cxx_std_`` and passed to `target_compile_features <https://cmake.org/cmake/help/latest/command/target_compile_features.html>`__ for all targets.
+  The valid values are the standards in `CMAKE_CXX_KNOWN_FEATURES <https://cmake.org/cmake/help/latest/prop_gbl/CMAKE_CXX_KNOWN_FEATURES.html#high-level-meta-features-indicating-c-standard-support>`__ without the leading ``cxx_std_``.
+  This is the minimum C++ standard required to use the ACE, TAO, and OpenDDS libraries.
+  When building OpenDDS using CMake, it's also the minimum C++ standard used to build OpenDDS.
+  The default depends on the version of ACE being used.
+
 .. cmake:var:: OPENDDS_DEBUG
   :no-contents-entry:
 

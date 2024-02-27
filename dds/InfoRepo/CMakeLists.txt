@@ -68,4 +68,4 @@ target_link_libraries(OpenDDS_InfoRepoServ PUBLIC OpenDDS::Federator)
 
 add_executable(DCPSInfoRepo DCPSInfoRepo.cpp)
 _opendds_executable(DCPSInfoRepo)
-target_link_libraries(DCPSInfoRepo OpenDDS::InfoRepoServ ${exe_dep_libs})
+target_link_libraries(DCPSInfoRepo PRIVATE OpenDDS::InfoRepoServ ${exe_dep_libs})
