@@ -12,13 +12,14 @@ using namespace OpenDDS::DCPS;
 TEST(dds_DCPS_ValueCommon, ListEnumHelper)
 {
   ListEnumHelper::Pair pairs[] = {
-    { "MONDAY", 2 },
-    { "TUESDAY", 3 },
-    { "WEDNESDAY", 4 },
-    { "THURSDAY", 5 },
-    { "FRIDAY", 6 },
-    { "SATURDAY", 7 },
-    { "SUNDAY", 8 }
+    {"MONDAY", 2},
+    {"TUESDAY", 3},
+    {"WEDNESDAY", 4},
+    {"THURSDAY", 5},
+    {"FRIDAY", 6},
+    {"SATURDAY", 7},
+    {"SUNDAY", 8},
+    {0, 0}
   };
   ListEnumHelper helper(pairs);
 
@@ -42,12 +43,13 @@ TEST(dds_DCPS_ValueCommon, ListEnumHelper)
 TEST(dds_DCPS_ValueCommon, MapBitmaskHelper)
 {
   MapBitmaskHelper::Pair pairs[] = {
-    { "FLAG0", 0 },
-    { "FLAG1", 1 },
-    { "FLAG2", 2 },
-    { "FLAG4", 4 },
-    { "FLAG5", 5 },
-    { "FLAG6", 6 }
+    {"FLAG0", 0},
+    {"FLAG1", 1},
+    {"FLAG2", 2},
+    {"FLAG4", 4},
+    {"FLAG5", 5},
+    {"FLAG6", 6},
+    {0, 0}
   };
   MapBitmaskHelper helper(pairs, 32, OpenDDS::XTypes::TK_UINT32);
 
