@@ -942,6 +942,7 @@ Features
 .. cmake:var:: MONOTONIC_USES_BOOTTIME
   :no-contents-entry:
 
-  OpenDDS uses monotonic clocks when scheduling timers and timed waits. On some platforms this uses CLOCK_MONOTONIC.
+  OpenDDS uses monotonic clocks when scheduling timers and timed waits.
+  On some platforms, this uses CLOCK_MONOTONIC which does not increment when the system is suspended.
   Enable this option to use CLOCK_BOOTTIME as the monotonic time source instead of CLOCK_MONOTONIC.
   Default is ``OFF``
