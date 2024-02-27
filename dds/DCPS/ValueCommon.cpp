@@ -81,6 +81,22 @@ size_t MapBitmaskHelper::get_names(OPENDDS_VECTOR(const char*)& names, ACE_CDR::
   return rtn_size;
 }
 
+String bitmask_to_string(ACE_CDR::ULongLong value, const BitmaskHelper& helper)
+{
+  String rtn;
+  OPENDDS_VECTOR(const char*) names;
+  const size_t size = helper.get_names(names, value);
+  rtn.reserve(size);
+
+  for (size_t i = 0; i < names.size(); ++i) {
+    rtn += names[i];
+    if (i < names.size() - 1) {
+      rtn += '|';
+    }
+  }
+  return rtn;
+}
+
 } // namespace DCPS
 } // namespace OpenDDS
 
