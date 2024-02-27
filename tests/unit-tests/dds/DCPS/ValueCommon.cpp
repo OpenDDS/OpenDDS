@@ -27,7 +27,7 @@ TEST(dds_DCPS_ValueCommon, ListEnumHelper)
   EXPECT_EQ(2, value);
   EXPECT_TRUE(helper.get_value(value, "FRIDAY"));
   EXPECT_EQ(6, value);
-  EXPECT_EQ(helper.get_value(value, "WEDNESDAY"));
+  EXPECT_TRUE(helper.get_value(value, "WEDNESDAY"));
   EXPECT_EQ(4, value);
   EXPECT_FALSE(helper.get_value(value, "SOMEDAY"));
 
@@ -49,7 +49,7 @@ TEST(dds_DCPS_ValueCommon, MapBitmaskHelper)
     { "FLAG5", 5 },
     { "FLAG6", 6 }
   };
-  MapBitmaskHelper helper(pairs, 32, XTypes::TK_UINT32);
+  MapBitmaskHelper helper(pairs, 32, OpenDDS::XTypes::TK_UINT32);
 
   OPENDDS_VECTOR(const char*) names(3);
   names[0] = "FLAG1";
@@ -58,14 +58,14 @@ TEST(dds_DCPS_ValueCommon, MapBitmaskHelper)
 
   ACE_CDR::ULongLong value = 0;
   EXPECT_TRUE(helper.get_value(value, names));
-  EXPECT_EQ(0x32, value);
+  EXPECT_EQ(0x32ull, value);
 
   names.push_back("FLAG3");
   EXPECT_FALSE(helper.get_value(value, names));
 
-  ACE_CDR::ULongLong value = 0x65;
-  EXPECT_GT(helper.get_names(names, value), 0);
-  EXPECT_EQ(names.size(), 4);
+  value = 0x65;
+  EXPECT_GT(helper.get_names(names, value), (size_t)0);
+  EXPECT_EQ(names.size(), (size_t)4);
   EXPECT_STREQ("FLAG0", names[0]);
   EXPECT_STREQ("FLAG2", names[1]);
   EXPECT_STREQ("FLAG5", names[2]);
