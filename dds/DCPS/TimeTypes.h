@@ -11,6 +11,7 @@
 #include "Definitions.h"
 #include "TimeDuration.h"
 #include "TimePoint_T.h"
+#include "dcps_export.h"
 
 #include <ace/Monotonic_Time_Policy.h>
 #include <ace/Time_Policy.h>
@@ -51,7 +52,7 @@ typedef TimePoint_T<SystemClock> SystemTimePoint;
 
 #if OPENDDS_CONFIG_MONOTONIC_USES_BOOTTIME
 
-struct BootTimePolicy {
+struct OpenDDS_Dcps_Export BootTimePolicy {
   ACE_Time_Value_T<BootTimePolicy> operator()() const;
   void set_gettimeofday(ACE_Time_Value (*)()) {} // see comment in ace/Monotonic_Time_Policy.h
 };
