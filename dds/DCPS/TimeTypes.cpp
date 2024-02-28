@@ -2,13 +2,13 @@
 
 #include "TimeTypes.h"
 
+#if OPENDDS_CONFIG_MONOTONIC_USES_BOOTTIME
+
 #include <ace/os_include/os_time.h>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
-
-#if OPENDDS_CONFIG_MONOTONIC_USES_BOOTTIME
 
 ACE_Time_Value_T<BootTimePolicy> BootTimePolicy::operator()() const
 {
@@ -20,8 +20,18 @@ ACE_Time_Value_T<BootTimePolicy> BootTimePolicy::operator()() const
   return ACE_Time_Value_T<BootTimePolicy>(ACE_Time_Value::zero);
 }
 
-#endif
-
 }
 }
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
+
+ACE_BEGIN_VERSIONED_NAMESPACE_DECL
+
+ACE_Condition_Attributes_T<OpenDDS::DCPS::BootTimePolicy>::ACE_Condition_Attributes_T(int type)
+ : ACE_Condition_Attributes(type)
+{
+  (void) ACE_OS::condattr_setclock(attributes_, CLOCK_BOOTTIME);
+}
+
+ACE_END_VERSIONED_NAMESPACE_DECL
+
+#endif

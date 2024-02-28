@@ -57,6 +57,22 @@ struct OpenDDS_Dcps_Export BootTimePolicy {
   void set_gettimeofday(ACE_Time_Value (*)()) {} // see comment in ace/Monotonic_Time_Policy.h
 };
 
+}
+}
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
+ACE_BEGIN_VERSIONED_NAMESPACE_DECL
+
+template <>
+struct OpenDDS_Dcps_Export ACE_Condition_Attributes_T<OpenDDS::DCPS::BootTimePolicy>
+  : ACE_Condition_Attributes {
+  ACE_Condition_Attributes_T(int type = ACE_DEFAULT_SYNCH_TYPE);
+};
+
+ACE_END_VERSIONED_NAMESPACE_DECL
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+namespace OpenDDS {
+namespace DCPS {
+
 typedef BootTimePolicy MonotonicClock;
 #elif defined OPENDDS_USES_MONOTONIC_TIME
 typedef ACE_Monotonic_Time_Policy MonotonicClock;
