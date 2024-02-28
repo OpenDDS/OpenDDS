@@ -1348,11 +1348,11 @@ sub write_opendds_configh {
     'OPENDDS_CONFIG_AUTO_STATIC_INCLUDES' => 0,
   );
 
-  sub replace_value {
+  my $replace_value = sub {
     my $var = shift;
     return 'UNDEFINED_NEED_TO_UPDATE_CONFIGURE_SCRIPT' unless exists $config{$var};
     return $config{$var};
-  }
+  };
 
   while (<$CFGIN>) {
     s/@(\w+)@/replace_value($1)/e;
