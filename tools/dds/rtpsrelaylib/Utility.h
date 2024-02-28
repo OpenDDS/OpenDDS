@@ -1,10 +1,10 @@
 #ifndef OPENDDS_RTPSRELAYLIB_UTILITY_H
 #define OPENDDS_RTPSRELAYLIB_UTILITY_H
 
-#include "RelayC.h"
+#include <dds/rtpsrelaylib/RelayC.h>
 
-#include "dds/DCPS/GuidUtils.h"
-#include "dds/DCPS/TimeDuration.h"
+#include <dds/DCPS/GuidUtils.h>
+#include <dds/DCPS/TimeDuration.h>
 
 #include <ace/INET_Addr.h>
 
