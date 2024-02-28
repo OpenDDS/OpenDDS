@@ -98,6 +98,7 @@ add_library(OpenDDS_Dcps
   DCPS/ThreadPool.cpp
   DCPS/ThreadStatusManager.cpp
   DCPS/TimeDuration.cpp
+  DCPS/TimeTypes.cpp
   DCPS/Time_Helper.cpp
   DCPS/TopicDescriptionImpl.cpp
   DCPS/TopicImpl.cpp
@@ -366,7 +367,6 @@ target_sources(OpenDDS_Dcps
     DCPS/TimePoint_T.h
     DCPS/TimePoint_T.inl
     DCPS/TimeSource.h
-    DCPS/TimeTypes.cpp
     DCPS/TimeTypes.h
     DCPS/Time_Helper.h
     DCPS/Time_Helper.inl
