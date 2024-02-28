@@ -1350,11 +1350,11 @@ sub write_opendds_configh {
     'OPENDDS_CONFIG_MONOTONIC_USES_BOOTTIME' => $opts{'boottime'} // 0,
   );
 
-  sub replace_value {
+  my $replace_value = sub {
     my $var = shift;
     return 'UNDEFINED_NEED_TO_UPDATE_CONFIGURE_SCRIPT' unless exists $config{$var};
     return $config{$var};
-  }
+  };
 
   while (<$CFGIN>) {
     s/@(\w+)@/replace_value($1)/e;
