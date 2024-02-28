@@ -227,7 +227,7 @@ my @specs = # Array of array-refs, each inner array is an option group which
     'macros=s@', 'Extra text for platform_macros.GNU',
     'features=s@', 'Extra text for default.features',
     'mpcopts=s@', 'Extra command-line args for MPC',
-    'boottime|boottime!', 'Use CLOCK_BOOTTIME as the monotonic time source',
+    'boottime|boottime!', 'Use CLOCK_BOOTTIME as the monotonic time source (no)',
    ],
    ['Optional dependencies for OpenDDS (disabled by default unless noted otherwise):',
     'java:s', 'Java development kit (use JAVA_HOME)',
