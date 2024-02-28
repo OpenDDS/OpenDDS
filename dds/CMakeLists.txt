@@ -366,6 +366,7 @@ target_sources(OpenDDS_Dcps
     DCPS/TimePoint_T.h
     DCPS/TimePoint_T.inl
     DCPS/TimeSource.h
+    DCPS/TimeTypes.cpp
     DCPS/TimeTypes.h
     DCPS/Time_Helper.h
     DCPS/Time_Helper.inl
