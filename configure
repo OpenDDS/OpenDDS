@@ -1357,7 +1357,7 @@ sub write_opendds_configh {
   };
 
   while (<$CFGIN>) {
-    s/@(\w+)@/replace_value($1)/e;
+    s/@(\w+)@/&$replace_value($1)/e;
     print $CFGH $_;
   }
 
