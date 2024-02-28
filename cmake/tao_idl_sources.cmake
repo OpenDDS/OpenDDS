@@ -64,25 +64,15 @@ function(_opendds_get_generated_output target file)
   _opendds_get_generated_output_dir("${target}" output_dir ${dir_args})
 
   if(arg_INCLUDE_BASE AND NOT OPENDDS_FILENAME_ONLY_INCLUDES AND NOT arg_O_OPT)
+    # We need to recreate the directory structure of the source IDL with the
+    # include base as the root.
     get_filename_component(real_include_base "${arg_INCLUDE_BASE}" REALPATH)
     if(IS_ABSOLUTE "${file}")
       get_filename_component(real_file "${file}" REALPATH)
     else()
       get_filename_component(real_file "${CMAKE_CURRENT_SOURCE_DIR}/${file}" REALPATH)
     endif()
-    file(RELATIVE_PATH rel_to_output "${output_dir}" "${real_file}")
-    if(rel_to_output MATCHES "^\\.\\.")
-      # This should be an IDL file that is relative to include_base.
-      set(rel_to "${real_include_base}")
-    else()
-      # This should be our own generated IDL file that is relative to
-      # opendds_generated. Doing this relative to the include base in the
-      # output might or might not make sense in practice, but makes output
-      # consistant with source directory case.
-      set(rel_to "${output_dir}/${arg_INCLUDE_BASE}")
-    endif()
-    file(RELATIVE_PATH rel_file "${rel_to}" "${real_file}")
-    get_filename_component(rel_dir "${rel_file}" DIRECTORY)
+    file(RELATIVE_PATH rel_file "${real_include_base}" "${real_file}")
     if(rel_file MATCHES "^\\.\\.")
       if(arg_FAIL_VAR)
         set(${arg_FAIL_VAR} TRUE PARENT_SCOPE)
@@ -99,6 +89,7 @@ function(_opendds_get_generated_output target file)
         "    ${arg_INCLUDE_BASE}\n"
         "    (${real_include_base})\n")
     endif()
+    get_filename_component(rel_dir "${rel_file}" DIRECTORY)
     set(output_dir "${output_dir}/${rel_dir}")
   endif()
 
@@ -138,6 +129,7 @@ function(_opendds_tao_idl target)
   # convert all include paths to be relative to binary tree instead of to source tree
   file(RELATIVE_PATH rel_path_to_source_tree ${working_binary_dir} ${working_source_dir})
   set(remove_next_opt FALSE)
+  set(converted_flags)
   foreach(flag ${arg_IDL_FLAGS})
     if("${flag}" MATCHES "^-I(\\.\\..*)")
       list(APPEND converted_flags "-I${rel_path_to_source_tree}/${CMAKE_MATCH_1}")
@@ -180,6 +172,7 @@ function(_opendds_tao_idl target)
     list(APPEND feature_flags -Sp -Sd)
   endif()
 
+  set(auto_includes)
   if(arg_INCLUDE_BASE)
     list(APPEND converted_flags "-I${arg_INCLUDE_BASE}")
     list(APPEND auto_includes "${arg_INCLUDE_BASE}")

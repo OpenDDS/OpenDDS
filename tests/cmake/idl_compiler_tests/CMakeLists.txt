@@ -6,6 +6,8 @@ find_package(OpenDDS REQUIRED)
 _opendds_save_cache(OPENDDS_AUTO_LINK_DCPS BOOL ON)
 _opendds_save_cache(OPENDDS_USE_CORRECT_INCLUDE_SCOPE BOOL ON)
 
+set(opendds_gen "${CMAKE_CURRENT_BINARY_DIR}/opendds_generated")
+
 macro(subtest name)
   set(no_value_options DUMMY)
   set(single_value_options)
@@ -14,6 +16,12 @@ macro(subtest name)
     "${no_value_options}" "${single_value_options}" "${multi_value_options}" ${ARGN})
 
   set(target "${PROJECT_NAME}_${name}")
+  # TODO: Add target when generation is per-target
+  set(target_gen "${opendds_gen}")
+  # Directory has to exist for get_filename_component(REAPATH) to consistently
+  # resolve it.
+  file(MAKE_DIRECTORY "${target_gen}")
+  get_filename_component(target_gen "${target_gen}" REALPATH)
   if(arg_DUMMY)
     add_custom_target(${target})
   else()
@@ -62,12 +70,6 @@ function(assert_includes target public_and_interface public_and_private)
     endforeach()
   endif()
 endfunction()
-
-set(opendds_gen "${CMAKE_CURRENT_BINARY_DIR}/opendds_generated")
-# Directory has to exist for get_filename_component(REAPATH) to consistently
-# resolve it.
-file(MAKE_DIRECTORY "${opendds_gen}")
-get_filename_component(opendds_gen "${opendds_gen}" REALPATH)
 
 function(assert_generated_output file)
   set(no_value_options EXPECT_FAIL)
@@ -127,45 +129,65 @@ function(assert_generated_output file)
 endfunction()
 
 subtest(generated_output DUMMY)
-foreach(in "" "${opendds_gen}/")
-  assert_generated_output("${in}file.ext" EXPECT "${opendds_gen}")
-  assert_generated_output("${in}x/file.ext" EXPECT "${opendds_gen}")
-  assert_generated_output("${in}x/y/file.ext" EXPECT "${opendds_gen}")
-  assert_generated_output("${in}x/y/z/file.ext" EXPECT "${opendds_gen}")
-  assert_generated_output("${in}file.ext" INCLUDE_BASE "." EXPECT "${opendds_gen}")
-  assert_generated_output("${in}x/file.ext" INCLUDE_BASE "." EXPECT "${opendds_gen}/x")
-  assert_generated_output("${in}x/y/file.ext" INCLUDE_BASE "." EXPECT "${opendds_gen}/x/y")
-  assert_generated_output("${in}x/y/z/file.ext" INCLUDE_BASE "." EXPECT "${opendds_gen}/x/y/z")
-  assert_generated_output("${in}x/file.ext" INCLUDE_BASE "x" EXPECT "${opendds_gen}")
-  assert_generated_output("${in}x/y/file.ext" INCLUDE_BASE "x" EXPECT "${opendds_gen}/y")
-  assert_generated_output("${in}x/y/z/file.ext" INCLUDE_BASE "x" EXPECT "${opendds_gen}/y/z")
-  assert_generated_output("${in}x/y/file.ext" INCLUDE_BASE "x/y" EXPECT "${opendds_gen}")
-  assert_generated_output("${in}x/y/z/file.ext" INCLUDE_BASE "x/y" EXPECT "${opendds_gen}/z")
-endforeach()
+# Legacy flat case
+assert_generated_output("file.ext" EXPECT "${target_gen}")
+assert_generated_output("x/file.ext" EXPECT "${target_gen}")
+assert_generated_output("x/y/file.ext" EXPECT "${target_gen}")
+assert_generated_output("x/y/z/file.ext" EXPECT "${target_gen}")
+# -o option
+assert_generated_output("o_opt_file.ext" O_OPT "o_opt_dir" EXPECT "${target_gen}/o_opt_dir")
+# INCLUDE_BASE="."
+assert_generated_output("file.ext" INCLUDE_BASE "." EXPECT "${target_gen}")
+assert_generated_output("x/file.ext" INCLUDE_BASE "." EXPECT "${target_gen}/x")
+assert_generated_output("x/y/file.ext" INCLUDE_BASE "." EXPECT "${target_gen}/x/y")
+assert_generated_output("x/y/z/file.ext" INCLUDE_BASE "." EXPECT "${target_gen}/x/y/z")
+# INCLUDE_BASE is a subdirectory
+assert_generated_output("x/y/file.ext" INCLUDE_BASE "x" EXPECT "${target_gen}/y")
+assert_generated_output("x/y/z/file.ext" INCLUDE_BASE "x" EXPECT "${target_gen}/y/z")
+assert_generated_output("x/y/file.ext" INCLUDE_BASE "x/y" EXPECT "${target_gen}")
+assert_generated_output("x/y/z/file.ext" INCLUDE_BASE "x/y" EXPECT "${target_gen}/z")
+# INCLUDE_BASE is a parent directory
+assert_generated_output("file.ext" INCLUDE_BASE ".." EXPECT "${target_gen}/idl_compiler_tests")
+assert_generated_output("x/file.ext" INCLUDE_BASE "../.."
+  EXPECT "${target_gen}/cmake/idl_compiler_tests/x")
+assert_generated_output("x/y/file.ext" INCLUDE_BASE "../.."
+  EXPECT "${target_gen}/cmake/idl_compiler_tests/x/y")
+# INCLUDE_BASE is base output directory
+assert_generated_output("${target_gen}/file.ext" INCLUDE_BASE "${target_gen}"
+  EXPECT "${target_gen}")
+assert_generated_output("${target_gen}/x/file.ext" INCLUDE_BASE "${target_gen}"
+  EXPECT "${target_gen}/x")
+assert_generated_output("${target_gen}/x/y/file.ext" INCLUDE_BASE "${target_gen}"
+  EXPECT "${target_gen}/x/y")
+assert_generated_output("${target_gen}/x/y/file.ext" INCLUDE_BASE "${target_gen}/x"
+  EXPECT "${target_gen}/y")
+assert_generated_output("${target_gen}/x/y/file.ext" INCLUDE_BASE "${target_gen}/x/y"
+  EXPECT "${target_gen}")
+# Input can not be outside INCLUDE_BASE
 assert_generated_output("../file.ext" INCLUDE_BASE "." EXPECT_FAIL)
 assert_generated_output("x/file.ext" INCLUDE_BASE "x/y/z" EXPECT_FAIL)
-assert_generated_output("o_opt_file.ext" O_OPT "o_opt_dir" EXPECT "${opendds_gen}/o_opt_dir")
+assert_generated_output("file.ext" INCLUDE_BASE "${target_gen}" EXPECT_FAIL)
 
 subtest(no_scope)
 opendds_target_sources(${target} ${idl_file})
-assert_includes(${target} "" "${opendds_gen}")
+assert_includes(${target} "" "${target_gen}")
 
 subtest(public)
 opendds_target_sources(${target} PUBLIC ${idl_file})
-assert_includes(${target} "${opendds_gen}" "${opendds_gen}")
+assert_includes(${target} "${target_gen}" "${target_gen}")
 
 subtest(interface)
 opendds_target_sources(${target} INTERFACE ${idl_file})
-assert_includes(${target} "${opendds_gen}" "${opendds_gen}")
+assert_includes(${target} "${target_gen}" "${target_gen}")
 
 subtest(private)
 opendds_target_sources(${target} PRIVATE ${idl_file})
-assert_includes(${target} "" "${opendds_gen}")
+assert_includes(${target} "" "${target_gen}")
 
 subtest(o_opt)
 opendds_target_sources(${target} ${idl_file}
   OPENDDS_IDL_OPTIONS -o opendds-idl-output
   TAO_IDL_OPTIONS -o tao-idl-output)
-assert_includes(${target} "" "${opendds_gen}/opendds-idl-output;${opendds_gen}/tao-idl-output")
+assert_includes(${target} "" "${target_gen}/opendds-idl-output;${target_gen}/tao-idl-output")
 
 _opendds_restore_cache()

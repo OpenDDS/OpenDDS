@@ -255,6 +255,7 @@ function(_opendds_target_idl_sources target)
     get_filename_component(idl_file_dir ${abs_filename} DIRECTORY)
 
     set(idl_files)
+    set(ts_idl_files)
     set(h_files)
     set(cpp_files)
     set(run_tao_idl_on_input FALSE)
@@ -280,7 +281,7 @@ function(_opendds_target_idl_sources target)
 
       if(NOT opendds_idl_opt_-SI)
         set(type_support_idl_file "${output_prefix}TypeSupport.idl")
-        list(APPEND idl_files ${type_support_idl_file})
+        list(APPEND ts_idl_files ${type_support_idl_file})
         list(APPEND generated_files ${type_support_idl_file})
         set_property(SOURCE ${abs_filename} APPEND PROPERTY
           OPENDDS_TYPESUPPORT_IDLS "${type_support_idl_file}")
@@ -358,6 +359,15 @@ function(_opendds_target_idl_sources target)
           IDL_FILES ${idl_files}
           INCLUDE_BASE "${include_base}"
           AUTO_INCLUDES tao_idl_auto_includes
+        )
+        list(APPEND file_auto_includes "${tao_idl_auto_includes}")
+      endif()
+      if(ts_idl_files)
+        _opendds_tao_idl(${target}
+          IDL_FLAGS ${tao_idl_opts}
+          IDL_FILES ${ts_idl_files}
+          INCLUDE_BASE "${gen_out}"
+          AUTO_INCLUDES tao_idl_ts_auto_includes
         )
         list(APPEND file_auto_includes "${tao_idl_auto_includes}")
       endif()

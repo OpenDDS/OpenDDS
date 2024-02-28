@@ -482,6 +482,7 @@ my %all_checks = (
       '!old_design_files',
       '!svg_file',
       '!batch_file',
+      '!cmake_file', # CMake requires trailing whitespace for preformatted messages
     ],
     line_matches => qr/(\s+)\n$/,
     message => [
