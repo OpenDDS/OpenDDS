@@ -20,32 +20,40 @@ inline bool vread(ValueReader&, XTypes::TypeIdentifier&)
   return false;
 }
 
-inline void vwrite(ValueWriter&, const XTypes::TypeIdentifier&)
-{ }
+inline bool vwrite(ValueWriter&, const XTypes::TypeIdentifier&)
+{
+  return false;
+}
 
 inline bool vread(ValueReader&, XTypes::TypeIdentifierTypeObjectPair&)
 {
   return false;
 }
 
-inline void vwrite(ValueWriter&, const XTypes::TypeIdentifierTypeObjectPair&)
-{ }
+inline bool vwrite(ValueWriter&, const XTypes::TypeIdentifierTypeObjectPair&)
+{
+  return false;
+}
 
 inline bool vread(ValueReader&, XTypes::TypeIdentifierPair&)
 {
   return false;
 }
 
-inline void vwrite(ValueWriter&, const XTypes::TypeIdentifierPair&)
-{ }
+inline bool vwrite(ValueWriter&, const XTypes::TypeIdentifierPair&)
+{
+  return false;
+}
 
 inline bool vread(ValueReader&, XTypes::TypeIdentifierWithSize&)
 {
   return false;
 }
 
-inline void vwrite(ValueWriter&, const XTypes::TypeIdentifierWithSize&)
-{ }
+inline bool vwrite(ValueWriter&, const XTypes::TypeIdentifierWithSize&)
+{
+  return false;
+}
 
 }
 }

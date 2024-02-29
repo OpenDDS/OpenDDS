@@ -4,11 +4,13 @@
 #  include <DynamicDataImplTypeSupportImpl.h>
 
 #  include <tests/Utils/GtestRc.h>
+#  include <tests/Utils/DataView.h>
 
 #  include <dds/DCPS/XTypes/Utils.h>
 #  include <dds/DCPS/XTypes/TypeLookupService.h>
 #  include <dds/DCPS/XTypes/DynamicDataAdapter.h>
 #  include <dds/DCPS/XTypes/DynamicDataFactory.h>
+#  include <dds/DCPS/XTypes/DynamicDataImpl.h>
 
 #  include <gtest/gtest.h>
 
@@ -724,6 +726,50 @@ TEST_F(dds_DCPS_XTypes_Utils, MemberPathParser)
     ASSERT_FALSE(mpp.get_next_subpath());
     ASSERT_FALSE(mpp.error);
   }
+}
+
+TEST_F(dds_DCPS_XTypes_Utils, MultidimArray)
+{
+  add_type<MultidimArrayStruct>();
+  DDS::DynamicType_var dt = get_dynamic_type<MultidimArrayStruct>();
+  OpenDDS::XTypes::DynamicDataImpl data(dt);
+  DDS::DynamicData_var arr_dd;
+  EXPECT_EQ(DDS::RETCODE_OK, data.get_complex_value(arr_dd, 0));
+  DDS::DynamicType_var arr_type = arr_dd->type();
+  DDS::TypeDescriptor_var arr_td;
+  EXPECT_EQ(DDS::RETCODE_OK, arr_type->get_descriptor(arr_td));
+
+  MultidimArrayStruct mdim_struct;
+  mdim_struct.arr[0][0] = 10;
+  mdim_struct.arr[0][1] = 20;
+  mdim_struct.arr[0][2] = 30;
+  mdim_struct.arr[1][0] = 40;
+  mdim_struct.arr[1][1] = 50;
+  mdim_struct.arr[1][2] = 60;
+  DDS::BoundSeq idx_vec;
+  idx_vec.length(2);
+  for (CORBA::ULong i = 0; i < arr_td->bound()[0]; ++i) {
+    idx_vec[0] = i;
+    for (CORBA::ULong j = 0; j < arr_td->bound()[1]; ++j) {
+      idx_vec[1] = j;
+      CORBA::ULong flat_idx;
+      EXPECT_EQ(DDS::RETCODE_OK, OpenDDS::XTypes::flat_index(flat_idx, idx_vec, arr_td->bound()));
+      EXPECT_EQ(i * arr_td->bound()[1] + j, flat_idx);
+      EXPECT_EQ(DDS::RETCODE_OK, arr_dd->set_int32_value(arr_dd->get_member_id_at_index(flat_idx),
+                                                         mdim_struct.arr[i][j]));
+    }
+  }
+
+  const unsigned char expected_cdr[] = {
+    0x00,0x00,0x00,0x18,
+    0x00,0x00,0x00,10, 0x00,0x00,0x00,20, 0x00,0x00,0x00,30,
+    0x00,0x00,0x00,40, 0x00,0x00,0x00,50, 0x00,0x00,0x00,60
+  };
+  ACE_Message_Block buffer(64);
+  OpenDDS::DCPS::Encoding xcdr2(OpenDDS::DCPS::Encoding::KIND_XCDR2, OpenDDS::DCPS::ENDIAN_BIG);
+  OpenDDS::DCPS::Serializer ser(&buffer, xcdr2);
+  ASSERT_TRUE(ser << &data);
+  EXPECT_PRED_FORMAT2(assert_DataView, expected_cdr, buffer);
 }
 
 #endif // OPENDDS_SAFETY_PROFILE

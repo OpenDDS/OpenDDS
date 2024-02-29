@@ -923,6 +923,7 @@ Consider the following example:
       @id(4) NestedStruct nested_field;
       @id(5) sequence<unsigned long> ul_seq_field;
       @id(6) double d_field[10];
+      @id(7) long mdim_field[2][3];
     };
 
 The samples for MyStruct are written by a normal, statically-typed DataWriter.
@@ -1047,14 +1048,14 @@ To get the values of the array member ``d_field``, we first need to create a sep
 
 .. code-block:: cpp
 
-    XTypes::DynamicData array_data;
+    DDS::DynamicData_var array_data;
     DDS::ReturnCode_t ret = data.get_complex_value(array_data, id); // id is 6
 
-    const DDS::UInt32 num_items = array_data.get_item_count();
+    const DDS::UInt32 num_items = array_data->get_item_count();
     for (DDS::UInt32 i = 0; i < num_items; ++i) {
-      const XTypes::MemberId my_id = array_data.get_member_id_at_index(i);
+      const XTypes::MemberId my_id = array_data->get_member_id_at_index(i);
       DDS::Float64 my_double;
-      ret = array_data.get_float64_value(my_double, my_id);
+      ret = array_data->get_float64_value(my_double, my_id);
     }
 
 In the example code above, ``get_item_count`` returns the number of elements of the array.
@@ -1064,6 +1065,35 @@ Note that the second parameter of the interfaces provided by DynamicData must be
 In case of collection, elements are considered members of the collection.
 However, the collection element doesn't have a member id.
 And thus, we need to convert its index into an id before calling a get_*_value (or get_*_values) method.
+
+Accessing a multi-dimensional array is a little different as ``get_member_id_at_index`` accepts a single index as its sole argument.
+OpenDDS provides function ``flat_index`` to convert an index to a multi-dimensional array to a flat index that can then be passed to ``get_member_id_at_index``.
+
+.. code-block:: cpp
+
+    DDS::DynamicData_var mdim_arr_data;
+    DDS::ReturnCode_t ret = data.get_complex_value(mdim_arr_data, id); // id is 7
+    DDS::DynamicType_var mdim_type = mdim_arr_data->type();
+    DDS::TypeDescriptor_var mdim_td;
+    ret = mdim_type->get_descriptor(mdim_td);
+    const DDS::BoundSeq& bound = mdim_td->bound();
+
+    DDS::UInt32Seq index_vec;
+    index_vec.length(2);
+    for (DDS::UInt32 i = 0; i < bound[0]; ++i) {
+        index_vec[0] = i;
+        for (DDS::UInt32 j = 0; j < bound[1]; ++j) {
+            index_vec[1] = j;
+            DDS::UInt32 flat_idx;
+            ret = OpenDDS::XTypes::flat_index(flat_idx, index_vec, bound);
+            const XTypes::MemberId id = mdim_arr_data->get_member_id_at_index(flat_idx);
+            DDS::Int32 my_long;
+            ret = mdim_arr_data->get_int32_value(my_long, id);
+        }
+    }
+
+``flat_index`` takes as input an index vector to the multi-dimensional array and the dimensions of the array and returns a flat index.
+The same function is used when serializing the dynamic data object to make sure the mapping from index to id is consistent and conforms to the XTypes spec regarding the order of the elements.
 
 .. _xtypes--reading-members-of-more-complex-types:
 
@@ -1080,7 +1110,7 @@ For example, a DynamicData object for the nested_field member of the MyStruct sa
 
 .. code-block:: cpp
 
-    XTypes::DynamicData nested_data;
+    DDS::DynamicData_var nested_data;
     DDS::ReturnCode_t ret = data.get_complex_value(nested_data, id); // id is 4
 
 Recall that nested_field has type NestedStruct which has one member s_field with id 1.
@@ -1089,7 +1119,7 @@ Now the value of s_field can be read from nested_data using get_int16_value, sin
 .. code-block:: cpp
 
     DDS::Int16 my_short;
-    ret = nested_data.get_int16_value(my_short, id); // id is 1
+    ret = nested_data->get_int16_value(my_short, id); // id is 1
 
 The get_complex_value method is also suitable for any other cases where the value of a member cannot be read directly using the get_*_value or get_*_values methods.
 As an example, suppose we have a struct MyStruct2 defined as follows.
@@ -1106,20 +1136,20 @@ To read the individual elements of seq_field, we first get a new DynamicData obj
 
 .. code-block:: cpp
 
-    XTypes::DynamicData seq_data;
+    DDS::DynamicData_var seq_data;
     DDS::ReturnCode_t ret = data.get_complex_value(seq_data, id); // id is 1
 
 Since the elements of seq_field are structures, for each of them we create another new DynamicData object to represent it, which can be used to read its member.
 
 .. code-block:: cpp
 
-    const DDS::UInt32 num_elems = seq_data.get_item_count();
+    const DDS::UInt32 num_elems = seq_data->get_item_count();
     for (DDS::UInt32 i = 0; i < num_elems; ++i) {
-      const XTypes::MemberId my_id = seq_data.get_member_id_at_index(i);
-      XTypes::DynamicData elem_data; // Represent each element.
-      ret = seq_data.get_complex_value(elem_data, my_id);
+      const XTypes::MemberId my_id = seq_data->get_member_id_at_index(i);
+      DDS::DynamicData_var elem_data; // Represent each element.
+      ret = seq_data->get_complex_value(elem_data, my_id);
       DDS::Int16 my_short;
-      ret = elem_data.get_int16_value(my_short, 1);
+      ret = elem_data->get_int16_value(my_short, 1);
     }
 
 .. _xtypes--populating-data-samples-with-dynamicdata:
