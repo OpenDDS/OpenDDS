@@ -20,7 +20,7 @@ namespace DCPS {
 
 void vwrite(ValueWriter& vw, const GuidPrefix_t& prefix)
 {
-  vw.begin_array();
+  vw.begin_array(XTypes::TK_BYTE);
   for (size_t idx = 0; idx != sizeof(prefix); ++idx) {
     vw.write_byte(prefix[idx]);
   }
@@ -41,13 +41,13 @@ void log_message(const char* format,
   rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
   DCPS::JsonValueWriter<rapidjson::Writer<rapidjson::StringBuffer> > jvw(writer);
   jvw.begin_struct();
-  jvw.begin_struct_member(XTypes::MemberDescriptor("guidPrefix", false));
+  jvw.begin_struct_member(DCPS::MemberParam("guidPrefix"));
   vwrite(jvw, prefix);
   jvw.end_struct_member();
-  jvw.begin_struct_member(XTypes::MemberDescriptor("send", false));
+  jvw.begin_struct_member(DCPS::MemberParam("send"));
   jvw.write_boolean(send);
   jvw.end_struct_member();
-  jvw.begin_struct_member(XTypes::MemberDescriptor("message", false));
+  jvw.begin_struct_member(DCPS::MemberParam("message"));
   vwrite(jvw, message);
   jvw.end_struct_member();
   jvw.end_struct();

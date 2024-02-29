@@ -562,6 +562,8 @@ void TypeLookupService::complete_to_dynamic_i(DynamicType_rch& dt,
       md.name = cto.bitmask_type.flag_seq[i].detail.name;
       md.type = type_identifier_to_dynamic(TypeIdentifier(TK_BOOLEAN), guid);
       md.index = i;
+      // Use Id to convey the position of bit flag.
+      md.id = cto.bitmask_type.flag_seq[i].common.position;
       dtm->set_descriptor(md);
       dtm->set_parent(dt);
       dt->insert_dynamic_member(dtm);

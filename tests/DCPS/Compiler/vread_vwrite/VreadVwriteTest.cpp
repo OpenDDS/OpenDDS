@@ -6,6 +6,7 @@
 #include <dds/DCPS/JsonValueReader.h>
 #include <dds/DCPS/JsonValueWriter.h>
 #include <dds/DCPS/Definitions.h>
+#include <dds/DCPS/XTypes/DynamicVwrite.h>
 
 #include <fstream>
 

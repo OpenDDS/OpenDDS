@@ -147,7 +147,7 @@ namespace {
     encoding_count
   };
 
-  string streamCommon(const std::string& indent, const string& name, AST_Type* type,
+  string streamCommon(const std::string& indent, AST_Decl* node, const string& name, AST_Type* type,
                       const string& prefix, bool wrap_nested_key_only, Intro& intro,
                       const string& stru = "");
 
@@ -1385,7 +1385,7 @@ namespace {
             stream = "(strm >> " + classic_array_wrapper.ref() + ")";
           } else {
             stream = streamCommon(
-              indent, "", arr->base_type(), ">> " + elem_access, nested_key_only, intro);
+              indent, 0, "", arr->base_type(), ">> " + elem_access, nested_key_only, intro);
           }
           intro.join(be_global->impl_, indent);
           be_global->impl_ <<
@@ -1889,7 +1889,7 @@ bool marshal_generator::gen_typedef(AST_Typedef*, UTL_ScopedName* name, AST_Type
 
 namespace {
   // common to both fields (in structs) and branches (in unions)
-  string findSizeCommon(const std::string& indent, const string& name, AST_Type* type,
+  string findSizeCommon(const std::string& indent, AST_Decl*, const string& name, AST_Type* type,
                         const string& prefix, bool wrap_nested_key_only, Intro& intro,
                         const string& = "") // same sig as streamCommon
   {
@@ -1931,12 +1931,12 @@ namespace {
     }
   }
 
-  string findSizeMutableUnion(const string& indent, const string& name, AST_Type* type,
+  string findSizeMutableUnion(const string& indent, AST_Decl* branch, const string& name, AST_Type* type,
                               const string& prefix, bool wrap_nested_key_only, Intro& intro,
                               const string & = "") // same sig as streamCommon
   {
     return indent + "serialized_size_parameter_id(encoding, size, mutable_running_total);\n"
-      + findSizeCommon(indent, name, type, prefix, wrap_nested_key_only, intro);
+      + findSizeCommon(indent, branch, name, type, prefix, wrap_nested_key_only, intro);
   }
 
   std::string generate_field_serialized_size(
@@ -1952,12 +1952,12 @@ namespace {
       return indent + "serialized_size(encoding, size, " + wrapper.ref() + ");\n";
     }
     return findSizeCommon(
-      indent, field->local_name()->get_string(), field->field_type(), prefix,
+      indent, field, field->local_name()->get_string(), field->field_type(), prefix,
       wrap_nested_key_only, intro);
   }
 
   // common to both fields (in structs) and branches (in unions)
-  string streamCommon(const std::string& /*indent*/, const string& name, AST_Type* type,
+  string streamCommon(const std::string& /*indent*/, AST_Decl*, const string& name, AST_Type* type,
                       const string& prefix, bool wrap_nested_key_only, Intro& intro,
                       const string& stru)
   {
@@ -2024,7 +2024,7 @@ namespace {
       return "(strm " + wrapper.stream() + ")";
     }
     return streamCommon(
-      indent, field->local_name()->get_string(), field->field_type(), prefix,
+      indent, field, field->local_name()->get_string(), field->field_type(), prefix,
       wrap_nested_key_only, intro);
   }
 
@@ -2382,7 +2382,7 @@ namespace {
     const std::string& indent, Encoding, const string& key_name, AST_Type* ast_type,
     size_t*, string* expr, Intro* intro)
   {
-    *expr += findSizeCommon(indent, key_name, ast_type, "stru.value", false, *intro);
+    *expr += findSizeCommon(indent, 0, key_name, ast_type, "stru.value", false, *intro);
   }
 
   std::string fill_datareprseq(
@@ -3275,7 +3275,7 @@ bool marshal_generator::gen_struct(AST_Structure* node,
         } else {
           expr += "\n    && ";
         }
-        expr += streamCommon(indent, key_name, field_type, "<< stru.value", false, intro);
+        expr += streamCommon(indent, 0, key_name, field_type, "<< stru.value", false, intro);
       }
 
       intro.join(be_global->impl_, indent);
@@ -3302,7 +3302,7 @@ bool marshal_generator::gen_struct(AST_Structure* node,
         } else {
           expr += "\n    && ";
         }
-        expr += streamCommon(indent, key_name, field_type, ">> stru.value", false, intro);
+        expr += streamCommon(indent, 0, key_name, field_type, ">> stru.value", false, intro);
       }
 
       intro.join(be_global->impl_, indent);
@@ -3771,7 +3771,7 @@ namespace {
           }
 
           be_global->impl_ <<
-            "  if (!strm.write_parameter_id(0, size)) {\n"
+            "  if (!strm.write_parameter_id(XTypes::DISCRIMINATOR_SERIALIZED_ID, size)) {\n"
             "    return false;\n"
             "  }\n"
             "  size = 0;\n";
@@ -3965,7 +3965,7 @@ bool marshal_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
       }
 
       be_global->impl_ <<
-        "  if (!strm.write_parameter_id(0, size)) {\n"
+        "  if (!strm.write_parameter_id(XTypes::DISCRIMINATOR_SERIALIZED_ID, size)) {\n"
         "    return false;\n"
         "  }\n"
         "  size = 0;\n";

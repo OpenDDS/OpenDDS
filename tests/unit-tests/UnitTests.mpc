@@ -3,7 +3,7 @@ project(UnitTests): dcps, dcps_rtps_udp, dcps_rtpsexe, dcps_test, dcps_transport
   recurse = 1
 
   dcps_ts_flags += -Gxtypes-complete
-  idlflags += -I dds/DCPS/XTypes
+  idlflags += -SS -I dds/DCPS -I dds/DCPS/XTypes -I ../DCPS/Compiler/key_annotation
 
   Idl_Files {
     dds/DCPS/XTypes/CompleteToDynamicType.idl

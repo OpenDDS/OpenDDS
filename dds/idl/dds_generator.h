@@ -751,7 +751,7 @@ struct Intro {
 };
 
 typedef std::string (*CommonFn)(
-  const std::string& indent,
+  const std::string& indent, AST_Decl* node,
   const std::string& name, AST_Type* type,
   const std::string& prefix, bool wrap_nested_key_only, Intro& intro,
   const std::string&);
@@ -863,12 +863,12 @@ void generateCaseBody(
     if (commonFn2) {
       const OpenDDS::XTypes::MemberId id = be_global->get_id(branch);
       contents
-        << commonFn2(indent, name + (parens ? "()" : ""), branch->field_type(), "uni", false, intro, "")
+        << commonFn2(indent, branch, name + (parens ? "()" : ""), branch->field_type(), "uni", false, intro, "")
         << indent << "if (!strm.write_parameter_id(" << id << ", size)) {\n"
         << indent << "  return false;\n"
         << indent << "}\n";
     }
-    const std::string expr = commonFn(indent,
+    const std::string expr = commonFn(indent, branch,
       name + (parens ? "()" : ""), branch->field_type(),
       std::string(namePrefix) + "uni", false, intro, uni);
     if (*statementPrefix) {

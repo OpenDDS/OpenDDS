@@ -21,10 +21,10 @@ public:
     : JsonValueWriter(writer)
     , elements_(0)
   {}
-  virtual void write_int16_array(const ACE_CDR::Short* x, size_t length)
+  virtual bool write_int16_array(const ACE_CDR::Short* x, ACE_CDR::ULong length)
   {
     elements_ += length;
-    JsonValueWriter<Writer>::write_int16_array(x, length);
+    return JsonValueWriter<Writer>::write_int16_array(x, length);
   }
   size_t elements_;
 };
@@ -54,7 +54,7 @@ TEST(dds_DCPS_JsonValueWriter, begin_struct_member)
   Writer writer(buffer);
   JsonValueWriter<Writer> jvw(writer);
   jvw.begin_struct();
-  jvw.begin_struct_member(OpenDDS::XTypes::MemberDescriptor("aField", false));
+  jvw.begin_struct_member(MemberParam("aField"));
   EXPECT_STREQ(buffer.GetString(), "{\"aField\"");
 }
 
@@ -64,7 +64,7 @@ TEST(dds_DCPS_JsonValueWriter, end_struct_member)
   Writer writer(buffer);
   JsonValueWriter<Writer> jvw(writer);
   jvw.begin_struct();
-  jvw.begin_struct_member(OpenDDS::XTypes::MemberDescriptor("aField", false));
+  jvw.begin_struct_member(MemberParam("aField"));
   jvw.write_int16(5);
   jvw.end_struct_member();
   EXPECT_STREQ(buffer.GetString(), "{\"aField\":5");
@@ -95,7 +95,7 @@ TEST(dds_DCPS_JsonValueWriter, begin_discriminator)
   Writer writer(buffer);
   JsonValueWriter<Writer> jvw(writer);
   jvw.begin_union();
-  jvw.begin_discriminator();
+  jvw.begin_discriminator(MemberParam());
   jvw.write_int16(5);
   EXPECT_STREQ(buffer.GetString(), "{\"$discriminator\":5");
 }
@@ -106,7 +106,7 @@ TEST(dds_DCPS_JsonValueWriter, end_discriminator)
   Writer writer(buffer);
   JsonValueWriter<Writer> jvw(writer);
   jvw.begin_union();
-  jvw.begin_discriminator();
+  jvw.begin_discriminator(MemberParam());
   jvw.write_int16(5);
   jvw.end_discriminator();
   EXPECT_STREQ(buffer.GetString(), "{\"$discriminator\":5");
@@ -118,7 +118,7 @@ TEST(dds_DCPS_JsonValueWriter, begin_union_member)
   Writer writer(buffer);
   JsonValueWriter<Writer> jvw(writer);
   jvw.begin_union();
-  jvw.begin_union_member("aField");
+  jvw.begin_union_member(MemberParam("aField"));
   EXPECT_STREQ(buffer.GetString(), "{\"aField\"");
 }
 
@@ -128,7 +128,7 @@ TEST(dds_DCPS_JsonValueWriter, end_union_member)
   Writer writer(buffer);
   JsonValueWriter<Writer> jvw(writer);
   jvw.begin_union();
-  jvw.begin_union_member("aField");
+  jvw.begin_union_member(MemberParam("aField"));
   jvw.write_int16(5);
   jvw.end_union_member();
   EXPECT_STREQ(buffer.GetString(), "{\"aField\":5");
@@ -140,10 +140,10 @@ TEST(dds_DCPS_JsonValueWriter, complete_struct)
   Writer writer(buffer);
   JsonValueWriter<Writer> jvw(writer);
   jvw.begin_struct();
-  jvw.begin_struct_member(OpenDDS::XTypes::MemberDescriptor("aField", false));
+  jvw.begin_struct_member(MemberParam("aField"));
   jvw.write_int16(5);
   jvw.end_struct_member();
-  jvw.begin_struct_member(OpenDDS::XTypes::MemberDescriptor("bField", false));
+  jvw.begin_struct_member(MemberParam("bField"));
   jvw.write_int16(6);
   jvw.end_struct_member();
   jvw.end_struct();
@@ -275,7 +275,7 @@ TEST(dds_DCPS_JsonValueWriter, complete_struct_with_complete_array)
   Writer writer(buffer);
   TestWriter jvw(writer);
   jvw.begin_struct();
-  jvw.begin_struct_member(OpenDDS::XTypes::MemberDescriptor("a", false));
+  jvw.begin_struct_member(MemberParam("a"));
   jvw.begin_array();
   jvw.begin_element(0);
   jvw.write_int16(5);
@@ -515,15 +515,6 @@ TEST(dds_DCPS_JsonValueWriter, write_float128)
   EXPECT_STREQ(buffer.GetString(), "5.6");
 }
 
-TEST(dds_DCPS_JsonValueWriter, write_fixed)
-{
-  Buffer buffer;
-  Writer writer(buffer);
-  JsonValueWriter<Writer> jvw(writer);
-  jvw.write_fixed(OpenDDS::FaceTypes::Fixed());
-  EXPECT_STREQ(buffer.GetString(), "\"fixed\"");
-}
-
 TEST(dds_DCPS_JsonValueWriter, write_char8)
 {
   Buffer buffer;
@@ -574,8 +565,34 @@ TEST(dds_DCPS_JsonValueWriter, write_enum)
   Buffer buffer;
   Writer writer(buffer);
   JsonValueWriter<Writer> jvw(writer);
-  jvw.write_enum("label", 5);
-  EXPECT_STREQ(buffer.GetString(), "\"label\"");
+  const ListEnumHelper::Pair enum_pairs[] = {
+    {"label_1", 5},
+    {"label_2", 6},
+    {0, 0}
+  };
+  const ListEnumHelper enum_helper(enum_pairs);
+  jvw.write_enum(5, enum_helper);
+  EXPECT_STREQ(buffer.GetString(), "\"label_1\"");
+}
+
+TEST(dds_DCPS_JsonValueWriter, write_bitmask)
+{
+  Buffer buffer;
+  Writer writer(buffer);
+  JsonValueWriter<Writer> jvw(writer);
+  const MapBitmaskHelper::Pair bitmask_pairs[] = {
+    {"flag0", 0},
+    {"flag1", 1},
+    {"flag2", 2},
+    {"flag3", 3},
+    {"flag4", 4},
+    {"flag5", 5},
+    {"flag6", 6},
+    {0, 0}
+  };
+  const MapBitmaskHelper bitmask_helper(bitmask_pairs, 7, OpenDDS::XTypes::TK_UINT8);
+  jvw.write_bitmask(1 << 1 | 1 << 3 | 1 << 5, bitmask_helper);
+  EXPECT_STREQ(buffer.GetString(), "\"flag1|flag3|flag5\"");
 }
 
 #endif

@@ -182,7 +182,7 @@ namespace {
     }
   }
 
-  std::string branch_helper(const std::string&,
+  std::string branch_helper(const std::string&, AST_Decl* branch,
                             const std::string& field_name,
                             AST_Type* type,
                             const std::string&,

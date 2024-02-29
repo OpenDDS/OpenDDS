@@ -591,7 +591,7 @@ bool v8_generator::gen_typedef(AST_Typedef*, UTL_ScopedName* name,
 }
 
 namespace {
-  std::string branchGenTo(const std::string&, const std::string& name, AST_Type* type,
+  std::string branchGenTo(const std::string&, AST_Decl*, const std::string& name, AST_Type* type,
                           const std::string&, bool, Intro&,
                           const std::string&)
   {
@@ -602,7 +602,7 @@ namespace {
     gen_copyto("uni", source.c_str(), type, prop.c_str(), strm);
     return strm.str();
   }
-  std::string branchGenFrom(const std::string&, const std::string& name, AST_Type* type,
+  std::string branchGenFrom(const std::string&, AST_Decl*, const std::string& name, AST_Type* type,
                             const std::string&, bool, Intro&,
                             const std::string&)
   {

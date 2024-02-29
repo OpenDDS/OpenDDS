@@ -7,6 +7,8 @@
 
 #include <gtest/gtest.h>
 
+#ifndef OPENDDS_SAFETY_PROFILE
+
 using namespace OpenDDS::DCPS;
 
 TEST(dds_DCPS_PrinterValueWriter, begin_struct)
@@ -28,7 +30,7 @@ TEST(dds_DCPS_PrinterValueWriter, begin_struct_member)
 {
   PrinterValueWriter pvw;
   pvw.begin_struct();
-  pvw.begin_struct_member(OpenDDS::XTypes::MemberDescriptor("aField", false));
+  pvw.begin_struct_member(MemberParam("aField"));
   EXPECT_STREQ(pvw.str().c_str(), "    aField: ");
 }
 
@@ -36,7 +38,7 @@ TEST(dds_DCPS_PrinterValueWriter, end_struct_member)
 {
   PrinterValueWriter pvw;
   pvw.begin_struct();
-  pvw.begin_struct_member(OpenDDS::XTypes::MemberDescriptor("aField", false));
+  pvw.begin_struct_member(MemberParam("aField"));
   pvw.write_int16(5);
   pvw.end_struct_member();
   EXPECT_STREQ(pvw.str().c_str(), "    aField: 5");
@@ -61,7 +63,7 @@ TEST(dds_DCPS_PrinterValueWriter, begin_discriminator)
 {
   PrinterValueWriter pvw;
   pvw.begin_union();
-  pvw.begin_discriminator();
+  pvw.begin_discriminator(MemberParam());
   pvw.write_int16(5);
   EXPECT_STREQ(pvw.str().c_str(), "    $discriminator: 5");
 }
@@ -70,7 +72,7 @@ TEST(dds_DCPS_PrinterValueWriter, end_discriminator)
 {
   PrinterValueWriter pvw;
   pvw.begin_union();
-  pvw.begin_discriminator();
+  pvw.begin_discriminator(MemberParam());
   pvw.write_int16(5);
   pvw.end_discriminator();
   EXPECT_STREQ(pvw.str().c_str(), "    $discriminator: 5");
@@ -80,7 +82,7 @@ TEST(dds_DCPS_PrinterValueWriter, begin_union_member)
 {
   PrinterValueWriter pvw;
   pvw.begin_union();
-  pvw.begin_union_member("aField");
+  pvw.begin_union_member(MemberParam("aField"));
   EXPECT_STREQ(pvw.str().c_str(), "    aField: ");
 }
 
@@ -88,7 +90,7 @@ TEST(dds_DCPS_PrinterValueWriter, end_union_member)
 {
   PrinterValueWriter pvw;
   pvw.begin_union();
-  pvw.begin_union_member("aField");
+  pvw.begin_union_member(MemberParam("aField"));
   pvw.write_int16(5);
   pvw.end_union_member();
   EXPECT_STREQ(pvw.str().c_str(), "    aField: 5");
@@ -98,10 +100,10 @@ TEST(dds_DCPS_PrinterValueWriter, complete_struct)
 {
   PrinterValueWriter pvw;
   pvw.begin_struct();
-  pvw.begin_struct_member(OpenDDS::XTypes::MemberDescriptor("aField", false));
+  pvw.begin_struct_member(MemberParam("aField"));
   pvw.write_int16(5);
   pvw.end_struct_member();
-  pvw.begin_struct_member(OpenDDS::XTypes::MemberDescriptor("bField", false));
+  pvw.begin_struct_member(MemberParam("bField"));
   pvw.write_int16(6);
   pvw.end_struct_member();
   pvw.end_struct();
@@ -208,7 +210,7 @@ TEST(dds_DCPS_PrinterValueWriter, complete_struct_with_complete_array)
 {
   PrinterValueWriter pvw;
   pvw.begin_struct();
-  pvw.begin_struct_member(OpenDDS::XTypes::MemberDescriptor("a", false));
+  pvw.begin_struct_member(MemberParam("a"));
   pvw.begin_array();
   pvw.begin_element(0);
   pvw.write_int16(5);
@@ -398,13 +400,6 @@ TEST(dds_DCPS_PrinterValueWriter, write_float128)
   EXPECT_STREQ(pvw.str().c_str(), "5.6");
 }
 
-TEST(dds_DCPS_PrinterValueWriter, write_fixed)
-{
-  PrinterValueWriter pvw;
-  pvw.write_fixed(OpenDDS::FaceTypes::Fixed());
-  EXPECT_STREQ(pvw.str().c_str(), "fixed");
-}
-
 TEST(dds_DCPS_PrinterValueWriter, write_char8)
 {
   PrinterValueWriter pvw;
@@ -443,6 +438,32 @@ TEST(dds_DCPS_PrinterValueWriter, write_string)
 TEST(dds_DCPS_PrinterValueWriter, write_enum)
 {
   PrinterValueWriter pvw;
-  pvw.write_enum("label", 5);
-  EXPECT_STREQ(pvw.str().c_str(), "label (5)");
+  const ListEnumHelper::Pair enum_pairs[] = {
+    {"label_1", 5},
+    {"label_2", 6},
+    {0, 0}
+  };
+  const ListEnumHelper enum_helper(enum_pairs);
+  pvw.write_enum(5, enum_helper);
+  EXPECT_STREQ(pvw.str().c_str(), "label_1 (5)");
 }
+
+TEST(dds_DCPS_PrinterValueWriter, write_bitmask)
+{
+  PrinterValueWriter pvw;
+  const MapBitmaskHelper::Pair bitmask_pairs[] = {
+    {"flag0", 0},
+    {"flag1", 1},
+    {"flag2", 2},
+    {"flag3", 3},
+    {"flag4", 4},
+    {"flag5", 5},
+    {"flag6", 6},
+    {0, 0}
+  };
+  const MapBitmaskHelper bitmask_helper(bitmask_pairs, 10, OpenDDS::XTypes::TK_UINT16);
+  pvw.write_bitmask(1 << 2 | 1 << 4 | 1 << 6, bitmask_helper);
+  EXPECT_STREQ(pvw.str().c_str(), "flag2|flag4|flag6");
+}
+
+#endif
