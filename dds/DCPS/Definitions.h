@@ -16,6 +16,7 @@
 #    include <dds/OpenDDSConfig.h>
 #  endif
 #endif
+
 #include <dds/Versioned_Namespace.h>
 
 #include <ace/Message_Block.h>
