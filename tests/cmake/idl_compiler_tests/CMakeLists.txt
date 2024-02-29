@@ -104,7 +104,6 @@ function(assert_generated_output file)
   set(expect_prefix_path "${expect_dir_path}/${filename_no_ext}")
   foreach(var failed dir_path file_path prefix_path)
     set(val "${${var}}")
-    # message("${var} ${val}")
     set(expect "${expect_${var}}")
     if(NOT val STREQUAL expect)
       message(SEND_ERROR
