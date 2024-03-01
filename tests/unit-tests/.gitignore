@@ -74,3 +74,14 @@
 /DynamicDataAdapterTypeSupportImpl.cpp
 /DynamicDataAdapterTypeSupportImpl.h
 /DynamicDataAdapterTypeSupportS.h
+/Xcdr2ValueWriterC.cpp
+/Xcdr2ValueWriterC.h
+/Xcdr2ValueWriterC.inl
+/Xcdr2ValueWriterS.h
+/Xcdr2ValueWriterTypeSupport.idl
+/Xcdr2ValueWriterTypeSupportC.cpp
+/Xcdr2ValueWriterTypeSupportC.h
+/Xcdr2ValueWriterTypeSupportC.inl
+/Xcdr2ValueWriterTypeSupportImpl.cpp
+/Xcdr2ValueWriterTypeSupportImpl.h
+/Xcdr2ValueWriterTypeSupportS.h

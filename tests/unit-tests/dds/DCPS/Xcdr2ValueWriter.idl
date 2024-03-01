@@ -1,0 +1,201 @@
+#include <tao/LongSeq.pidl>
+#include <tao/ShortSeq.pidl>
+
+module Test {
+
+// Basic types that cover all extensibilities
+
+#define TOP_MEMBERS \
+  short s_field; \
+  long l_field;
+
+#define NESTED_MEMBERS \
+  boolean b_field; \
+  float f_field; \
+  octet o_field;
+
+#define BOTTOM_MEMBERS \
+  string str_field; \
+  unsigned long long ull_field;
+
+@final
+struct FinalStruct {
+  NESTED_MEMBERS
+};
+
+@appendable
+struct AppendableStruct {
+  NESTED_MEMBERS
+};
+
+@mutable
+struct MutableStruct {
+  NESTED_MEMBERS
+};
+
+@final
+struct FinalFinalStruct {
+  TOP_MEMBERS
+  FinalStruct nested_field;
+  BOTTOM_MEMBERS
+};
+
+@final
+struct FinalAppendableStruct {
+  TOP_MEMBERS
+  AppendableStruct nested_field;
+  BOTTOM_MEMBERS
+};
+
+@final
+struct FinalMutableStruct {
+  TOP_MEMBERS
+  MutableStruct nested_field;
+  BOTTOM_MEMBERS
+};
+
+@appendable
+struct AppendableFinalStruct {
+  TOP_MEMBERS
+  FinalStruct nested_field;
+  BOTTOM_MEMBERS
+};
+
+@appendable
+struct AppendableAppendableStruct {
+  TOP_MEMBERS
+  AppendableStruct nested_field;
+  BOTTOM_MEMBERS
+};
+
+@appendable
+struct AppendableMutableStruct {
+  TOP_MEMBERS
+  MutableStruct nested_field;
+  BOTTOM_MEMBERS
+};
+
+@mutable
+struct MutableFinalStruct {
+  TOP_MEMBERS
+  FinalStruct nested_field;
+  BOTTOM_MEMBERS
+};
+
+@mutable
+struct MutableAppendableStruct {
+  TOP_MEMBERS
+  AppendableStruct nested_field;
+  BOTTOM_MEMBERS
+};
+
+@mutable
+struct MutableMutableStruct {
+  TOP_MEMBERS
+  MutableStruct nested_field;
+  BOTTOM_MEMBERS
+};
+
+// More involved types
+
+enum MyEnum {
+  ZERO, ONE, TWO, THREE
+};
+
+@final
+union FinalUnion switch (MyEnum) {
+ case ZERO:
+   string str_field;
+ case ONE:
+   long l_field;
+ case TWO:
+   AppendableMutableStruct nested_field;
+ default:
+   boolean b_field;
+};
+
+@appendable
+union AppendableUnion switch (MyEnum) {
+ case ZERO:
+   string str_field;
+ case ONE:
+   long l_field;
+ case TWO:
+   MutableFinalStruct nested_field;
+ default:
+   boolean b_field;
+};
+
+@mutable
+union MutableUnion switch (MyEnum) {
+ case ZERO:
+   string str_field;
+ case ONE:
+   long l_field;
+ case TWO:
+   FinalAppendableStruct nested_field;
+ default:
+   boolean b_field;
+};
+
+typedef long LongArray[2];
+typedef short ShortMDimArray[2][2];
+typedef MyEnum MyEnumArray[2];
+typedef unsigned long ULongMDimArray[2][2];
+
+typedef sequence<FinalStruct> FinalStructSeq;
+typedef sequence<AppendableStruct> AppendableStructSeq;
+typedef sequence<MutableStruct> MutableStructSeq;
+typedef FinalStruct FinalStructArray[2];
+typedef AppendableStruct AppendableStructArray[2];
+typedef MutableStruct MutableStructArray[2];
+
+@final
+struct FinalComplexStruct {
+  char c_field;
+  FinalUnion nested_union;
+  long long ll_field;
+  AppendableStruct nested_struct;
+  FinalAppendableStruct nnested_struct;
+  string str_field;
+  sequence<short> seq_field;
+  LongArray arr_field;
+  ShortMDimArray md_arr_field;
+  AppendableStructSeq nested_seq;
+  MutableStructArray nested_arr;
+  float f_field;
+};
+
+@appendable
+struct AppendableComplexStruct {
+  short s_field;
+  AppendableUnion nested_union;
+  float f_field;
+  MutableStruct nested_struct;
+  AppendableMutableStruct nnested_struct;
+  string str_field;
+  sequence<long> seq_field;
+  MyEnumArray arr_field;
+  ULongMDimArray md_arr_field;
+  MutableStructSeq nested_seq;
+  FinalStructArray nested_arr;
+  double d_field;
+};
+
+@mutable
+struct MutableComplexStruct {
+  string str_field;
+  MutableUnion nested_union;
+  short s_field;
+  FinalStruct nested_struct;
+  MutableFinalStruct nnested_struct;
+  string str2_field;
+  sequence<short> seq_field;
+  LongArray arr_field;
+  ShortMDimArray md_arr_field;
+  FinalStructSeq nested_seq;
+  AppendableStructArray nested_arr;
+  long l_field;
+};
+
+}; // module Test
