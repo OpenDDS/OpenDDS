@@ -29,8 +29,8 @@ void serializer_test(const OpenDDS::DCPS::Encoding& encoding, Type value, const 
 
   EXPECT_PRED_FORMAT2(assert_DataView, expected_cdr, buffer);
 
- // Type output;
- // ASSERT_TRUE(serializer >> output);
+  Type output;
+  ASSERT_TRUE(serializer >> output);
 }
 
 template<typename Type>
