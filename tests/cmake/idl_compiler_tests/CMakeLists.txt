@@ -183,6 +183,26 @@ subtest(private)
 opendds_target_sources(${target} PRIVATE ${idl_file})
 assert_includes(${target} "" "${target_gen}")
 
+subtest(export_header)
+opendds_target_sources(${target} PUBLIC "${idl_file}"
+  ALWAYS_GENERATE_LIB_EXPORT_HEADER TRUE)
+assert_includes(${target} "${target_gen}" "${target_gen}")
+set(export_header "${target_gen}/${target}_export.h")
+if(NOT EXISTS "${export_header}")
+  message(SEND_ERROR "${export_header} is missing")
+endif()
+
+subtest(idl_and_export_header_in_subdir)
+opendds_target_sources(${target} PUBLIC "dir/test2.idl"
+  INCLUDE_BASE "${CMAKE_CURRENT_SOURCE_DIR}"
+  EXPORT_HEADER_DIR dir
+  ALWAYS_GENERATE_LIB_EXPORT_HEADER TRUE)
+assert_includes(${target} "${target_gen};${target_gen}/dir" "${target_gen};${target_gen}/dir")
+set(export_header "${target_gen}/dir/${target}_export.h")
+if(NOT EXISTS "${export_header}")
+  message(SEND_ERROR "${export_header} is missing")
+endif()
+
 subtest(o_opt)
 opendds_target_sources(${target} ${idl_file}
   OPENDDS_IDL_OPTIONS -o opendds-idl-output

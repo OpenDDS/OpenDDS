@@ -44,7 +44,7 @@ function(_opendds_get_generated_output_dir target output_dir_var)
 endfunction()
 
 function(_opendds_get_generated_output target file)
-  set(no_value_options MKDIR GENERATED)
+  set(no_value_options MKDIR)
   set(single_value_options INCLUDE_BASE O_OPT DIR_PATH_VAR FILE_PATH_VAR PREFIX_PATH_VAR FAIL_VAR)
   set(multi_value_options)
   cmake_parse_arguments(arg
@@ -175,7 +175,6 @@ function(_opendds_tao_idl target)
   set(auto_includes)
   if(arg_INCLUDE_BASE)
     list(APPEND converted_flags "-I${arg_INCLUDE_BASE}")
-    list(APPEND auto_includes "${arg_INCLUDE_BASE}")
   endif()
 
   foreach(idl_file ${arg_IDL_FILES})

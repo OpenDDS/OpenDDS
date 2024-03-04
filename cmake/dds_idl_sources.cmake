@@ -275,9 +275,6 @@ function(_opendds_target_idl_sources target)
         INCLUDE_BASE "${arg_INCLUDE_BASE}" O_OPT "${o_opt}" MKDIR
         PREFIX_PATH_VAR output_prefix DIR_PATH_VAR output_dir)
       _opendds_get_generated_output_dir(${target} file_auto_includes O_OPT "${o_opt}")
-      if(arg_INCLUDE_BASE)
-        list(APPEND file_auto_includes "${arg_INCLUDE_BASE}")
-      endif()
 
       if(NOT opendds_idl_opt_-SI)
         set(type_support_idl_file "${output_prefix}TypeSupport.idl")
@@ -366,7 +363,7 @@ function(_opendds_target_idl_sources target)
         _opendds_tao_idl(${target}
           IDL_FLAGS ${tao_idl_opts}
           IDL_FILES ${ts_idl_files}
-          INCLUDE_BASE "${gen_out}"
+          INCLUDE_BASE "${gen_out}" # Generated files must be relative to generated output
           AUTO_INCLUDES tao_idl_ts_auto_includes
         )
         list(APPEND file_auto_includes "${tao_idl_auto_includes}")
