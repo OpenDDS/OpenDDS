@@ -46,7 +46,8 @@ This script requires :ref:`deps-perl`.
 
   `Strawberry Perl <https://strawberryperl.com>`__ is recommended for Windows.
 
-  To start the script, open a `Visual Studio Developer Command Prompt <https://learn.microsoft.com/en-us/visualstudio/ide/reference/command-prompt-powershell>`__ that has C++ tools available, then change to the root of the OpenDDS source directory and run:
+  To start the script, open a `Visual Studio Native Tools Command Prompt <https://learn.microsoft.com/en-us/cpp/build/how-to-enable-a-64-bit-visual-cpp-toolset-on-the-command-line>`__
+  or `Developer Command Prompt <https://learn.microsoft.com/en-us/visualstudio/ide/reference/command-prompt-powershell>`__ that has C++ tools available, then change to the root of the OpenDDS source directory and run:
 
   .. code-block:: batch
 
@@ -245,8 +246,7 @@ It requires :ref:`deps-xerces` and :ref:`deps-openssl`.
 
        .. code-block:: batch
 
-           configure --security --openssl=%NEW_SSL_ROOT% \
-             --xerces3=%NEW_XERCES_ROOT%
+           configure --security --openssl=%NEW_SSL_ROOT% --xerces3=%NEW_XERCES_ROOT%
 
     #. Compile with msbuild (or by opening the solution file in Visual Studio and building from there).
 
