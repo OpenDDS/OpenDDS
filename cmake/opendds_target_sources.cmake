@@ -216,7 +216,7 @@ function(opendds_export_header target)
     return()
   endif()
 
-  # Need come before configure_file
+  # Need to be defined before configure_file
   string(TOUPPER ${target} uppercase_target)
   set(export_macro "${target}_Export")
 
@@ -284,6 +284,7 @@ function(opendds_target_sources target)
 
   _opendds_get_generated_output_dir(${target} generated_directory MKDIR)
   set_target_properties(${target} PROPERTIES OPENDDS_GENERATED_DIRECTORY "${generated_directory}")
+  set(includes "${generated_directory}")
 
   get_target_property(target_type ${target} TYPE)
   if(target_type STREQUAL "SHARED_LIBRARY"
@@ -349,7 +350,6 @@ function(opendds_target_sources target)
     list(APPEND opendds_options "-D${def}")
   endforeach()
 
-  set(includes)
   foreach(scope PUBLIC PRIVATE INTERFACE)
     if(idl_sources_${scope})
       _opendds_target_idl_sources(${target}
