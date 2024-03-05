@@ -86,7 +86,7 @@ public:
 
   virtual bool begin_array(XTypes::TypeKind elem_kind) = 0;
   virtual bool end_array() = 0;
-  virtual bool begin_sequence(XTypes::TypeKind elem_kind, ACE_CDR::ULong& length) = 0;
+  virtual bool begin_sequence(XTypes::TypeKind elem_kind) = 0;
   virtual bool elements_remaining() = 0;
   virtual bool end_sequence() = 0;
   virtual bool begin_element() = 0;

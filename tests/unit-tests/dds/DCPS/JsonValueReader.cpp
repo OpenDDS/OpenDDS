@@ -79,7 +79,7 @@ static const MapBitmaskHelper::Pair bitmask_pairs[] = {
   {0, 0}
 };
 
-static const MapBitmaskHelper bitmask_helper(bitmask_pairs);
+static const MapBitmaskHelper bitmask_helper(bitmask_pairs, 64, OpenDDS::XTypes::TK_UINT64);
 
 TEST(dds_DCPS_JsonValueReader, struct_empty)
 {
@@ -611,7 +611,7 @@ namespace DCPS {
 
 bool vread(ValueReader& reader, MyStruct& s)
 {
-  if (!reader.begin_struct()) return false;
+  if (!reader.begin_struct(APPENDABLE)) return false;
   MemberId member_id;
   if (!reader.begin_struct_member(member_id, member_helper)) return false;
   if (member_id != BOOL_MEMBER_ID)  return false;

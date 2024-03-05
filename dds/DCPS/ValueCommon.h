@@ -79,8 +79,8 @@ public:
     ACE_CDR::UShort position;
   };
 
-  typedef OPENDDS_MAP(ACE_CDR::UShort, const char*) PosToNameMap;
-  typedef OPENDDS_MAP(const char*, ACE_CDR::UShort) NameToPosMap;
+  typedef OPENDDS_MAP(ACE_CDR::UShort, String) PosToNameMap;
+  typedef OPENDDS_MAP(String, ACE_CDR::UShort) NameToPosMap;
   typedef PosToNameMap::const_iterator ptn_iterator;
   typedef NameToPosMap::const_iterator ntp_iterator;
 

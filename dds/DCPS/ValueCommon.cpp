@@ -56,7 +56,7 @@ bool MapBitmaskHelper::get_value(ACE_CDR::ULongLong& value, const OPENDDS_VECTOR
 {
   ACE_CDR::ULongLong rtn = 0;
   for (size_t i = 0; i < names.size(); ++i) {
-    const ntp_iterator it = name_to_pos_.find(names.at(i).c_str());
+    const ntp_iterator it = name_to_pos_.find(names.at(i));
     if (it == name_to_pos_.end()) {
       if (log_level >= LogLevel::Warning) {
         ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: MapBitmaskHelper::get_value:"
@@ -78,7 +78,7 @@ size_t MapBitmaskHelper::get_names(OPENDDS_VECTOR(String)& names, ACE_CDR::ULong
     const ptn_iterator it = pos_to_name_.find(i);
     if ((it != pos_to_name_.end()) && (value & 1ull << i)) {
       rtn.push_back(it->second);
-      rtn_size += std::strlen(it->second) + 1; // +1 for a delimiter like a pipe ('|') character
+      rtn_size += it->second.size() + 1; // +1 for a delimiter like a pipe ('|') character
     }
   }
   names = rtn;

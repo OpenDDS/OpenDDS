@@ -51,22 +51,22 @@ public:
     reader_.IterativeParseInit();
   }
 
-  bool begin_struct(Extensibility extensibility);
+  bool begin_struct(Extensibility extensibility = FINAL);
   bool end_struct();
   bool begin_struct_member(XTypes::MemberId& member_id, const MemberHelper& helper);
   bool members_remaining();
   bool end_struct_member();
 
-  bool begin_union(Extensibility extensibility);
+  bool begin_union(Extensibility extensibility = FINAL);
   bool end_union();
   bool begin_discriminator();
   bool end_discriminator();
   bool begin_union_member();
   bool end_union_member();
 
-  bool begin_array(XTypes::TypeKind elem_kind);
+  bool begin_array(XTypes::TypeKind elem_kind = XTypes::TK_NONE);
   bool end_array();
-  bool begin_sequence(XTypes::TypeKind elem_kind, ACE_CDR::ULong& length);
+  bool begin_sequence(XTypes::TypeKind elem_kind = XTypes::TK_NONE);
   bool elements_remaining();
   bool end_sequence();
   bool begin_element();
@@ -308,7 +308,7 @@ bool JsonValueReader<InputStream>::end_array()
 }
 
 template <typename InputStream>
-bool JsonValueReader<InputStream>::begin_sequence(XTypes::TypeKind /*elem_kind*/, ACE_CDR::ULong& /*length*/)
+bool JsonValueReader<InputStream>::begin_sequence(XTypes::TypeKind /*elem_kind*/)
 {
   peek();
   return consume(kStartArray);
