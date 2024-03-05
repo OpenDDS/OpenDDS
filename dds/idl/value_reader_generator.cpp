@@ -304,7 +304,8 @@ bool value_reader_generator::gen_struct(AST_Structure*,
     be_global->impl_ <<
       "  if (!value_reader.begin_struct()) return false;\n"
       "  XTypes::MemberId member_id;\n"
-      "  while (value_reader.begin_struct_member(member_id, helper)) {\n"
+      "  while (value_reader.members_remaining()) {\n"
+      "    if (!value_reader.begin_struct_member(member_id, helper)) return false;\n"
       "    switch (member_id) {\n";
 
     for (std::vector<AST_Field*>::const_iterator pos = fields.begin(), limit = fields.end();

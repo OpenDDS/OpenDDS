@@ -63,11 +63,11 @@ private:
 class BitmaskHelper {
 public:
   virtual ~BitmaskHelper() {}
-  virtual bool get_value(ACE_CDR::ULongLong& value, const OPENDDS_VECTOR(const char*)& names) const = 0;
+  virtual bool get_value(ACE_CDR::ULongLong& value, const OPENDDS_VECTOR(String)& names) const = 0;
 
   // Return an estimated length of a string constructed by the returned flag names
   // with a delimiter character between two consecutive flags.
-  virtual size_t get_names(OPENDDS_VECTOR(const char*)& names, ACE_CDR::ULongLong value) const = 0;
+  virtual size_t get_names(OPENDDS_VECTOR(String)& names, ACE_CDR::ULongLong value) const = 0;
 
   virtual XTypes::TypeKind get_equivalent_uint() const = 0;
 };
@@ -101,8 +101,8 @@ public:
     bit_bound_ = bound;
   }
 
-  bool get_value(ACE_CDR::ULongLong& value, const OPENDDS_VECTOR(const char*)& names) const;
-  size_t get_names(OPENDDS_VECTOR(const char*)& names, ACE_CDR::ULongLong value) const;
+  bool get_value(ACE_CDR::ULongLong& value, const OPENDDS_VECTOR(String)& names) const;
+  size_t get_names(OPENDDS_VECTOR(String)& names, ACE_CDR::ULongLong value) const;
 
   XTypes::TypeKind get_equivalent_uint() const
   {
@@ -117,6 +117,7 @@ private:
 };
 
 OpenDDS_Dcps_Export String bitmask_to_string(ACE_CDR::ULongLong value, const BitmaskHelper& helper);
+OpenDDS_Dcps_Export ACE_CDR::ULongLong string_to_bitmask(const String& flags, const BitmaskHelper& helper);
 
 } // namespace DCPS
 } // namespace OpenDDS
