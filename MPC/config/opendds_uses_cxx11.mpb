@@ -1,4 +1,4 @@
-project: dcpslib {
+project {
   avoids += no_cxx11
   requires += no_opendds_safety_profile
   macros += OPENDDS_HAS_CXX11
