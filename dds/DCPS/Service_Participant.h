@@ -608,6 +608,10 @@ private:
   /// Initialize the thread scheduling and initial priority.
   void initializeScheduling();
 
+  /// Parse environment variables.
+  void parse_env();
+  void parse_env(const String& s);
+
   /**
    * Parse the command line for user options. e.g. "-DCPSInfoRepo <iorfile>".
    * It consumes -DCPS* options and their arguments
