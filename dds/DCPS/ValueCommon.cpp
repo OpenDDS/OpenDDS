@@ -6,8 +6,7 @@
 #include "DCPS/DdsDcps_pch.h"
 
 #include "ValueCommon.h"
-
-#include <dds/DCPS/debug.h>
+#include "debug.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
