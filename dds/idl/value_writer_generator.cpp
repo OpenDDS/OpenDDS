@@ -66,6 +66,9 @@ namespace {
     switch (type->node_type()) {
     case AST_Decl::NT_pre_defined: {
       AST_PredefinedType* pt_type = dynamic_cast<AST_PredefinedType*>(type);
+      if (!pt_type) {
+        return "XTypes::TK_NONE";
+      }
       switch (pt_type->pt()) {
       case AST_PredefinedType::PT_long:
         return "XTypes::TK_INT32";
