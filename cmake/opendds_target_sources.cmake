@@ -11,6 +11,7 @@ include(GNUInstallDirs)
 include("${CMAKE_CURRENT_LIST_DIR}/opendds_group.cmake")
 include("${CMAKE_CURRENT_LIST_DIR}/dds_idl_sources.cmake")
 
+# This function handles arguments for opendds_target_sources
 function(_opendds_get_sources_and_options
     idl_prefix
     non_idl_prefix
@@ -208,6 +209,7 @@ function(opendds_export_header target)
   cmake_parse_arguments(arg
     "${no_value_options}" "${single_value_options}" "${multi_value_options}" ${ARGN})
 
+  # Get existing export header and macro for target.
   get_target_property(use_export ${target} OPENDDS_USE_EXPORT)
   if(use_export)
     if(DEFINED arg_USE_EXPORT_VAR)
@@ -216,10 +218,11 @@ function(opendds_export_header target)
     return()
   endif()
 
-  # Need to be defined before configure_file
+  # These values are used in configure_file for the export header.
   string(TOUPPER ${target} uppercase_target)
   set(export_macro "${target}_Export")
 
+  # Geneate the export header
   _opendds_get_generated_output_dir(${target} gendir MKDIR)
   set(export_header "${target}_export.h")
   if(arg_DIR)
@@ -230,12 +233,10 @@ function(opendds_export_header target)
   if(NOT EXISTS "${export_header_path}")
     configure_file("${_OPENDDS_CMAKE_DIR}/export.h.in" "${export_header_path}")
   endif()
+
+  # Make sure the export header can be used properly and installed.
   _opendds_add_idl_or_header_files(${target} PUBLIC TRUE "${export_header_path}")
-
-  target_compile_definitions(${target}
-    PRIVATE
-      "${uppercase_target}_BUILD_DLL")
-
+  target_compile_definitions(${target} PRIVATE "${uppercase_target}_BUILD_DLL")
   set(use_export "${export_header};${export_macro}")
   set_target_properties(${target}
     PROPERTIES
