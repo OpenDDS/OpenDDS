@@ -69,8 +69,8 @@ TEST(dds_DCPS_ValueCommon, MapBitmaskHelper)
   value = 0x65;
   EXPECT_GT(helper.get_names(names, value), (size_t)0);
   EXPECT_EQ(names.size(), (size_t)4);
-  EXPECT_STREQ("FLAG0", names[0].c_str());
-  EXPECT_STREQ("FLAG2", names[1].c_str());
-  EXPECT_STREQ("FLAG5", names[2].c_str());
-  EXPECT_STREQ("FLAG6", names[3].c_str());
+  EXPECT_EQ("FLAG0", names[0]);
+  EXPECT_EQ("FLAG2", names[1]);
+  EXPECT_EQ("FLAG5", names[2]);
+  EXPECT_EQ("FLAG6", names[3]);
 }
