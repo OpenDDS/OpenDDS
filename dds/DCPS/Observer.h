@@ -106,7 +106,7 @@ protected:
 
 typedef RcHandle<Observer> Observer_rch;
 
-OpenDDS_Dcps_Export void
+OpenDDS_Dcps_Export bool
 vwrite(ValueWriter& vw, const Observer::Sample& sample);
 
 } // namespace DCPS
