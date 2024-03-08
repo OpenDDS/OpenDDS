@@ -6,6 +6,7 @@
 #ifndef OPENDDS_DCPS_VALUE_READER_H
 #define OPENDDS_DCPS_VALUE_READER_H
 
+#include "ValueCommon.h"
 #include "Definitions.h"
 #include "XTypes/TypeObject.h"
 
@@ -49,41 +50,6 @@ public:
   {}
 
   bool get_value(XTypes::MemberId& value,
-                 const char* name) const
-  {
-    for (const Pair* ptr = pairs_; ptr->name; ++ptr) {
-      if (std::strcmp(ptr->name, name) == 0) {
-        value = ptr->value;
-        return true;
-      }
-    }
-
-    return false;
-  }
-
-private:
-  const Pair* pairs_;
-};
-
-class EnumHelper {
-public:
-  virtual ~EnumHelper() {}
-  virtual bool get_value(ACE_CDR::Long& value,
-                         const char* name) const = 0;
-};
-
-class ListEnumHelper : public EnumHelper {
-public:
-  struct Pair {
-    const char* name;
-    ACE_CDR::Long value;
-  };
-
-  ListEnumHelper(const Pair* pairs)
-    : pairs_(pairs)
-  {}
-
-  bool get_value(ACE_CDR::Long& value,
                  const char* name) const
   {
     for (const Pair* ptr = pairs_; ptr->name; ++ptr) {
@@ -156,7 +122,7 @@ public:
   bool read_float128(long double& value);
 #endif
 
-  virtual bool read_fixed(OpenDDS::FaceTypes::Fixed& value) = 0;
+  virtual bool read_fixed(ACE_CDR::Fixed& value) = 0;
   virtual bool read_char8(ACE_CDR::Char& value) = 0;
   virtual bool read_char16(ACE_CDR::WChar& value) = 0;
   virtual bool read_string(String& value) = 0;

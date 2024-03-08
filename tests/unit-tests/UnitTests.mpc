@@ -2,7 +2,7 @@ project(UnitTests): opendds_unit_test, googlemock, msvc_bigobj, dcpsexe, dcps_tr
     optional_opendds_face, opendds_optional_security, optional_rapidjson, optional_rtps_relay_lib {
 
   dcps_ts_flags += -Gxtypes-complete
-  idlflags += -SS -I dds/DCPS/XTypes -I ../DCPS/Compiler/key_annotation
+  idlflags += -SS -I dds/DCPS -I dds/DCPS/XTypes -I ../DCPS/Compiler/key_annotation
   includes += . ../Utils
 
   Idl_Files {
@@ -13,6 +13,7 @@ project(UnitTests): opendds_unit_test, googlemock, msvc_bigobj, dcpsexe, dcps_tr
     dds/DCPS/XTypes/XTypesUtils.idl
     dds/DCPS/XTypes/DynamicDataAdapter.idl
     ../DCPS/Compiler/key_annotation/key_annotation.idl
+    dds/DCPS/Xcdr2ValueWriter.idl
   }
 
   TypeSupport_Files {
@@ -21,6 +22,7 @@ project(UnitTests): opendds_unit_test, googlemock, msvc_bigobj, dcpsexe, dcps_tr
     dds/DCPS/XTypes/XTypesUtils.idl
     dds/DCPS/XTypes/DynamicDataAdapter.idl
     ../DCPS/Compiler/key_annotation/key_annotation.idl
+    dds/DCPS/Xcdr2ValueWriter.idl
   }
 
   TypeSupport_Files {

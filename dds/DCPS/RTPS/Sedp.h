@@ -1208,8 +1208,6 @@ protected:
   bool handle_datareader_crypto_tokens(const DDS::Security::ParticipantVolatileMessageSecure& msg);
   bool handle_datawriter_crypto_tokens(const DDS::Security::ParticipantVolatileMessageSecure& msg);
 
-  DDS::DomainId_t get_domain_id() const;
-
   struct PublicationAgentInfoListener : public ICE::AgentInfoListener
   {
     Sedp& sedp;
@@ -1229,6 +1227,8 @@ protected:
   };
 
 #endif
+
+  DDS::DomainId_t get_domain_id() const;
 
   void add_assoc_i(const DCPS::GUID_t& local_guid, const LocalPublication& lpub,
                    const DCPS::GUID_t& remote_guid, const DiscoveredSubscription& dsub);

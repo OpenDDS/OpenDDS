@@ -60,6 +60,66 @@ namespace {
     }
   }
 
+  std::string type_kind(AST_Type* type)
+  {
+    type = resolveActualType(type);
+    switch (type->node_type()) {
+    case AST_Decl::NT_pre_defined: {
+      AST_PredefinedType* pt_type = dynamic_cast<AST_PredefinedType*>(type);
+      switch (pt_type->pt()) {
+      case AST_PredefinedType::PT_long:
+        return "XTypes::TK_INT32";
+      case AST_PredefinedType::PT_ulong:
+        return "XTypes::TK_UINT32";
+      case AST_PredefinedType::PT_longlong:
+        return "XTypes::TK_INT64";
+      case AST_PredefinedType::PT_ulonglong:
+        return "XTypes::TK_UINT64";
+      case AST_PredefinedType::PT_short:
+        return "XTypes::TK_INT16";
+      case AST_PredefinedType::PT_ushort:
+        return "XTypes::TK_UINT16";
+      case AST_PredefinedType::PT_float:
+        return "XTypes::TK_FLOAT32";
+      case AST_PredefinedType::PT_double:
+        return "XTypes::TK_FLOAT64";
+      case AST_PredefinedType::PT_longdouble:
+        return "XTypes::TK_FLOAT128";
+      case AST_PredefinedType::PT_char:
+        return "XTypes::TK_CHAR8";
+      case AST_PredefinedType::PT_wchar:
+        return "XTypes::TK_CHAR16";
+      case AST_PredefinedType::PT_boolean:
+        return "XTypes::TK_BOOLEAN";
+      case AST_PredefinedType::PT_octet:
+        return "XTypes::TK_BYTE";
+      case AST_PredefinedType::PT_int8:
+        return "XTypes::TK_INT8";
+      case AST_PredefinedType::PT_uint8:
+        return "XTypes::TK_UINT8";
+      default:
+        return "XTypes::TK_NONE";
+      }
+    }
+    case AST_Decl::NT_string:
+      return "XTypes::TK_STRING8";
+    case AST_Decl::NT_wstring:
+      return "XTypes::TK_STRING16";
+    case AST_Decl::NT_array:
+      return "XTypes::TK_ARRAY";
+    case AST_Decl::NT_sequence:
+      return "XTypes::TK_SEQUENCE";
+    case AST_Decl::NT_union:
+      return "XTypes::TK_UNION";
+    case AST_Decl::NT_struct:
+      return "XTypes::TK_STRUCTURE";
+    case AST_Decl::NT_enum:
+      return "XTypes::TK_ENUM";
+    default:
+      return "XTypes::TK_NONE";
+    }
+  }
+
   void array_helper(const std::string& expression, AST_Array* array,
                     size_t dim_idx, const std::string& idx, int level)
   {
@@ -70,31 +130,48 @@ namespace {
     // When we have a primitive type the last dimension is written using the write_*_array
     // operation, when we have a not primitive type the last dimension is written element by element
     // in a loop in the generated code
+    const std::string elem_kind = type_kind(array->base_type());
     if ((primitive && (dim_idx < array->n_dims() - 1)) || (!primitive && (dim_idx < array->n_dims()))) {
       const size_t dim = array->dims()[dim_idx]->ev()->u.ulval;
       be_global->impl_ <<
-        indent << "value_writer.begin_array();\n";
+        indent << "if (!value_writer.begin_array(" << elem_kind << ")) {\n" <<
+        indent << "  return false;\n" <<
+        indent << "}\n";
       be_global->impl_ <<
         indent << "for (" << (use_cxx11 ? "size_t " : "::CORBA::ULong ") << idx << " = 0; "
         << idx << " != " << dim << "; ++" << idx << ") {\n" <<
-        indent << "  value_writer.begin_element(" << idx << ");\n";
+        indent << "  if (!value_writer.begin_element(static_cast<ACE_CDR::ULong>(" << idx << "))) {\n" <<
+        indent << "    return false;\n" <<
+        indent << "  }\n";
       array_helper(expression + "[" + idx + "]", array, dim_idx + 1, idx + "i", level + 1);
       be_global->impl_ <<
-        indent << "  value_writer.end_element();\n" <<
+        indent << "  if (!value_writer.end_element()) {\n" <<
+        indent << "    return false;\n" <<
+        indent << "  }\n" <<
         indent << "}\n" <<
-        indent << "value_writer.end_array();\n";
+        indent << "if (!value_writer.end_array()) {\n" <<
+        indent << "  return false;\n" <<
+        indent << "}\n";
     } else {
       if (primitive) {
         const size_t dim = array->dims()[dim_idx]->ev()->u.ulval;
         AST_Type* const actual = resolveActualType(array->base_type());
         const AST_PredefinedType::PredefinedType pt =
           dynamic_cast<AST_PredefinedType*>(actual)->pt();
+
         be_global->impl_ <<
-          indent << "value_writer.begin_array();\n";
-        be_global->impl_ << indent <<
-          "value_writer.write_" << primitive_type(pt) << "_array (" << expression << (use_cxx11 ? ".data()" : "") << ", " << dim << ");\n";
+          indent << "if (!value_writer.begin_array(" << elem_kind << ")) {\n" <<
+          indent << "  return false;\n" <<
+          indent << "}\n";
         be_global->impl_ <<
-          indent << "value_writer.end_array();\n";
+          indent <<
+          "if (!value_writer.write_" << primitive_type(pt) << "_array (" << expression << (use_cxx11 ? ".data()" : "") << ", " << dim << ")) {\n" <<
+          indent << "  return false;\n" <<
+          indent << "}\n";
+        be_global->impl_ <<
+          indent << "if (!value_writer.end_array()) {\n" <<
+          indent << "  return false;\n" <<
+          indent << "}\n";
 
       } else {
         generate_write(expression, array->base_type(), idx + "i", level);
@@ -108,10 +185,16 @@ namespace {
     const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
     const char* const length_func = use_cxx11 ? "size" : "length";
     const std::string indent(level * 2, ' ');
-    be_global->impl_ << indent << "value_writer.begin_sequence();\n";
+    AST_Type* const base_type = sequence->base_type();
+    const std::string elem_tk = type_kind(base_type);
+    be_global->impl_ <<
+      indent << "if (!value_writer.begin_sequence(" << elem_tk <<
+      ", static_cast<ACE_CDR::ULong>(" << expression << "." << length_func << "()))) {\n" <<
+      indent << "  return false;\n" <<
+      indent << "}\n";
 
-    const Classification c = classify(sequence->base_type());
-    AST_Type* const actual = resolveActualType(sequence->base_type());
+    const Classification c = classify(base_type);
+    AST_Type* const actual = resolveActualType(base_type);
     bool use_optimized_write_ = false;
     if (c & CL_PRIMITIVE) {
       if (use_cxx11) {
@@ -126,20 +209,30 @@ namespace {
       const AST_PredefinedType::PredefinedType pt =
         dynamic_cast<AST_PredefinedType*>(actual)->pt();
       be_global->impl_ << indent <<
-        "value_writer.write_" << primitive_type(pt) << "_array (" << expression << (use_cxx11 ? ".data()" : ".get_buffer()") << ", " << expression << "." << length_func << "());\n";
+        "if (!value_writer.write_" << primitive_type(pt) << "_array (" <<
+        expression << (use_cxx11 ? ".data()" : ".get_buffer()") <<
+        ", static_cast<ACE_CDR::ULong>(" << expression << "." << length_func << "()))) {\n" <<
+        indent << "  return false;\n" <<
+        indent << "}\n";
     } else {
       be_global->impl_ <<
         indent << "for (" << (use_cxx11 ? "size_t " : "::CORBA::ULong ") << idx << " = 0; "
         << idx << " != " << expression << "." << length_func << "(); ++" << idx << ") {\n" <<
-        indent << "  value_writer.begin_element(" << idx << ");\n";
-      generate_write(expression + "[" + idx + "]", sequence->base_type(), idx + "i", level + 1);
+        indent << "  if (!value_writer.begin_element(static_cast<ACE_CDR::ULong>(" << idx << "))) {\n" <<
+        indent << "    return false;\n" <<
+        indent << "  }\n";
+      generate_write(expression + "[" + idx + "]", base_type, idx + "i", level + 1);
       be_global->impl_ <<
-        indent << "  value_writer.end_element();\n" <<
+        indent << "  if (!value_writer.end_element()) {\n" <<
+        indent << "    return false;\n" <<
+        indent << "  }\n" <<
         indent << "}\n";
     }
 
     be_global->impl_ <<
-      indent << "value_writer.end_sequence();\n";
+      indent << "if (!value_writer.end_sequence()) {\n" <<
+      indent << "  return false;\n" <<
+      indent << "}\n";
   }
 
 #if OPENDDS_HAS_IDL_MAP
@@ -196,21 +289,29 @@ namespace {
 
     if (c & CL_FIXED) {
       be_global->impl_ <<
-        "value_writer.write_fixed(" << expression << ");\n";
+        "if (!value_writer.write_fixed(" << expression << ".to_ace_fixed())) {\n"
+        "  return false;\n"
+        "}\n";
 
     } else if (c & CL_STRING) {
       be_global->impl_ <<
-        "value_writer.write_" << ((c & CL_WIDE) ? "w" : "") << "string(" << expression << ");\n";
+        "if (!value_writer.write_" << ((c & CL_WIDE) ? "w" : "") << "string(" << expression << ")) {\n"
+        "  return false;\n"
+        "}\n";
 
     } else if (c & CL_PRIMITIVE) {
       const AST_PredefinedType::PredefinedType pt =
         dynamic_cast<AST_PredefinedType*>(actual)->pt();
       be_global->impl_ <<
-        "value_writer.write_" << primitive_type(pt) << '(' << expression << ");\n";
+        "if (!value_writer.write_" << primitive_type(pt) << '(' << expression << ")) {\n"
+        "  return false;\n"
+        "}\n";
 
     } else {
       be_global->impl_ <<
-        "vwrite(value_writer, " << expression << ");\n";
+        "if (!vwrite(value_writer, " << expression << ")) {\n"
+        "  return false;\n"
+        "}\n";
     }
   }
 
@@ -223,12 +324,34 @@ namespace {
                             Intro&,
                             const std::string&)
   {
+    // TODO: Update the arguments when @optional is available.
+    const OpenDDS::XTypes::MemberId id = be_global->get_id(dynamic_cast<AST_UnionBranch*>(branch));
+    const bool must_understand = be_global->is_effectively_must_understand(branch);
     be_global->impl_ <<
-      "    value_writer.begin_union_member(\"" << canonical_name(branch) << "\");\n";
+      "    if (!value_writer.begin_union_member(MemberParam(" << id << ", " <<
+      (must_understand ? "true" : "false") << ", \"" << canonical_name(branch) << "\", false, true))) {\n"
+      "      return false;\n"
+      "    }\n";
     generate_write("value." + field_name + "()", type, "i", 2);
     be_global->impl_ <<
-      "    value_writer.end_union_member();\n";
+      "    if (!value_writer.end_union_member()) {\n"
+      "      return false;\n"
+      "    }\n";
     return "";
+  }
+
+  std::string extensibility_kind(ExtensibilityKind ek)
+  {
+    switch (ek) {
+    case extensibilitykind_final:
+      return "OpenDDS::DCPS::FINAL";
+    case extensibilitykind_appendable:
+      return "OpenDDS::DCPS::APPENDABLE";
+    case extensibilitykind_mutable:
+      return "OpenDDS::DCPS::MUTABLE";
+    default:
+      return "invalid";
+    }
   }
 }
 
@@ -240,29 +363,28 @@ bool value_writer_generator::gen_enum(AST_Enum*,
   be_global->add_include("dds/DCPS/ValueWriter.h", BE_GlobalData::STREAM_H);
 
   const std::string type_name = scoped(name);
-  const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
-
   {
     NamespaceGuard guard;
 
-    Function write("vwrite", "void");
+    Function write("vwrite", "bool");
     write.addArg("value_writer", "OpenDDS::DCPS::ValueWriter&");
     write.addArg("value", "const " + type_name + "&");
     write.endArgs();
 
     be_global->impl_ <<
-      "  switch (value) {\n";
-    for (std::vector<AST_EnumVal*>::const_iterator pos = contents.begin(), limit = contents.end();
-         pos != limit; ++pos) {
-      AST_EnumVal* const val = *pos;
-      const std::string value_name = (use_cxx11 ? (type_name + "::") : module_scope(name))
-        + val->local_name()->get_string();
+      "  static const ListEnumHelper::Pair pairs[] = {";
+    for (size_t i = 0; i != contents.size(); ++i) {
+      if (i) {
+        be_global->impl_ << ',';
+      }
+      const std::string idl_name = canonical_name(contents[i]);
       be_global->impl_ <<
-        "  case " << value_name << ":\n"
-        "    value_writer.write_enum(\"" << canonical_name(val) << "\", " << value_name << ");\n"
-        "    break;\n";
+        '{' << '"' << idl_name << '"' << ',' << contents[i]->constant_value()->ev()->u.eval << '}';
     }
-    be_global->impl_ << "  }\n";
+    be_global->impl_ <<
+      ",{0, 0}};\n"
+      "  ListEnumHelper helper(pairs);\n"
+      "  return value_writer.write_enum(value, helper);\n";
   }
 
   return true;
@@ -276,7 +398,7 @@ bool value_writer_generator::gen_typedef(AST_Typedef*,
   return true;
 }
 
-bool value_writer_generator::gen_struct(AST_Structure*,
+bool value_writer_generator::gen_struct(AST_Structure* node,
                                         UTL_ScopedName* name,
                                         const std::vector<AST_Field*>& fields,
                                         AST_Type::SIZE_TYPE,
@@ -291,27 +413,37 @@ bool value_writer_generator::gen_struct(AST_Structure*,
   {
     NamespaceGuard guard;
 
-    Function write("vwrite", "void");
+    Function write("vwrite", "bool");
     write.addArg("value_writer", "OpenDDS::DCPS::ValueWriter&");
     write.addArg("value", "const " + type_name + "&");
     write.endArgs();
 
+    const ExtensibilityKind ek = be_global->extensibility(node);
     be_global->impl_ <<
-      "  value_writer.begin_struct();\n";
+      "  if (!value_writer.begin_struct(" << extensibility_kind(ek) << ")) {\n"
+      "    return false;\n"
+      "  }\n";
     for (std::vector<AST_Field*>::const_iterator pos = fields.begin(), limit = fields.end();
          pos != limit; ++pos) {
       AST_Field* const field = *pos;
       const std::string field_name = field->local_name()->get_string();
       const std::string idl_name = canonical_name(field);
+      // TODO: Update the arguments when @optional is available.
+      const OpenDDS::XTypes::MemberId id = be_global->get_id(field);
+      const bool must_understand = be_global->is_effectively_must_understand(field);
       be_global->impl_ <<
-        "  value_writer.begin_struct_member(XTypes::MemberDescriptorImpl(\"" << idl_name << "\", "
-        << (be_global->is_key(field) ? "true" : "false") <<  "));\n";
+        "  if (!value_writer.begin_struct_member(MemberParam(" << id << ", " <<
+        (must_understand ? "true" : "false") << ", \"" << idl_name << "\", false, true))) {\n"
+        "    return false;\n"
+        "  }\n";
       generate_write("value." + field_name + accessor_suffix, field->field_type(), "i");
       be_global->impl_ <<
-        "  value_writer.end_struct_member();\n";
+        "  if (!value_writer.end_struct_member()) {\n"
+        "    return false;\n"
+        "  }\n";
     }
     be_global->impl_ <<
-      "  value_writer.end_struct();\n";
+      "  return value_writer.end_struct();\n";
   }
 
   return true;
@@ -331,23 +463,33 @@ bool value_writer_generator::gen_union(AST_Union* u,
   {
     NamespaceGuard guard;
 
-    Function write("vwrite", "void");
+    Function write("vwrite", "bool");
     write.addArg("value_writer", "OpenDDS::DCPS::ValueWriter&");
     write.addArg("value", "const " + type_name + "&");
     write.endArgs();
 
+    const ExtensibilityKind ek = be_global->extensibility(u);
     be_global->impl_ <<
-      "  value_writer.begin_union();\n"
-      "  value_writer.begin_discriminator();\n";
+      "  if (!value_writer.begin_union(" << extensibility_kind(ek) << ")) {\n"
+      "    return false;\n"
+      "  }\n";
+    const bool must_understand = be_global->is_effectively_must_understand(discriminator);
+    be_global->impl_ <<
+      "  if (!value_writer.begin_discriminator(MemberParam(0, " <<
+      (must_understand ? "true" : "false") << "))) {\n"
+      "    return false;\n"
+      "  }\n";
     generate_write("value._d()" , discriminator, "i");
     be_global->impl_ <<
-      "  value_writer.end_discriminator();\n";
+      "  if (!value_writer.end_discriminator()) {\n"
+      "    return false;\n"
+      "  }\n";
 
     generateSwitchForUnion(u, "value._d()", branch_helper, branches,
                            discriminator, "", "", type_name.c_str(),
                            false, false);
     be_global->impl_ <<
-      "  value_writer.end_union();\n";
+      "  return value_writer.end_union();\n";
   }
 
   return true;

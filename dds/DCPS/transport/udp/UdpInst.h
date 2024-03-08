@@ -30,11 +30,8 @@ public:
   void rcv_buffer_size(ACE_INT32 rbs);
   ACE_INT32 rcv_buffer_size() const;
 
-  virtual int load(ACE_Configuration_Heap& cf,
-                   ACE_Configuration_Section_Key& sect);
-
   /// Diagnostic aid.
-  virtual OPENDDS_STRING dump_to_str() const;
+  virtual OPENDDS_STRING dump_to_str(DDS::DomainId_t) const;
 
   bool is_reliable() const { return false; }
 
@@ -63,7 +60,9 @@ public:
     return locator_address_;
   }
 
-  virtual size_t populate_locator(OpenDDS::DCPS::TransportLocator& trans_info, ConnectionInfoFlags flags) const;
+  virtual size_t populate_locator(OpenDDS::DCPS::TransportLocator& trans_info,
+                                  ConnectionInfoFlags flags,
+                                  DDS::DomainId_t domain) const;
 
 private:
   friend class UdpType;
@@ -72,7 +71,7 @@ private:
   friend RcHandle<T> OpenDDS::DCPS::make_rch(U const&);
   explicit UdpInst(const std::string& name);
 
-  TransportImpl_rch new_impl();
+  TransportImpl_rch new_impl(DDS::DomainId_t domain);
 
   std::string locator_address_;
 };

@@ -8,7 +8,7 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  VCPKG_GIT_COMMIT: 8eb57355a4ffb410a2e94c07b4dca2dffbee8e50
+  VCPKG_GIT_COMMIT: 53bef8994c541b6561884a8395ea35715ece75db
 
 jobs:
 
@@ -40,7 +40,7 @@ jobs:
         cd OpenDDS
         ./configure --optimize --no-debug --static --tests --qt
         tools/scripts/show_build_config.pl
-    - uses: ammaraskar/gcc-problem-matcher@0.2.0
+    - uses: ammaraskar/gcc-problem-matcher@0.3.0
     - name: build
       shell: bash
       run: |

@@ -32,24 +32,16 @@ ShmemInst::ShmemInst(const std::string& name)
 }
 
 TransportImpl_rch
-ShmemInst::new_impl()
+ShmemInst::new_impl(DDS::DomainId_t domain)
 {
-  return make_rch<ShmemTransport>(rchandle_from(this));
-}
-
-int
-ShmemInst::load(ACE_Configuration_Heap& cf,
-                ACE_Configuration_Section_Key& sect)
-{
-  TransportInst::load(cf, sect);
-  return 0;
+  return make_rch<ShmemTransport>(rchandle_from(this), domain);
 }
 
 OPENDDS_STRING
-ShmemInst::dump_to_str() const
+ShmemInst::dump_to_str(DDS::DomainId_t domain) const
 {
   std::ostringstream os;
-  os << TransportInst::dump_to_str();
+  os << TransportInst::dump_to_str(domain);
   os << formatNameForDump("pool_size") << pool_size() << "\n"
      << formatNameForDump("datalink_control_size") << datalink_control_size() << "\n"
      << formatNameForDump("pool_name") << this->poolname_ << "\n"
@@ -59,7 +51,9 @@ ShmemInst::dump_to_str() const
 }
 
 size_t
-ShmemInst::populate_locator(OpenDDS::DCPS::TransportLocator& info, ConnectionInfoFlags) const
+ShmemInst::populate_locator(OpenDDS::DCPS::TransportLocator& info,
+                            ConnectionInfoFlags,
+                            DDS::DomainId_t) const
 {
   info.transport_type = "shmem";
 

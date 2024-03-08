@@ -63,6 +63,27 @@ if(NOT DEFINED OPENDDS_RAPIDJSON)
   endif()
 endif()
 
+# Generate OpenDDSConfig.h, make it available for all targets (see
+# opendds_build_helpers.cmake), and install it.
+set(OPENDDS_CONFIG_AUTO_STATIC_INCLUDES 1) # Always true for CMake builds
+set(config_file "dds/OpenDDSConfig.h")
+set(config_out_dir "${CMAKE_CURRENT_BINARY_DIR}/opendds_config_include")
+set(config_out_file "${config_out_dir}/${config_file}")
+configure_file("${config_file}.in" "${config_out_file}")
+add_library(OpenDDS_Config INTERFACE)
+target_include_directories(OpenDDS_Config
+  INTERFACE
+    "$<BUILD_INTERFACE:${config_out_dir}>"
+    "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>"
+)
+target_sources(OpenDDS_Config
+  INTERFACE FILE_SET HEADERS BASE_DIRS "${config_out_dir}" FILES "${config_out_file}")
+install(TARGETS OpenDDS_Config
+  EXPORT opendds_targets
+  FILE_SET HEADERS
+    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+)
+
 if(NOT CMAKE_CROSSCOMPILING)
   add_subdirectory(dds/DCPS) # OpenDDS_Util
   add_subdirectory(dds/idl) # opendds_idl

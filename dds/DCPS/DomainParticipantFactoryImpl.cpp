@@ -86,32 +86,6 @@ DomainParticipantFactoryImpl::create_participant(
     }
   }
 
-  // if the specified transport is a transport template then create a new transport
-  // instance for the new participant if per_participant is set (checked before creating instance).
-  String transport_base_config_name;
-  TheServiceParticipant->get_transport_base_config_name(domainId, transport_base_config_name);
-
-  if (TheTransportRegistry->config_has_transport_template(transport_base_config_name)) {
-    OPENDDS_STRING transport_config_name = transport_base_config_name;
-    OPENDDS_STRING transport_instance_name = dp->get_unique_id();
-
-    // unique config and instance names are returned in transport_config_name and transport_instance_name
-    const bool ret = TheTransportRegistry->create_new_transport_instance_for_participant(domainId, transport_config_name, transport_instance_name);
-
-    if (ret) {
-      TheTransportRegistry->bind_config(transport_config_name, dp.in());
-      TheTransportRegistry->update_config_template_instance_info(transport_config_name, transport_instance_name);
-    } else {
-      if (DCPS_debug_level > 0) {
-        ACE_ERROR((LM_ERROR,
-                  ACE_TEXT("(%P|%t) ERROR: ")
-                  ACE_TEXT("DomainParticipantFactoryImpl::create_participant, ")
-                  ACE_TEXT("could not create new transport instance for participant.\n")));
-      }
-      return DDS::DomainParticipant::_nil();
-    }
-  }
-
   ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
                    guard,
                    participants_protector_,
@@ -145,14 +119,6 @@ DomainParticipantFactoryImpl::delete_participant(
         ACE_TEXT("failed to obtain the DomainParticipantImpl.\n")));
     }
     return DDS::RETCODE_ERROR;
-  }
-
-  RcHandle<DomainParticipantImpl> servant_rch = rchandle_from(the_servant);
-
-  TransportConfig_rch tr_cfg = servant_rch->transport_config();
-  if (tr_cfg) {
-    // check for and remove tranport template instance
-    TheTransportRegistry->remove_transport_template_instance(tr_cfg->name());
   }
 
   //xxx servant rc = 4 (servant::DP::Entity::ServantBase::ref_count_
@@ -190,6 +156,7 @@ DomainParticipantFactoryImpl::delete_participant(
       return DDS::RETCODE_ERROR;
     }
 
+    RcHandle<DomainParticipantImpl> servant_rch = rchandle_from(the_servant);
     if (pos->second.erase(servant_rch) == 0) {
       if (DCPS_debug_level > 0) {
         ACE_ERROR((LM_ERROR,
@@ -231,6 +198,9 @@ DomainParticipantFactoryImpl::delete_participant(
       return DDS::RETCODE_ERROR;
     }
   }
+
+  TheTransportRegistry->remove_participant(domain_id, the_servant);
+
   return DDS::RETCODE_OK;
 }
 

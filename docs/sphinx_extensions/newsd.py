@@ -13,6 +13,7 @@ from version_info import VersionInfo
 # These sections are builtin and must appear in this order
 main_sections = {
     'Additions': 100,
+    'Platform Support and Dependencies': 95,
     'Deprecations': 90,
     'Removals': 80,
     'Security': 60,

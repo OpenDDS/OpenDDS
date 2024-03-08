@@ -27,7 +27,8 @@ typedef RcHandle<MulticastSession> MulticastSession_rch;
 
 class OpenDDS_Multicast_Export MulticastTransport : public TransportImpl {
 public:
-  explicit MulticastTransport(const MulticastInst_rch& inst);
+  MulticastTransport(const MulticastInst_rch& inst,
+                     DDS::DomainId_t domain);
   ~MulticastTransport();
 
   void passive_connection(MulticastPeer local_peer, MulticastPeer remote_peer);

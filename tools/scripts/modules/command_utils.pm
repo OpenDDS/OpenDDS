@@ -12,6 +12,7 @@ use Scalar::Util qw();
 use FindBin;
 use lib "$FindBin::RealBin";
 use ChangeDir;
+use misc_utils qw(trace);
 
 require Exporter;
 our @ISA = qw(Exporter);
@@ -126,16 +127,6 @@ sub get_dump_output {
   return $start . ("-" x (80 - length($start))) . "\n" .
     ${$capture_ref} . "\n" .
     $end . ("-" x (80 - length($end))) . "\n";
-}
-
-sub die_with_stack_trace {
-  my $i = 1;
-  print STDERR ("ERROR: ", @_, " STACK TRACE:\n");
-  while (my @call_details = (caller($i++)) ){
-      print STDERR "ERROR: STACK TRACE[", $i - 2, "] " .
-        "$call_details[1]:$call_details[2] in function $call_details[3]\n";
-  }
-  die();
 }
 
 # `run_command` runs a command using the `system` function built into Perl, but
@@ -275,7 +266,7 @@ sub run_command {
 
   my %args = (%valid_args, @_);
   my @invalid_args = grep { !exists($valid_args{$_}) } keys(%args);
-  die_with_stack_trace("invalid arguments: ", join(', ', @invalid_args)) if (scalar(@invalid_args));
+  trace("invalid arguments: ", join(', ', @invalid_args)) if (scalar(@invalid_args));
 
   my $chdir = ChangeDir->new($args{chdir});
 
@@ -312,16 +303,16 @@ sub run_command {
     }
     elsif (defined($capture_directive->{dest_fh})) {
       if ($capture_directive->{dump_on_failure}) {
-        die_with_stack_trace(
+        trace(
           "dump_on_failure requires a variable, path, or undef destination, not a file handle");
       }
     }
     elsif (defined($capture_directive->{dest_path})) {
       open($capture_directive->{dest_fh}, '>', $capture_directive->{dest_path})
-          or die_with_stack_trace("failed to open $capture_directive->{dest_path}: $!");
+          or trace("failed to open $capture_directive->{dest_path}: $!");
     }
     else {
-      die_with_stack_trace("capture_directive is invalid");
+      trace("capture_directive is invalid");
     }
     for my $std_fh (@{$capture_directive->{std_fhs}}) {
       open(my $saved_fh, '>&', $std_fh);
@@ -370,7 +361,7 @@ sub run_command {
 
     $exit_status = $system_status >> 8;
     my $signal = $system_status & 127;
-    die_with_stack_trace("${script_name}\"$name\" was interrupted") if ($signal == SIGINT);
+    trace("${script_name}\"$name\" was interrupted") if ($signal == SIGINT);
     my $coredump = $system_status & 128;
     my $error_message;
     if (!$ran) {
@@ -388,7 +379,7 @@ sub run_command {
     }
 
     if ($args{autodie}) {
-      die_with_stack_trace('run_command was set to autodie');
+      trace('run_command was set to autodie');
     }
   }
 

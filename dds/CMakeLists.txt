@@ -18,7 +18,6 @@ add_library(OpenDDS_Dcps
   DCPS/CoherentChangeControl.cpp
   DCPS/ConditionImpl.cpp
   DCPS/ConfigStoreImpl.cpp
-  DCPS/ConfigUtils.cpp
   DCPS/ConnectionRecords.cpp
   DCPS/ContentFilteredTopicImpl.cpp
   DCPS/DCPS_Utils.cpp
@@ -104,12 +103,14 @@ add_library(OpenDDS_Dcps
   DCPS/TopicImpl.cpp
   DCPS/Transient_Kludge.cpp
   DCPS/TypeSupportImpl.cpp
+  DCPS/ValueCommon.cpp
   DCPS/ValueReader.cpp
   DCPS/ValueWriter.cpp
   DCPS/WaitSet.cpp
   DCPS/WriteDataContainer.cpp
   DCPS/WriterDataSampleList.cpp
   DCPS/WriterInfo.cpp
+  DCPS/Xcdr2ValueWriter.cpp
   DCPS/XTypes/DynamicDataAdapter.cpp
   DCPS/XTypes/DynamicDataBase.cpp
   DCPS/XTypes/DynamicDataFactory.cpp
@@ -120,6 +121,7 @@ add_library(OpenDDS_Dcps
   DCPS/XTypes/DynamicTypeImpl.cpp
   DCPS/XTypes/DynamicTypeMemberImpl.cpp
   DCPS/XTypes/DynamicTypeSupport.cpp
+  DCPS/XTypes/DynamicVwrite.cpp
   DCPS/XTypes/IdlScanner.cpp
   DCPS/XTypes/MemberDescriptorImpl.cpp
   DCPS/XTypes/TypeAssignability.cpp
@@ -215,7 +217,6 @@ target_sources(OpenDDS_Dcps
     DCPS/ConditionImpl.h
     DCPS/ConditionVariable.h
     DCPS/ConfigStoreImpl.h
-    DCPS/ConfigUtils.h
     DCPS/ConnectionRecords.h
     DCPS/ContentFilteredTopicImpl.h
     DCPS/DCPS_Utils.h
@@ -382,6 +383,7 @@ target_sources(OpenDDS_Dcps
     DCPS/Util.h
     DCPS/ValueDispatcher.h
     DCPS/ValueHelper.h
+    DCPS/ValueCommon.h
     DCPS/ValueReader.h
     DCPS/ValueWriter.h
     DCPS/WaitSet.h
@@ -389,6 +391,7 @@ target_sources(OpenDDS_Dcps
     DCPS/WriterDataSampleList.h
     DCPS/WriterDataSampleList.inl
     DCPS/WriterInfo.h
+    DCPS/Xcdr2ValueWriter.h
     DCPS/XTypes/DynamicDataAdapter.h
     DCPS/XTypes/DynamicDataBase.h
     DCPS/XTypes/DynamicDataFactory.h
@@ -400,6 +403,7 @@ target_sources(OpenDDS_Dcps
     DCPS/XTypes/DynamicTypeImpl.h
     DCPS/XTypes/DynamicTypeMemberImpl.h
     DCPS/XTypes/DynamicTypeSupport.h
+    DCPS/XTypes/DynamicVwrite.h
     DCPS/XTypes/External.h
     DCPS/XTypes/IdlScanner.h
     DCPS/XTypes/MemberDescriptorImpl.h
@@ -632,9 +636,4 @@ opendds_target_sources(OpenDDS_Dcps
   ${opendds_target_sources_args}
 )
 
-get_target_property(gendir OpenDDS_Dcps OPENDDS_GENERATED_DIRECTORY)
-set(config_file "${gendir}/dds/DCPS/config.h")
-configure_file("${_OPENDDS_CMAKE_DIR}/config.h.in" "${config_file}")
-opendds_install_interface_files(OpenDDS_Dcps INCLUDE_BASE "${OPENDDS_SOURCE_DIR}"
-  EXTRA_GENERATED_FILES "${config_file}"
-)
+opendds_install_interface_files(OpenDDS_Dcps INCLUDE_BASE "${OPENDDS_SOURCE_DIR}")

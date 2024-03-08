@@ -63,26 +63,17 @@ MulticastInst::MulticastInst(const std::string& name)
   , async_send_(*this, &MulticastInst::async_send, &MulticastInst::async_send)
 {}
 
-int
-MulticastInst::load(ACE_Configuration_Heap& cf,
-                    ACE_Configuration_Section_Key& sect)
-{
-  TransportInst::load(cf, sect); // delegate to parent
-
-  return 0;
-}
-
 TransportImpl_rch
-MulticastInst::new_impl()
+MulticastInst::new_impl(DDS::DomainId_t domain)
 {
-  return make_rch<MulticastTransport>(rchandle_from(this));
+  return make_rch<MulticastTransport>(rchandle_from(this), domain);
 }
 
 OPENDDS_STRING
-MulticastInst::dump_to_str() const
+MulticastInst::dump_to_str(DDS::DomainId_t domain) const
 {
   std::ostringstream os;
-  os << TransportInst::dump_to_str();
+  os << TransportInst::dump_to_str(domain);
 
   os << formatNameForDump("group_address")       << LogAddr(group_address()).str() << std::endl;
   os << formatNameForDump("local_address")       << this->local_address() << std::endl;
@@ -117,7 +108,9 @@ MulticastInst::dump_to_str() const
 }
 
 size_t
-MulticastInst::populate_locator(OpenDDS::DCPS::TransportLocator& info, ConnectionInfoFlags) const
+MulticastInst::populate_locator(OpenDDS::DCPS::TransportLocator& info,
+                                ConnectionInfoFlags,
+                                DDS::DomainId_t) const
 {
   const NetworkAddress ga = group_address();
   if (ga != NetworkAddress::default_IPV4

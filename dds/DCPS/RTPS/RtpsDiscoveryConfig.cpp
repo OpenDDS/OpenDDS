@@ -28,7 +28,7 @@ namespace RTPS {
 using DCPS::TimeDuration;
 
 RtpsDiscoveryConfig::RtpsDiscoveryConfig(const String& name)
-  : config_prefix_(DCPS::ConfigPair::canonicalize("OPENDDS_RTPS_DISCOVERY_" + name))
+  : config_prefix_(DCPS::ConfigPair::canonicalize("RTPS_DISCOVERY_" + name))
 {}
 
 String
@@ -322,8 +322,8 @@ DCPS::NetworkAddress
 RtpsDiscoveryConfig::sedp_local_address() const
 {
   return TheServiceParticipant->config_store()->get(config_key("SEDP_LOCAL_ADDRESS").c_str(),
-                                                    DCPS::NetworkAddress::default_IPV4,
-                                                    DCPS::ConfigStoreImpl::Format_Required_Port,
+                                                    TheServiceParticipant->default_address(),
+                                                    DCPS::ConfigStoreImpl::Format_Optional_Port,
                                                     DCPS::ConfigStoreImpl::Kind_IPV4);
 }
 
@@ -332,7 +332,7 @@ RtpsDiscoveryConfig::sedp_local_address(const DCPS::NetworkAddress& mi)
 {
   TheServiceParticipant->config_store()->set(config_key("SEDP_LOCAL_ADDRESS").c_str(),
                                              mi,
-                                             DCPS::ConfigStoreImpl::Format_Required_Port,
+                                             DCPS::ConfigStoreImpl::Format_Optional_Port,
                                              DCPS::ConfigStoreImpl::Kind_IPV4);
 }
 
@@ -357,11 +357,8 @@ RtpsDiscoveryConfig::sedp_advertised_local_address(const DCPS::NetworkAddress& m
 DCPS::NetworkAddress
 RtpsDiscoveryConfig::spdp_local_address() const
 {
-  const DCPS::NetworkAddress d1(TheServiceParticipant->default_address());
-  const DCPS::NetworkAddress d2("0.0.0.0:0");
-
   return TheServiceParticipant->config_store()->get(config_key("SPDP_LOCAL_ADDRESS").c_str(),
-                                                    d1 ? d1 : d2,
+                                                    TheServiceParticipant->default_address(),
                                                     DCPS::ConfigStoreImpl::Format_Optional_Port,
                                                     DCPS::ConfigStoreImpl::Kind_IPV4);
 }
@@ -402,7 +399,7 @@ RtpsDiscoveryConfig::default_multicast_group(DDS::DomainId_t domain) const
   // Customize.
   const String customization_name = TheServiceParticipant->config_store()->get(config_key("CUSTOMIZATION").c_str(), "");
   if (!customization_name.empty()) {
-    const String directive = TheServiceParticipant->config_store()->get(String("OPENDDS_CUSTOMIZATION_" + customization_name + "_INTEROP_MULTICAST_OVERRIDE").c_str(), "");
+    const String directive = TheServiceParticipant->config_store()->get(String("CUSTOMIZATION_" + customization_name + "_INTEROP_MULTICAST_OVERRIDE").c_str(), "");
     if (directive == "AddDomainId") {
       String addr = DCPS::LogAddr(na, DCPS::LogAddr::Ip).str();
       const size_t pos = addr.find_last_of(".");
@@ -621,7 +618,7 @@ RtpsDiscoveryConfig::auth_resend_period() const
 void
 RtpsDiscoveryConfig::auth_resend_period(const DCPS::TimeDuration& x)
 {
-  TheServiceParticipant->config_store()->get(config_key("AUTH_RESEND_PERIOD").c_str(),
+  TheServiceParticipant->config_store()->set(config_key("AUTH_RESEND_PERIOD").c_str(),
                                              x,
                                              DCPS::ConfigStoreImpl::Format_FractionalSeconds);
 }
@@ -652,7 +649,7 @@ RtpsDiscoveryConfig::spdp_rtps_relay_address() const
 void
 RtpsDiscoveryConfig::spdp_rtps_relay_address(const DCPS::NetworkAddress& address)
 {
-  TheServiceParticipant->config_store()->get(config_key("SPDP_RTPS_RELAY_ADDRESS").c_str(),
+  TheServiceParticipant->config_store()->set(config_key("SPDP_RTPS_RELAY_ADDRESS").c_str(),
                                              address,
                                              DCPS::ConfigStoreImpl::Format_Required_Port,
                                              DCPS::ConfigStoreImpl::Kind_IPV4);
@@ -669,7 +666,7 @@ RtpsDiscoveryConfig::spdp_rtps_relay_send_period() const
 void
 RtpsDiscoveryConfig::spdp_rtps_relay_send_period(const DCPS::TimeDuration& period)
 {
-  TheServiceParticipant->config_store()->get(config_key("SPDP_RTPS_RELAY_SEND_PERIOD").c_str(),
+  TheServiceParticipant->config_store()->set(config_key("SPDP_RTPS_RELAY_SEND_PERIOD").c_str(),
                                              period,
                                              DCPS::ConfigStoreImpl::Format_IntegerSeconds);
 }
@@ -686,7 +683,7 @@ RtpsDiscoveryConfig::sedp_rtps_relay_address() const
 void
 RtpsDiscoveryConfig::sedp_rtps_relay_address(const DCPS::NetworkAddress& address)
 {
-  TheServiceParticipant->config_store()->get(config_key("SEDP_RTPS_RELAY_ADDRESS").c_str(),
+  TheServiceParticipant->config_store()->set(config_key("SEDP_RTPS_RELAY_ADDRESS").c_str(),
                                              address,
                                              DCPS::ConfigStoreImpl::Format_Required_Port,
                                              DCPS::ConfigStoreImpl::Kind_IPV4);

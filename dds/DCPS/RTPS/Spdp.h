@@ -165,7 +165,6 @@ public:
   ParticipantCryptoInfoPair lookup_participant_crypto_info(const DCPS::GUID_t& id) const;
   void send_participant_crypto_tokens(const DCPS::GUID_t& id);
 
-  DDS::DomainId_t get_domain_id() const { return domain_; }
   DDS::Security::PermissionsHandle lookup_participant_permissions(const DCPS::GUID_t& id) const;
 
   AuthState lookup_participant_auth_state(const GUID_t& id) const;
@@ -173,9 +172,9 @@ public:
   void process_participant_ice(const ParameterList& plist,
                                const ParticipantData_t& pdata,
                                const DCPS::GUID_t& guid);
-
 #endif
 
+  DDS::DomainId_t get_domain_id() const { return domain_; }
   const ParticipantData_t& get_participant_data(const DCPS::GUID_t& guid) const;
   ParticipantData_t& get_participant_data(const DCPS::GUID_t& guid);
   DCPS::MonotonicTime_t get_participant_discovered_at() const;

@@ -182,7 +182,7 @@ ConfigStoreImpl::get_boolean(const char* key,
 
   if (debug_logging) {
     ACE_DEBUG((LM_DEBUG, "(%P|%t) %C: ConfigStoreImpl::get_boolean: %C=%C\n",
-               OPENDDS_CONFIG_DEBUG_LOGGING,
+               CONFIG_DEBUG_LOGGING,
                cp.key().c_str(),
                retval ? "true" : "false"));
   }
@@ -230,7 +230,7 @@ ConfigStoreImpl::get_int32(const char* key,
 
   if (debug_logging) {
     ACE_DEBUG((LM_DEBUG, "(%P|%t) %C: ConfigStoreImpl::get_int32: %C=%d\n",
-               OPENDDS_CONFIG_DEBUG_LOGGING,
+               CONFIG_DEBUG_LOGGING,
                cp.key().c_str(),
                retval));
 
@@ -279,7 +279,7 @@ ConfigStoreImpl::get_uint32(const char* key,
 
   if (debug_logging) {
     ACE_DEBUG((LM_DEBUG, "(%P|%t) %C: ConfigStoreImpl::get_int32: %C=%u\n",
-               OPENDDS_CONFIG_DEBUG_LOGGING,
+               CONFIG_DEBUG_LOGGING,
                cp.key().c_str(),
                retval));
 
@@ -326,7 +326,7 @@ ConfigStoreImpl::get_float64(const char* key,
 
   if (debug_logging) {
     ACE_DEBUG((LM_DEBUG, "(%P|%t) %C: ConfigStoreImpl::get_float64: %C=%g\n",
-               OPENDDS_CONFIG_DEBUG_LOGGING,
+               CONFIG_DEBUG_LOGGING,
                cp.key().c_str(),
                retval));
 
@@ -369,7 +369,7 @@ ConfigStoreImpl::get_string(const char* key,
 
   if (debug_logging) {
     ACE_DEBUG((LM_DEBUG, "(%P|%t) %C: ConfigStoreImpl::get_string: %C=%C\n",
-               OPENDDS_CONFIG_DEBUG_LOGGING,
+               CONFIG_DEBUG_LOGGING,
                cp.key().c_str(),
                retval.in()));
 
@@ -416,7 +416,7 @@ ConfigStoreImpl::get_duration(const char* key,
 
   if (debug_logging) {
     ACE_DEBUG((LM_DEBUG, "(%P|%t) %C: ConfigStoreImpl::get_duration: %C=%C\n",
-               OPENDDS_CONFIG_DEBUG_LOGGING,
+               CONFIG_DEBUG_LOGGING,
                cp.key().c_str(),
                to_dds_string(retval).c_str()));
 
@@ -468,7 +468,7 @@ ConfigStoreImpl::get(const char* key,
 
   if (debug_logging) {
     ACE_DEBUG((LM_DEBUG, "(%P|%t) %C: ConfigStoreImpl::get: %C=%C\n",
-               OPENDDS_CONFIG_DEBUG_LOGGING,
+               CONFIG_DEBUG_LOGGING,
                cp.key().c_str(),
                retval.c_str()));
 
@@ -626,7 +626,7 @@ ConfigStoreImpl::get(const char* key,
 
   if (debug_logging) {
     ACE_DEBUG((LM_DEBUG, "(%P|%t) %C: ConfigStoreImpl::get: %C=%C\n",
-               OPENDDS_CONFIG_DEBUG_LOGGING,
+               CONFIG_DEBUG_LOGGING,
                cp.key().c_str(),
                time_duration_to_string(retval, format).c_str()));
   }
@@ -806,7 +806,7 @@ ConfigStoreImpl::get(const char* key,
 
   if (debug_logging) {
     ACE_DEBUG((LM_DEBUG, "(%P|%t) %C: ConfigStoreImpl::get: %C=%C\n",
-               OPENDDS_CONFIG_DEBUG_LOGGING,
+               CONFIG_DEBUG_LOGGING,
                cp.key().c_str(),
                LogAddr(retval.to_addr()).c_str()));
   }
@@ -967,7 +967,7 @@ ConfigStoreImpl::get(const char* key,
 
   if (debug_logging) {
     ACE_DEBUG((LM_DEBUG, "(%P|%t) %C: ConfigStoreImpl::get: %C=%C\n",
-               OPENDDS_CONFIG_DEBUG_LOGGING,
+               CONFIG_DEBUG_LOGGING,
                key,
                network_address_set_to_string(retval, format).c_str()));
   }
@@ -990,7 +990,10 @@ ConfigStoreImpl::get_section_names(const String& prefix) const
         pos->key() != cprefix &&
         !pos->value().empty() &&
         pos->value().substr(0, 1) == "@") {
-      retval.push_back(pos->value().substr(1));
+      const String name = pos->value().substr(1);
+      if (ConfigPair::canonicalize(prefix + "_" + name) == pos->key()) {
+        retval.push_back(name);
+      }
     }
   }
 
@@ -1048,7 +1051,7 @@ take_has_prefix(ConfigReader_rch reader,
   return false;
 }
 
-bool ConfigStoreImpl::debug_logging = OPENDDS_CONFIG_DEBUG_LOGGING_default;
+bool ConfigStoreImpl::debug_logging = CONFIG_DEBUG_LOGGING_default;
 
 void
 process_section(ConfigStoreImpl& config_store,

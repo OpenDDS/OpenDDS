@@ -33,8 +33,9 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-TcpTransport::TcpTransport(const TcpInst_rch& inst)
-  : TransportImpl(inst)
+TcpTransport::TcpTransport(const TcpInst_rch& inst,
+                           DDS::DomainId_t domain)
+  : TransportImpl(inst, domain)
   , acceptor_(new TcpAcceptor(RcHandle<TcpTransport>(this, inc_count())))
   , last_link_(0)
 {
@@ -445,7 +446,7 @@ TcpTransport::connection_info_i(TransportLocator& local_info, ConnectionInfoFlag
     VDBG_LVL((LM_DEBUG, "(%P|%t) TcpTransport public address string <%C>\n",
               cfg->get_locator_address().c_str()), 2);
 
-    cfg->populate_locator(local_info, flags);
+    cfg->populate_locator(local_info, flags, domain_);
     return true;
   }
 

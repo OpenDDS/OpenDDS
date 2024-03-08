@@ -29,4 +29,4 @@ target_include_directories(OpenDDS_Util
     .. # For pch
     ${TAO_INCLUDE_DIRS} # Only for orbconf.h and idl_features.h in Definitions.h
 )
-target_link_libraries(OpenDDS_Util ${deps})
+target_link_libraries(OpenDDS_Util PUBLIC ${deps})

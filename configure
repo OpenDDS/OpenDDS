@@ -82,7 +82,7 @@ my %platforminfo =
                                  'specify how the target', 'build should work'],
                     },
    'linux' => {
-               'compilers' => ['g++', 'clang', 'clang++'],
+               'compilers' => ['g++', 'clang++', 'clang'],
                'libpath' => 'LD_LIBRARY_PATH',
                'aceplatform' => 'linux_$NONSTDCOMP', # $NONSTDCOMP = clang
               },
@@ -185,7 +185,7 @@ my @specs = # Array of array-refs, each inner array is an option group which
    ['Build platform and compiler:',
     'host=s', 'Host (auto detect: linux, win32, macosx)',
     'compiler=s', 'Compiler (auto detect / guess by searching PATH)',
-    'std=s', 'C++ standard version (for compilers that use -std)',
+    'std=s', 'C++ standard version (compiler default)',
     'target=s', 'Cross-compile target (none): see --target-help',
     'target-arch=s', 'Architecture for target (none): see --target-help',
     'target-compiler=s', 'Compiler for target (if req\'d): see --target-help',
@@ -309,7 +309,7 @@ Options for this script are listed below, with the default behavior described
 in parenthesis after the option description.
 Boolean options can take the form "--opt" or "--no-opt", the more commonly
 needed one (the one that changes the default behavior) is shown below.
-Options that require arguments are shown as "--opt=VAL"  Options with optional
+Options that require arguments are shown as "--opt=VAL".  Options with optional
 arguments are shown as "--opt[=VAL]".  Options that can be repeated with
 cumulative effect are shown with a trailing "...".  Some third-party
 optional dependencies can be automatically located if they are installed in the
@@ -733,14 +733,26 @@ EOF
 
     if ($ver >= 19) {
       push(@{$opts{'features'}}, 'no_cxx11=0');
-      print "Visual C++ has C++11 support\n" if $opts{'verbose'};
+      print "Visual C++ has >= C++11 support\n" if $opts{'verbose'};
+    }
+    if ($opts{'std'}) {
+      # Accept any of --std=17, --std=stdcpp17, --std=c++17, etc.
+      $opts{'std'} =~ s/^(std)?(cpp|c\+\+)//;
+      my $prefix = 'stdcpp';
+      push(@{$opts{'mpcopts'}}, "-value_template LanguageStandard=$prefix$opts{'std'}");
+      print "Setting Visual C++ LanguageStandard to $prefix$opts{'std'}\n" if $opts{'verbose'};
+      if ($opts{'std'} eq 'latest' || $opts{'std'} >= 17) {
+        push(@{$opts{'features'}}, 'no_cxx17=0');
+        print "Visual C++ has >= C++17 support\n" if $opts{'verbose'};
+      }
     }
     $ENV{'PATH'} = $savepath;
     print "Detected Visual C++ version: $opts{'compiler_version'}\n"
       if $opts{'verbose'};
   }
-  elsif ($opts{'compiler'} =~ /g\+\+/) { # GCC or Clang
+  elsif ($opts{'compiler'} =~ /g\+\+|clang/) {
     my $version_string = `$opts{'compiler'} --version`;
+    print "Compiler version: $version_string\n" if $opts{'verbose'};
     if ($opts{'std'}) {
       push(@{$opts{'macros'}}, 'CCFLAGS += -std=' . $opts{'std'});
       print "Added platform_macros for -std=$opts{std}\n" if $opts{'verbose'};
@@ -916,7 +928,7 @@ if (!$ace_src || !$tao_src) {
     }
 
     if (!-r $file) {
-      my $dl_msg = "Downloading $file from using";
+      my $dl_msg = "Downloading $file from $url using";
       $would_download = 1;
       eval {
         require LWP::UserAgent;
@@ -1324,6 +1336,30 @@ EOT
       if $opts{'verbose'};
     dump_and_unlink($PMG) if $opts{'dry-run'};
   }
+}
+
+sub write_opendds_configh {
+  my %buildEnv = %{shift()};
+  my $CFGH = backup_and_open("$buildEnv{'DDS_ROOT'}/dds/OpenDDSConfig.h");
+  my $CFGIN = new FileHandle;
+  open($CFGIN, 'dds/OpenDDSConfig.h.in') or die("Can't open OpenDDSConfig.h.in for reading: $!\nStopped");
+
+  sub replace_value {
+    my $var = shift;
+    return '0' if $var eq 'OPENDDS_CONFIG_AUTO_STATIC_INCLUDES';
+    return 'UNDEFINED';
+  }
+
+  while (<$CFGIN>) {
+    s/@(\w+)@/replace_value($1)/e;
+    print $CFGH $_;
+  }
+
+  $CFGIN->close;
+  $CFGH->close;
+  print "Wrote $buildEnv{'DDS_ROOT'}/dds/OpenDDSConfig.h\n"
+    if $opts{'verbose'};
+  dump_and_unlink($CFGH) if $opts{'dry-run'};
 }
 
 ## Optional OpenDDS dependencies
@@ -2123,8 +2159,8 @@ sub write_opendds_mwc {
 if (!defined(\$ENV{ACE_ROOT}) || !defined(\$ENV{MPC_ROOT})) {
   die("The enviroment needs to be setup.");
 }
-exec('perl', "\$ENV{ACE_ROOT}/bin/mwc.pl", $args, \@ARGV)
-  or die("Failed to exec mwc: \$!");
+system('perl', "\$ENV{ACE_ROOT}/bin/mwc.pl", $args, \@ARGV) == 0
+  or die("Failed to run mwc: \$!");
 EOF
   $fd->close();
   print "Wrote $path\n" if $opts{'verbose'};
@@ -2484,6 +2520,7 @@ sub configure_build {
     write_default_features($buildEnvRef);
     write_platform_macros($buildEnvRef);
   }
+  write_opendds_configh($buildEnvRef);
   generate_workspace($buildEnvRef);
   write_environment($buildEnvRef, $buildEnvRef->{'DDS_ROOT'});
 

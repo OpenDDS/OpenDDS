@@ -32,8 +32,9 @@ namespace {
   const Encoding::Kind encoding_kind = Encoding::KIND_UNALIGNED_CDR;
 }
 
-UdpTransport::UdpTransport(const UdpInst_rch& inst)
-  : TransportImpl(inst)
+UdpTransport::UdpTransport(const UdpInst_rch& inst,
+                           DDS::DomainId_t domain)
+  : TransportImpl(inst, domain)
 {
   if (!(configure_i(inst) && open())) {
     throw Transport::UnableToCreate();
@@ -207,7 +208,7 @@ UdpTransport::connection_info_i(TransportLocator& info, ConnectionInfoFlags flag
 {
   UdpInst_rch cfg = config();
   if (cfg) {
-    cfg->populate_locator(info, flags);
+    cfg->populate_locator(info, flags, domain_);
     return true;
   }
   return false;

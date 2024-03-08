@@ -64,7 +64,7 @@ env:
   TRIGGERING_COMMIT: ${{ github.event.pull_request.head.sha || github.sha }}
   VCPKG_INSTALLED_DIR: ${{ github.workspace }}\vcpkg\installed
   CTEST_OUTPUT_ON_FAILURE: ON
-  VCPKG_GIT_COMMIT: 8eb57355a4ffb410a2e94c07b4dca2dffbee8e50
+  VCPKG_GIT_COMMIT: 53bef8994c541b6561884a8395ea35715ece75db
 
 jobs:
 
@@ -102,7 +102,7 @@ jobs:
         echo "JDK_VERSION=$JDK_VERSION" >> $GITHUB_ENV
     - name: Cache Artifact
       id: cache-artifact
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: ${{ github.job }}.tar.xz
         key: c01_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}_${{ env.JDK_VERSION }}
@@ -185,7 +185,7 @@ jobs:
         cd OpenDDS
         . setenv.sh
         tools/scripts/show_build_config.pl
-    - uses: ammaraskar/gcc-problem-matcher@0.2.0
+    - uses: ammaraskar/gcc-problem-matcher@0.3.0
     - name: build OpenDDS
       shell: bash
       run: |
@@ -313,7 +313,6 @@ jobs:
         </configuration>
         <command name="log" options="on"/>
         <command name="print_os_version"/>
-        <command name="print_env_vars"/>
         <command name="print_ace_config"/>
         <command name="print_cmake_version"/>
         <command name="print_make_version"/>
@@ -373,7 +372,7 @@ jobs:
           --no-debug \
           --features=versioned_namespace=1 \
           --tests
-    - uses: ammaraskar/gcc-problem-matcher@0.2.0
+    - uses: ammaraskar/gcc-problem-matcher@0.3.0
     - name: make OpenDDS
       run: |
         cd OpenDDS
@@ -550,10 +549,10 @@ jobs:
         echo "COMPILER_VERSION=$COMPILER_VERSION" >> $GITHUB_ENV
     - name: Cache Artifact
       id: cache-artifact
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: ${{ github.job }}.tar.xz
-        key: c10_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}
+        key: c11_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}
     - name: checkout MPC
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       uses: actions/checkout@v4
@@ -608,7 +607,8 @@ jobs:
         perl -ni.bak -e "print unless /opendds/" ACE/bin/MakeProjectCreator/config/default.features # remove opendds features from here, let individual build configure scripts handle those
         cd $GITHUB_WORKSPACE/OpenDDS
         find . -iname "*\.o" | xargs rm
-        tar cvf ../${{ github.job }}.tar build/host/ACE_TAO build/target/ACE_TAO build/host/setenv.sh build/host/VERSION.txt
+        rm -rf build/{host,target}/ACE_TAO/{ACE,TAO}/{examples,performance-tests,tests}
+        tar cvf ../${{ github.job }}.tar build/host/ACE_TAO build/target/ACE_TAO
         xz -3 ../${{ github.job }}.tar
     - name: upload ACE_TAO artifact
       uses: actions/upload-artifact@v4
@@ -671,7 +671,7 @@ jobs:
       run: |
         cd OpenDDS
         tar xvfJ ACE_TAO_u22_esafe_js0.tar.xz
-    - uses: ammaraskar/gcc-problem-matcher@0.2.0
+    - uses: ammaraskar/gcc-problem-matcher@0.3.0
     - name: build OpenDDS_Util lib and opendds_idl in host
       shell: bash
       run: |
@@ -700,10 +700,7 @@ jobs:
       shell: bash
       run: |
         cd OpenDDS/build
-        tar cvf ../../${{ github.job }}.tar host/dds/idl/opendds_idl
-        tar uvf ../../${{ github.job }}.tar host/bin/opendds_idl
-        tar uvf ../../${{ github.job }}.tar host/dds/DCPS/libOpenDDS_Util*
-        tar uvf ../../${{ github.job }}.tar host/lib/libOpenDDS_Util*
+        tar cvf ../../${{ github.job }}.tar host/dds/idl/opendds_idl host/bin/opendds_idl host/setenv.sh host/VERSION.txt
         cd target
         find . -iname "*\.o" | xargs rm
         cd ..
@@ -809,7 +806,6 @@ jobs:
         </configuration>
         <command name="log" options="on"/>
         <command name="print_os_version"/>
-        <command name="print_env_vars"/>
         <command name="print_ace_config"/>
         <command name="print_make_version"/>
         <command name="check_compiler" options="gcc"/>
@@ -876,10 +872,10 @@ jobs:
         echo "COMPILER_VERSION=$COMPILER_VERSION" >> $GITHUB_ENV
     - name: Cache Artifact
       id: cache-artifact
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: ${{ github.job }}.tar.xz
-        key: c10_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}
+        key: c11_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}
     - name: checkout MPC
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       uses: actions/checkout@v4
@@ -935,7 +931,8 @@ jobs:
         perl -ni.bak -e "print unless /opendds/" ACE/bin/MakeProjectCreator/config/default.features # remove opendds features from here, let individual build configure scripts handle those
         cd $GITHUB_WORKSPACE/OpenDDS
         find . -iname "*\.o" | xargs rm
-        tar cvf ../${{ github.job }}.tar build/host/ACE_TAO build/target/ACE_TAO build/host/setenv.sh build/host/VERSION.txt
+        rm -rf build/{host,target}/ACE_TAO/{ACE,TAO}/{examples,performance-tests,tests}
+        tar cvf ../${{ github.job }}.tar build/host/ACE_TAO build/target/ACE_TAO
         xz -3 ../${{ github.job }}.tar
     - name: upload ACE_TAO artifact
       uses: actions/upload-artifact@v4
@@ -999,7 +996,7 @@ jobs:
       run: |
         cd OpenDDS
         tar xvfJ ACE_TAO_u22_bsafe_js0_FM-1f.tar.xz
-    - uses: ammaraskar/gcc-problem-matcher@0.2.0
+    - uses: ammaraskar/gcc-problem-matcher@0.3.0
     - name: build OpenDDS_Util lib and opendds_idl in host
       shell: bash
       run: |
@@ -1028,10 +1025,7 @@ jobs:
       shell: bash
       run: |
         cd OpenDDS/build
-        tar cvf ../../${{ github.job }}.tar host/dds/idl/opendds_idl
-        tar uvf ../../${{ github.job }}.tar host/bin/opendds_idl
-        tar uvf ../../${{ github.job }}.tar host/dds/DCPS/libOpenDDS_Util*
-        tar uvf ../../${{ github.job }}.tar host/lib/libOpenDDS_Util*
+        tar cvf ../../${{ github.job }}.tar host/dds/idl/opendds_idl host/bin/opendds_idl host/setenv.sh host/VERSION.txt
         cd target
         find . -iname "*\.o" | xargs rm
         cd ..
@@ -1137,7 +1131,6 @@ jobs:
         </configuration>
         <command name="log" options="on"/>
         <command name="print_os_version"/>
-        <command name="print_env_vars"/>
         <command name="print_ace_config"/>
         <command name="print_make_version"/>
         <command name="check_compiler" options="gcc"/>
@@ -1204,7 +1197,7 @@ jobs:
         echo "COMPILER_VERSION=$COMPILER_VERSION" >> $GITHUB_ENV
     - name: Cache Artifact
       id: cache-artifact
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: ${{ github.job }}.tar.xz
         key: c01_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}
@@ -1292,7 +1285,7 @@ jobs:
         cd OpenDDS
         . setenv.sh
         tools/scripts/show_build_config.pl
-    - uses: ammaraskar/gcc-problem-matcher@0.2.0
+    - uses: ammaraskar/gcc-problem-matcher@0.3.0
     - name: build OpenDDS
       shell: bash
       run: |
@@ -1415,7 +1408,6 @@ jobs:
         </configuration>
         <command name="log" options="on"/>
         <command name="print_os_version"/>
-        <command name="print_env_vars"/>
         <command name="print_ace_config"/>
         <command name="print_cmake_version"/>
         <command name="print_make_version"/>
@@ -1483,7 +1475,7 @@ jobs:
         echo "COMPILER_VERSION=$COMPILER_VERSION" >> $GITHUB_ENV
     - name: Cache Artifact
       id: cache-artifact
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: ${{ github.job }}.tar.xz
         key: c02_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}
@@ -1542,6 +1534,8 @@ jobs:
     needs: ACE_TAO_u20_clang12_i0w1_sec
 
     steps:
+    - name: Update apt indexes
+      run: sudo apt-get -y update
     - name: install xerces
       run: sudo apt-get -y install libxerces-c-dev
     - name: checkout MPC
@@ -1590,7 +1584,7 @@ jobs:
         cd OpenDDS
         . setenv.sh
         tools/scripts/show_build_config.pl
-    - uses: ammaraskar/gcc-problem-matcher@0.2.0
+    - uses: ammaraskar/gcc-problem-matcher@0.3.0
     - name: build OpenDDS
       shell: bash
       run: |
@@ -1630,6 +1624,8 @@ jobs:
       id-token: write
 
     steps:
+    - name: Update apt indexes
+      run: sudo apt-get -y update
     - name: install xerces
       run: sudo apt-get -y install libxerces-c-dev
     - name: checkout MPC
@@ -1714,7 +1710,6 @@ jobs:
         </configuration>
         <command name="log" options="on"/>
         <command name="print_os_version"/>
-        <command name="print_env_vars"/>
         <command name="print_ace_config"/>
         <command name="print_cmake_version"/>
         <command name="print_make_version"/>
@@ -1782,7 +1777,7 @@ jobs:
         echo "COMPILER_VERSION=$COMPILER_VERSION" >> $GITHUB_ENV
     - name: Cache Artifact
       id: cache-artifact
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: ${{ github.job }}.tar.xz
         key: c02_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}
@@ -1840,6 +1835,8 @@ jobs:
     needs: ACE_TAO_u20_clang10_sec_js0
 
     steps:
+    - name: Update apt indexes
+      run: sudo apt-get -y update
     - name: install xerces
       run: sudo apt-get -y install libxerces-c-dev
     - name: checkout MPC
@@ -1887,7 +1884,7 @@ jobs:
         cd OpenDDS
         . setenv.sh
         tools/scripts/show_build_config.pl
-    - uses: ammaraskar/gcc-problem-matcher@0.2.0
+    - uses: ammaraskar/gcc-problem-matcher@0.3.0
     - name: build OpenDDS
       shell: bash
       run: |
@@ -1927,6 +1924,8 @@ jobs:
       id-token: write
 
     steps:
+    - name: Update apt indexes
+      run: sudo apt-get -y update
     - name: install xerces
       run: sudo apt-get -y install libxerces-c-dev
     - name: checkout MPC
@@ -2011,7 +2010,6 @@ jobs:
         </configuration>
         <command name="log" options="on"/>
         <command name="print_os_version"/>
-        <command name="print_env_vars"/>
         <command name="print_ace_config"/>
         <command name="print_cmake_version"/>
         <command name="print_make_version"/>
@@ -2079,7 +2077,7 @@ jobs:
         echo "COMPILER_VERSION=$COMPILER_VERSION" >> $GITHUB_ENV
     - name: Cache Artifact
       id: cache-artifact
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: ${{ github.job }}.tar.xz
         key: c01_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}
@@ -2137,6 +2135,8 @@ jobs:
     needs: ACE_TAO_u20_gcc9_d0w1_cpp03
 
     steps:
+    - name: Update apt indexes
+      run: sudo apt-get -y update
     - name: install xerces
       run: sudo apt-get -y install libxerces-c-dev
     - name: checkout MPC
@@ -2184,7 +2184,7 @@ jobs:
         cd OpenDDS
         . setenv.sh
         tools/scripts/show_build_config.pl
-    - uses: ammaraskar/gcc-problem-matcher@0.2.0
+    - uses: ammaraskar/gcc-problem-matcher@0.3.0
     - name: build OpenDDS
       shell: bash
       run: |
@@ -2305,7 +2305,6 @@ jobs:
         </configuration>
         <command name="log" options="on"/>
         <command name="print_os_version"/>
-        <command name="print_env_vars"/>
         <command name="print_ace_config"/>
         <command name="print_cmake_version"/>
         <command name="print_make_version"/>
@@ -2381,7 +2380,7 @@ jobs:
         echo "JDK_VERSION=$JDK_VERSION" >> $GITHUB_ENV
     - name: Cache Artifact
       id: cache-artifact
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: ${{ github.job }}.tar.xz
         key: c01_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}_${{ env.JDK_VERSION }}
@@ -2431,6 +2430,8 @@ jobs:
     needs: ACE_TAO_u20_gcc8_i0_js0_j
 
     steps:
+    - name: Update apt indexes
+      run: sudo apt-get -y update
     - name: install gcc and g++
       run: |
         sudo apt-get install g++-8
@@ -2472,7 +2473,7 @@ jobs:
         cd OpenDDS
         . setenv.sh
         tools/scripts/show_build_config.pl
-    - uses: ammaraskar/gcc-problem-matcher@0.2.0
+    - uses: ammaraskar/gcc-problem-matcher@0.3.0
     - name: build OpenDDS
       shell: bash
       run: |
@@ -2593,7 +2594,6 @@ jobs:
         </configuration>
         <command name="log" options="on"/>
         <command name="print_os_version"/>
-        <command name="print_env_vars"/>
         <command name="print_ace_config"/>
         <command name="print_cmake_version"/>
         <command name="print_make_version"/>
@@ -2664,7 +2664,7 @@ jobs:
         echo "COMPILER_VERSION=$COMPILER_VERSION" >> $GITHUB_ENV
     - name: Cache Artifact
       id: cache-artifact
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: ${{ github.job }}.tar.xz
         key: c01_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}
@@ -2750,7 +2750,7 @@ jobs:
         cd OpenDDS
         . setenv.sh
         tools/scripts/show_build_config.pl
-    - uses: ammaraskar/gcc-problem-matcher@0.2.0
+    - uses: ammaraskar/gcc-problem-matcher@0.3.0
     - name: build OpenDDS
       shell: bash
       run: |
@@ -2871,7 +2871,6 @@ jobs:
         </configuration>
         <command name="log" options="on"/>
         <command name="print_os_version"/>
-        <command name="print_env_vars"/>
         <command name="print_ace_config"/>
         <command name="print_cmake_version"/>
         <command name="print_make_version"/>
@@ -2915,6 +2914,8 @@ jobs:
     runs-on: ubuntu-20.04
 
     steps:
+    - name: Update apt indexes
+      run: sudo apt-get -y update
     - name: install xerces
       run: sudo apt-get -y install libxerces-c-dev
     - name: checkout OpenDDS
@@ -2941,7 +2942,7 @@ jobs:
         echo "COMPILER_VERSION=$COMPILER_VERSION" >> $GITHUB_ENV
     - name: Cache Artifact
       id: cache-artifact
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: ${{ github.job }}.tar.xz
         key: c10_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}
@@ -3018,6 +3019,8 @@ jobs:
     needs: ACE_TAO_u20_gcc10_bsafe_js0_FM-2c
 
     steps:
+    - name: Update apt indexes
+      run: sudo apt-get -y update
     - name: install xerces
       run: sudo apt-get -y install libxerces-c-dev
     - name: checkout MPC
@@ -3070,7 +3073,7 @@ jobs:
       run: |
         cd OpenDDS
         tar xvfJ ACE_TAO_u20_gcc10_bsafe_js0_FM-2c.tar.xz
-    - uses: ammaraskar/gcc-problem-matcher@0.2.0
+    - uses: ammaraskar/gcc-problem-matcher@0.3.0
     - name: build OpenDDS_Util lib and opendds_idl in host
       shell: bash
       run: |
@@ -3147,7 +3150,7 @@ jobs:
         echo "JDK_VERSION=$JDK_VERSION" >> $GITHUB_ENV
     - name: Cache Artifact
       id: cache-artifact
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: ${{ github.job }}.tar.xz
         key: c01_${{ github.job }}_master_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}_${{ env.JDK_VERSION }}
@@ -3236,7 +3239,7 @@ jobs:
         cd OpenDDS
         . setenv.sh
         tools/scripts/show_build_config.pl
-    - uses: ammaraskar/gcc-problem-matcher@0.2.0
+    - uses: ammaraskar/gcc-problem-matcher@0.3.0
     - name: build OpenDDS
       shell: bash
       run: |
@@ -3375,7 +3378,6 @@ jobs:
         </configuration>
         <command name="log" options="on"/>
         <command name="print_os_version"/>
-        <command name="print_env_vars"/>
         <command name="print_ace_config"/>
         <command name="print_cmake_version"/>
         <command name="print_make_version"/>
@@ -3443,7 +3445,7 @@ jobs:
         echo "COMPILER_VERSION=$COMPILER_VERSION" >> $GITHUB_ENV
     - name: Cache Artifact
       id: cache-artifact
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: ${{ github.job }}.tar.xz
         key: c11_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}
@@ -3503,6 +3505,8 @@ jobs:
     needs: ACE_TAO_u20_p1_asan
 
     steps:
+    - name: Update apt indexes
+      run: sudo apt-get -y update
     - name: install xerces
       run: sudo apt-get -y install libxerces-c-dev
     - name: checkout MPC
@@ -3551,7 +3555,7 @@ jobs:
         cd OpenDDS
         . setenv.sh
         tools/scripts/show_build_config.pl
-    - uses: ammaraskar/gcc-problem-matcher@0.2.0
+    - uses: ammaraskar/gcc-problem-matcher@0.3.0
     - name: build OpenDDS
       shell: bash
       run: |
@@ -3591,6 +3595,8 @@ jobs:
       id-token: write
 
     steps:
+    - name: Update apt indexes
+      run: sudo apt-get -y update
     - name: install xerces
       run: sudo apt-get -y install libxerces-c-dev
     - name: checkout MPC
@@ -3675,7 +3681,6 @@ jobs:
         </configuration>
         <command name="log" options="on"/>
         <command name="print_os_version"/>
-        <command name="print_env_vars"/>
         <command name="print_ace_config"/>
         <command name="print_cmake_version"/>
         <command name="print_make_version"/>
@@ -3743,7 +3748,7 @@ jobs:
         echo "COMPILER_VERSION=$COMPILER_VERSION" >> $GITHUB_ENV
     - name: Cache Artifact
       id: cache-artifact
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: ${{ github.job }}.tar.xz
         key: c11_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}
@@ -3801,6 +3806,8 @@ jobs:
     needs: ACE_TAO_u20_p1_tsan
 
     steps:
+    - name: Update apt indexes
+      run: sudo apt-get -y update
     - name: install xerces
       run: sudo apt-get -y install libxerces-c-dev
     - name: checkout MPC
@@ -3848,7 +3855,7 @@ jobs:
         cd OpenDDS
         . setenv.sh
         tools/scripts/show_build_config.pl
-    - uses: ammaraskar/gcc-problem-matcher@0.2.0
+    - uses: ammaraskar/gcc-problem-matcher@0.3.0
     - name: build OpenDDS
       shell: bash
       run: |
@@ -3881,6 +3888,8 @@ jobs:
       id-token: write
 
     steps:
+    - name: Update apt indexes
+      run: sudo apt-get -y update
     - name: install xerces
       run: sudo apt-get -y install libxerces-c-dev
     - name: checkout MPC
@@ -3965,7 +3974,6 @@ jobs:
         </configuration>
         <command name="log" options="on"/>
         <command name="print_os_version"/>
-        <command name="print_env_vars"/>
         <command name="print_ace_config"/>
         <command name="print_cmake_version"/>
         <command name="print_make_version"/>
@@ -4033,7 +4041,7 @@ jobs:
         echo "COMPILER_VERSION=$COMPILER_VERSION" >> $GITHUB_ENV
     - name: Cache Artifact
       id: cache-artifact
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: ${{ github.job }}.tar.xz
         key: c11_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}
@@ -4093,6 +4101,8 @@ jobs:
     needs: ACE_TAO_u20_p1_ubsan
 
     steps:
+    - name: Update apt indexes
+      run: sudo apt-get -y update
     - name: install xerces
       run: sudo apt-get -y install libxerces-c-dev
     - name: checkout MPC
@@ -4143,7 +4153,7 @@ jobs:
         cd OpenDDS
         . setenv.sh
         tools/scripts/show_build_config.pl
-    - uses: ammaraskar/gcc-problem-matcher@0.2.0
+    - uses: ammaraskar/gcc-problem-matcher@0.3.0
     - name: build OpenDDS
       shell: bash
       run: |
@@ -4182,6 +4192,8 @@ jobs:
       id-token: write
 
     steps:
+    - name: Update apt indexes
+      run: sudo apt-get -y update
     - name: install xerces
       run: sudo apt-get -y install libxerces-c-dev
     - name: checkout MPC
@@ -4266,7 +4278,6 @@ jobs:
         </configuration>
         <command name="log" options="on"/>
         <command name="print_os_version"/>
-        <command name="print_env_vars"/>
         <command name="print_ace_config"/>
         <command name="print_cmake_version"/>
         <command name="print_make_version"/>
@@ -4350,7 +4361,7 @@ jobs:
         echo "JDK_VERSION=$JDK_VERSION" >> $GITHUB_ENV
     - name: Cache Artifact
       id: cache-artifact
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: ${{ github.job }}.tar.xz
         key: c06_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}_${{ env.JDK_VERSION }}
@@ -4410,6 +4421,8 @@ jobs:
       run: |
         tar xvJf openssl3_u20.tar.xz
         rm -f openssl3_u20.tar.xz
+    - name: Update apt indexes
+      run: sudo apt-get -y update
     - name: install xerces
       run: sudo apt-get -y install libxerces-c-dev
     - name: checkout MPC
@@ -4451,7 +4464,7 @@ jobs:
         cd OpenDDS
         . setenv.sh
         tools/scripts/show_build_config.pl
-    - uses: ammaraskar/gcc-problem-matcher@0.2.0
+    - uses: ammaraskar/gcc-problem-matcher@0.3.0
     - name: build OpenDDS
       shell: bash
       run: |
@@ -4500,6 +4513,8 @@ jobs:
       run: |
         tar xvJf openssl3_u20.tar.xz
         rm -f openssl3_u20.tar.xz
+    - name: Update apt indexes
+      run: sudo apt-get -y update
     - name: install xerces
       run: sudo apt-get -y install libxerces-c-dev
     - name: checkout MPC
@@ -4583,7 +4598,6 @@ jobs:
         </configuration>
         <command name="log" options="on"/>
         <command name="print_os_version"/>
-        <command name="print_env_vars"/>
         <command name="print_ace_config"/>
         <command name="print_cmake_version"/>
         <command name="print_make_version"/>
@@ -4718,7 +4732,6 @@ jobs:
         </configuration>
         <command name="log" options="on"/>
         <command name="print_os_version"/>
-        <command name="print_env_vars"/>
         <command name="print_ace_config"/>
         <command name="print_cmake_version"/>
         <command name="print_make_version"/>
@@ -4764,6 +4777,8 @@ jobs:
     needs: ACE_TAO_u20_p1
 
     steps:
+    - name: Update apt indexes
+      run: sudo apt-get -y update
     - name: install xerces
       run: sudo apt-get -y install libxerces-c-dev
     - name: checkout MPC
@@ -4802,7 +4817,7 @@ jobs:
         cd OpenDDS
         . setenv.sh
         tools/scripts/show_build_config.pl
-    - uses: ammaraskar/gcc-problem-matcher@0.2.0
+    - uses: ammaraskar/gcc-problem-matcher@0.3.0
     - name: build OpenDDS
       shell: bash
       run: |
@@ -4857,6 +4872,8 @@ jobs:
       id-token: write
 
     steps:
+    - name: Update apt indexes
+      run: sudo apt-get -y update
     - name: install xerces
       run: sudo apt-get -y install libxerces-c-dev
     - name: checkout MPC
@@ -4940,7 +4957,6 @@ jobs:
         </configuration>
         <command name="log" options="on"/>
         <command name="print_os_version"/>
-        <command name="print_env_vars"/>
         <command name="print_ace_config"/>
         <command name="print_cmake_version"/>
         <command name="print_make_version"/>
@@ -5013,7 +5029,7 @@ jobs:
         echo "JDK_VERSION=$JDK_VERSION" >> $GITHUB_ENV
     - name: Cache Artifact
       id: cache-artifact
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: ${{ github.job }}.tar.xz
         key: c01_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}_${{ env.JDK_VERSION }}
@@ -5101,7 +5117,7 @@ jobs:
         cd OpenDDS
         . setenv.sh
         tools/scripts/show_build_config.pl
-    - uses: ammaraskar/gcc-problem-matcher@0.2.0
+    - uses: ammaraskar/gcc-problem-matcher@0.3.0
     - name: build OpenDDS
       shell: bash
       run: |
@@ -5224,7 +5240,6 @@ jobs:
         </configuration>
         <command name="log" options="on"/>
         <command name="print_os_version"/>
-        <command name="print_env_vars"/>
         <command name="print_ace_config"/>
         <command name="print_cmake_version"/>
         <command name="print_make_version"/>
@@ -5308,7 +5323,7 @@ jobs:
         cd OpenDDS
         . setenv.sh
         tools/scripts/show_build_config.pl
-    - uses: ammaraskar/gcc-problem-matcher@0.2.0
+    - uses: ammaraskar/gcc-problem-matcher@0.3.0
     - name: build OpenDDS
       shell: bash
       run: |
@@ -5446,7 +5461,6 @@ jobs:
         </configuration>
         <command name="log" options="on"/>
         <command name="print_os_version"/>
-        <command name="print_env_vars"/>
         <command name="print_ace_config"/>
         <command name="print_cmake_version"/>
         <command name="print_make_version"/>
@@ -5514,7 +5528,7 @@ jobs:
         echo "COMPILER_VERSION=$COMPILER_VERSION" >> $GITHUB_ENV
     - name: Cache Artifact
       id: cache-artifact
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: ${{ github.job }}.tar.xz
         key: c02_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}
@@ -5614,7 +5628,7 @@ jobs:
         cd OpenDDS
         . setenv.sh
         tools/scripts/show_build_config.pl
-    - uses: ammaraskar/gcc-problem-matcher@0.2.0
+    - uses: ammaraskar/gcc-problem-matcher@0.3.0
     - name: build OpenDDS
       shell: bash
       run: |
@@ -5712,7 +5726,7 @@ jobs:
         sudo sysctl -w kernel.core_pattern=core.%e.%p
         echo Core file pattern set to:
         cat /proc/sys/kernel/core_pattern
-    - uses: ammaraskar/gcc-problem-matcher@0.2.0
+    - uses: ammaraskar/gcc-problem-matcher@0.3.0
     - name: Build CMake Tests
       run: |
         source OpenDDS/setenv.sh
@@ -5742,7 +5756,6 @@ jobs:
         </configuration>
         <command name="log" options="on"/>
         <command name="print_os_version"/>
-        <command name="print_env_vars"/>
         <command name="print_ace_config"/>
         <command name="print_cmake_version"/>
         <command name="print_make_version"/>
@@ -5876,7 +5889,7 @@ jobs:
         . setenv.sh
         cd tests/DCPS/Messenger
         perl $ACE_ROOT/bin/mwc.pl -type gnuace -static
-    - uses: ammaraskar/gcc-problem-matcher@0.2.0
+    - uses: ammaraskar/gcc-problem-matcher@0.3.0
     - name: make messenger tests
       shell: bash
       run: |
@@ -5920,7 +5933,6 @@ jobs:
         </configuration>
         <command name="log" options="on"/>
         <command name="print_os_version"/>
-        <command name="print_env_vars"/>
         <command name="print_ace_config"/>
         <command name="print_make_version"/>
         <command name="check_compiler" options="gcc"/>
@@ -6053,7 +6065,7 @@ jobs:
         . setenv.sh
         cd tests/DCPS/Compiler
         perl $ACE_ROOT/bin/mwc.pl -type gnuace -static
-    - uses: ammaraskar/gcc-problem-matcher@0.2.0
+    - uses: ammaraskar/gcc-problem-matcher@0.3.0
     - name: make compiler tests
       shell: bash
       run: |
@@ -6083,7 +6095,6 @@ jobs:
         </configuration>
         <command name="log" options="on"/>
         <command name="print_os_version"/>
-        <command name="print_env_vars"/>
         <command name="print_ace_config"/>
         <command name="print_make_version"/>
         <command name="check_compiler" options="gcc"/>
@@ -6216,7 +6227,7 @@ jobs:
         . setenv.sh
         cd tests/unit-tests
         perl $ACE_ROOT/bin/mwc.pl -type gnuace -static
-    - uses: ammaraskar/gcc-problem-matcher@0.2.0
+    - uses: ammaraskar/gcc-problem-matcher@0.3.0
     - name: make unit tests
       shell: bash
       run: |
@@ -6246,7 +6257,6 @@ jobs:
         </configuration>
         <command name="log" options="on"/>
         <command name="print_os_version"/>
-        <command name="print_env_vars"/>
         <command name="print_ace_config"/>
         <command name="print_make_version"/>
         <command name="check_compiler" options="gcc"/>
@@ -6370,7 +6380,7 @@ jobs:
         . setenv.sh
         cd tests/security/attributes
         perl $ACE_ROOT/bin/mwc.pl -type gnuace -static
-    - uses: ammaraskar/gcc-problem-matcher@0.2.0
+    - uses: ammaraskar/gcc-problem-matcher@0.3.0
     - name: build security tests
       shell: bash
       run: |
@@ -6399,7 +6409,6 @@ jobs:
         </configuration>
         <command name="log" options="on"/>
         <command name="print_os_version"/>
-        <command name="print_env_vars"/>
         <command name="print_ace_config"/>
         <command name="print_make_version"/>
         <command name="check_compiler" options="gcc"/>
@@ -6471,7 +6480,7 @@ jobs:
         echo "JDK_VERSION=$JDK_VERSION" >> $GITHUB_ENV
     - name: Cache Artifact
       id: cache-artifact
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: ${{ github.job }}.tar.xz
         key: c01_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}_${{ env.JDK_VERSION }}
@@ -6559,7 +6568,7 @@ jobs:
         cd OpenDDS
         . setenv.sh
         tools/scripts/show_build_config.pl
-    - uses: ammaraskar/gcc-problem-matcher@0.2.0
+    - uses: ammaraskar/gcc-problem-matcher@0.3.0
     - name: build OpenDDS
       shell: bash
       run: |
@@ -6697,7 +6706,6 @@ jobs:
         </configuration>
         <command name="log" options="on"/>
         <command name="print_os_version"/>
-        <command name="print_env_vars"/>
         <command name="print_ace_config"/>
         <command name="print_cmake_version"/>
         <command name="print_make_version"/>
@@ -6765,7 +6773,7 @@ jobs:
         echo "COMPILER_VERSION=$COMPILER_VERSION" >> $GITHUB_ENV
     - name: Cache Artifact
       id: cache-artifact
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: ${{ github.job }}.tar.xz
         key: c01_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}
@@ -6888,7 +6896,7 @@ jobs:
         cd OpenDDS
         call setenv.cmd
         perl tools\scripts\show_build_config.pl
-    - uses: ammaraskar/msvc-problem-matcher@0.2.0
+    - uses: ammaraskar/msvc-problem-matcher@0.3.0
     - name: build OpenDDS
       shell: cmd
       run: |
@@ -6975,7 +6983,7 @@ jobs:
         rm -f build_w19_p1_stat_js0.tar.xz
     - name: set up msvc env
       uses: ilammy/msvc-dev-cmd@v1
-    - uses: ammaraskar/msvc-problem-matcher@0.2.0
+    - uses: ammaraskar/msvc-problem-matcher@0.3.0
     - name: Build CMake Tests
       shell: cmd
       run: |
@@ -7011,7 +7019,6 @@ jobs:
         </configuration>
         <command name="log" options="on"/>
         <command name="print_os_version"/>
-        <command name="print_env_vars"/>
         <command name="print_ace_config"/>
         <command name="print_cmake_version"/>
         <command name="print_make_version"/>
@@ -7146,7 +7153,7 @@ jobs:
         call setenv.cmd
         cd tests\DCPS\Messenger
         perl %ACE_ROOT%\bin\mwc.pl -type vs2019 -static -features no_rapidjson=1 -features ipv6=1 -features ssl=1 -features no_cxx11=0
-    - uses: ammaraskar/msvc-problem-matcher@0.2.0
+    - uses: ammaraskar/msvc-problem-matcher@0.3.0
     - name: make messenger tests
       shell: cmd
       run: |
@@ -7188,7 +7195,6 @@ jobs:
         </configuration>
         <command name="log" options="on"/>
         <command name="print_os_version"/>
-        <command name="print_env_vars"/>
         <command name="print_ace_config"/>
         <command name="print_make_version"/>
         <command name="check_compiler" options="msvc"/>
@@ -7324,7 +7330,7 @@ jobs:
         rm -rf xcdr
         rm -rf XTypesExtensibility
         perl %ACE_ROOT%\bin\mwc.pl -type vs2019 -static -features no_rapidjson=1 -features ipv6=1 -features no_cxx11=0
-    - uses: ammaraskar/msvc-problem-matcher@0.2.0
+    - uses: ammaraskar/msvc-problem-matcher@0.3.0
     - name: make compiler tests
       shell: cmd
       run: |
@@ -7353,7 +7359,6 @@ jobs:
         </configuration>
         <command name="log" options="on"/>
         <command name="print_os_version"/>
-        <command name="print_env_vars"/>
         <command name="print_ace_config"/>
         <command name="print_make_version"/>
         <command name="check_compiler" options="msvc"/>
@@ -7491,7 +7496,7 @@ jobs:
         rm -rf isolated_types
         rm -rf is_topic_type
         perl %ACE_ROOT%\bin\mwc.pl -type vs2019 -static -features no_rapidjson=1 -features ipv6=1 -features no_cxx11=0
-    - uses: ammaraskar/msvc-problem-matcher@0.2.0
+    - uses: ammaraskar/msvc-problem-matcher@0.3.0
     - name: make compiler tests
       shell: cmd
       run: |
@@ -7520,7 +7525,6 @@ jobs:
         </configuration>
         <command name="log" options="on"/>
         <command name="print_os_version"/>
-        <command name="print_env_vars"/>
         <command name="print_ace_config"/>
         <command name="print_make_version"/>
         <command name="check_compiler" options="msvc"/>
@@ -7654,7 +7658,7 @@ jobs:
         call setenv.cmd
         cd tests\unit-tests
         perl %ACE_ROOT%\bin\mwc.pl -type vs2019 -static -features no_rapidjson=1 -features ipv6=1 -features ssl=1 -features no_cxx11=0
-    - uses: ammaraskar/msvc-problem-matcher@0.2.0
+    - uses: ammaraskar/msvc-problem-matcher@0.3.0
     - name: make unit tests
       shell: cmd
       run: |
@@ -7682,7 +7686,6 @@ jobs:
         </configuration>
         <command name="log" options="on"/>
         <command name="print_os_version"/>
-        <command name="print_env_vars"/>
         <command name="print_ace_config"/>
         <command name="print_make_version"/>
         <command name="check_compiler" options="msvc"/>
@@ -7756,7 +7759,7 @@ jobs:
         echo "COMPILER_VERSION=$COMPILER_VERSION" >> $GITHUB_ENV
     - name: Cache Artifact
       id: cache-artifact
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: ${{ github.job }}.tar.xz
         key: c01_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}
@@ -7879,7 +7882,7 @@ jobs:
         cd OpenDDS
         call setenv.cmd
         perl tools\scripts\show_build_config.pl
-    - uses: ammaraskar/msvc-problem-matcher@0.2.0
+    - uses: ammaraskar/msvc-problem-matcher@0.3.0
     - name: build OpenDDS
       shell: cmd
       run: |
@@ -7966,7 +7969,7 @@ jobs:
         rm -f build_w19_re_p1_stat_FM-08.tar.xz
     - name: set up msvc env
       uses: ilammy/msvc-dev-cmd@v1
-    - uses: ammaraskar/msvc-problem-matcher@0.2.0
+    - uses: ammaraskar/msvc-problem-matcher@0.3.0
     - name: Build CMake Tests
       shell: cmd
       run: |
@@ -8002,7 +8005,6 @@ jobs:
         </configuration>
         <command name="log" options="on"/>
         <command name="print_os_version"/>
-        <command name="print_env_vars"/>
         <command name="print_ace_config"/>
         <command name="print_cmake_version"/>
         <command name="print_make_version"/>
@@ -8137,7 +8139,7 @@ jobs:
         call setenv.cmd
         cd tests\DCPS\Messenger
         perl %ACE_ROOT%\bin\mwc.pl -type vs2019 -static -features ipv6=1 -features no_cxx11=0 -features xerces3=1 -features no_rapidjson=0 -features ssl=1 -features openssl11=1 -features built_in_topics=0 -features ownership_profile=0 -features content_subscription=0 -features object_model_profile=0 -features persistence_profile=0
-    - uses: ammaraskar/msvc-problem-matcher@0.2.0
+    - uses: ammaraskar/msvc-problem-matcher@0.3.0
     - name: make messenger tests
       shell: cmd
       run: |
@@ -8179,7 +8181,6 @@ jobs:
         </configuration>
         <command name="log" options="on"/>
         <command name="print_os_version"/>
-        <command name="print_env_vars"/>
         <command name="print_ace_config"/>
         <command name="print_make_version"/>
         <command name="check_compiler" options="msvc"/>
@@ -8315,7 +8316,7 @@ jobs:
         rm -rf xcdr
         rm -rf XTypesExtensibility
         perl %ACE_ROOT%\bin\mwc.pl -type vs2019 -static -features ipv6=1 -features no_cxx11=0 -features no_rapidjson=0 -features openssl11=1 -features built_in_topics=0 -features ownership_profile=0 -features content_subscription=0 -features object_model_profile=0 -features persistence_profile=0
-    - uses: ammaraskar/msvc-problem-matcher@0.2.0
+    - uses: ammaraskar/msvc-problem-matcher@0.3.0
     - name: make compiler tests
       shell: cmd
       run: |
@@ -8343,7 +8344,6 @@ jobs:
         </configuration>
         <command name="log" options="on"/>
         <command name="print_os_version"/>
-        <command name="print_env_vars"/>
         <command name="print_ace_config"/>
         <command name="print_make_version"/>
         <command name="check_compiler" options="msvc"/>
@@ -8481,7 +8481,7 @@ jobs:
         rm -rf isolated_types
         rm -rf is_topic_type
         perl %ACE_ROOT%\bin\mwc.pl -type vs2019 -static -features ipv6=1 -features no_cxx11=0 -features no_rapidjson=0 -features openssl11=1 -features built_in_topics=0 -features ownership_profile=0 -features content_subscription=0 -features object_model_profile=0 -features persistence_profile=0
-    - uses: ammaraskar/msvc-problem-matcher@0.2.0
+    - uses: ammaraskar/msvc-problem-matcher@0.3.0
     - name: make compiler tests
       shell: cmd
       run: |
@@ -8509,7 +8509,6 @@ jobs:
         </configuration>
         <command name="log" options="on"/>
         <command name="print_os_version"/>
-        <command name="print_env_vars"/>
         <command name="print_ace_config"/>
         <command name="print_make_version"/>
         <command name="check_compiler" options="msvc"/>
@@ -8643,7 +8642,7 @@ jobs:
         call setenv.cmd
         cd tests\unit-tests
         perl %ACE_ROOT%\bin\mwc.pl -type vs2019 -static -features ipv6=1 -features no_cxx11=0 -features xerces3=1 -features no_rapidjson=0 -features ssl=1 -features openssl11=1 -features built_in_topics=0 -features ownership_profile=0 -features content_subscription=0 -features object_model_profile=0 -features persistence_profile=0
-    - uses: ammaraskar/msvc-problem-matcher@0.2.0
+    - uses: ammaraskar/msvc-problem-matcher@0.3.0
     - name: make unit tests
       shell: cmd
       run: |
@@ -8671,7 +8670,6 @@ jobs:
         </configuration>
         <command name="log" options="on"/>
         <command name="print_os_version"/>
-        <command name="print_env_vars"/>
         <command name="print_ace_config"/>
         <command name="print_make_version"/>
         <command name="check_compiler" options="msvc"/>
@@ -8756,7 +8754,7 @@ jobs:
         echo "COMPILER_VERSION=$COMPILER_VERSION" >> $GITHUB_ENV
     - name: Cache Artifact
       id: cache-artifact
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: ${{ github.job }}.tar.xz
         key: c02_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}
@@ -8892,7 +8890,7 @@ jobs:
         cd OpenDDS
         call setenv.cmd
         perl tools\scripts\show_build_config.pl
-    - uses: ammaraskar/msvc-problem-matcher@0.2.0
+    - uses: ammaraskar/msvc-problem-matcher@0.3.0
     - name: build OpenDDS
       shell: cmd
       run: |
@@ -9041,7 +9039,6 @@ jobs:
         </configuration>
         <command name="log" options="on"/>
         <command name="print_os_version"/>
-        <command name="print_env_vars"/>
         <command name="print_ace_config"/>
         <command name="print_cmake_version"/>
         <command name="print_make_version"/>
@@ -9185,7 +9182,7 @@ jobs:
         call setenv.cmd
         cd tests\DCPS\Messenger
         perl %ACE_ROOT%\bin\mwc.pl -type vs2019 -features ipv6=1 -features no_cxx11=0 -features xerces3=1 -features no_rapidjson=0 -features ssl=1 -features openssl11=1 -features no_opendds_security=0
-    - uses: ammaraskar/msvc-problem-matcher@0.2.0
+    - uses: ammaraskar/msvc-problem-matcher@0.3.0
     - name: make messenger tests
       shell: cmd
       run: |
@@ -9227,7 +9224,6 @@ jobs:
         </configuration>
         <command name="log" options="on"/>
         <command name="print_os_version"/>
-        <command name="print_env_vars"/>
         <command name="print_ace_config"/>
         <command name="print_make_version"/>
         <command name="check_compiler" options="msvc"/>
@@ -9361,7 +9357,7 @@ jobs:
         call setenv.cmd
         cd tests\DCPS\Compiler
         perl %ACE_ROOT%\bin\mwc.pl -type vs2019 -features ipv6=1 -features no_cxx11=0 -features xerces3=1 -features no_rapidjson=0 -features ssl=1 -features openssl11=1 -features no_opendds_security=0
-    - uses: ammaraskar/msvc-problem-matcher@0.2.0
+    - uses: ammaraskar/msvc-problem-matcher@0.3.0
     - name: make compiler tests
       shell: cmd
       run: |
@@ -9389,7 +9385,6 @@ jobs:
         </configuration>
         <command name="log" options="on"/>
         <command name="print_os_version"/>
-        <command name="print_env_vars"/>
         <command name="print_ace_config"/>
         <command name="print_make_version"/>
         <command name="check_compiler" options="msvc"/>
@@ -9532,7 +9527,7 @@ jobs:
         call setenv.cmd
         cd tests\unit-tests
         perl %ACE_ROOT%\bin\mwc.pl -type vs2019 -features ipv6=1 -features no_cxx11=0 -features xerces3=1 -features no_rapidjson=0 -features ssl=1 -features openssl11=1 -features no_opendds_security=0 -value_project macros+=GTEST_LINKED_AS_SHARED_LIBRARY
-    - uses: ammaraskar/msvc-problem-matcher@0.2.0
+    - uses: ammaraskar/msvc-problem-matcher@0.3.0
     - name: make unit tests
       shell: cmd
       run: |
@@ -9560,7 +9555,6 @@ jobs:
         </configuration>
         <command name="log" options="on"/>
         <command name="print_os_version"/>
-        <command name="print_env_vars"/>
         <command name="print_ace_config"/>
         <command name="print_make_version"/>
         <command name="check_compiler" options="msvc"/>
@@ -9627,7 +9621,7 @@ jobs:
         echo "COMPILER_VERSION=$COMPILER_VERSION" >> $GITHUB_ENV
     - name: Cache Artifact
       id: cache-artifact
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: ${{ github.job }}.tar.xz
         key: c02_${{ github.job }}_${{ env.WIRESHARK_COMMIT }}_${{ env.COMPILER_VERSION }}
@@ -9727,7 +9721,7 @@ jobs:
         echo "JDK_VERSION=$JDK_VERSION" >> $GITHUB_ENV
     - name: Cache Artifact
       id: cache-artifact
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: ${{ github.job }}.tar.xz
         key: c01_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}_${{ env.JDK_VERSION }}
@@ -9859,7 +9853,7 @@ jobs:
         cd OpenDDS
         call setenv.cmd
         perl tools\scripts\show_build_config.pl
-    - uses: ammaraskar/msvc-problem-matcher@0.2.0
+    - uses: ammaraskar/msvc-problem-matcher@0.3.0
     - name: build OpenDDS
       shell: cmd
       run: |
@@ -9972,7 +9966,6 @@ jobs:
         </configuration>
         <command name="log" options="on"/>
         <command name="print_os_version"/>
-        <command name="print_env_vars"/>
         <command name="print_ace_config"/>
         <command name="print_cmake_version"/>
         <command name="print_make_version"/>
@@ -10107,7 +10100,7 @@ jobs:
         call setenv.cmd
         cd tests\DCPS\Messenger
         perl %ACE_ROOT%\bin\mwc.pl -type vs2019 -features no_cxx11=0 -features java=1 -features xerces3=1 -features no_rapidjson=0 -features ssl=1 -features openssl11=1 -features built_in_topics=0
-    - uses: ammaraskar/msvc-problem-matcher@0.2.0
+    - uses: ammaraskar/msvc-problem-matcher@0.3.0
     - name: make messenger tests
       shell: cmd
       run: |
@@ -10149,7 +10142,6 @@ jobs:
         </configuration>
         <command name="log" options="on"/>
         <command name="print_os_version"/>
-        <command name="print_env_vars"/>
         <command name="print_ace_config"/>
         <command name="print_make_version"/>
         <command name="check_compiler" options="msvc"/>
@@ -10283,7 +10275,7 @@ jobs:
         call setenv.cmd
         cd tests\DCPS\Compiler
         perl %ACE_ROOT%\bin\mwc.pl -type vs2019 -features no_cxx11=0 -features java=1 -features xerces3=1 -features no_rapidjson=0 -features ssl=1 -features openssl11=1 -features built_in_topics=0
-    - uses: ammaraskar/msvc-problem-matcher@0.2.0
+    - uses: ammaraskar/msvc-problem-matcher@0.3.0
     - name: make compiler tests
       shell: cmd
       run: |
@@ -10311,7 +10303,6 @@ jobs:
         </configuration>
         <command name="log" options="on"/>
         <command name="print_os_version"/>
-        <command name="print_env_vars"/>
         <command name="print_ace_config"/>
         <command name="print_make_version"/>
         <command name="check_compiler" options="msvc"/>
@@ -10452,7 +10443,7 @@ jobs:
         call setenv.cmd
         cd tests\unit-tests
         perl %ACE_ROOT%\bin\mwc.pl -type vs2019 -features no_cxx11=0 -features java=1 -features xerces3=1 -features no_rapidjson=0 -features ssl=1 -features openssl11=1 -features built_in_topics=0 -value_project macros+=GTEST_LINKED_AS_SHARED_LIBRARY
-    - uses: ammaraskar/msvc-problem-matcher@0.2.0
+    - uses: ammaraskar/msvc-problem-matcher@0.3.0
     - name: make unit tests
       shell: cmd
       run: |
@@ -10480,7 +10471,6 @@ jobs:
         </configuration>
         <command name="log" options="on"/>
         <command name="print_os_version"/>
-        <command name="print_env_vars"/>
         <command name="print_ace_config"/>
         <command name="print_make_version"/>
         <command name="check_compiler" options="msvc"/>
@@ -10559,7 +10549,7 @@ jobs:
         echo "JDK_VERSION=$JDK_VERSION" >> $GITHUB_ENV
     - name: Cache Artifact
       id: cache-artifact
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: ${{ github.job }}.tar.xz
         key: c02_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}_${{ env.JDK_VERSION }}
@@ -10687,7 +10677,7 @@ jobs:
         cd /d C:\OpenDDS
         call setenv.cmd
         perl tools\scripts\show_build_config.pl
-    - uses: ammaraskar/msvc-problem-matcher@0.2.0
+    - uses: ammaraskar/msvc-problem-matcher@0.3.0
     - name: build OpenDDS
       shell: cmd
       run: |
@@ -10779,7 +10769,7 @@ jobs:
         mv OpenDDS /c/
     - name: set up msvc env
       uses: ilammy/msvc-dev-cmd@v1
-    - uses: ammaraskar/msvc-problem-matcher@0.2.0
+    - uses: ammaraskar/msvc-problem-matcher@0.3.0
     - name: Build CMake Tests
       shell: cmd
       run: |
@@ -10814,7 +10804,6 @@ jobs:
         </configuration>
         <command name="log" options="on"/>
         <command name="print_os_version"/>
-        <command name="print_env_vars"/>
         <command name="print_ace_config"/>
         <command name="print_cmake_version"/>
         <command name="print_make_version"/>
@@ -10965,7 +10954,6 @@ jobs:
         </configuration>
         <command name="log" options="on"/>
         <command name="print_os_version"/>
-        <command name="print_env_vars"/>
         <command name="print_ace_config"/>
         <command name="print_cmake_version"/>
         <command name="print_make_version"/>
@@ -11058,7 +11046,7 @@ jobs:
       shell: bash
       run: |
         mv OpenDDS /c/
-    - uses: ammaraskar/msvc-problem-matcher@0.2.0
+    - uses: ammaraskar/msvc-problem-matcher@0.3.0
     - name: set up msvc env
       uses: ilammy/msvc-dev-cmd@v1
       with:
@@ -11165,7 +11153,7 @@ jobs:
         mv OpenDDS /c/
     - name: set up msvc env
       uses: ilammy/msvc-dev-cmd@v1
-    - uses: ammaraskar/msvc-problem-matcher@0.2.0
+    - uses: ammaraskar/msvc-problem-matcher@0.3.0
     - name: check build configuration
       shell: cmd
       run: |
@@ -11200,7 +11188,6 @@ jobs:
         </configuration>
         <command name="log" options="on"/>
         <command name="print_os_version"/>
-        <command name="print_env_vars"/>
         <command name="print_ace_config"/>
         <command name="print_cmake_version"/>
         <command name="print_make_version"/>
@@ -11275,10 +11262,10 @@ jobs:
         echo "COMPILER_VERSION=$COMPILER_VERSION" >> $GITHUB_ENV
     - name: Cache Artifact
       id: cache-artifact
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: ${{ github.job }}.tar.xz
-        key: c01_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}
+        key: c02_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}
     - name: setup for run-vcpkg
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       shell: bash
@@ -11304,7 +11291,7 @@ jobs:
       shell: cmd
       run: |
         cd OpenDDS
-        configure --tests --ipv6 --rapidjson --ace=${{ github.workspace }}/OpenDDS/ACE_TAO/ACE --tao=${{ github.workspace }}/OpenDDS/ACE_TAO/TAO --mpc=${{ github.workspace }}/MPC --xerces3=${{ env.VCPKG_INSTALLED_DIR }}/x64-windows --openssl=${{ env.VCPKG_INSTALLED_DIR }}/x64-windows --mpcopts=-hierarchy
+        configure --std=c++20 --tests --ipv6 --rapidjson --ace=${{ github.workspace }}/OpenDDS/ACE_TAO/ACE --tao=${{ github.workspace }}/OpenDDS/ACE_TAO/TAO --mpc=${{ github.workspace }}/MPC --xerces3=${{ env.VCPKG_INSTALLED_DIR }}/x64-windows --openssl=${{ env.VCPKG_INSTALLED_DIR }}/x64-windows --mpcopts=-hierarchy
     - name: build ACE & TAO
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       shell: cmd
@@ -11391,14 +11378,14 @@ jobs:
       shell: cmd
       run: |
         cd OpenDDS
-        configure --ipv6 --rapidjson --gtest=${{ github.workspace }}/OpenDDS/tests/googletest/build/install --ace=${{ github.workspace }}/OpenDDS/ACE_TAO/ACE --tao=${{ github.workspace }}/OpenDDS/ACE_TAO/TAO --mpc=${{ github.workspace }}/MPC --xerces3=${{ env.VCPKG_INSTALLED_DIR }}/x64-windows --openssl=${{ env.VCPKG_INSTALLED_DIR }}/x64-windows
+        configure --std=c++20 --ipv6 --rapidjson --gtest=${{ github.workspace }}/OpenDDS/tests/googletest/build/install --ace=${{ github.workspace }}/OpenDDS/ACE_TAO/ACE --tao=${{ github.workspace }}/OpenDDS/ACE_TAO/TAO --mpc=${{ github.workspace }}/MPC --xerces3=${{ env.VCPKG_INSTALLED_DIR }}/x64-windows --openssl=${{ env.VCPKG_INSTALLED_DIR }}/x64-windows
     - name: check build configuration
       shell: cmd
       run: |
         cd OpenDDS
         call setenv.cmd
         perl tools\scripts\show_build_config.pl
-    - uses: ammaraskar/msvc-problem-matcher@0.2.0
+    - uses: ammaraskar/msvc-problem-matcher@0.3.0
     - name: build OpenDDS
       shell: cmd
       run: |
@@ -11485,7 +11472,7 @@ jobs:
         rm -f build_w22_p1.tar.xz
     - name: set up msvc env
       uses: ilammy/msvc-dev-cmd@v1
-    - uses: ammaraskar/msvc-problem-matcher@0.2.0
+    - uses: ammaraskar/msvc-problem-matcher@0.3.0
     - name: Build CMake Tests
       shell: cmd
       run: |
@@ -11521,7 +11508,6 @@ jobs:
         </configuration>
         <command name="log" options="on"/>
         <command name="print_os_version"/>
-        <command name="print_env_vars"/>
         <command name="print_ace_config"/>
         <command name="print_cmake_version"/>
         <command name="print_make_version"/>
@@ -11644,8 +11630,8 @@ jobs:
         cd OpenDDS
         call setenv.cmd
         cd tests\DCPS\Messenger
-        perl %ACE_ROOT%\bin\mwc.pl -type vs2022 -features no_rapidjson=0 -features ipv6=1 -features ssl=1 -features no_cxx11=0
-    - uses: ammaraskar/msvc-problem-matcher@0.2.0
+        perl %DDS_ROOT%\bin\opendds_mwc.pl
+    - uses: ammaraskar/msvc-problem-matcher@0.3.0
     - name: make messenger tests
       shell: cmd
       run: |
@@ -11659,7 +11645,7 @@ jobs:
         cd OpenDDS
         call setenv.cmd
         cd tests\DCPS\C++11
-        perl %ACE_ROOT%\bin\mwc.pl -type vs2022 -features no_rapidjson=0 -features ipv6=1 -features ssl=1 -features no_cxx11=0
+        perl %DDS_ROOT%\bin\opendds_mwc.pl
     - name: make C++11 messenger test
       shell: cmd
       run: |
@@ -11687,7 +11673,6 @@ jobs:
         </configuration>
         <command name="log" options="on"/>
         <command name="print_os_version"/>
-        <command name="print_env_vars"/>
         <command name="print_ace_config"/>
         <command name="print_make_version"/>
         <command name="check_compiler" options="msvc"/>
@@ -11820,8 +11805,8 @@ jobs:
         cd OpenDDS
         call setenv.cmd
         cd tests\DCPS\Compiler
-        perl %ACE_ROOT%\bin\mwc.pl -type vs2022 -features ipv6=1 -features no_cxx11=0 -features no_rapidjson=0 -features ssl=1 -value_project macros+=GTEST_LINKED_AS_SHARED_LIBRARY
-    - uses: ammaraskar/msvc-problem-matcher@0.2.0
+        perl %DDS_ROOT%\bin\opendds_mwc.pl -value_project macros+=GTEST_LINKED_AS_SHARED_LIBRARY
+    - uses: ammaraskar/msvc-problem-matcher@0.3.0
     - name: make compiler tests
       shell: cmd
       run: |
@@ -11849,7 +11834,6 @@ jobs:
         </configuration>
         <command name="log" options="on"/>
         <command name="print_os_version"/>
-        <command name="print_env_vars"/>
         <command name="print_ace_config"/>
         <command name="print_make_version"/>
         <command name="check_compiler" options="msvc"/>
@@ -11982,8 +11966,8 @@ jobs:
         cd OpenDDS
         call setenv.cmd
         cd tests\unit-tests
-        perl %ACE_ROOT%\bin\mwc.pl -type vs2022 -features ipv6=1 -features no_cxx11=0 -features no_rapidjson=0 -features ssl=1 -value_project macros+=GTEST_LINKED_AS_SHARED_LIBRARY
-    - uses: ammaraskar/msvc-problem-matcher@0.2.0
+        perl %DDS_ROOT%\bin\opendds_mwc.pl -value_project macros+=GTEST_LINKED_AS_SHARED_LIBRARY
+    - uses: ammaraskar/msvc-problem-matcher@0.3.0
     - name: make unit tests
       shell: cmd
       run: |
@@ -12011,7 +11995,6 @@ jobs:
         </configuration>
         <command name="log" options="on"/>
         <command name="print_os_version"/>
-        <command name="print_env_vars"/>
         <command name="print_ace_config"/>
         <command name="print_make_version"/>
         <command name="check_compiler" options="msvc"/>
@@ -12092,7 +12075,7 @@ jobs:
         echo "JDK_VERSION=$JDK_VERSION" >> $GITHUB_ENV
     - name: Cache Artifact
       id: cache-artifact
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: ${{ github.job }}.tar.xz
         key: c01_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}_${{ env.JDK_VERSION }}
@@ -12184,7 +12167,7 @@ jobs:
         cd OpenDDS
         . setenv.sh
         tools/scripts/show_build_config.pl
-    - uses: ammaraskar/gcc-problem-matcher@0.2.0
+    - uses: ammaraskar/gcc-problem-matcher@0.3.0
     - name: build OpenDDS
       shell: bash
       run: |
@@ -12295,7 +12278,6 @@ jobs:
         </configuration>
         <command name="log" options="on"/>
         <command name="print_os_version"/>
-        <command name="print_env_vars"/>
         <command name="print_ace_config"/>
         <command name="print_make_version"/>
         <command name="check_compiler" options="gcc"/>
@@ -12415,7 +12397,6 @@ jobs:
         </configuration>
         <command name="log" options="on"/>
         <command name="print_os_version"/>
-        <command name="print_env_vars"/>
         <command name="print_ace_config"/>
         <command name="print_make_version"/>
         <command name="check_compiler" options="gcc"/>
@@ -12499,7 +12480,7 @@ jobs:
         cd OpenDDS
         . setenv.sh
         tools/scripts/show_build_config.pl
-    - uses: ammaraskar/gcc-problem-matcher@0.2.0
+    - uses: ammaraskar/gcc-problem-matcher@0.3.0
     - name: build OpenDDS
       shell: bash
       run: |
@@ -12625,7 +12606,6 @@ jobs:
         </configuration>
         <command name="log" options="on"/>
         <command name="print_os_version"/>
-        <command name="print_env_vars"/>
         <command name="print_ace_config"/>
         <command name="print_make_version"/>
         <command name="check_compiler" options="gcc"/>
@@ -12745,7 +12725,6 @@ jobs:
         </configuration>
         <command name="log" options="on"/>
         <command name="print_os_version"/>
-        <command name="print_env_vars"/>
         <command name="print_ace_config"/>
         <command name="print_make_version"/>
         <command name="check_compiler" options="gcc"/>
@@ -12814,7 +12793,7 @@ jobs:
         echo "COMPILER_VERSION=$COMPILER_VERSION" >> $GITHUB_ENV
     - name: Cache Artifact
       id: cache-artifact
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: ${{ github.job }}.tar.xz
         key: c03_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}
@@ -12907,7 +12886,7 @@ jobs:
         cd OpenDDS
         . setenv.sh
         tools/scripts/show_build_config.pl
-    - uses: ammaraskar/gcc-problem-matcher@0.2.0
+    - uses: ammaraskar/gcc-problem-matcher@0.3.0
     - name: build OpenDDS
       shell: bash
       run: |
@@ -13021,7 +13000,6 @@ jobs:
         </configuration>
         <command name="log" options="on"/>
         <command name="print_os_version"/>
-        <command name="print_env_vars"/>
         <command name="print_ace_config"/>
         <command name="print_cmake_version"/>
         <command name="print_make_version"/>
@@ -13144,7 +13122,6 @@ jobs:
         </configuration>
         <command name="log" options="on"/>
         <command name="print_os_version"/>
-        <command name="print_env_vars"/>
         <command name="print_ace_config"/>
         <command name="print_cmake_version"/>
         <command name="print_make_version"/>
@@ -13217,7 +13194,7 @@ jobs:
         echo "JDK_VERSION=$JDK_VERSION" >> $GITHUB_ENV
     - name: Cache Artifact
       id: cache-artifact
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: ${{ github.job }}.tar.xz
         key: c01_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}_${{ env.JDK_VERSION }}
@@ -13310,7 +13287,7 @@ jobs:
         cd OpenDDS
         . setenv.sh
         tools/scripts/show_build_config.pl
-    - uses: ammaraskar/gcc-problem-matcher@0.2.0
+    - uses: ammaraskar/gcc-problem-matcher@0.3.0
     - name: build OpenDDS
       shell: bash
       run: |
@@ -13439,7 +13416,6 @@ jobs:
         </configuration>
         <command name="log" options="on"/>
         <command name="print_os_version"/>
-        <command name="print_env_vars"/>
         <command name="print_ace_config"/>
         <command name="print_cmake_version"/>
         <command name="print_make_version"/>
@@ -13562,7 +13538,6 @@ jobs:
         </configuration>
         <command name="log" options="on"/>
         <command name="print_os_version"/>
-        <command name="print_env_vars"/>
         <command name="print_ace_config"/>
         <command name="print_cmake_version"/>
         <command name="print_make_version"/>
@@ -13611,7 +13586,7 @@ jobs:
       with:
         path: OpenDDS
         submodules: true
-    - uses: ammaraskar/gcc-problem-matcher@0.2.0
+    - uses: ammaraskar/gcc-problem-matcher@0.3.0
     - name: Build
       run: cd OpenDDS && docker build -f .github/workflows/build_u14_gcc4.Dockerfile .
 
@@ -13627,7 +13602,7 @@ jobs:
         echo "OPENSSL_COMMIT=$(git rev-parse HEAD)" >> $GITHUB_ENV
     - name: Cache Artifact
       id: cache-artifact
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: ${{ github.job }}.tar.xz
         key: c02_${{ github.job }}_${{ env.OPENSSL_COMMIT }}
@@ -13670,7 +13645,7 @@ jobs:
         echo "COMPILER_VERSION=$COMPILER_VERSION" >> $GITHUB_ENV
     - name: Cache Artifact
       id: cache-artifact
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: ${{ github.job }}.tar.xz
         key: c01_${{ github.job }}_${{ env.OPENSSL_COMMIT }}_${{ env.COMPILER_VERSION }}
@@ -13741,7 +13716,7 @@ jobs:
           -DOPENDDS_MPC=$GITHUB_WORKSPACE/MPC \
           -DOPENDDS_BUILD_TESTS=TRUE \
           -DOPENDDS_CMAKE_VERBOSE=all
-    - uses: ammaraskar/gcc-problem-matcher@0.2.0
+    - uses: ammaraskar/gcc-problem-matcher@0.3.0
     - name: Build
       run: |
         cd OpenDDS
@@ -13782,7 +13757,7 @@ jobs:
           -DOPENDDS_MPC=$GITHUB_WORKSPACE/MPC \
           -DOPENDDS_BUILD_TESTS=TRUE \
           -DOPENDDS_CMAKE_VERBOSE=all
-    - uses: ammaraskar/gcc-problem-matcher@0.2.0
+    - uses: ammaraskar/gcc-problem-matcher@0.3.0
     - name: Build
       run: |
         cd OpenDDS
@@ -13831,7 +13806,7 @@ jobs:
           -DOPENDDS_OWNERSHIP_PROFILE=FALSE \
           -DOPENDDS_CONTENT_SUBSCRIPTION=FALSE \
           -DOPENDDS_CMAKE_VERBOSE=all
-    - uses: ammaraskar/gcc-problem-matcher@0.2.0
+    - uses: ammaraskar/gcc-problem-matcher@0.3.0
     - name: Build
       run: |
         cd OpenDDS
@@ -13875,7 +13850,7 @@ jobs:
           -G Ninja \
           -DBUILD_SHARED_LIBS=FALSE \
           -DOPENDDS_JUST_BUILD_HOST_TOOLS=TRUE
-    - uses: ammaraskar/gcc-problem-matcher@0.2.0
+    - uses: ammaraskar/gcc-problem-matcher@0.3.0
     - name: Build Host Tools
       run: |
         cd OpenDDS
@@ -13951,7 +13926,7 @@ jobs:
           -DOPENDDS_MPC=${{ github.workspace }}\MPC^
           -DOPENDDS_BUILD_TESTS=TRUE^
           -DOPENDDS_CMAKE_VERBOSE=all
-    - uses: ammaraskar/msvc-problem-matcher@0.2.0
+    - uses: ammaraskar/msvc-problem-matcher@0.3.0
     - name: Build
       shell: cmd
       run: |
@@ -13997,7 +13972,7 @@ jobs:
           -DOPENDDS_MPC=${{ github.workspace }}\MPC^
           -DOPENDDS_BUILD_TESTS=TRUE^
           -DOPENDDS_CMAKE_VERBOSE=all
-    - uses: ammaraskar/msvc-problem-matcher@0.2.0
+    - uses: ammaraskar/msvc-problem-matcher@0.3.0
     - name: Build
       shell: cmd
       run: |

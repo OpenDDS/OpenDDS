@@ -244,7 +244,7 @@ DataWriterImpl::add_association(const ReaderAssociation& reader,
     ACE_GUARD(ACE_Thread_Mutex, reader_info_guard, this->reader_info_lock_);
     reader_info_.insert(std::make_pair(reader.readerId,
                                        ReaderInfo(reader.filterClassName,
-                                                  publisher_content_filter_ ? reader.filterExpression : "",
+                                                  publisher_content_filter_ ? reader.filterExpression.in() : "",
                                                   reader.exprParams, participant_servant_,
                                                   reader.readerQos.durability.kind > DDS::VOLATILE_DURABILITY_QOS)));
   }
@@ -1463,7 +1463,7 @@ DataWriterImpl::enable()
 
   try {
     this->enable_transport(reliable,
-                           this->qos_.durability.kind > DDS::VOLATILE_DURABILITY_QOS);
+                           this->qos_.durability.kind > DDS::VOLATILE_DURABILITY_QOS, participant.get());
 
   } catch (const Transport::Exception&) {
     ACE_ERROR((LM_ERROR,
@@ -2820,7 +2820,8 @@ void DataWriterImpl::set_wait_pending_deadline(const MonotonicTimePoint& deadlin
 
 void DataWriterImpl::transport_discovery_change()
 {
-  populate_connection_info();
+  RcHandle<DomainParticipantImpl> participant = participant_servant_.lock();
+  populate_connection_info(participant.get());
   const TransportLocatorSeq& trans_conf_info = connection_info();
 
   ACE_Guard<ACE_Recursive_Thread_Mutex> guard(lock_);

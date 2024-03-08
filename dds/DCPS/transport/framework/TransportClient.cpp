@@ -80,7 +80,7 @@ TransportClient::clean_prev_pending()
 }
 
 void
-TransportClient::enable_transport(bool reliable, bool durable)
+TransportClient::enable_transport(bool reliable, bool durable, DomainParticipantImpl* dpi)
 {
   // Search for a TransportConfig to use:
   TransportConfig_rch tc;
@@ -117,20 +117,21 @@ TransportClient::enable_transport(bool reliable, bool durable)
     throw Transport::NotConfigured();
   }
 
-  enable_transport_using_config(reliable, durable, tc);
+  enable_transport_using_config(reliable, durable, tc, dpi);
 }
 
 void
 TransportClient::enable_transport_using_config(bool reliable, bool durable,
-                                               const TransportConfig_rch& tc)
+                                               const TransportConfig_rch& tc,
+                                               DomainParticipantImpl* dpi)
 {
   config_ = tc;
   swap_bytes_ = tc->swap_bytes_;
   reliable_ = reliable;
   durable_ = durable;
-  unsigned long duration = tc->passive_connect_duration_;
-  if (duration == 0) {
-    duration = TransportConfig::DEFAULT_PASSIVE_CONNECT_DURATION;
+  passive_connect_duration_ = tc->passive_connect_duration_;
+  if (passive_connect_duration_ == 0) {
+    passive_connect_duration_ = TimeDuration::from_msec(TransportConfig::DEFAULT_PASSIVE_CONNECT_DURATION);
     if (DCPS_debug_level) {
       ACE_DEBUG((LM_WARNING,
         ACE_TEXT("(%P|%t) TransportClient::enable_transport_using_config ")
@@ -138,9 +139,8 @@ TransportClient::enable_transport_using_config(bool reliable, bool durable,
         ACE_TEXT("default value\n")));
     }
   }
-  passive_connect_duration_ = TimeDuration::from_msec(duration);
 
-  populate_connection_info();
+  populate_connection_info(dpi);
 
   const size_t n = tc->instances_.size();
 
@@ -148,7 +148,7 @@ TransportClient::enable_transport_using_config(bool reliable, bool durable,
     TransportInst_rch inst = tc->instances_[i];
 
     if (check_transport_qos(*inst)) {
-      TransportImpl_rch impl = inst->get_or_create_impl();
+      TransportImpl_rch impl = inst->get_or_create_impl(domain_id(), dpi);
 
       if (impl) {
         impls_.push_back(impl);
@@ -171,7 +171,7 @@ TransportClient::enable_transport_using_config(bool reliable, bool durable,
 }
 
 void
-TransportClient::populate_connection_info()
+TransportClient::populate_connection_info(DomainParticipantImpl* dpi)
 {
   conn_info_.length(0);
 
@@ -179,7 +179,7 @@ TransportClient::populate_connection_info()
   for (size_t i = 0; i < n; ++i) {
     TransportInst_rch inst = config_->instances_[i];
     if (check_transport_qos(*inst)) {
-      TransportImpl_rch impl = inst->get_or_create_impl();
+      TransportImpl_rch impl = inst->get_or_create_impl(domain_id(), dpi);
       if (impl) {
         const CORBA::ULong idx = DCPS::grow(conn_info_) - 1;
         impl->connection_info(conn_info_[idx], CONNINFO_ALL);
