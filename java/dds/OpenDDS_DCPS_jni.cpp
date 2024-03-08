@@ -567,7 +567,7 @@ jint JNICALL Java_OpenDDS_DCPS_transport_TransportConfig_getPassiveConnectDurati
 (JNIEnv * jni, jobject jthis)
 {
   OpenDDS::DCPS::TransportConfig_rch config = OpenDDS::DCPS::rchandle_from(recoverCppObj<OpenDDS::DCPS::TransportConfig>(jni, jthis));
-  return config->passive_connect_duration_;
+  return config->passive_connect_duration().value().msec();
 }
 
 // TransportConfig::setPassiveConnectDuration
@@ -575,7 +575,7 @@ void JNICALL Java_OpenDDS_DCPS_transport_TransportConfig_setPassiveConnectDurati
 (JNIEnv * jni, jobject jthis, jint val)
 {
   OpenDDS::DCPS::TransportConfig_rch config = OpenDDS::DCPS::rchandle_from(recoverCppObj<OpenDDS::DCPS::TransportConfig>(jni, jthis));
-  config->passive_connect_duration_ = val;
+  config->passive_connect_duration(OpenDDS::DCPS::TimeDuration::from_msec(val));
 }
 
 // TransportInst

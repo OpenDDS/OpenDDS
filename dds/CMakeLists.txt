@@ -18,7 +18,6 @@ add_library(OpenDDS_Dcps
   DCPS/CoherentChangeControl.cpp
   DCPS/ConditionImpl.cpp
   DCPS/ConfigStoreImpl.cpp
-  DCPS/ConfigUtils.cpp
   DCPS/ConnectionRecords.cpp
   DCPS/ContentFilteredTopicImpl.cpp
   DCPS/DCPS_Utils.cpp
@@ -218,7 +217,6 @@ target_sources(OpenDDS_Dcps
     DCPS/ConditionImpl.h
     DCPS/ConditionVariable.h
     DCPS/ConfigStoreImpl.h
-    DCPS/ConfigUtils.h
     DCPS/ConnectionRecords.h
     DCPS/ContentFilteredTopicImpl.h
     DCPS/DCPS_Utils.h
@@ -638,9 +636,4 @@ opendds_target_sources(OpenDDS_Dcps
   ${opendds_target_sources_args}
 )
 
-get_target_property(gendir OpenDDS_Dcps OPENDDS_GENERATED_DIRECTORY)
-set(config_file "${gendir}/dds/DCPS/config.h")
-configure_file("${_OPENDDS_CMAKE_DIR}/config.h.in" "${config_file}")
-opendds_install_interface_files(OpenDDS_Dcps INCLUDE_BASE "${OPENDDS_SOURCE_DIR}"
-  EXTRA_GENERATED_FILES "${config_file}"
-)
+opendds_install_interface_files(OpenDDS_Dcps INCLUDE_BASE "${OPENDDS_SOURCE_DIR}")

@@ -7,8 +7,7 @@
 namespace RtpsRelay {
 
 GuidPartitionTable::Result GuidPartitionTable::insert(const OpenDDS::DCPS::GUID_t& guid,
-                                                      const DDS::StringSeq& partitions,
-                                                      const OpenDDS::DCPS::MonotonicTimePoint& now)
+                                                      const DDS::StringSeq& partitions)
 {
   Result result;
   std::vector<RelayPartitions> relay_partitions;
@@ -87,8 +86,7 @@ GuidPartitionTable::Result GuidPartitionTable::insert(const OpenDDS::DCPS::GUID_
 
   if (!spdp_replay.partitions().empty() && config_.log_activity()) {
     const auto part_guid = make_id(guid, OpenDDS::DCPS::ENTITYID_PARTICIPANT);
-    GuidAddrSet::Proxy proxy(guid_addr_set_);
-    ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) INFO: GuidPartitionTable::insert %C add partitions %C %C into session\n"), guid_to_string(part_guid).c_str(), OpenDDS::DCPS::to_json(spdp_replay).c_str(), proxy.get_session_time(part_guid, now).sec_str().c_str()));
+    ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) INFO: GuidPartitionTable::insert %C add partitions %C\n"), guid_to_string(part_guid).c_str(), OpenDDS::DCPS::to_json(spdp_replay).c_str()));
   }
 
   return result;

@@ -85,7 +85,8 @@ public:
   typedef NameToPosMap::const_iterator ntp_iterator;
 
   explicit MapBitmaskHelper(XTypes::TypeKind as_uint)
-    : as_uint_(as_uint)
+    : bit_bound_(32)
+    , as_uint_(as_uint)
   {}
 
   MapBitmaskHelper(ACE_CDR::UShort bit_bound, XTypes::TypeKind as_uint)

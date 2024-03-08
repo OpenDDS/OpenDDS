@@ -48,6 +48,7 @@ project(OpenDDS_Dcps): core, coverage_optional, \
   }
 
   Header_Files {
+    OpenDDSConfig.h
     Version.h
     Versioned_Namespace.h
     DCPS
@@ -71,7 +72,10 @@ project(OpenDDS_Dcps): core, coverage_optional, \
     DdsDcpsTopicS.h
     DdsDcpsTypeSupportExtS.h
     DdsDynamicDataS.h
+    DdsDynamicDataSeqS.h
     DdsDynamicTypeSupportS.h
+    DdsSecurityCoreS.h
+    DdsSecurityParamsS.h
   }
 
   // Should this be removed?

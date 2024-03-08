@@ -257,7 +257,7 @@ RtpsUdpInst::multicast_group_address(DDS::DomainId_t domain) const
     // Customize.
     const String customization_name = TheServiceParticipant->config_store()->get(config_key("CUSTOMIZATION").c_str(), "");
     if (!customization_name.empty()) {
-      const String directive = TheServiceParticipant->config_store()->get(String("OPENDDS_CUSTOMIZATION_" + customization_name + "_MULTICAST_GROUP_ADDRESS").c_str(), "");
+      const String directive = TheServiceParticipant->config_store()->get(String("CUSTOMIZATION_" + customization_name + "_MULTICAST_GROUP_ADDRESS").c_str(), "");
 
       // only add_domain_id_to_ip_addr and add_domain_id_to_port are supported at this time.
       if (directive.find("add_domain_id_to_ip_addr") != directive.npos) {

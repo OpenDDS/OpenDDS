@@ -309,7 +309,7 @@ Options for this script are listed below, with the default behavior described
 in parenthesis after the option description.
 Boolean options can take the form "--opt" or "--no-opt", the more commonly
 needed one (the one that changes the default behavior) is shown below.
-Options that require arguments are shown as "--opt=VAL"  Options with optional
+Options that require arguments are shown as "--opt=VAL".  Options with optional
 arguments are shown as "--opt[=VAL]".  Options that can be repeated with
 cumulative effect are shown with a trailing "...".  Some third-party
 optional dependencies can be automatically located if they are installed in the
@@ -928,7 +928,7 @@ if (!$ace_src || !$tao_src) {
     }
 
     if (!-r $file) {
-      my $dl_msg = "Downloading $file from using";
+      my $dl_msg = "Downloading $file from $url using";
       $would_download = 1;
       eval {
         require LWP::UserAgent;
@@ -1336,6 +1336,34 @@ EOT
       if $opts{'verbose'};
     dump_and_unlink($PMG) if $opts{'dry-run'};
   }
+}
+
+sub write_opendds_configh {
+  my %buildEnv = %{shift()};
+  my $CFGH = backup_and_open("$buildEnv{'DDS_ROOT'}/dds/OpenDDSConfig.h");
+  my $CFGIN = new FileHandle;
+  open($CFGIN, 'dds/OpenDDSConfig.h.in') or die("Can't open OpenDDSConfig.h.in for reading: $!\nStopped");
+
+  my %config = (
+    'OPENDDS_CONFIG_AUTO_STATIC_INCLUDES' => 0,
+  );
+
+  my $replace_value = sub {
+    my $var = shift;
+    return 'UNDEFINED_NEED_TO_UPDATE_CONFIGURE_SCRIPT' unless exists $config{$var};
+    return $config{$var};
+  };
+
+  while (<$CFGIN>) {
+    s/@(\w+)@/&$replace_value($1)/e;
+    print $CFGH $_;
+  }
+
+  $CFGIN->close;
+  $CFGH->close;
+  print "Wrote $buildEnv{'DDS_ROOT'}/dds/OpenDDSConfig.h\n"
+    if $opts{'verbose'};
+  dump_and_unlink($CFGH) if $opts{'dry-run'};
 }
 
 ## Optional OpenDDS dependencies
@@ -2496,6 +2524,7 @@ sub configure_build {
     write_default_features($buildEnvRef);
     write_platform_macros($buildEnvRef);
   }
+  write_opendds_configh($buildEnvRef);
   generate_workspace($buildEnvRef);
   write_environment($buildEnvRef, $buildEnvRef->{'DDS_ROOT'});
 

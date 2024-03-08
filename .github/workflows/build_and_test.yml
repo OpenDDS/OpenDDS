@@ -552,7 +552,7 @@ jobs:
       uses: actions/cache@v4
       with:
         path: ${{ github.job }}.tar.xz
-        key: c10_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}
+        key: c11_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}
     - name: checkout MPC
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       uses: actions/checkout@v4
@@ -607,7 +607,8 @@ jobs:
         perl -ni.bak -e "print unless /opendds/" ACE/bin/MakeProjectCreator/config/default.features # remove opendds features from here, let individual build configure scripts handle those
         cd $GITHUB_WORKSPACE/OpenDDS
         find . -iname "*\.o" | xargs rm
-        tar cvf ../${{ github.job }}.tar build/host/ACE_TAO build/target/ACE_TAO build/host/setenv.sh build/host/VERSION.txt
+        rm -rf build/{host,target}/ACE_TAO/{ACE,TAO}/{examples,performance-tests,tests}
+        tar cvf ../${{ github.job }}.tar build/host/ACE_TAO build/target/ACE_TAO
         xz -3 ../${{ github.job }}.tar
     - name: upload ACE_TAO artifact
       uses: actions/upload-artifact@v4
@@ -699,10 +700,7 @@ jobs:
       shell: bash
       run: |
         cd OpenDDS/build
-        tar cvf ../../${{ github.job }}.tar host/dds/idl/opendds_idl
-        tar uvf ../../${{ github.job }}.tar host/bin/opendds_idl
-        tar uvf ../../${{ github.job }}.tar host/dds/DCPS/libOpenDDS_Util*
-        tar uvf ../../${{ github.job }}.tar host/lib/libOpenDDS_Util*
+        tar cvf ../../${{ github.job }}.tar host/dds/idl/opendds_idl host/bin/opendds_idl host/setenv.sh host/VERSION.txt
         cd target
         find . -iname "*\.o" | xargs rm
         cd ..
@@ -877,7 +875,7 @@ jobs:
       uses: actions/cache@v4
       with:
         path: ${{ github.job }}.tar.xz
-        key: c10_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}
+        key: c11_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}
     - name: checkout MPC
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       uses: actions/checkout@v4
@@ -933,7 +931,8 @@ jobs:
         perl -ni.bak -e "print unless /opendds/" ACE/bin/MakeProjectCreator/config/default.features # remove opendds features from here, let individual build configure scripts handle those
         cd $GITHUB_WORKSPACE/OpenDDS
         find . -iname "*\.o" | xargs rm
-        tar cvf ../${{ github.job }}.tar build/host/ACE_TAO build/target/ACE_TAO build/host/setenv.sh build/host/VERSION.txt
+        rm -rf build/{host,target}/ACE_TAO/{ACE,TAO}/{examples,performance-tests,tests}
+        tar cvf ../${{ github.job }}.tar build/host/ACE_TAO build/target/ACE_TAO
         xz -3 ../${{ github.job }}.tar
     - name: upload ACE_TAO artifact
       uses: actions/upload-artifact@v4
@@ -1026,10 +1025,7 @@ jobs:
       shell: bash
       run: |
         cd OpenDDS/build
-        tar cvf ../../${{ github.job }}.tar host/dds/idl/opendds_idl
-        tar uvf ../../${{ github.job }}.tar host/bin/opendds_idl
-        tar uvf ../../${{ github.job }}.tar host/dds/DCPS/libOpenDDS_Util*
-        tar uvf ../../${{ github.job }}.tar host/lib/libOpenDDS_Util*
+        tar cvf ../../${{ github.job }}.tar host/dds/idl/opendds_idl host/bin/opendds_idl host/setenv.sh host/VERSION.txt
         cd target
         find . -iname "*\.o" | xargs rm
         cd ..
