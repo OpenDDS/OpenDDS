@@ -119,13 +119,13 @@ bool JsonValueWriter<Writer>::end_struct_member()
 }
 
 template <typename Writer>
-bool JsonValueWriter<Writer>::begin_optional() 
+bool JsonValueWriter<Writer>::begin_optional()
 {
   return true;
 }
 
 template <typename Writer>
-bool JsonValueWriter<Writer>::end_optional() 
+bool JsonValueWriter<Writer>::end_optional()
 {
   return true;
 }
