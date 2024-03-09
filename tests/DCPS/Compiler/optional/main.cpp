@@ -1,24 +1,22 @@
 #include "optionalC.h"
 #include "optionalTypeSupportImpl.h"
-#include "tests/Utils/DataView.h"
 
-#include "gtest/gtest.h"
+#include <tests/Utils/DataView.h>
+
 #include <dds/DCPS/Serializer.h>
 #include <dds/DCPS/TypeSupportImpl.h>
 #include <dds/DCPS/FilterEvaluator.h>
 
-#include <vector>
 #include <ace/ACE.h>
 #include <ace/Log_Msg.h>
 #include <gtest/gtest.h>
-#include <tests/Utils/DataView.h>
+
+#include <vector>
 
 using namespace OpenDDS::DCPS;
 using namespace OpenDDS::XTypes;
 
-const Encoding xcdr1(Encoding::KIND_XCDR1, ENDIAN_BIG);
 const Encoding xcdr2(Encoding::KIND_XCDR2, ENDIAN_BIG);
-const Encoding xcdr2_le(Encoding::KIND_XCDR2, ENDIAN_LITTLE);
 
 template<typename Type>
 void serializer_test(const OpenDDS::DCPS::Encoding& encoding, Type value, const DataView& expected_cdr) {
@@ -34,8 +32,7 @@ void serializer_test(const OpenDDS::DCPS::Encoding& encoding, Type value, const 
 }
 
 template<typename Type>
-void baseline_checks(const Encoding& encoding, Type value, const DataView& expected_cdr,
-  SerializedSizeBound bound = SerializedSizeBound())
+void baseline_checks(const Encoding& encoding, Type value, const DataView& expected_cdr)
 {
   EXPECT_EQ(serialized_size(encoding, value), expected_cdr.size);
 
@@ -46,7 +43,7 @@ TEST(OptionalTests, SerializationXCDR2Empty)
 {
   const uint8_t expected[] = {
     // Delimeter
-    0x00, 0x00, 0x00, 0x05, // +4 = 4
+    0x00, 0x00, 0x00, 0x06, // +4 = 4
 
     // bool_field
     0x00, // +1 = 5
@@ -62,6 +59,8 @@ TEST(OptionalTests, SerializationXCDR2Empty)
 
     // str_field
     0x00, // +1 = 9
+
+    0x00
   };
 
   optional::OptionalMembers empty;
@@ -72,7 +71,7 @@ TEST(OptionalTests, SerializationXCDR2NotEmpty)
 {
   const uint8_t expected[] = {
     // Delimeter
-    0x00, 0x00, 0x00, 0x18, // +4 = 4
+    0x00, 0x00, 0x00, 0x19, // +4 = 4
 
     // bool_field
     0x00,
@@ -90,11 +89,11 @@ TEST(OptionalTests, SerializationXCDR2NotEmpty)
     0x00, // ?
     0x00, 0x00, 0x00, 0x0c, // +4 = 14
     'H', 'e', 'l', 'l', 'o', ' ', 'W', 'o', 'r', 'l', 'd', '\0', // +12 = 26
+    0x00
   };
 
   optional::OptionalMembers value;
   value.short_field(0x7fff);
-  //value.int32_field(0x7fffffff);
   value.str_field("Hello World");
   serializer_test(xcdr2, value, expected);
 }

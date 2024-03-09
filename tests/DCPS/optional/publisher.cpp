@@ -2,7 +2,6 @@
 #include "optionalC.h"
 #include "optionalTypeSupportImpl.h"
 
-#include <ace/Log_Msg.h>
 #include <tests/Utils/DistributedConditionSet.h>
 
 #include <dds/DCPS/Service_Participant.h>
