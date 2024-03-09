@@ -63,7 +63,7 @@ TEST(OptionalTests, SerializationXCDR2Empty)
     0x00
   };
 
-  optional::OptionalMembers empty;
+  optional::OptionalMembers empty{};
   baseline_checks(xcdr2, empty, expected);
 }
 
@@ -92,7 +92,7 @@ TEST(OptionalTests, SerializationXCDR2NotEmpty)
     0x00
   };
 
-  optional::OptionalMembers value;
+  optional::OptionalMembers value{};
   value.short_field(0x7fff);
   value.str_field("Hello World");
   serializer_test(xcdr2, value, expected);

@@ -49,6 +49,9 @@ public:
   bool begin_struct_member(MemberParam params);
   bool end_struct_member();
 
+  bool begin_optional();
+  bool end_optional();
+
   bool begin_union(Extensibility extensibility = FINAL);
   bool end_union();
   bool begin_discriminator(MemberParam params);
@@ -111,6 +114,18 @@ bool JsonValueWriter<Writer>::begin_struct_member(MemberParam params)
 
 template <typename Writer>
 bool JsonValueWriter<Writer>::end_struct_member()
+{
+  return true;
+}
+
+template <typename Writer>
+bool JsonValueWriter<Writer>::begin_optional() 
+{
+  return true;
+}
+
+template <typename Writer>
+bool JsonValueWriter<Writer>::end_optional() 
 {
   return true;
 }
