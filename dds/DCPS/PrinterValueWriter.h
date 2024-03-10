@@ -43,6 +43,9 @@ public:
   bool begin_struct_member(MemberParam params);
   bool end_struct_member();
 
+  bool begin_optional();
+  bool end_optional();
+
   bool begin_union(Extensibility extensibility = FINAL);
   bool end_union();
   bool begin_discriminator(MemberParam params);
@@ -123,6 +126,16 @@ bool PrinterValueWriter::begin_struct_member(MemberParam params)
 }
 
 bool PrinterValueWriter::end_struct_member()
+{
+  return true;
+}
+
+bool PrinterValueWriter::begin_optional()
+{
+  return true;
+}
+
+bool PrinterValueWriter::end_optional()
 {
   return true;
 }
