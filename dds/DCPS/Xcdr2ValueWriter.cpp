@@ -275,7 +275,7 @@ bool Xcdr2ValueWriter::begin_optional()
 
 bool Xcdr2ValueWriter::end_optional()
 {
-  return true;     
+  return true;
 }
 
 bool Xcdr2ValueWriter::begin_union(Extensibility extensibility)
