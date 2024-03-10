@@ -1351,14 +1351,18 @@ sub write_opendds_configh {
   my $CFGIN = new FileHandle;
   open($CFGIN, 'dds/OpenDDSConfig.h.in') or die("Can't open OpenDDSConfig.h.in for reading: $!\nStopped");
 
-  sub replace_value {
+  my %config = (
+    'OPENDDS_CONFIG_AUTO_STATIC_INCLUDES' => 0,
+  );
+
+  my $replace_value = sub {
     my $var = shift;
-    return '0' if $var eq 'OPENDDS_CONFIG_AUTO_STATIC_INCLUDES';
-    return 'UNDEFINED';
-  }
+    return 'UNDEFINED_NEED_TO_UPDATE_CONFIGURE_SCRIPT' unless exists $config{$var};
+    return $config{$var};
+  };
 
   while (<$CFGIN>) {
-    s/@(\w+)@/replace_value($1)/e;
+    s/@(\w+)@/&$replace_value($1)/e;
     print $CFGH $_;
   }
 

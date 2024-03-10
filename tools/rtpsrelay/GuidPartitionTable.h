@@ -41,8 +41,7 @@ public:
 
   // Insert a reader/writer guid and its partitions.
   Result insert(const OpenDDS::DCPS::GUID_t& guid,
-                const DDS::StringSeq& partitions,
-                const OpenDDS::DCPS::MonotonicTimePoint& now);
+                const DDS::StringSeq& partitions);
 
   void remove(const OpenDDS::DCPS::GUID_t& guid)
   {

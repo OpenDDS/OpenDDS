@@ -56,7 +56,7 @@ void SubscriptionListener::on_data_available(DDS::DataReader_ptr reader)
     case DDS::ALIVE_INSTANCE_STATE:
       if (info.valid_data) {
         const auto repoid = participant_->get_repoid(info.instance_handle);
-        const auto r = guid_partition_table_.insert(repoid, data.partition.name, now);
+        const auto r = guid_partition_table_.insert(repoid, data.partition.name);
 
         if (r == GuidPartitionTable::ADDED) {
           if (config_.log_discovery()) {

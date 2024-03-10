@@ -1,6 +1,4 @@
-project: dcpsexe, dcps_test, dcps_transports_for_test{
-  avoids   += no_cxx11
-  requires += no_opendds_safety_profile
+project: dcpsexe, dcps_test, dcps_transports_for_test, opendds_uses_cxx11 {
   exename   = publisher
   after    += DDS_Cxx11_Messenger_Idl
   libs     += DDS_Cxx11_Messenger_Idl
