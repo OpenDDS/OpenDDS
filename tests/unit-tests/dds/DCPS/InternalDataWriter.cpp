@@ -207,3 +207,55 @@ TEST(dds_DCPS_InternalDataWriter, dispose)
   EXPECT_EQ(samples[0], sample);
   EXPECT_EQ(SIW(infos[0]), SIW(make_sample_info(DDS::NOT_READ_SAMPLE_STATE, DDS::NEW_VIEW_STATE, DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE, 0, 0, 0, 0, 0, true)));
 }
+
+TEST(dds_DCPS_InternalDataWriter, add_instance_reader)
+{
+  ReaderType::SampleSequence interesting_samples;
+  interesting_samples.push_back(Sample("a"));
+  interesting_samples.push_back(Sample("c"));
+
+  RcHandle<WriterType> writer = make_rch<WriterType>(DataWriterQosBuilder());
+  RcHandle<ReaderType> reader = make_rch<ReaderType>(DataReaderQosBuilder().reliability_reliable());
+  reader->set_interesting_instances(interesting_samples);
+  writer->add_reader(reader);
+
+  EXPECT_TRUE(writer->has_reader(reader));
+  writer->write(Sample("a"));
+  writer->write(Sample("b"));
+  writer->write(Sample("c"));
+
+  ReaderType::SampleSequence samples;
+  InternalSampleInfoSequence infos;
+  reader->take(samples, infos, DDS::LENGTH_UNLIMITED, DDS::ANY_SAMPLE_STATE, DDS::ANY_VIEW_STATE, DDS::ANY_INSTANCE_STATE);
+
+  ASSERT_EQ(samples.size(), 2U);
+  ASSERT_EQ(infos.size(), 2U);
+
+  EXPECT_EQ(samples[0], Sample("a"));
+  EXPECT_EQ(SIW(infos[0]), SIW(make_sample_info(DDS::NOT_READ_SAMPLE_STATE, DDS::NEW_VIEW_STATE, DDS::ALIVE_INSTANCE_STATE, 0, 0, 0, 0, 0, true)));
+  EXPECT_EQ(samples[1], Sample("c"));
+  EXPECT_EQ(SIW(infos[1]), SIW(make_sample_info(DDS::NOT_READ_SAMPLE_STATE, DDS::NEW_VIEW_STATE, DDS::ALIVE_INSTANCE_STATE, 0, 0, 0, 0, 0, true)));
+
+  writer->dispose(Sample("a"));
+  writer->dispose(Sample("b"));
+
+  reader->take(samples, infos, DDS::LENGTH_UNLIMITED, DDS::ANY_SAMPLE_STATE, DDS::ANY_VIEW_STATE, DDS::ANY_INSTANCE_STATE);
+
+  ASSERT_EQ(samples.size(), 1U);
+  ASSERT_EQ(infos.size(), 1U);
+
+  EXPECT_EQ(samples[0], Sample("a"));
+  EXPECT_EQ(SIW(infos[0]), SIW(make_sample_info(DDS::NOT_READ_SAMPLE_STATE, DDS::NOT_NEW_VIEW_STATE, DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE, 0, 0, 0, 0, 0, false)));
+
+  writer->unregister_instance(Sample("a"));
+  writer->unregister_instance(Sample("b"));
+  writer->unregister_instance(Sample("c"));
+
+  reader->take(samples, infos, DDS::LENGTH_UNLIMITED, DDS::ANY_SAMPLE_STATE, DDS::ANY_VIEW_STATE, DDS::ANY_INSTANCE_STATE);
+
+  ASSERT_EQ(samples.size(), 1U);
+  ASSERT_EQ(infos.size(), 1U);
+
+  EXPECT_EQ(samples[0], Sample("c"));
+  EXPECT_EQ(SIW(infos[0]), SIW(make_sample_info(DDS::NOT_READ_SAMPLE_STATE, DDS::NOT_NEW_VIEW_STATE, DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE, 0, 0, 0, 0, 0, false)));
+}
