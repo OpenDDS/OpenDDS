@@ -40,7 +40,7 @@ Four separate topics are defined for each domain.
 Each is dedicated to a particular entity (domain participant :ref:`built_in_topics--dcpsparticipant-topic`, topic :ref:`built_in_topics--dcpsparticipant-topic`, data writer :ref:`built_in_topics--dcpspublication-topic`, data reader :ref:`built_in_topics--dcpssubscription-topic`) and publishes instances describing the state for each entity in the domain.
 
 Subscriptions to built-in topics are automatically created for each domain participant.
-A participant's support for Built-In-Topics can be toggled via the ``DCPSBit`` configuration option (see the table in :ref:`run_time_configuration--common-configuration-options`) (Note: this option cannot be used for RTPS discovery).
+A participant's support for Built-In-Topics can be toggled via the ``DCPSBit`` configuration option (see the table in :ref:`run_time_configuration--common-configuration-options`).
 To view the built-in topic data, simply obtain the built-in Subscriber and then use it to access the Data Reader for the built-in topic of interest.
 The Data Reader can then be used like any other Data Reader.
 

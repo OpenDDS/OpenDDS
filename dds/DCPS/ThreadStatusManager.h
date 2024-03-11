@@ -67,10 +67,11 @@ public:
     struct OpenDDS_Dcps_Export Bucket {
       TimeDuration active_time;
       TimeDuration idle_time;
+      TimeDuration total_time() const { return active_time + idle_time; }
     };
     MonotonicTimePoint last_update_;
     Bucket total_;
-    Bucket bucket_[bucket_count];
+    Bucket buckets_[bucket_count];
     size_t current_bucket_;
     size_t nesting_depth_;
   };
@@ -93,7 +94,7 @@ public:
     return thread_status_interval_ > TimeDuration::zero_value;
   }
 
-  /// Add the calling thread with the manager.
+  /// Add the calling thread to the manager.
   /// name is for a more human-friendly name that will be appended to the BIT key.
   /// Implicitly makes the thread active and finishes the thread on destruction.
   class Start {
@@ -115,7 +116,7 @@ public:
 
   class Event {
   public:
-    Event(ThreadStatusManager& thread_status_manager)
+    explicit Event(ThreadStatusManager& thread_status_manager)
       : thread_status_manager_(thread_status_manager)
     {
       thread_status_manager_.active(true);
