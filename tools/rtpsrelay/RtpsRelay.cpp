@@ -79,7 +79,7 @@ namespace {
   const unsigned short DEFAULT_META = 8080;
 }
 
-int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
+int run(int argc, ACE_TCHAR* argv[])
 {
   DDS::DomainParticipantFactory_var factory = TheParticipantFactoryWithArgs(argc, argv);
   if (!factory) {
@@ -991,4 +991,18 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   data_vertical_handler.stop();
 
   return EXIT_SUCCESS;
+}
+
+int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
+{
+  try {
+    return run(argc, argv);
+  } catch (const CORBA::Exception& e) { // IDL-to-C++ classic sequences
+    e._tao_print_exception("RtpsRelay.cpp run():", stderr);
+  } catch (const std::exception& e) {
+    ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: exception thrown from run(): %C\n", e.what()));
+  } catch (...) {
+    ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: unknown exception thrown from run()\n"));
+  }
+  return EXIT_FAILURE;
 }
