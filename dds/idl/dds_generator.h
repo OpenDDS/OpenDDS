@@ -1356,6 +1356,83 @@ inline const char* get_shift_op(const std::string& s)
   return "";
 }
 
+inline std::string extensibility_kind(ExtensibilityKind ek)
+{
+  switch (ek) {
+  case extensibilitykind_final:
+    return "OpenDDS::DCPS::FINAL";
+  case extensibilitykind_appendable:
+    return "OpenDDS::DCPS::APPENDABLE";
+  case extensibilitykind_mutable:
+    return "OpenDDS::DCPS::MUTABLE";
+  default:
+    return "invalid";
+  }
+}
+
+inline std::string type_kind(AST_Type* type)
+{
+  type = AstTypeClassification::resolveActualType(type);
+  switch (type->node_type()) {
+  case AST_Decl::NT_pre_defined: {
+    AST_PredefinedType* pt_type = dynamic_cast<AST_PredefinedType*>(type);
+    if (!pt_type) {
+      return "XTypes::TK_NONE";
+    }
+    switch (pt_type->pt()) {
+    case AST_PredefinedType::PT_long:
+      return "XTypes::TK_INT32";
+    case AST_PredefinedType::PT_ulong:
+      return "XTypes::TK_UINT32";
+    case AST_PredefinedType::PT_longlong:
+      return "XTypes::TK_INT64";
+    case AST_PredefinedType::PT_ulonglong:
+      return "XTypes::TK_UINT64";
+    case AST_PredefinedType::PT_short:
+      return "XTypes::TK_INT16";
+    case AST_PredefinedType::PT_ushort:
+      return "XTypes::TK_UINT16";
+    case AST_PredefinedType::PT_float:
+      return "XTypes::TK_FLOAT32";
+    case AST_PredefinedType::PT_double:
+      return "XTypes::TK_FLOAT64";
+    case AST_PredefinedType::PT_longdouble:
+      return "XTypes::TK_FLOAT128";
+    case AST_PredefinedType::PT_char:
+      return "XTypes::TK_CHAR8";
+    case AST_PredefinedType::PT_wchar:
+      return "XTypes::TK_CHAR16";
+    case AST_PredefinedType::PT_boolean:
+      return "XTypes::TK_BOOLEAN";
+    case AST_PredefinedType::PT_octet:
+      return "XTypes::TK_BYTE";
+    case AST_PredefinedType::PT_int8:
+      return "XTypes::TK_INT8";
+    case AST_PredefinedType::PT_uint8:
+      return "XTypes::TK_UINT8";
+    default:
+      return "XTypes::TK_NONE";
+    }
+  }
+  case AST_Decl::NT_string:
+    return "XTypes::TK_STRING8";
+  case AST_Decl::NT_wstring:
+    return "XTypes::TK_STRING16";
+  case AST_Decl::NT_array:
+    return "XTypes::TK_ARRAY";
+  case AST_Decl::NT_sequence:
+    return "XTypes::TK_SEQUENCE";
+  case AST_Decl::NT_union:
+    return "XTypes::TK_UNION";
+  case AST_Decl::NT_struct:
+    return "XTypes::TK_STRUCTURE";
+  case AST_Decl::NT_enum:
+    return "XTypes::TK_ENUM";
+  default:
+    return "XTypes::TK_NONE";
+  }
+}
+
 /// Handling wrapping and unwrapping references in the wrapper types:
 /// NestedKeyOnly, IDL::DistinctType, and *_forany.
 struct RefWrapper {

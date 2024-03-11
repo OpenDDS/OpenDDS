@@ -72,10 +72,11 @@ namespace {
     // When we have a primitive type the last dimension is read using the read_*_array
     // operation, when we have a not primitive type the last dimension is read element by element
     // in a loop in the generated code
+    const std::string elem_kind = type_kind(array->base_type());
     if ((primitive && (dim_idx < array->n_dims() - 1)) || (!primitive && (dim_idx < array->n_dims()))) {
       const size_t dim = array->dims()[dim_idx]->ev()->u.ulval;
       be_global->impl_ <<
-        indent << "if (!value_reader.begin_array()) return false;\n" <<
+        indent << "if (!value_reader.begin_array(" << elem_kind << ")) return false;\n" <<
         indent << "for (" << (use_cxx11 ? "size_t " : "unsigned int ") << idx << " = 0; "
           << idx << " != " << dim << "; ++" << idx << ") {\n" <<
         indent << "  if (!value_reader.begin_element()) return false;\n";
@@ -91,7 +92,7 @@ namespace {
         const AST_PredefinedType::PredefinedType pt =
           dynamic_cast<AST_PredefinedType*>(actual)->pt();
         be_global->impl_ <<
-          indent << "if (!value_reader.begin_array()) return false;\n";
+          indent << "if (!value_reader.begin_array(" << elem_kind << ")) return false;\n";
         be_global->impl_ << indent <<
           "if (!value_reader.read_" << primitive_type(pt) << "_array (" << expression << (use_cxx11 ? ".data()" : "") << ", " << dim << ")) return false;\n";
         be_global->impl_ <<
@@ -109,8 +110,9 @@ namespace {
     // TODO: Take advantage of the size.
     const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
     const std::string indent(level * 2, ' ');
+    const std::string elem_tk = type_kind(sequence->base_type());
     be_global->impl_ <<
-      indent << "if (!value_reader.begin_sequence()) return false;\n" <<
+      indent << "if (!value_reader.begin_sequence(" << elem_tk << ")) return false;\n" <<
       indent << "for (" << (use_cxx11 ? "size_t " : "unsigned int ") << idx << " = 0; "
         "value_reader.elements_remaining(); ++" << idx << ") {\n";
     if (use_cxx11) {
@@ -278,7 +280,7 @@ bool value_reader_generator::gen_typedef(AST_Typedef*,
   return true;
 }
 
-bool value_reader_generator::gen_struct(AST_Structure*,
+bool value_reader_generator::gen_struct(AST_Structure* node,
                                         UTL_ScopedName* name,
                                         const std::vector<AST_Field*>& fields,
                                         AST_Type::SIZE_TYPE,
@@ -315,10 +317,12 @@ bool value_reader_generator::gen_struct(AST_Structure*,
       ",{0,0}};\n"
       "  ListMemberHelper helper(pairs);\n";
 
+    const ExtensibilityKind ek = be_global->extensibility(node);
     be_global->impl_ <<
-      "  if (!value_reader.begin_struct()) return false;\n"
+      "  if (!value_reader.begin_struct(" << extensibility_kind(ek) << ")) return false;\n"
       "  XTypes::MemberId member_id;\n"
-      "  while (value_reader.begin_struct_member(member_id, helper)) {\n"
+      "  while (value_reader.members_remaining()) {\n"
+      "    if (!value_reader.begin_struct_member(member_id, helper)) return false;\n"
       "    switch (member_id) {\n";
 
     for (std::vector<AST_Field*>::const_iterator pos = fields.begin(), limit = fields.end();
@@ -370,8 +374,9 @@ bool value_reader_generator::gen_union(AST_Union* u,
     read.addArg("value", type_name + "&");
     read.endArgs();
 
+    const ExtensibilityKind ek = be_global->extensibility(u);
     be_global->impl_ <<
-      "  if (!value_reader.begin_union()) return false;\n"
+      "  if (!value_reader.begin_union(" << extensibility_kind(ek) << ")) return false;\n"
       "  if (!value_reader.begin_discriminator()) return false;\n"
       "  {\n"
       "    " << scoped(discriminator->name()) << " d;\n";

@@ -53,7 +53,7 @@ TEST(dds_DCPS_ValueCommon, MapBitmaskHelper)
   };
   MapBitmaskHelper helper(pairs, 32, OpenDDS::XTypes::TK_UINT32);
 
-  OPENDDS_VECTOR(const char*) names(3);
+  OPENDDS_VECTOR(String) names(3);
   names[0] = "FLAG1";
   names[1] = "FLAG4";
   names[2] = "FLAG5"; // 00110010 0x32
@@ -63,13 +63,14 @@ TEST(dds_DCPS_ValueCommon, MapBitmaskHelper)
   EXPECT_EQ(0x32ull, value);
 
   names.push_back("FLAG3");
-  EXPECT_FALSE(helper.get_value(value, names));
+  EXPECT_TRUE(helper.get_value(value, names));
+  EXPECT_EQ(0x32ull, value);
 
   value = 0x65;
   EXPECT_GT(helper.get_names(names, value), (size_t)0);
   EXPECT_EQ(names.size(), (size_t)4);
-  EXPECT_STREQ("FLAG0", names[0]);
-  EXPECT_STREQ("FLAG2", names[1]);
-  EXPECT_STREQ("FLAG5", names[2]);
-  EXPECT_STREQ("FLAG6", names[3]);
+  EXPECT_EQ("FLAG0", names[0]);
+  EXPECT_EQ("FLAG2", names[1]);
+  EXPECT_EQ("FLAG5", names[2]);
+  EXPECT_EQ("FLAG6", names[3]);
 }

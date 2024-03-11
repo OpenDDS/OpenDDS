@@ -35,7 +35,7 @@ void RelayParticipantStatusReporter::add_participant(const OpenDDS::DCPS::GUID_t
                    guid_to_string(repoid).c_str(), OpenDDS::DCPS::to_json(data).c_str()));
       }
     } else {
-      p.first->second = status;
+      p.first->second = std::move(status);
     }
 
     stats_reporter_.local_participants(guids_.size(), monotonic_now);
