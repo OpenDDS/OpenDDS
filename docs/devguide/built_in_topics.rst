@@ -284,7 +284,7 @@ OpenDDSInternalThread Topic
 ..
     Sect<6.8.3>
 
-The Built-In Topic "OpenDDSInternalThread" is published when OpenDDS is configured with DCPSThreadStatusInterval (:ref:`run_time_configuration--common-configuration-options`).
+The Built-In Topic "OpenDDSInternalThread" is published by the DDSI-RTPS discovery implementation when OpenDDS is configured with DCPSThreadStatusInterval (:ref:`run_time_configuration--common-configuration-options`).
 When enabled, the DataReader for this Built-In Topic will report the status of threads created and managed by OpenDDS within the current process.
 The timestamp associated with samples can be used to determine the health (responsiveness) of the thread.
 
