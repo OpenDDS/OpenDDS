@@ -12,6 +12,11 @@ project(OpenDDS_Rtps): dcpslib, install, rtps_optional_safety, opendds_testing_f
     ICE
   }
 
+  TypeSupport_Files {
+    dcps_ts_flags += -Lspcpp -St -Sx
+    RtpsSubmessageKind.idl
+  }
+
   specific {
     install_dir = dds/DCPS/RTPS
   }

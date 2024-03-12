@@ -1939,8 +1939,12 @@ bool langmap_generator::gen_enum(AST_Enum*, UTL_ScopedName* name,
     "enum " << scoped_enum << nm << enum_base << " {\n";
   for (size_t i = 0; i < contents.size(); ++i) {
     be_global->lang_header_ <<
-      "  " << contents[i]->local_name()->get_string()
-      << ((i < contents.size() - 1) ? ",\n" : "\n");
+      "  " << contents[i]->local_name()->get_string();
+    ACE_INT32 value = 0;
+    if (be_global->value(contents[i], value)) {
+      be_global->lang_header_ << " = " << value;
+    }
+    be_global->lang_header_  << ((i < contents.size() - 1) ? ",\n" : "\n");
   }
   be_global->lang_header_ <<
     "};\n\n";
