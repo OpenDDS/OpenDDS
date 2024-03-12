@@ -495,9 +495,7 @@ Service_Participant::get_domain_participant_factory(int &argc,
 
       dp_factory_servant_ = make_rch<DomainParticipantFactoryImpl>();
 
-      reactor_task_.open_reactor_task(0,
-                                      &thread_status_manager_,
-                                      "Service_Participant");
+      reactor_task_.open_reactor_task(&thread_status_manager_, "Service_Participant");
 
       job_queue_ = make_rch<JobQueue>(reactor_task_.get_reactor());
 

@@ -318,8 +318,7 @@ int run(int argc, ACE_TCHAR* argv[])
   // Set up the relay participant.
   DDS::DomainParticipantQos participant_qos;
   factory->get_default_participant_qos(participant_qos);
-  DDS::PropertySeq& relay_properties = participant_qos.property.value;
-  append(relay_properties, OpenDDS::RTPS::RTPS_REFLECT_HEARTBEAT_COUNT, "true");
+  append(participant_qos.property.value, OpenDDS::RTPS::RTPS_REFLECT_HEARTBEAT_COUNT, "true");
 
   DDS::DomainParticipant_var relay_participant = factory->create_participant(relay_domain, participant_qos, nullptr,
                                                                              OpenDDS::DCPS::DEFAULT_STATUS_MASK);
@@ -718,7 +717,7 @@ int run(int argc, ACE_TCHAR* argv[])
   GuidAddrSet guid_addr_set(config, rtps_discovery, relay_participant_status_reporter, relay_statistics_reporter, *relay_thread_monitor);
   ACE_Reactor reactor_(new ACE_Select_Reactor, true);
   const auto reactor = &reactor_;
-  GuidPartitionTable guid_partition_table(config, guid_addr_set, spdp_horizontal_addr, relay_partitions_writer, spdp_replay_writer);
+  GuidPartitionTable guid_partition_table(config, spdp_horizontal_addr, relay_partitions_writer, spdp_replay_writer);
   RelayPartitionTable relay_partition_table;
   relay_statistics_reporter.report();
 
@@ -937,8 +936,6 @@ int run(int argc, ACE_TCHAR* argv[])
 
   RelayStatusReporter relay_status_reporter(config, guid_addr_set, relay_status_writer, reactor);
 
-  OpenDDS::DCPS::ThreadStatusManager& thread_status_manager = TheServiceParticipant->get_thread_status_manager();
-
   RelayHttpMetaDiscovery relay_http_meta_discovery(config, meta_discovery_content_type, meta_discovery_content, guid_addr_set);
   if (relay_http_meta_discovery.open(meta_discovery_addr, reactor) != 0) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: could not open RelayHttpMetaDiscovery\n")));
@@ -949,9 +946,10 @@ int run(int argc, ACE_TCHAR* argv[])
   const bool has_run_time = !config.run_time().is_zero();
   const OpenDDS::DCPS::MonotonicTimePoint end_time = OpenDDS::DCPS::MonotonicTimePoint::now() + config.run_time();
 
+  OpenDDS::DCPS::ThreadStatusManager& thread_status_manager = TheServiceParticipant->get_thread_status_manager();
   if (thread_status_manager.update_thread_status()) {
     if (relay_thread_monitor->start() == -1) {
-      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P:%t) ERROR: failed to activate Thread Load Monitor\n")));
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P:%t) ERROR: failed to start Relay Thread Monitor\n")));
       return EXIT_FAILURE;
     }
 
