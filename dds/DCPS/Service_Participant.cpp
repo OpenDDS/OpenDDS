@@ -398,66 +398,6 @@ Service_Participant::get_domain_participant_factory(int &argc,
         return DDS::DomainParticipantFactory::_nil();
       }
 
-      String config_fname = config_store_->get(COMMON_DCPS_CONFIG_FILE,
-                                               COMMON_DCPS_CONFIG_FILE_default);
-      const String default_configuration_file = config_store_->get(DEFAULT_CONFIGURATION_FILE,
-                                                                   DEFAULT_CONFIGURATION_FILE_default);
-
-      if (config_fname.empty() && !default_configuration_file.empty()) {
-        config_fname = default_configuration_file;
-      }
-
-      if (config_fname.empty()) {
-        if (log_level >= LogLevel::Info) {
-          ACE_DEBUG((LM_INFO,
-                     "(%P|%t) INFO: Service_Participant::get_domain_participant_factory: "
-                     "no configuration file specified.\n"));
-        }
-
-      } else {
-        // Convenient way to run tests in a different place from ini files.
-        const char* const config_dir = ACE_OS::getenv("OPENDDS_CONFIG_DIR");
-        if (config_dir && config_dir[0]) {
-          String new_path = config_dir;
-          new_path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-          new_path += config_fname;
-          config_fname = new_path;
-        }
-
-        // Load configuration only if the configuration file exists.
-        FILE* const in = ACE_OS::fopen(config_fname.c_str(), ACE_TEXT("r"));
-        if (!in) {
-          if (log_level >= LogLevel::Error) {
-            ACE_ERROR((LM_ERROR,
-                       "(%P|%t) ERROR: Service_Participant::get_domain_participant_factory: "
-                       "could not find config file \"%s\": %p\n",
-                       config_fname.c_str(), ACE_TEXT("fopen")));
-          }
-          return DDS::DomainParticipantFactory::_nil();
-
-        } else {
-          ACE_OS::fclose(in);
-
-          if (log_level >= LogLevel::Info) {
-            ACE_DEBUG((LM_INFO,
-                       "(%P|%t) INFO: Service_Participant::get_domain_participant_factory: "
-                       "Going to load configuration from <%s>\n",
-                       config_fname.c_str()));
-          }
-
-          if (this->load_configuration(config_fname) != 0) {
-            if (log_level >= LogLevel::Error) {
-              ACE_ERROR((LM_ERROR,
-                         "(%P|%t) ERROR: Service_Participant::get_domain_participant_factory: "
-                         "load_configuration() failed.\n"));
-            }
-            return DDS::DomainParticipantFactory::_nil();
-          }
-        }
-      }
-
-      config_reader_listener_->on_data_available(config_reader_);
-
 #if OPENDDS_POOL_ALLOCATOR
       // For non-FACE tests, configure pool
       configure_pool();
@@ -634,6 +574,9 @@ void Service_Participant::parse_env(const String& p)
 
 int Service_Participant::parse_args(int& argc, ACE_TCHAR* argv[])
 {
+  int retval = 0;
+  bool config_file_loaded = false;
+
   // Process logging options first, so they are in effect if we need to log
   // while processing other options.
   ACE_Arg_Shifter log_arg_shifter(argc, argv);
@@ -650,18 +593,68 @@ int Service_Participant::parse_args(int& argc, ACE_TCHAR* argv[])
       config_reader_listener_->on_data_available(config_reader_);
       log_arg_shifter.consume_arg();
 
+    } else if ((currentArg = log_arg_shifter.get_the_parameter(ACE_TEXT("-DCPSSingleConfigFile"))) != 0) {
+      config_store_->set_string("CommonDCPSSingleConfigFile", ACE_TEXT_ALWAYS_CHAR(currentArg));
+      config_reader_listener_->on_data_available(config_reader_);
+      log_arg_shifter.consume_arg();
+
     } else {
       log_arg_shifter.ignore_arg();
     }
   }
 
+  // Change the default to false in OpenDDS 4.
+  const bool single_config_file = config_store_->get_boolean("CommonDCPSSingleConfigFile", true);
+  String single_config_file_name;
+
   ACE_Arg_Shifter arg_shifter(argc, argv);
   while (arg_shifter.is_anything_left()) {
 
     const String current = ACE_TEXT_ALWAYS_CHAR(arg_shifter.get_current());
-    if (toupper(current.substr(0, 5)) == "-DCPS" || toupper(current.substr(0, 11)) == "-FEDERATION") {
+    if (current == "-DCPSConfigFile") {
       arg_shifter.consume_arg();
       if (!arg_shifter.is_anything_left()) {
+        if (log_level >= LogLevel::Error) {
+          ACE_ERROR((LM_ERROR,
+                     "(%P|%t) ERROR: Service_Participant::parse_args: %C requires a parameter\n",
+                     current.c_str()));
+        }
+        retval = -1;
+        break;
+      }
+      if (arg_shifter.is_parameter_next()) {
+        const String filename = ACE_TEXT_ALWAYS_CHAR(arg_shifter.get_current());
+        config_store_->set("CommonDCPSConfigFile", filename);
+        config_reader_listener_->on_data_available(config_reader_);
+        arg_shifter.consume_arg();
+
+        if (single_config_file) {
+          single_config_file_name = filename;
+        } else {
+          if (process_config_file(filename, true)) {
+            config_file_loaded = true;
+          } else {
+            retval = -1;
+          }
+        }
+      } else {
+        if (log_level >= LogLevel::Error) {
+          ACE_ERROR((LM_ERROR,
+                     "(%P|%t) ERROR: Service_Participant::parse_args: %C requires a parameter\n",
+                     current.c_str()));
+        }
+        retval = -1;
+        arg_shifter.ignore_arg();
+      }
+    } else if (toupper(current.substr(0, 5)) == "-DCPS" || toupper(current.substr(0, 11)) == "-FEDERATION") {
+      arg_shifter.consume_arg();
+      if (!arg_shifter.is_anything_left()) {
+        if (log_level >= LogLevel::Error) {
+          ACE_ERROR((LM_ERROR,
+                     "(%P|%t) ERROR: Service_Participant::parse_args: %C requires a parameter\n",
+                     current.c_str()));
+        }
+        retval = -1;
         break;
       }
       const String key = "COMMON" + current;
@@ -670,11 +663,23 @@ int Service_Participant::parse_args(int& argc, ACE_TCHAR* argv[])
         config_reader_listener_->on_data_available(config_reader_);
         arg_shifter.consume_arg();
       } else {
+        if (log_level >= LogLevel::Error) {
+          ACE_ERROR((LM_ERROR,
+                     "(%P|%t) ERROR: Service_Participant::parse_args: %C requires a parameter\n",
+                     current.c_str()));
+        }
+        retval = -1;
         arg_shifter.ignore_arg();
       }
     } else if (current.substr(0, 8) == "-OpenDDS") {
       arg_shifter.consume_arg();
       if (!arg_shifter.is_anything_left()) {
+        if (log_level >= LogLevel::Error) {
+          ACE_ERROR((LM_ERROR,
+                     "(%P|%t) ERROR: Service_Participant::parse_args: %C requires a parameter\n",
+                     current.c_str()));
+        }
+        retval = -1;
         break;
       }
       const String key = current.substr(8);
@@ -683,6 +688,12 @@ int Service_Participant::parse_args(int& argc, ACE_TCHAR* argv[])
         config_reader_listener_->on_data_available(config_reader_);
         arg_shifter.consume_arg();
       } else {
+        if (log_level >= LogLevel::Error) {
+          ACE_ERROR((LM_ERROR,
+                     "(%P|%t) ERROR: Service_Participant::parse_args: %C requires a parameter\n",
+                     current.c_str()));
+        }
+        retval = -1;
         arg_shifter.ignore_arg();
       }
     } else {
@@ -690,8 +701,195 @@ int Service_Participant::parse_args(int& argc, ACE_TCHAR* argv[])
     }
   }
 
+  if (single_config_file && !single_config_file_name.empty()) {
+    if (process_config_file(single_config_file_name, false)) {
+      config_file_loaded = true;
+    } else {
+      retval = -1;
+    }
+  }
+
+  if (!config_file_loaded) {
+    const String default_configuration_file = config_store_->get(DEFAULT_CONFIGURATION_FILE,
+                                                                 DEFAULT_CONFIGURATION_FILE_default);
+    if (!default_configuration_file.empty()) {
+      if (!process_config_file(default_configuration_file, !single_config_file)) {
+        retval = -1;
+      }
+    }
+  }
+
+  // Register static discovery.
+  add_discovery(static_rchandle_cast<Discovery>(StaticDiscovery::instance()));
+
+  // load any discovery configuration templates before rtps discovery
+  // this will populate the domain_range_templates_
+  int status = load_domain_ranges();
+
+  if (status != 0) {
+    if (log_level >= LogLevel::Error) {
+      ACE_ERROR((LM_ERROR,
+                 "(%P|%t) ERROR: Service_Participant::parse_args: "
+                 "load_domain_ranges() returned %d\n",
+                 status));
+    }
+    return -1;
+  }
+
+
+  // Domain config is loaded after Discovery (see below). Since the domain
+  // could be a domain_range that specifies the DiscoveryTemplate, check
+  // for config templates before loading any config information.
+
+  status = this->load_discovery_configuration(RTPS_DISCOVERY_TYPE, false);
+
+  if (status != 0) {
+    if (log_level >= LogLevel::Error) {
+      ACE_ERROR((LM_ERROR,
+                 "(%P|%t) ERROR: Service_Participant::parse_args: "
+                 "load_discovery_configuration() returned %d\n",
+                 status));
+    }
+    return -1;
+  }
+
+  status = this->load_discovery_configuration(REPO_DISCOVERY_TYPE, false);
+
+  if (status != 0) {
+    if (log_level >= LogLevel::Error) {
+      ACE_ERROR((LM_ERROR,
+                 "(%P|%t) ERROR: Service_Participant::parse_args: "
+                 "load_discovery_configuration() returned %d\n",
+                 status));
+    }
+    return -1;
+  }
+
+  status = TransportRegistry::instance()->load_transport_configuration();
+
+  if (status != 0) {
+    if (log_level >= LogLevel::Error) {
+      ACE_ERROR((LM_ERROR,
+                 "(%P|%t) ERROR: Service_Participant::parse_args: "
+                 "load_transport_configuration () returned %d\n",
+                 status));
+    }
+    return -1;
+  }
+
+  const String global_transport_config = config_store_->get(COMMON_DCPS_GLOBAL_TRANSPORT_CONFIG,
+                                                            COMMON_DCPS_GLOBAL_TRANSPORT_CONFIG_default);
+  if (!global_transport_config.empty()) {
+    TransportConfig_rch config = TransportRegistry::instance()->get_config(global_transport_config);
+    if (config) {
+      TransportRegistry::instance()->global_config(config);
+    } else {
+      if (log_level >= LogLevel::Error) {
+        ACE_ERROR((LM_ERROR,
+                   "(%P|%t) ERROR: Service_Participant::parse_args: "
+                   "Unable to locate specified global transport config: %C\n",
+                   global_transport_config.c_str()));
+      }
+      return -1;
+    }
+  }
+
+  // Needs to be loaded after the [rtps_discovery/*] and [repository/*]
+  // sections to allow error reporting on bad discovery config names.
+  // Also loaded after the transport configuration so that
+  // DefaultTransportConfig within [domain/*] can use TransportConfig objects.
+  status = load_domain_configuration();
+
+  if (status != 0) {
+    if (log_level >= LogLevel::Error) {
+      ACE_ERROR((LM_ERROR,
+                 "(%P|%t) ERROR: Service_Participant::parse_args: "
+                 "load_domain_configuration () returned %d\n",
+                 status));
+    }
+    return -1;
+  }
+
+  // Needs to be loaded after transport configs and instances and domains.
+  try {
+    status = StaticDiscovery::instance()->load_configuration();
+
+    if (status != 0) {
+      if (log_level >= LogLevel::Error) {
+        ACE_ERROR((LM_ERROR,
+                   "(%P|%t) ERROR: Service_Participant::parse_args: "
+                   "load_discovery_configuration() returned %d\n",
+                   status));
+      }
+      return -1;
+    }
+  } catch (const CORBA::BAD_PARAM& ex) {
+    ex._tao_print_exception("Exception caught in Service_Participant::parse_args: "
+      "trying to load_discovery_configuration()");
+    return -1;
+  }
+
   // Indicates successful parsing of the command line
-  return 0;
+  return retval;
+}
+
+bool
+Service_Participant::process_config_file(const String& config_name,
+                                         bool allow_overwrite)
+{
+  if (config_name.empty()) {
+    if (log_level >= LogLevel::Error) {
+      ACE_DEBUG((LM_INFO,
+                 "(%P|%t) ERROR: Service_Participant::process_config_file: "
+                 "configuration file name is empty.\n"));
+    }
+    return false;
+  }
+
+  String config_fname = config_name;
+
+  // Convenient way to run tests in a different place from ini files.
+  const char* const config_dir = ACE_OS::getenv("OPENDDS_CONFIG_DIR");
+  if (config_dir && config_dir[0]) {
+    String new_path = config_dir;
+    new_path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
+    new_path += config_fname;
+    config_fname = new_path;
+  }
+
+  // Load configuration only if the configuration file exists.
+  FILE* const in = ACE_OS::fopen(config_fname.c_str(), ACE_TEXT("r"));
+  if (!in) {
+    if (log_level >= LogLevel::Error) {
+      ACE_ERROR((LM_ERROR,
+                 "(%P|%t) ERROR: Service_Participant::process_config_file: "
+                 "could not find config file \"%C\": %p\n",
+                 config_fname.c_str(), ACE_TEXT("fopen")));
+    }
+    return false;
+  }
+
+  ACE_OS::fclose(in);
+
+  if (log_level >= LogLevel::Info) {
+    ACE_DEBUG((LM_INFO,
+               "(%P|%t) INFO: Service_Participant::process_config_file: "
+               "Going to load configuration from \"%C\"\n",
+               config_fname.c_str()));
+  }
+
+  if (load_configuration(config_fname, allow_overwrite) != 0) {
+    if (log_level >= LogLevel::Error) {
+      ACE_ERROR((LM_ERROR,
+                 "(%P|%t) ERROR: Service_Participant::process_config_file: "
+                 "load_configuration() failed.\n"));
+    }
+    return false;
+  }
+
+  config_reader_listener_->on_data_available(config_reader_);
+
+  return true;
 }
 
 void
@@ -1520,7 +1718,8 @@ Service_Participant::register_discovery_type(const char* section_name,
 }
 
 int
-Service_Participant::load_configuration(const String& config_fname)
+Service_Participant::load_configuration(const String& config_fname,
+                                        bool allow_overwrite)
 {
   ACE_Configuration_Heap cf;
   int status = 0;
@@ -1542,114 +1741,19 @@ Service_Participant::load_configuration(const String& config_fname)
                       status),
                      -1);
   } else {
-    status = this->load_configuration(cf, ACE_TEXT_CHAR_TO_TCHAR(config_fname.c_str()));
+    status = this->load_configuration(cf, ACE_TEXT_CHAR_TO_TCHAR(config_fname.c_str()), allow_overwrite);
   }
 
   return status;
 }
 
 int
-Service_Participant::load_configuration(
-  ACE_Configuration_Heap& config,
-  const ACE_TCHAR* filename)
+Service_Participant::load_configuration(ACE_Configuration_Heap& config,
+                                        const ACE_TCHAR* filename,
+                                        bool allow_overwrite)
 {
-  process_section(*config_store_, config_reader_, config_reader_listener_, "", config, config.root_section(), ACE_TEXT_ALWAYS_CHAR(filename), false);
-
-  // Register static discovery.
-  add_discovery(static_rchandle_cast<Discovery>(StaticDiscovery::instance()));
-
-  // load any discovery configuration templates before rtps discovery
-  // this will populate the domain_range_templates_
-  int status = load_domain_ranges();
-
-  if (status != 0) {
-    if (log_level >= LogLevel::Error) {
-      ACE_ERROR((LM_ERROR,
-                 "(%P|%t) ERROR: Service_Participant::load_configuration: "
-                 "load_domain_ranges() returned %d\n",
-                 status));
-    }
-    return -1;
-  }
-
-  // Domain config is loaded after Discovery (see below). Since the domain
-  // could be a domain_range that specifies the DiscoveryTemplate, check
-  // for config templates before loading any config information.
-
-  status = this->load_discovery_configuration(RTPS_DISCOVERY_TYPE, false);
-
-  if (status != 0) {
-    ACE_ERROR_RETURN((LM_ERROR,
-                      ACE_TEXT("(%P|%t) ERROR: Service_Participant::load_configuration ")
-                      ACE_TEXT("load_discovery_configuration() returned %d\n"),
-                      status),
-                     -1);
-  }
-
-  status = this->load_discovery_configuration(REPO_DISCOVERY_TYPE, false);
-
-  if (status != 0) {
-    ACE_ERROR_RETURN((LM_ERROR,
-                      ACE_TEXT("(%P|%t) ERROR: Service_Participant::load_configuration ")
-                      ACE_TEXT("load_discovery_configuration() returned %d\n"),
-                      status),
-                     -1);
-  }
-
-  status = TransportRegistry::instance()->load_transport_configuration(ACE_TEXT_ALWAYS_CHAR(filename));
-  const String global_transport_config = config_store_->get(COMMON_DCPS_GLOBAL_TRANSPORT_CONFIG,
-                                                            COMMON_DCPS_GLOBAL_TRANSPORT_CONFIG_default);
-  if (!global_transport_config.empty()) {
-    TransportConfig_rch config = TransportRegistry::instance()->get_config(global_transport_config);
-    if (config) {
-      TransportRegistry::instance()->global_config(config);
-    } else {
-      ACE_ERROR_RETURN((LM_ERROR,
-                        ACE_TEXT("(%P|%t) ERROR: Service_Participant::load_configuration ")
-                        ACE_TEXT("Unable to locate specified global transport config: %C\n"),
-                        global_transport_config.c_str()),
-                       -1);
-    }
-  }
-
-  if (status != 0) {
-    ACE_ERROR_RETURN((LM_ERROR,
-                      ACE_TEXT("(%P|%t) ERROR: Service_Participant::load_configuration ")
-                      ACE_TEXT("load_transport_configuration () returned %d\n"),
-                      status),
-                     -1);
-  }
-
-  // Needs to be loaded after the [rtps_discovery/*] and [repository/*]
-  // sections to allow error reporting on bad discovery config names.
-  // Also loaded after the transport configuration so that
-  // DefaultTransportConfig within [domain/*] can use TransportConfig objects.
-  status = load_domain_configuration();
-
-  if (status != 0) {
-    ACE_ERROR_RETURN((LM_ERROR,
-                      ACE_TEXT("(%P|%t) ERROR: Service_Participant::load_configuration ")
-                      ACE_TEXT("load_domain_configuration () returned %d\n"),
-                      status),
-                     -1);
-  }
-
-  // Needs to be loaded after transport configs and instances and domains.
-  try {
-    status = StaticDiscovery::instance()->load_configuration();
-
-    if (status != 0) {
-      ACE_ERROR_RETURN((LM_ERROR,
-        ACE_TEXT("(%P|%t) ERROR: Service_Participant::load_configuration ")
-        ACE_TEXT("load_discovery_configuration() returned %d\n"),
-        status),
-        -1);
-    }
-  } catch (const CORBA::BAD_PARAM& ex) {
-    ex._tao_print_exception("Exception caught in Service_Participant::load_configuration: "
-      "trying to load_discovery_configuration()");
-    return -1;
-  }
+  process_section(*config_store_, config_reader_, config_reader_listener_, "", config, config.root_section(), allow_overwrite);
+  TransportRegistry::instance()->add_config_alias(ACE_TEXT_ALWAYS_CHAR(filename), "$file");
 
   return 0;
 }
