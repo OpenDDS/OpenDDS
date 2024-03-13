@@ -29,10 +29,12 @@ my $cfg = new PerlACE::ConfigList->check_config('NO_BUILT_IN_TOPICS')
           ? 'test1_nobits.ini' : 'test1.ini';
 
 $test->process('ConfigFile', 'ConfigFile', "-DCPSConfigFile $cfg -OpenDDSMyConfigKey1 value1");
+$test->process('ConfigFile2', 'ConfigFile', "-DCPSSingleConfigFile 0 -DCPSConfigFile test0.ini -DCPSConfigFile $cfg");
 
 $ENV{'OPENDDS_MY_CONFIG_KEY2'} = "value2";
 
 $test->start_process('ConfigFile');
+$test->start_process('ConfigFile2');
 
 my $status = $test->finish(5);
 

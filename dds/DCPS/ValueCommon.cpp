@@ -6,6 +6,7 @@
 #include "DCPS/DdsDcps_pch.h"
 
 #include "ValueCommon.h"
+#include "debug.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -52,13 +53,17 @@ void MapBitmaskHelper::pairs(const OPENDDS_VECTOR(Pair)& pairs)
   }
 }
 
-bool MapBitmaskHelper::get_value(ACE_CDR::ULongLong& value, const OPENDDS_VECTOR(const char*)& names) const
+bool MapBitmaskHelper::get_value(ACE_CDR::ULongLong& value, const OPENDDS_VECTOR(String)& names) const
 {
   ACE_CDR::ULongLong rtn = 0;
   for (size_t i = 0; i < names.size(); ++i) {
     const ntp_iterator it = name_to_pos_.find(names.at(i));
     if (it == name_to_pos_.end()) {
-      return false;
+      if (log_level >= LogLevel::Warning) {
+        ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: MapBitmaskHelper::get_value:"
+                   " Ignore unknown flag: %C\n", names.at(i).c_str()));
+      }
+      continue;
     }
     rtn |= 1ull << it->second;
   }
@@ -66,15 +71,15 @@ bool MapBitmaskHelper::get_value(ACE_CDR::ULongLong& value, const OPENDDS_VECTOR
   return true;
 }
 
-size_t MapBitmaskHelper::get_names(OPENDDS_VECTOR(const char*)& names, ACE_CDR::ULongLong value) const
+size_t MapBitmaskHelper::get_names(OPENDDS_VECTOR(String)& names, ACE_CDR::ULongLong value) const
 {
   size_t rtn_size = 0;
-  OPENDDS_VECTOR(const char*) rtn;
+  OPENDDS_VECTOR(String) rtn;
   for (ACE_CDR::UShort i = 0; i < bit_bound_; ++i) {
     const ptn_iterator it = pos_to_name_.find(i);
     if ((it != pos_to_name_.end()) && (value & 1ull << i)) {
       rtn.push_back(it->second);
-      rtn_size += std::strlen(it->second) + 1; // +1 for a delimiter like a pipe ('|') character
+      rtn_size += it->second.size() + 1; // +1 for a delimiter like a pipe ('|') character
     }
   }
   names = rtn;
@@ -84,7 +89,7 @@ size_t MapBitmaskHelper::get_names(OPENDDS_VECTOR(const char*)& names, ACE_CDR::
 String bitmask_to_string(ACE_CDR::ULongLong value, const BitmaskHelper& helper)
 {
   String rtn;
-  OPENDDS_VECTOR(const char*) names;
+  OPENDDS_VECTOR(String) names;
   const size_t size = helper.get_names(names, value);
   rtn.reserve(size);
 
@@ -94,6 +99,22 @@ String bitmask_to_string(ACE_CDR::ULongLong value, const BitmaskHelper& helper)
       rtn += '|';
     }
   }
+  return rtn;
+}
+
+ACE_CDR::ULongLong string_to_bitmask(const String& flags, const BitmaskHelper& helper)
+{
+  // The flags string has format "FLAG_A|FLAG_B|FLAG_C"
+  OPENDDS_VECTOR(String) names;
+  size_t start = 0, end = 0;
+  while ((end = flags.find("|", start)) != String::npos) {
+    names.push_back(flags.substr(start, end - start));
+    start = end + 1;
+  }
+  names.push_back(flags.substr(start));
+
+  ACE_CDR::ULongLong rtn = 0;
+  helper.get_value(rtn, names);
   return rtn;
 }
 

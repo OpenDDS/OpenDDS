@@ -166,7 +166,7 @@ bool TransportRegistry::process_config(const String& config_id)
 }
 
 int
-TransportRegistry::load_transport_configuration(const String& file_name)
+TransportRegistry::load_transport_configuration()
 {
   // Record the transport instances created, so we can place them
   // in the implicit transport configuration for this file.
@@ -208,13 +208,12 @@ TransportRegistry::load_transport_configuration(const String& file_name)
   // Create and populate the default configuration for this
   // file with all the instances from this file.
   if (!instances.empty()) {
-    TransportConfig_rch config = create_config(file_name);
+    TransportConfig_rch config = create_config("$file");
     if (!config) {
       if (log_level >= LogLevel::Error) {
         ACE_ERROR((LM_ERROR,
-                   "(%P|%t) TransportRegistry::load_transport_configuration: "
-                   "Unable to create default transport config.\n",
-                   file_name.c_str()));
+                   "(%P|%t) ERROR: TransportRegistry::load_transport_configuration: "
+                   "Unable to create default transport config.\n"));
       }
       return -1;
     }
@@ -343,7 +342,15 @@ TransportConfig_rch
 TransportRegistry::get_config(const OPENDDS_STRING& name) const
 {
   GuardType guard(lock_);
-  ConfigMap::const_iterator found = config_map_.find(name);
+
+  String real_name = name;
+
+  AliasMap::const_iterator pos = alias_map_.find(real_name);
+  if (pos != alias_map_.end()) {
+    real_name = pos->second;
+  }
+
+  ConfigMap::const_iterator found = config_map_.find(real_name);
   if (found != config_map_.end()) {
     return found->second;
   }
@@ -364,6 +371,14 @@ TransportRegistry::bind_config(const TransportConfig_rch& cfg,
   }
 
   ei->transport_config(cfg);
+}
+
+void
+TransportRegistry::add_config_alias(const String& key,
+                                    const String& value)
+{
+  GuardType guard(lock_);
+  alias_map_[key] = value;
 }
 
 TransportConfig_rch

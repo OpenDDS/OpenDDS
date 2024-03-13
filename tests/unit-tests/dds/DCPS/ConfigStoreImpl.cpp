@@ -522,11 +522,11 @@ TEST(dds_DCPS_ConfigStoreImpl, process_section)
 
   EXPECT_CALL(*listener.get(), on_data_available(reader)).Times(3);
 
-  process_section(config_store, reader, listener, "MYPREFIX", config, config.root_section(), "my file name", false);
+  process_section(config_store, reader, listener, "MYPREFIX", config, config.root_section(), false);
 
   EXPECT_EQ(config_store.get("MYPREFIX_MY_SECTION", "default"), "@my_section");
   EXPECT_EQ(config_store.get("MYPREFIX_MY_SECTION_MYKEY", "default"), "myvalue");
-  EXPECT_EQ(config_store.get("MYPREFIX_MY_SECTION_ANOTHERKEY", "default"), "my file name");
+  EXPECT_EQ(config_store.get("MYPREFIX_MY_SECTION_ANOTHERKEY", "default"), "$file");
   EXPECT_EQ(config_store.get("MYPREFIX_MY_SECTION_THIRDKEY", "default"), "firstvalue");
 }
 
@@ -543,10 +543,10 @@ TEST(dds_DCPS_ConfigStoreImpl, process_section_allow_overwrite)
   config.set_string_value(section_key, ACE_TEXT("anotherkey"), ACE_TEXT("$file"));
   config.set_string_value(section_key, ACE_TEXT("thirdkey"), ACE_TEXT("secondvalue"));
 
-  process_section(config_store, ConfigReader_rch(), ConfigReaderListener_rch(), "MYPREFIX", config, config.root_section(), "my file name", true);
+  process_section(config_store, ConfigReader_rch(), ConfigReaderListener_rch(), "MYPREFIX", config, config.root_section(), true);
 
   EXPECT_EQ(config_store.get("MYPREFIX_MY_SECTION_MYKEY", "default"), "myvalue");
-  EXPECT_EQ(config_store.get("MYPREFIX_MY_SECTION_ANOTHERKEY", "default"), "my file name");
+  EXPECT_EQ(config_store.get("MYPREFIX_MY_SECTION_ANOTHERKEY", "default"), "$file");
   EXPECT_EQ(config_store.get("MYPREFIX_MY_SECTION_THIRDKEY", "default"), "secondvalue");
 }
 
@@ -584,11 +584,11 @@ TEST(dds_DCPS_ConfigStoreImpl, get_section_values)
 
   EXPECT_CALL(*listener.get(), on_data_available(reader)).Times(4);
 
-  process_section(config_store, reader, listener, "MYPREFIX", config, config.root_section(), "my file name", false);
+  process_section(config_store, reader, listener, "MYPREFIX", config, config.root_section(), false);
 
   ConfigStoreImpl::StringMap expected_sm;
   expected_sm["MYKEY"] = "myvalue";
-  expected_sm["ANOTHERKEY"] = "my file name";
+  expected_sm["ANOTHERKEY"] = "$file";
   expected_sm["THIRDKEY"] = "secondvalue";
 
   const ConfigStoreImpl::StringMap sm = config_store.get_section_values("MYPREFIX_MY_SECTION");

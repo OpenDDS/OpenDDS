@@ -99,6 +99,10 @@ Parser::parse(const char* filename)
   if (status)
     return status;
 
+  const DDS::DomainParticipantFactory_var dpf = TheParticipantFactory;
+  // For the configuration to be loaded.
+  ACE_UNUSED_ARG(dpf);
+
   for (ConnectionMap::const_iterator pos = connection_map_.begin(), limit = connection_map_.end();
        pos != limit;
        ++pos) {
