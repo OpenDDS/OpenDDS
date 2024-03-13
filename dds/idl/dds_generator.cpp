@@ -129,6 +129,39 @@ string dds_generator::module_scope_helper(UTL_ScopedName* sn, const char* sep, E
   return sname;
 }
 
+bool dds_generator::gen_enum_helper(AST_Enum*, UTL_ScopedName* name,
+  const std::vector<AST_EnumVal*>& contents, const char*)
+{
+  // The EnumHelper is used across multiple generators.
+  NamespaceGuard ng;
+  const std::string underscores = scoped_helper(name, "_"),
+    scope = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11
+            ? scoped(name) + "::"
+            : module_scope(name),
+    helper_decl = "const EnumHelper* gen_" + underscores + "_helper",
+    decl_prefix = (be_global->export_macro() == "")
+                  ? std::string("extern ")
+                  : std::string(be_global->export_macro().c_str()) + " extern ";
+
+  be_global->header_ << decl_prefix << helper_decl << ";\n";
+
+  be_global->impl_ <<
+    "const ListEnumHelper::Pair gen_" << underscores << "_pairs[] = {\n";
+
+  for (size_t i = 0; i < contents.size(); ++i) {
+    const std::string idl_name = canonical_name(contents[i]);
+    be_global->impl_ <<
+      "  {\"" << idl_name << "\", static_cast<ACE_CDR::Long>(" << scope << idl_name << ")},\n";
+  }
+
+  be_global->impl_ <<
+    "  {0, 0}};\n"
+    "const ListEnumHelper gen_" << underscores << "_helper_impl(gen_" << underscores << "_pairs);\n" <<
+    helper_decl << " = &gen_" << underscores << "_helper_impl;\n\n";
+  return true;
+}
+
+
 void composite_generator::gen_prologue()
 {
   for (vector<dds_generator*>::iterator it(components_.begin());
@@ -379,7 +412,7 @@ string type_to_default(const std::string& indent, AST_Type* type, const string& 
     // Must be changed, if support for @default_literal is desired.
     AST_Enum* enu = dynamic_cast<AST_Enum*>(actual_type);
     UTL_ScopeActiveIterator i(enu, UTL_Scope::IK_decls);
-    AST_EnumVal *item = dynamic_cast<AST_EnumVal*>(i.item());
+    AST_EnumVal* item = dynamic_cast<AST_EnumVal*>(i.item());
     if (use_cxx11) {
       def_val = scoped(type->name()) + "::" + item->local_name()->get_string();
     } else {

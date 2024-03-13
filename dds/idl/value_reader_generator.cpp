@@ -221,40 +221,21 @@ namespace {
 
 bool value_reader_generator::gen_enum(AST_Enum*,
                                       UTL_ScopedName* name,
-                                      const std::vector<AST_EnumVal*>& contents,
+                                      const std::vector<AST_EnumVal*>&,
                                       const char*)
 {
-  be_global->add_include("dds/DCPS/Util.h", BE_GlobalData::STREAM_H);
   be_global->add_include("dds/DCPS/ValueReader.h", BE_GlobalData::STREAM_H);
 
   const std::string type_name = scoped(name);
 
-  {
-    NamespaceGuard guard;
-
-    Function read("vread", "bool");
-    read.addArg("value_reader", "OpenDDS::DCPS::ValueReader&");
-    read.addArg("value", type_name + "&");
-    read.endArgs();
-
-    be_global->impl_ <<
-      "  static const ListEnumHelper::Pair pairs[] = {";
-
-    for (size_t i = 0; i != contents.size(); ++i) {
-      if (i) {
-        be_global->impl_ << ',';
-      }
-      const std::string idl_name = canonical_name(contents[i]);
-      be_global->impl_ <<
-        '{' << '"' << idl_name << '"' << ',' << contents[i]->constant_value()->ev()->u.eval << '}';
-    }
-
-    be_global->impl_ <<
-      ",{0,0}};\n"
-      "  ListEnumHelper helper(pairs);\n"
-      "  return value_reader.read_enum(value, helper);\n";
-  }
-
+  NamespaceGuard guard;
+  Function read("vread", "bool");
+  read.addArg("value_reader", "OpenDDS::DCPS::ValueReader&");
+  read.addArg("value", type_name + "&");
+  read.endArgs();
+  be_global->impl_ <<
+    "  return value_reader.read_enum(value, * ::OpenDDS::DCPS::gen_"
+    << scoped_helper(name, "_") << "_helper);\n";
   return true;
 }
 

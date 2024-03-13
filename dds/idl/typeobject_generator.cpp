@@ -589,7 +589,7 @@ typeobject_generator::gen_epilogue()
     be_global->impl_ <<
       "XTypes::TypeObject OPENDDS_IDL_FILE_SPECIFIC(minimal_to, " << idx << ")()\n"
       "{\n"
-      "  const unsigned char to_bytes[] = { ";
+      "  static const unsigned char to_bytes[] = { ";
     dump_bytes(pos->second);
     be_global->add_include("<stdexcept>", BE_GlobalData::STREAM_CPP);
     be_global->impl_ <<
@@ -1177,7 +1177,7 @@ typeobject_generator::generate_union_type_identifier(AST_Type* type)
     for (unsigned long j = 0; j < branch->label_list_length(); ++j) {
       AST_UnionLabel* label = branch->label(j);
       if (label->label_kind() != AST_UnionLabel::UL_default) {
-        minimal_member.common.label_seq.append(to_long(*label->label_val()->ev()));
+        minimal_member.common.label_seq.append(to_long(*label->label_val()->ev())); //TODO @value
       }
     }
     minimal_member.common.label_seq.sort();
@@ -1244,9 +1244,13 @@ typeobject_generator::generate_enum_type_identifier(AST_Type* type)
   complete_to.complete.enumerated_type.header.common.bit_bound = 32;
   complete_to.complete.enumerated_type.header.detail.type_name = canonical_name(type->name());
 
+  ACE_CDR::Long last_value = 0;
   for (size_t i = 0; i != contents.size(); ++i) {
     OpenDDS::XTypes::MinimalEnumeratedLiteral minimal_lit;
-    minimal_lit.common.value = contents[i]->constant_value()->ev()->u.eval;
+    if (!be_global->value(contents[i], minimal_lit.common.value)) {
+      minimal_lit.common.value = (i == 0) ? 0 : last_value + 1;
+    }
+    last_value = minimal_lit.common.value;
     minimal_lit.common.flags = (i == default_literal_idx ? OpenDDS::XTypes::IS_DEFAULT : 0);
     const std::string name = canonical_name(contents[i]->local_name());
     OpenDDS::XTypes::hash_member_name(minimal_lit.detail.name_hash, name);

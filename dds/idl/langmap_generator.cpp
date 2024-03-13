@@ -208,7 +208,7 @@ struct GeneratorBase
       return "";
     }
 
-    switch (the_union->udisc_type ())
+    switch (the_union->udisc_type())
       {
 #if OPENDDS_HAS_EXPLICIT_INTS
       case AST_Expression::EV_int8:

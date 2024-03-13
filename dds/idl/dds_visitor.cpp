@@ -362,6 +362,9 @@ dds_visitor::visit_enum(AST_Enum* node)
   scope2vector(contents, node, AST_Decl::NT_enum_val);
 
   if (!java_ts_only_) {
+    if (!node->imported()) {
+      error_ |= !dds_generator::gen_enum_helper(node, node->name(), contents, node->repoID());
+    }
     error_ |= !gen_target_.gen_enum(node, node->name(), contents, node->repoID());
   }
 
