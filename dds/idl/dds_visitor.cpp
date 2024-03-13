@@ -116,7 +116,7 @@ dds_visitor::visit_root(AST_Root* node)
   }
   gen_target_.gen_epilogue();
 
-  return (error_) ? -1 : 0;
+  return error_ ? -1 : 0;
 }
 
 int
@@ -165,8 +165,6 @@ dds_visitor::visit_module(AST_Module* node)
 
   BE_Comment_Guard g("MODULE", name);
 
-  ACE_UNUSED_ARG(g);
-
   if (this->visit_scope(node) == -1) {
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%N:%l) dds_visitor::visit_module -")
@@ -182,8 +180,6 @@ dds_visitor::visit_interface(AST_Interface* node)
   const char* name = node->local_name()->get_string();
 
   BE_Comment_Guard g("INTERFACE", name);
-
-  ACE_UNUSED_ARG(g);
 
   vector<AST_Interface*> inherits(node->n_inherits());
   for (int i = 0; i < node->n_inherits(); ++i) {
@@ -223,8 +219,6 @@ dds_visitor::visit_structure(AST_Structure* node)
   const char* name = node->local_name()->get_string();
 
   BE_Comment_Guard g("STRUCT", name);
-  ACE_UNUSED_ARG(g);
-
   // Check That Sample Keys Are Valid
   TopicKeys topic_keys(node);
   try {
@@ -338,8 +332,6 @@ dds_visitor::visit_exception(AST_Exception* node)
 
   BE_Comment_Guard g("EXCEPTION", name);
 
-  ACE_UNUSED_ARG(g);
-
   return 0;
 }
 
@@ -349,8 +341,6 @@ dds_visitor::visit_typedef(AST_Typedef* node)
   const char* name = node->local_name()->get_string();
 
   BE_Comment_Guard g("TYPEDEF", name);
-
-  ACE_UNUSED_ARG(g);
 
   if (!java_ts_only_) {
     error_ |= !gen_target_.gen_typedef(node, node->name(), node->base_type(),
@@ -366,8 +356,6 @@ dds_visitor::visit_enum(AST_Enum* node)
   const char* name = node->local_name()->get_string();
 
   BE_Comment_Guard g("ENUM", name);
-
-  ACE_UNUSED_ARG(g);
 
   vector<AST_EnumVal*> contents;
 
@@ -385,8 +373,6 @@ dds_visitor::visit_interface_fwd(AST_InterfaceFwd* node)
 {
   const char* name = node->local_name()->get_string();
   BE_Comment_Guard g("INTERFACE-FWD", name);
-  ACE_UNUSED_ARG(g);
-
   if (!java_ts_only_) {
     error_ |= !gen_target_.gen_interf_fwd(node->name());
   }
@@ -414,8 +400,6 @@ dds_visitor::visit_constant(AST_Constant* node)
 
   BE_Comment_Guard g("CONST", name);
 
-  ACE_UNUSED_ARG(g);
-
   AST_Decl* d = ScopeAsDecl(node->defined_in());
 
   bool nested = d && (d->node_type() == AST_Decl::NT_interface);
@@ -434,8 +418,6 @@ dds_visitor::visit_native(AST_Native* node)
 
   BE_Comment_Guard g("NATIVE", name);
 
-  ACE_UNUSED_ARG(g);
-
   if (!java_ts_only_) {
     error_ |= !gen_target_.gen_native(node, node->name(), node->repoID());
   }
@@ -449,8 +431,6 @@ dds_visitor::visit_union(AST_Union* node)
   const char* name = node->local_name()->get_string();
 
   BE_Comment_Guard g("UNION", name);
-  ACE_UNUSED_ARG(g);
-
   vector<AST_UnionBranch*> branches;
   branches.reserve(node->nfields());
   const Fields fields(node);
@@ -468,6 +448,19 @@ dds_visitor::visit_union(AST_Union* node)
   if (!java_ts_only_) {
     error_ |= !gen_target_.gen_union(node, node->name(), branches, node->disc_type(),
                                      node->repoID());
+  }
+
+  return 0;
+}
+
+int
+dds_visitor::visit_union_fwd(AST_UnionFwd* node)
+{
+  const char* name = node->local_name()->get_string();
+  BE_Comment_Guard g("UNION-FWD", name);
+
+  if (!java_ts_only_) {
+    error_ |= !gen_target_.gen_union_fwd(node, node->name(), node->size_type());
   }
 
   return 0;
@@ -571,19 +564,6 @@ dds_visitor::visit_predefined_type(AST_PredefinedType*)
 int
 dds_visitor::visit_string(AST_String*)
 {
-  return 0;
-}
-
-int
-dds_visitor::visit_union_fwd(AST_UnionFwd* node)
-{
-  const char* name = node->local_name()->get_string();
-  BE_Comment_Guard g("UNION-FWD", name);
-
-  if (!java_ts_only_) {
-    error_ |= !gen_target_.gen_union_fwd(node, node->name(), node->size_type());
-  }
-
   return 0;
 }
 

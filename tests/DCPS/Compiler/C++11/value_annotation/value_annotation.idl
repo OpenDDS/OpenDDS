@@ -1,0 +1,12 @@
+enum TestValueAnnotation {
+  ZERO,
+  ONE,
+  TWO,
+  @value(5) FIVE,
+  SIX,
+  @value(10) TEN
+};
+
+struct UsesAnnotatedEnum {
+  TestValueAnnotation tva;
+};

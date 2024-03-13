@@ -1,0 +1,7 @@
+project: dcpsexe, dcps_test, opendds_cxx11 {
+  exename = *
+  dcps_ts_flags += -SI
+  TypeSupport_Files {
+    value_annotation.idl
+  }
+}
