@@ -335,9 +335,12 @@ bool JsonValueReader<InputStream>::end_element()
 template <typename InputStream>
 bool JsonValueReader<InputStream>::read_boolean(ACE_CDR::Boolean& value)
 {
-  if (peek() == kBool) {
+  const TokenType token = peek();
+  if (token == kBool) {
     value = bool_value_;
     return consume(kBool);
+  } else if (token == kNull) {
+    return consume(kNull);
   }
   return false;
 }
@@ -345,9 +348,12 @@ bool JsonValueReader<InputStream>::read_boolean(ACE_CDR::Boolean& value)
 template <typename InputStream>
 bool JsonValueReader<InputStream>::read_byte(ACE_CDR::Octet& value)
 {
-  if (peek() == kUint) {
+  const TokenType token = peek();
+  if (token == kUint) {
     value = uint_value_;
     return consume(kUint);
+  } else if (token == kNull) {
+    return consume(kNull);
   }
   return false;
 }
@@ -356,13 +362,16 @@ bool JsonValueReader<InputStream>::read_byte(ACE_CDR::Octet& value)
 template <typename InputStream>
 bool JsonValueReader<InputStream>::read_int8(ACE_CDR::Int8& value)
 {
-  switch (peek()) {
+  const TokenType token = peek();
+  switch (token) {
   case kInt:
     value = int_value_;
     return consume(kInt);
   case kUint:
     value = uint_value_;
     return consume(kUint);
+  case kNull:
+    return consume(kNull);
   default:
     return false;
   }
@@ -371,9 +380,12 @@ bool JsonValueReader<InputStream>::read_int8(ACE_CDR::Int8& value)
 template <typename InputStream>
 bool JsonValueReader<InputStream>::read_uint8(ACE_CDR::UInt8& value)
 {
-  if (peek() == kUint) {
+  const TokenType token = peek();
+  if (token == kUint) {
     value = uint_value_;
     return consume(kUint);
+  } else if (token == kNull) {
+    return consume(kNull));
   }
   return false;
 }
@@ -382,14 +394,16 @@ bool JsonValueReader<InputStream>::read_uint8(ACE_CDR::UInt8& value)
 template <typename InputStream>
 bool JsonValueReader<InputStream>::read_int16(ACE_CDR::Short& value)
 {
-  peek();
-  switch (peek())  {
+  const TokenType token = peek();
+  switch (token)  {
   case kInt:
     value = int_value_;
     return consume(kInt);
   case kUint:
     value = uint_value_;
     return consume(kUint);
+  case kNull:
+    return consume(kNull);
   default:
     return false;
   }
@@ -398,9 +412,12 @@ bool JsonValueReader<InputStream>::read_int16(ACE_CDR::Short& value)
 template <typename InputStream>
 bool JsonValueReader<InputStream>::read_uint16(ACE_CDR::UShort& value)
 {
-  if (peek() == kUint) {
+  const TokenType token = peek();
+  if (token == kUint) {
     value = uint_value_;
     return consume(kUint);
+  } else if (token == kNull) {
+    return consume(kNull);
   }
   return false;
 }
@@ -408,13 +425,16 @@ bool JsonValueReader<InputStream>::read_uint16(ACE_CDR::UShort& value)
 template <typename InputStream>
 bool JsonValueReader<InputStream>::read_int32(ACE_CDR::Long& value)
 {
-  switch (peek()) {
+  const TokenType token = peek();
+  switch (token) {
   case kInt:
     value = int_value_;
     return consume(kInt);
   case kUint:
     value = uint_value_;
     return consume(kUint);
+  case kNull:
+    return consume(kNull);
   default:
     return false;
   }
@@ -423,9 +443,12 @@ bool JsonValueReader<InputStream>::read_int32(ACE_CDR::Long& value)
 template <typename InputStream>
 bool JsonValueReader<InputStream>::read_uint32(ACE_CDR::ULong& value)
 {
-  if (peek() == kUint) {
+  const TokenType token = peek();
+  if (token == kUint) {
     value = uint_value_;
     return consume(kUint);
+  } else if (token == kNull) {
+    return consume(kNull);
   }
   return false;
 }
@@ -433,7 +456,8 @@ bool JsonValueReader<InputStream>::read_uint32(ACE_CDR::ULong& value)
 template <typename InputStream>
 bool JsonValueReader<InputStream>::read_int64(ACE_CDR::LongLong& value)
 {
-  switch (peek()) {
+  const TokenType token = peek();
+  switch (token) {
   case kInt64:
     value = int64_value_;
     return consume(kInt64);
@@ -446,6 +470,8 @@ bool JsonValueReader<InputStream>::read_int64(ACE_CDR::LongLong& value)
   case kUint:
     value = uint_value_;
     return consume(kUint);
+  case kNull:
+    return consume(kNull);
   default:
     return false;
   }
@@ -454,13 +480,16 @@ bool JsonValueReader<InputStream>::read_int64(ACE_CDR::LongLong& value)
 template <typename InputStream>
 bool JsonValueReader<InputStream>::read_uint64(ACE_CDR::ULongLong& value)
 {
-  switch (peek()) {
+  const TokenType token = peek();
+  switch (token) {
   case kUint64:
     value = uint64_value_;
     return consume(kUint64);
   case kUint:
     value = uint_value_;
     return consume(kUint);
+  case kNull:
+    return consume(kNull);
   default:
     return false;
   }
@@ -469,7 +498,8 @@ bool JsonValueReader<InputStream>::read_uint64(ACE_CDR::ULongLong& value)
 template <typename InputStream>
 bool JsonValueReader<InputStream>::read_float32(ACE_CDR::Float& value)
 {
-  switch (peek()) {
+  const TokenType token = peek();
+  switch (token) {
   case kDouble:
     value = ACE_CDR::Float(double_value_);
     return consume(kDouble);
@@ -485,6 +515,8 @@ bool JsonValueReader<InputStream>::read_float32(ACE_CDR::Float& value)
   case kInt:
     value = ACE_CDR::Float(int_value_);
     return consume(kUint);
+  case kNull:
+    return consume(kNull);
   default:
     return false;
   }
@@ -493,7 +525,8 @@ bool JsonValueReader<InputStream>::read_float32(ACE_CDR::Float& value)
 template <typename InputStream>
 bool JsonValueReader<InputStream>::read_float64(ACE_CDR::Double& value)
 {
-  switch (peek()) {
+  const TokenType token = peek();
+  switch (token) {
   case kDouble:
     value = double_value_;
     return consume(kDouble);
@@ -509,6 +542,8 @@ bool JsonValueReader<InputStream>::read_float64(ACE_CDR::Double& value)
   case kInt:
     value = int_value_;
     return consume(kUint);
+  case kNull:
+    return consume(kNull);
   default:
     return false;
   }
@@ -517,7 +552,8 @@ bool JsonValueReader<InputStream>::read_float64(ACE_CDR::Double& value)
 template <typename InputStream>
 bool JsonValueReader<InputStream>::read_float128(ACE_CDR::LongDouble& value)
 {
-  switch (peek()) {
+  const TokenType token = peek();
+  switch (token) {
   case kDouble:
     ACE_CDR_LONG_DOUBLE_ASSIGNMENT(value, double_value_);
     return consume(kDouble);
@@ -545,6 +581,8 @@ bool JsonValueReader<InputStream>::read_float128(ACE_CDR::LongDouble& value)
   case kInt:
     ACE_CDR_LONG_DOUBLE_ASSIGNMENT(value, int_value_);
     return consume(kUint);
+  case kNull:
+    return consume(kNull);
   default:
     return false;
   }
@@ -553,9 +591,12 @@ bool JsonValueReader<InputStream>::read_float128(ACE_CDR::LongDouble& value)
 template <typename InputStream>
 bool JsonValueReader<InputStream>::read_fixed(ACE_CDR::Fixed& value)
 {
-  if (peek() == kString) {
+  const TokenType token = peek();
+  if (token == kString) {
     value = ACE_CDR::Fixed::from_string(string_value_.c_str());
     return consume(kString);
+  } else if (token == kNull) {
+    return consume(kNull);
   }
   return false;
 }
@@ -563,11 +604,14 @@ bool JsonValueReader<InputStream>::read_fixed(ACE_CDR::Fixed& value)
 template <typename InputStream>
 bool JsonValueReader<InputStream>::read_char8(ACE_CDR::Char& value)
 {
-  if (peek() == kString) {
+  const TokenType token = peek();
+  if (token == kString) {
     if (string_value_.length() == 1) {
       value = string_value_[0];
       return consume(kString);
     }
+  } else if (token == kNull) {
+    return consume(kNull);
   }
   return false;
 }
@@ -575,7 +619,8 @@ bool JsonValueReader<InputStream>::read_char8(ACE_CDR::Char& value)
 template <typename InputStream>
 bool JsonValueReader<InputStream>::read_char16(ACE_CDR::WChar& value)
 {
-  if (peek() == kString) {
+  const TokenType token = peek();
+  if (token == kString) {
     rapidjson::StringStream source(string_value_.c_str());
     rapidjson::GenericStringBuffer<rapidjson::UTF16<> > target;
 
@@ -589,6 +634,8 @@ bool JsonValueReader<InputStream>::read_char16(ACE_CDR::WChar& value)
       value = target.GetString()[0];
       return consume(kString);
     }
+  } else if (token == kNull) {
+    return consume(kNull);
   }
   return false;
 }
@@ -596,9 +643,12 @@ bool JsonValueReader<InputStream>::read_char16(ACE_CDR::WChar& value)
 template <typename InputStream>
 bool JsonValueReader<InputStream>::read_string(std::string& value)
 {
-  if (peek() == kString) {
+  const TokenType token = peek();
+  if (token == kString) {
     value = string_value_;
     return consume(kString);
+  } else if (token == kNull) {
+    return consume(kNull);
   }
   return false;
 }
@@ -606,7 +656,8 @@ bool JsonValueReader<InputStream>::read_string(std::string& value)
 template <typename InputStream>
 bool JsonValueReader<InputStream>::read_wstring(std::wstring& value)
 {
-  if (peek() == kString) {
+  const TokenType token = peek();
+  if (token == kString) {
     rapidjson::StringStream source(string_value_.c_str());
     rapidjson::GenericStringBuffer<rapidjson::UTF16<> > target;
 
@@ -618,6 +669,8 @@ bool JsonValueReader<InputStream>::read_wstring(std::wstring& value)
 
     value = target.GetString();
     return consume(kString);
+  } else if (token == kNull) {
+    return consume(kNull);
   }
   return false;
 }
@@ -625,19 +678,21 @@ bool JsonValueReader<InputStream>::read_wstring(std::wstring& value)
 template <typename InputStream>
 bool JsonValueReader<InputStream>::read_long_enum(ACE_CDR::Long& value, const EnumHelper& helper)
 {
-  switch (peek()) {
+  const TokenType token = peek();
+  switch (token) {
   case kString:
     if (helper.get_value(value, string_value_.c_str())) {
       return consume(kString);
     }
     return false;
-    break;
   case kInt:
     value = int_value_;
     return consume(kInt);
   case kUint:
     value = uint_value_;
     return consume(kUint);
+  case kNull:
+    return consume(kNull);
   default:
     return false;
   }
