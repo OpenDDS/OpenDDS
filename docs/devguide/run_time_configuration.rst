@@ -1,3 +1,5 @@
+.. default-domain:: cfg
+
 .. _run_time_configuration:
 .. _config:
 
@@ -25,10 +27,10 @@ OpenDDS configuration is concerned with three main areas:
 
 #. **Common Configuration Options** -- configure the behavior of DCPS entities at a global level.
    This allows separately deployed processes in a computing environment to share common settings for the specified behavior (e.g. all readers and writers should use RTPS discovery).
-   See :ref:`run_time_configuration--common-configuration-options` for details.
+   See :ref:`common-config` for details.
 
 #. **Discovery Configuration Options** -- configure the behavior of the discovery mechanism(s).
-   OpenDDS supports multiple approaches for discovering and associating writers and readers as detailed in :ref:`run_time_configuration--discovery-configuration`.
+   OpenDDS supports multiple approaches for discovering and associating writers and readers as detailed in :ref:`disc-config`.
 
 #. **Transport Configuration Options** -- configure the Extensible Transport Framework (ETF) which abstracts the transport layer from the DCPS layer of OpenDDS.
    Each pluggable transport can be configured separately.
@@ -45,47 +47,53 @@ The configuration file for OpenDDS is a human-readable ini-style text file.
 
      - **File Section Title**
 
-   * - :ref:`Global Settings <run_time_configuration--common-configuration-options>`
+   * - :ref:`Global Settings <common-config>`
 
-     - ``[common]``
+     - :sec:`common`
 
    * - Discovery
 
-     - ``[domain]``
+     - :sec:`domain`
 
-       ``[repository]``
+       :sec:`repository`
 
-       ``[rtps_discovery]``
+       :sec:`rtps_discovery`
 
    * - Static Discovery
 
-     - ``[endpoint]``
+     - :sec:`endpoint`
 
-       ``[topic]``
+       :sec:`topic`
 
-       ``[datawriterqos]``
+       :sec:`datawriterqos`
 
-       ``[datareaderqos]``
+       :sec:`datareaderqos`
 
-       ``[publisherqos]``
+       :sec:`publisherqos`
 
-       ``[subscriberqos]``
+       :sec:`subscriberqos`
 
    * - Transport
 
-     - ``[config]``
+     - :sec:`config`
 
-       ``[transport]``
+       :sec:`transport`
 
    * - Other
 
-     - ``[ice]``
+     - :sec:`ice`
 
-For each of the section types with the exception of ``[common]`` and ``[ice]``, the syntax of a section header takes the form of ``[section type/instance]``.
-For example, a ``[repository]`` section type would always be used in a configuration file like so:
+For each of the section types with the exception of :sec:`common` and :sec:`ice`, the syntax of a section header takes the form of ``[<section_type>/<instance_name>]``.
+For example, a :sec:`repository` section type would always be used in a configuration file like so:
 
 ``[repository/repo_1]`` where ``repository`` is the section type and ``repo_1`` is an instance name of a repository configuration.
-How to use instances to configure discovery and transports is explained further in :ref:`run_time_configuration--discovery-configuration` and :ref:`run_time_configuration--transport-configuration`.
+How to use instances to configure discovery and transports is explained further in :ref:`disc-config` and :ref:`transport-config`.
+
+.. _dcps_config_file:
+
+*******************
+``-DCPSConfigFile``
+*******************
 
 The ``-DCPSConfigFile`` command-line argument can be used to pass the location of a configuration file to OpenDDS.
 For example:
@@ -155,7 +163,7 @@ See the header file :ghfile:`dds/DCPS/Service_Participant.h` for details.
 
 The following subsections detail each of the configuration file sections and the available options related to those sections.
 
-.. _run_time_configuration--common-configuration-options:
+.. _common-config:
 
 ****************************
 Common Configuration Options
@@ -188,312 +196,303 @@ For example:
 
   subscriber -DCPSInfoRepo localhost:12345
 
-The following table summarizes the ``[common]`` configuration options:
+.. sec:: common
 
-.. list-table::
-   :header-rows: 1
+  .. key:: DCPSBidirGIOP=<boolean>
+    :default: ``1`` (enabled)
 
-   * - Option
+    Use TAO's BiDirectional GIOP feature for interaction with the DCPSInfoRepo.
+    With BiDir enabled, fewer sockets are needed since the same socket can be used for both client and server roles.
 
-     - Description
+  .. key:: DCPSBit=<boolean>
+    :default: ``1`` (Enabled)
 
-     - Default
+    Controls if :ref:`bit` are enabled.
 
-   * - ``DCPSBit=[1|0]``
+  .. key:: DCPSBitLookupDurationMsec=<msec>
+    :default: ``2000`` (2 seconds)
 
-     - Toggle Built-In-Topic support.
+    The maximum duration in milliseconds that the framework will wait for latent :ref:`bit` information when retrieving BIT data given an instance handle.
+    The participant code may get an instance handle for a remote entity before the framework receives and processes the related BIT information.
+    The framework waits for up to the given amount of time before it fails the operation.
 
-     - ``1``
+  .. key:: DCPSBitTransportIPAddress=<addr>
+    :default: ``INADDR_ANY``
 
-   * - ``DCPSBitLookupDurationMsec=msec``
+    IP address identifying the local interface to be used by tcp transport for the :ref:`bit`.
 
-     - The maximum duration in milliseconds that the framework will wait for latent Built-In Topic information when retrieving BIT data given an instance handle.
-       The participant code may get an instance handle for a remote entity before the framework receives and processes the related BIT information.
-       The framework waits for up to the given amount of time before it fails the operation.
+    .. note:: This property is only applicable to a ``DCPSInfoRepo`` configuration.
 
-     - ``2000``
+  .. key:: DCPSBitTransportPort=<port>
+    :default: ``0``
 
-   * - ``DCPSBitTransportIPAddress=addr``
+    Port used by the tcp transport for :ref:`bit`.
+    If the default of ``0`` is used, the operating system will choose a port to use.
 
-     - IP address identifying the local interface to be used by tcp transport for the Built-In Topics.
+    .. note:: This property is only applicable to a ``DCPSInfoRepo`` configuration.
 
-       .. note:: This property is only applicable to a ``DCPSInfoRepo`` configuration.
+  .. key:: DCPSChunkAssociationMultiplier=<n>
+    :default: ``10``
 
-     - ``INADDR_ANY``
+    Multiplier for the :key:`DCPSChunks` or ``resource_limits.max_samples`` value to determine the total number of shallow copy chunks that are preallocated.
+    Set this to a value greater than the number of connections so the preallocated chunk handles do not run out.
+    A sample written to multiple data readers will not be copied multiple times but there is a shallow copy handle to that sample used to manage the delivery to each data reader.
+    The size of the handle is small so there is not great need to set this value close to the number of connections.
 
-   * - ``DCPSBitTransportPort=port``
+  .. key:: DCPSChunks=<n>
+    :default: ``20``
 
-     - Port used by the tcp transport for Built-In Topics.
-       If the default of ``0`` is used, the operating system will choose a port to use.
+    Configurable number of chunks that a data writer's and reader's cached allocators will preallocate when the ``RESOURCE_LIMITS`` QoS value is infinite.
+    When all of the preallocated chunks are in use, OpenDDS allocates from the heap.
+    This feature of allocating from the heap when the preallocated memory is exhausted provides flexibility but performance will decrease when the preallocated memory is exhausted.
 
-       .. note:: This property is only applicable to a ``DCPSInfoRepo`` configuration.
+  .. key:: DCPSDebugLevel=<n>
+    :default: ``0``
 
-     - ``0``
+    Integer value that controls the amount of debug information the DCPS layer prints.
+    Valid values are ``0`` through ``10``.
 
-   * - ``DCPSChunks=n``
+    See :ref:`run_time_configuration--dcps-layer-debug-logging` for details.
 
-     - Configurable number of chunks that a data writer's and reader's cached allocators will preallocate when the ``RESOURCE_LIMITS`` QoS value is infinite.
-       When all of the preallocated chunks are in use, OpenDDS allocates from the heap.
+  .. key:: DCPSDefaultAddress=<addr>
+    :default: ``0.0.0.0``
 
-     - ``20``
+    Default value for the host portion of ``local_address`` for transport instances containing a ``local_address``.
+    Only applied when ``DCPSDefaultAddress`` is set to a non-empty value and no ``local_address`` is specified in the transport.
 
-   * - ``DCPSChunkAssociationMultiplier=n``
+    Other subsystems (such as DDSI-RTPS Discovery) use ``DCPSDefaultAddress`` as a default value as well.
 
-     - Multiplier for the DCPSChunks or ``resource_limits.max_samples`` value to determine the total number of shallow copy chunks that are preallocated.
-       Set this to a value greater than the number of connections so the preallocated chunk handles do not run out.
-       A sample written to multiple data readers will not be copied multiple times but there is a shallow copy handle to that sample used to manage the delivery to each data reader.
-       The size of the handle is small so there is not great need to set this value close to the number of connections.
+  .. key:: DCPSDefaultDiscovery=DEFAULT_REPO|DEFAULT_RTPS|DEFAULT_STATIC|<name>
+    :default: :val:`DEFAULT_REPO`
 
-     - ``10``
+    Specifies a discovery configuration to use for any domain not explicitly configured.
 
-   * - ``DCPSDebugLevel=n``
+    .. val:: DEFAULT_REPO
 
-     - Integer value that controls the amount of debug information the DCPS layer prints.
-       Valid values are 0 through 10.
+      Uses InfoRepo Discovery
 
-     - 0
+    .. val:: DEFAULT_RTPS
 
-   * - ``ORBLogFile=filename``
+      Uses RTPS Discovery
 
-     - Change log message destination to the file specified, which is opened in appending mode.
-       See the note below this table regarding the ORB prefix.
+    .. val:: DEFAULT_STATIC
 
-     - None: use standard error
+      Uses static discovery
 
-   * - ``ORBVerboseLogging=[0|1|2]``
+    .. val:: <name>
 
-     - Add a prefix to each log message, using a format defined by the ACE library:
+    See :ref:`disc-config` for details about configuring discovery.
 
-       0 -- no prefix
+  .. key:: DCPSGlobalTransportConfig=<name>
 
-       1 -- verbose "lite": adds timestamp and priority
+    Specifies the name of the transport configuration that should be used as the global configuration.
+    This configuration is used by all entities that do not otherwise specify a transport configuration.
+    A special value of ``$file`` uses a transport configuration that includes all transport instances defined in the configuration file.
 
-       2 -- verbose: in addition to "lite" has host name, PID, program name
+    The default configuration is used as described in :ref:`run_time_configuration--overview`
 
-       See the note below this table regarding the ORB prefix.
+  .. key:: DCPSInfoRepo=<objref>
+    :default: ``file://repo.ior``
 
-     - 0
+    Object reference for locating the DCPS Information Repository.
+    This value is passed to ``CORBA::ORB::string_to_object()`` and can be any Object URL type understandable by TAO (file, IOR, corbaloc, corbaname).
+    A simplified endpoint description of the form ``<host>:<port>`` is also accepted, which is equivalent to ``corbaloc::<host>:<port>/DCPSInfoRepo``.
 
-   * - ``DCPSDefaultAddress=addr``
+  .. key:: DCPSLivelinessFactor=<n>
+    :default: ``80``
 
-     - Default value for the host portion of ``local_address`` for transport instances containing a ``local_address``.
-       Only applied when ``DCPSDefaultAddress`` is set to a non-empty value and no ``local_address`` is specified in the transport.
+    Percent of the liveliness lease duration after which a liveliness message is sent.
+    A value of ``80`` implies a 20% cushion of latency from the last detected heartbeat message.
 
-       Other subsystems (such as DDSI-RTPS Discovery) use ``DCPSDefaultAddress`` as a default value as well.
+  .. key:: DCPSLogLevel=none|error|warning|notice|info|debug
+    :default: :val:`warning`
 
-     -
+    General logging control.
 
-   * - ``DCPSDefaultDiscovery=[``
+    .. val:: none
 
-       ``DEFAULT_REPO|``
+      See :ref:`none log level <log-none>`
 
-       ``DEFAULT_RTPS|``
+    .. val:: error
 
-       ``DEFAULT_STATIC|``
+      See :ref:`error log level <log-error>`
 
-       ``user-defined configuration instance name]``
+    .. val:: warning
 
-     - Specifies a discovery configuration to use for any domain not explicitly configured.
-       ``DEFAULT_REPO`` translates to using the ``DCPSInfoRepo``.
-       ``DEFAULT_RTPS`` specifies the use of RTPS for discovery.
-       ``DEFAULT_STATIC`` specifies the use of static discovery.
-       See :ref:`run_time_configuration--discovery-configuration` for details about configuring discovery.
+      See :ref:`warning log level <log-warning>`
 
-     - ``DEFAULT_REPO``
+    .. val:: notice
 
-   * - ``DCPSGlobalTransportConfig=name``
+      See :ref:`notice log level <log-notice>`
 
-     - Specifies the name of the transport configuration that should be used as the global configuration.
-       This configuration is used by all entities that do not otherwise specify a transport configuration.
-       A special value of $file uses a transport configuration that includes all transport instances defined in the configuration file.
+    .. val:: info
 
-     - The default configuration is used as described in :ref:`run_time_configuration--overview`
+      See :ref:`info log level <log-info>`
 
-   * - ``DCPSInfoRepo=objref``
+    .. val:: debug
 
-     - Object reference for locating the DCPS Information Repository.
-       This can either be a full CORBA IOR or a simple host:port string.
+      See :ref:`debug log level <log-debug>`
 
-     - ``file://repo.ior``
+    See :ref:`run_time_configuration--logging` for details.
 
-   * - ``DCPSLivelinessFactor=n``
+  .. key:: DCPSMonitor=<boolean>
+    :default: ``0``
 
-     - Percent of the liveliness lease duration after which a liveliness message is sent.
-       A value of 80 implies a 20% cushion of latency from the last detected heartbeat message.
+    Use the OpenDDS_Monitor library to publish data on monitoring topics (see :ghfile:`dds/monitor/README`).
 
-     - ``80``
+  .. key:: DCPSPendingTimeout=<sec>
+    :default: ``0``
 
-   * - ``DCPSLogLevel=``
+    The maximum duration in seconds a data writer will block to allow unsent samples to drain on deletion.
+    The default, ``0``, blocks indefinitely.
 
-       ``none|``
+  .. key:: DCPSPersistentDataDir=<path>
+    :default: ``OpenDDS-durable-data-dir``
 
-       ``error|``
+    The path on the file system where durable data will be stored.
+    If the directory does not exist it will be created automatically.
 
-       ``warning|``
+  .. key:: DCPSPublisherContentFilter=<boolean>
+    :default: ``1``
 
-       ``notice|``
+    Controls the filter expression evaluation policy for content filtered topics.
+    When the value is ``1`` the publisher may drop any samples, before handing them off to the transport when these samples would have been ignored by all subscribers.
 
-       ``info|``
+  .. key:: DCPSSecurity=<boolean>
+    :default: ``0``
 
-       ``debug``
+    This setting is only available when OpenDDS is compiled with :ref:`dds_security`.
+    If set to ``1``, enable DDS Security framework and built-in plugins.
+    Each Domain Participant using security must be created with certain QoS policy values.
 
-     - General logging control.
-       See :ref:`run_time_configuration--logging` for details.
+    See :ref:`dds_security` for more information.
 
-     - ``warning``
+  .. key:: DCPSSecurityDebug=<cat>[,<cat>]...
+    :default: ``0``
 
-   * - ``DCPSMonitor=[0|1]``
+    This setting is only available when OpenDDS is compiled with :ref:`dds_security` enabled.
+    This controls the security debug logging granularity by category.
+    The default is that no security logging is provided.
 
-     - Use the OpenDDS_monitor library to publish data on monitoring topics (see dds/monitor/README).
+    See :ref:`run_time_configuration--security-debug-logging` for details.
 
-     - ``0``
+  .. key:: DCPSSecurityDebugLevel=<n>
+    :default: ``0``
 
-   * - ``DCPSPendingTimeout=sec``
+    This setting is only available when OpenDDS is compiled with :ref:`dds_security` enabled.
+    This controls the security debug logging granularity by debug level.
 
-     - The maximum duration in seconds a data writer will block to allow unsent samples to drain on deletion.
-       By default, this option blocks indefinitely.
+    See :ref:`run_time_configuration--security-debug-logging` for details.
 
-     - ``0``
+  .. key:: DCPSSecurityFakeEncryption=<boolean>
+    :default: ``0``
 
-   * - ``DCPSPersistentDataDir=path``
+    This setting is only available when OpenDDS is compiled with :ref:`dds_security` enabled.
+    This option, when set to ``1``, disables all encryption by making encryption and decryption no-ops.
+    OpenDDS still generates keys and performs other security bookkeeping, so this option is useful for debugging the security infrastructure by making it possible to manually inspect all messages.
 
-     - The path on the file system where durable data will be stored.
-       If the directory does not exist it will be created automatically.
+  .. key:: DCPSThreadStatusInterval=<sec>
+    :default: ``0`` (disabled)
 
-     - ``OpenDDS-durable-data-dir``
+    Enable internal thread status reporting (:ref:`built_in_topics--openddsinternalthread-topic`) using the specified reporting interval, in seconds.
 
-   * - ``DCPSPublisherContentFilter=[1|0]``
+  .. key:: DCPSTransportDebugLevel=<n>
+    :default: ``0``
 
-     - Controls the filter expression evaluation policy for content filtered topics.
-       When enabled (1), the publisher may drop any samples, before handing them off to the transport when these samples would have been ignored by all subscribers.
+    Integer value that controls the amount of debug information the transport layer prints.
 
-     - ``1``
+    See :ref:`run_time_configuration--transport-layer-debug-logging` for details.
 
-   * - ``DCPSSecurity=[0|1]``
+  .. key:: DCPSTypeObjectEncoding=Normal|WriteOldFormat|ReadOldFormat
+    :default: :val:`Normal`
 
-     - This setting is only available when OpenDDS is compiled with DDS Security enabled.
-       If set to 1, enable DDS Security framework and built-in plugins.
-       Each Domain Participant using security must be created with certain QoS policy values.
-       See :ref:`dds_security`: DDS Security for more information.
+    .. val:: Normal
 
-     - ``0``
+      Default
 
-   * - ``DCPSSecurityDebug=CAT[,CAT...]``
+    .. val:: WriteOldFormat
 
-     - This setting is only available when OpenDDS is compiled with DDS Security enabled.
-       This controls the security debug logging granularity by category.
-       See :ref:`run_time_configuration--security-debug-logging` for details.
+    .. val:: ReadOldFormat
 
-     - ``0``
+    .. Before version 3.18, OpenDDS had a bug in the encoding used for TypeObject (from XTypes) and related data types.
 
-   * - ``DCPSSecurityDebugLevel=n``
+    .. If this application needs to be compatible with an application built with an older OpenDDS (that has XTypes), select one of WriteOldFormat or ReadOldFormat.
 
-     - This setting is only available when OpenDDS is compiled with DDS Security enabled.
-       This controls the security debug logging granularity by debug level.
-       See :ref:`run_time_configuration--security-debug-logging` for details.
+    .. Using WriteOldFormat means that the TypeInformation written by this application will be understood by legacy applications.
 
-     - ``N/A``
+    .. Using WriteOldFormat or ReadOldFormat means that TypeInformation written in the legacy format will be understood by this application.
 
-   * - ``DCPSSecurityFakeEncryption=[0|1]``
+    .. These options are designed to enable a phased migration from the incorrect implementation (pre-3.18) to a compliant one.
+    .. In the first phase, legacy applications can coexist with WriteOldFormat.
+    .. In the second phase (once all legacy applications have been upgraded), WriteOldFormat can communicate with ReadOldFormat.
+    .. In the final phase (once all WriteOldFormat applications have been upgraded), ReadOldFormat applications can be transitioned to Normal.
 
-     - This setting is only available when OpenDDS is compiled with DDS Security enabled.
-       This option, when set to 1, disables all encryption by making encryption and decryption no-ops.
-       OpenDDS still generates keys and performs other security bookkeeping, so this option is useful for debugging the security infrastructure by making it possible to manually inspect all messages.
+  .. key:: ORBLogFile=<filename>
+    :default: Output to standard error stream on most platforms
 
-     - ``0``
+    Change log message destination to the file specified, which is opened in appending mode.
+    See the note below this table regarding the ORB prefix.
 
-   * - ``DCPSTransportDebugLevel=n``
+  .. key:: ORBVerboseLogging=0|1|2
+    :default: ``0``
 
-     - Integer value that controls the amount of debug information the transport layer prints.
-       See :ref:`run_time_configuration--transport-layer-debug-logging` for details.
+    Add a prefix to each log message, using a format defined by the ACE library:
 
-     - ``0``
+    .. val:: 0
 
-   * - ``pool_size=n_bytes``
+      No prefix
 
-     - Size of safety profile memory pool, in bytes.
+    .. val:: 1
 
-     - ``41943040 (40 MiB)``
+      Verbose "lite", adds timestamp and priority
 
-   * - ``pool_granularity=n_bytes``
+    .. val:: 2
 
-     - Granularity of safety profile memory pool in bytes.
-       Must be multiple of 8.
+      Verbose, in addition to "lite" has host name, PID, program name
 
-     - ``8``
+    TODO: See the note below this table regarding the ORB prefix.
 
-   * - ``Scheduler=[``
+  .. key:: pool_size=<n_bytes>
+    :default: ``41943040`` bytes (40 MiB)
 
-       ``SCHED_RR|``
+    Size of :ref:`safety_profile` memory pool, in bytes.
 
-       ``SCHED_FIFO|``
+  .. key:: pool_granularity=<n_bytes>
+    :default: ``8``
 
-       ``SCHED_OTHER]``
+    Granularity of :ref:`safety_profile` memory pool in bytes.
+    Must be multiple of 8.
 
-     - Selects the thread scheduler to use.
-       Setting the scheduler to a value other than the default requires privileges on most systems.
-       A value of ``SCHED_RR``, ``SCHED_FIFO``, or ``SCHED_OTHER`` can be set.
-       ``SCHED_OTHER`` is the default scheduler on most systems; ``SCHED_RR`` is a round robin scheduling algorithm; and ``SCHED_FIFO`` allows each thread to run until it either blocks or completes before switching to a different thread.
+  .. key:: Scheduler=SCHED_RR|SCHED_FIFO|SCHED_OTHER
+    :default: :val:`SCHED_OTHER`
 
-     - SCHED_OTHER
+    Selects the thread scheduler to use.
+    Setting the scheduler to a value other than the default requires privileges on most systems.
 
-   * - ``scheduler_slice=usec``
+    .. val:: SCHED_RR
 
-     - Some operating systems, such as SunOS, require a time slice value to be set when selecting schedulers other than the default.
-       For those systems, this option can be used to set a value in microseconds.
+      Round robin scheduling algorithm
 
-     - ``none``
+    .. val:: SCHED_FIFO
 
-   * - ``DCPSBidirGIOP=[0|1]``
+      Allows each thread to run until it either blocks or completes before switching to a different thread
 
-     - Use TAO's BiDirectional GIOP feature for interaction with the DCPSInfoRepo.
-       With BiDir enabled, fewer sockets are needed since the same socket can be used for both client and server roles.
+    .. val:: SCHED_OTHER
 
-     - ``1``
+      The default scheduler on most systems
 
-   * - ``DCPSThreadStatusInterval=sec``
+  .. key:: scheduler_slice=<usec>
+    :default: ``0``
 
-     - Enable internal thread status reporting (:ref:`built_in_topics--openddsinternalthread-topic`) using the specified reporting interval, in seconds.
-
-     - ``0 (disabled)``
-
-   * - ``DCPSTypeObjectEncoding=[``
-
-       ``Normal |``
-
-       ``WriteOldFormat |``
-
-       ``ReadOldFormat ]``
-
-     - Before version 3.18, OpenDDS had a bug in the encoding used for TypeObject (from XTypes) and related data types.
-
-       If this application needs to be compatible with an application built with an older OpenDDS (that has XTypes), select one of WriteOldFormat or ReadOldFormat.
-
-       Using WriteOldFormat means that the TypeInformation written by this application will be understood by legacy applications.
-
-       Using WriteOldFormat or ReadOldFormat means that TypeInformation written in the legacy format will be understood by this application.
-
-       These options are designed to enable a phased migration from the incorrect implementation (pre-3.18) to a compliant one.
-       In the first phase, legacy applications can coexist with WriteOldFormat.
-       In the second phase (once all legacy applications have been upgraded), WriteOldFormat can communicate with ReadOldFormat.
-       In the final phase (once all WriteOldFormat applications have been upgraded), ReadOldFormat applications can be transitioned to Normal.
-
-     - ``Normal``
-
-The ``DCPSInfoRepo`` option's value is passed to ``CORBA::ORB::string_to_object()`` and can be any Object URL type understandable by TAO (file, IOR, corbaloc, corbaname).
-A simplified endpoint description of the form ``<host>:<port>`` is also accepted.
-It is equivalent to ``corbaloc::<host>:<port>/DCPSInfoRepo``.
+    Some operating systems require a time slice value to be set when selecting a :key:`Scheduler` other than the default.
+    For those systems, this option can be used to set a value in microseconds.
 
 Certain options that begin with "ORB" instead of "DCPS" are listed in the table above.
 They are named differently since they are inherited from TAO.
 The options starting with "ORB" listed in this table are implemented directly by OpenDDS (not passed to TAO) and are supported either on the command line (using a "-" prefix) or in the configuration file.
 Other command-line options that begin with ``-ORB`` are passed to TAO's ``ORB_init`` if DCPSInfoRepo discovery is used.
 
-The ``DCPSChunks`` option allows application developers to tune the amount of memory preallocated when the ``RESOURCE_LIMITS`` are set to infinite.
-Once the allocated memory is exhausted, additional chunks are allocated/deallocated from the heap.
-This feature of allocating from the heap when the preallocated memory is exhausted provides flexibility but performance will decrease when the preallocated memory is exhausted.
-
-.. _run_time_configuration--discovery-configuration:
+.. _disc-config:
 
 ***********************
 Discovery Configuration
@@ -516,7 +515,7 @@ Except for static discovery, each mechanism uses default values if no configurat
 The following sections show how to configure the advanced discovery capabilities.
 For example, some deployments may need to use multiple ``DCPSInfoRepo`` services or DDSI-RTPS discovery to satisfy interoperability requirements.
 
-.. _run_time_configuration--domain-configuration:
+.. _domain-config:
 
 Domain Configuration
 ====================
@@ -531,7 +530,7 @@ The static discovery mechanism does not have a dedicated section.
 Instead, users are expected to refer to the ``DEFAULT_STATIC`` instance.
 A single domain can refer to only one type of discovery section.
 
-See :ref:`run_time_configuration--configuring-applications-for-dcpsinforepo` for configuring InfoRepo Discovery, :ref:`run_time_configuration--configuring-for-ddsi-rtps-discovery` for configuring RTPS Discovery, and :ref:`run_time_configuration--configuring-for-static-discovery` for configuring Static Discovery.
+See :ref:`inforepo-disc-config` for configuring InfoRepo Discovery, :ref:`rtps-disc-config` for configuring RTPS Discovery, and :ref:`static-disc-config` for configuring Static Discovery.
 
 Ultimately a domain is assigned an integer value and a configuration file can support this in two ways.
 The first is to simply make the instance value the integer value assigned to the domain as shown here:
@@ -573,7 +572,7 @@ Here is an extension of our example:
     RepositoryIor=host1.mydomain.com:12345
 
 In this case our domain points to a ``[repository]`` section which is used for an OpenDDS ``DCPSInfoRepo`` service.
-See :ref:`run_time_configuration--configuring-applications-for-dcpsinforepo` for more details.
+See :ref:`inforepo-disc-config` for more details.
 
 There are going to be occasions when specific domains are not identified in the configuration file.
 For example, if an OpenDDS application assigns a domain ID of 3 to its participants and the above example does not supply a configuration for domain id of 3 then the following can be used:
@@ -592,7 +591,7 @@ For example, if an OpenDDS application assigns a domain ID of 3 to its participa
 
 The ``DCPSDefaultDiscovery`` property tells the application to assign any participant that doesn't have a domain id found in the configuration file to use a discovery type of ``DEFAULT_REPO`` which means "use a ``DCPSInfoRepo`` service"  and that ``DCPSInfoRepo`` service can be found at ``host3.mydomain.com:12345``.
 
-As shown in :ref:`run_time_configuration--common-configuration-options` the ``DCPSDefaultDiscovery`` property has three other values that can be used.
+As shown in :ref:`common-config` the ``DCPSDefaultDiscovery`` property has three other values that can be used.
 The ``DEFAULT_RTPS`` constant value informs participants that don't have a domain configuration to use RTPS discovery to find other participants.
 Similarly, the ``DEFAULT_STATIC`` constant value informs the participants that don't have a domain configuration to use static discovery to find other participants.
 
@@ -617,39 +616,32 @@ Here is an example:
     RepositoryIor=host2.mydomain.com:12345
 
 By adding the ``DCPSDefaultDiscovery`` property to the ``[common]`` section, any participant that hasn't been assigned to a domain id of ``1`` or ``2`` will use the configuration of ``DiscoveryConfig2``.
-For more explanation of a similar configuration for RTPS discovery see :ref:`run_time_configuration--configuring-for-ddsi-rtps-discovery`.
+For more explanation of a similar configuration for RTPS discovery see :ref:`rtps-disc-config`.
 
-Here are the available properties for the ``[domain]`` section:
+.. sec:: domain/<id>
 
-.. list-table:: Domain Section Configuration Properties
-   :header-rows: 1
+  .. key:: DomainId=<n>
+    :required:
 
-   * - Option
+    An integer value representing a domain being associated with a repository.
 
-     - Description
+  .. key:: DomainRepoKey=<k>
 
-   * - ``DomainId=n``
+    Key value of the mapped repository
 
-     - An integer value representing a Domain being associated with a repository.
+    .. deprecated:: Provided for backward compatibility.
 
-   * - ``DomainRepoKey=k``
+  .. key:: DiscoveryConfig=<name>``
 
-     - Key value of the mapped repository
+    A user-defined string that refers to the instance name of a ``[repository]`` or ``[rtps_discovery]`` section in the same configuration file or one of the internal default values (``DEFAULT_REPO``, ``DEFAULT_RTPS``, or ``DEFAULT_STATIC``).
+    (Also see the ``DCPSDefaultDiscovery`` property in :ref:`common-config`)
 
-       (Deprecated.
-       Provided for backward compatibility).
+  .. key:: DefaultTransportConfig=<name>
 
-   * - ``DiscoveryConfig=config instance name``
+    A user-defined string that refers to the instance name of a ``[config]`` section.
+    See :ref:`transport-config`.
 
-     - A user-defined string that refers to the instance name of a ``[repository]`` or ``[rtps_discovery]`` section in the same configuration file or one of the internal default values (``DEFAULT_REPO``, ``DEFAULT_RTPS``, or ``DEFAULT_STATIC``).
-       (Also see the ``DCPSDefaultDiscovery`` property in :ref:`run_time_configuration--common-configuration-options`)
-
-   * - ``DefaultTransportConfig=config``
-
-     - A user-defined string that refers to the instance name of a ``[config]`` section.
-       See :ref:`run_time_configuration--transport-configuration`.
-
-.. _run_time_configuration--configuring-applications-for-dcpsinforepo:
+.. _inforepo-disc-config:
 
 Configuring Applications for DCPSInfoRepo
 =========================================
@@ -816,7 +808,7 @@ For this example we will only show the discovery aspects of the configuration an
     RepositoryIor=host2.mydomain.com:12345
 
 When Process ``E`` reads in the above configuration it finds the occurrence of multiple domain sections.
-As described in :ref:`run_time_configuration--domain-configuration` each domain has an instance integer and a property of ``DiscoveryConfig`` defined.
+As described in :ref:`domain-config` each domain has an instance integer and a property of ``DiscoveryConfig`` defined.
 
 For the first domain (``[domain/1]``), the ``DiscoveryConfig`` property is supplied with the user-defined name of ``DiscoveryConfig1`` value.
 This property causes the OpenDDS implementation to find a section title of either ``repository`` or ``rtps_discovery`` and an instance name of ``DiscoveryConfig1``.
@@ -832,26 +824,19 @@ There may be any number of repository or domain sections within a single configu
 
 .. note:: Individual DCPSInfoRepos can be associated with multiple domains, however domains cannot be shared between multiple DCPSInfoRepos.
 
-Here are the valid properties for a ``[repository]`` section:
+.. sec:: repository/<inst_name>
 
-.. list-table:: Multiple repository configuration sections
-   :header-rows: 1
+  .. key:: RepositoryIor=<ior>
 
-   * - Option
+    Repository IOR or host:port
 
-     - Description
+  .. key:: RepositoryKey=<key>
 
-   * - ``RepositoryIor=ior``
+    Unique key value for the repository
 
-     - Repository IOR or host:port.
+    .. deprecated:: Provided for backward compatibility.
 
-   * - ``RepositoryKey=key``
-
-     - Unique key value for the repository.
-       (Deprecated.
-       Provided for backward compatibility)
-
-.. _run_time_configuration--configuring-for-ddsi-rtps-discovery:
+.. _rtps-disc-config:
 
 Configuring for DDSI-RTPS Discovery
 ===================================
@@ -925,403 +910,329 @@ Some important implementation notes regarding DDSI-RTPS discovery in OpenDDS are
 #. Domain IDs should be between 0 and 231 (inclusive) due to the way UDP ports are assigned to domain IDs.
    In each OpenDDS process, up to 120 domain participants are supported in each domain.
 
-#. OpenDDS's multicast transport (:ref:`run_time_configuration--ip-multicast-transport-configuration-options`) does not work with RTPS Discovery due to the way GUIDs are assigned (a warning will be issued if this is attempted).
+#. OpenDDS's multicast transport (:ref:`multicast-transport-config`) does not work with RTPS Discovery due to the way GUIDs are assigned (a warning will be issued if this is attempted).
 
 The OMG DDSI-RTPS specification details several properties that can be adjusted from their defaults that influence the behavior of DDSI-RTPS discovery.
 Those properties, along with options specific to OpenDDS's RTPS Discovery implementation, are listed below.
 
 .. _run_time_configuration--rtps-disc-config-options:
 
-.. list-table:: RTPS Discovery Configuration Options
-   :header-rows: 1
+.. sec:: rtps_discovery/<inst_name>
 
-   * - Option
+  .. key:: ResendPeriod=<sec>
+    :default: ``30``
 
-     - Description
+    The number of seconds that a process waits between the announcement of participants (see :omgspec:`rtps:8.5.3`).
 
-     - Default
+  .. key:: MinResendDelay=<msec>
+    :default: ``100``
 
-   * - ``ResendPeriod=sec``
+    The minimum time in milliseconds between participant announcements.
 
-     - The number of seconds that a process waits between the announcement of participants (see :omgspec:`rtps:8.5.3`).
+  .. key:: QuickResendRatio=<frac>
+    :default: ``0.1``
 
-     - ``30``
+    Tuning parameter that configures local SPDP resends as a fraction of the resend period.
 
-   * - ``MinResendDelay=msec``
+  .. key:: LeaseDuration=<sec>
+    :default: ``300`` (5 minutes)
 
-     - The minimum time in milliseconds between participant announcements.
+    Sent as part of the participant announcement.
+    It tells the peer participants that if they don't hear from this participant for the specified duration, then this participant can be considered "not alive".
 
-     - ``100``
+  .. key:: LeaseExtension=<sec>
+    :default: ``0``
 
-   * - ``QuickResendRatio=frac``
+    Extends the lease of discovered participants by the set amount of seconds.
+    Useful on spotty connections to reduce load on the RtpsRelay.
 
-     - Tuning parameter that configures local SPDP resends as a fraction of the resend period.
+  .. key:: PB=<port>
+    :default: ``7400``
 
-     - ``0.1``
+    This number sets the starting point for deriving port numbers used for Simple Endpoint Discovery Protocol (SEDP).
+    This property is used in conjunction with :key:`DG`, :key:`PG`, :key:`D0` (or :key:`DX`), and :key:`D1` to construct the necessary Endpoints for RTPS discovery communication.
+    See :omgspec:`rtps:9.6.1.1` for how these Endpoints are constructed.
 
-   * - ``LeaseDuration=sec``
+  .. key:: DG=<n>
+    :default: ``250``
 
-     - Sent as part of the participant announcement.
-       It tells the peer participants that if they don't hear from this participant for the specified duration, then this participant can be considered "not alive."
+    An integer value representing the Domain Gain.
+    This is a multiplier that assists in formulating Multicast or Unicast ports for RTPS.
 
-     - ``300``
+  .. key:: PG=<n>
+    :default: ``2``
 
-   * - ``LeaseExtension=sec``
+    An integer that assists in configuring SPDP Unicast ports and serves as an offset multiplier.
+    Participants are assigned addresses using the formula:
 
-     - Extends the lease of discovered participants by the set amount of seconds.
-       Useful on spotty connections to reduce load on the RtpsRelay.
+    .. math::
 
-     - ``0``
+      \mathit{PB} + DG \times \mathit{domainId} + \mathit{d}1 + \mathit{PG} \times \mathit{participantId}
 
-   * - ``PB=port``
+    See :omgspec:`rtps:9.6.1.1` for how these Endpoints are constructed.
 
-     - Port Base number.
-       This number sets the starting point for deriving port numbers used for Simple Endpoint Discovery Protocol (SEDP).
-       This property is used in conjunction with ``DG``, ``PG``, ``D0`` (or ``DX``), and ``D1`` to construct the necessary Endpoints for RTPS discovery communication.
-       See :omgspec:`rtps:9.6.1.1` for how these Endpoints are constructed.
+  .. key:: D0=<n>
+    :default: The value of the ``OPENDDS_RTPS_DEFAULT_D0`` environment variable if set, else ``0``
 
-     - ``7400``
+    An integer value that assists in providing an offset for calculating an assignable port in SPDP Multicast configurations.
+    The formula used is:
 
-   * - ``DG=n``
+    .. math::
 
-     - An integer value representing the Domain Gain.
-       This is a multiplier that assists in formulating Multicast or Unicast ports for RTPS.
+      \mathit{PB} + \mathit{DG} \times \mathit{domainId} + \mathit{d0}
 
-     - ``250``
+    See :omgspec:`rtps:9.6.1.1` for how these Endpoints are constructed.
 
-   * - ``PG=n``
+  .. key:: D1=<n>
+    :default: ``10``
 
-     - An integer that assists in configuring SPDP Unicast ports and serves as an offset multiplier as participants are assigned addresses using the formula:
+    An integer value that assists in providing an offset for calculating an assignable port in SPDP Unicast configurations.
+    The formula used is:
 
-       ``PB + DG * domainId + d1 + PG * participantId``
+    .. math::
 
-       See :omgspec:`rtps:9.6.1.1` for how these Endpoints are constructed.
+      \mathit{PB} + \mathit{DG} \times \mathit{domainId} + \mathit{d1} + \mathit{PG} \times \mathit{participantId}
 
-     - 2
+    See :omgspec:`rtps:9.6.1.1` for how these Endpoints are constructed.
 
-   * - ``D0=n``
+  .. key:: DX=<n>
+    :default: ``2``
 
-     - An integer value that assists in providing an offset for calculating an assignable port in SPDP Multicast configurations.
-       The formula used is:
+    An integer value that assists in providing an offset for calculating a port in SEDP Multicast configurations.
+    This is only valid when :key:`SedpMulticast=1 <SedpMulticast>`.
+    The formula used is:
 
-       PB + DG * domainId + d0
+    .. math::
 
-       See :omgspec:`rtps:9.6.1.1` for how these Endpoints are constructed.
+      \mathit{PB} + \mathit{DG} \times \mathit{domainId} + \mathit{dx}
 
-     - ``0``
+    This is an OpenDDS extension and not part of the OMG DDSI-RTPS specification.
 
-   * - ``D1=n``
+  .. key:: SpdpRequestRandomPort=<boolean>
+    :default: ``0``
 
-     - An integer value that assists in providing an offset for calculating an assignable port in SPDP Unicast configurations.
-       The formula used is:
+    Use a random port for SPDP.
 
-       ``PB + DG * domainId + d1 + PG * participantId``
+  .. key:: SedpMaxMessageSize=<n>
+    :default: ``65466`` (maximum worst-case UDP payload size)
 
-       See :omgspec:`rtps:9.6.1.1` for how these Endpoints are constructed.
+    Set the maximum SEDP message size.
 
-     - ``10``
+    See :key:`[transport@rtps_udp]max_message_size`.
 
-   * - ``SpdpRequestRandomPort=[0|1]``
+  .. key:: SedpMulticast=<boolean>
+    :default: ``1``
 
-     - Use a random port for SPDP.
+    Determines whether Multicast is used for the SEDP traffic.
+    When set to ``1``, Multicast is used.
+    When set to ``0``, Unicast is used.
 
-     - ``0``
+  .. key:: SedpLocalAddress=<addr>:[<port>]
+    :default: :key:`[common]DCPSDefaultAddress`
 
-   * - ``SedpMaxMessageSize=n``
+    Configure the transport instance created and used by SEDP to bind to the specified local address and port.
+    In order to leave the port unspecified, it can be omitted from the setting but the trailing ``:`` must be present.
 
-     - Set the maximum SEDP message size.
-       The default is the maximum UDP message size.
-       See max_message_size in table 7-17.
+  .. key:: SpdpLocalAddress=<addr>[:<port>]
+    :default: :key:`[common]DCPSDefaultAddress`
 
-     - ``65466``
+    Address of a local interface, which will be used by SPDP to bind to that specific interface.
 
-   * - ``SedpMulticast=[0|1]``
+  .. key:: SedpAdvertisedLocalAddress=<addr>:[<port>]
 
-     - A boolean value (0 or 1) that determines whether Multicast is used for the SEDP traffic.
-       When set to 1, Multicast is used.
-       When set to zero (0) Unicast for SEDP is used.
+    Sets the address advertised by SEDP.
+    Typically used when the participant is behind a firewall or NAT.
+    In order to leave the port unspecified, it can be omitted from the setting but the trailing ``:`` must be present.
 
-     - ``1``
+  .. key:: SedpSendDelay=<msec>
+    :default: ``10``
 
-   * - ``SedpLocalAddress=addr:[port]``
+    Time in milliseconds for a built-in SEDP Writer to wait before sending data.
 
-     - Configure the transport instance created and used by SEDP to bind to the specified local address and port.
-       In order to leave the port unspecified, it can be omitted from the setting but the trailing : must be present.
+  .. key:: SedpHeartbeatPeriod=<msec>
+    :default: ``200``
 
-     - System default address
+    Time in milliseconds for a built-in SEDP Writer to announce the availability of data.
 
-   * - ``SpdpLocalAddress=addr[:port]``
+  .. key:: SedpNakResponseDelay=<msec>
+    :default: ``100``
 
-     - Address of a local interface, which will be used by SPDP to bind to that specific interface.
+    Time in milliseconds for a built-in SEDP Writer to delay the response to a negative acknowledgment.
 
-     - DCPSDefaultAddress or ``0.0.0.0``
+  .. key:: SpdpSendAddrs=<host>:<port>[,<host>:<port>]...``
 
-   * - ``SedpAdvertisedLocalAddress= addr:[port]``
+    A list (comma or whitespace separated) of ``<host>:<port>`` pairs used as destinations for SPDP content.
+    This can be a combination of Unicast and Multicast addresses.
 
-     - Sets the address advertised by SEDP.
-       Typically used when the participant is behind a firewall or NAT.
-       In order to leave the port unspecified, it can be omitted from the setting but the trailing : must be present.
+  .. key:: MaxSpdpSequenceMsgResetChecks=<n>
+    :default: ``3``
 
-     -
+    Remove a discovered participant after this number of SPDP messages with earlier sequence numbers.
 
-   * - ``SedpSendDelay=msec``
+  .. key:: PeriodicDirectedSpdp=<boolean>
+    :default: ``0`` (disabled)
 
-     - Time in milliseconds for a built-in  (SEDP) Writer to wait before sending data.
+    A boolean value that determines whether directed SPDP messages are sent to all participants once every resend period.
+    This setting should be enabled for participants that cannot use multicast to send SPDP announcements, e.g., an RtpsRelay.
 
-     - ``10``
+  .. key:: UndirectedSpdp=<boolean>
+    :default: ``1`` (enabled)
 
-   * - ``SedpHeartbeatPeriod=msec``
+    A boolean value that determines whether undirected SPDP messages are sent.
+    This setting should be disabled for participants that cannot use multicast to send SPDP announcements, e.g., an RtpsRelay.
 
-     - Time in milliseconds for a built-in (SEDP) Writer to announce the availability of data.
+  .. key:: InteropMulticastOverride=<group_address>
 
-     - ``200``
+    A network address specifying the multicast group to be used for SPDP discovery.
+    This overrides the interoperability group of the specification, ``239.255.0.1``
+    It can be used, for example, to specify use of a routed group address to provide a larger discovery scope.
 
-   * - ``SedpNakResponseDelay=msec``
+  .. key:: TTL=n
+    :default: ``1`` (all data is restricted to the local network)
 
-     - Time in milliseconds for a built-in (SEDP) Writer to delay the response to a negative acknowledgment.
+    The value of the Time-To-Live (TTL) field of multicast datagrams sent as part of discovery.
+    This value specifies the number of hops the datagram will traverse before being discarded by the network.
 
-     - ``100``
+  .. key:: MulticastInterface=<iface>
+    :default: :key:`[common]DCPSDefaultAddress`
 
-   * - ``DX=n``
+    Specifies the network interface to be used by this discovery instance.
+    This uses a platform-specific format that identifies the network interface, but can be address assigned to that interface on most platforms.
 
-     - An integer value that assists in providing an offset for calculating a port in SEDP Multicast configurations.
-       The formula used is:
+  .. key:: GuidInterface=<iface>
+    :default: The system / ACE library default is used
 
-       ``PB + DG * domainId + dx``
+    Specifies the network interface to use when determining which local MAC address should appear in a GUID generated by this node.
 
-       This is only valid when ``SedpMulticast=1``.
-       This is an OpenDDS extension and not part of the OMG DDSI-RTPS specification.
+  .. key:: SpdpRtpsRelayAddress=<host>:<port>
 
-     - ``2``
+    Specifies the address of :ref:`rtpsrelay` for SPDP messages.
 
-   * - ``SpdpSendAddrs=``
+  .. key:: SpdpRtpsRelaySendPeriod=<sec>
+    :default: ``30`` seconds
 
-       ``[host:port],[host:port]...``
+    Specifies the interval between SPDP announcements sent to :ref:`rtpsrelay`.
 
-     - A list (comma or whitespace separated) of host:port pairs used as destinations for SPDP content.
-       This can be a combination of Unicast and Multicast addresses.
+  .. key:: SedpRtpsRelayAddress=host:port
 
-     -
+    Specifies the address of :ref:`rtpsrelay` for SEDP messages.
 
-   * - ``MaxSpdpSequenceMsgResetChecks=n``
+  .. key:: RtpsRelayOnly=<boolean>
+    :default: ``0`` (disabled)
 
-     - Remove a discovered participant after this number of SPDP messages with earlier sequence numbers.
+    Only send RTPS message to :ref:`rtpsrelay` (for debugging).
 
-     - ``3``
+  .. key:: UseRtpsRelay=<boolean>
+    :default: ``0`` (disabled)
 
-   * - ``PeriodicDirectedSpdp=[0|1]``
+    Send messages to :ref:`rtpsrelay`.
+    Messages will only be sent if :key:`SpdpRtpsRelayAddress` and/or :key:`SedpRtpsRelayAddress` are set.
 
-     - A boolean value that determines whether directed SPDP messages are sent to all participants once every resend period.
-       This setting should be enabled for participants that cannot use multicast to send SPDP announcements, e.g., an RtpsRelay.
+  .. key:: SpdpStunServerAddress=<host>:<port>
 
-     - ``0``
+    Specifies the address of the STUN server to use for SPDP when using :ref:`ICE <ice>`.
 
-   * - ``UndirectedSpdp=[0|1]``
+  .. key:: SedpStunServerAddress=<host>:<port>
 
-     - A boolean value that determines whether undirected SPDP messages are sent.
-       This setting should be disabled for participants that cannot use multicast to send SPDP announcements, e.g., an RtpsRelay.
+    Specifies the address of the STUN server to use for SEDP when using :ref:`ICE <ice>`.
 
-     - ``1``
+  .. key:: UseIce=<boolean>
+    :default: ``0`` (disabled)
 
-   * - ``InteropMulticastOverride=group_address``
+    Enable or disable :ref:`ICE <ice>` for both SPDP and SEDP.
 
-     - A network address specifying the multicast group to be used for SPDP discovery.
-       This overrides the interoperability group of the specification.
-       It can be used, for example, to specify use of a routed group address to provide a larger discovery scope.
+  .. key:: MaxAuthTime=<sec>
+    :default: ``300`` seconds (5 minutes)
 
-     - ``239.255.0.1``
+    Set the maximum time for authentication with :ref:`dds_security`.
 
-   * - ``TTL=n``
+  .. key:: AuthResendPeriod=<sec>
+    :default: ``1`` second
 
-     - The value of the Time-To-Live (TTL) field of multicast datagrams sent as part of discovery.
-       This value specifies the number of hops the datagram will traverse before being discarded by the network.
-       The default value of 1 means that all data is restricted to the local network subnet.
+    Resend authentication messages for :ref:`dds_security` after this amount of seconds.
+    It is a floating point value, so fractions of a second can be specified.
 
-     - ``1``
+  .. key:: SecureParticipantUserData=<boolean>
+    :default: ``0`` (disabled)
 
-   * - ``MulticastInterface=iface``
+    If :ref:`dds_security` is enabled, the :ref:`Participant's USER_DATA QoS <quality_of_service--user-data>` is omitted from unsecured discovery messages.
 
-     - Specifies the network interface to be used by this discovery instance.
-       This uses a platform-specific format that identifies the network interface.
-       On Linux systems this would be something like eth ``0``.
+  .. key:: UseXTypes=no|minimal|complete
+    :default: :val:`no`
 
-       If this value is not configured, the Common Configuration value ``DCPSDefaultAddress`` is used to set the multicast interface.
+    Enables discovery extensions from the XTypes specification.
+    Participants exchange topic type information in endpoint announcements and extended type information using the Type Lookup Service.
+    .. See :ref:`xtypes--representing-types-with-typeobject-and-dynamictype` for more information on ``CompleteTypeObject`` and its use in the dynamic binding.
 
-     - The system default interface is used
+    .. val:: no
 
-   * - ``GuidInterface=iface``
+      XTypes isn't taken into consideration during discovery.
+      ``0`` can also be used for backwards compatibility.
 
-     - Specifies the network interface to use when determining which local MAC address should appear in a GUID generated by this node.
+    .. val:: minimal
 
-     - The system / ACE library default is used
+      XTypes is used for discovery when possible and only the ``MinimalTypeObject`` is provided to remote participants if available.
+      ``1`` can also be used for backwards compatibility.
 
-   * - ``SpdpRtpsRelayAddress=host:port``
+    .. val:: complete
 
-     - Specifies the address of the RtpsRelay for SPDP messages.
-       See :ref:`internet_enabled_rtps--the-rtpsrelay`.
+      XTypes is used for discovery when possible and only the ``CompleteTypeObject`` is provided to remote participants if available.
+      This requires that :option:`opendds_idl -Gxtypes-complete` was used when compiling the IDL.
+      ``2`` can also be used for backwards compatibility.
 
-     -
+  .. key:: TypeLookupServiceReplyTimeout=<msec>
+    :default: ``5000`` milliseconds (5 seconds).
 
-   * - ``SpdpRtpsRelaySendPeriod=period``
+    If :key:`UseXTypes` is enabled, then this sets the timeout for waiting for replies to remote Type Lookup Service requests.
 
-     - Specifies the interval between SPDP announcements sent to the RtpsRelay.
-       See :ref:`internet_enabled_rtps--the-rtpsrelay`.
+  .. key:: SedpResponsiveMode=<boolean>
+    :default: ``0`` (disabled)
 
-     - 30 seconds
+    Causes the built-in SEDP endpoints to send additional messages which may reduce latency.
 
-   * - ``SedpRtpsRelayAddress=host:port``
+  .. key:: SedpPassiveConnectDuration=<msec>
+    :default: ``60000`` milliseconds (1 minute)
 
-     - Specifies the address of the RtpsRelay for SEDP messages.
-       See :ref:`internet_enabled_rtps--the-rtpsrelay`.
+    Sets the duration that a passive endpoint will wait for a connection.
 
-     -
+  .. key:: SendBufferSize=<bytes>
+    :default: ``0`` (system default value is used)
 
-   * - ``RtpsRelayOnly=[0|1]``
+    Socket send buffer size for both SPDP and SEDP.
 
-     - Only send RTPS message to the RtpsRelay (for debugging).
-       See :ref:`internet_enabled_rtps--the-rtpsrelay`.
+  .. key:: RecvBufferSize=<bytes>
+    :default: ``0`` (system default value is used)
 
-     - ``0``
+    Socket receive buffer size for both SPDP and SEDP.
 
-   * - ``UseRtpsRelay=[0|1]``
+  .. key:: MaxParticipantsInAuthentication=<n>
+    :default: ``0`` (no limit)
 
-     - Send messages to the RtpsRelay.
-       Messages will only be sent if SpdpRtpsRelayAddress and/or SedpRtpsRelayAddress is set.
-       See :ref:`internet_enabled_rtps--the-rtpsrelay`.
+    This setting is only available when OpenDDS is compiled with :ref:`dds_security` enabled.
+    Limits the number of peer participants that can be concurrently in the process of authenticating -- that is, not yet completed authentication.
 
-     - ``0``
+  .. key:: SedpReceivePreallocatedMessageBlocks=<n>
+    :default: ``0`` (use :key:`[transport]receive_preallocated_message_blocks`'s default)
 
-   * - ``SpdpStunServerAddress=host:port``
+    Configure the :key:`[transport]receive_preallocated_message_blocks` attribute of SEDP's transport.
 
-     - Specifies the address of the STUN server to use for SPDP when using ICE.
-       See :ref:`internet_enabled_rtps--interactive-connectivity-establishment-ice-for-rtps`
+  .. key:: SedpReceivePreallocatedDataBlocks=<n>
+    :default: ``0`` (use :key:`[transport]receive_preallocated_message_blocks`'s default)
 
-     -
+    Configure the :key:`[transport]receive_preallocated_data_blocks` attribute of SEDP's transport.
 
-   * - ``SedpStunServerAddress=host:port``
+  .. key:: CheckSourceIp=<boolean>
+    :default: ``1`` (enabled)
 
-     - Specifies the address of the STUN server to use for SEDP when using ICE.
-       See :ref:`internet_enabled_rtps--interactive-connectivity-establishment-ice-for-rtps`.
+    Incoming participant announcements (SPDP) are checked to verify that their source IP address matches one of:
 
-     -
+    - An entry in the metatraffic locator list
 
-   * - ``UseIce=[0|1]``
+    - The configured :ref:`RtpsRelay <rtpsrelay>` (if any)
 
-     - Enable or disable ICE for both SPDP and SEDP.
-       See :ref:`internet_enabled_rtps--interactive-connectivity-establishment-ice-for-rtps`.
+    - An :ref:`ICE <ice>` AgentInfo parameter.
 
-     - 0
-
-   * - ``MaxAuthTime=sec``
-
-     - Set the maximum time for authentication with DDS Security.
-
-     - 300
-
-   * - ``AuthResendPeriod=sec``
-
-     - Resend authentication messages after this amount of time.
-       It is a floating point value, so fractions of a second can be specified.
-
-     - 1
-
-   * - ``SecureParticipantUserData=[0|1]``
-
-     - If DDS Security is enabled, the Participant's USER_DATA QoS is omitted from unsecured discovery messages.
-
-     - ``0``
-
-   * - .. _run_time_configuration--usextypes:
-
-       ``UseXTypes=[``
-
-       ``no|0|``
-
-       ``minimal|1|``
-
-       ``complete|2``
-
-       ``]``
-
-     - Enables discovery extensions from the XTypes specification.
-       Participants exchange top-level type information in endpoint announcements and extended type information using the Type Lookup Service.
-
-       ``minimal`` or ``1`` uses ``MinimalTypeObject`` and ``complete`` or ``2`` uses ``CompleteTypeObject`` if available.
-       See :ref:`xtypes--representing-types-with-typeobject-and-dynamictype` for more information on ``CompleteTypeObject`` and its use in the dynamic binding.
-
-     - ``minimal``
-
-   * - ``TypeLookupServiceReplyTimeout=msec``
-
-     - If a request is sent to a peer's Type Lookup Service (see UseXTypes above), wait up to this duration (in milliseconds) for a reply.
-
-     - ``5000``
-
-       ``(5 seconds)``
-
-   * - ``SedpResponsiveMode=[0|1]``
-
-     - Causes the built-in SEDP endpoints to send additional messages which may reduce latency.
-
-     - 0
-
-   * - ``SedpPassiveConnectDuration=msec``
-
-     - Sets the duration that a passive endpoint will wait for a connection.
-
-     - 60000
-
-       (1 minute)
-
-   * - ``SendBufferSize=bytes``
-
-     - Socket send buffer size for both SPDP and SEDP.
-       A value of zero indicates that the system default value is used.
-
-     - 0
-
-   * - ``RecvBufferSize=bytes``
-
-     - Socket receive buffer size for both SPDP and SEDP.
-       A value of zero indicates that the system default value is used.
-
-     - 0
-
-   * - ``MaxParticipantsInAuthentication=n``
-
-     - If DDS Security is enabled, this option (when set to a positive number) limits the number of peer participants that can be concurrently in the process of authenticating -- that is, not yet completed authentication.
-
-     - 0 (unlimited)
-
-   * - ``SedpReceivePreallocatedMessageBlocks=n``
-
-     - Configure the receive_preallocated_message_blocks attribute of SEDP's transport.
-       See :ref:`run_time_configuration--configuration-options-common-to-all-transports`.
-
-     - 0 (use default)
-
-   * - ``SedpReceivePreallocatedDataBlocks=n``
-
-     - Configure the receive_preallocated_data_blocks attribute of SEDP's transport.
-       See :ref:`run_time_configuration--configuration-options-common-to-all-transports`.
-
-     - 0 (use default)
-
-   * - ``CheckSourceIp=[0|1]``
-
-     - Incoming participant announcements (SPDP) are checked to verify that their source IP address matches one of:
-
-       * An entry in the metatraffic locator list
-
-       * The configured RtpsRelay (if any)
-
-       * An ICE AgentInfo parameter
-
-         Announcements that don't match any of these are dropped if this check is enabled.
-
-     - 1 (enabled)
-
-.. note:: If the environment variable ``OPENDDS_RTPS_DEFAULT_D0`` is set, its value is used as the ``D0`` default value.
+    Announcements that don't match any of these are dropped if this check is enabled.
 
 .. _run_time_configuration--additional-ddsi-rtps-discovery-features:
 
@@ -1334,7 +1245,7 @@ Additional DDSI-RTPS Discovery Features
 The DDSI_RTPS discovery implementation creates and manages a transport instance -- specifically an object of class ``RtpsUdpInst``.
 In order for applications to access this object and enable advanced features (:ref:`Additional RTPS_UDP Features <run_time_configuration--additional-rtps-udp-features>`), the ``RtpsDiscovery`` class provides the method ``sedp_transport_inst(domainId, participant)``.
 
-.. _run_time_configuration--configuring-for-static-discovery:
+.. _static-disc-config:
 
 Configuring for Static Discovery
 ================================
@@ -1350,14 +1261,14 @@ A domain participant learns about the existence of an endpoint through hints sup
 
 .. note:: Currently, static discovery can only be used for endpoints using the RTPS UDP transport.
 
-Static discovery introduces the following configuration file sections:  ``[topic/*]``, ``[datawriterqos/*]``, ``[datareaderqos/*]``, ``[publisherqos/*]``, ``[subscriberqos/*]``, and ``[endpoint/*]``.
-The :ref:`topic <run_time_configuration--reftable13>` section is used to introduce a topic.
-The :ref:`datawriterqos <run_time_configuration--reftable14>`, :ref:`datareaderqos <run_time_configuration--reftable15>`, :ref:`publisherqos <run_time_configuration--reftable16>`, and :ref:`subscriberqos <run_time_configuration--reftable17>` sections are used to describe a QoS of the associated type.
-The :ref:`endpoint <run_time_configuration--reftable18>` section describes a data reader or writer.
+Static discovery introduces the following configuration file sections:
+- The :sec:`topic` section is used to introduce a topic.
+- The :sec:`datawriterqos`, :sec:`datareaderqos`, :sec:`publisherqos`, and :sec:`subscriberqos` sections are used to describe a QoS of the associated type.
+- The :sec:`endpoint` section describes a data reader or writer.
 
-Data reader and writer objects must be identified by the user so that the static discovery mechanism can associate them with the correct ``[endpoint/*]`` section in the configuration file.
+Data reader and writer objects must be identified by the user so that the static discovery mechanism can associate them with the correct :sec:`endpoint` section in the configuration file.
 This is done by setting the ``user_data`` of the ``DomainParticipantQos`` to an octet sequence of length 6.
-The representation of this octet sequence occurs in the ``participant`` value of an ``[endpoint/*]`` section as a string with two hexadecimal digits per octet.
+The representation of this octet sequence occurs in the :key:`[endpoint]participant` as a string with two hexadecimal digits per octet.
 Similarly, the ``user_data`` of the ``DataReaderQos`` or ``DataWriterQos`` must be set to an octet sequence of length 3 corresponding to the ``entity`` value in the ``[endpoint/*]`` section.
 For example, suppose the configuration file contains the following:
 
@@ -1410,555 +1321,297 @@ The code to configure the DataReaderQos is similar:
 The domain id, which is 34 in the example, should be passed to the call to ``create_participant``.
 
 In the example, the endpoint configuration for ``MyReader`` references ``MyConfig`` which in turn references ``MyTransport``.
-Transport configuration is described in :ref:`run_time_configuration--transport-configuration`.
+Transport configuration is described in :ref:`transport-config`.
 The important detail for static discovery is that at least one of the transports contains a known network address (``1.2.3.4:30000``).
 An error will be issued if an address cannot be determined for an endpoint.
 The static discovery implementation also checks that the QoS of a data reader or data writer object matches the QoS specified in the configuration file.
 
-.. _run_time_configuration--reftable13:
+.. sec:: topic/<inst_name>
 
-.. list-table:: [topic/\*] Configuration Options
-   :header-rows: 1
+  .. key:: name=<name>
+    :default: The ``<inst_name>`` of the topic section
 
-   * - Option
+    Use this to override the name of the topic in the DDS API.
 
-     - Description
+  .. key:: type_name=<name>
+    :required:
 
-     - Default
+    Identifier which uniquely defines the sample type.
+    This is typically a CORBA interface repository type name.
 
-   * - ``name=string``
+.. sec:: datawriterqos/<inst_name>
 
-     - The name of the topic.
+  .. key:: durability.kind=VOLATILE|TRANSIENT_LOCAL
 
-     - ``Instance name of section``
+    See :ref:`quality_of_service--durability`.
 
-   * - ``type_name=string``
+  .. key:: deadline.period.sec=<numberic>|DURATION_INFINITE_SEC
 
-     - Identifier which uniquely defines the sample type.
-       This is typically a CORBA interface repository type name.
+    See :ref:`quality_of_service--deadline`.
 
-     - ``Required``
+  .. key:: deadline.period.nanosec=<numberic>|DURATION_INFINITE_NANOSEC
 
-.. _run_time_configuration--reftable14:
+    See :ref:`quality_of_service--deadline`.
 
-.. list-table:: [datawriterqos/\*] Configuration Options
-   :header-rows: 1
+  .. key:: latency_budget.duration.sec=<numberic>|DURATION_INFINITE_SEC
 
-   * - Option
+    See :ref:`quality_of_service--latency-budget`.
 
-     - Description
+  .. key:: latency_budget.duration.nanosec=<numberic>|DURATION_INFINITE_NANOSEC
 
-     - Default
+    See :ref:`quality_of_service--latency-budget`.
 
-   * - ``durability.kind=[``
+  .. key:: liveliness.kind=AUTOMATIC|MANUAL_BY_TOPIC|MANUAL_BY_PARTICIPANT
 
-       ``VOLATILE|TRANSIENT_LOCAL]``
+    See :ref:`quality_of_service--liveliness`.
 
-     - See :ref:`quality_of_service--durability`.
+  .. key:: liveliness.lease_duration.sec=<numberic>|DURATION_INFINITE_SEC
 
-     - See :ref:`DataWriter QoS <quality_of_service--reftable6>`.
+    See :ref:`quality_of_service--liveliness`.
 
-   * - ``deadline.period.sec=[``
+  .. key:: liveliness.lease_duration.nanosec=<numberic>|DURATION_INFINITE_NANOSEC
 
-       ``numeric|DURATION_INFINITE_SEC]``
+    See :ref:`quality_of_service--liveliness`.
 
-     - See :ref:`quality_of_service--deadline`.
+  .. key:: reliability.kind=BEST_EFFORT|RELIABILE
 
-     - See :ref:`DataWriter QoS <quality_of_service--reftable6>`.
+    See :ref:`quality_of_service--reliability`.
 
-   * - ``deadline.period.nanosec=[``
+  .. key:: reliability.max_blocking_time.sec=<numberic>|DURATION_INFINITE_SEC
 
-       ``numeric|DURATION_INFINITE_NANOSEC]``
+    See :ref:`quality_of_service--reliability`.
 
-     - See :ref:`quality_of_service--deadline`.
+  .. key:: reliability.max_blocking_time.nanosec=<numberic>|DURATION_INFINITE_NANOSEC
 
-     - See :ref:`DataWriter QoS <quality_of_service--reftable6>`.
+    See :ref:`quality_of_service--reliability`.
 
-   * - ``latency_budget.duration.sec=[``
+  .. key:: destination_order.kind=BY_SOURCE_TIMESTAMP|BY_RECEPTION_TIMESTAMP
 
-       ``numeric|DURATION_INFINITE_SEC]``
+    See :ref:`quality_of_service--destination-order`.
 
-     - See :ref:`quality_of_service--latency-budget`.
+  .. key:: history.kind=KEEP_LAST|KEEP_ALL
 
-     - See :ref:`DataWriter QoS <quality_of_service--reftable6>`.
+    See :ref:`quality_of_service--history`.
 
-   * - ``latency_budget.duration.nanosec=[``
+  .. key:: history.depth=<numberic>
 
-       ``numeric|DURATION_INFINITE_NANOSEC]``
+    See :ref:`quality_of_service--history`.
 
-     - See :ref:`quality_of_service--latency-budget`.
+  .. key:: resource_limits.max_samples=<numberic>
 
-     - See :ref:`DataWriter QoS <quality_of_service--reftable6>`.
+    See :ref:`quality_of_service--resource-limits`.
 
-   * - ``liveliness.kind=[``
+  .. key:: resource_limits.max_instances=<numberic>
 
-       ``AUTOMATIC|``
+    See :ref:`quality_of_service--resource-limits`.
 
-       ``MANUAL_BY_TOPIC|``
+  .. key:: resource_limits.max_samples_per_instance=<numberic>
 
-       ``MANUAL_BY_PARTICIPANT]``
+    See :ref:`quality_of_service--resource-limits`.
 
-     - See :ref:`quality_of_service--liveliness`.
+  .. key:: transport_priority.value=<numberic>
 
-     - See :ref:`DataWriter QoS <quality_of_service--reftable6>`.
+    See :ref:`quality_of_service--transport-priority`.
 
-   * - ``liveliness.lease_duration.sec=[``
+  .. key:: lifespan.duration.sec=<numberic>|DURATION_INFINITE_SEC
 
-       ``numeric|DURATION_INFINITE_SEC]``
+    See :ref:`quality_of_service--lifespan`.
 
-     - See :ref:`quality_of_service--liveliness`.
+  .. key:: lifespan.duration.nanosec=<numberic>|DURATION_INFINITE_NANOSEC
 
-     - See :ref:`DataWriter QoS <quality_of_service--reftable6>`.
+    See :ref:`quality_of_service--lifespan`.
 
-   * - ``liveliness.lease_duration.nanosec=[``
+  .. key:: ownership.kind=SHARED|EXCLUSIVE
 
-       ``numeric|DURATION_INFINITE_NANOSEC]``
+    See :ref:`quality_of_service--ownership`.
 
-     - See :ref:`quality_of_service--liveliness`.
+  .. key:: ownership_strength.value=<numberic>
 
-     - See :ref:`DataWriter QoS <quality_of_service--reftable6>`.
+    See :ref:`quality_of_service--ownership-strength`.
 
-   * - ``reliability.kind=[BEST_EFFORT|RELIABILE]``
+.. sec:: datareaderqos/<inst_name>
 
-     - See :ref:`quality_of_service--reliability`.
+  .. key:: durability.kind=VOLATILE|TRANSIENT_LOCAL
 
-     - See :ref:`DataWriter QoS <quality_of_service--reftable6>`.
+    See :ref:`quality_of_service--durability`.
 
-   * - ``reliability.max_blocking_time.sec=[``
+  .. key:: deadline.period.sec=<numberic>|DURATION_INFINITE_SEC
 
-       ``numeric|DURATION_INFINITE_SEC]``
+    See :ref:`quality_of_service--deadline`.
 
-     - See :ref:`quality_of_service--reliability`.
+  .. key:: deadline.period.nanosec=<numberic>|DURATION_INFINITE_NANOSEC
 
-     - See :ref:`DataWriter QoS <quality_of_service--reftable6>`.
+    See :ref:`quality_of_service--deadline`.
 
-   * - ``reliability.max_blocking_time.nanosec=[``
+  .. key:: latency_budget.duration.sec=<numberic>|DURATION_INFINITE_SEC
 
-       ``numeric|DURATION_INFINITE_NANOSEC]``
+    See :ref:`quality_of_service--latency-budget`.
 
-     - See :ref:`quality_of_service--reliability`.
+  .. key:: latency_budget.duration.nanosec=<numberic>|DURATION_INFINITE_NANOSEC
 
-     - See :ref:`DataWriter QoS <quality_of_service--reftable6>`.
+    See :ref:`quality_of_service--latency-budget`.
 
-   * - ``destination_order.kind=[``
+  .. key:: liveliness.kind=AUTOMATIC|MANUAL_BY_TOPIC|MANUAL_BY_PARTICIPANT
 
-       ``BY_SOURCE_TIMESTAMP|``
+    See :ref:`quality_of_service--liveliness`.
 
-       ``BY_RECEPTION_TIMESTAMP]``
+  .. key:: liveliness.lease_duration.sec=<numberic>|DURATION_INFINITE_SEC
 
-     - See :ref:`quality_of_service--destination-order`.
+    See :ref:`quality_of_service--liveliness`.
 
-     - See :ref:`DataWriter QoS <quality_of_service--reftable6>`.
+  .. key:: liveliness.lease_duration.nanosec=<numberic>|DURATION_INFINITE_NANOSEC
 
-   * - ``history.kind=[KEEP_LAST|KEEP_ALL]``
+    See :ref:`quality_of_service--liveliness`.
 
-     - See :ref:`quality_of_service--history`.
+  .. key:: reliability.kind=BEST_EFFORT|RELIABILE
 
-     - See :ref:`DataWriter QoS <quality_of_service--reftable6>`.
+    See :ref:`quality_of_service--reliability`.
 
-   * - ``history.depth=numeric``
+  .. key:: reliability.max_blocking_time.sec=<numberic>|DURATION_INFINITE_SEC
 
-     - See :ref:`quality_of_service--history`.
+    See :ref:`quality_of_service--reliability`.
 
-     - See :ref:`DataWriter QoS <quality_of_service--reftable6>`.
+  .. key:: reliability.max_blocking_time.nanosec=<numberic>|DURATION_INFINITE_NANOSEC
 
-   * - ``resource_limits.max_samples=numeric``
+    See :ref:`quality_of_service--reliability`.
 
-     - See :ref:`quality_of_service--resource-limits`.
+  .. key:: destination_order.kind=BY_SOURCE_TIMESTAMP|BY_RECEPTION_TIMESTAMP
 
-     - See :ref:`DataWriter QoS <quality_of_service--reftable6>`.
+    See :ref:`quality_of_service--destination-order`.
 
-   * - ``resource_limits.max_instances=numeric``
+  .. key:: history.kind=KEEP_LAST|KEEP_ALL
 
-     - See :ref:`quality_of_service--resource-limits`.
+    See :ref:`quality_of_service--history`.
 
-     - See :ref:`DataWriter QoS <quality_of_service--reftable6>`.
+  .. key:: history.depth=<numberic>
 
-   * - ``resource_limits.max_samples_per_instance=``
+    See :ref:`quality_of_service--history`.
 
-       ``numeric``
+  .. key:: resource_limits.max_samples=<numberic>
 
-     - See :ref:`quality_of_service--resource-limits`.
+    See :ref:`quality_of_service--resource-limits`.
 
-     - See :ref:`DataWriter QoS <quality_of_service--reftable6>`.
+  .. key:: resource_limits.max_instances=<numberic>
 
-   * - ``transport_priority.value=numeric``
+    See :ref:`quality_of_service--resource-limits`.
 
-     - See :ref:`quality_of_service--transport-priority`.
+  .. key:: resource_limits.max_samples_per_instance=<numberic>
 
-     - See :ref:`DataWriter QoS <quality_of_service--reftable6>`.
+    See :ref:`quality_of_service--resource-limits`.
 
-   * - ``lifespan.duration.sec=[``
+  .. key:: time_based_filter.minimum_separation.sec=<numberic>|DURATION_INFINITE_SEC
 
-       ``numeric|DURATION_INFINITE_SEC]``
+    See :ref:`quality_of_service--time-based-filter`.
 
-     - See :ref:`quality_of_service--lifespan`.
+  .. key:: time_based_filter.minimum_separation.nanosec=<numberic>|DURATION_INFINITE_NANOSEC
 
-     - See :ref:`DataWriter QoS <quality_of_service--reftable6>`.
+    See :ref:`quality_of_service--time-based-filter`.
 
-   * - ``lifespan.duration.nanosec=[``
+  .. key:: reader_data_lifecycle.autopurge_nowriter_samples_delay.sec=<numberic>|DURATION_INFINITE_SEC
 
-       ``numeric|DURATION_INFINITE_NANOSEC]``
+    See :ref:`quality_of_service--reader-data-lifecycle`.
 
-     - See :ref:`quality_of_service--lifespan`.
+  .. key:: reader_data_lifecycle.autopurge_nowriter_samples_delay.nanosec=<numberic>|DURATION_INFINITE_NANOSEC
 
-     - See :ref:`DataWriter QoS <quality_of_service--reftable6>`.
+    See :ref:`quality_of_service--reader-data-lifecycle`.
 
-   * - ``ownership.kind=[SHARED|EXCLUSIVE]``
+  .. key:: reader_data_lifecycle.autopurge_dispose_samples_delay.sec=<numberic>|DURATION_INFINITE_SEC
 
-     - See :ref:`quality_of_service--ownership`.
+    See :ref:`quality_of_service--reader-data-lifecycle`.
 
-     - See :ref:`DataWriter QoS <quality_of_service--reftable6>`.
+  .. key:: reader_data_lifecycle.autopurge_dispose_samples_delay.nanosec=<numberic>|DURATION_INFINITE_NANOSEC
 
-   * - ``ownership_strength.value=numeric``
+    See :ref:`quality_of_service--reader-data-lifecycle`.
 
-     - See :ref:`quality_of_service--ownership-strength`.
+.. sec:: publisherqos/<inst_name>
 
-     - See :ref:`DataWriter QoS <quality_of_service--reftable6>`.
+  .. key:: presentation.access_scope=INSTANCE|TOPIC|GROUP
 
-.. _run_time_configuration--reftable15:
+    See :ref:`quality_of_service--presentation`.
 
-.. list-table:: [datareaderqos/\*] Configuration Options
-   :header-rows: 1
+  .. key:: presentation.coherent_access=true|false
 
-   * - Option
+    See :ref:`quality_of_service--presentation`.
 
-     - Description
+  .. key:: presentation.ordered_access=true|false
 
-     - Default
+    See :ref:`quality_of_service--presentation`.
 
-   * - ``durability.kind=[``
+  .. key:: partition.name=<name>[,<name>]...
 
-       ``VOLATILE|TRANSIENT_LOCAL]``
+    See :ref:`quality_of_service--partition`.
 
-     - See :ref:`quality_of_service--durability`.
+.. sec:: subscriberqos/<inst_name>
 
-     - See :ref:`DataReader QoS <quality_of_service--reftable7>`.
+  .. key:: presentation.access_scope=INSTANCE|TOPIC|GROUP
 
-   * - ``deadline.period.sec=[``
+    See :ref:`quality_of_service--presentation`.
 
-       ``numeric|DURATION_INFINITE_SEC]``
+  .. key:: presentation.coherent_access=true|false
 
-     - See :ref:`quality_of_service--deadline`.
+    See :ref:`quality_of_service--presentation`.
 
-     - See :ref:`DataReader QoS <quality_of_service--reftable7>`.
+  .. key:: presentation.ordered_access=true|false
 
-   * - ``deadline.period.nanosec=[``
+    See :ref:`quality_of_service--presentation`.
 
-       ``numeric|DURATION_INFINITE_NANOSEC]``
+  .. key:: partition.name=<name>[,<name>]...
 
-     - See :ref:`quality_of_service--deadline`.
+    See :ref:`quality_of_service--partition`.
 
-     - See :ref:`DataReader QoS <quality_of_service--reftable7>`.
+.. sec:: endpoint/<inst_name>
 
-   * - ``latency_budget.duration.sec=[``
+  .. key:: domain=<numberic>
+    :required:
 
-       ``numeric|DURATION_INFINITE_SEC]``
+    Domain id for endpoint in range 0-231.
+    Used to form GUID of endpoint.
 
-     - See :ref:`quality_of_service--latency-budget`.
+  .. key:: participant=<hexstring>
+    :required:
 
-     - See :ref:`DataReader QoS <quality_of_service--reftable7>`.
+    String of 12 hexadecimal digits.
+    Used to form GUID of endpoint.
+    All endpoints with the same domain/participant combination should be in the same process.
 
-   * - ``latency_budget.duration.nanosec=[``
+  .. key:: entity=<hexstring>
+    :required:
 
-       ``numeric|DURATION_INFINITE_NANOSEC]``
+    String of 6 hexadecimal digits.
+    Used to form GUID of endpoint.
+    The combination of domain/participant/entity should be unique.
 
-     - See :ref:`quality_of_service--latency-budget`.
+  .. key:: type=reader|writer
+    :required:
 
-     - See :ref:`DataReader QoS <quality_of_service--reftable7>`.
+    Determines if the entity is a data reader or data writer.
 
-   * - ``liveliness.kind=[``
+  .. key:: topic=<inst_name>
+    :required:
 
-       ``AUTOMATIC|``
+    The :sec:`topic` to use.
 
-       ``MANUAL_BY_TOPIC|``
+  .. key:: datawriterqos=<inst_name>
 
-       ``MANUAL_BY_PARTICIPANT]``
+    The :sec:`datawriterqos` to use.
 
-     - See :ref:`quality_of_service--liveliness`.
+  .. key:: datareaderqos=<inst_name>
 
-     - See :ref:`DataReader QoS <quality_of_service--reftable7>`.
+    The :sec:`datareaderqos` to use.
 
-   * - ``liveliness.lease_duration.sec=[``
+  .. key:: publisherqos=<inst_name>
 
-       ``numeric|DURATION_INFINITE_SEC]``
+    The :sec:`publisherqos` to use.
 
-     - See :ref:`quality_of_service--liveliness`.
+  .. key:: subscriberqos=<inst_name>
 
-     - See :ref:`DataReader QoS <quality_of_service--reftable7>`.
+    The :sec:`subscriberqos` to use.
 
-   * - ``liveliness.lease_duration.nanosec=[``
+  .. key:: config=<inst_name>
 
-       ``numeric|DURATION_INFINITE_NANOSEC]``
+    The :sec:`config` to use.
 
-     - See :ref:`quality_of_service--liveliness`.
-
-     - See :ref:`DataReader QoS <quality_of_service--reftable7>`.
-
-   * - ``reliability.kind=[BEST_EFFORT|RELIABILE]``
-
-     - See :ref:`quality_of_service--reliability`.
-
-     - See :ref:`DataReader QoS <quality_of_service--reftable7>`.
-
-   * - ``reliability.max_blocking_time.sec=[``
-
-       ``numeric|DURATION_INFINITE_SEC]``
-
-     - See :ref:`quality_of_service--reliability`.
-
-     - See :ref:`DataReader QoS <quality_of_service--reftable7>`.
-
-   * - ``reliability.max_blocking_time.nanosec=[``
-
-       ``numeric|DURATION_INFINITE_NANOSEC]``
-
-     - See :ref:`quality_of_service--reliability`.
-
-     - See :ref:`DataReader QoS <quality_of_service--reftable7>`.
-
-   * - ``destination_order.kind=[``
-
-       ``BY_SOURCE_TIMESTAMP|``
-
-       ``BY_RECEPTION_TIMESTAMP]``
-
-     - See :ref:`quality_of_service--destination-order`.
-
-     - See :ref:`DataReader QoS <quality_of_service--reftable7>`.
-
-   * - ``history.kind=[KEEP_LAST|KEEP_ALL]``
-
-     - See :ref:`quality_of_service--history`.
-
-     - See :ref:`DataReader QoS <quality_of_service--reftable7>`.
-
-   * - ``history.depth=numeric``
-
-     - See :ref:`quality_of_service--history`.
-
-     - See :ref:`DataReader QoS <quality_of_service--reftable7>`.
-
-   * - ``resource_limits.max_samples=numeric``
-
-     - See :ref:`quality_of_service--resource-limits`.
-
-     - See :ref:`DataReader QoS <quality_of_service--reftable7>`.
-
-   * - ``resource_limits.max_instances=numeric``
-
-     - See :ref:`quality_of_service--resource-limits`.
-
-     - See :ref:`DataReader QoS <quality_of_service--reftable7>`.
-
-   * - ``resource_limits.max_samples_per_instance=``
-
-       ``numeric``
-
-     - See :ref:`quality_of_service--resource-limits`.
-
-     - See :ref:`DataReader QoS <quality_of_service--reftable7>`.
-
-   * - ``time_based_filter.minimum_separation.sec=[``
-
-       ``numeric|DURATION_INFINITE_SEC]``
-
-     - See :ref:`quality_of_service--time-based-filter`.
-
-     - See :ref:`DataReader QoS <quality_of_service--reftable7>`.
-
-   * - ``time_based_filter.minimum_separation.nanosec=[``
-
-       ``numeric|DURATION_INFINITE_NANOSEC]``
-
-     - See :ref:`quality_of_service--time-based-filter`.
-
-     - See :ref:`DataReader QoS <quality_of_service--reftable7>`.
-
-   * - ``reader_data_lifecycle.``
-       ``autopurge_nowriter_samples_delay.sec=[``
-
-       ``numeric|DURATION_INFINITE_SEC]``
-
-     - See :ref:`quality_of_service--reader-data-lifecycle`.
-
-     - See :ref:`DataReader QoS <quality_of_service--reftable7>`.
-
-   * - ``reader_data_lifecycle.``
-       ``autopurge_nowriter_samples_delay.nanosec=[``
-
-       ``numeric|DURATION_INFINITE_NANOSEC]``
-
-     - See :ref:`quality_of_service--reader-data-lifecycle`.
-
-     - See :ref:`DataReader QoS <quality_of_service--reftable7>`.
-
-   * - ``reader_data_lifecycle.``
-       ``autopurge_dispose_samples_delay.sec=[``
-
-       ``numeric|DURATION_INFINITE_SEC]``
-
-     - See :ref:`quality_of_service--reader-data-lifecycle`.
-
-     - See :ref:`DataReader QoS <quality_of_service--reftable7>`.
-
-   * - ``reader_data_lifecycle.``
-       ``autopurge_dispose_samples_delay.nanosec=[``
-
-       ``numeric|DURATION_INFINITE_NANOSEC]``
-
-     - See :ref:`quality_of_service--reader-data-lifecycle`.
-
-     - See :ref:`DataReader QoS <quality_of_service--reftable7>`.
-
-.. _run_time_configuration--reftable16:
-
-.. list-table:: [publisherqos/\*] Configuration Options
-   :header-rows: 1
-
-   * - Option
-
-     - Description
-
-     - Default
-
-   * - ``presentation.access_scope=[INSTANCE|TOPIC|GROUP]``
-
-     - See :ref:`quality_of_service--presentation`.
-
-     - See :ref:`Publisher QoS <quality_of_service--publisher>`.
-
-   * - ``presentation.coherent_access=[true|false]``
-
-     - See :ref:`quality_of_service--presentation`.
-
-     - See :ref:`Publisher QoS <quality_of_service--publisher>`.
-
-   * - ``presentation.ordered_access=[true|false]``
-
-     - See :ref:`quality_of_service--presentation`.
-
-     - See :ref:`Publisher QoS <quality_of_service--publisher>`.
-
-   * - ``partition.name=name0,name1,...``
-
-     - See :ref:`quality_of_service--partition`.
-
-     - See :ref:`Publisher QoS <quality_of_service--publisher>`.
-
-.. _run_time_configuration--reftable17:
-
-.. list-table:: [subscriberqos/\*] Configuration Options
-   :header-rows: 1
-
-   * - Option
-
-     - Description
-
-     - Default
-
-   * - ``presentation.access_scope=[INSTANCE|TOPIC|GROUP]``
-
-     - See :ref:`quality_of_service--presentation`.
-
-     - See :ref:`Subscriber QoS <quality_of_service--reftable5>`.
-
-   * - ``presentation.coherent_access=[true|false]``
-
-     - See :ref:`quality_of_service--presentation`.
-
-     - See :ref:`Subscriber QoS <quality_of_service--reftable5>`.
-
-   * - ``presentation.ordered_access=[true|false]``
-
-     - See :ref:`quality_of_service--presentation`.
-
-     - See :ref:`Subscriber QoS <quality_of_service--reftable5>`.
-
-   * - ``partition.name=name0,name1,...``
-
-     - See :ref:`quality_of_service--partition`.
-
-     - See :ref:`Subscriber QoS <quality_of_service--reftable5>`.
-
-.. _run_time_configuration--reftable18:
-
-.. list-table:: [endpoint/\*] Configuration Options
-   :header-rows: 1
-
-   * - Option
-
-     - Description
-
-     - Default
-
-   * - ``domain=numeric``
-
-     - Domain id for endpoint in range 0-231.
-       Used to form GUID of endpoint.
-
-     - Required
-
-   * - ``participant=hexstring``
-
-     - String of 12 hexadecimal digits.
-       Used to form GUID of endpoint.
-       All endpoints with the same domain/participant combination should be in the same process.
-
-     - Required
-
-   * - ``entity=hexstring``
-
-     - String of 6 hexadecimal digits.
-       Used to form GUID of endpoint.
-       The combination of domain/participant/entity should be unique.
-
-     - Required
-
-   * - ``type=[reader|writer]``
-
-     - Determines if the entity is a data reader or data writer.
-
-     - Required
-
-   * - ``topic=name``
-
-     - Refers to a ``[topic/*]`` section.
-
-     - Required
-
-   * - ``datawriterqos=name``
-
-     - Refers to a ``[datawriterqos/*]`` section.
-
-     - See :ref:`DataWriter QoS <quality_of_service--reftable6>`.
-
-   * - ``datareaderqos=name``
-
-     - Refers to a ``[datareaderqos/*]`` section.
-
-     - See :ref:`DataReader QoS <quality_of_service--reftable7>`.
-
-   * - ``publisherqos=name``
-
-     - Refers to a ``[publisherqos/*]`` section.
-
-     - See :ref:`Publisher QoS <quality_of_service--publisher>`.
-
-   * - ``subscriberqos=name``
-
-     - Refers to a ``[subscriberqos/*]`` section.
-
-     - See :ref:`Subscriber QoS <quality_of_service--reftable5>`.
-
-   * - ``config``
-
-     - Refers to a transport configuration in a ``[config/*]`` section.
-       This is used to determine a network address for the endpoint.
-
-     -
-
-.. _run_time_configuration--transport-configuration:
+.. _transport-config:
 
 ***********************
 Transport Configuration
@@ -2230,7 +1883,7 @@ See the option descriptions in the following sections for a full understanding o
 Stepping back and comparing this code to the original configuration file from, the configuration file is much simpler than the corresponding C++ code and has the added advantage of being modifiable at run-time.
 It is easy to see why we recommend that almost all applications should use the configuration file mechanism for transport configuration.
 
-.. _run_time_configuration--transport-configuration-options:
+.. _transport-config-options:
 
 Transport Configuration Options
 ===============================
@@ -2241,40 +1894,25 @@ Transport Configuration Options
 Transport Configurations are specified in the OpenDDS configuration file via sections with the format of ``[config/<name>]``, where ``<name>`` is a unique name for that configuration within that process.
 The following table summarizes the options when specifying a transport configuration:
 
-.. _run_time_configuration--reftable19:
+.. sec:: config/<inst_name>
 
-.. list-table:: Transport Configuration Options
-   :header-rows: 1
+  .. key:: transports=<inst_name>[,<inst_name>]...
 
-   * - Option
+    The ordered list of transport instance names that this configuration will utilize.
+    This field is required for every transport configuration.
 
-     - Description
+  .. key:: swap_bytes=<boolean>
+    :default: ``0`` (disabled)
 
-     - Default
+    A value of ``0`` causes DDS to serialize data in the source machine's native endianness; a value of ``1`` causes DDS to serialize data in the opposite endianness.
+    The receiving side will adjust the data for its endianness so there is no need to match this option between machines.
+    The purpose of this option is to allow the developer to decide which side will make the endian adjustment, if necessary.
 
-   * - ``transports=inst1[,inst2][,...]``
+  .. key:: passive_connect_duration=<msec>
+    :default: ``10000`` (10 sec)
 
-     - The ordered list of transport instance names that this configuration will utilize.
-       This field is required for every transport configuration.
-
-     - none
-
-   * - ``swap_bytes=[0|1]``
-
-     - A value of 0 causes DDS to serialize data in the source machine's native endianness; a value of 1 causes DDS to serialize data in the opposite endianness.
-       The receiving side will adjust the data for its endianness so there is no need to match this option between machines.
-       The purpose of this option is to allow the developer to decide which side will make the endian adjustment, if necessary.
-
-     - ``0``
-
-   * - ``passive_connect_duration=msec``
-
-     - Timeout (milliseconds) for initial passive connection establishment.
-       A value of zero would wait indefinitely (not recommended).
-
-     - ``10000``
-
-       ``(10 sec)``
+    Timeout (milliseconds) for initial passive connection establishment.
+    A value of ``0`` would wait indefinitely (not recommended).
 
 The ``passive_connect_duration`` option is typically set to a non-zero, positive integer.
 Without a suitable connection timeout, the subscriber endpoint can potentially enter a state of deadlock while waiting for the remote side to initiate a connection.
@@ -2306,92 +1944,79 @@ The following sections list the other options that can be specified, starting wi
 When using dynamic libraries, the OpenDDS transport libraries are dynamically loaded whenever an instance of that type is defined in a configuration file.
 When using custom transport implementations or static linking, the application developer is responsible for ensuring that the transport implementation code is linked with their executables.
 
-.. _run_time_configuration--configuration-options-common-to-all-transports:
+.. sec:: transport/<inst_name>
 
-Configuration Options Common to All Transports
-----------------------------------------------
+  .. key:: transport_type=tcp|udp|multicast|shmem|rtps_udp
+    :required:
 
-..
-    Sect<7.4.5.1>
+    Type of the transport; the list of available transports can be extended programmatically via the transport framework.
 
-The following table summarizes the transport configuration options that are common to all transports:
+    .. val:: tcp
 
-.. _run_time_configuration--reftable20:
+      :sec:`transport@tcp`
 
-.. list-table:: Common Transport Configuration Options
-   :header-rows: 1
+    .. val:: udp
 
-   * - Option
+      :sec:`transport@udp`
 
-     - Description
+    .. val:: multicast
 
-     - Default
+      :sec:`transport@multicast`
 
-   * - ``transport_type=transport``
+    .. val:: shmem
 
-     - Type of the transport; the list of available transports can be extended programmatically via the transport framework.
-       tcp, udp, multicast, shmem, and rtps_udp are included with OpenDDS.
+      :sec:`transport@shmem`
 
-     - none
+    .. val:: rtps_udp
 
-   * - ``max_packet_size=n``
+      :sec:`transport@rtps_udp`
 
-     - The maximum size of a transport packet, including its transport header, sample header, and sample data.
+  .. key:: max_packet_size=<n>
+    :default: ``2147481599``
 
-     - ``2147481599``
+    The maximum size of a transport packet, including its transport header, sample header, and sample data.
 
-   * - ``max_samples_per_packet=n``
+  .. key:: max_samples_per_packet=<n>
+    :default: ``10``
 
-     - Maximum number of samples in a transport packet.
+    Maximum number of samples in a transport packet.
 
-     - ``10``
+  .. key:: optimum_packet_size=<n>
+    :default: ``4096`` (4 KiB)
 
-   * - ``optimum_packet_size=n``
+    Transport packets greater than this size will be sent over the wire even if there are still queued samples to be sent.
+    This value may impact performance depending on your network configuration and application nature.
 
-     - Transport packets greater than this size will be sent over the wire even if there are still queued samples to be sent.
-       This value may impact performance depending on your network configuration and application nature.
+  .. key:: thread_per_connection=<boolean>
+    :default: ``0`` (disabled)
 
-     - ``4096 (4 KiB)``
+    Enable or disable the thread per connection send strategy.
+    This option will increase performance when writing to multiple data readers on different process as long as the overhead of thread context switching does not outweigh the benefits of parallel writes.
+    This balance of network performance to context switching overhead is best determined by experimenting.
+    If a machine has multiple network cards, it may improve performance by creating a transport for each network card.
 
-   * - ``thread_per_connection= [0|1]``
+  .. key:: datalink_release_delay=<msec>
+    :default: ``10000`` (10 sec)
 
-     - Enable or disable the thread per connection send strategy.
-       By default, this option is disabled.
+    The datalink_release_delay is the delay (in milliseconds) for datalink release after no associations.
+    Increasing this value may reduce the overhead of re-establishment when reader/writer associations are added and removed frequently.
 
-     - ``0``
+  .. key:: datalink_control_chunks=<n>
+    :default: ``32``
 
-   * - ``datalink_release_delay=msec``
+    The number of chunks used to size allocators for transport control samples.
 
-     - The datalink_release_delay is the delay (in milliseconds) for datalink release after no associations.
-       Increasing this value may reduce the overhead of re-establishment when reader/writer associations are added and removed frequently.
+  .. key:: receive_preallocated_message_blocks=<n>
+    :default: ``0`` (use default)
 
-     - ``10000``
+    Set to a positive number to override the number of message blocks that the allocator reserves memory for eagerly (on startup).
 
-       ``(10 sec)``
+  .. key:: receive_preallocated_data_blocks=<n>
+    :default: ``0`` (use default)
 
-   * - ``datalink_control_chunks=n``
+    Set to a positive number to override the number of data blocks that the allocator reserves memory for eagerly (on startup).
 
-     - The number of chunks used to size allocators for transport control samples.
-
-     - ``32``
-
-   * - ``receive_preallocated_message_blocks=n``
-
-     - Set to a positive number to override the number of message blocks that the allocator reserves memory for eagerly (on startup).
-
-     - ``0 (use default)``
-
-   * - ``receive_preallocated_data_blocks=n``
-
-     - Set to a positive number to override the number of data blocks that the allocator reserves memory for eagerly (on startup).
-
-     - ``0 (use default)``
-
-Enabling the ``thread_per_connection`` option will increase performance when writing to multiple data readers on different process as long as the overhead of thread context switching does not outweigh the benefits of parallel writes.
-This balance of network performance to context switching overhead is best determined by experimenting.
-If a machine has multiple network cards, it may improve performance by creating a transport for each network card.
-
-.. _run_time_configuration--tcp-ip-transport-configuration-options:
+.. _tcp-transport-config:
 
 TCP/IP Transport Configuration Options
 --------------------------------------
@@ -2427,88 +2052,62 @@ Configuring subscribers and publishers should be identical, but different addres
 
 The following table summarizes the transport configuration options that are unique to the ``tcp`` transport:
 
-.. _run_time_configuration--reftable21:
+.. sec:: transport@tcp/<inst_name>
 
-.. list-table:: TCP Transport Configuration Options
-   :header-rows: 1
+  .. key:: active_conn_timeout_period=<msec>
+    :default: ``5000`` (5 sec)
 
-   * - Option
+    The time period (milliseconds) for the active connection side to wait for the connection to be established.
+    If not connected within this period then the ``on_publication_lost()`` callbacks will be called.
 
-     - Description
+  .. key:: conn_retry_attempts=<n>
+    :default: ``3``
 
-     - Default
+    Number of reconnect attempts before giving up and calling the ``on_publication_lost()`` and ``on_subscription_lost()`` callbacks.
 
-   * - ``active_conn_timeout_period=msec``
+  .. key:: conn_retry_initial_delay=<msec>
+    :default: ``500``
 
-     - The time period (milliseconds) for the active connection side to wait for the connection to be established.
-       If not connected within this period then the on_publication_lost() callbacks will be called.
+    Initial delay (milliseconds) for reconnect attempt.
+    As soon as a lost connection is detected, a reconnect is attempted.
+    If this reconnect fails, a second attempt is made after this specified delay.
 
-     - ``5000``
+  .. key:: conn_retry_backoff_multiplier=<n>
+    :default: ``2.0``
 
-       ``(5 sec)``
+    The backoff multiplier for reconnection tries.
+    After the initial delay described above, subsequent delays are determined by the product of this multiplier and the previous delay.
+    For example, with a :key:`conn_retry_initial_delay` of ``500`` and a :key:`conn_retry_backoff_multiplier` of ``1.5``, the second reconnect attempt will be 0.5 seconds after the first retry connect fails; the third attempt will be 0.75 seconds after the second retry connect fails; the fourth attempt will be 1.125 seconds after the third retry connect fails.
 
-   * - ``conn_retry_attempts=n``
+  .. key:: enable_nagle_algorithm=<boolean>
+    :default: ``0`` (disabled)
 
-     - Number of reconnect attempts before giving up and calling the on_publication_lost() and on_subscription_lost() callbacks.
+    Enable or disable the `Nagle's algorithm <https://en.wikipedia.org/wiki/Nagle%27s_algorithm>`__.
+    Enabling the Nagle's algorithm may increase throughput at the expense of increased latency.
 
-     - ``3``
+  .. key:: local_address=<host>:<port>
+    :default: :key:`[common]DCPSDefaultAddress`
 
-   * - ``conn_retry_initial_delay=msec``
+    Hostname and port of the connection acceptor.
+    If only the host is specified and the port number is omitted, the ``:`` is still required on the host specifier.
 
-     - Initial delay (milliseconds) for reconnect attempt.
-       As soon as a lost connection is detected, a reconnect is attempted.
-       If this reconnect fails, a second attempt is made after this specified delay.
+  .. key:: max_output_pause_period=<msec>
+    :default: ``0`` (disabled)
 
-     - ``500``
+    Maximum period (milliseconds) of not being able to send queued messages.
+    If there are samples queued and no output for longer than this period then the connection will be closed and ``on_*_lost()`` callbacks will be called.
+    The default value of ``0`` means that this check is not made.
 
-   * - ``conn_retry_backoff_multiplier=n``
+  .. key:: passive_reconnect_duration=<msec>
+    :default: ``2000`` (2 seconds)
 
-     - The backoff multiplier for reconnection tries.
-       After the initial delay described above, subsequent delays are determined by the product of this multiplier and the previous delay.
-       For example, with a conn_retry_initial_delay of 500 and a conn_retry_backoff_multiplier of 1.5, the second reconnect attempt will be 0.5 seconds after the first retry connect fails; the third attempt will be 0.75 seconds after the second retry connect fails; the fourth attempt will be 1.125 seconds after the third retry connect fails.
+    The time period (milliseconds) for the passive connection side to wait for the connection to be reconnected.
+    If not reconnected within this period then the ``on_*_lost()`` callbacks will be called.
 
-     - ``2.0``
+  .. key:: pub_address=<host>:<port>
 
-   * - ``enable_nagle_algorithm=[0|1]``
-
-     - Enable or disable the Nagle's algorithm.
-       By default, it is disabled.
-
-       Enabling the Nagle's algorithm may increase throughput at the expense of increased latency.
-
-     - ``0``
-
-   * - ``local_address=host:port``
-
-     - Hostname and port of the connection acceptor.
-       The default value is the FQDN and port 0, which means the OS will choose the port.
-       If only the host is specified and the port number is omitted, the ``:`` is still required on the host specifier.
-
-     - ``fqdn:0``
-
-   * - ``max_output_pause_period=msec``
-
-     - Maximum period (milliseconds) of not being able to send queued messages.
-       If there are samples queued and no output for longer than this period then the connection will be closed and ``on_*_lost()`` callbacks will be called.
-       The default value of zero means that this check is not made.
-
-     - ``0``
-
-   * - ``passive_reconnect_duration=msec``
-
-     - The time period (milliseconds) for the passive connection side to wait for the connection to be reconnected.
-       If not reconnected within this period then the ``on_*_lost()`` callbacks will be called.
-
-     - ``2000``
-
-       ``(2 sec)``
-
-   * - ``pub_address=host:port``
-
-     - Override the address sent to peers with the configured string.
-       This can be used for firewall traversal and other advanced network configurations.
-
-     -
+    Override the address sent to peers with the configured string.
+    This can be used for firewall traversal and other advanced network configurations.
 
 .. _run_time_configuration--tcp-ip-reconnection-options:
 
@@ -2527,7 +2126,7 @@ The reconnection process is (a successful reconnect ends this sequence):
 
 * While we have not tried more than ``conn_retry_attempts``, wait (previous wait time * ``conn_retry_backoff_multiplier``) milliseconds and attempt to reconnect.
 
-.. _run_time_configuration--udp-ip-transport-configuration-options:
+.. _udp-transport-config:
 
 UDP/IP Transport Configuration Options
 --------------------------------------
@@ -2545,38 +2144,25 @@ Additionally, your application must also include the proper header for service i
 
 The following table summarizes the transport configuration options that are unique to the ``udp`` transport:
 
-.. _run_time_configuration--reftable22:
+.. sec:: transport@udp/<inst_name>
 
-.. list-table:: UDP Transport Configuration Options
-   :header-rows: 1
+  .. key:: local_address=<host>:<port>
+    :default: :key:`[common]DCPSDefaultAddress`
 
-   * - Option
+    Hostname and port of the listening socket.
+    The port can be omitted, in which case the value should end in ":".
 
-     - Description
+  .. key:: send_buffer_size=<n>
+    :default: Platform value of ``ACE_DEFAULT_MAX_SOCKET_BUFSIZ``
 
-     - Default
+    Total send buffer size in bytes for UDP payload.
 
-   * - ``local_address=host:port``
+  .. key:: rcv_buffer_size=<n>
+    :default: Platform value of ``ACE_DEFAULT_MAX_SOCKET_BUFSIZ``
 
-     - Hostname and port of the listening socket.
-       Defaults to a value picked by the underlying OS.
-       The port can be omitted, in which case the value should end in ":".
+    Total receive buffer size in bytes for UDP payload.
 
-     - ``fqdn:0``
-
-   * - ``send_buffer_size=n``
-
-     - Total send buffer size in bytes for UDP payload.
-
-     - ``Platform value of ACE_DEFAULT_MAX_SOCKET_BUFSIZ``
-
-   * - ``rcv_buffer_size=n``
-
-     - Total receive buffer size in bytes for UDP payload.
-
-     - ``Platform value of ACE_DEFAULT_MAX_SOCKET_BUFSIZ``
-
-.. _run_time_configuration--ip-multicast-transport-configuration-options:
+.. _multicast-transport-config:
 
 IP Multicast Transport Configuration Options
 --------------------------------------------
@@ -2618,7 +2204,7 @@ Given the values of ``syn_backoff`` and ``syn_interval``, it is possible to calc
 
 ::
 
-        delay = syn_interval * syn_backoff ^ number_of_retries
+  delay = syn_interval * syn_backoff ^ number_of_retries
 
 For example, if the default configuration options are assumed, the delays between handshake attempts would be: 0, 250, 1000, 2000, 4000, and 8000 milliseconds respectively.
 
@@ -2648,123 +2234,94 @@ Additionally, your application must also include the proper header for service i
 
 The following table summarizes the transport configuration options that are unique to the ``multicast`` transport:
 
-.. _run_time_configuration--reftable23:
+.. sec:: transport@multicast/<inst_name>
 
-.. list-table:: Multicast Transport Configuration Options
-   :header-rows: 1
+  .. key:: default_to_ipv6=<boolean>
+    :default: ``0`` (disabled)
 
-   * - Option
+    Enables IPv6 default group address selection.
 
-     - Description
+  .. key:: group_address=<host>:<port>
+    :default: ``224.0.0.128:,[FF01::80]:``
 
-     - Default
+    The multicast group to join to send/receive data.
 
-   * - ``default_to_ipv6=[0|1]``
+  .. key:: local_address=<address>
+    :default: :key:`[common]DCPSDefaultAddress`
 
-     - Enables IPv6 default group address selection.
-       By default, this option is disabled.
+    If non-empty, address of a local network interface which is used to join the multicast group.
 
-     - ``0``
+  .. key:: nak_delay_intervals=<n>
+    :default: ``4``
 
-   * - ``group_address=host:port``
+    The number of intervals between naks after the initial nak.
 
-     - The multicast group to join to send/receive data.
+  .. key:: nak_depth=<n>
+    :default: ``32``
 
-     - ``224.0.0.128:<port>,``
+    The number of datagrams to retain in order to service repair requests (reliable only).
 
-       ``[FF01::80]:<port>``
+  .. key:: nak_interval=<msec>
+    :default: ``500``
 
-   * - ``local_address=address``
+    The minimum number of milliseconds to wait between repair requests (reliable only).
 
-     - If non-empty, address of a local network interface which is used to join the multicast group.
+  .. key:: nak_max=<n>
+    :default: ``3``
 
-     -
+    The maximum number of times a missing sample will be nak'ed.
 
-   * - ``nak_delay_intervals=n``
+  .. key:: nak_timeout=<msec>
+    :default: ``30000`` (30 sec)
 
-     - The number of intervals between naks after the initial nak.
+    The maximum number of milliseconds to wait before giving up on a repair response (reliable only).
 
-     - ``4``
+  .. key:: port_offset=<n>
+    :default: ``49152``
 
-   * - ``nak_depth=n``
+    Used to set the port number when not specifying a group address.
+    When a group address is specified, the port number within it is used.
+    If no group address is specified, the port offset is used as a port number.
+    This value should not be set less than ``49152``.
 
-     - The number of datagrams to retain in order to service repair requests (reliable only).
+  .. key:: rcv_buffer_size=<n>
+    :default: ``0`` system default buffer size
 
-     - ``32``
+    The size of the socket receive buffer in bytes.
+    A value of zero indicates that the system default value is used.
 
-   * - ``nak_interval=msec``
+  .. key:: reliable=<boolean>
+    :default: ``1``
 
-     - The minimum number of milliseconds to wait between repair requests (reliable only).
+    Enables reliable communication.
 
-     - ``500``
+  .. key:: syn_backoff=<n>
+    :default: ``2.0``
 
-   * - ``nak_max=n``
+    The exponential base used during handshake retries; smaller values yield shorter delays between attempts.
 
-     - The maximum number of times a missing sample will be nak'ed.
+  .. key:: syn_interval=<msec>
+    :default: ``250``
 
-     - ``3``
+    The minimum number of milliseconds to wait between handshake attempts during association.
 
-   * - ``nak_timeout=msec``
+  .. key:: syn_timeout=<msec>
+    :default: ``30000`` (30 sec)
 
-     - The maximum number of milliseconds to wait before giving up on a repair response (reliable only).
+    The maximum number of milliseconds to wait before giving up on a handshake response during association.
 
-     - ``30000 (30 sec)``
+  .. key:: ttl=<n>
+    :default: ``1`` (all data is restricted to the local network)
 
-   * - ``port_offset=n``
+    The value of the time-to-live (TTL) field of any datagrams sent.
+    This value specifies the number of hops the datagram will traverse before being discarded by the network.
 
-     - Used to set the port number when not specifying a group address.
-       When a group address is specified, the port number within it is used.
-       If no group address is specified, the port offset is used as a port number.
-       This value should not be set less than 49152.
+  .. key:: async_send=<boolean>
+    :default: ``0`` (disabled)
 
-     - ``49152``
+    Send datagrams using Async I/O (on platforms that support it efficiently).
 
-   * - ``rcv_buffer_size=n``
-
-     - The size of the socket receive buffer in bytes.
-       A value of zero indicates that the system default value is used.
-
-     - ``0``
-
-   * - ``reliable=[0|1]``
-
-     - Enables reliable communication.
-
-     - ``1``
-
-   * - ``syn_backoff=n``
-
-     - The exponential base used during handshake retries; smaller values yield shorter delays between attempts.
-
-     - ``2.0``
-
-   * - ``syn_interval=msec``
-
-     - The minimum number of milliseconds to wait between handshake attempts during association.
-
-     - ``250``
-
-   * - ``syn_timeout=msec``
-
-     - The maximum number of milliseconds to wait before giving up on a handshake response during association.
-       The default is 30 seconds.
-
-     - ``30000 (30 sec)``
-
-   * - ``ttl=n``
-
-     - The value of the time-to-live (ttl) field of any datagrams sent.
-       The default value of one means that all data is restricted to the local network.
-
-     - ``1``
-
-   * - ``async_send=[0|1]``
-
-     - Send datagrams using Async I/O (on platforms that support it efficiently).
-
-     -
-
-.. _run_time_configuration--rtps-udp-transport-configuration-options:
+.. _rtps-udp-transport-config:
 
 RTPS_UDP Transport Configuration Options
 ----------------------------------------
@@ -2817,168 +2374,124 @@ Some implementation notes related to using the ``rtps_udp`` transport protocol a
 
 #. Transport auto-selection (negotiation) is partially supported with RTPS such that the ``rtps_udp`` transport goes through a handshaking phase only in reliable mode.
 
-.. _run_time_configuration--reftable24:
+.. sec:: transport@rtps_udp/<inst_name>
 
-.. list-table:: RTPS/UDP Transport Configuration Options
-   :header-rows: 1
+  .. key:: use_multicast=<boolean>
+    :default: ``1`` (enabled)
 
-   * - Option
+    The ``rtps_udp`` transport can use Unicast or Multicast.
+    When set to ``0`` (false) the transport uses Unicast, otherwise a value of ``1`` (true) will use Multicast.
 
-     - Description
+  .. key:: multicast_group_address=<host>:<port>
+    :default: ``239.255.0.2:7401``
 
-     - Default
+    When :key:`use_multicast` is enabled, this is the multicast network address that should be used.
+    If ``<port>`` is not specified for the network address, port 7401 will be used.
 
-   * - ``use_multicast=[0|1]``
+  .. key:: ipv6_multicast_group_address=<network_address>
+    :default: ``[FF03::2]:7401``
 
-     - The ``rtps_udp`` transport can use Unicast or Multicast.
-       When set to 0 (false) the transport uses Unicast, otherwise a value of 1 (true) will use Multicast.
+    When the transport is set to multicast, this is the multicast network address that should be used.
+    If ``<port>`` is not specified for the network address, port 7401 will be used.
 
-     - ``1``
+  .. key:: multicast_interface=<iface>
+    :default: :key:`[common]DCPSDefaultAddress`
 
-   * - ``multicast_group_address``
+    Specifies the network interface to be used by this transport instance.
+    This uses a platform-specific format that identifies the network interface.
 
-       ``=network_address``
+  .. key:: local_address=<addr>:[<port>]
+    :default: :key:`[common]DCPSDefaultAddress`
 
-     - When the transport is set to multicast, this is the multicast network address that should be used.
-       If no port is specified for the network address, port 7401 will be used.
+    Bind the socket to the given address and port.
+    Port can be omitted but the trailing ":" is required.
 
-     - ``239.255.0.2:7401``
+  .. key:: ipv6_local_address=<addr>:[<port>]
+    :default: :key:`[common]DCPSDefaultAddress`
 
-   * - ``ipv6_multicast_group_address``
+    Bind the socket to the given address and port.
+    Port can be omitted but the trailing ":" is required.
 
-       ``=network_address``
+  .. key:: advertised_address=<addr>:[<port>]
 
-     - When the transport is set to multicast, this is the multicast network address that should be used.
-       If no port is specified for the network address, port 7401 will be used.
+    Sets the address advertised by the transport.
+    Typically used when the participant is behind a firewall or NAT.
+    Port can be omitted but the trailing ":" is required.
 
-     - ``[FF03::2]:7401``
+  .. key:: ipv6_advertised_address=<addr>:[<port>]
 
-   * - ``multicast_interface=iface``
+    Sets the address advertised by the transport.
+    Typically used when the participant is behind a firewall or NAT.
+    Port can be omitted but the trailing ":" is required.
 
-     - Specifies the network interface to be used by this transport instance.
-       This uses a platform-specific format that identifies the network interface.
-       On Linux systems this would be something like eth ``0``.
+  .. key:: send_delay=<msec>
+    :default: ``10``
 
-       If this value is not configured, the Common Configuration value ``DCPSDefaultAddress`` is used to set the multicast interface.
+    Time in milliseconds for an RTPS Writer to wait before sending data.
 
-     - The system default interface is used
+  .. key:: nak_depth=<n>
+    :default: ``32``
 
-   * - ``local_address=addr:[port]``
+    The number of data samples to retain in order to service repair requests (reliable only).
 
-     - Bind the socket to the given address and port.
-       Port can be omitted but the trailing ":" is required.
+  .. key:: nak_response_delay=<msec>
+    :default: ``200``
 
-     - System default
+    Protocol tuning parameter that allows the RTPS Writer to delay the response (expressed in milliseconds) to a request for data from a negative acknowledgment.
 
-   * - ``ipv6_local_address=addr:[port]``
+    See :omgspec:`rtps:8.4.7.1 RTPS Writer` for more information.
 
-     - Bind the socket to the given address and port.
-       Port can be omitted but the trailing ":" is required.
+  .. key:: heartbeat_period=<msec>
+    :default: ``1000`` (1 sec)
 
-     - System default
+    Protocol tuning parameter that specifies in milliseconds how often an RTPS Writer announces the availability of data.
 
-   * - ``advertised_address=``
+    See :omgspec:`rtps:8.4.7.1 RTPS Writer` for more information.
 
-       ``addr:[port]``
+  .. key:: ResponsiveMode=<boolean>
+    :default: ``0`` (disabled)
 
-     - Sets the address advertised by the transport.
-       Typically used when the participant is behind a firewall or NAT.
-       Port can be omitted but the trailing ":" is required.
+    Causes reliable writers and readers to send additional messages which may reduce latency.
 
-     -
+  .. key:: max_message_size=<n>
+    :default: ``65466`` (maximum worst-case UDP payload size)
 
-   * - ``ipv6_advertised_address=addr:[port]``
+    The maximum message size.
 
-     - Sets the address advertised by the transport.
-       Typically used when the participant is behind a firewall or NAT.
-       Port can be omitted but the trailing ":" is required.
+  .. key:: ttl=<n>
+    :default: ``1`` (all data is restricted to the local network)
 
-     -
+    The value of the time-to-live (TTL) field of any multicast datagrams sent.
+    This value specifies the number of hops the datagram will traverse before being discarded by the network.
 
-   * - ``send_delay=msec``
+  .. key:: DataRtpsRelayAddress=<host>:<port>
 
-     - Time in milliseconds for an RTPS Writer to wait before sending data.
+    Specifies the address of the RtpsRelay for RTPS messages.
+    See :ref:`internet_enabled_rtps--the-rtpsrelay`.
 
-     - ``10``
+  .. key:: RtpsRelayOnly=<boolean>
+    :default: ``0``
 
-   * - ``nak_depth=n``
+    Only send RTPS message to the RtpsRelay (for debugging).
+    See :ref:`internet_enabled_rtps--the-rtpsrelay`.
 
-     - The number of  data samples to retain in order to service repair requests (reliable only).
+  .. key:: UseRtpsRelay=<boolean>
+    :default: ``0``
 
-     - ``32``
+    Send messages to the RtpsRelay.
+    Messages will only be sent if DataRtpsRelayAddress is set.
+    See :ref:`internet_enabled_rtps--the-rtpsrelay`.
 
-   * - ``nak_response_delay=msec``
+  .. key:: DataStunServerAddress=<host>:<port>
 
-     - Protocol tuning parameter that allows the RTPS Writer to delay the response (expressed in milliseconds) to a request for data from a negative acknowledgment.
+    Specifies the address of the STUN server to use for RTPS when using ICE.
+    See :ref:`internet_enabled_rtps--interactive-connectivity-establishment-ice-for-rtps`.
 
-       (see table 8.47 in the OMG DDSI-RTPS specification)
+  .. key:: UseIce=<boolean>
+    :default: ``0``
 
-     - ``200``
-
-   * - ``heartbeat_period=msec``
-
-     - Protocol tuning parameter that specifies in milliseconds how often an RTPS Writer announces the availability of data.
-
-       (see table 8.47 in the OMG DDSI-RTPS specification)
-
-     - ``1000 (1 sec)``
-
-   * - ``ResponsiveMode=[0|1]``
-
-     - Causes reliable writers and readers to send additional messages which may reduce latency.
-
-     - ``0``
-
-   * - ``max_message_size=n``
-
-     - The maximum message size.
-       The default is the maximum UDP message size.
-
-     - ``65466``
-
-   * - ``ttl=n``
-
-     - The value of the time-to-live (ttl) field of any multicast datagrams sent.
-       This value specifies the number of hops the datagram will traverse before being discarded by the network.
-       The default value of 1 means that all data is restricted to the local network subnet.
-
-     - ``1``
-
-   * - ``DataRtpsRelayAddress=host:port``
-
-     - Specifies the address of the RtpsRelay for RTPS messages.
-       See :ref:`internet_enabled_rtps--the-rtpsrelay`.
-
-     -
-
-   * - ``RtpsRelayOnly=[0|1]``
-
-     - Only send RTPS message to the RtpsRelay (for debugging).
-       See :ref:`internet_enabled_rtps--the-rtpsrelay`.
-
-     - 0
-
-   * - ``UseRtpsRelay=[0|1]``
-
-     - Send messages to the RtpsRelay.
-       Messages will only be sent if DataRtpsRelayAddress is set.
-       See :ref:`internet_enabled_rtps--the-rtpsrelay`.
-
-     - 0
-
-   * - ``DataStunServerAddress=host:port``
-
-     - Specifies the address of the STUN server to use for RTPS when using ICE.
-       See :ref:`internet_enabled_rtps--interactive-connectivity-establishment-ice-for-rtps`.
-
-     -
-
-   * - ``UseIce=[0|1]``
-
-     - Enable or disable ICE for this transport instance.
-       See :ref:`internet_enabled_rtps--interactive-connectivity-establishment-ice-for-rtps`.
-
-     - ``0``
+    Enable or disable ICE for this transport instance.
+    See :ref:`internet_enabled_rtps--interactive-connectivity-establishment-ice-for-rtps`.
 
 .. _run_time_configuration--additional-rtps-udp-features:
 
@@ -3096,7 +2609,7 @@ The elements of that sequence are defined in IDL: ``OpenDDS::DCPS::TransportStat
 
      - Number of bytes received from the locator.
 
-.. _run_time_configuration--shared-memory-transport-configuration-options:
+.. _shmem-transport-config:
 
 Shared-Memory Transport Configuration Options
 ---------------------------------------------
@@ -3109,37 +2622,23 @@ This transport type is supported Unix-like platforms with POSIX/XSI shared memor
 The shared memory transport type can only provide communication between transport instances on the same host.
 As part of transport negotiation (:ref:`run_time_configuration--using-mixed-transports`), if there are multiple transport instances available for communication between hosts, the shared memory transport instances will be skipped so that other types can be used.
 
-.. _run_time_configuration--reftable25:
+.. sec:: transport@shmem/<inst_name>
 
-.. list-table:: Shared-Memory Transport Configuration Options
-   :header-rows: 1
+  .. key:: pool_size=<bytes>
+    :default: ``16777216`` (16 MiB)
 
-   * - Option
+    The size of the single shared-memory pool allocated.
 
-     - Description
+  .. key:: datalink_control_size=<bytes>
+    :default: ``4096`` (4 KiB)
 
-     - Default
+    The size of the control area allocated for each data link.
+    This allocation comes out of the shared-memory pool defined by pool_size.
 
-   * - ``pool_size=bytes``
+  .. key:: host_name=<host>
+    :default: Uses fully qualified domain name
 
-     - The size of the single shared-memory pool allocated.
-
-     - ``16777216``
-
-       ``(16 MiB)``
-
-   * - ``datalink_control_size=bytes``
-
-     - The size of the control area allocated for each data link.
-       This allocation comes out of the shared-memory pool defined by pool_size.
-
-     - ``4096 (4 KiB)``
-
-   * - ``host_name=host``
-
-     - Override the host name used to identify the host machine.
-
-     - Uses fully qualified domain name
+    Override the host name used to identify the host machine.
 
 *****************
 ICE Configuration
@@ -3147,77 +2646,53 @@ ICE Configuration
 
 The ``[ice]`` section of an OpenDDS configuration file contains settings for the ICE Agent.
 See :ref:`internet_enabled_rtps--interactive-connectivity-establishment-ice-for-rtps` for details about OpenDDS's implementation of ICE.
-A sample ``[ice]`` section follows:
 
-.. code-block:: ini
+.. sec:: ice
 
-    [ice]
-    Ta=50
-    ConnectivityCheckTTL=300
-    ChecklistPeriod=10
-    IndicationPeriod=15
-    NominatedTTL=300
-    ServerReflexiveAddressPeriod=30
-    ServerReflexiveIndicationCount=10
-    DeferredTriggeredCheckTTL=300
-    ChangePasswordPeriod=300
+  .. key:: Ta=<msec>
+    :default: ``50``
 
-.. list-table:: ICE Configuration Options
-   :header-rows: 1
+    Minimum interval between ICE sends.
 
-   * - ``Ta=msec``
+  .. key:: ConnectivityCheckTTL=<sec>
+    :default: ``300`` (5 minutes)
 
-     - Minimum interval between ICE sends.
+    Maximum duration of connectivity check.
 
-     - 50
+  .. key:: ChecklistPeriod=<sec>
+    :default: ``10``
 
-   * - ``ConnectivityCheckTTL=sec``
+    Attempt to cycle through all of the connectivity checks for a candidate in this amount of time.
 
-     - Maximum duration of connectivity check.
+  .. key:: IndicationPeriod=<sec>
+    :default: ``15``
 
-     - 300
+    Send STUN indications to peers to maintain NAT bindings at this period.
 
-   * - ``ChecklistPeriod=sec``
+  .. key:: NominatedTTL=<sec>
+    :default: ``300`` (5 minutes)
 
-     - Attempt to cycle through all of the connectivity checks for a candidate in this amount of time.
+    Forget a valid candidate if an indication is not received in this amount of time.
 
-     - 10
+  .. key:: ServerReflexiveAddressPeriod=<sec>
+    :default: ``30``
 
-   * - ``IndicationPeriod=sec``
+    Send a messages to the STUN server at this period.
 
-     - Send STUN indications to peers to maintain NAT bindings at this period.
+  .. key:: ServerReflexiveIndicationCount=<integer>
+    :default: ``10``
 
-     - 15
+    Send this many indications before sending a new binding request to the STUN server.
 
-   * - ``NominatedTTL=sec``
+  .. key:: DeferredTriggeredCheckTTL=<sec>
+    :default: ``300`` (5 minutes)
 
-     - Forget a valid candidate if an indication is not received in this amount of time.
+    Purge deferred checks after this amount of time.
 
-     - 300
+  .. key:: ChangePasswordPeriod=<sec>
+    :default: ``300`` (5 minutes)
 
-   * - ``ServerReflexiveAddressPeriod=sec``
-
-     - Send a messages to the STUN server at this period.
-
-     - 30
-
-   * - ``ServerReflexiveIndicationCount=integer``
-
-     - Send this many indications before sending a new binding request to the STUN server.
-
-     - 10
-
-   * - ``DeferredTriggeredCheckTTL=sec``
-
-     - Purge deferred checks after this amount of time.
-
-     - 300
-
-   * - ``ChangePasswordPeriod=sec``
-
-     - Change the ICE password after this amount of time.
-
-     - 300
+    Change the ICE password after this amount of time.
 
 .. _run_time_configuration--discovery-and-transport-configuration-templates:
 
@@ -3368,7 +2843,7 @@ By default, the OpenDDS framework will only log serious errors and warnings that
 An OpenDDS user may increase the amount of logging via the log level and debug logging via controls at the DCPS, Transport, or Security layers.
 
 The default destination of these log messages is the process's standard error stream.
-See :ref:`run_time_configuration--common-configuration-options` for options controlling the destination and formatting of log messages.
+See :ref:`common-config` for options controlling the destination and formatting of log messages.
 
 The highest level logging is controlled by the general log levels listed in the following table.
 
@@ -3381,57 +2856,79 @@ The highest level logging is controlled by the general log levels listed in the 
 
      - Description
 
-   * - ``Error``
+   * - .. _log-none:
 
-     - ``DCPSLogLevel``: ``error``
+       N/A
 
-       ``log_level``: ``Log_Level::Error``
+     - :val:`DCPSLogLevel:none`
+
+       ``log_level``: ``LogLevel::None``
+
+       ``ACE_Log_Priority``: N/A
+
+     - Disables all logging.
+
+   * - .. _log-error:
+
+       Error
+
+     - :val:`DCPSLogLevel:error`
+
+       ``log_level``: ``LogLevel::Error``
 
        ``ACE_Log_Priority``: ``LM_ERROR``
 
      - Logs issues that may prevent OpenDDS from functioning properly or functioning as configured.
 
-   * - ``Warning``
+   * - .. _log-warning:
 
-     - ``DCPSLogLevel``: ``warning``
+       Warning
 
-       ``log_level``: ``Log_Level::Warning``
+     - :val:`DCPSLogLevel:warning`
+
+       ``log_level``: ``LogLevel::Warning``
 
        ``ACE_Log_Priority``: ``LM_WARNING``
 
      - Log issues that should probably be addressed, but don't prevent OpenDDS from functioning.
        This is the default.
 
-   * - ``Notice``
+   * - .. _log-notice:
 
-     - ``DCPSLogLevel``: ``notice``
+       Notice
 
-       ``log_level``: ``Log_Level::Notice``
+     - :val:`DCPSLogLevel:notice`
+
+       ``log_level``: ``LogLevel::Notice``
 
        ``ACE_Log_Priority``: ``LM_NOTICE``
 
      - Logs details of issues that are returned to the user via the API, for example through a ``DDS::ReturnCode_t``.
 
-   * - ``Info``
+   * - .. _log-info:
 
-     - ``DCPSLogLevel``: ``info``
+       Info
 
-       ``log_level``: ``Log_Level::Info``
+     - :val:`DCPSLogLevel:info`
+
+       ``log_level``: ``LogLevel::Info``
 
        ``ACE_Log_Priority``: ``LM_INFO``
 
      - Logs a small amount of basic information, such as the version of OpenDDS being used.
 
-   * - ``Debug``
+   * - .. _log-debug:
 
-     - ``DCPSLogLevel``: ``debug``
+       Debug
 
-       ``log_level``: ``Log_Level::Debug``
+     - :val:`DCPSLogLevel:debug`
+
+       ``log_level``: ``LogLevel::Debug``
 
        ``ACE_Log_Priority``: ``LM_DEBUG``
 
      - This level doesn't directly control any logging but will enable at least DCPS and security debug level 1.
-       For backwards compatibility, setting DCPS debug logging to greater than zero will set this log level.
+       For backwards compatibility, setting :ref:`DCPS debug logging <run_time_configuration--dcps-layer-debug-logging>` to greater than zero will set this log level.
        Setting the log level to below this level will disable all debug logging.
 
 The log level can be set a number of ways.
@@ -3465,7 +2962,7 @@ DCPS Layer Debug Logging
 ..
     Sect<7.6.1>
 
-Debug logging in the DCPS layer of OpenDDS is controlled by the ``DCPSDebugLevel`` configuration option and command-line option.
+Debug logging in the DCPS layer of OpenDDS is controlled by the :key:`DCPSDebugLevel` configuration option and command-line option.
 It can also be set in application code using:
 
 .. code-block:: cpp
@@ -3496,7 +2993,7 @@ Transport Layer Debug Logging
 ..
     Sect<7.6.2>
 
-OpenDDS transport debug layer logging is controlled via the ``DCPSTransportDebugLevel`` configuration option.
+OpenDDS transport debug layer logging is controlled via the :key:`DCPSTransportDebugLevel` configuration option.
 For example, to add transport layer logging to any OpenDDS application that uses ``TheParticipantFactoryWithArgs``, add the following option to the command line:
 
 .. code-block:: bash
@@ -3561,8 +3058,8 @@ Security Debug Logging
 ..
     Sect<7.6.3>
 
-When OpenDDS is compiled with security enabled, debug logging for security can be enabled using ``DCPSecurityDebug`` (:ref:`run_time_configuration--common-configuration-options`).
-Security logging is divided into categories, although ``DCPSSecurityDebugLevel`` is also provided, which controls the categories in a similar manner and using the same scale as ``DCPSDebugLevel``.
+When OpenDDS is compiled with security enabled, debug logging for security can be enabled using :key:`DCPSSecurityDebug`.
+Security logging is divided into categories, although :key:`DCPSSecurityDebugLevel` is also provided, which controls the categories in a similar manner and using the same scale as :key:`DCPSDebugLevel`.
 
 .. _run_time_configuration--reftable28:
 
