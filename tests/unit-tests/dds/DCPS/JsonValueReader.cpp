@@ -738,7 +738,8 @@ TEST(dds_DCPS_JsonValueReader, optional_members)
     "\"sequence\":null,"
     "\"uint64\":15,"
     "\"nested_union\":null,"
-    "\"char8\":\"a\""
+    "\"char8\":\"a\","
+    "\"nested_union2\":{\"$discriminator\":3,\"3\":null}"
     "}";
 
   const ListMemberHelper::Pair member_pairs[] = {
@@ -755,6 +756,7 @@ TEST(dds_DCPS_JsonValueReader, optional_members)
     {"uint64", 10},
     {"nested_union", 11},
     {"char8", 12},
+    {"nested_union2", 13},
     {0, 0}
   };
   const ListMemberHelper member_helper(member_pairs);
@@ -770,6 +772,7 @@ TEST(dds_DCPS_JsonValueReader, optional_members)
   ACE_CDR::LongLong int64_value;
   ACE_CDR::ULongLong uint64_value;
   ACE_CDR::Char char8_value;
+  ACE_CDR::Long disc_value;
 
   EXPECT_TRUE(jvr.begin_struct());
 
@@ -814,7 +817,7 @@ TEST(dds_DCPS_JsonValueReader, optional_members)
   EXPECT_TRUE(jvr.begin_struct_member(member_id, member_helper));
   EXPECT_TRUE(jvr.member_has_value());
   EXPECT_TRUE(jvr.read_uint32(uint32_value));
-  EXPECT_EQ(uint32_value, 13);
+  EXPECT_EQ(uint32_value, 13ul);
   EXPECT_TRUE(jvr.end_struct_member());
 
   // array: no value
@@ -838,7 +841,7 @@ TEST(dds_DCPS_JsonValueReader, optional_members)
   EXPECT_TRUE(jvr.begin_struct_member(member_id, member_helper));
   EXPECT_TRUE(jvr.member_has_value());
   EXPECT_TRUE(jvr.read_uint64(uint64_value));
-  EXPECT_EQ(uint64_value, 15);
+  EXPECT_EQ(uint64_value, 15ull);
   EXPECT_TRUE(jvr.end_struct_member());
 
   // nested_union: no value
@@ -851,6 +854,20 @@ TEST(dds_DCPS_JsonValueReader, optional_members)
   EXPECT_TRUE(jvr.member_has_value());
   EXPECT_TRUE(jvr.read_char8(char8_value));
   EXPECT_EQ(char8_value, 'a');
+  EXPECT_TRUE(jvr.end_struct_member());
+
+  // nested_union2: has value with an absent branch
+  EXPECT_TRUE(jvr.begin_struct_member(member_id, member_helper));
+  EXPECT_TRUE(jvr.member_has_value());
+  EXPECT_TRUE(jvr.begin_union());
+  EXPECT_TRUE(jvr.begin_discriminator());
+  EXPECT_TRUE(jvr.read_int32(disc_value));
+  EXPECT_EQ(disc_value, 3);
+  EXPECT_TRUE(jvr.end_discriminator());
+  EXPECT_TRUE(jvr.begin_union_member());
+  EXPECT_FALSE(jvr.member_has_value());
+  EXPECT_TRUE(jvr.end_union_member());
+  EXPECT_TRUE(jvr.end_union());
   EXPECT_TRUE(jvr.end_struct_member());
 
   EXPECT_TRUE(jvr.end_struct());
