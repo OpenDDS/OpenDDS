@@ -144,15 +144,15 @@ The following configuration steps are required to enable OpenDDS Security featur
 
 .. _dds_security--dds-security-configuration-via-propertyqospolicy:
 
-DDS Security Configuration via PropertyQosPolicy
-================================================
+DDS Security Configuration via Property Qos Policy
+==================================================
 
 ..
     Sect<14.5.1>
 
-When the application creates a DomainParticipant object, the DomainParticipantQos passed to the ``create_participant()`` method now contains a PropertyQosPolicy object which has a sequence of name-value pairs.
+When the application creates a :term:`DomainParticipant`, the ``DomainParticipantQos`` passed to the ``create_participant()`` method contains :ref:`qos-property`, which has a sequence of name-value pairs.
 The following properties must be included to enable security.
-Except where noted, these values take the form of a URI starting with either the scheme "file:" followed by a filesystem path (absolute or relative) or the scheme "data:," followed by the literal data.
+Except where noted, these values take the form of a URI starting with either the scheme ``file:`` followed by a filesystem path (absolute or relative) or the scheme ``data:``, followed by the literal data.
 
 .. list-table::
    :header-rows: 1
@@ -173,7 +173,7 @@ Except where noted, these values take the form of a URI starting with either the
 
      - Certificate PEM file
 
-     - Can be the ``same as identity_ca``
+     - Can be the same as ``identity_ca``
 
    * - ``dds.sec.access.governance``
 
@@ -207,13 +207,13 @@ Except where noted, these values take the form of a URI starting with either the
 
 .. _dds_security--propertyqospolicy-example-code:
 
-PropertyQosPolicy Example Code
-==============================
+Example Code
+------------
 
 ..
     Sect<14.5.2>
 
-Below is an example of code that sets the DDS Participant QoS's PropertyQoSPolicy in order to configure DDS Security.
+Below is an example of code that sets the Participant QoS's :ref:`qos-property` in order to configure DDS Security.
 
 .. code-block:: cpp
 

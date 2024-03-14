@@ -1518,6 +1518,63 @@ The ownership strength QoS policy is used in conjunction with the :ref:`qos-owne
 The ``value`` member is used to determine which data writer is the *owner* of the :term:`instance`.
 The default value is zero.
 
+.. _qos-property:
+
+Property QoS
+============
+
+The property QoS policy contains sequences of key-value pairs for the :term:`DomainParticipant`.
+
+.. important::
+
+  This policy is :ref:`immutable <qos-changing>` and affects association indirectly through security.
+
+  IDL:
+
+  .. code-block:: omg-idl
+
+    struct Property_t {
+      string name;
+      string value;
+      boolean propagate;
+    };
+    typedef sequence<Property_t> PropertySeq;
+
+    struct BinaryProperty_t {
+      string name;
+      OctetSeq value;
+      boolean propagate;
+    };
+    typedef sequence<BinaryProperty_t> BinaryPropertySeq;
+
+    struct PropertyQosPolicy {
+      PropertySeq value;
+      BinaryPropertySeq binary_value;
+    };
+
+  .. list-table::
+     :header-rows: 1
+
+     * - :term:`Applicable entities <Entity>`
+
+       - Members
+
+       - :ref:`Default values <qos-defaults>`
+
+     * - :term:`DomainParticipant`
+
+       - ``value``
+
+         ``binary_value``
+
+       - (empty sequence)
+
+         (empty sequence)
+
+  Specification: :omgspec:`sec:7.2.5 PropertyQosPolicy, DomainParticipantQos, DataWriterQos, and DataReaderQos`
+
+Right now these are only used for :ref:`dds_security--dds-security-configuration-via-propertyqospolicy`.
+
 .. _qos-data-representation:
 
 Data Representation QoS
@@ -1670,8 +1727,8 @@ This XTypes concept is explained in detail in :ref:`xtypes--type-consistency-enf
 
 .. attention::
 
-  OpenDDS only supports setting one of them: ``ignore_member_names``.
-  All other members should be kept at their default values.
+  OpenDDS only supports ``ignore_member_names``.
+  All other members should be left at their default values.
 
 ``ignore_member_names`` defaults to ``false`` so member names (along with member IDs, see :ref:`xtypes--member-id-assignment`) are significant for type compatibility.
 Changing this to ``true`` means that only member IDs are used for type compatibility.
