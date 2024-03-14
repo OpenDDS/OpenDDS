@@ -117,10 +117,6 @@ public:
   bool EndArray(rapidjson::SizeType /* elementCount */) { token_type_ = kEndArray; return true; }
 
 private:
-  bool begin_aggregated();
-  bool begin_collection();
-  bool end_collection();
-
   enum TokenType {
     kUnknown,
     kNull,
