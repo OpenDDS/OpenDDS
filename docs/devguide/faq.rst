@@ -315,5 +315,5 @@ What could account for increasing memory usage in subscribing processes?
 ========================================================================
 
 If the subscribing process contains Data Readers which have received many instances from the corresponding Data Writers, it will need some resources to track each instance.
-This can be bounded by the ``RESOURCE_LIMITS`` QoS policy and by the subscribing application taking samples from the Data Reader.
-The ``READER_DATA_LIFECYCLE`` QoS policy may also be helpful.
+This can be bounded by the :ref:`qos-resource-limits` policy and by the subscribing application taking samples from the Data Reader.
+The :ref:`qos-reader-data-lifecycle` policy may also be helpful.

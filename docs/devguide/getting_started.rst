@@ -769,13 +769,9 @@ If the take is successful and returns valid data, we print out each of the messa
                 << "  from = " << message.from.in()  << std::endl
                 << "  count = " << message.count  << std::endl
                 << "  text = " << message.text.in()  << std::endl;
-          }
-          else if (si.instance_state == DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE)
-          {
+          } else if (si.instance_state == DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE) {
             std::cout << "instance is disposed" << std::endl;
-          }
-          else if (si.instance_state == DDS::NOT_ALIVE_NO_WRITERS_INSTANCE_STATE)
-          {
+          } else if (si.instance_state == DDS::NOT_ALIVE_NO_WRITERS_INSTANCE_STATE) {
             std::cout << "instance is unregistered" << std::endl;
           }
           else
@@ -822,7 +818,7 @@ Once this is done, we can use the domain participant factory to delete our domai
 
 Since the publication and subscription of data within DDS is decoupled, data is not guaranteed to be delivered if a publication is disassociated (shutdown) prior to all data that has been sent having been received by the subscriptions.
 If the application requires that all published data be received, the ``wait_for_acknowledgments()`` operation is available to allow the publication to wait until all written data has been received.
-Data readers must have a ``RELIABLE`` setting for the ``RELIABILITY`` QoS (which is the default) in order for ``wait_for_acknowledgments()`` to work.
+Data readers must have :ref:`qos-reliability` set to ``RELIABLE_RELIABILITY_QOS`` (which is the default) in order for ``wait_for_acknowledgments()`` to work.
 This operation is called on individual ``DataWriters`` and includes a timeout value to bound the time to wait.
 The following code illustrates the use of ``wait_for_acknowledgments()`` to block for up to 15 seconds to wait for subscriptions to acknowledge receipt of all written data:
 
@@ -831,7 +827,7 @@ The following code illustrates the use of ``wait_for_acknowledgments()`` to bloc
       DDS::Duration_t shutdown_delay = {15, 0};
       DDS::ReturnCode_t result;
       result = writer->wait_for_acknowledgments(shutdown_delay);
-      if( result != DDS::RETCODE_OK) {
+      if (result != DDS::RETCODE_OK) {
         std::cerr << "Failed while waiting for acknowledgment of "
                   << "data being received by subscriptions, some data "
                   << "may not have been delivered." << std::endl;

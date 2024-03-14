@@ -152,6 +152,9 @@ intersphinx_mapping = {
     'cmake': ('https://cmake.org/cmake/help/latest', None),
 }
 
+manpages_url = 'https://linux.die.net/man/{section}/{page}'
+
+
 # -- Options for Markdown output ---------------------------------------------
 # This builder is just used to generate the release notes for GitHub
 

@@ -445,35 +445,6 @@ If there's a need to be selective about what domains are chosen, here's an annot
       <id_range><min>10</min></id_range> <!-- 10 and onward -->
     </domains>
 
-.. _dds_security--fnmatch-expr:
-
-Fnmatch Expression
-==================
-
-A wildcard-capable string used to match one or more names from a set.
-This is used to match topic and partition names to the rules that apply to them.
-Recognized values will conform to POSIX ``fnmatch()`` function as specified in POSIX 1003.2-1992, Section B.6.
-This is a subset of UNIX shell file matching and is similar to, but separate from standard regular expressions.
-
-Simplified, this consists of the following:
-
-``?``
-  Will match any single character.
-  For example ``ab?`` matches ``abc`` and ``abb``.
-
-``*``
-  Will match any zero or more characters.
-  For example ``*`` will match anything and ``a*`` matches ``a``, ``abc``, and ``aaaaa``.
-
-``[]``
-  Will match a single character specified in the brackets.
-  For example ``a[bc]`` matches ``ab`` and ``ac``.
-  Can also use ranges, for example ``a[b-d]`` matches ``ab``, ``ac``, and ``ad``.
-
-``\``
-  Will escape the following character.
-  For example ``\?`` just matches ``?`` and ``\\`` matches ``\``.
-
 .. _dds_security--domain-governance-document:
 
 **************************
@@ -614,7 +585,7 @@ The following XML elements are used to configure topic endpoint behaviors:
 topic_expression
 ----------------
 
-A :ref:`dds_security--fnmatch-expr` of the topic names to match.
+A :ref:`fnmatch expression <fnmatch-exprs>` of the topic names to match.
 A default rule to catch all previously unmatched topics can be made with: ``<topic_expression>*</topic_expression>``
 
 .. _dds_security--enable-discovery-protection:
@@ -829,7 +800,7 @@ topics
 """"""
 
 The list of topics and/or topic expressions for which a rule applies.
-Topic names and expressions are matched using :ref:`dds_security--fnmatch-expr`.
+Topic names and expressions are matched using :ref:`fnmatch-exprs`.
 If the triggering operation matches any of the topics listed, the topic condition is met.
 The topic section must always be present for a PSR rule, so there there is no default behavior.
 
@@ -839,7 +810,7 @@ partitions
 """"""""""
 
 The partitions list contains the set of partition names for which the parent PSR rule applies.
-Similarly to topics, partition names and expressions are matched using :ref:`dds_security--fnmatch-expr`.
+Similarly to topics, partition names and expressions are matched using :ref:`fnmatch-exprs`.
 For "allow" PSR rules, the DDS entity of the associated triggering operation must be using a strict subset of the partitions listed for the rule to apply.
 When no partition list is given for an "allow" PSR rule, the "empty string" partition is used as the default value.
 For "deny" PSR rules, the rule will apply if the associated DDS entity is using any of the partitions listed.

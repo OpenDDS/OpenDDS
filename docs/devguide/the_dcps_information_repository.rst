@@ -161,9 +161,9 @@ An example of this would include two platforms which have independently establis
 The current federation capabilities in OpenDDS provide only the ability to statically specify a federation of repositories at startup of applications and repositories.
 A mechanism to dynamically discover and join a federation is planned for a future OpenDDS release.
 
-OpenDDS automatically detects the loss of a repository by using the ``LIVELINESS`` Quality of Service policy on a Built-in Topic.
-When a federation is used, the ``LIVELINESS`` QoS policy is modified to a non-infinite value.
-When ``LIVELINESS`` is lost for a Built-in Topic an application will initiate a failover sequence causing it to associate with a different repository server.
+OpenDDS automatically detects the loss of a repository by using the :ref:`qos-liveliness` policy on a Built-in Topic.
+When a federation is used, the liveliness QoS policy is modified to a non-infinite value.
+When liveliness is lost for a Built-in Topic an application will initiate a failover sequence causing it to associate with a different repository server.
 Because the federation implementation currently uses a Built-in Topic ``ParticipantDataDataReaderListener`` entity, applications should not install their own listeners for this topic.
 Doing so would affect the federation implementation's capability to detect repository failures.
 

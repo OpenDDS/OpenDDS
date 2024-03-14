@@ -297,7 +297,7 @@ To explicitly enable the feature, use ``feature=1`` above.
 
 .. _building--disabling-the-building-of-built-in-topic-support:
 
-Disabling the Building of Built-In Topic Support
+Disabling the Building of Built-in Topic Support
 ------------------------------------------------
 
 ..
@@ -306,7 +306,7 @@ Disabling the Building of Built-In Topic Support
 Feature Name: ``built_in_topics``
 
 You can reduce the footprint of the core DDS library by up to 30% by disabling Built-in Topic Support.
-See :ref:`bit` for a description of Built-In Topics.
+See :ref:`bit` for a description of built-in topics.
 
 .. _building--disabling-the-building-of-compliance-profile-features:
 
@@ -366,7 +366,7 @@ Persistence Profile
 
 Feature Name: ``persistence_profile``
 
-This profile adds the QoS policy ``DURABILITY_SERVICE`` and the settings ``TRANSIENT`` and ``PERSISTENT`` of the ``DURABILITY`` QoS policy ``kind``.
+This profile adds the :ref:`qos-durability-service` policy and the settings ``TRANSIENT`` and ``PERSISTENT`` of the :ref:`qos-durability` policy ``kind``.
 
 .. _building--ownership-profile:
 
@@ -380,14 +380,14 @@ Feature Name: ``ownership_profile``
 
 This profile adds:
 
-* the setting ``EXCLUSIVE`` of the ``OWNERSHIP`` ``kind``
+* the setting ``EXCLUSIVE`` of :ref:`qos-ownership`
 
-* support for the ``OWNERSHIP_STRENGTH`` policy
+* support for the :ref:`qos-ownership-strength` policy
 
-* setting a ``depth > 1`` for the ``HISTORY`` QoS policy.
+* setting a ``depth > 1`` for the :ref:`qos-history` policy
 
-*Some users may wish to exclude support for the Exclusive OWNERSHIP policy and its associated OWNERSHIP_STRENGTH without impacting use of HISTORY.*
-*In order to support this configuration, OpenDDS also has the MPC feature ownership_kind_exclusive (configure script option --no-ownership-kind-exclusive).*
+Some users may wish to exclude support for the exclusive :ref:`qos-ownership` policy and its associated :ref:`qos-ownership-strength` without impacting use of :ref:`qos-history`.
+In order to support this configuration, OpenDDS also has the MPC feature ``ownership_kind_exclusive`` (configure script option ``--no-ownership-kind-exclusive``).
 
 .. _building--object-model-profile:
 
@@ -399,9 +399,9 @@ Object Model Profile
 
 Feature Name: ``object_model_profile``
 
-This profile includes support for the ``PRESENTATION`` access_scope setting of ``GROUP``.
+This profile includes support for the :ref:`qos-presentation` ``access_scope`` setting of ``GROUP``.
 
-.. note:: Currently, the ``PRESENTATION`` access_scope of ``TOPIC`` is also excluded when ``object_model_profile`` is disabled.
+.. note:: Currently, the :ref:`qos-presentation` ``access_scope`` of ``TOPIC`` is also excluded when ``object_model_profile`` is disabled.
 
 .. _cross_compiling:
 
