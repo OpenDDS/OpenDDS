@@ -70,7 +70,7 @@ Inconsistent Topic Status
 ..
     Sect<4.2.1.1>
 
-The ``INCONSISTENT_TOPIC`` status indicates that a :term:`topic` was attempted to be registered that already exists with different characteristics.
+The ``INCONSISTENT_TOPIC`` status indicates that the :term:`topic` being registered has different characteristics than an existing topic with the same name.
 Typically, the existing topic may have a different type associated with it.
 The IDL associated with the Inconsistent Topic Status is listed below:
 

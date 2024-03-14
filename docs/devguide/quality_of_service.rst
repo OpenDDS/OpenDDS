@@ -557,7 +557,7 @@ Partition QoS
     Sect<3.2.8>
 
 The partition QoS policy allows the creation of logical partitions within a :term:`domain`.
-It only allows data readers and data writers to be associated if they have matched partition strings.
+Data readers and data writers can only be associated if they have at least one matched partition string.
 This policy applies to the publisher and subscriber entities via the ``partition`` member of their respective QoS structures.
 
 .. important::
