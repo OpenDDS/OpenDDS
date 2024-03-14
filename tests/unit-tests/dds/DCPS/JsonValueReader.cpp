@@ -762,19 +762,14 @@ TEST(dds_DCPS_JsonValueReader, optional_members)
   StringStream ss(json);
   JsonValueReader<> jvr(ss);
   MemberId member_id;
-  ACE_CDR::Boolean bool_value; // non-optional
-  ACE_CDR::Octet byte_value; // has value
-  // int16_value member has no value 
-  ACE_CDR::UShort uint16_value; // has value
-  ACE_CDR::Long int32_value; // has value
-  // nested_struct member has no value
-  ACE_CDR::ULong uint32_value; // has value
-  // array member has no value
-  ACE_CDR::LongLong int64_value; // has value
-  // sequence member has no value
-  ACE_CDR::ULongLong uint64_value; // has value
-  // nested_union member has no value
-  ACE_CDR::Char char8_value; // has value
+  ACE_CDR::Boolean bool_value;
+  ACE_CDR::Octet byte_value;
+  ACE_CDR::UShort uint16_value;
+  ACE_CDR::Long int32_value;
+  ACE_CDR::ULong uint32_value;
+  ACE_CDR::LongLong int64_value;
+  ACE_CDR::ULongLong uint64_value;
+  ACE_CDR::Char char8_value;
 
   EXPECT_TRUE(jvr.begin_struct());
 
