@@ -247,7 +247,7 @@ struct ScopedNamespaceGuard  {
         ++n_;
         if (!idl && !std::strcmp(str, "OpenDDS")) {
           os_ << "OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL\n";
-          suffix_ = "OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL\n";
+          suffix_ = "OPENDDS_END_VERSIONED_NAMESPACE_DECL\n";
         }
         os_ << keyword << ' ' << dds_generator::to_string(name->head(), ec) << " {\n";
       }
