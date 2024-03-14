@@ -133,17 +133,21 @@ bool dds_generator::gen_enum_helper(AST_Enum*, UTL_ScopedName* name,
   const std::vector<AST_EnumVal*>& contents, const char*)
 {
   // The EnumHelper is used across multiple generators.
+  be_global->add_include("dds/DCPS/ValueCommon.h", BE_GlobalData::STREAM_CPP);
   NamespaceGuard ng;
   const std::string underscores = scoped_helper(name, "_"),
     scope = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11
             ? scoped(name) + "::"
             : module_scope(name),
+    fwd_decl = be_global->value_reader_writer() ? "" : "class EnumHelper;\n",
     helper_decl = "const EnumHelper* gen_" + underscores + "_helper",
     decl_prefix = (be_global->export_macro() == "")
                   ? std::string("extern ")
                   : std::string(be_global->export_macro().c_str()) + " extern ";
 
-  be_global->header_ << decl_prefix << helper_decl << ";\n";
+  be_global->header_ <<
+    fwd_decl <<
+    decl_prefix << helper_decl << ";\n";
 
   be_global->impl_ <<
     "const ListEnumHelper::Pair gen_" << underscores << "_pairs[] = {\n";
