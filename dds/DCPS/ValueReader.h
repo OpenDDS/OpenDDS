@@ -75,6 +75,7 @@ public:
   virtual bool end_struct() = 0;
   virtual bool begin_struct_member(XTypes::MemberId& member_id, const MemberHelper& helper) = 0;
   virtual bool members_remaining() = 0;
+  virtual bool member_has_value() = 0;
   virtual bool end_struct_member() = 0;
 
   virtual bool begin_union(Extensibility extensibility) = 0;
