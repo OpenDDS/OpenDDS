@@ -13,7 +13,7 @@ project(OpenDDS_Rtps): dcpslib, install, rtps_optional_safety, opendds_testing_f
   }
 
   TypeSupport_Files {
-    dcps_ts_flags += -Lspcpp -St -Sx
+    dcps_ts_flags += -Lspcpp
     RtpsSubmessageKind.idl
   }
 
