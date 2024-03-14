@@ -762,27 +762,24 @@ If the take is successful and returns valid data, we print out each of the messa
         DDS::ReturnCode_t status = reader_i->take_next_sample(message, si);
 
         if (status == DDS::RETCODE_OK) {
-
-          if (si.valid_data == 1) {
+          if (si.valid_data) {
               std::cout << "Message: subject = " << message.subject.in() << std::endl
-                << "  subject_id = " << message.subject_id  << std::endl
-                << "  from = " << message.from.in()  << std::endl
-                << "  count = " << message.count  << std::endl
-                << "  text = " << message.text.in()  << std::endl;
+                << "  subject_id = " << message.subject_id << std::endl
+                << "  from = " << message.from.in() << std::endl
+                << "  count = " << message.count << std::endl
+                << "  text = " << message.text.in() << std::endl;
           } else if (si.instance_state == DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE) {
             std::cout << "instance is disposed" << std::endl;
           } else if (si.instance_state == DDS::NOT_ALIVE_NO_WRITERS_INSTANCE_STATE) {
             std::cout << "instance is unregistered" << std::endl;
-          }
-          else
-          {
+          } else {
             std::cerr << "ERROR: received unknown instance state "
                       << si.instance_state << std::endl;
           }
         } else if (status == DDS::RETCODE_NO_DATA) {
             cerr << "ERROR: reader received DDS::RETCODE_NO_DATA!" << std::endl;
         } else {
-            cerr << "ERROR: read Message: Error: " <<  status << std::endl;
+            cerr << "ERROR: read Message: Error: " << status << std::endl;
         }
 
 Note the sample read may contain invalid data.

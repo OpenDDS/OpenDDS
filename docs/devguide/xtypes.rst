@@ -392,7 +392,7 @@ Data representation is the way a data sample can be encoded for transmission.
 The possible data representations are:
 
 XML
-    This isn't currently supported and will be ignored.
+    This isn't currently supported.
 
     The ``DataRepresentationId_t`` value is ``DDS::XML_DATA_REPRESENTATION``
 
@@ -453,8 +453,8 @@ Type Consistency Enforcement
     Sect<16.5>
 
 When a reader/writer match is happening, type consistency enforcement checks that the two types are compatible according to the type objects if they are available.
-This can be affected on the reader side using :ref:`qos-type-consistency-enforcement`.
 This check will not happen if OpenDDS has been :ref:`configured not to generate or use type objects <xtypes--representing-types-with-typeobject-and-dynamictype>` or if the remote DDS doesn't support type objects.
+Some parts of the compatibility check can be controlled on the reader side using :ref:`qos-type-consistency-enforcement`.
 The full type object compatibility check is too detailed to reproduce here.
 It can be found in :omgspec:`xtypes:7.2.4`.
 In general though two topic types and their nested types are compatible if:

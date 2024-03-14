@@ -152,7 +152,7 @@ intersphinx_mapping = {
     'cmake': ('https://cmake.org/cmake/help/latest', None),
 }
 
-manpages_url = 'https://linux.die.net/man/{section}/{page}'
+manpages_url = 'https://manpages.debian.org/{page}({section})'
 
 
 # -- Options for Markdown output ---------------------------------------------

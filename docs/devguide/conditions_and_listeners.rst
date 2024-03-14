@@ -398,6 +398,103 @@ The ``current_count`` value is the current number of data readers matched to thi
 The ``current_count_change`` value is the change in the current count since the last time this status was accessed.
 The ``last_subscription_handle`` value is a handle for the last data reader matched.
 
+.. _conditions_and_listeners--budget-exceeded-status:
+
+Budget Exceeded Status
+----------------------
+
+This is an OpenDDS-specific listener extension allows for reporting delays in excess of the :ref:`qos-latency-budget`.
+The ``OpenDDS::DCPS::DataReaderListener`` interface has an additional operation for notification that samples were received with a measured transport delay greater than the latency budget policy duration.
+The IDL for this method is:
+
+.. code-block:: omg-idl
+
+      struct BudgetExceededStatus {
+        long total_count;
+        long total_count_change;
+        DDS::InstanceHandle_t last_instance_handle;
+      };
+
+      void on_budget_exceeded(
+             in DDS::DataReader reader,
+             in BudgetExceededStatus status);
+
+To use the extended listener callback you will need to derive the listener implementation from the extended interface, as shown in the following code fragment:
+
+.. code-block:: cpp
+
+      class DataReaderListenerImpl
+            : public virtual
+              OpenDDS::DCPS::LocalObject<OpenDDS::DCPS::DataReaderListener>
+
+Then you must provide a non-null implementation for the ``on_budget_exceeded()`` operation.
+Note that you will need to provide empty implementations for the following extended operations as well:
+
+.. code-block:: cpp
+
+      on_subscription_disconnected()
+      on_subscription_reconnected()
+      on_subscription_lost()
+      on_connection_deleted()
+
+OpenDDS also makes the summary latency statistics available via an extended interface of the data reader.
+This extended interface is located in the ``OpenDDS::DCPS`` module and the IDL is defined as:
+
+.. code-block:: omg-idl
+
+      struct LatencyStatistics {
+        GUID_t        publication;
+        unsigned long n;
+        double        maximum;
+        double        minimum;
+        double        mean;
+        double        variance;
+      };
+
+      typedef sequence<LatencyStatistics> LatencyStatisticsSeq;
+
+      local interface DataReaderEx : DDS::DataReader {
+        /// Obtain a sequence of statistics summaries.
+        void get_latency_stats(inout LatencyStatisticsSeq stats);
+
+        /// Clear any intermediate statistical values.
+        void reset_latency_stats();
+
+        /// Statistics gathering enable state.
+        attribute boolean statistics_enabled;
+      };
+
+To gather this statistical summary data you will need to use the extended interface.
+You can do so simply by dynamically casting the OpenDDS data reader pointer and calling the operations directly.
+In the following example, we assume that reader is initialized correctly by calling ``DDS::Subscriber::create_datareader()``:
+
+.. code-block:: cpp
+
+      DDS::DataReader_var reader;
+      // ...
+
+      // To start collecting new data.
+      dynamic_cast<OpenDDS::DCPS::DataReaderImpl*>(reader.in())->
+        reset_latency_stats();
+      dynamic_cast<OpenDDS::DCPS::DataReaderImpl*>(reader.in())->
+        statistics_enabled(true);
+
+      // ...
+
+      // To collect data.
+      OpenDDS::DCPS::LatencyStatisticsSeq stats;
+      dynamic_cast<OpenDDS::DCPS::DataReaderImpl*>(reader.in())->
+        get_latency_stats(stats);
+      for (unsigned long i = 0; i < stats.length(); ++i)
+      {
+        std::cout << "stats[" << i << "]:" << std::endl;
+        std::cout << "         n = " << stats[i].n << std::endl;
+        std::cout << "       max = " << stats[i].maximum << std::endl;
+        std::cout << "       min = " << stats[i].minimum << std::endl;
+        std::cout << "      mean = " << stats[i].mean << std::endl;
+        std::cout << "  variance = " << stats[i].variance << std::endl;
+      }
+
 .. _conditions_and_listeners--listeners:
 
 *********

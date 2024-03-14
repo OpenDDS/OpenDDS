@@ -4,8 +4,6 @@
 Annex
 #####
 
-Documentation that doesn't fit with other sections, but isn't big enough to justify having a separate section.
-
 .. _fnmatch-exprs:
 
 *******************
