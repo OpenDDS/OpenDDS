@@ -343,23 +343,23 @@ bool value_writer_generator::gen_struct(AST_Structure* node,
       const std::string value_name = "value." + field_name + accessor_suffix + (is_optional ? ".value()" : "");
       const std::string optional_is_present = !is_optional ? "false": "value." + field_name + accessor_suffix + ".has_value()";
 
-      be_global->impl_ << 
+      be_global->impl_ <<
         "  {\n" <<
         "    MemberParam param(" << id << ", " << (must_understand ? "true" : "false") << ", \"" << idl_name << "\", " << is_optional << ", " << optional_is_present << ");\n" <<
         "    if (!value_writer.begin_struct_member(param)) {\n"
         "      return false;\n"
         "    }\n" <<
         "    if (param.present) {\n";
-      
+
       generate_write(value_name, field->field_type(), "i");
-  
-      be_global->impl_ << 
+
+      be_global->impl_ <<
         "    } else {\n" <<
         "      value_writer.write_absent_value();\n" <<
         "    }\n" <<
         "    if (!value_writer.end_struct_member()) {\n"
         "      return false;\n"
-        "    }\n" << 
+        "    }\n" <<
         "  }\n";
     }
     be_global->impl_ <<
