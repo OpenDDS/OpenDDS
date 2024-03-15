@@ -88,9 +88,6 @@ public:
   virtual bool begin_struct_member(MemberParam params) = 0;
   virtual bool end_struct_member() = 0;
 
-  virtual bool begin_optional() = 0;
-  virtual bool end_optional() = 0;
-
   virtual bool begin_union(Extensibility extensibility) = 0;
   virtual bool end_union() = 0;
   virtual bool begin_discriminator(MemberParam params) = 0;

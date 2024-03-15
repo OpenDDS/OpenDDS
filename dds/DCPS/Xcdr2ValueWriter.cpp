@@ -268,16 +268,6 @@ bool Xcdr2ValueWriter::end_struct_member()
   return true;
 }
 
-bool Xcdr2ValueWriter::begin_optional()
-{
-  return true;
-}
-
-bool Xcdr2ValueWriter::end_optional()
-{
-  return true;
-}
-
 bool Xcdr2ValueWriter::begin_union(Extensibility extensibility)
 {
   return begin_complex(extensibility);
