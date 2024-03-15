@@ -127,16 +127,6 @@ bool PrinterValueWriter::end_struct_member()
   return true;
 }
 
-bool PrinterValueWriter::begin_optional()
-{
-  return true;
-}
-
-bool PrinterValueWriter::end_optional()
-{
-  return true;
-}
-
 bool PrinterValueWriter::begin_union(Extensibility /*extensibility*/)
 {
   current_indent_ += indent_;
