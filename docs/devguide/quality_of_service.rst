@@ -286,8 +286,8 @@ History QoS
     Sect<3.2.4>
 
 The history QoS policy determines how :term:`sample`\s are held in the data writer and data reader for a particular :term:`instance`.
-For data writers these values are held until the publisher retrieves them and successfully sends them to all connected subscribers.
-For data readers these values are held until :ref:`taken <getting_started--reading-multiple-samples>` by the application.
+For data writers these samples are held until the publisher retrieves them and successfully sends them to all connected subscribers.
+For data readers these samples are held until :ref:`taken <getting_started--reading-multiple-samples>` by the application.
 This policy applies to the topic, data reader, and data writer entities via the ``history`` member of their respective QoS structures.
 
 .. important::

@@ -424,7 +424,7 @@ Unaligned CDR
 
 Use :ref:`qos-data-representation` to define what representations writers and readers should use.
 Writers can only encode samples using only one data representation, but readers can accept multiple data representations.
-:ref:`@OpenDDS::data_representation <xtypes--specifying-allowed-data-representations>` can be used to restrict what what data representation can be used for a topic type in IDL.
+:ref:`@OpenDDS::data_representation <xtypes--specifying-allowed-data-representations>` can be used to restrict what data representation can be used for a topic type in IDL.
 
 .. warning::
 

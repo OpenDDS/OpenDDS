@@ -485,8 +485,7 @@ In the following example, we assume that reader is initialized correctly by call
       OpenDDS::DCPS::LatencyStatisticsSeq stats;
       dynamic_cast<OpenDDS::DCPS::DataReaderImpl*>(reader.in())->
         get_latency_stats(stats);
-      for (unsigned long i = 0; i < stats.length(); ++i)
-      {
+      for (unsigned long i = 0; i < stats.length(); ++i) {
         std::cout << "stats[" << i << "]:" << std::endl;
         std::cout << "         n = " << stats[i].n << std::endl;
         std::cout << "       max = " << stats[i].maximum << std::endl;
