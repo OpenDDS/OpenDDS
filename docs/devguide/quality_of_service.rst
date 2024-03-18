@@ -1434,7 +1434,8 @@ The property QoS policy contains sequences of key-value pairs for the :term:`Dom
 
 .. important::
 
-  This policy is :ref:`immutable <qos-changing>` and affects association indirectly through security.
+  This policy is :ref:`mutable <qos-changing>`, but updates to properties after creating the participant might not an effect.
+  This policy affects association indirectly through security.
 
   IDL:
 

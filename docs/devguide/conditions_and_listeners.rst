@@ -423,19 +423,37 @@ To use the extended listener callback you will need to derive the listener imple
 
 .. code-block:: cpp
 
-      class DataReaderListenerImpl
-            : public virtual
-              OpenDDS::DCPS::LocalObject<OpenDDS::DCPS::DataReaderListener>
+  class DataReaderListenerImpl
+    : public virtual OpenDDS::DCPS::LocalObject<OpenDDS::DCPS::DataReaderListener>
+  {
+    void on_budget_exceeded(
+      DDS::DataReader* reader,
+      const OpenDDS::DCPS::BudgetExceededStatus& status)
+    {
+    }
 
 Then you must provide a non-null implementation for the ``on_budget_exceeded()`` operation.
 Note that you will need to provide empty implementations for the following extended operations as well:
 
 .. code-block:: cpp
 
-      on_subscription_disconnected()
-      on_subscription_reconnected()
-      on_subscription_lost()
-      on_connection_deleted()
+  void on_subscription_disconnected(
+    DDS::DataReader* reader,
+    const OpenDDS::DCPS::SubscriptionDisconnectedStatus& status)
+  {
+  }
+
+  void on_subscription_reconnected(
+    DDS::DataReader* reader,
+    const OpenDDS::DCPS::SubscriptionReconnectedStatus& status)
+  {
+  }
+
+  void on_subscription_lost(
+    DDS::DataReader* reader,
+    const OpenDDS::DCPS::SubscriptionLostStatus& status)
+  {
+  }
 
 OpenDDS also makes the summary latency statistics available via an extended interface of the data reader.
 This extended interface is located in the ``OpenDDS::DCPS`` module and the IDL is defined as:
