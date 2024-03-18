@@ -388,11 +388,11 @@ Data Representation
     Sect<16.4>
 
 Data representation is the way a data sample can be encoded for transmission.
-Writers can only encode samples using one data representation, but readers can accept multiple data representations.
-Data representation can be XML, XCDR1, XCDR2, or unaligned CDR.
+
+The possible data representations are:
 
 XML
-    This isn't currently supported and will be ignored.
+    This isn't currently supported.
 
     The ``DataRepresentationId_t`` value is ``DDS::XML_DATA_REPRESENTATION``
 
@@ -422,17 +422,18 @@ Unaligned CDR
 
     The annotation is :ref:`xtypes--opendds-data-representation-unaligned-cdr`.
 
-Data representation is a QoS policy alongside the other QoS options.
-Its listed values represent allowed serialized forms of the data sample.
-The DataWriter and DataReader need to have at least one matching data representation for communication between them to be possible.
+Use :ref:`qos-data-representation` to define what representations writers and readers should use.
+Writers can only encode samples using only one data representation, but readers can accept multiple data representations.
+:ref:`@OpenDDS::data_representation <xtypes--specifying-allowed-data-representations>` can be used to restrict what data representation can be used for a topic type in IDL.
 
-The default value of the ``DataRepresentationQosPolicy`` is an empty sequence.
-For RTPS-UDP this is interpreted as XCDR2 for DataWriters and accepting XCDR1 and XCDR2 for DataReaders.
-For other transports it's interpreted as Unaligned CDR for DataWriters and accepting XCDR1, XCDR2, and Unaligned CDR for DataReaders.
-A writer or reader without an explicitly-set ``DataRepresentationQosPolicy`` will therefore be able to communicate with another reader or writer which is compatible with XCDR2.
-The example below shows a possible configuration for an XCDR1 DataWriter.
+.. warning::
 
-.. code-block:: cpp
+  Because writers default to XCDR2 instead of XCDR1, they aren't likely to be compatible with readers from OpenDDS versions before 3.16 and other DDS implementations by default.
+  Either the remote readers will have to set to use XCDR2 if they support it or OpenDDS writers will have to be set to use XCDR1.
+
+  The example below shows a possible configuration for an XCDR1 DataWriter.
+
+  .. code-block:: cpp
 
     DDS::DataWriterQos qos;
     pub->get_default_datawriter_qos(qos);
@@ -440,15 +441,7 @@ The example below shows a possible configuration for an XCDR1 DataWriter.
     qos.representation.value[0] = DDS::XCDR_DATA_REPRESENTATION;
     DDS::DataWriter_var dw = pub->create_datawriter(topic, qos, 0, 0);
 
-Note that the IDL constant used for XCDR1 is ``XCDR_DATA_REPRESENTATION`` (without the digit).
-
-In addition to a DataWriter/DataReader QoS setting for data representation, each type defined in IDL can have its own data representation specified via an annotation.
-This value restricts which data representations can be used for that type.
-A DataWriter/DataReader must have at least one data representation in common with the type it uses.
-
-The default value for an unspecified data representation annotation is to allow all forms of serialization.
-
-The type's set of allowed data representations can be specified by the user in IDL with the notation: ``@OpenDDS::data_representation(XCDR2)`` where XCDR2 is replaced with the specific data representation.
+  Note that the IDL constant used for XCDR1 is ``XCDR_DATA_REPRESENTATION`` (without the digit).
 
 .. _xtypes--type-consistency-enforcement:
 
@@ -459,28 +452,9 @@ Type Consistency Enforcement
 ..
     Sect<16.5>
 
-.. _xtypes--typeconsistencyenforcementqospolicy:
-
-TypeConsistencyEnforcementQosPolicy
-===================================
-
-The Type Consistency Enforcement QoS policy lets the application fine-tune details of how types may differ between writers and readers.
-The policy only applies to data readers.
-This means that each reader can set its own policy for how its type may vary from the types of the writers that it may match.
-
-There are six members of the ``TypeConsistencyEnforcementQosPolicy`` struct defined by XTypes, but OpenDDS only supports setting one of them: ``ignore_member_names``.
-All other members should be kept at their default values.
-
-``ignore_member_names`` defaults to ``FALSE`` so member names (along with member IDs, see :ref:`xtypes--member-id-assignment`) are significant for type compatibility.
-Changing this to ``TRUE`` means that only member IDs are used for type compatibility.
-
-.. _xtypes--type-compatibility:
-
-Type Compatibility
-==================
-
 When a reader/writer match is happening, type consistency enforcement checks that the two types are compatible according to the type objects if they are available.
 This check will not happen if OpenDDS has been :ref:`configured not to generate or use type objects <xtypes--representing-types-with-typeobject-and-dynamictype>` or if the remote DDS doesn't support type objects.
+Some parts of the compatibility check can be controlled on the reader side using :ref:`qos-type-consistency-enforcement`.
 The full type object compatibility check is too detailed to reproduce here.
 It can be found in :omgspec:`xtypes:7.2.4`.
 In general though two topic types and their nested types are compatible if:
