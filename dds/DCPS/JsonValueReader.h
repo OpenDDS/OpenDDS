@@ -55,6 +55,7 @@ public:
   bool end_struct();
   bool begin_struct_member(XTypes::MemberId& member_id, const MemberHelper& helper);
   bool members_remaining();
+  bool member_has_value();
   bool end_struct_member();
 
   bool begin_union(Extensibility extensibility = FINAL);
@@ -241,6 +242,17 @@ template <typename InputStream>
 bool JsonValueReader<InputStream>::members_remaining()
 {
   return peek() == kKey;
+}
+
+// Should only be called on optional members.
+template <typename InputStream>
+bool JsonValueReader<InputStream>::member_has_value()
+{
+  if (peek() != kNull) {
+    return true;
+  }
+  consume(kNull);
+  return false;
 }
 
 template <typename InputStream>
