@@ -341,7 +341,7 @@ bool value_writer_generator::gen_struct(AST_Structure* node,
       const bool must_understand = be_global->is_effectively_must_understand(field);
       const bool is_optional = be_global->is_optional(field);
       const std::string value_name = "value." + field_name + accessor_suffix + (is_optional ? ".value()" : "");
-      const std::string optional_is_present = !is_optional ? "false": "value." + field_name + accessor_suffix + ".has_value()";
+      const std::string optional_is_present = !is_optional ? "true": "value." + field_name + accessor_suffix + ".has_value()";
 
       be_global->impl_ <<
         "  {\n" <<

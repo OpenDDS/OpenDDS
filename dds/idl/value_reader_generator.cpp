@@ -138,15 +138,7 @@ namespace {
   void optional_helper(const std::string& expression, AST_Type* type, const std::string& idx, int level)
   {
     const std::string indent(level * 2, ' ');
-    be_global->impl_ << indent << "if (!value_reader.begin_optional()) return false;\n";
-
-    be_global->impl_ << indent << "bool has_value = false;\n";
-    be_global->impl_ << indent << "value_reader.read_boolean(has_value);\n";
-    be_global->impl_ << indent << "if (has_value) {\n";
     generate_read(expression + "().value()", "", type, idx + "i", 4);
-    be_global->impl_ << indent << "}\n";
-
-    be_global->impl_ << indent << "if (!value_reader.end_optional()) return false;\n";
   }
 
   void generate_read(const std::string& expression, const std::string& accessor,
@@ -323,6 +315,10 @@ bool value_reader_generator::gen_struct(AST_Structure* node,
       "  XTypes::MemberId member_id;\n"
       "  while (value_reader.members_remaining()) {\n"
       "    if (!value_reader.begin_struct_member(member_id, helper)) return false;\n"
+      "    if (!value_reader.member_has_value()) {\n"
+      "      "
+      "      continue;\n"
+      "    }\n"
       "    switch (member_id) {\n";
 
     for (std::vector<AST_Field*>::const_iterator pos = fields.begin(), limit = fields.end();
