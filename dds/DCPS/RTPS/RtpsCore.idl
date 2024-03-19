@@ -540,9 +540,9 @@ module OpenDDS {
       unsigned short submessageLength; /* octetsToNextHeader */
     };
     // Valid constants for the submessageId field are the enumerators
-    // of the SubmessageKind enum in RtpsSubmessageKind.idl
+    // of the SubmessageKind enum in RtpsSubmessageKind.idl.
     // The least-significant bit of "flags" is E, the endianness flag:
-    // pseudoenum E { BIG_ENDIAN = 0, LITTLE_ENDIAN = 1};
+    // pseudoenum E { BIG_ENDIAN = 0, LITTLE_ENDIAN = 1 };
 
     /* Type used to hold fragment numbers. */
     struct FragmentNumber_t {
