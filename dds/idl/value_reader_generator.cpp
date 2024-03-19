@@ -316,7 +316,7 @@ bool value_reader_generator::gen_struct(AST_Structure* node,
       "  while (value_reader.members_remaining()) {\n"
       "    if (!value_reader.begin_struct_member(member_id, helper)) return false;\n"
       "    if (!value_reader.member_has_value()) {\n"
-      "      "
+      "      \n" // TODO Read null value
       "      continue;\n"
       "    }\n"
       "    switch (member_id) {\n";
@@ -327,13 +327,11 @@ bool value_reader_generator::gen_struct(AST_Structure* node,
       const std::string field_name = field->local_name()->get_string();
       be_global->impl_ <<
         "    case " << be_global->get_id(field) << ": {\n";
+      const bool is_optional = be_global->is_optional(field);
+      const std::string expression = "value." + field_name + (is_optional ? "().value" : "");
 
-      if (be_global->is_optional(field)) {
-        optional_helper("value." + field_name, field->field_type(), "i", 3);
-      } else {
-        generate_read("value." + field_name, accessor, field->field_type(), "i", 3);
-      }
-
+      generate_read("value." + field_name, accessor, field->field_type(), "i", 3);
+      
       be_global->impl_ <<
         "      break;\n"
         "    }\n";
