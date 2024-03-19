@@ -80,9 +80,6 @@ const char COMMON_DCPS_CHUNK_ASSOCIATION_MULTIPLIER[] = "COMMON_DCPS_CHUNK_ASSOC
 const char COMMON_DCPS_CHUNK_ASSOCIATION_MUTLTIPLIER[] = "COMMON_DCPS_CHUNK_ASSOCIATION_MUTLTIPLIER";
 const size_t COMMON_DCPS_CHUNK_ASSOCIATION_MULTIPLIER_default = 10;
 
-const char COMMON_DCPS_CONFIG_FILE[] = "COMMON_DCPS_CONFIG_FILE";
-const String COMMON_DCPS_CONFIG_FILE_default = "";
-
 const char COMMON_DCPS_DEBUG_LEVEL[] = "COMMON_DCPS_DEBUG_LEVEL";
 
 const char COMMON_DCPS_DEFAULT_ADDRESS[] = "COMMON_DCPS_DEFAULT_ADDRESS";
@@ -534,7 +531,8 @@ public:
    * singleton.
    */
   int load_configuration(ACE_Configuration_Heap& cf,
-                         const ACE_TCHAR* filename);
+                         const ACE_TCHAR* filename,
+                         bool allow_overwrite = false);
 
 #ifdef OPENDDS_SAFETY_PROFILE
   /**
@@ -618,6 +616,9 @@ private:
    */
   int parse_args(int &argc, ACE_TCHAR *argv[]);
 
+  bool process_config_file(const String& config_fname,
+                           bool allow_overwrite);
+
   /**
    * Import the configuration file to the ACE_Configuration_Heap
    * object and load common section configuration to the
@@ -625,7 +626,8 @@ private:
    * transport section configuration to the TransportRegistry
    * singleton.
    */
-  int load_configuration(const String& config_fname);
+  int load_configuration(const String& config_fname,
+                         bool allow_overwrite = false);
 
   /**
    * Load the domain configuration to the Service_Participant

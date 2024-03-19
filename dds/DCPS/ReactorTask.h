@@ -32,7 +32,7 @@ namespace OpenDDS {
 namespace DCPS {
 
 class OpenDDS_Dcps_Export ReactorTask : public virtual ACE_Task_Base,
-public virtual RcObject {
+  public virtual RcObject {
 
 public:
 
@@ -40,12 +40,10 @@ public:
   virtual ~ReactorTask();
 
 public:
-  int open_reactor_task(void*,
-                        ThreadStatusManager* thread_status_manager = 0,
+  int open_reactor_task(ThreadStatusManager* thread_status_manager = 0,
                         const String& name = "");
-  virtual int open(void* ptr) {
-    return open_reactor_task(ptr);
-  }
+
+  virtual int open(void*) { return open_reactor_task(); }
   virtual int svc();
   virtual int close(u_long flags = 0);
 

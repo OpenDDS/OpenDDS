@@ -179,6 +179,20 @@ jobject JNICALL Java_OpenDDS_DCPS_TheServiceParticipant_network_1config_1modifie
 #endif
 }
 
+jobject JNICALL Java_OpenDDS_DCPS_TheServiceParticipant_config_1store
+(JNIEnv * jni, jclass)
+{
+  try {
+    OpenDDS::DCPS::ConfigStore_var c_ret(TheServiceParticipant->config_store().get());
+    jobject j_ret = 0;
+    copyToJava (jni, j_ret, c_ret, true);
+    return j_ret;
+  } catch (const CORBA::SystemException& se) {
+    throw_java_exception(jni, se);
+    return 0;
+  }
+}
+
 // NetworkConfigModifier
 
 // NetworkConfigModifier::_jni_fini

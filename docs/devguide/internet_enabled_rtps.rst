@@ -193,18 +193,17 @@ The command-line options for the RtpsRelay:
   ``-Permissions PATH``
 
   Provide paths to the DDS Security documents.
-  Requires a security-enabled build.
 
 * ``-RestartDetection 0|1``
 
   Setting RestartDetction to 1 causes the relay to track clients by the first 6 bytes of their RTPS GUID and source IP address and clean up older sessions with the same key.
   The default is 0 (false).
 
-* ``-LogWarnings0|1``
+* ``-LogWarnings 0|1``
 
-  ``-LogDiscovery0|1``
+  ``-LogDiscovery 0|1``
 
-  ``-LogActivity0|1``
+  ``-LogActivity 0|1``
 
   Enable/disable logging of the various event types.
 
