@@ -7,6 +7,7 @@
 
 #include "be_extern.h"
 #include "be_util.h"
+#include "dds/idl/dds_generator.h"
 
 #include <dds/DCPS/Definitions.h>
 
@@ -330,7 +331,7 @@ bool value_reader_generator::gen_struct(AST_Structure* node,
       const bool is_optional = be_global->is_optional(field);
       const std::string expression = "value." + field_name + (is_optional ? "().value" : "");
 
-      generate_read("value." + field_name, accessor, field->field_type(), "i", 3);
+      generate_read(expression, accessor, field->field_type(), "i", 3);
 
       be_global->impl_ <<
         "      break;\n"
