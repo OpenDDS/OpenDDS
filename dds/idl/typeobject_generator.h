@@ -120,6 +120,10 @@ private:
   std::map<AST_Type*, Element> element_;
   bool get_type_map_declared_;
   OpenDDS::DCPS::Encoding* typeid_encoding_;
+
+  typedef std::map<std::string, ACE_CDR::Long> EnumValues;
+  typedef std::map<AST_Enum*, EnumValues> EnumValueMap;
+  EnumValueMap enum_values_;
 };
 
 #endif
