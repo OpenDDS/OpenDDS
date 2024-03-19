@@ -7,7 +7,6 @@
 
 #include "be_extern.h"
 #include "be_util.h"
-#include "dds/idl/dds_generator.h"
 
 #include <dds/DCPS/Definitions.h>
 
