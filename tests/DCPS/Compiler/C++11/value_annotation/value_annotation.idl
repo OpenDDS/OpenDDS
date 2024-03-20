@@ -7,12 +7,14 @@ enum TestValueAnnotation {
   @value(10) TEN
 };
 
+@final
 struct UsesAnnotatedEnum {
   TestValueAnnotation tva;
 };
 
+@final
 union DiscByAnnotatedEnum switch (TestValueAnnotation) {
-case ONE:
+case FIVE:
   octet o;
 default:
   short s;
