@@ -6,6 +6,8 @@
 #include <dds/DCPS/Serializer.h>
 #include <dds/DCPS/TypeSupportImpl.h>
 #include <dds/DCPS/FilterEvaluator.h>
+#include <dds/DCPS/JsonValueWriter.h>
+#include <dds/DCPS/JsonValueReader.h>
 
 #include <ace/ACE.h>
 #include <ace/Log_Msg.h>
@@ -96,6 +98,39 @@ TEST(OptionalTests, SerializationXCDR2NotEmpty)
   value.short_field(0x7fff);
   value.str_field("Hello World");
   serializer_test(xcdr2, value, expected);
+}
+
+// TODO WIP will expand and cleanup
+TEST(OptionalTests, JsonValueWriterReader) {
+  typedef rapidjson::StringBuffer Buffer;
+  typedef rapidjson::Writer<Buffer> Writer;
+
+
+  Buffer buffer;
+  Writer writer(buffer);
+  JsonValueWriter<Writer> jvw(writer);
+
+  optional::OptionalMembers expected{};
+  expected.bool_field(true);
+  //expected.short_field(0x1234); // FIXME: Currently crashes with bad optional access
+  expected.str_field("Hello World");
+
+  vwrite(jvw, expected);
+
+  rapidjson::StringStream ss(buffer.GetString());
+  JsonValueReader<> jvr(ss);
+
+  optional::OptionalMembers got{};
+  vread(jvr, got);
+
+  EXPECT_TRUE(expected.bool_field() == got.bool_field());
+  EXPECT_TRUE(expected.short_field() == got.short_field());
+  // EXPECT_TRUE(expected.bool_field() == got.bool_field());
+  // EXPECT_TRUE(expected.bool_field() == got.bool_field());
+  // EXPECT_TRUE(expected.bool_field() == got.bool_field());
+  // EXPECT_TRUE(expected.bool_field() == got.bool_field());
+  
+  //EXPECT_TRUE(false);
 }
 
 int main(int argc, char ** argv)
