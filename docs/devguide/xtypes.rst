@@ -820,6 +820,35 @@ The ``@key`` annotation marks a member used to determine the Instances of a topi
 See :ref:`getting_started--keys` for more details on the general concept of a Key.
 For XTypes specifically, two types can only be compatible if each contains the members that are keys within the other.
 
+Customizing the values of enumerators
+=====================================
+
+..
+    Sect<16.6.7>
+
+.. _xtypes--value:
+
+@value(v)
+---------
+
+..
+    Sect<16.6.7.1>
+
+Applies to: enumerators (only when :ref:`opendds_idl--using-the-idl-to-c-11-mapping`)
+
+Without annotations, the enumerators of each enum type take on consecutive integer values starting at 0.
+The ``@value(v)`` annotation customizes the integer value of an individual enumerator. The parameter ``v`` is an integer constant (signed, 4 bytes wide).
+Any enumerators that are not annotated take on the integer value one higher than the value of the previously-declared enumerator, with the first declared taking value 0.
+
+.. code-block:: omg-idl
+
+  enum MyAnnotionEnabledEnum {
+    ZERO,
+    @value(3) THREE,
+    FOUR,
+    @value(2) TWO
+  };
+
 .. _xtypes--dynamic-language-binding-1:
 
 ************************
