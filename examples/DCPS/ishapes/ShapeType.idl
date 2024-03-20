@@ -4,11 +4,12 @@ module org {
       module demo {
 
         @topic
+        @appendable
         struct ShapeType {
-          @key string color;
-          long x;
-          long y;
-          long shapesize;
+          @key string<128> color;
+          int32 x;
+          int32 y;
+          int32 shapesize;
         };
 
       };
