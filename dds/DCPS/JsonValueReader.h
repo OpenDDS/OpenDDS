@@ -58,9 +58,6 @@ public:
   bool member_has_value();
   bool end_struct_member();
 
-  bool begin_optional() { return true; }
-  bool end_optional() { return true; }
-
   bool begin_union(Extensibility extensibility = FINAL);
   bool end_union();
   bool begin_discriminator();

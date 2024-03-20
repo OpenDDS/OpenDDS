@@ -175,22 +175,6 @@ namespace {
       indent << "}\n";
   }
 
-  void optional_helper(const std::string& field_name, const std::string& expression, AST_Type* type, const std::string& idx, int level = 1)
-  {
-    const std::string indent(level * 2, ' ');
-    const std::string field_has_value = field_name + "_has_value";
-    be_global->impl_ << indent << "MemberParam param(0, false, true, " << field_has_value << ");\n";
-    be_global->impl_ << indent << "value_writer.begin_optional();\n";
-
-    be_global->impl_ << indent << "bool " << field_has_value << " = " << expression << ".has_value();\n";
-    be_global->impl_ << indent << "value_writer.write_boolean(" << field_has_value << ");\n";
-    be_global->impl_ << indent << "if (" << field_has_value << ") {\n";
-    generate_write(expression + ".value()", type, idx + "i", level + 1);
-    be_global->impl_ << indent << "}\n";
-
-    be_global->impl_ << indent << "value_writer.end_optional();\n";
-  }
-
   void generate_write(const std::string& expression, AST_Type* type, const std::string& idx, int level)
   {
     AST_Type* const actual = resolveActualType(type);
