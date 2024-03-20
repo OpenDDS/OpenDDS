@@ -11,6 +11,7 @@
 #include <dds/DCPS/Definitions.h>
 
 #include <global_extern.h>
+#include <string>
 #include <utl_identifier.h>
 #include <utl_labellist.h>
 #include <ast_fixed.h>
@@ -135,10 +136,20 @@ namespace {
       indent << "if (!value_reader.end_sequence()) return false;\n";
   }
 
-  void optional_helper(const std::string& expression, AST_Type* type, const std::string& idx, int level)
+  void optional_helper(const std::string& expression, std::string accessor, AST_Type* type, const std::string& idx, int level)
   {
     const std::string indent(level * 2, ' ');
-    generate_read(expression + "().value()", "", type, idx + "i", 4);
+
+    AST_Type* const actual = resolveActualType(type);
+    const Classification c = classify(actual);
+    const std::string tmp_value_type = (c & CL_STRING) ? (c & CL_WIDE ? "WString" : "String") : scoped(type->name());
+    be_global->impl_ <<
+      indent << tmp_value_type << " tmp;\n";
+
+    generate_read("tmp", "", type, idx + "i", level);
+
+    be_global->impl_ <<
+          indent << expression << accessor << " = std::move(tmp);\n";      
   }
 
   void generate_read(const std::string& expression, const std::string& accessor,
@@ -315,10 +326,7 @@ bool value_reader_generator::gen_struct(AST_Structure* node,
       "  XTypes::MemberId member_id;\n"
       "  while (value_reader.members_remaining()) {\n"
       "    if (!value_reader.begin_struct_member(member_id, helper)) return false;\n"
-      "    if (!value_reader.member_has_value()) {\n"
-      // TODO Read null value
-      "      continue;\n"
-      "    }\n"
+      "    if (!value_reader.member_has_value()) continue;\n" // TODO(tyler) Will this be okay here, if a value isn't an optional, rather wrap the contents of every optional member's case
       "    switch (member_id) {\n";
 
     for (std::vector<AST_Field*>::const_iterator pos = fields.begin(), limit = fields.end();
@@ -327,10 +335,13 @@ bool value_reader_generator::gen_struct(AST_Structure* node,
       const std::string field_name = field->local_name()->get_string();
       be_global->impl_ <<
         "    case " << be_global->get_id(field) << ": {\n";
-      const bool is_optional = be_global->is_optional(field);
-      const std::string expression = "value." + field_name + (is_optional ? "().value" : "");
 
-      generate_read(expression, accessor, field->field_type(), "i", 3);
+      const std::string expression = "value." + field_name;
+      if (be_global->is_optional(field)) {
+        optional_helper(expression, accessor, field->field_type(), "i", 3);
+      } else {
+        generate_read(expression, accessor, field->field_type(), "i", 3);
+      }
 
       be_global->impl_ <<
         "      break;\n"
