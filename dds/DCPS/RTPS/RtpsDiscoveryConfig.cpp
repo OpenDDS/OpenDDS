@@ -1052,6 +1052,20 @@ RtpsDiscoveryConfig::check_source_ip(bool flag)
                                                      flag);
 }
 
+ACE_CDR::ULong
+RtpsDiscoveryConfig::spdp_user_tag() const
+{
+  return TheServiceParticipant->config_store()->get_uint32(config_key("SPDP_USER_TAG").c_str(),
+                                                           0);
+}
+
+void
+RtpsDiscoveryConfig::spdp_user_tag(ACE_CDR::ULong tag)
+{
+  TheServiceParticipant->config_store()->set_uint32(config_key("SPDP_USER_TAG").c_str(),
+                                                    tag);
+}
+
 } // namespace DCPS
 } // namespace OpenDDS
 
