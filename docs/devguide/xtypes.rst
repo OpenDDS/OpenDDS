@@ -823,8 +823,6 @@ For XTypes specifically, two types can only be compatible if each contains the m
 Customizing the values of enumerators
 =====================================
 
-..
-    Sect<16.6.7>
 
 .. _xtypes--value:
 
