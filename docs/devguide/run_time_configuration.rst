@@ -232,14 +232,14 @@ The following table summarizes the ``[common]`` configuration options:
 
    * - ``DCPSChunks=n``
 
-     - Configurable number of chunks that a data writer's and reader's cached allocators will preallocate when the ``RESOURCE_LIMITS`` QoS value is infinite.
+     - Configurable number of chunks that a data writer's and reader's cached allocators will preallocate when the :ref:`qos-resource-limits` QoS value is infinite.
        When all of the preallocated chunks are in use, OpenDDS allocates from the heap.
 
      - ``20``
 
    * - ``DCPSChunkAssociationMultiplier=n``
 
-     - Multiplier for the DCPSChunks or ``resource_limits.max_samples`` value to determine the total number of shallow copy chunks that are preallocated.
+     - Multiplier for ``DCPSChunks`` or the :ref:`qos-resource-limits` ``max_samples`` value to determine the total number of shallow copy chunks that are preallocated.
        Set this to a value greater than the number of connections so the preallocated chunk handles do not run out.
        A sample written to multiple data readers will not be copied multiple times but there is a shallow copy handle to that sample used to manage the delivery to each data reader.
        The size of the handle is small so there is not great need to set this value close to the number of connections.
@@ -489,7 +489,7 @@ They are named differently since they are inherited from TAO.
 The options starting with "ORB" listed in this table are implemented directly by OpenDDS (not passed to TAO) and are supported either on the command line (using a "-" prefix) or in the configuration file.
 Other command-line options that begin with ``-ORB`` are passed to TAO's ``ORB_init`` if DCPSInfoRepo discovery is used.
 
-The ``DCPSChunks`` option allows application developers to tune the amount of memory preallocated when the ``RESOURCE_LIMITS`` are set to infinite.
+The ``DCPSChunks`` option allows application developers to tune the amount of memory preallocated when the :ref:`qos-resource-limits` are set to infinite.
 Once the allocated memory is exhausted, additional chunks are allocated/deallocated from the heap.
 This feature of allocating from the heap when the preallocated memory is exhausted provides flexibility but performance will decrease when the preallocated memory is exhausted.
 
@@ -1227,7 +1227,7 @@ Those properties, along with options specific to OpenDDS's RTPS Discovery implem
 
    * - ``SecureParticipantUserData=[0|1]``
 
-     - If DDS Security is enabled, the Participant's USER_DATA QoS is omitted from unsecured discovery messages.
+     - If DDS Security is enabled, the Participant's :ref:`qos-user-data` is omitted from unsecured discovery messages.
 
      - ``0``
 
@@ -1456,7 +1456,7 @@ The static discovery implementation also checks that the QoS of a data reader or
 
      - See :ref:`quality_of_service--durability`.
 
-     - See :ref:`DataWriter QoS <quality_of_service--reftable6>`.
+     -
 
    * - ``deadline.period.sec=[``
 
@@ -1464,7 +1464,7 @@ The static discovery implementation also checks that the QoS of a data reader or
 
      - See :ref:`quality_of_service--deadline`.
 
-     - See :ref:`DataWriter QoS <quality_of_service--reftable6>`.
+     -
 
    * - ``deadline.period.nanosec=[``
 
@@ -1472,7 +1472,7 @@ The static discovery implementation also checks that the QoS of a data reader or
 
      - See :ref:`quality_of_service--deadline`.
 
-     - See :ref:`DataWriter QoS <quality_of_service--reftable6>`.
+     -
 
    * - ``latency_budget.duration.sec=[``
 
@@ -1480,7 +1480,7 @@ The static discovery implementation also checks that the QoS of a data reader or
 
      - See :ref:`quality_of_service--latency-budget`.
 
-     - See :ref:`DataWriter QoS <quality_of_service--reftable6>`.
+     -
 
    * - ``latency_budget.duration.nanosec=[``
 
@@ -1488,7 +1488,7 @@ The static discovery implementation also checks that the QoS of a data reader or
 
      - See :ref:`quality_of_service--latency-budget`.
 
-     - See :ref:`DataWriter QoS <quality_of_service--reftable6>`.
+     -
 
    * - ``liveliness.kind=[``
 
@@ -1500,7 +1500,7 @@ The static discovery implementation also checks that the QoS of a data reader or
 
      - See :ref:`quality_of_service--liveliness`.
 
-     - See :ref:`DataWriter QoS <quality_of_service--reftable6>`.
+     -
 
    * - ``liveliness.lease_duration.sec=[``
 
@@ -1508,7 +1508,7 @@ The static discovery implementation also checks that the QoS of a data reader or
 
      - See :ref:`quality_of_service--liveliness`.
 
-     - See :ref:`DataWriter QoS <quality_of_service--reftable6>`.
+     -
 
    * - ``liveliness.lease_duration.nanosec=[``
 
@@ -1516,13 +1516,13 @@ The static discovery implementation also checks that the QoS of a data reader or
 
      - See :ref:`quality_of_service--liveliness`.
 
-     - See :ref:`DataWriter QoS <quality_of_service--reftable6>`.
+     -
 
    * - ``reliability.kind=[BEST_EFFORT|RELIABILE]``
 
      - See :ref:`quality_of_service--reliability`.
 
-     - See :ref:`DataWriter QoS <quality_of_service--reftable6>`.
+     -
 
    * - ``reliability.max_blocking_time.sec=[``
 
@@ -1530,7 +1530,7 @@ The static discovery implementation also checks that the QoS of a data reader or
 
      - See :ref:`quality_of_service--reliability`.
 
-     - See :ref:`DataWriter QoS <quality_of_service--reftable6>`.
+     -
 
    * - ``reliability.max_blocking_time.nanosec=[``
 
@@ -1538,7 +1538,7 @@ The static discovery implementation also checks that the QoS of a data reader or
 
      - See :ref:`quality_of_service--reliability`.
 
-     - See :ref:`DataWriter QoS <quality_of_service--reftable6>`.
+     -
 
    * - ``destination_order.kind=[``
 
@@ -1548,31 +1548,31 @@ The static discovery implementation also checks that the QoS of a data reader or
 
      - See :ref:`quality_of_service--destination-order`.
 
-     - See :ref:`DataWriter QoS <quality_of_service--reftable6>`.
+     -
 
    * - ``history.kind=[KEEP_LAST|KEEP_ALL]``
 
      - See :ref:`quality_of_service--history`.
 
-     - See :ref:`DataWriter QoS <quality_of_service--reftable6>`.
+     -
 
    * - ``history.depth=numeric``
 
      - See :ref:`quality_of_service--history`.
 
-     - See :ref:`DataWriter QoS <quality_of_service--reftable6>`.
+     -
 
    * - ``resource_limits.max_samples=numeric``
 
      - See :ref:`quality_of_service--resource-limits`.
 
-     - See :ref:`DataWriter QoS <quality_of_service--reftable6>`.
+     -
 
    * - ``resource_limits.max_instances=numeric``
 
      - See :ref:`quality_of_service--resource-limits`.
 
-     - See :ref:`DataWriter QoS <quality_of_service--reftable6>`.
+     -
 
    * - ``resource_limits.max_samples_per_instance=``
 
@@ -1580,13 +1580,13 @@ The static discovery implementation also checks that the QoS of a data reader or
 
      - See :ref:`quality_of_service--resource-limits`.
 
-     - See :ref:`DataWriter QoS <quality_of_service--reftable6>`.
+     -
 
    * - ``transport_priority.value=numeric``
 
      - See :ref:`quality_of_service--transport-priority`.
 
-     - See :ref:`DataWriter QoS <quality_of_service--reftable6>`.
+     -
 
    * - ``lifespan.duration.sec=[``
 
@@ -1594,7 +1594,7 @@ The static discovery implementation also checks that the QoS of a data reader or
 
      - See :ref:`quality_of_service--lifespan`.
 
-     - See :ref:`DataWriter QoS <quality_of_service--reftable6>`.
+     -
 
    * - ``lifespan.duration.nanosec=[``
 
@@ -1602,19 +1602,19 @@ The static discovery implementation also checks that the QoS of a data reader or
 
      - See :ref:`quality_of_service--lifespan`.
 
-     - See :ref:`DataWriter QoS <quality_of_service--reftable6>`.
+     -
 
    * - ``ownership.kind=[SHARED|EXCLUSIVE]``
 
      - See :ref:`quality_of_service--ownership`.
 
-     - See :ref:`DataWriter QoS <quality_of_service--reftable6>`.
+     -
 
    * - ``ownership_strength.value=numeric``
 
      - See :ref:`quality_of_service--ownership-strength`.
 
-     - See :ref:`DataWriter QoS <quality_of_service--reftable6>`.
+     -
 
 .. _run_time_configuration--reftable15:
 
@@ -1633,7 +1633,7 @@ The static discovery implementation also checks that the QoS of a data reader or
 
      - See :ref:`quality_of_service--durability`.
 
-     - See :ref:`DataReader QoS <quality_of_service--reftable7>`.
+     -
 
    * - ``deadline.period.sec=[``
 
@@ -1641,7 +1641,7 @@ The static discovery implementation also checks that the QoS of a data reader or
 
      - See :ref:`quality_of_service--deadline`.
 
-     - See :ref:`DataReader QoS <quality_of_service--reftable7>`.
+     -
 
    * - ``deadline.period.nanosec=[``
 
@@ -1649,7 +1649,7 @@ The static discovery implementation also checks that the QoS of a data reader or
 
      - See :ref:`quality_of_service--deadline`.
 
-     - See :ref:`DataReader QoS <quality_of_service--reftable7>`.
+     -
 
    * - ``latency_budget.duration.sec=[``
 
@@ -1657,7 +1657,7 @@ The static discovery implementation also checks that the QoS of a data reader or
 
      - See :ref:`quality_of_service--latency-budget`.
 
-     - See :ref:`DataReader QoS <quality_of_service--reftable7>`.
+     -
 
    * - ``latency_budget.duration.nanosec=[``
 
@@ -1665,7 +1665,7 @@ The static discovery implementation also checks that the QoS of a data reader or
 
      - See :ref:`quality_of_service--latency-budget`.
 
-     - See :ref:`DataReader QoS <quality_of_service--reftable7>`.
+     -
 
    * - ``liveliness.kind=[``
 
@@ -1677,7 +1677,7 @@ The static discovery implementation also checks that the QoS of a data reader or
 
      - See :ref:`quality_of_service--liveliness`.
 
-     - See :ref:`DataReader QoS <quality_of_service--reftable7>`.
+     -
 
    * - ``liveliness.lease_duration.sec=[``
 
@@ -1685,7 +1685,7 @@ The static discovery implementation also checks that the QoS of a data reader or
 
      - See :ref:`quality_of_service--liveliness`.
 
-     - See :ref:`DataReader QoS <quality_of_service--reftable7>`.
+     -
 
    * - ``liveliness.lease_duration.nanosec=[``
 
@@ -1693,13 +1693,13 @@ The static discovery implementation also checks that the QoS of a data reader or
 
      - See :ref:`quality_of_service--liveliness`.
 
-     - See :ref:`DataReader QoS <quality_of_service--reftable7>`.
+     -
 
    * - ``reliability.kind=[BEST_EFFORT|RELIABILE]``
 
      - See :ref:`quality_of_service--reliability`.
 
-     - See :ref:`DataReader QoS <quality_of_service--reftable7>`.
+     -
 
    * - ``reliability.max_blocking_time.sec=[``
 
@@ -1707,7 +1707,7 @@ The static discovery implementation also checks that the QoS of a data reader or
 
      - See :ref:`quality_of_service--reliability`.
 
-     - See :ref:`DataReader QoS <quality_of_service--reftable7>`.
+     -
 
    * - ``reliability.max_blocking_time.nanosec=[``
 
@@ -1715,7 +1715,7 @@ The static discovery implementation also checks that the QoS of a data reader or
 
      - See :ref:`quality_of_service--reliability`.
 
-     - See :ref:`DataReader QoS <quality_of_service--reftable7>`.
+     -
 
    * - ``destination_order.kind=[``
 
@@ -1725,31 +1725,31 @@ The static discovery implementation also checks that the QoS of a data reader or
 
      - See :ref:`quality_of_service--destination-order`.
 
-     - See :ref:`DataReader QoS <quality_of_service--reftable7>`.
+     -
 
    * - ``history.kind=[KEEP_LAST|KEEP_ALL]``
 
      - See :ref:`quality_of_service--history`.
 
-     - See :ref:`DataReader QoS <quality_of_service--reftable7>`.
+     -
 
    * - ``history.depth=numeric``
 
      - See :ref:`quality_of_service--history`.
 
-     - See :ref:`DataReader QoS <quality_of_service--reftable7>`.
+     -
 
    * - ``resource_limits.max_samples=numeric``
 
      - See :ref:`quality_of_service--resource-limits`.
 
-     - See :ref:`DataReader QoS <quality_of_service--reftable7>`.
+     -
 
    * - ``resource_limits.max_instances=numeric``
 
      - See :ref:`quality_of_service--resource-limits`.
 
-     - See :ref:`DataReader QoS <quality_of_service--reftable7>`.
+     -
 
    * - ``resource_limits.max_samples_per_instance=``
 
@@ -1757,7 +1757,7 @@ The static discovery implementation also checks that the QoS of a data reader or
 
      - See :ref:`quality_of_service--resource-limits`.
 
-     - See :ref:`DataReader QoS <quality_of_service--reftable7>`.
+     -
 
    * - ``time_based_filter.minimum_separation.sec=[``
 
@@ -1765,7 +1765,7 @@ The static discovery implementation also checks that the QoS of a data reader or
 
      - See :ref:`quality_of_service--time-based-filter`.
 
-     - See :ref:`DataReader QoS <quality_of_service--reftable7>`.
+     -
 
    * - ``time_based_filter.minimum_separation.nanosec=[``
 
@@ -1773,7 +1773,7 @@ The static discovery implementation also checks that the QoS of a data reader or
 
      - See :ref:`quality_of_service--time-based-filter`.
 
-     - See :ref:`DataReader QoS <quality_of_service--reftable7>`.
+     -
 
    * - ``reader_data_lifecycle.``
        ``autopurge_nowriter_samples_delay.sec=[``
@@ -1782,7 +1782,7 @@ The static discovery implementation also checks that the QoS of a data reader or
 
      - See :ref:`quality_of_service--reader-data-lifecycle`.
 
-     - See :ref:`DataReader QoS <quality_of_service--reftable7>`.
+     -
 
    * - ``reader_data_lifecycle.``
        ``autopurge_nowriter_samples_delay.nanosec=[``
@@ -1791,7 +1791,7 @@ The static discovery implementation also checks that the QoS of a data reader or
 
      - See :ref:`quality_of_service--reader-data-lifecycle`.
 
-     - See :ref:`DataReader QoS <quality_of_service--reftable7>`.
+     -
 
    * - ``reader_data_lifecycle.``
        ``autopurge_dispose_samples_delay.sec=[``
@@ -1800,7 +1800,7 @@ The static discovery implementation also checks that the QoS of a data reader or
 
      - See :ref:`quality_of_service--reader-data-lifecycle`.
 
-     - See :ref:`DataReader QoS <quality_of_service--reftable7>`.
+     -
 
    * - ``reader_data_lifecycle.``
        ``autopurge_dispose_samples_delay.nanosec=[``
@@ -1809,7 +1809,7 @@ The static discovery implementation also checks that the QoS of a data reader or
 
      - See :ref:`quality_of_service--reader-data-lifecycle`.
 
-     - See :ref:`DataReader QoS <quality_of_service--reftable7>`.
+     -
 
 .. _run_time_configuration--reftable16:
 
@@ -1826,25 +1826,25 @@ The static discovery implementation also checks that the QoS of a data reader or
 
      - See :ref:`quality_of_service--presentation`.
 
-     - See :ref:`Publisher QoS <quality_of_service--publisher>`.
+     -
 
    * - ``presentation.coherent_access=[true|false]``
 
      - See :ref:`quality_of_service--presentation`.
 
-     - See :ref:`Publisher QoS <quality_of_service--publisher>`.
+     -
 
    * - ``presentation.ordered_access=[true|false]``
 
      - See :ref:`quality_of_service--presentation`.
 
-     - See :ref:`Publisher QoS <quality_of_service--publisher>`.
+     -
 
    * - ``partition.name=name0,name1,...``
 
      - See :ref:`quality_of_service--partition`.
 
-     - See :ref:`Publisher QoS <quality_of_service--publisher>`.
+     -
 
 .. _run_time_configuration--reftable17:
 
@@ -1861,25 +1861,25 @@ The static discovery implementation also checks that the QoS of a data reader or
 
      - See :ref:`quality_of_service--presentation`.
 
-     - See :ref:`Subscriber QoS <quality_of_service--reftable5>`.
+     -
 
    * - ``presentation.coherent_access=[true|false]``
 
      - See :ref:`quality_of_service--presentation`.
 
-     - See :ref:`Subscriber QoS <quality_of_service--reftable5>`.
+     -
 
    * - ``presentation.ordered_access=[true|false]``
 
      - See :ref:`quality_of_service--presentation`.
 
-     - See :ref:`Subscriber QoS <quality_of_service--reftable5>`.
+     -
 
    * - ``partition.name=name0,name1,...``
 
      - See :ref:`quality_of_service--partition`.
 
-     - See :ref:`Subscriber QoS <quality_of_service--reftable5>`.
+     -
 
 .. _run_time_configuration--reftable18:
 
@@ -1931,25 +1931,25 @@ The static discovery implementation also checks that the QoS of a data reader or
 
      - Refers to a ``[datawriterqos/*]`` section.
 
-     - See :ref:`DataWriter QoS <quality_of_service--reftable6>`.
+     -
 
    * - ``datareaderqos=name``
 
      - Refers to a ``[datareaderqos/*]`` section.
 
-     - See :ref:`DataReader QoS <quality_of_service--reftable7>`.
+     -
 
    * - ``publisherqos=name``
 
      - Refers to a ``[publisherqos/*]`` section.
 
-     - See :ref:`Publisher QoS <quality_of_service--publisher>`.
+     -
 
    * - ``subscriberqos=name``
 
      - Refers to a ``[subscriberqos/*]`` section.
 
-     - See :ref:`Subscriber QoS <quality_of_service--reftable5>`.
+     -
 
    * - ``config``
 
@@ -1981,7 +1981,7 @@ The basic goals of this design were to:
 
 * Support optimized transport development (such as collocated and shared memory transports - note that these are not currently implemented).
 
-* Integrate support for the ``RELIABILITY`` QoS policy with the underlying transport.
+* Integrate support for the :ref:`qos-reliability` policy with the underlying transport.
 
 * Whenever possible, avoid dependence on the ACE Service Configurator and its configuration files.
 

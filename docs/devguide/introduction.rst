@@ -178,9 +178,9 @@ Section 2 of the DDS specification defines five compliance points for a DDS impl
 OpenDDS complies with the entire DDS specification (including all optional profiles).
 This includes the implementation of all Quality of Service policies with the following notes:
 
-* RELIABILITY.kind = RELIABLE is supported by the RTPS_UDP transport, the TCP transport, or the IP Multicast transport (when configured as reliable).
+* :ref:`qos-reliability` ``RELIABLE_RELIABILITY_QOS`` is supported by the RTPS_UDP transport, the TCP transport, and the IP Multicast transport (when configured as reliable).
 
-* TRANSPORT_PRIORITY is not implemented as changeable.
+* :ref:`qos-transport-priority` is not implemented as changeable.
 
 Although version 1.5 of the DDS specification is not yet published, OpenDDS incorporates some changes planned for that version that are required for a robust implementation:
 
@@ -216,7 +216,7 @@ Items not implemented in OpenDDS:
 
    OpenDDS may still drop samples that aren't needed (due to content filtering) by any associated readers -- this is done above the transport layer
 
-#. :omgspec:`rtps:8.7.6 Coherent Sets` for ``PRESENTATION`` QoS
+#. :omgspec:`rtps:8.7.6 Coherent Sets` for :ref:`qos-presentation`
 
 #. :omgspec:`rtps:8.7.7 Directed Write`
 
@@ -224,7 +224,7 @@ Items not implemented in OpenDDS:
 
 #. :omgspec:`rtps:8.7.8 Property Lists`
 
-#. :omgspec:`rtps:8.7.9 Original Writer Info` for ``DURABLE`` data
+#. :omgspec:`rtps:8.7.9 Original Writer Info` for :ref:`qos-durability`
 
    This would only be used for transient and persistent durability, which are :omgspec:`not supported by the RTPS specification <rtps:8.7.2.2.1>`
 
