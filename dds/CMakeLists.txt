@@ -98,6 +98,7 @@ add_library(OpenDDS_Dcps
   DCPS/ThreadPool.cpp
   DCPS/ThreadStatusManager.cpp
   DCPS/TimeDuration.cpp
+  DCPS/TimeTypes.cpp
   DCPS/Time_Helper.cpp
   DCPS/TopicDescriptionImpl.cpp
   DCPS/TopicImpl.cpp

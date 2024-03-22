@@ -2743,7 +2743,7 @@ jobs:
     - name: configure OpenDDS
       run: |
         cd OpenDDS
-        ./configure --compiler=g++-11 --std=c++20 --no-inline --tests --rapidjson --ace=$GITHUB_WORKSPACE/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC
+        ./configure --compiler=g++-11 --std=c++20 --no-inline --tests --rapidjson --boottime --ace=$GITHUB_WORKSPACE/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC
     - name: check build configuration
       shell: bash
       run: |
@@ -13712,6 +13712,7 @@ jobs:
           -DBUILD_SHARED_LIBS=TRUE \
           -DCMAKE_BUILD_TYPE=Debug \
           -DOPENDDS_SECURITY=TRUE \
+          -DOPENDDS_MONOTONIC_USES_BOOTTIME=ON \
           -DOPENDDS_ACE_TAO_SRC=$GITHUB_WORKSPACE/OpenDDS/build/ACE_TAO \
           -DOPENDDS_MPC=$GITHUB_WORKSPACE/MPC \
           -DOPENDDS_BUILD_TESTS=TRUE \

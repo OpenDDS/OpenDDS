@@ -672,6 +672,16 @@ These are all the variables that are exclusive to building OpenDDS with CMake:
   See :ref:`cmake-running-tests` for how to run them.
   The default for this is ``TRUE``.
 
+.. cmake:var:: OPENDDS_MONOTONIC_USES_BOOTTIME
+  :no-contents-entry:
+
+  .. versionadded:: 3.28
+
+  OpenDDS uses monotonic clocks when scheduling timers and timed waits.
+  On some platforms, this uses CLOCK_MONOTONIC which does not increment when the system is suspended.
+  Enable this option to use CLOCK_BOOTTIME as the monotonic time source instead of CLOCK_MONOTONIC.
+  Default is ``OFF``
+
 Speeding up the build
 ---------------------
 
