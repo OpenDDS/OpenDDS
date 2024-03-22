@@ -758,18 +758,29 @@ EOF
       print "Added platform_macros for -std=$opts{std}\n" if $opts{'verbose'};
     }
     elsif ($opts{'compiler'} !~ /clang/) {
-      if ($version_string =~ /\(.*\) (\d+)\.\d+/ && $1 >= 6) {
+      $version_string =~ /\(.*\) (\d+)\.\d+/;
+      if ($1 >= 11) {
+        $opts{'std'} = 'gnu++17';
+        print "Detected GCC >= 11, default -std=gnu++17\n" if $opts{'verbose'};
+      }
+      elsif ($1 >= 6) {
         $opts{'std'} = 'gnu++14';
         print "Detected GCC >= 6, default -std=gnu++14\n" if $opts{'verbose'};
       }
     }
     elsif ($opts{'compiler'} =~ /clang/ && $version_string !~ /^Apple / &&
-           $version_string =~ /(\d+)\.(\d+)\.(\d+)/ && $1 > 6) {
+           $version_string =~ /(\d+)\.(\d+)\.(\d+)/) {
       # Apple's version of Clang doesn't default to c++11 or higher, users
       # can pass --std= to change the C++ standard version used.
-      # Other builds of Clang, if version 6 or newer, default to C++14 like GCC
-      $opts{'std'} = 'gnu++14';
-      print "Detected Clang >= 6, default -std=gnu++14\n" if $opts{'verbose'};
+      if ($1 >= 16) {
+        $opts{'std'} = 'gnu++17';
+        print "Detected Clang >= 16, default -std=gnu++17\n" if $opts{'verbose'};
+      }
+      elsif ($1 >= 6) {
+        # Non-Apple versions of Clang, if version 6 or newer, default to C++14 like GCC
+        $opts{'std'} = 'gnu++14';
+        print "Detected Clang >= 6, default -std=gnu++14\n" if $opts{'verbose'};
+      }
     }
 
     if ($opts{'std'} && $opts{'std'} =~ /(0x|11|1y|14|1z|17|2a|20|2b|23)$/) {
