@@ -129,7 +129,7 @@ TEST(OptionalTests, JsonValueWriterReader) {
   // EXPECT_TRUE(expected.bool_field() == got.bool_field());
   // EXPECT_TRUE(expected.bool_field() == got.bool_field());
   // EXPECT_TRUE(expected.bool_field() == got.bool_field());
-  
+
   //EXPECT_TRUE(false);
 }
 

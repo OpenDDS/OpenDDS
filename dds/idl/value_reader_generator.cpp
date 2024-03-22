@@ -149,7 +149,7 @@ namespace {
     generate_read("tmp", "", type, idx + "i", level);
 
     be_global->impl_ <<
-          indent << expression << accessor << " = std::move(tmp);\n";      
+          indent << expression << accessor << " = std::move(tmp);\n";
   }
 
   void generate_read(const std::string& expression, const std::string& accessor,
