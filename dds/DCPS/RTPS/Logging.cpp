@@ -9,6 +9,7 @@
 
 #include "BaseMessageUtils.h"
 #include "MessageTypes.h"
+#include "RtpsCoreTypeSupportImpl.h"
 
 #include <dds/DCPS/JsonValueWriter.h>
 

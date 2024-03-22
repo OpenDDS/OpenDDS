@@ -9,6 +9,7 @@
 #include <dds/DCPS/RTPS/GuidGenerator.h>
 #include <dds/DCPS/RTPS/MessageTypes.h>
 #include <dds/DCPS/RTPS/RtpsCoreTypeSupportImpl.h>
+#include <dds/DCPS/RTPS/RtpsSubmessageKindTypeSupportImpl.h>
 #include <dds/DCPS/RTPS/RtpsDiscovery.h>
 #include <dds/DCPS/RTPS/ParameterListConverter.h>
 #include <dds/DCPS/RTPS/Spdp.h>
@@ -181,17 +182,13 @@ struct TestParticipant: ACE_Event_Handler {
       if (smhdr.submessageId == DATA) {
         ok = recv_data(mp.serializer(), peer);
       } else {
-#ifdef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
-        ACE_DEBUG((LM_INFO, "Received submessage type: %u\n", unsigned(smhdr.submessageId)));
-#else
-        if (static_cast<size_t>(smhdr.submessageId) < gen_OpenDDS_RTPS_SubmessageKind_names_size) {
+        if (gen_OpenDDS_RTPS_SubmessageKind_helper->valid(smhdr.submessageId)) {
           ACE_DEBUG((LM_INFO, "Received submessage type: %C\n",
-                     gen_OpenDDS_RTPS_SubmessageKind_names[static_cast<size_t>(smhdr.submessageId)]));
+                     gen_OpenDDS_RTPS_SubmessageKind_helper->get_name(smhdr.submessageId)));
         } else {
           ACE_ERROR((LM_ERROR, "ERROR: Received unknown submessage type: %u\n",
                      unsigned(smhdr.submessageId)));
         }
-#endif
       }
 
       if (!ok || !mp.hasNextSubmessage()) {

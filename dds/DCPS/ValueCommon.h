@@ -15,12 +15,17 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-class EnumHelper {
+class OpenDDS_Dcps_Export EnumHelper {
 public:
   virtual ~EnumHelper() {}
+  virtual bool valid(const char* name) const = 0;
+  virtual bool valid(ACE_CDR::Long value) const = 0;
   virtual bool get_value(ACE_CDR::Long& value, const char* name) const = 0;
   virtual bool get_name(const char*& name, ACE_CDR::Long value) const = 0;
   virtual XTypes::TypeKind get_equivalent_int() const = 0;
+
+  ACE_CDR::Long get_value(const char* name) const;
+  const char* get_name(ACE_CDR::Long value) const;
 };
 
 class OpenDDS_Dcps_Export ListEnumHelper : public EnumHelper {
@@ -47,6 +52,8 @@ public:
     pairs_ = pairs;
   }
 
+  bool valid(const char* name) const;
+  bool valid(ACE_CDR::Long value) const;
   bool get_value(ACE_CDR::Long& value, const char* name) const;
   bool get_name(const char*& name, ACE_CDR::Long value) const;
 

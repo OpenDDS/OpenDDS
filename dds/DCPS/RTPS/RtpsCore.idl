@@ -16,6 +16,8 @@
 #include "dds/DdsSecurityParams.idl"
 #endif
 
+#include "RtpsSubmessageKind.idl"
+
 module OpenDDS {
   module RTPS {
 
@@ -535,9 +537,9 @@ module OpenDDS {
       unsigned short submessageLength; /* octetsToNextHeader */
     };
     // Valid constants for the submessageId field are the enumerators
-    // of the SubmessageKind enum in MessageTypes.h.
+    // of the SubmessageKind enum in RtpsSubmessageKind.idl.
     // The least-significant bit of "flags" is E, the endianness flag:
-    // pseudoenum E { BIG_ENDIAN = 0, LITTLE_ENDIAN = 1};
+    // pseudoenum E { BIG_ENDIAN = 0, LITTLE_ENDIAN = 1 };
 
     /* Type used to hold fragment numbers. */
     struct FragmentNumber_t {
@@ -766,63 +768,6 @@ module OpenDDS {
     struct SecuritySubmessage {
       SubmessageHeader smHeader;
       DDS::OctetSeq content;
-    };
-
-    enum SubmessageKind {
-      SUBMESSAGE_NONE,
-      PAD,            /* = 0x01, Pad */
-      RESERVED_2,
-      RESERVED_3,
-      RESERVED_4,
-      RESERVED_5,
-      ACKNACK,        /* = 0x06, AckNack */
-      HEARTBEAT,      /* = 0x07, Heartbeat */
-      GAP,            /* = 0x08, Gap */
-      INFO_TS,        /* = 0x09, InfoTimestamp */
-      RESERVED_10,
-      RESERVED_11,
-      INFO_SRC,       /* = 0x0c, InfoSource */
-      INFO_REPLY_IP4, /* = 0x0d, InfoReplyIp4 */
-      INFO_DST,       /* = 0x0e, InfoDestination */
-      INFO_REPLY,     /* = 0x0f, InfoReply */
-      RESERVED_16,
-      RESERVED_17,
-      NACK_FRAG,      /* = 0x12, NackFrag */
-      HEARTBEAT_FRAG, /* = 0x13, HeartbeatFrag */
-      RESERVED_20,
-      DATA,           /* = 0x15, Data */
-      DATA_FRAG,      /* = 0x16, DataFrag */
-      RESERVED_23,
-      RESERVED_24,
-      RESERVED_25,
-      RESERVED_26,
-      RESERVED_27,
-      RESERVED_28,
-      RESERVED_29,
-      RESERVED_30,
-      RESERVED_31,
-      RESERVED_32,
-      RESERVED_33,
-      RESERVED_34,
-      RESERVED_35,
-      RESERVED_36,
-      RESERVED_37,
-      RESERVED_38,
-      RESERVED_39,
-      RESERVED_40,
-      RESERVED_41,
-      RESERVED_42,
-      RESERVED_43,
-      RESERVED_44,
-      RESERVED_45,
-      RESERVED_46,
-      RESERVED_47,
-      SEC_BODY,  // SubmessageKinds 0x30-3f reserved for security
-      SEC_PREFIX,
-      SEC_POSTFIX,
-      SRTPS_PREFIX,
-      SRTPS_POSTFIX,
-      RESERVED_53_SECURITY
     };
 
     union Submessage switch (SubmessageKind) {

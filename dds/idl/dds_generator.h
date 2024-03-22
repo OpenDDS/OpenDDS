@@ -112,6 +112,9 @@ public:
     UTL_ScopedName* sn, const char* sep, EscapeContext cxt = EscapeContext_Normal);
   static std::string module_scope_helper(
     UTL_ScopedName* sn, const char* sep, EscapeContext cxt = EscapeContext_Normal);
+
+  static bool gen_enum_helper(AST_Enum* node, UTL_ScopedName* name,
+    const std::vector<AST_EnumVal*>& contents, const char* repoid);
 };
 
 class composite_generator : public dds_generator {

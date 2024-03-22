@@ -15,7 +15,7 @@
 #include "dds/DCPS/transport/framework/ReceivedDataSample.h"
 
 #include "dds/DCPS/RTPS/RtpsCoreTypeSupportImpl.h"
-#include "dds/DCPS/RTPS/BaseMessageTypes.h"
+#include "dds/DCPS/RTPS/RtpsSubmessageKindTypeSupportImpl.h"
 #include "dds/DCPS/RTPS/MessageTypes.h"
 #include "dds/DCPS/RTPS/BaseMessageUtils.h"
 #include "dds/DCPS/RTPS/GuidGenerator.h"
@@ -475,17 +475,13 @@ struct TestParticipant: ACE_Event_Handler {
         if (!recv_nackfrag(ser, peer)) return false;
         break;
       default:
-#ifdef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
-        ACE_DEBUG((LM_INFO, "Received submessage type: %u\n", unsigned(subm)));
-#else
-        if (static_cast<size_t>(subm) < gen_OpenDDS_RTPS_SubmessageKind_names_size) {
+        if (gen_OpenDDS_RTPS_SubmessageKind_helper->valid(subm)) {
           ACE_DEBUG((LM_INFO, "Received submessage type: %C\n",
-                     gen_OpenDDS_RTPS_SubmessageKind_names[static_cast<size_t>(subm)]));
+                     gen_OpenDDS_RTPS_SubmessageKind_helper->get_name(subm)));
         } else {
           ACE_ERROR((LM_ERROR, "ERROR: Received unknown submessage type: %u\n",
                      unsigned(subm)));
         }
-#endif
         SubmessageHeader smh;
         if (!(ser >> smh)) {
           ACE_ERROR((LM_ERROR, "ERROR: in handle_input() failed to deserialize "

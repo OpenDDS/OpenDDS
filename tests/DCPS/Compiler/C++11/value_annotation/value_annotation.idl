@@ -1,0 +1,21 @@
+enum TestValueAnnotation {
+  @value(99) NON_ZERO,
+  @value(1) ONE,
+  TWO,
+  @value(5) FIVE,
+  SIX,
+  @value(10) TEN
+};
+
+@final
+struct UsesAnnotatedEnum {
+  TestValueAnnotation tva;
+};
+
+@final
+union DiscByAnnotatedEnum switch (TestValueAnnotation) {
+case FIVE:
+  octet o;
+default:
+  short s;
+};

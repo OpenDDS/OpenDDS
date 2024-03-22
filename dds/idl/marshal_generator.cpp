@@ -158,23 +158,19 @@ namespace {
 } /* namespace */
 
 bool marshal_generator::gen_enum(AST_Enum*, UTL_ScopedName* name,
-  const std::vector<AST_EnumVal*>& vals, const char*)
+  const std::vector<AST_EnumVal*>&, const char*)
 {
   NamespaceGuard ng;
   be_global->add_include("dds/DCPS/Serializer.h");
-  string cxx = scoped(name); // name as a C++ class
+  const string cxx = scoped(name), // name as a C++ class
+    underscores = scoped_helper(name, "_");
   {
     Function insertion("operator<<", "bool");
     insertion.addArg("strm", "Serializer&");
     insertion.addArg("enumval", "const " + cxx + "&");
     insertion.endArgs();
     be_global->impl_ <<
-      "    if (CORBA::ULong(enumval) >= " << vals.size() << ") {\n"
-      "      ACE_DEBUG((LM_DEBUG, ACE_TEXT(\"(%P|%t) Invalid enumerated value for " << cxx << " (%u)\\n\"), enumval));\n"
-      "      return false;\n"
-      "    }\n";
-    be_global->impl_ <<
-      "  return strm << static_cast<CORBA::ULong>(enumval);\n";
+      "  return strm << static_cast<ACE_CDR::Long>(enumval);\n";
   }
   {
     Function extraction("operator>>", "bool");
@@ -182,10 +178,9 @@ bool marshal_generator::gen_enum(AST_Enum*, UTL_ScopedName* name,
     extraction.addArg("enumval", cxx + "&");
     extraction.endArgs();
     be_global->impl_ <<
-      "  CORBA::ULong temp = 0;\n"
-      "  if (strm >> temp) {\n";
-    be_global->impl_ <<
-      "    if (temp >= " << vals.size() << ") {\n"
+      "  ACE_CDR::Long temp = 0;\n"
+      "  if (strm >> temp) {\n"
+      "    if (! ::OpenDDS::DCPS::gen_" << underscores << "_helper->valid(temp)) {\n"
       "      strm.set_construction_status(Serializer::ElementConstructionFailure);\n"
       "      return false;\n"
       "    }\n";
@@ -3140,17 +3135,21 @@ namespace {
 } // anonymous namespace
 
 
-void marshal_generator::generate_dheader_code(const std::string& code, bool dheader_required, bool is_ser_func)
+void marshal_generator::generate_dheader_code(const std::string& code, bool dheader_required,
+                                              bool is_ser_func, const char* indent)
 {
+  const std::string indents(indent);
   //DHeader appears on aggregated types that are mutable or appendable in XCDR2
   //DHeader also appears on ALL sequences and arrays of non-primitives
   if (dheader_required) {
     if (is_ser_func) {
-      be_global->impl_ << "  size_t total_size = 0;\n";
+      be_global->impl_ <<
+        indents << "size_t total_size = 0;\n";
     }
-    be_global->impl_ << "  if (encoding.xcdr_version() == Encoding::XCDR_VERSION_2) {\n"
+    be_global->impl_ <<
+      indents << "if (encoding.xcdr_version() == Encoding::XCDR_VERSION_2) {\n"
       << code <<
-      "  }\n";
+      indents << "}\n";
   }
 }
 
@@ -3337,9 +3336,9 @@ marshal_generator::gen_field_getValueFromSerialized(AST_Structure* node, const s
     "    const Encoding& encoding = strm.encoding();\n"
     "    ACE_UNUSED_ARG(encoding);\n";
   marshal_generator::generate_dheader_code(
-    "    if (!strm.read_delimiter(total_size)) {\n"
-    "      throw std::runtime_error(\"Unable to reader delimiter in getValue\");\n"
-    "    }\n", not_final);
+    "      if (!strm.read_delimiter(total_size)) {\n"
+    "        throw std::runtime_error(\"Unable to reader delimiter in getValue\");\n"
+    "      }\n", not_final, true, "    ");
   be_global->impl_ <<
     "    std::string base_field = field;\n"
     "    size_t index = base_field.find('.');\n"
@@ -3390,6 +3389,15 @@ marshal_generator::gen_field_getValueFromSerialized(AST_Structure* node, const s
         const std::string cxx_type = to_cxx_type(field_type, size);
         const std::string val = (fld_cls & CL_STRING) ? (use_cxx11 ? "val" : "val.out()")
           : getWrapper("val", field_type, WD_INPUT);
+        std::string boundsCheck, transformPrefix, transformSuffix;
+        if (fld_cls & CL_ENUM) {
+          const std::string enumName = dds_generator::scoped_helper(field_type->name(), "_");
+          boundsCheck = "            if (!gen_" + enumName + "_helper->valid(val)) {\n"
+                        "              throw std::runtime_error(\"Enum value invalid\");\n"
+                        "            }\n";
+          transformPrefix = "gen_" + enumName + "_helper->get_name(";
+          transformSuffix = ")";
+        }
         cases <<
           "          if (field_id == member_id) {\n"
           "            " << cxx_type << " val;\n" <<
@@ -3463,6 +3471,15 @@ marshal_generator::gen_field_getValueFromSerialized(AST_Structure* node, const s
       const std::string cxx_type = to_cxx_type(field_type, size);
       const std::string val = (fld_cls & CL_STRING) ? (use_cxx11 ? "val" : "val.out()")
           : getWrapper("val", field_type, WD_INPUT);
+      std::string boundsCheck, transformPrefix, transformSuffix;
+      if (fld_cls & CL_ENUM) {
+        const std::string enumName = dds_generator::scoped_helper(field_type->name(), "_");
+        boundsCheck = "      if (!gen_" + enumName + "_helper->valid(val)) {\n"
+                      "        throw std::runtime_error(\"Enum value invalid\");\n"
+                      "      }\n";
+        transformPrefix = "gen_" + enumName + "_helper->get_name(";
+        transformSuffix = ")";
+      }
       expr +=
         "    if (base_field == \"" + field_name + "\") {\n"
         "      " + cxx_type + " val;\n"
@@ -3851,8 +3868,11 @@ bool marshal_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
     if (disc_cls & CL_ENUM) {
       AST_Enum* enu = dynamic_cast<AST_Enum*>(disc_type);
       UTL_ScopeActiveIterator i(enu, UTL_Scope::IK_decls);
-      AST_EnumVal *item = dynamic_cast<AST_EnumVal*>(i.item());
+      AST_EnumVal* item = dynamic_cast<AST_EnumVal*>(i.item());
       default_enum_val = item->constant_value()->ev()->u.eval;
+      // This doesn't look at @value annotations since it's only needed to find
+      // a matching branch label below -- the integer value of the enumerator
+      // isn't used in generated code.
     }
     bool found = false;
     for (std::vector<AST_UnionBranch*>::const_iterator itr = branches.begin(); itr < branches.end() && !found; ++itr) {
@@ -3860,7 +3880,7 @@ bool marshal_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
       for (unsigned i = 0; i < branch->label_list_length(); ++i) {
         AST_UnionLabel* ul = branch->label(i);
         if (ul->label_kind() != AST_UnionLabel::UL_default) {
-          AST_Expression::AST_ExprValue* ev = branch->label(i)->label_val()->ev();
+          AST_Expression::AST_ExprValue* ev = ul->label_val()->ev();
           if ((ev->et == AST_Expression::EV_enum && ev->u.eval == default_enum_val) ||
 #if OPENDDS_HAS_EXPLICIT_INTS
               (ev->et == AST_Expression::EV_uint8 && ev->u.uint8val == 0) ||
@@ -3878,8 +3898,7 @@ bool marshal_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
               (ev->et == AST_Expression::EV_char && ev->u.cval == 0) ||
               (ev->et == AST_Expression::EV_wchar && ev->u.wcval == 0) ||
               (ev->et == AST_Expression::EV_octet && ev->u.oval == 0) ||
-              (ev->et == AST_Expression::EV_bool && ev->u.bval == 0))
-          {
+              (ev->et == AST_Expression::EV_bool && ev->u.bval == 0)) {
             AST_Type* br = resolveActualType(branch->field_type());
             Classification br_cls = classify(br);
             if (br_cls & (CL_SEQUENCE | CL_ARRAY)) {

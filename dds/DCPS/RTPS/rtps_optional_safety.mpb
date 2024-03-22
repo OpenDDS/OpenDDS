@@ -1,6 +1,6 @@
-feature(no_opendds_safety_profile) : dcps_ts_defaults, dds_versioning_idl_defaults {
-  idlflags += -Wb,export_macro=OpenDDS_Rtps_Export -Wb,export_include=rtps_export.h -SS
-  dcps_ts_flags += -Wb,export_macro=OpenDDS_Rtps_Export -Wb,export_include=rtps_export.h -SI
+feature(no_opendds_safety_profile): dds_versioning_idl_defaults {
+  idlflags += -Wb,export_macro=OpenDDS_Rtps_Export -Wb,export_include=rtps_export.h -SS -Scdr
+  dcps_ts_flags += -Wb,export_macro=OpenDDS_Rtps_Export -Wb,export_include=rtps_export.h -SI -Sx -St
 
   IDL_Files {
     RtpsCore.idl
@@ -14,8 +14,8 @@ feature(no_opendds_safety_profile) : dcps_ts_defaults, dds_versioning_idl_defaul
   }
 }
 
-feature(!no_opendds_safety_profile) : dcps_ts_defaults, dds_versioning_idl_defaults {
-  dcps_ts_flags += -Wb,export_macro=OpenDDS_Rtps_Export -Wb,export_include=rtps_export.h -SI -Sx -Lspcpp
+feature(!no_opendds_safety_profile): dds_versioning_idl_defaults {
+  dcps_ts_flags += -Wb,export_macro=OpenDDS_Rtps_Export -Wb,export_include=rtps_export.h -SI -Sx -Sv -Lspcpp
 
   TypeSupport_Files {
     RtpsCore.idl
