@@ -200,6 +200,7 @@ void postprocess(const char* fn, ostringstream& content,
       if (be_global->language_mapping() == BE_GlobalData::LANGMAP_FACE_CXX ||
           be_global->language_mapping() == BE_GlobalData::LANGMAP_SP_CXX) {
         out <<
+          "#include <dds/DCPS/Definitions.h>\n\n"
           "#include <tao/orbconf.h>\n"
           "#include <tao/Basic_Types_IDLv4.h>\n"
           "TAO_BEGIN_VERSIONED_NAMESPACE_DECL\n"

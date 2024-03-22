@@ -208,7 +208,7 @@ struct GeneratorBase
       return "";
     }
 
-    switch (the_union->udisc_type ())
+    switch (the_union->udisc_type())
       {
 #if OPENDDS_HAS_EXPLICIT_INTS
       case AST_Expression::EV_int8:
@@ -1931,21 +1931,29 @@ bool langmap_generator::gen_enum(AST_Enum*, UTL_ScopedName* name,
                                  const std::vector<AST_EnumVal*>& contents,
                                  const char*)
 {
-  const ScopedNamespaceGuard namespaces(name, be_global->lang_header_);
-  const char* const nm = name->last_component()->get_string();
-  const char* scoped_enum = generator_->scoped_enum() ? "class " : "";
-  const std::string enum_base = generator_->enum_base();
-  be_global->lang_header_ <<
-    "enum " << scoped_enum << nm << enum_base << " {\n";
-  for (size_t i = 0; i < contents.size(); ++i) {
+  be_global->lang_header_ << be_global->versioning_begin() << "\n";
+  {
+    const ScopedNamespaceGuard namespaces(name, be_global->lang_header_);
+    const char* const nm = name->last_component()->get_string();
+    const char* scoped_enum = generator_->scoped_enum() ? "class " : "";
+    const std::string enum_base = generator_->enum_base();
     be_global->lang_header_ <<
-      "  " << contents[i]->local_name()->get_string()
-      << ((i < contents.size() - 1) ? ",\n" : "\n");
+      "enum " << scoped_enum << nm << enum_base << " {\n";
+    for (size_t i = 0; i < contents.size(); ++i) {
+      be_global->lang_header_ <<
+        "  " << contents[i]->local_name()->get_string();
+      ACE_INT32 value = 0;
+      if (be_global->value(contents[i], value)) {
+        be_global->lang_header_ << " = " << value;
+      }
+      be_global->lang_header_  << ((i < contents.size() - 1) ? ",\n" : "\n");
+    }
+    be_global->lang_header_ <<
+      "};\n\n";
+    generator_->gen_simple_out(nm);
+    gen_typecode(name);
   }
-  be_global->lang_header_ <<
-    "};\n\n";
-  generator_->gen_simple_out(nm);
-  gen_typecode(name);
+  be_global->lang_header_ << be_global->versioning_end() << "\n";
   return true;
 }
 

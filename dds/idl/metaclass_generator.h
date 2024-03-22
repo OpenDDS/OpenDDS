@@ -16,9 +16,6 @@ public:
     : first_struct_(true)
   {}
 
-  bool gen_enum(AST_Enum* node, UTL_ScopedName* name,
-                const std::vector<AST_EnumVal*>& contents, const char* repoid);
-
   bool gen_struct(AST_Structure* node, UTL_ScopedName* name,
                   const std::vector<AST_Field*>& fields,
                   AST_Type::SIZE_TYPE size, const char* repoid);

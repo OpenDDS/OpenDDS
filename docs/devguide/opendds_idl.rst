@@ -269,7 +269,7 @@ Unlike when using the classic mapping, ``Foo.idl`` is not processed by ``tao_idl
   * Bounded strings and sequences are supported, but bounds checks are not currently enforced.
     Due to this limitation, distinct types are not used for bounded instantiations.
 
-* annotations -- see :ref:`getting_started--defining-data-types-with-idl`
+* annotations -- see :ref:`getting_started--defining-data-types-with-idl` and :ref:`xtypes--idl-annotations`
 
 * ``#include``\s of IDL files that are also used with the IDL-to-C++11 mapping
 

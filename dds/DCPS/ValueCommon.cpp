@@ -8,10 +8,44 @@
 #include "ValueCommon.h"
 #include "debug.h"
 
+#include <cstring>
+
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
 namespace DCPS {
+
+ACE_CDR::Long EnumHelper::get_value(const char* name) const
+{
+  ACE_CDR::Long value;
+  return get_value(value, name) ? value : 0;
+}
+
+const char* EnumHelper::get_name(ACE_CDR::Long value) const
+{
+  const char* name;
+  return get_name(name, value) ? name : 0;
+}
+
+bool ListEnumHelper::valid(const char* name) const
+{
+  for (OPENDDS_VECTOR(Pair)::const_iterator it = pairs_.begin(); it != pairs_.end(); ++it) {
+    if (std::strcmp(it->name, name) == 0) {
+      return true;
+    }
+  }
+  return false;
+}
+
+bool ListEnumHelper::valid(ACE_CDR::Long value) const
+{
+  for (OPENDDS_VECTOR(Pair)::const_iterator it = pairs_.begin(); it != pairs_.end(); ++it) {
+    if (it->value == value) {
+      return true;
+    }
+  }
+  return false;
+}
 
 bool ListEnumHelper::get_value(ACE_CDR::Long& value, const char* name) const
 {
