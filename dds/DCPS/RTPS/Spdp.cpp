@@ -2761,7 +2761,7 @@ Spdp::SpdpTransport::write_i(WriteFlags flags)
   DCPS::Serializer ser(&wbuff_, encoding_plain_native);
   DCPS::EncapsulationHeader encap(ser.encoding(), DCPS::MUTABLE);
   if (!(ser << hdr_)) {
-    if (DCPS::DCPS_debug_level > 0) {
+    if (log_level >= LogLevel::Error) {
       ACE_ERROR((LM_ERROR,
         ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::write_i: ")
         ACE_TEXT("failed to serialize RTPS header for SPDP\n")));
@@ -2772,7 +2772,7 @@ Spdp::SpdpTransport::write_i(WriteFlags flags)
   // follow the RTPS Message Header.  No other submessages should be added
   // before it.  This enables filtering based on a fixed offset.
   if (user_tag_.smHeader.submessageId && !(ser << user_tag_)) {
-    if (DCPS::DCPS_debug_level > 0) {
+    if (log_level >= LogLevel::Error) {
       ACE_ERROR((LM_ERROR,
         ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::write_i: ")
         ACE_TEXT("failed to serialize user tag for SPDP\n")));
@@ -2780,7 +2780,7 @@ Spdp::SpdpTransport::write_i(WriteFlags flags)
     return;
   }
   if (!(ser << data_) || !(ser << encap) || !(ser << plist)) {
-    if (DCPS::DCPS_debug_level > 0) {
+    if (log_level >= LogLevel::Error) {
       ACE_ERROR((LM_ERROR,
         ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::write_i: ")
         ACE_TEXT("failed to serialize data submessage for SPDP\n")));
