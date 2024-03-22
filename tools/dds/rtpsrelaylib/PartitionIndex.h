@@ -35,7 +35,7 @@ public:
       if (iter == node->children_.end()) {
         NodePtr child(new TrieNode());
         node->children_[atom] = child;
-        node = child;
+        node = std::move(child);
       } else {
         node = iter->second;
       }
@@ -46,7 +46,7 @@ public:
 
   static void remove(NodePtr node, const Name& name, const typename T::value_type& guid)
   {
-    remove(node, name.begin(), name.end(), guid);
+    remove(std::move(node), name.begin(), name.end(), guid);
   }
 
   bool empty() const
@@ -57,9 +57,9 @@ public:
   static void lookup(NodePtr node, const Name& name, T& guids)
   {
     if (name.is_literal()) {
-      lookup_literal(node, name.begin(), name.end(), false, guids);
+      lookup_literal(std::move(node), name.begin(), name.end(), false, guids);
     } else {
-      lookup_pattern(node, name.begin(), name.end(), guids);
+      lookup_pattern(std::move(node), name.begin(), name.end(), guids);
     }
   }
 
@@ -181,7 +181,7 @@ private:
         }
       }
       // Glob matches no characters.
-      lookup_pattern(node, std::next(begin), end, guids);
+      lookup_pattern(std::move(node), std::next(begin), end, guids);
       break;
     }
   }

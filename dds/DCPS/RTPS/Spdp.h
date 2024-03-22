@@ -558,7 +558,7 @@ private:
     bool network_is_unreachable_;
     bool ice_endpoint_added_;
 
-    DCPS::MonotonicTimePoint last_harvest;
+    DCPS::MonotonicTimePoint last_thread_status_harvest_;
     DCPS::ConfigReader_rch config_reader_;
     void on_data_available(DCPS::ConfigReader_rch reader);
   };

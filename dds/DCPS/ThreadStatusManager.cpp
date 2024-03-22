@@ -25,36 +25,30 @@ void ThreadStatusManager::Thread::update(const MonotonicTimePoint& m_now,
   timestamp_ = s_now;
 
   if (nested) {
-    switch(next_status) {
-    case ThreadStatus_Active:
-      ++nesting_depth_;
-      break;
-    case ThreadStatus_Idle:
-      --nesting_depth_;
-      break;
-    }
+    nesting_depth_ += (next_status == ThreadStatus_Active) ? 1 : -1;
   }
 
   if (!nested ||
       (next_status == ThreadStatus_Active && nesting_depth_ == 1) ||
       (next_status == ThreadStatus_Idle && nesting_depth_ == 0)) {
-    if (bucket_[current_bucket_].active_time + bucket_[current_bucket_].idle_time > bucket_limit) {
+    if (buckets_[current_bucket_].total_time() > bucket_limit) {
       current_bucket_ = (current_bucket_ + 1) % bucket_count;
-      total_.active_time -= bucket_[current_bucket_].active_time;
-      bucket_[current_bucket_].active_time = 0;
-      total_.idle_time -= bucket_[current_bucket_].idle_time;
-      bucket_[current_bucket_].idle_time = 0;
+      Bucket& current = buckets_[current_bucket_];
+      total_.active_time -= current.active_time;
+      current.active_time = 0;
+      total_.idle_time -= current.idle_time;
+      current.idle_time = 0;
     }
 
     const TimeDuration t = m_now - last_update_;
 
     switch (status_) {
     case ThreadStatus_Active:
-      bucket_[current_bucket_].active_time += t;
+      buckets_[current_bucket_].active_time += t;
       total_.active_time += t;
       break;
     case ThreadStatus_Idle:
-      bucket_[current_bucket_].idle_time += t;
+      buckets_[current_bucket_].idle_time += t;
       total_.idle_time += t;
       break;
     }
@@ -68,7 +62,7 @@ double ThreadStatusManager::Thread::utilization(const MonotonicTimePoint& now) c
 {
   const TimeDuration active_bonus = (now > last_update_ && status_ == ThreadStatus_Active) ? (now - last_update_) : TimeDuration::zero_value;
   const TimeDuration idle_bonus = (now > last_update_ && status_ == ThreadStatus_Idle) ? (now - last_update_) : TimeDuration::zero_value;
-  const TimeDuration denom = total_.active_time + active_bonus + total_.idle_time + idle_bonus;
+  const TimeDuration denom = total_.total_time() + active_bonus + idle_bonus;
 
   if (!denom.is_zero()) {
     return (total_.active_time + active_bonus) / denom;

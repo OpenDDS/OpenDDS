@@ -261,7 +261,6 @@ process_section(ConfigStoreImpl& config_store,
                 const String& key_prefix,
                 ACE_Configuration_Heap& config,
                 const ACE_Configuration_Section_Key& base,
-                const String& filename,
                 bool allow_overwrite);
 
 } // namespace DCPS

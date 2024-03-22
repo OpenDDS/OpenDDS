@@ -612,7 +612,10 @@ my %all_checks = (
     message => [
       'Whitespace before a newline in a string'
     ],
-    path_matches_all_of => ['source_code'],
+    path_matches_all_of => [
+      'source_code',
+      '!cmake_file', # CMake requires trailing whitespace for preformatted messages
+    ],
     line_matches => qr/".*(?<!\s)(\s+)\\n.*"/,
     strip_fix => 1,
   },

@@ -10,6 +10,7 @@ import org.omg.CORBA.SystemException;
 
 import OpenDDS.DCPS.TheServiceParticipant;
 import OpenDDS.DCPS.TheParticipantFactory;
+import OpenDDS.DCPS.ConfigStore;
 
 import OpenDDS.DCPS.transport.TheTransportRegistry;
 import OpenDDS.DCPS.transport.TransportConfig;
@@ -34,6 +35,7 @@ public class TransportConfigTest {
     public static void main(String[] args) throws Exception {
         setUp(args);
 
+        testConfigStore();
         testModifyTransportFromFileTCP();
         testCreateNewTransportUdp();
         testCreateNewTransportMulticast();
@@ -42,6 +44,14 @@ public class TransportConfigTest {
         tearDown();
     }
 
+    protected static void testConfigStore() throws Exception {
+        ConfigStore cs = TheServiceParticipant.config_store();
+        assert cs.get_string("TRANSPORT_TCP1_TRANSPORT_TYPE", "").equals("tcp");
+        assert cs.get_uint32("TRANSPORT_TCP1_MAX_SAMPLES_PER_PACKET", 0) == 5;
+        assert cs.get_uint32("TRANSPORT_TCP1_CONN_RETRY_ATTEMPTS", 0) == 42;
+        cs.set_string("MY_KEY", "value");
+        assert cs.get_string("MY_KEY", "").equals("value");
+    }
 
     protected static void testModifyTransportFromFileTCP() throws Exception {
         final String ID = "tcp1"; //matches .ini file

@@ -4445,8 +4445,8 @@ void Spdp::SpdpTransport::thread_status_task(const DCPS::MonotonicTimePoint& now
   typedef DCPS::ThreadStatusManager::List List;
   List running;
   List removed;
-  TheServiceParticipant->get_thread_status_manager().harvest(last_harvest, running, removed);
-  last_harvest = now;
+  TheServiceParticipant->get_thread_status_manager().harvest(last_thread_status_harvest_, running, removed);
+  last_thread_status_harvest_ = now;
   for (List::const_iterator i = removed.begin(); i != removed.end(); ++i) {
     DCPS::InternalThreadBuiltinTopicData data;
     data.thread_id = i->bit_key().c_str();

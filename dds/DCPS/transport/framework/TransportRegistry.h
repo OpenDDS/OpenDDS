@@ -81,6 +81,9 @@ public:
   void bind_config(const OPENDDS_STRING& name, DDS::Entity_ptr entity);
   void bind_config(const TransportConfig_rch& cfg, DDS::Entity_ptr entity);
 
+  void add_config_alias(const String& key,
+                        const String& value);
+
   /// SPI (Service Provider Interface) for specific transport types:
   /// This function is called as the concrete transport library is
   /// loaded.  The concrete transport library creates a concrete
@@ -94,7 +97,7 @@ public:
   /// time. This function iterates each section in the configuration
   /// file, and creates TransportInst and TransportConfig objects and
   /// adds them to the registry.
-  int load_transport_configuration(const String& file_name);
+  int load_transport_configuration();
 
   /// For internal use by OpenDDS DCPS layer:
   /// If the default config is empty when it's about to be used, allow the
@@ -117,6 +120,7 @@ private:
   ~TransportRegistry();
 
   typedef OPENDDS_MAP(OPENDDS_STRING, TransportType_rch) TypeMap;
+  typedef OPENDDS_MAP(OPENDDS_STRING, OPENDDS_STRING) AliasMap;
   typedef OPENDDS_MAP(OPENDDS_STRING, TransportConfig_rch) ConfigMap;
   typedef OPENDDS_MAP(OPENDDS_STRING, TransportInst_rch) InstMap;
   typedef OPENDDS_MAP(OPENDDS_STRING, OPENDDS_STRING) LibDirectiveMap;
@@ -126,6 +130,7 @@ private:
   typedef ACE_Guard<LockType> GuardType;
 
   TypeMap type_map_;
+  AliasMap alias_map_;
   ConfigMap config_map_;
   InstMap inst_map_;
   LibDirectiveMap lib_directive_map_;

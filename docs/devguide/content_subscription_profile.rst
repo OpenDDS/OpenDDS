@@ -69,7 +69,7 @@ This data reader is functionally equivalent to a normal data reader except that 
 
 Filter expressions are first evaluated at the publisher so that data samples which would be ignored by the subscriber can be dropped before even getting to the transport.
 This feature can be turned off with ``-DCPSPublisherContentFilter 0`` or the equivalent setting in the ``[common]`` section of the configuration file.
-The behavior of non-default ``DEADLINE`` or ``LIVELINESS`` QoS policies may be affected by this policy.
+The behavior of non-default :ref:`qos-deadline` or :ref:`qos-liveliness` policies may be affected by this policy.
 Special consideration must be given to how the "missing" samples impact the QoS behavior, see the document in :ghfile:`docs/design/CONTENT_SUBSCRIPTION`.
 
 .. note:: RTPS_UDP transport does not always do Writer-side filtering.

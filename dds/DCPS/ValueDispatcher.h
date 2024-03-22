@@ -22,7 +22,7 @@ struct OpenDDS_Dcps_Export ValueDispatcher {
   virtual void delete_value(void* data) const = 0;
 
   virtual bool read(ValueReader& value_reader, void* data) const = 0;
-  virtual void write(ValueWriter& value_writer, const void* data) const = 0;
+  virtual bool write(ValueWriter& value_writer, const void* data) const = 0;
 
   virtual DDS::InstanceHandle_t register_instance_helper(DDS::DataWriter* dw, const void* data) const = 0;
   virtual DDS::ReturnCode_t write_helper(DDS::DataWriter* dw, const void* data, DDS::InstanceHandle_t inst) const = 0;
@@ -50,9 +50,9 @@ struct ValueDispatcher_T : public virtual ValueDispatcher {
     return vread(value_reader, *static_cast<T*>(data));
   }
 
-  virtual void write(ValueWriter& value_writer, const void* data) const
+  virtual bool write(ValueWriter& value_writer, const void* data) const
   {
-    vwrite(value_writer, *static_cast<const T*>(data));
+    return vwrite(value_writer, *static_cast<const T*>(data));
   }
 
   typedef typename OpenDDS::DCPS::DDSTraits<T> TraitsType;

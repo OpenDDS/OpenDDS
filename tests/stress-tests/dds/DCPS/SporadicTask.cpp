@@ -57,7 +57,7 @@ TEST(dds_DCPS_SporadicTask, TimingChecker)
   TimeSource time_source;
   ThreadStatusManager tsm;
   ReactorTask reactor_task(false);
-  reactor_task.open_reactor_task(0, &tsm);
+  reactor_task.open_reactor_task(&tsm);
 
   // Note: This test is modeled directly on the MultiTask stress test, which has a "fallback" timer
   // Since SporadicTask doesn't have this, we expect the number of total executions to be different

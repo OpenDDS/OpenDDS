@@ -387,7 +387,7 @@ CORBA::ULong VerticalHandler::process_message(const ACE_INET_Addr& remote_addres
           response.append_attribute(OpenDDS::STUN::make_mapped_address(remote_address));
           response.append_attribute(OpenDDS::STUN::make_xor_mapped_address(remote_address));
           response.append_attribute(OpenDDS::STUN::make_fingerprint());
-          bytes_sent = send(remote_address, response, now);
+          bytes_sent = send(remote_address, std::move(response), now);
         } else if (message.class_ == OpenDDS::STUN::INDICATION) {
           // Do nothing.
         } else {
