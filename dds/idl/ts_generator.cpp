@@ -156,14 +156,12 @@ bool ts_generator::generate_ts(AST_Decl* node, UTL_ScopedName* name)
   replaceAll(idl, replacements);
   be_global->idl_ << idl;
 
-  be_global->header_ << be_global->versioning_begin() << "\n";
   {
     ScopedNamespaceGuard hGuard(name, be_global->header_);
 
     be_global->header_ <<
       "class " << ts_short_name << "TypeSupportImpl;\n";
   }
-  be_global->header_ << be_global->versioning_end() << "\n";
 
   const std::string unescaped_name =
     dds_generator::scoped_helper(name, "::", EscapeContext_StripEscapes);
@@ -190,9 +188,9 @@ bool ts_generator::generate_ts(AST_Decl* node, UTL_ScopedName* name)
     "} // namespace OpenDDS\n"
     "OPENDDS_END_VERSIONED_NAMESPACE_DECL\n\n";
 
-  be_global->header_ << be_global->versioning_begin() << "\n";
   {
     ScopedNamespaceGuard hGuard(name, be_global->header_);
+    ScopedNamespaceGuard cppGuard(name, be_global->impl_);
 
     be_global->header_ <<
       "class " << be_global->export_macro() << " " << ts_short_name << "TypeSupportImpl\n"
@@ -237,12 +235,6 @@ bool ts_generator::generate_ts(AST_Decl* node, UTL_ScopedName* name)
       "\n"
       "  static " << ts_short_name << "TypeSupport::_ptr_type _narrow(CORBA::Object_ptr obj);\n"
       "};\n";
-  }
-  be_global->header_ << be_global->versioning_end() << "\n";
-
-  be_global->impl_ << be_global->versioning_begin() << "\n";
-  {
-    ScopedNamespaceGuard cppGuard(name, be_global->impl_);
     be_global->impl_ <<
       "::DDS::DataWriter_ptr " << ts_short_name << "TypeSupportImpl::create_datawriter()\n"
       "{\n"
@@ -411,7 +403,6 @@ bool ts_generator::generate_ts(AST_Decl* node, UTL_ScopedName* name)
       "  return TypeSupportType::_narrow(obj);\n"
       "}\n";
   }
-  be_global->impl_ << be_global->versioning_end() << "\n";
 
   if (be_global->face_ts()) {
     if (node->node_type() == AST_Decl::NT_struct) {
@@ -433,7 +424,7 @@ bool ts_generator::gen_struct(AST_Structure* node, UTL_ScopedName* name,
 }
 
 bool ts_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
-  const std::vector<AST_UnionBranch*>&, AST_Type*, const char*)
+  const std::vector<AST_UnionBranch*>& branches, AST_Type* discriminator, const char*)
 {
   return generate_ts(node, name);
 }

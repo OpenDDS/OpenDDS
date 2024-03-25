@@ -199,10 +199,14 @@ struct ScopedNamespaceGuard  {
   ScopedNamespaceGuard(UTL_ScopedName* name, std::ostream& os,
                        const char* keyword = "namespace")
     : os_(os)
-    , semi_()
     , n_(0)
   {
     const bool idl = !std::strcmp(keyword, "module");
+    const ACE_CString vn_begin = be_global->versioning_begin();
+    if (!idl && !vn_begin.empty()) {
+      os_ << vn_begin << '\n';
+      suffix_ = (be_global->versioning_end() + '\n').c_str();
+    }
     const EscapeContext ec = idl ? EscapeContext_ForGenIdl : EscapeContext_Normal;
     for (n_ = 0; name->tail();
          name = static_cast<UTL_ScopedName*>(name->tail())) {
@@ -217,11 +221,14 @@ struct ScopedNamespaceGuard  {
 
   ~ScopedNamespaceGuard()
   {
-    for (int i = 0; i < n_; ++i) os_ << '}' << semi_ << '\n';
+    for (int i = 0; i < n_; ++i) {
+      os_ << '}' << semi_ << '\n';
+    }
+    os_ << suffix_;
   }
 
   std::ostream& os_;
-  std::string semi_;
+  std::string semi_, suffix_;
   int n_;
 };
 
