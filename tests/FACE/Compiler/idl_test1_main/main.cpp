@@ -294,6 +294,10 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
   my_foo.ushrtseq.length(2); //+4+2*2 = 20 {padding +1 = 4}
   my_foo.ushrtseq[0] = 7;
   my_foo.ushrtseq[1] = 11;
+  my_foo.thestruct.v1 = 0;
+  my_foo.structArray[0].v1 = 0;
+  my_foo.structArray[1].v1 = 0;
+  my_foo.structArray[2].v1 = 0;
   // my_foo.thestruct        //+8 = 28
   // my_foo.theStructSeq     //+4 = 32
   my_foo.theString = "four"; //+4+5 = 41
@@ -315,6 +319,10 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
   foo2.ushrtseq.length(2);
   foo2.ushrtseq[0] = 7;
   foo2.ushrtseq[1] = 11;
+  foo2.thestruct.v1 = 0;
+  foo2.structArray[0].v1 = 0;
+  foo2.structArray[1].v1 = 0;
+  foo2.structArray[2].v1 = 0;
   foo2.theString = "four";
 
   std::map<Xyz::Foo, Xyz::Foo*, Xyz::Foo_OpenDDS_KeyLessThan> foomap;
