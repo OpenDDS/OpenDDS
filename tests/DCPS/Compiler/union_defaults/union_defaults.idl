@@ -55,10 +55,8 @@ module Unions {
   };
 };
 
-module DDS_Native
-{
-  module Uni
-  {
+module DDS_Native {
+  module Uni {
 
     enum DataType {
       dtLong,
