@@ -1183,7 +1183,7 @@ typeobject_generator::generate_union_type_identifier(AST_Type* type)
       AST_UnionLabel* label = branch->label(j);
       if (label->label_kind() != AST_UnionLabel::UL_default) {
         if (discEnum && enumValues != enum_values_.end()) {
-          const std::string labelName = canonical_name(label->label_val()->n());
+          const std::string labelName = canonical_name(label->label_val()->n()->last_component());
           const EnumValues::const_iterator iter = enumValues->second.find(labelName);
           if (iter == enumValues->second.end()) {
             be_util::misc_error_and_abort("Unknown union label value", branch);
