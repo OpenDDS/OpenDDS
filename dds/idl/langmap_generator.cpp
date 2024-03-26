@@ -1476,7 +1476,12 @@ struct Cxx11Generator : GeneratorBase {
       }
     }
 
-    const std::string lang_field_type = generator_->map_type(field);
+    const bool is_optional = be_global->is_optional(field);
+    const std::string lang_field_type = is_optional ? "std::optional<" + generator_->map_type(field) + ">" : generator_->map_type(field);
+    if (is_optional) {
+      be_global->add_include("<optional>", BE_GlobalData::STREAM_LANG_H);
+    }
+
     const std::string assign_pre = "{ _" + af.name_ + " = ",
       assign = assign_pre + "val; }\n",
       move = assign_pre + "std::move(val); }\n",

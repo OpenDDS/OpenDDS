@@ -397,7 +397,7 @@ string type_to_default_array(const std::string& indent, AST_Type* type, const st
 }
 
 string type_to_default(const std::string& indent, AST_Type* type, const string& name,
-  bool is_anonymous, bool is_union)
+  bool is_anonymous, bool is_union, bool is_optional)
 {
   AST_Type* actual_type = resolveActualType(type);
   Classification fld_cls = classify(actual_type);
@@ -409,7 +409,10 @@ string type_to_default(const std::string& indent, AST_Type* type, const string& 
     pre = "(";
     post = ")";
   }
-  if (fld_cls & (CL_STRUCTURE | CL_UNION)) {
+
+  if (is_optional) {
+    return indent + name + " = std::nullopt;\n";
+  } else if (fld_cls & (CL_STRUCTURE | CL_UNION)) {
     return indent + "set_default(" + name + (is_union ? "()" : "") + ");\n";
   } else if (fld_cls & CL_ARRAY) {
     return type_to_default_array(

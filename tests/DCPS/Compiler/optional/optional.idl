@@ -1,8 +1,26 @@
 module optional {
 
-  @topic
-  struct OptionalMembers {
-    @optional long value;
+  typedef sequence<int32> seq_int_t;
+
+  struct TestStruct {
+    octet octect_field;
   };
 
+  @appendable
+  struct OptionalMembers {
+    boolean bool_field;
+    @optional short short_field;
+    @optional int32 int32_field;
+    @optional int64 int64_field;
+    @optional string str_field;
+    @optional seq_int_t seq_field;
+
+    // TODO(tyler) typesupport failure
+    // return getMetaStruct< ::optional::TestStruct>().getValue(&typed._struct_field().value, field + 13);
+    // @optional TestStruct struct_field;
+
+    // TODO(tyler) should this be possible
+    // Code generates a IDL::DistinctType<...>
+    // @optional sequence<int32> seqInt;
+  };
 };

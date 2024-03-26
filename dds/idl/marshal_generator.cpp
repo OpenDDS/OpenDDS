@@ -1571,19 +1571,29 @@ namespace {
   {
     const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
     const bool is_union_member = prefix == "uni";
+    const bool is_optional = field != 0 ? be_global->is_optional(field) : false;
 
     AST_Type* const actual_type = resolveActualType(type);
     const Classification fld_cls = classify(actual_type);
 
-    const string qual = prefix + '.' + insert_cxx11_accessor_parens(name, is_union_member);
+    const std::string field_name = prefix + '.' + insert_cxx11_accessor_parens(name, is_union_member);
+    const string qual = prefix + '.' + insert_cxx11_accessor_parens(name, is_union_member)
+                        + (is_optional ? ".value()" : "");
+
+    std::string line = "";
+    if (is_optional) {
+      line += indent + "primitive_serialized_size_boolean(encoding, size);\n"
+            + indent + "if (" + field_name + ") {\n";
+    }
 
     if (fld_cls & CL_ENUM) {
-      return indent + "primitive_serialized_size_ulong(encoding, size);\n";
+      line += indent + "primitive_serialized_size_ulong(encoding, size);\n";
     } else if (fld_cls & CL_STRING) {
       const string suffix = is_union_member ? "" : ".in()";
       const string get_size = use_cxx11 ? (qual + ".size()")
         : ("ACE_OS::strlen(" + qual + suffix + ")");
-      return indent + "primitive_serialized_size_ulong(encoding, size);\n" +
+
+      line += indent + "primitive_serialized_size_ulong(encoding, size);\n" +
         indent + "size += " + get_size
         + ((fld_cls & CL_WIDE) ? " * char16_cdr_size;\n"
                                : " + 1;\n");
@@ -1591,20 +1601,27 @@ namespace {
       AST_PredefinedType* const p = dynamic_cast<AST_PredefinedType*>(actual_type);
       if (p->pt() == AST_PredefinedType::PT_longdouble) {
         // special case use to ACE's NONNATIVE_LONGDOUBLE in CDR_Base.h
-        return indent +
+        line += indent +
           "primitive_serialized_size(encoding, size, ACE_CDR::LongDouble());\n";
+      } else {
+        line += indent + "primitive_serialized_size(encoding, size, " +
+          getWrapper(qual, actual_type, WD_OUTPUT) + ");\n";
       }
-      return indent + "primitive_serialized_size(encoding, size, " +
-        getWrapper(qual, actual_type, WD_OUTPUT) + ");\n";
     } else if (fld_cls == CL_UNKNOWN) {
       return ""; // warning will be issued for the serialize functions
     } else { // sequence, struct, union, array
       RefWrapper wrapper(type, field_type_name(dynamic_cast<AST_Field*>(field), type),
-        prefix + "." + insert_cxx11_accessor_parens(name, is_union_member));
+        prefix + "." + insert_cxx11_accessor_parens(name, is_union_member) + (is_optional ? ".value()" : ""));
       wrapper.nested_key_only_ = wrap_nested_key_only;
       wrapper.done(&intro);
-      return indent + "serialized_size(encoding, size, " + wrapper.ref() + ");\n";
+      line += indent + "serialized_size(encoding, size, " + wrapper.ref() + ");\n";
     }
+
+    if (is_optional) {
+      line += indent + "}\n";
+    }
+
+    return line;
   }
 
   string findSizeMutableUnion(const string& indent, AST_Decl* node, const string& name, AST_Type* type,
@@ -1628,8 +1645,8 @@ namespace {
       return indent + "serialized_size(encoding, size, " + wrapper.ref() + ");\n";
     }
     return findSizeCommon(
-      indent, field, field->local_name()->get_string(), field->field_type(), prefix,
-      wrap_nested_key_only, intro);
+        indent, field, field->local_name()->get_string(), field->field_type(), prefix,
+        wrap_nested_key_only, intro);
   }
 
   // common to both fields (in structs) and branches (in unions)
@@ -1639,6 +1656,7 @@ namespace {
   {
     const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
     const bool is_union_member = prefix.substr(3) == "uni";
+    const bool is_optional = field != 0 ? be_global->is_optional(field) : false;
 
     AST_Type* const actual_type = resolveActualType(type);
     const Classification fld_cls = classify(actual_type);
@@ -1672,6 +1690,10 @@ namespace {
       const bool accessor = local.size() > 2 && local.substr(local.size() - 2) == "()";
       if (fld_cls & CL_STRING) {
         if (!accessor && !use_cxx11) {
+          if (is_optional) {
+            local += ".value()";
+          }
+
           local += ".in()";
         }
         if ((fld_cls & CL_BOUNDED)) {
@@ -1688,10 +1710,11 @@ namespace {
   }
 
   std::string generate_field_stream(
-    const std::string& indent, AST_Field* field, const std::string& prefix,
+    const std::string& indent, AST_Field* field, const std::string& prefix, const std::string& field_name,
     bool wrap_nested_key_only, Intro& intro)
   {
     FieldInfo af(*field);
+
     if (af.anonymous()) {
       RefWrapper wrapper(af.type_, af.scoped_type_,
         prefix + "." + insert_cxx11_accessor_parens(af.name_));
@@ -1700,7 +1723,7 @@ namespace {
       return "(strm " + wrapper.stream() + ")";
     }
     return streamCommon(
-      indent, field, field->local_name()->get_string(), field->field_type(), prefix,
+      indent, field, field_name, field->field_type(), prefix,
       wrap_nested_key_only, intro);
   }
 
@@ -2475,7 +2498,7 @@ namespace {
           cases <<
             "      case " << id << ": {\n"
             "        if (!" << generate_field_stream(
-            indent, field, ">> stru" + value_access, wrap_nested_key_only, intro) << ") {\n";
+            indent, field, ">> stru" + value_access, field->local_name()->get_string(), wrap_nested_key_only, intro) << ") {\n";
           AST_Type* const field_type = resolveActualType(field->field_type());
           Classification fld_cls = classify(field_type);
 
@@ -2572,6 +2595,8 @@ namespace {
       expr = "";
       for (Fields::Iterator i = fields.begin(); i != fields_end; ++i) {
         AST_Field* const field = *i;
+        const bool is_optional = be_global->is_optional(field);
+
         if (expr.size() && exten != extensibilitykind_appendable) {
           expr += "\n    && ";
         }
@@ -2603,16 +2628,44 @@ namespace {
           }
           expr +=
             "  if (reached_end_of_struct) {\n" +
-            type_to_default("    ", type, stru_field_name, type->anonymous()) +
-            "  } else {\n"
-            "    if (!";
+            type_to_default("    ", type, stru_field_name, type->anonymous(), false, is_optional) +
+            "  } else {\n";
+          if (!is_optional) {
+            expr += "    if (!";
+          }
         }
-        expr += generate_field_stream(
-          indent, field, ">> stru" + value_access, wrap_nested_key_only, intro);
+
+        // TODO(tyler) This feels kind of hacky
+        // Can the optional branch be isolated completely
+        // Assigns strm value to temporary values
+        if (is_optional) {
+            //TODO(tyler) Is there an easier way to deal with strings here
+            AST_Type* const field_type = resolveActualType(field->field_type());
+            Classification fld_cls = classify(field_type);
+            const std::string type_name = fld_cls & CL_STRING ? "String" : field->field_type()->full_name();
+            const std::string has_value_name = field_name + "_has_value";
+            expr += "    bool " + field_name + "_has_value = false;\n";
+            expr += "    strm >> ACE_InputCDR::to_boolean(" + has_value_name + ");\n";
+            expr += "    " + type_name + " " + field_name + "_tmp;\n";
+            expr += "    if (" + has_value_name + " && !";
+            expr += "(strm >> " + field_name + "_tmp)";
+        } else {
+          expr += generate_field_stream(
+            indent, field, ">> stru" + value_access, field->local_name()->get_string(), wrap_nested_key_only, intro);
+        }
         if (is_appendable) {
           expr += ") {\n"
             "      return false;\n"
             "    }\n";
+
+          // Copy temporaries to the struct
+          if (is_optional) {
+            string stru_field_name = "stru" + value_access + "." + field_name;
+            if (use_cxx11) {
+              stru_field_name += "()";
+            }
+            expr += "    if (" + field_name + "_has_value) " + stru_field_name + " = " + field_name + "_tmp;\n";
+          }
           if (cond.empty()) {
             expr +=
             "  }\n";
@@ -2756,7 +2809,7 @@ namespace {
             "    }\n"
             "    size = 0;\n"
             "    if (!" << generate_field_stream(
-              mutable_indent, field, "<< stru" + value_access, wrap_nested_key_only, intro)
+              mutable_indent, field, "<< stru" + value_access, field->local_name()->get_string(), wrap_nested_key_only, intro)
             << ") {\n"
             "      return false;\n"
             "    }\n";
@@ -2773,14 +2826,25 @@ namespace {
       string expr;
       for (Fields::Iterator i = fields.begin(); i != fields_end; ++i) {
         AST_Field* const field = *i;
+        const bool is_optional = be_global->is_optional(field);;
         if (expr.size()) expr += "\n    && ";
         const string field_name = field->local_name()->get_string(),
           cond = rtpsCustom.getConditional(field_name);
         if (!cond.empty()) {
           expr += "(!(" + cond + ") || ";
         }
-        expr += generate_field_stream(
-          indent, field, "<< stru" + value_access, wrap_nested_key_only, intro);
+
+        if (is_optional) {
+          expr += "(strm << ACE_OutputCDR::from_boolean(stru" + value_access + "." + field_name + "().has_value()) && ";
+          expr += "stru" + value_access + "." + field_name + "().has_value() ? ";
+          expr += generate_field_stream(
+            indent, field, "<< stru" + value_access, field_name + ".value", wrap_nested_key_only, intro);
+          expr += " : true)";
+        } else {
+          expr += generate_field_stream(
+            indent, field, "<< stru" + value_access, field_name, wrap_nested_key_only, intro);
+        }
+
         if (!cond.empty()) {
           expr += ")";
         }
@@ -2841,7 +2905,7 @@ bool marshal_generator::gen_struct(AST_Structure* node,
       if (use_cxx11) {
         field_name += "()";
       }
-      contents << type_to_default("  ", type, field_name, type->anonymous());
+      contents << type_to_default("  ", type, field_name, type->anonymous(), false, be_global->is_optional(field));
     }
     intro.join(be_global->impl_, "  ");
     be_global->impl_ << contents.str();

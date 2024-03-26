@@ -169,6 +169,12 @@ namespace {
       } else {
         value += (use_cxx11 ? "_" : "") + cpp_field_name;
       }
+
+      if (field != 0) {
+        const bool is_optional = be_global->is_optional(field);
+        if (is_optional) value += ".value()";
+      }
+
       generate_op(4, set, field_type, type_name, op_type, is_complex,
         value + extra_access, rc_dest);
       if (union_node && set) {

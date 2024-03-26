@@ -1,0 +1,23 @@
+project(*Publisher) : opendds_cxx11, opendds_uses_cxx17, dcpsexe, dcps_test, dcps_transports_for_test {
+  exename = publisher
+
+  TypeSupport_Files {
+    optional.idl
+  }
+
+  Source_Files {
+    publisher.cpp
+  }
+}
+
+project(*Subscriber) : opendds_cxx11, opendds_uses_cxx17, dcpsexe, dcps_test, dcps_transports_for_test {
+  exename = subscriber
+  after += *Publisher
+  TypeSupport_Files {
+    optional.idl
+  }
+
+  Source_Files {
+    subscriber.cpp
+  }
+}

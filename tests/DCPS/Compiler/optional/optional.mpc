@@ -1,4 +1,4 @@
-project(*): dcps_test, msvc_bigobj {
+project(*): opendds_uses_cxx17, opendds_cxx11, dcps_test, googletest, msvc_bigobj {
   exename = optional_annotation
   exeout = .
 
@@ -8,10 +8,5 @@ project(*): dcps_test, msvc_bigobj {
 
   TypeSupport_Files {
     optional.idl
-  }
-
-  IDL_Files {
-    optional.idl
-    optionalTypeSupport.idl
   }
 }
