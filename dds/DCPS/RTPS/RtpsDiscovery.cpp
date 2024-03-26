@@ -99,6 +99,7 @@ RtpsDiscoveryConfig::RtpsDiscoveryConfig()
   , sedp_receive_preallocated_message_blocks_(0)
   , sedp_receive_preallocated_data_blocks_(0)
   , check_source_ip_(true)
+  , spdp_user_tag_(0)
 {}
 
 RtpsDiscovery::RtpsDiscovery(const RepoKey& key)

@@ -758,6 +758,16 @@ public:
     check_source_ip_ = flag;
   }
 
+  ACE_CDR::ULong spdp_user_tag() const
+  {
+    return spdp_user_tag_;
+  }
+
+  void spdp_user_tag(ACE_CDR::ULong tag)
+  {
+    spdp_user_tag_ = tag;
+  }
+
 private:
   mutable ACE_Thread_Mutex lock_;
   DCPS::TimeDuration resend_period_;
@@ -813,6 +823,7 @@ private:
   ACE_Atomic_Op<ACE_Thread_Mutex, bool> sedp_responsive_mode_;
   size_t sedp_receive_preallocated_message_blocks_, sedp_receive_preallocated_data_blocks_;
   bool check_source_ip_;
+  ACE_CDR::ULong spdp_user_tag_;
 };
 
 typedef OpenDDS::DCPS::RcHandle<RtpsDiscoveryConfig> RtpsDiscoveryConfig_rch;

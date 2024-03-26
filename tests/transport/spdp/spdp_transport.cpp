@@ -139,7 +139,7 @@ struct TestParticipant: ACE_Event_Handler {
     ACE_Message_Block mb(size);
     Serializer ser(&mb, encoding);
 
-    const EncapsulationHeader encap (encoding, MUTABLE);
+    const EncapsulationHeader encap(encoding, MUTABLE);
     if (!(ser << hdr_ && ser << ds && ser << encap)) {
       ACE_DEBUG((LM_DEBUG, "ERROR: failed to serialize headers\n"));
       return false;
@@ -273,6 +273,7 @@ bool run_test()
   rd.config()->use_ncm(false);
   const ACE_INET_Addr local_addr(u_short(7575), "0.0.0.0");
   rd.config()->spdp_local_address(local_addr);
+  rd.config()->spdp_user_tag(0x99887766);
   const DDS::DomainId_t domain = 0;
   const DDS::DomainParticipantQos qos = TheServiceParticipant->initial_DomainParticipantQos();
   RepoId id = rd.generate_participant_guid();
@@ -528,16 +529,10 @@ bool run_test()
 int ACE_TMAIN(int, ACE_TCHAR*[])
 {
   DDS::DomainParticipantFactory_var dpf;
+  bool ok = false;
   try {
     dpf = TheServiceParticipant->get_domain_participant_factory();
     set_DCPS_debug_level(1);
-  } catch (const CORBA::BAD_PARAM& ex) {
-    ex._tao_print_exception("Exception caught in spdp_transport.cpp:");
-    return 1;
-  }
-
-  bool ok = false;
-  try {
     ok = run_test();
     if (!ok) {
       ACE_ERROR((LM_ERROR, "ERROR: test failed\n"));
