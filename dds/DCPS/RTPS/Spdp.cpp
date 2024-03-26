@@ -522,10 +522,16 @@ void Spdp::process_location_updates_i(const DiscoveredParticipantIter& iter, con
     ACE_DEBUG((LM_DEBUG, "(%P|%t) DEBUG: Spdp::process_location_updates_i: %@ %C has %B location update(s) force_publish=%d reason=%C\n", this, LogGuid(iter->first).c_str(), location_updates.size(), force_publish, reason));
   }
 
+  const DCPS::TimeDuration leaseDuration = rtps_duration_to_time_duration(iter->second.pdata_.leaseDuration,
+                                             iter->second.pdata_.participantProxy.protocolVersion,
+                                             iter->second.pdata_.participantProxy.vendorId);
+
+  DCPS::ParticipantLocationBuiltinTopicData& location_data = iter->second.location_data_;
+  location_data.lease_duration = leaseDuration.to_dds_duration();
+
   bool published = false;
   for (DiscoveredParticipant::LocationUpdateList::const_iterator pos = location_updates.begin(),
-         limit = location_updates.end(); iter != participants_.end() && pos != limit; ++pos) {
-    DCPS::ParticipantLocationBuiltinTopicData& location_data = iter->second.location_data_;
+         limit = location_updates.end(); pos != limit; ++pos) {
 
     OPENDDS_STRING addr = "";
     const DCPS::ParticipantLocation old_mask = location_data.location;
@@ -572,12 +578,8 @@ void Spdp::process_location_updates_i(const DiscoveredParticipantIter& iter, con
       break;
     }
 
-    const DDS::Time_t expr =
-      (
-       pos->timestamp_ - rtps_duration_to_time_duration(iter->second.pdata_.leaseDuration,
-                                                        iter->second.pdata_.participantProxy.protocolVersion,
-                                                        iter->second.pdata_.participantProxy.vendorId)
-       ).to_dds_time();
+    const DDS::Time_t expr = (pos->timestamp_ - leaseDuration).to_dds_time();
+
     if ((location_data.location & DCPS::LOCATION_LOCAL) && DCPS::operator<(location_data.local_timestamp, expr)) {
       location_data.location &= ~(DCPS::LOCATION_LOCAL);
       location_data.change_mask |= DCPS::LOCATION_LOCAL;

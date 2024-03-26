@@ -253,6 +253,8 @@ The topic type ParticipantLocationBuiltinTopicData is defined in :ghfile:`dds/Op
 
 * ``local6_addr``, ``local6_timestamp``, ``ice6_addr``, ``ice6_timestamp``, ``relay6_addr``, and ``relay6_timestamp`` -- Are the IPV6 equivalents.
 
+* ``lease_duration`` -- The remote participant's lease duration (see Lease Duration in :ref:`run_time_configuration--rtps-disc-config-options`)
+
 .. _built_in_topics--openddsconnectionrecord-topic:
 
 OpenDDSConnectionRecord Topic
