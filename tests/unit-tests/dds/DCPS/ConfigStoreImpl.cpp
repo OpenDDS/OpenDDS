@@ -594,3 +594,23 @@ TEST(dds_DCPS_ConfigStoreImpl, get_section_values)
   const ConfigStoreImpl::StringMap sm = config_store.get_section_values("MYPREFIX_MY_SECTION");
   EXPECT_EQ(sm, expected_sm);
 }
+
+TEST(dds_DCPS_ConfigStoreImpl, delete_section)
+{
+  ConfigTopic_rch topic = make_rch<ConfigTopic>();
+  ConfigStoreImpl config_store(topic);
+  config_store.set("MYPREFIX_MY_SECTION", "@my_section");
+  config_store.set("MYPREFIX_MY_SECTION_KEY", "not a section");
+  config_store.set("MYPREFIX_MY_SECTION2", "@my_section2");
+  config_store.set("MYPREFIX_MY_SECTION2_KEY", "not a section");
+  config_store.set("NOTMYPREFIX_MY_SECTION2", "@my_section2");
+  config_store.set("NOTMYPREFIX_MY_SECTION2_KEY", "not a section");
+
+  config_store.unset_section("MYPREFIX");
+  EXPECT_FALSE(config_store.has("MYPREFIX_MY_SECTION"));
+  EXPECT_FALSE(config_store.has("MYPREFIX_MY_SECTION_KEY"));
+  EXPECT_FALSE(config_store.has("MYPREFIX_MY_SECTION2"));
+  EXPECT_FALSE(config_store.has("MYPREFIX_MY_SECTION2_KEY"));
+  EXPECT_TRUE(config_store.has("NOTMYPREFIX_MY_SECTION2"));
+  EXPECT_TRUE(config_store.has("NOTMYPREFIX_MY_SECTION2_KEY"));
+}
