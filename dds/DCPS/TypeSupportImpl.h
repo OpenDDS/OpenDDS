@@ -167,7 +167,10 @@ private:
 };
 
 template <typename NativeType>
-class TypeSupportImpl_T : public TypeSupportImpl {
+class TypeSupportImpl_T
+  : public virtual LocalObject<typename DDSTraits<NativeType>::TypeSupportType>
+  , public TypeSupportImpl
+{
 public:
   typedef DDSTraits<NativeType> TraitsType;
   typedef MarshalTraits<NativeType> MarshalTraitsType;
@@ -217,6 +220,50 @@ public:
   {
     get_type_from_type_lookup_service();
     return TypeSupportImpl::get_type();
+  }
+
+  /// The IDL is `NativeType create_sample(DDS::DynamicData src)`, but in the
+  /// C++ mapping this can return NativeType* or just NativeType depending on if
+  /// the type is "variable length". If it has something like a sequence then
+  /// it's variable length and returns a pointer else it's fixed and returns on
+  /// the stack. opendds_idl will wrap this in the correct form.
+  bool create_sample(NativeType* dest, DDS::DynamicData_ptr src)
+  {
+    OpenDDS::DCPS::set_default(*dest);
+#  if OPENDDS_HAS_DYNAMIC_DATA_ADAPTOR
+    DDS::DynamicData_var dest_dd = get_dynamic_data_adapter<NativeType>(get_type(), dest);
+    const DDS::ReturnCode_t rc = XTypes::copy(dest_dd, src);
+    if (rc == DDS::RETCODE_OK) {
+      return true;
+    }
+    if (log_level >= LogLevel::Warning) {
+      ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: TypeSupportImpl_T::create_sample: "
+        "failed to copy from DynamicData: %C\n", retcode_to_string(rc)));
+    }
+#  else
+    ACE_UNUSED_ARG(dest);
+    ACE_UNUSED_ARG(src);
+#  endif
+    return false;
+  }
+
+  DDS::DynamicData_ptr create_dynamic_sample(const NativeType& src)
+  {
+#  if OPENDDS_HAS_DYNAMIC_DATA_ADAPTOR
+    DDS::DynamicData_var dest_dd = DDS::DynamicDataFactory::get_instance()->create_data(type_);
+    DDS::DynamicData_var src_dd = get_dynamic_data_adapter<NativeType>(get_type(), &src);
+    const DDS::ReturnCode_t rc = XTypes::copy(dest_dd, src_dd);
+    if (rc == DDS::RETCODE_OK) {
+      return dest_dd._retn();
+    }
+    if (log_level >= LogLevel::Notice) {
+      ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: TypeSupportImpl_T::create_dynamic_sample: "
+        "failed to copy to DynamicData: %C\n", retcode_to_string(rc)));
+    }
+#  else
+    ACE_UNUSED_ARG(src);
+#  endif
+    return 0;
   }
 #endif
 };

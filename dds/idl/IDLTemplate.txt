@@ -9,6 +9,16 @@ typedef sequence<<%SCOPED%>> <%TYPE%><%SEQ%>;
  * this interface.
  */
 local interface <%TYPE%>TypeSupport : OpenDDS::DCPS::TypeSupport {
+#ifndef OPENDDS_SAFETY_PROFILE
+    // valuetype isn't supported in Java, so we can't use DynamicData. This
+    // will exclude this operation from the generated Java code and return null
+    // in get_type method of the TAOPeer generated C++ class so it isn't a pure
+    // virtual function.
+    @OpenDDS::internal::hidden_op_in_java("(void)(src); return 0;")
+    <%SCOPED%> create_sample(in ::DDS::DynamicData src);
+    @OpenDDS::internal::hidden_op_in_java("(void)(src); return 0;")
+    ::DDS::DynamicData create_dynamic_sample(in <%SCOPED%> src);
+#endif
 
     ::DDS::ReturnCode_t encode_to_string(in <%SCOPED%> sample, out string encoded, in OpenDDS::DCPS::RepresentationFormat format);
     ::DDS::ReturnCode_t encode_to_bytes(in <%SCOPED%> sample, out ::DDS::OctetSeq encoded, in OpenDDS::DCPS::RepresentationFormat format);
