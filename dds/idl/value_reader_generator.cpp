@@ -339,18 +339,16 @@ bool value_reader_generator::gen_union(AST_Union* u,
     be_global->impl_ <<
       "  if (!value_reader.begin_union(" << extensibility_kind(ek) << ")) return false;\n"
       "  if (!value_reader.begin_discriminator()) return false;\n"
-      "  {\n"
-      "    " << scoped(discriminator->name()) << " d;\n";
+      " " << scoped(discriminator->name()) << " d;\n";
     generate_read("d", "", discriminator, "i", 2);
     be_global->impl_ <<
-      "    value._d(d);\n"
-      "  }\n"
       "  if (!value_reader.end_discriminator()) return false;\n";
 
-    generateSwitchForUnion(u, "value._d()", branch_helper, branches,
+    generateSwitchForUnion(u, "d", branch_helper, branches,
                            discriminator, "", "", type_name.c_str(),
                            false, false);
     be_global->impl_ <<
+      "  value._d(d);\n"
       "  if (!value_reader.end_union()) return false;\n"
       "  return true;\n";
   }
