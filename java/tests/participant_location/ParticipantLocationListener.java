@@ -48,8 +48,8 @@ class ParticipantLocationListener extends DDS._DataReaderListenerLocalBase {
     }
 
     ParticipantLocationBuiltinTopicDataHolder participant = new ParticipantLocationBuiltinTopicDataHolder(
-        new ParticipantLocationBuiltinTopicData(new byte[16], 0, 0, "", new DDS.Time_t(), "", new DDS.Time_t(), "",
-            new DDS.Time_t(), "", new DDS.Time_t(), "", new DDS.Time_t(), "", new DDS.Time_t()));
+      new ParticipantLocationBuiltinTopicData(new byte[16], 0, 0, "", new DDS.Time_t(), "", new DDS.Time_t(), "",
+        new DDS.Time_t(), "", new DDS.Time_t(), "", new DDS.Time_t(), "", new DDS.Time_t(), new DDS.Duration_t()));
     SampleInfoHolder si = new SampleInfoHolder(
         new SampleInfo(0, 0, 0, new DDS.Time_t(), 0, 0, 0, 0, 0, 0, 0, false, 0));
 
@@ -93,6 +93,7 @@ class ParticipantLocationListener extends DDS._DataReaderListenerLocalBase {
       System.out.println("      : " + participant.value.ice_timestamp.sec);
       System.out.println(" relay: " + participant.value.relay_addr);
       System.out.println("      : " + participant.value.relay_timestamp.sec);
+      System.out.println(" lease: " + participant.value.lease_duration.sec);
 
       // update locations if SampleInfo is valid
       if (si.value.valid_data) {
