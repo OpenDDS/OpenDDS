@@ -1325,7 +1325,7 @@ Those properties, along with options specific to OpenDDS's RTPS Discovery implem
 
      - Add the OpenDDS-specific UserTag RTPS submessage to the start of SPDP messages.
        If i is 0 (the default), the submessage is not added.
-       Otherwise this submessage's contents is the 4-byte integer i.
+       Otherwise this submessage's contents is the 4-byte unsigned integer i.
 
      - 0 (disabled)
 
