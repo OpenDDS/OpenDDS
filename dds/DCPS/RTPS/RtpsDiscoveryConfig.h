@@ -219,6 +219,9 @@ public:
   bool check_source_ip() const;
   void check_source_ip(bool flag);
 
+  ACE_CDR::ULong spdp_user_tag() const;
+  void spdp_user_tag(ACE_CDR::ULong tag);
+
 private:
   const String config_prefix_;
 };

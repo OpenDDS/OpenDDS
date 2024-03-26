@@ -2,10 +2,6 @@ name: "MPC Builds"
 
 on:
   push:
-    branches:
-      - master
-      - branch-DDS-3.*
-      - gh_wf_*
     paths:
       - '**'
       # Don't run this workflow if the only files that changed are the
@@ -29,9 +25,6 @@ on:
       - '!**/.lint_config'
       - '!**/README*'
   pull_request:
-    branches:
-      - master
-      - branch-DDS-3.*
     paths:
       - '**'
       # Don't run this workflow if the only files that changed are the

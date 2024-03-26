@@ -512,6 +512,7 @@ private:
 
     DCPS::WeakRcHandle<Spdp> outer_;
     Header hdr_;
+    UserTagSubmessage user_tag_;
     DataSubmessage data_;
     DCPS::SequenceNumber seq_;
     u_short uni_port_;

@@ -775,6 +775,13 @@ module OpenDDS {
       DDS::OctetSeq content;
     };
 
+    // UserTagSubmessage is an OpenDDS-specific extension that adds a configurable
+    // 32-bit value to the start of certain RTPS messages.
+    struct UserTagSubmessage {
+      SubmessageHeader smHeader;
+      unsigned long userTag;
+    };
+
     @OpenDDS::internal::special_serialization
     union Submessage switch (SubmessageKind) {
       case PAD:
@@ -822,6 +829,12 @@ module OpenDDS {
       case SRTPS_PREFIX:
       case SRTPS_POSTFIX:
         SecuritySubmessage security_sm;
+
+      // SUBMESSAGE_KIND_USER_TAG isn't included here.
+      // We don't need to parse incoming submessages or add a UserTagSubmessage
+      // to a generic collection of Submessages.
+      // If "vendor-specific" types are added, incoming messages need to have
+      // the Header::vendorId checked.
 
       default:
         SubmessageHeader unknown_sm;

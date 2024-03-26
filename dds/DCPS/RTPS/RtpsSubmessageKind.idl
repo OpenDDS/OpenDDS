@@ -9,6 +9,10 @@
 module OpenDDS {
 module RTPS {
 
+const octet SUBMESSAGE_VENDOR_SPECIFIC_BASE = 0x80;
+const octet SUBMESSAGE_OPENDDS_BASE = SUBMESSAGE_VENDOR_SPECIFIC_BASE | 0x30;
+const octet SUBMESSAGE_OPENDDS_USER_TAG = SUBMESSAGE_OPENDDS_BASE | 1;
+
 enum SubmessageKind {
   @value(0x00) RTPS_HE, /* HeaderExtension */
   @value(0x01) PAD, /* Pad */
@@ -30,9 +34,10 @@ enum SubmessageKind {
   @value(0x31) SEC_PREFIX,
   @value(0x32) SEC_POSTFIX,
   @value(0x33) SRTPS_PREFIX,
-  @value(0x34) SRTPS_POSTFIX
+  @value(0x34) SRTPS_POSTFIX,
 
   // SubmessageKinds 0x80 and above are vendor-specific
+  @value(SUBMESSAGE_OPENDDS_USER_TAG) SUBMESSAGE_KIND_USER_TAG /* UserTagSubmessage */
 };
 
 };
