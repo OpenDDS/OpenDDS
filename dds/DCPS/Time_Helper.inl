@@ -126,7 +126,7 @@ operator>=(const DDS::Time_t& t1, const DDS::Time_t& t2)
 ACE_INLINE DDS::Time_t
 operator+(const DDS::Time_t& t1, const DDS::Duration_t& d1)
 {
-  CORBA::Long sec = static_cast<CORBA::Long>(static_cast<CORBA::ULong>(t1.sec) + static_cast<CORBA::ULong>(d1.sec));
+  CORBA::LongLong sec = t1.sec + d1.sec;
   CORBA::ULong nanosec = t1.nanosec + d1.nanosec;
 
   while (nanosec >= ACE_ONE_SECOND_IN_NSECS) {
@@ -141,7 +141,7 @@ operator+(const DDS::Time_t& t1, const DDS::Duration_t& d1)
 ACE_INLINE DDS::Duration_t
 operator-(const DDS::Time_t& t1, const DDS::Time_t& t2)
 {
-  DDS::Duration_t t = { t1.sec - t2.sec, t1.nanosec - t2.nanosec };
+  DDS::Duration_t t = { static_cast<CORBA::Long>(t1.sec - t2.sec), t1.nanosec - t2.nanosec };
 
   if (t2.nanosec > t1.nanosec) {
       t.nanosec = (t1.nanosec + ACE_ONE_SECOND_IN_NSECS) - t2.nanosec;
@@ -167,7 +167,7 @@ operator-(const DDS::Time_t& t1, const DDS::Duration_t& t2)
 ACE_INLINE DDS::Duration_t
 operator-(const MonotonicTime_t& t1, const MonotonicTime_t& t2)
 {
-  DDS::Duration_t t = { t1.sec - t2.sec, t1.nanosec - t2.nanosec };
+  DDS::Duration_t t = { static_cast<CORBA::Long>(t1.sec - t2.sec), t1.nanosec - t2.nanosec };
 
   if (t2.nanosec > t1.nanosec) {
       t.nanosec = (t1.nanosec + ACE_ONE_SECOND_IN_NSECS) - t2.nanosec;
@@ -202,7 +202,7 @@ ACE_INLINE
 DDS::Time_t time_value_to_time(const ACE_Time_Value& tv)
 {
   DDS::Time_t t;
-  t.sec = ACE_Utils::truncate_cast<CORBA::Long>(tv.sec());
+  t.sec = tv.sec();
   t.nanosec = ACE_Utils::truncate_cast<CORBA::ULong>(tv.usec() * 1000);
   return t;
 }
@@ -211,7 +211,7 @@ ACE_INLINE
 MonotonicTime_t time_value_to_monotonic_time(const ACE_Time_Value& tv)
 {
   MonotonicTime_t t;
-  t.sec = ACE_Utils::truncate_cast<CORBA::Long>(tv.sec());
+  t.sec = tv.sec();
   t.nanosec = ACE_Utils::truncate_cast<CORBA::ULong>(tv.usec() * 1000);
   return t;
 }
@@ -268,7 +268,7 @@ double time_value_to_double(const ACE_Time_Value& tv)
 ACE_INLINE
 DDS::Duration_t time_to_duration(const DDS::Time_t& t)
 {
-  DDS::Duration_t d = { t.sec, t.nanosec };
+  DDS::Duration_t d = { static_cast<CORBA::Long>(t.sec), t.nanosec };
   return d;
 }
 
