@@ -879,7 +879,7 @@ Spdp::handle_participant_data(DCPS::MessageId id,
       if (from_relay) {
         tport_->write_i(guid, iter->second.last_recv_address_, SpdpTransport::SEND_RELAY);
       } else {
-        tport_->shorten_local_sender_delay_i();
+        tport_->write_i(guid, iter->second.local_address_, SpdpTransport::SEND_DIRECT);
       }
     }
 
