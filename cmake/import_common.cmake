@@ -360,6 +360,7 @@ function(_opendds_import_group_targets group libs exes)
 
     if(NOT TARGET ${target} AND ${var_prefix}_LIBRARY_FOUND)
       add_library(${target} ${OPENDDS_LIBRARY_TYPE} IMPORTED GLOBAL)
+      _opendds_cxx_std(${target} INTERFACE)
       set_target_properties(${target}
         PROPERTIES
           INTERFACE_INCLUDE_DIRECTORIES "${include_dirs}"
@@ -367,10 +368,6 @@ function(_opendds_import_group_targets group libs exes)
           INTERFACE_COMPILE_DEFINITIONS "${${var_prefix}_COMPILE_DEFINITIONS}"
           INTERFACE_COMPILE_OPTIONS "${${var_prefix}_COMPILE_OPTIONS}"
       )
-
-      if(NOT CMAKE_VERSION VERSION_LESS "3.11.0" AND OPENDDS_CXX_STD)
-        target_compile_features(${target} INTERFACE "cxx_std_${OPENDDS_CXX_STD}")
-      endif()
 
       set(mpc_ext_proj_var "${group_prefix}_MPC_EXTERNAL_PROJECT")
       if(DEFINED "${mpc_ext_proj_var}")

@@ -20,6 +20,9 @@ find_package(Perl REQUIRED)
 if(OPENDDS_STATIC)
   list(APPEND _OPENDDS_CONFIGURE_ACE_TAO_ARGS --static=1)
 endif()
+list(APPEND _OPENDDS_CONFIGURE_ACE_TAO_ARGS
+  --compiler "${CMAKE_CXX_COMPILER}"
+)
 execute_process(
   COMMAND
     "${PERL_EXECUTABLE}" "${_OPENDDS_CMAKE_DIR}/configure_ace_tao.pl"
@@ -34,6 +37,12 @@ execute_process(
   COMMAND_ECHO STDOUT
   COMMAND_ERROR_IS_FATAL ANY
 )
+
+# Get the C++ standard OpenDDS is going to be built with. We are going to force
+# the ACE/TAO build to use the same standard.
+set(opendds_idl_std "$<TARGET_PROPERTY:opendds_idl,CXX_STANDARD>")
+set(dcps_std "$<TARGET_PROPERTY:OpenDDS_Dcps,CXX_STANDARD>")
+set(std "$<IF:$<TARGET_EXISTS:OpenDDS_Dcps>,${dcps_std},${opendds_idl_std}>")
 
 if(_OPENDDS_MPC_TYPE STREQUAL gnuace)
   execute_process(
@@ -78,7 +87,7 @@ if(_OPENDDS_MPC_TYPE STREQUAL gnuace)
     SOURCE_DIR "${OPENDDS_ACE_TAO_SRC}"
     CONFIGURE_COMMAND "${CMAKE_COMMAND}" -E echo "Already configured"
     BUILD_IN_SOURCE TRUE
-    BUILD_COMMAND ${make_cmd}
+    BUILD_COMMAND ${make_cmd} "opendds_cmake_std=$<IF:$<BOOL:${std}>,-std=c++${std},>"
     BUILD_BYPRODUCTS ${byproducts}
     USES_TERMINAL_BUILD TRUE # Needed for Ninja to show the ACE/TAO build
     INSTALL_COMMAND "${CMAKE_COMMAND}" -E echo "No install step"
@@ -131,6 +140,7 @@ elseif(_OPENDDS_MPC_TYPE MATCHES "^vs")
       "${CMAKE_COMMAND}" -E env "ACE_ROOT=${OPENDDS_ACE}" "TAO_ROOT=${OPENDDS_TAO}"
       MSBuild "${sln}"
         "-property:Configuration=$<CONFIG>,Platform=${CMAKE_VS_PLATFORM_TOOLSET_HOST_ARCHITECTURE}"
+        "$<IF:$<BOOL:${std}>,-property:LanguageStandard=stdcpp${std},>"
         "-maxcpucount"
     BUILD_BYPRODUCTS ${byproducts}
     USES_TERMINAL_BUILD TRUE # Needed for Ninja to show the ACE/TAO build

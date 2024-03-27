@@ -24,6 +24,7 @@ my @optional_values = qw/
   workspace-file
   platform-macros-file
   static
+  compiler
 /;
 my %is_value_required = map {$_ => 1} @required_values;
 my %values = ();
@@ -100,6 +101,12 @@ if ($gnuace) {
   my $platform_macros_path = "$values{ace}/include/makeinclude/platform_macros.GNU";
   open(my $platform_macros_file, '>', $platform_macros_path)
     or die("Failed to open $platform_macros_path: $!");
+  if ($values{compiler}) {
+    for my $var ('CC', 'CXX', 'LD') {
+      print $platform_macros_file ("$var = $values{compiler}\n");
+    }
+  }
+  print $platform_macros_file ("CCFLAGS += \$(opendds_cmake_std)\n");
   if ($values{'macro-line'}) {
     for my $line (@{$values{'macro-line'}}) {
       print $platform_macros_file ("$line\n");
