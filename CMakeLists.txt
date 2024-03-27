@@ -109,6 +109,10 @@ if(OPENDDS_SECURITY)
 endif()
 add_subdirectory(tools/inspect)
 
+# Generate setenv
+include("${_OPENDDS_CMAKE_DIR}/opendds_testing.cmake")
+_opendds_write_setenv()
+
 # Installation
 set(cmake_dest "${CMAKE_INSTALL_DATAROOTDIR}/cmake/OpenDDS")
 install(EXPORT opendds_targets
