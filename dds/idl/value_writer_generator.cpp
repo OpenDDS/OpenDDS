@@ -18,7 +18,8 @@ using namespace AstTypeClassification;
 
 namespace {
 
-  void generate_write(const std::string& expression, AST_Type* type, const std::string& idx, int level = 1);
+void generate_write(const std::string& expression, AST_Type* type, const std::string& idx,
+                    int level = 1, FieldFilter field_filter = FieldFilter_All);
 
   std::string primitive_type(AST_PredefinedType::PredefinedType pt)
   {
@@ -175,7 +176,7 @@ namespace {
       indent << "}\n";
   }
 
-  void generate_write(const std::string& expression, AST_Type* type, const std::string& idx, int level)
+  void generate_write(const std::string& expression, AST_Type* type, const std::string& idx, int level, FieldFilter field_filter)
   {
     AST_Type* const actual = resolveActualType(type);
 
@@ -214,8 +215,22 @@ namespace {
         "}\n";
 
     } else {
+      const std::string type_name = scoped(type->name());
+      std::string value_expr = expression;
+      switch (field_filter) {
+      case FieldFilter_NestedKeyOnly:
+        value_expr = "nested_key_only_value(" + expression + ")";
+        be_global->impl_ <<
+          "const NestedKeyOnly<const" << type_name << "> " << value_expr << ";\n";
+        break;
+      case FieldFilter_KeyOnly:
+        value_expr = "key_only_value(" << expression << ")";
+        be_global->impl_ <<
+          "const KeyOnly<const" << type_name << "> " << value_expr << ";\n";
+        break;
+      }
       be_global->impl_ <<
-        "if (!vwrite(value_writer, " << expression << ")) {\n"
+        "if (!vwrite(value_writer, " << value_expr << ")) {\n"
         "  return false;\n"
         "}\n";
     }
@@ -275,6 +290,45 @@ bool value_writer_generator::gen_typedef(AST_Typedef*,
   return true;
 }
 
+bool value_writer_generator::gen_struct_i(AST_Structure* node,
+                                          const std::string type_name,
+                                          bool use_cxx11,
+                                          ExtensibilityKind ek,
+                                          FieldFilter field_filter)
+{
+  Function write("vwrite", "bool");
+  write.addArg("value_writer", "OpenDDS::DCPS::ValueWriter&");
+  write.addArg("value", "const NestedKeyOnly<const " + type_name + ">&");
+  write.endArgs();
+
+  const Fields fields(node, field_filter);
+  be_global->impl_ <<
+    "  if (!value_writer.begin_struct(" << extensibility_kind(ek) << ")) {\n"
+    "    return false;\n"
+    "  }\n";
+  for (Fields::Iterator i = fields.begin(); i != fields.end(); ++i) {
+    AST_Field* const field = *i;
+    const std::string field_name = field->local_name()->get_string();
+    const std::string idl_name = canonical_name(field);
+    const OpenDDS::XTypes::MemberId id = be_global->get_id(field);
+    const bool must_understand = be_global->is_effective_must_understand(field);
+    // TODO: Update the arguments for MemberParam when @optional is available.
+    be_global->impl_ <<
+      "  if (!value_writer.begin_struct_member(MemberParam(" << id << ", " <<
+      (must_understand ? "true" : "false") << ", \"" << idl_name << "\", false, true))) {\n"
+      "    return false;\n"
+      "  }\n";
+    generate_write("value." + field_name + (use_cxx11 ? "()" : ""), field->field_type(), "i");
+    be_global->impl_ <<
+      "  if (!value_writer.end_struct_member()) {\n"
+      "    return false;\n"
+      "  }\n";
+  }
+  be_global->impl_ <<
+    "  return value_writer.end_struct();\n";
+  return true;
+}
+
 bool value_writer_generator::gen_struct(AST_Structure* node,
                                         UTL_ScopedName* name,
                                         const std::vector<AST_Field*>& fields,
@@ -285,44 +339,19 @@ bool value_writer_generator::gen_struct(AST_Structure* node,
 
   const std::string type_name = scoped(name);
   const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
-  const std::string accessor_suffix = use_cxx11 ? "()" : "";
+  const ExtensibilityKind ek = be_global->extensibility(node);
 
-  {
-    NamespaceGuard guard;
-
-    Function write("vwrite", "bool");
-    write.addArg("value_writer", "OpenDDS::DCPS::ValueWriter&");
-    write.addArg("value", "const " + type_name + "&");
-    write.endArgs();
-
-    const ExtensibilityKind ek = be_global->extensibility(node);
-    be_global->impl_ <<
-      "  if (!value_writer.begin_struct(" << extensibility_kind(ek) << ")) {\n"
-      "    return false;\n"
-      "  }\n";
-    for (std::vector<AST_Field*>::const_iterator pos = fields.begin(), limit = fields.end();
-         pos != limit; ++pos) {
-      AST_Field* const field = *pos;
-      const std::string field_name = field->local_name()->get_string();
-      const std::string idl_name = canonical_name(field);
-      // TODO: Update the arguments when @optional is available.
-      const OpenDDS::XTypes::MemberId id = be_global->get_id(field);
-      const bool must_understand = be_global->is_effectively_must_understand(field);
-      be_global->impl_ <<
-        "  if (!value_writer.begin_struct_member(MemberParam(" << id << ", " <<
-        (must_understand ? "true" : "false") << ", \"" << idl_name << "\", false, true))) {\n"
-        "    return false;\n"
-        "  }\n";
-      generate_write("value." + field_name + accessor_suffix, field->field_type(), "i");
-      be_global->impl_ <<
-        "  if (!value_writer.end_struct_member()) {\n"
-        "    return false;\n"
-        "  }\n";
-    }
-    be_global->impl_ <<
-      "  return value_writer.end_struct();\n";
+  NamespaceGuard guard;
+  if (!gen_struct_i(node, type_name, use_cxx11, ek, FieldFilter_All) ||
+      !gen_struct_i(node, type_name, use_cxx11, ek, FieldFilter_NestedKeyOnly)) {
+    return false;
   }
 
+  if (be_global->is_topic_type(node)) {
+    if (!gen_struct_i(node, type_name, use_cxx11, ek, FieldFilter_KeyOnly)) {
+      return false;
+    }
+  }
   return true;
 }
 
