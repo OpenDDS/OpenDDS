@@ -260,6 +260,84 @@ void generate_write(const std::string& expression, AST_Type* type, const std::st
       "    }\n";
     return "";
   }
+
+  bool gen_struct_i(AST_Structure* node, const std::string type_name,
+                    bool use_cxx11, ExtensibilityKind ek, FieldFilter field_filter)
+  {
+    Function write("vwrite", "bool");
+    write.addArg("value_writer", "OpenDDS::DCPS::ValueWriter&");
+    write.addArg("value", "const NestedKeyOnly<const " + type_name + ">&");
+    write.endArgs();
+
+    const Fields fields(node, field_filter);
+    be_global->impl_ <<
+      "  if (!value_writer.begin_struct(" << extensibility_kind(ek) << ")) {\n"
+      "    return false;\n"
+      "  }\n";
+    for (Fields::Iterator i = fields.begin(); i != fields.end(); ++i) {
+      AST_Field* const field = *i;
+      const std::string field_name = field->local_name()->get_string();
+      const std::string idl_name = canonical_name(field);
+      const OpenDDS::XTypes::MemberId id = be_global->get_id(field);
+      const bool must_understand = be_global->is_effective_must_understand(field);
+      // TODO: Update the arguments for MemberParam when @optional is available.
+      be_global->impl_ <<
+        "  if (!value_writer.begin_struct_member(MemberParam(" << id << ", " <<
+        (must_understand ? "true" : "false") << ", \"" << idl_name << "\", false, true))) {\n"
+        "    return false;\n"
+        "  }\n";
+      generate_write("value." + field_name + (use_cxx11 ? "()" : ""), field->field_type(), "i");
+      be_global->impl_ <<
+        "  if (!value_writer.end_struct_member()) {\n"
+        "    return false;\n"
+        "  }\n";
+    }
+    be_global->impl_ <<
+      "  return value_writer.end_struct();\n";
+    return true;
+  }
+
+  bool gen_union_i(AST_Union* u, const std::vector<AST_UnionBranch*>& branches,
+                   AST_Type* discriminator, ExtensibilityKind ek, FieldFilter filter_kind)
+  {
+    Function write("vwrite", "bool");
+    write.addArg("value_writer", "OpenDDS::DCPS::ValueWriter&");
+    write.addArg("value", "const " + type_name + "&");
+    write.endArgs();
+
+    be_global->impl_ <<
+      "  if (!value_writer.begin_union(" << extensibility_kind(ek) << ")) {\n"
+      "    return false;\n"
+      "  }\n";
+
+    const bool write_disc = be_global->union_discriminator_is_key(u)
+      || filter_kind == FieldFilter_NestedKeyOnly
+      || filter_kind == FieldFilter_All;
+
+    if (write_disc) {
+      const bool must_understand = be_global->is_effectively_must_understand(discriminator);
+      be_global->impl_ <<
+        "  if (!value_writer.begin_discriminator(MemberParam(0, " <<
+        (must_understand ? "true" : "false") << "))) {\n"
+        "    return false;\n"
+        "  }\n";
+      generate_write("value._d()" , discriminator, "i", 1, filter_kind);
+      be_global->impl_ <<
+        "  if (!value_writer.end_discriminator()) {\n"
+        "    return false;\n"
+        "  }\n";
+    }
+
+    if (filter_kind == FieldFilter_All) {
+      generateSwitchForUnion(u, "value._d()", branch_helper, branches,
+                             discriminator, "", "", type_name.c_str(),
+                             false, false);
+    }
+
+    be_global->impl_ <<
+      "  return value_writer.end_union();\n";
+    return true;
+  }
 }
 
 bool value_writer_generator::gen_enum(AST_Enum*,
@@ -290,45 +368,6 @@ bool value_writer_generator::gen_typedef(AST_Typedef*,
   return true;
 }
 
-bool value_writer_generator::gen_struct_i(AST_Structure* node,
-                                          const std::string type_name,
-                                          bool use_cxx11,
-                                          ExtensibilityKind ek,
-                                          FieldFilter field_filter)
-{
-  Function write("vwrite", "bool");
-  write.addArg("value_writer", "OpenDDS::DCPS::ValueWriter&");
-  write.addArg("value", "const NestedKeyOnly<const " + type_name + ">&");
-  write.endArgs();
-
-  const Fields fields(node, field_filter);
-  be_global->impl_ <<
-    "  if (!value_writer.begin_struct(" << extensibility_kind(ek) << ")) {\n"
-    "    return false;\n"
-    "  }\n";
-  for (Fields::Iterator i = fields.begin(); i != fields.end(); ++i) {
-    AST_Field* const field = *i;
-    const std::string field_name = field->local_name()->get_string();
-    const std::string idl_name = canonical_name(field);
-    const OpenDDS::XTypes::MemberId id = be_global->get_id(field);
-    const bool must_understand = be_global->is_effective_must_understand(field);
-    // TODO: Update the arguments for MemberParam when @optional is available.
-    be_global->impl_ <<
-      "  if (!value_writer.begin_struct_member(MemberParam(" << id << ", " <<
-      (must_understand ? "true" : "false") << ", \"" << idl_name << "\", false, true))) {\n"
-      "    return false;\n"
-      "  }\n";
-    generate_write("value." + field_name + (use_cxx11 ? "()" : ""), field->field_type(), "i");
-    be_global->impl_ <<
-      "  if (!value_writer.end_struct_member()) {\n"
-      "    return false;\n"
-      "  }\n";
-  }
-  be_global->impl_ <<
-    "  return value_writer.end_struct();\n";
-  return true;
-}
-
 bool value_writer_generator::gen_struct(AST_Structure* node,
                                         UTL_ScopedName* name,
                                         const std::vector<AST_Field*>& fields,
@@ -355,7 +394,6 @@ bool value_writer_generator::gen_struct(AST_Structure* node,
   return true;
 }
 
-
 bool value_writer_generator::gen_union(AST_Union* u,
                                        UTL_ScopedName* name,
                                        const std::vector<AST_UnionBranch*>& branches,
@@ -365,38 +403,18 @@ bool value_writer_generator::gen_union(AST_Union* u,
   be_global->add_include("dds/DCPS/ValueWriter.h", BE_GlobalData::STREAM_H);
 
   const std::string type_name = scoped(name);
+  const ExtensibilityKind ek = be_global->extensibility(u);
 
-  {
-    NamespaceGuard guard;
-
-    Function write("vwrite", "bool");
-    write.addArg("value_writer", "OpenDDS::DCPS::ValueWriter&");
-    write.addArg("value", "const " + type_name + "&");
-    write.endArgs();
-
-    const ExtensibilityKind ek = be_global->extensibility(u);
-    be_global->impl_ <<
-      "  if (!value_writer.begin_union(" << extensibility_kind(ek) << ")) {\n"
-      "    return false;\n"
-      "  }\n";
-    const bool must_understand = be_global->is_effectively_must_understand(discriminator);
-    be_global->impl_ <<
-      "  if (!value_writer.begin_discriminator(MemberParam(0, " <<
-      (must_understand ? "true" : "false") << "))) {\n"
-      "    return false;\n"
-      "  }\n";
-    generate_write("value._d()" , discriminator, "i");
-    be_global->impl_ <<
-      "  if (!value_writer.end_discriminator()) {\n"
-      "    return false;\n"
-      "  }\n";
-
-    generateSwitchForUnion(u, "value._d()", branch_helper, branches,
-                           discriminator, "", "", type_name.c_str(),
-                           false, false);
-    be_global->impl_ <<
-      "  return value_writer.end_union();\n";
+  NamespaceGuard guard;
+  if (!gen_union_i(u, branches, discriminator, ek, FieldFilter_All) ||
+      !gen_union_i(u, branches, discriminator, ek, FiedlFilter_NestedKeyOnly)) {
+    return false;
   }
 
+  if (be_global->is_topic_type(u)) {
+    if (!gen_union_i(u, branches, discriminator, ek, FieldFilter_KeyOnly)) {
+      return false;
+    }
+  }
   return true;
 }
