@@ -45,7 +45,7 @@ TEST(OptionalTests, SerializationXCDR2Empty)
 {
   const uint8_t expected[] = {
     // Delimeter
-    0x00, 0x00, 0x00, 0x06, // +4 = 4
+    0x00, 0x00, 0x00, 0x07, // +4 = 4
 
     // bool_field
     0x00, // +1 = 5
@@ -62,6 +62,8 @@ TEST(OptionalTests, SerializationXCDR2Empty)
     // str_field
     0x00, // +1 = 9
 
+    0x00,
+
     0x00
   };
 
@@ -73,7 +75,7 @@ TEST(OptionalTests, SerializationXCDR2NotEmpty)
 {
   const uint8_t expected[] = {
     // Delimeter
-    0x00, 0x00, 0x00, 0x19, // +4 = 4
+    0x00, 0x00, 0x00, 0x1a, // +4 = 4
 
     // bool_field
     0x00,
@@ -91,6 +93,9 @@ TEST(OptionalTests, SerializationXCDR2NotEmpty)
     0x00, // ?
     0x00, 0x00, 0x00, 0x0c, // +4 = 14
     'H', 'e', 'l', 'l', 'o', ' ', 'W', 'o', 'r', 'l', 'd', '\0', // +12 = 26
+    0x00,
+
+    // struct_field
     0x00
   };
 
