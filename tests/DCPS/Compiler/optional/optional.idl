@@ -17,7 +17,7 @@ module optional {
 
     // TODO(tyler) typesupport failure
     // return getMetaStruct< ::optional::TestStruct>().getValue(&typed._struct_field().value, field + 13);
-    // @optional TestStruct struct_field;
+    @optional TestStruct struct_field;
 
     // TODO(tyler) should this be possible
     // Code generates a IDL::DistinctType<...>
