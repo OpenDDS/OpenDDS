@@ -798,7 +798,7 @@ namespace {
     AST_Type* elem = resolveActualType(seq->base_type());
     TryConstructFailAction try_construct = be_global->sequence_element_try_construct(seq);
 
-    Classification elem_cls = classify(elem);
+    const Classification elem_cls = classify(elem);
     const bool primitive = elem_cls & CL_PRIMITIVE;
     if (!elem->in_main_file()) {
       if (elem->node_type() == AST_Decl::NT_pre_defined) {
@@ -1221,7 +1221,7 @@ namespace {
 
     AST_Type* elem = resolveActualType(arr->base_type());
     TryConstructFailAction try_construct = be_global->array_element_try_construct(arr);
-    Classification elem_cls = classify(elem);
+    const Classification elem_cls = classify(elem);
     const bool primitive = elem_cls & CL_PRIMITIVE;
     if (!elem->in_main_file()
         && elem->node_type() != AST_Decl::NT_pre_defined) {
@@ -1561,7 +1561,7 @@ namespace {
       if (type == type_stack[i]) return false;
     }
     type_stack.push_back(type);
-    Classification fld_cls = classify(type);
+    const Classification fld_cls = classify(type);
     if ((fld_cls & CL_STRING) && !(fld_cls & CL_BOUNDED)) {
       bounded = false;
     } else if (fld_cls & CL_STRUCTURE) {
@@ -2819,7 +2819,7 @@ namespace {
             "        if (!" << generate_field_stream(
             indent, field, ">> stru" + value_access, wrap_nested_key_only, intro) << ") {\n";
           AST_Type* const field_type = resolveActualType(field->field_type());
-          Classification fld_cls = classify(field_type);
+          const Classification fld_cls = classify(field_type);
 
           if (use_cxx11) {
             field_name += "()";
@@ -3382,7 +3382,7 @@ marshal_generator::gen_field_getValueFromSerialized(AST_Structure* node, const s
       const OpenDDS::XTypes::MemberId id = be_global->get_id(field);
       std::string field_name = field->local_name()->get_string();
       AST_Type* const field_type = resolveActualType(field->field_type());
-      Classification fld_cls = classify(field_type);
+      const Classification fld_cls = classify(field_type);
 
       cases << "        case " << id << ": {\n";
       if (fld_cls & CL_SCALAR) {
@@ -3466,7 +3466,7 @@ marshal_generator::gen_field_getValueFromSerialized(AST_Structure* node, const s
     size_t size = 0;
     std::string field_name = field->local_name()->get_string();
     AST_Type* const field_type = resolveActualType(field->field_type());
-    Classification fld_cls = classify(field_type);
+    const Classification fld_cls = classify(field_type);
     if (fld_cls & CL_SCALAR) {
       const std::string cxx_type = to_cxx_type(field_type, size);
       const std::string val = (fld_cls & CL_STRING) ? (use_cxx11 ? "val" : "val.out()")
@@ -3847,7 +3847,7 @@ bool marshal_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
   NamespaceGuard ng;
   be_global->add_include("dds/DCPS/Serializer.h");
   string cxx = scoped(name); // name as a C++ class
-  Classification disc_cls = classify(discriminator);
+  const Classification disc_cls = classify(discriminator);
 
   const ExtensibilityKind exten = be_global->extensibility(node);
   const bool not_final = exten != extensibilitykind_final;

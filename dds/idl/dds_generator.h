@@ -504,7 +504,9 @@ inline std::string to_cxx_type(AST_Type* type, std::size_t& size)
   const AstTypeClassification::Classification cls = AstTypeClassification::classify(type);
   if (cls & AstTypeClassification::CL_ENUM) {
     size = 4;
-    return "ACE_CDR::ULong";
+    // Using the XTypes definition of Enums, this type is signed.
+    // It contradicts the OMG standard CDR definition.
+    return "ACE_CDR::Long";
   }
   if (cls & AstTypeClassification::CL_STRING) {
     return string_type(cls);
