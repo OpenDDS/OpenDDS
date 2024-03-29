@@ -139,40 +139,31 @@ namespace {
   void generate_read(const std::string& expression, const std::string& accessor,
                      AST_Type* type, const std::string& idx, int level, bool optional)
   {
-    const std::string indent(level * 2, ' ');
     AST_Type* const actual = resolveActualType(type);
-
     const Classification c = classify(actual);
-    const std::string tmp_name = scoped(type->name());
-    const bool create_tmp  = optional && !(c & CL_STRING);
 
-    const std::string var_name = create_tmp ? "tmp" : expression + accessor;
-    if (create_tmp) {
-      be_global->impl_ << indent << tmp_name << " tmp;\n";
+    const std::string indent(level * 2 + (optional ? 2 : 0), ' ');
+    if (optional) {
+      be_global->impl_ <<
+        indent.substr(0, indent.size() - 2) << "if (value_reader.member_has_value()) {\n";
     }
     
-    if (c & CL_SEQUENCE) {
-      AST_Sequence* const sequence = dynamic_cast<AST_Sequence*>(actual);
-      sequence_helper(var_name, sequence, idx, level);
-
-      if (create_tmp) {
-        be_global->impl_ <<
-          indent << expression << accessor << " = std::move(tmp);\n";
-      }
-      return;
-
-    } else if (c & CL_ARRAY) {
-      AST_Array* const array = dynamic_cast<AST_Array*>(actual);
-      array_helper(var_name, array, 0, idx, level);
-      if (create_tmp) {
-        be_global->impl_ <<
-          indent << expression << accessor << " = std::move(tmp);\n";
-      }
-      return;
+    const bool create_tmp  = optional && !(c & CL_STRING);   
+    const std::string var_name = create_tmp ? "tmp" : expression + accessor;
+    if (create_tmp) {
+      const std::string tmp_type = scoped(type->name());
+      be_global->impl_ <<
+        indent << tmp_type << " tmp;\n";
     }
 
     const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
-    if (c & CL_FIXED) {
+    if (c & CL_SEQUENCE) {
+      AST_Sequence* const sequence = dynamic_cast<AST_Sequence*>(actual);
+      sequence_helper(var_name, sequence, idx, level);
+    } else if (c & CL_ARRAY) {
+      AST_Array* const array = dynamic_cast<AST_Array*>(actual);
+      array_helper(var_name, array, 0, idx, level);
+    } else if (c & CL_FIXED) {
       be_global->impl_ <<
         indent << "::ACE_CDR::Fixed fixed;\n" <<
         indent << "if (!value_reader.read_fixed(fixed)) return false;\n" <<
@@ -212,6 +203,11 @@ namespace {
     if (create_tmp) {
       be_global->impl_ <<
         indent << expression << accessor << " = std::move(tmp);\n";
+    }
+
+    if (optional) {
+      be_global->impl_ <<
+        indent.substr(0, indent.size() - 2) << "}\n";
     }
   }
 
