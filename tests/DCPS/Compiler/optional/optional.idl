@@ -17,7 +17,7 @@ module optional {
 
     @optional TestStruct struct_field;
 
-    // TODO(tyler) should this be possible
+    // TODO(tyler) should this be possible? Maybe leave this for a future PR, typedefed sequences work
     // Code generates a IDL::DistinctType<...>
     // @optional sequence<int32> seqInt;
   };

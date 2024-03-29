@@ -117,7 +117,7 @@ TEST(OptionalTests, JsonValueWriterReader) {
 
   optional::OptionalMembers expected{};
   expected.bool_field(true);
-  //expected.short_field(0x1234); // FIXME: Currently crashes with bad optional access
+  expected.short_field(0x1234);
   expected.str_field("Hello World");
 
   vwrite(jvw, expected);
@@ -130,12 +130,14 @@ TEST(OptionalTests, JsonValueWriterReader) {
 
   EXPECT_TRUE(expected.bool_field() == got.bool_field());
   EXPECT_TRUE(expected.short_field() == got.short_field());
-  // EXPECT_TRUE(expected.bool_field() == got.bool_field());
-  // EXPECT_TRUE(expected.bool_field() == got.bool_field());
-  // EXPECT_TRUE(expected.bool_field() == got.bool_field());
-  // EXPECT_TRUE(expected.bool_field() == got.bool_field());
-
-  //EXPECT_TRUE(false);
+  EXPECT_TRUE(expected.int32_field() == got.int32_field());
+  EXPECT_TRUE(expected.int64_field() == got.int64_field());
+  EXPECT_TRUE(expected.str_field() == got.str_field());
+  EXPECT_TRUE(expected.seq_field() == got.seq_field());
+  EXPECT_TRUE(expected.struct_field().has_value() == got.struct_field().has_value());
+  if (expected.struct_field().has_value()) {
+    EXPECT_TRUE(expected.struct_field().value().octect_field() == got.struct_field().value().octect_field());
+  }
 }
 
 int main(int argc, char ** argv)

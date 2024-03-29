@@ -140,6 +140,7 @@ namespace {
                      AST_Type* type, const std::string& idx, int level, bool optional)
   {
     AST_Type* const actual = resolveActualType(type);
+
     const Classification c = classify(actual);
 
     const std::string indent(level * 2 + (optional ? 2 : 0), ' ');
@@ -328,7 +329,6 @@ bool value_reader_generator::gen_struct(AST_Structure* node,
       "  XTypes::MemberId member_id;\n"
       "  while (value_reader.members_remaining()) {\n"
       "    if (!value_reader.begin_struct_member(member_id, helper)) return false;\n"
-      "    if (!value_reader.member_has_value()) continue;\n" // TODO(tyler) Will this be okay here, if a value isn't an optional, rather wrap the contents of every optional member's case
       "    switch (member_id) {\n";
 
     for (std::vector<AST_Field*>::const_iterator pos = fields.begin(), limit = fields.end();
@@ -338,8 +338,7 @@ bool value_reader_generator::gen_struct(AST_Structure* node,
       be_global->impl_ <<
         "    case " << be_global->get_id(field) << ": {\n";
 
-      const std::string expression = "value." + field_name;
-      generate_read(expression, accessor, field->field_type(), "i", 3, be_global->is_optional(field));
+      generate_read("value." + field_name, accessor, field->field_type(), "i", 3, be_global->is_optional(field));
 
       be_global->impl_ <<
         "      break;\n"

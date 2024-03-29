@@ -1652,8 +1652,8 @@ namespace {
       return indent + "serialized_size(encoding, size, " + wrapper.ref() + ");\n";
     }
     return findSizeCommon(
-        indent, field, field->local_name()->get_string(), field->field_type(), prefix,
-        wrap_nested_key_only, intro);
+      indent, field, field->local_name()->get_string(), field->field_type(), prefix,
+      wrap_nested_key_only, intro);
   }
 
   // common to both fields (in structs) and branches (in unions)
