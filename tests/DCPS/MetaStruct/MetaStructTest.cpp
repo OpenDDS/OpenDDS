@@ -83,7 +83,7 @@ T enumToString(const T& t) { return t; }
 
 const char* enumToString(MyEnum e)
 {
-  return OpenDDS::DCPS::gen_MyEnum_names[e];
+  return OpenDDS::DCPS::gen_MyEnum_helper->get_name(e);
 }
 
 template<typename T, typename T2>

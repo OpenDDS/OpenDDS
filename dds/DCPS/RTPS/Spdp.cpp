@@ -522,10 +522,16 @@ void Spdp::process_location_updates_i(const DiscoveredParticipantIter& iter, con
     ACE_DEBUG((LM_DEBUG, "(%P|%t) DEBUG: Spdp::process_location_updates_i: %@ %C has %B location update(s) force_publish=%d reason=%C\n", this, LogGuid(iter->first).c_str(), location_updates.size(), force_publish, reason));
   }
 
+  const DCPS::TimeDuration leaseDuration = rtps_duration_to_time_duration(iter->second.pdata_.leaseDuration,
+                                             iter->second.pdata_.participantProxy.protocolVersion,
+                                             iter->second.pdata_.participantProxy.vendorId);
+
+  DCPS::ParticipantLocationBuiltinTopicData& location_data = iter->second.location_data_;
+  location_data.lease_duration = leaseDuration.to_dds_duration();
+
   bool published = false;
   for (DiscoveredParticipant::LocationUpdateList::const_iterator pos = location_updates.begin(),
-         limit = location_updates.end(); iter != participants_.end() && pos != limit; ++pos) {
-    DCPS::ParticipantLocationBuiltinTopicData& location_data = iter->second.location_data_;
+         limit = location_updates.end(); pos != limit; ++pos) {
 
     OPENDDS_STRING addr = "";
     const DCPS::ParticipantLocation old_mask = location_data.location;
@@ -572,12 +578,8 @@ void Spdp::process_location_updates_i(const DiscoveredParticipantIter& iter, con
       break;
     }
 
-    const DDS::Time_t expr =
-      (
-       pos->timestamp_ - rtps_duration_to_time_duration(iter->second.pdata_.leaseDuration,
-                                                        iter->second.pdata_.participantProxy.protocolVersion,
-                                                        iter->second.pdata_.participantProxy.vendorId)
-       ).to_dds_time();
+    const DDS::Time_t expr = (pos->timestamp_ - leaseDuration).to_dds_time();
+
     if ((location_data.location & DCPS::LOCATION_LOCAL) && DCPS::operator<(location_data.local_timestamp, expr)) {
       location_data.location &= ~(DCPS::LOCATION_LOCAL);
       location_data.change_mask |= DCPS::LOCATION_LOCAL;
@@ -2409,6 +2411,19 @@ Spdp::SpdpTransport::SpdpTransport(DCPS::RcHandle<Spdp> outer)
     outer->guid_.guidPrefix[9] = hdr_.guidPrefix[9];
   }
 #endif
+
+  const ACE_CDR::ULong userTag = outer->config_->spdp_user_tag();
+  if (userTag) {
+    user_tag_.smHeader.submessageId = SUBMESSAGE_KIND_USER_TAG;
+    user_tag_.smHeader.flags = FLAG_E;
+    user_tag_.smHeader.submessageLength = DCPS::uint32_cdr_size;
+    user_tag_.userTag = userTag;
+  } else {
+    user_tag_.smHeader.submessageId = 0;
+    user_tag_.smHeader.flags = 0;
+    user_tag_.smHeader.submessageLength = 0;
+    user_tag_.userTag = 0;
+  }
 }
 
 void
@@ -2713,7 +2728,7 @@ Spdp::SpdpTransport::write_i(WriteFlags flags)
   if (!ParameterListConverter::to_param_list(pdata, plist)) {
     if (DCPS::DCPS_debug_level > 0) {
       ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
-        ACE_TEXT("Spdp::SpdpTransport::write() - ")
+        ACE_TEXT("Spdp::SpdpTransport::write_i: ")
         ACE_TEXT("failed to convert from SPDPdiscoveredParticipantData ")
         ACE_TEXT("to ParameterList\n")));
     }
@@ -2735,7 +2750,7 @@ Spdp::SpdpTransport::write_i(WriteFlags flags)
     if (!ParameterListConverter::to_param_list(ai_map, plist)) {
       if (DCPS::DCPS_debug_level > 0) {
         ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
-                  ACE_TEXT("Spdp::SpdpTransport::write() - ")
+                  ACE_TEXT("Spdp::SpdpTransport::write_i: ")
                   ACE_TEXT("failed to convert from ICE::AgentInfo ")
                   ACE_TEXT("to ParameterList\n")));
       }
@@ -2747,11 +2762,30 @@ Spdp::SpdpTransport::write_i(WriteFlags flags)
   wbuff_.reset();
   DCPS::Serializer ser(&wbuff_, encoding_plain_native);
   DCPS::EncapsulationHeader encap(ser.encoding(), DCPS::MUTABLE);
-  if (!(ser << hdr_) || !(ser << data_) || !(ser << encap) || !(ser << plist)) {
-    if (DCPS::DCPS_debug_level > 0) {
+  if (!(ser << hdr_)) {
+    if (log_level >= LogLevel::Error) {
       ACE_ERROR((LM_ERROR,
-        ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::write() - ")
-        ACE_TEXT("failed to serialize headers for SPDP\n")));
+        ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::write_i: ")
+        ACE_TEXT("failed to serialize RTPS header for SPDP\n")));
+    }
+    return;
+  }
+  // The implementation-specific UserTagSubmessage is designed to directly
+  // follow the RTPS Message Header.  No other submessages should be added
+  // before it.  This enables filtering based on a fixed offset.
+  if (user_tag_.smHeader.submessageId && !(ser << user_tag_)) {
+    if (log_level >= LogLevel::Error) {
+      ACE_ERROR((LM_ERROR,
+        ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::write_i: ")
+        ACE_TEXT("failed to serialize user tag for SPDP\n")));
+    }
+    return;
+  }
+  if (!(ser << data_) || !(ser << encap) || !(ser << plist)) {
+    if (log_level >= LogLevel::Error) {
+      ACE_ERROR((LM_ERROR,
+        ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::write_i: ")
+        ACE_TEXT("failed to serialize data submessage for SPDP\n")));
     }
     return;
   }

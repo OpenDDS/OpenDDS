@@ -1020,6 +1020,22 @@ ConfigStoreImpl::get_section_values(const String& prefix) const
   return retval;
 }
 
+void
+ConfigStoreImpl::unset_section(const String& prefix) const
+{
+  const String cprefix = ConfigPair::canonicalize(prefix);
+
+  ConfigReader::SampleSequence samples;
+  DCPS::InternalSampleInfoSequence infos;
+  config_reader_->read(samples, infos, DDS::LENGTH_UNLIMITED,
+                       DDS::ANY_SAMPLE_STATE, DDS::ANY_VIEW_STATE, DDS::ALIVE_INSTANCE_STATE);
+  for (ConfigReader::SampleSequence::const_iterator pos = samples.begin(), limit = samples.end(); pos != limit; ++pos) {
+    if (pos->key_has_prefix(cprefix)) {
+      config_writer_->unregister_instance(*pos);
+    }
+  }
+}
+
 DDS::DataWriterQos ConfigStoreImpl::datawriter_qos()
 {
   return DataWriterQosBuilder().durability_transient_local();

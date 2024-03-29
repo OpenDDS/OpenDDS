@@ -114,6 +114,9 @@ public:
     UTL_ScopedName* sn, const char* sep, EscapeContext cxt = EscapeContext_Normal);
   static std::string module_scope_helper(
     UTL_ScopedName* sn, const char* sep, EscapeContext cxt = EscapeContext_Normal);
+
+  static bool gen_enum_helper(AST_Enum* node, UTL_ScopedName* name,
+    const std::vector<AST_EnumVal*>& contents, const char* repoid);
 };
 
 inline std::string canonical_name(UTL_ScopedName* sn)
@@ -232,10 +235,14 @@ struct ScopedNamespaceGuard  {
   ScopedNamespaceGuard(UTL_ScopedName* name, std::ostream& os,
                        const char* keyword = "namespace")
     : os_(os)
-    , semi_()
     , n_(0)
   {
     const bool idl = !std::strcmp(keyword, "module");
+    const ACE_CString vn_begin = be_global->versioning_begin();
+    if (!idl && !vn_begin.empty()) {
+      os_ << vn_begin << '\n';
+      suffix_ = (be_global->versioning_end() + '\n').c_str();
+    }
     const EscapeContext ec = idl ? EscapeContext_ForGenIdl : EscapeContext_Normal;
     for (n_ = 0; name->tail();
          name = static_cast<UTL_ScopedName*>(name->tail())) {
@@ -250,11 +257,14 @@ struct ScopedNamespaceGuard  {
 
   ~ScopedNamespaceGuard()
   {
-    for (int i = 0; i < n_; ++i) os_ << '}' << semi_ << '\n';
+    for (int i = 0; i < n_; ++i) {
+      os_ << '}' << semi_ << '\n';
+    }
+    os_ << suffix_;
   }
 
   std::ostream& os_;
-  std::string semi_;
+  std::string semi_, suffix_;
   int n_;
 };
 
@@ -528,7 +538,9 @@ inline std::string to_cxx_type(AST_Type* type, std::size_t& size)
   const AstTypeClassification::Classification cls = AstTypeClassification::classify(type);
   if (cls & AstTypeClassification::CL_ENUM) {
     size = 4;
-    return "ACE_CDR::ULong";
+    // Using the XTypes definition of Enums, this type is signed.
+    // It contradicts the OMG standard CDR definition.
+    return "ACE_CDR::Long";
   }
   if (cls & AstTypeClassification::CL_STRING) {
     return string_type(cls);

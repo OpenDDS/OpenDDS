@@ -238,6 +238,9 @@ public:
   typedef OPENDDS_MAP(String, String) StringMap;
   StringMap get_section_values(const String& prefix) const;
 
+  /// Remove the section key and all section values.
+  void unset_section(const String& prefix) const;
+
   static DDS::DataWriterQos datawriter_qos();
   static DDS::DataReaderQos datareader_qos();
 

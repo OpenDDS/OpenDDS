@@ -83,6 +83,8 @@ TEST(dds_DCPS_RTPS_DiscoveredEntities, DiscoveredParticipant_ctor)
     EXPECT_EQ(uut.location_data_.ice6_timestamp.nanosec, 0u);
     EXPECT_EQ(uut.location_data_.relay6_timestamp.sec, 0);
     EXPECT_EQ(uut.location_data_.relay6_timestamp.nanosec, 0u);
+    EXPECT_EQ(uut.location_data_.lease_duration.sec, 0);
+    EXPECT_EQ(uut.location_data_.lease_duration.nanosec, 0u);
 
 #ifdef OPENDDS_SECURITY
     EXPECT_EQ(uut.have_spdp_info_, false);

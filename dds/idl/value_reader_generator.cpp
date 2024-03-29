@@ -241,40 +241,21 @@ namespace {
 
 bool value_reader_generator::gen_enum(AST_Enum*,
                                       UTL_ScopedName* name,
-                                      const std::vector<AST_EnumVal*>& contents,
+                                      const std::vector<AST_EnumVal*>&,
                                       const char*)
 {
-  be_global->add_include("dds/DCPS/Util.h", BE_GlobalData::STREAM_H);
   be_global->add_include("dds/DCPS/ValueReader.h", BE_GlobalData::STREAM_H);
 
   const std::string type_name = scoped(name);
 
-  {
-    NamespaceGuard guard;
-
-    Function read("vread", "bool");
-    read.addArg("value_reader", "OpenDDS::DCPS::ValueReader&");
-    read.addArg("value", type_name + "&");
-    read.endArgs();
-
-    be_global->impl_ <<
-      "  static const ListEnumHelper::Pair pairs[] = {";
-
-    for (size_t i = 0; i != contents.size(); ++i) {
-      if (i) {
-        be_global->impl_ << ',';
-      }
-      const std::string idl_name = canonical_name(contents[i]);
-      be_global->impl_ <<
-        '{' << '"' << idl_name << '"' << ',' << contents[i]->constant_value()->ev()->u.eval << '}';
-    }
-
-    be_global->impl_ <<
-      ",{0,0}};\n"
-      "  ListEnumHelper helper(pairs);\n"
-      "  return value_reader.read_enum(value, helper);\n";
-  }
-
+  NamespaceGuard guard;
+  Function read("vread", "bool");
+  read.addArg("value_reader", "OpenDDS::DCPS::ValueReader&");
+  read.addArg("value", type_name + "&");
+  read.endArgs();
+  be_global->impl_ <<
+    "  return value_reader.read_enum(value, * ::OpenDDS::DCPS::gen_"
+    << scoped_helper(name, "_") << "_helper);\n";
   return true;
 }
 
@@ -380,18 +361,16 @@ bool value_reader_generator::gen_union(AST_Union* u,
     be_global->impl_ <<
       "  if (!value_reader.begin_union(" << extensibility_kind(ek) << ")) return false;\n"
       "  if (!value_reader.begin_discriminator()) return false;\n"
-      "  {\n"
-      "    " << scoped(discriminator->name()) << " d;\n";
+      " " << scoped(discriminator->name()) << " d;\n";
     generate_read("d", "", discriminator, "i", 2);
     be_global->impl_ <<
-      "    value._d(d);\n"
-      "  }\n"
       "  if (!value_reader.end_discriminator()) return false;\n";
 
-    generateSwitchForUnion(u, "value._d()", branch_helper, branches,
+    generateSwitchForUnion(u, "d", branch_helper, branches,
                            discriminator, "", "", type_name.c_str(),
                            false, false);
     be_global->impl_ <<
+      "  value._d(d);\n"
       "  if (!value_reader.end_union()) return false;\n"
       "  return true;\n";
   }
