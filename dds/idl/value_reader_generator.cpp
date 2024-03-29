@@ -147,8 +147,8 @@ namespace {
       be_global->impl_ <<
         indent.substr(0, indent.size() - 2) << "if (value_reader.member_has_value()) {\n";
     }
-    
-    const bool create_tmp  = optional && !(c & CL_STRING);   
+
+    const bool create_tmp  = optional && !(c & CL_STRING);
     const std::string var_name = create_tmp ? "tmp" : expression + accessor;
     if (create_tmp) {
       const std::string tmp_type = scoped(type->name());
