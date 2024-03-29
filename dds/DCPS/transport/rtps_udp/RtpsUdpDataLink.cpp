@@ -1968,7 +1968,13 @@ RtpsUdpDataLink::RtpsReader::process_heartbeat_i(const RTPS::HeartBeatSubmessage
         log_progress("RTPS reader/writer association complete", id_, writer->id_, writer->participant_discovered_at_);
       }
       log_remote_counts("process_heartbeat_i");
+      first_ever_hb = true;
+    }
 
+
+    ACE_CDR::ULong cumulative_bits_added = 0;
+    if (!writer->recvd_.empty() || first_ever_hb) {
+      // "gap" everything before the heartbeat range
       const SequenceRange sr(zero, hb_first.previous());
       writer->recvd_.insert(sr);
       while (!writer->held_.empty() && writer->held_.begin()->first <= sr.second) {
@@ -1978,11 +1984,7 @@ RtpsUdpDataLink::RtpsReader::process_heartbeat_i(const RTPS::HeartBeatSubmessage
         writer->recvd_.insert(it->first);
       }
       link->receive_strategy()->remove_fragments(sr, writer->id_);
-      first_ever_hb = true;
-    }
 
-    ACE_CDR::ULong cumulative_bits_added = 0;
-    if (!writer->recvd_.empty()) {
       writer->hb_last_ = std::max(writer->hb_last_, hb_last);
       gather_ack_nacks_i(writer, link, !is_final, meta_submessages, cumulative_bits_added);
     }
