@@ -15,8 +15,6 @@ module optional {
     @optional string str_field;
     @optional seq_int_t seq_field;
 
-    // TODO(tyler) typesupport failure
-    // return getMetaStruct< ::optional::TestStruct>().getValue(&typed._struct_field().value, field + 13);
     @optional TestStruct struct_field;
 
     // TODO(tyler) should this be possible
