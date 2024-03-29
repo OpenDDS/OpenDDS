@@ -21,7 +21,7 @@ using namespace AstTypeClassification;
 namespace {
 
   void generate_read(const std::string& expression, const std::string& accessor,
-                     AST_Type* type, const std::string& idx, int level = 1);
+                     AST_Type* type, const std::string& idx, int level = 1, bool optional = false);
 
   std::string primitive_type(AST_PredefinedType::PredefinedType pt)
   {
@@ -136,41 +136,42 @@ namespace {
       indent << "if (!value_reader.end_sequence()) return false;\n";
   }
 
-  void optional_helper(const std::string& expression, std::string accessor, AST_Type* type, const std::string& idx, int level)
+  void generate_read(const std::string& expression, const std::string& accessor,
+                     AST_Type* type, const std::string& idx, int level, bool optional)
   {
     const std::string indent(level * 2, ' ');
-
-    AST_Type* const actual = resolveActualType(type);
-    const Classification c = classify(actual);
-    const std::string tmp_value_type = (c & CL_STRING) ? (c & CL_WIDE ? "WString" : "String") : scoped(type->name());
-    be_global->impl_ <<
-      indent << tmp_value_type << " tmp;\n";
-
-    generate_read("tmp", "", type, idx + "i", level);
-
-    be_global->impl_ <<
-          indent << expression << accessor << " = std::move(tmp);\n";
-  }
-
-  void generate_read(const std::string& expression, const std::string& accessor,
-                     AST_Type* type, const std::string& idx, int level)
-  {
     AST_Type* const actual = resolveActualType(type);
 
     const Classification c = classify(actual);
+    const std::string tmp_name = scoped(type->name());
+    const bool create_tmp  = optional && !(c & CL_STRING);
+
+    const std::string var_name = create_tmp ? "tmp" : expression + accessor;
+    if (create_tmp) {
+      be_global->impl_ << indent << tmp_name << " tmp;\n";
+    }
+    
     if (c & CL_SEQUENCE) {
       AST_Sequence* const sequence = dynamic_cast<AST_Sequence*>(actual);
-      sequence_helper(expression + accessor, sequence, idx, level);
+      sequence_helper(var_name, sequence, idx, level);
+
+      if (create_tmp) {
+        be_global->impl_ <<
+          indent << expression << accessor << " = std::move(tmp);\n";
+      }
       return;
 
     } else if (c & CL_ARRAY) {
       AST_Array* const array = dynamic_cast<AST_Array*>(actual);
-      array_helper(expression + accessor, array, 0, idx, level);
+      array_helper(var_name, array, 0, idx, level);
+      if (create_tmp) {
+        be_global->impl_ <<
+          indent << expression << accessor << " = std::move(tmp);\n";
+      }
       return;
     }
 
     const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
-    const std::string indent(level * 2, ' ');
     if (c & CL_FIXED) {
       be_global->impl_ <<
         indent << "::ACE_CDR::Fixed fixed;\n" <<
@@ -200,12 +201,17 @@ namespace {
           indent << "}\n";
       } else {
         be_global->impl_ <<
-          indent << "if (!value_reader.read_" << primitive_type(pt) << '(' << expression << accessor << ")) return false;\n";
+          indent << "if (!value_reader.read_" << primitive_type(pt) << '(' << var_name << ")) return false;\n";
       }
     } else {
       be_global->impl_ <<
-        indent << "if (!vread(value_reader, " << expression << accessor <<
+        indent << "if (!vread(value_reader, " << var_name <<
           ")) return false;\n";
+    }
+
+    if (create_tmp) {
+      be_global->impl_ <<
+        indent << expression << accessor << " = std::move(tmp);\n";
     }
   }
 
@@ -337,11 +343,7 @@ bool value_reader_generator::gen_struct(AST_Structure* node,
         "    case " << be_global->get_id(field) << ": {\n";
 
       const std::string expression = "value." + field_name;
-      if (be_global->is_optional(field)) {
-        optional_helper(expression, accessor, field->field_type(), "i", 3);
-      } else {
-        generate_read(expression, accessor, field->field_type(), "i", 3);
-      }
+      generate_read(expression, accessor, field->field_type(), "i", 3, be_global->is_optional(field));
 
       be_global->impl_ <<
         "      break;\n"
