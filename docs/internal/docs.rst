@@ -617,7 +617,7 @@ Turns into:
         :no-contents-entry:
         :no-index-entry:
 
-        Sections with discriminators require them in the reference targets: cfg:sec:`server@linux`, :cfg:key:`[server@linux]distro`
+        Sections with discriminators require them in the reference targets: :cfg:sec:`server@linux`, :cfg:key:`[server@linux]distro`
 
   .. cfg:sec:: server@linux/<name>
     :no-contents-entry:

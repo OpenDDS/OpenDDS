@@ -125,20 +125,25 @@ def key_text(sec_name, sec_disc, key_name, insert=''):
 
 
 # This should be equivalent to ConfigPair::canonicalize
-def key_canonicalize(*parts):
-    key = '_'.join(filter(None, parts))
-
+def name_canonicalize(name):
     # Replace everything that's not a letter, number, or underscore
-    key = re.sub(r'[^\w]', '_', key)
+    name = re.sub(r'[^\w]', '_', name)
 
     # Convert CamelCase to camel_case
-    key = re.sub(r'([A-Z][a-z])', r'_\1', key)
-    key = re.sub(r'([a-z])([A-Z])', r'\1_\2', key)
+    name = re.sub(r'([A-Z][a-z])', r'_\1', name)
+    name = re.sub(r'([a-z])([A-Z])', r'\1_\2', name)
 
     # Removed repeated underscores
-    key = re.sub(r'_+', r'_', key)
+    name = re.sub(r'_+', r'_', name)
 
-    return key.strip('_').upper()
+    return name.strip('_').upper()
+
+
+def key_canonicalize(sec_name, sec_args, key_name):
+    sec = name_canonicalize(sec_name)
+    if sec_args:
+        sec += '_' + sec_args
+    return sec + '_' + name_canonicalize(key_name)
 
 
 class ConfigKeyRefRole(XRefRole):
@@ -383,14 +388,14 @@ class TestConfigDomain(unittest.TestCase):
 
     def test_key_canonicalize(self):
         cases = {
-            ('~!abc.123__CamelCase/CAMELCase#$%',): 'ABC_123_CAMEL_CASE_CAMEL_CASE',
-            ('CamelCase',): 'CAMEL_CASE',
+            ('CamelCase', None, 'key'): 'CAMEL_CASE_KEY',
+            ('##CamelCase##', None, 'key'): 'CAMEL_CASE_KEY',
+            ('~!abc.123_''_CamelCase/CAMELCase#$%', None, 'key'): 'ABC_123_CAMEL_CASE_CAMEL_CASE_KEY',
+            ('sect', None, 'UseXTypes',): 'SECT_USE_X_TYPES',
+            ('sect', None, 'UseXYZTypes',): 'SECT_USE_XYZ_TYPES',
             ('TheSection', None, 'TheKey'): 'THE_SECTION_THE_KEY',
             ('TheSection', '', 'TheKey'): 'THE_SECTION_THE_KEY',
-            ('TheSection', 'TheInstance', 'TheKey'): 'THE_SECTION_THE_INSTANCE_THE_KEY',
-            ('##CamelCase##',): 'CAMEL_CASE',
-            ('UseXTypes',): 'USE_X_TYPES',
-            ('UseXYZTypes',): 'USE_XYZ_TYPES',
+            ('TheSection', '<instance-name>', 'TheKey'): 'THE_SECTION_<instance-name>_THE_KEY',
         }
 
         for args, expected in cases.items():
