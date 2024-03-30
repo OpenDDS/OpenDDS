@@ -43,7 +43,8 @@ def parse(what, regex, string, node, *ret):
     return m.groups()
 
 
-id_re = r'[\w-]+'
+id_re = r'[\$\w-]+'
+
 
 # cfg:sec =====================================================================
 
@@ -124,7 +125,9 @@ def key_text(sec_name, sec_disc, key_name, insert=''):
 
 
 # This should be equivalent to ConfigPair::canonicalize
-def key_canonicalize(key):
+def key_canonicalize(*parts):
+    key = '_'.join(filter(None, parts))
+
     # Replace everything that's not a letter, number, or underscore
     key = re.sub(r'[^\w]', '_', key)
 
@@ -195,7 +198,9 @@ class ConfigKey(CustomDomainObject):
         name, arguments = parse(self._full_name, r'(' + key_name_re + r')(?:=(.*))?', sig, self)
         sec = ctx.get_full_name()
         ctx.push(self, name, f'{sec}{name}', arguments=arguments)
-        ctx.get(-2, 'keys').append((name, self.get_location()))
+        sec_ctx = ctx.get(-2, 'keys')
+        if sec_ctx is not None:
+            sec_ctx.append((name, self.get_location()))
         return (arguments,)
 
     def create_signode(self, ctx, name, signode, arguments):
@@ -213,11 +218,7 @@ class ConfigKey(CustomDomainObject):
         rst = ViewList()
 
         # Config store key
-        key = key_canonicalize(ctx.get(-2, 'sec_name')) + '_'
-        sec_args = ctx.get(-2, 'arguments')
-        if sec_args:
-            key += sec_args + '_'
-        key += key_canonicalize(ctx.get_name())
+        key = key_canonicalize(ctx.get(-2, 'sec_name'), ctx.get(-2, 'arguments'), ctx.get_name())
         rst.append(f'| **Config store key**: ``{key}``', f'{__name__}', 1)
 
         # :required: flag
@@ -382,12 +383,15 @@ class TestConfigDomain(unittest.TestCase):
 
     def test_key_canonicalize(self):
         cases = {
-            '~!abc.123__CamelCase/CAMELCase#$%': 'ABC_123_CAMEL_CASE_CAMEL_CASE',
-            'CamelCase': 'CAMEL_CASE',
-            '##CamelCase##': 'CAMEL_CASE',
-            'UseXTypes': 'USE_X_TYPES',
-            'UseXYZTypes': 'USE_XYZ_TYPES',
+            ('~!abc.123__CamelCase/CAMELCase#$%',): 'ABC_123_CAMEL_CASE_CAMEL_CASE',
+            ('CamelCase',): 'CAMEL_CASE',
+            ('TheSection', None, 'TheKey'): 'THE_SECTION_THE_KEY',
+            ('TheSection', '', 'TheKey'): 'THE_SECTION_THE_KEY',
+            ('TheSection', 'TheInstance', 'TheKey'): 'THE_SECTION_THE_INSTANCE_THE_KEY',
+            ('##CamelCase##',): 'CAMEL_CASE',
+            ('UseXTypes',): 'USE_X_TYPES',
+            ('UseXYZTypes',): 'USE_XYZ_TYPES',
         }
 
-        for value, expected in cases.items():
-            self.assertEqual(key_canonicalize(value), expected)
+        for args, expected in cases.items():
+            self.assertEqual(key_canonicalize(*args), expected)
