@@ -192,47 +192,52 @@ void generate_write(const std::string& expression, AST_Type* type, const std::st
       return;
     }
 
-    be_global->impl_ << std::string(level * 2, ' ');
+    const std::string indent(level * 2, ' ');
 
     if (c & CL_FIXED) {
       be_global->impl_ <<
-        "if (!value_writer.write_fixed(" << expression << ".to_ace_fixed())) {\n"
-        "  return false;\n"
-        "}\n";
+        indent << "if (!value_writer.write_fixed(" << expression << ".to_ace_fixed())) {\n" <<
+        indent << "  return false;\n" <<
+        indent << "}\n";
 
     } else if (c & CL_STRING) {
       be_global->impl_ <<
-        "if (!value_writer.write_" << ((c & CL_WIDE) ? "w" : "") << "string(" << expression << ")) {\n"
-        "  return false;\n"
-        "}\n";
+        indent << "if (!value_writer.write_" << ((c & CL_WIDE) ? "w" : "") << "string(" << expression << ")) {\n" <<
+        indent << "  return false;\n" <<
+        indent << "}\n";
 
     } else if (c & CL_PRIMITIVE) {
       const AST_PredefinedType::PredefinedType pt =
         dynamic_cast<AST_PredefinedType*>(actual)->pt();
       be_global->impl_ <<
-        "if (!value_writer.write_" << primitive_type(pt) << '(' << expression << ")) {\n"
-        "  return false;\n"
-        "}\n";
+        indent << "if (!value_writer.write_" << primitive_type(pt) << '(' << expression << ")) {\n" <<
+        indent << "  return false;\n" <<
+        indent << "}\n";
 
     } else {
-      const std::string type_name = scoped(type->name());
       std::string value_expr = expression;
-      switch (field_filter) {
-      case FieldFilter_NestedKeyOnly:
-        value_expr = "nested_key_only_value(" + expression + ")";
-        be_global->impl_ <<
-          "const NestedKeyOnly<const" << type_name << "> " << value_expr << ";\n";
-        break;
-      case FieldFilter_KeyOnly:
-        value_expr = "key_only_value(" << expression << ")";
-        be_global->impl_ <<
-          "const KeyOnly<const" << type_name << "> " << value_expr << ";\n";
-        break;
+      if (!(c & CL_ENUM)) {
+        const std::string type_name = scoped(type->name());
+        switch (field_filter) {
+        case FieldFilter_NestedKeyOnly:
+          value_expr = "nested_key_only_value";
+          be_global->impl_ <<
+            indent << "const NestedKeyOnly<const" << type_name << "> " << value_expr << "(" << expression <<  ");\n";
+          break;
+        case FieldFilter_KeyOnly:
+          value_expr = "key_only_value";
+          be_global->impl_ <<
+            indent << "const KeyOnly<const" << type_name << "> " << value_expr << "(" << expression << ");\n";
+          break;
+        default:
+          break;
+        }
       }
+
       be_global->impl_ <<
-        "if (!vwrite(value_writer, " << value_expr << ")) {\n"
-        "  return false;\n"
-        "}\n";
+        indent << "if (!vwrite(value_writer, " << value_expr << ")) {\n" <<
+        indent << "  return false;\n" <<
+        indent << "}\n";
     }
   }
 
@@ -261,15 +266,41 @@ void generate_write(const std::string& expression, AST_Type* type, const std::st
     return "";
   }
 
-  bool gen_struct_i(AST_Structure* node, const std::string type_name,
+  std::string wrapped_type_name(const std::string& type_name, FieldFilter field_filter)
+  {
+    std::string wrapped_type_name;
+    switch (field_filter) {
+    case FieldFilter_All:
+      wrapped_type_name = type_name;
+      break;
+    case FieldFilter_NestedKeyOnly:
+      wrapped_type_name = "NestedKeyOnly<const" + type_name + ">";
+      break;
+    case FieldFilter_KeyOnly:
+      wrapped_type_name = "KeyOnly<const" + type_name + ">";
+      break;
+    }
+    return wrapped_type_name;
+  }
+
+  FieldFilter nested(FieldFilter filter_kind)
+  {
+    return filter_kind == FieldFilter_KeyOnly ? FieldFilter_NestedKeyOnly : filter_kind;
+  }
+
+  bool gen_struct_i(AST_Structure* node, const std::string& type_name,
                     bool use_cxx11, ExtensibilityKind ek, FieldFilter field_filter)
   {
+    const std::string wrapped_name = wrapped_type_name(type_name, field_filter);
     Function write("vwrite", "bool");
     write.addArg("value_writer", "OpenDDS::DCPS::ValueWriter&");
-    write.addArg("value", "const NestedKeyOnly<const " + type_name + ">&");
+    write.addArg("value", "const " + wrapped_name + "&");
     write.endArgs();
 
+    const std::string value_prefix = field_filter == FieldFilter_All ? "value." : "value.value.";
     const Fields fields(node, field_filter);
+    const FieldFilter nested_field_filter = nested(field_filter);
+
     be_global->impl_ <<
       "  if (!value_writer.begin_struct(" << extensibility_kind(ek) << ")) {\n"
       "    return false;\n"
@@ -279,14 +310,15 @@ void generate_write(const std::string& expression, AST_Type* type, const std::st
       const std::string field_name = field->local_name()->get_string();
       const std::string idl_name = canonical_name(field);
       const OpenDDS::XTypes::MemberId id = be_global->get_id(field);
-      const bool must_understand = be_global->is_effective_must_understand(field);
+      const bool must_understand = be_global->is_effectively_must_understand(field);
       // TODO: Update the arguments for MemberParam when @optional is available.
       be_global->impl_ <<
         "  if (!value_writer.begin_struct_member(MemberParam(" << id << ", " <<
         (must_understand ? "true" : "false") << ", \"" << idl_name << "\", false, true))) {\n"
         "    return false;\n"
         "  }\n";
-      generate_write("value." + field_name + (use_cxx11 ? "()" : ""), field->field_type(), "i");
+      generate_write(value_prefix + field_name + (use_cxx11 ? "()" : ""), field->field_type(), "i",
+                     1, nested_field_filter);
       be_global->impl_ <<
         "  if (!value_writer.end_struct_member()) {\n"
         "    return false;\n"
@@ -297,14 +329,17 @@ void generate_write(const std::string& expression, AST_Type* type, const std::st
     return true;
   }
 
-  bool gen_union_i(AST_Union* u, const std::vector<AST_UnionBranch*>& branches,
+  bool gen_union_i(AST_Union* u, const std::string& type_name,
+                   const std::vector<AST_UnionBranch*>& branches,
                    AST_Type* discriminator, ExtensibilityKind ek, FieldFilter filter_kind)
   {
+    const std::string wrapped_name = wrapped_type_name(type_name, filter_kind);
     Function write("vwrite", "bool");
     write.addArg("value_writer", "OpenDDS::DCPS::ValueWriter&");
-    write.addArg("value", "const " + type_name + "&");
+    write.addArg("value", "const " + wrapped_name + "&");
     write.endArgs();
 
+    const std::string value_prefix = filter_kind == FieldFilter_All ? "value." : "value.value.";
     be_global->impl_ <<
       "  if (!value_writer.begin_union(" << extensibility_kind(ek) << ")) {\n"
       "    return false;\n"
@@ -321,7 +356,7 @@ void generate_write(const std::string& expression, AST_Type* type, const std::st
         (must_understand ? "true" : "false") << "))) {\n"
         "    return false;\n"
         "  }\n";
-      generate_write("value._d()" , discriminator, "i", 1, filter_kind);
+      generate_write(value_prefix + "_d()" , discriminator, "i", 1, nested(filter_kind));
       be_global->impl_ <<
         "  if (!value_writer.end_discriminator()) {\n"
         "    return false;\n"
@@ -370,7 +405,7 @@ bool value_writer_generator::gen_typedef(AST_Typedef*,
 
 bool value_writer_generator::gen_struct(AST_Structure* node,
                                         UTL_ScopedName* name,
-                                        const std::vector<AST_Field*>& fields,
+                                        const std::vector<AST_Field*>& /*fields*/,
                                         AST_Type::SIZE_TYPE,
                                         const char*)
 {
@@ -406,13 +441,13 @@ bool value_writer_generator::gen_union(AST_Union* u,
   const ExtensibilityKind ek = be_global->extensibility(u);
 
   NamespaceGuard guard;
-  if (!gen_union_i(u, branches, discriminator, ek, FieldFilter_All) ||
-      !gen_union_i(u, branches, discriminator, ek, FiedlFilter_NestedKeyOnly)) {
+  if (!gen_union_i(u, type_name, branches, discriminator, ek, FieldFilter_All) ||
+      !gen_union_i(u, type_name, branches, discriminator, ek, FieldFilter_NestedKeyOnly)) {
     return false;
   }
 
   if (be_global->is_topic_type(u)) {
-    if (!gen_union_i(u, branches, discriminator, ek, FieldFilter_KeyOnly)) {
+    if (!gen_union_i(u, type_name, branches, discriminator, ek, FieldFilter_KeyOnly)) {
       return false;
     }
   }
