@@ -120,7 +120,7 @@ def parse_key_name(full_name, node=None):
 def key_text(sec_name, sec_disc, key_name, insert=''):
     text = key_name + insert
     if sec_name is not None:
-        text = section_text(sec_name, sec_disc, text)
+        text = section_text(sec_name, sec_disc, ' ' + text)
     return text
 
 
@@ -244,7 +244,9 @@ class ConfigKey(CustomDomainObject):
 
 # cfg:val =====================================================================
 
-value_re = r'(?:(?P<key>' + key_re + r'):)?(?P<val_name>' + id_re + r')'
+value_sep = '='
+value_sep_re = re.escape(value_sep)
+value_re = r'(?:(?P<key>' + key_re + r')' + value_sep_re + r')?(?P<val_name>' + id_re + r')'
 
 
 def parse_value_name(full_name, node=None):
@@ -255,7 +257,7 @@ def parse_value_name(full_name, node=None):
 def value_text(sec_name, sec_disc, key_name, val_name):
     text = val_name
     if key_name is not None:
-        text = key_text(sec_name, sec_disc, key_name, ':' + text)
+        text = key_text(sec_name, sec_disc, key_name, value_sep + text)
     return text
 
 
@@ -272,16 +274,14 @@ class ConfigValueRefRole(XRefRole):
             # [sec]key=val anywhere
             pass
         elif scope_kind == 0 and sec is None:
-            # key:val outside section
+            # key=val outside section
             target = f'[common]{target}'
         elif scope_kind >= 1 and key is not None:
-            # key:val anywhere in a section
-            prefix = ctx.get_full_name(0)
-            target = f'{prefix}{target}'
+            # key=val anywhere in a section
+            target = ctx.get_full_name(0) + target
         elif scope_kind >= 2 and key is None:
             # val anywhere in a key
-            prefix = ctx.get_full_name(1)
-            target = f'{prefix}:{target}'
+            target = ctx.get_full_name(1) + value_sep + target
         else:
             ConfigDomain.logger.warning(f'{repr(target)} is an invalid target here',
                 location=self.get_location())
@@ -323,7 +323,7 @@ class ConfigValue(CustomDomainObject):
             r'(' + id_re + r')|<(' + id_re + r')>', sig, self)
         brackets = bool(name_w_brackets)
         name = name_w_brackets if brackets else name_wo_brackets
-        ctx.push(self, name, ctx.get_full_name() + f':{name}')
+        ctx.push(self, name, ctx.get_full_name() + value_sep + name)
         return (brackets,)
 
     def create_signode(self, ctx, name, signode, brackets):
@@ -371,16 +371,16 @@ class TestConfigDomain(unittest.TestCase):
         for ref, expected in cases.items():
             self.assertEqual(parse_key_name(ref), expected, f'On key {repr(ref)}')
 
-    def test_parse_key_name(self):
+    def test_parse_value_name(self):
         cases = {
             # sec, sec_name, sec_disc, key, key_name, val_name
             'vn': (None, None, None, None, None, 'vn'),
-            'kn:vn': (None, None, None, 'kn', 'kn', 'vn'),
-            'kn.a.b.c:vn': (None, None, None, 'kn.a.b.c', 'kn.a.b.c', 'vn'),
-            '[sn]kn:vn': ('sn', 'sn', None, '[sn]kn', 'kn', 'vn'),
-            '[sn]kn.a.b.c:vn': ('sn', 'sn', None, '[sn]kn.a.b.c', 'kn.a.b.c', 'vn'),
-            '[sn@sd]kn:vn': ('sn@sd', 'sn', 'sd', '[sn@sd]kn', 'kn', 'vn'),
-            '[sn@sd]kn.a.b.c:vn': ('sn@sd', 'sn', 'sd', '[sn@sd]kn.a.b.c', 'kn.a.b.c', 'vn'),
+            'kn=vn': (None, None, None, 'kn', 'kn', 'vn'),
+            'kn.a.b.c=vn': (None, None, None, 'kn.a.b.c', 'kn.a.b.c', 'vn'),
+            '[sn]kn=vn': ('sn', 'sn', None, '[sn]kn', 'kn', 'vn'),
+            '[sn]kn.a.b.c=vn': ('sn', 'sn', None, '[sn]kn.a.b.c', 'kn.a.b.c', 'vn'),
+            '[sn@sd]kn=vn': ('sn@sd', 'sn', 'sd', '[sn@sd]kn', 'kn', 'vn'),
+            '[sn@sd]kn.a.b.c=vn': ('sn@sd', 'sn', 'sd', '[sn@sd]kn.a.b.c', 'kn.a.b.c', 'vn'),
         }
 
         for ref, expected in cases.items():

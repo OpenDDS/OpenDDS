@@ -3411,7 +3411,7 @@ The highest level logging is controlled by the general log levels listed in the 
 
       N/A
 
-    - :val:`DCPSLogLevel:none`
+    - :val:`DCPSLogLevel=none`
 
       ``log_level``: ``LogLevel::None``
 
@@ -3423,7 +3423,7 @@ The highest level logging is controlled by the general log levels listed in the 
 
       Error
 
-    - :val:`DCPSLogLevel:error`
+    - :val:`DCPSLogLevel=error`
 
       ``log_level``: ``LogLevel::Error``
 
@@ -3435,7 +3435,7 @@ The highest level logging is controlled by the general log levels listed in the 
 
       Warning
 
-    - :val:`DCPSLogLevel:warning`
+    - :val:`DCPSLogLevel=warning`
 
       ``log_level``: ``LogLevel::Warning``
 
@@ -3448,7 +3448,7 @@ The highest level logging is controlled by the general log levels listed in the 
 
       Notice
 
-    - :val:`DCPSLogLevel:notice`
+    - :val:`DCPSLogLevel=notice`
 
       ``log_level``: ``LogLevel::Notice``
 
@@ -3460,7 +3460,7 @@ The highest level logging is controlled by the general log levels listed in the 
 
       Info
 
-    - :val:`DCPSLogLevel:info`
+    - :val:`DCPSLogLevel=info`
 
       ``log_level``: ``LogLevel::Info``
 
@@ -3472,7 +3472,7 @@ The highest level logging is controlled by the general log levels listed in the 
 
       Debug
 
-    - :val:`DCPSLogLevel:debug`
+    - :val:`DCPSLogLevel=debug`
 
       ``log_level``: ``LogLevel::Debug``
 

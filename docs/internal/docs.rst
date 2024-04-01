@@ -490,7 +490,7 @@ For :doc:`/devguide/run_time_configuration` there's a custom configuration Sphin
   Use to document a configuration key that can contain :rst:dir:`cfg:val` and most other RST content.
   Must be in a :rst:dir:`cfg:sec`.
   ``<values>`` describe what sort of text is accepted.
-  It is just for display and has no restrictions on the contents, but should follow the following syntax conventions to describe the accepted values:
+  It is just for display and has no restrictions on the contents, but should follow the following conventions to describe the accepted values:
 
   - ``|`` indicates an OR
   - ``[]`` indicates an optional part of the value
@@ -506,7 +506,7 @@ For :doc:`/devguide/run_time_configuration` there's a custom configuration Sphin
 
   .. rst:directive:option:: default
 
-    The default value of the key if ommitted
+    The default value of the key if omitted
 
 .. rst:role:: cfg:key
 
@@ -538,13 +538,13 @@ For :doc:`/devguide/run_time_configuration` there's a custom configuration Sphin
 
     This must be inside a :rst:dir:`cfg:key`.
 
-  - ``<key_name>:<val_name>``
+  - ``<key_name>=<val_name>``
 
     Inside of a :rst:dir:`cfg:sec`, it refers to a value of a key in that section.
     Outside of a :rst:dir:`cfg:sec`, the key is assumed to be ``common``.
 
-  - ``[<sect_name>]<key_name>:<val_name>``
-  - ``[<sect_name>@<disc_name>]<key_name>:<val_name>``
+  - ``[<sect_name>]<key_name>=<val_name>``
+  - ``[<sect_name>@<disc_name>]<key_name>=<val_name>``
 
 Example
 ^^^^^^^
@@ -562,13 +562,13 @@ This is a example made up for the following INI file:
 
 .. code-block:: rst
 
-  Outside their sections, references to keys and values must be complete: :cfg:val:`[server]os:linux`, :cfg:key:`[server@linux]distro`
+  Outside their sections, references to keys and values must be complete: :cfg:val:`[server]os=linux`, :cfg:key:`[server@linux]distro`
 
   Otherwise the ``common`` section will be assumed.
 
   .. cfg:sec:: server/<name>
 
-    A key or value's section can be omitted from references within their sections: :cfg:key:`os`, :cfg:val:`os:windows`
+    A key or value's section can be omitted from references within their sections: :cfg:key:`os`, :cfg:val:`os=windows`
 
     .. cfg:key:: os=windows|linux
       :required:
@@ -577,11 +577,11 @@ This is a example made up for the following INI file:
 
       .. cfg:val:: windows
 
-        Implied titles will be shortened within their scopes: :cfg:key:`[server]os`, :cfg:val:`[server]os:windows`
+        Implied titles will be shortened within their scopes: :cfg:key:`[server]os`, :cfg:val:`[server]os=windows`
 
       .. cfg:val:: linux
 
-        Sections with discriminators require them in the reference targets: cfg:sec:`server@linux`, :cfg:key:`[server@linux]distro`
+        Sections with discriminators require them in the reference targets: :cfg:sec:`server@linux`, :cfg:key:`[server@linux]distro`
 
   .. cfg:sec:: server@linux/<name>
 
@@ -590,7 +590,7 @@ This is a example made up for the following INI file:
 
 Turns into:
 
-  Outside their sections, references to keys and values must be complete: :cfg:val:`[server]os:linux`, :cfg:key:`[server@linux]distro`
+  Outside their sections, references to keys and values must be complete: :cfg:val:`[server]os=linux`, :cfg:key:`[server@linux]distro`
 
   Otherwise the ``common`` section will be assumed.
 
@@ -598,7 +598,7 @@ Turns into:
     :no-contents-entry:
     :no-index-entry:
 
-    A key or value's section can be omitted from references within their sections: :cfg:key:`os`, :cfg:val:`os:windows`
+    A key or value's section can be omitted from references within their sections: :cfg:key:`os`, :cfg:val:`os=windows`
 
     .. cfg:key:: os=windows|linux
       :required:
@@ -611,7 +611,7 @@ Turns into:
         :no-contents-entry:
         :no-index-entry:
 
-        Implied titles will be shortened within their scopes: :cfg:key:`[server]os`, :cfg:val:`[server]os:windows`
+        Implied titles will be shortened within their scopes: :cfg:key:`[server]os`, :cfg:val:`[server]os=windows`
 
       .. cfg:val:: linux
         :no-contents-entry:
