@@ -108,6 +108,8 @@ private:
   void release_remote_i(const GUID_t& remote);
   RepoIdSet readers_selected_, readers_withheld_;
   bool ready_to_deliver(const ReceivedDataSample& data);
+
+  bool uses_end_historic_control_messages() const { return false; }
 };
 
 } // namespace DCPS

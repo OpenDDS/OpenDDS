@@ -282,13 +282,14 @@ public:
 
   void set_scheduling_release(bool scheduling_release);
 
-  virtual void send_final_acks (const GUID_t& readerid);
+  virtual void send_final_acks(const GUID_t& readerid);
 
   virtual WeakRcHandle<ICE::Endpoint> get_ice_endpoint() const { return WeakRcHandle<ICE::Endpoint>(); }
 
   virtual bool is_leading(const GUID_t& /*writer*/,
                           const GUID_t& /*reader*/) const { return false; }
 
+  virtual bool uses_end_historic_control_messages() const { return true; }
 
 protected:
 
