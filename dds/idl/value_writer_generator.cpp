@@ -18,8 +18,14 @@ using namespace AstTypeClassification;
 
 namespace {
 
-void generate_write(const std::string& expression, AST_Type* type, const std::string& idx,
-                    int level = 1, FieldFilter field_filter = FieldFilter_All);
+void generate_write(const std::string& expression, const std::string& field_name,
+                    AST_Type* type, const std::string& idx, int level = 1,
+                    FieldFilter field_filter = FieldFilter_All);
+
+  FieldFilter nested(FieldFilter filter_kind)
+  {
+    return filter_kind == FieldFilter_KeyOnly ? FieldFilter_NestedKeyOnly : filter_kind;
+  }
 
   std::string primitive_type(AST_PredefinedType::PredefinedType pt)
   {
@@ -61,8 +67,8 @@ void generate_write(const std::string& expression, AST_Type* type, const std::st
     }
   }
 
-  void array_helper(const std::string& expression, AST_Array* array,
-                    size_t dim_idx, const std::string& idx, int level)
+  void array_helper(const std::string& expression, AST_Array* array, size_t dim_idx,
+                    const std::string& idx, int level, FieldFilter filter_kind)
   {
     const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
     const std::string indent(level * 2, ' ');
@@ -84,7 +90,7 @@ void generate_write(const std::string& expression, AST_Type* type, const std::st
         indent << "  if (!value_writer.begin_element(static_cast<ACE_CDR::ULong>(" << idx << "))) {\n" <<
         indent << "    return false;\n" <<
         indent << "  }\n";
-      array_helper(expression + "[" + idx + "]", array, dim_idx + 1, idx + "i", level + 1);
+      array_helper(expression + "[" + idx + "]", array, dim_idx + 1, idx + "i", level + 1, filter_kind);
       be_global->impl_ <<
         indent << "  if (!value_writer.end_element()) {\n" <<
         indent << "    return false;\n" <<
@@ -115,13 +121,13 @@ void generate_write(const std::string& expression, AST_Type* type, const std::st
           indent << "}\n";
 
       } else {
-        generate_write(expression, array->base_type(), idx + "i", level);
+        generate_write(expression, "elem", array->base_type(), idx + "i", level, nested(filter_kind));
       }
     }
   }
 
   void sequence_helper(const std::string& expression, AST_Sequence* sequence,
-                       const std::string& idx, int level)
+                       const std::string& idx, int level, FieldFilter filter_kind)
   {
     const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
     const char* const length_func = use_cxx11 ? "size" : "length";
@@ -162,7 +168,7 @@ void generate_write(const std::string& expression, AST_Type* type, const std::st
         indent << "  if (!value_writer.begin_element(static_cast<ACE_CDR::ULong>(" << idx << "))) {\n" <<
         indent << "    return false;\n" <<
         indent << "  }\n";
-      generate_write(expression + "[" + idx + "]", base_type, idx + "i", level + 1);
+      generate_write(expression + "[" + idx + "]", "elem", base_type, idx + "i", level + 1, nested(filter_kind));
       be_global->impl_ <<
         indent << "  if (!value_writer.end_element()) {\n" <<
         indent << "    return false;\n" <<
@@ -176,19 +182,20 @@ void generate_write(const std::string& expression, AST_Type* type, const std::st
       indent << "}\n";
   }
 
-  void generate_write(const std::string& expression, AST_Type* type, const std::string& idx, int level, FieldFilter field_filter)
+void generate_write(const std::string& expression, const std::string& field_name,
+                    AST_Type* type, const std::string& idx, int level, FieldFilter field_filter)
   {
     AST_Type* const actual = resolveActualType(type);
 
     const Classification c = classify(actual);
     if (c & CL_SEQUENCE) {
       AST_Sequence* const sequence = dynamic_cast<AST_Sequence*>(actual);
-      sequence_helper(expression, sequence, idx, level);
+      sequence_helper(expression, sequence, idx, level, field_filter);
       return;
 
     } else if (c & CL_ARRAY) {
       AST_Array* const array = dynamic_cast<AST_Array*>(actual);
-      array_helper(expression, array, 0, idx, level);
+      array_helper(expression, array, 0, idx, level, field_filter);
       return;
     }
 
@@ -220,12 +227,12 @@ void generate_write(const std::string& expression, AST_Type* type, const std::st
         const std::string type_name = scoped(type->name());
         switch (field_filter) {
         case FieldFilter_NestedKeyOnly:
-          value_expr = "nested_key_only_value";
+          value_expr = field_name + "_nested_key_only";
           be_global->impl_ <<
             indent << "const NestedKeyOnly<const" << type_name << "> " << value_expr << "(" << expression <<  ");\n";
           break;
         case FieldFilter_KeyOnly:
-          value_expr = "key_only_value";
+          value_expr = field_name + "_key_only";
           be_global->impl_ <<
             indent << "const KeyOnly<const" << type_name << "> " << value_expr << "(" << expression << ");\n";
           break;
@@ -258,7 +265,7 @@ void generate_write(const std::string& expression, AST_Type* type, const std::st
       (must_understand ? "true" : "false") << ", \"" << canonical_name(branch) << "\", false, true))) {\n"
       "      return false;\n"
       "    }\n";
-    generate_write("value." + field_name + "()", type, "i", 2);
+    generate_write("value." + field_name + "()", field_name, type, "i", 2);
     be_global->impl_ <<
       "    if (!value_writer.end_union_member()) {\n"
       "      return false;\n"
@@ -281,11 +288,6 @@ void generate_write(const std::string& expression, AST_Type* type, const std::st
       break;
     }
     return wrapped_type_name;
-  }
-
-  FieldFilter nested(FieldFilter filter_kind)
-  {
-    return filter_kind == FieldFilter_KeyOnly ? FieldFilter_NestedKeyOnly : filter_kind;
   }
 
   bool gen_struct_i(AST_Structure* node, const std::string& type_name,
@@ -317,8 +319,8 @@ void generate_write(const std::string& expression, AST_Type* type, const std::st
         (must_understand ? "true" : "false") << ", \"" << idl_name << "\", false, true))) {\n"
         "    return false;\n"
         "  }\n";
-      generate_write(value_prefix + field_name + (use_cxx11 ? "()" : ""), field->field_type(), "i",
-                     1, nested_field_filter);
+      generate_write(value_prefix + field_name + (use_cxx11 ? "()" : ""), field_name,
+                     field->field_type(), "i", 1, nested_field_filter);
       be_global->impl_ <<
         "  if (!value_writer.end_struct_member()) {\n"
         "    return false;\n"
@@ -356,7 +358,7 @@ void generate_write(const std::string& expression, AST_Type* type, const std::st
         (must_understand ? "true" : "false") << "))) {\n"
         "    return false;\n"
         "  }\n";
-      generate_write(value_prefix + "_d()" , discriminator, "i", 1, nested(filter_kind));
+      generate_write(value_prefix + "_d()", "disc", discriminator, "i", 1, nested(filter_kind));
       be_global->impl_ <<
         "  if (!value_writer.end_discriminator()) {\n"
         "    return false;\n"
