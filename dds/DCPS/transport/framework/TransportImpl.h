@@ -265,20 +265,6 @@ private:
   virtual void local_crypto_handle(DDS::Security::ParticipantCryptoHandle) {}
 #endif
 
-public:
-  /// Called by our friends, the TransportClient, and the DataLink.
-  /// Since this TransportImpl can be attached to many TransportClient
-  /// objects, and each TransportClient object could be "running" in
-  /// a separate thread, we need to protect all of the "reservation"
-  /// methods with a lock.  The protocol is that a client of ours
-  /// must "acquire" our reservation_lock_ before it can proceed to
-  /// call any methods that affect the DataLink reservations.  It
-  /// should release the reservation_lock_ as soon as it is done.
-  int acquire();
-  int tryacquire();
-  int release();
-  int remove();
-
   virtual OPENDDS_STRING transport_type() const = 0;
 
   /// Called by our friend, the TransportClient.
