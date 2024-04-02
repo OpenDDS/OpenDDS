@@ -1,3 +1,5 @@
+.. default-domain:: cfg
+
 .. _run_time_configuration:
 .. _config:
 
@@ -25,13 +27,14 @@ OpenDDS configuration is concerned with three main areas:
 
 #. **Common Configuration Options** -- configure the behavior of DCPS entities at a global level.
    This allows separately deployed processes in a computing environment to share common settings for the specified behavior (e.g. all readers and writers should use RTPS discovery).
-   See :ref:`run_time_configuration--common-configuration-options` for details.
+   See :ref:`config-common` for details.
 
-#. **Discovery Configuration Options** -- configure the behavior of the discovery mechanism(s).
-   OpenDDS supports multiple approaches for discovering and associating writers and readers as detailed in :ref:`run_time_configuration--discovery-configuration`.
+#. **Discovery Configuration Options** -- configure the behavior of the :ref:`discovery mechanism(s) <discovery>`.
+   OpenDDS supports multiple approaches for discovering and associating writers and readers as detailed in :ref:`config-disc`.
 
-#. **Transport Configuration Options** -- configure the Extensible Transport Framework (ETF) which abstracts the transport layer from the DCPS layer of OpenDDS.
+#. **Transport Configuration Options** -- configure the :ref:`transport framework <transports>` which abstracts the transport layer from the DCPS layer of OpenDDS.
    Each pluggable transport can be configured separately.
+   See :ref:`config-transport` for details.
 
 The configuration file for OpenDDS is a human-readable ini-style text file.
 :ref:`This table <run_time_configuration--sections>` shows a list of the available configuration section types as they relate to the area of OpenDDS that they configure.
@@ -45,19 +48,23 @@ The configuration file for OpenDDS is a human-readable ini-style text file.
 
      - **File Section Title**
 
-   * - :ref:`Global Settings <run_time_configuration--common-configuration-options>`
+   * - :ref:`Global Settings <config-common>`
 
-     - ``[common]``
+     - :sec:`common`
 
-   * - Discovery
+   * - :ref:`config-disc`
 
      - ``[domain]``
 
-       ``[repository]``
+   * - :ref:`inforepo-disc-config`
 
-       ``[rtps_discovery]``
+     - ``[repository]``
 
-   * - Static Discovery
+   * - :ref:`rtps-disc-config`
+
+     - ``[rtps_discovery]``
+
+   * - :ref:`static-disc-config`
 
      - ``[endpoint]``
 
@@ -71,7 +78,7 @@ The configuration file for OpenDDS is a human-readable ini-style text file.
 
        ``[subscriberqos]``
 
-   * - Transport
+   * - :ref:`config-transport`
 
      - ``[config]``
 
@@ -81,11 +88,16 @@ The configuration file for OpenDDS is a human-readable ini-style text file.
 
      - ``[ice]``
 
-For each of the section types with the exception of ``[common]`` and ``[ice]``, the syntax of a section header takes the form of ``[section type/instance]``.
-For example, a ``[repository]`` section type would always be used in a configuration file like so:
+For each of the section types with the exception of :sec:`common` and ``[ice]``, the syntax of a section header takes the form of ``[<section_type>/<instance_name>]``.
+For example, a ``[repository]`` section type would always be used in a configuration file like so: ``[repository/repo_1]`` where ``repository`` is the section type and ``repo_1`` is an instance name of a repository configuration.
 
-``[repository/repo_1]`` where ``repository`` is the section type and ``repo_1`` is an instance name of a repository configuration.
-How to use instances to configure discovery and transports is explained further in :ref:`run_time_configuration--discovery-configuration` and :ref:`run_time_configuration--transport-configuration`.
+How to use instances to configure discovery and transports is explained further in :ref:`config-disc` and :ref:`config-transport` respectively.
+
+.. _DCPSConfigFile:
+
+*******************
+``-DCPSConfigFile``
+*******************
 
 The ``-DCPSConfigFile`` command-line argument can be used to pass the location of a configuration file to OpenDDS.
 For example:
@@ -144,7 +156,7 @@ For example, the following commands would have the same effect:
 .. code-block:: bash
 
   ./publisher -DCPSConfigFile /pretend/this/is/a/long/path/a.ini
-  ./subscriber -DCPSConfigFile /pretend//this/is/a/long/path/b.ini
+  ./subscriber -DCPSConfigFile /pretend/this/is/a/long/path/b.ini
 
   export OPENDDS_CONFIG_DIR=/pretend/this/is/a/long/path
   ./publisher -DCPSConfigFile a.ini
@@ -155,6 +167,7 @@ See the header file :ghfile:`dds/DCPS/Service_Participant.h` for details.
 
 The following subsections detail each of the configuration file sections and the available options related to those sections.
 
+.. _config-common:
 .. _run_time_configuration--common-configuration-options:
 
 ****************************
@@ -164,7 +177,7 @@ Common Configuration Options
 ..
     Sect<7.2>
 
-The ``[common]`` section of an OpenDDS configuration file contains options such as the debugging output level, the location of the ``DCPSInfoRepo`` process, and memory preallocation settings.
+The :sec:`common` section of an OpenDDS configuration file contains options such as the debugging output level, the location of the ``DCPSInfoRepo`` process, and memory preallocation settings.
 A sample ``[common]`` section follows:
 
 .. code-block:: ini
@@ -180,7 +193,7 @@ A sample ``[common]`` section follows:
 
 It is not necessary to specify every option.
 
-Option values in the ``[common]`` section with names that begin with ``DCPS`` can be overridden by a command-line argument.
+Option values in the ``[common]`` section with names that begin with ``DCPS`` or ``ORB`` [#orbprefix]_ can be overridden by a command-line argument.
 The command-line argument has the same name as the configuration option with a ``-`` prepended to it.
 For example:
 
@@ -188,311 +201,307 @@ For example:
 
   subscriber -DCPSInfoRepo localhost:12345
 
-The following table summarizes the ``[common]`` configuration options:
+.. sec:: common
 
-.. list-table::
-   :header-rows: 1
+  .. key:: DCPSBidirGIOP=<boolean>
+    :default: ``1`` (enabled)
 
-   * - Option
+    .. note:: This key is only applicable when using :ref:`inforepo-disc`.
 
-     - Description
+    Use TAO's BiDirectional GIOP feature for interaction with the :ref:`inforepo`.
+    With BiDir enabled, fewer sockets are needed since the same socket can be used for both client and server roles.
 
-     - Default
+  .. key:: DCPSBit=<boolean>
+    :default: ``1`` (enabled)
 
-   * - ``DCPSBit=[1|0]``
+    Controls if :ref:`bit` are enabled.
 
-     - Toggle Built-In-Topic support.
+  .. key:: DCPSBitLookupDurationMsec=<msec>
+    :default: ``2000`` (2 seconds)
 
-     - ``1``
+    The maximum duration in milliseconds that the framework will wait for latent :ref:`bit` information when retrieving BIT data given an instance handle.
+    The participant code may get an instance handle for a remote entity before the framework receives and processes the related BIT information.
+    The framework waits for up to the given amount of time before it fails the operation.
 
-   * - ``DCPSBitLookupDurationMsec=msec``
+  .. key:: DCPSBitTransportIPAddress=<addr>
+    :default: ``INADDR_ANY``
 
-     - The maximum duration in milliseconds that the framework will wait for latent Built-In Topic information when retrieving BIT data given an instance handle.
-       The participant code may get an instance handle for a remote entity before the framework receives and processes the related BIT information.
-       The framework waits for up to the given amount of time before it fails the operation.
+    .. note:: This key is only applicable when using :ref:`inforepo-disc`.
 
-     - ``2000``
+    IP address identifying the local interface to be used by :ref:`tcp-transport` for the :ref:`bit`.
 
-   * - ``DCPSBitTransportIPAddress=addr``
+  .. key:: DCPSBitTransportPort=<port>
+    :default: ``0``
 
-     - IP address identifying the local interface to be used by tcp transport for the Built-In Topics.
+    .. note:: This key is only applicable when using :ref:`inforepo-disc`.
 
-       .. note:: This property is only applicable to a ``DCPSInfoRepo`` configuration.
+    Port used by the :ref:`tcp-transport` for :ref:`bit`.
+    If the default of ``0`` is used, the operating system will choose a port to use.
 
-     - ``INADDR_ANY``
+  .. key:: DCPSChunkAssociationMultiplier=<n>
+    :default: ``10``
 
-   * - ``DCPSBitTransportPort=port``
+    Multiplier for the :key:`DCPSChunks` or the ``max_samples`` value in :ref:`qos-resource-limits` to determine the total number of shallow copy chunks that are preallocated.
+    Set this to a value greater than the number of connections so the preallocated chunk handles do not run out.
+    A sample written to multiple data readers will not be copied multiple times but there is a shallow copy handle to that sample used to manage the delivery to each data reader.
+    The size of the handle is small so there is not great need to set this value close to the number of connections.
 
-     - Port used by the tcp transport for Built-In Topics.
-       If the default of ``0`` is used, the operating system will choose a port to use.
+  .. key:: DCPSChunks=<n>
+    :default: ``20``
 
-       .. note:: This property is only applicable to a ``DCPSInfoRepo`` configuration.
+    Configurable number of chunks that a data writer's and reader's cached allocators will preallocate when the :ref:`qos-resource-limits` value is infinite.
+    When all of the preallocated chunks are in use, OpenDDS allocates from the heap.
+    This feature of allocating from the heap when the preallocated memory is exhausted provides flexibility but performance will decrease when the preallocated memory is exhausted.
 
-     - ``0``
+  .. key:: DCPSDebugLevel=<n>
+    :default: ``0`` (disabled)
 
-   * - ``DCPSChunks=n``
+    Integer value that controls the amount of :ref:`debug information the DCPS layer logs <run_time_configuration--dcps-layer-debug-logging>`.
+    Valid values are ``0`` through ``10``.
 
-     - Configurable number of chunks that a data writer's and reader's cached allocators will preallocate when the :ref:`qos-resource-limits` QoS value is infinite.
-       When all of the preallocated chunks are in use, OpenDDS allocates from the heap.
+  .. key:: DCPSDefaultAddress=<addr>
+    :default: ``0.0.0.0``
 
-     - ``20``
+    Default value for the host portion of ``local_address`` in transport instances and some other host address values:
 
-   * - ``DCPSChunkAssociationMultiplier=n``
+    - ``[transport]local_address`` (tcp)
+    - ``[transport]local_address`` (udp)
+    - ``[transport]local_address`` (multicast)
+    - ``[transport]local_address`` (rtps_udp)
+    - ``[transport]ipv6_local_address`` (rstp_udp)
+    - ``[transport]multicast_interface`` (rtps_udp)
+    - ``[rtps_discovery]SedpLocalAddress``
+    - ``[rtps_discovery]SpdpLocalAddress``
+    - ``[rtps_discovery]MulticastInterface``
 
-     - Multiplier for ``DCPSChunks`` or the :ref:`qos-resource-limits` ``max_samples`` value to determine the total number of shallow copy chunks that are preallocated.
-       Set this to a value greater than the number of connections so the preallocated chunk handles do not run out.
-       A sample written to multiple data readers will not be copied multiple times but there is a shallow copy handle to that sample used to manage the delivery to each data reader.
-       The size of the handle is small so there is not great need to set this value close to the number of connections.
+  .. key:: DCPSDefaultDiscovery=DEFAULT_REPO|DEFAULT_RTPS|DEFAULT_STATIC|<name>
+    :default: :val:`DEFAULT_REPO`
 
-     - ``10``
+    Specifies a discovery configuration to use for any domain not explicitly configured.
 
-   * - ``DCPSDebugLevel=n``
+    .. val:: DEFAULT_REPO
 
-     - Integer value that controls the amount of debug information the DCPS layer prints.
-       Valid values are 0 through 10.
+      Uses a default :ref:`inforepo-disc` configuration.
 
-     - 0
+    .. val:: DEFAULT_RTPS
 
-   * - ``ORBLogFile=filename``
+      Uses a default :ref:`rtps-disc` configuration.
 
-     - Change log message destination to the file specified, which is opened in appending mode.
-       See the note below this table regarding the ORB prefix.
+    .. val:: DEFAULT_STATIC
 
-     - None: use standard error
+      Uses a default :ref:`static-disc` configuration.
 
-   * - ``ORBVerboseLogging=[0|1|2]``
+    .. val:: <name>
 
-     - Add a prefix to each log message, using a format defined by the ACE library:
+        Name of a user-defined discovery configuration.
+        This can either be a ``repository`` or ``rtps_discovery`` section
 
-       0 -- no prefix
+    See :ref:`config-disc` for details about configuring discovery.
 
-       1 -- verbose "lite": adds timestamp and priority
+  .. key:: DCPSGlobalTransportConfig=<name>|$file
+    :default: The default configuration is used as described in :ref:`run_time_configuration--overview`.
 
-       2 -- verbose: in addition to "lite" has host name, PID, program name
+    The :ref:`transport configuration <config-transport>` that should be used as the global default one.
 
-       See the note below this table regarding the ORB prefix.
+    .. val:: <name>
 
-     - 0
+      Name of a user-defined ``config`` section.
 
-   * - ``DCPSDefaultAddress=addr``
+    .. val:: $file
 
-     - Default value for the host portion of ``local_address`` for transport instances containing a ``local_address``.
-       Only applied when ``DCPSDefaultAddress`` is set to a non-empty value and no ``local_address`` is specified in the transport.
+      ``$file`` uses a transport configuration that includes all transport instances defined in the configuration file.
 
-       Other subsystems (such as DDSI-RTPS Discovery) use ``DCPSDefaultAddress`` as a default value as well.
+  .. key:: DCPSInfoRepo=<objref>
+    :default: ``file://repo.ior``
 
-     -
+    Object reference for locating the :ref:`inforepo` in :ref:`inforepo-disc`.
+    This value is passed to ``CORBA::ORB::string_to_object()`` and can be any Object URL type understandable by :term:`TAO` (file, IOR, corbaloc, corbaname).
+    A simplified endpoint description of the form ``<host>:<port>`` is also accepted, which is equivalent to ``corbaloc::<host>:<port>/DCPSInfoRepo``.
 
-   * - ``DCPSDefaultDiscovery=[``
+  .. key:: DCPSLivelinessFactor=<n>
+    :default: ``80``
 
-       ``DEFAULT_REPO|``
+    Percent of the :ref:`qos-liveliness` lease duration after which a liveliness message is sent.
+    A value of ``80`` implies a 20% cushion of latency from the last detected heartbeat message.
 
-       ``DEFAULT_RTPS|``
+  .. key:: DCPSLogLevel=none|error|warning|notice|info|debug
+    :default: :val:`warning`
 
-       ``DEFAULT_STATIC|``
+    General logging control.
 
-       ``user-defined configuration instance name]``
+    .. val:: none
 
-     - Specifies a discovery configuration to use for any domain not explicitly configured.
-       ``DEFAULT_REPO`` translates to using the ``DCPSInfoRepo``.
-       ``DEFAULT_RTPS`` specifies the use of RTPS for discovery.
-       ``DEFAULT_STATIC`` specifies the use of static discovery.
-       See :ref:`run_time_configuration--discovery-configuration` for details about configuring discovery.
+      See :ref:`none log level <log-none>`
 
-     - ``DEFAULT_REPO``
+    .. val:: error
 
-   * - ``DCPSGlobalTransportConfig=name``
+      See :ref:`error log level <log-error>`
 
-     - Specifies the name of the transport configuration that should be used as the global configuration.
-       This configuration is used by all entities that do not otherwise specify a transport configuration.
-       A special value of $file uses a transport configuration that includes all transport instances defined in the configuration file.
+    .. val:: warning
 
-     - The default configuration is used as described in :ref:`run_time_configuration--overview`
+      See :ref:`warning log level <log-warning>`
 
-   * - ``DCPSInfoRepo=objref``
+    .. val:: notice
 
-     - Object reference for locating the DCPS Information Repository.
-       This can either be a full CORBA IOR or a simple host:port string.
+      See :ref:`notice log level <log-notice>`
 
-     - ``file://repo.ior``
+    .. val:: info
 
-   * - ``DCPSLivelinessFactor=n``
+      See :ref:`info log level <log-info>`
 
-     - Percent of the liveliness lease duration after which a liveliness message is sent.
-       A value of 80 implies a 20% cushion of latency from the last detected heartbeat message.
+    .. val:: debug
 
-     - ``80``
+      See :ref:`debug log level <log-debug>`
 
-   * - ``DCPSLogLevel=``
+    See :ref:`run_time_configuration--logging` for details.
 
-       ``none|``
+  .. key:: DCPSMonitor=<boolean>
+    :default: ``0``
 
-       ``error|``
+    Use the Monitor library to publish data on monitoring topics (see :ghfile:`dds/monitor/README`).
 
-       ``warning|``
+  .. key:: DCPSPendingTimeout=<sec>
+    :default: ``0``
 
-       ``notice|``
+    The maximum duration in seconds a data writer will block to allow unsent samples to drain on deletion.
+    The default, ``0``, blocks indefinitely.
 
-       ``info|``
+  .. key:: DCPSPersistentDataDir=<path>
+    :default: ``OpenDDS-durable-data-dir``
 
-       ``debug``
+    The path to a directory on where durable data will be stored for :ref:`PERSISTENT_DURABILITY_QOS <PERSISTENT_DURABILITY_QOS>`.
+    If the directory does not exist it will be created automatically.
 
-     - General logging control.
-       See :ref:`run_time_configuration--logging` for details.
+  .. key:: DCPSPublisherContentFilter=<boolean>
+    :default: ``1``
 
-     - ``warning``
+    Controls the filter expression evaluation policy for :ref:`content filtered topics <content_subscription_profile--content-filtered-topic>`.
+    When the value is ``1`` the publisher may drop any samples, before handing them off to the transport when these samples would have been ignored by all subscribers.
 
-   * - ``DCPSMonitor=[0|1]``
+  .. key:: DCPSSecurity=<boolean>
+    :default: ``0``
 
-     - Use the OpenDDS_monitor library to publish data on monitoring topics (see dds/monitor/README).
+    This setting is only available when OpenDDS is compiled with :ref:`dds_security`.
+    If set to ``1``, enable DDS Security framework and built-in plugins.
+    Each Domain Participant using security must be created with the correct :ref:`property QoS <dds_security--dds-security-configuration-via-propertyqospolicy>`.
 
-     - ``0``
+    See :ref:`dds_security` for more information.
 
-   * - ``DCPSPendingTimeout=sec``
+  .. key:: DCPSSecurityDebug=<cat>[,<cat>]...
+    :default: ``0`` (No security logging)
 
-     - The maximum duration in seconds a data writer will block to allow unsent samples to drain on deletion.
-       By default, this option blocks indefinitely.
+    This setting is only available when OpenDDS is compiled with :ref:`dds_security` enabled.
+    This controls the :ref:`security debug logging <run_time_configuration--security-debug-logging>` granularity by category.
 
-     - ``0``
+  .. key:: DCPSSecurityDebugLevel=<n>
+    :default: ``0`` (No security logging)
 
-   * - ``DCPSPersistentDataDir=path``
+    This setting is only available when OpenDDS is compiled with :ref:`dds_security` enabled.
+    This controls the :ref:`security debug logging <run_time_configuration--security-debug-logging>` granularity by debug level.
 
-     - The path on the file system where durable data will be stored.
-       If the directory does not exist it will be created automatically.
+  .. key:: DCPSSecurityFakeEncryption=<boolean>
+    :default: ``0`` (Real encryption when that's setup)
 
-     - ``OpenDDS-durable-data-dir``
+    This setting is only available when OpenDDS is compiled with :ref:`dds_security` enabled.
+    This option, when set to ``1``, disables all encryption by making encryption and decryption no-ops.
+    OpenDDS still generates keys and performs other security bookkeeping, so this option is useful for debugging the security infrastructure by making it possible to manually inspect all messages.
 
-   * - ``DCPSPublisherContentFilter=[1|0]``
+  .. key:: DCPSThreadStatusInterval=<sec>
+    :default: ``0`` (disabled)
 
-     - Controls the filter expression evaluation policy for content filtered topics.
-       When enabled (1), the publisher may drop any samples, before handing them off to the transport when these samples would have been ignored by all subscribers.
+    Enable :ref:`internal thread status reporting <built_in_topics--openddsinternalthread-topic>` using the specified reporting interval, in seconds.
 
-     - ``1``
+  .. key:: DCPSTransportDebugLevel=<n>
+    :default: ``0`` (disabled)
 
-   * - ``DCPSSecurity=[0|1]``
+    Integer value that controls the amount of :ref:`debug information the transport layer logs <run_time_configuration--transport-layer-debug-logging>`.
+    Valid values are ``0`` through ``5``.
 
-     - This setting is only available when OpenDDS is compiled with DDS Security enabled.
-       If set to 1, enable DDS Security framework and built-in plugins.
-       Each Domain Participant using security must be created with certain QoS policy values.
-       See :ref:`dds_security`: DDS Security for more information.
+  .. key:: DCPSTypeObjectEncoding=Normal|WriteOldFormat|ReadOldFormat
+    :default: :val:`Normal`
 
-     - ``0``
+    From when :term:`XTypes` was first implemented in OpenDDS from 3.16.0 until 3.18.0, there was a bug in the encoding and decoding of ``TypeObject`` and related data types for :ref:`representing user types <xtypes--representing-types-with-typeobject-and-dynamictype>`.
+    This was fixed in 3.18.0, but if an application needs to be compatible with an application built with 3.16 or 3.17, then it can use this option to do that and migrate to the correct encoding without taking everything down all at once.
 
-   * - ``DCPSSecurityDebug=CAT[,CAT...]``
+    .. val:: WriteOldFormat
 
-     - This setting is only available when OpenDDS is compiled with DDS Security enabled.
-       This controls the security debug logging granularity by category.
-       See :ref:`run_time_configuration--security-debug-logging` for details.
+      This setting makes OpenDDS use the incorrect encoding.
+      To start to migrate an existing set of OpenDDS applications, this should be the setting of applications using OpenDDS 3.18 or later.
 
-     - ``0``
+    .. val:: ReadOldFormat
 
-   * - ``DCPSSecurityDebugLevel=n``
+      This setting allows OpenDDS to read the incorrect encoding, but it will always write the correct one.
+      Once all application using OpenDDS 3.16 or 3.17 have been upgraded to OpenDDS 3.18 or later, ``WriteOldFormat`` can be set to communicate with ``ReadOldFormat`` and ``Normal``.
 
-     - This setting is only available when OpenDDS is compiled with DDS Security enabled.
-       This controls the security debug logging granularity by debug level.
-       See :ref:`run_time_configuration--security-debug-logging` for details.
+    .. val:: Normal
 
-     - ``N/A``
+      The default, correct encoding is used.
+      Once all applications are using both OpenDDS 3.18 or later and ``ReadOldFormat``, then ``Normal`` can be used.
 
-   * - ``DCPSSecurityFakeEncryption=[0|1]``
+  .. key:: ORBLogFile=<filename>
+    :default: Output to standard error stream on most platforms
 
-     - This setting is only available when OpenDDS is compiled with DDS Security enabled.
-       This option, when set to 1, disables all encryption by making encryption and decryption no-ops.
-       OpenDDS still generates keys and performs other security bookkeeping, so this option is useful for debugging the security infrastructure by making it possible to manually inspect all messages.
+    Change :ref:`log <run_time_configuration--logging>` message destination to the file specified, which is opened in appending mode. [#orbprefix]_
 
-     - ``0``
+  .. key:: ORBVerboseLogging=0|1|2
+    :default: ``0``
 
-   * - ``DCPSTransportDebugLevel=n``
+    Add a prefix to each :ref:`log <run_time_configuration--logging>` message, using a format defined by the :term:`ACE` library: [#orbprefix]_
 
-     - Integer value that controls the amount of debug information the transport layer prints.
-       See :ref:`run_time_configuration--transport-layer-debug-logging` for details.
+    .. val:: 0
 
-     - ``0``
+      No prefix
 
-   * - ``pool_size=n_bytes``
+    .. val:: 1
 
-     - Size of safety profile memory pool, in bytes.
+      Verbose "lite", adds timestamp and priority
 
-     - ``41943040 (40 MiB)``
+    .. val:: 2
 
-   * - ``pool_granularity=n_bytes``
+      Verbose, in addition to "lite" has host name, PID, program name
 
-     - Granularity of safety profile memory pool in bytes.
-       Must be multiple of 8.
+  .. key:: pool_size=<n_bytes>
+    :default: ``41943040`` bytes (40 MiB)
 
-     - ``8``
+    Size of :ref:`safety_profile` memory pool, in bytes.
 
-   * - ``Scheduler=[``
+  .. key:: pool_granularity=<n_bytes>
+    :default: ``8``
 
-       ``SCHED_RR|``
+    Granularity of :ref:`safety_profile` memory pool in bytes.
+    Must be multiple of 8.
 
-       ``SCHED_FIFO|``
+  .. key:: Scheduler=SCHED_RR|SCHED_FIFO|SCHED_OTHER
+    :default: :val:`SCHED_OTHER`
 
-       ``SCHED_OTHER]``
+    Selects the scheduler to use for transport sending threads.
+    Setting the scheduler to a value other than the default requires privileges on most systems.
 
-     - Selects the thread scheduler to use.
-       Setting the scheduler to a value other than the default requires privileges on most systems.
-       A value of ``SCHED_RR``, ``SCHED_FIFO``, or ``SCHED_OTHER`` can be set.
-       ``SCHED_OTHER`` is the default scheduler on most systems; ``SCHED_RR`` is a round robin scheduling algorithm; and ``SCHED_FIFO`` allows each thread to run until it either blocks or completes before switching to a different thread.
+    .. val:: SCHED_RR
 
-     - SCHED_OTHER
+      Round robin scheduling algorithm
 
-   * - ``scheduler_slice=usec``
+    .. val:: SCHED_FIFO
 
-     - Some operating systems, such as SunOS, require a time slice value to be set when selecting schedulers other than the default.
-       For those systems, this option can be used to set a value in microseconds.
+      Allows each thread to run until it either blocks or completes before switching to a different thread
 
-     - ``none``
+    .. val:: SCHED_OTHER
 
-   * - ``DCPSBidirGIOP=[0|1]``
+      The default scheduler on most systems
 
-     - Use TAO's BiDirectional GIOP feature for interaction with the DCPSInfoRepo.
-       With BiDir enabled, fewer sockets are needed since the same socket can be used for both client and server roles.
+    .. seealso::
 
-     - ``1``
+      :manpage:`sched(7)`
 
-   * - ``DCPSThreadStatusInterval=sec``
+      :ref:`qos-transport-priority`
 
-     - Enable internal thread status reporting (:ref:`built_in_topics--openddsinternalthread-topic`) using the specified reporting interval, in seconds.
+  .. key:: scheduler_slice=<usec>
+    :default: ``0``
 
-     - ``0 (disabled)``
+    Some operating systems require a time slice value to be set when selecting a :key:`Scheduler` other than the default.
+    For those systems, this option can be used to set a value in microseconds.
 
-   * - ``DCPSTypeObjectEncoding=[``
-
-       ``Normal |``
-
-       ``WriteOldFormat |``
-
-       ``ReadOldFormat ]``
-
-     - Before version 3.18, OpenDDS had a bug in the encoding used for TypeObject (from XTypes) and related data types.
-
-       If this application needs to be compatible with an application built with an older OpenDDS (that has XTypes), select one of WriteOldFormat or ReadOldFormat.
-
-       Using WriteOldFormat means that the TypeInformation written by this application will be understood by legacy applications.
-
-       Using WriteOldFormat or ReadOldFormat means that TypeInformation written in the legacy format will be understood by this application.
-
-       These options are designed to enable a phased migration from the incorrect implementation (pre-3.18) to a compliant one.
-       In the first phase, legacy applications can coexist with WriteOldFormat.
-       In the second phase (once all legacy applications have been upgraded), WriteOldFormat can communicate with ReadOldFormat.
-       In the final phase (once all WriteOldFormat applications have been upgraded), ReadOldFormat applications can be transitioned to Normal.
-
-     - ``Normal``
-
-The ``DCPSInfoRepo`` option's value is passed to ``CORBA::ORB::string_to_object()`` and can be any Object URL type understandable by TAO (file, IOR, corbaloc, corbaname).
-A simplified endpoint description of the form ``<host>:<port>`` is also accepted.
-It is equivalent to ``corbaloc::<host>:<port>/DCPSInfoRepo``.
-
-Certain options that begin with "ORB" instead of "DCPS" are listed in the table above.
-They are named differently since they are inherited from TAO.
-The options starting with "ORB" listed in this table are implemented directly by OpenDDS (not passed to TAO) and are supported either on the command line (using a "-" prefix) or in the configuration file.
-Other command-line options that begin with ``-ORB`` are passed to TAO's ``ORB_init`` if DCPSInfoRepo discovery is used.
-
-The ``DCPSChunks`` option allows application developers to tune the amount of memory preallocated when the :ref:`qos-resource-limits` are set to infinite.
-Once the allocated memory is exhausted, additional chunks are allocated/deallocated from the heap.
-This feature of allocating from the heap when the preallocated memory is exhausted provides flexibility but performance will decrease when the preallocated memory is exhausted.
-
+.. _config-disc:
 .. _run_time_configuration--discovery-configuration:
 
 ***********************
@@ -649,10 +658,11 @@ Here are the available properties for the ``[domain]`` section:
      - A user-defined string that refers to the instance name of a ``[config]`` section.
        See :ref:`run_time_configuration--transport-configuration`.
 
+.. _inforepo-disc-config:
 .. _run_time_configuration--configuring-applications-for-dcpsinforepo:
 
-Configuring Applications for DCPSInfoRepo
-=========================================
+Configuring for InfoRepo Discovery
+==================================
 
 ..
     Sect<7.3.2>
@@ -851,10 +861,11 @@ Here are the valid properties for a ``[repository]`` section:
        (Deprecated.
        Provided for backward compatibility)
 
+.. _rtps-disc-config:
 .. _run_time_configuration--configuring-for-ddsi-rtps-discovery:
 
-Configuring for DDSI-RTPS Discovery
-===================================
+Configuring for RTPS Discovery
+==============================
 
 ..
     Sect<7.3.3>
@@ -1342,6 +1353,7 @@ Additional DDSI-RTPS Discovery Features
 The DDSI_RTPS discovery implementation creates and manages a transport instance -- specifically an object of class ``RtpsUdpInst``.
 In order for applications to access this object and enable advanced features (:ref:`Additional RTPS_UDP Features <run_time_configuration--additional-rtps-udp-features>`), the ``RtpsDiscovery`` class provides the method ``sedp_transport_inst(domainId, participant)``.
 
+.. _static-disc-config:
 .. _run_time_configuration--configuring-for-static-discovery:
 
 Configuring for Static Discovery
@@ -1966,6 +1978,7 @@ The static discovery implementation also checks that the QoS of a data reader or
 
      -
 
+.. _config-transport:
 .. _run_time_configuration--transport-configuration:
 
 ***********************
@@ -2399,10 +2412,11 @@ Enabling the ``thread_per_connection`` option will increase performance when wri
 This balance of network performance to context switching overhead is best determined by experimenting.
 If a machine has multiple network cards, it may improve performance by creating a transport for each network card.
 
+.. _tcp-transport-config:
 .. _run_time_configuration--tcp-ip-transport-configuration-options:
 
-TCP/IP Transport Configuration Options
---------------------------------------
+TCP Transport Configuration Options
+-----------------------------------
 
 ..
     Sect<7.4.5.2>
@@ -2535,10 +2549,11 @@ The reconnection process is (a successful reconnect ends this sequence):
 
 * While we have not tried more than ``conn_retry_attempts``, wait (previous wait time * ``conn_retry_backoff_multiplier``) milliseconds and attempt to reconnect.
 
+.. _udp-transport-config:
 .. _run_time_configuration--udp-ip-transport-configuration-options:
 
-UDP/IP Transport Configuration Options
---------------------------------------
+UDP Transport Configuration Options
+------------------------------------
 
 ..
     Sect<7.4.5.3>
@@ -2584,10 +2599,11 @@ The following table summarizes the transport configuration options that are uniq
 
      - ``Platform value of ACE_DEFAULT_MAX_SOCKET_BUFSIZ``
 
+.. _multicast-transport-config:
 .. _run_time_configuration--ip-multicast-transport-configuration-options:
 
-IP Multicast Transport Configuration Options
---------------------------------------------
+Multicast Transport Configuration Options
+-----------------------------------------
 
 ..
     Sect<7.4.5.4>
@@ -2772,9 +2788,10 @@ The following table summarizes the transport configuration options that are uniq
 
      -
 
+.. _rtps-udp-transport-config:
 .. _run_time_configuration--rtps-udp-transport-configuration-options:
 
-RTPS_UDP Transport Configuration Options
+RTPS UDP Transport Configuration Options
 ----------------------------------------
 
 ..
@@ -2990,13 +3007,13 @@ Some implementation notes related to using the ``rtps_udp`` transport protocol a
 
 .. _run_time_configuration--additional-rtps-udp-features:
 
-Additional RTPS_UDP Features
+Additional RTPS UDP Features
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 ..
     Sect<7.4.5.5.1>
 
-The RTPS_UDP transport implementation has capabilities that can only be enabled by API.
+The RTPS UDP transport implementation has capabilities that can only be enabled by API.
 These features cannot be enabled using configuration files.
 
 The ``RtpsUdpInst`` class has a method ``count_messages(bool flag)`` via inheritance from ``TransportInst``.
@@ -3104,9 +3121,10 @@ The elements of that sequence are defined in IDL: ``OpenDDS::DCPS::TransportStat
 
      - Number of bytes received from the locator.
 
+.. _shmem-transport-config:
 .. _run_time_configuration--shared-memory-transport-configuration-options:
 
-Shared-Memory Transport Configuration Options
+Shared Memory Transport Configuration Options
 ---------------------------------------------
 
 ..
@@ -3376,78 +3394,100 @@ By default, the OpenDDS framework will only log serious errors and warnings that
 An OpenDDS user may increase the amount of logging via the log level and debug logging via controls at the DCPS, Transport, or Security layers.
 
 The default destination of these log messages is the process's standard error stream.
-See :ref:`run_time_configuration--common-configuration-options` for options controlling the destination and formatting of log messages.
+See :ref:`config-common` for options controlling the destination and formatting of log messages.
 
 The highest level logging is controlled by the general log levels listed in the following table.
 
 .. list-table::
    :header-rows: 1
 
-   * - Level
+  * - Level
 
-     - Values
+    - Values
 
-     - Description
+    - Description
 
-   * - ``Error``
+  * - .. _log-none:
 
-     - ``DCPSLogLevel``: ``error``
+      N/A
 
-       ``log_level``: ``Log_Level::Error``
+    - :val:`DCPSLogLevel=none`
 
-       ``ACE_Log_Priority``: ``LM_ERROR``
+      ``log_level``: ``LogLevel::None``
 
-     - Logs issues that may prevent OpenDDS from functioning properly or functioning as configured.
+      ``ACE_Log_Priority``: N/A
 
-   * - ``Warning``
+    - Disables all logging.
 
-     - ``DCPSLogLevel``: ``warning``
+  * - .. _log-error:
 
-       ``log_level``: ``Log_Level::Warning``
+      Error
 
-       ``ACE_Log_Priority``: ``LM_WARNING``
+    - :val:`DCPSLogLevel=error`
 
-     - Log issues that should probably be addressed, but don't prevent OpenDDS from functioning.
-       This is the default.
+      ``log_level``: ``LogLevel::Error``
 
-   * - ``Notice``
+      ``ACE_Log_Priority``: ``LM_ERROR``
 
-     - ``DCPSLogLevel``: ``notice``
+    - Logs issues that may prevent OpenDDS from functioning properly or functioning as configured.
 
-       ``log_level``: ``Log_Level::Notice``
+  * - .. _log-warning:
 
-       ``ACE_Log_Priority``: ``LM_NOTICE``
+      Warning
 
-     - Logs details of issues that are returned to the user via the API, for example through a ``DDS::ReturnCode_t``.
+    - :val:`DCPSLogLevel=warning`
 
-   * - ``Info``
+      ``log_level``: ``LogLevel::Warning``
 
-     - ``DCPSLogLevel``: ``info``
+      ``ACE_Log_Priority``: ``LM_WARNING``
 
-       ``log_level``: ``Log_Level::Info``
+    - Log issues that should probably be addressed, but don't prevent OpenDDS from functioning.
+      This is the default.
 
-       ``ACE_Log_Priority``: ``LM_INFO``
+  * - .. _log-notice:
 
-     - Logs a small amount of basic information, such as the version of OpenDDS being used.
+      Notice
 
-   * - ``Debug``
+    - :val:`DCPSLogLevel=notice`
 
-     - ``DCPSLogLevel``: ``debug``
+      ``log_level``: ``LogLevel::Notice``
 
-       ``log_level``: ``Log_Level::Debug``
+      ``ACE_Log_Priority``: ``LM_NOTICE``
 
-       ``ACE_Log_Priority``: ``LM_DEBUG``
+    - Logs details of issues that are returned to the user via the API, for example through a ``DDS::ReturnCode_t``.
 
-     - This level doesn't directly control any logging but will enable at least DCPS and security debug level 1.
-       For backwards compatibility, setting DCPS debug logging to greater than zero will set this log level.
-       Setting the log level to below this level will disable all debug logging.
+  * - .. _log-info:
+
+      Info
+
+    - :val:`DCPSLogLevel=info`
+
+      ``log_level``: ``LogLevel::Info``
+
+      ``ACE_Log_Priority``: ``LM_INFO``
+
+    - Logs a small amount of basic information, such as the version of OpenDDS being used.
+
+  * - .. _log-debug:
+
+      Debug
+
+    - :val:`DCPSLogLevel=debug`
+
+      ``log_level``: ``LogLevel::Debug``
+
+      ``ACE_Log_Priority``: ``LM_DEBUG``
+
+    - This level doesn't directly control any logging but will enable at least DCPS and security debug level 1.
+      For backwards compatibility, setting :ref:`DCPS debug logging <run_time_configuration--dcps-layer-debug-logging>` to greater than zero will set this log level.
+      Setting the log level to below this level will disable all debug logging.
 
 The log level can be set a number of ways.
 To do it with command line arguments, pass:
 
 .. code-block:: bash
 
-    -DCPSLogLevel notice
+  -DCPSLogLevel notice
 
 Using a configuration file option is similar:
 
@@ -3460,8 +3500,8 @@ Doing this from code can be done using an enumerator or a string:
 
 .. code-block:: cpp
 
-    OpenDDS::DCPS::log_level.set(OpenDDS::DCPS::LogLevel::Notice);
-    OpenDDS::DCPS::log_level.set_from_string("notice");
+  OpenDDS::DCPS::log_level.set(OpenDDS::DCPS::LogLevel::Notice);
+  OpenDDS::DCPS::log_level.set_from_string("notice");
 
 Passing invalid levels to the text-based methods will cause warning messages to be logged unconditionally, but will not cause the ``DomainParticipantFactory`` to fail to initialize.
 
@@ -3473,7 +3513,7 @@ DCPS Layer Debug Logging
 ..
     Sect<7.6.1>
 
-Debug logging in the DCPS layer of OpenDDS is controlled by the ``DCPSDebugLevel`` configuration option and command-line option.
+Debug logging in the DCPS layer of OpenDDS is controlled by the :key:`DCPSDebugLevel` configuration option and command-line option.
 It can also be set in application code using:
 
 .. code-block:: cpp
@@ -3504,7 +3544,7 @@ Transport Layer Debug Logging
 ..
     Sect<7.6.2>
 
-OpenDDS transport debug layer logging is controlled via the ``DCPSTransportDebugLevel`` configuration option.
+OpenDDS transport debug layer logging is controlled via the :key:`DCPSTransportDebugLevel` configuration option.
 For example, to add transport layer logging to any OpenDDS application that uses ``TheParticipantFactoryWithArgs``, add the following option to the command line:
 
 .. code-block:: bash
@@ -3569,8 +3609,8 @@ Security Debug Logging
 ..
     Sect<7.6.3>
 
-When OpenDDS is compiled with security enabled, debug logging for security can be enabled using ``DCPSecurityDebug`` (:ref:`run_time_configuration--common-configuration-options`).
-Security logging is divided into categories, although ``DCPSSecurityDebugLevel`` is also provided, which controls the categories in a similar manner and using the same scale as ``DCPSDebugLevel``.
+When OpenDDS is compiled with security enabled, debug logging for security can be enabled using :key:`DCPSSecurityDebug`.
+Security logging is divided into categories, although :key:`DCPSSecurityDebugLevel` is also provided, which controls the categories in a similar manner and using the same scale as :key:`DCPSDebugLevel`.
 
 .. _run_time_configuration--reftable28:
 
@@ -3691,3 +3731,9 @@ All the following are equivalent:
     OpenDDS::DCPS::security_debug.access_warn = true;
     OpenDDS::DCPS::security_debug.set_debug_level(1);
     OpenDDS::DCPS::security_debug.parse_flags(ACE_TEXT("access_warn"));
+
+.. rubric:: Footnotes
+
+.. [#orbprefix] :key:`ORBLogFile` and :key:`ORBVerboseLogging` start with "ORB" because they are inherited from :term:`TAO`.
+  They are implemented directly by OpenDDS (not passed to TAO) and are supported either on the command line (using a "-" prefix) or in the configuration file.
+  Other command-line options that begin with ``-ORB`` are passed to TAO's ``ORB_init`` if :ref:`inforepo-disc` is used.

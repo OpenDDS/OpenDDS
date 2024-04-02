@@ -66,7 +66,7 @@ Usage Model
     Sect<12.1.2>
 
 The application creates any number of ``Recorder``\s and ``Replayer``\s as necessary.
-This could be based on using the Built-In Topics to dynamically discover which topics are active in the Domain.
+This could be based on using the :term:`built-in topics` to dynamically discover which topics are active in the Domain.
 Creating a ``Recorder`` or ``Replayer`` requires the application to provide a topic name and type name (as in ``DomainParticipant::create_topic()``) and also the relevant QoS data structures.
 The ``Recorder`` requires SubscriberQos and DataReaderQos whereas the ``Replayer`` requires PublisherQos and DataWriterQos.
 These values are used in discovery's reader/writer matching.
@@ -141,7 +141,7 @@ The properties can be divided into a few categories:
   * Durability Service
   * Ownership and Ownership Strength (still used for reader/writer match)
 
-* Affects reader/writer matching and Built-In Topics but otherwise ignored
+* Affects reader/writer matching and :term:`built-in topics` but otherwise ignored
 
   * Partition
   * Reliability (still used by transport negotiation)

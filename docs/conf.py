@@ -103,6 +103,7 @@ extensions = [
     # Custom ones
     'links',
     'cmake_domain',
+    'config_domain',
 
     # Official ones
     'sphinx.ext.ifconfig',

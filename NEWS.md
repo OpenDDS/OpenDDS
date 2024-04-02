@@ -29,9 +29,9 @@ Read [the documentation for this release on Read the Docs](https://opendds.readt
 ### Fixes
 
 - Updated the [read](https://opendds.readthedocs.io/en/dds-3.27/devguide/xtypes.html#xtypes-interpreting-data-samples-with-dynamicdata) and [write](https://opendds.readthedocs.io/en/dds-3.27/devguide/xtypes.html#xtypes-populating-data-samples-with-dynamicdata) semantics of DynamicData for union, expandable collections (sequence and string), and optional member of an aggregated type. ([PR #4278](https://github.com/OpenDDS/OpenDDS/pull/4278))
-- Fixed memory leak where instances were not cleaned up with exlusive ownership. ([PR #4343](https://github.com/OpenDDS/OpenDDS/pull/4343))
+- Fixed memory leak where instances were not cleaned up with exclusive ownership. ([PR #4343](https://github.com/OpenDDS/OpenDDS/pull/4343))
 - Removed the special handling for sequence members with length code of 5,6, or 7. ([PR #4376](https://github.com/OpenDDS/OpenDDS/pull/4376))
-- Reading data from a dynamic data object for a primitive type now must use MEMBER_ID_INVALID id. ([PR #4376](https://github.com/OpenDDS/OpenDDS/pull/4376))
+- Reading data from a dynamic data object for a primitive type now must use `MEMBER_ID_INVALID` id. ([PR #4376](https://github.com/OpenDDS/OpenDDS/pull/4376))
 - `create_datawriter` and `create_datareader` check if the topic belongs to the same participant as the publisher/subscriber. ([PR #4398](https://github.com/OpenDDS/OpenDDS/pull/4398))
 - Fixed uninitialized `durability_service` in Topic QoS when using QoS-XML. ([PR #4424](https://github.com/OpenDDS/OpenDDS/pull/4424))
 - Fixed a bug where compiling IDL with `-Lc++11 -Gequality` produced code outside of a namespace that didn't compile. ([PR #4450](https://github.com/OpenDDS/OpenDDS/pull/4450))
@@ -105,7 +105,7 @@ Read [the documentation for this release on Read the Docs](https://opendds.readt
 
 ### Documentation
 
-* Remove -Grapidjson flag [opendds_idl] ([PR #4231](https://github.com/OpenDDS/OpenDDS/pull/4231))
+* Removed documentation for `-Grapidjson` option of `opendds_idl` that was removed in 3.20.0 ([PR #4231](https://github.com/OpenDDS/OpenDDS/pull/4231))
 * Remove reference to mailing lists ([PR #4234](https://github.com/OpenDDS/OpenDDS/pull/4234))
 * Restructured parts of [DDS Security](https://opendds.readthedocs.io/en/dds-3.26/devguide/dds_security.html#dds-security) page and expanded documentation of some XML security document elements. ([PR #4281](https://github.com/OpenDDS/OpenDDS/pull/4281))
 * OS-specific instructions will now be automatically selected based on the browser's user agent. ([PR #4281](https://github.com/OpenDDS/OpenDDS/pull/4281))
