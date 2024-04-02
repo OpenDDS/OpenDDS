@@ -1443,6 +1443,38 @@ inline std::string type_kind(AST_Type* type)
   }
 }
 
+inline
+std::string key_only_type_name(const std::string& type_name, FieldFilter field_filter)
+{
+  std::string wrapped_type_name;
+  switch (field_filter) {
+  case FieldFilter_All:
+    wrapped_type_name = type_name;
+    break;
+  case FieldFilter_NestedKeyOnly:
+    wrapped_type_name = "NestedKeyOnly<const" + type_name + ">";
+    break;
+  case FieldFilter_KeyOnly:
+    wrapped_type_name = "KeyOnly<const" + type_name + ">";
+    break;
+  }
+  return wrapped_type_name;
+}
+
+inline
+FieldFilter nested(FieldFilter filter_kind)
+{
+  return filter_kind == FieldFilter_KeyOnly ? FieldFilter_NestedKeyOnly : filter_kind;
+}
+
+inline
+bool has_discriminator(AST_Union* u, FieldFilter filter_kind)
+{
+  return be_global->union_discriminator_is_key(u)
+    || filter_kind == FieldFilter_NestedKeyOnly
+    || filter_kind == FieldFilter_All;
+}
+
 /// Handling wrapping and unwrapping references in the wrapper types:
 /// NestedKeyOnly, IDL::DistinctType, and *_forany.
 struct RefWrapper {

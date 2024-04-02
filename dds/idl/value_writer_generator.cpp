@@ -22,11 +22,6 @@ void generate_write(const std::string& expression, const std::string& field_name
                     AST_Type* type, const std::string& idx, int level = 1,
                     FieldFilter field_filter = FieldFilter_All);
 
-  FieldFilter nested(FieldFilter filter_kind)
-  {
-    return filter_kind == FieldFilter_KeyOnly ? FieldFilter_NestedKeyOnly : filter_kind;
-  }
-
   std::string primitive_type(AST_PredefinedType::PredefinedType pt)
   {
     switch (pt) {
@@ -273,27 +268,10 @@ void generate_write(const std::string& expression, const std::string& field_name
     return "";
   }
 
-  std::string wrapped_type_name(const std::string& type_name, FieldFilter field_filter)
-  {
-    std::string wrapped_type_name;
-    switch (field_filter) {
-    case FieldFilter_All:
-      wrapped_type_name = type_name;
-      break;
-    case FieldFilter_NestedKeyOnly:
-      wrapped_type_name = "NestedKeyOnly<const" + type_name + ">";
-      break;
-    case FieldFilter_KeyOnly:
-      wrapped_type_name = "KeyOnly<const" + type_name + ">";
-      break;
-    }
-    return wrapped_type_name;
-  }
-
   bool gen_struct_i(AST_Structure* node, const std::string& type_name,
                     bool use_cxx11, ExtensibilityKind ek, FieldFilter field_filter)
   {
-    const std::string wrapped_name = wrapped_type_name(type_name, field_filter);
+    const std::string wrapped_name = key_only_type_name(type_name, field_filter);
     Function write("vwrite", "bool");
     write.addArg("value_writer", "OpenDDS::DCPS::ValueWriter&");
     write.addArg("value", "const " + wrapped_name + "&");
@@ -335,7 +313,7 @@ void generate_write(const std::string& expression, const std::string& field_name
                    const std::vector<AST_UnionBranch*>& branches,
                    AST_Type* discriminator, ExtensibilityKind ek, FieldFilter filter_kind)
   {
-    const std::string wrapped_name = wrapped_type_name(type_name, filter_kind);
+    const std::string wrapped_name = key_only_type_name(type_name, filter_kind);
     Function write("vwrite", "bool");
     write.addArg("value_writer", "OpenDDS::DCPS::ValueWriter&");
     write.addArg("value", "const " + wrapped_name + "&");
@@ -347,11 +325,7 @@ void generate_write(const std::string& expression, const std::string& field_name
       "    return false;\n"
       "  }\n";
 
-    const bool write_disc = be_global->union_discriminator_is_key(u)
-      || filter_kind == FieldFilter_NestedKeyOnly
-      || filter_kind == FieldFilter_All;
-
-    if (write_disc) {
+    if (has_discriminator(u, filter_kind)) {
       const bool must_understand = be_global->is_effectively_must_understand(discriminator);
       be_global->impl_ <<
         "  if (!value_writer.begin_discriminator(MemberParam(0, " <<
