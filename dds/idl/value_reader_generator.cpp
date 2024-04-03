@@ -244,7 +244,7 @@ void generate_read(const std::string& expression, const std::string& accessor,
   bool gen_struct_i(AST_Structure* node, const std::string& type_name,
                     bool use_cxx11, ExtensibilityKind ek, FieldFilter field_filter)
   {
-    const std::string wrapped_name = key_only_type_name(type_name, field_filter);
+    const std::string wrapped_name = key_only_type_name(type_name, field_filter, false);
     Function read("vread", "bool");
     read.addArg("value_reader", "OpenDDS::DCPS::ValueReader&");
     read.addArg("value", wrapped_name + "&");
@@ -305,7 +305,7 @@ void generate_read(const std::string& expression, const std::string& accessor,
                    const std::vector<AST_UnionBranch*>& branches,
                    AST_Type* discriminator, ExtensibilityKind ek, FieldFilter filter_kind)
   {
-    const std::string wrapped_name = key_only_type_name(type_name, filter_kind);
+    const std::string wrapped_name = key_only_type_name(type_name, filter_kind, false);
     Function read("vread", "bool");
     read.addArg("value_reader", "OpenDDS::DCPS::ValueReader&");
     read.addArg("value", wrapped_name + "&");

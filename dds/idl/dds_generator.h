@@ -1444,18 +1444,30 @@ inline std::string type_kind(AST_Type* type)
 }
 
 inline
-std::string key_only_type_name(const std::string& type_name, FieldFilter field_filter)
+std::string key_only_type_name(const std::string& type_name, FieldFilter field_filter, bool writing)
 {
   std::string wrapped_type_name;
   switch (field_filter) {
   case FieldFilter_All:
-    wrapped_type_name = type_name;
+    if (writing) {
+      wrapped_type_name = "const" + type_name;
+    } else {
+      wrapped_type_name = type_name;
+    }
     break;
   case FieldFilter_NestedKeyOnly:
-    wrapped_type_name = "NestedKeyOnly<const" + type_name + ">";
+    if (writing) {
+      wrapped_type_name = "const NestedKeyOnly<const" + type_name + ">";
+    } else {
+      wrapped_type_name = "const NestedKeyOnly<" + type_name + ">";
+    }
     break;
   case FieldFilter_KeyOnly:
-    wrapped_type_name = "KeyOnly<const" + type_name + ">";
+    if (writing) {
+      wrapped_type_name = "const KeyOnly<const" + type_name + ">";
+    } else {
+      wrapped_type_name = "const KeyOnly<" + type_name + ">";
+    }
     break;
   }
   return wrapped_type_name;
