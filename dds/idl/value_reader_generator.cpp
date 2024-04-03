@@ -256,21 +256,14 @@ void generate_read(const std::string& expression, const std::string& accessor,
     const std::string value_prefix = field_filter == FieldFilter_All ? "value." : "value.value.";
     const Fields fields(node, field_filter);
 
-    bool first = true;
     for (Fields::Iterator it = fields.begin(); it != fields.end(); ++it) {
       AST_Field* const field = *it;
-      const std::string idl_name = canonical_name(field);
-      if (first) {
-        first = false;
-      } else {
-        be_global->impl_ << ',';
-      }
       be_global->impl_ <<
-        '{' << '"' << idl_name << '"' << ',' << be_global->get_id(field) << '}';
+        "{\"" << canonical_name(field) << "\"," << be_global->get_id(field) << "},";
     }
 
     be_global->impl_ <<
-      ",{0,0}};\n"
+      "{0,0}};\n"
       "  ListMemberHelper helper(pairs);\n";
 
     be_global->impl_ <<

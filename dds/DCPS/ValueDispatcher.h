@@ -21,7 +21,7 @@ struct OpenDDS_Dcps_Export ValueDispatcher {
   virtual void* new_value() const = 0;
   virtual void delete_value(void* data) const = 0;
 
-  virtual bool read(ValueReader& value_reader, void* data) const = 0;
+  virtual bool read(ValueReader& value_reader, void* data, bool key_only = false) const = 0;
   virtual bool write(ValueWriter& value_writer, const void* data, bool key_only = false) const = 0;
 
   virtual DDS::InstanceHandle_t register_instance_helper(DDS::DataWriter* dw, const void* data) const = 0;
@@ -45,16 +45,18 @@ struct ValueDispatcher_T : public virtual ValueDispatcher {
     delete tbd;
   }
 
-  virtual bool read(ValueReader& value_reader, void* data) const
+  virtual bool read(ValueReader& value_reader, void* data, bool key_only = false) const
   {
+    if (key_only) {
+      return vread(value_reader, *static_cast<const KeyOnly<T>*>(data));
+    }
     return vread(value_reader, *static_cast<T*>(data));
   }
 
-  // Don't have to worry about NestedKeyOnly here since this is only called for topic type.
   virtual bool write(ValueWriter& value_writer, const void* data, bool key_only = false) const
   {
     if (key_only) {
-      return vwrite(value_writer, *static_cast<const KeyOnly<T>*>(data));
+      return vwrite(value_writer, *static_cast<const KeyOnly<const T>*>(data));
     }
     return vwrite(value_writer, *static_cast<const T*>(data));
   }
