@@ -149,6 +149,7 @@ _opendds_feature(QUERY_CONDITION "${OPENDDS_CONTENT_SUBSCRIPTION}" CONFIG
 _opendds_feature(SUPPRESS_ANYS ON CONFIG DOC "Default for opendds_target_sources(SUPPRESS_ANYS)")
 _opendds_feature(SECURITY OFF CONFIG DOC "Build with RTPS Security support")
 _opendds_feature(SAFETY_PROFILE OFF CONFIG DOC "Build using Safety Profile (Not for CMake-built OpenDDS)")
+_opendds_feature(BOOTTIME_TIMERS OFF CONFIG DOC "Use CLOCK_BOOTTIME for timers")
 
 # ACE Features
 if(NOT CMAKE_BUILD_TYPE OR CMAKE_BUILD_TYPE STREQUAL "Debug")
