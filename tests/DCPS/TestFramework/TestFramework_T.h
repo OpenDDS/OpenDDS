@@ -153,13 +153,6 @@ protected:
   virtual void fini_i();
 };
 
-#if defined (ACE_TEMPLATES_REQUIRE_SOURCE)
 #include "TestFramework_T.cpp"
-#endif
-
-#if defined (ACE_TEMPLATES_REQUIRE_PRAGMA)
-#pragma message("TestFramework_T.cpp template inst")
-#pragma implementation("TestFramework_T.cpp")
-#endif
 
 #endif  /* DCPS_TESTFRAMEWORK_T_H */
