@@ -186,8 +186,6 @@ OPENDDS_END_VERSIONED_NAMESPACE_DECL
 #include "TransportReceiveStrategy_T.inl"
 #endif /* __ACE_INLINE__ */
 
-#ifdef ACE_TEMPLATES_REQUIRE_SOURCE
 #include "TransportReceiveStrategy_T.cpp"
-#endif
 
 #endif /* OPENDDS_DCPS_TRANSPORTRECEIVESTRATEGY */

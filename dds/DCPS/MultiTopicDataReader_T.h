@@ -193,9 +193,7 @@ private:
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
-#ifdef ACE_TEMPLATES_REQUIRE_SOURCE
 #include "MultiTopicDataReader_T.cpp"
-#endif
 
 #endif
 #endif
