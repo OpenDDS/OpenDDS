@@ -158,6 +158,6 @@ OPENDDS_END_VERSIONED_NAMESPACE_DECL
 #  include "TimePoint_T.inl"
 #endif /* __ACE_INLINE__ */
 
-#  include "TimePoint_T.cpp"
+#include "TimePoint_T.cpp"
 
 #endif
