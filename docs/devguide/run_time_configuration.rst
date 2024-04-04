@@ -12,17 +12,6 @@ Run-time Configuration
 
 .. _run_time_configuration--configuration-approach:
 
-**********************
-Configuration Approach
-**********************
-
-..
-    Sect<7.1>
-
-OpenDDS includes a file-based configuration framework for configuring global options and options related to specific publishers and subscribers such as discovery and transport configuration.
-OpenDDS also allows configuration via the command line for a limited number of options and via a configuration API.
-This section summarizes the configuration options supported by OpenDDS.
-
 OpenDDS configuration is concerned with three main areas:
 
 #. **Common Configuration Options** -- configure the behavior of DCPS entities at a global level.
@@ -36,17 +25,50 @@ OpenDDS configuration is concerned with three main areas:
    Each pluggable transport can be configured separately.
    See :ref:`config-transport` for details.
 
-The configuration file for OpenDDS is a human-readable ini-style text file.
+**********************
+Configuration Approach
+**********************
+
+..
+    Sect<7.1>
+
+Most of OpenDDS is configured through a key-value store.
+Keys are strings that are converted to a canonical form before being stored by 1) converting camel case to snake case, 2) capitalizing all alphabetic characers, 3) replacing all non-alphanumeric characters with underscores, and 4) stripping leading, trailing, and duplicate underscores.
+For example, the key ``!SectionInstance__PROPERTY`` is canonicalized into ``SECTION_INSTANCE_PROPERTY`` before being stored.
+Values are stored as strings and converted to other types as necessary.
+The documentation for each key contains its canonical name.
+
+A key has the following parts:
+
+#. **section** -- The section describes the area of functionality that is being configured.
+
+#. **instance** -- (optional) The instance names a particular collection of configuration values.
+   Configuration keys that do not have an instance imply a singleton or global.
+
+#. **property** -- The property names a variable relative to the section and instance.
+
+Sections, instances, and properties can contain underscores meaning that underscores are not used as delimiters to separate the section, instance, and property.
+This ambiguity is resolved by the following rules:
+
+* Sections are known by OpenDDS.
+  For example, OpenDDS will look for :ref:`DDSI-RTPS Discovery<run_time_configuration--rtps-disc-config-options>` instances under keys prefixed by ``RTPS_DISCOVERY``.
+
+* Instances must be introduced by a special key-value pair where the value is prefixed by ``@``.
+  For example, ``RTPS_DISCOVERY_MY_DISCOVERY=@MY_DISCOVERY`` introduces an instance named ``MY_DISCOVERY`` under the ``RTPS_DISCOVERY`` section.
+
+Suppose the configuration store contains the following key-pairs: ``RTPS_DISCOVERY_MY_DISCOVERY=@MY_DISCOVERY`` and ``RTPS_DISCOVERY_MY_DISCOVERY_RESEND_PERIOD=5``.
+In this case, the ``MY_DISCOVERY`` instance of ``RTPS_DISCOVERY`` will have a ``RESEND_PERIOD`` with a value of ``5`` (seconds).
+
 :ref:`This table <run_time_configuration--sections>` shows a list of the available configuration section types as they relate to the area of OpenDDS that they configure.
 
 .. _run_time_configuration--sections:
 
-.. list-table:: Configuration File Sections
+.. list-table:: Configuration Sections
    :header-rows: 1
 
    * - **Focus Area**
 
-     - **File Section Title**
+     - **Section Title**
 
    * - :ref:`Global Settings <config-common>`
 
@@ -88,18 +110,108 @@ The configuration file for OpenDDS is a human-readable ini-style text file.
 
      - ``[ice]``
 
-For each of the section types with the exception of :sec:`common` and ``[ice]``, the syntax of a section header takes the form of ``[<section_type>/<instance_name>]``.
-For example, a ``[repository]`` section type would always be used in a configuration file like so: ``[repository/repo_1]`` where ``repository`` is the section type and ``repo_1`` is an instance name of a repository configuration.
+The configuration store can be populated in a number of ways:
 
-How to use instances to configure discovery and transports is explained further in :ref:`config-disc` and :ref:`config-transport` respectively.
+* :ref:`Environment variables <config-environment-variables>`
 
-.. _DCPSConfigFile:
+* :ref:`Command-line arguments <config-command-line-arguments>`
 
-*******************
-``-DCPSConfigFile``
-*******************
+* :ref:`Configuration file(s) <dcpsconfigfile>`
 
-The ``-DCPSConfigFile`` command-line argument can be used to pass the location of a configuration file to OpenDDS.
+* :ref:`Specific and generic APIs <config-api>`
+
+By default and for backwards compatibility, the different configuration mechanisms are processed in the following order:
+
+#. Environment variables
+
+#. Command-line arguments (will overwrite configuration from environment variables)
+
+#. Configuration file (will not overwrite configuration from environment variables or command-line arguments)
+
+#. APIs called by the user (will overwrite existing configuration)
+
+However, multiple configuration files can be processed by setting ``DCPS_SINGLE_CONFIG_FILE=0``.
+This can be done with an environment variable ``OPENDDS_DCPS_SINGLE_CONFIG_FILE=0`` or a command-line argument ``-DCPSSingleConfigFile 0``.
+This causes the different configuration mechanisms to be processed in the following order:
+
+#. Environment variables
+
+#. Command-line arguments and configuration files are processed sequentially and overwrite existing configuration
+
+#. APIs called by the user (which also overwrite existing configuration)
+
+Users can store configuration data for their applications in the configuration store.
+Users taking advantage of this capability should use the section names of ``APP`` and ``USER`` which are reserved for this purpose.
+
+.. _config-environment-variables:
+
+Configuration with Environment Variables
+========================================
+
+OpenDDS reads environment variables that begin with ``OPENDDS_`` to populate the configuration store.
+An environment variable ``OPENDDS_KEY=VALUE`` causes ``KEY=VALUE`` to be saved in the configuration store.
+``KEY`` is canonicalized before being stored.
+
+To set the ``ResendPeriod`` on an ``rtps_discovery`` instance named ``MyDiscovery`` to 5 seconds using environment variables, one would set the following:
+
+* ``OPENDDS_RTPS_DISCOVERY_MY_DISCOVERY=@MY_DISCOVERY``
+* ``OPENDDS_RTPS_DISCOVERY_MY_DISCOVERY_RESEND_PERIOD=5``
+
+.. _config-command-line-arguments:
+
+Configuration with Command-line Arguments
+=========================================
+
+This section describes the command-line arguments that are relevant to OpenDDS and how they are processed.
+Command-line arguments are passed to the service participant singleton when initializing the domain participant factory.
+This is accomplished by using the ``TheParticipantFactoryWithArgs`` macro:
+
+.. code-block:: cpp
+
+    #include <dds/DCPS/Service_Participant.h>
+
+    int main(int argc, char* argv[])
+    {
+      DDS::DomainParticipantFactory_var dpf =
+        TheParticipantFactoryWithArgs(argc, argv);
+      // ...
+    }
+
+Command-line arguments are parsed in two phases.
+The following arguments are parse in the first phase:
+
+#. ``-ORBLogFile PATH`` - Causes logging output to be written to the file indicated by ``PATH``.
+
+#. ``-ORBVerboseLogging [0|1]`` - Enables/disables verbose logging (default 0).
+   Verbose logging causes each log message to be prefixed with a timestamp.
+
+#. ``-DCPSSingleConfigFile [0|1]`` - Enables/disables the legacy behavior of a single configuration file that is processed after environment variables and command-line arguments and does not overwrite existing configuration (default 1).
+   When disabled, arguments processed in the second phase are processed as they are encountered and overwrite existing configuration.
+
+The following arguments are processed in the second phase:
+
+#. ``-DCPSConfigFile PATH`` - Causes configuration to be read from the file indicated by ``PATH``.
+   It is processed immediately if ``-DCPSSingleConfigFile 0`` and deferred to the end of argument processing, otherwise.
+
+#. ``-OpenDDSKEY VALUE`` - Causes ``KEY=VALUE`` to be saved in the configuration store.
+   The key ``KEY`` is canonicalized before being stored.
+   To set the ``ResendPeriod`` on an ``rtps_discovery`` instance named ``MyDiscovery`` to 5 seconds using environment variables, one could use the following arguments:
+
+   * ``-OpenDDS_rtps_discovery_MyDiscovery @MY_DISCOVERY``
+   * ``-OpenDDS_rtps_discovery_MyDiscovery_ResendPeriod 5``
+
+#. ``-DCPSx VALUE`` - Causes ``COMMON_DCPS_x=VALUE`` to be saved in the configuration store.
+   The key ``COMMON_DCPS_x`` is canonicalized before being stored.
+
+#. ``-FederationX VALUE`` - Causes ``COMMON_FEDERATION_X=VALUE`` to be saved in the configuration store.
+   The key ``COMMON_FEDERATION_X`` is canonicalized before being stored.
+
+.. _dcpsconfigfile:
+
+Configuration with a File
+=========================
+
+The ``-DCPSConfigFile PATH`` argument described above causes OpenDDS to read configuration from a human-readable ini-style text file.
 For example:
 
 .. tab:: Linux, macOS, BSDs, etc.
@@ -114,19 +226,10 @@ For example:
 
     publisher -DCPSConfigFile pub.ini
 
-Command-line arguments are passed to the service participant singleton when initializing the domain participant factory.
-This is accomplished by using the ``TheParticipantFactoryWithArgs`` macro:
+For each of the section types with the exception of :sec:`common` and ``[ice]``, the syntax of a section header takes the form of ``[<section_type>/<instance_name>]``.
+For example, a ``[repository]`` section type would always be used in a configuration file like so: ``[repository/repo_1]`` where ``repository`` is the section type and ``repo_1`` is an instance name of a repository configuration.
 
-.. code-block:: cpp
-
-    #include <dds/DCPS/Service_Participant.h>
-
-    int main(int argc, char* argv[])
-    {
-      DDS::DomainParticipantFactory_var dpf =
-        TheParticipantFactoryWithArgs(argc, argv);
-      // ...
-    }
+Using instances to configure discovery and transports is explained further in :ref:`config-disc` and :ref:`config-transport` respectively.
 
 ..
   Keep the "word joiner" U+FEFF in the next sentence, otherwise the line is broken up and it comes out strange in the output.
@@ -162,10 +265,62 @@ For example, the following commands would have the same effect:
   ./publisher -DCPSConfigFile a.ini
   ./subscriber -DCPSConfigFile b.ini
 
-The ``Service_Participant`` class also provides methods that allow an application to configure the DDS service.
-See the header file :ghfile:`dds/DCPS/Service_Participant.h` for details.
+.. _config-api:
 
-The following subsections detail each of the configuration file sections and the available options related to those sections.
+Configuration with API
+======================
+
+ConfigStore API
+---------------
+
+The configuration store API allows any configuration value to be set and retrieved.
+The interface for the ConfigStore is intentionally generic to facilitate multiple language bindings without specific support for every configuration property.
+See :ghfile:`dds/DdsDcpsInfrastructure.idl` and :ghfile:`dds/DCPS/ConfigStoreImpl.h` for more details.
+
+.. tab:: C++
+
+  .. code-block:: cpp
+
+     #include <dds/DCPS/Service_Participant.h>
+
+     int main(int argc, char* argv[])
+     {
+       // ...
+       TheServiceParticipant->config_store()->set_string("RTPS_DISCOVERY_MY_DISCOVERY", "@MY_DISCOVERY");
+       TheServiceParticipant->config_store()->set_string("RTPS_DISCOVERY_MY_DISCOVERY_RESEND_PERIOD", "5");
+       // ...
+     }
+
+.. tab:: Java
+
+  .. code-block:: java
+
+     import OpenDDS.DCPS.TheServiceParticipant;
+     import OpenDDS.DCPS.ConfigStore;
+     // ...
+     ConfigStore cs = TheServiceParticipant.config_store();
+     cs.set_string("RTPS_DISCOVERY_MY_DISCOVERY", "@MY_DISCOVERY");
+     cs.set_string("RTPS_DISCOVERY_MY_DISCOVERY_RESEND_PERIOD", "5");
+     // ...
+
+Specific APIs
+-------------
+
+Various classes provide methods that allow an application to configure OpenDDS.
+
+* See ``Service_Participant`` in :ghfile:`dds/DCPS/Service_Participant.h`
+
+* See ``InfoRepoDiscovery`` in :ghfile:`dds/DCPS/InfoRepoDiscovery/InfoRepoDiscovery.h`
+
+* See ``RtpsDiscoveryConfig`` in :ghfile:`dds/DCPS/RTPS/RtpsDiscoveryConfig.h`
+
+* See ``TransportRegistry`` in :ghfile:`dds/DCPS/transport/framework/TransportRegistry.h`
+
+* See ``RtpsUdpInst`` in :ghfile:`dds/DCPS/transport/rtps_udp/RtpsUdpInst.h`
+
+* See ``TcpInst`` in :ghfile:`dds/DCPS/transport/tcp/TcpInst.h`
+
+* See ``ShmemInst`` in :ghfile:`dds/DCPS/transport/shmem/ShmemInst.h`
 
 .. _config-common:
 .. _run_time_configuration--common-configuration-options:
