@@ -309,8 +309,11 @@ template <typename Type>
 void baseline_checks_vwrite(const Encoding& encoding, const Type& value, const DataView& expected_cdr)
 {
   if (encoding.kind() == Encoding::KIND_XCDR2) {
+    // Compute serialized size
     Xcdr2ValueWriter value_writer(encoding);
-    vwrite(value_writer, value);
+    EXPECT_TRUE(vwrite(value_writer, value));
+
+    // Serialize
     ACE_Message_Block buffer(value_writer.get_serialized_size());
     Serializer ser(&buffer, encoding);
     value_writer.set_serializer(&ser);
@@ -2000,6 +2003,16 @@ void key_only_test(bool topic_type)
   amalgam_serializer_test_base<ConstWrapper, Type, Wrapper, Type>(
     xcdr2, expected, wrapped_value, wrapped_result, field_filter);
   EXPECT_PRED_FORMAT2(assert_values, wrapped_value, wrapped_result);
+
+  // Test vwrite with KeyOnly or NestedKeyOnly samples
+  Xcdr2ValueWriter value_writer(xcdr2);
+  EXPECT_TRUE(vwrite(value_writer, wrapped_value));
+
+  ACE_Message_Block buffer(value_writer.get_serialized_size());
+  Serializer ser(&buffer, xcdr2);
+  value_writer.set_serializer(&ser);
+  EXPECT_TRUE(vwrite(value_writer, wrapped_value));
+  EXPECT_PRED_FORMAT2(assert_DataView, expected, buffer);
 }
 
 void serialize_u32(DataVec& data_vec, size_t value)
