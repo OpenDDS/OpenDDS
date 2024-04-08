@@ -25,6 +25,8 @@ OpenDDS configuration is concerned with three main areas:
    Each pluggable transport can be configured separately.
    See :ref:`config-transport` for details.
 
+.. _config-store-keys:
+
 **********************
 Configuration Approach
 **********************

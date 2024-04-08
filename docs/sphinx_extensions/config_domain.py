@@ -224,8 +224,14 @@ class ConfigProp(CustomDomainObject):
         rst = ViewList()
 
         # Config store key
-        key = key_canonicalize(ctx.get(-2, 'sec_name'), ctx.get(-2, 'arguments'), ctx.get_name())
-        rst.append(f'| **Config store key**: ``{key}``', f'{__name__}', 1)
+        try:
+            key = key_canonicalize(
+                ctx.get(-2, 'sec_name'), ctx.get(-2, 'arguments'), ctx.get_name())
+            rst.append(f'| :ref:`Config store key <config-store-keys>`: ``{key}``',
+                f'{__name__}', 1)
+        except Exception as e:
+            e = ValueError(f'Something went wrong with key_canonicalize: {e}')
+            ConfigDomain.logger.warning(e, location=self.get_location())
 
         # :required: flag
         required = 'required' in self.options
