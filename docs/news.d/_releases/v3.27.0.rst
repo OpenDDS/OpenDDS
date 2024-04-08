@@ -41,7 +41,7 @@ Fixes
 
 - Fixed a bug where compiling IDL with ``-Lc++11 -Gequality`` produced code outside of a namespace that didn't compile. (:ghpr:`4450`)
 
-- ``SedpLocalAddress`` now defaults to :cfg:key:`DCPSDefaultAddress` to behave like ``SpdpLocalAddress`` and ``local_address``. (:ghpr:`4451`)
+- ``SedpLocalAddress`` now defaults to :cfg:prop:`DCPSDefaultAddress` to behave like ``SpdpLocalAddress`` and ``local_address``. (:ghpr:`4451`)
 
 Notes
 =====

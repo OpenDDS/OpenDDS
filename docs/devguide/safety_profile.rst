@@ -96,7 +96,7 @@ Run-time Configurable Options
     Sect<13.4>
 
 The memory pool used by OpenDDS can be configured by setting values in the ``[common]`` section of the configuration file.
-See :cfg:key:`pool_size` and :cfg:key:`pool_granularity`.
+See :cfg:prop:`pool_size` and :cfg:prop:`pool_granularity`.
 
 .. _safety_profile--running-ace-and-opendds-tests:
 

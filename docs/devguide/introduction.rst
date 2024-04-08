@@ -360,7 +360,7 @@ It also makes it easier to replace these libraries with custom ones.
 
 - :ref:`security <sec>` [#plugins-sec]_
 
-How to enable and use a particular plugin will differ based on the kind of plugin and the plugin itself, but generally they are enabled by some form of configuration setting, for example using ``[transport]transport_type`` or :cfg:key:`DCPSSecurity` in a configuration file.
+How to enable and use a particular plugin will differ based on the kind of plugin and the plugin itself, but generally they are enabled by some form of configuration setting, for example using ``[transport]transport_type`` or :cfg:prop:`DCPSSecurity` in a configuration file.
 The plugin will also have to be linked and initialized at runtime.
 For dynamic libraries (``.dll``, ``.dynlib`` or, ``.so`` files) this is done automatically as the OpenDDS will load the dynamic library and then run any initialization the plugin requires.
 When the plugins are statically linked, then it requires explicit linking and including an initialization header in the application that contains a global object that will initialize the plugin.

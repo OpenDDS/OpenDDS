@@ -358,7 +358,7 @@ For example:
 
 .. sec:: common
 
-  .. key:: DCPSBidirGIOP=<boolean>
+  .. prop:: DCPSBidirGIOP=<boolean>
     :default: ``1`` (enabled)
 
     .. note:: This key is only applicable when using :ref:`inforepo-disc`.
@@ -366,26 +366,26 @@ For example:
     Use TAO's BiDirectional GIOP feature for interaction with the :ref:`inforepo`.
     With BiDir enabled, fewer sockets are needed since the same socket can be used for both client and server roles.
 
-  .. key:: DCPSBit=<boolean>
+  .. prop:: DCPSBit=<boolean>
     :default: ``1`` (enabled)
 
     Controls if :ref:`bit` are enabled.
 
-  .. key:: DCPSBitLookupDurationMsec=<msec>
+  .. prop:: DCPSBitLookupDurationMsec=<msec>
     :default: ``2000`` (2 seconds)
 
     The maximum duration in milliseconds that the framework will wait for latent :ref:`bit` information when retrieving BIT data given an instance handle.
     The participant code may get an instance handle for a remote entity before the framework receives and processes the related BIT information.
     The framework waits for up to the given amount of time before it fails the operation.
 
-  .. key:: DCPSBitTransportIPAddress=<addr>
+  .. prop:: DCPSBitTransportIPAddress=<addr>
     :default: ``INADDR_ANY``
 
     .. note:: This key is only applicable when using :ref:`inforepo-disc`.
 
     IP address identifying the local interface to be used by :ref:`tcp-transport` for the :ref:`bit`.
 
-  .. key:: DCPSBitTransportPort=<port>
+  .. prop:: DCPSBitTransportPort=<port>
     :default: ``0``
 
     .. note:: This key is only applicable when using :ref:`inforepo-disc`.
@@ -393,28 +393,28 @@ For example:
     Port used by the :ref:`tcp-transport` for :ref:`bit`.
     If the default of ``0`` is used, the operating system will choose a port to use.
 
-  .. key:: DCPSChunkAssociationMultiplier=<n>
+  .. prop:: DCPSChunkAssociationMultiplier=<n>
     :default: ``10``
 
-    Multiplier for the :key:`DCPSChunks` or the ``max_samples`` value in :ref:`qos-resource-limits` to determine the total number of shallow copy chunks that are preallocated.
+    Multiplier for the :prop:`DCPSChunks` or the ``max_samples`` value in :ref:`qos-resource-limits` to determine the total number of shallow copy chunks that are preallocated.
     Set this to a value greater than the number of connections so the preallocated chunk handles do not run out.
     A sample written to multiple data readers will not be copied multiple times but there is a shallow copy handle to that sample used to manage the delivery to each data reader.
     The size of the handle is small so there is not great need to set this value close to the number of connections.
 
-  .. key:: DCPSChunks=<n>
+  .. prop:: DCPSChunks=<n>
     :default: ``20``
 
     Configurable number of chunks that a data writer's and reader's cached allocators will preallocate when the :ref:`qos-resource-limits` value is infinite.
     When all of the preallocated chunks are in use, OpenDDS allocates from the heap.
     This feature of allocating from the heap when the preallocated memory is exhausted provides flexibility but performance will decrease when the preallocated memory is exhausted.
 
-  .. key:: DCPSDebugLevel=<n>
+  .. prop:: DCPSDebugLevel=<n>
     :default: ``0`` (disabled)
 
     Integer value that controls the amount of :ref:`debug information the DCPS layer logs <run_time_configuration--dcps-layer-debug-logging>`.
     Valid values are ``0`` through ``10``.
 
-  .. key:: DCPSDefaultAddress=<addr>
+  .. prop:: DCPSDefaultAddress=<addr>
     :default: ``0.0.0.0``
 
     Default value for the host portion of ``local_address`` in transport instances and some other host address values:
@@ -423,13 +423,13 @@ For example:
     - ``[transport]local_address`` (udp)
     - ``[transport]local_address`` (multicast)
     - ``[transport]local_address`` (rtps_udp)
-    - ``[transport]ipv6_local_address`` (rstp_udp)
+    - ``[transport]ipv6_local_address`` (rtps_udp)
     - ``[transport]multicast_interface`` (rtps_udp)
     - ``[rtps_discovery]SedpLocalAddress``
     - ``[rtps_discovery]SpdpLocalAddress``
     - ``[rtps_discovery]MulticastInterface``
 
-  .. key:: DCPSDefaultDiscovery=DEFAULT_REPO|DEFAULT_RTPS|DEFAULT_STATIC|<name>
+  .. prop:: DCPSDefaultDiscovery=DEFAULT_REPO|DEFAULT_RTPS|DEFAULT_STATIC|<name>
     :default: :val:`DEFAULT_REPO`
 
     Specifies a discovery configuration to use for any domain not explicitly configured.
@@ -453,7 +453,7 @@ For example:
 
     See :ref:`config-disc` for details about configuring discovery.
 
-  .. key:: DCPSGlobalTransportConfig=<name>|$file
+  .. prop:: DCPSGlobalTransportConfig=<name>|$file
     :default: The default configuration is used as described in :ref:`run_time_configuration--overview`.
 
     The :ref:`transport configuration <config-transport>` that should be used as the global default one.
@@ -466,20 +466,20 @@ For example:
 
       ``$file`` uses a transport configuration that includes all transport instances defined in the configuration file.
 
-  .. key:: DCPSInfoRepo=<objref>
+  .. prop:: DCPSInfoRepo=<objref>
     :default: ``file://repo.ior``
 
     Object reference for locating the :ref:`inforepo` in :ref:`inforepo-disc`.
     This value is passed to ``CORBA::ORB::string_to_object()`` and can be any Object URL type understandable by :term:`TAO` (file, IOR, corbaloc, corbaname).
     A simplified endpoint description of the form ``<host>:<port>`` is also accepted, which is equivalent to ``corbaloc::<host>:<port>/DCPSInfoRepo``.
 
-  .. key:: DCPSLivelinessFactor=<n>
+  .. prop:: DCPSLivelinessFactor=<n>
     :default: ``80``
 
     Percent of the :ref:`qos-liveliness` lease duration after which a liveliness message is sent.
     A value of ``80`` implies a 20% cushion of latency from the last detected heartbeat message.
 
-  .. key:: DCPSLogLevel=none|error|warning|notice|info|debug
+  .. prop:: DCPSLogLevel=none|error|warning|notice|info|debug
     :default: :val:`warning`
 
     General logging control.
@@ -510,30 +510,30 @@ For example:
 
     See :ref:`run_time_configuration--logging` for details.
 
-  .. key:: DCPSMonitor=<boolean>
+  .. prop:: DCPSMonitor=<boolean>
     :default: ``0``
 
     Use the Monitor library to publish data on monitoring topics (see :ghfile:`dds/monitor/README`).
 
-  .. key:: DCPSPendingTimeout=<sec>
+  .. prop:: DCPSPendingTimeout=<sec>
     :default: ``0``
 
     The maximum duration in seconds a data writer will block to allow unsent samples to drain on deletion.
     The default, ``0``, blocks indefinitely.
 
-  .. key:: DCPSPersistentDataDir=<path>
+  .. prop:: DCPSPersistentDataDir=<path>
     :default: ``OpenDDS-durable-data-dir``
 
     The path to a directory on where durable data will be stored for :ref:`PERSISTENT_DURABILITY_QOS <PERSISTENT_DURABILITY_QOS>`.
     If the directory does not exist it will be created automatically.
 
-  .. key:: DCPSPublisherContentFilter=<boolean>
+  .. prop:: DCPSPublisherContentFilter=<boolean>
     :default: ``1``
 
     Controls the filter expression evaluation policy for :ref:`content filtered topics <content_subscription_profile--content-filtered-topic>`.
     When the value is ``1`` the publisher may drop any samples, before handing them off to the transport when these samples would have been ignored by all subscribers.
 
-  .. key:: DCPSSecurity=<boolean>
+  .. prop:: DCPSSecurity=<boolean>
     :default: ``0``
 
     This setting is only available when OpenDDS is compiled with :ref:`dds_security`.
@@ -542,37 +542,37 @@ For example:
 
     See :ref:`dds_security` for more information.
 
-  .. key:: DCPSSecurityDebug=<cat>[,<cat>]...
+  .. prop:: DCPSSecurityDebug=<cat>[,<cat>]...
     :default: ``0`` (No security logging)
 
     This setting is only available when OpenDDS is compiled with :ref:`dds_security` enabled.
     This controls the :ref:`security debug logging <run_time_configuration--security-debug-logging>` granularity by category.
 
-  .. key:: DCPSSecurityDebugLevel=<n>
+  .. prop:: DCPSSecurityDebugLevel=<n>
     :default: ``0`` (No security logging)
 
     This setting is only available when OpenDDS is compiled with :ref:`dds_security` enabled.
     This controls the :ref:`security debug logging <run_time_configuration--security-debug-logging>` granularity by debug level.
 
-  .. key:: DCPSSecurityFakeEncryption=<boolean>
+  .. prop:: DCPSSecurityFakeEncryption=<boolean>
     :default: ``0`` (Real encryption when that's setup)
 
     This setting is only available when OpenDDS is compiled with :ref:`dds_security` enabled.
     This option, when set to ``1``, disables all encryption by making encryption and decryption no-ops.
     OpenDDS still generates keys and performs other security bookkeeping, so this option is useful for debugging the security infrastructure by making it possible to manually inspect all messages.
 
-  .. key:: DCPSThreadStatusInterval=<sec>
+  .. prop:: DCPSThreadStatusInterval=<sec>
     :default: ``0`` (disabled)
 
     Enable :ref:`internal thread status reporting <built_in_topics--openddsinternalthread-topic>` using the specified reporting interval, in seconds.
 
-  .. key:: DCPSTransportDebugLevel=<n>
+  .. prop:: DCPSTransportDebugLevel=<n>
     :default: ``0`` (disabled)
 
     Integer value that controls the amount of :ref:`debug information the transport layer logs <run_time_configuration--transport-layer-debug-logging>`.
     Valid values are ``0`` through ``5``.
 
-  .. key:: DCPSTypeObjectEncoding=Normal|WriteOldFormat|ReadOldFormat
+  .. prop:: DCPSTypeObjectEncoding=Normal|WriteOldFormat|ReadOldFormat
     :default: :val:`Normal`
 
     From when :term:`XTypes` was first implemented in OpenDDS from 3.16.0 until 3.18.0, there was a bug in the encoding and decoding of ``TypeObject`` and related data types for :ref:`representing user types <xtypes--representing-types-with-typeobject-and-dynamictype>`.
@@ -593,12 +593,12 @@ For example:
       The default, correct encoding is used.
       Once all applications are using both OpenDDS 3.18 or later and ``ReadOldFormat``, then ``Normal`` can be used.
 
-  .. key:: ORBLogFile=<filename>
+  .. prop:: ORBLogFile=<path>
     :default: Output to standard error stream on most platforms
 
     Change :ref:`log <run_time_configuration--logging>` message destination to the file specified, which is opened in appending mode. [#orbprefix]_
 
-  .. key:: ORBVerboseLogging=0|1|2
+  .. prop:: ORBVerboseLogging=0|1|2
     :default: ``0``
 
     Add a prefix to each :ref:`log <run_time_configuration--logging>` message, using a format defined by the :term:`ACE` library: [#orbprefix]_
@@ -615,18 +615,18 @@ For example:
 
       Verbose, in addition to "lite" has host name, PID, program name
 
-  .. key:: pool_size=<n_bytes>
+  .. prop:: pool_size=<n_bytes>
     :default: ``41943040`` bytes (40 MiB)
 
     Size of :ref:`safety_profile` memory pool, in bytes.
 
-  .. key:: pool_granularity=<n_bytes>
+  .. prop:: pool_granularity=<n_bytes>
     :default: ``8``
 
     Granularity of :ref:`safety_profile` memory pool in bytes.
     Must be multiple of 8.
 
-  .. key:: Scheduler=SCHED_RR|SCHED_FIFO|SCHED_OTHER
+  .. prop:: Scheduler=SCHED_RR|SCHED_FIFO|SCHED_OTHER
     :default: :val:`SCHED_OTHER`
 
     Selects the scheduler to use for transport sending threads.
@@ -650,10 +650,10 @@ For example:
 
       :ref:`qos-transport-priority`
 
-  .. key:: scheduler_slice=<usec>
+  .. prop:: scheduler_slice=<usec>
     :default: ``0``
 
-    Some operating systems require a time slice value to be set when selecting a :key:`Scheduler` other than the default.
+    Some operating systems require a time slice value to be set when selecting a :prop:`Scheduler` other than the default.
     For those systems, this option can be used to set a value in microseconds.
 
 .. _config-disc:
@@ -754,9 +754,9 @@ For example, if an OpenDDS application assigns a domain ID of 3 to its participa
     [repository/DiscoveryConfig1]
     RepositoryIor=host1.mydomain.com:12345
 
-The ``DCPSDefaultDiscovery`` property tells the application to assign any participant that doesn't have a domain id found in the configuration file to use a discovery type of ``DEFAULT_REPO`` which means "use a ``DCPSInfoRepo`` service"  and that ``DCPSInfoRepo`` service can be found at ``host3.mydomain.com:12345``.
+The :prop:`DCPSDefaultDiscovery` and :prop:`DCPSInfoRepo` properties tell the application that every participant that doesn't have a domain id found in the configuration file to use the :ref:`inforepo` at ``host3.mydomain.com:12345``.
 
-As shown in :ref:`run_time_configuration--common-configuration-options` the ``DCPSDefaultDiscovery`` property has three other values that can be used.
+As shown in :ref:`config-common` the ``DCPSDefaultDiscovery`` property has three other values that can be used.
 The ``DEFAULT_RTPS`` constant value informs participants that don't have a domain configuration to use RTPS discovery to find other participants.
 Similarly, the ``DEFAULT_STATIC`` constant value informs the participants that don't have a domain configuration to use static discovery to find other participants.
 
@@ -3668,7 +3668,7 @@ DCPS Layer Debug Logging
 ..
     Sect<7.6.1>
 
-Debug logging in the DCPS layer of OpenDDS is controlled by the :key:`DCPSDebugLevel` configuration option and command-line option.
+Debug logging in the DCPS layer of OpenDDS is controlled by the :prop:`DCPSDebugLevel` configuration option and command-line option.
 It can also be set in application code using:
 
 .. code-block:: cpp
@@ -3699,7 +3699,7 @@ Transport Layer Debug Logging
 ..
     Sect<7.6.2>
 
-OpenDDS transport debug layer logging is controlled via the :key:`DCPSTransportDebugLevel` configuration option.
+OpenDDS transport debug layer logging is controlled via the :prop:`DCPSTransportDebugLevel` configuration option.
 For example, to add transport layer logging to any OpenDDS application that uses ``TheParticipantFactoryWithArgs``, add the following option to the command line:
 
 .. code-block:: bash
@@ -3764,8 +3764,8 @@ Security Debug Logging
 ..
     Sect<7.6.3>
 
-When OpenDDS is compiled with security enabled, debug logging for security can be enabled using :key:`DCPSSecurityDebug`.
-Security logging is divided into categories, although :key:`DCPSSecurityDebugLevel` is also provided, which controls the categories in a similar manner and using the same scale as :key:`DCPSDebugLevel`.
+When OpenDDS is compiled with security enabled, debug logging for security can be enabled using :prop:`DCPSSecurityDebug`.
+Security logging is divided into categories, although :prop:`DCPSSecurityDebugLevel` is also provided, which controls the categories in a similar manner and using the same scale as :prop:`DCPSDebugLevel`.
 
 .. _run_time_configuration--reftable28:
 
@@ -3889,6 +3889,6 @@ All the following are equivalent:
 
 .. rubric:: Footnotes
 
-.. [#orbprefix] :key:`ORBLogFile` and :key:`ORBVerboseLogging` start with "ORB" because they are inherited from :term:`TAO`.
+.. [#orbprefix] :prop:`ORBLogFile` and :prop:`ORBVerboseLogging` start with "ORB" because they are inherited from :term:`TAO`.
   They are implemented directly by OpenDDS (not passed to TAO) and are supported either on the command line (using a "-" prefix) or in the configuration file.
   Other command-line options that begin with ``-ORB`` are passed to TAO's ``ORB_init`` if :ref:`inforepo-disc` is used.

@@ -68,7 +68,7 @@ Once the content-filtered topic has been created, it is used by the subscriber's
 This data reader is functionally equivalent to a normal data reader except that incoming data samples which do not meet the filter expression's criteria are dropped.
 
 Filter expressions are first evaluated at the publisher so that data samples which would be ignored by the subscriber can be dropped before even getting to the transport.
-This feature can be turned off by setting :cfg:key:`DCPSPublisherContentFilter` to ``0``.
+This feature can be turned off by setting :cfg:prop:`DCPSPublisherContentFilter` to ``0``.
 The behavior of non-default :ref:`qos-deadline` or :ref:`qos-liveliness` policies may be affected by this policy.
 Special consideration must be given to how the "missing" samples impact the QoS behavior, see the document in :ghfile:`docs/design/CONTENT_SUBSCRIPTION`.
 
