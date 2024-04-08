@@ -187,15 +187,16 @@ class CustomDomain(Domain):
     label = None
     logger = None
 
-    object_types = {
-    }
-    directives = {
-    }
-    roles = {
-    }
-    initial_data: dict[str, dict[tuple[str, str], str]] = {
-        'objects': {},  # fullname -> docname, objtype
-    }
+    def __init_subclass__(cls):
+        cls.object_types = {
+        }
+        cls.directives = {
+        }
+        cls.roles = {
+        }
+        cls.initial_data = {
+            'objects': {},  # fullname -> docname, objtype
+        }
 
     @property
     def objects(self) -> dict[tuple[str, str], tuple[str, str]]:

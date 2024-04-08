@@ -39,7 +39,7 @@ Four separate topics are defined for each domain.
 Each is dedicated to a particular entity (domain participant :ref:`built_in_topics--dcpsparticipant-topic`, topic :ref:`built_in_topics--dcpsparticipant-topic`, data writer :ref:`built_in_topics--dcpspublication-topic`, data reader :ref:`built_in_topics--dcpssubscription-topic`) and publishes instances describing the state for each entity in the domain.
 
 Subscriptions to built-in topics are automatically created for each domain participant.
-A participant's support for built-in topics can be toggled via the :cfg:key:`DCPSBit` configuration option.
+A participant's support for built-in topics can be toggled via the :cfg:prop:`DCPSBit` configuration option.
 To view the built-in topic data, simply obtain the built-in Subscriber and then use it to access the Data Reader for the built-in topic of interest.
 The Data Reader can then be used like any other Data Reader.
 
@@ -285,7 +285,7 @@ OpenDDSInternalThread Topic
 ..
     Sect<6.8.3>
 
-The built-in topic ``OpenDDSInternalThread`` is published when OpenDDS is configured with :cfg:key:`DCPSThreadStatusInterval`.
+The built-in topic ``OpenDDSInternalThread`` is published when OpenDDS is configured with :cfg:prop:`DCPSThreadStatusInterval`.
 When enabled, the DataReader for this built-in topic will report the status of threads created and managed by OpenDDS within the current process.
 The timestamp associated with samples can be used to determine the health (responsiveness) of the thread.
 

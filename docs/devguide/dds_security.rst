@@ -150,7 +150,7 @@ The following configuration steps are required to enable OpenDDS Security featur
 
    * Via API: ``TheServiceParticipant->set_security(true);`` or
 
-   * Via config file: setting :cfg:key:`DCPSSecurity` to ``1``.
+   * Via config file: setting :cfg:prop:`DCPSSecurity` to ``1``.
 
 .. _dds_security--dds-security-configuration-via-propertyqospolicy:
 

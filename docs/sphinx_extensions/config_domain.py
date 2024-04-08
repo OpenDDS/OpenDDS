@@ -91,7 +91,7 @@ class ConfigSection(CustomDomainObject):
             r'(' + id_re + r'(?:@' + id_re + r')?)(?:/(.*))?', sig, self)
         sec_name, sec_disc = parse_section_name(name)
         ctx.push(self, name, f'[{name}]',
-            sec_name=sec_name, sec_disc=sec_name, arguments=arguments, keys=[])
+            sec_name=sec_name, sec_disc=sec_name, arguments=arguments, props=[])
         return (sec_name, sec_disc, arguments)
 
     def create_signode(self, ctx, name, signode, sec_name, sec_disc, arguments):
@@ -106,19 +106,19 @@ class ConfigSection(CustomDomainObject):
             signode += addnodes.desc_annotation(text, text)
 
 
-# cfg:key =====================================================================
+# cfg:prop ====================================================================
 
-key_name_re = id_re + r'(?:\.' + id_re + r')*'
-key_re = r'(?:\[(?P<sec>' + section_re + r')\])?(?P<key_name>' + key_name_re + r')'
-
-
-def parse_key_name(full_name, node=None):
-    return parse(ConfigKey._full_name, key_re, full_name, node,
-        'sec', 'sec_name', 'sec_disc', 'key_name')
+prop_name_re = id_re + r'(?:\.' + id_re + r')*'
+prop_re = r'(?:\[(?P<sec>' + section_re + r')\])?(?P<prop_name>' + prop_name_re + r')'
 
 
-def key_text(sec_name, sec_disc, key_name, insert=''):
-    text = key_name + insert
+def parse_prop_name(full_name, node=None):
+    return parse(ConfigProp._full_name, prop_re, full_name, node,
+        'sec', 'sec_name', 'sec_disc', 'prop_name')
+
+
+def prop_text(sec_name, sec_disc, prop_name, insert=''):
+    text = prop_name + insert
     if sec_name is not None:
         text = section_text(sec_name, sec_disc, ' ' + text)
     return text
@@ -139,30 +139,30 @@ def name_canonicalize(name):
     return name.strip('_').upper()
 
 
-def key_canonicalize(sec_name, sec_args, key_name):
+def key_canonicalize(sec_name, sec_args, prop_name):
     sec = name_canonicalize(sec_name)
     if sec_args:
         sec += '_' + sec_args
-    return sec + '_' + name_canonicalize(key_name)
+    return sec + '_' + name_canonicalize(prop_name)
 
 
-class ConfigKeyRefRole(XRefRole):
+class ConfigPropRefRole(XRefRole):
     def process_link(self, env: BuildEnvironment, refnode: Element,
                      has_explicit_title: bool, title: str, target: str) -> tuple[str, str]:
         ctx = ContextWrapper(env, 'cfg')
         target = target.strip()
 
         # Normalize target for the current scope
-        sec, sec_name, sec_disc, key_name = parse_key_name(target, self)
+        sec, sec_name, sec_disc, prop_name = parse_prop_name(target, self)
         scope_kind = len(ctx.stack)
         if sec is not None:
-            # [sec]key anywhere
+            # [sec]prop anywhere
             pass
         elif scope_kind == 0 and sec is None:
-            # Assume key outside section should be in [common]
+            # Assume prop outside section should be in [common]
             target = f'[common]{target}'
         elif scope_kind >= 1:
-            # key anywhere in a section
+            # prop anywhere in a section
             prefix = ctx.get_full_name(0)
             target = f'{prefix}{target}'
         else:
@@ -171,45 +171,46 @@ class ConfigKeyRefRole(XRefRole):
 
         if not has_explicit_title:
             # Reparse target and hide parts of title that are in the current scope
-            sec, sec_name, sec_disc, key_name = parse_key_name(target, self)
+            sec, sec_name, sec_disc, prop_name = parse_prop_name(target, self)
             scope = ctx.get_all_names()
             scope = scope + [None] * (2 - len(scope))
             if scope[0] == sec:
                 sec_name = None
 
-            title = key_text(sec_name, sec_disc, key_name)
+            title = prop_text(sec_name, sec_disc, prop_name)
 
         return title, target
 
 
 @ConfigDomain.add_type
-class ConfigKey(CustomDomainObject):
+class ConfigProp(CustomDomainObject):
     option_spec: OptionSpec = CustomDomainObject.option_spec.copy()
     option_spec.update({
         'required': directives.flag,
         'default': directives.unchanged,
     })
 
-    our_name = 'key'
+    our_name = 'prop'
     our_parent_required = True
     our_parent_type = ConfigSection
-    our_ref_role_type = ConfigKeyRefRole
+    our_ref_role_type = ConfigPropRefRole
 
     def get_index_text(self, name, full_name):
-        sec, sec_name, sec_disc, key = parse_key_name(full_name)
-        return f'{key} (config key)'
+        sec, sec_name, sec_disc, prop = parse_prop_name(full_name)
+        return f'{prop} (config property)'
 
     def parse_sig(self, ctx, sig):
-        name, arguments = parse(self._full_name, r'(' + key_name_re + r')(?:=(.*))?', sig, self)
+        name, arguments = parse(self._full_name, r'(' + prop_name_re + r')(?:=(.*))?', sig, self)
         sec = ctx.get_full_name()
         ctx.push(self, name, f'{sec}{name}', arguments=arguments)
-        sec_ctx = ctx.get(-2, 'keys')
+        sec_ctx = ctx.get(-2, 'props')
         if sec_ctx is not None:
             sec_ctx.append((name, self.get_location()))
         return (arguments,)
 
     def create_signode(self, ctx, name, signode, arguments):
         signode += addnodes.desc_name(name, name)
+        print(ctx.get(-2, 'sec_name'), name)
         if arguments is not None:
             text = '=' + arguments
             signode += addnodes.desc_addname(text, text)
@@ -223,8 +224,14 @@ class ConfigKey(CustomDomainObject):
         rst = ViewList()
 
         # Config store key
-        key = key_canonicalize(ctx.get(-2, 'sec_name'), ctx.get(-2, 'arguments'), ctx.get_name())
-        rst.append(f'| **Config store key**: ``{key}``', f'{__name__}', 1)
+        try:
+            key = key_canonicalize(
+                ctx.get(-2, 'sec_name'), ctx.get(-2, 'arguments'), ctx.get_name())
+            rst.append(f'| :ref:`Config store key <config-store-keys>`: ``{key}``',
+                f'{__name__}', 1)
+        except Exception as e:
+            e = ValueError(f'Something went wrong with key_canonicalize: {e}')
+            ConfigDomain.logger.warning(e, location=self.get_location())
 
         # :required: flag
         required = 'required' in self.options
@@ -246,18 +253,18 @@ class ConfigKey(CustomDomainObject):
 
 value_sep = '='
 value_sep_re = re.escape(value_sep)
-value_re = r'(?:(?P<key>' + key_re + r')' + value_sep_re + r')?(?P<val_name>' + id_re + r')'
+value_re = r'(?:(?P<prop>' + prop_re + r')' + value_sep_re + r')?(?P<val_name>' + id_re + r')'
 
 
 def parse_value_name(full_name, node=None):
     return parse(ConfigValue._full_name, value_re, full_name, node,
-        'sec', 'sec_name', 'sec_disc', 'key', 'key_name', 'val_name')
+        'sec', 'sec_name', 'sec_disc', 'prop', 'prop_name', 'val_name')
 
 
-def value_text(sec_name, sec_disc, key_name, val_name):
+def value_text(sec_name, sec_disc, prop_name, val_name):
     text = val_name
-    if key_name is not None:
-        text = key_text(sec_name, sec_disc, key_name, value_sep + text)
+    if prop_name is not None:
+        text = prop_text(sec_name, sec_disc, prop_name, value_sep + text)
     return text
 
 
@@ -268,19 +275,19 @@ class ConfigValueRefRole(XRefRole):
         target = target.strip()
 
         # Normalize target for the current scope
-        sec, sec_name, sec_disc, key, key_name, val_name = parse_value_name(target, self)
+        sec, sec_name, sec_disc, prop, prop_name, val_name = parse_value_name(target, self)
         scope_kind = len(ctx.stack)
         if sec is not None:
-            # [sec]key=val anywhere
+            # [sec]prop=val anywhere
             pass
         elif scope_kind == 0 and sec is None:
-            # key=val outside section
+            # prop=val outside section
             target = f'[common]{target}'
-        elif scope_kind >= 1 and key is not None:
-            # key=val anywhere in a section
+        elif scope_kind >= 1 and prop is not None:
+            # prop=val anywhere in a section
             target = ctx.get_full_name(0) + target
-        elif scope_kind >= 2 and key is None:
-            # val anywhere in a key
+        elif scope_kind >= 2 and prop is None:
+            # val anywhere in a prop
             target = ctx.get_full_name(1) + value_sep + target
         else:
             ConfigDomain.logger.warning(f'{repr(target)} is an invalid target here',
@@ -288,15 +295,15 @@ class ConfigValueRefRole(XRefRole):
 
         if not has_explicit_title:
             # Reparse target and hide parts of title that are in the current scope
-            sec, sec_name, sec_disc, key, key_name, val_name = parse_value_name(target, self)
+            sec, sec_name, sec_disc, prop, prop_name, val_name = parse_value_name(target, self)
             scope = ctx.get_all_names()
             scope = scope + [None] * (3 - len(scope))
             if scope[0] == sec:
                 sec_name = None
-                if scope[1] == key_name:
-                    key_name = None
+                if scope[1] == prop_name:
+                    prop_name = None
 
-            title = value_text(sec_name, sec_disc, key_name, val_name)
+            title = value_text(sec_name, sec_disc, prop_name, val_name)
 
         return title, target
 
@@ -305,7 +312,7 @@ class ConfigValueRefRole(XRefRole):
 class ConfigValue(CustomDomainObject):
     our_name = 'val'
     our_parent_required = True
-    our_parent_type = ConfigKey
+    our_parent_type = ConfigProp
     our_ref_role_type = ConfigValueRefRole
 
     def run(self):
@@ -315,7 +322,7 @@ class ConfigValue(CustomDomainObject):
         return super().run()
 
     def get_index_text(self, name, full_name):
-        sec, sec_name, sec_disc, key, key_name, val_name = parse_value_name(full_name, self)
+        sec, sec_name, sec_disc, prop, prop_name, val_name = parse_value_name(full_name, self)
         return f'{val_name} (config value)'
 
     def parse_sig(self, ctx, sig):
@@ -345,6 +352,7 @@ def setup(app: Sphinx) -> dict[str, Any]:
         'parallel_write_safe': True,
     }
 
+
 class TestConfigDomain(unittest.TestCase):
 
     def test_parse_section_name(self):
@@ -357,9 +365,9 @@ class TestConfigDomain(unittest.TestCase):
         for ref, expected in cases.items():
             self.assertEqual(parse_section_name(ref), expected)
 
-    def test_parse_key_name(self):
+    def test_parse_prop_name(self):
         cases = {
-            # sec, sec_name, sec_disc, key_name
+            # sec, sec_name, sec_disc, prop_name
             'kn': (None, None, None, 'kn'),
             'kn.a.b.c': (None, None, None, 'kn.a.b.c'),
             '[sn]kn': ('sn', 'sn', None, 'kn'),
@@ -369,11 +377,11 @@ class TestConfigDomain(unittest.TestCase):
         }
 
         for ref, expected in cases.items():
-            self.assertEqual(parse_key_name(ref), expected, f'On key {repr(ref)}')
+            self.assertEqual(parse_prop_name(ref), expected, f'On prop {repr(ref)}')
 
     def test_parse_value_name(self):
         cases = {
-            # sec, sec_name, sec_disc, key, key_name, val_name
+            # sec, sec_name, sec_disc, prop, prop_name, val_name
             'vn': (None, None, None, None, None, 'vn'),
             'kn=vn': (None, None, None, 'kn', 'kn', 'vn'),
             'kn.a.b.c=vn': (None, None, None, 'kn.a.b.c', 'kn.a.b.c', 'vn'),

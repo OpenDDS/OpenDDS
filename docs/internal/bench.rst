@@ -439,7 +439,7 @@ with configuration of OpenDDS.
 
 The elements of this section are functionally identical to the :ref:`config` sections of an OpenDDS ``.ini`` file with the same name.
 Each config section is created programmatically within the worker process using the name provided and made available to the OpenDDS ``ServiceParticipant`` during entity creation.
-The example here sets the value of both the :cfg:key:`DCPSSecurity` and :cfg:key:`DCPSDebugLevel` keys to ``0``.
+The example here sets the value of both the :cfg:prop:`DCPSSecurity` and :cfg:prop:`DCPSDebugLevel` keys to ``0``.
 
 ::
 
