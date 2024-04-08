@@ -8,6 +8,9 @@
     Also removed large default value tables and put the default values in these boxes.
   - Added links to the QoS policies.
 
-- Moved :ref:`fnmatch-exprs` into an "annex" file so it can be common between security and partitions QoS.
 - Added definitions for :term:`instance`, :term:`unregister`, and :term:`dispose` to the glossary.
+
+.. news-start-section: :ref:`sec`
+- Moved :ref:`fnmatch-exprs` into an "annex" file so it can be common between security and partitions QoS.
+.. news-end-section
 .. news-end-section

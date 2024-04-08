@@ -722,6 +722,7 @@ User Data QoS
     Sect<3.2.11>
 
 The user data QoS policy can be used to attach arbitrary information to the created :term:`entity`.
+It is not available to the user when using :ref:`static-disc`.
 This policy applies to the domain participant, data reader, and data writer entities via the ``user_data`` member of their respective QoS structures.
 
 .. important::
@@ -867,7 +868,7 @@ This policy applies to topic and data writer entities via the ``transport_priori
 
 .. important::
 
-  OpenDDS currently only uses this in the tcp and udp transports.
+  OpenDDS currently only implements this for the :ref:`tcp <tcp-transport>` and :ref:`udp <udp-transport>` transports.
 
   This policy is :ref:`immutable <qos-changing>` and does not affect association.
   This is opposed to the DDS specification, which specifies that it's mutable.
@@ -1526,13 +1527,13 @@ This XTypes concept is explained in detail in :ref:`xtypes--data-representation`
 
        - :ref:`Default values <qos-defaults>`
 
-     * - :term:`DataWriter` using rtps_udp
+     * - :term:`DataWriter` using the :ref:`rtps-udp-transport`
 
        - ``value``
 
        - (empty sequence) -- interpreted as a sequence containing ``XCDR2_DATA_REPRESENTATION``
 
-     * - :term:`DataReader` using rtps_udp
+     * - :term:`DataReader` using the :ref:`rtps-udp-transport`
 
        - ``value``
 
@@ -1556,7 +1557,7 @@ This XTypes concept is explained in detail in :ref:`xtypes--data-representation`
 
   The default interpretation of ``value`` is OpenDDS-specific as of XTypes 1.3.
   The XTypes specification v1.3 specifies that it should be interpreted as a sequence containing ``XCDR_DATA_REPRESENTATION``.
-  This is because OpenDDS defaults to XCDR2 instead of XCDR1 when using rtps_udp, the use of unaligned CDR, and the desire to have readers be as compatible as possible by default.
+  This is because OpenDDS defaults to XCDR2 instead of XCDR1 when using the :ref:`rtps-udp-transport`, the use of unaligned CDR, and the desire to have readers be as compatible as possible by default.
   See :ref:`xtypes--data-representation` for details.
 
 .. _qos-data-representation-association:
@@ -1574,7 +1575,7 @@ This XTypes concept is explained in detail in :ref:`xtypes--type-consistency-enf
 
 .. important::
 
-  This is only used when using RTPS discovery.
+  OpenDDS only supports this with :ref:`rtps-disc`.
 
   This policy is :ref:`immutable <qos-changing>` and affects :ref:`association <xtypes--type-consistency-enforcement>`.
 

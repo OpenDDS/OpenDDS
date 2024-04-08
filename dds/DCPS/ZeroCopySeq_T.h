@@ -222,13 +222,6 @@ TAO_END_VERSIONED_NAMESPACE_DECL
 #include "ZeroCopySeq_T.inl"
 #endif /* __ACE_INLINE__ */
 
-#if defined (ACE_TEMPLATES_REQUIRE_SOURCE)
 #include "ZeroCopySeq_T.cpp"
-#endif /* ACE_TEMPLATES_REQUIRE_SOURCE */
-
-#if defined (ACE_TEMPLATES_REQUIRE_PRAGMA)
-#pragma message ("ZeroCopySeq_T.cpp template inst")
-#pragma implementation ("ZeroCopySeq_T.cpp")
-#endif /* ACE_TEMPLATES_REQUIRE_PRAGMA */
 
 #endif /* ZEROCOPYSEQ_H  */

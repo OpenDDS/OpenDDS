@@ -75,7 +75,7 @@ Common Terms
   Discovery
     Discovery is the configurable method that :term:`DomainParticipant`\s use to find one another.
 
-    See :ref:`introduction--dds-discovery` for more information.
+    See :ref:`dds-introduction--discovery` for more information.
 
   Dispose
     When an :term:`instance` is disposed by a :term:`DataWriter`, it means keeping the cached data related to it is no longer necessary.

@@ -935,6 +935,8 @@ private:
 
   RcHandle<InternalDataReader<NetworkInterfaceAddress> > network_interface_address_reader_;
   MulticastManager multicast_manager_;
+
+  bool uses_end_historic_control_messages() const { return false; }
 };
 
 } // namespace DCPS

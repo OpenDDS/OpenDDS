@@ -106,7 +106,7 @@ Assuming you already have scenario and worker configuration files defined, the g
 Configuration Files
 *******************
 
-As a general rule, Bench uses JSON configuration files that directly map onto the C++ Platform Specific Model (PSM) of the IDL found in :ghfile:`performance-tests/bench/idl` and the IDL used in the `DDS specification <https://www.omg.org/spec/DDS/About-DDS/>`_.
+As a general rule, Bench uses JSON configuration files that directly map onto the C++ Platform Specific Model (PSM) of the IDL found in :ghfile:`performance-tests/bench/idl` and the IDL used in the :ref:`spec-dds`.
 This allows the test applications to easily convert between configuration files and the C++ structures used for the configuration of DDS entities.
 
 Scenario Configuration Files
@@ -437,9 +437,9 @@ with configuration of OpenDDS.
 
       "config_sections": [
 
-The elements of this section are functionally identical to the sections of an OpenDDS ``.ini`` file with the same name.
+The elements of this section are functionally identical to the :ref:`config` sections of an OpenDDS ``.ini`` file with the same name.
 Each config section is created programmatically within the worker process using the name provided and made available to the OpenDDS ``ServiceParticipant`` during entity creation.
-The example here sets the value of both the ``DCPSSecurity`` and ``DCPSDebugLevel`` keys to 0 within the ``[common]`` section of the configuration.
+The example here sets the value of both the :cfg:prop:`DCPSSecurity` and :cfg:prop:`DCPSDebugLevel` keys to ``0``.
 
 ::
 
