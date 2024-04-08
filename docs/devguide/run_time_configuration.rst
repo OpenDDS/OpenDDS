@@ -363,7 +363,7 @@ For example:
   .. prop:: DCPSBidirGIOP=<boolean>
     :default: ``1`` (enabled)
 
-    .. note:: This key is only applicable when using :ref:`inforepo-disc`.
+    .. note:: This property is only applicable when using :ref:`inforepo-disc`.
 
     Use TAO's BiDirectional GIOP feature for interaction with the :ref:`inforepo`.
     With BiDir enabled, fewer sockets are needed since the same socket can be used for both client and server roles.
@@ -383,14 +383,14 @@ For example:
   .. prop:: DCPSBitTransportIPAddress=<addr>
     :default: ``INADDR_ANY``
 
-    .. note:: This key is only applicable when using :ref:`inforepo-disc`.
+    .. note:: This property is only applicable when using :ref:`inforepo-disc`.
 
     IP address identifying the local interface to be used by :ref:`tcp-transport` for the :ref:`bit`.
 
   .. prop:: DCPSBitTransportPort=<port>
     :default: ``0``
 
-    .. note:: This key is only applicable when using :ref:`inforepo-disc`.
+    .. note:: This property is only applicable when using :ref:`inforepo-disc`.
 
     Port used by the :ref:`tcp-transport` for :ref:`bit`.
     If the default of ``0`` is used, the operating system will choose a port to use.
