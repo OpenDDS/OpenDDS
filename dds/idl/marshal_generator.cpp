@@ -3379,9 +3379,9 @@ namespace {
       serialized_size.addArg("uni", "const " + wrapper + "<const " + cxx + ">");
       serialized_size.endArgs();
 
-      if (has_key) {
-        marshal_generator::generate_dheader_code("    serialized_size_delimiter(encoding, size);\n", not_final, false);
+      marshal_generator::generate_dheader_code("    serialized_size_delimiter(encoding, size);\n", not_final, false);
 
+      if (has_key) {
         if (exten == extensibilitykind_mutable) {
           be_global->impl_ <<
             "  size_t mutable_running_total = 0;\n"
@@ -3409,16 +3409,16 @@ namespace {
       insertion.addArg("uni", wrapper + "<const " + cxx + ">");
       insertion.endArgs();
 
-      if (has_key) {
-        be_global->impl_ <<
-          "  const Encoding& encoding = strm.encoding();\n"
-          "  ACE_UNUSED_ARG(encoding);\n";
-        marshal_generator::generate_dheader_code(
-          "    serialized_size(encoding, total_size, uni);\n"
-          "    if (!strm.write_delimiter(total_size)) {\n"
-          "      return false;\n"
-          "    }\n", not_final);
+      be_global->impl_ <<
+        "  const Encoding& encoding = strm.encoding();\n"
+        "  ACE_UNUSED_ARG(encoding);\n";
+      marshal_generator::generate_dheader_code(
+        "    serialized_size(encoding, total_size, uni);\n"
+        "    if (!strm.write_delimiter(total_size)) {\n"
+        "      return false;\n"
+        "    }\n", not_final);
 
+      if (has_key) {
         // EMHEADER for discriminator
         if (exten == extensibilitykind_mutable) {
           be_global->impl_ <<
@@ -3452,16 +3452,16 @@ namespace {
       extraction.addArg("uni", wrapper + "<" + cxx + ">");
       extraction.endArgs();
 
-      if (has_key) {
-        // DHEADER
-        be_global->impl_ <<
-          "  const Encoding& encoding = strm.encoding();\n"
-          "  ACE_UNUSED_ARG(encoding);\n";
-        marshal_generator::generate_dheader_code(
-          "    if (!strm.read_delimiter(total_size)) {\n"
-          "      return false;\n"
-          "    }\n", not_final);
+      // DHEADER
+      be_global->impl_ <<
+        "  const Encoding& encoding = strm.encoding();\n"
+        "  ACE_UNUSED_ARG(encoding);\n";
+      marshal_generator::generate_dheader_code(
+        "    if (!strm.read_delimiter(total_size)) {\n"
+        "      return false;\n"
+        "    }\n", not_final);
 
+      if (has_key) {
         if (exten == extensibilitykind_mutable) {
           // EMHEADER for discriminator
           be_global->impl_ <<
@@ -3739,7 +3739,9 @@ bool marshal_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
   }
 
   gen_union_key_serializers(node, FieldFilter_NestedKeyOnly);
-  gen_union_key_serializers(node, FieldFilter_KeyOnly);
+  if (be_global->is_topic_type(node)) {
+    gen_union_key_serializers(node, FieldFilter_KeyOnly);
+  }
 
   TopicKeys keys(node);
   return generate_marshal_traits(node, cxx, exten, keys);
