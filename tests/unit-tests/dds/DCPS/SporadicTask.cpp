@@ -42,7 +42,7 @@ namespace {
                    RcHandle<ReactorInterceptor> interceptor)
       : SporadicTask(time_source, interceptor)
     {}
-    long timer_id() { return get_timer_id(); }
+    long timer_id() const { return get_timer_id(); }
 
     MOCK_METHOD1(execute, void(const MonotonicTimePoint&));
   };
