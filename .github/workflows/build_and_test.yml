@@ -9618,17 +9618,6 @@ jobs:
       with:
         path: ${{ github.job }}.tar.xz
         key: c02_${{ github.job }}_${{ env.WIRESHARK_COMMIT }}_${{ env.COMPILER_VERSION }}
-    - name: setup for run-vcpkg
-      shell: bash
-      run: |
-        echo '{ "name": "opendds", "version-string": "github-actions", "dependencies": [ "qt5-winextras", "qt5-tools", "qt5-svg", "qt5-multimedia", "qt5-declarative" ] }' > vcpkg.json
-    - name: install vcpkg packages
-      if: steps.cache-artifact.outputs.cache-hit != 'true'
-      id: runvcpkg
-      uses: lukka/run-vcpkg@v11
-      with:
-        vcpkgGitCommitId: '${{ env.VCPKG_GIT_COMMIT }}'
-        runVcpkgInstall: true
     - name: checkout WinFlexBison
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       uses: actions/checkout@v4
