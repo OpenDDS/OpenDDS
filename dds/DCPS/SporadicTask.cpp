@@ -63,19 +63,19 @@ void SporadicTask::execute_i()
 {
   ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
 
-  if ((!desired_scheduled_ && timer_id_ != -1) ||
-      (desired_scheduled_ && timer_id_ != -1 && desired_next_time_ != actual_next_time_)) {
+  if ((!desired_scheduled_ && timer_id_ != Timers::InvalidTimerId) ||
+      (desired_scheduled_ && timer_id_ != Timers::InvalidTimerId && desired_next_time_ != actual_next_time_)) {
     Timers::cancel(reactor(), timer_id_);
-    timer_id_ = -1;
+    timer_id_ = Timers::InvalidTimerId;
   }
 
-  if (desired_scheduled_ && timer_id_ == -1) {
+  if (desired_scheduled_ && timer_id_ == Timers::InvalidTimerId) {
     timer_id_ = Timers::schedule(reactor(), *this, 0, desired_delay_);
     if (timer_id_ == Timers::InvalidTimerId) {
       if (log_level >= LogLevel::Error) {
         ACE_ERROR((LM_ERROR,
-                    "(%P|%t) ERROR: SporadicTask::execute_i: "
-                    "failed to schedule timer %p\n", ""));
+                   "(%P|%t) ERROR: SporadicTask::execute_i: "
+                   "failed to schedule timer %p\n", ACE_TEXT("")));
       }
     } else {
       actual_next_time_ = desired_next_time_;
