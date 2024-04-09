@@ -6,6 +6,7 @@
             "generator": "Ninja",
             "binaryDir": "$env{WIRESHARK_BUILD_DIR}",
             "cacheVariables": {
+                "BUILD_wireshark": "OFF",
                 "LEX_EXECUTABLE": "$env{WINFLEXBISON_ROOT}/bin/Debug/win_flex.exe"
             }
         }
