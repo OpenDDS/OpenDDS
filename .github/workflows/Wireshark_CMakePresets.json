@@ -7,6 +7,8 @@
             "binaryDir": "$env{WIRESHARK_BUILD_DIR}",
             "cacheVariables": {
                 "BUILD_wireshark": "OFF",
+                "MAKENSIS_EXECUTABLE": "OFF",
+                "WIX_CANDLE_EXECUTABLE": "OFF",
                 "LEX_EXECUTABLE": "$env{WINFLEXBISON_ROOT}/bin/Debug/win_flex.exe"
             }
         }
