@@ -15,6 +15,8 @@
 
 using namespace OpenDDS::DCPS;
 
+#if !OPENDDS_CONFIG_BOOTTIME_TIMERS
+
 namespace {
   class MyTimeSource : public TimeSource {
   public:
@@ -253,3 +255,4 @@ TEST(dds_DCPS_SporadicTask, cancel_no_interceptor)
   reactor_interceptor.reset();
   sporadic_task->cancel();
 }
+#endif
