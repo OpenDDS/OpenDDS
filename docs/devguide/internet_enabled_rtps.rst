@@ -31,6 +31,7 @@ Adding ICE to RTPS is an optimization that allows participants that are behind f
 ICE requires a back channel for distributing discovery information and is typically used with the RtpsRelay.
 
 .. _internet_enabled_rtps--the-rtpsrelay:
+.. _rtpsrelay:
 
 *************
 The RtpsRelay
@@ -38,6 +39,8 @@ The RtpsRelay
 
 ..
     Sect<15.2>
+
+.. program:: RtpsRelay
 
 The RtpsRelay is designed to allow participants to exchange RTPS datagrams when separated by a firewall that performs network address translation (NAT) and/or a network that does not support multicast like the public Internet.
 The RtpsRelay supports both IPv4 and IPv6.
@@ -77,7 +80,7 @@ Using the RtpsRelay
     Sect<15.2.1>
 
 Support for the RtpsRelay is activated via configuration.
-See :ref:`RTPS Discovery Configuration Options <run_time_configuration--rtps-disc-config-options>` and :ref:`RTPS_UDP Configuration Options <run_time_configuration--reftable24>`.
+See :cfg:sec:`rtps_discovery` and :cfg:sec:`transport@rtps_udp` for details.
 As an example:
 
 .. code-block:: ini
@@ -111,7 +114,7 @@ Usage
     Sect<15.2.2>
 
 The RtpsRelay itself is an OpenDDS application.
-The source code is located in ``tools/rtpsrelay``.
+The source code is located in :ghfile:`tools/rtpsrelay`.
 Security must be enabled to build the RtpsRelay.
 See :ref:`dds_security--building-opendds-with-security-enabled`.
 Each RtpsRelay process has a set of ports for exchanging RTPS messages with the participants called the "vertical" ports and a set of ports for exchanging RTPS messages with other relays called the "horizontal" ports.
@@ -127,143 +130,159 @@ The webserver has the following endpoints:
 
 * ``/healthcheck``
 
-  Responds with HTTP 200 (OK) or 503 (Service Unavailable) if thread monitoring is enabled and the RtpsRelay is not admitting new client participants.
+  Responds with HTTP 200 (OK) or 503 (Service Unavailable) if :cfg:prop:`thread monitoring is enabled <DCPSThreadStatusInterval>` and the RtpsRelay is not admitting new client participants.
   Load balancers can use this endpoint to route new client participants to an available RtpsRelay instance.
 
 The command-line options for the RtpsRelay:
 
-* ``-Id STRING``
+.. option:: -Id <string>
 
-  The Id option is mandatory and is a unique id associated with all topics published by the relay.
+  This option is mandatory and is a unique id associated with all topics published by the relay.
 
-* ``-HorizontalAddress ADDRESS``
+.. option:: -HorizontalAddres <address>
 
   Determines the base network address used for receiving RTPS message from other relays.
   By default, the relay listens on the first IP network and uses port 11444 for SPDP messages, 11445 for SEDP messages, and 11446 for data messages.
 
-* ``-VerticalAddress ADDRESS``
+.. option:: -VerticalAddress <address>
 
   Determines the base network address used for receiving RTPS messages from the participants.
   By default, the relay listens on 0.0.0.0:4444 for SPDP messages, 0.0.0.0:4445 for SEDP messages, and 0.0.0.0.4446 for data messages.
 
-* ``-RelayDomain DOMAIN``
+.. option:: -RelayDomain <domain>
 
   Sets the DDS domain used by the Relay Participant.
   The default is 0.
 
-* ``-ApplicationDomain DOMAIN``
+.. option:: -ApplicationDomain <domain>
 
   Sets the DDS domain used by the Application Participant.
   The default is 1.
 
-* ``-UserData STRING``
+.. option:: -UserData <string>
 
-  Set the contents of the Application Participant's UserData QoS policy to the provided string.
+  Set the contents of the Application Participant's :ref:`UserData QoS policy <qos-user-data>` to the provided string.
 
-* ``-BufferSize INTEGER``
+.. option:: -BufferSize <integer>
 
   Send of send and receive buffers in bytes
 
-* ``-Lifespan SECONDS``
+.. option:: -Lifespan <seconds>
 
   RtpsRelay will only forward a datagram to a client if it has received a datagram from the client in this amount of time.
   Otherwise, participant is marked as not alive.
   The default is 60 seconds.
 
-* ``-InactivePeriod SECONDS``
+.. option:: -InactivePeriod <seconds>
 
   RtpsRelay will mark participant as not active if does not receive a datagram from the client in this amount of time.
   The default is 60 seconds.
 
-* ``-AllowEmptyPartitions 0|1``
+.. option:: -AllowEmptyPartition 0|1
 
   Allow client participants with no partitions.
   Defaults to 1 (true).
 
-* ``-IdentityCA PATH``
+.. option:: -IdentityCA <path>
 
-  ``-PermissionsCA PATH``
+  Provide identity CA file for :ref:`sec`.
 
-  ``-IdentityCertificate PATH``
+.. option:: -PermissionsCA <path>
 
-  ``-IdentityKey PATH``
+  Provide permissions CA file for :ref:`sec`.
 
-  ``-Governance PATH``
+.. option:: -IdentityCertificate <path>
 
-  ``-Permissions PATH``
+  Provide identity certificate file for :ref:`sec`.
 
-  Provide paths to the DDS Security documents.
+.. option:: -IdentityKey <path>
 
-* ``-RestartDetection 0|1``
+  Provide identity key file for :ref:`sec`.
 
-  Setting RestartDetction to 1 causes the relay to track clients by the first 6 bytes of their RTPS GUID and source IP address and clean up older sessions with the same key.
+.. option:: -Governance <path>
+
+  Provide governance file for :ref:`sec`.
+
+.. option:: -Permissions <path>
+
+  Provide permissions file for :ref:`sec`.
+
+.. option:: -RestartDetection 0|1
+
+  Setting to 1 causes the relay to track clients by the first 6 bytes of their RTPS GUID and source IP address and clean up older sessions with the same key.
   The default is 0 (false).
 
-* ``-LogWarnings 0|1``
+.. option:: -LogWarnings 0|1
 
-  ``-LogDiscovery 0|1``
+  Enable/disable logging of warning events.
 
-  ``-LogActivity 0|1``
+.. option:: -LogDiscovery 0|1
 
-  Enable/disable logging of the various event types.
+  Enable/disable logging of discovery events.
 
-* ``-LogRelayStatistics SECONDS``
+.. option:: -LogActivity 0|1
 
-  ``-LogHandlerStatistics SECONDS``
+  Enable/disable logging of activity events.
 
-  ``-LogParticipantStatistics SECONDS``
+.. option:: -LogRelayStatistics <seconds>
+
+.. option:: -LogHandlerStatistics <seconds>
+
+.. option:: -LogParticipantStatistics <seconds>
 
   Write statistics for the various event types to the log at the given interval, defaults to 0 (disabled).
 
-* ``-PublishRelayStatistics SECONDS``
+.. option:: -PublishRelayStatistics <seconds>
 
-  ``-PublishHandlerStatistics SECONDS``
+.. option:: -PublishHandlerStatistics <seconds>
 
-  ``-PublishParticipantStatistics SECONDS``
+.. option:: -PublishParticipantStatistics <seconds>
 
   Configure the relay to publish usage statistics on DDS topics at the given interval, defaults to 0 (disabled).
 
-* ``-LogThreadStatus 0|1``
+.. option:: -LogThreadStatus 0|1
 
-  Log the status of the threads in the RtpsRelay, defaults to 0 (disabled).
+  If :cfg:prop:`thread monitoring is enabled <DCPSThreadStatusInterval>`, log the status of the threads in the RtpsRelay, defaults to 0 (disabled).
 
-* ``-ThreadStatusSafetyFactor INTEGER``
+.. option:: -ThreadStatusSafetyFactor <integer>
 
-  Restart if thread monitoring is enabled and a thread has not checked in for this many reporting intervals, default 3.
+  Restart if :cfg:prop:`thread monitoring is enabled <DCPSThreadStatusInterval>` and a thread has not checked in for this many reporting intervals, default 3.
 
-* ``-UtilizationLimit DECIMAL``
+.. option:: -UtilizationLimit <decimal>
 
-  If thread monitoring is enabled, the RtpsRelay will not accept to new client participants if the CPU utilization of any thread is above this limit, default .95.
+  If :cfg:prop:`thread monitoring is enabled <DCPSThreadStatusInterval>`, the RtpsRelay will not accept to new client participants if the CPU utilization of any thread is above this limit, default .95.
 
-* ``-PublishRelayStatus SECONDS``
+.. option:: -PublishRelayStatus <seconds>
 
-  ``-PublishRelayStatusLiveliness SECONDS``
+  Setting this to a positive integer causes the relay to publish its status at that interval.
 
-  Setting PublishRelayStatus to a positive integer causes the relay to publish its status at that interval.
-  Setting PublishRelayStatusLiveliness to a positive integer causes the relay to set the liveliness QoS on the relay status topic.
+.. option:: -PublishRelayStatusLiveliness <seconds>
 
-* ``-MetaDiscoveryAddress ADDRESS``
+  Setting this to a positive integer causes the relay to set the :ref:`qos-liveliness` on the relay status topic.
 
-  Listening address for the meta discovery server, default 0.0.0.0:8080.
+.. option:: -MetaDiscoveryAddress <host>:<port>
 
-* ``-MetaDiscoveryContentType CONTENT-TYPE``
+  Listening address for the meta discovery server, default is ``0.0.0.0:8080``.
 
-  The HTTP content type to report for the meta discovery config endpoint, default application/json.
+.. option:: -MetaDiscoveryContentType <content-type>
 
-* ``-MetaDiscoveryContentPath PATH``
+  The HTTP content type to report for the meta discovery config endpoint, default is ``application/json``.
 
-  ``-MetaDiscoveryContent CONTENT``
+.. option:: -MetaDiscoveryContentPath <content>
 
-  The content returned by the meta discovery config endpoint, default {}.
+.. option:: -MetaDiscoveryContent <content>
+
+  The content returned by the meta discovery config endpoint, default ``{}``.
   If a path is specified, the content of the file will be used.
 
-* ``-MaxIpsPerClient INTEGER``
+.. option:: -MaxIpsPerClient <integer>
 
   The maximum number of IP addresses that the RtpsRelay will maintain for a client participant, defaults to 0 (infinite).
 
-* ``-RejectedAddressDuration SECONDS``
+.. option:: -RejectedAddressDuration <seconds>
 
-  Amount of time to reject messages from client participants that show suspicious behavior, e.g., those that send messages from the RtpsRelay back to the RtpsRelay.  The default is 0 (disabled).
+  Amount of time to reject messages from client participants that show suspicious behavior, e.g., those that send messages from the RtpsRelay back to the RtpsRelay.
+  The default is 0 (disabled).
 
 .. _internet_enabled_rtps--deployment-considerations:
 
@@ -286,6 +305,7 @@ These simple web servers would be exposed via a centralized load balancer.
 A participant, then, could access the HTTP load balancer to select a relay.
 
 .. _internet_enabled_rtps--interactive-connectivity-establishment-ice-for-rtps:
+.. _ice:
 
 *****************************************************
 Interactive Connectivity Establishment (ICE) for RTPS
@@ -316,8 +336,8 @@ ICE utilizes the STUN protocol that is defined in :rfc:`5389`.
 The ICE implementation in OpenDDS does not use TURN servers.
 
 ICE is enabled through configuration.
-The minimum configuration involves setting the ``UseIce`` flag and providing addresses for the STUN servers.
-See :ref:`RTPS Discovery Configuration Options <run_time_configuration--rtps-disc-config-options>` and :ref:`RTPS_UDP Configuration Options <run_time_configuration--reftable24>` for details.
+The minimum configuration involves setting the :cfg:prop:`[rtps_discovery]UseIce` and ``[transport@rtps_udp]UseIce`` flags and providing addresses for the STUN servers.
+See :cfg:sec:`rtps_discovery` and ``transport@rtps_udp`` for details.
 
 .. code-block:: ini
 
@@ -333,6 +353,7 @@ See :ref:`RTPS Discovery Configuration Options <run_time_configuration--rtps-dis
 
     [domain/42]
     DiscoveryConfig=DiscoveryConfig1
+
     [rtps_discovery/DiscoveryConfig1]
     SpdpRtpsRelayAddress=5.6.7.8:4444
     SedpRtpsRelayAddress=5.6.7.8:4445
@@ -385,7 +406,7 @@ Secure RTPS Discovery has a behavior that can be exploited to launch a denial of
 Basically, an attacker can send a fake SPDP message to a secure participant which will cause it to begin authentication with a non-existent participant.
 The authentication messages are repeated resulting in amplification.
 An attacker could manipulate a group of secure participants to launch a denial of service attack against a specific host or group of hosts.
-RTPS (without security) has the same vulnerability except that messages come from the other builtin endpoints.
+RTPS (without security) has the same vulnerability except that messages come from the other built-in endpoints.
 For this reason, consider the mitigation features below before making an OpenDDS participant publicly accessible.
 
 The weakness in RTPS Discovery can be mitigated but currently does not have a solution.
@@ -394,18 +415,18 @@ OpenDDS includes the following features for mitigation:
 * Compare the source IP of the SPDP message to the locators.
   For most applications, the locators advertised by SPDP should match the source IP of the SPDP message.
 
-  * See ``CheckSourceIp`` in :ref:`RTPS Discovery Configuration Options <run_time_configuration--rtps-disc-config-options>`
+  * See :cfg:prop:`[rtps_discovery]CheckSourceIp`
 
 * Use the participant lease time from secure discovery and bound it otherwise.
   By default, OpenDDS will attempt authentication for the participant lease duration specified in the SPDP message.
   However, this data can't be trusted so a smaller maximum lease time can be specified to force authentication or discovery to terminate before the lease time.
 
-  * See ``MaxAuthTime`` in :ref:`RTPS Discovery Configuration Options <run_time_configuration--rtps-disc-config-options>`
+  * See :cfg:prop:`[rtps_discovery]MaxAuthTime`
 
 * Limit the number of outstanding secure discoveries.
   The number of discovered but not-yet-authenticated participants is capped when using secure discovery.
 
-  * See ``MaxParticipantsInAuthentication`` in :ref:`RTPS Discovery Configuration Options <run_time_configuration--rtps-disc-config-options>`
+  * See :cfg:prop:`[rtps_discovery]MaxParticipantsInAuthentication`
 
 .. _internet_enabled_rtps--run-participants-in-a-secure-network:
 
@@ -419,4 +440,3 @@ One approach to a secure application without DDS Security is to secure it at the
 A physically secure network satisfies this by construction.
 Another approach is to use a virtual private network (VPN) or a secure overlay.
 These approaches have a simple security model when compared to DDS Security and are not interoperable.
-

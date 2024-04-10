@@ -53,7 +53,7 @@ Sections, instances, and properties can contain underscores meaning that undersc
 This ambiguity is resolved by the following rules:
 
 * Sections are known by OpenDDS.
-  For example, OpenDDS will look for :ref:`DDSI-RTPS Discovery<run_time_configuration--rtps-disc-config-options>` instances under keys prefixed by ``RTPS_DISCOVERY``.
+  For example, OpenDDS will look for :ref:`RTPS Discovery <rtps-disc-config>` instances under keys prefixed by ``RTPS_DISCOVERY``.
 
 * Instances must be introduced by a special key-value pair where the value is prefixed by ``@``.
   For example, ``RTPS_DISCOVERY_MY_DISCOVERY=@MY_DISCOVERY`` introduces an instance named ``MY_DISCOVERY`` under the ``RTPS_DISCOVERY`` section.
@@ -182,22 +182,21 @@ This is accomplished by using the ``TheParticipantFactoryWithArgs`` macro:
 Command-line arguments are parsed in two phases.
 The following arguments are parse in the first phase:
 
-#. ``-ORBLogFile PATH`` - Causes logging output to be written to the file indicated by ``PATH``.
+#. :prop:`ORBLogFile`
 
-#. ``-ORBVerboseLogging [0|1]`` - Enables/disables verbose logging (default 0).
-   Verbose logging causes each log message to be prefixed with a timestamp.
+#. :prop:`ORBVerboseLogging`
 
-#. ``-DCPSSingleConfigFile [0|1]`` - Enables/disables the legacy behavior of a single configuration file that is processed after environment variables and command-line arguments and does not overwrite existing configuration (default 1).
+#. ``-DCPSSingleConfigFile 0|1`` - Enables/disables the legacy behavior of a single configuration file that is processed after environment variables and command-line arguments and does not overwrite existing configuration (default 1).
    When disabled, arguments processed in the second phase are processed as they are encountered and overwrite existing configuration.
 
 The following arguments are processed in the second phase:
 
-#. ``-DCPSConfigFile PATH`` - Causes configuration to be read from the file indicated by ``PATH``.
+#. ``-DCPSConfigFile <path>`` - Causes configuration to be read from the file indicated by ``<path>``.
    It is processed immediately if ``-DCPSSingleConfigFile 0`` and deferred to the end of argument processing, otherwise.
 
 #. ``-OpenDDSKEY VALUE`` - Causes ``KEY=VALUE`` to be saved in the configuration store.
    The key ``KEY`` is canonicalized before being stored.
-   To set the ``ResendPeriod`` on an ``rtps_discovery`` instance named ``MyDiscovery`` to 5 seconds using environment variables, one could use the following arguments:
+   To set the :prop:`[rtps_discovery]ResendPeriod` on an :sec:`rtps_discovery` instance named ``MyDiscovery`` to 5 seconds using environment variables, one could use the following arguments:
 
    * ``-OpenDDS_rtps_discovery_MyDiscovery @MY_DISCOVERY``
    * ``-OpenDDS_rtps_discovery_MyDiscovery_ResendPeriod 5``
@@ -213,7 +212,7 @@ The following arguments are processed in the second phase:
 Configuration with a File
 =========================
 
-The ``-DCPSConfigFile PATH`` argument described above causes OpenDDS to read configuration from a human-readable ini-style text file.
+The ``-DCPSConfigFile <path>`` argument described above causes OpenDDS to read configuration from a human-readable ini-style text file.
 For example:
 
 .. tab:: Linux, macOS, BSDs, etc.
@@ -288,8 +287,10 @@ See :ghfile:`dds/DdsDcpsInfrastructure.idl` and :ghfile:`dds/DCPS/ConfigStoreImp
      int main(int argc, char* argv[])
      {
        // ...
-       TheServiceParticipant->config_store()->set_string("RTPS_DISCOVERY_MY_DISCOVERY", "@MY_DISCOVERY");
-       TheServiceParticipant->config_store()->set_string("RTPS_DISCOVERY_MY_DISCOVERY_RESEND_PERIOD", "5");
+       TheServiceParticipant->config_store()->set_string(
+          "RTPS_DISCOVERY_MY_DISCOVERY", "@MY_DISCOVERY");
+       TheServiceParticipant->config_store()->set_string(
+          "RTPS_DISCOVERY_MY_DISCOVERY_RESEND_PERIOD", "5");
        // ...
      }
 
@@ -427,9 +428,9 @@ For example:
     - ``[transport]local_address`` (rtps_udp)
     - ``[transport]ipv6_local_address`` (rtps_udp)
     - ``[transport]multicast_interface`` (rtps_udp)
-    - ``[rtps_discovery]SedpLocalAddress``
-    - ``[rtps_discovery]SpdpLocalAddress``
-    - ``[rtps_discovery]MulticastInterface``
+    - :prop:`[rtps_discovery]SedpLocalAddress`
+    - :prop:`[rtps_discovery]SpdpLocalAddress`
+    - :prop:`[rtps_discovery]MulticastInterface`
 
   .. prop:: DCPSDefaultDiscovery=DEFAULT_REPO|DEFAULT_RTPS|DEFAULT_STATIC|<name>
     :default: :val:`DEFAULT_REPO`
@@ -451,7 +452,7 @@ For example:
     .. val:: <name>
 
         Name of a user-defined discovery configuration.
-        This can either be a ``repository`` or ``rtps_discovery`` section
+        This can either be a :sec:`repository` or :sec:`rtps_discovery` section
 
     See :ref:`config-disc` for details about configuring discovery.
 
@@ -682,6 +683,7 @@ Except for static discovery, each mechanism uses default values if no configurat
 The following sections show how to configure the advanced discovery capabilities.
 For example, some deployments may need to use multiple ``DCPSInfoRepo`` services or DDSI-RTPS discovery to satisfy interoperability requirements.
 
+.. _config-domain:
 .. _run_time_configuration--domain-configuration:
 
 Domain Configuration
@@ -692,12 +694,9 @@ Domain Configuration
 
 An OpenDDS configuration file uses the ``[domain]`` section type to configure one or more discovery domains with each domain pointing to a discovery configuration in the same file or a default discovery configuration.
 OpenDDS applications can use a centralized discovery approach using the ``DCPSInfoRepo`` service or a peer-to-peer discovery approach using the RTPS discovery protocol standard or a combination of the two in the same deployment.
-The section type for the ``DCPSInfoRepo`` method is ``[repository]`` and the section type for an RTPS discovery configuration is ``[rtps_discovery]``.
-The static discovery mechanism does not have a dedicated section.
-Instead, users are expected to refer to the ``DEFAULT_STATIC`` instance.
 A single domain can refer to only one type of discovery section.
 
-See :ref:`run_time_configuration--configuring-applications-for-dcpsinforepo` for configuring InfoRepo Discovery, :ref:`run_time_configuration--configuring-for-ddsi-rtps-discovery` for configuring RTPS Discovery, and :ref:`run_time_configuration--configuring-for-static-discovery` for configuring Static Discovery.
+See :ref:`inforepo-disc-config` for configuring InfoRepo Discovery, :ref:`rtps-disc-config` for configuring RTPS Discovery, and :ref:`static-disc-config` for configuring Static Discovery.
 
 Ultimately a domain is assigned an integer value and a configuration file can support this in two ways.
 The first is to simply make the instance value the integer value assigned to the domain as shown here:
@@ -708,9 +707,9 @@ The first is to simply make the instance value the integer value assigned to the
     DiscoveryConfig=DiscoveryConfig1
     (more properties...)
 
-Our example configures a single domain identified by the domain keyword and followed by an instance value of ``/1``.
+Our example configures a single domain identified by the ``domain`` keyword and followed by an instance value of ``/1``.
 The instance value after the slash in this case is the integer value assigned to the domain.
-An alternative syntax for this same content is to use a more recognizable (friendly) name instead of a number for the domain name and then add the ``DomainId`` property to the section to give the integer value.
+An alternative syntax for this same content is to use a more recognizable (friendly) name instead of a number for the domain name and then add the :prop:`[domain]DomainId` property to the section to give the integer value.
 Here is an example:
 
 .. code-block:: ini
@@ -720,13 +719,13 @@ Here is an example:
     DiscoveryConfig=DiscoveryConfig1
 
 The domain is given a friendly name of books.
-The ``DomainId`` property assigns the integer value of ``1`` needed by a DDS application reading the configuration.
+The :prop:`[domain]DomainId` property assigns the integer value of ``1`` needed by a DDS application reading the configuration.
 Multiple domain instances can be identified in a single configuration file in this format.
 
 Once one or more domain instances are established, the discovery properties must be identified for that domain.
-The ``DiscoveryConfig`` property must either point to another section that holds the discovery configuration or specify one of the internal default values for discovery (e.g. ``DEFAULT_REPO``, ``DEFAULT_RTPS``, or ``DEFAULT_STATIC``).
+The :prop:`[domain]DiscoveryConfig` property must either point to another section that holds the discovery configuration or specify one of the internal default values for discovery.
 The instance name in our example is ``DiscoveryConfig1``.
-This instance name must be associated with a section type of either ``[repository]`` or ``[rtps_discovery]``.
+This instance name must be associated with a section type of either :sec:`repository` or :sec:`rtps_discovery`.
 
 Here is an extension of our example:
 
@@ -739,7 +738,7 @@ Here is an extension of our example:
     RepositoryIor=host1.mydomain.com:12345
 
 In this case our domain points to a ``[repository]`` section which is used for an OpenDDS ``DCPSInfoRepo`` service.
-See :ref:`run_time_configuration--configuring-applications-for-dcpsinforepo` for more details.
+See :ref:`inforepo-disc-config` for more details.
 
 There are going to be occasions when specific domains are not identified in the configuration file.
 For example, if an OpenDDS application assigns a domain ID of 3 to its participants and the above example does not supply a configuration for domain id of 3 then the following can be used:
@@ -785,35 +784,29 @@ Here is an example:
 By adding the ``DCPSDefaultDiscovery`` property to the ``[common]`` section, any participant that hasn't been assigned to a domain id of ``1`` or ``2`` will use the configuration of ``DiscoveryConfig2``.
 For more explanation of a similar configuration for RTPS discovery see :ref:`run_time_configuration--configuring-for-ddsi-rtps-discovery`.
 
-Here are the available properties for the ``[domain]`` section:
+.. sec:: domain/<id>
 
-.. list-table:: Domain Section Configuration Properties
-   :header-rows: 1
+  .. prop:: DomainId=<n>
+    :required:
 
-   * - Option
+    An integer value representing a domain being associated with a repository.
 
-     - Description
+  .. prop:: DomainRepoKey=<k>
 
-   * - ``DomainId=n``
+    Key value of the mapped repository
 
-     - An integer value representing a Domain being associated with a repository.
+    .. deprecated:: Provided for backward compatibility.
 
-   * - ``DomainRepoKey=k``
+  .. prop:: DiscoveryConfig=<name>
+    :default: :prop:`[common]DCPSDefaultDiscovery`
 
-     - Key value of the mapped repository
+    Sets the discovery configuration for this domain.
+    It uses the same values as :prop:`[common]DCPSDefaultDiscovery`.
 
-       (Deprecated.
-       Provided for backward compatibility).
+  .. prop:: DefaultTransportConfig=<name>
 
-   * - ``DiscoveryConfig=config instance name``
-
-     - A user-defined string that refers to the instance name of a ``[repository]`` or ``[rtps_discovery]`` section in the same configuration file or one of the internal default values (``DEFAULT_REPO``, ``DEFAULT_RTPS``, or ``DEFAULT_STATIC``).
-       (Also see the ``DCPSDefaultDiscovery`` property in :ref:`run_time_configuration--common-configuration-options`)
-
-   * - ``DefaultTransportConfig=config``
-
-     - A user-defined string that refers to the instance name of a ``[config]`` section.
-       See :ref:`run_time_configuration--transport-configuration`.
+    A user-defined string that refers to the instance name of a ``[config]`` section.
+    See :ref:`config-transport`.
 
 .. _inforepo-disc-config:
 .. _run_time_configuration--configuring-applications-for-dcpsinforepo:
@@ -886,7 +879,7 @@ The command line to start our executable would now change to the following:
     publisher -DCSPConfigFile pub.ini
 
 A configuration file can specify domains with discovery configuration assigned to those domains.
-In this case the ``RepositoryIor`` property is used to take the same information that would be supplied on a command line to point to a running ``DCPSInfoRepo`` service.
+In this case the :prop:`[repository]RepositoryIor` property is used to take the same information that would be supplied on a command line to point to a running ``DCPSInfoRepo`` service.
 Two domains are configured here:
 
 .. code-block:: ini
@@ -903,7 +896,7 @@ Two domains are configured here:
     [repository/DiscoveryConfig2]
     RepositoryIor=host2.mydomain.com:12345
 
-The ``DiscoveryConfig`` property under ``[domain/1]`` instructs all participants in domain ``1`` to use the configuration defined in an instance called ``DiscoveryConfig1``.
+The :prop:`[domain]DiscoveryConfig` property under ``[domain/1]`` instructs all participants in domain ``1`` to use the configuration defined in an instance called ``DiscoveryConfig1``.
 In the above, this is mapped to a ``[repository]`` section that gives the ``RepositoryIor`` value of ``myhost.mydomain.com:12345``.
 
 Finally, when configuring a ``DCPSInfoRepo`` the ``DiscoveryConfig`` property under a domain instance entry can also contain the value of ``DEFAULT_REPO`` which instructs a participant using this instance to use the definition of the property ``DCPSInfoRepo`` wherever it has been supplied.
@@ -923,7 +916,7 @@ Consider the following configuration file as an example:
     [domain/2]
     DiscoveryConfig=DEFAULT_REPO
 
-In this case any participant in domain 2 would be instructed to refer to the discovery property of ``DCPSInfoRepo``, which is defined in the ``[common]`` section of our example.
+In this case any participant in domain 2 would be instructed to refer to the discovery property of :prop:`DCPSInfoRepo`, which is defined in the ``[common]`` section of our example.
 If the ``DCPSInfoRepo`` value is not supplied in the ``[common]`` section, it could alternatively be supplied as a parameter to the command line like so:
 
 .. code-block:: bash
@@ -983,7 +976,7 @@ For this example we will only show the discovery aspects of the configuration an
     RepositoryIor=host2.mydomain.com:12345
 
 When Process ``E`` reads in the above configuration it finds the occurrence of multiple domain sections.
-As described in :ref:`run_time_configuration--domain-configuration` each domain has an instance integer and a property of ``DiscoveryConfig`` defined.
+As described in :ref:`run_time_configuration--domain-configuration` each domain has an instance integer and a property of :prop:`[domain]DiscoveryConfig` defined.
 
 For the first domain (``[domain/1]``), the ``DiscoveryConfig`` property is supplied with the user-defined name of ``DiscoveryConfig1`` value.
 This property causes the OpenDDS implementation to find a section title of either ``repository`` or ``rtps_discovery`` and an instance name of ``DiscoveryConfig1``.
@@ -1001,22 +994,17 @@ There may be any number of repository or domain sections within a single configu
 
 Here are the valid properties for a ``[repository]`` section:
 
-.. list-table:: Multiple repository configuration sections
-   :header-rows: 1
+.. sec:: repository/<inst_name>
 
-   * - Option
+  .. prop:: RepositoryIor=<ior>
 
-     - Description
+    Repository IOR or host:port
 
-   * - ``RepositoryIor=ior``
+  .. prop:: RepositoryKey=<key>
 
-     - Repository IOR or host:port.
+    Unique key value for the repository
 
-   * - ``RepositoryKey=key``
-
-     - Unique key value for the repository.
-       (Deprecated.
-       Provided for backward compatibility)
+    .. deprecated:: Provided for backward compatibility.
 
 .. _rtps-disc-config:
 .. _run_time_configuration--configuring-for-ddsi-rtps-discovery:
@@ -1064,7 +1052,7 @@ The following example uses the ``[common]`` section to point to an instance of a
     ResendPeriod=5
 
 The instance ``[rtps_discovery/TheRTPSConfig]`` is now the location where properties that vary the default DDSI-RTPS settings get specified.
-In our example the ``ResendPeriod=5`` entry sets the number of seconds between periodic announcements of available data readers / data writers and to detect the presence of other data readers / data writers on the network.
+In our example the :prop:`ResendPeriod=5 <[rtps_discovery]ResendPeriod>` entry sets the number of seconds between periodic announcements of available data readers / data writers and to detect the presence of other data readers / data writers on the network.
 This would override the default of 30 seconds.
 
 If your OpenDDS deployment uses multiple domains, the following configuration approach combines the use of the ``[domain]`` section title with ``[rtps_discovery]`` to allow a user to specify particular settings by domain.
@@ -1093,411 +1081,333 @@ Some important implementation notes regarding DDSI-RTPS discovery in OpenDDS are
 #. Domain IDs should be between 0 and 231 (inclusive) due to the way UDP ports are assigned to domain IDs.
    In each OpenDDS process, up to 120 domain participants are supported in each domain.
 
-#. OpenDDS's multicast transport (:ref:`run_time_configuration--ip-multicast-transport-configuration-options`) does not work with RTPS Discovery due to the way GUIDs are assigned (a warning will be issued if this is attempted).
+#. The :ref:`multicast-transport` does not work with RTPS Discovery due to the way GUIDs are assigned (a warning will be issued if this is attempted).
 
 The OMG DDSI-RTPS specification details several properties that can be adjusted from their defaults that influence the behavior of DDSI-RTPS discovery.
 Those properties, along with options specific to OpenDDS's RTPS Discovery implementation, are listed below.
 
-.. _run_time_configuration--rtps-disc-config-options:
+.. sec:: rtps_discovery/<inst_name>
 
-.. list-table:: RTPS Discovery Configuration Options
-   :header-rows: 1
+  .. prop:: ResendPeriod=<sec>
+    :default: ``30``
 
-   * - Option
+    The number of seconds that a process waits between the announcement of participants (see :omgspec:`rtps:8.5.3`).
 
-     - Description
+  .. prop:: MinResendDelay=<msec>
+    :default: ``100``
 
-     - Default
+    The minimum time in milliseconds between participant announcements.
 
-   * - ``ResendPeriod=sec``
+  .. prop:: QuickResendRatio=<frac>
+    :default: ``0.1``
 
-     - The number of seconds that a process waits between the announcement of participants (see :omgspec:`rtps:8.5.3`).
+    Tuning parameter that configures local SPDP resends as a fraction of the resend period.
 
-     - ``30``
+  .. prop:: LeaseDuration=<sec>
+    :default: ``300`` (5 minutes)
 
-   * - ``MinResendDelay=msec``
+    Sent as part of the participant announcement.
+    It tells the peer participants that if they don't hear from this participant for the specified duration, then this participant can be considered "not alive".
 
-     - The minimum time in milliseconds between participant announcements.
+  .. prop:: LeaseExtension=<sec>
+    :default: ``0``
 
-     - ``100``
+    Extends the lease of discovered participants by the set amount of seconds.
+    Useful on spotty connections to reduce load on the RtpsRelay.
 
-   * - ``QuickResendRatio=frac``
+  .. prop:: PB=<port>
+    :default: ``7400``
 
-     - Tuning parameter that configures local SPDP resends as a fraction of the resend period.
+    This number sets the starting point for deriving port numbers used for Simple Endpoint Discovery Protocol (SEDP).
+    This property is used in conjunction with :prop:`DG`, :prop:`PG`, :prop:`D0` (or :prop:`DX`), and :prop:`D1` to construct the necessary Endpoints for RTPS discovery communication.
+    See :omgspec:`rtps:9.6.1.1` for how these Endpoints are constructed.
 
-     - ``0.1``
+  .. prop:: DG=<n>
+    :default: ``250``
 
-   * - ``LeaseDuration=sec``
+    An integer value representing the Domain Gain.
+    This is a multiplier that assists in formulating Multicast or Unicast ports for RTPS.
 
-     - Sent as part of the participant announcement.
-       It tells the peer participants that if they don't hear from this participant for the specified duration, then this participant can be considered "not alive."
+  .. prop:: PG=<n>
+    :default: ``2``
 
-     - ``300``
+    An integer that assists in configuring SPDP Unicast ports and serves as an offset multiplier.
+    Participants are assigned addresses using the formula:
 
-   * - ``LeaseExtension=sec``
+    .. math::
 
-     - Extends the lease of discovered participants by the set amount of seconds.
-       Useful on spotty connections to reduce load on the RtpsRelay.
+      \mathit{PB} + DG \times \mathit{domainId} + \mathit{d}1 + \mathit{PG} \times \mathit{participantId}
 
-     - ``0``
+    See :omgspec:`rtps:9.6.1.1` for how these Endpoints are constructed.
 
-   * - ``PB=port``
+  .. prop:: D0=<n>
+    :default: The value of the ``OPENDDS_RTPS_DEFAULT_D0`` environment variable if set, else ``0``
 
-     - Port Base number.
-       This number sets the starting point for deriving port numbers used for Simple Endpoint Discovery Protocol (SEDP).
-       This property is used in conjunction with ``DG``, ``PG``, ``D0`` (or ``DX``), and ``D1`` to construct the necessary Endpoints for RTPS discovery communication.
-       See :omgspec:`rtps:9.6.1.1` for how these Endpoints are constructed.
+    An integer value that assists in providing an offset for calculating an assignable port in SPDP Multicast configurations.
+    The formula used is:
 
-     - ``7400``
+    .. math::
 
-   * - ``DG=n``
+      \mathit{PB} + \mathit{DG} \times \mathit{domainId} + \mathit{d0}
 
-     - An integer value representing the Domain Gain.
-       This is a multiplier that assists in formulating Multicast or Unicast ports for RTPS.
+    See :omgspec:`rtps:9.6.1.1` for how these Endpoints are constructed.
 
-     - ``250``
+  .. prop:: D1=<n>
+    :default: ``10``
 
-   * - ``PG=n``
+    An integer value that assists in providing an offset for calculating an assignable port in SPDP Unicast configurations.
+    The formula used is:
 
-     - An integer that assists in configuring SPDP Unicast ports and serves as an offset multiplier as participants are assigned addresses using the formula:
+    .. math::
 
-       ``PB + DG * domainId + d1 + PG * participantId``
+      \mathit{PB} + \mathit{DG} \times \mathit{domainId} + \mathit{d1} + \mathit{PG} \times \mathit{participantId}
 
-       See :omgspec:`rtps:9.6.1.1` for how these Endpoints are constructed.
+    See :omgspec:`rtps:9.6.1.1` for how these Endpoints are constructed.
 
-     - 2
+  .. prop:: DX=<n>
+    :default: ``2``
 
-   * - ``D0=n``
+    An integer value that assists in providing an offset for calculating a port in SEDP Multicast configurations.
+    This is only valid when :prop:`SedpMulticast=1 <SedpMulticast>`.
+    The formula used is:
 
-     - An integer value that assists in providing an offset for calculating an assignable port in SPDP Multicast configurations.
-       The formula used is:
+    .. math::
 
-       PB + DG * domainId + d0
+      \mathit{PB} + \mathit{DG} \times \mathit{domainId} + \mathit{dx}
 
-       See :omgspec:`rtps:9.6.1.1` for how these Endpoints are constructed.
+    This is an OpenDDS extension and not part of the OMG DDSI-RTPS specification.
 
-     - ``0``
+  .. prop:: SpdpRequestRandomPort=<boolean>
+    :default: ``0``
 
-   * - ``D1=n``
+    Use a random port for SPDP.
 
-     - An integer value that assists in providing an offset for calculating an assignable port in SPDP Unicast configurations.
-       The formula used is:
+  .. prop:: SedpMaxMessageSize=<n>
+    :default: ``65466`` (maximum worst-case UDP payload size)
 
-       ``PB + DG * domainId + d1 + PG * participantId``
+    Set the maximum SEDP message size.
 
-       See :omgspec:`rtps:9.6.1.1` for how these Endpoints are constructed.
+    See ``[transport@rtps_udp]max_message_size``.
 
-     - ``10``
+  .. prop:: SedpMulticast=<boolean>
+    :default: ``1``
 
-   * - ``SpdpRequestRandomPort=[0|1]``
+    Determines whether Multicast is used for the SEDP traffic.
+    When set to ``1``, Multicast is used.
+    When set to ``0``, Unicast is used.
 
-     - Use a random port for SPDP.
+  .. prop:: SedpLocalAddress=<addr>:[<port>]
+    :default: :prop:`[common]DCPSDefaultAddress`
 
-     - ``0``
+    Configure the transport instance created and used by SEDP to bind to the specified local address and port.
+    In order to leave the port unspecified, it can be omitted from the setting but the trailing ``:`` must be present.
 
-   * - ``SedpMaxMessageSize=n``
+  .. prop:: SpdpLocalAddress=<addr>[:<port>]
+    :default: :prop:`[common]DCPSDefaultAddress`
 
-     - Set the maximum SEDP message size.
-       The default is the maximum UDP message size.
-       See max_message_size in table 7-17.
+    Address of a local interface, which will be used by SPDP to bind to that specific interface.
 
-     - ``65466``
+  .. prop:: SedpAdvertisedLocalAddress=<addr>:[<port>]
 
-   * - ``SedpMulticast=[0|1]``
+    Sets the address advertised by SEDP.
+    Typically used when the participant is behind a firewall or NAT.
+    In order to leave the port unspecified, it can be omitted from the setting but the trailing ``:`` must be present.
 
-     - A boolean value (0 or 1) that determines whether Multicast is used for the SEDP traffic.
-       When set to 1, Multicast is used.
-       When set to zero (0) Unicast for SEDP is used.
+  .. prop:: SedpSendDelay=<msec>
+    :default: ``10``
 
-     - ``1``
+    Time in milliseconds for a built-in SEDP Writer to wait before sending data.
 
-   * - ``SedpLocalAddress=addr:[port]``
+  .. prop:: SedpHeartbeatPeriod=<msec>
+    :default: ``200``
 
-     - Configure the transport instance created and used by SEDP to bind to the specified local address and port.
-       In order to leave the port unspecified, it can be omitted from the setting but the trailing : must be present.
+    Time in milliseconds for a built-in SEDP Writer to announce the availability of data.
 
-     - System default address
+  .. prop:: SedpNakResponseDelay=<msec>
+    :default: ``100``
 
-   * - ``SpdpLocalAddress=addr[:port]``
+    Time in milliseconds for a built-in SEDP Writer to delay the response to a negative acknowledgment.
 
-     - Address of a local interface, which will be used by SPDP to bind to that specific interface.
+  .. prop:: SpdpSendAddrs=<host>:<port>[,<host>:<port>]...
 
-     - DCPSDefaultAddress or ``0.0.0.0``
+    A list (comma or whitespace separated) of ``<host>:<port>`` pairs used as destinations for SPDP content.
+    This can be a combination of Unicast and Multicast addresses.
 
-   * - ``SedpAdvertisedLocalAddress= addr:[port]``
+  .. prop:: MaxSpdpSequenceMsgResetChecks=<n>
+    :default: ``3``
 
-     - Sets the address advertised by SEDP.
-       Typically used when the participant is behind a firewall or NAT.
-       In order to leave the port unspecified, it can be omitted from the setting but the trailing : must be present.
+    Remove a discovered participant after this number of SPDP messages with earlier sequence numbers.
 
-     -
+  .. prop:: PeriodicDirectedSpdp=<boolean>
+    :default: ``0`` (disabled)
 
-   * - ``SedpSendDelay=msec``
+    A boolean value that determines whether directed SPDP messages are sent to all participants once every resend period.
+    This setting should be enabled for participants that cannot use multicast to send SPDP announcements, e.g., an RtpsRelay.
 
-     - Time in milliseconds for a built-in  (SEDP) Writer to wait before sending data.
+  .. prop:: UndirectedSpdp=<boolean>
+    :default: ``1`` (enabled)
 
-     - ``10``
+    A boolean value that determines whether undirected SPDP messages are sent.
+    This setting should be disabled for participants that cannot use multicast to send SPDP announcements, e.g., an RtpsRelay.
 
-   * - ``SedpHeartbeatPeriod=msec``
+  .. prop:: InteropMulticastOverride=<group_address>
 
-     - Time in milliseconds for a built-in (SEDP) Writer to announce the availability of data.
+    A network address specifying the multicast group to be used for SPDP discovery.
+    This overrides the interoperability group of the specification, ``239.255.0.1``
+    It can be used, for example, to specify use of a routed group address to provide a larger discovery scope.
 
-     - ``200``
+  .. prop:: TTL=n
+    :default: ``1`` (all data is restricted to the local network)
 
-   * - ``SedpNakResponseDelay=msec``
+    The value of the Time-To-Live (TTL) field of multicast datagrams sent as part of discovery.
+    This value specifies the number of hops the datagram will traverse before being discarded by the network.
 
-     - Time in milliseconds for a built-in (SEDP) Writer to delay the response to a negative acknowledgment.
+  .. prop:: MulticastInterface=<iface>
+    :default: :prop:`[common]DCPSDefaultAddress`
 
-     - ``100``
+    Specifies the network interface to be used by this discovery instance.
+    This uses a platform-specific format that identifies the network interface, but can be address assigned to that interface on most platforms.
 
-   * - ``DX=n``
+  .. prop:: GuidInterface=<iface>
+    :default: The system / ACE library default is used
 
-     - An integer value that assists in providing an offset for calculating a port in SEDP Multicast configurations.
-       The formula used is:
+    Specifies the network interface to use when determining which local MAC address should appear in a GUID generated by this node.
 
-       ``PB + DG * domainId + dx``
+  .. prop:: SpdpRtpsRelayAddress=<host>:<port>
 
-       This is only valid when ``SedpMulticast=1``.
-       This is an OpenDDS extension and not part of the OMG DDSI-RTPS specification.
+    Specifies the address of :ref:`rtpsrelay` for SPDP messages.
 
-     - ``2``
+  .. prop:: SpdpRtpsRelaySendPeriod=<sec>
+    :default: ``30`` seconds
 
-   * - ``SpdpSendAddrs=``
+    Specifies the interval between SPDP announcements sent to :ref:`rtpsrelay`.
 
-       ``[host:port],[host:port]...``
+  .. prop:: SedpRtpsRelayAddress=host:port
 
-     - A list (comma or whitespace separated) of host:port pairs used as destinations for SPDP content.
-       This can be a combination of Unicast and Multicast addresses.
+    Specifies the address of :ref:`rtpsrelay` for SEDP messages.
 
-     -
+  .. prop:: RtpsRelayOnly=<boolean>
+    :default: ``0`` (disabled)
 
-   * - ``MaxSpdpSequenceMsgResetChecks=n``
+    Only send RTPS message to :ref:`rtpsrelay` (for debugging).
 
-     - Remove a discovered participant after this number of SPDP messages with earlier sequence numbers.
+  .. prop:: UseRtpsRelay=<boolean>
+    :default: ``0`` (disabled)
 
-     - ``3``
+    Send messages to :ref:`rtpsrelay`.
+    Messages will only be sent if :prop:`SpdpRtpsRelayAddress` and/or :prop:`SedpRtpsRelayAddress` are set.
 
-   * - ``PeriodicDirectedSpdp=[0|1]``
+  .. prop:: SpdpStunServerAddress=<host>:<port>
 
-     - A boolean value that determines whether directed SPDP messages are sent to all participants once every resend period.
-       This setting should be enabled for participants that cannot use multicast to send SPDP announcements, e.g., an RtpsRelay.
+    Specifies the address of the STUN server to use for SPDP when using :ref:`ICE <ice>`.
 
-     - ``0``
+  .. prop:: SedpStunServerAddress=<host>:<port>
 
-   * - ``UndirectedSpdp=[0|1]``
+    Specifies the address of the STUN server to use for SEDP when using :ref:`ICE <ice>`.
 
-     - A boolean value that determines whether undirected SPDP messages are sent.
-       This setting should be disabled for participants that cannot use multicast to send SPDP announcements, e.g., an RtpsRelay.
+  .. prop:: UseIce=<boolean>
+    :default: ``0`` (disabled)
 
-     - ``1``
+    Enable or disable :ref:`ICE <ice>` for both SPDP and SEDP.
 
-   * - ``InteropMulticastOverride=group_address``
+  .. prop:: MaxAuthTime=<sec>
+    :default: ``300`` seconds (5 minutes)
 
-     - A network address specifying the multicast group to be used for SPDP discovery.
-       This overrides the interoperability group of the specification.
-       It can be used, for example, to specify use of a routed group address to provide a larger discovery scope.
+    Set the maximum time for authentication with :ref:`dds_security`.
 
-     - ``239.255.0.1``
+  .. prop:: AuthResendPeriod=<sec>
+    :default: ``1`` second
 
-   * - ``TTL=n``
+    Resend authentication messages for :ref:`dds_security` after this amount of seconds.
+    It is a floating point value, so fractions of a second can be specified.
 
-     - The value of the Time-To-Live (TTL) field of multicast datagrams sent as part of discovery.
-       This value specifies the number of hops the datagram will traverse before being discarded by the network.
-       The default value of 1 means that all data is restricted to the local network subnet.
+  .. prop:: SecureParticipantUserData=<boolean>
+    :default: ``0`` (disabled)
 
-     - ``1``
+    If :ref:`dds_security` is enabled, the :ref:`Participant's USER_DATA QoS <quality_of_service--user-data>` is omitted from unsecured discovery messages.
 
-   * - ``MulticastInterface=iface``
+  .. prop:: UseXTypes=no|minimal|complete
+    :default: :val:`no`
 
-     - Specifies the network interface to be used by this discovery instance.
-       This uses a platform-specific format that identifies the network interface.
-       On Linux systems this would be something like eth ``0``.
+    Enables discovery extensions from the XTypes specification.
+    Participants exchange topic type information in endpoint announcements and extended type information using the Type Lookup Service.
 
-       If this value is not configured, the Common Configuration value ``DCPSDefaultAddress`` is used to set the multicast interface.
+    See :ref:`xtypes--representing-types-with-typeobject-and-dynamictype` for more information on ``CompleteTypeObject`` and its use in the dynamic binding.
 
-     - The system default interface is used
+    .. val:: no
 
-   * - ``GuidInterface=iface``
+      XTypes isn't taken into consideration during discovery.
+      ``0`` can also be used for backwards compatibility.
 
-     - Specifies the network interface to use when determining which local MAC address should appear in a GUID generated by this node.
+    .. val:: minimal
 
-     - The system / ACE library default is used
+      XTypes is used for discovery when possible and only the ``MinimalTypeObject`` is provided to remote participants if available.
+      ``1`` can also be used for backwards compatibility.
 
-   * - ``SpdpRtpsRelayAddress=host:port``
+    .. val:: complete
 
-     - Specifies the address of the RtpsRelay for SPDP messages.
-       See :ref:`internet_enabled_rtps--the-rtpsrelay`.
+      XTypes is used for discovery when possible and only the ``CompleteTypeObject`` is provided to remote participants if available.
+      This requires that :option:`opendds_idl -Gxtypes-complete` was used when compiling the IDL.
+      ``2`` can also be used for backwards compatibility.
 
-     -
+  .. prop:: TypeLookupServiceReplyTimeout=<msec>
+    :default: ``5000`` milliseconds (5 seconds).
 
-   * - ``SpdpRtpsRelaySendPeriod=period``
+    If :prop:`UseXTypes` is enabled, then this sets the timeout for waiting for replies to remote Type Lookup Service requests.
 
-     - Specifies the interval between SPDP announcements sent to the RtpsRelay.
-       See :ref:`internet_enabled_rtps--the-rtpsrelay`.
+  .. prop:: SedpResponsiveMode=<boolean>
+    :default: ``0`` (disabled)
 
-     - 30 seconds
+    Causes the built-in SEDP endpoints to send additional messages which may reduce latency.
 
-   * - ``SedpRtpsRelayAddress=host:port``
+  .. prop:: SedpPassiveConnectDuration=<msec>
+    :default: ``60000`` milliseconds (1 minute)
 
-     - Specifies the address of the RtpsRelay for SEDP messages.
-       See :ref:`internet_enabled_rtps--the-rtpsrelay`.
+    Sets the duration that a passive endpoint will wait for a connection.
 
-     -
+  .. prop:: SendBufferSize=<bytes>
+    :default: ``0`` (system default value is used)
 
-   * - ``RtpsRelayOnly=[0|1]``
+    Socket send buffer size for both SPDP and SEDP.
 
-     - Only send RTPS message to the RtpsRelay (for debugging).
-       See :ref:`internet_enabled_rtps--the-rtpsrelay`.
+  .. prop:: RecvBufferSize=<bytes>
+    :default: ``0`` (system default value is used)
 
-     - ``0``
+    Socket receive buffer size for both SPDP and SEDP.
 
-   * - ``UseRtpsRelay=[0|1]``
+  .. prop:: MaxParticipantsInAuthentication=<n>
+    :default: ``0`` (no limit)
 
-     - Send messages to the RtpsRelay.
-       Messages will only be sent if SpdpRtpsRelayAddress and/or SedpRtpsRelayAddress is set.
-       See :ref:`internet_enabled_rtps--the-rtpsrelay`.
+    This setting is only available when OpenDDS is compiled with :ref:`dds_security` enabled.
+    Limits the number of peer participants that can be concurrently in the process of authenticating -- that is, not yet completed authentication.
 
-     - ``0``
+  .. prop:: SedpReceivePreallocatedMessageBlocks=<n>
+    :default: ``0`` (use ``[transport]receive_preallocated_message_blocks``'s default)
 
-   * - ``SpdpStunServerAddress=host:port``
+    Configure the ``[transport]receive_preallocated_message_blocks`` attribute of SEDP's transport.
 
-     - Specifies the address of the STUN server to use for SPDP when using ICE.
-       See :ref:`internet_enabled_rtps--interactive-connectivity-establishment-ice-for-rtps`
+  .. prop:: SedpReceivePreallocatedDataBlocks=<n>
+    :default: ``0`` (use ``[transport]receive_preallocated_data_blocks``'s default)
 
-     -
+    Configure the ``[transport]receive_preallocated_data_blocks`` attribute of SEDP's transport.
 
-   * - ``SedpStunServerAddress=host:port``
+  .. prop:: CheckSourceIp=<boolean>
+    :default: ``1`` (enabled)
 
-     - Specifies the address of the STUN server to use for SEDP when using ICE.
-       See :ref:`internet_enabled_rtps--interactive-connectivity-establishment-ice-for-rtps`.
+    Incoming participant announcements (SPDP) are checked to verify that their source IP address matches one of:
 
-     -
+    - An entry in the metatraffic locator list
+    - The configured :ref:`RtpsRelay <rtpsrelay>` (if any)
+    - An :ref:`ICE <ice>` AgentInfo parameter
 
-   * - ``UseIce=[0|1]``
+    Announcements that don't match any of these are dropped if this check is enabled.
 
-     - Enable or disable ICE for both SPDP and SEDP.
-       See :ref:`internet_enabled_rtps--interactive-connectivity-establishment-ice-for-rtps`.
+  .. prop:: SpdpUserTag=<i>
+    :default: ``0`` (disabled)
 
-     - 0
-
-   * - ``MaxAuthTime=sec``
-
-     - Set the maximum time for authentication with DDS Security.
-
-     - 300
-
-   * - ``AuthResendPeriod=sec``
-
-     - Resend authentication messages after this amount of time.
-       It is a floating point value, so fractions of a second can be specified.
-
-     - 1
-
-   * - ``SecureParticipantUserData=[0|1]``
-
-     - If DDS Security is enabled, the Participant's :ref:`qos-user-data` is omitted from unsecured discovery messages.
-
-     - ``0``
-
-   * - .. _run_time_configuration--usextypes:
-
-       ``UseXTypes=[``
-
-       ``no|0|``
-
-       ``minimal|1|``
-
-       ``complete|2``
-
-       ``]``
-
-     - Enables discovery extensions from the XTypes specification.
-       Participants exchange top-level type information in endpoint announcements and extended type information using the Type Lookup Service.
-
-       ``minimal`` or ``1`` uses ``MinimalTypeObject`` and ``complete`` or ``2`` uses ``CompleteTypeObject`` if available.
-       See :ref:`xtypes--representing-types-with-typeobject-and-dynamictype` for more information on ``CompleteTypeObject`` and its use in the dynamic binding.
-
-     - ``minimal``
-
-   * - ``TypeLookupServiceReplyTimeout=msec``
-
-     - If a request is sent to a peer's Type Lookup Service (see UseXTypes above), wait up to this duration (in milliseconds) for a reply.
-
-     - ``5000``
-
-       ``(5 seconds)``
-
-   * - ``SedpResponsiveMode=[0|1]``
-
-     - Causes the built-in SEDP endpoints to send additional messages which may reduce latency.
-
-     - 0
-
-   * - ``SedpPassiveConnectDuration=msec``
-
-     - Sets the duration that a passive endpoint will wait for a connection.
-
-     - 60000
-
-       (1 minute)
-
-   * - ``SendBufferSize=bytes``
-
-     - Socket send buffer size for both SPDP and SEDP.
-       A value of zero indicates that the system default value is used.
-
-     - 0
-
-   * - ``RecvBufferSize=bytes``
-
-     - Socket receive buffer size for both SPDP and SEDP.
-       A value of zero indicates that the system default value is used.
-
-     - 0
-
-   * - ``MaxParticipantsInAuthentication=n``
-
-     - If DDS Security is enabled, this option (when set to a positive number) limits the number of peer participants that can be concurrently in the process of authenticating -- that is, not yet completed authentication.
-
-     - 0 (unlimited)
-
-   * - ``SedpReceivePreallocatedMessageBlocks=n``
-
-     - Configure the receive_preallocated_message_blocks attribute of SEDP's transport.
-       See :ref:`run_time_configuration--configuration-options-common-to-all-transports`.
-
-     - 0 (use default)
-
-   * - ``SedpReceivePreallocatedDataBlocks=n``
-
-     - Configure the receive_preallocated_data_blocks attribute of SEDP's transport.
-       See :ref:`run_time_configuration--configuration-options-common-to-all-transports`.
-
-     - 0 (use default)
-
-   * - ``CheckSourceIp=[0|1]``
-
-     - Incoming participant announcements (SPDP) are checked to verify that their source IP address matches one of:
-
-       * An entry in the metatraffic locator list
-
-       * The configured RtpsRelay (if any)
-
-       * An ICE AgentInfo parameter
-
-         Announcements that don't match any of these are dropped if this check is enabled.
-
-     - 1 (enabled)
-
-   * - ``SpdpUserTag=i``
-
-     - Add the OpenDDS-specific UserTag RTPS submessage to the start of SPDP messages.
-       If i is 0 (the default), the submessage is not added.
-       Otherwise this submessage's contents is the 4-byte unsigned integer i.
-
-     - 0 (disabled)
-
-.. note:: If the environment variable ``OPENDDS_RTPS_DEFAULT_D0`` is set, its value is used as the ``D0`` default value.
+    Add the OpenDDS-specific UserTag RTPS submessage to the start of SPDP messages.
+    If ``<i>`` is 0 (the default), the submessage is not added.
+    Otherwise this submessage's contents is the 4-byte unsigned integer ``<i>``.
 
 .. _run_time_configuration--additional-ddsi-rtps-discovery-features:
 
@@ -1525,16 +1435,17 @@ Using only the configuration file, the static discovery mechanism must be able t
 The static discovery mechanism uses this information to determine all potential associations between readers and writers.
 A domain participant learns about the existence of an endpoint through hints supplied by the underlying transport.
 
-.. note:: Currently, static discovery can only be used for endpoints using the RTPS UDP transport.
+.. note:: Currently, static discovery can only be used for endpoints using the :ref:`rtps-udp-transport`.
 
-Static discovery introduces the following configuration file sections:  ``[topic/*]``, ``[datawriterqos/*]``, ``[datareaderqos/*]``, ``[publisherqos/*]``, ``[subscriberqos/*]``, and ``[endpoint/*]``.
-The :ref:`topic <run_time_configuration--reftable13>` section is used to introduce a topic.
-The :ref:`datawriterqos <run_time_configuration--reftable14>`, :ref:`datareaderqos <run_time_configuration--reftable15>`, :ref:`publisherqos <run_time_configuration--reftable16>`, and :ref:`subscriberqos <run_time_configuration--reftable17>` sections are used to describe a QoS of the associated type.
-The :ref:`endpoint <run_time_configuration--reftable18>` section describes a data reader or writer.
+Static discovery introduces the following configuration file sections:
 
-Data reader and writer objects must be identified by the user so that the static discovery mechanism can associate them with the correct ``[endpoint/*]`` section in the configuration file.
-This is done by setting the ``user_data`` of the ``DomainParticipantQos`` to an octet sequence of length 6.
-The representation of this octet sequence occurs in the ``participant`` value of an ``[endpoint/*]`` section as a string with two hexadecimal digits per octet.
+- The :sec:`topic` section is used to introduce a topic.
+- The :sec:`datawriterqos`, :sec:`datareaderqos`, :sec:`publisherqos`, and :sec:`subscriberqos` sections are used to describe a QoS of the associated type.
+- The :sec:`endpoint` section describes a data reader or writer.
+
+Data reader and writer objects must be identified by the user so that the static discovery mechanism can associate them with the correct :sec:`endpoint` section in the configuration file.
+This is done by setting the :ref:`qos-user-data` of the ``DomainParticipantQos`` to an octet sequence of length 6.
+The representation of this octet sequence occurs in the :prop:`[endpoint]participant` as a string with two hexadecimal digits per octet.
 Similarly, the ``user_data`` of the ``DataReaderQos`` or ``DataWriterQos`` must be set to an octet sequence of length 3 corresponding to the ``entity`` value in the ``[endpoint/*]`` section.
 For example, suppose the configuration file contains the following:
 
@@ -1587,553 +1498,295 @@ The code to configure the DataReaderQos is similar:
 The domain id, which is 34 in the example, should be passed to the call to ``create_participant``.
 
 In the example, the endpoint configuration for ``MyReader`` references ``MyConfig`` which in turn references ``MyTransport``.
-Transport configuration is described in :ref:`run_time_configuration--transport-configuration`.
+Transport configuration is described in :ref:`config-transport`.
 The important detail for static discovery is that at least one of the transports contains a known network address (``1.2.3.4:30000``).
 An error will be issued if an address cannot be determined for an endpoint.
 The static discovery implementation also checks that the QoS of a data reader or data writer object matches the QoS specified in the configuration file.
 
-.. _run_time_configuration--reftable13:
+.. sec:: topic/<inst_name>
 
-.. list-table:: [topic/\*] Configuration Options
-   :header-rows: 1
+  .. prop:: name=<name>
+    :default: The ``<inst_name>`` of the topic section
 
-   * - Option
+    Use this to override the name of the topic in the DDS API.
 
-     - Description
+  .. prop:: type_name=<name>
+    :required:
 
-     - Default
+    Identifier which uniquely defines the sample type.
+    This is typically a CORBA interface repository type name.
 
-   * - ``name=string``
+.. sec:: datawriterqos/<inst_name>
 
-     - The name of the topic.
+  .. prop:: durability.kind=VOLATILE|TRANSIENT_LOCAL
 
-     - ``Instance name of section``
+    See :ref:`quality_of_service--durability`.
 
-   * - ``type_name=string``
+  .. prop:: deadline.period.sec=<numberic>|DURATION_INFINITE_SEC
 
-     - Identifier which uniquely defines the sample type.
-       This is typically a CORBA interface repository type name.
+    See :ref:`quality_of_service--deadline`.
 
-     - ``Required``
+  .. prop:: deadline.period.nanosec=<numberic>|DURATION_INFINITE_NANOSEC
 
-.. _run_time_configuration--reftable14:
+    See :ref:`quality_of_service--deadline`.
 
-.. list-table:: [datawriterqos/\*] Configuration Options
-   :header-rows: 1
+  .. prop:: latency_budget.duration.sec=<numberic>|DURATION_INFINITE_SEC
 
-   * - Option
+    See :ref:`quality_of_service--latency-budget`.
 
-     - Description
+  .. prop:: latency_budget.duration.nanosec=<numberic>|DURATION_INFINITE_NANOSEC
 
-     - Default
+    See :ref:`quality_of_service--latency-budget`.
 
-   * - ``durability.kind=[``
+  .. prop:: liveliness.kind=AUTOMATIC|MANUAL_BY_TOPIC|MANUAL_BY_PARTICIPANT
 
-       ``VOLATILE|TRANSIENT_LOCAL]``
+    See :ref:`qos-liveliness`.
 
-     - See :ref:`quality_of_service--durability`.
+  .. prop:: liveliness.lease_duration.sec=<numberic>|DURATION_INFINITE_SEC
 
-     -
+    See :ref:`qos-liveliness`.
 
-   * - ``deadline.period.sec=[``
+  .. prop:: liveliness.lease_duration.nanosec=<numberic>|DURATION_INFINITE_NANOSEC
 
-       ``numeric|DURATION_INFINITE_SEC]``
+    See :ref:`qos-liveliness`.
 
-     - See :ref:`quality_of_service--deadline`.
+  .. prop:: reliability.kind=BEST_EFFORT|RELIABILE
 
-     -
+    See :ref:`quality_of_service--reliability`.
 
-   * - ``deadline.period.nanosec=[``
+  .. prop:: reliability.max_blocking_time.sec=<numberic>|DURATION_INFINITE_SEC
 
-       ``numeric|DURATION_INFINITE_NANOSEC]``
+    See :ref:`quality_of_service--reliability`.
 
-     - See :ref:`quality_of_service--deadline`.
+  .. prop:: reliability.max_blocking_time.nanosec=<numberic>|DURATION_INFINITE_NANOSEC
 
-     -
+    See :ref:`quality_of_service--reliability`.
 
-   * - ``latency_budget.duration.sec=[``
+  .. prop:: destination_order.kind=BY_SOURCE_TIMESTAMP|BY_RECEPTION_TIMESTAMP
 
-       ``numeric|DURATION_INFINITE_SEC]``
+    See :ref:`quality_of_service--destination-order`.
 
-     - See :ref:`quality_of_service--latency-budget`.
+  .. prop:: history.kind=KEEP_LAST|KEEP_ALL
 
-     -
+    See :ref:`quality_of_service--history`.
 
-   * - ``latency_budget.duration.nanosec=[``
+  .. prop:: history.depth=<numberic>
 
-       ``numeric|DURATION_INFINITE_NANOSEC]``
+    See :ref:`quality_of_service--history`.
 
-     - See :ref:`quality_of_service--latency-budget`.
+  .. prop:: resource_limits.max_samples=<numberic>
 
-     -
+    See :ref:`quality_of_service--resource-limits`.
 
-   * - ``liveliness.kind=[``
+  .. prop:: resource_limits.max_instances=<numberic>
 
-       ``AUTOMATIC|``
+    See :ref:`quality_of_service--resource-limits`.
 
-       ``MANUAL_BY_TOPIC|``
+  .. prop:: resource_limits.max_samples_per_instance=<numberic>
 
-       ``MANUAL_BY_PARTICIPANT]``
+    See :ref:`quality_of_service--resource-limits`.
 
-     - See :ref:`quality_of_service--liveliness`.
+  .. prop:: transport_priority.value=<numberic>
 
-     -
+    See :ref:`quality_of_service--transport-priority`.
 
-   * - ``liveliness.lease_duration.sec=[``
+  .. prop:: lifespan.duration.sec=<numberic>|DURATION_INFINITE_SEC
 
-       ``numeric|DURATION_INFINITE_SEC]``
+    See :ref:`quality_of_service--lifespan`.
 
-     - See :ref:`quality_of_service--liveliness`.
+  .. prop:: lifespan.duration.nanosec=<numberic>|DURATION_INFINITE_NANOSEC
 
-     -
+    See :ref:`quality_of_service--lifespan`.
 
-   * - ``liveliness.lease_duration.nanosec=[``
+  .. prop:: ownership.kind=SHARED|EXCLUSIVE
 
-       ``numeric|DURATION_INFINITE_NANOSEC]``
+    See :ref:`quality_of_service--ownership`.
 
-     - See :ref:`quality_of_service--liveliness`.
+  .. prop:: ownership_strength.value=<numberic>
 
-     -
+    See :ref:`quality_of_service--ownership-strength`.
 
-   * - ``reliability.kind=[BEST_EFFORT|RELIABILE]``
+.. sec:: datareaderqos/<inst_name>
 
-     - See :ref:`quality_of_service--reliability`.
+  .. prop:: durability.kind=VOLATILE|TRANSIENT_LOCAL
 
-     -
+    See :ref:`quality_of_service--durability`.
 
-   * - ``reliability.max_blocking_time.sec=[``
+  .. prop:: deadline.period.sec=<numberic>|DURATION_INFINITE_SEC
 
-       ``numeric|DURATION_INFINITE_SEC]``
+    See :ref:`quality_of_service--deadline`.
 
-     - See :ref:`quality_of_service--reliability`.
+  .. prop:: deadline.period.nanosec=<numberic>|DURATION_INFINITE_NANOSEC
 
-     -
+    See :ref:`quality_of_service--deadline`.
 
-   * - ``reliability.max_blocking_time.nanosec=[``
+  .. prop:: latency_budget.duration.sec=<numberic>|DURATION_INFINITE_SEC
 
-       ``numeric|DURATION_INFINITE_NANOSEC]``
+    See :ref:`quality_of_service--latency-budget`.
 
-     - See :ref:`quality_of_service--reliability`.
+  .. prop:: latency_budget.duration.nanosec=<numberic>|DURATION_INFINITE_NANOSEC
 
-     -
+    See :ref:`quality_of_service--latency-budget`.
 
-   * - ``destination_order.kind=[``
+  .. prop:: liveliness.kind=AUTOMATIC|MANUAL_BY_TOPIC|MANUAL_BY_PARTICIPANT
 
-       ``BY_SOURCE_TIMESTAMP|``
+    See :ref:`qos-liveliness`.
 
-       ``BY_RECEPTION_TIMESTAMP]``
+  .. prop:: liveliness.lease_duration.sec=<numberic>|DURATION_INFINITE_SEC
 
-     - See :ref:`quality_of_service--destination-order`.
+    See :ref:`qos-liveliness`.
 
-     -
+  .. prop:: liveliness.lease_duration.nanosec=<numberic>|DURATION_INFINITE_NANOSEC
 
-   * - ``history.kind=[KEEP_LAST|KEEP_ALL]``
+    See :ref:`qos-liveliness`.
 
-     - See :ref:`quality_of_service--history`.
+  .. prop:: reliability.kind=BEST_EFFORT|RELIABILE
 
-     -
+    See :ref:`quality_of_service--reliability`.
 
-   * - ``history.depth=numeric``
+  .. prop:: reliability.max_blocking_time.sec=<numberic>|DURATION_INFINITE_SEC
 
-     - See :ref:`quality_of_service--history`.
+    See :ref:`quality_of_service--reliability`.
 
-     -
+  .. prop:: reliability.max_blocking_time.nanosec=<numberic>|DURATION_INFINITE_NANOSEC
 
-   * - ``resource_limits.max_samples=numeric``
+    See :ref:`quality_of_service--reliability`.
 
-     - See :ref:`quality_of_service--resource-limits`.
+  .. prop:: destination_order.kind=BY_SOURCE_TIMESTAMP|BY_RECEPTION_TIMESTAMP
 
-     -
+    See :ref:`quality_of_service--destination-order`.
 
-   * - ``resource_limits.max_instances=numeric``
+  .. prop:: history.kind=KEEP_LAST|KEEP_ALL
 
-     - See :ref:`quality_of_service--resource-limits`.
+    See :ref:`quality_of_service--history`.
 
-     -
+  .. prop:: history.depth=<numberic>
 
-   * - ``resource_limits.max_samples_per_instance=``
+    See :ref:`quality_of_service--history`.
 
-       ``numeric``
+  .. prop:: resource_limits.max_samples=<numberic>
 
-     - See :ref:`quality_of_service--resource-limits`.
+    See :ref:`quality_of_service--resource-limits`.
 
-     -
+  .. prop:: resource_limits.max_instances=<numberic>
 
-   * - ``transport_priority.value=numeric``
+    See :ref:`quality_of_service--resource-limits`.
 
-     - See :ref:`quality_of_service--transport-priority`.
+  .. prop:: resource_limits.max_samples_per_instance=<numberic>
 
-     -
+    See :ref:`quality_of_service--resource-limits`.
 
-   * - ``lifespan.duration.sec=[``
+  .. prop:: time_based_filter.minimum_separation.sec=<numberic>|DURATION_INFINITE_SEC
 
-       ``numeric|DURATION_INFINITE_SEC]``
+    See :ref:`quality_of_service--time-based-filter`.
 
-     - See :ref:`quality_of_service--lifespan`.
+  .. prop:: time_based_filter.minimum_separation.nanosec=<numberic>|DURATION_INFINITE_NANOSEC
 
-     -
+    See :ref:`quality_of_service--time-based-filter`.
 
-   * - ``lifespan.duration.nanosec=[``
+  .. prop:: reader_data_lifecycle.autopurge_nowriter_samples_delay.sec=<numberic>|DURATION_INFINITE_SEC
 
-       ``numeric|DURATION_INFINITE_NANOSEC]``
+    See :ref:`quality_of_service--reader-data-lifecycle`.
 
-     - See :ref:`quality_of_service--lifespan`.
+  .. prop:: reader_data_lifecycle.autopurge_nowriter_samples_delay.nanosec=<numberic>|DURATION_INFINITE_NANOSEC
 
-     -
+    See :ref:`quality_of_service--reader-data-lifecycle`.
 
-   * - ``ownership.kind=[SHARED|EXCLUSIVE]``
+  .. prop:: reader_data_lifecycle.autopurge_dispose_samples_delay.sec=<numberic>|DURATION_INFINITE_SEC
 
-     - See :ref:`quality_of_service--ownership`.
+    See :ref:`quality_of_service--reader-data-lifecycle`.
 
-     -
+  .. prop:: reader_data_lifecycle.autopurge_dispose_samples_delay.nanosec=<numberic>|DURATION_INFINITE_NANOSEC
 
-   * - ``ownership_strength.value=numeric``
+    See :ref:`quality_of_service--reader-data-lifecycle`.
 
-     - See :ref:`quality_of_service--ownership-strength`.
+.. sec:: publisherqos/<inst_name>
 
-     -
+  .. prop:: presentation.access_scope=INSTANCE|TOPIC|GROUP
 
-.. _run_time_configuration--reftable15:
+    See :ref:`quality_of_service--presentation`.
 
-.. list-table:: [datareaderqos/\*] Configuration Options
-   :header-rows: 1
+  .. prop:: presentation.coherent_access=true|false
 
-   * - Option
+    See :ref:`quality_of_service--presentation`.
 
-     - Description
+  .. prop:: presentation.ordered_access=true|false
 
-     - Default
+    See :ref:`quality_of_service--presentation`.
 
-   * - ``durability.kind=[``
+  .. prop:: partition.name=<name>[,<name>]...
 
-       ``VOLATILE|TRANSIENT_LOCAL]``
+    See :ref:`quality_of_service--partition`.
 
-     - See :ref:`quality_of_service--durability`.
+.. sec:: subscriberqos/<inst_name>
 
-     -
+  .. prop:: presentation.access_scope=INSTANCE|TOPIC|GROUP
 
-   * - ``deadline.period.sec=[``
+    See :ref:`quality_of_service--presentation`.
 
-       ``numeric|DURATION_INFINITE_SEC]``
+  .. prop:: presentation.coherent_access=true|false
 
-     - See :ref:`quality_of_service--deadline`.
+    See :ref:`quality_of_service--presentation`.
 
-     -
+  .. prop:: presentation.ordered_access=true|false
 
-   * - ``deadline.period.nanosec=[``
+    See :ref:`quality_of_service--presentation`.
 
-       ``numeric|DURATION_INFINITE_NANOSEC]``
+  .. prop:: partition.name=<name>[,<name>]...
 
-     - See :ref:`quality_of_service--deadline`.
+    See :ref:`quality_of_service--partition`.
 
-     -
+.. sec:: endpoint/<inst_name>
 
-   * - ``latency_budget.duration.sec=[``
+  .. prop:: domain=<numberic>
+    :required:
 
-       ``numeric|DURATION_INFINITE_SEC]``
+    Domain id for endpoint in range 0-231.
+    Used to form GUID of endpoint.
 
-     - See :ref:`quality_of_service--latency-budget`.
+  .. prop:: participant=<hexstring>
+    :required:
 
-     -
+    String of 12 hexadecimal digits.
+    Used to form GUID of endpoint.
+    All endpoints with the same domain/participant combination should be in the same process.
 
-   * - ``latency_budget.duration.nanosec=[``
+  .. prop:: entity=<hexstring>
+    :required:
 
-       ``numeric|DURATION_INFINITE_NANOSEC]``
+    String of 6 hexadecimal digits.
+    Used to form GUID of endpoint.
+    The combination of domain/participant/entity should be unique.
 
-     - See :ref:`quality_of_service--latency-budget`.
+  .. prop:: type=reader|writer
+    :required:
 
-     -
+    Determines if the entity is a data reader or data writer.
 
-   * - ``liveliness.kind=[``
+  .. prop:: topic=<inst_name>
+    :required:
 
-       ``AUTOMATIC|``
+    The :sec:`topic` to use.
 
-       ``MANUAL_BY_TOPIC|``
+  .. prop:: datawriterqos=<inst_name>
 
-       ``MANUAL_BY_PARTICIPANT]``
+    The :sec:`datawriterqos` to use.
 
-     - See :ref:`quality_of_service--liveliness`.
+  .. prop:: datareaderqos=<inst_name>
 
-     -
+    The :sec:`datareaderqos` to use.
 
-   * - ``liveliness.lease_duration.sec=[``
+  .. prop:: publisherqos=<inst_name>
 
-       ``numeric|DURATION_INFINITE_SEC]``
+    The :sec:`publisherqos` to use.
 
-     - See :ref:`quality_of_service--liveliness`.
+  .. prop:: subscriberqos=<inst_name>
 
-     -
+    The :sec:`subscriberqos` to use.
 
-   * - ``liveliness.lease_duration.nanosec=[``
+  .. prop:: config=<inst_name>
 
-       ``numeric|DURATION_INFINITE_NANOSEC]``
-
-     - See :ref:`quality_of_service--liveliness`.
-
-     -
-
-   * - ``reliability.kind=[BEST_EFFORT|RELIABILE]``
-
-     - See :ref:`quality_of_service--reliability`.
-
-     -
-
-   * - ``reliability.max_blocking_time.sec=[``
-
-       ``numeric|DURATION_INFINITE_SEC]``
-
-     - See :ref:`quality_of_service--reliability`.
-
-     -
-
-   * - ``reliability.max_blocking_time.nanosec=[``
-
-       ``numeric|DURATION_INFINITE_NANOSEC]``
-
-     - See :ref:`quality_of_service--reliability`.
-
-     -
-
-   * - ``destination_order.kind=[``
-
-       ``BY_SOURCE_TIMESTAMP|``
-
-       ``BY_RECEPTION_TIMESTAMP]``
-
-     - See :ref:`quality_of_service--destination-order`.
-
-     -
-
-   * - ``history.kind=[KEEP_LAST|KEEP_ALL]``
-
-     - See :ref:`quality_of_service--history`.
-
-     -
-
-   * - ``history.depth=numeric``
-
-     - See :ref:`quality_of_service--history`.
-
-     -
-
-   * - ``resource_limits.max_samples=numeric``
-
-     - See :ref:`quality_of_service--resource-limits`.
-
-     -
-
-   * - ``resource_limits.max_instances=numeric``
-
-     - See :ref:`quality_of_service--resource-limits`.
-
-     -
-
-   * - ``resource_limits.max_samples_per_instance=``
-
-       ``numeric``
-
-     - See :ref:`quality_of_service--resource-limits`.
-
-     -
-
-   * - ``time_based_filter.minimum_separation.sec=[``
-
-       ``numeric|DURATION_INFINITE_SEC]``
-
-     - See :ref:`quality_of_service--time-based-filter`.
-
-     -
-
-   * - ``time_based_filter.minimum_separation.nanosec=[``
-
-       ``numeric|DURATION_INFINITE_NANOSEC]``
-
-     - See :ref:`quality_of_service--time-based-filter`.
-
-     -
-
-   * - ``reader_data_lifecycle.``
-       ``autopurge_nowriter_samples_delay.sec=[``
-
-       ``numeric|DURATION_INFINITE_SEC]``
-
-     - See :ref:`quality_of_service--reader-data-lifecycle`.
-
-     -
-
-   * - ``reader_data_lifecycle.``
-       ``autopurge_nowriter_samples_delay.nanosec=[``
-
-       ``numeric|DURATION_INFINITE_NANOSEC]``
-
-     - See :ref:`quality_of_service--reader-data-lifecycle`.
-
-     -
-
-   * - ``reader_data_lifecycle.``
-       ``autopurge_dispose_samples_delay.sec=[``
-
-       ``numeric|DURATION_INFINITE_SEC]``
-
-     - See :ref:`quality_of_service--reader-data-lifecycle`.
-
-     -
-
-   * - ``reader_data_lifecycle.``
-       ``autopurge_dispose_samples_delay.nanosec=[``
-
-       ``numeric|DURATION_INFINITE_NANOSEC]``
-
-     - See :ref:`quality_of_service--reader-data-lifecycle`.
-
-     -
-
-.. _run_time_configuration--reftable16:
-
-.. list-table:: [publisherqos/\*] Configuration Options
-   :header-rows: 1
-
-   * - Option
-
-     - Description
-
-     - Default
-
-   * - ``presentation.access_scope=[INSTANCE|TOPIC|GROUP]``
-
-     - See :ref:`quality_of_service--presentation`.
-
-     -
-
-   * - ``presentation.coherent_access=[true|false]``
-
-     - See :ref:`quality_of_service--presentation`.
-
-     -
-
-   * - ``presentation.ordered_access=[true|false]``
-
-     - See :ref:`quality_of_service--presentation`.
-
-     -
-
-   * - ``partition.name=name0,name1,...``
-
-     - See :ref:`quality_of_service--partition`.
-
-     -
-
-.. _run_time_configuration--reftable17:
-
-.. list-table:: [subscriberqos/\*] Configuration Options
-   :header-rows: 1
-
-   * - Option
-
-     - Description
-
-     - Default
-
-   * - ``presentation.access_scope=[INSTANCE|TOPIC|GROUP]``
-
-     - See :ref:`quality_of_service--presentation`.
-
-     -
-
-   * - ``presentation.coherent_access=[true|false]``
-
-     - See :ref:`quality_of_service--presentation`.
-
-     -
-
-   * - ``presentation.ordered_access=[true|false]``
-
-     - See :ref:`quality_of_service--presentation`.
-
-     -
-
-   * - ``partition.name=name0,name1,...``
-
-     - See :ref:`quality_of_service--partition`.
-
-     -
-
-.. _run_time_configuration--reftable18:
-
-.. list-table:: [endpoint/\*] Configuration Options
-   :header-rows: 1
-
-   * - Option
-
-     - Description
-
-     - Default
-
-   * - ``domain=numeric``
-
-     - Domain id for endpoint in range 0-231.
-       Used to form GUID of endpoint.
-
-     - Required
-
-   * - ``participant=hexstring``
-
-     - String of 12 hexadecimal digits.
-       Used to form GUID of endpoint.
-       All endpoints with the same domain/participant combination should be in the same process.
-
-     - Required
-
-   * - ``entity=hexstring``
-
-     - String of 6 hexadecimal digits.
-       Used to form GUID of endpoint.
-       The combination of domain/participant/entity should be unique.
-
-     - Required
-
-   * - ``type=[reader|writer]``
-
-     - Determines if the entity is a data reader or data writer.
-
-     - Required
-
-   * - ``topic=name``
-
-     - Refers to a ``[topic/*]`` section.
-
-     - Required
-
-   * - ``datawriterqos=name``
-
-     - Refers to a ``[datawriterqos/*]`` section.
-
-     -
-
-   * - ``datareaderqos=name``
-
-     - Refers to a ``[datareaderqos/*]`` section.
-
-     -
-
-   * - ``publisherqos=name``
-
-     - Refers to a ``[publisherqos/*]`` section.
-
-     -
-
-   * - ``subscriberqos=name``
-
-     - Refers to a ``[subscriberqos/*]`` section.
-
-     -
-
-   * - ``config``
-
-     - Refers to a transport configuration in a ``[config/*]`` section.
-       This is used to determine a network address for the endpoint.
-
-     -
+    The transport configuration to use.
 
 .. _config-transport:
 .. _run_time_configuration--transport-configuration:
