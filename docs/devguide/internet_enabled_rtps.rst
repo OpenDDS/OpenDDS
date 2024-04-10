@@ -80,7 +80,7 @@ Using the RtpsRelay
     Sect<15.2.1>
 
 Support for the RtpsRelay is activated via configuration.
-See :cfg:sec:`rtps_discovery` and :cfg:sec:`transport@rtps_udp` for details.
+See :cfg:sec:`rtps_discovery` and ``transport@rtps_udp`` for details.
 As an example:
 
 .. code-block:: ini
