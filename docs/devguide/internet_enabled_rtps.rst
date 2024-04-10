@@ -250,7 +250,7 @@ The command-line options for the RtpsRelay:
 
 .. option:: -UtilizationLimit <decimal>
 
-  If :cfg:prop:`thread monitoring is enabled <DCPSThreadStatusInterval>`, the RtpsRelay will not accept to new client participants if the CPU utilization of any thread is above this limit, default .95.
+  If :cfg:prop:`thread monitoring is enabled <DCPSThreadStatusInterval>`, the RtpsRelay will not accept new client participants if the CPU utilization of any thread is above this limit, default .95.
 
 .. option:: -PublishRelayStatus <seconds>
 

@@ -1738,7 +1738,7 @@ The static discovery implementation also checks that the QoS of a data reader or
 
 .. sec:: endpoint/<inst_name>
 
-  .. prop:: domain=<numberic>
+  .. prop:: domain=<numeric>
     :required:
 
     Domain id for endpoint in range 0-231.
