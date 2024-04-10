@@ -378,8 +378,8 @@ TransportClient::PendingAssocTimer::CancelCommand::execute()
 {
   if (timer_->reactor() && timer_->get_id() != Timers::InvalidTimerId) {
     ACE_Guard<ACE_Thread_Mutex> guard(assoc_->mutex_);
-    timer_->reactor()->cancel_timer(timer_->get_id());
-    timer_->set_id(-1);
+    Timers::cancel(timer_->reactor(), timer_->get_id());
+    timer_->set_id(Timers::InvalidTimerId);
     assoc_->scheduled_ = false;
   }
 }
