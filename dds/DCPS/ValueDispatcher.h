@@ -10,6 +10,7 @@
 #include "ValueReader.h"
 #include "ValueWriter.h"
 #include "Sample.h"
+#include "debug.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
