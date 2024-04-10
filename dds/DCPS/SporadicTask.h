@@ -52,7 +52,7 @@ private:
     {
       RcHandle<SporadicTask> st = sporadic_task_.lock();
       if (st) {
-        st->execute_i();
+        st->update_schedule();
       }
     }
 
@@ -69,7 +69,7 @@ private:
   const RcHandle<SporadicCommand> sporadic_command_;
   mutable ACE_Thread_Mutex mutex_;
 
-  void execute_i();
+  void update_schedule();
 
   int handle_timeout(const ACE_Time_Value& tv, const void*)
   {

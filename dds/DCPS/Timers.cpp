@@ -83,19 +83,19 @@ TimerId schedule(ACE_Reactor* reactor,
     }
     return InvalidTimerId;
   }
-  itimerspec ts;
-  ts.it_interval = interval.value();
-  ts.it_value = delay.value();
-  if (timerfd_settime(fd, 0, &ts, 0) == -1) {
-    if (log_level >= LogLevel::Notice) {
-      ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: Timers::schedule: timerfd_settime %m\n"));
-    }
-    return InvalidTimerId;
-  }
   const RcHandle<TimerFdHandler> fdHandler = make_rch<TimerFdHandler>(ref(handler), fd, arg);
   if (reactor->register_handler(fdHandler.get(), ACE_Event_Handler::READ_MASK) == -1) {
     if (log_level >= LogLevel::Notice) {
       ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: Timers::schedule: register_handler %m\n"));
+    }
+    return InvalidTimerId;
+  }
+  itimerspec ts;
+  ts.it_interval = interval.value();
+  ts.it_value = (delay == TimeDuration()) ? interval.value() : delay.value();
+  if (timerfd_settime(fd, 0, &ts, 0) == -1) {
+    if (log_level >= LogLevel::Notice) {
+      ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: Timers::schedule: timerfd_settime %m\n"));
     }
     return InvalidTimerId;
   }

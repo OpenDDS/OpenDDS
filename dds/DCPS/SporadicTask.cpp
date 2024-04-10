@@ -59,7 +59,7 @@ void SporadicTask::cancel()
   }
 }
 
-void SporadicTask::execute_i()
+void SporadicTask::update_schedule()
 {
   ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
 
