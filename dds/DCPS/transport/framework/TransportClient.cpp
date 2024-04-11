@@ -14,9 +14,11 @@
 #include "TransportReceiveListener.h"
 
 #include <dds/DCPS/DataWriterImpl.h>
-#include <dds/DCPS/SendStateDataSampleList.h>
-#include <dds/DCPS/GuidConverter.h>
 #include <dds/DCPS/Definitions.h>
+#include <dds/DCPS/GuidConverter.h>
+#include <dds/DCPS/SendStateDataSampleList.h>
+#include <dds/DCPS/Timers.h>
+
 #include <dds/DCPS/RTPS/ICE/Ice.h>
 
 #include <dds/DdsDcpsInfoUtilsC.h>
@@ -337,15 +339,45 @@ TransportClient::associate(const AssociationData& data, bool active)
 }
 
 void
-TransportClient::PendingAssoc::reset_client() {
+TransportClient::PendingAssoc::reset_client()
+{
   ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
   client_.reset();
 }
 
 bool
-TransportClient::PendingAssoc::safe_to_remove() {
+TransportClient::PendingAssoc::safe_to_remove()
+{
   ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
   return !client_ && !scheduled_;
+}
+
+void
+TransportClient::PendingAssocTimer::ScheduleCommand::execute()
+{
+  if (timer_->reactor()) {
+    const TransportClient_rch client = transport_client_.lock();
+    if (client) {
+      ACE_Guard<ACE_Thread_Mutex> guard(assoc_->mutex_);
+      assoc_->scheduled_ = true;
+      const Timers::TimerId id = Timers::schedule(timer_->reactor(), *assoc_, client.in(),
+                                                  client->passive_connect_duration_);
+      if (id != Timers::InvalidTimerId) {
+        timer_->set_id(id);
+      }
+    }
+  }
+}
+
+void
+TransportClient::PendingAssocTimer::CancelCommand::execute()
+{
+  if (timer_->reactor() && timer_->get_id() != Timers::InvalidTimerId) {
+    ACE_Guard<ACE_Thread_Mutex> guard(assoc_->mutex_);
+    Timers::cancel(timer_->reactor(), timer_->get_id());
+    timer_->set_id(Timers::InvalidTimerId);
+    assoc_->scheduled_ = false;
+  }
 }
 
 int
