@@ -55,7 +55,7 @@ Fixes
 Documentation
 =============
 
-- Remove -Grapidjson flag [opendds_idl] (:ghpr:`4231`)
+- Removed documentation for ``-Grapidjson`` option of ``opendds_idl`` that was removed in 3.20.0 (:ghpr:`4231`)
 - Remove reference to mailing lists (:ghpr:`4234`)
 - Restructured parts of :ref:`dds_security` page and expanded documentation of some XML security document elements. (:ghpr:`4281`)
 - OS-specific instructions will now be automatically selected based on the browser's user agent. (:ghpr:`4281`)

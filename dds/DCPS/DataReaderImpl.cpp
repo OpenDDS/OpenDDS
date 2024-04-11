@@ -3231,15 +3231,8 @@ DataReaderImpl::add_link(const DataLink_rch& link, const GUID_t& peer)
     }
   }
   TransportClient::add_link(link, peer);
-  OPENDDS_STRING type;
-  {
-    TransportImpl_rch impl = link->impl();
-    if (impl) {
-      type = impl->transport_type();
-    }
-  }
 
-  if (type == "rtps_udp" || type == "multicast") {
+  if (!link->uses_end_historic_control_messages()) {
     resume_sample_processing(peer);
   }
 }

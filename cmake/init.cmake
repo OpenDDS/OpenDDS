@@ -378,6 +378,7 @@ _opendds_feature(SECURITY OFF CONFIG DOC "Build with RTPS Security support")
 _opendds_feature(SAFETY_PROFILE OFF CONFIG MPC_INVERTED_NAME no_opendds_safety_profile
   DOC "Build using Safety Profile (Not for CMake-built OpenDDS)")
 _opendds_feature(COVERAGE OFF MPC_INVERTED_NAME dds_non_coverage)
+_opendds_feature(BOOTTIME_TIMERS OFF CONFIG DOC "Use CLOCK_BOOTTIME for timers")
 
 # ACE Features
 _opendds_feature(VERSIONED_NAMESPACE OFF MPC DOC "Namespaces include versions")

@@ -55,6 +55,7 @@ module OpenDDS
       DDS::Time_t ice6_timestamp;
       string relay6_addr;
       DDS::Time_t relay6_timestamp;
+      DDS::Duration_t lease_duration;
     };
 
     const string RTPS_RELAY_STUN_PROTOCOL = "RtpsRelay:STUN";

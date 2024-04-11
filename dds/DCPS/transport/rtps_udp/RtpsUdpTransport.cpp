@@ -108,7 +108,7 @@ RtpsUdpTransport::make_datalink(const GuidPrefix_t& local_prefix)
 #if defined(OPENDDS_SECURITY)
   {
     if (core_.use_ice()) {
-      ReactorInterceptor_rch ri = reactor_task_->interceptor();
+      ReactorInterceptor_rch ri = reactor_task()->interceptor();
       ri->execute_or_enqueue(make_rch<RemoveHandler>(unicast_socket_.get_handle(), static_cast<ACE_Reactor_Mask>(ACE_Event_Handler::READ_MASK)));
 #ifdef ACE_HAS_IPV6
       ri->execute_or_enqueue(make_rch<RemoveHandler>(ipv6_unicast_socket_.get_handle(), static_cast<ACE_Reactor_Mask>(ACE_Event_Handler::READ_MASK)));
@@ -613,7 +613,7 @@ RtpsUdpTransport::configure_i(const RtpsUdpInst_rch& config)
 
   create_reactor_task(false, "RtpsUdpTransport" + config->name());
 
-  ACE_Reactor* reactor = reactor_task_->get_reactor();
+  ACE_Reactor* reactor = reactor_task()->get_reactor();
   job_queue_ = DCPS::make_rch<DCPS::JobQueue>(reactor);
 
 #ifdef OPENDDS_SECURITY
@@ -950,7 +950,7 @@ RtpsUdpTransport::start_ice()
   GuardThreadType guard_links(links_lock_);
 
   if (!link_) {
-    ReactorInterceptor_rch ri = reactor_task_->interceptor();
+    ReactorInterceptor_rch ri = reactor_task()->interceptor();
     ri->execute_or_enqueue(make_rch<RegisterHandler>(unicast_socket_.get_handle(), ice_endpoint_.get(), static_cast<ACE_Reactor_Mask>(ACE_Event_Handler::READ_MASK)));
 #ifdef ACE_HAS_IPV6
     ri->execute_or_enqueue(make_rch<RegisterHandler>(ipv6_unicast_socket_.get_handle(), ice_endpoint_.get(), static_cast<ACE_Reactor_Mask>(ACE_Event_Handler::READ_MASK)));
@@ -968,7 +968,7 @@ RtpsUdpTransport::stop_ice()
   GuardThreadType guard_links(links_lock_);
 
   if (!link_) {
-    ReactorInterceptor_rch ri = reactor_task_->interceptor();
+    ReactorInterceptor_rch ri = reactor_task()->interceptor();
     ri->execute_or_enqueue(make_rch<RemoveHandler>(unicast_socket_.get_handle(), static_cast<ACE_Reactor_Mask>(ACE_Event_Handler::READ_MASK)));
 #ifdef ACE_HAS_IPV6
     ri->execute_or_enqueue(make_rch<RemoveHandler>(ipv6_unicast_socket_.get_handle(), static_cast<ACE_Reactor_Mask>(ACE_Event_Handler::READ_MASK)));

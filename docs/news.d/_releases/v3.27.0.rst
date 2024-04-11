@@ -33,18 +33,18 @@ Fixes
 =====
 
 - Updated the :ref:`read <xtypes--interpreting-data-samples-with-dynamicdata>` and :ref:`write <xtypes--populating-data-samples-with-dynamicdata>` semantics of DynamicData for union, expandable collections (sequence and string), and optional member of an aggregated type. (:ghpr:`4278`)
-- Fixed memory leak where instances were not cleaned up with exlusive ownership. (:ghpr:`4343`)
+- Fixed memory leak where instances were not cleaned up with :ref:`exclusive ownership <qos-ownership>`. (:ghpr:`4343`)
 - Removed the special handling for sequence members with length code of 5,6, or 7. (:ghpr:`4376`)
-- Reading data from a dynamic data object for a primitive type now must use MEMBER_ID_INVALID id. (:ghpr:`4376`)
+- Reading data from a dynamic data object for a primitive type now must use ``MEMBER_ID_INVALID`` id. (:ghpr:`4376`)
 - ``create_datawriter`` and ``create_datareader`` check if the topic belongs to the same participant as the publisher/subscriber. (:ghpr:`4398`)
 - Fixed uninitialized ``durability_service`` in Topic QoS when using QoS-XML. (:ghpr:`4424`)
 
 - Fixed a bug where compiling IDL with ``-Lc++11 -Gequality`` produced code outside of a namespace that didn't compile. (:ghpr:`4450`)
 
-- ``SedpLocalAddress`` now defaults to ``DCPSDefaultAddress`` to behave like ``SpdpLocalAddress`` and ``local_address``. (:ghpr:`4451`)
+- ``SedpLocalAddress`` now defaults to :cfg:prop:`DCPSDefaultAddress` to behave like ``SpdpLocalAddress`` and ``local_address``. (:ghpr:`4451`)
 
 Notes
 =====
 
-- ``TheParticipantFactory*`` will now return a null pointer when ``DCPSConfigFile`` doesn't exist. (:ghpr:`4372`)
+- ``TheParticipantFactory*`` will now return a null pointer when :ref:`DCPSConfigFile` doesn't exist. (:ghpr:`4372`)
 
