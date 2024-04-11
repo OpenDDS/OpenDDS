@@ -227,6 +227,7 @@ my @specs = # Array of array-refs, each inner array is an option group which
     'macros=s@', 'Extra text for platform_macros.GNU',
     'features=s@', 'Extra text for default.features',
     'mpcopts=s@', 'Extra command-line args for MPC',
+    'boottime!', 'Use CLOCK_BOOTTIME for timers (no)',
    ],
    ['Optional dependencies for OpenDDS (disabled by default unless noted otherwise):',
     'java:s', 'Java development kit (use JAVA_HOME)',
@@ -1357,6 +1358,7 @@ sub write_opendds_configh {
 
   my %config = (
     'OPENDDS_CONFIG_AUTO_STATIC_INCLUDES' => 0,
+    'OPENDDS_CONFIG_BOOTTIME_TIMERS' => $opts{'boottime'} // 0,
   );
 
   my $replace_value = sub {
