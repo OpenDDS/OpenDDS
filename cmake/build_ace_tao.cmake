@@ -16,18 +16,6 @@ if(OPENDDS_JUST_BUILD_HOST_TOOLS)
   list(APPEND _OPENDDS_CONFIGURE_ACE_TAO_ARGS "--workspace-file=${ws}")
 endif()
 
-set(_build_cmd "${CMAKE_COMMAND}" -E env "ACE_ROOT=${OPENDDS_ACE}" "TAO_ROOT=${OPENDDS_TAO}")
-if(_OPENDDS_XERCES3_FOR_ACE)
-  list(APPEND _build_cmd "XERCESCROOT=${_OPENDDS_XERCES3_FOR_ACE}")
-
-  # Vcpkg debug libraries are in a non-standard place
-  set(_opendds_debug_vcpkg_xerces3_for_ace "${_OPENDDS_XERCES3_FOR_ACE}/debug/lib")
-  if(MSVC AND IS_DIRECTORY "${_opendds_debug_vcpkg_xerces3_for_ace}")
-    list(APPEND _OPENDDS_CONFIGURE_ACE_TAO_ARGS
-      --env "XERCESC_LIBDIR=${_opendds_debug_vcpkg_xerces3_for_ace}")
-  endif()
-endif()
-
 find_package(Perl REQUIRED)
 if(OPENDDS_STATIC)
   list(APPEND _OPENDDS_CONFIGURE_ACE_TAO_ARGS --static=1)
@@ -46,6 +34,11 @@ execute_process(
   COMMAND_ECHO STDOUT
   COMMAND_ERROR_IS_FATAL ANY
 )
+
+set(_build_cmd "${CMAKE_COMMAND}" -E env "ACE_ROOT=${OPENDDS_ACE}" "TAO_ROOT=${OPENDDS_TAO}")
+if(_OPENDDS_XERCES3_FOR_ACE)
+  list(APPEND _build_cmd "XERCESCROOT=${_OPENDDS_XERCES3_FOR_ACE}")
+endif()
 
 if(_OPENDDS_MPC_TYPE STREQUAL gnuace)
   execute_process(
