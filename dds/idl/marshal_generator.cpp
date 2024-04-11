@@ -1565,7 +1565,7 @@ bool marshal_generator::gen_typedef(AST_Typedef* node, UTL_ScopedName* name, AST
 
 namespace {
   // common to both fields (in structs) and branches (in unions)
-  string findSizeCommon(const std::string& indent, AST_Decl*field, const string& name,
+  string findSizeCommon(const std::string& indent, AST_Decl* field, const string& name,
                         AST_Type* type, const string& prefix, bool wrap_nested_key_only,
                         Intro& intro, const string& = "") // same sig as streamCommon
   {

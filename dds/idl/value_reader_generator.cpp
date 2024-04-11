@@ -19,9 +19,9 @@ using namespace AstTypeClassification;
 
 namespace {
 
-void generate_read(const std::string& expression, const std::string& accessor,
-                   const std::string& field_name, AST_Type* type, const std::string& idx,
-                   int level = 1, FieldFilter field_filter = FieldFilter_All);
+  void generate_read(const std::string& expression, const std::string& accessor,
+                     const std::string& field_name, AST_Type* type, const std::string& idx,
+                     int level = 1, FieldFilter field_filter = FieldFilter_All);
 
   std::string primitive_type(AST_PredefinedType::PredefinedType pt)
   {
@@ -244,10 +244,10 @@ void generate_read(const std::string& expression, const std::string& accessor,
   bool gen_struct_i(AST_Structure* node, const std::string& type_name,
                     bool use_cxx11, ExtensibilityKind ek, FieldFilter field_filter)
   {
-    const std::string wrapped_name = key_only_type_name(type_name, field_filter, false);
+    const std::string wrapped_name = key_only_type_name(node, type_name, field_filter, false);
     Function read("vread", "bool");
     read.addArg("value_reader", "OpenDDS::DCPS::ValueReader&");
-    read.addArg("value", wrapped_name + "&");
+    read.addArg("value", wrapped_name);
     read.endArgs();
 
     be_global->impl_ <<
@@ -298,10 +298,10 @@ void generate_read(const std::string& expression, const std::string& accessor,
                    const std::vector<AST_UnionBranch*>& branches,
                    AST_Type* discriminator, ExtensibilityKind ek, FieldFilter filter_kind)
   {
-    const std::string wrapped_name = key_only_type_name(type_name, filter_kind, false);
+    const std::string wrapped_name = key_only_type_name(u, type_name, filter_kind, false);
     Function read("vread", "bool");
     read.addArg("value_reader", "OpenDDS::DCPS::ValueReader&");
-    read.addArg("value", wrapped_name + "&");
+    read.addArg("value", wrapped_name);
     read.endArgs();
 
     const std::string value_prefix = filter_kind == FieldFilter_All ? "value." : "value.value.";

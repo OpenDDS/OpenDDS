@@ -18,9 +18,9 @@ using namespace AstTypeClassification;
 
 namespace {
 
-void generate_write(const std::string& expression, const std::string& field_name,
-                    AST_Type* type, const std::string& idx, int level = 1,
-                    FieldFilter field_filter = FieldFilter_All);
+  void generate_write(const std::string& expression, const std::string& field_name,
+                      AST_Type* type, const std::string& idx, int level = 1,
+                      FieldFilter field_filter = FieldFilter_All);
 
   std::string primitive_type(AST_PredefinedType::PredefinedType pt)
   {
@@ -177,8 +177,8 @@ void generate_write(const std::string& expression, const std::string& field_name
       indent << "}\n";
   }
 
-void generate_write(const std::string& expression, const std::string& field_name,
-                    AST_Type* type, const std::string& idx, int level, FieldFilter field_filter)
+  void generate_write(const std::string& expression, const std::string& field_name,
+                      AST_Type* type, const std::string& idx, int level, FieldFilter field_filter)
   {
     AST_Type* const actual = resolveActualType(type);
 
@@ -271,10 +271,10 @@ void generate_write(const std::string& expression, const std::string& field_name
   bool gen_struct_i(AST_Structure* node, const std::string& type_name,
                     bool use_cxx11, ExtensibilityKind ek, FieldFilter field_filter)
   {
-    const std::string wrapped_name = key_only_type_name(type_name, field_filter, true);
+    const std::string wrapped_name = key_only_type_name(node, type_name, field_filter, true);
     Function write("vwrite", "bool");
     write.addArg("value_writer", "OpenDDS::DCPS::ValueWriter&");
-    write.addArg("value", wrapped_name + "&");
+    write.addArg("value", wrapped_name);
     write.endArgs();
 
     const std::string value_prefix = field_filter == FieldFilter_All ? "value." : "value.value.";
@@ -313,10 +313,10 @@ void generate_write(const std::string& expression, const std::string& field_name
                    const std::vector<AST_UnionBranch*>& branches,
                    AST_Type* discriminator, ExtensibilityKind ek, FieldFilter filter_kind)
   {
-    const std::string wrapped_name = key_only_type_name(type_name, filter_kind, true);
+    const std::string wrapped_name = key_only_type_name(u, type_name, filter_kind, true);
     Function write("vwrite", "bool");
     write.addArg("value_writer", "OpenDDS::DCPS::ValueWriter&");
-    write.addArg("value", wrapped_name + "&");
+    write.addArg("value", wrapped_name);
     write.endArgs();
 
     const std::string value_prefix = filter_kind == FieldFilter_All ? "value." : "value.value.";
