@@ -894,7 +894,7 @@ To do the same for CMake:
     )
 
 Once set up to be generated, OpenDDS has to be configured to send and receive the ``CompleteTypeObject``\s.
-This can be done by setting the :ref:`UseXTypes <run_time_configuration--usextypes>` RTPS discovery configuration option (:ref:`run_time_configuration--configuring-for-ddsi-rtps-discovery`) or programmatically using the ``OpenDDS::RTPS::RtpsDiscovery::use_xtypes()`` setter methods.
+This can be done by setting :cfg:prop:`[rtps_discovery]UseXTypes` or programmatically using the ``OpenDDS::RTPS::RtpsDiscovery::use_xtypes()`` setter methods.
 
 .. _xtypes--interpreting-data-samples-with-dynamicdata:
 

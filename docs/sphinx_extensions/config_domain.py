@@ -210,7 +210,6 @@ class ConfigProp(CustomDomainObject):
 
     def create_signode(self, ctx, name, signode, arguments):
         signode += addnodes.desc_name(name, name)
-        print(ctx.get(-2, 'sec_name'), name)
         if arguments is not None:
             text = '=' + arguments
             signode += addnodes.desc_addname(text, text)

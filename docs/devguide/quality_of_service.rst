@@ -761,7 +761,7 @@ For example, the application could attach security credentials via the policy th
 .. warning::
 
   When using :ref:`dds_security`, the user data of a participant can be leaked in unsecured discovery messages.
-  Enabling ``[rtps_discovery]SecureParticipantUserData`` will only send and provide the real user data when it can be securely sent.
+  Enabling :cfg:prop:`[rtps_discovery]SecureParticipantUserData` will only send and provide the real user data when it can be securely sent.
   This is an OpenDDS-specific extension.
 
 .. _qos-topic-data:
