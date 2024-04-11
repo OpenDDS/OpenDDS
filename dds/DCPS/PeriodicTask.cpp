@@ -43,8 +43,10 @@ void PeriodicTask::enable_i(bool reenable, const TimeDuration& per)
   if (!enabled_) {
     timer_ = Timers::schedule(reactor(), *this, 0, TimeDuration(), per);
     if (timer_ == Timers::InvalidTimerId) {
-      ACE_ERROR((LM_ERROR, "(%P|%t) PeriodicTask::enable_i"
-                  " failed to schedule timer %p\n", ACE_TEXT("")));
+      if (log_level >= LogLevel::Error) {
+        ACE_ERROR((LM_ERROR, "(%P|%t) PeriodicTask::enable_i: "
+                   "failed to schedule timer %p\n", ACE_TEXT("")));
+      }
     } else {
       enabled_ = true;
     }

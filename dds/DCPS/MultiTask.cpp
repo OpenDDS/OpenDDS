@@ -38,8 +38,10 @@ void MultiTask::enable_i(const TimeDuration& per)
     timer_ = Timers::schedule(reactor(), *this, 0, per, delay_);
 
     if (timer_ == Timers::InvalidTimerId) {
-      ACE_ERROR((LM_ERROR, "(%P|%t) MultiTask::enable_i"
-                 " failed to schedule timer %p\n", ACE_TEXT("")));
+      if (log_level >= LogLevel::Error) {
+        ACE_ERROR((LM_ERROR, "(%P|%t) MultiTask::enable_i: "
+                   "failed to schedule timer %p\n", ACE_TEXT("")));
+      }
     } else {
       next_time_ = now + per;
     }
@@ -52,8 +54,10 @@ void MultiTask::enable_i(const TimeDuration& per)
       cancel_estimate_ = now2 - now;
 
       if (timer_ == Timers::InvalidTimerId) {
-        ACE_ERROR((LM_ERROR, "(%P|%t) MultiTask::enable_i"
-                   " failed to reschedule timer %p\n", ACE_TEXT("")));
+        if (log_level >= LogLevel::Error) {
+          ACE_ERROR((LM_ERROR, "(%P|%t) MultiTask::enable_i: "
+                     "failed to reschedule timer %p\n", ACE_TEXT("")));
+        }
       } else {
         next_time_ = now2 + per;
       }

@@ -32,9 +32,8 @@ void SporadicTask::schedule(const TimeDuration& delay)
   if (interceptor) {
     interceptor->execute_or_enqueue(sporadic_command_);
   } else if (log_level >= LogLevel::Error) {
-    ACE_ERROR((LM_ERROR,
-                "(%P|%t) ERROR: SporadicTask::schedule: "
-                "failed to receive ReactorInterceptor handle\n"));
+    ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: SporadicTask::schedule: "
+               "failed to receive ReactorInterceptor handle\n"));
   }
 }
 
@@ -53,9 +52,8 @@ void SporadicTask::cancel()
   if (interceptor) {
     interceptor->execute_or_enqueue(sporadic_command_);
   } else if (log_level >= LogLevel::Error) {
-    ACE_ERROR((LM_ERROR,
-                "(%P|%t) ERROR: SporadicTask::cancel: "
-                "failed to receive ReactorInterceptor handle\n"));
+    ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: SporadicTask::cancel: "
+               "failed to receive ReactorInterceptor handle\n"));
   }
 }
 
