@@ -1459,6 +1459,11 @@ bool has_discriminator(AST_Union* u, FieldFilter filter_kind)
     || filter_kind == FieldFilter_All;
 }
 
+// TODO: Add more fine-grained control of "const" string for the wrapper type and wrapped type.
+// Currently, there is a single bool to control both; that is, either both are "const" or
+// none is "const". But sometimes, we want something like "const KeyOnly<SampleType>&", and
+// not "const KeyOnly<const SampleType>&" or "KeyOnly<SampleType>&".
+
 /// Handling wrapping and unwrapping references in the wrapper types:
 /// NestedKeyOnly, KeyOnly, IDL::DistinctType, and *_forany.
 struct RefWrapper {
@@ -1720,7 +1725,8 @@ std::string key_only_type_name(AST_Type* type, const std::string& type_name,
 {
   RefWrapper wrapper(type, type_name, "", writing ? true : false);
   wrapper.field_filter_ = field_filter;
-  return wrapper.done().wrapped_type_name();
+  const bool has_wrapper = field_filter != FieldFilter_All;
+  return (has_wrapper && !writing ? "const " : "") + wrapper.done().wrapped_type_name();
 }
 
 #endif
