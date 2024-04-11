@@ -226,7 +226,13 @@ my @specs = # Array of array-refs, each inner array is an option group which
     'configh=s@', 'Extra text for config.h',
     'macros=s@', 'Extra text for platform_macros.GNU',
     'features=s@', 'Extra text for default.features',
-    'mpcopts=s@', 'Extra command-line args for MPC',
+    'mpcopts=s@', 'Extra command-line args for MPC' .
+      $argIndent . 'This option can be given multiple times' .
+      $argIndent . 'Example: --mpcopts=-value_template --mpcopts=build_flags+="-Wall -Werror"',
+    '<usage>mpc:ARG VALUE', 'Extra command-line args for MPC' .
+      $argIndent . 'This option can be given multiple times' .
+      $argIndent . 'For example, --mpc:value_template build_flags+="-Wall -Werror" turns into' .
+      $argIndent . 'the following options for MPC: -value_template build_flags+="-Wall -Werror"',
     'boottime!', 'Use CLOCK_BOOTTIME for timers (no)',
    ],
    ['Optional dependencies for OpenDDS (disabled by default unless noted otherwise):',
@@ -330,6 +336,9 @@ EOT
             if ($optkey =~ /^\<hidden\>/) {
               return;
             }
+            if ($opt =~ /^\<usage\>(.*)$/) {
+              $optkey = $1;
+            }
             $optkey =~ s/^\<default\>(.*)$/\[no-\]$1/g;
             $optkey .= '...' if $opt =~ /s\@$/;
             my $pad = $argPadding - length $optkey;
@@ -346,6 +355,9 @@ sub parseArgs {
   my @default = ();
   iterate(sub {
             my ($group, $opt, $descr, $optkey) = @_;
+            if ($opt =~ /^\<usage\>/) {
+              return;
+            }
             if ($opt =~ /^<default>(.*)$/) {
               push @getopts, $1;
               $optkey =~ /^<default>(.*)$/;
@@ -365,9 +377,27 @@ sub parseArgs {
   }
 
   my $opts = {};
+  Getopt::Long::Configure('pass_through');
   GetOptions($opts, @getopts) or usage(1);
   usage(0) if $opts->{'help'};
   targetUsage(0) if $opts->{'target-help'};
+
+  while (@ARGV != 0) {
+    my $arg = shift(@ARGV);
+    if ($arg =~ /^--mpc:(.*)$/) {
+      my $key = $1;
+      if (@ARGV != 0) {
+        my $value = shift(@ARGV);
+        push(@{$opts->{'mpcopts'}}, '-' . $key, $value);
+      } else {
+        print "ERROR: $arg requires a value\n";
+        usage(1);
+      }
+    } else {
+      print "ERROR: unknown argument $arg\n";
+      usage(1);
+    }
+  }
 
   if ($opts->{'verbose'}) {
     print "Options:\n";
@@ -744,7 +774,7 @@ EOF
     }
     if ($opts{'std'}) {
       my $std = "stdcpp$cxx_std";
-      push(@{$opts{'mpcopts'}}, "-value_template LanguageStandard=$std");
+      push(@{$opts{'mpcopts'}}, '-value_template', "LanguageStandard=$std");
       print "Setting Visual C++ LanguageStandard to $std\n" if $opts{'verbose'};
       if ($opts{'std'} eq 'latest' || $cxx_std >= 17) {
         push(@{$opts{'features'}}, 'no_cxx17=0');
@@ -2421,9 +2451,7 @@ EOT
     push(@mwc_common_args, '-static');
   }
   if (defined $opts{'mpcopts'}) {
-    for my $i (@{$opts{'mpcopts'}}) {
-      push(@mwc_common_args, split(/ /, $i));
-    }
+    push(@mwc_common_args, @{$opts{'mpcopts'}});
   }
 
   my @feature_opts = ();
