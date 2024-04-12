@@ -289,6 +289,8 @@ jobs:
           -DBUILD_SHARED_LIBS=TRUE^
           -DOPENDDS_ACE_TAO_SRC=${{ github.workspace }}\OpenDDS\build\ACE_TAO^
           -DOPENDDS_MPC=${{ github.workspace }}\MPC^
+          -DOPENDDS_XERCES3=${{ env.VCPKG_INSTALLED_DIR }}/x64-windows^
+          -DOPENDDS_OPENSSL=${{ env.VCPKG_INSTALLED_DIR }}/x64-windows^
           -DOPENDDS_BUILD_TESTS=TRUE^
           -DOPENDDS_CMAKE_VERBOSE=all
     - uses: ammaraskar/msvc-problem-matcher@0.3.0
@@ -308,6 +310,15 @@ jobs:
     runs-on: windows-2022
 
     steps:
+    - name: setup for run-vcpkg
+      shell: bash
+      run: |
+        echo '{ "name": "opendds", "version-string": "github-actions", "dependencies": [ "openssl", "xerces-c" ] }' > vcpkg.json
+    - name: install openssl & xerces-c
+      uses: lukka/run-vcpkg@v11
+      with:
+        vcpkgGitCommitId: '${{ env.VCPKG_GIT_COMMIT }}'
+        runVcpkgInstall: true
     - name: Checkout OpenDDS
       uses: actions/checkout@v4
       with:
@@ -334,6 +345,8 @@ jobs:
           -DBUILD_SHARED_LIBS=FALSE^
           -DOPENDDS_ACE_TAO_SRC=${{ github.workspace }}\OpenDDS\build\ACE_TAO^
           -DOPENDDS_MPC=${{ github.workspace }}\MPC^
+          -DOPENDDS_XERCES3=${{ env.VCPKG_INSTALLED_DIR }}/x64-windows^
+          -DOPENDDS_OPENSSL=${{ env.VCPKG_INSTALLED_DIR }}/x64-windows^
           -DOPENDDS_BUILD_TESTS=TRUE^
           -DOPENDDS_CMAKE_VERBOSE=all
     - uses: ammaraskar/msvc-problem-matcher@0.3.0
@@ -389,6 +402,8 @@ jobs:
           -DBUILD_SHARED_LIBS=TRUE^
           -DOPENDDS_ACE_TAO_SRC=${{ github.workspace }}\OpenDDS\build\ACE_TAO^
           -DOPENDDS_MPC=${{ github.workspace }}\MPC^
+          -DOPENDDS_XERCES3=${{ env.VCPKG_INSTALLED_DIR }}/x64-windows^
+          -DOPENDDS_OPENSSL=${{ env.VCPKG_INSTALLED_DIR }}/x64-windows^
           -DOPENDDS_BUILD_TESTS=TRUE^
           -DOPENDDS_CMAKE_VERBOSE=all
     - uses: ammaraskar/msvc-problem-matcher@0.3.0
@@ -408,6 +423,15 @@ jobs:
     runs-on: windows-2022
 
     steps:
+    - name: setup for run-vcpkg
+      shell: bash
+      run: |
+        echo '{ "name": "opendds", "version-string": "github-actions", "dependencies": [ "openssl", "xerces-c" ] }' > vcpkg.json
+    - name: install openssl & xerces-c
+      uses: lukka/run-vcpkg@v11
+      with:
+        vcpkgGitCommitId: '${{ env.VCPKG_GIT_COMMIT }}'
+        runVcpkgInstall: true
     - name: Checkout OpenDDS
       uses: actions/checkout@v4
       with:
@@ -434,6 +458,8 @@ jobs:
           -DBUILD_SHARED_LIBS=FALSE^
           -DOPENDDS_ACE_TAO_SRC=${{ github.workspace }}\OpenDDS\build\ACE_TAO^
           -DOPENDDS_MPC=${{ github.workspace }}\MPC^
+          -DOPENDDS_XERCES3=${{ env.VCPKG_INSTALLED_DIR }}/x64-windows^
+          -DOPENDDS_OPENSSL=${{ env.VCPKG_INSTALLED_DIR }}/x64-windows^
           -DOPENDDS_BUILD_TESTS=TRUE^
           -DOPENDDS_CMAKE_VERBOSE=all
     - uses: ammaraskar/msvc-problem-matcher@0.3.0

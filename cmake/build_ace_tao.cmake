@@ -35,6 +35,11 @@ execute_process(
   COMMAND_ERROR_IS_FATAL ANY
 )
 
+set(_build_cmd "${CMAKE_COMMAND}" -E env "ACE_ROOT=${OPENDDS_ACE}" "TAO_ROOT=${OPENDDS_TAO}")
+if(_OPENDDS_XERCES3_FOR_ACE)
+  list(APPEND _build_cmd "XERCESCROOT=${_OPENDDS_XERCES3_FOR_ACE}")
+endif()
+
 if(_OPENDDS_MPC_TYPE STREQUAL gnuace)
   execute_process(
     COMMAND
@@ -65,20 +70,19 @@ if(_OPENDDS_MPC_TYPE STREQUAL gnuace)
     list(APPEND byproducts "${file}")
   endforeach()
 
-  set(make_cmd "${CMAKE_COMMAND}" -E env "ACE_ROOT=${OPENDDS_ACE}" "TAO_ROOT=${OPENDDS_TAO}")
   if(CMAKE_GENERATOR STREQUAL "Unix Makefiles")
-    list(APPEND make_cmd "$(MAKE)")
+    list(APPEND _build_cmd "$(MAKE)")
   else()
     find_program(make_exe NAMES gmake make)
     cmake_host_system_information(RESULT core_count QUERY NUMBER_OF_LOGICAL_CORES)
-    list(APPEND make_cmd "${make_exe}" "-j${core_count}")
+    list(APPEND _build_cmd "${make_exe}" "-j${core_count}")
   endif()
 
   ExternalProject_Add(build_ace_tao
     SOURCE_DIR "${OPENDDS_ACE_TAO_SRC}"
     CONFIGURE_COMMAND "${CMAKE_COMMAND}" -E echo "Already configured"
     BUILD_IN_SOURCE TRUE
-    BUILD_COMMAND ${make_cmd}
+    BUILD_COMMAND ${_build_cmd}
     BUILD_BYPRODUCTS ${byproducts}
     USES_TERMINAL_BUILD TRUE # Needed for Ninja to show the ACE/TAO build
     INSTALL_COMMAND "${CMAKE_COMMAND}" -E echo "No install step"
@@ -123,15 +127,16 @@ elseif(_OPENDDS_MPC_TYPE MATCHES "^vs")
     endif()
   endforeach()
 
+  list(APPEND _build_cmd
+    MSBuild "${sln}" "-maxcpucount"
+    "-property:Configuration=$<CONFIG>,Platform=${CMAKE_VS_PLATFORM_TOOLSET_HOST_ARCHITECTURE}"
+  )
+
   ExternalProject_Add(build_ace_tao
     SOURCE_DIR "${OPENDDS_ACE_TAO_SRC}"
     CONFIGURE_COMMAND "${CMAKE_COMMAND}" -E echo "Already configured"
     BUILD_IN_SOURCE TRUE
-    BUILD_COMMAND
-      "${CMAKE_COMMAND}" -E env "ACE_ROOT=${OPENDDS_ACE}" "TAO_ROOT=${OPENDDS_TAO}"
-      MSBuild "${sln}"
-        "-property:Configuration=$<CONFIG>,Platform=${CMAKE_VS_PLATFORM_TOOLSET_HOST_ARCHITECTURE}"
-        "-maxcpucount"
+    BUILD_COMMAND ${_build_cmd}
     BUILD_BYPRODUCTS ${byproducts}
     USES_TERMINAL_BUILD TRUE # Needed for Ninja to show the ACE/TAO build
     INSTALL_COMMAND "${CMAKE_COMMAND}" -E echo "No install step"

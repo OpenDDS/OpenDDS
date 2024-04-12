@@ -33,6 +33,8 @@ for my $key (@required_values, @optional_values) {
   push(@opts, "$key=s");
 }
 push(@opts, "macro-line=s@");
+my %env;
+push(@opts, "env=s%" => %env);
 if (!GetOptions(\%values, @opts)) {
   exit(1);
 }
@@ -113,6 +115,13 @@ if ($gnuace) {
 $ENV{MPC_ROOT} = File::Spec->rel2abs($values{mpc});
 $ENV{ACE_ROOT} = File::Spec->rel2abs($values{ace});
 $ENV{TAO_ROOT} = File::Spec->rel2abs($values{tao});
+if ($values{'env'}) {
+  for my $name (keys(%{$values{'env'}})) {
+    my $value = $values{env}->{$name};
+    print("env: $name=$value\n");
+    $ENV{$name} = $value;
+  }
+}
 my $mwc_name = 'ACE_TAO_for_OpenDDS.mwc';
 my $mwc_src = $values{'workspace-file'} // "$FindBin::RealBin/../$mwc_name";
 my $mwc = "$values{src}/$mwc_name";
