@@ -40,9 +40,14 @@ execute_process(
 
 # Get the C++ standard OpenDDS is going to be built with. We are going to force
 # the ACE/TAO build to use the same standard.
-set(opendds_idl_std "$<TARGET_PROPERTY:opendds_idl,CXX_STANDARD>")
-set(dcps_std "$<TARGET_PROPERTY:OpenDDS_Dcps,CXX_STANDARD>")
-set(std "$<IF:$<TARGET_EXISTS:OpenDDS_Dcps>,${dcps_std},${opendds_idl_std}>")
+set(_opendds_idl_std "$<TARGET_PROPERTY:opendds_idl,CXX_STANDARD>")
+set(_opendds_dcps_std "$<TARGET_PROPERTY:OpenDDS_Dcps,CXX_STANDARD>")
+set(_opendds_std "$<IF:$<TARGET_EXISTS:OpenDDS_Dcps>,${_opendds_dcps_std},${_opendds_idl_std}>")
+
+set(_build_cmd "${CMAKE_COMMAND}" -E env "ACE_ROOT=${OPENDDS_ACE}" "TAO_ROOT=${OPENDDS_TAO}")
+if(_OPENDDS_XERCES3_FOR_ACE)
+  list(APPEND _build_cmd "XERCESCROOT=${_OPENDDS_XERCES3_FOR_ACE}")
+endif()
 
 if(_OPENDDS_MPC_TYPE STREQUAL gnuace)
   execute_process(
@@ -74,20 +79,23 @@ if(_OPENDDS_MPC_TYPE STREQUAL gnuace)
     list(APPEND byproducts "${file}")
   endforeach()
 
-  set(make_cmd "${CMAKE_COMMAND}" -E env "ACE_ROOT=${OPENDDS_ACE}" "TAO_ROOT=${OPENDDS_TAO}")
   if(CMAKE_GENERATOR STREQUAL "Unix Makefiles")
-    list(APPEND make_cmd "$(MAKE)")
+    list(APPEND _build_cmd "$(MAKE)")
   else()
     find_program(make_exe NAMES gmake make)
     cmake_host_system_information(RESULT core_count QUERY NUMBER_OF_LOGICAL_CORES)
-    list(APPEND make_cmd "${make_exe}" "-j${core_count}")
+    list(APPEND _build_cmd "${make_exe}" "-j${core_count}")
   endif()
+
+  list(APPEND _build_cmd
+    "opendds_cmake_std=$<IF:$<BOOL:${_opendds_std}>,-std=c++${_opendds_std},>"
+  )
 
   ExternalProject_Add(build_ace_tao
     SOURCE_DIR "${OPENDDS_ACE_TAO_SRC}"
     CONFIGURE_COMMAND "${CMAKE_COMMAND}" -E echo "Already configured"
     BUILD_IN_SOURCE TRUE
-    BUILD_COMMAND ${make_cmd} "opendds_cmake_std=$<IF:$<BOOL:${std}>,-std=c++${std},>"
+    BUILD_COMMAND ${_build_cmd}
     BUILD_BYPRODUCTS ${byproducts}
     USES_TERMINAL_BUILD TRUE # Needed for Ninja to show the ACE/TAO build
     INSTALL_COMMAND "${CMAKE_COMMAND}" -E echo "No install step"
@@ -132,16 +140,17 @@ elseif(_OPENDDS_MPC_TYPE MATCHES "^vs")
     endif()
   endforeach()
 
+  list(APPEND _build_cmd
+    MSBuild "${sln}" "-maxcpucount"
+    "-property:Configuration=$<CONFIG>,Platform=${CMAKE_VS_PLATFORM_TOOLSET_HOST_ARCHITECTURE}"
+    "$<IF:$<BOOL:${_opendds_std}>,-property:LanguageStandard=stdcpp${_opendds_std},>"
+  )
+
   ExternalProject_Add(build_ace_tao
     SOURCE_DIR "${OPENDDS_ACE_TAO_SRC}"
     CONFIGURE_COMMAND "${CMAKE_COMMAND}" -E echo "Already configured"
     BUILD_IN_SOURCE TRUE
-    BUILD_COMMAND
-      "${CMAKE_COMMAND}" -E env "ACE_ROOT=${OPENDDS_ACE}" "TAO_ROOT=${OPENDDS_TAO}"
-      MSBuild "${sln}"
-        "-property:Configuration=$<CONFIG>,Platform=${CMAKE_VS_PLATFORM_TOOLSET_HOST_ARCHITECTURE}"
-        "$<IF:$<BOOL:${std}>,-property:LanguageStandard=stdcpp${std},>"
-        "-maxcpucount"
+    BUILD_COMMAND ${_build_cmd}
     BUILD_BYPRODUCTS ${byproducts}
     USES_TERMINAL_BUILD TRUE # Needed for Ninja to show the ACE/TAO build
     INSTALL_COMMAND "${CMAKE_COMMAND}" -E echo "No install step"

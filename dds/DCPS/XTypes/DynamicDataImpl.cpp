@@ -5042,10 +5042,6 @@ bool serialized_size_dynamic_union(const Encoding& encoding, size_t& size,
   using namespace OpenDDS::XTypes;
   const DDS::DynamicType_var type = union_data->type();
   const DDS::DynamicType_var base_type = get_base_type(type);
-  if (ext == Sample::KeyOnly && !has_explicit_keys(base_type)) {
-    // nothing is serialized (not even a delimiter) for key-only serialization when there is no @key
-    return true;
-  }
 
   DDS::TypeDescriptor_var td;
   if (!get_type_descriptor(base_type, td)) {
@@ -5056,6 +5052,10 @@ bool serialized_size_dynamic_union(const Encoding& encoding, size_t& size,
   const DDS::ExtensibilityKind extensibility = td->extensibility_kind();
   if (extensibility == DDS::APPENDABLE || extensibility == DDS::MUTABLE) {
     serialized_size_delimiter(encoding, size);
+  }
+
+  if (ext == Sample::KeyOnly && !has_explicit_keys(base_type)) {
+    return true;
   }
 
   // Discriminator
@@ -5704,10 +5704,6 @@ bool serialize_dynamic_union(Serializer& ser, DDS::DynamicData_ptr data, Sample:
   using namespace OpenDDS::XTypes;
   const DDS::DynamicType_var type = data->type();
   const DDS::DynamicType_var base_type = get_base_type(type);
-  if (ext == Sample::KeyOnly && !has_explicit_keys(base_type)) {
-    // nothing is serialized (not even a delimiter) for key-only serialization when there is no @key
-    return true;
-  }
 
   DDS::TypeDescriptor_var td;
   if (!get_type_descriptor(base_type, td)) {
@@ -5723,6 +5719,10 @@ bool serialize_dynamic_union(Serializer& ser, DDS::DynamicData_ptr data, Sample:
         || !ser.write_delimiter(total_size)) {
       return false;
     }
+  }
+
+  if (ext == Sample::KeyOnly && !has_explicit_keys(base_type)) {
+    return true;
   }
 
   // Discriminator
