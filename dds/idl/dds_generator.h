@@ -1445,8 +1445,27 @@ inline std::string type_kind(AST_Type* type)
   }
 }
 
+inline
+FieldFilter nested(FieldFilter filter_kind)
+{
+  return filter_kind == FieldFilter_KeyOnly ? FieldFilter_NestedKeyOnly : filter_kind;
+}
+
+inline
+bool has_discriminator(AST_Union* u, FieldFilter filter_kind)
+{
+  return be_global->union_discriminator_is_key(u)
+    || filter_kind == FieldFilter_NestedKeyOnly
+    || filter_kind == FieldFilter_All;
+}
+
+// TODO: Add more fine-grained control of "const" string for the wrapper type and wrapped type.
+// Currently, there is a single bool to control both; that is, either both are "const" or
+// none is "const". But sometimes, we want something like "const KeyOnly<SampleType>&", and
+// not "const KeyOnly<const SampleType>&" or "KeyOnly<SampleType>&".
+
 /// Handling wrapping and unwrapping references in the wrapper types:
-/// NestedKeyOnly, IDL::DistinctType, and *_forany.
+/// NestedKeyOnly, KeyOnly, IDL::DistinctType, and *_forany.
 struct RefWrapper {
   const bool cpp11_;
   AST_Type* const type_;
@@ -1456,6 +1475,7 @@ struct RefWrapper {
   const std::string fieldref_;
   const std::string local_;
   bool is_const_;
+  FieldFilter field_filter_;
   bool nested_key_only_;
   bool classic_array_copy_;
   bool dynamic_data_adapter_;
@@ -1470,6 +1490,7 @@ struct RefWrapper {
     , to_wrap_(strip_shift_op(to_wrap))
     , shift_op_(get_shift_op(to_wrap))
     , is_const_(is_const)
+    , field_filter_(FieldFilter_All)
     , nested_key_only_(false)
     , classic_array_copy_(false)
     , dynamic_data_adapter_(false)
@@ -1488,6 +1509,7 @@ struct RefWrapper {
     , fieldref_(strip_shift_op(fieldref))
     , local_(local)
     , is_const_(is_const)
+    , field_filter_(FieldFilter_All)
     , nested_key_only_(false)
     , classic_array_copy_(false)
     , dynamic_data_adapter_(false)
@@ -1508,8 +1530,9 @@ struct RefWrapper {
     const bool forany = classic_array_copy_ || needs_forany(type_);
     const bool distinct_type = needs_distinct_type(type_);
     needs_dda_tag_ = dynamic_data_adapter_ && (forany || distinct_type);
-    nested_key_only_ = nested_key_only_ &&
-      needs_nested_key_only(typedef_node_ ? typedef_node_ : type_);
+    // If field_filter_ is set, this object is being used for vwrite or vread generator.
+    nested_key_only_ = field_filter_ == FieldFilter_NestedKeyOnly ||
+      (nested_key_only_ && needs_nested_key_only(typedef_node_ ? typedef_node_ : type_));
     wrapped_type_name_ = type_name_;
     bool by_ref = true;
 
@@ -1546,9 +1569,12 @@ struct RefWrapper {
       ref_ = var_name;
     }
 
+    if (field_filter_ == FieldFilter_KeyOnly) {
+      wrapped_type_name_ = std::string("KeyOnly<") + const_str + wrapped_type_name_ + ">";
+    }
+
     if (nested_key_only_) {
-      wrapped_type_name_ =
-        std::string("NestedKeyOnly<") + const_str + wrapped_type_name_ + ">";
+      wrapped_type_name_ = std::string("NestedKeyOnly<") + const_str + wrapped_type_name_ + ">";
       value_access_post_ = ".value" + value_access_post_;
       const std::string nko_arg = "(" + ref_ + ")";
       if (is_const_) {
@@ -1692,5 +1718,15 @@ private:
     return dds_generator::get_tag_name(type_name_, qualifier);
   }
 };
+
+inline
+std::string key_only_type_name(AST_Type* type, const std::string& type_name,
+                               FieldFilter field_filter, bool writing)
+{
+  RefWrapper wrapper(type, type_name, "", writing ? true : false);
+  wrapper.field_filter_ = field_filter;
+  const bool has_wrapper = field_filter != FieldFilter_All;
+  return (has_wrapper && !writing ? "const " : "") + wrapper.done().wrapped_type_name();
+}
 
 #endif
