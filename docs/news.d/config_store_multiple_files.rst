@@ -2,6 +2,9 @@
 
 .. news-start-section: Additions
 .. news-start-section: ``ConfigStore``
-- OpenDDS now supports multiple config files.  DevGuide update to follow.
+- OpenDDS now supports multiple config files.
+
+  - See :ref:`config-store-keys` for details.
+
 .. news-end-section
 .. news-end-section
