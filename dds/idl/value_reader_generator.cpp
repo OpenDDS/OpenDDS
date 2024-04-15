@@ -256,10 +256,13 @@ namespace {
     const std::string value_prefix = field_filter == FieldFilter_All ? "value." : "value.value.";
     const Fields fields(node, field_filter);
 
+    // KeyOnly wrapper has no field if there is no explicit key.
+    bool has_field = false;
     for (Fields::Iterator it = fields.begin(); it != fields.end(); ++it) {
       AST_Field* const field = *it;
       be_global->impl_ <<
         "{\"" << canonical_name(field) << "\"," << be_global->get_id(field) << "},";
+      has_field = true;
     }
 
     be_global->impl_ <<
@@ -267,28 +270,34 @@ namespace {
       "  ListMemberHelper helper(pairs);\n";
 
     be_global->impl_ <<
-      "  if (!value_reader.begin_struct(" << extensibility_kind(ek) << ")) return false;\n"
-      "  XTypes::MemberId member_id;\n"
-      "  while (value_reader.members_remaining()) {\n"
-      "    if (!value_reader.begin_struct_member(member_id, helper)) return false;\n"
-      "    switch (member_id) {\n";
+      "  if (!value_reader.begin_struct(" << extensibility_kind(ek) << ")) return false;\n";
 
-    for (Fields::Iterator it = fields.begin(); it != fields.end(); ++it) {
-      AST_Field* const field = *it;
-      const std::string field_name = field->local_name()->get_string();
+    if (has_field) {
       be_global->impl_ <<
-        "    case " << be_global->get_id(field) << ": {\n";
-      generate_read(value_prefix + field_name, use_cxx11 ? "()" : "", field_name,
-                    field->field_type(), "i", 3, nested(field_filter));
+        "  XTypes::MemberId member_id;\n"
+        "  while (value_reader.members_remaining()) {\n"
+        "    if (!value_reader.begin_struct_member(member_id, helper)) return false;\n"
+        "    switch (member_id) {\n";
+
+      for (Fields::Iterator it = fields.begin(); it != fields.end(); ++it) {
+        AST_Field* const field = *it;
+        const std::string field_name = field->local_name()->get_string();
+        be_global->impl_ <<
+          "    case " << be_global->get_id(field) << ": {\n";
+        generate_read(value_prefix + field_name, use_cxx11 ? "()" : "", field_name,
+                      field->field_type(), "i", 3, nested(field_filter));
+        be_global->impl_ <<
+          "      break;\n"
+          "    }\n";
+      }
+
       be_global->impl_ <<
-        "      break;\n"
-        "    }\n";
+        "    }\n"
+        "    if (!value_reader.end_struct_member()) return false;\n"
+        "  }\n";
     }
 
     be_global->impl_ <<
-      "    }\n"
-      "    if (!value_reader.end_struct_member()) return false;\n"
-      "  }\n"
       "  if (!value_reader.end_struct()) return false;\n"
       "  return true;\n";
     return true;
