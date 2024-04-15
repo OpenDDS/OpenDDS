@@ -380,7 +380,25 @@ Transmission of :term:`samples <Sample>` and information related to their manage
 Transports are typically specified via configuration files and are attached to various entities in the publisher and subscriber processes.
 See :ref:`config-transport` for details on configuring transports generally.
 
-.. figure:: images/pluggable.png
+.. svgbob::
+
+  .---------------------------.  .---------------------------.
+  |  "Publisher Application"  |  |  "Subscriber Application" |
+  | +-----------------------+ |  | +-----------------------+ |
+  | |      "DataWriter"     | |  | |      "DataReader"     | |
+  | +-----------------------+ |  | +-----------------------+ |
+  | |      "Publisher"      | |  | |      "Subscriber"     | |
+  | +-----------------------+ |  | +-----------------------+ |
+  | |  "DomainParticipant"  | |  | |  "DomainParticipant"  | |
+  | +-----------+-----------+ |  | +-----------+-----------+ |
+  | |"Discovery"|"Transport"| |  | |"Transport"|"Discovery"| |
+  | +-----o-----+-----o-----+ |  | +-----o-----+-----o-----+ |
+  |       |           |       |  |       |           |       |
+  |       +-----+-----+       |  |       +-----+-----+       |
+  `-------------|-------------'  `-------------|-------------'
+                |                              |
+                |           "Network"          |
+  ==============#==============================#==============
 
 Transports are used along with :ref:`discovery <discovery>` to define how OpenDDS communicates.
 
@@ -558,9 +576,28 @@ Each OpenDDS application connects to the DCPSInfoRepo and creates records for it
 As records for data writers and data readers are created, they are matched against the existing set of records.
 When matches are found, the DCPSInfoRepo invokes the participant to perform the necessary associations.
 
-.. figure:: images/inforepo_discovery.png
+.. svgbob::
 
-   Centralized Discovery with DCPSInfoRepo
+          .---------------------------.  .---------------------------.
+          |  "Publisher Application"  |  |  "Subscriber Application" |
+          | +-----------------------+ |  | +-----------------------+ |
+          | |      "DataWriter"     | |  | |      "DataReader"     | |
+          | +-----------------------+ |  | +-----------------------+ |
+          | |      "Publisher"      | |  | |      "Subscriber"     | |
+          | +-----------------------+ |  | +-----------------------+ |
+          | |  "DomainParticipant"  | |  | |  "DomainParticipant"  | |
+          | +-----------+-----------+ |  | +-----------+-----------+ |
+          | |"InfoRepo" |"Transport"| |  | |"Transport"|"InfoRepo" | |
+          | |"Discovery"|           | |  | |           |"Discovery"| |
+          | +-----o-----+-----o-----+ |  | +-----------+-----------+ |
+          |       |           |       |  |       ^           ^       |
+          `-------|-----------|-------'  `-------|-----------|-------'
+                  |           +------------------+           |
+  "1. Publisher"  |       "3. Publisher Writes Samples"      |2. Subscriber
+  "   Advertises" |                                          |   Discovers
+  "   Topic"      |        .------------------------.        |   Topic
+                  +------->+ "InfoRepo Application" +--------+
+                           `------------------------'
 
 .. important::
 
@@ -599,12 +636,31 @@ RTPS Discovery
 ..
     Sect<1.2.3.3.2>
 
-RTPS discovery is a peer-to-peer discovery mechanism standardized as part of the :omgspec:`RTPS spec <rtps:8.5 Discovery Module>`
+RTPS discovery is a peer-to-peer discovery mechanism standardized as part of the :omgspec:`RTPS spec <rtps:8.5 Discovery Module>`.
 Other DDS implementations can interoperate with OpenDDS when RTPS discovery is used with the :ref:`rtps-udp-transport`.
 
-.. figure:: images/rtps_discovery.png
+.. svgbob::
 
-  Peer-to-peer Discovery with RTPS
+          .---------------------------.  .---------------------------.
+          |  "Publisher Application"  |  |  "Subscriber Application" |
+          | +-----------------------+ |  | +-----------------------+ |
+          | |      "DataWriter"     | |  | |      "DataReader"     | |
+          | +-----------------------+ |  | +-----------------------+ |
+          | |      "Publisher"      | |  | |      "Subscriber"     | |
+          | +-----------------------+ |  | +-----------------------+ |
+          | |  "DomainParticipant"  | |  | |  "DomainParticipant"  | |
+          | +-----------+-----------+ |  | +-----------+-----------+ |
+          | |"RTPS"     |"Transport"| |  | |"Transport"|"RTPS"     | |
+          | |"Discovery"|           | |  | |           |"Discovery"| |
+          | +-----o-----+-----o-----+ |  | +-----------+-----------+ |
+          |       |           |       |  |       ^           ^       |
+          `-------|-----------|-------'  `-------|-----------|-------'
+                  |           +------------------+           |
+  "1. Publisher"  |       "3. Publisher Writes Samples"      |2. Subscriber
+  "   Advertises" |                                          |   Discovers
+  "   Topic"      |                                          |   Topic
+                  |         "RTPS SPDP Multicast Group"      |
+          ========#==========================================#========
 
 .. important::
 
@@ -652,6 +708,27 @@ Static Discovery
 ----------------
 
 In Static Discovery, each participant starts with a database containing identifiers, QoS settings, and network locators for all participants, topics, data writers, data readers.
+
+.. svgbob::
+
+          .---------------------------.  .---------------------------.
+          |  "Publisher Application"  |  |  "Subscriber Application" |
+          | +-----------------------+ |  | +-----------------------+ |
+          | |      "DataWriter"     | |  | |      "DataReader"     | |
+          | +-----------------------+ |  | +-----------------------+ |
+          | |      "Publisher"      | |  | |      "Subscriber"     | |
+          | +-----------------------+ |  | +-----------------------+ |
+          | |  "DomainParticipant"  | |  | |  "DomainParticipant"  | |
+          | +-----------+-----------+ |  | +-----------+-----------+ |
+          | |"Static"   |"RTPS UDP" | |  | |"RTPS UDP" |"Static"   | |
+          | |"Discovery"|"Transport"| |  | |"Transport"|"Discovery"| |
+          | +-----------+-----o-----+ |  | +-----------+-----------+ |
+          |                   |       |  |       ^                   |
+          `-------------------|-------'  `-------|-------------------'
+                              +------------------+
+                          "2. Publisher Writes Samples"
+                                                        1. Subscriber
+                                                           Assumes Topic
 
 .. important::
 

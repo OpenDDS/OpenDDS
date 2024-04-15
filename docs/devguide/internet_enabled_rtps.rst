@@ -54,7 +54,23 @@ When a client sends an RTPS datagram to its RtpsRelay instance, the RtpsRelay in
 Clients send RTPS datagrams via unicast which is generally supported and compatible with NAT.
 The RtpsRelay can be used in lieu of or in addition to conventional RTPS discovery.
 
-.. image:: images/rtps_relay.png
+.. svgbob::
+
+  +--------------+         +--------------+
+  | "RtpsRelay"  |<------->| "RtpsRelay"  |
+  +--------------+   "3"   +--------------+
+         ^                        ^
+         | "2"                "4" |
+         V                        V
+  +--------------+         +--------------+
+  |  "Firewall"  |         |  "Firewall"  |
+  +--------------+         +--------------+
+         ^                        ^
+         | "1"                "5" |
+         V                        V
+  +--------------+         +--------------+
+  |"Pariticpant" |         |"Pariticpant" |
+  +--------------+         +--------------+
 
 The preceding diagram illustrates how the RtpsRelay can be used to connect participants that are behind firewalls that may be performing NAT.
 First, a Participant sends an RTPS datagram to its associated RtpsRelay (1).

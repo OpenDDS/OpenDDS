@@ -46,7 +46,7 @@ Domain
 The *domain* is the fundamental partitioning unit within DCPS.
 Each of the other entities belongs to a domain and can only interact with other entities in that same domain.
 Application code is free to interact with multiple domains but must do so via separate entities that belong to the different domains.
-Domains are identified by an identifier.
+Domains are identified by an integer identifier.
 There is no entity in the DCPS API that represents the domain.
 
 Entity
