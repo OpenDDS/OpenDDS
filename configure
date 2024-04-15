@@ -397,6 +397,12 @@ my $debug = exists $opts{'debug'} ? $opts{'debug'} : 1;
 my $backup = exists $opts{'backup'} ? $opts{'backup'} : 1;
 my $force_ace_tao = exists $opts{'force-ace-tao'} ? $opts{'force-ace-tao'} : 0;
 my $no_disable_deprecated = exists $opts{'no-disable-deprecated'} ? $opts{'no-disable-deprecated'} : 0;
+my $cxx_std;
+if (exists($opts{'std'})) {
+  $cxx_std = $opts{'std'};
+  # Accept any of --std=17, --std=stdcpp17, --std=c++17, etc.
+  $cxx_std =~ s/^(std)?(cpp|c\+\+)//;
+}
 
 $opts{'host'} = perlOS_to_host() unless $opts{'host'};
 
@@ -737,12 +743,10 @@ EOF
       print "Visual C++ has >= C++11 support\n" if $opts{'verbose'};
     }
     if ($opts{'std'}) {
-      # Accept any of --std=17, --std=stdcpp17, --std=c++17, etc.
-      $opts{'std'} =~ s/^(std)?(cpp|c\+\+)//;
-      my $prefix = 'stdcpp';
-      push(@{$opts{'mpcopts'}}, "-value_template LanguageStandard=$prefix$opts{'std'}");
-      print "Setting Visual C++ LanguageStandard to $prefix$opts{'std'}\n" if $opts{'verbose'};
-      if ($opts{'std'} eq 'latest' || $opts{'std'} >= 17) {
+      my $std = "stdcpp$cxx_std";
+      push(@{$opts{'mpcopts'}}, "-value_template LanguageStandard=$std");
+      print "Setting Visual C++ LanguageStandard to $std\n" if $opts{'verbose'};
+      if ($opts{'std'} eq 'latest' || $cxx_std >= 17) {
         push(@{$opts{'features'}}, 'no_cxx17=0');
         print "Visual C++ has >= C++17 support\n" if $opts{'verbose'};
       }
@@ -2856,6 +2860,10 @@ sub write_cmake_file {
         $enabled = $default;
       }
       print_cmake_config($fh, $config->{name}, $enabled);
+    }
+
+    if (defined($cxx_std)) {
+      print_cmake_config($fh, 'OPENDDS_CXX_STD', $cxx_std);
     }
 
     # TODO(iguessthislldo): Move to a smarter system that can use existing

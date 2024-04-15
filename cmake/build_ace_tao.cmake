@@ -20,6 +20,9 @@ find_package(Perl REQUIRED)
 if(OPENDDS_STATIC)
   list(APPEND _OPENDDS_CONFIGURE_ACE_TAO_ARGS --static=1)
 endif()
+list(APPEND _OPENDDS_CONFIGURE_ACE_TAO_ARGS
+  --compiler "${CMAKE_CXX_COMPILER}"
+)
 execute_process(
   COMMAND
     "${PERL_EXECUTABLE}" "${_OPENDDS_CMAKE_DIR}/configure_ace_tao.pl"
@@ -34,6 +37,12 @@ execute_process(
   COMMAND_ECHO STDOUT
   COMMAND_ERROR_IS_FATAL ANY
 )
+
+# Get the C++ standard OpenDDS is going to be built with. We are going to force
+# the ACE/TAO build to use the same standard.
+set(_opendds_idl_std "$<TARGET_PROPERTY:opendds_idl,CXX_STANDARD>")
+set(_opendds_dcps_std "$<TARGET_PROPERTY:OpenDDS_Dcps,CXX_STANDARD>")
+set(_opendds_std "$<IF:$<TARGET_EXISTS:OpenDDS_Dcps>,${_opendds_dcps_std},${_opendds_idl_std}>")
 
 set(_build_cmd "${CMAKE_COMMAND}" -E env "ACE_ROOT=${OPENDDS_ACE}" "TAO_ROOT=${OPENDDS_TAO}")
 if(_OPENDDS_XERCES3_FOR_ACE)
@@ -77,6 +86,10 @@ if(_OPENDDS_MPC_TYPE STREQUAL gnuace)
     cmake_host_system_information(RESULT core_count QUERY NUMBER_OF_LOGICAL_CORES)
     list(APPEND _build_cmd "${make_exe}" "-j${core_count}")
   endif()
+
+  list(APPEND _build_cmd
+    "opendds_cmake_std=$<IF:$<BOOL:${_opendds_std}>,-std=c++${_opendds_std},>"
+  )
 
   ExternalProject_Add(build_ace_tao
     SOURCE_DIR "${OPENDDS_ACE_TAO_SRC}"
@@ -130,6 +143,7 @@ elseif(_OPENDDS_MPC_TYPE MATCHES "^vs")
   list(APPEND _build_cmd
     MSBuild "${sln}" "-maxcpucount"
     "-property:Configuration=$<CONFIG>,Platform=${CMAKE_VS_PLATFORM_TOOLSET_HOST_ARCHITECTURE}"
+    "$<IF:$<BOOL:${_opendds_std}>,-property:LanguageStandard=stdcpp${_opendds_std},>"
   )
 
   ExternalProject_Add(build_ace_tao
