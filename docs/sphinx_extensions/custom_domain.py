@@ -34,10 +34,11 @@ class ContextWrapper:
     def stack(self):
         return self.ctx['stack']
 
-    def push(self, obj, name, full_name=None, **kw):
+    def push(self, obj, name, options, full_name=None, **kw):
         data = dict(
             obj=obj,
             name=name,
+            options=options,
             full_name=name if full_name is None else full_name,
             index_text=None,
             **kw
@@ -108,8 +109,8 @@ class CustomDomainObject(ObjectDescription[str]):
             domain.logger.warning(e, location=self.get_location())
             raise e
 
-    def parse_sig(self, ctx, sig):
-        ctx.push(self, sig)
+    def parse_sig(self, ctx, sig, options):
+        ctx.push(self, sig, options)
         return ()
 
     def create_signode(self, ctx, name, signode):
@@ -120,7 +121,7 @@ class CustomDomainObject(ObjectDescription[str]):
         ctx = self.get_context()
 
         try:
-            extra = self.parse_sig(ctx, sig.strip())
+            extra = self.parse_sig(ctx, sig.strip(), self.options)
         except Exception as e:
             domain.logger.exception('Exception in parse_sig:', location=self.get_location())
             raise e

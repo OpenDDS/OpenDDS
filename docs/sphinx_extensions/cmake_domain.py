@@ -37,12 +37,12 @@ class CMakeFunctionArgument(CustomDomainObject):
     our_role_name = 'func'
     our_ref_role_type = None
 
-    def parse_sig(self, ctx, sig):
+    def parse_sig(self, ctx, sig, options):
         try:
             name, arguments = re.split(r'\s+', sig)
         except ValueError:
             name, arguments = sig, None
-        ctx.push(self, name, ctx.get_full_name() + f'({name})')
+        ctx.push(self, name, options, ctx.get_full_name() + f'({name})')
         return arguments,
 
     def create_signode(self, ctx, name, signode, arguments):
