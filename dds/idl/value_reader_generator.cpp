@@ -100,7 +100,7 @@ namespace {
           indent << "if (!value_reader.end_array()) return false;\n";
 
       } else {
-        generate_read(expression, "", "elem", array->base_type(), idx + "i", level, nested(filter_kind));
+        generate_read(expression, "", "elem", array->base_type(), idx, level, nested(filter_kind));
       }
     }
   }
@@ -120,7 +120,7 @@ namespace {
       be_global->impl_ << indent << "  " << expression << ".resize(" << expression << ".size() + 1);\n";
     } else {
       if (!sequence->unbounded()) {
-        be_global->impl_ << indent << "  if (i >= " << expression << ".maximum()) return false;\n";
+        be_global->impl_ << indent << "  if (" << idx << " >= " << expression << ".maximum()) return false;\n";
         be_global->impl_ << indent << "  const ACE_CDR::ULong len = " << expression << ".length();\n";
         be_global->impl_ << indent << "  " << expression << ".length(len + 1);\n";
       } else {
