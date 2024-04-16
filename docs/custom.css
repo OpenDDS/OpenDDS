@@ -1,0 +1,9 @@
+/*
+ * svgbob's outputs have fixed colors, which would be fine, but the background
+ * is transparent. This makes it impossible to see a lot or all of the diagrams
+ * in dark mode. The svgbob directive has a background-color option, but
+ * setting it doesn't seem to do anything.
+ */
+.svgbob {
+  background-color: white;
+}

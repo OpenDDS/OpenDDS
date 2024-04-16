@@ -360,11 +360,11 @@ It also makes it easier to replace these libraries with custom ones.
 
 - :ref:`security <sec>` [#plugins-sec]_
 
-How to enable and use a particular plugin will differ based on the kind of plugin and the plugin itself, but generally they are enabled by some form of configuration setting, for example using ``[transport]transport_type`` or :cfg:prop:`DCPSSecurity` in a configuration file.
+How to enable and use a particular plugin will differ based on the kind of plugin and the plugin itself, but generally they are enabled by some form of configuration setting, for example using :cfg:prop:`[transport]transport_type` or :cfg:prop:`DCPSSecurity` in a configuration file.
 The plugin will also have to be linked and initialized at runtime.
 For dynamic libraries (``.dll``, ``.dynlib`` or, ``.so`` files) this is done automatically as the OpenDDS will load the dynamic library and then run any initialization the plugin requires.
 When the plugins are statically linked, then it requires explicit linking and including an initialization header in the application that contains a global object that will initialize the plugin.
-If OpenDDS was :ref:`built using CMake <cmake-building>`, then :ghfile:`dds/DCPS/StaticIncludes.h` can be included and the initialization headers will be included automatically.
+If OpenDDS was :ref:`built using CMake <cmake-building>`, then :ghfile:`dds/DCPS/StaticIncludes.h` can be included and the initialization headers will be included automatically based on the :ref:`static libraries <cmake-libraries>` that were linked.
 Explicit linking and initialization headers can also be used with dynamic libraries.
 This will always load and initialize the plugin when the application starts instead of delaying until the plugin is needed.
 
@@ -380,7 +380,25 @@ Transmission of :term:`samples <Sample>` and information related to their manage
 Transports are typically specified via configuration files and are attached to various entities in the publisher and subscriber processes.
 See :ref:`config-transport` for details on configuring transports generally.
 
-.. figure:: images/pluggable.png
+.. svgbob::
+
+  .---------------------------.  .---------------------------.
+  |  "Publisher Application"  |  |  "Subscriber Application" |
+  | +-----------------------+ |  | +-----------------------+ |
+  | |      "DataWriter"     | |  | |      "DataReader"     | |
+  | +-----------------------+ |  | +-----------------------+ |
+  | |      "Publisher"      | |  | |      "Subscriber"     | |
+  | +-----------------------+ |  | +-----------------------+ |
+  | |  "DomainParticipant"  | |  | |  "DomainParticipant"  | |
+  | +-----------+-----------+ |  | +-----------+-----------+ |
+  | |"Discovery"|"Transport"| |  | |"Transport"|"Discovery"| |
+  | +-----o-----+-----o-----+ |  | +-----o-----+-----o-----+ |
+  |       |           |       |  |       |           |       |
+  |       +-----+-----+       |  |       +-----+-----+       |
+  `-------------|-------------'  `-------------|-------------'
+                |                              |
+                |           "Network"          |
+  ==============#==============================#==============
 
 Transports are used along with :ref:`discovery <discovery>` to define how OpenDDS communicates.
 
@@ -403,7 +421,7 @@ It's :ref:`reliable <qos-reliability>`, regardless of configuration.
 
   :ref:`Initialization header <plugins>`: :ghfile:`dds/DCPS/transport/tcp/Tcp.h`
 
-  ``[transport]transport_type``: ``tcp``
+  :cfg:prop:`[transport]transport_type`: :cfg:val:`tcp <[transport]transport_type=tcp>`
 
   Configuration: :ref:`tcp-transport-config`
 
@@ -427,7 +445,7 @@ It supports :ref:`reliability <qos-reliability>`.
 
   :ref:`Initialization header <plugins>`: :ghfile:`dds/DCPS/transport/rtps_udp/RtpsUdp.h`
 
-  ``[transport]transport_type``: ``rtps_udp``
+  :cfg:prop:`[transport]transport_type`: :cfg:val:`rtps_udp <[transport]transport_type=rtps_udp>`
 
   Configuration: :ref:`rtps-udp-transport-config`
 
@@ -457,7 +475,7 @@ It doesn't support :ref:`reliability <qos-reliability>` at all.
 
   :ref:`Initialization header <plugins>`: :ghfile:`dds/DCPS/transport/udp/Udp.h`
 
-  ``[transport]transport_type``: ``udp``
+  :cfg:prop:`[transport]transport_type`: :cfg:val:`udp <[transport]transport_type=udp>`
 
   Configuration: :ref:`udp-transport-config`
 
@@ -479,7 +497,7 @@ It supports :ref:`reliability <qos-reliability>`.
 
   :ref:`Initialization header <plugins>`: :ghfile:`dds/DCPS/transport/multicast/Multicast.h`
 
-  ``[transport]transport_type``: ``mulicast``
+  :cfg:prop:`[transport]transport_type`: :cfg:val:`multicast <[transport]transport_type=multicast>`
 
   Configuration: :ref:`multicast-transport-config`
 
@@ -505,7 +523,7 @@ It's :ref:`reliable <qos-reliability>`, regardless of configuration.
 
   :ref:`Initialization header <plugins>`: :ghfile:`dds/DCPS/transport/shmem/Shmem.h`
 
-  ``[transport]transport_type``: ``shmem``
+  :cfg:prop:`[transport]transport_type`: :cfg:val:`shmem <[transport]transport_type=shmem>`
 
   Configuration: :ref:`shmem-transport-config`
 
@@ -558,9 +576,28 @@ Each OpenDDS application connects to the DCPSInfoRepo and creates records for it
 As records for data writers and data readers are created, they are matched against the existing set of records.
 When matches are found, the DCPSInfoRepo invokes the participant to perform the necessary associations.
 
-.. figure:: images/inforepo_discovery.png
+.. svgbob::
 
-   Centralized Discovery with DCPSInfoRepo
+          .---------------------------.  .---------------------------.
+          |  "Publisher Application"  |  |  "Subscriber Application" |
+          | +-----------------------+ |  | +-----------------------+ |
+          | |      "DataWriter"     | |  | |      "DataReader"     | |
+          | +-----------------------+ |  | +-----------------------+ |
+          | |      "Publisher"      | |  | |      "Subscriber"     | |
+          | +-----------------------+ |  | +-----------------------+ |
+          | |  "DomainParticipant"  | |  | |  "DomainParticipant"  | |
+          | +-----------+-----------+ |  | +-----------+-----------+ |
+          | |"InfoRepo" |"Transport"| |  | |"Transport"|"InfoRepo" | |
+          | |"Discovery"|           | |  | |           |"Discovery"| |
+          | +-----o-----+-----o-----+ |  | +-----------+-----------+ |
+          |       |           |       |  |       ^           ^       |
+          `-------|-----------|-------'  `-------|-----------|-------'
+                  |           +------------------+           |
+  "1. Publisher"  |       "3. Publisher Writes Samples"      |2. Subscriber
+  "   Advertises" |                                          |   Discovers
+  "   Topic"      |        .------------------------.        |   Topic
+                  +------->+ "InfoRepo Application" +--------+
+                           `------------------------'
 
 .. important::
 
@@ -599,12 +636,31 @@ RTPS Discovery
 ..
     Sect<1.2.3.3.2>
 
-RTPS discovery is a peer-to-peer discovery mechanism standardized as part of the :omgspec:`RTPS spec <rtps:8.5 Discovery Module>`
+RTPS discovery is a peer-to-peer discovery mechanism standardized as part of the :omgspec:`RTPS spec <rtps:8.5 Discovery Module>`.
 Other DDS implementations can interoperate with OpenDDS when RTPS discovery is used with the :ref:`rtps-udp-transport`.
 
-.. figure:: images/rtps_discovery.png
+.. svgbob::
 
-  Peer-to-peer Discovery with RTPS
+          .---------------------------.  .---------------------------.
+          |  "Publisher Application"  |  |  "Subscriber Application" |
+          | +-----------------------+ |  | +-----------------------+ |
+          | |      "DataWriter"     | |  | |      "DataReader"     | |
+          | +-----------------------+ |  | +-----------------------+ |
+          | |      "Publisher"      | |  | |      "Subscriber"     | |
+          | +-----------------------+ |  | +-----------------------+ |
+          | |  "DomainParticipant"  | |  | |  "DomainParticipant"  | |
+          | +-----------+-----------+ |  | +-----------+-----------+ |
+          | |"RTPS"     |"Transport"| |  | |"Transport"|"RTPS"     | |
+          | |"Discovery"|           | |  | |           |"Discovery"| |
+          | +-----o-----+-----o-----+ |  | +-----------+-----------+ |
+          |       |           |       |  |       ^           ^       |
+          `-------|-----------|-------'  `-------|-----------|-------'
+                  |           +------------------+           |
+  "1. Publisher"  |       "3. Publisher Writes Samples"      |2. Subscriber
+  "   Advertises" |                                          |   Discovers
+  "   Topic"      |                                          |   Topic
+                  |         "RTPS SPDP Multicast Group"      |
+          ========#==========================================#========
 
 .. important::
 
@@ -652,6 +708,27 @@ Static Discovery
 ----------------
 
 In Static Discovery, each participant starts with a database containing identifiers, QoS settings, and network locators for all participants, topics, data writers, data readers.
+
+.. svgbob::
+
+          .---------------------------.  .---------------------------.
+          |  "Publisher Application"  |  |  "Subscriber Application" |
+          | +-----------------------+ |  | +-----------------------+ |
+          | |      "DataWriter"     | |  | |      "DataReader"     | |
+          | +-----------------------+ |  | +-----------------------+ |
+          | |      "Publisher"      | |  | |      "Subscriber"     | |
+          | +-----------------------+ |  | +-----------------------+ |
+          | |  "DomainParticipant"  | |  | |  "DomainParticipant"  | |
+          | +-----------+-----------+ |  | +-----------+-----------+ |
+          | |"Static"   |"RTPS UDP" | |  | |"RTPS UDP" |"Static"   | |
+          | |"Discovery"|"Transport"| |  | |"Transport"|"Discovery"| |
+          | +-----------+-----o-----+ |  | +-----------+-----------+ |
+          |                   |       |  |       ^                   |
+          `-------------------|-------'  `-------|-------------------'
+                              +------------------+
+                          "2. Publisher Writes Samples"
+                                                        1. Subscriber
+                                                           Assumes Topic
 
 .. important::
 

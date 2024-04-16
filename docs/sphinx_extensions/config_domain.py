@@ -86,11 +86,11 @@ class ConfigSection(CustomDomainObject):
             sec_disc = ''
         return f'{sec_name} ({sec_disc}config section)'
 
-    def parse_sig(self, ctx, sig):
+    def parse_sig(self, ctx, sig, options):
         name, arguments = parse(self._full_name,
             r'(' + id_re + r'(?:@' + id_re + r')?)(?:/(.*))?', sig, self)
         sec_name, sec_disc = parse_section_name(name)
-        ctx.push(self, name, f'[{name}]',
+        ctx.push(self, name, options, f'[{name}]',
             sec_name=sec_name, sec_disc=sec_name, arguments=arguments, props=[])
         return (sec_name, sec_disc, arguments)
 
@@ -199,10 +199,10 @@ class ConfigProp(CustomDomainObject):
         sec, sec_name, sec_disc, prop = parse_prop_name(full_name)
         return f'{prop} (config property)'
 
-    def parse_sig(self, ctx, sig):
+    def parse_sig(self, ctx, sig, options):
         name, arguments = parse(self._full_name, r'(' + prop_name_re + r')(?:=(.*))?', sig, self)
         sec = ctx.get_full_name()
-        ctx.push(self, name, f'{sec}{name}', arguments=arguments)
+        ctx.push(self, name, options, f'{sec}{name}', arguments=arguments)
         sec_ctx = ctx.get(-2, 'props')
         if sec_ctx is not None:
             sec_ctx.append((name, self.get_location()))
@@ -324,12 +324,12 @@ class ConfigValue(CustomDomainObject):
         sec, sec_name, sec_disc, prop, prop_name, val_name = parse_value_name(full_name, self)
         return f'{val_name} (config value)'
 
-    def parse_sig(self, ctx, sig):
+    def parse_sig(self, ctx, sig, options):
         name_wo_brackets, name_w_brackets = parse(self._full_name,
             r'(' + id_re + r')|<(' + id_re + r')>', sig, self)
         brackets = bool(name_w_brackets)
         name = name_w_brackets if brackets else name_wo_brackets
-        ctx.push(self, name, ctx.get_full_name() + value_sep + name)
+        ctx.push(self, name, options, ctx.get_full_name() + value_sep + name)
         return (brackets,)
 
     def create_signode(self, ctx, name, signode, brackets):

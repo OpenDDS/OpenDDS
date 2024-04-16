@@ -54,7 +54,23 @@ When a client sends an RTPS datagram to its RtpsRelay instance, the RtpsRelay in
 Clients send RTPS datagrams via unicast which is generally supported and compatible with NAT.
 The RtpsRelay can be used in lieu of or in addition to conventional RTPS discovery.
 
-.. image:: images/rtps_relay.png
+.. svgbob::
+
+  +--------------+         +--------------+
+  | "RtpsRelay"  |<------->| "RtpsRelay"  |
+  +--------------+   "3"   +--------------+
+         ^                        ^
+         | "2"                "4" |
+         V                        V
+  +--------------+         +--------------+
+  |  "Firewall"  |         |  "Firewall"  |
+  +--------------+         +--------------+
+         ^                        ^
+         | "1"                "5" |
+         V                        V
+  +--------------+         +--------------+
+  |"Pariticpant" |         |"Pariticpant" |
+  +--------------+         +--------------+
 
 The preceding diagram illustrates how the RtpsRelay can be used to connect participants that are behind firewalls that may be performing NAT.
 First, a Participant sends an RTPS datagram to its associated RtpsRelay (1).
@@ -80,7 +96,7 @@ Using the RtpsRelay
     Sect<15.2.1>
 
 Support for the RtpsRelay is activated via configuration.
-See :cfg:sec:`rtps_discovery` and ``transport@rtps_udp`` for details.
+See :cfg:sec:`rtps_discovery` and :cfg:sec:`transport@rtps_udp` for details.
 As an example:
 
 .. code-block:: ini
@@ -336,8 +352,8 @@ ICE utilizes the STUN protocol that is defined in :rfc:`5389`.
 The ICE implementation in OpenDDS does not use TURN servers.
 
 ICE is enabled through configuration.
-The minimum configuration involves setting the :cfg:prop:`[rtps_discovery]UseIce` and ``[transport@rtps_udp]UseIce`` flags and providing addresses for the STUN servers.
-See :cfg:sec:`rtps_discovery` and ``transport@rtps_udp`` for details.
+The minimum configuration involves setting the :cfg:prop:`[rtps_discovery]UseIce` and :cfg:prop:`[transport@rtps_udp]UseIce` flags and providing addresses for the STUN servers.
+See :cfg:sec:`rtps_discovery` and :cfg:sec:`transport@rtps_udp` for details.
 
 .. code-block:: ini
 

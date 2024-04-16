@@ -345,21 +345,31 @@ The CMake package can provide executable targets that can be called manually fro
 
 .. cmake:tgt:: TAO::tao_idl
 
-  Required
+  Required, :term:`tao_idl`
 
 .. cmake:tgt:: OpenDDS::opendds_idl
 
-  Required
+  Required, :ref:`opendds_idl`
 
 .. cmake:tgt:: OpenDDS::DCPSInfoRepo
 
+  :ref:`inforepo`
+
 .. cmake:tgt:: OpenDDS::RtpsRelay
+
+  :ref:`rtpsrelay`
 
 .. cmake:tgt:: OpenDDS::dcpsinfo_dump
 
+  Utility for :ref:`inforepo`
+
 .. cmake:tgt:: OpenDDS::inspect
 
+  :ghfile:`tools/inspect/README.rst`
+
 .. cmake:tgt:: OpenDDS::repoctl
+
+  Utility for :ref:`inforepo`
 
 Functions
 =========
@@ -805,6 +815,7 @@ Dependencies
   :no-contents-entry:
 
   Path to :ref:`deps-java`
+  Currently unsupported.
 
 .. cmake:var:: OPENDDS_QT
   :no-contents-entry:
