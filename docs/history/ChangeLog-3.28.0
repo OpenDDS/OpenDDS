@@ -1,0 +1,3550 @@
+Tue Apr 16 18:06:40 UTC 2024  Justin Wilson  <wilsonj@unityfoundation.io>
+        commit a5c2ef09f0c1a5c3705611e4b6f314e07ed64fbf
+
+          Merge pull request #4583 from
+          sonndinh/fix-coverity-keyonly-vread-vwrite
+
+          Generated `vread` for sequence uses incorrect index variable to
+          check bound
+
+Tue Apr 16 18:05:52 UTC 2024  Justin Wilson  <wilsonj@unityfoundation.io>
+        commit 284f7385dd98ace51638d9ecdd4338d88a5e3e15
+
+          Merge pull request #4587 from mitza-oci/master
+
+          boottime timers: support one-shot timers with zero delay
+
+Tue Apr 16 18:05:33 UTC 2024  Justin Wilson  <wilsonj@unityfoundation.io>
+        commit 47133ba08438786cf6b7f80d213c2db27da6c010
+
+          Merge pull request #4588 from
+          iguessthislldo/igtd/config-sphinx-domain
+
+          Convert Remaining Configuration Sections to Config Domain
+
+Mon Apr 15 23:58:03 UTC 2024  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit 16e99fd4c601d104044e9673898b035915176265
+
+        * docs/news.d/devguide-config.rst:
+
+          Update News
+
+Mon Apr 15 23:48:46 UTC 2024  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit b3a8d474560ac77e3d0af72ce6496e1f4e25ef43
+
+        * docs/conf.py:
+        * docs/custom.css:
+        * docs/devguide/images/inforepo_discovery.png:
+        * docs/devguide/images/pluggable.png:
+        * docs/devguide/images/rtps_discovery.png:
+        * docs/devguide/images/rtps_relay.png:
+        * docs/devguide/internet_enabled_rtps.rst:
+        * docs/devguide/introduction.rst:
+        * docs/devguide/introduction_to_dds.rst:
+        * docs/requirements.txt:
+
+          Replace Some Diagrams with Svgbob Ones
+
+Mon Apr 15 22:56:03 UTC 2024  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit e8ee1db8c61bfc7642de2fa260099fe501238887
+
+        * docs/devguide/building/cmake.rst:
+        * docs/devguide/internet_enabled_rtps.rst:
+        * docs/devguide/introduction.rst:
+        * docs/devguide/run_time_configuration.rst:
+        * docs/internal/dev_guidelines.rst:
+        * docs/news.d/devguide-config.rst:
+        * docs/sphinx_extensions/cmake_domain.py:
+        * docs/sphinx_extensions/config_domain.py:
+        * docs/sphinx_extensions/custom_domain.py:
+
+          Use cfg Domain in Transport and Remaining Sections
+
+Mon Apr 15 21:58:58 UTC 2024  Adam Mitz  <mitza@objectcomputing.com>
+        commit 45455561b45865862d899893efb36392a92e21dc
+
+        * dds/DCPS/Timers.cpp:
+        * tests/unit-tests/dds/DCPS/Timers.cpp:
+
+          boottime timers: support one-shot timers with zero delay
+
+Mon Apr 15 18:04:43 UTC 2024  Justin Wilson  <wilsonj@unityfoundation.io>
+        commit f6f852ad50408e0a00cd626d685697d06fd92653
+
+          Merge pull request #4487 from iguessthislldo/igtd/cmake-cxx-std
+
+          Allow Compiling with CMake and C++03
+
+Mon Apr 15 18:03:54 UTC 2024  Justin Wilson  <wilsonj@unityfoundation.io>
+        commit fe2344f324460c2670d0625b292e0a778f1a3ede
+
+          Merge pull request #4576 from jrw972/release-prep
+
+          Release prep
+
+Mon Apr 15 18:03:40 UTC 2024  Justin Wilson  <wilsonj@unityfoundation.io>
+        commit 610af762dd7970f896d39df96b009900b5fbdbc6
+
+          Merge pull request #4581 from
+          sonndinh/fix-warning-keyonly-vread-vwrite
+
+          Remove empty switch statement in KeyOnly `vread`
+
+Mon Apr 15 15:53:19 UTC 2024  Son Dinh  <dinhs@objectcomputing.com>
+        commit 19ee273438f22f923e2f093d4418cfe3281aab49
+
+        * dds/idl/value_reader_generator.cpp:
+
+          Fix index variable
+
+Mon Apr 15 04:11:28 UTC 2024  Son Dinh  <dinhs@objectcomputing.com>
+        commit 1609f83ede64d90761fcb032fcb7431be392c07f
+
+        * dds/idl/value_reader_generator.cpp:
+
+          Fix empty switch warning
+
+Fri Apr 12 21:33:58 UTC 2024  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit 7ec61db551d2f1f13ea0ddb8aa70844075b404ae
+
+          Merge remote-tracking branch 'upstream/master' into
+          igtd/cmake-cxx-std
+
+Fri Apr 12 16:41:43 UTC 2024  Justin Wilson  <wilsonj@unityfoundation.io>
+        commit 853705a82f3fe86ce7140c537e1ebf5034d617d9
+
+        * docs/news.d/config_store_environment_variables.rst:
+        * docs/news.d/config_store_multiple_files.rst:
+
+          Release prep
+
+Fri Apr 12 18:08:04 UTC 2024  Justin Wilson  <wilsonj@unityfoundation.io>
+        commit 5c8dd05d2c2f71f51c26298985497865578a01d7
+
+          Merge pull request #4554 from sonndinh/key-only-vread-vwrite
+
+          Generate `vread` and `vwrite` for key-only samples
+
+Fri Apr 12 18:07:41 UTC 2024  Justin Wilson  <wilsonj@unityfoundation.io>
+        commit 9a90b8afb523ddfead5b7c499a43a3733bc6ceac
+
+          Merge pull request #4572 from iguessthislldo/igtd/cmake-xerces
+
+          Pass Xerces Path to ACE/TAO in CMake
+
+Thu Apr 11 22:34:12 UTC 2024  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit 191f25529e8a63791074504b9dae58f30f9c15d5
+
+        * cmake/build_ace_tao.cmake:
+
+          Workaround doesn't work on Release
+
+          https://github.com/DOCGroup/MPC/pull/202
+
+Thu Apr 11 05:43:59 UTC 2024  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit 8b529a326f5891732193e641cda0567e6eb9d38d
+
+        * cmake/build_ace_tao.cmake:
+        * cmake/configure_ace_tao.pl:
+        * tools/dds/rtpsrelaylib/CMakeLists.txt:
+
+          Workaround Vcpkg, Add Missing BIGOBJ
+
+Wed Apr 10 22:00:03 UTC 2024  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit 54362154823d81c3ee68946ad5b3a8cd64aac15b
+
+        * dds/DCPS/QOS_XML_Handler/XML_String_Intf.h:
+
+          Fix for building with Xerces master branch
+
+          https://github.com/apache/xerces-c/pull/12
+
+Wed Apr 10 17:49:46 UTC 2024  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit d005c83bec7725d768044c01c8739b1ed064fa11
+
+        * .github/workflows/cmake.yml:
+        * cmake/ace_group.cmake:
+        * cmake/build_ace_tao.cmake:
+        * cmake/init.cmake:
+        * docs/news.d/cmake-xerces.rst:
+
+          Pass Xerces Path to ACE/TAO in CMake
+
+Thu Apr 11 22:20:03 UTC 2024  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit ac2e8f1117e3f23f5aaef8777e0aebec16872726
+
+        * docs/news.d/cmake-cxx-std.rst:
+
+          Add News
+
+Thu Apr 11 18:59:03 UTC 2024  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit a6b01d08a6497be80a41b3352dfb2a7cb1278275
+
+          Merge remote-tracking branch 'upstream/master' into
+          igtd/cmake-cxx-std
+
+Thu Apr 11 18:09:08 UTC 2024  Justin Wilson  <wilsonj@unityfoundation.io>
+        commit a42aca98974f724ad33f747be36e43a3065f0a38
+
+          Merge pull request #4570 from
+          iguessthislldo/igtd/config-sphinx-domain
+
+          Convert Discovery Config Tables in DevGuide to Use Config Domain
+
+Thu Apr 11 18:06:22 UTC 2024  Justin Wilson  <wilsonj@unityfoundation.io>
+        commit 327618ae32ba0193b5fb0e46b1e916903eda8748
+
+          Merge pull request #4568 from mitza-oci/boottime-timers
+
+          CLOCK_BOOTTIME timers (Linux only)
+
+Thu Apr 11 16:22:42 UTC 2024  Son Dinh  <dinhs@objectcomputing.com>
+        commit 379fe7e16b464c131dfe587679353f7957ef84aa
+
+        * dds/idl/dds_generator.h:
+        * docs/news.d/keyonly_vread_vwrite.rst:
+
+          Fix CI and from review
+
+Thu Apr 11 13:34:17 UTC 2024  Adam Mitz  <mitza@objectcomputing.com>
+        commit fa24b14f10a98ae955387f3ed2fcd0f806ed439b
+
+        * configure:
+        * dds/DCPS/MultiTask.cpp:
+        * dds/DCPS/PeriodicTask.cpp:
+        * dds/DCPS/SporadicTask.cpp:
+
+          Updated logging to use log_level
+
+          Fixed usage in configure script
+
+Thu Apr 11 06:20:40 UTC 2024  Son Dinh  <dinhs@objectcomputing.com>
+        commit 427ce89b0cd750f79bcaa2833fdb7ebbb2ebbd83
+
+        * dds/idl/dds_generator.h:
+        * dds/idl/marshal_generator.cpp:
+        * dds/idl/value_reader_generator.cpp:
+        * dds/idl/value_writer_generator.cpp:
+        * docs/news.d/keyonly_vread_vwrite.rst:
+
+          Use RefWrapper. Add a news fragment.
+
+Wed Apr 10 20:46:23 UTC 2024  Adam Mitz  <mitza@objectcomputing.com>
+        commit 4cd620ecb562c6935b7b8e6a16f0f4d282ab1ee3
+
+        * dds/DCPS/transport/framework/TransportClient.cpp:
+
+          Updated
+          TransportClient::PendingAssocTimer::CancelCommand::execute()
+
+Wed Apr 10 19:51:23 UTC 2024  Adam Mitz  <mitza@objectcomputing.com>
+        commit 2816ccf75c3bd9d812d99d286fa446c85b2f2c87
+
+        * tests/unit-tests/dds/DCPS/Timers.cpp:
+
+          extended test
+
+Wed Apr 10 19:24:38 UTC 2024  Adam Mitz  <mitza@objectcomputing.com>
+        commit 57c37cb3d2f3b8c5d8a2c2974e087007c5fe9ed8
+
+        * dds/DCPS/SporadicTask.cpp:
+        * dds/DCPS/SporadicTask.h:
+        * dds/DCPS/Timers.cpp:
+        * dds/DCPS/transport/framework/TransportClient.cpp:
+        * dds/DCPS/transport/framework/TransportClient.h:
+
+          updates from testing
+
+Wed Apr 10 18:03:39 UTC 2024  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit a7c6b43b1ab5d9ccb88859f91b476ce2a40e646e
+
+          Merge pull request #4571 from mitza-oci/ci-wireshark-nogui
+
+          Update GitHub Actions build for wireshark
+
+Wed Apr 10 17:54:18 UTC 2024  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit f3fa995f1ba1f730681a6174fbc9cd2e2f63ee25
+
+        * docs/devguide/internet_enabled_rtps.rst:
+        * docs/devguide/run_time_configuration.rst:
+
+          Apply suggestions from code review
+
+          Co-authored-by: Justin Wilson <wilsonj@unityfoundation.io>
+
+Wed Apr 10 16:49:46 UTC 2024  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit 3b1cf38cb9df00cdfb9d7d83d18295ccc713ba0f
+
+        * cmake/config.cmake.in:
+        * configure:
+        * dds/DdsDcps.mpc:
+
+          Attempt to Handle Installation Correctly
+
+Wed Apr 10 16:20:37 UTC 2024  Son Dinh  <dinhs@objectcomputing.com>
+        commit c3793d2c4a4dbb39c5f339b4d2bab1a93f771985
+
+        * dds/DCPS/ValueDispatcher.h:
+
+          Add header
+
+Wed Apr 10 16:08:57 UTC 2024  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit c4dbd3b941ed9b021fb68f9554d37b196c534fa3
+
+        * docs/devguide/internet_enabled_rtps.rst:
+        * docs/sphinx_extensions/config_domain.py:
+
+          Remove Two Accidentally Committed Things
+
+Wed Apr 10 13:29:50 UTC 2024  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit 0e791e020ddbc37987d61ed316c0b060c93d9e59
+
+        * docs/devguide/built_in_topics.rst:
+        * docs/devguide/internet_enabled_rtps.rst:
+        * docs/devguide/quality_of_service.rst:
+        * docs/devguide/run_time_configuration.rst:
+        * docs/devguide/xtypes.rst:
+        * docs/news.d/spdp-user-tag.rst:
+
+          Convert Disc. Config Tables to Use Config Domain
+
+Tue Apr 09 21:37:25 UTC 2024  Adam Mitz  <mitza@objectcomputing.com>
+        commit 8ecb6205c8d74322c4d9ca791dc960ae57db9365
+
+        * tests/unit-tests/dds/DCPS/Timers.cpp:
+
+          Unit test for timers: use the same ACE_Reactor impl on all
+          platforms
+
+Tue Apr 09 21:36:06 UTC 2024  Adam Mitz  <mitza@objectcomputing.com>
+        commit d9cd76cfe17a23620fb225189b1b9cd7058946bd
+
+        * .github/workflows/Wireshark_CMakePresets.json:
+
+          More Wireshark CMake settings - to avoid warnings
+
+Tue Apr 09 21:06:24 UTC 2024  Adam Mitz  <mitza@objectcomputing.com>
+        commit a3f3123544a263540e67a102782a91599f7ce719
+
+        * .github/workflows/build_and_test.yml:
+
+          Wireshark CI: vcpkg may not be needed here
+
+Tue Apr 09 20:23:26 UTC 2024  Adam Mitz  <mitza@objectcomputing.com>
+        commit 45dec5b4a0060da9c189920f09bced6cb2f4a7ba
+
+        * .github/workflows/Wireshark_CMakePresets.json:
+
+          GitHub Actions: build Wireshark libs without the GUI
+
+Tue Apr 09 18:45:19 UTC 2024  Son Dinh  <dinhs@objectcomputing.com>
+        commit 6c6b499ff161aa931691360dea379b83ee1ed103
+
+        * dds/DCPS/ValueDispatcher.h:
+        * tests/DCPS/Compiler/vread_vwrite/VreadVwriteTest.mpc:
+
+          From review and fix CI
+
+Tue Apr 09 18:33:18 UTC 2024  Adam Mitz  <mitza@objectcomputing.com>
+        commit 805596b15803b36daf2e6833472c92cfd23198dd
+
+        * tests/unit-tests/dds/DCPS/SporadicTask.cpp:
+
+          Update unit test for SporadicTask
+
+Tue Apr 09 18:18:51 UTC 2024  Adam Mitz  <mitza@objectcomputing.com>
+        commit 02bb45af9a65a8b4a5bd730f8879eda832eafe8f
+
+        * dds/DCPS/SporadicTask.cpp:
+
+          Use the Timers::InvalidTimerId constant
+
+Tue Apr 09 18:11:46 UTC 2024  Adam Mitz  <mitza@objectcomputing.com>
+        commit 5733f3ad66da2e22b8be79089b83ade896c1afe0
+
+        * docs/news.d/boottime.rst:
+
+          Updated docs
+
+Tue Apr 09 17:51:51 UTC 2024  Adam Mitz  <mitza@objectcomputing.com>
+        commit e6f2b43febfa5ec1c1d39c03b69ea04a706a71e0
+
+        * dds/CMakeLists.txt:
+        * dds/DCPS/Definitions.h:
+        * dds/DCPS/MultiTask.cpp:
+        * dds/DCPS/MultiTask.h:
+        * dds/DCPS/PeriodicTask.cpp:
+        * dds/DCPS/PeriodicTask.h:
+        * dds/DCPS/SporadicTask.cpp:
+        * dds/DCPS/SporadicTask.h:
+        * dds/DCPS/Timers.cpp:
+        * dds/DCPS/Timers.h:
+        * tests/unit-tests/dds/DCPS/SporadicTask.cpp:
+        * tests/unit-tests/dds/DCPS/Timers.cpp:
+
+          Enabled CLOCK_BOOTTIME timers for Multi/Periodic/SporadicTask
+
+Mon Apr 08 18:27:30 UTC 2024  Son Dinh  <dinhs@objectcomputing.com>
+        commit 5aa634c2d8e811b0c93ced8375eca34b2a215383
+
+          Merge branch 'master' of github.com:OpenDDS/OpenDDS into
+          key-only-vread-vwrite
+
+Mon Apr 08 18:27:22 UTC 2024  Son Dinh  <dinhs@objectcomputing.com>
+        commit df62cf4c0589f8e85f89c084dcb44c97cab299c1
+
+        * dds/DCPS/XTypes/DynamicDataImpl.cpp:
+
+          Add delimiter when serializing KeyOnly of dynamic union with no
+          key
+
+Mon Apr 08 18:03:23 UTC 2024  Justin Wilson  <wilsonj@unityfoundation.io>
+        commit 0511b8352965c566ddcaba4803774f774b342656
+
+          Merge pull request #4562 from jrw972/gov-gen-error-message
+
+          `gov_gen` fails without useful error message
+
+Mon Apr 08 18:02:05 UTC 2024  Justin Wilson  <wilsonj@unityfoundation.io>
+        commit 0e9ccec10e64d245663e5dabd57af9df7043eee6
+
+          Merge pull request #4564 from
+          iguessthislldo/igtd/config-sphinx-domain
+
+          Rename Configuration Keys to Properties
+
+Mon Apr 08 17:23:19 UTC 2024  Son Dinh  <dinhs@objectcomputing.com>
+        commit a59e645bae7fdac0c92589824e4fd12469d0f3a7
+
+        * dds/idl/marshal_generator.cpp:
+        * tests/DCPS/Compiler/xcdr/xcdr.cpp:
+
+          - Add delimiter for KeyOnly union without key
+          - Generate KeyOnly serialization functions for union only when it
+          is a topic type
+          - Added and fixed xcdr test with Complex(Unkeyed/Keyed)Struct
+
+Mon Apr 08 05:51:46 UTC 2024  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit 6ba78e39583c743f21ea8f36075660200c6b18a8
+
+        * docs/devguide/run_time_configuration.rst:
+
+          Change more terms
+
+Mon Apr 08 05:47:06 UTC 2024  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit 1eebceccc330d3708e55d112a8a884bffbd1df0c
+
+        * docs/devguide/run_time_configuration.rst:
+        * docs/sphinx_extensions/config_domain.py:
+        * docs/sphinx_extensions/custom_domain.py:
+
+          Fix :cfg:prop: and :cmake:prop: being confused
+
+          This was data accidentally shared between the custom Sphinx
+          domains.
+
+Mon Apr 08 05:07:43 UTC 2024  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit 46e7b8eace686aa9fe58891b4c177981cdf66d7e
+
+        * docs/devguide/built_in_topics.rst:
+        * docs/devguide/content_subscription_profile.rst:
+        * docs/devguide/dds_security.rst:
+        * docs/devguide/introduction.rst:
+        * docs/devguide/run_time_configuration.rst:
+        * docs/devguide/safety_profile.rst:
+        * docs/internal/bench.rst:
+        * docs/internal/docs.rst:
+        * docs/news.d/_releases/v3.27.0.rst:
+        * docs/sphinx_extensions/config_domain.py:
+
+          Rename Configuration Keys to Properties
+
+          To avoid confusion with config store keys, which are basically
+          the same
+          thing, but it comes across as strange in the documentation to use
+          the
+          same term.
+
+Fri Apr 05 16:58:54 UTC 2024  Son Dinh  <dinhs@objectcomputing.com>
+        commit c8b6e514c4e6277e841a6eae559255a91d4fac0d
+
+        * tests/DCPS/Compiler/xcdr/xcdr.cpp:
+
+          Add KeyOnly test cases to the xcdr test
+
+Thu Apr 04 23:14:07 UTC 2024  Son Dinh  <dinhs@objectcomputing.com>
+        commit 308972cf8a2beba2f88a0c4b72c0c2cd0f184151
+
+        * tests/DCPS/Compiler/vread_vwrite/VreadVwriteTest.cpp:
+        * tests/DCPS/Compiler/vread_vwrite/VreadVwriteTest.idl:
+
+          Add KeyOnly test cases to the vread_vwrite test
+
+Thu Apr 04 21:36:53 UTC 2024  Justin Wilson  <wilsonj@unityfoundation.io>
+        commit bd214ba07615b5485e9a08d449c74117656d6078
+
+        * tests/security/attributes/gov_gen.cpp:
+
+          `gov_gen` fails without useful error message
+
+          Problem
+          -------
+
+          `gov_gen` fails without a useful error message.
+
+          Solution
+          --------
+
+          Print out the error from openssl.
+
+Thu Apr 04 18:28:47 UTC 2024  Justin Wilson  <wilsonj@unityfoundation.io>
+        commit 9cd302b6e1606987353f3ff65f7b4b59e82757c8
+
+          Merge pull request #4561 from
+          jwillemsen/jwi-cleanuptemplatesourcepragma
+
+          Cleanup ACE_TEMPLATES_REQUIRE_PRAGMA and
+          ACE_TEMPLATES_REQUIRE_SOURCE…
+
+Thu Apr 04 18:18:52 UTC 2024  Justin Wilson  <wilsonj@unityfoundation.io>
+        commit 19bd1cbadbe2e3760d79e37d1c60fa3e0c66c4b5
+
+          Merge pull request #4556 from jrw972/config-store-documentation
+
+          Configuration with ConfigStore is not documented
+
+Thu Apr 04 18:06:04 UTC 2024  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit 68797b4e7cebe6fd635522840cdcbc70543fae17
+
+        * dds/DCPS/TimePoint_T.h:
+
+          Update dds/DCPS/TimePoint_T.h
+
+          Co-authored-by: Fred Hornsey <fred@hornsey.us>
+
+Thu Apr 04 10:13:19 UTC 2024  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit 03226fe97d55319b454315adad6fbe654e794853
+
+        * dds/DCPS/DataCollector_T.h:
+        * dds/DCPS/MultiTopicDataReader_T.h:
+        * dds/DCPS/RakeResults_T.h:
+        * dds/DCPS/TimePoint_T.h:
+        * dds/DCPS/ZeroCopyAllocator_T.h:
+        * dds/DCPS/ZeroCopySeq_T.h:
+        * dds/DCPS/transport/framework/TransportReceiveStrategy_T.h:
+        * dds/InfoRepo/UpdateListener_T.h:
+        * dds/InfoRepo/UpdateManager.h:
+        * dds/InfoRepo/UpdateProcessor_T.h:
+        * dds/InfoRepo/UpdateReceiver_T.h:
+        * tests/DCPS/TestFramework/TestFramework_T.h:
+        * tools/modeling/codegen/model/Service_T.h:
+
+          Cleanup ACE_TEMPLATES_REQUIRE_PRAGMA and
+          ACE_TEMPLATES_REQUIRE_SOURCE, fixed #4560
+
+          * dds/DCPS/DataCollector_T.h:
+          * dds/DCPS/MultiTopicDataReader_T.h:
+          * dds/DCPS/RakeResults_T.h:
+          * dds/DCPS/TimePoint_T.h:
+          * dds/DCPS/ZeroCopyAllocator_T.h:
+          * dds/DCPS/ZeroCopySeq_T.h:
+          * dds/DCPS/transport/framework/TransportReceiveStrategy_T.h:
+          * dds/InfoRepo/UpdateListener_T.h:
+          * dds/InfoRepo/UpdateManager.h:
+          * dds/InfoRepo/UpdateProcessor_T.h:
+          * dds/InfoRepo/UpdateReceiver_T.h:
+          * tests/DCPS/TestFramework/TestFramework_T.h:
+          * tools/modeling/codegen/model/Service_T.h:
+
+Wed Apr 03 22:01:22 UTC 2024  Son Dinh  <dinhs@objectcomputing.com>
+        commit 38f36f953c33082dbf1dc2c6ee353b1d18ded7a9
+
+        * dds/DCPS/ValueDispatcher.h:
+        * dds/idl/value_reader_generator.cpp:
+
+          Fix compile errors
+
+Wed Apr 03 16:49:56 UTC 2024  Justin Wilson  <wilsonj@unityfoundation.io>
+        commit f25a24a71b82eb244ccb98dd2de9ddb34b1bc9be
+
+        * docs/devguide/run_time_configuration.rst:
+        * docs/news.d/config_store_documentation.rst:
+
+          Configuration with ConfigStore is not documented
+
+          Problem
+          -------
+
+          The new capabilities from the ConfigStore are not documented for
+          users.
+
+          Solution
+          --------
+
+          Add to the configuration documentation.
+
+Wed Apr 03 20:37:57 UTC 2024  Adam Mitz  <mitza@objectcomputing.com>
+        commit af5094bdddd7cd741f12bd7a10de27df9336a12b
+
+        * .github/workflows/build_and_test.yml:
+        * .github/workflows/cmake.yml:
+        * cmake/init.cmake:
+        * configure:
+        * dds/OpenDDSConfig.h.in:
+        * docs/devguide/building/index.rst:
+        * docs/news.d/boottime.rst:
+
+          Imported and adapted commits from earlier attempt at using
+          CLOCK_BOOTTIME.
+          This only includes configuration, CI, and documentation changes.
+
+          Squashed commit of the following:
+
+          commit 77d7689470c45469f688545434c81d973398d44e
+          Merge: 2ba17977e0 0f79a06c8d
+          Author: Adam Mitz <mitza@objectcomputing.com>
+          Date:   Fri Mar 22 09:51:00 2024 -0500
+
+          Merge branch 'master' into boottime
+
+          # Conflicts:
+          #   cmake/init.cmake
+          #   configure
+
+          commit 2ba17977e0c2e10f1068884e13d9ec037950b570
+          Author: Adam Mitz <mitza@objectcomputing.com>
+          Date:   Wed Feb 28 17:20:58 2024 -0600
+
+          updated lint config
+
+          commit 819665da3c365b4337b97011f7fb3d98e385a09c
+          Author: Adam Mitz <mitza@objectcomputing.com>
+          Date:   Wed Feb 28 17:18:17 2024 -0600
+
+          corrected CMakeLists
+
+          commit bb92bf2a36b74fd61e80a961bb46a586845083b3
+          Author: Adam Mitz <mitza@objectcomputing.com>
+          Date:   Wed Feb 28 15:56:34 2024 -0600
+
+          Update configure
+
+          Co-authored-by: Son Dinh <technology789@gmail.com>
+
+          commit 515141480b9c9414fa13f9ecf4cd074e5ee2e563
+          Author: Adam Mitz <mitza@objectcomputing.com>
+          Date:   Wed Feb 28 15:55:01 2024 -0600
+
+          Specialize the ACE_Condition_Attributes_T template
+
+          commit 9ae1d8eb7f2dcf0034f21dbd9349a296ce8c0023
+          Author: Adam Mitz <mitza@objectcomputing.com>
+          Date:   Wed Feb 28 09:35:02 2024 -0600
+
+          Added export macro
+
+          commit 8dbd712e8475a871a6b808d8da93ab883a7b1873
+          Author: Adam Mitz <mitza@objectcomputing.com>
+          Date:   Wed Feb 28 08:56:48 2024 -0600
+
+          fixed perl closure
+
+          commit 419547e5a53da17de00f46fc36c04da058f72d29
+          Author: Adam Mitz <mitza@objectcomputing.com>
+          Date:   Wed Feb 28 08:52:16 2024 -0600
+
+          Add to dds/CMakeLists.txt
+
+          commit 073d23d03b8c94fc7f3ce0a450a78a3f4847cadb
+          Author: Adam Mitz <mitza@objectcomputing.com>
+          Date:   Wed Feb 28 08:51:46 2024 -0600
+
+          fixed perl closure
+
+          commit 4a2e3596cd6015814c714c8c55c8e36ffce01da1
+          Author: Adam Mitz <mitza@objectcomputing.com>
+          Date:   Wed Feb 28 08:28:34 2024 -0600
+
+          try the new configs in CI
+
+          commit 2777735b240229ad1a73ef22b8eb4d1c1b587d04
+          Author: Adam Mitz <mitza@objectcomputing.com>
+          Date:   Tue Feb 27 14:40:33 2024 -0600
+
+          Moved content in devguide
+
+          commit 013c2cafa085d958af754866cd7036088f7f7e9b
+          Author: Adam Mitz <mitza@objectcomputing.com>
+          Date:   Tue Feb 27 13:24:23 2024 -0600
+
+          Apply suggestions from code review
+
+          Co-authored-by: Fred Hornsey <fred@hornsey.us>
+
+          commit 9198ab4d8cf98cd119756426d9f72b6b4823f007
+          Author: Adam Mitz <mitza@objectcomputing.com>
+          Date:   Tue Feb 27 12:49:36 2024 -0600
+
+          NEWS for this change
+
+          commit 63324e166838cdefcbecc5d3741f08b298f73134
+          Author: Adam Mitz <mitza@objectcomputing.com>
+          Date:   Tue Feb 27 12:48:07 2024 -0600
+
+          Update docs/devguide/building/cmake.rst
+
+          Co-authored-by: Justin Wilson <wilsonj@unityfoundation.io>
+
+          commit 518a4308789fedddd1a6ba3b86e33eb51bf0486c
+          Author: Adam Mitz <mitza@objectcomputing.com>
+          Date:   Tue Feb 27 08:58:39 2024 -0600
+
+          Configure boottime from CMake
+
+          commit ef251c87930a730cfb38a7896c79e1dddf3cb6cc
+          Author: Adam Mitz <mitza@objectcomputing.com>
+          Date:   Tue Feb 27 08:58:23 2024 -0600
+
+          Updated build docs
+
+          commit c1757ef2bb9c2c59fcaaacec12b4de736bd3b764
+          Author: Fred Hornsey <fred@hornsey.us>
+          Date:   Mon Feb 26 17:45:48 2024 -0600
+
+          Set `OPENDDS_CONFIG_` values in CMake (#37)
+
+          commit fb365183fcf4a8c2fdb71f051c83da0a2731d748
+          Author: Adam Mitz <mitza@objectcomputing.com>
+          Date:   Mon Feb 26 15:29:12 2024 -0600
+
+          Update lint regex for gettimeofday to be more selective
+
+          commit 8506a96dbbf76ad0d9643ef08380c0dd5c331f98
+          Author: Adam Mitz <mitza@objectcomputing.com>
+          Date:   Fri Feb 23 17:15:31 2024 -0600
+
+          Optionally use CLOCK_BOOTTIME for monotonic time
+
+Wed Apr 03 18:05:35 UTC 2024  Son Dinh  <dinhs@objectcomputing.com>
+        commit 1e6349dd6f93b3606e553afc1d90ccbdc1177474
+
+        * dds/idl/dds_generator.h:
+        * dds/idl/value_reader_generator.cpp:
+        * dds/idl/value_writer_generator.cpp:
+
+          Fix compile errors
+
+Tue Apr 02 21:59:47 UTC 2024  Son Dinh  <dinhs@objectcomputing.com>
+        commit d25ad6a38b3b1ab123d863e901e5e394d9b80c35
+
+        * dds/idl/dds_generator.h:
+        * dds/idl/value_reader_generator.cpp:
+        * dds/idl/value_writer_generator.cpp:
+
+          Add vread
+
+Tue Apr 02 18:25:11 UTC 2024  Justin Wilson  <wilsonj@unityfoundation.io>
+        commit e685c3bef7ecee5ba2d587621cde44e5c913b7af
+
+          Merge pull request #4467 from
+          iguessthislldo/igtd/config-sphinx-domain
+
+          Add Config Sphinx Domain, Make Use of It in `[common]` Config
+          Section, Add More Info About Plugins
+
+Tue Apr 02 18:08:51 UTC 2024  Justin Wilson  <wilsonj@unityfoundation.io>
+        commit 3695cd07a66b675225a645da512d071f51c02738
+
+          Merge pull request #4551 from jrw972/missing-news
+
+          Add missing news
+
+Tue Apr 02 18:08:35 UTC 2024  Justin Wilson  <wilsonj@unityfoundation.io>
+        commit 4f3ec41c5f1d9cbff867aed94a577ac32c1b3495
+
+          Merge pull request #4553 from mitza-oci/transportimpl
+
+          TransportImpl: remove unused member function decls
+
+Tue Apr 02 17:03:02 UTC 2024  Son Dinh  <dinhs@objectcomputing.com>
+        commit e5418021a8dd9605c627e5cc9456134bcd745991
+
+        * dds/idl/value_writer_generator.cpp:
+
+          Working vwrite
+
+Mon Apr 01 23:19:54 UTC 2024  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit fa0a9d8d83ccae17ebc4359dc511fc1003988edc
+
+        * docs/devguide/run_time_configuration.rst:
+        * docs/internal/docs.rst:
+        * docs/sphinx_extensions/config_domain.py:
+
+          Change Value Seperator to =, Add Space to Key Name
+
+          Also fixed a few typos
+
+Mon Apr 01 23:20:55 UTC 2024  Son Dinh  <dinhs@objectcomputing.com>
+        commit 01735e70c3724b9069e11ad08412bb68cc5fa002
+
+        * dds/DCPS/ValueDispatcher.h:
+        * dds/idl/value_writer_generator.cpp:
+
+          Correct NestedKeyOnly or KeyOnly wrapper for nested fields
+
+Mon Apr 01 21:58:42 UTC 2024  Adam Mitz  <mitza@objectcomputing.com>
+        commit 8f1aefbad0dcd33c47786476fc4d4266b2c2b8d1
+
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/transport/framework/DataLink.h:
+        * dds/DCPS/transport/framework/TransportImpl.h:
+        * dds/DCPS/transport/multicast/MulticastDataLink.h:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.h:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpTransport.cpp:
+
+          TransportImpl: remove unused member function decls
+
+          This made a block of code public that probably wasn't supposed to
+          be.
+
+          DataReaderImpl should not have conditional logic based on
+          transport_type()
+
+Fri Mar 29 22:11:26 UTC 2024  Justin Wilson  <wilsonj@unityfoundation.io>
+        commit b0d54fcee5e4743074c8be5d88f61573c168abc5
+
+        * docs/news.d/config_store3.rst:
+        * docs/news.d/config_store_environment_variables.rst:
+        * docs/news.d/config_store_java.rst:
+        * docs/news.d/config_store_multiple_files.rst:
+        * docs/news.d/configstore-bug.rst:
+        * docs/news.d/rtps-reader-bug.rst:
+        * docs/news.d/shapes-interoperability.rst:
+        * docs/news.d/vread-bug.rst:
+
+          Add missing news
+
+Sat Mar 30 05:11:28 UTC 2024  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit 8fd9b85809b447f91b1ac1c9b6200dd0f6222086
+
+        * docs/internal/docs.rst:
+        * docs/sphinx_extensions/config_domain.py:
+
+          Fix Typo and Section Args in Config Store Keys
+
+Sat Mar 30 03:39:36 UTC 2024  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit 9a4204d8d161614fa5df5403107ee65820664a09
+
+        * NEWS.md:
+        * docs/devguide/alternate_interfaces_to_data.rst:
+        * docs/devguide/building/cmake.rst:
+        * docs/devguide/built_in_topics.rst:
+        * docs/devguide/content_subscription_profile.rst:
+        * docs/devguide/dds_security.rst:
+        * docs/devguide/introduction.rst:
+        * docs/devguide/introduction_to_dds.rst:
+        * docs/devguide/quality_of_service.rst:
+        * docs/devguide/run_time_configuration.rst:
+        * docs/devguide/safety_profile.rst:
+        * docs/glossary.rst:
+        * docs/internal/bench.rst:
+        * docs/internal/release.rst:
+        * docs/news.d/_releases/v3.26.0.rst:
+        * docs/news.d/_releases/v3.27.0.rst:
+        * docs/news.d/devguide-config.rst:
+        * docs/news.d/devguide-intro.rst:
+        * docs/news.d/devguide-qos.rst:
+        * docs/news.d/value-reader-writer-fixed.rst:
+
+          Use config domain in [common] and add library info
+
+          - Config
+          - Use the config domain for the common config section options.
+          Tried to
+          make as many links as possible.
+          - Added info and links to option descriptions as seemed needed.
+          - Introduction
+          - Add general info on how plugin libraries are initialized,
+          specifically
+          about static initialization headers.
+          - Add boxes with vital info about the plugins, including their
+          various
+          names initialization headers.
+          - Add sections summarizing the transports.
+          - Make spelling and capitalization of "built-in topic"
+          consistent.
+
+Sat Mar 30 03:13:08 UTC 2024  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit a95517324f8ca41068ec5a51487fadafbfde6e91
+
+        * docs/sphinx_extensions/config_domain.py:
+
+          Small Tweaks to Config Domain
+
+Tue Feb 13 06:41:03 UTC 2024  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit 153f100c386b85beb06ff2e5480e826358d459e5
+
+        * docs/build.py:
+        * docs/internal/docs.rst:
+        * docs/sphinx_extensions/config_domain.py:
+        * docs/sphinx_extensions/custom_domain.py:
+        * docs/sphinx_extensions/newsd.py:
+
+          Revise and Improve Config Domain
+
+          Also add testing for Sphinx code.
+
+Wed Feb 07 13:01:44 UTC 2024  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit 8597d50fd6e07f1b3a061052108b098fd1aee2f2
+
+        * docs/conf.py:
+        * docs/internal/docs.rst:
+        * docs/sphinx_extensions/cmake_domain.py:
+        * docs/sphinx_extensions/config_domain.py:
+        * docs/sphinx_extensions/custom_domain.py:
+
+          Configuration Domain for Sphinx
+
+          Also refactored the common domain code to make cmake_domain.py
+          simpler.
+
+Fri Mar 29 21:37:49 UTC 2024  Justin Wilson  <wilsonj@unityfoundation.io>
+        commit ca061639ef45ae274d870e0e8a8b6550c62c095e
+
+          Merge pull request #4548 from
+          jrw972/rtps-udp-datalink-heartbeat-gap
+
+          RtpsUdpDataLink sends nacks when writer has clearly moved on
+
+Fri Mar 29 18:02:15 UTC 2024  Justin Wilson  <wilsonj@unityfoundation.io>
+        commit c29c70445241c316a39b5fc528fb7eec806955be
+
+          Merge pull request #4549 from mitza-oci/master
+
+          Update integer type used internally for enums
+
+Fri Mar 29 17:48:53 UTC 2024  Son Dinh  <dinhs@objectcomputing.com>
+        commit da01538f81a9c9ae7798720a856a2b918898ac2b
+
+        * dds/idl/value_writer_generator.cpp:
+
+          vwrite for keyonly union
+
+Thu Mar 28 21:12:50 UTC 2024  Justin Wilson  <wilsonj@unityfoundation.io>
+        commit cc6d4b55bb1c3cb757cacbd3b527dfeb26d602e2
+
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.cpp:
+
+          RtpsUdpDataLink sends nacks when writer has clearly moved on
+
+          Problem
+          -------
+
+          When doing interoperability testing, OpenDDS was observed to send
+          a
+          nack for a sequence number that is no longer available. The
+          offending
+          sequence is
+
+          1. Writer sends a HB for [X, X].
+          2. OpenDDS Reader sends a NACK for X.
+          3. Writer sends DATA with sequence number X + 1.
+          4. Writer sends HB for [X+1, X+1].
+          5. OpenDDS Reader sends a NACK for X.
+
+          OpenDDS should treat X as unavailable.
+
+          Solution
+          --------
+
+          The RtpsUdpDataLink contains a code fragment that handles this
+          case
+          but it is limited to the first heartbeat that was received. Move
+          this
+          code out so that it is processed for each heartbeat.
+
+Thu Mar 28 22:53:49 UTC 2024  Son Dinh  <dinhs@objectcomputing.com>
+        commit db2c50176634fc2d9cf32a6250bba7793c5536cb
+
+        * dds/DCPS/ValueDispatcher.h:
+        * dds/idl/value_writer_generator.cpp:
+
+          vwrite for struct
+
+Thu Mar 28 21:46:19 UTC 2024  Adam Mitz  <mitza@objectcomputing.com>
+        commit 9835582361331bff0335b16bdbca2a97f037ce46
+
+        * dds/idl/dds_generator.h:
+
+          Update integer type used internally for enums
+
+Thu Mar 28 21:45:26 UTC 2024  Adam Mitz  <mitza@objectcomputing.com>
+        commit dac02d4835fcd4c4fd052257b6564374c8fae843
+
+        * dds/idl/marshal_generator.cpp:
+
+          constify
+
+Fri Feb 23 02:32:01 UTC 2024  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit 408694519d5beab2e829df2bfc357dc12e9e940c
+
+        * CMakeLists.txt:
+        * cmake/build_ace_tao.cmake:
+        * cmake/configure_ace_tao.pl:
+        * cmake/cplusplus.cpp:
+        * cmake/detect_ace.pl:
+        * cmake/import_common.cmake:
+        * cmake/init.cmake:
+        * cmake/opendds_build_helpers.cmake:
+        * dds/DCPS/unique_ptr.h:
+        * tests/CMakeLists.txt:
+        * tests/DCPS/CMakeLists.txt:
+        * tests/DCPS/Compiler/CMakeLists.txt:
+
+          Allow Compiling with CMake and C++03
+
+          This continues the work started in
+          https://github.com/OpenDDS/OpenDDS/pull/4481 and tries to
+          correctly
+          handle C++ standards in all CMake support. Previously the CMake
+          support
+          was agnostic towards C++ standards, but this meant that building
+          with
+          CMake didn't have a way of differentiating C++ standards. Now we
+          can
+          detect C++ standard support and should be able to build ACE/TAO
+          accordingly.
+
+          Also:
+          - Added `OPENDDS_CXX_STD_YEAR` CMake variable for easy checking
+          of C++
+          standard support.
+          - Passing C++ standard to the ACE/TAO MPC builds and
+          `CMAKE_CXX_COMPILER` for gnuace builds.
+          - Removed need for `cmake/detect_ace.pl`
+          - Some of the changes originally in
+          https://github.com/OpenDDS/OpenDDS/pull/4374
+          - MPC location message will now say when it wasn't set.
+          - Split adding of tests between different directories.
+
+Tue Mar 26 20:16:32 UTC 2024  Justin Wilson  <wilsonj@unityfoundation.io>
+        commit fafdb005842299696142042f623c88f37e87b8cc
+
+          Merge pull request #4545 from
+          mitza-oci/participant-location-duration
+
+          Added lease duration to ParticipantLocationBuiltinTopicData
+
+Tue Mar 26 18:08:10 UTC 2024  Justin Wilson  <wilsonj@unityfoundation.io>
+        commit 3c813b5093b7391d0bde2ba6be8eae6814210694
+
+          Merge pull request #4533 from mitza-oci/spdp-user-tag
+
+          Add a configurable "user tag" to SPDP
+
+Tue Mar 26 18:08:00 UTC 2024  Justin Wilson  <wilsonj@unityfoundation.io>
+        commit 502a7e61e46876312c318ad9428853f123deb866
+
+        * docs/devguide/run_time_configuration.rst:
+
+          Update docs/devguide/run_time_configuration.rst
+
+          Co-authored-by: Son Dinh <technology789@gmail.com>
+
+Tue Mar 26 18:05:08 UTC 2024  Justin Wilson  <wilsonj@unityfoundation.io>
+        commit 72968a9623f8a72e3a6aa141521cd8ad8870d7ff
+
+          Merge pull request #4540 from jrw972/config-store-sedp-cleanup
+
+          ConfigStore entries created by SEDP linger
+
+Tue Mar 26 18:03:52 UTC 2024  Justin Wilson  <wilsonj@unityfoundation.io>
+        commit 5b760aca45a90e099f3775a146c2a85d7632c07b
+
+          Merge pull request #4544 from jrw972/vread-union-ordering
+
+          `vread` for unions uses uninitialized memory
+
+Tue Mar 26 16:18:03 UTC 2024  Adam Mitz  <mitza@objectcomputing.com>
+        commit 536ffb960868214c20863cf346838378ec113f9c
+
+        * docs/news.d/participant-location-duration.rst:
+
+          Update docs/news.d/participant-location-duration.rst
+
+          Co-authored-by: Son Dinh <technology789@gmail.com>
+
+Mon Mar 25 22:20:07 UTC 2024  Adam Mitz  <mitza@objectcomputing.com>
+        commit 240180b14220110a181859502b2c1c0cdb25f2c6
+
+        * docs/devguide/built_in_topics.rst:
+        * docs/news.d/participant-location-duration.rst:
+
+          updated docs
+
+Mon Mar 25 19:51:29 UTC 2024  Adam Mitz  <mitza@objectcomputing.com>
+        commit c2d4ac8ec20d3c909bd20c3e12dcce310b0cf8ec
+
+        * dds/DCPS/RTPS/DiscoveredEntities.h:
+        * dds/DCPS/RTPS/Spdp.cpp:
+        * dds/OpenddsDcpsExt.idl:
+        * java/tests/participant_location/ParticipantLocationListener.java:
+        * tests/DCPS/ParticipantLocationTopic/ParticipantLocationListenerImpl.cpp:
+        * tests/unit-tests/dds/DCPS/RTPS/DiscoveredEntities.cpp:
+
+          Added lease duration to ParticipantLocationBuiltinTopicData
+
+Mon Mar 25 20:46:35 UTC 2024  Justin Wilson  <wilsonj@unityfoundation.io>
+        commit 07b4ca9b444d69d94a5b90ae04ea65dfec98e5c3
+
+        * dds/idl/value_reader_generator.cpp:
+
+          `vread` for unions uses uninitialized memory
+
+          Problem
+          -------
+
+          The `vread` function generated for unions sets the discriminant
+          explicitly and then sets the member. Setting the discriminant
+          first
+          sets the discriminant but doesn't initialize the member. Setting
+          the
+          member examines the previous discriminant to de-initialize the
+          previous member.  Thus, the sequence used by `vread` causes
+          uninitialized memory to be "deinitialized."
+
+          Solution
+          --------
+
+          Defer setting discriminant until after the member has been set.
+
+Mon Mar 25 18:10:08 UTC 2024  Justin Wilson  <wilsonj@unityfoundation.io>
+        commit 9b957b94a59bd9d566fd6d14669318f21a5b4a74
+
+          Merge pull request #4532 from mitza-oci/opendds_idl-vn-cleanup
+
+          opendds_idl: made versioned namespace support more consistent
+
+Mon Mar 25 18:06:12 UTC 2024  Justin Wilson  <wilsonj@unityfoundation.io>
+        commit 40ea86c4bdd68fce06bd53905d530c08fd4ac338
+
+          Merge pull request #4534 from mitza-oci/configure-cxx17
+
+          configure: detect default std c++17 based on GCC/Clang versions
+
+Mon Mar 25 18:03:21 UTC 2024  Justin Wilson  <wilsonj@unityfoundation.io>
+        commit 2968d94df86b440d47880f319262cf6c102422d9
+
+          Merge pull request #4535 from
+          iguessthislldo/igtd/cmake-msvc-configs
+
+          Fix Building OpenDDS and ACE/TAO at the same time with CMake on
+          Windows with Release Config
+
+Mon Mar 25 18:02:41 UTC 2024  Justin Wilson  <wilsonj@unityfoundation.io>
+        commit 197e6bae7e63319537a4f421c38f24b7134f286b
+
+          Merge pull request #4538 from mitza-oci/compiler-face-init
+
+          Compiler test for FACE: init variables to avoid warnings
+
+Mon Mar 25 18:02:27 UTC 2024  Justin Wilson  <wilsonj@unityfoundation.io>
+        commit f40580842f67dc93839c7de98b246dd446d5d23c
+
+          Merge pull request #4539 from mitza-oci/unknown-union-label
+
+          Corrected typeobject generation for unions that use qualified
+          enumerators in branch labels
+
+Wed Mar 13 19:28:50 UTC 2024  Justin Wilson  <wilsonj@unityfoundation.io>
+        commit bbde01c5c29879b6fd06c19e743f356d6e2a4adc
+
+        * dds/DCPS/ConfigStoreImpl.cpp:
+        * dds/DCPS/ConfigStoreImpl.h:
+        * dds/DCPS/RTPS/Sedp.cpp:
+        * tests/unit-tests/dds/DCPS/ConfigStoreImpl.cpp:
+
+          ConfigStore entries created by SEDP linger
+
+          Problem
+          -------
+
+          SEDP creates ConfigStore entries for the transport instance that
+          it
+          creates. These entries are not removed when the SEDP intance goes
+          away.  Thus, an application that recreates participants that
+          use RTPS Discovery will leak these entries.
+
+          Solution
+          --------
+
+          Remove the entries created by SEDP.
+
+Mon Mar 25 14:12:03 UTC 2024  Adam Mitz  <mitza@objectcomputing.com>
+        commit 0131457575c29f80d6471716c69f42c83166b137
+
+        * dds/idl/typeobject_generator.cpp:
+        * tests/DCPS/Compiler/union_defaults/union_defaults.idl:
+
+          Corrected typeobject generation for unions that use qualified
+          enumerator names in branch labels
+
+Mon Mar 25 13:50:57 UTC 2024  Adam Mitz  <mitza@objectcomputing.com>
+        commit ffb1e08beed8b21d264655cef037ac441d114624
+
+        * tests/FACE/Compiler/idl_test1_main/main.cpp:
+
+          Compiler test for FACE: init variables to avoid warnings
+
+Mon Mar 25 09:01:31 UTC 2024  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit 09cc4a34e2ed4d359f9a9d5b97d3520a0cd44cac
+
+        * tests/DCPS/Compiler/union_defaults/union_defaults.idl:
+
+          Extend test with a reproducer for `Unknown union label value`
+          error
+
+          * tests/DCPS/Compiler/union_defaults/union_defaults.idl:
+
+Mon Mar 25 02:06:15 UTC 2024  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit 286c67922f25e1b463008a7527d348247cf2969f
+
+        * .github/workflows/build_and_test.yml:
+        * .github/workflows/cmake.yml:
+        * cmake/build_ace_tao.cmake:
+        * cmake/import_common.cmake:
+        * cmake/scrape_vs.pl:
+        * docs/news.d/cmake-windows-release-config.rst:
+        * docs/news.d/openddsconfig.rst:
+
+          Differentiate Debug vs. Release in scrape_vs.pl
+
+          Should fix https://github.com/OpenDDS/OpenDDS/issues/4531
+
+          I think this used to work somewhat, but I think was more by
+          accident.
+          Also separated CMake builds from `build_and_test.yml`.
+
+Fri Mar 22 22:26:56 UTC 2024  Adam Mitz  <mitza@objectcomputing.com>
+        commit beaad8ce05d37786e2f3bb3f185804ed2cf82045
+
+        * configure:
+
+          configure: detect default std c++17 based on GCC/Clang versions
+
+Fri Mar 22 21:43:29 UTC 2024  Adam Mitz  <mitza@objectcomputing.com>
+        commit c59e7500409bccb911569994db0b71f2e51f5cfa
+
+        * dds/DCPS/RTPS/Spdp.cpp:
+
+          Apply suggestions from code review
+
+          Co-authored-by: Fred Hornsey <fred@hornsey.us>
+
+Fri Mar 22 18:10:56 UTC 2024  Adam Mitz  <mitza@objectcomputing.com>
+        commit d92eaeeaacc3fc141a19a1448bb5cfc585c5c145
+
+          Merge branch 'master' into opendds_idl-vn-cleanup
+
+Fri Mar 22 18:09:07 UTC 2024  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit 08a2763a65f6efe251b487bd30eaf1ac6cec5bf4
+
+          Merge pull request #4519 from mitza-oci/submessage-idl
+
+          Support the IDL4 `@value` annotation in IDL-to-C++11 and use it
+          for RTPS SubmessageKind
+
+Fri Mar 22 18:07:05 UTC 2024  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit 14fc41beed69fcf21a68060392731ce453100bd2
+
+          Merge pull request #4528 from OpenDDS/shapes-idl
+
+          Shapes IDL doesn't match interoperability IDL
+
+Fri Mar 22 18:06:31 UTC 2024  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit 136d1103991efd2144a3ab3a95df1b2cee542b49
+
+          Merge pull request #4530 from mitza-oci/vcpkg-2024-03-19
+
+          GitHub Actions: updated vcpkg tag to 2024.03.19
+
+Fri Mar 22 13:42:43 UTC 2024  Adam Mitz  <mitza@objectcomputing.com>
+        commit 5ff7379f51e5d381057071598f885923d09eea92
+
+        * .github/workflows/build_and_test.yml:
+
+          GitHub Actions: remove branch restrictions
+
+Thu Mar 21 22:20:45 UTC 2024  Adam Mitz  <mitza@objectcomputing.com>
+        commit 60f017181d41db59b3c2f610e8a80123950d596b
+
+        * docs/devguide/run_time_configuration.rst:
+        * docs/news.d/spdp-user-tag.rst:
+
+          docs
+
+Thu Mar 21 21:49:17 UTC 2024  Adam Mitz  <mitza@objectcomputing.com>
+        commit 2a5e9eca3c27a9faeb4cbd81259677c8671c5f65
+
+        * dds/DCPS/RTPS/RtpsCore.idl:
+        * dds/DCPS/RTPS/RtpsDiscoveryConfig.cpp:
+        * dds/DCPS/RTPS/RtpsDiscoveryConfig.h:
+        * dds/DCPS/RTPS/RtpsSubmessageKind.idl:
+        * dds/DCPS/RTPS/Spdp.cpp:
+        * dds/DCPS/RTPS/Spdp.h:
+        * tests/transport/spdp/spdp_transport.cpp:
+
+          Add a configurable "user tag" to SPDP
+
+          If the configuration specifies a non-zero tag, then that 32-bit
+          value is added to the start of the SPDP participant announcement
+          messages after the RTPS Header and its own Submessage Header.
+
+Thu Mar 21 14:01:24 UTC 2024  Adam Mitz  <mitza@objectcomputing.com>
+        commit adbdf5fdc433ae2921fb533541bcf39bea7d30d7
+
+        * dds/idl/dds_generator.h:
+        * dds/idl/langmap_generator.cpp:
+        * dds/idl/ts_generator.cpp:
+
+          opendds_idl: made versioned namespace support more consistent
+
+          clean up redundant code
+          attempt to follow style guidelines in source and generated
+
+Thu Mar 21 13:50:33 UTC 2024  Adam Mitz  <mitza@objectcomputing.com>
+        commit 648ca8251e3d2d973c30ee421c996a66d2c029ef
+
+        * docs/devguide/xtypes.rst:
+        * docs/news.d/enum-value-annotation.rst:
+
+          Docs updates from peer review
+
+          Co-authored-by: Fred Hornsey <fred@hornsey.us>
+
+Wed Mar 20 22:37:38 UTC 2024  Adam Mitz  <mitza@objectcomputing.com>
+        commit 602f65b8907487c0e9c2e058c36ed21e5b322fd0
+
+        * .github/workflows/build_and_test.yml:
+        * .github/workflows/ishapes.yml:
+
+          GitHub Actions: updated vcpkg tag to 2024.03.19
+
+Wed Mar 20 18:45:30 UTC 2024  Adam Mitz  <mitza@objectcomputing.com>
+        commit d334aebbd15d7ac94b5ab04fa150a32678d342d4
+
+        * docs/devguide/opendds_idl.rst:
+        * docs/devguide/xtypes.rst:
+        * docs/news.d/enum-value-annotation.rst:
+
+          Documentation for #4519
+
+Wed Mar 20 16:47:34 UTC 2024  Adam Mitz  <mitza@objectcomputing.com>
+        commit 8f3118c052c58e4a4e46a512ff3e156375b8adaa
+
+        * tests/DCPS/Compiler/C++11/value_annotation/value_annotation.cpp:
+        * tests/DCPS/Compiler/C++11/value_annotation/value_annotation.idl:
+        * tests/DCPS/Compiler/C++11/value_annotation/value_annotation.mpc:
+        * tests/core_ci_tests.lst:
+
+          Updated test
+
+Wed Mar 20 13:59:22 UTC 2024  Justin Wilson  <wilsonj@unityfoundation.io>
+        commit 7218c9e9ae7781dc904bae1ff2dd07f0a164e22d
+
+        * examples/DCPS/ishapes/ShapeType.idl:
+
+          Shapes IDL doesn't match interoperability IDL
+
+          Problem
+          -------
+
+          The Shapes IDL doesn't match the interoperability IDL which is
+          causing
+          a lot of test failures.
+
+          Solution
+          --------
+
+          Update the IDL to match.
+
+Tue Mar 19 22:28:33 UTC 2024  Adam Mitz  <mitza@objectcomputing.com>
+        commit aa08b18573b6de598500a59a18e24049377d890e
+
+        * tests/DCPS/Compiler/C++11/value_annotation/value_annotation.cpp:
+
+          started test
+
+Tue Mar 19 22:27:58 UTC 2024  Adam Mitz  <mitza@objectcomputing.com>
+        commit 22e1bd0b6ff99a5ee8ef850a53970f153ee312d9
+
+        * dds/DCPS/RTPS/RtpsCore.idl:
+
+          updated comments in IDL
+
+Tue Mar 19 19:24:42 UTC 2024  Adam Mitz  <mitza@objectcomputing.com>
+        commit c476732b86066fa4fd046b68f9b135070cbceda5
+
+        * dds/idl/be_produce.cpp:
+
+          Include Definitions.h in language mapping header
+
+Tue Mar 19 19:17:09 UTC 2024  Adam Mitz  <mitza@objectcomputing.com>
+        commit 1592dc9bb25df9deb5c96fda490da96db5e7cadb
+
+        * dds/idl/typeobject_generator.cpp:
+        * dds/idl/typeobject_generator.h:
+
+          Use enum values in union typeobject generation
+
+Tue Mar 19 18:03:12 UTC 2024  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit 0f79a06c8d1e9c638e0b4d661947219682d8203c
+
+          Merge pull request #4524 from
+          OpenDDS/dependabot/github_actions/docker/build-push-action-5.3.0
+
+          Bump docker/build-push-action from 5.2.0 to 5.3.0
+
+Tue Mar 19 18:02:53 UTC 2024  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit 8d75c446c2ae9f1af7f4b2e536937442e102b7b8
+
+          Merge pull request #4525 from
+          OpenDDS/dependabot/github_actions/docker/login-action-3.1.0
+
+          Bump docker/login-action from 3.0.0 to 3.1.0
+
+Tue Mar 19 17:28:45 UTC 2024  Adam Mitz  <mitza@objectcomputing.com>
+        commit 97f6e10a8b353777c54ad7528753f6ca51716f24
+
+        * tests/transport/rtps_reliability/rtps_reliability.cpp:
+        * tests/transport/spdp/spdp_transport.cpp:
+
+          fixed tests
+
+Tue Mar 19 14:27:26 UTC 2024  Adam Mitz  <mitza@objectcomputing.com>
+        commit d6981494482f87236ef74899553796f0136206cf
+
+        * MPC/config/dds_versioning_idl_defaults.mpb:
+        * dds/DCPS/RTPS/rtps.mpc:
+        * dds/DCPS/RTPS/rtps_optional_safety.mpb:
+        * dds/dcps_optional_safety.mpb:
+        * dds/idl/dds_generator.h:
+        * dds/idl/langmap_generator.cpp:
+
+          Fixed versioned namespaces
+
+          Consolidated some build settings related to versioned namespaces
+
+Tue Mar 19 14:26:43 UTC 2024  Adam Mitz  <mitza@objectcomputing.com>
+        commit 4dee96e78b42c22bdeff67a9e6430d2d9ceb2c41
+
+        * tests/DCPS/MetaStruct/MetaStructTest.cpp:
+
+          fixed test
+
+Mon Mar 18 18:06:40 UTC 2024  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit 3286e181f8e06757f0c2ca22119c8c93454c57ab
+
+          Merge pull request #4520 from iguessthislldo/igtd/devguide-qos
+
+          Improve QoS Documentation
+
+Mon Mar 18 18:05:27 UTC 2024  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit abf422a595e9e8c16ac86a94ec787df9879aa0ad
+
+          Merge pull request #4521 from sonndinh/update-json-value-reader
+
+          Update `ValueReader` to support optional members
+
+Mon Mar 18 10:05:22 UTC 2024  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit 9820f40a637ba321c5cfe36282a51cca8837dd89
+
+        * docs/devguide/conditions_and_listeners.rst:
+        * docs/devguide/quality_of_service.rst:
+
+          Respond to Review
+
+Mon Mar 18 09:52:47 UTC 2024  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit 972cc1f799d9f5ad60c3897c57755318489ea94f
+
+        * docs/devguide/conditions_and_listeners.rst:
+        * docs/devguide/quality_of_service.rst:
+        * docs/devguide/xtypes.rst:
+
+          Apply suggestions from code review
+
+          Co-authored-by: Son Dinh <technology789@gmail.com>
+
+Mon Mar 18 07:32:29 UTC 2024  dependabot[bot]  <49699333+dependabot[bot]@users.noreply.github.com>
+        commit 30f3308d8cd087300e030a1593674c2abb4bdfbc
+
+        * .github/workflows/docker_image.yml:
+
+          Bump docker/login-action from 3.0.0 to 3.1.0
+
+          Bumps
+          [docker/login-action](https://github.com/docker/login-action)
+          from 3.0.0 to 3.1.0.
+          - [Release
+          notes](https://github.com/docker/login-action/releases)
+          -
+          [Commits](https://github.com/docker/login-action/compare/343f7c4344506bcbf9b4de18042ae17996df046d...e92390c5fb421da1463c202d546fed0ec5c39f20)
+
+          ---
+          updated-dependencies:
+          - dependency-name: docker/login-action
+          dependency-type: direct:production
+          update-type: version-update:semver-minor
+          ...
+
+          Signed-off-by: dependabot[bot] <support@github.com>
+
+Mon Mar 18 07:32:25 UTC 2024  dependabot[bot]  <49699333+dependabot[bot]@users.noreply.github.com>
+        commit 46b516d26e357e9dc1a78d16109d581f7da435dd
+
+        * .github/workflows/docker_image.yml:
+
+          Bump docker/build-push-action from 5.2.0 to 5.3.0
+
+          Bumps
+          [docker/build-push-action](https://github.com/docker/build-push-action)
+          from 5.2.0 to 5.3.0.
+          - [Release
+          notes](https://github.com/docker/build-push-action/releases)
+          -
+          [Commits](https://github.com/docker/build-push-action/compare/af5a7ed5ba88268d5278f7203fb52cd833f66d6e...2cdde995de11925a030ce8070c3d77a52ffcf1c0)
+
+          ---
+          updated-dependencies:
+          - dependency-name: docker/build-push-action
+          dependency-type: direct:production
+          update-type: version-update:semver-minor
+          ...
+
+          Signed-off-by: dependabot[bot] <support@github.com>
+
+Thu Mar 14 21:09:26 UTC 2024  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit 8b2718b81c7e9b46d02c8b4a6682be753e985328
+
+        * docs/conf.py:
+        * docs/devguide/annex.rst:
+        * docs/devguide/conditions_and_listeners.rst:
+        * docs/devguide/getting_started.rst:
+        * docs/devguide/quality_of_service.rst:
+        * docs/devguide/xtypes.rst:
+
+          Respond to Review and Other Tweaks
+
+Thu Mar 14 20:44:04 UTC 2024  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit 42e8c6a625c77400133ec9caa5262e5e7dde8416
+
+        * docs/devguide/conditions_and_listeners.rst:
+        * docs/devguide/quality_of_service.rst:
+
+          Apply suggestions from code review
+
+          Co-authored-by: Justin Wilson <wilsonj@unityfoundation.io>
+
+Thu Mar 14 20:01:59 UTC 2024  Son Dinh  <dinhs@objectcomputing.com>
+        commit c42ac61cff421948ec900f72c38b504ad933075b
+
+        * tests/unit-tests/dds/DCPS/JsonValueReader.cpp:
+
+          Test union with optional branch
+
+Thu Mar 14 19:36:45 UTC 2024  Adam Mitz  <mitza@objectcomputing.com>
+        commit 93309c48c445d1f1aa33b91b6d0ea053a5bf993c
+
+        * dds/idl/dds_generator.h:
+
+          fixed typo in versioned namespace support
+
+Thu Mar 14 18:03:46 UTC 2024  Justin Wilson  <wilsonj@unityfoundation.io>
+        commit 33f65f988808d814f3828bf090ba0eab7c2b9c07
+
+          Merge pull request #4515 from jrw972/config-store-java
+
+          ConfigStore is not available in Java
+
+Thu Mar 14 17:39:19 UTC 2024  Adam Mitz  <mitza@objectcomputing.com>
+        commit b3ef2d35828f7cc459c91f290c3daf41e0eaba90
+
+        * dds/idl/dds_generator.cpp:
+
+          Support keywords
+
+Thu Mar 14 17:23:49 UTC 2024  Adam Mitz  <mitza@objectcomputing.com>
+        commit 9be2aac56d70dc24c8e1f6137ce76fd1b2b9a765
+
+        * dds/DCPS/RTPS/rtps.mpc:
+        * dds/idl/dds_generator.h:
+
+          fixed versioned namespace builds
+
+Thu Mar 14 15:33:46 UTC 2024  Son Dinh  <dinhs@objectcomputing.com>
+        commit 2f4adfe58b838b6f000bd01cba8259554fa0ca02
+
+        * dds/DCPS/JsonValueReader.h:
+
+          Revert read_float32
+
+Thu Mar 14 15:30:42 UTC 2024  Son Dinh  <dinhs@objectcomputing.com>
+        commit e9bd3869f41991b99d3d68353287b9322a877b14
+
+        * dds/DCPS/JsonValueReader.h:
+
+          Remove unused functions
+
+Thu Mar 14 15:27:18 UTC 2024  Son Dinh  <dinhs@objectcomputing.com>
+        commit fe78810875e677c5c881a75d76110574c05466b7
+
+        * dds/DCPS/JsonValueReader.h:
+        * tests/unit-tests/dds/DCPS/JsonValueReader.cpp:
+
+          Cleanup
+
+Thu Mar 14 15:21:03 UTC 2024  Son Dinh  <dinhs@objectcomputing.com>
+        commit 87c3347627ec353083d2ed0b21d6aff96aa365d4
+
+        * dds/DCPS/JsonValueReader.h:
+        * dds/DCPS/ValueReader.h:
+        * tests/unit-tests/dds/DCPS/JsonValueReader.cpp:
+
+          Add test for missing optional members
+
+Thu Mar 14 13:21:31 UTC 2024  Adam Mitz  <mitza@objectcomputing.com>
+        commit 00bc94b18089c06c7777e5bba3aeb496a61028a5
+
+        * tests/DCPS/Compiler/C++11/value_annotation/value_annotation.mpc:
+
+          fixed lint error
+
+Thu Mar 14 13:16:14 UTC 2024  Adam Mitz  <mitza@objectcomputing.com>
+        commit 3cd5bd6094036875cbd90f4c1a01e8ef8ac92ae5
+
+        * dds/idl/dds_generator.cpp:
+
+          Fix generated includes and forward declarations
+
+Thu Mar 14 12:50:39 UTC 2024  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit aa52f0386d81002111a1a078f5708c80cf632533
+
+        * docs/devguide/dds_security.rst:
+        * docs/devguide/quality_of_service.rst:
+        * docs/news.d/devguide-qos.rst:
+
+          Add Property QoS and News
+
+Thu Mar 14 11:45:57 UTC 2024  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit 7365bbf298ba7d359d1f481287a806e5901633d6
+
+        * docs/conf.py:
+        * docs/devguide/annex.rst:
+        * docs/devguide/building/index.rst:
+        * docs/devguide/conditions_and_listeners.rst:
+        * docs/devguide/content_subscription_profile.rst:
+        * docs/devguide/dds_security.rst:
+        * docs/devguide/faq.rst:
+        * docs/devguide/getting_started.rst:
+        * docs/devguide/index.rst:
+        * docs/devguide/introduction.rst:
+        * docs/devguide/quality_of_service.rst:
+        * docs/devguide/quickstart/windows.rst:
+        * docs/devguide/run_time_configuration.rst:
+        * docs/devguide/the_dcps_information_repository.rst:
+        * docs/devguide/xtypes.rst:
+        * docs/glossary.rst:
+
+          Improve QoS Documentation
+
+          - Quality of Service
+          - Rearranged to remove large default value tables.
+          - Added Data Representation and Type Consistency Enforcement.
+          - Every policy now has a box that says if it's mutable, if it
+          affects writer-reader association, its default values, and links
+          to the spec definition.
+          - Added many links to QoS policies
+          - Move fnmatch expressions into an "annex" file so it can be
+          common between security and partitions QoS.
+          - Add definitions for "instance", "unregister", and "dispose" to
+          the glossary.
+
+Wed Mar 13 22:19:37 UTC 2024  Adam Mitz  <mitza@objectcomputing.com>
+        commit 2c2084a3f25803cce0d439a7f94d2e3c36f8816d
+
+        * dds/DCPS/ValueCommon.cpp:
+        * dds/DCPS/ValueCommon.h:
+        * dds/idl/dds_generator.cpp:
+        * dds/idl/dds_generator.h:
+        * dds/idl/dds_visitor.cpp:
+        * dds/idl/langmap_generator.cpp:
+        * dds/idl/marshal_generator.cpp:
+        * dds/idl/marshal_generator.h:
+        * dds/idl/metaclass_generator.cpp:
+        * dds/idl/metaclass_generator.h:
+        * dds/idl/typeobject_generator.cpp:
+        * dds/idl/value_reader_generator.cpp:
+        * dds/idl/value_writer_generator.cpp:
+        * tests/DCPS/Compiler/C++11/value_annotation/value_annotation.idl:
+
+          Continued opendds_idl support for value annotation on enumerators
+
+Wed Mar 13 21:41:13 UTC 2024  Son Dinh  <dinhs@objectcomputing.com>
+        commit c7a9a2609d1ed5248094f2b1b1bea7d017e72baf
+
+          Merge branch 'master' of github.com:OpenDDS/OpenDDS into
+          update-json-value-reader
+
+Wed Mar 13 21:41:05 UTC 2024  Son Dinh  <dinhs@objectcomputing.com>
+        commit 2c543af1d7b8c2ea28bb1b49a05e00aa13700a33
+
+        * dds/DCPS/JsonValueReader.h:
+
+          Read null value
+
+Wed Mar 13 17:22:15 UTC 2024  Adam Mitz  <mitza@objectcomputing.com>
+        commit cd9f850d159fdaafd63964de742ba88647bbd67f
+
+        * dds/idl/dds_visitor.cpp:
+        * tests/DCPS/Compiler/C++11/value_annotation/.gitignore:
+        * tests/DCPS/Compiler/C++11/value_annotation/run_test.pl:
+        * tests/DCPS/Compiler/C++11/value_annotation/value_annotation.cpp:
+        * tests/DCPS/Compiler/C++11/value_annotation/value_annotation.idl:
+        * tests/DCPS/Compiler/C++11/value_annotation/value_annotation.mpc:
+        * tests/dcps_tests.lst:
+
+          Added test for value-annotated enums.
+
+          Minor cleanup in dds_vistor.cpp
+
+Tue Feb 13 16:33:52 UTC 2024  Justin Wilson  <wilsonj@unityfoundation.io>
+        commit c9b2d9f9f7b1ba34c94a4d2e0d0994ef1064d33f
+
+        * java/dds/OpenDDS/DCPS/TheServiceParticipant.java:
+        * java/dds/OpenDDS_DCPS_jni.cpp:
+        * java/tests/transport_config/TransportConfigTest.java:
+
+          ConfigStore is not available in Java
+
+          Problem
+          -------
+
+          The ConfigStore is not avaiable in Java. If it was available,
+          Java
+          users could configure anything that can be configured.
+
+          Solution
+          --------
+
+          Expose the ConfigStore via the Service Participant.
+
+Tue Mar 12 21:45:11 UTC 2024  Adam Mitz  <mitza@objectcomputing.com>
+        commit 0e7b820f28e13712ff67fb266dc8e33a748a3224
+
+        * dds/DCPS/RTPS/.gitignore:
+        * dds/DCPS/RTPS/CMakeLists.txt:
+        * dds/DCPS/RTPS/RtpsCore.idl:
+        * dds/DCPS/RTPS/RtpsSubmessageKind.idl:
+        * dds/DCPS/RTPS/rtps.mpc:
+        * dds/DCPS/RTPS/rtps_optional_safety.mpb:
+        * dds/DCPS/XTypes/TypeObjectTypeSupportImpl.h:
+        * dds/idl/annotations.cpp:
+        * dds/idl/annotations.h:
+        * dds/idl/be_global.cpp:
+        * dds/idl/be_global.h:
+        * dds/idl/langmap_generator.cpp:
+
+          Moved RTPS SubmessageKind to its own IDL file to use the value
+          annotation
+
+          Includes limited support for IDL4 "standardized" value
+          annotation.
+          When opendds_idl is used to generate the language mapping for an
+          enum,
+          an enumerator annoatated with value() will be assigned that
+          value.
+
+          Also changes opendds_idl options used for IDL internal to the
+          RTPS library
+          in order to minimize footprint of generated code.
+
+Tue Mar 12 18:02:19 UTC 2024  Justin Wilson  <wilsonj@unityfoundation.io>
+        commit a8749dc2fa27c30cb9fe3f16487a4b39d324abfd
+
+          Merge pull request #4505 from jrw972/multiple-config-files
+
+          Multiple config files are not supported
+
+Tue Mar 12 18:02:01 UTC 2024  Justin Wilson  <wilsonj@unityfoundation.io>
+        commit a7eb6efe048b3f46cb5821b1501c9dbc56ceb0a0
+
+          Merge pull request #4513 from mitza-oci/thread-status
+
+          Minor updates to ThreadStatusManager
+
+Tue Mar 12 14:28:46 UTC 2024  Adam Mitz  <mitza@objectcomputing.com>
+        commit 307e673ef8efe2849c1b5129daf47bf93721918c
+
+        * docs/devguide/built_in_topics.rst:
+
+          updated docs for OpenDDSInternalThread BIT
+
+Tue Mar 12 14:21:41 UTC 2024  Adam Mitz  <mitza@objectcomputing.com>
+        commit 44a5e6ec9d175880b2d68fd296e73bbd6c649c80
+
+        * tools/rtpsrelay/GuidPartitionTable.h:
+        * tools/rtpsrelay/RtpsRelay.cpp:
+
+          Removed unused data member from GuidPartitionTable
+
+Mon Mar 11 21:56:54 UTC 2024  Adam Mitz  <mitza@objectcomputing.com>
+        commit 3b8045835c840a5c63a0ed193decf9c2832ccea2
+
+        * dds/DCPS/RTPS/Spdp.cpp:
+        * dds/DCPS/RTPS/Spdp.h:
+        * dds/DCPS/ReactorTask.cpp:
+        * dds/DCPS/ReactorTask.h:
+        * dds/DCPS/Service_Participant.cpp:
+        * dds/DCPS/ThreadStatusManager.cpp:
+        * dds/DCPS/ThreadStatusManager.h:
+        * dds/DCPS/transport/framework/TransportImpl.cpp:
+        * docs/devguide/built_in_topics.rst:
+        * docs/devguide/internet_enabled_rtps.rst:
+        * tests/stress-tests/dds/DCPS/MultiTask.cpp:
+        * tests/stress-tests/dds/DCPS/SporadicTask.cpp:
+        * tests/stress-tests/dds/DCPS/TimingChecker.cpp:
+        * tools/rtpsrelay/RtpsRelay.cpp:
+
+          Minor updates to ThreadStatusManager
+
+Mon Mar 11 18:08:06 UTC 2024  Justin Wilson  <wilsonj@unityfoundation.io>
+        commit 750e54a5cde77dd24715dc442f3b138060bec482
+
+          Merge pull request #4500 from sonndinh/value-reader-writer-api
+
+          Update ValueReader interface
+
+Mon Mar 11 18:07:48 UTC 2024  Justin Wilson  <wilsonj@unityfoundation.io>
+        commit 415170b24f6cb6a105e6306d2623d74a920aeff5
+
+          Merge pull request #4501 from jrw972/internal-content-filter
+
+          Internal DDS cannot efficiently filter on instances
+
+Mon Mar 11 18:05:25 UTC 2024  Justin Wilson  <wilsonj@unityfoundation.io>
+        commit 052c08f0a5cd336545d3f0249f822d041bbd9d3f
+
+          Merge pull request #4511 from
+          OpenDDS/dependabot/github_actions/docker/build-push-action-5.2.0
+
+          Bump docker/build-push-action from 5.1.0 to 5.2.0
+
+Mon Mar 11 18:04:10 UTC 2024  Justin Wilson  <wilsonj@unityfoundation.io>
+        commit 1b44e3c3a485f1363c072f134ef553c470f4a26d
+
+          Merge pull request #4512 from mitza-oci/relay-move
+
+          RtpsRelay: use std::move and update exception handling
+
+Mon Mar 11 14:50:28 UTC 2024  Adam Mitz  <mitza@objectcomputing.com>
+        commit bfd2ffeaee8425e02ffec0e4d364c81be79fa977
+
+        * tests/DCPS/RtpsRelay/Smoke/DataReaderListener.cpp:
+        * tools/dds/rtpsrelaylib/PartitionIndex.h:
+        * tools/rtpsrelay/RelayHandler.cpp:
+        * tools/rtpsrelay/RelayParticipantStatusReporter.cpp:
+        * tools/rtpsrelay/RtpsRelay.cpp:
+
+          RtpsRelay: use std::move and update exception handling
+
+Mon Mar 11 07:14:49 UTC 2024  dependabot[bot]  <49699333+dependabot[bot]@users.noreply.github.com>
+        commit df881af870fccc7ab36c73ab547dd4f649143ed2
+
+        * .github/workflows/docker_image.yml:
+
+          Bump docker/build-push-action from 5.1.0 to 5.2.0
+
+          Bumps
+          [docker/build-push-action](https://github.com/docker/build-push-action)
+          from 5.1.0 to 5.2.0.
+          - [Release
+          notes](https://github.com/docker/build-push-action/releases)
+          -
+          [Commits](https://github.com/docker/build-push-action/compare/4a13e500e55cf31b7a5d59a38ab2040ab0f42f56...af5a7ed5ba88268d5278f7203fb52cd833f66d6e)
+
+          ---
+          updated-dependencies:
+          - dependency-name: docker/build-push-action
+          dependency-type: direct:production
+          update-type: version-update:semver-minor
+          ...
+
+          Signed-off-by: dependabot[bot] <support@github.com>
+
+Fri Feb 02 16:48:06 UTC 2024  Justin Wilson  <wilsonj@unityfoundation.io>
+        commit f96bb4c7b63c2034b3659f4e81c774a03197d027
+
+        * dds/DCPS/ConfigStoreImpl.cpp:
+        * dds/DCPS/ConfigStoreImpl.h:
+        * dds/DCPS/Service_Participant.cpp:
+        * dds/DCPS/Service_Participant.h:
+        * dds/DCPS/transport/framework/TransportRegistry.cpp:
+        * dds/DCPS/transport/framework/TransportRegistry.h:
+        * dds/DCPS/transport/framework/TransportRegistry.inl:
+        * dds/FACE/config/Parser.cpp:
+        * tests/DCPS/ConfigFile/README.rst:
+        * tests/DCPS/ConfigFile/run_test.pl:
+        * tests/DCPS/ConfigFile/test0.ini:
+        * tests/unit-tests/dds/DCPS/ConfigStoreImpl.cpp:
+
+          Multiple config files are not supported
+
+          Problem
+          -------
+
+          OpenDDS currently supports a single configuration file.
+          Supporting
+          multiple configuration files would allow complex configurations
+          to be
+          broken down into more modular configuration files and it allows
+          "base"
+          configuration to be customized.
+
+          Solution
+          --------
+
+          Add a command-line argument named `-DCPSSingleConfigFile 0` to
+          turn on
+          support for multiple config files. For backwards compatibility,
+          the
+          default is `-DCPSSingleConfigFile 0`. When multiple config files
+          are
+          enabled, process command-line arguments in order and process each
+          configuration file as it is encountered. Multiple configuration
+          files
+          are supported via multiple `-DCPSConfigFile` arguments.
+
+          Configuration now processes environment variables first and then
+          command-line arguments in order. Each config file is processed as
+          it
+          is encounter in the command-line.
+
+Fri Mar 08 19:21:36 UTC 2024  Son Dinh  <dinhs@objectcomputing.com>
+        commit a291d38b9b54b804d2316d93a92b3304c34cdff3
+
+          Resolve merge conflict
+
+Fri Mar 08 19:05:03 UTC 2024  Justin Wilson  <wilsonj@unityfoundation.io>
+        commit 66598651e5c40dc694ec08425d92f41f438ba540
+
+          Merge pull request #4504 from sonndinh/fix-value-writer-coverity
+
+          Check return value from `ValueWriter`
+
+Fri Mar 08 19:02:17 UTC 2024  Justin Wilson  <wilsonj@unityfoundation.io>
+        commit cadee30882cf2e824d2f0620b6aa3f9d357b2fdc
+
+          Merge pull request #4507 from mitza-oci/relay-reduce-locking
+
+          RtpsRelay: reduce contention for GuidAddrSet's lock
+
+Tue Mar 05 15:12:40 UTC 2024  Justin Wilson  <wilsonj@unityfoundation.io>
+        commit eb04de3567b347f4e0877cdd0bf8304c7b2d60f3
+
+        * dds/DCPS/InternalDataReader.h:
+        * dds/DCPS/InternalDataWriter.h:
+        * tests/unit-tests/dds/DCPS/InternalDataWriter.cpp:
+
+          Internal DDS cannot efficiently filter on instances
+
+          Problem
+          -------
+
+          It is foreseeable that "demuxing" will be a necessary feature of
+          the
+          Internal DDS system. For example, suppose a socket abstract
+          writes
+          RTPS message samples which are keyed by the participant guid
+          prefix.
+          A reader is probably only interested in one participant. The
+          write
+          could give the sample to all readers which would be inefficient
+          since
+          only one reader is actually interested.
+
+          Solution
+          --------
+
+          This solution assumes that an InternalDataReader reader is
+          interested
+          in a set of instances that known a priori and are specified
+          explicitly. The InternalDataReader indexes attached readers on
+          the
+          instances to efficiently deliver samples to readers that are only
+          interested in those instances.
+
+          Note
+          ----
+
+          A "real" DDS systems would content-filtering to accomplish the
+          same
+          objective.
+
+Wed Mar 06 23:33:52 UTC 2024  Adam Mitz  <mitza@objectcomputing.com>
+        commit 24b8f479518a7e03d0d2ed170861ba290240b14e
+
+        * tools/rtpsrelay/GuidAddrSet.cpp:
+        * tools/rtpsrelay/GuidAddrSet.h:
+        * tools/rtpsrelay/GuidPartitionTable.cpp:
+        * tools/rtpsrelay/GuidPartitionTable.h:
+        * tools/rtpsrelay/ParticipantListener.cpp:
+        * tools/rtpsrelay/PublicationListener.cpp:
+        * tools/rtpsrelay/RelayHandler.h:
+        * tools/rtpsrelay/RelayParticipantStatusReporter.cpp:
+        * tools/rtpsrelay/RelayParticipantStatusReporter.h:
+        * tools/rtpsrelay/SubscriptionListener.cpp:
+
+          RtpsRelay: reduce contention for GuidAddrSet lock
+
+Thu Mar 07 19:14:33 UTC 2024  Justin Wilson  <wilsonj@unityfoundation.io>
+        commit face351dfecb3ab842320ad86c6b6574586275bb
+
+          Merge pull request #4489 from iguessthislldo/igtd/cmake-gen-out
+
+          Make Generated Output in CMake More Robust
+
+Thu Mar 07 19:11:02 UTC 2024  Justin Wilson  <wilsonj@unityfoundation.io>
+        commit 40fd3d6f59a421b7b3865274f49496a4775b61b4
+
+          Merge pull request #4502 from mitza-oci/wrapper-mpb
+
+          Removed unused mpb file
+
+Thu Mar 07 19:09:14 UTC 2024  Justin Wilson  <wilsonj@unityfoundation.io>
+        commit a8595e8dacd6bc4400f1dccd74f4ee51fb10e074
+
+          Merge pull request #4503 from iguessthislldo/igtd/cxx11-mpbs
+
+          `opendds_cxx11.mpb` Should Use `opendds_uses_cxx11.mpb`
+
+Thu Mar 07 17:15:24 UTC 2024  Son Dinh  <dinhs@objectcomputing.com>
+        commit e981c04cea0d3b2d111a9b22a16b6956dd7f66b5
+
+        * dds/DCPS/Observer.cpp:
+        * dds/DCPS/Observer.h:
+        * dds/DCPS/ValueCommon.h:
+        * dds/DCPS/ValueDispatcher.h:
+        * dds/idl/ts_generator.cpp:
+        * dds/idl/value_writer_generator.cpp:
+        * tests/unit-tests/dds/DCPS/JsonValueWriter.cpp:
+
+          More for checking return value
+
+Thu Mar 07 15:20:23 UTC 2024  Son Dinh  <dinhs@objectcomputing.com>
+        commit 0ec436197a8992414d0e934f8291c6b894e83a99
+
+        * tests/unit-tests/dds/DCPS/PrinterValueWriter.cpp:
+
+          Check return in PrinterValueWriter
+
+Thu Mar 07 06:14:35 UTC 2024  Son Dinh  <dinhs@objectcomputing.com>
+        commit 6caf7d36a076fd60b4eae1f45438cd332e1fbfa2
+
+        * tests/unit-tests/dds/DCPS/ValueCommon.cpp:
+
+          From review
+
+Thu Mar 07 01:54:06 UTC 2024  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit b228451164a9152b9b2c313b6d24c3eaf5f8ad49
+
+        * cmake/opendds_target_sources.cmake:
+
+          Add More Comments
+
+Thu Mar 07 01:33:22 UTC 2024  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit 15a6c9689fbccecb4f122a2d488189cff0c31e0b
+
+        * performance-tests/bench/bench_builder_exe.mpb:
+        * performance-tests/bench/bench_builder_idl_lib.mpb:
+        * performance-tests/bench/bench_exe.mpb:
+        * performance-tests/bench/bench_idl_lib.mpb:
+        * performance-tests/bench/builder/Bench_Builder.mpc:
+        * performance-tests/bench/common/Bench_Common.mpc:
+        * tests/DCPS/C++11/Messenger/Publisher/DDS_Cxx11_Messenger_Publisher.mpc:
+        * tests/DCPS/C++11/Messenger/Subscriber/DDS_Cxx11_Messenger_Subscriber.mpc:
+        * tests/DCPS/Compiler/vread_vwrite/VreadVwriteTest.mpc:
+
+          Make Use of `opendds_uses_cxx11`
+
+Thu Mar 07 01:25:36 UTC 2024  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit 42f2e1683bbbf73476ff36985a1b7aa4622c518e
+
+        * MPC/config/dcpslib.mpb:
+        * MPC/config/opendds_cxx11.mpb:
+        * MPC/config/opendds_uses_cxx11.mpb:
+
+          Add comments to mpbs
+
+Thu Mar 07 01:13:18 UTC 2024  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit 21be02349b2256bc56f93d28def51862ca6c44b4
+
+        * MPC/config/rtps_relay_lib.mpb:
+        * java/tests/complex_idl/complex_idl_test.mpc:
+        * java/tests/multirepo/multirepo_test.mpc:
+        * java/tests/two_idl/two_idl.mpc:
+        * performance-tests/bench/builder/Bench_Builder.mpc:
+        * performance-tests/bench/builder_idl/Bench_Builder_Idl.mpc:
+        * performance-tests/bench/common/Bench_Common.mpc:
+        * performance-tests/bench/idl/Bench_Idl.mpc:
+
+          Remove dcpslib Where it's Not Needed
+
+Wed Mar 06 23:57:11 UTC 2024  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit 9290d11d901c1a606d955900a60949e43ac0aa2e
+
+        * MPC/config/opendds_cxx11.mpb:
+        * MPC/config/opendds_uses_cxx11.mpb:
+
+          opendds_cxx11 Should Use opendds_uses_cxx11
+
+Wed Mar 06 23:08:41 UTC 2024  Adam Mitz  <mitza@objectcomputing.com>
+        commit 5a7f8e1992a44fbf38dd0a7b7171eb3e598e4b39
+
+        * MPC/config/dds_wrapper.mpb:
+
+          Removed unused mpb file
+
+Wed Mar 06 19:17:24 UTC 2024  Justin Wilson  <wilsonj@unityfoundation.io>
+        commit 19abd115af14606492dd50adf1a96e518a06e886
+
+          Merge pull request #4491 from jrw972/env-config
+
+          OpenDDS cannot be configured with environment variables
+
+Wed Jan 31 22:22:49 UTC 2024  Justin Wilson  <wilsonj@unityfoundation.io>
+        commit 2605ead31cb4334c388f305e0fee89aa838bf857
+
+        * bin/PerlDDS/Run_Test.pm:
+        * dds/DCPS/Service_Participant.cpp:
+        * dds/DCPS/Service_Participant.h:
+        * tests/DCPS/ConfigFile/ConfigFile.cpp:
+        * tests/DCPS/ConfigFile/run_test.pl:
+
+          OpenDDS cannot be configured with environment variables
+
+          Problem
+          -------
+
+          OpenDDS cannot be configured with environment variables.
+          Configuring
+          with environment variables is useful for containers and cloud
+          deployments.
+
+          Solution
+          --------
+
+          Parse environment variables and add them to the ConfigStore. Only
+          environment variables starting with OPENDDS_ are parsed.  The
+          remainder of the name is used as the key for the ConfigStore.
+          Environment variables are processed before command-line arguments
+          and
+          the config file.
+
+Wed Mar 06 15:02:12 UTC 2024  Son Dinh  <dinhs@objectcomputing.com>
+        commit 425637db2b4f6aa7c0f4eb776e1c5d8b07616995
+
+        * dds/DCPS/ValueCommon.cpp:
+
+          Fix lint
+
+Tue Mar 05 22:30:41 UTC 2024  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit 6c4b59da5e3fa8d1ed5389ff647f48a4dabfc86e
+
+        * cmake/opendds_target_sources.cmake:
+        * tests/cmake/idl_compiler_tests/CMakeLists.txt:
+
+          Add Missing Include to opendds_target_sources
+
+Tue Mar 05 21:17:28 UTC 2024  Son Dinh  <dinhs@objectcomputing.com>
+        commit f752b955574cd9a10b6b1c961883b5148b883f77
+
+        * dds/DCPS/ValueCommon.cpp:
+
+          Add a header
+
+Tue Mar 05 19:50:12 UTC 2024  Son Dinh  <dinhs@objectcomputing.com>
+        commit 7375fdd0522078a1deef2397e98482305b4962c8
+
+        * dds/DCPS/JsonValueReader.h:
+        * dds/DCPS/ValueCommon.cpp:
+        * dds/DCPS/ValueCommon.h:
+        * dds/DCPS/ValueReader.h:
+        * dds/idl/dds_generator.h:
+        * dds/idl/value_reader_generator.cpp:
+        * dds/idl/value_writer_generator.cpp:
+        * tests/unit-tests/dds/DCPS/JsonValueReader.cpp:
+        * tests/unit-tests/dds/DCPS/ValueCommon.cpp:
+
+          Update opendds_idl and tests
+
+Tue Mar 05 19:05:37 UTC 2024  Justin Wilson  <wilsonj@unityfoundation.io>
+        commit af0b2b75d87d1333f7f9a1076f5654f18bbdc3f1
+
+          Merge pull request #4499 from mitza-oci/configvariables
+
+          Updated configure script and CMake handling of config variables;
+          documentation updates
+
+Mon Mar 04 20:01:54 UTC 2024  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit 078954417acf73eeb51324ce4f11ed16693ad3b8
+
+        * cmake/dds_idl_sources.cmake:
+        * cmake/export.h.in:
+        * cmake/opendds_target_sources.cmake:
+        * cmake/tao_idl_sources.cmake:
+        * docs/devguide/building/cmake.rst:
+        * docs/news.d/cmake-include-base.rst:
+        * tests/cmake/idl_compiler_tests/CMakeLists.txt:
+        * tests/cmake/idl_compiler_tests/dir/test2.idl:
+
+          Add Option for Export Header Dir. in CMake
+
+          Added `opendds_target_sources(EXPORT_HEADER_DIR)`,
+          `opendds_export_header(DIR)`, and tests for them. Removed the
+          broken
+          `opendds_export_header(INCLUDE_BASE)`.
+
+Tue Mar 05 17:19:25 UTC 2024  Son Dinh  <dinhs@objectcomputing.com>
+        commit 02b2ba3c0177d6171bfd8b8720dd9be56113ff61
+
+        * dds/DCPS/JsonValueReader.h:
+        * dds/DCPS/ValueCommon.cpp:
+        * dds/DCPS/ValueCommon.h:
+        * dds/DCPS/ValueReader.h:
+        * dds/idl/value_reader_generator.cpp:
+        * tests/unit-tests/dds/DCPS/JsonValueReader.cpp:
+
+          Update ValueReader interface
+
+Mon Mar 04 19:41:02 UTC 2024  Adam Mitz  <mitza@objectcomputing.com>
+        commit fbc7ba3d215e5d49c0d92490f8de0ab83d4e8191
+
+        * dds/DCPS/Definitions.h:
+
+          Restore comment in Definitions.h
+
+          This partially reverts commit
+          1a0effe70c434fd683a9da305f340e2992f74b06.
+
+Wed Feb 28 14:56:48 UTC 2024  Adam Mitz  <mitza@objectcomputing.com>
+        commit 5ea8d6780e3aa3d85e48df59a8f7abdd92139f68
+
+        * configure:
+
+          fixed perl closure
+
+          (cherry picked from commit
+          8dbd712e8475a871a6b808d8da93ab883a7b1873)
+
+Wed Feb 28 14:51:46 UTC 2024  Adam Mitz  <mitza@objectcomputing.com>
+        commit 0396b385ba008894432cf4b53e70254a1f417c25
+
+        * configure:
+
+          fixed perl closure
+
+          (cherry picked from commit
+          073d23d03b8c94fc7f3ce0a450a78a3f4847cadb)
+
+Tue Feb 27 14:58:23 UTC 2024  Adam Mitz  <mitza@objectcomputing.com>
+        commit 2df4a0908891a8a27fe1c001978d3e1a1a3b21ce
+
+        * docs/devguide/building/index.rst:
+
+          Updated build docs
+
+          (cherry picked from commit
+          ef251c87930a730cfb38a7896c79e1dddf3cb6cc)
+
+Mon Feb 26 23:45:48 UTC 2024  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit a35b4918607f356114e6490a332352d9cfa96bd2
+
+        * cmake/init.cmake:
+
+          Set `OPENDDS_CONFIG_` values in CMake (#37)
+
+          (cherry picked from commit
+          c1757ef2bb9c2c59fcaaacec12b4de736bd3b764)
+
+Mon Mar 04 19:30:20 UTC 2024  Adam Mitz  <mitza@objectcomputing.com>
+        commit fc391c816021655ade3b40cfc12739b887ea5a96
+
+        * configure:
+
+          configure script update for OpenDDSConfig.h variables
+
+Mon Mar 04 19:02:41 UTC 2024  Justin Wilson  <wilsonj@unityfoundation.io>
+        commit 49c87fe23d28af213974594d6981f07b1afe846b
+
+          Merge pull request #4498 from
+          jwillemsen/jwi-openddsconfighinclude
+
+          Conditionally include OpenDDSConfig.h, fixes #4497
+
+Mon Mar 04 18:10:52 UTC 2024  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit 45987195db5b2cff4cbe1c3fe7bc9e67d959d770
+
+        * docs/news.d/openddsconfig.rst:
+
+          Update docs/news.d/openddsconfig.rst
+
+          Co-authored-by: Fred Hornsey <fred@hornsey.us>
+
+Sat Mar 02 12:28:08 UTC 2024  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit 3ae451ba1fe49eec396a8bdc737e7e5fb85565f3
+
+        * docs/news.d/openddsconfig.rst:
+
+          Document OPENDDS_IGNORE_OPENDDSCONFIG_H_FILE
+
+          * docs/news.d/openddsconfig.rst:
+
+Fri Mar 01 07:35:22 UTC 2024  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit e95ba45620d0abd4de452adb11332dba85a32b67
+
+        * dds/DCPS/Definitions.h:
+
+          Update Definitions.h
+
+Thu Feb 29 19:25:25 UTC 2024  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit aee0af4556a4e92d1ac73c7fc063948a7cff2100
+
+          Merge pull request #4421 from sonndinh/serialized-size-writer
+
+          Add an XCDR2 Value Writer
+
+Thu Feb 29 15:32:42 UTC 2024  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit b4a724b03658b7541b5c6f3ea37432671f12fb79
+
+        * dds/DCPS/Definitions.h:
+
+          Added empty line
+          * dds/DCPS/Definitions.h:
+
+Thu Feb 29 08:19:20 UTC 2024  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit 1a0effe70c434fd683a9da305f340e2992f74b06
+
+        * dds/DCPS/Definitions.h:
+
+          Check whether OpenDDSConfig.h exists before including it, fixes
+          #4497
+
+          * dds/DCPS/Definitions.h:
+
+Thu Feb 29 04:30:48 UTC 2024  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit 2dc2560c3379f0075a788e541cb6b7fe93ab74a2
+
+        * docs/news.d/cmake-cxx-std.rst:
+        * docs/news.d/cmake-include-base.rst:
+        * tests/cmake/idl_compiler_tests/CMakeLists.txt:
+
+          Add News and Remove Debug Print
+
+Wed Feb 28 22:49:53 UTC 2024  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit 99c215d7f10a5d6ab8b36b3a93534b03223fbf82
+
+        * tools/dds/rtpsrelaylib/Utility.h:
+        * tools/scripts/lint.pl:
+
+          Fix lint and rtpsrelaylib
+
+Wed Feb 28 19:26:47 UTC 2024  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit 2f7e805dc5f64d7b4d60132d746ad3a7e228f4a2
+
+          Merge pull request #4494 from sonndinh/configure
+
+          Update the usage message in the configure script
+
+Wed Feb 28 19:05:53 UTC 2024  Son Dinh  <dinhs@objectcomputing.com>
+        commit 8fa442d823f49dca358044445571c7f0a9ad3bde
+
+        * configure:
+
+          Missed a period
+
+Wed Feb 28 06:09:17 UTC 2024  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit c973a4dfffd5583b5145bd43228d3d2c0f113734
+
+        * cmake/dds_idl_sources.cmake:
+        * cmake/tao_idl_sources.cmake:
+        * tests/cmake/idl_compiler_tests/CMakeLists.txt:
+        * tools/scripts/lint.pl:
+
+          Simplify INCLUDE_BASE Logic
+
+          Now it doesn't have a seperate case for generated directory, but
+          INCLUDE_BASE for the TypeSupport.idl has to be the generated
+          directory,
+          which required some changes.
+
+Tue Feb 27 20:15:30 UTC 2024  Son Dinh  <dinhs@objectcomputing.com>
+        commit 807df2b71fd2445df3d3a4e4daf117ec3ceb490e
+
+        * tests/unit-tests/dds/DCPS/ValueCommon.cpp:
+
+          Add a null pair instance
+
+Tue Feb 27 19:13:13 UTC 2024  Son Dinh  <dinhs@objectcomputing.com>
+        commit 84dd4eb53048aa84f45538a206e5cc110d182b66
+
+        * tests/unit-tests/dds/DCPS/ValueCommon.cpp:
+
+          Unit test compile errors
+
+Tue Feb 27 19:00:48 UTC 2024  Son Dinh  <dinhs@objectcomputing.com>
+        commit 16d1b2cf9a734a477833e482d3151b1450b8da92
+
+        * dds/DCPS/ValueCommon.cpp:
+        * dds/DCPS/ValueCommon.h:
+
+          Fix link issue
+
+Tue Feb 27 18:22:28 UTC 2024  Son Dinh  <dinhs@objectcomputing.com>
+        commit 7b6d4cff8e30ce539e77aed7065bd82ba6ac7e76
+
+        * dds/DCPS/ValueCommon.h:
+        * dds/DCPS/ValueWriter.cpp:
+        * dds/DCPS/ValueWriter.h:
+        * tests/unit-tests/dds/DCPS/ValueCommon.cpp:
+
+          From reviews
+
+Mon Feb 26 19:19:28 UTC 2024  Justin Wilson  <wilsonj@unityfoundation.io>
+        commit d139fe743445fa144a1eae230d5a2da704a8b692
+
+          Merge pull request #4482 from mitza-oci/configh
+
+          Move and rename cmake/config.h.in so it can be used more
+          generally
+
+Mon Feb 26 19:06:22 UTC 2024  Adam Mitz  <mitza@objectcomputing.com>
+        commit 61f549aaa9cec254ba65c9e9130fbb522af2f78b
+
+        * docs/news.d/openddsconfig.rst:
+
+          Update docs/news.d/openddsconfig.rst
+
+          Co-authored-by: Fred Hornsey <fred@hornsey.us>
+
+Mon Feb 26 19:04:59 UTC 2024  Justin Wilson  <wilsonj@unityfoundation.io>
+        commit 8a80ceba7926a158a48a0543af343eb1f2423502
+
+          Merge pull request #4488 from jrw972/opendds-prefix-not-needed
+
+          `OPENDDS` prefix is not necessary in ConfigStore
+
+Mon Feb 26 18:40:21 UTC 2024  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit eb3a16737ba1a491da6e4c860b99619241efdf2c
+
+        * cmake/dds_idl_sources.cmake:
+        * cmake/opendds_target_sources.cmake:
+        * cmake/tao_idl_sources.cmake:
+        * tests/cmake/idl_compiler_tests/CMakeLists.txt:
+
+          Make Generated Output in CMake More Robust
+
+          The `_opendds_*_generated_output functions` in CMake didn't have
+          any
+          sort of testing and could give incorrect results for where to put
+          the
+          export header file. This tries to correct both of those issues.
+
+          Also added workaround for
+          https://github.com/DOCGroup/ACE_TAO/issues/2202
+
+Mon Feb 26 16:53:37 UTC 2024  Adam Mitz  <mitza@objectcomputing.com>
+        commit ac19c6bea16c2364f5fab207ced0567950bdd78b
+
+        * docs/news.d/openddsconfig.rst:
+
+          NEWS for this change
+
+Fri Feb 23 23:10:15 UTC 2024  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit a9faa11e47799b5678407642a37c1982bcd62c36
+
+        * tools/rtpsrelay/CMakeLists.txt:
+
+          Add missing PRIVATE to RtpsRelay
+
+Fri Feb 23 22:57:00 UTC 2024  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit df2b8d5c0cad46d215a5859ea776260c9375c6d0
+
+        * CMakeLists.txt:
+
+          Fix Typo in CMakeLists.txt
+
+Fri Feb 23 22:42:41 UTC 2024  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit 1d2486d53dca5b49e896457278ec88ab0dbc0646
+
+        * CMakeLists.txt:
+        * cmake/opendds_build_helpers.cmake:
+        * dds/CMakeLists.txt:
+        * dds/DCPS/CMakeLists.txt:
+        * dds/InfoRepo/CMakeLists.txt:
+        * dds/OpenDDSConfig.h.in:
+        * dds/idl/CMakeLists.txt:
+        * tools/inspect/CMakeLists.txt:
+
+          Fix Including OpenDDSConfig.h for CMake
+
+Fri Feb 23 22:39:15 UTC 2024  Adam Mitz  <mitza@objectcomputing.com>
+        commit b8b0619b41487a26a59ee0a424b5c4d3964e315f
+
+        * dds/DdsDcps.mpc:
+
+          Install the new header
+
+Fri Feb 23 21:07:06 UTC 2024  Adam Mitz  <mitza@objectcomputing.com>
+        commit 1bd3d483990818cdad43093827b687abb264c3be
+
+        * dds/DdsDcps.mpc:
+
+          config dir no longer used
+
+Fri Feb 23 21:02:01 UTC 2024  Adam Mitz  <mitza@objectcomputing.com>
+        commit 20b5b40c8db3f013f9b621e04374588a4c5bc49d
+
+        * configure:
+        * dds/CMakeLists.txt:
+        * dds/DCPS/Definitions.h:
+        * dds/DCPS/StaticIncludes.h:
+        * dds/OpenDDSConfig.h.in:
+
+          Renamed OPENDDS_USES_AUTO_STATIC_INCLUDES
+
+Fri Feb 23 20:58:25 UTC 2024  Adam Mitz  <mitza@objectcomputing.com>
+        commit b18645616ecdce05dc09f63e3c82a094112c0d25
+
+        * dds/.gitignore:
+        * dds/config/.gitignore:
+
+          updated .gitignore
+
+Fri Feb 23 19:58:15 UTC 2024  Adam Mitz  <mitza@objectcomputing.com>
+        commit 6bc4b2bead1444edc6fb69a3bce0537951836d15
+
+        * configure:
+        * dds/CMakeLists.txt:
+        * dds/DCPS/Definitions.h:
+        * dds/config/OpenDDSConfig.h.in  dds/OpenDDSConfig.h.in:
+        * tools/scripts/show_build_config.pl:
+
+          Moved OpenDDSConfig.h and made it required
+
+Fri Feb 23 18:46:37 UTC 2024  Adam Mitz  <mitza@objectcomputing.com>
+        commit a53e0ddcd67601380ed8caa568c039c82d8004ab
+
+        * dds/config/OpenDDSConfig.h.in:
+
+          Updated header include guard name
+
+Wed Jan 31 20:20:02 UTC 2024  Justin Wilson  <wilsonj@unityfoundation.io>
+        commit fe67f27d40ea39988c7bb78e7fdb549a6edc7ad2
+
+        * dds/DCPS/ConfigStoreImpl.cpp:
+        * dds/DCPS/ConfigStoreImpl.h:
+        * dds/DCPS/InfoRepoDiscovery/InfoRepoDiscovery.cpp:
+        * dds/DCPS/RTPS/ICE/Ice.cpp:
+        * dds/DCPS/RTPS/RtpsDiscovery.cpp:
+        * dds/DCPS/RTPS/RtpsDiscoveryConfig.cpp:
+        * dds/DCPS/Service_Participant.cpp:
+        * dds/DCPS/Service_Participant.h:
+        * dds/DCPS/StaticDiscovery.cpp:
+        * dds/DCPS/security/framework/SecurityRegistry.cpp:
+        * dds/DCPS/transport/framework/TransportConfig.cpp:
+        * dds/DCPS/transport/framework/TransportInst.cpp:
+        * dds/DCPS/transport/framework/TransportRegistry.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpInst.cpp:
+
+          `OPENDDS` prefix is not necessary in ConfigStore
+
+          Problem
+          -------
+
+          Prefixing every ConfigStore key with OPENDDS is not necessary.
+
+          Solution
+          --------
+
+          Remove the `OPENDDS` prefix.
+
+Fri Feb 23 17:05:13 UTC 2024  Son Dinh  <dinhs@objectcomputing.com>
+        commit fe8ae0c3d5171cbf03e932f087881c54b665f9c7
+
+        * dds/CMakeLists.txt:
+
+          Try fixing cmake builds
+
+Fri Feb 23 15:42:27 UTC 2024  Son Dinh  <dinhs@objectcomputing.com>
+        commit 940a9b7a96b8d934d7c51259e1e150248bffe89b
+
+        * dds/DCPS/ValueCommon.cpp:
+
+          Fix implicit conversion warning on Windows
+
+Fri Feb 23 07:49:02 UTC 2024  Son Dinh  <dinhs@objectcomputing.com>
+        commit 719c171e65f05a78c5069bfb980b262defe94188
+
+        * dds/DCPS/ValueCommon.h:
+        * dds/DCPS/XTypes/DynamicVwrite.cpp:
+
+          From review & fix windows builds
+
+Thu Feb 22 19:10:37 UTC 2024  Justin Wilson  <wilsonj@unityfoundation.io>
+        commit 1c229557abf68bc70926c7dcad1be1e3902697ac
+
+          Merge pull request #4479 from jrw972/load-security-configuration
+
+          `load_security_configuration` uses `ACE_Configuration_Heap`
+
+Thu Feb 22 19:10:06 UTC 2024  Justin Wilson  <wilsonj@unityfoundation.io>
+        commit e27957c4280fd4e8dbf392ba4f9f79e33fb06974
+
+          Merge pull request #4481 from iguessthislldo/igtd/cmake-cxx-std
+
+          Set Minimum C++ Standard on CMake Targets
+
+Thu Feb 22 19:02:06 UTC 2024  Justin Wilson  <wilsonj@unityfoundation.io>
+        commit ff4472e8a66d64a8a71e7a67e69be9d73a287741
+
+          Merge pull request #4485 from
+          jrw972/rtps-discovery-config-setters
+
+          Various RtpsDiscoveryConfig setters don't set
+
+Thu Feb 22 18:56:31 UTC 2024  Son Dinh  <dinhs@objectcomputing.com>
+        commit 032923b136b51b09d55f4112e40081d88dc01168
+
+        * dds/DCPS/ValueCommon.h:
+
+          Fixing linking error
+
+Thu Feb 22 17:39:18 UTC 2024  Son Dinh  <dinhs@objectcomputing.com>
+        commit f62eb5e74393bfaf99be34eb0b42303ecf4c8a95
+
+        * dds/idl/value_writer_generator.cpp:
+
+          Scoped enum doesn't implicitly convert to int
+
+Thu Feb 22 16:17:10 UTC 2024  Son Dinh  <dinhs@objectcomputing.com>
+        commit 999cc1d271e38a793e8ef3c4bb38d92d18c54878
+
+        * dds/DCPS/JsonValueWriter.h:
+        * dds/DCPS/PrinterValueWriter.h:
+        * dds/DCPS/ValueCommon.cpp:
+        * dds/DCPS/ValueCommon.h:
+        * dds/DCPS/ValueWriter.cpp:
+        * dds/DCPS/ValueWriter.h:
+        * dds/DCPS/XTypes/DynamicVwrite.cpp:
+        * tests/unit-tests/dds/DCPS/PrinterValueWriter.cpp:
+
+          From review & fix bug
+
+Thu Feb 22 15:53:15 UTC 2024  Justin Wilson  <wilsonj@unityfoundation.io>
+        commit d77ef6fb53c3a72db00314d513082133a1fa5861
+
+        * dds/DCPS/RTPS/RtpsDiscoveryConfig.cpp:
+
+          Various RtpsDiscoveryConfig setters don't set
+
+          Problem
+          -------
+
+          Various setters in RtpsDiscoveryConfig are getting from the
+          ConfigStore instead of setting.
+
+          Solution
+          --------
+
+          Change the get to set.
+
+Wed Feb 21 23:14:50 UTC 2024  Adam Mitz  <mitza@objectcomputing.com>
+        commit c48f55bceb4523040c3e68bd2522f7ecd72fa424
+
+        * tools/scripts/show_build_config.pl:
+
+          cross-compile / safety profile
+
+Wed Feb 21 23:14:04 UTC 2024  Adam Mitz  <mitza@objectcomputing.com>
+        commit d139ade415ce0278b1f44d2a7e575d591e9b7772
+
+        * .github/workflows/build_and_test.yml:
+
+          try to simplify some of the safety profile CI builds
+
+Wed Feb 21 20:00:04 UTC 2024  Adam Mitz  <mitza@objectcomputing.com>
+        commit 1c2fc9614025846058ef71b837cf549aef2f7e95
+
+        * tools/scripts/show_build_config.pl:
+
+          Updated to work with cross-compiles
+
+Wed Feb 21 19:03:02 UTC 2024  Justin Wilson  <wilsonj@unityfoundation.io>
+        commit 2fa870e8376551c6b78f4d096bdc97a2c2edee2f
+
+          Merge pull request #4483 from mitza-oci/headers
+
+          Added a few generated headers to DdsDcps.mpc
+
+Wed Feb 21 18:10:37 UTC 2024  Son Dinh  <dinhs@objectcomputing.com>
+        commit 598dc8cf496bb799cdd5b96ec9bb1d29520144a0
+
+        * dds/DCPS/ValueCommon.h:
+        * dds/DCPS/XTypes/DynamicVwrite.cpp:
+        * dds/idl/value_writer_generator.cpp:
+        * tests/unit-tests/dds/DCPS/JsonValueWriter.cpp:
+        * tests/unit-tests/dds/DCPS/PrinterValueWriter.cpp:
+
+          Update helper classes and fix tests
+
+Wed Feb 21 16:20:29 UTC 2024  Son Dinh  <dinhs@objectcomputing.com>
+        commit 285594a0684941fe3f519934bf961824aa7694f2
+
+        * dds/DCPS/ValueCommon.h:
+        * dds/DCPS/Xcdr2ValueWriter.cpp:
+        * dds/idl/value_writer_generator.cpp:
+        * tests/unit-tests/dds/DCPS/JsonValueWriter.cpp:
+        * tests/unit-tests/dds/DCPS/PrinterValueWriter.cpp:
+
+          Update value writer generator
+
+Wed Feb 21 15:34:47 UTC 2024  Adam Mitz  <mitza@objectcomputing.com>
+        commit 0097901d204011e722ccdf1a110e061d71298ffe
+
+        * configure:
+
+          moved write_opendds_configh in configure
+
+Wed Feb 21 15:10:05 UTC 2024  Adam Mitz  <mitza@objectcomputing.com>
+        commit 302ba43f79b45881099636d44e899436a71b6e8d
+
+        * dds/DdsDcps.mpc:
+
+          Added a few generated headers to DdsDcps.mpc
+
+          They will now be included in make install and make realclean
+
+Mon Feb 19 23:29:52 UTC 2024  Adam Mitz  <mitza@objectcomputing.com>
+        commit 322994fc5013715fe0953f97557c9fd39c20e4a1
+
+        * cmake/config.h.in:
+        * configure:
+        * dds/CMakeLists.txt:
+        * dds/DCPS/Definitions.h:
+        * dds/DdsDcps.mpc:
+        * dds/config/.gitignore:
+        * dds/config/OpenDDSConfig.h.in:
+        * tools/scripts/show_build_config.pl:
+
+          Move and rename cmake/config.h.in so it can be used more
+          generally
+
+Wed Feb 21 07:43:45 UTC 2024  Son Dinh  <dinhs@objectcomputing.com>
+        commit 5634ebc5d189f413cbe5614fc6292240b5cd4e8f
+
+        * dds/DCPS/JsonValueWriter.h:
+        * dds/DCPS/PrinterValueWriter.h:
+        * dds/DCPS/ValueCommon.h:
+        * dds/DCPS/ValueReader.h:
+        * dds/DCPS/ValueWriter.cpp:
+        * dds/DCPS/ValueWriter.h:
+        * dds/DCPS/XTypes/DynamicVwrite.cpp:
+        * dds/DCPS/XTypes/DynamicVwrite.h:
+        * dds/DCPS/XTypes/TypeLookupService.cpp:
+        * dds/DCPS/Xcdr2ValueWriter.cpp:
+        * dds/DCPS/Xcdr2ValueWriter.h:
+
+          Use helper classes for enum and bitmask
+
+Tue Feb 20 18:46:24 UTC 2024  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit a1631e473146f4604e22237b763f89032e6f9f09
+
+        * cmake/import_common.cmake:
+        * cmake/init.cmake:
+        * cmake/opendds_build_helpers.cmake:
+        * docs/devguide/building/cmake.rst:
+        * docs/devguide/building/index.rst:
+        * docs/news.d/cmake-cxx-std.rst:
+
+          Set Minimum C++ Standard on CMake Targets
+
+          To fix #4478
+
+Mon Jan 29 15:14:01 UTC 2024  Justin Wilson  <wilsonj@unityfoundation.io>
+        commit 7c5ab910bdfc43f01ff4ae72cc7eaadbbcda24e3
+
+        * dds/CMakeLists.txt:
+        * dds/DCPS/ConfigUtils.cpp:
+        * dds/DCPS/ConfigUtils.h:
+        * dds/DCPS/InfoRepoDiscovery/InfoRepoDiscovery.cpp:
+        * dds/DCPS/RTPS/RtpsDiscovery.cpp:
+        * dds/DCPS/Service_Participant.h:
+        * dds/DCPS/StaticDiscovery.cpp:
+        * dds/DCPS/security/framework/SecurityRegistry.cpp:
+        * dds/DCPS/security/framework/SecurityRegistry.h:
+        * dds/DCPS/transport/framework/TransportDefs.h:
+        * dds/DCPS/transport/framework/TransportRegistry.h:
+
+          `load_security_configuration` uses `ACE_Configuration_Heap`
+
+          Problem
+          -------
+
+          `load_security_configuration` uses `ACE_Configuration_Heap` and
+          `ACE_Configuration_Heap` is being removed where possible as part
+          of #4134.
+
+          Solution
+          --------
+
+          Remove `ACE_Configuration_Heap`.
+
+Mon Feb 19 19:01:42 UTC 2024  Justin Wilson  <wilsonj@unityfoundation.io>
+        commit 9495d635d54d9de19c0f40258b9d54589265c4e9
+
+          Merge pull request #4475 from jrw972/load-transport-configuration
+
+          `load_transport_configuration` uses `ACE_Configuration_Heap`
+
+Mon Feb 19 18:50:39 UTC 2024  Son Dinh  <dinhs@objectcomputing.com>
+        commit ee8782c3f59970e67421744741c051fa9207231f
+
+        * dds/DCPS/ValueHelper.h:
+        * dds/DCPS/ValueWriter.cpp:
+        * dds/DCPS/ValueWriter.h:
+        * dds/idl/value_writer_generator.cpp:
+
+          Fixed warnings in generated code for writing sequence
+
+Mon Feb 19 18:17:04 UTC 2024  Son Dinh  <dinhs@objectcomputing.com>
+        commit e211bddbe993e614d1c11d952d968130adc60a11
+
+        * dds/DCPS/JsonValueWriter.h:
+        * dds/DCPS/PrinterValueWriter.h:
+        * dds/DCPS/ValueHelper.h:
+        * dds/DCPS/ValueWriter.h:
+        * dds/DCPS/XTypes/DynamicVwrite.cpp:
+        * dds/DCPS/XTypes/DynamicVwrite.h:
+        * dds/DCPS/Xcdr2ValueWriter.cpp:
+        * dds/DCPS/Xcdr2ValueWriter.h:
+        * tests/unit-tests/dds/DCPS/JsonValueWriter.cpp:
+        * tests/unit-tests/dds/DCPS/PrinterValueWriter.cpp:
+
+          Add write_bitmask
+
+Fri Feb 16 19:02:57 UTC 2024  Justin Wilson  <wilsonj@unityfoundation.io>
+        commit b1c534032bb62ad4ae32609778de6b8d6c823a66
+
+          Merge pull request #4472 from iguessthislldo/igtd/rtps-release
+
+          Post 3.27.0 Release Script Improvements
+
+Fri Feb 16 19:01:26 UTC 2024  Son Dinh  <dinhs@objectcomputing.com>
+        commit 06bb40ca1cb5a4b3c21c8c7c5b8b8e6a05a706d4
+
+        * tests/unit-tests/dds/DCPS/Xcdr2ValueWriter.cpp:
+
+          Fix a test fail caused by lack of DynamicDataAdapter
+
+Fri Feb 16 19:00:34 UTC 2024  Justin Wilson  <wilsonj@unityfoundation.io>
+        commit 0b8d2a7adea7154a946c136aa813300b12a1b859
+
+        * dds/DCPS/transport/framework/TransportRegistry.cpp:
+
+          Update dds/DCPS/transport/framework/TransportRegistry.cpp
+
+          Co-authored-by: Fred Hornsey <fred@hornsey.us>
+
+Fri Feb 16 17:15:37 UTC 2024  Son Dinh  <dinhs@objectcomputing.com>
+        commit 4680bc51998124fef1254a994b514808b2b64ec3
+
+        * dds/DCPS/ValueWriter.cpp:
+        * dds/DCPS/ValueWriter.h:
+        * dds/DCPS/XTypes/DynamicDataImpl.cpp:
+        * dds/DCPS/XTypes/DynamicVwrite.cpp:
+        * dds/DCPS/XTypes/DynamicVwrite.h:
+        * dds/DCPS/XTypes/TypeObject.h:
+        * dds/DCPS/XTypes/Utils.cpp:
+        * dds/DCPS/Xcdr2ValueWriter.cpp:
+        * tests/unit-tests/dds/DCPS/Xcdr2ValueWriter.cpp:
+
+          From reviews & CI
+
+Thu Feb 15 23:58:46 UTC 2024  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit 91574bf05947c0665adc06bd365c30b129889a44
+
+        * tools/scripts/gitrelease.pl:
+
+          Check for existing assets in release
+
+Fri Jan 26 21:31:43 UTC 2024  Justin Wilson  <wilsonj@unityfoundation.io>
+        commit 12938e05b6a4fdf183d73f6068fb0f0ca9cadb6a
+
+        * dds/DCPS/RTPS/Sedp.cpp:
+        * dds/DCPS/Service_Participant.cpp:
+        * dds/DCPS/transport/framework/TransportClient.cpp:
+        * dds/DCPS/transport/framework/TransportConfig.cpp:
+        * dds/DCPS/transport/framework/TransportConfig.h:
+        * dds/DCPS/transport/framework/TransportRegistry.cpp:
+        * dds/DCPS/transport/framework/TransportRegistry.h:
+        * java/dds/OpenDDS_DCPS_jni.cpp:
+        * tests/DCPS/ConfigFile/ConfigFile.cpp:
+        * tests/DCPS/Thrasher/Publisher.cpp:
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model/xsl/traits_cpp.xsl:
+
+          `load_transport_configuration` uses `ACE_Configuration_Heap`
+
+          Problem
+          -------
+
+          `load_transport_configuration` uses `ACE_Configuration_Heap` and
+          `ACE_Configuration_Heap` is being removed where possible as part
+          of #4134.
+
+          Solution
+          --------
+
+          Simplify the arguments to only have the file name.
+
+Wed Feb 14 19:04:38 UTC 2024  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit b47e567d03f50eb2ec38b90c2f2b110aa113c4e0
+
+          Merge pull request #4469 from jrw972/load-discovery-configuration
+
+          `load_discovery_configuration` uses `ACE_Configuration_Heap`
+
+Wed Feb 14 17:46:29 UTC 2024  Son Dinh  <dinhs@objectcomputing.com>
+        commit d2c3d278b15720b2c3cb69b04d2fa28adae89534
+
+        * dds/DCPS/Xcdr2ValueWriter.h:
+
+          Fix error for safety profile
+
+Wed Feb 14 17:29:26 UTC 2024  Son Dinh  <dinhs@objectcomputing.com>
+        commit 6c75daca85554bc25e5eeef76a138ce6f6ceb797
+
+        * dds/DCPS/ValueWriter.cpp:
+        * dds/DCPS/Xcdr2ValueWriter.cpp:
+        * tests/DCPS/Compiler/C++11/idl_test3_main/main.cpp:
+        * tests/DCPS/Compiler/idl_test3_main/main.cpp:
+
+          Fix CI
+
+Wed Feb 14 02:27:26 UTC 2024  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit 2b4392c0c35aec4e6d047ad2d6c78f36915f75de
+
+        * docs/internal/release.rst:
+        * tools/scripts/gitrelease.pl:
+
+          Specially Check for 403 and Tweak Release Document
+
+Wed Feb 14 01:32:18 UTC 2024  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit 00456bcb2a900f73db15b0bfcbb0aa03b1dc94fa
+
+        * docs/devguide/shapes.rst:
+        * docs/internal/release.rst:
+        * tools/scripts/gitrelease.pl:
+        * tools/scripts/modules/command_utils.pm:
+        * tools/scripts/modules/ini.pm:
+        * tools/scripts/modules/misc_utils.pm:
+
+          Post 3.27.0 Release Script Improvements
+
+          - Replace `--upload-shapes-demo` with `--upload-artifacts`, which
+          will
+          now upload the RTPS interop test in addition to the shapes demo.
+          - `--upload-shapes-demo`, now `--upload-artifacts` was unable to
+          download artifacts from workflows. [This GitHub discussion
+          answer](https://github.com/orgs/community/discussions/88698#discussioncomment-8252538)
+          provided an overview of the issue issue. The artifact download
+          URL was
+          being redirected to an internal Microsoft one which rejects
+          GitHub
+          authentication. The solution was to use the `download` function
+          instead
+          of PitHub and make a special case where it detects the failed
+          redirect
+          and retries it without authentication.
+          - Replace the multiple `die_with_stack_trace` functions with a
+          single
+          implementation called `trace`. Also fixed the confusing
+          off-by-one
+          error in the output.
+
+Tue Feb 13 22:10:49 UTC 2024  Son Dinh  <dinhs@objectcomputing.com>
+        commit 7328ed8303307ad429c54999f0b2174c2c3330b8
+
+        * dds/DCPS/PoolAllocator.h:
+        * dds/DCPS/XTypes/DynamicVwrite.cpp:
+        * dds/DCPS/Xcdr2ValueWriter.h:
+        * tests/unit-tests/dds/DCPS/JsonValueWriter.cpp:
+
+          More from CI
+
+Tue Feb 13 18:57:04 UTC 2024  Son Dinh  <dinhs@objectcomputing.com>
+        commit a8df5f0ef838cfd7fd2c895e0e76f66ff331e508
+
+        * dds/DCPS/ValueWriter.cpp:
+        * dds/DCPS/ValueWriter.h:
+        * dds/DCPS/XTypes/Utils.cpp:
+        * dds/DCPS/XTypes/Utils.h:
+        * dds/DCPS/Xcdr2ValueWriter.cpp:
+        * dds/DCPS/Xcdr2ValueWriter.h:
+
+          From review. Fixed conversion warning from size_t to
+          ACE_CDR::ULong
+
+Mon Feb 12 18:16:35 UTC 2024  Son Dinh  <dinhs@objectcomputing.com>
+        commit b4f19042046532bec9b64f68849e0c9af16f8ecf
+
+        * dds/DCPS/Xcdr2ValueWriter.h:
+        * tests/DCPS/Compiler/xcdr/xcdr.cpp:
+
+          Add vwrite test cases to the xcdr test
+
+Mon Feb 12 17:37:19 UTC 2024  Son Dinh  <dinhs@objectcomputing.com>
+        commit 4d56f0962b3cf1e54a7a12fe0c524a33fcef5d4d
+
+        * dds/DCPS/XTypes/DynamicDataImpl.cpp:
+        * dds/DCPS/XTypes/DynamicVwrite.cpp:
+        * dds/DCPS/XTypes/TypeObject.h:
+        * dds/DCPS/XTypes/TypeObjectTypeSupportImpl.h:
+        * dds/idl/marshal_generator.cpp:
+        * dds/idl/value_writer_generator.cpp:
+        * tests/DCPS/Compiler/C++11/idl_test3_main/main.cpp:
+        * tests/DCPS/Compiler/idl_test3_main/main.cpp:
+        * tests/unit-tests/dds/DCPS/XTypes/Utils.cpp:
+
+          Check return value from generated vwrite
+
+Thu Jan 25 20:55:44 UTC 2024  Justin Wilson  <wilsonj@unityfoundation.io>
+        commit 6753dc8c5310fed689e8aa054e8f93a59992b29b
+
+        * dds/DCPS/Service_Participant.cpp:
+        * dds/DCPS/Service_Participant.h:
+
+          `load_discovery_configuration` uses `ACE_Configuration_Heap`
+
+          Problem
+          -------
+
+          `load_discovery_configuration` uses `ACE_Configuration_Heap` and
+          `ACE_Configuration_Heap` is being removed where possible as part
+          of #4134.
+
+          Solution
+          --------
+
+          Simplify the arguments to only have the discovery type.
+
+Mon Feb 12 15:27:34 UTC 2024  Son Dinh  <dinhs@objectcomputing.com>
+        commit 0aabd9fa77c757d79db75c0b18db006968b72dda
+
+          Merge master
+
+Sun Feb 11 04:45:17 UTC 2024  Son Dinh  <dinhs@objectcomputing.com>
+        commit bd157c18ed022f0a0bbd984900726e3d3a62b021
+
+        * dds/DCPS/XTypes/DynamicVwrite.cpp:
+        * dds/DCPS/XTypes/Utils.cpp:
+        * dds/DCPS/XTypes/Utils.h:
+
+          Update write array
+
+Sat Feb 10 17:11:50 UTC 2024  Son Dinh  <dinhs@objectcomputing.com>
+        commit 630bccf39af1e5ed3d264dfa1b29804e3dc2ae6d
+
+        * dds/DCPS/XTypes/DynamicVwrite.cpp:
+
+          Optimize for multi-dimensional array of primitive
+
+Fri Feb 09 19:02:11 UTC 2024  Justin Wilson  <wilsonj@unityfoundation.io>
+        commit 26b946f4f0fde2d3480f27e1d6f879ff9be38ce7
+
+          Merge pull request #4470 from mitza-oci/master
+
+          Removed second ; when a statement ends in ;;
+
+Thu Feb 08 22:30:09 UTC 2024  Adam Mitz  <mitza@objectcomputing.com>
+        commit 6a118c118234f7b72349d43f536022f00991c1bb
+
+        * dds/DCPS/NetworkResource.cpp:
+        * dds/DCPS/RTPS/ICE/Stun.h:
+        * dds/DCPS/XTypes/DynamicDataXcdrReadImpl.cpp:
+        * dds/DCPS/transport/shmem/ShmemTransport.cpp:
+        * tests/unit-tests/dds/DCPS/Qos_Helper.cpp:
+
+          Removed second ; when a statement ends in ;;
+
+Thu Feb 08 21:21:28 UTC 2024  Justin Wilson  <wilsonj@unityfoundation.io>
+        commit c49bb54903eca9b360428e7630761c944ae56b82
+
+          Merge pull request #4454 from jrw972/domain-config-store
+
+          `[domain/*]` does not use `ConfigStore`
+
+Thu Feb 08 19:01:52 UTC 2024  Justin Wilson  <wilsonj@unityfoundation.io>
+        commit 7b5fd909cc0e8fe5a422e396d31281659931031c
+
+          Merge pull request #4466 from mitza-oci/vread-vwrite-fixed
+
+          Use ACE_CDR::Fixed as the type of fixed values in ValueReader and
+          ValueWriter
+
+Thu Feb 08 18:46:05 UTC 2024  Son Dinh  <dinhs@objectcomputing.com>
+        commit 9f949b676fc2af9e573f2c4b6aa23b189a246e18
+
+        * dds/DCPS/Observer.cpp:
+        * dds/DCPS/ValueWriter.cpp:
+        * dds/idl/value_writer_generator.cpp:
+        * tests/unit-tests/dds/DCPS/JsonValueWriter.cpp:
+        * tests/unit-tests/dds/DCPS/PrinterValueWriter.cpp:
+
+          Fix compile errors
+
+Thu Feb 08 18:02:18 UTC 2024  Son Dinh  <dinhs@objectcomputing.com>
+        commit 210aaff87406c695bc29325be5887cdff9947067
+
+        * dds/DCPS/JsonValueWriter.h:
+        * dds/DCPS/PrinterValueWriter.h:
+        * dds/DCPS/ValueWriter.h:
+        * dds/DCPS/XTypes/DynamicVwrite.cpp:
+        * dds/DCPS/XTypes/DynamicVwrite.h:
+        * dds/DCPS/Xcdr2ValueWriter.cpp:
+        * dds/DCPS/Xcdr2ValueWriter.h:
+        * dds/idl/value_writer_generator.cpp:
+        * tests/unit-tests/dds/DCPS/Xcdr2ValueWriter.cpp:
+
+          Make ValueWriter return bool
+
+Tue Jan 16 17:40:25 UTC 2024  Justin Wilson  <wilsonj@unityfoundation.io>
+        commit cfa7a55c27ee3ed5986a3117713308460b45d9a1
+
+        * dds/DCPS/ConfigStoreImpl.cpp:
+        * dds/DCPS/Service_Participant.cpp:
+        * dds/DCPS/Service_Participant.h:
+        * docs/news.d/config_store3.rst:
+
+          `[domain/*]` does not use `ConfigStore`
+
+          Problem
+          -------
+
+          `[domain/*]` does not use ConfigStore. See #4134.
+
+          Solution
+          --------
+
+          Convert `[domain/*]` to use ConfigStore.
+
+Wed Feb 07 21:34:49 UTC 2024  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit 78d2fbf9689f02a4cff7c30cc185cbc18d495fac
+
+        * PROBLEM-REPORT-FORM:
+        * VERSION.txt:
+        * dds/Version.h:
+
+          OpenDDS Post Release 3.27.0
+
+Wed Feb 07 21:18:11 UTC 2024  Adam Mitz  <mitza@objectcomputing.com>
+        commit 332f78d3703b9dafd86726cf26a120db06894789
+
+        * tests/unit-tests/dds/DCPS/PrinterValueWriter.cpp:
+
+          Avoid an off-by-one error in ACE by using different input
+
+Tue Feb 06 20:23:49 UTC 2024  Adam Mitz  <mitza@objectcomputing.com>
+        commit c8e45ada5e131dd94be0496f8dd27a255b4bc6d4
+
+        * FACE/Fixed.h:
+        * dds/DCPS/JsonValueReader.h:
+        * dds/DCPS/JsonValueWriter.h:
+        * dds/DCPS/PrinterValueWriter.h:
+        * dds/DCPS/ValueReader.h:
+        * dds/DCPS/ValueWriter.h:
+        * dds/idl/be_init.cpp:
+        * dds/idl/be_produce.cpp:
+        * dds/idl/dds_generator.h:
+        * dds/idl/langmap_generator.cpp:
+        * dds/idl/value_reader_generator.cpp:
+        * dds/idl/value_writer_generator.cpp:
+        * docs/news.d/value-reader-writer-fixed.rst:
+        * tests/FACE/Compiler/idl_test_fixed/TestFixed.cpp:
+        * tests/FACE/Messenger/Publisher/Publisher.cpp:
+        * tests/FACE/Messenger/Subscriber/Subscriber.cpp:
+        * tests/FACE/MultiDomainMessenger/Publisher/Publisher.cpp:
+        * tests/FACE/MultiDomainMessenger/Subscriber/Subscriber.cpp:
+        * tests/unit-tests/dds/DCPS/JsonValueWriter.cpp:
+        * tests/unit-tests/dds/DCPS/PrinterValueWriter.cpp:
+
+          Use ACE_CDR::Fixed as the type of fixed values in ValueReader and
+          ValueWriter
+
+          Also removed preprocessor conditionals for ACE_HAS_CDR_FIXED
+          since all supported ACE versions have it.
+
+Tue Feb 06 17:36:32 UTC 2024  Son Dinh  <dinhs@objectcomputing.com>
+        commit 8291f9936fa74131fb7d2ff9d0791a98596c3d26
+
+        * dds/DCPS/JsonValueWriter.h:
+        * dds/DCPS/PrinterValueWriter.h:
+        * dds/DCPS/ValueWriter.h:
+        * dds/DCPS/Xcdr2ValueWriter.cpp:
+        * dds/DCPS/Xcdr2ValueWriter.h:
+        * tests/unit-tests/dds/DCPS/Xcdr2ValueWriter.cpp:
+
+          From review
+
+Tue Feb 06 06:36:56 UTC 2024  Son Dinh  <dinhs@objectcomputing.com>
+        commit 84269c65ec24d68e5f8fd39563e556b48dfb8428
+
+        * dds/DCPS/XTypes/Utils.cpp:
+        * dds/DCPS/XTypes/Utils.h:
+        * docs/devguide/xtypes.rst:
+        * docs/news.d/xcdr2-value-writer.rst:
+        * tests/unit-tests/dds/DCPS/XTypes/Utils.cpp:
+        * tests/unit-tests/dds/DCPS/XTypes/XTypesUtils.idl:
+
+          Add news, update devguide
+
+Mon Feb 05 16:58:16 UTC 2024  Son Dinh  <dinhs@objectcomputing.com>
+        commit a6ebada8f886e617157587c77e055892a420ba0b
+
+        * tests/unit-tests/dds/DCPS/Xcdr2ValueWriter.idl:
+
+          Multiple definitions of LongSeq, ShortSeq
+
+Sat Feb 03 05:40:29 UTC 2024  Son Dinh  <dinhs@objectcomputing.com>
+        commit 24b876d23ef29845864a9a91015875345362791d
+
+          Merge branch 'master' of github.com:OpenDDS/OpenDDS into
+          serialized-size-writer
+
+Sat Feb 03 05:40:15 UTC 2024  Son Dinh  <dinhs@objectcomputing.com>
+        commit 13e2d6e789c56547c5272480a7ce8c4d2e6fb0a8
+
+        * dds/DCPS/XTypes/DynamicDataImpl.h:
+
+          Remove comments
+
+Sat Feb 03 05:21:34 UTC 2024  Son Dinh  <dinhs@objectcomputing.com>
+        commit fcccf80f5e4d287062f2682aeed1f4029b0fb54d
+
+        * tests/DCPS/Compiler/vread_vwrite/VreadVwriteTest.cpp:
+
+          Missed a header
+
+Sat Feb 03 00:23:42 UTC 2024  Son Dinh  <dinhs@objectcomputing.com>
+        commit 96dd156b1f63f2cbe60bc91d0e16600a8e5c3f04
+
+        * tests/unit-tests/dds/DCPS/Xcdr2ValueWriter.cpp:
+
+          Remove unused code
+
+Sat Feb 03 00:20:40 UTC 2024  Son Dinh  <dinhs@objectcomputing.com>
+        commit 35c532812042830a695b158b046f9fe36e88bb9d
+
+        * dds/DCPS/XTypes/DynamicVwrite.cpp:
+        * dds/DCPS/XTypes/Utils.cpp:
+        * dds/DCPS/XTypes/Utils.h:
+        * dds/DCPS/Xcdr2ValueWriter.cpp:
+        * dds/DCPS/Xcdr2ValueWriter.h:
+        * tests/unit-tests/dds/DCPS/Xcdr2ValueWriter.cpp:
+
+          Allow bulk write primitive array
+
+Fri Feb 02 16:23:34 UTC 2024  Son Dinh  <dinhs@objectcomputing.com>
+        commit 548a74e5b361baa1528116a777dd061acef20825
+
+        * dds/DCPS/XTypes/DynamicVwrite.cpp:
+        * dds/DCPS/Xcdr2ValueWriter.cpp:
+        * tests/unit-tests/dds/DCPS/Xcdr2ValueWriter.cpp:
+
+          Allow multiple writes with the same object
+
+Thu Feb 01 23:17:29 UTC 2024  Son Dinh  <dinhs@objectcomputing.com>
+        commit 6681b46525595cbb61b0204fe346cb84263d9aae
+
+        * dds/DCPS/DCPS_Utils.h:
+        * dds/DCPS/XTypes/DynamicVwrite.cpp:
+        * dds/DCPS/XTypes/Utils.h:
+        * dds/DCPS/Xcdr2ValueWriter.cpp:
+        * tests/DCPS/Compiler/vread_vwrite/VreadVwriteTest.cpp:
+
+          Fix optional handling for struct, union
+
+Thu Feb 01 18:19:45 UTC 2024  Son Dinh  <dinhs@objectcomputing.com>
+        commit 8352d03a3851d4cece1341ffa762179837350791
+
+        * dds/DCPS/XTypes/DynamicVwrite.cpp:
+        * dds/DCPS/Xcdr2ValueWriter.cpp:
+        * tests/unit-tests/dds/DCPS/Xcdr2ValueWriter.cpp:
+
+          Fix compile
+
+Thu Feb 01 17:26:27 UTC 2024  Son Dinh  <dinhs@objectcomputing.com>
+        commit 6ba3b79c6a0f215012213da8b1b3240a2eaa9b5a
+
+        * dds/DCPS/XTypes/DynamicDataImpl.cpp:
+        * dds/DCPS/XTypes/DynamicDataImpl.h:
+        * dds/DCPS/XTypes/DynamicVwrite.cpp:
+        * dds/DCPS/XTypes/DynamicVwrite.h:
+        * dds/DCPS/XTypes/Utils.h:
+        * tests/unit-tests/dds/DCPS/Xcdr2ValueWriter.cpp:
+
+          Make tests conditional on safety profile. Move dynamic vwrite to
+          new files.
+
+Thu Feb 01 06:31:57 UTC 2024  Son Dinh  <dinhs@objectcomputing.com>
+        commit 84e59cc4bcadfe83a96740e6f020e7596db072ed
+
+        * dds/idl/value_writer_generator.cpp:
+
+          vwrite for enum can have name conflicts
+
+Wed Jan 31 22:59:52 UTC 2024  Son Dinh  <dinhs@objectcomputing.com>
+        commit 52e72677761c41ec165322b63e181231be5673f5
+
+        * dds/DCPS/Xcdr2ValueWriter.cpp:
+        * dds/DCPS/Xcdr2ValueWriter.h:
+
+          Update names
+
+Wed Jan 31 22:43:27 UTC 2024  Son Dinh  <dinhs@objectcomputing.com>
+        commit cadb24e085cabd408c6b95514b7d508ec7a44b11
+
+        * dds/DCPS/JsonValueWriter.h:
+        * dds/DCPS/PrinterValueWriter.h:
+        * dds/DCPS/ValueWriter.h:
+        * dds/DCPS/XTypes/DynamicDataImpl.cpp:
+        * dds/DCPS/Xcdr2ValueWriter.cpp:
+        * dds/DCPS/Xcdr2ValueWriter.h:
+        * dds/idl/value_writer_generator.cpp:
+
+          Fixed tests
+
+Wed Jan 31 20:06:44 UTC 2024  Son Dinh  <dinhs@objectcomputing.com>
+        commit 77db04c40066cae6be6c5318ca12c1549a611047
+
+        * dds/DCPS/Xcdr2ValueWriter.cpp:
+        * dds/DCPS/Xcdr2ValueWriter.h:
+        * tests/unit-tests/dds/DCPS/Xcdr2ValueWriter.cpp:
+
+          Serialization tests need debug
+
+Tue Jan 30 18:42:28 UTC 2024  Son Dinh  <dinhs@objectcomputing.com>
+        commit 62f75c2812838d868ce720caad4b3d75a3a4b154
+
+        * tests/unit-tests/dds/DCPS/PrinterValueWriter.cpp:
+
+          Typo
+
+Tue Jan 30 18:40:35 UTC 2024  Son Dinh  <dinhs@objectcomputing.com>
+        commit fe944bf7254f9d765a04337931a7e7624db9a246
+
+        * dds/DCPS/JsonValueWriter.h:
+        * dds/DCPS/Observer.cpp:
+        * dds/DCPS/PrinterValueWriter.h:
+        * dds/DCPS/ValueWriter.h:
+        * dds/DCPS/XTypes/DynamicDataImpl.cpp:
+        * dds/DCPS/Xcdr2ValueWriter.cpp:
+        * dds/DCPS/Xcdr2ValueWriter.h:
+        * dds/idl/value_writer_generator.cpp:
+        * tests/unit-tests/dds/DCPS/JsonValueWriter.cpp:
+        * tests/unit-tests/dds/DCPS/PrinterValueWriter.cpp:
+
+          Wrap begin_struct_member parameters. Fix compile.
+
+Mon Jan 29 23:39:21 UTC 2024  Son Dinh  <dinhs@objectcomputing.com>
+        commit 1ff3144be04b9390adb25009d0f9a2b3b2ac6e70
+
+        * dds/DCPS/Xcdr2ValueWriter.cpp:
+        * dds/DCPS/Xcdr2ValueWriter.h:
+
+          Add serialization mode
+
+Thu Jan 25 22:47:03 UTC 2024  Son Dinh  <dinhs@objectcomputing.com>
+        commit 370c5ae91a9a1def37d27c611541837432a22606
+
+        * dds/DCPS/Xcdr2ValueWriter.cpp:
+        * dds/DCPS/Xcdr2ValueWriter.h:
+        * tests/unit-tests/UnitTests.mpc:
+
+          Cleanup
+
+Thu Jan 25 17:10:25 UTC 2024  Son Dinh  <dinhs@objectcomputing.com>
+        commit 37ef2ad619dbf6ca7a3ac97e80d70d8535d21b0f
+
+        * dds/DCPS/SerializedSizeValueWriter.cpp  dds/DCPS/Xcdr2ValueWriter.cpp:
+        * dds/DCPS/SerializedSizeValueWriter.h  dds/DCPS/Xcdr2ValueWriter.h:
+        * tests/unit-tests/.gitignore:
+        * tests/unit-tests/dds/DCPS/SerializedSizeValueWriter.cpp  tests/unit-tests/dds/DCPS/Xcdr2ValueWriter.cpp:
+        * tests/unit-tests/dds/DCPS/SerializedSizeValueWriter.idl  tests/unit-tests/dds/DCPS/Xcdr2ValueWriter.idl:
+
+          Working now. Change class name
+
+Thu Jan 25 05:36:02 UTC 2024  Son Dinh  <dinhs@objectcomputing.com>
+        commit e5401ea81b2881d3cdf0b6c8fe3886808d7fb9f1
+
+          Merge branch 'master' of github.com:OpenDDS/OpenDDS into
+          serialized-size-writer
+
+Thu Jan 25 05:35:42 UTC 2024  Son Dinh  <dinhs@objectcomputing.com>
+        commit 65da9807969f51cc33c4f29aa19831f9b2259026
+
+        * dds/DCPS/SerializedSizeValueWriter.cpp:
+        * dds/DCPS/SerializedSizeValueWriter.h:
+        * dds/DCPS/XTypes/DynamicDataImpl.cpp:
+        * dds/idl/value_writer_generator.cpp:
+        * tests/unit-tests/dds/DCPS/SerializedSizeValueWriter.cpp:
+
+          More involved tests
+
+Wed Jan 24 18:26:26 UTC 2024  Son Dinh  <dinhs@objectcomputing.com>
+        commit 69656543789d657276e7848ae32e2a4e3b96d628
+
+        * dds/DCPS/JsonValueWriter.h:
+        * dds/DCPS/PrinterValueWriter.h:
+        * dds/DCPS/SerializedSizeValueWriter.cpp:
+        * dds/DCPS/SerializedSizeValueWriter.h:
+        * dds/DCPS/ValueWriter.h:
+        * dds/DCPS/XTypes/DynamicDataImpl.cpp:
+        * dds/DCPS/XTypes/DynamicDataImpl.h:
+        * tests/unit-tests/dds/DCPS/SerializedSizeValueWriter.cpp:
+        * tests/unit-tests/dds/DCPS/SerializedSizeValueWriter.idl:
+
+          More complex tests
+
+Tue Jan 23 18:35:46 UTC 2024  Son Dinh  <dinhs@objectcomputing.com>
+        commit ee3c935f2a1e2945e4e801592be9b8af8efeb645
+
+        * tests/unit-tests/dds/DCPS/SerializedSizeValueWriter.cpp:
+
+          Struct working fine
+
+Tue Jan 23 15:20:36 UTC 2024  Son Dinh  <dinhs@objectcomputing.com>
+        commit f6735b012fc456da4a0df53dae606aa9345e0c0a
+
+        * dds/DCPS/SerializedSizeValueWriter.cpp:
+        * dds/DCPS/SerializedSizeValueWriter.h:
+        * tests/unit-tests/.gitignore:
+        * tests/unit-tests/UnitTests.mpc:
+        * tests/unit-tests/dds/DCPS/SerializedSizeValueWriter.cpp:
+        * tests/unit-tests/dds/DCPS/SerializedSizeValueWriter.idl:
+
+          Add basic tests
+
+Sun Jan 21 23:47:41 UTC 2024  Son Dinh  <dinhs@objectcomputing.com>
+        commit ab3e924cd8cad74b4d9b570122317b23ee8d41f7
+
+        * dds/DCPS/SerializedSizeValueWriter.cpp:
+        * dds/DCPS/SerializedSizeValueWriter.h:
+        * dds/DCPS/ValueWriter.h:
+
+          Missing include
+
+Sun Jan 21 23:13:52 UTC 2024  Son Dinh  <dinhs@objectcomputing.com>
+        commit bb9b3f3a9487a410a6714185d4a3fb67ac34d6d6
+
+        * dds/DCPS/JsonValueWriter.h:
+        * dds/DCPS/Observer.cpp:
+        * dds/DCPS/PrinterValueWriter.h:
+        * dds/DCPS/SerializedSizeValueWriter.cpp:
+        * dds/DCPS/SerializedSizeValueWriter.h:
+        * dds/DCPS/ValueWriter.h:
+        * dds/DCPS/XTypes/DynamicDataImpl.cpp:
+        * dds/idl/value_writer_generator.cpp:
+
+          Safety profile doesn't have dynamic data
+
+Sat Jan 20 23:56:56 UTC 2024  Son Dinh  <dinhs@objectcomputing.com>
+        commit 1eec42c5b96e8759605197a0a66806766a150552
+
+        * dds/DCPS/SerializedSizeValueWriter.cpp:
+        * dds/DCPS/ValueWriter.h:
+        * dds/idl/value_writer_generator.cpp:
+
+          Fix generated vwrite for array
+
+Sat Jan 20 22:58:51 UTC 2024  Son Dinh  <dinhs@objectcomputing.com>
+        commit e11e6cb9dd490118e8bb19a76d9b715d4d0461dc
+
+        * dds/DCPS/JsonValueWriter.h:
+        * dds/DCPS/Observer.cpp:
+        * dds/DCPS/PrinterValueWriter.h:
+        * dds/DCPS/SerializedSizeValueWriter.h:
+        * dds/DCPS/XTypes/DynamicDataImpl.cpp:
+        * tests/unit-tests/dds/DCPS/JsonValueWriter.cpp:
+        * tests/unit-tests/dds/DCPS/PrinterValueWriter.cpp:
+
+          Update tests to use the new interfaces
+
+Sat Jan 20 22:16:52 UTC 2024  Son Dinh  <dinhs@objectcomputing.com>
+        commit 574d967d488684f5a66442977108489a37d223f9
+
+        * dds/DCPS/XTypes/DynamicDataImpl.cpp:
+        * dds/DCPS/XTypes/Utils.cpp:
+        * dds/DCPS/XTypes/Utils.h:
+        * dds/idl/value_writer_generator.cpp:
+
+          vwrite for array didn't handle multi-dimensional arrays
+
+Thu Jan 18 18:58:31 UTC 2024  Son Dinh  <dinhs@objectcomputing.com>
+        commit b0851b16ecd58c7c7e6e6c4e67d9398ea0a6eb1d
+
+        * dds/DCPS/JsonValueWriter.h:
+        * dds/DCPS/Observer.cpp:
+        * dds/DCPS/PrinterValueWriter.h:
+        * dds/DCPS/SerializedSizeValueWriter.cpp:
+        * dds/DCPS/SerializedSizeValueWriter.h:
+        * dds/DCPS/ValueWriter.h:
+        * dds/DCPS/XTypes/DynamicDataImpl.cpp:
+        * dds/idl/value_writer_generator.cpp:
+
+          Fix compile
+
+Wed Jan 17 21:32:51 UTC 2024  Son Dinh  <dinhs@objectcomputing.com>
+        commit 77ef8ae12d5c6d3925889994c92a728126ced7f6
+
+        * dds/DCPS/SerializedSizeValueWriter.cpp:
+        * dds/DCPS/SerializedSizeValueWriter.h:
+
+          Handle sequence and array
+
+Wed Jan 17 18:27:47 UTC 2024  Son Dinh  <dinhs@objectcomputing.com>
+        commit afc506ac498cdb1fa385576a3e989911473102ee
+
+        * dds/DCPS/SerializedSizeValueWriter.cpp:
+
+          Handle union
+
+Tue Jan 16 22:23:25 UTC 2024  Son Dinh  <dinhs@objectcomputing.com>
+        commit 321999eb1a47dc908579be6652f6ded39fe3034c
+
+        * dds/DCPS/SerializedSizeValueWriter.cpp:
+        * dds/DCPS/SerializedSizeValueWriter.h:
+
+          In progress for struct
+
+Thu Jan 11 23:18:39 UTC 2024  Son Dinh  <dinhs@objectcomputing.com>
+
+        * dds/DCPS/SerializedSizeValueWriter.cpp:
+        * dds/DCPS/SerializedSizeValueWriter.h:
+
+          Work in progress
+
+Local Variables:
+mode: change-log
+add-log-time-format: (lambda () (progn (setq tz (getenv "TZ")) (set-time-zone-rule "UTC") (setq time (format-time-string "%a %b %e %H:%M:%S %Z %Y" (current-time))) (set-time-zone-rule tz) time))
+indent-tabs-mode: nil
+End:
