@@ -309,8 +309,11 @@ template <typename Type>
 void baseline_checks_vwrite(const Encoding& encoding, const Type& value, const DataView& expected_cdr)
 {
   if (encoding.kind() == Encoding::KIND_XCDR2) {
+    // Compute serialized size
     Xcdr2ValueWriter value_writer(encoding);
-    vwrite(value_writer, value);
+    EXPECT_TRUE(vwrite(value_writer, value));
+
+    // Serialize
     ACE_Message_Block buffer(value_writer.get_serialized_size());
     Serializer ser(&buffer, encoding);
     value_writer.set_serializer(&ser);
@@ -2000,6 +2003,16 @@ void key_only_test(bool topic_type)
   amalgam_serializer_test_base<ConstWrapper, Type, Wrapper, Type>(
     xcdr2, expected, wrapped_value, wrapped_result, field_filter);
   EXPECT_PRED_FORMAT2(assert_values, wrapped_value, wrapped_result);
+
+  // Test vwrite with KeyOnly or NestedKeyOnly samples
+  Xcdr2ValueWriter value_writer(xcdr2);
+  EXPECT_TRUE(vwrite(value_writer, wrapped_value));
+
+  ACE_Message_Block buffer(value_writer.get_serialized_size());
+  Serializer ser(&buffer, xcdr2);
+  value_writer.set_serializer(&ser);
+  EXPECT_TRUE(vwrite(value_writer, wrapped_value));
+  EXPECT_PRED_FORMAT2(assert_DataView, expected, buffer);
 }
 
 void serialize_u32(DataVec& data_vec, size_t value)
@@ -2140,55 +2153,57 @@ void key_only_complex_set_base_values(Type& value,
   const bool include_possible_keyed = (field_filter != FieldFilter_KeyOnly) || keyed;
   const bool include_unkeyed =
     field_filter == FieldFilter_All || (!keyed && field_filter == FieldFilter_NestedKeyOnly);
+  const FieldFilter nested_field_filter =
+    field_filter == FieldFilter_All ? FieldFilter_All : FieldFilter_NestedKeyOnly;
 
   set_default(value);
 
   if (include_possible_keyed) {
     key_only_set_base_values(
-      value.unkeyed_struct_value, field_filter, false);
+      value.unkeyed_struct_value, nested_field_filter, false);
     key_only_set_base_values(
-      value.unkeyed_struct_array_value[0], field_filter, false);
+      value.unkeyed_struct_array_value[0], nested_field_filter, false);
     key_only_set_base_values(
-      value.unkeyed_struct_array_value[1], field_filter, false);
+      value.unkeyed_struct_array_value[1], nested_field_filter, false);
     /* TODO(iguessthislldo): See IDL Def
     value.unkeyed_struct_seq_value.length(1);
     key_only_set_base_values(
-      value.unkeyed_struct_seq_value[0], field_filter, false);
+      value.unkeyed_struct_seq_value[0], nested_field_filter, false);
     */
     key_only_set_base_values(
-      value.keyed_struct_value, field_filter, true);
+      value.keyed_struct_value, nested_field_filter, true);
     key_only_set_base_values(
-      value.keyed_struct_array_value[0], field_filter, true);
+      value.keyed_struct_array_value[0], nested_field_filter, true);
     key_only_set_base_values(
-      value.keyed_struct_array_value[1], field_filter, true);
+      value.keyed_struct_array_value[1], nested_field_filter, true);
     /* TODO(iguessthislldo): See IDL Def
     value.keyed_struct_seq_value.length(1);
     key_only_set_base_values(
-      value.keyed_struct_seq_value[0], field_filter, true);
+      value.keyed_struct_seq_value[0], nested_field_filter, true);
     */
 
     key_only_union_set_base_values(
-      value.unkeyed_union_value, field_filter, false);
+      value.unkeyed_union_value, nested_field_filter, false);
     key_only_union_set_base_values(
-      value.unkeyed_union_array_value[0], field_filter, false);
+      value.unkeyed_union_array_value[0], nested_field_filter, false);
     key_only_union_set_base_values(
-      value.unkeyed_union_array_value[1], field_filter, false);
+      value.unkeyed_union_array_value[1], nested_field_filter, false);
     /* TODO(iguessthislldo): See IDL Def
     value.unkeyed_union_seq_value.length(1);
     key_only_union_set_base_values(
-      value.unkeyed_union_seq_value[0], field_filter, false);
+      value.unkeyed_union_seq_value[0], nested_field_filter, false);
     */
 
     key_only_union_set_base_values(
-      value.keyed_union_value, field_filter, true);
+      value.keyed_union_value, nested_field_filter, true);
     key_only_union_set_base_values(
-      value.keyed_union_array_value[0], field_filter, true);
+      value.keyed_union_array_value[0], nested_field_filter, true);
     key_only_union_set_base_values(
-      value.keyed_union_array_value[1], field_filter, true);
+      value.keyed_union_array_value[1], nested_field_filter, true);
     /* TODO(iguessthislldo): See IDL Def
     value.keyed_union_seq_value.length(1);
     key_only_union_set_base_values(
-      value.keyed_union_seq_value[0], field_filter, true);
+      value.keyed_union_seq_value[0], nested_field_filter, true);
     */
   }
 
@@ -2533,9 +2548,7 @@ void build_expected_union(DataVec& expected, FieldFilter field_filter, bool keye
   if (include_unkeyed) {
     non_keys = DataView(key_only_union_non_keys_expected_base);
   }
-  if (include_possible_keyed) {
-    serialize_u32(expected, keys.size + non_keys.size);
-  }
+  serialize_u32(expected, keys.size + non_keys.size);
   keys.copy_to(expected);
   non_keys.copy_to(expected);
 }
@@ -2562,7 +2575,7 @@ void build_expected_complex_struct(DataVec& expected, FieldFilter field_filter, 
     field_filter == FieldFilter_All ? FieldFilter_All : FieldFilter_NestedKeyOnly;
 
   if (include_possible_keyed) {
-    build_expected_basic_struct(all_contents, field_filter, false);
+    build_expected_basic_struct(all_contents, nested_field_filter, false);
     {
       DataVec array_contents;
       build_expected_basic_struct(array_contents, nested_field_filter, false);
@@ -2711,6 +2724,18 @@ TEST(KeyTests, KeyOnly_KeyedUnion)
 {
   key_only_test<KeyedUnion,
     KeyOnly<KeyedUnion>, KeyOnly<const KeyedUnion> >(true);
+}
+
+TEST(KeyTests, KeyOnly_ComplexUnkeyedStruct)
+{
+  key_only_test<ComplexUnkeyedStruct,
+    KeyOnly<ComplexUnkeyedStruct>, KeyOnly<const ComplexUnkeyedStruct> >(true);
+}
+
+TEST(KeyTests, KeyOnly_ComplexKeyedStruct)
+{
+  key_only_test<ComplexKeyedStruct,
+    KeyOnly<ComplexKeyedStruct>, KeyOnly<const ComplexKeyedStruct> >(true);
 }
 
 // ----------------------------------------------------------------------------

@@ -248,35 +248,35 @@ The CMake package can provide library targets that can be linked using `target_l
 
 .. cmake:tgt:: OpenDDS::Rtps
 
-  :ref:`RTPS Discovery <introduction--peer-to-peer-discovery-with-rtps>`
+  :ref:`rtps-disc`
 
 .. cmake:tgt:: OpenDDS::InfoRepoDiscovery
 
-  :ref:`InfoRepo Discovery <introduction--centralized-discovery-with-dcpsinforepo>`
+  :ref:`inforepo-disc`
 
 .. cmake:tgt:: OpenDDS::Rtps_Udp
 
-  :ref:`RTPS/UDP Transport <run_time_configuration--rtps-udp-transport-configuration-options>`
+  :ref:`rtps-udp-transport`
 
 .. cmake:tgt:: OpenDDS::Multicast
 
-  :ref:`Multicast Transport <run_time_configuration--ip-multicast-transport-configuration-options>`
+  :ref:`multicast-transport`
 
 .. cmake:tgt:: OpenDDS::Shmem
 
-  :ref:`Shared Memory Transport <run_time_configuration--shared-memory-transport-configuration-options>`
+  :ref:`shmem-transport`
 
 .. cmake:tgt:: OpenDDS::Tcp
 
-  :ref:`TCP Transport <run_time_configuration--tcp-ip-transport-configuration-options>`
+  :ref:`tcp-transport`
 
 .. cmake:tgt:: OpenDDS::Udp
 
-  :ref:`UDP Transport <run_time_configuration--udp-ip-transport-configuration-options>`
+  :ref:`udp-transport`
 
 .. cmake:tgt:: OpenDDS::Security
 
-  :doc:`/devguide/dds_security`
+  :ref:`sec`
 
 .. cmake:tgt:: OpenDDS::RtpsRelayLib
 
@@ -345,21 +345,31 @@ The CMake package can provide executable targets that can be called manually fro
 
 .. cmake:tgt:: TAO::tao_idl
 
-  Required
+  Required, :term:`tao_idl`
 
 .. cmake:tgt:: OpenDDS::opendds_idl
 
-  Required
+  Required, :ref:`opendds_idl`
 
 .. cmake:tgt:: OpenDDS::DCPSInfoRepo
 
+  :ref:`inforepo`
+
 .. cmake:tgt:: OpenDDS::RtpsRelay
+
+  :ref:`rtpsrelay`
 
 .. cmake:tgt:: OpenDDS::dcpsinfo_dump
 
+  Utility for :ref:`inforepo`
+
 .. cmake:tgt:: OpenDDS::inspect
 
+  :ghfile:`tools/inspect/README.rst`
+
 .. cmake:tgt:: OpenDDS::repoctl
+
+  Utility for :ref:`inforepo`
 
 Functions
 =========
@@ -805,6 +815,7 @@ Dependencies
   :no-contents-entry:
 
   Path to :ref:`deps-java`
+  Currently unsupported.
 
 .. cmake:var:: OPENDDS_QT
   :no-contents-entry:

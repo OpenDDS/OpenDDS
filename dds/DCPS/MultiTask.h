@@ -10,17 +10,17 @@
 
 #include "RcEventHandler.h"
 #include "ReactorInterceptor.h"
-#include "TimeTypes.h"
 #include "Service_Participant.h"
+#include "TimeTypes.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
 namespace DCPS {
 
-class MultiTask : public virtual RcEventHandler {
+class OpenDDS_Dcps_Export MultiTask : public virtual RcEventHandler {
 public:
-  explicit MultiTask(RcHandle<ReactorInterceptor> interceptor, const TimeDuration& delay)
+  MultiTask(RcHandle<ReactorInterceptor> interceptor, const TimeDuration& delay)
     : interceptor_(interceptor)
     , delay_(delay)
     , timer_(-1)
@@ -32,20 +32,7 @@ public:
 
   virtual ~MultiTask() {}
 
-  void enable(const TimeDuration& delay)
-  {
-    bool worth_passing_along = false;
-    {
-      ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
-      worth_passing_along = (timer_ == -1) || ((MonotonicTimePoint::now() + delay + cancel_estimate_) < next_time_);
-    }
-    if (worth_passing_along) {
-      RcHandle<ReactorInterceptor> interceptor = interceptor_.lock();
-      if (interceptor) {
-        interceptor->execute_or_enqueue(make_rch<ScheduleEnableCommand>(rchandle_from(this), delay));
-      }
-    }
-  }
+  void enable(const TimeDuration& delay);
 
   void disable()
   {
@@ -58,7 +45,7 @@ public:
   virtual void execute(const MonotonicTimePoint& now) = 0;
 
 private:
-  WeakRcHandle<ReactorInterceptor> interceptor_;
+  const WeakRcHandle<ReactorInterceptor> interceptor_;
   const TimeDuration delay_;
   long timer_;
   MonotonicTimePoint next_time_;
@@ -67,8 +54,9 @@ private:
 
   struct ScheduleEnableCommand : public ReactorInterceptor::Command {
     ScheduleEnableCommand(WeakRcHandle<MultiTask> multi_task, const TimeDuration& delay)
-      : multi_task_(multi_task), delay_(delay)
-    { }
+      : multi_task_(multi_task)
+      , delay_(delay)
+    {}
 
     virtual void execute()
     {
@@ -78,14 +66,14 @@ private:
       }
     }
 
-    WeakRcHandle<MultiTask> const multi_task_;
+    const WeakRcHandle<MultiTask> multi_task_;
     const TimeDuration delay_;
   };
 
   struct ScheduleDisableCommand : public ReactorInterceptor::Command {
     explicit ScheduleDisableCommand(WeakRcHandle<MultiTask> multi_task)
       : multi_task_(multi_task)
-    { }
+    {}
 
     virtual void execute()
     {
@@ -95,62 +83,14 @@ private:
       }
     }
 
-    WeakRcHandle<MultiTask> const multi_task_;
+    const WeakRcHandle<MultiTask> multi_task_;
   };
 
-  int handle_timeout(const ACE_Time_Value& tv, const void*)
-  {
-    ThreadStatusManager::Event ev(TheServiceParticipant->get_thread_status_manager());
+  int handle_timeout(const ACE_Time_Value& tv, const void*);
 
-    const MonotonicTimePoint now(tv);
-    {
-      ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
-      next_time_ = now + delay_;
-    }
-    execute(now);
-    return 0;
-  }
+  void enable_i(const TimeDuration& per);
 
-  void enable_i(const TimeDuration& per)
-  {
-    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
-    const MonotonicTimePoint now = MonotonicTimePoint::now();
-    if (timer_ == -1) {
-      timer_ = reactor()->schedule_timer(this, 0, per.value(), delay_.value());
-
-      if (timer_ == -1) {
-        ACE_ERROR((LM_ERROR, "(%P|%t) MultiTask::enable"
-                   " failed to schedule timer %p\n", ACE_TEXT("")));
-      } else {
-        next_time_ = now + per;
-      }
-    } else {
-      const MonotonicTimePoint estimated_next_time = now + per + cancel_estimate_;
-      if (estimated_next_time < next_time_) {
-        reactor()->cancel_timer(timer_);
-        const MonotonicTimePoint now2 = MonotonicTimePoint::now();
-        timer_ = reactor()->schedule_timer(this, 0, per.value(), delay_.value());
-        cancel_estimate_ = now2 - now;
-
-        if (timer_ == -1) {
-          ACE_ERROR((LM_ERROR, "(%P|%t) MultiTask::enable"
-                     " failed to reschedule timer %p\n", ACE_TEXT("")));
-        } else {
-          next_time_ = now2 + per;
-        }
-      }
-    }
-  }
-
-  void
-  disable_i()
-  {
-    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
-    if (timer_ != -1) {
-      reactor()->cancel_timer(timer_);
-      timer_ = -1;
-    }
-  }
+  void disable_i();
 };
 
 template <typename Delegate>
@@ -167,8 +107,8 @@ public:
     , function_(function) {}
 
 private:
-  WeakRcHandle<Delegate> delegate_;
-  PMF function_;
+  const WeakRcHandle<Delegate> delegate_;
+  const PMF function_;
 
   void execute(const MonotonicTimePoint& now)
   {

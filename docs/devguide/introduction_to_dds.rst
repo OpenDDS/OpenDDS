@@ -46,7 +46,7 @@ Domain
 The *domain* is the fundamental partitioning unit within DCPS.
 Each of the other entities belongs to a domain and can only interact with other entities in that same domain.
 Application code is free to interact with multiple domains but must do so via separate entities that belong to the different domains.
-Domains are identified by an identifier.
+Domains are identified by an integer identifier.
 There is no entity in the DCPS API that represents the domain.
 
 Entity
@@ -115,7 +115,7 @@ Each data writer is bound to a particular topic.
 The application uses the data writer's type-specific interface to publish samples on that topic.
 The data writer is responsible for marshaling the data and passing it to the publisher for transmission.
 
-Dynamic data writers (:ref:`xtypes--creating-and-using-a-dynamicdatawriter-or-dynamicdatareader`) can be used when code generated from IDL is not available or desired.
+:ref:`Dynamic data writers <xtypes--creating-and-using-a-dynamicdatawriter-or-dynamicdatareader>` can be used when code generated from IDL is not available or desired.
 Dynamic data writers are also type-safe, but type checking happens at runtime.
 
 .. _introduction--publisher:
@@ -154,7 +154,7 @@ A *data reader* takes data from the subscriber, demarshals it into the appropria
 Each data reader is bound to a particular topic.
 The application uses the data reader's type-specific interfaces to receive the samples.
 
-Dynamic data readers (:ref:`xtypes--creating-and-using-a-dynamicdatawriter-or-dynamicdatareader`) can be used when code generated from IDL is not available or desired.
+:ref:`Dynamic data readers <xtypes--creating-and-using-a-dynamicdatawriter-or-dynamicdatareader>` can be used when code generated from IDL is not available or desired.
 Dynamic data readers are also type-safe, but type checking happens at runtime.
 
 .. _dds-introduction--discovery:
@@ -164,8 +164,7 @@ Discovery, Matching, and Association
 ************************************
 
 *Discovery* is the process whereby a participant learns about the publications and subscriptions offered by other participants.
-The OMG DDS specification (``formal/2015-04-10``) leaves the details of discovery to the implementation.
-However, the OMG DDSI-RTPS specification (``formal/2014-09-01``) defines an interoperable peer-to-peer system for discovery.
+The :ref:`spec-dds` leaves the details of discovery to the implementation.
 
 After discovering a remote publication and subscription, a participant compares the remote entity with its local entities to determine if they are compatible.
 This process is called *matching*.
@@ -173,6 +172,11 @@ A data writer and data reader match if they are on the same topic, they have com
 
 If a local entity matches a remote entity, then the implementation is configured to allow data to flow from the data writer to the data reader.
 This is called *association*.
+
+.. seealso::
+
+  :ref:`discovery`
+    The discovery impementations availables in OpenDDS.
 
 .. _introduction--quality-of-service-policies:
 
@@ -192,7 +196,10 @@ Subscribers *request* a set of policies that are minimally required.
 Publishers *offer* a set of QoS policies to potential subscribers.
 The DDS implementation then attempts to match the requested policies with the offered policies; if these policies are compatible then the association is formed.
 
-The QoS policies currently implemented by OpenDDS are discussed in detail in :ref:`qos`.
+.. seealso::
+
+  :ref:`qos`
+    The QoS policies available in OpenDDS and how to use them.
 
 ********************
 Conceptual Data Flow
@@ -220,30 +227,10 @@ The DDS specification defines a number of topics that are built-in to the DDS im
 Subscribing to these *built-in topics* gives application developers access to the state of the domain being used including which topics are registered, which data readers and data writers have been discovered and their status, and the QoS settings of the various entities.
 While subscribed, the application receives samples indicating changes in the entities within the domain.
 
-The following table shows the built-in topics defined within the DDS specification:
+.. seealso::
 
-.. list-table:: Built-in Topics
-   :header-rows: 1
-
-   * - Topic Name
-
-     - Description
-
-   * - ``DCPSParticipant``
-
-     - Each instance represents a domain participant.
-
-   * - ``DCPSTopic``
-
-     - Each instance represents a normal (not built-in) topic.
-
-   * - ``DCPSPublication``
-
-     - Each instance represents a data writer.
-
-   * - ``DCPSSubscription``
-
-     - Each instance represents a data reader.
+  :ref:`bit`
+    The built-in topics available in OpenDDS and how to use them.
 
 .. _introduction--listeners:
 
@@ -257,6 +244,11 @@ Listeners
 The DCPS API defines a callback interface for each entity that allows an application to listen for certain state changes or events pertaining to that entity.
 For example, a Data Reader Listener is notified when there are data values available for reading.
 
+.. seealso::
+
+  :ref:`conditions_and_listeners--listeners`
+    The listeners available in OpenDDS and how to use them.
+
 .. _introduction--conditions:
 
 **********
@@ -267,9 +259,7 @@ Conditions
     Sect<1.1.5>
 
 *Conditions* and *Wait Sets* can also be used to detect events of interest in DDS Entities and are an alternative to listeners.
-The general pattern is
-
-The application creates a specific kind of ``Condition`` object, such as a ``StatusCondition``, and attaches it to a ``WaitSet``.
+The general pattern is the application creates a specific kind of ``Condition`` object, such as a ``StatusCondition``, and attaches it to a ``WaitSet``.
 
 * The application waits on the ``WaitSet`` until one or more conditions become true.
 
@@ -277,5 +267,10 @@ The application creates a specific kind of ``Condition`` object, such as a ``Sta
 
 * The ``DataReader`` interface also has operations that take a ``ReadCondition`` argument.
 
-* ``QueryCondition`` objects are provided as part of the implementation of the Content-Subscription Profile.
+* ``QueryCondition`` objects are provided as part of the implementation of the :ref:`content_subscription_profile`.
   The ``QueryCondition`` interface extends the ``ReadCondition`` interface.
+
+.. seealso::
+
+  :ref:`conditions_and_listeners--conditions`
+    The conditions available in OpenDDS and how to use them.

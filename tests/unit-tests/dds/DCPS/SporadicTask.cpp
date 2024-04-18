@@ -15,6 +15,8 @@
 
 using namespace OpenDDS::DCPS;
 
+#if !OPENDDS_CONFIG_BOOTTIME_TIMERS
+
 namespace {
   class MyTimeSource : public TimeSource {
   public:
@@ -42,7 +44,7 @@ namespace {
                    RcHandle<ReactorInterceptor> interceptor)
       : SporadicTask(time_source, interceptor)
     {}
-    long timer_id() { return get_timer_id(); }
+    long timer_id() const { return get_timer_id(); }
 
     MOCK_METHOD1(execute, void(const MonotonicTimePoint&));
   };
@@ -253,3 +255,4 @@ TEST(dds_DCPS_SporadicTask, cancel_no_interceptor)
   reactor_interceptor.reset();
   sporadic_task->cancel();
 }
+#endif

@@ -308,7 +308,7 @@ CMake Domain
 For :doc:`/devguide/building/cmake` there's a custom CMake Sphinx domain in :ghfile:`docs/sphinx_extensions/cmake_domain.py`.
 There is an official CMake domain used by CMake for their own documentation, but it would be impractical for us to use because it requires a separate RST file for every property and variable.
 
-.. rst:directive:: .. cmake:func:: NAME
+.. rst:directive:: .. cmake:func:: <name>
 
   Use to document public CMake functions.
 
@@ -350,7 +350,7 @@ There is an official CMake domain used by CMake for their own documentation, but
 
         This is a keyword argument
 
-.. rst:directive:: .. cmake:func:arg:: NAME [SIGNATURE]
+.. rst:directive:: .. cmake:func:arg:: <name> [<subargument>...]
 
   Use to document arguments and options for public CMake functions.
   Should be nested in :rst:dir:`cmake:func` of the function the argument belongs to.
@@ -376,7 +376,7 @@ There is an official CMake domain used by CMake for their own documentation, but
 
     :cmake:func:`opendds_cmake_function(ARG)`
 
-.. rst:directive:: .. cmake:var:: NAME
+.. rst:directive:: .. cmake:var:: <name>
 
   Use to document public variables.
 
@@ -406,7 +406,7 @@ There is an official CMake domain used by CMake for their own documentation, but
 
     :cmake:var:`OPENDDS_CMAKE_VARIABLE`
 
-.. rst:directive:: .. cmake:prop:: NAME
+.. rst:directive:: .. cmake:prop:: <name>
 
   Use to document properties on CMake targets, or possibly other kinds of properties, that we're looking for or creating for the user.
 
@@ -436,7 +436,7 @@ There is an official CMake domain used by CMake for their own documentation, but
 
     :cmake:prop:`OPENDDS_CMAKE_PROPERTY`
 
-.. rst:directive:: .. cmake:tgt:: NAME
+.. rst:directive:: .. cmake:tgt:: <name>
 
   Use to document a library or executable CMake target meant to users that can be imported or exported.
 
@@ -465,6 +465,168 @@ There is an official CMake domain used by CMake for their own documentation, but
   Turns into:
 
     :cmake:tgt:`OpenDDS::MessengerPigeonTransport`
+
+Config Domain
+-------------
+
+For :doc:`/devguide/run_time_configuration` there's a custom configuration Sphinx domain in :ghfile:`docs/sphinx_extensions/config_domain.py`.
+
+.. rst:directive:: .. cfg:sec:: <name>[@<discriminator>][/<argument>]
+
+  Use to document a configuration section that can contain :rst:dir:`cfg:prop` and most other RST content.
+  ``<discriminator>`` is an optional extension of the name to document cases where the available properties depend on something.
+  Using discriminators requires separate :rst:dir:`cfg:sec` entires.
+  ``<arguments>`` is just for display and has no restrictions on the contents.
+
+.. rst:role:: cfg:sec
+
+  Use to reference a :rst:dir:`cfg:sec` by name and optional discriminator.
+  If the section has a discriminator, it must be separated by a ``@`` symbol.
+  Do not include arguments if it has arguments in the directive.
+  The possible formats are ``<sect_name>`` and ``<sect_name>@<disc_name>``.
+
+.. rst:directive:: .. cfg:prop:: <name>=<values>
+
+  Use to document a configuration property that can contain :rst:dir:`cfg:val` and most other RST content.
+  Must be in a :rst:dir:`cfg:sec`.
+  ``<values>`` describe what sort of text is accepted.
+  It is just for display and has no restrictions on the contents, but should follow the following conventions to describe the accepted values:
+
+  - ``|`` indicates an OR
+  - ``[]`` indicates an optional part of the value
+  - ``...`` indicates the previous part can be repeated
+  - Words surrounded angle brackets (ex: ``<prop_name>``) indicate placeholders.
+  - Everything else should be considered literal.
+
+  For example: ``log_level=none|error|warn|debug``, ``memory_limit=<uint64>``, ``addresses=<ip>[:<port>],...``.
+
+  .. rst:directive:option:: required
+
+    Indicates the property is required for the section
+
+  .. rst:directive:option:: default
+
+    The default value of the property if omitted
+
+.. rst:role:: cfg:prop
+
+  Use to reference a :rst:dir:`cfg:prop` by name.
+  Do not include values if it has values in the directive.
+  The possible formats are:
+
+  - ``<prop_name>``
+
+    Inside of a :rst:dir:`cfg:sec`, it refers to a property in that section.
+    Outside of a :rst:dir:`cfg:sec`, the property is assumed to be ``common``.
+
+  - ``[<sect_name>]<prop_name>``
+  - ``[<sect_name>@<disc_name>]<prop_name>``
+
+.. rst:directive:: .. cfg:val:: [<]<name>[>]
+
+  Use to document a part of what a configuration property accepts.
+  Must be in a :rst:dir:`cfg:prop`.
+  The optional angle brackets (``<>``) are just for display and are meant to help distinguish between the value being a literal and a placeholder.
+
+.. rst:role:: cfg:val
+
+  Use to reference a :rst:dir:`cfg:val` by name.
+  Do not include brackets if it has brackets in the directive.
+  The possible formats are:
+
+  - ``<val_name>``
+
+    This must be inside a :rst:dir:`cfg:prop`.
+
+  - ``<prop_name>=<val_name>``
+
+    Inside of a :rst:dir:`cfg:sec`, it refers to a value of a property in that section.
+    Outside of a :rst:dir:`cfg:sec`, the property is assumed to be ``common``.
+
+  - ``[<sect_name>]<prop_name>=<val_name>``
+  - ``[<sect_name>@<disc_name>]<prop_name>=<val_name>``
+
+Example
+^^^^^^^
+
+This is a example made up for the following INI file:
+
+.. code-block:: ini
+
+  [server/Alpha]
+  os=windows
+
+  [server/Beta]
+  os=linux
+  distro=Debian
+
+.. code-block:: rst
+
+  Outside their sections, references to properties and values must be complete: :cfg:val:`[server]os=linux`, :cfg:prop:`[server@linux]distro`
+
+  Otherwise the ``common`` section will be assumed.
+
+  .. cfg:sec:: server/<name>
+
+    A property or value's section can be omitted from references within their sections: :cfg:prop:`os`, :cfg:val:`os=windows`
+
+    .. cfg:prop:: os=windows|linux
+      :required:
+
+      A value's property can be omitted from references within their properties: :cfg:val:`linux`
+
+      .. cfg:val:: windows
+
+        Implied titles will be shortened within their scopes: :cfg:prop:`[server]os`, :cfg:val:`[server]os=windows`
+
+      .. cfg:val:: linux
+
+        Sections with discriminators require them in the reference targets: :cfg:sec:`server@linux`, :cfg:prop:`[server@linux]distro`
+
+  .. cfg:sec:: server@linux/<name>
+
+    .. cfg:prop:: distro=<name>
+      :default: ``Ubuntu``
+
+Turns into:
+
+  Outside their sections, references to properties and values must be complete: :cfg:val:`[server]os=linux`, :cfg:prop:`[server@linux]distro`
+
+  Otherwise the ``common`` section will be assumed.
+
+  .. cfg:sec:: server/<name>
+    :no-contents-entry:
+    :no-index-entry:
+
+    A property or value's section can be omitted from references within their sections: :cfg:prop:`os`, :cfg:val:`os=windows`
+
+    .. cfg:prop:: os=windows|linux
+      :required:
+      :no-contents-entry:
+      :no-index-entry:
+
+      A value's property can be omitted from references within their properties: :cfg:val:`linux`
+
+      .. cfg:val:: windows
+        :no-contents-entry:
+        :no-index-entry:
+
+        Implied titles will be shortened within their scopes: :cfg:prop:`[server]os`, :cfg:val:`[server]os=windows`
+
+      .. cfg:val:: linux
+        :no-contents-entry:
+        :no-index-entry:
+
+        Sections with discriminators require them in the reference targets: :cfg:sec:`server@linux`, :cfg:prop:`[server@linux]distro`
+
+  .. cfg:sec:: server@linux/<name>
+    :no-contents-entry:
+    :no-index-entry:
+
+    .. cfg:prop:: distro=<name>
+      :default: ``Ubuntu``
+      :no-contents-entry:
+      :no-index-entry:
 
 .. _docs-news:
 

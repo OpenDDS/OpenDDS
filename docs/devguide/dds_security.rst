@@ -11,6 +11,16 @@ DDS Security
 OpenDDS includes an implementation of the :ref:`DDS Security specification <spec-dds-security>`.
 This allows participants to encrypt messages and to authenticate remote participants before engaging with them.
 
+.. important::
+
+  Library filename: ``OpenDDS_Security``
+
+  MPC base project name: :ghfile:`\`\`opendds_security\`\` <MPC/config/opendds_security.mpb>`
+
+  CMake target Name: :cmake:tgt:`OpenDDS::Security`
+
+  :ref:`Initialization header <plugins>`: :ghfile:`dds/DCPS/security/BuiltInPlugins.h`
+
 .. _dds_security--building-opendds-with-security-enabled:
 
 **************************************
@@ -140,7 +150,7 @@ The following configuration steps are required to enable OpenDDS Security featur
 
    * Via API: ``TheServiceParticipant->set_security(true);`` or
 
-   * Via config file: ``DCPSSecurity=1`` in the ``[common]`` section.
+   * Via config file: setting :cfg:prop:`DCPSSecurity` to ``1``.
 
 .. _dds_security--dds-security-configuration-via-propertyqospolicy:
 
