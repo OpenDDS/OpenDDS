@@ -11,7 +11,6 @@
 #include <dds/DCPS/Definitions.h>
 
 #include <global_extern.h>
-#include <string>
 #include <utl_identifier.h>
 #include <utl_labellist.h>
 #include <ast_fixed.h>
@@ -305,12 +304,10 @@ namespace {
       for (Fields::Iterator it = fields.begin(); it != fields.end(); ++it) {
         AST_Field* const field = *it;
         const std::string field_name = field->local_name()->get_string();
-        const bool is_optional = be_global->is_optional(field);
-        const std::string accessor = std::string(use_cxx11 ? "()" : "");
         be_global->impl_ <<
           "    case " << be_global->get_id(field) << ": {\n";
-        generate_read(value_prefix + field_name, accessor, field_name,
-                      field->field_type(), "i", 3, nested(field_filter), is_optional);
+        generate_read(value_prefix + field_name, use_cxx11 ? "()" : "", field_name,
+                      field->field_type(), "i", 3, nested(field_filter), be_global->is_optional(field));
         be_global->impl_ <<
           "      break;\n"
           "    }\n";
