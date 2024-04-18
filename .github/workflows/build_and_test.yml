@@ -1870,7 +1870,7 @@ jobs:
           --tests \
           --security \
           --no-rapidjson \
-          --mpcopts="-features no_opendds_testing_features=0"
+          --features no_opendds_testing_features=0
     - name: check build configuration
       shell: bash
       run: |
@@ -5103,7 +5103,7 @@ jobs:
     - name: configure OpenDDS
       run: |
         cd OpenDDS
-        ./configure --features=uses_wchar=1 "--mpcopts=-features dds_suppress_anys=0" --tests --security --rapidjson --ace=$GITHUB_WORKSPACE/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC
+        ./configure --features=uses_wchar=1 --features dds_suppress_anys=0 --tests --security --rapidjson --ace=$GITHUB_WORKSPACE/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC
     - name: check build configuration
       shell: bash
       run: |
@@ -11037,7 +11037,7 @@ jobs:
       shell: cmd
       run: |
         cd /d C:\OpenDDS
-        configure --tests --java --no-built-in-topics --rapidjson --mpc=${{ github.workspace }}\MPC --xerces3="${{ env.VCPKG_INSTALLED_DIR }}\x86-windows" --mpcopts="-features no_opendds_testing_features=0"
+        configure --tests --java --no-built-in-topics --rapidjson --mpc=${{ github.workspace }}\MPC --xerces3="${{ env.VCPKG_INSTALLED_DIR }}\x86-windows" --features no_opendds_testing_features=0
     - name: check build configuration
       shell: cmd
       run: |
