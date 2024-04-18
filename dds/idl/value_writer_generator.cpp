@@ -291,17 +291,26 @@ namespace {
       const std::string idl_name = canonical_name(field);
       const OpenDDS::XTypes::MemberId id = be_global->get_id(field);
       const bool must_understand = be_global->is_effectively_must_understand(field);
-      // TODO: Update the arguments for MemberParam when @optional is available.
+      const bool is_optional = be_global->is_optional(field);
+      const std::string value_name = value_prefix + field_name + (use_cxx11 ? "()" : "") + (is_optional ? ".value()" : "");
+      const std::string optional_is_present = !is_optional ? "true" : value_prefix + field_name + "().has_value()";
+
       be_global->impl_ <<
-        "  if (!value_writer.begin_struct_member(MemberParam(" << id << ", " <<
-        (must_understand ? "true" : "false") << ", \"" << idl_name << "\", false, true))) {\n"
-        "    return false;\n"
-        "  }\n";
-      generate_write(value_prefix + field_name + (use_cxx11 ? "()" : ""), field_name,
-                     field->field_type(), "i", 1, nested_field_filter);
+        "  {\n" <<
+        "    MemberParam param(" << id << ", " << (must_understand ? "true" : "false") << ", \"" << idl_name << "\", " << is_optional << ", " << optional_is_present << ");\n" <<
+        "    if (!value_writer.begin_struct_member(param)) {\n"
+        "      return false;\n"
+        "    }\n" <<
+        "    if (param.present) {\n";
+      generate_write(value_name, field_name,
+                     field->field_type(), "i", 3, nested_field_filter);
       be_global->impl_ <<
-        "  if (!value_writer.end_struct_member()) {\n"
-        "    return false;\n"
+        "    } else {\n" <<
+        "      value_writer.write_absent_value();\n" <<
+        "    }\n" <<
+        "    if (!value_writer.end_struct_member()) {\n"
+        "      return false;\n"
+        "    }\n" <<
         "  }\n";
     }
     be_global->impl_ <<
@@ -397,58 +406,58 @@ bool value_writer_generator::gen_struct(AST_Structure* node,
     return false;
   }
 
-  if (be_global->is_topic_type(node)) {
-    if (!gen_struct_i(node, type_name, use_cxx11, ek, FieldFilter_KeyOnly)) {
-      return false;
-    }
-  }
-  {
-    NamespaceGuard guard;
-
-    Function write("vwrite", "bool");
-    write.addArg("value_writer", "OpenDDS::DCPS::ValueWriter&");
-    write.addArg("value", "const " + type_name + "&");
-    write.endArgs();
-
-    const ExtensibilityKind ek = be_global->extensibility(node);
-    be_global->impl_ <<
-      "  if (!value_writer.begin_struct(" << extensibility_kind(ek) << ")) {\n"
-      "    return false;\n"
-      "  }\n";
-    for (std::vector<AST_Field*>::const_iterator pos = fields.begin(), limit = fields.end();
-         pos != limit; ++pos) {
-      AST_Field* const field = *pos;
-      const std::string field_name = field->local_name()->get_string();
-      const std::string idl_name = canonical_name(field);
-      // TODO: Update the arguments when @optional is available.
-      const OpenDDS::XTypes::MemberId id = be_global->get_id(field);
-      const bool must_understand = be_global->is_effectively_must_understand(field);
-      const bool is_optional = be_global->is_optional(field);
-      const std::string value_name = "value." + field_name + accessor_suffix + (is_optional ? ".value()" : "");
-      const std::string optional_is_present = !is_optional ? "true": "value." + field_name + accessor_suffix + ".has_value()";
-
-      be_global->impl_ <<
-        "  {\n" <<
-        "    MemberParam param(" << id << ", " << (must_understand ? "true" : "false") << ", \"" << idl_name << "\", " << is_optional << ", " << optional_is_present << ");\n" <<
-        "    if (!value_writer.begin_struct_member(param)) {\n"
-        "      return false;\n"
-        "    }\n" <<
-        "    if (param.present) {\n";
-
-      generate_write(value_name, field->field_type(), "i");
-
-      be_global->impl_ <<
-        "    } else {\n" <<
-        "      value_writer.write_absent_value();\n" <<
-        "    }\n" <<
-        "    if (!value_writer.end_struct_member()) {\n"
-        "      return false;\n"
-        "    }\n" <<
-        "  }\n";
-    }
-    be_global->impl_ <<
-      "  return value_writer.end_struct();\n";
-  }
+  // if (be_global->is_topic_type(node)) {
+  //   if (!gen_struct_i(node, type_name, use_cxx11, ek, FieldFilter_KeyOnly)) {
+  //     return false;
+  //   }
+  // }
+  // {
+  //   NamespaceGuard guard;
+  //
+  //   Function write("vwrite", "bool");
+  //   write.addArg("value_writer", "OpenDDS::DCPS::ValueWriter&");
+  //   write.addArg("value", "const " + type_name + "&");
+  //   write.endArgs();
+  //
+  //   const ExtensibilityKind ek = be_global->extensibility(node);
+  //   be_global->impl_ <<
+  //     "  if (!value_writer.begin_struct(" << extensibility_kind(ek) << ")) {\n"
+  //     "    return false;\n"
+  //     "  }\n";
+  //   for (std::vector<AST_Field*>::const_iterator pos = fields.begin(), limit = fields.end();
+  //        pos != limit; ++pos) {
+  //     AST_Field* const field = *pos;
+  //     const std::string field_name = field->local_name()->get_string();
+  //     const std::string idl_name = canonical_name(field);
+  //     // TODO: Update the arguments when @optional is available.
+  //     const OpenDDS::XTypes::MemberId id = be_global->get_id(field);
+  //     const bool must_understand = be_global->is_effectively_must_understand(field);
+  //     const bool is_optional = be_global->is_optional(field);
+  //     const std::string value_name = "value." + field_name + accessor_suffix + (is_optional ? ".value()" : "");
+  //     const std::string optional_is_present = !is_optional ? "true": "value." + field_name + accessor_suffix + ".has_value()";
+  //
+  //     be_global->impl_ <<
+  //       "  {\n" <<
+  //       "    MemberParam param(" << id << ", " << (must_understand ? "true" : "false") << ", \"" << idl_name << "\", " << is_optional << ", " << optional_is_present << ");\n" <<
+  //       "    if (!value_writer.begin_struct_member(param)) {\n"
+  //       "      return false;\n"
+  //       "    }\n" <<
+  //       "    if (param.present) {\n";
+  //
+  //     generate_write(value_name, field->field_type(), "i");
+  //
+  //     be_global->impl_ <<
+  //       "    } else {\n" <<
+  //       "      value_writer.write_absent_value();\n" <<
+  //       "    }\n" <<
+  //       "    if (!value_writer.end_struct_member()) {\n"
+  //       "      return false;\n"
+  //       "    }\n" <<
+  //       "  }\n";
+  //   }
+  //   be_global->impl_ <<
+  //     "  return value_writer.end_struct();\n";
+  // }
 
   return true;
 }

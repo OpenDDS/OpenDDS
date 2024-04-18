@@ -199,21 +199,23 @@ namespace {
           indent << "if (!value_reader.read_" << primitive_type(pt) << '(' << var_name << ")) return false;\n";
       }
     } else {
+      // TODO(tyler) Not sure how this affects the original
       std::string value_expr = expression + accessor;
       if (!(c & CL_ENUM)) {
+        const std::string value_name = optional ? "tmp" : expression + accessor;
         const std::string type_name = scoped(type->name());
         switch (filter_kind) {
         case FieldFilter_NestedKeyOnly:
           value_expr = field_name + "_nested_key_only";
           be_global->impl_ <<
             indent << "const NestedKeyOnly<" << type_name << "> " <<
-            value_expr << "(" << expression << accessor << ");\n";
+            value_expr << "(" << value_name << ");\n";
           break;
         case FieldFilter_KeyOnly:
           value_expr = field_name + "_key_only";
           be_global->impl_ <<
             indent << "const KeyOnly<" << type_name << "> " <<
-            value_expr << "(" << expression << accessor << ");\n";
+            value_expr << "(" << value_name << ");\n";
           break;
         default:
           break;
@@ -303,10 +305,12 @@ namespace {
       for (Fields::Iterator it = fields.begin(); it != fields.end(); ++it) {
         AST_Field* const field = *it;
         const std::string field_name = field->local_name()->get_string();
+        const bool is_optional = be_global->is_optional(field);
+        const std::string accessor = std::string(use_cxx11 ? "()" : "");
         be_global->impl_ <<
           "    case " << be_global->get_id(field) << ": {\n";
-        generate_read(value_prefix + field_name, use_cxx11 ? "()" : "", field_name,
-                      field->field_type(), "i", 3, nested(field_filter));
+        generate_read(value_prefix + field_name, accessor, field_name,
+                      field->field_type(), "i", 3, nested(field_filter), is_optional);
         be_global->impl_ <<
           "      break;\n"
           "    }\n";
@@ -421,60 +425,6 @@ bool value_reader_generator::gen_struct(AST_Structure* node,
       return false;
     }
   }
-  {
-    NamespaceGuard guard;
-
-    Function read("vread", "bool");
-    read.addArg("value_reader", "OpenDDS::DCPS::ValueReader&");
-    read.addArg("value", type_name + "&");
-    read.endArgs();
-
-    be_global->impl_ <<
-      "  static const ListMemberHelper::Pair pairs[] = {";
-
-    for (size_t i = 0; i != fields.size(); ++i) {
-      if (i) {
-        be_global->impl_ << ',';
-      }
-      const std::string idl_name = canonical_name(fields[i]);
-      be_global->impl_ <<
-        '{' << '"' << idl_name << '"' << ',' << be_global->get_id(fields[i]) << '}';
-    }
-
-    be_global->impl_ <<
-      ",{0,0}};\n"
-      "  ListMemberHelper helper(pairs);\n";
-
-    const ExtensibilityKind ek = be_global->extensibility(node);
-    be_global->impl_ <<
-      "  if (!value_reader.begin_struct(" << extensibility_kind(ek) << ")) return false;\n"
-      "  XTypes::MemberId member_id;\n"
-      "  while (value_reader.members_remaining()) {\n"
-      "    if (!value_reader.begin_struct_member(member_id, helper)) return false;\n"
-      "    switch (member_id) {\n";
-
-    for (std::vector<AST_Field*>::const_iterator pos = fields.begin(), limit = fields.end();
-         pos != limit; ++pos) {
-      AST_Field* const field = *pos;
-      const std::string field_name = field->local_name()->get_string();
-      be_global->impl_ <<
-        "    case " << be_global->get_id(field) << ": {\n";
-
-      generate_read("value." + field_name, accessor, field->field_type(), "i", 3, be_global->is_optional(field));
-
-      be_global->impl_ <<
-        "      break;\n"
-        "    }\n";
-    }
-
-    be_global->impl_ <<
-      "    }\n"
-      "    if (!value_reader.end_struct_member()) return false;\n"
-      "  }\n"
-      "  if (!value_reader.end_struct()) return false;\n"
-      "  return true;\n";
-  }
-
   return true;
 }
 
