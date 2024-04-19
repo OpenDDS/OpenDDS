@@ -31,28 +31,37 @@ jobs:
       run: |
         cd OpenDDS
         GITHUB_TOKEN=${{secrets.GITHUB_TOKEN}} perl tools/scripts/gitrelease.pl --update-ace-tao
-        # Help make the title and message for commit and PR
-        perl tools/scripts/modules/ini.pm acetao.ini --join ', ' '.*/version' > ../acevers
-        echo "ACEVERS=$(cat ../acevers)" >> $GITHUB_ENV
-        perl tools/scripts/modules/ini.pm acetao.ini --join ', ' '.*/url' > ../acevers_urls
-        echo "ACEVERS_URLS=$(cat ../acevers_urls)" >> $GITHUB_ENV
+        prefix="$GITHUB_WORKSPACE/update-ace-tao-"
+        commit_msg="${prefix}commit.md"
+        # Only commit and make a PR if the release script recognized a change
+        # from both master and workflows/update-ace-tao if it exists.
+        if [ -f "${commit_msg}" ]
+        then
+          echo "CREATE_PULL_REQUEST=true" >> $GITHUB_ENV
+          # create-pull-request can commit for us, but manually commit here so
+          # we can use file input for the commit message.
+          #   https://github.com/peter-evans/create-pull-request/issues/2864
+          git config user.name GitHub
+          git config user.email noreply@github.com
+          git add --all
+          git commit --file "${commit_msg}" \
+            --author "${{github.actor}} <${{github.actor}}@users.noreply.github.com>"
+          echo "PR_TITLE=$(cat ${prefix}pr-title.md)" >> $GITHUB_ENV
+          echo "PR_BODY_FILE=${prefix}pr-body.md" >> $GITHUB_ENV
+        else
+          echo "CREATE_PULL_REQUEST=false" >> $GITHUB_ENV
+        fi
     - name: Create Pull Request
       uses: peter-evans/create-pull-request@v6
+      if: env.CREATE_PULL_REQUEST == 'true'
       id: cpr
       with:
         path: OpenDDS
         token: ${{ secrets.GITHUB_TOKEN }}
-        commit-message: |
-          Update ACE/TAO to ${{env.ACEVERS}}
-
-          The releases are ${{env.ACEVERS_URLS}}
-        committer: GitHub <noreply@github.com>
-        author: ${{ github.actor }} <${{ github.actor }}@users.noreply.github.com>
-        signoff: false
         branch: workflows/update-ace-tao
         delete-branch: true
-        title: Update ACE/TAO to ${{env.ACEVERS}}
-        body: "Releases: ${{env.ACEVERS_URLS}}"
+        title: ${{env.PR_TITLE}}
+        body-path: ${{env.PR_BODY_FILE}}
         labels: |
           dependencies
     - name: Check outputs
