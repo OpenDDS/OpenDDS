@@ -682,6 +682,13 @@ These are all the variables that are exclusive to building OpenDDS with CMake:
   Enable this option to use CLOCK_BOOTTIME as the timer base clock instead of CLOCK_MONOTONIC.
   Default is ``OFF``.
 
+.. cmake:var:: OPENDDS_COMPILE_WARNINGS
+
+  If set to ``WARNING``, enables additional compiler warnings when compiling OpenDDS.
+  If set to ``ERROR``, enables additional compiler warnings which are treated as errors when compiling OpenDDS.
+
+  .. versionadded:: 3.28
+
 Speeding up the build
 ---------------------
 

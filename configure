@@ -210,6 +210,9 @@ my @specs = # Array of array-refs, each inner array is an option group which
       $argIndent . '  asan: Address Sanitizer, gcc/clang only' .
       $argIndent . '  tsan: Thread Sanitizer, gcc/clang only' .
       $argIndent . '  ubsan: Undefined Behavior Sanitizer, clang only',
+    'compile-warnings=s', 'Enable additional compiler warnings (empty)' .
+      $argIndent . 'If set to WARNING, enable additional warnings' .
+      $argIndent . 'If set to ERROR, enable additional warnings and treated them as errors',
    ],
    ['Required dependencies for OpenDDS:',
     'ace=s', 'ACE (use ACE_ROOT, ACE_wrappers, or download)',
@@ -788,6 +791,7 @@ EOF
   elsif ($opts{'compiler'} =~ /g\+\+|clang/) {
     my $version_string = `$opts{'compiler'} --version`;
     print "Compiler version: $version_string\n" if $opts{'verbose'};
+    $opts{'is apple clang'} = $version_string =~ /^Apple/;
     if ($opts{'std'}) {
       push(@{$opts{'macros'}}, 'CCFLAGS += -std=' . $opts{'std'});
       print "Added platform_macros for -std=$opts{std}\n" if $opts{'verbose'};
@@ -822,6 +826,21 @@ EOF
       push(@{$opts{'features'}}, 'no_cxx11=0');
       print "Compiler has >= C++11 support\n" if $opts{'verbose'};
     }
+  }
+}
+
+if ($opts{'compile-warnings'} eq 'WARNING' or $opts{'compile-warnings'} eq 'ERROR') {
+  my ($section_names, $sections) = read_ini_file("$FindBin::RealBin/build.ini");
+  my %compiler_map = ( 'g++' => 'GNU', 'clang' => 'Clang', 'cl' => 'MSVC', 'cl.exe' => 'MSVC');
+  my $section = $compiler_map{$opts{'compiler'}};
+  if ($opts{'is apple clang'}) {
+    $section = 'AppleClang';
+  }
+  my $warning_flags = $sections->{$section}{'warning'};
+  my $error_flags = $sections->{$section}{'error'};
+  push(@{$opts{'mpcopts'}}, '-value_template', "compile_flags+=${warning_flags}");
+  if ($opts{'compile-warnings'} eq 'ERROR') {
+    push(@{$opts{'mpcopts'}}, '-value_template', "compile_flags+=${error_flags}");
   }
 }
 
