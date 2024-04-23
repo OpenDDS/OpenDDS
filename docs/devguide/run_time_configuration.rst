@@ -1366,14 +1366,18 @@ Those properties, along with options specific to OpenDDS's RTPS discovery implem
     Sets the duration that a passive endpoint will wait for a connection.
 
   .. prop:: SendBufferSize=<bytes>
-    :default: ``0`` (system default value is used)
+    :default: ``0`` (system default value is used, ``65466`` typical)
 
     Socket send buffer size for both SPDP and SEDP.
 
+    See :prop:`[transport@rtps_udp]send_buffer_size`.
+
   .. prop:: RecvBufferSize=<bytes>
-    :default: ``0`` (system default value is used)
+    :default: ``0`` (system default value is used, ``65466`` typical)
 
     Socket receive buffer size for both SPDP and SEDP.
+
+    See :prop:`[transport@rtps_udp]rcv_buffer_size`.
 
   .. prop:: MaxParticipantsInAuthentication=<n>
     :default: ``0`` (no limit)
@@ -2665,6 +2669,16 @@ Some implementation notes related to using the ``rtps_udp`` transport protocol a
     :default: ``65466`` (maximum worst-case UDP payload size)
 
     The maximum message size.
+
+  .. prop:: send_buffer_size=<bytes>
+    :default: ``0`` (system default value is used, ``65466`` typical)
+
+    Socket send buffer size for sending RTPS messages.
+
+  .. prop:: rcv_buffer_size=<bytes>
+    :default: ``0`` (system default value is used, ``65466`` typical)
+
+    Socket receive buffer size for receiving RTPS messages.
 
   .. prop:: ttl=<n>
     :default: ``1`` (all data is restricted to the local network)
