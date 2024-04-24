@@ -11,7 +11,6 @@
 #include "Discovery.h"
 #include "PoolAllocator.h"
 #include "DomainParticipantFactoryImpl.h"
-#include "ConfigUtils.h"
 #include "unique_ptr.h"
 #include "ReactorTask.h"
 #include "JobQueue.h"
@@ -43,140 +42,138 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-const char OPENDDS_COMMON_BIT_AUTOPURGE_DISPOSED_SAMPLES_DELAY[] =
-  "OPENDDS_COMMON_BIT_AUTOPURGE_DISPOSED_SAMPLES_DELAY";
-const DDS::Duration_t OPENDDS_COMMON_BIT_AUTOPURGE_DISPOSED_SAMPLES_DELAY_default =
+const char COMMON_BIT_AUTOPURGE_DISPOSED_SAMPLES_DELAY[] =
+  "COMMON_BIT_AUTOPURGE_DISPOSED_SAMPLES_DELAY";
+const DDS::Duration_t COMMON_BIT_AUTOPURGE_DISPOSED_SAMPLES_DELAY_default =
   { DDS::DURATION_INFINITE_SEC, DDS::DURATION_INFINITE_NSEC };
 
-const char OPENDDS_COMMON_BIT_AUTOPURGE_NOWRITER_SAMPLES_DELAY[] =
-  "OPENDDS_COMMON_BIT_AUTOPURGE_NOWRITER_SAMPLES_DELAY";
-const DDS::Duration_t OPENDDS_COMMON_BIT_AUTOPURGE_NOWRITER_SAMPLES_DELAY_default =
+const char COMMON_BIT_AUTOPURGE_NOWRITER_SAMPLES_DELAY[] =
+  "COMMON_BIT_AUTOPURGE_NOWRITER_SAMPLES_DELAY";
+const DDS::Duration_t COMMON_BIT_AUTOPURGE_NOWRITER_SAMPLES_DELAY_default =
   { DDS::DURATION_INFINITE_SEC, DDS::DURATION_INFINITE_NSEC };
 
-const char OPENDDS_COMMON_DCPSRTI_SERIALIZATION[] = "OPENDDS_COMMON_DCPSRTI_SERIALIZATION";
+const char COMMON_DCPSRTI_SERIALIZATION[] = "COMMON_DCPSRTI_SERIALIZATION";
 
-const char OPENDDS_COMMON_DCPS_BIDIR_GIOP[] = "OPENDDS_COMMON_DCPS_BIDIR_GIOP";
-const bool OPENDDS_COMMON_DCPS_BIDIR_GIOP_default = true;
+const char COMMON_DCPS_BIDIR_GIOP[] = "COMMON_DCPS_BIDIR_GIOP";
+const bool COMMON_DCPS_BIDIR_GIOP_default = true;
 
-const char OPENDDS_COMMON_DCPS_BIT[] = "OPENDDS_COMMON_DCPS_BIT";
+const char COMMON_DCPS_BIT[] = "COMMON_DCPS_BIT";
 #ifdef DDS_HAS_MINIMUM_BIT
-const bool OPENDDS_COMMON_DCPS_BIT_default = false;
+const bool COMMON_DCPS_BIT_default = false;
 #else
-const bool OPENDDS_COMMON_DCPS_BIT_default = true;
+const bool COMMON_DCPS_BIT_default = true;
 #endif
 
-const char OPENDDS_COMMON_DCPS_BIT_LOOKUP_DURATION_MSEC[] = "OPENDDS_COMMON_DCPS_BIT_LOOKUP_DURATION_MSEC";
-const int OPENDDS_COMMON_DCPS_BIT_LOOKUP_DURATION_MSEC_default = 2000;
+const char COMMON_DCPS_BIT_LOOKUP_DURATION_MSEC[] = "COMMON_DCPS_BIT_LOOKUP_DURATION_MSEC";
+const int COMMON_DCPS_BIT_LOOKUP_DURATION_MSEC_default = 2000;
 
-const char OPENDDS_COMMON_DCPS_BIT_TRANSPORT_IP_ADDRESS[] = "OPENDDS_COMMON_DCPS_BIT_TRANSPORT_IP_ADDRESS";
-const String OPENDDS_COMMON_DCPS_BIT_TRANSPORT_IP_ADDRESS_default = "";
+const char COMMON_DCPS_BIT_TRANSPORT_IP_ADDRESS[] = "COMMON_DCPS_BIT_TRANSPORT_IP_ADDRESS";
+const String COMMON_DCPS_BIT_TRANSPORT_IP_ADDRESS_default = "";
 
-const char OPENDDS_COMMON_DCPS_BIT_TRANSPORT_PORT[] = "OPENDDS_COMMON_DCPS_BIT_TRANSPORT_PORT";
-const int OPENDDS_COMMON_DCPS_BIT_TRANSPORT_PORT_default = 0;
+const char COMMON_DCPS_BIT_TRANSPORT_PORT[] = "COMMON_DCPS_BIT_TRANSPORT_PORT";
+const int COMMON_DCPS_BIT_TRANSPORT_PORT_default = 0;
 
-const char OPENDDS_COMMON_DCPS_CHUNKS[] = "OPENDDS_COMMON_DCPS_CHUNKS";
-const size_t OPENDDS_COMMON_DCPS_CHUNKS_default = 20;
+const char COMMON_DCPS_CHUNKS[] = "COMMON_DCPS_CHUNKS";
+const size_t COMMON_DCPS_CHUNKS_default = 20;
 
-const char OPENDDS_COMMON_DCPS_CHUNK_ASSOCIATION_MULTIPLIER[] = "OPENDDS_COMMON_DCPS_CHUNK_ASSOCIATION_MULTIPLIER";
-const char OPENDDS_COMMON_DCPS_CHUNK_ASSOCIATION_MUTLTIPLIER[] = "OPENDDS_COMMON_DCPS_CHUNK_ASSOCIATION_MUTLTIPLIER";
-const size_t OPENDDS_COMMON_DCPS_CHUNK_ASSOCIATION_MULTIPLIER_default = 10;
+const char COMMON_DCPS_CHUNK_ASSOCIATION_MULTIPLIER[] = "COMMON_DCPS_CHUNK_ASSOCIATION_MULTIPLIER";
+const char COMMON_DCPS_CHUNK_ASSOCIATION_MUTLTIPLIER[] = "COMMON_DCPS_CHUNK_ASSOCIATION_MUTLTIPLIER";
+const size_t COMMON_DCPS_CHUNK_ASSOCIATION_MULTIPLIER_default = 10;
 
-const char OPENDDS_COMMON_DCPS_CONFIG_FILE[] = "OPENDDS_COMMON_DCPS_CONFIG_FILE";
-const String OPENDDS_COMMON_DCPS_CONFIG_FILE_default = "";
+const char COMMON_DCPS_DEBUG_LEVEL[] = "COMMON_DCPS_DEBUG_LEVEL";
 
-const char OPENDDS_COMMON_DCPS_DEBUG_LEVEL[] = "OPENDDS_COMMON_DCPS_DEBUG_LEVEL";
+const char COMMON_DCPS_DEFAULT_ADDRESS[] = "COMMON_DCPS_DEFAULT_ADDRESS";
+// Can't use NetworkAddress::default_IPV4 due to static initialization.
+const NetworkAddress COMMON_DCPS_DEFAULT_ADDRESS_default = NetworkAddress("0.0.0.0:0");
 
-const char OPENDDS_COMMON_DCPS_DEFAULT_ADDRESS[] = "OPENDDS_COMMON_DCPS_DEFAULT_ADDRESS";
-const NetworkAddress OPENDDS_COMMON_DCPS_DEFAULT_ADDRESS_default = NetworkAddress("0.0.0.0:0");
-
-const char OPENDDS_COMMON_DCPS_DEFAULT_DISCOVERY[] = "OPENDDS_COMMON_DCPS_DEFAULT_DISCOVERY";
+const char COMMON_DCPS_DEFAULT_DISCOVERY[] = "COMMON_DCPS_DEFAULT_DISCOVERY";
 #ifdef DDS_DEFAULT_DISCOVERY_METHOD
-const Discovery::RepoKey OPENDDS_COMMON_DCPS_DEFAULT_DISCOVERY_default = DDS_DEFAULT_DISCOVERY_METHOD;
+const Discovery::RepoKey COMMON_DCPS_DEFAULT_DISCOVERY_default = DDS_DEFAULT_DISCOVERY_METHOD;
 #else
 # ifdef OPENDDS_SAFETY_PROFILE
-const Discovery::RepoKey OPENDDS_COMMON_DCPS_DEFAULT_DISCOVERY_default = Discovery::DEFAULT_RTPS;
+const Discovery::RepoKey COMMON_DCPS_DEFAULT_DISCOVERY_default = Discovery::DEFAULT_RTPS;
 # else
-const Discovery::RepoKey OPENDDS_COMMON_DCPS_DEFAULT_DISCOVERY_default = Discovery::DEFAULT_REPO;
+const Discovery::RepoKey COMMON_DCPS_DEFAULT_DISCOVERY_default = Discovery::DEFAULT_REPO;
 # endif
 #endif
 
-const char OPENDDS_COMMON_DCPS_GLOBAL_TRANSPORT_CONFIG[] = "OPENDDS_COMMON_DCPS_GLOBAL_TRANSPORT_CONFIG";
-const String OPENDDS_COMMON_DCPS_GLOBAL_TRANSPORT_CONFIG_default = "";
+const char COMMON_DCPS_GLOBAL_TRANSPORT_CONFIG[] = "COMMON_DCPS_GLOBAL_TRANSPORT_CONFIG";
+const String COMMON_DCPS_GLOBAL_TRANSPORT_CONFIG_default = "";
 
-const char OPENDDS_COMMON_DCPS_INFO_REPO[] = "OPENDDS_COMMON_DCPS_INFO_REPO";
+const char COMMON_DCPS_INFO_REPO[] = "COMMON_DCPS_INFO_REPO";
 
-const char OPENDDS_COMMON_DCPS_LIVELINESS_FACTOR[] = "OPENDDS_COMMON_DCPS_LIVELINESS_FACTOR";
-const int OPENDDS_COMMON_DCPS_LIVELINESS_FACTOR_default = 80;
+const char COMMON_DCPS_LIVELINESS_FACTOR[] = "COMMON_DCPS_LIVELINESS_FACTOR";
+const int COMMON_DCPS_LIVELINESS_FACTOR_default = 80;
 
-const char OPENDDS_COMMON_DCPS_LOG_LEVEL[] = "OPENDDS_COMMON_DCPS_LOG_LEVEL";
+const char COMMON_DCPS_LOG_LEVEL[] = "COMMON_DCPS_LOG_LEVEL";
 
-const char OPENDDS_COMMON_DCPS_MONITOR[] = "OPENDDS_COMMON_DCPS_MONITOR";
-const bool OPENDDS_COMMON_DCPS_MONITOR_default = false;
+const char COMMON_DCPS_MONITOR[] = "COMMON_DCPS_MONITOR";
+const bool COMMON_DCPS_MONITOR_default = false;
 
-const char OPENDDS_COMMON_DCPS_PENDING_TIMEOUT[] = "OPENDDS_COMMON_DCPS_PENDING_TIMEOUT";
+const char COMMON_DCPS_PENDING_TIMEOUT[] = "COMMON_DCPS_PENDING_TIMEOUT";
 // Can't use TimeDuration::zero_value since initialization order is undefined.
-const TimeDuration OPENDDS_COMMON_DCPS_PENDING_TIMEOUT_default(0, 0);
+const TimeDuration COMMON_DCPS_PENDING_TIMEOUT_default(0, 0);
 
 #ifndef OPENDDS_NO_PERSISTENCE_PROFILE
-const char OPENDDS_COMMON_DCPS_PERSISTENT_DATA_DIR[] = "OPENDDS_COMMON_DCPS_PERSISTENT_DATA_DIR";
-const String OPENDDS_COMMON_DCPS_PERSISTENT_DATA_DIR_default = "OpenDDS-durable-data-dir";
+const char COMMON_DCPS_PERSISTENT_DATA_DIR[] = "COMMON_DCPS_PERSISTENT_DATA_DIR";
+const String COMMON_DCPS_PERSISTENT_DATA_DIR_default = "OpenDDS-durable-data-dir";
 #endif
 
-const char OPENDDS_COMMON_DCPS_PUBLISHER_CONTENT_FILTER[] = "OPENDDS_COMMON_DCPS_PUBLISHER_CONTENT_FILTER";
-const bool OPENDDS_COMMON_DCPS_PUBLISHER_CONTENT_FILTER_default = true;
+const char COMMON_DCPS_PUBLISHER_CONTENT_FILTER[] = "COMMON_DCPS_PUBLISHER_CONTENT_FILTER";
+const bool COMMON_DCPS_PUBLISHER_CONTENT_FILTER_default = true;
 
-const char OPENDDS_COMMON_DCPS_THREAD_STATUS_INTERVAL[] = "OPENDDS_COMMON_DCPS_THREAD_STATUS_INTERVAL";
+const char COMMON_DCPS_THREAD_STATUS_INTERVAL[] = "COMMON_DCPS_THREAD_STATUS_INTERVAL";
 
-const char OPENDDS_COMMON_DCPS_TRANSPORT_DEBUG_LEVEL[] = "OPENDDS_COMMON_DCPS_TRANSPORT_DEBUG_LEVEL";
+const char COMMON_DCPS_TRANSPORT_DEBUG_LEVEL[] = "COMMON_DCPS_TRANSPORT_DEBUG_LEVEL";
 
-const char OPENDDS_COMMON_DCPS_TYPE_OBJECT_ENCODING[] = "OPENDDS_COMMON_DCPS_TYPE_OBJECT_ENCODING";
-const String OPENDDS_COMMON_DCPS_TYPE_OBJECT_ENCODING_default = "Normal";
+const char COMMON_DCPS_TYPE_OBJECT_ENCODING[] = "COMMON_DCPS_TYPE_OBJECT_ENCODING";
+const String COMMON_DCPS_TYPE_OBJECT_ENCODING_default = "Normal";
 
-const char OPENDDS_COMMON_FEDERATION_BACKOFF_MULTIPLIER[] = "OPENDDS_COMMON_FEDERATION_BACKOFF_MULTIPLIER";
-const int OPENDDS_COMMON_FEDERATION_BACKOFF_MULTIPLIER_default = 2;
+const char COMMON_FEDERATION_BACKOFF_MULTIPLIER[] = "COMMON_FEDERATION_BACKOFF_MULTIPLIER";
+const int COMMON_FEDERATION_BACKOFF_MULTIPLIER_default = 2;
 
-const char OPENDDS_COMMON_FEDERATION_INITIAL_BACKOFF_SECONDS[] = "OPENDDS_COMMON_FEDERATION_INITIAL_BACKOFF_SECONDS";
-const int OPENDDS_COMMON_FEDERATION_INITIAL_BACKOFF_SECONDS_default = 1;
+const char COMMON_FEDERATION_INITIAL_BACKOFF_SECONDS[] = "COMMON_FEDERATION_INITIAL_BACKOFF_SECONDS";
+const int COMMON_FEDERATION_INITIAL_BACKOFF_SECONDS_default = 1;
 
-const char OPENDDS_COMMON_FEDERATION_LIVELINESS_DURATION[] = "OPENDDS_COMMON_FEDERATION_LIVELINESS_DURATION";
-const int OPENDDS_COMMON_FEDERATION_LIVELINESS_DURATION_default = 60;
+const char COMMON_FEDERATION_LIVELINESS_DURATION[] = "COMMON_FEDERATION_LIVELINESS_DURATION";
+const int COMMON_FEDERATION_LIVELINESS_DURATION_default = 60;
 
-const char OPENDDS_COMMON_FEDERATION_RECOVERY_DURATION[] = "OPENDDS_COMMON_FEDERATION_RECOVERY_DURATION";
-const int OPENDDS_COMMON_FEDERATION_RECOVERY_DURATION_default = 900;
+const char COMMON_FEDERATION_RECOVERY_DURATION[] = "COMMON_FEDERATION_RECOVERY_DURATION";
+const int COMMON_FEDERATION_RECOVERY_DURATION_default = 900;
 
-const char OPENDDS_COMMON_ORB_LOG_FILE[] = "OPENDDS_COMMON_ORB_LOG_FILE";
+const char COMMON_ORB_LOG_FILE[] = "COMMON_ORB_LOG_FILE";
 
-const char OPENDDS_COMMON_ORB_VERBOSE_LOGGING[] = "OPENDDS_COMMON_ORB_VERBOSE_LOGGING";
+const char COMMON_ORB_VERBOSE_LOGGING[] = "COMMON_ORB_VERBOSE_LOGGING";
 
-const char OPENDDS_COMMON_PRINTER_VALUE_WRITER_INDENT[] = "OPENDDS_COMMON_PRINTER_VALUE_WRITER_INDENT";
-const unsigned int OPENDDS_COMMON_PRINTER_VALUE_WRITER_INDENT_default = 4;
+const char COMMON_PRINTER_VALUE_WRITER_INDENT[] = "COMMON_PRINTER_VALUE_WRITER_INDENT";
+const unsigned int COMMON_PRINTER_VALUE_WRITER_INDENT_default = 4;
 
-const char OPENDDS_COMMON_SCHEDULER[] = "OPENDDS_COMMON_SCHEDULER";
-const String OPENDDS_COMMON_SCHEDULER_default = "";
+const char COMMON_SCHEDULER[] = "COMMON_SCHEDULER";
+const String COMMON_SCHEDULER_default = "";
 
-const char OPENDDS_COMMON_SCHEDULER_SLICE[] = "OPENDDS_COMMON_SCHEDULER_SLICE";
-const int OPENDDS_COMMON_SCHEDULER_SLICE_default = 0;
+const char COMMON_SCHEDULER_SLICE[] = "COMMON_SCHEDULER_SLICE";
+const int COMMON_SCHEDULER_SLICE_default = 0;
 
-const char OPENDDS_DEFAULT_CONFIGURATION_FILE[] = "OPENDDS_DEFAULT_CONFIGURATION_FILE";
-const String OPENDDS_DEFAULT_CONFIGURATION_FILE_default = "";
+const char DEFAULT_CONFIGURATION_FILE[] = "DEFAULT_CONFIGURATION_FILE";
+const String DEFAULT_CONFIGURATION_FILE_default = "";
 
 #ifdef OPENDDS_SECURITY
-const char OPENDDS_COMMON_DCPS_SECURITY[] = "OPENDDS_COMMON_DCPS_SECURITY";
-const bool OPENDDS_COMMON_DCPS_SECURITY_default = false;
+const char COMMON_DCPS_SECURITY[] = "COMMON_DCPS_SECURITY";
+const bool COMMON_DCPS_SECURITY_default = false;
 
-const char OPENDDS_COMMON_DCPS_SECURITY_DEBUG[] = "OPENDDS_COMMON_DCPS_SECURITY_DEBUG";
+const char COMMON_DCPS_SECURITY_DEBUG[] = "COMMON_DCPS_SECURITY_DEBUG";
 
-const char OPENDDS_COMMON_DCPS_SECURITY_DEBUG_LEVEL[] = "OPENDDS_COMMON_DCPS_SECURITY_DEBUG_LEVEL";
+const char COMMON_DCPS_SECURITY_DEBUG_LEVEL[] = "COMMON_DCPS_SECURITY_DEBUG_LEVEL";
 
-const char OPENDDS_COMMON_DCPS_SECURITY_FAKE_ENCRYPTION[] = "OPENDDS_COMMON_DCPS_SECURITY_FAKE_ENCRYPTION";
+const char COMMON_DCPS_SECURITY_FAKE_ENCRYPTION[] = "COMMON_DCPS_SECURITY_FAKE_ENCRYPTION";
 #endif
 
 #if OPENDDS_POOL_ALLOCATOR
-const char OPENDDS_COMMON_POOL_GRANULARITY[] = "OPENDDS_COMMON_POOL_GRANULARITY";
-const size_t OPENDDS_COMMON_POOL_GRANULARITY_default = 8;
+const char COMMON_POOL_GRANULARITY[] = "COMMON_POOL_GRANULARITY";
+const size_t COMMON_POOL_GRANULARITY_default = 8;
 
-const char OPENDDS_COMMON_POOL_SIZE[] = "OPENDDS_COMMON_POOL_SIZE";
-const size_t OPENDDS_COMMON_POOL_SIZE_default = 1024 * 1024 * 16;
+const char COMMON_POOL_SIZE[] = "COMMON_POOL_SIZE";
+const size_t COMMON_POOL_SIZE_default = 1024 * 1024 * 16;
 #endif
 
 #ifndef OPENDDS_NO_PERSISTENCE_PROFILE
@@ -534,15 +531,8 @@ public:
    * singleton.
    */
   int load_configuration(ACE_Configuration_Heap& cf,
-                         const ACE_TCHAR* filename);
-
-  /**
-   * Used by TransportRegistry to determine if a domain ID
-   * is part of a [DomainRange]
-   */
-  bool belongs_to_domain_range(DDS::DomainId_t domainId) const;
-
-  bool get_transport_base_config_name(DDS::DomainId_t domainId, String& name) const;
+                         const ACE_TCHAR* filename,
+                         bool allow_overwrite = false);
 
 #ifdef OPENDDS_SAFETY_PROFILE
   /**
@@ -616,11 +606,18 @@ private:
   /// Initialize the thread scheduling and initial priority.
   void initializeScheduling();
 
+  /// Parse environment variables.
+  void parse_env();
+  void parse_env(const String& s);
+
   /**
    * Parse the command line for user options. e.g. "-DCPSInfoRepo <iorfile>".
    * It consumes -DCPS* options and their arguments
    */
   int parse_args(int &argc, ACE_TCHAR *argv[]);
+
+  bool process_config_file(const String& config_fname,
+                           bool allow_overwrite);
 
   /**
    * Import the configuration file to the ACE_Configuration_Heap
@@ -629,44 +626,27 @@ private:
    * transport section configuration to the TransportRegistry
    * singleton.
    */
-  int load_configuration(const String& config_fname);
+  int load_configuration(const String& config_fname,
+                         bool allow_overwrite = false);
 
   /**
    * Load the domain configuration to the Service_Participant
    * singleton.
    */
-  int load_domain_configuration(ACE_Configuration_Heap& cf,
-                                const ACE_TCHAR* filename);
+  int load_domain_configuration();
 
   /**
    * Load the domain range template configuration
    * prior to discovery and domain configuration
    */
-  int load_domain_ranges(ACE_Configuration_Heap& cf);
-
-  /**
-   * Load the discovery template information
-   */
-  int load_discovery_templates(ACE_Configuration_Heap& cf);
-
-  /**
-   * Process the domain range template and activate the
-   * domain for the given domain ID
-   */
-  int configure_domain_range_instance(DDS::DomainId_t domainId);
+  int load_domain_ranges();
 
   /**
    * Load the discovery configuration to the Service_Participant
    * singleton.
    */
-  int load_discovery_configuration(ACE_Configuration_Heap& cf,
-                                   const ACE_TCHAR* section_name);
-
-  /**
-   * Create and load a discovery config from a discovery template
-   */
-  int configure_discovery_template(DDS::DomainId_t domainId,
-                                   const OPENDDS_STRING& discovery_name);
+  int load_discovery_configuration(const String& discovery_type,
+                                   bool force);
 
   typedef OPENDDS_MAP(OPENDDS_STRING, container_supported_unique_ptr<Discovery::Config>) DiscoveryTypes;
   DiscoveryTypes discovery_types_;
@@ -726,42 +706,110 @@ private:
   DDS::DomainParticipantFactoryQos    initial_DomainParticipantFactoryQos_;
   DDS::TypeConsistencyEnforcementQosPolicy initial_TypeConsistencyEnforcementQosPolicy_;
 
+  class Domain {
+  public:
+    const String& name() const { return name_; }
+    DDS::DomainId_t domain_id() const { return domain_id_; }
+    const Discovery::RepoKey& discovery_config() const { return discovery_config_; }
+    const String& default_transport_config() const { return default_transport_config_; }
+
+    Domain(const String& name,
+           DDS::DomainId_t domain_id,
+           const Discovery::RepoKey& discovery_config,
+           const String& default_transport_config)
+      : name_(name)
+      , domain_id_(domain_id)
+      , discovery_config_(discovery_config)
+      , default_transport_config_(default_transport_config)
+    {}
+
+  private:
+    const String name_;
+    const DDS::DomainId_t domain_id_;
+    const Discovery::RepoKey discovery_config_;
+    const String default_transport_config_;
+  };
+
+  class DomainConfig {
+  public:
+    DomainConfig(const String& name)
+      : name_(name)
+      , config_prefix_(ConfigPair::canonicalize(String("DOMAIN_") + name))
+    {}
+
+    const String& name() const { return name_; }
+    const String& config_prefix() const { return config_prefix_; }
+
+    DDS::DomainId_t domain_id(RcHandle<ConfigStoreImpl> config_store) const;
+    String discovery_config(RcHandle<ConfigStoreImpl> config_store) const;
+    String default_transport_config(RcHandle<ConfigStoreImpl> config_store) const;
+
+    Domain to_domain(RcHandle<ConfigStoreImpl> config_store) const
+    {
+      return Domain(name_,
+                    domain_id(config_store),
+                    discovery_config(config_store),
+                    default_transport_config(config_store));
+    }
+
+  private:
+
+    String config_key(const String& key) const
+    {
+      return ConfigPair::canonicalize(config_prefix_ + "_" + key);
+    }
+
+    const String name_;
+    const String config_prefix_;
+  };
+
+  bool process_domain(const Domain& domain);
+
   // domain range template support
-  struct DomainRange
-  {
-    DDS::DomainId_t range_start;
-    DDS::DomainId_t range_end;
-    OPENDDS_STRING discovery_template_name;
-    OPENDDS_STRING transport_config_name;
-    ValueMap domain_info;
+  class DomainRange {
+  public:
+    DomainRange(const String& name)
+      : name_(name)
+      , config_prefix_(ConfigPair::canonicalize(String("DOMAIN_RANGE_") + name))
+      , range_start_(-1)
+      , range_end_(-1)
+    {}
 
-    DomainRange() : range_start(-1), range_end(-1) {}
+    int parse_domain_range();
+
+    const String& name() const { return name_; }
+    const String& config_prefix() const { return config_prefix_; }
+    String discovery_template(RcHandle<ConfigStoreImpl> config_store,
+                              const String& default_name) const;
+    String default_transport_config(RcHandle<ConfigStoreImpl> config_store) const;
+
+    bool belongs_to_domain_range(DDS::DomainId_t domain_id) const
+    {
+      return domain_id >= range_start_ && domain_id <= range_end_;
+    }
+
+  private:
+    String config_key(const String& key) const
+    {
+      return ConfigPair::canonicalize(config_prefix_ + "_" + key);
+    }
+
+    String name_;
+    String config_prefix_;
+    DDS::DomainId_t range_start_;
+    DDS::DomainId_t range_end_;
   };
 
-  struct DiscoveryInfo
-  {
-    OPENDDS_STRING discovery_name;
-    ValueMap customizations;
-    ValueMap disc_info;
-  };
+  typedef OPENDDS_VECTOR(DomainRange) DomainRanges;
+  DomainRanges domain_ranges_;
 
-  OPENDDS_MAP(DDS::DomainId_t, OPENDDS_STRING) domain_to_transport_name_map_;
-
-  OPENDDS_VECTOR(DomainRange) domain_ranges_;
-
-  OPENDDS_VECTOR(DiscoveryInfo) discovery_infos_;
-
-  int parse_domain_range(const OPENDDS_STRING& range, int& start, int& end);
-
-  bool has_domain_range() const;
-
-  bool get_domain_range_info(DDS::DomainId_t id, DomainRange& inst);
-
-  bool process_customizations(DDS::DomainId_t id, const OPENDDS_STRING& discovery_name, ValueMap& customs);
-
-  OpenDDS::DCPS::Discovery::RepoKey get_discovery_template_instance_name(DDS::DomainId_t id);
-
-  bool is_discovery_template(const OPENDDS_STRING& name);
+  /**
+   * Process the domain range template and activate the
+   * domain for the given domain ID
+   */
+  int configure_domain_range_instance(DomainRanges::const_iterator dr_pos,
+                                      DDS::DomainId_t domainId,
+                                      const Discovery::RepoKey& name);
 
 public:
   /// getter for lock that protects the static initialization of XTypes related data structures

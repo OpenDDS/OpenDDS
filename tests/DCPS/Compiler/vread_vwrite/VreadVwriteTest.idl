@@ -95,4 +95,52 @@ module Mod {
     MaskType mask;
   };
 
+  /////// For KeyOnly tests
+  struct ExplicitKeysStruct {
+    @key short s;
+    @key string str;
+    unsigned long long ull;
+  };
+
+  typedef ExplicitKeysStruct ExplicitKeysStructArr[2][2];
+
+  @topic
+  struct NoExplicitKeysStruct {
+    boolean b;
+    char c;
+    long l;
+  };
+
+#define COMMON_BRANCHES  \
+  case one:              \
+    boolean b;           \
+  case two:              \
+    char c;              \
+  default:               \
+    octet o;             \
+
+  @topic
+  union ExplicitKeyUnion switch (@key MyEnum) {
+    COMMON_BRANCHES
+  };
+
+  @topic
+  union NoExplicitKeyUnion switch (MyEnum) {
+    COMMON_BRANCHES
+  };
+
+  @topic
+  struct KeyOnlyStruct {
+    @key long id;
+    @key ExplicitKeysStruct eks;
+    @key NoExplicitKeysStruct neks;
+    @key ExplicitKeysStructArr eksarr;
+    @key ExplicitKeyUnion eku;
+    @key NoExplicitKeyUnion neku;
+    @key string str;
+    octet o;
+    MaskedJunk mj;
+    long long ll;
+  };
+
 };

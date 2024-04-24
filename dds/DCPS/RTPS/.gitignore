@@ -17,10 +17,6 @@
 /RtpsCoreC.h
 /RtpsCoreC.inl
 /RtpsCoreS.h
-/RtpsSecurityC.cpp
-/RtpsSecurityC.h
-/RtpsSecurityC.inl
-/RtpsSecurityS.h
 /RtpsCoreTypeSupport.idl
 /RtpsCoreTypeSupportC.cpp
 /RtpsCoreTypeSupportC.h
@@ -49,6 +45,13 @@
 /RtpsRpcS.h
 /RtpsRpcTypeSupportImpl.cpp
 /RtpsRpcTypeSupportImpl.h
+/RtpsSecurityC.cpp
+/RtpsSecurityC.h
+/RtpsSecurityC.inl
+/RtpsSecurityS.h
+/RtpsSubmessageKindC.h
+/RtpsSubmessageKindTypeSupportImpl.cpp
+/RtpsSubmessageKindTypeSupportImpl.h
 /TypeLookupC.cpp
 /TypeLookupC.h
 /TypeLookupC.inl

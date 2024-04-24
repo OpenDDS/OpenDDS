@@ -45,8 +45,9 @@ RtpsUdpCore::RtpsUdpCore(const RtpsUdpInst_rch& inst)
   , relay_stun_task_falloff_(TimeDuration::zero_value)
 {}
 
-RtpsUdpTransport::RtpsUdpTransport(const RtpsUdpInst_rch& inst)
-  : TransportImpl(inst)
+RtpsUdpTransport::RtpsUdpTransport(const RtpsUdpInst_rch& inst,
+                                   DDS::DomainId_t domain)
+  : TransportImpl(inst, domain)
 #if defined(OPENDDS_SECURITY)
   , local_crypto_handle_(DDS::HANDLE_NIL)
 #endif
@@ -107,7 +108,7 @@ RtpsUdpTransport::make_datalink(const GuidPrefix_t& local_prefix)
 #if defined(OPENDDS_SECURITY)
   {
     if (core_.use_ice()) {
-      ReactorInterceptor_rch ri = reactor_task_->interceptor();
+      ReactorInterceptor_rch ri = reactor_task()->interceptor();
       ri->execute_or_enqueue(make_rch<RemoveHandler>(unicast_socket_.get_handle(), static_cast<ACE_Reactor_Mask>(ACE_Event_Handler::READ_MASK)));
 #ifdef ACE_HAS_IPV6
       ri->execute_or_enqueue(make_rch<RemoveHandler>(ipv6_unicast_socket_.get_handle(), static_cast<ACE_Reactor_Mask>(ACE_Event_Handler::READ_MASK)));
@@ -258,20 +259,20 @@ RtpsUdpTransport::use_datalink(const GUID_t& local_id,
                                SequenceNumber max_sn,
                                const TransportClient_rch& client)
 {
-  AddrSet uc_addrs, mc_addrs;
+  NetworkAddressSet uc_addrs, mc_addrs;
   bool requires_inline_qos;
   unsigned int blob_bytes_read;
   get_connection_addrs(remote_data, &uc_addrs, &mc_addrs, &requires_inline_qos, &blob_bytes_read);
 
   NetworkAddress disco_addr_hint;
   if (discovery_locator.length()) {
-    AddrSet disco_uc_addrs, disco_mc_addrs;
+    NetworkAddressSet disco_uc_addrs, disco_mc_addrs;
     bool disco_requires_inline_qos;
     unsigned int disco_blob_bytes_read;
     get_connection_addrs(discovery_locator, &disco_uc_addrs, &disco_mc_addrs, &disco_requires_inline_qos, &disco_blob_bytes_read);
 
-    for (AddrSet::const_iterator it = disco_uc_addrs.begin(), limit = disco_uc_addrs.end(); it != limit; ++it) {
-      for (AddrSet::const_iterator it2 = uc_addrs.begin(), limit2 = uc_addrs.end(); it2 != limit2; ++it2) {
+    for (NetworkAddressSet::const_iterator it = disco_uc_addrs.begin(), limit = disco_uc_addrs.end(); it != limit; ++it) {
+      for (NetworkAddressSet::const_iterator it2 = uc_addrs.begin(), limit2 = uc_addrs.end(); it2 != limit2; ++it2) {
         if (it->addr_bytes_equal(*it2) && DCPS::is_more_local(disco_addr_hint, *it2)) {
           disco_addr_hint = *it2;
         }
@@ -307,8 +308,8 @@ RtpsUdpTransport::local_crypto_handle(DDS::Security::ParticipantCryptoHandle pch
 
 void
 RtpsUdpTransport::get_connection_addrs(const TransportBLOB& remote,
-                                       AddrSet* uc_addrs,
-                                       AddrSet* mc_addrs,
+                                       NetworkAddressSet* uc_addrs,
+                                       NetworkAddressSet* mc_addrs,
                                        bool* requires_inline_qos,
                                        unsigned int* blob_bytes_read) const
 {
@@ -341,7 +342,7 @@ RtpsUdpTransport::connection_info_i(TransportLocator& info, ConnectionInfoFlags 
 {
   RtpsUdpInst_rch cfg = config();
   if (cfg) {
-    cfg->populate_locator(info, flags);
+    cfg->populate_locator(info, flags, domain_);
     return true;
   }
   return false;
@@ -374,7 +375,7 @@ RtpsUdpTransport::register_for_reader(const GUID_t& participant,
     link_ = make_datalink(participant.guidPrefix);
   }
 
-  AddrSet uc_addrs;
+  NetworkAddressSet uc_addrs;
   get_connection_addrs(*blob, &uc_addrs);
   link_->register_for_reader(writerid, readerid, uc_addrs, listener);
 }
@@ -418,7 +419,7 @@ RtpsUdpTransport::register_for_writer(const GUID_t& participant,
     link_ = make_datalink(participant.guidPrefix);
   }
 
-  AddrSet uc_addrs;
+  NetworkAddressSet uc_addrs;
   get_connection_addrs(*blob, &uc_addrs);
   link_->register_for_writer(readerid, writerid, uc_addrs, listener);
 }
@@ -456,7 +457,7 @@ RtpsUdpTransport::update_locators(const GUID_t& remote,
   GuardThreadType guard_links(links_lock_);
 
   if (link_) {
-    AddrSet uc_addrs, mc_addrs;
+    NetworkAddressSet uc_addrs, mc_addrs;
     bool requires_inline_qos;
     unsigned int blob_bytes_read;
     get_connection_addrs(*blob, &uc_addrs, &mc_addrs, &requires_inline_qos, &blob_bytes_read);
@@ -612,7 +613,7 @@ RtpsUdpTransport::configure_i(const RtpsUdpInst_rch& config)
 
   create_reactor_task(false, "RtpsUdpTransport" + config->name());
 
-  ACE_Reactor* reactor = reactor_task_->get_reactor();
+  ACE_Reactor* reactor = reactor_task()->get_reactor();
   job_queue_ = DCPS::make_rch<DCPS::JobQueue>(reactor);
 
 #ifdef OPENDDS_SECURITY
@@ -949,7 +950,7 @@ RtpsUdpTransport::start_ice()
   GuardThreadType guard_links(links_lock_);
 
   if (!link_) {
-    ReactorInterceptor_rch ri = reactor_task_->interceptor();
+    ReactorInterceptor_rch ri = reactor_task()->interceptor();
     ri->execute_or_enqueue(make_rch<RegisterHandler>(unicast_socket_.get_handle(), ice_endpoint_.get(), static_cast<ACE_Reactor_Mask>(ACE_Event_Handler::READ_MASK)));
 #ifdef ACE_HAS_IPV6
     ri->execute_or_enqueue(make_rch<RegisterHandler>(ipv6_unicast_socket_.get_handle(), ice_endpoint_.get(), static_cast<ACE_Reactor_Mask>(ACE_Event_Handler::READ_MASK)));
@@ -967,7 +968,7 @@ RtpsUdpTransport::stop_ice()
   GuardThreadType guard_links(links_lock_);
 
   if (!link_) {
-    ReactorInterceptor_rch ri = reactor_task_->interceptor();
+    ReactorInterceptor_rch ri = reactor_task()->interceptor();
     ri->execute_or_enqueue(make_rch<RemoveHandler>(unicast_socket_.get_handle(), static_cast<ACE_Reactor_Mask>(ACE_Event_Handler::READ_MASK)));
 #ifdef ACE_HAS_IPV6
     ri->execute_or_enqueue(make_rch<RemoveHandler>(ipv6_unicast_socket_.get_handle(), static_cast<ACE_Reactor_Mask>(ACE_Event_Handler::READ_MASK)));

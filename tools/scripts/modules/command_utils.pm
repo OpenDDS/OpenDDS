@@ -12,6 +12,7 @@ use Scalar::Util qw();
 use FindBin;
 use lib "$FindBin::RealBin";
 use ChangeDir;
+use misc_utils qw(trace);
 
 require Exporter;
 our @ISA = qw(Exporter);
@@ -78,7 +79,8 @@ sub process_capture_arguments {
       my $ambiguous_dest_type = ref(\$ambiguous_dest);
       if ($ambiguous_dest_type eq "REF") {
         $dest_var = $ambiguous_dest;
-      } else {
+      }
+      else {
         if (defined($ambiguous_dest)) {
           if (Scalar::Util::openhandle($ambiguous_dest)) {
             $dest_fh = $ambiguous_dest;
@@ -92,7 +94,8 @@ sub process_capture_arguments {
           if (exists($kw{dump_on_failure}) && $kw{dump_on_failure}) {
             my $just_for_this_case;
             $dest_var = \$just_for_this_case;
-          } else {
+          }
+          else {
             $dest_path = File::Spec->devnull();
           }
         }
@@ -128,16 +131,6 @@ sub get_dump_output {
     $end . ("-" x (80 - length($end))) . "\n";
 }
 
-sub die_with_stack_trace {
-  my $i = 1;
-  print STDERR ("ERROR: ", @_, " STACK TRACE:\n");
-  while (my @call_details = (caller($i++)) ){
-      print STDERR "ERROR: STACK TRACE[", $i - 2, "] " .
-        "$call_details[1]:$call_details[2] in function $call_details[3]\n";
-  }
-  die();
-}
-
 # `run_command` runs a command using the `system` function built into Perl, but
 # with extra features. It automatically prints out the exit status of a command
 # that returned something other than zero. It also checks if the program died
@@ -167,7 +160,7 @@ sub die_with_stack_trace {
 #   run_command(\@cmd);
 #
 # 0 is returned if the command ran and returned a 0 exit status, else 1 is
-# returned.
+# returned. If autodie is true, then the exit_status is returned instead.
 #
 # The optional arguments are passed as a hash key value elements directly
 # inside the arguments. Example:
@@ -188,6 +181,13 @@ sub die_with_stack_trace {
 #     else {
 #       print("Command failed to run\n");
 #     }
+#
+# ignore
+#   Array ref of non-zero exit statuses to not treat as errors. Combine with
+#   exit_status or autodie to get specific exit statuses.
+#
+# ignore_all
+#   Do not treat any non-zero exit status as an error.
 #
 # chdir
 #   Change to the given directory before executing the command, returning
@@ -224,27 +224,28 @@ sub die_with_stack_trace {
 #     });
 #
 # name
-#     String of the name of the command to report in errors. Defaults to the
-#     first element of the command array.
+#   String of the name of the command to report in errors. Defaults to the
+#   first element of the command array.
 #
 # verbose
-#     Boolean that when true prints the command and current working directory
-#     before running. Defaults to false.
+#   Boolean that when true prints the command and current working directory
+#   before running. Defaults to false.
 #
 # dry_run
-#     The same as verbose, but doesn't run the command. Defaults to false.
+#   The same as verbose, but doesn't run the command. Defaults to false.
 #
 # script_name
-#     String of the name of the perl script running the command to report in
-#     errors. Defaults to being blank.
+#   String of the name of the perl script running the command to report in
+#   errors. Defaults to being blank.
 #
 # error_fh
-#     File handle to print failure messages and capture dump_on_failure output
-#     to. Setting to undef disables these.
+#   File handle to print failure messages and capture dump_on_failure output
+#   to. Setting to undef disables these.
 #
 # autodie
-#     Die with stack trace if the command failed to run or returned a non-zero
-#     exit status. Defaults to false.
+#   Die with stack trace if the command failed to run or returned a non-zero
+#   exit status that's not ignored. If it doesn't fail, then it returns the
+#   exit status. Defaults to false.
 #
 sub run_command {
   my $command = shift;
@@ -269,13 +270,16 @@ sub run_command {
     script_name => undef,
     error_fh => *STDERR,
     exit_status => undef,
+    ignore => [],
+    ignore_all => 0,
+    ret_exit_status => 0,
     chdir => undef,
     autodie => 0,
   );
 
   my %args = (%valid_args, @_);
   my @invalid_args = grep { !exists($valid_args{$_}) } keys(%args);
-  die_with_stack_trace("invalid arguments: ", join(', ', @invalid_args)) if (scalar(@invalid_args));
+  trace("invalid arguments: ", join(', ', @invalid_args)) if (scalar(@invalid_args));
 
   my $chdir = ChangeDir->new($args{chdir});
 
@@ -287,6 +291,8 @@ sub run_command {
   my $script_name = $args{script_name} ? "$args{script_name}: " : "";
   my $error_fh = $args{error_fh};
   my $exit_status_ref = $args{exit_status};
+  my %ignore = map {$_ => 1} @{$args{ignore}};
+  my $autodie = $args{autodie};
 
   if ($verbose && defined($verbose_fh)) {
     my $cwd = getcwd();
@@ -312,16 +318,16 @@ sub run_command {
     }
     elsif (defined($capture_directive->{dest_fh})) {
       if ($capture_directive->{dump_on_failure}) {
-        die_with_stack_trace(
+        trace(
           "dump_on_failure requires a variable, path, or undef destination, not a file handle");
       }
     }
     elsif (defined($capture_directive->{dest_path})) {
       open($capture_directive->{dest_fh}, '>', $capture_directive->{dest_path})
-          or die_with_stack_trace("failed to open $capture_directive->{dest_path}: $!");
+          or trace("failed to open $capture_directive->{dest_path}: $!");
     }
     else {
-      die_with_stack_trace("capture_directive is invalid");
+      trace("capture_directive is invalid");
     }
     for my $std_fh (@{$capture_directive->{std_fhs}}) {
       open(my $saved_fh, '>&', $std_fh);
@@ -339,6 +345,12 @@ sub run_command {
   my $system_status = $?;
   my $system_error = $!;
   my $ran = $system_status != -1;
+  my $exit_status = $ran ? $system_status >> 8 : undef;
+
+  # Override failed if we're ignoring this exit status
+  if ($failed && $ran && ($args{ignore_all} || $ignore{$exit_status})) {
+    $failed = 0;
+  }
 
   # Reverse redirect
   for my $capture_directive (@capture_directives) {
@@ -356,7 +368,6 @@ sub run_command {
   }
 
   # Process results
-  my $exit_status = 0;
   if ($failed) {
     # Dump output if ran and directed to do so
     if ($ran) {
@@ -368,9 +379,8 @@ sub run_command {
       }
     }
 
-    $exit_status = $system_status >> 8;
     my $signal = $system_status & 127;
-    die_with_stack_trace("${script_name}\"$name\" was interrupted") if ($signal == SIGINT);
+    trace("${script_name}\"$name\" was interrupted") if ($signal == SIGINT);
     my $coredump = $system_status & 128;
     my $error_message;
     if (!$ran) {
@@ -387,16 +397,16 @@ sub run_command {
       print $error_fh "${script_name}ERROR: \"$name\" $error_message\n";
     }
 
-    if ($args{autodie}) {
-      die_with_stack_trace('run_command was set to autodie');
+    if ($autodie) {
+      trace('run_command was set to autodie');
     }
   }
 
   if (defined($exit_status_ref)) {
-    ${$exit_status_ref} = $ran ? $exit_status : undef;
+    ${$exit_status_ref} = $exit_status;
   }
 
-  return $failed;
+  return $autodie ? $exit_status : $failed;
 }
 
 1;

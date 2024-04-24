@@ -32,6 +32,7 @@ static const MemberId CHAR16_MEMBER_ID = 15;
 static const MemberId STRING_MEMBER_ID = 16;
 //static const MemberId WSTRING_MEMBER_ID = 17;
 static const MemberId ENUM_MEMBER_ID = 18;
+static const MemberId BITMASK_MEMBER_ID = 19;
 
 static const ListMemberHelper::Pair member_pairs[] = {
   {"bool", BOOL_MEMBER_ID},
@@ -51,6 +52,7 @@ static const ListMemberHelper::Pair member_pairs[] = {
   {"char16", CHAR16_MEMBER_ID},
   {"string", STRING_MEMBER_ID},
   {"enum", ENUM_MEMBER_ID},
+  {"bitmask", BITMASK_MEMBER_ID},
   {0, 0}
 };
 
@@ -68,6 +70,16 @@ static const ListEnumHelper::Pair enum_pairs[] = {
 };
 
 static const ListEnumHelper enum_helper(enum_pairs);
+
+static const MapBitmaskHelper::Pair bitmask_pairs[] = {
+  {"FLAG_0", 0},
+  {"FLAG_1", 1},
+  {"FLAG_2", 2},
+  {"FLAG_3", 3},
+  {0, 0}
+};
+
+static const MapBitmaskHelper bitmask_helper(bitmask_pairs, 64, OpenDDS::XTypes::TK_UINT64);
 
 TEST(dds_DCPS_JsonValueReader, struct_empty)
 {
@@ -147,7 +159,8 @@ TEST(dds_DCPS_JsonValueReader, struct_max)
     "\"char8\":\"a\","
     "\"char16\":\"a\","
     "\"string\":\"a string\","
-    "\"enum\":\"kValue1\""
+    "\"enum\":\"kValue1\","
+    "\"bitmask\":\"FLAG_0|FLAG_2|FLAG_3\""
     "}";
   StringStream ss(json);
   JsonValueReader<> jvr(ss);
@@ -171,6 +184,7 @@ TEST(dds_DCPS_JsonValueReader, struct_max)
   ACE_CDR::WChar char16_value;
   std::string string_value;
   MyEnum enum_value;
+  ACE_CDR::ULongLong bitmask_value;
 
   EXPECT_TRUE(jvr.begin_struct());
 
@@ -280,6 +294,12 @@ TEST(dds_DCPS_JsonValueReader, struct_max)
   EXPECT_EQ(enum_value, kValue1);
   EXPECT_TRUE(jvr.end_struct_member());
 
+  EXPECT_TRUE(jvr.begin_struct_member(member_id, member_helper));
+  EXPECT_EQ(member_id, BITMASK_MEMBER_ID);
+  EXPECT_TRUE(jvr.read_bitmask(bitmask_value, bitmask_helper));
+  EXPECT_EQ(bitmask_value, 13ull);
+  EXPECT_TRUE(jvr.end_struct_member());
+
   EXPECT_TRUE(jvr.end_struct());
 }
 
@@ -309,7 +329,7 @@ TEST(dds_DCPS_JsonValueReader, array_min)
 #if OPENDDS_HAS_EXPLICIT_INTS
     "-128,0,"
 #endif
-    "-32768,0,-2147483648,0,-9223372036854775808,0,-1.25,-1.25,-1.25,\"a\",\"a\",\"a string\",\"kValue2\"]";
+    "-32768,0,-2147483648,0,-9223372036854775808,0,-1.25,-1.25,-1.25,\"a\",\"a\",\"a string\",\"kValue2\",\"FLAG_2|FLAG_3\"]";
   StringStream ss(json);
   JsonValueReader<> jvr(ss);
   ACE_CDR::Boolean bool_value;
@@ -331,6 +351,7 @@ TEST(dds_DCPS_JsonValueReader, array_min)
   ACE_CDR::WChar char16_value;
   std::string string_value;
   MyEnum enum_value;
+  ACE_CDR::ULongLong bitmask_value;
 
   EXPECT_TRUE(jvr.begin_array());
 
@@ -423,6 +444,11 @@ TEST(dds_DCPS_JsonValueReader, array_min)
   EXPECT_EQ(enum_value, kValue2);
   EXPECT_TRUE(jvr.end_element());
 
+  EXPECT_TRUE(jvr.begin_element());
+  EXPECT_TRUE(jvr.read_bitmask(bitmask_value, bitmask_helper));
+  EXPECT_EQ(bitmask_value, 12ull);
+  EXPECT_TRUE(jvr.end_element());
+
   EXPECT_TRUE(jvr.end_array());
 }
 
@@ -432,7 +458,7 @@ TEST(dds_DCPS_JsonValueReader, sequence_zero)
 #if OPENDDS_HAS_EXPLICIT_INTS
     "0,0,"
 #endif
-    "0,0,0,0,0,0,0,0,0,\"\\u0000\",\"\\u0000\",\"\",\"kValue1\"]";
+    "0,0,0,0,0,0,0,0,0,\"\\u0000\",\"\\u0000\",\"\",\"kValue1\",\"FLAG_0|FLAG_2\"]";
   StringStream ss(json);
   JsonValueReader<> jvr(ss);
   ACE_CDR::Boolean bool_value;
@@ -454,6 +480,7 @@ TEST(dds_DCPS_JsonValueReader, sequence_zero)
   ACE_CDR::WChar char16_value;
   std::string string_value;
   MyEnum enum_value;
+  ACE_CDR::ULongLong bitmask_value;
 
   EXPECT_TRUE(jvr.begin_sequence());
 
@@ -563,6 +590,12 @@ TEST(dds_DCPS_JsonValueReader, sequence_zero)
   EXPECT_EQ(enum_value, kValue1);
   EXPECT_TRUE(jvr.end_element());
 
+  EXPECT_TRUE(jvr.elements_remaining());
+  EXPECT_TRUE(jvr.begin_element());
+  EXPECT_TRUE(jvr.read_bitmask(bitmask_value, bitmask_helper));
+  EXPECT_EQ(bitmask_value, 5ull);
+  EXPECT_TRUE(jvr.end_element());
+
   EXPECT_FALSE(jvr.elements_remaining());
 
   EXPECT_TRUE(jvr.end_sequence());
@@ -578,7 +611,7 @@ namespace DCPS {
 
 bool vread(ValueReader& reader, MyStruct& s)
 {
-  if (!reader.begin_struct()) return false;
+  if (!reader.begin_struct(APPENDABLE)) return false;
   MemberId member_id;
   if (!reader.begin_struct_member(member_id, member_helper)) return false;
   if (member_id != BOOL_MEMBER_ID)  return false;
@@ -686,6 +719,157 @@ TEST(dds_DCPS_JsonValueReader, skip_unknown_last)
   JsonValueReader<> jvr(ss);
   EXPECT_TRUE(jvr.begin_struct());
   check_members(jvr);
+  EXPECT_TRUE(jvr.end_struct());
+}
+
+TEST(dds_DCPS_JsonValueReader, optional_members)
+{
+  const char json[] =
+    "{"
+    "\"bool\":true,"
+    "\"byte\":10,"
+    "\"int16\":null,"
+    "\"uint16\":11,"
+    "\"int32\":12,"
+    "\"nested_struct\":null,"
+    "\"uint32\":13,"
+    "\"array\":null,"
+    "\"int64\":14,"
+    "\"sequence\":null,"
+    "\"uint64\":15,"
+    "\"nested_union\":null,"
+    "\"char8\":\"a\","
+    "\"nested_union2\":{\"$discriminator\":3,\"3\":null}"
+    "}";
+
+  const ListMemberHelper::Pair member_pairs[] = {
+    {"bool", 0},
+    {"byte", 1},
+    {"int16", 2},
+    {"uint16", 3},
+    {"int32", 4},
+    {"nested_struct", 5},
+    {"uint32", 6},
+    {"array", 7},
+    {"int64", 8},
+    {"sequence", 9},
+    {"uint64", 10},
+    {"nested_union", 11},
+    {"char8", 12},
+    {"nested_union2", 13},
+    {0, 0}
+  };
+  const ListMemberHelper member_helper(member_pairs);
+
+  StringStream ss(json);
+  JsonValueReader<> jvr(ss);
+  MemberId member_id;
+  ACE_CDR::Boolean bool_value;
+  ACE_CDR::Octet byte_value;
+  ACE_CDR::UShort uint16_value;
+  ACE_CDR::Long int32_value;
+  ACE_CDR::ULong uint32_value;
+  ACE_CDR::LongLong int64_value;
+  ACE_CDR::ULongLong uint64_value;
+  ACE_CDR::Char char8_value;
+  ACE_CDR::Long disc_value;
+
+  EXPECT_TRUE(jvr.begin_struct());
+
+  // bool: non-optional
+  EXPECT_TRUE(jvr.begin_struct_member(member_id, member_helper));
+  EXPECT_TRUE(jvr.read_boolean(bool_value));
+  EXPECT_EQ(bool_value, true);
+  EXPECT_TRUE(jvr.end_struct_member());
+
+  // byte: has value
+  EXPECT_TRUE(jvr.begin_struct_member(member_id, member_helper));
+  EXPECT_TRUE(jvr.member_has_value());
+  EXPECT_TRUE(jvr.read_byte(byte_value));
+  EXPECT_EQ(byte_value, 10);
+  EXPECT_TRUE(jvr.end_struct_member());
+
+  // int16: no value
+  EXPECT_TRUE(jvr.begin_struct_member(member_id, member_helper));
+  EXPECT_FALSE(jvr.member_has_value());
+  EXPECT_TRUE(jvr.end_struct_member());
+
+  // uint16: has value
+  EXPECT_TRUE(jvr.begin_struct_member(member_id, member_helper));
+  EXPECT_TRUE(jvr.member_has_value());
+  EXPECT_TRUE(jvr.read_uint16(uint16_value));
+  EXPECT_EQ(uint16_value, 11);
+  EXPECT_TRUE(jvr.end_struct_member());
+
+  // int32: has value
+  EXPECT_TRUE(jvr.begin_struct_member(member_id, member_helper));
+  EXPECT_TRUE(jvr.member_has_value());
+  EXPECT_TRUE(jvr.read_int32(int32_value));
+  EXPECT_EQ(int32_value, 12);
+  EXPECT_TRUE(jvr.end_struct_member());
+
+  // nested_struct: no value
+  EXPECT_TRUE(jvr.begin_struct_member(member_id, member_helper));
+  EXPECT_FALSE(jvr.member_has_value());
+  EXPECT_TRUE(jvr.end_struct_member());
+
+  // uint32: has value
+  EXPECT_TRUE(jvr.begin_struct_member(member_id, member_helper));
+  EXPECT_TRUE(jvr.member_has_value());
+  EXPECT_TRUE(jvr.read_uint32(uint32_value));
+  EXPECT_EQ(uint32_value, 13ul);
+  EXPECT_TRUE(jvr.end_struct_member());
+
+  // array: no value
+  EXPECT_TRUE(jvr.begin_struct_member(member_id, member_helper));
+  EXPECT_FALSE(jvr.member_has_value());
+  EXPECT_TRUE(jvr.end_struct_member());
+
+  // int64: has value
+  EXPECT_TRUE(jvr.begin_struct_member(member_id, member_helper));
+  EXPECT_TRUE(jvr.member_has_value());
+  EXPECT_TRUE(jvr.read_int64(int64_value));
+  EXPECT_EQ(int64_value, 14);
+  EXPECT_TRUE(jvr.end_struct_member());
+
+  // sequence: no value
+  EXPECT_TRUE(jvr.begin_struct_member(member_id, member_helper));
+  EXPECT_FALSE(jvr.member_has_value());
+  EXPECT_TRUE(jvr.end_struct_member());
+
+  // uint64: has value
+  EXPECT_TRUE(jvr.begin_struct_member(member_id, member_helper));
+  EXPECT_TRUE(jvr.member_has_value());
+  EXPECT_TRUE(jvr.read_uint64(uint64_value));
+  EXPECT_EQ(uint64_value, 15ull);
+  EXPECT_TRUE(jvr.end_struct_member());
+
+  // nested_union: no value
+  EXPECT_TRUE(jvr.begin_struct_member(member_id, member_helper));
+  EXPECT_FALSE(jvr.member_has_value());
+  EXPECT_TRUE(jvr.end_struct_member());
+
+  // char8: has value
+  EXPECT_TRUE(jvr.begin_struct_member(member_id, member_helper));
+  EXPECT_TRUE(jvr.member_has_value());
+  EXPECT_TRUE(jvr.read_char8(char8_value));
+  EXPECT_EQ(char8_value, 'a');
+  EXPECT_TRUE(jvr.end_struct_member());
+
+  // nested_union2: has value with an absent branch
+  EXPECT_TRUE(jvr.begin_struct_member(member_id, member_helper));
+  EXPECT_TRUE(jvr.member_has_value());
+  EXPECT_TRUE(jvr.begin_union());
+  EXPECT_TRUE(jvr.begin_discriminator());
+  EXPECT_TRUE(jvr.read_int32(disc_value));
+  EXPECT_EQ(disc_value, 3);
+  EXPECT_TRUE(jvr.end_discriminator());
+  EXPECT_TRUE(jvr.begin_union_member());
+  EXPECT_FALSE(jvr.member_has_value());
+  EXPECT_TRUE(jvr.end_union_member());
+  EXPECT_TRUE(jvr.end_union());
+  EXPECT_TRUE(jvr.end_struct_member());
+
   EXPECT_TRUE(jvr.end_struct());
 }
 

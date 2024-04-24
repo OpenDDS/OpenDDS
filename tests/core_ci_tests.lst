@@ -27,6 +27,7 @@ tests/DCPS/Compiler/idl_test1_main/run_test.pl: !DCPS_MIN !OPENDDS_SAFETY_PROFIL
 tests/DCPS/Compiler/idl_test3_main/run_test.pl: !DCPS_MIN !OPENDDS_SAFETY_PROFILE STATIC_COMPILER
 tests/DCPS/Compiler/C++11/idl_test1_main/run_test.pl: !DCPS_MIN CXX11 STATIC_COMPILER
 tests/DCPS/Compiler/C++11/idl_test3_main/run_test.pl: !DCPS_MIN CXX11 STATIC_COMPILER
+tests/DCPS/Compiler/C++11/value_annotation/run_test.pl: !DCPS_MIN CXX11 STATIC_COMPILER
 tests/DCPS/Compiler/key_annotation/run_test.pl: !DCPS_MIN STATIC_COMPILER2
 tests/DCPS/Compiler/is_topic_type/run_test.pl: !DCPS_MIN STATIC_COMPILER
 tests/DCPS/Compiler/vread_vwrite/run_test.pl: !DCPS_MIN RAPIDJSON CXX11 STATIC_COMPILER2

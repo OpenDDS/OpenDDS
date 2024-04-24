@@ -21,7 +21,7 @@ public class RtpsUdpInst extends TransportInst {
     public native boolean isUseMulticast();
     public native void setUseMulticast(boolean um);
 
-    public native String getMulticastGroupAddress();
+    public native String getMulticastGroupAddress(int domain);
     public native void setMulticastGroupAddress(String mga);
 
     public native int getNakDepth();

@@ -13,18 +13,18 @@
 
 #if ${uppercase_target}_HAS_DLL
 #  if defined ${uppercase_target}_BUILD_DLL
-#    define ${target}_Export ACE_Proper_Export_Flag
+#    define ${export_macro} ACE_Proper_Export_Flag
 #    define ${uppercase_target}_SINGLETON_DECLARATION(T) ACE_EXPORT_SINGLETON_DECLARATION (T)
 #    define ${uppercase_target}_SINGLETON_DECLARE(SINGLETON_TYPE, CLASS, LOCK) \
         ACE_EXPORT_SINGLETON_DECLARE(SINGLETON_TYPE, CLASS, LOCK)
 #  else
-#    define ${target}_Export ACE_Proper_Import_Flag
+#    define ${export_macro} ACE_Proper_Import_Flag
 #    define ${uppercase_target}_SINGLETON_DECLARATION(T) ACE_IMPORT_SINGLETON_DECLARATION (T)
 #    define ${uppercase_target}_SINGLETON_DECLARE(SINGLETON_TYPE, CLASS, LOCK) \
         ACE_IMPORT_SINGLETON_DECLARE(SINGLETON_TYPE, CLASS, LOCK)
 #  endif
 #else
-#  define ${target}_Export
+#  define ${export_macro}
 #  define ${uppercase_target}_SINGLETON_DECLARATION(T)
 #  define ${uppercase_target}_SINGLETON_DECLARE(SINGLETON_TYPE, CLASS, LOCK)
 #endif

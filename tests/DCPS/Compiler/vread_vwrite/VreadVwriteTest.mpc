@@ -1,9 +1,6 @@
-project: dcpsexe, dcps_test, googletest, rapidjson {
-
+project: dcpsexe, dcps_test, googletest, rapidjson, opendds_uses_cxx11, msvc_bigobj {
+  dcps_ts_flags += -Gxtypes-complete
   exename = *
-
-  requires += no_opendds_safety_profile
-  avoids += no_cxx11
 
   Idl_Files {
     VreadVwriteTest.idl

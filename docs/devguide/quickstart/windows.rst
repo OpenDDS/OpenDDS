@@ -1,6 +1,6 @@
-###################
-Windows Quick Start
-###################
+#######
+Windows
+#######
 
 The goal of this guide is help you download and compile OpenDDS and run a simple example.
 

@@ -3,7 +3,6 @@
 #include "StaticDiscovery.h"
 
 #include "debug.h"
-#include "ConfigUtils.h"
 #include "DomainParticipantImpl.h"
 #include "Marked_Default_Qos.h"
 #include "SubscriberImpl.h"
@@ -120,7 +119,18 @@ void StaticEndpointManager::init_bit()
       data.key = key;
       OPENDDS_STRING topic_name = writer.topic_name;
       data.topic_name = topic_name.c_str();
-      const EndpointRegistry::Topic& topic = registry_.topic_map.find(topic_name)->second;
+
+      EndpointRegistry::TopicMapType::const_iterator iter = registry_.topic_map.find(topic_name);
+      if (iter == registry_.topic_map.end()) {
+        if (log_level >= LogLevel::Error) {
+          ACE_ERROR((LM_ERROR,
+                     "(%P|%t) ERROR: StaticEndpointManager::init_bit: no topic named %C\n",
+                     topic_name.c_str()));
+        }
+        continue;
+      }
+
+      const EndpointRegistry::Topic& topic = iter->second;
       data.type_name = topic.type_name.c_str();
       data.durability = writer.qos.durability;
       data.durability_service = writer.qos.durability_service;
@@ -166,7 +176,18 @@ void StaticEndpointManager::init_bit()
       data.key = key;
       OPENDDS_STRING topic_name = reader.topic_name;
       data.topic_name = topic_name.c_str();
-      const EndpointRegistry::Topic& topic = registry_.topic_map.find(topic_name)->second;
+
+      EndpointRegistry::TopicMapType::const_iterator iter = registry_.topic_map.find(topic_name);
+      if (iter == registry_.topic_map.end()) {
+        if (log_level >= LogLevel::Error) {
+          ACE_ERROR((LM_ERROR,
+                     "(%P|%t) ERROR: StaticEndpointManager::init_bit: no topic named %C\n",
+                     topic_name.c_str()));
+        }
+        continue;
+      }
+
+      const EndpointRegistry::Topic& topic = iter->second;
       data.type_name = topic.type_name.c_str();
       data.durability = reader.qos.durability;
       data.deadline = reader.qos.deadline;
@@ -1702,7 +1723,7 @@ namespace {
 }
 
 int
-StaticDiscovery::load_configuration(ACE_Configuration_Heap&)
+StaticDiscovery::load_configuration()
 {
   if (parse_topics() ||
       parse_datawriterqos() ||
@@ -1722,7 +1743,7 @@ int
 StaticDiscovery::parse_topics()
 {
   RcHandle<ConfigStoreImpl> config_store = TheServiceParticipant->config_store();
-  const ConfigStoreImpl::StringList sections = config_store->get_section_names("OPENDDS_TOPIC");
+  const ConfigStoreImpl::StringList sections = config_store->get_section_names("TOPIC");
 
   // Loop through the [topic/*] sections
   for (ConfigStoreImpl::StringList::const_iterator pos = sections.begin(), limit = sections.end();
@@ -1737,8 +1758,8 @@ StaticDiscovery::parse_topics()
     }
 
     EndpointRegistry::Topic topic;
-    topic.name = config_store->get((String("OPENDDS_TOPIC_") + topic_name + "_NAME").c_str(), topic_name);
-    topic.type_name = config_store->get((String("OPENDDS_TOPIC_") + topic_name + "_TYPE_NAME").c_str(), "");
+    topic.name = config_store->get((String("TOPIC_") + topic_name + "_NAME").c_str(), topic_name);
+    topic.type_name = config_store->get((String("TOPIC_") + topic_name + "_TYPE_NAME").c_str(), "");
     if (topic.type_name.empty()) {
       ACE_ERROR((LM_ERROR,
                  ACE_TEXT("(%P|%t) StaticDiscovery::parse_topics ")
@@ -1765,7 +1786,7 @@ int
 StaticDiscovery::parse_datawriterqos()
 {
   RcHandle<ConfigStoreImpl> config_store = TheServiceParticipant->config_store();
-  const ConfigStoreImpl::StringList sections = config_store->get_section_names("OPENDDS_DATAWRITERQOS");
+  const ConfigStoreImpl::StringList sections = config_store->get_section_names("DATAWRITERQOS");
 
   // Loop through the [datawriterqos/*] sections
   for (ConfigStoreImpl::StringList::const_iterator pos = sections.begin(), limit = sections.end();
@@ -1779,7 +1800,7 @@ StaticDiscovery::parse_datawriterqos()
                  datawriterqos_name.c_str()));
     }
 
-    const String prefix = String("OPENDDS_DATAWRITERQOS_") + datawriterqos_name;
+    const String prefix = String("DATAWRITERQOS_") + datawriterqos_name;
 
     DDS::DataWriterQos datawriterqos(TheServiceParticipant->initial_DataWriterQos());
 
@@ -1848,7 +1869,7 @@ int
 StaticDiscovery::parse_datareaderqos()
 {
   RcHandle<ConfigStoreImpl> config_store = TheServiceParticipant->config_store();
-  const ConfigStoreImpl::StringList sections = config_store->get_section_names("OPENDDS_DATAREADERQOS");
+  const ConfigStoreImpl::StringList sections = config_store->get_section_names("DATAREADERQOS");
 
   // Loop through the [datareaderqos/*] sections
   for (ConfigStoreImpl::StringList::const_iterator pos = sections.begin(), limit = sections.end();
@@ -1862,7 +1883,7 @@ StaticDiscovery::parse_datareaderqos()
                   datareaderqos_name.c_str()));
     }
 
-    const String prefix = String("OPENDDS_DATAREADERQOS_") + datareaderqos_name;
+    const String prefix = String("DATAREADERQOS_") + datareaderqos_name;
 
     DDS::DataReaderQos datareaderqos(TheServiceParticipant->initial_DataReaderQos());
 
@@ -1933,7 +1954,7 @@ int
 StaticDiscovery::parse_publisherqos()
 {
   RcHandle<ConfigStoreImpl> config_store = TheServiceParticipant->config_store();
-  const ConfigStoreImpl::StringList sections = config_store->get_section_names("OPENDDS_PUBLISHERQOS");
+  const ConfigStoreImpl::StringList sections = config_store->get_section_names("PUBLISHERQOS");
 
   // Loop through the [publisherqos/*] sections
   for (ConfigStoreImpl::StringList::const_iterator pos = sections.begin(), limit = sections.end();
@@ -1947,7 +1968,7 @@ StaticDiscovery::parse_publisherqos()
                   publisherqos_name.c_str()));
     }
 
-    const String prefix = String("OPENDDS_PUBLISHERQOS_") + publisherqos_name;
+    const String prefix = String("PUBLISHERQOS_") + publisherqos_name;
 
     DDS::PublisherQos publisherqos(TheServiceParticipant->initial_PublisherQos());
 
@@ -1972,7 +1993,7 @@ int
 StaticDiscovery::parse_subscriberqos()
 {
   RcHandle<ConfigStoreImpl> config_store = TheServiceParticipant->config_store();
-  const ConfigStoreImpl::StringList sections = config_store->get_section_names("OPENDDS_SUBSCRIBERQOS");
+  const ConfigStoreImpl::StringList sections = config_store->get_section_names("SUBSCRIBERQOS");
 
   // Loop through the [subscriberqos/*] sections
   for (ConfigStoreImpl::StringList::const_iterator pos = sections.begin(), limit = sections.end();
@@ -1986,7 +2007,7 @@ StaticDiscovery::parse_subscriberqos()
                   subscriberqos_name.c_str()));
     }
 
-    const String prefix = String("OPENDDS_SUBSCRIBERQOS_") + subscriberqos_name;
+    const String prefix = String("SUBSCRIBERQOS_") + subscriberqos_name;
 
     DDS::SubscriberQos subscriberqos(TheServiceParticipant->initial_SubscriberQos());
 
@@ -2011,7 +2032,7 @@ int
 StaticDiscovery::parse_endpoints()
 {
   RcHandle<ConfigStoreImpl> config_store = TheServiceParticipant->config_store();
-  const ConfigStoreImpl::StringList sections = config_store->get_section_names("OPENDDS_ENDPOINT");
+  const ConfigStoreImpl::StringList sections = config_store->get_section_names("ENDPOINT");
 
   // Loop through the [endpoint/*] sections
   for (ConfigStoreImpl::StringList::const_iterator pos = sections.begin(), limit = sections.end();
@@ -2025,7 +2046,7 @@ StaticDiscovery::parse_endpoints()
                   endpoint_name.c_str()));
     }
 
-    const String prefix = String("OPENDDS_ENDPOINT_") + endpoint_name;
+    const String prefix = String("ENDPOINT_") + endpoint_name;
 
     int domain;
     {
@@ -2208,7 +2229,7 @@ StaticDiscovery::parse_endpoints()
 
     TransportLocatorSeq trans_info;
     try {
-      config->populate_locators(trans_info);
+      config->populate_locators(trans_info, domain);
     }
     catch (const CORBA::Exception& ex) {
       ACE_ERROR_RETURN((LM_ERROR,

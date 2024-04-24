@@ -213,35 +213,35 @@ TEST(dds_DCPS_Qos_Helper, DurabilityQosPolicyBuilder_kind)
 {
   OpenDDS::DCPS::DurabilityQosPolicyBuilder uut;
   uut.kind(DDS::TRANSIENT_DURABILITY_QOS);
-  EXPECT_EQ(uut.qos().kind, DDS::TRANSIENT_DURABILITY_QOS);;
+  EXPECT_EQ(uut.qos().kind, DDS::TRANSIENT_DURABILITY_QOS);
 }
 
 TEST(dds_DCPS_Qos_Helper, DurabilityQosPolicyBuilder_volatile)
 {
   OpenDDS::DCPS::DurabilityQosPolicyBuilder uut;
   uut._volatile();
-  EXPECT_EQ(uut.qos().kind, DDS::VOLATILE_DURABILITY_QOS);;
+  EXPECT_EQ(uut.qos().kind, DDS::VOLATILE_DURABILITY_QOS);
 }
 
 TEST(dds_DCPS_Qos_Helper, DurabilityQosPolicyBuilder_transient_local)
 {
   OpenDDS::DCPS::DurabilityQosPolicyBuilder uut;
   uut.transient_local();
-  EXPECT_EQ(uut.qos().kind, DDS::TRANSIENT_LOCAL_DURABILITY_QOS);;
+  EXPECT_EQ(uut.qos().kind, DDS::TRANSIENT_LOCAL_DURABILITY_QOS);
 }
 
 TEST(dds_DCPS_Qos_Helper, DurabilityQosPolicyBuilder_transient)
 {
   OpenDDS::DCPS::DurabilityQosPolicyBuilder uut;
   uut.transient();
-  EXPECT_EQ(uut.qos().kind, DDS::TRANSIENT_DURABILITY_QOS);;
+  EXPECT_EQ(uut.qos().kind, DDS::TRANSIENT_DURABILITY_QOS);
 }
 
 TEST(dds_DCPS_Qos_Helper, DurabilityQosPolicyBuilder_persistent)
 {
   OpenDDS::DCPS::DurabilityQosPolicyBuilder uut;
   uut.persistent();
-  EXPECT_EQ(uut.qos().kind, DDS::PERSISTENT_DURABILITY_QOS);;
+  EXPECT_EQ(uut.qos().kind, DDS::PERSISTENT_DURABILITY_QOS);
 }
 
 TEST(dds_DCPS_Qos_Helper, DurabilityServiceQosPolicyBuilder_default_ctor)
@@ -421,14 +421,14 @@ TEST(dds_DCPS_Qos_Helper, OwnershipQosPolicyBuilder_shared)
 {
   OpenDDS::DCPS::OwnershipQosPolicyBuilder uut;
   uut.shared();
-  EXPECT_EQ(uut.qos().kind, DDS::SHARED_OWNERSHIP_QOS);;
+  EXPECT_EQ(uut.qos().kind, DDS::SHARED_OWNERSHIP_QOS);
 }
 
 TEST(dds_DCPS_Qos_Helper, OwnershipQosPolicyBuilder_exclusive)
 {
   OpenDDS::DCPS::OwnershipQosPolicyBuilder uut;
   uut.exclusive();
-  EXPECT_EQ(uut.qos().kind, DDS::EXCLUSIVE_OWNERSHIP_QOS);;
+  EXPECT_EQ(uut.qos().kind, DDS::EXCLUSIVE_OWNERSHIP_QOS);
 }
 
 TEST(dds_DCPS_Qos_Helper, OwnershipStrengthQosPolicyBuilder_default_ctor)
@@ -494,14 +494,14 @@ TEST(dds_DCPS_Qos_Helper, LivelinessQosPolicyBuilder_manual_by_participant)
 {
   OpenDDS::DCPS::LivelinessQosPolicyBuilder uut;
   uut.manual_by_participant();
-  EXPECT_EQ(uut.qos().kind, DDS::MANUAL_BY_PARTICIPANT_LIVELINESS_QOS);;
+  EXPECT_EQ(uut.qos().kind, DDS::MANUAL_BY_PARTICIPANT_LIVELINESS_QOS);
 }
 
 TEST(dds_DCPS_Qos_Helper, LivelinessQosPolicyBuilder_manual_by_topic)
 {
   OpenDDS::DCPS::LivelinessQosPolicyBuilder uut;
   uut.manual_by_topic();
-  EXPECT_EQ(uut.qos().kind, DDS::MANUAL_BY_TOPIC_LIVELINESS_QOS);;
+  EXPECT_EQ(uut.qos().kind, DDS::MANUAL_BY_TOPIC_LIVELINESS_QOS);
 }
 
 TEST(dds_DCPS_Qos_Helper, LivelinessQosPolicyBuilder_lease_duration)
@@ -1457,7 +1457,7 @@ TEST(dds_DCPS_Qos_Helper, DataWriterQosBuilder_Publisher_ctor)
   qos.reliability_best_effort();
   OpenDDS::DCPS::RcHandle<OpenDDS::Test::MockPublisher> publisher = OpenDDS::DCPS::make_rch<OpenDDS::Test::MockPublisher>();
   EXPECT_CALL(*publisher, get_default_datawriter_qos(testing::_))
-    .WillOnce(DoAll(testing::SetArgReferee<0>(qos.qos()), testing::Return(DDS::RETCODE_OK)));
+    .WillOnce(testing::DoAll(testing::SetArgReferee<0>(qos.qos()), testing::Return(DDS::RETCODE_OK)));
   DDS::Publisher_var publisher_var = DDS::Publisher::_duplicate(publisher.in());
   OpenDDS::DCPS::DataWriterQosBuilder uut(publisher_var);
   EXPECT_EQ(qos, uut);
@@ -1513,12 +1513,12 @@ TEST(dds_DCPS_Qos_Helper, DataWriterQosBuilder_Topic_ctor)
 
   OpenDDS::DCPS::RcHandle<OpenDDS::Test::MockTopic> topic = OpenDDS::DCPS::make_rch<OpenDDS::Test::MockTopic>();
   EXPECT_CALL(*topic, get_qos(testing::_))
-    .WillOnce(DoAll(testing::SetArgReferee<0>(topic_qos.qos()), testing::Return(DDS::RETCODE_OK)));
+    .WillOnce(testing::DoAll(testing::SetArgReferee<0>(topic_qos.qos()), testing::Return(DDS::RETCODE_OK)));
   DDS::Topic_var topic_var = DDS::Topic::_duplicate(topic.in());
 
   OpenDDS::DCPS::RcHandle<OpenDDS::Test::MockPublisher> publisher = OpenDDS::DCPS::make_rch<OpenDDS::Test::MockPublisher>();
   EXPECT_CALL(*publisher, get_default_datawriter_qos(testing::_))
-    .WillOnce(DoAll(testing::SetArgReferee<0>(datawriter_qos.qos()), testing::Return(DDS::RETCODE_OK)));
+    .WillOnce(testing::DoAll(testing::SetArgReferee<0>(datawriter_qos.qos()), testing::Return(DDS::RETCODE_OK)));
   EXPECT_CALL(*publisher, copy_from_topic_qos(testing::_, testing::_))
     .WillOnce(testing::DoAll(testing::Invoke(copy_from_topic1), testing::Return(DDS::RETCODE_OK)));
   DDS::Publisher_var publisher_var = DDS::Publisher::_duplicate(publisher.in());
@@ -1927,7 +1927,7 @@ TEST(dds_DCPS_Qos_Helper, DataReaderQosBuilder_Subscriber_ctor)
   qos.reliability_best_effort();
   OpenDDS::DCPS::RcHandle<OpenDDS::Test::MockSubscriber> subscriber = OpenDDS::DCPS::make_rch<OpenDDS::Test::MockSubscriber>();
   EXPECT_CALL(*subscriber, get_default_datareader_qos(testing::_))
-    .WillOnce(DoAll(testing::SetArgReferee<0>(qos.qos()), testing::Return(DDS::RETCODE_OK)));
+    .WillOnce(testing::DoAll(testing::SetArgReferee<0>(qos.qos()), testing::Return(DDS::RETCODE_OK)));
   DDS::Subscriber_var subscriber_var = DDS::Subscriber::_duplicate(subscriber.in());
   OpenDDS::DCPS::DataReaderQosBuilder uut(subscriber_var);
   EXPECT_EQ(qos, uut);
@@ -1979,12 +1979,12 @@ TEST(dds_DCPS_Qos_Helper, DataReaderQosBuilder_Topic_ctor)
 
   OpenDDS::DCPS::RcHandle<OpenDDS::Test::MockTopic> topic = OpenDDS::DCPS::make_rch<OpenDDS::Test::MockTopic>();
   EXPECT_CALL(*topic, get_qos(testing::_))
-    .WillOnce(DoAll(testing::SetArgReferee<0>(topic_qos.qos()), testing::Return(DDS::RETCODE_OK)));
+    .WillOnce(testing::DoAll(testing::SetArgReferee<0>(topic_qos.qos()), testing::Return(DDS::RETCODE_OK)));
   DDS::Topic_var topic_var = DDS::Topic::_duplicate(topic.in());
 
   OpenDDS::DCPS::RcHandle<OpenDDS::Test::MockSubscriber> subscriber = OpenDDS::DCPS::make_rch<OpenDDS::Test::MockSubscriber>();
   EXPECT_CALL(*subscriber, get_default_datareader_qos(testing::_))
-    .WillOnce(DoAll(testing::SetArgReferee<0>(datareader_qos.qos()), testing::Return(DDS::RETCODE_OK)));
+    .WillOnce(testing::DoAll(testing::SetArgReferee<0>(datareader_qos.qos()), testing::Return(DDS::RETCODE_OK)));
   EXPECT_CALL(*subscriber, copy_from_topic_qos(testing::_, testing::_))
     .WillOnce(testing::DoAll(testing::Invoke(copy_from_topic2), testing::Return(DDS::RETCODE_OK)));
   DDS::Subscriber_var subscriber_var = DDS::Subscriber::_duplicate(subscriber.in());

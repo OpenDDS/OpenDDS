@@ -203,14 +203,12 @@ bool ts_generator::generate_ts(AST_Type* node, UTL_ScopedName* name)
   replaceAll(idl, replacements);
   be_global->idl_ << idl;
 
-  be_global->header_ << be_global->versioning_begin() << "\n";
   {
     ScopedNamespaceGuard hGuard(name, be_global->header_);
 
     be_global->header_ <<
       "class " << short_tsi_name << ";\n";
   }
-  be_global->header_ << be_global->versioning_end() << "\n";
 
   be_global->header_ <<
     "OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL\n"
@@ -258,9 +256,9 @@ bool ts_generator::generate_ts(AST_Type* node, UTL_ScopedName* name)
     "} // namespace OpenDDS\n"
     "OPENDDS_END_VERSIONED_NAMESPACE_DECL\n\n";
 
-  be_global->header_ << be_global->versioning_begin() << "\n";
   {
     ScopedNamespaceGuard hGuard(name, be_global->header_);
+    ScopedNamespaceGuard cppGuard(name, be_global->impl_);
 
     be_global->header_ <<
       "class " << be_global->export_macro() << " " << short_tsi_name << "\n"
@@ -300,12 +298,6 @@ bool ts_generator::generate_ts(AST_Type* node, UTL_ScopedName* name)
       "\n"
       "  static " << short_ts_name << "::_ptr_type _narrow(CORBA::Object_ptr obj);\n"
       "};\n\n";
-  }
-  be_global->header_ << be_global->versioning_end() << "\n";
-
-  be_global->impl_ << be_global->versioning_begin() << "\n";
-  {
-    ScopedNamespaceGuard cppGuard(name, be_global->impl_);
     be_global->impl_ <<
       "::DDS::DataWriter_ptr " << short_tsi_name << "::create_datawriter()\n"
       "{\n"
@@ -431,7 +423,9 @@ bool ts_generator::generate_ts(AST_Type* node, UTL_ScopedName* name)
       "    rapidjson::StringBuffer buffer;\n"
       "    rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);\n"
       "    OpenDDS::DCPS::JsonValueWriter<rapidjson::Writer<rapidjson::StringBuffer> > jvw(writer);\n"
-      "    vwrite(jvw, in);\n"
+      "    if (!vwrite(jvw, in)) {\n"
+      "      return ::DDS::RETCODE_ERROR;\n"
+      "    }\n"
       "    out = buffer.GetString();\n"
       "    return ::DDS::RETCODE_OK;\n"
       "  }\n"
@@ -511,7 +505,6 @@ bool ts_generator::generate_ts(AST_Type* node, UTL_ScopedName* name)
       "  return TypeSupportType::_narrow(obj);\n"
       "}\n";
   }
-  be_global->impl_ << be_global->versioning_end() << "\n";
 
   if (be_global->face_ts()) {
     if (node->node_type() == AST_Decl::NT_struct) {
@@ -534,50 +527,42 @@ bool ts_generator::gen_struct(AST_Structure* node, UTL_ScopedName* name,
 
     const char* const nm = name->last_component()->get_string();
 
-    be_global->header_ << be_global->versioning_begin() << "\n";
-    {
-      ScopedNamespaceGuard hGuard(name, be_global->header_);
+    ScopedNamespaceGuard hGuard(name, be_global->header_);
+    ScopedNamespaceGuard cppGuard(name, be_global->impl_);
 
-      be_global->header_
-        << be_global->export_macro() << " bool operator==(const " << nm << "&, const " << nm << "&);\n"
-        << be_global->export_macro() << " bool operator!=(const " << nm << "&, const " << nm << "&);\n";
-    }
-    be_global->header_ << be_global->versioning_end() << "\n";
+    be_global->header_
+      << be_global->export_macro() << " bool operator==(const " << nm << "&, const " << nm << "&);\n"
+      << be_global->export_macro() << " bool operator!=(const " << nm << "&, const " << nm << "&);\n";
 
-    be_global->impl_ << be_global->versioning_begin() << "\n";
-    {
-      ScopedNamespaceGuard cppGuard(name, be_global->impl_);
-
-      be_global->impl_ << "bool operator==(const " << nm << "& lhs, const " << nm << "& rhs)\n"
-                       << "{\n";
-      for (size_t i = 0; i < fields.size(); ++i) {
-        const std::string field_name = fields[i]->local_name()->get_string();
-        AST_Type* field_type = resolveActualType(fields[i]->field_type());
-        const Classification cls = classify(field_type);
-        if (cls & CL_ARRAY) {
-          std::string indent("  ");
-          NestedForLoops nfl("int", "i",
-            dynamic_cast<AST_Array*>(field_type), indent, true);
-          be_global->impl_ <<
-            indent << "if (lhs." << field_name << nfl.index_ << " != rhs."
-            << field_name << nfl.index_ << ") {\n" <<
-            indent << "  return false;\n" <<
-            indent << "}\n";
-        } else if (cls & CL_SEQUENCE) {
-          be_global->impl_ <<
-            "  if (!OpenDDS::DCPS::sequence_equal(lhs." << field_name << ", rhs." << field_name << ")) return false;\n";
-        } else {
-          be_global->impl_ <<
-            "  if (lhs." << field_name << " != rhs." << field_name << ") {\n"
-            "    return false;\n"
-            "  }\n";
-        }
+    be_global->impl_ << "bool operator==(const " << nm << "& lhs, const " << nm << "& rhs)\n"
+                      << "{\n";
+    for (size_t i = 0; i < fields.size(); ++i) {
+      const std::string field_name = fields[i]->local_name()->get_string();
+      AST_Type* field_type = resolveActualType(fields[i]->field_type());
+      const Classification cls = classify(field_type);
+      if (cls & CL_ARRAY) {
+        std::string indent("  ");
+        NestedForLoops nfl("int", "i",
+          dynamic_cast<AST_Array*>(field_type), indent, true);
+        be_global->impl_ <<
+          indent << "if (lhs." << field_name << nfl.index_ << " != rhs."
+          << field_name << nfl.index_ << ") {\n" <<
+          indent << "  return false;\n" <<
+          indent << "}\n";
+      } else if (cls & CL_SEQUENCE) {
+        be_global->impl_ <<
+          "  if (!OpenDDS::DCPS::sequence_equal(lhs." << field_name << ", rhs." << field_name << ")) return false;\n";
+      } else {
+        be_global->impl_ <<
+          "  if (lhs." << field_name << " != rhs." << field_name << ") {\n"
+          "    return false;\n"
+          "  }\n";
       }
-      be_global->impl_ << "  return true;\n"
-                       << "}\n";
-      be_global->impl_ << "bool operator!=(const " << nm << "& lhs, const " << nm << "& rhs) { return !(lhs == rhs); }\n";
     }
-    be_global->impl_ << be_global->versioning_end() << "\n";
+    be_global->impl_ <<
+      "  return true;\n"
+      "}\n\n"
+      "bool operator!=(const " << nm << "& lhs, const " << nm << "& rhs) { return !(lhs == rhs); }\n";
   }
 
   return generate_ts(node, name);
@@ -631,31 +616,22 @@ bool ts_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
 
     const char* const nm = name->last_component()->get_string();
 
-    be_global->header_ << be_global->versioning_begin() << "\n";
-    {
-      ScopedNamespaceGuard hGuard(name, be_global->header_);
+    ScopedNamespaceGuard hGuard(name, be_global->header_);
+    ScopedNamespaceGuard cppGuard(name, be_global->impl_);
 
-      be_global->header_
-        << be_global->export_macro() << " bool operator==(const " << nm << "&, const " << nm << "&);\n"
-        << be_global->export_macro() << " bool operator!=(const " << nm << "&, const " << nm << "&);\n";
+    be_global->header_
+      << be_global->export_macro() << " bool operator==(const " << nm << "&, const " << nm << "&);\n"
+      << be_global->export_macro() << " bool operator!=(const " << nm << "&, const " << nm << "&);\n";
+
+    be_global->impl_ << "bool operator==(const " << nm << "& lhs, const " << nm << "& rhs)\n"
+                      << "{\n"
+                      << "  if (lhs._d() != rhs._d()) return false;\n";
+    if (generateSwitchForUnion(node, "lhs._d()", generateEqual, branches, discriminator, "", "", "", false, false)) {
+      be_global->impl_ <<
+        "  return false;\n";
     }
-    be_global->header_ << be_global->versioning_end() << "\n";
-
-    be_global->impl_ << be_global->versioning_begin() << "\n";
-    {
-      ScopedNamespaceGuard cppGuard(name, be_global->impl_);
-
-      be_global->impl_ << "bool operator==(const " << nm << "& lhs, const " << nm << "& rhs)\n"
-                       << "{\n"
-                       << "  if (lhs._d() != rhs._d()) return false;\n";
-      if (generateSwitchForUnion(node, "lhs._d()", generateEqual, branches, discriminator, "", "", "", false, false)) {
-        be_global->impl_ <<
-          "  return false;\n";
-      }
-      be_global->impl_ << "}\n";
-      be_global->impl_ << "bool operator!=(const " << nm << "& lhs, const " << nm << "& rhs) { return !(lhs == rhs); }\n";
-    }
-    be_global->impl_ << be_global->versioning_end() << "\n";
+    be_global->impl_ << "}\n";
+    be_global->impl_ << "bool operator!=(const " << nm << "& lhs, const " << nm << "& rhs) { return !(lhs == rhs); }\n";
   }
 
   return generate_ts(node, name);

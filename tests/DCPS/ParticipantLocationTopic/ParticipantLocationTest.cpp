@@ -103,14 +103,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     DDS::DomainParticipantQos pub_qos;
     dpf->get_default_participant_qos(pub_qos);
 
-    DDS::PropertySeq& pub_props = pub_qos.property.value;
-    append(pub_props, "OpenDDS.RtpsRelay.Groups", "Messenger", true);
-
     DDS::DomainParticipantQos sub_qos;
     dpf->get_default_participant_qos(sub_qos);
-
-    DDS::PropertySeq& sub_props = sub_qos.property.value;
-    append(sub_props, "OpenDDS.RtpsRelay.Groups", "Messenger", true);
 
 #ifdef OPENDDS_SECURITY
       // Determine the path to the keys
@@ -131,6 +125,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       const OPENDDS_STRING sub_id_key_file = path_to_tests + sub_id_key_file_from_tests;
 
       if (TheServiceParticipant->get_security()) {
+        DDS::PropertySeq& pub_props = pub_qos.property.value;
         append(pub_props, DDS::Security::Properties::AuthIdentityCA, auth_ca_file.c_str());
         append(pub_props, DDS::Security::Properties::AuthIdentityCertificate, pub_id_cert_file.c_str());
         append(pub_props, DDS::Security::Properties::AuthPrivateKey, pub_id_key_file.c_str());
@@ -138,6 +133,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
         append(pub_props, DDS::Security::Properties::AccessGovernance, governance_file);
         append(pub_props, DDS::Security::Properties::AccessPermissions, pub_permissions_file);
 
+        DDS::PropertySeq& sub_props = sub_qos.property.value;
         append(sub_props, DDS::Security::Properties::AuthIdentityCA, auth_ca_file.c_str());
         append(sub_props, DDS::Security::Properties::AuthIdentityCertificate, sub_id_cert_file.c_str());
         append(sub_props, DDS::Security::Properties::AuthPrivateKey, sub_id_key_file.c_str());

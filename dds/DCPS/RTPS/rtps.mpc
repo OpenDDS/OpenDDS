@@ -1,4 +1,4 @@
-project(OpenDDS_Rtps): dcpslib, install, rtps_optional_safety, opendds_testing_features {
+project(OpenDDS_Rtps): dcpslib, install, rtps_optional_safety, opendds_testing_features, dds_versioning_idl_defaults {
   sharedname = OpenDDS_Rtps
   dynamicflags = OPENDDS_RTPS_BUILD_DLL
 
@@ -10,6 +10,11 @@ project(OpenDDS_Rtps): dcpslib, install, rtps_optional_safety, opendds_testing_f
   Header_Files {
     .
     ICE
+  }
+
+  TypeSupport_Files {
+    dcps_ts_flags += -Lspcpp
+    RtpsSubmessageKind.idl
   }
 
   specific {

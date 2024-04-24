@@ -23,12 +23,6 @@
 #include <string>
 #include <utility>
 
-#ifdef OPENDDS_SECURITY
-#define CRYPTO_TYPE DDS::Security::CryptoTransform_var
-#else
-#define CRYPTO_TYPE int
-#endif
-
 namespace RtpsRelay {
 
 class RelayHandler : public ACE_Event_Handler {
@@ -108,7 +102,7 @@ public:
                   const RelayPartitionTable& relay_partition_table,
                   GuidAddrSet& guid_addr_set,
                   const OpenDDS::RTPS::RtpsDiscovery_rch& rtps_discovery,
-                  const CRYPTO_TYPE& crypto,
+                  const DDS::Security::CryptoTransform_var& crypto,
                   const ACE_INET_Addr& application_participant_addr,
                   HandlerStatisticsReporter& stats_reporter,
                   OpenDDS::DCPS::Lockable_Message_Block_Ptr::Lock_Policy message_block_locking = OpenDDS::DCPS::Lockable_Message_Block_Ptr::Lock_Policy::No_Lock);
@@ -150,12 +144,14 @@ protected:
                                const OpenDDS::DCPS::MonotonicTimePoint& now,
                                const OpenDDS::DCPS::Lockable_Message_Block_Ptr& msg,
                                MessageType& type) override;
+
   ParticipantStatisticsReporter& record_activity(GuidAddrSet::Proxy& proxy,
                                                  const AddrPort& remote_address,
                                                  const OpenDDS::DCPS::MonotonicTimePoint& now,
                                                  const OpenDDS::DCPS::GUID_t& src_guid,
                                                  MessageType msg_type,
                                                  const size_t& msg_len);
+
   CORBA::ULong send(GuidAddrSet::Proxy& proxy,
                     const OpenDDS::DCPS::GUID_t& src_guid,
                     const StringSet& to_partitions,
@@ -163,6 +159,7 @@ protected:
                     bool send_to_application_participant,
                     const OpenDDS::DCPS::Lockable_Message_Block_Ptr& msg,
                     const OpenDDS::DCPS::MonotonicTimePoint& now);
+
   size_t send(const ACE_INET_Addr& addr,
               OpenDDS::STUN::Message message,
               const OpenDDS::DCPS::MonotonicTimePoint& now);
@@ -188,10 +185,8 @@ private:
                      const OpenDDS::DCPS::MonotonicTimePoint& now);
 
   OpenDDS::RTPS::RtpsDiscovery_rch rtps_discovery_;
-#ifdef OPENDDS_SECURITY
   const DDS::Security::CryptoTransform_var crypto_;
   const DDS::Security::ParticipantCryptoHandle application_participant_crypto_handle_;
-#endif
 };
 
 // Sends to and receives from other relays.
@@ -205,6 +200,7 @@ public:
                     HandlerStatisticsReporter& stats_reporter);
 
   void vertical_handler(VerticalHandler* vertical_handler) { vertical_handler_ = vertical_handler; }
+
   void enqueue_message(const ACE_INET_Addr& addr,
                        const StringSet& to_partitions,
                        const GuidSet& to_guids,
@@ -230,7 +226,7 @@ public:
               const RelayPartitionTable& relay_partition_table,
               GuidAddrSet& guid_addr_set,
               const OpenDDS::RTPS::RtpsDiscovery_rch& rtps_discovery,
-              const CRYPTO_TYPE& crypto,
+              const DDS::Security::CryptoTransform_var& crypto,
               const ACE_INET_Addr& application_participant_addr,
               HandlerStatisticsReporter& stats_reporter);
 
@@ -274,7 +270,7 @@ public:
               const RelayPartitionTable& relay_partition_table,
               GuidAddrSet& guid_addr_set,
               const OpenDDS::RTPS::RtpsDiscovery_rch& rtps_discovery,
-              const CRYPTO_TYPE& crypto,
+              const DDS::Security::CryptoTransform_var& crypto,
               const ACE_INET_Addr& application_participant_addr,
               HandlerStatisticsReporter& stats_reporter);
 
@@ -300,7 +296,7 @@ public:
               const RelayPartitionTable& relay_partition_table,
               GuidAddrSet& guid_addr_set,
               const OpenDDS::RTPS::RtpsDiscovery_rch& rtps_discovery,
-              const CRYPTO_TYPE& crypto,
+              const DDS::Security::CryptoTransform_var& crypto,
               HandlerStatisticsReporter& stats_reporter);
 };
 

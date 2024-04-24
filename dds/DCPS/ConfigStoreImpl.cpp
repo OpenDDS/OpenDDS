@@ -20,6 +20,40 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
+OPENDDS_VECTOR(String)
+split(const String& str,
+      const String& delims,
+      bool skip_leading,
+      bool skip_consecutive)
+{
+  OPENDDS_VECTOR(String) retval;
+
+  std::string::size_type pos = 0;
+  if (skip_leading) {
+    pos = str.find_first_not_of(delims);
+  }
+
+  while (pos != std::string::npos && pos < str.size()) {
+    const std::string::size_type limit = str.find_first_of(delims, pos);
+    if (limit == std::string::npos) {
+      retval.push_back(str.substr(pos));
+      break;
+    } else {
+      retval.push_back(str.substr(pos, limit - pos));
+      if (limit == str.size() - 1) {
+        // Delimeter at the end.
+        retval.push_back(String());
+      }
+      pos = limit + 1;
+      if (skip_consecutive && pos != std::string::npos && pos < str.size()) {
+        pos = str.find_first_not_of(delims, pos);
+      }
+    }
+  }
+
+  return retval;
+}
+
 String ConfigPair::canonicalize(const String& key)
 {
   String retval;
@@ -37,8 +71,20 @@ String ConfigPair::canonicalize(const String& key)
       // Deal with camelcase;
       const char y = key[idx + 1];
 
-      if (ACE_OS::ace_isupper(x) && ACE_OS::ace_islower(y) && !retval.empty() && retval[retval.size() - 1] != '_') {
-        retval += '_';
+      if (ACE_OS::ace_isupper(x) && ACE_OS::ace_islower(y)) {
+        if (!retval.empty() && retval[retval.size() - 1] != '_') {
+          retval += '_';
+        }
+        retval += ACE_OS::ace_toupper(x);
+        ++idx;
+        continue;
+      } else if (ACE_OS::ace_islower(x) && ACE_OS::ace_isupper(y)) {
+        retval += ACE_OS::ace_toupper(x);
+        if (!retval.empty() && retval[retval.size() - 1] != '_') {
+          retval += '_';
+        }
+        ++idx;
+        continue;
       }
     }
 
@@ -136,7 +182,7 @@ ConfigStoreImpl::get_boolean(const char* key,
 
   if (debug_logging) {
     ACE_DEBUG((LM_DEBUG, "(%P|%t) %C: ConfigStoreImpl::get_boolean: %C=%C\n",
-               OPENDDS_CONFIG_DEBUG_LOGGING,
+               CONFIG_DEBUG_LOGGING,
                cp.key().c_str(),
                retval ? "true" : "false"));
   }
@@ -184,7 +230,7 @@ ConfigStoreImpl::get_int32(const char* key,
 
   if (debug_logging) {
     ACE_DEBUG((LM_DEBUG, "(%P|%t) %C: ConfigStoreImpl::get_int32: %C=%d\n",
-               OPENDDS_CONFIG_DEBUG_LOGGING,
+               CONFIG_DEBUG_LOGGING,
                cp.key().c_str(),
                retval));
 
@@ -233,7 +279,7 @@ ConfigStoreImpl::get_uint32(const char* key,
 
   if (debug_logging) {
     ACE_DEBUG((LM_DEBUG, "(%P|%t) %C: ConfigStoreImpl::get_int32: %C=%u\n",
-               OPENDDS_CONFIG_DEBUG_LOGGING,
+               CONFIG_DEBUG_LOGGING,
                cp.key().c_str(),
                retval));
 
@@ -280,7 +326,7 @@ ConfigStoreImpl::get_float64(const char* key,
 
   if (debug_logging) {
     ACE_DEBUG((LM_DEBUG, "(%P|%t) %C: ConfigStoreImpl::get_float64: %C=%g\n",
-               OPENDDS_CONFIG_DEBUG_LOGGING,
+               CONFIG_DEBUG_LOGGING,
                cp.key().c_str(),
                retval));
 
@@ -323,7 +369,7 @@ ConfigStoreImpl::get_string(const char* key,
 
   if (debug_logging) {
     ACE_DEBUG((LM_DEBUG, "(%P|%t) %C: ConfigStoreImpl::get_string: %C=%C\n",
-               OPENDDS_CONFIG_DEBUG_LOGGING,
+               CONFIG_DEBUG_LOGGING,
                cp.key().c_str(),
                retval.in()));
 
@@ -370,7 +416,7 @@ ConfigStoreImpl::get_duration(const char* key,
 
   if (debug_logging) {
     ACE_DEBUG((LM_DEBUG, "(%P|%t) %C: ConfigStoreImpl::get_duration: %C=%C\n",
-               OPENDDS_CONFIG_DEBUG_LOGGING,
+               CONFIG_DEBUG_LOGGING,
                cp.key().c_str(),
                to_dds_string(retval).c_str()));
 
@@ -422,13 +468,29 @@ ConfigStoreImpl::get(const char* key,
 
   if (debug_logging) {
     ACE_DEBUG((LM_DEBUG, "(%P|%t) %C: ConfigStoreImpl::get: %C=%C\n",
-               OPENDDS_CONFIG_DEBUG_LOGGING,
+               CONFIG_DEBUG_LOGGING,
                cp.key().c_str(),
                retval.c_str()));
 
   }
 
   return retval;
+}
+
+namespace {
+  String time_duration_to_string(const TimeDuration& value,
+                                 ConfigStoreImpl::TimeFormat format)
+  {
+    switch (format) {
+    case ConfigStoreImpl::Format_IntegerMilliseconds:
+      return to_dds_string(value.value().msec());
+    case ConfigStoreImpl::Format_IntegerSeconds:
+      return to_dds_string(value.value().sec());
+    case ConfigStoreImpl::Format_FractionalSeconds:
+      return to_dds_string(value.to_double());
+    }
+    return "";
+  }
 }
 
 void
@@ -475,32 +537,28 @@ ConfigStoreImpl::get(const char* key,
   return retval;
 }
 
-namespace {
-  DDS::Int32 time_duration_to_integer(const TimeDuration& value,
-                                      ConfigStoreImpl::IntegerTimeFormat format)
-  {
-    switch (format) {
-    case ConfigStoreImpl::Format_IntegerMilliseconds:
-      return value.value().msec();
-    case ConfigStoreImpl::Format_IntegerSeconds:
-      return static_cast<DDS::Int32>(value.value().sec());
-    }
-    return 0;
-  }
-}
-
 void
 ConfigStoreImpl::set(const char* key,
                      const TimeDuration& value,
-                     IntegerTimeFormat format)
+                     TimeFormat format)
 {
-  set_int32(key, time_duration_to_integer(value, format));
+  switch (format) {
+  case Format_IntegerMilliseconds:
+    set_uint32(key, value.value().msec());
+    break;
+  case Format_IntegerSeconds:
+    set_uint32(key, static_cast<DDS::UInt32>(value.value().sec()));
+    break;
+  case Format_FractionalSeconds:
+    set_float64(key, value.to_double());
+    break;
+  }
 }
 
 TimeDuration
 ConfigStoreImpl::get(const char* key,
                      const TimeDuration& value,
-                     IntegerTimeFormat format) const
+                     TimeFormat format) const
 {
   const ConfigPair cp(key, "");
   TimeDuration retval = value;
@@ -513,33 +571,64 @@ ConfigStoreImpl::get(const char* key,
     const ConfigPair& sample = samples[idx];
     const DDS::SampleInfo& info = infos[idx];
     if (info.valid_data) {
-      int x = 0;
-      if (DCPS::convertToInteger(sample.value(), x)) {
-        switch (format) {
-        case Format_IntegerMilliseconds:
-          retval = TimeDuration::from_msec(x);
-          break;
-        case Format_IntegerSeconds:
-          retval = TimeDuration(x);
-          break;
+      switch (format) {
+      case Format_IntegerMilliseconds:
+        {
+          DDS::UInt32 x = 0;
+          if (DCPS::convertToInteger(sample.value(), x)) {
+            retval = TimeDuration::from_msec(x);
+          } else {
+            retval = value;
+            if (log_level >= LogLevel::Warning) {
+              ACE_ERROR((LM_WARNING,
+                         ACE_TEXT("(%P|%t) WARNING: ConfigStoreImpl::get: ")
+                         ACE_TEXT("failed to parse TimeDuration (integer milliseconds) for %C=%C\n"),
+                         sample.key().c_str(), sample.value().c_str()));
+            }
+          }
         }
-      } else {
-        retval = value;
-        if (log_level >= LogLevel::Warning) {
-          ACE_ERROR((LM_WARNING,
-                     ACE_TEXT("(%P|%t) WARNING: ConfigStoreImpl::get: ")
-                     ACE_TEXT("failed to parse TimeDuration for %C=%C\n"),
-                     sample.key().c_str(), sample.value().c_str()));
+        break;
+      case Format_IntegerSeconds:
+        {
+          DDS::UInt32 x = 0;
+          if (DCPS::convertToInteger(sample.value(), x)) {
+            retval = TimeDuration(x);
+          } else {
+            retval = value;
+            if (log_level >= LogLevel::Warning) {
+              ACE_ERROR((LM_WARNING,
+                         ACE_TEXT("(%P|%t) WARNING: ConfigStoreImpl::get: ")
+                         ACE_TEXT("failed to parse TimeDuration (integer seconds) for %C=%C\n"),
+                         sample.key().c_str(), sample.value().c_str()));
+            }
+          }
         }
+        break;
+      case Format_FractionalSeconds:
+        {
+          double x = 0.0;
+          if (DCPS::convertToDouble(sample.value(), x)) {
+            retval = TimeDuration::from_double(x);
+          } else {
+            retval = value;
+            if (log_level >= LogLevel::Warning) {
+              ACE_ERROR((LM_WARNING,
+                         ACE_TEXT("(%P|%t) WARNING: ConfigStoreImpl::get: ")
+                         ACE_TEXT("failed to parse TimeDuration (fractional seconds) for %C=%C\n"),
+                         sample.key().c_str(), sample.value().c_str()));
+            }
+          }
+        }
+        break;
       }
     }
   }
 
   if (debug_logging) {
-    ACE_DEBUG((LM_DEBUG, "(%P|%t) %C: ConfigStoreImpl::get: %C=%d\n",
-               OPENDDS_CONFIG_DEBUG_LOGGING,
+    ACE_DEBUG((LM_DEBUG, "(%P|%t) %C: ConfigStoreImpl::get: %C=%C\n",
+               CONFIG_DEBUG_LOGGING,
                cp.key().c_str(),
-               time_duration_to_integer(retval, format)));
+               time_duration_to_string(retval, format).c_str()));
   }
 
   return retval;
@@ -608,11 +697,12 @@ ConfigStoreImpl::set(const char* key,
 }
 
 namespace {
-  void parse_no_port(const ConfigPair& sample, NetworkAddress& retval, const NetworkAddress& value)
+  bool parse_no_port(const ConfigPair& sample, NetworkAddress& retval, const NetworkAddress& value)
   {
     ACE_INET_Addr addr;
     if (addr.set(u_short(0), sample.value().c_str()) == 0) {
       retval = NetworkAddress(addr);
+      return true;
     } else {
       retval = value;
       if (log_level >= LogLevel::Warning) {
@@ -622,13 +712,15 @@ namespace {
                    sample.key().c_str(), sample.value().c_str()));
       }
     }
+    return false;
   }
 
-  void parse_port(const ConfigPair& sample, NetworkAddress& retval, const NetworkAddress& value)
+  bool parse_port(const ConfigPair& sample, NetworkAddress& retval, const NetworkAddress& value)
   {
     ACE_INET_Addr addr;
     if (addr.set(sample.value().c_str()) == 0) {
       retval = NetworkAddress(addr);
+      return true;
     } else {
       retval = value;
       if (log_level >= LogLevel::Warning) {
@@ -638,15 +730,18 @@ namespace {
                    sample.key().c_str(), sample.value().c_str()));
       }
     }
+    return false;
   }
 
-  void parse_optional_port(const ConfigPair& sample, NetworkAddress& retval, const NetworkAddress& value)
+  bool parse_optional_port(const ConfigPair& sample, NetworkAddress& retval, const NetworkAddress& value)
   {
     ACE_INET_Addr addr;
     if (addr.set(sample.value().c_str()) == 0) {
       retval = NetworkAddress(addr);
+      return true;
     } else if (addr.set(u_short(0), sample.value().c_str()) == 0) {
       retval = NetworkAddress(addr);
+      return true;
     } else {
       retval = value;
       if (log_level >= LogLevel::Warning) {
@@ -656,6 +751,7 @@ namespace {
                    sample.key().c_str(), sample.value().c_str()));
       }
     }
+    return false;
   }
 }
 
@@ -710,9 +806,170 @@ ConfigStoreImpl::get(const char* key,
 
   if (debug_logging) {
     ACE_DEBUG((LM_DEBUG, "(%P|%t) %C: ConfigStoreImpl::get: %C=%C\n",
-               OPENDDS_CONFIG_DEBUG_LOGGING,
+               CONFIG_DEBUG_LOGGING,
                cp.key().c_str(),
                LogAddr(retval.to_addr()).c_str()));
+  }
+
+  return retval;
+}
+
+void
+ConfigStoreImpl::set(const char* key,
+                     const NetworkAddressSet& value,
+                     NetworkAddressFormat format,
+                     NetworkAddressKind kind)
+{
+  String addr_str;
+
+  for (NetworkAddressSet::const_iterator pos = value.begin(), limit = value.end(); pos != limit; ++pos) {
+    String temp;
+    switch (format) {
+    case Format_No_Port:
+      temp = LogAddr(*pos, LogAddr::Ip).str();
+      break;
+    case Format_Required_Port:
+      temp = LogAddr(*pos, LogAddr::IpPort).str();
+      break;
+    case Format_Optional_Port:
+      if (pos->get_port_number() == 0) {
+        temp = LogAddr(*pos, LogAddr::Ip).str();
+      } else {
+        temp = LogAddr(*pos, LogAddr::IpPort).str();
+      }
+      break;
+    }
+
+    if (!expected_kind(*pos, kind)) {
+      if (log_level >= LogLevel::Warning) {
+        ACE_ERROR((LM_WARNING,
+                   ACE_TEXT("(%P|%t) WARNING: ConfigStoreImpl::set: ")
+                   ACE_TEXT("NetworkAddress kind mismatch for %C member %C\n"),
+                   key, temp.c_str()));
+      }
+      return;
+    }
+
+    if (!addr_str.empty()) {
+      addr_str += ",";
+    }
+    addr_str += temp;
+  }
+
+  set(key, addr_str);
+}
+
+namespace {
+  String network_address_set_to_string(const NetworkAddressSet& value,
+                                       ConfigStoreImpl::NetworkAddressFormat format)
+  {
+    String retval;
+
+    for (NetworkAddressSet::const_iterator pos = value.begin(), limit = value.end(); pos != limit; ++pos) {
+      if (!retval.empty()) {
+        retval += ",";
+      }
+
+      switch (format) {
+      case ConfigStoreImpl::Format_No_Port:
+        retval += LogAddr(*pos, LogAddr::Ip).str();
+        break;
+      case ConfigStoreImpl::Format_Required_Port:
+        retval += LogAddr(*pos, LogAddr::IpPort).str();
+        break;
+      case ConfigStoreImpl::Format_Optional_Port:
+        if (pos->get_port_number()) {
+          retval += LogAddr(*pos, LogAddr::IpPort).str();
+        } else {
+          retval += LogAddr(*pos, LogAddr::Ip).str();
+        }
+        break;
+      }
+    }
+
+    return retval;
+  }
+}
+
+NetworkAddressSet
+ConfigStoreImpl::get(const char* key,
+                     const NetworkAddressSet& value,
+                     NetworkAddressFormat format,
+                     NetworkAddressKind kind) const
+{
+  if (DCPS_debug_level) {
+    ACE_DEBUG((LM_DEBUG, "(%P|%t) DEBUG: ConfigStoreImpl::get: %C\n", key));
+  }
+
+  NetworkAddress default_na;
+  switch (kind) {
+  case Kind_ANY:
+  case Kind_IPV4:
+    default_na = NetworkAddress::default_IPV4;
+    break;
+#ifdef ACE_HAS_IPV6
+  case Kind_IPV6:
+    default_na = NetworkAddress::default_IPV6;
+    break;
+#endif
+  }
+
+  NetworkAddressSet retval = value;
+
+  DCPS::InternalDataReader<ConfigPair>::SampleSequence samples;
+  DCPS::InternalSampleInfoSequence infos;
+  config_reader_->read_instance(samples, infos, DDS::LENGTH_UNLIMITED, ConfigPair(key, ""),
+                                DDS::ANY_SAMPLE_STATE, DDS::ANY_VIEW_STATE, DDS::ALIVE_INSTANCE_STATE);
+  for (size_t idx = 0; idx != samples.size(); ++idx) {
+    const ConfigPair& sample = samples[idx];
+    const DDS::SampleInfo& info = infos[idx];
+    if (info.valid_data) {
+      retval.clear();
+      if (!sample.value().empty()) {
+        typedef OPENDDS_VECTOR(String) Vector;
+        const Vector vec = split(sample.value(), " ,", true, true);
+        bool err = false;
+        for (Vector::const_iterator pos = vec.begin(), limit = vec.end(); !err && pos != limit; ++pos) {
+          NetworkAddress addr;
+          switch (format) {
+          case Format_No_Port:
+            err = !parse_no_port(ConfigPair(sample.key(), *pos), addr, default_na);
+            break;
+          case Format_Required_Port:
+            err = !parse_port(ConfigPair(sample.key(), *pos), addr, default_na);
+            break;
+          case Format_Optional_Port:
+            err = !parse_optional_port(ConfigPair(sample.key(), *pos), addr, default_na);
+            break;
+          }
+
+          if (err) {
+            retval = value;
+            break;
+          }
+
+          if (!expected_kind(addr, kind)) {
+            if (log_level >= LogLevel::Warning) {
+              ACE_ERROR((LM_WARNING,
+                         ACE_TEXT("(%P|%t) WARNING: ConfigStoreImpl::get: ")
+                         ACE_TEXT("NetworkAddress kind mismatch for %C\n"),
+                         key));
+            }
+            retval = value;
+            break;
+          }
+
+          retval.insert(addr);
+        }
+      }
+    }
+  }
+
+  if (debug_logging) {
+    ACE_DEBUG((LM_DEBUG, "(%P|%t) %C: ConfigStoreImpl::get: %C=%C\n",
+               CONFIG_DEBUG_LOGGING,
+               key,
+               network_address_set_to_string(retval, format).c_str()));
   }
 
   return retval;
@@ -733,11 +990,50 @@ ConfigStoreImpl::get_section_names(const String& prefix) const
         pos->key() != cprefix &&
         !pos->value().empty() &&
         pos->value().substr(0, 1) == "@") {
-      retval.push_back(pos->value().substr(1));
+      const String name = pos->value().substr(1);
+      if (ConfigPair::canonicalize(prefix + "_" + name) == pos->key()) {
+        retval.push_back(name);
+      }
     }
   }
 
   return retval;
+}
+
+ConfigStoreImpl::StringMap
+ConfigStoreImpl::get_section_values(const String& prefix) const
+{
+  const String cprefix = ConfigPair::canonicalize(prefix);
+
+  ConfigReader::SampleSequence samples;
+  DCPS::InternalSampleInfoSequence infos;
+  config_reader_->read(samples, infos, DDS::LENGTH_UNLIMITED,
+                       DDS::ANY_SAMPLE_STATE, DDS::ANY_VIEW_STATE, DDS::ALIVE_INSTANCE_STATE);
+  StringMap retval;
+  for (ConfigReader::SampleSequence::const_iterator pos = samples.begin(), limit = samples.end(); pos != limit; ++pos) {
+    if (pos->key_has_prefix(cprefix) &&
+        pos->key() != cprefix) {
+      retval[pos->key().substr(cprefix.size() + 1)] = pos->value();
+    }
+  }
+
+  return retval;
+}
+
+void
+ConfigStoreImpl::unset_section(const String& prefix) const
+{
+  const String cprefix = ConfigPair::canonicalize(prefix);
+
+  ConfigReader::SampleSequence samples;
+  DCPS::InternalSampleInfoSequence infos;
+  config_reader_->read(samples, infos, DDS::LENGTH_UNLIMITED,
+                       DDS::ANY_SAMPLE_STATE, DDS::ANY_VIEW_STATE, DDS::ALIVE_INSTANCE_STATE);
+  for (ConfigReader::SampleSequence::const_iterator pos = samples.begin(), limit = samples.end(); pos != limit; ++pos) {
+    if (pos->key_has_prefix(cprefix)) {
+      config_writer_->unregister_instance(*pos);
+    }
+  }
 }
 
 DDS::DataWriterQos ConfigStoreImpl::datawriter_qos()
@@ -771,7 +1067,7 @@ take_has_prefix(ConfigReader_rch reader,
   return false;
 }
 
-bool ConfigStoreImpl::debug_logging = OPENDDS_CONFIG_DEBUG_LOGGING_default;
+bool ConfigStoreImpl::debug_logging = CONFIG_DEBUG_LOGGING_default;
 
 void
 process_section(ConfigStoreImpl& config_store,
@@ -780,7 +1076,6 @@ process_section(ConfigStoreImpl& config_store,
                 const String& key_prefix,
                 ACE_Configuration_Heap& config,
                 const ACE_Configuration_Section_Key& base,
-                const String& filename,
                 bool allow_overwrite)
 {
   // Process the values.
@@ -797,9 +1092,6 @@ process_section(ConfigStoreImpl& config_store,
           if (config.get_string_value(base, key.c_str(), value) == 0) {
             const String key_name = key_prefix + "_" + ACE_TEXT_ALWAYS_CHAR(key.c_str());
             String value_str = ACE_TEXT_ALWAYS_CHAR(value.c_str());
-            if (value_str == "$file") {
-              value_str = filename;
-            }
             if (allow_overwrite || !config_store.has(key_name.c_str())) {
               config_store.set(key_name.c_str(), value_str);
               if (listener && reader) {
@@ -842,24 +1134,25 @@ process_section(ConfigStoreImpl& config_store,
     status = config.enumerate_sections(base, idx, section_name);
     const String next_key_prefix = key_prefix + "_" + ACE_TEXT_ALWAYS_CHAR(section_name.c_str());
 
-    // Indicate the section.
-    if (allow_overwrite || !config_store.has(next_key_prefix.c_str())) {
-      config_store.set(next_key_prefix.c_str(), String("@") + ACE_TEXT_ALWAYS_CHAR(section_name.c_str()));
-      if (listener && reader) {
-        listener->on_data_available(reader);
-      }
-    }
-
     if (status == 0) {
       ACE_Configuration_Section_Key key;
       if (config.open_section(base, section_name.c_str(), 0, key) == 0) {
-        process_section(config_store, reader, listener, next_key_prefix, config, key, filename, allow_overwrite);
+        process_section(config_store, reader, listener, next_key_prefix, config, key, allow_overwrite);
       } else {
         if (log_level >= LogLevel::Error) {
           ACE_ERROR((LM_ERROR,
                      "(%P|%t) ERROR: process_section: "
                      "open_section() failed for name \"%s\"\n",
                      section_name.c_str()));
+        }
+      }
+
+      // Indicate the section last.
+      // This allows the listener to see complete sections.
+      if (allow_overwrite || !config_store.has(next_key_prefix.c_str())) {
+        config_store.set(next_key_prefix.c_str(), String("@") + ACE_TEXT_ALWAYS_CHAR(section_name.c_str()));
+        if (listener && reader) {
+          listener->on_data_available(reader);
         }
       }
     }

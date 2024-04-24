@@ -1,0 +1,4 @@
+@topic
+struct TestStruct2 {
+  int16 value;
+};

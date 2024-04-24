@@ -9,7 +9,6 @@
 
 #include <dds/DCPS/LogAddr.h>
 #include <dds/DCPS/Service_Participant.h>
-#include <dds/DCPS/ConfigUtils.h>
 #include <dds/DCPS/DomainParticipantImpl.h>
 #include <dds/DCPS/SubscriberImpl.h>
 #include <dds/DCPS/Marked_Default_Qos.h>
@@ -33,7 +32,7 @@ using DCPS::TimeDuration;
 
 RtpsDiscovery::RtpsDiscovery(const RepoKey& key)
   : key_(key)
-  , config_(DCPS::make_rch<RtpsDiscoveryConfig>())
+  , config_(DCPS::make_rch<RtpsDiscoveryConfig>(key))
 {
 }
 
@@ -41,778 +40,102 @@ RtpsDiscovery::~RtpsDiscovery()
 {
 }
 
-namespace {
-  const ACE_TCHAR RTPS_SECTION_NAME[] = ACE_TEXT("rtps_discovery");
-}
-
 int
-RtpsDiscovery::Config::discovery_config(ACE_Configuration_Heap& cf)
+RtpsDiscovery::Config::discovery_config()
 {
-  const ACE_Configuration_Section_Key &root = cf.root_section();
-  ACE_Configuration_Section_Key rtps_sect;
+  RcHandle<DCPS::ConfigStoreImpl> config_store = TheServiceParticipant->config_store();
 
-  if (cf.open_section(root, RTPS_SECTION_NAME, 0, rtps_sect) == 0) {
+  const DCPS::ConfigStoreImpl::StringList sections = config_store->get_section_names("RTPS_DISCOVERY");
 
-    // Ensure there are no properties in this section
-    DCPS::ValueMap vm;
-    if (DCPS::pullValues(cf, rtps_sect, vm) > 0) {
-      // There are values inside [rtps_discovery]
-      ACE_ERROR_RETURN((LM_ERROR,
-                        ACE_TEXT("(%P|%t) ERROR: RtpsDiscovery::Config::discovery_config(): ")
-                        ACE_TEXT("rtps_discovery sections must have a subsection name\n")),
-                       -1);
-    }
-    // Process the subsections of this section (the individual rtps_discovery/*)
-    DCPS::KeyList keys;
-    if (DCPS::processSections(cf, rtps_sect, keys) != 0) {
-      ACE_ERROR_RETURN((LM_ERROR,
-                        ACE_TEXT("(%P|%t) ERROR: RtpsDiscovery::Config::discovery_config(): ")
-                        ACE_TEXT("too many nesting layers in the [rtps] section.\n")),
-                       -1);
-    }
+  // Loop through the [rtps_discovery/*] sections
+  for (DCPS::ConfigStoreImpl::StringList::const_iterator pos = sections.begin(), limit = sections.end();
+       pos != limit; ++pos) {
+    const String& rtps_name = *pos;
 
-    // Loop through the [rtps_discovery/*] sections
-    for (DCPS::KeyList::const_iterator it = keys.begin();
-         it != keys.end(); ++it) {
-      const OPENDDS_STRING& rtps_name = it->first;
+    RtpsDiscovery_rch discovery = OpenDDS::DCPS::make_rch<RtpsDiscovery>(rtps_name);
+    RtpsDiscoveryConfig_rch config = discovery->config();
 
-      RtpsDiscovery_rch discovery = OpenDDS::DCPS::make_rch<RtpsDiscovery>(rtps_name);
-      RtpsDiscoveryConfig_rch config = discovery->config();
-
-      // spdpaddr defaults to DCPSDefaultAddress if set
-      if (TheServiceParticipant->default_address() != DCPS::NetworkAddress::default_IPV4) {
-        config->spdp_local_address(TheServiceParticipant->default_address().to_addr());
-        config->multicast_interface(DCPS::LogAddr::ip(TheServiceParticipant->default_address().to_addr()));
+#if defined(OPENDDS_SECURITY)
+    if (config_store->has(config->config_key("IceTa").c_str())) {
+      if (log_level >= DCPS::LogLevel::Warning) {
+        ACE_ERROR((LM_WARNING,
+                   "(%P|%t) RtpsDiscovery::Config::discovery_config: "
+                   "IceTa is deprecated.  Use Ta in [ice]\n"));
       }
-
-      DCPS::ValueMap values;
-      DCPS::pullValues(cf, it->second, values);
-      for (DCPS::ValueMap::const_iterator it = values.begin();
-           it != values.end(); ++it) {
-        const OPENDDS_STRING& name = it->first;
-        if (name == "ResendPeriod") {
-          const OPENDDS_STRING& value = it->second;
-          int resend = 0;
-          if (!DCPS::convertToInteger(value, resend)) {
-            ACE_ERROR_RETURN((LM_ERROR,
-              ACE_TEXT("(%P|%t) RtpsDiscovery::Config::discovery_config(): ")
-              ACE_TEXT("Invalid entry (%C) for ResendPeriod in ")
-              ACE_TEXT("[rtps_discovery/%C] section.\n"),
-              value.c_str(), rtps_name.c_str()), -1);
-          }
-          config->resend_period(TimeDuration(resend));
-        } else if (name == "QuickResendRatio") {
-          const OPENDDS_STRING& value = it->second;
-          double ratio = 0.0;
-          if (!DCPS::convertToDouble(value, ratio)) {
-            ACE_ERROR_RETURN((LM_ERROR,
-              ACE_TEXT("(%P|%t) RtpsDiscovery::Config::discovery_config(): ")
-              ACE_TEXT("Invalid entry (%C) for QuickResendRatio in ")
-              ACE_TEXT("[rtps_discovery/%C] section.\n"),
-              value.c_str(), rtps_name.c_str()), -1);
-          }
-          config->quick_resend_ratio(ratio);
-        } else if (name == "MinResendDelay") {
-          const OPENDDS_STRING& value = it->second;
-          int delay = 0;
-          if (!DCPS::convertToInteger(value, delay)) {
-            ACE_ERROR_RETURN((LM_ERROR,
-              ACE_TEXT("(%P|%t) RtpsDiscovery::Config::discovery_config(): ")
-              ACE_TEXT("Invalid entry (%C) for MinResendDelay in ")
-              ACE_TEXT("[rtps_discovery/%C] section.\n"),
-              value.c_str(), rtps_name.c_str()), -1);
-          }
-          config->min_resend_delay(TimeDuration::from_msec(delay));
-        } else if (name == "LeaseDuration") {
-          const OPENDDS_STRING& value = it->second;
-          int duration = 0;
-          if (!DCPS::convertToInteger(value, duration)) {
-            ACE_ERROR_RETURN((LM_ERROR,
-              ACE_TEXT("(%P|%t) RtpsDiscovery::Config::discovery_config(): ")
-              ACE_TEXT("Invalid entry (%C) for LeaseDuration in ")
-              ACE_TEXT("[rtps_discovery/%C] section.\n"),
-              value.c_str(), rtps_name.c_str()), -1);
-          }
-          config->lease_duration(TimeDuration(duration));
-        } else if (name == "MaxLeaseDuration") {
-          const OPENDDS_STRING& value = it->second;
-          int duration = 0;
-          if (!DCPS::convertToInteger(value, duration)) {
-            ACE_ERROR_RETURN((LM_ERROR,
-              ACE_TEXT("(%P|%t) RtpsDiscovery::Config::discovery_config(): ")
-              ACE_TEXT("Invalid entry (%C) for MaxLeaseDuration in ")
-              ACE_TEXT("[rtps_discovery/%C] section.\n"),
-              value.c_str(), rtps_name.c_str()), -1);
-          }
-          config->max_lease_duration(TimeDuration(duration));
-#ifdef OPENDDS_SECURITY
-        } else if (name == "SecurityUnsecureLeaseDuration") {
-          const OPENDDS_STRING& value = it->second;
-          int duration = 0;
-          if (!DCPS::convertToInteger(value, duration)) {
-            ACE_ERROR_RETURN((LM_ERROR,
-              ACE_TEXT("(%P|%t) RtpsDiscovery::Config::discovery_config(): ")
-              ACE_TEXT("Invalid entry (%C) for SecurityUnsecureLeaseDuration in ")
-              ACE_TEXT("[rtps_discovery/%C] section.\n"),
-              value.c_str(), rtps_name.c_str()), -1);
-          }
-          config->security_unsecure_lease_duration(TimeDuration(duration));
-        } else if (name == "MaxParticipantsInAuthentication") {
-          const OPENDDS_STRING& value = it->second;
-          unsigned int max_participants = 0;
-          if (!DCPS::convertToInteger(value, max_participants)) {
-            ACE_ERROR_RETURN((LM_ERROR,
-              ACE_TEXT("(%P|%t) RtpsDiscovery::Config::discovery_config(): ")
-              ACE_TEXT("Invalid entry (%C) for MaxParticipantsInAuthentication in ")
-              ACE_TEXT("[rtps_discovery/%C] section.\n"),
-              value.c_str(), rtps_name.c_str()), -1);
-          }
-          config->max_participants_in_authentication(max_participants);
-#endif
-        } else if (name == "LeaseExtension") {
-          const OPENDDS_STRING& value = it->second;
-          int extension = 0;
-          if (!DCPS::convertToInteger(value, extension)) {
-            ACE_ERROR_RETURN((LM_ERROR,
-              ACE_TEXT("(%P|%t) RtpsDiscovery::Config::discovery_config(): ")
-              ACE_TEXT("Invalid entry (%C) for LeaseExtension in ")
-              ACE_TEXT("[rtps_discovery/%C] section.\n"),
-              value.c_str(), rtps_name.c_str()), -1);
-          }
-          config->lease_extension(TimeDuration(extension));
-        } else if (name == "PB") {
-          const OPENDDS_STRING& value = it->second;
-          u_short pb = 0;
-          if (!DCPS::convertToInteger(value, pb)) {
-            ACE_ERROR_RETURN((LM_ERROR,
-              ACE_TEXT("(%P|%t) RtpsDiscovery::Config::discovery_config(): ")
-              ACE_TEXT("Invalid entry (%C) for PB in ")
-              ACE_TEXT("[rtps_discovery/%C] section.\n"),
-              value.c_str(), rtps_name.c_str()), -1);
-          }
-          config->pb(pb);
-        } else if (name == "DG") {
-          const OPENDDS_STRING& value = it->second;
-          u_short dg = 0;
-          if (!DCPS::convertToInteger(value, dg)) {
-            ACE_ERROR_RETURN((LM_ERROR,
-              ACE_TEXT("(%P|%t) RtpsDiscovery::Config::discovery_config(): ")
-              ACE_TEXT("Invalid entry (%C) for DG in ")
-              ACE_TEXT("[rtps_discovery/%C] section.\n"),
-              value.c_str(), rtps_name.c_str()), -1);
-          }
-          config->dg(dg);
-        } else if (name == "PG") {
-          const OPENDDS_STRING& value = it->second;
-          u_short pg = 0;
-          if (!DCPS::convertToInteger(value, pg)) {
-            ACE_ERROR_RETURN((LM_ERROR,
-              ACE_TEXT("(%P|%t) RtpsDiscovery::Config::discovery_config(): ")
-              ACE_TEXT("Invalid entry (%C) for PG in ")
-              ACE_TEXT("[rtps_discovery/%C] section.\n"),
-              value.c_str(), rtps_name.c_str()), -1);
-          }
-          config->pg(pg);
-        } else if (name == "D0") {
-          const OPENDDS_STRING& value = it->second;
-          u_short d0 = 0;
-          if (!DCPS::convertToInteger(value, d0)) {
-            ACE_ERROR_RETURN((LM_ERROR,
-              ACE_TEXT("(%P|%t) RtpsDiscovery::Config::discovery_config(): ")
-              ACE_TEXT("Invalid entry (%C) for D0 in ")
-              ACE_TEXT("[rtps_discovery/%C] section.\n"),
-              value.c_str(), rtps_name.c_str()), -1);
-          }
-          config->d0(d0);
-        } else if (name == "D1") {
-          const OPENDDS_STRING& value = it->second;
-          u_short d1 = 0;
-          if (!DCPS::convertToInteger(value, d1)) {
-            ACE_ERROR_RETURN((LM_ERROR,
-              ACE_TEXT("(%P|%t) RtpsDiscovery::Config::discovery_config(): ")
-              ACE_TEXT("Invalid entry (%C) for D1 in ")
-              ACE_TEXT("[rtps_discovery/%C] section.\n"),
-              value.c_str(), rtps_name.c_str()), -1);
-          }
-          config->d1(d1);
-        } else if (name == "DX") {
-          const OPENDDS_STRING& value = it->second;
-          u_short dx = 0;
-          if (!DCPS::convertToInteger(value, dx)) {
-            ACE_ERROR_RETURN((LM_ERROR,
-               ACE_TEXT("(%P|%t) RtpsDiscovery::Config::discovery_config(): ")
-               ACE_TEXT("Invalid entry (%C) for DX in ")
-               ACE_TEXT("[rtps_discovery/%C] section.\n"),
-               value.c_str(), rtps_name.c_str()), -1);
-          }
-          config->dx(dx);
-        } else if (name == "TTL") {
-          const OPENDDS_STRING& value = it->second;
-          unsigned short ttl_us = 0;
-          if (!DCPS::convertToInteger(value, ttl_us) || ttl_us > UCHAR_MAX) {
-            ACE_ERROR_RETURN((LM_ERROR,
-               ACE_TEXT("(%P|%t) RtpsDiscovery::Config::discovery_config(): ")
-               ACE_TEXT("Invalid entry (%C) for TTL in ")
-               ACE_TEXT("[rtps_discovery/%C] section.\n"),
-               value.c_str(), rtps_name.c_str()), -1);
-          }
-          config->ttl(static_cast<unsigned char>(ttl_us));
-        } else if (name == "SendBufferSize") {
-          const OPENDDS_STRING& value = it->second;
-          ACE_INT32 send_buffer_size = 0;
-          if (!DCPS::convertToInteger(value, send_buffer_size)) {
-            ACE_ERROR_RETURN((LM_ERROR,
-               ACE_TEXT("(%P|%t) RtpsDiscovery::Config::discovery_config(): ")
-               ACE_TEXT("Invalid entry (%C) for SendBufferSize in ")
-               ACE_TEXT("[rtps_discovery/%C] section.\n"),
-               value.c_str(), rtps_name.c_str()), -1);
-          }
-          config->send_buffer_size(send_buffer_size);
-        } else if (name == "RecvBufferSize") {
-          const OPENDDS_STRING& value = it->second;
-          ACE_INT32 recv_buffer_size = 0;
-          if (!DCPS::convertToInteger(value, recv_buffer_size)) {
-            ACE_ERROR_RETURN((LM_ERROR,
-               ACE_TEXT("(%P|%t) RtpsDiscovery::Config::discovery_config(): ")
-               ACE_TEXT("Invalid entry (%C) for RecvBufferSize in ")
-               ACE_TEXT("[rtps_discovery/%C] section.\n"),
-               value.c_str(), rtps_name.c_str()), -1);
-          }
-          config->recv_buffer_size(recv_buffer_size);
-        } else if (name == "SedpMulticast") {
-          const OPENDDS_STRING& value = it->second;
-          int smInt = 0;
-          if (!DCPS::convertToInteger(value, smInt)) {
-            ACE_ERROR_RETURN((LM_ERROR,
-               ACE_TEXT("(%P|%t) RtpsDiscovery::Config::discovery_config ")
-               ACE_TEXT("Invalid entry (%C) for SedpMulticast in ")
-               ACE_TEXT("[rtps_discovery/%C] section.\n"),
-               value.c_str(), rtps_name.c_str()), -1);
-          }
-          config->sedp_multicast(bool(smInt));
-        } else if (name == "MulticastInterface") {
-          config->multicast_interface(it->second);
-        } else if (name == "SedpLocalAddress") {
-          ACE_INET_Addr addr;
-          if (addr.set(it->second.c_str())) {
-            ACE_ERROR_RETURN((LM_ERROR,
-                              ACE_TEXT("(%P|%t) ERROR: RtpsDiscovery::Config::discovery_config(): ")
-                              ACE_TEXT("failed to parse SedpLocalAddress %C\n"),
-                              it->second.c_str()),
-                             -1);
-          }
-          config->sedp_local_address(addr);
-        } else if (name == "SedpAdvertisedLocalAddress") {
-          ACE_INET_Addr addr;
-          if (addr.set(it->second.c_str())) {
-            ACE_ERROR_RETURN((LM_ERROR,
-                              ACE_TEXT("(%P|%t) ERROR: RtpsDiscovery::Config::discovery_config(): ")
-                              ACE_TEXT("failed to parse SedpAdvertisedLocalAddress %C\n"),
-                              it->second.c_str()),
-                             -1);
-          }
-          config->sedp_advertised_address(addr);
-        } else if (name == "SpdpLocalAddress") {
-          ACE_INET_Addr addr;
-          if (addr.set(u_short(0), it->second.c_str())) {
-            ACE_ERROR_RETURN((LM_ERROR,
-                              ACE_TEXT("(%P|%t) ERROR: RtpsDiscovery::Config::discovery_config(): ")
-                              ACE_TEXT("failed to parse SpdpLocalAddress %C\n"),
-                              it->second.c_str()),
-                             -1);
-          }
-          config->spdp_local_address(addr);
-        } else if (name == "SpdpRequestRandomPort") {
-          const OPENDDS_STRING& value = it->second;
-          int smInt = 0;
-          if (!DCPS::convertToInteger(value, smInt)) {
-            ACE_ERROR_RETURN((LM_ERROR,
-                              ACE_TEXT("(%P|%t) RtpsDiscovery::Config::discovery_config ")
-                              ACE_TEXT("Invalid entry (%C) for SpdpRequestRandomPort in ")
-                              ACE_TEXT("[rtps_discovery/%C] section.\n"),
-                              value.c_str(), rtps_name.c_str()), -1);
-          }
-          config->spdp_request_random_port(bool(smInt));
-        } else if (name == "GuidInterface") {
-          config->guid_interface(it->second);
-        } else if (name == "InteropMulticastOverride") {
-          /// FUTURE: handle > 1 group.
-          ACE_INET_Addr addr;
-          if (addr.set(u_short(0), it->second.c_str())) {
-            ACE_ERROR_RETURN((LM_ERROR,
-                              ACE_TEXT("(%P|%t) ERROR: RtpsDiscovery::Config::discovery_config(): ")
-                              ACE_TEXT("failed to parse InteropMulticastOverride %C\n"),
-                              it->second.c_str()),
-                             -1);
-          }
-          config->default_multicast_group(addr);
-        } else if (name == "SpdpSendAddrs") {
-          AddrVec spdp_send_addrs;
-          const OPENDDS_STRING& value = it->second;
-          size_t i = 0;
-          do {
-            i = value.find_first_not_of(' ', i); // skip spaces
-            const size_t n = value.find_first_of(", ", i);
-            spdp_send_addrs.push_back(value.substr(i, (n == OPENDDS_STRING::npos) ? n : n - i));
-            i = value.find(',', i);
-          } while (i++ != OPENDDS_STRING::npos); // skip past comma if there is one
-          config->spdp_send_addrs(spdp_send_addrs);
-        } else if (name == "SpdpRtpsRelayAddress") {
-          ACE_INET_Addr addr;
-          if (addr.set(it->second.c_str())) {
-            ACE_ERROR_RETURN((LM_ERROR,
-                              ACE_TEXT("(%P|%t) ERROR: RtpsDiscovery::Config::discovery_config(): ")
-                              ACE_TEXT("failed to parse SpdpRtpsRelayAddress %C\n"),
-                              it->second.c_str()),
-                             -1);
-          }
-          config->spdp_rtps_relay_address(addr);
-        } else if (name == "SpdpRtpsRelayBeaconPeriod") {
-          ACE_ERROR((LM_ERROR,
-                     ACE_TEXT("(%P|%t) RtpsDiscovery::Config::discovery_config(): ")
-                     ACE_TEXT("Entry SpdpRtpsRelayBeaconPeriod is deprecated and will be ignored.\n")));
-        } else if (name == "SpdpRtpsRelaySendPeriod") {
-          const OPENDDS_STRING& value = it->second;
-          int period = 0;
-          if (!DCPS::convertToInteger(value, period)) {
-            ACE_ERROR_RETURN((LM_ERROR,
-              ACE_TEXT("(%P|%t) RtpsDiscovery::Config::discovery_config(): ")
-              ACE_TEXT("Invalid entry (%C) for SpdpRtpsRelaySendPeriod in ")
-              ACE_TEXT("[rtps_discovery/%C] section.\n"),
-              value.c_str(), rtps_name.c_str()), -1);
-          }
-          config->spdp_rtps_relay_send_period(TimeDuration(period));
-        } else if (name == "SedpRtpsRelayAddress") {
-          ACE_INET_Addr addr;
-          if (addr.set(it->second.c_str())) {
-            ACE_ERROR_RETURN((LM_ERROR,
-                              ACE_TEXT("(%P|%t) ERROR: RtpsDiscovery::Config::discovery_config(): ")
-                              ACE_TEXT("failed to parse SedpRtpsRelayAddress %C\n"),
-                              it->second.c_str()),
-                             -1);
-          }
-          config->sedp_rtps_relay_address(DCPS::NetworkAddress(addr));
-        } else if (name == "SedpRtpsRelayBeaconPeriod") {
-          ACE_ERROR((LM_ERROR,
-                     ACE_TEXT("(%P|%t) RtpsDiscovery::Config::discovery_config(): ")
-                     ACE_TEXT("Entry SedpRtpsRelayBeaconPeriod is deprecated and will be ignored.\n")));
-        } else if (name == "RtpsRelayOnly") {
-          const OPENDDS_STRING& value = it->second;
-          int smInt = 0;
-          if (!DCPS::convertToInteger(value, smInt)) {
-            ACE_ERROR_RETURN((LM_ERROR,
-                              ACE_TEXT("(%P|%t) RtpsDiscovery::Config::discovery_config ")
-                              ACE_TEXT("Invalid entry (%C) for RtpsRelayOnly in ")
-                              ACE_TEXT("[rtps_discovery/%C] section.\n"),
-                              value.c_str(), rtps_name.c_str()), -1);
-          }
-          config->rtps_relay_only(bool(smInt));
-        } else if (name == "UseRtpsRelay") {
-          const OPENDDS_STRING& value = it->second;
-          int smInt = 0;
-          if (!DCPS::convertToInteger(value, smInt)) {
-            ACE_ERROR_RETURN((LM_ERROR,
-                              ACE_TEXT("(%P|%t) RtpsDiscovery::Config::discovery_config ")
-                              ACE_TEXT("Invalid entry (%C) for UseRtpsRelay in ")
-                              ACE_TEXT("[rtps_discovery/%C] section.\n"),
-                              value.c_str(), rtps_name.c_str()), -1);
-          }
-          config->use_rtps_relay(bool(smInt));
-#ifdef OPENDDS_SECURITY
-        } else if (name == "SpdpStunServerAddress") {
-          ACE_INET_Addr addr;
-          if (addr.set(it->second.c_str())) {
-            ACE_ERROR_RETURN((LM_ERROR,
-                              ACE_TEXT("(%P|%t) ERROR: RtpsDiscovery::Config::discovery_config(): ")
-                              ACE_TEXT("failed to parse SpdpStunServerAddress %C\n"),
-                              it->second.c_str()),
-                             -1);
-          }
-          config->spdp_stun_server_address(addr);
-        } else if (name == "SedpStunServerAddress") {
-          ACE_INET_Addr addr;
-          if (addr.set(it->second.c_str())) {
-            ACE_ERROR_RETURN((LM_ERROR,
-                              ACE_TEXT("(%P|%t) ERROR: RtpsDiscovery::Config::discovery_config(): ")
-                              ACE_TEXT("failed to parse SedpStunServerAddress %C\n"),
-                              it->second.c_str()),
-                             -1);
-          }
-          config->sedp_stun_server_address(DCPS::NetworkAddress(addr));
-        } else if (name == "UseIce") {
-          const OPENDDS_STRING& value = it->second;
-          int smInt = 0;
-          if (!DCPS::convertToInteger(value, smInt)) {
-            ACE_ERROR_RETURN((LM_ERROR,
-                              ACE_TEXT("(%P|%t) RtpsDiscovery::Config::discovery_config ")
-                              ACE_TEXT("Invalid entry (%C) for UseIce in ")
-                              ACE_TEXT("[rtps_discovery/%C] section.\n"),
-                              value.c_str(), rtps_name.c_str()), -1);
-          }
-          config->use_ice(bool(smInt));
-          if (smInt && !TheServiceParticipant->get_security()) {
-            ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Security must be enabled (-DCPSSecurity 1) when using ICE (UseIce)\n")), -1);
-          }
-        } else if (name == "IceTa") {
-          // In milliseconds.
-          const OPENDDS_STRING& string_value = it->second;
-          int int_value = 0;
-          if (DCPS::convertToInteger(string_value, int_value)) {
-            ICE::Configuration::instance()->T_a(TimeDuration::from_msec(int_value));
-          } else {
-            ACE_ERROR_RETURN((LM_ERROR,
-               ACE_TEXT("(%P|%t) RtpsDiscovery::Config::discovery_config(): ")
-               ACE_TEXT("Invalid entry (%C) for IceTa in ")
-               ACE_TEXT("[rtps_discovery/%C] section.\n"),
-               string_value.c_str(), rtps_name.c_str()), -1);
-          }
-        } else if (name == "IceConnectivityCheckTTL") {
-          // In seconds.
-          const OPENDDS_STRING& string_value = it->second;
-          int int_value = 0;
-          if (DCPS::convertToInteger(string_value, int_value)) {
-            ICE::Configuration::instance()->connectivity_check_ttl(TimeDuration(int_value));
-          } else {
-            ACE_ERROR_RETURN((LM_ERROR,
-               ACE_TEXT("(%P|%t) RtpsDiscovery::Config::discovery_config(): ")
-               ACE_TEXT("Invalid entry (%C) for IceConnectivityCheckTTL in ")
-               ACE_TEXT("[rtps_discovery/%C] section.\n"),
-               string_value.c_str(), rtps_name.c_str()), -1);
-          }
-        } else if (name == "IceChecklistPeriod") {
-          // In seconds.
-          const OPENDDS_STRING& string_value = it->second;
-          int int_value = 0;
-          if (DCPS::convertToInteger(string_value, int_value)) {
-            ICE::Configuration::instance()->checklist_period(TimeDuration(int_value));
-          } else {
-            ACE_ERROR_RETURN((LM_ERROR,
-               ACE_TEXT("(%P|%t) RtpsDiscovery::Config::discovery_config(): ")
-               ACE_TEXT("Invalid entry (%C) for IceChecklistPeriod in ")
-               ACE_TEXT("[rtps_discovery/%C] section.\n"),
-               string_value.c_str(), rtps_name.c_str()), -1);
-          }
-        } else if (name == "IceIndicationPeriod") {
-          // In seconds.
-          const OPENDDS_STRING& string_value = it->second;
-          int int_value = 0;
-          if (DCPS::convertToInteger(string_value, int_value)) {
-            ICE::Configuration::instance()->indication_period(TimeDuration(int_value));
-          } else {
-            ACE_ERROR_RETURN((LM_ERROR,
-               ACE_TEXT("(%P|%t) RtpsDiscovery::Config::discovery_config(): ")
-               ACE_TEXT("Invalid entry (%C) for IceIndicationPeriod in ")
-               ACE_TEXT("[rtps_discovery/%C] section.\n"),
-               string_value.c_str(), rtps_name.c_str()), -1);
-          }
-        } else if (name == "IceNominatedTTL") {
-          // In seconds.
-          const OPENDDS_STRING& string_value = it->second;
-          int int_value = 0;
-          if (DCPS::convertToInteger(string_value, int_value)) {
-            ICE::Configuration::instance()->nominated_ttl(TimeDuration(int_value));
-          } else {
-            ACE_ERROR_RETURN((LM_ERROR,
-               ACE_TEXT("(%P|%t) RtpsDiscovery::Config::discovery_config(): ")
-               ACE_TEXT("Invalid entry (%C) for IceNominatedTTL in ")
-               ACE_TEXT("[rtps_discovery/%C] section.\n"),
-               string_value.c_str(), rtps_name.c_str()), -1);
-          }
-        } else if (name == "IceServerReflexiveAddressPeriod") {
-          // In seconds.
-          const OPENDDS_STRING& string_value = it->second;
-          int int_value = 0;
-          if (DCPS::convertToInteger(string_value, int_value)) {
-            ICE::Configuration::instance()->server_reflexive_address_period(TimeDuration(int_value));
-          } else {
-            ACE_ERROR_RETURN((LM_ERROR,
-               ACE_TEXT("(%P|%t) RtpsDiscovery::Config::discovery_config(): ")
-               ACE_TEXT("Invalid entry (%C) for IceServerReflexiveAddressPeriod in ")
-               ACE_TEXT("[rtps_discovery/%C] section.\n"),
-               string_value.c_str(), rtps_name.c_str()), -1);
-          }
-        } else if (name == "IceServerReflexiveIndicationCount") {
-          const OPENDDS_STRING& string_value = it->second;
-          int int_value = 0;
-          if (DCPS::convertToInteger(string_value, int_value)) {
-            ICE::Configuration::instance()->server_reflexive_indication_count(int_value);
-          } else {
-            ACE_ERROR_RETURN((LM_ERROR,
-               ACE_TEXT("(%P|%t) RtpsDiscovery::Config::discovery_config(): ")
-               ACE_TEXT("Invalid entry (%C) for IceServerReflexiveIndicationCount in ")
-               ACE_TEXT("[rtps_discovery/%C] section.\n"),
-               string_value.c_str(), rtps_name.c_str()), -1);
-          }
-        } else if (name == "IceDeferredTriggeredCheckTTL") {
-          // In seconds.
-          const OPENDDS_STRING& string_value = it->second;
-          int int_value = 0;
-          if (DCPS::convertToInteger(string_value, int_value)) {
-            ICE::Configuration::instance()->deferred_triggered_check_ttl(TimeDuration(int_value));
-          } else {
-            ACE_ERROR_RETURN((LM_ERROR,
-               ACE_TEXT("(%P|%t) RtpsDiscovery::Config::discovery_config(): ")
-               ACE_TEXT("Invalid entry (%C) for IceDeferredTriggeredCheckTTL in ")
-               ACE_TEXT("[rtps_discovery/%C] section.\n"),
-               string_value.c_str(), rtps_name.c_str()), -1);
-          }
-        } else if (name == "IceChangePasswordPeriod") {
-          // In seconds.
-          const OPENDDS_STRING& string_value = it->second;
-          int int_value = 0;
-          if (DCPS::convertToInteger(string_value, int_value)) {
-            ICE::Configuration::instance()->change_password_period(TimeDuration(int_value));
-          } else {
-            ACE_ERROR_RETURN((LM_ERROR,
-               ACE_TEXT("(%P|%t) RtpsDiscovery::Config::discovery_config(): ")
-               ACE_TEXT("Invalid entry (%C) for IceChangePasswordPeriod in ")
-               ACE_TEXT("[rtps_discovery/%C] section.\n"),
-               string_value.c_str(), rtps_name.c_str()), -1);
-          }
-        } else if (name == "MaxAuthTime") {
-          // In seconds.
-          const OPENDDS_STRING& string_value = it->second;
-          int int_value = 0;
-          if (DCPS::convertToInteger(string_value, int_value)) {
-            config->max_auth_time(TimeDuration(int_value));
-          } else {
-            ACE_ERROR_RETURN((LM_ERROR,
-                              ACE_TEXT("(%P|%t) RtpsDiscovery::Config::discovery_config(): ")
-                              ACE_TEXT("Invalid entry (%C) for MaxAuthTime in ")
-                              ACE_TEXT("[rtps_discovery/%C] section.\n"),
-                              string_value.c_str(), rtps_name.c_str()), -1);
-          }
-        } else if (name == "AuthResendPeriod") {
-          // In seconds.
-          const OPENDDS_STRING& string_value = it->second;
-          double double_value = 0.0;
-          if (DCPS::convertToDouble(string_value, double_value)) {
-            config->auth_resend_period(TimeDuration::from_double(double_value));
-          } else {
-            ACE_ERROR_RETURN((LM_ERROR,
-                              ACE_TEXT("(%P|%t) RtpsDiscovery::Config::discovery_config(): ")
-                              ACE_TEXT("Invalid entry (%C) for AuthResendPeriod in ")
-                              ACE_TEXT("[rtps_discovery/%C] section.\n"),
-                              string_value.c_str(), rtps_name.c_str()), -1);
-          }
+      config_store->set("IceTa", config_store->get(config->config_key("IceTa").c_str(), ""));
+    }
+    if (config_store->has(config->config_key("IceConnectivityCheckTTL").c_str())) {
+      if (log_level >= DCPS::LogLevel::Warning) {
+        ACE_ERROR((LM_WARNING,
+                   "(%P|%t) RtpsDiscovery::Config::discovery_config: "
+                   "IceConnectivityCheckTTL is deprecated.  Use ConnectivityCheckTTL in [ice]\n"));
+      }
+      config_store->set("IceConnectivityCheckTTL", config_store->get(config->config_key("IceConnectivityCheckTTL").c_str(), ""));
+    }
+    if (config_store->has(config->config_key("IceChecklistPeriod").c_str())) {
+      if (log_level >= DCPS::LogLevel::Warning) {
+        ACE_ERROR((LM_WARNING,
+                   "(%P|%t) RtpsDiscovery::Config::discovery_config: "
+                   "IceChecklistPeriod is deprecated.  Use ChecklistPeriod in [ice]\n"));
+      }
+      config_store->set("IceChecklistPeriod", config_store->get(config->config_key("IceChecklistPeriod").c_str(), ""));
+    }
+    if (config_store->has(config->config_key("IceIndicationPeriod").c_str())) {
+      if (log_level >= DCPS::LogLevel::Warning) {
+        ACE_ERROR((LM_WARNING,
+                   "(%P|%t) RtpsDiscovery::Config::discovery_config: "
+                   "IceIndicationPeriod is deprecated.  Use IndicationPeriod in [ice]\n"));
+      }
+      config_store->set("IceIndicationPeriod", config_store->get(config->config_key("IceIndicationPeriod").c_str(), ""));
+    }
+    if (config_store->has(config->config_key("IceNominatedTTL").c_str())) {
+      if (log_level >= DCPS::LogLevel::Warning) {
+        ACE_ERROR((LM_WARNING,
+                   "(%P|%t) RtpsDiscovery::Config::discovery_config: "
+                   "IceNominatedTTL is deprecated.  Use NominatedTTL in [ice]\n"));
+      }
+      config_store->set("IceNominatedTTL", config_store->get(config->config_key("IceNominatedTTL").c_str(), ""));
+    }
+    if (config_store->has(config->config_key("IceServerReflexiveAddressPeriod").c_str())) {
+      if (log_level >= DCPS::LogLevel::Warning) {
+        ACE_ERROR((LM_WARNING,
+                   "(%P|%t) RtpsDiscovery::Config::discovery_config: "
+                   "IceServerReflexiveAddressPeriod is deprecated.  Use ServerReflexiveAddressPeriod in [ice]\n"));
+      }
+      config_store->set("IceServerReflexiveAddressPeriod", config_store->get(config->config_key("IceServerReflexiveAddressPeriod").c_str(), ""));
+    }
+    if (config_store->has(config->config_key("IceServerReflexiveIndicationCount").c_str())) {
+      if (log_level >= DCPS::LogLevel::Warning) {
+        ACE_ERROR((LM_WARNING,
+                   "(%P|%t) RtpsDiscovery::Config::discovery_config: "
+                   "IceServerReflexiveIndicationCount is deprecated.  Use ServerReflexiveIndicationCount in [ice]\n"));
+      }
+      config_store->set("IceServerReflexiveIndicationCount", config_store->get(config->config_key("IceServerReflexiveIndicationCount").c_str(), ""));
+    }
+    if (config_store->has(config->config_key("IceDeferredTriggeredCheckTTL").c_str())) {
+      if (log_level >= DCPS::LogLevel::Warning) {
+        ACE_ERROR((LM_WARNING,
+                   "(%P|%t) RtpsDiscovery::Config::discovery_config: "
+                   "IceDeferredTriggeredCheckTTL is deprecated.  Use DeferredTriggeredCheckTTL in [ice]\n"));
+      }
+      config_store->set("IceDeferredTriggeredCheckTTL", config_store->get(config->config_key("IceDeferredTriggeredCheckTTL").c_str(), ""));
+    }
+    if (config_store->has(config->config_key("IceChangePasswordPeriod").c_str())) {
+      if (log_level >= DCPS::LogLevel::Warning) {
+        ACE_ERROR((LM_WARNING,
+                   "(%P|%t) RtpsDiscovery::Config::discovery_config: "
+                   "IceChangePasswordPeriod is deprecated.  Use ChangePasswordPeriod in [ice]\n"));
+      }
+      config_store->set("IceChangePasswordPeriod", config_store->get(config->config_key("IceChangePasswordPeriod").c_str(), ""));
+    }
 #endif /* OPENDDS_SECURITY */
-        } else if (name == "MaxSpdpSequenceMsgResetChecks") {
-          const OPENDDS_STRING& string_value = it->second;
-          u_short value = 0;
-          if (DCPS::convertToInteger(string_value, value)) {
-            config->max_spdp_sequence_msg_reset_check(value);
-          } else {
-            ACE_ERROR_RETURN((LM_ERROR,
-                              ACE_TEXT("(%P|%t) RtpsDiscovery::Config::discovery_config(): ")
-                              ACE_TEXT("Invalid entry (%C) for MaxSpdpSequenceMsgResetChecks in ")
-                              ACE_TEXT("[rtps_discovery/%C] section.\n"),
-                              string_value.c_str(), rtps_name.c_str()), -1);
-          }
-        } else if (name == "SedpMaxMessageSize") {
-          const OPENDDS_STRING& string_value = it->second;
-          size_t value = 0;
-          if (DCPS::convertToInteger(string_value, value)) {
-            config->sedp_max_message_size(value);
-          } else {
-            ACE_ERROR_RETURN((LM_ERROR,
-                              ACE_TEXT("(%P|%t) RtpsDiscovery::Config::discovery_config(): ")
-                              ACE_TEXT("Invalid entry (%C) for SedpMaxMessageSize in ")
-                              ACE_TEXT("[rtps_discovery/%C] section.\n"),
-                              string_value.c_str(), rtps_name.c_str()), -1);
-          }
-        } else if (name == "SedpHeartbeatPeriod") {
-          const OPENDDS_STRING& string_value = it->second;
-          int value = 0;
-          if (DCPS::convertToInteger(string_value, value)) {
-            config->sedp_heartbeat_period(TimeDuration::from_msec(value));
-          } else {
-            ACE_ERROR_RETURN((LM_ERROR,
-                              ACE_TEXT("(%P|%t) RtpsDiscovery::Config::discovery_config(): ")
-                              ACE_TEXT("Invalid entry (%C) for SedpHeartbeatPeriod in ")
-                              ACE_TEXT("[rtps_discovery/%C] section.\n"),
-                              string_value.c_str(), rtps_name.c_str()), -1);
-          }
-        } else if (name == "SedpNakResponseDelay") {
-          const OPENDDS_STRING& string_value = it->second;
-          int value = 0;
-          if (DCPS::convertToInteger(string_value, value)) {
-            config->sedp_nak_response_delay(TimeDuration::from_msec(value));
-          } else {
-            ACE_ERROR_RETURN((LM_ERROR,
-                              ACE_TEXT("(%P|%t) RtpsDiscovery::Config::discovery_config(): ")
-                              ACE_TEXT("Invalid entry (%C) for SedpNakResponseDelay in ")
-                              ACE_TEXT("[rtps_discovery/%C] section.\n"),
-                              string_value.c_str(), rtps_name.c_str()), -1);
-          }
-        } else if (name == "SedpSendDelay") {
-          const OPENDDS_STRING& string_value = it->second;
-          int value = 0;
-          if (DCPS::convertToInteger(string_value, value)) {
-            config->sedp_send_delay(TimeDuration::from_msec(value));
-          } else {
-            ACE_ERROR_RETURN((LM_ERROR,
-                              ACE_TEXT("(%P|%t) RtpsDiscovery::Config::discovery_config(): ")
-                              ACE_TEXT("Invalid entry (%C) for SedpSendDelay in ")
-                              ACE_TEXT("[rtps_discovery/%C] section.\n"),
-                              string_value.c_str(), rtps_name.c_str()), -1);
-          }
-        } else if (name == "SedpFragmentReassemblyTimeout") {
-          const OPENDDS_STRING& string_value = it->second;
-          int value = 0;
-          if (DCPS::convertToInteger(string_value, value)) {
-            config->sedp_fragment_reassembly_timeout(TimeDuration::from_msec(value));
-          } else {
-            ACE_ERROR_RETURN((LM_ERROR,
-                              ACE_TEXT("(%P|%t) RtpsDiscovery::Config::discovery_config(): ")
-                              ACE_TEXT("Invalid entry (%C) for SedpFragmentReassemblyTimeout in ")
-                              ACE_TEXT("[rtps_discovery/%C] section.\n"),
-                              string_value.c_str(), rtps_name.c_str()), -1);
-          }
-        } else if (name == "SedpPassiveConnectDuration") {
-          const OPENDDS_STRING& string_value = it->second;
-          int value = 0;
-          if (DCPS::convertToInteger(string_value, value)) {
-            config->sedp_passive_connect_duration(TimeDuration::from_msec(value));
-          } else {
-            ACE_ERROR_RETURN((LM_ERROR,
-                              ACE_TEXT("(%P|%t) RtpsDiscovery::Config::discovery_config(): ")
-                              ACE_TEXT("Invalid entry (%C) for SedpPassiveConnectDuration in ")
-                              ACE_TEXT("[rtps_discovery/%C] section.\n"),
-                              string_value.c_str(), rtps_name.c_str()), -1);
-          }
-        } else if (name == "SecureParticipantUserData") {
-          const OPENDDS_STRING& string_value = it->second;
-          int int_value = 0;
-          if (!DCPS::convertToInteger(string_value, int_value)) {
-            ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: RtpsDiscovery::Config::discovery_config: ")
-                       ACE_TEXT("Invalid entry (%C) for SecureParticipantUserData in ")
-                       ACE_TEXT("[rtps_discovery/%C] section.\n"),
-                       string_value.c_str(), rtps_name.c_str()));
-            return -1;
-          }
-          config->secure_participant_user_data(int_value);
-        } else if (name == "Customization") {
-          if (DCPS::DCPS_debug_level > 0) {
-            ACE_DEBUG((LM_DEBUG,
-                       ACE_TEXT("(%P|%t) RtpsDiscovery::Config::discovery_config(): ")
-                       ACE_TEXT("%C section has a Customization setting.\n"),
-                       rtps_name.c_str()));
-          }
-        } else if (name == "UndirectedSpdp") {
-          const OPENDDS_STRING& value = it->second;
-          int smInt = 0;
-          if (!DCPS::convertToInteger(value, smInt)) {
-            ACE_ERROR_RETURN((LM_ERROR,
-                              ACE_TEXT("(%P|%t) RtpsDiscovery::Config::discovery_config ")
-                              ACE_TEXT("Invalid entry (%C) for UndirectedSpdp in ")
-                              ACE_TEXT("[rtps_discovery/%C] section.\n"),
-                              value.c_str(), rtps_name.c_str()), -1);
-          }
-          config->undirected_spdp(bool(smInt));
-        } else if (name == "PeriodicDirectedSpdp") {
-          const OPENDDS_STRING& value = it->second;
-          int smInt = 0;
-          if (!DCPS::convertToInteger(value, smInt)) {
-            ACE_ERROR_RETURN((LM_ERROR,
-                              ACE_TEXT("(%P|%t) RtpsDiscovery::Config::discovery_config ")
-                              ACE_TEXT("Invalid entry (%C) for PeriodicDirectedSpdp in ")
-                              ACE_TEXT("[rtps_discovery/%C] section.\n"),
-                              value.c_str(), rtps_name.c_str()), -1);
-          }
-          config->periodic_directed_spdp(bool(smInt));
-        } else if (name == "TypeLookupServiceReplyTimeout") {
-          const OPENDDS_STRING& value = it->second;
-          int timeout = 0;
-          if (!DCPS::convertToInteger(value, timeout)) {
-            ACE_ERROR_RETURN((LM_ERROR,
-              ACE_TEXT("(%P|%t) RtpsDiscovery::Config::discovery_config(): ")
-              ACE_TEXT("Invalid entry (%C) for TypeLookupServiceReplyTimeout in ")
-              ACE_TEXT("[rtps_discovery/%C] section.\n"),
-              value.c_str(), rtps_name.c_str()), -1);
-          }
-          config->max_type_lookup_service_reply_period(TimeDuration::from_msec(timeout));
-        } else if (name == "UseXTypes") {
-          const OPENDDS_STRING& value = it->second;
-          int smInt = 0;
-          bool valid = value.size() == 1 && DCPS::convertToInteger(value, smInt) &&
-            smInt >= 0 && smInt <= 2;
-          if (valid) {
-            config->use_xtypes(static_cast<RtpsDiscoveryConfig::UseXTypes>(smInt));
-          } else {
-            valid = config->use_xtypes(value.c_str());
-          }
-          if (!valid) {
-            ACE_ERROR((LM_ERROR,
-                       "(%P|%t) RtpsDiscovery::Config::discovery_config: "
-                       "Invalid entry (%C) for UseXTypes in "
-                       "[rtps_discovery/%C] section.\n",
-                       value.c_str(), rtps_name.c_str()));
-            return -1;
-          }
-        } else if (name == "SedpResponsiveMode") {
-          const OPENDDS_STRING& value = it->second;
-          int smInt = 0;
-          if (!DCPS::convertToInteger(value, smInt)) {
-            ACE_ERROR_RETURN((LM_ERROR,
-                              ACE_TEXT("(%P|%t) RtpsDiscovery::Config::discovery_config ")
-                              ACE_TEXT("Invalid entry (%C) for SedpResponsiveMode in ")
-                              ACE_TEXT("[rtps_discovery/%C] section.\n"),
-                              value.c_str(), rtps_name.c_str()), -1);
-          }
-          config->sedp_responsive_mode(bool(smInt));
-        } else if (name == "SedpReceivePreallocatedMessageBlocks") {
-          const String& string_value = it->second;
-          size_t value;
-          if (DCPS::convertToInteger(string_value, value)) {
-            config->sedp_receive_preallocated_message_blocks(value);
-          } else {
-            ACE_ERROR_RETURN((LM_ERROR,
-                              "(%P|%t) RtpsDiscovery::Config::discovery_config(): "
-                              "Invalid entry (%C) for SedpReceivePreallocatedMessageBlocks in "
-                              "[rtps_discovery/%C] section.\n",
-                              string_value.c_str(), rtps_name.c_str()), -1);
-          }
-        } else if (name == "SedpReceivePreallocatedDataBlocks") {
-          const String& string_value = it->second;
-          size_t value = 0;
-          if (DCPS::convertToInteger(string_value, value)) {
-            config->sedp_receive_preallocated_data_blocks(value);
-          } else {
-            ACE_ERROR_RETURN((LM_ERROR,
-                              "(%P|%t) RtpsDiscovery::Config::discovery_config(): "
-                              "Invalid entry (%C) for SedpReceivePreallocatedDataBlocks in "
-                              "[rtps_discovery/%C] section.\n",
-                              string_value.c_str(), rtps_name.c_str()), -1);
-          }
-        } else if (name == "CheckSourceIp") {
-          const OPENDDS_STRING& value = it->second;
-          int smInt = 0;
-          if (!DCPS::convertToInteger(value, smInt)) {
-            ACE_ERROR_RETURN((LM_ERROR,
-                              ACE_TEXT("(%P|%t) RtpsDiscovery::Config::discovery_config ")
-                              ACE_TEXT("Invalid entry (%C) for CheckSourceIp in ")
-                              ACE_TEXT("[rtps_discovery/%C] section.\n"),
-                              value.c_str(), rtps_name.c_str()), -1);
-          }
-          config->check_source_ip(bool(smInt));
-        } else {
-          ACE_ERROR_RETURN((LM_ERROR,
-            ACE_TEXT("(%P|%t) RtpsDiscovery::Config::discovery_config(): ")
-            ACE_TEXT("Unexpected entry (%C) in [rtps_discovery/%C] section.\n"),
-            name.c_str(), rtps_name.c_str()), -1);
-        }
-      }
 
-      TheServiceParticipant->add_discovery(discovery);
-    }
+    TheServiceParticipant->add_discovery(discovery);
   }
 
   // If the default RTPS discovery object has not been configured,
   // instantiate it now.
-  const DCPS::Service_Participant::RepoKeyDiscoveryMap& discoveryMap = TheServiceParticipant->discoveryMap();
-  if (discoveryMap.find(Discovery::DEFAULT_RTPS) == discoveryMap.end()) {
-    TheServiceParticipant->add_discovery(OpenDDS::DCPS::make_rch<RtpsDiscovery>(Discovery::DEFAULT_RTPS));
-  }
+  TheServiceParticipant->add_discovery(OpenDDS::DCPS::make_rch<RtpsDiscovery>(Discovery::DEFAULT_RTPS));
 
   return 0;
 }
@@ -913,57 +236,24 @@ void
 RtpsDiscovery::rtps_relay_only_now(bool after)
 {
   RtpsDiscoveryConfig_rch config = get_config();
-  const bool before = config->rtps_relay_only();
   config->rtps_relay_only(after);
-
-  if (before != after) {
-    ACE_GUARD(ACE_Thread_Mutex, g, participants_lock_);
-    for (DomainParticipantMap::const_iterator dom_pos = participants_.begin(), dom_limit = participants_.end();
-         dom_pos != dom_limit; ++dom_pos) {
-      for (ParticipantMap::const_iterator part_pos = dom_pos->second.begin(), part_limit = dom_pos->second.end(); part_pos != part_limit; ++part_pos) {
-        part_pos->second->rtps_relay_only_now(after);
-      }
-    }
-  }
 }
 
 void
 RtpsDiscovery::use_rtps_relay_now(bool after)
 {
   RtpsDiscoveryConfig_rch config = get_config();
-  const bool before = config->use_rtps_relay();
   config->use_rtps_relay(after);
-
-  if (before != after) {
-    ACE_GUARD(ACE_Thread_Mutex, g, participants_lock_);
-    for (DomainParticipantMap::const_iterator dom_pos = participants_.begin(), dom_limit = participants_.end();
-         dom_pos != dom_limit; ++dom_pos) {
-      for (ParticipantMap::const_iterator part_pos = dom_pos->second.begin(), part_limit = dom_pos->second.end(); part_pos != part_limit; ++part_pos) {
-        part_pos->second->use_rtps_relay_now(after);
-      }
-    }
-  }
 }
 
+#ifdef OPENDDS_SECURITY
 void
 RtpsDiscovery::use_ice_now(bool after)
 {
   RtpsDiscoveryConfig_rch config = get_config();
-  const bool before = config->use_ice();
   config->use_ice(after);
-
-  if (before != after) {
-    ACE_GUARD(ACE_Thread_Mutex, g, participants_lock_);
-    for (DomainParticipantMap::const_iterator dom_pos = participants_.begin(), dom_limit = participants_.end();
-         dom_pos != dom_limit; ++dom_pos) {
-      for (ParticipantMap::const_iterator part_pos = dom_pos->second.begin(), part_limit = dom_pos->second.end(); part_pos != part_limit; ++part_pos) {
-        part_pos->second->use_ice_now(after);
-      }
-    }
-  }
 }
 
-#ifdef OPENDDS_SECURITY
 DDS::Security::ParticipantCryptoHandle
 RtpsDiscovery::get_crypto_handle(DDS::DomainId_t domain,
                                  const DCPS::GUID_t& local_participant,
@@ -1040,62 +330,31 @@ RtpsDiscovery::get_ipv6_sedp_port(DDS::DomainId_t domain,
 #endif
 
 void
-RtpsDiscovery::spdp_rtps_relay_address(const ACE_INET_Addr& address)
+RtpsDiscovery::spdp_rtps_relay_address(const DCPS::NetworkAddress& address)
 {
   RtpsDiscoveryConfig_rch config = get_config();
-  const ACE_INET_Addr prev = config->spdp_rtps_relay_address();
-  if (prev == address) {
-    return;
-  }
-
   config->spdp_rtps_relay_address(address);
-
-  if (address == ACE_INET_Addr()) {
-    return;
-  }
-
-  ACE_GUARD(ACE_Thread_Mutex, g, participants_lock_);
-  for (DomainParticipantMap::const_iterator dom_pos = participants_.begin(), dom_limit = participants_.end();
-       dom_pos != dom_limit; ++dom_pos) {
-    for (ParticipantMap::const_iterator part_pos = dom_pos->second.begin(), part_limit = dom_pos->second.end(); part_pos != part_limit; ++part_pos) {
-      part_pos->second->spdp_rtps_relay_address_change();
-    }
-  }
 }
 
 void
-RtpsDiscovery::sedp_rtps_relay_address(const ACE_INET_Addr& address)
+RtpsDiscovery::sedp_rtps_relay_address(const DCPS::NetworkAddress& address)
 {
   RtpsDiscoveryConfig_rch config = get_config();
-  config->sedp_rtps_relay_address(DCPS::NetworkAddress(address));
-
-  ACE_GUARD(ACE_Thread_Mutex, g, participants_lock_);
-  for (DomainParticipantMap::const_iterator dom_pos = participants_.begin(), dom_limit = participants_.end();
-       dom_pos != dom_limit; ++dom_pos) {
-    for (ParticipantMap::const_iterator part_pos = dom_pos->second.begin(), part_limit = dom_pos->second.end(); part_pos != part_limit; ++part_pos) {
-      part_pos->second->sedp_rtps_relay_address(DCPS::NetworkAddress(address));
-    }
-  }
+  config->sedp_rtps_relay_address(address);
 }
 
 void
-RtpsDiscovery::spdp_stun_server_address(const ACE_INET_Addr& address)
+RtpsDiscovery::spdp_stun_server_address(const DCPS::NetworkAddress& address)
 {
-  get_config()->spdp_stun_server_address(address);
+  RtpsDiscoveryConfig_rch config = get_config();
+  config->spdp_stun_server_address(address);
 }
 
 void
-RtpsDiscovery::sedp_stun_server_address(const ACE_INET_Addr& address)
+RtpsDiscovery::sedp_stun_server_address(const DCPS::NetworkAddress& address)
 {
-  get_config()->sedp_stun_server_address(DCPS::NetworkAddress(address));
-
-  ACE_GUARD(ACE_Thread_Mutex, g, participants_lock_);
-  for (DomainParticipantMap::const_iterator dom_pos = participants_.begin(), dom_limit = participants_.end();
-       dom_pos != dom_limit; ++dom_pos) {
-    for (ParticipantMap::const_iterator part_pos = dom_pos->second.begin(), part_limit = dom_pos->second.end(); part_pos != part_limit; ++part_pos) {
-      part_pos->second->sedp_stun_server_address(DCPS::NetworkAddress(address));
-    }
-  }
+  RtpsDiscoveryConfig_rch config = get_config();
+  config->sedp_stun_server_address(address);
 }
 
 void

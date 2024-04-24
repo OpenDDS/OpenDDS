@@ -8,13 +8,12 @@
 namespace RtpsRelay {
 
 ParticipantStatisticsReporter&
-GuidAddrSet::record_activity(const Proxy& proxy,
-                             const AddrPort& remote_address,
+GuidAddrSet::record_activity(const AddrPort& remote_address,
                              const OpenDDS::DCPS::MonotonicTimePoint& now,
                              const OpenDDS::DCPS::GUID_t& src_guid,
                              MessageType msg_type,
                              const size_t& msg_len,
-                             RelayHandler& handler)
+                             const RelayHandler& handler)
 {
   const auto expiration = now + config_.lifespan();
   const auto deactivation = now + config_.inactive_period();
@@ -38,7 +37,7 @@ GuidAddrSet::record_activity(const Proxy& proxy,
       const auto pos = guid_addr_set_map_.find(result.first->second);
       const auto prev_guid = result.first->second;
       if (pos != guid_addr_set_map_.end()) {
-        remove(proxy, prev_guid, pos, now, &relay_participant_status_reporter_);
+        remove(prev_guid, pos, now, &relay_participant_status_reporter_);
         result = remote_map_.insert(std::make_pair(remote, src_guid));
         if (!result.second) {
           result.first->second = src_guid;
@@ -68,7 +67,7 @@ GuidAddrSet::record_activity(const Proxy& proxy,
     deactivation_guid_queue_.push_back(std::make_pair(deactivation, src_guid));
   }
   addr_set_stats.deactivation = deactivation;
-  relay_participant_status_reporter_.set_alive_active(proxy, src_guid, true, true);
+  relay_participant_status_reporter_.set_alive_active(src_guid, true, true);
 
   if (addr_set_stats.upsert_address(remote_address, now, expiration, config_.max_ips_per_client())) {
     if (config_.log_activity()) {
@@ -97,8 +96,7 @@ GuidAddrSet::record_activity(const Proxy& proxy,
   return stats_reporter;
 }
 
-void GuidAddrSet::process_expirations(const Proxy& proxy,
-                                      const OpenDDS::DCPS::MonotonicTimePoint& now)
+void GuidAddrSet::process_expirations(const OpenDDS::DCPS::MonotonicTimePoint& now)
 {
   bool update_reject_stat = false;
   auto it = rejected_address_expiration_queue_.begin();
@@ -132,7 +130,7 @@ void GuidAddrSet::process_expirations(const Proxy& proxy,
     AddrSetStats& addr_stats = pos->second;
 
     if (addr_stats.deactivation <= now) {
-      relay_participant_status_reporter_.set_active(proxy, guid, false);
+      relay_participant_status_reporter_.set_active(guid, false);
       addr_stats.deactivation = OpenDDS::DCPS::MonotonicTimePoint::zero_value;
     } else {
       deactivation_guid_queue_.push_back(std::make_pair(addr_stats.deactivation, guid));
@@ -186,7 +184,7 @@ void GuidAddrSet::process_expirations(const Proxy& proxy,
     relay_stats_reporter_.expired_address(now);
 
     if (addr_stats.ip_to_ports.empty()) {
-      remove(proxy, ga.guid, pos, now, &relay_participant_status_reporter_);
+      remove(ga.guid, pos, now, &relay_participant_status_reporter_);
     }
   }
 }
@@ -257,8 +255,7 @@ bool GuidAddrSet::ignore_rtps(bool from_application_participant,
   return false;
 }
 
-void GuidAddrSet::remove(const Proxy& proxy,
-                         const OpenDDS::DCPS::GUID_t& guid,
+void GuidAddrSet::remove(const OpenDDS::DCPS::GUID_t& guid,
                          GuidAddrSetMap::iterator it,
                          const OpenDDS::DCPS::MonotonicTimePoint& now,
                          RelayParticipantStatusReporter* reporter)
@@ -296,7 +293,7 @@ void GuidAddrSet::remove(const Proxy& proxy,
   }
 
   if (reporter) {
-    reporter->set_alive(proxy, guid, false);
+    reporter->set_alive(guid, false);
   }
 }
 

@@ -29,14 +29,11 @@
 #ifdef ACE_AS_STATIC_LIBS
 #  include <dds/DCPS/RTPS/RtpsDiscovery.h>
 #  include <dds/DCPS/transport/rtps_udp/RtpsUdp.h>
-#  ifdef OPENDDS_SECURITY
-#    include <dds/DCPS/security/BuiltInPlugins.h>
-#  endif
+#  include <dds/DCPS/security/BuiltInPlugins.h>
 #endif
-#ifdef OPENDDS_SECURITY
-#  include <dds/DCPS/security/framework/Properties.h>
-#  include <dds/DCPS/security/framework/SecurityRegistry.h>
-#endif
+
+#include <dds/DCPS/security/framework/Properties.h>
+#include <dds/DCPS/security/framework/SecurityRegistry.h>
 
 #include <ace/Arg_Shifter.h>
 #include <ace/Argv_Type_Converter.h>
@@ -82,7 +79,7 @@ namespace {
   const unsigned short DEFAULT_META = 8080;
 }
 
-int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
+int run(int argc, ACE_TCHAR* argv[])
 {
   DDS::DomainParticipantFactory_var factory = TheParticipantFactoryWithArgs(argc, argv);
   if (!factory) {
@@ -98,7 +95,6 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   std::string user_data;
   Config config;
 
-#ifdef OPENDDS_SECURITY
   std::string identity_ca_file;
   std::string permissions_ca_file;
   std::string identity_certificate_file;
@@ -107,7 +103,6 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   std::string permissions_file;
   bool secure = false;
   const std::string file = "file:";
-#endif
 
   int argc_copy = argc;
   ACE_Argv_Type_Converter atc(argc_copy, argv);
@@ -217,7 +212,6 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     } else if ((arg = args.get_the_parameter("-RejectedAddressDuration"))) {
       config.rejected_address_duration(OpenDDS::DCPS::TimeDuration(ACE_OS::atoi(arg)));
       args.consume_arg();
-#ifdef OPENDDS_SECURITY
     } else if ((arg = args.get_the_parameter("-IdentityCA"))) {
       identity_ca_file = file + arg;
       secure = true;
@@ -242,7 +236,6 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
       permissions_file = file + arg;
       secure = true;
       args.consume_arg();
-#endif
     } else if ((arg = args.get_the_parameter("-Id"))) {
       config.relay_id(arg);
       args.consume_arg();
@@ -286,7 +279,6 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     return EXIT_FAILURE;
   }
 
-#ifdef OPENDDS_SECURITY
   if (secure) {
     if (identity_ca_file.empty()) {
       ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: -IdentityCA is empty\n")));
@@ -313,14 +305,10 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
       return EXIT_FAILURE;
     }
   }
-#endif
-
-#ifdef OPENDDS_SECURITY
   if (secure && !TheServiceParticipant->get_security()) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Security documents provided but security is not enabled\n")));
     return EXIT_FAILURE;
   }
-#endif
 
   const DDS::Duration_t one_minute = { 60, 0 };
 
@@ -330,8 +318,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   // Set up the relay participant.
   DDS::DomainParticipantQos participant_qos;
   factory->get_default_participant_qos(participant_qos);
-  DDS::PropertySeq& relay_properties = participant_qos.property.value;
-  append(relay_properties, OpenDDS::RTPS::RTPS_REFLECT_HEARTBEAT_COUNT, "true");
+  append(participant_qos.property.value, OpenDDS::RTPS::RTPS_REFLECT_HEARTBEAT_COUNT, "true");
 
   DDS::DomainParticipant_var relay_participant = factory->create_participant(relay_domain, participant_qos, nullptr,
                                                                              OpenDDS::DCPS::DEFAULT_STATUS_MASK);
@@ -582,8 +569,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 
   ParticipantStatisticsReporter::config = &config;
   ParticipantStatisticsReporter::writer = participant_statistics_writer;
-  DDS::Topic_var t = participant_statistics_writer->get_topic();
-  ParticipantStatisticsReporter::topic_name = t->get_name();
+  DDS::Topic_var participant_stats_topic = participant_statistics_writer->get_topic();
+  ParticipantStatisticsReporter::topic_name = participant_stats_topic->get_name();
 
   // Configure ports and addresses.
   auto port_horizontal = nic_horizontal.get_port_number();
@@ -613,7 +600,6 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   append(application_properties, OpenDDS::RTPS::RTPS_REFLECT_HEARTBEAT_COUNT, "true");
   append(application_properties, OpenDDS::RTPS::RTPS_RELAY_APPLICATION_PARTICIPANT, "true");
 
-#ifdef OPENDDS_SECURITY
   if (secure) {
     append(application_properties, DDS::Security::Properties::AuthIdentityCA, identity_ca_file);
     append(application_properties, DDS::Security::Properties::AccessPermissionsCA, permissions_ca_file);
@@ -622,7 +608,6 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     append(application_properties, DDS::Security::Properties::AccessGovernance, governance_file);
     append(application_properties, DDS::Security::Properties::AccessPermissions, permissions_file);
   }
-#endif
 
   DDS::DomainParticipant_var application_participant = factory->create_participant(config.application_domain(), participant_qos, nullptr,
                                                                                    OpenDDS::DCPS::DEFAULT_STATUS_MASK);
@@ -661,13 +646,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 #endif
   }
 
-#ifdef OPENDDS_SECURITY
   OpenDDS::Security::SecurityConfig_rch conf = TheSecurityRegistry->default_config();
   DDS::Security::CryptoTransform_var crypto = conf->get_crypto_transform();
-#else
-  const int crypto = 0;
-#endif
-
 
   DDS::DataWriterListener_var relay_partitions_writer_listener =
     new StatisticsWriterListener(relay_statistics_reporter, &RelayStatisticsReporter::relay_partitions_sub_count);
@@ -737,7 +717,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   GuidAddrSet guid_addr_set(config, rtps_discovery, relay_participant_status_reporter, relay_statistics_reporter, *relay_thread_monitor);
   ACE_Reactor reactor_(new ACE_Select_Reactor, true);
   const auto reactor = &reactor_;
-  GuidPartitionTable guid_partition_table(config, guid_addr_set, spdp_horizontal_addr, relay_partitions_writer, spdp_replay_writer);
+  GuidPartitionTable guid_partition_table(config, spdp_horizontal_addr, relay_partitions_writer, spdp_replay_writer);
   RelayPartitionTable relay_partition_table;
   relay_statistics_reporter.report();
 
@@ -956,8 +936,6 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 
   RelayStatusReporter relay_status_reporter(config, guid_addr_set, relay_status_writer, reactor);
 
-  OpenDDS::DCPS::ThreadStatusManager& thread_status_manager = TheServiceParticipant->get_thread_status_manager();
-
   RelayHttpMetaDiscovery relay_http_meta_discovery(config, meta_discovery_content_type, meta_discovery_content, guid_addr_set);
   if (relay_http_meta_discovery.open(meta_discovery_addr, reactor) != 0) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: could not open RelayHttpMetaDiscovery\n")));
@@ -968,13 +946,14 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   const bool has_run_time = !config.run_time().is_zero();
   const OpenDDS::DCPS::MonotonicTimePoint end_time = OpenDDS::DCPS::MonotonicTimePoint::now() + config.run_time();
 
+  OpenDDS::DCPS::ThreadStatusManager& thread_status_manager = TheServiceParticipant->get_thread_status_manager();
   if (thread_status_manager.update_thread_status()) {
     if (relay_thread_monitor->start() == -1) {
-      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P:%t) ERROR: failed to activate Thread Load Monitor\n")));
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P:%t) ERROR: failed to start Relay Thread Monitor\n")));
       return EXIT_FAILURE;
     }
 
-    OpenDDS::DCPS::ThreadStatusManager::Start s(thread_status_manager, "RtpsRelay Main");
+    OpenDDS::DCPS::ThreadStatusManager::Start thread_status_monitoring_active(thread_status_manager, "RtpsRelay Main");
 
     while (!has_run_time || OpenDDS::DCPS::MonotonicTimePoint::now() < end_time) {
       ACE_Time_Value t = thread_status_manager.thread_status_interval().value();
@@ -1010,4 +989,18 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   data_vertical_handler.stop();
 
   return EXIT_SUCCESS;
+}
+
+int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
+{
+  try {
+    return run(argc, argv);
+  } catch (const CORBA::Exception& e) { // IDL-to-C++ classic sequences
+    e._tao_print_exception("RtpsRelay.cpp run():", stderr);
+  } catch (const std::exception& e) {
+    ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: exception thrown from run(): %C\n", e.what()));
+  } catch (...) {
+    ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: unknown exception thrown from run()\n"));
+  }
+  return EXIT_FAILURE;
 }

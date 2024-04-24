@@ -47,26 +47,27 @@ Observer::Sample::Sample(DDS::InstanceHandle_t a_instance,
 
 Observer::~Observer() {}
 
-void
+bool
 vwrite(ValueWriter& vw, const Observer::Sample& sample)
 {
-  vw.begin_struct();
-  vw.begin_struct_member(XTypes::MemberDescriptorImpl("instance", false));
-  vw.write_int32(sample.instance);
-  vw.end_struct_member();
-  vw.begin_struct_member(XTypes::MemberDescriptorImpl("instance_state", false));
-  vw.write_uint32(sample.instance_state);
-  vw.end_struct_member();
-  vw.begin_struct_member(XTypes::MemberDescriptorImpl("timestamp", false));
-  vwrite(vw, sample.timestamp);
-  vw.end_struct_member();
-  vw.begin_struct_member(XTypes::MemberDescriptorImpl("sequence_number", false));
-  vw.write_int64(sample.sequence_number.getValue());
-  vw.end_struct_member();
-  vw.begin_struct_member(XTypes::MemberDescriptorImpl("data", false));
-  sample.data_dispatcher.write(vw, sample.data);
-  vw.end_struct_member();
-  vw.end_struct();
+  if (!vw.begin_struct(FINAL)) { return false; }
+  if (!vw.begin_struct_member(MemberParam("instance"))) { return false; }
+  if (!vw.write_int32(sample.instance)) { return false; }
+  if (!vw.end_struct_member()) { return false; }
+  if (!vw.begin_struct_member(MemberParam("instance_state"))) { return false; }
+  if (!vw.write_uint32(sample.instance_state)) { return false; }
+  if (!vw.end_struct_member()) { return false; }
+  if (!vw.begin_struct_member(MemberParam("timestamp"))) { return false; }
+  if (!vwrite(vw, sample.timestamp)) { return false; }
+  if (!vw.end_struct_member()) { return false; }
+  if (!vw.begin_struct_member(MemberParam("sequence_number"))) { return false; }
+  if (!vw.write_int64(sample.sequence_number.getValue())) { return false; }
+  if (!vw.end_struct_member()) { return false; }
+  if (!vw.begin_struct_member(MemberParam("data"))) { return false; }
+  if (!sample.data_dispatcher.write(vw, sample.data)) { return false; }
+  if (!vw.end_struct_member()) { return false; }
+  if (!vw.end_struct()) { return false; }
+  return true;
 }
 
 } // namespace DCPS

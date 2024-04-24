@@ -273,7 +273,7 @@ Appendable Extensibility
     Sect<16.3.4>
 
 Mutable extensibility requires a certain amount of overhead both in terms of processing and network traffic.
-A more efficient but less flexible form of extensibility is appendable
+A more efficient but less flexible form of extensibility is appendable.
 Appendable is limited in that members can only be added to or removed from the end of the type.
 With appendable, the initial version of the weather station IDL would be:
 
@@ -388,11 +388,11 @@ Data Representation
     Sect<16.4>
 
 Data representation is the way a data sample can be encoded for transmission.
-Writers can only encode samples using one data representation, but readers can accept multiple data representations.
-Data representation can be XML, XCDR1, XCDR2, or unaligned CDR.
+
+The possible data representations are:
 
 XML
-    This isn't currently supported and will be ignored.
+    This isn't currently supported.
 
     The ``DataRepresentationId_t`` value is ``DDS::XML_DATA_REPRESENTATION``
 
@@ -422,17 +422,18 @@ Unaligned CDR
 
     The annotation is :ref:`xtypes--opendds-data-representation-unaligned-cdr`.
 
-Data representation is a QoS policy alongside the other QoS options.
-Its listed values represent allowed serialized forms of the data sample.
-The DataWriter and DataReader need to have at least one matching data representation for communication between them to be possible.
+Use :ref:`qos-data-representation` to define what representations writers and readers should use.
+Writers can only encode samples using only one data representation, but readers can accept multiple data representations.
+:ref:`@OpenDDS::data_representation <xtypes--specifying-allowed-data-representations>` can be used to restrict what data representation can be used for a topic type in IDL.
 
-The default value of the ``DataRepresentationQosPolicy`` is an empty sequence.
-For RTPS-UDP this is interpreted as XCDR2 for DataWriters and accepting XCDR1 and XCDR2 for DataReaders.
-For other transports it's interpreted as Unaligned CDR for DataWriters and accepting XCDR1, XCDR2, and Unaligned CDR for DataReaders.
-A writer or reader without an explicitly-set ``DataRepresentationQosPolicy`` will therefore be able to communicate with another reader or writer which is compatible with XCDR2.
-The example below shows a possible configuration for an XCDR1 DataWriter.
+.. warning::
 
-.. code-block:: cpp
+  Because writers default to XCDR2 instead of XCDR1, they aren't likely to be compatible with readers from OpenDDS versions before 3.16 and other DDS implementations by default.
+  Either the remote readers will have to set to use XCDR2 if they support it or OpenDDS writers will have to be set to use XCDR1.
+
+  The example below shows a possible configuration for an XCDR1 DataWriter.
+
+  .. code-block:: cpp
 
     DDS::DataWriterQos qos;
     pub->get_default_datawriter_qos(qos);
@@ -440,15 +441,7 @@ The example below shows a possible configuration for an XCDR1 DataWriter.
     qos.representation.value[0] = DDS::XCDR_DATA_REPRESENTATION;
     DDS::DataWriter_var dw = pub->create_datawriter(topic, qos, 0, 0);
 
-Note that the IDL constant used for XCDR1 is ``XCDR_DATA_REPRESENTATION`` (without the digit).
-
-In addition to a DataWriter/DataReader QoS setting for data representation, each type defined in IDL can have its own data representation specified via an annotation.
-This value restricts which data representations can be used for that type.
-A DataWriter/DataReader must have at least one data representation in common with the type it uses.
-
-The default value for an unspecified data representation annotation is to allow all forms of serialization.
-
-The type's set of allowed data representations can be specified by the user in IDL with the notation: ``@OpenDDS::data_representation(XCDR2)`` where XCDR2 is replaced with the specific data representation.
+  Note that the IDL constant used for XCDR1 is ``XCDR_DATA_REPRESENTATION`` (without the digit).
 
 .. _xtypes--type-consistency-enforcement:
 
@@ -459,28 +452,9 @@ Type Consistency Enforcement
 ..
     Sect<16.5>
 
-.. _xtypes--typeconsistencyenforcementqospolicy:
-
-TypeConsistencyEnforcementQosPolicy
-===================================
-
-The Type Consistency Enforcement QoS policy lets the application fine-tune details of how types may differ between writers and readers.
-The policy only applies to data readers.
-This means that each reader can set its own policy for how its type may vary from the types of the writers that it may match.
-
-There are six members of the ``TypeConsistencyEnforcementQosPolicy`` struct defined by XTypes, but OpenDDS only supports setting one of them: ``ignore_member_names``.
-All other members should be kept at their default values.
-
-``ignore_member_names`` defaults to ``FALSE`` so member names (along with member IDs, see :ref:`xtypes--member-id-assignment`) are significant for type compatibility.
-Changing this to ``TRUE`` means that only member IDs are used for type compatibility.
-
-.. _xtypes--type-compatibility:
-
-Type Compatibility
-==================
-
 When a reader/writer match is happening, type consistency enforcement checks that the two types are compatible according to the type objects if they are available.
 This check will not happen if OpenDDS has been :ref:`configured not to generate or use type objects <xtypes--representing-types-with-typeobject-and-dynamictype>` or if the remote DDS doesn't support type objects.
+Some parts of the compatibility check can be controlled on the reader side using :ref:`qos-type-consistency-enforcement`.
 The full type object compatibility check is too detailed to reproduce here.
 It can be found in :omgspec:`xtypes:7.2.4`.
 In general though two topic types and their nested types are compatible if:
@@ -820,6 +794,33 @@ The ``@key`` annotation marks a member used to determine the Instances of a topi
 See :ref:`getting_started--keys` for more details on the general concept of a Key.
 For XTypes specifically, two types can only be compatible if each contains the members that are keys within the other.
 
+Customizing the values of enumerators
+=====================================
+
+
+.. _xtypes--value:
+
+@value(v)
+---------
+
+..
+    Sect<16.6.7.1>
+
+Applies to: enumerators (only when :ref:`opendds_idl--using-the-idl-to-c-11-mapping`)
+
+Without annotations, the enumerators of each enum type take on consecutive integer values starting at 0.
+The ``@value(v)`` annotation customizes the integer value of an individual enumerator. The parameter ``v`` is an integer constant (signed, 4 bytes wide).
+Any enumerators that are not annotated take on the integer value one higher than the value of the previously-declared enumerator, with the first declared taking value 0.
+
+.. code-block:: omg-idl
+
+  enum MyAnnotionEnabledEnum {
+    ZERO,
+    @value(3) THREE,
+    FOUR,
+    @value(2) TWO
+  };
+
 .. _xtypes--dynamic-language-binding-1:
 
 ************************
@@ -893,7 +894,7 @@ To do the same for CMake:
     )
 
 Once set up to be generated, OpenDDS has to be configured to send and receive the ``CompleteTypeObject``\s.
-This can be done by setting the :ref:`UseXTypes <run_time_configuration--usextypes>` RTPS discovery configuration option (:ref:`run_time_configuration--configuring-for-ddsi-rtps-discovery`) or programmatically using the ``OpenDDS::RTPS::RtpsDiscovery::use_xtypes()`` setter methods.
+This can be done by setting :cfg:prop:`[rtps_discovery]UseXTypes` or programmatically using the ``OpenDDS::RTPS::RtpsDiscovery::use_xtypes()`` setter methods.
 
 .. _xtypes--interpreting-data-samples-with-dynamicdata:
 
@@ -923,6 +924,7 @@ Consider the following example:
       @id(4) NestedStruct nested_field;
       @id(5) sequence<unsigned long> ul_seq_field;
       @id(6) double d_field[10];
+      @id(7) long mdim_field[2][3];
     };
 
 The samples for MyStruct are written by a normal, statically-typed DataWriter.
@@ -977,6 +979,7 @@ Suppose id is 1, meaning that the member at index 0 is ``l_field``, we now can g
 
 After the call, ``int32_value`` contains the value of the member ``l_field`` from the sample.
 The method returns ``DDS::RETCODE_OK`` if successful.
+In case the type has an optional member and it is not present in the DynamicData instance, ``DDS::RETCODE_NO_DATA`` is returned.
 
 Similarly, suppose we have already found out the types and ids of the members ``us_field`` and ``f_field``, their values can be read as follows.
 
@@ -986,6 +989,39 @@ Similarly, suppose we have already found out the types and ids of the members ``
     ret = data.get_uint16_value(uint16_value, 2); // Get the value of us_field
     DDS::Float32 float32_value;
     ret = data.get_float32_value(float32_value, 3); // Get the value of f_field
+
+Reading members from union is a little different as there is at most one active branch at any time.
+In general, DynamicData in OpenDDS follows the IDL-to-C++ mappings for union.
+Consider the following union as an example.
+
+.. code-block:: omg-idl
+
+    @mutable
+    union MyUnion switch (short) {
+    case 1:
+    case 2:
+      @id(1) short s_field;
+    case 3:
+      @id(2) long l_field;
+    case 4:
+      @id(3) string str_field;
+    };
+
+The discriminator can be read using the appropriate method for the discriminator type and id ``XTypes::DISCRIMINATOR_ID`` (see :ghfile:`dds/DCPS/XTypes/TypeObject.h`).
+
+.. code-block:: cpp
+
+    DDS::Int32 disc_value;
+    ret = data.get_int16_value(disc_val, XTypes::DISCRIMINATOR_ID);
+
+Using the value of the discriminator, user can decide which branch is activated and read its value in a similar way as reading a struct member.
+Reading a branch that is not activated returns ``DDS::RETCODE_PRECONDITION_NOT_MET``.
+
+At any time, a DynamicData instance of a union represents a valid state of that union.
+A special case is an empty DynamicData instance.
+In this case, the discriminator takes the default value of the discriminator type (the XTypes specification specifies the default value for each type).
+If that discriminator value selects a branch, the selected branch also takes the default value corresponding to its type.
+If it doesn't select a branch, the union contains only the discriminator.
 
 .. _xtypes--reading-collections-of-basic-types:
 
@@ -1013,14 +1049,14 @@ To get the values of the array member ``d_field``, we first need to create a sep
 
 .. code-block:: cpp
 
-    XTypes::DynamicData array_data;
+    DDS::DynamicData_var array_data;
     DDS::ReturnCode_t ret = data.get_complex_value(array_data, id); // id is 6
 
-    const DDS::UInt32 num_items = array_data.get_item_count();
+    const DDS::UInt32 num_items = array_data->get_item_count();
     for (DDS::UInt32 i = 0; i < num_items; ++i) {
-      const XTypes::MemberId my_id = array_data.get_member_id_at_index(i);
+      const XTypes::MemberId my_id = array_data->get_member_id_at_index(i);
       DDS::Float64 my_double;
-      ret = array_data.get_float64_value(my_double, my_id);
+      ret = array_data->get_float64_value(my_double, my_id);
     }
 
 In the example code above, ``get_item_count`` returns the number of elements of the array.
@@ -1030,6 +1066,35 @@ Note that the second parameter of the interfaces provided by DynamicData must be
 In case of collection, elements are considered members of the collection.
 However, the collection element doesn't have a member id.
 And thus, we need to convert its index into an id before calling a get_*_value (or get_*_values) method.
+
+Accessing a multi-dimensional array is a little different as ``get_member_id_at_index`` accepts a single index as its sole argument.
+OpenDDS provides function ``flat_index`` to convert an index to a multi-dimensional array to a flat index that can then be passed to ``get_member_id_at_index``.
+
+.. code-block:: cpp
+
+    DDS::DynamicData_var mdim_arr_data;
+    DDS::ReturnCode_t ret = data.get_complex_value(mdim_arr_data, id); // id is 7
+    DDS::DynamicType_var mdim_type = mdim_arr_data->type();
+    DDS::TypeDescriptor_var mdim_td;
+    ret = mdim_type->get_descriptor(mdim_td);
+    const DDS::BoundSeq& bound = mdim_td->bound();
+
+    DDS::UInt32Seq index_vec;
+    index_vec.length(2);
+    for (DDS::UInt32 i = 0; i < bound[0]; ++i) {
+        index_vec[0] = i;
+        for (DDS::UInt32 j = 0; j < bound[1]; ++j) {
+            index_vec[1] = j;
+            DDS::UInt32 flat_idx;
+            ret = OpenDDS::XTypes::flat_index(flat_idx, index_vec, bound);
+            const XTypes::MemberId id = mdim_arr_data->get_member_id_at_index(flat_idx);
+            DDS::Int32 my_long;
+            ret = mdim_arr_data->get_int32_value(my_long, id);
+        }
+    }
+
+``flat_index`` takes as input an index vector to the multi-dimensional array and the dimensions of the array and returns a flat index.
+The same function is used when serializing the dynamic data object to make sure the mapping from index to id is consistent and conforms to the XTypes spec regarding the order of the elements.
 
 .. _xtypes--reading-members-of-more-complex-types:
 
@@ -1046,7 +1111,7 @@ For example, a DynamicData object for the nested_field member of the MyStruct sa
 
 .. code-block:: cpp
 
-    XTypes::DynamicData nested_data;
+    DDS::DynamicData_var nested_data;
     DDS::ReturnCode_t ret = data.get_complex_value(nested_data, id); // id is 4
 
 Recall that nested_field has type NestedStruct which has one member s_field with id 1.
@@ -1055,7 +1120,7 @@ Now the value of s_field can be read from nested_data using get_int16_value, sin
 .. code-block:: cpp
 
     DDS::Int16 my_short;
-    ret = nested_data.get_int16_value(my_short, id); // id is 1
+    ret = nested_data->get_int16_value(my_short, id); // id is 1
 
 The get_complex_value method is also suitable for any other cases where the value of a member cannot be read directly using the get_*_value or get_*_values methods.
 As an example, suppose we have a struct MyStruct2 defined as follows.
@@ -1072,20 +1137,20 @@ To read the individual elements of seq_field, we first get a new DynamicData obj
 
 .. code-block:: cpp
 
-    XTypes::DynamicData seq_data;
+    DDS::DynamicData_var seq_data;
     DDS::ReturnCode_t ret = data.get_complex_value(seq_data, id); // id is 1
 
 Since the elements of seq_field are structures, for each of them we create another new DynamicData object to represent it, which can be used to read its member.
 
 .. code-block:: cpp
 
-    const DDS::UInt32 num_elems = seq_data.get_item_count();
+    const DDS::UInt32 num_elems = seq_data->get_item_count();
     for (DDS::UInt32 i = 0; i < num_elems; ++i) {
-      const XTypes::MemberId my_id = seq_data.get_member_id_at_index(i);
-      XTypes::DynamicData elem_data; // Represent each element.
-      ret = seq_data.get_complex_value(elem_data, my_id);
+      const XTypes::MemberId my_id = seq_data->get_member_id_at_index(i);
+      DDS::DynamicData_var elem_data; // Represent each element.
+      ret = seq_data->get_complex_value(elem_data, my_id);
       DDS::Int16 my_short;
-      ret = elem_data.get_int16_value(my_short, 1);
+      ret = elem_data->get_int16_value(my_short, 1);
     }
 
 .. _xtypes--populating-data-samples-with-dynamicdata:
@@ -1118,17 +1183,38 @@ They are analogous to the "get_*" operations that are described in :ref:`xtypes-
 When populating the DynamicData of complex data types, use get_complex_value() (:ref:`xtypes--reading-members-of-more-complex-types`) to navigate from DynamicData representing containing types to DynamicData representing contained types.
 
 Setting the value of a member of a DynamicData union using a ``set_*`` method implicitly 1) activates the branch corresponding to the member and 2) sets the discriminator to a value corresponding to the active branch.
-After a branch has been activated, the value of the discriminator can be changed using a ``set_*`` method.
-However, the new value of the discriminator must correspond to the active branch.
-To set the discriminator, use ``DISCRIMINATOR_ID`` as the member id for the call to ``set_*`` (see :ghfile:`dds/DCPS/XTypes/TypeObject.h`).
+For example, the ``l_field`` member of ``MyUnion`` above can be set as follows:
 
-Unions start in an "empty" state meaning that no branch is active.
-At the point of serialization, the middleware will treat an empty union according to the following procedure.
-The discriminator is assumed to have the default value for the discriminator type and all members are assumed to have the default value for their type.
-There are three possibilities.
-First, the discriminator selects a non-default branch in which case the serialized union will have the default discriminator value and the default value for the implicitly selected member;
-Second, the discriminator selects a default branch in which case the serialized union will have the default discriminator value and the default value for the default branch member.
-Third, the discriminator selects no branch (and a default branch is not defined) in which case the serialized union will have the default discriminator only.
+.. code-block:: cpp
+
+    DDS::Int32 l_field_value = 12;
+    data.set_int32_value(id, l_field_value); // id is 2
+
+The discriminator can also be set directly in the following two cases.
+First, the new discriminator value selects the same branch that is currently activated.
+Second, the new discriminator value selects no branch. In all other cases, ``DDS::RETCODE_PRECONDITION_NOT_MET`` is returned.
+As an example for the first case, suppose the union currently has the discriminator value of 1 and the member `s_field` is active.
+We can set the discriminator value to 2 as it selects the same member.
+
+.. code-block:: cpp
+
+    DDS::Int16 new_disc_value = 2;
+    data.set_int16_value(XTypes::DISCRIMINATOR_ID, new_disc_value);
+
+For the second case, setting the discriminator to any value that doesn't select a member will succeed. After that, the union contains only the discriminator.
+
+.. code-block:: cpp
+
+    DDS::Int16 new_disc_value = 5; // does not select any branch
+    data.set_int16_value(XTypes::DISCRIMINATOR_ID, new_disc_value);
+
+Unions start in an "empty" state as described in :ref:`xtypes--interpreting-data-samples-with-dynamicdata`.
+Consequently, at the point of serialization, empty and non-empty unions are not differentiated.
+
+Expandable collection types such as sequences or strings can be extended one element at a time.
+To extend a sequence (or string), we first get the id of the new element at index equal to the current length of the sequence using the ``get_member_id_at_index`` operation.
+The length of the sequence can be got using ``get_item_count``.
+After we obtain the id, we can write the new element using the ``set_*`` operation as usual.
 
 .. _xtypes--dynamicdatawriters-and-dynamicdatareaders:
 
@@ -1138,10 +1224,10 @@ DynamicDataWriters and DynamicDataReaders
 ..
     Sect<16.7.4>
 
-DynamicDataWriters and DataReaders are designed to work like any other DataWriter and DataReader except that their APIs are defined in terms of the DynamicData type instead of a type generated from IDL.
+DynamicDataWriters and DynamicDataReaders are designed to work like any other DataWriter and DataReader except that their APIs are defined in terms of the DynamicData type instead of a type generated from IDL.
 Each DataWriter and DataReader has an associated Topic and that Topic has a data type (represented by a TypeSupport object).
-Behavior related to keys, QoS policies, discovery and built-in topics, DDS Security, and transport is not any different for a DynamicDataWriter or DataReader.
-One exception is that in the current implementation, :ref:`content_subscription_profile` is not supported for DynamicDataWriters and DataReaders.
+Behavior related to keys, QoS policies, discovery and built-in topics, DDS Security, and transport is not any different for a DynamicDataWriter or DynamicDataReader.
+One exception is that in the current implementation, :ref:`content_subscription_profile` is not supported for DynamicDataWriters and DynamicDataReaders.
 
 .. _xtypes--obtaining-dynamictype-and-registering-typesupport:
 

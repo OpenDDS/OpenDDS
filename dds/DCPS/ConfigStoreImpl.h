@@ -24,8 +24,14 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-const char OPENDDS_CONFIG_DEBUG_LOGGING[] = "OPENDDS_CONFIG_DEBUG_LOGGING";
-const bool OPENDDS_CONFIG_DEBUG_LOGGING_default = false;
+const char CONFIG_DEBUG_LOGGING[] = "CONFIG_DEBUG_LOGGING";
+const bool CONFIG_DEBUG_LOGGING_default = false;
+
+OpenDDS_Dcps_Export
+OPENDDS_VECTOR(String) split(const String& str,
+                             const String& delims,
+                             bool skip_leading,
+                             bool skip_consecutive);
 
 /**
  * @class ConfigPair
@@ -90,9 +96,10 @@ struct EnumList {
 
 class OpenDDS_Dcps_Export ConfigStoreImpl : public ConfigStore {
 public:
-  enum IntegerTimeFormat {
+  enum TimeFormat {
     Format_IntegerSeconds,
-    Format_IntegerMilliseconds
+    Format_IntegerMilliseconds,
+    Format_FractionalSeconds
   };
 
   enum NetworkAddressFormat {
@@ -165,7 +172,6 @@ public:
         const EnumList<T> decoder[])
   {
     bool found = false;
-    // Encode the default.
     String value_as_string;
     for (size_t idx = 0; decoder[idx].name; ++idx) {
       if (decoder[idx].value == value) {
@@ -177,8 +183,8 @@ public:
 
     if (!found && log_level >= LogLevel::Warning) {
       ACE_ERROR((LM_WARNING,
-                 ACE_TEXT("(%P|%t) WARNING: ConfigStoreImpl::get: ")
-                 ACE_TEXT("failed to convert default value to string\n")));
+                 "(%P|%t) WARNING: ConfigStoreImpl::get: "
+                 "failed to convert default value to string\n"));
     }
 
     const String actual = get(key, value_as_string);
@@ -190,20 +196,72 @@ public:
 
     if (log_level >= LogLevel::Warning) {
       ACE_ERROR((LM_WARNING,
-                 ACE_TEXT("(%P|%t) WARNING: ConfigStoreImpl::get: ")
-                 ACE_TEXT("failed to encode (%C) to enumerated value, defaulting to (%C)\n"),
-                 actual.c_str(), value_as_string.c_str()));
+                 "(%P|%t) WARNING: ConfigStoreImpl::get: "
+                 "for %C, failed to encode (%C) to enumerated value, defaulting to (%C)\n",
+                 key, actual.c_str(), value_as_string.c_str()));
     }
 
     return value;
   }
 
+  template<typename T>
+  void set(const char* key,
+           T value,
+           const EnumList<T> decoder[])
+  {
+    bool found = false;
+    String value_as_string;
+    for (size_t idx = 0; decoder[idx].name; ++idx) {
+      if (decoder[idx].value == value) {
+        value_as_string = decoder[idx].name;
+        found = true;
+        break;
+      }
+    }
+
+    if (!found) {
+      if (log_level >= LogLevel::Warning) {
+        ACE_ERROR((LM_WARNING,
+                   "(%P|%t) WARNING: ConfigStoreImpl::set: "
+                   "for %C, failed to convert enum value to string\n",
+                   key));
+      }
+      return;
+    }
+
+    set(key, value_as_string);
+  }
+
+  template<typename T>
+  void set(const char* key,
+           const String& value,
+           const EnumList<T> decoder[])
+  {
+    bool found = false;
+    // Sanity check.
+    String value_as_string;
+    for (size_t idx = 0; decoder[idx].name; ++idx) {
+      if (value == decoder[idx].name) {
+        set(key, value);
+        found = true;
+        break;
+      }
+    }
+
+    if (!found && log_level >= LogLevel::Warning) {
+      ACE_ERROR((LM_WARNING,
+                 "(%P|%t) WARNING: ConfigStoreImpl::set: "
+                 "for %C, %C is not a valid enum value\n",
+                 key, value.c_str()));
+    }
+  }
+
   void set(const char* key,
            const TimeDuration& value,
-           IntegerTimeFormat format);
+           TimeFormat format);
   TimeDuration get(const char* key,
                    const TimeDuration& value,
-                   IntegerTimeFormat format) const;
+                   TimeFormat format) const;
 
   void set(const char* key,
            const NetworkAddress& value,
@@ -214,10 +272,25 @@ public:
                      NetworkAddressFormat format,
                      NetworkAddressKind kind) const;
 
+  void set(const char* key,
+           const NetworkAddressSet& value,
+           NetworkAddressFormat format,
+           NetworkAddressKind kind);
+  NetworkAddressSet get(const char* key,
+                        const NetworkAddressSet& value,
+                        NetworkAddressFormat format,
+                        NetworkAddressKind kind) const;
+
   // Section names are identified as values starting with '@' and
   // having the original text of the last part of the section name.
   // This is used to create objects of different types.
   StringList get_section_names(const String& prefix) const;
+
+  typedef OPENDDS_MAP(String, String) StringMap;
+  StringMap get_section_values(const String& prefix) const;
+
+  /// Remove the section key and all section values.
+  void unset_section(const String& prefix) const;
 
   static DDS::DataWriterQos datawriter_qos();
   static DDS::DataReaderQos datareader_qos();
@@ -242,7 +315,6 @@ process_section(ConfigStoreImpl& config_store,
                 const String& key_prefix,
                 ACE_Configuration_Heap& config,
                 const ACE_Configuration_Section_Key& base,
-                const String& filename,
                 bool allow_overwrite);
 
 } // namespace DCPS

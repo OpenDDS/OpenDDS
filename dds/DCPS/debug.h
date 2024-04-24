@@ -13,6 +13,7 @@
 #endif
 
 #include <ace/ace_wchar.h>
+#include <ace/Log_Priority.h>
 
 #ifndef ACE_LACKS_PRAGMA_ONCE
 #  pragma once
@@ -52,6 +53,9 @@ public:
     return level_;
   }
   const char* get_as_string() const;
+
+  static const char* to_string(Value val, bool uppercase = true);
+  static ACE_Log_Priority to_priority(Value val);
 
 private:
   Value level_;

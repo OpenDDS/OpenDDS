@@ -126,8 +126,8 @@ Avoid using implementation-defined extensions (including ``#pragma``). Exception
 Use the C++ standard library as much as possible.
 The standard library should be preferred over ACE, which in turn should be preferred over system-specific libraries.
 
-The C++ standard library includes the C standard library by reference, making those identifiers available in namespace std.
-Using C's standard library identifiers in namespace std is preferred over the global namespace -- ``#include <cstring>`` instead of ``#include <string.h>``.
+The C++ standard library includes the C standard library by reference, making those identifiers available in namespace ``std``.
+Using C's standard library identifiers in namespace ``std`` is preferred over the global namespace -- ``#include <cstring>`` instead of ``#include <string.h>``.
 Not all supported platforms have standard library support for wide characters (``wchar_t``) but this is rarely needed.
 Preprocessor macro ``DDS_HAS_WCHAR`` can be used to detect those platforms.
 
@@ -584,7 +584,7 @@ Perl Coding Style
 *****************
 
 `The Perl style guide <https://perldoc.perl.org/perlstyle>`_ should be generally followed, as long as it doesn't conflict with :ref:`dev_guidelines-text_file_formating`.
-Some additional nodes and exceptions:
+Some additional notes and exceptions:
 
 - New files should use 2 space indents, while existing 4 space indent files should stay that way for the most part.
 
@@ -595,7 +595,7 @@ Some additional nodes and exceptions:
     if (x) {
     }
     elsif (y) {
-    {
+    }
     else {
     }
 
@@ -629,7 +629,7 @@ CMake Coding Style
 ******************
 
 `The vcpkg CMake style guide <https://learn.microsoft.com/en-us/vcpkg/contributing/cmake-guidelines>`_ should be generally followed, as long as it doesn't conflict with :ref:`dev_guidelines-text_file_formating`.
-Some additional nodes and exceptions:
+Some additional notes and exceptions:
 
 - vcpkg-specific things can be ignored.
 - Whitespace:

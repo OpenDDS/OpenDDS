@@ -97,7 +97,15 @@ void
 TransportRegistry::remove_config(const OPENDDS_STRING& config_name)
 {
   GuardType guard(this->lock_);
-  config_map_.erase(config_name);
+
+  String real_name = config_name;
+
+  AliasMap::const_iterator pos = alias_map_.find(real_name);
+  if (pos != alias_map_.end()) {
+    real_name = pos->second;
+  }
+
+  config_map_.erase(real_name);
 }
 
 ACE_INLINE

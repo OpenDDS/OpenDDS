@@ -118,6 +118,8 @@ struct DiscoveredParticipant {
     location_data_.ice6_timestamp.nanosec = 0;
     location_data_.relay6_timestamp.sec = 0;
     location_data_.relay6_timestamp.nanosec = 0;
+    location_data_.lease_duration.sec = 0;
+    location_data_.lease_duration.nanosec = 0;
 
 #ifdef OPENDDS_SECURITY
     security_info_.participant_security_attributes = 0;
@@ -131,11 +133,11 @@ struct DiscoveredParticipant {
 
   struct LocationUpdate {
     DCPS::ParticipantLocation mask_;
-    ACE_INET_Addr from_;
+    DCPS::NetworkAddress from_;
     DCPS::SystemTimePoint timestamp_;
     LocationUpdate() {}
     LocationUpdate(DCPS::ParticipantLocation mask,
-                   const ACE_INET_Addr& from,
+                   const DCPS::NetworkAddress& from,
                    const DCPS::SystemTimePoint& timestamp)
       : mask_(mask), from_(from), timestamp_(timestamp) {}
   };
@@ -144,7 +146,7 @@ struct DiscoveredParticipant {
   DCPS::ParticipantLocationBuiltinTopicData location_data_;
   DDS::InstanceHandle_t location_ih_;
 
-  ACE_INET_Addr last_recv_address_;
+  DCPS::NetworkAddress last_recv_address_;
   DCPS::MonotonicTimePoint discovered_at_;
   DCPS::MonotonicTimePoint lease_expiration_;
   DDS::InstanceHandle_t bit_ih_;

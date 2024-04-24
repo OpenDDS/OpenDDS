@@ -157,16 +157,16 @@ public:
   NetworkAddress get_last_recv_address(const GUID_t& remote_id);
 
   void update_locators(const GUID_t& remote_id,
-                       AddrSet& unicast_addresses,
-                       AddrSet& multicast_addresses,
+                       NetworkAddressSet& unicast_addresses,
+                       NetworkAddressSet& multicast_addresses,
                        bool requires_inline_qos,
                        bool add_ref);
 
   /// Given a 'local' id and a 'remote' id of a publication or
   /// subscription, return the set of addresses of the remote peers.
-  AddrSet get_addresses(const GUID_t& local, const GUID_t& remote) const;
+  NetworkAddressSet get_addresses(const GUID_t& local, const GUID_t& remote) const;
   /// Given a 'local' id, return the set of address for all remote peers.
-  AddrSet get_addresses(const GUID_t& local) const;
+  NetworkAddressSet get_addresses(const GUID_t& local) const;
 
   void filterBestEffortReaders(const ReceivedDataSample& ds, RepoIdSet& selected, RepoIdSet& withheld);
 
@@ -182,8 +182,8 @@ public:
                   ACE_CDR::ULong participant_flags,
                   SequenceNumber max_sn,
                   const TransportClient_rch& client,
-                  AddrSet& unicast_addresses,
-                  AddrSet& multicast_addresses,
+                  NetworkAddressSet& unicast_addresses,
+                  NetworkAddressSet& multicast_addresses,
                   const NetworkAddress& last_addr_hint,
                   bool requires_inline_qos);
 
@@ -191,7 +191,7 @@ public:
 
   void register_for_reader(const GUID_t& writerid,
                            const GUID_t& readerid,
-                           const AddrSet& addresses,
+                           const NetworkAddressSet& addresses,
                            DiscoveryListener* listener);
 
   void unregister_for_reader(const GUID_t& writerid,
@@ -199,7 +199,7 @@ public:
 
   void register_for_writer(const GUID_t& readerid,
                            const GUID_t& writerid,
-                           const AddrSet& addresses,
+                           const NetworkAddressSet& addresses,
                            DiscoveryListener* listener);
 
   void unregister_for_writer(const GUID_t& readerid,
@@ -250,8 +250,8 @@ private:
   void on_data_available(RcHandle<InternalDataReader<NetworkInterfaceAddress> > reader);
 
   // Internal non-locking versions of the above
-  AddrSet get_addresses_i(const GUID_t& local, const GUID_t& remote) const;
-  AddrSet get_addresses_i(const GUID_t& local) const;
+  NetworkAddressSet get_addresses_i(const GUID_t& local, const GUID_t& remote) const;
+  NetworkAddressSet get_addresses_i(const GUID_t& local) const;
 
   virtual void stop_i();
 
@@ -276,15 +276,15 @@ private:
 
   struct RemoteInfo {
     RemoteInfo() : unicast_addrs_(), multicast_addrs_(), requires_inline_qos_(false), ref_count_(0) {}
-    RemoteInfo(const AddrSet& unicast_addrs, const AddrSet& multicast_addrs, bool iqos)
+    RemoteInfo(const NetworkAddressSet& unicast_addrs, const NetworkAddressSet& multicast_addrs, bool iqos)
       : unicast_addrs_(unicast_addrs), multicast_addrs_(multicast_addrs), requires_inline_qos_(iqos), ref_count_(0) {}
-    AddrSet unicast_addrs_;
-    AddrSet multicast_addrs_;
+    NetworkAddressSet unicast_addrs_;
+    NetworkAddressSet multicast_addrs_;
     bool requires_inline_qos_;
     NetworkAddress last_recv_addr_;
     MonotonicTimePoint last_recv_time_;
     size_t ref_count_;
-    bool insert_recv_addr(AddrSet& aset) const;
+    bool insert_recv_addr(NetworkAddressSet& aset) const;
   };
 
 #ifdef ACE_HAS_CPP11
@@ -865,7 +865,7 @@ private:
     /// id of local entity that is interested in this remote.
     GUID_t localid;
     /// addresses of this entity
-    AddrSet addresses;
+    NetworkAddressSet addresses;
     /// Callback to invoke.
     DiscoveryListener* listener;
     /**
@@ -877,7 +877,7 @@ private:
     enum { DOES_NOT_EXIST, EXISTS } status;
 
     InterestingRemote() { }
-    InterestingRemote(const GUID_t& w, const AddrSet& a, DiscoveryListener* l)
+    InterestingRemote(const GUID_t& w, const NetworkAddressSet& a, DiscoveryListener* l)
       : localid(w)
       , addresses(a)
       , listener(l)
@@ -931,10 +931,12 @@ private:
   RcHandle<ICE::Agent> ice_agent_;
 #endif
 
-  void accumulate_addresses(const GUID_t& local, const GUID_t& remote, AddrSet& addresses, bool prefer_unicast = false) const;
+  void accumulate_addresses(const GUID_t& local, const GUID_t& remote, NetworkAddressSet& addresses, bool prefer_unicast = false) const;
 
   RcHandle<InternalDataReader<NetworkInterfaceAddress> > network_interface_address_reader_;
   MulticastManager multicast_manager_;
+
+  bool uses_end_historic_control_messages() const { return false; }
 };
 
 } // namespace DCPS

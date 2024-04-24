@@ -14,6 +14,7 @@
 
 #include <dds/DCPS/Serializer.h>
 #include <dds/DCPS/SafetyProfileStreams.h>
+#include <dds/DCPS/Xcdr2ValueWriter.h>
 #include <dds/DCPS/XTypes/Utils.h>
 #include <dds/DCPS/XTypes/TypeLookupService.h>
 #include <dds/DCPS/XTypes/DynamicDataAdapter.h>
@@ -228,14 +229,14 @@ void amalgam_serializer_test_base(
       DDS::DynamicData_var dd = DDS::DynamicDataFactory::get_instance()->create_data(type);
       ASSERT_RC_OK(copy(dd, dda));
 
-      DynamicDataImpl& ddi = *dynamic_cast<DynamicDataImpl*>(dd.in());
+      DDS::DynamicData_ptr dd_ptr = dd.in();
       if (key_only) {
-        const KeyOnly<const DynamicDataImpl> key_only(ddi);
+        const KeyOnly<DDS::DynamicData_ptr> key_only(dd_ptr);
         EXPECT_EQ(serialized_size(encoding, key_only), expected_cdr.size);
         ASSERT_TRUE(serializer << key_only);
       } else {
-        EXPECT_EQ(serialized_size(encoding, ddi), expected_cdr.size);
-        ASSERT_TRUE(serializer << ddi);
+        EXPECT_EQ(serialized_size(encoding, dd_ptr), expected_cdr.size);
+        ASSERT_TRUE(serializer << dd_ptr);
       }
 #else
       ASSERT_TRUE(false);
@@ -304,6 +305,23 @@ void serializer_test_union(const Encoding& encoding, const DataView& expected_cd
   amalgam_serializer_test_union<Type, Type>(encoding, expected_cdr, disc);
 }
 
+template <typename Type>
+void baseline_checks_vwrite(const Encoding& encoding, const Type& value, const DataView& expected_cdr)
+{
+  if (encoding.kind() == Encoding::KIND_XCDR2) {
+    // Compute serialized size
+    Xcdr2ValueWriter value_writer(encoding);
+    EXPECT_TRUE(vwrite(value_writer, value));
+
+    // Serialize
+    ACE_Message_Block buffer(value_writer.get_serialized_size());
+    Serializer ser(&buffer, encoding);
+    value_writer.set_serializer(&ser);
+    EXPECT_TRUE(vwrite(value_writer, value));
+    EXPECT_PRED_FORMAT2(assert_DataView, expected_cdr, buffer);
+  }
+}
+
 template<typename Type>
 void baseline_checks(const Encoding& encoding, const DataView& expected_cdr,
   SerializedSizeBound bound = SerializedSizeBound())
@@ -325,17 +343,20 @@ void baseline_checks(const Encoding& encoding, const DataView& expected_cdr,
   Type value;
   set_values(value);
   EXPECT_EQ(serialized_size(encoding, value), expected_cdr.size);
-
   serializer_test<Type>(encoding, expected_cdr);
+
+  baseline_checks_vwrite(encoding, value, expected_cdr);
 }
 
 template<typename Type>
 void baseline_checks_union(const Encoding& encoding, const DataView& expected_cdr, UnionDisc disc)
 {
   Type value;
-  value._d(disc);
+  set_values_union(value, disc);
   EXPECT_EQ(serialized_size(encoding, value), expected_cdr.size);
   serializer_test_union<Type>(encoding, expected_cdr, disc);
+
+  baseline_checks_vwrite(encoding, value, expected_cdr);
 }
 
 #define STREAM_DATA \
@@ -1982,6 +2003,16 @@ void key_only_test(bool topic_type)
   amalgam_serializer_test_base<ConstWrapper, Type, Wrapper, Type>(
     xcdr2, expected, wrapped_value, wrapped_result, field_filter);
   EXPECT_PRED_FORMAT2(assert_values, wrapped_value, wrapped_result);
+
+  // Test vwrite with KeyOnly or NestedKeyOnly samples
+  Xcdr2ValueWriter value_writer(xcdr2);
+  EXPECT_TRUE(vwrite(value_writer, wrapped_value));
+
+  ACE_Message_Block buffer(value_writer.get_serialized_size());
+  Serializer ser(&buffer, xcdr2);
+  value_writer.set_serializer(&ser);
+  EXPECT_TRUE(vwrite(value_writer, wrapped_value));
+  EXPECT_PRED_FORMAT2(assert_DataView, expected, buffer);
 }
 
 void serialize_u32(DataVec& data_vec, size_t value)
@@ -2122,55 +2153,57 @@ void key_only_complex_set_base_values(Type& value,
   const bool include_possible_keyed = (field_filter != FieldFilter_KeyOnly) || keyed;
   const bool include_unkeyed =
     field_filter == FieldFilter_All || (!keyed && field_filter == FieldFilter_NestedKeyOnly);
+  const FieldFilter nested_field_filter =
+    field_filter == FieldFilter_All ? FieldFilter_All : FieldFilter_NestedKeyOnly;
 
   set_default(value);
 
   if (include_possible_keyed) {
     key_only_set_base_values(
-      value.unkeyed_struct_value, field_filter, false);
+      value.unkeyed_struct_value, nested_field_filter, false);
     key_only_set_base_values(
-      value.unkeyed_struct_array_value[0], field_filter, false);
+      value.unkeyed_struct_array_value[0], nested_field_filter, false);
     key_only_set_base_values(
-      value.unkeyed_struct_array_value[1], field_filter, false);
+      value.unkeyed_struct_array_value[1], nested_field_filter, false);
     /* TODO(iguessthislldo): See IDL Def
     value.unkeyed_struct_seq_value.length(1);
     key_only_set_base_values(
-      value.unkeyed_struct_seq_value[0], field_filter, false);
+      value.unkeyed_struct_seq_value[0], nested_field_filter, false);
     */
     key_only_set_base_values(
-      value.keyed_struct_value, field_filter, true);
+      value.keyed_struct_value, nested_field_filter, true);
     key_only_set_base_values(
-      value.keyed_struct_array_value[0], field_filter, true);
+      value.keyed_struct_array_value[0], nested_field_filter, true);
     key_only_set_base_values(
-      value.keyed_struct_array_value[1], field_filter, true);
+      value.keyed_struct_array_value[1], nested_field_filter, true);
     /* TODO(iguessthislldo): See IDL Def
     value.keyed_struct_seq_value.length(1);
     key_only_set_base_values(
-      value.keyed_struct_seq_value[0], field_filter, true);
+      value.keyed_struct_seq_value[0], nested_field_filter, true);
     */
 
     key_only_union_set_base_values(
-      value.unkeyed_union_value, field_filter, false);
+      value.unkeyed_union_value, nested_field_filter, false);
     key_only_union_set_base_values(
-      value.unkeyed_union_array_value[0], field_filter, false);
+      value.unkeyed_union_array_value[0], nested_field_filter, false);
     key_only_union_set_base_values(
-      value.unkeyed_union_array_value[1], field_filter, false);
+      value.unkeyed_union_array_value[1], nested_field_filter, false);
     /* TODO(iguessthislldo): See IDL Def
     value.unkeyed_union_seq_value.length(1);
     key_only_union_set_base_values(
-      value.unkeyed_union_seq_value[0], field_filter, false);
+      value.unkeyed_union_seq_value[0], nested_field_filter, false);
     */
 
     key_only_union_set_base_values(
-      value.keyed_union_value, field_filter, true);
+      value.keyed_union_value, nested_field_filter, true);
     key_only_union_set_base_values(
-      value.keyed_union_array_value[0], field_filter, true);
+      value.keyed_union_array_value[0], nested_field_filter, true);
     key_only_union_set_base_values(
-      value.keyed_union_array_value[1], field_filter, true);
+      value.keyed_union_array_value[1], nested_field_filter, true);
     /* TODO(iguessthislldo): See IDL Def
     value.keyed_union_seq_value.length(1);
     key_only_union_set_base_values(
-      value.keyed_union_seq_value[0], field_filter, true);
+      value.keyed_union_seq_value[0], nested_field_filter, true);
     */
   }
 
@@ -2515,9 +2548,7 @@ void build_expected_union(DataVec& expected, FieldFilter field_filter, bool keye
   if (include_unkeyed) {
     non_keys = DataView(key_only_union_non_keys_expected_base);
   }
-  if (include_possible_keyed) {
-    serialize_u32(expected, keys.size + non_keys.size);
-  }
+  serialize_u32(expected, keys.size + non_keys.size);
   keys.copy_to(expected);
   non_keys.copy_to(expected);
 }
@@ -2544,7 +2575,7 @@ void build_expected_complex_struct(DataVec& expected, FieldFilter field_filter, 
     field_filter == FieldFilter_All ? FieldFilter_All : FieldFilter_NestedKeyOnly;
 
   if (include_possible_keyed) {
-    build_expected_basic_struct(all_contents, field_filter, false);
+    build_expected_basic_struct(all_contents, nested_field_filter, false);
     {
       DataVec array_contents;
       build_expected_basic_struct(array_contents, nested_field_filter, false);
@@ -2693,6 +2724,18 @@ TEST(KeyTests, KeyOnly_KeyedUnion)
 {
   key_only_test<KeyedUnion,
     KeyOnly<KeyedUnion>, KeyOnly<const KeyedUnion> >(true);
+}
+
+TEST(KeyTests, KeyOnly_ComplexUnkeyedStruct)
+{
+  key_only_test<ComplexUnkeyedStruct,
+    KeyOnly<ComplexUnkeyedStruct>, KeyOnly<const ComplexUnkeyedStruct> >(true);
+}
+
+TEST(KeyTests, KeyOnly_ComplexKeyedStruct)
+{
+  key_only_test<ComplexKeyedStruct,
+    KeyOnly<ComplexKeyedStruct>, KeyOnly<const ComplexKeyedStruct> >(true);
 }
 
 // ----------------------------------------------------------------------------

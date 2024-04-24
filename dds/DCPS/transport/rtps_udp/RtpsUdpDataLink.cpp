@@ -433,12 +433,14 @@ void RtpsUdpDataLink::on_data_available(RcHandle<InternalDataReader<NetworkInter
     return;
   }
 
+  RtpsUdpTransport_rch tport = transport();
+
   multicast_manager_.process(samples,
                              infos,
                              cfg->multicast_interface(),
                              get_reactor(),
                              receive_strategy().in(),
-                             cfg->multicast_group_address(),
+                             cfg->multicast_group_address(tport->domain()),
                              multicast_socket_
 #ifdef ACE_HAS_IPV6
                              , cfg->ipv6_multicast_group_address(),
@@ -475,8 +477,8 @@ RtpsUdpDataLink::get_last_recv_address(const GUID_t& remote_id)
 
 void
 RtpsUdpDataLink::update_locators(const GUID_t& remote_id,
-                                 AddrSet& unicast_addresses,
-                                 AddrSet& multicast_addresses,
+                                 NetworkAddressSet& unicast_addresses,
+                                 NetworkAddressSet& multicast_addresses,
                                  bool requires_inline_qos,
                                  bool add_ref)
 {
@@ -503,14 +505,14 @@ RtpsUdpDataLink::update_locators(const GUID_t& remote_id,
   g.release();
 
   if (log_unicast_change) {
-    for (AddrSet::const_iterator pos = unicast_addresses.begin(), limit = unicast_addresses.end();
+    for (NetworkAddressSet::const_iterator pos = unicast_addresses.begin(), limit = unicast_addresses.end();
          pos != limit; ++pos) {
       ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) RtpsUdpDataLink::update_locators %C is now at %C\n"),
                  LogGuid(remote_id).c_str(), LogAddr(*pos).c_str()));
     }
   }
   if (log_multicast_change) {
-    for (AddrSet::const_iterator pos = multicast_addresses.begin(), limit = multicast_addresses.end();
+    for (NetworkAddressSet::const_iterator pos = multicast_addresses.begin(), limit = multicast_addresses.end();
          pos != limit; ++pos) {
       ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) RtpsUdpDataLink::update_locators %C is now at %C\n"),
                  LogGuid(remote_id).c_str(), LogAddr(*pos).c_str()));
@@ -559,8 +561,8 @@ RtpsUdpDataLink::associated(const GUID_t& local_id, const GUID_t& remote_id,
                             ACE_CDR::ULong participant_flags,
                             SequenceNumber max_sn,
                             const TransportClient_rch& client,
-                            AddrSet& unicast_addresses,
-                            AddrSet& multicast_addresses,
+                            NetworkAddressSet& unicast_addresses,
+                            NetworkAddressSet& multicast_addresses,
                             const NetworkAddress& last_addr_hint,
                             bool requires_inline_qos)
 {
@@ -674,7 +676,7 @@ RtpsUdpDataLink::disassociated(const GUID_t& local_id,
 void
 RtpsUdpDataLink::register_for_reader(const GUID_t& writerid,
                                      const GUID_t& readerid,
-                                     const AddrSet& addresses,
+                                     const NetworkAddressSet& addresses,
                                      DiscoveryListener* listener)
 {
   ACE_GUARD(ACE_Thread_Mutex, g, writers_lock_);
@@ -713,7 +715,7 @@ RtpsUdpDataLink::unregister_for_reader(const GUID_t& writerid,
 void
 RtpsUdpDataLink::register_for_writer(const GUID_t& readerid,
                                      const GUID_t& writerid,
-                                     const AddrSet& addresses,
+                                     const NetworkAddressSet& addresses,
                                      DiscoveryListener* listener)
 {
   ACE_GUARD(ACE_Thread_Mutex, g, readers_lock_);
@@ -1966,7 +1968,13 @@ RtpsUdpDataLink::RtpsReader::process_heartbeat_i(const RTPS::HeartBeatSubmessage
         log_progress("RTPS reader/writer association complete", id_, writer->id_, writer->participant_discovered_at_);
       }
       log_remote_counts("process_heartbeat_i");
+      first_ever_hb = true;
+    }
 
+
+    ACE_CDR::ULong cumulative_bits_added = 0;
+    if (!writer->recvd_.empty() || first_ever_hb) {
+      // "gap" everything before the heartbeat range
       const SequenceRange sr(zero, hb_first.previous());
       writer->recvd_.insert(sr);
       while (!writer->held_.empty() && writer->held_.begin()->first <= sr.second) {
@@ -1976,11 +1984,7 @@ RtpsUdpDataLink::RtpsReader::process_heartbeat_i(const RTPS::HeartBeatSubmessage
         writer->recvd_.insert(it->first);
       }
       link->receive_strategy()->remove_fragments(sr, writer->id_);
-      first_ever_hb = true;
-    }
 
-    ACE_CDR::ULong cumulative_bits_added = 0;
-    if (!writer->recvd_.empty()) {
       writer->hb_last_ = std::max(writer->hb_last_, hb_last);
       gather_ack_nacks_i(writer, link, !is_final, meta_submessages, cumulative_bits_added);
     }
@@ -2419,7 +2423,7 @@ RtpsUdpDataLink::build_meta_submessage_map(MetaSubmessageVec& meta_submessages, 
     BundlingCache::ScopedAccess entry(bundling_cache_, key, false, now);
     if (entry.is_new_) {
 
-      AddrSet& addrs = entry.value().addrs_;
+      NetworkAddressSet& addrs = entry.value().addrs_;
       ACE_GUARD(ACE_Thread_Mutex, g, locators_lock_);
 
       const bool directed = it->dst_guid_ != GUID_UNKNOWN;
@@ -2442,7 +2446,7 @@ RtpsUdpDataLink::build_meta_submessage_map(MetaSubmessageVec& meta_submessages, 
     }
 
     const BundlingCache::ScopedAccess& const_entry = entry;
-    const AddrSet& addrs = const_entry.value().addrs_;
+    const NetworkAddressSet& addrs = const_entry.value().addrs_;
     addrset_min_size = std::min(addrset_min_size, static_cast<size_t>(addrs.size()));
     addrset_max_size = std::max(addrset_max_size, static_cast<size_t>(addrs.size()));
     if (addrs.empty()) {
@@ -3478,7 +3482,7 @@ RtpsUdpDataLink::RtpsWriter::gather_nack_replies_i(MetaSubmessageVec& meta_subme
   typedef OPENDDS_MAP(SequenceNumber, DisjointSequence) FragmentInfo;
 
   // Consolidated non-directed requests and address sets to be sent together at the end, after directed replies
-  typedef OPENDDS_MAP(SequenceNumber, AddrSet) RecipientMap;
+  typedef OPENDDS_MAP(SequenceNumber, NetworkAddressSet) RecipientMap;
   typedef OPENDDS_MAP(SequenceNumber, RepoIdSet) ReaderMap;
   DisjointSequence consolidated_requests;
   ReaderMap consolidated_request_readers;
@@ -3499,7 +3503,7 @@ RtpsUdpDataLink::RtpsWriter::gather_nack_replies_i(MetaSubmessageVec& meta_subme
        pos != limit; ++pos) {
 
     const ReaderInfo_rch& reader = *pos;
-    const AddrSet addrs = link->get_addresses(id_, reader->id_);
+    const NetworkAddressSet addrs = link->get_addresses(id_, reader->id_);
 
     DisjointSequence gaps;
 
@@ -3668,8 +3672,8 @@ RtpsUdpDataLink::RtpsWriter::gather_nack_replies_i(MetaSubmessageVec& meta_subme
                    pos->second.getValue()));
       }
       for (SequenceNumber seq = pos->first; seq <= pos->second; ++seq) {
-        const AddrSet& uni = consolidated_recipients_unicast[seq];
-        const AddrSet& multi = consolidated_recipients_multicast[seq];
+        const NetworkAddressSet& uni = consolidated_recipients_unicast[seq];
+        const NetworkAddressSet& multi = consolidated_recipients_multicast[seq];
         const RepoIdSet& readers = consolidated_request_readers[seq];
 
         if (proxy.has_frags(seq)) {
@@ -3691,8 +3695,8 @@ RtpsUdpDataLink::RtpsWriter::gather_nack_replies_i(MetaSubmessageVec& meta_subme
 
     for (FragmentInfo::const_iterator pos = consolidated_fragment_requests.begin(),
            limit = consolidated_fragment_requests.end(); pos != limit; ++pos) {
-      const AddrSet& uni = consolidated_fragment_recipients_unicast[pos->first];
-      const AddrSet& multi = consolidated_fragment_recipients_multicast[pos->first];
+      const NetworkAddressSet& uni = consolidated_fragment_recipients_unicast[pos->first];
+      const NetworkAddressSet& multi = consolidated_fragment_recipients_multicast[pos->first];
       const RepoIdSet& readers = consolidated_fragment_request_readers[pos->first];
       const RtpsUdpSendStrategy::OverrideToken ot =
         link->send_strategy()->override_destinations(readers.size() * 2 > remote_readers_.size() ? multi : uni);
@@ -4020,7 +4024,7 @@ void RtpsUdpDataLink::durability_resend(TransportQueueElement* element,
   if (Transport_debug_level > 5) {
     ACE_DEBUG((LM_DEBUG, "(%P|%t) TRACK RtpsUdpDataLink::durability_resend %q\n", element->sequence().getValue()));
   }
-  const AddrSet addrs = get_addresses(element->publication_id(), element->subscription_id());
+  const NetworkAddressSet addrs = get_addresses(element->publication_id(), element->subscription_id());
   if (addrs.empty()) {
     const LogGuid conv(element->subscription_id());
     ACE_ERROR((LM_ERROR,
@@ -4583,34 +4587,34 @@ RtpsUdpDataLink::receive_strategy()
   return dynamic_rchandle_cast<RtpsUdpReceiveStrategy>(receive_strategy_);
 }
 
-AddrSet
+NetworkAddressSet
 RtpsUdpDataLink::get_addresses(const GUID_t& local, const GUID_t& remote) const
 {
-  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, locators_lock_, AddrSet());
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, locators_lock_, NetworkAddressSet());
   return get_addresses_i(local, remote);
 }
 
-AddrSet
+NetworkAddressSet
 RtpsUdpDataLink::get_addresses(const GUID_t& local) const
 {
-  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, locators_lock_, AddrSet());
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, locators_lock_, NetworkAddressSet());
   return get_addresses_i(local);
 }
 
-AddrSet
+NetworkAddressSet
 RtpsUdpDataLink::get_addresses_i(const GUID_t& local, const GUID_t& remote) const
 {
-  AddrSet retval;
+  NetworkAddressSet retval;
 
   accumulate_addresses(local, remote, retval, true);
 
   return retval;
 }
 
-AddrSet
+NetworkAddressSet
 RtpsUdpDataLink::get_addresses_i(const GUID_t& local) const
 {
-  AddrSet retval;
+  NetworkAddressSet retval;
   bool use_peers = true;
 
   // For reliable writers, use remote_reader_guids()
@@ -4648,7 +4652,7 @@ RtpsUdpDataLink::get_addresses_i(const GUID_t& local) const
   return retval;
 }
 
-bool RtpsUdpDataLink::RemoteInfo::insert_recv_addr(AddrSet& aset) const
+bool RtpsUdpDataLink::RemoteInfo::insert_recv_addr(NetworkAddressSet& aset) const
 {
   if (!last_recv_addr_) {
     return false;
@@ -4656,7 +4660,7 @@ bool RtpsUdpDataLink::RemoteInfo::insert_recv_addr(AddrSet& aset) const
   const ACE_INT16 last_addr_type = last_recv_addr_.get_type();
   NetworkAddress limit;
   limit.set_type(last_addr_type);
-  AddrSet::const_iterator it = unicast_addrs_.lower_bound(limit);
+  NetworkAddressSet::const_iterator it = unicast_addrs_.lower_bound(limit);
   while (it != unicast_addrs_.end() && it->get_type() == last_addr_type) {
     if (it->addr_bytes_equal(last_recv_addr_)) {
       aset.insert(*it);
@@ -4669,7 +4673,7 @@ bool RtpsUdpDataLink::RemoteInfo::insert_recv_addr(AddrSet& aset) const
 
 void
 RtpsUdpDataLink::accumulate_addresses(const GUID_t& local, const GUID_t& remote,
-                                      AddrSet& addresses, bool prefer_unicast) const
+                                      NetworkAddressSet& addresses, bool prefer_unicast) const
 {
   OPENDDS_ASSERT(local != GUID_UNKNOWN);
   OPENDDS_ASSERT(remote != GUID_UNKNOWN);
@@ -4697,7 +4701,7 @@ RtpsUdpDataLink::accumulate_addresses(const GUID_t& local, const GUID_t& remote,
   }
 
   const TimeDuration receive_address_duration = tport->core().receive_address_duration();
-  AddrSet normal_addrs;
+  NetworkAddressSet normal_addrs;
   MonotonicTimePoint normal_addrs_expires = MonotonicTimePoint::max_value;
   NetworkAddress ice_addr;
   bool valid_last_recv_addr = false;
@@ -4713,8 +4717,8 @@ RtpsUdpDataLink::accumulate_addresses(const GUID_t& local, const GUID_t& remote,
     } else if (!pos->second.multicast_addrs_.empty()) {
 #ifdef ACE_HAS_IPV6
       if (pos->second.last_recv_addr_ != NO_ADDR) {
-        const AddrSet& mc_addrs = pos->second.multicast_addrs_;
-        for (AddrSet::const_iterator it = mc_addrs.begin(); it != mc_addrs.end(); ++it) {
+        const NetworkAddressSet& mc_addrs = pos->second.multicast_addrs_;
+        for (NetworkAddressSet::const_iterator it = mc_addrs.begin(); it != mc_addrs.end(); ++it) {
           if (it->get_type() == pos->second.last_recv_addr_.get_type()) {
             normal_addrs.insert(*it);
           }

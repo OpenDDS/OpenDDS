@@ -6,6 +6,7 @@ from pathlib import Path
 import io
 from datetime import datetime, timezone
 import textwrap
+import unittest
 
 from version_info import VersionInfo
 
@@ -13,6 +14,7 @@ from version_info import VersionInfo
 # These sections are builtin and must appear in this order
 main_sections = {
     'Additions': 100,
+    'Platform Support and Dependencies': 95,
     'Deprecations': 90,
     'Removals': 80,
     'Security': 60,
@@ -67,12 +69,9 @@ class PrintHelper:
             print(file=self.file)
             self.printed_blank_line = True
 
-    def test(self, expected):
+    def test_str(self):
         assert isinstance(self.file, io.StringIO)
-        got = self.file.getvalue()
-        if got != expected:
-            print('ERROR: internal test failed, expected:', expected, 'but got:', got, sep='\n', file=sys.stderr)
-            raise AssertionError()
+        return self.file.getvalue()
 
 
 class Node:
@@ -128,10 +127,11 @@ class Text(Node):
             h.put(self.level - 1, line, decorate=decorate)
 
 
-def test_text():
-    ph = PrintHelper(None)
-    Text(0, set([1, 2]), 3, ['- Item\n  - SubItem\n- Additional Item']).print(ph)
-    ph.test('''\
+class TestText(unittest.TestCase):
+    def test_text(self):
+        ph = PrintHelper(None)
+        Text(0, set([1, 2]), 3, ['- Item\n  - SubItem\n- Additional Item']).print(ph)
+        self.assertEqual(ph.test_str(), '''\
   - Item (:ghpr:`1`, :ghpr:`2`)
     - SubItem
   - Additional Item (:ghpr:`1`, :ghpr:`2`)
@@ -215,33 +215,34 @@ class Section(Node):
             self.print(h)
 
 
-def test_section():
-    root = Section()
-    a = root.get_section('Section A')
-    a.add_text(set([0]), ['- This is some text\n', '- This is a separate item\n'])
-    aa = a.get_section('Section AA')
-    aa.add_text(set([3]), ['- This is some text\n  - This is some more\n'])
-    aa.add_text(set([1]), ['- This is some text  \n  - This is some more\n'])
-    aa.add_text(set([5]), ['- This is some text\n  - This is some more\n    \n'])
-    aa.add_text(set([50]), ['- (Should be second in Section AA)\n'], 9)
-    aaa = aa.get_section('Section AAA (Should be first in Section AA)', 10)
-    aaa.add_text(set([4]), ['- This is some text\n  - This is some more\n'])
-    aab = aa.get_section('Section AAB')
-    aab.add_text(set([10]), ['- This is some text\n'])
-    aaba = aab.get_section('Section AABA')
-    aaba.add_text(set([9]), ['- This is some text\n'])
-    aac = aa.get_section('Section AAC')
-    aac.add_text(set([1]), ['- This is some text\n'])
-    b = root.get_section('Section B')
-    b.add_text(set([12]), ['- This is some text\n'])
-    root.get_section('This should be hidden') \
-        .get_section('This should be hidden') \
-        .get_section('This should be hidden')
+class TestSection(unittest.TestCase):
+    def test_section(self):
+        root = Section()
+        a = root.get_section('Section A')
+        a.add_text(set([0]), ['- This is some text\n', '- This is a separate item\n'])
+        aa = a.get_section('Section AA')
+        aa.add_text(set([3]), ['- This is some text\n  - This is some more\n'])
+        aa.add_text(set([1]), ['- This is some text  \n  - This is some more\n'])
+        aa.add_text(set([5]), ['- This is some text\n  - This is some more\n    \n'])
+        aa.add_text(set([50]), ['- (Should be second in Section AA)\n'], 9)
+        aaa = aa.get_section('Section AAA (Should be first in Section AA)', 10)
+        aaa.add_text(set([4]), ['- This is some text\n  - This is some more\n'])
+        aab = aa.get_section('Section AAB')
+        aab.add_text(set([10]), ['- This is some text\n'])
+        aaba = aab.get_section('Section AABA')
+        aaba.add_text(set([9]), ['- This is some text\n'])
+        aac = aa.get_section('Section AAC')
+        aac.add_text(set([1]), ['- This is some text\n'])
+        b = root.get_section('Section B')
+        b.add_text(set([12]), ['- This is some text\n'])
+        root.get_section('This should be hidden') \
+            .get_section('This should be hidden') \
+            .get_section('This should be hidden')
 
-    ph = PrintHelper(None)
-    ph.show_rank = True
-    root.print(ph)
-    ph.test('''\
+        ph = PrintHelper(None)
+        ph.show_rank = True
+        root.print(ph)
+        self.assertEqual(ph.test_str(), '''\
 
 Section A
 =========
@@ -422,11 +423,6 @@ def print_all_news(file=sys.stdout):
     **************
 
     Older releases can be found in :ghfile:`NEWS.md`'''), file=file)
-
-
-# Since we can, always do testing.
-test_text()
-test_section()
 
 
 if __name__ == '__main__':

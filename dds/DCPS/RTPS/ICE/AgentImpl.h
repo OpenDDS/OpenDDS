@@ -99,9 +99,30 @@ public:
 
   mutable ACE_Recursive_Thread_Mutex mutex;
 
+  // Cached configuration.
+  const DCPS::TimeDuration& T_a() const { return T_a_; }
+  const DCPS::TimeDuration& connectivity_check_ttl() const { return connectivity_check_ttl_; }
+  const DCPS::TimeDuration& checklist_period() const { return checklist_period_; }
+  const DCPS::TimeDuration& indication_period() const { return indication_period_; }
+  const DCPS::TimeDuration& nominated_ttl() const { return nominated_ttl_; }
+  const DCPS::TimeDuration& server_reflexive_address_period() const { return server_reflexive_address_period_; }
+  size_t server_reflexive_indication_count() const { return server_reflexive_indication_count_; }
+  const DCPS::TimeDuration& deferred_triggered_check_ttl() const { return deferred_triggered_check_ttl_; }
+  const DCPS::TimeDuration& change_password_period() const { return change_password_period_; }
+
 private:
   void on_data_available(DCPS::RcHandle<DCPS::InternalDataReader<DCPS::NetworkInterfaceAddress> > reader);
   void process_deferred();
+
+  const DCPS::TimeDuration T_a_;
+  const DCPS::TimeDuration connectivity_check_ttl_;
+  const DCPS::TimeDuration checklist_period_;
+  const DCPS::TimeDuration indication_period_;
+  const DCPS::TimeDuration nominated_ttl_;
+  const DCPS::TimeDuration server_reflexive_address_period_;
+  const size_t server_reflexive_indication_count_;
+  const DCPS::TimeDuration deferred_triggered_check_ttl_;
+  const DCPS::TimeDuration change_password_period_;
 
   ActiveFoundationSet active_foundations_;
   FoundationList to_unfreeze_;

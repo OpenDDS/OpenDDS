@@ -28,7 +28,8 @@ class UdpInst;
 
 class OpenDDS_Udp_Export UdpTransport : public TransportImpl {
 public:
-  explicit UdpTransport(const UdpInst_rch& inst);
+  UdpTransport(const UdpInst_rch& inst,
+               DDS::DomainId_t domain);
 
   void passive_connection(const ACE_INET_Addr& remote_address,
                           const ReceivedDataSample& data);

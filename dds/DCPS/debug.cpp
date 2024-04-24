@@ -58,15 +58,16 @@ void LogLevel::set(LogLevel::Value value)
 namespace {
   struct LogLevelNameValue {
     const char* const name;
+    const char* const uc_name; // Uppercase
     const LogLevel::Value value;
   };
   static const LogLevelNameValue log_levels[] = {
-    {"none", LogLevel::None},
-    {"error", LogLevel::Error},
-    {"warning", LogLevel::Warning},
-    {"notice", LogLevel::Notice},
-    {"info", LogLevel::Info},
-    {"debug", LogLevel::Debug}
+    {"none", "NONE", LogLevel::None},
+    {"error", "ERROR", LogLevel::Error},
+    {"warning", "WARNING", LogLevel::Warning},
+    {"notice", "NOTICE", LogLevel::Notice},
+    {"info", "INFO", LogLevel::Info},
+    {"debug", "DEBUG", LogLevel::Debug}
   };
 };
 
@@ -86,13 +87,36 @@ void LogLevel::set_from_string(const char* name)
 
 const char* LogLevel::get_as_string() const
 {
-  const unsigned index = static_cast<unsigned>(get());
+  return to_string(get(), false);
+}
+
+const char* LogLevel::to_string(Value val, bool uppercase)
+{
+  const unsigned index = static_cast<unsigned>(val);
   if (index >= array_count(log_levels)) {
-    ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: LogLevel::get_as_string: "
+    ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: LogLevel::to_string: "
       "Invalid log level value: %u\n", index));
     return "invalid";
   }
-  return log_levels[index].name;
+  return uppercase ? log_levels[index].uc_name : log_levels[index].name;
+}
+
+ACE_Log_Priority LogLevel::to_priority(Value val)
+{
+  switch (val) {
+  case Error:
+    return LM_ERROR;
+  case Warning:
+    return LM_WARNING;
+  case Notice:
+    return LM_NOTICE;
+  case Info:
+    return LM_INFO;
+  case Debug:
+    return LM_DEBUG;
+  default:
+    return LM_SHUTDOWN;
+  }
 }
 
 OpenDDS_Dcps_Export void set_DCPS_debug_level(unsigned int lvl)

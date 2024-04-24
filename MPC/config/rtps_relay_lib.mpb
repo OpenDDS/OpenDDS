@@ -1,4 +1,4 @@
-project: dcpslib, opendds_uses_cxx11 {
+project: dcps, opendds_uses_cxx11 {
   after += RtpsRelayLib
   libs += OpenDDS_RtpsRelay
   includes += $(DDS_ROOT)/tools

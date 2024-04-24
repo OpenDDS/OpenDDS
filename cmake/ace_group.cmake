@@ -38,16 +38,6 @@ _opendds_group_exe(ace_gperf
   EXTRA_BIN_DIRS "${TAO_BIN_DIR}"
 )
 
-if(OPENDDS_XERCES3)
-  find_package(XercesC PATHS "${OPENDDS_XERCES3}" NO_DEFAULT_PATH QUIET)
-  if(NOT XercesC_FOUND)
-    find_package(XercesC QUIET)
-  endif()
-  if(NOT XercesC_FOUND)
-    message(FATAL_ERROR "Could not find XercesC")
-  endif()
-endif()
-
 function(_opendds_vs_force_static)
   # Make sure the MSVC runtime library, which is similar to libc of other
   # systems, is the same kind everywhere. Normally we shouldn't make global

@@ -29,8 +29,6 @@
 #include <dds/DCPS/PoolAllocator.h>
 #include <dds/DCPS/PoolAllocationBase.h>
 #include <dds/DCPS/TimeTypes.h>
-#include <dds/DCPS/transport/framework/TransportStatistics.h>
-#include <dds/DCPS/transport/framework/MessageDropper.h>
 #include <dds/DCPS/AtomicBool.h>
 #include <dds/DCPS/Discovery.h>
 
@@ -141,7 +139,7 @@ public:
                                const ParticipantData_t& pdata,
                                const DCPS::MonotonicTimePoint& now,
                                const DCPS::SequenceNumber& seq,
-                               const ACE_INET_Addr& from,
+                               const DCPS::NetworkAddress& from,
                                bool from_sedp);
 
   bool validateSequenceNumber(const DCPS::MonotonicTimePoint& now, const DCPS::SequenceNumber& seq, DiscoveredParticipantIter& iter);
@@ -167,7 +165,6 @@ public:
   ParticipantCryptoInfoPair lookup_participant_crypto_info(const DCPS::GUID_t& id) const;
   void send_participant_crypto_tokens(const DCPS::GUID_t& id);
 
-  DDS::DomainId_t get_domain_id() const { return domain_; }
   DDS::Security::PermissionsHandle lookup_participant_permissions(const DCPS::GUID_t& id) const;
 
   AuthState lookup_participant_auth_state(const GUID_t& id) const;
@@ -175,9 +172,9 @@ public:
   void process_participant_ice(const ParameterList& plist,
                                const ParticipantData_t& pdata,
                                const DCPS::GUID_t& guid);
-
 #endif
 
+  DDS::DomainId_t get_domain_id() const { return domain_; }
   const ParticipantData_t& get_participant_data(const DCPS::GUID_t& guid) const;
   ParticipantData_t& get_participant_data(const DCPS::GUID_t& guid);
   DCPS::MonotonicTime_t get_participant_discovered_at() const;
@@ -192,12 +189,6 @@ public:
 
   u_short get_ipv6_sedp_port() const { return sedp_->ipv6_local_address().get_port_number(); }
 #endif
-
-  void rtps_relay_only_now(bool f);
-  void use_rtps_relay_now(bool f);
-  void use_ice_now(bool f);
-  void sedp_rtps_relay_address(const DCPS::NetworkAddress& address) { sedp_->rtps_relay_address(address); }
-  void sedp_stun_server_address(const DCPS::NetworkAddress& address) { sedp_->stun_server_address(address); }
 
   BuiltinEndpointSet_t available_builtin_endpoints() const { return available_builtin_endpoints_; }
 #ifdef OPENDDS_SECURITY
@@ -217,7 +208,6 @@ public:
   );
 
   DCPS::RcHandle<RtpsDiscoveryConfig> config() const { return config_; }
-  void spdp_rtps_relay_address_change();
 
   void append_transport_statistics(DCPS::TransportStatisticsSequence& seq);
 
@@ -363,7 +353,7 @@ protected:
   void purge_discovered_participant(const DiscoveredParticipantIter& iter);
 
 #ifndef DDS_HAS_MINIMUM_BIT
-  void enqueue_location_update_i(DiscoveredParticipantIter iter, DCPS::ParticipantLocation mask, const ACE_INET_Addr& from, const char* reason);
+  void enqueue_location_update_i(DiscoveredParticipantIter iter, DCPS::ParticipantLocation mask, const DCPS::NetworkAddress& from, const char* reason);
   void process_location_updates_i(const DiscoveredParticipantIter& iter, const char* reason, bool force_publish = false);
   void publish_location_update_i(const DiscoveredParticipantIter& iter);
 #endif
@@ -389,10 +379,23 @@ private:
   DiscoveredParticipantMap participants_;
   RtpsDiscovery* disco_;
   DCPS::RcHandle<RtpsDiscoveryConfig> config_;
+  const CORBA::ULong participant_flags_;
+  const DCPS::TimeDuration resend_period_;
   const double quick_resend_ratio_;
   const DCPS::TimeDuration min_resend_delay_;
-  DCPS::TimeDuration lease_duration_;
-  DCPS::TimeDuration lease_extension_;
+  const DCPS::TimeDuration lease_duration_;
+  const DCPS::TimeDuration lease_extension_;
+  const DCPS::TimeDuration max_lease_duration_;
+  const u_short max_spdp_sequence_msg_reset_check_;
+  const bool check_source_ip_;
+  const bool undirected_spdp_;
+#ifdef OPENDDS_SECURITY
+  const size_t max_participants_in_authentication_;
+  const DCPS::TimeDuration security_unsecure_lease_duration_;
+  const DCPS::TimeDuration auth_resend_period_;
+  const DCPS::TimeDuration max_auth_time_;
+  const bool secure_participant_user_data_;
+#endif
   XTypes::TypeLookupService_rch type_lookup_service_;
 
   // Participant:
@@ -401,7 +404,7 @@ private:
   const DCPS::MonotonicTime_t participant_discovered_at_;
   bool is_application_participant_;
 
-  void data_received(const DataSubmessage& data, const ParameterList& plist, const ACE_INET_Addr& from);
+  void data_received(const DataSubmessage& data, const ParameterList& plist, const DCPS::NetworkAddress& from);
 
   void match_unauthenticated(const DiscoveredParticipantIter& dp_iter);
 
@@ -482,10 +485,10 @@ private:
     void shorten_local_sender_delay_i();
     void write(WriteFlags flags);
     void write_i(WriteFlags flags);
-    void write_i(const DCPS::GUID_t& guid, const ACE_INET_Addr& local_address, WriteFlags flags);
-    void send(WriteFlags flags, const ACE_INET_Addr& local_address = ACE_INET_Addr());
-    const ACE_SOCK_Dgram& choose_send_socket(const ACE_INET_Addr& addr) const;
-    ssize_t send(const ACE_INET_Addr& addr, bool relay);
+    void write_i(const DCPS::GUID_t& guid, const DCPS::NetworkAddress& local_address, WriteFlags flags);
+    void send(WriteFlags flags, const DCPS::NetworkAddress& local_address = DCPS::NetworkAddress());
+    const ACE_SOCK_Dgram& choose_send_socket(const DCPS::NetworkAddress& addr) const;
+    ssize_t send(const DCPS::NetworkAddress& addr);
     void close(const DCPS::ReactorTask_rch& reactor_task);
     void dispose_unregister();
     bool open_unicast_socket(u_short port_common, u_short participant_id);
@@ -509,22 +512,23 @@ private:
 
     DCPS::WeakRcHandle<Spdp> outer_;
     Header hdr_;
+    UserTagSubmessage user_tag_;
     DataSubmessage data_;
     DCPS::SequenceNumber seq_;
     u_short uni_port_;
     ACE_SOCK_Dgram unicast_socket_;
     OPENDDS_STRING multicast_interface_;
-    ACE_INET_Addr multicast_address_;
+    DCPS::NetworkAddress multicast_address_;
     ACE_SOCK_Dgram_Mcast multicast_socket_;
 #ifdef ACE_HAS_IPV6
     u_short ipv6_uni_port_;
     ACE_SOCK_Dgram unicast_ipv6_socket_;
     OPENDDS_STRING multicast_ipv6_interface_;
-    ACE_INET_Addr multicast_ipv6_address_;
+    DCPS::NetworkAddress multicast_ipv6_address_;
     ACE_SOCK_Dgram_Mcast multicast_ipv6_socket_;
 #endif
     DCPS::MulticastManager multicast_manager_;
-    OPENDDS_SET(ACE_INET_Addr) send_addrs_;
+    DCPS::NetworkAddressSet send_addrs_;
     ACE_Message_Block buff_, wbuff_;
     typedef DCPS::PmfPeriodicTask<SpdpTransport> SpdpPeriodic;
     typedef DCPS::PmfSporadicTask<SpdpTransport> SpdpSporadic;
@@ -546,10 +550,8 @@ private:
     DCPS::RcHandle<SpdpSporadic> handshake_resend_task_;
     void send_relay(const DCPS::MonotonicTimePoint& now);
     DCPS::RcHandle<SpdpSporadic> relay_spdp_task_;
-    DCPS::FibonacciSequence<TimeDuration> relay_spdp_task_falloff_;
     void relay_stun_task(const DCPS::MonotonicTimePoint& now);
     DCPS::RcHandle<SpdpSporadic> relay_stun_task_;
-    DCPS::FibonacciSequence<TimeDuration> relay_stun_task_falloff_;
     ICE::ServerReflexiveStateMachine relay_srsm_;
     void process_relay_sra(ICE::ServerReflexiveStateMachine::StateChange);
     void disable_relay_stun_task();
@@ -557,11 +559,9 @@ private:
     bool network_is_unreachable_;
     bool ice_endpoint_added_;
 
-    DCPS::InternalTransportStatistics transport_statistics_;
-    DCPS::MonotonicTimePoint last_harvest;
+    DCPS::MonotonicTimePoint last_thread_status_harvest_;
     DCPS::ConfigReader_rch config_reader_;
     void on_data_available(DCPS::ConfigReader_rch reader);
-    DCPS::MessageDropper message_dropper_;
   };
 
   DCPS::RcHandle<SpdpTransport> tport_;
@@ -570,7 +570,7 @@ private:
   class SendStun : public DCPS::Job {
   public:
     SendStun(const DCPS::RcHandle<SpdpTransport>& tport,
-             const ACE_INET_Addr& address,
+             const DCPS::NetworkAddress& address,
              const STUN::Message& message)
       : tport_(tport)
       , address_(address)
@@ -579,7 +579,7 @@ private:
     void execute();
   private:
     DCPS::WeakRcHandle<SpdpTransport> tport_;
-    ACE_INET_Addr address_;
+    DCPS::NetworkAddress address_;
     STUN::Message message_;
   };
 
@@ -588,7 +588,7 @@ private:
   public:
     IceConnect(DCPS::RcHandle<Spdp> spdp,
                const ICE::GuidSetType& guids,
-               const ACE_INET_Addr& addr,
+               const DCPS::NetworkAddress& addr,
                bool connect)
       : spdp_(spdp)
       , guids_(guids)
@@ -599,7 +599,7 @@ private:
   private:
     DCPS::RcHandle<Spdp> spdp_;
     ICE::GuidSetType guids_;
-    ACE_INET_Addr addr_;
+    DCPS::NetworkAddress addr_;
     bool connect_;
   };
 #endif /* DDS_HAS_MINIMUM_BIT */

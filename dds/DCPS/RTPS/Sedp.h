@@ -42,11 +42,13 @@
 #include <dds/DCPS/TopicDetails.h>
 #include <dds/DCPS/AtomicBool.h>
 
+#include <dds/DCPS/transport/framework/MessageDropper.h>
 #include <dds/DCPS/transport/framework/TransportClient.h>
 #include <dds/DCPS/transport/framework/TransportDefs.h>
 #include <dds/DCPS/transport/framework/TransportInst_rch.h>
 #include <dds/DCPS/transport/framework/TransportRegistry.h>
 #include <dds/DCPS/transport/framework/TransportSendListener.h>
+#include <dds/DCPS/transport/framework/TransportStatistics.h>
 
 #include <dds/DdsDcpsInfrastructureC.h>
 #include <dds/DdsDcpsInfoUtilsC.h>
@@ -72,8 +74,240 @@ using DCPS::AtomicBool;
 using DCPS::GUID_UNKNOWN;
 
 class RtpsDiscovery;
+class RtpsDiscoveryConfig;
 class Spdp;
 class WaitForAcks;
+
+class RtpsDiscoveryCore {
+public:
+  RtpsDiscoveryCore(RcHandle<RtpsDiscoveryConfig> config,
+                    const String& transport_statistics_key);
+
+  void rtps_relay_only(bool flag)
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+    rtps_relay_only_ = flag;
+  }
+
+  bool rtps_relay_only() const
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+    return rtps_relay_only_;
+  }
+
+  void use_rtps_relay(bool flag)
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+    use_rtps_relay_ = flag;
+  }
+
+  bool use_rtps_relay() const
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+    return use_rtps_relay_;
+  }
+
+  bool from_relay(const DCPS::NetworkAddress& from) const
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+    return (rtps_relay_only_ || use_rtps_relay_) && from == spdp_rtps_relay_address_;
+  }
+
+  bool ignore_from_relay(const DCPS::NetworkAddress& from) const
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+    return (!(rtps_relay_only_ || use_rtps_relay_)) && from == spdp_rtps_relay_address_;
+  }
+
+#ifdef OPENDDS_SECURITY
+  void use_ice(bool flag)
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+    use_ice_ = flag;
+  }
+
+  bool use_ice() const
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+    return use_ice_;
+  }
+#endif
+
+  void spdp_rtps_relay_address(const DCPS::NetworkAddress& addr)
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+    spdp_rtps_relay_address_ = addr;
+  }
+
+  DCPS::NetworkAddress spdp_rtps_relay_address() const
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+    return spdp_rtps_relay_address_;
+  }
+
+  void reset_relay_spdp_task_falloff()
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+    relay_spdp_task_falloff_.set(sedp_heartbeat_period_);
+  }
+
+  TimeDuration advance_relay_spdp_task_falloff()
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+    relay_spdp_task_falloff_.advance(spdp_rtps_relay_send_period_);
+    return relay_spdp_task_falloff_.get();
+  }
+
+  void set_relay_spdp_task_falloff()
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+    relay_spdp_task_falloff_.set(spdp_rtps_relay_send_period_);
+  }
+
+  void spdp_stun_server_address(const DCPS::NetworkAddress& addr)
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+    spdp_stun_server_address_ = addr;
+  }
+
+  DCPS::NetworkAddress spdp_stun_server_address() const
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+    return spdp_stun_server_address_;
+  }
+
+  void reset_relay_stun_task_falloff()
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+    relay_stun_task_falloff_.set(sedp_heartbeat_period_);
+  }
+
+#ifdef OPENDDS_SECURITY
+  TimeDuration advance_relay_stun_task_falloff()
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+    relay_stun_task_falloff_.advance(ICE::Configuration::instance()->server_reflexive_address_period());
+    return relay_stun_task_falloff_.get();
+  }
+
+  void set_relay_stun_task_falloff()
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+    relay_stun_task_falloff_.set(ICE::Configuration::instance()->server_reflexive_address_period());
+  }
+#endif
+
+  void send(const DCPS::NetworkAddress& remote_address,
+            CORBA::Long key_kind,
+            ssize_t bytes)
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+    if (transport_statistics_.count_messages()) {
+      const DCPS::InternalMessageCountKey key(remote_address, key_kind, remote_address == spdp_rtps_relay_address_);
+      transport_statistics_.message_count[key].send(bytes);
+    }
+  }
+
+  void send_fail(const DCPS::NetworkAddress& remote_address,
+                 CORBA::Long key_kind,
+                 ssize_t bytes)
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+    if (transport_statistics_.count_messages()) {
+      const DCPS::InternalMessageCountKey key(remote_address, key_kind, remote_address == spdp_rtps_relay_address_);
+      transport_statistics_.message_count[key].send_fail(bytes);
+    }
+  }
+
+  void send_fail(const DCPS::NetworkAddress& remote_address,
+                 CORBA::Long key_kind,
+                 iovec iov[],
+                 int num_blocks)
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+    if (transport_statistics_.count_messages()) {
+      ssize_t bytes = 0;
+      for (int i = 0; i < num_blocks; ++i) {
+        bytes += iov[i].iov_len;
+      }
+      const DCPS::InternalMessageCountKey key(remote_address, key_kind, remote_address == spdp_rtps_relay_address_);
+      transport_statistics_.message_count[key].send_fail(bytes);
+    }
+  }
+
+  void recv(const DCPS::NetworkAddress& remote_address,
+            CORBA::Long key_kind,
+            ssize_t bytes)
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+    if (transport_statistics_.count_messages()) {
+      const DCPS::InternalMessageCountKey key(remote_address, key_kind, remote_address == spdp_rtps_relay_address_);
+      transport_statistics_.message_count[key].recv(bytes);
+    }
+  }
+
+  void reader_nack_count(const GUID_t& guid,
+                         ACE_CDR::ULong count)
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+    if (transport_statistics_.count_messages()) {
+      transport_statistics_.reader_nack_count[guid] += count;
+    }
+  }
+
+  void writer_resend_count(const GUID_t& guid,
+                           ACE_CDR::ULong count)
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+    if (transport_statistics_.count_messages()) {
+      transport_statistics_.writer_resend_count[guid] += count;
+    }
+  }
+
+  void append_transport_statistics(DCPS::TransportStatisticsSequence& seq)
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+    append(seq, transport_statistics_);
+    transport_statistics_.clear();
+  }
+
+  bool should_drop(ssize_t length) const
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+    return message_dropper_.should_drop(length);
+  }
+
+  bool should_drop(const iovec iov[],
+                   int n,
+                   ssize_t& length) const
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+    return message_dropper_.should_drop(iov, n, length);
+  }
+
+  void reload(const String& config_prefix)
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+    message_dropper_.reload(TheServiceParticipant->config_store(), config_prefix);
+    transport_statistics_.reload(TheServiceParticipant->config_store(), config_prefix);
+  }
+
+private:
+  mutable ACE_Thread_Mutex mutex_;
+  const TimeDuration sedp_heartbeat_period_;
+  const TimeDuration spdp_rtps_relay_send_period_;
+  bool rtps_relay_only_;
+  bool use_rtps_relay_;
+#ifdef OPENDDS_SECURITY
+  bool use_ice_;
+#endif
+  DCPS::NetworkAddress spdp_rtps_relay_address_;
+  DCPS::FibonacciSequence<TimeDuration> relay_spdp_task_falloff_;
+  DCPS::NetworkAddress spdp_stun_server_address_;
+  DCPS::FibonacciSequence<TimeDuration> relay_stun_task_falloff_;
+  DCPS::MessageDropper message_dropper_;
+  DCPS::InternalTransportStatistics transport_statistics_;
+};
 
 class Sedp : public virtual DCPS::RcEventHandler {
 public:
@@ -188,12 +422,6 @@ public:
 
   DCPS::WeakRcHandle<ICE::Endpoint> get_ice_endpoint();
 
-  void rtps_relay_only_now(bool f);
-  void use_rtps_relay_now(bool f);
-  void use_ice_now(bool f);
-  void rtps_relay_address(const DCPS::NetworkAddress& address);
-  void stun_server_address(const DCPS::NetworkAddress& address);
-
   DCPS::ReactorTask_rch reactor_task() const { return reactor_task_; }
 
   DCPS::JobQueue_rch job_queue() const { return job_queue_; }
@@ -266,6 +494,9 @@ public:
     const GUID_t& remote_entity, const XTypes::TypeInformation& remote_type_info,
     DCPS::TypeObjReqCond& cond);
 
+  RtpsDiscoveryCore& core() { return core_; }
+  const RtpsDiscoveryCore& core() const { return core_; }
+
 private:
   typedef OPENDDS_MAP_CMP(GUID_t, DiscoveredSubscription,
                           GUID_tKeyLessThan) DiscoveredSubscriptionMap;
@@ -286,6 +517,13 @@ private:
   bool remote_has_local_endpoint_token_i(const GUID_t& local, bool local_tokens_sent,
                                          const GUID_t& remote) const;
 #endif
+
+  // These are called by Spdp with the lock.
+  void rtps_relay_only_now(bool f);
+  void use_rtps_relay_now(bool f);
+  void use_ice_now(bool f);
+  void rtps_relay_address(const DCPS::NetworkAddress& address);
+  void stun_server_address(const DCPS::NetworkAddress& address);
 
   void type_lookup_init(DCPS::ReactorInterceptor_rch reactor_interceptor)
   {
@@ -970,8 +1208,6 @@ protected:
   bool handle_datareader_crypto_tokens(const DDS::Security::ParticipantVolatileMessageSecure& msg);
   bool handle_datawriter_crypto_tokens(const DDS::Security::ParticipantVolatileMessageSecure& msg);
 
-  DDS::DomainId_t get_domain_id() const;
-
   struct PublicationAgentInfoListener : public ICE::AgentInfoListener
   {
     Sedp& sedp;
@@ -991,6 +1227,8 @@ protected:
   };
 
 #endif
+
+  DDS::DomainId_t get_domain_id() const;
 
   void add_assoc_i(const DCPS::GUID_t& local_guid, const LocalPublication& lpub,
                    const DCPS::GUID_t& remote_guid, const DiscoveredSubscription& dsub);
@@ -1229,7 +1467,8 @@ protected:
 
   Spdp& spdp_;
   ACE_Thread_Mutex& lock_;
-  GUID_t participant_id_;
+  const GUID_t participant_id_;
+  const CORBA::ULong participant_flags_;
   RepoIdSet ignored_guids_;
   unsigned int publication_counter_, subscription_counter_, topic_counter_;
   LocalPublicationMap local_publications_;
@@ -1383,6 +1622,7 @@ protected:
     const ReaderAssociationRecord_rch record_;
   };
 
+  RtpsDiscoveryCore core_;
 };
 
 bool locators_changed(const ParticipantProxy_t& x,

@@ -8,7 +8,7 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  VCPKG_GIT_COMMIT: 8eb57355a4ffb410a2e94c07b4dca2dffbee8e50
+  VCPKG_GIT_COMMIT: 898b728edc5e0d12b50015f9cd18247c4257a3eb
 
 jobs:
 
@@ -40,14 +40,14 @@ jobs:
         cd OpenDDS
         ./configure --optimize --no-debug --static --tests --qt
         tools/scripts/show_build_config.pl
-    - uses: ammaraskar/gcc-problem-matcher@0.2.0
+    - uses: ammaraskar/gcc-problem-matcher@0.3.0
     - name: build
       shell: bash
       run: |
         cd OpenDDS
         make -j4 ishapes
     - name: upload ishapes artifact
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: ${{ github.job }}_artifact
         path: OpenDDS/examples/DCPS/ishapes/ishapes
@@ -92,9 +92,9 @@ jobs:
         cd OpenDDS
         perl configure --optimize --no-debug --static --tests ^
           "--qt=%VCPKG_INSTALLED_DIR%/x64-windows" ^
-          "--mpcopts=-value_template platforms=x64" ^
-          "--mpcopts=-value_template configurations=Release" ^
-          "--mpcopts=-value_template Release::runtime_library=MultiThreadedDLL"
+          "--mpc:value_template platforms=x64" ^
+          "--mpc:value_template configurations=Release" ^
+          "--mpc:value_template Release::runtime_library=MultiThreadedDLL"
         tools\scripts\show_build_config.pl
     - name: build
       shell: cmd
@@ -103,7 +103,7 @@ jobs:
         call setenv.cmd
         msbuild -p:Configuration=Release,Platform=x64 -m -t:ishapes DDS_TAOv2_all.sln
     - name: upload ishapes artifact
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: ${{ github.job }}_artifact
         path: OpenDDS/examples/DCPS/ishapes/Static_Release/ishapes.exe

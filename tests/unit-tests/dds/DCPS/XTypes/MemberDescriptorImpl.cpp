@@ -17,8 +17,8 @@ TEST(dds_DCPS_XTypes_MemberDescriptorImpl, MemberDescriptorImpl_ctor)
   EXPECT_EQ(md.id(), MEMBER_ID_INVALID);
   EXPECT_EQ(md.type(), DDS::DynamicType::_nil());
   EXPECT_STREQ(md.default_value(), "");
-  EXPECT_EQ(md.index(), 0);
-  EXPECT_EQ(md.label().length(), 0);
+  EXPECT_EQ(md.index(), 0U);
+  EXPECT_EQ(md.label().length(), 0U);
   EXPECT_EQ(md.try_construct_kind(), DDS::DISCARD);
   EXPECT_FALSE(md.is_key());
   EXPECT_FALSE(md.is_optional());

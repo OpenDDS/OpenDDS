@@ -12,7 +12,6 @@
 #include "FailoverListener.h"
 #include "dds/DCPS/Service_Participant.h"
 #include "dds/DCPS/RepoIdBuilder.h"
-#include "dds/DCPS/ConfigUtils.h"
 #include "dds/DCPS/DCPS_Utils.h"
 #include "dds/DCPS/BuiltInTopicUtils.h"
 
@@ -136,7 +135,7 @@ namespace DCPS {
 
 InfoRepoDiscovery::InfoRepoDiscovery(const String& name)
   : name_(name)
-  , config_prefix_(ConfigPair::canonicalize("OPENDDS_REPOSITORY_" + name))
+  , config_prefix_(ConfigPair::canonicalize("REPOSITORY_" + name))
   , use_bidir_giop_(TheServiceParticipant->use_bidir_giop())
   , orb_from_user_(false)
   , config_store_(make_rch<ConfigStoreImpl>(TheServiceParticipant->config_topic()))
@@ -147,7 +146,7 @@ InfoRepoDiscovery::InfoRepoDiscovery(const String& name)
 InfoRepoDiscovery::InfoRepoDiscovery(const String& name,
                                      const DCPSInfo_var& info)
   : name_(name)
-  , config_prefix_(ConfigPair::canonicalize("OPENDDS_REPOSITORY_" + name))
+  , config_prefix_(ConfigPair::canonicalize("REPOSITORY_" + name))
   , info_(info)
   , use_bidir_giop_(TheServiceParticipant->use_bidir_giop())
   , orb_from_user_(false)
@@ -290,7 +289,7 @@ String
 InfoRepoDiscovery::ior() const
 {
   return TheServiceParticipant->config_store()->get(config_key("RepositoryIor").c_str(),
-                                                    (key() == Discovery::DEFAULT_REPO) ? TheServiceParticipant->config_store()->get(OPENDDS_COMMON_DCPS_INFO_REPO, "file://repo.ior") : "");
+                                                    (key() == Discovery::DEFAULT_REPO) ? TheServiceParticipant->config_store()->get(COMMON_DCPS_INFO_REPO, "file://repo.ior") : "");
 }
 
 TransportConfig_rch
@@ -946,12 +945,12 @@ InfoRepoDiscovery::removeDataWriterRemote(const GUID_t& publicationId)
 }
 
 int
-InfoRepoDiscovery::Config::discovery_config(ACE_Configuration_Heap&)
+InfoRepoDiscovery::Config::discovery_config()
 {
   const Service_Participant::RepoKeyDiscoveryMap& discoveryMap = TheServiceParticipant->discoveryMap();
 
   typedef OPENDDS_VECTOR(String) VecType;
-  const VecType cseq = TheServiceParticipant->config_store()->get_section_names("OPENDDS_REPOSITORY");
+  const VecType cseq = TheServiceParticipant->config_store()->get_section_names("REPOSITORY");
   for (VecType::const_iterator pos = cseq.begin(), limit = cseq.end(); pos != limit; ++pos) {
     if (discoveryMap.find(*pos) == discoveryMap.end()) {
       InfoRepoDiscovery_rch discovery(make_rch<InfoRepoDiscovery>(*pos));
@@ -1028,7 +1027,8 @@ class InfoRepoType : public TransportType {
 public:
   const char* name() { return "repository"; }
 
-  TransportInst_rch new_inst(const std::string&)
+  TransportInst_rch new_inst(const std::string&,
+                             bool)
   {
     return TransportInst_rch();
   }

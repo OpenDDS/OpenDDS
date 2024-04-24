@@ -248,35 +248,35 @@ The CMake package can provide library targets that can be linked using `target_l
 
 .. cmake:tgt:: OpenDDS::Rtps
 
-  :ref:`RTPS Discovery <introduction--peer-to-peer-discovery-with-rtps>`
+  :ref:`rtps-disc`
 
 .. cmake:tgt:: OpenDDS::InfoRepoDiscovery
 
-  :ref:`InfoRepo Discovery <introduction--centralized-discovery-with-dcpsinforepo>`
+  :ref:`inforepo-disc`
 
 .. cmake:tgt:: OpenDDS::Rtps_Udp
 
-  :ref:`RTPS/UDP Transport <run_time_configuration--rtps-udp-transport-configuration-options>`
+  :ref:`rtps-udp-transport`
 
 .. cmake:tgt:: OpenDDS::Multicast
 
-  :ref:`Multicast Transport <run_time_configuration--ip-multicast-transport-configuration-options>`
+  :ref:`multicast-transport`
 
 .. cmake:tgt:: OpenDDS::Shmem
 
-  :ref:`Shared Memory Transport <run_time_configuration--shared-memory-transport-configuration-options>`
+  :ref:`shmem-transport`
 
 .. cmake:tgt:: OpenDDS::Tcp
 
-  :ref:`TCP Transport <run_time_configuration--tcp-ip-transport-configuration-options>`
+  :ref:`tcp-transport`
 
 .. cmake:tgt:: OpenDDS::Udp
 
-  :ref:`UDP Transport <run_time_configuration--udp-ip-transport-configuration-options>`
+  :ref:`udp-transport`
 
 .. cmake:tgt:: OpenDDS::Security
 
-  :doc:`/devguide/dds_security`
+  :ref:`sec`
 
 .. cmake:tgt:: OpenDDS::RtpsRelayLib
 
@@ -285,50 +285,50 @@ The CMake package can provide library targets that can be linked using `target_l
   .. versionadded:: 3.25
 
 .. cmake:tgt:: ACE::ACE
-  :nocontentsentry:
+  :no-contents-entry:
 
   Required
 
 .. cmake:tgt:: ACE::XML_Utils
-  :nocontentsentry:
+  :no-contents-entry:
 
 .. cmake:tgt:: TAO::TAO
-  :nocontentsentry:
+  :no-contents-entry:
 
   Required
 
 .. cmake:tgt:: TAO::IDL_FE
-  :nocontentsentry:
+  :no-contents-entry:
 
 .. cmake:tgt:: TAO::AnyTypeCode
-  :nocontentsentry:
+  :no-contents-entry:
 
 .. cmake:tgt:: TAO::BiDirGIOP
-  :nocontentsentry:
+  :no-contents-entry:
 
 .. cmake:tgt:: TAO::CodecFactory
-  :nocontentsentry:
+  :no-contents-entry:
 
 .. cmake:tgt:: TAO::IORManip
-  :nocontentsentry:
+  :no-contents-entry:
 
 .. cmake:tgt:: TAO::IORTable
-  :nocontentsentry:
+  :no-contents-entry:
 
 .. cmake:tgt:: TAO::ImR_Client
-  :nocontentsentry:
+  :no-contents-entry:
 
 .. cmake:tgt:: TAO::PI
-  :nocontentsentry:
+  :no-contents-entry:
 
 .. cmake:tgt:: TAO::PortableServer
-  :nocontentsentry:
+  :no-contents-entry:
 
 .. cmake:tgt:: TAO::Svc_Utils
-  :nocontentsentry:
+  :no-contents-entry:
 
 .. cmake:tgt:: TAO::Valuetype
-  :nocontentsentry:
+  :no-contents-entry:
 
 .. _cmake-executables:
 
@@ -345,21 +345,31 @@ The CMake package can provide executable targets that can be called manually fro
 
 .. cmake:tgt:: TAO::tao_idl
 
-  Required
+  Required, :term:`tao_idl`
 
 .. cmake:tgt:: OpenDDS::opendds_idl
 
-  Required
+  Required, :ref:`opendds_idl`
 
 .. cmake:tgt:: OpenDDS::DCPSInfoRepo
 
+  :ref:`inforepo`
+
 .. cmake:tgt:: OpenDDS::RtpsRelay
+
+  :ref:`rtpsrelay`
 
 .. cmake:tgt:: OpenDDS::dcpsinfo_dump
 
+  Utility for :ref:`inforepo`
+
 .. cmake:tgt:: OpenDDS::inspect
 
+  :ghfile:`tools/inspect/README.rst`
+
 .. cmake:tgt:: OpenDDS::repoctl
+
+  Utility for :ref:`inforepo`
 
 Functions
 =========
@@ -414,16 +424,24 @@ Functions
 
   .. cmake:func:arg:: ALWAYS_GENERATE_LIB_EXPORT_HEADER TRUE|FALSE
 
-    If ``TRUE``, an header for exporting symbols in a shared library will be always generated as long the target is `some sort of library <https://cmake.org/cmake/help/latest/prop_tgt/TYPE.html>`__.
-    This is only really useful if the target is a library that uses the export header itself and also needs to be built as a static library as well.
+    If ``TRUE``, a header for exporting symbols in a shared library will be always generated as long the target is `some sort of library <https://cmake.org/cmake/help/latest/prop_tgt/TYPE.html>`__.
     If ``FALSE``, then it will only be done if the target is a shared library.
     The default is set by :cmake:var:`OPENDDS_ALWAYS_GENERATE_LIB_EXPORT_HEADER`.
 
     .. versionadded:: 3.20
 
+  .. cmake:func:arg:: EXPORT_HEADER_DIR <header-dir>
+
+    Where the export header is placed relative to the other generated files.
+    The value is passed to :cmake:func:`opendds_export_header(DIR)`.
+
+    .. versionadded:: 3.28
+
   .. cmake:func:arg:: USE_EXPORT <export-header>;<export-macro>
 
     Pass a CMake list (``;``-delimited) of an existing export header and export macro to use in the generated code.
+    This is the same format as :cmake:func:`opendds_export_header(USE_EXPORT_VAR)`, but is intended for use with a custom export header.
+    If there are multiple calls to :cmake:func:`opendds_target_sources` on the same target, only the first ``USE_EXPORT`` is used.
 
     .. versionadded:: 3.25
 
@@ -477,7 +495,7 @@ Functions
   After ``opendds_target_sources`` is run on a target, it will have these target properties set on it:
 
   .. cmake:prop:: OPENDDS_LANGUAGE_MAPPINGS
-    :nocontentsentry:
+    :no-contents-entry:
 
     This holds the IDL language mappings used in the target based on what is passed to :cmake:func:`opendds_target_sources(OPENDDS_IDL_OPTIONS)`.
 
@@ -506,7 +524,7 @@ Functions
   .. _cmake-files-props:
 
   .. cmake:prop:: OPENDDS_GENERATED_DIRECTORY
-    :nocontentsentry:
+    :no-contents-entry:
 
     The is the directory where generated files have been placed.
     This is an absolute path and is not exported with the target.
@@ -524,40 +542,40 @@ Functions
   - These properties are not exported with the target because the paths may not be valid any more if the build directory has been removed or the export is being used on another machine.
 
   .. cmake:prop:: OPENDDS_PASSED_IDL_INTERFACE_FILES
-    :nocontentsentry:
+    :no-contents-entry:
 
     The ``PUBLIC`` and ``INTERFACE`` scoped IDL files passed.
 
     .. versionadded:: 3.20
 
   .. cmake:prop:: OPENDDS_GENERATED_IDL_INTERFACE_FILES
-    :nocontentsentry:
+    :no-contents-entry:
 
     The IDL files generated from the IDL files in :cmake:prop:`OPENDDS_PASSED_IDL_INTERFACE_FILES`.
 
     .. versionadded:: 3.20
 
   .. cmake:prop:: OPENDDS_ALL_IDL_INTERFACE_FILES
-    :nocontentsentry:
+    :no-contents-entry:
 
     Combination of :cmake:prop:`OPENDDS_PASSED_IDL_INTERFACE_FILES` and :cmake:prop:`OPENDDS_GENERATED_IDL_INTERFACE_FILES`.
 
   .. cmake:prop:: OPENDDS_GENERATED_HEADER_FILES
-    :nocontentsentry:
+    :no-contents-entry:
 
     The ``.h`` and ``.inl`` files generated from :cmake:prop:`OPENDDS_ALL_IDL_INTERFACE_FILES`.
 
     .. versionadded:: 3.20
 
   .. cmake:prop:: OPENDDS_ALL_GENERATED_INTERFACE_FILES
-    :nocontentsentry:
+    :no-contents-entry:
 
     Combination of :cmake:prop:`OPENDDS_GENERATED_IDL_INTERFACE_FILES` and :cmake:prop:`OPENDDS_GENERATED_HEADER_FILES`.
 
     .. versionadded:: 3.20
 
   .. cmake:prop:: OPENDDS_ALL_INTERFACE_FILES
-    :nocontentsentry:
+    :no-contents-entry:
 
     All the ``INTERFACE`` and ``PUBLIC`` scoped files that were passed in or generated.
 
@@ -582,7 +600,10 @@ Functions
 
   ::
 
-    opendds_export_header(<target> [USE_EXPORT_VAR <use-export-var-name>])
+    opendds_export_header(<target>
+      [USE_EXPORT_VAR <use-export-var-name>]
+      [DIR <dir-path>]
+    )
 
   Generates a header that is compatible with `ACE's generate_export_file.pl <https://github.com/DOCGroup/ACE_TAO/blob/master/ACE/bin/generate_export_file.pl>`__ for exporting symbols in shared libraries.
   The header will able to be included as ``<target>_export.h`` and the macro that can be used to export symbols will be named ``<target>_Export``.
@@ -591,6 +612,15 @@ Functions
   .. cmake:func:arg:: USE_EXPORT_VAR <use-export-var-name>
 
     Set a variable with the given name that contains a list with the location of the generated export header and the macro name to export a symbol.
+    These values could be passed to :cmake:func:`opendds_target_sources(USE_EXPORT)`, but this shouldn't be necessary because these values are saved on the target on the first call of :cmake:func:`opendds_target_sources` or :cmake:func:`opendds_export_header`.
+
+  .. cmake:func:arg:: DIR <dir-path>
+
+    Where the export header is placed relative to the other generated files.
+    By default the generated export header is put in the root of the include base.
+    See :cmake:func:`opendds_target_sources(EXPORT_HEADER_DIR)` for how to pass this argument from there.
+
+    .. versionadded:: 3.28 to replace the broken and undocumented ``INCLUDE_BASE`` argument.
 
   .. versionadded:: 3.25
 
@@ -748,56 +778,57 @@ Dependencies
 ^^^^^^^^^^^^
 
 .. cmake:var:: OPENDDS_ACE
-  :nocontentsentry:
+  :no-contents-entry:
 
   Path to :ref:`deps-ace`, usually :envvar:`ACE_ROOT`
 
 .. cmake:var:: OPENDDS_ACE_VERSION
-  :nocontentsentry:
+  :no-contents-entry:
 
   The version of ACE being used.
 
   .. versionadded:: 3.27
 
 .. cmake:var:: OPENDDS_TAO
-  :nocontentsentry:
+  :no-contents-entry:
 
   Path to :ref:`deps-tao`, usually :envvar:`TAO_ROOT`
 
 .. cmake:var:: OPENDDS_TAO_VERSION
-  :nocontentsentry:
+  :no-contents-entry:
 
   The version of TAO being used.
 
   .. versionadded:: 3.27
 
 .. cmake:var:: OPENDDS_OPENSSL
-  :nocontentsentry:
+  :no-contents-entry:
 
   Path to :ref:`deps-openssl`
 
 .. cmake:var:: OPENDDS_GTEST
-  :nocontentsentry:
+  :no-contents-entry:
 
   Path to :ref:`deps-gtest`
 
 .. cmake:var:: OPENDDS_JAVA
-  :nocontentsentry:
+  :no-contents-entry:
 
   Path to :ref:`deps-java`
+  Currently unsupported.
 
 .. cmake:var:: OPENDDS_QT
-  :nocontentsentry:
+  :no-contents-entry:
 
   Path to :ref:`deps-qt`
 
 .. cmake:var:: OPENDDS_RAPIDJSON
-  :nocontentsentry:
+  :no-contents-entry:
 
   Path to :ref:`deps-rapidjson`
 
 .. cmake:var:: OPENDDS_XERCES3
-  :nocontentsentry:
+  :no-contents-entry:
 
   Path to :ref:`deps-xerces`
 
@@ -820,111 +851,121 @@ Features
 ^^^^^^^^
 
 .. cmake:var:: OPENDDS_CXX11
-  :nocontentsentry:
+  :no-contents-entry:
 
   ACE/TAO and OpenDDS were built with C++11 or later.
   Default depends on the compiler being used.
   Has no effect when building OpenDDS using CMake.
 
+.. cmake:var:: OPENDDS_CXX_STD
+
+  .. versionadded:: 3.28
+
+  If defined, then this value is prefixed with ``cxx_std_`` and passed to `target_compile_features <https://cmake.org/cmake/help/latest/command/target_compile_features.html>`__ for all targets.
+  The valid values are the standards in `CMAKE_CXX_KNOWN_FEATURES <https://cmake.org/cmake/help/latest/prop_gbl/CMAKE_CXX_KNOWN_FEATURES.html#high-level-meta-features-indicating-c-standard-support>`__ without the leading ``cxx_std_``.
+  This is the minimum C++ standard required to use the ACE, TAO, and OpenDDS libraries.
+  When building OpenDDS using CMake, it's also the minimum C++ standard used to build OpenDDS.
+  The default depends on the version of ACE being used.
+
 .. cmake:var:: OPENDDS_DEBUG
-  :nocontentsentry:
+  :no-contents-entry:
 
   Default depends on `CMAKE_BUILD_TYPE <https://cmake.org/cmake/help/latest/variable/CMAKE_BUILD_TYPE.html>`__.
   When building OpenDDS using CMake ``CMAKE_BUILD_TYPE`` should be used.
 
 .. cmake:var:: OPENDDS_OPTIMIZE
-  :nocontentsentry:
+  :no-contents-entry:
 
   Default depends on `CMAKE_BUILD_TYPE <https://cmake.org/cmake/help/latest/variable/CMAKE_BUILD_TYPE.html>`__.
   When building OpenDDS using CMake ``CMAKE_BUILD_TYPE`` should be used.
 
 .. cmake:var:: OPENDDS_INLINE
-  :nocontentsentry:
+  :no-contents-entry:
 
   ``.inl`` files are included in header files.
   Default is ``ON``
   Has no effect when building OpenDDS using CMake.
 
-.. cmake:var:: OPENDDS_VERSIONED_NAMEPSACE
-  :nocontentsentry:
+.. cmake:var:: OPENDDS_VERSIONED_NAMESPACE
+  :no-contents-entry:
 
   ACE/TAO and OpenDDS have versioned namespaces.
   Default is ``OFF``
 
 .. cmake:var:: OPENDDS_STATIC
-  :nocontentsentry:
+  :no-contents-entry:
 
   ACE/TAO are built as static libraries.
   Default depends on `BUILD_SHARED_LIBS <https://cmake.org/cmake/help/latest/variable/BUILD_SHARED_LIBS.html>`__.
   When building OpenDDS using CMake ``BUILD_SHARED_LIBS`` should be used.
 
 .. cmake:var:: OPENDDS_WCHAR
-  :nocontentsentry:
+  :no-contents-entry:
 
   ACE/TAO prefers using wide characters.
   Default is ``OFF``
 
 .. cmake:var:: OPENDDS_TAO_IIOP
-  :nocontentsentry:
+  :no-contents-entry:
 
   Default is ``ON``
 
 .. cmake:var:: OPENDDS_TAO_OPTIMIZE_COLLOCATED_INVOCATIONS
-  :nocontentsentry:
+  :no-contents-entry:
 
   Default is ``ON``
 
 .. cmake:var:: OPENDDS_BUILT_IN_TOPICS
-  :nocontentsentry:
+  :no-contents-entry:
 
   Default is ``ON``
 
 .. cmake:var:: OPENDDS_OBJECT_MODEL_PROFILE
-  :nocontentsentry:
+  :no-contents-entry:
 
   Default is ``ON``
 
 .. cmake:var:: OPENDDS_PERSISTENCE_PROFILE
-  :nocontentsentry:
+  :no-contents-entry:
 
   Default is ``ON``
 
 .. cmake:var:: OPENDDS_OWNERSHIP_PROFILE
-  :nocontentsentry:
+  :no-contents-entry:
 
   Default is ``ON``
 
 .. cmake:var:: OPENDDS_OWNERSHIP_KIND_EXCLUSIVE
-  :nocontentsentry:
+  :no-contents-entry:
 
   Default is the value of :cmake:var:`OPENDDS_OWNERSHIP_PROFILE`.
 
 .. cmake:var:: OPENDDS_CONTENT_SUBSCRIPTION
-  :nocontentsentry:
+  :no-contents-entry:
 
   Default is ``ON``
 
 .. cmake:var:: OPENDDS_CONTENT_FILTERED_TOPIC
-  :nocontentsentry:
+  :no-contents-entry:
 
   Default is the value of :cmake:var:`OPENDDS_CONTENT_SUBSCRIPTION`.
 
 .. cmake:var:: OPENDDS_MULTI_TOPIC
-  :nocontentsentry:
+  :no-contents-entry:
 
   Default is the value of :cmake:var:`OPENDDS_CONTENT_SUBSCRIPTION`.
 
 .. cmake:var:: OPENDDS_QUERY_CONDITION
-  :nocontentsentry:
+  :no-contents-entry:
 
   Default is the value of :cmake:var:`OPENDDS_CONTENT_SUBSCRIPTION`.
 
 .. cmake:var:: OPENDDS_SECURITY
-  :nocontentsentry:
+  :no-contents-entry:
 
   Default is ``OFF``
 
 .. cmake:var:: OPENDDS_SAFETY_PROFILE
-  :nocontentsentry:
+  :no-contents-entry:
 
   Default is ``OFF``
