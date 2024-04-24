@@ -341,14 +341,14 @@ bool ts_generator::generate_ts(AST_Type* node, UTL_ScopedName* name)
       "  ";
     if (op_ret_is_ptr) {
       be_global->impl_ << short_cxx_name << "* value = new " << short_cxx_name << ";\n"
-        "  if (" << ts_base << "::create_sample(value, src)) {\n"
+        "  if (" << ts_base << "::create_sample_i(value, src)) {\n"
         "    return value;\n"
         "  }\n"
         "  delete value;\n"
         "  return 0;\n";
     } else {
       be_global->impl_ << short_cxx_name << " value;\n"
-        "  " << ts_base << "::create_sample(&value, src);\n"
+        "  " << ts_base << "::create_sample_i(&value, src);\n"
         "  return value;\n";
     }
     be_global->impl_ <<

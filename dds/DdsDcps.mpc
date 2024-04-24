@@ -71,6 +71,7 @@ project(OpenDDS_Dcps): core, coverage_optional, \
     DdsDcpsTopicS.h
     DdsDcpsTypeSupportExtS.h
     DdsDynamicDataS.h
+    DdsDynamicDataSeqS.h
     DdsDynamicTypeSupportS.h
   }
 

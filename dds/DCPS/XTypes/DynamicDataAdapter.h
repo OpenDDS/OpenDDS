@@ -56,7 +56,7 @@ class DynamicDataAdapterImpl;
  * TODO:
  * - Support direct array methods, like get_int32_values
  *   - Part of this is accessing all types as complex value.
- * - Implement equals, clear_value, clear_all_values, and clear_nonkey_values
+ * - Implement equals, clear_value, and clear_nonkey_values
  * - Respect bounds of strings and sequences.
  * - Add a way to check if using get_complex_value on a complex member of a
  *   union that isn't selected. Doing this will cause a segfault. It should
@@ -75,10 +75,8 @@ public:
   virtual DDS::MemberId get_member_id_at_index_impl(DDS::UInt32);
   DDS::MemberId get_member_id_at_index(DDS::UInt32 index);
 
-  DDS::ReturnCode_t clear_all_values();
   DDS::ReturnCode_t clear_nonkey_values();
   DDS::ReturnCode_t clear_value(DDS::MemberId);
-  DDS::DynamicData_ptr clone() = 0;
 
   DDS::ReturnCode_t get_int8_value(CORBA::Int8& value,
                                    DDS::MemberId id)

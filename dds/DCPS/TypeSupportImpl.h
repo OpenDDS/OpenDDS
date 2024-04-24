@@ -227,7 +227,7 @@ public:
   /// the type is "variable length". If it has something like a sequence then
   /// it's variable length and returns a pointer else it's fixed and returns on
   /// the stack. opendds_idl will wrap this in the correct form.
-  bool create_sample(NativeType* dest, DDS::DynamicData_ptr src)
+  bool create_sample_i(NativeType* dest, DDS::DynamicData_ptr src)
   {
     OpenDDS::DCPS::set_default(*dest);
 #  if OPENDDS_HAS_DYNAMIC_DATA_ADAPTOR
@@ -237,7 +237,7 @@ public:
       return true;
     }
     if (log_level >= LogLevel::Warning) {
-      ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: TypeSupportImpl_T::create_sample: "
+      ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: TypeSupportImpl_T::create_sample_i: "
         "failed to copy from DynamicData: %C\n", retcode_to_string(rc)));
     }
 #  else

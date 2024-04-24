@@ -41,6 +41,7 @@ BE_post_init(char *[], long)
   DRV_cpp_putarg("-D__OPENDDS_IDL_HAS_ANNOTATIONS");
   DRV_cpp_putarg("-DOPENDDS_HIDE_DYNAMIC_DATA");
 
+  // If adding or changing annotations here, they should also be copied into opendds_idl
   idl_global->eval(
     "module OpenDDS {module internal {@annotation hidden_op_in_java {string impl;};};};\n");
 }
