@@ -118,7 +118,7 @@ sub do_cached_parse {
   my %macros = (
     __OPENDDS_IDL => 1,
     __OPENDDS_MPC => 1,
-    OPENDDS_HIDE_DYNMIC_DATA => 1,
+    OPENDDS_HIDE_DYNAMIC_DATA => 1,
   );
   my %mparams;
   my @include;

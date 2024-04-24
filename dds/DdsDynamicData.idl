@@ -7,15 +7,15 @@
 #define OPENDDS_DDS_DYNAMIC_DATA_IDL
 
 #ifndef OPENDDS_SAFETY_PROFILE
-#  ifndef OPENDDS_HIDE_DYNMIC_DATA
+#  ifndef OPENDDS_HIDE_DYNAMIC_DATA
 #    include <dds/DdsDcpsInfrastructure.idl>
 #    include <dds/DdsDcpsDomain.idl>
 #    include <dds/DdsDynamicDataSeq.idl>
-#  endif // OPENDDS_HIDE_DYNMIC_DATA
+#  endif
 
 module DDS {
   local interface DynamicType;
-#  ifndef OPENDDS_HIDE_DYNMIC_DATA
+#  ifndef OPENDDS_HIDE_DYNAMIC_DATA
   valuetype TypeDescriptor;
 
   typedef sequence<string> IncludePathSeq;
@@ -158,11 +158,11 @@ module DDS {
 
     void clear();
   };
-#  endif // OPENDDS_HIDE_DYNMIC_DATA
+#  endif // OPENDDS_HIDE_DYNAMIC_DATA
 
   local interface DynamicData;
 
-#  ifndef OPENDDS_HIDE_DYNMIC_DATA
+#  ifndef OPENDDS_HIDE_DYNAMIC_DATA
   local interface DynamicDataFactoryInterf {
     // Implemented in C++
     // static DynamicDataFactory get_instance();
@@ -403,7 +403,7 @@ module DDS {
                                          in MemberId id,
                                          in WstringSeq value);
   }; // local interface DynamicData
-#  endif // OPENDDS_HIDE_DYNMIC_DATA
+#  endif // OPENDDS_HIDE_DYNAMIC_DATA
 };
 
 #endif // OPENDDS_SAFETY_PROFILE
