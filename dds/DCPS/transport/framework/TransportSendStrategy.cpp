@@ -81,7 +81,8 @@ TransportSendStrategy::TransportSendStrategy(
     transport_(transport),
     graceful_disconnecting_(false),
     link_released_(true),
-    send_buffer_(0)
+    send_buffer_(0),
+    is_sending_(GUID_UNKNOWN)
 {
   DBG_ENTRY_LVL("TransportSendStrategy","TransportSendStrategy",6);
 
@@ -1088,6 +1089,7 @@ TransportSendStrategy::send(TransportQueueElement* element, bool relink)
 
       // Loop for sending 'element', in fragments if needed
       bool first_pkt = true; // enter the loop 1st time through unconditionally
+      BeginEndSend bes(*this, element->publication_id());
       for (TransportQueueElement* next_fragment = 0;
            (first_pkt || next_fragment)
            && (mode_ == MODE_DIRECT || mode_ == MODE_TERMINATED);) {

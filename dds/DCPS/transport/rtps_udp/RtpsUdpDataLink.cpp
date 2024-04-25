@@ -1460,11 +1460,18 @@ RtpsUdpDataLink::RtpsWriter::send_heartbeats(const MonotonicTimePoint& /*now*/)
   }
 
   MetaSubmessageVec meta_submessages;
-  gather_heartbeats_i(meta_submessages);
+  const bool not_sending = !link->send_strategy()->is_sending(id_);
+  if (not_sending) {
+    gather_heartbeats_i(meta_submessages);
+  }
 
   if (!preassociation_readers_.empty() || !lagging_readers_.empty()) {
     heartbeat_->schedule(fallback_.get());
-    fallback_.advance();
+    if (not_sending) {
+      fallback_.advance();
+    } else {
+      fallback_.set(initial_fallback_);
+    }
   } else {
     fallback_.set(initial_fallback_);
   }
