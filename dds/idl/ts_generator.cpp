@@ -424,7 +424,7 @@ bool ts_generator::gen_struct(AST_Structure* node, UTL_ScopedName* name,
 }
 
 bool ts_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
-  const std::vector<AST_UnionBranch*>& branches, AST_Type* discriminator, const char*)
+  const std::vector<AST_UnionBranch*>&, AST_Type*, const char*)
 {
   return generate_ts(node, name);
 }
