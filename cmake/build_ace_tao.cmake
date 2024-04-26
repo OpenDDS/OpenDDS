@@ -1,9 +1,5 @@
 include(ExternalProject)
 
-if(_OPENDDS_MPC_TYPE STREQUAL gnuace)
-  set(_OPENDDS_TAO_MPC_NAME_IS_TAO_TARGET TRUE CACHE INTERNAL "")
-endif()
-
 if(OPENDDS_JUST_BUILD_HOST_TOOLS)
   set(ws "${OPENDDS_BUILD_DIR}/host-tools.mwc")
   file(WRITE "${ws}"
