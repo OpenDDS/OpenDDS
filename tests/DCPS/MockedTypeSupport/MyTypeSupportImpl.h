@@ -66,6 +66,7 @@ public:
 #endif
 
   size_t key_count() const { return 0; }
+  bool is_dcps_key(const char*) const { return false; }
 
   void representations_allowed_by_type(DDS::DataRepresentationIdSeq& seq);
 
