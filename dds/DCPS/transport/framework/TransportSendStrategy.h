@@ -326,7 +326,14 @@ public:
 
   /// Access the current sending mode.
   SendMode mode() const;
-protected:
+
+  bool is_sending(const GUID_t& guid) const
+  {
+    GuardType g(is_sending_lock_);
+    return is_sending_ == guid;
+  }
+
+ protected:
   /// Implement framework chain visitations to remove a sample.
   virtual RemoveResult do_remove_sample(const GUID_t& pub_id,
     const TransportQueueElement::MatchCriteria& criteria, bool remove_all = false);
@@ -437,6 +444,26 @@ private:
 
   /// Current transport packet header.
   TransportHeader header_;
+
+  struct BeginEndSend {
+    BeginEndSend(TransportSendStrategy& tss,
+                 const GUID_t& guid)
+      : tss_(tss)
+    {
+      GuardType g(tss_.is_sending_lock_);
+      tss_.is_sending_ = guid;
+    }
+
+    ~BeginEndSend()
+    {
+      GuardType g(tss_.is_sending_lock_);
+      tss_.is_sending_ = GUID_UNKNOWN;
+    }
+
+    TransportSendStrategy& tss_;
+  };
+  mutable LockType is_sending_lock_;
+  GUID_t is_sending_;
 
 protected:
   ThreadSynch* synch() const;
