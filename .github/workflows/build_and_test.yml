@@ -2157,12 +2157,11 @@ jobs:
       uses: actions/checkout@v4
       with:
         path: OpenDDS
-        submodules: false # Otherwise this would conflict with --force-clone-submodules
+        submodules: true
     - name: configure OpenDDS
       run: |
         cd OpenDDS
         ./configure \
-          --force-clone-submodules \
           --compiler=g++-9 \
           --no-debug \
           --features=uses_wchar=1 \
@@ -3119,7 +3118,7 @@ jobs:
       uses: actions/checkout@v4
       with:
         path: OpenDDS
-        submodules: false # Test that the configure script can download Google Test and RapidJSON
+        submodules: true
     - name: checkout ACE_TAO
       uses: actions/checkout@v4
       with:
@@ -3221,7 +3220,7 @@ jobs:
       uses: actions/checkout@v4
       with:
         path: OpenDDS
-        submodules: false # Test that the configure script can download Google Test and RapidJSON
+        submodules: true
     - name: configure OpenDDS
       run: |
         cd OpenDDS
