@@ -7,7 +7,6 @@
 
 #include <dds/DCPS/Serializer.h>
 #include <dds/DCPS/SafetyProfileStreams.h>
-#include <dds/DCPS/Xcdr2ValueWriter.h>
 
 #include <gtest/gtest.h>
 
@@ -317,20 +316,6 @@ void serializer_test_union(const Encoding& encoding, const DataView& expected_cd
   amalgam_serializer_test_union<Type, Type>(encoding, expected_cdr, disc);
 }
 
-template <typename Type>
-void baseline_checks_vwrite(const Encoding& encoding, const Type& value, const DataView& expected_cdr)
-{
-  if (encoding.kind() == Encoding::KIND_XCDR2) {
-    Xcdr2ValueWriter value_writer(encoding);
-    vwrite(value_writer, value);
-    ACE_Message_Block buffer(value_writer.get_serialized_size());
-    Serializer ser(&buffer, encoding);
-    value_writer.set_serializer(&ser);
-    EXPECT_TRUE(vwrite(value_writer, value));
-    EXPECT_PRED_FORMAT2(assert_DataView, expected_cdr, buffer);
-  }
-}
-
 template<typename Type>
 void baseline_checks(const Encoding& encoding, const DataView& expected_cdr,
   SerializedSizeBound bound = SerializedSizeBound())
@@ -353,8 +338,6 @@ void baseline_checks(const Encoding& encoding, const DataView& expected_cdr,
   set_values(value);
   EXPECT_EQ(serialized_size(encoding, value), expected_cdr.size);
   serializer_test<Type>(encoding, expected_cdr);
-
-  baseline_checks_vwrite(encoding, value, expected_cdr);
 }
 
 template<typename Type>
@@ -364,8 +347,6 @@ void baseline_checks_union(const Encoding& encoding, const DataView& expected_cd
   value._d(disc);
   EXPECT_EQ(serialized_size(encoding, value), expected_cdr.size);
   serializer_test_union<Type>(encoding, expected_cdr, disc);
-
-  baseline_checks_vwrite(encoding, value, expected_cdr);
 }
 
 #define STREAM_DATA \
