@@ -11525,7 +11525,7 @@ jobs:
         cd OpenDDS
         call setenv.cmd
         cd tests\DCPS\Messenger
-        perl %DDS_ROOT%\bin\opendds_mwc.pl
+        perl %ACE_ROOT%\bin\mwc.pl -type vs2022
     - uses: ammaraskar/msvc-problem-matcher@0.3.0
     - name: make messenger tests
       shell: cmd
@@ -11540,7 +11540,7 @@ jobs:
         cd OpenDDS
         call setenv.cmd
         cd tests\DCPS\C++11
-        perl %DDS_ROOT%\bin\opendds_mwc.pl
+        perl %ACE_ROOT%\bin\mwc.pl -type vs2022
     - name: make C++11 messenger test
       shell: cmd
       run: |
@@ -11700,7 +11700,7 @@ jobs:
         cd OpenDDS
         call setenv.cmd
         cd tests\DCPS\Compiler
-        perl %DDS_ROOT%\bin\opendds_mwc.pl -value_project macros+=GTEST_LINKED_AS_SHARED_LIBRARY
+        perl %ACE_ROOT%\bin\mwc.pl -type vs2022 -value_project macros+=GTEST_LINKED_AS_SHARED_LIBRARY
     - uses: ammaraskar/msvc-problem-matcher@0.3.0
     - name: make compiler tests
       shell: cmd
@@ -11861,7 +11861,7 @@ jobs:
         cd OpenDDS
         call setenv.cmd
         cd tests\unit-tests
-        perl %DDS_ROOT%\bin\opendds_mwc.pl -value_project macros+=GTEST_LINKED_AS_SHARED_LIBRARY
+        perl %ACE_ROOT%\bin\mwc.pl -type vs2022 -value_project macros+=GTEST_LINKED_AS_SHARED_LIBRARY
     - uses: ammaraskar/msvc-problem-matcher@0.3.0
     - name: make unit tests
       shell: cmd
