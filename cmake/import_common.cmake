@@ -104,11 +104,20 @@ endfunction()
 function(_opendds_find_in_mpc_projects found_var path_var mpc_projects mpc_name config)
   string(JSON mpc_project ERROR_VARIABLE err GET "${mpc_projects}" "${mpc_name}")
   if(NOT mpc_project)
-    set(${found_var} FALSE CACHE INTERNAL "" FORCE)
-    if(debug)
-      message(STATUS "lib ${target} (${mpc_name}) not in MPC projects")
+    # The ACE and TAO libraries targets from MPC might be called ACE-target and
+    # TAO-target depending on if they're in directories of the same name. It
+    # should be trivial to predict this, but the path logic for this in MPC
+    # seems buggy and might not prepend -target when OPENDDS_ACE_TAO_SRC is
+    # outside of the build directory, so we're just going to check both for all
+    # targets.
+    string(JSON mpc_project ERROR_VARIABLE err GET "${mpc_projects}" "${mpc_name}-target")
+    if(NOT mpc_project)
+      set(${found_var} FALSE CACHE INTERNAL "" FORCE)
+      if(debug)
+        message(STATUS "lib ${target} (${mpc_name} or ${mpc_name}-target) not in MPC projects")
+      endif()
+      return()
     endif()
-    return()
   endif()
   string(JSON configs ERROR_VARIABLE err GET "${mpc_project}" "configs")
   if(config AND configs)
