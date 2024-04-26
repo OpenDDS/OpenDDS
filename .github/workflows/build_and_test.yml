@@ -109,7 +109,7 @@ jobs:
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: |
         cd OpenDDS
-        ./configure --no-inline --tests --ace=$GITHUB_WORKSPACE/OpenDDS/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC --compile-warnings=WARNING
+        ./configure --no-inline --tests --ace=$GITHUB_WORKSPACE/OpenDDS/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC
     - name: build ACE and TAO
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: |
@@ -171,7 +171,7 @@ jobs:
     - name: configure OpenDDS
       run: |
         cd OpenDDS
-        ./configure --no-inline --tests --java=$JAVA_HOME_17_X64 --no-rapidjson --ace=$GITHUB_WORKSPACE/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC --compile-warnings=WARNING
+        ./configure --no-inline --tests --java=$JAVA_HOME_17_X64 --no-rapidjson --ace=$GITHUB_WORKSPACE/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC
     - name: check build configuration
       shell: bash
       run: |
@@ -364,8 +364,7 @@ jobs:
           --optimize \
           --no-debug \
           --features=versioned_namespace=1 \
-          --tests \
-          --compile-warnings=WARNING
+          --tests
     - uses: ammaraskar/gcc-problem-matcher@0.3.0
     - name: make OpenDDS
       run: |
@@ -574,8 +573,7 @@ jobs:
           --gtest=$GITHUB_WORKSPACE/OpenDDS/tests/googletest/build/install \
           --no-rapidjson \
           --safety-profile \
-          --tests \
-          --compile-warnings=WARNING
+          --tests
     - name: exclude OpenDDS_Util and opendds_idl
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       shell: bash
@@ -655,8 +653,7 @@ jobs:
           --gtest=$GITHUB_WORKSPACE/OpenDDS/tests/googletest/build/install \
           --no-rapidjson \
           --safety-profile \
-          --tests \
-          --compile-warnings=WARNING
+          --tests
     - name: download ACE_TAO artifact
       uses: actions/download-artifact@v4
       with:
@@ -900,8 +897,7 @@ jobs:
           --no-rapidjson \
           --safety-profile=base \
           --no-built-in-topics \
-          --tests \
-          --compile-warnings=WARNING
+          --tests
     - name: exclude OpenDDS_Util and opendds_idl
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       shell: bash
@@ -982,8 +978,7 @@ jobs:
           --no-rapidjson \
           --safety-profile=base \
           --no-built-in-topics \
-          --tests \
-          --compile-warnings=WARNING
+          --tests
     - name: download ACE_TAO artifact
       uses: actions/download-artifact@v4
       with:
@@ -1212,7 +1207,7 @@ jobs:
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: |
         cd OpenDDS
-        ./configure --no-debug --no-inline --features=versioned_namespace=1 --tests --security --ace=$GITHUB_WORKSPACE/OpenDDS/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC --compile-warnings=WARNING
+        ./configure --no-debug --no-inline --features=versioned_namespace=1 --tests --security --ace=$GITHUB_WORKSPACE/OpenDDS/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC
     - name: build ACE and TAO
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: |
@@ -1276,7 +1271,7 @@ jobs:
     - name: configure OpenDDS
       run: |
         cd OpenDDS
-        ./configure --no-debug --no-inline --features=versioned_namespace=1 --tests --security --no-rapidjson --no-built-in-topics --no-content-subscription --no-ownership-profile --no-object-model-profile --no-persistence-profile --ace=$GITHUB_WORKSPACE/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC --compile-warnings=WARNING
+        ./configure --no-debug --no-inline --features=versioned_namespace=1 --tests --security --no-rapidjson --no-built-in-topics --no-content-subscription --no-ownership-profile --no-object-model-profile --no-persistence-profile --ace=$GITHUB_WORKSPACE/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC
     - name: check build configuration
       shell: bash
       run: |
@@ -1499,8 +1494,7 @@ jobs:
           --features=uses_wchar=1 \
           --macros=SOFLAGS+=-Wl,-h,\$\(SONAME\) \
           --tests \
-          --security \
-          --compile-warnings=WARNING
+          --security
     - name: build ACE and TAO
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: |
@@ -1576,8 +1570,7 @@ jobs:
           --macros=SOFLAGS+=-Wl,-h,\$\(SONAME\) \
           --tests \
           --security \
-          --rapidjson \
-          --compile-warnings=WARNING
+          --rapidjson
     - name: check build configuration
       shell: bash
       run: |
@@ -1802,8 +1795,7 @@ jobs:
           --macros=SOFLAGS+=-Wl,-h,\$\(SONAME\) \
           --tests \
           --security \
-          --no-rapidjson \
-          --compile-warnings=WARNING
+          --no-rapidjson
     - name: build ACE and TAO
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: |
@@ -1878,8 +1870,7 @@ jobs:
           --tests \
           --security \
           --no-rapidjson \
-          --features no_opendds_testing_features=0 \
-          --compile-warnings=WARNING
+          --features no_opendds_testing_features=0
     - name: check build configuration
       shell: bash
       run: |
@@ -2104,8 +2095,7 @@ jobs:
           --std=c++03 \
           --tests \
           --ace=$GITHUB_WORKSPACE/OpenDDS/ACE_TAO/ACE \
-          --mpc=$GITHUB_WORKSPACE/MPC \
-          --compile-warnings=WARNING
+          --mpc=$GITHUB_WORKSPACE/MPC
     - name: build ACE and TAO
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: |
@@ -2180,8 +2170,7 @@ jobs:
           --tests \
           --rapidjson \
           --ace=$GITHUB_WORKSPACE/ACE_TAO/ACE \
-          --mpc=$GITHUB_WORKSPACE/MPC \
-          --compile-warnings=WARNING
+          --mpc=$GITHUB_WORKSPACE/MPC
     - name: check build configuration
       shell: bash
       run: |
@@ -2401,7 +2390,7 @@ jobs:
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: |
         cd OpenDDS
-        ./configure --compiler=g++-8 --no-inline --no-rapidjson --tests --java --ace=$GITHUB_WORKSPACE/OpenDDS/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC --compile-warnings=WARNING
+        ./configure --compiler=g++-8 --no-inline --no-rapidjson --tests --java --ace=$GITHUB_WORKSPACE/OpenDDS/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC
     - name: build ACE and TAO
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: |
@@ -2470,7 +2459,7 @@ jobs:
     - name: configure OpenDDS
       run: |
         cd OpenDDS
-        ./configure --compiler=g++-8 --no-inline --no-rapidjson --tests --java --ace=$GITHUB_WORKSPACE/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC --compile-warnings=WARNING
+        ./configure --compiler=g++-8 --no-inline --no-rapidjson --tests --java --ace=$GITHUB_WORKSPACE/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC
     - name: check build configuration
       shell: bash
       run: |
@@ -2682,7 +2671,7 @@ jobs:
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: |
         cd OpenDDS
-        ./configure --compiler=g++-11 --std=c++20 --no-inline --tests --ace=$GITHUB_WORKSPACE/OpenDDS/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC --compile-warnings=WARNING
+        ./configure --compiler=g++-11 --std=c++20 --no-inline --tests --ace=$GITHUB_WORKSPACE/OpenDDS/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC
     - name: build ACE and TAO
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: |
@@ -2747,7 +2736,7 @@ jobs:
     - name: configure OpenDDS
       run: |
         cd OpenDDS
-        ./configure --compiler=g++-11 --std=c++20 --no-inline --tests --rapidjson --boottime --ace=$GITHUB_WORKSPACE/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC --compile-warnings=WARNING
+        ./configure --compiler=g++-11 --std=c++20 --no-inline --tests --rapidjson --boottime --ace=$GITHUB_WORKSPACE/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC
     - name: check build configuration
       shell: bash
       run: |
@@ -2981,8 +2970,7 @@ jobs:
           --no-content-subscription \
           --no-object-model-profile \
           --no-persistence-profile \
-          --tests \
-          --compile-warnings=WARNING
+          --tests
     - name: exclude OpenDDS_Util and opendds_idl
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       shell: bash
@@ -3067,8 +3055,7 @@ jobs:
           --no-content-subscription \
           --no-object-model-profile \
           --no-persistence-profile \
-          --tests \
-          --compile-warnings=WARNING
+          --tests
     - name: download ACE_TAO artifact
       uses: actions/download-artifact@v4
       with:
@@ -3173,7 +3160,7 @@ jobs:
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: |
         cd OpenDDS
-        ./configure --tests --security --ace=$GITHUB_WORKSPACE/OpenDDS/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC --compile-warnings=WARNING
+        ./configure --tests --security --ace=$GITHUB_WORKSPACE/OpenDDS/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC
     - name: build ACE and TAO
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: |
@@ -3238,7 +3225,7 @@ jobs:
     - name: configure OpenDDS
       run: |
         cd OpenDDS
-        ./configure --qt --wireshark --tests --security --java --rapidjson --ace=$GITHUB_WORKSPACE/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC --compile-warnings=WARNING
+        ./configure --qt --wireshark --tests --security --java --rapidjson --ace=$GITHUB_WORKSPACE/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC
     - name: check build configuration
       shell: bash
       run: |
@@ -3477,8 +3464,7 @@ jobs:
           --macros=SOFLAGS+=-Wl,-h,\$\(SONAME\) \
           --ipv6 \
           --tests \
-          --security \
-          --compile-warnings=WARNING
+          --security
     - name: build ACE and TAO
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: |
@@ -3555,8 +3541,7 @@ jobs:
           --ipv6 \
           --tests \
           --security \
-          --rapidjson \
-          --compile-warnings=WARNING
+          --rapidjson
     - name: check build configuration
       shell: bash
       run: |
@@ -3781,8 +3766,7 @@ jobs:
           --sanitize tsan \
           --ipv6 \
           --tests \
-          --security \
-          --compile-warnings=WARNING
+          --security
     - name: build ACE and TAO
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: |
@@ -3857,8 +3841,7 @@ jobs:
           --ipv6 \
           --tests \
           --security \
-          --rapidjson \
-          --compile-warnings=WARNING
+          --rapidjson
     - name: check build configuration
       shell: bash
       run: |
@@ -4078,8 +4061,7 @@ jobs:
           --macros=SOFLAGS+=-Wl,-h,\$\(SONAME\) \
           --ipv6 \
           --tests \
-          --security \
-          --compile-warnings=WARNING
+          --security
     - name: build ACE and TAO
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: |
@@ -4157,8 +4139,7 @@ jobs:
           --macros=SOFLAGS+=-Wl,-h,\$\(SONAME\) \
           --ipv6 \
           --security \
-          --rapidjson \
-          --compile-warnings=WARNING
+          --rapidjson
     - name: check build configuration
       shell: bash
       run: |
@@ -4391,7 +4372,7 @@ jobs:
       run: |
         SSL_DIR=$PWD/openssl_install
         cd OpenDDS
-        ./configure --ipv6 --tests --security --openssl=$SSL_DIR --ace=$GITHUB_WORKSPACE/OpenDDS/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC --compile-warnings=WARNING
+        ./configure --ipv6 --tests --security --openssl=$SSL_DIR --ace=$GITHUB_WORKSPACE/OpenDDS/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC
     - name: build ACE and TAO
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: |
@@ -4468,7 +4449,7 @@ jobs:
         SSL_DIR=$PWD/openssl_install
         export SSL_LIBDIR=$SSL_DIR/lib64
         cd OpenDDS
-        ./configure --ipv6 --tests --security --openssl=$SSL_DIR --rapidjson --ace=$GITHUB_WORKSPACE/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC --compile-warnings=WARNING
+        ./configure --ipv6 --tests --security --openssl=$SSL_DIR --rapidjson --ace=$GITHUB_WORKSPACE/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC
         echo "export SSL_LIBDIR=$SSL_LIBDIR" >> setenv.sh
     - name: check build configuration
       shell: bash
@@ -4822,7 +4803,7 @@ jobs:
     - name: configure OpenDDS
       run: |
         cd OpenDDS
-        ./configure --tests --java=$JAVA_HOME_8_X64 --no-built-in-topics --rapidjson --ace=$GITHUB_WORKSPACE/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC --compile-warnings=WARNING
+        ./configure --tests --java=$JAVA_HOME_8_X64 --no-built-in-topics --rapidjson --ace=$GITHUB_WORKSPACE/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC
     - name: check build configuration
       shell: bash
       run: |
@@ -5058,7 +5039,7 @@ jobs:
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: |
         cd OpenDDS
-        ./configure --features=uses_wchar=1 --tests --security --ace=$GITHUB_WORKSPACE/OpenDDS/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC --compile-warnings=WARNING
+        ./configure --features=uses_wchar=1 --tests --security --ace=$GITHUB_WORKSPACE/OpenDDS/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC
     - name: build ACE and TAO
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: |
@@ -5122,7 +5103,7 @@ jobs:
     - name: configure OpenDDS
       run: |
         cd OpenDDS
-        ./configure --features=uses_wchar=1 --features dds_suppress_anys=0 --tests --security --rapidjson --ace=$GITHUB_WORKSPACE/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC --compile-warnings=WARNING
+        ./configure --features=uses_wchar=1 --features dds_suppress_anys=0 --tests --security --rapidjson --ace=$GITHUB_WORKSPACE/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC
     - name: check build configuration
       shell: bash
       run: |
@@ -5328,7 +5309,7 @@ jobs:
     - name: configure OpenDDS
       run: |
         cd OpenDDS
-        ./configure --features=uses_wchar=1 --tests --java --no-content-subscription --rapidjson --ace=$GITHUB_WORKSPACE/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC --compile-warnings=WARNING
+        ./configure --features=uses_wchar=1 --tests --java --no-content-subscription --rapidjson --ace=$GITHUB_WORKSPACE/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC
     - name: check build configuration
       shell: bash
       run: |
@@ -5557,7 +5538,7 @@ jobs:
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: |
         cd OpenDDS
-        ./configure --static --tests --security --ace=$GITHUB_WORKSPACE/OpenDDS/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC --compile-warnings=WARNING
+        ./configure --static --tests --security --ace=$GITHUB_WORKSPACE/OpenDDS/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC
     - name: build ACE and TAO
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: |
@@ -5633,7 +5614,7 @@ jobs:
     - name: configure OpenDDS
       run: |
         cd OpenDDS
-        ./configure --static --qt --wireshark --security --rapidjson --gtest=$GITHUB_WORKSPACE/OpenDDS/tests/googletest/build/install --ace=$GITHUB_WORKSPACE/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC --compile-warnings=WARNING
+        ./configure --static --qt --wireshark --security --rapidjson --gtest=$GITHUB_WORKSPACE/OpenDDS/tests/googletest/build/install --ace=$GITHUB_WORKSPACE/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC
     - name: check build configuration
       shell: bash
       run: |
@@ -6509,7 +6490,7 @@ jobs:
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: |
         cd OpenDDS
-        ./configure --tests --security --ace=$GITHUB_WORKSPACE/OpenDDS/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC --compile-warnings=WARNING
+        ./configure --tests --security --ace=$GITHUB_WORKSPACE/OpenDDS/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC
     - name: build ACE and TAO
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: |
@@ -6573,7 +6554,7 @@ jobs:
     - name: configure OpenDDS
       run: |
         cd OpenDDS
-        ./configure --tests --java --no-content-filtered-topic --rapidjson --ace=$GITHUB_WORKSPACE/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC --compile-warnings=WARNING
+        ./configure --tests --java --no-content-filtered-topic --rapidjson --ace=$GITHUB_WORKSPACE/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC
     - name: check build configuration
       shell: bash
       run: |
@@ -6814,7 +6795,7 @@ jobs:
       shell: cmd
       run: |
         cd OpenDDS
-        configure --ipv6 --static --no-rapidjson --ace=${{ github.workspace }}/OpenDDS/ACE_TAO/ACE --tao=${{ github.workspace }}/OpenDDS/ACE_TAO/TAO --mpc=${{ github.workspace }}/MPC --xerces3=${{ env.VCPKG_INSTALLED_DIR }}/x64-windows --openssl=${{ env.VCPKG_INSTALLED_DIR }}/x64-windows --mpcopts=-hierarchy --compile-warnings=WARNING
+        configure --ipv6 --static --no-rapidjson --ace=${{ github.workspace }}/OpenDDS/ACE_TAO/ACE --tao=${{ github.workspace }}/OpenDDS/ACE_TAO/TAO --mpc=${{ github.workspace }}/MPC --xerces3=${{ env.VCPKG_INSTALLED_DIR }}/x64-windows --openssl=${{ env.VCPKG_INSTALLED_DIR }}/x64-windows --mpcopts=-hierarchy
     - name: build ACE & TAO
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       shell: cmd
@@ -6901,7 +6882,7 @@ jobs:
       shell: cmd
       run: |
         cd OpenDDS
-        configure --ipv6 --static --no-rapidjson --gtest=${{ github.workspace }}/OpenDDS/tests/googletest/build/install --ace=${{ github.workspace }}/OpenDDS/ACE_TAO/ACE --tao=${{ github.workspace }}/OpenDDS/ACE_TAO/TAO --mpc=${{ github.workspace }}/MPC --xerces3=${{ env.VCPKG_INSTALLED_DIR }}/x64-windows --openssl=${{ env.VCPKG_INSTALLED_DIR }}/x64-windows --compile-warnings=WARNING
+        configure --ipv6 --static --no-rapidjson --gtest=${{ github.workspace }}/OpenDDS/tests/googletest/build/install --ace=${{ github.workspace }}/OpenDDS/ACE_TAO/ACE --tao=${{ github.workspace }}/OpenDDS/ACE_TAO/TAO --mpc=${{ github.workspace }}/MPC --xerces3=${{ env.VCPKG_INSTALLED_DIR }}/x64-windows --openssl=${{ env.VCPKG_INSTALLED_DIR }}/x64-windows
     - name: check build configuration
       shell: cmd
       run: |
@@ -7800,7 +7781,7 @@ jobs:
       shell: cmd
       run: |
         cd OpenDDS
-        configure --ipv6 --static --rapidjson --no-built-in-topics --no-content-subscription --no-ownership-profile --no-object-model-profile --no-persistence-profile --ace=${{ github.workspace }}/OpenDDS/ACE_TAO/ACE --tao=${{ github.workspace }}/OpenDDS/ACE_TAO/TAO --mpc=${{ github.workspace }}/MPC --xerces3=${{ env.VCPKG_INSTALLED_DIR }}/x64-windows --openssl=${{ env.VCPKG_INSTALLED_DIR }}/x64-windows --mpcopts=-hierarchy --compile-warnings=WARNING
+        configure --ipv6 --static --rapidjson --no-built-in-topics --no-content-subscription --no-ownership-profile --no-object-model-profile --no-persistence-profile --ace=${{ github.workspace }}/OpenDDS/ACE_TAO/ACE --tao=${{ github.workspace }}/OpenDDS/ACE_TAO/TAO --mpc=${{ github.workspace }}/MPC --xerces3=${{ env.VCPKG_INSTALLED_DIR }}/x64-windows --openssl=${{ env.VCPKG_INSTALLED_DIR }}/x64-windows --mpcopts=-hierarchy
     - name: build ACE & TAO
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       shell: cmd
@@ -7887,7 +7868,7 @@ jobs:
       shell: cmd
       run: |
         cd OpenDDS
-        configure --ipv6 --static --rapidjson --gtest=${{ github.workspace }}/OpenDDS/tests/googletest/build/install --no-built-in-topics --no-content-subscription --no-ownership-profile --no-object-model-profile --no-persistence-profile --ace=${{ github.workspace }}/OpenDDS/ACE_TAO/ACE --tao=${{ github.workspace }}/OpenDDS/ACE_TAO/TAO --mpc=${{ github.workspace }}/MPC --xerces3=${{ env.VCPKG_INSTALLED_DIR }}/x64-windows --openssl=${{ env.VCPKG_INSTALLED_DIR }}/x64-windows --compile-warnings=WARNING
+        configure --ipv6 --static --rapidjson --gtest=${{ github.workspace }}/OpenDDS/tests/googletest/build/install --no-built-in-topics --no-content-subscription --no-ownership-profile --no-object-model-profile --no-persistence-profile --ace=${{ github.workspace }}/OpenDDS/ACE_TAO/ACE --tao=${{ github.workspace }}/OpenDDS/ACE_TAO/TAO --mpc=${{ github.workspace }}/MPC --xerces3=${{ env.VCPKG_INSTALLED_DIR }}/x64-windows --openssl=${{ env.VCPKG_INSTALLED_DIR }}/x64-windows
     - name: check build configuration
       shell: cmd
       run: |
@@ -8795,7 +8776,7 @@ jobs:
       run: |
         set SSL_DIR=%CD%/openssl3
         cd OpenDDS
-        call configure -v --optimize --ipv6 --security --ace=${{ github.workspace }}/OpenDDS/ACE_TAO/ACE --tao=${{ github.workspace }}/OpenDDS/ACE_TAO/TAO --mpc=${{ github.workspace }}/MPC --xerces3=${{ env.VCPKG_INSTALLED_DIR }}/x64-windows --openssl=%SSL_DIR% --mpcopts=-hierarchy --compile-warnings=WARNING
+        call configure -v --optimize --ipv6 --security --ace=${{ github.workspace }}/OpenDDS/ACE_TAO/ACE --tao=${{ github.workspace }}/OpenDDS/ACE_TAO/TAO --mpc=${{ github.workspace }}/MPC --xerces3=${{ env.VCPKG_INSTALLED_DIR }}/x64-windows --openssl=%SSL_DIR% --mpcopts=-hierarchy
         echo "SSL_DIR=%SSL_DIR%" >> setenv.cmd
         perl tools\scripts\show_build_config.pl
     - name: build ACE & TAO
@@ -8894,7 +8875,7 @@ jobs:
       run: |
         set SSL_DIR=%CD%/openssl3
         cd OpenDDS
-        configure --optimize --ipv6 --rapidjson --security --gtest=${{ github.workspace }}/OpenDDS/tests/googletest/build/install --ace=${{ github.workspace }}/OpenDDS/ACE_TAO/ACE --tao=${{ github.workspace }}/OpenDDS/ACE_TAO/TAO --mpc=${{ github.workspace }}/MPC --xerces3=${{ env.VCPKG_INSTALLED_DIR }}/x64-windows --openssl=%SSL_DIR% --compile-warnings=WARNING
+        configure --optimize --ipv6 --rapidjson --security --gtest=${{ github.workspace }}/OpenDDS/tests/googletest/build/install --ace=${{ github.workspace }}/OpenDDS/ACE_TAO/ACE --tao=${{ github.workspace }}/OpenDDS/ACE_TAO/TAO --mpc=${{ github.workspace }}/MPC --xerces3=${{ env.VCPKG_INSTALLED_DIR }}/x64-windows --openssl=%SSL_DIR%
         echo "SSL_DIR=%SSL_DIR%" >> setenv.cmd
     - name: check build configuration
       shell: cmd
@@ -9611,83 +9592,6 @@ jobs:
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
         grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
 
-  wireshark_w19-release:
-
-    runs-on: windows-2019
-
-    steps:
-    - name: checkout OpenDDS
-      uses: actions/checkout@v4
-      with:
-        path: OpenDDS
-    - name: checkout Wireshark
-      shell: cmd
-      run: |
-        git clone -q -b release-3.6 --depth=1 https://gitlab.com/wireshark/wireshark.git
-        cd wireshark
-        for /f %%x in ('git rev-parse HEAD') do @echo WIRESHARK_COMMIT=%%x>> %GITHUB_ENV%
-    - name: get compiler version
-      shell: bash
-      run: |
-        export COMPILER_VERSION=$("C:\Program Files (x86)\Microsoft Visual Studio\Installer\vswhere.exe" -property catalog_productDisplayVersion)
-        echo "COMPILER_VERSION=$COMPILER_VERSION" >> $GITHUB_ENV
-    - name: Cache Artifact
-      id: cache-artifact
-      uses: actions/cache@v4
-      with:
-        path: ${{ github.job }}.tar.xz
-        key: c02_${{ github.job }}_${{ env.WIRESHARK_COMMIT }}_${{ env.COMPILER_VERSION }}
-    - name: checkout WinFlexBison
-      if: steps.cache-artifact.outputs.cache-hit != 'true'
-      uses: actions/checkout@v4
-      with:
-        repository: lexxmark/winflexbison
-        path: winflexbison
-        ref: v2.5.24
-    - name: set up msvc env
-      if: steps.cache-artifact.outputs.cache-hit != 'true'
-      uses: ilammy/msvc-dev-cmd@v1
-    - name: copy CMakePresets for WinFlexBison
-      if: steps.cache-artifact.outputs.cache-hit != 'true'
-      shell: cmd
-      run: copy OpenDDS\.github\workflows\WinFlexBison_CMakePresets.json winflexbison\CMakePresets.json
-    - name: build WinFlexBison
-      if: steps.cache-artifact.outputs.cache-hit != 'true'
-      uses: lukka/run-cmake@v10
-      with:
-        cmakeListsTxtPath: winflexbison/CMakeLists.txt
-        configurePreset: config1
-        buildPreset: build1
-    - name: set Wireshark environment and copy CMakePresets
-      if: steps.cache-artifact.outputs.cache-hit != 'true'
-      shell: cmd
-      run: |
-        echo WIRESHARK_LIB_DIR=%CD%\wireshark-win64-libs-3.6>> %GITHUB_ENV%
-        echo QT5_BASE_DIR=${{ steps.runvcpkg.outputs.RUNVCPKG_VCPKG_ROOT_OUT }}\installed\x64-windows>> %GITHUB_ENV%
-        echo WIRESHARK_BUILD_DIR=${{ github.workspace }}\wsbuild>> %GITHUB_ENV%
-        echo WINFLEXBISON_ROOT=${{ github.workspace }}\winflexbison>> %GITHUB_ENV%
-        type %GITHUB_ENV%
-        copy OpenDDS\.github\workflows\Wireshark_CMakePresets.json wireshark\CMakePresets.json
-    - name: build Wireshark
-      if: steps.cache-artifact.outputs.cache-hit != 'true'
-      uses: lukka/run-cmake@v10
-      with:
-        cmakeListsTxtPath: wireshark/CMakeLists.txt
-        configurePreset: config1
-        buildPreset: build1
-    - name: create Wireshark artifact
-      if: steps.cache-artifact.outputs.cache-hit != 'true'
-      shell: bash
-      run: |
-        find -iname "*\.obj" -delete
-        tar cvhf ${{ github.job }}.tar wireshark wsbuild wireshark-win64-libs-3.6
-        xz -3 ${{ github.job }}.tar
-    - name: upload Wireshark artifact
-      uses: actions/upload-artifact@v4
-      with:
-        name: ${{ github.job }}_artifact
-        path: ${{ github.job }}.tar.xz
-
   ACE_TAO_w19_re_j_ws_FM-1f:
 
     runs-on: windows-2019
@@ -9751,7 +9655,7 @@ jobs:
       shell: cmd
       run: |
         cd OpenDDS
-        configure --optimize --java --no-built-in-topics --rapidjson --ace=${{ github.workspace }}/OpenDDS/ACE_TAO/ACE --tao=${{ github.workspace }}/OpenDDS/ACE_TAO/TAO --mpc=${{ github.workspace }}/MPC --xerces3=${{ env.VCPKG_INSTALLED_DIR }}/x64-windows --openssl=${{ env.VCPKG_INSTALLED_DIR }}/x64-windows --mpcopts=-hierarchy --compile-warnings=WARNING
+        configure --optimize --java --no-built-in-topics --rapidjson --ace=${{ github.workspace }}/OpenDDS/ACE_TAO/ACE --tao=${{ github.workspace }}/OpenDDS/ACE_TAO/TAO --mpc=${{ github.workspace }}/MPC --xerces3=${{ env.VCPKG_INSTALLED_DIR }}/x64-windows --openssl=${{ env.VCPKG_INSTALLED_DIR }}/x64-windows --mpcopts=-hierarchy
     - name: build ACE & TAO
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       shell: cmd
@@ -9782,18 +9686,9 @@ jobs:
 
     runs-on: windows-2019
 
-    needs: [ACE_TAO_w19_re_j_ws_FM-1f, wireshark_w19-release]
+    needs: ACE_TAO_w19_re_j_ws_FM-1f
 
     steps:
-    - name: download Wireshark artifact
-      uses: actions/download-artifact@v4
-      with:
-        name: wireshark_w19-release_artifact
-    - name: extract Wireshark artifact
-      shell: bash
-      run: |
-        tar xvJf wireshark_w19-release.tar.xz
-        rm -f wireshark_w19-release.tar.xz
     - name: setup for run-vcpkg
       shell: bash
       run: |
@@ -9847,7 +9742,7 @@ jobs:
       shell: cmd
       run: |
         cd OpenDDS
-        configure --optimize --java --no-built-in-topics --rapidjson --gtest=${{ github.workspace }}/OpenDDS/tests/googletest/build/install --ace=${{ github.workspace }}/OpenDDS/ACE_TAO/ACE --tao=${{ github.workspace }}/OpenDDS/ACE_TAO/TAO --mpc=${{ github.workspace }}/MPC --xerces3=${{ env.VCPKG_INSTALLED_DIR }}/x64-windows --wireshark-cmake=${{ github.workspace }}\wireshark --wireshark-build=${{ github.workspace }}\wsbuild --wireshark-lib=run --glib=${{ github.workspace }}\wireshark-win64-libs-3.6\vcpkg-export-20210609-1-win64ws\installed\x64-windows --openssl=${{ env.VCPKG_INSTALLED_DIR }}/x64-windows --mpcopts=-hierarchy --compile-warnings=WARNING
+        configure --optimize --java --no-built-in-topics --rapidjson --gtest=${{ github.workspace }}/OpenDDS/tests/googletest/build/install --ace=${{ github.workspace }}/OpenDDS/ACE_TAO/ACE --tao=${{ github.workspace }}/OpenDDS/ACE_TAO/TAO --mpc=${{ github.workspace }}/MPC --xerces3=${{ env.VCPKG_INSTALLED_DIR }}/x64-windows --openssl=${{ env.VCPKG_INSTALLED_DIR }}/x64-windows --mpcopts=-hierarchy
     - name: check build configuration
       shell: cmd
       run: |
@@ -10582,7 +10477,7 @@ jobs:
       shell: cmd
       run: |
         cd OpenDDS
-        call configure -v --no-inline --tests --security --ace=${{ github.workspace }}/OpenDDS/ACE_TAO/ACE --tao=${{ github.workspace }}/OpenDDS/ACE_TAO/TAO --mpc=${{ github.workspace }}/MPC --xerces3=${{ env.VCPKG_INSTALLED_DIR }}/x86-windows --openssl=${{ env.VCPKG_INSTALLED_DIR }}/x86-windows --mpcopts=-hierarchy --compile-warnings=WARNING
+        call configure -v --no-inline --tests --security --ace=${{ github.workspace }}/OpenDDS/ACE_TAO/ACE --tao=${{ github.workspace }}/OpenDDS/ACE_TAO/TAO --mpc=${{ github.workspace }}/MPC --xerces3=${{ env.VCPKG_INSTALLED_DIR }}/x86-windows --openssl=${{ env.VCPKG_INSTALLED_DIR }}/x86-windows --mpcopts=-hierarchy
         perl tools\scripts\show_build_config.pl
     - name: build ACE & TAO
       if: steps.cache-artifact.outputs.cache-hit != 'true'
@@ -10671,7 +10566,7 @@ jobs:
       shell: cmd
       run: |
         cd /d C:\OpenDDS
-        configure --tests --rapidjson --security --ace=${{ github.workspace }}\ACE_TAO\ACE --tao=${{ github.workspace }}\ACE_TAO\TAO --mpc=${{ github.workspace }}\MPC --xerces3="${{ env.VCPKG_INSTALLED_DIR }}\x86-windows" --openssl="${{ env.VCPKG_INSTALLED_DIR }}\x86-windows" --compile-warnings=WARNING
+        configure --tests --rapidjson --security --ace=${{ github.workspace }}\ACE_TAO\ACE --tao=${{ github.workspace }}\ACE_TAO\TAO --mpc=${{ github.workspace }}\MPC --xerces3="${{ env.VCPKG_INSTALLED_DIR }}\x86-windows" --openssl="${{ env.VCPKG_INSTALLED_DIR }}\x86-windows"
     - name: check build configuration
       shell: cmd
       run: |
@@ -11056,7 +10951,7 @@ jobs:
       shell: cmd
       run: |
         cd /d C:\OpenDDS
-        configure --tests --java --no-built-in-topics --rapidjson --mpc=${{ github.workspace }}\MPC --xerces3="${{ env.VCPKG_INSTALLED_DIR }}\x86-windows" --features no_opendds_testing_features=0 --compile-warnings=WARNING
+        configure --tests --java --no-built-in-topics --rapidjson --mpc=${{ github.workspace }}\MPC --xerces3="${{ env.VCPKG_INSTALLED_DIR }}\x86-windows" --features no_opendds_testing_features=0
     - name: check build configuration
       shell: cmd
       run: |
@@ -11292,7 +11187,7 @@ jobs:
       shell: cmd
       run: |
         cd OpenDDS
-        configure --std=c++20 --tests --ipv6 --rapidjson --ace=${{ github.workspace }}/OpenDDS/ACE_TAO/ACE --tao=${{ github.workspace }}/OpenDDS/ACE_TAO/TAO --mpc=${{ github.workspace }}/MPC --xerces3=${{ env.VCPKG_INSTALLED_DIR }}/x64-windows --openssl=${{ env.VCPKG_INSTALLED_DIR }}/x64-windows --mpcopts=-hierarchy --compile-warnings=WARNING
+        configure --std=c++20 --tests --ipv6 --rapidjson --ace=${{ github.workspace }}/OpenDDS/ACE_TAO/ACE --tao=${{ github.workspace }}/OpenDDS/ACE_TAO/TAO --mpc=${{ github.workspace }}/MPC --xerces3=${{ env.VCPKG_INSTALLED_DIR }}/x64-windows --openssl=${{ env.VCPKG_INSTALLED_DIR }}/x64-windows --mpcopts=-hierarchy
     - name: build ACE & TAO
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       shell: cmd
@@ -11379,7 +11274,7 @@ jobs:
       shell: cmd
       run: |
         cd OpenDDS
-        configure --std=c++20 --ipv6 --rapidjson --gtest=${{ github.workspace }}/OpenDDS/tests/googletest/build/install --ace=${{ github.workspace }}/OpenDDS/ACE_TAO/ACE --tao=${{ github.workspace }}/OpenDDS/ACE_TAO/TAO --mpc=${{ github.workspace }}/MPC --xerces3=${{ env.VCPKG_INSTALLED_DIR }}/x64-windows --openssl=${{ env.VCPKG_INSTALLED_DIR }}/x64-windows --compile-warnings=WARNING
+        configure --std=c++20 --ipv6 --rapidjson --gtest=${{ github.workspace }}/OpenDDS/tests/googletest/build/install --ace=${{ github.workspace }}/OpenDDS/ACE_TAO/ACE --tao=${{ github.workspace }}/OpenDDS/ACE_TAO/TAO --mpc=${{ github.workspace }}/MPC --xerces3=${{ env.VCPKG_INSTALLED_DIR }}/x64-windows --openssl=${{ env.VCPKG_INSTALLED_DIR }}/x64-windows
     - name: check build configuration
       shell: cmd
       run: |
@@ -12095,7 +11990,7 @@ jobs:
       run: |
         cd OpenDDS
         XERCESC_ROOT=$(find /usr/local/Cellar/xerces-c -iname "3\.*\.*" -type d | sort -r | head -n 1)
-        ./configure --std=c++11 --tests --security --ace=$GITHUB_WORKSPACE/OpenDDS/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC --xerces3=$XERCESC_ROOT --openssl=/usr/local/opt/openssl@1.1 --compile-warnings=WARNING
+        ./configure --std=c++11 --tests --security --ace=$GITHUB_WORKSPACE/OpenDDS/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC --xerces3=$XERCESC_ROOT --openssl=/usr/local/opt/openssl@1.1
     - name: build ACE and TAO
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: |
@@ -12161,7 +12056,7 @@ jobs:
       run: |
         cd OpenDDS
         XERCESC_ROOT=$(find /usr/local/Cellar/xerces-c -iname "3\.*\.*" -type d | sort -r | head -n 1)
-        ./configure --std=c++11 --tests --rapidjson --security --ace=$GITHUB_WORKSPACE/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC --xerces3=$XERCESC_ROOT --openssl=/usr/local/opt/openssl@1.1 --compile-warnings=WARNING
+        ./configure --std=c++11 --tests --rapidjson --security --ace=$GITHUB_WORKSPACE/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC --xerces3=$XERCESC_ROOT --openssl=/usr/local/opt/openssl@1.1
     - name: check build configuration
       shell: bash
       run: |
@@ -12474,7 +12369,7 @@ jobs:
     - name: configure OpenDDS
       run: |
         cd OpenDDS
-        ./configure --std=c++11 --tests --rapidjson --java --no-built-in-topics --ace=$GITHUB_WORKSPACE/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC --compile-warnings=WARNING
+        ./configure --std=c++11 --tests --rapidjson --java --no-built-in-topics --ace=$GITHUB_WORKSPACE/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC
     - name: check build configuration
       shell: bash
       run: |
@@ -12813,7 +12708,7 @@ jobs:
       run: |
         cd OpenDDS
         XERCESC_ROOT=$(find /usr/local/Cellar/xerces-c -iname "3\.*\.*" -type d | sort -r | head -n 1)
-        ./configure --optimize --no-debug --std=c++11 --tests --security --ace=$GITHUB_WORKSPACE/OpenDDS/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC --xerces3=$XERCESC_ROOT --openssl=/usr/local/opt/openssl@1.1 --compile-warnings=WARNING
+        ./configure --optimize --no-debug --std=c++11 --tests --security --ace=$GITHUB_WORKSPACE/OpenDDS/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC --xerces3=$XERCESC_ROOT --openssl=/usr/local/opt/openssl@1.1
     - name: build ACE and TAO
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: |
@@ -12880,7 +12775,7 @@ jobs:
         cd OpenDDS
         clang++ --version
         XERCESC_ROOT=$(find /usr/local/Cellar/xerces-c -iname "3\.*\.*" -type d | sort -r | head -n 1)
-        ./configure --optimize --no-debug --std=c++11 --tests --rapidjson --security --ace=$GITHUB_WORKSPACE/OpenDDS/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC --xerces3=$XERCESC_ROOT --openssl=/usr/local/opt/openssl@1.1 --compile-warnings=WARNING
+        ./configure --optimize --no-debug --std=c++11 --tests --rapidjson --security --ace=$GITHUB_WORKSPACE/OpenDDS/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC --xerces3=$XERCESC_ROOT --openssl=/usr/local/opt/openssl@1.1
     - name: check build configuration
       shell: bash
       run: |
@@ -13214,7 +13109,7 @@ jobs:
       run: |
         cd OpenDDS
         XERCESC_ROOT=$(find /usr/local/Cellar/xerces-c -iname "3\.*\.*" -type d | sort -r | head -n 1)
-        ./configure  --no-inline --std=c++11 --tests --security --ace=$GITHUB_WORKSPACE/OpenDDS/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC --xerces3=$XERCESC_ROOT --openssl=/usr/local/opt/openssl@1.1 --compile-warnings=WARNING
+        ./configure  --no-inline --std=c++11 --tests --security --ace=$GITHUB_WORKSPACE/OpenDDS/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC --xerces3=$XERCESC_ROOT --openssl=/usr/local/opt/openssl@1.1
     - name: build ACE and TAO
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: |
@@ -13281,7 +13176,7 @@ jobs:
       run: |
         cd OpenDDS
         clang++ --version
-        ./configure --no-inline --std=c++11 --tests --rapidjson --java --no-built-in-topics --ace=$GITHUB_WORKSPACE/OpenDDS/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC --compile-warnings=WARNING
+        ./configure --no-inline --std=c++11 --tests --rapidjson --java --no-built-in-topics --ace=$GITHUB_WORKSPACE/OpenDDS/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC
     - name: check build configuration
       shell: bash
       run: |
