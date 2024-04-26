@@ -47,11 +47,8 @@ public:
     ::DDS::DomainParticipant_ptr participant,
     const char* type_name);
 
-  const char* name() const { return "MyType"; }
+  const char* default_type_name() const override { return "MyType"; }
   virtual char* get_type_name();
-#ifndef OPENDDS_SAFETY_PROFILE
-  DDS::DynamicType_ptr get_type() { return 0; }
-#endif
 
   virtual ::DDS::DataWriter_ptr create_datawriter();
 
@@ -62,20 +59,14 @@ public:
 #endif
 
 #ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
-  virtual const OpenDDS::DCPS::MetaStruct& getMetaStructForType() const;
+  virtual const OpenDDS::DCPS::MetaStruct& getMetaStructForType();
 #endif
 
-  size_t key_count() const { return 0; }
-  bool is_dcps_key(const char*) const { return false; }
+  bool has_dcps_key() override { return false; }
 
   void representations_allowed_by_type(DDS::DataRepresentationIdSeq& seq);
 
-  OpenDDS::DCPS::Extensibility base_extensibility() const
-  {
-    return OpenDDS::DCPS::FINAL;
-  }
-
-  OpenDDS::DCPS::Extensibility max_extensibility() const
+  OpenDDS::DCPS::Extensibility getExtensibility() const
   {
     return OpenDDS::DCPS::FINAL;
   }
