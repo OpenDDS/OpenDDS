@@ -82,7 +82,7 @@ void MyTypeSupportImpl::representations_allowed_by_type(
 #ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
 
 const OpenDDS::DCPS::MetaStruct&
-MyTypeSupportImpl::getMetaStructForType()
+MyTypeSupportImpl::getMetaStructForType() const
 {
   throw std::runtime_error("unimplemented");
 }
