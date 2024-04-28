@@ -28,6 +28,7 @@ use version_utils;
 use command_utils;
 use ChangeDir;
 use misc_utils qw/trace/;
+use ini qw/read_ini_file/;
 
 my $zero_version = parse_version("0.0.0");
 
@@ -236,6 +237,17 @@ sub run_command {
   );
 }
 
+sub git {
+  my $args = shift();
+  my $exit_statuses = shift() // [0];
+  return command_utils::run_command(['git', @{$args}], @_,
+    script_name => 'gitrelease.pl',
+    verbose => 1,
+    autodie => 1,
+    ignore => $exit_statuses,
+  );
+}
+
 sub yes_no {
   my $message = shift;
   print("$message [y/n] ");
@@ -268,6 +280,24 @@ sub touch_file {
     my $t = time();
     utime($t, $t, $path) || trace("Couldn't touch file $path: $!");
   }
+}
+
+sub read_file {
+  my $path = shift();
+
+  open(my $fh, '<', $path) or trace("Couldn't open file $path: $!");
+  my $text = do { local $/; <$fh> };
+  close($fh);
+
+  return $text;
+}
+
+sub write_file {
+  my $path = shift();
+
+  open(my $fh, '>', $path) or trace("Couldn't open file $path: $!");
+  print $fh (@_);
+  close($fh);
 }
 
 my %dummy_release_files = ();
@@ -349,22 +379,15 @@ sub check_pithub_result {
 sub read_json_file {
   my $path = shift();
 
-  open my $f, '<', $path or trace("Can't open JSON file $path: $!");
-  local $/;
-  my $text = <$f>;
-  close $f;
-
-  return decode_json($text);
+  return decode_json(read_file($path));
 }
 
 sub write_json_file {
   my $path = shift();
   my $what = shift();
 
-  open my $f, '>', $path or trace("Can't open JSON file $path: $!");
   # Writes indented, space-separated JSON in a reproducible order
-  print $f JSON::PP->new->pretty->canonical->encode($what);
-  close $f;
+  write_file($path, JSON::PP->new->pretty->canonical->encode($what));
 }
 
 sub expand_releases {
@@ -889,16 +912,17 @@ sub upload_artifacts_from_workflow {
     ) or trace("Could not download $artifact->{name}");
   }
 
-  # TODO: This probably shouldn't assume we will always want the first release.
-  my $release = get_github_releases($settings)->first;
-
-  # Get existing aritfacts in the release
+  # Get the release of the repo to upload to
   my $upload_settings = $settings;
   if (defined($workflow->{pithub_override})) {
     $upload_settings = new_pithub($settings, %{$workflow->{pithub_override}}, needs_token => 1);
   }
+  # TODO: This probably shouldn't assume we will always want the first release.
+  my $upload_release = get_github_releases($upload_settings)->first;
+
+  # Get existing aritfacts in the release
   my $assets_ph = $upload_settings->{pithub}->repos->releases->assets;
-  my $assets_result = $assets_ph->list(release_id => $release->{id});
+  my $assets_result = $assets_ph->list(release_id => $upload_release->{id});
   check_pithub_result($assets_result);
   my @existing_assets = ();
   while (my $existing_asset = $assets_result->next) {
@@ -915,7 +939,7 @@ sub upload_artifacts_from_workflow {
     else {
       trace("Unexpected artifact name: $artifact->{name}");
     }
-    my $name = $workflow->{arc_name}($settings, $workflow, $os_name);
+    my $name = $workflow->{arc_name}($upload_settings, $workflow, $os_name);
     my $dir_path = "$ws_subdir/$name";
     if (!-d $dir_path) {
       mkdir($dir_path) or trace("mkdir $dir_path failed: $!");
@@ -925,7 +949,7 @@ sub upload_artifacts_from_workflow {
     extract_archive($artifact->{path}, $dir_path) or
       trace("Extract artifact failed");
 
-    $workflow->{prepare}($settings, $workflow, $os_name, $dir_path);
+    $workflow->{prepare}($upload_settings, $workflow, $os_name, $dir_path);
 
     print("Archiving $name...\n");
     my $arc_ext;
@@ -942,8 +966,9 @@ sub upload_artifacts_from_workflow {
     my $filename = "$name$arc_ext";
     my $filename_re = quotemeta($filename);
     if (grep(/^$filename_re$/, @existing_assets)) {
-      print("Skipping $filename it's already uploaded\n");
-    } else {
+      print("Skipping $filename, it's already uploaded\n");
+    }
+    else {
       create_archive($dir_path, $arc, no_dir => $workflow->{no_dir}) or
         trace("Failed to create archive $arc");
       push(@to_upload, $arc);
@@ -952,12 +977,12 @@ sub upload_artifacts_from_workflow {
 
   print("Upload to Github\n");
   my %asset_details;
-  read_assets($settings, \@to_upload, \%asset_details);
+  read_assets($upload_settings, \@to_upload, \%asset_details);
   if (defined($workflow->{before_upload})) {
     $workflow->{before_upload}($upload_settings, $workflow,
-      \@to_upload, \%asset_details, $release->{id});
+      \@to_upload, \%asset_details, $upload_release->{id});
   }
-  github_upload_assets($settings, \@to_upload, \%asset_details, $release->{id},
+  github_upload_assets($upload_settings, \@to_upload, \%asset_details, $upload_release->{id},
     "\nGithub upload failed, try again");
 }
 
@@ -1221,26 +1246,33 @@ sub update_ace_tao {
 
   my $doc_repo = $settings->{pithub}->repos->get()->content->{clone_url};
   my @arc_exts = ('zip', 'tar.gz', 'tar.bz2');
-  my @ace_tao_versions = (
-    {
-      name => 'ace6tao2',
-      min => parse_version('6.5.0'),
-      repo => $doc_repo,
-      branch => 'ace6tao2',
-    },
-    {
-      name => 'ace7tao3',
-      min => parse_version('7.1.0'),
-      repo => $doc_repo,
-      branch => 'master',
-    },
-  );
+  my $ini_path = 'acetao.ini';
+  my $update_branch = "workflows/update-ace-tao";
+
+  # Get the ACE/TAO repos/branches we're interested in
+  my ($section_names, $sections) = read_ini_file($ini_path);
+  my @ace_tao_versions;
+  for my $name (@{$section_names}) {
+    my $sec = $sections->{$name};
+    my $ace_tao_version = {
+      name => $name,
+      current => $sec->{version},
+      hold => 0,
+      %{$sec}
+    };
+    if (!$sec->{hold}) {
+      my $ver = parse_version($sec->{version});
+      my $plus = $ver->{minor} + 1;
+      $ace_tao_version->{next_minor} = parse_version("$ver->{major}.$plus.$ver->{micro}");
+    }
+    push(@ace_tao_versions, $ace_tao_version);
+  }
 
   # Get all the ACE/TAO releases
   my $release_list = get_github_releases($settings);
   my @releases = ();
   while (my $release = $release_list->next) {
-    next if $release->{prerelease};
+    next if ($release->{prerelease});
     next if ($release->{tag_name} !~ /^ACE\+TAO-(\d+_\d+_\d+)$/);
     my $ver = $1;
     $ver =~ s/_/./g;
@@ -1251,15 +1283,26 @@ sub update_ace_tao {
   }
   my @sorted = sort { version_cmp($b->{version}, $a->{version}) } @releases;
 
+  my @updated;
   for my $ace_tao_version (@ace_tao_versions) {
+    print("$ace_tao_version->{name} currently $ace_tao_version->{current}\n");
+    if ($ace_tao_version->{hold}) {
+      print("Hold there for now\n");
+      next;
+    }
+
     # Find versions that match ace_tao_versions. This is the first one that's
     # less than MAJOR.MINOR+1.MICRO.
-    my $min = $ace_tao_version->{min};
-    my $plus = $min->{minor} + 1;
-    my $max = parse_version("$min->{major}.$plus.$min->{micro}");
     for my $r (@sorted) {
-      if (version_lesser($r->{version}, $max)) {
+      if (version_lesser($r->{version}, $ace_tao_version->{next_minor})) {
         my $version = $r->{version}->{string};
+        if ($ace_tao_version->{version} ne $version) {
+          print("Will update to $ace_tao_version->{version}\n");
+          push(@updated, $ace_tao_version);
+        }
+        else {
+          print("$ace_tao_version->{version} is the newest\n");
+        }
         $ace_tao_version->{version} = $version;
         $ace_tao_version->{url} = $r->{release}->{html_url};
 
@@ -1298,18 +1341,16 @@ sub update_ace_tao {
   }
 
   # Print the INI file
-  my $ini_path = 'acetao.ini';
   open(my $ini_fh, '>', $ini_path) or trace("Could not open $ini_path: $!");
   print $ini_fh (
     "# This file contains the common info for ACE/TAO releases. Insead of editing\n",
     "# this directly, run:\n",
-    "#   GITHUB_TOKEN=... ./tools/scripts/gitrelease.pl --update-ace-tao\n");
+    "#   tools/scripts/gitrelease.pl --update-ace-tao\n");
   for my $ace_tao_version (@ace_tao_versions) {
-    print $ini_fh ("\n[$ace_tao_version->{name}]\n",
-      "version=$ace_tao_version->{version}\n",
-      "repo=$ace_tao_version->{repo}\n",
-      "branch=$ace_tao_version->{branch}\n",
-      "url=$ace_tao_version->{url}\n");
+    print $ini_fh ("\n[$ace_tao_version->{name}]\n");
+    for my $key ('hold', 'desc', 'version', 'repo', 'branch', 'url') {
+      print $ini_fh ("$key=$ace_tao_version->{$key}\n");
+    }
     for my $ext (@arc_exts) {
       for my $suffix ('filename', 'url', 'md5') {
         my $key = "$ext-$suffix";
@@ -1318,6 +1359,73 @@ sub update_ace_tao {
     }
   }
   close($ini_fh);
+
+  if (@updated) {
+    my $long_desc = "Updated:\n";
+    my @versions;
+
+    for my $ace_tao_version (@updated) {
+      # For Commit/PR Message
+      push(@versions, $ace_tao_version->{version});
+      $long_desc .= "- $ace_tao_version->{desc} from $ace_tao_version->{current} " .
+          "to [$ace_tao_version->{version}]($ace_tao_version->{url}).\n";
+
+      # Print news file
+      write_file("docs/news.d/automated-update-$ace_tao_version->{name}.rst",
+        "# This file was generated by tools/scripts/gitrelease.pl. It can be edited, but\n",
+        "# if there is another release for $ace_tao_version->{name}, the automated PR\n",
+        "# will overwrite this file.\n",
+        ".. news-prs: none\n",
+        ".. news-start-section: Platform Support and Dependencies\n",
+        ".. news-start-section: ACE/TAO\n",
+        "- Updated $ace_tao_version->{desc} from $ace_tao_version->{current} " .
+          "to `$ace_tao_version->{version} <$ace_tao_version->{url}>`__.\n",
+        ".. news-end-section\n",
+        ".. news-end-section\n");
+    }
+
+    # Prepare Commit and PR Messages
+    my $short_desc = 'Update ACE/TAO to ' . join(", ", @versions);
+    my $full_desc = "$short_desc\n\n$long_desc";
+    print($full_desc);
+    if ($ENV{GITHUB_WORKSPACE}) {
+      # Write the commit/PR message only if the update branch doesn't already
+      # exist or the acetao.ini on the update branch is different. We're
+      # assuming if it's different, then this one is correct and that one is
+      # out of date. The branch will be forcefully rewritten.
+      my $file = "file";
+      git(['pull', $settings->{remote}]);
+      git(['status']);
+      my $create_pr = 0;
+      if (git(['ls-remote', '--exit-code', '--heads',
+          $settings->{remote}, $update_branch], [0, 2])) {
+        print("$update_branch does not exist\n");
+        $create_pr = 1;
+      }
+      else {
+        print("$update_branch exists\n");
+        if (git(['--no-pager', 'diff', '--exit-code',
+            "$settings->{remote}/$update_branch", '--', $ini_path], [0, 1])) {
+          print("$ini_path on $update_branch differs\n");
+          $create_pr = 1;
+        }
+        else {
+          print("$ini_path is the same on $update_branch\n");
+        }
+      }
+
+      if ($create_pr) {
+        print("PR needed\n");
+        my $prefix = "$ENV{GITHUB_WORKSPACE}/update-ace-tao-";
+        write_file("${prefix}commit.md", $full_desc);
+        write_file("${prefix}pr-title.md", $short_desc);
+        write_file("${prefix}pr-body.md", $long_desc);
+      }
+      else {
+        print("PR NOT needed\n");
+      }
+    }
+  }
 }
 
 ############################################################################
@@ -2763,9 +2871,6 @@ sub remedy_github_upload {
   read_assets($settings, \@assets, \%asset_details);
 
   my $releases = $settings->{pithub}->repos->releases;
-  my $release_notes_path = 'docs/gh-release-notes.md';
-  open(my $fh, '<', $release_notes_path) or trace("Failed to read $release_notes_path: $!");
-  my $release_notes = do { local $/; <$fh> };
   my $release = $releases->create(
     data => {
       name => "OpenDDS $settings->{version}",
@@ -2773,7 +2878,7 @@ sub remedy_github_upload {
       body =>
         "**Download $settings->{zip_src} (Windows) or $settings->{tgz_src} (Linux/macOS) " .
           "instead of \"Source code (zip)\" or \"Source code (tar.gz)\".**\n\n" .
-        $release_notes,
+        read_file('docs/gh-release-notes.md'),
     },
   );
   check_pithub_result($release);

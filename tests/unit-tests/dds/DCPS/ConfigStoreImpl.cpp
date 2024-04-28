@@ -242,7 +242,8 @@ TEST(dds_DCPS_ConfigStoreImpl, set_get_StringList)
 enum MyConfigStoreEnum {
   ALPHA,
   BETA,
-  GAMMA
+  GAMMA,
+  DELTA
 };
 
 TEST(dds_DCPS_ConfigStoreImpl, set_get_Enum)
@@ -257,8 +258,26 @@ TEST(dds_DCPS_ConfigStoreImpl, set_get_Enum)
 
   ConfigTopic_rch topic = make_rch<ConfigTopic>();
   ConfigStoreImpl store(topic);
+  // Get the default if there is no entry.
   EXPECT_EQ(store.get("key", GAMMA, kinds), GAMMA);
-  store.set("key", "beta");
+
+  // Default not in helper works.
+  EXPECT_EQ(store.get("key", DELTA, kinds), DELTA);
+
+  // Setting with enum works.
+  store.set("key", ALPHA, kinds);
+  EXPECT_EQ(store.get("key", GAMMA, kinds), ALPHA);
+
+  // Setting with string works.
+  store.set("key", "beta", kinds);
+  EXPECT_EQ(store.get("key", GAMMA, kinds), BETA);
+
+  // Setting with enum that is not in helper does nothing.
+  store.set("key", DELTA, kinds);
+  EXPECT_EQ(store.get("key", GAMMA, kinds), BETA);
+
+  // Setting with enum that is not in helper does nothing.
+  store.set("key", "delta", kinds);
   EXPECT_EQ(store.get("key", GAMMA, kinds), BETA);
 }
 

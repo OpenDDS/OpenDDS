@@ -2283,51 +2283,31 @@ Service_Participant::get_type_object(DDS::DomainParticipant_ptr participant,
   return XTypes::TypeObject();
 }
 
+namespace {
+  const EnumList<Service_Participant::TypeObjectEncoding> type_object_encoding_kinds[] =
+    {
+      { Service_Participant::Encoding_Normal, "Normal" },
+      { Service_Participant::Encoding_WriteOldFormat, "WriteOldFormat" },
+      { Service_Participant::Encoding_ReadOldFormat, "ReadOldFormat" },
+      { Service_Participant::Encoding_Normal, 0 }
+    };
+}
+
 Service_Participant::TypeObjectEncoding
 Service_Participant::type_object_encoding() const
 {
-  String encoding_str = "Normal";
-  config_store_->get(COMMON_DCPS_TYPE_OBJECT_ENCODING, encoding_str);
-
-  struct NameValue {
-    const char* name;
-    TypeObjectEncoding value;
-  };
-  static const NameValue entries[] = {
-    {"Normal", Encoding_Normal},
-    {"WriteOldFormat", Encoding_WriteOldFormat},
-    {"ReadOldFormat", Encoding_ReadOldFormat},
-  };
-  for (size_t i = 0; i < sizeof entries / sizeof entries[0]; ++i) {
-    if (0 == std::strcmp(entries[i].name, encoding_str.c_str())) {
-      return entries[i].value;
-    }
-  }
-  ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: Service_Participant::type_object_encoding: "
-             "invalid encoding %C\n", encoding_str.c_str()));
-
-  return Encoding_Normal;
+  return config_store_->get(COMMON_DCPS_TYPE_OBJECT_ENCODING, Encoding_Normal, type_object_encoding_kinds);
 }
 
 void Service_Participant::type_object_encoding(TypeObjectEncoding encoding)
 {
-  switch (encoding) {
-  case Encoding_Normal:
-    config_store_->set_string(COMMON_DCPS_TYPE_OBJECT_ENCODING, "Normal");
-    break;
-  case Encoding_WriteOldFormat:
-    config_store_->set_string(COMMON_DCPS_TYPE_OBJECT_ENCODING, "WriteOldFormat");
-    break;
-  case Encoding_ReadOldFormat:
-    config_store_->set_string(COMMON_DCPS_TYPE_OBJECT_ENCODING, "ReadOldFormat");
-    break;
-  }
+  config_store_->set(COMMON_DCPS_TYPE_OBJECT_ENCODING, encoding, type_object_encoding_kinds);
 }
 
 void
 Service_Participant::type_object_encoding(const char* encoding)
 {
-  config_store_->set_string(COMMON_DCPS_TYPE_OBJECT_ENCODING, encoding);
+  config_store_->set(COMMON_DCPS_TYPE_OBJECT_ENCODING, encoding, type_object_encoding_kinds);
 }
 
 unsigned int

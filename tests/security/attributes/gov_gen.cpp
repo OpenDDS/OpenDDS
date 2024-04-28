@@ -403,7 +403,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     return EXIT_FAILURE;
   }
 
-  PKCS7* p7 = PKCS7_sign(cert, key, NULL, NULL, PKCS7_TEXT | PKCS7_DETACHED);
+  PKCS7* p7 = PKCS7_sign(cert, key, NULL, mem, PKCS7_TEXT | PKCS7_DETACHED | PKCS7_STREAM);
   if (!p7) {
     std::cerr << "ERROR: could not sign" << std::endl;
     print_ssl_error();
@@ -418,7 +418,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 
   }
 
-  if (!SMIME_write_PKCS7(out, p7, mem, PKCS7_TEXT | PKCS7_DETACHED)) {
+  if (!SMIME_write_PKCS7(out, p7, mem, PKCS7_TEXT | PKCS7_DETACHED | PKCS7_STREAM)) {
     std::cerr << "ERROR: could not write " << outpath << std::endl;
     print_ssl_error();
     return EXIT_FAILURE;
