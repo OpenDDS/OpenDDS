@@ -1214,7 +1214,7 @@ sub default_features {
   my @feat;
   if ($buildEnv{'build'} eq 'target') {
     push(@feat, 'ipv6=1') if $opts{'ipv6'};
-    my @normalized = map {/=/ ? $_: "$_=1"} @features;
+    my @normalized = map {/=/ ? $_ : "$_=1"} @features;
     push(@feat, @normalized) if @normalized;
   }
   return @feat;
