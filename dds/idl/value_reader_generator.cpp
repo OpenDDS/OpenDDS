@@ -151,6 +151,7 @@ namespace {
         indent.substr(0, indent.size() - 2) << "if (value_reader.member_has_value()) {\n";
     }
 
+    // If the field is optional we need to create a temporary to read the value into before we can assign it to the optional
     const bool create_tmp  = optional && !(c & CL_STRING);
     const std::string var_name = create_tmp ? "tmp" : expression + accessor;
     if (create_tmp) {
@@ -198,31 +199,30 @@ namespace {
           indent << "if (!value_reader.read_" << primitive_type(pt) << '(' << var_name << ")) return false;\n";
       }
     } else {
-      // TODO(tyler) Not sure how this affects the original
-      std::string value_expr = expression + accessor;
       if (!(c & CL_ENUM)) {
-        const std::string value_name = optional ? "tmp" : expression + accessor;
         const std::string type_name = scoped(type->name());
         switch (filter_kind) {
-        case FieldFilter_NestedKeyOnly:
-          value_expr = field_name + "_nested_key_only";
-          be_global->impl_ <<
-            indent << "const NestedKeyOnly<" << type_name << "> " <<
-            value_expr << "(" << value_name << ");\n";
-          break;
-        case FieldFilter_KeyOnly:
-          value_expr = field_name + "_key_only";
-          be_global->impl_ <<
-            indent << "const KeyOnly<" << type_name << "> " <<
-            value_expr << "(" << value_name << ");\n";
-          break;
+        case FieldFilter_NestedKeyOnly: {
+            const std::string value_expr = field_name + "_nested_key_only";
+            be_global->impl_ <<
+              indent << "const NestedKeyOnly<" << type_name << "> " <<
+              value_expr << "(" << var_name << ");\n";
+            break;
+          }
+        case FieldFilter_KeyOnly: {
+            const std::string value_expr = field_name + "_key_only";
+            be_global->impl_ <<
+              indent << "const KeyOnly<" << type_name << "> " <<
+              value_expr << "(" << var_name << ");\n";
+            break;
+          }
         default:
           break;
         }
       }
 
       be_global->impl_ <<
-        indent << "if (!vread(value_reader, " << value_expr <<
+        indent << "if (!vread(value_reader, " << var_name <<
           ")) return false;\n";
     }
 
