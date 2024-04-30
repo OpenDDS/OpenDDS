@@ -452,7 +452,6 @@ my @mpcopts;
 push(@mpcopts, @{$opts{'mpcopts'}}) if exists($opts{'mpcopts'});
 my @features;
 push(@features, @{$opts{'features'}}) if exists($opts{'features'});
-push(@features, 'java=1') if $opts{'java'};
 
 $opts{'host'} = perlOS_to_host() unless $opts{'host'};
 
@@ -1807,6 +1806,8 @@ sub has_feature {
 }
 
 if ($opts{'java'}) {
+  push(@features, 'java=1');
+
   my $feat = 'java_pre_jpms';
   unless (has_feature($feat)) {
     my $javac = File::Spec->catfile($opts{'java'}, 'bin', 'javac');
