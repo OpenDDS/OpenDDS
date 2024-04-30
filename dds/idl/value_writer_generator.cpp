@@ -405,6 +405,12 @@ bool value_writer_generator::gen_struct(AST_Structure* node,
       !gen_struct_i(node, type_name, use_cxx11, ek, FieldFilter_NestedKeyOnly)) {
     return false;
   }
+
+  if (be_global->is_topic_type(node)) {
+    if (!gen_struct_i(node, type_name, use_cxx11, ek, FieldFilter_KeyOnly)) {
+      return false;
+    }
+  }
   return true;
 }
 

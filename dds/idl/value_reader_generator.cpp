@@ -222,7 +222,7 @@ namespace {
       }
 
       be_global->impl_ <<
-        indent << "if (!vread(value_reader, " << var_name <<
+        indent << "if (!vread(value_reader, " << value_expr <<
           ")) return false;\n";
     }
 
