@@ -105,7 +105,7 @@ my %platforminfo =
                     'no_host' => 1,
                     'aceplatform' => 'lynxos',
                     'compiler_root_env' => 'ENV_PREFIX',
-                    'usage' => ['Set up the cross-compile using '.
+                    'usage' => ['Set up the cross compile using '.
                                 'the script from LynxOS',
                                ],
                    },
@@ -191,7 +191,7 @@ my @specs =
     'target=s', 'Cross-compile target (none): see --target-help',
     'target-arch=s', 'Architecture for target (none): see --target-help',
     'target-compiler=s', 'Compiler for target (if req\'d): see --target-help',
-    'host-tools=s', 'DDS_ROOT of host tools for cross-compile (build)',
+    'host-tools=s', 'DDS_ROOT of host tools for cross compile (build)',
     'host-ace=s', 'Define host ACE_ROOT (uses relative path from' .
       $argIndent . 'target DDS_ROOT to target ACE_ROOT)',
     'host-tools-only!', 'Just build the host tools (no)',
