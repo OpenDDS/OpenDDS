@@ -105,7 +105,7 @@ my %platforminfo =
                     'no_host' => 1,
                     'aceplatform' => 'lynxos',
                     'compiler_root_env' => 'ENV_PREFIX',
-                    'usage' => ['Set up the cross-compile using '.
+                    'usage' => ['Set up the cross compile using '.
                                 'the script from LynxOS',
                                ],
                    },
@@ -166,13 +166,15 @@ sub targetUsage {
 my $argPadding = 29;
 my $argIndent = "\n   " . (' ' x $argPadding);
 
-my @specs = # Array of array-refs, each inner array is an option group which
-            # has the format [Group Description, Opt1 Spec, Opt1 Description,
-            # Opt2 Spec, Opt2 Description, ...]
+# Array of array-refs, each inner array is an option group which
+# has the format [Group Description, Opt1 Spec, Opt1 Description,
+# Opt2 Spec, Opt2 Description, ...]
 # <default>OPT is a custom token marking a string option that
 # defaults to $opts{'OPT'} = '' and can be overridden by opts by passing
 # --no-OPT or --OPT with a value.
 # <hidden>OPT hides the option from --help
+# <usage>OPT hides the option from GetOpt::Long
+my @specs =
   (
    ['Options controlling the configure script:',
     'help|h|?', 'Show this help and exit',
@@ -210,9 +212,11 @@ my @specs = # Array of array-refs, each inner array is an option group which
       $argIndent . '  asan: Address Sanitizer, gcc/clang only' .
       $argIndent . '  tsan: Thread Sanitizer, gcc/clang only' .
       $argIndent . '  ubsan: Undefined Behavior Sanitizer, clang only',
-    'compile-warnings=s', 'Enable additional compiler warnings (empty)' .
-      $argIndent . 'If set to WARNING, enable additional warnings' .
-      $argIndent . 'If set to ERROR, enable additional warnings and treated them as errors',
+    'compile-warnings=s', 'Enable additional compiler warnings' .
+      $argIndent . '(default compiler warnings)' .
+      $argIndent . '  WARNING: enable additional warnings' .
+      $argIndent . '  ERROR: enable additional warnings that are' .
+      $argIndent . '    treated as errors',
    ],
    ['Required dependencies for OpenDDS:',
     'ace=s', 'ACE (use ACE_ROOT, ACE_wrappers, or download)',
@@ -229,13 +233,18 @@ my @specs = # Array of array-refs, each inner array is an option group which
     'configh=s@', 'Extra text for config.h',
     'macros=s@', 'Extra text for platform_macros.GNU',
     'features=s@', 'Extra text for default.features',
-    'mpcopts=s@', 'Extra command-line args for MPC' .
+    'mpcopts=s@', 'Extra command-line options for MPC' .
       $argIndent . 'This option can be given multiple times' .
-      $argIndent . 'Example: --mpcopts=-value_template --mpcopts=build_flags+="-Wall -Werror"',
-    '<usage>mpc:ARG VALUE', 'Extra command-line args for MPC' .
-      $argIndent . 'This option can be given multiple times' .
-      $argIndent . 'For example, --mpc:value_template build_flags+="-Wall -Werror" turns into' .
-      $argIndent . 'the following options for MPC: -value_template build_flags+="-Wall -Werror"',
+      $argIndent . 'For example:' .
+      $argIndent . '  --mpcopts=-value_template --mpcopts=build_flags+="-Wall -Werror"' .
+      $argIndent . 'turns into the following arguments for MPC:' .
+      $argIndent . '  -value_template build_flags+="-Wall -Werror"',
+    '<usage>mpc:OPT=VALUE', 'Extra command-line options for MPC' .
+      $argIndent . 'For example:' .
+      $argIndent . '  --mpc:value_template build_flags+="-Wall -Werror"' .
+      $argIndent . 'turns into the following arguments for MPC:' .
+      $argIndent . '  -value_template build_flags+="-Wall -Werror"' .
+      $argIndent . 'This option can be given multiple times',
     'boottime!', 'Use CLOCK_BOOTTIME for timers (no)',
    ],
    ['Optional dependencies for OpenDDS (disabled by default unless noted otherwise):',
@@ -262,14 +271,13 @@ my @specs = # Array of array-refs, each inner array is an option group which
       $argIndent . 'use git submodle, RAPIDJSON_ROOT, or system pkg)',
     'qt:s', 'Qt5 (use QTDIR or system pkg)',
     'qt-include:s', 'Qt include dir (use QT5_INCDIR, QTDIR/include,' .
-      $argIndent . 'or sysytem package)',
+      $argIndent . 'or system package)',
     'xerces3:s', 'Xerces-C++ 3 for QoS XML handling, DDS Security',
     'openssl:s', 'OpenSSL for DDS Security',
-    'cmake:s', 'Path to cmake binary for compiling Google Test' .
-      $argIndent . 'Framework. (Check Path and Check Normal' .
-      $argIndent . 'Locations)',
-    'gtest:s', 'Path to Google Test Framework, required for' .
-      $argIndent . 'tests (uses GTEST_ROOT).' .
+    'cmake:s', 'Path to CMake for compiling GoogleTest' .
+      $argIndent . '(Check PATH and normal locations)',
+    'gtest:s', 'Path to GoogleTest, required for tests' .
+      $argIndent . '(uses GTEST_ROOT)' .
       $argIndent . 'If not built, will try to build using CMake.',
    ],
    ['Optional OpenDDS features:',
@@ -387,17 +395,21 @@ sub parseArgs {
 
   while (@ARGV != 0) {
     my $arg = shift(@ARGV);
-    if ($arg =~ /^--mpc:(.*)$/) {
+    if ($arg =~ /^--mpc:([^=]*)(?:=(.*))?$/) {
       my $key = $1;
-      if (@ARGV != 0) {
-        my $value = shift(@ARGV);
+      my $value = $2;
+      if (defined($value)) {
+        push(@{$opts->{'mpcopts'}}, '-' . $key, $value);
+      }
+      elsif (@ARGV != 0) {
+        $value = shift(@ARGV);
         push(@{$opts->{'mpcopts'}}, '-' . $key, $value);
       } else {
-        print "ERROR: $arg requires a value\n";
+        print STDERR "ERROR: $arg requires a value\n";
         usage(1);
       }
     } else {
-      print "ERROR: unknown argument $arg\n";
+      print STDERR "ERROR: unknown argument $arg\n";
       usage(1);
     }
   }
@@ -436,6 +448,10 @@ if (exists($opts{'std'})) {
   # Accept any of --std=17, --std=stdcpp17, --std=c++17, etc.
   $cxx_std =~ s/^(std)?(cpp|c\+\+)//;
 }
+my @mpcopts;
+push(@mpcopts, @{$opts{'mpcopts'}}) if exists($opts{'mpcopts'});
+my @features;
+push(@features, @{$opts{'features'}}) if exists($opts{'features'});
 
 $opts{'host'} = perlOS_to_host() unless $opts{'host'};
 
@@ -772,15 +788,15 @@ EOF
     $opts{'compiler_target_architecture'} = $arch;
 
     if ($ver >= 19) {
-      push(@{$opts{'features'}}, 'no_cxx11=0');
+      push(@features, 'no_cxx11=0');
       print "Visual C++ has >= C++11 support\n" if $opts{'verbose'};
     }
     if ($opts{'std'}) {
       my $std = "stdcpp$cxx_std";
-      push(@{$opts{'mpcopts'}}, '-value_template', "LanguageStandard=$std");
+      push(@mpcopts, '-value_template', "LanguageStandard=$std");
       print "Setting Visual C++ LanguageStandard to $std\n" if $opts{'verbose'};
       if ($opts{'std'} eq 'latest' || $cxx_std >= 17) {
-        push(@{$opts{'features'}}, 'no_cxx17=0');
+        push(@features, 'no_cxx17=0');
         print "Visual C++ has >= C++17 support\n" if $opts{'verbose'};
       }
     }
@@ -823,13 +839,14 @@ EOF
     }
 
     if ($opts{'std'} && $opts{'std'} =~ /(0x|11|1y|14|1z|17|2a|20|2b|23)$/) {
-      push(@{$opts{'features'}}, 'no_cxx11=0');
+      push(@features, 'no_cxx11=0');
       print "Compiler has >= C++11 support\n" if $opts{'verbose'};
     }
   }
 }
 
-if ($opts{'compile-warnings'} eq 'WARNING' or $opts{'compile-warnings'} eq 'ERROR') {
+my $compile_warnings = $opts{'compile-warnings'} // '';
+if ($compile_warnings eq 'WARNING' or $compile_warnings eq 'ERROR') {
   my ($section_names, $sections) = read_ini_file("$FindBin::RealBin/build.ini");
   my %compiler_map = ( 'g++' => 'GNU', 'clang' => 'Clang', 'cl' => 'MSVC', 'cl.exe' => 'MSVC');
   my $section = $compiler_map{$opts{'compiler'}};
@@ -838,9 +855,9 @@ if ($opts{'compile-warnings'} eq 'WARNING' or $opts{'compile-warnings'} eq 'ERRO
   }
   my $warning_flags = $sections->{$section}{'warning'};
   my $error_flags = $sections->{$section}{'error'};
-  push(@{$opts{'mpcopts'}}, '-value_template', "compile_flags+=${warning_flags}");
-  if ($opts{'compile-warnings'} eq 'ERROR') {
-    push(@{$opts{'mpcopts'}}, '-value_template', "compile_flags+=${error_flags}");
+  push(@mpcopts, '-value_template', "compile_flags+=${warning_flags}");
+  if ($compile_warnings eq 'ERROR') {
+    push(@mpcopts, '-value_template', "compile_flags+=${error_flags}");
   }
 }
 
@@ -1191,16 +1208,20 @@ sub write_config_h {
 
 my $wrote_df = 0;
 
-sub write_default_features {
+sub default_features {
   my %buildEnv = %{shift()};
   my @feat;
   if ($buildEnv{'build'} eq 'target') {
     push(@feat, 'ipv6=1') if $opts{'ipv6'};
-    push(@feat, @{$opts{'features'}}) if $opts{'features'};
+    my @normalized = map {/=/ ? $_ : "$_=1"} @features;
+    push(@feat, @normalized) if @normalized;
   }
-  elsif ($opts{'java'}) {
-    push(@feat, 'java=1');
-  }
+  return @feat;
+}
+
+sub write_default_features {
+  my %buildEnv = %{shift()};
+  my @feat = default_features(\%buildEnv);
 
   if (@feat) {
     my $DF = backup_and_open("$buildEnv{'ACE_ROOT'}/bin/MakeProjectCreator" .
@@ -1623,7 +1644,7 @@ if (exists $opts{'gtest'} || $tests) {
       setEnv('GTEST_ROOT', $gtest_root);
     }
     else {
-      print "Could not find Google Test, cloning...\n" if $opts{'verbose'};
+      print "Could not find GoogleTest, cloning...\n" if $opts{'verbose'};
       if (git_ensure_submodule($rel_path)) {
         $use_sm_dir = 1;
       }
@@ -1642,8 +1663,8 @@ if (exists $opts{'gtest'} || $tests) {
     }
 
     if (!defined($gtest_root)) {
-      die "ERROR: Google Test '$gtest_sanity' not found in submodule src '$sm_src' or " .
-        "default install dir '$sys_dir', please pass a correct version of Google Test to --gtest\nStopped";
+      die "ERROR: GoogleTest '$gtest_sanity' not found in submodule src '$sm_src' or " .
+        "default install dir '$sys_dir', please pass a correct version of GoogleTest to --gtest\nStopped";
     }
   }
   if ($is_windows && -d File::Spec->catdir($gtest_root, 'bin')) {
@@ -1655,7 +1676,7 @@ if (exists $opts{'gtest'} || $tests) {
 
 }
 if ($build_gtest && !$has_cmake) {
-  die "ERROR: Google Test in $opts{'gtest'} must be built but can't find CMake\nStopped";
+  die "ERROR: GoogleTest in $opts{'gtest'} must be built but can't find CMake\nStopped";
 }
 
 if (exists $opts{'rapidjson'}) {
@@ -1775,19 +1796,18 @@ for my $key (keys %optdep) {
 
 sub has_feature {
   my $feat = shift;
-  if ($opts{'features'}) {
-    for my $f (@{$opts{'features'}}) {
-      my ($key, $value) = split(/=/, $f);
-      if ($key eq $feat) {
-        return 1;
-      }
+  for my $f (@features) {
+    my ($key, $value) = split(/=/, $f);
+    if ($key eq $feat) {
+      return 1;
     }
   }
   return 0;
 }
 
-my @features;
 if ($opts{'java'}) {
+  push(@features, 'java=1');
+
   my $feat = 'java_pre_jpms';
   unless (has_feature($feat)) {
     my $javac = File::Spec->catfile($opts{'java'}, 'bin', 'javac');
@@ -1904,7 +1924,7 @@ sub win32_cmake_generator {
 }
 
 if ($build_gtest) {
-  print("Building Google Test...\n");
+  print("Building GoogleTest...\n");
 
   my $cwd = Cwd::getcwd();
   my $build_dir = $opts{'gtest'} . $slash . 'build';
@@ -1940,7 +1960,7 @@ if ($build_gtest) {
       or die "ERROR: Invoking @{$cmd} failed.\nStopped";
   }
 
-  print("Done Building Google Test\n");
+  print("Done Building GoogleTest\n");
 }
 
 if (exists $opts{'jboss'} && !exists $opts{'java'}) {
@@ -2274,15 +2294,10 @@ sub generate_workspace {
     # We can't detect C++11 compatibility in cross compilers at the moment,
     # but all the NDKs we officially support are C++11+ by default, so enable
     # C++11 features unless an explicit 'no_cxx11' feature already is set.
-    my $set = 1;
-    for my $feature (@{$opts{'features'}}) {
-      if ($feature =~ /no_cxx11/) {
-        $set = 0;
-      }
-    }
-    disable_feature(\@features, 'no_cxx11') if ($set);
-    if ($opts{'verbose'}) {
-      print "Setting no_cxx11=0 for Android: $set\n";
+    my $feat = 'no_cxx11';
+    unless (has_feature($feat)) {
+      disable_feature(\@features, $feat);
+      print "Setting $feat=0 for Android\n";
     }
 
     # Disable including $JAVA_HOME/include on Android. Android NDK includes a
@@ -2465,26 +2480,31 @@ EOT
   print "ENV: saving current environment\n" if $opts{'verbose'};
   mergeToEnv($buildEnv);
 
-  my @mwc_common_args = ('-type', "$mpctype");
+  my @mwc_common_args = ('-type', $mpctype, @mpcopts);
   if ($static) {
     push(@mwc_common_args, '-static');
   }
-  if (defined $opts{'mpcopts'}) {
-    push(@mwc_common_args, @{$opts{'mpcopts'}});
-  }
 
-  my @feature_opts = ();
-  if (!$buildtao && @features) {
-    push(@feature_opts, '-features', join(',', map {/=/ ? $_: "$_=1"} @features));
+  if (!$buildtao) {
+    my %existing_features = get_default_features($buildEnv);
+    my %requested_features = get_requested_features();
+    my @features_to_add;
+    for my $feature (keys(%requested_features)) {
+      my $value = $requested_features{$feature};
+      push(@features_to_add, "$feature=$value") unless exists($existing_features{$feature});
+    }
+    if (@features_to_add) {
+      push(@mwc_common_args, '-features', join(',', @features_to_add));
+    }
   }
 
   # Generate our own mwc wrapper script
-  write_opendds_mwc($buildEnv->{'DDS_ROOT'}, [@mwc_common_args, @feature_opts]);
+  write_opendds_mwc($buildEnv->{'DDS_ROOT'}, [@mwc_common_args]);
 
   my @mwc = ('perl', "$ENV{ACE_ROOT}/bin/mwc.pl");
   print 'Running MPC to generate ', ($mpctype eq 'gnuace' ? 'makefiles' :
                                      'project files'), ".\n";
-  if (run_command([@mwc, @mwc_common_args, @feature_opts, "$buildEnv->{'DDS_ROOT'}$slash$ws"])) {
+  if (run_command([@mwc, @mwc_common_args, "$buildEnv->{'DDS_ROOT'}$slash$ws"])) {
     die "ERROR: Error from MPC, stopped";
   }
   $buildEnv->{'mpctype'} = $mpctype;
@@ -2922,11 +2942,9 @@ sub write_cmake_file {
       'content-filtered-topic' => 1,
       'content-subscription' => 1,
       'debug' => 1,
-      'features' => '',
       'gtest' => '',
       'inline' => 1,
       'java' => '',
-      'mpcopts' => '',
       'multi-topic' => 1,
       'object-model-profile' => 1,
       'openssl' => '',
@@ -2944,6 +2962,8 @@ sub write_cmake_file {
     for my $opt (sort(keys(%opts_to_use))) {
       print_cmake_config($fh, $opt, exists($opts{$opt}) ? $opts{$opt} : $opts_to_use{$opt});
     }
+    print_cmake_config($fh, 'features', \@features);
+    print_cmake_config($fh, 'mpcopts', \@mpcopts);
 
     print $fh "\n# Sanitizers\n";
     for my $name (sort(keys(%all_sanitizers))) {

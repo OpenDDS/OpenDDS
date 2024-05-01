@@ -269,6 +269,7 @@
 /OctetSeqS.h
 /OctetSeqS.inl
 /OpenDDSConfig.h
+/OpenDDSConfig.h.bak*
 /OpenddsDcpsExtC.cpp
 /OpenddsDcpsExtC.h
 /OpenddsDcpsExtC.inl
