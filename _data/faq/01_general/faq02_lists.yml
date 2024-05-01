@@ -1,9 +1,0 @@
-Q: Is there a mailing list or forum or usenet group for discussion of OpenDDS?
-
-A: >
- Yes.  The [GitHub
- Discussions]({{ site.opendds.discussions_uri }}) for the
- OpenDDS project can be used to ask questions and get help.  Please
- remember to use the Problem Report Form (See <a
- href="#general-prf">What's a PRF?</a>) when posting questions (and
- not just "problems").
