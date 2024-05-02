@@ -1,0 +1,385 @@
+Wed May 01 18:02:57 UTC 2024  Justin Wilson  <wilsonj@unityfoundation.io>
+        commit 62ad206a8eb81313e0b630d21f186e8f6ce11007
+
+          Merge pull request #4611 from
+          iguessthislldo/igtd/configure-warning
+
+          Improvements to configure Script
+
+Wed May 01 18:02:31 UTC 2024  Justin Wilson  <wilsonj@unityfoundation.io>
+        commit dd75e07fd9a0ef1ac377545d215cd8a846ebb191
+
+          Merge pull request #4612 from
+          iguessthislldo/igtd/config-sphinx-domain
+
+          Fix Minor Issues in DevGuide
+
+Tue Apr 30 20:04:53 UTC 2024  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit 9bf567d224f42c7b37fee5bb94f193a4c0675b65
+
+        * configure:
+
+          Move Setting java Feature
+
+Tue Apr 30 19:52:58 UTC 2024  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit 6734aa82ccf675550b947ccfbcd34b174e810114
+
+        * configure:
+
+          Update configure
+
+          Co-authored-by: Adam Mitz <mitza@objectcomputing.com>
+
+Tue Apr 30 17:58:46 UTC 2024  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit f2f2630d7905ccff4d591909ea1e68a0d8bf34e0
+
+        * docs/devguide/introduction.rst:
+        * docs/devguide/run_time_configuration.rst:
+
+          Fix Minor Issues in DevGuide
+
+Tue Apr 30 18:15:21 UTC 2024  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit 4829b5a4639a027d7be898ea955672aa0db5c6b2
+
+        * configure:
+
+          Use "cross compile" when it's a noun
+
+Tue Apr 30 16:38:29 UTC 2024  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit 2a4535fff2b8ab8bceaab389f674b41fbafd7080
+
+        * configure:
+        * dds/.gitignore:
+
+          Improvements to configure Script
+
+          - Fix uninitialized value warning
+          - Tweak configure script output:
+          - Bring `--help` mostly back to 80-ish columns.
+          - Try to make new options a little more clear.
+          - Use "cross-compile" instead of "cross compile" and "GoogleTest"
+          instead of "Google Test", "CMake" instead of "cmake", etc.
+          - `--mpc:OPT` should accept `--mpc:*=OPT=VALUE`.
+          - Try to make how features are handled a little bit more sane by
+          putting
+          them all in `@features`. It's still not great and I know I'm at
+          least
+          partially to blame.
+          - Try to put all features not in `default.features` in
+          `opendds_mwc.pl`.
+          - Add `OpenDDSCOnfig.h.bak*` to git ignore.
+
+Mon Apr 29 18:04:19 UTC 2024  Justin Wilson  <wilsonj@unityfoundation.io>
+        commit 3afd105b0c5fbf3e9727e89f8920cc88422692dd
+
+          Merge pull request #4606 from jrw972/value-dispatcher-pointers
+
+          ValueDispatcher assumes pointer is KeyOnly
+
+Fri Apr 26 21:51:58 UTC 2024  Justin Wilson  <wilsonj@unityfoundation.io>
+        commit 33e4af6db825b2973ff696ecd4ae640fd8651669
+
+          Merge pull request #4603 from
+          jrw972/heartbeat-during-fragmentation
+
+          rtps_udp sends heartbeats when sending fragments
+
+Fri Apr 26 19:13:34 UTC 2024  Justin Wilson  <wilsonj@unityfoundation.io>
+        commit 3aa1b0648a38879d9173d850a3b1f9af15235e26
+
+        * dds/DCPS/ValueDispatcher.h:
+
+          ValueDispatcher assumes pointer is KeyOnly
+
+          Problem
+          -------
+
+          The ValueDispatcher code assumes the value indicated by the void*
+          is a KeyOnly<T>*.  This is incorrect as the void* is a T*.
+
+          Solution
+          --------
+
+          Assume the void* is a T* and construct the KeyOnly.
+
+Fri Apr 26 18:04:34 UTC 2024  Justin Wilson  <wilsonj@unityfoundation.io>
+        commit 4497cc664d3425cc499687a6bf991b07782613af
+
+          Merge pull request #4602 from jrw972/buffer-size-doc
+
+          DevGuide doesn't document `send_buffer_size` and
+          `rcv_buffer_size`
+
+Fri Apr 26 18:03:51 UTC 2024  Justin Wilson  <wilsonj@unityfoundation.io>
+        commit 57ce6ea0ca4faff43e134592390516e8e6c61c6f
+
+          Merge pull request #4604 from
+          iguessthislldo/igtd/cmake-ace-tao-src
+
+          Fix Missing ACE with `OPENDDS_ACE_TAO_SRC`
+
+Tue Apr 23 21:19:45 UTC 2024  Justin Wilson  <wilsonj@unityfoundation.io>
+        commit 54796ebccc885ab5e0b28c70a351aa1d4e23ca45
+
+        * docs/devguide/run_time_configuration.rst:
+        * docs/news.d/buffer-doc.rst:
+
+          DevGuide doesn't document `send_buffer_size` and
+          `rcv_buffer_size`
+
+          Problem
+          -------
+
+          The DevGuide doesn't document `send_buffer_size` and
+          `rcv_buffer_size`
+          for the `rtps_udp` transport and RTPS Discovery.
+
+          Solution
+          --------
+
+          Add documentation.
+
+Thu Apr 25 16:09:10 UTC 2024  Justin Wilson  <wilsonj@unityfoundation.io>
+        commit 69481c0a2e79555aea5be22c1095939982610c9f
+
+        * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
+        * dds/DCPS/transport/framework/TransportSendStrategy.h:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.cpp:
+        * docs/news.d/heartbeat-fragmentation.rst:
+
+          rtps_udp sends heartbeats when sending fragments
+
+          Problem
+          -------
+
+          Suppose a writer has an agressive heartbeat period and then
+          writes a
+          sample that is highly fragmented. It is possible (probable) that
+          the
+          heartbeat timer will go off before all fragments have been sent.
+          The
+          reader can then nack fragments that haven't even been sent.  The
+          writer would then resend the requested fragments.
+
+          Solution
+          --------
+
+          Before sending a heartbeat, check that the user is not in the
+          middle
+          of a send.
+
+          The solution does not make a change for resends due to
+          reliability
+          and/or durability. The reason for this is that sending heartbeats
+          and
+          nack responses are mutually exclusive based on locking.
+
+Fri Apr 26 00:44:56 UTC 2024  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit c028b45bfb3756bb56d4f29315aa5be491910435
+
+        * cmake/ace_group.cmake:
+        * cmake/build_ace_tao.cmake:
+        * cmake/get_ace_tao.cmake:
+        * cmake/import_common.cmake:
+        * cmake/tao_group.cmake:
+        * docs/news.d/cmake-ace-tao-src.rst:
+
+          Fix Missing ACE with OPENDDS_ACE_TAO_SRC
+
+          The ACE and TAO library targets from MPC might be called
+          `ACE-target`
+          and `TAO-target` depending on if they're in directories of the
+          same
+          name. It should be trivial to predict this, but the path logic
+          for this
+          in MPC seems buggy and might not prepend `-target` when
+          `OPENDDS_ACE_TAO_SRC` is outside of the build directory, so we're
+          just
+          going to check both for all targets.
+
+Tue Apr 23 18:01:43 UTC 2024  Justin Wilson  <wilsonj@unityfoundation.io>
+        commit 9a1f1f67dcc114c85f203615459458206e2db9da
+
+          Merge pull request #4600 from OpenDDS/igtd/cmake-readme
+
+          Update Link in cmake/README.md
+
+Tue Apr 23 16:14:35 UTC 2024  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit 012e0ea92567337f7a1841518e098aa6451b8457
+
+        * cmake/README.md:
+
+          Update Link in cmake/README.md
+
+Mon Apr 22 18:40:30 UTC 2024  Justin Wilson  <wilsonj@unityfoundation.io>
+        commit a17f490a737e19fca9bbd366fac7659b193da2b8
+
+          Merge pull request #4558 from jrw972/compiler-flags
+
+          Update compiler warning levels
+
+Fri Apr 19 18:01:11 UTC 2024  Justin Wilson  <wilsonj@unityfoundation.io>
+        commit 5ab002d29a993b90213a38a232a3a641aba29023
+
+          Merge pull request #4593 from jrw972/type-object-encoding
+
+          `Service_Participant::type_object_encoding` returns incorrect
+          value
+
+Fri Apr 19 18:00:54 UTC 2024  Justin Wilson  <wilsonj@unityfoundation.io>
+        commit f7165a795a03244221c74991f9e4cb34f0259e1e
+
+          Merge pull request #4594 from
+          iguessthislldo/igtd/release-script-3.28.0
+
+          Post 3.28.0 Release Script Improvements
+
+Wed Apr 03 21:45:38 UTC 2024  Justin Wilson  <wilsonj@unityfoundation.io>
+        commit 1e9097f6abef6f3757ee7fd724796174124dc3ed
+
+        * .github/workflows/build_and_test.yml:
+        * .github/workflows/cmake.yml:
+        * build.ini:
+        * cmake/opendds_build_helpers.cmake:
+        * configure:
+        * docs/devguide/building/index.rst:
+        * docs/news.d/compiler-warnings.rst:
+
+          Update compiler warning levels
+
+          See #4550.
+
+Thu Apr 18 20:09:45 UTC 2024  Fred Hornsey  <hornseyf@unityfoundation.io>
+        commit 765f2bd229623f79e08e2faa933ee53e9eb44ce1
+
+        * .github/workflows/update-ace-tao.yml:
+        * acetao.ini:
+        * tools/scripts/gitrelease.pl:
+        * tools/scripts/modules/command_utils.pm:
+        * tools/scripts/modules/misc_utils.pm:
+        * tools/scripts/modules/tests/command_utils.pl:
+
+          Post 3.28.0 Release Script Improvements
+
+          - Fixed an issue with uploading RTPS interop test to the OMG
+          repo.
+          - Update ACE/TAO Workflow:
+          - Try to make it so it won't force push a new commit every time
+          it
+          runs but the PR hasn't been merged yet.
+          - Generate a news fragment so the ACE/TAO update will be
+          announced and
+          users can see the ACE/TAO changes.
+          - Try to improve the commit message and PR title and body so says
+          which ACE/TAO was updated. Right now it always lists both.
+          - Made `run_command` more useful when non-zero exit statuses are
+          not
+          considered errors.
+
+Thu Apr 18 15:25:28 UTC 2024  Justin Wilson  <wilsonj@unityfoundation.io>
+        commit c66891c19c5cc7786ea3f45ada678bf15deda9e2
+
+        * dds/DCPS/ConfigStoreImpl.h:
+        * dds/DCPS/Service_Participant.cpp:
+        * docs/news.d/type-object-encoding.rst:
+        * tests/unit-tests/dds/DCPS/ConfigStoreImpl.cpp:
+        * tests/unit-tests/dds/DCPS/Service_Participant.cpp:
+
+          `Service_Participant::type_object_encoding` returns incorrect
+          value
+
+          Problem
+          -------
+
+          `Service_Participant::type_object_encoding` doesn't return the
+          value
+          that is stored in the ConfigStore.
+
+          Solution
+          --------
+
+          Finish the support for enums in the ConfigStore and use it.
+
+Thu Apr 18 18:07:30 UTC 2024  Justin Wilson  <wilsonj@unityfoundation.io>
+        commit 1a0528b2739c6168cf6c883f6ab6056c93c6083b
+
+          Merge pull request #4574 from jrw972/mpcopts-fix
+
+          `--mpcopts` values are split on spaces
+
+Thu Apr 18 18:06:40 UTC 2024  Justin Wilson  <wilsonj@unityfoundation.io>
+        commit 270cae56421462db367cbe8d89cccd752108dd20
+
+          Merge pull request #4591 from jrw972/gov-gen-fix
+
+          `gov_gen` uses openssl API incorrectly
+
+Thu Apr 11 19:25:23 UTC 2024  Justin Wilson  <wilsonj@unityfoundation.io>
+        commit 95ef01cd1bf48bb4a0d4fd347ee3899b43587527
+
+        * .github/workflows/build_and_test.yml:
+        * .github/workflows/ishapes.yml:
+        * configure:
+        * docs/news.d/mpcopts.rst:
+
+          `--mpcopts` values are split on spaces
+
+          Problem
+          -------
+
+          `--mpcopts` is a `configure` script option that accumulates
+          additional
+          options for MPC.  These values are split on spaces so
+          `--mpcopts='-value_template build_flags+=-Wall -Werror'` results
+          in three
+          arguments to MPC: `-value_template`, `build_flags+=-Wall` and
+          `-Werror`.  This causes the configure script to fail because the
+          arguments to MPC are incorrect.
+
+          Solution
+          --------
+
+          Remove the splitting functionality.
+
+          The examples above would now be written as
+          * `--mpcopts=-value_template --mpcopts=build_flags+="-Wall
+          -Werror"`
+
+          Introduce a new option `--mpc:opt arg`. The examples would then
+          be
+          * `--mpc:value_template build_flags+="-Wall -Werror"`
+
+Wed Apr 17 17:59:03 UTC 2024  Justin Wilson  <wilsonj@unityfoundation.io>
+        commit 5a9bc8545f771742e48d31e1635e15f156cc9c17
+
+        * docs/news.d/gov-gen.rst:
+        * tests/security/attributes/gov_gen.cpp:
+
+          `gov_gen` uses openssl API incorrectly
+
+          Problem
+          -------
+
+          The `gov_gen` application generates governance files for testing
+          and
+          signs them with openssl.  `gov_gen` has a bug on Debian
+          12.5 (openssl 3.0.11) where a null argument is passed.
+
+          Solution
+          --------
+
+          Pass `mem` as the "in"" parameter and use `PKCS7_STREAM`.
+
+Tue Apr 16 19:33:38 UTC 2024  Fred Hornsey  <hornseyf@unityfoundation.io>
+
+        * PROBLEM-REPORT-FORM:
+        * VERSION.txt:
+        * dds/Version.h:
+
+          OpenDDS Post Release 3.28.0
+
+Local Variables:
+mode: change-log
+add-log-time-format: (lambda () (progn (setq tz (getenv "TZ")) (set-time-zone-rule "UTC") (setq time (format-time-string "%a %b %e %H:%M:%S %Z %Y" (current-time))) (set-time-zone-rule tz) time))
+indent-tabs-mode: nil
+End:
