@@ -213,16 +213,6 @@ jobs:
       with:
         ndk-version: r25c
         add-to-path: false
-    - name: Checkout MPC
-      uses: actions/checkout@v4
-      with:
-        repository: DOCGroup/MPC
-        path: MPC
-    - name: Checkout ACE/TAO
-      uses: actions/checkout@v4
-      with:
-        repository: DOCGroup/ACE_TAO
-        path: OpenDDS/build/ACE_TAO
     - name: Install Ninja
       run: sudo apt-get -y install ninja-build
     - name: Configure Host Tools
