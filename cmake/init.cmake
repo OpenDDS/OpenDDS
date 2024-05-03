@@ -170,14 +170,23 @@ function(_opendds_cxx_std_from_year out_var year)
 endfunction()
 
 function(_opendds_set_cxx_std)
+  set(cplusplus_values 201103 201402 201703 202002 202302)
+  set(test_cxx_std "${CMAKE_CURRENT_LIST_DIR}/test_cxx_std.cpp")
+  set(temp_dir "${CMAKE_CURRENT_BINARY_DIR}/opendds_test_cxx_std")
+  file(MAKE_DIRECTORY "${temp_dir}")
+
   # Get the latest known default compiler C++ standard
   set(default_cxx_std_year 1998)
-  set(cplusplus_values 201103 201402 201703 202002 202302)
   foreach(cplusplus IN LISTS cplusplus_values)
+    set(args)
+    if(MSVC AND NOT MSVC_VERSION LESS 1914)
+      list(APPEND args CMAKE_FLAGS "-DCMAKE_CXX_FLAGS=/Zc:__cplusplus")
+    endif()
     try_compile(compiled
-      "${CMAKE_CURRENT_BINARY_DIR}/opendds_test_cplusplus_${cplusplus}"
-      SOURCES "${CMAKE_CURRENT_LIST_DIR}/cplusplus.cpp"
+      "${temp_dir}/cplusplus_${cplusplus}"
+      SOURCES "${test_cxx_std}"
       COMPILE_DEFINITIONS "-DOPENDDS_TEST_CPLUSPLUS=${cplusplus}L"
+      ${args}
     )
     if(compiled)
       _opendds_cplusplus_to_year(default_cxx_std_year ${cplusplus})
@@ -236,14 +245,13 @@ function(_opendds_set_cxx_std)
     # What ACE 7+ requires depends on a check in ace/Global_Macros.h. We must
     # compile against that header using each standard we know of until it
     # compiles.
-    set(dir "${CMAKE_CURRENT_BINARY_DIR}/opendds_test_ace_cppstd")
     set(includes "${ACE_INCLUDE_DIRS}")
     if(NOT EXISTS "${ACE_INCLUDE_DIRS}/ace/config.h")
       if(NOT ACE_IS_BEING_BUILT)
         message(FATAL_ERROR "ACE doesn't have a config.h.")
       endif()
       # Won't compile without a config.h, so make a fake one.
-      set(include_dir "${dir}/include")
+      set(include_dir "${temp_dir}/include")
       list(APPEND includes "${include_dir}")
       set(ace_dir "${include_dir}/ace")
       file(MAKE_DIRECTORY "${ace_dir}")
@@ -253,8 +261,9 @@ function(_opendds_set_cxx_std)
       _opendds_cplusplus_to_year(try_year ${try_cplusplus})
       _opendds_cxx_std_from_year(try_std ${try_year})
       try_compile(compiled
-        "${dir}/${try_cplusplus}"
-        SOURCES "${CMAKE_CURRENT_LIST_DIR}/ace_cppstd.cpp"
+        "${temp_dir}/ace_cxx_std_${try_cplusplus}"
+        SOURCES "${test_cxx_std}"
+        COMPILE_DEFINITIONS "-DOPENDDS_TEST_ACE_CXX_STD"
         CMAKE_FLAGS
           "-DCMAKE_CXX_STANDARD=${try_std}"
           "-DINCLUDE_DIRECTORIES=${includes}"
