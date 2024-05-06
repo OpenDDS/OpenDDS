@@ -93,7 +93,8 @@ bool DynamicSample::deserialize(Serializer& ser)
   mb->wr_ptr(len);
 
   const DDS::DynamicType_var type = data_->type();
-  data_ = new DynamicDataXcdrReadImpl(mb.get(), ser.encoding(), type, extent_);
+  DDS::DynamicData_var back = new DynamicDataXcdrReadImpl(mb.get(), ser.encoding(), type, extent_);
+  data_ = new DynamicDataImpl(type, back);
   return true;
 }
 

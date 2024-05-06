@@ -340,10 +340,6 @@ public:
 
   CORBA::Boolean equals(DDS::DynamicData_ptr other);
 
-#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
-  DDS::ReturnCode_t get_simple_value(DCPS::Value& value, DDS::MemberId id);
-#endif
-
   bool serialized_size(const DCPS::Encoding&, size_t&, DCPS::Sample::Extent) const
   {
     // Not supported.
