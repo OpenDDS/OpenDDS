@@ -178,15 +178,10 @@ function(_opendds_set_cxx_std)
   # Get the latest known default compiler C++ standard
   set(default_cxx_std_year 1998)
   foreach(cplusplus IN LISTS cplusplus_values)
-    set(args)
-    if(MSVC AND NOT MSVC_VERSION LESS 1914)
-      list(APPEND args CMAKE_FLAGS "-DCMAKE_CXX_FLAGS=/Zc:__cplusplus")
-    endif()
     try_compile(compiled
       "${temp_dir}/cplusplus_${cplusplus}"
       SOURCES "${test_cxx_std}"
       COMPILE_DEFINITIONS "-DOPENDDS_TEST_CPLUSPLUS=${cplusplus}L"
-      ${args}
     )
     if(compiled)
       _opendds_cplusplus_to_year(default_cxx_std_year ${cplusplus})

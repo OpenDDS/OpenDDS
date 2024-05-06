@@ -1,5 +1,9 @@
 #ifdef OPENDDS_TEST_CPLUSPLUS
-#  if __cplusplus < OPENDDS_TEST_CPLUSPLUS
+#  ifdef _MSVC_LANG
+#    if _MSVC_LANG < OPENDDS_TEST_CPLUSPLUS
+#      error "Less then requested value"
+#    endif
+#  elif __cplusplus < OPENDDS_TEST_CPLUSPLUS
 #    error "Less then requested value"
 #  endif
 #elif defined OPENDDS_TEST_ACE_CXX_STD
