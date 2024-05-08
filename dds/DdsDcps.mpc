@@ -112,7 +112,7 @@ project(OpenDDS_Dcps): core, coverage_optional, \
 "	cp $(DDS_ROOT)/user_macros.GNU $(DESTDIR)$(INSTALL_PREFIX)/share/dds $(ACE_NUL_STDERR)"
 "	@$(MKDIR) $(cmake_dir_install_dest)"
 "	cp $(DDS_ROOT)/cmake/*.cmake $(cmake_dir_install_dest)"
-"	cp $(DDS_ROOT)/cmake/cplusplus.cpp $(cmake_dir_install_dest)"
+"	cp $(DDS_ROOT)/cmake/test_cxx_std.cpp $(cmake_dir_install_dest)"
 "	cp $(DDS_ROOT)/cmake/export.h.in $(cmake_dir_install_dest)"
 "	echo '' >> $(cmake_config_install_dest)"
 "	echo '# From make install' >> $(cmake_config_install_dest)"
