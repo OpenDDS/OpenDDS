@@ -50,6 +50,7 @@ struct OpenDDS_Dcps_Export Value {
   Value(const char* s, bool conversion_preferred = false);
   Value(const std::string& s, bool conversion_preferred = false);
 #ifdef DDS_HAS_WCHAR
+  Value(ACE_OutputCDR::from_wchar wc, bool conversion_preferred = false);
   Value(const std::wstring& s, bool conversion_preferred = false);
 #endif
   Value(const TAO::String_Manager& s, bool conversion_preferred = false);

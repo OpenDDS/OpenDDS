@@ -2198,7 +2198,7 @@ Transport Instance Properties
     Sect<7.4.5>
 
 Transport instances are specified in the OpenDDS configuration file via sections with the format of ``[transport/<name>]``, where ``<name>`` is a unique name for that instance within that process.
-Each transport instance must specify the :val:`[transport]transport_type=tcp` option with a valid transport implementation type.
+Each transport instance must specify the :prop:`[transport]transport_type` option with a valid transport implementation type.
 The following sections list the other options that can be specified, starting with those options common to all transport types and following with those specific to each transport type.
 
 When using dynamic libraries, the OpenDDS transport libraries are dynamically loaded whenever an instance of that type is defined in a configuration file.
