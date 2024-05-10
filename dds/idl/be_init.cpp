@@ -65,5 +65,5 @@ BE_post_init(char*[], long)
   // This annotation isn't used, but must match the one in idl2jni to avoid
   // warnings or errors.
   idl_global->eval(
-    "module OpenDDS {module internal {@annotation hidden_op_in_java {string impl;};};};\n");
+    "module OpenDDS {module internal {@annotation hidden_op_in_java {int8 dummy;};};};\n");
 }
