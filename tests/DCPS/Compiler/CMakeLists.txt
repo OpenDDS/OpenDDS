@@ -8,6 +8,6 @@ if(NOT OPENDDS_CXX_STD_YEAR LESS 2011)
   add_subdirectory(char_literals)
 endif()
 
-if (NOT OPENDDS_CXX_STD_YEAR LESS 2017)
+if(NOT OPENDDS_CXX_STD_YEAR LESS 2017)
   add_subdirectory(optional)
 endif ()
