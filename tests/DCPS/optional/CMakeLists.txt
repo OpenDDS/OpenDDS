@@ -15,8 +15,8 @@ target_compile_features(${idl} PUBLIC cxx_std_17)
 
 set(opendds_libs
   OpenDDS::Dcps # Core OpenDDS Library
-  OpenDDS::InfoRepoDiscovery OpenDDS::Tcp # For run_test.pl
-  OpenDDS::Rtps OpenDDS::Rtps_Udp # For run_test.pl --rtps
+  OpenDDS::InfoRepoDiscovery OpenDDS::Tcp
+  OpenDDS::Rtps OpenDDS::Rtps_Udp
   ${idl}
 )
 

@@ -128,15 +128,15 @@ TEST(OptionalTests, JsonValueWriterReader) {
   optional::OptionalMembers got{};
   vread(jvr, got);
 
-  EXPECT_TRUE(expected.bool_field() == got.bool_field());
-  EXPECT_TRUE(expected.short_field() == got.short_field());
-  EXPECT_TRUE(expected.int32_field() == got.int32_field());
-  EXPECT_TRUE(expected.int64_field() == got.int64_field());
-  EXPECT_TRUE(expected.str_field() == got.str_field());
-  EXPECT_TRUE(expected.seq_field() == got.seq_field());
-  EXPECT_TRUE(expected.struct_field().has_value() == got.struct_field().has_value());
+  EXPECT_EQ(expected.bool_field(), got.bool_field());
+  EXPECT_EQ(expected.short_field(), got.short_field());
+  EXPECT_EQ(expected.int32_field(), got.int32_field());
+  EXPECT_EQ(expected.int64_field(), got.int64_field());
+  EXPECT_EQ(expected.str_field(), got.str_field());
+  EXPECT_EQ(expected.seq_field(), got.seq_field());
+  EXPECT_EQ(expected.struct_field().has_value(), got.struct_field().has_value());
   if (expected.struct_field().has_value()) {
-    EXPECT_TRUE(expected.struct_field().value().octect_field() == got.struct_field().value().octect_field());
+    EXPECT_EQ(expected.struct_field().value().octect_field(), got.struct_field().value().octect_field());
   }
 }
 
