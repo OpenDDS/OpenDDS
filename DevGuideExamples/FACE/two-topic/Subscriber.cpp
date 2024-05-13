@@ -10,21 +10,8 @@
 #include "dds/DCPS/transport/rtps_udp/RtpsUdp.h"
 #endif
 
-// Global flag to indicate if termination signal was received
-volatile sig_atomic_t termination_flag = 0;
-
-// Signal handler function
-void signal_handler(int signal) {
-  // Set termination flag to true
-  termination_flag = 1;
-}
-
 // FUZZ: disable check_for_improper_main_declaration
 int main(int, char *[]) {
-
-  // Set up signal handlers
-  std::signal(SIGINT, signal_handler);  // Ctrl+C
-  std::signal(SIGTERM, signal_handler); // Termination signal
 
   // Initialize the TS interface
   FACE::RETURN_CODE_TYPE status;
@@ -89,10 +76,6 @@ int main(int, char *[]) {
     ACE_DEBUG((LM_INFO, "Subscriber: received message\n"));
     ACE_DEBUG((LM_INFO, "  exchange: %s\n", msg.exchange.in()));
     ACE_DEBUG((LM_INFO, "  value: %f\n", msg.value));
-
-    if (termination_flag) {
-      break;
-    }
   }
 
   // Destroy the sub connection
@@ -113,5 +96,4 @@ int main(int, char *[]) {
   }
 
   return EXIT_SUCCESS;
-  
 }

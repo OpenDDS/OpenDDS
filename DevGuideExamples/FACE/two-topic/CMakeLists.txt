@@ -17,8 +17,8 @@ endif()
 set(ecu_lib "${target_prefix}lib") 
 add_library(${ecu_lib})
 
-opendds_target_sources(${ecu_lib} PUBLIC "StockQuoter.idl")
 target_link_libraries(${ecu_lib} PUBLIC OpenDDS::FACE)
+opendds_target_sources(${ecu_lib} PUBLIC "StockQuoter.idl")
 
 set(opendds_libs
   OpenDDS::Rtps OpenDDS::Rtps_Udp 

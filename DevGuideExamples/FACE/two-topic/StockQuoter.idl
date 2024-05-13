@@ -22,5 +22,4 @@ module StockQuoter
     TimeBase::TimeT timestamp;
   };
   #pragma FACE ts_definitions Message
-  
 };
