@@ -346,9 +346,94 @@ DDS::ReturnCode_t DynamicDataBase::unsupported_method(const char* method_name, b
 }
 
 #ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
-DDS::ReturnCode_t DynamicDataBase::get_simple_value(DCPS::Value& /*value*/, DDS::MemberId /*id*/)
+namespace {
+  template <typename T>
+  DDS::ReturnCode_t get_some_value(DCPS::Value& value, DDS::MemberId id, DDS::DynamicData& dyn,
+                                   DDS::ReturnCode_t (DDS::DynamicData::* pmf)(T&, DDS::MemberId))
+  {
+    T v;
+    const DDS::ReturnCode_t ret = (dyn.*pmf)(v, id);
+    if (ret == DDS::RETCODE_OK) {
+      value = v;
+    }
+    return ret;
+  }
+
+  DDS::ReturnCode_t get_some_value(DCPS::Value& value, DDS::MemberId id, DDS::DynamicData& dyn,
+                                   DDS::ReturnCode_t (DDS::DynamicData::* pmf)(char*&, DDS::MemberId))
+  {
+    CORBA::String_var v;
+    const DDS::ReturnCode_t ret = (dyn.*pmf)(v, id);
+    if (ret == DDS::RETCODE_OK) {
+      value = v.in();
+    }
+    return ret;
+  }
+
+  DDS::ReturnCode_t get_some_value(DCPS::Value& value, DDS::MemberId id, DDS::DynamicData& dyn,
+                                   DDS::ReturnCode_t (DDS::DynamicData::* pmf)(ACE_CDR::WChar*&, DDS::MemberId))
+  {
+    CORBA::WString_var v;
+    const DDS::ReturnCode_t ret = (dyn.*pmf)(v, id);
+    if (ret == DDS::RETCODE_OK) {
+      value = v.in();
+    }
+    return ret;
+  }
+}
+
+DDS::ReturnCode_t DynamicDataBase::get_simple_value(DCPS::Value& value, DDS::MemberId id)
 {
-  return unsupported_method("DynamicDataBase::get_simple_value");
+  DDS::DynamicType_var member_type;
+  DDS::ReturnCode_t rc = get_member_type(member_type, type_, id);
+  if (rc != DDS::RETCODE_OK) {
+    return rc;
+  }
+  const TypeKind member_kind = member_type->get_kind();
+  switch (member_kind) {
+  case TK_BOOLEAN:
+    return get_some_value(value, id, *this, &DDS::DynamicData::get_boolean_value);
+  case TK_BYTE:
+    return get_some_value(value, id, *this, &DDS::DynamicData::get_byte_value);
+  case TK_INT8:
+    return get_some_value(value, id, *this, &DDS::DynamicData::get_int8_value);
+  case TK_INT16:
+    return get_some_value(value, id, *this, &DDS::DynamicData::get_int16_value);
+  case TK_INT32:
+    return get_some_value(value, id, *this, &DDS::DynamicData::get_int32_value);
+  case TK_INT64:
+    return get_some_value(value, id, *this, &DDS::DynamicData::get_int64_value);
+  case TK_UINT8:
+    return get_some_value(value, id, *this, &DDS::DynamicData::get_uint8_value);
+  case TK_UINT16:
+    return get_some_value(value, id, *this, &DDS::DynamicData::get_uint16_value);
+  case TK_UINT32:
+    return get_some_value(value, id, *this, &DDS::DynamicData::get_uint32_value);
+  case TK_UINT64:
+    return get_some_value(value, id, *this, &DDS::DynamicData::get_uint64_value);
+  case TK_FLOAT32:
+    return get_some_value(value, id, *this, &DDS::DynamicData::get_float32_value);
+  case TK_FLOAT64:
+    return get_some_value(value, id, *this, &DDS::DynamicData::get_float64_value);
+  case TK_FLOAT128:
+    return get_some_value(value, id, *this, &DDS::DynamicData::get_float128_value);
+  case TK_CHAR8:
+    return get_some_value(value, id, *this, &DDS::DynamicData::get_char8_value);
+  case TK_CHAR16:
+    return get_some_value(value, id, *this, &DDS::DynamicData::get_char16_value);
+  case TK_ENUM:
+  case TK_STRING8:
+    return get_some_value(value, id, *this, &DDS::DynamicData::get_string_value);
+  case TK_STRING16:
+    return get_some_value(value, id, *this, &DDS::DynamicData::get_wstring_value);
+  default:
+    if (log_level >= LogLevel::Notice) {
+      ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicDataBase::get_simple_value: "
+                 "Member type %C is not supported by DCPS::Value\n",
+                 typekind_to_string(member_kind)));
+    }
+  }
+  return DDS::RETCODE_ERROR;
 }
 #endif
 

@@ -21,6 +21,7 @@ struct DynamicTopic {
   DDS::DynamicType_var type;
   DDS::TypeSupport_var ts;
   DDS::Topic_var topic;
+  DDS::DynamicDataReader_var reader;
   DDS::DynamicDataWriter_var writer;
 };
 
@@ -28,7 +29,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 {
   using OpenDDS::DCPS::retcode_to_string;
 
-  Test t("responder");
+  Test t(RESPONDER);
   if (!t.init(argc, argv)) {
     return 1;
   }
@@ -44,7 +45,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
   topics["SimpleUnion"] = DynamicTopic();
   topics["SimpleStructNotComplete"].get_dynamic_type_rc = DDS::RETCODE_NO_DATA;
 
-  t.wait_for("origin", "ready");
+  t.wait_for(ORIGIN, TOPICS_CREATED);
 
   size_t found_count = 0;
   while (found_count < topics.size()) {
@@ -85,10 +86,17 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
           continue;
         }
 
+        topic.reader = t.create_reader<DDS::DynamicDataReader>(topic.topic);
+        DDS::DataReader_var dr = DDS::DataReader::_duplicate(topic.reader);
+        if (Utils::wait_match(dr, 1, Utils::EQ)) {
+          ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: main(): Error waiting for match for dr\n"));
+          continue;
+        }
+
         topic.writer = t.create_writer<DDS::DynamicDataWriter>(topic.topic);
 
         DDS::DataWriter_var dw = DDS::DataWriter::_duplicate(topic.writer);
-        if (Utils::wait_match(dw, 1, Utils::EQ)) {
+        if (Utils::wait_match(dw, 2, Utils::EQ)) {
           ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: main(): Error waiting for match for dw\n"));
           continue;
         }
@@ -97,12 +105,23 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
   }
   ACE_DEBUG((LM_DEBUG, "Found all %B topics\n", topics.size()));
 
+  t.post(TOPICS_ANALYZED);
+
+  t.wait_for(ORIGIN, ORIGIN_SAMPLES_AWAY);
+
   for (DynamicTopicMap::iterator it = topics.begin(); it != topics.end(); ++it) {
     DynamicTopic& topic = it->second;
     if (topic.type) {
-      // TODO: Read First
+      DDS::DataReader_var dr = DDS::DataReader::_duplicate(topic.reader);
+      ACE_DEBUG((LM_DEBUG, "%C (%P|%t) waiting for sample on %C\n", RESPONDER, it->first.c_str()));
+      Utils::waitForSample(dr);
+      DDS::DynamicData_var dd;
+      DDS::SampleInfo info;
+      if (!t.check_rc(topic.reader->read_next_sample(dd, info), "read failed")) {
+        ACE_DEBUG((LM_ERROR, "ERROR: read_next_sample failed\n"));
+        t.exit_status = 1;
+      }
 
-      DDS::DynamicData_var dd = DDS::DynamicDataFactory::get_instance()->create_data(topic.type);
       const DDS::TypeKind tk = topic.type->get_kind();
       if (!t.check_rc(dd->set_string_value(0,
           tk == OpenDDS::XTypes::TK_STRUCTURE ? "Hello struct" : "Hello union"),
@@ -113,12 +132,17 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       if (!t.check_rc(topic.writer->write(dd, DDS::HANDLE_NIL), "write failed")) {
         t.exit_status = 1;
       }
+      const DDS::Duration_t duration = { 30, 0 };
+      if (topic.writer->wait_for_acknowledgments(duration) != DDS::RETCODE_OK) {
+        ACE_DEBUG((LM_ERROR, "ERROR: wait_for_acknowledgments failed\n"));
+        t.exit_status = 1;
+      }
     }
   }
 
-  t.post("done");
+  t.post(RESPONDER_SAMPLES_AWAY);
 
-  t.wait_for("origin", "done");
+  t.wait_for(ORIGIN, DONE);
 
   return t.exit_status;
 }

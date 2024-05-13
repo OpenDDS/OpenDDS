@@ -58,6 +58,17 @@ namespace {
           prefix += "static_cast<int>(";
         }
         suffix = use_cxx11 ? "()))" : ")";
+      } else if (cls & CL_PRIMITIVE) {
+        AST_Type* const actual = resolveActualType(field->field_type());
+        const AST_PredefinedType::PredefinedType pt =
+          dynamic_cast<AST_PredefinedType*>(actual)->pt();
+        if (use_cxx11) {
+          suffix += "()";
+        }
+        if (pt == AST_PredefinedType::PT_wchar) {
+          prefix = "ACE_OutputCDR::from_wchar(" + prefix;
+          suffix += ")";
+        }
       } else if (use_cxx11) {
         suffix += "()";
       }

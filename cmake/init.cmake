@@ -155,6 +155,11 @@ function(_opendds_cxx_std_to_year out_var cxx_std)
   set(${out_var} ${year} PARENT_SCOPE)
 endfunction()
 
+function(_opendds_cplusplus_to_year out_var cplusplus)
+  math(EXPR year "${cplusplus} / 100")
+  set(${out_var} ${year} PARENT_SCOPE)
+endfunction()
+
 function(_opendds_cxx_std_from_year out_var year)
   if(year STREQUAL 1998)
     set(std 98)
@@ -165,16 +170,21 @@ function(_opendds_cxx_std_from_year out_var year)
 endfunction()
 
 function(_opendds_set_cxx_std)
+  set(cplusplus_values 201103 201402 201703 202002 202302)
+  set(test_cxx_std "${CMAKE_CURRENT_LIST_DIR}/test_cxx_std.cpp")
+  set(temp_dir "${CMAKE_CURRENT_BINARY_DIR}/opendds_test_cxx_std")
+  file(MAKE_DIRECTORY "${temp_dir}")
+
   # Get the latest known default compiler C++ standard
   set(default_cxx_std_year 1998)
-  foreach(cplusplus 201103 201402 201703 202002 202302)
-    try_compile(at_least
-      "${CMAKE_CURRENT_BINARY_DIR}/opendds_test_cplusplus_${cplusplus}"
-      SOURCES "${CMAKE_CURRENT_LIST_DIR}/cplusplus.cpp"
+  foreach(cplusplus IN LISTS cplusplus_values)
+    try_compile(compiled
+      "${temp_dir}/cplusplus_${cplusplus}"
+      SOURCES "${test_cxx_std}"
       COMPILE_DEFINITIONS "-DOPENDDS_TEST_CPLUSPLUS=${cplusplus}L"
     )
-    if(at_least)
-      math(EXPR default_cxx_std_year "${cplusplus} / 100")
+    if(compiled)
+      _opendds_cplusplus_to_year(default_cxx_std_year ${cplusplus})
     else()
       break()
     endif()
@@ -207,10 +217,8 @@ function(_opendds_set_cxx_std)
   endif()
 
   # Get the C++ standard ACE requires
-  set(ace7 FALSE)
-  if(NOT OPENDDS_ACE_VERSION VERSION_LESS "7.0.0")
-    set(ace7 TRUE)
-  endif()
+  set(ace_info "ACE ${OPENDDS_ACE_VERSION}")
+  set(compiler_info "compiler ${CMAKE_CXX_COMPILER_ID} ${CMAKE_CXX_COMPILER_VERSION}")
   set(existing_cxx11 FALSE)
   if(OPENDDS_CXX11 OR (DEFINED _opendds_default_features_no_cxx11 AND
       _opendds_default_features_no_cxx11 STREQUAL "0"))
@@ -220,12 +228,54 @@ function(_opendds_set_cxx_std)
   if(ACE_IS_BEING_BUILT AND NOT cxx_std_year LESS 2011)
     set(can_build_cxx11 TRUE)
   endif()
-  if(ace7)
-    set(ace_min_cxx_std_year 2014)
-  elseif(existing_cxx11 OR can_build_cxx11)
-    set(ace_min_cxx_std_year 2011)
+  if(OPENDDS_ACE_VERSION VERSION_LESS "7.0.0")
+    # What ACE 6 requires depends on the no_cxx11 feature
+    set(ace_info "${ace_info} (cxx11=${existing_cxx11})")
+    if(existing_cxx11 OR can_build_cxx11)
+      set(ace_min_cxx_std_year 2011)
+    else()
+      set(ace_min_cxx_std_year 1998)
+    endif()
   else()
-    set(ace_min_cxx_std_year 1998)
+    # What ACE 7+ requires depends on a check in ace/Global_Macros.h. We must
+    # compile against that header using each standard we know of until it
+    # compiles.
+    set(includes "${ACE_INCLUDE_DIRS}")
+    if(NOT EXISTS "${ACE_INCLUDE_DIRS}/ace/config.h")
+      if(NOT ACE_IS_BEING_BUILT)
+        message(FATAL_ERROR "ACE doesn't have a config.h.")
+      endif()
+      # Won't compile without a config.h, so make a fake one.
+      set(include_dir "${temp_dir}/include")
+      list(APPEND includes "${include_dir}")
+      set(ace_dir "${include_dir}/ace")
+      file(MAKE_DIRECTORY "${ace_dir}")
+      file(WRITE "${ace_dir}/config.h" "#include <ace/${_OPENDDS_ACE_CONFIG_FILE}>\n")
+    endif()
+    foreach(try_cplusplus IN LISTS cplusplus_values)
+      _opendds_cplusplus_to_year(try_year ${try_cplusplus})
+      _opendds_cxx_std_from_year(try_std ${try_year})
+      try_compile(compiled
+        "${temp_dir}/ace_cxx_std_${try_cplusplus}"
+        SOURCES "${test_cxx_std}"
+        COMPILE_DEFINITIONS "-DOPENDDS_TEST_ACE_CXX_STD"
+        CMAKE_FLAGS
+          "-DCMAKE_CXX_STANDARD=${try_std}"
+          "-DINCLUDE_DIRECTORIES=${includes}"
+        OUTPUT_VARIABLE build_output
+      )
+      if(compiled)
+        set(ace_min_cxx_std_year ${try_year})
+        break()
+      endif()
+    endforeach()
+    if(NOT DEFINED ace_min_cxx_std_year)
+      message(FATAL_ERROR
+        " Can't figure out required C++ standard for ${ace_info}\n"
+        " Tried up to C++ ${try_year} on ${compiler_info}, last output:\n"
+        " \n"
+        " ${build_output}")
+    endif()
   endif()
 
   if(OPENDDS_CMAKE_VERBOSE)
@@ -239,17 +289,12 @@ function(_opendds_set_cxx_std)
 
   # See if ACE requires a later standard
   if(cxx_std_year LESS ace_min_cxx_std_year)
-    set(compiler_info "compiler ${CMAKE_CXX_COMPILER_ID} ${CMAKE_CXX_COMPILER_VERSION}")
-    set(ace_info "ACE ${OPENDDS_ACE_VERSION}")
-    if(NOT ace7)
-      set(ace_info "${ace_info} (cxx11=${existing_cxx11})")
-    endif()
-    set(ace_info "${ace_info} requires at least C++ ${ace_min_cxx_std_year}")
+    set(msg "${ace_info} requires at least C++ ${ace_min_cxx_std_year}")
     if(NOT explicit AND max_cxx_std_year LESS ace_min_cxx_std_year)
-      message(FATAL_ERROR "${ace_info}, but ${compiler_info} only supports up to "
+      message(FATAL_ERROR "${msg}, but ${compiler_info} only supports up to "
         "C++ ${max_cxx_std_year}.")
     endif()
-    message(STATUS "${compiler_info} would use ${cxx_std_year}, but ${ace_info}. Raising "
+    message(STATUS "${compiler_info} would use ${cxx_std_year}, but ${msg}. Raising "
       "requirment to that.")
     set(cxx_std_year ${ace_min_cxx_std_year})
   endif()

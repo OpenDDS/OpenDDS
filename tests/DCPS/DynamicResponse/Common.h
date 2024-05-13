@@ -1,5 +1,6 @@
 #include <tests/Utils/DistributedConditionSet.h>
 #include <tests/Utils/WaitForSample.h>
+#include <tests/Utils/StatusMatching.h>
 
 #include <dds/DCPS/Service_Participant.h>
 #include <dds/DCPS/DCPS_Utils.h>
@@ -10,6 +11,15 @@
 #include <dds/DCPS/transport/rtps_udp/RtpsUdp.h>
 
 #include <string>
+
+const char ORIGIN[] = "origin";
+const char RESPONDER[] = "responder";
+
+const char TOPICS_CREATED[] = "topics created";
+const char TOPICS_ANALYZED[] = "topics analyzed";
+const char ORIGIN_SAMPLES_AWAY[] = "origin samples away";
+const char RESPONDER_SAMPLES_AWAY[] = "responder samples away";
+const char DONE[] = "done";
 
 struct Test {
   const char* const name;
@@ -114,6 +124,23 @@ struct Test {
     return dw2;
   }
 
+  template <typename DataReaderType>
+  typename DataReaderType::_var_type create_reader(DDS::Topic_var& topic)
+  {
+    DDS::DataReaderQos qos;
+    sub->get_default_datareader_qos(qos);
+    qos.history.kind = DDS::KEEP_ALL_HISTORY_QOS;
+    qos.reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
+    DDS::DataReader_var dr =
+      sub->create_datareader(topic, qos, 0, OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+    typename DataReaderType::_var_type dr2 = DataReaderType::_narrow(dr);
+    if (!dr2) {
+      ACE_ERROR((LM_ERROR, "%C (%P|%t) ERROR: create_datareader failed!\n", name));
+      exit_status = 1;
+    }
+    return dr2;
+  }
+
   bool check_rc(DDS::ReturnCode_t rc, const std::string& what)
   {
     if (rc != DDS::RETCODE_OK) {
@@ -127,14 +154,11 @@ struct Test {
 
   void wait_for(const std::string& actor, const std::string& what)
   {
-    ACE_DEBUG((LM_DEBUG, "%C is waiting for %C to post %C\n", name, actor.c_str(), what.c_str()));
     dcs->wait_for(name, actor, what);
-    ACE_DEBUG((LM_DEBUG, "%C is DONE waiting for %C to post %C\n", name, actor.c_str(), what.c_str()));
   }
 
   void post(const std::string& what)
   {
-    ACE_DEBUG((LM_DEBUG, "%C is posting %C\n", name, what.c_str()));
     dcs->post(name, what);
   }
 };
@@ -187,6 +211,21 @@ struct Topic {
     reader = DataReaderType::_narrow(dr);
     if (!reader) {
       ACE_ERROR((LM_ERROR, "%C (%P|%t) failed to get %C datareader\n", name));
+      return false;
+    }
+    return true;
+  }
+
+  bool write(const TopicType& msg)
+  {
+    return writer->write(msg, DDS::HANDLE_NIL) == DDS::RETCODE_OK;
+  }
+
+  bool wait_dr_match(int count) const
+  {
+    DDS::DataReader_var dr = DDS::DataReader::_duplicate(reader);
+    if (Utils::wait_match(dr, count, Utils::EQ)) {
+      ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: main(): Error waiting for match for dr\n"));
       return false;
     }
     return true;

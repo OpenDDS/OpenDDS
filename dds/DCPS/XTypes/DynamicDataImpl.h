@@ -213,23 +213,10 @@ public:
   DDS::ReturnCode_t set_wstring_values(DDS::MemberId id,
                                        const DDS::WstringSeq& value);
 
-#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
-  DDS::ReturnCode_t get_simple_value(DCPS::Value& value, DDS::MemberId id);
-#endif
-
   bool serialized_size(const DCPS::Encoding& enc, size_t& size, DCPS::Sample::Extent ext) const;
   bool serialize(DCPS::Serializer& ser, DCPS::Sample::Extent ext) const;
 
 private:
-#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
-  DDS::ReturnCode_t get_simple_value_boolean(DCPS::Value& value, DDS::MemberId id) const;
-  DDS::ReturnCode_t get_simple_value_char(DCPS::Value& value, DDS::MemberId id) const;
-  template<typename ValueType>
-  DDS::ReturnCode_t get_simple_value_primitive(DCPS::Value& value, DDS::MemberId id) const;
-  DDS::ReturnCode_t get_simple_value_string(DCPS::Value& value, DDS::MemberId id) const;
-  DDS::ReturnCode_t get_simple_value_enum(DCPS::Value& value, DDS::MemberId id) const;
-#endif
-
   CORBA::ULong get_string_item_count() const;
   CORBA::ULong get_sequence_item_count() const;
   bool has_member(DDS::MemberId id) const;
