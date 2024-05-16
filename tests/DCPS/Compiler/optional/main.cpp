@@ -67,7 +67,7 @@ TEST(OptionalTests, SerializationXCDR2Empty)
     0x00
   };
 
-  optional::OptionalMembers empty{};
+  Optional::OptionalMembers empty{};
   baseline_checks(xcdr2, empty, expected);
 }
 
@@ -99,7 +99,7 @@ TEST(OptionalTests, SerializationXCDR2NotEmpty)
     0x00
   };
 
-  optional::OptionalMembers value{};
+  Optional::OptionalMembers value{};
   value.short_field(0x7fff);
   value.str_field("Hello World");
   serializer_test(xcdr2, value, expected);
@@ -115,7 +115,7 @@ TEST(OptionalTests, JsonValueWriterReader) {
   Writer writer(buffer);
   JsonValueWriter<Writer> jvw(writer);
 
-  optional::OptionalMembers expected{};
+  Optional::OptionalMembers expected{};
   expected.bool_field(true);
   expected.short_field(0x1234);
   expected.str_field("Hello World");
@@ -125,7 +125,7 @@ TEST(OptionalTests, JsonValueWriterReader) {
   rapidjson::StringStream ss(buffer.GetString());
   JsonValueReader<> jvr(ss);
 
-  optional::OptionalMembers got{};
+  Optional::OptionalMembers got{};
   vread(jvr, got);
 
   EXPECT_EQ(expected.bool_field(), got.bool_field());

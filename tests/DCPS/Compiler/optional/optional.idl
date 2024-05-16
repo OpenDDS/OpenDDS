@@ -1,4 +1,4 @@
-module optional {
+module Optional {
 
   typedef sequence<int32> seq_int_t;
 
