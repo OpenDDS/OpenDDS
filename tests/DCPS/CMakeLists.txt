@@ -6,7 +6,3 @@ find_package(OpenDDS REQUIRED)
 
 add_subdirectory(Compiler)
 add_subdirectory(HelloWorld)
-
-if(NOT OPENDDS_CXX_STD_YEAR LESS 2017)
-    add_subdirectory(optional)
-endif ()

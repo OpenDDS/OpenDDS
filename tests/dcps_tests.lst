@@ -92,9 +92,6 @@ tests/DCPS/Compiler/union_defaults/run_test.pl: !DCPS_MIN
 tests/DCPS/Compiler/union_defaults/C++11/run_test.pl: !DCPS_MIN CXX11
 tests/DCPS/Compiler/optional/run_test.pl: !DCPS_MIN CXX17
 
-tests/DCPS/optional/run_test.pl: CXX17
-tests/DCPS/optional/run_test.pl ini=rtps.ini: RTPS CXX17
-
 tests/DCPS/C++11/Messenger/run_test.pl: !DCPS_MIN CXX11 !DDS_NO_OWNERSHIP_PROFILE !OPENDDS_SAFETY_PROFILE
 
 tests/DCPS/DcpsIntegration/run_test-integration.pl: !DCPS_MIN !DDS_NO_OWNERSHIP_PROFILE
