@@ -11481,7 +11481,7 @@ jobs:
         call setenv.cmd
         mkdir tests\cmake\build
         cd tests\cmake\build
-        cmake ..
+        cmake .. -DCMAKE_CXX_STANDARD=20
         cmake --build .
     - name: check build configuration
       shell: cmd
