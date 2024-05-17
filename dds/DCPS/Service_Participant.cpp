@@ -568,6 +568,7 @@ void Service_Participant::parse_env(const String& p)
       const String key = q.substr(0, pos);
       const String value = q.substr(pos + 1);
       config_store_->set(key.c_str(), value);
+      config_reader_listener_->on_data_available(config_reader_);
     }
   }
 }
