@@ -268,7 +268,7 @@ my @specs =
     '<default>rapidjson:s',
       'RapidJSON for Wireshark dissector and JSON' .
       $argIndent . 'Sample Serialization (Enabled by default,' .
-      $argIndent . 'use git submodle, RAPIDJSON_ROOT, or system pkg)',
+      $argIndent . 'use git submodule, RAPIDJSON_ROOT, or system pkg)',
     'qt:s', 'Qt5 (use QTDIR or system pkg)',
     'qt-include:s', 'Qt include dir (use QT5_INCDIR, QTDIR/include,' .
       $argIndent . 'or system package)',
