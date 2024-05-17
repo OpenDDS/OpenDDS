@@ -116,7 +116,7 @@ TAO is a C++ CORBA Implementation built on ACE.
 
   - This is the only library which depends on ``TAO_PortableServer``.
 
-The TAO Developer's Guide book can be requested for free from https://objectcomputing.com/products/tao/tao-developers-guide.
+The TAO Developer's Guide book can be requested for free from https://objectcomputing.com/platforms/tao/tao-developers-guide.
 The CORBA Programmers Guide can be downloaded for free from https://www.remedy.nl/opensource/corbapg.html.
 
 .. _deps-optional:
