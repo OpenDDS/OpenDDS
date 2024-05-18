@@ -37,7 +37,9 @@ execute_process(
 # Get the C++ standard OpenDDS is going to be built with. We are going to force
 # the ACE/TAO build to use the same standard.
 set(_opendds_idl_std "$<TARGET_PROPERTY:opendds_idl,CXX_STANDARD>")
-set(_opendds_dcps_std "$<TARGET_PROPERTY:OpenDDS_Dcps,CXX_STANDARD>")
+if(NOT OPENDDS_JUST_BUILD_HOST_TOOLS)
+  set(_opendds_dcps_std "$<TARGET_PROPERTY:OpenDDS_Dcps,CXX_STANDARD>")
+endif()
 set(_opendds_std "$<IF:$<TARGET_EXISTS:OpenDDS_Dcps>,${_opendds_dcps_std},${_opendds_idl_std}>")
 
 set(_build_cmd "${CMAKE_COMMAND}" -E env "ACE_ROOT=${OPENDDS_ACE}" "TAO_ROOT=${OPENDDS_TAO}")
