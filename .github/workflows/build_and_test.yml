@@ -12040,11 +12040,11 @@ jobs:
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
         grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
 
-  # macOS 11.0
+  # macOS 13
 
-  ACE_TAO_m11_sec:
+  ACE_TAO_m13_sec:
 
-    runs-on: macos-11.0
+    runs-on: macos-13
 
     steps:
     - name: checkout OpenDDS
@@ -12121,11 +12121,11 @@ jobs:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
 
-  build_m11_sec:
+  build_m13_sec:
 
-    runs-on: macos-11.0
+    runs-on: macos-13
 
-    needs: ACE_TAO_m11_sec
+    needs: ACE_TAO_m13_sec
 
     steps:
     - name: install xerces-c
@@ -12145,13 +12145,13 @@ jobs:
     - name: download ACE_TAO artifact
       uses: actions/download-artifact@v4
       with:
-        name: ACE_TAO_m11_sec_artifact
+        name: ACE_TAO_m13_sec_artifact
         path: ACE_TAO
     - name: extract ACE_TAO artifact
       shell: bash
       run: |
         cd ACE_TAO
-        gtar xvfJ ACE_TAO_m11_sec.tar.xz
+        gtar xvfJ ACE_TAO_m13_sec.tar.xz
     - name: checkout OpenDDS
       uses: actions/checkout@v4
       with:
@@ -12197,11 +12197,11 @@ jobs:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
 
-  test_m11_sec:
+  test_m13_sec:
 
-    runs-on: macos-11.0
+    runs-on: macos-13
 
-    needs: build_m11_sec
+    needs: build_m13_sec
 
     permissions:
       contents: read
@@ -12230,13 +12230,13 @@ jobs:
     - name: download ACE_TAO artifact
       uses: actions/download-artifact@v4
       with:
-        name: ACE_TAO_m11_sec_artifact
+        name: ACE_TAO_m13_sec_artifact
         path: ACE_TAO
     - name: extract ACE_TAO artifact
       shell: bash
       run: |
         cd ACE_TAO
-        gtar xvfJ ACE_TAO_m11_sec.tar.xz
+        gtar xvfJ ACE_TAO_m13_sec.tar.xz
     - name: checkout OpenDDS
       uses: actions/checkout@v4
       with:
@@ -12245,13 +12245,13 @@ jobs:
     - name: download OpenDDS artifact
       uses: actions/download-artifact@v4
       with:
-        name: build_m11_sec_artifact
+        name: build_m13_sec_artifact
         path: OpenDDS
     - name: extract OpenDDS artifact
       shell: bash
       run: |
         cd OpenDDS
-        gtar xvfJ build_m11_sec.tar.xz
+        gtar xvfJ build_m13_sec.tar.xz
     - name: check build configuration
       shell: bash
       run: |
@@ -12316,11 +12316,11 @@ jobs:
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
         grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
 
-  cmake_m11_sec:
+  cmake_m13_sec:
 
-    runs-on: macos-11.0
+    runs-on: macos-13
 
-    needs: build_m11_sec
+    needs: build_m13_sec
 
     permissions:
       contents: read
@@ -12349,13 +12349,13 @@ jobs:
     - name: download ACE_TAO artifact
       uses: actions/download-artifact@v4
       with:
-        name: ACE_TAO_m11_sec_artifact
+        name: ACE_TAO_m13_sec_artifact
         path: ACE_TAO
     - name: extract ACE_TAO artifact
       shell: bash
       run: |
         cd ACE_TAO
-        gtar xvfJ ACE_TAO_m11_sec.tar.xz
+        gtar xvfJ ACE_TAO_m13_sec.tar.xz
     - name: checkout OpenDDS
       uses: actions/checkout@v4
       with:
@@ -12364,13 +12364,13 @@ jobs:
     - name: download OpenDDS artifact
       uses: actions/download-artifact@v4
       with:
-        name: build_m11_sec_artifact
+        name: build_m13_sec_artifact
         path: OpenDDS
     - name: extract OpenDDS artifact
       shell: bash
       run: |
         cd OpenDDS
-        gtar xvfJ build_m11_sec.tar.xz
+        gtar xvfJ build_m13_sec.tar.xz
     - name: check build configuration
       shell: bash
       run: |
@@ -12435,11 +12435,11 @@ jobs:
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
         grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
 
-  build_m11_j_FM-1f:
+  build_m13_j_FM-1f:
 
-    runs-on: macos-11.0
+    runs-on: macos-13
 
-    needs: ACE_TAO_m11_sec
+    needs: ACE_TAO_m13_sec
 
     steps:
     - name: install xerces-c
@@ -12459,13 +12459,13 @@ jobs:
     - name: download ACE_TAO artifact
       uses: actions/download-artifact@v4
       with:
-        name: ACE_TAO_m11_sec_artifact
+        name: ACE_TAO_m13_sec_artifact
         path: ACE_TAO
     - name: extract ACE_TAO artifact
       shell: bash
       run: |
         cd ACE_TAO
-        gtar xvfJ ACE_TAO_m11_sec.tar.xz
+        gtar xvfJ ACE_TAO_m13_sec.tar.xz
     - name: checkout OpenDDS
       uses: actions/checkout@v4
       with:
@@ -12525,11 +12525,11 @@ jobs:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
 
-  test_m11_j_FM-1f:
+  test_m13_j_FM-1f:
 
-    runs-on: macos-11.0
+    runs-on: macos-13
 
-    needs: build_m11_j_FM-1f
+    needs: build_m13_j_FM-1f
 
     permissions:
       contents: read
@@ -12558,13 +12558,13 @@ jobs:
     - name: download ACE_TAO artifact
       uses: actions/download-artifact@v4
       with:
-        name: ACE_TAO_m11_sec_artifact
+        name: ACE_TAO_m13_sec_artifact
         path: ACE_TAO
     - name: extract ACE_TAO artifact
       shell: bash
       run: |
         cd ACE_TAO
-        gtar xvfJ ACE_TAO_m11_sec.tar.xz
+        gtar xvfJ ACE_TAO_m13_sec.tar.xz
     - name: checkout OpenDDS
       uses: actions/checkout@v4
       with:
@@ -12573,13 +12573,13 @@ jobs:
     - name: download OpenDDS artifact
       uses: actions/download-artifact@v4
       with:
-        name: build_m11_j_FM-1f_artifact
+        name: build_m13_j_FM-1f_artifact
         path: OpenDDS
     - name: extract OpenDDS artifact
       shell: bash
       run: |
         cd OpenDDS
-        gtar xvfJ build_m11_j_FM-1f.tar.xz
+        gtar xvfJ build_m13_j_FM-1f.tar.xz
     - name: check build configuration
       shell: bash
       run: |
@@ -12644,11 +12644,11 @@ jobs:
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
         grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
 
-  cmake_modeling_m11_j_FM-1f:
+  cmake_modeling_m13_j_FM-1f:
 
-    runs-on: macos-11.0
+    runs-on: macos-13
 
-    needs: build_m11_j_FM-1f
+    needs: build_m13_j_FM-1f
 
     permissions:
       contents: read
@@ -12677,13 +12677,13 @@ jobs:
     - name: download ACE_TAO artifact
       uses: actions/download-artifact@v4
       with:
-        name: ACE_TAO_m11_sec_artifact
+        name: ACE_TAO_m13_sec_artifact
         path: ACE_TAO
     - name: extract ACE_TAO artifact
       shell: bash
       run: |
         cd ACE_TAO
-        gtar xvfJ ACE_TAO_m11_sec.tar.xz
+        gtar xvfJ ACE_TAO_m13_sec.tar.xz
     - name: checkout OpenDDS
       uses: actions/checkout@v4
       with:
@@ -12692,13 +12692,13 @@ jobs:
     - name: download OpenDDS artifact
       uses: actions/download-artifact@v4
       with:
-        name: build_m11_j_FM-1f_artifact
+        name: build_m13_j_FM-1f_artifact
         path: OpenDDS
     - name: extract OpenDDS artifact
       shell: bash
       run: |
         cd OpenDDS
-        gtar xvfJ build_m11_j_FM-1f.tar.xz
+        gtar xvfJ build_m13_j_FM-1f.tar.xz
     - name: check build configuration
       shell: bash
       run: |
