@@ -817,7 +817,7 @@ Configuring for InfoRepo Discovery
 ..
     Sect<7.3.2>
 
-This section describes the configuration properties for the :ref:`inforepo-disc`.
+This section describes the configuration properties for :ref:`inforepo-disc`.
 Assume for example that the :ref:`inforepo` is started on a host and port of ``myhost.mydomain.com:12345``.
 Applications can make their OpenDDS participants aware of how to find this service through command line options or by reading a configuration file.
 
@@ -1014,7 +1014,7 @@ Configuring for RTPS Discovery
 ..
     Sect<7.3.3>
 
-This section describes the configuration properties for the :ref:`rtps-disc`.
+This section describes the configuration properties for :ref:`rtps-disc`.
 The RTPS specification gives the following simple description that forms the basis for the discovery approach used by OpenDDS and the two different protocols used to accomplish the discovery operations.
 The excerpt from the :omgspec:`rtps:8.5.1` is as follows:
 

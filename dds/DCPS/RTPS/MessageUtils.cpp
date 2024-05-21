@@ -8,6 +8,8 @@
 #include "MessageTypes.h"
 
 #include <dds/DCPS/Time_Helper.h>
+#include <dds/DCPS/debug.h>
+
 #include <dds/OpenddsDcpsExtTypeSupportImpl.h>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
@@ -16,6 +18,8 @@ namespace OpenDDS {
 namespace RTPS {
 
 using DCPS::Encoding;
+using DCPS::LogLevel;
+using DCPS::log_level;
 
 const DCPS::Encoding& get_locators_encoding()
 {
@@ -132,6 +136,41 @@ bool bitmapNonEmpty(const SequenceNumberSet& snSet)
   const CORBA::ULong mod = snSet.numBits % 32;
   const CORBA::ULong mask = mod ? (1 + ~(1u << (32 - mod))) : 0xFFFFFFFF;
   return (bool)(snSet.bitmap[last_index] & mask);
+}
+
+bool get_rtps_port(DDS::UInt16& port_result, const char* what,
+  DDS::UInt16 port_base, DDS::UInt16 offset,
+  DDS::UInt16 domain, DDS::UInt16 domain_gain,
+  DDS::UInt16 part, DDS::UInt16 part_gain)
+{
+  const DDS::UInt32 port = static_cast<DDS::UInt32>(port_base) +
+    domain * domain_gain + part * part_gain + offset;
+  ACE_DEBUG((LM_DEBUG, "HERE %C %u + %u * %u + %u * %u + %u = %u\n", what, port_base, domain, domain_gain, part, part_gain, offset, port));
+  if (port > 65535) {
+    if (log_level >= LogLevel::Error) {
+      ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: rtps_port: %C port %u is too high\n", what, port));
+    }
+    return false;
+  }
+  port_result = static_cast<DDS::UInt16>(port);
+  return true;
+}
+
+namespace {
+  const DCPS::EnumList<PortMode> port_modes[] = {
+    {PortMode_System, "system"},
+    {PortMode_Probe, "probe"}
+  };
+};
+
+PortMode get_port_mode(const String& key, PortMode default_value)
+{
+  return TheServiceParticipant->config_store()->get(key.c_str(), default_value, port_modes);
+}
+
+void set_port_mode(const String& key, PortMode value)
+{
+  TheServiceParticipant->config_store()->set(key.c_str(), value, port_modes);
 }
 
 }

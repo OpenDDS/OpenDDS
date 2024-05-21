@@ -320,6 +320,10 @@ public:
   DDS::ReturnCode_t init(const DCPS::GUID_t& guid,
                          const RtpsDiscovery& disco,
                          DDS::DomainId_t domainId,
+                         DDS::UInt16 ipv4_participant_port_id,
+#ifdef ACE_HAS_IPV6
+                         DDS::UInt16 ipv6_participant_port_id,
+#endif
                          XTypes::TypeLookupService_rch tls);
 
 #ifdef OPENDDS_SECURITY

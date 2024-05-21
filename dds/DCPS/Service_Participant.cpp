@@ -2288,8 +2288,7 @@ namespace {
     {
       { Service_Participant::Encoding_Normal, "Normal" },
       { Service_Participant::Encoding_WriteOldFormat, "WriteOldFormat" },
-      { Service_Participant::Encoding_ReadOldFormat, "ReadOldFormat" },
-      { Service_Participant::Encoding_Normal, 0 }
+      { Service_Participant::Encoding_ReadOldFormat, "ReadOldFormat" }
     };
 }
 

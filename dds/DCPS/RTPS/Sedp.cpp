@@ -401,6 +401,10 @@ DDS::ReturnCode_t
 Sedp::init(const GUID_t& guid,
            const RtpsDiscovery& disco,
            DDS::DomainId_t domainId,
+           DDS::UInt16 ipv4_participant_port_id,
+#ifdef ACE_HAS_IPV6
+           DDS::UInt16 ipv6_participant_port_id,
+#endif
            XTypes::TypeLookupService_rch tls)
 {
   type_lookup_service_ = tls;
@@ -434,40 +438,45 @@ Sedp::init(const GUID_t& guid,
   transport_inst_->receive_preallocated_message_blocks(disco.config()->sedp_receive_preallocated_message_blocks());
   transport_inst_->receive_preallocated_data_blocks(disco.config()->sedp_receive_preallocated_data_blocks());
 
-  if (disco.sedp_multicast()) {
-    config_store_->set_boolean(transport_inst_->config_key("USE_MULTICAST").c_str(), true);
-
-    // Bind to a specific multicast group
-    const u_short mc_port = disco.pb() + disco.dg() * domainId + disco.dx();
-
-    DCPS::NetworkAddress mc_addr = disco.default_multicast_group(domainId);
-    mc_addr.set_port_number(mc_port);
+  const bool sedp_multicast = disco.sedp_multicast();
+  config_store_->set_boolean(transport_inst_->config_key("USE_MULTICAST").c_str(), sedp_multicast);
+  if (sedp_multicast) {
+    DCPS::NetworkAddress mc_addr;
+    if (!disco.config()->sedp_multicast_address(mc_addr, domainId)) {
+      return DDS::RETCODE_ERROR;
+    }
     config_store_->set(transport_inst_->config_key("MULTICAST_GROUP_ADDRESS").c_str(),
-                       NetworkAddress(mc_addr),
+                       mc_addr,
                        ConfigStoreImpl::Format_Optional_Port,
                        ConfigStoreImpl::Kind_IPV4);
 
     config_store_->set_uint32(transport_inst_->config_key("TTL").c_str(), disco.ttl());
     config_store_->set(transport_inst_->config_key("MULTICAST_INTERFACE").c_str(), disco.multicast_interface());
-  } else {
-    config_store_->set_boolean(transport_inst_->config_key("USE_MULTICAST").c_str(), false);
   }
 
+  DCPS::NetworkAddress addr4;
+  if (!disco.config()->sedp_unicast_address(addr4, domainId, ipv4_participant_port_id)) {
+    return DDS::RETCODE_ERROR;
+  }
   config_store_->set(transport_inst_->config_key("LOCAL_ADDRESS").c_str(),
-                     NetworkAddress(disco.config()->sedp_local_address()),
+                     addr4,
                      ConfigStoreImpl::Format_Required_Port,
                      ConfigStoreImpl::Kind_IPV4);
   config_store_->set(transport_inst_->config_key("ADVERTISED_ADDRESS").c_str(),
-                     NetworkAddress(disco.config()->sedp_advertised_local_address()),
+                     disco.config()->sedp_advertised_local_address(),
                      ConfigStoreImpl::Format_Required_Port,
                      ConfigStoreImpl::Kind_IPV4);
 #ifdef ACE_HAS_IPV6
+  DCPS::NetworkAddress addr6;
+  if (!disco.config()->ipv6_sedp_unicast_address(addr6, domainId, ipv6_participant_port_id)) {
+    return DDS::RETCODE_ERROR;
+  }
   config_store_->set(transport_inst_->config_key("IPV6_LOCAL_ADDRESS").c_str(),
-                     NetworkAddress(disco.config()->ipv6_sedp_local_address()),
+                     addr6,
                      ConfigStoreImpl::Format_Required_Port,
                      ConfigStoreImpl::Kind_IPV6);
   config_store_->set(transport_inst_->config_key("IPV6_ADVERTISED_ADDRESS").c_str(),
-                     NetworkAddress(disco.config()->ipv6_sedp_advertised_local_address()),
+                     disco.config()->ipv6_sedp_advertised_local_address(),
                      ConfigStoreImpl::Format_Required_Port,
                      ConfigStoreImpl::Kind_IPV6);
 #endif
