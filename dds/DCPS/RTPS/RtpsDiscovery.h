@@ -11,9 +11,11 @@
 #include "Spdp.h"
 #include "rtps_export.h"
 
+#include <dds/DCPS/AtomicBool.h>
 #include <dds/DCPS/PoolAllocator.h>
 #include <dds/DCPS/debug.h>
-#include <dds/DCPS/AtomicBool.h>
+
+#include <dds/OpenDDSConfigWrapper.h>
 
 #include <ace/Configuration.h>
 
@@ -66,7 +68,7 @@ public:
     const DDS::DomainParticipantQos& qos,
     XTypes::TypeLookupService_rch tls);
 
-#if defined(OPENDDS_SECURITY)
+#if OPENDDS_CONFIG_SECURITY
 #  if defined __GNUC__ && ((__GNUC__ == 5 && __GNUC_MINOR__ < 3) || __GNUC__ < 5) && ! defined __clang__
 #    define OPENDDS_GCC_PRE53_DISABLE_OPTIMIZATION __attribute__((optimize("-O0")))
 #  else
@@ -158,7 +160,7 @@ public:
   bool use_rtps_relay() const { return config_->use_rtps_relay(); }
   void use_rtps_relay_now(bool f);
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
   bool use_ice() const { return config_->use_ice(); }
   void use_ice_now(bool f);
 #endif
@@ -178,7 +180,7 @@ public:
 
   RtpsDiscoveryConfig_rch config() const { return config_; }
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
   DDS::Security::ParticipantCryptoHandle get_crypto_handle(DDS::DomainId_t domain,
                                                            const DCPS::GUID_t& local_participant,
                                                            const DCPS::GUID_t& remote_participant = GUID_UNKNOWN) const;

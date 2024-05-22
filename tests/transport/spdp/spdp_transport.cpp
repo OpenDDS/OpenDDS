@@ -15,8 +15,10 @@
 #include <dds/DCPS/RTPS/Spdp.h>
 
 #include <dds/DCPS/LogAddr.h>
-#include <dds/DCPS/Service_Participant.h>
 #include <dds/DCPS/NetworkResource.h>
+#include <dds/DCPS/Service_Participant.h>
+
+#include <dds/OpenDDSConfigWrapper.h>
 
 #include <ace/Configuration.h>
 #include <ace/Reactor.h>
@@ -335,7 +337,7 @@ bool run_test()
     BUILTIN_ENDPOINT_TYPE_LOOKUP_REPLY_DATA_WRITER |
     BUILTIN_ENDPOINT_TYPE_LOOKUP_REPLY_DATA_READER;
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
   const DDS::Security::ExtendedBuiltinEndpointSet_t availableExtendedBuiltinEndpoints =
     DDS::Security::TYPE_LOOKUP_SERVICE_REQUEST_WRITER_SECURE |
     DDS::Security::TYPE_LOOKUP_SERVICE_REPLY_WRITER_SECURE |
@@ -396,7 +398,7 @@ bool run_test()
       , qos.property
       , {PFLAGS_THIS_VERSION} // opendds_participant_flags
       , false // opendds_rtps_relay_application_participant
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
       , availableExtendedBuiltinEndpoints
 #endif
     },

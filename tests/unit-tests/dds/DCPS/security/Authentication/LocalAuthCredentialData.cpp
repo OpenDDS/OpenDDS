@@ -3,7 +3,9 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifdef OPENDDS_SECURITY
+#include <dds/OpenDDSConfigWrapper.h>
+
+#if OPENDDS_CONFIG_SECURITY
 
 #include <dds/DCPS/security/Authentication/LocalAuthCredentialData.h>
 #include <dds/DCPS/security/TokenWriter.h>

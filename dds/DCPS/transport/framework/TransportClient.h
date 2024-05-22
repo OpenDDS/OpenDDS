@@ -23,6 +23,8 @@
 #include <dds/DCPS/BuiltInTopicUtils.h>
 #include <dds/DCPS/GuidUtils.h>
 
+#include <dds/OpenDDSConfigWrapper.h>
+
 #include <ace/Time_Value.h>
 #include <ace/Event_Handler.h>
 #include <ace/Reverse_Lock_T.h>
@@ -171,7 +173,7 @@ private:
 
 
 
-#if defined(OPENDDS_SECURITY)
+#if OPENDDS_CONFIG_SECURITY
   virtual DDS::Security::ParticipantCryptoHandle get_crypto_handle() const
   {
     return DDS::HANDLE_NIL;

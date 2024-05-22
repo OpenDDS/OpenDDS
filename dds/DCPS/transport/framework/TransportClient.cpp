@@ -155,7 +155,7 @@ TransportClient::enable_transport_using_config(bool reliable, bool durable,
       if (impl) {
         impls_.push_back(impl);
 
-#if defined(OPENDDS_SECURITY)
+#if OPENDDS_CONFIG_SECURITY
         impl->local_crypto_handle(get_crypto_handle());
 #endif
 

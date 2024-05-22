@@ -3,7 +3,9 @@
  * See: http://www.OpenDDS.org/license.html
  */
 
-#ifdef OPENDDS_SECURITY
+#include <dds/OpenDDSConfigWrapper.h>
+
+#if OPENDDS_CONFIG_SECURITY
 
 #include "gtest/gtest.h"
 #include "dds/DCPS/security/OpenSSL_init.h"

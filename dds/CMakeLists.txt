@@ -555,6 +555,9 @@ target_sources(OpenDDS_Dcps
     DCPS/yard/yard_tree.hpp
     Version.h
     Versioned_Namespace.h
+    OpenDDSConfigWrapper.h
+    OpenDDSConfigWrapperC.h
+    OpenDDSConfigWrapper.idl
 )
 target_compile_definitions(OpenDDS_Dcps PUBLIC ${OPENDDS_DCPS_COMPILE_DEFINITIONS})
 _opendds_library(OpenDDS_Dcps MSVC_BIGOBJ)

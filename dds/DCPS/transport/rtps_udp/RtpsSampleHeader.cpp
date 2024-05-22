@@ -9,18 +9,22 @@
 
 #include "RtpsUdpSendStrategy.h"
 
-#include <dds/DCPS/SequenceNumber.h>
-#include <dds/DCPS/Serializer.h>
 #include <dds/DCPS/DataSampleElement.h>
+#include <dds/DCPS/DisjointSequence.h>
 #include <dds/DCPS/Marked_Default_Qos.h>
 #include <dds/DCPS/Qos_Helper.h>
+#include <dds/DCPS/SequenceNumber.h>
+#include <dds/DCPS/Serializer.h>
 #include <dds/DCPS/Service_Participant.h>
-#include <dds/DCPS/DisjointSequence.h>
+
 #include <dds/DCPS/RTPS/RtpsCoreTypeSupportImpl.h>
 #include <dds/DCPS/RTPS/MessageTypes.h>
 #include <dds/DCPS/RTPS/MessageUtils.h>
+
 #include <dds/DCPS/transport/framework/ReceivedDataSample.h>
 #include <dds/DCPS/transport/framework/TransportSendListener.h>
+
+#include <dds/OpenDDSConfigWrapper.h>
 
 #include <cstring>
 
@@ -110,7 +114,7 @@ RtpsSampleHeader::init(ACE_Message_Block& mb)
   CASE_SMKIND(DATA, DataSubmessage, data)
   CASE_SMKIND(DATA_FRAG, DataFragSubmessage, data_frag)
 
-#if defined(OPENDDS_SECURITY)
+#if OPENDDS_CONFIG_SECURITY
     // Each submessage type introduced by the Security spec is treated
     // as an opaque octet sequence at this layer.
     case SEC_BODY:

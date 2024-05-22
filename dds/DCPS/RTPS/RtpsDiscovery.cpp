@@ -7,18 +7,19 @@
 
 #include "RtpsDiscoveryConfig.h"
 
-#include <dds/DCPS/LogAddr.h>
-#include <dds/DCPS/Service_Participant.h>
-#include <dds/DCPS/DomainParticipantImpl.h>
-#include <dds/DCPS/SubscriberImpl.h>
-#include <dds/DCPS/Marked_Default_Qos.h>
 #include <dds/DCPS/BuiltInTopicUtils.h>
+#include <dds/DCPS/DomainParticipantImpl.h>
+#include <dds/DCPS/LogAddr.h>
+#include <dds/DCPS/Marked_Default_Qos.h>
 #include <dds/DCPS/Registered_Data_Types.h>
+#include <dds/DCPS/Service_Participant.h>
+#include <dds/DCPS/SubscriberImpl.h>
 
 #include <dds/DCPS/transport/framework/TransportConfig.h>
 #include <dds/DCPS/transport/framework/TransportSendStrategy.h>
 
 #include <dds/DdsDcpsInfoUtilsC.h>
+#include <dds/OpenDDSConfigWrapper.h>
 
 #include <cstdlib>
 #include <limits>
@@ -55,7 +56,7 @@ RtpsDiscovery::Config::discovery_config()
     RtpsDiscovery_rch discovery = OpenDDS::DCPS::make_rch<RtpsDiscovery>(rtps_name);
     RtpsDiscoveryConfig_rch config = discovery->config();
 
-#if defined(OPENDDS_SECURITY)
+#if OPENDDS_CONFIG_SECURITY
     if (config_store->has(config->config_key("IceTa").c_str())) {
       if (log_level >= DCPS::LogLevel::Warning) {
         ACE_ERROR((LM_WARNING,
@@ -128,7 +129,7 @@ RtpsDiscovery::Config::discovery_config()
       }
       config_store->set("IceChangePasswordPeriod", config_store->get(config->config_key("IceChangePasswordPeriod").c_str(), ""));
     }
-#endif /* OPENDDS_SECURITY */
+#endif
 
     TheServiceParticipant->add_discovery(discovery);
   }
@@ -196,7 +197,7 @@ RtpsDiscovery::add_domain_participant(DDS::DomainId_t domain,
   return ads;
 }
 
-#if defined(OPENDDS_SECURITY)
+#if OPENDDS_CONFIG_SECURITY
 DCPS::AddDomainStatus
 RtpsDiscovery::add_domain_participant_secure(
   DDS::DomainId_t domain,
@@ -246,7 +247,7 @@ RtpsDiscovery::use_rtps_relay_now(bool after)
   config->use_rtps_relay(after);
 }
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
 void
 RtpsDiscovery::use_ice_now(bool after)
 {
