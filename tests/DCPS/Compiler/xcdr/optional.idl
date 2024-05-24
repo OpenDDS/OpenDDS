@@ -3,12 +3,12 @@ module Optional {
   typedef sequence<int32> seq_int_t;
 
   struct TestStruct {
-    octet octect_field;
+    octet octet_field;
   };
 
   @appendable
   struct OptionalMembers {
-    boolean bool_field;
+    @optional boolean bool_field;
     @optional short short_field;
     @optional int32 int32_field;
     @optional int64 int64_field;

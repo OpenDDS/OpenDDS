@@ -186,18 +186,8 @@ namespace {
     } else if (c & CL_PRIMITIVE) {
       const AST_PredefinedType::PredefinedType pt =
         dynamic_cast<AST_PredefinedType*>(actual)->pt();
-      if (pt == AST_PredefinedType::PT_boolean) {
-        be_global->impl_ <<
-          indent << "{\n" <<
-          indent << "  " << scoped(type->name()) << " bx;\n" <<
-          indent << "  if (!value_reader.read_" << primitive_type(pt)
-            << "(bx)) return false;\n" <<
-          indent << "  " << expression << accessor << " = bx;\n" <<
-          indent << "}\n";
-      } else {
-        be_global->impl_ <<
-          indent << "if (!value_reader.read_" << primitive_type(pt) << '(' << var_name << ")) return false;\n";
-      }
+      be_global->impl_ <<
+        indent << "if (!value_reader.read_" << primitive_type(pt) << '(' << var_name << ")) return false;\n";
     } else {
       std::string value_expr = (create_tmp ? "tmp" : expression + accessor);
       if (!(c & CL_ENUM)) {

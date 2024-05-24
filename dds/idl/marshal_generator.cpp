@@ -2646,9 +2646,17 @@ namespace {
             const std::string has_value_name = field_name + "_has_value";
             expr += "    bool " + field_name + "_has_value = false;\n";
             expr += "    strm >> ACE_InputCDR::to_boolean(" + has_value_name + ");\n";
-            expr += "    " + type_name + " " + field_name + "_tmp;\n";
+            const std::string tmp_name = field_name + "_tmp";
+            expr += "    " + type_name + " " + tmp_name + ";\n";
             expr += "    if (" + has_value_name + " && !";
-            expr += "(strm >> " + field_name + "_tmp)";
+            std::string strm_name = tmp_name;
+            if (fld_cls & CL_PRIMITIVE) {
+              AST_PredefinedType* p = dynamic_cast<AST_PredefinedType*>(field_type);
+              if (p->pt() == AST_PredefinedType::PT_boolean) {
+                strm_name = "ACE_InputCDR::to_boolean(" + tmp_name + ")";
+              }
+            }
+            expr += "(strm >> " + strm_name + ")";
         } else {
           expr += generate_field_stream(
             indent, field, ">> stru" + value_access, field->local_name()->get_string(), wrap_nested_key_only, intro);
