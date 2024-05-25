@@ -47,6 +47,7 @@ using DCPS::ENDIAN_LITTLE;
 using DCPS::LogLevel;
 using DCPS::log_level;
 using DCPS::LogAddr;
+using DCPS::set_sock_opt;
 
 namespace {
   const Encoding encoding_plain_big(Encoding::KIND_XCDR1, ENDIAN_BIG);
@@ -2384,10 +2385,7 @@ Spdp::SpdpTransport::SpdpTransport(DCPS::RcHandle<Spdp> outer)
   const DCPS::NetworkAddressSet addrs = outer->config_->spdp_send_addrs();
   send_addrs_.insert(addrs.begin(), addrs.end());
 
-#ifdef OPENDDS_SAFETY_PROFILE
   const DDS::UInt16 startingParticipantId = outer->ipv4_participant_port_id_;
-#endif
-
   const DDS::UInt16 max_part_id = 119; // RTPS 2.5 9.6.2.3
   while (!open_unicast_socket(outer->ipv4_participant_port_id_)) {
     if (outer->ipv4_participant_port_id_ == max_part_id && log_level >= LogLevel::Warning) {
@@ -2399,12 +2397,18 @@ Spdp::SpdpTransport::SpdpTransport(DCPS::RcHandle<Spdp> outer)
       // could use this as a hard limit, but that's much less of a concern.
     }
     ++outer->ipv4_participant_port_id_;
+    if (outer->ipv4_participant_port_id_ == startingParticipantId) {
+      throw std::runtime_error("could not find a free IPv4 unicast port for SPDP");
+    }
   }
 
 #ifdef ACE_HAS_IPV6
   outer->ipv6_participant_port_id_ = outer->ipv4_participant_port_id_;
   while (!open_unicast_ipv6_socket(outer->ipv6_participant_port_id_)) {
     ++outer->ipv6_participant_port_id_;
+    if (outer->ipv4_participant_port_id_ == outer->ipv6_participant_port_id_) {
+      throw std::runtime_error("could not find a free IPv6 unicast port for SPDP");
+    }
   }
 #endif
 
@@ -3447,18 +3451,6 @@ Spdp::SpdpTransport::open_unicast_socket(DDS::UInt16 participant_id)
   return true;
 }
 
-namespace {
-  template <typename T>
-  bool set_sock_opt(ACE_SOCK_Dgram& sock,
-    int level, int option, T value, bool ignore_notsup = false)
-  {
-    if (sock.set_option(level, option, (void*) &value, sizeof(T)) < 0) {
-      return ignore_notsup && errno == ENOTSUP;
-    }
-    return true;
-  }
-}
-
 void Spdp::SpdpTransport::set_unicast_socket_opts(
   DCPS::RcHandle<Spdp>& outer, ACE_SOCK_Dgram& sock, DDS::UInt16& port)
 {
@@ -3467,18 +3459,13 @@ void Spdp::SpdpTransport::set_unicast_socket_opts(
     throw std::runtime_error("failed to get address from socket");
   }
   port = addr.get_port_number();
-  const bool ipv6 =
-#ifdef ACE_HAS_IPV6
-    addr.get_type () == AF_INET6;
-#else
-    false;
-#endif
+  const bool ipv4 = addr.get_type () == AF_INET;
 
   if (DCPS::DCPS_debug_level > 3) {
     ACE_DEBUG((LM_DEBUG,
                "(%P|%t) Spdp::SpdpTransport::set_unicast_socket_opts: "
                "opened %C unicast socket %d on port %d\n",
-               ipv6 ? "IPv6" : "IPv4", sock.get_handle(), port));
+               ipv4 ? "IPv4" : "IPv6", sock.get_handle(), port));
   }
 
   if (!DCPS::set_socket_multicast_ttl(sock, outer->config_->ttl())) {
@@ -3509,21 +3496,7 @@ void Spdp::SpdpTransport::set_unicast_socket_opts(
     throw std::runtime_error("failed to set recv buffer size");
   }
 
-  bool success = true;
-  if (ipv6) {
-#ifdef ACE_RECVPKTINFO6
-    success = set_sock_opt(sock, IPPROTO_IPV6, ACE_RECVPKTINFO6, 1);
-#endif
-  } else {
-#ifdef ACE_RECVPKTINFO
-    success = set_sock_opt(sock, IPPROTO_IP, ACE_RECVPKTINFO, 1);
-#endif
-  }
-  if (!success) {
-    if (log_level >= LogLevel::Error) {
-      ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: Spdp::SpdpTransport::set_unicast_socket_opts: "
-        "failed to set RECVPKTINFO: %m\n"));
-    }
+  if (!DCPS::set_recvpktinfo(sock, ipv4)) {
     throw std::runtime_error("failed to set RECVPKTINFO");
   }
 }

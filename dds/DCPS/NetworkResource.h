@@ -88,6 +88,19 @@ void get_interface_addrs(OPENDDS_VECTOR(ACE_INET_Addr)& addrs);
 extern OpenDDS_Dcps_Export
 bool set_socket_multicast_ttl(const ACE_SOCK_Dgram& socket, const unsigned char& ttl);
 
+template <typename T>
+bool set_sock_opt(ACE_SOCK_Dgram& sock,
+  int level, int option, T value, bool ignore_notsup = false)
+{
+  if (sock.set_option(level, option, (void*) &value, sizeof(T)) < 0) {
+    return ignore_notsup && errno == ENOTSUP;
+  }
+  return true;
+}
+
+OpenDDS_Dcps_Export
+bool set_recvpktinfo(ACE_SOCK_Dgram& sock, bool ipv4);
+
 /// Helper function to create dual stack socket to support IPV4 and IPV6,
 /// for IPV6 builds allows for setting IPV6_V6ONLY socket option to 0 before binding
 /// Otherwise defaults to opening a socket based on the type of local_address

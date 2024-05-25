@@ -1,6 +1,4 @@
 /*
- *
- *
  * Distributed under the OpenDDS License.
  * See: http://www.opendds.org/license.html
  */
@@ -14,6 +12,7 @@
 #include <dds/DCPS/NetworkAddress.h>
 #include <dds/DCPS/SafetyProfileStreams.h>
 #include <dds/DCPS/RTPS/ICE/Ice.h>
+#include <dds/DCPS/RTPS/MessageUtils.h>
 #include <dds/DCPS/transport/framework/TransportInst.h>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
@@ -97,21 +96,54 @@ public:
                                   DDS::DomainId_t domain) const;
   const TransportBLOB* get_blob(const OpenDDS::DCPS::TransportLocatorSeq& trans_info) const;
 
+  RTPS::PortMode port_mode() const;
+  void port_mode(RTPS::PortMode value);
+
+  void pb(DDS::UInt16 port_base);
+  DDS::UInt16 pb() const;
+
+  void dg(DDS::UInt16 domain_gain);
+  DDS::UInt16 dg() const;
+
+  void pg(DDS::UInt16 participant_gain);
+  DDS::UInt16 pg() const;
+
+  void d2(DDS::UInt16 multicast_offset);
+  DDS::UInt16 d2() const;
+
+  void d3(DDS::UInt16 unicast_offset);
+  DDS::UInt16 d3() const;
+
+  bool multicast_port(DDS::UInt16& port, DDS::UInt16 domain) const;
+  bool unicast_port(DDS::UInt16& port, DDS::UInt16 domain, DDS::UInt16 part) const;
+
+  bool multicast_address(DCPS::NetworkAddress& addr, DDS::DomainId_t domain) const;
   void multicast_group_address(const NetworkAddress& addr);
   NetworkAddress multicast_group_address(DDS::DomainId_t domain) const;
 
+  void init_participant_port_id(DDS::UInt16 part_id);
+  DDS::UInt16 init_participant_port_id() const;
+
   void local_address(const NetworkAddress& addr);
   NetworkAddress local_address() const;
+  bool unicast_address(DCPS::NetworkAddress& addr, bool& fixed_port,
+    DDS::DomainId_t domain, DDS::UInt16 part_id) const;
 
   void advertised_address(const NetworkAddress& addr);
   NetworkAddress advertised_address() const;
 
 #ifdef ACE_HAS_IPV6
+  bool ipv6_multicast_address(DCPS::NetworkAddress& addr, DDS::DomainId_t domain) const;
   void ipv6_multicast_group_address(const NetworkAddress& addr);
   NetworkAddress ipv6_multicast_group_address() const;
 
+  void ipv6_init_participant_port_id(DDS::UInt16 part_id);
+  DDS::UInt16 ipv6_init_participant_port_id() const;
+
   void ipv6_local_address(const NetworkAddress& addr);
   NetworkAddress ipv6_local_address() const;
+  bool ipv6_unicast_address(DCPS::NetworkAddress& addr, bool& fixed_port,
+    DDS::DomainId_t domain, DDS::UInt16 part_id) const;
 
   void ipv6_advertised_address(const NetworkAddress& addr);
   NetworkAddress ipv6_advertised_address() const;

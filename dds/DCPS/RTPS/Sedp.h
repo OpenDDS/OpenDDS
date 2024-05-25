@@ -587,6 +587,7 @@ private:
   public:
     Endpoint(const DCPS::GUID_t& repo_id, Sedp& sedp)
       : repo_id_(repo_id)
+      , domain_id_(sedp.get_domain_id())
       , sedp_(sedp)
       , shutting_down_(false)
 #ifdef OPENDDS_SECURITY
@@ -612,7 +613,7 @@ private:
 
     DDS::DomainId_t domain_id() const
     {
-      return 0; // not used for SEDP
+      return domain_id_;
     }
 
     CORBA::Long get_priority_value(const DCPS::AssociationData&) const
@@ -665,6 +666,7 @@ private:
 
   protected:
     DCPS::GUID_t repo_id_;
+    DDS::DomainId_t domain_id_;
     Sedp& sedp_;
     AtomicBool shutting_down_;
 #ifdef OPENDDS_SECURITY

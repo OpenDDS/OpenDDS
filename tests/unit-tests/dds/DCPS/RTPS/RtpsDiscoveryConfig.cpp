@@ -82,7 +82,9 @@ TEST(dds_DCPS_RTPS_RtpsDiscoveryConfig, sedp_unicast_address)
     t.rtps.dy(9999);
     LogRestore lr;
     log_level.set(LogLevel::None);
-    ASSERT_FALSE(t.rtps.sedp_unicast_address(t.addr, 9999, 9999));
+    ASSERT_TRUE(t.rtps.sedp_unicast_address(t.addr, 9999, 9999));
+    EXPECT_ADDR_EQ(t.addr, NetworkAddress(29664, "0.0.0.0"));
+    EXPECT_FALSE(t.fixed);
   }
 
   {
@@ -149,7 +151,9 @@ TEST(dds_DCPS_RTPS_RtpsDiscoveryConfig, spdp_unicast_address)
     t.rtps.d1(9999);
     LogRestore lr;
     log_level.set(LogLevel::None);
-    ASSERT_FALSE(t.rtps.spdp_unicast_address(t.addr, t.fixed, 9999, 9999));
+    ASSERT_TRUE(t.rtps.spdp_unicast_address(t.addr, t.fixed, 9999, 9999));
+    EXPECT_ADDR_EQ(t.addr, NetworkAddress(29664, "0.0.0.0"));
+    EXPECT_FALSE(t.fixed);
   }
 
   {
@@ -194,7 +198,9 @@ TEST(dds_DCPS_RTPS_RtpsDiscoveryConfig, spdp_multicast_address)
     t.rtps.d0(9999);
     LogRestore lr;
     log_level.set(LogLevel::None);
-    ASSERT_FALSE(t.rtps.spdp_multicast_address(t.addr, 9999));
+    ASSERT_TRUE(t.rtps.spdp_multicast_address(t.addr, 9999));
+    EXPECT_ADDR_EQ(t.addr, NetworkAddress(57599, "239.255.0.1"));
+    EXPECT_FALSE(t.fixed);
   }
 
   {
@@ -239,7 +245,10 @@ TEST(dds_DCPS_RTPS_RtpsDiscoveryConfig, sedp_multicast_address)
     t.rtps.dx(9999);
     LogRestore lr;
     log_level.set(LogLevel::None);
-    ASSERT_FALSE(t.rtps.sedp_multicast_address(t.addr, 9999));
+    ASSERT_TRUE(t.rtps.sedp_multicast_address(t.addr, 9999));
+    EXPECT_ADDR_EQ(t.addr, NetworkAddress(57599, "239.255.0.1"));
+
+    EXPECT_FALSE(t.fixed);
   }
 
   {
@@ -306,7 +315,9 @@ TEST(dds_DCPS_RTPS_RtpsDiscoveryConfig, ipv6_sedp_unicast_address)
     t.rtps.dy(9999);
     LogRestore lr;
     log_level.set(LogLevel::None);
-    ASSERT_FALSE(t.rtps.ipv6_sedp_unicast_address(t.addr, 9999, 9999));
+    ASSERT_TRUE(t.rtps.ipv6_sedp_unicast_address(t.addr, 9999, 9999));
+    EXPECT_ADDR_EQ(t.addr, NetworkAddress(29664, "[::]"));
+    EXPECT_FALSE(t.fixed);
   }
 
   {
@@ -373,7 +384,9 @@ TEST(dds_DCPS_RTPS_RtpsDiscoveryConfig, ipv6_spdp_unicast_address)
     t.rtps.d1(9999);
     LogRestore lr;
     log_level.set(LogLevel::None);
-    ASSERT_FALSE(t.rtps.ipv6_spdp_unicast_address(t.addr, t.fixed, 9999, 9999));
+    ASSERT_TRUE(t.rtps.ipv6_spdp_unicast_address(t.addr, t.fixed, 9999, 9999));
+    EXPECT_ADDR_EQ(t.addr, NetworkAddress(29664, "[::]"));
+    EXPECT_FALSE(t.fixed);
   }
 
   {
@@ -418,7 +431,9 @@ TEST(dds_DCPS_RTPS_RtpsDiscoveryConfig, ipv6_spdp_multicast_address)
     t.rtps.d0(9999);
     LogRestore lr;
     log_level.set(LogLevel::None);
-    ASSERT_FALSE(t.rtps.ipv6_spdp_multicast_address(t.addr, 9999));
+    ASSERT_TRUE(t.rtps.ipv6_spdp_multicast_address(t.addr, 9999));
+    EXPECT_ADDR_EQ(t.addr, NetworkAddress(57599, "[FF03::1]"));
+    EXPECT_FALSE(t.fixed);
   }
 
   {
@@ -463,7 +478,9 @@ TEST(dds_DCPS_RTPS_RtpsDiscoveryConfig, ipv6_sedp_multicast_address)
     t.rtps.dx(9999);
     LogRestore lr;
     log_level.set(LogLevel::None);
-    ASSERT_FALSE(t.rtps.ipv6_sedp_multicast_address(t.addr, 9999));
+    ASSERT_TRUE(t.rtps.ipv6_sedp_multicast_address(t.addr, 9999));
+    EXPECT_ADDR_EQ(t.addr, NetworkAddress(57599, "[FF03::1]"));
+    EXPECT_FALSE(t.fixed);
   }
 
   {

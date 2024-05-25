@@ -417,6 +417,7 @@ Sedp::init(const GUID_t& guid,
                        DCPS::TransportRegistry::DEFAULT_INST_PREFIX +
                        OPENDDS_STRING("_SEDPTransportInst_") + key + domainStr,
                        "rtps_udp");
+  DCPS::RtpsUdpInst_rch inst = DCPS::static_rchandle_cast<DCPS::RtpsUdpInst>(transport_inst_);
 
   // Be careful to not call any function that causes the transport be
   // to created before the configuration is complete.
@@ -454,12 +455,17 @@ Sedp::init(const GUID_t& guid,
     config_store_->set(transport_inst_->config_key("MULTICAST_INTERFACE").c_str(), disco.multicast_interface());
   }
 
-  DCPS::NetworkAddress addr4;
-  if (!disco.config()->sedp_unicast_address(addr4, domainId, ipv4_participant_port_id)) {
-    return DDS::RETCODE_ERROR;
-  }
+  inst->port_mode(disco.config()->sedp_port_mode());
+  inst->pb(disco.config()->pb());
+  inst->dg(disco.config()->dg());
+  inst->pg(disco.config()->pg());
+  inst->d2(disco.config()->dx());
+  inst->d3(disco.config()->dy());
+  inst->d3(disco.config()->dy());
+
+  inst->init_participant_port_id(ipv4_participant_port_id);
   config_store_->set(transport_inst_->config_key("LOCAL_ADDRESS").c_str(),
-                     addr4,
+                     disco.config()->sedp_local_address(),
                      ConfigStoreImpl::Format_Required_Port,
                      ConfigStoreImpl::Kind_IPV4);
   config_store_->set(transport_inst_->config_key("ADVERTISED_ADDRESS").c_str(),
@@ -467,12 +473,9 @@ Sedp::init(const GUID_t& guid,
                      ConfigStoreImpl::Format_Required_Port,
                      ConfigStoreImpl::Kind_IPV4);
 #ifdef ACE_HAS_IPV6
-  DCPS::NetworkAddress addr6;
-  if (!disco.config()->ipv6_sedp_unicast_address(addr6, domainId, ipv6_participant_port_id)) {
-    return DDS::RETCODE_ERROR;
-  }
+  inst->ipv6_init_participant_port_id(ipv6_participant_port_id);
   config_store_->set(transport_inst_->config_key("IPV6_LOCAL_ADDRESS").c_str(),
-                     addr6,
+                     disco.config()->ipv6_sedp_local_address(),
                      ConfigStoreImpl::Format_Required_Port,
                      ConfigStoreImpl::Kind_IPV6);
   config_store_->set(transport_inst_->config_key("IPV6_ADVERTISED_ADDRESS").c_str(),
