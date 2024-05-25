@@ -1479,7 +1479,7 @@ struct Cxx11Generator : GeneratorBase {
     const bool is_optional = be_global->is_optional(field);
     const std::string lang_field_type = is_optional ? "OPENDDS_OPTIONAL_NS::optional<" + generator_->map_type(field) + ">" : generator_->map_type(field);
     if (is_optional) {
-      be_global->add_include("<optional>", BE_GlobalData::STREAM_LANG_H);
+      be_global->add_include("dds/DCPS/optional.h", BE_GlobalData::STREAM_LANG_H);
     }
 
     const std::string assign_pre = "{ _" + af.name_ + " = ",
