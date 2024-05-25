@@ -32,10 +32,10 @@ namespace OpenDDS {
 namespace DCPS {
 
 struct nullopt_t {
-    constexpr explicit nullopt_t(int) {}
+    explicit nullopt_t(int) {}
 };
 
-constexpr nullopt_t nullopt();
+const nullopt_t nullopt();
 
 template <typename T>
 class optional : public SafeBool_T<optional<T> > {
