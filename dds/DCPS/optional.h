@@ -43,7 +43,7 @@ public:
     : value_(0)
   {}
 
-  optional(nullopt_t)
+  optional(const nullopt_t&)
     : value_(0)
   {}
 
