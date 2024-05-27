@@ -31,19 +31,12 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-struct nullopt_t {};
-const nullopt_t nullopt{};
-
 template <typename T>
 class optional : public SafeBool_T<optional<T> > {
 public:
   typedef T value_type;
 
   optional()
-    : value_(0)
-  {}
-
-  optional(const nullopt_t&)
     : value_(0)
   {}
 

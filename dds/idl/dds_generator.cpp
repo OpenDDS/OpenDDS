@@ -411,7 +411,7 @@ string type_to_default(const std::string& indent, AST_Type* type, const string& 
   }
 
   if (is_optional) {
-    return indent + name + " = OPENDDS_OPTIONAL_NS::nullopt;\n";
+    return indent + name + " = OPENDDS_OPTIONAL_NS::optional{};\n";
   } else if (fld_cls & (CL_STRUCTURE | CL_UNION)) {
     return indent + "set_default(" + name + (is_union ? "()" : "") + ");\n";
   } else if (fld_cls & CL_ARRAY) {
