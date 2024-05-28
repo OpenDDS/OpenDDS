@@ -3459,7 +3459,7 @@ void Spdp::SpdpTransport::set_unicast_socket_opts(
     throw std::runtime_error("failed to get address from socket");
   }
   port = addr.get_port_number();
-  const bool ipv4 = addr.get_type () == AF_INET;
+  const bool ipv4 = addr.get_type() == AF_INET;
 
   if (DCPS::DCPS_debug_level > 3) {
     ACE_DEBUG((LM_DEBUG,

@@ -417,7 +417,6 @@ Sedp::init(const GUID_t& guid,
                        DCPS::TransportRegistry::DEFAULT_INST_PREFIX +
                        OPENDDS_STRING("_SEDPTransportInst_") + key + domainStr,
                        "rtps_udp");
-  DCPS::RtpsUdpInst_rch inst = DCPS::static_rchandle_cast<DCPS::RtpsUdpInst>(transport_inst_);
 
   // Be careful to not call any function that causes the transport be
   // to created before the configuration is complete.
@@ -439,15 +438,18 @@ Sedp::init(const GUID_t& guid,
   transport_inst_->receive_preallocated_message_blocks(disco.config()->sedp_receive_preallocated_message_blocks());
   transport_inst_->receive_preallocated_data_blocks(disco.config()->sedp_receive_preallocated_data_blocks());
 
+  set_port_mode(transport_inst_->config_key("PORT_MODE").c_str(), disco.config()->sedp_port_mode());
+  config_store_->set_int32(transport_inst_->config_key("PB").c_str(), disco.config()->pb());
+  config_store_->set_int32(transport_inst_->config_key("DG").c_str(), disco.config()->dg());
+  config_store_->set_int32(transport_inst_->config_key("PG").c_str(), disco.config()->pg());
+  config_store_->set_int32(transport_inst_->config_key("D2").c_str(), disco.config()->dx());
+  config_store_->set_int32(transport_inst_->config_key("D3").c_str(), disco.config()->dy());
+
   const bool sedp_multicast = disco.sedp_multicast();
   config_store_->set_boolean(transport_inst_->config_key("USE_MULTICAST").c_str(), sedp_multicast);
   if (sedp_multicast) {
-    DCPS::NetworkAddress mc_addr;
-    if (!disco.config()->sedp_multicast_address(mc_addr, domainId)) {
-      return DDS::RETCODE_ERROR;
-    }
     config_store_->set(transport_inst_->config_key("MULTICAST_GROUP_ADDRESS").c_str(),
-                       mc_addr,
+                       disco.config()->sedp_multicast_address(domainId),
                        ConfigStoreImpl::Format_Optional_Port,
                        ConfigStoreImpl::Kind_IPV4);
 
@@ -455,15 +457,8 @@ Sedp::init(const GUID_t& guid,
     config_store_->set(transport_inst_->config_key("MULTICAST_INTERFACE").c_str(), disco.multicast_interface());
   }
 
-  inst->port_mode(disco.config()->sedp_port_mode());
-  inst->pb(disco.config()->pb());
-  inst->dg(disco.config()->dg());
-  inst->pg(disco.config()->pg());
-  inst->d2(disco.config()->dx());
-  inst->d3(disco.config()->dy());
-  inst->d3(disco.config()->dy());
-
-  inst->init_participant_port_id(ipv4_participant_port_id);
+  config_store_->set_int32(
+    transport_inst_->config_key("INIT_PARTICIPANT_PORT_ID").c_str(), ipv4_participant_port_id);
   config_store_->set(transport_inst_->config_key("LOCAL_ADDRESS").c_str(),
                      disco.config()->sedp_local_address(),
                      ConfigStoreImpl::Format_Required_Port,
@@ -473,7 +468,8 @@ Sedp::init(const GUID_t& guid,
                      ConfigStoreImpl::Format_Required_Port,
                      ConfigStoreImpl::Kind_IPV4);
 #ifdef ACE_HAS_IPV6
-  inst->ipv6_init_participant_port_id(ipv6_participant_port_id);
+  config_store_->set_int32(
+    transport_inst_->config_key("IPV6_INIT_PARTICIPANT_PORT_ID").c_str(), ipv6_participant_port_id);
   config_store_->set(transport_inst_->config_key("IPV6_LOCAL_ADDRESS").c_str(),
                      disco.config()->ipv6_sedp_local_address(),
                      ConfigStoreImpl::Format_Required_Port,
@@ -520,6 +516,12 @@ Sedp::init(const GUID_t& guid,
   const_cast<bool&>(use_xtypes_complete_) = disco.use_xtypes_complete();
 
   reactor_task_ = transport_inst_->reactor_task(domainId, 0);
+  if (!reactor_task_) {
+    if (log_level >= LogLevel::Error) {
+      ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: Sedp::init: SEDP transport initialization failed\n"));
+    }
+    return DDS::RETCODE_ERROR;
+  }
   // One should assume that the transport is configured after this
   // point.  Changes to transport_inst_ or rtps_inst after this line
   // may not be reflected.

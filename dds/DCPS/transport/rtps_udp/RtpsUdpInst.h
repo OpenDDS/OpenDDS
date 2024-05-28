@@ -114,8 +114,9 @@ public:
   void d3(DDS::UInt16 unicast_offset);
   DDS::UInt16 d3() const;
 
-  bool multicast_port(DDS::UInt16& port, DDS::UInt16 domain) const;
-  bool unicast_port(DDS::UInt16& port, DDS::UInt16 domain, DDS::UInt16 part) const;
+  bool set_multicast_port(DCPS::NetworkAddress& addr, DDS::DomainId_t domain) const;
+  bool set_unicast_port(DCPS::NetworkAddress& addr, bool& fixed_port,
+    DDS::DomainId_t domain, DDS::UInt16 part_id) const;
 
   bool multicast_address(DCPS::NetworkAddress& addr, DDS::DomainId_t domain) const;
   void multicast_group_address(const NetworkAddress& addr);
@@ -135,7 +136,7 @@ public:
 #ifdef ACE_HAS_IPV6
   bool ipv6_multicast_address(DCPS::NetworkAddress& addr, DDS::DomainId_t domain) const;
   void ipv6_multicast_group_address(const NetworkAddress& addr);
-  NetworkAddress ipv6_multicast_group_address() const;
+  NetworkAddress ipv6_multicast_group_address(DDS::DomainId_t domain) const;
 
   void ipv6_init_participant_port_id(DDS::UInt16 part_id);
   DDS::UInt16 ipv6_init_participant_port_id() const;

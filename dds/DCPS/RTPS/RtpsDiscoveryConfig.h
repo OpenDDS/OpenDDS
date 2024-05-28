@@ -86,10 +86,9 @@ public:
   DDS::UInt16 dy() const;
   void dy(DDS::UInt16 sedp_unicast_offset);
 
-  bool spdp_multicast_port(DDS::UInt16& port, DDS::UInt16 domain) const;
-  bool spdp_unicast_port(DDS::UInt16& port, DDS::UInt16 domain, DDS::UInt16 part) const;
-  bool sedp_multicast_port(DDS::UInt16& port, DDS::UInt16 domain) const;
-  bool sedp_unicast_port(DDS::UInt16& port, DDS::UInt16 domain, DDS::UInt16 part) const;
+  bool set_spdp_multicast_port(DCPS::NetworkAddress& addr, DDS::DomainId_t domain) const;
+  bool set_spdp_unicast_port(DCPS::NetworkAddress& addr, bool& fixed_port,
+    DDS::DomainId_t domain, DDS::UInt16 part_id) const;
 
   unsigned char ttl() const;
   void ttl(unsigned char time_to_live);
@@ -102,9 +101,6 @@ public:
 
   DCPS::NetworkAddress sedp_local_address() const;
   void sedp_local_address(const DCPS::NetworkAddress& mi);
-
-  bool sedp_unicast_address(
-    DCPS::NetworkAddress& addr, DDS::DomainId_t domain, DDS::UInt16 part_id) const;
 
   DCPS::NetworkAddress sedp_advertised_local_address() const;
   void sedp_advertised_local_address(const DCPS::NetworkAddress& mi);
@@ -127,7 +123,7 @@ public:
   bool spdp_multicast_address(DCPS::NetworkAddress& addr, DDS::DomainId_t domain) const;
   void spdp_multicast_address(const DCPS::NetworkAddress& addr);
 
-  bool sedp_multicast_address(DCPS::NetworkAddress& addr, DDS::DomainId_t domain) const;
+  DCPS::NetworkAddress sedp_multicast_address(DDS::DomainId_t domain) const;
   void sedp_multicast_address(const DCPS::NetworkAddress& addr);
 
 #ifdef ACE_HAS_IPV6
@@ -140,9 +136,6 @@ public:
   DCPS::NetworkAddress ipv6_sedp_local_address() const;
   void ipv6_sedp_local_address(const DCPS::NetworkAddress& mi);
 
-  bool ipv6_sedp_unicast_address(
-    DCPS::NetworkAddress& addr, DDS::DomainId_t domain, DDS::UInt16 part_id) const;
-
   DCPS::NetworkAddress ipv6_sedp_advertised_local_address() const;
   void ipv6_sedp_advertised_local_address(const DCPS::NetworkAddress& mi);
 
@@ -152,7 +145,7 @@ public:
   bool ipv6_spdp_multicast_address(DCPS::NetworkAddress& addr, DDS::DomainId_t domain) const;
   void ipv6_spdp_multicast_address(const DCPS::NetworkAddress& addr);
 
-  bool ipv6_sedp_multicast_address(DCPS::NetworkAddress& addr, DDS::DomainId_t domain) const;
+  DCPS::NetworkAddress ipv6_sedp_multicast_address(DDS::DomainId_t domain) const;
   void ipv6_sedp_multicast_address(const DCPS::NetworkAddress& addr);
 #endif
 

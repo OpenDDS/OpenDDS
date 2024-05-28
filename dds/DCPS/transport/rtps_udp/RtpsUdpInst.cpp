@@ -304,14 +304,16 @@ DDS::UInt16 RtpsUdpInst::d3() const
                                                            RTPS::default_user_unicast_offset);
 }
 
-bool RtpsUdpInst::multicast_port(DDS::UInt16& port, DDS::UInt16 domain) const
+bool RtpsUdpInst::set_multicast_port(DCPS::NetworkAddress& addr, DDS::DomainId_t domain) const
 {
-  return RTPS::get_rtps_port(port, "RTPS/UDP multicast", pb(), d2(), domain, dg());
+  return RTPS::set_rtps_multicast_port(addr, "RTPS/UDP multicast", pb(), d2(), domain, dg());
 }
 
-bool RtpsUdpInst::unicast_port(DDS::UInt16& port, DDS::UInt16 domain, DDS::UInt16 part) const
+bool RtpsUdpInst::set_unicast_port(DCPS::NetworkAddress& addr, bool& fixed_port,
+  DDS::DomainId_t domain, DDS::UInt16 part_id) const
 {
-  return RTPS::get_rtps_port(port, "RTPS/UDP unicast", pb(), d3(), domain, dg(), part, pg());
+  return RTPS::set_rtps_unicast_port(addr, fixed_port, "RTPS/UDP unicast", port_mode(),
+    pb(), d3(), domain, dg(), part_id, pg());
 }
 
 void
@@ -336,13 +338,10 @@ bool RtpsUdpInst::multicast_address(DCPS::NetworkAddress& na, DDS::DomainId_t do
                                                              NetworkAddress(0, "239.255.0.2"),
                                                              ConfigStoreImpl::Format_Optional_Port,
                                                              ConfigStoreImpl::Kind_IPV4);
-  DDS::UInt16 default_port = 0;
-  if (!multicast_port(default_port, domain)) {
+  if (!set_multicast_port(na, domain)) {
     return false;
   }
-  if (na.get_port_number() == 0) {
-    na.set_port_number(default_port);
-  }
+  const DDS::UInt16 default_port = na.get_port_number();
   const NetworkAddress na_original = na;
 
   if (is_template()) {
@@ -448,15 +447,7 @@ bool RtpsUdpInst::unicast_address(DCPS::NetworkAddress& addr, bool& fixed_port,
   DDS::DomainId_t domain, DDS::UInt16 part_id) const
 {
   addr = local_address();
-  fixed_port = addr.get_port_number() > 0;
-  if (!fixed_port && port_mode() == RTPS::PortMode_Probe) {
-    DDS::UInt16 port;
-    if (!unicast_port(port, domain, part_id)) {
-      return false;
-    }
-    addr.set_port_number(port);
-  }
-  return true;
+  return set_unicast_port(addr, fixed_port, domain, part_id);
 }
 
 void
@@ -496,19 +487,11 @@ RtpsUdpInst::ipv6_multicast_group_address(DDS::DomainId_t domain) const
 
 bool RtpsUdpInst::ipv6_multicast_address(DCPS::NetworkAddress& addr, DDS::DomainId_t domain) const
 {
-  NetworkAddress addr = TheServiceParticipant->config_store()->get(
+  addr = TheServiceParticipant->config_store()->get(
     config_key("IPV6_MULTICAST_GROUP_ADDRESS").c_str(),
     NetworkAddress(0, "FF03::2"), ConfigStoreImpl::Format_Optional_Port,
     ConfigStoreImpl::Kind_IPV6);
-
-  if (na.get_port_number() == 0) {
-    DDS::UInt16 default_port = 0;
-    if (!multicast_port(default_port, domain)) {
-      return false;
-    }
-    na.set_port_number(default_port);
-  }
-  return
+  return set_multicast_port(addr, domain);
 }
 
 void RtpsUdpInst::ipv6_init_participant_port_id(DDS::UInt16 part_id)
@@ -545,15 +528,7 @@ bool RtpsUdpInst::ipv6_unicast_address(DCPS::NetworkAddress& addr, bool& fixed_p
   DDS::DomainId_t domain, DDS::UInt16 part_id) const
 {
   addr = ipv6_local_address();
-  fixed_port = addr.get_port_number() > 0;
-  if (!fixed_port && port_mode() == RTPS::PortMode_Probe) {
-    DDS::UInt16 port;
-    if (!unicast_port(port, domain, part_id)) {
-      return false;
-    }
-    addr.set_port_number(port);
-  }
-  return true;
+  return set_unicast_port(addr, fixed_port, domain, part_id);
 }
 
 void
@@ -696,7 +671,7 @@ RtpsUdpInst::populate_locator(TransportLocator& info,
     address_to_locator(locators[idx++], multicast_group_addr.to_addr());
   }
 #ifdef ACE_HAS_IPV6
-  const NetworkAddress ipv6_multicast_group_addr = ipv6_multicast_group_address();
+  const NetworkAddress ipv6_multicast_group_addr = ipv6_multicast_group_address(domain);
   if ((flags & CONNINFO_MULTICAST) && use_multicast() && ipv6_multicast_group_addr != NetworkAddress::default_IPV6) {
     grow(locators);
     address_to_locator(locators[idx++], ipv6_multicast_group_addr.to_addr());

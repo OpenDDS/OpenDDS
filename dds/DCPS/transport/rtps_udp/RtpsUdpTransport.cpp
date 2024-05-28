@@ -513,40 +513,69 @@ RtpsUdpTransport::append_transport_statistics(TransportStatisticsSequence& seq)
 }
 
 bool RtpsUdpTransport::open_socket(
-  const RtpsUdpInst_rch& config, ACE_SOCK_Dgram& sock, int protocol, DDS::UInt16 part_port_id,
-  NetworkAddress& actual, bool& fail)
+  const RtpsUdpInst_rch& config, ACE_SOCK_Dgram& sock, int protocol, ACE_INET_Addr& actual)
 {
-  fail = true;
   const bool ipv4 = protocol == PF_INET;
+  const DDS::UInt16 init_part_port_id =
+#ifdef ACE_HAS_IPV6
+    ipv4 ? config->init_participant_port_id() : config->ipv6_init_participant_port_id();
+#else
+    config->init_participant_port_id();
+#endif
 
   NetworkAddress address;
   bool fixed_port;
-  if (ipv4) {
-    if (!config->unicast_address(address, fixed_port, domain_, part_port_id)) {
+  DDS::UInt16 part_port_id = init_part_port_id;
+  while (true) {
+#ifdef ACE_HAS_IPV6
+    if (ipv4) {
+#endif
+      if (!config->unicast_address(address, fixed_port, domain_, part_port_id)) {
+        return false;
+      }
+#ifdef ACE_HAS_IPV6
+    } else if (!config->ipv6_unicast_address(address, fixed_port, domain_, part_port_id)) {
       return false;
     }
-#ifdef ACE_HAS_IPV6
-  } else if (!config->ipv6_unicast_address(address, fixed_port, domain_, part_port_id)) {
-    return false;
 #endif
-  }
 
-  if (sock.open(address.to_addr(), protocol) != 0) {
+    if (sock.open(address.to_addr(), protocol) == 0) {
+      break;
+    }
+
     if (fixed_port) {
       if (log_level >= LogLevel::Error) {
         ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: RtpsUdpTransport::open_socket: "
           "failed to open unicast %C socket for %C: %m\n",
           ipv4 ? "IPv4" : "IPv6", LogAddr(address).c_str()));
       }
+      return false;
+
     } else {
       if (DCPS::DCPS_debug_level > 3) {
         ACE_DEBUG((LM_DEBUG, "(%P|%t) RtpsUdpTransport::open_socket: "
           "failed to open unicast %C socket for %C: %m, trying next participant ID...\n",
           ipv4 ? "IPv4" : "IPv6", LogAddr(address).c_str()));
       }
-      fail = false;
+
+      ++part_port_id;
+
+      if (part_port_id == init_part_port_id) {
+        if (log_level >= LogLevel::Error) {
+          ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: RtpsUdpTransport::open_socket: "
+            "could not find a free %C unicast port\n",
+            ipv4 ? "IPv4" : "IPv6"));
+        }
+        return false;
+      }
     }
-    return false;
+  }
+
+  if (DCPS::DCPS_debug_level > 3) {
+    ACE_DEBUG((LM_DEBUG,
+               "(%P|%t) RtpsUdpTransport::open_socket: "
+               "opened %C unicast socket %d for %C\n",
+               ipv4 ? "IPv4" : "IPv6", sock.get_handle(), LogAddr(address).c_str()));
   }
 
 #ifdef ACE_WIN32
@@ -561,8 +590,7 @@ bool RtpsUdpTransport::open_socket(
   }
 #endif
 
-  ACE_INET_Addr ace_actual;
-  if (sock.get_local_addr(ace_actual) != 0) {
+  if (sock.get_local_addr(actual) != 0) {
     if (log_level >= LogLevel::Error) {
       ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: RtpsUdpTransport::open_socket: "
         "failed to get actual address from %C socket for %C: %m\n",
@@ -570,7 +598,6 @@ bool RtpsUdpTransport::open_socket(
     }
     return false;
   }
-  actual = ace_actual;
 
   if (!set_recvpktinfo(sock, ipv4)) {
     if (log_level >= LogLevel::Error) {
@@ -581,7 +608,6 @@ bool RtpsUdpTransport::open_socket(
     return false;
   }
 
-  fail = false;
   return true;
 }
 
@@ -598,40 +624,15 @@ RtpsUdpTransport::configure_i(const RtpsUdpInst_rch& config)
   // detect and report errors during DataReader/Writer setup instead
   // of during association.
 
-  bool error = false;
-  const DDS::UInt16 init_part_port_id4 = config->init_participant_port_id();
-  DDS::UInt16 part_port_id4 = init_part_port_id4;
-  NetworkAddress actual4;
-  while (!open_socket(config, unicast_socket_, PF_INET, part_port_id4, actual4, error) && !error) {
-    ++part_port_id4;
-    if (part_port_id4 == init_part_port_id4) {
-      if (log_level >= LogLevel::Error) {
-        ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: RtpsUdpTransport::configure_i: "
-          "could not find a free IPv4 unicast port\n"));
-      }
-      return false;
-    }
-  }
-  if (error) {
+  ACE_INET_Addr actual4;
+  if (!open_socket(config, unicast_socket_, PF_INET, actual4)) {
     return false;
   }
   config->actual_local_address_ = actual4;
 
 #ifdef ACE_HAS_IPV6
-  const DDS::UInt16 init_part_port_id6 = config->ipv6_init_participant_port_id();
-  DDS::UInt16 part_port_id6 = init_part_port_id6;
-  NetworkAddress actual6;
-  while (!open_socket(config, ipv6_unicast_socket_, PF_INET6, part_port_id, actual6, error) && !error) {
-    ++part_port_id6;
-    if (part_port_id6 == init_part_port_id6) {
-      if (log_level >= LogLevel::Error) {
-        ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: RtpsUdpTransport::configure_i: "
-          "could not find a free IPv6 unicast port\n"));
-      }
-      return false;
-    }
-  }
-  if (error) {
+  ACE_INET_Addr actual6;
+  if (!open_socket(config, ipv6_unicast_socket_, PF_INET6, actual6)) {
     return false;
   }
   NetworkAddress temp(actual6);

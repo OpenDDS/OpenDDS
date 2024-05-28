@@ -269,6 +269,20 @@ PortMode get_port_mode(const String& key, PortMode default_value);
 OpenDDS_Rtps_Export
 void set_port_mode(const String& key, PortMode value);
 
+OpenDDS_Rtps_Export
+bool set_rtps_multicast_port(
+  DCPS::NetworkAddress& addr, const char* what,
+  DDS::UInt16 port_base, DDS::UInt16 offset,
+  DDS::UInt16 domain, DDS::UInt16 domain_gain);
+
+OpenDDS_Rtps_Export
+bool set_rtps_unicast_port(
+  DCPS::NetworkAddress& addr, bool& fixed_port,
+  const char* what, PortMode port_mode,
+  DDS::UInt16 port_base, DDS::UInt16 offset,
+  DDS::UInt16 domain, DDS::UInt16 domain_gain,
+  DDS::UInt16 part, DDS::UInt16 part_gain);
+
 } // namespace RTPS
 } // namespace OpenDDS
 

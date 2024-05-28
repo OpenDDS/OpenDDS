@@ -289,8 +289,7 @@ private:
                                             bool association_failed);
 
   bool open_socket(
-    const RtpsUdpInst_rch& config, ACE_SOCK_Dgram& sock, int protocol, DDS::UInt16 part_port_id,
-    NetworkAddress& actual, bool& fail);
+    const RtpsUdpInst_rch& config, ACE_SOCK_Dgram& sock, int protocol, ACE_INET_Addr& actual);
 
   bool configure_i(const RtpsUdpInst_rch& config);
 

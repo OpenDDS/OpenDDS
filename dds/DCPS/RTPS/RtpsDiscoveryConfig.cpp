@@ -291,24 +291,17 @@ RtpsDiscoveryConfig::dy(DDS::UInt16 sedp_unicast_offset)
                                                     sedp_unicast_offset);
 }
 
-bool RtpsDiscoveryConfig::spdp_multicast_port(DDS::UInt16& port, DDS::UInt16 domain) const
+bool RtpsDiscoveryConfig::set_spdp_multicast_port(DCPS::NetworkAddress& addr,
+  DDS::DomainId_t domain) const
 {
-  return get_rtps_port(port, "SPDP multicast", pb(), d0(), domain, dg());
+  return set_rtps_multicast_port(addr, "SPDP multicast", pb(), d0(), domain, dg());
 }
 
-bool RtpsDiscoveryConfig::spdp_unicast_port(DDS::UInt16& port, DDS::UInt16 domain, DDS::UInt16 part) const
+bool RtpsDiscoveryConfig::set_spdp_unicast_port(DCPS::NetworkAddress& addr, bool& fixed_port,
+  DDS::DomainId_t domain, DDS::UInt16 part_id) const
 {
-  return get_rtps_port(port, "SPDP unicast", pb(), d1(), domain, dg(), part, pg());
-}
-
-bool RtpsDiscoveryConfig::sedp_multicast_port(DDS::UInt16& port, DDS::UInt16 domain) const
-{
-  return get_rtps_port(port, "SEDP multicast", pb(), dx(), domain, dg());
-}
-
-bool RtpsDiscoveryConfig::sedp_unicast_port(DDS::UInt16& port, DDS::UInt16 domain, DDS::UInt16 part) const
-{
-  return get_rtps_port(port, "SEDP unicast", pb(), dy(), domain, dg(), part, pg());
+  return set_rtps_unicast_port(addr, fixed_port, "SPDP unicast", spdp_port_mode(),
+    pb(), d1(), domain, dg(), part_id, pg());
 }
 
 unsigned char
@@ -385,20 +378,6 @@ RtpsDiscoveryConfig::sedp_local_address() const
                                                     DCPS::ConfigStoreImpl::Kind_IPV4);
 }
 
-bool RtpsDiscoveryConfig::sedp_unicast_address(
-  DCPS::NetworkAddress& addr, DDS::DomainId_t domain, DDS::UInt16 part_id) const
-{
-  addr = sedp_local_address();
-  if (addr.get_port_number() == 0 && sedp_port_mode() == PortMode_Probe) {
-    DDS::UInt16 port = 0;
-    if (!sedp_unicast_port(port, domain, part_id)) {
-      return false;
-    }
-    addr.set_port_number(port);
-  }
-  return true;
-}
-
 void
 RtpsDiscoveryConfig::sedp_local_address(const DCPS::NetworkAddress& mi)
 {
@@ -448,15 +427,7 @@ bool RtpsDiscoveryConfig::spdp_unicast_address(DCPS::NetworkAddress& addr, bool&
   DDS::DomainId_t domain, DDS::UInt16 part_id) const
 {
   addr = spdp_local_address();
-  fixed_port = addr.get_port_number() > 0;
-  if (!fixed_port && spdp_port_mode() == PortMode_Probe) {
-    DDS::UInt16 port = 0;
-    if (!spdp_unicast_port(port, domain, part_id)) {
-      return false;
-    }
-    addr.set_port_number(port);
-  }
-  return true;
+  return set_spdp_unicast_port(addr, fixed_port, domain, part_id);
 }
 
 OPENDDS_STRING
@@ -539,15 +510,7 @@ bool RtpsDiscoveryConfig::spdp_multicast_address(
     default_multicast_group(domain),
     DCPS::ConfigStoreImpl::Format_Optional_Port,
     DCPS::ConfigStoreImpl::Kind_IPV4);
-
-  if (addr.get_port_number() == 0) {
-    DDS::UInt16 port;
-    if (!spdp_multicast_port(port, domain)) {
-      return false;
-    }
-    addr.set_port_number(port);
-  }
-  return true;
+  return set_spdp_multicast_port(addr, domain);
 }
 
 void RtpsDiscoveryConfig::spdp_multicast_address(const DCPS::NetworkAddress& addr)
@@ -558,23 +521,13 @@ void RtpsDiscoveryConfig::spdp_multicast_address(const DCPS::NetworkAddress& add
                                              DCPS::ConfigStoreImpl::Kind_IPV4);
 }
 
-bool RtpsDiscoveryConfig::sedp_multicast_address(
-  DCPS::NetworkAddress& addr, DDS::DomainId_t domain) const
+DCPS::NetworkAddress RtpsDiscoveryConfig::sedp_multicast_address(DDS::DomainId_t domain) const
 {
-  addr = TheServiceParticipant->config_store()->get(
+  return TheServiceParticipant->config_store()->get(
     config_key("SEDP_MULTICAST_ADDRESS").c_str(),
     default_multicast_group(domain),
     DCPS::ConfigStoreImpl::Format_Optional_Port,
     DCPS::ConfigStoreImpl::Kind_IPV4);
-
-  if (addr.get_port_number() == 0) {
-    DDS::UInt16 port;
-    if (!sedp_multicast_port(port, domain)) {
-      return false;
-    }
-    addr.set_port_number(port);
-  }
-  return true;
 }
 
 void RtpsDiscoveryConfig::sedp_multicast_address(const DCPS::NetworkAddress& addr)
@@ -608,17 +561,7 @@ bool RtpsDiscoveryConfig::ipv6_spdp_unicast_address(DCPS::NetworkAddress& addr, 
   DDS::DomainId_t domain, DDS::UInt16 part_id) const
 {
   addr = ipv6_spdp_local_address();
-  fixed_port = addr.get_port_number() > 0;
-  if (!fixed_port) {
-    if (spdp_port_mode() == PortMode_Probe) {
-      DDS::UInt16 port = 0;
-      if (!spdp_unicast_port(port, domain, part_id)) {
-        return false;
-      }
-      addr.set_port_number(port);
-    }
-  }
-  return true;
+  return set_spdp_unicast_port(addr, fixed_port, domain, part_id);
 }
 
 DCPS::NetworkAddress
@@ -637,22 +580,6 @@ RtpsDiscoveryConfig::ipv6_sedp_local_address(const DCPS::NetworkAddress& mi)
                                              mi,
                                              DCPS::ConfigStoreImpl::Format_Required_Port,
                                              DCPS::ConfigStoreImpl::Kind_IPV6);
-}
-
-bool RtpsDiscoveryConfig::ipv6_sedp_unicast_address(
-  DCPS::NetworkAddress& addr, DDS::DomainId_t domain, DDS::UInt16 part_id) const
-{
-  addr = ipv6_sedp_local_address();
-  if (addr.get_port_number() == 0) {
-    if (sedp_port_mode() == PortMode_Probe) {
-      DDS::UInt16 port = 0;
-      if (!sedp_unicast_port(port, domain, part_id)) {
-        return false;
-      }
-      addr.set_port_number(port);
-    }
-  }
-  return true;
 }
 
 DCPS::NetworkAddress
@@ -696,18 +623,10 @@ bool RtpsDiscoveryConfig::ipv6_spdp_multicast_address(
 {
   addr = TheServiceParticipant->config_store()->get(
     config_key("IPV6_SPDP_MULTICAST_ADDRESS").c_str(),
-    ipv6_default_multicast_group(domain),
+    ipv6_default_multicast_group(),
     DCPS::ConfigStoreImpl::Format_Optional_Port,
     DCPS::ConfigStoreImpl::Kind_IPV6);
-
-  if (addr.get_port_number() == 0) {
-    DDS::UInt16 port;
-    if (!spdp_multicast_port(port, domain)) {
-      return false;
-    }
-    addr.set_port_number(port);
-  }
-  return true;
+  return set_spdp_multicast_port(addr, domain);
 }
 
 void RtpsDiscoveryConfig::ipv6_spdp_multicast_address(const DCPS::NetworkAddress& addr)
@@ -716,25 +635,6 @@ void RtpsDiscoveryConfig::ipv6_spdp_multicast_address(const DCPS::NetworkAddress
                                              addr,
                                              DCPS::ConfigStoreImpl::Format_Optional_Port,
                                              DCPS::ConfigStoreImpl::Kind_IPV6);
-}
-
-bool RtpsDiscoveryConfig::ipv6_sedp_multicast_address(
-  DCPS::NetworkAddress& addr, DDS::DomainId_t domain) const
-{
-  addr = TheServiceParticipant->config_store()->get(
-    config_key("IPV6_SEDP_MULTICAST_ADDRESS").c_str(),
-    ipv6_default_multicast_group(domain),
-    DCPS::ConfigStoreImpl::Format_Optional_Port,
-    DCPS::ConfigStoreImpl::Kind_IPV6);
-
-  if (addr.get_port_number() == 0) {
-    DDS::UInt16 port;
-    if (!sedp_multicast_port(port, domain)) {
-      return false;
-    }
-    addr.set_port_number(port);
-  }
-  return true;
 }
 
 void RtpsDiscoveryConfig::ipv6_sedp_multicast_address(const DCPS::NetworkAddress& addr)

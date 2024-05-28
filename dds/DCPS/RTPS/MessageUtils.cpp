@@ -174,6 +174,39 @@ void set_port_mode(const String& key, PortMode value)
   TheServiceParticipant->config_store()->set(key.c_str(), value, port_modes);
 }
 
+bool set_rtps_multicast_port(
+  DCPS::NetworkAddress& addr, const char* what,
+  DDS::UInt16 port_base, DDS::UInt16 offset,
+  DDS::UInt16 domain, DDS::UInt16 domain_gain)
+{
+  if (addr.get_port_number() == 0) {
+    DDS::UInt16 port;
+    if (!get_rtps_port(port, what, port_base, offset, domain, domain_gain)) {
+      return false;
+    }
+    addr.set_port_number(port);
+  }
+  return true;
+}
+
+bool set_rtps_unicast_port(
+  DCPS::NetworkAddress& addr, bool& fixed_port,
+  const char* what, PortMode port_mode,
+  DDS::UInt16 port_base, DDS::UInt16 offset,
+  DDS::UInt16 domain, DDS::UInt16 domain_gain,
+  DDS::UInt16 part, DDS::UInt16 part_gain)
+{
+  fixed_port = addr.get_port_number() > 0 || port_mode != PortMode_Probe;
+  if (!fixed_port) {
+    DDS::UInt16 port = 0;
+    if (!get_rtps_port(port, what, port_base, offset, domain, domain_gain, part, part_gain)) {
+      return false;
+    }
+    addr.set_port_number(port);
+  }
+  return true;
+}
+
 }
 }
 
