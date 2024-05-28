@@ -666,7 +666,7 @@ private:
 
   protected:
     DCPS::GUID_t repo_id_;
-    DDS::DomainId_t domain_id_;
+    const DDS::DomainId_t domain_id_;
     Sedp& sedp_;
     AtomicBool shutting_down_;
 #ifdef OPENDDS_SECURITY

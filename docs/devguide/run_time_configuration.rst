@@ -1306,11 +1306,13 @@ Those properties, along with options specific to OpenDDS's RTPS discovery implem
     The default is defined by the RTPS specification.
     This property can be used, for example, to specify use of a routed group address to provide a larger discovery scope.
     It can be modified by :prop:`[Customization]InteropMulticastOverride`.
+    It is the default host for :prop:`SpdpMulticastAddress` and :prop:`SedpMulticastAddress`.
 
   .. prop:: Ipv6DefaultMulticastGroup=<group_address>
     :default: ``ff03::1``
 
     IPv6-variant of :prop:`InteropMulticastOverride`.
+    It is the default host for :prop:`Ipv6SpdpMulticastAddress` and :prop:`Ipv6SedpMulticastAddress`.
 
   .. prop:: TTL=n
     :default: ``1`` (all data is restricted to the local network)
@@ -1533,6 +1535,10 @@ The SEDP unicast port will be one of the following:
 
 - Port from :prop:`SedpLocalAddress <[rtps_discovery]SedpLocalAddress>` if set
 - :prop:`PB <[rtps_discovery]PB>` + :prop:`DG <[rtps_discovery]DG>` × *domainId* + :prop:`DY <[rtps_discovery]DY>` + :prop:`PG <[rtps_discovery]PG>` × *participantId* if :val:`SedpPortMode=probe <[rtps_discovery]SedpPortMode=probe>` is set
+
+  - If the port can not be opened, then the *participantId* is incremented until a port can be opened.
+  - If no valid UDP port can be opened, then an error will be logged.
+
 - A system-provided port if :val:`SedpPortMode=system <[rtps_discovery]SedpPortMode=system>` (default)
 
 .. _run_time_configuration--additional-ddsi-rtps-discovery-features:
@@ -2726,7 +2732,7 @@ Some implementation notes related to using the ``rtps_udp`` transport protocol a
   .. prop:: ipv6_multicast_group_address=<network_address>
     :default: ``[FF03::2]:0``
 
-    When the transport is set to multicast, this is the multicast network address that should be used.
+    When :prop:`use_multicast` is enabled, this is the multicast IPv6 network address that should be used.
     If ``<port>`` is ``0`` or not specified, it is calculated as described in :ref:`config-ports-used-by-rtps-udp-multicast`.
 
   .. prop:: multicast_interface=<iface>
@@ -2899,6 +2905,10 @@ The RTPS/UDP unicast port will be one of the following:
 
 - Port from :prop:`local_address <[transport@rtps_udp]local_address>` and :prop:`ipv6_local_address <[transport@rtps_udp]ipv6_local_address>` if set
 - :prop:`PB <[transport@rtps_udp]PB>` + :prop:`DG <[transport@rtps_udp]DG>` × *domainId* + :prop:`D3 <[transport@rtps_udp]D3>` + :prop:`PG <[transport@rtps_udp]PG>` × *participantId* if :val:`PortMode=prob <[transport@rtps_udp]PortMode=probe>`
+
+  - If the port can not be opened, then the *participantId* is incremented until a port can be opened.
+  - If no valid UDP port can be opened, then an error will be logged.
+
 - A system-provided port if :val:`PortMode=system <[transport@rtps_udp]PortMode=system>` (default)
 
 .. _run_time_configuration--additional-rtps-udp-features:

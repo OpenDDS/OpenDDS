@@ -5,7 +5,7 @@
 
   - For RTPS Discovery:
 
-    - :cfg:val:`[rtps_discovery]SedpPortMode=probe` will use ports similar to how the RTPS specification defines them.
+    - Added :cfg:val:`[rtps_discovery]SedpPortMode=probe`, which will use ports similar to how the RTPS specification defines them.
       This uses the existing port parameter properties for SPDP and a new one, :cfg:prop:`[rtps_discovery]DY`.
     - Added :cfg:prop:`[rtps_discovery]SpdpPortMode` as an alias to the now deprecated :cfg:prop:`[rtps_discovery]SpdpRequestRandomPort`.
     - Added :cfg:prop:`[rtps_discovery]SpdpMulticastAddress`, :cfg:prop:`[rtps_discovery]Ipv6SpdpMulticastAddress`, :cfg:prop:`[rtps_discovery]SedpMulticastAddress`, and :cfg:prop:`[rtps_discovery]Ipv6SedpMulticastAddress` to set the multicast addresses and ports separately on SPDP and SEDP.
@@ -13,7 +13,7 @@
 
   - For RTPS/UDP Transport:
 
-    - Added :cfg:val:`[transport@rtps_udp]PortMode=probe` will use port exactly as the RTPS specification defines them.
+    - Added :cfg:val:`[transport@rtps_udp]PortMode=probe`, which will use ports exactly as the RTPS specification defines them.
       This uses new port parameter properties: :cfg:prop:`[transport@rtps_udp]PB`, :cfg:prop:`[transport@rtps_udp]DG`, :cfg:prop:`[transport@rtps_udp]PG`, :cfg:prop:`[transport@rtps_udp]D2`, and :cfg:prop:`[transport@rtps_udp]D3`.
     - See :ref:`here <config-ports-used-by-rtps-udp>` for the full overview of port usage.
 

@@ -3512,9 +3512,9 @@ Spdp::SpdpTransport::open_unicast_ipv6_socket(DDS::UInt16 participant_id)
 
   DCPS::NetworkAddress local_addr;
   bool fixed_port;
-  if (!outer->config_->spdp_unicast_address(
+  if (!outer->config_->ipv6_spdp_unicast_address(
         local_addr, fixed_port, outer->domain_, participant_id)) {
-    throw std::runtime_error("failed to get valid unicast IPv4 address for SPDP");
+    throw std::runtime_error("failed to get valid unicast IPv6 address for SPDP");
   }
 
   if (unicast_ipv6_socket_.open(local_addr.to_addr(), PF_INET6) != 0) {
