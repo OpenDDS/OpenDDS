@@ -192,7 +192,7 @@ namespace {
           indent << "  " << scoped(type->name()) << " bx;\n" <<
           indent << "  if (!value_reader.read_" << primitive_type(pt)
             << "(bx)) return false;\n" <<
-          indent << "  " << expression << accessor << " = bx;\n" <<
+          indent << "  " << var_name << " = bx;\n" <<
           indent << "}\n";
       } else {
         be_global->impl_ <<
