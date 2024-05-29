@@ -288,6 +288,9 @@ private:
                                             bool disassociate,
                                             bool association_failed);
 
+  bool open_socket(
+    const RtpsUdpInst_rch& config, ACE_SOCK_Dgram& sock, int protocol, ACE_INET_Addr& actual);
+
   bool configure_i(const RtpsUdpInst_rch& config);
 
   void client_stop(const GUID_t& localId);

@@ -320,6 +320,10 @@ public:
   DDS::ReturnCode_t init(const DCPS::GUID_t& guid,
                          const RtpsDiscovery& disco,
                          DDS::DomainId_t domainId,
+                         DDS::UInt16 ipv4_participant_port_id,
+#ifdef ACE_HAS_IPV6
+                         DDS::UInt16 ipv6_participant_port_id,
+#endif
                          XTypes::TypeLookupService_rch tls);
 
 #ifdef OPENDDS_SECURITY
@@ -583,6 +587,7 @@ private:
   public:
     Endpoint(const DCPS::GUID_t& repo_id, Sedp& sedp)
       : repo_id_(repo_id)
+      , domain_id_(sedp.get_domain_id())
       , sedp_(sedp)
       , shutting_down_(false)
 #ifdef OPENDDS_SECURITY
@@ -608,7 +613,7 @@ private:
 
     DDS::DomainId_t domain_id() const
     {
-      return 0; // not used for SEDP
+      return domain_id_;
     }
 
     CORBA::Long get_priority_value(const DCPS::AssociationData&) const
@@ -661,6 +666,7 @@ private:
 
   protected:
     DCPS::GUID_t repo_id_;
+    const DDS::DomainId_t domain_id_;
     Sedp& sedp_;
     AtomicBool shutting_down_;
 #ifdef OPENDDS_SECURITY

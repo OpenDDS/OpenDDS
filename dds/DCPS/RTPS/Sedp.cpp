@@ -401,6 +401,10 @@ DDS::ReturnCode_t
 Sedp::init(const GUID_t& guid,
            const RtpsDiscovery& disco,
            DDS::DomainId_t domainId,
+           DDS::UInt16 ipv4_participant_port_id,
+#ifdef ACE_HAS_IPV6
+           DDS::UInt16 ipv6_participant_port_id,
+#endif
            XTypes::TypeLookupService_rch tls)
 {
   type_lookup_service_ = tls;
@@ -434,40 +438,44 @@ Sedp::init(const GUID_t& guid,
   transport_inst_->receive_preallocated_message_blocks(disco.config()->sedp_receive_preallocated_message_blocks());
   transport_inst_->receive_preallocated_data_blocks(disco.config()->sedp_receive_preallocated_data_blocks());
 
-  if (disco.sedp_multicast()) {
-    config_store_->set_boolean(transport_inst_->config_key("USE_MULTICAST").c_str(), true);
+  set_port_mode(transport_inst_->config_key("PORT_MODE").c_str(), disco.config()->sedp_port_mode());
+  config_store_->set_int32(transport_inst_->config_key("PB").c_str(), disco.config()->pb());
+  config_store_->set_int32(transport_inst_->config_key("DG").c_str(), disco.config()->dg());
+  config_store_->set_int32(transport_inst_->config_key("PG").c_str(), disco.config()->pg());
+  config_store_->set_int32(transport_inst_->config_key("D2").c_str(), disco.config()->dx());
+  config_store_->set_int32(transport_inst_->config_key("D3").c_str(), disco.config()->dy());
 
-    // Bind to a specific multicast group
-    const u_short mc_port = disco.pb() + disco.dg() * domainId + disco.dx();
-
-    DCPS::NetworkAddress mc_addr = disco.default_multicast_group(domainId);
-    mc_addr.set_port_number(mc_port);
+  const bool sedp_multicast = disco.sedp_multicast();
+  config_store_->set_boolean(transport_inst_->config_key("USE_MULTICAST").c_str(), sedp_multicast);
+  if (sedp_multicast) {
     config_store_->set(transport_inst_->config_key("MULTICAST_GROUP_ADDRESS").c_str(),
-                       NetworkAddress(mc_addr),
+                       disco.config()->sedp_multicast_address(domainId),
                        ConfigStoreImpl::Format_Optional_Port,
                        ConfigStoreImpl::Kind_IPV4);
 
     config_store_->set_uint32(transport_inst_->config_key("TTL").c_str(), disco.ttl());
     config_store_->set(transport_inst_->config_key("MULTICAST_INTERFACE").c_str(), disco.multicast_interface());
-  } else {
-    config_store_->set_boolean(transport_inst_->config_key("USE_MULTICAST").c_str(), false);
   }
 
+  config_store_->set_int32(
+    transport_inst_->config_key("INIT_PARTICIPANT_PORT_ID").c_str(), ipv4_participant_port_id);
   config_store_->set(transport_inst_->config_key("LOCAL_ADDRESS").c_str(),
-                     NetworkAddress(disco.config()->sedp_local_address()),
+                     disco.config()->sedp_local_address(),
                      ConfigStoreImpl::Format_Required_Port,
                      ConfigStoreImpl::Kind_IPV4);
   config_store_->set(transport_inst_->config_key("ADVERTISED_ADDRESS").c_str(),
-                     NetworkAddress(disco.config()->sedp_advertised_local_address()),
+                     disco.config()->sedp_advertised_local_address(),
                      ConfigStoreImpl::Format_Required_Port,
                      ConfigStoreImpl::Kind_IPV4);
 #ifdef ACE_HAS_IPV6
+  config_store_->set_int32(
+    transport_inst_->config_key("IPV6_INIT_PARTICIPANT_PORT_ID").c_str(), ipv6_participant_port_id);
   config_store_->set(transport_inst_->config_key("IPV6_LOCAL_ADDRESS").c_str(),
-                     NetworkAddress(disco.config()->ipv6_sedp_local_address()),
+                     disco.config()->ipv6_sedp_local_address(),
                      ConfigStoreImpl::Format_Required_Port,
                      ConfigStoreImpl::Kind_IPV6);
   config_store_->set(transport_inst_->config_key("IPV6_ADVERTISED_ADDRESS").c_str(),
-                     NetworkAddress(disco.config()->ipv6_sedp_advertised_local_address()),
+                     disco.config()->ipv6_sedp_advertised_local_address(),
                      ConfigStoreImpl::Format_Required_Port,
                      ConfigStoreImpl::Kind_IPV6);
 #endif
@@ -508,6 +516,12 @@ Sedp::init(const GUID_t& guid,
   const_cast<bool&>(use_xtypes_complete_) = disco.use_xtypes_complete();
 
   reactor_task_ = transport_inst_->reactor_task(domainId, 0);
+  if (!reactor_task_) {
+    if (log_level >= LogLevel::Error) {
+      ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: Sedp::init: SEDP transport initialization failed\n"));
+    }
+    return DDS::RETCODE_ERROR;
+  }
   // One should assume that the transport is configured after this
   // point.  Changes to transport_inst_ or rtps_inst after this line
   // may not be reflected.

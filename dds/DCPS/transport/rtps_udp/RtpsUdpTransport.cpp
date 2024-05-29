@@ -512,6 +512,105 @@ RtpsUdpTransport::append_transport_statistics(TransportStatisticsSequence& seq)
   core_.append_transport_statistics(seq);
 }
 
+bool RtpsUdpTransport::open_socket(
+  const RtpsUdpInst_rch& config, ACE_SOCK_Dgram& sock, int protocol, ACE_INET_Addr& actual)
+{
+  const bool ipv4 = protocol == PF_INET;
+  const DDS::UInt16 init_part_port_id =
+#ifdef ACE_HAS_IPV6
+    ipv4 ? config->init_participant_port_id() : config->ipv6_init_participant_port_id();
+#else
+    config->init_participant_port_id();
+#endif
+
+  NetworkAddress address;
+  bool fixed_port;
+  DDS::UInt16 part_port_id = init_part_port_id;
+  while (true) {
+#ifdef ACE_HAS_IPV6
+    if (ipv4) {
+#endif
+      if (!config->unicast_address(address, fixed_port, domain_, part_port_id)) {
+        return false;
+      }
+#ifdef ACE_HAS_IPV6
+    } else if (!config->ipv6_unicast_address(address, fixed_port, domain_, part_port_id)) {
+      return false;
+    }
+#endif
+
+    if (sock.open(address.to_addr(), protocol) == 0) {
+      break;
+    }
+
+    if (fixed_port) {
+      if (log_level >= LogLevel::Error) {
+        ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: RtpsUdpTransport::open_socket: "
+          "failed to open unicast %C socket for %C: %m\n",
+          ipv4 ? "IPv4" : "IPv6", LogAddr(address).c_str()));
+      }
+      return false;
+
+    } else {
+      if (DCPS::DCPS_debug_level > 3) {
+        ACE_DEBUG((LM_DEBUG, "(%P|%t) RtpsUdpTransport::open_socket: "
+          "failed to open unicast %C socket for %C: %m, trying next participant ID...\n",
+          ipv4 ? "IPv4" : "IPv6", LogAddr(address).c_str()));
+      }
+
+      ++part_port_id;
+
+      if (part_port_id == init_part_port_id) {
+        if (log_level >= LogLevel::Error) {
+          ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: RtpsUdpTransport::open_socket: "
+            "could not find a free %C unicast port\n",
+            ipv4 ? "IPv4" : "IPv6"));
+        }
+        return false;
+      }
+    }
+  }
+
+  if (DCPS::DCPS_debug_level > 3) {
+    ACE_DEBUG((LM_DEBUG,
+               "(%P|%t) RtpsUdpTransport::open_socket: "
+               "opened %C unicast socket %d for %C\n",
+               ipv4 ? "IPv4" : "IPv6", sock.get_handle(), LogAddr(address).c_str()));
+  }
+
+#ifdef ACE_WIN32
+  // By default Winsock will cause reads to fail with "connection reset"
+  // when UDP sends result in ICMP "port unreachable" messages.
+  // The transport framework is not set up for this since returning <= 0
+  // from our receive_bytes causes the framework to close down the datalink
+  // which in this case is used to receive from multiple peers.
+  {
+    BOOL recv_udp_connreset = FALSE;
+    sock.control(SIO_UDP_CONNRESET, &recv_udp_connreset);
+  }
+#endif
+
+  if (sock.get_local_addr(actual) != 0) {
+    if (log_level >= LogLevel::Error) {
+      ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: RtpsUdpTransport::open_socket: "
+        "failed to get actual address from %C socket for %C: %m\n",
+        ipv4 ? "IPv4" : "IPv6", LogAddr(address).c_str()));
+    }
+    return false;
+  }
+
+  if (!set_recvpktinfo(sock, ipv4)) {
+    if (log_level >= LogLevel::Error) {
+      ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: RtpsUdpTransport::open_socket: "
+        "failed to set RECVPKTINFO on %C socket for %C\n",
+        ipv4 ? "IPv4" : "IPv6", LogAddr(address).c_str()));
+    }
+    return false;
+  }
+
+  return true;
+}
+
 bool
 RtpsUdpTransport::configure_i(const RtpsUdpInst_rch& config)
 {
@@ -525,90 +624,22 @@ RtpsUdpTransport::configure_i(const RtpsUdpInst_rch& config)
   // detect and report errors during DataReader/Writer setup instead
   // of during association.
 
-  const NetworkAddress address4 = config->local_address();
-
-  if (unicast_socket_.open(address4.to_addr(), PF_INET) != 0) {
-    ACE_ERROR_RETURN((LM_ERROR,
-                      ACE_TEXT("(%P|%t) ERROR: RtpsUdpTransport::configure_i: open4 %C: %m\n"),
-                      LogAddr(address4).c_str()),
-                     false);
-  }
-
-#ifdef ACE_WIN32
-  // By default Winsock will cause reads to fail with "connection reset"
-  // when UDP sends result in ICMP "port unreachable" messages.
-  // The transport framework is not set up for this since returning <= 0
-  // from our receive_bytes causes the framework to close down the datalink
-  // which in this case is used to receive from multiple peers.
-  {
-    BOOL recv_udp_connreset = FALSE;
-    unicast_socket_.control(SIO_UDP_CONNRESET, &recv_udp_connreset);
-  }
-#endif
-
   ACE_INET_Addr actual4;
-  if (unicast_socket_.get_local_addr(actual4) != 0) {
-    ACE_ERROR_RETURN((LM_ERROR,
-                      ACE_TEXT("(%P|%t) ERROR: RtpsUdpTransport::configure_i: get_local_addr4 %C: %m\n"),
-                      LogAddr(address4).c_str()),
-                     false);
+  if (!open_socket(config, unicast_socket_, PF_INET, actual4)) {
+    return false;
   }
-
-  config->actual_local_address_ = NetworkAddress(actual4);
-
-#ifdef ACE_RECVPKTINFO
-  int sockopt = 1;
-  if (unicast_socket_.set_option(IPPROTO_IP, ACE_RECVPKTINFO, &sockopt, sizeof sockopt) == -1) {
-    ACE_ERROR_RETURN((LM_ERROR,
-                      ACE_TEXT("(%P|%t) ERROR: RtpsUdpTransport::configure_i: set_option4 %C: %m\n"),
-                      LogAddr(address4).c_str()), false);
-  }
-#endif
+  config->actual_local_address_ = actual4;
 
 #ifdef ACE_HAS_IPV6
-  const NetworkAddress address6 = config->ipv6_local_address();
-
-  if (ipv6_unicast_socket_.open(address6.to_addr(), PF_INET6) != 0) {
-    ACE_ERROR_RETURN((LM_ERROR,
-                      ACE_TEXT("(%P|%t) ERROR: RtpsUdpTransport::configure_i: open6 %C: %m\n"),
-                      LogAddr(address6).c_str()),
-                     false);
-  }
-
-#ifdef ACE_WIN32
-  // By default Winsock will cause reads to fail with "connection reset"
-  // when UDP sends result in ICMP "port unreachable" messages.
-  // The transport framework is not set up for this since returning <= 0
-  // from our receive_bytes causes the framework to close down the datalink
-  // which in this case is used to receive from multiple peers.
-  {
-    BOOL recv_udp_connreset = FALSE;
-    ipv6_unicast_socket_.control(SIO_UDP_CONNRESET, &recv_udp_connreset);
-  }
-#endif
-
   ACE_INET_Addr actual6;
-  if (ipv6_unicast_socket_.get_local_addr(actual6) != 0) {
-    ACE_ERROR_RETURN((LM_ERROR,
-                      ACE_TEXT("(%P|%t) ERROR: RtpsUdpTransport::configure_i: get_local_addr6 %C: %m\n"),
-                      LogAddr(address6).c_str()),
-                     false);
+  if (!open_socket(config, ipv6_unicast_socket_, PF_INET6, actual6)) {
+    return false;
   }
-
   NetworkAddress temp(actual6);
   if (actual6.is_ipv4_mapped_ipv6() && temp.is_any()) {
     temp = NetworkAddress(actual6.get_port_number(), "::");
   }
   config->ipv6_actual_local_address_ = temp;
-
-#ifdef ACE_RECVPKTINFO6
-  if (ipv6_unicast_socket_.set_option(IPPROTO_IPV6, ACE_RECVPKTINFO6, &sockopt, sizeof sockopt) == -1) {
-    ACE_ERROR_RETURN((LM_ERROR,
-                      ACE_TEXT("(%P|%t) ERROR: RtpsUdpTransport::configure_i: set_option4 %C: %m\n"),
-                      LogAddr(address6).c_str()),
-                     false);
-  }
-#endif
 #endif
 
   create_reactor_task(false, "RtpsUdpTransport" + config->name());

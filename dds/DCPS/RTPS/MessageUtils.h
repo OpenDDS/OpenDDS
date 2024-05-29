@@ -237,6 +237,52 @@ handle_to_octets(DDS::Security::NativeCryptoHandle handle)
 }
 #endif
 
+// Default values for spec-defined parameters for determining what ports RTPS
+// uses.
+const DDS::UInt16 default_port_base = 7400; // (PB)
+const DDS::UInt16 default_domain_gain = 250; // (DG)
+const DDS::UInt16 default_part_gain = 2; // (PG)
+const DDS::UInt16 default_spdp_multicast_offset = 0; // (D0)
+const DDS::UInt16 default_spdp_unicast_offset = 10; // (D1)
+const DDS::UInt16 default_user_multicast_offset = 1; // (D2)
+const DDS::UInt16 default_user_unicast_offset = 11; // (D3)
+
+// Default values for OpenDDS-specific parameters for determining what ports
+// RTPS uses.
+const DDS::UInt16 default_sedp_multicast_offset = 2; // (DX)
+const DDS::UInt16 default_sedp_unicast_offset = 12; // (DY)
+
+OpenDDS_Rtps_Export
+bool get_rtps_port(DDS::UInt16& port_result, const char* what,
+  DDS::UInt16 port_base, DDS::UInt16 offset,
+  DDS::UInt16 domain, DDS::UInt16 domain_gain,
+  DDS::UInt16 part = 0, DDS::UInt16 part_gain = 0);
+
+enum PortMode {
+  PortMode_System,
+  PortMode_Probe
+};
+
+OpenDDS_Rtps_Export
+PortMode get_port_mode(const String& key, PortMode default_value);
+
+OpenDDS_Rtps_Export
+void set_port_mode(const String& key, PortMode value);
+
+OpenDDS_Rtps_Export
+bool set_rtps_multicast_port(
+  DCPS::NetworkAddress& addr, const char* what,
+  DDS::UInt16 port_base, DDS::UInt16 offset,
+  DDS::UInt16 domain, DDS::UInt16 domain_gain);
+
+OpenDDS_Rtps_Export
+bool set_rtps_unicast_port(
+  DCPS::NetworkAddress& addr, bool& fixed_port,
+  const char* what, PortMode port_mode,
+  DDS::UInt16 port_base, DDS::UInt16 offset,
+  DDS::UInt16 domain, DDS::UInt16 domain_gain,
+  DDS::UInt16 part, DDS::UInt16 part_gain);
+
 } // namespace RTPS
 } // namespace OpenDDS
 

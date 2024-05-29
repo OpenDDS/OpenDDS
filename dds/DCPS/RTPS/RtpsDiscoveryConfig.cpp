@@ -7,19 +7,6 @@
 
 #include <dds/DCPS/LogAddr.h>
 
-namespace {
-  u_short get_default_d0(u_short fallback)
-  {
-#if !defined ACE_LACKS_GETENV && !defined ACE_LACKS_ENV
-    const char* from_env = std::getenv("OPENDDS_RTPS_DEFAULT_D0");
-    if (from_env) {
-      return static_cast<u_short>(std::atoi(from_env));
-    }
-#endif
-    return fallback;
-  }
-}
-
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
@@ -164,93 +151,157 @@ RtpsDiscoveryConfig::lease_extension(const DCPS::TimeDuration& period)
                                              DCPS::ConfigStoreImpl::Format_IntegerSeconds);
 }
 
-u_short
-RtpsDiscoveryConfig::pb() const
+PortMode RtpsDiscoveryConfig::spdp_port_mode() const
 {
-  // see RTPS v2.1 9.6.1.3 for PB, DG, PG, D0, D1 defaults
-  return TheServiceParticipant->config_store()->get_uint32(config_key("PB").c_str(),
-                                                           7400);
+  // TODO: Deprecated, remove in OpenDDS 4
+  const bool request_random_port = TheServiceParticipant->config_store()->get_boolean(
+    config_key("SPDP_REQUEST_RANDOM_PORT").c_str(), false);
+  return get_port_mode(config_key("SPDP_PORT_MODE"),
+    request_random_port ? PortMode_System : PortMode_Probe);
+}
+
+void RtpsDiscoveryConfig::spdp_port_mode(PortMode value)
+{
+  set_port_mode(config_key("SPDP_PORT_MODE"), value);
+}
+
+bool
+RtpsDiscoveryConfig::spdp_request_random_port() const
+{
+  return spdp_port_mode() == PortMode_System;
 }
 
 void
-RtpsDiscoveryConfig::pb(u_short port_base)
+RtpsDiscoveryConfig::spdp_request_random_port(bool f)
+{
+  spdp_port_mode(f ? PortMode_System : PortMode_Probe);
+}
+
+PortMode RtpsDiscoveryConfig::sedp_port_mode() const
+{
+  return get_port_mode(config_key("SEDP_PORT_MODE"), PortMode_System);
+}
+
+void RtpsDiscoveryConfig::sedp_port_mode(PortMode value)
+{
+  set_port_mode(config_key("SEDP_PORT_MODE"), value);
+}
+
+DDS::UInt16
+RtpsDiscoveryConfig::pb() const
+{
+  return TheServiceParticipant->config_store()->get_uint32(config_key("PB").c_str(),
+                                                           default_port_base);
+}
+
+void
+RtpsDiscoveryConfig::pb(DDS::UInt16 port_base)
 {
   TheServiceParticipant->config_store()->set_uint32(config_key("PB").c_str(),
                                                     port_base);
 }
 
-u_short
+DDS::UInt16
 RtpsDiscoveryConfig::dg() const
 {
-  // see RTPS v2.1 9.6.1.3 for PB, DG, PG, D0, D1 defaults
   return TheServiceParticipant->config_store()->get_uint32(config_key("DG").c_str(),
-                                                           250);
+                                                           default_domain_gain);
 }
 
 void
-RtpsDiscoveryConfig::dg(u_short domain_gain)
+RtpsDiscoveryConfig::dg(DDS::UInt16 domain_gain)
 {
   TheServiceParticipant->config_store()->set_uint32(config_key("DG").c_str(),
                                                     domain_gain);
 }
 
-u_short
+DDS::UInt16
 RtpsDiscoveryConfig::pg() const
 {
-  // see RTPS v2.1 9.6.1.3 for PB, DG, PG, D0, D1 defaults
   return TheServiceParticipant->config_store()->get_uint32(config_key("PG").c_str(),
-                                                           2);
+                                                           default_part_gain);
 }
 
 void
-RtpsDiscoveryConfig::pg(u_short participant_gain)
+RtpsDiscoveryConfig::pg(DDS::UInt16 participant_gain)
 {
   TheServiceParticipant->config_store()->set_uint32(config_key("PG").c_str(),
                                                     participant_gain);
 }
 
-u_short
+DDS::UInt16
 RtpsDiscoveryConfig::d0() const
 {
-  // see RTPS v2.1 9.6.1.3 for PB, DG, PG, D0, D1 defaults
+  DDS::UInt16 default_value = 0;
+#if !defined ACE_LACKS_GETENV && !defined ACE_LACKS_ENV
+  const char* const from_env = ACE_OS::getenv("OPENDDS_RTPS_DEFAULT_D0");
+  if (from_env) {
+    default_value = static_cast<DDS::UInt16>(std::atoi(from_env));
+  }
+#endif
   return TheServiceParticipant->config_store()->get_uint32(config_key("D0").c_str(),
-                                                           get_default_d0(0));
+                                                           default_value);
 }
 
 void
-RtpsDiscoveryConfig::d0(u_short offset_zero)
+RtpsDiscoveryConfig::d0(DDS::UInt16 spdp_multicast_offset)
 {
   TheServiceParticipant->config_store()->set_uint32(config_key("D0").c_str(),
-                                                    offset_zero);
+                                                    spdp_multicast_offset);
 }
 
-u_short
+DDS::UInt16
 RtpsDiscoveryConfig::d1() const
 {
-  // see RTPS v2.1 9.6.1.3 for PB, DG, PG, D0, D1 defaults
   return TheServiceParticipant->config_store()->get_uint32(config_key("D1").c_str(),
-                                                           10);
+                                                           default_spdp_unicast_offset);
 }
 
 void
-RtpsDiscoveryConfig::d1(u_short offset_one)
+RtpsDiscoveryConfig::d1(DDS::UInt16 spdp_unicast_offset)
 {
   TheServiceParticipant->config_store()->set_uint32(config_key("D1").c_str(),
-                                                    offset_one);
+                                                    spdp_unicast_offset);
 }
-
-u_short
+DDS::UInt16
 RtpsDiscoveryConfig::dx() const
 {
   return TheServiceParticipant->config_store()->get_uint32(config_key("DX").c_str(),
-                                                           2);
+                                                           default_sedp_multicast_offset);
 }
 
 void
-RtpsDiscoveryConfig::dx(u_short offset_two)
+RtpsDiscoveryConfig::dx(DDS::UInt16 sedp_multicast_offset)
 {
   TheServiceParticipant->config_store()->set_uint32(config_key("DX").c_str(),
-                                                    offset_two);
+                                                    sedp_multicast_offset);
+}
+
+DDS::UInt16
+RtpsDiscoveryConfig::dy() const
+{
+  return TheServiceParticipant->config_store()->get_uint32(config_key("DY").c_str(),
+                                                           default_sedp_unicast_offset);
+}
+
+void
+RtpsDiscoveryConfig::dy(DDS::UInt16 sedp_unicast_offset)
+{
+  TheServiceParticipant->config_store()->set_uint32(config_key("DY").c_str(),
+                                                    sedp_unicast_offset);
+}
+
+bool RtpsDiscoveryConfig::set_spdp_multicast_port(DCPS::NetworkAddress& addr,
+  DDS::DomainId_t domain) const
+{
+  return set_rtps_multicast_port(addr, "SPDP multicast", pb(), d0(), domain, dg());
+}
+
+bool RtpsDiscoveryConfig::set_spdp_unicast_port(DCPS::NetworkAddress& addr, bool& fixed_port,
+  DDS::DomainId_t domain, DDS::UInt16 part_id) const
+{
+  return set_rtps_unicast_port(addr, fixed_port, "SPDP unicast", spdp_port_mode(),
+    pb(), d1(), domain, dg(), part_id, pg());
 }
 
 unsigned char
@@ -372,6 +423,13 @@ RtpsDiscoveryConfig::spdp_local_address(const DCPS::NetworkAddress& mi)
                                              DCPS::ConfigStoreImpl::Kind_IPV4);
 }
 
+bool RtpsDiscoveryConfig::spdp_unicast_address(DCPS::NetworkAddress& addr, bool& fixed_port,
+  DDS::DomainId_t domain, DDS::UInt16 part_id) const
+{
+  addr = spdp_local_address();
+  return set_spdp_unicast_port(addr, fixed_port, domain, part_id);
+}
+
 OPENDDS_STRING
 RtpsDiscoveryConfig::multicast_interface() const
 {
@@ -444,21 +502,40 @@ RtpsDiscoveryConfig::default_multicast_group(const DCPS::NetworkAddress& group)
                                              DCPS::ConfigStoreImpl::Kind_IPV4);
 }
 
-u_short
-RtpsDiscoveryConfig::port_common(DDS::DomainId_t domain) const
+bool RtpsDiscoveryConfig::spdp_multicast_address(
+  DCPS::NetworkAddress& addr, DDS::DomainId_t domain) const
 {
-  // Ports are set by the formulas in RTPS v2.1 Table 9.8
-  return  pb() + (dg() * domain);
+  addr = TheServiceParticipant->config_store()->get(
+    config_key("SPDP_MULTICAST_ADDRESS").c_str(),
+    default_multicast_group(domain),
+    DCPS::ConfigStoreImpl::Format_Optional_Port,
+    DCPS::ConfigStoreImpl::Kind_IPV4);
+  return set_spdp_multicast_port(addr, domain);
 }
 
-DCPS::NetworkAddress
-RtpsDiscoveryConfig::multicast_address(u_short port_common,
-                                       DDS::DomainId_t domain) const
+void RtpsDiscoveryConfig::spdp_multicast_address(const DCPS::NetworkAddress& addr)
 {
-  DCPS::NetworkAddress addr = default_multicast_group(domain);
-  // Ports are set by the formulas in RTPS v2.1 Table 9.8
-  addr.set_port_number(port_common + d0());
-  return addr;
+  TheServiceParticipant->config_store()->set(config_key("SPDP_MULTICAST_ADDRESS").c_str(),
+                                             addr,
+                                             DCPS::ConfigStoreImpl::Format_Optional_Port,
+                                             DCPS::ConfigStoreImpl::Kind_IPV4);
+}
+
+DCPS::NetworkAddress RtpsDiscoveryConfig::sedp_multicast_address(DDS::DomainId_t domain) const
+{
+  return TheServiceParticipant->config_store()->get(
+    config_key("SEDP_MULTICAST_ADDRESS").c_str(),
+    default_multicast_group(domain),
+    DCPS::ConfigStoreImpl::Format_Optional_Port,
+    DCPS::ConfigStoreImpl::Kind_IPV4);
+}
+
+void RtpsDiscoveryConfig::sedp_multicast_address(const DCPS::NetworkAddress& addr)
+{
+  TheServiceParticipant->config_store()->set(config_key("SEDP_MULTICAST_ADDRESS").c_str(),
+                                             addr,
+                                             DCPS::ConfigStoreImpl::Format_Optional_Port,
+                                             DCPS::ConfigStoreImpl::Kind_IPV4);
 }
 
 #ifdef ACE_HAS_IPV6
@@ -478,6 +555,13 @@ RtpsDiscoveryConfig::ipv6_spdp_local_address(const DCPS::NetworkAddress& mi)
                                              mi,
                                              DCPS::ConfigStoreImpl::Format_Optional_Port,
                                              DCPS::ConfigStoreImpl::Kind_IPV6);
+}
+
+bool RtpsDiscoveryConfig::ipv6_spdp_unicast_address(DCPS::NetworkAddress& addr, bool& fixed_port,
+  DDS::DomainId_t domain, DDS::UInt16 part_id) const
+{
+  addr = ipv6_spdp_local_address();
+  return set_spdp_unicast_port(addr, fixed_port, domain, part_id);
 }
 
 DCPS::NetworkAddress
@@ -534,30 +618,33 @@ RtpsDiscoveryConfig::ipv6_default_multicast_group(const DCPS::NetworkAddress& gr
                                              DCPS::ConfigStoreImpl::Kind_IPV6);
 }
 
-DCPS::NetworkAddress
-RtpsDiscoveryConfig::ipv6_multicast_address(u_short port_common) const
+bool RtpsDiscoveryConfig::ipv6_spdp_multicast_address(
+  DCPS::NetworkAddress& addr, DDS::DomainId_t domain) const
 {
-  DCPS::NetworkAddress addr = ipv6_default_multicast_group();
-  // Ports are set by the formulas in RTPS v2.1 Table 9.8
-  addr.set_port_number(port_common + d0());
-  return addr;
+  addr = TheServiceParticipant->config_store()->get(
+    config_key("IPV6_SPDP_MULTICAST_ADDRESS").c_str(),
+    ipv6_default_multicast_group(),
+    DCPS::ConfigStoreImpl::Format_Optional_Port,
+    DCPS::ConfigStoreImpl::Kind_IPV6);
+  return set_spdp_multicast_port(addr, domain);
 }
 
+void RtpsDiscoveryConfig::ipv6_spdp_multicast_address(const DCPS::NetworkAddress& addr)
+{
+  TheServiceParticipant->config_store()->set(config_key("IPV6_SPDP_MULTICAST_ADDRESS").c_str(),
+                                             addr,
+                                             DCPS::ConfigStoreImpl::Format_Optional_Port,
+                                             DCPS::ConfigStoreImpl::Kind_IPV6);
+}
+
+void RtpsDiscoveryConfig::ipv6_sedp_multicast_address(const DCPS::NetworkAddress& addr)
+{
+  TheServiceParticipant->config_store()->set(config_key("IPV6_SEDP_MULTICAST_ADDRESS").c_str(),
+                                             addr,
+                                             DCPS::ConfigStoreImpl::Format_Optional_Port,
+                                             DCPS::ConfigStoreImpl::Kind_IPV6);
+}
 #endif
-
-bool
-RtpsDiscoveryConfig::spdp_request_random_port() const
-{
-  return TheServiceParticipant->config_store()->get_boolean(config_key("SPDP_REQUEST_RANDOM_PORT").c_str(),
-                                                            false);
-}
-
-void
-RtpsDiscoveryConfig::spdp_request_random_port(bool f)
-{
-  TheServiceParticipant->config_store()->set_boolean(config_key("SPDP_REQUEST_RANDOM_PORT").c_str(),
-                                                     f);
-}
 
 OPENDDS_STRING
 RtpsDiscoveryConfig::guid_interface() const

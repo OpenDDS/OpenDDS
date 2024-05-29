@@ -403,6 +403,10 @@ private:
   DCPS::GUID_t guid_;
   const DCPS::MonotonicTime_t participant_discovered_at_;
   bool is_application_participant_;
+  DDS::UInt16 ipv4_participant_port_id_;
+#ifdef ACE_HAS_IPV6
+  DDS::UInt16 ipv6_participant_port_id_;
+#endif
 
   void data_received(const DataSubmessage& data, const ParameterList& plist, const DCPS::NetworkAddress& from);
 
@@ -491,9 +495,10 @@ private:
     ssize_t send(const DCPS::NetworkAddress& addr);
     void close(const DCPS::ReactorTask_rch& reactor_task);
     void dispose_unregister();
-    bool open_unicast_socket(u_short port_common, u_short participant_id);
+    void set_unicast_socket_opts(DCPS::RcHandle<Spdp>& outer, ACE_SOCK_Dgram& sock, DDS::UInt16& port);
+    bool open_unicast_socket(DDS::UInt16 participant_id);
 #ifdef ACE_HAS_IPV6
-    bool open_unicast_ipv6_socket(u_short port);
+    bool open_unicast_ipv6_socket(DDS::UInt16 participant_id);
 #endif
 
     void on_data_available(DCPS::RcHandle<DCPS::InternalDataReader<DCPS::NetworkInterfaceAddress> > reader);
@@ -515,13 +520,13 @@ private:
     UserTagSubmessage user_tag_;
     DataSubmessage data_;
     DCPS::SequenceNumber seq_;
-    u_short uni_port_;
+    DDS::UInt16 uni_port_;
     ACE_SOCK_Dgram unicast_socket_;
     OPENDDS_STRING multicast_interface_;
     DCPS::NetworkAddress multicast_address_;
     ACE_SOCK_Dgram_Mcast multicast_socket_;
 #ifdef ACE_HAS_IPV6
-    u_short ipv6_uni_port_;
+    DDS::UInt16 ipv6_uni_port_;
     ACE_SOCK_Dgram unicast_ipv6_socket_;
     OPENDDS_STRING multicast_ipv6_interface_;
     DCPS::NetworkAddress multicast_ipv6_address_;

@@ -47,6 +47,7 @@ using DCPS::ENDIAN_LITTLE;
 using DCPS::LogLevel;
 using DCPS::log_level;
 using DCPS::LogAddr;
+using DCPS::set_sock_opt;
 
 namespace {
   const Encoding encoding_plain_big(Encoding::KIND_XCDR1, ENDIAN_BIG);
@@ -245,6 +246,10 @@ Spdp::Spdp(DDS::DomainId_t domain,
   , guid_(guid)
   , participant_discovered_at_(MonotonicTimePoint::now().to_monotonic_time())
   , is_application_participant_(false)
+  , ipv4_participant_port_id_(0)
+#ifdef ACE_HAS_IPV6
+  , ipv6_participant_port_id_(0)
+#endif
   , tport_(DCPS::make_rch<SpdpTransport>(rchandle_from(this)))
   , initialized_flag_(false)
   , eh_shutdown_(false)
@@ -304,6 +309,10 @@ Spdp::Spdp(DDS::DomainId_t domain,
   , guid_(guid)
   , participant_discovered_at_(MonotonicTimePoint::now().to_monotonic_time())
   , is_application_participant_(false)
+  , ipv4_participant_port_id_(0)
+#ifdef ACE_HAS_IPV6
+  , ipv6_participant_port_id_(0)
+#endif
   , tport_(DCPS::make_rch<SpdpTransport>(rchandle_from(this)))
   , initialized_flag_(false)
   , eh_shutdown_(false)
@@ -2177,7 +2186,11 @@ Spdp::init_bit(DCPS::RcHandle<DCPS::BitSubscriber> bit_subscriber)
   bit_subscriber_ = bit_subscriber;
 
   // Defer initilization until we have the bit subscriber.
-  sedp_->init(guid_, *disco_, domain_, type_lookup_service_);
+  sedp_->init(guid_, *disco_, domain_, ipv4_participant_port_id_,
+#ifdef ACE_HAS_IPV6
+    ipv6_participant_port_id_,
+#endif
+    type_lookup_service_);
   tport_->open(sedp_->reactor_task(), sedp_->job_queue());
 
 #ifdef OPENDDS_SECURITY
@@ -2350,38 +2363,32 @@ Spdp::SpdpTransport::SpdpTransport(DCPS::RcHandle<Spdp> outer)
 #ifdef ACE_HAS_MAC_OSX
   multicast_socket_.opts(ACE_SOCK_Dgram_Mcast::OPT_BINDADDR_NO |
                          ACE_SOCK_Dgram_Mcast::DEFOPT_NULLIFACE);
-#ifdef ACE_HAS_IPV6
+#  ifdef ACE_HAS_IPV6
   multicast_ipv6_socket_.opts(ACE_SOCK_Dgram_Mcast::OPT_BINDADDR_NO |
                               ACE_SOCK_Dgram_Mcast::DEFOPT_NULLIFACE);
-#endif
+#  endif
 #endif
 
   multicast_interface_ = outer->disco_->multicast_interface();
 
-  const u_short port_common = outer->config_->port_common(outer->domain_);
-  multicast_address_ = outer->config_->multicast_address(port_common, outer->domain_);
-
-#ifdef ACE_HAS_IPV6
-  multicast_ipv6_address_ = outer->config_->ipv6_multicast_address(port_common);
-#endif
-
+  if (!outer->config_->spdp_multicast_address(multicast_address_, outer->domain_)) {
+    throw std::runtime_error("failed to get valid multicast IPv4 address for SPDP");
+  }
   send_addrs_.insert(multicast_address_);
 #ifdef ACE_HAS_IPV6
+  if (!outer->config_->ipv6_spdp_multicast_address(multicast_ipv6_address_, outer->domain_)) {
+    throw std::runtime_error("failed to get valid multicast IPv4 address for SPDP");
+  }
   send_addrs_.insert(multicast_ipv6_address_);
 #endif
 
   const DCPS::NetworkAddressSet addrs = outer->config_->spdp_send_addrs();
   send_addrs_.insert(addrs.begin(), addrs.end());
 
-  u_short participantId = 0;
-
-#ifdef OPENDDS_SAFETY_PROFILE
-  const u_short startingParticipantId = participantId;
-#endif
-
-  const u_short max_part_id = 119; // RTPS 2.5 9.6.2.3
-  while (!open_unicast_socket(port_common, participantId)) {
-    if (participantId == max_part_id && log_level >= LogLevel::Warning) {
+  const DDS::UInt16 startingParticipantId = outer->ipv4_participant_port_id_;
+  const DDS::UInt16 max_part_id = 119; // RTPS 2.5 9.6.2.3
+  while (!open_unicast_socket(outer->ipv4_participant_port_id_)) {
+    if (outer->ipv4_participant_port_id_ == max_part_id && log_level >= LogLevel::Warning) {
       ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: Spdp::SpdpTransport: "
         "participant id is going above max %u allowed by RTPS spec\n", max_part_id));
       // As long as it doesn't result in an invalid port, going past this
@@ -2389,24 +2396,30 @@ Spdp::SpdpTransport::SpdpTransport(DCPS::RcHandle<Spdp> outer)
       // limited number of ports at its disposal. Also another implementation
       // could use this as a hard limit, but that's much less of a concern.
     }
-    ++participantId;
+    ++outer->ipv4_participant_port_id_;
+    if (outer->ipv4_participant_port_id_ == startingParticipantId) {
+      throw std::runtime_error("could not find a free IPv4 unicast port for SPDP");
+    }
   }
-#ifdef ACE_HAS_IPV6
-  u_short port = uni_port_;
 
-  while (!open_unicast_ipv6_socket(port)) {
-    ++port;
+#ifdef ACE_HAS_IPV6
+  outer->ipv6_participant_port_id_ = outer->ipv4_participant_port_id_;
+  while (!open_unicast_ipv6_socket(outer->ipv6_participant_port_id_)) {
+    ++outer->ipv6_participant_port_id_;
+    if (outer->ipv4_participant_port_id_ == outer->ipv6_participant_port_id_) {
+      throw std::runtime_error("could not find a free IPv6 unicast port for SPDP");
+    }
   }
 #endif
 
 #ifdef OPENDDS_SAFETY_PROFILE
-  if (participantId > startingParticipantId && ACE_OS::getpid() == -1) {
+  if (outer->ipv4_participant_port_id_ > startingParticipantId && ACE_OS::getpid() == -1) {
     // Since pids are not available, use the fact that we had to increment
     // participantId to modify the GUID's pid bytes.  This avoids GUID conflicts
     // between processes on the same host which start at the same time
     // (resulting in the same seed value for the random number generator).
-    hdr_.guidPrefix[8] = static_cast<CORBA::Octet>(participantId >> 8);
-    hdr_.guidPrefix[9] = static_cast<CORBA::Octet>(participantId & 0xFF);
+    hdr_.guidPrefix[8] = static_cast<CORBA::Octet>(outer->ipv4_participant_port_id_ >> 8);
+    hdr_.guidPrefix[9] = static_cast<CORBA::Octet>(outer->ipv4_participant_port_id_ & 0xFF);
     outer->guid_.guidPrefix[8] = hdr_.guidPrefix[8];
     outer->guid_.guidPrefix[9] = hdr_.guidPrefix[9];
   }
@@ -3401,31 +3414,18 @@ Spdp::signal_liveliness(DDS::LivelinessQosPolicyKind kind)
 }
 
 bool
-Spdp::SpdpTransport::open_unicast_socket(u_short port_common,
-                                         u_short participant_id)
+Spdp::SpdpTransport::open_unicast_socket(DDS::UInt16 participant_id)
 {
   DCPS::RcHandle<Spdp> outer = outer_.lock();
   if (!outer) {
     throw std::runtime_error("couldn't get Spdp");
   }
 
-  DCPS::NetworkAddress local_addr = outer->config_->spdp_local_address();
-  const bool fixed_port = local_addr.get_port_number();
-
-  if (fixed_port) {
-    uni_port_ = local_addr.get_port_number();
-  } else if (!outer->config_->spdp_request_random_port()) {
-    const ACE_UINT32 port = static_cast<ACE_UINT32>(port_common) + outer->config_->d1() +
-      outer->config_->pg() * participant_id;
-    if (port > 65535) {
-      if (log_level >= LogLevel::Error) {
-        ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: Spdp::SpdpTransport::open_unicast_socket: "
-                   "port %u is too high\n", port));
-      }
-      throw std::runtime_error("failed to open unicast port for SPDP (port too high)");
-    }
-    uni_port_ = static_cast<unsigned short>(port);
-    local_addr.set_port_number(uni_port_);
+  DCPS::NetworkAddress local_addr;
+  bool fixed_port;
+  if (!outer->config_->spdp_unicast_address(
+        local_addr, fixed_port, outer->domain_, participant_id)) {
+    throw std::runtime_error("failed to get valid unicast IPv4 address for SPDP");
   }
 
   if (unicast_socket_.open(local_addr.to_addr(), PF_INET) != 0) {
@@ -3435,170 +3435,107 @@ Spdp::SpdpTransport::open_unicast_socket(u_short port_common,
                    "failed to open %C %p.\n",
                    LogAddr(local_addr).c_str(), ACE_TEXT("ACE_SOCK_Dgram::open")));
       }
-      throw std::runtime_error("failed to open unicast port for SPDP");
+      throw std::runtime_error("failed to open fixed unicast IPv4 port for SPDP");
     }
     if (DCPS::DCPS_debug_level > 3) {
       ACE_DEBUG((LM_DEBUG,
-                 ACE_TEXT("(%P|%t) Spdp::SpdpTransport::open_unicast_socket() - ")
-                 ACE_TEXT("failed to open %C %p.  ")
-                 ACE_TEXT("Trying next participantId...\n"),
-                 DCPS::LogAddr(local_addr).c_str(), ACE_TEXT("ACE_SOCK_Dgram::open")));
+                 "(%P|%t) Spdp::SpdpTransport::open_unicast_socket: "
+                 "failed to open %C %p, trying next participant ID...\n",
+                 LogAddr(local_addr).c_str(), ACE_TEXT("ACE_SOCK_Dgram::open")));
     }
     return false;
   }
 
-  if (!fixed_port && outer->config_->spdp_request_random_port()) {
-    ACE_INET_Addr addr;
-    if (unicast_socket_.get_local_addr(addr) == 0) {
-      uni_port_ = addr.get_port_number();
-    }
-  }
-
-  if (DCPS::DCPS_debug_level > 3) {
-    ACE_DEBUG((LM_INFO,
-               ACE_TEXT("(%P|%t) Spdp::SpdpTransport::open_unicast_socket() - ")
-               ACE_TEXT("opened unicast socket on port %d\n"),
-               uni_port_));
-  }
-
-  if (!DCPS::set_socket_multicast_ttl(unicast_socket_, outer->config_->ttl())) {
-    if (DCPS::DCPS_debug_level > 0) {
-      ACE_ERROR((LM_ERROR,
-                ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::open_unicast_socket() - ")
-                ACE_TEXT("failed to set TTL value to %d ")
-                ACE_TEXT("for port:%hu %p\n"),
-                outer->config_->ttl(), uni_port_, ACE_TEXT("DCPS::set_socket_multicast_ttl:")));
-    }
-    throw std::runtime_error("failed to set TTL");
-  }
-
-  const int send_buffer_size = outer->config()->send_buffer_size();
-  if (send_buffer_size > 0) {
-    if (unicast_socket_.set_option(SOL_SOCKET,
-                                   SO_SNDBUF,
-                                   (void *) &send_buffer_size,
-                                   sizeof(send_buffer_size)) < 0
-        && errno != ENOTSUP) {
-      if (DCPS::DCPS_debug_level > 0) {
-        ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::open_unicast_socket() - failed to set the send buffer size to %d errno %m\n"), send_buffer_size));
-      }
-      throw std::runtime_error("failed to set send buffer size");
-    }
-  }
-
-  const int recv_buffer_size = outer->config()->recv_buffer_size();
-  if (recv_buffer_size > 0) {
-    if (unicast_socket_.set_option(SOL_SOCKET,
-                                   SO_RCVBUF,
-                                   (void *) &recv_buffer_size,
-                                   sizeof(recv_buffer_size)) < 0
-        && errno != ENOTSUP) {
-      if (DCPS::DCPS_debug_level > 0) {
-        ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::open_unicast_socket() - failed to set the recv buffer size to %d errno %m\n"), recv_buffer_size));
-      }
-      throw std::runtime_error("failed to set recv buffer size");
-    }
-  }
-
-#ifdef ACE_RECVPKTINFO
-  int sockopt = 1;
-  if (unicast_socket_.set_option(IPPROTO_IP, ACE_RECVPKTINFO, &sockopt, sizeof sockopt) == -1) {
-    ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::open_unicast_socket: set_option: %m\n")), false);
-  }
-#endif
+  set_unicast_socket_opts(outer, unicast_socket_, uni_port_);
 
   return true;
 }
 
-#ifdef ACE_HAS_IPV6
-bool
-Spdp::SpdpTransport::open_unicast_ipv6_socket(u_short port)
+void Spdp::SpdpTransport::set_unicast_socket_opts(
+  DCPS::RcHandle<Spdp>& outer, ACE_SOCK_Dgram& sock, DDS::UInt16& port)
 {
-  DCPS::RcHandle<Spdp> outer = outer_.lock();
-  if (!outer) return false;
-
-  DCPS::NetworkAddress local_addr = outer->config_->ipv6_spdp_local_address();
-  const bool fixed_port = local_addr.get_port_number();
-
-  if (fixed_port) {
-    ipv6_uni_port_ = local_addr.get_port_number();
-  } else {
-    ipv6_uni_port_ = port;
-    local_addr.set_port_number(ipv6_uni_port_);
+  ACE_INET_Addr addr;
+  if (sock.get_local_addr(addr) != 0) {
+    throw std::runtime_error("failed to get address from socket");
   }
-
-  if (unicast_ipv6_socket_.open(local_addr.to_addr(), PF_INET6) != 0) {
-    if (fixed_port) {
-      if (DCPS::DCPS_debug_level > 0) {
-        ACE_ERROR((LM_ERROR,
-                  ACE_TEXT("(%P|%t) Spdp::SpdpTransport::open_unicast_ipv6_socket() - ")
-                  ACE_TEXT("failed to open %C %p.\n"),
-                  DCPS::LogAddr(local_addr).c_str(), ACE_TEXT("ACE_SOCK_Dgram::open")));
-      }
-      throw std::runtime_error("failed to open ipv6 unicast port for SPDP");
-    }
-    if (DCPS::DCPS_debug_level > 3) {
-      ACE_DEBUG((LM_WARNING,
-                 ACE_TEXT("(%P|%t) Spdp::SpdpTransport::open_unicast_ipv6_socket() - ")
-                 ACE_TEXT("failed to open %C %p.  ")
-                 ACE_TEXT("Trying next port...\n"),
-                 DCPS::LogAddr(local_addr).c_str(), ACE_TEXT("ACE_SOCK_Dgram::open")));
-    }
-    return false;
-  }
+  port = addr.get_port_number();
+  const bool ipv4 = addr.get_type() == AF_INET;
 
   if (DCPS::DCPS_debug_level > 3) {
-    ACE_DEBUG((LM_INFO,
-               ACE_TEXT("(%P|%t) Spdp::SpdpTransport::open_unicast_ipv6_socket() - ")
-               ACE_TEXT("opened unicast ipv6 socket on port %d\n"),
-               ipv6_uni_port_));
+    ACE_DEBUG((LM_DEBUG,
+               "(%P|%t) Spdp::SpdpTransport::set_unicast_socket_opts: "
+               "opened %C unicast socket %d on port %d\n",
+               ipv4 ? "IPv4" : "IPv6", sock.get_handle(), port));
   }
 
-  if (!DCPS::set_socket_multicast_ttl(unicast_ipv6_socket_, outer->config_->ttl())) {
-    if (DCPS::DCPS_debug_level > 0) {
+  if (!DCPS::set_socket_multicast_ttl(sock, outer->config_->ttl())) {
+    if (log_level >= LogLevel::Error) {
       ACE_ERROR((LM_ERROR,
-                ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::open_unicast_ipv6_socket() - ")
-                ACE_TEXT("failed to set TTL value to %d ")
-                ACE_TEXT("for port:%hu %p\n"),
-                outer->config_->ttl(), ipv6_uni_port_, ACE_TEXT("DCPS::set_socket_multicast_ttl:")));
+                 "(%P|%t) ERROR: Spdp::SpdpTransport::set_unicast_socket_opts: "
+                 "failed to set TTL value to %d for port:%hu %p\n",
+                 outer->config_->ttl(), port, ACE_TEXT("DCPS::set_socket_multicast_ttl:")));
     }
     throw std::runtime_error("failed to set TTL");
   }
 
   const int send_buffer_size = outer->config()->send_buffer_size();
-  if (send_buffer_size > 0) {
-    if (unicast_ipv6_socket_.set_option(SOL_SOCKET,
-                                        SO_SNDBUF,
-                                        (void *) &send_buffer_size,
-                                        sizeof(send_buffer_size)) < 0
-        && errno != ENOTSUP) {
-      if (DCPS::DCPS_debug_level > 0) {
-        ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::open_unicast_ipv6_socket() - failed to set the send buffer size to %d errno %m\n"), send_buffer_size));
-      }
-      throw std::runtime_error("failed to set send buffer size");
+  if (send_buffer_size > 0 && !set_sock_opt(sock, SOL_SOCKET, SO_SNDBUF, send_buffer_size, true)) {
+    if (log_level >= LogLevel::Error) {
+      ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: Spdp::SpdpTransport::set_unicast_socket_opts: "
+        "failed to set the send buffer size to %d: %m\n", send_buffer_size));
     }
+    throw std::runtime_error("failed to set send buffer size");
   }
 
   const int recv_buffer_size = outer->config()->recv_buffer_size();
-  if (recv_buffer_size > 0) {
-    if (unicast_ipv6_socket_.set_option(SOL_SOCKET,
-                                        SO_RCVBUF,
-                                        (void *) &recv_buffer_size,
-                                        sizeof(recv_buffer_size)) < 0
-        && errno != ENOTSUP) {
-      if (DCPS::DCPS_debug_level > 0) {
-        ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::open_unicast_ipv6_socket() - failed to set the recv buffer size to %d errno %m\n"), recv_buffer_size));
-      }
-      throw std::runtime_error("failed to set recv buffer size");
+  if (recv_buffer_size > 0 && !set_sock_opt(sock, SOL_SOCKET, SO_RCVBUF, recv_buffer_size, true)) {
+    if (log_level >= LogLevel::Error) {
+      ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: Spdp::SpdpTransport::set_unicast_socket_opts: "
+        "failed to set the recv buffer size to %d: %m\n", recv_buffer_size));
     }
+    throw std::runtime_error("failed to set recv buffer size");
   }
 
-#ifdef ACE_RECVPKTINFO6
-  int sockopt = 1;
-  if (unicast_ipv6_socket_.set_option(IPPROTO_IPV6, ACE_RECVPKTINFO6, &sockopt, sizeof sockopt) == -1) {
-    ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::open_unicast_ipv6_socket: set_option: %m\n")), false);
+  if (!DCPS::set_recvpktinfo(sock, ipv4)) {
+    throw std::runtime_error("failed to set RECVPKTINFO");
   }
-#endif
+}
+
+#ifdef ACE_HAS_IPV6
+bool
+Spdp::SpdpTransport::open_unicast_ipv6_socket(DDS::UInt16 participant_id)
+{
+  DCPS::RcHandle<Spdp> outer = outer_.lock();
+  if (!outer) {
+    throw std::runtime_error("couldn't get Spdp");
+  }
+
+  DCPS::NetworkAddress local_addr;
+  bool fixed_port;
+  if (!outer->config_->ipv6_spdp_unicast_address(
+        local_addr, fixed_port, outer->domain_, participant_id)) {
+    throw std::runtime_error("failed to get valid unicast IPv6 address for SPDP");
+  }
+
+  if (unicast_ipv6_socket_.open(local_addr.to_addr(), PF_INET6) != 0) {
+    if (fixed_port) {
+      if (log_level >= LogLevel::Error) {
+        ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: Spdp::SpdpTransport::open_unicast_ipv6_socket: "
+                   "failed to open %C %p.\n",
+                   LogAddr(local_addr).c_str(), ACE_TEXT("ACE_SOCK_Dgram::open")));
+      }
+      throw std::runtime_error("failed to open fixed unicast IPv6 port for SPDP");
+    }
+    if (DCPS::DCPS_debug_level > 3) {
+      ACE_DEBUG((LM_DEBUG,
+                 "(%P|%t) Spdp::SpdpTransport::open_unicast_ipv6_socket: "
+                 "failed to open %C %p, trying next participant ID...\n",
+                 LogAddr(local_addr).c_str(), ACE_TEXT("ACE_SOCK_Dgram::open")));
+    }
+    return false;
+  }
+
+  set_unicast_socket_opts(outer, unicast_ipv6_socket_, ipv6_uni_port_);
 
   return true;
 }
