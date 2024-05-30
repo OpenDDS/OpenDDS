@@ -1566,7 +1566,7 @@ DDS::ReturnCode_t copy(DDS::DynamicData_ptr dest, DDS::DynamicData_ptr src)
         }
 
         const DDS::ReturnCode_t this_rc = copy_member(dest, id, src, id);
-        if (this_rc != DDS::RETCODE_OK && rc == DDS::RETCODE_OK) {
+        if (this_rc != DDS::RETCODE_OK && this_rc != DDS::RETCODE_NO_DATA && rc == DDS::RETCODE_OK) {
           rc = this_rc;
         }
       }
