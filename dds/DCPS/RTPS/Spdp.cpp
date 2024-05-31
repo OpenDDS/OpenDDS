@@ -4427,6 +4427,7 @@ void Spdp::SpdpTransport::thread_status_task(const DCPS::MonotonicTimePoint& now
     DCPS::InternalThreadBuiltinTopicData data;
     data.thread_id = i->bit_key().c_str();
     data.utilization = i->utilization(now);
+    data.monotonic_timestamp = i->last_update().to_monotonic_time();
     outer->bit_subscriber_->add_thread_status(data, DDS::NEW_VIEW_STATE, i->timestamp());
   }
 
