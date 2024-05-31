@@ -170,17 +170,21 @@ namespace {
         value += (use_cxx11 ? "_" : "") + cpp_field_name;
       }
 
+      std::string optional_value;
       if (field != 0 && be_global->is_optional(field)) {
         if (set) {
+          optional_value = value;
           be_global->impl_ <<
-            "        " << value << " = " << type_name << "();\n";
+            "        " << type_name << " temp;\n";
+          rc_dest = "rc = ";
+          value = "temp";
         } else {
           be_global->impl_ <<
             "        if (!" << value << ".has_value()) {\n"
             "          return DDS::RETCODE_NO_DATA;\n"
             "        }\n";
+          value += ".value()";
         }
-        value += ".value()";
       }
 
       generate_op(4, set, field_type, type_name, op_type, is_complex,
@@ -189,6 +193,13 @@ namespace {
         be_global->impl_ <<
           "        if (rc == DDS::RETCODE_OK) {\n"
           "          value_." << cpp_field_name << "(temp);\n"
+          "        }\n"
+          "        return rc;\n";
+      }
+      if (!optional_value.empty()) {
+        be_global->impl_ <<
+          "        if (rc == DDS::RETCODE_OK) {\n"
+          "          " << optional_value << " = temp;\n"
           "        }\n"
           "        return rc;\n";
       }
