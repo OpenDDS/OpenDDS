@@ -12,7 +12,11 @@ local interface <%TYPE%>TypeSupport : OpenDDS::DCPS::TypeSupport {
 #ifndef OPENDDS_SAFETY_PROFILE
     // TODO: valuetype isn't supported in Java.
     @OpenDDS::internal::hidden_op_in_java(0)
+    ::DDS::ReturnCode_t create_sample_rc(in ::DDS::DynamicData src, inout <%SCOPED%> dst);
+    @OpenDDS::internal::hidden_op_in_java(0)
     <%SCOPED%> create_sample(in ::DDS::DynamicData src);
+    @OpenDDS::internal::hidden_op_in_java(0)
+    ::DDS::ReturnCode_t create_dynamic_sample_rc(in <%SCOPED%> src, inout ::DDS::DynamicData dst);
     @OpenDDS::internal::hidden_op_in_java(0)
     ::DDS::DynamicData create_dynamic_sample(in <%SCOPED%> src);
 #endif

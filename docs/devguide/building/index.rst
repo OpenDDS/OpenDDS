@@ -689,7 +689,9 @@ These are all the variables that are exclusive to building OpenDDS with CMake:
 
   .. versionadded:: 3.28
 
-Speeding up the build
+.. _cmake-building-speed:
+
+Speeding up the Build
 ---------------------
 
 A major speed up supported by all the CMake generators are `unity builds <https://cmake.org/cmake/help/latest/prop_tgt/UNITY_BUILD.html>`__.

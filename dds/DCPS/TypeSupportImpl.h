@@ -227,43 +227,62 @@ public:
   /// the type is "variable length". If it has something like a sequence then
   /// it's variable length and returns a pointer else it's fixed and returns on
   /// the stack. opendds_idl will wrap this in the correct form.
-  bool create_sample_i(NativeType* dest, DDS::DynamicData_ptr src)
+  DDS::ReturnCode_t create_sample_rc(DDS::DynamicData_ptr src, NativeType& dst)
   {
-    OpenDDS::DCPS::set_default(*dest);
+    OpenDDS::DCPS::set_default(dst);
 #  if OPENDDS_HAS_DYNAMIC_DATA_ADAPTOR
-    DDS::DynamicData_var dest_dd = get_dynamic_data_adapter<NativeType>(get_type(), dest);
-    const DDS::ReturnCode_t rc = XTypes::copy(dest_dd, src);
-    if (rc == DDS::RETCODE_OK) {
-      return true;
-    }
-    if (log_level >= LogLevel::Warning) {
-      ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: TypeSupportImpl_T::create_sample_i: "
+    DDS::DynamicType_var type = get_type();
+    DDS::DynamicData_var dst_dd = get_dynamic_data_adapter<NativeType>(type, dst);
+    const DDS::ReturnCode_t rc = XTypes::copy(dst_dd, src);
+    if (rc != DDS::RETCODE_OK && log_level >= LogLevel::Notice) {
+      ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: TypeSupportImpl_T::create_sample_rc: "
         "failed to copy from DynamicData: %C\n", retcode_to_string(rc)));
     }
+    return rc;
 #  else
-    ACE_UNUSED_ARG(dest);
+    ACE_UNUSED_ARG(dst);
     ACE_UNUSED_ARG(src);
+    if (log_level >= LogLevel::Notice) {
+      ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: TypeSupportImpl_T::create_sample_rc: "
+        "OpenDDS built without DynamicDataAdaptor support\n"));
+    }
+    return DDS::RETCODE_UNSUPPORTED;
 #  endif
-    return false;
+  }
+
+  DDS::ReturnCode_t create_dynamic_sample_rc(const NativeType& src, DDS::DynamicData_ptr& dst)
+  {
+    CORBA::release(dst);
+    dst = 0;
+#  if OPENDDS_HAS_DYNAMIC_DATA_ADAPTOR
+    DDS::DynamicType_var type = get_type();
+    DDS::DynamicData_var dest_dd = DDS::DynamicDataFactory::get_instance()->create_data(type);
+    DDS::DynamicData_var src_dd = get_dynamic_data_adapter<NativeType>(type, &src);
+    const DDS::ReturnCode_t rc = XTypes::copy(dest_dd, src_dd);
+    if (rc == DDS::RETCODE_OK) {
+      dst = DDS::DynamicData::_duplicate(dest_dd);
+      return rc;
+    }
+    if (log_level >= LogLevel::Notice) {
+      ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: TypeSupportImpl_T::create_dynamic_sample_rc: "
+        "failed to copy to DynamicData: %C\n", retcode_to_string(rc)));
+    }
+#  else
+    ACE_UNUSED_ARG(dst);
+    ACE_UNUSED_ARG(src);
+    if (log_level >= LogLevel::Notice) {
+      ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: TypeSupportImpl_T::create_dynamic_sample_rc: "
+        "OpenDDS built without DynamicDataAdaptor support\n"));
+    }
+    return DDS::RETCODE_UNSUPPORTED;
+#  endif
   }
 
   DDS::DynamicData_ptr create_dynamic_sample(const NativeType& src)
   {
-#  if OPENDDS_HAS_DYNAMIC_DATA_ADAPTOR
-    DDS::DynamicData_var dest_dd = DDS::DynamicDataFactory::get_instance()->create_data(type_);
-    DDS::DynamicData_var src_dd = get_dynamic_data_adapter<NativeType>(get_type(), &src);
-    const DDS::ReturnCode_t rc = XTypes::copy(dest_dd, src_dd);
-    if (rc == DDS::RETCODE_OK) {
-      return dest_dd._retn();
-    }
-    if (log_level >= LogLevel::Notice) {
-      ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: TypeSupportImpl_T::create_dynamic_sample: "
-        "failed to copy to DynamicData: %C\n", retcode_to_string(rc)));
-    }
-#  else
-    ACE_UNUSED_ARG(src);
-#  endif
-    return 0;
+    DDS::DynamicData_var dst;
+    create_dynamic_sample_rc(src, dst);
+    return dst;
   }
 #endif
 };

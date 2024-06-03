@@ -15,10 +15,7 @@
 #include <dds/DCPS/Serializer.h>
 #include <dds/DCPS/SafetyProfileStreams.h>
 #include <dds/DCPS/Xcdr2ValueWriter.h>
-#include <dds/DCPS/XTypes/Utils.h>
 #include <dds/DCPS/XTypes/TypeLookupService.h>
-#include <dds/DCPS/XTypes/DynamicDataAdapter.h>
-#include <dds/DCPS/XTypes/DynamicDataFactory.h>
 #include <dds/DCPS/XTypes/DynamicDataImpl.h>
 #include <dds/DCPS/XTypes/DynamicDataXcdrReadImpl.h>
 
