@@ -12,6 +12,8 @@
 
 #include <dds/DCPS/GuidUtils.h>
 
+#include <dds/OpenDDSConfigWrapper.h>
+
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
@@ -67,7 +69,7 @@ namespace OpenDDS {
     const ProtocolVersion_t PROTOCOLVERSION = PROTOCOLVERSION_2_4;
 
     using OpenDDS::DCPS::EntityId_t;
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
     /**
      * The below entities
      are from the security spec. V1.1

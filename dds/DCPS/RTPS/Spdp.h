@@ -11,26 +11,27 @@
 #include "ICE/Ice.h"
 #include "RtpsCoreC.h"
 
-#include <dds/DCPS/RcObject.h>
-#include <dds/DCPS/GuidUtils.h>
+#include <dds/DCPS/AtomicBool.h>
+#include <dds/DCPS/BuiltInTopicDataReaderImpls.h>
 #include <dds/DCPS/Definitions.h>
-#include <dds/DCPS/RcEventHandler.h>
-#include <dds/DCPS/ReactorTask.h>
-#include <dds/DCPS/PeriodicTask.h>
-#include <dds/DCPS/SporadicTask.h>
+#include <dds/DCPS/Discovery.h>
+#include <dds/DCPS/GuidUtils.h>
+#include <dds/DCPS/JobQueue.h>
 #include <dds/DCPS/MultiTask.h>
 #include <dds/DCPS/MulticastManager.h>
-#include <dds/DCPS/JobQueue.h>
-#include <dds/DCPS/BuiltInTopicDataReaderImpls.h>
+#include <dds/DCPS/PeriodicTask.h>
+#include <dds/DCPS/PoolAllocationBase.h>
+#include <dds/DCPS/PoolAllocator.h>
+#include <dds/DCPS/RcEventHandler.h>
+#include <dds/DCPS/RcObject.h>
+#include <dds/DCPS/ReactorTask.h>
+#include <dds/DCPS/SporadicTask.h>
+#include <dds/DCPS/TimeTypes.h>
+
 #include <dds/DCPS/security/framework/SecurityConfig_rch.h>
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
 #  include <dds/DCPS/security/framework/SecurityConfig.h>
 #endif
-#include <dds/DCPS/PoolAllocator.h>
-#include <dds/DCPS/PoolAllocationBase.h>
-#include <dds/DCPS/TimeTypes.h>
-#include <dds/DCPS/AtomicBool.h>
-#include <dds/DCPS/Discovery.h>
 
 #include <dds/DdsDcpsInfrastructureC.h>
 #include <dds/DdsDcpsInfoUtilsC.h>
@@ -59,7 +60,7 @@ const char SEDP_AGENT_INFO_KEY[] = "SEDP";
 /// Simple Participant Discovery Protocol for a single local DomainParticipant.
 class OpenDDS_Rtps_Export Spdp
   : public virtual DCPS::RcObject
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
   , public virtual ICE::AgentInfoListener
 #endif
 {
@@ -76,7 +77,7 @@ public:
        RtpsDiscovery* disco,
        XTypes::TypeLookupService_rch tls);
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
   Spdp(DDS::DomainId_t domain,
        const DCPS::GUID_t& guid,
        const DDS::DomainParticipantQos& qos,
@@ -123,7 +124,7 @@ public:
   bool has_discovered_participant(const DCPS::GUID_t& guid) const;
   ACE_CDR::ULong get_participant_flags(const DCPS::GUID_t& guid) const;
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
   Security::SecurityConfig_rch get_security_config() const { return security_config_; }
   DDS::Security::ParticipantCryptoHandle crypto_handle() const { return crypto_handle_; }
   DDS::Security::ParticipantCryptoHandle remote_crypto_handle(const DCPS::GUID_t& remote_participant) const;
@@ -144,7 +145,7 @@ public:
 
   bool validateSequenceNumber(const DCPS::MonotonicTimePoint& now, const DCPS::SequenceNumber& seq, DiscoveredParticipantIter& iter);
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
   void process_handshake_deadlines(const DCPS::MonotonicTimePoint& tv);
   void process_handshake_resends(const DCPS::MonotonicTimePoint& tv);
 
@@ -160,7 +161,7 @@ public:
 
   bool is_expectant_opendds(const GUID_t& participant) const;
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
   typedef std::pair<DDS::Security::ParticipantCryptoHandle, DDS::Security::SharedSecretHandle_var> ParticipantCryptoInfoPair;
   ParticipantCryptoInfoPair lookup_participant_crypto_info(const DCPS::GUID_t& id) const;
   void send_participant_crypto_tokens(const DCPS::GUID_t& id);
@@ -191,7 +192,7 @@ public:
 #endif
 
   BuiltinEndpointSet_t available_builtin_endpoints() const { return available_builtin_endpoints_; }
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
   DDS::Security::ExtendedBuiltinEndpointSet_t available_extended_builtin_endpoints() const
   {
     return available_extended_builtin_endpoints_;
@@ -201,7 +202,7 @@ public:
   DCPS::WeakRcHandle<ICE::Endpoint> get_ice_endpoint_if_added();
 
   ParticipantData_t build_local_pdata(
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
     bool always_in_the_clear,
     Security::DiscoveredParticipantDataKind kind
 #endif
@@ -362,7 +363,7 @@ protected:
 
 private:
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
   typedef OPENDDS_MAP_CMP(GUID_t, DDS::Security::AuthRequestMessageToken, GUID_tKeyLessThan)
     PendingRemoteAuthTokenMap;
 #endif
@@ -389,7 +390,7 @@ private:
   const u_short max_spdp_sequence_msg_reset_check_;
   const bool check_source_ip_;
   const bool undirected_spdp_;
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
   const size_t max_participants_in_authentication_;
   const DCPS::TimeDuration security_unsecure_lease_duration_;
   const DCPS::TimeDuration auth_resend_period_;
@@ -425,7 +426,7 @@ private:
 
   void update_rtps_relay_application_participant_i(DiscoveredParticipantIter iter, bool new_participant);
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
   DDS::ReturnCode_t send_handshake_message(const DCPS::GUID_t& guid,
                                            DiscoveredParticipant& dp,
                                            const DDS::Security::ParticipantStatelessMessage& msg);
@@ -440,7 +441,7 @@ private:
     : public virtual DCPS::RcEventHandler
     , public virtual DCPS::InternalDataReaderListener<DCPS::NetworkInterfaceAddress>
     , public virtual DCPS::ConfigListener
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
     , public virtual ICE::Endpoint
 #endif
   {
@@ -505,7 +506,7 @@ private:
 
     DCPS::WeakRcHandle<ICE::Endpoint> get_ice_endpoint();
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
     ICE::AddressListType host_addresses() const;
     void send(const ACE_INET_Addr& address, const STUN::Message& message);
     ACE_INET_Addr stun_server_address() const;
@@ -548,7 +549,7 @@ private:
     void thread_status_task(const DCPS::MonotonicTimePoint& now);
     DCPS::RcHandle<SpdpPeriodic> thread_status_task_;
     DCPS::RcHandle<DCPS::InternalDataReader<DCPS::NetworkInterfaceAddress> > network_interface_address_reader_;
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
     void process_handshake_deadlines(const DCPS::MonotonicTimePoint& now);
     DCPS::RcHandle<SpdpSporadic> handshake_deadline_task_;
     void process_handshake_resends(const DCPS::MonotonicTimePoint& now);
@@ -571,7 +572,7 @@ private:
 
   DCPS::RcHandle<SpdpTransport> tport_;
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
   class SendStun : public DCPS::Job {
   public:
     SendStun(const DCPS::RcHandle<SpdpTransport>& tport,
@@ -629,7 +630,7 @@ private:
   void process_lease_expirations(const DCPS::MonotonicTimePoint& now);
   TimeQueue lease_expirations_;
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
   DDS::Security::ExtendedBuiltinEndpointSet_t available_extended_builtin_endpoints_;
   Security::SecurityConfig_rch security_config_;
   bool security_enabled_;

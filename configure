@@ -1433,6 +1433,7 @@ sub write_opendds_configh {
   my %config = (
     'OPENDDS_CONFIG_AUTO_STATIC_INCLUDES' => 0,
     'OPENDDS_CONFIG_BOOTTIME_TIMERS' => $opts{'boottime'} // 0,
+    'OPENDDS_CONFIG_SECURITY' => $opts{'security'} // 0,
   );
 
   my $replace_value = sub {

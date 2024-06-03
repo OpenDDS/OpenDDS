@@ -4,11 +4,15 @@
  * Distributed under the OpenDDS License.
  * See: http://www.opendds.org/license.html
  */
-#ifdef OPENDDS_SECURITY
+
+#include <dds/OpenDDSConfigWrapper.h>
+
+#if OPENDDS_CONFIG_SECURITY
 
 #include "Ice.h"
 
 #include "AgentImpl.h"
+
 #include "dds/DCPS/SafetyProfileStreams.h"
 #include "dds/DCPS/debug.h"
 #include <dds/DCPS/LogAddr.h>
@@ -468,4 +472,4 @@ ServerReflexiveStateMachine::error_response(const STUN::Message& message)
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
-#endif /* OPENDDS_SECURITY */
+#endif

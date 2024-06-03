@@ -11,8 +11,9 @@
 #include "dds/OpenddsDcpsExt.idl"
 #include "dds/DdsDcpsInfoUtils.idl"
 #include "dds/DdsDcpsInfrastructure.idl"
+#include <dds/OpenDDSConfigWrapper.idl>
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
 #include "dds/DdsSecurityParams.idl"
 #endif
 
@@ -469,7 +470,7 @@ module OpenDDS {
       case PID_OPENDDS_LOCATOR:
         DCPS::TransportLocator opendds_locator;
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
       case DDS::Security::PID_IDENTITY_TOKEN:
         DDS::Security::IdentityToken identity_token;
 
@@ -618,7 +619,7 @@ module OpenDDS {
       DDS::PropertyQosPolicy property;
       OpenDDSParticipantFlags_t opendds_participant_flags;
       boolean opendds_rtps_relay_application_participant;
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
       DDS::Security::ExtendedBuiltinEndpointSet_t availableExtendedBuiltinEndpoints;
 #endif
     };

@@ -11,14 +11,17 @@
 #include "RtpsUdpSendStrategy.h"
 #include "RtpsUdpReceiveStrategy.h"
 
+#include <dds/OpenDDSConfigWrapper.h>
 #include <dds/OpenddsDcpsExtTypeSupportImpl.h>
 
 #include <dds/DCPS/AssociationData.h>
 #include <dds/DCPS/BuiltInTopicUtils.h>
 #include <dds/DCPS/LogAddr.h>
 #include <dds/DCPS/NetworkResource.h>
+
 #include <dds/DCPS/transport/framework/TransportClient.h>
 #include <dds/DCPS/transport/framework/TransportExceptions.h>
+
 #include <dds/DCPS/RTPS/MessageUtils.h>
 #include <dds/DCPS/RTPS/RtpsCoreTypeSupportImpl.h>
 
@@ -48,10 +51,10 @@ RtpsUdpCore::RtpsUdpCore(const RtpsUdpInst_rch& inst)
 RtpsUdpTransport::RtpsUdpTransport(const RtpsUdpInst_rch& inst,
                                    DDS::DomainId_t domain)
   : TransportImpl(inst, domain)
-#if defined(OPENDDS_SECURITY)
+#if OPENDDS_CONFIG_SECURITY
   , local_crypto_handle_(DDS::HANDLE_NIL)
 #endif
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
   , ice_endpoint_(make_rch<IceEndpoint>(ref(*this)))
   , ice_agent_(ICE::Agent::instance())
 #endif
@@ -69,7 +72,7 @@ RtpsUdpTransport::config() const
   return dynamic_rchandle_cast<RtpsUdpInst>(TransportImpl::config());
 }
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
 DCPS::RcHandle<ICE::Agent>
 RtpsUdpTransport::get_ice_agent() const
 {
@@ -80,7 +83,7 @@ RtpsUdpTransport::get_ice_agent() const
 DCPS::WeakRcHandle<ICE::Endpoint>
 RtpsUdpTransport::get_ice_endpoint()
 {
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
   return core_.use_ice() ? static_rchandle_cast<ICE::Endpoint>(ice_endpoint_) : DCPS::WeakRcHandle<ICE::Endpoint>();
 #else
   return DCPS::WeakRcHandle<ICE::Endpoint>();
@@ -99,13 +102,13 @@ RtpsUdpTransport::make_datalink(const GuidPrefix_t& local_prefix)
 
   if (equal_guid_prefixes(local_prefix_, GUIDPREFIX_UNKNOWN)) {
     assign(local_prefix_, local_prefix);
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
     core_.reset_relay_stun_task_falloff();
     relay_stun_task_->schedule(TimeDuration::zero_value);
 #endif
   }
 
-#if defined(OPENDDS_SECURITY)
+#if OPENDDS_CONFIG_SECURITY
   {
     if (core_.use_ice()) {
       ReactorInterceptor_rch ri = reactor_task()->interceptor();
@@ -119,7 +122,7 @@ RtpsUdpTransport::make_datalink(const GuidPrefix_t& local_prefix)
 
   RtpsUdpDataLink_rch link = make_rch<RtpsUdpDataLink>(rchandle_from(this), local_prefix, config(), reactor_task());
 
-#if defined(OPENDDS_SECURITY)
+#if OPENDDS_CONFIG_SECURITY
   link->local_crypto_handle(local_crypto_handle_);
 #endif
 
@@ -290,7 +293,7 @@ RtpsUdpTransport::use_datalink(const GUID_t& local_id,
   return true;
 }
 
-#if defined(OPENDDS_SECURITY)
+#if OPENDDS_CONFIG_SECURITY
 void
 RtpsUdpTransport::local_crypto_handle(DDS::Security::ParticipantCryptoHandle pch)
 {
@@ -647,7 +650,7 @@ RtpsUdpTransport::configure_i(const RtpsUdpInst_rch& config)
   ACE_Reactor* reactor = reactor_task()->get_reactor();
   job_queue_ = DCPS::make_rch<DCPS::JobQueue>(reactor);
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
   if (core_.use_ice()) {
     start_ice();
   }
@@ -661,7 +664,7 @@ RtpsUdpTransport::configure_i(const RtpsUdpInst_rch& config)
     link_->default_listener(*config->opendds_discovery_default_listener_);
   }
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
   core_.reset_relay_stun_task_falloff();
   relay_stun_task_->schedule(TimeDuration::zero_value);
 #endif
@@ -687,7 +690,7 @@ void RtpsUdpTransport::client_stop(const GUID_t& localId)
 void
 RtpsUdpTransport::shutdown_i()
 {
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
   if (core_.use_ice()) {
     stop_ice();
   }
@@ -734,7 +737,7 @@ RtpsUdpTransport::on_data_available(ConfigReader_rch)
     if (sample.key_has_prefix(config_prefix)) {
       has_prefix = true;
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
       if (sample.key() == cfg->config_key("RTPS_RELAY_ONLY")) {
         core_.rtps_relay_only(cfg->rtps_relay_only());
         if (core_.rtps_relay_only()) {
@@ -780,7 +783,7 @@ RtpsUdpTransport::on_data_available(ConfigReader_rch)
   }
 }
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
 
 const ACE_SOCK_Dgram&
 RtpsUdpTransport::IceEndpoint::choose_recv_socket(ACE_HANDLE fd) const
@@ -807,7 +810,7 @@ RtpsUdpTransport::IceEndpoint::handle_input(ACE_HANDLE fd)
 
   bool stop;
   RtpsUdpReceiveStrategy::receive_bytes_helper(iov, 1, choose_recv_socket(fd), remote_address,
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
                                                transport.get_ice_agent(), transport.get_ice_endpoint(),
 #endif
                                                transport, stop);
