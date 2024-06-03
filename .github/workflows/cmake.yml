@@ -168,8 +168,10 @@ jobs:
       with:
         repository: DOCGroup/ACE_TAO
         path: OpenDDS/build/ACE_TAO
-    - name: Install Ninja
-      run: sudo apt-get -y install ninja-build
+    - uses: lukka/get-cmake@latest
+      with:
+        cmakeVersion: "3.23"
+        ninjaVersion: "latest"
     - name: Configure
       run: |
         cd OpenDDS
@@ -213,8 +215,10 @@ jobs:
       with:
         ndk-version: r25c
         add-to-path: false
-    - name: Install Ninja
-      run: sudo apt-get -y install ninja-build
+    - uses: lukka/get-cmake@latest
+      with:
+        cmakeVersion: "3.23"
+        ninjaVersion: "latest"
     - name: Configure Host Tools
       run: |
         cd OpenDDS
@@ -315,6 +319,10 @@ jobs:
       with:
         vcpkgGitCommitId: '${{ env.VCPKG_GIT_COMMIT }}'
         runVcpkgInstall: true
+    - uses: lukka/get-cmake@latest
+      with:
+        cmakeVersion: "3.23"
+        ninjaVersion: "latest"
     - name: Checkout OpenDDS
       uses: actions/checkout@v4
       with:
