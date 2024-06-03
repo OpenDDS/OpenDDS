@@ -821,6 +821,22 @@ Any enumerators that are not annotated take on the integer value one higher than
     @value(2) TWO
   };
 
+
+Marking member as optional
+==========================
+
+.. _xtypes--optional:
+
+@optional
+---------
+
+..
+    Sect<16.6.8.1>
+
+Applies to: struct members
+
+This annotation marks a member as optional.
+
 .. _xtypes--dynamic-language-binding-1:
 
 ************************
@@ -1387,8 +1403,6 @@ They are listed in groups defined by the rows of that table.
 Some annotations in that table, and not listed here, can only be used with new capabilities of the :ref:`xtypes--type-system`.
 
 * Struct members
-
-  * ``@optional``
 
   * ``@must_understand``
 
