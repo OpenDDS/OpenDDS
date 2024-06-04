@@ -833,7 +833,7 @@ Marking member as optional
 ..
     Sect<16.6.8.1>
 
-Applies to: struct members
+Applies to: struct members (only when :ref:`opendds_idl--using-the-idl-to-c-11-mapping`)
 
 This annotation marks a member as optional.
 
@@ -1403,6 +1403,8 @@ They are listed in groups defined by the rows of that table.
 Some annotations in that table, and not listed here, can only be used with new capabilities of the :ref:`xtypes--type-system`.
 
 * Struct members
+
+  * ``@optional`` (only implemented for IDL-to-C++11 mapping)
 
   * ``@must_understand``
 
