@@ -7,6 +7,7 @@
 #define OPENDDS_DCPS_TYPESUPPORTIMPL_H
 
 #include "dcps_export.h"
+#include "debug.h"
 #include "Definitions.h"
 #include "LocalObject.h"
 #include "Serializer.h"
