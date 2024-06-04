@@ -136,13 +136,13 @@ namespace {
     // TODO (tyler) Is there a better way to do this
     be_global->impl_ <<
       indent << "  if (!value_reader.begin_pair_key()) return false;\n";
-    generate_read(kidx, "", map->key_type(), idx + "i", level + 1);
+    generate_read(kidx, "", "key", map->key_type(), idx + "i", level + 1);
     be_global->impl_ <<
       indent << "  if (!value_reader.end_pair_key()) return false;\n";
 
     be_global->impl_ <<
       indent << "  if (!value_reader.begin_pair_value()) return false;\n";
-    generate_read(expression + "[" + kidx + "]", "", map->value_type(), idx + "i", level + 1);
+    generate_read(expression + "[" + kidx + "]", "", "value", map->value_type(), idx + "i", level + 1);
     be_global->impl_ <<
       indent << "  if (!value_reader.end_pair_value()) return false;\n" <<
       indent << "  if (!value_reader.end_pair()) return false;\n" <<

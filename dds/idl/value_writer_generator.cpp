@@ -178,7 +178,7 @@ namespace {
   }
 
 #if OPENDDS_HAS_IDL_MAP
-  void map_helper(const std::string& expression, AST_Map* map, const std::string& idx, int level)
+  void map_helper(const std::string& expression, AST_Map* map, const std::string& idx, int level, FieldFilter filter_kind)
   {
     // const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
     const std::string indent(level * 2, ' ');
@@ -189,12 +189,12 @@ namespace {
         indent << "for (auto "<< idx << " = " <<  expression << ".begin(); " << idx << " != " << expression << ".end(); ++" << idx << ") {\n" <<
         indent << "  value_writer.begin_pair();\n" <<
         indent << "  value_writer.write_key();\n";
-    generate_write(idx + "->first", map->key_type(), idx + "i", level + 1);
+    generate_write(idx + "->first", "key", map->key_type(), idx + "i", level + 1);
 
     be_global->impl_ <<
         indent << "  value_writer.write_value();\n";
 
-    generate_write(idx + "->second", map->value_type(), idx + "i", level + 1);
+    generate_write(idx + "->second", "value", map->value_type(), idx + "i", level + 1);
     be_global->impl_ <<
       indent << "  value_writer.end_pair();\n";
 
@@ -216,12 +216,12 @@ namespace {
         indent << "for (auto "<< idx << " = " <<  expression << ".begin(); " << idx << " != " << expression << ".end(); ++" << idx << ") {\n" <<
         indent << "  value_writer.begin_pair();\n" <<
         indent << "  value_writer.write_key();\n";
-    generate_write(idx + "->first", map->key_type(), idx + "i", level + 1);
+    generate_write(idx + "->first", "key", map->key_type(), idx + "i", level + 1);
 
     be_global->impl_ <<
         indent << "  value_writer.write_value();\n";
 
-    generate_write(idx + "->second", map->value_type(), idx + "i", level + 1);
+    generate_write(idx + "->second", "value", map->value_type(), idx + "i", level + 1);
     be_global->impl_ <<
       indent << "  value_writer.end_pair();\n";
 
