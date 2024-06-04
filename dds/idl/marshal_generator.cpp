@@ -1577,7 +1577,7 @@ namespace {
     const Classification fld_cls = classify(actual_type);
 
     const std::string field_name = prefix + '.' + insert_cxx11_accessor_parens(name, is_union_member);
-    const string qual = prefix + '.' + insert_cxx11_accessor_parens(name, is_union_member)
+    const std::string qual = prefix + '.' + insert_cxx11_accessor_parens(name, is_union_member)
                         + (is_optional ? ".value()" : "");
 
     std::string line = "";
@@ -2635,28 +2635,24 @@ namespace {
           }
         }
 
-        // TODO(tyler) This feels kind of hacky
-        // Can the optional branch be isolated completely
-        // Assigns strm value to temporary values
         if (is_optional) {
-            //TODO(tyler) Is there an easier way to deal with strings here
-            AST_Type* const field_type = resolveActualType(field->field_type());
-            Classification fld_cls = classify(field_type);
-            const std::string type_name = fld_cls & CL_STRING ? "String" : field->field_type()->full_name();
-            const std::string has_value_name = field_name + "_has_value";
-            expr += "    bool " + field_name + "_has_value = false;\n";
-            expr += "    strm >> ACE_InputCDR::to_boolean(" + has_value_name + ");\n";
-            const std::string tmp_name = field_name + "_tmp";
-            expr += "    " + type_name + " " + tmp_name + ";\n";
-            expr += "    if (" + has_value_name + " && !";
-            std::string strm_name = tmp_name;
-            if (fld_cls & CL_PRIMITIVE) {
-              AST_PredefinedType* p = dynamic_cast<AST_PredefinedType*>(field_type);
-              if (p->pt() == AST_PredefinedType::PT_boolean) {
-                strm_name = "ACE_InputCDR::to_boolean(" + tmp_name + ")";
-              }
+          AST_Type* const type = resolveActualType(field->field_type());
+          Classification fld_cls = classify(type);
+          const std::string type_name = fld_cls & CL_STRING ? "String" : field->field_type()->full_name();
+          const std::string has_value_name = field_name + "_has_value";
+          expr += "    bool " + field_name + "_has_value = false;\n";
+          expr += "    strm >> ACE_InputCDR::to_boolean(" + has_value_name + ");\n";
+          const std::string tmp_name = field_name + "_tmp";
+          expr += "    " + type_name + " " + tmp_name + ";\n";
+          expr += "    if (" + has_value_name + " && !";
+          std::string strm_name = tmp_name;
+          if (fld_cls & CL_PRIMITIVE) {
+            AST_PredefinedType* p = dynamic_cast<AST_PredefinedType*>(type);
+            if (p->pt() == AST_PredefinedType::PT_boolean) {
+              strm_name = "ACE_InputCDR::to_boolean(" + tmp_name + ")";
             }
-            expr += "(strm >> " + strm_name + ")";
+          }
+          expr += "(strm >> " + strm_name + ")";
         } else {
           expr += generate_field_stream(
             indent, field, ">> stru" + value_access, field->local_name()->get_string(), wrap_nested_key_only, intro);
