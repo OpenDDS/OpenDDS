@@ -15,12 +15,17 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-class EnumHelper {
+class OpenDDS_Dcps_Export EnumHelper {
 public:
   virtual ~EnumHelper() {}
+  virtual bool valid(const char* name) const = 0;
+  virtual bool valid(ACE_CDR::Long value) const = 0;
   virtual bool get_value(ACE_CDR::Long& value, const char* name) const = 0;
   virtual bool get_name(const char*& name, ACE_CDR::Long value) const = 0;
   virtual XTypes::TypeKind get_equivalent_int() const = 0;
+
+  ACE_CDR::Long get_value(const char* name) const;
+  const char* get_name(ACE_CDR::Long value) const;
 };
 
 class OpenDDS_Dcps_Export ListEnumHelper : public EnumHelper {
@@ -47,6 +52,8 @@ public:
     pairs_ = pairs;
   }
 
+  bool valid(const char* name) const;
+  bool valid(ACE_CDR::Long value) const;
   bool get_value(ACE_CDR::Long& value, const char* name) const;
   bool get_name(const char*& name, ACE_CDR::Long value) const;
 
@@ -63,11 +70,11 @@ private:
 class BitmaskHelper {
 public:
   virtual ~BitmaskHelper() {}
-  virtual bool get_value(ACE_CDR::ULongLong& value, const OPENDDS_VECTOR(const char*)& names) const = 0;
+  virtual bool get_value(ACE_CDR::ULongLong& value, const OPENDDS_VECTOR(String)& names) const = 0;
 
   // Return an estimated length of a string constructed by the returned flag names
   // with a delimiter character between two consecutive flags.
-  virtual size_t get_names(OPENDDS_VECTOR(const char*)& names, ACE_CDR::ULongLong value) const = 0;
+  virtual size_t get_names(OPENDDS_VECTOR(String)& names, ACE_CDR::ULongLong value) const = 0;
 
   virtual XTypes::TypeKind get_equivalent_uint() const = 0;
 };
@@ -79,13 +86,14 @@ public:
     ACE_CDR::UShort position;
   };
 
-  typedef OPENDDS_MAP(ACE_CDR::UShort, const char*) PosToNameMap;
-  typedef OPENDDS_MAP(const char*, ACE_CDR::UShort) NameToPosMap;
+  typedef OPENDDS_MAP(ACE_CDR::UShort, String) PosToNameMap;
+  typedef OPENDDS_MAP(String, ACE_CDR::UShort) NameToPosMap;
   typedef PosToNameMap::const_iterator ptn_iterator;
   typedef NameToPosMap::const_iterator ntp_iterator;
 
   explicit MapBitmaskHelper(XTypes::TypeKind as_uint)
-    : as_uint_(as_uint)
+    : bit_bound_(32)
+    , as_uint_(as_uint)
   {}
 
   MapBitmaskHelper(ACE_CDR::UShort bit_bound, XTypes::TypeKind as_uint)
@@ -101,8 +109,8 @@ public:
     bit_bound_ = bound;
   }
 
-  bool get_value(ACE_CDR::ULongLong& value, const OPENDDS_VECTOR(const char*)& names) const;
-  size_t get_names(OPENDDS_VECTOR(const char*)& names, ACE_CDR::ULongLong value) const;
+  bool get_value(ACE_CDR::ULongLong& value, const OPENDDS_VECTOR(String)& names) const;
+  size_t get_names(OPENDDS_VECTOR(String)& names, ACE_CDR::ULongLong value) const;
 
   XTypes::TypeKind get_equivalent_uint() const
   {
@@ -117,6 +125,7 @@ private:
 };
 
 OpenDDS_Dcps_Export String bitmask_to_string(ACE_CDR::ULongLong value, const BitmaskHelper& helper);
+OpenDDS_Dcps_Export ACE_CDR::ULongLong string_to_bitmask(const String& flags, const BitmaskHelper& helper);
 
 } // namespace DCPS
 } // namespace OpenDDS

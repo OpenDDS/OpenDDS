@@ -23,9 +23,11 @@
 #include "DirectPriorityMapper.h"
 #include "EntryExit.h"
 
-#include <dds/DCPS/DataSampleHeader.h>
 #include <dds/DCPS/DataSampleElement.h>
+#include <dds/DCPS/DataSampleHeader.h>
 #include <dds/DCPS/Service_Participant.h>
+
+#include <dds/OpenDDSConfigWrapper.h>
 
 #include <ace/Reverse_Lock_T.h>
 
@@ -81,7 +83,8 @@ TransportSendStrategy::TransportSendStrategy(
     transport_(transport),
     graceful_disconnecting_(false),
     link_released_(true),
-    send_buffer_(0)
+    send_buffer_(0),
+    is_sending_(GUID_UNKNOWN)
 {
   DBG_ENTRY_LVL("TransportSendStrategy","TransportSendStrategy",6);
 
@@ -1088,6 +1091,7 @@ TransportSendStrategy::send(TransportQueueElement* element, bool relink)
 
       // Loop for sending 'element', in fragments if needed
       bool first_pkt = true; // enter the loop 1st time through unconditionally
+      BeginEndSend bes(*this, element->publication_id());
       for (TransportQueueElement* next_fragment = 0;
            (first_pkt || next_fragment)
            && (mode_ == MODE_DIRECT || mode_ == MODE_TERMINATED);) {
@@ -1750,7 +1754,7 @@ TransportSendStrategy::do_send_packet(const ACE_Message_Block* packet, int& bp)
   }
   DBG_ENTRY_LVL("TransportSendStrategy", "do_send_packet", 6);
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
   Message_Block_Ptr substitute;
   if (security_config()) {
     const DDS::Security::CryptoTransform_var crypto = security_config()->get_crypto_transform();
@@ -1771,7 +1775,7 @@ TransportSendStrategy::do_send_packet(const ACE_Message_Block* packet, int& bp)
 
   iovec iov[MAX_SEND_BLOCKS];
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
   const int num_blocks = mb_to_iov(substitute ? *substitute : *packet, iov);
 #else
   const int num_blocks = mb_to_iov(*packet, iov);
@@ -1790,7 +1794,7 @@ TransportSendStrategy::do_send_packet(const ACE_Message_Block* packet, int& bp)
             "The send_bytes() said that num_bytes_sent == [%d].\n",
             num_bytes_sent), 5);
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
   if (num_bytes_sent > 0 && substitute && packet->data_block() != substitute->data_block()) {
     // Although the "substitute" data took the place of "packet", the rest
     // of the framework needs to account for the bytes in "packet" being taken

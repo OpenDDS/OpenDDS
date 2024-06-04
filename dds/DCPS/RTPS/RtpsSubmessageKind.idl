@@ -1,0 +1,45 @@
+/*
+ * Distributed under the OpenDDS License.
+ * See: http://www.opendds.org/license.html
+ */
+
+#ifndef OPENDDS_DCPS_RTPS_RTPSSUBMESSAGEKIND_IDL
+#define OPENDDS_DCPS_RTPS_RTPSSUBMESSAGEKIND_IDL
+
+module OpenDDS {
+module RTPS {
+
+const octet SUBMESSAGE_VENDOR_SPECIFIC_BASE = 0x80;
+const octet SUBMESSAGE_OPENDDS_BASE = SUBMESSAGE_VENDOR_SPECIFIC_BASE | 0x30;
+const octet SUBMESSAGE_OPENDDS_USER_TAG = SUBMESSAGE_OPENDDS_BASE | 1;
+
+enum SubmessageKind {
+  @value(0x00) RTPS_HE, /* HeaderExtension */
+  @value(0x01) PAD, /* Pad */
+  @value(0x06) ACKNACK, /* AckNack */
+  @value(0x07) HEARTBEAT, /* Heartbeat */
+  @value(0x08) GAP, /* Gap */
+  @value(0x09) INFO_TS, /* InfoTimestamp */
+  @value(0x0c) INFO_SRC, /* InfoSource */
+  @value(0x0d) INFO_REPLY_IP4, /* InfoReplyIp4 */
+  @value(0x0e) INFO_DST, /* InfoDestination */
+  @value(0x0f) INFO_REPLY, /* InfoReply */
+  @value(0x12) NACK_FRAG, /* NackFrag */
+  @value(0x13) HEARTBEAT_FRAG, /* HeartbeatFrag */
+  @value(0x15) DATA, /* Data */
+  @value(0x16) DATA_FRAG, /* DataFrag */
+
+  // SubmessageKinds 0x30-3f are reserved for DDS Security
+  @value(0x30) SEC_BODY,
+  @value(0x31) SEC_PREFIX,
+  @value(0x32) SEC_POSTFIX,
+  @value(0x33) SRTPS_PREFIX,
+  @value(0x34) SRTPS_POSTFIX,
+
+  // SubmessageKinds 0x80 and above are vendor-specific
+  @value(SUBMESSAGE_OPENDDS_USER_TAG) SUBMESSAGE_KIND_USER_TAG /* UserTagSubmessage */
+};
+
+};
+};
+#endif

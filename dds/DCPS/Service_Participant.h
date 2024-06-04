@@ -6,21 +6,21 @@
 #ifndef OPENDDS_DCPS_SERVICE_PARTICIPANT_H
 #define OPENDDS_DCPS_SERVICE_PARTICIPANT_H
 
+#include "AtomicBool.h"
+#include "ConfigStoreImpl.h"
 #include "Definitions.h"
-#include "MonitorFactory.h"
 #include "Discovery.h"
-#include "PoolAllocator.h"
 #include "DomainParticipantFactoryImpl.h"
-#include "unique_ptr.h"
-#include "ReactorTask.h"
 #include "JobQueue.h"
-#include "NetworkConfigMonitor.h"
+#include "MonitorFactory.h"
 #include "NetworkConfigModifier.h"
+#include "NetworkConfigMonitor.h"
+#include "PoolAllocator.h"
+#include "ReactorTask.h"
 #include "Recorder.h"
 #include "Replayer.h"
 #include "TimeSource.h"
-#include "AtomicBool.h"
-#include "ConfigStoreImpl.h"
+#include "unique_ptr.h"
 
 #include <dds/DdsDcpsInfrastructureC.h>
 #include <dds/DdsDcpsDomainC.h>
@@ -79,9 +79,6 @@ const size_t COMMON_DCPS_CHUNKS_default = 20;
 const char COMMON_DCPS_CHUNK_ASSOCIATION_MULTIPLIER[] = "COMMON_DCPS_CHUNK_ASSOCIATION_MULTIPLIER";
 const char COMMON_DCPS_CHUNK_ASSOCIATION_MUTLTIPLIER[] = "COMMON_DCPS_CHUNK_ASSOCIATION_MUTLTIPLIER";
 const size_t COMMON_DCPS_CHUNK_ASSOCIATION_MULTIPLIER_default = 10;
-
-const char COMMON_DCPS_CONFIG_FILE[] = "COMMON_DCPS_CONFIG_FILE";
-const String COMMON_DCPS_CONFIG_FILE_default = "";
 
 const char COMMON_DCPS_DEBUG_LEVEL[] = "COMMON_DCPS_DEBUG_LEVEL";
 
@@ -160,7 +157,7 @@ const int COMMON_SCHEDULER_SLICE_default = 0;
 const char DEFAULT_CONFIGURATION_FILE[] = "DEFAULT_CONFIGURATION_FILE";
 const String DEFAULT_CONFIGURATION_FILE_default = "";
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
 const char COMMON_DCPS_SECURITY[] = "COMMON_DCPS_SECURITY";
 const bool COMMON_DCPS_SECURITY_default = false;
 
@@ -455,7 +452,7 @@ public:
   void bit_lookup_duration_msec(int msec);
   //@}
 
-#if defined(OPENDDS_SECURITY)
+#if OPENDDS_CONFIG_SECURITY
   bool get_security() const;
   void set_security(bool b);
 #endif
@@ -534,7 +531,8 @@ public:
    * singleton.
    */
   int load_configuration(ACE_Configuration_Heap& cf,
-                         const ACE_TCHAR* filename);
+                         const ACE_TCHAR* filename,
+                         bool allow_overwrite = false);
 
 #ifdef OPENDDS_SAFETY_PROFILE
   /**
@@ -608,11 +606,18 @@ private:
   /// Initialize the thread scheduling and initial priority.
   void initializeScheduling();
 
+  /// Parse environment variables.
+  void parse_env();
+  void parse_env(const String& s);
+
   /**
    * Parse the command line for user options. e.g. "-DCPSInfoRepo <iorfile>".
    * It consumes -DCPS* options and their arguments
    */
   int parse_args(int &argc, ACE_TCHAR *argv[]);
+
+  bool process_config_file(const String& config_fname,
+                           bool allow_overwrite);
 
   /**
    * Import the configuration file to the ACE_Configuration_Heap
@@ -621,7 +626,8 @@ private:
    * transport section configuration to the TransportRegistry
    * singleton.
    */
-  int load_configuration(const String& config_fname);
+  int load_configuration(const String& config_fname,
+                         bool allow_overwrite = false);
 
   /**
    * Load the domain configuration to the Service_Participant

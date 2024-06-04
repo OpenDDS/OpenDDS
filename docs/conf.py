@@ -103,6 +103,7 @@ extensions = [
     # Custom ones
     'links',
     'cmake_domain',
+    'config_domain',
 
     # Official ones
     'sphinx.ext.ifconfig',
@@ -113,6 +114,7 @@ extensions = [
     'sphinx_copybutton',
     'sphinx_markdown_builder',
     'sphinx_inline_tabs',
+    'sphinxcontrib.svgbob'
 ]
 
 # List of patterns, relative to source directory, that match files and
@@ -152,6 +154,9 @@ intersphinx_mapping = {
     'cmake': ('https://cmake.org/cmake/help/latest', None),
 }
 
+manpages_url = 'https://manpages.debian.org/{page}({section})'
+
+
 # -- Options for Markdown output ---------------------------------------------
 # This builder is just used to generate the release notes for GitHub
 
@@ -169,6 +174,10 @@ markdown_uri_doc_suffix = '.html'
 # -- Options for HTML output -------------------------------------------------
 
 html_static_path = ['.']
+
+html_css_files = [
+    'custom.css',
+]
 
 html_theme = 'furo'
 # See documentation for the theme here:

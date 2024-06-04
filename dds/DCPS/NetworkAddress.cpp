@@ -8,7 +8,6 @@
 #include "NetworkAddress.h"
 
 #include "Hash.h"
-#include "LogAddr.h"
 
 #include <cstring>
 

@@ -86,7 +86,8 @@ void ParticipantLocationListenerImpl::on_data_available(DDS::DataReader_ptr read
     << "  ice6: " << participant.ice6_addr << std::endl
     << "      : " << participant.ice6_timestamp.sec << std::endl
     << "relay6: " << participant.relay6_addr << std::endl
-    << "      : " << participant.relay6_timestamp.sec << std::endl;
+    << "      : " << participant.relay6_timestamp.sec << std::endl
+    << " lease: " << OpenDDS::DCPS::TimeDuration(participant.lease_duration).str(9) << std::endl;
 
     // update locations if SampleInfo is valid.
     if (si.valid_data == 1)

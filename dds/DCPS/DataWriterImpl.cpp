@@ -7,23 +7,26 @@
 
 #include "DataWriterImpl.h"
 
-#include "FeatureDisabledQosCheck.h"
-#include "DomainParticipantImpl.h"
-#include "PublisherImpl.h"
-#include "Service_Participant.h"
-#include "GuidConverter.h"
-#include "TopicImpl.h"
-#include "PublicationInstance.h"
-#include "Serializer.h"
-#include "Transient_Kludge.h"
-#include "DataDurabilityCache.h"
-#include "MonitorFactory.h"
-#include "SendStateDataSampleList.h"
-#include "DataSampleElement.h"
-#include "Util.h"
 #include "DCPS_Utils.h"
-#include "XTypes/TypeObject.h"
+#include "DataDurabilityCache.h"
+#include "DataSampleElement.h"
+#include "DomainParticipantImpl.h"
+#include "FeatureDisabledQosCheck.h"
+#include "GuidConverter.h"
+#include "MonitorFactory.h"
+#include "PublicationInstance.h"
+#include "PublisherImpl.h"
+#include "SendStateDataSampleList.h"
+#include "Serializer.h"
+#include "Service_Participant.h"
+#include "TopicImpl.h"
+#include "Transient_Kludge.h"
 #include "TypeSupportImpl.h"
+#include "Util.h"
+
+#include "XTypes/TypeObject.h"
+
+#include <dds/OpenDDSConfigWrapper.h>
 #ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
 #  include "CoherentChangeControl.h"
 #endif
@@ -1519,7 +1522,7 @@ DataWriterImpl::enable()
       return DDS::RETCODE_ERROR;
     }
 
-#if defined(OPENDDS_SECURITY)
+#if OPENDDS_CONFIG_SECURITY
     security_config_ = participant->get_security_config();
     participant_permissions_handle_ = participant->permissions_handle();
     dynamic_type_ = type_support_->get_type();
@@ -2764,7 +2767,7 @@ DataWriterImpl::retrieve_inline_qos_data(TransportSendListener::InlineQosData& q
   qos_data.topic_name = this->topic_name_.in();
 }
 
-#if defined(OPENDDS_SECURITY)
+#if OPENDDS_CONFIG_SECURITY
 DDS::Security::ParticipantCryptoHandle DataWriterImpl::get_crypto_handle() const
 {
   RcHandle<DomainParticipantImpl> participant = participant_servant_.lock();
@@ -2961,7 +2964,7 @@ DDS::ReturnCode_t DataWriterImpl::dispose_w_timestamp(
   DDS::InstanceHandle_t instance_handle,
   const DDS::Time_t& source_timestamp)
 {
-#if defined(OPENDDS_SECURITY) && OPENDDS_HAS_DYNAMIC_DATA_ADAPTER
+#if OPENDDS_CONFIG_SECURITY && OPENDDS_HAS_DYNAMIC_DATA_ADAPTER
   DDS::DynamicData_var dynamic_data = sample.get_dynamic_data(dynamic_type_);
   DDS::Security::SecurityException ex;
   if (dynamic_data && security_config_ &&
@@ -3100,7 +3103,7 @@ DDS::ReturnCode_t DataWriterImpl::get_or_create_instance_handle(
   handle = lookup_instance(sample);
   if (handle == DDS::HANDLE_NIL || !get_handle_instance(handle)) {
     Sample_rch copy = sample.copy(Sample::ReadOnly, Sample::KeyOnly);
-#if defined(OPENDDS_SECURITY) && OPENDDS_HAS_DYNAMIC_DATA_ADAPTER
+#if OPENDDS_CONFIG_SECURITY && OPENDDS_HAS_DYNAMIC_DATA_ADAPTER
     DDS::DynamicData_var dynamic_data = copy->get_dynamic_data(dynamic_type_);
     DDS::Security::SecurityException ex;
     if (dynamic_data && security_config_ &&

@@ -9,13 +9,16 @@
 #include <dds/DCPS/RTPS/MessageTypes.h>
 #include <dds/DCPS/RTPS/MessageParser.h>
 #include <dds/DCPS/RTPS/RtpsCoreTypeSupportImpl.h>
+#include <dds/DCPS/RTPS/RtpsSubmessageKindTypeSupportImpl.h>
 #include <dds/DCPS/RTPS/RtpsDiscovery.h>
 #include <dds/DCPS/RTPS/ParameterListConverter.h>
 #include <dds/DCPS/RTPS/Spdp.h>
 
 #include <dds/DCPS/LogAddr.h>
-#include <dds/DCPS/Service_Participant.h>
 #include <dds/DCPS/NetworkResource.h>
+#include <dds/DCPS/Service_Participant.h>
+
+#include <dds/OpenDDSConfigWrapper.h>
 
 #include <ace/Configuration.h>
 #include <ace/Reactor.h>
@@ -139,7 +142,7 @@ struct TestParticipant: ACE_Event_Handler {
     ACE_Message_Block mb(size);
     Serializer ser(&mb, encoding);
 
-    const EncapsulationHeader encap (encoding, MUTABLE);
+    const EncapsulationHeader encap(encoding, MUTABLE);
     if (!(ser << hdr_ && ser << ds && ser << encap)) {
       ACE_DEBUG((LM_DEBUG, "ERROR: failed to serialize headers\n"));
       return false;
@@ -182,17 +185,13 @@ struct TestParticipant: ACE_Event_Handler {
       if (smhdr.submessageId == DATA) {
         ok = recv_data(mp.serializer(), peer);
       } else {
-#ifdef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
-        ACE_DEBUG((LM_INFO, "Received submessage type: %u\n", unsigned(smhdr.submessageId)));
-#else
-        if (static_cast<size_t>(smhdr.submessageId) < gen_OpenDDS_RTPS_SubmessageKind_names_size) {
+        if (gen_OpenDDS_RTPS_SubmessageKind_helper->valid(smhdr.submessageId)) {
           ACE_DEBUG((LM_INFO, "Received submessage type: %C\n",
-                     gen_OpenDDS_RTPS_SubmessageKind_names[static_cast<size_t>(smhdr.submessageId)]));
+                     gen_OpenDDS_RTPS_SubmessageKind_helper->get_name(smhdr.submessageId)));
         } else {
           ACE_ERROR((LM_ERROR, "ERROR: Received unknown submessage type: %u\n",
                      unsigned(smhdr.submessageId)));
         }
-#endif
       }
 
       if (!ok || !mp.hasNextSubmessage()) {
@@ -278,6 +277,7 @@ bool run_test()
   RtpsDiscovery rd("test");
   const ACE_INET_Addr local_addr(u_short(7575), "0.0.0.0");
   rd.config()->spdp_local_address(NetworkAddress(local_addr));
+  rd.config()->spdp_user_tag(0x99887766);
   const DDS::DomainId_t domain = 0;
   const DDS::DomainParticipantQos qos = TheServiceParticipant->initial_DomainParticipantQos();
   GUID_t id = rd.generate_participant_guid();
@@ -337,7 +337,7 @@ bool run_test()
     BUILTIN_ENDPOINT_TYPE_LOOKUP_REPLY_DATA_WRITER |
     BUILTIN_ENDPOINT_TYPE_LOOKUP_REPLY_DATA_READER;
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
   const DDS::Security::ExtendedBuiltinEndpointSet_t availableExtendedBuiltinEndpoints =
     DDS::Security::TYPE_LOOKUP_SERVICE_REQUEST_WRITER_SECURE |
     DDS::Security::TYPE_LOOKUP_SERVICE_REPLY_WRITER_SECURE |
@@ -398,7 +398,7 @@ bool run_test()
       , qos.property
       , {PFLAGS_THIS_VERSION} // opendds_participant_flags
       , false // opendds_rtps_relay_application_participant
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
       , availableExtendedBuiltinEndpoints
 #endif
     },
@@ -536,16 +536,10 @@ bool run_test()
 int ACE_TMAIN(int, ACE_TCHAR*[])
 {
   DDS::DomainParticipantFactory_var dpf;
+  bool ok = false;
   try {
     dpf = TheServiceParticipant->get_domain_participant_factory();
     set_DCPS_debug_level(1);
-  } catch (const CORBA::BAD_PARAM& ex) {
-    ex._tao_print_exception("Exception caught in spdp_transport.cpp:");
-    return 1;
-  }
-
-  bool ok = false;
-  try {
     ok = run_test();
     if (!ok) {
       ACE_ERROR((LM_ERROR, "ERROR: test failed\n"));

@@ -68,6 +68,7 @@ endif()
 set(OPENDDS_CONFIG_AUTO_STATIC_INCLUDES 1) # Always true for CMake builds
 set(config_file "dds/OpenDDSConfig.h")
 set(config_out_dir "${CMAKE_CURRENT_BINARY_DIR}/opendds_config_include")
+set(OPENDDS_CONFIG_INCLUDE_DIR "${config_out_dir}" CACHE INTERNAL "")
 set(config_out_file "${config_out_dir}/${config_file}")
 configure_file("${config_file}.in" "${config_out_file}")
 add_library(OpenDDS_Config INTERFACE)
@@ -106,7 +107,7 @@ if(OPENDDS_XERCES3)
 endif()
 if(OPENDDS_SECURITY)
   add_subdirectory(dds/DCPS/security)
-  if(OPENDDS_BUILT_IN_TOPICS)
+  if(OPENDDS_BUILT_IN_TOPICS AND NOT OPENDDS_CXX_STD_YEAR LESS 2011)
     add_subdirectory(tools/dds/rtpsrelaylib)
     add_subdirectory(tools/rtpsrelay)
   endif()
@@ -140,6 +141,7 @@ install(
     cmake/opendds_version.cmake
     cmake/tao_group.cmake
     cmake/tao_idl_sources.cmake
+    cmake/test_cxx_std.cpp
     "${config_cmake}"
   DESTINATION "${cmake_dest}"
 )
@@ -162,50 +164,5 @@ if(OPENDDS_BUILD_EXAMPLES OR OPENDDS_BUILD_TESTS)
   add_subdirectory(DevGuideExamples/DCPS/Messenger)
 endif()
 if(OPENDDS_BUILD_TESTS)
-  find_package(GTest QUIET PATHS "${OPENDDS_GTEST}")
-  if(NOT GTest_FOUND)
-    set(gtestsm "${OPENDDS_SOURCE_DIR}/tests/googletest")
-    if(EXISTS "${gtestsm}/CMakeLists.txt")
-      message("GTest not found, using submodule")
-      set(fetch_args SOURCE_DIR "${gtestsm}")
-    else()
-      message("GTest not found, using clone")
-      set(fetch_args
-        GIT_REPOSITORY "https://github.com/OpenDDS/googletest"
-        GIT_TAG "v1.8.x"
-        GIT_SHALLOW TRUE
-        GIT_PROGRESS TRUE
-        USES_TERMINAL_DOWNLOAD TRUE
-      )
-    endif()
-    FetchContent_Declare(googletest ${fetch_args})
-    # Prevent overriding the parent project's compiler/linker
-    # settings on Windows
-    set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
-    FetchContent_MakeAvailable(googletest)
-  endif()
-  if(TARGET GTest::gtest)
-    get_target_property(google_test_bin_dir GTest::gtest BINARY_DIR)
-    set(_OPENDDS_GOOGLE_TEST_DIR "${google_test_bin_dir}" CACHE INTERNAL "")
-  elseif(TARGET gtest)
-    get_target_property(google_test_bin_dir gtest BINARY_DIR)
-    set(_OPENDDS_GOOGLE_TEST_DIR "${google_test_bin_dir}" CACHE INTERNAL "")
-  endif()
-
-  add_subdirectory(tests/cmake/ace_tao_only)
-  if(OPENDDS_OWNERSHIP_PROFILE)
-    add_subdirectory(tests/cmake/Messenger)
-  endif()
-  add_subdirectory(tests/cmake/idl_compiler_tests)
-  add_subdirectory(tests/DCPS/Compiler/optional)
-  add_subdirectory(tests/cmake/include_subdir)
-  add_subdirectory(tests/DCPS/Compiler/maps)
-  add_subdirectory(tests/DCPS/Maps)
-  add_subdirectory(tests/DCPS/Compiler/char_literals)
-  add_subdirectory(tests/DCPS/HelloWorld)
-  # TODO: This test always builds shared libraries and linker complains about
-  # ACE/TAO libs lacking -fPIC when ACE is static.
-  if(OPENDDS_OWNERSHIP_PROFILE AND NOT OPENDDS_STATIC)
-    add_subdirectory(tests/cmake/generated_global)
-  endif()
+  add_subdirectory(tests)
 endif()

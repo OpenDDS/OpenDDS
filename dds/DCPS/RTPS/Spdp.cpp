@@ -10,20 +10,23 @@
 #include "ParameterListConverter.h"
 #include "RtpsDiscovery.h"
 
-#include <dds/DCPS/Service_Participant.h>
+#include <dds/DCPS/ConnectionRecords.h>
 #include <dds/DCPS/GuidConverter.h>
 #include <dds/DCPS/GuidUtils.h>
 #include <dds/DCPS/Ice.h>
 #include <dds/DCPS/LogAddr.h>
 #include <dds/DCPS/Logging.h>
 #include <dds/DCPS/Qos_Helper.h>
-#include <dds/DCPS/ConnectionRecords.h>
+#include <dds/DCPS/Service_Participant.h>
+
 #include <dds/DCPS/transport/framework/TransportDebug.h>
-#ifdef OPENDDS_SECURITY
-#  include <dds/DCPS/security/framework/SecurityRegistry.h>
-#endif
 
 #include <dds/DdsDcpsGuidC.h>
+#include <dds/OpenDDSConfigWrapper.h>
+
+#if OPENDDS_CONFIG_SECURITY
+#  include <dds/DCPS/security/framework/SecurityRegistry.h>
+#endif
 
 #include <ace/Reactor.h>
 #include <ace/OS_NS_sys_socket.h> // For setsockopt()
@@ -47,6 +50,7 @@ using DCPS::ENDIAN_LITTLE;
 using DCPS::LogLevel;
 using DCPS::log_level;
 using DCPS::LogAddr;
+using DCPS::set_sock_opt;
 
 namespace {
   const Encoding encoding_plain_big(Encoding::KIND_XCDR1, ENDIAN_BIG);
@@ -72,7 +76,7 @@ namespace {
   }
 #endif
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
 
 #ifndef DDS_HAS_MINIMUM_BIT
   DCPS::ParticipantLocation compute_ice_location_mask(const DCPS::NetworkAddress& address)
@@ -180,7 +184,7 @@ void Spdp::init(DDS::DomainId_t /*domain*/,
       BUILTIN_ENDPOINT_TYPE_LOOKUP_REPLY_DATA_WRITER;
   }
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
   if (is_security_enabled()) {
     using namespace DDS::Security;
 
@@ -234,7 +238,7 @@ Spdp::Spdp(DDS::DomainId_t domain,
   , max_spdp_sequence_msg_reset_check_(disco->config()->max_spdp_sequence_msg_reset_check())
   , check_source_ip_(disco->config()->check_source_ip())
   , undirected_spdp_(disco->config()->undirected_spdp())
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
   , max_participants_in_authentication_(disco->config()->max_participants_in_authentication())
   , security_unsecure_lease_duration_(disco->config()->security_unsecure_lease_duration())
   , auth_resend_period_(disco->config()->auth_resend_period())
@@ -245,6 +249,10 @@ Spdp::Spdp(DDS::DomainId_t domain,
   , guid_(guid)
   , participant_discovered_at_(MonotonicTimePoint::now().to_monotonic_time())
   , is_application_participant_(false)
+  , ipv4_participant_port_id_(0)
+#ifdef ACE_HAS_IPV6
+  , ipv6_participant_port_id_(0)
+#endif
   , tport_(DCPS::make_rch<SpdpTransport>(rchandle_from(this)))
   , initialized_flag_(false)
   , eh_shutdown_(false)
@@ -252,7 +260,7 @@ Spdp::Spdp(DDS::DomainId_t domain,
   , shutdown_flag_(false)
   , available_builtin_endpoints_(0)
   , sedp_(DCPS::make_rch<Sedp>(guid_, DCPS::ref(*this), DCPS::ref(lock_)))
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
   , available_extended_builtin_endpoints_(0)
   , security_config_()
   , security_enabled_(false)
@@ -267,13 +275,13 @@ Spdp::Spdp(DDS::DomainId_t domain,
 
   init(domain, guid, qos, tls);
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
   init_participant_sec_attributes(participant_sec_attr_);
 #endif
 
 }
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
 Spdp::Spdp(DDS::DomainId_t domain,
            const DCPS::GUID_t& guid,
            const DDS::DomainParticipantQos& qos,
@@ -304,6 +312,10 @@ Spdp::Spdp(DDS::DomainId_t domain,
   , guid_(guid)
   , participant_discovered_at_(MonotonicTimePoint::now().to_monotonic_time())
   , is_application_participant_(false)
+  , ipv4_participant_port_id_(0)
+#ifdef ACE_HAS_IPV6
+  , ipv6_participant_port_id_(0)
+#endif
   , tport_(DCPS::make_rch<SpdpTransport>(rchandle_from(this)))
   , initialized_flag_(false)
   , eh_shutdown_(false)
@@ -393,7 +405,7 @@ Spdp::shutdown()
                  ACE_TEXT("remove discovered participants\n")));
     }
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
     try {
       write_secure_disposes();
     } catch (const CORBA::Exception& e) {
@@ -403,7 +415,7 @@ Spdp::shutdown()
 #endif
 
     for (DiscoveredParticipantIter part = participants_.begin(); part != participants_.end(); ++part) {
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
       DCPS::WeakRcHandle<ICE::Endpoint> sedp_endpoint = sedp_->get_ice_endpoint();
       if (sedp_endpoint) {
         stop_ice(sedp_endpoint, part->first, part->second.pdata_.participantProxy.availableBuiltinEndpoints,
@@ -419,7 +431,7 @@ Spdp::shutdown()
     }
   }
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
   DCPS::WeakRcHandle<ICE::Endpoint> sedp_endpoint = sedp_->get_ice_endpoint();
   if (sedp_endpoint) {
     const GUID_t l = make_id(guid_, ENTITYID_SEDP_BUILTIN_PUBLICATIONS_READER);
@@ -448,7 +460,7 @@ Spdp::~Spdp()
 {
 }
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
 void
 Spdp::write_secure_updates()
 {
@@ -472,7 +484,7 @@ Spdp::write_secure_disposes()
 namespace {
   DDS::ParticipantBuiltinTopicData& partBitData(ParticipantData_t& pdata)
   {
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
     return pdata.ddsParticipantDataSecure.base.base;
 #else
     return pdata.ddsParticipantData;
@@ -522,10 +534,16 @@ void Spdp::process_location_updates_i(const DiscoveredParticipantIter& iter, con
     ACE_DEBUG((LM_DEBUG, "(%P|%t) DEBUG: Spdp::process_location_updates_i: %@ %C has %B location update(s) force_publish=%d reason=%C\n", this, LogGuid(iter->first).c_str(), location_updates.size(), force_publish, reason));
   }
 
+  const DCPS::TimeDuration leaseDuration = rtps_duration_to_time_duration(iter->second.pdata_.leaseDuration,
+                                             iter->second.pdata_.participantProxy.protocolVersion,
+                                             iter->second.pdata_.participantProxy.vendorId);
+
+  DCPS::ParticipantLocationBuiltinTopicData& location_data = iter->second.location_data_;
+  location_data.lease_duration = leaseDuration.to_dds_duration();
+
   bool published = false;
   for (DiscoveredParticipant::LocationUpdateList::const_iterator pos = location_updates.begin(),
-         limit = location_updates.end(); iter != participants_.end() && pos != limit; ++pos) {
-    DCPS::ParticipantLocationBuiltinTopicData& location_data = iter->second.location_data_;
+         limit = location_updates.end(); pos != limit; ++pos) {
 
     OPENDDS_STRING addr = "";
     const DCPS::ParticipantLocation old_mask = location_data.location;
@@ -572,12 +590,8 @@ void Spdp::process_location_updates_i(const DiscoveredParticipantIter& iter, con
       break;
     }
 
-    const DDS::Time_t expr =
-      (
-       pos->timestamp_ - rtps_duration_to_time_duration(iter->second.pdata_.leaseDuration,
-                                                        iter->second.pdata_.participantProxy.protocolVersion,
-                                                        iter->second.pdata_.participantProxy.vendorId)
-       ).to_dds_time();
+    const DDS::Time_t expr = (pos->timestamp_ - leaseDuration).to_dds_time();
+
     if ((location_data.location & DCPS::LOCATION_LOCAL) && DCPS::operator<(location_data.local_timestamp, expr)) {
       location_data.location &= ~(DCPS::LOCATION_LOCAL);
       location_data.change_mask |= DCPS::LOCATION_LOCAL;
@@ -698,7 +712,7 @@ bool ip_in_locator_list(const DCPS::NetworkAddress& from, const DCPS::LocatorSeq
   return false;
 }
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
 bool ip_in_AgentInfo(const DCPS::NetworkAddress& from, const ParameterList& plist)
 {
   bool found = false;
@@ -764,7 +778,7 @@ Spdp::handle_participant_data(DCPS::MessageId id,
 
   // Don't trust SPDP for the RtpsRelay application participant.
   // Otherwise, anyone can reset the application participant.
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
   if (is_security_enabled() && !from_sedp) {
     pdata.participantProxy.opendds_rtps_relay_application_participant = false;
   }
@@ -779,7 +793,7 @@ Spdp::handle_participant_data(DCPS::MessageId id,
       return;
     }
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
     if (max_participants_in_authentication_ &&
         n_participants_in_authentication_ >= max_participants_in_authentication_) {
       if (DCPS::security_debug.auth_debug) {
@@ -804,7 +818,7 @@ Spdp::handle_participant_data(DCPS::MessageId id,
     }
 
     if (!from_sedp) {
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
       if (is_security_enabled()) {
         effective_lease = security_unsecure_lease_duration_;
       } else {
@@ -819,7 +833,7 @@ Spdp::handle_participant_data(DCPS::MessageId id,
           }
           effective_lease = maxLeaseDuration;
         }
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
       }
 #endif
     }
@@ -835,7 +849,7 @@ Spdp::handle_participant_data(DCPS::MessageId id,
 
     // add a new participant
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
     std::pair<DiscoveredParticipantIter, bool> p = participants_.insert(std::make_pair(guid, DiscoveredParticipant(pdata, seq, auth_resend_period_)));
     ++n_participants_in_authentication_;
     if (DCPS::security_debug.auth_debug) {
@@ -866,7 +880,7 @@ Spdp::handle_participant_data(DCPS::MessageId id,
 #endif
 
     sedp_->associate(iter->second
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
                      , participant_sec_attr_
 #endif
                      );
@@ -881,7 +895,7 @@ Spdp::handle_participant_data(DCPS::MessageId id,
       }
     }
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
     if (is_security_enabled()) {
       if (!iter->second.has_security_data()) {
         if (!participant_sec_attr_.allow_unauthenticated_participants) {
@@ -951,7 +965,7 @@ Spdp::handle_participant_data(DCPS::MessageId id,
       enqueue_location_update_i(iter, location_mask, from, "existing participant");
     }
 #endif
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
     // Non-secure updates for authenticated participants are used for liveliness but
     // are otherwise ignored. Non-secure dispose messages are ignored completely.
     if (is_security_enabled() && iter->second.auth_state_ == AUTH_STATE_AUTHENTICATED && !from_sedp) {
@@ -967,7 +981,7 @@ Spdp::handle_participant_data(DCPS::MessageId id,
 #endif
 
     if (id == DCPS::DISPOSE_INSTANCE || id == DCPS::DISPOSE_UNREGISTER_INSTANCE) {
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
       DCPS::WeakRcHandle<ICE::Endpoint> sedp_endpoint = sedp_->get_ice_endpoint();
       if (sedp_endpoint) {
         stop_ice(sedp_endpoint, iter->first, iter->second.pdata_.participantProxy.availableBuiltinEndpoints,
@@ -1029,7 +1043,7 @@ Spdp::handle_participant_data(DCPS::MessageId id,
 #endif
     // Else a reset has occurred and check if we should remove the participant
     } else if (iter->second.seq_reset_count_ >= max_spdp_sequence_msg_reset_check_) {
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
       purge_handshake_deadlines(iter);
 #endif
 #ifndef DDS_HAS_MINIMUM_BIT
@@ -1083,7 +1097,7 @@ Spdp::data_received(const DataSubmessage& data,
 
   pdata.participantProxy.domainId = domain_;
   pdata.discoveredAt = now.to_monotonic_time();
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
   pdata.ddsParticipantDataSecure.base.base.key = DCPS::BUILTIN_TOPIC_KEY_UNKNOWN;
 #endif
 
@@ -1109,7 +1123,7 @@ Spdp::data_received(const DataSubmessage& data,
 
   const DCPS::MessageId msg_id = (data.inlineQos.length() && disposed(data.inlineQos)) ? DCPS::DISPOSE_INSTANCE : DCPS::SAMPLE_DATA;
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
   const bool from_relay = sedp_->core().from_relay(from);
 
   if (check_source_ip_ && msg_id == DCPS::SAMPLE_DATA && !from_relay && !ip_in_locator_list(from, pdata.participantProxy.metatrafficUnicastLocatorList) && !ip_in_AgentInfo(from, plist)) {
@@ -1156,7 +1170,7 @@ Spdp::match_unauthenticated(const DiscoveredParticipantIter& dp_iter)
 #endif /* DDS_HAS_MINIMUM_BIT */
 }
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
 
 void
 Spdp::handle_auth_request(const DDS::Security::ParticipantStatelessMessage& msg)
@@ -2175,10 +2189,14 @@ Spdp::init_bit(DCPS::RcHandle<DCPS::BitSubscriber> bit_subscriber)
   bit_subscriber_ = bit_subscriber;
 
   // Defer initilization until we have the bit subscriber.
-  sedp_->init(guid_, *disco_, domain_, type_lookup_service_);
+  sedp_->init(guid_, *disco_, domain_, ipv4_participant_port_id_,
+#ifdef ACE_HAS_IPV6
+    ipv6_participant_port_id_,
+#endif
+    type_lookup_service_);
   tport_->open(sedp_->reactor_task(), sedp_->job_queue());
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
   DCPS::WeakRcHandle<ICE::Endpoint> sedp_endpoint = sedp_->get_ice_endpoint();
   if (sedp_endpoint) {
     const GUID_t l = make_id(guid_, ENTITYID_SEDP_BUILTIN_PUBLICATIONS_READER);
@@ -2215,7 +2233,7 @@ Spdp::is_expectant_opendds(const GUID_t& participant) const
 }
 
 ParticipantData_t Spdp::build_local_pdata(
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
   bool always_in_the_clear,
   Security::DiscoveredParticipantDataKind kind
 #endif
@@ -2249,7 +2267,7 @@ ParticipantData_t Spdp::build_local_pdata(
     }
   }
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
   const Security::SPDPdiscoveredParticipantData pdata = {
     kind,
     { // ParticipantBuiltinTopicDataSecure
@@ -2288,7 +2306,7 @@ ParticipantData_t Spdp::build_local_pdata(
       , qos_.property
       , { participant_flags_ } // opendds_participant_flags
       , is_application_participant_
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
       , available_extended_builtin_endpoints_
 #endif
     },
@@ -2306,7 +2324,7 @@ ParticipantData_t Spdp::build_local_pdata(
 bool Spdp::announce_domain_participant_qos()
 {
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
   if (is_security_enabled()) {
     write_secure_updates();
   }
@@ -2348,38 +2366,32 @@ Spdp::SpdpTransport::SpdpTransport(DCPS::RcHandle<Spdp> outer)
 #ifdef ACE_HAS_MAC_OSX
   multicast_socket_.opts(ACE_SOCK_Dgram_Mcast::OPT_BINDADDR_NO |
                          ACE_SOCK_Dgram_Mcast::DEFOPT_NULLIFACE);
-#ifdef ACE_HAS_IPV6
+#  ifdef ACE_HAS_IPV6
   multicast_ipv6_socket_.opts(ACE_SOCK_Dgram_Mcast::OPT_BINDADDR_NO |
                               ACE_SOCK_Dgram_Mcast::DEFOPT_NULLIFACE);
-#endif
+#  endif
 #endif
 
   multicast_interface_ = outer->disco_->multicast_interface();
 
-  const u_short port_common = outer->config_->port_common(outer->domain_);
-  multicast_address_ = outer->config_->multicast_address(port_common, outer->domain_);
-
-#ifdef ACE_HAS_IPV6
-  multicast_ipv6_address_ = outer->config_->ipv6_multicast_address(port_common);
-#endif
-
+  if (!outer->config_->spdp_multicast_address(multicast_address_, outer->domain_)) {
+    throw std::runtime_error("failed to get valid multicast IPv4 address for SPDP");
+  }
   send_addrs_.insert(multicast_address_);
 #ifdef ACE_HAS_IPV6
+  if (!outer->config_->ipv6_spdp_multicast_address(multicast_ipv6_address_, outer->domain_)) {
+    throw std::runtime_error("failed to get valid multicast IPv4 address for SPDP");
+  }
   send_addrs_.insert(multicast_ipv6_address_);
 #endif
 
   const DCPS::NetworkAddressSet addrs = outer->config_->spdp_send_addrs();
   send_addrs_.insert(addrs.begin(), addrs.end());
 
-  u_short participantId = 0;
-
-#ifdef OPENDDS_SAFETY_PROFILE
-  const u_short startingParticipantId = participantId;
-#endif
-
-  const u_short max_part_id = 119; // RTPS 2.5 9.6.2.3
-  while (!open_unicast_socket(port_common, participantId)) {
-    if (participantId == max_part_id && log_level >= LogLevel::Warning) {
+  const DDS::UInt16 startingParticipantId = outer->ipv4_participant_port_id_;
+  const DDS::UInt16 max_part_id = 119; // RTPS 2.5 9.6.2.3
+  while (!open_unicast_socket(outer->ipv4_participant_port_id_)) {
+    if (outer->ipv4_participant_port_id_ == max_part_id && log_level >= LogLevel::Warning) {
       ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: Spdp::SpdpTransport: "
         "participant id is going above max %u allowed by RTPS spec\n", max_part_id));
       // As long as it doesn't result in an invalid port, going past this
@@ -2387,28 +2399,47 @@ Spdp::SpdpTransport::SpdpTransport(DCPS::RcHandle<Spdp> outer)
       // limited number of ports at its disposal. Also another implementation
       // could use this as a hard limit, but that's much less of a concern.
     }
-    ++participantId;
+    ++outer->ipv4_participant_port_id_;
+    if (outer->ipv4_participant_port_id_ == startingParticipantId) {
+      throw std::runtime_error("could not find a free IPv4 unicast port for SPDP");
+    }
   }
-#ifdef ACE_HAS_IPV6
-  u_short port = uni_port_;
 
-  while (!open_unicast_ipv6_socket(port)) {
-    ++port;
+#ifdef ACE_HAS_IPV6
+  outer->ipv6_participant_port_id_ = outer->ipv4_participant_port_id_;
+  while (!open_unicast_ipv6_socket(outer->ipv6_participant_port_id_)) {
+    ++outer->ipv6_participant_port_id_;
+    if (outer->ipv4_participant_port_id_ == outer->ipv6_participant_port_id_) {
+      throw std::runtime_error("could not find a free IPv6 unicast port for SPDP");
+    }
   }
 #endif
 
 #ifdef OPENDDS_SAFETY_PROFILE
-  if (participantId > startingParticipantId && ACE_OS::getpid() == -1) {
+  if (outer->ipv4_participant_port_id_ > startingParticipantId && ACE_OS::getpid() == -1) {
     // Since pids are not available, use the fact that we had to increment
     // participantId to modify the GUID's pid bytes.  This avoids GUID conflicts
     // between processes on the same host which start at the same time
     // (resulting in the same seed value for the random number generator).
-    hdr_.guidPrefix[8] = static_cast<CORBA::Octet>(participantId >> 8);
-    hdr_.guidPrefix[9] = static_cast<CORBA::Octet>(participantId & 0xFF);
+    hdr_.guidPrefix[8] = static_cast<CORBA::Octet>(outer->ipv4_participant_port_id_ >> 8);
+    hdr_.guidPrefix[9] = static_cast<CORBA::Octet>(outer->ipv4_participant_port_id_ & 0xFF);
     outer->guid_.guidPrefix[8] = hdr_.guidPrefix[8];
     outer->guid_.guidPrefix[9] = hdr_.guidPrefix[9];
   }
 #endif
+
+  const ACE_CDR::ULong userTag = outer->config_->spdp_user_tag();
+  if (userTag) {
+    user_tag_.smHeader.submessageId = SUBMESSAGE_KIND_USER_TAG;
+    user_tag_.smHeader.flags = FLAG_E;
+    user_tag_.smHeader.submessageLength = DCPS::uint32_cdr_size;
+    user_tag_.userTag = userTag;
+  } else {
+    user_tag_.smHeader.submessageId = 0;
+    user_tag_.smHeader.flags = 0;
+    user_tag_.smHeader.submessageLength = 0;
+    user_tag_.userTag = 0;
+  }
 }
 
 void
@@ -2418,7 +2449,7 @@ Spdp::SpdpTransport::open(const DCPS::ReactorTask_rch& reactor_task,
   DCPS::RcHandle<Spdp> outer = outer_.lock();
   if (!outer) return;
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
   // Add the endpoint before any sending and receiving occurs.
   DCPS::WeakRcHandle<ICE::Endpoint> endpoint = get_ice_endpoint();
   if (endpoint) {
@@ -2431,7 +2462,7 @@ Spdp::SpdpTransport::open(const DCPS::ReactorTask_rch& reactor_task,
   reactor(reactor_task->get_reactor());
   reactor_task->interceptor()->execute_or_enqueue(DCPS::make_rch<RegisterHandlers>(rchandle_from(this), reactor_task));
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
   // Now that the endpoint is added, SEDP can write the SPDP info.
   if (outer->is_security_enabled()) {
     outer->write_secure_updates();
@@ -2450,7 +2481,7 @@ Spdp::SpdpTransport::open(const DCPS::ReactorTask_rch& reactor_task,
     DCPS::make_rch<SpdpSporadic>(TheServiceParticipant->time_source(), reactor_task->interceptor(),
                                  rchandle_from(this), &SpdpTransport::process_lease_expirations);
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
   handshake_deadline_task_ =
     DCPS::make_rch<SpdpSporadic>(TheServiceParticipant->time_source(), reactor_task->interceptor(),
                                  rchandle_from(this), &SpdpTransport::process_handshake_deadlines);
@@ -2556,7 +2587,7 @@ Spdp::SpdpTransport::enable_periodic_tasks()
     local_send_task_->enable(TimeDuration::zero_value);
   }
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
   DCPS::RcHandle<Spdp> outer = outer_.lock();
   if (!outer) return;
 
@@ -2620,7 +2651,7 @@ Spdp::SpdpTransport::close(const DCPS::ReactorTask_rch& reactor_task)
 
   TheServiceParticipant->network_interface_address_topic()->disconnect(network_interface_address_reader_);
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
   DCPS::WeakRcHandle<ICE::Endpoint> endpoint = get_ice_endpoint();
   if (endpoint) {
     outer->ice_agent_->remove_endpoint(endpoint);
@@ -2701,7 +2732,7 @@ Spdp::SpdpTransport::write_i(WriteFlags flags)
   }
 
   const ParticipantData_t pdata = outer->build_local_pdata(
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
     true, outer->is_security_enabled() ? Security::DPDK_ENHANCED : Security::DPDK_ORIGINAL
 #endif
   );
@@ -2713,14 +2744,14 @@ Spdp::SpdpTransport::write_i(WriteFlags flags)
   if (!ParameterListConverter::to_param_list(pdata, plist)) {
     if (DCPS::DCPS_debug_level > 0) {
       ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
-        ACE_TEXT("Spdp::SpdpTransport::write() - ")
+        ACE_TEXT("Spdp::SpdpTransport::write_i: ")
         ACE_TEXT("failed to convert from SPDPdiscoveredParticipantData ")
         ACE_TEXT("to ParameterList\n")));
     }
     return;
   }
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
   if (!outer->is_security_enabled()) {
     ICE::AgentInfoMap ai_map;
     DCPS::WeakRcHandle<ICE::Endpoint> sedp_endpoint = outer->sedp_->get_ice_endpoint();
@@ -2735,7 +2766,7 @@ Spdp::SpdpTransport::write_i(WriteFlags flags)
     if (!ParameterListConverter::to_param_list(ai_map, plist)) {
       if (DCPS::DCPS_debug_level > 0) {
         ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
-                  ACE_TEXT("Spdp::SpdpTransport::write() - ")
+                  ACE_TEXT("Spdp::SpdpTransport::write_i: ")
                   ACE_TEXT("failed to convert from ICE::AgentInfo ")
                   ACE_TEXT("to ParameterList\n")));
       }
@@ -2747,11 +2778,30 @@ Spdp::SpdpTransport::write_i(WriteFlags flags)
   wbuff_.reset();
   DCPS::Serializer ser(&wbuff_, encoding_plain_native);
   DCPS::EncapsulationHeader encap(ser.encoding(), DCPS::MUTABLE);
-  if (!(ser << hdr_) || !(ser << data_) || !(ser << encap) || !(ser << plist)) {
-    if (DCPS::DCPS_debug_level > 0) {
+  if (!(ser << hdr_)) {
+    if (log_level >= LogLevel::Error) {
       ACE_ERROR((LM_ERROR,
-        ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::write() - ")
-        ACE_TEXT("failed to serialize headers for SPDP\n")));
+        ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::write_i: ")
+        ACE_TEXT("failed to serialize RTPS header for SPDP\n")));
+    }
+    return;
+  }
+  // The implementation-specific UserTagSubmessage is designed to directly
+  // follow the RTPS Message Header.  No other submessages should be added
+  // before it.  This enables filtering based on a fixed offset.
+  if (user_tag_.smHeader.submessageId && !(ser << user_tag_)) {
+    if (log_level >= LogLevel::Error) {
+      ACE_ERROR((LM_ERROR,
+        ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::write_i: ")
+        ACE_TEXT("failed to serialize user tag for SPDP\n")));
+    }
+    return;
+  }
+  if (!(ser << data_) || !(ser << encap) || !(ser << plist)) {
+    if (log_level >= LogLevel::Error) {
+      ACE_ERROR((LM_ERROR,
+        ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::write_i: ")
+        ACE_TEXT("failed to serialize data submessage for SPDP\n")));
     }
     return;
   }
@@ -2767,7 +2817,7 @@ Spdp::update_rtps_relay_application_participant_i(DiscoveredParticipantIter iter
   }
 
   if (new_participant) {
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
     tport_->relay_spdp_task_->cancel();
     sedp_->core().reset_relay_spdp_task_falloff();
     tport_->relay_spdp_task_->schedule(TimeDuration::zero_value);
@@ -2812,7 +2862,7 @@ Spdp::SpdpTransport::write_i(const DCPS::GUID_t& guid, const DCPS::NetworkAddres
   if (!outer) return;
 
   const ParticipantData_t pdata = outer->build_local_pdata(
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
     true, outer->is_security_enabled() ? Security::DPDK_ENHANCED : Security::DPDK_ORIGINAL
 #endif
   );
@@ -2831,7 +2881,7 @@ Spdp::SpdpTransport::write_i(const DCPS::GUID_t& guid, const DCPS::NetworkAddres
     return;
   }
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
   if (!outer->is_security_enabled()) {
     ICE::AgentInfoMap ai_map;
     DCPS::WeakRcHandle<ICE::Endpoint> sedp_endpoint = outer->sedp_->get_ice_endpoint();
@@ -3174,7 +3224,7 @@ Spdp::SpdpTransport::handle_input(ACE_HANDLE h)
     return 0; // Ignore
   }
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
   // Assume STUN
   if (!outer->initialized() || outer->shutting_down()) {
     return 0;
@@ -3212,7 +3262,7 @@ Spdp::SpdpTransport::handle_input(ACE_HANDLE h)
 DCPS::WeakRcHandle<ICE::Endpoint>
 Spdp::SpdpTransport::get_ice_endpoint()
 {
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
   DCPS::RcHandle<Spdp> outer = outer_.lock();
   return outer && outer->sedp_->core().use_ice() ? DCPS::static_rchandle_cast<ICE::Endpoint>(rchandle_from(this)) : DCPS::WeakRcHandle<ICE::Endpoint>();
 #else
@@ -3220,7 +3270,7 @@ Spdp::SpdpTransport::get_ice_endpoint()
 #endif
 }
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
 ICE::AddressListType
 Spdp::SpdpTransport::host_addresses() const
 {
@@ -3358,7 +3408,7 @@ Spdp::SpdpTransport::ice_disconnect(const ICE::GuidSetType& guids, const ACE_INE
   outer->sedp_->job_queue()->enqueue(DCPS::make_rch<IceConnect>(outer, guids, DCPS::NetworkAddress(addr), false));
 }
 #endif /* DDS_HAS_MINIMUM_BIT */
-#endif /* OPENDDS_SECURITY */
+#endif
 
 void
 Spdp::signal_liveliness(DDS::LivelinessQosPolicyKind kind)
@@ -3367,31 +3417,18 @@ Spdp::signal_liveliness(DDS::LivelinessQosPolicyKind kind)
 }
 
 bool
-Spdp::SpdpTransport::open_unicast_socket(u_short port_common,
-                                         u_short participant_id)
+Spdp::SpdpTransport::open_unicast_socket(DDS::UInt16 participant_id)
 {
   DCPS::RcHandle<Spdp> outer = outer_.lock();
   if (!outer) {
     throw std::runtime_error("couldn't get Spdp");
   }
 
-  DCPS::NetworkAddress local_addr = outer->config_->spdp_local_address();
-  const bool fixed_port = local_addr.get_port_number();
-
-  if (fixed_port) {
-    uni_port_ = local_addr.get_port_number();
-  } else if (!outer->config_->spdp_request_random_port()) {
-    const ACE_UINT32 port = static_cast<ACE_UINT32>(port_common) + outer->config_->d1() +
-      outer->config_->pg() * participant_id;
-    if (port > 65535) {
-      if (log_level >= LogLevel::Error) {
-        ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: Spdp::SpdpTransport::open_unicast_socket: "
-                   "port %u is too high\n", port));
-      }
-      throw std::runtime_error("failed to open unicast port for SPDP (port too high)");
-    }
-    uni_port_ = static_cast<unsigned short>(port);
-    local_addr.set_port_number(uni_port_);
+  DCPS::NetworkAddress local_addr;
+  bool fixed_port;
+  if (!outer->config_->spdp_unicast_address(
+        local_addr, fixed_port, outer->domain_, participant_id)) {
+    throw std::runtime_error("failed to get valid unicast IPv4 address for SPDP");
   }
 
   if (unicast_socket_.open(local_addr.to_addr(), PF_INET) != 0) {
@@ -3401,170 +3438,107 @@ Spdp::SpdpTransport::open_unicast_socket(u_short port_common,
                    "failed to open %C %p.\n",
                    LogAddr(local_addr).c_str(), ACE_TEXT("ACE_SOCK_Dgram::open")));
       }
-      throw std::runtime_error("failed to open unicast port for SPDP");
+      throw std::runtime_error("failed to open fixed unicast IPv4 port for SPDP");
     }
     if (DCPS::DCPS_debug_level > 3) {
       ACE_DEBUG((LM_DEBUG,
-                 ACE_TEXT("(%P|%t) Spdp::SpdpTransport::open_unicast_socket() - ")
-                 ACE_TEXT("failed to open %C %p.  ")
-                 ACE_TEXT("Trying next participantId...\n"),
-                 DCPS::LogAddr(local_addr).c_str(), ACE_TEXT("ACE_SOCK_Dgram::open")));
+                 "(%P|%t) Spdp::SpdpTransport::open_unicast_socket: "
+                 "failed to open %C %p, trying next participant ID...\n",
+                 LogAddr(local_addr).c_str(), ACE_TEXT("ACE_SOCK_Dgram::open")));
     }
     return false;
   }
 
-  if (!fixed_port && outer->config_->spdp_request_random_port()) {
-    ACE_INET_Addr addr;
-    if (unicast_socket_.get_local_addr(addr) == 0) {
-      uni_port_ = addr.get_port_number();
-    }
-  }
-
-  if (DCPS::DCPS_debug_level > 3) {
-    ACE_DEBUG((LM_INFO,
-               ACE_TEXT("(%P|%t) Spdp::SpdpTransport::open_unicast_socket() - ")
-               ACE_TEXT("opened unicast socket on port %d\n"),
-               uni_port_));
-  }
-
-  if (!DCPS::set_socket_multicast_ttl(unicast_socket_, outer->config_->ttl())) {
-    if (DCPS::DCPS_debug_level > 0) {
-      ACE_ERROR((LM_ERROR,
-                ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::open_unicast_socket() - ")
-                ACE_TEXT("failed to set TTL value to %d ")
-                ACE_TEXT("for port:%hu %p\n"),
-                outer->config_->ttl(), uni_port_, ACE_TEXT("DCPS::set_socket_multicast_ttl:")));
-    }
-    throw std::runtime_error("failed to set TTL");
-  }
-
-  const int send_buffer_size = outer->config()->send_buffer_size();
-  if (send_buffer_size > 0) {
-    if (unicast_socket_.set_option(SOL_SOCKET,
-                                   SO_SNDBUF,
-                                   (void *) &send_buffer_size,
-                                   sizeof(send_buffer_size)) < 0
-        && errno != ENOTSUP) {
-      if (DCPS::DCPS_debug_level > 0) {
-        ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::open_unicast_socket() - failed to set the send buffer size to %d errno %m\n"), send_buffer_size));
-      }
-      throw std::runtime_error("failed to set send buffer size");
-    }
-  }
-
-  const int recv_buffer_size = outer->config()->recv_buffer_size();
-  if (recv_buffer_size > 0) {
-    if (unicast_socket_.set_option(SOL_SOCKET,
-                                   SO_RCVBUF,
-                                   (void *) &recv_buffer_size,
-                                   sizeof(recv_buffer_size)) < 0
-        && errno != ENOTSUP) {
-      if (DCPS::DCPS_debug_level > 0) {
-        ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::open_unicast_socket() - failed to set the recv buffer size to %d errno %m\n"), recv_buffer_size));
-      }
-      throw std::runtime_error("failed to set recv buffer size");
-    }
-  }
-
-#ifdef ACE_RECVPKTINFO
-  int sockopt = 1;
-  if (unicast_socket_.set_option(IPPROTO_IP, ACE_RECVPKTINFO, &sockopt, sizeof sockopt) == -1) {
-    ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::open_unicast_socket: set_option: %m\n")), false);
-  }
-#endif
+  set_unicast_socket_opts(outer, unicast_socket_, uni_port_);
 
   return true;
 }
 
-#ifdef ACE_HAS_IPV6
-bool
-Spdp::SpdpTransport::open_unicast_ipv6_socket(u_short port)
+void Spdp::SpdpTransport::set_unicast_socket_opts(
+  DCPS::RcHandle<Spdp>& outer, ACE_SOCK_Dgram& sock, DDS::UInt16& port)
 {
-  DCPS::RcHandle<Spdp> outer = outer_.lock();
-  if (!outer) return false;
-
-  DCPS::NetworkAddress local_addr = outer->config_->ipv6_spdp_local_address();
-  const bool fixed_port = local_addr.get_port_number();
-
-  if (fixed_port) {
-    ipv6_uni_port_ = local_addr.get_port_number();
-  } else {
-    ipv6_uni_port_ = port;
-    local_addr.set_port_number(ipv6_uni_port_);
+  ACE_INET_Addr addr;
+  if (sock.get_local_addr(addr) != 0) {
+    throw std::runtime_error("failed to get address from socket");
   }
-
-  if (unicast_ipv6_socket_.open(local_addr.to_addr(), PF_INET6) != 0) {
-    if (fixed_port) {
-      if (DCPS::DCPS_debug_level > 0) {
-        ACE_ERROR((LM_ERROR,
-                  ACE_TEXT("(%P|%t) Spdp::SpdpTransport::open_unicast_ipv6_socket() - ")
-                  ACE_TEXT("failed to open %C %p.\n"),
-                  DCPS::LogAddr(local_addr).c_str(), ACE_TEXT("ACE_SOCK_Dgram::open")));
-      }
-      throw std::runtime_error("failed to open ipv6 unicast port for SPDP");
-    }
-    if (DCPS::DCPS_debug_level > 3) {
-      ACE_DEBUG((LM_WARNING,
-                 ACE_TEXT("(%P|%t) Spdp::SpdpTransport::open_unicast_ipv6_socket() - ")
-                 ACE_TEXT("failed to open %C %p.  ")
-                 ACE_TEXT("Trying next port...\n"),
-                 DCPS::LogAddr(local_addr).c_str(), ACE_TEXT("ACE_SOCK_Dgram::open")));
-    }
-    return false;
-  }
+  port = addr.get_port_number();
+  const bool ipv4 = addr.get_type() == AF_INET;
 
   if (DCPS::DCPS_debug_level > 3) {
-    ACE_DEBUG((LM_INFO,
-               ACE_TEXT("(%P|%t) Spdp::SpdpTransport::open_unicast_ipv6_socket() - ")
-               ACE_TEXT("opened unicast ipv6 socket on port %d\n"),
-               ipv6_uni_port_));
+    ACE_DEBUG((LM_DEBUG,
+               "(%P|%t) Spdp::SpdpTransport::set_unicast_socket_opts: "
+               "opened %C unicast socket %d on port %d\n",
+               ipv4 ? "IPv4" : "IPv6", sock.get_handle(), port));
   }
 
-  if (!DCPS::set_socket_multicast_ttl(unicast_ipv6_socket_, outer->config_->ttl())) {
-    if (DCPS::DCPS_debug_level > 0) {
+  if (!DCPS::set_socket_multicast_ttl(sock, outer->config_->ttl())) {
+    if (log_level >= LogLevel::Error) {
       ACE_ERROR((LM_ERROR,
-                ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::open_unicast_ipv6_socket() - ")
-                ACE_TEXT("failed to set TTL value to %d ")
-                ACE_TEXT("for port:%hu %p\n"),
-                outer->config_->ttl(), ipv6_uni_port_, ACE_TEXT("DCPS::set_socket_multicast_ttl:")));
+                 "(%P|%t) ERROR: Spdp::SpdpTransport::set_unicast_socket_opts: "
+                 "failed to set TTL value to %d for port:%hu %p\n",
+                 outer->config_->ttl(), port, ACE_TEXT("DCPS::set_socket_multicast_ttl:")));
     }
     throw std::runtime_error("failed to set TTL");
   }
 
   const int send_buffer_size = outer->config()->send_buffer_size();
-  if (send_buffer_size > 0) {
-    if (unicast_ipv6_socket_.set_option(SOL_SOCKET,
-                                        SO_SNDBUF,
-                                        (void *) &send_buffer_size,
-                                        sizeof(send_buffer_size)) < 0
-        && errno != ENOTSUP) {
-      if (DCPS::DCPS_debug_level > 0) {
-        ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::open_unicast_ipv6_socket() - failed to set the send buffer size to %d errno %m\n"), send_buffer_size));
-      }
-      throw std::runtime_error("failed to set send buffer size");
+  if (send_buffer_size > 0 && !set_sock_opt(sock, SOL_SOCKET, SO_SNDBUF, send_buffer_size, true)) {
+    if (log_level >= LogLevel::Error) {
+      ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: Spdp::SpdpTransport::set_unicast_socket_opts: "
+        "failed to set the send buffer size to %d: %m\n", send_buffer_size));
     }
+    throw std::runtime_error("failed to set send buffer size");
   }
 
   const int recv_buffer_size = outer->config()->recv_buffer_size();
-  if (recv_buffer_size > 0) {
-    if (unicast_ipv6_socket_.set_option(SOL_SOCKET,
-                                        SO_RCVBUF,
-                                        (void *) &recv_buffer_size,
-                                        sizeof(recv_buffer_size)) < 0
-        && errno != ENOTSUP) {
-      if (DCPS::DCPS_debug_level > 0) {
-        ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::open_unicast_ipv6_socket() - failed to set the recv buffer size to %d errno %m\n"), recv_buffer_size));
-      }
-      throw std::runtime_error("failed to set recv buffer size");
+  if (recv_buffer_size > 0 && !set_sock_opt(sock, SOL_SOCKET, SO_RCVBUF, recv_buffer_size, true)) {
+    if (log_level >= LogLevel::Error) {
+      ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: Spdp::SpdpTransport::set_unicast_socket_opts: "
+        "failed to set the recv buffer size to %d: %m\n", recv_buffer_size));
     }
+    throw std::runtime_error("failed to set recv buffer size");
   }
 
-#ifdef ACE_RECVPKTINFO6
-  int sockopt = 1;
-  if (unicast_ipv6_socket_.set_option(IPPROTO_IPV6, ACE_RECVPKTINFO6, &sockopt, sizeof sockopt) == -1) {
-    ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::open_unicast_ipv6_socket: set_option: %m\n")), false);
+  if (!DCPS::set_recvpktinfo(sock, ipv4)) {
+    throw std::runtime_error("failed to set RECVPKTINFO");
   }
-#endif
+}
+
+#ifdef ACE_HAS_IPV6
+bool
+Spdp::SpdpTransport::open_unicast_ipv6_socket(DDS::UInt16 participant_id)
+{
+  DCPS::RcHandle<Spdp> outer = outer_.lock();
+  if (!outer) {
+    throw std::runtime_error("couldn't get Spdp");
+  }
+
+  DCPS::NetworkAddress local_addr;
+  bool fixed_port;
+  if (!outer->config_->ipv6_spdp_unicast_address(
+        local_addr, fixed_port, outer->domain_, participant_id)) {
+    throw std::runtime_error("failed to get valid unicast IPv6 address for SPDP");
+  }
+
+  if (unicast_ipv6_socket_.open(local_addr.to_addr(), PF_INET6) != 0) {
+    if (fixed_port) {
+      if (log_level >= LogLevel::Error) {
+        ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: Spdp::SpdpTransport::open_unicast_ipv6_socket: "
+                   "failed to open %C %p.\n",
+                   LogAddr(local_addr).c_str(), ACE_TEXT("ACE_SOCK_Dgram::open")));
+      }
+      throw std::runtime_error("failed to open fixed unicast IPv6 port for SPDP");
+    }
+    if (DCPS::DCPS_debug_level > 3) {
+      ACE_DEBUG((LM_DEBUG,
+                 "(%P|%t) Spdp::SpdpTransport::open_unicast_ipv6_socket: "
+                 "failed to open %C %p, trying next participant ID...\n",
+                 LogAddr(local_addr).c_str(), ACE_TEXT("ACE_SOCK_Dgram::open")));
+    }
+    return false;
+  }
+
+  set_unicast_socket_opts(outer, unicast_ipv6_socket_, ipv6_uni_port_);
 
   return true;
 }
@@ -3634,7 +3608,7 @@ void Spdp::SpdpTransport::on_data_available(DCPS::ConfigReader_rch)
 
     if (sample.key_has_prefix(config_prefix)) {
       has_prefix = true;
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
       if (config->config_key("RTPS_RELAY_ONLY") == sample.key()) {
         const bool flag = config->rtps_relay_only();
         core.rtps_relay_only(flag);
@@ -3909,7 +3883,7 @@ Spdp::process_lease_expirations(const DCPS::MonotonicTimePoint& now)
                  DCPS::LogGuid(part->first).c_str()));
     }
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
     DCPS::WeakRcHandle<ICE::Endpoint> sedp_endpoint = sedp_->get_ice_endpoint();
     if (sedp_endpoint) {
       stop_ice(sedp_endpoint, part->first, part->second.pdata_.participantProxy.availableBuiltinEndpoints,
@@ -3930,7 +3904,7 @@ Spdp::process_lease_expirations(const DCPS::MonotonicTimePoint& now)
   }
 }
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
 Spdp::ParticipantCryptoInfoPair
 Spdp::lookup_participant_crypto_info(const DCPS::GUID_t& id) const
 {
@@ -4010,7 +3984,7 @@ AuthState Spdp::lookup_participant_auth_state(const GUID_t& id) const
 }
 #endif
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
 void Spdp::start_ice(DCPS::WeakRcHandle<ICE::Endpoint> endpoint, GUID_t r, BuiltinEndpointSet_t avail,
                      DDS::Security::ExtendedBuiltinEndpointSet_t extended_avail,
                      const ICE::AgentInfo& agent_info)
@@ -4445,8 +4419,8 @@ void Spdp::SpdpTransport::thread_status_task(const DCPS::MonotonicTimePoint& now
   typedef DCPS::ThreadStatusManager::List List;
   List running;
   List removed;
-  TheServiceParticipant->get_thread_status_manager().harvest(last_harvest, running, removed);
-  last_harvest = now;
+  TheServiceParticipant->get_thread_status_manager().harvest(last_thread_status_harvest_, running, removed);
+  last_thread_status_harvest_ = now;
   for (List::const_iterator i = removed.begin(); i != removed.end(); ++i) {
     DCPS::InternalThreadBuiltinTopicData data;
     data.thread_id = i->bit_key().c_str();
@@ -4462,7 +4436,7 @@ void Spdp::SpdpTransport::thread_status_task(const DCPS::MonotonicTimePoint& now
 #endif /* DDS_HAS_MINIMUM_BIT */
 }
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
 void Spdp::SpdpTransport::process_handshake_deadlines(const DCPS::MonotonicTimePoint& now)
 {
   DCPS::RcHandle<Spdp> outer = outer_.lock();
@@ -4630,7 +4604,7 @@ DCPS::MonotonicTime_t Spdp::get_participant_discovered_at(const DCPS::GUID_t& gu
 
 bool Spdp::secure_part_user_data() const
 {
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
   return security_enabled_ && secure_participant_user_data_;
 #else
   return false;
@@ -4640,7 +4614,7 @@ bool Spdp::secure_part_user_data() const
 DDS::ParticipantBuiltinTopicData Spdp::get_part_bit_data(bool secure) const
 {
   bool include_user_data = true;
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
   if (secure_part_user_data()) {
     include_user_data = secure;
   }
@@ -4719,7 +4693,7 @@ void Spdp::purge_discovered_participant(const DiscoveredParticipantIter& iter)
 
   remove_lease_expiration_i(iter);
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
   if (security_config_) {
     DDS::Security::SecurityException se = {"", 0, 0};
     DDS::Security::Authentication_var auth = security_config_->get_authentication();
@@ -4794,7 +4768,7 @@ void Spdp::purge_discovered_participant(const DiscoveredParticipantIter& iter)
 #endif
 }
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
 void Spdp::set_auth_state(DiscoveredParticipant& dp, AuthState new_state)
 {
   if (dp.auth_state_ == AUTH_STATE_HANDSHAKE &&

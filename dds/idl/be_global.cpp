@@ -980,6 +980,12 @@ TryConstructFailAction BE_GlobalData::union_discriminator_try_construct(AST_Unio
   return try_construct_annotation->union_value(node);
 }
 
+bool BE_GlobalData::value(AST_Decl* node, ACE_INT32& value) const
+{
+  ValueAnnotation* annotation = dynamic_cast<ValueAnnotation*>(builtin_annotations_["::@value"]);
+  return annotation->node_value_exists(node, value);
+}
+
 #if OPENDDS_HAS_IDL_MAP
 TryConstructFailAction BE_GlobalData::map_key_try_construct(AST_Map* node)
 {

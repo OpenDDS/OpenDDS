@@ -23,9 +23,11 @@
 #include "Time_Helper.h"
 #include "TopicImpl.h"
 #include "WriteDataContainer.h"
+#include "unique_ptr.h"
+
 #include "transport/framework/TransportClient.h"
 #include "transport/framework/TransportSendListener.h"
-#include "unique_ptr.h"
+
 #ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
 #  include "FilterEvaluator.h"
 #endif
@@ -711,7 +713,7 @@ private:
     return this->qos_.transport_priority.value;
   }
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
   DDS::Security::ParticipantCryptoHandle get_crypto_handle() const;
 #endif
 
@@ -851,7 +853,7 @@ private:
   bool insert_instance(DDS::InstanceHandle_t handle, Sample_rch& sample);
   InstanceValuesToHandles::iterator find_instance(const Sample& sample);
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
 protected:
   Security::SecurityConfig_rch security_config_;
   DDS::Security::PermissionsHandle participant_permissions_handle_;

@@ -1,12 +1,11 @@
 /*
- *
- *
  * Distributed under the OpenDDS License.
  * See: http://www.opendds.org/license.html
  */
 
-#include "RtpsSampleHeader.h"
 #include "RtpsUdpInst.h"
+
+#include "RtpsSampleHeader.h"
 #include "RtpsUdpLoader.h"
 #include "RtpsUdpTransport.h"
 #include "RtpsUdpSendStrategy.h"
@@ -235,6 +234,88 @@ RtpsUdpInst::send_delay() const
                                                     ConfigStoreImpl::Format_IntegerMilliseconds);
 }
 
+RTPS::PortMode RtpsUdpInst::port_mode() const
+{
+  return get_port_mode(config_key("PORT_MODE"), RTPS::PortMode_System);
+}
+
+void RtpsUdpInst::port_mode(RTPS::PortMode value)
+{
+  set_port_mode(config_key("PORT_MODE"), value);
+}
+
+void RtpsUdpInst::pb(DDS::UInt16 port_base)
+{
+  TheServiceParticipant->config_store()->set_uint32(config_key("PB").c_str(),
+                                                    port_base);
+}
+
+DDS::UInt16 RtpsUdpInst::pb() const
+{
+  return TheServiceParticipant->config_store()->get_uint32(config_key("PB").c_str(),
+                                                           RTPS::default_port_base);
+}
+
+void RtpsUdpInst::dg(DDS::UInt16 domain_gain)
+{
+  TheServiceParticipant->config_store()->set_uint32(config_key("DG").c_str(),
+                                                    domain_gain);
+}
+
+DDS::UInt16 RtpsUdpInst::dg() const
+{
+  return TheServiceParticipant->config_store()->get_uint32(config_key("DG").c_str(),
+                                                           RTPS::default_domain_gain);
+}
+
+void RtpsUdpInst::pg(DDS::UInt16 participant_gain)
+{
+  TheServiceParticipant->config_store()->set_uint32(config_key("PG").c_str(),
+                                                    participant_gain);
+}
+
+DDS::UInt16 RtpsUdpInst::pg() const
+{
+  return TheServiceParticipant->config_store()->get_uint32(config_key("PG").c_str(),
+                                                           RTPS::default_part_gain);
+}
+
+void RtpsUdpInst::d2(DDS::UInt16 multicast_offset)
+{
+  TheServiceParticipant->config_store()->set_uint32(config_key("D2").c_str(),
+                                                    multicast_offset);
+}
+
+DDS::UInt16 RtpsUdpInst::d2() const
+{
+  return TheServiceParticipant->config_store()->get_uint32(config_key("D2").c_str(),
+                                                           RTPS::default_user_multicast_offset);
+}
+
+void RtpsUdpInst::d3(DDS::UInt16 unicast_offset)
+{
+  TheServiceParticipant->config_store()->set_uint32(config_key("D3").c_str(),
+                                                    unicast_offset);
+}
+
+DDS::UInt16 RtpsUdpInst::d3() const
+{
+  return TheServiceParticipant->config_store()->get_uint32(config_key("D3").c_str(),
+                                                           RTPS::default_user_unicast_offset);
+}
+
+bool RtpsUdpInst::set_multicast_port(DCPS::NetworkAddress& addr, DDS::DomainId_t domain) const
+{
+  return RTPS::set_rtps_multicast_port(addr, "RTPS/UDP multicast", pb(), d2(), domain, dg());
+}
+
+bool RtpsUdpInst::set_unicast_port(DCPS::NetworkAddress& addr, bool& fixed_port,
+  DDS::DomainId_t domain, DDS::UInt16 part_id) const
+{
+  return RTPS::set_rtps_unicast_port(addr, fixed_port, "RTPS/UDP unicast", port_mode(),
+    pb(), d3(), domain, dg(), part_id, pg());
+}
+
 void
 RtpsUdpInst::multicast_group_address(const NetworkAddress& addr)
 {
@@ -247,10 +328,20 @@ RtpsUdpInst::multicast_group_address(const NetworkAddress& addr)
 NetworkAddress
 RtpsUdpInst::multicast_group_address(DDS::DomainId_t domain) const
 {
-  NetworkAddress na = TheServiceParticipant->config_store()->get(config_key("MULTICAST_GROUP_ADDRESS").c_str(),
-                                                                 NetworkAddress(7401, "239.255.0.2"),
-                                                                 ConfigStoreImpl::Format_Optional_Port,
-                                                                 ConfigStoreImpl::Kind_IPV4);
+  NetworkAddress addr;
+  return multicast_address(addr, domain) ? addr : NetworkAddress();
+}
+
+bool RtpsUdpInst::multicast_address(DCPS::NetworkAddress& na, DDS::DomainId_t domain) const
+{
+  na = TheServiceParticipant->config_store()->get(config_key("MULTICAST_GROUP_ADDRESS").c_str(),
+                                                             NetworkAddress(0, "239.255.0.2"),
+                                                             ConfigStoreImpl::Format_Optional_Port,
+                                                             ConfigStoreImpl::Kind_IPV4);
+  if (!set_multicast_port(na, domain)) {
+    return false;
+  }
+  const DDS::UInt16 default_port = na.get_port_number();
   const NetworkAddress na_original = na;
 
   if (is_template()) {
@@ -275,7 +366,7 @@ RtpsUdpInst::multicast_group_address(DDS::DomainId_t domain) const
                          "could not convert %C to integer\n",
                          last_octet.c_str()));
             }
-            return na;
+            return false;
           }
 
           val += domain;
@@ -289,10 +380,10 @@ RtpsUdpInst::multicast_group_address(DDS::DomainId_t domain) const
                        "could not add_domain_id_to_ip_addr for address %C\n",
                        addr.c_str()));
           }
-          return na;
+          return false;
         }
 
-        if (log_level >= LogLevel::Debug && DCPS_debug_level > 0) {
+        if (DCPS_debug_level > 0) {
           ACE_DEBUG((LM_DEBUG,
                      "(%P|%t) DEBUG: RtpsUdpInst::multicast_group_address: "
                      "processing add_domain_id_to_ip_addr: %C=%C => %C\n",
@@ -302,17 +393,14 @@ RtpsUdpInst::multicast_group_address(DDS::DomainId_t domain) const
 
       if (directive.find("add_domain_id_to_port") != directive.npos) {
         if (na.get_port_number() == 0) {
-          // use default port + domainId. See 9.6.1.3 in the RTPS 2.2 protocol specification.
-          const int PB = 7400;
-          const int DG = 250;
-          const int D2 = 1;
-          na.set_port_number(PB + DG * domain + D2 + domain);
+          // use default port + domainId
+          na.set_port_number(default_port + domain);
         } else {
           // address has a port supplied
           na.set_port_number(na.get_port_number() + domain);
         }
 
-        if (log_level >= LogLevel::Debug && DCPS_debug_level > 0) {
+        if (DCPS_debug_level > 0) {
           ACE_DEBUG((LM_DEBUG,
                      "(%P|%t) DEBUG: RtpsUdpInst::multicast_group_address: "
                      "processing add_domain_id_to_port: %C=%C => %C\n",
@@ -322,7 +410,19 @@ RtpsUdpInst::multicast_group_address(DDS::DomainId_t domain) const
     }
   }
 
-  return na;
+  return true;
+}
+
+void RtpsUdpInst::init_participant_port_id(DDS::UInt16 part_id)
+{
+  TheServiceParticipant->config_store()->set_uint32(config_key("INIT_PARTICIPANT_PORT_ID").c_str(),
+                                                    part_id);
+}
+
+DDS::UInt16 RtpsUdpInst::init_participant_port_id() const
+{
+  return TheServiceParticipant->config_store()->get_uint32(config_key("INIT_PARTICIPANT_PORT_ID").c_str(),
+                                                           0);
 }
 
 void
@@ -341,6 +441,13 @@ RtpsUdpInst::local_address() const
                                                     TheServiceParticipant->default_address(),
                                                     ConfigStoreImpl::Format_Required_Port,
                                                     ConfigStoreImpl::Kind_IPV4);
+}
+
+bool RtpsUdpInst::unicast_address(DCPS::NetworkAddress& addr, bool& fixed_port,
+  DDS::DomainId_t domain, DDS::UInt16 part_id) const
+{
+  addr = local_address();
+  return set_unicast_port(addr, fixed_port, domain, part_id);
 }
 
 void
@@ -372,12 +479,31 @@ RtpsUdpInst::ipv6_multicast_group_address(const NetworkAddress& addr)
 }
 
 NetworkAddress
-RtpsUdpInst::ipv6_multicast_group_address() const
+RtpsUdpInst::ipv6_multicast_group_address(DDS::DomainId_t domain) const
 {
-  return TheServiceParticipant->config_store()->get(config_key("IPV6_MULTICAST_GROUP_ADDRESS").c_str(),
-                                                    NetworkAddress(7401, "FF03::2"),
-                                                    ConfigStoreImpl::Format_Optional_Port,
-                                                    ConfigStoreImpl::Kind_IPV6);
+  NetworkAddress addr;
+  return ipv6_multicast_address(addr, domain) ? addr : NetworkAddress();
+}
+
+bool RtpsUdpInst::ipv6_multicast_address(DCPS::NetworkAddress& addr, DDS::DomainId_t domain) const
+{
+  addr = TheServiceParticipant->config_store()->get(
+    config_key("IPV6_MULTICAST_GROUP_ADDRESS").c_str(),
+    NetworkAddress(0, "FF03::2"), ConfigStoreImpl::Format_Optional_Port,
+    ConfigStoreImpl::Kind_IPV6);
+  return set_multicast_port(addr, domain);
+}
+
+void RtpsUdpInst::ipv6_init_participant_port_id(DDS::UInt16 part_id)
+{
+  TheServiceParticipant->config_store()->set_uint32(config_key("IPV6_INIT_PARTICIPANT_PORT_ID").c_str(),
+                                                    part_id);
+}
+
+DDS::UInt16 RtpsUdpInst::ipv6_init_participant_port_id() const
+{
+  return TheServiceParticipant->config_store()->get_uint32(config_key("IPV6_INIT_PARTICIPANT_PORT_ID").c_str(),
+                                                           0);
 }
 
 void
@@ -396,6 +522,13 @@ RtpsUdpInst::ipv6_local_address() const
                                                     NetworkAddress::default_IPV6,
                                                     ConfigStoreImpl::Format_Required_Port,
                                                     ConfigStoreImpl::Kind_IPV6);
+}
+
+bool RtpsUdpInst::ipv6_unicast_address(DCPS::NetworkAddress& addr, bool& fixed_port,
+  DDS::DomainId_t domain, DDS::UInt16 part_id) const
+{
+  addr = ipv6_local_address();
+  return set_unicast_port(addr, fixed_port, domain, part_id);
 }
 
 void
@@ -514,7 +647,7 @@ RtpsUdpInst::dump_to_str(DDS::DomainId_t domain) const
   ret += formatNameForDump("local_address") + LogAddr(local_address()).str() + '\n';
   ret += formatNameForDump("advertised_address") + LogAddr(advertised_address()).str() + '\n';
 #ifdef ACE_HAS_IPV6
-  ret += formatNameForDump("ipv6_multicast_group_address") + LogAddr(ipv6_multicast_group_address()).str() + '\n';
+  ret += formatNameForDump("ipv6_multicast_group_address") + LogAddr(ipv6_multicast_group_address(domain)).str() + '\n';
   ret += formatNameForDump("ipv6_local_address") + LogAddr(ipv6_local_address()).str() + '\n';
   ret += formatNameForDump("ipv6_advertised_address") + LogAddr(ipv6_advertised_address()).str() + '\n';
 #endif
@@ -538,7 +671,7 @@ RtpsUdpInst::populate_locator(TransportLocator& info,
     address_to_locator(locators[idx++], multicast_group_addr.to_addr());
   }
 #ifdef ACE_HAS_IPV6
-  const NetworkAddress ipv6_multicast_group_addr = ipv6_multicast_group_address();
+  const NetworkAddress ipv6_multicast_group_addr = ipv6_multicast_group_address(domain);
   if ((flags & CONNINFO_MULTICAST) && use_multicast() && ipv6_multicast_group_addr != NetworkAddress::default_IPV6) {
     grow(locators);
     address_to_locator(locators[idx++], ipv6_multicast_group_addr.to_addr());

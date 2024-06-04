@@ -114,6 +114,9 @@ public:
     UTL_ScopedName* sn, const char* sep, EscapeContext cxt = EscapeContext_Normal);
   static std::string module_scope_helper(
     UTL_ScopedName* sn, const char* sep, EscapeContext cxt = EscapeContext_Normal);
+
+  static bool gen_enum_helper(AST_Enum* node, UTL_ScopedName* name,
+    const std::vector<AST_EnumVal*>& contents, const char* repoid);
 };
 
 inline std::string canonical_name(UTL_ScopedName* sn)
@@ -232,10 +235,14 @@ struct ScopedNamespaceGuard  {
   ScopedNamespaceGuard(UTL_ScopedName* name, std::ostream& os,
                        const char* keyword = "namespace")
     : os_(os)
-    , semi_()
     , n_(0)
   {
     const bool idl = !std::strcmp(keyword, "module");
+    const ACE_CString vn_begin = be_global->versioning_begin();
+    if (!idl && !vn_begin.empty()) {
+      os_ << vn_begin << '\n';
+      suffix_ = (be_global->versioning_end() + '\n').c_str();
+    }
     const EscapeContext ec = idl ? EscapeContext_ForGenIdl : EscapeContext_Normal;
     for (n_ = 0; name->tail();
          name = static_cast<UTL_ScopedName*>(name->tail())) {
@@ -250,11 +257,14 @@ struct ScopedNamespaceGuard  {
 
   ~ScopedNamespaceGuard()
   {
-    for (int i = 0; i < n_; ++i) os_ << '}' << semi_ << '\n';
+    for (int i = 0; i < n_; ++i) {
+      os_ << '}' << semi_ << '\n';
+    }
+    os_ << suffix_;
   }
 
   std::ostream& os_;
-  std::string semi_;
+  std::string semi_, suffix_;
   int n_;
 };
 
@@ -532,7 +542,9 @@ inline std::string to_cxx_type(AST_Type* type, std::size_t& size)
   const AstTypeClassification::Classification cls = AstTypeClassification::classify(type);
   if (cls & AstTypeClassification::CL_ENUM) {
     size = 4;
-    return "ACE_CDR::ULong";
+    // Using the XTypes definition of Enums, this type is signed.
+    // It contradicts the OMG standard CDR definition.
+    return "ACE_CDR::Long";
   }
   if (cls & AstTypeClassification::CL_STRING) {
     return string_type(cls);
@@ -1360,8 +1372,104 @@ inline const char* get_shift_op(const std::string& s)
   return "";
 }
 
+inline std::string extensibility_kind(ExtensibilityKind ek)
+{
+  switch (ek) {
+  case extensibilitykind_final:
+    return "OpenDDS::DCPS::FINAL";
+  case extensibilitykind_appendable:
+    return "OpenDDS::DCPS::APPENDABLE";
+  case extensibilitykind_mutable:
+    return "OpenDDS::DCPS::MUTABLE";
+  default:
+    return "invalid";
+  }
+}
+
+inline std::string type_kind(AST_Type* type)
+{
+  type = AstTypeClassification::resolveActualType(type);
+  switch (type->node_type()) {
+  case AST_Decl::NT_pre_defined: {
+    AST_PredefinedType* pt_type = dynamic_cast<AST_PredefinedType*>(type);
+    if (!pt_type) {
+      return "XTypes::TK_NONE";
+    }
+    switch (pt_type->pt()) {
+    case AST_PredefinedType::PT_long:
+      return "XTypes::TK_INT32";
+    case AST_PredefinedType::PT_ulong:
+      return "XTypes::TK_UINT32";
+    case AST_PredefinedType::PT_longlong:
+      return "XTypes::TK_INT64";
+    case AST_PredefinedType::PT_ulonglong:
+      return "XTypes::TK_UINT64";
+    case AST_PredefinedType::PT_short:
+      return "XTypes::TK_INT16";
+    case AST_PredefinedType::PT_ushort:
+      return "XTypes::TK_UINT16";
+    case AST_PredefinedType::PT_float:
+      return "XTypes::TK_FLOAT32";
+    case AST_PredefinedType::PT_double:
+      return "XTypes::TK_FLOAT64";
+    case AST_PredefinedType::PT_longdouble:
+      return "XTypes::TK_FLOAT128";
+    case AST_PredefinedType::PT_char:
+      return "XTypes::TK_CHAR8";
+    case AST_PredefinedType::PT_wchar:
+      return "XTypes::TK_CHAR16";
+    case AST_PredefinedType::PT_boolean:
+      return "XTypes::TK_BOOLEAN";
+    case AST_PredefinedType::PT_octet:
+      return "XTypes::TK_BYTE";
+    case AST_PredefinedType::PT_int8:
+      return "XTypes::TK_INT8";
+    case AST_PredefinedType::PT_uint8:
+      return "XTypes::TK_UINT8";
+    default:
+      return "XTypes::TK_NONE";
+    }
+  }
+  case AST_Decl::NT_string:
+    return "XTypes::TK_STRING8";
+  case AST_Decl::NT_wstring:
+    return "XTypes::TK_STRING16";
+  case AST_Decl::NT_array:
+    return "XTypes::TK_ARRAY";
+  case AST_Decl::NT_sequence:
+    return "XTypes::TK_SEQUENCE";
+  case AST_Decl::NT_union:
+    return "XTypes::TK_UNION";
+  case AST_Decl::NT_struct:
+    return "XTypes::TK_STRUCTURE";
+  case AST_Decl::NT_enum:
+    return "XTypes::TK_ENUM";
+  default:
+    return "XTypes::TK_NONE";
+  }
+}
+
+inline
+FieldFilter nested(FieldFilter filter_kind)
+{
+  return filter_kind == FieldFilter_KeyOnly ? FieldFilter_NestedKeyOnly : filter_kind;
+}
+
+inline
+bool has_discriminator(AST_Union* u, FieldFilter filter_kind)
+{
+  return be_global->union_discriminator_is_key(u)
+    || filter_kind == FieldFilter_NestedKeyOnly
+    || filter_kind == FieldFilter_All;
+}
+
+// TODO: Add more fine-grained control of "const" string for the wrapper type and wrapped type.
+// Currently, there is a single bool to control both; that is, either both are "const" or
+// none is "const". But sometimes, we want something like "const KeyOnly<SampleType>&", and
+// not "const KeyOnly<const SampleType>&" or "KeyOnly<SampleType>&".
+
 /// Handling wrapping and unwrapping references in the wrapper types:
-/// NestedKeyOnly, IDL::DistinctType, and *_forany.
+/// NestedKeyOnly, KeyOnly, IDL::DistinctType, and *_forany.
 struct RefWrapper {
   const bool cpp11_;
   AST_Type* const type_;
@@ -1371,6 +1479,7 @@ struct RefWrapper {
   const std::string fieldref_;
   const std::string local_;
   bool is_const_;
+  FieldFilter field_filter_;
   bool nested_key_only_;
   bool classic_array_copy_;
   bool dynamic_data_adapter_;
@@ -1385,6 +1494,7 @@ struct RefWrapper {
     , to_wrap_(strip_shift_op(to_wrap))
     , shift_op_(get_shift_op(to_wrap))
     , is_const_(is_const)
+    , field_filter_(FieldFilter_All)
     , nested_key_only_(false)
     , classic_array_copy_(false)
     , dynamic_data_adapter_(false)
@@ -1403,6 +1513,7 @@ struct RefWrapper {
     , fieldref_(strip_shift_op(fieldref))
     , local_(local)
     , is_const_(is_const)
+    , field_filter_(FieldFilter_All)
     , nested_key_only_(false)
     , classic_array_copy_(false)
     , dynamic_data_adapter_(false)
@@ -1423,8 +1534,9 @@ struct RefWrapper {
     const bool forany = classic_array_copy_ || needs_forany(type_);
     const bool distinct_type = needs_distinct_type(type_);
     needs_dda_tag_ = dynamic_data_adapter_ && (forany || distinct_type);
-    nested_key_only_ = nested_key_only_ &&
-      needs_nested_key_only(typedef_node_ ? typedef_node_ : type_);
+    // If field_filter_ is set, this object is being used for vwrite or vread generator.
+    nested_key_only_ = field_filter_ == FieldFilter_NestedKeyOnly ||
+      (nested_key_only_ && needs_nested_key_only(typedef_node_ ? typedef_node_ : type_));
     wrapped_type_name_ = type_name_;
     bool by_ref = true;
 
@@ -1461,9 +1573,12 @@ struct RefWrapper {
       ref_ = var_name;
     }
 
+    if (field_filter_ == FieldFilter_KeyOnly) {
+      wrapped_type_name_ = std::string("KeyOnly<") + const_str + wrapped_type_name_ + ">";
+    }
+
     if (nested_key_only_) {
-      wrapped_type_name_ =
-        std::string("NestedKeyOnly<") + const_str + wrapped_type_name_ + ">";
+      wrapped_type_name_ = std::string("NestedKeyOnly<") + const_str + wrapped_type_name_ + ">";
       value_access_post_ = ".value" + value_access_post_;
       const std::string nko_arg = "(" + ref_ + ")";
       if (is_const_) {
@@ -1618,5 +1733,15 @@ private:
     return dds_generator::get_tag_name(type_name_, qualifier);
   }
 };
+
+inline
+std::string key_only_type_name(AST_Type* type, const std::string& type_name,
+                               FieldFilter field_filter, bool writing)
+{
+  RefWrapper wrapper(type, type_name, "", writing ? true : false);
+  wrapper.field_filter_ = field_filter;
+  const bool has_wrapper = field_filter != FieldFilter_All;
+  return (has_wrapper && !writing ? "const " : "") + wrapper.done().wrapped_type_name();
+}
 
 #endif

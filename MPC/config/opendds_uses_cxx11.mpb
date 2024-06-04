@@ -1,4 +1,6 @@
-project: dcpslib {
+// This is for projects that require C++11. Use opendds_cxx11 for the IDL to
+// C++11 Mapping.
+project {
   avoids += no_cxx11
   requires += no_opendds_safety_profile
   macros += OPENDDS_HAS_CXX11

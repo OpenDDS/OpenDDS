@@ -55,6 +55,7 @@ add_library(OpenDDS_Dcps
   DCPS/MessageBlock.cpp
   DCPS/MessageTracker.cpp
   DCPS/MonitorFactory.cpp
+  DCPS/MultiTask.cpp
   DCPS/MultiTopicDataReaderBase.cpp
   DCPS/MultiTopicImpl.cpp
   DCPS/MulticastManager.cpp
@@ -65,6 +66,7 @@ add_library(OpenDDS_Dcps
   DCPS/Observer.cpp
   DCPS/OwnershipManager.cpp
   DCPS/PeriodicEvent.cpp
+  DCPS/PeriodicTask.cpp
   DCPS/PublisherImpl.cpp
   DCPS/Qos_Helper.cpp
   DCPS/QueryConditionImpl.cpp
@@ -91,6 +93,7 @@ add_library(OpenDDS_Dcps
   DCPS/ServiceEventDispatcher.cpp
   DCPS/Service_Participant.cpp
   DCPS/SporadicEvent.cpp
+  DCPS/SporadicTask.cpp
   DCPS/StaticDiscovery.cpp
   DCPS/StatusConditionImpl.cpp
   DCPS/SubscriberImpl.cpp
@@ -99,6 +102,7 @@ add_library(OpenDDS_Dcps
   DCPS/ThreadStatusManager.cpp
   DCPS/TimeDuration.cpp
   DCPS/Time_Helper.cpp
+  DCPS/Timers.cpp
   DCPS/TopicDescriptionImpl.cpp
   DCPS/TopicImpl.cpp
   DCPS/Transient_Kludge.cpp
@@ -551,6 +555,9 @@ target_sources(OpenDDS_Dcps
     DCPS/yard/yard_tree.hpp
     Version.h
     Versioned_Namespace.h
+    OpenDDSConfigWrapper.h
+    OpenDDSConfigWrapperC.h
+    OpenDDSConfigWrapper.idl
 )
 target_compile_definitions(OpenDDS_Dcps PUBLIC ${OPENDDS_DCPS_COMPILE_DEFINITIONS})
 _opendds_library(OpenDDS_Dcps MSVC_BIGOBJ)

@@ -589,7 +589,7 @@ typeobject_generator::gen_epilogue()
     be_global->impl_ <<
       "XTypes::TypeObject OPENDDS_IDL_FILE_SPECIFIC(minimal_to, " << idx << ")()\n"
       "{\n"
-      "  const unsigned char to_bytes[] = { ";
+      "  static const unsigned char to_bytes[] = { ";
     dump_bytes(pos->second);
     be_global->add_include("<stdexcept>", BE_GlobalData::STREAM_CPP);
     be_global->impl_ <<
@@ -1019,16 +1019,16 @@ typeobject_generator::update_maps(AST_Type* type,
 }
 
 void typeobject_generator::set_builtin_member_annotations(AST_Decl* member,
-  OpenDDS::XTypes::Optional<OpenDDS::XTypes::AppliedBuiltinMemberAnnotations>& annotations)
+  OPENDDS_OPTIONAL_NS::optional<OpenDDS::XTypes::AppliedBuiltinMemberAnnotations>& annotations)
 {
   // Support only @hashid annotation for member at this time.
   const HashidAnnotation* hashid_ann = dynamic_cast<const HashidAnnotation*>(be_global->builtin_annotations_["::@hashid"]);
   std::string hash_name;
   if (hashid_ann->node_value_exists(member, hash_name)) {
-    OpenDDS::XTypes::Optional<std::string> hash_id(hash_name);
+    OPENDDS_OPTIONAL_NS::optional<std::string> hash_id(hash_name);
     if (!annotations) {
       OpenDDS::XTypes::AppliedBuiltinMemberAnnotations value;
-      annotations = OpenDDS::XTypes::Optional<OpenDDS::XTypes::AppliedBuiltinMemberAnnotations>(value);
+      annotations = OPENDDS_OPTIONAL_NS::optional<OpenDDS::XTypes::AppliedBuiltinMemberAnnotations>(value);
     }
     annotations.value().hash_id = hash_id;
   }
@@ -1120,7 +1120,12 @@ void
 typeobject_generator::generate_union_type_identifier(AST_Type* type)
 {
   AST_Union* const n = dynamic_cast<AST_Union*>(type);
-  AST_Type* discriminator = n->disc_type();
+
+  AST_Type* const discriminator = n->disc_type();
+  AST_Type* const discriminatorActual = resolveActualType(discriminator);
+  AST_Enum* const discEnum = dynamic_cast<AST_Enum*>(discriminatorActual);
+  const EnumValueMap::const_iterator enumValues = enum_values_.find(discEnum);
+
   const Fields fields(n);
 
   const ExtensibilityKind exten = be_global->extensibility(n);
@@ -1186,7 +1191,16 @@ typeobject_generator::generate_union_type_identifier(AST_Type* type)
     for (unsigned long j = 0; j < branch->label_list_length(); ++j) {
       AST_UnionLabel* label = branch->label(j);
       if (label->label_kind() != AST_UnionLabel::UL_default) {
-        minimal_member.common.label_seq.append(to_long(*label->label_val()->ev()));
+        if (discEnum && enumValues != enum_values_.end()) {
+          const std::string labelName = canonical_name(label->label_val()->n()->last_component());
+          const EnumValues::const_iterator iter = enumValues->second.find(labelName);
+          if (iter == enumValues->second.end()) {
+            be_util::misc_error_and_abort("Unknown union label value", branch);
+          }
+          minimal_member.common.label_seq.append(iter->second);
+        } else {
+          minimal_member.common.label_seq.append(to_long(*label->label_val()->ev()));
+        }
       }
     }
     minimal_member.common.label_seq.sort();
@@ -1253,11 +1267,20 @@ typeobject_generator::generate_enum_type_identifier(AST_Type* type)
   complete_to.complete.enumerated_type.header.common.bit_bound = 32;
   complete_to.complete.enumerated_type.header.detail.type_name = canonical_name(type->name());
 
+  EnumValues& cached = enum_values_[n];
+  cached.clear();
+  ACE_CDR::Long last_value = -1;
   for (size_t i = 0; i != contents.size(); ++i) {
-    OpenDDS::XTypes::MinimalEnumeratedLiteral minimal_lit;
-    minimal_lit.common.value = contents[i]->constant_value()->ev()->u.eval;
-    minimal_lit.common.flags = (i == default_literal_idx ? OpenDDS::XTypes::IS_DEFAULT : 0);
     const std::string name = canonical_name(contents[i]->local_name());
+
+    OpenDDS::XTypes::MinimalEnumeratedLiteral minimal_lit;
+    if (!be_global->value(contents[i], minimal_lit.common.value)) {
+      minimal_lit.common.value = last_value + 1;
+    }
+    cached[name] = last_value = minimal_lit.common.value;
+
+    minimal_lit.common.flags = (i == default_literal_idx ? OpenDDS::XTypes::IS_DEFAULT : 0);
+
     OpenDDS::XTypes::hash_member_name(minimal_lit.detail.name_hash, name);
     minimal_to.minimal.enumerated_type.literal_seq.append(minimal_lit);
 

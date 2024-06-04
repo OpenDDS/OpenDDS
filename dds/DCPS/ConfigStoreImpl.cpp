@@ -1020,6 +1020,22 @@ ConfigStoreImpl::get_section_values(const String& prefix) const
   return retval;
 }
 
+void
+ConfigStoreImpl::unset_section(const String& prefix) const
+{
+  const String cprefix = ConfigPair::canonicalize(prefix);
+
+  ConfigReader::SampleSequence samples;
+  DCPS::InternalSampleInfoSequence infos;
+  config_reader_->read(samples, infos, DDS::LENGTH_UNLIMITED,
+                       DDS::ANY_SAMPLE_STATE, DDS::ANY_VIEW_STATE, DDS::ALIVE_INSTANCE_STATE);
+  for (ConfigReader::SampleSequence::const_iterator pos = samples.begin(), limit = samples.end(); pos != limit; ++pos) {
+    if (pos->key_has_prefix(cprefix)) {
+      config_writer_->unregister_instance(*pos);
+    }
+  }
+}
+
 DDS::DataWriterQos ConfigStoreImpl::datawriter_qos()
 {
   return DataWriterQosBuilder().durability_transient_local();
@@ -1060,7 +1076,6 @@ process_section(ConfigStoreImpl& config_store,
                 const String& key_prefix,
                 ACE_Configuration_Heap& config,
                 const ACE_Configuration_Section_Key& base,
-                const String& filename,
                 bool allow_overwrite)
 {
   // Process the values.
@@ -1077,9 +1092,6 @@ process_section(ConfigStoreImpl& config_store,
           if (config.get_string_value(base, key.c_str(), value) == 0) {
             const String key_name = key_prefix + "_" + ACE_TEXT_ALWAYS_CHAR(key.c_str());
             String value_str = ACE_TEXT_ALWAYS_CHAR(value.c_str());
-            if (value_str == "$file") {
-              value_str = filename;
-            }
             if (allow_overwrite || !config_store.has(key_name.c_str())) {
               config_store.set(key_name.c_str(), value_str);
               if (listener && reader) {
@@ -1125,7 +1137,7 @@ process_section(ConfigStoreImpl& config_store,
     if (status == 0) {
       ACE_Configuration_Section_Key key;
       if (config.open_section(base, section_name.c_str(), 0, key) == 0) {
-        process_section(config_store, reader, listener, next_key_prefix, config, key, filename, allow_overwrite);
+        process_section(config_store, reader, listener, next_key_prefix, config, key, allow_overwrite);
       } else {
         if (log_level >= LogLevel::Error) {
           ACE_ERROR((LM_ERROR,

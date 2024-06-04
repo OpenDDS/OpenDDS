@@ -3,18 +3,23 @@
 
 #include "CommonTypeSupportImpl.h"
 
+#include <dds/DCPS/BuiltInTopicUtils.h>
+#include <dds/DCPS/DCPS_Utils.h>
 #include <dds/DCPS/Marked_Default_Qos.h>
 #include <dds/DCPS/Service_Participant.h>
 #include <dds/DCPS/WaitSet.h>
+
 #include <dds/DCPS/transport/framework/TransportSendStrategy.h>
+
 #include <dds/DCPS/security/framework/Properties.h>
-#include <dds/DCPS/BuiltInTopicUtils.h>
-#include <dds/DCPS/DCPS_Utils.h>
+
+#include <dds/OpenDDSConfigWrapper.h>
+
 #ifdef ACE_AS_STATIC_LIBS
 #  include <dds/DCPS/RTPS/RtpsDiscovery.h>
 #  include <dds/DCPS/transport/rtps_udp/RtpsUdp.h>
 #  include <dds/DCPS/transport/tcp/Tcp.h>
-#  ifdef OPENDDS_SECURITY
+#  if OPENDDS_CONFIG_SECURITY
 #    include <dds/DCPS/security/BuiltInPlugins.h>
 #  endif
 #endif
@@ -315,7 +320,7 @@ void create_participant(const DomainParticipantFactory_var& dpf, DomainParticipa
   DomainParticipantQos part_qos;
   dpf->get_default_participant_qos(part_qos);
 
-#if defined(OPENDDS_SECURITY)
+#if OPENDDS_CONFIG_SECURITY
   if (TheServiceParticipant->get_security()) {
     using namespace DDS::Security::Properties;
     PropertySeq& props = part_qos.property.value;

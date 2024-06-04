@@ -144,12 +144,14 @@ protected:
                                const OpenDDS::DCPS::MonotonicTimePoint& now,
                                const OpenDDS::DCPS::Lockable_Message_Block_Ptr& msg,
                                MessageType& type) override;
+
   ParticipantStatisticsReporter& record_activity(GuidAddrSet::Proxy& proxy,
                                                  const AddrPort& remote_address,
                                                  const OpenDDS::DCPS::MonotonicTimePoint& now,
                                                  const OpenDDS::DCPS::GUID_t& src_guid,
                                                  MessageType msg_type,
                                                  const size_t& msg_len);
+
   CORBA::ULong send(GuidAddrSet::Proxy& proxy,
                     const OpenDDS::DCPS::GUID_t& src_guid,
                     const StringSet& to_partitions,
@@ -157,6 +159,7 @@ protected:
                     bool send_to_application_participant,
                     const OpenDDS::DCPS::Lockable_Message_Block_Ptr& msg,
                     const OpenDDS::DCPS::MonotonicTimePoint& now);
+
   size_t send(const ACE_INET_Addr& addr,
               OpenDDS::STUN::Message message,
               const OpenDDS::DCPS::MonotonicTimePoint& now);
@@ -197,6 +200,7 @@ public:
                     HandlerStatisticsReporter& stats_reporter);
 
   void vertical_handler(VerticalHandler* vertical_handler) { vertical_handler_ = vertical_handler; }
+
   void enqueue_message(const ACE_INET_Addr& addr,
                        const StringSet& to_partitions,
                        const GuidSet& to_guids,

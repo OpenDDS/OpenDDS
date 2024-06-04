@@ -9,7 +9,10 @@
 #define OPENDDS_DCPS_SECURITY_BUILTINSECURITYPLUGININST_H
 
 #include "OpenDDS_Security_Export.h"
+
 #include "framework/SecurityPluginInst.h"
+
+#include <dds/OpenDDSConfigWrapper.h>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -27,7 +30,7 @@ public:
   BuiltInSecurityPluginInst();
   ~BuiltInSecurityPluginInst();
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
   virtual Authentication_var create_authentication();
   virtual AccessControl_var create_access_control();
   virtual CryptoKeyFactory_var create_crypto_key_factory();
@@ -39,7 +42,7 @@ public:
   virtual void shutdown();
 
 private:
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
   Authentication_var authentication_;
   AccessControl_var access_control_;
   CryptoKeyFactory_var key_factory_;

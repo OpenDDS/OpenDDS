@@ -9,6 +9,7 @@ use File::Temp;
 use FindBin;
 use lib "$FindBin::RealBin/..";
 use command_utils;
+use misc_utils qw/just_trace/;
 
 my $test_exit_status = 0;
 
@@ -30,17 +31,9 @@ sub check_value {
     $not_equal = $expected ne $actual;
   }
   if (defined($expected) != defined($actual) || $not_equal) {
-    print STDERR "ERROR: expected $what to be $expected_repr, but it's $actual_repr\n";
+    just_trace("expected $what to be $expected_repr, but it's $actual_repr");
     $test_exit_status = 1;
   }
-}
-
-sub check_boolean {
-  my $what = shift();
-  my $expected = shift() ? "true" : "false";
-  my $actual = shift() ? "true" : "false";
-
-  check_value($what, $expected, $actual);
 }
 
 my $cmd_name = 'test-command';
@@ -50,7 +43,7 @@ sub run_command {
   my $expected_exit_status = shift();
   my $exit_status;
   my $command = shift();
-  check_boolean('failure', $expected_failure,
+  check_value('failure', $expected_failure,
     command_utils::run_command($command,
       verbose => 1,
       error_fh => undef,
@@ -71,8 +64,18 @@ print("Check that return value and exit status work as expected ================
 if ($^O ne 'MSWin32') {
   run_command(1, undef, '___this_really_should_be_invalid___');
 }
-run_command(1, 2, perl('exit(2);'));
 run_command(0, 0, perl('exit(0);'));
+run_command(1, 1, perl('exit(1);'));
+run_command(1, 2, perl('exit(2);'));
+
+print("Check that ignore_exit_statues works ==========================================\n");
+run_command(0, 0, perl('exit(0);'), ignore => [1]);
+run_command(0, 1, perl('exit(1);'), ignore => [1]);
+run_command(1, 2, perl('exit(2);'), ignore => [1]);
+run_command(0, 0, perl('exit(0);'), ignore => [2], autodie => 1);
+eval { run_command(0, 1, perl('exit(1);'), ignore => [2], autodie => 1); };
+check_value('died', 1, $@ ? 1 : 0);
+run_command(2, 2, perl('exit(2);'), ignore => [2], autodie => 1);
 
 print("Check that putting the ouput in a variable works ==============================\n");
 my $stdout;

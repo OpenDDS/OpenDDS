@@ -7,8 +7,12 @@
 
 // This file should not #include any other files.
 
-// To add variables to this file, update both CMakeLists.txt and configure.
+// To add variables to this file, update both cmake/init.cmake and configure.
 
 #define OPENDDS_CONFIG_AUTO_STATIC_INCLUDES @OPENDDS_CONFIG_AUTO_STATIC_INCLUDES@
+
+#define OPENDDS_CONFIG_BOOTTIME_TIMERS @OPENDDS_CONFIG_BOOTTIME_TIMERS@
+
+#define OPENDDS_CONFIG_SECURITY @OPENDDS_CONFIG_SECURITY@
 
 #endif

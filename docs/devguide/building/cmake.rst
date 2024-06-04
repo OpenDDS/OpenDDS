@@ -248,35 +248,35 @@ The CMake package can provide library targets that can be linked using `target_l
 
 .. cmake:tgt:: OpenDDS::Rtps
 
-  :ref:`RTPS Discovery <introduction--peer-to-peer-discovery-with-rtps>`
+  :ref:`rtps-disc`
 
 .. cmake:tgt:: OpenDDS::InfoRepoDiscovery
 
-  :ref:`InfoRepo Discovery <introduction--centralized-discovery-with-dcpsinforepo>`
+  :ref:`inforepo-disc`
 
 .. cmake:tgt:: OpenDDS::Rtps_Udp
 
-  :ref:`RTPS/UDP Transport <run_time_configuration--rtps-udp-transport-configuration-options>`
+  :ref:`rtps-udp-transport`
 
 .. cmake:tgt:: OpenDDS::Multicast
 
-  :ref:`Multicast Transport <run_time_configuration--ip-multicast-transport-configuration-options>`
+  :ref:`multicast-transport`
 
 .. cmake:tgt:: OpenDDS::Shmem
 
-  :ref:`Shared Memory Transport <run_time_configuration--shared-memory-transport-configuration-options>`
+  :ref:`shmem-transport`
 
 .. cmake:tgt:: OpenDDS::Tcp
 
-  :ref:`TCP Transport <run_time_configuration--tcp-ip-transport-configuration-options>`
+  :ref:`tcp-transport`
 
 .. cmake:tgt:: OpenDDS::Udp
 
-  :ref:`UDP Transport <run_time_configuration--udp-ip-transport-configuration-options>`
+  :ref:`udp-transport`
 
 .. cmake:tgt:: OpenDDS::Security
 
-  :doc:`/devguide/dds_security`
+  :ref:`sec`
 
 .. cmake:tgt:: OpenDDS::RtpsRelayLib
 
@@ -345,21 +345,31 @@ The CMake package can provide executable targets that can be called manually fro
 
 .. cmake:tgt:: TAO::tao_idl
 
-  Required
+  Required, :term:`tao_idl`
 
 .. cmake:tgt:: OpenDDS::opendds_idl
 
-  Required
+  Required, :ref:`opendds_idl`
 
 .. cmake:tgt:: OpenDDS::DCPSInfoRepo
 
+  :ref:`inforepo`
+
 .. cmake:tgt:: OpenDDS::RtpsRelay
+
+  :ref:`rtpsrelay`
 
 .. cmake:tgt:: OpenDDS::dcpsinfo_dump
 
+  Utility for :ref:`inforepo`
+
 .. cmake:tgt:: OpenDDS::inspect
 
+  :ghfile:`tools/inspect/README.rst`
+
 .. cmake:tgt:: OpenDDS::repoctl
+
+  Utility for :ref:`inforepo`
 
 Functions
 =========
@@ -414,16 +424,24 @@ Functions
 
   .. cmake:func:arg:: ALWAYS_GENERATE_LIB_EXPORT_HEADER TRUE|FALSE
 
-    If ``TRUE``, an header for exporting symbols in a shared library will be always generated as long the target is `some sort of library <https://cmake.org/cmake/help/latest/prop_tgt/TYPE.html>`__.
-    This is only really useful if the target is a library that uses the export header itself and also needs to be built as a static library as well.
+    If ``TRUE``, a header for exporting symbols in a shared library will be always generated as long the target is `some sort of library <https://cmake.org/cmake/help/latest/prop_tgt/TYPE.html>`__.
     If ``FALSE``, then it will only be done if the target is a shared library.
     The default is set by :cmake:var:`OPENDDS_ALWAYS_GENERATE_LIB_EXPORT_HEADER`.
 
     .. versionadded:: 3.20
 
+  .. cmake:func:arg:: EXPORT_HEADER_DIR <header-dir>
+
+    Where the export header is placed relative to the other generated files.
+    The value is passed to :cmake:func:`opendds_export_header(DIR)`.
+
+    .. versionadded:: 3.28
+
   .. cmake:func:arg:: USE_EXPORT <export-header>;<export-macro>
 
     Pass a CMake list (``;``-delimited) of an existing export header and export macro to use in the generated code.
+    This is the same format as :cmake:func:`opendds_export_header(USE_EXPORT_VAR)`, but is intended for use with a custom export header.
+    If there are multiple calls to :cmake:func:`opendds_target_sources` on the same target, only the first ``USE_EXPORT`` is used.
 
     .. versionadded:: 3.25
 
@@ -582,7 +600,10 @@ Functions
 
   ::
 
-    opendds_export_header(<target> [USE_EXPORT_VAR <use-export-var-name>])
+    opendds_export_header(<target>
+      [USE_EXPORT_VAR <use-export-var-name>]
+      [DIR <dir-path>]
+    )
 
   Generates a header that is compatible with `ACE's generate_export_file.pl <https://github.com/DOCGroup/ACE_TAO/blob/master/ACE/bin/generate_export_file.pl>`__ for exporting symbols in shared libraries.
   The header will able to be included as ``<target>_export.h`` and the macro that can be used to export symbols will be named ``<target>_Export``.
@@ -591,6 +612,15 @@ Functions
   .. cmake:func:arg:: USE_EXPORT_VAR <use-export-var-name>
 
     Set a variable with the given name that contains a list with the location of the generated export header and the macro name to export a symbol.
+    These values could be passed to :cmake:func:`opendds_target_sources(USE_EXPORT)`, but this shouldn't be necessary because these values are saved on the target on the first call of :cmake:func:`opendds_target_sources` or :cmake:func:`opendds_export_header`.
+
+  .. cmake:func:arg:: DIR <dir-path>
+
+    Where the export header is placed relative to the other generated files.
+    By default the generated export header is put in the root of the include base.
+    See :cmake:func:`opendds_target_sources(EXPORT_HEADER_DIR)` for how to pass this argument from there.
+
+    .. versionadded:: 3.28 to replace the broken and undocumented ``INCLUDE_BASE`` argument.
 
   .. versionadded:: 3.25
 
@@ -785,6 +815,7 @@ Dependencies
   :no-contents-entry:
 
   Path to :ref:`deps-java`
+  Currently unsupported.
 
 .. cmake:var:: OPENDDS_QT
   :no-contents-entry:
@@ -855,7 +886,7 @@ Features
   Default is ``ON``
   Has no effect when building OpenDDS using CMake.
 
-.. cmake:var:: OPENDDS_VERSIONED_NAMEPSACE
+.. cmake:var:: OPENDDS_VERSIONED_NAMESPACE
   :no-contents-entry:
 
   ACE/TAO and OpenDDS have versioned namespaces.

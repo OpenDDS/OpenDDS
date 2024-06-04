@@ -8,12 +8,14 @@
 #define OPENDDS_DCPS_XTYPES_TYPEOBJECTTYPESUPPORTIMPL_H
 
 #include "TypeObject.h"
-#include "dds/DCPS/ValueReader.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
 namespace DCPS {
+
+class ValueReader;
+class ValueWriter;
 
 inline bool vread(ValueReader&, XTypes::TypeIdentifier&)
 {

@@ -1,5 +1,4 @@
-project: dcps_rtps_udp, dcps_ts_defaults, rapidjson {
-  avoids += no_cxx11
+project: dcps_rtps_udp, dcps_ts_defaults, rapidjson, opendds_uses_cxx11 {
   after    += Bench_Common Bench_Idl Bench_Builder Bench_Builder_Idl
   libs     += Bench_Common Bench_Idl Bench_Builder Bench_Builder_Idl
   expand(BENCH_ROOT) {

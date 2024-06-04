@@ -17,35 +17,38 @@
 #include "TransactionalRtpsSendQueue.h"
 
 #include <dds/DCPS/transport/framework/DataLink.h>
-#include <dds/DCPS/ReactorTask.h>
-#include <dds/DCPS/ReactorTask_rch.h>
 #include <dds/DCPS/transport/framework/ReceivedDataSample.h>
 #include <dds/DCPS/transport/framework/TransportSendBuffer.h>
 #include <dds/DCPS/transport/framework/TransportStatistics.h>
-#include <dds/DCPS/DataSampleElement.h>
-#include <dds/DCPS/DisjointSequence.h>
-#include <dds/DCPS/GuidConverter.h>
-#include <dds/DCPS/DataBlockLockPool.h>
-#include <dds/DCPS/PoolAllocator.h>
-#include <dds/DCPS/DiscoveryListener.h>
-#include <dds/DCPS/ReactorInterceptor.h>
-#include <dds/DCPS/RcEventHandler.h>
-#include <dds/DCPS/JobQueue.h>
-#include <dds/DCPS/SequenceNumber.h>
-#include <dds/DCPS/AddressCache.h>
-#include <dds/DCPS/Hash.h>
-#include <dds/DCPS/FibonacciSequence.h>
-#include <dds/DCPS/MulticastManager.h>
-#include <dds/DCPS/SporadicEvent.h>
-#include <dds/DCPS/PeriodicEvent.h>
 
-#ifdef OPENDDS_SECURITY
+#include <dds/DCPS/AddressCache.h>
+#include <dds/DCPS/DataBlockLockPool.h>
+#include <dds/DCPS/DataSampleElement.h>
+#include <dds/DCPS/DiscoveryListener.h>
+#include <dds/DCPS/DisjointSequence.h>
+#include <dds/DCPS/FibonacciSequence.h>
+#include <dds/DCPS/GuidConverter.h>
+#include <dds/DCPS/Hash.h>
+#include <dds/DCPS/JobQueue.h>
+#include <dds/DCPS/MulticastManager.h>
+#include <dds/DCPS/PeriodicEvent.h>
+#include <dds/DCPS/PoolAllocator.h>
+#include <dds/DCPS/RcEventHandler.h>
+#include <dds/DCPS/ReactorInterceptor.h>
+#include <dds/DCPS/ReactorTask.h>
+#include <dds/DCPS/ReactorTask_rch.h>
+#include <dds/DCPS/SequenceNumber.h>
+#include <dds/DCPS/SporadicEvent.h>
+
+#include <dds/OpenDDSConfigWrapper.h>
+
+#if OPENDDS_CONFIG_SECURITY
 #  include <dds/DCPS/security/framework/SecurityConfig.h>
 #  include <dds/DCPS/security/framework/SecurityConfig_rch.h>
 #  include <dds/DCPS/RTPS/ICE/Ice.h>
 #endif
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
 #  include <dds/DdsSecurityCoreC.h>
 #endif
 
@@ -209,7 +212,7 @@ public:
 
   virtual void pre_stop_i();
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
   DCPS::RcHandle<ICE::Agent> get_ice_agent() const;
 #endif
   virtual DCPS::WeakRcHandle<ICE::Endpoint> get_ice_endpoint() const;
@@ -217,7 +220,7 @@ public:
   virtual bool is_leading(const GUID_t& writer_id,
                           const GUID_t& reader_id) const;
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
   Security::SecurityConfig_rch security_config() const
   {
     ACE_Guard<ACE_Thread_Mutex> guard(security_mutex_);
@@ -351,7 +354,7 @@ private:
     OPENDDS_MAP(SequenceNumber, TransportQueueElement*) durable_data_;
     MonotonicTimePoint durable_timestamp_;
     const SequenceNumber start_sn_;
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
     SequenceNumber max_pvs_sn_;
     DisjointSequence pvs_outstanding_;
 #endif
@@ -370,7 +373,7 @@ private:
       , participant_flags_(participant_flags)
       , required_acknack_count_(0)
       , start_sn_(start_sn)
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
       , max_pvs_sn_(SequenceNumber::ZERO())
 #endif
     {}
@@ -447,7 +450,7 @@ private:
     const bool durable_;
     bool stopping_;
     CORBA::Long heartbeat_count_;
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
     /// Participant Volatile Secure writer
     const bool is_pvs_writer_;
     /// Partcicipant Secure (Reliable SPDP) writer
@@ -489,7 +492,7 @@ private:
     void record_directed(const GUID_t& reader, SequenceNumber seq);
     void update_remote_guids_cache_i(bool add, const GUID_t& guid);
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
     bool is_pvs_writer() const { return is_pvs_writer_; }
 #else
     bool is_pvs_writer() const { return false; }
@@ -923,7 +926,7 @@ private:
     GUID_t writer_id_;
   };
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
   mutable ACE_Thread_Mutex security_mutex_;
   Security::SecurityConfig_rch security_config_;
   Security::HandleRegistry_rch handle_registry_;
@@ -935,6 +938,8 @@ private:
 
   RcHandle<InternalDataReader<NetworkInterfaceAddress> > network_interface_address_reader_;
   MulticastManager multicast_manager_;
+
+  bool uses_end_historic_control_messages() const { return false; }
 };
 
 } // namespace DCPS

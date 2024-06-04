@@ -30,7 +30,7 @@ DynamicDataImpl::DynamicDataImpl(DDS::DynamicType_ptr type,
                                  DDS::DynamicData_ptr backing_store)
   : DynamicDataBase(type)
   , container_(type_, this)
-  , backing_store_(backing_store)
+  , backing_store_(DDS::DynamicData::_duplicate(backing_store))
 {
 }
 
@@ -2129,169 +2129,6 @@ DDS::ReturnCode_t DynamicDataImpl::set_wstring_value(DDS::MemberId id, const COR
   return DDS::RETCODE_UNSUPPORTED;
 #endif
 }
-
-#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
-DDS::ReturnCode_t DynamicDataImpl::get_simple_value_boolean(DCPS::Value& value,
-                                                            DDS::MemberId id) const
-{
-  const_single_iterator single_it = container_.single_map_.find(id);
-  if (single_it != container_.single_map_.end()) {
-    value = single_it->second.get<ACE_OutputCDR::from_boolean>().val_;
-    return DDS::RETCODE_OK;
-  }
-  const_complex_iterator complex_it = container_.complex_map_.find(id);
-  if (complex_it != container_.complex_map_.end()) {
-    const DynamicDataImpl* inner_dd = dynamic_cast<DynamicDataImpl*>(complex_it->second.in());
-    if (!inner_dd) {
-      return DDS::RETCODE_ERROR;
-    }
-    const_single_iterator inner_it = inner_dd->container_.single_map_.find(MEMBER_ID_INVALID);
-    if (inner_it != inner_dd->container_.single_map_.end()) {
-      value = inner_it->second.get<ACE_OutputCDR::from_boolean>().val_;
-      return DDS::RETCODE_OK;
-    }
-  }
-  return DDS::RETCODE_ERROR;
-}
-
-DDS::ReturnCode_t DynamicDataImpl::get_simple_value_char(DCPS::Value& value,
-                                                         DDS::MemberId id) const
-{
-  const_single_iterator single_it = container_.single_map_.find(id);
-  if (single_it != container_.single_map_.end()) {
-    value = single_it->second.get<ACE_OutputCDR::from_char>().val_;
-    return DDS::RETCODE_OK;
-  }
-  const_complex_iterator complex_it = container_.complex_map_.find(id);
-  if (complex_it != container_.complex_map_.end()) {
-    const DynamicDataImpl* inner_dd = dynamic_cast<DynamicDataImpl*>(complex_it->second.in());
-    if (!inner_dd) {
-      return DDS::RETCODE_ERROR;
-    }
-    const_single_iterator inner_it = inner_dd->container_.single_map_.find(MEMBER_ID_INVALID);
-    if (inner_it != inner_dd->container_.single_map_.end()) {
-      value = inner_it->second.get<ACE_OutputCDR::from_char>().val_;
-      return DDS::RETCODE_OK;
-    }
-  }
-  return DDS::RETCODE_ERROR;
-}
-
-template<typename ValueType>
-DDS::ReturnCode_t DynamicDataImpl::get_simple_value_primitive(DCPS::Value& value,
-                                                              DDS::MemberId id) const
-{
-  const_single_iterator single_it = container_.single_map_.find(id);
-  if (single_it != container_.single_map_.end()) {
-    value = single_it->second.get<ValueType>();
-    return DDS::RETCODE_OK;
-  }
-  const_complex_iterator complex_it = container_.complex_map_.find(id);
-  if (complex_it != container_.complex_map_.end()) {
-    const DynamicDataImpl* inner_dd = dynamic_cast<DynamicDataImpl*>(complex_it->second.in());
-    if (!inner_dd) {
-      return DDS::RETCODE_ERROR;
-    }
-    const_single_iterator inner_it = inner_dd->container_.single_map_.find(MEMBER_ID_INVALID);
-    if (inner_it != inner_dd->container_.single_map_.end()) {
-      value = inner_it->second.get<ValueType>();
-      return DDS::RETCODE_OK;
-    }
-  }
-  return DDS::RETCODE_ERROR;
-}
-
-DDS::ReturnCode_t DynamicDataImpl::get_simple_value_string(DCPS::Value& value,
-                                                           DDS::MemberId id) const
-{
-  const_single_iterator single_it = container_.single_map_.find(id);
-  if (single_it != container_.single_map_.end()) {
-    value = single_it->second.get<const char*>();
-    return DDS::RETCODE_OK;
-  }
-
-  const_complex_iterator complex_it = container_.complex_map_.find(id);
-  if (complex_it != container_.complex_map_.end()) {
-    // The string member has its own DynamicData object.
-    const DynamicDataImpl* str_dd = dynamic_cast<DynamicDataImpl*>(complex_it->second.in());
-    char* str = 0;
-    if (!str_dd || !str_dd->read_basic_value(str)) {
-      return DDS::RETCODE_ERROR;
-    }
-    value = str;
-    return DDS::RETCODE_OK;
-  }
-  return DDS::RETCODE_ERROR;
-}
-
-DDS::ReturnCode_t DynamicDataImpl::get_simple_value_enum(DCPS::Value& value,
-                                                         DDS::MemberId id) const
-{
-  DDS::DynamicType_var mtype;
-  DDS::ReturnCode_t ret = get_member_type(mtype, type_, id);
-  if (ret != DDS::RETCODE_OK) {
-    return ret;
-  }
-
-  DDS::Int32 enumAsInteger;
-  ret = get_enum_value(enumAsInteger, mtype, interface_from_this(), id);
-  if (ret != DDS::RETCODE_OK) {
-    return ret;
-  }
-
-  DDS::String8_var str;
-  ret = get_enumerator_name(str, enumAsInteger, mtype);
-  if (ret != DDS::RETCODE_OK) {
-    return ret;
-  }
-
-  value = str.in();
-  return DDS::RETCODE_OK;
-}
-
-DDS::ReturnCode_t DynamicDataImpl::get_simple_value(DCPS::Value& value, DDS::MemberId id)
-{
-  DDS::DynamicTypeMember_var dtm;
-  if (type_->get_member(dtm, id) != DDS::RETCODE_OK) {
-    return DDS::RETCODE_ERROR;
-  }
-  DDS::MemberDescriptor_var md;
-  if (dtm->get_descriptor(md) != DDS::RETCODE_OK) {
-    return DDS::RETCODE_ERROR;
-  }
-  DDS::DynamicType_var member_type = get_base_type(md->type());
-  const TypeKind member_kind = member_type->get_kind();
-  switch (member_kind) {
-  case TK_BOOLEAN:
-    return get_simple_value_boolean(value, id);
-  case TK_INT32:
-    return get_simple_value_primitive<CORBA::Long>(value, id);
-  case TK_UINT32:
-    return get_simple_value_primitive<CORBA::ULong>(value, id);
-  case TK_INT64:
-    return get_simple_value_primitive<CORBA::LongLong>(value, id);
-  case TK_UINT64:
-    return get_simple_value_primitive<CORBA::ULongLong>(value, id);
-  case TK_CHAR8:
-    return get_simple_value_char(value, id);
-  case TK_FLOAT64:
-    return get_simple_value_primitive<CORBA::Double>(value, id);
-  case TK_FLOAT128:
-    return get_simple_value_primitive<CORBA::LongDouble>(value, id);
-  case TK_STRING8:
-    return get_simple_value_string(value, id);
-  case TK_ENUM:
-    return get_simple_value_enum(value, id);
-  default:
-    if (log_level >= LogLevel::Notice) {
-      ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicDataImpl::get_simple_value:"
-                 " Member type %C is not supported by DCPS::Value\n",
-                 typekind_to_string(member_kind)));
-    }
-  }
-  return DDS::RETCODE_ERROR;
-}
-#endif
 
 bool DynamicDataImpl::serialized_size(const DCPS::Encoding& enc, size_t& size, DCPS::Sample::Extent ext) const
 {
@@ -5042,10 +4879,6 @@ bool serialized_size_dynamic_union(const Encoding& encoding, size_t& size,
   using namespace OpenDDS::XTypes;
   const DDS::DynamicType_var type = union_data->type();
   const DDS::DynamicType_var base_type = get_base_type(type);
-  if (ext == Sample::KeyOnly && !has_explicit_keys(base_type)) {
-    // nothing is serialized (not even a delimiter) for key-only serialization when there is no @key
-    return true;
-  }
 
   DDS::TypeDescriptor_var td;
   if (!get_type_descriptor(base_type, td)) {
@@ -5056,6 +4889,10 @@ bool serialized_size_dynamic_union(const Encoding& encoding, size_t& size,
   const DDS::ExtensibilityKind extensibility = td->extensibility_kind();
   if (extensibility == DDS::APPENDABLE || extensibility == DDS::MUTABLE) {
     serialized_size_delimiter(encoding, size);
+  }
+
+  if (ext == Sample::KeyOnly && !has_explicit_keys(base_type)) {
+    return true;
   }
 
   // Discriminator
@@ -5704,10 +5541,6 @@ bool serialize_dynamic_union(Serializer& ser, DDS::DynamicData_ptr data, Sample:
   using namespace OpenDDS::XTypes;
   const DDS::DynamicType_var type = data->type();
   const DDS::DynamicType_var base_type = get_base_type(type);
-  if (ext == Sample::KeyOnly && !has_explicit_keys(base_type)) {
-    // nothing is serialized (not even a delimiter) for key-only serialization when there is no @key
-    return true;
-  }
 
   DDS::TypeDescriptor_var td;
   if (!get_type_descriptor(base_type, td)) {
@@ -5723,6 +5556,10 @@ bool serialize_dynamic_union(Serializer& ser, DDS::DynamicData_ptr data, Sample:
         || !ser.write_delimiter(total_size)) {
       return false;
     }
+  }
+
+  if (ext == Sample::KeyOnly && !has_explicit_keys(base_type)) {
+    return true;
   }
 
   // Discriminator

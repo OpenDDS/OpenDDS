@@ -7,27 +7,31 @@
 
 #include "DataReaderImpl.h"
 
-#include "SubscriptionInstance.h"
-#include "ReceivedDataElementList.h"
+#include "DCPS_Utils.h"
 #include "DomainParticipantImpl.h"
-#include "Service_Participant.h"
-#include "Qos_Helper.h"
 #include "FeatureDisabledQosCheck.h"
 #include "GuidConverter.h"
-#include "TopicImpl.h"
-#include "Serializer.h"
-#include "SubscriberImpl.h"
-#include "Transient_Kludge.h"
-#include "Util.h"
-#include "DCPS_Utils.h"
+#include "MonitorFactory.h"
+#include "Qos_Helper.h"
 #include "QueryConditionImpl.h"
 #include "ReadConditionImpl.h"
-#include "MonitorFactory.h"
+#include "ReceivedDataElementList.h"
+#include "SafetyProfileStreams.h"
+#include "Serializer.h"
+#include "Service_Participant.h"
+#include "SubscriberImpl.h"
+#include "SubscriptionInstance.h"
+#include "TopicImpl.h"
+#include "Transient_Kludge.h"
+#include "TypeSupportImpl.h"
+#include "Util.h"
+
 #include "transport/framework/EntryExit.h"
 #include "transport/framework/TransportExceptions.h"
-#include "SafetyProfileStreams.h"
-#include "TypeSupportImpl.h"
+
 #include "XTypes/TypeObject.h"
+
+#include <dds/OpenDDSConfigWrapper.h>
 #ifndef DDS_HAS_MINIMUM_BIT
 #  include "BuiltInTopicUtils.h"
 #endif
@@ -1267,7 +1271,7 @@ DataReaderImpl::enable()
                               exprParams,
                               type_info);
 
-#if defined(OPENDDS_SECURITY)
+#if OPENDDS_CONFIG_SECURITY
     {
       ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, sample_lock_, DDS::RETCODE_ERROR);
       security_config_ = participant->get_security_config();
@@ -3231,15 +3235,8 @@ DataReaderImpl::add_link(const DataLink_rch& link, const GUID_t& peer)
     }
   }
   TransportClient::add_link(link, peer);
-  OPENDDS_STRING type;
-  {
-    TransportImpl_rch impl = link->impl();
-    if (impl) {
-      type = impl->transport_type();
-    }
-  }
 
-  if (type == "rtps_udp" || type == "multicast") {
+  if (!link->uses_end_historic_control_messages()) {
     resume_sample_processing(peer);
   }
 }
@@ -3394,7 +3391,7 @@ void DataReaderImpl::accept_sample_processing(const SubscriptionInstance_rch& in
   }
 }
 
-#if defined(OPENDDS_SECURITY)
+#if OPENDDS_CONFIG_SECURITY
 DDS::Security::ParticipantCryptoHandle DataReaderImpl::get_crypto_handle() const
 {
   RcHandle<DomainParticipantImpl> participant = participant_servant_.lock();
