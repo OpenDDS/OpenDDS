@@ -145,8 +145,12 @@ linkcheck_ignore = [
     r'^https?://github\.com/.*#.+$',
     # Returns 403 for some reason
     r'^https?://docs\.github\.com/.*$',
+    r'^https://www.dds-foundation.org/.*$',
+    r'^https://www.corba.org/.*$',
     # UTF-8 decode errors (trying to parse PDF as HTML?), shouldn't check these anyways
     r'^https?://www\.omg\.org/spec/.*/PDF.*$',
+    # OMG Member link, will always redirect to a login page
+    r'https://issues.omg.org/browse/.*$'
 ]
 
 intersphinx_mapping = {
