@@ -2231,8 +2231,8 @@ DDS::ReturnCode_t DynamicDataXcdrReadImpl::skip_to_struct_member(DDS::MemberDesc
       bool has_value = false;
       if (!(strm_ >> ACE_InputCDR::to_boolean(has_value))) {
         if (DCPS::DCPS_debug_level >= 1) {
-          ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) DynamicDataXcdrReadImpl::skip_to_struct_member: ")
-                     ACE_TEXT("Failed to read is_present for member ID %d\n"), id));
+          ACE_ERROR((LM_ERROR, "(%P|%t) DynamicDataXcdrReadImpl::skip_to_struct_member: "
+                     "Failed to read is_present for member ID %d\n", id));
         }
         return DDS::RETCODE_ERROR;
       }

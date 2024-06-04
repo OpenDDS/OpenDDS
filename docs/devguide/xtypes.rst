@@ -827,8 +827,8 @@ Marking member as optional
 
 .. _xtypes--optional:
 
-@optional
----------
+``@optional``
+-------------
 
 ..
     Sect<16.6.8.1>
