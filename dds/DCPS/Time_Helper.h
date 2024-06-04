@@ -23,8 +23,12 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-ACE_INLINE OpenDDS_Dcps_Export
-ACE_Time_Value time_to_time_value(const DDS::Time_t& t);
+template <typename TimeT>
+ACE_Time_Value time_to_time_value(const TimeT& t)
+{
+  ACE_Time_Value tv(t.sec, t.nanosec / 1000);
+  return tv;
+}
 
 ACE_INLINE OpenDDS_Dcps_Export
 DDS::Time_t time_value_to_time(const ACE_Time_Value& tv);

@@ -37,6 +37,13 @@ TimePoint_T<AceClock>::TimePoint_T(const DDS::Time_t& dds_time)
 
 template<typename AceClock>
 ACE_INLINE
+TimePoint_T<AceClock>::TimePoint_T(const MonotonicTime_t& monotonic_time)
+: value_(time_to_time_value(monotonic_time))
+{
+}
+
+template<typename AceClock>
+ACE_INLINE
 TimePoint_T<AceClock>
 TimePoint_T<AceClock>::now()
 {

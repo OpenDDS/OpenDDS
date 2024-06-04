@@ -58,6 +58,7 @@ public:
   explicit TimePoint_T(const ACE_Time_Value& ace_time_value);
   explicit TimePoint_T(const ACE_Time_Value_T<AceClock>& ace_time_value);
   explicit TimePoint_T(const DDS::Time_t& dds_time);
+  explicit TimePoint_T(const MonotonicTime_t& monotonic_time);
   ///@}
 
   /**
