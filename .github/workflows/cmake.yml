@@ -82,6 +82,10 @@ jobs:
         path: OpenDDS/build/ACE_TAO
     - name: Install xerces
       run: sudo apt-get -y install libxerces-c-dev
+    - uses: lukka/get-cmake@latest
+      with:
+        cmakeVersion: "3.23"
+        ninjaVersion: "latest"
     - name: Configure
       run: |
         cd OpenDDS
@@ -170,7 +174,7 @@ jobs:
         path: OpenDDS/build/ACE_TAO
     - uses: lukka/get-cmake@latest
       with:
-        cmakeVersion: "3.23"
+        cmakeVersion: "latest"
         ninjaVersion: "latest"
     - name: Configure
       run: |
@@ -217,7 +221,7 @@ jobs:
         add-to-path: false
     - uses: lukka/get-cmake@latest
       with:
-        cmakeVersion: "3.23"
+        cmakeVersion: "3.24"
         ninjaVersion: "latest"
     - name: Configure Host Tools
       run: |
