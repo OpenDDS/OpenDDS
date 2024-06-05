@@ -170,7 +170,10 @@ int ReactorTask::svc()
                                            period, period);
 
     if (thread_status_timer == Timers::InvalidTimerId) {
-      //TODO: log error
+      if (log_level >= LogLevel::Notice) {
+        ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: ReactorTask::svc: failed to "
+                              "schedule timer for ThreadStatusManager::Updater\n"));
+      }
     }
   }
 
