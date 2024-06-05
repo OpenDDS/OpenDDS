@@ -2649,10 +2649,9 @@ namespace {
 
         if (is_optional) {
           FieldInfo af(*field);
-          //TODO(tyler) Is there an easier way to deal with strings here
           AST_Type* const field_type = resolveActualType(field->field_type());
           Classification fld_cls = classify(field_type);
-          std::string type_name = fld_cls & CL_STRING ? "String" : field->field_type()->full_name();
+          std::string type_name = (fld_cls & CL_STRING) ? ((fld_cls & CL_WIDE) ? "WString" : "String") : field->field_type()->full_name();
           if (af.anonymous()) {
             type_name = af.scoped_type_;
           }
