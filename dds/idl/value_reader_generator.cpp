@@ -7,6 +7,7 @@
 
 #include "be_extern.h"
 #include "be_util.h"
+#include "field_info.h"
 
 #include <dds/DCPS/Definitions.h>
 
@@ -155,7 +156,10 @@ namespace {
     const bool create_tmp  = optional && !(c & CL_STRING);
     const std::string var_name = create_tmp ? "tmp" : expression + accessor;
     if (create_tmp) {
-      const std::string tmp_type = scoped(type->name());
+      std::string tmp_type = scoped(type->name());
+      if (c & (CL_ARRAY | CL_SEQUENCE)) {
+        tmp_type = FieldInfo::scoped_type(*type, field_name);
+      }
       be_global->impl_ <<
         indent << tmp_type << " tmp;\n";
     }
