@@ -90,13 +90,16 @@ TimerId schedule(ACE_Reactor* reactor,
     }
     return InvalidTimerId;
   }
+  static const timespec one_ns = {0, 1};
   itimerspec ts;
   ts.it_interval = interval.value();
-  if (delay == TimeDuration()) {
+  if (delay < TimeDuration::zero_value) {
+    // expiration in the past, execute as soon as possible (see note about zeros below)
+    ts.it_value = one_ns;
+  } else if (delay == TimeDuration::zero_value) {
     // avoid zeros since that would disarm the timer
     // if the interval is positive, use that as the initial expiration
-    static const timespec one = {0, 1};
-    ts.it_value = (interval == TimeDuration()) ? one : interval.value();
+    ts.it_value = (interval == TimeDuration::zero_value) ? one_ns : interval.value();
   } else {
     ts.it_value = delay.value();
   }
