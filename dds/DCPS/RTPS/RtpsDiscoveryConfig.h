@@ -8,8 +8,10 @@
 
 #include "Spdp.h"
 
-#include <dds/DCPS/debug.h>
 #include <dds/DCPS/AtomicBool.h>
+#include <dds/DCPS/debug.h>
+
+#include <dds/OpenDDSConfigWrapper.h>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -48,7 +50,7 @@ public:
   DCPS::TimeDuration max_lease_duration() const;
   void max_lease_duration(const DCPS::TimeDuration& period);
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
   DCPS::TimeDuration security_unsecure_lease_duration() const;
   void security_unsecure_lease_duration(const DCPS::TimeDuration& period);
 
@@ -189,7 +191,7 @@ public:
   DCPS::NetworkAddress sedp_stun_server_address() const;
   void sedp_stun_server_address(const DCPS::NetworkAddress& address);
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
   bool use_ice() const;
   void use_ice(bool ui);
 #endif

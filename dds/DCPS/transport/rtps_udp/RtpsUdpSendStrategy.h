@@ -9,12 +9,16 @@
 #include "Rtps_Udp_Export.h"
 #include "RtpsUdpDataLink_rch.h"
 
-#include <dds/DCPS/NetworkAddress.h>
 #include <dds/DCPS/AtomicBool.h>
+#include <dds/DCPS/NetworkAddress.h>
+
 #include <dds/DCPS/transport/framework/TransportSendStrategy.h>
+
 #include <dds/DCPS/RTPS/MessageTypes.h>
 
-#ifdef OPENDDS_SECURITY
+#include <dds/OpenDDSConfigWrapper.h>
+
+#if OPENDDS_CONFIG_SECURITY
 #  include <dds/DdsSecurityCoreC.h>
 #endif
 
@@ -53,7 +57,7 @@ public:
                          const NetworkAddressSet& destinations);
   void append_submessages(const RTPS::SubmessageSeq& submessages);
 
-#if defined(OPENDDS_SECURITY)
+#if OPENDDS_CONFIG_SECURITY
   void encode_payload(const GUID_t& pub_id, Message_Block_Ptr& payload,
                       RTPS::SubmessageSeq& submessages);
 #endif
@@ -75,7 +79,7 @@ public:
   static const size_t MaxSecureFullMessageAdditionalSize =
     MaxSecureFullMessageLeadingSize + MaxSubmessagePadding + MaxSecureFullMessageFollowingSize;
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
   virtual Security::SecurityConfig_rch security_config() const;
 #endif
 
@@ -95,7 +99,7 @@ private:
   ssize_t send_single_i(const iovec iov[], int n,
                         const NetworkAddress& addr);
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
   ACE_Message_Block* pre_send_packet(const ACE_Message_Block* plain);
 
   struct Chunk {

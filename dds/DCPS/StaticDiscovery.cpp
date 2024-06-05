@@ -2,17 +2,21 @@
 
 #include "StaticDiscovery.h"
 
-#include "debug.h"
-#include "DomainParticipantImpl.h"
-#include "Marked_Default_Qos.h"
-#include "SubscriberImpl.h"
 #include "BuiltInTopicUtils.h"
-#include "Registered_Data_Types.h"
-#include "Qos_Helper.h"
 #include "DataWriterImpl.h"
 #include "DcpsUpcalls.h"
+#include "DomainParticipantImpl.h"
+#include "Marked_Default_Qos.h"
+#include "Qos_Helper.h"
+#include "Registered_Data_Types.h"
+#include "SubscriberImpl.h"
+#include "debug.h"
+
 #include "transport/framework/TransportRegistry.h"
+
 #include "XTypes/TypeAssignability.h"
+
+#include <dds/OpenDDSConfigWrapper.h>
 
 #include <ctype.h>
 
@@ -1623,7 +1627,7 @@ StaticDiscovery::add_domain_participant(DDS::DomainId_t domain,
   return ads;
 }
 
-#if defined(OPENDDS_SECURITY)
+#if OPENDDS_CONFIG_SECURITY
 AddDomainStatus
 StaticDiscovery::add_domain_participant_secure(
   DDS::DomainId_t /*domain*/,

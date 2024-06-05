@@ -5,7 +5,9 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifdef OPENDDS_SECURITY
+#include <dds/OpenDDSConfigWrapper.idl>
+
+#if OPENDDS_CONFIG_SECURITY
 #ifndef OPENDDS_DCPS_RTPS_RTPS_SECURITY_IDL
 #define OPENDDS_DCPS_RTPS_RTPS_SECURITY_IDL
 

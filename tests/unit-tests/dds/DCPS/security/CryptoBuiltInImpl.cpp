@@ -1,4 +1,6 @@
-#ifdef OPENDDS_SECURITY
+#include <dds/OpenDDSConfigWrapper.h>
+
+#if OPENDDS_CONFIG_SECURITY
 
 #include "dds/DCPS/LocalObject.h"
 #include "dds/DCPS/security/CryptoBuiltInImpl.h"

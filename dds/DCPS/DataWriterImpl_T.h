@@ -6,16 +6,18 @@
 #ifndef OPENDDS_DCPS_DATAWRITERIMPL_T_H
 #define OPENDDS_DCPS_DATAWRITERIMPL_T_H
 
-#include "Sample.h"
-#include "PublicationInstance.h"
-#include "DataWriterImpl.h"
-#include "Util.h"
-#include "TypeSupportImpl.h"
-#include "dcps_export.h"
-#include "SafetyProfileStreams.h"
 #include "DCPS_Utils.h"
+#include "DataWriterImpl.h"
+#include "PublicationInstance.h"
+#include "SafetyProfileStreams.h"
+#include "Sample.h"
+#include "TypeSupportImpl.h"
+#include "Util.h"
+#include "dcps_export.h"
 
-#ifdef OPENDDS_SECURITY
+#include <dds/OpenDDSConfigWrapper.h>
+
+#if OPENDDS_CONFIG_SECURITY
 #  include <dds/DdsSecurityCoreC.h>
 #endif
 

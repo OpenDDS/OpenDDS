@@ -8,10 +8,13 @@
 #include <MessengerTypeSupportImpl.h>
 #include <tests/Utils/StatusMatching.h>
 
+#include <dds/DCPS/BuiltInTopicUtils.h>
 #include <dds/DCPS/Marked_Default_Qos.h>
 #include <dds/DCPS/PublisherImpl.h>
 #include <dds/DCPS/Service_Participant.h>
-#include <dds/DCPS/BuiltInTopicUtils.h>
+
+#include <dds/OpenDDSConfigWrapper.h>
+
 #include <dds/DCPS/transport/framework/TransportExceptions.h>
 #include <dds/DCPS/transport/framework/TransportRegistry.h>
 #ifdef ACE_AS_STATIC_LIBS
@@ -106,7 +109,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     DDS::DomainParticipantQos sub_qos;
     dpf->get_default_participant_qos(sub_qos);
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
       // Determine the path to the keys
       OPENDDS_STRING path_to_tests;
       const char* dds_root = ACE_OS::getenv("DDS_ROOT");

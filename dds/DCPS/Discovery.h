@@ -6,21 +6,24 @@
 #ifndef OPENDDS_DCPS_DISCOVERY_H
 #define OPENDDS_DCPS_DISCOVERY_H
 
-#include "RcObject.h"
-#include "RcHandle_T.h"
-#include "unique_ptr.h"
-#include "XTypes/TypeObject.h"
-#include "XTypes/TypeLookupService.h"
+#include "ConditionVariable.h"
 #include "DataReaderCallbacks.h"
 #include "DataWriterCallbacks.h"
-#include "TopicCallbacks.h"
-#include "PoolAllocator.h"
 #include "PoolAllocationBase.h"
-#include "ConditionVariable.h"
+#include "PoolAllocator.h"
+#include "RcHandle_T.h"
+#include "RcObject.h"
+#include "TopicCallbacks.h"
+#include "unique_ptr.h"
+
+#include "XTypes/TypeLookupService.h"
+#include "XTypes/TypeObject.h"
 
 #include <dds/DdsDcpsInfoUtilsC.h>
 #include <dds/DdsDcpsSubscriptionC.h>
-#ifdef OPENDDS_SECURITY
+#include <dds/OpenDDSConfigWrapper.h>
+
+#if OPENDDS_CONFIG_SECURITY
 #  include <dds/DdsSecurityCoreC.h>
 #endif
 
@@ -108,7 +111,7 @@ public:
     const DDS::DomainParticipantQos& qos,
     XTypes::TypeLookupService_rch tls) = 0;
 
-#if defined(OPENDDS_SECURITY)
+#if OPENDDS_CONFIG_SECURITY
   virtual OpenDDS::DCPS::AddDomainStatus add_domain_participant_secure(
     DDS::DomainId_t domain,
     const DDS::DomainParticipantQos& qos,
