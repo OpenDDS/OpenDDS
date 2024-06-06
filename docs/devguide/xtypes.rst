@@ -835,7 +835,9 @@ Marking member as optional
 
 Applies to: struct members (only when :ref:`opendds_idl--using-the-idl-to-c-11-mapping`)
 
-This annotation marks a member as optional.
+This annotation marks a member as optional. In the IDL-to-C++11 mapping it generates either an std::optional<T> or an equivalent custom implementation of std::optional.
+
+More information about other language bindings for @optional can be found [here](https://github.com/OpenDDS/OpenDDS/wiki/Proposal:-@optional-support)
 
 .. _xtypes--dynamic-language-binding-1:
 
