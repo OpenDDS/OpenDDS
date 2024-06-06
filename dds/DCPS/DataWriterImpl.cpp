@@ -543,7 +543,7 @@ DataWriterImpl::association_complete_i(const GUID_t& remote_id)
       Message_Block_Ptr end_historic_samples(
         create_control_message(
           END_HISTORIC_SAMPLES, header, move(data),
-          SystemTimePoint::now().to_dds_time()));
+          SystemTimePoint::now().to_idl_struct()));
 
       this->controlTracker.message_sent();
       guard.release();
@@ -776,7 +776,7 @@ void DataWriterImpl::replay_durable_data_for(const GUID_t& remote_id)
 
       DataSampleHeader header;
       Message_Block_Ptr end_historic_samples(create_control_message(END_HISTORIC_SAMPLES, header, move(data),
-                                                                    SystemTimePoint::now().to_dds_time()));
+                                                                    SystemTimePoint::now().to_idl_struct()));
 
       this->controlTracker.message_sent();
       guard.release();
@@ -1075,7 +1075,7 @@ DataWriterImpl::send_request_ack()
       REQUEST_ACK,
       element->get_header(),
       move(blk),
-      SystemTimePoint::now().to_dds_time()));
+      SystemTimePoint::now().to_idl_struct()));
 
   element->set_sample(move(sample));
 
@@ -2426,7 +2426,7 @@ DataWriterImpl::end_coherent_changes(const GroupCoherentSamples& group_samples)
   Message_Block_Ptr control(
     create_control_message(
       END_COHERENT_CHANGES, header, move(data),
-      SystemTimePoint::now().to_dds_time()));
+      SystemTimePoint::now().to_idl_struct()));
 
   this->coherent_ = false;
   this->coherent_samples_ = 0;
@@ -2550,7 +2550,7 @@ DataWriterImpl::send_liveliness(const MonotonicTimePoint& now)
     Message_Block_Ptr liveliness_msg(
       create_control_message(
         DATAWRITER_LIVELINESS, header, move(empty),
-        SystemTimePoint::now().to_dds_time()));
+        SystemTimePoint::now().to_idl_struct()));
 
     if (this->send_control(header, move(liveliness_msg)) == SEND_CONTROL_ERROR) {
       ACE_ERROR_RETURN((LM_ERROR,
@@ -2582,7 +2582,7 @@ DataWriterImpl::prepare_to_delete()
 #endif
 
   // Unregister all registered instances prior to deletion.
-  unregister_instances(SystemTimePoint::now().to_dds_time());
+  unregister_instances(SystemTimePoint::now().to_idl_struct());
 
   const Observer_rch observer = get_observer(Observer::e_DELETED);
   if (observer) {

@@ -364,7 +364,7 @@ RecorderImpl::add_association(const WriterAssociation& writer,
     //
     //     if (where->second->should_ack(now)) {
     //       const SequenceNumber sequence = where->second->ack_sequence();
-    //       if (send_sample_ack(writer.writerId, sequence, now.to_dds_time())) {
+    //       if (send_sample_ack(writer.writerId, sequence, now.to_idl_struct())) {
     //         where->second->clear_acks(sequence);
     //       }
     //     }

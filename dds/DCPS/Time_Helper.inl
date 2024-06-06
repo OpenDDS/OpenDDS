@@ -201,7 +201,7 @@ DDS::Time_t time_value_to_time(const ACE_Time_Value& tv)
 }
 
 ACE_INLINE
-MonotonicTime_t time_value_to_monotonic_time(const ACE_Time_Value& tv)
+MonotonicTime_t time_value_to_time(const ACE_Time_Value_T<ACE_Monotonic_Time_Policy>& tv)
 {
   MonotonicTime_t t;
   t.sec = ACE_Utils::truncate_cast<CORBA::Long>(tv.sec());
