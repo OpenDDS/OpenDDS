@@ -1475,6 +1475,7 @@ struct RefWrapper {
   const std::string fieldref_;
   const std::string local_;
   bool is_const_;
+  bool is_optional_;
   FieldFilter field_filter_;
   bool nested_key_only_;
   bool classic_array_copy_;
@@ -1490,6 +1491,7 @@ struct RefWrapper {
     , to_wrap_(strip_shift_op(to_wrap))
     , shift_op_(get_shift_op(to_wrap))
     , is_const_(is_const)
+    , is_optional_(false)
     , field_filter_(FieldFilter_All)
     , nested_key_only_(false)
     , classic_array_copy_(false)
@@ -1509,6 +1511,7 @@ struct RefWrapper {
     , fieldref_(strip_shift_op(fieldref))
     , local_(local)
     , is_const_(is_const)
+    , is_optional_(false)
     , field_filter_(FieldFilter_All)
     , nested_key_only_(false)
     , classic_array_copy_(false)
@@ -1543,6 +1546,10 @@ struct RefWrapper {
       if (local_.size()) {
         ref_ += '.' + local_;
       }
+    }
+
+    if (is_optional_) {
+      ref_ += ".value()";
     }
 
     if (forany && !dynamic_data_adapter_) {

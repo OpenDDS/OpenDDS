@@ -119,7 +119,11 @@ struct GeneratorBase {
   std::string map_type(AST_Field* field)
   {
     FieldInfo af(*field);
-    return (af.type_->anonymous() && af.as_base_) ? af.type_name_ : map_type(af.type_);
+    std::string mt = (af.type_->anonymous() && af.as_base_) ? af.type_name_ : map_type(af.type_);
+    if (af.is_optional_) {
+      mt = "OPENDDS_OPTIONAL_NS::optional<" + mt + ">";
+    }
+    return mt;
   }
 
   virtual std::string map_type_string(AST_PredefinedType::PredefinedType chartype, bool constant)
@@ -1476,9 +1480,8 @@ struct Cxx11Generator : GeneratorBase {
       }
     }
 
-    const bool is_optional = be_global->is_optional(field);
-    const std::string lang_field_type = is_optional ? "OPENDDS_OPTIONAL_NS::optional<" + generator_->map_type(field) + ">" : generator_->map_type(field);
-    if (is_optional) {
+    const std::string lang_field_type = generator_->map_type(field);
+    if (be_global->is_optional(field)) {
       be_global->add_include("dds/DCPS/optional.h", BE_GlobalData::STREAM_LANG_H);
     }
 

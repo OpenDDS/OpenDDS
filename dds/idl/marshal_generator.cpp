@@ -1641,8 +1641,19 @@ namespace {
       RefWrapper wrapper(af.type_, af.scoped_type_,
         prefix + "." + insert_cxx11_accessor_parens(af.name_));
       wrapper.nested_key_only_ = wrap_nested_key_only;
+      wrapper.is_optional_ = af.is_optional_;
       wrapper.done(&intro);
-      return indent + "serialized_size(encoding, size, " + wrapper.ref() + ");\n";
+      std::string line;
+      if (af.is_optional_) {
+        const bool is_union_member = prefix == "uni";
+        line += indent + "primitive_serialized_size_boolean(encoding, size);\n";
+        line += indent + "if (" + prefix + '.' + insert_cxx11_accessor_parens(field->local_name()->get_string(), is_union_member) + ") {\n";
+        line += indent + "  serialized_size(encoding, size, " + wrapper.ref() + ");\n";
+        line += indent + "}\n";
+      } else {
+        line += indent + "serialized_size(encoding, size, " + wrapper.ref() + ");\n";
+      }
+      return line;
     }
     return findSizeCommon(
       indent, field, field->local_name()->get_string(), field->field_type(), prefix,
@@ -1719,6 +1730,7 @@ namespace {
       RefWrapper wrapper(af.type_, af.scoped_type_,
         prefix + "." + insert_cxx11_accessor_parens(af.name_));
       wrapper.nested_key_only_ = wrap_nested_key_only;
+      wrapper.is_optional_ = af.is_optional_;
       wrapper.done(&intro);
       return "(strm " + wrapper.stream() + ")";
     }
@@ -2448,9 +2460,9 @@ namespace {
           "  ACE_UNUSED_ARG(reached_end_of_struct);\n";
       }
       marshal_generator::generate_dheader_code(
-        "    if (!strm.read_delimiter(total_size)) {\n"
-        "      return false;\n"
-        "    }\n", not_final);
+                                               "    if (!strm.read_delimiter(total_size)) {\n"
+                                               "      return false;\n"
+                                               "    }\n", not_final);
 
       if (not_final) {
         be_global->impl_ <<
@@ -2468,12 +2480,12 @@ namespace {
           "    while (true) {\n";
 
         /*
-        * Get the Member ID and see if we're done. In XCDR1 we use a special
-        * member ID to stop the loop. We don't have a PID marking the end in
-        * XCDR2 parameter lists, but we have the size, so we need to stop
-        * after we hit the offset marked by the delimiter, but before trying
-        * to read a non-existent member id.
-        */
+         * Get the Member ID and see if we're done. In XCDR1 we use a special
+         * member ID to stop the loop. We don't have a PID marking the end in
+         * XCDR2 parameter lists, but we have the size, so we need to stop
+         * after we hit the offset marked by the delimiter, but before trying
+         * to read a non-existent member id.
+         */
         be_global->impl_ <<
           "      if (encoding.xcdr_version() == Encoding::XCDR_VERSION_2 && strm.rpos() >= end_of_struct) {\n"
           "        return true;\n"
@@ -2498,7 +2510,7 @@ namespace {
           cases <<
             "      case " << id << ": {\n"
             "        if (!" << generate_field_stream(
-            indent, field, ">> stru" + value_access, field->local_name()->get_string(), wrap_nested_key_only, intro) << ") {\n";
+                                                     indent, field, ">> stru" + value_access, field->local_name()->get_string(), wrap_nested_key_only, intro) << ") {\n";
           AST_Type* const field_type = resolveActualType(field->field_type());
           const Classification fld_cls = classify(field_type);
 
@@ -2512,14 +2524,14 @@ namespace {
               "          strm.set_construction_status(Serializer::ConstructionSuccessful);\n";
             if (!(fld_cls & CL_STRING)) cases << "        strm.skip(end_of_field - strm.rpos());\n";
           } else if ((try_construct == tryconstructfailaction_trim) && (fld_cls & CL_BOUNDED) &&
-                    (fld_cls & (CL_STRING | CL_SEQUENCE))) {
+                     (fld_cls & (CL_STRING | CL_SEQUENCE))) {
             if ((fld_cls & CL_STRING) && (fld_cls & CL_BOUNDED)) {
               const std::string check_not_empty = use_cxx11 ? "!" + field_name + ".empty()" : field_name + ".in()";
               const std::string get_length = use_cxx11 ? field_name + ".length()" : "ACE_OS::strlen(" + field_name + ".in())";
               const std::string inout = use_cxx11 ? "" : ".inout()";
               cases <<
                 "        if (" + construct_bound_fail + " && " << check_not_empty << " && ("
-                        << bounded_arg(field_type) << " < " << get_length << ")) {\n"
+                                                               << bounded_arg(field_type) << " < " << get_length << ")) {\n"
                 "          " << field_name << inout;
               if (use_cxx11) {
                 cases <<
@@ -2565,7 +2577,7 @@ namespace {
         } else {
           be_global->impl_ <<
             "      switch (member_id) {\n"
-            << switch_cases <<
+                           << switch_cases <<
             "      default:\n";
         }
 
@@ -2573,7 +2585,7 @@ namespace {
           sw_indent << "if (must_understand) {\n" <<
           sw_indent << "  if (DCPS_debug_level >= 8) {\n" <<
           sw_indent << "    ACE_DEBUG((LM_DEBUG, ACE_TEXT(\"(%P|%t) unknown must_understand field(%u) in "
-          << cpp_name << "\\n\"), member_id));\n" <<
+                    << cpp_name << "\\n\"), member_id));\n" <<
           sw_indent << "  }\n" <<
           sw_indent << "  return false;\n" <<
           sw_indent << "}\n" <<
@@ -2636,9 +2648,13 @@ namespace {
         }
 
         if (is_optional) {
-          AST_Type* const type = resolveActualType(field->field_type());
-          Classification fld_cls = classify(type);
-          const std::string type_name = fld_cls & CL_STRING ? "String" : field->field_type()->full_name();
+          FieldInfo af(*field);
+          AST_Type* const field_type = resolveActualType(field->field_type());
+          Classification fld_cls = classify(field_type);
+          std::string type_name = (fld_cls & CL_STRING) ? ((fld_cls & CL_WIDE) ? "WString" : "String") : field->field_type()->full_name();
+          if (af.anonymous()) {
+            type_name = af.scoped_type_;
+          }
           const std::string has_value_name = field_name + "_has_value";
           expr += "    bool " + field_name + "_has_value = false;\n";
           expr += "    strm >> ACE_InputCDR::to_boolean(" + has_value_name + ");\n";
@@ -2647,15 +2663,19 @@ namespace {
           expr += "    if (" + has_value_name + " && !";
           std::string strm_name = tmp_name;
           if (fld_cls & CL_PRIMITIVE) {
-            AST_PredefinedType* p = dynamic_cast<AST_PredefinedType*>(type);
+            AST_PredefinedType* p = dynamic_cast<AST_PredefinedType*>(field_type);
             if (p->pt() == AST_PredefinedType::PT_boolean) {
               strm_name = "ACE_InputCDR::to_boolean(" + tmp_name + ")";
             }
+          } else if (fld_cls & (CL_ARRAY | CL_SEQUENCE)) {
+            RefWrapper wrapper(field_type, type_name, "", "", false);
+            wrapper.done();
+            strm_name = wrapper.wrapped_type_name() + "(" + strm_name + ")";
           }
           expr += "(strm >> " + strm_name + ")";
         } else {
           expr += generate_field_stream(
-            indent, field, ">> stru" + value_access, field->local_name()->get_string(), wrap_nested_key_only, intro);
+                                        indent, field, ">> stru" + value_access, field->local_name()->get_string(), wrap_nested_key_only, intro);
         }
         if (is_appendable) {
           expr += ") {\n"
@@ -2672,7 +2692,7 @@ namespace {
           }
           if (cond.empty()) {
             expr +=
-            "  }\n";
+              "  }\n";
           }
         } else if (!cond.empty()) {
           expr += ")";
