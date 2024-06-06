@@ -88,7 +88,9 @@ ACE_INLINE
 IdlType
 TimePoint_T<AceClock, IdlType>::to_idl_struct() const
 {
-  return time_value_to_time(value_);
+  IdlType i;
+  time_value_to_time(i, value_);
+  return i;
 }
 
 template<typename AceClock, typename IdlType>

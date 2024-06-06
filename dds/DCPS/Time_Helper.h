@@ -31,6 +31,13 @@ ACE_Time_Value time_to_time_value(const TimeT& t)
   return tv;
 }
 
+template <typename IdlType>
+void time_value_to_time(IdlType& t, const ACE_Time_Value& tv)
+{
+  t.sec = ACE_Utils::truncate_cast<CORBA::Long>(tv.sec());
+  t.nanosec = ACE_Utils::truncate_cast<CORBA::ULong>(tv.usec() * 1000);
+}
+
 ACE_INLINE OpenDDS_Dcps_Export
 DDS::Time_t time_value_to_time(const ACE_Time_Value& tv);
 
