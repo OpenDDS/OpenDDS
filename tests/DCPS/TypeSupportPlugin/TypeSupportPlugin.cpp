@@ -20,12 +20,12 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   DDS::DomainParticipantFactory_var dpf = TheParticipantFactoryWithArgs(argc, argv);
 
   ACE_DLL ts_plugin;
-  if (ts_plugin.open(ACE_TEXT("TypeSupportPlugin"))) {
+  if (ts_plugin.open(ACE_TEXT("ConsolidatedMessengerIdl"))) {
     ACE_ERROR((LM_ERROR, "ERROR: Failed to open the type support library\n"));
     return 1;
   }
 
-  const char* type_name = "TopicType";
+  const char* const type_name = "Messenger::Message";
   ACE_DEBUG((LM_DEBUG, "Getting TypeSupport for %C\n", type_name));
   DDS::TypeSupport_var ts = Registered_Data_Types->lookup(0, type_name);
   if (!ts) {
