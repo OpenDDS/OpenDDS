@@ -7,7 +7,6 @@
 #define OPENDDS_DCPS_TYPESUPPORTIMPL_H
 
 #include "dcps_export.h"
-#include "debug.h"
 #include "Definitions.h"
 #include "LocalObject.h"
 #include "Serializer.h"
@@ -15,7 +14,6 @@
 #include "XTypes/TypeObject.h"
 #include "XTypes/TypeLookupService.h"
 
-#include <dds/DdsDynamicDataC.h>
 #include <dds/DdsDcpsTypeSupportExtC.h>
 
 #ifndef ACE_LACKS_PRAGMA_ONCE
@@ -165,127 +163,6 @@ private:
 #endif
 
   OPENDDS_DELETED_COPY_MOVE_CTOR_ASSIGN(TypeSupportImpl)
-};
-
-template <typename NativeType>
-class TypeSupportImpl_T
-  : public virtual LocalObject<typename DDSTraits<NativeType>::TypeSupportType>
-  , public TypeSupportImpl
-{
-public:
-  typedef DDSTraits<NativeType> TraitsType;
-  typedef MarshalTraits<NativeType> MarshalTraitsType;
-
-  const char* name() const
-  {
-    return TraitsType::type_name();
-  }
-
-  size_t key_count() const
-  {
-    return TraitsType::key_count();
-  }
-
-  bool is_dcps_key(const char* fieldname) const
-  {
-    return TraitsType::is_key(fieldname);
-  }
-
-  void representations_allowed_by_type(DDS::DataRepresentationIdSeq& seq)
-  {
-    MarshalTraitsType::representations_allowed_by_type(seq);
-  }
-
-  Extensibility base_extensibility() const
-  {
-    return MarshalTraitsType::extensibility();
-  }
-
-  Extensibility max_extensibility() const
-  {
-    return MarshalTraitsType::max_extensibility_level();
-  }
-
-  SerializedSizeBound serialized_size_bound(const Encoding& encoding) const
-  {
-    return MarshalTraitsType::serialized_size_bound(encoding);
-  }
-
-  SerializedSizeBound key_only_serialized_size_bound(const Encoding& encoding) const
-  {
-    return MarshalTraitsType::key_only_serialized_size_bound(encoding);
-  }
-
-#ifndef OPENDDS_SAFETY_PROFILE
-  DDS::DynamicType_ptr get_type()
-  {
-    get_type_from_type_lookup_service();
-    return TypeSupportImpl::get_type();
-  }
-
-  /// The IDL is `NativeType create_sample(DDS::DynamicData src)`, but in the
-  /// C++ mapping this can return NativeType* or just NativeType depending on if
-  /// the type is "variable length". If it has something like a sequence then
-  /// it's variable length and returns a pointer else it's fixed and returns on
-  /// the stack. opendds_idl will wrap this in the correct form.
-  DDS::ReturnCode_t create_sample_rc(DDS::DynamicData_ptr src, NativeType& dst)
-  {
-    OpenDDS::DCPS::set_default(dst);
-#  if OPENDDS_HAS_DYNAMIC_DATA_ADAPTOR
-    DDS::DynamicType_var type = get_type();
-    DDS::DynamicData_var dst_dd = get_dynamic_data_adapter<NativeType>(type, dst);
-    const DDS::ReturnCode_t rc = XTypes::copy(dst_dd, src);
-    if (rc != DDS::RETCODE_OK && log_level >= LogLevel::Notice) {
-      ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: TypeSupportImpl_T::create_sample_rc: "
-        "failed to copy from DynamicData: %C\n", retcode_to_string(rc)));
-    }
-    return rc;
-#  else
-    ACE_UNUSED_ARG(dst);
-    ACE_UNUSED_ARG(src);
-    if (log_level >= LogLevel::Notice) {
-      ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: TypeSupportImpl_T::create_sample_rc: "
-        "OpenDDS built without DynamicDataAdaptor support\n"));
-    }
-    return DDS::RETCODE_UNSUPPORTED;
-#  endif
-  }
-
-  DDS::ReturnCode_t create_dynamic_sample_rc(const NativeType& src, DDS::DynamicData_ptr& dst)
-  {
-    CORBA::release(dst);
-    dst = 0;
-#  if OPENDDS_HAS_DYNAMIC_DATA_ADAPTOR
-    DDS::DynamicType_var type = get_type();
-    DDS::DynamicData_var dest_dd = DDS::DynamicDataFactory::get_instance()->create_data(type);
-    DDS::DynamicData_var src_dd = get_dynamic_data_adapter<NativeType>(type, &src);
-    const DDS::ReturnCode_t rc = XTypes::copy(dest_dd, src_dd);
-    if (rc == DDS::RETCODE_OK) {
-      dst = DDS::DynamicData::_duplicate(dest_dd);
-      return rc;
-    }
-    if (log_level >= LogLevel::Notice) {
-      ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: TypeSupportImpl_T::create_dynamic_sample_rc: "
-        "failed to copy to DynamicData: %C\n", retcode_to_string(rc)));
-    }
-#  else
-    ACE_UNUSED_ARG(dst);
-    ACE_UNUSED_ARG(src);
-    if (log_level >= LogLevel::Notice) {
-      ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: TypeSupportImpl_T::create_dynamic_sample_rc: "
-        "OpenDDS built without DynamicDataAdaptor support\n"));
-    }
-    return DDS::RETCODE_UNSUPPORTED;
-#  endif
-  }
-
-  DDS::DynamicData_ptr create_dynamic_sample(const NativeType& src)
-  {
-    DDS::DynamicData_var dst;
-    create_dynamic_sample_rc(src, dst);
-    return dst;
-  }
-#endif
 };
 
 template <typename T>

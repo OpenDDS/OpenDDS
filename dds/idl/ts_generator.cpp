@@ -171,7 +171,7 @@ bool ts_generator::generate_ts(AST_Type* node, UTL_ScopedName* name)
   be_global->add_include(dc.c_str());
 
   static const char* h_includes[] = {
-    "dds/DCPS/TypeSupportImpl.h", "dds/DCPS/ValueDispatcher.h"
+    "dds/DCPS/TypeSupportImpl_T.h", "dds/DCPS/ValueDispatcher.h"
   };
   add_includes(h_includes, BE_GlobalData::STREAM_H);
 

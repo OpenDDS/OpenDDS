@@ -6,6 +6,8 @@
 #ifndef OPENDDS_DCPS_XTYPES_DYNAMIC_DATA_ADAPTER_H
 #define OPENDDS_DCPS_XTYPES_DYNAMIC_DATA_ADAPTER_H
 
+#include "DynamicDataAdapterFwd.h"
+
 #ifndef OPENDDS_SAFETY_PROFILE
 #  include <dds/DCPS/Definitions.h>
 #  if OPENDDS_HAS_DYNAMIC_DATA_ADAPTER
@@ -22,30 +24,7 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace XTypes {
 
-// If changing just these two, also change the get_dynamic_data_adapter forward
-// declarations in Sample.h.
-template <typename T, typename Tag>
-DDS::DynamicData_ptr get_dynamic_data_adapter(DDS::DynamicType_ptr type, const T& value);
-template <typename T, typename Tag>
-DDS::DynamicData_ptr get_dynamic_data_adapter(DDS::DynamicType_ptr type, T& value);
-
-template <typename T>
-DDS::DynamicData_ptr get_dynamic_data_adapter(DDS::DynamicType_ptr type, T& value)
-{
-  return get_dynamic_data_adapter<T, T>(type, value);
-}
-
-template <typename T>
-DDS::DynamicData_ptr get_dynamic_data_adapter(DDS::DynamicType_ptr type, const T& value)
-{
-  return get_dynamic_data_adapter<T, T>(type, value);
-}
-
-template <typename T, typename Tag>
-const T* get_dynamic_data_adapter_value(DDS::DynamicData_ptr dda);
-
 #  if OPENDDS_HAS_DYNAMIC_DATA_ADAPTER
-
 template <typename T, typename Tag = void>
 class DynamicDataAdapterImpl;
 
