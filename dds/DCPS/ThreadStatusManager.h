@@ -199,7 +199,6 @@ private:
   mutable ACE_Thread_Mutex lock_;
 };
 
-
 } // namespace DCPS
 } // namespace OpenDDS
 
