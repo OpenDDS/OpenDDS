@@ -3820,8 +3820,9 @@ bool operator>>(Serializer& strm, XTypes::AnnotationParameterValue& uni)
   case XTypes::TK_STRING16:
 #ifdef DDS_HAS_WCHAR
     return (strm >> Serializer::ToBoundedString<wchar_t>(uni.string16_value(), 128));
-#endif
+#else
     return false;
+#endif
   default:
     return (strm >> uni.extended_value());
   }
