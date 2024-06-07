@@ -9,6 +9,7 @@
 #define OPENDDS_DCPS_EXT_IDL
 
 #include <dds/DdsDcpsCore.idl>
+#include <dds/DdsDcpsInfoUtils.idl>
 #include <dds/DdsDcpsGuid.idl>
 
 #if defined __OPENDDS_IDL && !defined DDS_HAS_MINIMUM_BIT
@@ -74,6 +75,7 @@ module OpenDDS
     struct InternalThreadBuiltinTopicData {
       BUILT_IN_TOPIC_KEY string thread_id;
       double utilization;
+      MonotonicTime_t monotonic_timestamp;
     };
 
     const long LOCATOR_KIND_INVALID = -1;

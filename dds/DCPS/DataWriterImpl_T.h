@@ -52,7 +52,7 @@ public:
 
   DDS::InstanceHandle_t register_instance(const MessageType& instance)
   {
-    return register_instance_w_timestamp(instance, SystemTimePoint::now().to_dds_time());
+    return register_instance_w_timestamp(instance, SystemTimePoint::now().to_idl_struct());
   }
 
   DDS::InstanceHandle_t register_instance_w_timestamp(
@@ -64,7 +64,7 @@ public:
 
   DDS::ReturnCode_t unregister_instance(const MessageType& instance, DDS::InstanceHandle_t handle)
   {
-    return unregister_instance_w_timestamp(instance, handle, SystemTimePoint::now().to_dds_time());
+    return unregister_instance_w_timestamp(instance, handle, SystemTimePoint::now().to_idl_struct());
   }
 
   DDS::ReturnCode_t unregister_instance_w_timestamp(
@@ -81,7 +81,7 @@ public:
   //         This lack of safety helps performance.
   DDS::ReturnCode_t write(const MessageType& instance_data, DDS::InstanceHandle_t handle)
   {
-    return write_w_timestamp(instance_data, handle, SystemTimePoint::now().to_dds_time());
+    return write_w_timestamp(instance_data, handle, SystemTimePoint::now().to_idl_struct());
   }
 
   //WARNING: If the handle is non-nil and the instance is not registered
@@ -98,7 +98,7 @@ public:
 
   DDS::ReturnCode_t dispose(const MessageType& instance_data, DDS::InstanceHandle_t instance_handle)
   {
-    return dispose_w_timestamp(instance_data, instance_handle, SystemTimePoint::now().to_dds_time());
+    return dispose_w_timestamp(instance_data, instance_handle, SystemTimePoint::now().to_idl_struct());
   }
 
   DDS::ReturnCode_t dispose_w_timestamp(

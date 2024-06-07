@@ -7,7 +7,7 @@ void RelayParticipantStatusReporter::add_participant(const OpenDDS::DCPS::GUID_t
 {
   const auto monotonic_now = OpenDDS::DCPS::MonotonicTimePoint::now();
   const auto system_now = OpenDDS::DCPS::SystemTimePoint::now();
-  const DDS::Time_t timestamp = system_now.to_dds_time();
+  const DDS::Time_t timestamp = system_now.to_idl_struct();
 
   RelayParticipantStatus status;
   status.relay_id(config_.relay_id());
@@ -94,7 +94,7 @@ void RelayParticipantStatusReporter::set_alive(const OpenDDS::DCPS::GUID_t& repo
   }
 
   pos->second.alive(alive);
-  pos->second.alive_ts(system_now.to_dds_time());
+  pos->second.alive_ts(system_now.to_idl_struct());
 
   if (writer_->write(pos->second, DDS::HANDLE_NIL) != DDS::RETCODE_OK) {
     ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: "
@@ -120,7 +120,7 @@ void RelayParticipantStatusReporter::set_active(const OpenDDS::DCPS::GUID_t& rep
   }
 
   pos->second.active(active);
-  pos->second.active_ts(system_now.to_dds_time());
+  pos->second.active_ts(system_now.to_idl_struct());
 
   if (writer_->write(pos->second, DDS::HANDLE_NIL) != DDS::RETCODE_OK) {
     ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: "
@@ -146,7 +146,7 @@ void RelayParticipantStatusReporter::set_alive_active(const OpenDDS::DCPS::GUID_
     return;
   }
 
-  const DDS::Time_t timestamp = system_now.to_dds_time();
+  const DDS::Time_t timestamp = system_now.to_idl_struct();
   if (pos->second.alive() != alive) {
     pos->second.alive(alive);
     pos->second.alive_ts(timestamp);
