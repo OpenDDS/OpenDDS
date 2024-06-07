@@ -3,6 +3,7 @@
  * See: http://www.opendds.org/license.html
  */
 
+#include <ace/config.h>
 #include <dds/OpenDDSConfigWrapper.h>
 
 #if OPENDDS_CONFIG_SECURITY

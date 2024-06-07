@@ -6,6 +6,7 @@
 #ifndef OPENDDS_DCPS_RTPS_SEDP_H
 #define OPENDDS_DCPS_RTPS_SEDP_H
 
+#include <ace/config.h>
 #include <dds/OpenDDSConfigWrapper.h>
 
 #include "AssociationRecord.h"

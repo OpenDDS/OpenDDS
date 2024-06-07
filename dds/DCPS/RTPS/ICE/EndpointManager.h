@@ -5,6 +5,8 @@
  * See: http://www.opendds.org/license.html
  */
 
+#include <ace/config.h>
+#include <dds/OpenDDSConfigWrapper.h>
 
 #if OPENDDS_CONFIG_SECURITY
 #ifndef OPENDDS_DCPS_RTPS_ICE_ENDPOINTMANAGER_H
@@ -16,7 +18,6 @@
 
 #include "dds/DCPS/Definitions.h"
 
-#include <dds/OpenDDSConfigWrapper.h>
 #include "dds/Versioned_Namespace.h"
 
 #include <ace/INET_Addr.h>
