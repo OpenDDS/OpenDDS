@@ -899,8 +899,8 @@ private:
 
 template<typename Type>
 struct KeyOnly {
-  explicit KeyOnly(Type& value)
-    : value(value)
+  explicit KeyOnly(Type& a_value)
+    : value(a_value)
   {
   }
 
@@ -914,8 +914,8 @@ struct KeyOnly {
 
 template<typename Type>
 struct NestedKeyOnly {
-  explicit NestedKeyOnly(Type& value)
-    : value(value)
+  explicit NestedKeyOnly(Type& a_value)
+    : value(a_value)
   {
   }
 
