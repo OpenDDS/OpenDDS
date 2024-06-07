@@ -42,7 +42,7 @@ ACE_INLINE OpenDDS_Dcps_Export
 DDS::Time_t time_value_to_time(const ACE_Time_Value& tv);
 
 ACE_INLINE OpenDDS_Dcps_Export
-MonotonicTime_t time_value_to_time(const ACE_Time_Value_T<MonotonicClock>& tv);
+MonotonicTime_t time_value_to_time(const ACE_Time_Value_T<ACE_Monotonic_Time_Policy>& tv);
 
 ACE_INLINE OpenDDS_Dcps_Export
 ACE_Time_Value duration_to_time_value(const DDS::Duration_t& t);
