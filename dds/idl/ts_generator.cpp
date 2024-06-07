@@ -340,7 +340,7 @@ bool ts_generator::generate_ts(AST_Type* node, UTL_ScopedName* name)
         "  const ::DDS::ReturnCode_t rc = " << ts_base << "::create_sample_rc(src, value);\n";
     }
     be_global->impl_ <<
-      "  if (rc != DDS::RETCODE_OK && OpenDDS::DCPS::log_level >= OpenDDS::DCPS::LogLevel::Warning) {\n"
+      "  if (rc != ::DDS::RETCODE_OK && OpenDDS::DCPS::log_level >= OpenDDS::DCPS::LogLevel::Warning) {\n"
       "    ACE_ERROR((LM_WARNING, \"(%P|%t) WARNING: " << short_tsi_name << "::create_sample: \"\n"
       "      \"create_sample_rc failed: %C\\n\", OpenDDS::DCPS::retcode_to_string(rc)));\n"
       "  }\n"
