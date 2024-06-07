@@ -1516,7 +1516,7 @@ DomainParticipantImpl::get_default_topic_qos(
 DDS::ReturnCode_t
 DomainParticipantImpl::get_current_time(DDS::Time_t& current_time)
 {
-  current_time = SystemTimePoint::now().to_dds_time();
+  current_time = SystemTimePoint::now().to_idl_struct();
   return DDS::RETCODE_OK;
 }
 

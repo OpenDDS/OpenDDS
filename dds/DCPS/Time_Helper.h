@@ -11,6 +11,7 @@
 #include <dds/DdsDcpsCoreC.h>
 #include <dds/DdsDcpsInfoUtilsC.h>
 
+#include <ace/Monotonic_Time_Policy.h>
 #include <ace/OS_NS_sys_time.h>
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
@@ -22,14 +23,25 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-ACE_INLINE OpenDDS_Dcps_Export
-ACE_Time_Value time_to_time_value(const DDS::Time_t& t);
+template <typename TimeT>
+ACE_Time_Value time_to_time_value(const TimeT& t)
+{
+  ACE_Time_Value tv(t.sec, t.nanosec / 1000);
+  return tv;
+}
+
+template <typename IdlType>
+void time_value_to_time(IdlType& t, const ACE_Time_Value& tv)
+{
+  t.sec = ACE_Utils::truncate_cast<CORBA::Long>(tv.sec());
+  t.nanosec = ACE_Utils::truncate_cast<CORBA::ULong>(tv.usec() * 1000);
+}
 
 ACE_INLINE OpenDDS_Dcps_Export
 DDS::Time_t time_value_to_time(const ACE_Time_Value& tv);
 
 ACE_INLINE OpenDDS_Dcps_Export
-MonotonicTime_t time_value_to_monotonic_time(const ACE_Time_Value& tv);
+MonotonicTime_t time_value_to_time(const ACE_Time_Value_T<ACE_Monotonic_Time_Policy>& tv);
 
 ACE_INLINE OpenDDS_Dcps_Export
 ACE_Time_Value duration_to_time_value(const DDS::Duration_t& t);

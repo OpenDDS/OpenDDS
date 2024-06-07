@@ -832,7 +832,7 @@ namespace OpenDDS {
     bool filtered = false;
     SubscriptionInstance_rch instance;
 
-    const DDS::Time_t now = timestamp.to_dds_time();
+    const DDS::Time_t now = timestamp.to_idl_struct();
     DataSampleHeader header;
     header.source_timestamp_sec_ = now.sec;
     header.source_timestamp_nanosec_ = now.nanosec;
@@ -884,7 +884,7 @@ namespace OpenDDS {
 
     SubscriptionInstance_rch si = get_handle_instance(instance);
     if (si && state != DDS::ALIVE_INSTANCE_STATE) {
-      const DDS::Time_t now = timestamp.to_dds_time();
+      const DDS::Time_t now = timestamp.to_idl_struct();
       DataSampleHeader header;
       header.publication_id_ = publication_id;
       header.source_timestamp_sec_ = now.sec;

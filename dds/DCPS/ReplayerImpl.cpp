@@ -102,7 +102,7 @@ ReplayerImpl::cleanup()
 {
 
   //     // Unregister all registered instances prior to deletion.
-  //     // this->unregister_instances(SystemTimePoint::now().to_dds_time());
+  //     // this->unregister_instances(SystemTimePoint::now().to_idl_struct());
   //
   //     // CORBA::String_var topic_name = this->get_Atopic_name();
   {

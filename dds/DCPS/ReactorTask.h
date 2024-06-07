@@ -112,11 +112,10 @@ private:
 #endif
 
   TimerQueueType* timer_queue_;
+  ReactorInterceptor_rch interceptor_;
 
   // thread status reporting
   String name_;
-
-  ReactorInterceptor_rch interceptor_;
   ThreadStatusManager* thread_status_manager_;
 };
 

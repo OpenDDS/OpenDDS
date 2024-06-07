@@ -105,6 +105,8 @@
 /DdsDcpsDomainJC.h
 /DdsDcpsGuidJC.cpp
 /DdsDcpsGuidJC.h
+/DdsDcpsInfoUtilsJC.cpp
+/DdsDcpsInfoUtilsJC.h
 /DdsDcpsInfrastructureJC.cpp
 /DdsDcpsInfrastructureJC.h
 /DdsDcpsInfrastructureTypeSupportJC.cpp
@@ -119,6 +121,7 @@
 /DdsDcpsTopicJC.h
 /DdsDcpsTypeSupportExtJC.cpp
 /DdsDcpsTypeSupportExtJC.h
+/OpenDDS_DCPS__ConfigStoreTAOPeer.h
 /OpenDDS_DCPS__ConnectionRecordDataReaderTAOPeer.h
 /OpenDDS_DCPS__ConnectionRecordDataWriterTAOPeer.h
 /OpenDDS_DCPS__ConnectionRecordTypeSupportTAOPeer.h

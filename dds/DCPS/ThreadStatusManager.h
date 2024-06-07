@@ -9,6 +9,7 @@
 #define OPENDDS_DCPS_THREADSTATUSMANAGER_H
 
 #include "dcps_export.h"
+#include "RcEventHandler.h"
 #include "TimeTypes.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
@@ -145,6 +146,16 @@ public:
 
   private:
     ThreadStatusManager& thread_status_manager_;
+  };
+
+  struct Updater : RcEventHandler {
+    int handle_timeout(const ACE_Time_Value&, const void* arg)
+    {
+      const ThreadStatusManager* const tsmConst = static_cast<const ThreadStatusManager*>(arg);
+      ThreadStatusManager* const tsm = const_cast<ThreadStatusManager*>(tsmConst);
+      tsm->idle();
+      return 0;
+    }
   };
 
   /// Copy active and idle threads to running and finished threads to

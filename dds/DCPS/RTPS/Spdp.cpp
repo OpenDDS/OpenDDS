@@ -232,7 +232,7 @@ Spdp::Spdp(DDS::DomainId_t domain,
   , lease_extension_(disco_->config()->lease_extension())
   , domain_(domain)
   , guid_(guid)
-  , participant_discovered_at_(MonotonicTimePoint::now().to_monotonic_time())
+  , participant_discovered_at_(MonotonicTimePoint::now().to_idl_struct())
   , is_application_participant_(false)
   , tport_(DCPS::make_rch<SpdpTransport>(rchandle_from(this)))
   , initialized_flag_(false)
@@ -280,7 +280,7 @@ Spdp::Spdp(DDS::DomainId_t domain,
   , lease_extension_(disco_->config()->lease_extension())
   , domain_(domain)
   , guid_(guid)
-  , participant_discovered_at_(MonotonicTimePoint::now().to_monotonic_time())
+  , participant_discovered_at_(MonotonicTimePoint::now().to_idl_struct())
   , is_application_participant_(false)
   , tport_(DCPS::make_rch<SpdpTransport>(rchandle_from(this)))
   , initialized_flag_(false)
@@ -509,56 +509,56 @@ void Spdp::process_location_updates_i(const DiscoveredParticipantIter& iter, boo
     case DCPS::LOCATION_LOCAL:
       address_change = addr.compare(location_data.local_addr.in()) != 0;
       location_data.local_addr = addr.c_str();
-      location_data.local_timestamp = pos->timestamp_.to_dds_time();
+      location_data.local_timestamp = pos->timestamp_.to_idl_struct();
       break;
     case DCPS::LOCATION_ICE:
       address_change = addr.compare(location_data.ice_addr.in()) != 0;
       location_data.ice_addr = addr.c_str();
-      location_data.ice_timestamp = pos->timestamp_.to_dds_time();
+      location_data.ice_timestamp = pos->timestamp_.to_idl_struct();
       break;
     case DCPS::LOCATION_RELAY:
       address_change = addr.compare(location_data.relay_addr.in()) != 0;
       location_data.relay_addr = addr.c_str();
-      location_data.relay_timestamp = pos->timestamp_.to_dds_time();
+      location_data.relay_timestamp = pos->timestamp_.to_idl_struct();
       break;
     case DCPS::LOCATION_LOCAL6:
       address_change = addr.compare(location_data.local6_addr.in()) != 0;
       location_data.local6_addr = addr.c_str();
-      location_data.local6_timestamp = pos->timestamp_.to_dds_time();
+      location_data.local6_timestamp = pos->timestamp_.to_idl_struct();
       break;
     case DCPS::LOCATION_ICE6:
       address_change = addr.compare(location_data.ice6_addr.in()) != 0;
       location_data.ice6_addr = addr.c_str();
-      location_data.ice6_timestamp = pos->timestamp_.to_dds_time();
+      location_data.ice6_timestamp = pos->timestamp_.to_idl_struct();
       break;
     case DCPS::LOCATION_RELAY6:
       address_change = addr.compare(location_data.relay6_addr.in()) != 0;
       location_data.relay6_addr = addr.c_str();
-      location_data.relay6_timestamp = pos->timestamp_.to_dds_time();
+      location_data.relay6_timestamp = pos->timestamp_.to_idl_struct();
       break;
     }
 
-    const DDS::Time_t expr = (pos->timestamp_ - leaseDuration).to_dds_time();
+    const DDS::Time_t expr = (pos->timestamp_ - leaseDuration).to_idl_struct();
 
     if ((location_data.location & DCPS::LOCATION_LOCAL) && DCPS::operator<(location_data.local_timestamp, expr)) {
       location_data.location &= ~(DCPS::LOCATION_LOCAL);
       location_data.change_mask |= DCPS::LOCATION_LOCAL;
-      location_data.local_timestamp = pos->timestamp_.to_dds_time();
+      location_data.local_timestamp = pos->timestamp_.to_idl_struct();
     }
     if ((location_data.location & DCPS::LOCATION_RELAY) && DCPS::operator<(location_data.relay_timestamp, expr)) {
       location_data.location &= ~(DCPS::LOCATION_RELAY);
       location_data.change_mask |= DCPS::LOCATION_RELAY;
-      location_data.relay_timestamp = pos->timestamp_.to_dds_time();
+      location_data.relay_timestamp = pos->timestamp_.to_idl_struct();
     }
     if ((location_data.location & DCPS::LOCATION_LOCAL6) && DCPS::operator<(location_data.local6_timestamp, expr)) {
       location_data.location &= ~(DCPS::LOCATION_LOCAL6);
       location_data.change_mask |= DCPS::LOCATION_LOCAL6;
-      location_data.local6_timestamp = pos->timestamp_.to_dds_time();
+      location_data.local6_timestamp = pos->timestamp_.to_idl_struct();
     }
     if ((location_data.location & DCPS::LOCATION_RELAY6) && DCPS::operator<(location_data.relay6_timestamp, expr)) {
       location_data.location &= ~(DCPS::LOCATION_RELAY6);
       location_data.change_mask |= DCPS::LOCATION_RELAY6;
-      location_data.relay6_timestamp = pos->timestamp_.to_dds_time();
+      location_data.relay6_timestamp = pos->timestamp_.to_idl_struct();
     }
 
     if (old_mask != location_data.location || address_change) {
@@ -799,7 +799,7 @@ Spdp::handle_participant_data(DCPS::MessageId id,
     }
 
     if (DCPS::transport_debug.log_progress) {
-      log_progress("participant discovery", guid_, guid, iter->second.discovered_at_.to_monotonic_time());
+      log_progress("participant discovery", guid_, guid, iter->second.discovered_at_.to_idl_struct());
     }
 
 #ifndef DDS_HAS_MINIMUM_BIT
@@ -880,7 +880,7 @@ Spdp::handle_participant_data(DCPS::MessageId id,
 
   } else { // Existing Participant
     if (from_sedp && DCPS::transport_debug.log_progress) {
-      log_progress("secure participant discovery", guid_, guid, iter->second.discovered_at_.to_monotonic_time());
+      log_progress("secure participant discovery", guid_, guid, iter->second.discovered_at_.to_idl_struct());
     }
 
 #ifndef DDS_HAS_MINIMUM_BIT
@@ -1015,7 +1015,7 @@ Spdp::data_received(const DataSubmessage& data,
   ParticipantData_t pdata = ParticipantData_t();
 
   pdata.participantProxy.domainId = domain_;
-  pdata.discoveredAt = MonotonicTimePoint::now().to_monotonic_time();
+  pdata.discoveredAt = MonotonicTimePoint::now().to_idl_struct();
 
 
   if (!ParameterListConverter::from_param_list(plist, pdata)) {
@@ -1846,7 +1846,7 @@ Spdp::handle_participant_crypto_tokens(const DDS::Security::ParticipantVolatileM
   }
 
   if (DCPS::transport_debug.log_progress) {
-    log_progress("participant crypto token", guid_, src_participant, iter->second.discovered_at_.to_monotonic_time());
+    log_progress("participant crypto token", guid_, src_participant, iter->second.discovered_at_.to_idl_struct());
   }
 
   const DDS::Security::ParticipantCryptoTokenSeq& inboundTokens =
@@ -2010,7 +2010,7 @@ Spdp::match_authenticated(const DCPS::RepoId& guid, DiscoveredParticipantIter& i
   }
 
   if (DCPS::transport_debug.log_progress) {
-    log_progress("authentication", guid_, guid, iter->second.discovered_at_.to_monotonic_time());
+    log_progress("authentication", guid_, guid, iter->second.discovered_at_.to_idl_struct());
   }
 
   DDS::Security::ParticipantCryptoHandle dp_crypto_handle =
@@ -4476,6 +4476,7 @@ void Spdp::SpdpTransport::thread_status_task(const DCPS::MonotonicTimePoint& now
     DCPS::InternalThreadBuiltinTopicData data;
     data.thread_id = i->bit_key().c_str();
     data.utilization = i->utilization(now);
+    data.monotonic_timestamp = i->last_update().to_idl_struct();
     outer->bit_subscriber_->add_thread_status(data, DDS::NEW_VIEW_STATE, i->timestamp());
   }
 
@@ -4621,7 +4622,7 @@ DCPS::MonotonicTime_t Spdp::get_participant_discovered_at() const
 DCPS::MonotonicTime_t Spdp::get_participant_discovered_at(const DCPS::RepoId& guid) const
 {
   const DiscoveredParticipantConstIter iter = participants_.find(make_part_guid(guid));
-  return iter->second.discovered_at_.to_monotonic_time();
+    return iter->second.discovered_at_.to_idl_struct();
 }
 
 void
