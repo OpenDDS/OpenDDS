@@ -5,6 +5,7 @@
 
 #include <DCPS/DdsDcps_pch.h> //Only the _pch include should start with DCPS/
 
+#include <ace/config.h>
 #include <dds/OpenDDSConfigWrapper.h>
 
 #if OPENDDS_CONFIG_SECURITY
