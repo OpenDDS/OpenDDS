@@ -1354,7 +1354,7 @@ The standard methods will only warn if there was an error and can't indicate tha
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 ``create_sample`` takes a ``DynamicData`` and returns the IDL-generated type.
-One thing to note about this method is the C++ to IDL specification requires that returns like this can be either returned on the stack or the heap depending on if they are :omgspec:`"variable-length" <cpp03:5.11 Mapping for Structured Types>`.
+One thing to note about this method is the IDL-to-C++ specification requires that returns like this can be either returned on the stack or the heap depending on if they are :omgspec:`"variable-length" <cpp03:5.11 Mapping for Structured Types>`.
 For example if there's a topic type ``Foo`` that doesn't contain a ``vector`` or ``string``, then:
 
 .. code-block:: omg-idl
@@ -1370,7 +1370,7 @@ For example if there's a topic type ``Foo`` that doesn't contain a ``vector`` or
 
   Foo foo = type_support->create_sample(data);
 
-If the type contains a ``vector`` or ``string`` anywhere, then then it returns a pointer that's meant to go inside a ``_var`` class:
+If the type contains a ``sequence`` or ``string`` anywhere, then then it returns a pointer that's meant to go inside a ``_var`` class:
 
 .. code-block:: omg-idl
 
@@ -1427,7 +1427,7 @@ Wrapping Data using ``DynamicDataAdapter``
 .. versionadded:: 3.29.0 (but unofficially present in its current form in 3.24.0)
 
 ``DynamicDataAdapter`` is an OpenDDS-specific implementation of ``DynamicData`` that wraps an IDL-generated type.
-This allows direct interaction instead of copying all the data everytime.
+This allows direct interaction instead of copying all the data every time.
 See :ghfile:`dds/DCPS/XTypes/DynamicDataAdapter.h` for a list of known issues and unimplemented features.
 
 ``DynamicDataAdapter`` requires the :ref:`building--content-subscription-profile` (enabled by default) and can be acquired using the ``DDS::DynamicData* OpenDDS::XTypes::get_dynamic_data_adapter<T>(DDS::DynamicType* type, T& value)`` function in the type's ``*TypeSupportImpl.h`` file.
