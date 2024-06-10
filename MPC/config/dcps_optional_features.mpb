@@ -59,5 +59,10 @@ feature (!no_opendds_security) : taoidldefaults, dcps_ts_defaults {
   dcps_ts_flags += -DOPENDDS_SECURITY
 }
 
+feature (!openddsconfig_h_file) : taoidldefaults, dcps_ts_defaults {
+  idlflags += -DOPENDDS_IGNORE_OPENDDSCONFIG_H_FILE
+  dcps_ts_flags += -DOPENDDS_IGNORE_OPENDDSCONFIG_H_FILE
+}
+
 project: dcps_optional_bidir_giop {
 }

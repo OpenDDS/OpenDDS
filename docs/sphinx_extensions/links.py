@@ -375,7 +375,7 @@ class OmgSpecsDirective(SphinxDirective):
             p += nodes.literal('', spec_name)
             p += nodes.inline('', ')')
             spec_node += p
-            if 'debug-links' in self.options:
+            if 'debug-links' in self.options and not self.env.app.config.gen_all_omg_spec_links:
                 self.spec_sections(spec, spec_node, spec['sections'])
             specs_node += spec_node
         return [specs_node]
@@ -395,6 +395,7 @@ def setup(app):
     app.add_role('acetaorel', acetaorel_role)
 
     app.add_config_value('omg_specs', {}, 'env', types=[dict])
+    app.add_config_value('gen_all_omg_spec_links', True, 'env', types=[bool])
     app.add_role('omgissue', omgissue_role)
     app.add_role('omgspec', omgspec_role)
     app.add_directive("omgspecs", OmgSpecsDirective)

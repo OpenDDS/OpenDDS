@@ -53,6 +53,41 @@ Dependencies
 
   :doc:`/devguide/building/dependencies` for all dependencies and details on how these are used in OpenDDS.
 
+*********************
+Dependency Management
+*********************
+
+ACE/TAO
+=======
+
+By default, the :ghfile:`configure` script and :ref:`CMake support<cmake-building>` use released versions of ACE/TAO.
+The same versions are used for pull requests.
+The versions are documented in :ghfile:`acetao.ini`.
+Currently, the :ghfile:`configure` scripts uses a release of ACE6 and CMake uses a release of ACE7.
+
+The versions are updated by the GitHub Actions workflow in :ghfile:`.github/workflows/update-ace-tao.yml` for micro/patch releases.
+When a new version of ACE/TAO is available, the workflow creates a pull request based on the new version.
+Ideally, this pull request would be merged early in a development cycle to allow the maximum number of builds to use the new versions.
+Changing the major and minor version will be considered at the beginning of a development cycle.
+
+To stay abreast of changes in ACE/TAO and provide feedback to ACE/TAO, there are additional GitHub Action workflows for build and testing with various ACE/TAO branches.
+These workflows are executed on a periodic basis.
+
+A developer is allowed to change the ACE/TAO version for their PR.
+If this is not a release, then the PR would be merged after the necessary ACE/TAO functionality is released.
+Ideally, the GitHub Actions files would be extended with variables that allow the default versions to be changed easily and a lint script would be added to prevent unintended changes.
+
+TODO
+====
+
+* MPC
+* Perl
+* openssl
+* xerces
+* rapidjson
+* GoogleTest
+* vcpkg
+
 .. _dev_guidelines-text_file_formating:
 
 ********************

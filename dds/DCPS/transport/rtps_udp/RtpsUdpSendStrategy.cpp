@@ -11,11 +11,15 @@
 #include "RtpsUdpTransport.h"
 
 #include <dds/DdsDcpsGuidTypeSupportImpl.h>
+#include <dds/OpenDDSConfigWrapper.h>
+
 #include <dds/DCPS/LogAddr.h>
 #include <dds/DCPS/Serializer.h>
+
 #include <dds/DCPS/RTPS/MessageUtils.h>
 #include <dds/DCPS/RTPS/MessageParser.h>
 #include <dds/DCPS/RTPS/RtpsCoreTypeSupportImpl.h>
+
 #include <dds/DCPS/transport/framework/NullSynchStrategy.h>
 #include <dds/DCPS/transport/framework/TransportCustomizedElement.h>
 #include <dds/DCPS/transport/framework/TransportSendElement.h>
@@ -170,7 +174,7 @@ RtpsUdpSendStrategy::send_rtps_control(RTPS::Message& message,
 
   const AMB_Continuation cont(rtps_header_mb_lock_, rtps_header_mb_, submessages);
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
   Message_Block_Ptr alternate;
   if (security_config()) {
     const DDS::Security::CryptoTransform_var crypto = link_->security_config()->get_crypto_transform();
@@ -210,7 +214,7 @@ RtpsUdpSendStrategy::send_rtps_control(RTPS::Message& message,
 
   const AMB_Continuation cont(rtps_header_mb_lock_, rtps_header_mb_, submessages);
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
   Message_Block_Ptr alternate;
   if (security_config()) {
     const DDS::Security::CryptoTransform_var crypto = link_->security_config()->get_crypto_transform();
@@ -348,7 +352,7 @@ RtpsUdpSendStrategy::add_delayed_notification(TransportQueueElement* element)
   }
 }
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
 namespace {
   DDS::OctetSeq toSeq(const ACE_Message_Block* mb)
   {
@@ -788,7 +792,7 @@ size_t RtpsUdpSendStrategy::max_message_size() const
 {
   // TODO: Make this conditional on if the message actually needs to do this.
   return max_message_size_
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
     // Worst case scenario is full message encryption plus one submessage encryption.
     - MaxSecureSubmessageAdditionalSize - MaxSecureFullMessageAdditionalSize
 #endif

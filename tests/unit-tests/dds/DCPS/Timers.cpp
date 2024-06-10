@@ -64,3 +64,18 @@ TEST(dds_DCPS_Timers, test_immediate)
   ASSERT_EQ(handler->calls_, 1);
   Timers::cancel(&reactor, id);
 }
+
+TEST(dds_DCPS_Timers, test_negative)
+{
+  RcHandle<TestEventHandler> handler = make_rch<TestEventHandler>();
+  ACE_Reactor reactor(new ACE_Select_Reactor, true);
+
+  const Timers::TimerId id = Timers::schedule(&reactor, *handler, 0, TimeDuration(-23));
+  ASSERT_NE(id, Timers::InvalidTimerId);
+
+  ACE_Time_Value one_sec(1);
+  reactor.handle_events(one_sec);
+
+  ASSERT_EQ(handler->calls_, 1);
+  Timers::cancel(&reactor, id);
+}

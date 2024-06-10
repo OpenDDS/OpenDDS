@@ -51,10 +51,10 @@ MinimalMemberDetail::MinimalMemberDetail(const OPENDDS_STRING& name)
 #undef max
 #endif
 
-AppliedBuiltinMemberAnnotations::AppliedBuiltinMemberAnnotations(const Optional<DCPS::String>& a_unit,
-                                                                 const Optional<AnnotationParameterValue>& a_min,
-                                                                 const Optional<AnnotationParameterValue>& a_max,
-                                                                 const Optional<DCPS::String>& a_hash_id)
+AppliedBuiltinMemberAnnotations::AppliedBuiltinMemberAnnotations(const OPENDDS_OPTIONAL_NS::optional<DCPS::String>& a_unit,
+                                                                 const OPENDDS_OPTIONAL_NS::optional<AnnotationParameterValue>& a_min,
+                                                                 const OPENDDS_OPTIONAL_NS::optional<AnnotationParameterValue>& a_max,
+                                                                 const OPENDDS_OPTIONAL_NS::optional<DCPS::String>& a_hash_id)
   : unit(a_unit)
   , min(a_min)
   , max(a_max)
@@ -499,7 +499,7 @@ void compute_dependencies(const TypeMap& type_map,
 }
 
 void compute_dependencies(const TypeMap& type_map,
-                          const Optional<AppliedAnnotationSeq>& ann_seq,
+                          const OPENDDS_OPTIONAL_NS::optional<AppliedAnnotationSeq>& ann_seq,
                           OPENDDS_SET(TypeIdentifier)& dependencies)
 {
   if (ann_seq) {

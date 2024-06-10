@@ -105,6 +105,8 @@
 /DdsDcpsDomainJC.h
 /DdsDcpsGuidJC.cpp
 /DdsDcpsGuidJC.h
+/DdsDcpsInfoUtilsJC.cpp
+/DdsDcpsInfoUtilsJC.h
 /DdsDcpsInfrastructureJC.cpp
 /DdsDcpsInfrastructureJC.h
 /DdsDcpsInfrastructureTypeSupportJC.cpp

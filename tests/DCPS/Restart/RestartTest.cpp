@@ -2,13 +2,18 @@
 
 #include <MessengerTypeSupportImpl.h>
 
-#include <dds/DCPS/debug.h>
 #include <dds/DCPS/Marked_Default_Qos.h>
 #include <dds/DCPS/Service_Participant.h>
+#include <dds/DCPS/debug.h>
+
 #include <dds/DCPS/transport/framework/TransportRegistry.h>
 #include <dds/DCPS/transport/rtps_udp/RtpsUdpLoader.h>
+
 #include <dds/DCPS/RTPS/RtpsDiscovery.h>
-#ifdef OPENDDS_SECURITY
+
+#include <dds/OpenDDSConfigWrapper.h>
+
+#if OPENDDS_CONFIG_SECURITY
 #  include <dds/DCPS/security/BuiltInPlugins.h>
 #  include <dds/DCPS/security/framework/Properties.h>
 #  ifdef ACE_AS_STATIC_LIBS
@@ -23,7 +28,7 @@
 #include <string>
 #include <stdexcept>
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
 const char auth_ca_file[] = "file:../../security/certs/identity/identity_ca_cert.pem";
 const char perm_ca_file[] = "file:../../security/certs/permissions/permissions_ca_cert.pem";
 const char id_cert_file[] = "file:../../security/certs/identity/test_participant_02_cert.pem";
@@ -62,7 +67,7 @@ struct Application {
     OpenDDS::DCPS::TransportConfig_rch cfg = TheTransportRegistry->create_config(transport_config_name_);
     cfg->instances_.push_back(ti);
 
-#if defined OPENDDS_SECURITY && defined ACE_AS_STATIC_LIBS
+#if OPENDDS_CONFIG_SECURITY && defined ACE_AS_STATIC_LIBS
     OpenDDS::Security::BuiltInPluginLoader().init(0, 0);
 #endif
 
@@ -79,7 +84,7 @@ struct Application {
 
     DDS::DomainParticipantQos participant_qos;
     dpf->get_default_participant_qos(participant_qos);
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
     DDS::PropertySeq& props = participant_qos.property.value;
     if (TheServiceParticipant->get_security()) {
       using namespace DDS::Security::Properties;
@@ -175,14 +180,14 @@ int main(int argc, char* argv[])
     if (argument == "--help" || argument == "-h") {
       std::cout << usage;
       return EXIT_SUCCESS;
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
     } else if (argument == "--secure") {
       TheServiceParticipant->set_security(true);
 #endif
     }
   }
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
   OpenDDS::DCPS::security_debug.new_entity_error = true;
 #endif
 

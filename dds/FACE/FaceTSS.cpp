@@ -878,7 +878,7 @@ void populate_header_received(const FACE::CONNECTION_ID_TYPE& connection_id,
   header.message_timestamp = convertTime(sinfo.source_timestamp);
   const OpenDDS::DCPS::SystemTimePoint now = OpenDDS::DCPS::SystemTimePoint::now();
 
-  readers[connection_id]->sum_recvd_msgs_latency += (convertTime(now.to_dds_time()) - header.message_timestamp);
+  readers[connection_id]->sum_recvd_msgs_latency += (convertTime(now.to_idl_struct()) - header.message_timestamp);
   ++readers[connection_id]->total_msgs_recvd;
 
   if (OpenDDS::DCPS::DCPS_debug_level > 8) {

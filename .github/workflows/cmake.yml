@@ -82,6 +82,10 @@ jobs:
         path: OpenDDS/build/ACE_TAO
     - name: Install xerces
       run: sudo apt-get -y install libxerces-c-dev
+    - uses: lukka/get-cmake@latest
+      with:
+        cmakeVersion: "3.23"
+        ninjaVersion: "latest"
     - name: Configure
       run: |
         cd OpenDDS
@@ -168,8 +172,10 @@ jobs:
       with:
         repository: DOCGroup/ACE_TAO
         path: OpenDDS/build/ACE_TAO
-    - name: Install Ninja
-      run: sudo apt-get -y install ninja-build
+    - uses: lukka/get-cmake@latest
+      with:
+        cmakeVersion: "latest"
+        ninjaVersion: "latest"
     - name: Configure
       run: |
         cd OpenDDS
@@ -213,18 +219,10 @@ jobs:
       with:
         ndk-version: r25c
         add-to-path: false
-    - name: Checkout MPC
-      uses: actions/checkout@v4
+    - uses: lukka/get-cmake@latest
       with:
-        repository: DOCGroup/MPC
-        path: MPC
-    - name: Checkout ACE/TAO
-      uses: actions/checkout@v4
-      with:
-        repository: DOCGroup/ACE_TAO
-        path: OpenDDS/build/ACE_TAO
-    - name: Install Ninja
-      run: sudo apt-get -y install ninja-build
+        cmakeVersion: "3.24"
+        ninjaVersion: "latest"
     - name: Configure Host Tools
       run: |
         cd OpenDDS
@@ -325,6 +323,10 @@ jobs:
       with:
         vcpkgGitCommitId: '${{ env.VCPKG_GIT_COMMIT }}'
         runVcpkgInstall: true
+    - uses: lukka/get-cmake@latest
+      with:
+        cmakeVersion: "3.23"
+        ninjaVersion: "latest"
     - name: Checkout OpenDDS
       uses: actions/checkout@v4
       with:

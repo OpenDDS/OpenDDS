@@ -12,6 +12,8 @@
 #include "CryptoBuiltInImpl.h"
 #include "UtilityImpl.h"
 
+#include <dds/OpenDDSConfigWrapper.h>
+
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
@@ -21,7 +23,7 @@ using DDS::Security::CryptoKeyExchange;
 using DDS::Security::CryptoTransform;
 
 BuiltInSecurityPluginInst::BuiltInSecurityPluginInst()
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
   : authentication_(new AuthenticationBuiltInImpl)
   , access_control_(new AccessControlBuiltInImpl)
   , key_factory_(new CryptoBuiltInImpl)
@@ -36,7 +38,7 @@ BuiltInSecurityPluginInst::~BuiltInSecurityPluginInst()
 {
 }
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
 Authentication_var BuiltInSecurityPluginInst::create_authentication()
 {
   return authentication_;

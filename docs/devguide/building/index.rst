@@ -84,6 +84,8 @@ If configure runs successfully it will end with a message about the next steps f
 .. tab:: Windows
 
   The configure script will say how to open the solution file for OpenDDS in Visual Studio using ``devenv``.
+  Before building, check that the "Configuration" and "Platform" are correct.
+  In Visual Studio, select "Build" and then "Build Solution".
 
   It can also be built directly from the command prompt by using MSBuild.
   For example, if the configure script was ran without any arguments, to do a Debug x64 build:

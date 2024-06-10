@@ -1,5 +1,39 @@
 # OpenDDS Releases
 
+## Version 3.28.1 of OpenDDS
+
+Released 2024-05-02
+
+Download [this release on GitHub](https://github.com/OpenDDS/OpenDDS/releases/tag/DDS-3.28.1).
+
+Read [the documentation for this release on Read the Docs](https://opendds.readthedocs.io/en/dds-3.28.1).
+
+### Additions
+
+- Added [`OPENDDS_COMPILE_WARNINGS`](https://opendds.readthedocs.io/en/dds-3.28.1/devguide/building/index.html#cmake-var-OPENDDS_COMPILE_WARNINGS) and `configure` option `--compile-warnings=[WARNING|ERROR]` to enable additional compiler warnings and treating them as errors. ([PR #4558](https://github.com/OpenDDS/OpenDDS/pull/4558))
+- Add a `configure` script option for MPC options requiring a value. ([PR #4574](https://github.com/OpenDDS/OpenDDS/pull/4574))
+  - For example, `./configure --mpc:value_template build_flags+="-Wall -Werror"`.
+
+### Platform Support and Dependencies
+
+- Building with CMake
+  - Fixed CMake saying it's missing the ACE library when using [`OPENDDS_ACE_TAO_SRC`](https://opendds.readthedocs.io/en/dds-3.28.1/devguide/building/index.html#cmake-var-OPENDDS_ACE_TAO_SRC) with an ACE/TAO outside of the build directory. ([PR #4604](https://github.com/OpenDDS/OpenDDS/pull/4604))
+
+### Removals
+
+- Values passed to the configure script via `--mpcopts` are no longer split on spaces. ([PR #4574](https://github.com/OpenDDS/OpenDDS/pull/4574))
+  - For example, `./configure --mpcopts="-value_template build_flags+=-Wall -Werror"` must now be written as `./configure --mpcopts=-value_template --mpcopts="build_flags+=-Wall -Werror"`.
+
+### Fixes
+
+- Fixed incorrect usage of OpenSSL in `gov_gen` application. ([PR #4591](https://github.com/OpenDDS/OpenDDS/pull/4591))
+- Fix bug where `Service_Participant::type_object_encoding` doesn't return configured value. ([PR #4593](https://github.com/OpenDDS/OpenDDS/pull/4593))
+- Do not send heartbeats during a fragmented send in `rtps_udp`. ([PR #4603](https://github.com/OpenDDS/OpenDDS/pull/4603))
+
+### Documentation
+
+- Added [`[transport] send_buffer_size (rtps_udp)`](https://opendds.readthedocs.io/en/dds-3.28.1/devguide/run_time_configuration.html#cfg-prop-transport-rtps_udp-send_buffer_size) and [`[transport] rcv_buffer_size (rtps_udp)`](https://opendds.readthedocs.io/en/dds-3.28.1/devguide/run_time_configuration.html#cfg-prop-transport-rtps_udp-rcv_buffer_size). ([PR #4602](https://github.com/OpenDDS/OpenDDS/pull/4602))
+
 ## Version 3.28.0 of OpenDDS
 
 Released 2024-04-16
