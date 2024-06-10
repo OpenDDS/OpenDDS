@@ -333,11 +333,11 @@ bool ts_generator::generate_ts(AST_Type* node, UTL_ScopedName* name)
     if (op_ret_is_ptr) {
       be_global->impl_ <<
         "  " << short_cxx_name << "* value = new " << short_cxx_name << ";\n"
-        "  const ::DDS::ReturnCode_t rc = " << ts_base << "::create_sample_rc(src, *value);\n";
+        "  const ::DDS::ReturnCode_t rc = " << ts_base << "::create_sample_rc(*value, src);\n";
     } else {
       be_global->impl_ <<
         "  " << short_cxx_name << " value;\n"
-        "  const ::DDS::ReturnCode_t rc = " << ts_base << "::create_sample_rc(src, value);\n";
+        "  const ::DDS::ReturnCode_t rc = " << ts_base << "::create_sample_rc(value, src);\n";
     }
     be_global->impl_ <<
       "  if (rc != ::DDS::RETCODE_OK && OpenDDS::DCPS::log_level >= OpenDDS::DCPS::LogLevel::Warning) {\n"

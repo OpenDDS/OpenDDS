@@ -1385,7 +1385,7 @@ If the type contains a ``vector`` or ``string`` anywhere, then then it returns a
 
   Foo foo = type_support->create_sample(data);
 
-``create_sample_rc`` is the same regardless and returns a ``ReturnCode_t`` to indicate failure:
+Using ``create_sample_rc`` is the same regardless of the type and returns a ``ReturnCode_t`` to indicate failure:
 
 .. code-block:: cpp
 
@@ -1393,7 +1393,7 @@ If the type contains a ``vector`` or ``string`` anywhere, then then it returns a
   DynamicData_var data = /* ... */;
 
   Foo foo;
-  DDS::ReturnCode_t rc = type_support->create_sample_rc(data, foo);
+  const DDS::ReturnCode_t rc = type_support->create_sample_rc(foo, data);
   if (rc != DDS::RETCODE_OK) /* (handle error) */;
 
 ``create_dynamic_sample`` and ``create_dynamic_sample_rc``
@@ -1416,7 +1416,7 @@ If the type contains a ``vector`` or ``string`` anywhere, then then it returns a
   Foo foo = /* ... */;
 
   DynamicData_var data;
-  DDS::ReturnCode_t rc = type_support->create_dynamic_sample_rc(foo, data);
+  const DDS::ReturnCode_t rc = type_support->create_dynamic_sample_rc(data, foo);
   if (rc != DDS::RETCODE_OK) /* (handle error) */;
 
 .. _xtypes-dynamic-data-adapter:
@@ -1509,7 +1509,9 @@ Type System
 
 * IDL ``bitmask`` type
 
-* Struct and union inheritance
+* IDL ``bitset`` type
+
+* Struct inheritance
 
 .. _xtypes--annotations:
 

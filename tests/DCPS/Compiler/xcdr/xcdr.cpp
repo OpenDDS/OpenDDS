@@ -222,7 +222,7 @@ void amalgam_serializer_test_base(
 #if OPENDDS_HAS_DYNAMIC_DATA_ADAPTER
       typename DDSTraits<RealTypeA>::TypeSupportImplType tsi;
       DDS::DynamicData_var dd;
-      ASSERT_RC_OK(tsi.create_dynamic_sample_rc(value, dd));
+      ASSERT_RC_OK(tsi.create_dynamic_sample_rc(dd, value));
 
       DDS::DynamicData_ptr dd_ptr = dd.in();
       if (key_only) {
@@ -252,7 +252,7 @@ void amalgam_serializer_test_base(
       DDS::DynamicData_var ddi = new DynamicDataXcdrReadImpl(serializer, type,
         key_only ? Sample::KeyOnly: Sample::Full);
       typename DDSTraits<RealTypeB>::TypeSupportImplType tsi;
-      ASSERT_RC_OK(tsi.create_sample_rc(ddi, result));
+      ASSERT_RC_OK(tsi.create_sample_rc(result, ddi));
 #else
       ASSERT_TRUE(false);
 #endif

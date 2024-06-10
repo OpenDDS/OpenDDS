@@ -86,7 +86,7 @@ public:
   /// the type is "variable length". If it has something like a sequence then
   /// it's variable length and returns a pointer else it's fixed and returns on
   /// the stack. opendds_idl will wrap this in the correct form.
-  DDS::ReturnCode_t create_sample_rc(DDS::DynamicData_ptr src, NativeType& dst)
+  DDS::ReturnCode_t create_sample_rc(NativeType& dst, DDS::DynamicData_ptr src)
   {
     OpenDDS::DCPS::set_default(dst);
 #  if OPENDDS_HAS_DYNAMIC_DATA_ADAPTER
@@ -109,7 +109,7 @@ public:
 #  endif
   }
 
-  DDS::ReturnCode_t create_dynamic_sample_rc(const NativeType& src, DDS::DynamicData_ptr& dst)
+  DDS::ReturnCode_t create_dynamic_sample_rc(DDS::DynamicData_ptr& dst, const NativeType& src)
   {
     CORBA::release(dst);
     DDS::DynamicType_var type = get_type();
@@ -136,7 +136,7 @@ public:
   DDS::DynamicData_ptr create_dynamic_sample(const NativeType& src)
   {
     DDS::DynamicData_var dst;
-    create_dynamic_sample_rc(src, dst);
+    create_dynamic_sample_rc(dst, src);
     return dst;
   }
 #endif
