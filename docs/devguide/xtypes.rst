@@ -830,14 +830,12 @@ Marking member as optional
 ``@optional``
 -------------
 
-..
-    Sect<16.6.8.1>
-
 Applies to: struct members (only when :ref:`opendds_idl--using-the-idl-to-c-11-mapping`)
 
-This annotation marks a member as optional. In the IDL-to-C++11 mapping it generates either an std::optional<T> or an equivalent custom implementation of std::optional.
+This annotation marks a member as optional.
+In the IDL-to-C++11 mapping it generates either a ``std::optional<T>`` or an equivalent custom implementation.
 
-More information about other language bindings for @optional can be found [here](https://github.com/OpenDDS/OpenDDS/wiki/Proposal:-@optional-support)
+More information about other language bindings for ``@optional`` can be found `here <https://github.com/OpenDDS/OpenDDS/wiki/Proposal:-@optional-support>`__
 
 .. _xtypes--dynamic-language-binding-1:
 
@@ -1406,7 +1404,7 @@ Some annotations in that table, and not listed here, can only be used with new c
 
 * Struct members
 
-  * ``@optional`` (only implemented for IDL-to-C++11 mapping)
+  * :ref:`xtypes--optional` (only implemented for IDL-to-C++11 mapping)
 
   * ``@must_understand``
 
