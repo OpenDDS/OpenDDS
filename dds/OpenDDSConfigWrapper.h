@@ -11,9 +11,7 @@
 // named OpenDDSConfig.h in a dds/ directory on the include path.
 // See the OpenDDS Developer's Guide and dds/OpenDDSConfig.h.in for details
 // regarding what can be customized.
-#ifndef OPENDDS_IGNORE_OPENDDSCONFIG_H_FILE
-#  include <dds/OpenDDSConfig.h>
-#endif
+#include <dds/OpenDDSConfig.h>
 
 #if defined OPENDDS_SECURITY && defined OPENDDS_CONFIG_SECURITY
 #  if !OPENDDS_CONFIG_SECURITY
