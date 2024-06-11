@@ -1110,7 +1110,7 @@ OpenDDS provides function ``flat_index`` to convert an index to a multi-dimensio
         }
     }
 
-``flat_index`` takes as input an index vector to the multi-dimensional array and the dimensions of the array and returns a flat index.
+``flat_index`` takes as input an index sequence to the multi-dimensional array and the dimensions of the array and returns a flat index.
 The same function is used when serializing the dynamic data object to make sure the mapping from index to id is consistent and conforms to the XTypes spec regarding the order of the elements.
 
 .. _xtypes--reading-members-of-more-complex-types:
@@ -1355,7 +1355,10 @@ The standard methods will only warn if there was an error and can't indicate tha
 
 ``create_sample`` takes a ``DynamicData`` and returns the IDL-generated type.
 One thing to note about this method is the IDL-to-C++ specification requires that returns like this can be either returned on the stack or the heap depending on if they are :omgspec:`"variable-length" <cpp03:5.11 Mapping for Structured Types>`.
-For example if there's a topic type ``Foo`` that doesn't contain a ``vector`` or ``string``, then:
+For example if there's a topic type ``Foo`` that doesn't contain a ``sequence`` or ``string`` anywhere inside it, then:
+
+..
+  TODO: Add map above and below when we support that, assuming it's also counted as variable length by tao_idl
 
 .. code-block:: omg-idl
 
