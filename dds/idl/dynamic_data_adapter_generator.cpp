@@ -421,6 +421,15 @@ namespace {
           "    : DynamicDataAdapter_T<" << cpp_name << ">(type, value)\n"
           "  {\n"
           "  }\n"
+          "\n"
+          "  DDS::ReturnCode_t clear_all_values()\n"
+          "  {\n"
+          "    const DDS::ReturnCode_t rc = assert_mutable(\"DynamicDataAdapter::clear_all_values\");\n"
+          "    if (rc == DDS::RETCODE_OK) {\n"
+          "      OpenDDS::DCPS::set_default(value_);\n"
+          "    }\n"
+          "    return rc;\n"
+          "  }\n"
           "\n";
         if (struct_node || seq_node || array_node) {
           be_global->impl_ <<
@@ -460,11 +469,6 @@ namespace {
         const bool forany = needs_forany(node_as_type);
         const bool distinct_type = needs_distinct_type(node_as_type);
         be_global->impl_ <<
-          "  DDS::DynamicData_ptr clone()\n"
-          "  {\n"
-          "    return new DynamicDataAdapterImpl(type_, value_);\n"
-          "  }\n"
-          "\n"
           "  bool serialized_size(const OpenDDS::DCPS::Encoding& enc, size_t& size, OpenDDS::DCPS::Sample::Extent ext) const\n"
           "  {\n";
         if (struct_node || union_node) {
@@ -552,9 +556,7 @@ namespace {
         }
         be_global->impl_ <<
           "  }\n"
-          "\n";
-
-        be_global->impl_ <<
+          "\n"
           "protected:\n";
 
         if (!generate_dynamic_data_adapter_access(node, wrapper, false)) {

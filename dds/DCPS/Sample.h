@@ -10,24 +10,13 @@
 #include "TypeSupportImpl.h"
 #include "RcHandle_T.h"
 #include "FilterEvaluator.h"
+#include "XTypes/DynamicDataAdapterFwd.h"
 
 #include <dds/DdsDynamicDataC.h>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
-
-#ifndef OPENDDS_SAFETY_PROFILE
-namespace XTypes {
-  // These are here because including DynamicDataAdapter.h creates a include loop.
-  template <typename T, typename Tag>
-  DDS::DynamicData_ptr get_dynamic_data_adapter(DDS::DynamicType_ptr type, const T& value);
-
-  template <typename T, typename Tag>
-  DDS::DynamicData_ptr get_dynamic_data_adapter(DDS::DynamicType_ptr type, T& value);
-}
-#endif
-
 namespace DCPS {
 
 class Sample;

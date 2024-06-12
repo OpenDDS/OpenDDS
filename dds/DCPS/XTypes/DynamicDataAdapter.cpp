@@ -181,11 +181,6 @@ DDS::MemberId DynamicDataAdapter::get_member_id_at_index(DDS::UInt32 index)
   }
 }
 
-DDS::ReturnCode_t DynamicDataAdapter::clear_all_values()
-{
-  return unsupported_method("DynamicDataAdapater::clear_all_values");
-}
-
 DDS::ReturnCode_t DynamicDataAdapter::clear_nonkey_values()
 {
   return unsupported_method("DynamicDataAdapater::clear_nonkey_values");

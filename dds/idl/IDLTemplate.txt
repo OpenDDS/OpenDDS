@@ -9,6 +9,17 @@ typedef sequence<<%SCOPED%>> <%TYPE%><%SEQ%>;
  * this interface.
  */
 local interface <%TYPE%>TypeSupport : OpenDDS::DCPS::TypeSupport {
+#ifndef OPENDDS_SAFETY_PROFILE
+    // TODO: valuetype isn't supported in Java.
+    @OpenDDS::internal::hidden_op_in_java(0)
+    ::DDS::ReturnCode_t create_sample_rc(inout <%SCOPED%> dst, in ::DDS::DynamicData src);
+    @OpenDDS::internal::hidden_op_in_java(0)
+    <%SCOPED%> create_sample(in ::DDS::DynamicData src);
+    @OpenDDS::internal::hidden_op_in_java(0)
+    ::DDS::ReturnCode_t create_dynamic_sample_rc(inout ::DDS::DynamicData dst, in <%SCOPED%> src);
+    @OpenDDS::internal::hidden_op_in_java(0)
+    ::DDS::DynamicData create_dynamic_sample(in <%SCOPED%> src);
+#endif
 
     ::DDS::ReturnCode_t encode_to_string(in <%SCOPED%> sample, out string encoded, in OpenDDS::DCPS::RepresentationFormat format);
     ::DDS::ReturnCode_t encode_to_bytes(in <%SCOPED%> sample, out ::DDS::OctetSeq encoded, in OpenDDS::DCPS::RepresentationFormat format);

@@ -121,6 +121,8 @@
 /DdsDcpsTopicJC.h
 /DdsDcpsTypeSupportExtJC.cpp
 /DdsDcpsTypeSupportExtJC.h
+/DdsDynamicDataJC.cpp
+/DdsDynamicDataJC.h
 /OpenDDS_DCPS__ConfigStoreTAOPeer.h
 /OpenDDS_DCPS__ConnectionRecordDataReaderTAOPeer.h
 /OpenDDS_DCPS__ConnectionRecordDataWriterTAOPeer.h
