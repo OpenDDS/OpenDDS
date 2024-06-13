@@ -16,10 +16,7 @@
 #include <dds/DCPS/Serializer.h>
 #include <dds/DCPS/SafetyProfileStreams.h>
 #include <dds/DCPS/Xcdr2ValueWriter.h>
-#include <dds/DCPS/XTypes/Utils.h>
 #include <dds/DCPS/XTypes/TypeLookupService.h>
-#include <dds/DCPS/XTypes/DynamicDataAdapter.h>
-#include <dds/DCPS/XTypes/DynamicDataFactory.h>
 #include <dds/DCPS/XTypes/DynamicDataImpl.h>
 #include <dds/DCPS/XTypes/DynamicDataXcdrReadImpl.h>
 
@@ -225,11 +222,9 @@ void amalgam_serializer_test_base(
     Serializer serializer(&buffer, encoding);
     if (dynamic) {
 #if OPENDDS_HAS_DYNAMIC_DATA_ADAPTER
-      add_type<RealTypeA>();
-      DDS::DynamicType_var type = get_dynamic_type<RealTypeA>();
-      DDS::DynamicData_var dda = get_dynamic_data_adapter<RealTypeA>(type, value);
-      DDS::DynamicData_var dd = DDS::DynamicDataFactory::get_instance()->create_data(type);
-      ASSERT_RC_OK(copy(dd, dda));
+      typename DDSTraits<RealTypeA>::TypeSupportImplType tsi;
+      DDS::DynamicData_var dd;
+      ASSERT_RC_OK(tsi.create_dynamic_sample_rc(dd, value));
 
       DDS::DynamicData_ptr dd_ptr = dd.in();
       if (key_only) {
@@ -256,10 +251,10 @@ void amalgam_serializer_test_base(
 #if OPENDDS_HAS_DYNAMIC_DATA_ADAPTER
       add_type<RealTypeB>();
       DDS::DynamicType_var type = get_dynamic_type<RealTypeB>();
-      DDS::DynamicData_var dda = get_dynamic_data_adapter<RealTypeB>(type, result);
       DDS::DynamicData_var ddi = new DynamicDataXcdrReadImpl(serializer, type,
         key_only ? Sample::KeyOnly: Sample::Full);
-      ASSERT_RC_OK(copy(dda, ddi));
+      typename DDSTraits<RealTypeB>::TypeSupportImplType tsi;
+      ASSERT_RC_OK(tsi.create_sample_rc(result, ddi));
 #else
       ASSERT_TRUE(false);
 #endif

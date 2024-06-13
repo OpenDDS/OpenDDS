@@ -8,8 +8,10 @@
 
 #include "Spdp.h"
 
-#include <dds/DCPS/debug.h>
 #include <dds/DCPS/AtomicBool.h>
+#include <dds/DCPS/debug.h>
+
+#include <dds/OpenDDSConfigWrapper.h>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -48,7 +50,7 @@ public:
   DCPS::TimeDuration max_lease_duration() const;
   void max_lease_duration(const DCPS::TimeDuration& period);
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
   DCPS::TimeDuration security_unsecure_lease_duration() const;
   void security_unsecure_lease_duration(const DCPS::TimeDuration& period);
 
@@ -59,23 +61,36 @@ public:
   DCPS::TimeDuration lease_extension() const;
   void lease_extension(const DCPS::TimeDuration& period);
 
-  u_short pb() const;
-  void pb(u_short port_base);
+  PortMode spdp_port_mode() const;
+  void spdp_port_mode(PortMode value);
 
-  u_short dg() const;
-  void dg(u_short domain_gain);
+  PortMode sedp_port_mode() const;
+  void sedp_port_mode(PortMode value);
 
-  u_short pg() const;
-  void pg(u_short participant_gain);
+  DDS::UInt16 pb() const;
+  void pb(DDS::UInt16 port_base);
 
-  u_short d0() const;
-  void d0(u_short offset_zero);
+  DDS::UInt16 dg() const;
+  void dg(DDS::UInt16 domain_gain);
 
-  u_short d1() const;
-  void d1(u_short offset_one);
+  DDS::UInt16 pg() const;
+  void pg(DDS::UInt16 participant_gain);
 
-  u_short dx() const;
-  void dx(u_short offset_two);
+  DDS::UInt16 d0() const;
+  void d0(DDS::UInt16 spdp_multicast_offset);
+
+  DDS::UInt16 d1() const;
+  void d1(DDS::UInt16 spdp_unicast_offset);
+
+  DDS::UInt16 dx() const;
+  void dx(DDS::UInt16 sedp_multicast_offset);
+
+  DDS::UInt16 dy() const;
+  void dy(DDS::UInt16 sedp_unicast_offset);
+
+  bool set_spdp_multicast_port(DCPS::NetworkAddress& addr, DDS::DomainId_t domain) const;
+  bool set_spdp_unicast_port(DCPS::NetworkAddress& addr, bool& fixed_port,
+    DDS::DomainId_t domain, DDS::UInt16 part_id) const;
 
   unsigned char ttl() const;
   void ttl(unsigned char time_to_live);
@@ -95,6 +110,9 @@ public:
   DCPS::NetworkAddress spdp_local_address() const;
   void spdp_local_address(const DCPS::NetworkAddress& mi);
 
+  bool spdp_unicast_address(DCPS::NetworkAddress& addr, bool& fixed_port,
+    DDS::DomainId_t domain, DDS::UInt16 part_id) const;
+
   bool sedp_multicast() const;
   void sedp_multicast(bool sm);
 
@@ -104,14 +122,18 @@ public:
   DCPS::NetworkAddress default_multicast_group(DDS::DomainId_t domain) const;
   void default_multicast_group(const DCPS::NetworkAddress& group);
 
-  u_short port_common(DDS::DomainId_t domain) const;
+  bool spdp_multicast_address(DCPS::NetworkAddress& addr, DDS::DomainId_t domain) const;
+  void spdp_multicast_address(const DCPS::NetworkAddress& addr);
 
-  DCPS::NetworkAddress multicast_address(u_short port_common,
-                                         DDS::DomainId_t domain) const;
+  DCPS::NetworkAddress sedp_multicast_address(DDS::DomainId_t domain) const;
+  void sedp_multicast_address(const DCPS::NetworkAddress& addr);
 
 #ifdef ACE_HAS_IPV6
   DCPS::NetworkAddress ipv6_spdp_local_address() const;
   void ipv6_spdp_local_address(const DCPS::NetworkAddress& mi);
+
+  bool ipv6_spdp_unicast_address(DCPS::NetworkAddress& addr, bool& fixed_port,
+    DDS::DomainId_t domain, DDS::UInt16 part_id) const;
 
   DCPS::NetworkAddress ipv6_sedp_local_address() const;
   void ipv6_sedp_local_address(const DCPS::NetworkAddress& mi);
@@ -122,9 +144,14 @@ public:
   DCPS::NetworkAddress ipv6_default_multicast_group() const;
   void ipv6_default_multicast_group(const DCPS::NetworkAddress& group);
 
-  DCPS::NetworkAddress ipv6_multicast_address(u_short port_common) const;
+  bool ipv6_spdp_multicast_address(DCPS::NetworkAddress& addr, DDS::DomainId_t domain) const;
+  void ipv6_spdp_multicast_address(const DCPS::NetworkAddress& addr);
+
+  DCPS::NetworkAddress ipv6_sedp_multicast_address(DDS::DomainId_t domain) const;
+  void ipv6_sedp_multicast_address(const DCPS::NetworkAddress& addr);
 #endif
 
+  // TODO: Deprecated, remove in OpenDDS 4
   bool spdp_request_random_port() const;
   void spdp_request_random_port(bool f);
 
@@ -164,7 +191,7 @@ public:
   DCPS::NetworkAddress sedp_stun_server_address() const;
   void sedp_stun_server_address(const DCPS::NetworkAddress& address);
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
   bool use_ice() const;
   void use_ice(bool ui);
 #endif

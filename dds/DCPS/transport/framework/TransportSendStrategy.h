@@ -17,15 +17,15 @@
 #include "TransportReplacedElement.h"
 #include "TransportRetainedElement.h"
 
-#include <dds/DCPS/dcps_export.h>
 #include "dds/DCPS/Atomic.h"
 #include <dds/DCPS/DataBlockLockPool.h>
 #include <dds/DCPS/Definitions.h>
 #include <dds/DCPS/Dynamic_Cached_Allocator_With_Overflow_T.h>
 #include <dds/DCPS/PoolAllocator.h>
 #include <dds/DCPS/RcObject.h>
+#include <dds/DCPS/dcps_export.h>
 
-#if defined(OPENDDS_SECURITY)
+#if OPENDDS_CONFIG_SECURITY
 #include <dds/DdsSecurityCoreC.h>
 #include <dds/DCPS/security/framework/SecurityConfig.h>
 #include <dds/DCPS/security/framework/SecurityConfig_rch.h>
@@ -215,7 +215,7 @@ protected:
   /// Returns true if anything in the delayed notification list matched.
   bool send_delayed_notifications(const TransportQueueElement::MatchCriteria* match = 0);
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
   virtual Security::SecurityConfig_rch security_config() const { return Security::SecurityConfig_rch(); }
 #endif
 
@@ -266,7 +266,7 @@ private:
   /// Form an IOV and call the send_bytes() template method.
   ssize_t do_send_packet(const ACE_Message_Block* packet, int& bp);
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
   /// Derived classes can override to transform the data right before it's
   /// sent.  If the returned value is non-NULL it will be sent instead of
   /// sending the parameter.  If the returned value is NULL the original

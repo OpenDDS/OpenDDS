@@ -1,4 +1,6 @@
-#ifdef OPENDDS_SECURITY
+#include <dds/OpenDDSConfigWrapper.h>
+
+#if OPENDDS_CONFIG_SECURITY
 
 #if defined (ACE_AS_STATIC_LIBS)
 #include <dds/DCPS/security/BuiltInPlugins.h>

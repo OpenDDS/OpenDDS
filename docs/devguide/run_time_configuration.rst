@@ -108,6 +108,14 @@ In this case, the ``MY_DISCOVERY`` instance of ``RTPS_DISCOVERY`` will have a ``
 
        :sec:`transport`
 
+   * - :ref:`config-templates`
+
+     - :sec:`DomainRange`
+
+       :sec:`transport_template`
+
+       :sec:`Customization`
+
    * - Other
 
      - :sec:`ice`
@@ -227,8 +235,8 @@ For example:
 
     publisher -DCPSConfigFile pub.ini
 
-For each of the section types with the exception of :sec:`common` and ``[ice]``, the syntax of a section header takes the form of ``[<section_type>/<instance_name>]``.
-For example, a ``[repository]`` section type would always be used in a configuration file like so: ``[repository/repo_1]`` where ``repository`` is the section type and ``repo_1`` is an instance name of a repository configuration.
+For each of the section types with the exception of :sec:`common` and :sec:`ice`, the syntax of a section header takes the form of ``[<section_type>/<instance_name>]``.
+For example, a :sec:`repository` section type would always be used in a configuration file like so: ``[repository/repo_1]`` where ``repository`` is the section type and ``repo_1`` is an instance name of a repository configuration.
 
 Using instances to configure discovery and transports is explained further in :ref:`config-disc` and :ref:`config-transport` respectively.
 
@@ -675,13 +683,13 @@ When DDS applications are written, participants are assigned to a domain and nee
 
 OpenDDS offers a centralized discovery mechanism, a peer-to-peer discovery mechanism, and a static discovery mechanism.
 The centralized mechanism uses a separate service running a ``DCPSInfoRepo`` process.
-The RTPS peer-to-peer mechanism uses the DDSI-RTPS discovery protocol standard to achieve non-centralized discovery.
+The RTPS peer-to-peer mechanism uses the RTPS discovery protocol standard to achieve non-centralized discovery.
 The static discovery mechanism uses the configuration file to determine which writers and readers should be associated and uses the underlying transport to determine which writers and readers exist.
 A number of configuration options exist to meet the deployment needs of DDS applications.
 Except for static discovery, each mechanism uses default values if no configuration is supplied either via the command line or configuration file.
 
 The following sections show how to configure the advanced discovery capabilities.
-For example, some deployments may need to use multiple ``DCPSInfoRepo`` services or DDSI-RTPS discovery to satisfy interoperability requirements.
+For example, some deployments may need to use multiple ``DCPSInfoRepo`` services or RTPS discovery to satisfy interoperability requirements.
 
 .. _config-domain:
 .. _run_time_configuration--domain-configuration:
@@ -795,7 +803,9 @@ For more explanation of a similar configuration for RTPS discovery see :ref:`run
 
     Key value of the mapped repository
 
-    .. deprecated:: Provided for backward compatibility.
+    .. deprecated:: 3.1.0
+
+      Provided for backward compatibility.
 
   .. prop:: DiscoveryConfig=<name>
     :default: :prop:`[common]DCPSDefaultDiscovery`
@@ -817,7 +827,7 @@ Configuring for InfoRepo Discovery
 ..
     Sect<7.3.2>
 
-This section describes the configuration properties for the :ref:`inforepo-disc`.
+This section describes the configuration properties for :ref:`inforepo-disc`.
 Assume for example that the :ref:`inforepo` is started on a host and port of ``myhost.mydomain.com:12345``.
 Applications can make their OpenDDS participants aware of how to find this service through command line options or by reading a configuration file.
 
@@ -1003,7 +1013,9 @@ Here are the valid properties for a ``[repository]`` section:
 
     Unique key value for the repository
 
-    .. deprecated:: Provided for backward compatibility.
+    .. deprecated:: 3.1.0
+
+      Provided for backward compatibility.
 
 .. _rtps-disc-config:
 .. _run_time_configuration--configuring-for-ddsi-rtps-discovery:
@@ -1014,7 +1026,7 @@ Configuring for RTPS Discovery
 ..
     Sect<7.3.3>
 
-This section describes the configuration properties for the :ref:`rtps-disc`.
+This section describes the configuration properties for :ref:`rtps-disc`.
 The RTPS specification gives the following simple description that forms the basis for the discovery approach used by OpenDDS and the two different protocols used to accomplish the discovery operations.
 The excerpt from the :omgspec:`rtps:8.5.1` is as follows:
 
@@ -1115,72 +1127,75 @@ Those properties, along with options specific to OpenDDS's RTPS discovery implem
     Extends the lease of discovered participants by the set amount of seconds.
     Useful on spotty connections to reduce load on the :ref:`RtpsRelay <rtpsrelay>`.
 
-  .. prop:: PB=<port>
+  .. prop:: PB=<n>
     :default: ``7400``
 
-    This number sets the starting point for deriving port numbers used for Simple Endpoint Discovery Protocol (SEDP).
-    This property is used in conjunction with :prop:`DG`, :prop:`PG`, :prop:`D0` (or :prop:`DX`), and :prop:`D1` to construct the necessary Endpoints for RTPS discovery communication.
-    See :omgspec:`rtps:9.6.1.1` for how these Endpoints are constructed.
+    The port base parameter for the :ref:`computed RTPS ports <config-ports-used-by-rtps-disc>`.
 
   .. prop:: DG=<n>
     :default: ``250``
 
-    An integer value representing the Domain Gain.
-    This is a multiplier that assists in formulating Multicast or Unicast ports for RTPS.
+    The domain gain coefficient parameter for the :ref:`computed RTPS ports <config-ports-used-by-rtps-disc>`.
 
   .. prop:: PG=<n>
     :default: ``2``
 
-    An integer that assists in configuring SPDP Unicast ports and serves as an offset multiplier.
-    Participants are assigned addresses using the formula:
-
-    .. math::
-
-      \mathit{PB} + DG \times \mathit{domainId} + \mathit{d}1 + \mathit{PG} \times \mathit{participantId}
-
-    See :omgspec:`rtps:9.6.1.1` for how these Endpoints are constructed.
+    The participant gain coefficient parameter for the :ref:`computed RTPS ports <config-ports-used-by-rtps-disc>`.
 
   .. prop:: D0=<n>
     :default: The value of the ``OPENDDS_RTPS_DEFAULT_D0`` environment variable if set, else ``0``
 
-    An integer value that assists in providing an offset for calculating an assignable port in SPDP Multicast configurations.
-    The formula used is:
-
-    .. math::
-
-      \mathit{PB} + \mathit{DG} \times \mathit{domainId} + \mathit{d0}
-
-    See :omgspec:`rtps:9.6.1.1` for how these Endpoints are constructed.
+    The offset parameter for the :ref:`computed SPDP multicast port <config-ports-used-by-spdp-multicast>`.
 
   .. prop:: D1=<n>
     :default: ``10``
 
-    An integer value that assists in providing an offset for calculating an assignable port in SPDP Unicast configurations.
-    The formula used is:
-
-    .. math::
-
-      \mathit{PB} + \mathit{DG} \times \mathit{domainId} + \mathit{d1} + \mathit{PG} \times \mathit{participantId}
-
-    See :omgspec:`rtps:9.6.1.1` for how these Endpoints are constructed.
+    The offset parameter for the :ref:`computed SPDP unicast port <config-ports-used-by-spdp-unicast>`.
 
   .. prop:: DX=<n>
     :default: ``2``
 
-    An integer value that assists in providing an offset for calculating a port in SEDP Multicast configurations.
-    This is only valid when :prop:`SedpMulticast=1 <SedpMulticast>`.
-    The formula used is:
+    The offset parameter for the :ref:`computed SEDP multicast port <config-ports-used-by-sedp-multicast>`.
 
-    .. math::
+  .. prop:: DY=<n>
+    :default: ``12``
 
-      \mathit{PB} + \mathit{DG} \times \mathit{domainId} + \mathit{dx}
+    The offset parameter for the :ref:`computed SEDP unicast port <config-ports-used-by-sedp-unicast>`.
 
-    This is an OpenDDS extension and not part of the OMG DDSI-RTPS specification.
+  .. prop:: SpdpPortMode=system|probe
+    :default: :val:`system`
+
+    When :prop:`SpdpLocalAddress` and :prop:`Ipv6SpdpLocalAddress` don't explicitly set the ports, they are assigned according to one of these methods:
+
+    .. val:: system
+
+      The operating system assigns one when the socket is opened.
+
+    .. val:: probe
+
+      :ref:`Computed SPDP unicast port <config-ports-used-by-spdp-unicast>`
 
   .. prop:: SpdpRequestRandomPort=<boolean>
     :default: ``0``
 
-    Use a random port for SPDP.
+    ``0`` is the same as :val:`SpdpPortMode=probe` and ``1`` is the same as :val:`SpdpPortMode=system`.
+
+    .. deprecated:: 3.29.0
+
+      Use :prop:`SpdpPortMode` instead.
+
+  .. prop:: SedpPortMode=system|probe
+    :default: :val:`system`
+
+    When :prop:`SedpLocalAddress` and :prop:`Ipv6SedpLocalAddress` don't explicitly set the ports, they are assigned according to one of these methods:
+
+    .. val:: system
+
+      The operating system assigns one when the socket is opened.
+
+    .. val:: probe
+
+      :ref:`Computed SEDP unicast port <config-ports-used-by-sedp-unicast>`
 
   .. prop:: SedpMaxMessageSize=<n>
     :default: ``65466`` (maximum worst-case UDP payload size)
@@ -1196,18 +1211,52 @@ Those properties, along with options specific to OpenDDS's RTPS discovery implem
     When set to ``1``, Multicast is used.
     When set to ``0``, Unicast is used.
 
-  .. prop:: SedpLocalAddress=<addr>:[<port>]
+  .. prop:: SedpMulticastAddress=<host>[:<port>]
+    :default: :prop:`InteropMulticastOverride`
+
+    The multicast group to use for SEDP multicast traffic.
+    If ``<port>`` is ``0`` or not specified, it is calculated as described in :ref:`config-ports-used-by-sedp-multicast`.
+
+  .. prop:: Ipv6SedpMulticastAddress=<host>[:<port>]
+    :default: :prop:`Ipv6DefaultMulticastGroup`
+
+    IPv6 variant of :prop:`SedpMulticastAddress`.
+
+  .. prop:: SedpLocalAddress=<host>:[<port>]
     :default: :prop:`[common]DCPSDefaultAddress`
 
     Configure the transport instance created and used by SEDP to bind to the specified local address and port.
     In order to leave the port unspecified, it can be omitted from the setting but the trailing ``:`` must be present.
+    If ``<port>`` is ``0`` or not specified, it is calculated as described in :ref:`config-ports-used-by-sedp-unicast`.
 
-  .. prop:: SpdpLocalAddress=<addr>[:<port>]
+  .. prop:: Ipv6SedpLocalAddress=<host>:[<port>]
+    :default: :prop:`[common]DCPSDefaultAddress`
+
+    IPv6 variant of :prop:`SedpLocalAddress`.
+
+  .. prop:: SpdpMulticastAddress=<host>[:<port>]
+    :default: :prop:`InteropMulticastOverride`
+
+    The multicast group to use for SPDP multicast traffic.
+    If ``<port>`` is ``0`` or not specified, it is calculated as described in :ref:`config-ports-used-by-spdp-multicast`.
+
+  .. prop:: Ipv6SpdpMulticastAddress=<host>[:<port>]
+    :default: :prop:`Ipv6DefaultMulticastGroup`
+
+    IPv6 variant of :prop:`Ipv6SpdpMulticastAddress`.
+
+  .. prop:: SpdpLocalAddress=<host>[:<port>]
     :default: :prop:`[common]DCPSDefaultAddress`
 
     Address of a local interface, which will be used by SPDP to bind to that specific interface.
+    If ``<port>`` is ``0`` or not specified, it is calculated as described in :ref:`config-ports-used-by-spdp-unicast`.
 
-  .. prop:: SedpAdvertisedLocalAddress=<addr>:[<port>]
+  .. prop:: Ipv6SpdpLocalAddress=<host>[:<port>]
+    :default: :prop:`[common]DCPSDefaultAddress`
+
+    IPv6 variant of :prop:`SpdpLocalAddress`.
+
+  .. prop:: SedpAdvertisedLocalAddress=<host>:[<port>]
 
     Sets the address advertised by SEDP.
     Typically used when the participant is behind a firewall or NAT.
@@ -1251,10 +1300,19 @@ Those properties, along with options specific to OpenDDS's RTPS discovery implem
     This setting should be disabled for participants that cannot use multicast to send SPDP announcements, e.g., an RtpsRelay.
 
   .. prop:: InteropMulticastOverride=<group_address>
+    :default: ``239.255.0.1``
 
-    A network address specifying the multicast group to be used for SPDP discovery.
-    This overrides the interoperability group of the specification, ``239.255.0.1``
-    It can be used, for example, to specify use of a routed group address to provide a larger discovery scope.
+    A network address specifying the multicast group to be used for SPDP and SEDP.
+    The default is defined by the RTPS specification.
+    This property can be used, for example, to specify use of a routed group address to provide a larger discovery scope.
+    It can be modified by :prop:`[Customization]InteropMulticastOverride`.
+    It is the default host for :prop:`SpdpMulticastAddress` and :prop:`SedpMulticastAddress`.
+
+  .. prop:: Ipv6DefaultMulticastGroup=<group_address>
+    :default: ``ff03::1``
+
+    IPv6-variant of :prop:`InteropMulticastOverride`.
+    It is the default host for :prop:`Ipv6SpdpMulticastAddress` and :prop:`Ipv6SedpMulticastAddress`.
 
   .. prop:: TTL=n
     :default: ``1`` (all data is restricted to the local network)
@@ -1413,16 +1471,86 @@ Those properties, along with options specific to OpenDDS's RTPS discovery implem
     If ``<i>`` is 0 (the default), the submessage is not added.
     Otherwise this submessage's contents is the 4-byte unsigned integer ``<i>``.
 
+.. _config-ports-used-by-rtps-disc:
+
+Ports Used by RTPS Discovery
+----------------------------
+
+See :omgspec:`rtps:9.6.1 Default Locators` for the related RTPS spec definitions.
+
+.. _config-ports-used-by-spdp:
+
+Simple Participant Discovery Protocol (SPDP)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. _config-ports-used-by-spdp-multicast:
+
+SPDP Multicast
+""""""""""""""
+
+The SPDP multicast port will be one of the following:
+
+- Port from :prop:`SpdpMulticastAddress <[rtps_discovery]SpdpMulticastAddress>` if set
+- :prop:`PB <[rtps_discovery]PB>` + :prop:`DG <[rtps_discovery]DG>` × *domainId* + :prop:`D0 <[rtps_discovery]D0>`
+
+.. _config-ports-used-by-spdp-unicast:
+
+SPDP Unicast
+""""""""""""
+
+The SPDP unicast port will be one of the following:
+
+- Port from :prop:`SpdpLocalAddress <[rtps_discovery]SpdpLocalAddress>` if set
+- A system-provided port if :val:`SpdpPortMode=system <[rtps_discovery]SpdpPortMode=system>`
+- :prop:`PB <[rtps_discovery]PB>` + :prop:`DG <[rtps_discovery]DG>` × *domainId* + :prop:`D1 <[rtps_discovery]D1>` + :prop:`PG <[rtps_discovery]PG>` × *participantId* if :val:`SpdpPortMode=probe <[rtps_discovery]SpdpPortMode=probe>` is set (default)
+
+  - If the port can not be opened, then the *participantId* is incremented until a port can be opened.
+  - If no valid UDP port can be opened, then an error will be logged.
+
+.. _config-ports-used-by-sedp:
+
+Simple Endpoint Discovery Protocol (SEDP)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. note::
+
+  :prop:`DX <[rtps_discovery]DX>` and :prop:`DY <[rtps_discovery]DY>` are OpenDDS-specific.
+
+.. _config-ports-used-by-sedp-multicast:
+
+SEDP Multicast
+""""""""""""""
+
+If :prop:`SedpMulticast=1 <[rtps_discovery]SedpMulticast>`, the SEDP multicast port will be one of the following:
+
+- Port from :prop:`SedpMulticastAddress <[rtps_discovery]SedpMulticastAddress>` if set (the same as SPDP)
+- :prop:`PB <[rtps_discovery]PB>` + :prop:`DG <[rtps_discovery]DG>` × *domainId* + :prop:`DX <[rtps_discovery]DX>`
+
+.. _config-ports-used-by-sedp-unicast:
+
+SEDP Unicast
+""""""""""""
+
+The SEDP unicast port will be one of the following:
+
+- Port from :prop:`SedpLocalAddress <[rtps_discovery]SedpLocalAddress>` if set
+- :prop:`PB <[rtps_discovery]PB>` + :prop:`DG <[rtps_discovery]DG>` × *domainId* + :prop:`DY <[rtps_discovery]DY>` + :prop:`PG <[rtps_discovery]PG>` × *participantId* if :val:`SedpPortMode=probe <[rtps_discovery]SedpPortMode=probe>` is set
+
+  - If the port can not be opened, then the *participantId* is incremented until a port can be opened.
+  - If no valid UDP port can be opened, then an error will be logged.
+
+- A system-provided port if :val:`SedpPortMode=system <[rtps_discovery]SedpPortMode=system>` (default)
+
 .. _run_time_configuration--additional-ddsi-rtps-discovery-features:
 
-Additional DDSI-RTPS Discovery Features
----------------------------------------
+Additional RTPS Discovery Features
+----------------------------------
 
 ..
     Sect<7.3.3.1>
 
-The DDSI_RTPS discovery implementation creates and manages a transport instance -- specifically an object of class ``RtpsUdpInst``.
-In order for applications to access this object and enable advanced features (:ref:`Additional RTPS_UDP Features <run_time_configuration--additional-rtps-udp-features>`), the ``RtpsDiscovery`` class provides the method ``sedp_transport_inst(domainId, participant)``.
+The RTPS discovery implementation creates and manages a transport instance -- specifically an object of class ``RtpsUdpInst``.
+In order for applications to access this object and :ref:`enable advanced features <run_time_configuration--additional-rtps-udp-features>`, the ``RtpsDiscovery`` class provides the method ``sedp_transport_inst(domainId, participant)``.
 
 .. _static-disc-config:
 .. _run_time_configuration--configuring-for-static-discovery:
@@ -2595,16 +2723,17 @@ Some implementation notes related to using the ``rtps_udp`` transport protocol a
     When set to ``0`` (false) the transport uses Unicast, otherwise a value of ``1`` (true) will use Multicast.
 
   .. prop:: multicast_group_address=<host>:<port>
-    :default: ``239.255.0.2:7401``
+    :default: ``239.255.0.2:0``
 
     When :prop:`use_multicast` is enabled, this is the multicast network address that should be used.
-    If ``<port>`` is not specified for the network address, port 7401 will be used.
+    If ``<port>`` is ``0`` or not specified, it is calculated as described in :ref:`config-ports-used-by-rtps-udp-multicast`.
+    It can be modified by :prop:`[Customization]multicast_group_address`.
 
   .. prop:: ipv6_multicast_group_address=<network_address>
-    :default: ``[FF03::2]:7401``
+    :default: ``[FF03::2]:0``
 
-    When the transport is set to multicast, this is the multicast network address that should be used.
-    If ``<port>`` is not specified for the network address, port 7401 will be used.
+    When :prop:`use_multicast` is enabled, this is the multicast IPv6 network address that should be used.
+    If ``<port>`` is ``0`` or not specified, it is calculated as described in :ref:`config-ports-used-by-rtps-udp-multicast`.
 
   .. prop:: multicast_interface=<iface>
     :default: :prop:`[common]DCPSDefaultAddress`
@@ -2612,17 +2741,57 @@ Some implementation notes related to using the ``rtps_udp`` transport protocol a
     Specifies the network interface to be used by this transport instance.
     This uses a platform-specific format that identifies the network interface.
 
-  .. prop:: local_address=<addr>:[<port>]
+  .. prop:: local_address=<host>:[<port>]
     :default: :prop:`[common]DCPSDefaultAddress`
 
     Bind the socket to the given address and port.
-    Port can be omitted but the trailing ``:`` is required.
+    ``<port>`` can be omitted but the trailing ``:`` is required.
+    If ``<port>`` is ``0`` or not specified, it is calculated as described in :ref:`config-ports-used-by-rtps-udp-unicast`.
 
-  .. prop:: ipv6_local_address=<addr>:[<port>]
+  .. prop:: ipv6_local_address=<host>:[<port>]
     :default: :prop:`[common]DCPSDefaultAddress`
 
     Bind the socket to the given address and port.
-    Port can be omitted but the trailing ``:`` is required.
+    ``<port>`` can be omitted but the trailing ``:`` is required.
+    If ``<port>`` is ``0`` or not specified, it is calculated as described in :ref:`config-ports-used-by-rtps-udp-unicast`.
+
+  .. prop:: PortMode=system|probe
+    :default: :val:`system`
+
+    When :prop:`local_address` and :prop:`ipv6_local_address` don't explicitly set the ports, they are assigned according to one of these methods:
+
+    .. val:: system
+
+      The operating system assigns one when the socket is opened.
+
+    .. val:: probe
+
+      :ref:`Computed unicast port <config-ports-used-by-rtps-udp-unicast>`
+
+  .. prop:: PB=<n>
+    :default: ``7400``
+
+    The port base parameter for the :ref:`computed RTPS ports <config-ports-used-by-rtps-udp>`.
+
+  .. prop:: DG=<n>
+    :default: ``250``
+
+    The domain gain coefficient parameter for the :ref:`computed RTPS ports <config-ports-used-by-rtps-udp>`.
+
+  .. prop:: PG=<n>
+    :default: ``2``
+
+    The participant gain coefficient parameter for the :ref:`computed RTPS ports <config-ports-used-by-rtps-udp>`.
+
+  .. prop:: D2=<n>
+    :default: ``1``
+
+    The offset parameter for the :ref:`computed multicast port <config-ports-used-by-rtps-udp-multicast>`.
+
+  .. prop:: D3=<n>
+    :default: ``11``
+
+    The offset parameter for the :ref:`computed unicast port <config-ports-used-by-rtps-udp-unicast>`.
 
   .. prop:: advertised_address=<addr>:[<port>]
 
@@ -2709,6 +2878,38 @@ Some implementation notes related to using the ``rtps_udp`` transport protocol a
     :default: ``0``
 
     Enable or disable :ref:`ICE <ice>` for this transport instance.
+
+.. _config-ports-used-by-rtps-udp:
+
+Ports used by RTPS/UDP
+^^^^^^^^^^^^^^^^^^^^^^
+
+See :omgspec:`rtps:9.6.1 Default Locators` for the related RTPS spec definitions.
+
+.. _config-ports-used-by-rtps-udp-multicast:
+
+Multicast
+"""""""""
+
+If :prop:`use_multicast=1 <[transport@rtps_udp]use_multicast>` the RTPS/UDP multicast port will be one of the following:
+
+- Port from :prop:`multicast_group_address <[transport@rtps_udp]multicast_group_address>` and :prop:`ipv6_multicast_group_address <[transport@rtps_udp]ipv6_multicast_group_address>` if set
+- :prop:`PB <[transport@rtps_udp]PB>` + :prop:`DG <[transport@rtps_udp]DG>` × *domainId* + :prop:`D2 <[transport@rtps_udp]D2>`
+
+.. _config-ports-used-by-rtps-udp-unicast:
+
+Unicast
+"""""""
+
+The RTPS/UDP unicast port will be one of the following:
+
+- Port from :prop:`local_address <[transport@rtps_udp]local_address>` and :prop:`ipv6_local_address <[transport@rtps_udp]ipv6_local_address>` if set
+- :prop:`PB <[transport@rtps_udp]PB>` + :prop:`DG <[transport@rtps_udp]DG>` × *domainId* + :prop:`D3 <[transport@rtps_udp]D3>` + :prop:`PG <[transport@rtps_udp]PG>` × *participantId* if :val:`PortMode=prob <[transport@rtps_udp]PortMode=probe>`
+
+  - If the port can not be opened, then the *participantId* is incremented until a port can be opened.
+  - If no valid UDP port can be opened, then an error will be logged.
+
+- A system-provided port if :val:`PortMode=system <[transport@rtps_udp]PortMode=system>` (default)
 
 .. _run_time_configuration--additional-rtps-udp-features:
 

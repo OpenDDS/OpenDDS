@@ -264,8 +264,11 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     return EXIT_FAILURE;
   }
 
-  const u_short port_common = disc->config()->port_common(domain);
-  const NetworkAddress multicast_address = disc->config()->multicast_address(port_common, domain);
+  NetworkAddress multicast_address;
+  if (!disc->config()->spdp_multicast_address(multicast_address, domain)) {
+    ACE_ERROR((LM_ERROR, "ERROR: failed to get SPDP multicast address\n"));
+    return EXIT_FAILURE;
+  }
   ACE_DEBUG((LM_DEBUG, "multicast_address = %C\n", LogAddr(multicast_address).c_str()));
   ACE_SOCK_Dgram_Mcast multicast_socket;
 #ifdef ACE_HAS_MAC_OSX
