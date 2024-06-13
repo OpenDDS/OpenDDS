@@ -16,6 +16,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+
 public class ParticipantLocationTest {
   private static final int N_MSGS = 20;
   private static final int DOMAIN_ID = 42;
@@ -29,7 +30,7 @@ public class ParticipantLocationTest {
   private static boolean security = false;
   private static boolean ipv6 = false;
 
-  public static void main (String[] args) throws Exception {
+  public static void main(String[] args) throws Exception {
 
     for (String s: args) {
       if (s.equals("-n")) {
@@ -143,7 +144,13 @@ public class ParticipantLocationTest {
 
     DataReader pubDr = pubBuiltinSubscriber.lookup_datareader(BuiltinTopicUtils.BUILT_IN_PARTICIPANT_LOCATION_TOPIC);
     if (pubDr == null) {
-      System.err.println("ERROR: Publisher could not lookup datareader");
+      System.err.println("ERROR: Publisher could not lookup datareader for BUILT_IN_PARTICIPANT_LOCATION_TOPIC");
+      return;
+    }
+
+    DataReader pubDr2 = pubBuiltinSubscriber.lookup_datareader(BuiltinTopicUtils.BUILT_IN_PARTICIPANT_TOPIC);
+    if (pubDr2 == null) {
+      System.err.println("ERROR: Publisher could not lookup datareader for BUILT_IN_PARTICIPANT_TOPIC");
       return;
     }
 
@@ -152,6 +159,8 @@ public class ParticipantLocationTest {
     assert (pubLocationListener != null);
 
     int ret = pubDr.set_listener(pubLocationListener, OpenDDS.DCPS.DEFAULT_STATUS_MASK.value);
+    assert (ret == DDS.RETCODE_OK.value);
+    ret = pubDr2.set_listener(pubLocationListener, OpenDDS.DCPS.DEFAULT_STATUS_MASK.value);
     assert (ret == DDS.RETCODE_OK.value);
     // Don't need to invoke the listener because the subscriber doesn't exist.
 
