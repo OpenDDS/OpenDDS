@@ -836,11 +836,13 @@ This annotation marks a member as optional. An optional member doesn't require a
 In the IDL-to-C++11 mapping it generates either a ``std::optional<T>`` or an equivalent custom implementation.
 
 .. code-block:: omg-idl
+
     struct Foo {
         @optional string name;
     };
 
 .. code-block:: cpp
+
     Foo foo;
     if (foo.name().has_value()) {
         std::cout << foo.name().value() << std::endl;
