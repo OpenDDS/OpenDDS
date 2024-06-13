@@ -832,8 +832,21 @@ Marking member as optional
 
 Applies to: struct members (only when :ref:`opendds_idl--using-the-idl-to-c-11-mapping`)
 
-This annotation marks a member as optional.
+This annotation marks a member as optional. An optional member doesn't require a value to be set, which means it can be skipped when publishing to the topic.
 In the IDL-to-C++11 mapping it generates either a ``std::optional<T>`` or an equivalent custom implementation.
+
+.. code-block:: omg-idl
+    struct Foo {
+        @optional string name;
+    };
+
+.. code-block:: cpp
+    Foo foo;
+    if (foo.name().has_value()) {
+        std::cout << foo.name().value() << std::endl;
+    } else {
+        foo.name("bar");
+    }
 
 More information about other language bindings for ``@optional`` can be found `here <https://github.com/OpenDDS/OpenDDS/wiki/Proposal:-@optional-support>`__
 
