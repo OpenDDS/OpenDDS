@@ -384,10 +384,11 @@ target_sources(OpenDDS_Dcps
     DCPS/Transient_Kludge.h
     DCPS/Transient_Kludge.inl
     DCPS/TypeSupportImpl.h
+    DCPS/TypeSupportImpl_T.h
     DCPS/Util.h
+    DCPS/ValueCommon.h
     DCPS/ValueDispatcher.h
     DCPS/ValueHelper.h
-    DCPS/ValueCommon.h
     DCPS/ValueReader.h
     DCPS/ValueWriter.h
     DCPS/WaitSet.h
@@ -395,8 +396,8 @@ target_sources(OpenDDS_Dcps
     DCPS/WriterDataSampleList.h
     DCPS/WriterDataSampleList.inl
     DCPS/WriterInfo.h
-    DCPS/Xcdr2ValueWriter.h
     DCPS/XTypes/DynamicDataAdapter.h
+    DCPS/XTypes/DynamicDataAdapterFwd.h
     DCPS/XTypes/DynamicDataBase.h
     DCPS/XTypes/DynamicDataFactory.h
     DCPS/XTypes/DynamicDataImpl.h
@@ -418,6 +419,7 @@ target_sources(OpenDDS_Dcps
     DCPS/XTypes/TypeObjectC.h
     DCPS/XTypes/TypeObjectTypeSupportImpl.h
     DCPS/XTypes/Utils.h
+    DCPS/Xcdr2ValueWriter.h
     DCPS/ZeroCopyAllocator_T.cpp
     DCPS/ZeroCopyAllocator_T.h
     DCPS/ZeroCopyAllocator_T.inl
@@ -428,6 +430,7 @@ target_sources(OpenDDS_Dcps
     DCPS/ZeroCopySeq_T.inl
     DCPS/dcps_export.h
     DCPS/debug.h
+    DCPS/optional.h
     DCPS/security/framework/HandleRegistry.h
     DCPS/security/framework/Properties.h
     DCPS/security/framework/SecurityConfig.h
@@ -555,6 +558,9 @@ target_sources(OpenDDS_Dcps
     DCPS/yard/yard_tree.hpp
     Version.h
     Versioned_Namespace.h
+    OpenDDSConfigWrapper.h
+    OpenDDSConfigWrapperC.h
+    OpenDDSConfigWrapper.idl
 )
 target_compile_definitions(OpenDDS_Dcps PUBLIC ${OPENDDS_DCPS_COMPILE_DEFINITIONS})
 _opendds_library(OpenDDS_Dcps MSVC_BIGOBJ)

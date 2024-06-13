@@ -1,4 +1,6 @@
-#ifdef OPENDDS_SECURITY
+#include <dds/OpenDDSConfigWrapper.h>
+
+#if OPENDDS_CONFIG_SECURITY
 
 #include <dds/DCPS/security/AccessControl/XmlUtils.h>
 #include <dds/DCPS/debug.h>
@@ -313,4 +315,4 @@ TEST(dds_DCPS_security_AccessControl_XmlUtils, parse_domain_id_set)
   }
 }
 
-#endif // OPENDDS_SECURITY
+#endif

@@ -1,14 +1,1 @@
-/TypeSupportPluginUser
-/TypeSupportPluginC.cpp
-/TypeSupportPluginC.h
-/TypeSupportPluginC.inl
-/TypeSupportPluginS.cpp
-/TypeSupportPluginS.h
-/TypeSupportPluginTypeSupportC.cpp
-/TypeSupportPluginTypeSupportC.h
-/TypeSupportPluginTypeSupportC.inl
-/TypeSupportPluginTypeSupport.idl
-/TypeSupportPluginTypeSupportImpl.cpp
-/TypeSupportPluginTypeSupportImpl.h
-/TypeSupportPluginTypeSupportS.cpp
-/TypeSupportPluginTypeSupportS.h
+/TypeSupportPlugin

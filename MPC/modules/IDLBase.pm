@@ -115,7 +115,11 @@ sub do_cached_parse {
   $self->{'default_nested'} = 1;
 
   ## Set up the macros and include paths supplied in the command flags
-  my %macros = ('__OPENDDS_IDL' => 1, '__OPENDDS_MPC' => 1);
+  my %macros = (
+    __OPENDDS_IDL => 1,
+    __OPENDDS_MPC => 1,
+    OPENDDS_HIDE_DYNAMIC_DATA => 1,
+  );
   my %mparams;
   my @include;
   if (defined $flags) {

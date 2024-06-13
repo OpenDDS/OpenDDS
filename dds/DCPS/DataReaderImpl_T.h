@@ -7,15 +7,18 @@
 #  define OPENDDS_HAS_STD_SHARED_PTR
 #endif
 
+#include "BuiltInTopicUtils.h"
+#include "GuidConverter.h"
 #include "MultiTopicImpl.h"
 #include "RakeResults_T.h"
 #include "SubscriberImpl.h"
-#include "BuiltInTopicUtils.h"
-#include "Util.h"
 #include "TypeSupportImpl.h"
+#include "Util.h"
 #include "dcps_export.h"
-#include "GuidConverter.h"
+
 #include "XTypes/DynamicDataAdapter.h"
+
+#include <dds/OpenDDSConfigWrapper.h>
 
 #ifndef OPENDDS_HAS_STD_SHARED_PTR
 #  include <ace/Bound_Ptr.h>
@@ -847,7 +850,7 @@ namespace OpenDDS {
     bool filtered = false;
     SubscriptionInstance_rch instance;
 
-    const DDS::Time_t now = timestamp.to_dds_time();
+    const DDS::Time_t now = timestamp.to_idl_struct();
     DataSampleHeader header;
     header.source_timestamp_sec_ = now.sec;
     header.source_timestamp_nanosec_ = now.nanosec;
@@ -895,7 +898,7 @@ namespace OpenDDS {
 
     SubscriptionInstance_rch si = get_handle_instance(instance);
     if (si && state != DDS::ALIVE_INSTANCE_STATE) {
-      const DDS::Time_t now = timestamp.to_dds_time();
+      const DDS::Time_t now = timestamp.to_idl_struct();
       DataSampleHeader header;
       header.publication_id_ = publication_id;
       header.source_timestamp_sec_ = now.sec;
@@ -1268,7 +1271,7 @@ private:
                                  const OpenDDS::DCPS::DataSampleHeader& header,
                                  OpenDDS::DCPS::SubscriptionInstance_rch& instance_ptr)
   {
-#if defined(OPENDDS_SECURITY) && OPENDDS_HAS_DYNAMIC_DATA_ADAPTER
+#if OPENDDS_CONFIG_SECURITY && OPENDDS_HAS_DYNAMIC_DATA_ADAPTER
     const bool is_dispose_msg =
       header.message_id_ == OpenDDS::DCPS::DISPOSE_INSTANCE ||
       header.message_id_ == OpenDDS::DCPS::DISPOSE_UNREGISTER_INSTANCE;

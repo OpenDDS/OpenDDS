@@ -62,7 +62,7 @@ my %platforminfo =
                'cl_versions' => {13.1 => 'vc71', 14 => 'vc8', 15 => 'vc9',
                                  16 => 'vc10', 17 => 'vc11', 18 => 'vc12',
                                  19 => 'vc14', 19.1 => 'vs2017',
-                                 19.2 => 'vs2019', 19.3 => 'vs2022'},
+                                 19.2 => 'vs2019', 19.3 => 'vs2022', 19.4 => 'vs2022'},
                'cl_archs' => {'x64' => 1, 'Win32' => 1, 'ARM64' => 0, 'ARM' => 0}, # 1 if supported
               },
    'macos' => {
@@ -268,7 +268,7 @@ my @specs =
     '<default>rapidjson:s',
       'RapidJSON for Wireshark dissector and JSON' .
       $argIndent . 'Sample Serialization (Enabled by default,' .
-      $argIndent . 'use git submodle, RAPIDJSON_ROOT, or system pkg)',
+      $argIndent . 'use git submodule, RAPIDJSON_ROOT, or system pkg)',
     'qt:s', 'Qt5 (use QTDIR or system pkg)',
     'qt-include:s', 'Qt include dir (use QT5_INCDIR, QTDIR/include,' .
       $argIndent . 'or system package)',
@@ -772,19 +772,25 @@ EOF
     if ($arch eq 'Unknown') {
       die "cl version probe failed, no known architecture macro was defined\nStopped";
     }
-    if (!exists $platforminfo{'win32'}->{'cl_archs'}->{$arch}) {
-      die "cl version probe failed, invalid architecture \"$arch\"\nStopped";
+
+    my $archs = $platforminfo{'win32'}->{'cl_archs'};
+    if (!exists($archs->{$arch})) {
+      die "cl version probe failed, unknown architecture \"$arch\"\nStopped";
     }
-    if (!$platforminfo{'win32'}->{'cl_archs'}->{$arch}) {
+    if (!$archs->{$arch}) {
       die "ERROR: Windows for $arch isn't supported\nStopped";
     }
-    if (!exists $platforminfo{'win32'}->{'cl_versions'}->{$ver}) {
-      die "ERROR: Unknown or unsupported Visual C++ compiler version: $ver\n"
-        . "Stopped";
-    }
-
-    $opts{'compiler_version'} = $platforminfo{'win32'}->{'cl_versions'}->{$ver};
     $opts{'compiler_target_architecture'} = $arch;
+
+    my $vers = $platforminfo{'win32'}->{'cl_versions'};
+    if (!exists($vers->{$ver})) {
+      my @vers_sorted = sort(keys(%{$vers}));
+      my $last_cl = $vers_sorted[-1];
+      print "$ver isn't a known version of cl, using the last known version: $last_cl\n"
+        if $opts{'verbose'};
+      $ver = $last_cl;
+    }
+    $opts{'compiler_version'} = $vers->{$ver};
 
     if ($ver >= 19) {
       push(@features, 'no_cxx11=0');
@@ -1440,6 +1446,7 @@ sub write_opendds_configh {
   my %config = (
     'OPENDDS_CONFIG_AUTO_STATIC_INCLUDES' => 0,
     'OPENDDS_CONFIG_BOOTTIME_TIMERS' => $opts{'boottime'} // 0,
+    'OPENDDS_CONFIG_SECURITY' => $opts{'security'} // 0,
   );
 
   my $replace_value = sub {

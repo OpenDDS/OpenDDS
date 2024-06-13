@@ -294,3 +294,5 @@ The topic type InternalThreadBuiltinTopicData is defined in :ghfile:`dds/Opendds
 * ``thread_id`` (key) -- A string identifier for the thread.
 
 * ``utilization`` -- Estimated utilization of this thread (0.0-1.0).
+
+* ``monotonic_timestamp`` -- Time of most recent update (monotonic clock).  The SampleInfo's ``source_timestamp`` has the timestamp on the system clock.

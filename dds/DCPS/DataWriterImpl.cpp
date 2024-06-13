@@ -7,23 +7,26 @@
 
 #include "DataWriterImpl.h"
 
-#include "FeatureDisabledQosCheck.h"
-#include "DomainParticipantImpl.h"
-#include "PublisherImpl.h"
-#include "Service_Participant.h"
-#include "GuidConverter.h"
-#include "TopicImpl.h"
-#include "PublicationInstance.h"
-#include "Serializer.h"
-#include "Transient_Kludge.h"
-#include "DataDurabilityCache.h"
-#include "MonitorFactory.h"
-#include "SendStateDataSampleList.h"
-#include "DataSampleElement.h"
-#include "Util.h"
 #include "DCPS_Utils.h"
-#include "XTypes/TypeObject.h"
+#include "DataDurabilityCache.h"
+#include "DataSampleElement.h"
+#include "DomainParticipantImpl.h"
+#include "FeatureDisabledQosCheck.h"
+#include "GuidConverter.h"
+#include "MonitorFactory.h"
+#include "PublicationInstance.h"
+#include "PublisherImpl.h"
+#include "SendStateDataSampleList.h"
+#include "Serializer.h"
+#include "Service_Participant.h"
+#include "TopicImpl.h"
+#include "Transient_Kludge.h"
 #include "TypeSupportImpl.h"
+#include "Util.h"
+
+#include "XTypes/TypeObject.h"
+
+#include <dds/OpenDDSConfigWrapper.h>
 #ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
 #  include "CoherentChangeControl.h"
 #endif
@@ -540,7 +543,7 @@ DataWriterImpl::association_complete_i(const GUID_t& remote_id)
       Message_Block_Ptr end_historic_samples(
         create_control_message(
           END_HISTORIC_SAMPLES, header, move(data),
-          SystemTimePoint::now().to_dds_time()));
+          SystemTimePoint::now().to_idl_struct()));
 
       this->controlTracker.message_sent();
       guard.release();
@@ -773,7 +776,7 @@ void DataWriterImpl::replay_durable_data_for(const GUID_t& remote_id)
 
       DataSampleHeader header;
       Message_Block_Ptr end_historic_samples(create_control_message(END_HISTORIC_SAMPLES, header, move(data),
-                                                                    SystemTimePoint::now().to_dds_time()));
+                                                                    SystemTimePoint::now().to_idl_struct()));
 
       this->controlTracker.message_sent();
       guard.release();
@@ -1072,7 +1075,7 @@ DataWriterImpl::send_request_ack()
       REQUEST_ACK,
       element->get_header(),
       move(blk),
-      SystemTimePoint::now().to_dds_time()));
+      SystemTimePoint::now().to_idl_struct()));
 
   element->set_sample(move(sample));
 
@@ -1519,7 +1522,7 @@ DataWriterImpl::enable()
       return DDS::RETCODE_ERROR;
     }
 
-#if defined(OPENDDS_SECURITY)
+#if OPENDDS_CONFIG_SECURITY
     security_config_ = participant->get_security_config();
     participant_permissions_handle_ = participant->permissions_handle();
     dynamic_type_ = type_support_->get_type();
@@ -2423,7 +2426,7 @@ DataWriterImpl::end_coherent_changes(const GroupCoherentSamples& group_samples)
   Message_Block_Ptr control(
     create_control_message(
       END_COHERENT_CHANGES, header, move(data),
-      SystemTimePoint::now().to_dds_time()));
+      SystemTimePoint::now().to_idl_struct()));
 
   this->coherent_ = false;
   this->coherent_samples_ = 0;
@@ -2547,7 +2550,7 @@ DataWriterImpl::send_liveliness(const MonotonicTimePoint& now)
     Message_Block_Ptr liveliness_msg(
       create_control_message(
         DATAWRITER_LIVELINESS, header, move(empty),
-        SystemTimePoint::now().to_dds_time()));
+        SystemTimePoint::now().to_idl_struct()));
 
     if (this->send_control(header, move(liveliness_msg)) == SEND_CONTROL_ERROR) {
       ACE_ERROR_RETURN((LM_ERROR,
@@ -2579,7 +2582,7 @@ DataWriterImpl::prepare_to_delete()
 #endif
 
   // Unregister all registered instances prior to deletion.
-  unregister_instances(SystemTimePoint::now().to_dds_time());
+  unregister_instances(SystemTimePoint::now().to_idl_struct());
 
   const Observer_rch observer = get_observer(Observer::e_DELETED);
   if (observer) {
@@ -2764,7 +2767,7 @@ DataWriterImpl::retrieve_inline_qos_data(TransportSendListener::InlineQosData& q
   qos_data.topic_name = this->topic_name_.in();
 }
 
-#if defined(OPENDDS_SECURITY)
+#if OPENDDS_CONFIG_SECURITY
 DDS::Security::ParticipantCryptoHandle DataWriterImpl::get_crypto_handle() const
 {
   RcHandle<DomainParticipantImpl> participant = participant_servant_.lock();
@@ -2961,7 +2964,7 @@ DDS::ReturnCode_t DataWriterImpl::dispose_w_timestamp(
   DDS::InstanceHandle_t instance_handle,
   const DDS::Time_t& source_timestamp)
 {
-#if defined(OPENDDS_SECURITY) && OPENDDS_HAS_DYNAMIC_DATA_ADAPTER
+#if OPENDDS_CONFIG_SECURITY && OPENDDS_HAS_DYNAMIC_DATA_ADAPTER
   DDS::DynamicData_var dynamic_data = sample.get_dynamic_data(dynamic_type_);
   DDS::Security::SecurityException ex;
   if (dynamic_data && security_config_ &&
@@ -3100,7 +3103,7 @@ DDS::ReturnCode_t DataWriterImpl::get_or_create_instance_handle(
   handle = lookup_instance(sample);
   if (handle == DDS::HANDLE_NIL || !get_handle_instance(handle)) {
     Sample_rch copy = sample.copy(Sample::ReadOnly, Sample::KeyOnly);
-#if defined(OPENDDS_SECURITY) && OPENDDS_HAS_DYNAMIC_DATA_ADAPTER
+#if OPENDDS_CONFIG_SECURITY && OPENDDS_HAS_DYNAMIC_DATA_ADAPTER
     DDS::DynamicData_var dynamic_data = copy->get_dynamic_data(dynamic_type_);
     DDS::Security::SecurityException ex;
     if (dynamic_data && security_config_ &&

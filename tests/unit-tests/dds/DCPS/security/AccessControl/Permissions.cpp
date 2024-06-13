@@ -1,4 +1,6 @@
-#ifdef OPENDDS_SECURITY
+#include <dds/OpenDDSConfigWrapper.h>
+
+#if OPENDDS_CONFIG_SECURITY
 
 #include <dds/DCPS/security/AccessControl/Permissions.h>
 #include <dds/DCPS/debug.h>
@@ -96,4 +98,4 @@ TEST(dds_DCPS_security_AccessControl_Permissions, Permissions_load)
   EXPECT_EQ(action.validity, Permissions::Validity_t(1444870800, 1760490000));
 }
 
-#endif // OPENDDS_SECURITY
+#endif

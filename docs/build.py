@@ -8,6 +8,7 @@ import sys
 import os
 import venv
 import webbrowser
+import itertools
 from subprocess import check_call
 from shutil import rmtree
 from argparse import ArgumentParser
@@ -80,9 +81,9 @@ class DocEnv:
             self.venv_path.touch()
             self.rm_build()
 
-    def sphinx_build(self, builder, *args):
+    def sphinx_build(self, builder, *args, defines=[]):
         args = list(args)
-        for define in self.conf_defines:
+        for define in itertools.chain(self.conf_defines, defines):
             args.append('-D' + define)
         if self.debug:
             args.append('-vv')
@@ -118,7 +119,7 @@ class DocEnv:
     def do_strict(self):
         self.do(['test'], because_of='strict')
         self.sphinx_build('dummy', '-W')
-        self.sphinx_build('linkcheck')
+        self.sphinx_build('linkcheck', defines=['gen_all_omg_spec_links=False'])
         return None
 
     def do_html(self):

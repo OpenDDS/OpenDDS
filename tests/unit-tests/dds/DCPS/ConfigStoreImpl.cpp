@@ -252,8 +252,7 @@ TEST(dds_DCPS_ConfigStoreImpl, set_get_Enum)
     {
       { ALPHA, "alpha" },
       { BETA, "beta" },
-      { GAMMA, "gamma" },
-      { static_cast<MyConfigStoreEnum>(0), 0 }
+      { GAMMA, "gamma" }
     };
 
   ConfigTopic_rch topic = make_rch<ConfigTopic>();

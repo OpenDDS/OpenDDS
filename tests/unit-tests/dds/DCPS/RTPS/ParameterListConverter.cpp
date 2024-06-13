@@ -5,17 +5,20 @@
  */
 
 #include "ace/OS_main.h"
+
 #include "dds/DCPS/Definitions.h"
 #include "dds/DCPS/GuidBuilder.h"
+#include "dds/DCPS/Service_Participant.h"
+
 #include "dds/DCPS/RTPS/MessageUtils.h"
 #include "dds/DCPS/RTPS/GuidGenerator.h"
 #include "dds/DCPS/RTPS/ParameterListConverter.h"
 #include "dds/DCPS/RTPS/RtpsCoreC.h"
-#include "dds/DCPS/Service_Participant.h"
+
 #include "dds/DdsDcpsInfoUtilsC.h"
 
 // make sure we get set_default overloads in scope
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
 #include "dds/DdsSecurityCoreTypeSupportImpl.h"
 #endif
 #include "dds/DdsDcpsInfoUtilsTypeSupportImpl.h"
@@ -33,7 +36,7 @@ using namespace OpenDDS::DCPS;
 using namespace OpenDDS::RTPS::ParameterListConverter;
 using namespace OpenDDS::RTPS;
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
 using namespace DDS::Security;
 using namespace OpenDDS::Security;
 #endif
@@ -487,7 +490,7 @@ namespace {
     } // method
   } // Factory namespace
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
   OpenDDS::RTPS::SPDPdiscoveredParticipantData spdp_participant(
     const void* user_data = 0,
     CORBA::ULong user_data_len = 0,
@@ -685,7 +688,7 @@ Parameter get(const ParameterList& param_list,
   return Parameter();
 }
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
 namespace {
   void init(OpenDDS::Security::SPDPdiscoveredParticipantData& s)
   {

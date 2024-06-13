@@ -10,10 +10,11 @@
 #include "DataWriterRemoteC.h"
 #include "DataWriterRemoteImpl.h"
 #include "FailoverListener.h"
-#include "dds/DCPS/Service_Participant.h"
-#include "dds/DCPS/RepoIdBuilder.h"
-#include "dds/DCPS/DCPS_Utils.h"
+
 #include "dds/DCPS/BuiltInTopicUtils.h"
+#include "dds/DCPS/DCPS_Utils.h"
+#include "dds/DCPS/RepoIdBuilder.h"
+#include "dds/DCPS/Service_Participant.h"
 
 #include "dds/DCPS/transport/framework/TransportRegistry.h"
 #include "dds/DCPS/transport/framework/TransportType.h"
@@ -22,6 +23,8 @@
 #include "tao/ORB_Core.h"
 #include "tao/BiDir_GIOP/BiDirGIOP.h"
 #include "ace/Reactor.h"
+
+#include <dds/OpenDDSConfigWrapper.h>
 
 #if !defined (DDS_HAS_MINIMUM_BIT)
 #include "dds/DCPS/DomainParticipantImpl.h"
@@ -525,7 +528,7 @@ InfoRepoDiscovery::add_domain_participant(DDS::DomainId_t domainId,
   return ads;
 }
 
-#if defined(OPENDDS_SECURITY)
+#if OPENDDS_CONFIG_SECURITY
 DCPS::AddDomainStatus
 InfoRepoDiscovery::add_domain_participant_secure(
   DDS::DomainId_t /*domain*/,

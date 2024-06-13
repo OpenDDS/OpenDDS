@@ -7,33 +7,38 @@
 
 #include "DomainParticipantImpl.h"
 
-#include "FeatureDisabledQosCheck.h"
-#include "Service_Participant.h"
-#include "Qos_Helper.h"
-#include "GuidConverter.h"
-#include "PublisherImpl.h"
-#include "SubscriberImpl.h"
-#include "DataWriterImpl.h"
-#include "Marked_Default_Qos.h"
-#include "Registered_Data_Types.h"
-#include "Transient_Kludge.h"
-#include "DomainParticipantFactoryImpl.h"
-#include "Util.h"
-#include "DCPS_Utils.h"
-#include "MonitorFactory.h"
-#include "ContentFilteredTopicImpl.h"
-#include "MultiTopicImpl.h"
-#include "Service_Participant.h"
-#include "RecorderImpl.h"
-#include "ReplayerImpl.h"
 #include "BuiltInTopicUtils.h"
+#include "ContentFilteredTopicImpl.h"
+#include "DCPS_Utils.h"
+#include "DataWriterImpl.h"
+#include "DomainParticipantFactoryImpl.h"
+#include "FeatureDisabledQosCheck.h"
+#include "GuidConverter.h"
+#include "Marked_Default_Qos.h"
+#include "MonitorFactory.h"
+#include "MultiTopicImpl.h"
+#include "PublisherImpl.h"
+#include "Qos_Helper.h"
+#include "RecorderImpl.h"
+#include "Registered_Data_Types.h"
+#include "ReplayerImpl.h"
+#include "Service_Participant.h"
+#include "Service_Participant.h"
+#include "SubscriberImpl.h"
+#include "Transient_Kludge.h"
+#include "Util.h"
+
 #include "transport/framework/TransportRegistry.h"
 #include "transport/framework/TransportExceptions.h"
-#ifdef OPENDDS_SECURITY
+
+#include <dds/OpenDDSConfigWrapper.h>
+
+#if OPENDDS_CONFIG_SECURITY
 #  include "security/framework/SecurityRegistry.h"
 #  include "security/framework/SecurityConfig.h"
 #  include "security/framework/Properties.h"
 #endif
+
 #include "XTypes/Utils.h"
 
 #include <dds/DdsDcpsGuidC.h>
@@ -99,7 +104,7 @@ DomainParticipantImpl::DomainParticipantImpl(
   , default_publisher_qos_(TheServiceParticipant->initial_PublisherQos())
   , default_subscriber_qos_(TheServiceParticipant->initial_SubscriberQos())
   , qos_(qos)
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
   , id_handle_(DDS::HANDLE_NIL)
   , perm_handle_(DDS::HANDLE_NIL)
   , part_crypto_handle_(DDS::HANDLE_NIL)
@@ -132,7 +137,7 @@ DomainParticipantImpl::DomainParticipantImpl(
 
 DomainParticipantImpl::~DomainParticipantImpl()
 {
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
   if (security_config_ && perm_handle_ != DDS::HANDLE_NIL) {
     Security::AccessControl_var access = security_config_->get_access_control();
     DDS::Security::SecurityException se;
@@ -1513,7 +1518,7 @@ DomainParticipantImpl::get_default_topic_qos(
 DDS::ReturnCode_t
 DomainParticipantImpl::get_current_time(DDS::Time_t& current_time)
 {
-  current_time = SystemTimePoint::now().to_dds_time();
+  current_time = SystemTimePoint::now().to_idl_struct();
   return DDS::RETCODE_OK;
 }
 
@@ -1626,7 +1631,7 @@ DomainParticipantImpl::enable()
     return DDS::RETCODE_OK;
   }
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
   if (!security_config_ && TheServiceParticipant->get_security()) {
     security_config_ = TheSecurityRegistry->default_config();
     if (!security_config_) {
@@ -1647,7 +1652,7 @@ DomainParticipantImpl::enable()
     return DDS::RETCODE_ERROR;
   }
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
   if (TheServiceParticipant->get_security() && !security_config_) {
     if (DCPS::security_debug.new_entity_error) {
       ACE_ERROR((LM_ERROR,
@@ -1660,7 +1665,7 @@ DomainParticipantImpl::enable()
 
   AddDomainStatus value = {GUID_UNKNOWN, false};
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
   if (TheServiceParticipant->get_security() && security_config_->qos_implies_security(qos_)) {
     Security::Authentication_var auth = security_config_->get_authentication();
 
@@ -1770,7 +1775,7 @@ DomainParticipantImpl::enable()
       return DDS::RETCODE_ERROR;
     }
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
   }
 #endif
 
@@ -1952,7 +1957,7 @@ DomainParticipantImpl::create_new_topic(
                    this->topics_protector_,
                    DDS::Topic::_nil());
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
   if (perm_handle_ && !topicIsBIT(topic_name, type_name)) {
     Security::AccessControl_var access = security_config_->get_access_control();
 

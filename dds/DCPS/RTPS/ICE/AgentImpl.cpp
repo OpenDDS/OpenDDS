@@ -14,12 +14,14 @@
 #include <dds/DCPS/Service_Participant.h>
 #include <dds/DCPS/TimeTypes.h>
 
+#include <dds/OpenDDSConfigWrapper.h>
+
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
 namespace ICE {
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
 
 using DCPS::TimeDuration;
 using DCPS::MonotonicTimePoint;
@@ -305,7 +307,7 @@ void AgentImpl::process_deferred()
   }
 }
 
-#endif /* OPENDDS_SECURITY */
+#endif
 
 } // namespace ICE
 } // namespace OpenDDS

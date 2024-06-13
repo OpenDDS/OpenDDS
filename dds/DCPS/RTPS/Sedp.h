@@ -6,18 +6,20 @@
 #ifndef OPENDDS_DCPS_RTPS_SEDP_H
 #define OPENDDS_DCPS_RTPS_SEDP_H
 
+#include <dds/OpenDDSConfigWrapper.h>
+
 #include "AssociationRecord.h"
 #include "DiscoveredEntities.h"
 #include "LocalEntities.h"
 #include "MessageTypes.h"
 #include "MessageUtils.h"
 #include "TypeLookupTypeSupportImpl.h"
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
 #  include "ParameterListConverter.h"
 #endif
 #include "RtpsRpcTypeSupportImpl.h"
 #include "RtpsCoreTypeSupportImpl.h"
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
 #  include "RtpsSecurityC.h"
 #endif
 
@@ -53,7 +55,7 @@
 #include <dds/DdsDcpsInfrastructureC.h>
 #include <dds/DdsDcpsInfoUtilsC.h>
 #include <dds/DdsDcpsCoreTypeSupportImpl.h>
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
 #  include <dds/DdsSecurityCoreC.h>
 #endif
 
@@ -119,7 +121,7 @@ public:
     return (!(rtps_relay_only_ || use_rtps_relay_)) && from == spdp_rtps_relay_address_;
   }
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
   void use_ice(bool flag)
   {
     ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
@@ -182,7 +184,7 @@ public:
     relay_stun_task_falloff_.set(sedp_heartbeat_period_);
   }
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
   TimeDuration advance_relay_stun_task_falloff()
   {
     ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
@@ -298,7 +300,7 @@ private:
   const TimeDuration spdp_rtps_relay_send_period_;
   bool rtps_relay_only_;
   bool use_rtps_relay_;
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
   bool use_ice_;
 #endif
   DCPS::NetworkAddress spdp_rtps_relay_address_;
@@ -320,9 +322,13 @@ public:
   DDS::ReturnCode_t init(const DCPS::GUID_t& guid,
                          const RtpsDiscovery& disco,
                          DDS::DomainId_t domainId,
+                         DDS::UInt16 ipv4_participant_port_id,
+#ifdef ACE_HAS_IPV6
+                         DDS::UInt16 ipv6_participant_port_id,
+#endif
                          XTypes::TypeLookupService_rch tls);
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
   DDS::ReturnCode_t init_security(DDS::Security::IdentityHandle id_handle,
                                   DDS::Security::PermissionsHandle perm_handle,
                                   DDS::Security::ParticipantCryptoHandle crypto_handle);
@@ -341,7 +347,7 @@ public:
   DCPS::NetworkAddress multicast_group() const;
 
   void associate(DiscoveredParticipant& participant
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
                  , const DDS::Security::ParticipantSecurityAttributes& participant_sec_attr
 #endif
                  );
@@ -353,7 +359,7 @@ public:
   void process_association_records_i(DiscoveredParticipant& participant);
   void generate_remote_matched_crypto_handles(DiscoveredParticipant& participant);
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
   void disassociate_volatile(DiscoveredParticipant& participant);
   void cleanup_volatile_crypto(const DCPS::GUID_t& remote);
   void associate_volatile(DiscoveredParticipant& participant);
@@ -372,7 +378,7 @@ public:
 
   void update_locators(const ParticipantData_t& pdata);
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
   DDS::ReturnCode_t write_stateless_message(const DDS::Security::ParticipantStatelessMessage& msg,
                                             const DCPS::GUID_t& reader);
 
@@ -416,7 +422,7 @@ public:
                                 bool is_discovery_protected, bool send_get_types,
                                 const SequenceNumber& seq_num);
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
   void signal_liveliness_secure(DDS::LivelinessQosPolicyKind kind);
 #endif
 
@@ -481,7 +487,7 @@ public:
   void update_subscription_locators(const GUID_t& subscriptionId,
                                     const DCPS::TransportLocatorSeq& transInfo);
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
   inline Security::HandleRegistry_rch get_handle_registry() const
   {
     return handle_registry_;
@@ -509,7 +515,7 @@ private:
   void populate_origination_locator(const GUID_t& id, DCPS::TransportLocator& tl);
 
   bool remote_knows_about_local_i(const GUID_t& local, const GUID_t& remote) const;
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
   bool remote_is_authenticated_i(const GUID_t& local, const GUID_t& remote, const DiscoveredParticipant& participant) const;
   bool local_has_remote_participant_token_i(const GUID_t& local, const GUID_t& remote) const;
   bool remote_has_local_participant_token_i(const GUID_t& local, const GUID_t& remote, const DiscoveredParticipant& participant) const;
@@ -549,7 +555,7 @@ private:
     topics_.erase(top_it);
   }
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
   void cleanup_secure_writer(const GUID_t& publicationId);
   void cleanup_secure_reader(const GUID_t& subscriptionId);
 #endif
@@ -583,9 +589,10 @@ private:
   public:
     Endpoint(const DCPS::GUID_t& repo_id, Sedp& sedp)
       : repo_id_(repo_id)
+      , domain_id_(sedp.get_domain_id())
       , sedp_(sedp)
       , shutting_down_(false)
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
       , participant_crypto_handle_(DDS::HANDLE_NIL)
       , endpoint_crypto_handle_(DDS::HANDLE_NIL)
 #endif
@@ -608,7 +615,7 @@ private:
 
     DDS::DomainId_t domain_id() const
     {
-      return 0; // not used for SEDP
+      return domain_id_;
     }
 
     CORBA::Long get_priority_value(const DCPS::AssociationData&) const
@@ -619,7 +626,7 @@ private:
     using DCPS::TransportClient::enable_transport_using_config;
     using DCPS::TransportClient::disassociate;
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
     void set_crypto_handles(DDS::Security::ParticipantCryptoHandle p,
                             DDS::Security::NativeCryptoHandle e = DDS::HANDLE_NIL)
     {
@@ -661,9 +668,10 @@ private:
 
   protected:
     DCPS::GUID_t repo_id_;
+    const DDS::DomainId_t domain_id_;
     Sedp& sedp_;
     AtomicBool shutting_down_;
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
     DDS::Security::ParticipantCryptoHandle participant_crypto_handle_;
     DDS::Security::NativeCryptoHandle endpoint_crypto_handle_;
 #endif
@@ -753,7 +761,7 @@ private:
 
     virtual ~SecurityWriter();
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
     DDS::ReturnCode_t write_stateless_message(const DDS::Security::ParticipantStatelessMessage& msg,
                                               const DCPS::GUID_t& reader,
                                               DCPS::SequenceNumber& sequence);
@@ -790,7 +798,7 @@ private:
 
     virtual ~DiscoveryWriter();
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
     DDS::ReturnCode_t write_dcps_participant_secure(const Security::SPDPdiscoveredParticipantData& msg,
                                                     const DCPS::GUID_t& reader, DCPS::SequenceNumber& sequence);
 #endif
@@ -1028,7 +1036,7 @@ private:
                                       const DCPS::DiscoveredWriterData& wdata,
                                       const DCPS::GUID_t& guid,
                                       const XTypes::TypeInformation& type_info
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
                                       ,
                                       bool have_ice_agent_info,
                                       const ICE::AgentInfo& ice_agent_info,
@@ -1039,7 +1047,7 @@ private:
   void data_received(DCPS::MessageId message_id,
                      const DiscoveredPublication& wdata);
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
   void data_received(DCPS::MessageId message_id,
                      const ParameterListConverter::DiscoveredPublication_SecurityWrapper& wrapper);
 #endif
@@ -1048,7 +1056,7 @@ private:
                                       const DCPS::DiscoveredReaderData& rdata,
                                       const DCPS::GUID_t& guid,
                                       const XTypes::TypeInformation& type_info
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
                                       ,
                                       bool have_ice_agent_info,
                                       const ICE::AgentInfo& ice_agent_info,
@@ -1059,7 +1067,7 @@ private:
   void data_received(DCPS::MessageId message_id,
                      const DiscoveredSubscription& rdata);
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
   void data_received(DCPS::MessageId message_id,
                      const ParameterListConverter::DiscoveredSubscription_SecurityWrapper& wrapper);
 #endif
@@ -1072,7 +1080,7 @@ private:
   void data_received(DCPS::MessageId message_id,
                      const ParticipantMessageData& data);
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
   void received_participant_message_data_secure(DCPS::MessageId message_id,
                                                 const ParticipantMessageData& data);
 
@@ -1121,7 +1129,7 @@ private:
 
   void write_durable_participant_message_data(const DCPS::GUID_t& reader);
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
   void write_durable_participant_message_data_secure(const DCPS::GUID_t& reader);
 #endif
 
@@ -1132,7 +1140,7 @@ private:
                                            LocalPublication& pub,
                                            const DCPS::GUID_t& reader = GUID_UNKNOWN);
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
   DDS::ReturnCode_t write_publication_data_secure(const DCPS::GUID_t& rid,
                                                   LocalPublication& pub,
                                                   const DCPS::GUID_t& reader = GUID_UNKNOWN);
@@ -1150,7 +1158,7 @@ private:
                                             LocalSubscription& sub,
                                             const DCPS::GUID_t& reader = GUID_UNKNOWN);
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
   DDS::ReturnCode_t write_subscription_data_secure(const DCPS::GUID_t& rid,
                                                    LocalSubscription& sub,
                                                    const DCPS::GUID_t& reader = GUID_UNKNOWN);
@@ -1163,7 +1171,7 @@ private:
   DDS::ReturnCode_t write_participant_message_data(const DCPS::GUID_t& rid,
                                                    DCPS::SequenceNumber& sn,
                                                    const DCPS::GUID_t& reader = GUID_UNKNOWN);
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
   DDS::ReturnCode_t write_participant_message_data_secure(const DCPS::GUID_t& rid,
                                                           DCPS::SequenceNumber& sn,
                                                           const DCPS::GUID_t& reader = GUID_UNKNOWN);
@@ -1172,7 +1180,7 @@ private:
   virtual bool is_expectant_opendds(const GUID_t& endpoint) const;
 
 protected:
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
   DDS::Security::DatawriterCryptoHandle
   generate_remote_matched_writer_crypto_handle(const DCPS::GUID_t& writer,
                                                const DCPS::GUID_t& reader);
@@ -1377,7 +1385,7 @@ protected:
   void get_remote_type_objects(const XTypes::TypeIdentifierWithDependencies& tid_with_deps,
                                MatchingData& md, bool get_minimal, const GUID_t& remote_id,
                                bool is_discovery_protected);
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
   void match_continue_security_enabled(
     const GUID_t& writer, const GUID_t& reader, bool call_writer, bool call_reader);
 #endif
@@ -1413,7 +1421,7 @@ protected:
     return td->second.has_dcps_key();
   }
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
   inline bool is_security_enabled()
   {
     return (permissions_handle_ != DDS::HANDLE_NIL) && (access_control_ != 0);
@@ -1491,7 +1499,7 @@ protected:
   // These are the last sequence numbers sent for the various "liveliness" instances.
   DCPS::SequenceNumber local_participant_automatic_liveliness_sn_;
   DCPS::SequenceNumber local_participant_manual_liveliness_sn_;
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
   DCPS::SequenceNumber local_participant_automatic_liveliness_sn_secure_;
   DCPS::SequenceNumber local_participant_manual_liveliness_sn_secure_;
 
@@ -1516,15 +1524,15 @@ protected:
 #endif
 
   DiscoveryWriter_rch publications_writer_;
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
   DiscoveryWriter_rch publications_secure_writer_;
 #endif
   DiscoveryWriter_rch subscriptions_writer_;
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
   DiscoveryWriter_rch subscriptions_secure_writer_;
 #endif
   LivelinessWriter_rch participant_message_writer_;
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
   LivelinessWriter_rch participant_message_secure_writer_;
   SecurityWriter_rch participant_stateless_message_writer_;
   DiscoveryWriter_rch dcps_participant_secure_writer_;
@@ -1533,20 +1541,20 @@ protected:
 #endif
   TypeLookupRequestWriter_rch type_lookup_request_writer_;
   TypeLookupReplyWriter_rch type_lookup_reply_writer_;
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
   TypeLookupRequestWriter_rch type_lookup_request_secure_writer_;
   TypeLookupReplyWriter_rch type_lookup_reply_secure_writer_;
 #endif
   DiscoveryReader_rch publications_reader_;
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
   DiscoveryReader_rch publications_secure_reader_;
 #endif
   DiscoveryReader_rch subscriptions_reader_;
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
   DiscoveryReader_rch subscriptions_secure_reader_;
 #endif
   LivelinessReader_rch participant_message_reader_;
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
   LivelinessReader_rch participant_message_secure_reader_;
   SecurityReader_rch participant_stateless_message_reader_;
   SecurityReader_rch participant_volatile_message_secure_reader_;
@@ -1554,12 +1562,12 @@ protected:
 #endif
   TypeLookupRequestReader_rch type_lookup_request_reader_;
   TypeLookupReplyReader_rch type_lookup_reply_reader_;
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
   TypeLookupRequestReader_rch type_lookup_request_secure_reader_;
   TypeLookupReplyReader_rch type_lookup_reply_secure_reader_;
 #endif
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
   DCPS::RcHandle<ICE::Agent> ice_agent_;
   RcHandle<PublicationAgentInfoListener> publication_agent_info_listener_;
   RcHandle<SubscriptionAgentInfoListener> subscription_agent_info_listener_;

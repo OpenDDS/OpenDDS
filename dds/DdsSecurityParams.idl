@@ -10,7 +10,9 @@
  *
  */
 
-#ifdef OPENDDS_SECURITY
+#include <dds/OpenDDSConfigWrapper.idl>
+
+#if OPENDDS_CONFIG_SECURITY
 #ifndef OPENDDS_DDS_SECURITY_PARAMS_IDL
 #define OPENDDS_DDS_SECURITY_PARAMS_IDL
 
