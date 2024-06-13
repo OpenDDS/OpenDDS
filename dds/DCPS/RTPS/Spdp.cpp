@@ -519,14 +519,6 @@ void Spdp::process_location_updates_i(const DiscoveredParticipantIter& iter, con
     return;
   }
 
-  if (iter->second.bit_ih_ == DDS::HANDLE_NIL) {
-    // Do not process updates until the participant exists in the built-in topics.
-    if (DCPS::log_bits) {
-      ACE_DEBUG((LM_DEBUG, "(%P|%t) DEBUG: Spdp::process_location_updates_i: %@ %C does not exist in participant bit, returning\n", this, LogGuid(iter->first).c_str()));
-    }
-    return;
-  }
-
   DiscoveredParticipant::LocationUpdateList location_updates;
   std::swap(iter->second.location_updates_, location_updates);
 
