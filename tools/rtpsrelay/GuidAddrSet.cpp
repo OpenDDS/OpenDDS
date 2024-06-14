@@ -281,7 +281,7 @@ void GuidAddrSet::remove(const OpenDDS::DCPS::GUID_t& guid,
   relay_stats_reporter_.local_active_participants(guid_addr_set_map_.size(), now);
 
   if (config_.log_activity()) {
-    ACE_DEBUG((LM_INFO, "(%P|%t) INFO: GuidAddrSet::remove_i "
+    ACE_DEBUG((LM_INFO, "(%P|%t) INFO: GuidAddrSet::remove "
                "%C removed %C into session total=%B remote=%B deactivation=%B expire=%B admit=%B\n",
                guid_to_string(guid).c_str(),
                session_time.sec_str().c_str(),
