@@ -5,5 +5,5 @@
 
   - These files will provide defaults for various configuration macros.
 
-  - These files should be include in preference to :ghfile:`dds/OpenDDsConfig.h`
+  - These files should be include in preference to ``dds/OpenDDSConfig.h``
 .. news-end-section
