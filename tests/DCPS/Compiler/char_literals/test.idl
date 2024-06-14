@@ -8,7 +8,7 @@
 #  define WCHAR_DISC 0
 #endif
 #ifndef WCHAR_ESC_SEQ
-#  define WCHAR_ESC_SEQ  0
+#  define WCHAR_ESC_SEQ 0
 #endif
 
 const char c_a = 'a';
@@ -85,11 +85,16 @@ const wchar wc_backslash = L'\\';
 const wchar wc_question = L'\?';
 const wchar wc_single_quote = L'\'';
 const wchar wc_double_quote = L'\"';
+const wchar wc_oct_0 = L'\0';
+const wchar wc_oct_255 = L'\377';
+const wchar wc_hex_1 = L'\x1';
+const wchar wc_hex_254 = L'\xfe';
 #endif
 #if defined __OPENDDS_IDL || WCHAR_ESC_SEQ
 const wchar wc_u_escape = L'\u203C'; // (Double Exclamation Mark: ‼)
 #endif
 
+/* TODO: tao_idl supports these now, but OpenDDS doesn't
 #if WCHAR_DISC
 const wchar wc_const = L'*';
 @topic
@@ -121,6 +126,14 @@ case L'\'':
   long single_quote;
 case L'\"':
   long double_quote;
+case L'\0':
+  long oct_0;
+case L'\377':
+  long oct_255;
+case L'\x1':
+  long hex_1;
+case L'\xfe':
+  long hex_254;
 case L'\u203C':
   long u_escape;
 #endif
@@ -128,6 +141,7 @@ default:
   long defualt_member;
 };
 #endif
+*/
 
 /* TODO(iguessthislldo): config-linux.h doesn't seem to have ACE_HAS_WCHAR
  * defined, which makes WChar typedef to ACE_UINT16, which doesn't seem to
