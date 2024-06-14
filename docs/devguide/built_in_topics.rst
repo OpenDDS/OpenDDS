@@ -229,6 +229,7 @@ OpenDDSParticipantLocation Topic
 
 The built-in topic ``OpenDDSParticipantLocation`` is published by the DDSI-RTPS discovery implementation to give applications visibility into the details of how each remote participant is connected over the network.
 If the RtpsRelay (:ref:`internet_enabled_rtps--the-rtpsrelay`) and/or IETF ICE (:ref:`internet_enabled_rtps--interactive-connectivity-establishment-ice-for-rtps`) are enabled, their usage is reflected in the OpenDDSParticipantLocation topic data.
+Instances of this built-in topic are published before participant discovery is complete so that applications can be notified that discovery is in progress.
 The topic type ParticipantLocationBuiltinTopicData is defined in :ghfile:`dds/OpenddsDcpsExt.idl` in the ``OpenDDS::DCPS`` module:
 
 * ``guid`` (key) -- The GUID of the remote participant.
