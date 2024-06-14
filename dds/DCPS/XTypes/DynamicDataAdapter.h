@@ -571,9 +571,17 @@ protected:
   DDS::ReturnCode_t get_cpp11_s8_raw_value(
     const char* method, void* dest, DDS::TypeKind tk,
     const std::string& source, DDS::MemberId id);
+  template<typename T>
   DDS::ReturnCode_t set_cpp11_s8_raw_value(
-    const char* method, std::string& dest, DDS::MemberId id,
-    const void* source, DDS::TypeKind tk);
+    const char* method, T& dest, DDS::MemberId id,
+    const void* source, DDS::TypeKind tk)
+  {
+    const DDS::ReturnCode_t rc = check_member(method, tk, id);
+    if (rc == DDS::RETCODE_OK) {
+      dest = static_cast<const char*>(source);
+    }
+    return rc;
+  }
   DDS::ReturnCode_t get_s16_raw_value(
     const char* method, void* dest, DDS::TypeKind tk,
     const DDS::Char16* source, DDS::MemberId id);

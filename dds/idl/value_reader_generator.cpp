@@ -7,6 +7,7 @@
 
 #include "be_extern.h"
 #include "be_util.h"
+#include "field_info.h"
 
 #include <dds/DCPS/Definitions.h>
 
@@ -21,7 +22,7 @@ namespace {
 
   void generate_read(const std::string& expression, const std::string& accessor,
                      const std::string& field_name, AST_Type* type, const std::string& idx,
-                     int level = 1, FieldFilter field_filter = FieldFilter_All);
+                     int level = 1, FieldFilter field_filter = FieldFilter_All, bool optional = false);
 
   std::string primitive_type(AST_PredefinedType::PredefinedType pt)
   {
@@ -139,25 +140,38 @@ namespace {
 
   void generate_read(const std::string& expression, const std::string& accessor,
                      const std::string& field_name, AST_Type* type, const std::string& idx,
-                     int level, FieldFilter filter_kind)
+                     int level, FieldFilter filter_kind, bool optional)
   {
     AST_Type* const actual = resolveActualType(type);
 
     const Classification c = classify(actual);
-    if (c & CL_SEQUENCE) {
-      AST_Sequence* const sequence = dynamic_cast<AST_Sequence*>(actual);
-      sequence_helper(expression + accessor, sequence, idx, level, filter_kind);
-      return;
 
-    } else if (c & CL_ARRAY) {
-      AST_Array* const array = dynamic_cast<AST_Array*>(actual);
-      array_helper(expression + accessor, array, 0, idx, level, filter_kind);
-      return;
+    const std::string indent(level * 2 + (optional ? 2 : 0), ' ');
+    if (optional) {
+      be_global->impl_ <<
+        indent.substr(0, indent.size() - 2) << "if (value_reader.member_has_value()) {\n";
+    }
+
+    // If the field is optional we need to create a temporary to read the value into before we can assign it to the optional
+    const bool create_tmp  = optional && !(c & CL_STRING);
+    const std::string var_name = create_tmp ? "tmp" : expression + accessor;
+    if (create_tmp) {
+      std::string tmp_type = scoped(type->name());
+      if (c & (CL_ARRAY | CL_SEQUENCE)) {
+        tmp_type = FieldInfo::scoped_type(*type, field_name);
+      }
+      be_global->impl_ <<
+        indent << tmp_type << " tmp;\n";
     }
 
     const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
-    const std::string indent(level * 2, ' ');
-    if (c & CL_FIXED) {
+    if (c & CL_SEQUENCE) {
+      AST_Sequence* const sequence = dynamic_cast<AST_Sequence*>(actual);
+      sequence_helper(var_name, sequence, idx, level, filter_kind);
+    } else if (c & CL_ARRAY) {
+      AST_Array* const array = dynamic_cast<AST_Array*>(actual);
+      array_helper(var_name, array, 0, idx, level, filter_kind);
+    } else if (c & CL_FIXED) {
       be_global->impl_ <<
         indent << "::ACE_CDR::Fixed fixed;\n" <<
         indent << "if (!value_reader.read_fixed(fixed)) return false;\n" <<
@@ -182,14 +196,14 @@ namespace {
           indent << "  " << scoped(type->name()) << " bx;\n" <<
           indent << "  if (!value_reader.read_" << primitive_type(pt)
             << "(bx)) return false;\n" <<
-          indent << "  " << expression << accessor << " = bx;\n" <<
+          indent << "  " << var_name << " = bx;\n" <<
           indent << "}\n";
       } else {
         be_global->impl_ <<
-          indent << "if (!value_reader.read_" << primitive_type(pt) << '(' << expression << accessor << ")) return false;\n";
+          indent << "if (!value_reader.read_" << primitive_type(pt) << '(' << var_name << ")) return false;\n";
       }
     } else {
-      std::string value_expr = expression + accessor;
+      std::string value_expr = (create_tmp ? "tmp" : expression + accessor);
       if (!(c & CL_ENUM)) {
         const std::string type_name = scoped(type->name());
         switch (filter_kind) {
@@ -197,13 +211,13 @@ namespace {
           value_expr = field_name + "_nested_key_only";
           be_global->impl_ <<
             indent << "const NestedKeyOnly<" << type_name << "> " <<
-            value_expr << "(" << expression << accessor << ");\n";
+            value_expr << "(" << var_name << ");\n";
           break;
         case FieldFilter_KeyOnly:
           value_expr = field_name + "_key_only";
           be_global->impl_ <<
             indent << "const KeyOnly<" << type_name << "> " <<
-            value_expr << "(" << expression << accessor << ");\n";
+            value_expr << "(" << var_name << ");\n";
           break;
         default:
           break;
@@ -211,7 +225,18 @@ namespace {
       }
 
       be_global->impl_ <<
-        indent << "if (!vread(value_reader, " << value_expr << ")) return false;\n";
+        indent << "if (!vread(value_reader, " << value_expr <<
+          ")) return false;\n";
+    }
+
+    if (create_tmp) {
+      be_global->impl_ <<
+        indent << expression << accessor << " = std::move(tmp);\n";
+    }
+
+    if (optional) {
+      be_global->impl_ <<
+        indent.substr(0, indent.size() - 2) << "}\n";
     }
   }
 
@@ -285,7 +310,7 @@ namespace {
         be_global->impl_ <<
           "    case " << be_global->get_id(field) << ": {\n";
         generate_read(value_prefix + field_name, use_cxx11 ? "()" : "", field_name,
-                      field->field_type(), "i", 3, nested(field_filter));
+                      field->field_type(), "i", 3, nested(field_filter), be_global->is_optional(field));
         be_global->impl_ <<
           "      break;\n"
           "    }\n";
