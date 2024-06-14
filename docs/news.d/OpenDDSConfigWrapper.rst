@@ -5,5 +5,5 @@
 
   - These files will provide defaults for various configuration macros.
 
-  - These files should be include in preference to ``dds/OpenDDSConfig.h``
+  - These files should be included in preference to ``dds/OpenDDSConfig.h``
 .. news-end-section
