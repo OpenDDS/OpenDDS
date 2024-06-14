@@ -63,6 +63,13 @@ public:
   bool begin_element(ACE_CDR::ULong idx);
   bool end_element();
 
+  void begin_map();
+  void end_map();
+  void begin_pair();
+  void end_pair();
+  void write_key();
+  void write_value();
+
   bool write_boolean(ACE_CDR::Boolean value);
   bool write_byte(ACE_CDR::Octet value);
 #if OPENDDS_HAS_EXPLICIT_INTS
@@ -173,6 +180,42 @@ template <typename Writer>
 bool JsonValueWriter<Writer>::end_sequence()
 {
   return writer_.EndArray();
+}
+
+template <typename Writer>
+void JsonValueWriter<Writer>::begin_map()
+{
+  writer_.StartArray();
+}
+
+template <typename Writer>
+void JsonValueWriter<Writer>::end_map()
+{
+  writer_.EndArray();
+}
+
+template <typename Writer>
+void JsonValueWriter<Writer>::begin_pair()
+{
+  writer_.StartObject();
+}
+
+template <typename Writer>
+void JsonValueWriter<Writer>::end_pair()
+{
+  writer_.EndObject();
+}
+
+template <typename Writer>
+void JsonValueWriter<Writer>::write_key()
+{
+  writer_.Key("key");
+}
+
+template <typename Writer>
+void JsonValueWriter<Writer>::write_value()
+{
+  writer_.Key("value");
 }
 
 template <typename Writer>

@@ -99,6 +99,12 @@ public:
   virtual bool end_array() = 0;
   virtual bool begin_sequence(XTypes::TypeKind elem_kind, ACE_CDR::ULong length) = 0;
   virtual bool end_sequence() = 0;
+  virtual void begin_map() {}
+  virtual void end_map() {}
+  virtual void begin_pair() {}
+  virtual void end_pair() {}
+  virtual void write_key() {}
+  virtual void write_value() {}
   virtual bool begin_element(ACE_CDR::ULong idx) = 0;
   virtual bool end_element() = 0;
 

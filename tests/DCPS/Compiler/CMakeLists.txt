@@ -8,3 +8,5 @@ if(NOT OPENDDS_CXX_STD_YEAR LESS 2011)
   add_subdirectory(optional)
   add_subdirectory(char_literals)
 endif()
+
+add_subdirectory(maps)

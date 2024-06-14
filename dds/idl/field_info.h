@@ -47,6 +47,9 @@ struct FieldInfo {
   const AstTypeClassification::Classification cls_;
   AST_Array* arr_;
   AST_Sequence* seq_;
+#if OPENDDS_HAS_IDL_MAP
+  AST_Map* map_;
+#endif
   AST_Type* as_base_;
   AST_Type* as_act_;
   const AstTypeClassification::Classification as_cls_;

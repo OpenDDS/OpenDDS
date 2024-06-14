@@ -73,6 +73,16 @@ public:
   bool begin_element();
   bool end_element();
 
+  bool begin_map();
+  bool end_map();
+  bool pairs_remaining();
+  bool begin_pair();
+  bool begin_pair_key();
+  bool end_pair_key();
+  bool begin_pair_value();
+  bool end_pair_value();
+  bool end_pair();
+
   bool read_boolean(ACE_CDR::Boolean& value);
   bool read_byte(ACE_CDR::Octet& value);
 #if OPENDDS_HAS_EXPLICIT_INTS
@@ -350,6 +360,71 @@ template <typename InputStream>
 bool JsonValueReader<InputStream>::end_element()
 {
   return true;
+}
+
+template <typename InputStream>
+bool JsonValueReader<InputStream>::begin_map()
+{
+  peek();
+  return consume(kStartArray);
+}
+
+template <typename InputStream>
+bool JsonValueReader<InputStream>::pairs_remaining()
+{
+  peek();
+  return token_type_ != kEndArray;
+}
+
+template <typename InputStream>
+bool JsonValueReader<InputStream>::begin_pair()
+{
+  peek();
+  return consume(kStartObject);
+}
+
+template <typename InputStream>
+bool JsonValueReader<InputStream>::begin_pair_key()
+{
+  if (peek() == kKey) {
+    return consume(kKey);
+  }
+  return false;
+}
+
+template <typename InputStream>
+bool JsonValueReader<InputStream>::end_pair_key()
+{
+  return true;
+}
+
+template <typename InputStream>
+bool JsonValueReader<InputStream>::begin_pair_value()
+{
+  if (peek() == kKey) {
+    return consume(kKey);
+  }
+  return false;
+}
+
+template <typename InputStream>
+bool JsonValueReader<InputStream>::end_pair_value()
+{
+  return true;
+}
+
+template <typename InputStream>
+bool JsonValueReader<InputStream>::end_pair()
+{
+  peek();
+  return consume(kEndObject);
+}
+
+template <typename InputStream>
+bool JsonValueReader<InputStream>::end_map()
+{
+  peek();
+  return consume(kEndArray);
 }
 
 template <typename InputStream>

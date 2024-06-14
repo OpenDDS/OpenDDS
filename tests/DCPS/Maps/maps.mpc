@@ -1,0 +1,28 @@
+project(*Publisher) : dcpsexe, opendds_cxx11, dcps_test, dcps_transports_for_test {
+
+  exename = publisher
+
+  macros += CPP11_MAPPING=1
+  TypeSupport_Files {
+    maps.idl
+  }
+
+  Source_Files {
+    publisher.cpp
+  }
+}
+
+project(*Subscriber) : dcpsexe, opendds_cxx11, dcps_test, dcps_transports_for_test {
+
+  exename = subscriber
+  after += *Publisher
+
+  macros += CPP11_MAPPING=1
+  TypeSupport_Files {
+    maps.idl
+  }
+
+  Source_Files {
+    subscriber.cpp
+  }
+}
