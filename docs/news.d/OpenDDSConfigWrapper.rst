@@ -1,6 +1,6 @@
 .. news-prs: 4659
 
-.. news-start-section: Additionos
+.. news-start-section: Additions
 - Added :ghfile:`dds/OpenDDSConfigWrapper.h` and :ghfile:`dds/OpenDDSConfigWrapper.idl`.
 
   - These files will provide defaults for various configuration macros.
