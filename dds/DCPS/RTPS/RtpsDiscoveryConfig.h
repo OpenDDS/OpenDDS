@@ -167,8 +167,8 @@ public:
   DCPS::TimeDuration auth_resend_period() const;
   void auth_resend_period(const DCPS::TimeDuration& x);
 
-  u_short max_spdp_sequence_msg_reset_check() const;
-  void max_spdp_sequence_msg_reset_check(u_short reset_value);
+  u_short max_spdp_sequence_msg_reset_checks() const;
+  void max_spdp_sequence_msg_reset_checks(u_short reset_value);
 
   DCPS::NetworkAddress spdp_rtps_relay_address() const;
   void spdp_rtps_relay_address(const DCPS::NetworkAddress& address);

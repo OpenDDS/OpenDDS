@@ -713,16 +713,16 @@ RtpsDiscoveryConfig::auth_resend_period(const DCPS::TimeDuration& x)
 }
 
 u_short
-RtpsDiscoveryConfig::max_spdp_sequence_msg_reset_check() const
+RtpsDiscoveryConfig::max_spdp_sequence_msg_reset_checks() const
 {
-  return TheServiceParticipant->config_store()->get_uint32(config_key("MAX_SPDP_SEQUENCE_MSG_RESET_CHECK").c_str(),
+  return TheServiceParticipant->config_store()->get_uint32(config_key("MAX_SPDP_SEQUENCE_MSG_RESET_CHECKS").c_str(),
                                                            3);
 }
 
 void
-RtpsDiscoveryConfig::max_spdp_sequence_msg_reset_check(u_short reset_value)
+RtpsDiscoveryConfig::max_spdp_sequence_msg_reset_checks(u_short reset_value)
 {
-  TheServiceParticipant->config_store()->set_uint32(config_key("MAX_SPDP_SEQUENCE_MSG_RESET_CHECK").c_str(),
+  TheServiceParticipant->config_store()->set_uint32(config_key("MAX_SPDP_SEQUENCE_MSG_RESET_CHECKS").c_str(),
                                                     reset_value);
 }
 

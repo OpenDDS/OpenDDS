@@ -235,7 +235,7 @@ Spdp::Spdp(DDS::DomainId_t domain,
   , lease_duration_(disco_->config()->lease_duration())
   , lease_extension_(disco_->config()->lease_extension())
   , max_lease_duration_(disco_->config()->max_lease_duration())
-  , max_spdp_sequence_msg_reset_check_(disco->config()->max_spdp_sequence_msg_reset_check())
+  , max_spdp_sequence_msg_reset_checks_(disco->config()->max_spdp_sequence_msg_reset_checks())
   , check_source_ip_(disco->config()->check_source_ip())
   , undirected_spdp_(disco->config()->undirected_spdp())
 #if OPENDDS_CONFIG_SECURITY
@@ -300,7 +300,7 @@ Spdp::Spdp(DDS::DomainId_t domain,
   , lease_duration_(disco_->config()->lease_duration())
   , lease_extension_(disco_->config()->lease_extension())
   , max_lease_duration_(disco_->config()->max_lease_duration())
-  , max_spdp_sequence_msg_reset_check_(disco->config()->max_spdp_sequence_msg_reset_check())
+  , max_spdp_sequence_msg_reset_checks_(disco->config()->max_spdp_sequence_msg_reset_checks())
   , check_source_ip_(disco->config()->check_source_ip())
   , undirected_spdp_(disco->config()->undirected_spdp())
   , max_participants_in_authentication_(disco->config()->max_participants_in_authentication())
@@ -1042,7 +1042,7 @@ Spdp::handle_participant_data(DCPS::MessageId id,
       process_location_updates_i(iter, "valid SPDP", secure_part_user_data());
 #endif
     // Else a reset has occurred and check if we should remove the participant
-    } else if (iter->second.seq_reset_count_ >= max_spdp_sequence_msg_reset_check_) {
+    } else if (iter->second.seq_reset_count_ >= max_spdp_sequence_msg_reset_checks_) {
 #if OPENDDS_CONFIG_SECURITY
       purge_handshake_deadlines(iter);
 #endif
