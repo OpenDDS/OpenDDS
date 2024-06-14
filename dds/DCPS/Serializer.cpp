@@ -290,7 +290,7 @@ String EncapsulationHeader::to_string() const
   case KIND_INVALID:
     return "Invalid";
   default:
-    return "Unknown: " + to_dds_string(static_cast<unsigned>(kind_), true);
+    return "Unknown: 0x" + to_dds_string(static_cast<unsigned>(kind_), true);
   }
 }
 
@@ -333,7 +333,7 @@ String Encoding::kind_to_string(Kind value)
   case KIND_UNALIGNED_CDR:
     return "Unaligned CDR";
   default:
-    return "Unknown: " + to_dds_string(static_cast<unsigned>(value), true);
+    return "Unknown: 0x" + to_dds_string(static_cast<unsigned>(value), true);
   }
 }
 
