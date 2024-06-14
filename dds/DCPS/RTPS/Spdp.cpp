@@ -474,8 +474,7 @@ void Spdp::process_location_updates_i(const DiscoveredParticipantIter& iter, boo
 {
   // We have the global lock.
 
-  if (iter == participants_.end() || iter->second.bit_ih_ == DDS::HANDLE_NIL) {
-    // Do not process updates until the participant exists in the built-in topics.
+  if (iter == participants_.end()) {
     return;
   }
 
