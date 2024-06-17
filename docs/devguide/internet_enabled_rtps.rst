@@ -83,7 +83,7 @@ Firewalls on the path to the participants intercept the packet and replace the d
 The RTPS implementation in OpenDDS uses a port for SPDP, a port for SEDP, and a port for conventional RTPS messages.
 The relay mirrors this idea and exposes three ports to handle each type of traffic.
 
-To keep NAT bindings alive, clients send STUN binding requests and indications periodically to the RtspRelay ports.
+To keep NAT bindings alive, clients send STUN binding requests and indications periodically to the RtpsRelay ports.
 Participants using ICE may use these ports as a STUN server for determining a server reflexive address.
 The timing parameters for the periodic messages are controlled via the ICE configuration variables for server reflexive addresses.
 
@@ -119,8 +119,8 @@ As an example:
 
 Each participant should use a single RtpsRelay instance due to the way NAT bindings work.
 Most firewalls will only forward packets received from the destination address that was originally used to create the NAT binding.
-That is, if participant A is interacting with relay A and participant B is interacting with relay B, then a message from A to B must go from A to relay A, to relay B, and finally to B.
-Relay A cannot send directly to B since that packet will not be accepted by the firewall.
+That is, if participant A is interacting with relay 1 and participant B is interacting with relay 2, then a message from participant A to participant B must go from participant A to relay 1, to relay 2, and finally to participant B.
+Relay 1 cannot send directly to B since that packet will not be accepted by the firewall.
 
 .. _internet_enabled_rtps--usage:
 
@@ -138,8 +138,11 @@ Security must be enabled to build the RtpsRelay.
 See :ref:`dds_security--building-opendds-with-security-enabled`.
 Each RtpsRelay process has a set of ports for exchanging RTPS messages with the participants called the "vertical" ports and a set of ports for exchanging RTPS messages with other relays called the "horizontal" ports.
 
-The RtpsRelay contains an embedded webserver called the meta discovery server.
-The webserver has the following endpoints:
+.. _internet_enabled_rtps--metadisc-server:
+
+The RtpsRelay contains an embedded web server called the *meta discovery server*.
+The listening address can be set using :option:`-MetaDiscoveryAddress` and logging can be enabled using :option:`-LogHttp`.
+The web server has the following endpoints:
 
 * ``/config``
 
@@ -150,6 +153,7 @@ The webserver has the following endpoints:
 * ``/healthcheck``
 
   Responds with HTTP 200 (OK) or 503 (Service Unavailable) if :cfg:prop:`thread monitoring is enabled <DCPSThreadStatusInterval>` and the RtpsRelay is not admitting new client participants.
+  See :option:`-UtilizationLimit`, :option:`-AdmissionControlQueueSize`, and :option:`-AdmissionControlQueueDuration` for more information.
   Load balancers can use this endpoint to route new client participants to an available RtpsRelay instance.
 
 The command-line options for the RtpsRelay:
@@ -161,7 +165,7 @@ The command-line options for the RtpsRelay:
 .. option:: -HorizontalAddress <address>
 
   Determines the base network address used for receiving RTPS message from other relays.
-  By default, the relay listens on the first IP network and uses port ``11444`` for :ref:`SPDP <spdp>` messages, ``11445`` for :ref:`SEDP <sedp>` messages, and ``11446`` for data messages.
+  By default, the relay listens on the first IP network interface and uses port ``11444`` for :ref:`SPDP <spdp>` messages, ``11445`` for :ref:`SEDP <sedp>` messages, and ``11446`` for data messages.
 
 .. option:: -VerticalAddress <address>
 
@@ -245,7 +249,7 @@ The command-line options for the RtpsRelay:
 
 .. option:: -LogHttp 0|1
 
-  Enable/disable logging of the HTTP server.
+  Enable/disable logging in the :ref:`meta discovery HTTP server <internet_enabled_rtps--metadisc-server>`.
 
 .. option:: -LogRelayStatistics <seconds>
 
@@ -296,17 +300,17 @@ The command-line options for the RtpsRelay:
 
 .. option:: -MetaDiscoveryAddress <host>:<port>
 
-  Listening address for the meta discovery server, default is ``0.0.0.0:8080``.
+  Listening address for the :ref:`meta discovery HTTP server <internet_enabled_rtps--metadisc-server>`, default is ``0.0.0.0:8080``.
 
 .. option:: -MetaDiscoveryContentType <content-type>
 
-  The HTTP content type to report for the meta discovery config endpoint, default is ``application/json``.
+  The HTTP content type to report for the :ref:`meta discovery HTTP server <internet_enabled_rtps--metadisc-server>` ``/config`` endpoint, default is ``application/json``.
 
 .. option:: -MetaDiscoveryContentPath <path>
 
 .. option:: -MetaDiscoveryContent <content>
 
-  The content returned by the meta discovery config endpoint, default ``{}``.
+  The content returned by the :ref:`meta discovery HTTP server <internet_enabled_rtps--metadisc-server>` ``/config`` endpoint, default is ``{}``.
   If a path is specified, the content of the file will be used.
 
 .. option:: -MaxIpsPerClient <integer>

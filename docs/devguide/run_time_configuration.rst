@@ -1117,6 +1117,8 @@ Those properties, along with options specific to OpenDDS's RTPS discovery implem
     :default: ``0.1``
 
     Tuning parameter that configures local :ref:`SPDP participant announcement <spdp>` resends as a fraction of the resend period.
+    When a new participant is discovered, the :prop:`ResendPeriod` is shorted by multiplying with the ``QuickResendRatio`` for the next announcement.
+    Thus, if ``ResendPeriod`` was 30 and ``QuickResendRatio`` is .1, then the resend period would go down to 3 seconds when a new participant is discovered.
 
   .. prop:: LeaseDuration=<sec>
     :default: ``300`` (5 minutes)
@@ -1541,7 +1543,7 @@ SEDP Unicast
 The :ref:`SEDP <sedp>` unicast port will be one of the following:
 
 - Port from :prop:`SedpLocalAddress` if set
-- :prop:`PB` + :prop:`DG` × *domainId* + :prop:`DY` + :prop:`PG` × *participantId* if :val:`SedpPortMode=probe` is set
+- :prop:`PB` + :prop:`DG` × *domainId* + :prop:`DY` + :prop:`PG` × *participantId* if :val:`SedpPortMode=probe`
 
   - *participantId* starts at 0 and if the port can not be opened, then the *participantId* is incremented until a port can be opened.
   - If no valid UDP port can be opened, then an error will be logged.
