@@ -151,8 +151,8 @@ public:
   DCPS::TimeDuration auth_resend_period() const { return config_->auth_resend_period(); }
   void auth_resend_period(const DCPS::TimeDuration& x) { config_->auth_resend_period(x); }
 
-  u_short max_spdp_sequence_msg_reset_check() const { return config_->max_spdp_sequence_msg_reset_check(); }
-  void max_spdp_sequence_msg_reset_check(u_short reset_value) { config_->max_spdp_sequence_msg_reset_check(reset_value); }
+  u_short max_spdp_sequence_msg_reset_checks() const { return config_->max_spdp_sequence_msg_reset_checks(); }
+  void max_spdp_sequence_msg_reset_checks(u_short reset_value) { config_->max_spdp_sequence_msg_reset_checks(reset_value); }
 
   bool rtps_relay_only() const { return config_->rtps_relay_only(); }
   void rtps_relay_only_now(bool f);
