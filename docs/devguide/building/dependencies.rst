@@ -73,6 +73,14 @@ DOC Group :acetaorel:`ace7tao3`
   This also clones the ``master`` branch of MPC as is.
   :ref:`CMake <cmake-building>` will do the same if :cmake:var:`OPENDDS_ACE_TAO_GIT` is set to ``TRUE``.
 
+.. _ace8tao4:
+
+DOC Group :acetaorel:`ace8tao4`
+  Pass ``--ace-tao=ace8tao4`` to the configure script to download this version.
+  :ref:`CMake <cmake-building>` will download this version if :cmake:var:`OPENDDS_ACE_TAO_KIND` is set to ``ace8tao4``.
+
+  This version requires a C++14-capable compiler.
+
 .. _deps-ace:
 
 ACE
