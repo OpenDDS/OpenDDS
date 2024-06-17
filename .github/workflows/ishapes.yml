@@ -92,9 +92,9 @@ jobs:
         cd OpenDDS
         perl configure --optimize --no-debug --static --tests ^
           "--qt=%VCPKG_INSTALLED_DIR%/x64-windows" ^
-          "--mpc:value_template platforms=x64" ^
-          "--mpc:value_template configurations=Release" ^
-          "--mpc:value_template Release::runtime_library=MultiThreadedDLL"
+          --mpc:value_template platforms=x64 ^
+          --mpc:value_template configurations=Release ^
+          --mpc:value_template Release::runtime_library=MultiThreadedDLL
         tools\scripts\show_build_config.pl
     - name: build
       shell: cmd
