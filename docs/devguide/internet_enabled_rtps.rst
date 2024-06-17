@@ -283,7 +283,7 @@ The command-line options for the RtpsRelay:
 
 .. option:: -AdmissionControlQueueDuration <seconds>
 
-  New client participants in the :option:`admission control queue <-AdmissionControlQueueSize>` that are taking longer than this many seconds to perform discovery are kicked out of the queue.
+  New client participants in the :option:`admission control queue <-AdmissionControlQueueSize>` that are taking longer than this many seconds to perform discovery are removed from the queue.
   Default is 0.
 
 .. option:: -PublishRelayStatus <seconds>

@@ -1030,7 +1030,7 @@ Configuring for RTPS Discovery
 
 This section describes the configuration properties for :ref:`rtps-disc`.
 
-To configure RTPS discovery, it's helpful to understand that it is composed of 2 distinct protocols:
+To configure RTPS discovery, it's helpful to understand that it is composed of two distinct protocols:
 
 .. _spdp:
 
@@ -1106,22 +1106,22 @@ Those properties, along with options specific to OpenDDS's RTPS discovery implem
   .. prop:: ResendPeriod=<sec>
     :default: ``30``
 
-    The number of seconds that a process waits between the :ref:`SPDP participants announcements <spdp>`.
+    The number of seconds that a process waits between the :ref:`SPDP participant announcements <spdp>`.
 
   .. prop:: MinResendDelay=<msec>
     :default: ``100``
 
-    The minimum time in milliseconds between :ref:`SPDP participants announcements <spdp>`.
+    The minimum time in milliseconds between :ref:`SPDP participant announcements <spdp>`.
 
   .. prop:: QuickResendRatio=<frac>
     :default: ``0.1``
 
-    Tuning parameter that configures local :ref:`SPDP participants announcement <spdp>` resends as a fraction of the resend period.
+    Tuning parameter that configures local :ref:`SPDP participant announcement <spdp>` resends as a fraction of the resend period.
 
   .. prop:: LeaseDuration=<sec>
     :default: ``300`` (5 minutes)
 
-    Sent as part of the :ref:`SPDP participants announcement <spdp>`.
+    Sent as part of the :ref:`SPDP participant announcement <spdp>`.
     It tells the peer participants that if they don't hear from this participant for the specified duration, then this participant can be considered "not alive".
 
   .. prop:: LeaseExtension=<sec>
@@ -1210,7 +1210,7 @@ Those properties, along with options specific to OpenDDS's RTPS discovery implem
   .. prop:: SedpMulticast=<boolean>
     :default: ``1``
 
-    Determines whether Multicast is used for the :ref:`SEDP <sedp>` traffic.
+    Determines whether multicast can be used for :ref:`SEDP <sedp>` traffic.
     When set to ``1``, Multicast is used.
     When set to ``0``, Unicast is used.
 
@@ -1282,7 +1282,7 @@ Those properties, along with options specific to OpenDDS's RTPS discovery implem
 
   .. prop:: SpdpSendAddrs=<host>:<port>[,<host>:<port>]...
 
-    A list (comma or whitespace separated) of ``<host>:<port>`` pairs used as destinations for :ref:`SPDP <spdp>` content.
+    A list (comma or whitespace separated) of ``<host>:<port>`` pairs used as destinations for :ref:`SPDP <spdp>` messages.
     This can be a combination of Unicast and Multicast addresses.
 
   .. prop:: MaxSpdpSequenceMsgResetChecks=<n>
@@ -1509,7 +1509,7 @@ The :ref:`SPDP <spdp>` unicast port will be one of the following:
 
 - Port from :prop:`SpdpLocalAddress` if set
 - A system-provided port if :val:`SpdpPortMode=system`
-- :prop:`PB` + :prop:`DG` × *domainId* + :prop:`D1` + :prop:`PG` × *participantId* if :val:`SpdpPortMode=probe` is set (default)
+- :prop:`PB` + :prop:`DG` × *domainId* + :prop:`D1` + :prop:`PG` × *participantId* if :val:`SpdpPortMode=probe` (default)
 
   - *participantId* starts at 0 and if the port can not be opened, then the *participantId* is incremented until a port can be opened.
   - If no valid UDP port can be opened, then an error will be logged.
