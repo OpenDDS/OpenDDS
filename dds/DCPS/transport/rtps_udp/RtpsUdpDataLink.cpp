@@ -1198,7 +1198,7 @@ RtpsUdpDataLink::RtpsWriter::customize_queue_element_helper(
   Message_Block_Ptr hdr(link->submsgs_to_msgblock(subm));
   hdr->cont(data.release());
   RtpsCustomizedElement* rtps =
-    new RtpsCustomizedElement(element, move(hdr));
+    new RtpsCustomizedElement(element, OPENDDS_MOVE_NS::move(hdr));
 
   // Handle durability resends
   if (durable) {
@@ -1300,7 +1300,7 @@ RtpsUdpDataLink::customize_queue_element_non_reliable_i(
 
   Message_Block_Ptr hdr(submsgs_to_msgblock(subm));
   hdr->cont(data.release());
-  return new RtpsCustomizedElement(element, move(hdr));
+  return new RtpsCustomizedElement(element, OPENDDS_MOVE_NS::move(hdr));
 }
 
 TransportQueueElement*
