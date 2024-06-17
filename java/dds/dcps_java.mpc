@@ -134,7 +134,6 @@ project: idl2jni, javah, dcpslib, optional_jni_check, dcps_java_optional, dcps_m
 "	cp $(DDS_ROOT)/lib/OpenDDS_DCPS.jar $(DESTDIR)$(INSTALL_PREFIX)/$(INSTALL_LIB)"
 "	perl -pi -e 's!\\$$[(]DDS_ROOT[)]/lib!$(INSTALL_PREFIX)/$(INSTALL_LIB)!g' $(DESTDIR)$(INSTALL_PREFIX)/share/dds/MPC/config/idl2jni.mpb"
 "	perl -pi -e 's!\\$$[(]DDS_ROOT[)]/lib!$(INSTALL_PREFIX)/$(INSTALL_LIB)!g' $(DESTDIR)$(INSTALL_PREFIX)/share/dds/MPC/config/dcps_java.mpb"
-"	rm $(DESTDIR)$(INSTALL_PREFIX)/dds/*.idl && rmdir $(DESTDIR)$(INSTALL_PREFIX)/dds"
     INST_TAGS := lib_output header_files template_files inline_files
   }
 }
