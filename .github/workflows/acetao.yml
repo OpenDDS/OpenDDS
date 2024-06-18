@@ -1,0 +1,14 @@
+on: [push]
+
+jobs:
+  acetao_job:
+    runs-on: ubuntu-latest
+    name: Test parsing acetao.ini
+    steps:
+      - name: Parse step
+        id: acetaoversion
+        uses: OpenDDS/acetao-ini-parser@v0.1.0
+        with:
+          section: 'ace6tao2'
+      - name: Output some stuff
+        run: echo "desc ${{ steps.acetaoversion.outputs.desc }} version ${{ steps.acetaoversion.outputs.version }}"
