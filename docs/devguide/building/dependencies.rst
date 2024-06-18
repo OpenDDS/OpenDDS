@@ -49,7 +49,7 @@ ACE/TAO
 
 The DOC Group repository for ACE/TAO is hosted on Github at `DOCGroup/ACE_TAO <https://github.com/DOCGroup/ACE_TAO>`__.
 
-There are two versions of ACE/TAO that are officially supported by OpenDDS in this release (|release|):
+These are the versions of ACE/TAO that are officially supported by OpenDDS in this release (|release|):
 
 .. _ace6tao2:
 
