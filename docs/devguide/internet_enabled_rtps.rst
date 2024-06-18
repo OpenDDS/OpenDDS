@@ -16,11 +16,11 @@ Overview
 ..
     Sect<15.1>
 
-Like any specification, standard, or system, RTPS was designed with certain assumptions.
+Like any specification, standard, or system, :ref:`RTPS <spec-rtps>` was designed with certain assumptions.
 Two of these assumptions severely limit the ability to use RTPS in modern network environments.
-First, RTPS, or more specifically, SPDP uses multicast for discovery.
+First, RTPS, or more specifically, :ref:`SPDP <spdp>` uses multicast for discovery.
 Multicast is not supported on the public Internet which precludes the use of RTPS for Internet of Things (IoT) applications and Industrial Internet of Things (IIoT) applications.
-Second, SPDP and SEDP advertise locators (IP and port pairs) for endpoints (DDS readers and writer).
+Second, SPDP and :ref:`SEDP <sedp>` advertise locators (IP and port pairs) for endpoints (DDS readers and writer).
 If the participant is behind a firewall that performs network address translation, then the locators advertised by the participant are useless to participants on the public side of the firewall.
 
 This section describes different tools and techniques for getting around these limitations.
@@ -83,7 +83,7 @@ Firewalls on the path to the participants intercept the packet and replace the d
 The RTPS implementation in OpenDDS uses a port for SPDP, a port for SEDP, and a port for conventional RTPS messages.
 The relay mirrors this idea and exposes three ports to handle each type of traffic.
 
-To keep NAT bindings alive, clients send STUN binding requests and indications periodically to the RtspRelay ports.
+To keep NAT bindings alive, clients send STUN binding requests and indications periodically to the RtpsRelay ports.
 Participants using ICE may use these ports as a STUN server for determining a server reflexive address.
 The timing parameters for the periodic messages are controlled via the ICE configuration variables for server reflexive addresses.
 
@@ -119,7 +119,8 @@ As an example:
 
 Each participant should use a single RtpsRelay instance due to the way NAT bindings work.
 Most firewalls will only forward packets received from the destination address that was originally used to create the NAT binding.
-That is, if participant A is interacting with relay A and participant B is interacting with relay B, then a message from A to B must go from A to relay A, to relay B, and finally to B.  Relay A cannot send directly to B since that packet will not be accepted by the firewall.
+That is, if participant A is interacting with relay 1 and participant B is interacting with relay 2, then a message from participant A to participant B must go from participant A to relay 1, to relay 2, and finally to participant B.
+Relay 1 cannot send directly to B since that packet will not be accepted by the firewall.
 
 .. _internet_enabled_rtps--usage:
 
@@ -129,24 +130,30 @@ Usage
 ..
     Sect<15.2.2>
 
+.. program:: RtpsRelay
+
 The RtpsRelay itself is an OpenDDS application.
 The source code is located in :ghfile:`tools/rtpsrelay`.
 Security must be enabled to build the RtpsRelay.
 See :ref:`dds_security--building-opendds-with-security-enabled`.
 Each RtpsRelay process has a set of ports for exchanging RTPS messages with the participants called the "vertical" ports and a set of ports for exchanging RTPS messages with other relays called the "horizontal" ports.
 
-The RtpsRelay contains an embedded webserver called the meta discovery server.
-The webserver has the following endpoints:
+.. _internet_enabled_rtps--metadisc-server:
+
+The RtpsRelay contains an embedded web server called the *meta discovery server*.
+The listening address can be set using :option:`-MetaDiscoveryAddress` and logging can be enabled using :option:`-LogHttp`.
+The web server has the following endpoints:
 
 * ``/config``
 
   Responds with configured content and content type.
-  See -MetaDiscovery options below.
+  See :option:`-MetaDiscoveryContentPath` and :option:`-MetaDiscoveryContent` below.
   Potential client participants can download the necessary configuration from this endpoint.
 
 * ``/healthcheck``
 
   Responds with HTTP 200 (OK) or 503 (Service Unavailable) if :cfg:prop:`thread monitoring is enabled <DCPSThreadStatusInterval>` and the RtpsRelay is not admitting new client participants.
+  See :option:`-UtilizationLimit`, :option:`-AdmissionControlQueueSize`, and :option:`-AdmissionControlQueueDuration` for more information.
   Load balancers can use this endpoint to route new client participants to an available RtpsRelay instance.
 
 The command-line options for the RtpsRelay:
@@ -155,15 +162,15 @@ The command-line options for the RtpsRelay:
 
   This option is mandatory and is a unique id associated with all topics published by the relay.
 
-.. option:: -HorizontalAddres <address>
+.. option:: -HorizontalAddress <address>
 
   Determines the base network address used for receiving RTPS message from other relays.
-  By default, the relay listens on the first IP network and uses port 11444 for SPDP messages, 11445 for SEDP messages, and 11446 for data messages.
+  By default, the relay listens on the first IP network interface and uses port ``11444`` for :ref:`SPDP <spdp>` messages, ``11445`` for :ref:`SEDP <sedp>` messages, and ``11446`` for data messages.
 
 .. option:: -VerticalAddress <address>
 
   Determines the base network address used for receiving RTPS messages from the participants.
-  By default, the relay listens on 0.0.0.0:4444 for SPDP messages, 0.0.0.0:4445 for SEDP messages, and 0.0.0.0.4446 for data messages.
+  By default, the relay listens on ``0.0.0.0:4444`` for :ref:`SPDP <spdp>` messages, ``0.0.0.0:4445`` for :ref:`SEDP <sedp>` messages, and ``0.0.0.0.4446`` for data messages.
 
 .. option:: -RelayDomain <domain>
 
@@ -240,6 +247,10 @@ The command-line options for the RtpsRelay:
 
   Enable/disable logging of activity events.
 
+.. option:: -LogHttp 0|1
+
+  Enable/disable logging in the :ref:`meta discovery HTTP server <internet_enabled_rtps--metadisc-server>`.
+
 .. option:: -LogRelayStatistics <seconds>
 
 .. option:: -LogHandlerStatistics <seconds>
@@ -268,6 +279,17 @@ The command-line options for the RtpsRelay:
 
   If :cfg:prop:`thread monitoring is enabled <DCPSThreadStatusInterval>`, the RtpsRelay will not accept new client participants if the CPU utilization of any thread is above this limit, default .95.
 
+.. option:: -AdmissionControlQueueSize <count>
+
+  The max number of new client participants that are allowed to perform discovery.
+  If the admission control queue is full, then new client participants are not admitted.
+  Default is 0 (disabled).
+
+.. option:: -AdmissionControlQueueDuration <seconds>
+
+  New client participants in the :option:`admission control queue <-AdmissionControlQueueSize>` that are taking longer than this many seconds to perform discovery are removed from the queue.
+  Default is 0.
+
 .. option:: -PublishRelayStatus <seconds>
 
   Setting this to a positive integer causes the relay to publish its status at that interval.
@@ -278,17 +300,17 @@ The command-line options for the RtpsRelay:
 
 .. option:: -MetaDiscoveryAddress <host>:<port>
 
-  Listening address for the meta discovery server, default is ``0.0.0.0:8080``.
+  Listening address for the :ref:`meta discovery HTTP server <internet_enabled_rtps--metadisc-server>`, default is ``0.0.0.0:8080``.
 
 .. option:: -MetaDiscoveryContentType <content-type>
 
-  The HTTP content type to report for the meta discovery config endpoint, default is ``application/json``.
+  The HTTP content type to report for the :ref:`meta discovery HTTP server <internet_enabled_rtps--metadisc-server>` ``/config`` endpoint, default is ``application/json``.
 
-.. option:: -MetaDiscoveryContentPath <content>
+.. option:: -MetaDiscoveryContentPath <path>
 
 .. option:: -MetaDiscoveryContent <content>
 
-  The content returned by the meta discovery config endpoint, default ``{}``.
+  The content returned by the :ref:`meta discovery HTTP server <internet_enabled_rtps--metadisc-server>` ``/config`` endpoint, default is ``{}``.
   If a path is specified, the content of the file will be used.
 
 .. option:: -MaxIpsPerClient <integer>
@@ -343,7 +365,7 @@ Second, the hosts generate and exchange candidates (which includes the public IP
 A candidate is an IP and port that responds to STUN messages and sends datagrams.
 Third, the hosts send STUN binding requests to the candidates in an attempt to generate the necessary NAT bindings and establish connectivity.
 
-For OpenDDS, ICE can be used to potentially establish connectivity between SPDP endpoints, SEDP endpoints, and ordinary RTPS endpoints.
+For OpenDDS, ICE can be used to potentially establish connectivity between :ref:`SPDP <spdp>` endpoints, :ref:`SEDP <sedp>` endpoints, and ordinary RTPS endpoints.
 SPDP is used as the side channel for SEDP and SEDP is used as the side channel for the ordinary RTPS endpoints.
 To this, we added two parameters to the RTPS protocol for sending general ICE information and ICE candidates and added the ability to execute the ICE protocol and process STUN messages to the RTPS transports.
 
