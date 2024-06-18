@@ -79,7 +79,7 @@ DOC Group :acetaorel:`ace8tao4`
   Pass ``--ace-tao=ace8tao4`` to the configure script to download this version.
   :ref:`CMake <cmake-building>` will download this version if :cmake:var:`OPENDDS_ACE_TAO_KIND` is set to ``ace8tao4``.
 
-  This version requires a C++14-capable compiler.
+  This version requires a C++17-capable compiler.
 
 .. _deps-ace:
 
