@@ -56,7 +56,7 @@ Using OpenDDS
   A tutorial on making basic OpenDDS applications
 
 :doc:`devguide/index`
-  The OpenDDS Developer's Guide has more detailed documentation.
+  The OpenDDS Developer's Guide has more detailed documentation
 
 *******************
 Other Documentation
