@@ -70,7 +70,7 @@ Real-time Publish-Subscribe (RTPS)
 
 The full name of this specification is the *Real-time Publish-Subscribe Protocol DDS Interoperability Wire Protocol* (DDSI-RTPS), but can also be just called RTPS.
 This specification describes the requirements for interoperability between DDS implementations.
-See :ref:`rtps-disc` for more information.
+See :ref:`rtps-disc` and :ref:`rtps-udp-transport` for more information.
 
 The version OpenDDS uses is :omgspec:`rtps`.
 Although the document number is v2.3, it specifies protocol version 2.4.

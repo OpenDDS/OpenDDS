@@ -57,7 +57,7 @@ It is possible that enabling any of these compliance profiles in a Safety Profil
 
 To build OpenDDS Safety Profile, pass the command line argument ``--safety-profile`` to the configure script along with any other arguments needed for your platform or configuration.
 When safety profile is enabled in the configure script, the four compliance profiles listed above default to disabled.
-See :ref:`install` for more information about the configure script.
+See :ref:`building` for more information about the configure script.
 
 .. _safety_profile--safety-profile-configurations-of-ace:
 
