@@ -341,7 +341,7 @@ A third option is to use a program translates multicast to unicast.
 RTPS uses UDP which typically cannot be load balanced effectively due to the way NAT bindings work.
 Consequently, each RtpsRelay server must have a public IP address.
 Load balancing can be achieved by having the participants choose a relay according to a load balancing policy.
-To support this usage, the RtpsRelay includes :ref:`_internet_enabled_rtps--metadisc-server` which can be configured to serve the public IP address of the relay.
+To support this usage, the RtpsRelay includes a :ref:`web server <internet_enabled_rtps--metadisc-server>` which can be configured to serve the public IP address of the relay.
 These web server ports would be exposed via a centralized load balancer.
 A participant, then, could access the HTTP load balancer to select a relay.
 
