@@ -541,15 +541,14 @@ DataWriterImpl::association_complete_i(const GUID_t& remote_id)
 
       DataSampleHeader header;
       Message_Block_Ptr end_historic_samples(
-        create_control_message(
-          END_HISTORIC_SAMPLES, header, move(data),
+        create_control_message(END_HISTORIC_SAMPLES, header, OPENDDS_MOVE_NS::move(data),
           SystemTimePoint::now().to_idl_struct()));
 
       this->controlTracker.message_sent();
       guard.release();
       ACE_Reverse_Lock<ACE_Recursive_Thread_Mutex> rev_lock(lock_);
       ACE_Guard<ACE_Reverse_Lock<ACE_Recursive_Thread_Mutex> > rev_guard(rev_lock);
-      SendControlStatus ret = send_w_control(list, header, move(end_historic_samples), remote_id);
+      SendControlStatus ret = send_w_control(list, header, OPENDDS_MOVE_NS::move(end_historic_samples), remote_id);
       if (ret == SEND_CONTROL_ERROR) {
         ACE_ERROR((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: ")
                              ACE_TEXT("DataWriterImpl::association_complete_i: ")
@@ -775,12 +774,12 @@ void DataWriterImpl::replay_durable_data_for(const GUID_t& remote_id)
       ser << remote_id;
 
       DataSampleHeader header;
-      Message_Block_Ptr end_historic_samples(create_control_message(END_HISTORIC_SAMPLES, header, move(data),
+      Message_Block_Ptr end_historic_samples(create_control_message(END_HISTORIC_SAMPLES, header, OPENDDS_MOVE_NS::move(data),
                                                                     SystemTimePoint::now().to_idl_struct()));
 
       this->controlTracker.message_sent();
       guard.release();
-      const SendControlStatus ret = send_w_control(list, header, move(end_historic_samples), remote_id);
+      const SendControlStatus ret = send_w_control(list, header, OPENDDS_MOVE_NS::move(end_historic_samples), remote_id);
       if (ret == SEND_CONTROL_ERROR) {
         ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
                    ACE_TEXT("DataWriterImpl::replay_durable_data_for: ")
@@ -1074,10 +1073,10 @@ DataWriterImpl::send_request_ack()
     create_control_message(
       REQUEST_ACK,
       element->get_header(),
-      move(blk),
+      OPENDDS_MOVE_NS::move(blk),
       SystemTimePoint::now().to_idl_struct()));
 
-  element->set_sample(move(sample));
+  element->set_sample(OPENDDS_MOVE_NS::move(sample));
 
   ret = this->data_container_->enqueue_control(element);
 
@@ -1645,10 +1644,10 @@ DataWriterImpl::register_instance_i(DDS::InstanceHandle_t& handle,
     create_control_message(
      INSTANCE_REGISTRATION,
      element->get_header(),
-     move(data),
+     OPENDDS_MOVE_NS::move(data),
      source_timestamp));
 
-  element->set_sample(move(sample));
+  element->set_sample(OPENDDS_MOVE_NS::move(sample));
 
   ret = this->data_container_->enqueue_control(element);
 
@@ -1678,7 +1677,7 @@ DataWriterImpl::register_instance_from_durable_data(
                    get_lock(),
                    DDS::RETCODE_ERROR);
 
-  const DDS::ReturnCode_t ret = register_instance_i(handle, move(data), source_timestamp);
+  const DDS::ReturnCode_t ret = register_instance_i(handle, OPENDDS_MOVE_NS::move(data), source_timestamp);
   if (ret != DDS::RETCODE_OK) {
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: DataWriterImpl::register_instance_from_durable_data: ")
@@ -1739,9 +1738,9 @@ DataWriterImpl::unregister_instance_i(DDS::InstanceHandle_t handle,
 
   Message_Block_Ptr sample(create_control_message(UNREGISTER_INSTANCE,
                                                   element->get_header(),
-                                                  move(unregistered_sample_data),
+                                                  OPENDDS_MOVE_NS::move(unregistered_sample_data),
                                                   source_timestamp));
-  element->set_sample(move(sample));
+  element->set_sample(OPENDDS_MOVE_NS::move(sample));
 
   ret = this->data_container_->enqueue_control(element);
 
@@ -1811,9 +1810,9 @@ DataWriterImpl::dispose_and_unregister(DDS::InstanceHandle_t handle,
 
   Message_Block_Ptr sample(create_control_message(DISPOSE_UNREGISTER_INSTANCE,
                                                   element->get_header(),
-                                                  move(data_sample),
+                                                  OPENDDS_MOVE_NS::move(data_sample),
                                                   source_timestamp));
-  element->set_sample(move(sample));
+  element->set_sample(OPENDDS_MOVE_NS::move(sample));
 
   ret = this->data_container_->enqueue_control(element);
 
@@ -1906,13 +1905,13 @@ DataWriterImpl::write(Message_Block_Ptr data,
   }
 
   Message_Block_Ptr temp;
-  ret = create_sample_data_message(move(data),
+  ret = create_sample_data_message(OPENDDS_MOVE_NS::move(data),
                                    handle,
                                    element->get_header(),
                                    temp,
                                    source_timestamp,
                                    (filter_out != 0));
-  element->set_sample(move(temp));
+  element->set_sample(OPENDDS_MOVE_NS::move(temp));
 
   if (ret != DDS::RETCODE_OK) {
     data_container_->release_buffer(element);
@@ -2068,9 +2067,9 @@ DataWriterImpl::dispose(DDS::InstanceHandle_t handle,
 
   Message_Block_Ptr sample(create_control_message(DISPOSE_INSTANCE,
                                                   element->get_header(),
-                                                  move(registered_sample_data),
+                                                  OPENDDS_MOVE_NS::move(registered_sample_data),
                                                   source_timestamp));
-  element->set_sample(move(sample));
+  element->set_sample(OPENDDS_MOVE_NS::move(sample));
 
   ret = this->data_container_->enqueue_control(element);
 
@@ -2424,15 +2423,14 @@ DataWriterImpl::end_coherent_changes(const GroupCoherentSamples& group_samples)
 
   DataSampleHeader header;
   Message_Block_Ptr control(
-    create_control_message(
-      END_COHERENT_CHANGES, header, move(data),
+    create_control_message(END_COHERENT_CHANGES, header, OPENDDS_MOVE_NS::move(data),
       SystemTimePoint::now().to_idl_struct()));
 
   this->coherent_ = false;
   this->coherent_samples_ = 0;
 
   guard.release();
-  if (this->send_control(header, move(control)) == SEND_CONTROL_ERROR) {
+  if (this->send_control(header, OPENDDS_MOVE_NS::move(control)) == SEND_CONTROL_ERROR) {
     ACE_ERROR((LM_ERROR,
                ACE_TEXT("(%P|%t) ERROR: DataWriterImpl::end_coherent_changes:")
                ACE_TEXT(" unable to send END_COHERENT_CHANGES control message!\n")));
@@ -2548,11 +2546,10 @@ DataWriterImpl::send_liveliness(const MonotonicTimePoint& now)
     DataSampleHeader header;
     Message_Block_Ptr empty;
     Message_Block_Ptr liveliness_msg(
-      create_control_message(
-        DATAWRITER_LIVELINESS, header, move(empty),
+      create_control_message(DATAWRITER_LIVELINESS, header, OPENDDS_MOVE_NS::move(empty),
         SystemTimePoint::now().to_idl_struct()));
 
-    if (this->send_control(header, move(liveliness_msg)) == SEND_CONTROL_ERROR) {
+    if (this->send_control(header, OPENDDS_MOVE_NS::move(liveliness_msg)) == SEND_CONTROL_ERROR) {
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("(%P|%t) ERROR: DataWriterImpl::send_liveliness: ")
                         ACE_TEXT("send_control failed.\n")),
@@ -2801,7 +2798,7 @@ DataWriterImpl::send_control(const DataSampleHeader& header,
 {
   controlTracker.message_sent();
 
-  SendControlStatus status = TransportClient::send_control(header, move(msg));
+  SendControlStatus status = TransportClient::send_control(header, OPENDDS_MOVE_NS::move(msg));
 
   if (status != SEND_CONTROL_OK) {
     controlTracker.message_dropped();
@@ -3130,7 +3127,7 @@ DDS::ReturnCode_t DataWriterImpl::get_or_create_instance_handle(
     }
 
     // tell DataWriterLocal and Publisher about the instance.
-    const DDS::ReturnCode_t ret = register_instance_i(handle, move(serialized), source_timestamp);
+    const DDS::ReturnCode_t ret = register_instance_i(handle, OPENDDS_MOVE_NS::move(serialized), source_timestamp);
     // note: the WriteDataContainer/PublicationInstance maintains ownership
     // of the marshalled sample.
     if (ret != DDS::RETCODE_OK) {
@@ -3250,7 +3247,7 @@ DDS::ReturnCode_t DataWriterImpl::write_sample(
     return DDS::RETCODE_ERROR;
   }
 
-  return write(move(serialized), handle, source_timestamp, filter_out, sample.native_data());
+  return write(OPENDDS_MOVE_NS::move(serialized), handle, source_timestamp, filter_out, sample.native_data());
 }
 
 } // namespace DCPS

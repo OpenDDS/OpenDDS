@@ -94,8 +94,8 @@ bool set_security_error(DDS::Security::SecurityException& ex,
   std::string full(message);
   const size_t i = full.size();
   full.resize(i + 26);
-  std::sprintf(&full[i], " %.2x %.2x %.2x %.2x, %.2x %.2x %.2x %.2x",
-               a1[0], a1[1], a1[2], a1[3], a2[0], a2[1], a2[2], a2[3]);
+  std::snprintf(&full[i], 26, " %.2x %.2x %.2x %.2x, %.2x %.2x %.2x %.2x",
+                a1[0], a1[1], a1[2], a1[3], a2[0], a2[1], a2[2], a2[3]);
   return set_security_error(ex, code, minor_code, full.c_str());
 }
 

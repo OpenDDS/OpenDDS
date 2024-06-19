@@ -457,7 +457,7 @@ ReliableSession::send_naks()
       }
     }
     // Send control sample to remote peer:
-    send_control(MULTICAST_NAK, move(data));
+    send_control(MULTICAST_NAK, OPENDDS_MOVE_NS::move(data));
   }
   if (received.disjoint()) {
     sending_naks = true;
@@ -578,7 +578,7 @@ ReliableSession::send_naks(DisjointSequence& received)
     }
   }
   // Send control sample to remote peer:
-  send_control(MULTICAST_NAK, move(data));
+  send_control(MULTICAST_NAK, OPENDDS_MOVE_NS::move(data));
 }
 
 
@@ -642,7 +642,7 @@ ReliableSession::send_nakack(SequenceNumber low)
 
   serializer << low;
   // Broadcast control sample to all peers:
-  send_control(MULTICAST_NAKACK, move(data));
+  send_control(MULTICAST_NAKACK, OPENDDS_MOVE_NS::move(data));
 }
 
 bool

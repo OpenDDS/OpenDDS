@@ -902,12 +902,12 @@ ReplayerImpl::write (const RawDataSample*   samples,
     list.enqueue_tail(element);
     Message_Block_Ptr temp;
     Message_Block_Ptr sample(samples[i].sample_->duplicate());
-    DDS::ReturnCode_t ret = create_sample_data_message(move(sample),
+    DDS::ReturnCode_t ret = create_sample_data_message(OPENDDS_MOVE_NS::move(sample),
                                                        element->get_header(),
                                                        temp,
                                                        samples[i].source_timestamp_,
                                                        false);
-    element->set_sample(move(temp));
+    element->set_sample(OPENDDS_MOVE_NS::move(temp));
     if (reader_ih_ptr) {
       element->set_num_subs(1);
       element->set_sub_id(0, repo_id);

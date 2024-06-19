@@ -578,10 +578,10 @@ namespace {
         } else {
           RefWrapper elem_wrapper(elem, cxx_elem, value_access + "[i]");
           elem_wrapper.nested_key_only_ = nested_key_only;
-          Intro intro;
-          elem_wrapper.done(&intro);
+          Intro intro2;
+          elem_wrapper.done(&intro2);
           const std::string indent = "    ";
-          intro.join(be_global->impl_, indent);
+          intro2.join(be_global->impl_, indent);
           be_global->impl_ <<
             indent << "serialized_size(encoding, size, " << elem_wrapper.ref() << ");\n";
         }
@@ -659,9 +659,9 @@ namespace {
         } else {
           RefWrapper elem_wrapper(elem, cxx_elem, value_access + "[i]");
           elem_wrapper.nested_key_only_ = nested_key_only;
-          Intro intro;
-          elem_wrapper.done(&intro);
-          intro.join(be_global->impl_, "    ");
+          Intro intro2;
+          elem_wrapper.done(&intro2);
+          intro2.join(be_global->impl_, "    ");
           be_global->impl_ << streamAndCheck("<< " + elem_wrapper.ref(), 4);
         }
         be_global->impl_ <<
@@ -792,14 +792,14 @@ namespace {
         be_global->impl_ <<
           "  for (CORBA::ULong i = 0; i < new_length; ++i) {\n";
 
-        Intro intro;
+        Intro intro2;
         std::string stream_to;
         std::string classic_array_copy;
         if (!use_cxx11 && (elem_cls & CL_ARRAY)) {
           RefWrapper classic_array_wrapper(
             seq->base_type(), scoped(deepest_named_type(seq->base_type())->name()), elem_access);
           classic_array_wrapper.classic_array_copy_ = true;
-          classic_array_wrapper.done(&intro);
+          classic_array_wrapper.done(&intro2);
           classic_array_copy = classic_array_wrapper.classic_array_copy();
           stream_to = classic_array_wrapper.ref();
         } else if (elem_cls & CL_STRING) {
@@ -815,11 +815,11 @@ namespace {
         } else {
           RefWrapper elem_wrapper(elem, cxx_elem, value_access + "[i]", false);
           elem_wrapper.nested_key_only_ = nested_key_only;
-          elem_wrapper.done(&intro);
+          elem_wrapper.done(&intro2);
           stream_to = elem_wrapper.ref();
         }
         const std::string indent = "    ";
-        intro.join(be_global->impl_, indent);
+        intro2.join(be_global->impl_, indent);
         be_global->impl_ <<
           indent << " if (!(strm >> " << stream_to << ")) {\n";
 
@@ -829,15 +829,15 @@ namespace {
             "        strm.set_construction_status(Serializer::ConstructionSuccessful);\n";
         } else if ((try_construct == tryconstructfailaction_trim) && (elem_cls & CL_BOUNDED) &&
                    (elem_cls & (CL_STRING | CL_SEQUENCE))) {
-          if (elem_cls & CL_STRING){
+          if (elem_cls & CL_STRING) {
             const std::string check_not_empty =
               use_cxx11 ? "!" + elem_access + ".empty()" : elem_access + ".in()";
-            const std::string get_length =
+            const std::string get_length2 =
               use_cxx11 ? elem_access + ".length()" : "ACE_OS::strlen(" + elem_access + ".in())";
             const string inout = use_cxx11 ? "" : ".inout()";
             be_global->impl_ <<
               "        if (" + construct_bound_fail + " && " << check_not_empty << " && (" <<
-              bounded_arg(elem) << " < " << get_length << ")) {\n"
+              bounded_arg(elem) << " < " << get_length2 << ")) {\n"
               "          "  << elem_access << inout <<
               (use_cxx11 ? (".resize(" + bounded_arg(elem) +  ");\n") : ("[" + bounded_arg(elem) + "] = 0;\n")) <<
               "          strm.set_construction_status(Serializer::ConstructionSuccessful);\n"
@@ -2410,13 +2410,13 @@ namespace {
     return true;
   }
 
-  bool generate_struct_deserialization(
-    AST_Structure* node, FieldFilter field_type)
+  bool generate_struct_deserialization(AST_Structure* node,
+                                       FieldFilter field_filter)
   {
     const std::string actual_cpp_name = scoped(node->name());
     std::string cpp_name = actual_cpp_name;
     std::string const_cpp_name;
-    switch (field_type) {
+    switch (field_filter) {
     case FieldFilter_All:
       const_cpp_name = "const" + actual_cpp_name + "&";
       break;
@@ -2429,9 +2429,9 @@ namespace {
       const_cpp_name = "const KeyOnly<const" + actual_cpp_name + ">&";
       break;
     }
-    const std::string value_access = field_type == FieldFilter_All ? "" : ".value";
-    const bool wrap_nested_key_only = field_type != FieldFilter_All;
-    const Fields fields(node, field_type);
+    const std::string value_access = field_filter == FieldFilter_All ? "" : ".value";
+    const bool wrap_nested_key_only = field_filter != FieldFilter_All;
+    const Fields fields(node, field_filter);
     const Fields::Iterator fields_end = fields.end();
     RtpsFieldCustomizer rtpsCustom(cpp_name);
 
@@ -2715,12 +2715,12 @@ namespace {
     return true;
   }
 
-  bool generate_struct_serialization_functions(AST_Structure* node, FieldFilter field_type)
+  bool generate_struct_serialization_functions(AST_Structure* node, FieldFilter field_filter)
   {
     const std::string actual_cpp_name = scoped(node->name());
     std::string cpp_name = actual_cpp_name;
     std::string const_cpp_name;
-    switch (field_type) {
+    switch (field_filter) {
     case FieldFilter_All:
       const_cpp_name = "const" + actual_cpp_name + "&";
       break;
@@ -2733,9 +2733,9 @@ namespace {
       const_cpp_name = "const KeyOnly<const" + actual_cpp_name + ">&";
       break;
     }
-    const std::string value_access = field_type == FieldFilter_All ? "" : ".value";
-    const bool wrap_nested_key_only = field_type != FieldFilter_All;
-    const Fields fields(node, field_type);
+    const std::string value_access = field_filter == FieldFilter_All ? "" : ".value";
+    const bool wrap_nested_key_only = field_filter != FieldFilter_All;
+    const Fields fields(node, field_filter);
     const Fields::Iterator fields_end = fields.end();
     RtpsFieldCustomizer rtpsCustom(cpp_name);
 
@@ -2881,7 +2881,7 @@ namespace {
       be_global->impl_ << mutable_fields.str() << "  return " << expr << ";\n";
     }
 
-    return generate_struct_deserialization(node, field_type);
+    return generate_struct_deserialization(node, field_filter);
   }
 
 } // anonymous namespace
@@ -3606,7 +3606,6 @@ bool marshal_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
 
     // Add a reference to the idl file, if the descriminator is user defined.
     AST_Type* disc_type = resolveActualType(discriminator);
-    const Classification disc_cls = classify(disc_type);
     if (!disc_type->in_main_file() && disc_type->node_type() != AST_Decl::NT_pre_defined) {
       be_global->add_referenced(disc_type->file_name().c_str());
     }

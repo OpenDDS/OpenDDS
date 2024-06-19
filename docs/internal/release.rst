@@ -358,7 +358,7 @@ Update News on Master
 
 .. note::
 
-    This should only be done for the :ref:`latest release <release-latest-release>` that's also a `:ref:`micro release <release-micro-release>`.
+    This should only be done for the :ref:`latest release <release-latest-release>` that's also a :ref:`micro release <release-micro-release>`.
 
 The news on the master branch has to be updated to account for the micro release.
 Updating the news consists of:

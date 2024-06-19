@@ -3408,7 +3408,7 @@ Sedp::Writer::write_parameter_list(const ParameterList& plist,
   DCPS::EncapsulationHeader encap;
   if (encap.from_encoding(sedp_encoding, DCPS::MUTABLE) &&
       serializer << encap && serializer << plist) {
-    send_sample(move(payload), size, reader, sequence, reader != GUID_UNKNOWN);
+    send_sample(OPENDDS_MOVE_NS::move(payload), size, reader, sequence, reader != GUID_UNKNOWN);
   } else {
     result = DDS::RETCODE_ERROR;
   }
@@ -3438,7 +3438,7 @@ Sedp::LivelinessWriter::write_participant_message(const ParticipantMessageData& 
   DCPS::EncapsulationHeader encap;
   if (encap.from_encoding(sedp_encoding, DCPS::FINAL) &&
       serializer << encap && serializer << pmd) {
-    send_sample(move(payload), size, reader, sequence, reader != GUID_UNKNOWN);
+    send_sample(OPENDDS_MOVE_NS::move(payload), size, reader, sequence, reader != GUID_UNKNOWN);
   } else {
     result = DDS::RETCODE_ERROR;
   }
@@ -3467,7 +3467,7 @@ Sedp::SecurityWriter::write_stateless_message(const DDS::Security::ParticipantSt
   DCPS::EncapsulationHeader encap;
   if (encap.from_encoding(sedp_encoding, DCPS::FINAL) &&
       serializer << encap && serializer << msg) {
-    send_sample(move(payload), size, reader, sequence);
+    send_sample(OPENDDS_MOVE_NS::move(payload), size, reader, sequence);
   } else {
     result = DDS::RETCODE_ERROR;
   }
@@ -3495,7 +3495,7 @@ Sedp::SecurityWriter::write_volatile_message_secure(const DDS::Security::Partici
   DCPS::EncapsulationHeader encap;
   if (encap.from_encoding(sedp_encoding, DCPS::FINAL) &&
       serializer << encap && serializer << msg) {
-    send_sample(move(payload), size, reader, sequence);
+    send_sample(OPENDDS_MOVE_NS::move(payload), size, reader, sequence);
   } else {
     result = DDS::RETCODE_ERROR;
   }
@@ -3572,7 +3572,7 @@ Sedp::DiscoveryWriter::write_unregister_dispose(const GUID_t& rid, CORBA::UShort
   if (encap.from_encoding(sedp_encoding, DCPS::MUTABLE) &&
       serializer << encap && serializer << plist) {
     // Send
-    write_control_msg(move(payload), size, DCPS::DISPOSE_UNREGISTER_INSTANCE);
+    write_control_msg(OPENDDS_MOVE_NS::move(payload), size, DCPS::DISPOSE_UNREGISTER_INSTANCE);
     return DDS::RETCODE_OK;
   } else {
     // Error
@@ -3596,7 +3596,7 @@ Sedp::Writer::end_historic_samples(const GUID_t& reader)
   if (mb.get()) {
     mb->cont()->wr_ptr(sizeof(reader));
     // 'mb' would contain the DSHeader, but we skip it. mb.cont() has the data
-    write_control_msg(move(mb), sizeof(reader), DCPS::END_HISTORIC_SAMPLES,
+    write_control_msg(OPENDDS_MOVE_NS::move(mb), sizeof(reader), DCPS::END_HISTORIC_SAMPLES,
                       DCPS::SequenceNumber::SEQUENCENUMBER_UNKNOWN());
   } else {
     ACE_ERROR((LM_ERROR,
@@ -3618,7 +3618,7 @@ Sedp::Writer::request_ack(const GUID_t& reader)
   if (mb.get()) {
     mb->cont()->wr_ptr(sizeof(reader));
     // 'mb' would contain the DSHeader, but we skip it. mb.cont() has the data
-    write_control_msg(move(mb), sizeof(reader), DCPS::REQUEST_ACK,
+    write_control_msg(OPENDDS_MOVE_NS::move(mb), sizeof(reader), DCPS::REQUEST_ACK,
                       DCPS::SequenceNumber::SEQUENCENUMBER_UNKNOWN());
   } else {
     ACE_ERROR((LM_ERROR,
@@ -3755,7 +3755,7 @@ bool Sedp::TypeLookupRequestWriter::send_type_lookup_request(
   if (encap.from_encoding(serializer.encoding(), DCPS::FINAL) &&
       serializer << encap && serializer << type_lookup_request) {
     DCPS::SequenceNumber sn(seq_++);
-    send_sample(move(payload), size, reader, sn);
+    send_sample(OPENDDS_MOVE_NS::move(payload), size, reader, sn);
   } else {
     if (DCPS::DCPS_debug_level) {
       ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: "
@@ -3796,7 +3796,7 @@ bool Sedp::TypeLookupReplyWriter::send_type_lookup_reply(
   if (encap.from_encoding(serializer.encoding(), DCPS::FINAL) &&
       serializer << encap && serializer << type_lookup_reply) {
     DCPS::SequenceNumber sn(seq_++);
-    send_sample(move(payload), size, reader, sn);
+    send_sample(OPENDDS_MOVE_NS::move(payload), size, reader, sn);
   } else {
     if (DCPS::DCPS_debug_level) {
       ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: "
