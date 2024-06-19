@@ -68,7 +68,7 @@ pygments_style = 'manni'
 nitpicky = True
 
 project = 'OpenDDS'
-copyright = '2023, OpenDDS Foundation'
+copyright = '2024 OpenDDS Foundation'
 author = 'OpenDDS Foundation'
 github_links_repo = 'OpenDDS/OpenDDS'
 github_main_branch = 'master'
