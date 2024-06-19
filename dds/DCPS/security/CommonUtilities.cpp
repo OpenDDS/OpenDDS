@@ -80,7 +80,7 @@ bool set_security_error(DDS::Security::SecurityException& ex,
   ex.minor_code = minor_code;
   // OpenSSL errors are rendered in hex, matching "openssl errstr"
   static const bool as_hex = true;
-  ex.message = (message_prefix + String(" OpenSSL error ") + to_dds_string(openssl_error, as_hex)).c_str();
+  ex.message = (message_prefix + String(" OpenSSL error ") + to_dds_string(static_cast<unsigned int>(openssl_error), as_hex)).c_str();
   return false;
 }
 
@@ -93,7 +93,7 @@ bool set_security_error(DDS::Security::SecurityException& ex,
 {
   std::string full(message);
   const size_t i = full.size();
-  full.resize(i + 25);
+  full.resize(i + 26);
   std::sprintf(&full[i], " %.2x %.2x %.2x %.2x, %.2x %.2x %.2x %.2x",
                a1[0], a1[1], a1[2], a1[3], a2[0], a2[1], a2[2], a2[3]);
   return set_security_error(ex, code, minor_code, full.c_str());

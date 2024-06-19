@@ -18,15 +18,15 @@ String to_dds_string(ACE_CDR::Octet to_convert, bool as_hex)
 {
   static const int buff_size = 3 + 1; // note +1 for null terminator
   char buf[buff_size];
-  ACE_OS::snprintf(&buf[0], buff_size, as_hex ? "%02x" : "%d", to_convert);
+  ACE_OS::snprintf(&buf[0], buff_size, as_hex ? "%02x" : "%u", to_convert);
   return String(buf);
 }
 
-String to_dds_string(unsigned short to_convert)
+String to_dds_string(unsigned short to_convert, bool as_hex)
 {
   static const int buff_size = 5 + 1; // note +1 for null terminator
   char buf[buff_size];
-  ACE_OS::snprintf(&buf[0], buff_size, "%hu", to_convert);
+  ACE_OS::snprintf(&buf[0], buff_size, as_hex ? "%04hx" : "%hu", to_convert);
   return String(buf);
 }
 
@@ -42,7 +42,7 @@ String to_dds_string(unsigned int to_convert, bool as_hex)
 {
   static const int buff_size = 20 + 1; // note +1 for null terminator
   char buf[buff_size];
-  ACE_OS::snprintf(&buf[0], buff_size, as_hex ? "%x" : "%u", to_convert);
+  ACE_OS::snprintf(&buf[0], buff_size, as_hex ? "%08x" : "%u", to_convert);
   return String(buf);
 }
 
@@ -66,15 +66,15 @@ String to_dds_string(unsigned long long to_convert, bool as_hex)
 {
   const int buff_size = 20 + 1; // note +1 for null terminator
   char buf[buff_size];
-  ACE_OS::snprintf(&buf[0], buff_size, as_hex ? "%0llx" : "%llu", to_convert);
+  ACE_OS::snprintf(&buf[0], buff_size, as_hex ? "%016llx" : "%llu", to_convert);
   return String(buf);
 }
 
-String to_dds_string(unsigned long to_convert, bool as_hex)
+String to_dds_string(unsigned long to_convert)
 {
   const int buff_size = 20 + 1; // note +1 for null terminator
   char buf[buff_size];
-  ACE_OS::snprintf(&buf[0], buff_size, as_hex ? "%08lx" : "%lu", to_convert);
+  ACE_OS::snprintf(&buf[0], buff_size, "%lu", to_convert);
   return String(buf);
 }
 

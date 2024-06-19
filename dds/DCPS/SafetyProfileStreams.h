@@ -5,8 +5,6 @@
 #include "PoolAllocator.h"
 
 #include <ace/CDR_Base.h>
-#include <ace/INET_Addr.h>
-#include <ace/OS_NS_stdio.h>
 
 #ifdef OPENDDS_SAFETY_PROFILE
 #  include <cstdlib> // For strto*
@@ -23,13 +21,13 @@ namespace OpenDDS {
 namespace DCPS {
 
 OpenDDS_Dcps_Export String to_dds_string(ACE_CDR::Octet to_convert, bool as_hex = false);
-OpenDDS_Dcps_Export String to_dds_string(unsigned short to_convert);
+OpenDDS_Dcps_Export String to_dds_string(unsigned short to_convert, bool as_hex = false);
 OpenDDS_Dcps_Export String to_dds_string(int to_convert);
 OpenDDS_Dcps_Export String to_dds_string(unsigned int to_convert, bool as_hex = false);
 OpenDDS_Dcps_Export String to_dds_string(long to_convert);
+OpenDDS_Dcps_Export String to_dds_string(unsigned long to_convert);
 OpenDDS_Dcps_Export String to_dds_string(long long to_convert);
 OpenDDS_Dcps_Export String to_dds_string(unsigned long long to_convert, bool as_hex = false);
-OpenDDS_Dcps_Export String to_dds_string(unsigned long to_convert, bool as_hex = false);
 OpenDDS_Dcps_Export String to_dds_string(const unsigned char* array, size_t length);
 OpenDDS_Dcps_Export String to_dds_string(double value);
 OpenDDS_Dcps_Export String to_dds_string(const void* to_convert);
