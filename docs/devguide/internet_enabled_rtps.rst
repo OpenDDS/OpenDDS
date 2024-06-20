@@ -18,7 +18,7 @@ Overview
 
 Like any specification, standard, or system, :ref:`RTPS <spec-rtps>` was designed with certain assumptions.
 Two of these assumptions severely limit the ability to use RTPS in modern network environments.
-First, RTPS, or more specifically, :ref:`SPDP <spdp>` uses multicast for discovery.
+First, RTPS, or more specifically, :ref:`SPDP <spdp>` may use multicast for discovery.
 Multicast is not supported on the public Internet which precludes the use of RTPS for Internet of Things (IoT) applications and Industrial Internet of Things (IIoT) applications.
 Second, SPDP and :ref:`SEDP <sedp>` advertise locators (IP and port pairs) for endpoints (DDS readers and writer).
 If the participant is behind a firewall that performs network address translation, then the locators advertised by the participant are useless to participants on the public side of the firewall.
@@ -28,7 +28,7 @@ First, we introduce the *RtpsRelay* as a service for forwarding RTPS messages ac
 The RtpsRelay can be used to connect participants that are deployed in environments that don't support multicast and whose packets are subject to NAT.
 Second, we introduce Interactive Connection Establishment (ICE) for RTPS.
 Adding ICE to RTPS is an optimization that allows participants that are behind firewalls that perform NAT to exchange messages directly.
-ICE requires a back channel for distributing discovery information and is typically used with the RtpsRelay.
+ICE requires a backchannel for distributing discovery information and is typically used with the RtpsRelay.
 
 .. _internet_enabled_rtps--the-rtpsrelay:
 .. _rtpsrelay:
@@ -45,14 +45,16 @@ The RtpsRelay
 The RtpsRelay is designed to allow participants to exchange RTPS datagrams when separated by a firewall that performs network address translation (NAT) and/or a network that does not support multicast like the public Internet.
 The RtpsRelay supports both IPv4 and IPv6.
 A participant that uses an RtpsRelay Instance is a *client* of that instance.
+
 Each RtpsRelay instance contains two participants:  the *Application Participant* and the *Relay Participant*.
 The Application Participant runs in the domain of the application.
 The RtpsRelay reads the built-in topics to discover Participants, DataReaders, and DataWriters.
 It then shares this information with other RtpsRelay instances using the Relay Participant.
+
 Each RtpsRelay instance maintains a map of associated readers and writers.
 When a client sends an RTPS datagram to its RtpsRelay instance, the RtpsRelay instance uses the association table to forward the datagram to other clients and other RtpsRelay instances so that they can deliver it to their clients.
 Clients send RTPS datagrams via unicast which is generally supported and compatible with NAT.
-The RtpsRelay can be used in lieu of or in addition to conventional RTPS discovery.
+The RtpsRelay can be used in lieu of -- or in addition to -- conventional RTPS discovery.
 
 .. svgbob::
 
@@ -80,8 +82,8 @@ The RtpsRelay instance forwards the datagram to other RtpsRelay instances (3).
 The RtpsRelays then forward the datagram to all of the destination participants (4).
 Firewalls on the path to the participants intercept the packet and replace the destination address (which is the external IP and port of the firewall) with the address of the Participant according to a previously created NAT binding (5).
 
-The RTPS implementation in OpenDDS uses a port for SPDP, a port for SEDP, and a port for conventional RTPS messages.
-The relay mirrors this idea and exposes three ports to handle each type of traffic.
+The RTPS implementation in OpenDDS uses a port for SPDP, a port for SEDP, and a port for non-discovery RTPS messages.
+The RtpsRelay mirrors this idea and exposes three ports, each dedicated to handling one type of traffic.
 
 To keep NAT bindings alive, clients send STUN binding requests and indications periodically to the RtpsRelay ports.
 Participants using ICE may use these ports as a STUN server for determining a server reflexive address.
@@ -133,9 +135,10 @@ Usage
 .. program:: RtpsRelay
 
 The RtpsRelay itself is an OpenDDS application.
-The source code is located in :ghfile:`tools/rtpsrelay`.
-Security must be enabled to build the RtpsRelay.
+The source code is located in :ghfile:`tools/rtpsrelay` and :ghfile:`tools/dds/rtpsrelaylib`.
+DDS Security must be enabled to build the RtpsRelay.
 See :ref:`dds_security--building-opendds-with-security-enabled`.
+
 Each RtpsRelay process has a set of ports for exchanging RTPS messages with the participants called the "vertical" ports and a set of ports for exchanging RTPS messages with other relays called the "horizontal" ports.
 
 .. _internet_enabled_rtps--metadisc-server:
@@ -338,8 +341,8 @@ A third option is to use a program translates multicast to unicast.
 RTPS uses UDP which typically cannot be load balanced effectively due to the way NAT bindings work.
 Consequently, each RtpsRelay server must have a public IP address.
 Load balancing can be achieved by having the participants choose a relay according to a load balancing policy.
-To illustrate, each relay could also run an HTTP server which does nothing but serve the public IP address of the relay.
-These simple web servers would be exposed via a centralized load balancer.
+To support this usage, the RtpsRelay includes a :ref:`web server <internet_enabled_rtps--metadisc-server>` which can be configured to serve the public IP address of the relay.
+These web server ports would be exposed via a centralized load balancer.
 A participant, then, could access the HTTP load balancer to select a relay.
 
 .. _internet_enabled_rtps--interactive-connectivity-establishment-ice-for-rtps:
