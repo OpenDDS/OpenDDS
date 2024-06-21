@@ -12,9 +12,10 @@
 #include "FilterEvaluator.h"
 #include "FilterExpressionGrammar.h"
 #include "AstNodeWrapper.h"
-#include "Definitions.h"
 #include "SafetyProfileStreams.h"
 #include "TypeSupportImpl.h"
+#include "GuidConverter.h"
+#include "EncapsulationHeader.h"
 
 #include <ace/ACE.h>
 
@@ -148,7 +149,7 @@ FilterEvaluator::SerializedForEval::lookup(const char* field) const
         "deserialization of encapsulation header failed.\n");
     }
     Encoding encoding;
-    if (!encap.to_encoding(encoding, exten_)) {
+    if (!to_encoding(encoding, encap, exten_)) {
       ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR ")
         ACE_TEXT("FilterEvaluator::SerializedForEval::lookup: ")
         ACE_TEXT("failed to convert encapsulation header to encoding.\n")));

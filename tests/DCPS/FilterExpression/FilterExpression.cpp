@@ -5,6 +5,7 @@
 #include "FilterStructDynamicTypeSupport.h"
 
 #include "dds/DCPS/Definitions.h"
+#include "dds/DCPS/EncapsulationHeader.h"
 #include "dds/DCPS/FilterExpressionGrammar.h"
 #include "dds/DCPS/yard/yard_parser.hpp"
 #include "dds/DCPS/FilterEvaluator.h"

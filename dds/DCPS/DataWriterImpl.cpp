@@ -3035,7 +3035,7 @@ ACE_Message_Block* DataWriterImpl::serialize_sample(const Sample& sample)
     Serializer serializer(mb.get(), encoding);
     if (encapsulated) {
       EncapsulationHeader encap;
-      if (!encap.from_encoding(encoding, type_support_->base_extensibility())) {
+      if (!from_encoding(encap, encoding, type_support_->base_extensibility())) {
         // from_encoding logged the error
         return 0;
       }

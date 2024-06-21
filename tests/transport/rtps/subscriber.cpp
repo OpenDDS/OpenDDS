@@ -13,6 +13,7 @@
 #include <dds/DCPS/RTPS/MessageUtils.h>
 
 #include <dds/DCPS/RepoIdBuilder.h>
+#include <dds/DCPS/EncapsulationHeader.h>
 #include <dds/DCPS/GuidConverter.h>
 #include <dds/DCPS/AssociationData.h>
 #include <dds/DCPS/Service_Participant.h>

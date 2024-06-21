@@ -12,6 +12,7 @@
 #include "DataSampleHeader.h"
 #include "DataWriterCallbacks.h"
 #include "Definitions.h"
+#include "EncapsulationHeader.h"
 #include "GuidUtils.h"
 #include "MessageTracker.h"
 #include "Message_Block_Ptr.h"

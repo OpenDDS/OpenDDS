@@ -11,6 +11,7 @@
 
 #include <dds/DCPS/DataSampleElement.h>
 #include <dds/DCPS/DisjointSequence.h>
+#include <dds/DCPS/EncapsulationHeader.h>
 #include <dds/DCPS/Marked_Default_Qos.h>
 #include <dds/DCPS/Qos_Helper.h>
 #include <dds/DCPS/SequenceNumber.h>
