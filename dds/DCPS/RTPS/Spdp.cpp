@@ -3100,6 +3100,8 @@ Spdp::SpdpTransport::handle_input(ACE_HANDLE h)
       message.hdr = header;
     }
 
+    DCPS::GuidPrefix_t destinationGuidPrefix = {0};
+
     while (buff_.length() > 3) {
       const char subm = buff_.rd_ptr()[0], flags = buff_.rd_ptr()[1];
       ser.swap_bytes((flags & FLAG_E) != ACE_CDR_BYTE_ORDER);
@@ -3122,9 +3124,11 @@ Spdp::SpdpTransport::handle_input(ACE_HANDLE h)
           append_submessage(message, data);
         }
 
-        if (data.writerId != ENTITYID_SPDP_BUILTIN_PARTICIPANT_WRITER) {
-          // Not our message: this could be the same multicast group used
-          // for SEDP and other traffic.
+        if (data.writerId != ENTITYID_SPDP_BUILTIN_PARTICIPANT_WRITER ||
+            (data.readerId != ENTITYID_SPDP_BUILTIN_PARTICIPANT_READER &&
+             data.readerId != ENTITYID_UNKNOWN) ||
+            (!DCPS::equal_guid_prefixes(destinationGuidPrefix, hdr_.guidPrefix) &&
+             !DCPS::equal_guid_prefixes(destinationGuidPrefix, DCPS::GUIDPREFIX_UNKNOWN))) {
           break;
         }
 
@@ -3164,22 +3168,20 @@ Spdp::SpdpTransport::handle_input(ACE_HANDLE h)
         break;
       }
       case INFO_DST: {
-        if (DCPS::transport_debug.log_messages) {
-          InfoDestinationSubmessage sm;
-          if (!(ser >> sm)) {
-            if (DCPS::DCPS_debug_level > 0) {
-              ACE_ERROR((LM_ERROR,
-                        ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::handle_input() - ")
-                        ACE_TEXT("failed to deserialize INFO_DST header for SPDP\n")));
-            }
-            return 0;
+        InfoDestinationSubmessage sm;
+        if (!(ser >> sm)) {
+          if (DCPS::DCPS_debug_level > 0) {
+            ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: Spdp::SpdpTransport::handle_input() - "
+                       "failed to deserialize INFO_DST submessage for SPDP\n"));
           }
-          submessageLength = sm.smHeader.submessageLength;
-          append_submessage(message, sm);
-          break;
+          return 0;
         }
+        submessageLength = sm.smHeader.submessageLength;
+        if (DCPS::transport_debug.log_messages) {
+          append_submessage(message, sm);
+        }
+        break;
       }
-      // fallthrough
       default:
         SubmessageHeader smHeader;
         if (!(ser >> smHeader)) {
