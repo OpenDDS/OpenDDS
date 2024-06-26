@@ -3176,6 +3176,7 @@ Spdp::SpdpTransport::handle_input(ACE_HANDLE h)
           }
           return 0;
         }
+        assign(destinationGuidPrefix, sm.guidPrefix);
         submessageLength = sm.smHeader.submessageLength;
         if (DCPS::transport_debug.log_messages) {
           append_submessage(message, sm);
