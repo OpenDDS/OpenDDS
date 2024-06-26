@@ -84,6 +84,7 @@ struct TestParticipant: ACE_Event_Handler {
     : sock_(sock)
     , recv_mb_(64 * 1024)
   {
+    assign(destination_prefix_, GUIDPREFIX_UNKNOWN);
     const Header hdr = {
       {'R', 'T', 'P', 'S'}, PROTOCOLVERSION, VENDORID_OPENDDS,
       {prefix[0], prefix[1], prefix[2], prefix[3], prefix[4], prefix[5],
@@ -118,6 +119,11 @@ struct TestParticipant: ACE_Event_Handler {
     return true;
   }
 
+  void set_infodst(const GuidPrefix_t& dst)
+  {
+    assign(destination_prefix_, dst);
+  }
+
   bool send_data(const OpenDDS::DCPS::EntityId_t& writer,
                  const SequenceNumber_t& seq, OpenDDS::RTPS::ParameterList& plist, const ACE_INET_Addr& send_to)
   {
@@ -129,9 +135,12 @@ struct TestParticipant: ACE_Event_Handler {
     };
 
     const Encoding encoding(Encoding::KIND_XCDR1, OpenDDS::DCPS::ENDIAN_LITTLE);
-
+    InfoDestinationSubmessage idst = { {INFO_DST, FLAG_E, 0}, {0} };
     size_t size = 0;
     serialized_size(encoding, size, hdr_);
+    if (!equal_guid_prefixes(destination_prefix_, GUIDPREFIX_UNKNOWN)) {
+      serialized_size(encoding, size, idst);
+    }
     serialized_size(encoding, size, ds);
     primitive_serialized_size_ulong(encoding, size);
     serialized_size(encoding, size, plist);
@@ -139,9 +148,23 @@ struct TestParticipant: ACE_Event_Handler {
     ACE_Message_Block mb(size);
     Serializer ser(&mb, encoding);
 
+    if (!(ser << hdr_)) {
+      ACE_DEBUG((LM_DEBUG, "ERROR: failed to serialize message headers\n"));
+      return false;
+    }
+
+    if (!equal_guid_prefixes(destination_prefix_, GUIDPREFIX_UNKNOWN)) {
+      assign(idst.guidPrefix, destination_prefix_);
+      assign(destination_prefix_, GUIDPREFIX_UNKNOWN);
+      if (!(ser << idst)) {
+        ACE_DEBUG((LM_DEBUG, "ERROR: failed to serialize InfoDestinationSubmessage\n"));
+        return false;
+      }
+    }
+
     const EncapsulationHeader encap(encoding, MUTABLE);
-    if (!(ser << hdr_ && ser << ds && ser << encap)) {
-      ACE_DEBUG((LM_DEBUG, "ERROR: failed to serialize headers\n"));
+    if (!(ser << ds && ser << encap)) {
+      ACE_DEBUG((LM_DEBUG, "ERROR: failed to serialize submessage headers\n"));
       return false;
     }
 
@@ -222,6 +245,7 @@ struct TestParticipant: ACE_Event_Handler {
   ACE_SOCK_Dgram& sock_;
   Header hdr_;
   ACE_Message_Block recv_mb_;
+  GuidPrefix_t destination_prefix_;
 };
 
 
@@ -418,6 +442,19 @@ bool run_test()
   bool expect_participant = true;
 
   if (spdp_friend.check_for_participant(false)) {
+    return false;
+  }
+
+  ACE_DEBUG((LM_DEBUG, "Info Destination Test\n"));
+  part1.set_infodst(gp); // The next send_data will insert an InfoDestination submessage before Data.
+  // Using the GuidPrefix 'gp' sets the destination GUID to part1's own guid, so it won't be read by 'spdp'.
+  if (!part1.send_data(test_part_guid.entityId, seq, plist, send_addr)) {
+    ACE_DEBUG((LM_DEBUG, "ERROR: Info Destination test couldn't send\n"));
+    return false;
+  }
+  reactor_wait();
+  if (spdp_friend.check_for_participant(false)) {
+    ACE_DEBUG((LM_DEBUG, "ERROR: Info Destination test resulted in discovery when it shouldn't\n"));
     return false;
   }
 
