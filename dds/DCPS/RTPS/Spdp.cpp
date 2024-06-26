@@ -532,6 +532,7 @@ void Spdp::process_location_updates_i(const DiscoveredParticipantIter& iter, con
 
   DCPS::ParticipantLocationBuiltinTopicData& location_data = iter->second.location_data_;
   location_data.lease_duration = leaseDuration.to_dds_duration();
+  location_data.user_tag = iter->second.opendds_user_tag_;
 
   bool published = false;
   for (DiscoveredParticipant::LocationUpdateList::const_iterator pos = location_updates.begin(),
@@ -2301,6 +2302,7 @@ ParticipantData_t Spdp::build_local_pdata(
 #if OPENDDS_CONFIG_SECURITY
       , available_extended_builtin_endpoints_
 #endif
+      , 0
     },
     { // Duration_t (leaseDuration)
       static_cast<CORBA::Long>(lease_duration_.value().sec()),
@@ -2904,12 +2906,31 @@ Spdp::SpdpTransport::write_i(const DCPS::GUID_t& guid, const DCPS::NetworkAddres
   wbuff_.reset();
   DCPS::Serializer ser(&wbuff_, encoding_plain_native);
   DCPS::EncapsulationHeader encap(ser.encoding(), DCPS::MUTABLE);
-  if (!(ser << hdr_) || !(ser << info_dst) || !(ser << data_) || !(ser << encap)
-      || !(ser << plist)) {
+  if (!(ser << hdr_)) {
+    if (log_level >= LogLevel::Error) {
+      ACE_ERROR((LM_ERROR,
+        ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::write_i: ")
+        ACE_TEXT("failed to serialize RTPS header for SPDP\n")));
+    }
+  }
+
+  // The implementation-specific UserTagSubmessage is designed to directly
+  // follow the RTPS Message Header.  No other submessages should be added
+  // before it.  This enables filtering based on a fixed offset.
+  if (user_tag_.smHeader.submessageId && !(ser << user_tag_)) {
+    if (log_level >= LogLevel::Error) {
+      ACE_ERROR((LM_ERROR,
+        ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::write_i: ")
+        ACE_TEXT("failed to serialize user tag for SPDP\n")));
+    }
+    return;
+  }
+
+  if (!(ser << info_dst) || !(ser << data_) || !(ser << encap) || !(ser << plist)) {
     if (DCPS::DCPS_debug_level > 0) {
       ACE_ERROR((LM_ERROR,
         ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::write_i() - ")
-        ACE_TEXT("failed to serialize headers for SPDP\n")));
+        ACE_TEXT("failed to serialize submessages for SPDP\n")));
     }
     return;
   }
@@ -3101,13 +3122,14 @@ Spdp::SpdpTransport::handle_input(ACE_HANDLE h)
     }
 
     DCPS::GuidPrefix_t destinationGuidPrefix = {0};
+    ACE_CDR::ULong userTag = 0;
 
     while (buff_.length() > 3) {
       const char subm = buff_.rd_ptr()[0], flags = buff_.rd_ptr()[1];
       ser.swap_bytes((flags & FLAG_E) != ACE_CDR_BYTE_ORDER);
       const size_t start = buff_.length();
       CORBA::UShort submessageLength = 0;
-      switch (subm) {
+      switch (static_cast<ACE_CDR::Octet>(subm)) {
       case DATA: {
         DataSubmessage data;
         if (!(ser >> data)) {
@@ -3161,6 +3183,12 @@ Spdp::SpdpTransport::handle_input(ACE_HANDLE h)
           plist[0]._d(PID_PARTICIPANT_GUID);
         }
 
+        if (userTag) {
+          const ACE_CDR::ULong len = plist.length();
+          plist.length(len + 1);
+          plist[len].user_tag(userTag);
+        }
+
         DCPS::RcHandle<Spdp> outer = outer_.lock();
         if (outer) {
           outer->data_received(data, plist, remote_na);
@@ -3180,6 +3208,32 @@ Spdp::SpdpTransport::handle_input(ACE_HANDLE h)
         submessageLength = sm.smHeader.submessageLength;
         if (DCPS::transport_debug.log_messages) {
           append_submessage(message, sm);
+        }
+        break;
+      }
+      case SUBMESSAGE_KIND_USER_TAG: {
+        if (hdr_.vendorId == VENDORID_OPENDDS) {
+          UserTagSubmessage sm;
+          if (!(ser >> sm)) {
+            if (DCPS::DCPS_debug_level > 0) {
+              ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: Spdp::SpdpTransport::handle_input() - "
+                        "failed to deserialize UserTagSubmessage for SPDP\n"));
+            }
+            return 0;
+          }
+          submessageLength = sm.smHeader.submessageLength;
+          userTag = sm.userTag;
+        } else {
+          SubmessageHeader smHeader;
+          if (!(ser >> smHeader)) {
+            if (DCPS::DCPS_debug_level > 0) {
+              ACE_ERROR((LM_ERROR,
+                        ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::handle_input() - ")
+                        ACE_TEXT("failed to deserialize SubmessageHeader for SPDP\n")));
+            }
+            return 0;
+          }
+          submessageLength = smHeader.submessageLength;
         }
         break;
       }

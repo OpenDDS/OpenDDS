@@ -425,6 +425,7 @@ bool run_test()
 #if OPENDDS_CONFIG_SECURITY
       , availableExtendedBuiltinEndpoints
 #endif
+      , 0
     },
     { // Duration_t (leaseDuration)
       static_cast<CORBA::Long>((rd.resend_period() * 10).value().sec()),
