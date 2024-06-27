@@ -32,7 +32,7 @@ RtpsDiscoveryConfig::resend_period() const
   // see RTPS v2.1 9.6.1.4.2
   return TheServiceParticipant->config_store()->get(config_key("RESEND_PERIOD").c_str(),
                                                     TimeDuration(30 /*seconds*/),
-                                                    DCPS::ConfigStoreImpl::Format_IntegerSeconds);
+                                                    DCPS::ConfigStoreImpl::Format_IntegerMilliseconds);
 }
 
 void
@@ -40,7 +40,7 @@ RtpsDiscoveryConfig::resend_period(const DCPS::TimeDuration& period)
 {
   TheServiceParticipant->config_store()->set(config_key("RESEND_PERIOD").c_str(),
                                              period,
-                                             DCPS::ConfigStoreImpl::Format_IntegerSeconds);
+                                             DCPS::ConfigStoreImpl::Format_IntegerMilliseconds);
 }
 
 double
