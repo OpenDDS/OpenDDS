@@ -255,6 +255,8 @@ The topic type ParticipantLocationBuiltinTopicData is defined in :ghfile:`dds/Op
 
 * ``lease_duration`` -- The remote participant's :cfg:prop:`[rtps_discovery]LeaseDuration`
 
+* ``user_tag`` -- The remote participant's :cfg:prop:`[rtps_discovery]SpdpUserTag`
+
 .. _built_in_topics--openddsconnectionrecord-topic:
 
 OpenDDSConnectionRecord Topic

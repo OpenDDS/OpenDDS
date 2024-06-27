@@ -579,6 +579,7 @@ bool from_param_list(const ParameterList& param_list,
   proxy.expectsInlineQos = false;
   proxy.opendds_participant_flags.bits = 0;
   proxy.opendds_rtps_relay_application_participant = false;
+  proxy.opendds_user_tag = 0;
 
   const CORBA::ULong length = param_list.length();
   for (CORBA::ULong i = 0; i < length; ++i) {
@@ -655,6 +656,9 @@ bool from_param_list(const ParameterList& param_list,
         break;
       case PID_OPENDDS_RTPS_RELAY_APPLICATION_PARTICIPANT:
         proxy.opendds_rtps_relay_application_participant = param.opendds_rtps_relay_application_participant();
+        break;
+      case PID_OPENDDS_SPDP_USER_TAG:
+        proxy.opendds_user_tag = param.user_tag();
         break;
       case PID_SENTINEL:
       case PID_PAD:

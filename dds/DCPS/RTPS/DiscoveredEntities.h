@@ -87,6 +87,7 @@ struct DiscoveredParticipant {
     , bit_ih_(DDS::HANDLE_NIL)
     , max_seq_(seq)
     , seq_reset_count_(0)
+    , opendds_user_tag_(p.participantProxy.opendds_user_tag)
 #if OPENDDS_CONFIG_SECURITY
     , have_spdp_info_(false)
     , have_sedp_info_(false)
@@ -155,6 +156,7 @@ struct DiscoveredParticipant {
   DDS::InstanceHandle_t bit_ih_;
   DCPS::SequenceNumber max_seq_;
   ACE_UINT16 seq_reset_count_;
+  ACE_CDR::ULong opendds_user_tag_;
   typedef OPENDDS_LIST(BuiltinAssociationRecord) BuiltinAssociationRecords;
   BuiltinAssociationRecords builtin_pending_records_;
   BuiltinAssociationRecords builtin_associated_records_;
