@@ -1474,7 +1474,8 @@ Those properties, along with options specific to OpenDDS's RTPS discovery implem
 
     Add the OpenDDS-specific UserTag RTPS submessage to the start of :ref:`SPDP <spdp>` messages.
     If ``<i>`` is 0 (the default), the submessage is not added.
-    Otherwise this submessage's contents is the 4-byte unsigned integer ``<i>``.
+    Otherwise this submessage's content is the 4-byte unsigned integer ``<i>``.
+    User tags from received SPDP messages are available to the application using the ParticipantLocation built-in topic.
 
 .. _config-ports-used-by-rtps-disc:
 
