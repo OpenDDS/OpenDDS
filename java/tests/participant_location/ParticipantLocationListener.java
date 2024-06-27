@@ -63,7 +63,7 @@ class ParticipantLocationListener extends DDS._DataReaderListenerLocalBase {
   private void on_data_available_i(ParticipantLocationBuiltinTopicDataDataReader bitDataReader) {
     ParticipantLocationBuiltinTopicDataHolder participant = new ParticipantLocationBuiltinTopicDataHolder(
       new ParticipantLocationBuiltinTopicData(new byte[16], 0, 0, "", new DDS.Time_t(), "", new DDS.Time_t(), "",
-        new DDS.Time_t(), "", new DDS.Time_t(), "", new DDS.Time_t(), "", new DDS.Time_t(), new DDS.Duration_t()));
+        new DDS.Time_t(), "", new DDS.Time_t(), "", new DDS.Time_t(), "", new DDS.Time_t(), new DDS.Duration_t(), 0));
     SampleInfoHolder si = new SampleInfoHolder(
         new SampleInfo(0, 0, 0, new DDS.Time_t(), 0, 0, 0, 0, 0, 0, 0, false, 0));
 
