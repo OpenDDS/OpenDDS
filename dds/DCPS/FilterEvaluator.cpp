@@ -120,7 +120,7 @@ FilterEvaluator::DeserializedForEval::lookup(const char* field) const
 }
 
 FilterEvaluator::SerializedForEval::SerializedForEval(ACE_Message_Block* data,
-                                                      const TypeSupportImpl& type_support,
+                                                      TypeSupportImpl& type_support,
                                                       const DDS::StringSeq& params,
                                                       Encoding encoding)
   : DataForEval(type_support.getMetaStructForType(), params)

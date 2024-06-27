@@ -52,19 +52,19 @@ public:
   bool in_subscript;
   DCPS::String subpath;
 
-  MemberPathParser(const char* path)
+  MemberPathParser(const char* a_path)
     : pos(0)
-    , left(path ? std::strlen(path) : 0)
-    , path(left > 0 ? path : 0)
+    , left(a_path ? std::strlen(a_path) : 0)
+    , path(left > 0 ? a_path : 0)
     , error(false)
     , in_subscript(false)
   {
   }
 
-  MemberPathParser(const DCPS::String& path)
+  MemberPathParser(const DCPS::String& a_path)
     : pos(0)
-    , left(path.size())
-    , path(left > 0 ? path.c_str() : 0)
+    , left(a_path.size())
+    , path(left > 0 ? a_path.c_str() : 0)
     , error(false)
     , in_subscript(false)
   {
