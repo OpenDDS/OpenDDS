@@ -64,7 +64,7 @@ namespace OpenDDS {
         return getValueImpl(dd, field);
       }
 
-      Value getValue(Serializer& strm, const char* field, const TypeSupportImpl* ts) const
+      Value getValue(Serializer& strm, const char* field, TypeSupportImpl* ts) const
       {
         DDS::DynamicType_var type = ts->get_type();
         const DDS::DynamicData_var dd = new XTypes::DynamicDataXcdrReadImpl(strm, type);

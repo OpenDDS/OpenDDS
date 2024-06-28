@@ -3406,7 +3406,7 @@ Sedp::Writer::write_parameter_list(const ParameterList& plist,
 
   Serializer serializer(payload->cont(), sedp_encoding);
   DCPS::EncapsulationHeader encap;
-  if (encap.from_encoding(sedp_encoding, DCPS::MUTABLE) &&
+  if (from_encoding(encap, sedp_encoding, DCPS::MUTABLE) &&
       serializer << encap && serializer << plist) {
     send_sample(OPENDDS_MOVE_NS::move(payload), size, reader, sequence, reader != GUID_UNKNOWN);
   } else {
@@ -3436,7 +3436,7 @@ Sedp::LivelinessWriter::write_participant_message(const ParticipantMessageData& 
       new ACE_Message_Block(size)));
   Serializer serializer(payload->cont(), sedp_encoding);
   DCPS::EncapsulationHeader encap;
-  if (encap.from_encoding(sedp_encoding, DCPS::FINAL) &&
+  if (from_encoding(encap, sedp_encoding, DCPS::FINAL) &&
       serializer << encap && serializer << pmd) {
     send_sample(OPENDDS_MOVE_NS::move(payload), size, reader, sequence, reader != GUID_UNKNOWN);
   } else {
@@ -3465,7 +3465,7 @@ Sedp::SecurityWriter::write_stateless_message(const DDS::Security::ParticipantSt
       new ACE_Message_Block(size)));
   Serializer serializer(payload->cont(), sedp_encoding);
   DCPS::EncapsulationHeader encap;
-  if (encap.from_encoding(sedp_encoding, DCPS::FINAL) &&
+  if (from_encoding(encap, sedp_encoding, DCPS::FINAL) &&
       serializer << encap && serializer << msg) {
     send_sample(OPENDDS_MOVE_NS::move(payload), size, reader, sequence);
   } else {
@@ -3493,7 +3493,7 @@ Sedp::SecurityWriter::write_volatile_message_secure(const DDS::Security::Partici
       new ACE_Message_Block(size)));
   Serializer serializer(payload->cont(), sedp_encoding);
   DCPS::EncapsulationHeader encap;
-  if (encap.from_encoding(sedp_encoding, DCPS::FINAL) &&
+  if (from_encoding(encap, sedp_encoding, DCPS::FINAL) &&
       serializer << encap && serializer << msg) {
     send_sample(OPENDDS_MOVE_NS::move(payload), size, reader, sequence);
   } else {
@@ -3569,7 +3569,7 @@ Sedp::DiscoveryWriter::write_unregister_dispose(const GUID_t& rid, CORBA::UShort
 
   Serializer serializer(payload->cont(), sedp_encoding);
   DCPS::EncapsulationHeader encap;
-  if (encap.from_encoding(sedp_encoding, DCPS::MUTABLE) &&
+  if (from_encoding(encap, sedp_encoding, DCPS::MUTABLE) &&
       serializer << encap && serializer << plist) {
     // Send
     write_control_msg(OPENDDS_MOVE_NS::move(payload), size, DCPS::DISPOSE_UNREGISTER_INSTANCE);
@@ -3752,7 +3752,7 @@ bool Sedp::TypeLookupRequestWriter::send_type_lookup_request(
   Serializer serializer(payload->cont(), type_lookup_encoding);
   DCPS::EncapsulationHeader encap;
   bool success = true;
-  if (encap.from_encoding(serializer.encoding(), DCPS::FINAL) &&
+  if (from_encoding(encap, serializer.encoding(), DCPS::FINAL) &&
       serializer << encap && serializer << type_lookup_request) {
     DCPS::SequenceNumber sn(seq_++);
     send_sample(OPENDDS_MOVE_NS::move(payload), size, reader, sn);
@@ -3793,7 +3793,7 @@ bool Sedp::TypeLookupReplyWriter::send_type_lookup_reply(
   Serializer serializer(payload->cont(), type_lookup_encoding);
   DCPS::EncapsulationHeader encap;
   bool success = true;
-  if (encap.from_encoding(serializer.encoding(), DCPS::FINAL) &&
+  if (from_encoding(encap, serializer.encoding(), DCPS::FINAL) &&
       serializer << encap && serializer << type_lookup_reply) {
     DCPS::SequenceNumber sn(seq_++);
     send_sample(OPENDDS_MOVE_NS::move(payload), size, reader, sn);
@@ -4251,7 +4251,13 @@ Sedp::Reader::data_received(const DCPS::ReceivedDataSample& sample)
       }
       return;
     }
-    if (!encap.to_encoding(encoding, extensibility)) {
+    if (!to_encoding(encoding, encap, extensibility)) {
+      if (log_level >= DCPS::LogLevel::Error) {
+        ACE_ERROR((LM_ERROR,
+                   "(%P|%t) ERROR: Sedp::Reader::data_received: "
+                   "to_encoding failed writer %C reader %C\n",
+                   LogGuid(sample.header_.publication_id_).c_str(), LogGuid(repo_id_).c_str()));
+      }
       return;
     }
     ser.encoding(encoding);

@@ -33,6 +33,7 @@ add_library(OpenDDS_Dcps
   DCPS/DispatchService.cpp
   DCPS/DomainParticipantFactoryImpl.cpp
   DCPS/DomainParticipantImpl.cpp
+  DCPS/EncapsulationHeader.cpp
   DCPS/EntityImpl.cpp
   DCPS/EventDispatcher.cpp
   DCPS/FileSystemStorage.cpp
@@ -255,6 +256,7 @@ target_sources(OpenDDS_Dcps
     DCPS/DurabilityArray.h
     DCPS/DurabilityQueue.h
     DCPS/Dynamic_Cached_Allocator_With_Overflow_T.h
+    DCPS/EncapsulationHeader.h
     DCPS/EntityImpl.h
     DCPS/EventDispatcher.h
     DCPS/FeatureDisabledQosCheck.h

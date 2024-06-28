@@ -3158,11 +3158,13 @@ Spdp::SpdpTransport::handle_input(ACE_HANDLE h)
         if (data.smHeader.flags & (FLAG_D | FLAG_K_IN_DATA)) {
           DCPS::EncapsulationHeader encap;
           DCPS::Encoding enc;
-          if (!(ser >> encap) || !encap.to_encoding(enc, DCPS::MUTABLE) || enc.kind() != Encoding::KIND_XCDR1) {
+          if (!(ser >> encap) || !to_encoding(enc, encap, DCPS::MUTABLE) || enc.kind() != Encoding::KIND_XCDR1) {
             if (DCPS::DCPS_debug_level > 0) {
               ACE_ERROR((LM_ERROR,
-                        ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::handle_input() - ")
-                        ACE_TEXT("failed to deserialize encapsulation header for SPDP\n")));
+                         "(%P|%t) ERROR: Spdp::SpdpTransport::handle_input: "
+                         "failed to deserialize encapsulation header for SPDP writer %C reader %C\n",
+                         LogGuid(make_id(header.guidPrefix, data.writerId)).c_str(),
+                         LogGuid(outer->guid_).c_str()));
             }
             return 0;
           }
