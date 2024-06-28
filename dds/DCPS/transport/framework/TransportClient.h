@@ -263,9 +263,6 @@ private:
     }
 
   private:
-    ~PendingAssocTimer()
-    { }
-
     class CommandBase : public Command {
     public:
       CommandBase(PendingAssocTimer* timer,

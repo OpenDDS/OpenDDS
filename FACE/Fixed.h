@@ -251,14 +251,14 @@ inline FACE::UnsignedShort Fixed::fixed_scale() const
 
 inline void Fixed::enforce(unsigned int digits, unsigned int scale)
 {
-  impl_ = impl_.truncate(scale);
+  impl_ = impl_.truncate(static_cast<ACE_CDR::UShort>(scale));
   if (impl_.fixed_digits() > digits) {
     throw CORBA::DATA_CONVERSION();
   }
 
   if (impl_.fixed_scale() < scale) {
-    const int offset = scale - impl_.fixed_scale();
-    if (offset + impl_.fixed_digits() > int(digits)) {
+    const unsigned int offset = scale - impl_.fixed_scale();
+    if (offset + impl_.fixed_digits() > digits) {
       throw CORBA::DATA_CONVERSION();
     }
 
