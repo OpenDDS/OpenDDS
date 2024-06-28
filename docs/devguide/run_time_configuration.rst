@@ -1107,6 +1107,7 @@ Those properties, along with options specific to OpenDDS's RTPS discovery implem
     :default: ``30``
 
     The number of seconds that a process waits between the :ref:`SPDP participant announcements <spdp>`.
+    It is a floating point value, so fractions of a second can be specified.
 
   .. prop:: MinResendDelay=<msec>
     :default: ``100``
