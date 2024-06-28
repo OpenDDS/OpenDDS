@@ -163,6 +163,7 @@ participant_data(DDS::DomainId_t domain,
         , {PFLAGS_THIS_VERSION} // opendds_participant_flags
         , false // opendds_rtps_relay_application_participant
         , availableExtendedBuiltinEndpoints
+        , 0
       },
       {300, 0}, // leaseDuration
       {0, 0}, // discoveredAt
