@@ -171,7 +171,7 @@ jobs:
     - name: configure OpenDDS
       run: |
         cd OpenDDS
-        ./configure --no-inline --tests --java=$JAVA_HOME_17_X64 --no-rapidjson --ace=$GITHUB_WORKSPACE/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC --compile-warnings=WARNING
+        ./configure --no-inline --tests --java=$JAVA_HOME_17_X64 --ace=$GITHUB_WORKSPACE/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC --compile-warnings=WARNING
     - name: check build configuration
       shell: bash
       run: |
@@ -1276,7 +1276,7 @@ jobs:
     - name: configure OpenDDS
       run: |
         cd OpenDDS
-        ./configure --no-debug --no-inline --features=versioned_namespace=1 --tests --security --no-rapidjson --no-built-in-topics --no-content-subscription --no-ownership-profile --no-object-model-profile --no-persistence-profile --ace=$GITHUB_WORKSPACE/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC --compile-warnings=WARNING
+        ./configure --no-debug --no-inline --features=versioned_namespace=1 --tests --security --no-built-in-topics --no-content-subscription --no-ownership-profile --no-object-model-profile --no-persistence-profile --ace=$GITHUB_WORKSPACE/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC --compile-warnings=WARNING
     - name: check build configuration
       shell: bash
       run: |
