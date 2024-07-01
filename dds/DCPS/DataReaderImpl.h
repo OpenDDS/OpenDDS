@@ -142,8 +142,6 @@ public:
   }
 
 private:
-  ~EndHistoricSamplesMissedSweeper();
-
   WeakRcHandle<DataReaderImpl> reader_;
   OPENDDS_SET(WriterInfo_rch) info_set_;
 
@@ -913,8 +911,6 @@ private:
     }
 
   private:
-    ~LivelinessTimer() { }
-
     WeakRcHandle<DataReaderImpl> data_reader_;
 
     /// liveliness timer id; -1 if no timer is set

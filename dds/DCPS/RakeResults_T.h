@@ -38,7 +38,7 @@ public:
   RakeResults(DataReaderImpl* reader,
               SampleSeq& received_data,
               DDS::SampleInfoSeq& info_seq,
-              CORBA::Long max_samples,
+              CORBA::ULong max_samples,
               DDS::PresentationQosPolicy presentation,
 #ifndef OPENDDS_NO_QUERY_CONDITION
               DDS::QueryCondition_ptr cond,

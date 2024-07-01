@@ -3406,9 +3406,6 @@ EndHistoricSamplesMissedSweeper::EndHistoricSamplesMissedSweeper(ACE_Reactor* re
   , reader_(*reader)
 { }
 
-EndHistoricSamplesMissedSweeper::~EndHistoricSamplesMissedSweeper()
-{ }
-
 void EndHistoricSamplesMissedSweeper::schedule_timer(OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::WriterInfo>& info)
 {
   info->waiting_for_end_historic_samples(true);
