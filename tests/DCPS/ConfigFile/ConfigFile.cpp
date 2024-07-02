@@ -225,12 +225,22 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
       OpenDDS::RTPS::RtpsDiscovery_rch rd =
         dynamic_rchandle_cast<OpenDDS::RTPS::RtpsDiscovery>(discovery);
       TEST_CHECK(!rd.is_nil());
-      TEST_CHECK(rd->spdp_send_addrs().size() == 5);
+      TEST_CHECK(rd->spdp_send_addrs().size() == 10);
       TEST_CHECK(rd->spdp_send_addrs().count(NetworkAddress("10.1.1.1:10001")) == 1);
       TEST_CHECK(rd->spdp_send_addrs().count(NetworkAddress("10.2.2.2:10002")) == 1);
       TEST_CHECK(rd->spdp_send_addrs().count(NetworkAddress("10.3.3.3:10003")) == 1);
       TEST_CHECK(rd->spdp_send_addrs().count(NetworkAddress("10.4.4.4:10004")) == 1);
+
+      // Specifying 10.5.5.5:10005:2 gives us two ports, with default interval of 2
       TEST_CHECK(rd->spdp_send_addrs().count(NetworkAddress("10.5.5.5:10005")) == 1);
+      TEST_CHECK(rd->spdp_send_addrs().count(NetworkAddress("10.5.5.5:10007")) == 1);
+
+      TEST_CHECK(rd->spdp_send_addrs().count(NetworkAddress("10.6.6.6:10006")) == 1);
+
+      // Specifying 10.7.7.7:10007:3:3 gives three ports, with interval of three
+      TEST_CHECK(rd->spdp_send_addrs().count(NetworkAddress("10.7.7.7:10007")) == 1);
+      TEST_CHECK(rd->spdp_send_addrs().count(NetworkAddress("10.7.7.7:10010")) == 1);
+      TEST_CHECK(rd->spdp_send_addrs().count(NetworkAddress("10.7.7.7:10013")) == 1);
     }
     {
       DDS::DomainId_t domain = 97;
