@@ -119,6 +119,9 @@ class DocEnv:
     def do_strict(self):
         self.do(['test'], because_of='strict')
         self.sphinx_build('dummy', '-W')
+        return None
+
+    def do_linkcheck(self):
         self.sphinx_build('linkcheck', defines=['gen_all_omg_spec_links=False'])
         return None
 
