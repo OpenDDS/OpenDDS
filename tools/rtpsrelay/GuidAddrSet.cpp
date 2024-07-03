@@ -208,7 +208,7 @@ bool GuidAddrSet::ignore_rtps(bool from_application_participant,
     pos->second.allow_rtps = true;
 
     if (config_.log_activity()) {
-      ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) INFO: GuidAddrSet::record_activity ")
+      ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) INFO: GuidAddrSet::ignore_rtps ")
                  ACE_TEXT("%C was admitted %C into session\n"),
                  guid_to_string(guid).c_str(),
                  pos->second.get_session_time(now).sec_str().c_str()));
@@ -246,7 +246,7 @@ bool GuidAddrSet::ignore_rtps(bool from_application_participant,
   admitted = true;
 
   if (config_.log_activity()) {
-    ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) INFO: GuidAddrSet::record_activity ")
+    ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) INFO: GuidAddrSet::ignore_rtps ")
                ACE_TEXT("%C was admitted %C into session\n"),
                guid_to_string(guid).c_str(),
                pos->second.get_session_time(now).sec_str().c_str()));
