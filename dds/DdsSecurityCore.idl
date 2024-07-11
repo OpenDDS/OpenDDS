@@ -112,11 +112,10 @@ module DDS {
       // in this and following structs, 'base' is used in place of struct inheritance
       DDS::ParticipantBuiltinTopicData base;
 
-      IdentityToken     identity_token;
-      PermissionsToken  permissions_token;
+      IdentityToken identity_token;
+      PermissionsToken permissions_token;
       PropertyQosPolicy property;
-      ParticipantSecurityInfo  security_info;
-      // https://issues.omg.org/browse/DDSSEC12-87
+      ParticipantSecurityInfo security_info;
       ExtendedBuiltinEndpointSet_t extended_builtin_endpoints;
     };
 

@@ -351,9 +351,9 @@ Sedp::Sedp(const GUID_t& participant_id, Spdp& owner, ACE_Thread_Mutex& lock)
       make_id(participant_id, ENTITYID_TL_SVC_REPLY_WRITER), ref(*this)))
 #if OPENDDS_CONFIG_SECURITY
   , type_lookup_request_secure_writer_(make_rch<TypeLookupRequestWriter>(
-      make_id(participant_id, ENTITYID_TL_SVC_REQ_WRITER_SECURE), ref(*this)))
+      make_id(participant_id, ENTITYID_TL_SVC_REQ_SECURE_WRITER), ref(*this)))
   , type_lookup_reply_secure_writer_(make_rch<TypeLookupReplyWriter>(
-      make_id(participant_id, ENTITYID_TL_SVC_REPLY_WRITER_SECURE), ref(*this)))
+      make_id(participant_id, ENTITYID_TL_SVC_REPLY_SECURE_WRITER), ref(*this)))
 #endif
   , publications_reader_(make_rch<DiscoveryReader>(
       make_id(participant_id, ENTITYID_SEDP_BUILTIN_PUBLICATIONS_READER), ref(*this)))
@@ -385,9 +385,9 @@ Sedp::Sedp(const GUID_t& participant_id, Spdp& owner, ACE_Thread_Mutex& lock)
       make_id(participant_id, ENTITYID_TL_SVC_REPLY_READER), ref(*this)))
 #if OPENDDS_CONFIG_SECURITY
   , type_lookup_request_secure_reader_(make_rch<TypeLookupRequestReader>(
-      make_id(participant_id, ENTITYID_TL_SVC_REQ_READER_SECURE), ref(*this)))
+      make_id(participant_id, ENTITYID_TL_SVC_REQ_SECURE_READER), ref(*this)))
   , type_lookup_reply_secure_reader_(make_rch<TypeLookupReplyReader>(
-      make_id(participant_id, ENTITYID_TL_SVC_REPLY_READER_SECURE), ref(*this)))
+      make_id(participant_id, ENTITYID_TL_SVC_REPLY_SECURE_READER), ref(*this)))
   , ice_agent_(ICE::Agent::instance())
   , publication_agent_info_listener_(DCPS::make_rch<PublicationAgentInfoListener>(ref(*this)))
   , subscription_agent_info_listener_(DCPS::make_rch<SubscriptionAgentInfoListener>(ref(*this)))
@@ -617,20 +617,20 @@ Sedp::init(const GUID_t& guid,
   }
 
 #if OPENDDS_CONFIG_SECURITY
-  if (xbep & DDS::Security::TYPE_LOOKUP_SERVICE_REQUEST_WRITER_SECURE) {
+  if (xbep & DDS::Security::TYPE_LOOKUP_SERVICE_REQUEST_SECURE_WRITER) {
     type_lookup_request_secure_writer_->set_crypto_handles(spdp_.crypto_handle());
     type_lookup_request_secure_writer_->enable_transport_using_config(reliable, nondurable, transport_cfg_, 0);
   }
-  if (xbep & DDS::Security::TYPE_LOOKUP_SERVICE_REQUEST_READER_SECURE) {
+  if (xbep & DDS::Security::TYPE_LOOKUP_SERVICE_REQUEST_SECURE_READER) {
     type_lookup_request_secure_reader_->set_crypto_handles(spdp_.crypto_handle());
     type_lookup_request_secure_reader_->enable_transport_using_config(reliable, nondurable, transport_cfg_, 0);
   }
 
-  if (xbep & DDS::Security::TYPE_LOOKUP_SERVICE_REPLY_WRITER_SECURE) {
+  if (xbep & DDS::Security::TYPE_LOOKUP_SERVICE_REPLY_SECURE_WRITER) {
     type_lookup_reply_secure_writer_->set_crypto_handles(spdp_.crypto_handle());
     type_lookup_reply_secure_writer_->enable_transport_using_config(reliable, nondurable, transport_cfg_, 0);
   }
-  if (xbep & DDS::Security::TYPE_LOOKUP_SERVICE_REPLY_READER_SECURE) {
+  if (xbep & DDS::Security::TYPE_LOOKUP_SERVICE_REPLY_SECURE_READER) {
     type_lookup_reply_secure_reader_->set_crypto_handles(spdp_.crypto_handle());
     type_lookup_reply_secure_reader_->enable_transport_using_config(reliable, nondurable, transport_cfg_, 0);
   }
@@ -1231,31 +1231,31 @@ Sedp::associate(DiscoveredParticipant& participant
       participant.builtin_pending_records_.push_back(record);
     }
 
-    if ((local_available_extended & TYPE_LOOKUP_SERVICE_REQUEST_READER_SECURE) &&
-        (remote_available_extended & TYPE_LOOKUP_SERVICE_REQUEST_WRITER_SECURE)) {
+    if ((local_available_extended & TYPE_LOOKUP_SERVICE_REQUEST_SECURE_READER) &&
+        (remote_available_extended & TYPE_LOOKUP_SERVICE_REQUEST_SECURE_WRITER)) {
       BuiltinAssociationRecord record(type_lookup_request_secure_reader_,
-                                      make_id(participant.pdata_.participantProxy.guidPrefix, ENTITYID_TL_SVC_REQ_WRITER_SECURE),
+                                      make_id(participant.pdata_.participantProxy.guidPrefix, ENTITYID_TL_SVC_REQ_SECURE_WRITER),
                                       AC_REMOTE_RELIABLE | AC_GENERATE_REMOTE_MATCHED_CRYPTO_HANDLE | (participant_sec_attr.is_discovery_protected ? AC_SEND_LOCAL_TOKEN : AC_EMPTY));
       participant.builtin_pending_records_.push_back(record);
     }
-    if ((local_available_extended & TYPE_LOOKUP_SERVICE_REQUEST_WRITER_SECURE) &&
-        (remote_available_extended & TYPE_LOOKUP_SERVICE_REQUEST_READER_SECURE)) {
+    if ((local_available_extended & TYPE_LOOKUP_SERVICE_REQUEST_SECURE_WRITER) &&
+        (remote_available_extended & TYPE_LOOKUP_SERVICE_REQUEST_SECURE_READER)) {
       BuiltinAssociationRecord record(type_lookup_request_secure_writer_,
-                                      make_id(participant.pdata_.participantProxy.guidPrefix, ENTITYID_TL_SVC_REQ_READER_SECURE),
+                                      make_id(participant.pdata_.participantProxy.guidPrefix, ENTITYID_TL_SVC_REQ_SECURE_READER),
                                       AC_REMOTE_RELIABLE | AC_GENERATE_REMOTE_MATCHED_CRYPTO_HANDLE | (participant_sec_attr.is_discovery_protected ? AC_SEND_LOCAL_TOKEN : AC_EMPTY));
       participant.builtin_pending_records_.push_back(record);
     }
-    if ((local_available_extended & TYPE_LOOKUP_SERVICE_REPLY_READER_SECURE) &&
-        (remote_available_extended & TYPE_LOOKUP_SERVICE_REPLY_WRITER_SECURE)) {
+    if ((local_available_extended & TYPE_LOOKUP_SERVICE_REPLY_SECURE_READER) &&
+        (remote_available_extended & TYPE_LOOKUP_SERVICE_REPLY_SECURE_WRITER)) {
       BuiltinAssociationRecord record(type_lookup_reply_secure_reader_,
-                                      make_id(participant.pdata_.participantProxy.guidPrefix, ENTITYID_TL_SVC_REPLY_WRITER_SECURE),
+                                      make_id(participant.pdata_.participantProxy.guidPrefix, ENTITYID_TL_SVC_REPLY_SECURE_WRITER),
                                       AC_REMOTE_RELIABLE | AC_GENERATE_REMOTE_MATCHED_CRYPTO_HANDLE | (participant_sec_attr.is_discovery_protected ? AC_SEND_LOCAL_TOKEN : AC_EMPTY));
       participant.builtin_pending_records_.push_back(record);
     }
-    if ((local_available_extended & TYPE_LOOKUP_SERVICE_REPLY_WRITER_SECURE) &&
-        (remote_available_extended & TYPE_LOOKUP_SERVICE_REPLY_READER_SECURE)) {
+    if ((local_available_extended & TYPE_LOOKUP_SERVICE_REPLY_SECURE_WRITER) &&
+        (remote_available_extended & TYPE_LOOKUP_SERVICE_REPLY_SECURE_READER)) {
       BuiltinAssociationRecord record(type_lookup_reply_secure_writer_,
-                                      make_id(participant.pdata_.participantProxy.guidPrefix, ENTITYID_TL_SVC_REPLY_READER_SECURE),
+                                      make_id(participant.pdata_.participantProxy.guidPrefix, ENTITYID_TL_SVC_REPLY_SECURE_READER),
                                       AC_REMOTE_RELIABLE | AC_GENERATE_REMOTE_MATCHED_CRYPTO_HANDLE | (participant_sec_attr.is_discovery_protected ? AC_SEND_LOCAL_TOKEN : AC_EMPTY));
       participant.builtin_pending_records_.push_back(record);
     }
@@ -1623,10 +1623,10 @@ Sedp::disassociate(DiscoveredParticipant& participant)
       ENTITYID_P2P_BUILTIN_PARTICIPANT_VOLATILE_SECURE_WRITER,
       ENTITYID_SPDP_RELIABLE_BUILTIN_PARTICIPANT_SECURE_READER,
       ENTITYID_SPDP_RELIABLE_BUILTIN_PARTICIPANT_SECURE_WRITER,
-      ENTITYID_TL_SVC_REQ_WRITER_SECURE,
-      ENTITYID_TL_SVC_REQ_READER_SECURE,
-      ENTITYID_TL_SVC_REPLY_WRITER_SECURE,
-      ENTITYID_TL_SVC_REPLY_READER_SECURE
+      ENTITYID_TL_SVC_REQ_SECURE_WRITER,
+      ENTITYID_TL_SVC_REQ_SECURE_READER,
+      ENTITYID_TL_SVC_REPLY_SECURE_WRITER,
+      ENTITYID_TL_SVC_REPLY_SECURE_READER
     };
     for (size_t i = 0; i < DCPS::array_count(secure_entities); ++i) {
       remove_remote_crypto_handle(part, secure_entities[i]);
@@ -1809,20 +1809,20 @@ Sedp::update_locators(const ParticipantData_t& pdata)
   const DDS::Security::ExtendedBuiltinEndpointSet_t& extended_avail =
     pdata.participantProxy.availableExtendedBuiltinEndpoints;
 
-  if (extended_avail & DDS::Security::TYPE_LOOKUP_SERVICE_REQUEST_WRITER_SECURE) {
-    remote_id.entityId = ENTITYID_TL_SVC_REQ_WRITER_SECURE;
+  if (extended_avail & DDS::Security::TYPE_LOOKUP_SERVICE_REQUEST_SECURE_WRITER) {
+    remote_id.entityId = ENTITYID_TL_SVC_REQ_SECURE_WRITER;
     transport_inst_->update_locators(remote_id, remote_data, get_domain_id(), 0);
   }
-  if (extended_avail & DDS::Security::TYPE_LOOKUP_SERVICE_REQUEST_READER_SECURE) {
-    remote_id.entityId = ENTITYID_TL_SVC_REQ_READER_SECURE;
+  if (extended_avail & DDS::Security::TYPE_LOOKUP_SERVICE_REQUEST_SECURE_READER) {
+    remote_id.entityId = ENTITYID_TL_SVC_REQ_SECURE_READER;
     transport_inst_->update_locators(remote_id, remote_data, get_domain_id(), 0);
   }
-  if (extended_avail & DDS::Security::TYPE_LOOKUP_SERVICE_REPLY_WRITER_SECURE) {
-    remote_id.entityId = ENTITYID_TL_SVC_REPLY_WRITER_SECURE;
+  if (extended_avail & DDS::Security::TYPE_LOOKUP_SERVICE_REPLY_SECURE_WRITER) {
+    remote_id.entityId = ENTITYID_TL_SVC_REPLY_SECURE_WRITER;
     transport_inst_->update_locators(remote_id, remote_data, get_domain_id(), 0);
   }
-  if (extended_avail & DDS::Security::TYPE_LOOKUP_SERVICE_REPLY_READER_SECURE) {
-    remote_id.entityId = ENTITYID_TL_SVC_REPLY_READER_SECURE;
+  if (extended_avail & DDS::Security::TYPE_LOOKUP_SERVICE_REPLY_SECURE_READER) {
+    remote_id.entityId = ENTITYID_TL_SVC_REPLY_SECURE_READER;
     transport_inst_->update_locators(remote_id, remote_data, get_domain_id(), 0);
   }
 #endif
@@ -3029,9 +3029,9 @@ Sedp::association_complete_i(const GUID_t& localId,
     spdp_.send_participant_crypto_tokens(remoteId);
     send_builtin_crypto_tokens(remoteId);
     resend_user_crypto_tokens(remoteId);
-  } else if (remoteId.entityId == ENTITYID_TL_SVC_REQ_READER_SECURE) {
+  } else if (remoteId.entityId == ENTITYID_TL_SVC_REQ_SECURE_READER) {
     type_lookup_request_secure_writer_->send_deferred_samples(remoteId);
-  } else if (remoteId.entityId == ENTITYID_TL_SVC_REPLY_READER_SECURE) {
+  } else if (remoteId.entityId == ENTITYID_TL_SVC_REPLY_SECURE_READER) {
     type_lookup_reply_secure_writer_->send_deferred_samples(remoteId);
   } else
 #endif
@@ -3146,7 +3146,7 @@ bool Sedp::send_type_lookup_request(const XTypes::TypeIdentifierSeq& type_ids,
 #if OPENDDS_CONFIG_SECURITY
   if (is_security_enabled() && is_discovery_protected) {
     writer = type_lookup_request_secure_writer_;
-    remote_reader = make_id(reader, ENTITYID_TL_SVC_REQ_READER_SECURE);
+    remote_reader = make_id(reader, ENTITYID_TL_SVC_REQ_SECURE_READER);
   }
 #else
   ACE_UNUSED_ARG(is_discovery_protected);
@@ -4224,8 +4224,8 @@ Sedp::Reader::data_received(const DCPS::ReceivedDataSample& sample)
       entity_id == ENTITYID_TL_SVC_REQ_WRITER ||
       entity_id == ENTITYID_TL_SVC_REPLY_WRITER ||
 #if OPENDDS_CONFIG_SECURITY
-      entity_id == ENTITYID_TL_SVC_REQ_WRITER_SECURE ||
-      entity_id == ENTITYID_TL_SVC_REPLY_WRITER_SECURE ||
+      entity_id == ENTITYID_TL_SVC_REQ_SECURE_WRITER ||
+      entity_id == ENTITYID_TL_SVC_REPLY_SECURE_WRITER ||
 #endif
       false;
     if (is_mutable == is_final) {
@@ -4584,8 +4584,8 @@ Sedp::TypeLookupRequestReader::data_received_i(const DCPS::ReceivedDataSample& s
   }
 
 #if OPENDDS_CONFIG_SECURITY
-  if (entity_id == ENTITYID_TL_SVC_REQ_WRITER_SECURE) {
-    const DCPS::GUID_t reader = make_id(sample.header_.publication_id_, ENTITYID_TL_SVC_REPLY_READER_SECURE);
+  if (entity_id == ENTITYID_TL_SVC_REQ_SECURE_WRITER) {
+    const DCPS::GUID_t reader = make_id(sample.header_.publication_id_, ENTITYID_TL_SVC_REPLY_SECURE_READER);
     if (!sedp_.type_lookup_reply_secure_writer_->send_type_lookup_reply(type_lookup_reply, reader)) {
       if (DCPS::DCPS_debug_level) {
         ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Sedp::TypeLookupRequestReader::data_received_i: ")
@@ -4622,7 +4622,7 @@ void Sedp::TypeLookupReplyReader::data_received_i(
   }
 
 #if OPENDDS_CONFIG_SECURITY
-  if (remote_id == ENTITYID_TL_SVC_REPLY_WRITER_SECURE) {
+  if (remote_id == ENTITYID_TL_SVC_REPLY_SECURE_WRITER) {
     if (!process_type_lookup_reply(sample, ser, true)) {
       if (DCPS::DCPS_debug_level) {
         ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Sedp::TypeLookupReplyReader::data_received_i: ")
