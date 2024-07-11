@@ -208,10 +208,10 @@ void Spdp::init(DDS::DomainId_t /*domain*/,
 
     if (enable_type_lookup_service) {
       available_extended_builtin_endpoints_ =
-        TYPE_LOOKUP_SERVICE_REQUEST_READER_SECURE |
-        TYPE_LOOKUP_SERVICE_REPLY_READER_SECURE |
-        TYPE_LOOKUP_SERVICE_REQUEST_WRITER_SECURE |
-        TYPE_LOOKUP_SERVICE_REPLY_WRITER_SECURE;
+        TYPE_LOOKUP_SERVICE_REQUEST_SECURE_READER |
+        TYPE_LOOKUP_SERVICE_REPLY_SECURE_READER |
+        TYPE_LOOKUP_SERVICE_REQUEST_SECURE_WRITER |
+        TYPE_LOOKUP_SERVICE_REPLY_SECURE_WRITER;
     }
   }
 #endif
@@ -1263,8 +1263,8 @@ DDS::OctetSeq Spdp::local_participant_data_as_octets() const
   if (participant_sec_attr_.is_discovery_protected) {
     pbtds.base.security_info.participant_security_attributes |= DDS::Security::PARTICIPANT_SECURITY_ATTRIBUTES_FLAG_IS_DISCOVERY_PROTECTED;
     pbtds.base.extended_builtin_endpoints =
-      DDS::Security::TYPE_LOOKUP_SERVICE_REQUEST_WRITER_SECURE | DDS::Security::TYPE_LOOKUP_SERVICE_REQUEST_READER_SECURE |
-      DDS::Security::TYPE_LOOKUP_SERVICE_REPLY_WRITER_SECURE | DDS::Security::TYPE_LOOKUP_SERVICE_REPLY_READER_SECURE;
+      DDS::Security::TYPE_LOOKUP_SERVICE_REQUEST_SECURE_WRITER | DDS::Security::TYPE_LOOKUP_SERVICE_REQUEST_SECURE_READER |
+      DDS::Security::TYPE_LOOKUP_SERVICE_REPLY_SECURE_WRITER | DDS::Security::TYPE_LOOKUP_SERVICE_REPLY_SECURE_READER;
   }
   if (participant_sec_attr_.is_liveliness_protected) {
     pbtds.base.security_info.participant_security_attributes |= DDS::Security::PARTICIPANT_SECURITY_ATTRIBUTES_FLAG_IS_LIVELINESS_PROTECTED;
@@ -4156,24 +4156,24 @@ void Spdp::start_ice(DCPS::WeakRcHandle<ICE::Endpoint> endpoint, GUID_t r, Built
     r.entityId = ENTITYID_SPDP_RELIABLE_BUILTIN_PARTICIPANT_SECURE_READER;
     ice_agent_->start_ice(endpoint, l, r, agent_info);
   }
-  if (extended_avail & TYPE_LOOKUP_SERVICE_REQUEST_WRITER_SECURE) {
-    l.entityId = ENTITYID_TL_SVC_REQ_READER_SECURE;
-    r.entityId = ENTITYID_TL_SVC_REQ_WRITER_SECURE;
+  if (extended_avail & TYPE_LOOKUP_SERVICE_REQUEST_SECURE_WRITER) {
+    l.entityId = ENTITYID_TL_SVC_REQ_SECURE_READER;
+    r.entityId = ENTITYID_TL_SVC_REQ_SECURE_WRITER;
     ice_agent_->start_ice(endpoint, l, r, agent_info);
   }
-  if (extended_avail & TYPE_LOOKUP_SERVICE_REQUEST_READER_SECURE) {
-    l.entityId = ENTITYID_TL_SVC_REQ_WRITER_SECURE;
-    r.entityId = ENTITYID_TL_SVC_REQ_READER_SECURE;
+  if (extended_avail & TYPE_LOOKUP_SERVICE_REQUEST_SECURE_READER) {
+    l.entityId = ENTITYID_TL_SVC_REQ_SECURE_WRITER;
+    r.entityId = ENTITYID_TL_SVC_REQ_SECURE_READER;
     ice_agent_->start_ice(endpoint, l, r, agent_info);
   }
-  if (extended_avail & TYPE_LOOKUP_SERVICE_REPLY_WRITER_SECURE) {
-    l.entityId = ENTITYID_TL_SVC_REPLY_READER_SECURE;
-    r.entityId = ENTITYID_TL_SVC_REPLY_WRITER_SECURE;
+  if (extended_avail & TYPE_LOOKUP_SERVICE_REPLY_SECURE_WRITER) {
+    l.entityId = ENTITYID_TL_SVC_REPLY_SECURE_READER;
+    r.entityId = ENTITYID_TL_SVC_REPLY_SECURE_WRITER;
     ice_agent_->start_ice(endpoint, l, r, agent_info);
   }
-  if (extended_avail & TYPE_LOOKUP_SERVICE_REPLY_READER_SECURE) {
-    l.entityId = ENTITYID_TL_SVC_REPLY_WRITER_SECURE;
-    r.entityId = ENTITYID_TL_SVC_REPLY_READER_SECURE;
+  if (extended_avail & TYPE_LOOKUP_SERVICE_REPLY_SECURE_READER) {
+    l.entityId = ENTITYID_TL_SVC_REPLY_SECURE_WRITER;
+    r.entityId = ENTITYID_TL_SVC_REPLY_SECURE_READER;
     ice_agent_->start_ice(endpoint, l, r, agent_info);
   }
 }
@@ -4296,24 +4296,24 @@ void Spdp::stop_ice(DCPS::WeakRcHandle<ICE::Endpoint> endpoint, DCPS::GUID_t r, 
     r.entityId = ENTITYID_SPDP_RELIABLE_BUILTIN_PARTICIPANT_SECURE_READER;
     ice_agent_->stop_ice(endpoint, l, r);
   }
-  if (extended_avail & TYPE_LOOKUP_SERVICE_REQUEST_WRITER_SECURE) {
-    l.entityId = ENTITYID_TL_SVC_REQ_READER_SECURE;
-    r.entityId = ENTITYID_TL_SVC_REQ_WRITER_SECURE;
+  if (extended_avail & TYPE_LOOKUP_SERVICE_REQUEST_SECURE_WRITER) {
+    l.entityId = ENTITYID_TL_SVC_REQ_SECURE_READER;
+    r.entityId = ENTITYID_TL_SVC_REQ_SECURE_WRITER;
     ice_agent_->stop_ice(endpoint, l, r);
   }
-  if (extended_avail & TYPE_LOOKUP_SERVICE_REQUEST_READER_SECURE) {
-    l.entityId = ENTITYID_TL_SVC_REQ_WRITER_SECURE;
-    r.entityId = ENTITYID_TL_SVC_REQ_READER_SECURE;
+  if (extended_avail & TYPE_LOOKUP_SERVICE_REQUEST_SECURE_READER) {
+    l.entityId = ENTITYID_TL_SVC_REQ_SECURE_WRITER;
+    r.entityId = ENTITYID_TL_SVC_REQ_SECURE_READER;
     ice_agent_->stop_ice(endpoint, l, r);
   }
-  if (extended_avail & TYPE_LOOKUP_SERVICE_REPLY_WRITER_SECURE) {
-    l.entityId = ENTITYID_TL_SVC_REPLY_READER_SECURE;
-    r.entityId = ENTITYID_TL_SVC_REPLY_WRITER_SECURE;
+  if (extended_avail & TYPE_LOOKUP_SERVICE_REPLY_SECURE_WRITER) {
+    l.entityId = ENTITYID_TL_SVC_REPLY_SECURE_READER;
+    r.entityId = ENTITYID_TL_SVC_REPLY_SECURE_WRITER;
     ice_agent_->stop_ice(endpoint, l, r);
   }
-  if (extended_avail & TYPE_LOOKUP_SERVICE_REPLY_READER_SECURE) {
-    l.entityId = ENTITYID_TL_SVC_REPLY_WRITER_SECURE;
-    r.entityId = ENTITYID_TL_SVC_REPLY_READER_SECURE;
+  if (extended_avail & TYPE_LOOKUP_SERVICE_REPLY_SECURE_READER) {
+    l.entityId = ENTITYID_TL_SVC_REPLY_SECURE_WRITER;
+    r.entityId = ENTITYID_TL_SVC_REPLY_SECURE_READER;
     ice_agent_->stop_ice(endpoint, l, r);
   }
 }

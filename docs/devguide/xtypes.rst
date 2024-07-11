@@ -1604,8 +1604,6 @@ Differences From the Specification
 
 * :omgissue:`Default data representation is XCDR2 <DDSXTY14-27>`
 
-* :omgissue:`Type Lookup Service when using DDS Security <DDSSEC12-86>`
-
 * :omgissue:`Anonymous types in Strongly Connected Components <DDSXTY14-35>`
 
 * :omgissue:`Meaning of ignore_member_names in TypeConsistencyEnforcement <DDSXTY14-40>`
