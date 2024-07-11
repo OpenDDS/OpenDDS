@@ -98,7 +98,7 @@ jobs:
       uses: actions/cache@v4
       with:
         path: ${{ github.job }}.tar.xz
-        key: c01_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}_${{ env.JDK_VERSION }}
+        key: c02_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}_${{ env.JDK_VERSION }}
     - name: checkout MPC
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       uses: actions/checkout@v4
@@ -109,7 +109,7 @@ jobs:
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: |
         cd OpenDDS
-        ./configure --no-inline --tests --ace=$GITHUB_WORKSPACE/OpenDDS/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC --compile-warnings=WARNING
+        ./configure --no-inline --tests --no-rapidjson --ace=$GITHUB_WORKSPACE/OpenDDS/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC --compile-warnings=WARNING
     - name: build ACE and TAO
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: |
@@ -1198,7 +1198,7 @@ jobs:
       uses: actions/cache@v4
       with:
         path: ${{ github.job }}.tar.xz
-        key: c01_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}
+        key: c02_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}
     - name: install xerces
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: sudo apt-get -y install libxerces-c-dev
@@ -1212,7 +1212,7 @@ jobs:
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: |
         cd OpenDDS
-        ./configure --no-debug --no-inline --features=versioned_namespace=1 --tests --security --ace=$GITHUB_WORKSPACE/OpenDDS/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC --compile-warnings=WARNING
+        ./configure --no-debug --no-inline --features=versioned_namespace=1 --tests --security --no-rapidjson --ace=$GITHUB_WORKSPACE/OpenDDS/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC --compile-warnings=WARNING
     - name: build ACE and TAO
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: |
