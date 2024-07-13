@@ -12,6 +12,12 @@
 # To use:
 #   - Run `gdb -x path/to/gdbext.py ...` for a new session
 #   - `source path/to/gdbext.py` for an existing session
+#   - You might run into this python exception comming from libstdcpp.py:
+#       'NoneType' object has no attribute 'pointer'
+#     This is a GDB patch that might fix it:
+#       https://sourceware.org/pipermail/libstdc++/2020-December/051773.html
+#     However it can also be fixed by switching to a frame of a C++ function
+#     and sourcing the file again.
 #
 # Tested with Ubuntu 22.04 (GDB 12.1, gcc 11.4, and libstdc++ 3.4.30)
 # This script might break with changes to either OpenDDS, GDB, or gcc/libstdc++
