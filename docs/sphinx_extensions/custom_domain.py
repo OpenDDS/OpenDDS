@@ -22,6 +22,7 @@ class ContextWrapper:
         self.ctx = env.ref_context.setdefault(f'{domain}-context', dict(
             stack=[],
             needs_push=True,
+            misc={},
         ))
 
     def needs_push(self):
@@ -73,6 +74,10 @@ class ContextWrapper:
 
     def get_index_text(self, index=-1):
         return self.get(index, 'index_text')
+
+    @property
+    def misc(self):
+        return self.ctx['misc']
 
 
 class CustomDomainObject(ObjectDescription[str]):

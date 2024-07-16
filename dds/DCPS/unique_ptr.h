@@ -17,6 +17,7 @@
 
 #ifdef OPENDDS_HAS_STD_UNIQUE_PTR
 #  include <memory>
+#  define OPENDDS_MOVE_NS std
 #else
 #  include "Atomic.h"
 #  ifdef ACE_HAS_CPP11
@@ -24,6 +25,7 @@
 #  else
 #    include <algorithm>
 #  endif
+#  define OPENDDS_MOVE_NS OpenDDS::DCPS
 #endif
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL

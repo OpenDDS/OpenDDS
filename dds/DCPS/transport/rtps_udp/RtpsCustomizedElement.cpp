@@ -30,11 +30,11 @@ TqePair RtpsCustomizedElement::fragment(size_t size)
     return null_tqe_pair;
   }
 
-  RtpsCustomizedElement* frag = new RtpsCustomizedElement(0, move(head));
+  RtpsCustomizedElement* frag = new RtpsCustomizedElement(0, OPENDDS_MOVE_NS::move(head));
   frag->set_fragment(this);
   frag->last_frag_ = fragNumbers.first;
 
-  RtpsCustomizedElement* rest = new RtpsCustomizedElement(this, move(tail));
+  RtpsCustomizedElement* rest = new RtpsCustomizedElement(this, OPENDDS_MOVE_NS::move(tail));
   rest->set_fragment(this);
   rest->last_frag_ = fragNumbers.second;
 

@@ -10,6 +10,8 @@
 
 #include "Properties.h"
 
+#include <dds/OpenDDSConfigWrapper.h>
+
 #include <cstring>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
@@ -18,7 +20,7 @@ namespace OpenDDS {
 namespace Security {
 
 SecurityConfig::SecurityConfig(const OPENDDS_STRING& name,
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
                                Authentication_var authentication_plugin,
                                AccessControl_var access_ctrl_plugin,
                                CryptoKeyExchange_var key_exchange_plugin,
@@ -28,7 +30,7 @@ SecurityConfig::SecurityConfig(const OPENDDS_STRING& name,
 #endif
                                const ConfigPropertyList& properties)
   : name_(name)
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
   , authentication_plugin_(authentication_plugin)
   , access_control_plugin_(access_ctrl_plugin)
   , key_exchange_plugin_(key_exchange_plugin)
@@ -41,7 +43,7 @@ SecurityConfig::SecurityConfig(const OPENDDS_STRING& name,
 
 SecurityConfig::~SecurityConfig()
 {
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
   if (DCPS::security_debug.bookkeeping) {
     ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {bookkeeping} ")
                ACE_TEXT("SecurityConfig::~SecurityConfig handle_registry_map_ %B\n"),

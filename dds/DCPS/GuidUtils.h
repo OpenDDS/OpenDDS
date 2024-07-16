@@ -259,9 +259,9 @@ struct OpenDDS_Dcps_Export GuidPair {
   GUID_t local;
   GUID_t remote;
 
-  GuidPair(const GUID_t& local, const GUID_t& remote)
-  : local(local)
-  , remote(remote)
+  GuidPair(const GUID_t& a_local, const GUID_t& a_remote)
+  : local(a_local)
+  , remote(a_remote)
   {
   }
 

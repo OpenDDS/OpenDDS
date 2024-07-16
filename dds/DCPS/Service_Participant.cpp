@@ -7,23 +7,27 @@
 
 #include "Service_Participant.h"
 
-#include "Logging.h"
-#include "WaitSet.h"
-#include "transport/framework/TransportRegistry.h"
-#include "debug.h"
 #include "BuiltInTopicUtils.h"
 #include "DataDurabilityCache.h"
+#include "DefaultNetworkConfigMonitor.h"
 #include "GuidConverter.h"
+#include "LinuxNetworkConfigMonitor.h"
+#include "Logging.h"
 #include "MonitorFactory.h"
+#include "Qos_Helper.h"
 #include "RecorderImpl.h"
 #include "ReplayerImpl.h"
-#include "LinuxNetworkConfigMonitor.h"
-#include "DefaultNetworkConfigMonitor.h"
 #include "StaticDiscovery.h"
 #include "ThreadStatusManager.h"
-#include "Qos_Helper.h"
+#include "WaitSet.h"
+#include "debug.h"
+
+#include "transport/framework/TransportRegistry.h"
+
+#include <dds/OpenDDSConfigWrapper.h>
+
 #include "../Version.h"
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
 #  include "security/framework/SecurityRegistry.h"
 #endif
 
@@ -315,7 +319,7 @@ DDS::ReturnCode_t Service_Participant::shutdown()
       discovery_types_.clear();
     }
     TransportRegistry::close();
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
     OpenDDS::Security::SecurityRegistry::close();
 #endif
   } catch (const CORBA::Exception& ex) {
@@ -568,6 +572,7 @@ void Service_Participant::parse_env(const String& p)
       const String key = q.substr(0, pos);
       const String value = q.substr(pos + 1);
       config_store_->set(key.c_str(), value);
+      config_reader_listener_->on_data_available(config_reader_);
     }
   }
 }
@@ -1636,7 +1641,7 @@ Service_Participant::bit_lookup_duration_msec(int msec)
   config_store_->set_int32(COMMON_DCPS_BIT_LOOKUP_DURATION_MSEC, msec);
 }
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
 bool
 Service_Participant::get_security() const
 {
@@ -2288,8 +2293,7 @@ namespace {
     {
       { Service_Participant::Encoding_Normal, "Normal" },
       { Service_Participant::Encoding_WriteOldFormat, "WriteOldFormat" },
-      { Service_Participant::Encoding_ReadOldFormat, "ReadOldFormat" },
-      { Service_Participant::Encoding_Normal, 0 }
+      { Service_Participant::Encoding_ReadOldFormat, "ReadOldFormat" }
     };
 }
 
@@ -2350,7 +2354,7 @@ Service_Participant::ConfigReaderListener::on_data_available(InternalDataReader_
         OpenDDS::DCPS::Transport_debug_level = ACE_OS::atoi(p.value().c_str());
       } else if (p.key() == COMMON_DCPS_THREAD_STATUS_INTERVAL) {
         service_participant_.thread_status_manager_.thread_status_interval(TimeDuration(ACE_OS::atoi(p.value().c_str())));
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
       } else if (p.key() == COMMON_DCPS_SECURITY_DEBUG_LEVEL) {
         security_debug.set_debug_level(ACE_OS::atoi(p.value().c_str()));
       } else if (p.key() == COMMON_DCPS_SECURITY_DEBUG) {

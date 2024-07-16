@@ -11,13 +11,16 @@
 #include <dds/DCPS/PublisherImpl.h>
 #include <dds/DCPS/Service_Participant.h>
 #include <dds/DCPS/StaticIncludes.h>
+
+#include <dds/OpenDDSConfigWrapper.h>
+
 #if defined ACE_AS_STATIC_LIBS && !defined OPENDDS_SAFETY_PROFILE
 #  include <dds/DCPS/transport/udp/Udp.h>
 #  include <dds/DCPS/transport/multicast/Multicast.h>
 #  include <dds/DCPS/transport/shmem/Shmem.h>
 #  include <dds/DCPS/transport/rtps_udp/RtpsUdp.h>
 #  include <dds/DCPS/RTPS/RtpsDiscovery.h>
-#  ifdef OPENDDS_SECURITY
+#  if OPENDDS_CONFIG_SECURITY
 #    include <dds/DCPS/security/BuiltInPlugins.h>
 #  endif
 #endif
@@ -78,7 +81,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     // Create DomainParticipant
     DDS::DomainParticipantQos participant_qos;
     dpf->get_default_participant_qos(participant_qos);
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
     set_security_qos(participant_qos, security_id);
 #endif
     DDS::DomainParticipant_var participant =

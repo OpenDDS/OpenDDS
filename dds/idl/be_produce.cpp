@@ -274,7 +274,7 @@ void postprocess(const char* fn, ostringstream& content,
     // to make namespaces with names based on the file instead.
     std::string prefix = to_macro(fn);
     for (size_t i = 0; i < prefix.size(); ++i) {
-      prefix[i] = tolower(prefix[i]);
+      prefix[i] = static_cast<char>(tolower(prefix[i]));
     }
     out <<
       "\n"

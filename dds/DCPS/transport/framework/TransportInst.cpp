@@ -287,23 +287,23 @@ TransportInst::get_or_create_impl(DDS::DomainId_t domain,
 {
   ACE_GUARD_RETURN(ACE_SYNCH_MUTEX, g, lock_, TransportImpl_rch());
 
-  // Only use the domain if the inst is a template.
+  // Only use the domain to find the impl is if this inst is a template.
   // Furthermore, only use the client if the instantiation rule is per_participant.
-
+  DDS::DomainId_t find_domain = domain;
   if (is_template_) {
     if (instantiation_rule() != "per_participant") {
       participant = 0;
     }
   } else {
-    domain = 0;
+    find_domain = 0;
     participant = 0;
   }
 
   if (!shutting_down_) {
     try {
-      DomainMap::iterator pos = domain_map_.find(domain);
+      DomainMap::iterator pos = domain_map_.find(find_domain);
       if (pos == domain_map_.end()) {
-        pos = domain_map_.insert(std::make_pair(domain, ParticipantMap())).first;
+        pos = domain_map_.insert(std::make_pair(find_domain, ParticipantMap())).first;
       }
       ParticipantMap::iterator pos2 = pos->second.find(participant);
       if (pos2 == pos->second.end()) {

@@ -35,7 +35,7 @@ public:
                  AST_Type*, const char*);
 
 private:
-  bool generate_ts(AST_Decl* node, UTL_ScopedName* name);
+  bool generate_ts(AST_Type* node, UTL_ScopedName* name);
 
   std::string idl_template_;
 };

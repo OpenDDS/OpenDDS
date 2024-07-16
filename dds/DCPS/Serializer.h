@@ -32,8 +32,9 @@
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
 #include "Definitions.h"
-#include "PoolAllocator.h"
 #include "Message_Block_Ptr.h"
+#include "PoolAllocator.h"
+#include "Util.h"
 #include "dcps_export.h"
 
 #include <ace/CDR_Base.h>
@@ -217,95 +218,6 @@ private:
   bool skip_sequence_dheader_;
   XcdrVersion xcdr_version_;
 };
-
-/**
- * Represents the RTPS encapsulation header for serialized data.
- *
- * This consists of 4 bytes that appear in front of the data. The first two
- * bytes represents the kind of the encoding the data uses and the last two
- * bytes (known as "options") are traditionally reserved.
- *
- * See XTypes 1.3 7.6.3.1.2
- */
-class OpenDDS_Dcps_Export EncapsulationHeader {
-public:
-  /**
-   * The known possible values of the first 2 bytes represented as big endian
-   * integers.
-   */
-  enum Kind {
-    KIND_CDR_BE = 0x0000,
-    KIND_CDR_LE = 0x0001,
-    KIND_PL_CDR_BE = 0x0002,
-    KIND_PL_CDR_LE = 0x0003,
-    KIND_CDR2_BE = 0x0006,
-    KIND_CDR2_LE = 0x0007,
-    KIND_D_CDR2_BE = 0x0008,
-    KIND_D_CDR2_LE = 0x0009,
-    KIND_PL_CDR2_BE = 0x000a,
-    KIND_PL_CDR2_LE = 0x000b,
-    KIND_XML = 0x0004,
-    KIND_INVALID = 0xFFFF
-  };
-
-  const static size_t serialized_size = 4;
-  const static size_t padding_marker_byte_index = 3;
-  const static size_t padding_marker_alignment = 4;
-
-  EncapsulationHeader(Kind k = KIND_CDR_BE, ACE_CDR::UShort options = 0);
-
-  /**
-   * Success can be verified using is_good()
-   */
-  EncapsulationHeader(const Encoding& enc, Extensibility ext, ACE_CDR::UShort options = 0);
-
-  Kind kind() const;
-  void kind(Kind value);
-
-  ACE_UINT16 options() const;
-  void options(ACE_UINT16 value);
-
-  /**
-   * post-initialization test for a successful call to from_encoding during
-   * construction of this encapsulation header.
-   */
-  bool is_good() const;
-
-  /**
-   * Translate from an encoding, returns false if it failed.
-   */
-  bool from_encoding(const Encoding& encoding, Extensibility extensibility);
-
-  /**
-   * Translate to an encoding, returns false if it failed.
-   */
-  bool to_encoding(Encoding& encoding, Extensibility expected_extensibility);
-
-  /**
-   * Like to_encoding, but without an expected extensibility.
-   */
-  bool to_any_encoding(Encoding& encoding);
-
-  String to_string() const;
-
-  static bool set_encapsulation_options(Message_Block_Ptr& mb);
-
-private:
-  /// The first two bytes as a big endian integer
-  Kind kind_;
-  /// The last two bytes as a big endian integer
-  ACE_CDR::UShort options_;
-
-  bool to_encoding_i(Encoding& encoding, Extensibility* expected_extensibility_ptr);
-};
-
-class Serializer;
-
-OpenDDS_Dcps_Export
-bool operator>>(Serializer& s, EncapsulationHeader& value);
-
-OpenDDS_Dcps_Export
-bool operator<<(Serializer& s, const EncapsulationHeader& value);
 
 /**
  * Convenience function for the serialized_size of a single value with no
@@ -899,8 +811,8 @@ private:
 
 template<typename Type>
 struct KeyOnly {
-  explicit KeyOnly(Type& value)
-    : value(value)
+  explicit KeyOnly(Type& a_value)
+    : value(a_value)
   {
   }
 
@@ -914,8 +826,8 @@ struct KeyOnly {
 
 template<typename Type>
 struct NestedKeyOnly {
-  explicit NestedKeyOnly(Type& value)
-    : value(value)
+  explicit NestedKeyOnly(Type& a_value)
+    : value(a_value)
   {
   }
 

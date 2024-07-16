@@ -417,8 +417,7 @@ MulticastDataLink::syn_received_no_session(MulticastPeer source,
   serializer_write << source;
 
   DataSampleHeader header;
-  Message_Block_Ptr control(
-      create_control(MULTICAST_SYNACK, header, move(synack_data)));
+  Message_Block_Ptr control(create_control(MULTICAST_SYNACK, header, OPENDDS_MOVE_NS::move(synack_data)));
 
   if (control == 0) {
     ACE_ERROR((LM_ERROR,
@@ -428,7 +427,7 @@ MulticastDataLink::syn_received_no_session(MulticastPeer source,
     return;
   }
 
-  const int error = send_control(header, move(control));
+  const int error = send_control(header, OPENDDS_MOVE_NS::move(control));
   if (error != SEND_CONTROL_OK) {
     ACE_ERROR((LM_ERROR, "(%P|%t) MulticastDataLink::syn_received_no_session: "
         "ERROR: send_control failed: %d!\n", error));

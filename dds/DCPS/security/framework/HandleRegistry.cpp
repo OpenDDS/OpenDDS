@@ -5,7 +5,9 @@
 
 #include <DCPS/DdsDcps_pch.h> //Only the _pch include should start with DCPS/
 
-#ifdef OPENDDS_SECURITY
+#include <dds/OpenDDSConfigWrapper.h>
+
+#if OPENDDS_CONFIG_SECURITY
 
 #include "HandleRegistry.h"
 
@@ -383,4 +385,4 @@ HandleRegistry::erase_remote_datawriter_crypto_handle(const DCPS::GUID_t& id)
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
-#endif // OPENDDS_SECURITY
+#endif

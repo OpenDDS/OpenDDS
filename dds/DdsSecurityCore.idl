@@ -5,7 +5,9 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifdef OPENDDS_SECURITY
+#include <dds/OpenDDSConfigWrapper.idl>
+
+#if OPENDDS_CONFIG_SECURITY
 #ifndef OPENDDS_DDS_SECURITY_CORE_IDL
 #define OPENDDS_DDS_SECURITY_CORE_IDL
 
@@ -110,11 +112,10 @@ module DDS {
       // in this and following structs, 'base' is used in place of struct inheritance
       DDS::ParticipantBuiltinTopicData base;
 
-      IdentityToken     identity_token;
-      PermissionsToken  permissions_token;
+      IdentityToken identity_token;
+      PermissionsToken permissions_token;
       PropertyQosPolicy property;
-      ParticipantSecurityInfo  security_info;
-      // https://issues.omg.org/browse/DDSSEC12-87
+      ParticipantSecurityInfo security_info;
       ExtendedBuiltinEndpointSet_t extended_builtin_endpoints;
     };
 

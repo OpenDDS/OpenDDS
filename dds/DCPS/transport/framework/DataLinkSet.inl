@@ -58,7 +58,7 @@ OpenDDS::DCPS::DataLinkSet::send(DataSampleElement* sample)
         DataSampleHeader::add_cfentries(guids, mb.get());
 
         TransportCustomizedElement* tce = new TransportCustomizedElement(send_element);
-        tce->set_msg(move(mb)); // tce now owns ACE_Message_Block chain
+        tce->set_msg(OPENDDS_MOVE_NS::move(mb)); // tce now owns ACE_Message_Block chain
 
         itr->second->send(tce);
 
@@ -124,7 +124,7 @@ OpenDDS::DCPS::DataLinkSet::send_control(GUID_t                           pub_id
 
   TransportSendControlElement* const send_element =
     new TransportSendControlElement(static_cast<int>(dup_map.size()), pub_id,
-                                       listener.in(), header, move(msg));
+                                    listener.in(), header, OPENDDS_MOVE_NS::move(msg));
 
   for (MapType::iterator itr = dup_map.begin();
        itr != dup_map.end();
@@ -148,8 +148,8 @@ OpenDDS::DCPS::DataLinkSet::send_response(
 
   TransportSendControlElement* const send_element =
     new TransportSendControlElement(static_cast<int>(map_.size()), pub_id,
-                                       &send_response_listener_, header,
-                                       move(response));
+                                    &send_response_listener_, header,
+                                    OPENDDS_MOVE_NS::move(response));
   if (!send_element) return;
   send_response_listener_.track_message();
 

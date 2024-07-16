@@ -5,6 +5,7 @@
 #include "FilterStructDynamicTypeSupport.h"
 
 #include "dds/DCPS/Definitions.h"
+#include "dds/DCPS/EncapsulationHeader.h"
 #include "dds/DCPS/FilterExpressionGrammar.h"
 #include "dds/DCPS/yard/yard_parser.hpp"
 #include "dds/DCPS/FilterEvaluator.h"
@@ -62,7 +63,7 @@ ACE_Message_Block* serialize(const OpenDDS::DCPS::Encoding& enc, const T& sample
 using OpenDDS::DCPS::TypeSupportImpl;
 template <size_t N, typename T>
 bool doEvalTest(const char* (&input)[N], bool expected, const T& sample, const DDS::StringSeq& params,
-                const TypeSupportImpl& tsStatic, const TypeSupportImpl& tsDynamic)
+                TypeSupportImpl& tsStatic, TypeSupportImpl& tsDynamic)
 {
   ACE_UNUSED_ARG(tsStatic);
   ACE_UNUSED_ARG(tsDynamic);

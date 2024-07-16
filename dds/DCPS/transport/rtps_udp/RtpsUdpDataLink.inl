@@ -59,7 +59,7 @@ RtpsUdpDataLink::ipv6_multicast_socket()
 }
 #endif
 
-#if defined(OPENDDS_SECURITY)
+#if OPENDDS_CONFIG_SECURITY
 ACE_INLINE DDS::Security::ParticipantCryptoHandle
 RtpsUdpDataLink::local_crypto_handle() const
 {

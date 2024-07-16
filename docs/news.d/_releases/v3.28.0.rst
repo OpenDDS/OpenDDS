@@ -29,7 +29,7 @@ Additions
 
 - The ``@value(x)`` annotation is now supported on IDL enumerators when using the IDL-to-C++11 mapping. (:ghpr:`4519`)
 
-  - See :ref:`xtypes--value` for details.
+  - See :ref:`xtypes--anno-value` for details.
 
 - The IDL for the Shapes example was updated for interoperability. (:ghpr:`4528`)
 - Added :cfg:prop:`[rtps_discovery]SpdpUserTag`. (:ghpr:`4533`)

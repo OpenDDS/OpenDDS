@@ -155,7 +155,7 @@ TransportClient::enable_transport_using_config(bool reliable, bool durable,
       if (impl) {
         impls_.push_back(impl);
 
-#if defined(OPENDDS_SECURITY)
+#if OPENDDS_CONFIG_SECURITY
         impl->local_crypto_handle(get_crypto_handle());
 #endif
 
@@ -934,7 +934,7 @@ TransportClient::send_response(const GUID_t& peer,
 
   DataLinkSet singular;
   singular.insert_link(found->second);
-  singular.send_response(peer, header, move(payload));
+  singular.send_response(peer, header, OPENDDS_MOVE_NS::move(payload));
   return true;
 }
 
@@ -959,7 +959,7 @@ TransportClient::send_w_control(SendStateDataSampleList send_list,
   if (send_list.head()) {
     send_i(send_list, 0);
   }
-  return send_control_to(header, move(msg), destination);
+  return send_control_to(header, OPENDDS_MOVE_NS::move(msg), destination);
 }
 
 void
@@ -1137,7 +1137,7 @@ TransportClient::send_control(const DataSampleHeader& header,
                               Message_Block_Ptr msg)
 {
   OPENDDS_ASSERT(guid_ != GUID_UNKNOWN);
-  return links_.send_control(guid_, get_send_listener(), header, move(msg));
+  return links_.send_control(guid_, get_send_listener(), header, OPENDDS_MOVE_NS::move(msg));
 }
 
 SendControlStatus
@@ -1158,7 +1158,7 @@ TransportClient::send_control_to(const DataSampleHeader& header,
 
     singular.insert_link(found->second);
   }
-  return singular.send_control(guid_, get_send_listener(), header, move(msg));
+  return singular.send_control(guid_, get_send_listener(), header, OPENDDS_MOVE_NS::move(msg));
 }
 
 bool

@@ -2,6 +2,9 @@
 
 #include <dds/DCPS/Definitions.h>
 
+#include <dds/DCPS/EncapsulationHeader.h>
+#include <dds/DCPS/GuidUtils.h>
+
 #include <ace/ACE.h>
 #include <ace/Message_Block.h>
 #include <ace/OS_NS_string.h>
@@ -821,7 +824,7 @@ bool runEncapsulationOptionsTest()
   const OpenDDS::DCPS::Encoding encoding = OpenDDS::DCPS::Encoding(
     OpenDDS::DCPS::Encoding::KIND_XCDR2, OpenDDS::DCPS::ENDIAN_BIG);
 
-  if (!encap.from_encoding(encoding, OpenDDS::DCPS::APPENDABLE)) {
+  if (!from_encoding(encap, encoding, OpenDDS::DCPS::APPENDABLE)) {
     std::cerr << "EncapsulationHeader::from_encoding failed" << std::endl;
     return false;
   }

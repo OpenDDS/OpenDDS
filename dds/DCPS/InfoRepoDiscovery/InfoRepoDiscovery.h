@@ -13,12 +13,17 @@
 #include "InfoC.h"
 
 #include <dds/DdsDcpsInfoUtilsC.h>
+#include <dds/OpenDDSConfigWrapper.h>
+
 #include <dds/DCPS/Atomic.h>
 #include <dds/DCPS/Discovery.h>
 #include <dds/DCPS/GuidUtils.h>
-#include <dds/DCPS/transport/framework/TransportConfig_rch.h>
-#include <dds/DCPS/XTypes/TypeObject.h>
 #include <dds/DCPS/TypeSupportImpl.h>
+
+#include <dds/DCPS/transport/framework/TransportConfig_rch.h>
+
+#include <dds/DCPS/XTypes/TypeObject.h>
+
 
 #include <ace/Task.h>
 #include <ace/Thread_Mutex.h>
@@ -82,7 +87,7 @@ public:
     const DDS::DomainParticipantQos& qos,
     XTypes::TypeLookupService_rch tls);
 
-#if defined(OPENDDS_SECURITY)
+#if OPENDDS_CONFIG_SECURITY
   virtual OpenDDS::DCPS::AddDomainStatus add_domain_participant_secure(
     DDS::DomainId_t domain,
     const DDS::DomainParticipantQos& qos,

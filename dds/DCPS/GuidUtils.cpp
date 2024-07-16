@@ -47,7 +47,7 @@ OPENDDS_STRING
 to_string(const EntityId_t& entityId)
 {
   return to_hex_dds_string(&entityId.entityKey[0], sizeof(EntityKey_t)) +
-    to_dds_string(unsigned(entityId.entityKind), true);
+    to_dds_string(entityId.entityKind, true);
 }
 
 OPENDDS_STRING

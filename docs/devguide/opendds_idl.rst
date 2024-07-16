@@ -156,7 +156,8 @@ opendds_idl Command Line Options
   Don't warn about ``#pragma DCPS_DATA_TYPE``.
   See :ref:`getting_started--identifying-topic-types` for more information.
 
-.. option:: --[no-]default-nested
+.. option:: --default-nested
+.. option:: --no-default-nested
 
   Un-annotated types/modules are treated as nested.
   By default all types are nested by default
@@ -173,7 +174,7 @@ opendds_idl Command Line Options
 
 .. option:: --default-autoid VALUE
 
-  Set the default :ref:`XTypes auto member-id assignment strategy <xtypes--autoid-value>`.
+  Set the default :ref:`XTypes auto member-id assignment strategy <xtypes--anno-autoid>`.
   *VALUE* can be ``sequential`` (the default) or ``hash``.
 
 .. option:: --default-try-construct VALUE

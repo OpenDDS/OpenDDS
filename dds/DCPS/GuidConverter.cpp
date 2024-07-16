@@ -28,7 +28,7 @@ GuidConverter::GuidConverter(const GUID_t& guid)
 GuidConverter::~GuidConverter()
 {}
 
-long
+unsigned int
 GuidConverter::checksum() const
 {
   return ACE::crc32(reinterpret_cast<const void*>(&guid_), sizeof(guid_));
@@ -156,7 +156,7 @@ GuidConverter::operator OPENDDS_STRING() const
 {
   OPENDDS_STRING ret(to_string(guid_));
   ret += "(";
-  ret += to_dds_string((unsigned long) checksum(), true);
+  ret += to_dds_string(checksum(), true);
   ret += ")";
   return ret;
 }

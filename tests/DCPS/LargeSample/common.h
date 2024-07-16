@@ -3,6 +3,7 @@
 
 #include <dds/DdsDcpsCoreC.h>
 #include <dds/DdsDcpsInfrastructureC.h>
+#include <dds/OpenDDSConfigWrapper.h>
 
 const DDS::DomainId_t domain = 113;
 const size_t default_writer_process_count = 2;
@@ -12,7 +13,7 @@ const size_t default_data_field_length_offset = 0;
 
 unsigned expected_data_field_length(unsigned offset, int writer_id, int sample_id);
 unsigned char expected_data_field_element(int writer_id, int sample_id, int j);
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
 void append(
   DDS::PropertySeq& props, const char* name, const char* value, bool propagate = false);
 void set_security_qos(DDS::DomainParticipantQos& participant_qos, unsigned secid);

@@ -1,4 +1,4 @@
-project: opendds_unit_test, msvc_bigobj {
+project: opendds_unit_test, opendds_cxx11, msvc_bigobj {
   dcps_ts_flags += --no-default-nested -Gxtypes-complete
   TypeSupport_Files {
     xcdrbasetypes.idl
@@ -6,5 +6,6 @@ project: opendds_unit_test, msvc_bigobj {
     mutable_types.idl
     mutable_types2.idl
     keyonly.idl
+    optional.idl
   }
 }

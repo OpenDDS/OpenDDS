@@ -351,6 +351,11 @@ function(opendds_target_sources target)
     list(APPEND opendds_options "-D${def}")
   endforeach()
 
+  if(DEFINED OPENDDS_CONFIG_INCLUDE_DIR)
+    list(APPEND tao_options "-I${OPENDDS_CONFIG_INCLUDE_DIR}")
+    list(APPEND opendds_options "-I${OPENDDS_CONFIG_INCLUDE_DIR}")
+  endif()
+
   foreach(scope PUBLIC PRIVATE INTERFACE)
     if(idl_sources_${scope})
       _opendds_target_idl_sources(${target}

@@ -181,11 +181,6 @@ DDS::MemberId DynamicDataAdapter::get_member_id_at_index(DDS::UInt32 index)
   }
 }
 
-DDS::ReturnCode_t DynamicDataAdapter::clear_all_values()
-{
-  return unsupported_method("DynamicDataAdapater::clear_all_values");
-}
-
 DDS::ReturnCode_t DynamicDataAdapter::clear_nonkey_values()
 {
   return unsupported_method("DynamicDataAdapater::clear_nonkey_values");
@@ -295,17 +290,6 @@ DDS::ReturnCode_t DynamicDataAdapter::get_cpp11_s8_raw_value(
   char*& dest_value = *static_cast<char**>(dest);
   CORBA::string_free(dest_value);
   dest_value = CORBA::string_dup(source.c_str());
-  return rc;
-}
-
-DDS::ReturnCode_t DynamicDataAdapter::set_cpp11_s8_raw_value(
-  const char* method, std::string& dest, DDS::MemberId id,
-  const void* source, DDS::TypeKind tk)
-{
-  const DDS::ReturnCode_t rc = check_member(method, tk, id);
-  if (rc == DDS::RETCODE_OK) {
-    dest = static_cast<const char*>(source);
-  }
   return rc;
 }
 

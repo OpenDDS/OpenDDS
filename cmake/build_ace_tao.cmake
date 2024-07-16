@@ -1,5 +1,6 @@
 include(ExternalProject)
 
+set(_opendds_std_target OpenDDS_Dcps)
 if(OPENDDS_JUST_BUILD_HOST_TOOLS)
   set(ws "${OPENDDS_BUILD_DIR}/host-tools.mwc")
   file(WRITE "${ws}"
@@ -10,7 +11,12 @@ if(OPENDDS_JUST_BUILD_HOST_TOOLS)
     "}\n"
   )
   list(APPEND _OPENDDS_CONFIGURE_ACE_TAO_ARGS "--workspace-file=${ws}")
+  set(_opendds_std_target opendds_idl)
 endif()
+
+# Get the C++ standard OpenDDS is going to be built with. We are going to force
+# the ACE/TAO build to use the same standard.
+set(_opendds_std "$<TARGET_PROPERTY:${_opendds_std_target},CXX_STANDARD>")
 
 find_package(Perl REQUIRED)
 if(OPENDDS_STATIC)
@@ -33,12 +39,6 @@ execute_process(
   COMMAND_ECHO STDOUT
   COMMAND_ERROR_IS_FATAL ANY
 )
-
-# Get the C++ standard OpenDDS is going to be built with. We are going to force
-# the ACE/TAO build to use the same standard.
-set(_opendds_idl_std "$<TARGET_PROPERTY:opendds_idl,CXX_STANDARD>")
-set(_opendds_dcps_std "$<TARGET_PROPERTY:OpenDDS_Dcps,CXX_STANDARD>")
-set(_opendds_std "$<IF:$<TARGET_EXISTS:OpenDDS_Dcps>,${_opendds_dcps_std},${_opendds_idl_std}>")
 
 set(_build_cmd "${CMAKE_COMMAND}" -E env "ACE_ROOT=${OPENDDS_ACE}" "TAO_ROOT=${OPENDDS_TAO}")
 if(_OPENDDS_XERCES3_FOR_ACE)

@@ -5,7 +5,9 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifdef OPENDDS_SECURITY
+#include <dds/OpenDDSConfigWrapper.h>
+
+#if OPENDDS_CONFIG_SECURITY
 
 #include "Stun.h"
 
@@ -983,4 +985,4 @@ bool operator<<(DCPS::Serializer& serializer, const Message& message)
 } // namespace OpenDDS
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
-#endif /* OPENDDS_SECURITY */
+#endif

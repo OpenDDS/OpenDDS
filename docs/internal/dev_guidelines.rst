@@ -301,7 +301,7 @@ Naming
 
 .. note::
 
-  For CMake `<https://cmake.org/cmake/help/latest/prop_tgt/UNITY_BUILD.html>` are nominally supported.
+  For CMake :ref:`unity builds <cmake-building-speed>` should be supported.
   This may cause unexpected build issues in CI builds when a name in one file happens to clash with another source file in the same source file batch.
 
 Comments

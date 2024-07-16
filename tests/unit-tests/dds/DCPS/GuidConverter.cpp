@@ -55,8 +55,8 @@ TEST(dds_DCPS_GuidConverter, validate_Checksum)
   GUID_t guid0 = InitGUID(0);
   GUID_t guid1 = InitGUID(1);
 
-  long crc0 = GuidConverter(guid0).checksum();
-  long crc1 = GuidConverter(guid1).checksum();
+  unsigned int crc0 = GuidConverter(guid0).checksum();
+  unsigned int crc1 = GuidConverter(guid1).checksum();
 
   EXPECT_EQ(crc0, 0xf09df109);
   EXPECT_EQ(crc1, 0xf1b7254f);

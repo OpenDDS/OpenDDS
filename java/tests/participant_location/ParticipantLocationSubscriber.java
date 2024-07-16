@@ -44,7 +44,13 @@ class ParticipantLocationSubscriber implements Callable<Boolean> {
 
     DataReader dr = builtinSubscriber.lookup_datareader(BuiltinTopicUtils.BUILT_IN_PARTICIPANT_LOCATION_TOPIC);
     if (dr == null) {
-      System.err.println("ERROR: subscriber could not lookup datareader");
+      System.err.println("ERROR: subscriber could not lookup datareader for BUILT_IN_PARTICIPANT_LOCATION_TOPIC");
+      return false;
+    }
+
+    DataReader dr2 = builtinSubscriber.lookup_datareader(BuiltinTopicUtils.BUILT_IN_PARTICIPANT_TOPIC);
+    if (dr2 == null) {
+      System.err.println("ERROR: Publisher could not lookup datareader for BUILT_IN_PARTICIPANT_TOPIC");
       return false;
     }
 
@@ -54,7 +60,10 @@ class ParticipantLocationSubscriber implements Callable<Boolean> {
 
     int ret = dr.set_listener(locationListener, OpenDDS.DCPS.DEFAULT_STATUS_MASK.value);
     assert (ret == DDS.RETCODE_OK.value);
+    ret = dr2.set_listener(locationListener, OpenDDS.DCPS.DEFAULT_STATUS_MASK.value);
+    assert (ret == DDS.RETCODE_OK.value);
     locationListener.on_data_available(dr);
+    locationListener.on_data_available(dr2);
 
     Subscriber sub = participant.create_subscriber(SUBSCRIBER_QOS_DEFAULT.get(), null, DEFAULT_STATUS_MASK.value);
     if (sub == null) {

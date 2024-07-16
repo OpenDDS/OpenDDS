@@ -25,6 +25,8 @@
 #include "dds/DCPS/DisjointSequence.h"
 #include "dds/DCPS/SendStateDataSampleList.h"
 #include "dds/DCPS/DataSampleElement.h"
+#include "dds/DCPS/GuidUtils.h"
+#include "dds/DCPS/EncapsulationHeader.h"
 
 #include <dds/OpenddsDcpsExtTypeSupportImpl.h>
 

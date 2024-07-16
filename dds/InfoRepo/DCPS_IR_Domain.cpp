@@ -212,7 +212,7 @@ OpenDDS::DCPS::TopicStatus DCPS_IR_Domain::add_topic_i(OpenDDS::DCPS::GUID_t& to
                      topicName,
                      dataTypeName));
     description = desc.get();
-    int descriptionAddition = add_topic_description(move(desc));
+    int descriptionAddition = add_topic_description(OPENDDS_MOVE_NS::move(desc));
 
     if (0 != descriptionAddition) {
       topicId = OpenDDS::DCPS::GUID_UNKNOWN;
@@ -258,7 +258,7 @@ OpenDDS::DCPS::TopicStatus DCPS_IR_Domain::add_topic_i(OpenDDS::DCPS::GUID_t& to
       publish_topic_bit(topic.get());
 
       // Keep a reference to easily locate the topic by id.
-      this->idToTopicMap_[topicId] = move(topic);
+      this->idToTopicMap_[topicId] = OPENDDS_MOVE_NS::move(topic);
 
     }
     break;
@@ -907,7 +907,7 @@ int DCPS_IR_Domain::add_topic_description(OpenDDS::DCPS::unique_ptr<DCPS_IR_Topi
             desc->get_dataTypeName(),
             discard)) {
   case -1:
-    this->topicDescriptions_[desc_ptr->get_name()] = move(desc);
+    this->topicDescriptions_[desc_ptr->get_name()] = OPENDDS_MOVE_NS::move(desc);
 
     if (OpenDDS::DCPS::DCPS_debug_level > 0) {
       ACE_DEBUG((LM_DEBUG,

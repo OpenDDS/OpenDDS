@@ -81,7 +81,7 @@ UpdateListener<DataType, ReaderType>::on_data_available(
             this->federationId_.id() != sample->sender) {
 
           // Delegate processing to the federation manager.
-          this->receiver_.add(move(sample), move(info));
+          this->receiver_.add(OPENDDS_MOVE_NS::move(sample), OPENDDS_MOVE_NS::move(info));
         }
 
       } else if (status == DDS::RETCODE_NO_DATA) {

@@ -25,7 +25,7 @@ void OpenDDS_Dcps_Export log_progress(const char* activity,
 {
   ACE_DEBUG((LM_INFO, "(%P|%t) {transport_debug.log_progress} local: %C remote: %C reference: %C time(ms): %Lu activity: %C\n",
              DCPS::LogGuid(local).c_str(), DCPS::LogGuid(remote).c_str(), DCPS::LogGuid(reference).c_str(),
-             duration_to_time_value(MonotonicTimePoint::now().to_monotonic_time() - start_time).msec(),
+             duration_to_time_value(MonotonicTimePoint::now().to_idl_struct() - start_time).msec(),
              activity));
 }
 

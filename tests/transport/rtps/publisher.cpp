@@ -21,6 +21,7 @@
 #include <dds/DCPS/Qos_Helper.h>
 #include <dds/DCPS/Marked_Default_Qos.h>
 #include <dds/DCPS/Message_Block_Ptr.h>
+#include <dds/DCPS/EncapsulationHeader.h>
 
 #include <dds/OpenddsDcpsExtTypeSupportImpl.h>
 
@@ -248,6 +249,7 @@ int DDS_TEST::test(ACE_TString host, u_short port)
   remote.participantId(0xefcdab89); // guidPrefix2
   remote.entityKey(0x452310);
   remote.entityKind(ENTITYKIND_USER_READER_WITH_KEY);
+  GUID_t remote_guid(remote);
 
   LocatorSeq locators;
   locators.length(1);

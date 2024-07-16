@@ -5,7 +5,8 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifdef OPENDDS_SECURITY
+
+#if OPENDDS_CONFIG_SECURITY
 #ifndef OPENDDS_DCPS_RTPS_ICE_ENDPOINTMANAGER_H
 #define OPENDDS_DCPS_RTPS_ICE_ENDPOINTMANAGER_H
 
@@ -14,7 +15,10 @@
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
 #include "dds/DCPS/Definitions.h"
+
+#include <dds/OpenDDSConfigWrapper.h>
 #include "dds/Versioned_Namespace.h"
+
 #include <ace/INET_Addr.h>
 
 #include "Ice.h"
@@ -265,4 +269,4 @@ typedef DCPS::RcHandle<EndpointManager> EndpointManagerPtr;
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #endif /* OPENDDS_RTPS_ICE_ENDPOINT_MANAGER_H */
-#endif /* OPENDDS_SECURITY */
+#endif

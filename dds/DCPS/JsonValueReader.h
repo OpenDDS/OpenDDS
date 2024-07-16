@@ -433,7 +433,7 @@ bool JsonValueReader<InputStream>::read_int32(ACE_CDR::Long& value)
     value = int_value_;
     return consume(kInt);
   case kUint:
-    value = uint_value_;
+    value = static_cast<ACE_CDR::Long>(uint_value_);
     return consume(kUint);
   default:
     return false;
@@ -458,7 +458,7 @@ bool JsonValueReader<InputStream>::read_int64(ACE_CDR::LongLong& value)
     value = int64_value_;
     return consume(kInt64);
   case kUint64:
-    value = uint64_value_;
+    value = static_cast<ACE_CDR::LongLong>(uint64_value_);
     return consume(kUint64);
   case kInt:
     value = int_value_;
@@ -655,7 +655,7 @@ bool JsonValueReader<InputStream>::read_long_enum(ACE_CDR::Long& value, const En
     value = int_value_;
     return consume(kInt);
   case kUint:
-    value = uint_value_;
+    value = static_cast<ACE_CDR::Long>(uint_value_);
     return consume(kUint);
   default:
     return false;
@@ -670,13 +670,13 @@ bool JsonValueReader<InputStream>::read_bitmask(ACE_CDR::ULongLong& value, const
     value = string_to_bitmask(string_value_, helper);
     return consume(kString);
   case kInt:
-    value = int_value_;
+    value = static_cast<ACE_CDR::ULongLong>(int_value_);
     return consume(kInt);
   case kUint:
     value = uint_value_;
     return consume(kUint);
   case kInt64:
-    value = int64_value_;
+    value = static_cast<ACE_CDR::ULongLong>(int64_value_);
     return consume(kInt64);
   case kUint64:
     value = uint64_value_;

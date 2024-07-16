@@ -158,44 +158,6 @@ bool Encoding::is_encapsulated() const
 }
 
 ACE_INLINE
-EncapsulationHeader::Kind EncapsulationHeader::kind() const
-{
-  return kind_;
-}
-
-ACE_INLINE
-void EncapsulationHeader::kind(Kind value)
-{
-  kind_ = value;
-}
-
-ACE_INLINE
-bool EncapsulationHeader::is_good() const
-{
-  return kind_ != KIND_INVALID;
-}
-
-ACE_INLINE
-ACE_UINT16 EncapsulationHeader::options() const
-{
-  return options_;
-}
-
-ACE_INLINE
-void EncapsulationHeader::options(ACE_CDR::UShort value)
-{
-  options_ = value;
-}
-
-ACE_INLINE
-bool serialized_size(const Encoding& /*encoding*/, size_t& size,
-  const EncapsulationHeader& /*value*/)
-{
-  size += EncapsulationHeader::serialized_size;
-  return true;
-}
-
-ACE_INLINE
 const Encoding& Serializer::encoding() const
 {
   return encoding_;

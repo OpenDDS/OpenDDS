@@ -111,10 +111,11 @@ bool keys_generator::gen_struct(AST_Structure* node, UTL_ScopedName* name,
         TopicKeys::Iterator finished = keys.end();
         for (TopicKeys::Iterator i = keys.begin(); i != finished; ++i) {
           string fname = i.path();
+          if (use_cxx11) {
+            fname = insert_cxx11_accessor_parens(fname, false);
+          }
           if (i.root_type() == TopicKeys::UnionType) {
             fname += "._d()";
-          } else if (use_cxx11) {
-            fname = insert_cxx11_accessor_parens(fname, false);
           }
           wrapper.key_compare(fname);
         }

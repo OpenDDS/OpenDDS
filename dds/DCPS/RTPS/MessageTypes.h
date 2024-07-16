@@ -12,6 +12,8 @@
 
 #include <dds/DCPS/GuidUtils.h>
 
+#include <dds/OpenDDSConfigWrapper.h>
+
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
@@ -30,6 +32,7 @@ namespace OpenDDS {
     using OpenDDS::DCPS::GUIDPREFIX_UNKNOWN;
     using OpenDDS::DCPS::GUID_UNKNOWN;
 
+    using OpenDDS::DCPS::EntityId_t;
     using OpenDDS::DCPS::ENTITYID_UNKNOWN;
     using OpenDDS::DCPS::ENTITYID_PARTICIPANT;
     using OpenDDS::DCPS::ENTITYID_SEDP_BUILTIN_TOPIC_WRITER;
@@ -66,12 +69,9 @@ namespace OpenDDS {
     const ProtocolVersion_t PROTOCOLVERSION_2_4 = { 2, 4 };
     const ProtocolVersion_t PROTOCOLVERSION = PROTOCOLVERSION_2_4;
 
-    using OpenDDS::DCPS::EntityId_t;
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
     /**
-     * The below entities
-     are from the security spec. V1.1
-     * section 7.3.7.1 "Mapping of the EntityIds for the Builtin DataWriters and DataReaders"
+     * See DDS Security spec v1.2 Table 9
      */
     ///@{
     const EntityId_t ENTITYID_SEDP_BUILTIN_PUBLICATIONS_SECURE_WRITER = {{0xff, 0x00, 0x03}, 0xc2};
@@ -86,17 +86,15 @@ namespace OpenDDS {
     const EntityId_t ENTITYID_P2P_BUILTIN_PARTICIPANT_VOLATILE_SECURE_READER = {{0xff, 0x02, 0x02}, 0xc4};
     const EntityId_t ENTITYID_SPDP_RELIABLE_BUILTIN_PARTICIPANT_SECURE_WRITER = {{0xff, 0x01, 0x01}, 0xc2};
     const EntityId_t ENTITYID_SPDP_RELIABLE_BUILTIN_PARTICIPANT_SECURE_READER = {{0xff, 0x01, 0x01}, 0xc7};
-    // https://issues.omg.org/browse/DDSSEC12-87
-    const EntityId_t ENTITYID_TL_SVC_REQ_WRITER_SECURE = {{0xff, 0x03, 0x00}, 0xc3 };
-    const EntityId_t ENTITYID_TL_SVC_REQ_READER_SECURE = {{0xff, 0x03, 0x00}, 0xc4 };
-    const EntityId_t ENTITYID_TL_SVC_REPLY_WRITER_SECURE = {{0xff, 0x03, 0x01}, 0xc3 };
-    const EntityId_t ENTITYID_TL_SVC_REPLY_READER_SECURE = {{0xff, 0x03, 0x01}, 0xc4 };
+    const EntityId_t ENTITYID_TL_SVC_REQ_SECURE_WRITER = {{0xff, 0x03, 0x00}, 0xc3};
+    const EntityId_t ENTITYID_TL_SVC_REQ_SECURE_READER = {{0xff, 0x03, 0x00}, 0xc4};
+    const EntityId_t ENTITYID_TL_SVC_REPLY_SECURE_WRITER = {{0xff, 0x03, 0x01}, 0xc3};
+    const EntityId_t ENTITYID_TL_SVC_REPLY_SECURE_READER = {{0xff, 0x03, 0x01}, 0xc4};
     ///@}
 
     const DDS::Security::ParticipantSecurityInfo PARTICIPANT_SECURITY_ATTRIBUTES_INFO_DEFAULT = {0, 0};
     const DDS::Security::EndpointSecurityInfo ENDPOINT_SECURITY_ATTRIBUTES_INFO_DEFAULT = {0, 0};
 #endif
-    // end of EntityId section
 
     // For messages we create, the "octetsToInlineQoS" value will be constant.
     const ACE_CDR::UShort DATA_OCTETS_TO_IQOS = 16;

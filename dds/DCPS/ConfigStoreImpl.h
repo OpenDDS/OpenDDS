@@ -166,14 +166,14 @@ public:
   StringList get(const char* key,
                  const StringList& value) const;
 
-  template<typename T>
+  template<typename T, size_t count>
   T get(const char* key,
         T value,
-        const EnumList<T> decoder[])
+        const EnumList<T> (&decoder)[count])
   {
     bool found = false;
     String value_as_string;
-    for (size_t idx = 0; decoder[idx].name; ++idx) {
+    for (size_t idx = 0; idx < count; ++idx) {
       if (decoder[idx].value == value) {
         value_as_string = decoder[idx].name;
         found = true;
@@ -188,7 +188,7 @@ public:
     }
 
     const String actual = get(key, value_as_string);
-    for (size_t idx = 0; decoder[idx].name; ++idx) {
+    for (size_t idx = 0; idx < count; ++idx) {
       if (decoder[idx].name == actual) {
         return decoder[idx].value;
       }
@@ -204,14 +204,14 @@ public:
     return value;
   }
 
-  template<typename T>
+  template<typename T, size_t count>
   void set(const char* key,
            T value,
-           const EnumList<T> decoder[])
+           const EnumList<T> (&decoder)[count])
   {
     bool found = false;
     String value_as_string;
-    for (size_t idx = 0; decoder[idx].name; ++idx) {
+    for (size_t idx = 0; idx < count; ++idx) {
       if (decoder[idx].value == value) {
         value_as_string = decoder[idx].name;
         found = true;
@@ -232,15 +232,15 @@ public:
     set(key, value_as_string);
   }
 
-  template<typename T>
+  template<typename T, size_t count>
   void set(const char* key,
            const String& value,
-           const EnumList<T> decoder[])
+           const EnumList<T> (&decoder)[count])
   {
     bool found = false;
     // Sanity check.
     String value_as_string;
-    for (size_t idx = 0; decoder[idx].name; ++idx) {
+    for (size_t idx = 0; idx < count; ++idx) {
       if (value == decoder[idx].name) {
         set(key, value);
         found = true;

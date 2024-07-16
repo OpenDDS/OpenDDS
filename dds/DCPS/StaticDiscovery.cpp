@@ -2,17 +2,21 @@
 
 #include "StaticDiscovery.h"
 
-#include "debug.h"
-#include "DomainParticipantImpl.h"
-#include "Marked_Default_Qos.h"
-#include "SubscriberImpl.h"
 #include "BuiltInTopicUtils.h"
-#include "Registered_Data_Types.h"
-#include "Qos_Helper.h"
 #include "DataWriterImpl.h"
 #include "DcpsUpcalls.h"
+#include "DomainParticipantImpl.h"
+#include "Marked_Default_Qos.h"
+#include "Qos_Helper.h"
+#include "Registered_Data_Types.h"
+#include "SubscriberImpl.h"
+#include "debug.h"
+
 #include "transport/framework/TransportRegistry.h"
+
 #include "XTypes/TypeAssignability.h"
+
+#include <dds/OpenDDSConfigWrapper.h>
 
 #include <ctype.h>
 
@@ -1623,7 +1627,7 @@ StaticDiscovery::add_domain_participant(DDS::DomainId_t domain,
   return ads;
 }
 
-#if defined(OPENDDS_SECURITY)
+#if OPENDDS_CONFIG_SECURITY
 AddDomainStatus
 StaticDiscovery::add_domain_participant_secure(
   DDS::DomainId_t /*domain*/,
@@ -1657,56 +1661,50 @@ namespace {
   const EnumList<DDS::DurabilityQosPolicyKind> durability_kinds[] =
     {
       { DDS::VOLATILE_DURABILITY_QOS, "VOLATILE" },
-      { DDS::TRANSIENT_LOCAL_DURABILITY_QOS, "TRANSIENT_LOCAL" },
+      { DDS::TRANSIENT_LOCAL_DURABILITY_QOS, "TRANSIENT_LOCAL" }
 #ifndef OPENDDS_NO_PERSISTENCE_PROFILE
+      ,
       { DDS::TRANSIENT_DURABILITY_QOS, "TRANSIENT" },
-      { DDS::PERSISTENT_DURABILITY_QOS, "PERSISTENT" },
+      { DDS::PERSISTENT_DURABILITY_QOS, "PERSISTENT" }
 #endif
-      { static_cast<DDS::DurabilityQosPolicyKind>(0), 0 }
     };
 
   const EnumList<DDS::LivelinessQosPolicyKind> liveliness_kinds[] =
     {
       { DDS::AUTOMATIC_LIVELINESS_QOS, "AUTOMATIC" },
       { DDS::MANUAL_BY_TOPIC_LIVELINESS_QOS, "MANUAL_BY_TOPIC" },
-      { DDS::MANUAL_BY_PARTICIPANT_LIVELINESS_QOS, "MANUAL_BY_PARTICIPANT" },
-      { static_cast<DDS::LivelinessQosPolicyKind>(0), 0 }
+      { DDS::MANUAL_BY_PARTICIPANT_LIVELINESS_QOS, "MANUAL_BY_PARTICIPANT" }
     };
 
   const EnumList<DDS::ReliabilityQosPolicyKind> reliability_kinds[] =
     {
       { DDS::BEST_EFFORT_RELIABILITY_QOS, "BEST_EFFORT" },
-      { DDS::RELIABLE_RELIABILITY_QOS, "RELIABLE" },
-      { static_cast<DDS::ReliabilityQosPolicyKind>(0), 0 }
+      { DDS::RELIABLE_RELIABILITY_QOS, "RELIABLE" }
     };
 
   const EnumList<DDS::DestinationOrderQosPolicyKind> destination_order_kinds[] =
     {
       { DDS::BY_RECEPTION_TIMESTAMP_DESTINATIONORDER_QOS, "BY_RECEPTION_TIMESTAMP" },
-      { DDS::BY_SOURCE_TIMESTAMP_DESTINATIONORDER_QOS, "BY_SOURCE_TIMESTAMP" },
-      { static_cast<DDS::DestinationOrderQosPolicyKind>(0), 0 }
+      { DDS::BY_SOURCE_TIMESTAMP_DESTINATIONORDER_QOS, "BY_SOURCE_TIMESTAMP" }
     };
 
   const EnumList<DDS::HistoryQosPolicyKind> history_kinds[] =
     {
       { DDS::KEEP_ALL_HISTORY_QOS, "KEEP_ALL" },
-      { DDS::KEEP_LAST_HISTORY_QOS, "KEEP_LAST" },
-      { static_cast<DDS::HistoryQosPolicyKind>(0), 0 }
+      { DDS::KEEP_LAST_HISTORY_QOS, "KEEP_LAST" }
     };
 
   const EnumList<DDS::OwnershipQosPolicyKind> ownership_kinds[] =
     {
       { DDS::SHARED_OWNERSHIP_QOS, "SHARED" },
-      { DDS::EXCLUSIVE_OWNERSHIP_QOS, "EXCLUSIVE" },
-      { static_cast<DDS::OwnershipQosPolicyKind>(0), 0 }
+      { DDS::EXCLUSIVE_OWNERSHIP_QOS, "EXCLUSIVE" }
     };
 
   const EnumList<DDS::PresentationQosPolicyAccessScopeKind> access_scope_kinds[] =
     {
       { DDS::INSTANCE_PRESENTATION_QOS, "INSTANCE" },
       { DDS::TOPIC_PRESENTATION_QOS, "TOPIC" },
-      { DDS::GROUP_PRESENTATION_QOS, "GROUP" },
-      { static_cast<DDS::PresentationQosPolicyAccessScopeKind>(0), 0 }
+      { DDS::GROUP_PRESENTATION_QOS, "GROUP" }
     };
 
   enum Type {
@@ -1716,8 +1714,7 @@ namespace {
   const EnumList<Type> type_kinds[] =
     {
       { Reader, "reader" },
-      { Writer, "writer" },
-      { static_cast<Type>(0), 0 }
+      { Writer, "writer" }
     };
 
 }

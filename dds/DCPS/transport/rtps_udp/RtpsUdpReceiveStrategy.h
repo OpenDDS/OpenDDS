@@ -16,8 +16,11 @@
 
 #include "dds/DCPS/RTPS/RtpsCoreC.h"
 #include "dds/DCPS/RTPS/ICE/Ice.h"
-#include "dds/DCPS/RcEventHandler.h"
+
 #include "dds/DCPS/NetworkAddress.h"
+#include "dds/DCPS/RcEventHandler.h"
+
+#include <dds/OpenDDSConfigWrapper.h>
 
 #include "ace/SOCK_Dgram.h"
 
@@ -78,7 +81,7 @@ public:
                                       int n,
                                       const ACE_SOCK_Dgram& socket,
                                       ACE_INET_Addr& remote_address,
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
                                       DCPS::RcHandle<ICE::Agent> agent,
                                       DCPS::WeakRcHandle<ICE::Endpoint> endpoint,
 #endif
@@ -116,7 +119,7 @@ private:
   virtual bool reassemble(ReceivedDataSample& data);
   virtual bool reassemble_i(ReceivedDataSample& data, RtpsSampleHeader& rsh);
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
   bool sec_submsg_to_octets(DDS::OctetSeq& encoded,
                             const RTPS::Submessage& postfix);
 
@@ -174,7 +177,7 @@ private:
   ACE_INET_Addr remote_address_;
   RTPS::Message message_;
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
   RTPS::SecuritySubmessage secure_prefix_;
   OPENDDS_VECTOR(RTPS::Submessage) secure_submessages_;
   ReceivedDataSample secure_sample_;

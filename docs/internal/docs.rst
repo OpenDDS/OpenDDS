@@ -485,6 +485,11 @@ For :doc:`/devguide/run_time_configuration` there's a custom configuration Sphin
   Do not include arguments if it has arguments in the directive.
   The possible formats are ``<sect_name>`` and ``<sect_name>@<disc_name>``.
 
+.. rst:directive:: .. default-cfg-sec:: [<section_name>[@<discriminator>]]
+
+  This sets the default :rst:dir:`cfg:sec` to use in the roles when outside of a section.
+  If this is not used or has been used with no argument, then the default will be ``common``.
+
 .. rst:directive:: .. cfg:prop:: <name>=<values>
 
   Use to document a configuration property that can contain :rst:dir:`cfg:val` and most other RST content.
@@ -517,7 +522,7 @@ For :doc:`/devguide/run_time_configuration` there's a custom configuration Sphin
   - ``<prop_name>``
 
     Inside of a :rst:dir:`cfg:sec`, it refers to a property in that section.
-    Outside of a :rst:dir:`cfg:sec`, the property is assumed to be ``common``.
+    Outside of a :rst:dir:`cfg:sec`, the property is assumed to be in :rst:dir:`default-cfg-sec`.
 
   - ``[<sect_name>]<prop_name>``
   - ``[<sect_name>@<disc_name>]<prop_name>``
@@ -541,7 +546,7 @@ For :doc:`/devguide/run_time_configuration` there's a custom configuration Sphin
   - ``<prop_name>=<val_name>``
 
     Inside of a :rst:dir:`cfg:sec`, it refers to a value of a property in that section.
-    Outside of a :rst:dir:`cfg:sec`, the property is assumed to be ``common``.
+    Outside of a :rst:dir:`cfg:sec`, the property is assumed to be in :rst:dir:`default-cfg-sec`.
 
   - ``[<sect_name>]<prop_name>=<val_name>``
   - ``[<sect_name>@<disc_name>]<prop_name>=<val_name>``
@@ -564,7 +569,7 @@ This is a example made up for the following INI file:
 
   Outside their sections, references to properties and values must be complete: :cfg:val:`[server]os=linux`, :cfg:prop:`[server@linux]distro`
 
-  Otherwise the ``common`` section will be assumed.
+  Otherwise the default section will be assumed.
 
   .. cfg:sec:: server/<name>
 
@@ -587,12 +592,24 @@ This is a example made up for the following INI file:
 
     .. cfg:prop:: distro=<name>
       :default: ``Ubuntu``
+
+  .. default-cfg-sec:: server
+
+  ``default-cfg-sec=server``: :cfg:prop:`os`.
+
+  .. default-cfg-sec:: server@linux
+
+  ``default-cfg-sec=server@linux``: :cfg:prop:`distro`.
+
+  .. default-cfg-sec::
+
+  ``default-cfg-sec=``: :cfg:prop:`[server@linux]distro`.
 
 Turns into:
 
   Outside their sections, references to properties and values must be complete: :cfg:val:`[server]os=linux`, :cfg:prop:`[server@linux]distro`
 
-  Otherwise the ``common`` section will be assumed.
+  Otherwise the default section will be assumed.
 
   .. cfg:sec:: server/<name>
     :no-contents-entry:
@@ -628,7 +645,19 @@ Turns into:
       :no-contents-entry:
       :no-index-entry:
 
-.. _docs-news:
+  .. default-cfg-sec:: server
+
+  ``default-cfg-sec=server``: :cfg:prop:`os`.
+
+  .. default-cfg-sec:: server@linux
+
+  ``default-cfg-sec=server@linux``: :cfg:prop:`distro`.
+
+  .. default-cfg-sec::
+
+  ``default-cfg-sec=``: :cfg:prop:`[server@linux]distro`.
+
+  .. _docs-news:
 
 ****
 News

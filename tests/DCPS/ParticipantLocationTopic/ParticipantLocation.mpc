@@ -1,9 +1,4 @@
 project(ParticipantLocationTopic): dcps_test, dcps_cm, opendds_security, dcps_rtps_udp {
   exename = ParticipantLocationTest
   requires += built_in_topics
-
-  Source_Files {
-    ParticipantLocationTest.cpp
-    ParticipantLocationListenerImpl.cpp
-  }
 }

@@ -340,7 +340,7 @@ private:
     {
       if (instance_state_ == DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE &&
           !is_infinite(qos.reader_data_lifecycle.autopurge_disposed_samples_delay) &&
-          SystemTimePoint::now().to_dds_time() > disposed_expiration_date_) {
+          SystemTimePoint::now().to_idl_struct() > disposed_expiration_date_) {
         not_read_samples_.clear();
         read_samples_.clear();
       }
@@ -357,7 +357,7 @@ private:
 
       if (instance_state_ == DDS::NOT_ALIVE_NO_WRITERS_INSTANCE_STATE &&
           !is_infinite(qos.reader_data_lifecycle.autopurge_nowriter_samples_delay) &&
-          SystemTimePoint::now().to_dds_time() > no_writers_expiration_date_) {
+          SystemTimePoint::now().to_idl_struct() > no_writers_expiration_date_) {
         return true;
       }
 
@@ -511,7 +511,7 @@ private:
 
       if (instance_state_ == DDS::ALIVE_INSTANCE_STATE) {
         instance_state_ = DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE;
-        disposed_expiration_date_ = SystemTimePoint::now().to_dds_time() + qos.reader_data_lifecycle.autopurge_disposed_samples_delay;
+        disposed_expiration_date_ = SystemTimePoint::now().to_idl_struct() + qos.reader_data_lifecycle.autopurge_disposed_samples_delay;
         informed_of_not_alive_ = false;
         return true;
       }
@@ -526,7 +526,7 @@ private:
 
       if (publication_set_.empty() && instance_state_ == DDS::ALIVE_INSTANCE_STATE) {
         instance_state_ = DDS::NOT_ALIVE_NO_WRITERS_INSTANCE_STATE;
-        no_writers_expiration_date_ = SystemTimePoint::now().to_dds_time() + qos.reader_data_lifecycle.autopurge_nowriter_samples_delay;
+        no_writers_expiration_date_ = SystemTimePoint::now().to_idl_struct() + qos.reader_data_lifecycle.autopurge_nowriter_samples_delay;
         informed_of_not_alive_ = false;
         return true;
       }

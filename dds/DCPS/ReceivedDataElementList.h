@@ -36,6 +36,7 @@ public:
     : pub_(header.publication_id_),
       registered_data_(received_data),
       sample_state_(DDS::NOT_READ_SAMPLE_STATE),
+      destination_timestamp_(SystemTimePoint::now().to_idl_struct()),
 #ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
       coherent_change_(header.coherent_change_),
       group_coherent_(header.group_coherent_),
@@ -51,8 +52,6 @@ public:
       ref_count_(1),
       mx_(mx)
   {
-    destination_timestamp_ = SystemTimePoint::now().to_dds_time();
-
     source_timestamp_.sec = header.source_timestamp_sec_;
     source_timestamp_.nanosec = header.source_timestamp_nanosec_;
 

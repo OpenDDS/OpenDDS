@@ -163,8 +163,12 @@ struct AddrSetStats {
 
   bool has_discovery_addrs() const
   {
+    bool spdp = false;
+    bool sedp = false;
     for (const auto& ip : ip_to_ports) {
-      if (!ip.second.spdp_ports.empty() && !ip.second.sedp_ports.empty()) {
+      spdp = spdp || !ip.second.spdp_ports.empty();
+      sedp = sedp || !ip.second.sedp_ports.empty();
+      if (spdp && sedp) {
         return true;
       }
     }

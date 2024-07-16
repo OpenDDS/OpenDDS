@@ -64,6 +64,7 @@ struct FieldInfo {
   std::string ref_;
   std::string const_ref_;
   std::string ptr_;
+  const bool is_optional_;
 
   explicit FieldInfo(AST_Field& field);
   bool is_new(EleLenSet& el_set) const;

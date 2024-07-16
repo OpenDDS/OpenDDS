@@ -12,10 +12,14 @@
 
 #include "dds/DCPS/RTPS/MessageUtils.h"
 #include "dds/DCPS/RTPS/MessageTypes.h"
-#include "dds/DCPS/GuidUtils.h"
+
+#include <dds/DCPS/GuidUtils.h>
 #include <dds/DCPS/LogAddr.h>
-#include "dds/DCPS/Util.h"
+#include <dds/DCPS/Util.h>
+
 #include "dds/DCPS/transport/framework/TransportDebug.h"
+
+#include <dds/OpenDDSConfigWrapper.h>
 
 #include "ace/Reactor.h"
 
@@ -40,7 +44,7 @@ RtpsUdpReceiveStrategy::RtpsUdpReceiveStrategy(RtpsUdpDataLink* link,
   , reassembly_(link->config()->fragment_reassembly_timeout())
   , receiver_(local_prefix)
   , thread_status_manager_(thread_status_manager)
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
   , secure_sample_()
   , encoded_rtps_(false)
   , encoded_submsg_(false)
@@ -68,7 +72,7 @@ RtpsUdpReceiveStrategy::RtpsUdpReceiveStrategy(RtpsUdpDataLink* link,
       ));
   }
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
   secure_prefix_.smHeader.submessageId = SUBMESSAGE_NONE;
 #endif
 }
@@ -217,7 +221,7 @@ RtpsUdpReceiveStrategy::receive_bytes_helper(iovec iov[],
                                              int n,
                                              const ACE_SOCK_Dgram& socket,
                                              ACE_INET_Addr& remote_address,
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
                                              DCPS::RcHandle<ICE::Agent> ice_agent,
                                              DCPS::WeakRcHandle<ICE::Endpoint> endpoint,
 #endif
@@ -247,7 +251,7 @@ RtpsUdpReceiveStrategy::receive_bytes_helper(iovec iov[],
     return ret;
   }
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
   // Assume STUN
 # ifndef ACE_RECVPKTINFO
   ACE_ERROR((LM_ERROR, "ERROR: RtpsUdpReceiveStrategy::receive_bytes_helper potential STUN message "
@@ -282,7 +286,7 @@ RtpsUdpReceiveStrategy::receive_bytes_helper(iovec iov[],
 
     if (tport.relay_srsm().is_response(message)) {
       tport.process_relay_sra(tport.relay_srsm().receive(message));
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
     } else if (endpoint) {
       ice_agent->receive(endpoint, local_address, remote_address, message);
 #endif
@@ -297,7 +301,7 @@ RtpsUdpReceiveStrategy::receive_bytes_helper(iovec iov[],
   return ret;
 }
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
 namespace {
   ssize_t recv_err(const char* msg, const ACE_INET_Addr& remote, const DCPS::GUID_t& peer, bool& stop)
   {
@@ -352,14 +356,14 @@ RtpsUdpReceiveStrategy::receive_bytes(iovec iov[],
   const ssize_t ret = (scatter < 0) ? scatter : (iter - buffer);
 #else
   const ssize_t ret = receive_bytes_helper(iov, n, socket, remote_address,
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
                                            link_->get_ice_agent(), link_->get_ice_endpoint(),
 #endif
                                            *link_->transport(), stop);
 #endif
   remote_address_ = remote_address;
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
   if (stop) {
     return ret;
   }
@@ -464,7 +468,7 @@ RtpsUdpReceiveStrategy::receive_bytes(iovec iov[],
 
 bool RtpsUdpReceiveStrategy::check_encoded(const EntityId_t& sender)
 {
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
   using namespace DDS::Security;
   const GUID_t sendGuid = make_id(receiver_.source_guid_prefix_, sender);
   const GuidConverter conv(sendGuid);
@@ -520,7 +524,7 @@ RtpsUdpReceiveStrategy::deliver_sample(ReceivedDataSample& sample,
     DCPS::push_back(message_.submessages, rsh.submessage_);
   }
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
   const SubmessageKind kind = rsh.submessage_._d();
 
   if (secure_prefix_.smHeader.submessageId == SEC_PREFIX && kind != SEC_POSTFIX) {
@@ -566,7 +570,7 @@ RtpsUdpReceiveStrategy::deliver_sample_i(ReceivedDataSample& sample,
       break;
     }
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
     if (!decode_payload(sample, data)) {
       if (transport_debug.log_dropped_messages) {
         ACE_DEBUG((LM_DEBUG, "(%P|%t) {transport_debug.log_dropped_messages} RtpsUdpReceiveStrategy::deliver_sample_i - decode error\n"));
@@ -725,7 +729,7 @@ RtpsUdpReceiveStrategy::deliver_sample_i(ReceivedDataSample& sample,
      has successfully reassembled the fragments and we now have a DATA submsg
    */
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
   case SEC_PREFIX:
     secure_prefix_ = submessage.security_sm();
     break;
@@ -740,7 +744,7 @@ RtpsUdpReceiveStrategy::deliver_sample_i(ReceivedDataSample& sample,
   }
 }
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
 void
 RtpsUdpReceiveStrategy::deliver_from_secure(const RTPS::Submessage& submessage,
                                             const NetworkAddress& remote_addr)
@@ -1020,7 +1024,7 @@ RtpsUdpReceiveStrategy::check_header(const RtpsTransportHeader& header)
     message_.hdr = header.header_;
   }
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
   secure_prefix_.smHeader.submessageId = SUBMESSAGE_NONE;
 #endif
 
@@ -1031,7 +1035,7 @@ bool
 RtpsUdpReceiveStrategy::check_header(const RtpsSampleHeader& header)
 {
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
   if (secure_prefix_.smHeader.submessageId) {
     return header.valid();
   }

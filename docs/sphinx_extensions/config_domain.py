@@ -17,6 +17,7 @@ from sphinx import addnodes
 from sphinx.application import Sphinx
 from sphinx.util import logging
 from sphinx.util.nodes import nested_parse_with_titles
+from sphinx.util.docutils import SphinxDirective
 from sphinx.roles import XRefRole
 
 from custom_domain import CustomDomain, CustomDomainObject, ContextWrapper
@@ -26,6 +27,10 @@ class ConfigDomain(CustomDomain):
     name = 'cfg'
     label = 'config'
     logger = logging.getLogger(__name__)
+
+    @classmethod
+    def ctx(cls, env):
+        return ContextWrapper(env, cls.name)
 
 
 def parse(what, regex, string, node, *ret):
@@ -106,6 +111,31 @@ class ConfigSection(CustomDomainObject):
             signode += addnodes.desc_annotation(text, text)
 
 
+class DefaultCfgSecDirective(SphinxDirective):
+    has_content = True
+    name = 'default-cfg-sec'
+
+    def run(self):
+        ctx = ConfigDomain.ctx(self.env)
+
+        count = len(self.content)
+        if count == 0:
+            del ctx.misc[self.name]
+        elif count == 1:
+            sec = self.content[0].strip()
+            parse_section_name(sec, self)
+            ctx.misc[self.name] = sec
+        else:
+            e = ValueError(f'Can not pass more than one line to default-sec')
+            ConfigDomain.logger.warning(e, location=self.get_location())
+            raise e
+        return []
+
+    @classmethod
+    def get_default_section(cls, ctx):
+        return ctx.misc.get(cls.name, 'common')
+
+
 # cfg:prop ====================================================================
 
 prop_name_re = id_re + r'(?:\.' + id_re + r')*'
@@ -146,10 +176,25 @@ def key_canonicalize(sec_name, sec_args, prop_name):
     return sec + '_' + name_canonicalize(prop_name)
 
 
+def rescope(ctx, sec, sec_name, prop_name=None):
+    scope = ctx.get_all_names()
+    if scope:
+        # We're somewhere inside a sec
+        scope = scope + [None] * (2 - len(scope))
+        if scope[0] == sec:
+            sec_name = None
+            if scope[1] == prop_name:
+                prop_name = None
+    elif sec == DefaultCfgSecDirective.get_default_section(ctx):
+        sec_name = None
+
+    return sec_name, prop_name
+
+
 class ConfigPropRefRole(XRefRole):
     def process_link(self, env: BuildEnvironment, refnode: Element,
                      has_explicit_title: bool, title: str, target: str) -> tuple[str, str]:
-        ctx = ContextWrapper(env, 'cfg')
+        ctx = ConfigDomain.ctx(env)
         target = target.strip()
 
         # Normalize target for the current scope
@@ -159,8 +204,9 @@ class ConfigPropRefRole(XRefRole):
             # [sec]prop anywhere
             pass
         elif scope_kind == 0 and sec is None:
-            # Assume prop outside section should be in [common]
-            target = f'[common]{target}'
+            # prop outside a section
+            default_section = DefaultCfgSecDirective.get_default_section(ctx)
+            target = f'[{default_section}]{target}'
         elif scope_kind >= 1:
             # prop anywhere in a section
             prefix = ctx.get_full_name(0)
@@ -172,11 +218,7 @@ class ConfigPropRefRole(XRefRole):
         if not has_explicit_title:
             # Reparse target and hide parts of title that are in the current scope
             sec, sec_name, sec_disc, prop_name = parse_prop_name(target, self)
-            scope = ctx.get_all_names()
-            scope = scope + [None] * (2 - len(scope))
-            if scope[0] == sec:
-                sec_name = None
-
+            sec_name, _ = rescope(ctx, sec, sec_name)
             title = prop_text(sec_name, sec_disc, prop_name)
 
         return title, target
@@ -270,7 +312,7 @@ def value_text(sec_name, sec_disc, prop_name, val_name):
 class ConfigValueRefRole(XRefRole):
     def process_link(self, env: BuildEnvironment, refnode: Element,
                      has_explicit_title: bool, title: str, target: str) -> tuple[str, str]:
-        ctx = ContextWrapper(env, 'cfg')
+        ctx = ConfigDomain.ctx(env)
         target = target.strip()
 
         # Normalize target for the current scope
@@ -280,8 +322,9 @@ class ConfigValueRefRole(XRefRole):
             # [sec]prop=val anywhere
             pass
         elif scope_kind == 0 and sec is None:
-            # prop=val outside section
-            target = f'[common]{target}'
+            # prop outside a section
+            default_section = DefaultCfgSecDirective.get_default_section(ctx)
+            target = f'[{default_section}]{target}'
         elif scope_kind >= 1 and prop is not None:
             # prop=val anywhere in a section
             target = ctx.get_full_name(0) + target
@@ -295,13 +338,7 @@ class ConfigValueRefRole(XRefRole):
         if not has_explicit_title:
             # Reparse target and hide parts of title that are in the current scope
             sec, sec_name, sec_disc, prop, prop_name, val_name = parse_value_name(target, self)
-            scope = ctx.get_all_names()
-            scope = scope + [None] * (3 - len(scope))
-            if scope[0] == sec:
-                sec_name = None
-                if scope[1] == prop_name:
-                    prop_name = None
-
+            sec_name, prop_name = rescope(ctx, sec, sec_name, prop_name)
             title = value_text(sec_name, sec_disc, prop_name, val_name)
 
         return title, target
@@ -344,6 +381,7 @@ class ConfigValue(CustomDomainObject):
 
 def setup(app: Sphinx) -> dict[str, Any]:
     app.add_domain(ConfigDomain)
+    app.add_directive(DefaultCfgSecDirective.name, DefaultCfgSecDirective)
 
     return {
         'version': '0.1',

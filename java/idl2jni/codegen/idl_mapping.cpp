@@ -137,12 +137,7 @@ bool composite_mapping::gen_union(UTL_ScopedName *name,
   return true;
 }
 
-bool is_hidden_op_in_java(AST_Operation* op, std::string* impl)
+bool is_hidden_op_in_java(AST_Operation* op)
 {
-  AST_Annotation_Appl* a = op->annotations().find("::OpenDDS::@hidden_op_in_java");
-  if (a && impl) {
-    *impl = dynamic_cast<AST_Annotation_Member*>((*a)["impl"])->
-      value()->ev()->u.strval->get_string();
-  }
-  return a;
+  return op->annotations().find("::OpenDDS::internal::@hidden_op_in_java");
 }

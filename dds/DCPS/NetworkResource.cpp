@@ -1,16 +1,15 @@
 /*
- *
- *
  * Distributed under the OpenDDS License.
  * See: http://www.opendds.org/license.html
  */
 
-#include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
+#include <DCPS/DdsDcps_pch.h> // Only the _pch include should start with DCPS/
 
 #include "NetworkResource.h"
 
 #include "LogAddr.h"
 #include "TimeTypes.h"
+#include "debug.h"
 
 #include <ace/OS_NS_netdb.h>
 #include <ace/Sock_Connect.h>
@@ -433,6 +432,29 @@ bool set_socket_multicast_ttl(const ACE_SOCK_Dgram& socket, const unsigned char&
                      false);
   }
   return true;
+}
+
+bool set_recvpktinfo(ACE_SOCK_Dgram& sock, bool ipv4)
+{
+  bool success = true;
+#if defined ACE_RECVPKTINFO || defined ACE_RECVPKTINFO6
+  if (ipv4) {
+#  ifdef ACE_RECVPKTINFO
+    success = set_sock_opt(sock, IPPROTO_IP, ACE_RECVPKTINFO, 1);
+#  endif
+  } else {
+#  ifdef ACE_RECVPKTINFO6
+    success = set_sock_opt(sock, IPPROTO_IPV6, ACE_RECVPKTINFO6, 1);
+#  endif
+  }
+  if (!success && log_level >= LogLevel::Error) {
+    ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: set_recvpktinfo: failed to set RECVPKTINFO: %m\n"));
+  }
+#  else
+  ACE_UNUSED_ARG(sock);
+  ACE_UNUSED_ARG(ipv4);
+#  endif
+  return success;
 }
 
 bool open_appropriate_socket_type(ACE_SOCK_Dgram& socket, const ACE_INET_Addr& local_address, int* proto_family)

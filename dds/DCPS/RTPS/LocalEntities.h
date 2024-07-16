@@ -5,6 +5,7 @@
 #ifndef OPENDDS_DCPS_RTPS_LOCAL_ENTITIES_H
 #define OPENDDS_DCPS_RTPS_LOCAL_ENTITIES_H
 
+#include <dds/OpenDDSConfigWrapper.h>
 #include <dds/Versioned_Namespace.h>
 
 #include <dds/DCPS/DataReaderCallbacks.h>
@@ -12,11 +13,13 @@
 #include <dds/DCPS/GuidUtils.h>
 #include <dds/DCPS/SequenceNumber.h>
 #include <dds/DCPS/Time_Helper.h>
+
 #include <dds/DCPS/XTypes/TypeObject.h>
+
 #include <dds/DdsDcpsGuidC.h>
 #include <dds/DdsDcpsInfoUtilsC.h>
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
 #  include <dds/DCPS/Ice.h>
 #  include <dds/DdsSecurityCoreC.h>
 #endif
@@ -36,7 +39,7 @@ struct LocalEntity {
     , participant_discovered_at_(DCPS::monotonic_time_zero())
     , transport_context_(0)
     , sequence_(DCPS::SequenceNumber::SEQUENCENUMBER_UNKNOWN())
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
     , have_ice_agent_info(false)
   {
     security_attribs_.base.is_read_protected = false;
@@ -61,7 +64,7 @@ struct LocalEntity {
   DCPS::SequenceNumber sequence_;
   DCPS::RepoIdSet remote_expectant_opendds_associations_;
   XTypes::TypeInformation type_info_;
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
   bool have_ice_agent_info;
   ICE::AgentInfo ice_agent_info;
   DDS::Security::EndpointSecurityAttributes security_attribs_;

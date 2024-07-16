@@ -3,7 +3,9 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifdef OPENDDS_SECURITY
+#include <dds/OpenDDSConfigWrapper.h>
+
+#if OPENDDS_CONFIG_SECURITY
 #ifndef OPENDDS_DCPS_RTPS_ICE_ICE_H
 #define OPENDDS_DCPS_RTPS_ICE_ICE_H
 
@@ -210,4 +212,4 @@ private:
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #endif /* OPENDDS_RTPS_ICE_H */
-#endif /* OPENDDS_SECURITY */
+#endif

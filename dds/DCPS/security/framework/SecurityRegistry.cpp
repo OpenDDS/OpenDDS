@@ -12,12 +12,15 @@
 #include "SecurityConfig.h"
 
 #include <dds/DCPS/transport/framework/EntryExit.h>
-#include <dds/DCPS/Util.h>
-#include <dds/DCPS/Service_Participant.h>
+
+#include <dds/DCPS/DomainParticipantImpl.h>
 #include <dds/DCPS/EntityImpl.h>
 #include <dds/DCPS/SafetyProfileStreams.h>
-#include <dds/DCPS/DomainParticipantImpl.h>
 #include <dds/DCPS/Service_Participant.h>
+#include <dds/DCPS/Service_Participant.h>
+#include <dds/DCPS/Util.h>
+
+#include <dds/OpenDDSConfigWrapper.h>
 
 #include <ace/Singleton.h>
 #include <ace/OS_NS_strings.h>
@@ -186,7 +189,7 @@ SecurityRegistry::create_config(const OPENDDS_STRING& config_name)
   // release the new config and fail
   SecurityConfig_rch new_config =
     DCPS::make_rch<SecurityConfig>(config_name,
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
                                    auth_plugin_inst->create_authentication(),
                                    ac_plugin_inst->create_access_control(),
                                    crypto_plugin_inst->create_crypto_key_exchange(),
@@ -211,7 +214,7 @@ SecurityConfig_rch
 SecurityRegistry::create_config(const OPENDDS_STRING& config_name,
                                 SecurityPluginInst_rch plugin)
 {
-#ifndef OPENDDS_SECURITY
+#if !OPENDDS_CONFIG_SECURITY
   ACE_UNUSED_ARG(plugin);
 #endif
 
@@ -222,7 +225,7 @@ SecurityRegistry::create_config(const OPENDDS_STRING& config_name,
 
   SecurityConfig_rch new_config =
     DCPS::make_rch<SecurityConfig>(config_name,
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
                                    plugin->create_authentication(),
                                    plugin->create_access_control(),
                                    plugin->create_crypto_key_exchange(),
@@ -254,7 +257,7 @@ SecurityRegistry::get_config(const OPENDDS_STRING& config_name) const
 SecurityConfig_rch
 SecurityRegistry::default_config() const
 {
-#if defined(OPENDDS_SECURITY)
+#if OPENDDS_CONFIG_SECURITY
   GuardType guard(lock_);
   if (!default_config_ && !TheServiceParticipant->get_security()) {
     Authentication_var a;
@@ -280,7 +283,7 @@ SecurityRegistry::default_config(const SecurityConfig_rch& config)
 SecurityConfig_rch
 SecurityRegistry::builtin_config() const
 {
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
   GuardType g1(default_load_lock_);
   GuardType guard(lock_);
   if (!builtin_config_) {

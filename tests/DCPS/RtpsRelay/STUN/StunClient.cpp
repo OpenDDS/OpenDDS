@@ -5,9 +5,12 @@
  * See: http://www.opendds.org/license.html
  */
 
-#include "dds/DCPS/RTPS/ICE/Stun.h"
-#include "dds/DCPS/Message_Block_Ptr.h"
 #include <dds/DCPS/LogAddr.h>
+#include <dds/DCPS/Message_Block_Ptr.h>
+
+#include <dds/DCPS/RTPS/ICE/Stun.h>
+
+#include <dds/OpenDDSConfigWrapper.h>
 
 #include "ace/ACE.h"
 #include "ace/Argv_Type_Converter.h"
@@ -19,7 +22,7 @@
 #include <cstdlib>
 #include <iostream>
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
 
 void generate_transaction_id(OpenDDS::STUN::Message& message)
 {

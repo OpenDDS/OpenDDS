@@ -4,6 +4,7 @@
 #include <TestMsg.h>
 
 #include <dds/DCPS/Serializer.h>
+#include <dds/DCPS/EncapsulationHeader.h>
 #include <dds/DCPS/GuidUtils.h>
 #include <dds/DCPS/RTPS/RtpsCoreC.h>
 #include <dds/DdsDcpsInfoUtilsC.h>

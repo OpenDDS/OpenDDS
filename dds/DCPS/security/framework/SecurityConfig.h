@@ -10,15 +10,17 @@
 #include "HandleRegistry.h"
 #include "Utility.h"
 
+#include <dds/DCPS/GuidUtils.h>
+#include <dds/DCPS/RcObject.h>
 #include <dds/DCPS/dcps_export.h>
 #include <dds/DCPS/debug.h>
-#include <dds/DCPS/RcObject.h>
-#include <dds/DCPS/GuidUtils.h>
 
-#ifdef OPENDDS_SECURITY
+#include <dds/DdsDcpsCoreC.h>
+#include <dds/OpenDDSConfigWrapper.h>
+
+#if OPENDDS_CONFIG_SECURITY
 #  include <dds/DdsSecurityCoreC.h>
 #endif
-#include <dds/DdsDcpsCoreC.h>
 
 #include <ace/config.h>
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
@@ -32,7 +34,7 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace Security {
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
 using DDS::Security::Authentication_var;
 using DDS::Security::AccessControl_var;
 using DDS::Security::CryptoKeyExchange_var;
@@ -48,7 +50,7 @@ class OpenDDS_Dcps_Export SecurityConfig : public DCPS::RcObject {
     return name_;
   }
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
   // Get the plugins associated with this configuration
   Authentication_var get_authentication() const
   {
@@ -122,7 +124,7 @@ class OpenDDS_Dcps_Export SecurityConfig : public DCPS::RcObject {
   bool qos_implies_security(const DDS::DomainParticipantQos& qos) const;
 
   SecurityConfig(const OPENDDS_STRING& name,
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
                  Authentication_var authentication_plugin,
                  AccessControl_var access_ctrl_plugin,
                  CryptoKeyExchange_var key_exchange_plugin,
@@ -142,7 +144,7 @@ class OpenDDS_Dcps_Export SecurityConfig : public DCPS::RcObject {
 
   const OPENDDS_STRING name_;
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
   Authentication_var authentication_plugin_;
   AccessControl_var access_control_plugin_;
   CryptoKeyExchange_var key_exchange_plugin_;

@@ -9,90 +9,74 @@
 
 #include "Definitions.h"
 
+#include <ace/OS_NS_stdio.h>
+
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
 namespace DCPS {
 
-String to_dds_string(unsigned short to_convert)
+String to_dds_string(ACE_CDR::Octet to_convert, bool as_hex)
 {
-  const char* fmt = "%hu";
-  const int buff_size = 5 + 1; // note +1 for null terminator
+  static const int buff_size = 3 + 1; // note +1 for null terminator
   char buf[buff_size];
-  ACE_OS::snprintf(&buf[0], buff_size, fmt, to_convert);
+  ACE_OS::snprintf(&buf[0], buff_size, as_hex ? "%02x" : "%u", to_convert);
+  return String(buf);
+}
+
+String to_dds_string(unsigned short to_convert, bool as_hex)
+{
+  static const int buff_size = 5 + 1; // note +1 for null terminator
+  char buf[buff_size];
+  ACE_OS::snprintf(&buf[0], buff_size, as_hex ? "%04hx" : "%hu", to_convert);
   return String(buf);
 }
 
 String to_dds_string(int to_convert)
 {
-  const char* fmt = "%d";
-  const int buff_size = 20 + 1; // note +1 for null terminator
+  static const int buff_size = 20 + 1; // note +1 for null terminator
   char buf[buff_size];
-  ACE_OS::snprintf(&buf[0], buff_size, fmt, to_convert);
+  ACE_OS::snprintf(&buf[0], buff_size, "%d", to_convert);
   return String(buf);
 }
 
 String to_dds_string(unsigned int to_convert, bool as_hex)
 {
-  const char* fmt;
-  if (as_hex) {
-    fmt = "%02x";
-    const int buff_size = 3; // note +1 for null terminator
-    char buf[buff_size];
-    ACE_OS::snprintf(&buf[0], buff_size, fmt, to_convert);
-    return String(buf);
-  } else {
-    fmt = "%u";
-    const int buff_size = 20 + 1; // note +1 for null terminator
-    char buf[buff_size];
-    ACE_OS::snprintf(&buf[0], buff_size, fmt, to_convert);
-    return String(buf);
-  }
+  static const int buff_size = 20 + 1; // note +1 for null terminator
+  char buf[buff_size];
+  ACE_OS::snprintf(&buf[0], buff_size, as_hex ? "%08x" : "%u", to_convert);
+  return String(buf);
 }
 
 String to_dds_string(long to_convert)
 {
-  const char* fmt = "%ld";
   const int buff_size = 20 + 1; // note +1 for null terminator
   char buf[buff_size];
-  ACE_OS::snprintf(&buf[0], buff_size, fmt, to_convert);
+  ACE_OS::snprintf(&buf[0], buff_size, "%ld", to_convert);
   return String(buf);
 }
 
 String to_dds_string(long long to_convert)
 {
-  const char* fmt = "%lld";
   const int buff_size = 20 + 1; // note +1 for null terminator
   char buf[buff_size];
-  ACE_OS::snprintf(&buf[0], buff_size, fmt, to_convert);
+  ACE_OS::snprintf(&buf[0], buff_size, "%lld", to_convert);
   return String(buf);
 }
 
 String to_dds_string(unsigned long long to_convert, bool as_hex)
 {
-  const char* fmt;
-  if (as_hex) {
-    fmt = "%0llx";
-  } else {
-    fmt = "%llu";
-  }
   const int buff_size = 20 + 1; // note +1 for null terminator
   char buf[buff_size];
-  ACE_OS::snprintf(&buf[0], buff_size, fmt, to_convert);
+  ACE_OS::snprintf(&buf[0], buff_size, as_hex ? "%016llx" : "%llu", to_convert);
   return String(buf);
 }
 
-String to_dds_string(unsigned long to_convert, bool as_hex)
+String to_dds_string(unsigned long to_convert)
 {
-  const char* fmt;
-  if (as_hex) {
-    fmt = "%0.8lx";
-  } else {
-    fmt = "%lu";
-  }
   const int buff_size = 20 + 1; // note +1 for null terminator
   char buf[buff_size];
-  ACE_OS::snprintf(&buf[0], buff_size, fmt, to_convert);
+  ACE_OS::snprintf(&buf[0], buff_size, "%lu", to_convert);
   return String(buf);
 }
 
@@ -118,10 +102,17 @@ String to_dds_string(const unsigned char* array, size_t length)
 
 OpenDDS_Dcps_Export String to_dds_string(double to_convert)
 {
-  const char* fmt = "%g";
   const int buff_size = 20 + 1; // note +1 for null terminator
   char buf[buff_size];
-  ACE_OS::snprintf(&buf[0], buff_size, fmt, to_convert);
+  ACE_OS::snprintf(&buf[0], buff_size, "%g", to_convert);
+  return String(buf);
+}
+
+String to_dds_string(const void* to_convert)
+{
+  const int buff_size = 20 + 1; // note +1 for null terminator
+  char buf[buff_size];
+  ACE_OS::snprintf(&buf[0], buff_size, "%p", to_convert);
   return String(buf);
 }
 

@@ -8,6 +8,8 @@
 #include "MessageTypes.h"
 
 #include <dds/DCPS/Time_Helper.h>
+#include <dds/DCPS/debug.h>
+
 #include <dds/OpenddsDcpsExtTypeSupportImpl.h>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
@@ -16,6 +18,8 @@ namespace OpenDDS {
 namespace RTPS {
 
 using DCPS::Encoding;
+using DCPS::LogLevel;
+using DCPS::log_level;
 
 const DCPS::Encoding& get_locators_encoding()
 {
@@ -132,6 +136,75 @@ bool bitmapNonEmpty(const SequenceNumberSet& snSet)
   const CORBA::ULong mod = snSet.numBits % 32;
   const CORBA::ULong mask = mod ? (1 + ~(1u << (32 - mod))) : 0xFFFFFFFF;
   return (bool)(snSet.bitmap[last_index] & mask);
+}
+
+bool get_rtps_port(DDS::UInt16& port_result, const char* what,
+  DDS::UInt16 port_base, DDS::UInt16 offset,
+  DDS::UInt16 domain, DDS::UInt16 domain_gain,
+  DDS::UInt16 part, DDS::UInt16 part_gain)
+{
+  const DDS::UInt32 port = static_cast<DDS::UInt32>(port_base) +
+    domain * domain_gain + part * part_gain + offset;
+  port_result = static_cast<DDS::UInt16>(port);
+  if (port > 65535) {
+    if (log_level >= LogLevel::Warning) {
+      ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: rtps_port: "
+        "%C port %u is going to be truncated to %u. This behavior is deprecated, please reduce "
+        "domain ID or other RTPS port parameters.\n",
+        what, port, port_result));
+    }
+  }
+  return true;
+}
+
+namespace {
+  const DCPS::EnumList<PortMode> port_modes[] = {
+    {PortMode_System, "system"},
+    {PortMode_Probe, "probe"}
+  };
+};
+
+PortMode get_port_mode(const String& key, PortMode default_value)
+{
+  return TheServiceParticipant->config_store()->get(key.c_str(), default_value, port_modes);
+}
+
+void set_port_mode(const String& key, PortMode value)
+{
+  TheServiceParticipant->config_store()->set(key.c_str(), value, port_modes);
+}
+
+bool set_rtps_multicast_port(
+  DCPS::NetworkAddress& addr, const char* what,
+  DDS::UInt16 port_base, DDS::UInt16 offset,
+  DDS::UInt16 domain, DDS::UInt16 domain_gain)
+{
+  if (addr.get_port_number() == 0) {
+    DDS::UInt16 port;
+    if (!get_rtps_port(port, what, port_base, offset, domain, domain_gain)) {
+      return false;
+    }
+    addr.set_port_number(port);
+  }
+  return true;
+}
+
+bool set_rtps_unicast_port(
+  DCPS::NetworkAddress& addr, bool& fixed_port,
+  const char* what, PortMode port_mode,
+  DDS::UInt16 port_base, DDS::UInt16 offset,
+  DDS::UInt16 domain, DDS::UInt16 domain_gain,
+  DDS::UInt16 part, DDS::UInt16 part_gain)
+{
+  fixed_port = addr.get_port_number() > 0 || port_mode != PortMode_Probe;
+  if (!fixed_port) {
+    DDS::UInt16 port = 0;
+    if (!get_rtps_port(port, what, port_base, offset, domain, domain_gain, part, part_gain)) {
+      return false;
+    }
+    addr.set_port_number(port);
+  }
+  return true;
 }
 
 }

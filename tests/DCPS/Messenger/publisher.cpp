@@ -8,11 +8,14 @@
 
 #include <tests/Utils/StatusMatching.h>
 
+#include <dds/DCPS/DCPS_Utils.h>
 #include <dds/DCPS/Marked_Default_Qos.h>
 #include <dds/DCPS/PublisherImpl.h>
 #include <dds/DCPS/Service_Participant.h>
-#include <dds/DCPS/DCPS_Utils.h>
-#ifdef OPENDDS_SECURITY
+
+#include <dds/OpenDDSConfigWrapper.h>
+
+#if OPENDDS_CONFIG_SECURITY
 #  include <dds/DCPS/security/framework/Properties.h>
 #endif
 #include <dds/DCPS/StaticIncludes.h>
@@ -22,7 +25,7 @@
 #    include <dds/DCPS/transport/multicast/Multicast.h>
 #    include <dds/DCPS/RTPS/RtpsDiscovery.h>
 #    include <dds/DCPS/transport/shmem/Shmem.h>
-#    ifdef OPENDDS_SECURITY
+#    if OPENDDS_CONFIG_SECURITY
 #      include <dds/DCPS/security/BuiltInPlugins.h>
 #    endif
 #  endif
@@ -74,7 +77,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
       DDS::DomainParticipantQos part_qos;
       dpf->get_default_participant_qos(part_qos);
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
       if (TheServiceParticipant->get_security()) {
         // Determine the path to the keys
         String path_to_tests;

@@ -1010,16 +1010,16 @@ typeobject_generator::update_maps(AST_Type* type,
 }
 
 void typeobject_generator::set_builtin_member_annotations(AST_Decl* member,
-  OpenDDS::XTypes::Optional<OpenDDS::XTypes::AppliedBuiltinMemberAnnotations>& annotations)
+  OPENDDS_OPTIONAL_NS::optional<OpenDDS::XTypes::AppliedBuiltinMemberAnnotations>& annotations)
 {
   // Support only @hashid annotation for member at this time.
   const HashidAnnotation* hashid_ann = dynamic_cast<const HashidAnnotation*>(be_global->builtin_annotations_["::@hashid"]);
   std::string hash_name;
   if (hashid_ann->node_value_exists(member, hash_name)) {
-    OpenDDS::XTypes::Optional<std::string> hash_id(hash_name);
+    OPENDDS_OPTIONAL_NS::optional<std::string> hash_id(hash_name);
     if (!annotations) {
       OpenDDS::XTypes::AppliedBuiltinMemberAnnotations value;
-      annotations = OpenDDS::XTypes::Optional<OpenDDS::XTypes::AppliedBuiltinMemberAnnotations>(value);
+      annotations = OPENDDS_OPTIONAL_NS::optional<OpenDDS::XTypes::AppliedBuiltinMemberAnnotations>(value);
     }
     annotations.value().hash_id = hash_id;
   }

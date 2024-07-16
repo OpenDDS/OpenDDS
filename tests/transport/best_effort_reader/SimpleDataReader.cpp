@@ -3,6 +3,7 @@
 #include "dds/DCPS/transport/framework/TransportExceptions.h"
 #include "dds/DCPS/transport/framework/ReceivedDataSample.h"
 #include "dds/DCPS/AssociationData.h"
+#include "dds/DCPS/EncapsulationHeader.h"
 #include "dds/DCPS/GuidConverter.h"
 #include "dds/DCPS/Qos_Helper.h"
 

@@ -45,7 +45,8 @@ namespace {
   {
     const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
     const Classification cls = classify(field->field_type());
-    const std::string fieldName = field->local_name()->get_string();
+    std::string fieldName = field->local_name()->get_string();
+
     const std::string idl_name = canonical_name(field);
     if (cls & CL_SCALAR) {
       std::string prefix, suffix;
@@ -72,6 +73,11 @@ namespace {
       } else if (use_cxx11) {
         suffix += "()";
       }
+
+      if (be_global->is_optional(field)) {
+        fieldName += "().value";
+      }
+
       const std::string string_to_ptr = use_cxx11 ? "" : ".in()";
       be_global->impl_ <<
         "    if (std::strcmp(field, \"" << idl_name << "\") == 0) {\n"
@@ -80,8 +86,12 @@ namespace {
         "    }\n";
       be_global->add_include("<cstring>", BE_GlobalData::STREAM_CPP);
     } else if (cls & CL_STRUCTURE) {
-      delegateToNested(idl_name, field,
-                       "&typed." + std::string(use_cxx11 ? "_" : "") + fieldName);
+      std::string fieldAccessor = "&typed." + std::string(use_cxx11 ? "_" : "") + fieldName;
+      if (be_global->is_optional(field)) {
+        fieldAccessor += ".value()";
+      }
+
+      delegateToNested(idl_name, field, fieldAccessor);
       be_global->add_include("<cstring>", BE_GlobalData::STREAM_CPP);
     }
   }
@@ -315,7 +325,7 @@ namespace {
       marshal_generator::gen_field_getValueFromSerialized(struct_node, clazz);
     } else {
       be_global->impl_ <<
-        "  Value getValue(Serializer& ser, const char* field, const TypeSupportImpl* = 0) const\n"
+        "  Value getValue(Serializer& ser, const char* field, TypeSupportImpl* = 0) const\n"
         "  {\n"
         "    ACE_UNUSED_ARG(ser);\n"
         "    if (!field[0]) {\n"   // if 'field' is the empty string...

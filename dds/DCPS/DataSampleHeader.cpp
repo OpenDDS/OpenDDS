@@ -533,12 +533,12 @@ OPENDDS_STRING to_string(const DataSampleHeader& value)
   if (value.submessage_id_ != SUBMESSAGE_NONE) {
     ret += to_string(SubMessageId(value.submessage_id_));
     ret += " 0x";
-    ret += to_dds_string(unsigned(value.submessage_id_), true);
+    ret += to_dds_string(ACE_CDR::Octet(value.submessage_id_), true);
     ret += "), ";
   } else {
     ret += to_string(MessageId(value.message_id_));
     ret += " (0x";
-    ret += to_dds_string(unsigned(value.message_id_), true);
+    ret += to_dds_string(ACE_CDR::Octet(value.message_id_), true);
     ret += "), ";
   }
 

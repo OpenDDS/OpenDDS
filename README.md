@@ -62,7 +62,7 @@ If you wish to file a bug report:
 4. Add a launcher script `run_test.pl`.  Be sure to document the options.  See `tests/DCPS/HelloWorld/run_test.pl` for inspiration.
 5. Add a `README.rst` file that gives a high-level overview of the example and the problem that it illustrates.
 
-It should be possible to build and run the example using `run_test.pl` as in the quickstarts for [Windows](https://opendds.org/quickstart/GettingStartedWindows.html) and [Linux](https://opendds.org/quickstart/GettingStartedLinux.html).
+It should be possible to build and run the example using `run_test.pl` as in the quickstarts for [Windows](https://opendds.readthedocs.io/en/latest-release/devguide/quickstart/windows.html) and [Linux](https://opendds.readthedocs.io/en/latest-release/devguide/quickstart/linux.html).
 If the problem lies in the example, then GitHub's Pull Request interface will allow people to discuss, comment on, and propose changes to get the example working.
 If the problem lies in OpenDDS, then the example is a new test case.
 
@@ -83,7 +83,7 @@ formal/2019-04-03 (version 2.3)](https://www.omg.org/spec/DDSI-RTPS/2.3).  See
 the OpenDDS Developer's Guide and the file [docs/design/RTPS](docs/design/RTPS)
 for more details on RTPS.
 
-See the [Developer's Guide](https://opendds.readthedocs.io/en/latest-release/devguide/building/introduction.html) for
+See the [Developer's Guide](https://opendds.readthedocs.io/en/latest-release/devguide/introduction.html#specifications) for
 information on OpenDDS compliance with the DDS specification. If you would like
 to contribute a feature or sponsor the developers to add a feature please see
 the Support section above for contact information.
@@ -133,7 +133,7 @@ Windows family:
 Embedded/Mobile/IoT:
 * LynxOS-178 (OpenDDS Safety Profile)
 * VxWorks 6.9, 7, 21.03 (see below)
-* [Linux on Raspberry Pi](https://opendds.org/quickstart/GettingStartedPi.html)
+* [Linux on Raspberry Pi](https://opendds.readthedocs.io/en/latest-release/devguide/quickstart/pi.html)
 * [Android 9.0 "Pie" (API Level 28) NDK r18b](https://opendds.readthedocs.io/en/latest-release/devguide/building/android.html)
 
 We have built OpenDDS for VxWorks 6.9, 7, and 21.03 and have run basic
@@ -169,5 +169,5 @@ https://opendds.readthedocs.io/en/latest-release/devguide/building/index.html
 ## Quick Start with Docker
 
 See the [Docker Quick
-Start](https://opendds.org/quickstart/GettingStartedDocker.html) for
+Start](https://opendds.readthedocs.io/en/latest-release/devguide/quickstart/docker.html) for
 how to use the pre-built docker image.
