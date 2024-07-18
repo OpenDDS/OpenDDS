@@ -768,7 +768,7 @@ TransportClient::disassociate(const GUID_t& peerId)
   }
 
   OPENDDS_ASSERT(guid_ != GUID_UNKNOWN);
-  link->release_reservations(peerId, guid_, released);
+  link->release_reservations(peerId, guid_, &released);
 
   if (!released.empty()) {
 

@@ -106,8 +106,7 @@ struct DiscoveredParticipant {
     , participant_tokens_sent_(false)
 #endif
   {
-    const DCPS::GUID_t guid = DCPS::make_part_guid(p.participantProxy.guidPrefix);
-    assign(location_data_.guid, guid);
+    assign(location_data_.guid, make_part_guid());
     location_data_.location = 0;
     location_data_.change_mask = 0;
     location_data_.local_timestamp.sec = 0;
@@ -206,6 +205,21 @@ struct DiscoveredParticipant {
     return pdata_.dataKind == Security::DPDK_ENHANCED || pdata_.dataKind == Security::DPDK_SECURE;
   }
 #endif
+
+  const DCPS::GuidPrefix_t& prefix() const
+  {
+    return pdata_.participantProxy.guidPrefix;
+  }
+
+  DCPS::GUID_t make_guid(const DCPS::EntityId_t& entity) const
+  {
+    return DCPS::make_id(prefix(), entity);
+  }
+
+  DCPS::GUID_t make_part_guid() const
+  {
+    return DCPS::make_part_guid(prefix());
+  }
 };
 
 struct DiscoveredSubscription : DCPS::PoolAllocationBase {

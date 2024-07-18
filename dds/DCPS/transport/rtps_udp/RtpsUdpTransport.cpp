@@ -233,7 +233,7 @@ RtpsUdpTransport::stop_accepting_or_connecting(const TransportClient_wrch& clien
     if (link_) {
       TransportClient_rch c = client.lock();
       if (c) {
-        link_->disassociated(c->get_guid(), remote_id);
+        link_->release_reservations(c->get_guid(), remote_id);
       }
     }
   }

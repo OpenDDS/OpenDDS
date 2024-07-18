@@ -509,8 +509,8 @@ DataLink::peer_ids(const GUID_t& local_id) const
 /// with a simultaneous call (in another thread) to one of this
 /// DataLink's make_reservation() methods.
 void
-DataLink::release_reservations(GUID_t remote_id, GUID_t local_id,
-                               DataLinkSetMap& released_locals)
+DataLink::release_reservations(const GUID_t& remote_id, const GUID_t& local_id,
+                               DataLinkSetMap* released_locals)
 {
   DBG_ENTRY_LVL("DataLink", "release_reservations", 6);
 
@@ -550,11 +550,13 @@ DataLink::release_reservations(GUID_t remote_id, GUID_t local_id,
     }
     RepoIdSet& ris = assoc_by_local_[local_id].associated_;
     if (ris.size() == 1) {
-      DataLinkSet_rch& links = released_locals[local_id];
-      if (links.is_nil()) {
-        links = make_rch<DataLinkSet>();
+      if (released_locals) {
+        DataLinkSet_rch& links = (*released_locals)[local_id];
+        if (links.is_nil()) {
+          links = make_rch<DataLinkSet>();
+        }
+        links->insert_link(rchandle_from(this));
       }
-      links->insert_link(rchandle_from(this));
       assoc_by_local_.erase(local_id);
     } else {
       ris.erase(remote_id);

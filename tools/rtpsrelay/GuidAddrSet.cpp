@@ -26,8 +26,7 @@ GuidAddrSet::record_activity(const AddrPort& remote_address,
     auto result = remote_map_.insert(std::make_pair(remote, src_guid));
     if (result.second) {
       relay_stats_reporter_.remote_map_size(static_cast<uint32_t>(remote_map_.size()), now);
-    }
-    if (!result.second && result.first->second != src_guid) {
+    } else if (result.first->second != src_guid) {
       if (config_.log_activity()) {
         ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) INFO: GuidAddrSet::record_activity change detected %C -> %C\n"),
                    guid_to_string(result.first->second).c_str(),
