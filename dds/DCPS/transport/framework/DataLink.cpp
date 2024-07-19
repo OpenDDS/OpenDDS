@@ -541,25 +541,32 @@ DataLink::release_reservations(const GUID_t& remote_id, const GUID_t& local_id,
 
     if (this->stopped_) return;
 
-    ReceiveListenerSet_rch& rls = assoc_by_remote_[remote_id];
-    if (rls->size() == 1) {
-      assoc_by_remote_.erase(remote_id);
-      release_remote_required = true;
-    } else {
-      rls->remove(local_id);
-    }
-    RepoIdSet& ris = assoc_by_local_[local_id].associated_;
-    if (ris.size() == 1) {
-      if (released_locals) {
-        DataLinkSet_rch& links = (*released_locals)[local_id];
-        if (links.is_nil()) {
-          links = make_rch<DataLinkSet>();
-        }
-        links->insert_link(rchandle_from(this));
+    AssocByRemote::iterator remote_it = assoc_by_remote_.find(remote_id);
+    if (remote_it != assoc_by_remote_.end()) {
+      ReceiveListenerSet_rch& rls = remote_it->second;
+      if (rls->size() == 1) {
+        assoc_by_remote_.erase(remote_id);
+        release_remote_required = true;
+      } else {
+        rls->remove(local_id);
       }
-      assoc_by_local_.erase(local_id);
-    } else {
-      ris.erase(remote_id);
+    }
+
+    AssocByLocal::iterator local_it = assoc_by_local_.find(local_id);
+    if (local_it != assoc_by_local_.end()) {
+      RepoIdSet& ris = local_it->second.associated_;
+      if (ris.size() == 1) {
+        if (released_locals) {
+          DataLinkSet_rch& links = (*released_locals)[local_id];
+          if (links.is_nil()) {
+            links = make_rch<DataLinkSet>();
+          }
+          links->insert_link(rchandle_from(this));
+        }
+        assoc_by_local_.erase(local_id);
+      } else {
+        ris.erase(remote_id);
+      }
     }
 
     if (assoc_by_local_.empty()) {

@@ -957,14 +957,14 @@ RtpsUdpDataLink::release_reservations_i(const GUID_t& remote_id,
     RemoteInfoMap::iterator pos = locators_.find(remote_id);
     if (pos != locators_.end()) {
       OPENDDS_ASSERT(pos->second.ref_count_ > 0);
-
-      --pos->second.ref_count_;
-      if (pos->second.ref_count_ == 0) {
+      if (--pos->second.ref_count_ == 0) {
         locators_.erase(pos);
       }
     } else if (Transport_debug_level >= 4) {
-      ACE_DEBUG((LM_DEBUG, "(%P|%t) RtpsUdpDataLink::disassociated: "
-        "remote id %C does not have any locators\n", String(conv).c_str()));
+      g.release();
+      ACE_DEBUG((LM_DEBUG, "(%P|%t) RtpsUdpDataLink::release_reservations_i: "
+        "%C doesn't not have any locators with remote %C\n",
+        String(conv).c_str(), LogGuid(remote_id).c_str()));
     }
   }
 
