@@ -264,15 +264,16 @@ RtpsUdpTransport::use_datalink(const GUID_t& local_id,
 {
   NetworkAddressSet uc_addrs, mc_addrs;
   bool requires_inline_qos;
+  RTPS::VendorId_t vendor_id = { 0, 0 };
   unsigned int blob_bytes_read;
-  get_connection_addrs(remote_data, &uc_addrs, &mc_addrs, &requires_inline_qos, &blob_bytes_read);
+  get_connection_addrs(remote_data, &uc_addrs, &mc_addrs, &requires_inline_qos, &vendor_id, &blob_bytes_read);
 
   NetworkAddress disco_addr_hint;
   if (discovery_locator.length()) {
     NetworkAddressSet disco_uc_addrs, disco_mc_addrs;
     bool disco_requires_inline_qos;
     unsigned int disco_blob_bytes_read;
-    get_connection_addrs(discovery_locator, &disco_uc_addrs, &disco_mc_addrs, &disco_requires_inline_qos, &disco_blob_bytes_read);
+    get_connection_addrs(discovery_locator, &disco_uc_addrs, &disco_mc_addrs, &disco_requires_inline_qos, 0, &disco_blob_bytes_read);
 
     for (NetworkAddressSet::const_iterator it = disco_uc_addrs.begin(), limit = disco_uc_addrs.end(); it != limit; ++it) {
       for (NetworkAddressSet::const_iterator it2 = uc_addrs.begin(), limit2 = uc_addrs.end(); it2 != limit2; ++it2) {
@@ -286,6 +287,7 @@ RtpsUdpTransport::use_datalink(const GUID_t& local_id,
   if (link_) {
     return link_->associated(local_id, remote_id, local_reliable, remote_reliable,
                              local_durable, remote_durable,
+                             vendor_id,
                              participant_discovered_at, participant_flags, max_sn, client,
                              uc_addrs, mc_addrs, disco_addr_hint, requires_inline_qos);
   }
@@ -314,14 +316,20 @@ RtpsUdpTransport::get_connection_addrs(const TransportBLOB& remote,
                                        NetworkAddressSet* uc_addrs,
                                        NetworkAddressSet* mc_addrs,
                                        bool* requires_inline_qos,
+                                       RTPS::VendorId_t* vendor_id,
                                        unsigned int* blob_bytes_read) const
 {
   using namespace OpenDDS::RTPS;
   LocatorSeq locators;
+  VendorId_t vid;
   DDS::ReturnCode_t result =
-    blob_to_locators(remote, locators, requires_inline_qos, blob_bytes_read);
+    blob_to_locators(remote, locators, vid, requires_inline_qos, blob_bytes_read);
   if (result != DDS::RETCODE_OK) {
     return;
+  }
+
+  if (vendor_id) {
+    *vendor_id = vid;
   }
 
   for (CORBA::ULong i = 0; i < locators.length(); ++i) {
@@ -463,13 +471,14 @@ RtpsUdpTransport::update_locators(const GUID_t& remote,
     NetworkAddressSet uc_addrs, mc_addrs;
     bool requires_inline_qos;
     unsigned int blob_bytes_read;
-    get_connection_addrs(*blob, &uc_addrs, &mc_addrs, &requires_inline_qos, &blob_bytes_read);
+    get_connection_addrs(*blob, &uc_addrs, &mc_addrs, &requires_inline_qos, 0, &blob_bytes_read);
     link_->update_locators(remote, uc_addrs, mc_addrs, requires_inline_qos, false);
   }
 }
 
 void
 RtpsUdpTransport::get_last_recv_locator(const GUID_t& remote,
+                                        const GuidVendorId_t& vendor_id,
                                         TransportLocator& tl)
 {
   if (is_shut_down()) {
@@ -496,13 +505,19 @@ RtpsUdpTransport::get_last_recv_locator(const GUID_t& remote,
   locators.length(1);
   address_to_locator(locators[0], addr.to_addr());
 
+  RTPS::VendorId_t vid;
+  vid.vendorId[0] = vendor_id[0];
+  vid.vendorId[1] = vendor_id[1];
+
   const Encoding& encoding = RTPS::get_locators_encoding();
   size_t size = serialized_size(encoding, locators);
+  serialized_size(encoding, size, vid);
   primitive_serialized_size_boolean(encoding, size);
 
   ACE_Message_Block mb_locator(size);
   Serializer ser_loc(&mb_locator, encoding);
   ser_loc << locators;
+  ser_loc << vid;
   ser_loc << ACE_OutputCDR::from_boolean(expects_inline_qos);
 
   tl.transport_type = "rtps_udp";

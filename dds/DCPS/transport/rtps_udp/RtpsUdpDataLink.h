@@ -40,6 +40,9 @@
 #include <dds/DCPS/SequenceNumber.h>
 #include <dds/DCPS/SporadicEvent.h>
 
+#include <dds/DCPS/RTPS/MessageTypes.h>
+#include <dds/DCPS/RTPS/MessageUtils.h>
+
 #include <dds/OpenDDSConfigWrapper.h>
 
 #if OPENDDS_CONFIG_SECURITY
@@ -181,6 +184,7 @@ public:
   bool associated(const GUID_t& local, const GUID_t& remote,
                   bool local_reliable, bool remote_reliable,
                   bool local_durable, bool remote_durable,
+                  const RTPS::VendorId_t& vendor_id,
                   const MonotonicTime_t& participant_discovered_at,
                   ACE_CDR::ULong participant_flags,
                   SequenceNumber max_sn,
@@ -588,6 +592,7 @@ private:
 
   struct WriterInfo : RcObject {
     const GUID_t id_;
+    const RTPS::VendorId_t vendor_id_;
     const MonotonicTime_t participant_discovered_at_;
     DisjointSequence recvd_;
     typedef OPENDDS_MAP(SequenceNumber, ReceivedDataSample) HeldMap;
@@ -598,18 +603,36 @@ private:
     const ACE_CDR::ULong participant_flags_;
 
     WriterInfo(const GUID_t& id,
+               const RTPS::VendorId_t& vendor_id,
                const MonotonicTime_t& participant_discovered_at,
                ACE_CDR::ULong participant_flags)
       : id_(id)
+      , vendor_id_(vendor_id)
       , participant_discovered_at_(participant_discovered_at)
       , hb_last_(SequenceNumber::ZERO())
       , heartbeat_recvd_count_(0)
       , hb_frag_recvd_count_(0)
       , participant_flags_(participant_flags)
+      , acknack_count_(0)
     { }
 
     bool should_nack() const;
     bool sends_directed_hb() const;
+    SequenceNumber preemptive_acknack_base() const
+    {
+      // RTI expects 0 while the spec implies it should be 1.
+      static const RTPS::VendorId_t rti_vendor_id = { 0x01, 0x01 };
+      return vendor_id_ == rti_vendor_id ? 0 : 1;
+    }
+
+    CORBA::Long next_acknack_count()
+    {
+      // Reflect the heartbeat count for OpenDDS.
+      return vendor_id_ == RTPS::VENDORID_OPENDDS ? heartbeat_recvd_count_ : ++acknack_count_;
+    }
+
+  private:
+    CORBA::Long acknack_count_;
   };
   typedef RcHandle<WriterInfo> WriterInfo_rch;
 #ifdef ACE_HAS_CPP11

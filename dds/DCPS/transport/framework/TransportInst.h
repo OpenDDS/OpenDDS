@@ -149,6 +149,7 @@ public:
                                DomainParticipantImpl* /*participant*/) {}
 
   virtual void get_last_recv_locator(const GUID_t& /*remote_id*/,
+                                     const GuidVendorId_t& /*vendor_id*/,
                                      TransportLocator& /*locators*/,
                                      DDS::DomainId_t /*domain*/,
                                      DomainParticipantImpl* /*participant*/) {}

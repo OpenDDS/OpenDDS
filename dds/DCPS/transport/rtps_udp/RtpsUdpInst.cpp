@@ -736,7 +736,7 @@ RtpsUdpInst::populate_locator(TransportLocator& info,
   }
 
   info.transport_type = "rtps_udp";
-  RTPS::locators_to_blob(locators, info.data);
+  RTPS::locators_to_blob(locators, VENDORID_OPENDDS, info.data);
 
   return locators.length();
 }
@@ -768,6 +768,7 @@ RtpsUdpInst::update_locators(const GUID_t& remote_id,
 
 void
 RtpsUdpInst::get_last_recv_locator(const GUID_t& remote_id,
+                                   const GuidVendorId_t& vendor_id,
                                    TransportLocator& locator,
                                    DDS::DomainId_t domain,
                                    DomainParticipantImpl* participant)
@@ -775,7 +776,7 @@ RtpsUdpInst::get_last_recv_locator(const GUID_t& remote_id,
   TransportImpl_rch imp = get_or_create_impl(domain, participant);
   if (imp) {
     RtpsUdpTransport_rch rtps_impl = static_rchandle_cast<RtpsUdpTransport>(imp);
-    rtps_impl->get_last_recv_locator(remote_id, locator);
+    rtps_impl->get_last_recv_locator(remote_id, vendor_id, locator);
   }
 }
 

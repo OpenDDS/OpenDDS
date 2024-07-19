@@ -4679,6 +4679,23 @@ DDS::ParticipantBuiltinTopicData Spdp::get_part_bit_data(bool secure) const
   return bit_data;
 }
 
+VendorId_t Spdp::get_vendor_id(const GUID_t& guid) const
+{
+  const VendorId_t unknown_vendor = { 0, 0 };
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, unknown_vendor);
+  return get_vendor_id_i(guid);
+}
+
+VendorId_t Spdp::get_vendor_id_i(const GUID_t& guid) const
+{
+  const VendorId_t unknown_vendor = { 0, 0 };
+  DiscoveredParticipantConstIter iter = participants_.find(make_part_guid(guid));
+  if (iter != participants_.end()) {
+    return iter->second.pdata_.participantProxy.vendorId;
+  }
+  return unknown_vendor;
+}
+
 void Spdp::ignore_domain_participant(const GUID_t& ignoreId)
 {
   ACE_GUARD(ACE_Thread_Mutex, g, lock_);
