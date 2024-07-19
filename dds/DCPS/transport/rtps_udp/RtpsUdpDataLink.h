@@ -603,10 +603,25 @@ private:
       , heartbeat_recvd_count_(0)
       , hb_frag_recvd_count_(0)
       , participant_flags_(participant_flags)
+      , acknack_count_(0)
     { }
 
     bool should_nack() const;
     bool sends_directed_hb() const;
+    SequenceNumber preemptive_acknack_base() const
+    {
+      // RTI expects 0 while the spec implies it should be 1.
+      return (id_.guidPrefix[0] == 0x01 && id_.guidPrefix[1] == 0x01) ? 0 : 1;
+    }
+
+    CORBA::Long next_acknack_count()
+    {
+      // Reflect the heartbeat count for OpenDDS.
+      return (id_.guidPrefix[0] == 0x01 && id_.guidPrefix[1] == 0x03) ? heartbeat_recvd_count_ : ++acknack_count_;
+    }
+
+  private:
+    CORBA::Long acknack_count_;
   };
   typedef RcHandle<WriterInfo> WriterInfo_rch;
 #ifdef ACE_HAS_CPP11

@@ -2277,10 +2277,10 @@ RtpsUdpDataLink::RtpsReader::gather_preassociation_acknack_i(MetaSubmessageVec& 
     reader_id,
     writer_id,
     { // SequenceNumberSet: acking bitmapBase - 1
-      {0, 1},
+      to_rtps_seqnum(writer->preemptive_acknack_base()),
       num_bits, bitmap
     },
-    {writer->heartbeat_recvd_count_}
+    { writer->next_acknack_count() }
   };
   meta_submessage.sm_.acknack_sm(acknack);
   meta_submessages.push_back(meta_submessage);
@@ -2367,7 +2367,7 @@ RtpsUdpDataLink::RtpsReader::gather_ack_nacks_i(const WriterInfo_rch& writer,
         to_rtps_seqnum(ack),
         num_bits, bitmap
       },
-      {writer->heartbeat_recvd_count_}
+      { writer->next_acknack_count() }
     };
     meta_submessage.sm_.acknack_sm(acknack);
     meta_submessages.push_back(meta_submessage);
@@ -2396,7 +2396,7 @@ RtpsUdpDataLink::RtpsReader::gather_ack_nacks_i(const WriterInfo_rch& writer,
         to_rtps_seqnum(ack),
         num_bits, bitmap
       },
-      {writer->heartbeat_recvd_count_}
+      { writer->next_acknack_count() }
     };
     meta_submessage.sm_.acknack_sm(acknack);
     meta_submessages.push_back(meta_submessage);
@@ -3168,11 +3168,16 @@ RtpsUdpDataLink::RtpsWriter::process_acknack(const RTPS::AckNackSubmessage& ackn
     return;
   }
 
-  const SequenceNumber ack = to_opendds_seqnum(acknack.readerSNState.bitmapBase);
+  SequenceNumber ack = to_opendds_seqnum(acknack.readerSNState.bitmapBase);
 
   if (Transport_debug_level > 5) {
     ACE_DEBUG((LM_DEBUG, "(%P|%t) RtpsUdpDataLink::RtpsWriter::process_acknack: %C -> %C base %q bits %u count %d\n",
       LogGuid(src).c_str(), LogGuid(id_).c_str(), ack.getValue(), acknack.readerSNState.numBits, acknack.count.value));
+  }
+
+  if (ack == 0 && !bitmapNonEmpty(acknack.readerSNState)) {
+    // Adjust the ack to 1 to make it look like a preassociation acknack from OpenDDS.
+    ack = 1;
   }
 
   ReaderInfoMap::iterator ri = remote_readers_.find(src);
