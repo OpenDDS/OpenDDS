@@ -5,8 +5,17 @@
 
 module Messenger {
 
+    struct DataField {
+        string name;
+        sequence<octet> value;
+    };
+
+    typedef sequence<DataField> DataSeq;
+
+
   @topic
   struct Message {
+    DataSeq data;
     string text;
     @key
     long   subject_id;
