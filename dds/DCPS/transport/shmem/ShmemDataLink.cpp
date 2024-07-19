@@ -159,7 +159,7 @@ ShmemDataLink::send_association_msg(const GUID_t& local, const GUID_t& remote)
   Serializer ser(message.get(), encoding_unaligned_native);
   ser << remote;
   send_strategy_->link_released(false);
-  TransportControlElement* send_element = new TransportControlElement(move(message));
+  TransportControlElement* send_element = new TransportControlElement(OPENDDS_MOVE_NS::move(message));
   this->send_i(send_element, false);
 }
 

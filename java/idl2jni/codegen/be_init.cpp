@@ -39,6 +39,11 @@ BE_post_init(char *[], long)
   idl_global->unknown_annotations_ = IDL_GlobalData::UNKNOWN_ANNOTATIONS_IGNORE;
 
   DRV_cpp_putarg("-D__OPENDDS_IDL_HAS_ANNOTATIONS");
+  DRV_cpp_putarg("-DOPENDDS_HIDE_DYNAMIC_DATA");
 
-  idl_global->eval("module OpenDDS {@annotation hidden_op_in_java {string impl;};};\n");
+  // If adding or changing annotations here, they should also be copied into
+  // opendds_idl. dummy is there because IDL annotations can't be used before a
+  // scoped name starting with :: unless they have annotation parameters.
+  idl_global->eval(
+    "module OpenDDS {module internal {@annotation hidden_op_in_java {int8 dummy;};};};\n");
 }

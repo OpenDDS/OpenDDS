@@ -304,7 +304,7 @@ dds_visitor::visit_structure(AST_Structure* node)
   }
 
   for (vector<AST_Field*>::iterator it = field_vec.begin(); it != field_vec.end(); ++it) {
-    if (be_global->is_optional(*it)) {
+    if (be_global->is_optional(*it) && be_global->language_mapping() != BE_GlobalData::LANGMAP_CXX11) {
       idl_global->err()->misc_warning("@optional annotation isn't fully supported", *it);
     }
   }

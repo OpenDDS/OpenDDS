@@ -1,0 +1,17 @@
+module Optional {
+
+  struct TestStruct {
+    octet octet_field;
+  };
+
+  @appendable
+  struct OptionalMembers {
+    @optional boolean bool_field;
+    @optional short short_field;
+    @optional int32 int32_field;
+    @optional int64 int64_field;
+    @optional string str_field;
+    @optional sequence<int32> seq_field;
+    @optional TestStruct struct_field;
+  };
+};

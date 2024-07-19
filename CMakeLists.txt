@@ -64,6 +64,7 @@ endif()
 set(OPENDDS_CONFIG_AUTO_STATIC_INCLUDES 1) # Always true for CMake builds
 set(config_file "dds/OpenDDSConfig.h")
 set(config_out_dir "${CMAKE_CURRENT_BINARY_DIR}/opendds_config_include")
+set(OPENDDS_CONFIG_INCLUDE_DIR "${config_out_dir}" CACHE INTERNAL "")
 set(config_out_file "${config_out_dir}/${config_file}")
 configure_file("${config_file}.in" "${config_out_file}")
 add_library(OpenDDS_Config INTERFACE)
@@ -136,6 +137,7 @@ install(
     cmake/opendds_version.cmake
     cmake/tao_group.cmake
     cmake/tao_idl_sources.cmake
+    cmake/test_cxx_std.cpp
     "${config_cmake}"
   DESTINATION "${cmake_dest}"
 )

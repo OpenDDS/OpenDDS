@@ -8,6 +8,7 @@
 #include <dds/DdsDcpsInfrastructureC.h>
 #include <dds/DdsDcpsPublicationC.h>
 #include <dds/DdsDcpsSubscriptionC.h>
+#include <dds/OpenDDSConfigWrapper.h>
 
 #include <dds/DCPS/Marked_Default_Qos.h>
 #include <dds/DCPS/Service_Participant.h>
@@ -28,14 +29,14 @@
 
 #include <ace/Argv_Type_Converter.h>
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
 #include <dds/DCPS/security/framework/Properties.h>
 #endif
 
 using namespace OpenDDS::RTPS;
 using namespace OpenDDS::DCPS;
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
 // security setup helpers:
 
 const char auth_ca_file[] = "file:security/TESTONLY_identity_ca_cert.pem";
@@ -158,7 +159,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[]) {
     DDS::DomainParticipantQos dp_qos;
     dpf->get_default_participant_qos(dp_qos);
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
     if (!governance.empty() && !permissions.empty()) {
       TheServiceParticipant->set_security(true);
       DDS::PropertySeq& props = dp_qos.property.value;
@@ -191,7 +192,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[]) {
     // create and show your widgets here
     ShapesDialog shapes(participant, qosConfig, defaultSize);
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
     if (TheServiceParticipant->get_security()) {
       shapes.setWindowTitle("OpenDDS with DDS Security");
     }

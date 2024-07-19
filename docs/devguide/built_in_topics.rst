@@ -229,6 +229,7 @@ OpenDDSParticipantLocation Topic
 
 The built-in topic ``OpenDDSParticipantLocation`` is published by the DDSI-RTPS discovery implementation to give applications visibility into the details of how each remote participant is connected over the network.
 If the RtpsRelay (:ref:`internet_enabled_rtps--the-rtpsrelay`) and/or IETF ICE (:ref:`internet_enabled_rtps--interactive-connectivity-establishment-ice-for-rtps`) are enabled, their usage is reflected in the OpenDDSParticipantLocation topic data.
+Instances of this built-in topic are published before participant discovery is complete so that applications can be notified that discovery is in progress.
 The topic type ParticipantLocationBuiltinTopicData is defined in :ghfile:`dds/OpenddsDcpsExt.idl` in the ``OpenDDS::DCPS`` module:
 
 * ``guid`` (key) -- The GUID of the remote participant.
@@ -253,6 +254,8 @@ The topic type ParticipantLocationBuiltinTopicData is defined in :ghfile:`dds/Op
 * ``local6_addr``, ``local6_timestamp``, ``ice6_addr``, ``ice6_timestamp``, ``relay6_addr``, and ``relay6_timestamp`` -- Are the IPV6 equivalents.
 
 * ``lease_duration`` -- The remote participant's :cfg:prop:`[rtps_discovery]LeaseDuration`
+
+* ``user_tag`` -- The remote participant's :cfg:prop:`[rtps_discovery]SpdpUserTag`
 
 .. _built_in_topics--openddsconnectionrecord-topic:
 
@@ -294,3 +297,5 @@ The topic type InternalThreadBuiltinTopicData is defined in :ghfile:`dds/Opendds
 * ``thread_id`` (key) -- A string identifier for the thread.
 
 * ``utilization`` -- Estimated utilization of this thread (0.0-1.0).
+
+* ``monotonic_timestamp`` -- Time of most recent update (monotonic clock).  The SampleInfo's ``source_timestamp`` has the timestamp on the system clock.

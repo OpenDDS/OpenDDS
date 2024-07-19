@@ -12,9 +12,10 @@
 #include "FilterEvaluator.h"
 #include "FilterExpressionGrammar.h"
 #include "AstNodeWrapper.h"
-#include "Definitions.h"
 #include "SafetyProfileStreams.h"
 #include "TypeSupportImpl.h"
+#include "GuidConverter.h"
+#include "EncapsulationHeader.h"
 
 #include <ace/ACE.h>
 
@@ -119,7 +120,7 @@ FilterEvaluator::DeserializedForEval::lookup(const char* field) const
 }
 
 FilterEvaluator::SerializedForEval::SerializedForEval(ACE_Message_Block* data,
-                                                      const TypeSupportImpl& type_support,
+                                                      TypeSupportImpl& type_support,
                                                       const DDS::StringSeq& params,
                                                       Encoding encoding)
   : DataForEval(type_support.getMetaStructForType(), params)
@@ -148,7 +149,7 @@ FilterEvaluator::SerializedForEval::lookup(const char* field) const
         "deserialization of encapsulation header failed.\n");
     }
     Encoding encoding;
-    if (!encap.to_encoding(encoding, exten_)) {
+    if (!to_encoding(encoding, encap, exten_)) {
       ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR ")
         ACE_TEXT("FilterEvaluator::SerializedForEval::lookup: ")
         ACE_TEXT("failed to convert encapsulation header to encoding.\n")));
@@ -629,6 +630,10 @@ Value::Value(const std::string& s, bool conversion_preferred)
 {}
 
 #ifdef DDS_HAS_WCHAR
+Value::Value(ACE_OutputCDR::from_wchar wc, bool conversion_preferred)
+  : type_(VAL_INT), i_(wc.val_), conversion_preferred_(conversion_preferred)
+{}
+
 Value::Value(const std::wstring& s, bool conversion_preferred)
   : type_(VAL_STRING), s_(ACE_OS::strdup(ACE_Wide_To_Ascii(s.c_str()).char_rep()))
   , conversion_preferred_(conversion_preferred)

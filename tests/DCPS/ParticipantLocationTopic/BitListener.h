@@ -1,0 +1,74 @@
+/*
+ *
+ *
+ * Distributed under the OpenDDS License.
+ * See: http://www.opendds.org/license.html
+ */
+
+#ifndef BIT_LISTENER
+#define BIT_LISTENER
+
+#include <dds/DdsDcpsCoreTypeSupportC.h>
+#include <dds/DdsDcpsSubscriptionC.h>
+#include <dds/OpenddsDcpsExtTypeSupportC.h>
+
+#include <dds/DCPS/LocalObject.h>
+#include <dds/DCPS/GuidUtils.h>
+
+#include <map>
+
+#if !defined (ACE_LACKS_PRAGMA_ONCE)
+#pragma once
+#endif /* ACE_LACKS_PRAGMA_ONCE */
+
+typedef void (*callback_t)();
+
+class BitListener
+  : public virtual OpenDDS::DCPS::LocalObject<DDS::DataReaderListener> {
+public:
+  BitListener(const std::string& id, bool no_ice, bool ipv6, callback_t done_callback);
+
+  virtual ~BitListener();
+
+  virtual void on_requested_deadline_missed(DDS::DataReader_ptr reader,
+                                            const DDS::RequestedDeadlineMissedStatus& status);
+
+  virtual void on_requested_incompatible_qos(DDS::DataReader_ptr reader,
+                                             const DDS::RequestedIncompatibleQosStatus& status);
+
+  virtual void on_liveliness_changed(DDS::DataReader_ptr reader,
+                                     const DDS::LivelinessChangedStatus& status);
+
+  virtual void on_subscription_matched(DDS::DataReader_ptr reader,
+                                       const DDS::SubscriptionMatchedStatus& status);
+
+  virtual void on_sample_rejected(DDS::DataReader_ptr reader,
+                                  const DDS::SampleRejectedStatus& status);
+
+  virtual void on_data_available(DDS::DataReader_ptr reader);
+
+  virtual void on_sample_lost(DDS::DataReader_ptr reader,
+                              const DDS::SampleLostStatus& status);
+
+  bool check(bool print_results = true);
+
+private:
+  ACE_Thread_Mutex mutex_;
+
+  typedef std::map<OpenDDS::DCPS::GUID_t, OpenDDS::DCPS::ParticipantLocation, OpenDDS::DCPS::GUID_tKeyLessThan> LocationMapType;
+  LocationMapType location_map;
+
+  const std::string id_;
+  bool no_ice_;
+  bool ipv6_;
+  callback_t done_callback_;
+  bool done_;
+
+  typedef std::set<OpenDDS::DCPS::GUID_t, OpenDDS::DCPS::GUID_tKeyLessThan> GuidSetType;
+  GuidSetType participants_seen_;
+
+  void on_data_available_i(OpenDDS::DCPS::ParticipantLocationBuiltinTopicDataDataReader_var builtin_dr);
+  void on_data_available_i(DDS::ParticipantBuiltinTopicDataDataReader_var builtin_dr);
+};
+
+#endif

@@ -36,7 +36,7 @@ public class InternalThreadListener extends DDS._DataReaderListenerLocalBase {
 
     InternalThreadBuiltinTopicDataHolder info =
       new InternalThreadBuiltinTopicDataHolder(
-        new InternalThreadBuiltinTopicData("", 0.0));
+        new InternalThreadBuiltinTopicData("", 0.0, new MonotonicTime_t()));
 
     SampleInfoHolder si = new SampleInfoHolder(new SampleInfo(0, 0, 0,
       new DDS.Time_t(), 0, 0, 0, 0, 0, 0, 0, false, 0));
@@ -48,6 +48,7 @@ public class InternalThreadListener extends DDS._DataReaderListenerLocalBase {
       System.out.println("== " + id + " Thread Info ==");
       System.out.println("        tid: " + info.value.thread_id);
       System.out.println("utilization: " + info.value.utilization);
+      System.out.println("  monotonic: " + info.value.monotonic_timestamp.sec);
       System.out.println("       time: " + si.value.source_timestamp.sec);
     }
   }

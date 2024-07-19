@@ -11,8 +11,9 @@
 #include "dds/OpenddsDcpsExt.idl"
 #include "dds/DdsDcpsInfoUtils.idl"
 #include "dds/DdsDcpsInfrastructure.idl"
+#include <dds/OpenDDSConfigWrapper.idl>
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
 #include "dds/DdsSecurityParams.idl"
 #endif
 
@@ -344,6 +345,7 @@ module OpenDDS {
     const ParameterId_t PID_OPENDDS_ICE_CANDIDATE     = PID_OPENDDS_BASE + 4;
     const ParameterId_t PID_OPENDDS_PARTICIPANT_FLAGS = PID_OPENDDS_BASE + 5;
     const ParameterId_t PID_OPENDDS_RTPS_RELAY_APPLICATION_PARTICIPANT = PID_OPENDDS_BASE + 6;
+    const ParameterId_t PID_OPENDDS_SPDP_USER_TAG     = PID_OPENDDS_BASE + 7;
 
     /* Always used inside a ParameterList */
     /* custom de/serializer implemented in opendds_idl */
@@ -469,7 +471,7 @@ module OpenDDS {
       case PID_OPENDDS_LOCATOR:
         DCPS::TransportLocator opendds_locator;
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
       case DDS::Security::PID_IDENTITY_TOKEN:
         DDS::Security::IdentityToken identity_token;
 
@@ -515,6 +517,9 @@ module OpenDDS {
 
       case PID_XTYPES_TYPE_CONSISTENCY:
         DDS::TypeConsistencyEnforcementQosPolicy type_consistency;
+
+      case PID_OPENDDS_SPDP_USER_TAG:
+        unsigned long user_tag;
 
       default:
         DDS::OctetSeq unknown_data;
@@ -618,9 +623,10 @@ module OpenDDS {
       DDS::PropertyQosPolicy property;
       OpenDDSParticipantFlags_t opendds_participant_flags;
       boolean opendds_rtps_relay_application_participant;
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
       DDS::Security::ExtendedBuiltinEndpointSet_t availableExtendedBuiltinEndpoints;
 #endif
+      unsigned long opendds_user_tag;
     };
 
     // top-level data type for SPDP

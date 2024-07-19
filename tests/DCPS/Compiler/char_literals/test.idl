@@ -1,8 +1,14 @@
 #if defined __TAO_IDL_FEATURES
 #  include __TAO_IDL_FEATURES
 #  define WCHAR_DISC TAO_IDL_HAS_OCTET_AND_WCHAR_UNION_DISCS
+#  ifdef TAO_IDL_HAS_WCHAR_ESCAPE_SEQUENCES
+#    define WCHAR_ESC_SEQ TAO_IDL_HAS_WCHAR_ESCAPE_SEQUENCES
+#  endif
 #else
 #  define WCHAR_DISC 0
+#endif
+#ifndef WCHAR_ESC_SEQ
+#  define WCHAR_ESC_SEQ 0
 #endif
 
 const char c_a = 'a';
@@ -23,9 +29,12 @@ const char c_hex_1 = '\x1';
 const char c_hex_254 = '\xfe';
 
 @topic
+const char c_const = '*';
 union CharUnion switch (@key char) {
 case 'a':
   long a;
+case c_const:
+  long const_branch;
 case '\n':
   long newline;
 case '\t':
@@ -64,7 +73,7 @@ const string str_normal = "a\n \t \v \b \r \f \a \\ \? \' \"";
 const string str_values = "\377\x1\xfe\0";
 
 const wchar wc_a = L'a';
-/* TODO(iguessthislldo): See https://github.com/DOCGroup/ACE_TAO/issues/1284
+#if WCHAR_ESC_SEQ
 const wchar wc_newline = L'\n';
 const wchar wc_tab = L'\t';
 const wchar wc_vertical_tab = L'\v';
@@ -80,17 +89,21 @@ const wchar wc_oct_0 = L'\0';
 const wchar wc_oct_255 = L'\377';
 const wchar wc_hex_1 = L'\x1';
 const wchar wc_hex_254 = L'\xfe';
-*/
-// TODO(iguessthislldo): See https://github.com/DOCGroup/ACE_TAO/issues/1284#issuecomment-879455512
-#ifdef __OPENDDS_IDL
+#endif
+#if defined __OPENDDS_IDL || WCHAR_ESC_SEQ
 const wchar wc_u_escape = L'\u203C'; // (Double Exclamation Mark: ‼)
 #endif
 
+/* TODO: tao_idl supports these now, but OpenDDS doesn't
 #if WCHAR_DISC
+const wchar wc_const = L'*';
 @topic
 union WcharUnion switch (@key wchar) {
 case L'a':
   long a;
+case wc_const:
+  long const_branch;
+#if WCHAR_ESC_SEQ
 case L'\n':
   long newline;
 case L'\t':
@@ -123,10 +136,12 @@ case L'\xfe':
   long hex_254;
 case L'\u203C':
   long u_escape;
+#endif
 default:
   long defualt_member;
-}
+};
 #endif
+*/
 
 /* TODO(iguessthislldo): config-linux.h doesn't seem to have ACE_HAS_WCHAR
  * defined, which makes WChar typedef to ACE_UINT16, which doesn't seem to

@@ -6,21 +6,21 @@
 #ifndef OPENDDS_DCPS_SERVICE_PARTICIPANT_H
 #define OPENDDS_DCPS_SERVICE_PARTICIPANT_H
 
+#include "AtomicBool.h"
+#include "ConfigStoreImpl.h"
 #include "Definitions.h"
-#include "MonitorFactory.h"
 #include "Discovery.h"
-#include "PoolAllocator.h"
 #include "DomainParticipantFactoryImpl.h"
-#include "unique_ptr.h"
-#include "ReactorTask.h"
 #include "JobQueue.h"
-#include "NetworkConfigMonitor.h"
+#include "MonitorFactory.h"
 #include "NetworkConfigModifier.h"
+#include "NetworkConfigMonitor.h"
+#include "PoolAllocator.h"
+#include "ReactorTask.h"
 #include "Recorder.h"
 #include "Replayer.h"
 #include "TimeSource.h"
-#include "AtomicBool.h"
-#include "ConfigStoreImpl.h"
+#include "unique_ptr.h"
 
 #include <dds/DdsDcpsInfrastructureC.h>
 #include <dds/DdsDcpsDomainC.h>
@@ -157,7 +157,7 @@ const int COMMON_SCHEDULER_SLICE_default = 0;
 const char DEFAULT_CONFIGURATION_FILE[] = "DEFAULT_CONFIGURATION_FILE";
 const String DEFAULT_CONFIGURATION_FILE_default = "";
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
 const char COMMON_DCPS_SECURITY[] = "COMMON_DCPS_SECURITY";
 const bool COMMON_DCPS_SECURITY_default = false;
 
@@ -452,7 +452,7 @@ public:
   void bit_lookup_duration_msec(int msec);
   //@}
 
-#if defined(OPENDDS_SECURITY)
+#if OPENDDS_CONFIG_SECURITY
   bool get_security() const;
   void set_security(bool b);
 #endif

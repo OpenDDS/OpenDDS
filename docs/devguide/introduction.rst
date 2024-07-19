@@ -36,7 +36,7 @@ You may modify it for your own needs, within the terms of the license agreements
 You must not copyright OpenDDS software.
 For details of the licensing terms, see the file named :ghfile:`LICENSE` that is included in the OpenDDS source code distribution or visit https://opendds.org/about/license.html.
 
-OpenDDS also utilizes other open source software products including MPC (Make Project Creator), ACE (the ADAPTIVE Communication Environment), and TAO (The ACE ORB).
+OpenDDS also utilizes other open source software products including :ref:`deps-mpc` and :ref:`deps-ace-tao`.
 
 OpenDDS is open source and the development team welcomes contributions of code, tests, documentation, and ideas.
 Active participation by users ensures a robust implementation.
@@ -70,7 +70,7 @@ Real-time Publish-Subscribe (RTPS)
 
 The full name of this specification is the *Real-time Publish-Subscribe Protocol DDS Interoperability Wire Protocol* (DDSI-RTPS), but can also be just called RTPS.
 This specification describes the requirements for interoperability between DDS implementations.
-See :ref:`rtps-disc` for more information.
+See :ref:`rtps-disc` and :ref:`rtps-udp-transport` for more information.
 
 The version OpenDDS uses is :omgspec:`rtps`.
 Although the document number is v2.3, it specifies protocol version 2.4.
@@ -741,7 +741,7 @@ In Static Discovery, each participant starts with a database containing identifi
 When an application creates a data writer or data reader, Static Discovery causes it to send out periodic announcements.
 Upon receiving one of these announcements, Static Discovery consults its local database of entities to look up the details necessary for matching and matches it against local entities.
 
-Static Discovery requires that the :ref:`quality_of_service--user-data` QoS be configured for each participant, data writer, and data reader.
+Static Discovery requires that the :ref:`qos-user-data` be configured for each participant, data writer, and data reader.
 This user data must contain the identifier of the entity that is being created.
 Thus, the user data QoS is not available for general use when using Static Discovery.
 Static Discovery also requires that the network locators for all entities be determined up front by configuring the transport with the necessary networking information.
@@ -756,7 +756,7 @@ Threading
 
 OpenDDS creates its own threads for handling I/O, timers, asynchronous jobs, and cleanup tasks.
 These threads are collectively called *service threads*.
-Applications may receive a callback from these threads via :ref:`introduction--listeners` (see :ref:`conditions_and_listeners--listeners`).
+Applications may receive a callback from these threads via :ref:`conditions_and_listeners--listeners`.
 
 When publishing a sample, OpenDDS normally attempts to send the sample to any connected subscribers using the calling thread.
 If the send call would block, then the sample may be queued for sending on a separate service thread.

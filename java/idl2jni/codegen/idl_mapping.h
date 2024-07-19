@@ -164,6 +164,6 @@ private:
                          bool sequence, const std::string &length, bool elementIsObjref = false);
 };
 
-bool is_hidden_op_in_java(AST_Operation* op, std::string* impl = 0);
+bool is_hidden_op_in_java(AST_Operation* op);
 
 #endif

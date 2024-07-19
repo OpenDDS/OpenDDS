@@ -10,11 +10,13 @@
 #include "MessageUtils.h"
 
 #include <dds/DCPS/DCPS_Utils.h>
-#include <dds/DCPS/GuidUtils.h>
-#include <dds/DCPS/Qos_Helper.h>
 #include <dds/DCPS/DCPS_Utils.h>
-#include <dds/DCPS/Service_Participant.h>
+#include <dds/DCPS/GuidUtils.h>
 #include <dds/DCPS/NetworkResource.h>
+#include <dds/DCPS/Qos_Helper.h>
+#include <dds/DCPS/Service_Participant.h>
+
+#include <dds/OpenDDSConfigWrapper.h>
 
 #include <cstring>
 
@@ -272,7 +274,7 @@ namespace {
     }
   }
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
   OpenDDS::Security::DiscoveredParticipantDataKind find_data_kind(const ParameterList& param_list)
   {
     enum FieldMaskNames {
@@ -363,7 +365,7 @@ bool from_param_list(const ParameterList& param_list,
   return true;
 }
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
 bool to_param_list(const DDS::Security::ParticipantBuiltinTopicData& pbtd,
                    ParameterList& param_list)
 {
@@ -513,7 +515,7 @@ bool to_param_list(const ParticipantProxy_t& proxy,
     proxy.availableBuiltinEndpoints);
   DCPS::push_back(param_list, be_param);
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
   Parameter ebe_param;
   ebe_param.extended_builtin_endpoints(
     proxy.availableExtendedBuiltinEndpoints);
@@ -571,12 +573,13 @@ bool from_param_list(const ParameterList& param_list,
 {
   // Start by setting defaults
   proxy.availableBuiltinEndpoints = 0;
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
   proxy.availableExtendedBuiltinEndpoints = 0;
 #endif
   proxy.expectsInlineQos = false;
   proxy.opendds_participant_flags.bits = 0;
   proxy.opendds_rtps_relay_application_participant = false;
+  proxy.opendds_user_tag = 0;
 
   const CORBA::ULong length = param_list.length();
   for (CORBA::ULong i = 0; i < length; ++i) {
@@ -615,7 +618,7 @@ bool from_param_list(const ParameterList& param_list,
         proxy.availableBuiltinEndpoints =
             param.builtin_endpoints();
         break;
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
       case DDS::Security::PID_EXTENDED_BUILTIN_ENDPOINTS:
         proxy.availableExtendedBuiltinEndpoints =
           param.extended_builtin_endpoints();
@@ -653,6 +656,9 @@ bool from_param_list(const ParameterList& param_list,
         break;
       case PID_OPENDDS_RTPS_RELAY_APPLICATION_PARTICIPANT:
         proxy.opendds_rtps_relay_application_participant = param.opendds_rtps_relay_application_participant();
+        break;
+      case PID_OPENDDS_SPDP_USER_TAG:
+        proxy.opendds_user_tag = param.user_tag();
         break;
       case PID_SENTINEL:
       case PID_PAD:
@@ -734,7 +740,7 @@ bool from_param_list(const ParameterList& param_list,
   return result;
 }
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
 bool to_param_list(const OpenDDS::Security::SPDPdiscoveredParticipantData& participant_data,
                    ParameterList& param_list)
 {
@@ -1473,7 +1479,7 @@ bool from_param_list(const ParameterList& param_list,
   return true;
 }
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
 bool to_param_list(const DDS::Security::EndpointSecurityInfo& info,
                    ParameterList& param_list)
 {

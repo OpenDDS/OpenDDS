@@ -17,11 +17,13 @@
 
 #include "dds/DCPS/Service_Participant.h"
 
+#include <dds/OpenDDSConfigWrapper.h>
+
 namespace {
   const char* logoFile()
   {
     return
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
       TheServiceParticipant->get_security() ? ":/images/logo_secure_beta.png" :
 #endif
       ":/images/logo.png";

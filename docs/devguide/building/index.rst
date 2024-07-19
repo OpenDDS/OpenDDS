@@ -84,6 +84,8 @@ If configure runs successfully it will end with a message about the next steps f
 .. tab:: Windows
 
   The configure script will say how to open the solution file for OpenDDS in Visual Studio using ``devenv``.
+  Before building, check that the "Configuration" and "Platform" are correct.
+  In Visual Studio, select "Build" and then "Build Solution".
 
   It can also be built directly from the command prompt by using MSBuild.
   For example, if the configure script was ran without any arguments, to do a Debug x64 build:
@@ -603,7 +605,7 @@ These are all the variables that are exclusive to building OpenDDS with CMake:
 .. cmake:var:: OPENDDS_ACE_TAO_KIND
 
   The default is ``ace7tao3`` for :ref:`ACE 7/TAO 3 <ace7tao3>`.
-  Use ``ace6tao2`` to get :ref:`ACE 6/TAO 2 <ace6tao2>`.
+  See :ref:`here <deps-ace-tao>` for other versions of ACE/TAO.
 
   .. versionadded:: 3.27
 
@@ -689,7 +691,9 @@ These are all the variables that are exclusive to building OpenDDS with CMake:
 
   .. versionadded:: 3.28
 
-Speeding up the build
+.. _cmake-building-speed:
+
+Speeding up the Build
 ---------------------
 
 A major speed up supported by all the CMake generators are `unity builds <https://cmake.org/cmake/help/latest/prop_tgt/UNITY_BUILD.html>`__.

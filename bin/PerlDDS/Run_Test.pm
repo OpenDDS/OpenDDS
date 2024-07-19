@@ -595,7 +595,7 @@ sub _process_common {
   my $self = shift;
   my $name = shift;
   my $params = shift;
-  my $debug_logging = $self->{dcps_log_level};
+  my $debug_logging = 1;
 
   if ($$params !~ /-DCPSLogLevel / && $self->{dcps_log_level}) {
     $$params .= " -DCPSLogLevel $self->{dcps_log_level}";
