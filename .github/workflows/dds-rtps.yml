@@ -58,12 +58,14 @@ jobs:
     - name: build shape_main
       shell: bash
       run: |
-        cd dds-rtps/srcCxx
-        . ../../OpenDDS/setenv.sh
-        mwc.pl -type gnuace
-        make -sj4
+        cd dds-rtps/srcCxx/opendds-cmake
+        . ../../../OpenDDS/setenv.sh
+        mkdir build
+        cd build
+        cmake ..
+        cmake --build . -- -j4
     - name: upload shape_main artifact
       uses: actions/upload-artifact@v4
       with:
         name: ${{ github.job }}_artifact
-        path: dds-rtps/srcCxx/shape_main
+        path: dds-rtps/srcCxx/opendds-cmake/build/shape_main
