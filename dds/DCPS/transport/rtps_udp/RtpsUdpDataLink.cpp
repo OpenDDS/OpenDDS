@@ -2174,7 +2174,8 @@ RtpsUdpDataLink::RtpsReader::add_writer(const WriterInfo_rch& writer)
       return false;
     }
 
-    preassociation_task_->schedule(heartbeat_period_);
+    fallback_.set(initial_fallback_);
+    preassociation_task_->schedule(fallback_.get());
     MetaSubmessageVec meta_submessages;
     gather_preassociation_acknack_i(meta_submessages, writer);
     g.release();
@@ -2254,11 +2255,12 @@ RtpsUdpDataLink::RtpsReader::send_preassociation_acknacks(const MonotonicTimePoi
          pos != limit; ++pos) {
       gather_preassociation_acknack_i(meta_submessages, *pos);
     }
+
+    fallback_.advance();
+    preassociation_task_->schedule(fallback_.get());
   }
 
   link->queue_submessages(meta_submessages);
-
-  preassociation_task_->schedule(heartbeat_period_);
 }
 
 void

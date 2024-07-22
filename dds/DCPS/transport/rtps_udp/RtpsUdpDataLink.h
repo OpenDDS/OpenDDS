@@ -700,7 +700,8 @@ private:
     bool stopping_;
     CORBA::Long nackfrag_count_;
     RcHandle<SporadicEvent> preassociation_task_;
-    TimeDuration heartbeat_period_;
+    const TimeDuration initial_fallback_;
+    FibonacciSequence<TimeDuration> fallback_;
   };
   typedef RcHandle<RtpsReader> RtpsReader_rch;
 
