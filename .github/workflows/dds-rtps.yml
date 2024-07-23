@@ -58,12 +58,10 @@ jobs:
     - name: build shape_main
       shell: bash
       run: |
+        . OpenDDS/setenv.sh
         cd dds-rtps/srcCxx/opendds-cmake
-        . ../../../OpenDDS/setenv.sh
-        mkdir build
-        cd build
-        cmake ..
-        cmake --build . -- -j4
+        cmake -S . -B build
+        cmake --build build -- -j4
     - name: upload shape_main artifact
       uses: actions/upload-artifact@v4
       with:
