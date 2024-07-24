@@ -486,9 +486,9 @@ RtpsUdpDataLink::update_locators(const GUID_t& remote_id,
                                  bool requires_inline_qos,
                                  bool add_ref)
 {
-  const bool log_error = log_level >= LogLevel::Error;
-  if (log_error && unicast_addresses.empty() && multicast_addresses.empty()) {
-    ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: RtpsUdpDataLink::update_locators: "
+  const bool log_warn = log_level >= LogLevel::Warning;
+  if (log_warn && unicast_addresses.empty() && multicast_addresses.empty()) {
+    ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: RtpsUdpDataLink::update_locators: "
       "no addresses for %C\n", LogGuid(remote_id).c_str()));
   }
 
@@ -503,9 +503,9 @@ RtpsUdpDataLink::update_locators(const GUID_t& remote_id,
     RemoteInfoMap::iterator it = locators_.find(remote_id);
     locators_.find(remote_id);
     if (it == locators_.end()) {
-      if (log_error) {
+      if (log_warn) {
         g.release();
-        ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: RtpsUdpDataLink::update_locators: "
+        ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: RtpsUdpDataLink::update_locators: "
           "no existing locators to update for %C\n", LogGuid(remote_id).c_str()));
       }
       return;
@@ -513,9 +513,9 @@ RtpsUdpDataLink::update_locators(const GUID_t& remote_id,
     info = &it->second;
   }
 
-  const bool log = DCPS_debug_level >= 4;
-  const bool log_unicast_change = log && info->unicast_addrs_ != unicast_addresses;
-  const bool log_multicast_change = log && info->multicast_addrs_ != multicast_addresses;
+  const bool log_change = DCPS_debug_level >= 4;
+  const bool log_unicast_change = log_change && info->unicast_addrs_ != unicast_addresses;
+  const bool log_multicast_change = log_change && info->multicast_addrs_ != multicast_addresses;
   info->unicast_addrs_.swap(unicast_addresses);
   info->multicast_addrs_.swap(multicast_addresses);
   info->requires_inline_qos_ = requires_inline_qos;
