@@ -54,6 +54,7 @@ struct DiscoveredParticipant {
     : location_ih_(DDS::HANDLE_NIL)
     , bit_ih_(DDS::HANDLE_NIL)
     , seq_reset_count_(0)
+    , opendds_user_tag_(0)
 #if OPENDDS_CONFIG_SECURITY
     , have_spdp_info_(false)
     , have_sedp_info_(false)
