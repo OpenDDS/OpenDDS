@@ -217,7 +217,7 @@ Xerces
 OpenSSL
 =======
 
-`OpenSSL <https://www.openssl.org/>`__ is used for :ref:`sec` for verifying security configurations and encryption and decryption.
+`OpenSSL <https://www.openssl-library.org/>`__ is used for :ref:`sec` for verifying security configurations and encryption and decryption.
 Versions 1.0, 1.1 and 3.0 (3.0.1 or later) are supported.
 
 .. _deps-python:
