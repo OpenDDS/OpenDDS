@@ -191,8 +191,6 @@ public:
                   const NetworkAddress& last_addr_hint,
                   bool requires_inline_qos);
 
-  void disassociated(const RepoId& local, const RepoId& remote);
-
   void register_for_reader(const RepoId& writerid,
                            const RepoId& readerid,
                            const AddrSet& addresses,
@@ -292,7 +290,7 @@ private:
     bool requires_inline_qos_;
     NetworkAddress last_recv_addr_;
     MonotonicTimePoint last_recv_time_;
-    size_t ref_count_;
+    DDS::UInt32 ref_count_;
     bool insert_recv_addr(AddrSet& aset) const;
   };
 

@@ -368,6 +368,21 @@ struct DiscoveredParticipant {
   DDS::Security::ExtendedBuiltinEndpointSet_t extended_builtin_endpoints_;
   bool participant_tokens_sent_;
 #endif
+
+  const DCPS::GuidPrefix_t& prefix() const
+  {
+    return pdata_.participantProxy.guidPrefix;
+  }
+
+  DCPS::GUID_t make_guid(const DCPS::EntityId_t& entity) const
+  {
+    return DCPS::make_id(prefix(), entity);
+  }
+
+  DCPS::GUID_t make_part_guid() const
+  {
+    return DCPS::make_part_guid(prefix());
+  }
 };
 
 class Sedp : public virtual DCPS::RcEventHandler {

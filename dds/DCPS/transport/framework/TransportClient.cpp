@@ -739,7 +739,7 @@ TransportClient::disassociate(const RepoId& peerId)
                link.in()));
   }
 
-  link->release_reservations(peerId, repo_id_, released);
+  link->release_reservations(peerId, repo_id_, &released);
 
   if (!released.empty()) {
 

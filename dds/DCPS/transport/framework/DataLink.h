@@ -128,9 +128,9 @@ public:
   /// make_reservation() methods.  All we know is that the supplied
   /// RepoId is considered to be a remote id.  It could be a
   /// remote subscriber or a remote publisher.
-  void release_reservations(RepoId          remote_id,
-                            RepoId          local_id,
-                            DataLinkSetMap& released_locals);
+  void release_reservations(const GUID_t& remote_id,
+                            const GUID_t& local_id,
+                            DataLinkSetMap* released_locals = 0);
 
   void schedule_delayed_release();
 

@@ -44,7 +44,8 @@
 
 namespace {
 
-bool compare_and_update_counts(CORBA::Long incoming, CORBA::Long& existing) {
+bool compare_and_update_counts(CORBA::Long incoming, CORBA::Long& existing)
+{
   static const CORBA::Long ONE_QUARTER_MAX_POSITIVE = 0x20000000;
   static const CORBA::Long THREE_QUARTER_MAX_POSITIVE = 0x60000000;
   if (incoming <= existing &&
@@ -587,24 +588,41 @@ RtpsUdpDataLink::update_locators(const RepoId& remote_id,
                                  bool requires_inline_qos,
                                  bool add_ref)
 {
-  if (unicast_addresses.empty() && multicast_addresses.empty()) {
-    if (DCPS_debug_level > 0) {
-      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: RtpsUdpDataLink::update_locators: no addresses for %C\n"), LogGuid(remote_id).c_str()));
-    }
+  const bool log_warn = log_level >= LogLevel::Warning;
+  if (log_warn && unicast_addresses.empty() && multicast_addresses.empty()) {
+    ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: RtpsUdpDataLink::update_locators: "
+      "no addresses for %C\n", LogGuid(remote_id).c_str()));
   }
 
   remove_locator_and_bundling_cache(remote_id);
 
   ACE_GUARD(ACE_Thread_Mutex, g, locators_lock_);
 
-  RemoteInfo& info = locators_[remote_id];
-  const bool log_unicast_change = DCPS_debug_level > 3 && info.unicast_addrs_ != unicast_addresses;
-  const bool log_multicast_change = DCPS_debug_level > 3 && info.multicast_addrs_ != multicast_addresses;
-  info.unicast_addrs_.swap(unicast_addresses);
-  info.multicast_addrs_.swap(multicast_addresses);
-  info.requires_inline_qos_ = requires_inline_qos;
+  RemoteInfo* info = 0;
   if (add_ref) {
-    ++info.ref_count_;
+    info = &locators_[remote_id];
+  } else {
+    RemoteInfoMap::iterator it = locators_.find(remote_id);
+    locators_.find(remote_id);
+    if (it == locators_.end()) {
+      if (log_warn) {
+        g.release();
+        ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: RtpsUdpDataLink::update_locators: "
+          "no existing locators to update for %C\n", LogGuid(remote_id).c_str()));
+      }
+      return;
+    }
+    info = &it->second;
+  }
+
+  const bool log_change = DCPS_debug_level >= 4;
+  const bool log_unicast_change = log_change && info->unicast_addrs_ != unicast_addresses;
+  const bool log_multicast_change = log_change && info->multicast_addrs_ != multicast_addresses;
+  info->unicast_addrs_.swap(unicast_addresses);
+  info->multicast_addrs_.swap(multicast_addresses);
+  info->requires_inline_qos_ = requires_inline_qos;
+  if (add_ref) {
+    ++info->ref_count_;
   }
 
   g.release();
@@ -751,29 +769,6 @@ RtpsUdpDataLink::associated(const RepoId& local_id, const RepoId& remote_id,
   }
 
   return associated;
-}
-
-void
-RtpsUdpDataLink::disassociated(const RepoId& local_id,
-                               const RepoId& remote_id)
-{
-  release_reservations_i(remote_id, local_id);
-  remove_locator_and_bundling_cache(remote_id);
-  sq_.purge_remote(remote_id);
-
-  ACE_GUARD(ACE_Thread_Mutex, g, locators_lock_);
-
-  RemoteInfoMap::iterator pos = locators_.find(remote_id);
-  if (pos != locators_.end()) {
-    OPENDDS_ASSERT(pos->second.ref_count_ > 0);
-
-    --pos->second.ref_count_;
-    if (pos->second.ref_count_ == 0) {
-      locators_.erase(pos);
-    }
-  } else if (Transport_debug_level > 3) {
-    ACE_DEBUG((LM_DEBUG, "(%P|%t) RtpsUdpDataLink::disassociated: local id %C does not have any locators\n", LogGuid(local_id).c_str()));
-  }
 }
 
 void
@@ -1053,6 +1048,25 @@ RtpsUdpDataLink::release_reservations_i(const RepoId& remote_id,
   }
 
   remove_locator_and_bundling_cache(remote_id);
+
+  {
+    ACE_GUARD(ACE_Thread_Mutex, g, locators_lock_);
+
+    RemoteInfoMap::iterator pos = locators_.find(remote_id);
+    if (pos != locators_.end()) {
+      OPENDDS_ASSERT(pos->second.ref_count_ > 0);
+      if (--pos->second.ref_count_ == 0) {
+        locators_.erase(pos);
+      }
+    } else if (Transport_debug_level >= 4) {
+      g.release();
+      ACE_DEBUG((LM_DEBUG, "(%P|%t) RtpsUdpDataLink::release_reservations_i: "
+        "%C doesn't not have any locators with remote %C\n",
+        String(conv).c_str(), LogGuid(remote_id).c_str()));
+    }
+  }
+
+  sq_.purge_remote(remote_id);
 
   for (TqeVector::iterator drop_it = to_drop.begin(); drop_it != to_drop.end(); ++drop_it) {
     (*drop_it)->data_dropped(true);
