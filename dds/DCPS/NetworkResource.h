@@ -120,10 +120,10 @@ inline void assign(DDS::OctetArray16& dest,
                    ACE_CDR::ULong ipv4addr_be)
 {
   std::memset(&dest[0], 0, 12);
-  dest[12] = ipv4addr_be >> 24;
-  dest[13] = ipv4addr_be >> 16;
-  dest[14] = ipv4addr_be >> 8;
-  dest[15] = ipv4addr_be;
+  dest[12] = static_cast<ACE_CDR::Octet>(ipv4addr_be >> 24);
+  dest[13] = static_cast<ACE_CDR::Octet>(ipv4addr_be >> 16);
+  dest[14] = static_cast<ACE_CDR::Octet>(ipv4addr_be >> 8);
+  dest[15] = static_cast<ACE_CDR::Octet>(ipv4addr_be);
 }
 
 inline void

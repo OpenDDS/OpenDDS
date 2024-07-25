@@ -524,8 +524,8 @@ metaclass_generator::gen_typedef(AST_Typedef*, UTL_ScopedName* name,
   AST_Type* type, const char*)
 {
   AST_Array* arr = dynamic_cast<AST_Array*>(type);
-  AST_Sequence* seq = 0;
-  if (!arr && !(seq = dynamic_cast<AST_Sequence*>(type))) {
+  AST_Sequence* seq = dynamic_cast<AST_Sequence*>(type);
+  if (!arr && !seq) {
     return true;
   }
   const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
