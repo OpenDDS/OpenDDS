@@ -75,7 +75,8 @@ namespace {
   {
     // Convert the tls blob to an RTPS locator seq
     DCPS::LocatorSeq locators;
-    const DDS::ReturnCode_t result = blob_to_locators(dcps_locator.data, locators);
+    VendorId_t vendor_id;
+    const DDS::ReturnCode_t result = blob_to_locators(dcps_locator.data, locators, vendor_id);
     if (result == DDS::RETCODE_OK) {
       const CORBA::ULong locators_len = locators.length();
       for (CORBA::ULong i = 0; i < locators_len; ++i) {
@@ -109,12 +110,13 @@ namespace {
   }
 
   void append_locators_if_present(DCPS::TransportLocatorSeq& list,
-                                  const DCPS::LocatorSeq& rtps_udp_locators)
+                                  const DCPS::LocatorSeq& rtps_udp_locators,
+                                  const VendorId_t& vendor_id)
   {
     if (rtps_udp_locators.length()) {
       DCPS::TransportLocator& tl = list[DCPS::grow(list) - 1];
       tl.transport_type = "rtps_udp";
-      locators_to_blob(rtps_udp_locators, tl.data);
+      locators_to_blob(rtps_udp_locators, vendor_id, tl.data);
     }
   }
 
@@ -967,6 +969,7 @@ bool to_param_list(const DCPS::DiscoveredWriterData& writer_data,
 }
 
 bool from_param_list(const ParameterList& param_list,
+                     const VendorId_t& vendor_id,
                      DCPS::DiscoveredWriterData& writer_data,
                      bool use_xtypes,
                      XTypes::TypeInformation& type_info)
@@ -1107,7 +1110,8 @@ bool from_param_list(const ParameterList& param_list,
       case PID_OPENDDS_LOCATOR:
         // Append the rtps_udp_locators, if any, first, to preserve order
         append_locators_if_present(writer_data.writerProxy.allLocators,
-                                   rtps_udp_locators);
+                                   rtps_udp_locators,
+                                   vendor_id);
         rtps_udp_locators.length(0);
         DCPS::push_back(writer_data.writerProxy.allLocators,
                        param.opendds_locator());
@@ -1129,7 +1133,8 @@ bool from_param_list(const ParameterList& param_list,
   }
   // Append additional rtps_udp_locators, if any
   append_locators_if_present(writer_data.writerProxy.allLocators,
-                             rtps_udp_locators);
+                             rtps_udp_locators,
+                             vendor_id);
   rtps_udp_locators.length(0);
   return true;
 }
@@ -1311,6 +1316,7 @@ bool to_param_list(const DCPS::DiscoveredReaderData& reader_data,
 }
 
 bool from_param_list(const ParameterList& param_list,
+                     const VendorId_t& vendor_id,
                      DCPS::DiscoveredReaderData& reader_data,
                      bool use_xtypes,
                      XTypes::TypeInformation& type_info)
@@ -1449,7 +1455,8 @@ bool from_param_list(const ParameterList& param_list,
       case PID_OPENDDS_LOCATOR:
         // Append the rtps_udp_locators, if any, first, to preserve order
         append_locators_if_present(reader_data.readerProxy.allLocators,
-                                   rtps_udp_locators);
+                                   rtps_udp_locators,
+                                   vendor_id);
         rtps_udp_locators.length(0);
         DCPS::push_back(reader_data.readerProxy.allLocators,
                        param.opendds_locator());
@@ -1474,7 +1481,8 @@ bool from_param_list(const ParameterList& param_list,
   }
   // Append additional rtps_udp_locators, if any
   append_locators_if_present(reader_data.readerProxy.allLocators,
-                             rtps_udp_locators);
+                             rtps_udp_locators,
+                             vendor_id);
   rtps_udp_locators.length(0);
   return true;
 }
@@ -1558,11 +1566,12 @@ bool to_param_list(const DiscoveredPublication_SecurityWrapper& wrapper,
 }
 
 bool from_param_list(const ParameterList& param_list,
+                     const VendorId_t& vendor_id,
                      DiscoveredPublication_SecurityWrapper& wrapper,
                      bool use_xtypes,
                      XTypes::TypeInformation& type_info)
 {
-  bool result = from_param_list(param_list, wrapper.data, use_xtypes, type_info) &&
+  bool result = from_param_list(param_list, vendor_id, wrapper.data, use_xtypes, type_info) &&
     from_param_list(param_list, wrapper.security_info) &&
     from_param_list(param_list, wrapper.data_tags);
 
@@ -1584,11 +1593,12 @@ bool to_param_list(const DiscoveredSubscription_SecurityWrapper& wrapper,
 }
 
 bool from_param_list(const ParameterList& param_list,
+                     const VendorId_t& vendor_id,
                      DiscoveredSubscription_SecurityWrapper& wrapper,
                      bool use_xtypes,
                      XTypes::TypeInformation& type_info)
 {
-  bool result = from_param_list(param_list, wrapper.data, use_xtypes, type_info) &&
+  bool result = from_param_list(param_list, vendor_id, wrapper.data, use_xtypes, type_info) &&
     from_param_list(param_list, wrapper.security_info) &&
     from_param_list(param_list, wrapper.data_tags);
 

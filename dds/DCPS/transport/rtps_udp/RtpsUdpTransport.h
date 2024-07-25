@@ -271,6 +271,7 @@ public:
                                const TransportLocatorSeq& /*locators*/);
 
   virtual void get_last_recv_locator(const GUID_t& /*remote_id*/,
+                                     const GuidVendorId_t& /*vendor_id*/,
                                      TransportLocator& /*locators*/);
 
   void append_transport_statistics(TransportStatisticsSequence& seq);
@@ -327,6 +328,7 @@ private:
                             NetworkAddressSet* uc_addrs,
                             NetworkAddressSet* mc_addrs = 0,
                             bool* requires_inline_qos = 0,
+                            RTPS::VendorId_t* vendor_id = 0,
                             unsigned int* blob_bytes_read = 0) const;
 
   virtual void release_datalink(DataLink* link);

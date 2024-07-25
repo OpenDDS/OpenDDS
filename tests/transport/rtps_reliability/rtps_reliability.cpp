@@ -664,9 +664,11 @@ void make_blob(const ACE_INET_Addr& part1_addr, ACE_Message_Block& mb_locator)
   address_to_locator(part1_locators[0], part1_addr);
   size_t size = 0;
   serialized_size(blob_encoding, size, part1_locators);
+  serialized_size(blob_encoding, size, VENDORID_OPENDDS);
   mb_locator.init(size + 1);
   Serializer ser_loc(&mb_locator, blob_encoding);
   ser_loc << part1_locators;
+  ser_loc << VENDORID_OPENDDS;
   ser_loc << ACE_OutputCDR::from_boolean(false); // requires inline QoS
 }
 

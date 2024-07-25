@@ -1016,7 +1016,7 @@ populate_locators(DCPS::TransportLocatorSeq& remote_data,
   const Encoding& encoding = get_locators_encoding();
   ACE_Message_Block mb_locator(
     DCPS::uint32_cdr_size +
-    (locator_count * serialized_size(encoding, DCPS::Locator_t())) + DCPS::boolean_cdr_size);
+    (locator_count * serialized_size(encoding, DCPS::Locator_t())) + serialized_size(encoding, pdata.participantProxy.vendorId) + DCPS::boolean_cdr_size);
   Serializer ser_loc(&mb_locator, encoding);
   ser_loc << locator_count;
 
@@ -1026,6 +1026,7 @@ populate_locators(DCPS::TransportLocatorSeq& remote_data,
   for (CORBA::ULong i = 0; i < ull.length(); ++i) {
     ser_loc << ull[i];
   }
+  ser_loc << pdata.participantProxy.vendorId;
   ser_loc << ACE_OutputCDR::from_boolean(false); // requires_inline_qos
 
   remote_data.length(1);
@@ -4363,7 +4364,7 @@ Sedp::DiscoveryReader::data_received_i(const DCPS::ReceivedDataSample& sample,
     }
 
     DiscoveredPublication wdata;
-    if (!ParameterListConverter::from_param_list(data, wdata.writer_data_, sedp_.use_xtypes_, wdata.type_info_)) {
+    if (!ParameterListConverter::from_param_list(data, sedp_.spdp_.get_vendor_id(sample.header_.publication_id_), wdata.writer_data_, sedp_.use_xtypes_, wdata.type_info_)) {
       if (log_level >= LogLevel::Warning) {
         ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: Sedp::DiscoveryReader::data_received_i: "
                    "failed to convert from ParameterList to DiscoveredWriterData\n"));
@@ -4409,7 +4410,7 @@ Sedp::DiscoveryReader::data_received_i(const DCPS::ReceivedDataSample& sample,
 
     ParameterListConverter::DiscoveredPublication_SecurityWrapper wdata_secure = ParameterListConverter::DiscoveredPublication_SecurityWrapper();
 
-    if (!ParameterListConverter::from_param_list(data, wdata_secure, sedp_.use_xtypes_, wdata_secure.type_info)) {
+    if (!ParameterListConverter::from_param_list(data, sedp_.spdp_.get_vendor_id(sample.header_.publication_id_), wdata_secure, sedp_.use_xtypes_, wdata_secure.type_info)) {
       if (log_level >= LogLevel::Warning) {
         ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: Sedp::DiscoveryReader::data_received_i: "
                    "failed to convert from ParameterList to DiscoveredPublication_SecurityWrapper\n"));
@@ -4452,7 +4453,7 @@ Sedp::DiscoveryReader::data_received_i(const DCPS::ReceivedDataSample& sample,
     }
 
     DiscoveredSubscription rdata;
-    if (!ParameterListConverter::from_param_list(data, rdata.reader_data_, sedp_.use_xtypes_, rdata.type_info_)) {
+    if (!ParameterListConverter::from_param_list(data, sedp_.spdp_.get_vendor_id(sample.header_.publication_id_), rdata.reader_data_, sedp_.use_xtypes_, rdata.type_info_)) {
       if (log_level >= LogLevel::Warning) {
         ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: Sedp::DiscoveryReader::data_received_i: "
                    "failed to convert from ParameterList to DiscoveredReaderData\n"));
@@ -4500,7 +4501,7 @@ Sedp::DiscoveryReader::data_received_i(const DCPS::ReceivedDataSample& sample,
     }
 
     ParameterListConverter::DiscoveredSubscription_SecurityWrapper rdata_secure;
-    if (!ParameterListConverter::from_param_list(data, rdata_secure, sedp_.use_xtypes_, rdata_secure.type_info)) {
+    if (!ParameterListConverter::from_param_list(data, sedp_.spdp_.get_vendor_id(sample.header_.publication_id_), rdata_secure, sedp_.use_xtypes_, rdata_secure.type_info)) {
       if (log_level >= LogLevel::Warning) {
         ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: Sedp::DiscoveryReader::data_received_i: "
                    "failed to convert from ParameterList to DiscoveredSubscription_SecurityWrapper\n"));
@@ -5287,13 +5288,16 @@ Sedp::populate_transport_locator_sequence(DCPS::TransportLocatorSeq& rTls,
     if (!participant_found) {
       return;
     } else if (locs.length()) {
+      const VendorId_t vendor_id = spdp_.get_vendor_id_i(remote_participant);
       const Encoding& encoding = get_locators_encoding();
       size_t size = DCPS::serialized_size(encoding, locs);
+      serialized_size(encoding, size, vendor_id);
       DCPS::primitive_serialized_size_boolean(encoding, size);
 
       ACE_Message_Block mb_locator(size);
       Serializer ser_loc(&mb_locator, encoding);
       ser_loc << locs;
+      ser_loc << vendor_id;
       const bool readerExpectsInlineQos =
         dsi->second.reader_data_.readerProxy.expectsInlineQos;
       ser_loc << ACE_OutputCDR::from_boolean(participantExpectsInlineQos
@@ -5329,13 +5333,16 @@ Sedp::populate_transport_locator_sequence(DCPS::TransportLocatorSeq& wTls,
     if (!participant_found) {
       return;
     } else if (locs.length()) {
+      const VendorId_t vendor_id = spdp_.get_vendor_id_i(remote_participant);
       const Encoding& encoding = get_locators_encoding();
       size_t size = DCPS::serialized_size(encoding, locs);
+      serialized_size(encoding, size, vendor_id);
       DCPS::primitive_serialized_size_boolean(encoding, size);
 
       ACE_Message_Block mb_locator(size);
       Serializer ser_loc(&mb_locator, encoding);
       ser_loc << locs;
+      ser_loc << vendor_id;
       ser_loc << ACE_OutputCDR::from_boolean(participantExpectsInlineQos);
 
       DCPS::TransportLocator tl;
@@ -7119,6 +7126,7 @@ void Sedp::remove_expired_endpoints(const MonotonicTimePoint& /*now*/)
 void Sedp::populate_origination_locator(const GUID_t& id, DCPS::TransportLocator& tl)
 {
   DCPS::GuidConverter conv(id);
+  const VendorId_t vendor_id = spdp_.get_vendor_id_i(id);
   if (conv.isBuiltinDomainEntity()) {
     DCPS::LocatorSeq locators;
     bool expects_inline_qos = false;
@@ -7130,20 +7138,22 @@ void Sedp::populate_origination_locator(const GUID_t& id, DCPS::TransportLocator
 
     const Encoding& encoding = RTPS::get_locators_encoding();
     size_t size = serialized_size(encoding, locators);
+    serialized_size(encoding, size, vendor_id);
     primitive_serialized_size_boolean(encoding, size);
 
     ACE_Message_Block mb_locator(size);
     Serializer ser_loc(&mb_locator, encoding);
     ser_loc << locators;
+    ser_loc << vendor_id;
     ser_loc << ACE_OutputCDR::from_boolean(expects_inline_qos);
 
     tl.transport_type = "rtps_udp";
     RTPS::message_block_to_sequence(mb_locator, tl.data);
   } else {
     if (conv.isReader()) {
-      transport_inst_->get_last_recv_locator(make_id(id, ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_WRITER), tl, get_domain_id(), 0);
+      transport_inst_->get_last_recv_locator(make_id(id, ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_WRITER), vendor_id.vendorId, tl, get_domain_id(), 0);
     } else {
-      transport_inst_->get_last_recv_locator(make_id(id, ENTITYID_SEDP_BUILTIN_PUBLICATIONS_WRITER), tl, get_domain_id(), 0);
+      transport_inst_->get_last_recv_locator(make_id(id, ENTITYID_SEDP_BUILTIN_PUBLICATIONS_WRITER), vendor_id.vendorId, tl, get_domain_id(), 0);
     }
   }
 }
