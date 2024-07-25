@@ -1413,7 +1413,7 @@ typeobject_generator::generate_sequence_type_identifier(AST_Type* type, bool for
         OpenDDS::XTypes::TypeIdentifier complete_ti(OpenDDS::XTypes::TI_PLAIN_SEQUENCE_SMALL);
         complete_ti.seq_sdefn().header.equiv_kind = complete_ek;
         complete_ti.seq_sdefn().header.element_flags = cef;
-        complete_ti.seq_sdefn().bound = static_cast<OpenDDS::XTypes::SBound>bound;
+        complete_ti.seq_sdefn().bound = static_cast<OpenDDS::XTypes::SBound>(bound);
         complete_ti.seq_sdefn().element_identifier = complete_elem_ti;
 
         const TypeIdentifierPair ti_pair = {minimal_ti, complete_ti};
