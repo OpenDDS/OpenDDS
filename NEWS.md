@@ -1,5 +1,77 @@
 # OpenDDS Releases
 
+## Version 3.29.0 of OpenDDS
+
+Released 2024-07-26
+
+Download [this release on GitHub](https://github.com/OpenDDS/OpenDDS/releases/tag/DDS-3.29).
+
+Read [the documentation for this release on Read the Docs](https://opendds.readthedocs.io/en/dds-3.29).
+
+### Additions
+
+- Added support for the [@optional](https://opendds.readthedocs.io/en/dds-3.29/devguide/xtypes.html#xtypes-optional) IDL annotation for the IDL-to-C++11 mapping. `@optional` maps to either `std::optional` or a similar custom implementation in the generated code. ([PR #4364](https://github.com/OpenDDS/OpenDDS/pull/4364))
+- Implemented the `create_sample`, `create_sample_rc`, `create_dynamic_sample`, and `create_dynamic_sample_rc` methods on `TypeSupport` to convert samples to and from `DynamicData`. ([PR #4373](https://github.com/OpenDDS/OpenDDS/pull/4373))
+  - Also documented the existing `DynamicDataAdapter` class for wrapping IDL-generated types in a `DynamicData`.
+  - See [DynamicData and IDL-Generated Types](https://opendds.readthedocs.io/en/dds-3.29/devguide/xtypes.html#xtypes-dynamicdata-and-idl-generated-types) for details.
+- Samples from DynamicDataReaders can be modified and passed to DynamicDataWriters. ([PR #4609](https://github.com/OpenDDS/OpenDDS/pull/4609))
+- Added config properties to give more control over what UDP ports RTPS uses: ([PR #4655](https://github.com/OpenDDS/OpenDDS/pull/4655))
+  - For RTPS Discovery:
+    - Added [`[rtps_discovery] SedpPortMode=probe`](https://opendds.readthedocs.io/en/dds-3.29/devguide/run_time_configuration.html#cfg-val-rtps_discovery-SedpPortMode-probe), which will use ports similar to how the RTPS specification defines them.
+      This uses the existing port parameter properties for SPDP and a new one, [`[rtps_discovery] DY`](https://opendds.readthedocs.io/en/dds-3.29/devguide/run_time_configuration.html#cfg-prop-rtps_discovery-DY).
+    - Added [`[rtps_discovery] SpdpPortMode`](https://opendds.readthedocs.io/en/dds-3.29/devguide/run_time_configuration.html#cfg-prop-rtps_discovery-SpdpPortMode) as an alias to the now deprecated [`[rtps_discovery] SpdpRequestRandomPort`](https://opendds.readthedocs.io/en/dds-3.29/devguide/run_time_configuration.html#cfg-prop-rtps_discovery-SpdpRequestRandomPort).
+    - Added [`[rtps_discovery] SpdpMulticastAddress`](https://opendds.readthedocs.io/en/dds-3.29/devguide/run_time_configuration.html#cfg-prop-rtps_discovery-SpdpMulticastAddress), [`[rtps_discovery] Ipv6SpdpMulticastAddress`](https://opendds.readthedocs.io/en/dds-3.29/devguide/run_time_configuration.html#cfg-prop-rtps_discovery-Ipv6SpdpMulticastAddress), [`[rtps_discovery] SedpMulticastAddress`](https://opendds.readthedocs.io/en/dds-3.29/devguide/run_time_configuration.html#cfg-prop-rtps_discovery-SedpMulticastAddress), and [`[rtps_discovery] Ipv6SedpMulticastAddress`](https://opendds.readthedocs.io/en/dds-3.29/devguide/run_time_configuration.html#cfg-prop-rtps_discovery-Ipv6SedpMulticastAddress) to set the multicast addresses and ports separately on SPDP and SEDP.
+    - See [here](https://opendds.readthedocs.io/en/dds-3.29/devguide/run_time_configuration.html#config-ports-used-by-rtps-disc) for the full overview of port usage.
+  - For RTPS/UDP Transport:
+    - Added [`[transport] PortMode=probe (rtps_udp)`](https://opendds.readthedocs.io/en/dds-3.29/devguide/run_time_configuration.html#cfg-val-transport-rtps_udp-PortMode-probe), which will use ports exactly as the RTPS specification defines them.
+      This uses new port parameter properties: [`[transport] PB (rtps_udp)`](https://opendds.readthedocs.io/en/dds-3.29/devguide/run_time_configuration.html#cfg-prop-transport-rtps_udp-PB), [`[transport] DG (rtps_udp)`](https://opendds.readthedocs.io/en/dds-3.29/devguide/run_time_configuration.html#cfg-prop-transport-rtps_udp-DG), [`[transport] PG (rtps_udp)`](https://opendds.readthedocs.io/en/dds-3.29/devguide/run_time_configuration.html#cfg-prop-transport-rtps_udp-PG), [`[transport] D2 (rtps_udp)`](https://opendds.readthedocs.io/en/dds-3.29/devguide/run_time_configuration.html#cfg-prop-transport-rtps_udp-D2), and [`[transport] D3 (rtps_udp)`](https://opendds.readthedocs.io/en/dds-3.29/devguide/run_time_configuration.html#cfg-prop-transport-rtps_udp-D3).
+    - See [here](https://opendds.readthedocs.io/en/dds-3.29/devguide/run_time_configuration.html#config-ports-used-by-rtps-udp) for the full overview of port usage.
+  - All ports calculated using port parameter properties now warn if they overflow the 16 bit integer.
+  - [`[rtps_discovery] SedpPortMode=probe`](https://opendds.readthedocs.io/en/dds-3.29/devguide/run_time_configuration.html#cfg-val-rtps_discovery-SedpPortMode-probe) and [`[transport] PortMode=probe (rtps_udp)`](https://opendds.readthedocs.io/en/dds-3.29/devguide/run_time_configuration.html#cfg-val-transport-rtps_udp-PortMode-probe) might make [config template customizations](https://opendds.readthedocs.io/en/dds-3.29/devguide/run_time_configuration.html#run-time-configuration-adding-customizations) unnecessary.
+- Added [`dds/OpenDDSConfigWrapper.h`](https://github.com/OpenDDS/OpenDDS/blob/DDS-3.29/dds/OpenDDSConfigWrapper.h) and [`dds/OpenDDSConfigWrapper.idl`](https://github.com/OpenDDS/OpenDDS/blob/DDS-3.29/dds/OpenDDSConfigWrapper.idl). ([PR #4659](https://github.com/OpenDDS/OpenDDS/pull/4659))
+  - These files will provide defaults for various configuration macros.
+  - These files should be included in preference to `dds/OpenDDSConfig.h`
+- Added a new data member, `monotonic_timestamp` to the `InternalThreadBuiltInTopic` IDL struct. ([PR #4677](https://github.com/OpenDDS/OpenDDS/pull/4677))
+  - `monotonic_timestamp` is the time of the sample was written (time of last update of this instance) on the monotonic clock.
+  - On systems that don't support a monotonic clock, this will be the same value as the corresponding `SampleInfo`'s `source_timestamp`.
+- The ParticipantLocation BIT instance is now published before participant discovery completes. ([PR #4693](https://github.com/OpenDDS/OpenDDS/pull/4693))
+  - Applications can use ParticipantLocation to get notified that discovery is in progress. The spec-defined Participant BIT won't be published until participant discovery is complete.
+- The Info Destination submessage is now used if present in incoming SPDP messages ([PR #4710](https://github.com/OpenDDS/OpenDDS/pull/4710))
+- The ParticipantLocation BIT has a new data member: the SPDP user tag of the peer (0 if none present) ([PR #4711](https://github.com/OpenDDS/OpenDDS/pull/4711))
+  - Also added the SPDP user tag to outbound messages which are directed to a specific destination
+- [`[rtps_discovery] ResendPeriod`](https://opendds.readthedocs.io/en/dds-3.29/devguide/run_time_configuration.html#cfg-prop-rtps_discovery-ResendPeriod) now accepts fractions of a second. ([PR #4712](https://github.com/OpenDDS/OpenDDS/pull/4712))
+- OpenDDS now sends pre-emptive (pre-association) acknacks in a form that RTI Connext understands. ([PR #4735](https://github.com/OpenDDS/OpenDDS/pull/4735))
+- Pre-association acknacks now fall off like heartbeats. ([PR #4735](https://github.com/OpenDDS/OpenDDS/pull/4735))
+
+### Platform Support and Dependencies
+
+- ACE/TAO
+  - Added support for building with [ACE 8.0.0 / TAO 4.0.0](https://github.com/DOCGroup/ACE_TAO/releases/tag/ACE%2BTAO-8_0_0).
+  - Updated ACE 6/TAO 2 from 6.5.20 to [6.5.21](https://github.com/DOCGroup/ACE_TAO/releases/tag/ACE%2BTAO-6_5_21).
+- CMake
+  - Allow using the ACE/TAO master branch which now requires C++17. ([PR #4618](https://github.com/OpenDDS/OpenDDS/pull/4618))
+- Building with CMake
+  - Visual Studio now defaults to using at least C++11 with ACE 6/TAO 2 instead of C++03. ([PR #4618](https://github.com/OpenDDS/OpenDDS/pull/4618))
+  - Fixed [configure error](https://github.com/OpenDDS/OpenDDS/issues/4645) when using [`OPENDDS_JUST_BUILD_HOST_TOOLS`](https://opendds.readthedocs.io/en/dds-3.29/devguide/building/index.html#cmake-var-OPENDDS_JUST_BUILD_HOST_TOOLS) with CMake <3.28. ([PR #4646](https://github.com/OpenDDS/OpenDDS/pull/4646))
+
+### Removals
+
+- Removed `OPENDDS_IGNORE_OPENDDSCONFIG_H_FILE` macro. ([PR #4687](https://github.com/OpenDDS/OpenDDS/pull/4687))
+  - Users manually configuring a build will need to create `dds/OpenDDSConfig.h` which may be empty.
+
+### Fixes
+
+- When [`DCPSThreadStatusInterval`](https://opendds.readthedocs.io/en/dds-3.29/devguide/run_time_configuration.html#cfg-prop-common-DCPSThreadStatusInterval) is enabled, threads that run the ACE Reactor now use timers instead of a time-limited `select()` system call to update the `InternalThreadBuiltInTopic`. ([PR #4677](https://github.com/OpenDDS/OpenDDS/pull/4677))
+  - This allows the `InternalThreadBuiltInTopic` to be updated accurately on systems that suspend/resume and are configured for boottime timers.
+- [`[rtps_discovery] MaxSpdpSequenceMsgResetChecks`](https://opendds.readthedocs.io/en/dds-3.29/devguide/run_time_configuration.html#cfg-prop-rtps_discovery-MaxSpdpSequenceMsgResetChecks) is recognized again. ([PR #4696](https://github.com/OpenDDS/OpenDDS/pull/4696))
+- RtpsRelay: Recognize clients that are using different IP addresses for SPDP and SEDP. ([PR #4718](https://github.com/OpenDDS/OpenDDS/pull/4718))
+- Fixed memory leak of remote locators in the RTPS/UDP transport. ([PR #4731](https://github.com/OpenDDS/OpenDDS/pull/4731))
+
+### Documentation
+
+- Documented [`RtpsRelay -LogHttp`](https://opendds.readthedocs.io/en/dds-3.29/devguide/internet_enabled_rtps.html#cmdoption-RtpsRelay-LogHttp), [`RtpsRelay -AdmissionControlQueueSize`](https://opendds.readthedocs.io/en/dds-3.29/devguide/internet_enabled_rtps.html#cmdoption-RtpsRelay-AdmissionControlQueueSize), and [`RtpsRelay -AdmissionControlQueueDuration`](https://opendds.readthedocs.io/en/dds-3.29/devguide/internet_enabled_rtps.html#cmdoption-RtpsRelay-AdmissionControlQueueDuration). ([PR #4699](https://github.com/OpenDDS/OpenDDS/pull/4699))
+- Documented [SPDP](https://opendds.readthedocs.io/en/dds-3.29/devguide/run_time_configuration.html#spdp) and [SEDP](https://opendds.readthedocs.io/en/dds-3.29/devguide/run_time_configuration.html#sedp). ([PR #4699](https://github.com/OpenDDS/OpenDDS/pull/4699))
+
 ## Version 3.28.1 of OpenDDS
 
 Released 2024-05-02
