@@ -603,7 +603,6 @@ RtpsUdpDataLink::update_locators(const RepoId& remote_id,
     info = &locators_[remote_id];
   } else {
     RemoteInfoMap::iterator it = locators_.find(remote_id);
-    locators_.find(remote_id);
     if (it == locators_.end()) {
       if (log_warn) {
         g.release();
