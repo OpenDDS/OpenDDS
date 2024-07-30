@@ -139,19 +139,19 @@ BE_GlobalData::open_streams(const char *filename)
     BE_abort();
   }
 
-  string filebase(filename);
-  filebase.erase(filebase.rfind('.'));
-  size_t idx = filebase.find_last_of("/\\"); // allow either slash
+  filebase_ = filename;
+  filebase_.erase(filebase_.rfind('.'));
+  size_t idx = filebase_.find_last_of("/\\"); // allow either slash
   if (idx != string::npos) {
-    filebase = filebase.substr(idx + 1);
+    filebase_ = filebase_.substr(idx + 1);
   }
 
-  stub_header_name_ = (filebase + "JC.h").c_str();
-  stub_impl_name_ = (filebase + "JC.cpp").c_str();
+  stub_header_name_ = (filebase_ + "JC.h").c_str();
+  stub_impl_name_ = (filebase_ + "JC.cpp").c_str();
 
   if (this->do_server_side()) {
-    skel_header_name_ = (filebase + "JS.h").c_str();
-    skel_impl_name_ = (filebase + "JS.cpp").c_str();
+    skel_header_name_ = (filebase_ + "JS.h").c_str();
+    skel_impl_name_ = (filebase_ + "JS.cpp").c_str();
   }
 }
 
