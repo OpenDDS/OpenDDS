@@ -1,0 +1,28 @@
+Mon Jul 29 21:46:23 UTC 2024  Justin Wilson  <wilsonj@objectcomputing.com>
+
+        * docs/news.d/java-fixed-size-structs.rst:
+        * java/idl2jni/codegen/be_global.cpp:
+        * java/idl2jni/codegen/be_global.h:
+        * java/idl2jni/codegen/im_jni.cpp:
+        * java/tests/complex_idl/Complex_Idl.idl:
+
+          Fix size structs don't compile with Java
+
+          Problem
+          -------
+
+          A topic type that has fixed size results in compilation errors in
+          the
+          generated code.
+
+          Solution
+          --------
+
+          Extend `idl2jni` to stub out return values for fixed-size
+          structs.
+
+Local Variables:
+mode: change-log
+add-log-time-format: (lambda () (progn (setq tz (getenv "TZ")) (set-time-zone-rule "UTC") (setq time (format-time-string "%a %b %e %H:%M:%S %Z %Y" (current-time))) (set-time-zone-rule tz) time))
+indent-tabs-mode: nil
+End:
