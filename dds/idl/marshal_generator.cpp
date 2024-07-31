@@ -768,6 +768,7 @@ namespace {
               "  return strm.read_" << getSerializerName(elem)
               << "_array(" << get_buffer << ", length);\n";
           }
+          return;
         }
       } else if (elem_cls & CL_INTERFACE) {
         be_global->impl_ <<
