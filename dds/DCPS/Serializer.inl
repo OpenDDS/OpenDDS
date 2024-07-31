@@ -783,7 +783,7 @@ bool Serializer::align_r(size_t al)
   }
   al = (std::min)(al, encoding().max_align());
   const size_t len =
-    (al - static_cast<size_t>(current_->rd_ptr()) + align_rshift_) % al;
+    (al - reinterpret_cast<size_t>(current_->rd_ptr()) + align_rshift_) % al;
 
   return skip(static_cast<ACE_CDR::UShort>(len));
 }
@@ -800,7 +800,7 @@ bool Serializer::align_w(size_t al)
   }
   al = (std::min)(al, encoding().max_align());
   size_t len =
-    (al - static_cast<size_t>(current_->wr_ptr()) + align_wshift_) % al;
+    (al - reinterpret_cast<size_t>(current_->wr_ptr()) + align_wshift_) % al;
   while (len) {
     if (!current_) {
       good_bit_ = false;
@@ -830,7 +830,7 @@ bool Serializer::align_w(size_t al)
 ACE_INLINE unsigned char
 Serializer::offset(char* index, size_t start, size_t align)
 {
-  return static_cast<unsigned char>((ptrdiff_t(index) - start) % align);
+  return static_cast<unsigned char>((reinterpret_cast<size_t>(index) - start) % align);
 }
 
 ACE_INLINE void
@@ -838,7 +838,7 @@ Serializer::align_cont_r()
 {
   const size_t max_align = encoding().max_align();
   const size_t thisblock =
-    max_align ? (ptrdiff_t(current_->rd_ptr()) - align_rshift_) % max_align : 0;
+    max_align ? (reinterpret_cast<size_t>(current_->rd_ptr()) - align_rshift_) % max_align : 0;
 
   current_ = current_->cont();
 
@@ -852,7 +852,7 @@ Serializer::align_cont_w()
 {
   const size_t max_align = encoding().max_align();
   const size_t thisblock =
-    max_align ? (ptrdiff_t(current_->wr_ptr()) - align_wshift_) % max_align : 0;
+    max_align ? (reinterpret_cast<size_t>(current_->wr_ptr()) - align_wshift_) % max_align : 0;
 
   current_ = current_->cont();
 
