@@ -1,5 +1,17 @@
 # OpenDDS Releases
 
+## Version 3.29.1 of OpenDDS
+
+Released 2024-07-31
+
+Download [this release on GitHub](https://github.com/OpenDDS/OpenDDS/releases/tag/DDS-3.29.1).
+
+Read [the documentation for this release on Read the Docs](https://opendds.readthedocs.io/en/dds-3.29.1).
+
+### Fixes
+
+- Fixed code generation for fixed-size structs in Java that caused compilation errors. ([PR #4752](https://github.com/OpenDDS/OpenDDS/pull/4752))
+
 ## Version 3.29.0 of OpenDDS
 
 Released 2024-07-26
