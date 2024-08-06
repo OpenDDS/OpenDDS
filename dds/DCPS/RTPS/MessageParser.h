@@ -1,6 +1,4 @@
 /*
- *
- *
  * Distributed under the OpenDDS License.
  * See: http://www.opendds.org/license.html
  */
@@ -9,7 +7,7 @@
 #define OPENDDS_DCPS_RTPS_MESSAGEPARSER_H
 
 #include "RtpsCoreTypeSupportImpl.h"
-
+#include "rtps_export.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 

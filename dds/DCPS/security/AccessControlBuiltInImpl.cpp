@@ -260,7 +260,6 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
   remote_permissions->perm_token_ = remote_permissions_token;
   remote_permissions->perm_cred_token_ = remote_credential_token;
 
-
   AccessData cache_this;
   cache_this.identity = remote_identity_handle;
   cache_this.subject = sn_id_remote;
@@ -397,15 +396,17 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
     return CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_create_datawriter: Permissions grant not found");
   }
 
-  if (!validate_date_time(grant->validity, ex)) {
+  const time_t now_utc = utc_now();
+  if (!validate_date_time(grant->validity, now_utc, ex)) {
     return false;
   }
 
-  if (!search_permissions(topic_name, domain_id, partition, Permissions::PUBLISH, *grant, ex)) {
+  time_t expiration_time = grant->validity.not_after;
+  if (!search_permissions(topic_name, domain_id, partition, Permissions::PUBLISH, *grant, now_utc, expiration_time, ex)) {
     return false;
   }
 
-  make_task(local_rp_task_)->insert(permissions_handle, grant->validity.not_after);
+  make_task(local_rp_task_)->insert(permissions_handle, expiration_time);
 
   return true;
 }
@@ -460,15 +461,17 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
     return CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_create_datareader: Permissions grant not found");
   }
 
-  if (!validate_date_time(grant->validity, ex)) {
+  const time_t now_utc = utc_now();
+  if (!validate_date_time(grant->validity, now_utc, ex)) {
     return false;
   }
 
-  if (!search_permissions(topic_name, domain_id, partition, Permissions::SUBSCRIBE, *grant, ex)) {
+  time_t expiration_time = grant->validity.not_after;
+  if (!search_permissions(topic_name, domain_id, partition, Permissions::SUBSCRIBE, *grant, now_utc, expiration_time, ex)) {
     return false;
   }
 
-  make_task(local_rp_task_)->insert(permissions_handle, grant->validity.not_after);
+  make_task(local_rp_task_)->insert(permissions_handle, expiration_time);
 
   return true;
 }
@@ -526,7 +529,8 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
     return CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_create_topic: grant not found");
   }
 
-  if (!validate_date_time(grant->validity, ex)) {
+  const time_t now_utc = utc_now();
+  if (!validate_date_time(grant->validity, now_utc, ex)) {
     return false;
   }
 
@@ -732,17 +736,19 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
     return CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_remote_datawriter: Permissions grant not found");
   }
 
-  if (!validate_date_time(grant->validity, ex)) {
+  const time_t now_utc = utc_now();
+  if (!validate_date_time(grant->validity, now_utc, ex)) {
     return false;
   }
 
+  time_t expiration_time = grant->validity.not_after;
   if (!search_permissions(publication_data.base.base.topic_name, domain_id,
                           publication_data.base.base.partition, Permissions::PUBLISH,
-                          *grant, ex)) {
+                          *grant, now_utc, expiration_time, ex)) {
     return false;
   }
 
-  make_task(remote_rp_task_)->insert(permissions_handle, grant->validity.not_after);
+  make_task(remote_rp_task_)->insert(permissions_handle, expiration_time);
 
   return true;
 }
@@ -792,17 +798,19 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
     return CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_remote_datareader: Permissions grant not found");
   }
 
-  if (!validate_date_time(grant->validity, ex)) {
+  const time_t now_utc = utc_now();
+  if (!validate_date_time(grant->validity, now_utc, ex)) {
     return false;
   }
 
+  time_t expiration_time = grant->validity.not_after;
   if (!search_permissions(subscription_data.base.base.topic_name, domain_id,
                           subscription_data.base.base.partition, Permissions::SUBSCRIBE,
-                          *grant, ex)) {
+                          *grant, now_utc, expiration_time, ex)) {
     return false;
   }
 
-  make_task(remote_rp_task_)->insert(permissions_handle, grant->validity.not_after);
+  make_task(remote_rp_task_)->insert(permissions_handle, expiration_time);
 
   return true;
 }
@@ -893,7 +901,8 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
     return CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_remote_topic: grant not found");
   }
 
-  if (!validate_date_time(grant->validity, ex)) {
+  const time_t now_utc = utc_now();
+  if (!validate_date_time(grant->validity, now_utc, ex)) {
     return false;
   }
 
@@ -987,10 +996,8 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
   if (0 == reader) {
     return CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_remote_datawriter_register_instance: Invalid Reader pointer");
   }
-  if (0 == key) {
-    return CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_remote_datawriter_register_instance: Invalid Topic Key");
-  }
-
+  // Key could be null if we don't have complete type objects
+  ACE_UNUSED_ARG(key);
   return true;
 }
 
@@ -1008,9 +1015,8 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
   if (0 == reader) {
     return CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_remote_datawriter_dispose_instance: Invalid Reader pointer");
   }
-  if (0 == key) {
-    return CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_remote_datawriter_dispose_instance: Invalid Topic Key");
-  }
+  // Key could be null if we don't have complete type objects
+  ACE_UNUSED_ARG(key);
   return true;
 }
 
@@ -1302,8 +1308,17 @@ AccessControlBuiltInImpl::make_task(RevokePermissionsTask_rch& task)
   return task;
 }
 
+time_t AccessControlBuiltInImpl::utc_now()
+{
+  // Get the current time as UTC
+  const time_t now = std::time(0);
+  std::tm* const now_utc_tm = std::gmtime(&now);
+  return std::mktime(now_utc_tm);
+}
+
 bool AccessControlBuiltInImpl::validate_date_time(
   const Permissions::Validity_t& validity,
+  time_t now_utc,
   DDS::Security::SecurityException& ex)
 {
   if (validity.not_before == 0) {
@@ -1317,11 +1332,6 @@ bool AccessControlBuiltInImpl::validate_date_time(
       "AccessControlBuiltInImpl::validate_date_time: Permissions not_after time is invalid.");
     return false;
   }
-
-  // Get the current time as UTC
-  const time_t now = std::time(0);
-  std::tm* const now_utc_tm = std::gmtime(&now);
-  const time_t now_utc = std::mktime(now_utc_tm);
 
   if (now_utc < validity.not_before) {
     CommonUtilities::set_security_error(ex, -1, 0,
@@ -1484,6 +1494,8 @@ bool AccessControlBuiltInImpl::search_permissions(
   const DDS::PartitionQosPolicy& partition,
   const Permissions::PublishSubscribe_t pub_or_sub,
   const Permissions::Grant& grant,
+  time_t now_utc,
+  time_t& expiration_time,
   DDS::Security::SecurityException& ex)
 {
   for (Permissions::Rules::const_iterator rit = grant.rules.begin(); rit != grant.rules.end(); ++rit) {
@@ -1491,8 +1503,12 @@ bool AccessControlBuiltInImpl::search_permissions(
       for (Permissions::Actions::const_iterator ait = rit->actions.begin(); ait != rit->actions.end(); ++ait) {
         if (ait->ps_type == pub_or_sub &&
             ait->topic_matches(topic_name) &&
-            ait->partitions_match(partition.name, rit->ad_type)) {
+            ait->partitions_match(partition.name, rit->ad_type) &&
+            ait->valid(now_utc)) {
           if (rit->ad_type == Permissions::ALLOW) {
+            if (ait->validity.not_after != 0) {
+              expiration_time = std::min(expiration_time, ait->validity.not_after);
+            }
             return true;
           } else {
             return CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl: DENY rule matched");

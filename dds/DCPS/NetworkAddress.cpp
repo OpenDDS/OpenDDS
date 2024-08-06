@@ -8,7 +8,6 @@
 #include "NetworkAddress.h"
 
 #include "Hash.h"
-#include "LogAddr.h"
 
 #include <cstring>
 
@@ -354,14 +353,19 @@ bool is_more_local(const NetworkAddress& current, const NetworkAddress& incoming
 }
 
 #if defined ACE_HAS_CPP11
-size_t calculate_hash(const AddrSet& addrs, size_t start_hash)
+size_t calculate_hash(const NetworkAddressSet& addrs, size_t start_hash)
 {
   size_t result = start_hash;
-  for (AddrSet::const_iterator it = addrs.begin(), limit = addrs.end(); it != limit; ++it) {
+  for (NetworkAddressSet::const_iterator it = addrs.begin(), limit = addrs.end(); it != limit; ++it) {
     result = it->hash(result);
   }
   return result;
 }
+#endif
+
+const NetworkAddress NetworkAddress::default_IPV4("0.0.0.0:0");
+#ifdef ACE_HAS_IPV6
+const NetworkAddress NetworkAddress::default_IPV6("[::]:0");
 #endif
 
 } // namespace DCPS

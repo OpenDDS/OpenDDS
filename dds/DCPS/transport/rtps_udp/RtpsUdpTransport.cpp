@@ -11,14 +11,17 @@
 #include "RtpsUdpSendStrategy.h"
 #include "RtpsUdpReceiveStrategy.h"
 
+#include <dds/OpenDDSConfigWrapper.h>
 #include <dds/OpenddsDcpsExtTypeSupportImpl.h>
 
 #include <dds/DCPS/AssociationData.h>
 #include <dds/DCPS/BuiltInTopicUtils.h>
 #include <dds/DCPS/LogAddr.h>
 #include <dds/DCPS/NetworkResource.h>
+
 #include <dds/DCPS/transport/framework/TransportClient.h>
 #include <dds/DCPS/transport/framework/TransportExceptions.h>
+
 #include <dds/DCPS/RTPS/MessageUtils.h>
 #include <dds/DCPS/RTPS/RtpsCoreTypeSupportImpl.h>
 
@@ -31,17 +34,31 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-RtpsUdpTransport::RtpsUdpTransport(const RtpsUdpInst_rch& inst)
-  : TransportImpl(inst)
-#if defined(OPENDDS_SECURITY)
+RtpsUdpCore::RtpsUdpCore(const RtpsUdpInst_rch& inst)
+  : send_delay_(inst->send_delay())
+  , heartbeat_period_(inst->heartbeat_period())
+  , nak_response_delay_(inst->nak_response_delay())
+  , receive_address_duration_(inst->receive_address_duration())
+  , rtps_relay_only_(inst->rtps_relay_only())
+  , use_rtps_relay_(inst->use_rtps_relay())
+  , rtps_relay_address_(inst->rtps_relay_address())
+  , use_ice_(inst->use_ice())
+  , stun_server_address_(inst->stun_server_address())
+  , transport_statistics_(inst->name())
+  , relay_stun_task_falloff_(TimeDuration::zero_value)
+{}
+
+RtpsUdpTransport::RtpsUdpTransport(const RtpsUdpInst_rch& inst,
+                                   DDS::DomainId_t domain)
+  : TransportImpl(inst, domain)
+#if OPENDDS_CONFIG_SECURITY
   , local_crypto_handle_(DDS::HANDLE_NIL)
 #endif
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
   , ice_endpoint_(make_rch<IceEndpoint>(ref(*this)))
-  , relay_stun_task_falloff_(TimeDuration::zero_value)
   , ice_agent_(ICE::Agent::instance())
 #endif
-  , transport_statistics_(inst->name())
+  , core_(inst)
 {
   assign(local_prefix_, GUIDPREFIX_UNKNOWN);
   if (!(configure_i(inst) && open())) {
@@ -55,7 +72,7 @@ RtpsUdpTransport::config() const
   return dynamic_rchandle_cast<RtpsUdpInst>(TransportImpl::config());
 }
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
 DCPS::RcHandle<ICE::Agent>
 RtpsUdpTransport::get_ice_agent() const
 {
@@ -66,73 +83,10 @@ RtpsUdpTransport::get_ice_agent() const
 DCPS::WeakRcHandle<ICE::Endpoint>
 RtpsUdpTransport::get_ice_endpoint()
 {
-#ifdef OPENDDS_SECURITY
-  RtpsUdpInst_rch cfg = config();
-  return (cfg && cfg->use_ice()) ? static_rchandle_cast<ICE::Endpoint>(ice_endpoint_) : DCPS::WeakRcHandle<ICE::Endpoint>();
+#if OPENDDS_CONFIG_SECURITY
+  return core_.use_ice() ? static_rchandle_cast<ICE::Endpoint>(ice_endpoint_) : DCPS::WeakRcHandle<ICE::Endpoint>();
 #else
   return DCPS::WeakRcHandle<ICE::Endpoint>();
-#endif
-}
-
-void
-RtpsUdpTransport::rtps_relay_only_now(bool flag)
-{
-  ACE_UNUSED_ARG(flag);
-
-#ifdef OPENDDS_SECURITY
-  RtpsUdpInst_rch cfg = config();
-  if (flag) {
-    {
-      ACE_Guard<ThreadLockType> guard(relay_stun_task_falloff_mutex_);
-      relay_stun_task_falloff_.set(cfg ? cfg->heartbeat_period_ : TimeDuration(RtpsUdpInst::DEFAULT_HEARTBEAT_PERIOD_SEC));
-    }
-    relay_stun_task_->schedule(TimeDuration::zero_value);
-  } else {
-    if (!cfg || cfg->use_rtps_relay()) {
-      disable_relay_stun_task();
-    }
-  }
-#endif
-}
-
-void
-RtpsUdpTransport::use_rtps_relay_now(bool flag)
-{
-  ACE_UNUSED_ARG(flag);
-
-#ifdef OPENDDS_SECURITY
-  RtpsUdpInst_rch cfg = config();
-  if (flag) {
-    {
-      ACE_Guard<ThreadLockType> guard(relay_stun_task_falloff_mutex_);
-      relay_stun_task_falloff_.set(cfg ? cfg->heartbeat_period_ : TimeDuration(RtpsUdpInst::DEFAULT_HEARTBEAT_PERIOD_SEC));
-    }
-    relay_stun_task_->schedule(TimeDuration::zero_value);
-  } else {
-    if (!cfg || !cfg->rtps_relay_only()) {
-      disable_relay_stun_task();
-    }
-  }
-#endif
-}
-
-void
-RtpsUdpTransport::use_ice_now(bool after)
-{
-  ACE_UNUSED_ARG(after);
-
-#ifdef OPENDDS_SECURITY
-  RtpsUdpInst_rch cfg = config();
-  const bool before = cfg && cfg->use_ice();
-  if (cfg) {
-    cfg->use_ice(after);
-  }
-
-  if (before && !after) {
-    stop_ice();
-  } else if (!before && after) {
-    start_ice();
-  }
 #endif
 }
 
@@ -148,28 +102,27 @@ RtpsUdpTransport::make_datalink(const GuidPrefix_t& local_prefix)
 
   if (equal_guid_prefixes(local_prefix_, GUIDPREFIX_UNKNOWN)) {
     assign(local_prefix_, local_prefix);
-#ifdef OPENDDS_SECURITY
-    {
-      ACE_Guard<ThreadLockType> guard(relay_stun_task_falloff_mutex_);
-      relay_stun_task_falloff_.set(cfg ? cfg->heartbeat_period_ : TimeDuration(RtpsUdpInst::DEFAULT_HEARTBEAT_PERIOD_SEC));
-    }
+#if OPENDDS_CONFIG_SECURITY
+    core_.reset_relay_stun_task_falloff();
     relay_stun_task_->schedule(TimeDuration::zero_value);
 #endif
   }
 
-#if defined(OPENDDS_SECURITY)
-  if (cfg->use_ice()) {
-    ReactorInterceptor_rch ri = reactor_task_->interceptor();
-    ri->execute_or_enqueue(make_rch<RemoveHandler>(unicast_socket_.get_handle(), static_cast<ACE_Reactor_Mask>(ACE_Event_Handler::READ_MASK)));
+#if OPENDDS_CONFIG_SECURITY
+  {
+    if (core_.use_ice()) {
+      ReactorInterceptor_rch ri = reactor_task()->interceptor();
+      ri->execute_or_enqueue(make_rch<RemoveHandler>(unicast_socket_.get_handle(), static_cast<ACE_Reactor_Mask>(ACE_Event_Handler::READ_MASK)));
 #ifdef ACE_HAS_IPV6
-    ri->execute_or_enqueue(make_rch<RemoveHandler>(ipv6_unicast_socket_.get_handle(), static_cast<ACE_Reactor_Mask>(ACE_Event_Handler::READ_MASK)));
+      ri->execute_or_enqueue(make_rch<RemoveHandler>(ipv6_unicast_socket_.get_handle(), static_cast<ACE_Reactor_Mask>(ACE_Event_Handler::READ_MASK)));
 #endif
+    }
   }
 #endif
 
-  RtpsUdpDataLink_rch link = make_rch<RtpsUdpDataLink>(rchandle_from(this), local_prefix, config(), reactor_task(), ref(transport_statistics_), ref(transport_statistics_mutex_));
+  RtpsUdpDataLink_rch link = make_rch<RtpsUdpDataLink>(rchandle_from(this), local_prefix, config(), reactor_task());
 
-#if defined(OPENDDS_SECURITY)
+#if OPENDDS_CONFIG_SECURITY
   link->local_crypto_handle(local_crypto_handle_);
 #endif
 
@@ -230,7 +183,6 @@ RtpsUdpTransport::connect_datalink(const RemoteTransport& remote,
     return AcceptConnectResult(link);
   }
 
-  GuardType guard(connections_lock_);
   add_pending_connection(client, link);
   VDBG_LVL((LM_DEBUG, "(%P|%t) RtpsUdpTransport::connect_datalink pending.\n"), 2);
   return AcceptConnectResult(AcceptConnectResult::ACR_SUCCESS);
@@ -264,7 +216,6 @@ RtpsUdpTransport::accept_datalink(const RemoteTransport& remote,
     return AcceptConnectResult(link);
   }
 
-  GuardType guard(connections_lock_);
   add_pending_connection(client, link);
   VDBG_LVL((LM_DEBUG, "(%P|%t) RtpsUdpTransport::accept_datalink pending.\n"), 2);
   return AcceptConnectResult(AcceptConnectResult::ACR_SUCCESS);
@@ -282,7 +233,7 @@ RtpsUdpTransport::stop_accepting_or_connecting(const TransportClient_wrch& clien
     if (link_) {
       TransportClient_rch c = client.lock();
       if (c) {
-        link_->disassociated(c->get_guid(), remote_id);
+        link_->release_reservations(c->get_guid(), remote_id);
       }
     }
   }
@@ -311,20 +262,21 @@ RtpsUdpTransport::use_datalink(const GUID_t& local_id,
                                SequenceNumber max_sn,
                                const TransportClient_rch& client)
 {
-  AddrSet uc_addrs, mc_addrs;
+  NetworkAddressSet uc_addrs, mc_addrs;
   bool requires_inline_qos;
+  RTPS::VendorId_t vendor_id = { 0, 0 };
   unsigned int blob_bytes_read;
-  get_connection_addrs(remote_data, &uc_addrs, &mc_addrs, &requires_inline_qos, &blob_bytes_read);
+  get_connection_addrs(remote_data, &uc_addrs, &mc_addrs, &requires_inline_qos, &vendor_id, &blob_bytes_read);
 
   NetworkAddress disco_addr_hint;
   if (discovery_locator.length()) {
-    AddrSet disco_uc_addrs, disco_mc_addrs;
+    NetworkAddressSet disco_uc_addrs, disco_mc_addrs;
     bool disco_requires_inline_qos;
     unsigned int disco_blob_bytes_read;
-    get_connection_addrs(discovery_locator, &disco_uc_addrs, &disco_mc_addrs, &disco_requires_inline_qos, &disco_blob_bytes_read);
+    get_connection_addrs(discovery_locator, &disco_uc_addrs, &disco_mc_addrs, &disco_requires_inline_qos, 0, &disco_blob_bytes_read);
 
-    for (AddrSet::const_iterator it = disco_uc_addrs.begin(), limit = disco_uc_addrs.end(); it != limit; ++it) {
-      for (AddrSet::const_iterator it2 = uc_addrs.begin(), limit2 = uc_addrs.end(); it2 != limit2; ++it2) {
+    for (NetworkAddressSet::const_iterator it = disco_uc_addrs.begin(), limit = disco_uc_addrs.end(); it != limit; ++it) {
+      for (NetworkAddressSet::const_iterator it2 = uc_addrs.begin(), limit2 = uc_addrs.end(); it2 != limit2; ++it2) {
         if (it->addr_bytes_equal(*it2) && DCPS::is_more_local(disco_addr_hint, *it2)) {
           disco_addr_hint = *it2;
         }
@@ -335,6 +287,7 @@ RtpsUdpTransport::use_datalink(const GUID_t& local_id,
   if (link_) {
     return link_->associated(local_id, remote_id, local_reliable, remote_reliable,
                              local_durable, remote_durable,
+                             vendor_id,
                              participant_discovered_at, participant_flags, max_sn, client,
                              uc_addrs, mc_addrs, disco_addr_hint, requires_inline_qos);
   }
@@ -342,7 +295,7 @@ RtpsUdpTransport::use_datalink(const GUID_t& local_id,
   return true;
 }
 
-#if defined(OPENDDS_SECURITY)
+#if OPENDDS_CONFIG_SECURITY
 void
 RtpsUdpTransport::local_crypto_handle(DDS::Security::ParticipantCryptoHandle pch)
 {
@@ -360,17 +313,23 @@ RtpsUdpTransport::local_crypto_handle(DDS::Security::ParticipantCryptoHandle pch
 
 void
 RtpsUdpTransport::get_connection_addrs(const TransportBLOB& remote,
-                                       AddrSet* uc_addrs,
-                                       AddrSet* mc_addrs,
+                                       NetworkAddressSet* uc_addrs,
+                                       NetworkAddressSet* mc_addrs,
                                        bool* requires_inline_qos,
+                                       RTPS::VendorId_t* vendor_id,
                                        unsigned int* blob_bytes_read) const
 {
   using namespace OpenDDS::RTPS;
   LocatorSeq locators;
+  VendorId_t vid;
   DDS::ReturnCode_t result =
-    blob_to_locators(remote, locators, requires_inline_qos, blob_bytes_read);
+    blob_to_locators(remote, locators, vid, requires_inline_qos, blob_bytes_read);
   if (result != DDS::RETCODE_OK) {
     return;
+  }
+
+  if (vendor_id) {
+    *vendor_id = vid;
   }
 
   for (CORBA::ULong i = 0; i < locators.length(); ++i) {
@@ -379,7 +338,7 @@ RtpsUdpTransport::get_connection_addrs(const TransportBLOB& remote,
     if (locator_to_address(addr, locators[i], false) == 0) {
       if (addr.is_multicast()) {
         RtpsUdpInst_rch cfg = config();
-        if (cfg && cfg->use_multicast_ && mc_addrs) {
+        if (cfg && cfg->use_multicast() && mc_addrs) {
           mc_addrs->insert(NetworkAddress(addr));
         }
       } else if (uc_addrs) {
@@ -394,7 +353,7 @@ RtpsUdpTransport::connection_info_i(TransportLocator& info, ConnectionInfoFlags 
 {
   RtpsUdpInst_rch cfg = config();
   if (cfg) {
-    cfg->populate_locator(info, flags);
+    cfg->populate_locator(info, flags, domain_);
     return true;
   }
   return false;
@@ -427,7 +386,7 @@ RtpsUdpTransport::register_for_reader(const GUID_t& participant,
     link_ = make_datalink(participant.guidPrefix);
   }
 
-  AddrSet uc_addrs;
+  NetworkAddressSet uc_addrs;
   get_connection_addrs(*blob, &uc_addrs);
   link_->register_for_reader(writerid, readerid, uc_addrs, listener);
 }
@@ -471,7 +430,7 @@ RtpsUdpTransport::register_for_writer(const GUID_t& participant,
     link_ = make_datalink(participant.guidPrefix);
   }
 
-  AddrSet uc_addrs;
+  NetworkAddressSet uc_addrs;
   get_connection_addrs(*blob, &uc_addrs);
   link_->register_for_writer(readerid, writerid, uc_addrs, listener);
 }
@@ -509,16 +468,17 @@ RtpsUdpTransport::update_locators(const GUID_t& remote,
   GuardThreadType guard_links(links_lock_);
 
   if (link_) {
-    AddrSet uc_addrs, mc_addrs;
+    NetworkAddressSet uc_addrs, mc_addrs;
     bool requires_inline_qos;
     unsigned int blob_bytes_read;
-    get_connection_addrs(*blob, &uc_addrs, &mc_addrs, &requires_inline_qos, &blob_bytes_read);
+    get_connection_addrs(*blob, &uc_addrs, &mc_addrs, &requires_inline_qos, 0, &blob_bytes_read);
     link_->update_locators(remote, uc_addrs, mc_addrs, requires_inline_qos, false);
   }
 }
 
 void
 RtpsUdpTransport::get_last_recv_locator(const GUID_t& remote,
+                                        const GuidVendorId_t& vendor_id,
                                         TransportLocator& tl)
 {
   if (is_shut_down()) {
@@ -545,13 +505,19 @@ RtpsUdpTransport::get_last_recv_locator(const GUID_t& remote,
   locators.length(1);
   address_to_locator(locators[0], addr.to_addr());
 
+  RTPS::VendorId_t vid;
+  vid.vendorId[0] = vendor_id[0];
+  vid.vendorId[1] = vendor_id[1];
+
   const Encoding& encoding = RTPS::get_locators_encoding();
   size_t size = serialized_size(encoding, locators);
+  serialized_size(encoding, size, vid);
   primitive_serialized_size_boolean(encoding, size);
 
   ACE_Message_Block mb_locator(size);
   Serializer ser_loc(&mb_locator, encoding);
   ser_loc << locators;
+  ser_loc << vid;
   ser_loc << ACE_OutputCDR::from_boolean(expects_inline_qos);
 
   tl.transport_type = "rtps_udp";
@@ -559,25 +525,108 @@ RtpsUdpTransport::get_last_recv_locator(const GUID_t& remote,
 }
 
 void
-RtpsUdpTransport::rtps_relay_address_change()
-{
-#ifdef OPENDDS_SECURITY
-  relay_stun_task_->cancel();
-  RtpsUdpInst_rch cfg = config();
-  {
-    ACE_Guard<ThreadLockType> guard(relay_stun_task_falloff_mutex_);
-    relay_stun_task_falloff_.set(cfg ? cfg->heartbeat_period_ : TimeDuration(RtpsUdpInst::DEFAULT_HEARTBEAT_PERIOD_SEC));
-  }
-  relay_stun_task_->schedule(TimeDuration::zero_value);
-#endif
-}
-
-void
 RtpsUdpTransport::append_transport_statistics(TransportStatisticsSequence& seq)
 {
-  ACE_GUARD(ACE_Thread_Mutex, g, transport_statistics_mutex_);
-  append(seq, transport_statistics_);
-  transport_statistics_.clear();
+  core_.append_transport_statistics(seq);
+}
+
+bool RtpsUdpTransport::open_socket(
+  const RtpsUdpInst_rch& config, ACE_SOCK_Dgram& sock, int protocol, ACE_INET_Addr& actual)
+{
+  const bool ipv4 = protocol == PF_INET;
+  const DDS::UInt16 init_part_port_id =
+#ifdef ACE_HAS_IPV6
+    ipv4 ? config->init_participant_port_id() : config->ipv6_init_participant_port_id();
+#else
+    config->init_participant_port_id();
+#endif
+
+  NetworkAddress address;
+  bool fixed_port;
+  DDS::UInt16 part_port_id = init_part_port_id;
+  while (true) {
+#ifdef ACE_HAS_IPV6
+    if (ipv4) {
+#endif
+      if (!config->unicast_address(address, fixed_port, domain_, part_port_id)) {
+        return false;
+      }
+#ifdef ACE_HAS_IPV6
+    } else if (!config->ipv6_unicast_address(address, fixed_port, domain_, part_port_id)) {
+      return false;
+    }
+#endif
+
+    if (sock.open(address.to_addr(), protocol) == 0) {
+      break;
+    }
+
+    if (fixed_port) {
+      if (log_level >= LogLevel::Error) {
+        ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: RtpsUdpTransport::open_socket: "
+          "failed to open unicast %C socket for %C: %m\n",
+          ipv4 ? "IPv4" : "IPv6", LogAddr(address).c_str()));
+      }
+      return false;
+
+    } else {
+      if (DCPS::DCPS_debug_level > 3) {
+        ACE_DEBUG((LM_DEBUG, "(%P|%t) RtpsUdpTransport::open_socket: "
+          "failed to open unicast %C socket for %C: %m, trying next participant ID...\n",
+          ipv4 ? "IPv4" : "IPv6", LogAddr(address).c_str()));
+      }
+
+      ++part_port_id;
+
+      if (part_port_id == init_part_port_id) {
+        if (log_level >= LogLevel::Error) {
+          ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: RtpsUdpTransport::open_socket: "
+            "could not find a free %C unicast port\n",
+            ipv4 ? "IPv4" : "IPv6"));
+        }
+        return false;
+      }
+    }
+  }
+
+  if (DCPS::DCPS_debug_level > 3) {
+    ACE_DEBUG((LM_DEBUG,
+               "(%P|%t) RtpsUdpTransport::open_socket: "
+               "opened %C unicast socket %d for %C\n",
+               ipv4 ? "IPv4" : "IPv6", sock.get_handle(), LogAddr(address).c_str()));
+  }
+
+#ifdef ACE_WIN32
+  // By default Winsock will cause reads to fail with "connection reset"
+  // when UDP sends result in ICMP "port unreachable" messages.
+  // The transport framework is not set up for this since returning <= 0
+  // from our receive_bytes causes the framework to close down the datalink
+  // which in this case is used to receive from multiple peers.
+  {
+    BOOL recv_udp_connreset = FALSE;
+    sock.control(SIO_UDP_CONNRESET, &recv_udp_connreset);
+  }
+#endif
+
+  if (sock.get_local_addr(actual) != 0) {
+    if (log_level >= LogLevel::Error) {
+      ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: RtpsUdpTransport::open_socket: "
+        "failed to get actual address from %C socket for %C: %m\n",
+        ipv4 ? "IPv4" : "IPv6", LogAddr(address).c_str()));
+    }
+    return false;
+  }
+
+  if (!set_recvpktinfo(sock, ipv4)) {
+    if (log_level >= LogLevel::Error) {
+      ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: RtpsUdpTransport::open_socket: "
+        "failed to set RECVPKTINFO on %C socket for %C\n",
+        ipv4 ? "IPv4" : "IPv6", LogAddr(address).c_str()));
+    }
+    return false;
+  }
+
+  return true;
 }
 
 bool
@@ -587,112 +636,37 @@ RtpsUdpTransport::configure_i(const RtpsUdpInst_rch& config)
     return false;
   }
 
-  // Override with DCPSDefaultAddress.
-  if (config->local_address() == NetworkAddress() &&
-      TheServiceParticipant->default_address() != NetworkAddress()) {
-    config->local_address(TheServiceParticipant->default_address());
-  }
-  if (config->multicast_interface_.empty() &&
-      TheServiceParticipant->default_address().to_addr() != ACE_INET_Addr()) {
-    config->multicast_interface_ = DCPS::LogAddr::ip(TheServiceParticipant->default_address().to_addr());
-  }
-
   // Open the socket here so that any addresses/ports left
   // unspecified in the RtpsUdpInst are known by the time we get to
   // connection_info_i().  Opening the sockets here also allows us to
   // detect and report errors during DataReader/Writer setup instead
   // of during association.
 
-  ACE_INET_Addr address = config->local_address().to_addr();
-
-  if (unicast_socket_.open(address, PF_INET) != 0) {
-    ACE_ERROR_RETURN((LM_ERROR,
-                      ACE_TEXT("(%P|%t) ERROR: ")
-                      ACE_TEXT("RtpsUdpTransport::configure_i: open:")
-                      ACE_TEXT("%m\n")),
-                     false);
+  ACE_INET_Addr actual4;
+  if (!open_socket(config, unicast_socket_, PF_INET, actual4)) {
+    return false;
   }
-
-#ifdef ACE_WIN32
-  // By default Winsock will cause reads to fail with "connection reset"
-  // when UDP sends result in ICMP "port unreachable" messages.
-  // The transport framework is not set up for this since returning <= 0
-  // from our receive_bytes causes the framework to close down the datalink
-  // which in this case is used to receive from multiple peers.
-  {
-    BOOL recv_udp_connreset = FALSE;
-    unicast_socket_.control(SIO_UDP_CONNRESET, &recv_udp_connreset);
-  }
-#endif
-
-  if (unicast_socket_.get_local_addr(address) != 0) {
-    ACE_ERROR_RETURN((LM_ERROR,
-                      ACE_TEXT("(%P|%t) ERROR: ")
-                      ACE_TEXT("RtpsUdpTransport::configure_i: get_local_addr:")
-                      ACE_TEXT("%m\n")),
-                     false);
-  }
-
-  config->local_address(NetworkAddress(address));
-
-#ifdef ACE_RECVPKTINFO
-  int sockopt = 1;
-  if (unicast_socket_.set_option(IPPROTO_IP, ACE_RECVPKTINFO, &sockopt, sizeof sockopt) == -1) {
-    ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: RtpsUdpTransport::configure_i: set_option: %m\n")), false);
-  }
-#endif
+  config->actual_local_address_ = actual4;
 
 #ifdef ACE_HAS_IPV6
-  address = config->ipv6_local_address().to_addr();
-
-  if (ipv6_unicast_socket_.open(address, PF_INET6) != 0) {
-    ACE_ERROR_RETURN((LM_ERROR,
-                      ACE_TEXT("(%P|%t) ERROR: ")
-                      ACE_TEXT("RtpsUdpTransport::configure_i: open:")
-                      ACE_TEXT("%m\n")),
-                     false);
+  ACE_INET_Addr actual6;
+  if (!open_socket(config, ipv6_unicast_socket_, PF_INET6, actual6)) {
+    return false;
   }
-
-#ifdef ACE_WIN32
-  // By default Winsock will cause reads to fail with "connection reset"
-  // when UDP sends result in ICMP "port unreachable" messages.
-  // The transport framework is not set up for this since returning <= 0
-  // from our receive_bytes causes the framework to close down the datalink
-  // which in this case is used to receive from multiple peers.
-  {
-    BOOL recv_udp_connreset = FALSE;
-    ipv6_unicast_socket_.control(SIO_UDP_CONNRESET, &recv_udp_connreset);
+  NetworkAddress temp(actual6);
+  if (actual6.is_ipv4_mapped_ipv6() && temp.is_any()) {
+    temp = NetworkAddress(actual6.get_port_number(), "::");
   }
-#endif
-
-  if (ipv6_unicast_socket_.get_local_addr(address) != 0) {
-    ACE_ERROR_RETURN((LM_ERROR,
-                      ACE_TEXT("(%P|%t) ERROR: ")
-                      ACE_TEXT("RtpsUdpTransport::configure_i: get_local_addr:")
-                      ACE_TEXT("%m\n")),
-                     false);
-  }
-
-  NetworkAddress temp(address);
-  if (address.is_ipv4_mapped_ipv6() && temp.is_any()) {
-    temp = NetworkAddress(address.get_port_number(), "::");
-  }
-  config->ipv6_local_address(temp);
-
-#ifdef ACE_RECVPKTINFO6
-  if (ipv6_unicast_socket_.set_option(IPPROTO_IPV6, ACE_RECVPKTINFO6, &sockopt, sizeof sockopt) == -1) {
-    ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: RtpsUdpTransport::configure_i: set_option: %m\n")), false);
-  }
-#endif
+  config->ipv6_actual_local_address_ = temp;
 #endif
 
   create_reactor_task(false, "RtpsUdpTransport" + config->name());
 
-  ACE_Reactor* reactor = reactor_task_->get_reactor();
+  ACE_Reactor* reactor = reactor_task()->get_reactor();
   job_queue_ = DCPS::make_rch<DCPS::JobQueue>(reactor);
 
-#ifdef OPENDDS_SECURITY
-  if (config->use_ice()) {
+#if OPENDDS_CONFIG_SECURITY
+  if (core_.use_ice()) {
     start_ice();
   }
 
@@ -705,13 +679,15 @@ RtpsUdpTransport::configure_i(const RtpsUdpInst_rch& config)
     link_->default_listener(*config->opendds_discovery_default_listener_);
   }
 
-#ifdef OPENDDS_SECURITY
-  {
-    ACE_Guard<ThreadLockType> guard(relay_stun_task_falloff_mutex_);
-    relay_stun_task_falloff_.set(config->heartbeat_period_);
-  }
+#if OPENDDS_CONFIG_SECURITY
+  core_.reset_relay_stun_task_falloff();
   relay_stun_task_->schedule(TimeDuration::zero_value);
 #endif
+
+  // Start listening for config events after everything is initialized.
+  ConfigListener::job_queue(job_queue_);
+  config_reader_ = make_rch<ConfigReader>(ConfigStoreImpl::datareader_qos(), rchandle_from(this));
+  TheServiceParticipant->config_topic()->connect(config_reader_);
 
   return true;
 }
@@ -729,15 +705,18 @@ void RtpsUdpTransport::client_stop(const GUID_t& localId)
 void
 RtpsUdpTransport::shutdown_i()
 {
-#ifdef OPENDDS_SECURITY
-  RtpsUdpInst_rch cfg = config();
-
-  if (cfg && cfg->use_ice()) {
+#if OPENDDS_CONFIG_SECURITY
+  if (core_.use_ice()) {
     stop_ice();
   }
 
   relay_stun_task_->cancel();
 #endif
+
+  if (config_reader_) {
+    TheServiceParticipant->config_topic()->disconnect(config_reader_);
+    config_reader_.reset();
+  }
 
   job_queue_.reset();
 
@@ -754,9 +733,72 @@ RtpsUdpTransport::release_datalink(DataLink* /*link*/)
   // No-op for rtps_udp: keep the link_ around until the transport is shut down.
 }
 
+void
+RtpsUdpTransport::on_data_available(ConfigReader_rch)
+{
+  const RtpsUdpInst_rch cfg = config();
+  OPENDDS_ASSERT(cfg);
+  RcHandle<ConfigStoreImpl> config_store = TheServiceParticipant->config_store();
+  const String& config_prefix = cfg->config_prefix();
+  bool has_prefix = false;
 
+  DCPS::InternalDataReader<ConfigPair>::SampleSequence samples;
+  DCPS::InternalSampleInfoSequence infos;
+  config_reader_->take(samples, infos, DDS::LENGTH_UNLIMITED,
+                       DDS::ANY_SAMPLE_STATE, DDS::ANY_VIEW_STATE, DDS::ALIVE_INSTANCE_STATE);
+  for (size_t idx = 0; idx != samples.size(); ++idx) {
+    const ConfigPair& sample = samples[idx];
 
-#ifdef OPENDDS_SECURITY
+    if (sample.key_has_prefix(config_prefix)) {
+      has_prefix = true;
+
+#if OPENDDS_CONFIG_SECURITY
+      if (sample.key() == cfg->config_key("RTPS_RELAY_ONLY")) {
+        core_.rtps_relay_only(cfg->rtps_relay_only());
+        if (core_.rtps_relay_only()) {
+          core_.reset_relay_stun_task_falloff();
+          relay_stun_task_->schedule(TimeDuration::zero_value);
+        } else {
+          if (!core_.use_rtps_relay()) {
+            disable_relay_stun_task();
+          }
+        }
+      } else if (sample.key() == cfg->config_key("USE_RTPS_RELAY")) {
+        core_.use_rtps_relay(cfg->use_rtps_relay());
+        if (core_.use_rtps_relay()) {
+          core_.reset_relay_stun_task_falloff();
+          relay_stun_task_->schedule(TimeDuration::zero_value);
+        } else {
+          if (!core_.rtps_relay_only()) {
+            disable_relay_stun_task();
+          }
+        }
+      } else if (sample.key() == cfg->config_key("DATA_RTPS_RELAY_ADDRESS")) {
+        core_.rtps_relay_address(cfg->rtps_relay_address());
+        relay_stun_task_->cancel();
+        core_.reset_relay_stun_task_falloff();
+        relay_stun_task_->schedule(TimeDuration::zero_value);
+      } else if (sample.key() == cfg->config_key("USE_ICE")) {
+        const bool before = core_.use_ice();
+        const bool after = cfg->use_ice();
+        core_.use_ice(after);
+
+        if (before && !after) {
+          stop_ice();
+        } else if (!before && after) {
+          start_ice();
+        }
+      }
+#endif
+    }
+  }
+
+  if (has_prefix) {
+    core_.reload(config_prefix);
+  }
+}
+
+#if OPENDDS_CONFIG_SECURITY
 
 const ACE_SOCK_Dgram&
 RtpsUdpTransport::IceEndpoint::choose_recv_socket(ACE_HANDLE fd) const
@@ -783,7 +825,7 @@ RtpsUdpTransport::IceEndpoint::handle_input(ACE_HANDLE fd)
 
   bool stop;
   RtpsUdpReceiveStrategy::receive_bytes_helper(iov, 1, choose_recv_socket(fd), remote_address,
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
                                                transport.get_ice_agent(), transport.get_ice_endpoint(),
 #endif
                                                transport, stop);
@@ -798,17 +840,20 @@ namespace {
   }
 
   ssize_t
-  send_single_i(RtpsUdpInst_rch config, ACE_SOCK_Dgram& socket, const iovec iov[], int n, const ACE_INET_Addr& addr, bool& network_is_unreachable)
+  send_single_i(const RtpsUdpTransport& transport,
+                ACE_SOCK_Dgram& socket,
+                const iovec iov[],
+                int n,
+                const ACE_INET_Addr& addr,
+                bool& network_is_unreachable)
   {
-    OPENDDS_ASSERT(addr != ACE_INET_Addr());
+    ACE_UNUSED_ARG(transport);
 
-    if (!config) {
-      return -1;
-    }
+    OPENDDS_ASSERT(addr != ACE_INET_Addr());
 
 #ifdef OPENDDS_TESTING_FEATURES
     ssize_t total_length;
-    if (config->should_drop(iov, n, total_length)) {
+    if (transport.core().should_drop(iov, n, total_length)) {
       return total_length;
     }
 #endif
@@ -850,7 +895,8 @@ namespace {
 }
 
 ICE::AddressListType
-RtpsUdpTransport::IceEndpoint::host_addresses() const {
+RtpsUdpTransport::IceEndpoint::host_addresses() const
+{
   ICE::AddressListType addresses;
 
   RtpsUdpInst_rch cfg = transport.config();
@@ -859,7 +905,7 @@ RtpsUdpTransport::IceEndpoint::host_addresses() const {
     return addresses;
   }
 
-  ACE_INET_Addr addr = cfg->local_address().to_addr();
+  ACE_INET_Addr addr = cfg->actual_local_address_.to_addr();
   if (addr != ACE_INET_Addr()) {
     if (addr.is_any()) {
       ICE::AddressListType addrs;
@@ -876,7 +922,7 @@ RtpsUdpTransport::IceEndpoint::host_addresses() const {
   }
 
 #ifdef ACE_HAS_IPV6
-  addr = cfg->ipv6_local_address().to_addr();
+  addr = cfg->ipv6_actual_local_address_.to_addr();
   if (addr != ACE_INET_Addr()) {
     if (addr.is_any()) {
       ICE::AddressListType addrs;
@@ -912,6 +958,7 @@ RtpsUdpTransport::IceEndpoint::choose_send_socket(const ACE_INET_Addr& destinati
 void
 RtpsUdpTransport::IceEndpoint::send(const ACE_INET_Addr& destination, const STUN::Message& message)
 {
+  const NetworkAddress da(destination);
   ACE_SOCK_Dgram& socket = choose_send_socket(destination);
 
   ACE_Message_Block block(20 + message.length());
@@ -921,37 +968,23 @@ RtpsUdpTransport::IceEndpoint::send(const ACE_INET_Addr& destination, const STUN
 
   iovec iov[MAX_SEND_BLOCKS];
   const int num_blocks = RtpsUdpSendStrategy::mb_to_iov(block, iov);
-  const ssize_t result = send_single_i(transport.config(), socket, iov, num_blocks, destination, network_is_unreachable_);
+  const ssize_t result = send_single_i(transport, socket, iov, num_blocks, destination, network_is_unreachable_);
 
-  RtpsUdpInst_rch cfg = transport.config();
   if (result < 0) {
-    if (cfg && cfg->count_messages()) {
-      ssize_t bytes = 0;
-      for (int i = 0; i < num_blocks; ++i) {
-        bytes += iov[i].iov_len;
-      }
-      const NetworkAddress da(destination);
-      const InternalMessageCountKey key(da, MCK_STUN, da == cfg->rtps_relay_address());
-      ACE_GUARD(ACE_Thread_Mutex, g, transport.transport_statistics_mutex_);
-      transport.transport_statistics_.message_count[key].send_fail(bytes);
-    }
+    transport.core().send_fail(da, MCK_STUN, iov, num_blocks);
     if (!network_is_unreachable_) {
       const ACE_Log_Priority prio = shouldWarn(errno) ? LM_WARNING : LM_ERROR;
       ACE_ERROR((prio, "(%P|%t) RtpsUdpTransport::send() - "
                  "failed to send STUN message\n"));
     }
-  } else if (cfg && cfg->count_messages()) {
-    const NetworkAddress da(destination);
-    const InternalMessageCountKey key(da, MCK_STUN, da == cfg->rtps_relay_address());
-    ACE_GUARD(ACE_Thread_Mutex, g, transport.transport_statistics_mutex_);
-    transport.transport_statistics_.message_count[key].send(result);
+  } else {
+    transport.core().send(da, MCK_STUN, result);
   }
 }
 
 ACE_INET_Addr
 RtpsUdpTransport::IceEndpoint::stun_server_address() const {
-  RtpsUdpInst_rch cfg = transport.config();
-  return cfg ? cfg->stun_server_address().to_addr() : ACE_INET_Addr();
+  return transport.core().stun_server_address().to_addr();
 }
 
 void
@@ -966,7 +999,7 @@ RtpsUdpTransport::start_ice()
   GuardThreadType guard_links(links_lock_);
 
   if (!link_) {
-    ReactorInterceptor_rch ri = reactor_task_->interceptor();
+    ReactorInterceptor_rch ri = reactor_task()->interceptor();
     ri->execute_or_enqueue(make_rch<RegisterHandler>(unicast_socket_.get_handle(), ice_endpoint_.get(), static_cast<ACE_Reactor_Mask>(ACE_Event_Handler::READ_MASK)));
 #ifdef ACE_HAS_IPV6
     ri->execute_or_enqueue(make_rch<RegisterHandler>(ipv6_unicast_socket_.get_handle(), ice_endpoint_.get(), static_cast<ACE_Reactor_Mask>(ACE_Event_Handler::READ_MASK)));
@@ -984,7 +1017,7 @@ RtpsUdpTransport::stop_ice()
   GuardThreadType guard_links(links_lock_);
 
   if (!link_) {
-    ReactorInterceptor_rch ri = reactor_task_->interceptor();
+    ReactorInterceptor_rch ri = reactor_task()->interceptor();
     ri->execute_or_enqueue(make_rch<RemoveHandler>(unicast_socket_.get_handle(), static_cast<ACE_Reactor_Mask>(ACE_Event_Handler::READ_MASK)));
 #ifdef ACE_HAS_IPV6
     ri->execute_or_enqueue(make_rch<RemoveHandler>(ipv6_unicast_socket_.get_handle(), static_cast<ACE_Reactor_Mask>(ACE_Event_Handler::READ_MASK)));
@@ -999,23 +1032,14 @@ RtpsUdpTransport::relay_stun_task(const DCPS::MonotonicTimePoint& /*now*/)
 {
   GuardThreadType guard_links(links_lock_);
 
-  RtpsUdpInst_rch cfg = config();
-  if (!cfg) {
-    return;
-  }
+  const ACE_INET_Addr relay_address = core_.rtps_relay_address().to_addr();
 
-  const ACE_INET_Addr relay_address = cfg->rtps_relay_address().to_addr();
-
-  if ((cfg->use_rtps_relay() || cfg->rtps_relay_only()) &&
+  if ((core_.use_rtps_relay() || core_.rtps_relay_only()) &&
       relay_address != ACE_INET_Addr() &&
       !equal_guid_prefixes(local_prefix_, GUIDPREFIX_UNKNOWN)) {
     process_relay_sra(relay_srsm_.send(relay_address, ICE::Configuration::instance()->server_reflexive_indication_count(), local_prefix_));
     ice_endpoint_->send(relay_address, relay_srsm_.message());
-    {
-      ACE_Guard<ThreadLockType> guard(relay_stun_task_falloff_mutex_);
-      relay_stun_task_falloff_.advance(ICE::Configuration::instance()->server_reflexive_address_period());
-      relay_stun_task_->schedule(relay_stun_task_falloff_.get());
-    }
+    relay_stun_task_->schedule(core_.advance_relay_stun_task_falloff());
   }
 }
 
@@ -1040,10 +1064,7 @@ RtpsUdpTransport::process_relay_sra(ICE::ServerReflexiveStateMachine::StateChang
   case ICE::ServerReflexiveStateMachine::SRSM_Set:
   case ICE::ServerReflexiveStateMachine::SRSM_Change:
     // Lengthen to normal period.
-    {
-      ACE_Guard<ThreadLockType> guard(relay_stun_task_falloff_mutex_);
-      relay_stun_task_falloff_.set(ICE::Configuration::instance()->server_reflexive_address_period());
-    }
+    core_.set_relay_stun_task_falloff();
     connection_record.address = DCPS::LogAddr(relay_srsm_.stun_server_address()).c_str();
     connection_record.latency = relay_srsm_.latency().to_dds_duration();
     relay_srsm_.latency_available(false);

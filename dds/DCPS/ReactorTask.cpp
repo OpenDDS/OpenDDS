@@ -13,6 +13,7 @@
 #endif /* __ACE_INLINE__ */
 
 #include "Service_Participant.h"
+#include "Timers.h"
 
 #include <ace/Select_Reactor.h>
 #include <ace/WFMO_Reactor.h>
@@ -76,8 +77,7 @@ void ReactorTask::cleanup()
   timer_queue_ = 0;
 }
 
-int ReactorTask::open_reactor_task(void*,
-                                   ThreadStatusManager* thread_status_manager,
+int ReactorTask::open_reactor_task(ThreadStatusManager* thread_status_manager,
                                    const String& name)
 {
   GuardType guard(lock_);
@@ -160,18 +160,29 @@ int ReactorTask::svc()
     condition_.notify_all();
   }
 
-  // Tell the reactor to handle events.
-  if (thread_status_manager_->update_thread_status()) {
-    while (state_ == STATE_RUNNING) {
-      ACE_Time_Value t = thread_status_manager_->thread_status_interval().value();
-      ThreadStatusManager::Sleeper sleeper(*thread_status_manager_);
-      reactor_->run_reactor_event_loop(t, 0);
-    }
+  Timers::TimerId thread_status_timer = Timers::InvalidTimerId;
+  RcHandle<RcEventHandler> tsm_updater_handler;
 
-  } else {
-    reactor_->run_reactor_event_loop();
+  if (thread_status_manager_->update_thread_status()) {
+    tsm_updater_handler = make_rch<ThreadStatusManager::Updater>();
+    const TimeDuration period = thread_status_manager_->thread_status_interval();
+    thread_status_timer = Timers::schedule(reactor_, *tsm_updater_handler, thread_status_manager_,
+                                           period, period);
+
+    if (thread_status_timer == Timers::InvalidTimerId) {
+      if (log_level >= LogLevel::Notice) {
+        ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: ReactorTask::svc: failed to "
+                              "schedule timer for ThreadStatusManager::Updater\n"));
+      }
+    }
   }
 
+  ThreadStatusManager::Sleeper sleeper(thread_status_manager_);
+  reactor_->run_reactor_event_loop();
+
+  if (thread_status_timer != Timers::InvalidTimerId) {
+    Timers::cancel(reactor_, thread_status_timer);
+  }
   return 0;
 }
 
@@ -223,23 +234,17 @@ void ReactorTask::stop()
     reactor->end_reactor_event_loop();
   }
 
-  {
-    GuardType guard(lock_);
+  // In the future, we will likely want to replace this assert with a new "SHUTTING_DOWN" state
+  // which can be used to delay any potential new calls to open_reactor_task()
+  OPENDDS_ASSERT(state() == STATE_SHUT_DOWN);
 
-    // In the future, we will likely want to replace this assert with a new "SHUTTING_DOWN" state
-    // which can be used to delay any potential new calls to open_reactor_task()
-    OPENDDS_ASSERT(state_ == STATE_SHUT_DOWN);
+  // Let's wait for the reactor task's thread to complete before we
+  // leave this stop method.
+  ThreadStatusManager::Sleeper sleeper(thread_status_manager_);
+  wait();
 
-    // Let's wait for the reactor task's thread to complete before we
-    // leave this stop method.
-    if (thread_status_manager_) {
-      ThreadStatusManager::Sleeper sleeper(*thread_status_manager_);
-      wait();
-
-      // Reset the thread manager in case it goes away before the next open.
-      thr_mgr(0);
-    }
-  }
+  // Reset the thread manager in case it goes away before the next open.
+  thr_mgr(0);
 }
 
 void ReactorTask::reactor(ACE_Reactor* reactor)

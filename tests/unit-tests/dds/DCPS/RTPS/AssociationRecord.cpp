@@ -17,23 +17,19 @@ using namespace OpenDDS::RTPS;
 class MockTransportClient : public OpenDDS::DCPS::TransportClient {
 public:
   MockTransportClient()
-    : local_id_(GUID_UNKNOWN)
   {
-    GuidBuilder builder(local_id_);
+    GUID_t local_id;
+    GuidBuilder builder(local_id);
     builder.guidPrefix0(0);
     builder.guidPrefix1(1);
     builder.guidPrefix2(2);
     builder.entityId(3);
     builder.entityKey(4);
+    TransportClient::set_guid(local_id);
   }
 
   virtual ~MockTransportClient()
   {}
-
-  virtual GUID_t get_guid() const
-  {
-    return local_id_;
-  }
 
   virtual bool check_transport_qos(const TransportInst&)
   {
@@ -49,9 +45,6 @@ public:
   {
     return 0;
   }
-
-private:
-  GUID_t local_id_;
 };
 
 TEST(dds_DCPS_RTPS_AssociationRecord, BuiltinAssociationRecord_ctor)
@@ -138,8 +131,11 @@ TEST(dds_DCPS_RTPS_AssociationRecord, BuiltinAssociationRecord_local_tokens_sent
 
 class MockDataWriterCallbacks : public DataWriterCallbacks {
 public:
-  virtual void add_association(const GUID_t&,
-                               const ReaderAssociation&,
+
+  virtual void set_publication_id(const GUID_t&)
+  {}
+
+  virtual void add_association(const ReaderAssociation&,
                                bool)
   {}
 
@@ -194,8 +190,10 @@ TEST(dds_DCPS_RTPS_AssociationRecord, WriterAssociationRecord_ctor)
 
 class MockDataReaderCallbacks : public DataReaderCallbacks {
 public:
-  virtual void add_association(const GUID_t&,
-                               const WriterAssociation&,
+  virtual void set_subscription_id(const GUID_t&)
+  {}
+
+  virtual void add_association(const WriterAssociation&,
                                bool)
   {}
 

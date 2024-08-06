@@ -11,6 +11,7 @@
 #include "dcps_export.h"
 
 #include "AssociationData.h"
+#include "AtomicBool.h"
 #include "Cached_Allocator_With_Overflow_T.h"
 #include "CoherentChangeControl.h"
 #include "ContentFilteredTopicImpl.h"
@@ -35,7 +36,7 @@
 #include "TopicImpl.h"
 #include "WriterInfo.h"
 #include "ZeroCopyInfoSeq_T.h"
-#include "AtomicBool.h"
+
 #include "transport/framework/ReceivedDataSample.h"
 #include "transport/framework/TransportClient.h"
 #include "transport/framework/TransportReceiveListener.h"
@@ -141,8 +142,6 @@ public:
   }
 
 private:
-  ~EndHistoricSamplesMissedSweeper();
-
   WeakRcHandle<DataReaderImpl> reader_;
   OPENDDS_SET(WriterInfo_rch) info_set_;
 
@@ -176,20 +175,6 @@ private:
     { }
     virtual void execute();
   };
-};
-
-class MessageHolder : public virtual RcObject {
-public:
-  virtual const void* get() const = 0;
-};
-
-template <typename T>
-class MessageHolder_T : public MessageHolder {
-public:
-  MessageHolder_T(const T& v) : v_(v) {}
-  const void* get() const { return &v_; }
-private:
-  T v_;
 };
 
 /**
@@ -228,8 +213,11 @@ public:
 
   virtual DDS::InstanceHandle_t get_instance_handle();
 
-  virtual void add_association(const GUID_t& yourId,
-                               const WriterAssociation& writer,
+  virtual void set_subscription_id(const GUID_t& guid);
+
+  const GUID_t& subscription_id() const { return subscription_id_; }
+
+  virtual void add_association(const WriterAssociation& writer,
                                bool active);
 
   virtual void transport_assoc_done(int flags, const GUID_t& remote_id);
@@ -392,13 +380,12 @@ public:
                                         const DDS::StringSeq& params) = 0;
 #endif
 
-  virtual RcHandle<MessageHolder> dds_demarshal(const ReceivedDataSample& sample,
-                                                DDS::InstanceHandle_t publication_handle,
-                                                SubscriptionInstance_rch& instance,
-                                                bool& is_new_instance,
-                                                bool& filtered,
-                                                MarshalingType marshaling_type,
-                                                bool full_copy) = 0;
+  virtual void dds_demarshal(const ReceivedDataSample& sample,
+                             DDS::InstanceHandle_t publication_handle,
+                             SubscriptionInstance_rch& instance,
+                             bool& is_new_instance,
+                             bool& filtered,
+                             MarshalingType marshaling_type) = 0;
 
   virtual void dispose_unregister(const ReceivedDataSample& sample,
                                   DDS::InstanceHandle_t publication_handle,
@@ -625,16 +612,6 @@ public:
 
   virtual DCPS::WeakRcHandle<ICE::Endpoint> get_ice_endpoint();
 
-  GUID_t get_guid() const
-  {
-    ACE_Guard<ACE_Thread_Mutex> guard(subscription_id_mutex_);
-    ThreadStatusManager& thread_status_manager = TheServiceParticipant->get_thread_status_manager();
-    while (!has_subscription_id_ && !get_deleted()) {
-      subscription_id_condition_.wait(thread_status_manager);
-    }
-    return subscription_id_;
-  }
-
   void return_handle(DDS::InstanceHandle_t handle);
 
   const ValueDispatcher* get_value_dispatcher() const
@@ -764,10 +741,6 @@ protected:
   /// Data has arrived into the cache, unblock waiting ReadConditions
   void notify_read_conditions();
 
-  bool has_subscription_id_;
-  mutable ACE_Thread_Mutex subscription_id_mutex_;
-  mutable ConditionVariable<ACE_Thread_Mutex> subscription_id_condition_;
-
   unique_ptr<ReceivedDataAllocator> rd_allocator_;
   DDS::DataReaderQos qos_;
   DDS::DataReaderQos passed_qos_;
@@ -850,7 +823,7 @@ private:
     return data.publication_transport_priority_;
   }
 
-#if defined(OPENDDS_SECURITY)
+#if OPENDDS_CONFIG_SECURITY
   DDS::Security::ParticipantCryptoHandle get_crypto_handle() const;
 #endif
 
@@ -938,8 +911,6 @@ private:
     }
 
   private:
-    ~LivelinessTimer() { }
-
     WeakRcHandle<DataReaderImpl> data_reader_;
 
     /// liveliness timer id; -1 if no timer is set
@@ -1100,7 +1071,7 @@ public:
   };
 
 protected:
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
   Security::SecurityConfig_rch security_config_;
   DDS::DynamicType_var dynamic_type_;
 #endif

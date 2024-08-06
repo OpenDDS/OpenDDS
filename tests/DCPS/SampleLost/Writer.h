@@ -6,7 +6,6 @@
 
 #include <dds/DdsDcpsPublicationC.h>
 #include "MessengerTypeSupportC.h"
-#include "DataWriterListenerImpl.h"
 #include <ace/Task.h>
 
 class Writer : public ACE_Task_Base
@@ -35,8 +34,6 @@ private:
   ACE_Thread_Mutex lock_;
 
   int count_;
-
-  DataWriterListenerImpl* dwl_servant_;
 };
 
 #endif /* WRITER_H */

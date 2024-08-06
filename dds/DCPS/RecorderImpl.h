@@ -72,7 +72,6 @@ public:
 
   // Implement TransportClient
   virtual bool check_transport_qos(const TransportInst& inst);
-  virtual GUID_t get_guid() const;
   DDS::DomainId_t domain_id() const { return this->domain_id_; }
   virtual CORBA::Long get_priority_value(const AssociationData& data) const;
 
@@ -84,8 +83,9 @@ public:
 
   // Implement DataReaderCallbacks
 
-  virtual void add_association(const GUID_t&            yourId,
-                               const WriterAssociation& writer,
+  virtual void set_subscription_id(const GUID_t& guid);
+
+  virtual void add_association(const WriterAssociation& writer,
                                bool                     active);
 
   virtual void remove_associations(const WriterIdSeq& writers,

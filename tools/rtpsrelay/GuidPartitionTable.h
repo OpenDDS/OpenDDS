@@ -28,12 +28,10 @@ public:
   };
 
   GuidPartitionTable(const Config& config,
-                     GuidAddrSet& guid_addr_set,
                      const ACE_INET_Addr& address,
                      RelayPartitionsDataWriter_var relay_partitions_writer,
                      SpdpReplayDataWriter_var spdp_replay_writer)
     : config_(config)
-    , guid_addr_set_(guid_addr_set)
     , address_(OpenDDS::DCPS::LogAddr(address).c_str())
     , relay_partitions_writer_(relay_partitions_writer)
     , spdp_replay_writer_(spdp_replay_writer)
@@ -41,8 +39,7 @@ public:
 
   // Insert a reader/writer guid and its partitions.
   Result insert(const OpenDDS::DCPS::GUID_t& guid,
-                const DDS::StringSeq& partitions,
-                const OpenDDS::DCPS::MonotonicTimePoint& now);
+                const DDS::StringSeq& partitions);
 
   void remove(const OpenDDS::DCPS::GUID_t& guid)
   {
@@ -106,20 +103,23 @@ public:
     }
   }
 
+  /// Add to 'guids' the GUIDs of participants that should receive messages based on 'partitions'.
+  /// If 'allowed' is empty, it has no effect. Otherwise all entires added to 'guids' must be in 'allowed'.
   template <typename T>
-  void lookup(GuidSet& guids, const T& partitions) const
+  void lookup(GuidSet& guids, const T& partitions, const GuidSet& allowed) const
   {
+    const auto limits = allowed.empty() ? nullptr : &allowed;
     ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
 
     for (const auto& part : partitions) {
       if (config_.allow_empty_partition() || !part.empty()) {
-        partition_index_.lookup(part, guids);
+        partition_index_.lookup(part, guids, limits);
       }
     }
   }
 
 private:
-  void remove_from_cache(const OpenDDS::DCPS::GUID_t guid)
+  void remove_from_cache(const OpenDDS::DCPS::GUID_t& guid)
   {
     // Invalidate the cache.
     const OpenDDS::DCPS::GUID_t prefix = make_id(guid, OpenDDS::DCPS::ENTITYID_UNKNOWN);
@@ -242,7 +242,6 @@ private:
   }
 
   const Config& config_;
-  GuidAddrSet& guid_addr_set_;
   const std::string address_;
   RelayPartitionsDataWriter_var relay_partitions_writer_;
 

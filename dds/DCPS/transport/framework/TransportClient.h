@@ -21,6 +21,9 @@
 #include <dds/DCPS/DiscoveryListener.h>
 #include <dds/DCPS/RcEventHandler.h>
 #include <dds/DCPS/BuiltInTopicUtils.h>
+#include <dds/DCPS/GuidUtils.h>
+
+#include <dds/OpenDDSConfigWrapper.h>
 
 #include <ace/Time_Value.h>
 #include <ace/Event_Handler.h>
@@ -59,14 +62,15 @@ public:
 
   // Local setup:
 
-  void enable_transport(bool reliable, bool durable);
+  void enable_transport(bool reliable, bool durable, DomainParticipantImpl* dpi);
   void enable_transport_using_config(bool reliable, bool durable,
-                                     const TransportConfig_rch& tc);
+                                     const TransportConfig_rch& tc,
+                                     DomainParticipantImpl* dpi);
 
   bool swap_bytes() const { return swap_bytes_; }
   bool cdr_encapsulation() const { return cdr_encapsulation_; }
   const TransportLocatorSeq& connection_info() const { return conn_info_; }
-  void populate_connection_info();
+  void populate_connection_info(DomainParticipantImpl* dpi);
   bool is_reliable() const { return reliable_; }
 
   // Managing associations to remote peers:
@@ -128,7 +132,6 @@ public:
   bool remove_all_msgs();
 
   virtual void add_link(const DataLink_rch& link, const GUID_t& peer);
-  virtual GUID_t get_guid() const = 0;
   virtual RcHandle<BitSubscriber> get_builtin_subscriber_proxy() const { return RcHandle<BitSubscriber>(); }
 
   void terminate_send_if_suspended();
@@ -136,10 +139,17 @@ public:
   bool associated_with(const GUID_t& remote) const;
   bool pending_association_with(const GUID_t& remote) const;
 
-  GUID_t repo_id() const
+  void set_guid(const GUID_t& guid)
   {
-    ACE_Guard<ACE_Thread_Mutex> guard(lock_);
-    return repo_id_;
+    OPENDDS_ASSERT(guid_ == GUID_UNKNOWN);
+    OPENDDS_ASSERT(guid != GUID_UNKNOWN);
+    guid_ = guid;
+  }
+
+  GUID_t get_guid() const
+  {
+    OPENDDS_ASSERT(guid_ != GUID_UNKNOWN);
+    return guid_;
   }
 
   void data_acked(const GUID_t& remote);
@@ -163,7 +173,7 @@ private:
 
 
 
-#if defined(OPENDDS_SECURITY)
+#if OPENDDS_CONFIG_SECURITY
   virtual DDS::Security::ParticipantCryptoHandle get_crypto_handle() const
   {
     return DDS::HANDLE_NIL;
@@ -253,15 +263,12 @@ private:
     }
 
   private:
-    ~PendingAssocTimer()
-    { }
-
     class CommandBase : public Command {
     public:
       CommandBase(PendingAssocTimer* timer,
                   const PendingAssoc_rch& assoc)
-        : timer_ (timer)
-        , assoc_ (assoc)
+        : timer_(timer)
+        , assoc_(assoc)
       { }
     protected:
       PendingAssocTimer* timer_;
@@ -271,41 +278,18 @@ private:
       ScheduleCommand(PendingAssocTimer* timer,
                       TransportClient_rch transport_client,
                       const PendingAssoc_rch& assoc)
-        : CommandBase (timer, assoc)
-        , transport_client_ (transport_client)
+        : CommandBase(timer, assoc)
+        , transport_client_(transport_client)
       { }
-      virtual void execute()
-      {
-        if (timer_->reactor()) {
-          TransportClient_rch client = transport_client_.lock();
-          if (client) {
-            ACE_Guard<ACE_Thread_Mutex> guard(assoc_->mutex_);
-            assoc_->scheduled_ = true;
-            long id = timer_->reactor()->schedule_timer(assoc_.in(),
-                                                        client.in(),
-                                                        client->passive_connect_duration_.value());
-            if (id != -1) {
-              timer_->set_id(id);
-            }
-          }
-        }
-      }
-      WeakRcHandle<TransportClient> transport_client_;
+      virtual void execute();
+      const WeakRcHandle<TransportClient> transport_client_;
     };
     struct CancelCommand : public CommandBase {
       CancelCommand(PendingAssocTimer* timer,
                     const PendingAssoc_rch& assoc)
-        : CommandBase (timer, assoc)
+        : CommandBase(timer, assoc)
       { }
-      virtual void execute()
-      {
-        if (timer_->reactor() && timer_->get_id()) {
-          ACE_Guard<ACE_Thread_Mutex> guard(assoc_->mutex_);
-          timer_->reactor()->cancel_timer(timer_->get_id());
-          timer_->set_id(-1);
-          assoc_->scheduled_ = false;
-        }
-      }
+      virtual void execute();
     };
     long timer_id_;
   };
@@ -348,7 +332,7 @@ private:
 
   Reverse_Lock_t reverse_lock_;
 
-  GUID_t repo_id_;
+  GUID_t guid_;
 };
 
 typedef RcHandle<TransportClient> TransportClient_rch;

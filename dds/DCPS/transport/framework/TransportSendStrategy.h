@@ -17,15 +17,15 @@
 #include "TransportReplacedElement.h"
 #include "TransportRetainedElement.h"
 
-#include <dds/DCPS/dcps_export.h>
 #include "dds/DCPS/Atomic.h"
 #include <dds/DCPS/DataBlockLockPool.h>
 #include <dds/DCPS/Definitions.h>
 #include <dds/DCPS/Dynamic_Cached_Allocator_With_Overflow_T.h>
 #include <dds/DCPS/PoolAllocator.h>
 #include <dds/DCPS/RcObject.h>
+#include <dds/DCPS/dcps_export.h>
 
-#if defined(OPENDDS_SECURITY)
+#if OPENDDS_CONFIG_SECURITY
 #include <dds/DdsSecurityCoreC.h>
 #include <dds/DCPS/security/framework/SecurityConfig.h>
 #include <dds/DCPS/security/framework/SecurityConfig_rch.h>
@@ -215,7 +215,7 @@ protected:
   /// Returns true if anything in the delayed notification list matched.
   bool send_delayed_notifications(const TransportQueueElement::MatchCriteria* match = 0);
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
   virtual Security::SecurityConfig_rch security_config() const { return Security::SecurityConfig_rch(); }
 #endif
 
@@ -266,7 +266,7 @@ private:
   /// Form an IOV and call the send_bytes() template method.
   ssize_t do_send_packet(const ACE_Message_Block* packet, int& bp);
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
   /// Derived classes can override to transform the data right before it's
   /// sent.  If the returned value is non-NULL it will be sent instead of
   /// sending the parameter.  If the returned value is NULL the original
@@ -326,7 +326,14 @@ public:
 
   /// Access the current sending mode.
   SendMode mode() const;
-protected:
+
+  bool is_sending(const GUID_t& guid) const
+  {
+    GuardType g(is_sending_lock_);
+    return is_sending_ == guid;
+  }
+
+ protected:
   /// Implement framework chain visitations to remove a sample.
   virtual RemoveResult do_remove_sample(const GUID_t& pub_id,
     const TransportQueueElement::MatchCriteria& criteria, bool remove_all = false);
@@ -437,6 +444,26 @@ private:
 
   /// Current transport packet header.
   TransportHeader header_;
+
+  struct BeginEndSend {
+    BeginEndSend(TransportSendStrategy& tss,
+                 const GUID_t& guid)
+      : tss_(tss)
+    {
+      GuardType g(tss_.is_sending_lock_);
+      tss_.is_sending_ = guid;
+    }
+
+    ~BeginEndSend()
+    {
+      GuardType g(tss_.is_sending_lock_);
+      tss_.is_sending_ = GUID_UNKNOWN;
+    }
+
+    TransportSendStrategy& tss_;
+  };
+  mutable LockType is_sending_lock_;
+  GUID_t is_sending_;
 
 protected:
   ThreadSynch* synch() const;

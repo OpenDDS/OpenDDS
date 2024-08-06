@@ -1,5 +1,5 @@
+cmake_minimum_required(VERSION 3.8...3.27)
 project(opendds_cpp11_typecode CXX)
-cmake_minimum_required(VERSION 3.8.2)
 
 find_package(OpenDDS REQUIRED)
 
@@ -7,7 +7,7 @@ if(OPENDDS_SAFETY_PROFILE)
   message(FATAL_ERROR "This test cannot be built with Safety Profile enabled")
 endif()
 
-if (NOT OPENDDS_CXX11)
+if(NOT OPENDDS_CXX11)
   message(FATAL_ERROR "This test requires OpenDDS to be built with C++11 Support")
 endif()
 
@@ -18,7 +18,7 @@ set(dst ${CMAKE_CURRENT_BINARY_DIR})
 # IDL Library
 set(idl "${target_prefix}idl")
 add_library(${idl})
-OPENDDS_TARGET_SOURCES(${idl} PUBLIC "${src}/typecode.idl" OPENDDS_IDL_OPTIONS "-Lc++11" SUPPRESS_ANYS OFF)
+opendds_target_sources(${idl} PUBLIC "${src}/typecode.idl" OPENDDS_IDL_OPTIONS "-Lc++11" SUPPRESS_ANYS OFF)
 target_link_libraries(${idl} PUBLIC OpenDDS::Dcps)
 set_target_properties(${idl} PROPERTIES
   RUNTIME_OUTPUT_DIRECTORY "${dst}/Idl"

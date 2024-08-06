@@ -11,8 +11,11 @@
 #include "Checklist.h"
 
 #include "dds/DCPS/SafetyProfileStreams.h"
+
 #include "dds/DCPS/security/framework/SecurityConfig.h"
 #include "dds/DCPS/security/framework/SecurityRegistry.h"
+
+#include <dds/OpenDDSConfigWrapper.h>
 
 #include <ace/Reverse_Lock_T.h>
 
@@ -21,7 +24,7 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace ICE {
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
 
 using DCPS::MonotonicTimePoint;
 
@@ -208,11 +211,9 @@ void EndpointManager::set_host_addresses(const AddressListType& a_host_addresses
     //   continue;
     // }
 
-#if !IPV6_V6ONLY
     if (pos->is_ipv4_mapped_ipv6()) {
       continue;
     }
-#endif
 #endif
 
     host_addresses.push_back(*pos);
@@ -314,11 +315,11 @@ void EndpointManager::server_reflexive_task(const MonotonicTimePoint& a_now)
 
     send(next_stun_server_address_, binding_request_);
 
-    if (!requesting_ && send_count_ == ICE::Configuration::instance()->server_reflexive_indication_count() - 1) {
+    if (!requesting_ && send_count_ == agent_impl->server_reflexive_indication_count() - 1) {
       requesting_ = true;
     }
 
-    send_count_ = (send_count_ + 1) % ICE::Configuration::instance()->server_reflexive_indication_count();
+    send_count_ = (send_count_ + 1) % agent_impl->server_reflexive_indication_count();
   } else {
     requesting_ = true;
     send_count_ = 0;
@@ -582,7 +583,7 @@ void EndpointManager::request(const ACE_INET_Addr& a_local_address,
         deferred_triggered_checks_.insert(std::make_pair(remote_username, DeferredTriggeredCheckListType()));
       x.first->second.push_back(DeferredTriggeredCheck(
         a_local_address, a_remote_address, priority, use_candidate,
-        MonotonicTimePoint::now() + ICE::Configuration::instance()->deferred_triggered_check_ttl()));
+        MonotonicTimePoint::now() + agent_impl->deferred_triggered_check_ttl()));
     }
   }
   break;
@@ -740,7 +741,7 @@ void EndpointManager::check_invariants() const
     const DeferredTriggeredCheckListType& list = pos->second;
     ACE_UNUSED_ARG(list);
     OPENDDS_ASSERT(!list.empty());
-    OPENDDS_ASSERT(list.front().expiration_date >= MonotonicTimePoint::now() - ICE::Configuration::instance()->server_reflexive_address_period() - ICE::Configuration::instance()->server_reflexive_address_period());
+    OPENDDS_ASSERT(list.front().expiration_date >= MonotonicTimePoint::now() - agent_impl->server_reflexive_address_period() - agent_impl->server_reflexive_address_period());
   }
 
   for (UsernameToChecklistType::const_iterator pos = username_to_checklist_.begin(),
@@ -793,7 +794,7 @@ void EndpointManager::ServerReflexiveTask::execute(const MonotonicTimePoint& a_n
   DCPS::RcHandle<EndpointManager> em = endpoint_manager.lock();
   if (em) {
     em->server_reflexive_task(a_now);
-    enqueue(a_now + ICE::Configuration::instance()->server_reflexive_address_period());
+    enqueue(a_now + em->agent_impl->server_reflexive_address_period());
   }
 }
 
@@ -801,7 +802,10 @@ EndpointManager::ChangePasswordTask::ChangePasswordTask(DCPS::RcHandle<EndpointM
   : Task(a_endpoint_manager->agent_impl),
     endpoint_manager(a_endpoint_manager)
 {
-  enqueue(MonotonicTimePoint::now() + ICE::Configuration::instance()->change_password_period());
+  DCPS::RcHandle<EndpointManager> em = endpoint_manager.lock();
+  if (em) {
+    enqueue(MonotonicTimePoint::now() + em->agent_impl->change_password_period());
+  }
 }
 
 void EndpointManager::ChangePasswordTask::execute(const MonotonicTimePoint& a_now)
@@ -809,7 +813,7 @@ void EndpointManager::ChangePasswordTask::execute(const MonotonicTimePoint& a_no
   DCPS::RcHandle<EndpointManager> em = endpoint_manager.lock();
   if (em) {
     em->change_password(true);
-    enqueue(a_now + ICE::Configuration::instance()->change_password_period());
+    enqueue(a_now + em->agent_impl->change_password_period());
   }
 }
 
@@ -844,7 +848,7 @@ void EndpointManager::purge()
   }
 }
 
-#endif /* OPENDDS_SECURITY */
+#endif
 
 } // namespace ICE
 } // namespace OpenDDS

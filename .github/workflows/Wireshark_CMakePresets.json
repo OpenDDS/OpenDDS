@@ -1,0 +1,23 @@
+{
+    "version": 7,
+    "configurePresets": [
+        {
+            "name": "config1",
+            "generator": "Ninja",
+            "binaryDir": "$env{WIRESHARK_BUILD_DIR}",
+            "cacheVariables": {
+                "BUILD_wireshark": "OFF",
+                "MAKENSIS_EXECUTABLE": "OFF",
+                "WIX_CANDLE_EXECUTABLE": "OFF",
+                "LEX_EXECUTABLE": "$env{WINFLEXBISON_ROOT}/bin/Debug/win_flex.exe"
+            }
+        }
+    ],
+    "buildPresets": [
+        {
+            "name": "build1",
+            "configurePreset": "config1",
+            "targets": "epan"
+        }
+    ]
+}

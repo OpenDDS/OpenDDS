@@ -5,6 +5,8 @@
  * See: http://www.opendds.org/license.html
  */
 
+#include "SafetyProfileStreams.h"
+
 #include "ace/OS_NS_string.h"
 #include "ace/Truncate.h"
 
@@ -121,6 +123,21 @@ operator>=(const DDS::Time_t& t1, const DDS::Time_t& t2)
   return t2 <= t1;
 }
 
+ACE_INLINE DDS::Time_t
+operator+(const DDS::Time_t& t1, const DDS::Duration_t& d1)
+{
+  CORBA::Long sec = static_cast<CORBA::Long>(static_cast<CORBA::ULong>(t1.sec) + static_cast<CORBA::ULong>(d1.sec));
+  CORBA::ULong nanosec = t1.nanosec + d1.nanosec;
+
+  while (nanosec >= ACE_ONE_SECOND_IN_NSECS) {
+    ++sec;
+    nanosec -= ACE_ONE_SECOND_IN_NSECS;
+  }
+
+  const DDS::Time_t t = { sec, nanosec };
+  return t;
+}
+
 ACE_INLINE DDS::Duration_t
 operator-(const DDS::Time_t& t1, const DDS::Time_t& t2)
 {
@@ -175,13 +192,6 @@ operator==(const MonotonicTime_t& t1, const MonotonicTime_t& t2)
 #endif
 
 ACE_INLINE
-ACE_Time_Value time_to_time_value(const DDS::Time_t& t)
-{
-  ACE_Time_Value tv(t.sec, t.nanosec / 1000);
-  return tv;
-}
-
-ACE_INLINE
 DDS::Time_t time_value_to_time(const ACE_Time_Value& tv)
 {
   DDS::Time_t t;
@@ -191,7 +201,7 @@ DDS::Time_t time_value_to_time(const ACE_Time_Value& tv)
 }
 
 ACE_INLINE
-MonotonicTime_t time_value_to_monotonic_time(const ACE_Time_Value& tv)
+MonotonicTime_t time_value_to_time(const ACE_Time_Value_T<ACE_Monotonic_Time_Policy>& tv)
 {
   MonotonicTime_t t;
   t.sec = ACE_Utils::truncate_cast<CORBA::Long>(tv.sec());
@@ -240,6 +250,12 @@ DDS::Duration_t time_value_to_duration(const ACE_Time_Value& tv)
   t.sec = ACE_Utils::truncate_cast<CORBA::Long>(tv.sec());
   t.nanosec = ACE_Utils::truncate_cast<CORBA::ULong>(tv.usec() * 1000);
   return t;
+}
+
+ACE_INLINE
+double time_value_to_double(const ACE_Time_Value& tv)
+{
+  return double(tv.sec()) + (double(tv.usec()) / 1000000.0);
 }
 
 ACE_INLINE
@@ -308,9 +324,83 @@ const MonotonicTime_t& monotonic_time_zero()
 }
 
 ACE_INLINE OpenDDS_Dcps_Export
-DDS::Duration_t make_duration(int sec, unsigned long nanosec)
+DDS::Duration_t make_duration_t(int sec, unsigned long nanosec)
 {
   DDS::Duration_t x;
+  x.sec = sec;
+  x.nanosec = nanosec;
+  return x;
+}
+
+namespace {
+
+  String left_pad(const String& x, char p, size_t total_length) {
+    return String(total_length - x.size(), p) + x;
+  }
+
+  String right_pad(const String& x, char p, size_t total_length) {
+    return x + String(total_length - x.size(), p);
+  }
+
+}
+
+
+ACE_INLINE OpenDDS_Dcps_Export
+String to_dds_string(const DDS::Duration_t& duration)
+{
+  if (is_infinite(duration)) {
+    return "DURATION_INFINITY";
+  }
+
+  return to_dds_string(duration.sec) + '.' + left_pad(to_dds_string(duration.nanosec), '0', 9);
+}
+
+ACE_INLINE OpenDDS_Dcps_Export
+bool from_dds_string(const String& str, DDS::Duration_t& duration)
+{
+  if (str == "DURATION_INFINITY") {
+    duration.sec = DDS::DURATION_INFINITE_SEC;
+    duration.nanosec = DDS::DURATION_INFINITE_NSEC;
+    return true;
+  }
+
+  DDS::Duration_t temp = { 0, 0 };
+
+  const size_t decimal_pos = str.find_first_of('.');
+  if (decimal_pos == std::string::npos) {
+    // Assume integer seconds.
+    if (!DCPS::convertToInteger(str, temp.sec)) {
+      return false;
+    }
+  } else {
+    // Assume decimal seconds.
+    const String sec_str = str.substr(0, decimal_pos);
+    String nanosec_str = str.substr(decimal_pos + 1);
+    if (sec_str.empty() && nanosec_str.empty()) {
+      return false;
+    }
+    if (nanosec_str.size() > 9) {
+      return false;
+    }
+    // Pad the nanosecs.
+    nanosec_str = right_pad(nanosec_str, '0', 9);
+
+    if (!sec_str.empty() && !DCPS::convertToInteger(sec_str, temp.sec)) {
+      return false;
+    }
+    if (!nanosec_str.empty() && !DCPS::convertToInteger(nanosec_str, temp.nanosec)) {
+      return false;
+    }
+  }
+
+  duration = temp;
+  return true;
+}
+
+ACE_INLINE OpenDDS_Dcps_Export
+DDS::Time_t make_time_t(int sec, unsigned long nanosec)
+{
+  DDS::Time_t x;
   x.sec = sec;
   x.nanosec = nanosec;
   return x;

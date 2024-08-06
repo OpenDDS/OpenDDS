@@ -12,6 +12,8 @@
 #include <dds/DCPS/transport/framework/TransportRegistry.h>
 #include <dds/DCPS/transport/framework/TransportConfig.h>
 #include <dds/DCPS/transport/framework/TransportInst.h>
+#include <dds/DCPS/transport/rtps_udp/RtpsUdpInst_rch.h>
+#include <dds/DCPS/transport/rtps_udp/RtpsUdpInst.h>
 
 #include <string>
 #include <stdexcept>
@@ -167,24 +169,17 @@ void Publisher::configure_transport()
   OpenDDS::RTPS::RtpsDiscovery_rch rd = OpenDDS::DCPS::dynamic_rchandle_cast<OpenDDS::RTPS::RtpsDiscovery>(disc);
   if (!rd.is_nil()) {
     char config_name[64], inst_name[64];
-    ACE_TCHAR nak_depth[8];
     ACE_OS::snprintf(config_name, 64, "cfg_%d", thread_index_);
     ACE_OS::snprintf(inst_name, 64, "rtps_%d", thread_index_);
-    // The 2 is a safety factor to allow for control messages.
-    ACE_OS::snprintf(nak_depth, 8, ACE_SIZE_T_FORMAT_SPECIFIER, 2 * samples_per_thread_);
     ACE_DEBUG((LM_INFO, (pfx_ + "->transport %C\n").c_str(), config_name));
     OpenDDS::DCPS::TransportConfig_rch config = TheTransportRegistry->create_config(config_name);
     OpenDDS::DCPS::TransportInst_rch inst = TheTransportRegistry->create_inst(inst_name, "rtps_udp");
-    ACE_Configuration_Heap ach;
-    ACE_Configuration_Section_Key sect_key;
-    ach.open();
-    ach.open_section(ach.root_section(), ACE_TEXT("not_root"), 1, sect_key);
-    ach.set_string_value(sect_key, ACE_TEXT("use_multicast"), ACE_TEXT("0"));
-    ach.set_string_value(sect_key, ACE_TEXT("nak_depth"), nak_depth);
-    ach.set_string_value(sect_key, ACE_TEXT("heartbeat_period"), ACE_TEXT("200"));
-    ach.set_string_value(sect_key, ACE_TEXT("heartbeat_response_delay"), ACE_TEXT("100"));
-    inst->load(ach, sect_key);
-    config->passive_connect_duration_ = 600000;
+    OpenDDS::DCPS::RtpsUdpInst_rch rtps_inst = OpenDDS::DCPS::static_rchandle_cast<OpenDDS::DCPS::RtpsUdpInst>(inst);
+    rtps_inst->use_multicast(false);
+    // The 2 is a safety factor to allow for control messages.
+    rtps_inst->nak_depth(2 * samples_per_thread_);
+    rtps_inst->heartbeat_period(OpenDDS::DCPS::TimeDuration::from_msec(200));
+    config->passive_connect_duration_ = OpenDDS::DCPS::TimeDuration::from_msec(600000);
     config->instances_.push_back(inst);
     TheTransportRegistry->bind_config(config_name, dp_);
   }

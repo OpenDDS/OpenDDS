@@ -287,10 +287,11 @@ private:
     KeyOctetSeq key_;
     ACE_UINT64 counter_;
 
-    KeyOctetSeq get_key(const KeyMaterial& master, const CryptoHeader& header);
-    void create_key(const KeyMaterial& master);
-    void derive_key(const KeyMaterial& master);
-    void next_id(const KeyMaterial& master);
+    KeyOctetSeq get_key(const KeyMaterial& master, const CryptoHeader& header,
+                        DDS::Security::SecurityException& ex);
+    bool create_key(const KeyMaterial& master, DDS::Security::SecurityException& ex);
+    bool derive_key(const KeyMaterial& master, DDS::Security::SecurityException& ex);
+    bool next_id(const KeyMaterial& master, DDS::Security::SecurityException& ex);
     void inc_iv();
   };
   typedef std::pair<DDS::Security::NativeCryptoHandle, unsigned int> KeyId_t;
@@ -315,8 +316,9 @@ private:
                CryptoHeader& header, CryptoFooter& footer,
                DDS::Security::SecurityException& ex);
 
-  void encauth_setup(const KeyMaterial& master, Session& sess,
-                     const DDS::OctetSeq& plain, CryptoHeader& header);
+  bool encauth_setup(const KeyMaterial& master, Session& sess,
+                     const DDS::OctetSeq& plain, CryptoHeader& header,
+                     DDS::Security::SecurityException& ex);
 
   bool decode_submessage(DDS::OctetSeq& plain_rtps_submessage,
                          const DDS::OctetSeq& encoded_rtps_submessage,

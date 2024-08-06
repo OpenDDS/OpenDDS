@@ -78,12 +78,14 @@ bool LinuxNetworkConfigMonitor::open_i()
   if (socket_.open(addr, AF_NETLINK, NETLINK_ROUTE) != 0) {
 #ifdef ACE_ANDROID
     if (log_level >= LogLevel::Warning) {
-      ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: LinuxNetworkConfigMonitor::open_i: could not open socket"
-                 " this is expected for API30+\n"));
+      ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: LinuxNetworkConfigMonitor::open_i: "
+        "could not open Netlink socket "
+        "(this is expected for API>=30, see Android section in the Developer's Guide)\n"));
     }
 #else
     if (log_level >= LogLevel::Error) {
-      ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: LinuxNetworkConfigMonitor::open_i: could not open socket: %m\n"));
+      ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: LinuxNetworkConfigMonitor::open_i: "
+        "could not open Netlink socket: %m\n"));
     }
 #endif
     return false;

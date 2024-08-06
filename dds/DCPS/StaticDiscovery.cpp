@@ -2,18 +2,21 @@
 
 #include "StaticDiscovery.h"
 
-#include "debug.h"
-#include "ConfigUtils.h"
-#include "DomainParticipantImpl.h"
-#include "Marked_Default_Qos.h"
-#include "SubscriberImpl.h"
 #include "BuiltInTopicUtils.h"
-#include "Registered_Data_Types.h"
-#include "Qos_Helper.h"
 #include "DataWriterImpl.h"
 #include "DcpsUpcalls.h"
+#include "DomainParticipantImpl.h"
+#include "Marked_Default_Qos.h"
+#include "Qos_Helper.h"
+#include "Registered_Data_Types.h"
+#include "SubscriberImpl.h"
+#include "debug.h"
+
 #include "transport/framework/TransportRegistry.h"
+
 #include "XTypes/TypeAssignability.h"
+
+#include <dds/OpenDDSConfigWrapper.h>
 
 #include <ctype.h>
 
@@ -120,7 +123,18 @@ void StaticEndpointManager::init_bit()
       data.key = key;
       OPENDDS_STRING topic_name = writer.topic_name;
       data.topic_name = topic_name.c_str();
-      const EndpointRegistry::Topic& topic = registry_.topic_map.find(topic_name)->second;
+
+      EndpointRegistry::TopicMapType::const_iterator iter = registry_.topic_map.find(topic_name);
+      if (iter == registry_.topic_map.end()) {
+        if (log_level >= LogLevel::Error) {
+          ACE_ERROR((LM_ERROR,
+                     "(%P|%t) ERROR: StaticEndpointManager::init_bit: no topic named %C\n",
+                     topic_name.c_str()));
+        }
+        continue;
+      }
+
+      const EndpointRegistry::Topic& topic = iter->second;
       data.type_name = topic.type_name.c_str();
       data.durability = writer.qos.durability;
       data.durability_service = writer.qos.durability_service;
@@ -166,7 +180,18 @@ void StaticEndpointManager::init_bit()
       data.key = key;
       OPENDDS_STRING topic_name = reader.topic_name;
       data.topic_name = topic_name.c_str();
-      const EndpointRegistry::Topic& topic = registry_.topic_map.find(topic_name)->second;
+
+      EndpointRegistry::TopicMapType::const_iterator iter = registry_.topic_map.find(topic_name);
+      if (iter == registry_.topic_map.end()) {
+        if (log_level >= LogLevel::Error) {
+          ACE_ERROR((LM_ERROR,
+                     "(%P|%t) ERROR: StaticEndpointManager::init_bit: no topic named %C\n",
+                     topic_name.c_str()));
+        }
+        continue;
+      }
+
+      const EndpointRegistry::Topic& topic = iter->second;
       data.type_name = topic.type_name.c_str();
       data.durability = reader.qos.durability;
       data.deadline = reader.qos.deadline;
@@ -332,7 +357,7 @@ StaticEndpointManager::add_publication_i(const GUID_t& writerid,
       {reader.trans_info, TransportLocator(), 0, readerid, reader.subscriber_qos, reader.qos, "", "", 0, 0, {0, 0}};
     DataWriterCallbacks_rch pl = pub.publication_.lock();
     if (pl) {
-      pl->add_association(writerid, ra, true);
+      pl->add_association(ra, true);
     }
   }
 
@@ -404,7 +429,7 @@ StaticEndpointManager::add_subscription_i(const GUID_t& readerid,
     };
     DataReaderCallbacks_rch sl = sub.subscription_.lock();
     if (sl) {
-      sl->add_association(readerid, wa, false);
+      sl->add_association(wa, false);
     }
   }
 
@@ -496,7 +521,7 @@ StaticEndpointManager::reader_exists(const GUID_t& readerid, const GUID_t& write
       const ReaderAssociation ra =
         {reader_pos->second.trans_info, TransportLocator(), 0, readerid, reader_pos->second.subscriber_qos, reader_pos->second.qos,
          "", "", DDS::StringSeq(), DDS::OctetSeq(), {0, 0}};
-      dwr->add_association(writerid, ra, true);
+      dwr->add_association(ra, true);
     }
   }
 }
@@ -531,7 +556,7 @@ StaticEndpointManager::writer_exists(const GUID_t& writerid, const GUID_t& reade
     if (drr) {
       const WriterAssociation wa =
         {writer_pos->second.trans_info, TransportLocator(), 0, writerid, writer_pos->second.publisher_qos, writer_pos->second.qos, DDS::OctetSeq(), {0,0}};
-      drr->add_association(readerid, wa, false);
+      drr->add_association(wa, false);
     }
   }
 }
@@ -757,18 +782,18 @@ TopicStatus StaticEndpointManager::remove_topic(const GUID_t& topicId)
   return REMOVED;
 }
 
-GUID_t StaticEndpointManager::add_publication(
-  const GUID_t& topicId,
-  DataWriterCallbacks_rch publication,
-  const DDS::DataWriterQos& qos,
-  const TransportLocatorSeq& transInfo,
-  const DDS::PublisherQos& publisherQos,
-  const XTypes::TypeInformation& type_info)
+bool StaticEndpointManager::add_publication(const GUID_t& topicId,
+                                            DataWriterCallbacks_rch publication,
+                                            const DDS::DataWriterQos& qos,
+                                            const TransportLocatorSeq& transInfo,
+                                            const DDS::PublisherQos& publisherQos,
+                                            const XTypes::TypeInformation& type_info)
 {
-  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, GUID_t());
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, false);
 
   GUID_t rid = participant_id_;
   assign_publication_key(rid, topicId, qos);
+  publication->set_publication_id(rid);
   LocalPublication& pb = local_publications_[rid];
   pb.topic_id_ = topicId;
   pb.publication_ = publication;
@@ -782,11 +807,11 @@ GUID_t StaticEndpointManager::add_publication(
   td.add_local_publication(rid);
 
   if (DDS::RETCODE_OK != add_publication_i(rid, pb)) {
-    return GUID_t();
+    return false;
   }
 
   if (DDS::RETCODE_OK != write_publication_data(rid, pb)) {
-    return GUID_t();
+    return false;
   }
 
   if (DCPS_debug_level > 3) {
@@ -795,7 +820,7 @@ GUID_t StaticEndpointManager::add_publication(
   }
   match_endpoints(rid, td);
 
-  return rid;
+  return true;
 }
 
 void StaticEndpointManager::remove_publication(const GUID_t& publicationId)
@@ -836,21 +861,21 @@ void StaticEndpointManager::update_publication_locators(
   }
 }
 
-GUID_t StaticEndpointManager::add_subscription(
-  const GUID_t& topicId,
-  DataReaderCallbacks_rch subscription,
-  const DDS::DataReaderQos& qos,
-  const TransportLocatorSeq& transInfo,
-  const DDS::SubscriberQos& subscriberQos,
-  const char* filterClassName,
-  const char* filterExpr,
-  const DDS::StringSeq& params,
-  const XTypes::TypeInformation& type_info)
+bool StaticEndpointManager::add_subscription(const GUID_t& topicId,
+                                             DataReaderCallbacks_rch subscription,
+                                             const DDS::DataReaderQos& qos,
+                                             const TransportLocatorSeq& transInfo,
+                                             const DDS::SubscriberQos& subscriberQos,
+                                             const char* filterClassName,
+                                             const char* filterExpr,
+                                             const DDS::StringSeq& params,
+                                             const XTypes::TypeInformation& type_info)
 {
-  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, GUID_t());
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, false);
 
   GUID_t rid = participant_id_;
   assign_subscription_key(rid, topicId, qos);
+  subscription->set_subscription_id(rid);
   LocalSubscription& sb = local_subscriptions_[rid];
   sb.topic_id_ = topicId;
   sb.subscription_ = subscription;
@@ -867,11 +892,11 @@ GUID_t StaticEndpointManager::add_subscription(
   td.add_local_subscription(rid);
 
   if (DDS::RETCODE_OK != add_subscription_i(rid, sb)) {
-    return GUID_t();
+    return false;
   }
 
   if (DDS::RETCODE_OK != write_subscription_data(rid, sb)) {
-    return GUID_t();
+    return false;
   }
 
   if (DCPS_debug_level > 3) {
@@ -880,7 +905,7 @@ GUID_t StaticEndpointManager::add_subscription(
   }
   match_endpoints(rid, td);
 
-  return rid;
+  return true;
 }
 
 void StaticEndpointManager::remove_subscription(const GUID_t& subscriptionId)
@@ -1380,13 +1405,13 @@ void StaticEndpointManager::match_continue(const GUID_t& writer, const GUID_t& r
         if (call_reader) {
           DataReaderCallbacks_rch drr_lock = drr.lock();
           if (drr_lock) {
-            DcpsUpcalls thr(drr_lock, reader, wa, !writer_active, dwr_lock);
+            DcpsUpcalls thr(drr_lock, wa, !writer_active, dwr_lock);
             thr.activate();
-            dwr_lock->add_association(writer, ra, writer_active);
+            dwr_lock->add_association(ra, writer_active);
             thr.writer_done();
           }
         } else {
-          dwr_lock->add_association(writer, ra, writer_active);
+          dwr_lock->add_association(ra, writer_active);
         }
       }
     } else if (call_reader) {
@@ -1397,7 +1422,7 @@ void StaticEndpointManager::match_continue(const GUID_t& writer, const GUID_t& r
       }
       DataReaderCallbacks_rch drr_lock = drr.lock();
       if (drr_lock) {
-        drr_lock->add_association(reader, wa, !writer_active);
+        drr_lock->add_association(wa, !writer_active);
       }
     }
 
@@ -1497,7 +1522,7 @@ bool StaticEndpointManager::has_dcps_key(const GUID_t& topicId) const
 }
 
 StaticDiscovery::StaticDiscovery(const RepoKey& key)
-  : Discovery(key)
+  : key_(key)
 {}
 
 namespace {
@@ -1602,7 +1627,7 @@ StaticDiscovery::add_domain_participant(DDS::DomainId_t domain,
   return ads;
 }
 
-#if defined(OPENDDS_SECURITY)
+#if OPENDDS_CONFIG_SECURITY
 AddDomainStatus
 StaticDiscovery::add_domain_participant_secure(
   DDS::DomainId_t /*domain*/,
@@ -1622,71 +1647,87 @@ StaticDiscovery::add_domain_participant_secure(
 #endif
 
 namespace {
-  const ACE_TCHAR TOPIC_SECTION_NAME[] = ACE_TEXT("topic");
-  const ACE_TCHAR DATAWRITERQOS_SECTION_NAME[] = ACE_TEXT("datawriterqos");
-  const ACE_TCHAR DATAREADERQOS_SECTION_NAME[] = ACE_TEXT("datareaderqos");
-  const ACE_TCHAR PUBLISHERQOS_SECTION_NAME[]  = ACE_TEXT("publisherqos");
-  const ACE_TCHAR SUBSCRIBERQOS_SECTION_NAME[] = ACE_TEXT("subscriberqos");
-  const ACE_TCHAR ENDPOINT_SECTION_NAME[] = ACE_TEXT("endpoint");
 
-  void parse_second(CORBA::Long& x, const OPENDDS_STRING& value)
+  void string_list_to_partitions(DDS::PartitionQosPolicy& x,
+                                 const ConfigStoreImpl::StringList& value)
   {
-    if (value == "DURATION_INFINITE_SEC") {
-      x = DDS::DURATION_INFINITE_SEC;
-    } else {
-      x = atoi(value.c_str());
-    }
-  }
-
-  void parse_nanosecond(CORBA::ULong& x, const OPENDDS_STRING& value)
-  {
-    if (value == "DURATION_INFINITE_NANOSEC") {
-      x = DDS::DURATION_INFINITE_NSEC;
-    } else {
-      x = atoi(value.c_str());
-    }
-  }
-
-  bool parse_bool(CORBA::Boolean& x, const OPENDDS_STRING& value)
-  {
-    if (value == "true") {
-      x = true;
-      return true;
-    } else if (value == "false") {
-      x = false;
-      return true;
-    }
-    return false;
-  }
-
-  void parse_list(DDS::PartitionQosPolicy& x, const OPENDDS_STRING& value)
-  {
-    // Value can be a comma-separated list
-    const char* start = value.c_str();
-    while (const char* next_comma = std::strchr(start, ',')) {
-      const size_t size = next_comma - start;
-      const OPENDDS_STRING temp(start, size);
-      // Add to QOS
+    for (ConfigStoreImpl::StringList::const_iterator pos = value.begin(), limit = value.end();
+         pos != limit; ++pos) {
       x.name.length(x.name.length() + 1);
-      x.name[x.name.length() - 1] = temp.c_str();
-      // Advance pointer
-      start = next_comma + 1;
+      x.name[x.name.length() - 1] = pos->c_str();
     }
-    // Append everything after last comma
-    x.name.length(x.name.length() + 1);
-    x.name[x.name.length() - 1] = start;
   }
+
+  const EnumList<DDS::DurabilityQosPolicyKind> durability_kinds[] =
+    {
+      { DDS::VOLATILE_DURABILITY_QOS, "VOLATILE" },
+      { DDS::TRANSIENT_LOCAL_DURABILITY_QOS, "TRANSIENT_LOCAL" }
+#ifndef OPENDDS_NO_PERSISTENCE_PROFILE
+      ,
+      { DDS::TRANSIENT_DURABILITY_QOS, "TRANSIENT" },
+      { DDS::PERSISTENT_DURABILITY_QOS, "PERSISTENT" }
+#endif
+    };
+
+  const EnumList<DDS::LivelinessQosPolicyKind> liveliness_kinds[] =
+    {
+      { DDS::AUTOMATIC_LIVELINESS_QOS, "AUTOMATIC" },
+      { DDS::MANUAL_BY_TOPIC_LIVELINESS_QOS, "MANUAL_BY_TOPIC" },
+      { DDS::MANUAL_BY_PARTICIPANT_LIVELINESS_QOS, "MANUAL_BY_PARTICIPANT" }
+    };
+
+  const EnumList<DDS::ReliabilityQosPolicyKind> reliability_kinds[] =
+    {
+      { DDS::BEST_EFFORT_RELIABILITY_QOS, "BEST_EFFORT" },
+      { DDS::RELIABLE_RELIABILITY_QOS, "RELIABLE" }
+    };
+
+  const EnumList<DDS::DestinationOrderQosPolicyKind> destination_order_kinds[] =
+    {
+      { DDS::BY_RECEPTION_TIMESTAMP_DESTINATIONORDER_QOS, "BY_RECEPTION_TIMESTAMP" },
+      { DDS::BY_SOURCE_TIMESTAMP_DESTINATIONORDER_QOS, "BY_SOURCE_TIMESTAMP" }
+    };
+
+  const EnumList<DDS::HistoryQosPolicyKind> history_kinds[] =
+    {
+      { DDS::KEEP_ALL_HISTORY_QOS, "KEEP_ALL" },
+      { DDS::KEEP_LAST_HISTORY_QOS, "KEEP_LAST" }
+    };
+
+  const EnumList<DDS::OwnershipQosPolicyKind> ownership_kinds[] =
+    {
+      { DDS::SHARED_OWNERSHIP_QOS, "SHARED" },
+      { DDS::EXCLUSIVE_OWNERSHIP_QOS, "EXCLUSIVE" }
+    };
+
+  const EnumList<DDS::PresentationQosPolicyAccessScopeKind> access_scope_kinds[] =
+    {
+      { DDS::INSTANCE_PRESENTATION_QOS, "INSTANCE" },
+      { DDS::TOPIC_PRESENTATION_QOS, "TOPIC" },
+      { DDS::GROUP_PRESENTATION_QOS, "GROUP" }
+    };
+
+  enum Type {
+    Reader,
+    Writer
+  };
+  const EnumList<Type> type_kinds[] =
+    {
+      { Reader, "reader" },
+      { Writer, "writer" }
+    };
+
 }
 
 int
-StaticDiscovery::load_configuration(ACE_Configuration_Heap& cf)
+StaticDiscovery::load_configuration()
 {
-  if (parse_topics(cf) ||
-      parse_datawriterqos(cf) ||
-      parse_datareaderqos(cf) ||
-      parse_publisherqos(cf) ||
-      parse_subscriberqos(cf) ||
-      parse_endpoints(cf)) {
+  if (parse_topics() ||
+      parse_datawriterqos() ||
+      parse_datareaderqos() ||
+      parse_publisherqos() ||
+      parse_subscriberqos() ||
+      parse_endpoints()) {
     return -1;
   }
 
@@ -1696,91 +1737,40 @@ StaticDiscovery::load_configuration(ACE_Configuration_Heap& cf)
 }
 
 int
-StaticDiscovery::parse_topics(ACE_Configuration_Heap& cf)
+StaticDiscovery::parse_topics()
 {
-  const ACE_Configuration_Section_Key& root = cf.root_section();
-  ACE_Configuration_Section_Key section;
-
-  if (cf.open_section(root, TOPIC_SECTION_NAME, false, section) != 0) {
-    if (DCPS_debug_level > 0) {
-      // This is not an error if the configuration file does not have
-      // any topic (sub)section.
-      ACE_DEBUG((LM_NOTICE,
-                  ACE_TEXT("(%P|%t) NOTICE: StaticDiscovery::parse_topics ")
-                  ACE_TEXT("no [%s] sections.\n"),
-                  TOPIC_SECTION_NAME));
-    }
-    return 0;
-  }
-
-  // Ensure there are no key/values in the [topic] section.
-  // Every key/value must be in a [topic/*] sub-section.
-  ValueMap vm;
-  if (pullValues(cf, section, vm) > 0) {
-    ACE_ERROR_RETURN((LM_ERROR,
-                      ACE_TEXT("(%P|%t) StaticDiscovery::parse_topics ")
-                      ACE_TEXT("[topic] sections must have a subsection name\n")),
-                      -1);
-  }
-  // Process the subsections of this section
-  KeyList keys;
-  if (processSections(cf, section, keys) != 0) {
-    ACE_ERROR_RETURN((LM_ERROR,
-                      ACE_TEXT("(%P|%t) StaticDiscovery::parse_topics ")
-                      ACE_TEXT("too many nesting layers in the [topic] section.\n")),
-                      -1);
-  }
+  RcHandle<ConfigStoreImpl> config_store = TheServiceParticipant->config_store();
+  const ConfigStoreImpl::StringList sections = config_store->get_section_names("TOPIC");
 
   // Loop through the [topic/*] sections
-  for (KeyList::const_iterator it = keys.begin(); it != keys.end(); ++it) {
-    OPENDDS_STRING topic_name = it->first;
+  for (ConfigStoreImpl::StringList::const_iterator pos = sections.begin(), limit = sections.end();
+       pos != limit; ++pos) {
+    const String& topic_name = *pos;
 
     if (DCPS_debug_level > 0) {
       ACE_DEBUG((LM_NOTICE,
-                  ACE_TEXT("(%P|%t) NOTICE: StaticDiscovery::parse_topics ")
-                  ACE_TEXT("processing [topic/%C] section.\n"),
-                  topic_name.c_str()));
+                 ACE_TEXT("(%P|%t) NOTICE: StaticDiscovery::parse_topics ")
+                 ACE_TEXT("processing [topic/%C] section.\n"),
+                 topic_name.c_str()));
     }
-
-    ValueMap values;
-    pullValues(cf, it->second, values);
 
     EndpointRegistry::Topic topic;
-    bool name_specified = false,
-      type_name_specified = false;
-
-    for (ValueMap::const_iterator it = values.begin(); it != values.end(); ++it) {
-      OPENDDS_STRING name = it->first;
-      OPENDDS_STRING value = it->second;
-
-      if (name == "name") {
-        topic.name = value;
-        name_specified = true;
-      } else if (name == "type_name") {
-        if (value.size() >= TYPE_NAME_MAX) {
-          ACE_ERROR_RETURN((LM_ERROR,
-                            ACE_TEXT("(%P|%t) StaticDiscovery::parse_topics ")
-                            ACE_TEXT("type_name (%C) must be less than 128 characters in [topic/%C] section.\n"),
-                            value.c_str(), topic_name.c_str()),
-                            -1);
-        }
-        topic.type_name = value;
-        type_name_specified = true;
-      } else {
-        // Typos are ignored to avoid parsing FACE-specific keys.
-      }
+    topic.name = config_store->get((String("TOPIC_") + topic_name + "_NAME").c_str(), topic_name);
+    topic.type_name = config_store->get((String("TOPIC_") + topic_name + "_TYPE_NAME").c_str(), "");
+    if (topic.type_name.empty()) {
+      ACE_ERROR((LM_ERROR,
+                 ACE_TEXT("(%P|%t) StaticDiscovery::parse_topics ")
+                 ACE_TEXT("No type_name specified for [topic/%C] section.\n"),
+                 topic_name.c_str()));
+      return -1;
     }
+    if (topic.type_name.size() >= TYPE_NAME_MAX) {
+      ACE_ERROR((LM_ERROR,
+                 ACE_TEXT("(%P|%t) StaticDiscovery::parse_topics ")
+                 ACE_TEXT("type_name (%C) must be less than 128 characters in [topic/%C] section.\n"),
+                 topic.type_name.c_str(), topic_name.c_str()));
+      return -1;
 
-    if (!name_specified) {
-      topic.name = topic_name;
-    }
-
-    if (!type_name_specified) {
-      ACE_ERROR_RETURN((LM_ERROR,
-                        ACE_TEXT("(%P|%t) StaticDiscovery::parse_topics ")
-                        ACE_TEXT("No type_name specified for [topic/%C] section.\n"),
-                        topic_name.c_str()),
-                       -1);
     }
 
     registry.topic_map[topic_name] = topic;
@@ -1790,181 +1780,81 @@ StaticDiscovery::parse_topics(ACE_Configuration_Heap& cf)
 }
 
 int
-StaticDiscovery::parse_datawriterqos(ACE_Configuration_Heap& cf)
+StaticDiscovery::parse_datawriterqos()
 {
-  const ACE_Configuration_Section_Key& root = cf.root_section();
-  ACE_Configuration_Section_Key section;
-
-  if (cf.open_section(root, DATAWRITERQOS_SECTION_NAME, false, section) != 0) {
-    if (DCPS_debug_level > 0) {
-      // This is not an error if the configuration file does not have
-      // any datawriterqos (sub)section.
-      ACE_DEBUG((LM_NOTICE,
-                  ACE_TEXT("(%P|%t) NOTICE: StaticDiscovery::parse_datawriterqos ")
-                  ACE_TEXT("no [%s] sections.\n"),
-                  DATAWRITERQOS_SECTION_NAME));
-    }
-    return 0;
-  }
-
-  // Ensure there are no key/values in the [datawriterqos] section.
-  // Every key/value must be in a [datawriterqos/*] sub-section.
-  ValueMap vm;
-  if (pullValues(cf, section, vm) > 0) {
-    ACE_ERROR_RETURN((LM_ERROR,
-                      ACE_TEXT("(%P|%t) StaticDiscovery::parse_datawriterqos ")
-                      ACE_TEXT("[datawriterqos] sections must have a subsection name\n")),
-                      -1);
-  }
-  // Process the subsections of this section
-  KeyList keys;
-  if (processSections(cf, section, keys) != 0) {
-    ACE_ERROR_RETURN((LM_ERROR,
-                      ACE_TEXT("(%P|%t) StaticDiscovery::parse_datawriterqos ")
-                      ACE_TEXT("too many nesting layers in the [datawriterqos] section.\n")),
-                      -1);
-  }
+  RcHandle<ConfigStoreImpl> config_store = TheServiceParticipant->config_store();
+  const ConfigStoreImpl::StringList sections = config_store->get_section_names("DATAWRITERQOS");
 
   // Loop through the [datawriterqos/*] sections
-  for (KeyList::const_iterator it = keys.begin(); it != keys.end(); ++it) {
-    OPENDDS_STRING datawriterqos_name = it->first;
+  for (ConfigStoreImpl::StringList::const_iterator pos = sections.begin(), limit = sections.end();
+       pos != limit; ++pos) {
+    const String& datawriterqos_name = *pos;
 
     if (DCPS_debug_level > 0) {
       ACE_DEBUG((LM_NOTICE,
-                  ACE_TEXT("(%P|%t) NOTICE: StaticDiscovery::parse_datawriterqos ")
-                  ACE_TEXT("processing [datawriterqos/%C] section.\n"),
-                  datawriterqos_name.c_str()));
+                 ACE_TEXT("(%P|%t) NOTICE: StaticDiscovery::parse_datawriterqos ")
+                 ACE_TEXT("processing [datawriterqos/%C] section.\n"),
+                 datawriterqos_name.c_str()));
     }
 
-    ValueMap values;
-    pullValues(cf, it->second, values);
+    const String prefix = String("DATAWRITERQOS_") + datawriterqos_name;
 
     DDS::DataWriterQos datawriterqos(TheServiceParticipant->initial_DataWriterQos());
 
-    for (ValueMap::const_iterator it = values.begin(); it != values.end(); ++it) {
-      OPENDDS_STRING name = it->first;
-      OPENDDS_STRING value = it->second;
+    datawriterqos.durability.kind =
+      config_store->get((prefix + "_DURABILITY_KIND").c_str(), datawriterqos.durability.kind, durability_kinds);
 
-      if (name == "durability.kind") {
-        if (value == "VOLATILE") {
-          datawriterqos.durability.kind = DDS::VOLATILE_DURABILITY_QOS;
-        } else if (value == "TRANSIENT_LOCAL") {
-          datawriterqos.durability.kind = DDS::TRANSIENT_LOCAL_DURABILITY_QOS;
-#ifndef OPENDDS_NO_PERSISTENCE_PROFILE
-        } else if (value == "TRANSIENT") {
-          datawriterqos.durability.kind = DDS::TRANSIENT_DURABILITY_QOS;
-        } else if (value == "PERSISTENT") {
-          datawriterqos.durability.kind = DDS::PERSISTENT_DURABILITY_QOS;
-#endif
-        } else {
-          ACE_ERROR_RETURN((LM_ERROR,
-                            ACE_TEXT("(%P|%t) StaticDiscovery::parse_datawriterqos ")
-                            ACE_TEXT("Illegal value for durability.kind (%C) in [datawriterqos/%C] section.\n"),
-                            value.c_str(), datawriterqos_name.c_str()),
-                            -1);
-        }
-      } else if (name == "deadline.period.sec") {
-        parse_second(datawriterqos.deadline.period.sec, value);
-      } else if (name == "deadline.period.nanosec") {
-        parse_nanosecond(datawriterqos.deadline.period.nanosec, value);
-      } else if (name == "latency_budget.duration.sec") {
-        parse_second(datawriterqos.latency_budget.duration.sec, value);
-      } else if (name == "latency_budget.duration.nanosec") {
-        parse_nanosecond(datawriterqos.latency_budget.duration.nanosec, value);
-      } else if (name == "liveliness.kind") {
-        if (value == "AUTOMATIC") {
-          datawriterqos.liveliness.kind = DDS::AUTOMATIC_LIVELINESS_QOS;
-        } else if (value == "MANUAL_BY_TOPIC") {
-          datawriterqos.liveliness.kind = DDS::MANUAL_BY_TOPIC_LIVELINESS_QOS;
-        } else if (value == "MANUAL_BY_PARTICIPANT") {
-          datawriterqos.liveliness.kind = DDS::MANUAL_BY_PARTICIPANT_LIVELINESS_QOS;
-        } else {
-          ACE_ERROR_RETURN((LM_ERROR,
-                            ACE_TEXT("(%P|%t) StaticDiscovery::parse_datawriterqos ")
-                            ACE_TEXT("Illegal value for liveliness.kind (%C) in [datawriterqos/%C] section.\n"),
-                            value.c_str(), datawriterqos_name.c_str()),
-                            -1);
-        }
-      } else if (name == "liveliness.lease_duration.sec") {
-        parse_second(datawriterqos.liveliness.lease_duration.sec, value);
-      } else if (name == "liveliness.lease_duration.nanosec") {
-        parse_nanosecond(datawriterqos.liveliness.lease_duration.nanosec, value);
-      } else if (name == "reliability.kind") {
-        if (value == "BEST_EFFORT") {
-          datawriterqos.reliability.kind = DDS::BEST_EFFORT_RELIABILITY_QOS;
-        } else if (value == "RELIABLE") {
-          datawriterqos.reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
-        } else {
-          ACE_ERROR_RETURN((LM_ERROR,
-                            ACE_TEXT("(%P|%t) StaticDiscovery::parse_datawriterqos ")
-                            ACE_TEXT("Illegal value for reliability.kind (%C) in [datawriterqos/%C] section.\n"),
-                            value.c_str(), datawriterqos_name.c_str()),
-                            -1);
-        }
-      } else if (name == "reliability.max_blocking_time.sec") {
-        parse_second(datawriterqos.reliability.max_blocking_time.sec, value);
-      } else if (name == "reliability.max_blocking_time.nanosec") {
-        parse_nanosecond(datawriterqos.reliability.max_blocking_time.nanosec, value);
-      } else if (name == "destination_order.kind") {
-        if (value == "BY_RECEPTION_TIMESTAMP") {
-          datawriterqos.destination_order.kind = DDS::BY_RECEPTION_TIMESTAMP_DESTINATIONORDER_QOS;
-        } else if (value == "BY_SOURCE_TIMESTAMP") {
-          datawriterqos.destination_order.kind = DDS::BY_SOURCE_TIMESTAMP_DESTINATIONORDER_QOS;
-        } else {
-          ACE_ERROR_RETURN((LM_ERROR,
-                            ACE_TEXT("(%P|%t) StaticDiscovery::parse_datawriterqos ")
-                            ACE_TEXT("Illegal value for destination_order.kind (%C) in [datawriterqos/%C] section.\n"),
-                            value.c_str(), datawriterqos_name.c_str()),
-                            -1);
-        }
-      } else if (name == "history.kind") {
-        if (value == "KEEP_ALL") {
-          datawriterqos.history.kind = DDS::KEEP_ALL_HISTORY_QOS;
-        } else if (value == "KEEP_LAST") {
-          datawriterqos.history.kind = DDS::KEEP_LAST_HISTORY_QOS;
-        } else {
-          ACE_ERROR_RETURN((LM_ERROR,
-                            ACE_TEXT("(%P|%t) StaticDiscovery::parse_datawriterqos ")
-                            ACE_TEXT("Illegal value for history.kind (%C) in [datawriterqos/%C] section.\n"),
-                            value.c_str(), datawriterqos_name.c_str()),
-                            -1);
-        }
-      } else if (name == "history.depth") {
-        datawriterqos.history.depth = atoi(value.c_str());
-      } else if (name == "resource_limits.max_samples") {
-        datawriterqos.resource_limits.max_samples = atoi(value.c_str());
-      } else if (name == "resource_limits.max_instances") {
-        datawriterqos.resource_limits.max_instances = atoi(value.c_str());
-      } else if (name == "resource_limits.max_samples_per_instance") {
-        datawriterqos.resource_limits.max_samples_per_instance = atoi(value.c_str());
-      } else if (name == "transport_priority.value") {
-        datawriterqos.transport_priority.value = atoi(value.c_str());
-      } else if (name == "lifespan.duration.sec") {
-        parse_second(datawriterqos.lifespan.duration.sec, value);
-      } else if (name == "lifespan.duration.nanosec") {
-        parse_nanosecond(datawriterqos.lifespan.duration.nanosec, value);
-      } else if (name == "ownership.kind") {
-        if (value == "SHARED") {
-          datawriterqos.ownership.kind = DDS::SHARED_OWNERSHIP_QOS;
-        } else if (value == "EXCLUSIVE") {
-          datawriterqos.ownership.kind = DDS::EXCLUSIVE_OWNERSHIP_QOS;
-        } else {
-          ACE_ERROR_RETURN((LM_ERROR,
-                            ACE_TEXT("(%P|%t) StaticDiscovery::parse_datawriterqos ")
-                            ACE_TEXT("Illegal value for ownership.kind (%C) in [datawriterqos/%C] section.\n"),
-                            value.c_str(), datawriterqos_name.c_str()),
-                            -1);
-        }
-      } else if (name == "ownership_strength.value") {
-        datawriterqos.ownership_strength.value = atoi(value.c_str());
-      } else {
-        ACE_ERROR_RETURN((LM_ERROR,
-                          ACE_TEXT("(%P|%t) StaticDiscovery::parse_datawriterqos ")
-                          ACE_TEXT("Unexpected entry (%C) in [datawriterqos/%C] section.\n"),
-                          name.c_str(), datawriterqos_name.c_str()),
-                          -1);
-      }
-    }
+    datawriterqos.deadline.period.sec =
+      config_store->get_int32((prefix + "_DEADLINE_PERIOD_SEC").c_str(), datawriterqos.deadline.period.sec);
+    datawriterqos.deadline.period.nanosec =
+      config_store->get_uint32((prefix + "_DEADLINE_PERIOD_NANOSEC").c_str(), datawriterqos.deadline.period.nanosec);
+
+    datawriterqos.latency_budget.duration.sec =
+      config_store->get_int32((prefix + "_LATENCY_BUDGET_DURATION_SEC").c_str(), datawriterqos.latency_budget.duration.sec);
+    datawriterqos.latency_budget.duration.nanosec =
+      config_store->get_uint32((prefix + "_LATENCY_BUDGET_DURATION_NANOSEC").c_str(), datawriterqos.latency_budget.duration.nanosec);
+
+    datawriterqos.liveliness.kind =
+      config_store->get((prefix + "_LIVELINESS_KIND").c_str(), datawriterqos.liveliness.kind, liveliness_kinds);
+    datawriterqos.liveliness.lease_duration.sec =
+      config_store->get_int32((prefix + "_LIVELINESS_LEASE_DURATION_SEC").c_str(), datawriterqos.liveliness.lease_duration.sec);
+    datawriterqos.liveliness.lease_duration.nanosec =
+      config_store->get_uint32((prefix + "_LIVELINESS_LEASE_DURATION_NANOSEC").c_str(), datawriterqos.liveliness.lease_duration.nanosec);
+
+    datawriterqos.reliability.kind =
+      config_store->get((prefix + "_RELIABILITY_KIND").c_str(), datawriterqos.reliability.kind, reliability_kinds);
+    datawriterqos.reliability.max_blocking_time.sec =
+      config_store->get_int32((prefix + "_RELIABILITY_MAX_BLOCKING_TIME_SEC").c_str(), datawriterqos.reliability.max_blocking_time.sec);
+    datawriterqos.reliability.max_blocking_time.nanosec =
+      config_store->get_uint32((prefix + "_RELIABILITY_MAX_BLOCKING_TIME_NANOSEC").c_str(), datawriterqos.reliability.max_blocking_time.nanosec);
+
+    datawriterqos.destination_order.kind =
+      config_store->get((prefix + "_DESTINATION_ORDER_KIND").c_str(), datawriterqos.destination_order.kind, destination_order_kinds);
+
+    datawriterqos.history.kind =
+      config_store->get((prefix + "_HISTORY_KIND").c_str(), datawriterqos.history.kind, history_kinds);
+    datawriterqos.history.depth =
+      config_store->get_int32((prefix + "_HISTORY_DEPTH").c_str(), datawriterqos.history.depth);
+
+    datawriterqos.resource_limits.max_samples =
+      config_store->get_int32((prefix + "_RESOURCE_LIMITS_MAX_SAMPLES").c_str(), datawriterqos.resource_limits.max_samples);
+    datawriterqos.resource_limits.max_instances =
+      config_store->get_int32((prefix + "_RESOURCE_LIMITS_MAX_INSTANCES").c_str(), datawriterqos.resource_limits.max_instances);
+    datawriterqos.resource_limits.max_samples_per_instance =
+      config_store->get_int32((prefix + "_RESOURCE_LIMITS_MAX_SAMPLES_PER_INSTANCE").c_str(), datawriterqos.resource_limits.max_samples_per_instance);
+
+    datawriterqos.transport_priority.value =
+      config_store->get_int32((prefix + "_TRANSPORT_PRIORITY_VALUE").c_str(), datawriterqos.transport_priority.value);
+
+    datawriterqos.lifespan.duration.sec =
+      config_store->get_int32((prefix + "_LIFESPAN_DURATION_SEC").c_str(), datawriterqos.lifespan.duration.sec);
+    datawriterqos.lifespan.duration.nanosec =
+      config_store->get_uint32((prefix + "_LIFESPAN_DURATION_NANOSEC").c_str(), datawriterqos.lifespan.duration.nanosec);
+
+    datawriterqos.ownership.kind =
+      config_store->get((prefix + "_OWNERSHIP_KIND").c_str(), datawriterqos.ownership.kind, ownership_kinds);
+    datawriterqos.ownership_strength.value =
+      config_store->get_int32((prefix + "_OWNERSHIP_STRENGTH_VALUE").c_str(), datawriterqos.ownership_strength.value);
 
     registry.datawriterqos_map[datawriterqos_name] = datawriterqos;
   }
@@ -1973,44 +1863,15 @@ StaticDiscovery::parse_datawriterqos(ACE_Configuration_Heap& cf)
 }
 
 int
-StaticDiscovery::parse_datareaderqos(ACE_Configuration_Heap& cf)
+StaticDiscovery::parse_datareaderqos()
 {
-  const ACE_Configuration_Section_Key& root = cf.root_section();
-  ACE_Configuration_Section_Key section;
-
-  if (cf.open_section(root, DATAREADERQOS_SECTION_NAME, false, section) != 0) {
-    if (DCPS_debug_level > 0) {
-      // This is not an error if the configuration file does not have
-      // any datareaderqos (sub)section.
-      ACE_DEBUG((LM_NOTICE,
-                  ACE_TEXT("(%P|%t) NOTICE: StaticDiscovery::parse_datareaderqos ")
-                  ACE_TEXT("no [%s] sections.\n"),
-                  DATAREADERQOS_SECTION_NAME));
-    }
-    return 0;
-  }
-
-  // Ensure there are no key/values in the [datareaderqos] section.
-  // Every key/value must be in a [datareaderqos/*] sub-section.
-  ValueMap vm;
-  if (pullValues(cf, section, vm) > 0) {
-    ACE_ERROR_RETURN((LM_ERROR,
-                      ACE_TEXT("(%P|%t) StaticDiscovery::parse_datareaderqos ")
-                      ACE_TEXT("[datareaderqos] sections must have a subsection name\n")),
-                      -1);
-  }
-  // Process the subsections of this section
-  KeyList keys;
-  if (processSections(cf, section, keys) != 0) {
-    ACE_ERROR_RETURN((LM_ERROR,
-                      ACE_TEXT("(%P|%t) StaticDiscovery::parse_datareaderqos ")
-                      ACE_TEXT("too many nesting layers in the [datareaderqos] section.\n")),
-                      -1);
-  }
+  RcHandle<ConfigStoreImpl> config_store = TheServiceParticipant->config_store();
+  const ConfigStoreImpl::StringList sections = config_store->get_section_names("DATAREADERQOS");
 
   // Loop through the [datareaderqos/*] sections
-  for (KeyList::const_iterator it = keys.begin(); it != keys.end(); ++it) {
-    OPENDDS_STRING datareaderqos_name = it->first;
+  for (ConfigStoreImpl::StringList::const_iterator pos = sections.begin(), limit = sections.end();
+       pos != limit; ++pos) {
+    const String& datareaderqos_name = *pos;
 
     if (DCPS_debug_level > 0) {
       ACE_DEBUG((LM_NOTICE,
@@ -2019,127 +1880,66 @@ StaticDiscovery::parse_datareaderqos(ACE_Configuration_Heap& cf)
                   datareaderqos_name.c_str()));
     }
 
-    ValueMap values;
-    pullValues(cf, it->second, values);
+    const String prefix = String("DATAREADERQOS_") + datareaderqos_name;
 
     DDS::DataReaderQos datareaderqos(TheServiceParticipant->initial_DataReaderQos());
 
-    for (ValueMap::const_iterator it = values.begin(); it != values.end(); ++it) {
-      OPENDDS_STRING name = it->first;
-      OPENDDS_STRING value = it->second;
+    datareaderqos.durability.kind =
+      config_store->get((prefix + "_DURABILITY_KIND").c_str(), datareaderqos.durability.kind, durability_kinds);
 
-      if (name == "durability.kind") {
-        if (value == "VOLATILE") {
-          datareaderqos.durability.kind = DDS::VOLATILE_DURABILITY_QOS;
-        } else if (value == "TRANSIENT_LOCAL") {
-          datareaderqos.durability.kind = DDS::TRANSIENT_LOCAL_DURABILITY_QOS;
-#ifndef OPENDDS_NO_PERSISTENCE_PROFILE
-        } else if (value == "TRANSIENT") {
-          datareaderqos.durability.kind = DDS::TRANSIENT_DURABILITY_QOS;
-        } else if (value == "PERSISTENT") {
-          datareaderqos.durability.kind = DDS::PERSISTENT_DURABILITY_QOS;
-#endif
-        } else {
-          ACE_ERROR_RETURN((LM_ERROR,
-                            ACE_TEXT("(%P|%t) StaticDiscovery::parse_datareaderqos ")
-                            ACE_TEXT("Illegal value for durability.kind (%C) in [datareaderqos/%C] section.\n"),
-                            value.c_str(), datareaderqos_name.c_str()),
-                            -1);
-        }
-      } else if (name == "deadline.period.sec") {
-        parse_second(datareaderqos.deadline.period.sec, value);
-      } else if (name == "deadline.period.nanosec") {
-        parse_nanosecond(datareaderqos.deadline.period.nanosec, value);
-      } else if (name == "latency_budget.duration.sec") {
-        parse_second(datareaderqos.latency_budget.duration.sec, value);
-      } else if (name == "latency_budget.duration.nanosec") {
-        parse_nanosecond(datareaderqos.latency_budget.duration.nanosec, value);
-      } else if (name == "liveliness.kind") {
-        if (value == "AUTOMATIC") {
-          datareaderqos.liveliness.kind = DDS::AUTOMATIC_LIVELINESS_QOS;
-        } else if (value == "MANUAL_BY_TOPIC") {
-          datareaderqos.liveliness.kind = DDS::MANUAL_BY_TOPIC_LIVELINESS_QOS;
-        } else if (value == "MANUAL_BY_PARTICIPANT") {
-          datareaderqos.liveliness.kind = DDS::MANUAL_BY_PARTICIPANT_LIVELINESS_QOS;
-        } else {
-          ACE_ERROR_RETURN((LM_ERROR,
-                            ACE_TEXT("(%P|%t) StaticDiscovery::parse_datareaderqos ")
-                            ACE_TEXT("Illegal value for liveliness.kind (%C) in [datareaderqos/%C] section.\n"),
-                            value.c_str(), datareaderqos_name.c_str()),
-                            -1);
-        }
-      } else if (name == "liveliness.lease_duration.sec") {
-        parse_second(datareaderqos.liveliness.lease_duration.sec, value);
-      } else if (name == "liveliness.lease_duration.nanosec") {
-        parse_nanosecond(datareaderqos.liveliness.lease_duration.nanosec, value);
-      } else if (name == "reliability.kind") {
-        if (value == "BEST_EFFORT") {
-          datareaderqos.reliability.kind = DDS::BEST_EFFORT_RELIABILITY_QOS;
-        } else if (value == "RELIABLE") {
-          datareaderqos.reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
-        } else {
-          ACE_ERROR_RETURN((LM_ERROR,
-                            ACE_TEXT("(%P|%t) StaticDiscovery::parse_datareaderqos ")
-                            ACE_TEXT("Illegal value for reliability.kind (%C) in [datareaderqos/%C] section.\n"),
-                            value.c_str(), datareaderqos_name.c_str()),
-                            -1);
-        }
-      } else if (name == "reliability.max_blocking_time.sec") {
-        parse_second(datareaderqos.reliability.max_blocking_time.sec, value);
-      } else if (name == "reliability.max_blocking_time.nanosec") {
-        parse_nanosecond(datareaderqos.reliability.max_blocking_time.nanosec, value);
-      } else if (name == "destination_order.kind") {
-        if (value == "BY_RECEPTION_TIMESTAMP") {
-          datareaderqos.destination_order.kind = DDS::BY_RECEPTION_TIMESTAMP_DESTINATIONORDER_QOS;
-        } else if (value == "BY_SOURCE_TIMESTAMP") {
-          datareaderqos.destination_order.kind = DDS::BY_SOURCE_TIMESTAMP_DESTINATIONORDER_QOS;
-        } else {
-          ACE_ERROR_RETURN((LM_ERROR,
-                            ACE_TEXT("(%P|%t) StaticDiscovery::parse_datareaderqos ")
-                            ACE_TEXT("Illegal value for destination_order.kind (%C) in [datareaderqos/%C] section.\n"),
-                            value.c_str(), datareaderqos_name.c_str()),
-                            -1);
-        }
-      } else if (name == "history.kind") {
-        if (value == "KEEP_ALL") {
-          datareaderqos.history.kind = DDS::KEEP_ALL_HISTORY_QOS;
-        } else if (value == "KEEP_LAST") {
-          datareaderqos.history.kind = DDS::KEEP_LAST_HISTORY_QOS;
-        } else {
-          ACE_ERROR_RETURN((LM_ERROR,
-                            ACE_TEXT("(%P|%t) StaticDiscovery::parse_datareaderqos ")
-                            ACE_TEXT("Illegal value for history.kind (%C) in [datareaderqos/%C] section.\n"),
-                            value.c_str(), datareaderqos_name.c_str()),
-                            -1);
-        }
-      } else if (name == "history.depth") {
-        datareaderqos.history.depth = atoi(value.c_str());
-      } else if (name == "resource_limits.max_samples") {
-        datareaderqos.resource_limits.max_samples = atoi(value.c_str());
-      } else if (name == "resource_limits.max_instances") {
-        datareaderqos.resource_limits.max_instances = atoi(value.c_str());
-      } else if (name == "resource_limits.max_samples_per_instance") {
-        datareaderqos.resource_limits.max_samples_per_instance = atoi(value.c_str());
-      } else if (name == "time_based_filter.minimum_separation.sec") {
-        parse_second(datareaderqos.time_based_filter.minimum_separation.sec, value);
-      } else if (name == "time_based_filter.minimum_separation.nanosec") {
-        parse_nanosecond(datareaderqos.time_based_filter.minimum_separation.nanosec, value);
-      } else if (name == "reader_data_lifecycle.autopurge_nowriter_samples_delay.sec") {
-        parse_second(datareaderqos.reader_data_lifecycle.autopurge_nowriter_samples_delay.sec, value);
-      } else if (name == "reader_data_lifecycle.autopurge_nowriter_samples_delay.nanosec") {
-        parse_nanosecond(datareaderqos.reader_data_lifecycle.autopurge_nowriter_samples_delay.nanosec, value);
-      } else if (name == "reader_data_lifecycle.autopurge_disposed_samples_delay.sec") {
-        parse_second(datareaderqos.reader_data_lifecycle.autopurge_disposed_samples_delay.sec, value);
-      } else if (name == "reader_data_lifecycle.autopurge_disposed_samples_delay.nanosec") {
-        parse_nanosecond(datareaderqos.reader_data_lifecycle.autopurge_disposed_samples_delay.nanosec, value);
-      } else {
-        ACE_ERROR_RETURN((LM_ERROR,
-                          ACE_TEXT("(%P|%t) StaticDiscovery::parse_datareaderqos ")
-                          ACE_TEXT("Unexpected entry (%C) in [datareaderqos/%C] section.\n"),
-                          name.c_str(), datareaderqos_name.c_str()),
-                          -1);
-      }
-    }
+    datareaderqos.deadline.period.sec =
+      config_store->get_int32((prefix + "_DEADLINE_PERIOD_SEC").c_str(), datareaderqos.deadline.period.sec);
+    datareaderqos.deadline.period.nanosec =
+      config_store->get_uint32((prefix + "_DEADLINE_PERIOD_NANOSEC").c_str(), datareaderqos.deadline.period.nanosec);
+
+    datareaderqos.latency_budget.duration.sec =
+      config_store->get_int32((prefix + "_LATENCY_BUDGET_DURATION_SEC").c_str(), datareaderqos.latency_budget.duration.sec);
+    datareaderqos.latency_budget.duration.nanosec =
+      config_store->get_uint32((prefix + "_LATENCY_BUDGET_DURATION_NANOSEC").c_str(), datareaderqos.latency_budget.duration.nanosec);
+
+    datareaderqos.liveliness.kind =
+      config_store->get((prefix + "_LIVELINESS_KIND").c_str(), datareaderqos.liveliness.kind, liveliness_kinds);
+    datareaderqos.liveliness.lease_duration.sec =
+      config_store->get_int32((prefix + "_LIVELINESS_LEASE_DURATION_SEC").c_str(), datareaderqos.liveliness.lease_duration.sec);
+    datareaderqos.liveliness.lease_duration.nanosec =
+      config_store->get_uint32((prefix + "_LIVELINESS_LEASE_DURATION_NANOSEC").c_str(), datareaderqos.liveliness.lease_duration.nanosec);
+
+    datareaderqos.reliability.kind =
+      config_store->get((prefix + "_RELIABILITY_KIND").c_str(), datareaderqos.reliability.kind, reliability_kinds);
+    datareaderqos.reliability.max_blocking_time.sec =
+      config_store->get_int32((prefix + "_RELIABILITY_MAX_BLOCKING_TIME_SEC").c_str(), datareaderqos.reliability.max_blocking_time.sec);
+    datareaderqos.reliability.max_blocking_time.nanosec =
+      config_store->get_uint32((prefix + "_RELIABILITY_MAX_BLOCKING_TIME_NANOSEC").c_str(), datareaderqos.reliability.max_blocking_time.nanosec);
+
+    datareaderqos.destination_order.kind =
+      config_store->get((prefix + "_DESTINATION_ORDER_KIND").c_str(), datareaderqos.destination_order.kind, destination_order_kinds);
+
+    datareaderqos.history.kind =
+      config_store->get((prefix + "_HISTORY_KIND").c_str(), datareaderqos.history.kind, history_kinds);
+    datareaderqos.history.depth =
+      config_store->get_int32((prefix + "_HISTORY_DEPTH").c_str(), datareaderqos.history.depth);
+
+    datareaderqos.resource_limits.max_samples =
+      config_store->get_int32((prefix + "_RESOURCE_LIMITS_MAX_SAMPLES").c_str(), datareaderqos.resource_limits.max_samples);
+    datareaderqos.resource_limits.max_instances =
+      config_store->get_int32((prefix + "_RESOURCE_LIMITS_MAX_INSTANCES").c_str(), datareaderqos.resource_limits.max_instances);
+    datareaderqos.resource_limits.max_samples_per_instance =
+      config_store->get_int32((prefix + "_RESOURCE_LIMITS_MAX_SAMPLES_PER_INSTANCE").c_str(), datareaderqos.resource_limits.max_samples_per_instance);
+
+    datareaderqos.time_based_filter.minimum_separation.sec =
+      config_store->get_int32((prefix + "_TIME_BASED_FILTER_MINIMUM_SEPARATION_SEC").c_str(), datareaderqos.time_based_filter.minimum_separation.sec);
+    datareaderqos.time_based_filter.minimum_separation.nanosec =
+      config_store->get_uint32((prefix + "_TIME_BASED_FILTER_MINIMUM_SEPARATION_NANOSEC").c_str(), datareaderqos.time_based_filter.minimum_separation.nanosec);
+
+    datareaderqos.reader_data_lifecycle.autopurge_nowriter_samples_delay.sec =
+      config_store->get_int32((prefix + "_READER_DATA_LIFECYCLE_AUTOPURGE_NOWRITER_SAMPLES_DELAY_SEC").c_str(), datareaderqos.reader_data_lifecycle.autopurge_nowriter_samples_delay.sec);
+    datareaderqos.reader_data_lifecycle.autopurge_nowriter_samples_delay.nanosec =
+      config_store->get_uint32((prefix + "_READER_DATA_LIFECYCLE_AUTOPURGE_NOWRITER_SAMPLES_DELAY_NANOSEC").c_str(), datareaderqos.reader_data_lifecycle.autopurge_nowriter_samples_delay.nanosec);
+
+    datareaderqos.reader_data_lifecycle.autopurge_disposed_samples_delay.sec =
+      config_store->get_int32((prefix + "_READER_DATA_LIFECYCLE_AUTOPURGE_DISPOSED_SAMPLES_DELAY_SEC").c_str(), datareaderqos.reader_data_lifecycle.autopurge_disposed_samples_delay.sec);
+    datareaderqos.reader_data_lifecycle.autopurge_disposed_samples_delay.nanosec =
+      config_store->get_uint32((prefix + "_READER_DATA_LIFECYCLE_AUTOPURGE_DISPOSED_SAMPLES_DELAY_NANOSEC").c_str(), datareaderqos.reader_data_lifecycle.autopurge_disposed_samples_delay.nanosec);
 
     registry.datareaderqos_map[datareaderqos_name] = datareaderqos;
   }
@@ -2148,44 +1948,15 @@ StaticDiscovery::parse_datareaderqos(ACE_Configuration_Heap& cf)
 }
 
 int
-StaticDiscovery::parse_publisherqos(ACE_Configuration_Heap& cf)
+StaticDiscovery::parse_publisherqos()
 {
-  const ACE_Configuration_Section_Key& root = cf.root_section();
-  ACE_Configuration_Section_Key section;
-
-  if (cf.open_section(root, PUBLISHERQOS_SECTION_NAME, false, section) != 0) {
-    if (DCPS_debug_level > 0) {
-      // This is not an error if the configuration file does not have
-      // any publisherqos (sub)section.
-      ACE_DEBUG((LM_NOTICE,
-                  ACE_TEXT("(%P|%t) NOTICE: StaticDiscovery::parse_publisherqos ")
-                  ACE_TEXT("no [%s] sections.\n"),
-                  PUBLISHERQOS_SECTION_NAME));
-    }
-    return 0;
-  }
-
-  // Ensure there are no key/values in the [publisherqos] section.
-  // Every key/value must be in a [publisherqos/*] sub-section.
-  ValueMap vm;
-  if (pullValues(cf, section, vm) > 0) {
-    ACE_ERROR_RETURN((LM_ERROR,
-                      ACE_TEXT("(%P|%t) StaticDiscovery::parse_publisherqos ")
-                      ACE_TEXT("[publisherqos] sections must have a subsection name\n")),
-                      -1);
-  }
-  // Process the subsections of this section
-  KeyList keys;
-  if (processSections(cf, section, keys) != 0) {
-    ACE_ERROR_RETURN((LM_ERROR,
-                      ACE_TEXT("(%P|%t) StaticDiscovery::parse_publisherqos ")
-                      ACE_TEXT("too many nesting layers in the [publisherqos] section.\n")),
-                      -1);
-  }
+  RcHandle<ConfigStoreImpl> config_store = TheServiceParticipant->config_store();
+  const ConfigStoreImpl::StringList sections = config_store->get_section_names("PUBLISHERQOS");
 
   // Loop through the [publisherqos/*] sections
-  for (KeyList::const_iterator it = keys.begin(); it != keys.end(); ++it) {
-    OPENDDS_STRING publisherqos_name = it->first;
+  for (ConfigStoreImpl::StringList::const_iterator pos = sections.begin(), limit = sections.end();
+       pos != limit; ++pos) {
+    const String& publisherqos_name = *pos;
 
     if (DCPS_debug_level > 0) {
       ACE_DEBUG((LM_NOTICE,
@@ -2194,68 +1965,20 @@ StaticDiscovery::parse_publisherqos(ACE_Configuration_Heap& cf)
                   publisherqos_name.c_str()));
     }
 
-    ValueMap values;
-    pullValues(cf, it->second, values);
+    const String prefix = String("PUBLISHERQOS_") + publisherqos_name;
 
     DDS::PublisherQos publisherqos(TheServiceParticipant->initial_PublisherQos());
 
-    for (ValueMap::const_iterator it = values.begin(); it != values.end(); ++it) {
-      OPENDDS_STRING name = it->first;
-      OPENDDS_STRING value = it->second;
+    publisherqos.presentation.access_scope =
+      config_store->get((prefix + "_PRESENTATION_ACCESS_SCOPE").c_str(), publisherqos.presentation.access_scope, access_scope_kinds);
+    publisherqos.presentation.coherent_access =
+      config_store->get_boolean((prefix + "_PRESENTATION_COHERENT_ACCESS").c_str(), publisherqos.presentation.coherent_access);
+    publisherqos.presentation.ordered_access =
+      config_store->get_boolean((prefix + "_PRESENTATION_ORDERED_ACCESS").c_str(), publisherqos.presentation.ordered_access);
 
-      if (name == "presentation.access_scope") {
-        if (value == "INSTANCE") {
-          publisherqos.presentation.access_scope = DDS::INSTANCE_PRESENTATION_QOS;
-        } else if (value == "TOPIC") {
-          publisherqos.presentation.access_scope = DDS::TOPIC_PRESENTATION_QOS;
-        } else if (value == "GROUP") {
-          publisherqos.presentation.access_scope = DDS::GROUP_PRESENTATION_QOS;
-        } else {
-          ACE_ERROR_RETURN((LM_ERROR,
-                            ACE_TEXT("(%P|%t) StaticDiscovery::parse_publisherqos ")
-                            ACE_TEXT("Illegal value for presentation.access_scope (%C) in [publisherqos/%C] section.\n"),
-                            value.c_str(), publisherqos_name.c_str()),
-                            -1);
-        }
-      } else if (name == "presentation.coherent_access") {
-        if (parse_bool(publisherqos.presentation.coherent_access, value)) {
-        } else {
-          ACE_ERROR_RETURN((LM_ERROR,
-                            ACE_TEXT("(%P|%t) StaticDiscovery::parse_publisherqos ")
-                            ACE_TEXT("Illegal value for presentation.coherent_access (%C) in [publisherqos/%C] section.\n"),
-                            value.c_str(), publisherqos_name.c_str()),
-                            -1);
-        }
-      } else if (name == "presentation.ordered_access") {
-        if (parse_bool(publisherqos.presentation.ordered_access, value)) {
-        } else {
-          ACE_ERROR_RETURN((LM_ERROR,
-                            ACE_TEXT("(%P|%t) StaticDiscovery::parse_publisherqos ")
-                            ACE_TEXT("Illegal value for presentation.ordered_access (%C)")
-                            ACE_TEXT("in [publisherqos/%C] section.\n"),
-                            value.c_str(), publisherqos_name.c_str()),
-                            -1);
-        }
-      } else if (name == "partition.name") {
-        try {
-          parse_list(publisherqos.partition, value);
-        }
-        catch (const CORBA::Exception& ex) {
-          ACE_ERROR_RETURN((LM_ERROR,
-            ACE_TEXT("(%P|%t) StaticDiscovery::parse_publisherqos ")
-            ACE_TEXT("Exception caught while parsing partition.name (%C) ")
-            ACE_TEXT("in [publisherqos/%C] section: %C.\n"),
-            value.c_str(), publisherqos_name.c_str(), ex._info().c_str()),
-            -1);
-        }
-      } else {
-        ACE_ERROR_RETURN((LM_ERROR,
-                          ACE_TEXT("(%P|%t) StaticDiscovery::parse_publisherqos ")
-                          ACE_TEXT("Unexpected entry (%C) in [publisherqos/%C] section.\n"),
-                          name.c_str(), publisherqos_name.c_str()),
-                          -1);
-      }
-    }
+    const ConfigStoreImpl::StringList partitions =
+      config_store->get((prefix + "_PARTITION_NAME").c_str(), ConfigStoreImpl::StringList());
+    string_list_to_partitions(publisherqos.partition, partitions);
 
     registry.publisherqos_map[publisherqos_name] = publisherqos;
   }
@@ -2264,44 +1987,15 @@ StaticDiscovery::parse_publisherqos(ACE_Configuration_Heap& cf)
 }
 
 int
-StaticDiscovery::parse_subscriberqos(ACE_Configuration_Heap& cf)
+StaticDiscovery::parse_subscriberqos()
 {
-  const ACE_Configuration_Section_Key& root = cf.root_section();
-  ACE_Configuration_Section_Key section;
-
-  if (cf.open_section(root, SUBSCRIBERQOS_SECTION_NAME, false, section) != 0) {
-    if (DCPS_debug_level > 0) {
-      // This is not an error if the configuration file does not have
-      // any subscriberqos (sub)section.
-      ACE_DEBUG((LM_NOTICE,
-                  ACE_TEXT("(%P|%t) NOTICE: StaticDiscovery::parse_subscriberqos ")
-                  ACE_TEXT("no [%s] sections.\n"),
-                  SUBSCRIBERQOS_SECTION_NAME));
-    }
-    return 0;
-  }
-
-  // Ensure there are no key/values in the [subscriberqos] section.
-  // Every key/value must be in a [subscriberqos/*] sub-section.
-  ValueMap vm;
-  if (pullValues(cf, section, vm) > 0) {
-    ACE_ERROR_RETURN((LM_ERROR,
-                      ACE_TEXT("(%P|%t) StaticDiscovery::parse_subscriberqos ")
-                      ACE_TEXT("[subscriberqos] sections must have a subsection name\n")),
-                      -1);
-  }
-  // Process the subsections of this section
-  KeyList keys;
-  if (processSections(cf, section, keys) != 0) {
-    ACE_ERROR_RETURN((LM_ERROR,
-                      ACE_TEXT("(%P|%t) StaticDiscovery::parse_subscriberqos ")
-                      ACE_TEXT("too many nesting layers in the [subscriberqos] section.\n")),
-                      -1);
-  }
+  RcHandle<ConfigStoreImpl> config_store = TheServiceParticipant->config_store();
+  const ConfigStoreImpl::StringList sections = config_store->get_section_names("SUBSCRIBERQOS");
 
   // Loop through the [subscriberqos/*] sections
-  for (KeyList::const_iterator it = keys.begin(); it != keys.end(); ++it) {
-    OPENDDS_STRING subscriberqos_name = it->first;
+  for (ConfigStoreImpl::StringList::const_iterator pos = sections.begin(), limit = sections.end();
+       pos != limit; ++pos) {
+    const String& subscriberqos_name = *pos;
 
     if (DCPS_debug_level > 0) {
       ACE_DEBUG((LM_NOTICE,
@@ -2310,113 +2004,37 @@ StaticDiscovery::parse_subscriberqos(ACE_Configuration_Heap& cf)
                   subscriberqos_name.c_str()));
     }
 
-    ValueMap values;
-    pullValues(cf, it->second, values);
+    const String prefix = String("SUBSCRIBERQOS_") + subscriberqos_name;
 
     DDS::SubscriberQos subscriberqos(TheServiceParticipant->initial_SubscriberQos());
 
-    for (ValueMap::const_iterator it = values.begin(); it != values.end(); ++it) {
-      OPENDDS_STRING name = it->first;
-      OPENDDS_STRING value = it->second;
+    subscriberqos.presentation.access_scope =
+      config_store->get((prefix + "_PRESENTATION_ACCESS_SCOPE").c_str(), subscriberqos.presentation.access_scope, access_scope_kinds);
+    subscriberqos.presentation.coherent_access =
+      config_store->get_boolean((prefix + "_PRESENTATION_COHERENT_ACCESS").c_str(), subscriberqos.presentation.coherent_access);
+    subscriberqos.presentation.ordered_access =
+      config_store->get_boolean((prefix + "_PRESENTATION_ORDERED_ACCESS").c_str(), subscriberqos.presentation.ordered_access);
 
-      if (name == "presentation.access_scope") {
-        if (value == "INSTANCE") {
-          subscriberqos.presentation.access_scope = DDS::INSTANCE_PRESENTATION_QOS;
-        } else if (value == "TOPIC") {
-          subscriberqos.presentation.access_scope = DDS::TOPIC_PRESENTATION_QOS;
-        } else if (value == "GROUP") {
-          subscriberqos.presentation.access_scope = DDS::GROUP_PRESENTATION_QOS;
-        } else {
-          ACE_ERROR_RETURN((LM_ERROR,
-                            ACE_TEXT("(%P|%t) StaticDiscovery::parse_subscriberqos ")
-                            ACE_TEXT("Illegal value for presentation.access_scope (%C) in [subscriberqos/%C] section.\n"),
-                            value.c_str(), subscriberqos_name.c_str()),
-                            -1);
-        }
-      } else if (name == "presentation.coherent_access") {
-        if (parse_bool(subscriberqos.presentation.coherent_access, value)) {
-        } else {
-          ACE_ERROR_RETURN((LM_ERROR,
-                            ACE_TEXT("(%P|%t) StaticDiscovery::parse_subscriberqos ")
-                            ACE_TEXT("Illegal value for presentation.coherent_access (%C) in [subscriberqos/%C] section.\n"),
-                            value.c_str(), subscriberqos_name.c_str()),
-                            -1);
-        }
-      } else if (name == "presentation.ordered_access") {
-        if (parse_bool(subscriberqos.presentation.ordered_access, value)) {
-        } else {
-          ACE_ERROR_RETURN((LM_ERROR,
-                            ACE_TEXT("(%P|%t) StaticDiscovery::parse_subscriberqos ")
-                            ACE_TEXT("Illegal value for presentation.ordered_access (%C) in [subscriberqos/%C] section.\n"),
-                            value.c_str(), subscriberqos_name.c_str()),
-                            -1);
-        }
-      } else if (name == "partition.name") {
-        try {
-          parse_list(subscriberqos.partition, value);
-        }
-        catch (const CORBA::Exception& ex) {
-          ACE_ERROR_RETURN((LM_ERROR,
-            ACE_TEXT("(%P|%t) StaticDiscovery::parse_subscriberqos ")
-            ACE_TEXT("Exception caught while parsing partition.name (%C) ")
-            ACE_TEXT("in [subscriberqos/%C] section: %C.\n"),
-            value.c_str(), subscriberqos_name.c_str(), ex._info().c_str()),
-            -1);
-        }
-      } else {
-        ACE_ERROR_RETURN((LM_ERROR,
-                          ACE_TEXT("(%P|%t) StaticDiscovery::parse_subscriberqos ")
-                          ACE_TEXT("Unexpected entry (%C) in [subscriberqos/%C] section.\n"),
-                          name.c_str(), subscriberqos_name.c_str()),
-                          -1);
-      }
-    }
+    const ConfigStoreImpl::StringList partitions =
+      config_store->get((prefix + "_PARTITION_NAME").c_str(), ConfigStoreImpl::StringList());
+    string_list_to_partitions(subscriberqos.partition, partitions);
 
-   registry.subscriberqos_map[subscriberqos_name] = subscriberqos;
+    registry.subscriberqos_map[subscriberqos_name] = subscriberqos;
   }
 
   return 0;
 }
 
 int
-StaticDiscovery::parse_endpoints(ACE_Configuration_Heap& cf)
+StaticDiscovery::parse_endpoints()
 {
-  const ACE_Configuration_Section_Key& root = cf.root_section();
-  ACE_Configuration_Section_Key section;
-
-  if (cf.open_section(root, ENDPOINT_SECTION_NAME, false, section) != 0) {
-    if (DCPS_debug_level > 0) {
-      // This is not an error if the configuration file does not have
-      // any endpoint (sub)section.
-      ACE_DEBUG((LM_NOTICE,
-                  ACE_TEXT("(%P|%t) NOTICE: StaticDiscovery::parse_endpoints ")
-                  ACE_TEXT("no [%s] sections.\n"),
-                  ENDPOINT_SECTION_NAME));
-    }
-    return 0;
-  }
-
-  // Ensure there are no key/values in the [endpoint] section.
-  // Every key/value must be in a [endpoint/*] sub-section.
-  ValueMap vm;
-  if (pullValues(cf, section, vm) > 0) {
-    ACE_ERROR_RETURN((LM_ERROR,
-                      ACE_TEXT("(%P|%t) ERROR: StaticDiscovery::parse_endpoints ")
-                      ACE_TEXT("[endpoint] sections must have a subsection name\n")),
-                      -1);
-  }
-  // Process the subsections of this section
-  KeyList keys;
-  if (processSections(cf, section, keys) != 0) {
-    ACE_ERROR_RETURN((LM_ERROR,
-                      ACE_TEXT("(%P|%t) ERROR: StaticDiscovery::parse_endpoints ")
-                      ACE_TEXT("too many nesting layers in the [endpoint] section.\n")),
-                      -1);
-  }
+  RcHandle<ConfigStoreImpl> config_store = TheServiceParticipant->config_store();
+  const ConfigStoreImpl::StringList sections = config_store->get_section_names("ENDPOINT");
 
   // Loop through the [endpoint/*] sections
-  for (KeyList::const_iterator it = keys.begin(); it != keys.end(); ++it) {
-    OPENDDS_STRING endpoint_name = it->first;
+  for (ConfigStoreImpl::StringList::const_iterator pos = sections.begin(), limit = sections.end();
+       pos != limit; ++pos) {
+    const String& endpoint_name = *pos;
 
     if (DCPS_debug_level > 0) {
       ACE_DEBUG((LM_NOTICE,
@@ -2425,209 +2043,180 @@ StaticDiscovery::parse_endpoints(ACE_Configuration_Heap& cf)
                   endpoint_name.c_str()));
     }
 
-    ValueMap values;
-    pullValues(cf, it->second, values);
-    int domain = 0;
+    const String prefix = String("ENDPOINT_") + endpoint_name;
+
+    int domain;
+    {
+      if (!config_store->has((prefix + "_DOMAIN").c_str())) {
+        ACE_ERROR((LM_ERROR,
+                   ACE_TEXT("(%P|%t) ERROR: StaticDiscovery::parse_endpoints ")
+                   ACE_TEXT("No domain specified for [endpoint/%C] section.\n"),
+                   endpoint_name.c_str()));
+        return -1;
+      }
+
+      domain = config_store->get_int32((prefix + "_DOMAIN").c_str(), -1);
+    }
+
     unsigned char participant[6] = { 0 };
-    unsigned char entity[3] = { 0 };
-    enum Type {
-      Reader,
-      Writer
-    };
-    Type type = Reader; // avoid warning
-    OPENDDS_STRING topic_name;
-    DDS::DataWriterQos datawriterqos(TheServiceParticipant->initial_DataWriterQos());
-    DDS::DataReaderQos datareaderqos(TheServiceParticipant->initial_DataReaderQos());
-    DDS::PublisherQos publisherqos(TheServiceParticipant->initial_PublisherQos());
-    DDS::SubscriberQos subscriberqos(TheServiceParticipant->initial_SubscriberQos());
-    TransportLocatorSeq trans_info;
-    OPENDDS_STRING config_name;
+    {
+      if (!config_store->has((prefix + "_PARTICIPANT").c_str())) {
+        ACE_ERROR((LM_ERROR,
+                   ACE_TEXT("(%P|%t) ERROR: StaticDiscovery::parse_endpoints ")
+                   ACE_TEXT("No participant specified for [endpoint/%C] section.\n"),
+                   endpoint_name.c_str()));
+        return -1;
+      }
 
-    bool domain_specified = false,
-      participant_specified = false,
-      entity_specified = false,
-      type_specified = false,
-      topic_name_specified = false,
-      config_name_specified = false;
+      const String value = config_store->get((prefix + "_PARTICIPANT").c_str(), "");
+      const OPENDDS_STRING::difference_type count = std::count_if(value.begin(), value.end(), isxdigit);
+      if (value.size() != HEX_DIGITS_IN_PARTICIPANT || static_cast<size_t>(count) != HEX_DIGITS_IN_PARTICIPANT) {
+        ACE_ERROR((LM_ERROR,
+                   ACE_TEXT("(%P|%t) ERROR: StaticDiscovery::parse_endpoints ")
+                   ACE_TEXT("participant (%C) must be 12 hexadecimal digits in [endpoint/%C] section.\n"),
+                   value.c_str(), endpoint_name.c_str()));
+        return -1;
+      }
 
-    for (ValueMap::const_iterator it = values.begin(); it != values.end(); ++it) {
-      OPENDDS_STRING name = it->first;
-      OPENDDS_STRING value = it->second;
-
-      if (name == "domain") {
-        if (convertToInteger(value, domain)) {
-          domain_specified = true;
-        } else {
-          ACE_ERROR_RETURN((LM_ERROR,
-                            ACE_TEXT("(%P|%t) ERROR: StaticDiscovery::parse_endpoints ")
-                            ACE_TEXT("Illegal integer value for domain (%C) in [endpoint/%C] section.\n"),
-                            value.c_str(), endpoint_name.c_str()),
-                            -1);
-        }
-      } else if (name == "participant") {
-        const OPENDDS_STRING::difference_type count = std::count_if(value.begin(), value.end(), isxdigit);
-        if (value.size() != HEX_DIGITS_IN_PARTICIPANT || static_cast<size_t>(count) != HEX_DIGITS_IN_PARTICIPANT) {
-          ACE_ERROR_RETURN((LM_ERROR,
-                            ACE_TEXT("(%P|%t) ERROR: StaticDiscovery::parse_endpoints ")
-                            ACE_TEXT("participant (%C) must be 12 hexadecimal digits in [endpoint/%C] section.\n"),
-                            value.c_str(), endpoint_name.c_str()),
-                            -1);
-        }
-
-        for (size_t idx = 0; idx != BYTES_IN_PARTICIPANT; ++idx) {
-          participant[idx] = fromhex(value, idx);
-        }
-        participant_specified = true;
-      } else if (name == "entity") {
-        const OPENDDS_STRING::difference_type count = std::count_if(value.begin(), value.end(), isxdigit);
-        if (value.size() != HEX_DIGITS_IN_ENTITY || static_cast<size_t>(count) != HEX_DIGITS_IN_ENTITY) {
-          ACE_ERROR_RETURN((LM_ERROR,
-                            ACE_TEXT("(%P|%t) ERROR: StaticDiscovery::parse_endpoints ")
-                            ACE_TEXT("entity (%C) must be 6 hexadecimal digits in [endpoint/%C] section.\n"),
-                            value.c_str(), endpoint_name.c_str()),
-                            -1);
-        }
-
-        for (size_t idx = 0; idx != BYTES_IN_ENTITY; ++idx) {
-          entity[idx] = fromhex(value, idx);
-        }
-        entity_specified = true;
-      } else if (name == "type") {
-        if (value == "reader") {
-          type = Reader;
-          type_specified = true;
-        } else if (value == "writer") {
-          type = Writer;
-          type_specified = true;
-        } else {
-          ACE_ERROR_RETURN((LM_ERROR,
-                            ACE_TEXT("(%P|%t) ERROR: StaticDiscovery::parse_endpoints ")
-                            ACE_TEXT("Illegal string value for type (%C) in [endpoint/%C] section.\n"),
-                            value.c_str(), endpoint_name.c_str()),
-                            -1);
-        }
-      } else if (name == "topic") {
-        EndpointRegistry::TopicMapType::const_iterator pos = this->registry.topic_map.find(value);
-        if (pos != this->registry.topic_map.end()) {
-          topic_name = pos->second.name;
-          topic_name_specified = true;
-        } else {
-          ACE_ERROR_RETURN((LM_ERROR,
-                            ACE_TEXT("(%P|%t) ERROR: StaticDiscovery::parse_endpoints ")
-                            ACE_TEXT("Illegal topic reference (%C) in [endpoint/%C] section.\n"),
-                            value.c_str(), endpoint_name.c_str()),
-                            -1);
-        }
-      } else if (name == "datawriterqos") {
-        EndpointRegistry::DataWriterQosMapType::const_iterator pos = this->registry.datawriterqos_map.find(value);
-        if (pos != this->registry.datawriterqos_map.end()) {
-          datawriterqos = pos->second;
-        } else {
-          ACE_ERROR_RETURN((LM_ERROR,
-                            ACE_TEXT("(%P|%t) ERROR: StaticDiscovery::parse_endpoints ")
-                            ACE_TEXT("Illegal datawriterqos reference (%C) in [endpoint/%C] section.\n"),
-                            value.c_str(), endpoint_name.c_str()),
-                            -1);
-        }
-      } else if (name == "publisherqos") {
-        EndpointRegistry::PublisherQosMapType::const_iterator pos = this->registry.publisherqos_map.find(value);
-        if (pos != this->registry.publisherqos_map.end()) {
-          publisherqos = pos->second;
-        } else {
-          ACE_ERROR_RETURN((LM_ERROR,
-                            ACE_TEXT("(%P|%t) ERROR: StaticDiscovery::parse_endpoints ")
-                            ACE_TEXT("Illegal publisherqos reference (%C) in [endpoint/%C] section.\n"),
-                            value.c_str(), endpoint_name.c_str()),
-                            -1);
-        }
-      } else if (name == "datareaderqos") {
-        EndpointRegistry::DataReaderQosMapType::const_iterator pos = this->registry.datareaderqos_map.find(value);
-        if (pos != this->registry.datareaderqos_map.end()) {
-          datareaderqos = pos->second;
-        } else {
-          ACE_ERROR_RETURN((LM_ERROR,
-                            ACE_TEXT("(%P|%t) ERROR: StaticDiscovery::parse_endpoints ")
-                            ACE_TEXT("Illegal datareaderqos reference (%C) in [endpoint/%C] section.\n"),
-                            value.c_str(), endpoint_name.c_str()),
-                            -1);
-        }
-      } else if (name == "subscriberqos") {
-        EndpointRegistry::SubscriberQosMapType::const_iterator pos = this->registry.subscriberqos_map.find(value);
-        if (pos != this->registry.subscriberqos_map.end()) {
-          subscriberqos = pos->second;
-        } else {
-          ACE_ERROR_RETURN((LM_ERROR,
-                            ACE_TEXT("(%P|%t) ERROR: StaticDiscovery::parse_endpoints ")
-                            ACE_TEXT("Illegal subscriberqos reference (%C) in [endpoint/%C] section.\n"),
-                            value.c_str(), endpoint_name.c_str()),
-                            -1);
-        }
-      } else if (name == "config") {
-        config_name = value;
-        config_name_specified = true;
-      } else {
-        ACE_ERROR_RETURN((LM_ERROR,
-                          ACE_TEXT("(%P|%t) ERROR: StaticDiscovery::parse_endpoints ")
-                          ACE_TEXT("Unexpected entry (%C) in [endpoint/%C] section.\n"),
-                          name.c_str(), endpoint_name.c_str()),
-                          -1);
+      for (size_t idx = 0; idx != BYTES_IN_PARTICIPANT; ++idx) {
+        participant[idx] = fromhex(value, idx);
       }
     }
 
-    if (!domain_specified) {
-      ACE_ERROR_RETURN((LM_ERROR,
-                        ACE_TEXT("(%P|%t) ERROR: StaticDiscovery::parse_endpoints ")
-                        ACE_TEXT("No domain specified for [endpoint/%C] section.\n"),
-                        endpoint_name.c_str()),
-                        -1);
+    unsigned char entity[3] = { 0 };
+    {
+      if (!config_store->has((prefix + "_ENTITY").c_str())) {
+        ACE_ERROR((LM_ERROR,
+                   ACE_TEXT("(%P|%t) ERROR: StaticDiscovery::parse_endpoints ")
+                   ACE_TEXT("No entity specified for [endpoint/%C] section.\n"),
+                   endpoint_name.c_str()));
+        return -1;
+      }
+
+      const String value = config_store->get((prefix + "_ENTITY").c_str(), "");
+      const OPENDDS_STRING::difference_type count = std::count_if(value.begin(), value.end(), isxdigit);
+      if (value.size() != HEX_DIGITS_IN_ENTITY || static_cast<size_t>(count) != HEX_DIGITS_IN_ENTITY) {
+        ACE_ERROR((LM_ERROR,
+                   ACE_TEXT("(%P|%t) ERROR: StaticDiscovery::parse_endpoints ")
+                   ACE_TEXT("entity (%C) must be 6 hexadecimal digits in [endpoint/%C] section.\n"),
+                   value.c_str(), endpoint_name.c_str()));
+        return -1;
+      }
+
+      for (size_t idx = 0; idx != BYTES_IN_ENTITY; ++idx) {
+        entity[idx] = fromhex(value, idx);
+      }
     }
 
-    if (!participant_specified) {
-      ACE_ERROR_RETURN((LM_ERROR,
-                        ACE_TEXT("(%P|%t) ERROR: StaticDiscovery::parse_endpoints ")
-                        ACE_TEXT("No participant specified for [endpoint/%C] section.\n"),
-                        endpoint_name.c_str()),
-                        -1);
+    Type type = Reader;
+    {
+      if (!config_store->has((prefix + "_TYPE").c_str())) {
+        ACE_ERROR((LM_ERROR,
+                   ACE_TEXT("(%P|%t) ERROR: StaticDiscovery::parse_endpoints ")
+                   ACE_TEXT("No type specified for [endpoint/%C] section.\n"),
+                   endpoint_name.c_str()));
+        return -1;
+      }
+      type = config_store->get((prefix + "_TYPE").c_str(), Reader, type_kinds);
     }
 
-    if (!entity_specified) {
-      ACE_ERROR_RETURN((LM_ERROR,
-                        ACE_TEXT("(%P|%t) ERROR: StaticDiscovery::parse_endpoints ")
-                        ACE_TEXT("No entity specified for [endpoint/%C] section.\n"),
-                        endpoint_name.c_str()),
-                        -1);
+    String topic_name;
+    {
+      if (!config_store->has((prefix + "_TOPIC").c_str())) {
+        ACE_ERROR((LM_ERROR,
+                   ACE_TEXT("(%P|%t) ERROR: StaticDiscovery::parse_endpoints ")
+                   ACE_TEXT("No topic specified for [endpoint/%C] section.\n"),
+                   endpoint_name.c_str()));
+        return -1;
+      }
+
+      const String value = config_store->get((prefix + "_TOPIC").c_str(), "");
+      EndpointRegistry::TopicMapType::const_iterator pos = this->registry.topic_map.find(value);
+      if (pos == this->registry.topic_map.end()) {
+        ACE_ERROR((LM_ERROR,
+                   ACE_TEXT("(%P|%t) ERROR: StaticDiscovery::parse_endpoints ")
+                   ACE_TEXT("Illegal topic reference (%C) in [endpoint/%C] section.\n"),
+                   value.c_str(), endpoint_name.c_str()));
+        return -1;
+      }
+
+      topic_name = pos->second.name;
     }
 
-    if (!type_specified) {
-      ACE_ERROR_RETURN((LM_ERROR,
-                        ACE_TEXT("(%P|%t) ERROR:StaticDiscovery::parse_endpoints ")
-                        ACE_TEXT("No type specified for [endpoint/%C] section.\n"),
-                        endpoint_name.c_str()),
-                        -1);
+    DDS::DataWriterQos datawriterqos(TheServiceParticipant->initial_DataWriterQos());
+    if (config_store->has((prefix + "_DATAWRITERQOS").c_str())) {
+      const String value = config_store->get((prefix + "_DATAWRITERQOS").c_str(), "");
+      EndpointRegistry::DataWriterQosMapType::const_iterator pos = this->registry.datawriterqos_map.find(value);
+      if (pos == this->registry.datawriterqos_map.end()) {
+        ACE_ERROR((LM_ERROR,
+                   ACE_TEXT("(%P|%t) ERROR: StaticDiscovery::parse_endpoints ")
+                   ACE_TEXT("Illegal datawriterqos reference (%C) in [endpoint/%C] section.\n"),
+                   value.c_str(), endpoint_name.c_str()));
+        return -1;
+      }
+
+      datawriterqos = pos->second;
     }
 
-    if (!topic_name_specified) {
-      ACE_ERROR_RETURN((LM_ERROR,
-                        ACE_TEXT("(%P|%t) ERROR: StaticDiscovery::parse_endpoints ")
-                        ACE_TEXT("No topic specified for [endpoint/%C] section.\n"),
-                        endpoint_name.c_str()),
-                        -1);
+    DDS::DataReaderQos datareaderqos(TheServiceParticipant->initial_DataReaderQos());
+    if (config_store->has((prefix + "_DATAREADERQOS").c_str())) {
+      const String value = config_store->get((prefix + "_DATAREADERQOS").c_str(), "");
+      EndpointRegistry::DataReaderQosMapType::const_iterator pos = this->registry.datareaderqos_map.find(value);
+      if (pos == this->registry.datareaderqos_map.end()) {
+        ACE_ERROR((LM_ERROR,
+                   ACE_TEXT("(%P|%t) ERROR: StaticDiscovery::parse_endpoints ")
+                   ACE_TEXT("Illegal datareaderqos reference (%C) in [endpoint/%C] section.\n"),
+                   value.c_str(), endpoint_name.c_str()));
+        return -1;
+      }
+
+      datareaderqos = pos->second;
     }
 
+    DDS::PublisherQos publisherqos(TheServiceParticipant->initial_PublisherQos());
+    if (config_store->has((prefix + "_PUBLISHERQOS").c_str())) {
+      const String value = config_store->get((prefix + "_PUBLISHERQOS").c_str(), "");
+      EndpointRegistry::PublisherQosMapType::const_iterator pos = this->registry.publisherqos_map.find(value);
+      if (pos == this->registry.publisherqos_map.end()) {
+        ACE_ERROR((LM_ERROR,
+                   ACE_TEXT("(%P|%t) ERROR: StaticDiscovery::parse_endpoints ")
+                   ACE_TEXT("Illegal publisherqos reference (%C) in [endpoint/%C] section.\n"),
+                   value.c_str(), endpoint_name.c_str()));
+        return -1;
+      }
+
+      publisherqos = pos->second;
+    }
+
+    DDS::SubscriberQos subscriberqos(TheServiceParticipant->initial_SubscriberQos());
+    if (config_store->has((prefix + "_SUBSCRIBERQOS").c_str())) {
+      const String value = config_store->get((prefix + "_SUBSCRIBERQOS").c_str(), "");
+      EndpointRegistry::SubscriberQosMapType::const_iterator pos = this->registry.subscriberqos_map.find(value);
+      if (pos == this->registry.subscriberqos_map.end()) {
+        ACE_ERROR((LM_ERROR,
+                   ACE_TEXT("(%P|%t) ERROR: StaticDiscovery::parse_endpoints ")
+                   ACE_TEXT("Illegal subscriberqos reference (%C) in [endpoint/%C] section.\n"),
+                   value.c_str(), endpoint_name.c_str()));
+        return -1;
+      }
+
+      subscriberqos = pos->second;
+    }
+
+    String config_name;
     TransportConfig_rch config;
-
-    if (config_name_specified) {
+    if (config_store->has((prefix + "_CONFIG").c_str())) {
+      config_name = config_store->get((prefix + "_CONFIG").c_str(), "");
       config = TheTransportRegistry->get_config(config_name);
       if (config.is_nil()) {
-        ACE_ERROR_RETURN((LM_ERROR,
-                          ACE_TEXT("(%P|%t) ERROR: StaticDiscovery::parse_endpoints ")
-                          ACE_TEXT("Illegal config reference (%C) in [endpoint/%C] section.\n"),
-                          config_name.c_str(), endpoint_name.c_str()),
-                          -1);
+        ACE_ERROR((LM_ERROR,
+                   ACE_TEXT("(%P|%t) ERROR: StaticDiscovery::parse_endpoints ")
+                   ACE_TEXT("Illegal config reference (%C) in [endpoint/%C] section.\n"),
+                   config_name.c_str(), endpoint_name.c_str()));
       }
     }
 
-    if (config.is_nil() && domain_specified) {
+    if (config.is_nil()) {
       config = TheTransportRegistry->domain_default_config(domain);
     }
 
@@ -2635,8 +2224,9 @@ StaticDiscovery::parse_endpoints(ACE_Configuration_Heap& cf)
       config = TheTransportRegistry->global_config();
     }
 
+    TransportLocatorSeq trans_info;
     try {
-      config->populate_locators(trans_info);
+      config->populate_locators(trans_info, domain);
     }
     catch (const CORBA::Exception& ex) {
       ACE_ERROR_RETURN((LM_ERROR,
@@ -2957,7 +2547,7 @@ bool StaticDiscovery::update_topic_qos(const GUID_t& topicId, DDS::DomainId_t do
   return participants_[domainId][participantId]->update_topic_qos(topicId, qos);
 }
 
-GUID_t StaticDiscovery::add_publication(
+bool StaticDiscovery::add_publication(
   DDS::DomainId_t domainId,
   const GUID_t& participantId,
   const GUID_t& topicId,
@@ -2967,8 +2557,7 @@ GUID_t StaticDiscovery::add_publication(
   const DDS::PublisherQos& publisherQos,
   const XTypes::TypeInformation& type_info)
 {
-  return get_part(domainId, participantId)->add_publication(
-    topicId, publication, qos, transInfo, publisherQos, type_info);
+  return get_part(domainId, participantId)->add_publication(topicId, publication, qos, transInfo, publisherQos, type_info);
 }
 
 bool StaticDiscovery::remove_publication(
@@ -3003,7 +2592,7 @@ void StaticDiscovery::update_publication_locators(
   get_part(domainId, partId)->update_publication_locators(dwId, transInfo);
 }
 
-GUID_t StaticDiscovery::add_subscription(
+bool StaticDiscovery::add_subscription(
   DDS::DomainId_t domainId,
   const GUID_t& participantId,
   const GUID_t& topicId,
@@ -3016,9 +2605,15 @@ GUID_t StaticDiscovery::add_subscription(
   const DDS::StringSeq& params,
   const XTypes::TypeInformation& type_info)
 {
-  return get_part(domainId, participantId)->add_subscription(
-    topicId, subscription, qos, transInfo, subscriberQos, filterClassName,
-    filterExpr, params, type_info);
+  return get_part(domainId, participantId)->add_subscription(topicId,
+                                                             subscription,
+                                                             qos,
+                                                             transInfo,
+                                                             subscriberQos,
+                                                             filterClassName,
+                                                             filterExpr,
+                                                             params,
+                                                             type_info);
 }
 
 bool StaticDiscovery::remove_subscription(

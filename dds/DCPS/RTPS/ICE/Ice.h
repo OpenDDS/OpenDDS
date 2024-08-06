@@ -3,7 +3,9 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifdef OPENDDS_SECURITY
+#include <dds/OpenDDSConfigWrapper.h>
+
+#if OPENDDS_CONFIG_SECURITY
 #ifndef OPENDDS_DCPS_RTPS_ICE_ICE_H
 #define OPENDDS_DCPS_RTPS_ICE_ICE_H
 
@@ -58,121 +60,44 @@ public:
 
 class OpenDDS_Rtps_Export Configuration {
 public:
-  Configuration() :
-    T_a_(0, 50000),
-    connectivity_check_ttl_(5 * 60),
-    checklist_period_(10),
-    indication_period_(15),
-    nominated_ttl_(5 * 60),
-    server_reflexive_address_period_(30),
-    server_reflexive_indication_count_(10),
-    deferred_triggered_check_ttl_(5 * 60),
-    change_password_period_(5 * 60)
-  {}
-
-  void T_a(const DCPS::TimeDuration& x)
-  {
-    T_a_ = x;
-  }
-  DCPS::TimeDuration T_a() const
-  {
-    return T_a_;
-  }
-
-  void connectivity_check_ttl(const DCPS::TimeDuration& x)
-  {
-    connectivity_check_ttl_ = x;
-  }
-  DCPS::TimeDuration connectivity_check_ttl() const
-  {
-    return connectivity_check_ttl_;
-  }
-
-  void checklist_period(const DCPS::TimeDuration& x)
-  {
-    checklist_period_ = x;
-  }
-  DCPS::TimeDuration checklist_period() const
-  {
-    return checklist_period_;
-  }
-
-  void indication_period(const DCPS::TimeDuration& x)
-  {
-    indication_period_ = x;
-  }
-  DCPS::TimeDuration indication_period() const
-  {
-    return indication_period_;
-  }
-
-  void nominated_ttl(const DCPS::TimeDuration& x)
-  {
-    nominated_ttl_ = x;
-  }
-  DCPS::TimeDuration nominated_ttl() const
-  {
-    return nominated_ttl_;
-  }
-
-  void server_reflexive_address_period(const DCPS::TimeDuration& x)
-  {
-    server_reflexive_address_period_ = x;
-  }
-  DCPS::TimeDuration server_reflexive_address_period() const
-  {
-    return server_reflexive_address_period_;
-  }
-
-  void server_reflexive_indication_count(size_t x)
-  {
-    server_reflexive_indication_count_ = x;
-  }
-  size_t server_reflexive_indication_count() const
-  {
-    return server_reflexive_indication_count_;
-  }
-
-  void deferred_triggered_check_ttl(const DCPS::TimeDuration& x)
-  {
-    deferred_triggered_check_ttl_ = x;
-  }
-  DCPS::TimeDuration deferred_triggered_check_ttl() const
-  {
-    return deferred_triggered_check_ttl_;
-  }
-
-  void change_password_period(const DCPS::TimeDuration& x)
-  {
-    change_password_period_ = x;
-  }
-  DCPS::TimeDuration change_password_period() const
-  {
-    return change_password_period_;
-  }
-
-  static Configuration* instance();
-
-private:
   // Mininum time between consecutive sends.
   // RFC 8445 Section 14.2
-  DCPS::TimeDuration T_a_;
+  void T_a(const DCPS::TimeDuration& x);
+  DCPS::TimeDuration T_a() const;
+
   // Repeat a check for this long before failing it.
-  DCPS::TimeDuration connectivity_check_ttl_;
+  void connectivity_check_ttl(const DCPS::TimeDuration& x);
+  DCPS::TimeDuration connectivity_check_ttl() const;
+
   // Run all of the ordinary checks in a checklist in this amount of time.
-  DCPS::TimeDuration checklist_period_;
+  void checklist_period(const DCPS::TimeDuration& x);
+  DCPS::TimeDuration checklist_period() const;
+
   // Send an indication at this interval once an address is selected.
-  DCPS::TimeDuration indication_period_;
+  void indication_period(const DCPS::TimeDuration& x);
+  DCPS::TimeDuration indication_period() const;
+
   // The nominated pair will still be valid if an indication has been received within this amount of time.
-  DCPS::TimeDuration nominated_ttl_;
+  void nominated_ttl(const DCPS::TimeDuration& x);
+  DCPS::TimeDuration nominated_ttl() const;
+
   // Perform server-reflexive candidate gathering this often.
-  DCPS::TimeDuration server_reflexive_address_period_;
+  void server_reflexive_address_period(const DCPS::TimeDuration& x);
+  DCPS::TimeDuration server_reflexive_address_period() const;
+
   // Send this many binding indications to the STUN server before sending a binding request.
-  size_t server_reflexive_indication_count_;
+  void server_reflexive_indication_count(size_t x);
+  size_t server_reflexive_indication_count() const;
+
   // Lifetime of a deferred triggered check.
-  DCPS::TimeDuration deferred_triggered_check_ttl_;
+  void deferred_triggered_check_ttl(const DCPS::TimeDuration& x);
+  DCPS::TimeDuration deferred_triggered_check_ttl() const;
+
   // Change the password this often.
-  DCPS::TimeDuration change_password_period_;
+  void change_password_period(const DCPS::TimeDuration& x);
+  DCPS::TimeDuration change_password_period() const;
+
+  static Configuration* instance();
 };
 
 class OpenDDS_Rtps_Export Agent : public virtual DCPS::RcObject {
@@ -287,4 +212,4 @@ private:
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #endif /* OPENDDS_RTPS_ICE_H */
-#endif /* OPENDDS_SECURITY */
+#endif

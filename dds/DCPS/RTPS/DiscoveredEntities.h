@@ -9,14 +9,17 @@
 
 #include "AssociationRecord.h"
 #include "RtpsCoreC.h"
-#ifdef OPENDDS_SECURITY
-#  include "RtpsSecurityC.h"
-#endif
+
 #include "ICE/Ice.h"
 
+#include <dds/DCPS/Definitions.h>
 #include <dds/DCPS/FibonacciSequence.h>
 #include <dds/DCPS/PoolAllocationBase.h>
 #include <dds/DCPS/SequenceNumber.h>
+
+#if OPENDDS_CONFIG_SECURITY
+#  include "RtpsSecurityC.h"
+#endif
 
 #ifndef ACE_LACKS_PRAGMA_ONCE
 #  pragma once
@@ -27,7 +30,7 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace RTPS {
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
 enum AuthState {
   AUTH_STATE_HANDSHAKE,
   AUTH_STATE_AUTHENTICATED,
@@ -51,7 +54,8 @@ struct DiscoveredParticipant {
     : location_ih_(DDS::HANDLE_NIL)
     , bit_ih_(DDS::HANDLE_NIL)
     , seq_reset_count_(0)
-#ifdef OPENDDS_SECURITY
+    , opendds_user_tag_(0)
+#if OPENDDS_CONFIG_SECURITY
     , have_spdp_info_(false)
     , have_sedp_info_(false)
     , have_auth_req_msg_(false)
@@ -69,7 +73,7 @@ struct DiscoveredParticipant {
     , participant_tokens_sent_(false)
 #endif
   {
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
     pdata_.dataKind = Security::DPDK_NONE;
     security_info_.participant_security_attributes = 0;
     security_info_.plugin_participant_security_attributes = 0;
@@ -84,7 +88,8 @@ struct DiscoveredParticipant {
     , bit_ih_(DDS::HANDLE_NIL)
     , max_seq_(seq)
     , seq_reset_count_(0)
-#ifdef OPENDDS_SECURITY
+    , opendds_user_tag_(p.participantProxy.opendds_user_tag)
+#if OPENDDS_CONFIG_SECURITY
     , have_spdp_info_(false)
     , have_sedp_info_(false)
     , have_auth_req_msg_(false)
@@ -102,8 +107,7 @@ struct DiscoveredParticipant {
     , participant_tokens_sent_(false)
 #endif
   {
-    const DCPS::GUID_t guid = DCPS::make_part_guid(p.participantProxy.guidPrefix);
-    assign(location_data_.guid, guid);
+    assign(location_data_.guid, make_part_guid());
     location_data_.location = 0;
     location_data_.change_mask = 0;
     location_data_.local_timestamp.sec = 0;
@@ -118,8 +122,10 @@ struct DiscoveredParticipant {
     location_data_.ice6_timestamp.nanosec = 0;
     location_data_.relay6_timestamp.sec = 0;
     location_data_.relay6_timestamp.nanosec = 0;
+    location_data_.lease_duration.sec = 0;
+    location_data_.lease_duration.nanosec = 0;
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
     security_info_.participant_security_attributes = 0;
     security_info_.plugin_participant_security_attributes = 0;
 #else
@@ -131,11 +137,11 @@ struct DiscoveredParticipant {
 
   struct LocationUpdate {
     DCPS::ParticipantLocation mask_;
-    ACE_INET_Addr from_;
+    DCPS::NetworkAddress from_;
     DCPS::SystemTimePoint timestamp_;
     LocationUpdate() {}
     LocationUpdate(DCPS::ParticipantLocation mask,
-                   const ACE_INET_Addr& from,
+                   const DCPS::NetworkAddress& from,
                    const DCPS::SystemTimePoint& timestamp)
       : mask_(mask), from_(from), timestamp_(timestamp) {}
   };
@@ -144,12 +150,13 @@ struct DiscoveredParticipant {
   DCPS::ParticipantLocationBuiltinTopicData location_data_;
   DDS::InstanceHandle_t location_ih_;
 
-  ACE_INET_Addr last_recv_address_;
+  DCPS::NetworkAddress last_recv_address_;
   DCPS::MonotonicTimePoint discovered_at_;
   DCPS::MonotonicTimePoint lease_expiration_;
   DDS::InstanceHandle_t bit_ih_;
   DCPS::SequenceNumber max_seq_;
   ACE_UINT16 seq_reset_count_;
+  ACE_CDR::ULong opendds_user_tag_;
   typedef OPENDDS_LIST(BuiltinAssociationRecord) BuiltinAssociationRecords;
   BuiltinAssociationRecords builtin_pending_records_;
   BuiltinAssociationRecords builtin_associated_records_;
@@ -159,7 +166,7 @@ struct DiscoveredParticipant {
   typedef OPENDDS_LIST(ReaderAssociationRecord_rch) ReaderAssociationRecords;
   ReaderAssociationRecords reader_pending_records_;
   ReaderAssociationRecords reader_associated_records_;
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
   bool have_spdp_info_;
   ICE::AgentInfo spdp_info_;
   bool have_sedp_info_;
@@ -199,6 +206,21 @@ struct DiscoveredParticipant {
     return pdata_.dataKind == Security::DPDK_ENHANCED || pdata_.dataKind == Security::DPDK_SECURE;
   }
 #endif
+
+  const DCPS::GuidPrefix_t& prefix() const
+  {
+    return pdata_.participantProxy.guidPrefix;
+  }
+
+  DCPS::GUID_t make_guid(const DCPS::EntityId_t& entity) const
+  {
+    return DCPS::make_id(prefix(), entity);
+  }
+
+  DCPS::GUID_t make_part_guid() const
+  {
+    return DCPS::make_part_guid(prefix());
+  }
 };
 
 struct DiscoveredSubscription : DCPS::PoolAllocationBase {
@@ -206,11 +228,11 @@ struct DiscoveredSubscription : DCPS::PoolAllocationBase {
     : bit_ih_(DDS::HANDLE_NIL)
     , participant_discovered_at_(DCPS::monotonic_time_zero())
     , transport_context_(0)
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
     , have_ice_agent_info_(false)
 #endif
   {
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
     security_attribs_.base = DDS::Security::TopicSecurityAttributes();
     security_attribs_.is_key_protected = 0;
     security_attribs_.is_payload_protected = 0;
@@ -224,12 +246,12 @@ struct DiscoveredSubscription : DCPS::PoolAllocationBase {
     , bit_ih_(DDS::HANDLE_NIL)
     , participant_discovered_at_(DCPS::monotonic_time_zero())
     , transport_context_(0)
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
     , security_attribs_(DDS::Security::EndpointSecurityAttributes())
     , have_ice_agent_info_(false)
 #endif
   {
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
     security_attribs_.base = DDS::Security::TopicSecurityAttributes();
     security_attribs_.is_key_protected = 0;
     security_attribs_.is_payload_protected = 0;
@@ -245,7 +267,7 @@ struct DiscoveredSubscription : DCPS::PoolAllocationBase {
   ACE_CDR::ULong transport_context_;
   XTypes::TypeInformation type_info_;
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
   DDS::Security::EndpointSecurityAttributes security_attribs_;
   bool have_ice_agent_info_;
   ICE::AgentInfo ice_agent_info_;
@@ -267,11 +289,11 @@ struct DiscoveredPublication : DCPS::PoolAllocationBase {
     : bit_ih_(DDS::HANDLE_NIL)
     , participant_discovered_at_(DCPS::monotonic_time_zero())
     , transport_context_(0)
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
     , have_ice_agent_info_(false)
 #endif
   {
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
     security_attribs_.base = DDS::Security::TopicSecurityAttributes();
     security_attribs_.is_key_protected = 0;
     security_attribs_.is_payload_protected = 0;
@@ -285,11 +307,11 @@ struct DiscoveredPublication : DCPS::PoolAllocationBase {
     , bit_ih_(DDS::HANDLE_NIL)
     , participant_discovered_at_(DCPS::monotonic_time_zero())
     , transport_context_(0)
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
     , have_ice_agent_info_(false)
 #endif
   {
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
     security_attribs_.base = DDS::Security::TopicSecurityAttributes();
     security_attribs_.is_key_protected = 0;
     security_attribs_.is_payload_protected = 0;
@@ -305,7 +327,7 @@ struct DiscoveredPublication : DCPS::PoolAllocationBase {
   ACE_CDR::ULong transport_context_;
   XTypes::TypeInformation type_info_;
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
   DDS::Security::EndpointSecurityAttributes security_attribs_;
   bool have_ice_agent_info_;
   ICE::AgentInfo ice_agent_info_;

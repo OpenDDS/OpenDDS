@@ -26,7 +26,8 @@ class ShmemInst;
 
 class OpenDDS_Shmem_Export ShmemTransport : public TransportImpl {
 public:
-  explicit ShmemTransport(const ShmemInst_rch& inst);
+  ShmemTransport(const ShmemInst_rch& inst,
+                 DDS::DomainId_t domain);
 
   // used by our DataLink:
   ShmemAllocator* alloc() { return alloc_.get(); }

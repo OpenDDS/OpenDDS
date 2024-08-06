@@ -3,6 +3,7 @@
 
 #include "PoolAllocator.h"
 #include "SafeBool_T.h"
+#include "dcps_export.h"
 
 #include <dds/DdsDcpsCoreC.h>
 
@@ -73,6 +74,7 @@ public:
   bool is_zero() const;
   bool is_max() const;
   DDS::Duration_t to_dds_duration() const;
+  double to_double() const;
 
   bool boolean_test() const
   {

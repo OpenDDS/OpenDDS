@@ -7,15 +7,19 @@
 #  define OPENDDS_HAS_STD_SHARED_PTR
 #endif
 
+#include "BuiltInTopicUtils.h"
+#include "EncapsulationHeader.h"
+#include "GuidConverter.h"
 #include "MultiTopicImpl.h"
 #include "RakeResults_T.h"
 #include "SubscriberImpl.h"
-#include "BuiltInTopicUtils.h"
-#include "Util.h"
 #include "TypeSupportImpl.h"
+#include "Util.h"
 #include "dcps_export.h"
-#include "GuidConverter.h"
+
 #include "XTypes/DynamicDataAdapter.h"
+
+#include <dds/OpenDDSConfigWrapper.h>
 
 #ifndef OPENDDS_HAS_STD_SHARED_PTR
 #  include <ace/Bound_Ptr.h>
@@ -847,7 +851,7 @@ namespace OpenDDS {
     bool filtered = false;
     SubscriptionInstance_rch instance;
 
-    const DDS::Time_t now = timestamp.to_dds_time();
+    const DDS::Time_t now = timestamp.to_idl_struct();
     DataSampleHeader header;
     header.source_timestamp_sec_ = now.sec;
     header.source_timestamp_nanosec_ = now.nanosec;
@@ -863,7 +867,7 @@ namespace OpenDDS {
 
       bool just_registered;
       unique_ptr<MessageTypeWithAllocator> data(new (*data_allocator()) MessageTypeWithAllocator(sample));
-      store_instance_data(move(data), DDS::HANDLE_NIL, header, instance, just_registered, filtered);
+      store_instance_data(OPENDDS_MOVE_NS::move(data), DDS::HANDLE_NIL, header, instance, just_registered, filtered);
       if (instance) inst = instance->instance_handle_;
     }
 
@@ -895,7 +899,7 @@ namespace OpenDDS {
 
     SubscriptionInstance_rch si = get_handle_instance(instance);
     if (si && state != DDS::ALIVE_INSTANCE_STATE) {
-      const DDS::Time_t now = timestamp.to_dds_time();
+      const DDS::Time_t now = timestamp.to_idl_struct();
       DataSampleHeader header;
       header.publication_id_ = publication_id;
       header.source_timestamp_sec_ = now.sec;
@@ -906,7 +910,7 @@ namespace OpenDDS {
       bool just_registered, filtered;
       unique_ptr<MessageTypeWithAllocator> data(new (*data_allocator()) MessageTypeWithAllocator);
       get_key_value(*data, instance);
-      store_instance_data(move(data), publication_handle, header, si, just_registered, filtered);
+      store_instance_data(OPENDDS_MOVE_NS::move(data), publication_handle, header, si, just_registered, filtered);
       if (!filtered) {
         notify_read_conditions();
       }
@@ -936,7 +940,14 @@ namespace OpenDDS {
         return;
       }
       Encoding encoding;
-      if (!encap.to_encoding(encoding, type_support_->base_extensibility())) {
+      if (!to_encoding(encoding, encap, type_support_->base_extensibility())) {
+        if (log_level >= LogLevel::Error) {
+          ACE_ERROR((LM_ERROR,
+                     "(%P|%t) ERROR: %CDataReaderImpl::lookup_instance: "
+                     "to_encoding failed writer %C reader %C\n",
+                     LogGuid(sample.header_.publication_id_).c_str(),
+                     LogGuid(subscription_id()).c_str()));
+        }
         return;
       }
 
@@ -1064,17 +1075,15 @@ namespace OpenDDS {
 
 protected:
 
-  virtual RcHandle<MessageHolder> dds_demarshal(const OpenDDS::DCPS::ReceivedDataSample& sample,
-                                                DDS::InstanceHandle_t publication_handle,
-                                                OpenDDS::DCPS::SubscriptionInstance_rch& instance,
-                                                bool& just_registered,
-                                                bool& filtered,
-                                                OpenDDS::DCPS::MarshalingType marshaling_type,
-                                                bool full_copy)
+  virtual void dds_demarshal(const OpenDDS::DCPS::ReceivedDataSample& sample,
+                             DDS::InstanceHandle_t publication_handle,
+                             OpenDDS::DCPS::SubscriptionInstance_rch& instance,
+                             bool& just_registered,
+                             bool& filtered,
+                             OpenDDS::DCPS::MarshalingType marshaling_type)
   {
     unique_ptr<MessageTypeWithAllocator> data(new (*data_allocator()) MessageTypeWithAllocator);
     dynamic_hook(*data);
-    RcHandle<MessageHolder> message_holder;
 
     Message_Block_Ptr payload(sample.data(&mb_alloc_));
     if (marshal_skip_serialize_) {
@@ -1083,10 +1092,10 @@ protected:
           ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: DataReaderImpl::dds_demarshal: ")
                     ACE_TEXT("attempting to skip serialize but bad from_message_block. Returning from demarshal.\n")));
         }
-        return message_holder;
+        return;
       }
-      store_instance_data(move(data), publication_handle, sample.header_, instance, just_registered, filtered);
-      return message_holder;
+      store_instance_data(OPENDDS_MOVE_NS::move(data), publication_handle, sample.header_, instance, just_registered, filtered);
+      return;
     }
     const bool encapsulated = sample.header_.cdr_encapsulation_;
 
@@ -1104,11 +1113,18 @@ protected:
             ACE_TEXT("deserialization of encapsulation header failed.\n"),
             TraitsType::type_name()));
         }
-        return message_holder;
+        return;
       }
       Encoding encoding;
-      if (!encap.to_encoding(encoding, type_support_->base_extensibility())) {
-        return message_holder;
+      if (!to_encoding(encoding, encap, type_support_->base_extensibility())) {
+        if (log_level >= LogLevel::Error) {
+          ACE_ERROR((LM_ERROR,
+                     "(%P|%t) ERROR: %CDataReaderImpl::dds_demarshal: "
+                     "to_encoding failed writer %C reader %C\n",
+                     LogGuid(sample.header_.publication_id_).c_str(),
+                     LogGuid(subscription_id()).c_str()));
+        }
+        return;
       }
 
       if (decoding_modes_.find(encoding.kind()) == decoding_modes_.end()) {
@@ -1120,7 +1136,7 @@ protected:
             TraitsType::type_name(),
             Encoding::kind_to_string(encoding.kind()).c_str()));
         }
-        return message_holder;
+        return;
       }
       if (DCPS_debug_level >= 8) {
         ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) ")
@@ -1141,9 +1157,6 @@ protected:
       ser_ret = ser >> OpenDDS::DCPS::KeyOnly<MessageType>(*data);
     } else {
       ser_ret = ser >> *data;
-      if (full_copy) {
-        message_holder = make_rch<MessageHolder_T<MessageType> >(*data);
-      }
     }
     if (!ser_ret) {
       if (ser.get_construction_status() != Serializer::ConstructionSuccessful) {
@@ -1159,7 +1172,7 @@ protected:
                     TraitsType::type_name()));
         }
       }
-      return message_holder;
+      return;
     }
 
 #ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
@@ -1181,21 +1194,18 @@ protected:
               to_string(static_cast<MessageId>(sample.header_.message_id_))));
           }
           filtered = true;
-          message_holder.reset();
-          return message_holder;
+          return;
         }
         const MessageType& type = static_cast<MessageType&>(*data);
         if (!content_filtered_topic_->filter(type, sample_only_has_key_fields)) {
           filtered = true;
-          message_holder.reset();
-          return message_holder;
+          return;
         }
       }
     }
 #endif
 
-    store_instance_data(move(data), publication_handle, sample.header_, instance, just_registered, filtered);
-    return message_holder;
+    store_instance_data(OPENDDS_MOVE_NS::move(data), publication_handle, sample.header_, instance, just_registered, filtered);
   }
 
   virtual void dispose_unregister(const OpenDDS::DCPS::ReceivedDataSample& sample,
@@ -1214,7 +1224,7 @@ protected:
     if (sample.header_.key_fields_only_) {
       marshaling = OpenDDS::DCPS::KEY_ONLY_MARSHALING;
     }
-    dds_demarshal(sample, publication_handle, instance, just_registered, filtered, marshaling, false);
+    dds_demarshal(sample, publication_handle, instance, just_registered, filtered, marshaling);
   }
 
   virtual void purge_data(OpenDDS::DCPS::SubscriptionInstance_rch instance)
@@ -1234,6 +1244,21 @@ protected:
 
   virtual void release_instance_i(DDS::InstanceHandle_t handle)
   {
+#ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
+    OwnershipManagerPtr owner_manager = ownership_manager();
+    if (owner_manager) {
+      ACE_GUARD(ACE_Recursive_Thread_Mutex, instance_guard, instances_lock_);
+
+      SharedInstanceMap_rch inst = dynamic_rchandle_cast<SharedInstanceMap>(owner_manager->get_instance_map(topic_servant_->type_name(), this));
+      if (inst != 0) {
+        const typename ReverseInstanceMap::iterator pos = reverse_instance_map_.find(handle);
+        if (pos != reverse_instance_map_.end()) {
+          inst->erase(pos->second->first);
+        }
+      }
+    }
+#endif
+
     const typename ReverseInstanceMap::iterator pos = reverse_instance_map_.find(handle);
     if (pos != reverse_instance_map_.end()) {
       remove_from_lookup_maps(handle);
@@ -1261,7 +1286,7 @@ private:
                                  const OpenDDS::DCPS::DataSampleHeader& header,
                                  OpenDDS::DCPS::SubscriptionInstance_rch& instance_ptr)
   {
-#if defined(OPENDDS_SECURITY) && OPENDDS_HAS_DYNAMIC_DATA_ADAPTER
+#if OPENDDS_CONFIG_SECURITY && OPENDDS_HAS_DYNAMIC_DATA_ADAPTER
     const bool is_dispose_msg =
       header.message_id_ == OpenDDS::DCPS::DISPOSE_INSTANCE ||
       header.message_id_ == OpenDDS::DCPS::DISPOSE_UNREGISTER_INSTANCE;
@@ -1278,14 +1303,15 @@ private:
         }
 
         DDS::Security::SecurityException ex;
-        const GUID_t local_participant = make_id(get_guid(), ENTITYID_PARTICIPANT);
-        const GUID_t remote_participant = make_id(header.publication_id_, ENTITYID_PARTICIPANT);
+        const GUID_t local_participant = make_part_guid(subscription_id());
+        const GUID_t remote_participant = make_part_guid(header.publication_id_);
         const DDS::Security::ParticipantCryptoHandle remote_participant_permissions_handle = security_config_->get_handle_registry(local_participant)->get_remote_participant_permissions_handle(remote_participant);
         // Construct a DynamicData around the deserialized sample.
-        XTypes::DynamicDataAdapter<MessageType> dda(dynamic_type_, getMetaStruct<MessageType>(), *instance_data);
+        DDS::DynamicData_var dda =
+          XTypes::get_dynamic_data_adapter(dynamic_type_, *instance_data->message());
         // The remote participant might not be using security.
         if (remote_participant_permissions_handle != DDS::HANDLE_NIL &&
-            !security_config_->get_access_control()->check_remote_datawriter_register_instance(remote_participant_permissions_handle, this, publication_handle, &dda, ex)) {
+            !security_config_->get_access_control()->check_remote_datawriter_register_instance(remote_participant_permissions_handle, this, publication_handle, dda, ex)) {
           if (log_level >= LogLevel::Warning) {
             ACE_ERROR((LM_WARNING,
                        "(%P|%t) WARNING: DataReaderImpl_T::store_instance_data_check: unable to register instance SecurityException[%d.%d]: %C\n",
@@ -1296,14 +1322,15 @@ private:
       } else if (is_dispose_msg) {
 
         DDS::Security::SecurityException ex;
-        const GUID_t local_participant = make_id(get_guid(), ENTITYID_PARTICIPANT);
-        const GUID_t remote_participant = make_id(header.publication_id_, ENTITYID_PARTICIPANT);
+        const GUID_t local_participant = make_part_guid(subscription_id());
+        const GUID_t remote_participant = make_part_guid(header.publication_id_);
         const DDS::Security::ParticipantCryptoHandle remote_participant_permissions_handle = security_config_->get_handle_registry(local_participant)->get_remote_participant_permissions_handle(remote_participant);
         // Construct a DynamicData around the deserialized sample.
-        XTypes::DynamicDataAdapter<MessageType> dda(dynamic_type_, getMetaStruct<MessageType>(), *instance_data);
+        DDS::DynamicData_var dda =
+          XTypes::get_dynamic_data_adapter(dynamic_type_, *instance_data->message());
         // The remote participant might not be using security.
         if (remote_participant_permissions_handle != DDS::HANDLE_NIL &&
-            !security_config_->get_access_control()->check_remote_datawriter_dispose_instance(remote_participant_permissions_handle, this, publication_handle, &dda, ex)) {
+            !security_config_->get_access_control()->check_remote_datawriter_dispose_instance(remote_participant_permissions_handle, this, publication_handle, dda, ex)) {
           if (log_level >= LogLevel::Warning) {
             ACE_ERROR((LM_WARNING,
                        "(%P|%t) WARNING: DataReaderImpl_T::store_instance_data_check: unable to dispose instance SecurityException[%d.%d]: %C\n",
@@ -1541,7 +1568,7 @@ DDS::ReturnCode_t read_instance_i(MessageSequenceType& received_data,
     }
     ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) DataReaderImpl_T::read_instance_i: ")
                ACE_TEXT("will return no data reading sub %C because:\n  %C\n"),
-               LogGuid(get_guid()).c_str(), msg.c_str()));
+               LogGuid(subscription_id()).c_str(), msg.c_str()));
   }
 
   results.copy_to_user();
@@ -1825,7 +1852,7 @@ void store_instance_data(unique_ptr<MessageTypeWithAllocator> instance_data,
       const std::pair<typename SubscriptionInstanceMapType::iterator, bool> bpair =
         instances_.insert(typename SubscriptionInstanceMapType::value_type(handle, instance));
 
-      if (bpair.second == false) {
+      if (!bpair.second) {
         if (DCPS_debug_level > 0) {
           ACE_ERROR((LM_ERROR,
                      ACE_TEXT("(%P|%t) ")
@@ -1848,9 +1875,9 @@ void store_instance_data(unique_ptr<MessageTypeWithAllocator> instance_data,
         }
 
         if (new_handle) {
-          const std::pair<typename InstanceMap::iterator, bool> bpair =
+          const std::pair<typename InstanceMap::iterator, bool> res =
             inst->insert(typename InstanceMap::value_type(*instance_data, handle));
-          if (!bpair.second) {
+          if (!res.second) {
             if (DCPS_debug_level > 0) {
               ACE_ERROR ((LM_ERROR,
                           ACE_TEXT("(%P|%t) ")
@@ -1881,7 +1908,7 @@ void store_instance_data(unique_ptr<MessageTypeWithAllocator> instance_data,
     std::pair<typename InstanceMap::iterator, bool> bpair =
       instance_map_.insert(typename InstanceMap::value_type(*instance_data,
         handle));
-    if (bpair.second == false)
+    if (!bpair.second)
     {
       if (DCPS_debug_level > 0) {
         ACE_ERROR ((LM_ERROR,
@@ -1917,7 +1944,7 @@ void store_instance_data(unique_ptr<MessageTypeWithAllocator> instance_data,
       if (!filtered && time_based_filter_instance(instance_ptr, now, deadline)) {
         filtered = true;
         if (qos_.reliability.kind == DDS::RELIABLE_RELIABILITY_QOS) {
-          delay_sample(handle, move(instance_data), header, just_registered, now, deadline);
+          delay_sample(handle, OPENDDS_MOVE_NS::move(instance_data), header, just_registered, now, deadline);
         }
       } else {
         // nothing time based filtered now
@@ -1930,7 +1957,7 @@ void store_instance_data(unique_ptr<MessageTypeWithAllocator> instance_data,
       }
     }
 
-    finish_store_instance_data(move(instance_data), header, instance_ptr, is_dispose_msg, is_unregister_msg);
+    finish_store_instance_data(OPENDDS_MOVE_NS::move(instance_data), header, instance_ptr, is_dispose_msg, is_unregister_msg);
   }
   else
   {
@@ -2040,21 +2067,46 @@ void finish_store_instance_data(unique_ptr<MessageTypeWithAllocator> instance_da
     }
   }
 
+  const ValueDispatcher* vd = get_value_dispatcher();
+  const DDS::Time_t timestamp = {
+    header.source_timestamp_sec_,
+    header.source_timestamp_nanosec_
+  };
+
   bool event_notify = false;
 
   if (is_dispose_msg) {
     event_notify = instance_ptr->instance_state_->dispose_was_received(header.publication_id_);
+
+    const Observer_rch disposed_observer = get_observer(Observer::e_DISPOSED);
+    if (disposed_observer && instance_data && vd) {
+      Observer::Sample s(instance_ptr->instance_handle_, instance_ptr->instance_state_->instance_state(), timestamp, header.sequence_, instance_data->message(), *vd);
+      disposed_observer->on_disposed(this, s);
+    }
   }
 
   if (is_unregister_msg) {
     if (instance_ptr->instance_state_->unregister_was_received(header.publication_id_)) {
       event_notify = true;
     }
+
+    const Observer_rch unregistered_observer = get_observer(Observer::e_UNREGISTERED);
+    if (unregistered_observer && instance_data && vd) {
+      Observer::Sample s(instance_ptr->instance_handle_, instance_ptr->instance_state_->instance_state(), timestamp, header.sequence_, instance_data->message(), *vd);
+      unregistered_observer->on_unregistered(this, s);
+    }
+
   }
 
   if (!is_dispose_msg && !is_unregister_msg) {
     event_notify = true;
     instance_ptr->instance_state_->data_was_received(header.publication_id_);
+
+    const Observer_rch sample_received_observer = get_observer(Observer::e_SAMPLE_RECEIVED);
+    if (sample_received_observer && instance_data && vd) {
+      Observer::Sample s(instance_ptr->instance_handle_, instance_ptr->instance_state_->instance_state(), timestamp, header.sequence_, instance_data->message(), *vd);
+      sample_received_observer->on_sample_received(this, s);
+    }
   }
 
   if (!event_notify) {
@@ -2280,7 +2332,7 @@ void delay_sample(DDS::InstanceHandle_t handle,
 #ifdef ACE_HAS_CPP11
       filter_delayed_sample_map_.emplace(std::piecewise_construct,
                                          std::forward_as_tuple(handle),
-                                         std::forward_as_tuple(move(data), hdr, just_registered));
+                                         std::forward_as_tuple(OPENDDS_MOVE_NS::move(data), hdr, just_registered));
 #else
       filter_delayed_sample_map_.insert(std::make_pair(handle, FilterDelayedSample(move(data), hdr, just_registered)));
 #endif
@@ -2298,7 +2350,7 @@ void delay_sample(DDS::InstanceHandle_t handle,
     FilterDelayedSample& sample = i->second;
     // we only care about the most recently filtered sample, so clean up the last one
 
-    sample.message = move(data);
+    sample.message = OPENDDS_MOVE_NS::move(data);
     sample.header = hdr;
     sample.new_instance = just_registered;
     // already scheduled for timeout at the desired time
@@ -2374,7 +2426,7 @@ void filter_delayed(const MonotonicTimePoint& now)
       const bool new_instance = data->second.new_instance;
 
       // should not use data iterator anymore, since finish_store_instance_data releases sample_lock_
-      finish_store_instance_data(move(data->second.message),
+      finish_store_instance_data(OPENDDS_MOVE_NS::move(data->second.message),
                                  *header,
                                  instance,
                                  NOT_DISPOSE_MSG,
@@ -2425,7 +2477,7 @@ typedef ACE_Strong_Bound_Ptr<const OpenDDS::DCPS::DataSampleHeader, ACE_Null_Mut
 #endif
 struct FilterDelayedSample {
   FilterDelayedSample(unique_ptr<MessageTypeWithAllocator> msg, DataSampleHeader_ptr hdr, bool new_inst)
-    : message(move(msg))
+    : message(OPENDDS_MOVE_NS::move(msg))
     , header(hdr)
     , new_instance(new_inst)
   {}

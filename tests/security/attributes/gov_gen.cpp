@@ -14,6 +14,7 @@
 
 #include <openssl/pkcs7.h>
 #include <openssl/pem.h>
+#include <openssl/err.h>
 
 size_t find(const std::string& option, const std::string& needle, const std::string arr[], size_t arr_size)
 {
@@ -274,6 +275,13 @@ std::string generate_global_name(size_t aup, size_t ejac, size_t dpk, size_t lpk
   return result;
 }
 
+void print_ssl_error() {
+  const unsigned long ec = ERR_get_error();
+  const char* es = ERR_error_string(ec, 0);
+  std::cerr << "ERROR: " << es << std::endl;
+}
+
+
 int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 {
   std::string aup;
@@ -355,12 +363,14 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     BIO* filebuf = BIO_new_file(certpath.c_str(), "r");
     if (!filebuf) {
       std::cerr << "ERROR: could not open " << certpath << std::endl;
+      print_ssl_error();
       return EXIT_FAILURE;
     }
 
     cert = PEM_read_bio_X509(filebuf, NULL, 0, NULL);
     if (!cert) {
       std::cerr << "ERROR: could not read " << certpath << std::endl;
+      print_ssl_error();
       return EXIT_FAILURE;
     }
 
@@ -371,12 +381,14 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     BIO* filebuf = BIO_new_file(keypath.c_str(), "r");
     if (!filebuf) {
       std::cerr << "ERROR: could not open " << keypath << std::endl;
+      print_ssl_error();
       return EXIT_FAILURE;
     }
 
     key = PEM_read_bio_PrivateKey(filebuf, NULL, NULL, NULL);
     if (!key) {
       std::cerr << "ERROR: could not key " << keypath << std::endl;
+      print_ssl_error();
       return EXIT_FAILURE;
     }
 
@@ -387,24 +399,28 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   const int buffer_size = static_cast<int>(buffer.str().size());
   if (BIO_write(mem, buffer.str().data(), buffer_size) != buffer_size) {
     std::cerr << "ERROR: could not copy to BIO" << std::endl;
+    print_ssl_error();
     return EXIT_FAILURE;
   }
 
-  PKCS7* p7 = PKCS7_sign(cert, key, NULL, NULL, PKCS7_TEXT | PKCS7_DETACHED);
+  PKCS7* p7 = PKCS7_sign(cert, key, NULL, mem, PKCS7_TEXT | PKCS7_DETACHED | PKCS7_STREAM);
   if (!p7) {
     std::cerr << "ERROR: could not sign" << std::endl;
+    print_ssl_error();
     return EXIT_FAILURE;
   }
 
   BIO* out = BIO_new_file(outpath.c_str(), "w");
   if (out == NULL) {
     std::cerr << "ERROR: could not open " << outpath << std::endl;
+    print_ssl_error();
     return EXIT_FAILURE;
 
   }
 
-  if (!SMIME_write_PKCS7(out, p7, mem, PKCS7_TEXT | PKCS7_DETACHED)) {
+  if (!SMIME_write_PKCS7(out, p7, mem, PKCS7_TEXT | PKCS7_DETACHED | PKCS7_STREAM)) {
     std::cerr << "ERROR: could not write " << outpath << std::endl;
+    print_ssl_error();
     return EXIT_FAILURE;
   }
 

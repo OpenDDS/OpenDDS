@@ -1,10 +1,10 @@
 #ifndef OPENDDS_RTPSRELAYLIB_UTILITY_H
 #define OPENDDS_RTPSRELAYLIB_UTILITY_H
 
-#include "RelayC.h"
+#include <dds/rtpsrelaylib/RelayC.h>
 
-#include "dds/DCPS/GuidUtils.h"
-#include "dds/DCPS/TimeDuration.h"
+#include <dds/DCPS/GuidUtils.h>
+#include <dds/DCPS/TimeDuration.h>
 
 #include <ace/INET_Addr.h>
 
@@ -188,6 +188,15 @@ struct GuidHash {
   }
 };
 typedef std::unordered_set<OpenDDS::DCPS::GUID_t, GuidHash> GuidSet;
+
+inline GuidSet relay_guids_to_set(const RtpsRelay::GuidSequence& seq)
+{
+  GuidSet set;
+  for (const auto& guid : seq) {
+    set.insert(relay_guid_to_rtps_guid(guid));
+  }
+  return set;
+}
 
 }
 

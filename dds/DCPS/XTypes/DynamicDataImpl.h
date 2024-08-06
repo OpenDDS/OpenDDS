@@ -11,6 +11,7 @@
 
 #  include <dds/DCPS/FilterEvaluator.h>
 #  include <dds/DCPS/Sample.h>
+#  include <dds/DCPS/ValueWriter.h>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -20,29 +21,15 @@ namespace XTypes {
 class DynamicDataImpl;
 }
 
-namespace DCPS {
-OpenDDS_Dcps_Export
-bool serialized_size(const Encoding& encoding, size_t& size, const XTypes::DynamicDataImpl& data);
-OpenDDS_Dcps_Export
-bool operator<<(Serializer& ser, const XTypes::DynamicDataImpl& data);
-OpenDDS_Dcps_Export
-bool serialized_size(const Encoding& encoding, size_t& size, const KeyOnly<const XTypes::DynamicDataImpl>& data);
-OpenDDS_Dcps_Export
-bool operator<<(Serializer& ser, const KeyOnly<const XTypes::DynamicDataImpl>& data);
-}
-
 namespace XTypes {
 
 class OpenDDS_Dcps_Export DynamicDataImpl : public DynamicDataBase {
 public:
-  explicit DynamicDataImpl(DDS::DynamicType_ptr type);
+  // An optional, read-only backing store can be passed as a last resort for reading data.
+  DynamicDataImpl(DDS::DynamicType_ptr type, DDS::DynamicData_ptr backing_store = 0);
   DynamicDataImpl(const DynamicDataImpl& other);
 
-  DDS::DynamicType_ptr type();
-
   DDS::ReturnCode_t set_descriptor(MemberId id, DDS::MemberDescriptor* value);
-
-  CORBA::Boolean equals(DDS::DynamicData_ptr other);
 
   MemberId get_member_id_at_index(ACE_CDR::ULong index);
   ACE_CDR::ULong get_item_count();
@@ -50,8 +37,6 @@ public:
   DDS::ReturnCode_t clear_all_values();
   DDS::ReturnCode_t clear_nonkey_values();
   DDS::ReturnCode_t clear_value(DDS::MemberId id);
-  DDS::DynamicData_ptr loan_value(DDS::MemberId id);
-  DDS::ReturnCode_t return_loaned_value(DDS::DynamicData_ptr value);
 
   DDS::DynamicData_ptr clone();
 
@@ -85,13 +70,11 @@ public:
   DDS::ReturnCode_t set_uint32_value(DDS::MemberId id,
                                      CORBA::ULong value);
 
-  DDS::ReturnCode_t get_int64_value(CORBA::LongLong& value,
-                                    DDS::MemberId id);
+  DDS::ReturnCode_t get_int64_value_impl(CORBA::LongLong& value, DDS::MemberId id);
   DDS::ReturnCode_t set_int64_value(DDS::MemberId id,
                                     CORBA::LongLong value);
 
-  DDS::ReturnCode_t get_uint64_value(CORBA::ULongLong& value,
-                                     DDS::MemberId id);
+  DDS::ReturnCode_t get_uint64_value_impl(CORBA::ULongLong& value, DDS::MemberId id);
   DDS::ReturnCode_t set_uint64_value(DDS::MemberId id,
                                      CORBA::ULongLong value);
 
@@ -230,21 +213,13 @@ public:
   DDS::ReturnCode_t set_wstring_values(DDS::MemberId id,
                                        const DDS::WstringSeq& value);
 
-#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
-  DDS::ReturnCode_t get_simple_value(DCPS::Value& value, DDS::MemberId id);
-#endif
+  bool serialized_size(const DCPS::Encoding& enc, size_t& size, DCPS::Sample::Extent ext) const;
+  bool serialize(DCPS::Serializer& ser, DCPS::Sample::Extent ext) const;
 
 private:
-#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
-  DDS::ReturnCode_t get_simple_value_boolean(DCPS::Value& value, DDS::MemberId id) const;
-  DDS::ReturnCode_t get_simple_value_char(DCPS::Value& value, DDS::MemberId id) const;
-  template<typename ValueType>
-  DDS::ReturnCode_t get_simple_value_primitive(DCPS::Value& value, DDS::MemberId id) const;
-  DDS::ReturnCode_t get_simple_value_string(DCPS::Value& value, DDS::MemberId id) const;
-  DDS::ReturnCode_t get_simple_value_enum(DCPS::Value& value, DDS::MemberId id) const;
-#endif
-
-  CORBA::ULong get_sequence_size() const;
+  CORBA::ULong get_string_item_count() const;
+  CORBA::ULong get_sequence_item_count() const;
+  bool has_member(DDS::MemberId id) const;
   void erase_member(DDS::MemberId id);
 
   /// Group of functions to read a basic value represented by this DynamicData instance
@@ -275,6 +250,27 @@ private:
   template<typename ValueType>
   void cast_to_enum_value(ValueType& dst, CORBA::Long src) const;
 
+  void set_backing_store(DDS::DynamicData_ptr backing_store);
+
+  // Wrappers for reading different types from the backing store
+  bool get_value_from_backing_store(ACE_OutputCDR::from_int8& value, DDS::MemberId id);
+  bool get_value_from_backing_store(ACE_OutputCDR::from_uint8& value, DDS::MemberId id);
+  bool get_value_from_backing_store(CORBA::Short& value, DDS::MemberId id);
+  bool get_value_from_backing_store(CORBA::UShort& value, DDS::MemberId id);
+  bool get_value_from_backing_store(CORBA::Long& value, DDS::MemberId id);
+  bool get_value_from_backing_store(CORBA::ULong& value, DDS::MemberId id);
+  bool get_value_from_backing_store(CORBA::LongLong& value, DDS::MemberId id);
+  bool get_value_from_backing_store(CORBA::ULongLong& value, DDS::MemberId id);
+  bool get_value_from_backing_store(CORBA::Float& value, DDS::MemberId id);
+  bool get_value_from_backing_store(CORBA::Double& value, DDS::MemberId id);
+  bool get_value_from_backing_store(CORBA::LongDouble& value, DDS::MemberId id);
+  bool get_value_from_backing_store(ACE_OutputCDR::from_octet& value, DDS::MemberId id);
+  bool get_value_from_backing_store(char*& value, DDS::MemberId id);
+  bool get_value_from_backing_store(CORBA::WChar*& value, DDS::MemberId id);
+  bool get_value_from_backing_store(ACE_OutputCDR::from_char& value, DDS::MemberId id);
+  bool get_value_from_backing_store(ACE_OutputCDR::from_wchar& value, DDS::MemberId id);
+  bool get_value_from_backing_store(ACE_OutputCDR::from_boolean& value, DDS::MemberId id);
+
   /// Read a basic member from a containing type
   template<typename ValueType>
   bool read_basic_in_single_map(ValueType& value, DDS::MemberId id);
@@ -286,31 +282,33 @@ private:
   bool read_basic_member(ValueType& value, DDS::MemberId id);
 
   template<typename ValueType>
-  bool get_value_from_self(ValueType& value, DDS::MemberId id);
+  DDS::ReturnCode_t get_value_from_self(ValueType& value, DDS::MemberId id);
 
   template<TypeKind ValueTypeKind, typename ValueType>
-  bool get_value_from_enum(ValueType& value, DDS::MemberId id);
+  DDS::ReturnCode_t get_value_from_enum(ValueType& value, DDS::MemberId id);
 
   template<TypeKind ValueTypeKind, typename ValueType>
-  bool get_value_from_bitmask(ValueType& value, DDS::MemberId id);
+  DDS::ReturnCode_t get_value_from_bitmask(ValueType& value, DDS::MemberId id);
 
   template<TypeKind ValueTypeKind, typename ValueType>
-  bool get_value_from_struct(ValueType& value, DDS::MemberId id);
+  DDS::ReturnCode_t get_value_from_struct(ValueType& value, DDS::MemberId id);
 
   template<TypeKind ValueTypeKind, typename ValueType>
-  bool get_value_from_union(ValueType& value, DDS::MemberId id);
+  DDS::ReturnCode_t get_value_from_union(ValueType& value, DDS::MemberId id);
+
+  bool check_out_of_bound_read(DDS::MemberId id);
 
   template<TypeKind ValueTypeKind, typename ValueType>
-  bool get_value_from_collection(ValueType& value, DDS::MemberId id);
+  DDS::ReturnCode_t get_value_from_collection(ValueType& value, DDS::MemberId id);
 
   template<TypeKind CharKind, TypeKind StringKind, typename FromCharT, typename CharT>
   DDS::ReturnCode_t get_char_common(CharT& value, DDS::MemberId id);
 
   template<typename UIntType>
-  bool get_boolean_from_bitmask(CORBA::ULong index, CORBA::Boolean& value);
+  DDS::ReturnCode_t get_boolean_from_bitmask(CORBA::ULong index, CORBA::Boolean& value);
 
   template<TypeKind MemberTypeKind, typename MemberType>
-  bool set_value_to_struct(DDS::MemberId id, const MemberType& value);
+  DDS::ReturnCode_t set_value_to_struct(DDS::MemberId id, const MemberType& value);
 
   bool cast_to_discriminator_value(CORBA::Long& disc_value, const ACE_OutputCDR::from_boolean& value) const;
   bool cast_to_discriminator_value(CORBA::Long& disc_value, const ACE_OutputCDR::from_octet& value) const;
@@ -330,34 +328,46 @@ private:
   template<typename MemberType>
   bool cast_to_discriminator_value(CORBA::Long& disc_value, const MemberType& value) const;
 
+  DDS::ReturnCode_t set_union_discriminator_helper(CORBA::Long disc_val, const char* func_name);
+
+  bool get_union_member_type(DDS::MemberId id, DDS::DynamicType_var& member_type,
+                             DDS::MemberDescriptor_var& md) const;
+  bool find_selected_union_branch(bool& has_existing_branch, DDS::MemberDescriptor_var& existing_md);
+
   template<TypeKind MemberTypeKind, typename MemberType>
-  bool set_value_to_union(DDS::MemberId id, const MemberType& value,
-    TypeKind enum_or_bitmask = TK_NONE, LBound lower = 0, LBound upper = 0);
+  DDS::ReturnCode_t set_value_to_union(DDS::MemberId id, const MemberType& value);
+
+  bool check_out_of_bound_write(DDS::MemberId id);
 
   template<TypeKind ElementTypeKind, typename ElementType>
-  bool set_value_to_collection(DDS::MemberId id, const ElementType& value,
-    TypeKind coll_tk, TypeKind enum_or_bitmask = TK_NONE, LBound lower = 0, LBound upper = 0);
+  DDS::ReturnCode_t set_value_to_collection(DDS::MemberId id, const ElementType& value);
 
   template<TypeKind ValueTypeKind, typename ValueType>
-  DDS::ReturnCode_t set_single_value(DDS::MemberId id, const ValueType& value,
-    TypeKind enum_or_bitmask = TK_NONE, LBound lower = 0, LBound upper = 0);
+  DDS::ReturnCode_t set_single_value(DDS::MemberId id, const ValueType& value);
 
   template<TypeKind CharKind, TypeKind StringKind, typename FromCharT>
   DDS::ReturnCode_t set_char_common(DDS::MemberId id, const FromCharT& value);
 
+  // Conversion between index and ID for collection
+  CORBA::ULong index_to_id(CORBA::ULong index) const
+  {
+    return index;
+  }
+
+  CORBA::ULong id_to_index(CORBA::ULong id) const
+  {
+    return id;
+  }
+
   bool check_index_from_id(TypeKind tk, DDS::MemberId id, CORBA::ULong bound) const;
   static bool is_valid_discriminator_type(TypeKind tk);
   bool is_default_member_selected(CORBA::Long disc_val, DDS::MemberId default_id) const;
-  bool read_discriminator(CORBA::Long& disc_val) const;
-  DDS::MemberId find_selected_member() const;
+  bool read_discriminator(CORBA::Long& disc_val);
   bool validate_discriminator(CORBA::Long disc_val, const DDS::MemberDescriptor_var& md) const;
 
-  bool set_complex_to_struct(DDS::MemberId id, DDS::DynamicData_var value);
-  bool set_complex_to_union(DDS::MemberId id, DDS::DynamicData_var value,
-                            const DDS::TypeDescriptor_var& descriptor);
-  bool set_complex_to_collection(DDS::MemberId id, DDS::DynamicData_var value, TypeKind tk);
-  bool validate_member_id_collection(const DDS::TypeDescriptor_var& descriptor,
-                                     DDS::MemberId id, TypeKind collection_tk) const;
+  DDS::ReturnCode_t set_complex_to_struct(DDS::MemberId id, DDS::DynamicData_var value);
+  DDS::ReturnCode_t set_complex_to_union(DDS::MemberId id, DDS::DynamicData_var value);
+  DDS::ReturnCode_t set_complex_to_collection(DDS::MemberId id, DDS::DynamicData_var value);
 
   DDS::ReturnCode_t clear_value_i(DDS::MemberId id, const DDS::DynamicType_var& member_type);
 
@@ -378,38 +388,82 @@ private:
   bool insert_sequence(DDS::MemberId id, const SequenceType& value);
 
   template<TypeKind ElementTypeKind>
-  bool check_seqmem_in_struct_and_union(DDS::MemberId id, TypeKind enum_or_bitmask,
-                                        LBound lower, LBound upper) const;
-  template<TypeKind ElementTypeKind>
-  bool check_seqmem_in_sequence_and_array(DDS::MemberId id, CORBA::ULong bound,
-                                          TypeKind enum_or_bitmask, LBound lower, LBound upper) const;
+  bool check_seqmem_in_struct_and_union(DDS::MemberId id, DDS::MemberDescriptor_var& md) const;
 
   template<TypeKind ElementTypeKind, typename SequenceType>
-  bool set_values_to_struct(DDS::MemberId id, const SequenceType& value,
-                            TypeKind enum_or_bitmask, LBound lower, LBound upper);
+  bool set_values_to_struct(DDS::MemberId id, const SequenceType& value);
 
   template<TypeKind ElementTypeKind, typename SequenceType>
-  bool set_values_to_union(DDS::MemberId id, const SequenceType& value,
-                           TypeKind enum_or_bitmask, LBound lower, LBound upper);
+  bool set_values_to_union(DDS::MemberId id, const SequenceType& value);
 
   template<TypeKind ElementTypeKind, typename SequenceType>
-  bool set_values_to_sequence(DDS::MemberId id, const SequenceType& value,
-                              TypeKind enum_or_bitmask, LBound lower, LBound upper);
+  bool set_values_to_collection(DDS::MemberId id, const SequenceType& value);
 
   template<TypeKind ElementTypeKind, typename SequenceType>
-  bool set_values_to_array(DDS::MemberId id, const SequenceType& value,
-                           TypeKind enum_or_bitmask, LBound lower, LBound upper);
-
-  template<TypeKind ElementTypeKind, typename SequenceType>
-  DDS::ReturnCode_t set_sequence_values(DDS::MemberId id, const SequenceType& value,
-                                        TypeKind enum_or_bitmask = TK_NONE,
-                                        LBound lower = 0, LBound upper = 0);
+  DDS::ReturnCode_t set_sequence_values(DDS::MemberId id, const SequenceType& value);
 
   template<TypeKind ValueTypeKind, typename ValueType>
   DDS::ReturnCode_t get_single_value(ValueType& value, DDS::MemberId id);
 
+  void set_default_basic_value(CORBA::Long& value) const;
+  void set_default_basic_value(CORBA::ULong& value) const;
+  void set_default_basic_value(ACE_OutputCDR::from_int8& value) const;
+  void set_default_basic_value(ACE_OutputCDR::from_uint8& value) const;
+  void set_default_basic_value(CORBA::Short& value) const;
+  void set_default_basic_value(CORBA::UShort& value) const;
+  void set_default_basic_value(CORBA::LongLong& value) const;
+  void set_default_basic_value(CORBA::ULongLong& value) const;
+  void set_default_basic_value(CORBA::Float& value) const;
+  void set_default_basic_value(CORBA::Double& value) const;
+  void set_default_basic_value(CORBA::LongDouble& value) const;
+  void set_default_basic_value(ACE_OutputCDR::from_char& value) const;
+  void set_default_basic_value(ACE_OutputCDR::from_octet& value) const;
+  void set_default_basic_value(const char*& value) const;
+  void set_default_basic_value(char*& value) const;
+  void set_default_basic_value(ACE_OutputCDR::from_boolean& value) const;
+#ifdef DDS_HAS_WCHAR
+  void set_default_basic_value(ACE_OutputCDR::from_wchar& value) const;
+  void set_default_basic_value(const CORBA::WChar*& value) const;
+  void set_default_basic_value(CORBA::WChar*& value) const;
+#endif
+
+  bool set_default_enum_value(const DDS::DynamicType_var& dt, CORBA::Long& value) const;
+
+  template<typename ElementType, typename CollectionType>
+  bool set_default_enum_values(CollectionType& collection,
+                               const DDS::DynamicType_var& enum_type) const;
+
+  void set_default_bitmask_value(ACE_OutputCDR::from_uint8& value) const;
+  void set_default_bitmask_value(CORBA::UShort& value) const;
+  void set_default_bitmask_value(CORBA::ULong& value) const;
+  void set_default_bitmask_value(CORBA::ULongLong& value) const;
+
+  template<typename Type>
+  void set_default_bitmask_value(Type& value) const;
+
+  template<typename CollectionType>
+  void set_default_bitmask_values(CollectionType& col) const;
+
+  void set_default_primitive_values(DDS::Int8Seq& collection) const;
+  void set_default_primitive_values(DDS::UInt8Seq& collection) const;
+  void set_default_primitive_values(DDS::CharSeq& collection) const;
+  void set_default_primitive_values(DDS::ByteSeq& collection) const;
+  void set_default_primitive_values(DDS::BooleanSeq& collection) const;
+#ifdef DDS_HAS_WCHAR
+  void set_default_primitive_values(DDS::WcharSeq& collection) const;
+#endif
+
+  template<typename CollectionType>
+  void set_default_primitive_values(CollectionType& collection) const;
+
+  bool set_default_discriminator_value(CORBA::Long& value,
+                                       const DDS::DynamicType_var& disc_type) const;
+
+  typedef OPENDDS_VECTOR(CORBA::ULong) IndexToIdMap;
+
   // Contain data for an instance of a basic type.
   struct SingleValue {
+    SingleValue();
     SingleValue(CORBA::Long int32);
     SingleValue(CORBA::ULong uint32);
     SingleValue(ACE_OutputCDR::from_int8 from_int8);
@@ -430,6 +484,8 @@ private:
     SingleValue(const CORBA::WChar* wstr);
 #endif
     SingleValue(const SingleValue& other);
+    SingleValue& operator=(const SingleValue& other);
+    void copy(const SingleValue& other);
 
     ~SingleValue();
 
@@ -466,9 +522,6 @@ private:
       const CORBA::WChar* wstr_;
 #endif
     };
-
-  private:
-    SingleValue& operator=(const SingleValue&); // = delete
   };
 
   struct SequenceValue {
@@ -527,24 +580,26 @@ private:
     SequenceValue& operator=(const SequenceValue& rhs);
   };
 
-  typedef OPENDDS_VECTOR(CORBA::ULong) IndexToIdMap;
+  typedef OPENDDS_MAP(DDS::MemberId, SingleValue)::const_iterator const_single_iterator;
+  typedef OPENDDS_MAP(DDS::MemberId, SequenceValue)::const_iterator const_sequence_iterator;
+  typedef OPENDDS_MAP(DDS::MemberId, DDS::DynamicData_var)::const_iterator const_complex_iterator;
 
   // Container for all data written to this DynamicData object.
   // At anytime, there can be at most 1 entry for any given MemberId in all maps.
   // That is, each member is stored in at most 1 map.
   struct DataContainer {
-    typedef OPENDDS_MAP(DDS::MemberId, SingleValue)::const_iterator const_single_iterator;
-    typedef OPENDDS_MAP(DDS::MemberId, SequenceValue)::const_iterator const_sequence_iterator;
-    typedef OPENDDS_MAP(DDS::MemberId, DDS::DynamicData_var)::const_iterator const_complex_iterator;
-
     DataContainer(const DDS::DynamicType_var& type, const DynamicDataImpl* data)
-      : type_(type), data_(data) {}
+      : type_(type)
+      , type_desc_(data->type_desc_)
+      , data_(data)
+    {}
 
     DataContainer(const DataContainer& other, const DynamicDataImpl* data)
       : single_map_(other.single_map_)
       , sequence_map_(other.sequence_map_)
       , complex_map_(other.complex_map_)
       , type_(data->type_)
+      , type_desc_(data->type_desc_)
       , data_(data)
     {}
 
@@ -566,470 +621,83 @@ private:
     // Assuming at least 1 sequence is stored.
     bool get_largest_index_basic_sequence(CORBA::ULong& index) const;
 
-    bool serialize_single_value(DCPS::Serializer& ser, const SingleValue& sv) const;
-
-    template<typename PrimitiveType>
-    bool serialize_primitive_value(DCPS::Serializer& ser, PrimitiveType default_value) const;
-    bool serialized_size_enum(const DCPS::Encoding& encoding,
-                              size_t& size, const DDS::DynamicType_var& enum_type) const;
-    bool serialize_enum_default_value(DCPS::Serializer& ser,
-                                      const DDS::DynamicType_var& enum_type) const;
-    bool serialize_enum_value(DCPS::Serializer& ser) const;
-    bool serialized_size_bitmask(const DCPS::Encoding& encoding,
-                                 size_t& size, const DDS::DynamicType_var& bitmask_type) const;
-    bool serialize_bitmask_default_value(DCPS::Serializer& ser,
-                                         const DDS::DynamicType_var& bitmask_type) const;
-    bool serialize_bitmask_value(DCPS::Serializer& ser) const;
-    bool reconstruct_string_value(CORBA::Char* str) const;
-    bool serialized_size_string(const DCPS::Encoding& encoding, size_t& size) const;
-    bool serialize_string_value(DCPS::Serializer& ser) const;
-    bool reconstruct_wstring_value(CORBA::WChar* wstr) const;
-    bool serialized_size_wstring(const DCPS::Encoding& encoding, size_t& size) const;
-    bool serialize_wstring_value(DCPS::Serializer& ser) const;
-    void serialized_size_primitive_sequence(const DCPS::Encoding& encoding, size_t& size,
-                                            TypeKind elem_tk, CORBA::ULong length) const;
-
-    void set_default_basic_value(CORBA::Long& value) const;
-    void set_default_basic_value(CORBA::ULong& value) const;
-    void set_default_basic_value(ACE_OutputCDR::from_int8& value) const;
-    void set_default_basic_value(ACE_OutputCDR::from_uint8& value) const;
-    void set_default_basic_value(CORBA::Short& value) const;
-    void set_default_basic_value(CORBA::UShort& value) const;
-    void set_default_basic_value(CORBA::LongLong& value) const;
-    void set_default_basic_value(CORBA::ULongLong& value) const;
-    void set_default_basic_value(CORBA::Float& value) const;
-    void set_default_basic_value(CORBA::Double& value) const;
-    void set_default_basic_value(CORBA::LongDouble& value) const;
-    void set_default_basic_value(ACE_OutputCDR::from_char& value) const;
-    void set_default_basic_value(ACE_OutputCDR::from_octet& value) const;
-    void set_default_basic_value(const char*& value) const;
-    void set_default_basic_value(char*& value) const;
-    void set_default_basic_value(ACE_OutputCDR::from_boolean& value) const;
-#ifdef DDS_HAS_WCHAR
-    void set_default_basic_value(ACE_OutputCDR::from_wchar& value) const;
-    void set_default_basic_value(const CORBA::WChar*& value) const;
-    void set_default_basic_value(CORBA::WChar*& value) const;
-#endif
-
-    bool set_default_enum_value(const DDS::DynamicType_var& dt, CORBA::Long& value) const;
-
-    void set_default_bitmask_value(ACE_OutputCDR::from_uint8& value) const;
-    void set_default_bitmask_value(CORBA::UShort& value) const;
-    void set_default_bitmask_value(CORBA::ULong& value) const;
-    void set_default_bitmask_value(CORBA::ULongLong& value) const;
-
-    template<typename Type>
-    void set_default_bitmask_value(Type& value) const;
-
-    void set_default_primitive_values(DDS::Int8Seq& collection) const;
-    void set_default_primitive_values(DDS::UInt8Seq& collection) const;
-    void set_default_primitive_values(DDS::CharSeq& collection) const;
-    void set_default_primitive_values(DDS::ByteSeq& collection) const;
-    void set_default_primitive_values(DDS::BooleanSeq& collection) const;
-#ifdef DDS_HAS_WCHAR
-    void set_default_primitive_values(DDS::WcharSeq& collection) const;
-#endif
-
-    template<typename CollectionType>
-    void set_default_primitive_values(CollectionType& collection) const;
-
-    template<typename ElementType, typename CollectionType>
-    bool set_primitive_values(CollectionType& collection, CORBA::ULong bound,
-                              const ElementType& elem_tag) const;
-
-    template<typename ElementType, typename CollectionType>
-    bool reconstruct_primitive_collection(CollectionType& collection,
-      CORBA::ULong size, CORBA::ULong bound, const ElementType& elem_tag) const;
-
-    bool serialize_primitive_sequence(DCPS::Serializer& ser, TypeKind elem_tk,
-                                      CORBA::ULong size, CORBA::ULong bound) const;
-
-    void serialized_size_string_common(const DCPS::Encoding& encoding, size_t& size,
-                                       const char* str) const;
-#ifdef DDS_HAS_WCHAR
-    void serialized_size_string_common(const DCPS::Encoding& encoding, size_t& size,
-                                       const CORBA::WChar* wstr) const;
-#endif
-    void serialized_size_string_common(const DCPS::Encoding& encoding, size_t& size,
-                                       const SingleValue& sv) const;
-
-    template<typename StringType>
-    bool serialized_size_generic_string_collection(const DCPS::Encoding& encoding, size_t& size,
-                                                   const IndexToIdMap& index_to_id) const;
-    template<typename StringType>
-    bool serialized_size_generic_string_sequence(const DCPS::Encoding& encoding, size_t& size,
-                                                 const IndexToIdMap& index_to_id) const;
-    template<typename StringType>
-    bool serialize_generic_string_collection(DCPS::Serializer& ser,
-                                             const IndexToIdMap& index_to_id) const;
-    template<typename StringType>
-    bool serialize_generic_string_sequence(DCPS::Serializer& ser, CORBA::ULong length,
-                                           CORBA::ULong bound) const;
-
-    template<typename ElementType, typename CollectionType>
-    bool set_default_enum_values(CollectionType& collection,
-                                 const DDS::DynamicType_var& enum_type) const;
-
-    template<typename ElementType, typename WrapElementType, typename CollectionType>
-    bool reconstruct_enum_collection(CollectionType& collection, CORBA::ULong size,
-      CORBA::ULong bound, const DDS::DynamicType_var& enum_type, const WrapElementType& elem_tag) const;
-
-    void serialized_size_enum_sequence_as_int8s(const DCPS::Encoding& encoding, size_t& size,
-                                                CORBA::ULong length) const;
-    void serialized_size_enum_sequence(const DCPS::Encoding& encoding, size_t& size,
-                                       const DDS::Int8Seq& seq) const;
-    bool serialize_enum_sequence_as_ints_i(DCPS::Serializer& ser, const DDS::Int8Seq& enumseq) const;
-    bool serialize_enum_sequence_as_int8s(DCPS::Serializer& ser, CORBA::ULong size,
-      CORBA::ULong bound, const DDS::DynamicType_var& enum_type) const;
-    void serialized_size_enum_sequence_as_int16s(const DCPS::Encoding& encoding, size_t& size,
-                                                 CORBA::ULong length) const;
-    void serialized_size_enum_sequence(const DCPS::Encoding& encoding, size_t& size,
-                                       const DDS::Int16Seq& seq) const;
-    bool serialize_enum_sequence_as_ints_i(DCPS::Serializer& ser, const DDS::Int16Seq& enumseq) const;
-    bool serialize_enum_sequence_as_int16s(DCPS::Serializer& ser, CORBA::ULong size,
-      CORBA::ULong bound, const DDS::DynamicType_var& enum_type) const;
-    void serialized_size_enum_sequence_as_int32s(const DCPS::Encoding& encoding, size_t& size,
-                                                 CORBA::ULong length) const;
-    void serialized_size_enum_sequence(const DCPS::Encoding& encoding, size_t& size,
-                                       const DDS::Int32Seq& seq) const;
-    bool serialize_enum_sequence_as_ints_i(DCPS::Serializer& ser, const DDS::Int32Seq& enumseq) const;
-    bool serialize_enum_sequence_as_int32s(DCPS::Serializer& ser, CORBA::ULong size,
-      CORBA::ULong bound, const DDS::DynamicType_var& enum_type) const;
-
-    void serialized_size_enum_sequence(const DCPS::Encoding& encoding, size_t& size,
-                                       CORBA::ULong length, CORBA::ULong bitbound) const;
-    bool serialize_enum_sequence(DCPS::Serializer& ser, CORBA::ULong size, CORBA::ULong bitbound,
-                                 CORBA::ULong seqbound, const DDS::DynamicType_var& enum_type) const;
-
-    template<typename CollectionType>
-    void set_default_bitmask_values(CollectionType& col) const;
-
-    template<typename WrapElementType, typename CollectionType>
-    bool reconstruct_bitmask_collection(CollectionType& collection, CORBA::ULong size,
-                                        CORBA::ULong bound, const WrapElementType& elem_tag) const;
-    void serialized_size_bitmask_sequence_as_uint8s(const DCPS::Encoding& encoding,
-                                                    size_t& size, CORBA::ULong length) const;
-    void serialized_size_bitmask_sequence(const DCPS::Encoding& encoding, size_t& size,
-                                          const DDS::UInt8Seq& seq) const;
-    bool serialize_bitmask_sequence_as_uints_i(DCPS::Serializer& ser,
-                                               const DDS::UInt8Seq& bitmask_seq) const;
-    bool serialize_bitmask_sequence_as_uint8s(DCPS::Serializer& ser, CORBA::ULong size,
-                                              CORBA::ULong bound) const;
-    void serialized_size_bitmask_sequence_as_uint16s(const DCPS::Encoding& encoding, size_t& size,
-                                                     CORBA::ULong length) const;
-    void serialized_size_bitmask_sequence(const DCPS::Encoding& encoding, size_t& size,
-                                          const DDS::UInt16Seq& seq) const;
-    bool serialize_bitmask_sequence_as_uints_i(DCPS::Serializer& ser,
-                                               const DDS::UInt16Seq& bitmask_seq) const;
-    bool serialize_bitmask_sequence_as_uint16s(DCPS::Serializer& ser, CORBA::ULong size,
-                                               CORBA::ULong bound) const;
-    void serialized_size_bitmask_sequence_as_uint32s(const DCPS::Encoding& encoding, size_t& size,
-                                                     CORBA::ULong length) const;
-    void serialized_size_bitmask_sequence(const DCPS::Encoding& encoding, size_t& size,
-                                          const DDS::UInt32Seq& seq) const;
-    bool serialize_bitmask_sequence_as_uints_i(DCPS::Serializer& ser,
-                                               const DDS::UInt32Seq& bitmask_seq) const;
-    bool serialize_bitmask_sequence_as_uint32s(DCPS::Serializer& ser, CORBA::ULong size,
-                                               CORBA::ULong bound) const;
-    void serialized_size_bitmask_sequence_as_uint64s(const DCPS::Encoding& encoding, size_t& size,
-                                                     CORBA::ULong length) const;
-    void serialized_size_bitmask_sequence(const DCPS::Encoding& encoding, size_t& size,
-                                          const DDS::UInt64Seq& seq) const;
-    bool serialize_bitmask_sequence_as_uints_i(DCPS::Serializer& ser,
-                                               const DDS::UInt64Seq& bitmask_seq) const;
-    bool serialize_bitmask_sequence_as_uint64s(DCPS::Serializer& ser, CORBA::ULong size,
-                                               CORBA::ULong bound) const;
-    void serialized_size_bitmask_sequence(const DCPS::Encoding& encoding, size_t& size,
-                                          CORBA::ULong length, CORBA::ULong bitbound) const;
-    bool serialize_bitmask_sequence(DCPS::Serializer& ser, CORBA::ULong size,
-                                    CORBA::ULong bitbound, CORBA::ULong seqbound) const;
-
-    bool serialized_size_sequence_value(const DCPS::Encoding& encoding, size_t& size,
-                                        const SequenceValue& sv) const;
-    bool serialize_sequence_value(DCPS::Serializer& ser, const SequenceValue& sv) const;
-    bool get_index_to_id_map(IndexToIdMap& index_to_id, CORBA::ULong bound) const;
-    bool serialized_size_complex_member_i(const DCPS::Encoding& encoding, size_t& size,
-                                          DDS::MemberId id, DCPS::Sample::Extent ext) const;
-
-    template<typename SequenceType>
-    bool serialized_size_nested_basic_sequences(const DCPS::Encoding& encoding, size_t& size,
-      const IndexToIdMap& index_to_id, SequenceType protoseq) const;
-
-    template<typename SequenceType>
-    bool serialized_size_nesting_basic_sequence(const DCPS::Encoding& encoding, size_t& size,
-      const IndexToIdMap& index_to_id, SequenceType protoseq) const;
-
-    bool serialize_complex_member_i(DCPS::Serializer& ser, DDS::MemberId id, DCPS::Sample::Extent ext) const;
-
-    template<typename SequenceType>
-    bool serialize_nested_basic_sequences(DCPS::Serializer& ser, const IndexToIdMap& index_to_id,
-                                          SequenceType protoseq) const;
-
-    template<typename SequenceType>
-    bool serialize_nesting_basic_sequence_i(DCPS::Serializer& ser, CORBA::ULong size,
-                                            CORBA::ULong bound, SequenceType protoseq) const;
-
-    bool serialized_size_nesting_basic_sequence(const DCPS::Encoding& encoding, size_t& size,
-      TypeKind nested_elem_tk, const IndexToIdMap& index_to_id) const;
-    bool serialize_nesting_basic_sequence(DCPS::Serializer& ser, TypeKind nested_elem_tk,
-                                          CORBA::ULong size, CORBA::ULong bound) const;
-    bool serialized_size_nested_enum_sequences(const DCPS::Encoding& encoding, size_t& size,
-                                               const IndexToIdMap& index_to_id) const;
-    bool serialized_size_nesting_enum_sequence(const DCPS::Encoding& encoding, size_t& size,
-                                               const IndexToIdMap& index_to_id) const;
-    bool serialize_nested_enum_sequences(DCPS::Serializer& ser, const IndexToIdMap& index_to_id) const;
-    bool serialize_nesting_enum_sequence(DCPS::Serializer& ser, CORBA::ULong size,
-                                         CORBA::ULong bound) const;
-    bool serialized_size_nested_bitmask_sequences(const DCPS::Encoding& encoding, size_t& size,
-                                                  const IndexToIdMap& index_to_id) const;
-    bool serialized_size_nesting_bitmask_sequence(const DCPS::Encoding& encoding, size_t& size,
-                                                  const IndexToIdMap& index_to_id) const;
-    bool serialize_nested_bitmask_sequences(DCPS::Serializer& ser,
-                                            const IndexToIdMap& index_to_id) const;
-    bool serialize_nesting_bitmask_sequence(DCPS::Serializer& ser, CORBA::ULong size,
-                                            CORBA::ULong bound) const;
-    bool serialized_size_complex_member(const DCPS::Encoding& encoding, size_t& size,
-                                        DDS::MemberId id, const DDS::DynamicType_var& elem_type,
-                                        DCPS::Sample::Extent ext) const;
-    bool serialized_size_complex_sequence(const DCPS::Encoding& encoding, size_t& size,
-      const IndexToIdMap& index_to_id, const DDS::DynamicType_var& elem_type, DCPS::Sample::Extent ext) const;
-    bool serialize_complex_sequence_i(DCPS::Serializer& ser, const IndexToIdMap& index_to_id,
-                                      const DDS::DynamicType_var& elem_type, DCPS::Sample::Extent ext) const;
-    bool serialize_complex_sequence(DCPS::Serializer& ser, CORBA::ULong size, CORBA::ULong bound,
-                                    const DDS::DynamicType_var& elem_type, DCPS::Sample::Extent ext) const;
-    bool get_index_to_id_from_complex(IndexToIdMap& index_to_id, CORBA::ULong bound) const;
-    bool serialized_size_sequence(const DCPS::Encoding& encoding, size_t& size, DCPS::Sample::Extent ext) const;
-    bool serialize_sequence(DCPS::Serializer& ser, DCPS::Sample::Extent ext) const;
-
-    // Serialize array
-    void serialized_size_primitive_array(const DCPS::Encoding& encoding, size_t& size,
-                                         TypeKind elem_tk, CORBA::ULong length) const;
-    bool serialize_primitive_array(DCPS::Serializer& ser, TypeKind elem_tk, CORBA::ULong length) const;
-
-    template<typename StringType>
-    bool serialized_size_generic_string_array(const DCPS::Encoding& encoding, size_t& size,
-                                              const IndexToIdMap& index_to_id) const;
-    template<typename StringType>
-    bool serialize_generic_string_array(DCPS::Serializer& ser, CORBA::ULong length) const;
-    void serialized_size_enum_array_as_int8s(const DCPS::Encoding& encoding, size_t& size,
-                                             CORBA::ULong length) const;
-    bool serialize_enum_array_as_ints_i(DCPS::Serializer& ser, const DDS::Int8Seq& enumarr) const;
-    bool serialize_enum_array_as_int8s(DCPS::Serializer& ser, CORBA::ULong length,
-                                       const DDS::DynamicType_var& enum_type) const;
-    void serialized_size_enum_array_as_int16s(const DCPS::Encoding& encoding, size_t& size,
-                                              CORBA::ULong length) const;
-    bool serialize_enum_array_as_ints_i(DCPS::Serializer& ser, const DDS::Int16Seq& enumarr) const;
-    bool serialize_enum_array_as_int16s(DCPS::Serializer& ser, CORBA::ULong length,
-                                        const DDS::DynamicType_var& enum_type) const;
-    void serialized_size_enum_array_as_int32s(const DCPS::Encoding& encoding, size_t& size,
-                                              CORBA::ULong length) const;
-    bool serialize_enum_array_as_ints_i(DCPS::Serializer& ser, const DDS::Int32Seq& enumarr) const;
-    bool serialize_enum_array_as_int32s(DCPS::Serializer& ser, CORBA::ULong length,
-                                        const DDS::DynamicType_var& enum_type) const;
-    void serialized_size_enum_array(const DCPS::Encoding& encoding, size_t& size,
-                                    CORBA::ULong length, CORBA::ULong bitbound) const;
-    bool serialize_enum_array(DCPS::Serializer& ser, CORBA::ULong bitbound, CORBA::ULong length,
-                              const DDS::DynamicType_var& enum_type) const;
-
-    void serialized_size_bitmask_array_as_uint8s(const DCPS::Encoding& encoding, size_t& size,
-                                                 CORBA::ULong length) const;
-    bool serialize_bitmask_array_as_uints_i(DCPS::Serializer& ser,
-                                            const DDS::UInt8Seq& bitmask_arr) const;
-    bool serialize_bitmask_array_as_uint8s(DCPS::Serializer& ser, CORBA::ULong length) const;
-    void serialized_size_bitmask_array_as_uint16s(const DCPS::Encoding& encoding, size_t& size,
-                                                  CORBA::ULong length) const;
-    bool serialize_bitmask_array_as_uints_i(DCPS::Serializer& ser,
-                                            const DDS::UInt16Seq& bitmask_arr) const;
-    bool serialize_bitmask_array_as_uint16s(DCPS::Serializer& ser, CORBA::ULong length) const;
-    void serialized_size_bitmask_array_as_uint32s(const DCPS::Encoding& encoding, size_t& size,
-                                                  CORBA::ULong length) const;
-    bool serialize_bitmask_array_as_uints_i(DCPS::Serializer& ser,
-                                            const DDS::UInt32Seq& bitmask_arr) const;
-    bool serialize_bitmask_array_as_uint32s(DCPS::Serializer& ser, CORBA::ULong length) const;
-    void serialized_size_bitmask_array_as_uint64s(const DCPS::Encoding& encoding, size_t& size,
-                                                  CORBA::ULong length) const;
-    bool serialize_bitmask_array_as_uints_i(DCPS::Serializer& ser,
-                                            const DDS::UInt64Seq& bitmask_arr) const;
-    bool serialize_bitmask_array_as_uint64s(DCPS::Serializer& ser, CORBA::ULong length) const;
-    void serialized_size_bitmask_array(const DCPS::Encoding& encoding, size_t& size,
-                                       CORBA::ULong length, CORBA::ULong bitbound) const;
-    bool serialize_bitmask_array(DCPS::Serializer& ser, CORBA::ULong bitbound,
-                                 CORBA::ULong length) const;
-
-    template<typename SequenceType>
-    bool serialized_size_nesting_basic_array(const DCPS::Encoding& encoding, size_t& size,
-      const IndexToIdMap& index_to_id, SequenceType protoseq) const;
-
-    template<typename SequenceType>
-    bool serialize_nesting_basic_array_i(DCPS::Serializer& ser, CORBA::ULong length,
-                                         SequenceType protoseq) const;
-    bool serialized_size_nesting_basic_array(const DCPS::Encoding& encoding, size_t& size,
-      TypeKind nested_elem_tk, const IndexToIdMap& index_to_id) const;
-    bool serialize_nesting_basic_array(DCPS::Serializer& ser, TypeKind nested_elem_tk,
-                                       CORBA::ULong length) const;
-    bool serialized_size_nesting_enum_array(const DCPS::Encoding& encoding, size_t& size,
-                                            const IndexToIdMap& index_to_id) const;
-    bool serialize_nesting_enum_array(DCPS::Serializer& ser, CORBA::ULong length) const;
-    bool serialized_size_nesting_bitmask_array(const DCPS::Encoding& encoding, size_t& size,
-                                               const IndexToIdMap& index_to_id) const;
-    bool serialize_nesting_bitmask_array(DCPS::Serializer& ser, CORBA::ULong length) const;
-    bool serialized_size_complex_array(const DCPS::Encoding& encoding, size_t& size,
-      const IndexToIdMap& index_to_id, const DDS::DynamicType_var& elem_type, DCPS::Sample::Extent ext) const;
-    bool serialize_complex_array(DCPS::Serializer& ser, CORBA::ULong length,
-                                 const DDS::DynamicType_var& elem_type, DCPS::Sample::Extent ext) const;
-    bool serialized_size_array(const DCPS::Encoding& encoding, size_t& size, DCPS::Sample::Extent ext) const;
-    bool serialize_array(DCPS::Serializer& ser, DCPS::Sample::Extent ext) const;
-
-    bool serialized_size_primitive_member(const DCPS::Encoding& encoding, size_t& size,
-                                          TypeKind member_tk) const;
-
-    bool serialized_size_basic_member_default_value(const DCPS::Encoding& encoding, size_t& size,
-                                                    TypeKind member_tk) const;
-    bool serialized_size_basic_member(const DCPS::Encoding& encoding, size_t& size,
-                                      TypeKind member_tk, const_single_iterator it) const;
-    bool serialize_basic_member_default_value(DCPS::Serializer& ser, TypeKind member_tk) const;
-
-    bool serialized_size_single_aggregated_member_xcdr2(const DCPS::Encoding& encoding, size_t& size,
-      const_single_iterator it, const DDS::DynamicType_var& member_type, bool optional,
-      DDS::ExtensibilityKind extensibility, size_t& mutable_running_total) const;
-    bool serialize_single_aggregated_member_xcdr2(DCPS::Serializer& ser, const_single_iterator it,
-      const DDS::DynamicType_var& member_type, bool optional, bool must_understand,
-      DDS::ExtensibilityKind extensibility) const;
-    bool serialized_size_complex_aggregated_member_xcdr2_default(const DCPS::Encoding& encoding,
-      size_t& size, const DDS::DynamicType_var& member_type, bool optional,
-      DDS::ExtensibilityKind extensibility, size_t& mutable_running_total, DCPS::Sample::Extent ext) const;
-    bool serialize_complex_aggregated_member_xcdr2_default(DCPS::Serializer& ser, DDS::MemberId id,
-      const DDS::DynamicType_var& member_type, bool optional, bool must_understand,
-      DDS::ExtensibilityKind extensibility, DCPS::Sample::Extent ext) const;
-    bool serialized_size_complex_aggregated_member_xcdr2(const DCPS::Encoding& encoding, size_t& size,
-      const_complex_iterator it, bool optional, DDS::ExtensibilityKind extensibility,
-      size_t& mutable_running_total, DCPS::Sample::Extent ext) const;
-    bool serialize_complex_aggregated_member_xcdr2(DCPS::Serializer& ser, const_complex_iterator it,
-      bool optional, bool must_understand, DDS::ExtensibilityKind extensibility, DCPS::Sample::Extent ext) const;
-    bool serialized_size_basic_struct_member_xcdr2(const DCPS::Encoding& encoding, size_t& size,
-      DDS::MemberId id, const DDS::DynamicType_var& member_type, bool optional,
-      DDS::ExtensibilityKind extensibility, size_t& mutable_running_total) const;
-    bool serialize_basic_struct_member_xcdr2(DCPS::Serializer& ser, DDS::MemberId id,
-      const DDS::DynamicType_var& member_type, bool optional, bool must_understand,
-      DDS::ExtensibilityKind extensibility) const;
-
-    void serialized_size_sequence_member_default_value(const DCPS::Encoding& encoding,
-                                                       size_t& size, TypeKind elem_tk) const;
-    bool serialize_sequence_member_default_value(DCPS::Serializer& ser, TypeKind elem_tk) const;
-
-    bool serialized_size_basic_sequence(const DCPS::Encoding& encoding, size_t& size,
-                                        const_sequence_iterator it) const;
-    bool serialize_basic_sequence(DCPS::Serializer& ser, const_sequence_iterator it) const;
-    bool serialized_size_enum_sequence(const DCPS::Encoding& encoding, size_t& size,
-                                       const_sequence_iterator it) const;
-    bool serialize_enum_sequence(DCPS::Serializer& ser, const_sequence_iterator it) const;
-    bool serialized_size_bitmask_sequence(const DCPS::Encoding& encoding, size_t& size,
-                                          const_sequence_iterator it) const;
-    bool serialize_bitmask_sequence(DCPS::Serializer& ser, const_sequence_iterator it) const;
-    void serialized_size_sequence_aggregated_member_xcdr2(const DCPS::Encoding& encoding,
-      size_t& size, const_sequence_iterator it, TypeKind elem_tk, bool optional,
-      DDS::ExtensibilityKind extensibility, size_t& mutable_running_total) const;
-    bool serialize_sequence_aggregated_member_xcdr2(DCPS::Serializer& ser, const_sequence_iterator it,
-      TypeKind elem_tk, bool optional, bool must_understand, DDS::ExtensibilityKind extensibility) const;
-    bool serialized_size_sequence_struct_member_xcdr2(const DCPS::Encoding& encoding, size_t& size,
-      DDS::MemberId id, TypeKind elem_tk, bool optional,
-      DDS::ExtensibilityKind extensibility, size_t& mutable_running_total, DCPS::Sample::Extent ext) const;
-    bool serialize_sequence_struct_member_xcdr2(DCPS::Serializer& ser, DDS::MemberId id,
-      TypeKind elem_tk, bool optional, bool must_understand, DDS::ExtensibilityKind extensibility, DCPS::Sample::Extent ext) const;
-    bool serialized_size_structure_xcdr2(const DCPS::Encoding& encoding, size_t& size, DCPS::Sample::Extent ext) const;
-    bool serialize_structure_xcdr2(DCPS::Serializer& ser, DCPS::Sample::Extent ext) const;
-    bool serialized_size_structure_xcdr1(const DCPS::Encoding& encoding, size_t& size, DCPS::Sample::Extent ext) const;
-    bool serialize_structure_xcdr1(DCPS::Serializer& ser, DCPS::Sample::Extent ext) const;
-    bool serialized_size_structure(const DCPS::Encoding& encoding, size_t& size,
-                                   DCPS::Sample::Extent ext) const;
-    bool serialize_structure(DCPS::Serializer& ser, DCPS::Sample::Extent) const;
-
-    bool set_default_discriminator_value(CORBA::Long& value,
-                                         const DDS::DynamicType_var& disc_type) const;
-    bool get_discriminator_value(CORBA::Long& value, const_single_iterator single_it,
-      const_complex_iterator complex_it, const DDS::DynamicType_var& disc_type) const;
-    bool serialized_size_discriminator_member_xcdr2(const DCPS::Encoding& encoding, size_t& size,
-      const DDS::DynamicType_var& disc_type, DDS::ExtensibilityKind extensibility,
-      size_t& mutable_running_total) const;
-    bool serialize_discriminator_member_xcdr2(DCPS::Serializer& ser, CORBA::Long value,
-      const DDS::DynamicType_var& disc_type, DDS::ExtensibilityKind extensibility) const;
-    bool serialized_size_selected_member_xcdr2(const DCPS::Encoding& encoding, size_t& size,
-      DDS::MemberId selected_id, DDS::ExtensibilityKind extensibility,
-      size_t& mutable_running_total) const;
-    bool serialize_selected_member_xcdr2(DCPS::Serializer& ser, DDS::MemberId selected_id,
-                                         DDS::ExtensibilityKind extensibility) const;
-    bool select_union_member(CORBA::Long disc_value, bool& found_selected_member,
-                             DDS::MemberDescriptor_var& selected_md) const;
-    bool serialized_size_union_xcdr2(const DCPS::Encoding& encoding, size_t& size, DCPS::Sample::Extent ext) const;
-    bool serialize_union_xcdr2(DCPS::Serializer& ser, DCPS::Sample::Extent ext) const;
-    bool serialized_size_union_xcdr1(const DCPS::Encoding& encoding, size_t& size, DCPS::Sample::Extent ext) const;
-    bool serialize_union_xcdr1(DCPS::Serializer& ser, DCPS::Sample::Extent ext) const;
-    bool serialized_size_union(const DCPS::Encoding& encoding, size_t& size,
-                               DCPS::Sample::Extent ext) const;
-    bool serialize_union(DCPS::Serializer& ser, DCPS::Sample::Extent ext) const;
-
     // Internal data
     OPENDDS_MAP(DDS::MemberId, SingleValue) single_map_;
     OPENDDS_MAP(DDS::MemberId, SequenceValue) sequence_map_;
     OPENDDS_MAP(DDS::MemberId, DDS::DynamicData_var) complex_map_;
 
     const DDS::DynamicType_var& type_;
+    const DDS::TypeDescriptor_var& type_desc_;
     const DynamicDataImpl* data_;
   };
 
   // Copy a value of a basic member from single map to a DynamicData object.
-  bool move_single_to_complex(const DataContainer::const_single_iterator& it,
-                              DynamicDataImpl* data);
-  bool move_single_to_complex_i(const DataContainer::const_single_iterator& it,
-                                DynamicDataImpl* data, const TypeKind treat_as);
+  bool move_single_to_complex(const const_single_iterator& it, DynamicDataImpl* data);
+  bool move_single_to_complex_i(const const_single_iterator& it, DynamicDataImpl* data, TypeKind treat_as);
 
   template<typename SequenceType>
-  void move_sequence_helper(const DataContainer::const_sequence_iterator& it,
-                            DynamicDataImpl* data);
+  void move_sequence_helper(const const_sequence_iterator& it, DynamicDataImpl* data);
 
   // Copy values of a basic sequence member from sequence map to a DynamicData object.
-  bool move_sequence_to_complex(const DataContainer::const_sequence_iterator& it,
-                                DynamicDataImpl* data);
+  bool move_sequence_to_complex(const const_sequence_iterator& it, DynamicDataImpl* data);
+
+  DDS::ReturnCode_t set_member_backing_store(DynamicDataImpl* member_ddi, DDS::MemberId id);
 
   // Indicate whether the value of a member is found in the complex map or
   // one of the other two maps or not found from any map in the container.
   enum FoundStatus { FOUND_IN_COMPLEX_MAP, FOUND_IN_NON_COMPLEX_MAP, NOT_FOUND };
-  bool get_complex_from_aggregated(DDS::DynamicData_var& value, DDS::MemberId id,
-                                   FoundStatus& found_status);
 
-  bool get_complex_from_struct(DDS::DynamicData_ptr& value, DDS::MemberId id);
-  bool write_discriminator_helper(CORBA::Long value, TypeKind treat_as);
-  bool write_discriminator(CORBA::Long value);
-  bool get_complex_from_union(DDS::DynamicData_ptr& value, DDS::MemberId id);
-  bool get_complex_from_collection(DDS::DynamicData_ptr& value, DDS::MemberId id);
+  bool get_complex_from_container(DDS::DynamicData_var& value, DDS::MemberId id,
+                                  FoundStatus& found_status);
+  DDS::ReturnCode_t get_complex_from_aggregated(DDS::DynamicData_var& dd_var, DDS::MemberId id);
+  DDS::ReturnCode_t get_complex_from_struct(DDS::DynamicData_ptr& value, DDS::MemberId id);
+  DDS::ReturnCode_t get_complex_from_union(DDS::DynamicData_ptr& value, DDS::MemberId id);
+  DDS::ReturnCode_t get_complex_from_collection(DDS::DynamicData_ptr& value, DDS::MemberId id);
 
-  bool read_discriminator(CORBA::Long& disc_val, const DDS::DynamicType_var& disc_type,
-                          DataContainer::const_single_iterator it) const;
+  bool read_disc_from_single_map(CORBA::Long& disc_val, const DDS::DynamicType_var& disc_type,
+                                 const const_single_iterator& it) const;
+  bool read_disc_from_backing_store(CORBA::Long& disc_val, DDS::MemberId id,
+                                    const DDS::DynamicType_var& disc_type);
 
   // Add a single value for any valid discriminator value that selects the given member
   bool insert_valid_discriminator(DDS::MemberDescriptor* memberSelected);
   bool insert_discriminator(ACE_CDR::Long value);
   void clear_container();
 
+  // Container for data set by the user.
   DataContainer container_;
 
-  bool serialized_size_i(const DCPS::Encoding& encoding, size_t& size, DCPS::Sample::Extent ext) const;
-  bool serialize_i(DCPS::Serializer& ser, DCPS::Sample::Extent ext) const;
+  // Immutable backing store to retrieve data in case the container doesn't have it.
+  // The type associated with the backing store can be different (but assignable to)
+  // the type associated with this object. Reading from the backing store is considered
+  // best effort, that is failure to read from it doesn't cascade to the caller.
+  DDS::DynamicData_var backing_store_;
 
-  friend OpenDDS_Dcps_Export
-  bool DCPS::serialized_size(const DCPS::Encoding& encoding, size_t& size, const DynamicDataImpl& data);
-
-  friend OpenDDS_Dcps_Export
-  bool DCPS::operator<<(DCPS::Serializer& ser, const DynamicDataImpl& data);
-
-  friend OpenDDS_Dcps_Export
-  bool DCPS::serialized_size(const DCPS::Encoding& encoding, size_t& size, const DCPS::KeyOnly<const DynamicDataImpl>& data);
-
-  friend OpenDDS_Dcps_Export
-  bool DCPS::operator<<(DCPS::Serializer& ser, const DCPS::KeyOnly<const DynamicDataImpl>& data);
+  bool reconstruct_string_value(CORBA::Char* str) const;
+  bool reconstruct_wstring_value(CORBA::WChar* wstr) const;
+  bool has_discriminator_value(const_single_iterator& single_it, const_complex_iterator& complex_it) const;
+  bool get_discriminator_value(CORBA::Long& value, const const_single_iterator& single_it,
+    const const_complex_iterator& complex_it, const DDS::DynamicType_var& disc_type);
 };
 
 } // namespace XTypes
+
+namespace DCPS {
+
+OpenDDS_Dcps_Export
+bool serialized_size(const Encoding& encoding, size_t& size, DDS::DynamicData_ptr data);
+
+OpenDDS_Dcps_Export
+bool operator<<(Serializer& ser, DDS::DynamicData_ptr data);
+
+OpenDDS_Dcps_Export
+bool serialized_size(const Encoding& encoding, size_t& size, const KeyOnly<DDS::DynamicData_ptr>& key);
+
+OpenDDS_Dcps_Export
+bool operator<<(Serializer& ser, const KeyOnly<DDS::DynamicData_ptr>& key);
+
+}
+
 } // namespace OpenDDS
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL

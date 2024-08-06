@@ -51,10 +51,10 @@ MinimalMemberDetail::MinimalMemberDetail(const OPENDDS_STRING& name)
 #undef max
 #endif
 
-AppliedBuiltinMemberAnnotations::AppliedBuiltinMemberAnnotations(const Optional<DCPS::String>& a_unit,
-                                                                 const Optional<AnnotationParameterValue>& a_min,
-                                                                 const Optional<AnnotationParameterValue>& a_max,
-                                                                 const Optional<DCPS::String>& a_hash_id)
+AppliedBuiltinMemberAnnotations::AppliedBuiltinMemberAnnotations(const OPENDDS_OPTIONAL_NS::optional<DCPS::String>& a_unit,
+                                                                 const OPENDDS_OPTIONAL_NS::optional<AnnotationParameterValue>& a_min,
+                                                                 const OPENDDS_OPTIONAL_NS::optional<AnnotationParameterValue>& a_max,
+                                                                 const OPENDDS_OPTIONAL_NS::optional<DCPS::String>& a_hash_id)
   : unit(a_unit)
   , min(a_min)
   , max(a_max)
@@ -499,7 +499,7 @@ void compute_dependencies(const TypeMap& type_map,
 }
 
 void compute_dependencies(const TypeMap& type_map,
-                          const Optional<AppliedAnnotationSeq>& ann_seq,
+                          const OPENDDS_OPTIONAL_NS::optional<AppliedAnnotationSeq>& ann_seq,
                           OPENDDS_SET(TypeIdentifier)& dependencies)
 {
   if (ann_seq) {
@@ -1185,6 +1185,68 @@ const char* typekind_to_string(TypeKind tk)
         "passed unknown TypeKind %u\n", tk));
     }
     return "unknown";
+  }
+}
+
+bool is_primitive(TypeKind tk)
+{
+  switch (tk) {
+  case TK_BOOLEAN:
+  case TK_BYTE:
+  case TK_INT8:
+  case TK_UINT8:
+  case TK_INT16:
+  case TK_UINT16:
+  case TK_INT32:
+  case TK_UINT32:
+  case TK_INT64:
+  case TK_UINT64:
+  case TK_FLOAT32:
+  case TK_FLOAT64:
+  case TK_FLOAT128:
+  case TK_CHAR8:
+  case TK_CHAR16:
+    return true;
+  default:
+    return false;
+  }
+}
+
+bool is_scalar(TypeKind tk)
+{
+  return is_primitive(tk) || tk == TK_ENUM;
+}
+
+bool is_basic(TypeKind tk)
+{
+  return is_primitive(tk) || tk == TK_STRING8 || tk == TK_STRING16;
+}
+
+bool is_complex(TypeKind tk)
+{
+  switch (tk) {
+  case TK_ARRAY:
+  case TK_SEQUENCE:
+  case TK_MAP:
+  case TK_STRUCTURE:
+  case TK_UNION:
+  case TK_BITSET:
+    return true;
+  default:
+    return false;
+  }
+}
+
+bool is_sequence_like(TypeKind tk)
+{
+  switch (tk) {
+  case TK_SEQUENCE:
+  case TK_ARRAY:
+  case TK_STRING8:
+  case TK_STRING16:
+    return true;
+  default:
+    return false;
   }
 }
 
@@ -3758,8 +3820,9 @@ bool operator>>(Serializer& strm, XTypes::AnnotationParameterValue& uni)
   case XTypes::TK_STRING16:
 #ifdef DDS_HAS_WCHAR
     return (strm >> Serializer::ToBoundedString<wchar_t>(uni.string16_value(), 128));
-#endif
+#else
     return false;
+#endif
   default:
     return (strm >> uni.extended_value());
   }
@@ -4877,8 +4940,8 @@ bool operator>>(Serializer& strm, XTypes::TypeInformation& stru)
 
   const size_t start_pos = strm.rpos();
 
-  unsigned member_id;
-  size_t field_size;
+  unsigned member_id = 0;
+  size_t field_size = 0;
   while (true) {
 
     if (strm.rpos() - start_pos >= total_size) {

@@ -70,8 +70,7 @@ DisjointSequence::insert_i(const SequenceRange& range,
       SequenceNumber last_gap = gap_iter++->second;
       for (; gap_iter != range_above; ++gap_iter) {
         const SequenceNumber in_range =
-          std::min(gap_iter->first.previous().getValue(),
-                   range.second.getValue());
+          (std::min)(gap_iter->first.previous().getValue(), range.second.getValue());
         gaps->push_back(SequenceRange(++last_gap, in_range));
         last_gap = gap_iter->second;
       }
@@ -193,7 +192,7 @@ DisjointSequence::insert_bitmap_range(RangeSet::Container::iterator& iter,
     ++right;
   }
 
-  const SequenceNumber low = std::min(iter->first, range.first);
+  const SequenceNumber low = (std::min)(iter->first, range.first);
   sequences_.ranges_.erase(iter, right);
 
   iter = sequences_.ranges_.insert(SequenceRange(low, high)).first;
@@ -330,7 +329,7 @@ DisjointSequence::dump() const
 ACE_CDR::ULong
 DisjointSequence::bitmap_num_longs(const SequenceNumber& low, const SequenceNumber& high)
 {
-  return high < low ? 0u : std::min(8u, unsigned((high.getValue() - low.getValue() + 32) / 32));
+  return high < low ? 0u : (std::min)(8u, unsigned((high.getValue() - low.getValue() + 32) / 32));
 }
 
 void

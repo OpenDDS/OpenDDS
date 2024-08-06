@@ -32,8 +32,7 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-/// Convert values to JSON.
-/// Currently, this class does not produce value JSON nor does it adhere to the DDS JSON spec.
+/// Convert JSON to values.
 template <typename InputStream = rapidjson::StringStream>
 class JsonValueReader
   : public ValueReader,
@@ -52,21 +51,23 @@ public:
     reader_.IterativeParseInit();
   }
 
-  bool begin_struct();
+  bool begin_struct(Extensibility extensibility = FINAL);
   bool end_struct();
   bool begin_struct_member(XTypes::MemberId& member_id, const MemberHelper& helper);
+  bool members_remaining();
+  bool member_has_value();
   bool end_struct_member();
 
-  bool begin_union();
+  bool begin_union(Extensibility extensibility = FINAL);
   bool end_union();
   bool begin_discriminator();
   bool end_discriminator();
   bool begin_union_member();
   bool end_union_member();
 
-  bool begin_array();
+  bool begin_array(XTypes::TypeKind elem_kind = XTypes::TK_NONE);
   bool end_array();
-  bool begin_sequence();
+  bool begin_sequence(XTypes::TypeKind elem_kind = XTypes::TK_NONE);
   bool elements_remaining();
   bool end_sequence();
   bool begin_element();
@@ -87,12 +88,13 @@ public:
   bool read_float32(ACE_CDR::Float& value);
   bool read_float64(ACE_CDR::Double& value);
   bool read_float128(ACE_CDR::LongDouble& value);
-  bool read_fixed(OpenDDS::FaceTypes::Fixed& value);
+  bool read_fixed(ACE_CDR::Fixed& value);
   bool read_char8(ACE_CDR::Char& value);
   bool read_char16(ACE_CDR::WChar& value);
   bool read_string(std::string& value);
   bool read_wstring(std::wstring& value);
   bool read_long_enum(ACE_CDR::Long& value, const EnumHelper& helper);
+  bool read_bitmask(ACE_CDR::ULongLong& value, const BitmaskHelper& helper);
 
   bool Null() { token_type_ = kNull; return true; }
   bool Bool(bool b) { token_type_ = kBool; bool_value_ = b; return true; }
@@ -162,6 +164,34 @@ private:
     return false;
   }
 
+  // consume tokens until peek() would return 'expected'
+  // skips over objects and arrays atomically
+  bool skip_to(TokenType expected)
+  {
+    int skip_level = 0;
+
+    while (peek() != kEnd) {
+      if (skip_level == 0 && token_type_ == expected) {
+        return true;
+      }
+      switch (token_type_) {
+      case kStartArray:
+      case kStartObject:
+        ++skip_level;
+        break;
+      case kEndArray:
+      case kEndObject:
+        --skip_level;
+        break;
+      default:
+        break;
+      }
+      consume(token_type_);
+    }
+
+    return false;
+  }
+
   TokenType token_type_;
   InputStream& input_stream_;
   rapidjson::Reader reader_;
@@ -176,7 +206,7 @@ private:
 };
 
 template <typename InputStream>
-bool JsonValueReader<InputStream>::begin_struct()
+bool JsonValueReader<InputStream>::begin_struct(Extensibility /*extensibility*/)
 {
   peek();
   return consume(kStartObject);
@@ -185,16 +215,43 @@ bool JsonValueReader<InputStream>::begin_struct()
 template <typename InputStream>
 bool JsonValueReader<InputStream>::end_struct()
 {
-  peek();
+  if (peek() == kKey) { // skip any unknown members at the end
+    if (!skip_to(kEndObject)) {
+      return false;
+    }
+  }
   return consume(kEndObject);
 }
 
 template <typename InputStream>
 bool JsonValueReader<InputStream>::begin_struct_member(XTypes::MemberId& member_id, const MemberHelper& helper)
 {
-  if (peek() == kKey && helper.get_value(member_id, key_value_.c_str())) {
-    return consume(kKey);
+  while (members_remaining()) {
+    consume(kKey);
+    if (helper.get_value(member_id, key_value_.c_str())) {
+      return true;
+    }
+    if (!skip_to(kKey)) { // skip unknown members when expecting a known member
+      return false;
+    }
   }
+  return false;
+}
+
+template <typename InputStream>
+bool JsonValueReader<InputStream>::members_remaining()
+{
+  return peek() == kKey;
+}
+
+// Should only be called on optional members.
+template <typename InputStream>
+bool JsonValueReader<InputStream>::member_has_value()
+{
+  if (peek() != kNull) {
+    return true;
+  }
+  consume(kNull);
   return false;
 }
 
@@ -205,7 +262,7 @@ bool JsonValueReader<InputStream>::end_struct_member()
 }
 
 template <typename InputStream>
-bool JsonValueReader<InputStream>::begin_union()
+bool JsonValueReader<InputStream>::begin_union(Extensibility /*extensibility*/)
 {
   peek();
   return consume(kStartObject);
@@ -249,7 +306,7 @@ bool JsonValueReader<InputStream>::end_union_member()
 }
 
 template <typename InputStream>
-bool JsonValueReader<InputStream>::begin_array()
+bool JsonValueReader<InputStream>::begin_array(XTypes::TypeKind /*elem_kind*/)
 {
   peek();
   return consume(kStartArray);
@@ -263,7 +320,7 @@ bool JsonValueReader<InputStream>::end_array()
 }
 
 template <typename InputStream>
-bool JsonValueReader<InputStream>::begin_sequence()
+bool JsonValueReader<InputStream>::begin_sequence(XTypes::TypeKind /*elem_kind*/)
 {
   peek();
   return consume(kStartArray);
@@ -376,7 +433,7 @@ bool JsonValueReader<InputStream>::read_int32(ACE_CDR::Long& value)
     value = int_value_;
     return consume(kInt);
   case kUint:
-    value = uint_value_;
+    value = static_cast<ACE_CDR::Long>(uint_value_);
     return consume(kUint);
   default:
     return false;
@@ -401,7 +458,7 @@ bool JsonValueReader<InputStream>::read_int64(ACE_CDR::LongLong& value)
     value = int64_value_;
     return consume(kInt64);
   case kUint64:
-    value = uint64_value_;
+    value = static_cast<ACE_CDR::LongLong>(uint64_value_);
     return consume(kUint64);
   case kInt:
     value = int_value_;
@@ -514,10 +571,10 @@ bool JsonValueReader<InputStream>::read_float128(ACE_CDR::LongDouble& value)
 }
 
 template <typename InputStream>
-bool JsonValueReader<InputStream>::read_fixed(OpenDDS::FaceTypes::Fixed& /*value*/)
+bool JsonValueReader<InputStream>::read_fixed(ACE_CDR::Fixed& value)
 {
-  // TODO
   if (peek() == kString) {
+    value = ACE_CDR::Fixed::from_string(string_value_.c_str());
     return consume(kString);
   }
   return false;
@@ -594,13 +651,36 @@ bool JsonValueReader<InputStream>::read_long_enum(ACE_CDR::Long& value, const En
       return consume(kString);
     }
     return false;
-    break;
   case kInt:
     value = int_value_;
     return consume(kInt);
   case kUint:
+    value = static_cast<ACE_CDR::Long>(uint_value_);
+    return consume(kUint);
+  default:
+    return false;
+  }
+}
+
+template <typename InputStream>
+bool JsonValueReader<InputStream>::read_bitmask(ACE_CDR::ULongLong& value, const BitmaskHelper& helper)
+{
+  switch (peek()) {
+  case kString:
+    value = string_to_bitmask(string_value_, helper);
+    return consume(kString);
+  case kInt:
+    value = static_cast<ACE_CDR::ULongLong>(int_value_);
+    return consume(kInt);
+  case kUint:
     value = uint_value_;
     return consume(kUint);
+  case kInt64:
+    value = static_cast<ACE_CDR::ULongLong>(int64_value_);
+    return consume(kInt64);
+  case kUint64:
+    value = uint64_value_;
+    return consume(kUint64);
   default:
     return false;
   }

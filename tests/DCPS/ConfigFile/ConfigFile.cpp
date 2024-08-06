@@ -40,6 +40,10 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
       TheParticipantFactoryWithArgs(argc, argv);
     TEST_CHECK(dpf.in() != 0);
 
+    // From commandline
+    TEST_CHECK(TheServiceParticipant->config_store()->get("MY_CONFIG_KEY1", "") == "value1");
+    // From environment variable
+    TEST_CHECK(TheServiceParticipant->config_store()->get("MY_CONFIG_KEY2", "") == "value2");
     TEST_CHECK(OpenDDS::DCPS::DCPS_debug_level == 1);
     TEST_CHECK(TheServiceParticipant->n_chunks() == 10);
     TEST_CHECK(TheServiceParticipant->association_chunk_multiplier() == 5);
@@ -66,21 +70,19 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     // tcp_inst->dump(std::cout);
 
     TEST_CHECK(tcp_inst->name() == "mytcp");
-    TEST_CHECK(tcp_inst->queue_messages_per_pool_ == 9);
-    TEST_CHECK(tcp_inst->queue_initial_pools_ == 2);
-    TEST_CHECK(tcp_inst->max_packet_size_ == 2000000000);
-    TEST_CHECK(tcp_inst->max_samples_per_packet_ == 3);
-    TEST_CHECK(tcp_inst->optimum_packet_size_ == 2048);
-    TEST_CHECK(tcp_inst->thread_per_connection_ == true);
-    TEST_CHECK(tcp_inst->datalink_release_delay_ == 5000);
-    TEST_CHECK(tcp_inst->datalink_control_chunks_ == 16);
-    TEST_CHECK(tcp_inst->local_address_string() == "localhost:");
-    TEST_CHECK(tcp_inst->enable_nagle_algorithm_ == true);
-    TEST_CHECK(tcp_inst->conn_retry_initial_delay_ == 1000);
-    TEST_CHECK(tcp_inst->conn_retry_backoff_multiplier_ == 4);
-    TEST_CHECK(tcp_inst->conn_retry_attempts_ == 4);
-    TEST_CHECK(tcp_inst->passive_reconnect_duration_ == 4000);
-    TEST_CHECK(tcp_inst->max_output_pause_period_ == 1000);
+    TEST_CHECK(tcp_inst->max_packet_size() == 2000000000);
+    TEST_CHECK(tcp_inst->max_samples_per_packet() == 3);
+    TEST_CHECK(tcp_inst->optimum_packet_size() == 2048);
+    TEST_CHECK(tcp_inst->thread_per_connection() == true);
+    TEST_CHECK(tcp_inst->datalink_release_delay() == 5000);
+    TEST_CHECK(tcp_inst->datalink_control_chunks() == 16);
+    TEST_CHECK(tcp_inst->local_address() == "localhost:");
+    TEST_CHECK(tcp_inst->enable_nagle_algorithm() == true);
+    TEST_CHECK(tcp_inst->conn_retry_initial_delay() == 1000);
+    TEST_CHECK(tcp_inst->conn_retry_backoff_multiplier() == 4);
+    TEST_CHECK(tcp_inst->conn_retry_attempts() == 4);
+    TEST_CHECK(tcp_inst->passive_reconnect_duration() == 4000);
+    TEST_CHECK(tcp_inst->max_output_pause_period() == 1000);
 
     TransportInst_rch inst2 = TransportRegistry::instance()->get_inst("anothertcp");
     TEST_CHECK(inst2);
@@ -92,7 +94,7 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     TEST_CHECK(config->instances_[0] == inst);
     TEST_CHECK(config->instances_[1] == inst2);
     TEST_CHECK(config->swap_bytes_ == true);
-    TEST_CHECK(config->passive_connect_duration_ == 20000);
+    TEST_CHECK(config->passive_connect_duration_ == TimeDuration::from_msec(20000));
 
     TransportConfig_rch default_config =
 #ifdef DDS_HAS_MINIMUM_BIT
@@ -111,7 +113,7 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     TEST_CHECK(default_config->instances_[2] == inst);   // mytcp
     TEST_CHECK(default_config->instances_[9]->name() == std::string("tcp7"));
     TEST_CHECK(default_config->swap_bytes_ == false);
-    TEST_CHECK(default_config->passive_connect_duration_ == 60000);
+    TEST_CHECK(default_config->passive_connect_duration_ == TimeDuration::from_msec(60000));
 
     TransportConfig_rch global_config =
       TransportRegistry::instance()->global_config();
@@ -203,7 +205,7 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
       TEST_CHECK(rd->d1() == 9);
       TEST_CHECK(rd->dx() == 15);
       TEST_CHECK(rd->spdp_send_addrs().size() == 1);
-      TEST_CHECK(rd->spdp_send_addrs()[0] == "host1:10001");
+      TEST_CHECK(rd->spdp_send_addrs().count(NetworkAddress("10.1.1.1:10001")) == 1);
     }
 
     {
@@ -224,11 +226,11 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
         dynamic_rchandle_cast<OpenDDS::RTPS::RtpsDiscovery>(discovery);
       TEST_CHECK(!rd.is_nil());
       TEST_CHECK(rd->spdp_send_addrs().size() == 5);
-      TEST_CHECK(rd->spdp_send_addrs()[0] == "host1:10001");
-      TEST_CHECK(rd->spdp_send_addrs()[1] == "host2:10002");
-      TEST_CHECK(rd->spdp_send_addrs()[2] == "host3:10003");
-      TEST_CHECK(rd->spdp_send_addrs()[3] == "host4:10004");
-      TEST_CHECK(rd->spdp_send_addrs()[4] == "host5:10005");
+      TEST_CHECK(rd->spdp_send_addrs().count(NetworkAddress("10.1.1.1:10001")) == 1);
+      TEST_CHECK(rd->spdp_send_addrs().count(NetworkAddress("10.2.2.2:10002")) == 1);
+      TEST_CHECK(rd->spdp_send_addrs().count(NetworkAddress("10.3.3.3:10003")) == 1);
+      TEST_CHECK(rd->spdp_send_addrs().count(NetworkAddress("10.4.4.4:10004")) == 1);
+      TEST_CHECK(rd->spdp_send_addrs().count(NetworkAddress("10.5.5.5:10005")) == 1);
     }
     {
       DDS::DomainId_t domain = 97;

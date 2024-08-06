@@ -36,7 +36,8 @@ module Mod {
     wstring wstr;
   };
 
-  typedef sequence<short> MySeq;
+  typedef sequence<short, 7> MyBoundedSeq;
+  typedef sequence<short> MyUnboundedSeq;
   typedef sequence<CORBA::StringSeq> NestedSeq;
 
   union MyUnion switch (MyEnum) {
@@ -63,8 +64,9 @@ module Mod {
     MyEnum enu;
     MyEnum enu2;
     BasicTypes bt;
-    MySeq seq1;
+    MyBoundedSeq seq1;
     CORBA::LongSeq seq2;
+    MyUnboundedSeq seq3;
     NestedSeq ns;
     MyUnion mu;
     CharArray ca;
@@ -91,6 +93,54 @@ module Mod {
   struct MaskedJunk {
     JunkType junk;
     MaskType mask;
+  };
+
+  /////// For KeyOnly tests
+  struct ExplicitKeysStruct {
+    @key short s;
+    @key string str;
+    unsigned long long ull;
+  };
+
+  typedef ExplicitKeysStruct ExplicitKeysStructArr[2][2];
+
+  @topic
+  struct NoExplicitKeysStruct {
+    boolean b;
+    char c;
+    long l;
+  };
+
+#define COMMON_BRANCHES  \
+  case one:              \
+    boolean b;           \
+  case two:              \
+    char c;              \
+  default:               \
+    octet o;             \
+
+  @topic
+  union ExplicitKeyUnion switch (@key MyEnum) {
+    COMMON_BRANCHES
+  };
+
+  @topic
+  union NoExplicitKeyUnion switch (MyEnum) {
+    COMMON_BRANCHES
+  };
+
+  @topic
+  struct KeyOnlyStruct {
+    @key long id;
+    @key ExplicitKeysStruct eks;
+    @key NoExplicitKeysStruct neks;
+    @key ExplicitKeysStructArr eksarr;
+    @key ExplicitKeyUnion eku;
+    @key NoExplicitKeyUnion neku;
+    @key string str;
+    octet o;
+    MaskedJunk mj;
+    long long ll;
   };
 
 };

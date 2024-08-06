@@ -11,11 +11,15 @@
 #include "RtpsUdpTransport.h"
 
 #include <dds/DdsDcpsGuidTypeSupportImpl.h>
+#include <dds/OpenDDSConfigWrapper.h>
+
 #include <dds/DCPS/LogAddr.h>
 #include <dds/DCPS/Serializer.h>
+
 #include <dds/DCPS/RTPS/MessageUtils.h>
 #include <dds/DCPS/RTPS/MessageParser.h>
 #include <dds/DCPS/RTPS/RtpsCoreTypeSupportImpl.h>
+
 #include <dds/DCPS/transport/framework/NullSynchStrategy.h>
 #include <dds/DCPS/transport/framework/TransportCustomizedElement.h>
 #include <dds/DCPS/transport/framework/TransportSendElement.h>
@@ -40,7 +44,7 @@ RtpsUdpSendStrategy::RtpsUdpSendStrategy(RtpsUdpDataLink* link,
     link_(link),
     override_dest_(0),
     override_single_dest_(0),
-    max_message_size_(link->config()->max_message_size_),
+    max_message_size_(link->config()->max_message_size()),
     rtps_header_db_(RTPS::RTPSHDR_SZ, ACE_Message_Block::MB_DATA,
                     rtps_header_data_, 0, 0, ACE_Message_Block::DONT_DELETE, 0),
     rtps_header_mb_(&rtps_header_db_, ACE_Message_Block::DONT_DELETE),
@@ -57,7 +61,8 @@ RtpsUdpSendStrategy::RtpsUdpSendStrategy(RtpsUdpDataLink* link,
 }
 
 namespace {
-  bool shouldWarn(int code) {
+  bool ss_shouldWarn(int code)
+  {
     return code == EPERM || code == EACCES || code == EINTR || code == ENOBUFS
       || code == ENOMEM || code == EADDRNOTAVAIL || code == ENETUNREACH;
   }
@@ -68,7 +73,7 @@ RtpsUdpSendStrategy::send_bytes_i(const iovec iov[], int n)
 {
   ssize_t result = send_bytes_i_helper(iov, n);
 
-  if (result == -1 && shouldWarn(errno)) {
+  if (result == -1 && ss_shouldWarn(errno)) {
     // Make the framework think this was a successful send to avoid
     // putting the send strategy in suspended mode. If reliability
     // is enabled, the data may be resent later.
@@ -100,7 +105,7 @@ RtpsUdpSendStrategy::send_bytes_i_helper(const iovec iov[], int n)
     return -1;
   }
 
-  AddrSet addrs;
+  NetworkAddressSet addrs;
   if (elem->subscription_id() != GUID_UNKNOWN) {
     addrs = link_->get_addresses(elem->publication_id(), elem->subscription_id());
 
@@ -127,7 +132,7 @@ RtpsUdpSendStrategy::override_destinations(const NetworkAddress& destination)
 }
 
 RtpsUdpSendStrategy::OverrideToken
-RtpsUdpSendStrategy::override_destinations(const AddrSet& dest)
+RtpsUdpSendStrategy::override_destinations(const NetworkAddressSet& dest)
 {
   override_dest_ = &dest;
   return OverrideToken(this);
@@ -169,7 +174,7 @@ RtpsUdpSendStrategy::send_rtps_control(RTPS::Message& message,
 
   const AMB_Continuation cont(rtps_header_mb_lock_, rtps_header_mb_, submessages);
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
   Message_Block_Ptr alternate;
   if (security_config()) {
     const DDS::Security::CryptoTransform_var crypto = link_->security_config()->get_crypto_transform();
@@ -191,7 +196,7 @@ RtpsUdpSendStrategy::send_rtps_control(RTPS::Message& message,
   const int num_blocks = mb_to_iov(use_mb, iov);
   const ssize_t result = send_single_i(iov, num_blocks, addr);
   if (result < 0 && !network_is_unreachable_) {
-    const ACE_Log_Priority prio = shouldWarn(errno) ? LM_WARNING : LM_ERROR;
+    const ACE_Log_Priority prio = ss_shouldWarn(errno) ? LM_WARNING : LM_ERROR;
     ACE_ERROR((prio, "(%P|%t) RtpsUdpSendStrategy::send_rtps_control() - "
       "failed to send RTPS control message\n"));
   }
@@ -200,7 +205,7 @@ RtpsUdpSendStrategy::send_rtps_control(RTPS::Message& message,
 void
 RtpsUdpSendStrategy::send_rtps_control(RTPS::Message& message,
                                        ACE_Message_Block& submessages,
-                                       const AddrSet& addrs)
+                                       const NetworkAddressSet& addrs)
 {
   {
     ACE_GUARD(ACE_Thread_Mutex, g, rtps_message_mutex_);
@@ -209,7 +214,7 @@ RtpsUdpSendStrategy::send_rtps_control(RTPS::Message& message,
 
   const AMB_Continuation cont(rtps_header_mb_lock_, rtps_header_mb_, submessages);
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
   Message_Block_Ptr alternate;
   if (security_config()) {
     const DDS::Security::CryptoTransform_var crypto = link_->security_config()->get_crypto_transform();
@@ -231,7 +236,7 @@ RtpsUdpSendStrategy::send_rtps_control(RTPS::Message& message,
   const int num_blocks = mb_to_iov(use_mb, iov);
   const ssize_t result = send_multi_i(iov, num_blocks, addrs);
   if (result < 0 && !network_is_unreachable_) {
-    const ACE_Log_Priority prio = shouldWarn(errno) ? LM_WARNING : LM_ERROR;
+    const ACE_Log_Priority prio = ss_shouldWarn(errno) ? LM_WARNING : LM_ERROR;
     ACE_ERROR((prio, "(%P|%t) RtpsUdpSendStrategy::send_rtps_control() - "
       "failed to send RTPS control message\n"));
   }
@@ -248,10 +253,10 @@ RtpsUdpSendStrategy::append_submessages(const RTPS::SubmessageSeq& submessages)
 
 ssize_t
 RtpsUdpSendStrategy::send_multi_i(const iovec iov[], int n,
-                                  const AddrSet& addrs)
+                                  const NetworkAddressSet& addrs)
 {
   ssize_t result = -1;
-  typedef AddrSet::const_iterator iter_t;
+  typedef NetworkAddressSet::const_iterator iter_t;
   for (iter_t iter = addrs.begin(); iter != addrs.end(); ++iter) {
     if (!*iter) {
       continue;
@@ -269,10 +274,12 @@ RtpsUdpSendStrategy::choose_send_socket(const NetworkAddress& addr) const
 {
 #ifdef ACE_HAS_IPV6
   if (addr.get_type() == AF_INET6) {
+    OPENDDS_ASSERT(addr != NetworkAddress::default_IPV6);
     return link_->ipv6_unicast_socket();
   }
 #endif
   ACE_UNUSED_ARG(addr);
+  OPENDDS_ASSERT(addr != NetworkAddress::default_IPV4);
   return link_->unicast_socket();
 }
 
@@ -280,8 +287,6 @@ ssize_t
 RtpsUdpSendStrategy::send_single_i(const iovec iov[], int n,
                                    const NetworkAddress& addr)
 {
-  OPENDDS_ASSERT(addr);
-
   const ACE_SOCK_Dgram& socket = choose_send_socket(addr);
 
   RtpsUdpTransport_rch transport = link_->transport();
@@ -289,14 +294,9 @@ RtpsUdpSendStrategy::send_single_i(const iovec iov[], int n,
     return 0;
   }
 
-  RtpsUdpInst_rch cfg = transport->config();
-  if (!cfg) {
-    return 0;
-  }
-
 #ifdef OPENDDS_TESTING_FEATURES
   ssize_t total_length;
-  if (cfg->should_drop(iov, n, total_length)) {
+  if (transport->core().should_drop(iov, n, total_length)) {
     return total_length;
   }
 #endif
@@ -318,15 +318,11 @@ RtpsUdpSendStrategy::send_single_i(const iovec iov[], int n,
   const ssize_t result = socket.send(iov, n, addr.to_addr());
 #endif
   if (result < 0) {
-    if (cfg->count_messages()) {
-      const InternalMessageCountKey key(addr, MCK_RTPS, addr == NetworkAddress(cfg->rtps_relay_address()));
-      ACE_GUARD_RETURN(ACE_Thread_Mutex, g, transport->transport_statistics_mutex_, -1);
-      transport->transport_statistics_.message_count[key].send_fail(result);
-    }
+    transport->core().send_fail(addr, MCK_RTPS, result);
     const int err = errno;
     if (err != ENETUNREACH || !network_is_unreachable_) {
       errno = err;
-      const ACE_Log_Priority prio = shouldWarn(errno) ? LM_WARNING : LM_ERROR;
+      const ACE_Log_Priority prio = ss_shouldWarn(errno) ? LM_WARNING : LM_ERROR;
       ACE_ERROR((prio, "(%P|%t) RtpsUdpSendStrategy::send_single_i() - "
                  "destination %C failed send: %m\n", DCPS::LogAddr(addr).c_str()));
       if (errno == EMSGSIZE) {
@@ -342,11 +338,7 @@ RtpsUdpSendStrategy::send_single_i(const iovec iov[], int n,
     // Reset errno since the rest of framework expects it.
     errno = err;
   } else {
-    if (cfg->count_messages()) {
-      const InternalMessageCountKey key(addr, MCK_RTPS, addr == NetworkAddress(cfg->rtps_relay_address()));
-      ACE_GUARD_RETURN(ACE_Thread_Mutex, g, transport->transport_statistics_mutex_, -1);
-      transport->transport_statistics_.message_count[key].send(result);
-    }
+    transport->core().send(addr, MCK_RTPS, result);
     network_is_unreachable_ = false;
   }
   return result;
@@ -360,7 +352,7 @@ RtpsUdpSendStrategy::add_delayed_notification(TransportQueueElement* element)
   }
 }
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
 namespace {
   DDS::OctetSeq toSeq(const ACE_Message_Block* mb)
   {
@@ -800,7 +792,7 @@ size_t RtpsUdpSendStrategy::max_message_size() const
 {
   // TODO: Make this conditional on if the message actually needs to do this.
   return max_message_size_
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
     // Worst case scenario is full message encryption plus one submessage encryption.
     - MaxSecureSubmessageAdditionalSize - MaxSecureFullMessageAdditionalSize
 #endif

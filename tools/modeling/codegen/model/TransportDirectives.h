@@ -42,5 +42,7 @@ namespace OpenDDS { namespace Model { namespace Transport {
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
+#include /**/ "ace/post.h"
+
 #endif
 

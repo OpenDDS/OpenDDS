@@ -6,18 +6,20 @@
 #ifndef OPENDDS_DCPS_RTPS_SEDP_H
 #define OPENDDS_DCPS_RTPS_SEDP_H
 
+#include <dds/OpenDDSConfigWrapper.h>
+
 #include "AssociationRecord.h"
 #include "DiscoveredEntities.h"
 #include "LocalEntities.h"
 #include "MessageTypes.h"
 #include "MessageUtils.h"
 #include "TypeLookupTypeSupportImpl.h"
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
 #  include "ParameterListConverter.h"
 #endif
 #include "RtpsRpcTypeSupportImpl.h"
 #include "RtpsCoreTypeSupportImpl.h"
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
 #  include "RtpsSecurityC.h"
 #endif
 
@@ -42,16 +44,18 @@
 #include <dds/DCPS/TopicDetails.h>
 #include <dds/DCPS/AtomicBool.h>
 
+#include <dds/DCPS/transport/framework/MessageDropper.h>
 #include <dds/DCPS/transport/framework/TransportClient.h>
 #include <dds/DCPS/transport/framework/TransportDefs.h>
 #include <dds/DCPS/transport/framework/TransportInst_rch.h>
 #include <dds/DCPS/transport/framework/TransportRegistry.h>
 #include <dds/DCPS/transport/framework/TransportSendListener.h>
+#include <dds/DCPS/transport/framework/TransportStatistics.h>
 
 #include <dds/DdsDcpsInfrastructureC.h>
 #include <dds/DdsDcpsInfoUtilsC.h>
 #include <dds/DdsDcpsCoreTypeSupportImpl.h>
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
 #  include <dds/DdsSecurityCoreC.h>
 #endif
 
@@ -72,8 +76,240 @@ using DCPS::AtomicBool;
 using DCPS::GUID_UNKNOWN;
 
 class RtpsDiscovery;
+class RtpsDiscoveryConfig;
 class Spdp;
 class WaitForAcks;
+
+class RtpsDiscoveryCore {
+public:
+  RtpsDiscoveryCore(RcHandle<RtpsDiscoveryConfig> config,
+                    const String& transport_statistics_key);
+
+  void rtps_relay_only(bool flag)
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+    rtps_relay_only_ = flag;
+  }
+
+  bool rtps_relay_only() const
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+    return rtps_relay_only_;
+  }
+
+  void use_rtps_relay(bool flag)
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+    use_rtps_relay_ = flag;
+  }
+
+  bool use_rtps_relay() const
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+    return use_rtps_relay_;
+  }
+
+  bool from_relay(const DCPS::NetworkAddress& from) const
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+    return (rtps_relay_only_ || use_rtps_relay_) && from == spdp_rtps_relay_address_;
+  }
+
+  bool ignore_from_relay(const DCPS::NetworkAddress& from) const
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+    return (!(rtps_relay_only_ || use_rtps_relay_)) && from == spdp_rtps_relay_address_;
+  }
+
+#if OPENDDS_CONFIG_SECURITY
+  void use_ice(bool flag)
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+    use_ice_ = flag;
+  }
+
+  bool use_ice() const
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+    return use_ice_;
+  }
+#endif
+
+  void spdp_rtps_relay_address(const DCPS::NetworkAddress& addr)
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+    spdp_rtps_relay_address_ = addr;
+  }
+
+  DCPS::NetworkAddress spdp_rtps_relay_address() const
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+    return spdp_rtps_relay_address_;
+  }
+
+  void reset_relay_spdp_task_falloff()
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+    relay_spdp_task_falloff_.set(sedp_heartbeat_period_);
+  }
+
+  TimeDuration advance_relay_spdp_task_falloff()
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+    relay_spdp_task_falloff_.advance(spdp_rtps_relay_send_period_);
+    return relay_spdp_task_falloff_.get();
+  }
+
+  void set_relay_spdp_task_falloff()
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+    relay_spdp_task_falloff_.set(spdp_rtps_relay_send_period_);
+  }
+
+  void spdp_stun_server_address(const DCPS::NetworkAddress& addr)
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+    spdp_stun_server_address_ = addr;
+  }
+
+  DCPS::NetworkAddress spdp_stun_server_address() const
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+    return spdp_stun_server_address_;
+  }
+
+  void reset_relay_stun_task_falloff()
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+    relay_stun_task_falloff_.set(sedp_heartbeat_period_);
+  }
+
+#if OPENDDS_CONFIG_SECURITY
+  TimeDuration advance_relay_stun_task_falloff()
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+    relay_stun_task_falloff_.advance(ICE::Configuration::instance()->server_reflexive_address_period());
+    return relay_stun_task_falloff_.get();
+  }
+
+  void set_relay_stun_task_falloff()
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+    relay_stun_task_falloff_.set(ICE::Configuration::instance()->server_reflexive_address_period());
+  }
+#endif
+
+  void send(const DCPS::NetworkAddress& remote_address,
+            CORBA::Long key_kind,
+            ssize_t bytes)
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+    if (transport_statistics_.count_messages()) {
+      const DCPS::InternalMessageCountKey key(remote_address, key_kind, remote_address == spdp_rtps_relay_address_);
+      transport_statistics_.message_count[key].send(bytes);
+    }
+  }
+
+  void send_fail(const DCPS::NetworkAddress& remote_address,
+                 CORBA::Long key_kind,
+                 ssize_t bytes)
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+    if (transport_statistics_.count_messages()) {
+      const DCPS::InternalMessageCountKey key(remote_address, key_kind, remote_address == spdp_rtps_relay_address_);
+      transport_statistics_.message_count[key].send_fail(bytes);
+    }
+  }
+
+  void send_fail(const DCPS::NetworkAddress& remote_address,
+                 CORBA::Long key_kind,
+                 iovec iov[],
+                 int num_blocks)
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+    if (transport_statistics_.count_messages()) {
+      ssize_t bytes = 0;
+      for (int i = 0; i < num_blocks; ++i) {
+        bytes += iov[i].iov_len;
+      }
+      const DCPS::InternalMessageCountKey key(remote_address, key_kind, remote_address == spdp_rtps_relay_address_);
+      transport_statistics_.message_count[key].send_fail(bytes);
+    }
+  }
+
+  void recv(const DCPS::NetworkAddress& remote_address,
+            CORBA::Long key_kind,
+            ssize_t bytes)
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+    if (transport_statistics_.count_messages()) {
+      const DCPS::InternalMessageCountKey key(remote_address, key_kind, remote_address == spdp_rtps_relay_address_);
+      transport_statistics_.message_count[key].recv(bytes);
+    }
+  }
+
+  void reader_nack_count(const GUID_t& guid,
+                         ACE_CDR::ULong count)
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+    if (transport_statistics_.count_messages()) {
+      transport_statistics_.reader_nack_count[guid] += count;
+    }
+  }
+
+  void writer_resend_count(const GUID_t& guid,
+                           ACE_CDR::ULong count)
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+    if (transport_statistics_.count_messages()) {
+      transport_statistics_.writer_resend_count[guid] += count;
+    }
+  }
+
+  void append_transport_statistics(DCPS::TransportStatisticsSequence& seq)
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+    append(seq, transport_statistics_);
+    transport_statistics_.clear();
+  }
+
+  bool should_drop(ssize_t length) const
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+    return message_dropper_.should_drop(length);
+  }
+
+  bool should_drop(const iovec iov[],
+                   int n,
+                   ssize_t& length) const
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+    return message_dropper_.should_drop(iov, n, length);
+  }
+
+  void reload(const String& config_prefix)
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+    message_dropper_.reload(TheServiceParticipant->config_store(), config_prefix);
+    transport_statistics_.reload(TheServiceParticipant->config_store(), config_prefix);
+  }
+
+private:
+  mutable ACE_Thread_Mutex mutex_;
+  const TimeDuration sedp_heartbeat_period_;
+  const TimeDuration spdp_rtps_relay_send_period_;
+  bool rtps_relay_only_;
+  bool use_rtps_relay_;
+#if OPENDDS_CONFIG_SECURITY
+  bool use_ice_;
+#endif
+  DCPS::NetworkAddress spdp_rtps_relay_address_;
+  DCPS::FibonacciSequence<TimeDuration> relay_spdp_task_falloff_;
+  DCPS::NetworkAddress spdp_stun_server_address_;
+  DCPS::FibonacciSequence<TimeDuration> relay_stun_task_falloff_;
+  DCPS::MessageDropper message_dropper_;
+  DCPS::InternalTransportStatistics transport_statistics_;
+};
 
 class Sedp : public virtual DCPS::RcEventHandler {
 public:
@@ -86,9 +322,13 @@ public:
   DDS::ReturnCode_t init(const DCPS::GUID_t& guid,
                          const RtpsDiscovery& disco,
                          DDS::DomainId_t domainId,
+                         DDS::UInt16 ipv4_participant_port_id,
+#ifdef ACE_HAS_IPV6
+                         DDS::UInt16 ipv6_participant_port_id,
+#endif
                          XTypes::TypeLookupService_rch tls);
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
   DDS::ReturnCode_t init_security(DDS::Security::IdentityHandle id_handle,
                                   DDS::Security::PermissionsHandle perm_handle,
                                   DDS::Security::ParticipantCryptoHandle crypto_handle);
@@ -100,14 +340,14 @@ public:
 
   // @brief return the ip address we have bound to.
   // Valid after init() call
-  const DCPS::NetworkAddress& local_address() const;
+  DCPS::NetworkAddress local_address() const;
 #ifdef ACE_HAS_IPV6
-  const DCPS::NetworkAddress& ipv6_local_address() const;
+  DCPS::NetworkAddress ipv6_local_address() const;
 #endif
-  const DCPS::NetworkAddress& multicast_group() const;
+  DCPS::NetworkAddress multicast_group() const;
 
   void associate(DiscoveredParticipant& participant
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
                  , const DDS::Security::ParticipantSecurityAttributes& participant_sec_attr
 #endif
                  );
@@ -119,7 +359,7 @@ public:
   void process_association_records_i(DiscoveredParticipant& participant);
   void generate_remote_matched_crypto_handles(DiscoveredParticipant& participant);
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
   void disassociate_volatile(DiscoveredParticipant& participant);
   void cleanup_volatile_crypto(const DCPS::GUID_t& remote);
   void associate_volatile(DiscoveredParticipant& participant);
@@ -138,7 +378,7 @@ public:
 
   void update_locators(const ParticipantData_t& pdata);
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
   DDS::ReturnCode_t write_stateless_message(const DDS::Security::ParticipantStatelessMessage& msg,
                                             const DCPS::GUID_t& reader);
 
@@ -182,17 +422,11 @@ public:
                                 bool is_discovery_protected, bool send_get_types,
                                 const SequenceNumber& seq_num);
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
   void signal_liveliness_secure(DDS::LivelinessQosPolicyKind kind);
 #endif
 
   DCPS::WeakRcHandle<ICE::Endpoint> get_ice_endpoint();
-
-  void rtps_relay_only_now(bool f);
-  void use_rtps_relay_now(bool f);
-  void use_ice_now(bool f);
-  void rtps_relay_address(const ACE_INET_Addr& address);
-  void stun_server_address(const ACE_INET_Addr& address);
 
   DCPS::ReactorTask_rch reactor_task() const { return reactor_task_; }
 
@@ -224,7 +458,7 @@ public:
 
   DCPS::TopicStatus remove_topic(const GUID_t& topicId);
 
-  GUID_t add_publication(
+  bool add_publication(
     const GUID_t& topicId,
     DCPS::DataWriterCallbacks_rch publication,
     const DDS::DataWriterQos& qos,
@@ -237,7 +471,7 @@ public:
   void update_publication_locators(const GUID_t& publicationId,
                                    const DCPS::TransportLocatorSeq& transInfo);
 
-  GUID_t add_subscription(
+  bool add_subscription(
     const GUID_t& topicId,
     DCPS::DataReaderCallbacks_rch subscription,
     const DDS::DataReaderQos& qos,
@@ -253,7 +487,7 @@ public:
   void update_subscription_locators(const GUID_t& subscriptionId,
                                     const DCPS::TransportLocatorSeq& transInfo);
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
   inline Security::HandleRegistry_rch get_handle_registry() const
   {
     return handle_registry_;
@@ -265,6 +499,9 @@ public:
   void request_remote_complete_type_objects(
     const GUID_t& remote_entity, const XTypes::TypeInformation& remote_type_info,
     DCPS::TypeObjReqCond& cond);
+
+  RtpsDiscoveryCore& core() { return core_; }
+  const RtpsDiscoveryCore& core() const { return core_; }
 
 private:
   typedef OPENDDS_MAP_CMP(GUID_t, DiscoveredSubscription,
@@ -278,7 +515,7 @@ private:
   void populate_origination_locator(const GUID_t& id, DCPS::TransportLocator& tl);
 
   bool remote_knows_about_local_i(const GUID_t& local, const GUID_t& remote) const;
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
   bool remote_is_authenticated_i(const GUID_t& local, const GUID_t& remote, const DiscoveredParticipant& participant) const;
   bool local_has_remote_participant_token_i(const GUID_t& local, const GUID_t& remote) const;
   bool remote_has_local_participant_token_i(const GUID_t& local, const GUID_t& remote, const DiscoveredParticipant& participant) const;
@@ -286,6 +523,13 @@ private:
   bool remote_has_local_endpoint_token_i(const GUID_t& local, bool local_tokens_sent,
                                          const GUID_t& remote) const;
 #endif
+
+  // These are called by Spdp with the lock.
+  void rtps_relay_only_now(bool f);
+  void use_rtps_relay_now(bool f);
+  void use_ice_now(bool f);
+  void rtps_relay_address(const DCPS::NetworkAddress& address);
+  void stun_server_address(const DCPS::NetworkAddress& address);
 
   void type_lookup_init(DCPS::ReactorInterceptor_rch reactor_interceptor)
   {
@@ -311,7 +555,7 @@ private:
     topics_.erase(top_it);
   }
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
   void cleanup_secure_writer(const GUID_t& publicationId);
   void cleanup_secure_reader(const GUID_t& subscriptionId);
 #endif
@@ -345,13 +589,16 @@ private:
   public:
     Endpoint(const DCPS::GUID_t& repo_id, Sedp& sedp)
       : repo_id_(repo_id)
+      , domain_id_(sedp.get_domain_id())
       , sedp_(sedp)
       , shutting_down_(false)
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
       , participant_crypto_handle_(DDS::HANDLE_NIL)
       , endpoint_crypto_handle_(DDS::HANDLE_NIL)
 #endif
-    {}
+    {
+      TransportClient::set_guid(repo_id);
+    }
 
     virtual ~Endpoint();
 
@@ -368,7 +615,7 @@ private:
 
     DDS::DomainId_t domain_id() const
     {
-      return 0; // not used for SEDP
+      return domain_id_;
     }
 
     CORBA::Long get_priority_value(const DCPS::AssociationData&) const
@@ -379,7 +626,7 @@ private:
     using DCPS::TransportClient::enable_transport_using_config;
     using DCPS::TransportClient::disassociate;
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
     void set_crypto_handles(DDS::Security::ParticipantCryptoHandle p,
                             DDS::Security::NativeCryptoHandle e = DDS::HANDLE_NIL)
     {
@@ -408,22 +655,22 @@ private:
       return OPENDDS_STRING("dds.builtin.TOS.") +
         DCPS::to_hex_dds_string(&participant.guidPrefix[0], sizeof(DCPS::GuidPrefix_t)) +
         DCPS::to_hex_dds_string(&participant.entityId.entityKey[0], sizeof(DCPS::EntityKey_t)) +
-        DCPS::to_dds_string(unsigned(participant.entityId.entityKind), true);
+        DCPS::to_dds_string(participant.entityId.entityKind, true);
     }
 
     EntityId_t counterpart_entity_id() const;
     GUID_t make_counterpart_guid(const DCPS::GUID_t& remote_part) const;
     bool associated_with_counterpart(const DCPS::GUID_t& remote_part) const;
-    bool pending_association_with_counterpart(const DCPS::GUID_t& remote_part) const;
     bool associated_with_counterpart_if_not_pending(const DCPS::GUID_t& remote_part) const;
 
     RcHandle<DCPS::BitSubscriber> get_builtin_subscriber_proxy() const;
 
   protected:
     DCPS::GUID_t repo_id_;
+    const DDS::DomainId_t domain_id_;
     Sedp& sedp_;
     AtomicBool shutting_down_;
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
     DDS::Security::ParticipantCryptoHandle participant_crypto_handle_;
     DDS::Security::NativeCryptoHandle endpoint_crypto_handle_;
 #endif
@@ -513,7 +760,7 @@ private:
 
     virtual ~SecurityWriter();
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
     DDS::ReturnCode_t write_stateless_message(const DDS::Security::ParticipantStatelessMessage& msg,
                                               const DCPS::GUID_t& reader,
                                               DCPS::SequenceNumber& sequence);
@@ -550,7 +797,7 @@ private:
 
     virtual ~DiscoveryWriter();
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
     DDS::ReturnCode_t write_dcps_participant_secure(const Security::SPDPdiscoveredParticipantData& msg,
                                                     const DCPS::GUID_t& reader, DCPS::SequenceNumber& sequence);
 #endif
@@ -769,6 +1016,7 @@ private:
   // Transport
   DCPS::TransportInst_rch transport_inst_;
   DCPS::TransportConfig_rch transport_cfg_;
+  DCPS::RcHandle<DCPS::ConfigStoreImpl> config_store_;
   DCPS::ReactorTask_rch reactor_task_;
   DCPS::JobQueue_rch job_queue_;
   DCPS::EventDispatcher_rch event_dispatcher_;
@@ -787,7 +1035,7 @@ private:
                                       const DCPS::DiscoveredWriterData& wdata,
                                       const DCPS::GUID_t& guid,
                                       const XTypes::TypeInformation& type_info
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
                                       ,
                                       bool have_ice_agent_info,
                                       const ICE::AgentInfo& ice_agent_info,
@@ -798,7 +1046,7 @@ private:
   void data_received(DCPS::MessageId message_id,
                      const DiscoveredPublication& wdata);
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
   void data_received(DCPS::MessageId message_id,
                      const ParameterListConverter::DiscoveredPublication_SecurityWrapper& wrapper);
 #endif
@@ -807,7 +1055,7 @@ private:
                                       const DCPS::DiscoveredReaderData& rdata,
                                       const DCPS::GUID_t& guid,
                                       const XTypes::TypeInformation& type_info
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
                                       ,
                                       bool have_ice_agent_info,
                                       const ICE::AgentInfo& ice_agent_info,
@@ -818,7 +1066,7 @@ private:
   void data_received(DCPS::MessageId message_id,
                      const DiscoveredSubscription& rdata);
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
   void data_received(DCPS::MessageId message_id,
                      const ParameterListConverter::DiscoveredSubscription_SecurityWrapper& wrapper);
 #endif
@@ -831,7 +1079,7 @@ private:
   void data_received(DCPS::MessageId message_id,
                      const ParticipantMessageData& data);
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
   void received_participant_message_data_secure(DCPS::MessageId message_id,
                                                 const ParticipantMessageData& data);
 
@@ -880,7 +1128,7 @@ private:
 
   void write_durable_participant_message_data(const DCPS::GUID_t& reader);
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
   void write_durable_participant_message_data_secure(const DCPS::GUID_t& reader);
 #endif
 
@@ -891,7 +1139,7 @@ private:
                                            LocalPublication& pub,
                                            const DCPS::GUID_t& reader = GUID_UNKNOWN);
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
   DDS::ReturnCode_t write_publication_data_secure(const DCPS::GUID_t& rid,
                                                   LocalPublication& pub,
                                                   const DCPS::GUID_t& reader = GUID_UNKNOWN);
@@ -909,7 +1157,7 @@ private:
                                             LocalSubscription& sub,
                                             const DCPS::GUID_t& reader = GUID_UNKNOWN);
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
   DDS::ReturnCode_t write_subscription_data_secure(const DCPS::GUID_t& rid,
                                                    LocalSubscription& sub,
                                                    const DCPS::GUID_t& reader = GUID_UNKNOWN);
@@ -922,7 +1170,7 @@ private:
   DDS::ReturnCode_t write_participant_message_data(const DCPS::GUID_t& rid,
                                                    DCPS::SequenceNumber& sn,
                                                    const DCPS::GUID_t& reader = GUID_UNKNOWN);
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
   DDS::ReturnCode_t write_participant_message_data_secure(const DCPS::GUID_t& rid,
                                                           DCPS::SequenceNumber& sn,
                                                           const DCPS::GUID_t& reader = GUID_UNKNOWN);
@@ -931,7 +1179,7 @@ private:
   virtual bool is_expectant_opendds(const GUID_t& endpoint) const;
 
 protected:
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
   DDS::Security::DatawriterCryptoHandle
   generate_remote_matched_writer_crypto_handle(const DCPS::GUID_t& writer,
                                                const DCPS::GUID_t& reader);
@@ -967,8 +1215,6 @@ protected:
   bool handle_datareader_crypto_tokens(const DDS::Security::ParticipantVolatileMessageSecure& msg);
   bool handle_datawriter_crypto_tokens(const DDS::Security::ParticipantVolatileMessageSecure& msg);
 
-  DDS::DomainId_t get_domain_id() const;
-
   struct PublicationAgentInfoListener : public ICE::AgentInfoListener
   {
     Sedp& sedp;
@@ -988,6 +1234,8 @@ protected:
   };
 
 #endif
+
+  DDS::DomainId_t get_domain_id() const;
 
   void add_assoc_i(const DCPS::GUID_t& local_guid, const LocalPublication& lpub,
                    const DCPS::GUID_t& remote_guid, const DiscoveredSubscription& dsub);
@@ -1136,7 +1384,7 @@ protected:
   void get_remote_type_objects(const XTypes::TypeIdentifierWithDependencies& tid_with_deps,
                                MatchingData& md, bool get_minimal, const GUID_t& remote_id,
                                bool is_discovery_protected);
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
   void match_continue_security_enabled(
     const GUID_t& writer, const GUID_t& reader, bool call_writer, bool call_reader);
 #endif
@@ -1172,7 +1420,7 @@ protected:
     return td->second.has_dcps_key();
   }
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
   inline bool is_security_enabled()
   {
     return (permissions_handle_ != DDS::HANDLE_NIL) && (access_control_ != 0);
@@ -1226,7 +1474,8 @@ protected:
 
   Spdp& spdp_;
   ACE_Thread_Mutex& lock_;
-  GUID_t participant_id_;
+  const GUID_t participant_id_;
+  const CORBA::ULong participant_flags_;
   RepoIdSet ignored_guids_;
   unsigned int publication_counter_, subscription_counter_, topic_counter_;
   LocalPublicationMap local_publications_;
@@ -1249,7 +1498,7 @@ protected:
   // These are the last sequence numbers sent for the various "liveliness" instances.
   DCPS::SequenceNumber local_participant_automatic_liveliness_sn_;
   DCPS::SequenceNumber local_participant_manual_liveliness_sn_;
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
   DCPS::SequenceNumber local_participant_automatic_liveliness_sn_secure_;
   DCPS::SequenceNumber local_participant_manual_liveliness_sn_secure_;
 
@@ -1274,15 +1523,15 @@ protected:
 #endif
 
   DiscoveryWriter_rch publications_writer_;
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
   DiscoveryWriter_rch publications_secure_writer_;
 #endif
   DiscoveryWriter_rch subscriptions_writer_;
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
   DiscoveryWriter_rch subscriptions_secure_writer_;
 #endif
   LivelinessWriter_rch participant_message_writer_;
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
   LivelinessWriter_rch participant_message_secure_writer_;
   SecurityWriter_rch participant_stateless_message_writer_;
   DiscoveryWriter_rch dcps_participant_secure_writer_;
@@ -1291,20 +1540,20 @@ protected:
 #endif
   TypeLookupRequestWriter_rch type_lookup_request_writer_;
   TypeLookupReplyWriter_rch type_lookup_reply_writer_;
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
   TypeLookupRequestWriter_rch type_lookup_request_secure_writer_;
   TypeLookupReplyWriter_rch type_lookup_reply_secure_writer_;
 #endif
   DiscoveryReader_rch publications_reader_;
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
   DiscoveryReader_rch publications_secure_reader_;
 #endif
   DiscoveryReader_rch subscriptions_reader_;
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
   DiscoveryReader_rch subscriptions_secure_reader_;
 #endif
   LivelinessReader_rch participant_message_reader_;
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
   LivelinessReader_rch participant_message_secure_reader_;
   SecurityReader_rch participant_stateless_message_reader_;
   SecurityReader_rch participant_volatile_message_secure_reader_;
@@ -1312,12 +1561,12 @@ protected:
 #endif
   TypeLookupRequestReader_rch type_lookup_request_reader_;
   TypeLookupReplyReader_rch type_lookup_reply_reader_;
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
   TypeLookupRequestReader_rch type_lookup_request_secure_reader_;
   TypeLookupReplyReader_rch type_lookup_reply_secure_reader_;
 #endif
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
   DCPS::RcHandle<ICE::Agent> ice_agent_;
   RcHandle<PublicationAgentInfoListener> publication_agent_info_listener_;
   RcHandle<SubscriptionAgentInfoListener> subscription_agent_info_listener_;
@@ -1380,6 +1629,7 @@ protected:
     const ReaderAssociationRecord_rch record_;
   };
 
+  RtpsDiscoveryCore core_;
 };
 
 bool locators_changed(const ParticipantProxy_t& x,

@@ -13,10 +13,11 @@
 #include "TransportControlElement.inl"
 #endif /* __ACE_INLINE__ */
 
-OpenDDS::DCPS::TransportControlElement::TransportControlElement(
-  Message_Block_Ptr msg_block
-) : TransportQueueElement(1),
-    msg_( msg_block.release())
+OpenDDS::DCPS::TransportControlElement::TransportControlElement(Message_Block_Ptr msg_block,
+                                                                const GUID_t& publication_id)
+  : TransportQueueElement(1)
+  , msg_( msg_block.release())
+  , publication_id_(publication_id)
 {
   DBG_ENTRY_LVL("TransportControlElement", "TransportControlElement", 6);
 }

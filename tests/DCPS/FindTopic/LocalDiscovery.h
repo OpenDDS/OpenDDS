@@ -1,6 +1,9 @@
 #include <dds/DCPS/Discovery.h>
 #include <dds/DCPS/GuidUtils.h>
+
 #include <dds/DCPS/XTypes/TypeLookupService.h>
+
+#include <dds/OpenDDSConfigWrapper.h>
 
 #include <map>
 #include <string>
@@ -10,6 +13,8 @@ using namespace OpenDDS::DCPS;
 class LocalDiscovery : public Discovery {
 public:
   LocalDiscovery();
+
+  virtual RepoKey key() const { return "LocalDiscovery"; }
 
 private:
   EntityId_t next_topic_id_;
@@ -45,7 +50,7 @@ private:
     const DDS::DomainParticipantQos& qos,
     OpenDDS::XTypes::TypeLookupService_rch tls);
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
   AddDomainStatus add_domain_participant_secure(
     DDS::DomainId_t domain,
     const DDS::DomainParticipantQos& qos,
@@ -104,7 +109,7 @@ private:
     const GUID_t& participantId,
     const DDS::TopicQos& qos);
 
-  GUID_t add_publication(
+  bool add_publication(
     DDS::DomainId_t domainId,
     const GUID_t& participantId,
     const GUID_t& topicId,
@@ -131,7 +136,7 @@ private:
     const DDS::DataWriterQos& qos,
     const DDS::PublisherQos& publisherQos);
 
-  GUID_t add_subscription(
+  bool add_subscription(
     DDS::DomainId_t domainId,
     const GUID_t& participantId,
     const GUID_t& topicId,

@@ -8,8 +8,10 @@
 #include <dds/DCPS/transport/framework/ReceivedDataSample.h>
 
 #include <dds/DCPS/RTPS/MessageUtils.h>
+#include <dds/DCPS/RTPS/MessageTypes.h>
 
 #include <dds/DCPS/GuidConverter.h>
+#include <dds/DCPS/EncapsulationHeader.h>
 #include <dds/DCPS/AssociationData.h>
 #include <dds/DCPS/Service_Participant.h>
 #include <dds/DCPS/Qos_Helper.h>
@@ -37,7 +39,9 @@ public:
   SimpleDataReader(const AppConfig& ac, const int readerIndex, AssociationData& publication)
     : config(ac), index(readerIndex), done_(false), seq_()
   {
-    enable_transport(config.readersReliable(), false); //(reliable, durable)
+    TransportClient::set_guid(config.getSubRdrId(index));
+
+    enable_transport(config.readersReliable(), false, 0); //(reliable, durable)
 
     if (index == 1) {
       writeSubReady();
@@ -165,9 +169,11 @@ public:
     const Encoding& locators_encoding = OpenDDS::RTPS::get_locators_encoding();
     size_t size_locator = 0;
     serialized_size(locators_encoding, size_locator, locators);
+    serialized_size(locators_encoding, size_locator, OpenDDS::RTPS::VENDORID_OPENDDS);
     ACE_Message_Block mb_locator(size_locator + 1);
     Serializer ser_loc(&mb_locator, locators_encoding);
     if (!(ser_loc << locators) ||
+        !(ser_loc << OpenDDS::RTPS::VENDORID_OPENDDS) ||
         !(ser_loc << ACE_OutputCDR::from_boolean(false))) { // requires inline QoS
       std::cerr << "subscriber serialize locators failed\n";
     }

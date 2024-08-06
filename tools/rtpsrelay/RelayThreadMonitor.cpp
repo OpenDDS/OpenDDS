@@ -3,6 +3,7 @@
 #include <dds/DCPS/Service_Participant.h>
 #include <dds/DCPS/DCPS_Utils.h>
 #include <dds/DCPS/JsonValueWriter.h>
+#include <dds/DCPS/TimeTypes.h>
 
 #include <ace/Thread.h>
 
@@ -51,23 +52,22 @@ int RelayThreadMonitor::svc()
   int count = 0;
 
   while (running_) {
-    const MonotonicTimePoint expire = MonotonicTimePoint::now() + thread_status_interval;
-    condition_.wait_until(expire, thread_status_manager);
+    condition_.wait_until(MonotonicTimePoint::now() + thread_status_interval, thread_status_manager);
     if (running_) {
       OpenDDS::DCPS::InternalThreadBuiltinTopicDataSeq datas;
       DDS::SampleInfoSeq infos;
-      DDS::ReturnCode_t ret = thread_status_reader_->read(datas,
-                                                          infos,
-                                                          DDS::LENGTH_UNLIMITED,
-                                                          DDS::ANY_SAMPLE_STATE,
-                                                          DDS::ANY_VIEW_STATE,
-                                                          DDS::ANY_INSTANCE_STATE);
+      const DDS::ReturnCode_t ret = thread_status_reader_->read(datas,
+                                                                infos,
+                                                                DDS::LENGTH_UNLIMITED,
+                                                                DDS::ANY_SAMPLE_STATE,
+                                                                DDS::ANY_VIEW_STATE,
+                                                                DDS::ANY_INSTANCE_STATE);
       if (ret != DDS::RETCODE_OK) {
         ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: RelayThreadMonitor::svc failed to read %C\n"), OpenDDS::DCPS::retcode_to_string(ret)));
         continue;
       }
 
-      const DDS::Time_t timestamp = SystemTimePoint::now().to_dds_time() - time_value_to_duration((thread_status_interval * safety_factor).value());
+      const SystemTimePoint expire = SystemTimePoint::now() - thread_status_interval * safety_factor;
 
       for (CORBA::ULong idx = 0; idx != infos.length(); ++idx) {
         if (infos[idx].valid_data) {
@@ -82,7 +82,8 @@ int RelayThreadMonitor::svc()
                      to_json(infos[idx]).c_str()));
         }
 
-        if (infos[idx].instance_state == DDS::ALIVE_INSTANCE_STATE && infos[idx].source_timestamp < timestamp) {
+        const SystemTimePoint timestamp(infos[idx].source_timestamp);
+        if (infos[idx].instance_state == DDS::ALIVE_INSTANCE_STATE && timestamp < expire) {
           ACE_ERROR((LM_ERROR,
                      ACE_TEXT("(%P|%t) ERROR: RelayThreadMonitor::svc thread %C failed to update status.  Aborting...\n"),
                      datas[idx].thread_id.in()));
@@ -103,12 +104,12 @@ void RelayThreadMonitor::on_data_available(DDS::DataReader_ptr /*reader*/)
 
   OpenDDS::DCPS::InternalThreadBuiltinTopicDataSeq datas;
   DDS::SampleInfoSeq infos;
-  DDS::ReturnCode_t ret = thread_status_reader_->read(datas,
-                                                      infos,
-                                                      DDS::LENGTH_UNLIMITED,
-                                                      DDS::NOT_READ_SAMPLE_STATE,
-                                                      DDS::ANY_VIEW_STATE,
-                                                      DDS::ANY_INSTANCE_STATE);
+  const DDS::ReturnCode_t ret = thread_status_reader_->read(datas,
+                                                            infos,
+                                                            DDS::LENGTH_UNLIMITED,
+                                                            DDS::NOT_READ_SAMPLE_STATE,
+                                                            DDS::ANY_VIEW_STATE,
+                                                            DDS::ANY_INSTANCE_STATE);
 
   if (ret == DDS::RETCODE_NO_DATA) {
     return;

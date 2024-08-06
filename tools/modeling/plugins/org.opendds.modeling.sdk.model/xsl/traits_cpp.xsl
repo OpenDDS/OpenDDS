@@ -140,8 +140,16 @@
         '&quot;);', $newline
     )"/>
     <xsl:for-each select="*[name() != 'transportRef']">
-      <xsl:value-of select="concat('    ', $config-varname, '->', name(), '_ = ',
-                                   @value, ';', $newline)"/>
+      <xsl:choose>
+        <xsl:when test="name() = 'passive_connect_duration'">
+          <xsl:value-of select="concat('    ', $config-varname, '->', name(), '(OpenDDS::DCPS::TimeDuration::from_msec(',
+                                @value, '));', $newline)"/>
+        </xsl:when>
+        <xsl:otherwise>
+          <xsl:value-of select="concat('    ', $config-varname, '->', name(), '_ = ',
+                                @value, ';', $newline)"/>
+        </xsl:otherwise>
+      </xsl:choose>
     </xsl:for-each>
 
     <xsl:for-each select="transportRef">
@@ -180,16 +188,14 @@
 </xsl:template>
 
 <!-- Output general configuration settings -->
-<xsl:template match="queue_messages_per_pool
-                   | queue_initial_pools
-                   | max_packet_size
+<xsl:template match="max_packet_size
                    | max_samples_per_packet
                    | optimum_packet_size
                    | thread_per_connection
                    | datalink_release_delay
                    | datalink_control_chunks">
-  <xsl:value-of select="concat('    child_inst->', name(), '_ = ',
-                               @value, ';', $newline)"/>
+  <xsl:value-of select="concat('    child_inst->', name(), '(',
+                               @value, ');', $newline)"/>
 </xsl:template>
 
 <!-- Handle TCP-specific configuration parameters -->
@@ -230,9 +236,9 @@
   <xsl:variable name="value">
     <xsl:call-template name="str-value"/>
   </xsl:variable>
-  <xsl:value-of select="concat('    child_inst->group_address_ = ',
-                               'ACE_INET_Addr(&quot;', $value, '&quot;)',
-                               ';', $newline)"/>
+  <xsl:value-of select="concat('    child_inst->group_address(',
+                               'OpenDDS::DCPS::NetworkAddress(&quot;', $value, '&quot;)',
+                               ');', $newline)"/>
 </xsl:template>
 
 <!-- Output IP address conversion for local address -->
@@ -246,23 +252,31 @@
 </xsl:template>
 
 <!-- Output type-specific configuration settings -->
+<xsl:template match="default_to_ipv6
+                   | port_offset
+                   | reliable
+                   | syn_backoff
+                   | nak_depth
+                   | ttl
+                   | rcv_buffer_size">
+  <xsl:value-of select="concat('    child_inst->', name(), '(',
+                               @value, ');', $newline)"/>
+</xsl:template>
+
+<xsl:template match="syn_interval
+                   | syn_timeout
+                   | nak_interval
+                   | nak_timeout">
+  <xsl:value-of select="concat('    child_inst->', name(), '(OpenDDS::DCPS::TimeDuration::from_msec(',
+                               @value, '));', $newline)"/>
+</xsl:template>
+
 <xsl:template match="enable_nagle_algorithm
                    | conn_retry_initial_delay
                    | conn_retry_backoff_multiplier
                    | conn_retry_attempts
                    | max_output_pause_period
-                   | passive_reconnect_duration
-                   | default_to_ipv6
-                   | port_offset
-                   | reliable
-                   | syn_backoff
-                   | syn_interval
-                   | syn_timeout
-                   | nak_depth
-                   | ttl
-                   | rcv_buffer_size
-                   | nak_interval
-                   | nak_timeout">
+                   | passive_reconnect_duration">
 
   <xsl:value-of select="concat('    child_inst->', name(),  '_ = ',
                                @value, ';', $newline)"/>

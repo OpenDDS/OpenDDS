@@ -25,8 +25,9 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-ShmemTransport::ShmemTransport(const ShmemInst_rch& inst)
-  : TransportImpl(inst)
+ShmemTransport::ShmemTransport(const ShmemInst_rch& inst,
+                                 DDS::DomainId_t domain)
+  : TransportImpl(inst, domain)
 {
   if (!(configure_i(inst) && open())) {
     throw Transport::UnableToCreate();
@@ -149,10 +150,10 @@ ShmemTransport::configure_i(const ShmemInst_rch& config)
 
   ShmemAllocator::MEMORY_POOL_OPTIONS alloc_opts;
 #  if defined OPENDDS_SHMEM_WINDOWS
-  alloc_opts.max_size_ = config->pool_size_;
+  alloc_opts.max_size_ = config->pool_size();
 #  elif defined OPENDDS_SHMEM_UNIX
   alloc_opts.base_addr_ = 0;
-  alloc_opts.segment_size_ = config->pool_size_;
+  alloc_opts.segment_size_ = config->pool_size();
   alloc_opts.minimum_bytes_ = alloc_opts.segment_size_;
   alloc_opts.max_segments_ = 1;
 #  endif /* OPENDDS_SHMEM_WINDOWS */
@@ -164,7 +165,7 @@ ShmemTransport::configure_i(const ShmemInst_rch& config)
   void* mem = alloc_->malloc(sizeof(ShmemSharedSemaphore));
   if (mem == 0) {
     if (log_level >= LogLevel::Error) {
-      ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: ShmemTrasport::configure_i: failed to allocate"
+      ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: ShmemTransport::configure_i: failed to allocate"
                  " space for semaphore in shared memory!\n"));
     }
     return false;
@@ -210,6 +211,8 @@ ShmemTransport::configure_i(const ShmemInst_rch& config)
 void
 ShmemTransport::shutdown_i()
 {
+  DBG_ENTRY_LVL("ShmemTransport","shutdown_i",6);
+
   if (read_task_) {
     read_task_->stop();
     ThreadStatusManager::Sleeper s(TheServiceParticipant->get_thread_status_manager());
@@ -238,7 +241,11 @@ ShmemTransport::shutdown_i()
 #  endif /* OPENDDS_SHMEM_WINDOWS */
 #endif /* OPENDDS_SHMEM_UNSUPPORTED */
 
-    alloc_->release(1 /*close*/);
+    if (alloc_->release(1 /*close*/) == -1) {
+      VDBG_LVL((LM_ERROR,
+                "(%P|%t) ShmemTransport::shutdown_i Release shared memory failed\n"), 1);
+    }
+
     alloc_.reset();
   }
 }
@@ -248,7 +255,7 @@ ShmemTransport::connection_info_i(TransportLocator& info, ConnectionInfoFlags fl
 {
   ShmemInst_rch cfg = config();
   if (cfg) {
-    cfg->populate_locator(info, flags);
+    cfg->populate_locator(info, flags, domain_);
     return true;
   }
   return false;
@@ -268,17 +275,27 @@ ShmemTransport::blob_to_key(const TransportBLOB& blob)
 void
 ShmemTransport::release_datalink(DataLink* link)
 {
+  DBG_ENTRY_LVL("ShmemTransport", "release_datalink", 6);
+
   GuardType guard(links_lock_);
   for (ShmemDataLinkMap::iterator it(links_.begin());
        it != links_.end(); ++it) {
     // We are guaranteed to have exactly one matching DataLink
     // in the map; release any resources held and return.
     if (link == static_cast<DataLink*>(it->second.in())) {
+      VDBG_LVL((LM_DEBUG,
+                "(%P|%t) ShmemTransport::release_datalink link[%@]\n",
+                link), 2);
+
       link->stop();
       links_.erase(it);
       return;
     }
   }
+
+  VDBG_LVL((LM_ERROR,
+            "(%P|%t) ShmemTransport::release_datalink link[%@] not found in ShmemDataLinkMap\n",
+            link), 1);
 }
 
 ShmemTransport::ReadTask::ReadTask(ShmemTransport* outer, ACE_sema_t semaphore)
@@ -312,7 +329,7 @@ ShmemTransport::ReadTask::stop()
   }
   stopped_ = true;
   ACE_OS::sema_post(&semaphore_);
-  ThreadStatusManager::Sleeper s(TheServiceParticipant->get_thread_status_manager());;
+  ThreadStatusManager::Sleeper s(TheServiceParticipant->get_thread_status_manager());
   wait();
 }
 

@@ -5,7 +5,9 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifdef OPENDDS_SECURITY
+#include <dds/OpenDDSConfigWrapper.h>
+
+#if OPENDDS_CONFIG_SECURITY
 
 #include "Checklist.h"
 
@@ -146,9 +148,9 @@ void Checklist::generate_candidate_pairs()
   }
 
   if (frozen_.size() != 0) {
-    check_interval_ = ICE::Configuration::instance()->T_a();
+    check_interval_ = endpoint_manager_->agent_impl->T_a();
     double s = static_cast<double>(frozen_.size());
-    max_check_interval_ = ICE::Configuration::instance()->checklist_period() * (1.0 / s);
+    max_check_interval_ = endpoint_manager_->agent_impl->checklist_period() * (1.0 / s);
   }
 }
 
@@ -375,7 +377,7 @@ void Checklist::generate_triggered_check(const ACE_INET_Addr& local_address,
   add_triggered_check(cp);
   // This can move something from failed to in progress.
   // In that case, we need to schedule.
-  check_interval_ = ICE::Configuration::instance()->T_a();
+  check_interval_ = endpoint_manager_->agent_impl->T_a();
   enqueue(MonotonicTimePoint::now());
 }
 
@@ -631,7 +633,7 @@ void Checklist::do_next_check(const MonotonicTimePoint& a_now)
     CandidatePair cp = triggered_check_queue_.front();
     triggered_check_queue_.pop_front();
 
-    ConnectivityCheck cc(cp, local_agent_info_, remote_agent_info_, ice_tie_breaker_, a_now + ICE::Configuration::instance()->connectivity_check_ttl());
+    ConnectivityCheck cc(cp, local_agent_info_, remote_agent_info_, ice_tie_breaker_, a_now + endpoint_manager_->agent_impl->connectivity_check_ttl());
 
     waiting_.remove(cp);
     in_progress_.push_back(cp);
@@ -640,7 +642,7 @@ void Checklist::do_next_check(const MonotonicTimePoint& a_now)
     endpoint_manager_->send(cc.candidate_pair().remote.address, cc.request());
     connectivity_checks_.push_back(cc);
     endpoint_manager_->set_responsible_checklist(cc.request().transaction_id, rchandle_from(this));
-    check_interval_ = ICE::Configuration::instance()->T_a();
+    check_interval_ = endpoint_manager_->agent_impl->T_a();
     return;
   }
 
@@ -649,7 +651,7 @@ void Checklist::do_next_check(const MonotonicTimePoint& a_now)
     CandidatePair cp = waiting_.front();
     waiting_.pop_front();
 
-    ConnectivityCheck cc(cp, local_agent_info_, remote_agent_info_, ice_tie_breaker_, a_now + ICE::Configuration::instance()->connectivity_check_ttl());
+    ConnectivityCheck cc(cp, local_agent_info_, remote_agent_info_, ice_tie_breaker_, a_now + endpoint_manager_->agent_impl->connectivity_check_ttl());
 
     in_progress_.push_back(cp);
     in_progress_.sort(CandidatePair::priority_sorted);
@@ -657,7 +659,7 @@ void Checklist::do_next_check(const MonotonicTimePoint& a_now)
     endpoint_manager_->send(cc.candidate_pair().remote.address, cc.request());
     connectivity_checks_.push_back(cc);
     endpoint_manager_->set_responsible_checklist(cc.request().transaction_id, rchandle_from(this));
-    check_interval_ = ICE::Configuration::instance()->T_a();
+    check_interval_ = endpoint_manager_->agent_impl->T_a();
     return;
   }
 
@@ -693,7 +695,7 @@ void Checklist::do_next_check(const MonotonicTimePoint& a_now)
   }
 
   // Waiting for the remote or frozen.
-  check_interval_ = ICE::Configuration::instance()->checklist_period();
+  check_interval_ = endpoint_manager_->agent_impl->checklist_period();
 }
 
 void Checklist::execute(const MonotonicTimePoint& a_now)
@@ -712,7 +714,7 @@ void Checklist::execute(const MonotonicTimePoint& a_now)
   }
 
   bool flag = false;
-  TimeDuration interval = std::max(check_interval_, ICE::Configuration::instance()->indication_period());
+  TimeDuration interval = std::max(check_interval_, endpoint_manager_->agent_impl->indication_period());
 
   if (!triggered_check_queue_.empty() ||
       !frozen_.empty() ||
@@ -735,11 +737,11 @@ void Checklist::execute(const MonotonicTimePoint& a_now)
     message.append_attribute(STUN::make_fingerprint());
     endpoint_manager_->send(nominated_->remote.address, message);
     flag = true;
-    interval = std::min(interval, ICE::Configuration::instance()->indication_period());
+    interval = std::min(interval, endpoint_manager_->agent_impl->indication_period());
 
     // Check that we are receiving indications.
     const bool before = nominated_is_live_;
-    nominated_is_live_ = (a_now - last_indication_) < ICE::Configuration::instance()->nominated_ttl();
+    nominated_is_live_ = (a_now - last_indication_) < endpoint_manager_->agent_impl->nominated_ttl();
     if (before && !nominated_is_live_) {
       endpoint_manager_->ice_disconnect(guids_, nominated_->remote.address);
     } else if (!before && nominated_is_live_) {
@@ -814,4 +816,4 @@ void Checklist::indication()
 } // namespace OpenDDS
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
-#endif /* OPENDDS_SECURITY */
+#endif

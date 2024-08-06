@@ -108,14 +108,25 @@ SubscriberImpl::create_datareader(
   DDS::DataReaderListener_ptr a_listener,
   DDS::StatusMask             mask)
 {
-  if (CORBA::is_nil(a_topic_desc)) {
-    if (DCPS_debug_level > 0) {
-      ACE_ERROR((LM_ERROR,
-                ACE_TEXT("(%P|%t) ERROR: ")
-                ACE_TEXT("SubscriberImpl::create_datareader, ")
-                ACE_TEXT("topic desc is nil.\n")));
+  if (!a_topic_desc) {
+    if (log_level >= LogLevel::Notice) {
+      ACE_ERROR((LM_NOTICE,
+                 "(%P|%t) NOTICE: SubscriberImpl::create_datareader: "
+                 "topic is nil\n"));
     }
-    return DDS::DataReader::_nil();
+    return 0;
+  }
+
+  DDS::DomainParticipant_var my_participant = get_participant();
+  DDS::DomainParticipant_var topic_participant = a_topic_desc->get_participant();
+
+  if (my_participant != topic_participant) {
+    if (log_level >= LogLevel::Notice) {
+      ACE_ERROR((LM_NOTICE,
+                 "(%P|%t) NOTICE: SubscriberImpl::create_datareader: "
+                 "topic does not belong to same participant\n"));
+    }
+    return 0;
   }
 
   DDS::DataReaderQos dr_qos;
@@ -370,7 +381,7 @@ SubscriberImpl::delete_datareader(::DDS::DataReader_ptr a_datareader)
     this->monitor_->report();
   }
 
-  const GUID_t subscription_id = dr_servant->get_guid();
+  const GUID_t subscription_id = dr_servant->subscription_id();
   Discovery_rch disco = TheServiceParticipant->get_discovery(this->domain_id_);
   if (!disco->remove_subscription(this->domain_id_,
                                   this->dp_id_,

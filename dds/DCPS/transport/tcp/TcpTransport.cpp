@@ -33,8 +33,9 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-TcpTransport::TcpTransport(const TcpInst_rch& inst)
-  : TransportImpl(inst)
+TcpTransport::TcpTransport(const TcpInst_rch& inst,
+                           DDS::DomainId_t domain)
+  : TransportImpl(inst, domain)
   , acceptor_(new TcpAcceptor(RcHandle<TcpTransport>(this, inc_count())))
   , last_link_(0)
 {
@@ -66,7 +67,7 @@ TcpTransport::blob_to_key(const TransportBLOB& remote,
 {
   const ACE_INET_Addr remote_address = AssociationData::get_remote_address(remote);
   TcpInst_rch cfg = config();
-  const bool is_loopback = cfg && (remote_address == cfg->local_address());
+  const bool is_loopback = cfg && (remote_address == cfg->accept_address());
   return PriorityKey(priority, remote_address, is_loopback, active);
 }
 
@@ -94,7 +95,7 @@ TcpTransport::connect_datalink(const RemoteTransport& remote,
     GuardType guard(links_lock_);
 
     if (find_datalink_i(key, link)) {
-      VDBG_LVL((LM_DEBUG, "(%P|%t) TcpTransport::connect_datalink found datalink link[%@]\n", link.in()), 0);
+      VDBG_LVL((LM_DEBUG, "(%P|%t) TcpTransport::connect_datalink found datalink[%@]\n", link.in()), 0);
       link->add_on_start_callback(client, remote.repo_id_);
       add_pending_connection(client, link);
       link->do_association_actions();
@@ -127,7 +128,7 @@ TcpTransport::connect_datalink(const RemoteTransport& remote,
 
     // Can't make this call while holding onto TransportClient::lock_
     ACE_Time_Value conn_timeout;
-    conn_timeout.msec(cfg->active_conn_timeout_period_);
+    conn_timeout.msec(cfg->active_conn_timeout_period());
 
     ret = connector_.connect(pConn, key.address(), ACE_Synch_Options(ACE_Synch_Options::USE_REACTOR|ACE_Synch_Options::USE_TIMEOUT, conn_timeout));
   }
@@ -244,7 +245,7 @@ TcpTransport::accept_datalink(const RemoteTransport& remote,
     GuardType guard(links_lock_);
 
     if (find_datalink_i(key, link)) {
-      VDBG_LVL((LM_DEBUG, "(%P|%t) TcpTransport::accept_datalink found datalink link[%@]\n", link.in()), 0);
+      VDBG_LVL((LM_DEBUG, "(%P|%t) TcpTransport::accept_datalink found datalink[%@]\n", link.in()), 0);
       link->add_on_start_callback(client, remote.repo_id_);
       add_pending_connection(client, link);
       guard.release();
@@ -328,24 +329,15 @@ TcpTransport::configure_i(const TcpInst_rch& config)
 
   connector_.open(reactor_task()->get_reactor());
 
-  // Override with DCPSDefaultAddress.
-  if (config->local_address() == ACE_INET_Addr() &&
-      TheServiceParticipant->default_address().to_addr() != ACE_INET_Addr()) {
-    VDBG_LVL((LM_DEBUG,
-              ACE_TEXT("(%P|%t) TcpTransport::configure_i overriding with DCPSDefaultAddress\n")), 2);
-
-    config->local_address(TheServiceParticipant->default_address().to_addr());
-  }
-
   VDBG_LVL((LM_DEBUG, ACE_TEXT("(%P|%t) TcpTransport::configure_i opening acceptor for %C on %C\n"),
-            config->local_address_string().c_str(), LogAddr(config->local_address()).c_str()), 2);
+            config->local_address().c_str(), LogAddr(config->accept_address()).c_str()), 2);
 
   // Open our acceptor object so that we can accept passive connections
   // on our config->local_address_.
-  if (this->acceptor_->open(config->local_address(),
+  if (this->acceptor_->open(config->accept_address(),
                             this->reactor_task()->get_reactor()) != 0) {
     ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Acceptor failed to open %C: %p\n"),
-                      LogAddr(config->local_address()).c_str(), ACE_TEXT("open")), false);
+                      LogAddr(config->accept_address()).c_str(), ACE_TEXT("open")), false);
   }
 
   // update the port number (incase port zero was given).
@@ -361,29 +353,7 @@ TcpTransport::configure_i(const TcpInst_rch& config)
   VDBG_LVL((LM_DEBUG, ACE_TEXT("(%P|%t) TcpTransport::configure_i listening on %C\n"),
             LogAddr(address).c_str()), 2);
 
-  const unsigned short port = address.get_port_number();
-
-  // As default, the acceptor will be listening on INADDR_ANY but advertise with the fully
-  // qualified hostname and actual listening port number.
-  if (config->local_address().is_any()) {
-    const std::string hostname = get_fully_qualified_hostname();
-    config->local_address(port, hostname.c_str());
-    if (config->local_address() == ACE_INET_Addr()) {
-       ACE_ERROR_RETURN((LM_ERROR,
-                          ACE_TEXT("(%P|%t) ERROR: Failed to resolve a local address using fully qualified hostname '%C'\n"),
-                          hostname.c_str()),
-                          false);
-    }
-  }
-
-  // Now we got the actual listening port. Update the port number in the configuration
-  // if it's 0 originally.
-  else if (config->local_address().get_port_number() == 0) {
-    config->local_address_set_port(port);
-  }
-
-  // Ahhh...  The sweet smell of success!
-  return true;
+  return config->set_locator_address(address);
 }
 
 void
@@ -474,9 +444,9 @@ TcpTransport::connection_info_i(TransportLocator& local_info, ConnectionInfoFlag
   TcpInst_rch cfg = config();
   if (cfg) {
     VDBG_LVL((LM_DEBUG, "(%P|%t) TcpTransport public address string <%C>\n",
-              cfg->get_public_address().c_str()), 2);
+              cfg->get_locator_address().c_str()), 2);
 
-    cfg->populate_locator(local_info, flags);
+    cfg->populate_locator(local_info, flags, domain_);
     return true;
   }
 
@@ -613,7 +583,7 @@ TcpTransport::passive_connection(const ACE_INET_Addr& remote_address,
 
   const PriorityKey key(connection->transport_priority(),
                         remote_address,
-                        remote_address == cfg->local_address(),
+                        remote_address == cfg->accept_address(),
                         connection->is_connector());
 
   VDBG_LVL((LM_DEBUG, ACE_TEXT("(%P|%t) TcpTransport::passive_connection() - ")
@@ -699,7 +669,7 @@ TcpTransport::connect_tcp_datalink(TcpDataLink& link,
   TcpSendStrategy_rch send_strategy (
     make_rch<TcpSendStrategy>(last_link_.load(), ref(link),
                              new TcpSynchResource(link,
-                                                  cfg->max_output_pause_period_),
+                                                  cfg->max_output_pause_period()),
                              this->reactor_task(), link.transport_priority()));
 
   TcpReceiveStrategy_rch receive_strategy(
@@ -734,7 +704,7 @@ TcpTransport::fresh_link(TcpConnection_rch connection)
 
   PriorityKey key(connection->transport_priority(),
                   connection->get_remote_address(),
-                  connection->get_remote_address() == cfg->local_address(),
+                  connection->get_remote_address() == cfg->accept_address(),
                   connection->is_connector());
 
   if (this->links_.find(key, link) == 0) {

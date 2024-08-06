@@ -9,18 +9,23 @@
 
 #include "RtpsUdpSendStrategy.h"
 
-#include <dds/DCPS/SequenceNumber.h>
-#include <dds/DCPS/Serializer.h>
 #include <dds/DCPS/DataSampleElement.h>
+#include <dds/DCPS/DisjointSequence.h>
+#include <dds/DCPS/EncapsulationHeader.h>
 #include <dds/DCPS/Marked_Default_Qos.h>
 #include <dds/DCPS/Qos_Helper.h>
+#include <dds/DCPS/SequenceNumber.h>
+#include <dds/DCPS/Serializer.h>
 #include <dds/DCPS/Service_Participant.h>
-#include <dds/DCPS/DisjointSequence.h>
+
 #include <dds/DCPS/RTPS/RtpsCoreTypeSupportImpl.h>
 #include <dds/DCPS/RTPS/MessageTypes.h>
 #include <dds/DCPS/RTPS/MessageUtils.h>
+
 #include <dds/DCPS/transport/framework/ReceivedDataSample.h>
 #include <dds/DCPS/transport/framework/TransportSendListener.h>
+
+#include <dds/OpenDDSConfigWrapper.h>
 
 #include <cstring>
 
@@ -110,7 +115,7 @@ RtpsSampleHeader::init(ACE_Message_Block& mb)
   CASE_SMKIND(DATA, DataSubmessage, data)
   CASE_SMKIND(DATA_FRAG, DataFragSubmessage, data_frag)
 
-#if defined(OPENDDS_SECURITY)
+#if OPENDDS_CONFIG_SECURITY
     // Each submessage type introduced by the Security spec is treated
     // as an opaque octet sequence at this layer.
     case SEC_BODY:
@@ -163,12 +168,19 @@ RtpsSampleHeader::init(ACE_Message_Block& mb)
       return;
     }
 
-    if ((kind == DATA && (flags & (FLAG_D | FLAG_K_IN_DATA)))
-        || kind == DATA_FRAG) {
+    if ((data_ && (flags & (FLAG_D | FLAG_K_IN_DATA))) || frag_) {
       // These Submessages have a payload which we haven't deserialized yet.
       // The TransportReceiveStrategy will know this via message_length().
       // octetsToNextHeader does not count the SubmessageHeader (4 bytes)
       message_length_ = octetsToNextHeader + SMHDR_SZ - serialized_size_;
+      if (frag_) {
+        const DataFragSubmessage& df = submessage_.data_frag_sm();
+        if (df.fragmentSize == 0 || df.fragmentStartingNum.value == 0 ||
+            df.fragmentsInSubmessage == 0 || last_fragment(df) > total_fragments(df)) {
+          valid_ = false;
+          return;
+        }
+      }
     } else {
       // These Submessages _could_ have extra data that we don't know about
       // (from a newer minor version of the RTPS spec).  Either way, indicate
@@ -763,6 +775,16 @@ RtpsSampleHeader::split(const ACE_Message_Block& orig, size_t size,
 
   return SequenceRange(starting_frag + frags - 1,
                        starting_frag + frags + tail_frags - 1);
+}
+
+FragmentNumber RtpsSampleHeader::last_fragment(const RTPS::DataFragSubmessage& df)
+{
+  return df.fragmentStartingNum.value + df.fragmentsInSubmessage - 1;
+}
+
+ACE_UINT32 RtpsSampleHeader::total_fragments(const RTPS::DataFragSubmessage& df)
+{
+  return df.sampleSize / df.fragmentSize + ((df.sampleSize % df.fragmentSize) ? 1 : 0);
 }
 
 }

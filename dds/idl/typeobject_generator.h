@@ -81,7 +81,7 @@ private:
                    const OpenDDS::XTypes::TypeObject& minimal_to,
                    const OpenDDS::XTypes::TypeObject& complete_to);
   void set_builtin_member_annotations(AST_Decl* member,
-    OpenDDS::XTypes::Optional<OpenDDS::XTypes::AppliedBuiltinMemberAnnotations>& annotations);
+    OPENDDS_OPTIONAL_NS::optional<OpenDDS::XTypes::AppliedBuiltinMemberAnnotations>& annotations);
 
   OpenDDS::XTypes::TypeIdentifier get_minimal_type_identifier(AST_Type* type);
   OpenDDS::XTypes::TypeIdentifier get_complete_type_identifier(AST_Type* type);
@@ -120,6 +120,10 @@ private:
   std::map<AST_Type*, Element> element_;
   bool get_type_map_declared_;
   OpenDDS::DCPS::Encoding* typeid_encoding_;
+
+  typedef std::map<std::string, ACE_CDR::Long> EnumValues;
+  typedef std::map<AST_Enum*, EnumValues> EnumValueMap;
+  EnumValueMap enum_values_;
 };
 
 #endif

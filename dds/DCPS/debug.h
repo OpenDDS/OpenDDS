@@ -8,11 +8,14 @@
 
 #include "dcps_export.h"
 
+#include <dds/OpenDDSConfigWrapper.h>
+
 #ifndef OPENDDS_UTIL_BUILD
 #include "transport/framework/TransportDebug.h"
 #endif
 
 #include <ace/ace_wchar.h>
+#include <ace/Log_Priority.h>
 
 #ifndef ACE_LACKS_PRAGMA_ONCE
 #  pragma once
@@ -53,6 +56,9 @@ public:
   }
   const char* get_as_string() const;
 
+  static const char* to_string(Value val, bool uppercase = true);
+  static ACE_Log_Priority to_priority(Value val);
+
 private:
   Value level_;
 };
@@ -85,7 +91,7 @@ extern OpenDDS_Dcps_Export unsigned int Transport_debug_level;
 extern OpenDDS_Dcps_Export TransportDebug transport_debug;
 #endif
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
 /**
  * Global Security Debug Settings
  */
@@ -101,7 +107,7 @@ public:
    * Unknown ones are ignored and "all" enables all the flags.
    * Ex: "bookkeeping,showkeys"
    */
-  void parse_flags(const ACE_TCHAR* flags);
+  void parse_flags(const char* flags);
 
   /**
    * Set debug level similarly to DCPSDebugLevel
@@ -166,7 +172,7 @@ public:
     , orig_dcps_debug_level_(DCPS_debug_level)
     , orig_transport_debug_level_(Transport_debug_level)
     , orig_transport_debug_(transport_debug)
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
     , orig_security_debug_(security_debug)
 #endif
   {
@@ -178,7 +184,7 @@ public:
     DCPS_debug_level = orig_dcps_debug_level_;
     Transport_debug_level = orig_transport_debug_level_;
     transport_debug = orig_transport_debug_;
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
     security_debug = orig_security_debug_;
 #endif
   }
@@ -188,7 +194,7 @@ private:
   unsigned orig_dcps_debug_level_;
   unsigned orig_transport_debug_level_;
   TransportDebug orig_transport_debug_;
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
   SecurityDebug orig_security_debug_;
 #endif
 };

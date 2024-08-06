@@ -1,6 +1,4 @@
 /*
- *
- *
  * Distributed under the OpenDDS License.
  * See: http://www.opendds.org/license.html
  */
@@ -8,14 +6,14 @@
 #ifndef OPENDDS_DCPS_ZEROCOPYSEQ_T_H
 #define OPENDDS_DCPS_ZEROCOPYSEQ_T_H
 
-#if !defined (ACE_LACKS_PRAGMA_ONCE)
-# pragma once
-#endif /* ACE_LACKS_PRAGMA_ONCE */
-
-#include /**/ "ace/pre.h"
+#include <ace/config-macros.h>
+#ifndef ACE_LACKS_PRAGMA_ONCE
+#  pragma once
+#endif
 
 #include "ZeroCopySeqBase.h"
 #include "ZeroCopyAllocator_T.h"
+
 #include <ace/Vector_T.h>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
@@ -224,15 +222,6 @@ TAO_END_VERSIONED_NAMESPACE_DECL
 #include "ZeroCopySeq_T.inl"
 #endif /* __ACE_INLINE__ */
 
-#if defined (ACE_TEMPLATES_REQUIRE_SOURCE)
 #include "ZeroCopySeq_T.cpp"
-#endif /* ACE_TEMPLATES_REQUIRE_SOURCE */
-
-#if defined (ACE_TEMPLATES_REQUIRE_PRAGMA)
-#pragma message ("ZeroCopySeq_T.cpp template inst")
-#pragma implementation ("ZeroCopySeq_T.cpp")
-#endif /* ACE_TEMPLATES_REQUIRE_PRAGMA */
-
-#include /**/ "ace/post.h"
 
 #endif /* ZEROCOPYSEQ_H  */

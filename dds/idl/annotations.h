@@ -88,6 +88,9 @@ bool get_bool_annotation_member_value(AST_Annotation_Appl* appl,
 ACE_UINT32 get_u32_annotation_member_value(AST_Annotation_Appl* appl,
                                            const char* member_name);
 
+ACE_INT32 get_i32_annotation_member_value(AST_Annotation_Appl* appl,
+                                          const char* member_name);
+
 std::string get_str_annotation_member_value(AST_Annotation_Appl* appl,
                                             const char* member_name);
 
@@ -138,6 +141,9 @@ bool AnnotationWithValue<bool>::value_from_appl(AST_Annotation_Appl* appl) const
 
 template<>
 unsigned AnnotationWithValue<ACE_UINT32>::value_from_appl(AST_Annotation_Appl* appl) const;
+
+template<>
+int AnnotationWithValue<ACE_INT32>::value_from_appl(AST_Annotation_Appl* appl) const;
 
 template<>
 std::string AnnotationWithValue<std::string>::value_from_appl(AST_Annotation_Appl* appl) const;
@@ -335,6 +341,15 @@ public:
   TryConstructFailAction union_value(AST_Union* node) const;
 };
 
+// @value ====================================================================
+
+struct ValueAnnotation : AnnotationWithValue<ACE_INT32> {
+  // @value(long) is supported for enumerators
+  // more general @value support as described in IDL4.2 is not yet supported
+  std::string definition() const;
+  std::string name() const;
+};
+
 // OpenDDS Specific Annotations
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
@@ -415,6 +430,73 @@ namespace OpenDDS {
   protected:
     DataRepresentation value_from_appl(AST_Annotation_Appl* appl) const;
   };
+
+  namespace internal {
+    /**
+     * Types with this annotation will not get a DynamicDataAdapterImpl generated
+     * for them. Attempting to access struct or union members with this
+     * annotation on their type will result in an UNSUPPORTED retcode.
+     * get_dynamic_data_adapter for these types will be generated, but will
+     * return nullptr.
+     */
+    struct NoDynamicDataAdapterAnnotation : public Annotation {
+      std::string definition() const
+      {
+        return
+          "module OpenDDS {\n"
+          "  module internal {\n"
+          "    @annotation no_dynamic_data_adapter {\n"
+          "    };\n"
+          "  };\n"
+          "};\n";
+      }
+
+      std::string name() const
+      {
+        return "no_dynamic_data_adapter";
+      }
+
+      std::string module() const
+      {
+        return "::OpenDDS::internal::";
+      }
+    };
+
+    /**
+     * Types with this annotation have a special serialization case in
+     * marshal_generator.
+     */
+    class SpecialSerializationAnnotation : public AnnotationWithValue<std::string> {
+    public:
+      std::string definition() const
+      {
+        return
+          "module OpenDDS {\n"
+          "  module internal {\n"
+          "    @annotation special_serialization {\n"
+          "      string template_name default \"\";\n"
+          "    };\n"
+          "  };\n"
+          "};\n";
+      }
+
+      std::string name() const
+      {
+        return "special_serialization";
+      }
+
+      std::string module() const
+      {
+        return "::OpenDDS::internal::";
+      }
+
+    protected:
+      std::string value_from_appl(AST_Annotation_Appl* appl) const
+      {
+        return get_str_annotation_member_value(appl, "template_name");
+      }
+    };
+  }
 }
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
 

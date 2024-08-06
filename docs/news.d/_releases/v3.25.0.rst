@@ -1,0 +1,88 @@
+Released 2023-07-20
+
+Download :ghrelease:`this release on GitHub <DDS-3.25>`.
+
+Read `the documentation for this release on Read the Docs <https://opendds.readthedocs.io/en/dds-3.25>`__.
+
+Additions
+=========
+
+- The Observer interface now has support for dispose and unregister. (:ghpr:`4137`)
+- OpenDDS now stores configuration information in a key-value store. (:ghpr:`4138`, :ghpr:`4134`, :ghpr:`4151`)
+
+  - Configuration values can be set via API, config file, or command line.
+
+    - Currently applies to the `common` section and common transport configuration.
+- Added ``encode_to_string``, ``encode_to_bytes``, ``decode_from_string``, and ``decode_from_bytes`` to ``TypeSupport``. (:ghpr:`4144`, :ghpr:`4122`, :ghpr:`4133`, :ghpr:`4135`)
+
+  - These methods convert samples to and from other formats.
+  - Currently only ``OpenDDS::DCPS::JSON_DATA_REPRESENTATION`` is supported.
+- Add ``-Gequality`` option to opendds_idl to generate ``==`` and ``!=`` for structs and unions. (:ghpr:`4154`)
+
+  - The members of the struct or union must have a type that could appear in a DDS topic and be supported by opendds_idl.
+
+  - The motivation for this change was to make the generated code more useful as many users go on to define these operators.
+
+- CMake Config Package
+
+  - Added :ref:`executable targets <cmake-executables>`. (:ghpr:`4160`)
+  - :cmake:var:`OPENDDS_CMAKE_VERBOSE` output has been expanded, but now accepts a list of categories to control how much is logged. (:ghpr:`4160`)
+  - Added :cmake:func:`opendds_export_header` to generate an export header. (:ghpr:`4160`)
+
+  - :cmake:func:`opendds_target_sources`:
+
+    - Added :cmake:func:`opendds_target_sources(GENERATE_SERVER_SKELETONS)` to allow ``tao_idl`` to generate code for CORBA servers. (:ghpr:`4140`)
+    - Added :cmake:func:`opendds_target_sources(AUTO_LINK)` as a fine-grained version of :cmake:var:`OPENDDS_AUTO_LINK_DCPS`. (:ghpr:`4140`)
+    - Added :cmake:func:`opendds_target_sources(SKIP_TAO_IDL)` to disable ``tao_idl``. (:ghpr:`4140`)
+    - Added :cmake:func:`opendds_target_sources(SKIP_OPENDDS_IDL)` to disable ``opendds_idl``. (:ghpr:`4140`)
+    - Added :cmake:func:`opendds_target_sources(USE_EXPORT)` to allow overriding the generated export header with an existing one. (:ghpr:`4160`)
+
+  - Libraries and features can be passed to ``find_package(OpenDDS COMPONENTS)`` to change what is required. (:ghpr:`4160`, :ghpr:`4140`)
+
+    - See :ref:`cmake-components` for details.
+
+Security
+========
+
+- Fixed null pointer exception caused by RTPS Parameters with incorrect zero size. (:ghpr:`4197`)
+
+Fixes
+=====
+
+- CMake Config Package
+
+  - Made linking dependencies and macro definitions closer match using MPC with OpenDDS and TAO. (:ghpr:`4140`)
+  - Fixed issues with passing ``OPENDDS_IDL_OPTIONS -SI`` to ``opendds_target_sources``. (:ghpr:`4140`)
+
+- Fixed issue deserializing bounded sequences with JSON (:ghpr:`4150`)
+
+  - The deserialization will fail if the JSON input contains more elements than the bounded sequence can hold.
+- Updated the RtpsRelay's tracking of client IP addresses so they are removed when no longer used. (:ghpr:`4202`)
+
+  - The RtpsRelay configuration option -MaxAddrSetSize was renamed to -MaxIpsPerClient
+
+Documentation
+=============
+
+- Moved various markdown files into the Sphinx documentation so that they are now included along with the Developer's Guide: (:ghpr:`4139`)
+
+  - ``INSTALL.md`` is now :doc:`/devguide/building/index`.
+  - ``docs/dependencies.md`` is now :doc:`/devguide/building/dependencies`.
+  - ``docs/cmake.md`` is now :doc:`/devguide/building/cmake`.
+  - ``docs/android.md`` is now :doc:`/devguide/building/android`.
+  - ``docs/ios.md`` is now :doc:`/devguide/building/ios`.
+
+- Restructured how the documentation is presented to cleanly separate the Developer's Guide and internal documentation. (:ghpr:`4139`)
+- Added a :doc:`proper main page </index>`. (:ghpr:`4139`)
+- Added :doc:`/glossary`. (:ghpr:`4139`)
+- In addition to :ghfile:`NEWS.md`, started adding release notes to :doc:`/news`. (:ghpr:`4125`)
+
+Notes
+=====
+
+- CMake Config Package
+
+  - ``OPENDDS_TARGET_SOURCES`` is now called ``opendds_target_sources``. (:ghpr:`4140`)
+
+    - CMake macros and functions names are case insensitive, so this should have no effect on CMake code.
+

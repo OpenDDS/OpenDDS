@@ -128,9 +128,9 @@ public:
   /// make_reservation() methods.  All we know is that the supplied
   /// GUID_t is considered to be a remote id.  It could be a
   /// remote subscriber or a remote publisher.
-  void release_reservations(GUID_t          remote_id,
-                            GUID_t          local_id,
-                            DataLinkSetMap& released_locals);
+  void release_reservations(const GUID_t& remote_id,
+                            const GUID_t& local_id,
+                            DataLinkSetMap* released_locals = 0);
 
   void schedule_delayed_release();
 
@@ -282,13 +282,14 @@ public:
 
   void set_scheduling_release(bool scheduling_release);
 
-  virtual void send_final_acks (const GUID_t& readerid);
+  virtual void send_final_acks(const GUID_t& readerid);
 
   virtual WeakRcHandle<ICE::Endpoint> get_ice_endpoint() const { return WeakRcHandle<ICE::Endpoint>(); }
 
   virtual bool is_leading(const GUID_t& /*writer*/,
                           const GUID_t& /*reader*/) const { return false; }
 
+  virtual bool uses_end_historic_control_messages() const { return true; }
 
 protected:
 

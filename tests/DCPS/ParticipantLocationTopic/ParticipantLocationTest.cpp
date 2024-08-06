@@ -3,15 +3,18 @@
  * See: http://www.opendds.org/license.html
  */
 
-#include "ParticipantLocationListenerImpl.h"
+#include "BitListener.h"
 
 #include <MessengerTypeSupportImpl.h>
 #include <tests/Utils/StatusMatching.h>
 
+#include <dds/DCPS/BuiltInTopicUtils.h>
 #include <dds/DCPS/Marked_Default_Qos.h>
 #include <dds/DCPS/PublisherImpl.h>
 #include <dds/DCPS/Service_Participant.h>
-#include <dds/DCPS/BuiltInTopicUtils.h>
+
+#include <dds/OpenDDSConfigWrapper.h>
+
 #include <dds/DCPS/transport/framework/TransportExceptions.h>
 #include <dds/DCPS/transport/framework/TransportRegistry.h>
 #ifdef ACE_AS_STATIC_LIBS
@@ -40,29 +43,27 @@ const char sub_permissions_file[] = "file:./permissions_subscriber_signed.p7s";
 bool no_ice = false;
 bool ipv6 = false;
 
-int parse_args (int argc, ACE_TCHAR *argv[])
+int parse_args(int argc, ACE_TCHAR* argv[])
 {
-  ACE_Get_Opt get_opts (argc, argv, ACE_TEXT ("n6"));
+  ACE_Get_Opt get_opts(argc, argv, ACE_TEXT("n6"));
   int c;
 
-  while ((c = get_opts ()) != -1)
-    switch (c)
-      {
-      case 'n':
-        no_ice = true;
-        break;
-      case '6':
-        ipv6 = true;
-        break;
-      case '?':
-      default:
-        ACE_ERROR_RETURN ((LM_ERROR,
-                           "usage:  %s "
-                           "-n do not check for ICE connections"
-                           "\n",
-                           argv [0]),
-                          -1);
-      }
+  while ((c = get_opts()) != -1)
+    switch (c) {
+    case 'n':
+      no_ice = true;
+      break;
+    case '6':
+      ipv6 = true;
+      break;
+    case '?':
+    default:
+      ACE_ERROR_RETURN((LM_ERROR, "usage: %s\n"
+                        "\t-n do not check for ICE connections\n"
+                        "\t-6 use IPv6\n",
+                        argv[0]),
+                       -1);
+    }
   // Indicates successful parsing of the command line
   return 0;
 }
@@ -86,7 +87,7 @@ void participants_done_callback()
   participants_done_cond.signal();
 }
 
-int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
+int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 {
   int status = EXIT_SUCCESS;
 
@@ -94,26 +95,18 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
     std::cout << "Starting publisher" << std::endl;
 
-    // Initialize DomainParticipantFactory
     DDS::DomainParticipantFactory_var dpf = TheParticipantFactoryWithArgs(argc, argv);
 
-    if( parse_args(argc, argv) != 0)
+    if (parse_args(argc, argv) != 0)
       return 1;
 
     DDS::DomainParticipantQos pub_qos;
     dpf->get_default_participant_qos(pub_qos);
 
-    DDS::PropertySeq& pub_props = pub_qos.property.value;
-    append(pub_props, "OpenDDS.RtpsRelay.Groups", "Messenger", true);
-
     DDS::DomainParticipantQos sub_qos;
     dpf->get_default_participant_qos(sub_qos);
 
-    DDS::PropertySeq& sub_props = sub_qos.property.value;
-    append(sub_props, "OpenDDS.RtpsRelay.Groups", "Messenger", true);
-
-#ifdef OPENDDS_SECURITY
-      // Determine the path to the keys
+#if OPENDDS_CONFIG_SECURITY
       OPENDDS_STRING path_to_tests;
       const char* dds_root = ACE_OS::getenv("DDS_ROOT");
       if (dds_root && dds_root[0]) {
@@ -131,6 +124,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       const OPENDDS_STRING sub_id_key_file = path_to_tests + sub_id_key_file_from_tests;
 
       if (TheServiceParticipant->get_security()) {
+        DDS::PropertySeq& pub_props = pub_qos.property.value;
         append(pub_props, DDS::Security::Properties::AuthIdentityCA, auth_ca_file.c_str());
         append(pub_props, DDS::Security::Properties::AuthIdentityCertificate, pub_id_cert_file.c_str());
         append(pub_props, DDS::Security::Properties::AuthPrivateKey, pub_id_key_file.c_str());
@@ -138,6 +132,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
         append(pub_props, DDS::Security::Properties::AccessGovernance, governance_file);
         append(pub_props, DDS::Security::Properties::AccessPermissions, pub_permissions_file);
 
+        DDS::PropertySeq& sub_props = sub_qos.property.value;
         append(sub_props, DDS::Security::Properties::AuthIdentityCA, auth_ca_file.c_str());
         append(sub_props, DDS::Security::Properties::AuthIdentityCertificate, sub_id_cert_file.c_str());
         append(sub_props, DDS::Security::Properties::AuthPrivateKey, sub_id_key_file.c_str());
@@ -148,47 +143,43 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
 #endif
 
-    // Create Publisher DomainParticipant
     DDS::DomainParticipant_var participant = dpf->create_participant(42,
                                                                      pub_qos,
                                                                      DDS::DomainParticipantListener::_nil(),
                                                                      OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
-    if (CORBA::is_nil(participant.in())) {
+    if (!participant) {
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("%N:%l: main()")
                         ACE_TEXT(" ERROR: create_participant failed!\n")),
                        EXIT_FAILURE);
     }
 
-    // Register TypeSupport (Messenger::Message)
     Messenger::MessageTypeSupport_var mts =
       new Messenger::MessageTypeSupportImpl();
 
-    if (mts->register_type(participant.in(), "") != DDS::RETCODE_OK) {
+    if (mts->register_type(participant, "") != DDS::RETCODE_OK) {
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("%N:%l: main()")
                         ACE_TEXT(" ERROR: register_type failed!\n")),
                        EXIT_FAILURE);
     }
 
-    // Create Topic
     CORBA::String_var type_name = mts->get_type_name();
     DDS::Topic_var topic =
       participant->create_topic("Movie Discussion List",
-                                type_name.in(),
+                                type_name,
                                 TOPIC_QOS_DEFAULT,
                                 DDS::TopicListener::_nil(),
                                 OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
-    if (CORBA::is_nil(topic.in())) {
+    if (!topic) {
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("%N:%l: main()")
                         ACE_TEXT(" ERROR: create_topic failed!\n")),
                        EXIT_FAILURE);
     }
 
-    // Create Publisher
     DDS::PublisherQos publisher_qos;
     participant->get_default_publisher_qos(publisher_qos);
     publisher_qos.partition.name.length(1);
@@ -199,7 +190,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
                                     DDS::PublisherListener::_nil(),
                                     OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
-    if (CORBA::is_nil(pub.in())) {
+    if (!pub) {
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("%N:%l: main()")
                         ACE_TEXT(" ERROR: create_publisher failed!\n")),
@@ -214,21 +205,19 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     qos.history.kind = DDS::KEEP_ALL_HISTORY_QOS;
     qos.reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
 
-    // Create DataWriter
     DDS::DataWriter_var dw =
-      pub->create_datawriter(topic.in(),
+      pub->create_datawriter(topic,
                              qos,
                              DDS::DataWriterListener::_nil(),
                              OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
-    if (CORBA::is_nil(dw.in())) {
+    if (!dw) {
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("%N:%l: main()")
                         ACE_TEXT(" ERROR: create_datawriter failed!\n")),
                        EXIT_FAILURE);
     }
 
-    // Get the Built-In Subscriber for Built-In Topics
     DDS::Subscriber_var bit_subscriber = participant->get_builtin_subscriber();
 
     DDS::DataReader_var pub_loc_dr = bit_subscriber->lookup_datareader(OpenDDS::DCPS::BUILT_IN_PARTICIPANT_LOCATION_TOPIC);
@@ -240,7 +229,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       ACE_OS::exit(EXIT_FAILURE);
     }
 
-    ParticipantLocationListenerImpl* listener = new ParticipantLocationListenerImpl("Publisher", no_ice, ipv6, participants_done_callback);
+    BitListener* listener = new BitListener("Publisher", no_ice, ipv6, participants_done_callback);
     DDS::DataReaderListener_var listener_var(listener);
 
     CORBA::Long retcode =
@@ -255,47 +244,61 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     }
     // No need to call on_data_available since subscriber doesn't exist.
 
-    // Create Subscriber DomainParticipant
+    DDS::DataReader_var part_dr = bit_subscriber->lookup_datareader(OpenDDS::DCPS::BUILT_IN_PARTICIPANT_TOPIC);
+    if (!part_dr) {
+      ACE_ERROR((LM_ERROR,
+                 ACE_TEXT("%N:%l main()")
+                 ACE_TEXT(" ERROR: Could not get %C DataReader\n"),
+                 OpenDDS::DCPS::BUILT_IN_PARTICIPANT_TOPIC));
+      ACE_OS::exit(EXIT_FAILURE);
+    }
+
+    retcode = part_dr->set_listener(listener, OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+    if (retcode != DDS::RETCODE_OK) {
+      ACE_ERROR((LM_ERROR,
+                 ACE_TEXT("%N:%l main()")
+                 ACE_TEXT(" ERROR: set_listener for %C failed\n"),
+                 OpenDDS::DCPS::BUILT_IN_PARTICIPANT_TOPIC));
+      ACE_OS::exit(EXIT_FAILURE);
+    }
+
     std::cout << "Starting subscriber" << std::endl;
 
     DDS::DomainParticipant_var sub_participant = dpf->create_participant(42,
-                                                                     sub_qos,
-                                                                     DDS::DomainParticipantListener::_nil(),
-                                                                     OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+                                                                         sub_qos,
+                                                                         DDS::DomainParticipantListener::_nil(),
+                                                                         OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
-    if (CORBA::is_nil(sub_participant.in())) {
+    if (!sub_participant) {
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("%N:%l: main()")
                         ACE_TEXT(" ERROR: subscriber create_participant failed!\n")),
                        EXIT_FAILURE);
     }
 
-    // Register Type (Messenger::Message)
     Messenger::MessageTypeSupport_var sub_ts =
       new Messenger::MessageTypeSupportImpl();
 
-    if (sub_ts->register_type(sub_participant.in(), "") != DDS::RETCODE_OK) {
+    if (sub_ts->register_type(sub_participant, "") != DDS::RETCODE_OK) {
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("%N:%l main()")
                         ACE_TEXT(" ERROR: register_type() failed!\n")), EXIT_FAILURE);
     }
 
-    // Create Topic (Movie Discussion List)
     CORBA::String_var sub_type_name = sub_ts->get_type_name();
     DDS::Topic_var sub_topic =
       sub_participant->create_topic("Movie Discussion List",
-                                sub_type_name.in(),
-                                TOPIC_QOS_DEFAULT,
-                                DDS::TopicListener::_nil(),
-                                OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+                                    sub_type_name,
+                                    TOPIC_QOS_DEFAULT,
+                                    DDS::TopicListener::_nil(),
+                                    OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
-    if (CORBA::is_nil(sub_topic.in())) {
+    if (!sub_topic) {
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("%N:%l main()")
                         ACE_TEXT(" ERROR: create_topic() failed!\n")), EXIT_FAILURE);
     }
 
-    // Create Subscriber
     DDS::SubscriberQos subscriber_qos;
     sub_participant->get_default_subscriber_qos(subscriber_qos);
     subscriber_qos.partition.name.length(1);
@@ -306,7 +309,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
                                      DDS::SubscriberListener::_nil(),
                                      OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
-    if (CORBA::is_nil(sub.in())) {
+    if (!sub) {
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("%N:%l main()")
                         ACE_TEXT(" ERROR: create_subscriber() failed!\n")), EXIT_FAILURE);
@@ -320,18 +323,17 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     dr_qos.reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
 
     DDS::DataReader_var reader =
-      sub->create_datareader(sub_topic.in(),
+      sub->create_datareader(sub_topic,
                              dr_qos,
                              0,
                              OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
-    if (CORBA::is_nil(reader.in())) {
+    if (!reader) {
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("%N:%l main()")
                         ACE_TEXT(" ERROR: create_datareader() failed!\n")), EXIT_FAILURE);
     }
 
-    // Get the Built-In Subscriber for Built-In Topics
     DDS::Subscriber_var sub_bit_subscriber = sub_participant->get_builtin_subscriber();
 
     DDS::DataReader_var sub_loc_dr = sub_bit_subscriber->lookup_datareader(OpenDDS::DCPS::BUILT_IN_PARTICIPANT_LOCATION_TOPIC);
@@ -343,7 +345,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       ACE_OS::exit(EXIT_FAILURE);
     }
 
-    ParticipantLocationListenerImpl* sub_listener = new ParticipantLocationListenerImpl("Subscriber", no_ice, ipv6, participants_done_callback);
+    BitListener* sub_listener = new BitListener("Subscriber", no_ice, ipv6, participants_done_callback);
     DDS::DataReaderListener_var sub_listener_var(sub_listener);
 
     retcode =
@@ -359,6 +361,27 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
     // Call on_data_available in case there are samples which are waiting
     sub_listener->on_data_available(sub_loc_dr);
+
+    DDS::DataReader_var sub_part_dr = sub_bit_subscriber->lookup_datareader(OpenDDS::DCPS::BUILT_IN_PARTICIPANT_TOPIC);
+    if (!sub_loc_dr) {
+      ACE_ERROR((LM_ERROR,
+                 ACE_TEXT("%N:%l main()")
+                 ACE_TEXT(" ERROR: Could not get %C DataReader\n"),
+                 OpenDDS::DCPS::BUILT_IN_PARTICIPANT_TOPIC));
+      ACE_OS::exit(EXIT_FAILURE);
+    }
+
+    retcode = sub_part_dr->set_listener(sub_listener, OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+    if (retcode != DDS::RETCODE_OK) {
+      ACE_ERROR((LM_ERROR,
+                 ACE_TEXT("%N:%l main()")
+                 ACE_TEXT(" ERROR: set_listener for %C failed\n"),
+                 OpenDDS::DCPS::BUILT_IN_PARTICIPANT_TOPIC));
+      ACE_OS::exit(EXIT_FAILURE);
+    }
+
+    // Call on_data_available in case there are samples which are waiting
+    sub_listener->on_data_available(sub_part_dr);
 
     while (participants_done != 2) {
       participants_done_cond.wait();
@@ -379,7 +402,6 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       status = EXIT_FAILURE;
     }
 
-    // Clean-up!
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("%N:%l main()")
                ACE_TEXT(" publisher participant deleting contained entities\n")));
@@ -391,8 +413,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("%N:%l main()")
                ACE_TEXT(" domain participant factory deleting participants\n")));
-    dpf->delete_participant(participant.in());
-    dpf->delete_participant(sub_participant.in());
+    dpf->delete_participant(participant);
+    dpf->delete_participant(sub_participant);
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("%N:%l main()")
                ACE_TEXT(" shutdown service participant\n")));
@@ -401,8 +423,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
   } catch (const CORBA::Exception& e) {
     e._tao_print_exception("Exception caught in main():");
     status = EXIT_FAILURE;
-  } catch (const OpenDDS::DCPS::Transport::Exception& ex) {
-    ACE_UNUSED_ARG(ex);
+  } catch (const OpenDDS::DCPS::Transport::Exception&) {
     ACE_ERROR((LM_ERROR,
                ACE_TEXT("%N:%l main()")
                ACE_TEXT(" ERROR: Transport Exception\n")));

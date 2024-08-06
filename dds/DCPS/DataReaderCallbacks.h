@@ -40,8 +40,9 @@ public:
 
   virtual ~DataReaderCallbacks() {}
 
-  virtual void add_association(const GUID_t& yourId,
-                               const WriterAssociation& writer,
+  virtual void set_subscription_id(const GUID_t& guid) = 0;
+
+  virtual void add_association(const WriterAssociation& writer,
                                bool active) = 0;
 
   virtual void remove_associations(const WriterIdSeq& writers,

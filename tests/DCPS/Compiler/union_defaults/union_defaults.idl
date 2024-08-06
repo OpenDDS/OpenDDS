@@ -55,3 +55,20 @@ module Unions {
   };
 };
 
+module DDS_Native {
+  module Uni {
+
+    enum DataType {
+      dtLong,
+      dtShort
+    };
+
+    @appendable
+    union Data switch (Uni::DataType) {
+      case Uni::dtLong:
+        long longData;
+      case Uni::dtShort:
+        short shortData;
+    };
+  };
+};

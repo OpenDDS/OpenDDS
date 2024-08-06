@@ -76,6 +76,11 @@ public:
   bool is_uniquelocal() const; // IPv6 only (only one routing domain)
   bool is_sitelocal() const; // IPv6 only (deprecated)
 
+  static const NetworkAddress default_IPV4;
+#ifdef ACE_HAS_IPV6
+  static const NetworkAddress default_IPV6;
+#endif
+
 private:
   union ip46
   {
@@ -86,11 +91,11 @@ private:
   } inet_addr_;
 };
 
-typedef OPENDDS_SET(NetworkAddress) AddrSet;
+typedef OPENDDS_SET(NetworkAddress) NetworkAddressSet;
 
 #if defined ACE_HAS_CPP11
 OpenDDS_Dcps_Export
-size_t calculate_hash(const AddrSet& addrs, size_t start_hash = 0);
+size_t calculate_hash(const NetworkAddressSet& addrs, size_t start_hash = 0);
 #endif
 
 OpenDDS_Dcps_Export

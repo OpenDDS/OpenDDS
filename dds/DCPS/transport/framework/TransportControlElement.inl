@@ -26,7 +26,7 @@ ACE_INLINE
 OpenDDS::DCPS::GUID_t
 OpenDDS::DCPS::TransportControlElement::publication_id() const
 {
-  return GUID_UNKNOWN;
+  return publication_id_;
 }
 
 ACE_INLINE

@@ -30,10 +30,12 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-TransportImpl::TransportImpl(TransportInst_rch config)
+TransportImpl::TransportImpl(TransportInst_rch config,
+                             DDS::DomainId_t domain)
   : config_(config)
   , event_dispatcher_(make_rch<ServiceEventDispatcher>(1))
   , is_shut_down_(false)
+  , domain_(domain)
 {
   DBG_ENTRY_LVL("TransportImpl", "TransportImpl", 6);
   if (TheServiceParticipant->monitor_factory_) {
@@ -105,9 +107,7 @@ TransportImpl::create_reactor_task(bool useAsyncSend, const OPENDDS_STRING& name
 
   this->reactor_task_= make_rch<ReactorTask>(useAsyncSend);
 
-  if (reactor_task_->open_reactor_task(0,
-                                       &TheServiceParticipant->get_thread_status_manager(),
-                                       name)) {
+  if (reactor_task_->open_reactor_task(&TheServiceParticipant->get_thread_status_manager(), name)) {
     throw Transport::MiscProblem(); // error already logged by TRT::open()
   }
 }
@@ -151,7 +151,7 @@ OPENDDS_STRING
 TransportImpl::dump_to_str()
 {
   TransportInst_rch cfg = config_.lock();
-  return cfg ? cfg->dump_to_str() : OPENDDS_STRING();
+  return cfg ? cfg->dump_to_str(domain_) : OPENDDS_STRING();
 }
 
 }

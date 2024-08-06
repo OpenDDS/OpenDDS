@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.3)
+cmake_minimum_required(VERSION 3.3...3.27)
 find_package(OpenDDS REQUIRED)
 project(ishapes VERSION ${OpenDDS_VERSION} LANGUAGES CXX)
 
@@ -45,7 +45,7 @@ add_executable(ishapes
   WriterQosDialog.hpp
 )
 target_include_directories(ishapes PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
-OPENDDS_TARGET_SOURCES(ishapes ShapeType.idl)
+opendds_target_sources(ishapes ShapeType.idl)
 target_link_libraries(ishapes
   Qt5::Widgets
   OpenDDS::Dcps

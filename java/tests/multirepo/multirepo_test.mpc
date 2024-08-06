@@ -1,4 +1,4 @@
-project: dcpslib, dcps_tcp, dcps_test_java {
+project: dcps, dcps_tcp, dcps_test_java {
 
     sharedname      = multirepo_test
 

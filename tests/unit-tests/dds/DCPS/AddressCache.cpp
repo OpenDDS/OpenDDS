@@ -58,14 +58,14 @@ template<> struct hash<TestKey>
 TEST(dds_DCPS_AddressCache, load_fail)
 {
   AddressCache<TestKey> test_cache_;
-  AddrSet addrs;
+  NetworkAddressSet addrs;
   ASSERT_FALSE(test_cache_.load(TestKey(GUID_UNKNOWN, GUID_UNKNOWN), addrs));
 }
 
 TEST(dds_DCPS_AddressCache, store_load_success)
 {
   AddressCache<TestKey> test_cache_;
-  AddrSet addrs;
+  NetworkAddressSet addrs;
   addrs.insert(NetworkAddress("127.0.0.1:1234"));
 
   test_cache_.store(TestKey(GUID_UNKNOWN, GUID_UNKNOWN), addrs);
@@ -79,7 +79,7 @@ TEST(dds_DCPS_AddressCache, store_load_success)
 TEST(dds_DCPS_AddressCache, store_remove_load_fail)
 {
   AddressCache<TestKey> test_cache_;
-  AddrSet addrs;
+  NetworkAddressSet addrs;
   addrs.insert(NetworkAddress("127.0.0.1:1234"));
 
   test_cache_.store(TestKey(GUID_UNKNOWN, GUID_UNKNOWN), addrs);
@@ -93,7 +93,7 @@ TEST(dds_DCPS_AddressCache, store_remove_load_fail)
 TEST(dds_DCPS_AddressCache, store_remove_id_load_fail)
 {
   AddressCache<TestKey> test_cache_;
-  AddrSet addrs;
+  NetworkAddressSet addrs;
   addrs.insert(NetworkAddress("127.0.0.1:1234"));
 
   test_cache_.store(TestKey(GUID_UNKNOWN, GUID_UNKNOWN), addrs);
@@ -109,13 +109,13 @@ TEST(dds_DCPS_AddressCache, scoped_access_load_success)
   AddressCache<TestKey> test_cache_;
   {
     AddressCache<TestKey>::ScopedAccess entry(test_cache_, TestKey(GUID_UNKNOWN, GUID_UNKNOWN));
-    AddrSet& addrs = entry.value().addrs_;
+    NetworkAddressSet& addrs = entry.value().addrs_;
 
     addrs.insert(NetworkAddress("127.0.0.1:1234"));
     addrs.insert(NetworkAddress("127.0.1.1:4321"));
   }
 
-  AddrSet addrs;
+  NetworkAddressSet addrs;
   ASSERT_TRUE(test_cache_.load(TestKey(GUID_UNKNOWN, GUID_UNKNOWN), addrs));
   ASSERT_EQ(addrs.size(), 2u);
   ASSERT_EQ(*addrs.begin(), NetworkAddress("127.0.0.1:1234"));
@@ -125,7 +125,7 @@ TEST(dds_DCPS_AddressCache, scoped_access_load_success)
 TEST(dds_DCPS_AddressCache, scoped_access_cache_hit)
 {
   AddressCache<TestKey> test_cache_;
-  AddrSet addrs;
+  NetworkAddressSet addrs;
   addrs.insert(NetworkAddress("127.0.0.1:1234"));
 
   test_cache_.store(TestKey(GUID_UNKNOWN, GUID_UNKNOWN), addrs);
@@ -137,17 +137,17 @@ TEST(dds_DCPS_AddressCache, scoped_access_cache_hit)
 
 TEST(dds_DCPS_AddressCache, store_twice)
 {
-  AddrSet addrs1;
+  NetworkAddressSet addrs1;
   addrs1.insert(NetworkAddress("127.0.0.1:1234"));
 
-  AddrSet addrs2;
+  NetworkAddressSet addrs2;
   addrs2.insert(NetworkAddress("127.0.0.1:5678"));
 
   AddressCache<TestKey> test_cache_;
   test_cache_.store(TestKey(GUID_UNKNOWN, GUID_UNKNOWN), addrs1);
   test_cache_.store(TestKey(GUID_UNKNOWN, GUID_UNKNOWN), addrs2);
 
-  AddrSet addrs;
+  NetworkAddressSet addrs;
 
   ASSERT_TRUE(test_cache_.load(TestKey(GUID_UNKNOWN, GUID_UNKNOWN), addrs));
   ASSERT_EQ(addrs.size(), 1u);
@@ -157,7 +157,7 @@ TEST(dds_DCPS_AddressCache, store_twice)
 TEST(dds_DCPS_AddressCache, scoped_access_expired)
 {
   AddressCache<TestKey> test_cache_;
-  AddrSet addrs;
+  NetworkAddressSet addrs;
   addrs.insert(NetworkAddress("127.0.0.1:1234"));
 
   test_cache_.store(TestKey(GUID_UNKNOWN, GUID_UNKNOWN), addrs, MonotonicTimePoint(ACE_Time_Value(0, 0)));

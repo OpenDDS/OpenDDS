@@ -11,9 +11,11 @@
 #include "Spdp.h"
 #include "rtps_export.h"
 
+#include <dds/DCPS/AtomicBool.h>
 #include <dds/DCPS/PoolAllocator.h>
 #include <dds/DCPS/debug.h>
-#include <dds/DCPS/AtomicBool.h>
+
+#include <dds/OpenDDSConfigWrapper.h>
 
 #include <ace/Configuration.h>
 
@@ -54,10 +56,10 @@ const char RTPS_REFLECT_HEARTBEAT_COUNT[] = "OpenDDS.Rtps.ReflectHeartbeatCount"
  */
 class OpenDDS_Rtps_Export RtpsDiscovery : public DCPS::Discovery {
 public:
-  typedef RtpsDiscoveryConfig::AddrVec AddrVec;
-
   explicit RtpsDiscovery(const RepoKey& key);
   ~RtpsDiscovery();
+
+  virtual RepoKey key() const { return key_; }
 
   virtual OpenDDS::DCPS::GUID_t generate_participant_guid();
 
@@ -66,7 +68,7 @@ public:
     const DDS::DomainParticipantQos& qos,
     XTypes::TypeLookupService_rch tls);
 
-#if defined(OPENDDS_SECURITY)
+#if OPENDDS_CONFIG_SECURITY
 #  if defined __GNUC__ && ((__GNUC__ == 5 && __GNUC_MINOR__ < 3) || __GNUC__ < 5) && ! defined __clang__
 #    define OPENDDS_GCC_PRE53_DISABLE_OPTIMIZATION __attribute__((optimize("-O0")))
 #  else
@@ -122,11 +124,11 @@ public:
   unsigned char ttl() const { return config_->ttl(); }
   void ttl(unsigned char time_to_live) { config_->ttl(time_to_live); }
 
-  ACE_INET_Addr sedp_local_address() const { return config_->sedp_local_address(); }
-  void sedp_local_address(const ACE_INET_Addr& mi) { config_->sedp_local_address(mi); }
+  DCPS::NetworkAddress sedp_local_address() const { return config_->sedp_local_address(); }
+  void sedp_local_address(const DCPS::NetworkAddress& mi) { config_->sedp_local_address(mi); }
 
-  ACE_INET_Addr spdp_local_address() const { return config_->spdp_local_address(); }
-  void spdp_local_address(const ACE_INET_Addr& mi) { config_->spdp_local_address(mi); }
+  DCPS::NetworkAddress spdp_local_address() const { return config_->spdp_local_address(); }
+  void spdp_local_address(const DCPS::NetworkAddress& mi) { config_->spdp_local_address(mi); }
 
   bool sedp_multicast() const { return config_->sedp_multicast(); }
   void sedp_multicast(bool sm) { config_->sedp_multicast(sm); }
@@ -134,11 +136,11 @@ public:
   OPENDDS_STRING multicast_interface() const { return config_->multicast_interface(); }
   void multicast_interface(const OPENDDS_STRING& mi) { config_->multicast_interface(mi); }
 
-  ACE_INET_Addr default_multicast_group() const { return config_->default_multicast_group(); }
-  void default_multicast_group(const ACE_INET_Addr& group) { config_->default_multicast_group(group); }
+  DCPS::NetworkAddress default_multicast_group(DDS::DomainId_t domain) const { return config_->default_multicast_group(domain); }
+  void default_multicast_group(const DCPS::NetworkAddress& group) { config_->default_multicast_group(group); }
 
-  AddrVec spdp_send_addrs() const { return config_->spdp_send_addrs(); }
-  void spdp_send_addrs(const AddrVec& addrs) { return config_->spdp_send_addrs(addrs); }
+  DCPS::NetworkAddressSet spdp_send_addrs() const { return config_->spdp_send_addrs(); }
+  void spdp_send_addrs(const DCPS::NetworkAddressSet& addrs) { return config_->spdp_send_addrs(addrs); }
 
   OPENDDS_STRING guid_interface() const { return config_->guid_interface(); }
   void guid_interface(const OPENDDS_STRING& gi) { config_->guid_interface(gi); }
@@ -149,8 +151,8 @@ public:
   DCPS::TimeDuration auth_resend_period() const { return config_->auth_resend_period(); }
   void auth_resend_period(const DCPS::TimeDuration& x) { config_->auth_resend_period(x); }
 
-  u_short max_spdp_sequence_msg_reset_check() const { return config_->max_spdp_sequence_msg_reset_check(); }
-  void max_spdp_sequence_msg_reset_check(u_short reset_value) { config_->max_spdp_sequence_msg_reset_check(reset_value); }
+  u_short max_spdp_sequence_msg_reset_checks() const { return config_->max_spdp_sequence_msg_reset_checks(); }
+  void max_spdp_sequence_msg_reset_checks(u_short reset_value) { config_->max_spdp_sequence_msg_reset_checks(reset_value); }
 
   bool rtps_relay_only() const { return config_->rtps_relay_only(); }
   void rtps_relay_only_now(bool f);
@@ -158,8 +160,10 @@ public:
   bool use_rtps_relay() const { return config_->use_rtps_relay(); }
   void use_rtps_relay_now(bool f);
 
+#if OPENDDS_CONFIG_SECURITY
   bool use_ice() const { return config_->use_ice(); }
   void use_ice_now(bool f);
+#endif
 
   bool secure_participant_user_data() const
   {
@@ -176,7 +180,7 @@ public:
 
   RtpsDiscoveryConfig_rch config() const { return config_; }
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
   DDS::Security::ParticipantCryptoHandle get_crypto_handle(DDS::DomainId_t domain,
                                                            const DCPS::GUID_t& local_participant,
                                                            const DCPS::GUID_t& remote_participant = GUID_UNKNOWN) const;
@@ -192,10 +196,10 @@ public:
   u_short get_ipv6_sedp_port(DDS::DomainId_t domain,
                              const DCPS::GUID_t& local_participant) const;
 #endif
-  void spdp_rtps_relay_address(const ACE_INET_Addr& address);
-  void sedp_rtps_relay_address(const ACE_INET_Addr& address);
-  void spdp_stun_server_address(const ACE_INET_Addr& address);
-  void sedp_stun_server_address(const ACE_INET_Addr& address);
+  void spdp_rtps_relay_address(const DCPS::NetworkAddress& address);
+  void sedp_rtps_relay_address(const DCPS::NetworkAddress& address);
+  void spdp_stun_server_address(const DCPS::NetworkAddress& address);
+  void sedp_stun_server_address(const DCPS::NetworkAddress& address);
 
   void append_transport_statistics(DDS::DomainId_t domain,
                                    const DCPS::GUID_t& local_participant,
@@ -249,7 +253,7 @@ public:
   bool update_topic_qos(const GUID_t& topicId, DDS::DomainId_t domainId,
     const GUID_t& participantId, const DDS::TopicQos& qos);
 
-  GUID_t add_publication(
+  bool add_publication(
     DDS::DomainId_t domainId,
     const GUID_t& participantId,
     const GUID_t& topicId,
@@ -278,7 +282,7 @@ public:
     const GUID_t& dwId,
     const DCPS::TransportLocatorSeq& transInfo);
 
-  GUID_t add_subscription(
+  bool add_subscription(
     DDS::DomainId_t domainId,
     const GUID_t& participantId,
     const GUID_t& topicId,
@@ -333,6 +337,8 @@ private:
 
   ParticipantHandle get_part(const DDS::DomainId_t domain_id, const GUID_t& part_id) const;
 
+  const RepoKey key_;
+
   // This mutex protects everything else
   mutable ACE_Thread_Mutex lock_;
 
@@ -350,7 +356,7 @@ private:
 public:
   class Config : public Discovery::Config {
   public:
-    int discovery_config(ACE_Configuration_Heap& cf);
+    int discovery_config();
   };
 
   class OpenDDS_Rtps_Export StaticInitializer {

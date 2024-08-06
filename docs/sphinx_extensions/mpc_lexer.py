@@ -10,10 +10,13 @@ class MpcLexer(RegexLexer):
     mimetypes = []
 
     tokens = {
-        'common': [
+        'comment': [
             (r'//.*', Comment),
+            (r'\s+', Whitespace),
+        ],
+        'common': [
+            include('comment'),
             (words((
-                'project', 'workspace',
                 'compile_flags',
                 'Define_Custom', 'Modify_Custom',
                 'exename', 'sharedname', 'staticname', 'buildflags', 'dependent_upon', 'dllout', 'libout',
@@ -34,7 +37,7 @@ class MpcLexer(RegexLexer):
                 'documentation_pre_dirname', 'generic_pre_dirname', 'source_outputext',
                 'inline_outputext', 'header_outputext', 'template_outputext', 'resource_outputext',
                 'documentation_outputext', 'generic_outputext',
-                'feature', 'prop', 'else', 'associate', 'exclude', 'cmdline', 'Release', 'Debug',
+                'prop', 'else', 'associate', 'exclude', 'cmdline', 'Release', 'Debug',
             ), prefix=r'\b', suffix=r'\b'), Keyword),
         ],
         'value': [
@@ -43,13 +46,11 @@ class MpcLexer(RegexLexer):
             include('common'),
             (r'\$\w+', Name.Variable),
             (r'\$\(\w+\)', Name.Variable),
-            (r'\s+', Whitespace),
             (r'\S+', String),
         ],
         'block_common': [
             (r'(\w+)(\s*)(\+?=)(\s*)', bygroups(Name.Variable, Whitespace, Operator, Whitespace), 'value'),
             include('common'),
-            (r'\s+', Whitespace),
             (r'(\+?=)(\s*)', bygroups(Operator, Whitespace), 'value'),
             ('}', Punctuation, '#pop'),
         ],
@@ -58,18 +59,29 @@ class MpcLexer(RegexLexer):
             (r'(\S+)$', bygroups(String)),
         ],
         'block': [
+            (r'(\()([A-Za-z0-9_* ]+)(\))',
+                bygroups(Punctuation, Name.Constant, Whitespace)),
             (r'(\w+)(\s*)({)', bygroups(Name.Function, Whitespace, Punctuation), 'nested_block'),
             include('block_common'),
             (r'{', Punctuation, 'nested_block'),
-            ('}', Punctuation, '#pop'),
         ],
-        'root': [
-            include('common'),
-            (r'(\s*)(\()([A-Za-z0-9_*]+)(\))(\s*)',
+        'complete_file': [
+            include('comment'),
+            (r'(\s*)(\()([A-Za-z0-9_* ]+)(\))(\s*)',
                 bygroups(Whitespace, Punctuation, Name.Class, Punctuation, Whitespace)),
             (r'[:,]', Punctuation),
-            (r'\s+', Whitespace),
             (r'\w+', Name.Class),
             (r'({)', Punctuation, 'block'),
         ],
+        'root': [
+            include('comment'),
+            (words(('project', 'workspace', 'feature'), prefix=r'\b', suffix=r'\b'), Keyword, 'complete_file'),
+            default('block'),
+        ],
     }
+
+# Allow MpcLexer to be used with python3 -m pygments -x -l mpc_lexer.py file.mpc
+CustomLexer = MpcLexer
+
+
+# vim: expandtab:ts=4:sw=4

@@ -78,13 +78,6 @@ private:
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
-#if defined (ACE_TEMPLATES_REQUIRE_SOURCE)
 #include "UpdateListener_T.cpp"
-#endif /* ACE_TEMPLATES_REQUIRE_SOURCE */
-
-#if defined (ACE_TEMPLATES_REQUIRE_PRAGMA)
-#pragma message ("UpdateListener_T.cpp template inst")
-#pragma implementation ("UpdateListener_T.cpp")
-#endif /* ACE_TEMPLATES_REQUIRE_PRAGMA */
 
 #endif /* UPDATELISTENER_T_H  */

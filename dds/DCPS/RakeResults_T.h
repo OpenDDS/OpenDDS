@@ -1,6 +1,4 @@
 /*
- *
- *
  * Distributed under the OpenDDS License.
  * See: http://www.opendds.org/license.html
  */
@@ -8,17 +6,17 @@
 #ifndef OPENDDS_DCPS_RAKERESULTS_T_H
 #define OPENDDS_DCPS_RAKERESULTS_T_H
 
-#include /**/ "ace/pre.h"
+#include <ace/config-macros.h>
+#ifndef ACE_LACKS_PRAGMA_ONCE
+#  pragma once
+#endif
 
-#if !defined (ACE_LACKS_PRAGMA_ONCE)
-# pragma once
-#endif /* ACE_LACKS_PRAGMA_ONCE */
-
-#include "dds/DdsDcpsSubscriptionC.h"
 #include "Comparator_T.h"
 #include "PoolAllocator.h"
 #include "RakeData.h"
 #include "TypeSupportImpl.h"
+
+#include <dds/DdsDcpsSubscriptionC.h>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -40,7 +38,7 @@ public:
   RakeResults(DataReaderImpl* reader,
               SampleSeq& received_data,
               DDS::SampleInfoSeq& info_seq,
-              CORBA::Long max_samples,
+              CORBA::ULong max_samples,
               DDS::PresentationQosPolicy presentation,
 #ifndef OPENDDS_NO_QUERY_CONDITION
               DDS::QueryCondition_ptr cond,
@@ -122,10 +120,6 @@ private:
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
-#if defined (ACE_TEMPLATES_REQUIRE_SOURCE)
 #include "RakeResults_T.cpp"
-#endif /* ACE_TEMPLATES_REQUIRE_SOURCE */
-
-#include /**/ "ace/post.h"
 
 #endif /* RAKERESULTS_H  */

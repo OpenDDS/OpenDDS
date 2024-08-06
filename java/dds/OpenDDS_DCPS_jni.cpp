@@ -179,6 +179,20 @@ jobject JNICALL Java_OpenDDS_DCPS_TheServiceParticipant_network_1config_1modifie
 #endif
 }
 
+jobject JNICALL Java_OpenDDS_DCPS_TheServiceParticipant_config_1store
+(JNIEnv * jni, jclass)
+{
+  try {
+    OpenDDS::DCPS::ConfigStore_var c_ret(TheServiceParticipant->config_store().get());
+    jobject j_ret = 0;
+    copyToJava (jni, j_ret, c_ret, true);
+    return j_ret;
+  } catch (const CORBA::SystemException& se) {
+    throw_java_exception(jni, se);
+    return 0;
+  }
+}
+
 // NetworkConfigModifier
 
 // NetworkConfigModifier::_jni_fini
@@ -567,7 +581,7 @@ jint JNICALL Java_OpenDDS_DCPS_transport_TransportConfig_getPassiveConnectDurati
 (JNIEnv * jni, jobject jthis)
 {
   OpenDDS::DCPS::TransportConfig_rch config = OpenDDS::DCPS::rchandle_from(recoverCppObj<OpenDDS::DCPS::TransportConfig>(jni, jthis));
-  return config->passive_connect_duration_;
+  return config->passive_connect_duration().value().msec();
 }
 
 // TransportConfig::setPassiveConnectDuration
@@ -575,7 +589,7 @@ void JNICALL Java_OpenDDS_DCPS_transport_TransportConfig_setPassiveConnectDurati
 (JNIEnv * jni, jobject jthis, jint val)
 {
   OpenDDS::DCPS::TransportConfig_rch config = OpenDDS::DCPS::rchandle_from(recoverCppObj<OpenDDS::DCPS::TransportConfig>(jni, jthis));
-  config->passive_connect_duration_ = val;
+  config->passive_connect_duration(OpenDDS::DCPS::TimeDuration::from_msec(val));
 }
 
 // TransportInst
@@ -598,44 +612,12 @@ jstring JNICALL Java_OpenDDS_DCPS_transport_TransportInst_getName
   return retStr;
 }
 
-// TransportInst::getQueueMessagesPerPool
-jint JNICALL Java_OpenDDS_DCPS_transport_TransportInst_getQueueMessagesPerPool
-(JNIEnv * jni, jobject jthis)
-{
-  OpenDDS::DCPS::TransportInst_rch inst = OpenDDS::DCPS::rchandle_from(recoverCppObj<OpenDDS::DCPS:: TransportInst>(jni, jthis));
-  return static_cast<jint>(inst->queue_messages_per_pool_);
-}
-
-// TransportInst::setQueueMessagesPerPool
-void JNICALL Java_OpenDDS_DCPS_transport_TransportInst_setQueueMessagesPerPool
-(JNIEnv * jni, jobject jthis, jint val)
-{
-  OpenDDS::DCPS::TransportInst_rch inst = OpenDDS::DCPS::rchandle_from(recoverCppObj<OpenDDS::DCPS:: TransportInst>(jni, jthis));
-  inst->queue_messages_per_pool_ = val;
-}
-
-// TransportInst::getQueueInitialPools
-jint JNICALL Java_OpenDDS_DCPS_transport_TransportInst_getQueueInitialPools
-(JNIEnv * jni, jobject jthis)
-{
-  OpenDDS::DCPS::TransportInst_rch inst = OpenDDS::DCPS::rchandle_from(recoverCppObj<OpenDDS::DCPS:: TransportInst>(jni, jthis));
-  return static_cast<jint>(inst->queue_initial_pools_);
-}
-
-// TransportInst::setQueueInitialPools
-void JNICALL Java_OpenDDS_DCPS_transport_TransportInst_setQueueInitialPools
-(JNIEnv * jni, jobject jthis, jint val)
-{
-  OpenDDS::DCPS::TransportInst_rch inst = OpenDDS::DCPS::rchandle_from(recoverCppObj<OpenDDS::DCPS:: TransportInst>(jni, jthis));
-  inst->queue_initial_pools_ = val;
-}
-
 // TransportInst::getMaxPacketSize
 jint JNICALL Java_OpenDDS_DCPS_transport_TransportInst_getMaxPacketSize
 (JNIEnv * jni, jobject jthis)
 {
   OpenDDS::DCPS::TransportInst_rch inst = OpenDDS::DCPS::rchandle_from(recoverCppObj<OpenDDS::DCPS:: TransportInst>(jni, jthis));
-  return inst->max_packet_size_;
+  return inst->max_packet_size();
 }
 
 // TransportInst::setMaxPacketSize
@@ -643,7 +625,7 @@ void JNICALL Java_OpenDDS_DCPS_transport_TransportInst_setMaxPacketSize
 (JNIEnv * jni, jobject jthis, jint val)
 {
   OpenDDS::DCPS::TransportInst_rch inst = OpenDDS::DCPS::rchandle_from(recoverCppObj<OpenDDS::DCPS:: TransportInst>(jni, jthis));
-  inst->max_packet_size_ = val;
+  inst->max_packet_size(val);
 }
 
 // TransportInst::getMaxSamplesPerPacket
@@ -651,7 +633,7 @@ jint JNICALL Java_OpenDDS_DCPS_transport_TransportInst_getMaxSamplesPerPacket
 (JNIEnv * jni, jobject jthis)
 {
   OpenDDS::DCPS::TransportInst_rch inst = OpenDDS::DCPS::rchandle_from(recoverCppObj<OpenDDS::DCPS:: TransportInst>(jni, jthis));
-  return static_cast<jint>(inst->max_samples_per_packet_);
+  return static_cast<jint>(inst->max_samples_per_packet());
 }
 
 // TransportInst::setMaxSamplesPerPacket
@@ -659,7 +641,7 @@ void JNICALL Java_OpenDDS_DCPS_transport_TransportInst_setMaxSamplesPerPacket
 (JNIEnv * jni, jobject jthis, jint val)
 {
   OpenDDS::DCPS::TransportInst_rch inst = OpenDDS::DCPS::rchandle_from(recoverCppObj<OpenDDS::DCPS:: TransportInst>(jni, jthis));
-  inst->max_samples_per_packet_ = val;
+  inst->max_samples_per_packet(val);
 }
 
 // TransportInst::getOptimumPacketSize
@@ -667,7 +649,7 @@ jint JNICALL Java_OpenDDS_DCPS_transport_TransportInst_getOptimumPacketSize
 (JNIEnv * jni, jobject jthis)
 {
   OpenDDS::DCPS::TransportInst_rch inst = OpenDDS::DCPS::rchandle_from(recoverCppObj<OpenDDS::DCPS:: TransportInst>(jni, jthis));
-  return inst->optimum_packet_size_;
+  return inst->optimum_packet_size();
 }
 
 // TransportInst::setOptimumPacketSize
@@ -675,7 +657,7 @@ void JNICALL Java_OpenDDS_DCPS_transport_TransportInst_setOptimumPacketSize
 (JNIEnv * jni, jobject jthis, jint val)
 {
   OpenDDS::DCPS::TransportInst_rch inst = OpenDDS::DCPS::rchandle_from(recoverCppObj<OpenDDS::DCPS:: TransportInst>(jni, jthis));
-  inst->optimum_packet_size_ = val;
+  inst->optimum_packet_size(val);
 }
 
 // TransportInst::isThreadPerConnection
@@ -683,7 +665,7 @@ jboolean JNICALL Java_OpenDDS_DCPS_transport_TransportInst_isThreadPerConnection
 (JNIEnv * jni, jobject jthis)
 {
   OpenDDS::DCPS::TransportInst_rch inst = OpenDDS::DCPS::rchandle_from(recoverCppObj<OpenDDS::DCPS:: TransportInst>(jni, jthis));
-  return inst->thread_per_connection_;
+  return inst->thread_per_connection();
 }
 
 // TransportInst::setThreadPerConnection
@@ -691,7 +673,7 @@ void JNICALL Java_OpenDDS_DCPS_transport_TransportInst_setThreadPerConnection
 (JNIEnv * jni, jobject jthis, jboolean val)
 {
   OpenDDS::DCPS::TransportInst_rch inst = OpenDDS::DCPS::rchandle_from(recoverCppObj<OpenDDS::DCPS:: TransportInst>(jni, jthis));
-  inst->thread_per_connection_ = val;
+  inst->thread_per_connection(val);
 }
 
 // TransportInst::getDatalinkReleaseDelay
@@ -699,7 +681,7 @@ jint JNICALL Java_OpenDDS_DCPS_transport_TransportInst_getDatalinkReleaseDelay
 (JNIEnv * jni, jobject jthis)
 {
   OpenDDS::DCPS::TransportInst_rch inst = OpenDDS::DCPS::rchandle_from(recoverCppObj<OpenDDS::DCPS:: TransportInst>(jni, jthis));
-  return inst->datalink_release_delay_;
+  return inst->datalink_release_delay();
 }
 
 // TransportInst::setDatalinkReleaseDelay
@@ -707,7 +689,7 @@ void JNICALL Java_OpenDDS_DCPS_transport_TransportInst_setDatalinkReleaseDelay
 (JNIEnv * jni, jobject jthis, jint val)
 {
   OpenDDS::DCPS::TransportInst_rch inst = OpenDDS::DCPS::rchandle_from(recoverCppObj<OpenDDS::DCPS:: TransportInst>(jni, jthis));
-  inst->datalink_release_delay_ = val;
+  inst->datalink_release_delay(val);
 }
 
 // TransportInst::getDatalinkControlChunks
@@ -715,7 +697,7 @@ jint JNICALL Java_OpenDDS_DCPS_transport_TransportInst_getDatalinkControlChunks
 (JNIEnv * jni, jobject jthis)
 {
   OpenDDS::DCPS::TransportInst_rch inst = OpenDDS::DCPS::rchandle_from(recoverCppObj<OpenDDS::DCPS:: TransportInst>(jni, jthis));
-  return static_cast<jint>(inst->datalink_control_chunks_);
+  return static_cast<jint>(inst->datalink_control_chunks());
 }
 
 // TransportInst::setDatalinkControlChunks
@@ -723,7 +705,7 @@ void JNICALL Java_OpenDDS_DCPS_transport_TransportInst_setDatalinkControlChunks
 (JNIEnv * jni, jobject jthis, jint val)
 {
   OpenDDS::DCPS::TransportInst_rch inst = OpenDDS::DCPS::rchandle_from(recoverCppObj<OpenDDS::DCPS::TransportInst>(jni, jthis));
-  inst->datalink_control_chunks_ = val;
+  inst->datalink_control_chunks(val);
 }
 
 // TcpInst
@@ -733,7 +715,7 @@ jstring JNICALL Java_OpenDDS_DCPS_transport_TcpInst_getLocalAddress
 (JNIEnv * jni, jobject jthis)
 {
   OpenDDS::DCPS::TcpInst_rch inst = OpenDDS::DCPS::rchandle_from(recoverCppObj<OpenDDS::DCPS::TcpInst>(jni, jthis));
-  jstring retStr = jni->NewStringUTF(inst->local_address_string().c_str());
+  jstring retStr = jni->NewStringUTF(inst->local_address().c_str());
   return retStr;
 }
 
@@ -849,7 +831,7 @@ jstring JNICALL Java_OpenDDS_DCPS_transport_UdpInst_getLocalAddress
 (JNIEnv * jni, jobject jthis)
 {
   OpenDDS::DCPS::UdpInst_rch inst = OpenDDS::DCPS::rchandle_from(recoverCppObj<OpenDDS::DCPS:: UdpInst>(jni, jthis)); // Don't take ownership
-  jstring retStr = jni->NewStringUTF(inst->local_address_string().c_str());
+  jstring retStr = jni->NewStringUTF(inst->local_address().c_str());
   return retStr;
 }
 
@@ -869,7 +851,7 @@ jboolean JNICALL Java_OpenDDS_DCPS_transport_MulticastInst_getDefaultToIPv6
 (JNIEnv * jni, jobject jthis)
 {
   OpenDDS::DCPS::MulticastInst_rch inst = OpenDDS::DCPS::rchandle_from(recoverCppObj<OpenDDS::DCPS:: MulticastInst>(jni, jthis));
-  return inst->default_to_ipv6_;
+  return inst->default_to_ipv6();
 }
 
 // MulticastInst::setDefaultToIPv6
@@ -877,7 +859,7 @@ void JNICALL Java_OpenDDS_DCPS_transport_MulticastInst_setDefaultToIPv6
 (JNIEnv * jni, jobject jthis, jboolean val)
 {
   OpenDDS::DCPS::MulticastInst_rch inst = OpenDDS::DCPS::rchandle_from(recoverCppObj<OpenDDS::DCPS:: MulticastInst>(jni, jthis));
-  inst->default_to_ipv6_ = val;
+  inst->default_to_ipv6(val);
 }
 
 // MulticastInst::getPortOffset
@@ -885,7 +867,7 @@ jshort JNICALL Java_OpenDDS_DCPS_transport_MulticastInst_getPortOffset
 (JNIEnv * jni, jobject jthis)
 {
   OpenDDS::DCPS::MulticastInst_rch inst = OpenDDS::DCPS::rchandle_from(recoverCppObj<OpenDDS::DCPS:: MulticastInst>(jni, jthis));
-  return inst->port_offset_;
+  return inst->port_offset();
 }
 
 // MulticastInst::setPortOffset
@@ -893,7 +875,7 @@ void JNICALL Java_OpenDDS_DCPS_transport_MulticastInst_setPortOffset
 (JNIEnv * jni, jobject jthis, jshort val)
 {
   OpenDDS::DCPS::MulticastInst_rch inst = OpenDDS::DCPS::rchandle_from(recoverCppObj<OpenDDS::DCPS:: MulticastInst>(jni, jthis));
-  inst->port_offset_ = val;
+  inst->port_offset(val);
 }
 
 // MulticastInst::getGroupAddress
@@ -901,7 +883,7 @@ jstring JNICALL Java_OpenDDS_DCPS_transport_MulticastInst_getGroupAddress
 (JNIEnv * jni, jobject jthis)
 {
   OpenDDS::DCPS::MulticastInst_rch inst = OpenDDS::DCPS::rchandle_from(recoverCppObj<OpenDDS::DCPS:: MulticastInst>(jni, jthis));
-  return jni->NewStringUTF(OpenDDS::DCPS::LogAddr(inst->group_address_).c_str());
+  return jni->NewStringUTF(OpenDDS::DCPS::LogAddr(inst->group_address()).c_str());
 }
 
 // MulticastInst::setGroupAddress
@@ -910,7 +892,9 @@ void JNICALL Java_OpenDDS_DCPS_transport_MulticastInst_setGroupAddress
 {
   OpenDDS::DCPS::MulticastInst_rch inst = OpenDDS::DCPS::rchandle_from(recoverCppObj<OpenDDS::DCPS:: MulticastInst>(jni, jthis));
   JStringMgr jsm_val(jni, val);
-  inst->group_address_.set(jsm_val.c_str());
+  ACE_INET_Addr addr;
+  addr.set(jsm_val.c_str());
+  inst->group_address(OpenDDS::DCPS::NetworkAddress(addr));
 }
 
 // MulticastInst::getReliable
@@ -918,7 +902,7 @@ jboolean JNICALL Java_OpenDDS_DCPS_transport_MulticastInst_getReliable
 (JNIEnv * jni, jobject jthis)
 {
   OpenDDS::DCPS::MulticastInst_rch inst = OpenDDS::DCPS::rchandle_from(recoverCppObj<OpenDDS::DCPS:: MulticastInst>(jni, jthis));
-  return inst->reliable_;
+  return inst->reliable();
 }
 
 // MulticastInst::setReliable
@@ -926,7 +910,7 @@ void JNICALL Java_OpenDDS_DCPS_transport_MulticastInst_setReliable
 (JNIEnv * jni, jobject jthis, jboolean val)
 {
   OpenDDS::DCPS::MulticastInst_rch inst = OpenDDS::DCPS::rchandle_from(recoverCppObj<OpenDDS::DCPS:: MulticastInst>(jni, jthis));
-  inst->reliable_ = val;
+  inst->reliable(val);
 }
 
 // MulticastInst::getSynBackoff
@@ -934,7 +918,7 @@ jdouble JNICALL Java_OpenDDS_DCPS_transport_MulticastInst_getSynBackoff
 (JNIEnv * jni, jobject jthis)
 {
   OpenDDS::DCPS::MulticastInst_rch inst = OpenDDS::DCPS::rchandle_from(recoverCppObj<OpenDDS::DCPS:: MulticastInst>(jni, jthis));
-  return inst->syn_backoff_;
+  return inst->syn_backoff();
 }
 
 // MulticastInst::setSynBackoff
@@ -942,7 +926,7 @@ void JNICALL Java_OpenDDS_DCPS_transport_MulticastInst_setSynBackoff
 (JNIEnv * jni, jobject jthis, jdouble val)
 {
   OpenDDS::DCPS::MulticastInst_rch inst = OpenDDS::DCPS::rchandle_from(recoverCppObj<OpenDDS::DCPS:: MulticastInst>(jni, jthis));
-  inst->syn_backoff_ = val;
+  inst->syn_backoff(val);
 }
 
 // MulticastInst::getSynInterval
@@ -950,7 +934,7 @@ jlong JNICALL Java_OpenDDS_DCPS_transport_MulticastInst_getSynInterval
 (JNIEnv * jni, jobject jthis)
 {
   OpenDDS::DCPS::MulticastInst_rch inst = OpenDDS::DCPS::rchandle_from(recoverCppObj<OpenDDS::DCPS:: MulticastInst>(jni, jthis));
-  return inst->syn_interval_.value().msec();
+  return inst->syn_interval().value().msec();
 }
 
 // MulticastInst::setSynInterval
@@ -958,7 +942,7 @@ void JNICALL Java_OpenDDS_DCPS_transport_MulticastInst_setSynInterval
 (JNIEnv * jni, jobject jthis, jlong val)
 {
   OpenDDS::DCPS::MulticastInst_rch inst = OpenDDS::DCPS::rchandle_from(recoverCppObj<OpenDDS::DCPS:: MulticastInst>(jni, jthis));
-  inst->syn_interval_ = OpenDDS::DCPS::TimeDuration::from_msec(val);
+  inst->syn_interval(OpenDDS::DCPS::TimeDuration::from_msec(val));
 }
 
 // MulticastInst::getSynTimeout
@@ -966,7 +950,7 @@ jlong JNICALL Java_OpenDDS_DCPS_transport_MulticastInst_getSynTimeout
 (JNIEnv * jni, jobject jthis)
 {
   OpenDDS::DCPS::MulticastInst_rch inst = OpenDDS::DCPS::rchandle_from(recoverCppObj<OpenDDS::DCPS:: MulticastInst>(jni, jthis));
-  return inst->syn_timeout_.value().msec();
+  return inst->syn_timeout().value().msec();
 }
 
 // MulticastInst::setSynTimeout
@@ -974,7 +958,7 @@ void JNICALL Java_OpenDDS_DCPS_transport_MulticastInst_setSynTimeout
 (JNIEnv * jni, jobject jthis, jlong val)
 {
   OpenDDS::DCPS::MulticastInst_rch inst = OpenDDS::DCPS::rchandle_from(recoverCppObj<OpenDDS::DCPS:: MulticastInst>(jni, jthis));
-  inst->syn_timeout_ = OpenDDS::DCPS::TimeDuration::from_msec(val);
+  inst->syn_timeout(OpenDDS::DCPS::TimeDuration::from_msec(val));
 }
 
 // MulticastInst::getNakDepth
@@ -982,7 +966,7 @@ jint JNICALL Java_OpenDDS_DCPS_transport_MulticastInst_getNakDepth
 (JNIEnv * jni, jobject jthis)
 {
   OpenDDS::DCPS::MulticastInst_rch inst = OpenDDS::DCPS::rchandle_from(recoverCppObj<OpenDDS::DCPS:: MulticastInst>(jni, jthis));
-  return static_cast<jint>(inst->nak_depth_);
+  return static_cast<jint>(inst->nak_depth());
 }
 
 // MulticastInst::setNakDepth
@@ -990,7 +974,7 @@ void JNICALL Java_OpenDDS_DCPS_transport_MulticastInst_setNakDepth
 (JNIEnv * jni, jobject jthis, jint val)
 {
   OpenDDS::DCPS::MulticastInst_rch inst = OpenDDS::DCPS::rchandle_from(recoverCppObj<OpenDDS::DCPS:: MulticastInst>(jni, jthis));
-  inst->nak_depth_ = val;
+  inst->nak_depth(val);
 }
 
 // MulticastInst::getNakInterval
@@ -998,7 +982,7 @@ jlong JNICALL Java_OpenDDS_DCPS_transport_MulticastInst_getNakInterval
 (JNIEnv * jni, jobject jthis)
 {
   OpenDDS::DCPS::MulticastInst_rch inst = OpenDDS::DCPS::rchandle_from(recoverCppObj<OpenDDS::DCPS:: MulticastInst>(jni, jthis));
-  return inst->nak_interval_.value().msec();
+  return inst->nak_interval().value().msec();
 }
 
 // MulticastInst::setNakInterval
@@ -1006,7 +990,7 @@ void JNICALL Java_OpenDDS_DCPS_transport_MulticastInst_setNakInterval
 (JNIEnv * jni, jobject jthis, jlong val)
 {
   OpenDDS::DCPS::MulticastInst_rch inst = OpenDDS::DCPS::rchandle_from(recoverCppObj<OpenDDS::DCPS:: MulticastInst>(jni, jthis));
-  inst->nak_interval_ = OpenDDS::DCPS::TimeDuration::from_msec(val);
+  inst->nak_interval(OpenDDS::DCPS::TimeDuration::from_msec(val));
 }
 
 // MulticastInst::getNakDelayInterval
@@ -1014,7 +998,7 @@ jint JNICALL Java_OpenDDS_DCPS_transport_MulticastInst_getNakDelayInterval
 (JNIEnv * jni, jobject jthis)
 {
   OpenDDS::DCPS::MulticastInst_rch inst = OpenDDS::DCPS::rchandle_from(recoverCppObj<OpenDDS::DCPS:: MulticastInst>(jni, jthis));
-  return static_cast<jint>(inst->nak_delay_intervals_);
+  return static_cast<jint>(inst->nak_delay_intervals());
 }
 
 // MulticastInst::setNakDelayInterval
@@ -1022,7 +1006,7 @@ void JNICALL Java_OpenDDS_DCPS_transport_MulticastInst_setNakDelayInterval
 (JNIEnv * jni, jobject jthis, jint val)
 {
   OpenDDS::DCPS::MulticastInst_rch inst = OpenDDS::DCPS::rchandle_from(recoverCppObj<OpenDDS::DCPS:: MulticastInst>(jni, jthis));
-  inst->nak_delay_intervals_ = val;
+  inst->nak_delay_intervals(val);
 }
 
 // MulticastInst::getNakMax
@@ -1030,7 +1014,7 @@ jint JNICALL Java_OpenDDS_DCPS_transport_MulticastInst_getNakMax
 (JNIEnv * jni, jobject jthis)
 {
   OpenDDS::DCPS::MulticastInst_rch inst = OpenDDS::DCPS::rchandle_from(recoverCppObj<OpenDDS::DCPS:: MulticastInst>(jni, jthis));
-  return static_cast<jint>(inst->nak_max_);
+  return static_cast<jint>(inst->nak_max());
 }
 
 // MulticastInst::setNakMax
@@ -1038,7 +1022,7 @@ void JNICALL Java_OpenDDS_DCPS_transport_MulticastInst_setNakMax
 (JNIEnv * jni, jobject jthis, jint val)
 {
   OpenDDS::DCPS::MulticastInst_rch inst = OpenDDS::DCPS::rchandle_from(recoverCppObj<OpenDDS::DCPS:: MulticastInst>(jni, jthis));
-  inst->nak_max_ = val;
+  inst->nak_max(val);
 }
 
 // MulticastInst::getNakTimeout
@@ -1046,7 +1030,7 @@ jlong JNICALL Java_OpenDDS_DCPS_transport_MulticastInst_getNakTimeout
 (JNIEnv * jni, jobject jthis)
 {
   OpenDDS::DCPS::MulticastInst_rch inst = OpenDDS::DCPS::rchandle_from(recoverCppObj<OpenDDS::DCPS:: MulticastInst>(jni, jthis));
-  return inst->nak_timeout_.value().msec();
+  return inst->nak_timeout().value().msec();
 }
 
 // MulticastInst::setNakTimeout
@@ -1054,7 +1038,7 @@ void JNICALL Java_OpenDDS_DCPS_transport_MulticastInst_setNakTimeout
 (JNIEnv * jni, jobject jthis, jlong val)
 {
   OpenDDS::DCPS::MulticastInst_rch inst = OpenDDS::DCPS::rchandle_from(recoverCppObj<OpenDDS::DCPS:: MulticastInst>(jni, jthis));
-  inst->nak_timeout_ = OpenDDS::DCPS::TimeDuration::from_msec(val);
+  inst->nak_timeout(OpenDDS::DCPS::TimeDuration::from_msec(val));
 }
 
 // MulticastInst::getTimeToLive
@@ -1062,7 +1046,7 @@ jbyte JNICALL Java_OpenDDS_DCPS_transport_MulticastInst_getTimeToLive
 (JNIEnv * jni, jobject jthis)
 {
   OpenDDS::DCPS::MulticastInst_rch inst = OpenDDS::DCPS::rchandle_from(recoverCppObj<OpenDDS::DCPS:: MulticastInst>(jni, jthis));
-  return inst->ttl_;
+  return inst->ttl();
 }
 
 // MulticastInst::setTimeToLive
@@ -1070,7 +1054,7 @@ void JNICALL Java_OpenDDS_DCPS_transport_MulticastInst_setTimeToLive
 (JNIEnv * jni, jobject jthis, jbyte val)
 {
   OpenDDS::DCPS::MulticastInst_rch inst = OpenDDS::DCPS::rchandle_from(recoverCppObj<OpenDDS::DCPS:: MulticastInst>(jni, jthis));
-  inst->ttl_ = static_cast<unsigned char>(val);
+  inst->ttl(static_cast<unsigned char>(val));
 }
 
 // MulticastInst::getRcvBufferSize
@@ -1078,7 +1062,7 @@ jint JNICALL Java_OpenDDS_DCPS_transport_MulticastInst_getRcvBufferSize
 (JNIEnv * jni, jobject jthis)
 {
   OpenDDS::DCPS::MulticastInst_rch inst = OpenDDS::DCPS::rchandle_from(recoverCppObj<OpenDDS::DCPS:: MulticastInst>(jni, jthis));
-  return static_cast<jint>(inst->rcv_buffer_size_);
+  return static_cast<jint>(inst->rcv_buffer_size());
 }
 
 // MulticastInst::setRcvBufferSize
@@ -1086,7 +1070,7 @@ void JNICALL Java_OpenDDS_DCPS_transport_MulticastInst_setRcvBufferSize
 (JNIEnv * jni, jobject jthis, jint val)
 {
   OpenDDS::DCPS::MulticastInst_rch inst = OpenDDS::DCPS::rchandle_from(recoverCppObj<OpenDDS::DCPS:: MulticastInst>(jni, jthis));
-  inst->rcv_buffer_size_ = val;
+  inst->rcv_buffer_size(val);
 }
 
 // RtpsUdpInst
@@ -1114,7 +1098,7 @@ jboolean JNICALL Java_OpenDDS_DCPS_transport_RtpsUdpInst_isUseMulticast
 (JNIEnv * jni, jobject jthis)
 {
   OpenDDS::DCPS::RtpsUdpInst_rch inst = OpenDDS::DCPS::rchandle_from(recoverCppObj<OpenDDS::DCPS:: RtpsUdpInst>(jni, jthis));
-  return inst->use_multicast_;
+  return inst->use_multicast();
 }
 
 // RtpsUdpInst::setUseMulticast
@@ -1122,15 +1106,15 @@ void JNICALL Java_OpenDDS_DCPS_transport_RtpsUdpInst_setUseMulticast
 (JNIEnv * jni, jobject jthis, jboolean val)
 {
   OpenDDS::DCPS::RtpsUdpInst_rch inst = OpenDDS::DCPS::rchandle_from(recoverCppObj<OpenDDS::DCPS:: RtpsUdpInst>(jni, jthis));
-  inst->use_multicast_ = val;
+  inst->use_multicast(val);
 }
 
 // RtpsUdpInst::getMulticastGroupAddress
 jstring JNICALL Java_OpenDDS_DCPS_transport_RtpsUdpInst_getMulticastGroupAddress
-(JNIEnv * jni, jobject jthis)
+(JNIEnv * jni, jobject jthis, jint domain)
 {
   OpenDDS::DCPS::RtpsUdpInst_rch inst = OpenDDS::DCPS::rchandle_from(recoverCppObj<OpenDDS::DCPS:: RtpsUdpInst>(jni, jthis));
-  return jni->NewStringUTF(OpenDDS::DCPS::LogAddr(inst->multicast_group_address()).c_str());
+  return jni->NewStringUTF(OpenDDS::DCPS::LogAddr(inst->multicast_group_address(domain)).c_str());
 }
 
 // RtpsUdpInst::setMulticastGroupAddress
@@ -1148,7 +1132,7 @@ jint JNICALL Java_OpenDDS_DCPS_transport_RtpsUdpInst_getNakDepth
 (JNIEnv * jni, jobject jthis)
 {
   OpenDDS::DCPS::RtpsUdpInst_rch inst = OpenDDS::DCPS::rchandle_from(recoverCppObj<OpenDDS::DCPS:: RtpsUdpInst>(jni, jthis));
-  return static_cast<jint>(inst->nak_depth_);
+  return static_cast<jint>(inst->nak_depth());
 }
 
 // RtpsUdpInst::setNakDepth
@@ -1156,7 +1140,7 @@ void JNICALL Java_OpenDDS_DCPS_transport_RtpsUdpInst_setNakDepth
 (JNIEnv * jni, jobject jthis, jint val)
 {
   OpenDDS::DCPS::RtpsUdpInst_rch inst = OpenDDS::DCPS::rchandle_from(recoverCppObj<OpenDDS::DCPS:: RtpsUdpInst>(jni, jthis));
-  inst->nak_depth_ = val;
+  inst->nak_depth(val);
 }
 
 // RtpsUdpInst::getNakResponseDelay
@@ -1164,7 +1148,7 @@ jlong JNICALL Java_OpenDDS_DCPS_transport_RtpsUdpInst_getNakResponseDelay
 (JNIEnv * jni, jobject jthis)
 {
   OpenDDS::DCPS::RtpsUdpInst_rch inst = OpenDDS::DCPS::rchandle_from(recoverCppObj<OpenDDS::DCPS:: RtpsUdpInst>(jni, jthis));
-  return inst->nak_response_delay_.value().msec();
+  return inst->nak_response_delay().value().msec();
 }
 
 // RtpsUdpInst::setNakResponseDelay
@@ -1172,7 +1156,7 @@ void JNICALL Java_OpenDDS_DCPS_transport_RtpsUdpInst_setNakResponseDelay
 (JNIEnv * jni, jobject jthis, jlong val)
 {
   OpenDDS::DCPS::RtpsUdpInst_rch inst = OpenDDS::DCPS::rchandle_from(recoverCppObj<OpenDDS::DCPS:: RtpsUdpInst>(jni, jthis));
-  inst->nak_response_delay_ = OpenDDS::DCPS::TimeDuration::from_msec(val);
+  inst->nak_response_delay(OpenDDS::DCPS::TimeDuration::from_msec(val));
 }
 
 // RtpsUdpInst::getHeartbeatPeriod
@@ -1180,7 +1164,7 @@ jlong JNICALL Java_OpenDDS_DCPS_transport_RtpsUdpInst_getHeartbeatPeriod
 (JNIEnv * jni, jobject jthis)
 {
   OpenDDS::DCPS::RtpsUdpInst_rch inst = OpenDDS::DCPS::rchandle_from(recoverCppObj<OpenDDS::DCPS:: RtpsUdpInst>(jni, jthis));
-  return inst->heartbeat_period_.value().msec();
+  return inst->heartbeat_period().value().msec();
 }
 
 // RtpsUdpInst::setHeartbeatPeriod
@@ -1188,7 +1172,7 @@ void JNICALL Java_OpenDDS_DCPS_transport_RtpsUdpInst_setHeartbeatPeriod
 (JNIEnv * jni, jobject jthis, jlong val)
 {
   OpenDDS::DCPS::RtpsUdpInst_rch inst = OpenDDS::DCPS::rchandle_from(recoverCppObj<OpenDDS::DCPS:: RtpsUdpInst>(jni, jthis));
-  inst->heartbeat_period_ = OpenDDS::DCPS::TimeDuration::from_msec(val);
+  inst->heartbeat_period(OpenDDS::DCPS::TimeDuration::from_msec(val));
 }
 
 // WaitSet and GuardCondition

@@ -32,8 +32,9 @@ namespace {
   const Encoding::Kind encoding_kind = Encoding::KIND_UNALIGNED_CDR;
 }
 
-UdpTransport::UdpTransport(const UdpInst_rch& inst)
-  : TransportImpl(inst)
+UdpTransport::UdpTransport(const UdpInst_rch& inst,
+                           DDS::DomainId_t domain)
+  : TransportImpl(inst, domain)
 {
   if (!(configure_i(inst) && open())) {
     throw Transport::UnableToCreate();
@@ -78,7 +79,7 @@ UdpTransport::connect_datalink(const RemoteTransport& remote,
   }
   const ACE_INET_Addr remote_address = get_connection_addr(remote.blob_);
   const bool active = true;
-  const PriorityKey key = blob_to_key(remote.blob_, attribs.priority_, cfg->local_address(), active);
+  const PriorityKey key = blob_to_key(remote.blob_, attribs.priority_, cfg->send_receive_address(), active);
 
   VDBG_LVL((LM_DEBUG, "(%P|%t) UdpTransport::connect_datalink PriorityKey "
             "prio=%d, addr=%C, is_loopback=%d, is_active=%d\n",
@@ -121,7 +122,7 @@ UdpTransport::accept_datalink(const RemoteTransport& remote,
   ACE_Guard<ACE_Recursive_Thread_Mutex> guard(connections_lock_);
 
   const PriorityKey key = blob_to_key(remote.blob_,
-                                      attribs.priority_, cfg->local_address(), false /* !active */);
+                                      attribs.priority_, cfg->send_receive_address(), false /* !active */);
 
   VDBG_LVL((LM_DEBUG, "(%P|%t) UdpTransport::accept_datalink PriorityKey "
             "prio=%d, addr=%C, is_loopback=%d, is_active=%d\n",
@@ -178,16 +179,10 @@ UdpTransport::configure_i(const UdpInst_rch& config)
   }
   create_reactor_task(false, "UdpTransport" + config->name());
 
-  // Override with DCPSDefaultAddress.
-  if (config->local_address() == ACE_INET_Addr() &&
-      TheServiceParticipant->default_address().to_addr() != ACE_INET_Addr()) {
-    config->local_address(TheServiceParticipant->default_address().to_addr());
-  }
-
   // Our "server side" data link is created here, similar to the acceptor_
   // in the TcpTransport implementation.  This establishes a socket as an
   // endpoint that we can advertise to peers via connection_info_i().
-  server_link_ = make_datalink(config->local_address(), 0 /* priority */, false);
+  server_link_ = make_datalink(config->send_receive_address(), 0 /* priority */, false);
   return true;
 }
 
@@ -213,7 +208,7 @@ UdpTransport::connection_info_i(TransportLocator& info, ConnectionInfoFlags flag
 {
   UdpInst_rch cfg = config();
   if (cfg) {
-    cfg->populate_locator(info, flags);
+    cfg->populate_locator(info, flags, domain_);
     return true;
   }
   return false;
@@ -301,7 +296,7 @@ UdpTransport::passive_connection(const ACE_INET_Addr& remote_address,
     VDBG((LM_DEBUG, "(%P|%t) UdpTransport::passive_connection failed to send ack\n"));
   }
 
-  const PriorityKey key = blob_to_key(blob, priority, cfg->local_address(), false /* passive */);
+  const PriorityKey key = blob_to_key(blob, priority, cfg->send_receive_address(), false /* passive */);
 
   ACE_Guard<ACE_Recursive_Thread_Mutex> guard(connections_lock_);
 

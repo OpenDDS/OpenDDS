@@ -1,6 +1,4 @@
 /*
- *
- *
  * Distributed under the OpenDDS License.
  * See: http://www.opendds.org/license.html
  */
@@ -9,13 +7,15 @@
 #define OPENDDS_DDS_DYNAMIC_DATA_IDL
 
 #ifndef OPENDDS_SAFETY_PROFILE
-
-#include <dds/DdsDcpsInfrastructure.idl>
-#include <dds/DdsDcpsDomain.idl>
-#include <dds/DdsDynamicDataSeq.idl>
+#  ifndef OPENDDS_HIDE_DYNAMIC_DATA
+#    include <dds/DdsDcpsInfrastructure.idl>
+#    include <dds/DdsDcpsDomain.idl>
+#    include <dds/DdsDynamicDataSeq.idl>
+#  endif
 
 module DDS {
   local interface DynamicType;
+#  ifndef OPENDDS_HIDE_DYNAMIC_DATA
   valuetype TypeDescriptor;
 
   typedef sequence<string> IncludePathSeq;
@@ -158,16 +158,17 @@ module DDS {
 
     void clear();
   };
+#  endif // OPENDDS_HIDE_DYNAMIC_DATA
 
   local interface DynamicData;
 
+#  ifndef OPENDDS_HIDE_DYNAMIC_DATA
   local interface DynamicDataFactoryInterf {
     // Implemented in C++
-    //static DynamicDataFactory get_instance();
-    // Not Implemented
-    //static DDS::ReturnCode_t delete_instance();
+    // static DynamicDataFactory get_instance();
+    // Implemented in C++
+    // static DDS::ReturnCode_t delete_instance();
     DynamicData create_data(in DynamicType type);
-    /// This is a NOP in OpenDDS
     DDS::ReturnCode_t delete_data(in DynamicData data);
   };
 
@@ -402,6 +403,7 @@ module DDS {
                                          in MemberId id,
                                          in WstringSeq value);
   }; // local interface DynamicData
+#  endif // OPENDDS_HIDE_DYNAMIC_DATA
 };
 
 #endif // OPENDDS_SAFETY_PROFILE

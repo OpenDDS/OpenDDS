@@ -97,9 +97,12 @@ public:
   // of <= (see issue 16966).
   static const ACE_CDR::UShort FRAG_SIZE = 1024;
 
+  static FragmentNumber last_fragment(const RTPS::DataFragSubmessage& df);
+  static ACE_UINT32 total_fragments(const RTPS::DataFragSubmessage& df);
+
 private:
   static void process_iqos(DataSampleHeader& opendds,
-                           const OpenDDS::RTPS::ParameterList& iqos);
+                           const RTPS::ParameterList& iqos);
 };
 
 }

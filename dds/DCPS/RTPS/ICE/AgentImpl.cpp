@@ -10,15 +10,18 @@
 #include "Task.h"
 #include "EndpointManager.h"
 
+#include <dds/DCPS/Qos_Helper.h>
 #include <dds/DCPS/Service_Participant.h>
 #include <dds/DCPS/TimeTypes.h>
+
+#include <dds/OpenDDSConfigWrapper.h>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
 namespace ICE {
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
 
 using DCPS::TimeDuration;
 using DCPS::MonotonicTimePoint;
@@ -42,7 +45,7 @@ void AgentImpl::enqueue(const DCPS::MonotonicTimePoint& a_release_time,
                         WeakTaskPtr wtask)
 {
   if (tasks_.empty() || a_release_time < tasks_.top().release_time_) {
-    const MonotonicTimePoint release = std::max(last_execute_ + ICE::Configuration::instance()->T_a(), a_release_time);
+    const MonotonicTimePoint release = std::max(last_execute_ + T_a_, a_release_time);
     execute_or_enqueue(DCPS::make_rch<ScheduleTimerCommand>(reactor(), this, release - MonotonicTimePoint::now()));
   }
   tasks_.push(Item(a_release_time, wtask));
@@ -79,7 +82,7 @@ int AgentImpl::handle_timeout(const ACE_Time_Value& a_now, const void* /*act*/)
   check_invariants();
 
   if (!tasks_.empty()) {
-    const MonotonicTimePoint release = std::max(last_execute_ + ICE::Configuration::instance()->T_a(), tasks_.top().release_time_);
+    const MonotonicTimePoint release = std::max(last_execute_ + T_a_, tasks_.top().release_time_);
     execute_or_enqueue(DCPS::make_rch<ScheduleTimerCommand>(reactor(), this, release - now));
   }
 
@@ -89,8 +92,17 @@ int AgentImpl::handle_timeout(const ACE_Time_Value& a_now, const void* /*act*/)
 AgentImpl::AgentImpl()
   : DCPS::InternalDataReaderListener<DCPS::NetworkInterfaceAddress>(TheServiceParticipant->job_queue())
   , ReactorInterceptor(TheServiceParticipant->reactor(), TheServiceParticipant->reactor_owner())
+  , T_a_(ICE::Configuration::instance()->T_a())
+  , connectivity_check_ttl_(ICE::Configuration::instance()->connectivity_check_ttl())
+  , checklist_period_(ICE::Configuration::instance()->checklist_period())
+  , indication_period_(ICE::Configuration::instance()->indication_period())
+  , nominated_ttl_(ICE::Configuration::instance()->nominated_ttl())
+  , server_reflexive_address_period_(ICE::Configuration::instance()->server_reflexive_address_period())
+  , server_reflexive_indication_count_(ICE::Configuration::instance()->server_reflexive_indication_count())
+  , deferred_triggered_check_ttl_(ICE::Configuration::instance()->deferred_triggered_check_ttl())
+  , change_password_period_(ICE::Configuration::instance()->change_password_period())
   , unfreeze_(false)
-  , reader_(DCPS::make_rch<DCPS::InternalDataReader<DCPS::NetworkInterfaceAddress> >(true, DCPS::rchandle_from(this)))
+  , reader_(DCPS::make_rch<DCPS::InternalDataReader<DCPS::NetworkInterfaceAddress> >(DCPS::DataReaderQosBuilder().reliability_reliable().durability_transient_local(), DCPS::rchandle_from(this)))
   , reader_added_(false)
   , remote_peer_reflexive_counter_(0)
 {
@@ -262,7 +274,7 @@ void AgentImpl::on_data_available(DCPS::RcHandle<DCPS::InternalDataReader<DCPS::
 {
   DCPS::InternalDataReader<DCPS::NetworkInterfaceAddress>::SampleSequence samples;
   DCPS::InternalSampleInfoSequence infos;
-  reader_->take(samples, infos);
+  reader_->take(samples, infos, DDS::LENGTH_UNLIMITED, DDS::ANY_SAMPLE_STATE, DDS::ANY_VIEW_STATE, DDS::ANY_INSTANCE_STATE);
 
   // FUTURE: This polls the endpoints.  The endpoints should just publish the change.
   ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, mutex);
@@ -295,7 +307,7 @@ void AgentImpl::process_deferred()
   }
 }
 
-#endif /* OPENDDS_SECURITY */
+#endif
 
 } // namespace ICE
 } // namespace OpenDDS

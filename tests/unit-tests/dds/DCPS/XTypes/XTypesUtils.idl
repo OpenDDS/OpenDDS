@@ -94,5 +94,10 @@ struct LessThanStruct {
   sequence<uint32> uint_32_seq;
 };
 
+@topic
+struct MultidimArrayStruct {
+  long arr[2][3];
+};
+
 };
 #endif

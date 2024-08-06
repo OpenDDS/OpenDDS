@@ -5,35 +5,39 @@
 
 #include "Args.h"
 #include "MessengerTypeSupportImpl.h"
+#include "ParticipantBit.h"
 #include "Writer.h"
 
 #include <dds/DCPS/JsonValueWriter.h>
 #include <dds/DCPS/Marked_Default_Qos.h>
 #include <dds/DCPS/PublisherImpl.h>
-#include <dds/DCPS/RTPS/RtpsDiscovery.h>
 #include <dds/DCPS/Service_Participant.h>
+
+#include <dds/DCPS/RTPS/RtpsDiscovery.h>
+
 #include <dds/DCPS/transport/framework/TransportRegistry.h>
+
+#include <dds/OpenDDSConfigWrapper.h>
 #include <dds/OpenddsDcpsExtTypeSupportImpl.h>
 
 #ifdef ACE_AS_STATIC_LIBS
 #  include <dds/DCPS/RTPS/RtpsDiscovery.h>
 #  include <dds/DCPS/transport/rtps_udp/RtpsUdp.h>
-#  ifdef OPENDDS_SECURITY
+#  if OPENDDS_CONFIG_SECURITY
 #    include <dds/DCPS/security/BuiltInPlugins.h>
 #  endif
 #endif
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
 #  include <dds/DCPS/security/framework/Properties.h>
 #endif
 
-#include <ace/Get_Opt.h>
 #include <ace/Log_Msg.h>
 #include <ace/OS_NS_stdlib.h>
 #include <ace/OS_NS_unistd.h>
 
 #include <iostream>
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
 const char auth_ca_file[] = "file:../../../security/certs/identity/identity_ca_cert.pem";
 const char perm_ca_file[] = "file:../../../security/certs/permissions/permissions_ca_cert.pem";
 const char id_cert_file[] = "file:../../../security/certs/identity/test_participant_02_cert.pem";
@@ -50,16 +54,43 @@ void append(DDS::PropertySeq& props, const char* name, const char* value, bool p
 }
 #endif
 
-bool check_lease_recovery = false;
-bool expect_unmatch = false;
+Args args;
 
 const char USER_DATA[] = "The Publisher";
+const char OTHER_USER_DATA[] = "The Subscriber";
+
+void writer_test(const DDS::DataWriter_var& dw)
+{
+  // Start writing threads
+  std::cout << "Creating Writer" << std::endl;
+  Writer* writer = args.check_lease_recovery ? new Writer(dw, 30, true) : new Writer(dw, 10, false);
+  std::cout << "Starting Writer" << std::endl;
+  writer->start();
+
+  while (!writer->is_finished()) {
+    ACE_Time_Value small_time(0, 250000);
+    ACE_OS::sleep(small_time);
+  }
+
+  std::cout << "Writer finished " << std::endl;
+  writer->end();
+
+  std::cout << "Writer wait for ACKS" << std::endl;
+
+  DDS::Duration_t timeout =
+    { DDS::DURATION_INFINITE_SEC, DDS::DURATION_INFINITE_NSEC };
+  dw->wait_for_acknowledgments(timeout);
+
+  std::cerr << "deleting DW" << std::endl;
+  delete writer;
+}
 
 int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 {
   DDS::DomainParticipantFactory_var dpf;
   DDS::DomainParticipant_var participant;
 
+  int status = EXIT_SUCCESS;
   try {
 
     std::cout << "Starting publisher" << std::endl;
@@ -67,8 +98,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       // Initialize DomainParticipantFactory
       dpf = TheParticipantFactoryWithArgs(argc, argv);
 
-      int status = EXIT_SUCCESS;
-      if ((status = parse_args(argc, argv)) != EXIT_SUCCESS) {
+      if ((status = args.parse(argc, argv)) != EXIT_SUCCESS) {
         return status;
       }
 
@@ -80,7 +110,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       part_qos.user_data.value.length(static_cast<unsigned int>(std::strlen(USER_DATA)));
       std::memcpy(part_qos.user_data.value.get_buffer(), USER_DATA, std::strlen(USER_DATA));
 
-#if defined(OPENDDS_SECURITY)
+#if OPENDDS_CONFIG_SECURITY
       if (TheServiceParticipant->get_security()) {
         DDS::PropertySeq& props = part_qos.property.value;
         append(props, DDS::Security::Properties::AuthIdentityCA, auth_ca_file);
@@ -144,7 +174,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       DDS::PublisherQos publisher_qos;
       participant->get_default_publisher_qos(publisher_qos);
       publisher_qos.partition.name.length(1);
-      publisher_qos.partition.name[0] = "OCI";
+      publisher_qos.partition.name[0] = args.override_partition
+        ? ACE_TEXT_ALWAYS_CHAR(args.override_partition) : "OCI";
 
       DDS::Publisher_var pub =
         participant->create_publisher(publisher_qos,
@@ -178,39 +209,23 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
                          1);
       }
 
-      // Start writing threads
-      std::cout << "Creating Writer" << std::endl;
-      Writer* writer = check_lease_recovery ? new Writer(dw.in(), 30, true) : new Writer(dw.in(), 10, false);
-      std::cout << "Starting Writer" << std::endl;
-      writer->start();
-
-      while (!writer->is_finished()) {
-        ACE_Time_Value small_time(0, 250000);
-        ACE_OS::sleep(small_time);
-      }
-
-      std::cout << "Writer finished " << std::endl;
-      writer->end();
-
-      std::cout << "Writer wait for ACKS" << std::endl;
-
-      DDS::Duration_t timeout =
-        { DDS::DURATION_INFINITE_SEC, DDS::DURATION_INFINITE_NSEC };
-      dw->wait_for_acknowledgments(timeout);
-
-      std::cerr << "deleting DW" << std::endl;
-      delete writer;
+      if (args.participant_bit_expected_instances > 0) {
+        status = test_participant_discovery(participant, args.participant_bit_expected_instances,
+                                            USER_DATA, OTHER_USER_DATA, disc->config()->resend_period());
+      } else {
+        writer_test(dw);
 
 #if OPENDDS_HAS_JSON_VALUE_WRITER
-      std::cout << "Publisher Guid: " << OpenDDS::DCPS::LogGuid(guid).c_str() << std::endl;
-      OpenDDS::DCPS::TransportStatisticsSequence stats;
-      disc->append_transport_statistics(42, guid, stats);
-      transport_inst->append_transport_statistics(stats);
+        std::cout << "Publisher Guid: " << OpenDDS::DCPS::LogGuid(guid).c_str() << std::endl;
+        OpenDDS::DCPS::TransportStatisticsSequence stats;
+        disc->append_transport_statistics(42, guid, stats);
+        transport_inst->append_transport_statistics(stats, 42, dp_impl);
 
-      for (unsigned int i = 0; i != stats.length(); ++i) {
-        std::cout << "Publisher Transport Statistics: " << OpenDDS::DCPS::to_json(stats[i]) << std::endl;
-      }
+        for (unsigned int i = 0; i != stats.length(); ++i) {
+          std::cout << "Publisher Transport Statistics: " << OpenDDS::DCPS::to_json(stats[i]) << std::endl;
+        }
 #endif
+      }
     }
 
     // Clean-up!
@@ -223,8 +238,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
   } catch (const CORBA::Exception& e) {
     e._tao_print_exception("Exception caught in main():");
-    ACE_OS::exit(1);
+    status = EXIT_FAILURE;
   }
 
-  return 0;
+  return status;
 }

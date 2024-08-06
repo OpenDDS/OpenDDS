@@ -75,7 +75,7 @@ DDS::ReturnCode_t DynamicTypeImpl::get_member(DDS::DynamicTypeMember_ptr& member
     if (DCPS::log_level >= DCPS::LogLevel::Notice) {
       CORBA::String_var name = descriptor_->name();
       ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicTypeImpl::get_member: "
-        "type %C doesn't have a member with id %d\n", name.in(), id));
+        "type %C doesn't have a member with id %u\n", name.in(), id));
     }
     return DDS::RETCODE_BAD_PARAMETER;
   }
@@ -99,12 +99,18 @@ ACE_CDR::ULong DynamicTypeImpl::get_member_count()
 
 DDS::ReturnCode_t DynamicTypeImpl::get_member_by_index(DDS::DynamicTypeMember_ptr& member, ACE_CDR::ULong index)
 {
-  if (index < member_by_index_.size()) {
-    DDS::DynamicTypeMember_var member_v(member);
-    member = DDS::DynamicTypeMember::_duplicate(member_by_index_[index]);
-    return DDS::RETCODE_OK;
+  if (index >= member_by_index_.size()) {
+    if (DCPS::log_level >= DCPS::LogLevel::Notice) {
+      CORBA::String_var name = descriptor_->name();
+      ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicTypeImpl::get_member_by_index: "
+        "type %C doesn't have a member with index %u\n", name.in(), index));
+    }
+    return DDS::RETCODE_BAD_PARAMETER;
   }
-  return DDS::RETCODE_ERROR;
+
+  DDS::DynamicTypeMember_var member_v(member);
+  member = DDS::DynamicTypeMember::_duplicate(member_by_index_[index]);
+  return DDS::RETCODE_OK;
 }
 
 CORBA::ULong DynamicTypeImpl::get_annotation_count()
@@ -192,9 +198,6 @@ bool test_equality(DDS::DynamicType_ptr lhs, DDS::DynamicType_ptr rhs, DynamicTy
   if (lhs == rhs) {
     return true;
   }
-
-  OPENDDS_ASSERT(lhs);
-  OPENDDS_ASSERT(rhs);
 
   if (lhs == 0 || rhs == 0) {
     return false;

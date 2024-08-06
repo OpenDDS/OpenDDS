@@ -26,6 +26,7 @@ public:
   /// This creates a duplicated ACE_Message_Block chain from the provided chain.
   /// The duplicated chain is released when the object is destroyed. Caller is
   /// responsible for the release of the input message block chain.
+  /// The provided type is expected to be the type of the binary data.
   DynamicDataXcdrReadImpl(ACE_Message_Block* chain,
                           const DCPS::Encoding& encoding,
                           DDS::DynamicType_ptr type,
@@ -34,6 +35,7 @@ public:
   /// Use this when you want to pass the alignment state of a given Serializer object over.
   /// A typical use case would be when a part of the data has already been consumed from
   /// @a ser and you want to give the remaining to DynamicData.
+  /// The provided type is expected to be the type of the binary data.
   DynamicDataXcdrReadImpl(DCPS::Serializer& ser, DDS::DynamicType_ptr type,
                           DCPS::Sample::Extent ext = DCPS::Sample::Full);
 
@@ -102,16 +104,14 @@ public:
     return DDS::RETCODE_UNSUPPORTED;
   }
 
-  DDS::ReturnCode_t get_int64_value(CORBA::LongLong& value,
-                                    DDS::MemberId id);
+  DDS::ReturnCode_t get_int64_value_impl(CORBA::LongLong& value, DDS::MemberId id);
   DDS::ReturnCode_t set_int64_value(DDS::MemberId,
                                     CORBA::LongLong)
   {
     return DDS::RETCODE_UNSUPPORTED;
   }
 
-  DDS::ReturnCode_t get_uint64_value(CORBA::ULongLong& value,
-                                     DDS::MemberId id);
+  DDS::ReturnCode_t get_uint64_value_impl(CORBA::ULongLong& value, DDS::MemberId id);
   DDS::ReturnCode_t set_uint64_value(DDS::MemberId,
                                      CORBA::ULongLong)
   {
@@ -340,9 +340,17 @@ public:
 
   CORBA::Boolean equals(DDS::DynamicData_ptr other);
 
-#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
-  DDS::ReturnCode_t get_simple_value(DCPS::Value& value, DDS::MemberId id);
-#endif
+  bool serialized_size(const DCPS::Encoding&, size_t&, DCPS::Sample::Extent) const
+  {
+    // Not supported.
+    return false;
+  }
+
+  bool serialize(DCPS::Serializer&, DCPS::Sample::Extent) const
+  {
+    // Not supported.
+    return false;
+  }
 
 private:
 
@@ -366,6 +374,9 @@ private:
   };
 
   void copy(const DynamicDataXcdrReadImpl& other);
+
+  bool get_struct_item_count();
+  bool get_union_item_count();
 
   /// Skip the whole data corresponding to this type if it is a struct or union.
   /// This is called by a containing type when it wants to skip a member which
@@ -399,16 +410,12 @@ private:
    *  and @a lower and @a upper to form a corresponding range for the bitmask's bit bound.
    */
   template<TypeKind MemberTypeKind, typename MemberType>
-  bool get_value_from_struct(MemberType& value, MemberId id,
-                             TypeKind enum_or_bitmask = TK_NONE,
-                             LBound lower = 0,
-                             LBound upper = 0);
+  DDS::ReturnCode_t get_value_from_struct(MemberType& value, MemberId id);
 
   template<TypeKind MemberTypeKind, typename MemberType>
-  bool get_value_from_union(MemberType& value, MemberId id,
-                            TypeKind enum_or_bitmask = TK_NONE,
-                            LBound lower = 0,
-                            LBound upper = 0);
+  DDS::ReturnCode_t get_value_from_union(
+    MemberType& value, MemberId id, TypeKind enum_or_bitmask = TK_NONE,
+    LBound lower = 0, LBound upper = 0);
 
   template<TypeKind ElementTypeKind, typename ElementType>
   bool get_value_from_collection(ElementType& value, MemberId id, TypeKind collection_tk,
@@ -434,7 +441,7 @@ private:
 
   /// Skip to a member with a given ID in a struct.
   ///
-  bool skip_to_struct_member(DDS::MemberDescriptor* member_desc, MemberId id);
+  DDS::ReturnCode_t skip_to_struct_member(DDS::MemberDescriptor* member_desc, MemberId id);
 
   bool get_from_struct_common_checks(const DDS::MemberDescriptor_var& md, MemberId id,
                                      TypeKind kind, bool is_sequence = false);
@@ -467,8 +474,8 @@ private:
    *  and the similar methods for the use of @a enum_or_bitmask, @a lower, @a upper.
    */
   template<TypeKind ElementTypeKind, typename SequenceType>
-  bool get_values_from_struct(SequenceType& value, MemberId id,
-                              TypeKind enum_or_bitmask, LBound lower, LBound upper);
+  DDS::ReturnCode_t get_values_from_struct(
+    SequenceType& value, MemberId id, TypeKind enum_or_bitmask, LBound lower, LBound upper);
 
   template<TypeKind ElementTypeKind, typename SequenceType>
   bool get_values_from_union(SequenceType& value, MemberId id,

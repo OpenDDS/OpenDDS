@@ -9,12 +9,16 @@
 #include "Rtps_Udp_Export.h"
 #include "RtpsUdpDataLink_rch.h"
 
-#include <dds/DCPS/NetworkAddress.h>
 #include <dds/DCPS/AtomicBool.h>
+#include <dds/DCPS/NetworkAddress.h>
+
 #include <dds/DCPS/transport/framework/TransportSendStrategy.h>
+
 #include <dds/DCPS/RTPS/MessageTypes.h>
 
-#ifdef OPENDDS_SECURITY
+#include <dds/OpenDDSConfigWrapper.h>
+
+#if OPENDDS_CONFIG_SECURITY
 #  include <dds/DdsSecurityCoreC.h>
 #endif
 
@@ -43,18 +47,17 @@ public:
   friend struct OverrideToken;
 
   OverrideToken override_destinations(const NetworkAddress& destination);
-  OverrideToken override_destinations(
-    const AddrSet& destinations);
+  OverrideToken override_destinations(const NetworkAddressSet& destinations);
 
   void send_rtps_control(RTPS::Message& message,
                          ACE_Message_Block& submessages,
                          const NetworkAddress& destination);
   void send_rtps_control(RTPS::Message& message,
                          ACE_Message_Block& submessages,
-                         const AddrSet& destinations);
+                         const NetworkAddressSet& destinations);
   void append_submessages(const RTPS::SubmessageSeq& submessages);
 
-#if defined(OPENDDS_SECURITY)
+#if OPENDDS_CONFIG_SECURITY
   void encode_payload(const GUID_t& pub_id, Message_Block_Ptr& payload,
                       RTPS::SubmessageSeq& submessages);
 #endif
@@ -76,7 +79,7 @@ public:
   static const size_t MaxSecureFullMessageAdditionalSize =
     MaxSecureFullMessageLeadingSize + MaxSubmessagePadding + MaxSecureFullMessageFollowingSize;
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
   virtual Security::SecurityConfig_rch security_config() const;
 #endif
 
@@ -91,12 +94,12 @@ protected:
 private:
   bool marshal_transport_header(ACE_Message_Block* mb);
   ssize_t send_multi_i(const iovec iov[], int n,
-                       const AddrSet& addrs);
+                       const NetworkAddressSet& addrs);
   const ACE_SOCK_Dgram& choose_send_socket(const NetworkAddress& addr) const;
   ssize_t send_single_i(const iovec iov[], int n,
                         const NetworkAddress& addr);
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
   ACE_Message_Block* pre_send_packet(const ACE_Message_Block* plain);
 
   struct Chunk {
@@ -133,7 +136,7 @@ private:
 #endif
 
   RtpsUdpDataLink* link_;
-  const AddrSet* override_dest_;
+  const NetworkAddressSet* override_dest_;
   const NetworkAddress* override_single_dest_;
 
   const size_t max_message_size_;

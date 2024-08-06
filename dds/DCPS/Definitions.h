@@ -6,7 +6,11 @@
 #ifndef OPENDDS_DCPS_DEFINITIONS_H
 #define OPENDDS_DCPS_DEFINITIONS_H
 
-#include "../Versioned_Namespace.h"
+#include <ace/config-lite.h>
+
+#include <dds/OpenDDSConfigWrapper.h>
+
+#include <dds/Versioned_Namespace.h>
 
 #include <ace/Message_Block.h>
 #include <ace/Global_Macros.h>
@@ -15,48 +19,54 @@
 #include <functional>
 #include <utility>
 
-#if !defined (ACE_LACKS_PRAGMA_ONCE)
-#pragma once
-#endif /* ACE_LACKS_PRAGMA_ONCE */
+#ifndef ACE_LACKS_PRAGMA_ONCE
+#  pragma once
+#endif
 
 // More strict check than ACE does: if we have GNU lib C++ without support for
 // wchar_t (std::wstring, std::wostream, etc.) then we don't have DDS_HAS_WCHAR
-#if defined (ACE_HAS_WCHAR) && \
-    (!defined (_GLIBCPP_VERSION) || defined(_GLIBCPP_USE_WCHAR_T))
-#define DDS_HAS_WCHAR
+#if defined ACE_HAS_WCHAR && (!defined _GLIBCPP_VERSION || defined_GLIBCPP_USE_WCHAR_T)
+#  define DDS_HAS_WCHAR
 #endif
 
 #ifdef ACE_HAS_CPP11
-#define OPENDDS_DELETED_COPY_MOVE_CTOR_ASSIGN(CLASS)         \
-  CLASS(const CLASS&) = delete;           \
-  CLASS(CLASS&&) = delete;           \
+#  define OPENDDS_DELETED_COPY_MOVE_CTOR_ASSIGN(CLASS) \
+  CLASS(const CLASS&) = delete; \
+  CLASS(CLASS&&) = delete; \
   CLASS& operator=(const CLASS&) = delete; \
   CLASS& operator=(CLASS&&) = delete;
 #else
-#define OPENDDS_DELETED_COPY_MOVE_CTOR_ASSIGN(CLASS)         \
-  ACE_UNIMPLEMENTED_FUNC(CLASS(const CLASS&))           \
+#  define OPENDDS_DELETED_COPY_MOVE_CTOR_ASSIGN(CLASS) \
+  ACE_UNIMPLEMENTED_FUNC(CLASS(const CLASS&)) \
   ACE_UNIMPLEMENTED_FUNC(CLASS& operator=(const CLASS&))
 #endif
 
-#if defined (ACE_DES_FREE_THIS)
-#define OPENDDS_DES_FREE_THIS ACE_DES_FREE_THIS
+#if defined ACE_DES_FREE_THIS
+#  define OPENDDS_DES_FREE_THIS ACE_DES_FREE_THIS
 #else
 // The macro ACE_DES_FREE_THIS is part of ACE 6.4.2 or newer, define it within
 // OpenDDS at the moment we compile against an older ACE version
-# define OPENDDS_DES_FREE_THIS(DEALLOCATOR,CLASS) \
+#  define OPENDDS_DES_FREE_THIS(DEALLOCATOR,CLASS) \
    do { \
         this->~CLASS (); \
         DEALLOCATOR (this); \
       } \
    while (0)
-#endif /* ACE_DES_FREE_THIS */
-
+#endif
 
 // If features content_filtered_topic, multi_topic, and query_condition
 // are all disabled, define a macro to indicate common code these
 // three features depend on should not be built.
-#if defined(OPENDDS_NO_QUERY_CONDITION) && defined(OPENDDS_NO_CONTENT_FILTERED_TOPIC) && defined(OPENDDS_NO_MULTI_TOPIC)
-#define OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+#if defined OPENDDS_NO_QUERY_CONDITION && defined OPENDDS_NO_CONTENT_FILTERED_TOPIC && defined OPENDDS_NO_MULTI_TOPIC
+#  define OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+#endif
+
+#ifndef OPENDDS_HAS_DYNAMIC_DATA_ADAPTER
+#  if !defined OPENDDS_SAFETY_PROFILE && !defined OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+#    define OPENDDS_HAS_DYNAMIC_DATA_ADAPTER 1
+#  else
+#    define OPENDDS_HAS_DYNAMIC_DATA_ADAPTER 0
+#  endif
 #endif
 
 #ifdef OPENDDS_SAFETY_PROFILE
@@ -75,6 +85,26 @@
 #  define OPENDDS_HAS_EXPLICIT_INTS TAO_IDL_HAS_EXPLICIT_INTS
 #else
 #  define OPENDDS_HAS_EXPLICIT_INTS 0
+#endif
+
+#if defined __GNUC__ && (__GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 6) || defined __clang__)
+#  define OPENDDS_GCC_HAS_DIAG_PUSHPOP 1
+#else
+#  define OPENDDS_GCC_HAS_DIAG_PUSHPOP 0
+#endif
+
+#ifndef OPENDDS_CONFIG_AUTO_STATIC_INCLUDES
+#  define OPENDDS_CONFIG_AUTO_STATIC_INCLUDES 0
+#endif
+
+#if !OPENDDS_CONFIG_AUTO_STATIC_INCLUDES && defined(ACE_AS_STATIC_LIBS)
+#  define OPENDDS_DO_MANUAL_STATIC_INCLUDES 1
+#else
+#  define OPENDDS_DO_MANUAL_STATIC_INCLUDES 0
+#endif
+
+#ifndef OPENDDS_CONFIG_BOOTTIME_TIMERS
+#  define OPENDDS_CONFIG_BOOTTIME_TIMERS 0
 #endif
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
@@ -112,7 +142,7 @@ struct Objref_Servant_Pair {
   }
 
   T_impl* svt_;
-  T_var   obj_;
+  T_var obj_;
 };
 
 /// Use a Foo_var in a std::set or std::map with this comparison function,

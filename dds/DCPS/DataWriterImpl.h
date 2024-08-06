@@ -7,24 +7,28 @@
 #define OPENDDS_DCPS_DATAWRITERIMPL_H
 
 #include "Atomic.h"
-#include "Sample.h"
-#include "DataWriterCallbacks.h"
-#include "transport/framework/TransportSendListener.h"
-#include "transport/framework/TransportClient.h"
-#include "MessageTracker.h"
-#include "DataBlockLockPool.h"
-#include "PoolAllocator.h"
-#include "WriteDataContainer.h"
-#include "Definitions.h"
-#include "DataSampleHeader.h"
-#include "TopicImpl.h"
-#include "Time_Helper.h"
 #include "CoherentChangeControl.h"
+#include "DataBlockLockPool.h"
+#include "DataSampleHeader.h"
+#include "DataWriterCallbacks.h"
+#include "Definitions.h"
+#include "EncapsulationHeader.h"
 #include "GuidUtils.h"
-#include "RcEventHandler.h"
-#include "unique_ptr.h"
+#include "MessageTracker.h"
 #include "Message_Block_Ptr.h"
+#include "PoolAllocator.h"
+#include "RcEventHandler.h"
+#include "Sample.h"
+#include "SporadicTask.h"
 #include "TimeTypes.h"
+#include "Time_Helper.h"
+#include "TopicImpl.h"
+#include "WriteDataContainer.h"
+#include "unique_ptr.h"
+
+#include "transport/framework/TransportClient.h"
+#include "transport/framework/TransportSendListener.h"
+
 #ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
 #  include "FilterEvaluator.h"
 #endif
@@ -54,7 +58,6 @@ class Monitor;
 class DataSampleElement;
 class SendStateDataSampleList;
 struct AssociationData;
-class LivenessTimer;
 
 /**
  * @class DataWriterImpl
@@ -191,8 +194,9 @@ public:
 
   virtual DDS::ReturnCode_t enable();
 
-  virtual void add_association(const GUID_t& yourId,
-                               const ReaderAssociation& reader,
+  virtual void set_publication_id(const GUID_t& guid);
+
+  virtual void add_association(const ReaderAssociation& reader,
                                bool active);
 
   virtual void transport_assoc_done(int flags, const GUID_t& remote_id);
@@ -253,6 +257,7 @@ public:
   DDS::ReturnCode_t
   unregister_instance_i(
     DDS::InstanceHandle_t handle,
+    const Sample* sample,
     const DDS::Time_t & source_timestamp);
 
   /**
@@ -287,6 +292,7 @@ public:
    * broadcast the disposed instance.
    */
   DDS::ReturnCode_t dispose(DDS::InstanceHandle_t handle,
+                            const Sample& sample,
                             const DDS::Time_t & source_timestamp);
 
   /**
@@ -395,10 +401,6 @@ public:
    */
   DDS::DataWriterListener_ptr listener_for(DDS::StatusKind kind);
 
-  /// Handle the assert liveliness timeout.
-  virtual int handle_timeout(const ACE_Time_Value &tv,
-                             const void *arg);
-
   /// Called by the PublisherImpl to indicate that the Publisher is now
   /// resumed and any data collected while it was suspended should now be sent.
   void send_suspended_data();
@@ -485,12 +487,6 @@ public:
 
   virtual WeakRcHandle<ICE::Endpoint> get_ice_endpoint();
 
-  GUID_t get_guid() const
-  {
-    ACE_Guard<ACE_Recursive_Thread_Mutex> guard(lock_);
-    return publication_id_;
-  }
-
   SequenceNumber get_max_sn() const
   {
     ACE_Guard<ACE_Thread_Mutex> guard(sn_lock_);
@@ -516,14 +512,6 @@ public:
     const DDS::Time_t& source_timestamp);
 
 protected:
-
-  void check_and_set_repo_id(const GUID_t& id)
-  {
-    ACE_Guard<ACE_Recursive_Thread_Mutex> guard(lock_);
-    if (GUID_UNKNOWN == publication_id_) {
-      publication_id_ = id;
-    }
-  }
 
   SequenceNumber get_next_sn()
   {
@@ -554,6 +542,8 @@ protected:
   DDS::ReturnCode_t setup_serialization();
 
   ACE_Message_Block* serialize_sample(const Sample& sample);
+
+  const bool publisher_content_filter_;
 
   /// The number of chunks for the cached allocator.
   size_t n_chunks_;
@@ -690,6 +680,7 @@ private:
   void notify_publication_lost(const DDS::InstanceHandleSeq& handles);
 
   DDS::ReturnCode_t dispose_and_unregister(DDS::InstanceHandle_t handle,
+                                           const Sample* sample,
                                            const DDS::Time_t& timestamp);
 
   /**
@@ -723,7 +714,7 @@ private:
     return this->qos_.transport_priority.value;
   }
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
   DDS::Security::ParticipantCryptoHandle get_crypto_handle() const;
 #endif
 
@@ -786,10 +777,6 @@ private:
   DDS::OfferedIncompatibleQosStatus offered_incompatible_qos_status_ ;
   DDS::PublicationMatchedStatus publication_match_status_ ;
 
-  /// True if the writer failed to actively signal its liveliness within
-  /// its offered liveliness period.
-  bool liveliness_lost_;
-
   /**
    * @todo The publication_lost_status_ and
    *       publication_reconnecting_status_ are left here for
@@ -810,13 +797,6 @@ private:
   unique_ptr<DataSampleHeaderAllocator> header_allocator_;
   unique_ptr<DataAllocator> data_allocator_;
 
-  /// The orb's reactor to be used to register the liveliness
-  /// timer.
-  ACE_Reactor_Timer_Interface* reactor_;
-  /// The time interval for sending liveliness message.
-  TimeDuration liveliness_check_interval_;
-  /// Timestamp of last write/dispose/assert_liveliness.
-  MonotonicTimePoint last_liveliness_activity_time_;
   /// Total number of offered deadlines missed during last offered
   /// deadline status check.
   CORBA::Long last_deadline_missed_total_count_;
@@ -845,12 +825,24 @@ private:
   DDS::ReturnCode_t send_end_historic_samples(const GUID_t& readerId);
   DDS::ReturnCode_t send_request_ack();
 
-  bool liveliness_asserted_;
-
   // Lock used to synchronize remove_associations calls from discovery
   // and unregister_instances during deletion of datawriter from application
   ACE_Thread_Mutex sync_unreg_rem_assocs_lock_;
-  RcHandle<LivenessTimer> liveness_timer_;
+
+  typedef PmfSporadicTask<DataWriterImpl> DWISporadicTask;
+
+  RcHandle<DWISporadicTask> liveliness_send_task_;
+  virtual void liveliness_send_task(const MonotonicTimePoint& now);
+  RcHandle<DWISporadicTask> liveliness_lost_task_;
+  virtual void liveliness_lost_task(const MonotonicTimePoint& now);
+  /// The time interval for sending liveliness message.
+  TimeDuration liveliness_send_interval_;
+  TimeDuration liveliness_lost_interval_;
+  /// True if the writer failed to actively signal its liveliness within
+  /// its offered liveliness period.
+  bool liveliness_lost_;
+  /// Timestamp of last write/dispose/assert_liveliness.
+  MonotonicTimePoint last_liveliness_activity_time_;
 
   MonotonicTimePoint wait_pending_deadline_;
 
@@ -862,7 +854,7 @@ private:
   bool insert_instance(DDS::InstanceHandle_t handle, Sample_rch& sample);
   InstanceValuesToHandles::iterator find_instance(const Sample& sample);
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
 protected:
   Security::SecurityConfig_rch security_config_;
   DDS::Security::PermissionsHandle participant_permissions_handle_;
@@ -871,22 +863,6 @@ protected:
 };
 
 typedef RcHandle<DataWriterImpl> DataWriterImpl_rch;
-
-
-class LivenessTimer : public virtual RcEventHandler
-{
-public:
-  LivenessTimer(DataWriterImpl& writer)
-    : writer_(writer)
-  {
-  }
-
-  /// Handle the assert liveliness timeout.
-  virtual int handle_timeout(const ACE_Time_Value& tv, const void* arg);
-
-private:
-  WeakRcHandle<DataWriterImpl> writer_;
-};
 
 } // namespace DCPS
 } // namespace OpenDDS

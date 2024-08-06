@@ -10,11 +10,11 @@
 #include "DataWriterRemoteC.h"
 #include "DataWriterRemoteImpl.h"
 #include "FailoverListener.h"
-#include "dds/DCPS/Service_Participant.h"
-#include "dds/DCPS/RepoIdBuilder.h"
-#include "dds/DCPS/ConfigUtils.h"
-#include "dds/DCPS/DCPS_Utils.h"
+
 #include "dds/DCPS/BuiltInTopicUtils.h"
+#include "dds/DCPS/DCPS_Utils.h"
+#include "dds/DCPS/RepoIdBuilder.h"
+#include "dds/DCPS/Service_Participant.h"
 
 #include "dds/DCPS/transport/framework/TransportRegistry.h"
 #include "dds/DCPS/transport/framework/TransportType.h"
@@ -24,13 +24,15 @@
 #include "tao/BiDir_GIOP/BiDirGIOP.h"
 #include "ace/Reactor.h"
 
+#include <dds/OpenDDSConfigWrapper.h>
+
 #if !defined (DDS_HAS_MINIMUM_BIT)
 #include "dds/DCPS/DomainParticipantImpl.h"
 #include "dds/DCPS/BuiltInTopicUtils.h"
 #include "dds/DCPS/Marked_Default_Qos.h"
 
 #include "dds/DCPS/transport/framework/TransportExceptions.h"
-
+#include "dds/DCPS/transport/framework/TransportInst.h"
 #include "dds/DCPS/transport/tcp/TcpInst.h"
 #include "dds/DCPS/transport/tcp/TcpInst_rch.h"
 #include "dds/DdsDcpsCoreTypeSupportImpl.h"
@@ -49,13 +51,13 @@ struct DestroyPolicy {
   CORBA::Policy_var p_;
 };
 
-PortableServer::POA_ptr get_POA(CORBA::ORB_ptr orb)
+PortableServer::POA_ptr get_POA(CORBA::ORB_ptr orb, bool use_bidir_giop)
 {
   CORBA::Object_var obj =
     orb->resolve_initial_references(ROOT_POA);
   PortableServer::POA_var root_poa = PortableServer::POA::_narrow(obj.in());
 
-  if (TheServiceParticipant->use_bidir_giop()) {
+  if (use_bidir_giop) {
     while (true) {
       try {
         return root_poa->find_POA(BIDIR_POA, false /*activate*/);
@@ -86,13 +88,13 @@ PortableServer::POA_ptr get_POA(CORBA::ORB_ptr orb)
 ///         PortableServer::POA::WrongAdapter
 ///         PortableServer::POA::WrongPolicy
 template <class T_impl, class T_ptr>
-T_impl* remote_reference_to_servant(T_ptr p, CORBA::ORB_ptr orb)
+T_impl* remote_reference_to_servant(T_ptr p, CORBA::ORB_ptr orb, bool use_bidir_giop)
 {
   if (CORBA::is_nil(p)) {
     return 0;
   }
 
-  PortableServer::POA_var poa = get_POA(orb);
+  PortableServer::POA_var poa = get_POA(orb, use_bidir_giop);
 
   T_impl* the_servant =
     dynamic_cast<T_impl*>(poa->reference_to_servant(p));
@@ -108,9 +110,9 @@ T_impl* remote_reference_to_servant(T_ptr p, CORBA::ORB_ptr orb)
 /// @throws PortableServer::POA::ServantNotActive,
 ///         PortableServer::POA::WrongPolicy
 template <class T>
-typename T::_stub_ptr_type servant_to_remote_reference(T* servant, CORBA::ORB_ptr orb)
+typename T::_stub_ptr_type servant_to_remote_reference(T* servant, CORBA::ORB_ptr orb, bool use_bidir_giop)
 {
-  PortableServer::POA_var poa = get_POA(orb);
+  PortableServer::POA_var poa = get_POA(orb, use_bidir_giop);
   PortableServer::ObjectId_var oid = poa->activate_object(servant);
   CORBA::Object_var obj = poa->id_to_reference(oid.in());
 
@@ -119,9 +121,9 @@ typename T::_stub_ptr_type servant_to_remote_reference(T* servant, CORBA::ORB_pt
 }
 
 template <class T>
-void deactivate_remote_object(T obj, CORBA::ORB_ptr orb)
+void deactivate_remote_object(T obj, CORBA::ORB_ptr orb, bool use_bidir_giop)
 {
-  PortableServer::POA_var poa = get_POA(orb);
+  PortableServer::POA_var poa = get_POA(orb, use_bidir_giop);
   PortableServer::ObjectId_var oid =
     poa->reference_to_id(obj);
   poa->deactivate_object(oid.in());
@@ -134,24 +136,40 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-InfoRepoDiscovery::InfoRepoDiscovery(const RepoKey& key,
-                                     const std::string& ior)
-  : Discovery(key),
-    ior_(ior),
-    bit_transport_port_(0),
-    use_local_bit_config_(false),
-    orb_from_user_(false)
+InfoRepoDiscovery::InfoRepoDiscovery(const String& name)
+  : name_(name)
+  , config_prefix_(ConfigPair::canonicalize("REPOSITORY_" + name))
+  , use_bidir_giop_(TheServiceParticipant->use_bidir_giop())
+  , orb_from_user_(false)
+  , config_store_(make_rch<ConfigStoreImpl>(TheServiceParticipant->config_topic()))
 {
+  init_bidir_giop();
 }
 
-InfoRepoDiscovery::InfoRepoDiscovery(const RepoKey& key,
+InfoRepoDiscovery::InfoRepoDiscovery(const String& name,
                                      const DCPSInfo_var& info)
-  : Discovery(key),
-    info_(info),
-    bit_transport_port_(0),
-    use_local_bit_config_(false),
-    orb_from_user_(false)
+  : name_(name)
+  , config_prefix_(ConfigPair::canonicalize("REPOSITORY_" + name))
+  , info_(info)
+  , use_bidir_giop_(TheServiceParticipant->use_bidir_giop())
+  , orb_from_user_(false)
+  , config_store_(make_rch<ConfigStoreImpl>(TheServiceParticipant->config_topic()))
 {
+  init_bidir_giop();
+}
+
+void
+InfoRepoDiscovery::init_bidir_giop()
+{
+  if (use_bidir_giop_) {
+    ACE_Service_Object* const bidir_loader =
+      ACE_Dynamic_Service<ACE_Service_Object>::instance(ACE_Service_Config::current(),
+                                                        "BiDirGIOP_Loader");
+
+    if (bidir_loader != 0) {
+      bidir_loader->init(0, 0);
+    }
+  }
 }
 
 InfoRepoDiscovery::~InfoRepoDiscovery()
@@ -236,13 +254,21 @@ InfoRepoDiscovery::get_dcps_info()
     }
 
     try {
-      this->info_ = get_repo(this->ior_.c_str(), orb_);
+      const String ior_str = ior();
+      if (ior_str.empty()) {
+        ACE_ERROR((LM_ERROR,
+                   ACE_TEXT("(%P|%t) ERROR: InfoRepoDiscovery::get_dcps_info: ")
+                   ACE_TEXT("ior is empty for key %C.\n"),
+                   this->key().c_str()));
+        return DCPSInfo::_nil();
+      }
 
+      this->info_ = get_repo(ior_str.c_str(), orb_);
       if (CORBA::is_nil(this->info_.in())) {
         ACE_ERROR((LM_ERROR,
                    ACE_TEXT("(%P|%t) ERROR: InfoRepoDiscovery::get_dcps_info: ")
                    ACE_TEXT("unable to narrow DCPSInfo (%C) for key %C.\n"),
-                   this->ior_.c_str(),
+                   ior_str.c_str(),
                    this->key().c_str()));
         return DCPSInfo::_nil();
       }
@@ -259,8 +285,14 @@ InfoRepoDiscovery::get_dcps_info()
 std::string
 InfoRepoDiscovery::get_stringified_dcps_info_ior()
 {
-  ACE_Guard<ACE_Thread_Mutex> guard(lock_);
-  return this->ior_;
+  return ior();
+}
+
+String
+InfoRepoDiscovery::ior() const
+{
+  return TheServiceParticipant->config_store()->get(config_key("RepositoryIor").c_str(),
+                                                    (key() == Discovery::DEFAULT_REPO) ? TheServiceParticipant->config_store()->get(COMMON_DCPS_INFO_REPO, "file://repo.ior") : "");
 }
 
 TransportConfig_rch
@@ -279,25 +311,23 @@ InfoRepoDiscovery::bit_config()
       TransportRegistry::instance()->create_inst(inst_name, "tcp");
     bit_config_->instances_.push_back(inst);
 
-    if (!use_local_bit_config_) {
-      bit_transport_ip_ = TheServiceParticipant->bit_transport_ip();
-      bit_transport_port_ = TheServiceParticipant->bit_transport_port();
-    }
-
     // Use a static cast to avoid dependency on the Tcp library
     TcpInst_rch tcp_inst = static_rchandle_cast<TcpInst>(inst);
-
-    tcp_inst->datalink_release_delay_ = 0;
-    if (!bit_transport_ip_.empty()) {
-      tcp_inst->local_address(bit_transport_port_,
-                              bit_transport_ip_.c_str());
+    config_store_->set_int32(tcp_inst->config_key("DATALINK_RELEASE_DELAY").c_str(), 0);
+    const int port = bit_transport_port();
+    const String ip = bit_transport_ip();
+    if (!ip.empty()) {
+      config_store_->set(tcp_inst->config_key("LOCAL_ADDRESS").c_str(),
+                         ip + ":" + to_dds_string(port));
     } else {
-      tcp_inst->local_address_set_port(bit_transport_port_);
+      String addr = tcp_inst->local_address();
+      tcp_inst->set_port_in_addr_string(addr, port);
+      config_store_->set(tcp_inst->config_key("LOCAL_ADDRESS").c_str(), addr);
     }
 
     if (DCPS_debug_level) {
       ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) InfoRepoDiscovery::bit_config")
-                 ACE_TEXT(" - BIT tcp transport %C\n"), tcp_inst->local_address_string().c_str()));
+                 ACE_TEXT(" - BIT tcp transport %C\n"), tcp_inst->local_address().c_str()));
     }
   }
   return bit_config_;
@@ -417,6 +447,12 @@ InfoRepoDiscovery::fini_bit(DCPS::DomainParticipantImpl* /* participant */)
   // nothing to do for DCPSInfoRepo
 }
 
+Discovery::RepoKey
+InfoRepoDiscovery::key() const
+{
+  return TheServiceParticipant->config_store()->get(config_key("RepositoryKey").c_str(), name_);
+}
+
 bool
 InfoRepoDiscovery::active()
 {
@@ -427,6 +463,32 @@ InfoRepoDiscovery::active()
   } catch (const CORBA::Exception&) {
     return false;
   }
+}
+
+int
+InfoRepoDiscovery::bit_transport_port() const
+{
+  return TheServiceParticipant->config_store()->get_int32(config_key("DCPSBitTransportPort").c_str(),
+                                                          TheServiceParticipant->bit_transport_port());
+}
+
+void
+InfoRepoDiscovery::bit_transport_port(int port)
+{
+  TheServiceParticipant->config_store()->set_int32(config_key("DCPSBitTransportPort").c_str(), port);
+}
+
+String
+InfoRepoDiscovery::bit_transport_ip() const
+{
+  return TheServiceParticipant->config_store()->get(config_key("DCPSBitTransportIPAddress").c_str(),
+                                                    TheServiceParticipant->bit_transport_ip());
+}
+
+void
+InfoRepoDiscovery::bit_transport_ip(const String& ip)
+{
+  return TheServiceParticipant->config_store()->set(config_key("DCPSBitTransportIPAddress").c_str(), ip);
 }
 
 // Participant operations:
@@ -466,7 +528,7 @@ InfoRepoDiscovery::add_domain_participant(DDS::DomainId_t domainId,
   return ads;
 }
 
-#if defined(OPENDDS_SECURITY)
+#if OPENDDS_CONFIG_SECURITY
 DCPS::AddDomainStatus
 InfoRepoDiscovery::add_domain_participant_secure(
   DDS::DomainId_t /*domain*/,
@@ -595,7 +657,7 @@ InfoRepoDiscovery::update_topic_qos(const GUID_t& topicId, DDS::DomainId_t domai
 
 // Publication operations:
 
-GUID_t
+bool
 InfoRepoDiscovery::add_publication(DDS::DomainId_t domainId,
                                    const GUID_t& participantId,
                                    const GUID_t& topicId,
@@ -605,37 +667,50 @@ InfoRepoDiscovery::add_publication(DDS::DomainId_t domainId,
                                    const DDS::PublisherQos& publisherQos,
                                    const XTypes::TypeInformation& type_info)
 {
-  GUID_t pubId;
+
 
   try {
     DCPS::DataWriterRemoteImpl* writer_remote_impl = 0;
     ACE_NEW_RETURN(writer_remote_impl,
                    DataWriterRemoteImpl(*publication),
-                   DCPS::GUID_UNKNOWN);
+                   false);
 
     //this is taking ownership of the DataWriterRemoteImpl (server side) allocated above
     PortableServer::ServantBase_var writer_remote(writer_remote_impl);
 
     //this is the client reference to the DataWriterRemoteImpl
     OpenDDS::DCPS::DataWriterRemote_var dr_remote_obj =
-      servant_to_remote_reference(writer_remote_impl, orb_);
+      servant_to_remote_reference(writer_remote_impl, orb_, use_bidir_giop_);
     //turn into a octet seq to pass through generated files
     DDS::OctetSeq serializedTypeInfo;
     XTypes::serialize_type_info(type_info, serializedTypeInfo);
 
-    pubId = get_dcps_info()->add_publication(domainId, participantId, topicId,
-      dr_remote_obj, qos, transInfo, publisherQos, serializedTypeInfo);
+    const GUID_t pubId = get_dcps_info()->reserve_publication_id(domainId, participantId, topicId);
+    publication->set_publication_id(pubId);
 
-    ACE_GUARD_RETURN(ACE_Thread_Mutex, g, this->lock_, DCPS::GUID_UNKNOWN);
+    if (!get_dcps_info()->add_publication(domainId,
+                                          participantId,
+                                          topicId,
+                                          pubId,
+                                          dr_remote_obj,
+                                          qos,
+                                          transInfo,
+                                          publisherQos,
+                                          serializedTypeInfo)) {
+      ACE_ERROR((LM_ERROR,
+                 ACE_TEXT("(%P|%t) ERROR: InfoRepoDiscovery::add_publication: ")
+                 ACE_TEXT("failed to add publication\n")));
+      return false;
+    }
+
+    ACE_GUARD_RETURN(ACE_Thread_Mutex, g, this->lock_, false);
     // take ownership of the client allocated above
     dataWriterMap_[pubId] = dr_remote_obj;
-
+    return true;
   } catch (const CORBA::Exception& ex) {
     ex._tao_print_exception("ERROR: InfoRepoDiscovery::add_publication: ");
-    pubId = DCPS::GUID_UNKNOWN;
+    return false;
   }
-
-  return pubId;
 }
 
 bool
@@ -691,7 +766,7 @@ InfoRepoDiscovery::update_publication_qos(DDS::DomainId_t domainId,
 
 // Subscription operations:
 
-GUID_t
+bool
 InfoRepoDiscovery::add_subscription(DDS::DomainId_t domainId,
                                     const GUID_t& participantId,
                                     const GUID_t& topicId,
@@ -704,38 +779,51 @@ InfoRepoDiscovery::add_subscription(DDS::DomainId_t domainId,
                                     const DDS::StringSeq& params,
                                     const XTypes::TypeInformation& type_info)
 {
-  GUID_t subId;
-
   try {
     DCPS::DataReaderRemoteImpl* reader_remote_impl = 0;
     ACE_NEW_RETURN(reader_remote_impl,
                    DataReaderRemoteImpl(*subscription),
-                   DCPS::GUID_UNKNOWN);
+                   false);
 
     //this is taking ownership of the DataReaderRemoteImpl (server side) allocated above
     PortableServer::ServantBase_var reader_remote(reader_remote_impl);
 
     //this is the client reference to the DataReaderRemoteImpl
     OpenDDS::DCPS::DataReaderRemote_var dr_remote_obj =
-      servant_to_remote_reference(reader_remote_impl, orb_);
+      servant_to_remote_reference(reader_remote_impl, orb_, use_bidir_giop_);
     //turn into a octet seq to pass through generated files
     DDS::OctetSeq serializedTypeInfo;
     XTypes::serialize_type_info(type_info, serializedTypeInfo);
 
-    subId = get_dcps_info()->add_subscription(domainId, participantId, topicId,
-                                              dr_remote_obj, qos, transInfo, subscriberQos,
-                                              filterClassName, filterExpr, params,
-                                              serializedTypeInfo);
+    const GUID_t subId = get_dcps_info()->reserve_subscription_id(domainId, participantId, topicId);
+    subscription->set_subscription_id(subId);
 
-    ACE_GUARD_RETURN(ACE_Thread_Mutex, g, this->lock_, DCPS::GUID_UNKNOWN);
+    if (!get_dcps_info()->add_subscription(domainId,
+                                           participantId,
+                                           topicId,
+                                           subId,
+                                           dr_remote_obj,
+                                           qos,
+                                           transInfo,
+                                           subscriberQos,
+                                           filterClassName,
+                                           filterExpr,
+                                           params,
+                                           serializedTypeInfo)) {
+      ACE_ERROR((LM_ERROR,
+                 ACE_TEXT("(%P|%t) ERROR: InfoRepoDiscovery::add_subscription: ")
+                 ACE_TEXT("failed to add subscription\n")));
+      return false;
+    }
+
+    ACE_GUARD_RETURN(ACE_Thread_Mutex, g, this->lock_, false);
     // take ownership of the client allocated above
     dataReaderMap_[subId] = dr_remote_obj;
-
+    return true;
   } catch (const CORBA::Exception& ex) {
     ex._tao_print_exception("ERROR: InfoRepoDiscovery::add_subscription: ");
-    subId = DCPS::GUID_UNKNOWN;
+    return false;
   }
-  return subId;
 }
 
 bool
@@ -820,9 +908,9 @@ InfoRepoDiscovery::removeDataReaderRemote(const GUID_t& subscriptionId)
 
   try {
     DataReaderRemoteImpl* impl =
-      remote_reference_to_servant<DataReaderRemoteImpl>(drr->second.in(), orb_);
+      remote_reference_to_servant<DataReaderRemoteImpl>(drr->second.in(), orb_, use_bidir_giop_);
     impl->detach_parent();
-    deactivate_remote_object(drr->second.in(), orb_);
+    deactivate_remote_object(drr->second.in(), orb_, use_bidir_giop_);
   } catch (const CORBA::BAD_INV_ORDER&) {
     // The orb may throw ::CORBA::BAD_INV_ORDER when is has been shutdown.
     // Ignore it anyway.
@@ -846,9 +934,9 @@ InfoRepoDiscovery::removeDataWriterRemote(const GUID_t& publicationId)
 
   try {
     DataWriterRemoteImpl* impl =
-      remote_reference_to_servant<DataWriterRemoteImpl>(dwr->second.in(), orb_);
+      remote_reference_to_servant<DataWriterRemoteImpl>(dwr->second.in(), orb_, use_bidir_giop_);
     impl->detach_parent();
-    deactivate_remote_object(dwr->second.in(), orb_);
+    deactivate_remote_object(dwr->second.in(), orb_, use_bidir_giop_);
   } catch (const CORBA::BAD_INV_ORDER&) {
     // The orb may throw ::CORBA::BAD_INV_ORDER when is has been shutdown.
     // Ignore it anyway.
@@ -859,131 +947,17 @@ InfoRepoDiscovery::removeDataWriterRemote(const GUID_t& publicationId)
   dataWriterMap_.erase(dwr);
 }
 
-namespace {
-  const ACE_TCHAR REPO_SECTION_NAME[] = ACE_TEXT("repository");
-}
-
 int
-InfoRepoDiscovery::Config::discovery_config(ACE_Configuration_Heap& cf)
+InfoRepoDiscovery::Config::discovery_config()
 {
-  const ACE_Configuration_Section_Key& root = cf.root_section();
-  ACE_Configuration_Section_Key repo_sect;
+  const Service_Participant::RepoKeyDiscoveryMap& discoveryMap = TheServiceParticipant->discoveryMap();
 
-  if (cf.open_section(root, REPO_SECTION_NAME, 0, repo_sect) != 0) {
-    if (DCPS_debug_level > 0) {
-      // This is not an error if the configuration file does not have
-      // any repository (sub)section. The code default configuration will be used.
-      ACE_DEBUG((LM_NOTICE,
-                 ACE_TEXT("(%P|%t) NOTICE: InfoRepoDiscovery::Config::discovery_config ")
-                 ACE_TEXT("failed to open [%s] section.\n"),
-                 REPO_SECTION_NAME));
-    }
-
-    return 0;
-
-  } else {
-    // Ensure there are no properties in this section
-    ValueMap vm;
-    if (pullValues(cf, repo_sect, vm) > 0) {
-      // There are values inside [repo]
-      ACE_ERROR_RETURN((LM_ERROR,
-                        ACE_TEXT("(%P|%t) InfoRepoDiscovery::Config::discovery_config ")
-                        ACE_TEXT("repo sections must have a subsection name\n")),
-                       -1);
-    }
-    // Process the subsections of this section (the individual repos)
-    KeyList keys;
-    if (processSections( cf, repo_sect, keys ) != 0) {
-      ACE_ERROR_RETURN((LM_ERROR,
-                        ACE_TEXT("(%P|%t) InfoRepoDiscovery::Config::discovery_config ")
-                        ACE_TEXT("too many nesting layers in the [repo] section.\n")),
-                       -1);
-    }
-
-    // Loop through the [repo/*] sections
-    for (KeyList::const_iterator it=keys.begin(); it != keys.end(); ++it) {
-      std::string repo_name = (*it).first;
-
-      ValueMap values;
-      pullValues( cf, (*it).second, values );
-      Discovery::RepoKey repoKey = Discovery::DEFAULT_REPO;
-      bool repoKeySpecified = false, bitIpSpecified = false,
-        bitPortSpecified = false;
-      std::string repoIor;
-      int bitPort = 0;
-      std::string bitIp;
-      for (ValueMap::const_iterator it=values.begin(); it != values.end(); ++it) {
-        std::string name = (*it).first;
-        if (name == "RepositoryKey") {
-          repoKey = (*it).second;
-          repoKeySpecified = true;
-          if (DCPS_debug_level > 0) {
-            ACE_DEBUG((LM_DEBUG,
-                       ACE_TEXT("(%P|%t) [repository/%C]: RepositoryKey == %C\n"),
-                       repo_name.c_str(), repoKey.c_str()));
-          }
-
-        } else if (name == "RepositoryIor") {
-          repoIor = (*it).second;
-
-          if (DCPS_debug_level > 0) {
-            ACE_DEBUG((LM_DEBUG,
-                       ACE_TEXT("(%P|%t) [repository/%C]: RepositoryIor == %C\n"),
-                       repo_name.c_str(), repoIor.c_str()));
-          }
-        } else if (name == "DCPSBitTransportIPAddress") {
-          bitIp = (*it).second;
-          bitIpSpecified = true;
-          if (DCPS_debug_level > 0) {
-            ACE_DEBUG((LM_DEBUG,
-                       ACE_TEXT("(%P|%t) [repository/%C]: DCPSBitTransportIPAddress == %C\n"),
-                       repo_name.c_str(), bitIp.c_str()));
-          }
-        } else if (name == "DCPSBitTransportPort") {
-          std::string value = (*it).second;
-          bitPort = ACE_OS::atoi(value.c_str());
-          bitPortSpecified = true;
-          if (convertToInteger(value, bitPort)) {
-          } else {
-            ACE_ERROR_RETURN((LM_ERROR,
-                              ACE_TEXT("(%P|%t) InfoRepoDiscovery::Config::discovery_config ")
-                              ACE_TEXT("Illegal integer value for DCPSBitTransportPort (%C) in [repository/%C] section.\n"),
-                              value.c_str(), repo_name.c_str()),
-                             -1);
-          }
-          if (DCPS_debug_level > 0) {
-            ACE_DEBUG((LM_DEBUG,
-                       ACE_TEXT("(%P|%t) [repository/%C]: DCPSBitTransportPort == %d\n"),
-                       repo_name.c_str(), bitPort));
-          }
-        } else {
-          ACE_ERROR_RETURN((LM_ERROR,
-                            ACE_TEXT("(%P|%t) InfoRepoDiscovery::Config::discovery_config ")
-                            ACE_TEXT("Unexpected entry (%C) in [repository/%C] section.\n"),
-                            name.c_str(), repo_name.c_str()),
-                           -1);
-        }
-      }
-
-      if (values.find("RepositoryIor") == values.end()) {
-        ACE_ERROR_RETURN((LM_ERROR,
-                          ACE_TEXT("(%P|%t) InfoRepoDiscovery::Config::discovery_config ")
-                          ACE_TEXT("Repository section [repository/%C] section is missing RepositoryIor value.\n"),
-                          repo_name.c_str()),
-                         -1);
-      }
-
-      if (!repoKeySpecified) {
-        // If the RepositoryKey option was not specified, use the section
-        // name as the repo key
-        repoKey = repo_name;
-      }
-      InfoRepoDiscovery_rch discovery(
-        make_rch<InfoRepoDiscovery>(repoKey, repoIor.c_str()));
-      if (bitPortSpecified) discovery->bit_transport_port(bitPort);
-      if (bitIpSpecified) discovery->bit_transport_ip(bitIp);
-      TheServiceParticipant->add_discovery(
-        DCPS::static_rchandle_cast<Discovery>(discovery));
+  typedef OPENDDS_VECTOR(String) VecType;
+  const VecType cseq = TheServiceParticipant->config_store()->get_section_names("REPOSITORY");
+  for (VecType::const_iterator pos = cseq.begin(), limit = cseq.end(); pos != limit; ++pos) {
+    if (discoveryMap.find(*pos) == discoveryMap.end()) {
+      InfoRepoDiscovery_rch discovery(make_rch<InfoRepoDiscovery>(*pos));
+      TheServiceParticipant->add_discovery(DCPS::static_rchandle_cast<Discovery>(discovery));
     }
   }
 
@@ -1056,7 +1030,8 @@ class InfoRepoType : public TransportType {
 public:
   const char* name() { return "repository"; }
 
-  TransportInst_rch new_inst(const std::string&)
+  TransportInst_rch new_inst(const std::string&,
+                             bool)
   {
     return TransportInst_rch();
   }

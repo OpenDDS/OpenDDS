@@ -7,6 +7,9 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+env:
+  VCPKG_GIT_COMMIT: f7423ee180c4b7f40d43402c2feb3859161ef625
+
 jobs:
 
   Linux:
@@ -17,18 +20,18 @@ jobs:
     - name: install qt
       run: sudo apt-get -y install qtbase5-dev
     - name: checkout OpenDDS
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
       with:
         path: OpenDDS
         submodules: true
     - name: checkout ACE_TAO
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
       with:
         repository: DOCGroup/ACE_TAO
         ref: Latest_Micro
         path: OpenDDS/ACE_TAO
     - name: checkout MPC
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
       with:
         repository: DOCGroup/MPC
         path: OpenDDS/ACE_TAO/ACE/MPC
@@ -37,14 +40,14 @@ jobs:
         cd OpenDDS
         ./configure --optimize --no-debug --static --tests --qt
         tools/scripts/show_build_config.pl
-    - uses: ammaraskar/gcc-problem-matcher@0.2.0
+    - uses: ammaraskar/gcc-problem-matcher@0.3.0
     - name: build
       shell: bash
       run: |
         cd OpenDDS
         make -j4 ishapes
     - name: upload ishapes artifact
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: ${{ github.job }}_artifact
         path: OpenDDS/examples/DCPS/ishapes/ishapes
@@ -53,12 +56,12 @@ jobs:
     runs-on: windows-2022
     steps:
     - name: checkout OpenDDS
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
       with:
         path: OpenDDS
         submodules: true
     - name: checkout ACE_TAO
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
       with:
         repository: DOCGroup/ACE_TAO
         ref: Latest_Micro
@@ -71,13 +74,13 @@ jobs:
         echo VCPKG_INSTALLED_DIR=${{ github.workspace }}\vcpkg-qt\installed>> %GITHUB_ENV%
     - name: install vcpkg packages
       id: runvcpkg
-      uses: lukka/run-vcpkg@v10
+      uses: lukka/run-vcpkg@v11
       with:
         vcpkgDirectory: '${{ github.workspace }}/vcpkg-qt'
-        vcpkgGitCommitId: 71d3fa60b67540e9bf5fde2bf2188f579ff09433
+        vcpkgGitCommitId: '${{ env.VCPKG_GIT_COMMIT }}'
         runVcpkgInstall: true
     - name: checkout MPC
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
       with:
         repository: DOCGroup/MPC
         path: OpenDDS/ACE_TAO/ACE/MPC
@@ -87,7 +90,11 @@ jobs:
       shell: cmd
       run: |
         cd OpenDDS
-        perl configure --optimize --no-debug --static --tests --qt=%VCPKG_ROOT%/installed/x64-windows "--mpcopts=-value_template platforms=x64" "--mpcopts=-value_template configurations=Release" "--mpcopts=-value_template Release::runtime_library=MultiThreadedDLL"
+        perl configure --optimize --no-debug --static --tests ^
+          "--qt=%VCPKG_INSTALLED_DIR%/x64-windows" ^
+          --mpc:value_template platforms=x64 ^
+          --mpc:value_template configurations=Release ^
+          --mpc:value_template Release::runtime_library=MultiThreadedDLL
         tools\scripts\show_build_config.pl
     - name: build
       shell: cmd
@@ -96,7 +103,7 @@ jobs:
         call setenv.cmd
         msbuild -p:Configuration=Release,Platform=x64 -m -t:ishapes DDS_TAOv2_all.sln
     - name: upload ishapes artifact
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: ${{ github.job }}_artifact
         path: OpenDDS/examples/DCPS/ishapes/Static_Release/ishapes.exe

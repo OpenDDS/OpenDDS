@@ -13,12 +13,17 @@
 #include "InfoC.h"
 
 #include <dds/DdsDcpsInfoUtilsC.h>
+#include <dds/OpenDDSConfigWrapper.h>
+
 #include <dds/DCPS/Atomic.h>
 #include <dds/DCPS/Discovery.h>
 #include <dds/DCPS/GuidUtils.h>
-#include <dds/DCPS/transport/framework/TransportConfig_rch.h>
-#include <dds/DCPS/XTypes/TypeObject.h>
 #include <dds/DCPS/TypeSupportImpl.h>
+
+#include <dds/DCPS/transport/framework/TransportConfig_rch.h>
+
+#include <dds/DCPS/XTypes/TypeObject.h>
+
 
 #include <ace/Task.h>
 #include <ace/Thread_Mutex.h>
@@ -45,27 +50,22 @@ namespace DCPS {
  */
 class OpenDDS_InfoRepoDiscovery_Export InfoRepoDiscovery : public Discovery {
 public:
-  InfoRepoDiscovery(const RepoKey& key, const std::string& ior);
-  InfoRepoDiscovery(const RepoKey& key, const DCPSInfo_var& info);
+  InfoRepoDiscovery(const String& name);
+  InfoRepoDiscovery(const String& name, const DCPSInfo_var& info);
 
   virtual ~InfoRepoDiscovery();
 
   std::string get_stringified_dcps_info_ior();
   DCPSInfo_var get_dcps_info();
 
+  virtual RepoKey key() const;
   virtual bool active();
 
-  int bit_transport_port() const { return bit_transport_port_; }
-  void bit_transport_port(int port) {
-    bit_transport_port_ = port;
-    use_local_bit_config_ = true;
-  }
+  int bit_transport_port() const;
+  void bit_transport_port(int port);
 
-  std::string bit_transport_ip() const { return bit_transport_ip_; }
-  void bit_transport_ip(const std::string& ip) {
-    bit_transport_ip_ = ip;
-    use_local_bit_config_ = true;
-  }
+  String bit_transport_ip() const;
+  void bit_transport_ip(const String& ip);
 
   /// User provides an ORB for OpenDDS to use.
   /// @note The user is responsible for running the ORB.
@@ -87,7 +87,7 @@ public:
     const DDS::DomainParticipantQos& qos,
     XTypes::TypeLookupService_rch tls);
 
-#if defined(OPENDDS_SECURITY)
+#if OPENDDS_CONFIG_SECURITY
   virtual OpenDDS::DCPS::AddDomainStatus add_domain_participant_secure(
     DDS::DomainId_t domain,
     const DDS::DomainParticipantQos& qos,
@@ -152,7 +152,7 @@ public:
 
   // Publication operations:
 
-  virtual OpenDDS::DCPS::GUID_t add_publication(
+  virtual bool add_publication(
     DDS::DomainId_t domainId,
     const OpenDDS::DCPS::GUID_t& participantId,
     const OpenDDS::DCPS::GUID_t& topicId,
@@ -182,7 +182,7 @@ public:
 
   // Subscription operations:
 
-  virtual OpenDDS::DCPS::GUID_t add_subscription(
+  virtual bool add_subscription(
     DDS::DomainId_t domainId,
     const OpenDDS::DCPS::GUID_t& participantId,
     const OpenDDS::DCPS::GUID_t& topicId,
@@ -219,23 +219,28 @@ public:
     const DDS::StringSeq& params);
 
 private:
+  const String name_;
+  const String config_prefix_;
+
+  String config_key(const String& key) const
+  {
+    return ConfigPair::canonicalize(config_prefix_ + "_" + key);
+  }
+
+  String ior() const;
+
   TransportConfig_rch bit_config();
 
   void removeDataReaderRemote(const GUID_t& subscriptionId);
 
   void removeDataWriterRemote(const GUID_t& publicationId);
 
-  std::string    ior_;
-  DCPSInfo_var   info_;
+  DCPSInfo_var info_;
 
-  /// The builtin topic transport address.
-  std::string bit_transport_ip_;
-
-  /// The builtin topic transport port number.
-  int bit_transport_port_;
-
-  bool use_local_bit_config_;
   TransportConfig_rch bit_config_;
+
+  const bool use_bidir_giop_;
+  void init_bidir_giop();
 
   CORBA::ORB_var orb_;
   bool orb_from_user_;
@@ -265,10 +270,12 @@ private:
 
   mutable ACE_Thread_Mutex lock_;
 
+  DCPS::RcHandle<DCPS::ConfigStoreImpl> config_store_;
+
 public:
   class Config : public Discovery::Config {
   public:
-    int discovery_config(ACE_Configuration_Heap& cf);
+    int discovery_config();
   };
 
   class OpenDDS_InfoRepoDiscovery_Export StaticInitializer {

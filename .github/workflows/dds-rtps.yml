@@ -10,20 +10,20 @@ concurrency:
 jobs:
 
   Linux:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     steps:
     - name: checkout OpenDDS
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
       with:
         path: OpenDDS
         submodules: true
     - name: checkout dds-rtps
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
       with:
         repository: omg-dds/dds-rtps
         path: dds-rtps
     - name: checkout ACE_TAO
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
       with:
         repository: DOCGroup/ACE_TAO
         ref: Latest_Micro
@@ -40,7 +40,7 @@ jobs:
         export COMPILER_VERSION=$(g++ --version 2>&1 | head -n 1)
         echo "COMPILER_VERSION=$COMPILER_VERSION" >> $GITHUB_ENV
     - name: checkout MPC
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
       with:
         repository: DOCGroup/MPC
         path: OpenDDS/ACE_TAO/ACE/MPC
@@ -49,7 +49,7 @@ jobs:
         cd OpenDDS
         ./configure --optimize --no-debug --static --no-inline
         tools/scripts/show_build_config.pl
-    - uses: ammaraskar/gcc-problem-matcher@0.1
+    - uses: ammaraskar/gcc-problem-matcher@0.3.0
     - name: build OpenDDS
       shell: bash
       run: |
@@ -58,12 +58,12 @@ jobs:
     - name: build shape_main
       shell: bash
       run: |
-        cd dds-rtps/srcCxx
-        . ../../OpenDDS/setenv.sh
-        mwc.pl -type gnuace
-        make -sj4
+        . OpenDDS/setenv.sh
+        cd dds-rtps/srcCxx/opendds-cmake
+        cmake -S . -B build
+        cmake --build build -- -j4
     - name: upload shape_main artifact
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: ${{ github.job }}_artifact
-        path: dds-rtps/srcCxx/shape_main
+        path: dds-rtps/srcCxx/opendds-cmake/build/shape_main

@@ -216,6 +216,12 @@ WriterInfo::is_owner_evaluated(::DDS::InstanceHandle_t instance)
     return iter->second;
 }
 
+void
+WriterInfo::remove_instance(DDS::InstanceHandle_t instance)
+{
+  owner_evaluated_.erase(instance);
+}
+
 MonotonicTimePoint
 WriterInfo::check_activity(const MonotonicTimePoint& now)
 {

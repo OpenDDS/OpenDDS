@@ -6,15 +6,17 @@
 #ifndef OPENDDS_DCPS_STATICDISCOVERY_H
 #define OPENDDS_DCPS_STATICDISCOVERY_H
 
-#include "WaitSet.h"
-#include "PoolAllocator.h"
-#include "TopicDetails.h"
-#include "SporadicTask.h"
+#include "BuiltInTopicDataReaderImpls.h"
+#include "DCPS_Utils.h"
 #include "GuidUtils.h"
 #include "Marked_Default_Qos.h"
-#include "DCPS_Utils.h"
-#include "BuiltInTopicDataReaderImpls.h"
+#include "PoolAllocator.h"
+#include "SporadicTask.h"
+#include "TopicDetails.h"
+#include "WaitSet.h"
 #include "dcps_export.h"
+
+#include <dds/OpenDDSConfigWrapper.h>
 
 #include <ace/Configuration.h>
 
@@ -379,25 +381,25 @@ public:
   TopicStatus remove_topic(const GUID_t& topicId);
 
 
-  GUID_t add_publication(const GUID_t& topicId,
-                         DataWriterCallbacks_rch publication,
-                         const DDS::DataWriterQos& qos,
-                         const TransportLocatorSeq& transInfo,
-                         const DDS::PublisherQos& publisherQos,
-                         const XTypes::TypeInformation& type_info);
+  bool add_publication(const GUID_t& topicId,
+                       DataWriterCallbacks_rch publication,
+                       const DDS::DataWriterQos& qos,
+                       const TransportLocatorSeq& transInfo,
+                       const DDS::PublisherQos& publisherQos,
+                       const XTypes::TypeInformation& type_info);
   void remove_publication(const GUID_t& publicationId);
   void update_publication_locators(const GUID_t& publicationId,
                                    const TransportLocatorSeq& transInfo);
 
-  GUID_t add_subscription(const GUID_t& topicId,
-                          DataReaderCallbacks_rch subscription,
-                          const DDS::DataReaderQos& qos,
-                          const TransportLocatorSeq& transInfo,
-                          const DDS::SubscriberQos& subscriberQos,
-                          const char* filterClassName,
-                          const char* filterExpr,
-                          const DDS::StringSeq& params,
-                          const XTypes::TypeInformation& type_info);
+  bool add_subscription(const GUID_t& topicId,
+                        DataReaderCallbacks_rch subscription,
+                        const DDS::DataReaderQos& qos,
+                        const TransportLocatorSeq& transInfo,
+                        const DDS::SubscriberQos& subscriberQos,
+                        const char* filterClassName,
+                        const char* filterExpr,
+                        const DDS::StringSeq& params,
+                        const XTypes::TypeInformation& type_info);
   void remove_subscription(const GUID_t& subscriptionId);
   void update_subscription_locators(const GUID_t& subscriptionId,
                                     const TransportLocatorSeq& transInfo);
@@ -439,6 +441,7 @@ private:
   bool has_dcps_key(const GUID_t& topicId) const;
 
   ACE_Thread_Mutex& lock_;
+  const Discovery::RepoKey key_;
   GUID_t participant_id_;
   RepoIdSet ignored_guids_;
   unsigned int topic_counter_;
@@ -541,15 +544,14 @@ public:
   bool update_topic_qos(const GUID_t& topicId, DDS::DomainId_t domainId,
     const GUID_t& participantId, const DDS::TopicQos& qos);
 
-  GUID_t add_publication(
-    DDS::DomainId_t domainId,
-    const GUID_t& participantId,
-    const GUID_t& topicId,
-    DCPS::DataWriterCallbacks_rch publication,
-    const DDS::DataWriterQos& qos,
-    const DCPS::TransportLocatorSeq& transInfo,
-    const DDS::PublisherQos& publisherQos,
-    const XTypes::TypeInformation& type_info);
+  bool add_publication(DDS::DomainId_t domainId,
+                       const GUID_t& participantId,
+                       const GUID_t& topicId,
+                       DCPS::DataWriterCallbacks_rch publication,
+                       const DDS::DataWriterQos& qos,
+                       const DCPS::TransportLocatorSeq& transInfo,
+                       const DDS::PublisherQos& publisherQos,
+                       const XTypes::TypeInformation& type_info);
 
   bool remove_publication(DDS::DomainId_t domainId, const GUID_t& participantId,
     const GUID_t& publicationId);
@@ -570,18 +572,17 @@ public:
     const GUID_t& dwId,
     const DCPS::TransportLocatorSeq& transInfo);
 
-  GUID_t add_subscription(
-    DDS::DomainId_t domainId,
-    const GUID_t& participantId,
-    const GUID_t& topicId,
-    DCPS::DataReaderCallbacks_rch subscription,
-    const DDS::DataReaderQos& qos,
-    const DCPS::TransportLocatorSeq& transInfo,
-    const DDS::SubscriberQos& subscriberQos,
-    const char* filterClassName,
-    const char* filterExpr,
-    const DDS::StringSeq& params,
-    const XTypes::TypeInformation& type_info);
+  bool add_subscription(DDS::DomainId_t domainId,
+                        const GUID_t& participantId,
+                        const GUID_t& topicId,
+                        DCPS::DataReaderCallbacks_rch subscription,
+                        const DDS::DataReaderQos& qos,
+                        const DCPS::TransportLocatorSeq& transInfo,
+                        const DDS::SubscriberQos& subscriberQos,
+                        const char* filterClassName,
+                        const char* filterExpr,
+                        const DDS::StringSeq& params,
+                        const XTypes::TypeInformation& type_info);
 
   bool remove_subscription(DDS::DomainId_t domainId, const GUID_t& participantId,
     const GUID_t& subscriptionId);
@@ -672,7 +673,7 @@ public:
     return endpoint_manager().update_topic_qos(topicId, qos);
   }
 
-  GUID_t add_publication(
+  bool add_publication(
     const GUID_t& topicId,
     DataWriterCallbacks_rch publication,
     const DDS::DataWriterQos& qos,
@@ -680,8 +681,7 @@ public:
     const DDS::PublisherQos& publisherQos,
     const XTypes::TypeInformation& type_info)
   {
-    return endpoint_manager().add_publication(topicId, publication, qos,
-                                              transInfo, publisherQos, type_info);
+    return endpoint_manager().add_publication(topicId, publication, qos, transInfo, publisherQos, type_info);
   }
 
   void remove_publication(const GUID_t& publicationId)
@@ -709,19 +709,18 @@ public:
     endpoint_manager().update_publication_locators(publicationId, transInfo);
   }
 
-  GUID_t add_subscription(
-    const GUID_t& topicId,
-    DataReaderCallbacks_rch subscription,
-    const DDS::DataReaderQos& qos,
-    const TransportLocatorSeq& transInfo,
-    const DDS::SubscriberQos& subscriberQos,
-    const char* filterClassName,
-    const char* filterExpr,
-    const DDS::StringSeq& params,
-    const XTypes::TypeInformation& type_info)
+  bool add_subscription(const GUID_t& topicId,
+                        DataReaderCallbacks_rch subscription,
+                        const DDS::DataReaderQos& qos,
+                        const TransportLocatorSeq& transInfo,
+                        const DDS::SubscriberQos& subscriberQos,
+                        const char* filterClassName,
+                        const char* filterExpr,
+                        const DDS::StringSeq& params,
+                        const XTypes::TypeInformation& type_info)
   {
     return endpoint_manager().add_subscription(topicId, subscription, qos, transInfo,
-      subscriberQos, filterClassName, filterExpr, params, type_info);
+                                               subscriberQos, filterClassName, filterExpr, params, type_info);
   }
 
   void remove_subscription(const GUID_t& subscriptionId)
@@ -866,7 +865,9 @@ class OpenDDS_Dcps_Export StaticDiscovery : public Discovery {
 public:
   explicit StaticDiscovery(const RepoKey& key);
 
-  int load_configuration(ACE_Configuration_Heap& config);
+  RepoKey key() const { return key_; }
+
+  int load_configuration();
 
   virtual GUID_t generate_participant_guid();
 
@@ -874,7 +875,7 @@ public:
                                                  const DDS::DomainParticipantQos& qos,
                                                  XTypes::TypeLookupService_rch tls);
 
-#if defined(OPENDDS_SECURITY)
+#if OPENDDS_CONFIG_SECURITY
   virtual AddDomainStatus add_domain_participant_secure(
     DDS::DomainId_t domain,
     const DDS::DomainParticipantQos& qos,
@@ -932,15 +933,14 @@ public:
   bool update_topic_qos(const GUID_t& topicId, DDS::DomainId_t domainId,
     const GUID_t& participantId, const DDS::TopicQos& qos);
 
-  GUID_t add_publication(
-    DDS::DomainId_t domainId,
-    const GUID_t& participantId,
-    const GUID_t& topicId,
-    DCPS::DataWriterCallbacks_rch publication,
-    const DDS::DataWriterQos& qos,
-    const DCPS::TransportLocatorSeq& transInfo,
-    const DDS::PublisherQos& publisherQos,
-    const XTypes::TypeInformation& type_info);
+  bool add_publication(DDS::DomainId_t domainId,
+                       const GUID_t& participantId,
+                       const GUID_t& topicId,
+                       DCPS::DataWriterCallbacks_rch publication,
+                       const DDS::DataWriterQos& qos,
+                       const DCPS::TransportLocatorSeq& transInfo,
+                       const DDS::PublisherQos& publisherQos,
+                       const XTypes::TypeInformation& type_info);
 
   bool remove_publication(DDS::DomainId_t domainId, const GUID_t& participantId,
     const GUID_t& publicationId);
@@ -961,18 +961,17 @@ public:
     const GUID_t& dwId,
     const DCPS::TransportLocatorSeq& transInfo);
 
-  GUID_t add_subscription(
-    DDS::DomainId_t domainId,
-    const GUID_t& participantId,
-    const GUID_t& topicId,
-    DCPS::DataReaderCallbacks_rch subscription,
-    const DDS::DataReaderQos& qos,
-    const DCPS::TransportLocatorSeq& transInfo,
-    const DDS::SubscriberQos& subscriberQos,
-    const char* filterClassName,
-    const char* filterExpr,
-    const DDS::StringSeq& params,
-    const XTypes::TypeInformation& type_info);
+  bool add_subscription(DDS::DomainId_t domainId,
+                        const GUID_t& participantId,
+                        const GUID_t& topicId,
+                        DCPS::DataReaderCallbacks_rch subscription,
+                        const DDS::DataReaderQos& qos,
+                        const DCPS::TransportLocatorSeq& transInfo,
+                        const DDS::SubscriberQos& subscriberQos,
+                        const char* filterClassName,
+                        const char* filterExpr,
+                        const DDS::StringSeq& params,
+                        const XTypes::TypeInformation& type_info);
 
   bool remove_subscription(DDS::DomainId_t domainId, const GUID_t& participantId,
     const GUID_t& subscriptionId);
@@ -1010,18 +1009,19 @@ private:
                      SubscriberImpl* sub,
                      const DDS::DataReaderQos& qos);
 
-  int parse_topics(ACE_Configuration_Heap& cf);
-  int parse_datawriterqos(ACE_Configuration_Heap& cf);
-  int parse_datareaderqos(ACE_Configuration_Heap& cf);
-  int parse_publisherqos(ACE_Configuration_Heap& cf);
-  int parse_subscriberqos(ACE_Configuration_Heap& cf);
-  int parse_endpoints(ACE_Configuration_Heap& cf);
+  int parse_topics();
+  int parse_datawriterqos();
+  int parse_datareaderqos();
+  int parse_publisherqos();
+  int parse_subscriberqos();
+  int parse_endpoints();
 
   void pre_writer(DataWriterImpl* writer);
   void pre_reader(DataReaderImpl* reader);
 
   static StaticDiscovery_rch instance_;
 
+  const RepoKey key_;
   mutable ACE_Thread_Mutex lock_;
 
   DomainParticipantMap participants_;

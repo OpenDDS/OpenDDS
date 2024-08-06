@@ -11,8 +11,10 @@
 #include <dds/DCPS/transport/framework/ReceivedDataSample.h>
 
 #include <dds/DCPS/RTPS/MessageUtils.h>
+#include <dds/DCPS/RTPS/MessageTypes.h>
 
 #include <dds/DCPS/RepoIdBuilder.h>
+#include <dds/DCPS/EncapsulationHeader.h>
 #include <dds/DCPS/GuidConverter.h>
 #include <dds/DCPS/AssociationData.h>
 #include <dds/DCPS/Service_Participant.h>
@@ -46,7 +48,9 @@ public:
     , pub_id_(GUID_UNKNOWN)
     , seq_(SequenceNumber::ZERO())
     , control_msg_count_(0)
-  {}
+  {
+    TransportClient::set_guid(sub_id_);
+  }
 
   virtual ~SimpleDataReader() {}
 
@@ -250,7 +254,7 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 #endif
     ACE_INET_Addr addr(port, ACE_TEXT_ALWAYS_CHAR(host.c_str()));
     rtps_inst->local_address(OpenDDS::DCPS::NetworkAddress(addr));
-    rtps_inst->datalink_release_delay_ = 0;
+    rtps_inst->datalink_release_delay(0);
 
     TransportConfig_rch cfg = TheTransportRegistry->create_config("cfg");
     cfg->instances_.push_back(inst);
@@ -270,7 +274,7 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     remote.entityKind(ENTITYKIND_USER_WRITER_WITH_KEY);
 
     SimpleDataReader sdr(local);
-    sdr.enable_transport(false /*reliable*/, false /*durable*/);
+    sdr.enable_transport(false /*reliable*/, false /*durable*/, 0);
     // Write a file so that test script knows we're ready
     FILE* file = std::fopen("subready.txt", "w");
     std::fprintf(file, "Ready\n");
@@ -288,9 +292,11 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     const Encoding& locators_encoding = OpenDDS::RTPS::get_locators_encoding();
     size_t size_locator = 0;
     serialized_size(locators_encoding, size_locator, locators);
+    serialized_size(locators_encoding, size_locator, OpenDDS::RTPS::VENDORID_OPENDDS);
     ACE_Message_Block mb_locator(size_locator + 1);
     Serializer ser_loc(&mb_locator, locators_encoding);
     if (!(ser_loc << locators) ||
+        !(ser_loc << OpenDDS::RTPS::VENDORID_OPENDDS) ||
         !(ser_loc << ACE_OutputCDR::from_boolean(false))) { // requires inline QoS
       std::cerr << "subscriber serialize locators failed\n";
       return 1;

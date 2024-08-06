@@ -554,10 +554,10 @@ typeobject_generator::declare_get_type_map()
 
   be_global->add_include("dds/DCPS/XTypes/TypeObject.h", BE_GlobalData::STREAM_H);
 
-  be_global->impl_ << "static const XTypes::TypeMap& get_minimal_type_map();\n";
+  be_global->impl_ << "static const XTypes::TypeMap& OPENDDS_IDL_FILE_SPECIFIC(get_minimal_type_map, 0)();\n";
 
   if (produce_xtypes_complete_) {
-    be_global->impl_ << "static const XTypes::TypeMap& get_complete_type_map();\n";
+    be_global->impl_ << "static const XTypes::TypeMap& OPENDDS_IDL_FILE_SPECIFIC(get_complete_type_map, 0)();\n";
   }
 }
 
@@ -587,9 +587,9 @@ typeobject_generator::gen_epilogue()
   for (OpenDDS::XTypes::TypeMap::const_iterator pos = minimal_type_map_.begin();
        pos != minimal_type_map_.end(); ++pos, ++idx) {
     be_global->impl_ <<
-      "XTypes::TypeObject minimal_to" << idx << "()\n"
+      "XTypes::TypeObject OPENDDS_IDL_FILE_SPECIFIC(minimal_to, " << idx << ")()\n"
       "{\n"
-      "  const unsigned char to_bytes[] = { ";
+      "  static const unsigned char to_bytes[] = { ";
     dump_bytes(pos->second);
     be_global->add_include("<stdexcept>", BE_GlobalData::STREAM_CPP);
     be_global->impl_ <<
@@ -603,14 +603,14 @@ typeobject_generator::gen_epilogue()
   }
 
   be_global->impl_ <<
-    "XTypes::TypeMap get_minimal_type_map_private()\n"
+    "XTypes::TypeMap OPENDDS_IDL_FILE_SPECIFIC(get_minimal_type_map_private, 0)()\n"
     "{\n"
     "  XTypes::TypeMap tm;\n";
 
   idx = 0;
   for (OpenDDS::XTypes::TypeMap::const_iterator pos = minimal_type_map_.begin();
        pos != minimal_type_map_.end(); ++pos, ++idx) {
-    be_global->impl_ << "  tm[" << pos->first << "] = minimal_to" << idx << "();\n";
+    be_global->impl_ << "  tm[" << pos->first << "] = OPENDDS_IDL_FILE_SPECIFIC(minimal_to, " << idx << ")();\n";
   }
 
   be_global->impl_ <<
@@ -622,7 +622,7 @@ typeobject_generator::gen_epilogue()
     for (OpenDDS::XTypes::TypeMap::const_iterator pos = complete_type_map_.begin();
          pos != complete_type_map_.end(); ++pos, ++idx) {
       be_global->impl_ <<
-        "XTypes::TypeObject complete_to" << idx << "()\n"
+        "XTypes::TypeObject OPENDDS_IDL_FILE_SPECIFIC(complete_to, " << idx << ")()\n"
         "{\n"
         "  const unsigned char to_bytes[] = {\n";
       dump_bytes(pos->second);
@@ -638,14 +638,14 @@ typeobject_generator::gen_epilogue()
     }
 
     be_global->impl_ <<
-      "XTypes::TypeMap get_complete_type_map_private()\n"
+      "XTypes::TypeMap OPENDDS_IDL_FILE_SPECIFIC(get_complete_type_map_private, 0)()\n"
       "{\n"
       "  XTypes::TypeMap tm;\n";
 
     idx = 0;
     for (OpenDDS::XTypes::TypeMap::const_iterator pos = complete_type_map_.begin();
          pos != complete_type_map_.end(); ++pos, ++idx) {
-      be_global->impl_ << "  tm[" << pos->first << "] = complete_to" << idx << "();\n";
+      be_global->impl_ << "  tm[" << pos->first << "] = OPENDDS_IDL_FILE_SPECIFIC(complete_to, " << idx << ")();\n";
     }
 
     be_global->impl_ <<
@@ -660,16 +660,16 @@ typeobject_generator::gen_epilogue()
     "  if (tm.empty()) {\n";
 
   be_global->impl_ <<
-    "const XTypes::TypeMap& get_minimal_type_map()\n" << common <<
-    "    tm = get_minimal_type_map_private();\n"
+    "const XTypes::TypeMap& OPENDDS_IDL_FILE_SPECIFIC(get_minimal_type_map, 0)()\n" << common <<
+    "    tm = OPENDDS_IDL_FILE_SPECIFIC(get_minimal_type_map_private, 0)();\n"
     "  }\n"
     "  return tm;\n"
     "}\n\n";
 
   if (produce_xtypes_complete_) {
     be_global->impl_ <<
-      "const XTypes::TypeMap& get_complete_type_map()\n" << common <<
-      "    tm = get_complete_type_map_private();\n"
+      "const XTypes::TypeMap& OPENDDS_IDL_FILE_SPECIFIC(get_complete_type_map, 0)()\n" << common <<
+      "    tm = OPENDDS_IDL_FILE_SPECIFIC(get_complete_type_map_private, 0)();\n"
       "  }\n"
       "  return tm;\n"
       "}\n";
@@ -846,14 +846,6 @@ typeobject_generator::strong_connect(AST_Type* type, const std::string& anonymou
       break;
     }
 
-  case AST_ConcreteType::NT_string:
-  case AST_ConcreteType::NT_wstring:
-  case AST_ConcreteType::NT_pre_defined:
-  case AST_ConcreteType::NT_fixed:
-  case AST_ConcreteType::NT_interface:
-  case AST_ConcreteType::NT_interface_fwd:
-      break;
-
   case AST_ConcreteType::NT_struct_fwd:
   case AST_ConcreteType::NT_union_fwd:
   case AST_ConcreteType::NT_native:
@@ -892,6 +884,11 @@ typeobject_generator::strong_connect(AST_Type* type, const std::string& anonymou
   case AST_ConcreteType::NT_field:
   case AST_ConcreteType::NT_enum_val:
     be_util::misc_error_and_abort("Unexpected AST type", type);
+    break;
+
+  default:
+    // Different versions of TAO_IDL_FE can have additional NT_* enumerators.
+    // Ignoring them with a default: case silences a compiler warning.
     break;
   }
 
@@ -980,10 +977,10 @@ typeobject_generator::strong_connect(AST_Type* type, const std::string& anonymou
       // Compute the final type objects with the final type identifiers.
       for (List::const_iterator pos = scc.begin(); pos != scc.end(); ++pos) {
         generate_type_identifier(pos->type, true);
-        const OpenDDS::XTypes::TypeIdentifier& minimal_ti = hash_type_identifier_map_[pos->type].minimal;
-        const OpenDDS::XTypes::TypeIdentifier& complete_ti = hash_type_identifier_map_[pos->type].complete;
-        minimal_type_map_[minimal_ti] = type_object_map_[pos->type].minimal;
-        complete_type_map_[complete_ti] = type_object_map_[pos->type].complete;
+        const OpenDDS::XTypes::TypeIdentifier& minimal_tid = hash_type_identifier_map_[pos->type].minimal;
+        const OpenDDS::XTypes::TypeIdentifier& complete_tid = hash_type_identifier_map_[pos->type].complete;
+        minimal_type_map_[minimal_tid] = type_object_map_[pos->type].minimal;
+        complete_type_map_[complete_tid] = type_object_map_[pos->type].complete;
       }
     }
   }
@@ -1013,16 +1010,16 @@ typeobject_generator::update_maps(AST_Type* type,
 }
 
 void typeobject_generator::set_builtin_member_annotations(AST_Decl* member,
-  OpenDDS::XTypes::Optional<OpenDDS::XTypes::AppliedBuiltinMemberAnnotations>& annotations)
+  OPENDDS_OPTIONAL_NS::optional<OpenDDS::XTypes::AppliedBuiltinMemberAnnotations>& annotations)
 {
   // Support only @hashid annotation for member at this time.
   const HashidAnnotation* hashid_ann = dynamic_cast<const HashidAnnotation*>(be_global->builtin_annotations_["::@hashid"]);
   std::string hash_name;
   if (hashid_ann->node_value_exists(member, hash_name)) {
-    OpenDDS::XTypes::Optional<std::string> hash_id(hash_name);
+    OPENDDS_OPTIONAL_NS::optional<std::string> hash_id(hash_name);
     if (!annotations) {
       OpenDDS::XTypes::AppliedBuiltinMemberAnnotations value;
-      annotations = OpenDDS::XTypes::Optional<OpenDDS::XTypes::AppliedBuiltinMemberAnnotations>(value);
+      annotations = OPENDDS_OPTIONAL_NS::optional<OpenDDS::XTypes::AppliedBuiltinMemberAnnotations>(value);
     }
     annotations.value().hash_id = hash_id;
   }
@@ -1102,8 +1099,10 @@ typeobject_generator::generate_struct_type_identifier(AST_Type* type)
     complete_to.complete.struct_type.member_seq.append(complete_member);
   }
 
-  minimal_to.minimal.struct_type.member_seq.sort();
-  complete_to.complete.struct_type.member_seq.sort();
+  if (be_global->old_typeobject_member_order()) {
+    minimal_to.minimal.struct_type.member_seq.sort();
+    complete_to.complete.struct_type.member_seq.sort();
+  }
 
   update_maps(type, minimal_to, complete_to);
 }
@@ -1112,7 +1111,12 @@ void
 typeobject_generator::generate_union_type_identifier(AST_Type* type)
 {
   AST_Union* const n = dynamic_cast<AST_Union*>(type);
-  AST_Type* discriminator = n->disc_type();
+
+  AST_Type* const discriminator = n->disc_type();
+  AST_Type* const discriminatorActual = resolveActualType(discriminator);
+  AST_Enum* const discEnum = dynamic_cast<AST_Enum*>(discriminatorActual);
+  const EnumValueMap::const_iterator enumValues = enum_values_.find(discEnum);
+
   const Fields fields(n);
 
   const ExtensibilityKind exten = be_global->extensibility(n);
@@ -1150,7 +1154,7 @@ typeobject_generator::generate_union_type_identifier(AST_Type* type)
 
   for (Fields::Iterator i = fields.begin(); i != fields.end(); ++i) {
     AST_UnionBranch* branch = dynamic_cast<AST_UnionBranch*>(*i);
-    const TryConstructFailAction trycon = be_global->try_construct(branch);
+    const TryConstructFailAction try_con = be_global->try_construct(branch);
 
     bool is_default = false;
     for (unsigned long j = 0; j < branch->label_list_length(); ++j) {
@@ -1163,7 +1167,7 @@ typeobject_generator::generate_union_type_identifier(AST_Type* type)
 
     OpenDDS::XTypes::MinimalUnionMember minimal_member;
     minimal_member.common.member_id = be_global->get_id(branch);
-    minimal_member.common.member_flags = try_construct_to_member_flag(trycon);
+    minimal_member.common.member_flags = try_construct_to_member_flag(try_con);
 
     if (is_default) {
       minimal_member.common.member_flags |= OpenDDS::XTypes::IS_DEFAULT;
@@ -1178,7 +1182,16 @@ typeobject_generator::generate_union_type_identifier(AST_Type* type)
     for (unsigned long j = 0; j < branch->label_list_length(); ++j) {
       AST_UnionLabel* label = branch->label(j);
       if (label->label_kind() != AST_UnionLabel::UL_default) {
-        minimal_member.common.label_seq.append(to_long(*label->label_val()->ev()));
+        if (discEnum && enumValues != enum_values_.end()) {
+          const std::string labelName = canonical_name(label->label_val()->n()->last_component());
+          const EnumValues::const_iterator iter = enumValues->second.find(labelName);
+          if (iter == enumValues->second.end()) {
+            be_util::misc_error_and_abort("Unknown union label value", branch);
+          }
+          minimal_member.common.label_seq.append(iter->second);
+        } else {
+          minimal_member.common.label_seq.append(to_long(*label->label_val()->ev()));
+        }
       }
     }
     minimal_member.common.label_seq.sort();
@@ -1198,8 +1211,11 @@ typeobject_generator::generate_union_type_identifier(AST_Type* type)
 
     complete_to.complete.union_type.member_seq.append(complete_member);
   }
-  minimal_to.minimal.union_type.member_seq.sort();
-  complete_to.complete.union_type.member_seq.sort();
+
+  if (be_global->old_typeobject_member_order()) {
+    minimal_to.minimal.union_type.member_seq.sort();
+    complete_to.complete.union_type.member_seq.sort();
+  }
 
   update_maps(type, minimal_to, complete_to);
 }
@@ -1242,11 +1258,20 @@ typeobject_generator::generate_enum_type_identifier(AST_Type* type)
   complete_to.complete.enumerated_type.header.common.bit_bound = 32;
   complete_to.complete.enumerated_type.header.detail.type_name = canonical_name(type->name());
 
+  EnumValues& cached = enum_values_[n];
+  cached.clear();
+  ACE_CDR::Long last_value = -1;
   for (size_t i = 0; i != contents.size(); ++i) {
-    OpenDDS::XTypes::MinimalEnumeratedLiteral minimal_lit;
-    minimal_lit.common.value = contents[i]->constant_value()->ev()->u.eval;
-    minimal_lit.common.flags = (i == default_literal_idx ? OpenDDS::XTypes::IS_DEFAULT : 0);
     const std::string name = canonical_name(contents[i]->local_name());
+
+    OpenDDS::XTypes::MinimalEnumeratedLiteral minimal_lit;
+    if (!be_global->value(contents[i], minimal_lit.common.value)) {
+      minimal_lit.common.value = last_value + 1;
+    }
+    cached[name] = last_value = minimal_lit.common.value;
+
+    minimal_lit.common.flags = (i == default_literal_idx ? OpenDDS::XTypes::IS_DEFAULT : 0);
+
     OpenDDS::XTypes::hash_member_name(minimal_lit.detail.name_hash, name);
     minimal_to.minimal.enumerated_type.literal_seq.append(minimal_lit);
 
@@ -1291,7 +1316,8 @@ typeobject_generator::generate_array_type_identifier(AST_Type* type, bool force_
       minimal_ti.array_sdefn().header.equiv_kind = minimal_ek;
       minimal_ti.array_sdefn().header.element_flags = cef;
       for (ACE_CDR::ULong dim = 0; dim != n->n_dims(); ++dim) {
-        minimal_ti.array_sdefn().array_bound_seq.append(n->dims()[dim]->ev()->u.ulval);
+        minimal_ti.array_sdefn().array_bound_seq.append(
+          static_cast<OpenDDS::XTypes::SBound>(n->dims()[dim]->ev()->u.ulval));
       }
       minimal_ti.array_sdefn().element_identifier = minimal_elem_ti;
 
@@ -1378,7 +1404,7 @@ typeobject_generator::generate_sequence_type_identifier(AST_Type* type, bool for
       OpenDDS::XTypes::TypeIdentifier minimal_ti(OpenDDS::XTypes::TI_PLAIN_SEQUENCE_SMALL);
       minimal_ti.seq_sdefn().header.equiv_kind = minimal_ek;
       minimal_ti.seq_sdefn().header.element_flags = cef;
-      minimal_ti.seq_sdefn().bound = bound;
+      minimal_ti.seq_sdefn().bound = static_cast<OpenDDS::XTypes::SBound>(bound);
       minimal_ti.seq_sdefn().element_identifier = minimal_elem_ti;
 
       if (minimal_ek == OpenDDS::XTypes::EK_BOTH) {
@@ -1387,7 +1413,7 @@ typeobject_generator::generate_sequence_type_identifier(AST_Type* type, bool for
         OpenDDS::XTypes::TypeIdentifier complete_ti(OpenDDS::XTypes::TI_PLAIN_SEQUENCE_SMALL);
         complete_ti.seq_sdefn().header.equiv_kind = complete_ek;
         complete_ti.seq_sdefn().header.element_flags = cef;
-        complete_ti.seq_sdefn().bound = bound;
+        complete_ti.seq_sdefn().bound = static_cast<OpenDDS::XTypes::SBound>(bound);
         complete_ti.seq_sdefn().element_identifier = complete_elem_ti;
 
         const TypeIdentifierPair ti_pair = {minimal_ti, complete_ti};
@@ -1541,7 +1567,7 @@ typeobject_generator::generate_type_identifier(AST_Type* type, bool force_type_o
       ACE_CDR::ULong bound = n->max_size()->ev()->u.ulval;
       if (bound < 256) {
         OpenDDS::XTypes::TypeIdentifier ti(OpenDDS::XTypes::TI_STRING8_SMALL);
-        ti.string_sdefn().bound = bound;
+        ti.string_sdefn().bound = static_cast<OpenDDS::XTypes::SBound>(bound);
         fully_desc_type_identifier_map_[type] = ti;
       } else {
         OpenDDS::XTypes::TypeIdentifier ti(OpenDDS::XTypes::TI_STRING8_LARGE);
@@ -1557,7 +1583,7 @@ typeobject_generator::generate_type_identifier(AST_Type* type, bool force_type_o
       ACE_CDR::ULong bound = n->max_size()->ev()->u.ulval;
       if (bound < 256) {
         OpenDDS::XTypes::TypeIdentifier ti(OpenDDS::XTypes::TI_STRING16_SMALL);
-        ti.string_sdefn().bound = bound;
+        ti.string_sdefn().bound = static_cast<OpenDDS::XTypes::SBound>(bound);
         fully_desc_type_identifier_map_[type] = ti;
       } else {
         OpenDDS::XTypes::TypeIdentifier ti(OpenDDS::XTypes::TI_STRING16_LARGE);
@@ -1637,6 +1663,11 @@ typeobject_generator::generate_type_identifier(AST_Type* type, bool force_type_o
   case AST_ConcreteType::NT_field:
   case AST_ConcreteType::NT_enum_val:
     be_util::misc_error_and_abort("Unexpected AST type", type);
+
+  default:
+    // Different versions of TAO_IDL_FE can have additional NT_* enumerators.
+    // Ignoring them with a default: case silences a compiler warning.
+    break;
   }
 }
 
@@ -1731,7 +1762,7 @@ typeobject_generator::generate(AST_Type* node, UTL_ScopedName* name)
     Function gti(decl.c_str(), "const XTypes::TypeMap&", "");
     gti.endArgs();
     be_global->impl_ <<
-      "  return get_minimal_type_map();\n";
+      "  return OPENDDS_IDL_FILE_SPECIFIC(get_minimal_type_map, 0)();\n";
   }
 
   if (produce_xtypes_complete_) {
@@ -1758,7 +1789,7 @@ typeobject_generator::generate(AST_Type* node, UTL_ScopedName* name)
       Function gti(decl.c_str(), "const XTypes::TypeMap&", "");
       gti.endArgs();
       be_global->impl_ <<
-        "  return get_complete_type_map();\n";
+        "  return OPENDDS_IDL_FILE_SPECIFIC(get_complete_type_map, 0)();\n";
     }
   }
 

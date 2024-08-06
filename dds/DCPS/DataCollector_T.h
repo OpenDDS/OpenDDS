@@ -1,6 +1,4 @@
 /*
- *
- *
  * Distributed under the OpenDDS License.
  * See: http://www.opendds.org/license.html
  */
@@ -8,13 +6,10 @@
 #ifndef OPENDDS_DCPS_DATACOLLECTOR_T_H
 #define OPENDDS_DCPS_DATACOLLECTOR_T_H
 
-// Needed here to avoid the pragma below when necessary.
-#include /**/ "ace/pre.h"
-#include /**/ "ace/config-all.h"
-
-#if !defined (ACE_LACKS_PRAGMA_ONCE)
-#pragma once
-#endif /* ACE_LACKS_PRAGMA_ONCE */
+#include <ace/config-macros.h>
+#ifndef ACE_LACKS_PRAGMA_ONCE
+#  pragma once
+#endif
 
 #include "PoolAllocator.h"
 #include "SafetyProfileStreams.h"
@@ -118,14 +113,6 @@ OPENDDS_END_VERSIONED_NAMESPACE_DECL
 #include "DataCollector_T.inl"
 #endif /* __ACE_INLINE__ */
 
-#if defined (ACE_TEMPLATES_REQUIRE_SOURCE)
 #include "DataCollector_T.cpp"
-#endif /* ACE_TEMPLATES_REQUIRE_SOURCE */
-
-#if defined (ACE_TEMPLATES_REQUIRE_PRAGMA)
-#pragma implementation ("DataCollector_T.cpp")
-#endif /* ACE_TEMPLATES_REQUIRE_PRAGMA */
-
-#include /**/ "ace/post.h"
 
 #endif /* DATA_COLLECTOR_H */

@@ -10,7 +10,7 @@
 #include "TypeSupportImpl.h"
 #include "RcHandle_T.h"
 #include "FilterEvaluator.h"
-#include "XTypes/DynamicDataAdapter.h"
+#include "XTypes/DynamicDataAdapterFwd.h"
 
 #include <dds/DdsDynamicDataC.h>
 
@@ -109,9 +109,6 @@ public:
   typedef RcHandle<Sample_T<NativeType> > Rch;
   typedef DCPS::KeyOnly<const NativeType> KeyOnlyType;
   typedef DCPS::KeyOnly<NativeType> MutableKeyOnlyType;
-#if OPENDDS_HAS_DYNAMIC_DATA_ADAPTER
-  typedef XTypes::DynamicDataAdapter<NativeType> DynamicDataImpl;
-#endif
 
   explicit Sample_T(const NativeType& data, Extent extent = Full)
     : Sample(ReadOnly, extent)
@@ -239,8 +236,10 @@ public:
   DDS::DynamicData_var get_dynamic_data(DDS::DynamicType_ptr type) const
   {
 #  if OPENDDS_HAS_DYNAMIC_DATA_ADAPTER
-    if (type && !dynamic_data_) {
-      dynamic_data_ = new DynamicDataImpl(type, getMetaStruct<NativeType>(), *data_);
+    if (!dynamic_data_ && data_) {
+      dynamic_data_ = read_only() ?
+        XTypes::get_dynamic_data_adapter<NativeType, NativeType>(type, *data_) :
+        XTypes::get_dynamic_data_adapter<NativeType, NativeType>(type, mutable_data());
     }
     return dynamic_data_;
 #  else

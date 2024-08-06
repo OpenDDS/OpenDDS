@@ -1,0 +1,71 @@
+name: "Update ACE/TAO Versions"
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '33 23 * * *'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  update-ace-tao:
+    runs-on: ubuntu-22.04
+    steps:
+    - name: Checkout OpenDDS
+      uses: actions/checkout@v4
+      with:
+        path: OpenDDS
+        submodules: true
+    - name: Install Perl Dependencies
+      uses: shogo82148/actions-setup-perl@v1
+      with:
+        install-modules: |
+          Pithub
+          Net::SFTP::Foreign
+          Time::Piece
+          LWP::UserAgent
+          LWP::Protocol::https
+    - name: Run gitrelease.pl --update-ace-tao
+      run: |
+        cd OpenDDS
+        GITHUB_TOKEN=${{secrets.GITHUB_TOKEN}} perl tools/scripts/gitrelease.pl --update-ace-tao
+        prefix="$GITHUB_WORKSPACE/update-ace-tao-"
+        commit_msg="${prefix}commit.md"
+        # Only commit and make a PR if the release script recognized a change
+        # from both master and workflows/update-ace-tao if it exists.
+        if [ -f "${commit_msg}" ]
+        then
+          echo "CREATE_PULL_REQUEST=true" >> $GITHUB_ENV
+          # create-pull-request can commit for us, but manually commit here so
+          # we can use file input for the commit message.
+          #   https://github.com/peter-evans/create-pull-request/issues/2864
+          git config user.name GitHub
+          git config user.email noreply@github.com
+          git add --all
+          git commit --file "${commit_msg}" \
+            --author "${{github.actor}} <${{github.actor}}@users.noreply.github.com>"
+          echo "PR_TITLE=$(cat ${prefix}pr-title.md)" >> $GITHUB_ENV
+          echo "PR_BODY_FILE=${prefix}pr-body.md" >> $GITHUB_ENV
+        else
+          echo "CREATE_PULL_REQUEST=false" >> $GITHUB_ENV
+        fi
+    - name: Create Pull Request
+      uses: peter-evans/create-pull-request@v6
+      if: env.CREATE_PULL_REQUEST == 'true'
+      id: cpr
+      with:
+        path: OpenDDS
+        token: ${{ secrets.GITHUB_TOKEN }}
+        branch: workflows/update-ace-tao
+        delete-branch: true
+        title: ${{env.PR_TITLE}}
+        body-path: ${{env.PR_BODY_FILE}}
+        labels: |
+          dependencies
+    - name: Check outputs
+      if: ${{ steps.cpr.outputs.pull-request-number }}
+      run: |
+        echo "Pull Request Number - ${{ steps.cpr.outputs.pull-request-number }}"
+        echo "Pull Request URL - ${{ steps.cpr.outputs.pull-request-url }}"

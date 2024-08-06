@@ -9,13 +9,16 @@
 #include <dds/DCPS/RTPS/MessageTypes.h>
 #include <dds/DCPS/RTPS/MessageParser.h>
 #include <dds/DCPS/RTPS/RtpsCoreTypeSupportImpl.h>
+#include <dds/DCPS/RTPS/RtpsSubmessageKindTypeSupportImpl.h>
 #include <dds/DCPS/RTPS/RtpsDiscovery.h>
 #include <dds/DCPS/RTPS/ParameterListConverter.h>
 #include <dds/DCPS/RTPS/Spdp.h>
 
 #include <dds/DCPS/LogAddr.h>
-#include <dds/DCPS/Service_Participant.h>
 #include <dds/DCPS/NetworkResource.h>
+#include <dds/DCPS/Service_Participant.h>
+
+#include <dds/OpenDDSConfigWrapper.h>
 
 #include <ace/Configuration.h>
 #include <ace/Reactor.h>
@@ -71,7 +74,7 @@ public:
       ACE_ERROR((LM_ERROR, ACE_TEXT("ERROR: Null SPDP Transport\n")));
       return false;
     }
-    addr = spdp_->tport_->multicast_address_;
+    addr = spdp_->tport_->multicast_address_.to_addr();
     return true;
   }
 
@@ -84,6 +87,7 @@ struct TestParticipant: ACE_Event_Handler {
     : sock_(sock)
     , recv_mb_(64 * 1024)
   {
+    assign(destination_prefix_, GUIDPREFIX_UNKNOWN);
     const Header hdr = {
       {'R', 'T', 'P', 'S'}, PROTOCOLVERSION, VENDORID_OPENDDS,
       {prefix[0], prefix[1], prefix[2], prefix[3], prefix[4], prefix[5],
@@ -118,6 +122,11 @@ struct TestParticipant: ACE_Event_Handler {
     return true;
   }
 
+  void set_infodst(const GuidPrefix_t& dst)
+  {
+    assign(destination_prefix_, dst);
+  }
+
   bool send_data(const OpenDDS::DCPS::EntityId_t& writer,
                  const SequenceNumber_t& seq, OpenDDS::RTPS::ParameterList& plist, const ACE_INET_Addr& send_to)
   {
@@ -129,9 +138,12 @@ struct TestParticipant: ACE_Event_Handler {
     };
 
     const Encoding encoding(Encoding::KIND_XCDR1, OpenDDS::DCPS::ENDIAN_LITTLE);
-
+    InfoDestinationSubmessage idst = { {INFO_DST, FLAG_E, 0}, {0} };
     size_t size = 0;
     serialized_size(encoding, size, hdr_);
+    if (!equal_guid_prefixes(destination_prefix_, GUIDPREFIX_UNKNOWN)) {
+      serialized_size(encoding, size, idst);
+    }
     serialized_size(encoding, size, ds);
     primitive_serialized_size_ulong(encoding, size);
     serialized_size(encoding, size, plist);
@@ -139,9 +151,23 @@ struct TestParticipant: ACE_Event_Handler {
     ACE_Message_Block mb(size);
     Serializer ser(&mb, encoding);
 
-    const EncapsulationHeader encap (encoding, MUTABLE);
-    if (!(ser << hdr_ && ser << ds && ser << encap)) {
-      ACE_DEBUG((LM_DEBUG, "ERROR: failed to serialize headers\n"));
+    if (!(ser << hdr_)) {
+      ACE_DEBUG((LM_DEBUG, "ERROR: failed to serialize message headers\n"));
+      return false;
+    }
+
+    if (!equal_guid_prefixes(destination_prefix_, GUIDPREFIX_UNKNOWN)) {
+      assign(idst.guidPrefix, destination_prefix_);
+      assign(destination_prefix_, GUIDPREFIX_UNKNOWN);
+      if (!(ser << idst)) {
+        ACE_DEBUG((LM_DEBUG, "ERROR: failed to serialize InfoDestinationSubmessage\n"));
+        return false;
+      }
+    }
+
+    const EncapsulationHeader encap(encoding, MUTABLE);
+    if (!(ser << ds && ser << encap)) {
+      ACE_DEBUG((LM_DEBUG, "ERROR: failed to serialize submessage headers\n"));
       return false;
     }
 
@@ -182,17 +208,13 @@ struct TestParticipant: ACE_Event_Handler {
       if (smhdr.submessageId == DATA) {
         ok = recv_data(mp.serializer(), peer);
       } else {
-#ifdef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
-        ACE_DEBUG((LM_INFO, "Received submessage type: %u\n", unsigned(smhdr.submessageId)));
-#else
-        if (static_cast<size_t>(smhdr.submessageId) < gen_OpenDDS_RTPS_SubmessageKind_names_size) {
+        if (gen_OpenDDS_RTPS_SubmessageKind_helper->valid(smhdr.submessageId)) {
           ACE_DEBUG((LM_INFO, "Received submessage type: %C\n",
-                     gen_OpenDDS_RTPS_SubmessageKind_names[static_cast<size_t>(smhdr.submessageId)]));
+                     gen_OpenDDS_RTPS_SubmessageKind_helper->get_name(smhdr.submessageId)));
         } else {
           ACE_ERROR((LM_ERROR, "ERROR: Received unknown submessage type: %u\n",
                      unsigned(smhdr.submessageId)));
         }
-#endif
       }
 
       if (!ok || !mp.hasNextSubmessage()) {
@@ -226,6 +248,7 @@ struct TestParticipant: ACE_Event_Handler {
   ACE_SOCK_Dgram& sock_;
   Header hdr_;
   ACE_Message_Block recv_mb_;
+  GuidPrefix_t destination_prefix_;
 };
 
 
@@ -277,7 +300,8 @@ bool run_test()
   // Create and initialize RtpsDiscovery
   RtpsDiscovery rd("test");
   const ACE_INET_Addr local_addr(u_short(7575), "0.0.0.0");
-  rd.config()->spdp_local_address(local_addr);
+  rd.config()->spdp_local_address(NetworkAddress(local_addr));
+  rd.config()->spdp_user_tag(0x99887766);
   const DDS::DomainId_t domain = 0;
   const DDS::DomainParticipantQos qos = TheServiceParticipant->initial_DomainParticipantQos();
   GUID_t id = rd.generate_participant_guid();
@@ -337,12 +361,12 @@ bool run_test()
     BUILTIN_ENDPOINT_TYPE_LOOKUP_REPLY_DATA_WRITER |
     BUILTIN_ENDPOINT_TYPE_LOOKUP_REPLY_DATA_READER;
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
   const DDS::Security::ExtendedBuiltinEndpointSet_t availableExtendedBuiltinEndpoints =
-    DDS::Security::TYPE_LOOKUP_SERVICE_REQUEST_WRITER_SECURE |
-    DDS::Security::TYPE_LOOKUP_SERVICE_REPLY_WRITER_SECURE |
-    DDS::Security::TYPE_LOOKUP_SERVICE_REQUEST_READER_SECURE |
-    DDS::Security::TYPE_LOOKUP_SERVICE_REPLY_READER_SECURE;
+    DDS::Security::TYPE_LOOKUP_SERVICE_REQUEST_SECURE_WRITER |
+    DDS::Security::TYPE_LOOKUP_SERVICE_REPLY_SECURE_WRITER |
+    DDS::Security::TYPE_LOOKUP_SERVICE_REQUEST_SECURE_READER |
+    DDS::Security::TYPE_LOOKUP_SERVICE_REPLY_SECURE_READER;
 #endif
 
   OpenDDS::DCPS::LocatorSeq nonEmptyList(1);
@@ -398,9 +422,10 @@ bool run_test()
       , qos.property
       , {PFLAGS_THIS_VERSION} // opendds_participant_flags
       , false // opendds_rtps_relay_application_participant
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
       , availableExtendedBuiltinEndpoints
 #endif
+      , 0
     },
     { // Duration_t (leaseDuration)
       static_cast<CORBA::Long>((rd.resend_period() * 10).value().sec()),
@@ -423,6 +448,19 @@ bool run_test()
   bool expect_participant = true;
 
   if (spdp_friend.check_for_participant(false)) {
+    return false;
+  }
+
+  ACE_DEBUG((LM_DEBUG, "Info Destination Test\n"));
+  part1.set_infodst(gp); // The next send_data will insert an InfoDestination submessage before Data.
+  // Using the GuidPrefix 'gp' sets the destination GUID to part1's own guid, so it won't be read by 'spdp'.
+  if (!part1.send_data(test_part_guid.entityId, seq, plist, send_addr)) {
+    ACE_DEBUG((LM_DEBUG, "ERROR: Info Destination test couldn't send\n"));
+    return false;
+  }
+  reactor_wait();
+  if (spdp_friend.check_for_participant(false)) {
+    ACE_DEBUG((LM_DEBUG, "ERROR: Info Destination test resulted in discovery when it shouldn't\n"));
     return false;
   }
 
@@ -528,22 +566,18 @@ bool run_test()
     }
   }
 
+  spdp->shutdown();
+
   return true;
 }
 
 int ACE_TMAIN(int, ACE_TCHAR*[])
 {
   DDS::DomainParticipantFactory_var dpf;
+  bool ok = false;
   try {
     dpf = TheServiceParticipant->get_domain_participant_factory();
     set_DCPS_debug_level(1);
-  } catch (const CORBA::BAD_PARAM& ex) {
-    ex._tao_print_exception("Exception caught in spdp_transport.cpp:");
-    return 1;
-  }
-
-  bool ok = false;
-  try {
     ok = run_test();
     if (!ok) {
       ACE_ERROR((LM_ERROR, "ERROR: test failed\n"));

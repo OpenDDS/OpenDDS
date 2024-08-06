@@ -7,28 +7,32 @@
 
 #include "RecorderImpl.h"
 
-#include "SubscriptionInstance.h"
-#include "ReceivedDataElementList.h"
+#include "DCPS_Utils.h"
 #include "DomainParticipantImpl.h"
-#include "Service_Participant.h"
-#include "Qos_Helper.h"
+#include "EncapsulationHeader.h"
 #include "FeatureDisabledQosCheck.h"
 #include "GuidConverter.h"
-#include "Serializer.h"
-#include "SubscriberImpl.h"
-#include "Transient_Kludge.h"
-#include "Util.h"
+#include "MonitorFactory.h"
+#include "PoolAllocator.h"
+#include "Qos_Helper.h"
 #include "QueryConditionImpl.h"
 #include "ReadConditionImpl.h"
-#include "MonitorFactory.h"
+#include "ReceivedDataElementList.h"
 #include "SafetyProfileStreams.h"
+#include "Serializer.h"
+#include "Service_Participant.h"
+#include "SubscriberImpl.h"
+#include "SubscriptionInstance.h"
+#include "Transient_Kludge.h"
 #include "TypeSupportImpl.h"
-#include "PoolAllocator.h"
-#include "DCPS_Utils.h"
+#include "Util.h"
+
 #ifndef DDS_HAS_MINIMUM_BIT
 #  include "BuiltInTopicUtils.h"
 #endif
+
 #include "XTypes/DynamicDataXcdrReadImpl.h"
+
 #include "transport/framework/EntryExit.h"
 #include "transport/framework/TransportExceptions.h"
 
@@ -161,11 +165,6 @@ bool RecorderImpl::check_transport_qos(const TransportInst& ti)
   return true;
 }
 
-GUID_t RecorderImpl::get_guid() const
-{
-  return subscription_id_;
-}
-
 CORBA::Long RecorderImpl::get_priority_value(const AssociationData& data) const
 {
   return data.publication_transport_priority_;
@@ -196,7 +195,7 @@ void RecorderImpl::data_received(const ReceivedDataSample& sample)
       Encoding enc;
       Serializer ser(payload.get(), enc);
       EncapsulationHeader encap;
-      if (ser >> encap && encap.to_any_encoding(enc)) {
+      if (ser >> encap && to_any_encoding(enc, encap)) {
         kind = enc.kind();
       }
     }
@@ -245,15 +244,23 @@ RecorderImpl::add_to_dynamic_type_map(const GUID_t& pub_id, const XTypes::TypeId
 #endif
 
 void
-RecorderImpl::add_association(const GUID_t&            yourId,
-                              const WriterAssociation& writer,
+RecorderImpl::set_subscription_id(const GUID_t& guid)
+{
+  OPENDDS_ASSERT(subscription_id_ == GUID_UNKNOWN);
+  OPENDDS_ASSERT(guid != GUID_UNKNOWN);
+  subscription_id_ = guid;
+  TransportClient::set_guid(guid);
+}
+
+void
+RecorderImpl::add_association(const WriterAssociation& writer,
                               bool                     active)
 {
   if (DCPS_debug_level >= 4) {
     ACE_DEBUG((LM_DEBUG, "(%P|%t) RecorderImpl::add_association: "
                "bit %d local %C remote %C\n",
                is_bit_,
-               LogGuid(yourId).c_str(),
+               LogGuid(subscription_id_).c_str(),
                LogGuid(writer.writerId).c_str()));
   }
 
@@ -269,16 +276,6 @@ RecorderImpl::add_association(const GUID_t&            yourId,
   //
   //   return;
   // }
-
-  //
-  // We are being called back from the repository before we are done
-  // processing after our call to the repository that caused this call
-  // (from the repository) to be made.
-  //
-  if (GUID_UNKNOWN == subscription_id_) {
-    // add_associations was invoked before DCSPInfoRepo::add_subscription() returned.
-    subscription_id_ = yourId;
-  }
 
   //
   // We do the following while holding the publication_handle_lock_.
@@ -371,7 +368,7 @@ RecorderImpl::add_association(const GUID_t&            yourId,
     //
     //     if (where->second->should_ack(now)) {
     //       const SequenceNumber sequence = where->second->ack_sequence();
-    //       if (send_sample_ack(writer.writerId, sequence, now.to_dds_time())) {
+    //       if (send_sample_ack(writer.writerId, sequence, now.to_idl_struct())) {
     //         where->second->clear_acks(sequence);
     //       }
     //     }
@@ -893,7 +890,8 @@ RecorderImpl::enable()
 
     try {
       enable_transport(qos_.reliability.kind == DDS::RELIABLE_RELIABILITY_QOS,
-                             qos_.durability.kind > DDS::VOLATILE_DURABILITY_QOS);
+                       qos_.durability.kind > DDS::VOLATILE_DURABILITY_QOS,
+                       participant_servant_);
     } catch (const Transport::Exception&) {
       if (log_level >= LogLevel::Warning) {
         ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: RecorderImpl::enable: Transport Exception\n"));
@@ -921,7 +919,7 @@ RecorderImpl::enable()
 
     XTypes::TypeInformation type_info;
 
-    subscription_id_ =
+    const bool success =
       disco->add_subscription(domain_id_,
                               participant_servant_->get_id(),
                               topic_servant_->get_id(),
@@ -934,7 +932,7 @@ RecorderImpl::enable()
                               exprParams,
                               type_info);
 
-    if (subscription_id_ == OpenDDS::DCPS::GUID_UNKNOWN) {
+    if (!success || subscription_id_ == OpenDDS::DCPS::GUID_UNKNOWN) {
       if (log_level >= LogLevel::Warning) {
         ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: RecorderImpl::enable: "
           "add_subscription returned invalid id\n"));

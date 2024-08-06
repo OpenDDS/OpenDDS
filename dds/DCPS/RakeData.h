@@ -1,6 +1,4 @@
 /*
- *
- *
  * Distributed under the OpenDDS License.
  * See: http://www.opendds.org/license.html
  */
@@ -8,14 +6,13 @@
 #ifndef OPENDDS_DCPS_RAKEDATA_H
 #define OPENDDS_DCPS_RAKEDATA_H
 
-#include /**/ "ace/pre.h"
-#include "dcps_export.h"
 #include "ReceivedDataElementList.h"
 #include "SubscriptionInstance.h"
+#include "dcps_export.h"
 
-#if !defined (ACE_LACKS_PRAGMA_ONCE)
-# pragma once
-#endif /* ACE_LACKS_PRAGMA_ONCE */
+#ifndef ACE_LACKS_PRAGMA_ONCE
+#  pragma once
+#endif
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 

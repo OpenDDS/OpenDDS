@@ -1,5 +1,6 @@
 # This is used by gitrelease.pl to correct commit individual author info for
-# the generation of the AUTHORS file
+# the generation of the AUTHORS file. This also corrects it in the rest of the
+# history like `git log`.
 #
 # See https://git-scm.com/docs/gitmailmap for how this works
 #
@@ -9,6 +10,7 @@
 
 Justin Wilson <wilsonj@objectcomputing.com> <jrw972@gmail.com>
 Justin Wilson <wilsonj@objectcomputing.com> Justin R. Wilson
+Justin Wilson <wilsonj@objectcomputing.com> <wilsonj@unityfoundation.io>
 
 Jeff Schmitz <schmitzj@ociweb.com> <jeffrey.j.schmitz@gmail.com>
 Jeff Schmitz <schmitzj@ociweb.com> iamtheschmitzer <schmitzj@ociweb.com>
@@ -21,6 +23,8 @@ Huang-Ming Huang <huangh@ociweb.com> <huangming.huang@gmail.com>
 
 Fred Hornsey <hornseyf@objectcomputing.com> <fred@hornsey.us>
 Fred Hornsey <hornseyf@objectcomputing.com> Frederick Hornsey
+Fred Hornsey <hornseyf@objectcomputing.com> <hornseyf@unityfoundation.io>
+Fred Hornsey <hornseyf@objectcomputing.com> iguessthislldo <iguessthislldo@users.noreply.github.com>
 
 Doug Lewis <lewisdo@objectcomputing.com> unknown <lewisdo@objectcomputing.com>
 
@@ -50,3 +54,12 @@ Tim Pollock <pollockt@objectcomputing.com> pollocktoci <70289169+pollocktoci@use
 
 <mesnierp@objectcomputing.com> <mesnier_p@ociweb.com>
 Phil Mesnier <mesnierp@objectcomputing.com> Phil <mesnierp@objectcomputing.com>
+
+Jose Morato <jmmorato@enxarxats.com> jmmorato
+Jose Morato <jmmorato@enxarxats.com> jmorato
+Jose Morato <jmmorato@enxarxats.com> jose_morato
+Jose Morato <jmmorato@enxarxats.com> <jose.morato@swisstiming.com>
+
+Simon Rogers <smnrgrs@gmail.com> smnrgrs
+
+Tyler Mayoff <tyler@tylermayoff.com> Tyler

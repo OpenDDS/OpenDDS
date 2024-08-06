@@ -1,5 +1,7 @@
 #include <dds/DCPS/InternalTopic.h>
 
+#include <dds/DCPS/Qos_Helper.h>
+
 #include <gtest/gtest.h>
 
 using namespace OpenDDS::DCPS;
@@ -20,8 +22,8 @@ typedef InternalDataReader<Sample> ReaderType;
 TEST(dds_DCPS_InternalTopic, connect_writer)
 {
   RcHandle<TopicType> topic = make_rch<TopicType>();
-  RcHandle<ReaderType> reader = make_rch<ReaderType>(false);
-  RcHandle<WriterType> writer = make_rch<WriterType>(false);
+  RcHandle<ReaderType> reader = make_rch<ReaderType>(DataReaderQosBuilder().reliability_reliable());
+  RcHandle<WriterType> writer = make_rch<WriterType>(DataWriterQosBuilder());
 
   topic->connect(reader);
   topic->connect(writer);
@@ -32,8 +34,8 @@ TEST(dds_DCPS_InternalTopic, connect_writer)
 TEST(dds_DCPS_InternalTopic, connect_reader)
 {
   RcHandle<TopicType> topic = make_rch<TopicType>();
-  RcHandle<ReaderType> reader = make_rch<ReaderType>(false);
-  RcHandle<WriterType> writer = make_rch<WriterType>(false);
+  RcHandle<ReaderType> reader = make_rch<ReaderType>(DataReaderQosBuilder().reliability_reliable());
+  RcHandle<WriterType> writer = make_rch<WriterType>(DataWriterQosBuilder());
 
   topic->connect(writer);
   topic->connect(reader);
@@ -44,8 +46,8 @@ TEST(dds_DCPS_InternalTopic, connect_reader)
 TEST(dds_DCPS_InternalTopic, disconnect_writer)
 {
   RcHandle<TopicType> topic = make_rch<TopicType>();
-  RcHandle<ReaderType> reader = make_rch<ReaderType>(false);
-  RcHandle<WriterType> writer = make_rch<WriterType>(false);
+  RcHandle<ReaderType> reader = make_rch<ReaderType>(DataReaderQosBuilder().reliability_reliable());
+  RcHandle<WriterType> writer = make_rch<WriterType>(DataWriterQosBuilder());
 
   topic->connect(reader);
   topic->connect(writer);
@@ -57,8 +59,8 @@ TEST(dds_DCPS_InternalTopic, disconnect_writer)
 TEST(dds_DCPS_InternalTopic, disconnect_reader)
 {
   RcHandle<TopicType> topic = make_rch<TopicType>();
-  RcHandle<ReaderType> reader = make_rch<ReaderType>(false);
-  RcHandle<WriterType> writer = make_rch<WriterType>(false);
+  RcHandle<ReaderType> reader = make_rch<ReaderType>(DataReaderQosBuilder().reliability_reliable());
+  RcHandle<WriterType> writer = make_rch<WriterType>(DataWriterQosBuilder());
 
   topic->connect(writer);
   topic->connect(reader);
@@ -70,10 +72,10 @@ TEST(dds_DCPS_InternalTopic, disconnect_reader)
 TEST(dds_DCPS_InternalTopic, connect_multiple)
 {
   RcHandle<TopicType> topic = make_rch<TopicType>();
-  RcHandle<ReaderType> reader1 = make_rch<ReaderType>(false);
-  RcHandle<WriterType> writer1 = make_rch<WriterType>(false);
-  RcHandle<ReaderType> reader2 = make_rch<ReaderType>(false);
-  RcHandle<WriterType> writer2 = make_rch<WriterType>(false);
+  RcHandle<ReaderType> reader1 = make_rch<ReaderType>(DataReaderQosBuilder().reliability_reliable());
+  RcHandle<WriterType> writer1 = make_rch<WriterType>(DataWriterQosBuilder());
+  RcHandle<ReaderType> reader2 = make_rch<ReaderType>(DataReaderQosBuilder().reliability_reliable());
+  RcHandle<WriterType> writer2 = make_rch<WriterType>(DataWriterQosBuilder());
 
   topic->connect(reader1);
   topic->connect(writer1);

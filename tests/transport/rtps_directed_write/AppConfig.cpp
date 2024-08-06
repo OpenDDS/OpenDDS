@@ -39,7 +39,7 @@ AppConfig::AppConfig(int argc, ACE_TCHAR* argv[], bool setLocalAddress) :
       ACE_DEBUG((LM_INFO, ACE_TEXT("ERROR: Failed to cast to RtpsUdpInst*\n")));
       throw;
     }
-    rtpsInst->datalink_release_delay_ = 0;
+    rtpsInst->datalink_release_delay(0);
     if (setLocalAddress) {
       ACE_INET_Addr addr(port, ACE_TEXT_ALWAYS_CHAR(host.c_str()));
       rtpsInst->local_address(OpenDDS::DCPS::NetworkAddress(addr));
@@ -75,11 +75,11 @@ ACE_INET_Addr AppConfig::getHostAddress() const {
     (host == ACE_TEXT("localhost")) ? AF_UNSPEC : AF_INET);
 }
 
-const OpenDDS::DCPS::TimeDuration& AppConfig::getHeartbeatPeriod() const {
-  return rtpsInst->heartbeat_period_;
+const OpenDDS::DCPS::TimeDuration AppConfig::getHeartbeatPeriod() const {
+  return rtpsInst->heartbeat_period();
 }
 void AppConfig::setHeartbeatPeriod(const ACE_UINT64& ms) {
-  rtpsInst->heartbeat_period_ = OpenDDS::DCPS::TimeDuration::from_msec(ms);
+  rtpsInst->heartbeat_period(OpenDDS::DCPS::TimeDuration::from_msec(ms));
 }
 
 OpenDDS::DCPS::GUID_t AppConfig::createID(long participantId, long key, CORBA::Octet kind) {

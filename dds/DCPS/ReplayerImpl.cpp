@@ -39,7 +39,6 @@
 #include "transport/framework/TransportCustomizedElement.h"
 
 #include "ace/Reactor.h"
-#include "ace/Auto_Ptr.h"
 
 #include <stdexcept>
 
@@ -103,7 +102,7 @@ ReplayerImpl::cleanup()
 {
 
   //     // Unregister all registered instances prior to deletion.
-  //     // this->unregister_instances(SystemTimePoint::now().to_dds_time());
+  //     // this->unregister_instances(SystemTimePoint::now().to_idl_struct());
   //
   //     // CORBA::String_var topic_name = this->get_Atopic_name();
   {
@@ -349,7 +348,7 @@ ReplayerImpl::enable()
 
   try {
     this->enable_transport(reliable,
-                           this->qos_.durability.kind > DDS::VOLATILE_DURABILITY_QOS);
+                           this->qos_.durability.kind > DDS::VOLATILE_DURABILITY_QOS, participant_servant_);
 
   } catch (const Transport::Exception&) {
     ACE_ERROR((LM_ERROR,
@@ -375,7 +374,7 @@ ReplayerImpl::enable()
   type_info.complete.typeid_with_size.typeobject_serialized_size = 0;
   type_info.complete.dependent_typeid_count = 0;
 
-  this->publication_id_ =
+  const bool success =
     disco->add_publication(this->domain_id_,
                            this->participant_servant_->get_id(),
                            this->topic_servant_->get_id(),
@@ -385,7 +384,7 @@ ReplayerImpl::enable()
                            this->publisher_qos_,
                            type_info);
 
-  if (this->publication_id_ == GUID_UNKNOWN) {
+  if (!success || this->publication_id_ == GUID_UNKNOWN) {
     ACE_ERROR((LM_ERROR,
                ACE_TEXT("(%P|%t) ERROR: ReplayerImpl::enable, ")
                ACE_TEXT("add_publication returned invalid id.\n")));
@@ -395,11 +394,17 @@ ReplayerImpl::enable()
   return DDS::RETCODE_OK;
 }
 
-
+void
+ReplayerImpl::set_publication_id(const GUID_t& guid)
+{
+  OPENDDS_ASSERT(publication_id_ == GUID_UNKNOWN);
+  OPENDDS_ASSERT(guid != GUID_UNKNOWN);
+  publication_id_ = guid;
+  TransportClient::set_guid(guid);
+}
 
 void
-ReplayerImpl::add_association(const GUID_t&            yourId,
-                              const ReaderAssociation& reader,
+ReplayerImpl::add_association(const ReaderAssociation& reader,
                               bool                     active)
 {
   DBG_ENTRY_LVL("ReplayerImpl", "add_association", 6);
@@ -409,7 +414,7 @@ ReplayerImpl::add_association(const GUID_t&            yourId,
                ACE_TEXT("(%P|%t) ReplayerImpl::add_association - ")
                ACE_TEXT("bit %d local %C remote %C\n"),
                is_bit_,
-               LogGuid(yourId).c_str(),
+               LogGuid(publication_id_).c_str(),
                LogGuid(reader.readerId).c_str()));
   }
 
@@ -422,14 +427,10 @@ ReplayerImpl::add_association(const GUID_t&            yourId,
   //   return;
   // }
 
-  if (GUID_UNKNOWN == publication_id_) {
-    publication_id_ = yourId;
-  }
-
   {
     ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, this->lock_);
     reader_info_.insert(std::make_pair(reader.readerId,
-                                       ReaderInfo(TheServiceParticipant->publisher_content_filter() ? reader.filterExpression : "",
+                                       ReaderInfo(TheServiceParticipant->publisher_content_filter() ? reader.filterExpression.in() : "",
                                                   reader.exprParams, participant_servant_,
                                                   reader.readerQos.durability.kind > DDS::VOLATILE_DURABILITY_QOS)));
   }
@@ -767,11 +768,6 @@ ReplayerImpl::check_transport_qos(const TransportInst&)
   return true;
 }
 
-GUID_t ReplayerImpl::get_guid() const
-{
-  return this->publication_id_;
-}
-
 CORBA::Long
 ReplayerImpl::get_priority_value(const AssociationData&) const
 {
@@ -906,12 +902,12 @@ ReplayerImpl::write (const RawDataSample*   samples,
     list.enqueue_tail(element);
     Message_Block_Ptr temp;
     Message_Block_Ptr sample(samples[i].sample_->duplicate());
-    DDS::ReturnCode_t ret = create_sample_data_message(move(sample),
+    DDS::ReturnCode_t ret = create_sample_data_message(OPENDDS_MOVE_NS::move(sample),
                                                        element->get_header(),
                                                        temp,
                                                        samples[i].source_timestamp_,
                                                        false);
-    element->set_sample(move(temp));
+    element->set_sample(OPENDDS_MOVE_NS::move(temp));
     if (reader_ih_ptr) {
       element->set_num_subs(1);
       element->set_sub_id(0, repo_id);

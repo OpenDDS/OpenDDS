@@ -82,10 +82,10 @@ participant_data(DDS::DomainId_t domain,
     DDS::Security::SPDP_BUILTIN_PARTICIPANT_SECURE_READER;
 
   const DDS::Security::ExtendedBuiltinEndpointSet_t availableExtendedBuiltinEndpoints =
-    DDS::Security::TYPE_LOOKUP_SERVICE_REQUEST_WRITER_SECURE |
-    DDS::Security::TYPE_LOOKUP_SERVICE_REPLY_WRITER_SECURE |
-    DDS::Security::TYPE_LOOKUP_SERVICE_REQUEST_READER_SECURE |
-    DDS::Security::TYPE_LOOKUP_SERVICE_REPLY_READER_SECURE;
+    DDS::Security::TYPE_LOOKUP_SERVICE_REQUEST_SECURE_WRITER |
+    DDS::Security::TYPE_LOOKUP_SERVICE_REPLY_SECURE_WRITER |
+    DDS::Security::TYPE_LOOKUP_SERVICE_REQUEST_SECURE_READER |
+    DDS::Security::TYPE_LOOKUP_SERVICE_REPLY_SECURE_READER;
 
   ACE_INET_Addr bogus(12345, "127.0.0.1");
   OpenDDS::DCPS::LocatorSeq nonEmptyList(1);
@@ -163,6 +163,7 @@ participant_data(DDS::DomainId_t domain,
         , {PFLAGS_THIS_VERSION} // opendds_participant_flags
         , false // opendds_rtps_relay_application_participant
         , availableExtendedBuiltinEndpoints
+        , 0
       },
       {300, 0}, // leaseDuration
       {0, 0}, // discoveredAt
@@ -264,15 +265,18 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     return EXIT_FAILURE;
   }
 
-  const u_short port_common = disc->config()->port_common(domain);
-  const ACE_INET_Addr multicast_address = disc->config()->multicast_address(port_common);
+  NetworkAddress multicast_address;
+  if (!disc->config()->spdp_multicast_address(multicast_address, domain)) {
+    ACE_ERROR((LM_ERROR, "ERROR: failed to get SPDP multicast address\n"));
+    return EXIT_FAILURE;
+  }
   ACE_DEBUG((LM_DEBUG, "multicast_address = %C\n", LogAddr(multicast_address).c_str()));
   ACE_SOCK_Dgram_Mcast multicast_socket;
 #ifdef ACE_HAS_MAC_OSX
   multicast_socket.opts(ACE_SOCK_Dgram_Mcast::OPT_BINDADDR_NO |
                         ACE_SOCK_Dgram_Mcast::DEFOPT_NULLIFACE);
 #endif
-  if (multicast_socket.join(multicast_address, 1, 0)) {
+  if (multicast_socket.join(multicast_address.to_addr(), 1, 0)) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("ERROR: failed to join multicast group\n")));
     return EXIT_FAILURE;
   }
@@ -305,10 +309,10 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   while (!receive(participant_guid, multicast_socket)) {}
 
   // Send an SPDP message from writer1.
-  send(writer1_socket, writer1_guid, writer1_sequence, multicast_address, participant_data(domain, writer1_guid.guidPrefix, DDS::DomainParticipantQos(), writer1_addr));
+  send(writer1_socket, writer1_guid, writer1_sequence, multicast_address.to_addr(), participant_data(domain, writer1_guid.guidPrefix, DDS::DomainParticipantQos(), writer1_addr));
 
   // Send an SPDP message from writer2.
-  send(writer2_socket, writer2_guid, writer2_sequence, multicast_address, participant_data(domain, writer2_guid.guidPrefix, DDS::DomainParticipantQos(), writer2_addr));
+  send(writer2_socket, writer2_guid, writer2_sequence, multicast_address.to_addr(), participant_data(domain, writer2_guid.guidPrefix, DDS::DomainParticipantQos(), writer2_addr));
 
   // Sleep to let SPDP process.
   ACE_OS::sleep(1);

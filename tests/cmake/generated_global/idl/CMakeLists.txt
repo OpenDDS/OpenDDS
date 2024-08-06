@@ -4,16 +4,12 @@
 # This file is setup the way it is for testing purposes. For a cleaner example
 # see DevGuideExamples/DCPS/Messenger/CMakeLists.txt
 
+cmake_minimum_required(VERSION 3.8...3.27)
 project(opendds_generated_global_idl CXX)
-cmake_minimum_required(VERSION 3.8.2)
 
 find_package(OpenDDS REQUIRED)
 
-if (OPENDDS_STATIC)
-  message(FATAL_ERROR "This test cannot be run on static builds.")
-endif()
-
-if (NOT OPENDDS_OWNERSHIP_PROFILE)
+if(NOT OPENDDS_OWNERSHIP_PROFILE)
   message(FATAL_ERROR "These tests require OpenDDS to be built with Ownership Profile enabled")
 endif()
 
@@ -22,17 +18,12 @@ set(messenger "opendds_generated_global_messenger")
 set(src "${CMAKE_CURRENT_SOURCE_DIR}/../../../DCPS/Messenger")
 set(dst ${CMAKE_CURRENT_BINARY_DIR})
 
-foreach(file
-  Messenger.idl)
-  configure_file(${src}/${file} ${dst}/${file} COPYONLY)
-endforeach()
+configure_file("${src}/Messenger.idl" "${dst}/Messenger.idl" COPYONLY)
 
 # Messenger library
 add_library(${messenger} SHARED)
 set_target_properties(${messenger}
   PROPERTIES OUTPUT_NAME messenger
 )
-# TODO: This should be PUBLIC, but this is broken because of the unrecognized
-# GENERATED property on IDL compiler-generated files for this test.
-OPENDDS_TARGET_SOURCES(${messenger} "${dst}/Messenger.idl")
+opendds_target_sources(${messenger} PUBLIC "${dst}/Messenger.idl")
 target_link_libraries(${messenger} OpenDDS::Dcps)

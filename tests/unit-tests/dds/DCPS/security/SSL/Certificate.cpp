@@ -3,7 +3,9 @@
  * See: http://www.OpenDDS.org/license.html
  */
 
-#ifdef OPENDDS_SECURITY
+#include <dds/OpenDDSConfigWrapper.h>
+
+#if OPENDDS_CONFIG_SECURITY
 
 #include "gtest/gtest.h"
 #include "dds/DCPS/security/OpenSSL_init.h"
@@ -48,21 +50,21 @@ public:
       "VQQIDAJNTzEUMBIGA1UEBwwLU2FpbnQgTG91aXMxLDAqBgNVBAoMI09iamVjdCBD\n"
       "b21wdXRpbmcgKFRlc3QgSWRlbnRpdHkgQ0EpMSwwKgYDVQQDDCNPYmplY3QgQ29t\n"
       "cHV0aW5nIChUZXN0IElkZW50aXR5IENBKTEnMCUGCSqGSIb3DQEJARYYaW5mb0Bv\n"
-      "YmplY3Rjb21wdXRpbmcuY29tMB4XDTE4MDYxMzA0MTMxNloXDTI4MDYxMDA0MTMx\n"
-      "NlowXDELMAkGA1UEBhMCQVUxEzARBgNVBAgMClNvbWUtU3RhdGUxITAfBgNVBAoM\n"
-      "GEludGVybmV0IFdpZGdpdHMgUHR5IEx0ZDEVMBMGA1UEAwwMT3p6aWUgT3ptYW5u\n"
-      "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAsnrguqg0qT/phhwsT7I0\n"
-      "QfqK3GdYtgdjzk1y2qkMvsAACSwUxqEDxwQq3onpZ2wOSKfCK2dnAtj4l39zA7Pk\n"
-      "Jg3syE98/cFxWLDznjvti73xXoHJOZ7q/V2d6/jRFixYWHLa2+nUJ6gCcvC9Z+Kk\n"
-      "fxfv5QHw4/y6WKzG+f8+wvThT2x/+80n62MvTpyGtOV1TP2bhEqhgrxQHJkv3N4K\n"
-      "rnC+niiy4ShHXytwnM8tell3IBFmuGIrmGn1OI9RiljjSt2nKc8vAbxcvnifjk15\n"
-      "PIwRlVXk1jVNu1FmWlTxAMd5VumyfjmZzk/1t0n8xDAerDfvmr33ycDmo9h7OBnW\n"
-      "bQIDAQABMA0GCSqGSIb3DQEBCwUAA4IBAQBH9Cdn8L93xmre0hTkDAeq08NEBIll\n"
-      "Cf7BpreOg7tDoT59AqomBNEP5X9yl/WFI0ywcTsPqKAIIyQVmFRf4fM5PxLwn3Ii\n"
-      "YeJVBhmZ7+6Ul5h0Oxtjbnrtl9gb2Pu4EFDh1ulCUow9p/H5ceNk2jGtogEcodzJ\n"
-      "9U1WpJDneVqLw9GPlSiOaG22kQ8z+3Bhxgx5zJXa9gxzVwPQ1DfTYF2004UYeOk+\n"
-      "1Duu88crRp00ghesoFKx5OURjTrImIo5cQEazVQ7sX3BAki3egwpaKXNiWQ7VIuZ\n"
-      "NFqBYfNRpivWQhcdG7g0MTK/AF6ddad6GdaknYlmBhlYpSd/K9DYIkMx\n"
+      "YmplY3Rjb21wdXRpbmcuY29tMB4XDTIzMDcyNTA2MzExNVoXDTMzMDcyMjA2MzEx\n"
+      "NVowXDEVMBMGA1UEAwwMT3p6aWUgT3ptYW5uMSEwHwYDVQQKDBhJbnRlcm5ldCBX\n"
+      "aWRnaXRzIFB0eSBMdGQxEzARBgNVBAgMClNvbWUtU3RhdGUxCzAJBgNVBAYTAkFV\n"
+      "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA0Zh19uPcQ/PWYOUXmL5A\n"
+      "guBP+BpQuQKLsgdeigwQzXurQIcdK4Lz0rKQh0ZbCyZdUP1wTx0UlO+RosLhPBEl\n"
+      "juesyf1Idis+GJFyiO61lK5taNj0nwIQcIJXzfgQfLG+wE3gsaio9nJ5OE2LBRZg\n"
+      "9V6/fTaBQirvsL/NsQwkf9NvQAhk+nEaSxok2z35pe9ZCfy2J+Qs9SgIYrOeQ8eY\n"
+      "to12Uvt4euLNzrRr7QhomIuUBLmAbiSj52Es78HqZ2Qa+1VSwPnOtDrUyNtxIF36\n"
+      "9WH0TiaOfBvv1tfOG3+bmQrP4pMZyHHfbw0S08yDDxCzTYXCgbJxqg7/fsa9B8NZ\n"
+      "uwIDAQABMA0GCSqGSIb3DQEBCwUAA4IBAQACefgHwieavqKmrnkm+S5WNHlXSN9e\n"
+      "YLQumMfttm667K5TwlQMuKKO+wgnS3CgTBi43CsYipVwpsEMpsIcdfHc4eXXbPRc\n"
+      "vje1VIpiRlfLRCeiZUBHbhfkSxAI+myEvqlZpmlvVUzmnjD3pDzHcBjslM/Jolj2\n"
+      "YKUbPCq78IV+B+u/8A7q4H/QYsDCC+Hfyr1JUVMfvWiNitkqatEx3ZO0XWCGQEAb\n"
+      "AjTB14qF3FhQMxpfaY/zc4cKiC/fjj9WNIGW7D7sJNiT8WKkjGZjNH8NjMI5qzUp\n"
+      "fLXxT12zMxJeVYhVC7W6UvyJAeQJU7k/faxS4KljC9o0e9tOHnuKEM3k\n"
       "-----END CERTIFICATE-----"),
     signed_ec_("file:../security/certs/identity/test_participant_03_cert.pem"),
     not_signed_("file:../security/certs/identity/not_signed.pem")
@@ -142,7 +144,7 @@ TEST_F(dds_DCPS_security_SSL_Certificate, Algorithm_ECDSA_SHA256_Success)
 TEST_F(dds_DCPS_security_SSL_Certificate, SubjectNameToString_Success)
 {
   /* From this cmd: openssl x509 -noout -subject -in ./security/certs/identity/test_participant_01_cert.pem */
-  std::string expected("C = AU, ST = Some-State, O = Internet Widgits Pty Ltd, CN = Ozzie Ozmann");
+  std::string expected("CN = Ozzie Ozmann, O = Internet Widgits Pty Ltd, ST = Some-State, C = AU");
   std::string name;
   ASSERT_EQ(signed_.subject_name_to_str(name), 0 /* success! */);
   ASSERT_EQ(name, expected);

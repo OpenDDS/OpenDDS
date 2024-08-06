@@ -9,6 +9,7 @@
 
 #include "be_util.h"
 #include "be_extern.h"
+#include "dds_generator.h"
 
 #include "dds/DCPS/XTypes/TypeObject.h"
 
@@ -53,6 +54,7 @@ BE_GlobalData::BE_GlobalData()
   , generate_value_reader_writer_(true)
   , generate_xtypes_complete_(false)
   , face_ts_(false)
+  , generate_equality_(false)
   , filename_only_includes_(false)
   , sequence_suffix_("Seq")
   , language_mapping_(LANGMAP_NONE)
@@ -63,6 +65,7 @@ BE_GlobalData::BE_GlobalData()
   , root_default_autoid_(autoidkind_sequential)
   , default_try_construct_(tryconstructfailaction_discard)
   , old_typeobject_encoding_(false)
+  , old_typeobject_member_order_(false)
 {
   default_data_representation_.set_all(true);
 
@@ -374,6 +377,8 @@ BE_GlobalData::parse_args(long& i, char** av)
       face_ts(true);
     } else if (0 == ACE_OS::strcasecmp(av[i], "-Gxtypes-complete")) {
       xtypes_complete(true);
+    } else if (0 == ACE_OS::strcasecmp(av[i], "-Gequality")) {
+      generate_equality(true);
     } else {
       invalid_option(av[i]);
     }
@@ -479,6 +484,8 @@ BE_GlobalData::parse_args(long& i, char** av)
       }
     } else if (!strcmp(av[i], "--old-typeobject-encoding")) {
       old_typeobject_encoding_ = true;
+    } else if (!strcmp(av[i], "--old-typeobject-member-order")) {
+      old_typeobject_member_order_ = true;
     } else {
       invalid_option(av[i]);
     }
@@ -896,6 +903,11 @@ bool BE_GlobalData::is_must_understand(AST_Decl* node) const
   return value;
 }
 
+bool BE_GlobalData::is_effectively_must_understand(AST_Decl* node) const
+{
+  return is_must_understand(node) || is_key(node);
+}
+
 bool BE_GlobalData::is_key(AST_Decl* node) const
 {
   bool value;
@@ -968,6 +980,12 @@ TryConstructFailAction BE_GlobalData::union_discriminator_try_construct(AST_Unio
   return try_construct_annotation->union_value(node);
 }
 
+bool BE_GlobalData::value(AST_Decl* node, ACE_INT32& value) const
+{
+  ValueAnnotation* annotation = dynamic_cast<ValueAnnotation*>(builtin_annotations_["::@value"]);
+  return annotation->node_value_exists(node, value);
+}
+
 OpenDDS::DataRepresentation BE_GlobalData::data_representations(
   AST_Decl* node) const
 {
@@ -992,7 +1010,7 @@ OpenDDS::XTypes::MemberId BE_GlobalData::compute_id(
 
   using OpenDDS::XTypes::hash_member_name_to_id;
   using OpenDDS::XTypes::MemberId;
-  const string field_name = field->local_name()->get_string();
+  const string field_name = canonical_name(field);
   string hash_id;
   MemberId mid;
   if (id(field, member_id)) {
@@ -1017,8 +1035,7 @@ OpenDDS::XTypes::MemberId BE_GlobalData::compute_id(
   MemberIdCollisionMap::iterator lit = git->second.find(mid);
   if (lit != git->second.end()) {
     std::ostringstream msg;
-    msg << "Member id " << mid << " is the same as on field "
-      << lit->second->local_name()->get_string();
+    msg << "Member id " << mid << " is the same as on field " << canonical_name(lit->second);
     be_util::misc_error_and_abort(msg.str(), field);
   }
   git->second.insert(std::pair<MemberId, AST_Field*>(mid, field));
@@ -1040,5 +1057,24 @@ OpenDDS::XTypes::MemberId BE_GlobalData::get_id(AST_Field* field)
     return pos->second;
   }
   be_util::misc_error_and_abort("Could not get member id for field");
-  return -1;
+  return OpenDDS::XTypes::MEMBER_ID_INVALID;
+}
+
+bool BE_GlobalData::dynamic_data_adapter(AST_Decl* node) const
+{
+  return !builtin_annotations_["::OpenDDS::internal::@no_dynamic_data_adapter"]->find_on(node);
+}
+
+bool BE_GlobalData::special_serialization(AST_Decl* node, std::string& template_name) const
+{
+  typedef OpenDDS::internal::SpecialSerializationAnnotation Anno;
+  const Anno* const anno =
+    dynamic_cast<const Anno*>(builtin_annotations_["::OpenDDS::internal::@special_serialization"]);
+  if (!anno->node_value_exists(node, template_name)) {
+    return false;
+  }
+  if (template_name.empty()) {
+    template_name = canonical_name(node->local_name());
+  }
+  return true;
 }

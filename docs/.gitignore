@@ -3,3 +3,6 @@
 /.venv
 /OpenDDS.docset
 /sphinx_extensions/__pycache__
+/news.rst
+/this-release.rst
+/gh-release-notes.md

@@ -1,4 +1,6 @@
-#ifdef OPENDDS_SECURITY
+#include <dds/OpenDDSConfigWrapper.h>
+
+#if OPENDDS_CONFIG_SECURITY
 
 #include <dds/DCPS/security/AccessControlBuiltInImpl.h>
 #include <dds/DCPS/security/OpenSSL_init.h>
@@ -358,6 +360,10 @@ public:
     perm_date_p7s_.value = "file:../security/permissions/permissions_test_participant_01_NotBefore_signed.p7s";
     perm_date_p7s_.propagate = false;
 
+    perm_action_validity_p7s_.name = DDS::Security::Properties::AccessPermissions;
+    perm_action_validity_p7s_.value = "file:../security/permissions/permissions_test_participant_01_ActionValidity_signed.p7s";
+    perm_action_validity_p7s_.propagate = false;
+
     perm_dateoffset_p7s_.name = DDS::Security::Properties::AccessPermissions;
     perm_dateoffset_p7s_.value = "file:../security/permissions/permissions_test_participant_01_NotBeforeOffset_signed.p7s";
     perm_dateoffset_p7s_.propagate = false;
@@ -384,7 +390,7 @@ public:
 
     DDS::Security::IdentityToken local_id_token;
     OpenDDS::Security::TokenWriter local_tw(local_id_token);
-    local_tw.add_property("dds.cert.sn", "/C=AU/ST=Some-State/O=Internet Widgits Pty Ltd/CN=Ozzie Ozmann");
+    local_tw.add_property("dds.cert.sn", "CN=Ozzie Ozmann,O=Internet Widgits Pty Ltd,ST=Some-State,C=AU");
 
     EXPECT_CALL(*dynamic_cast<MockAuthentication*>(auth_plugin_.get()), get_identity_token(A<DDS::Security::IdentityToken&>(), 1, A<DDS::Security::SecurityException&>())).WillRepeatedly(DoAll(SetArgReferee<0>(local_id_token), Return(true)));
   }
@@ -476,6 +482,7 @@ public:
   Property_t perm_allowall_p7s_, perm_topic_p7s_, perm_topic2_p7s_;
   Property_t perm_date_p7s_, perm_dateoffset_p7s_;
   Property_t perm_parts_p7s_, perm_two_partitions_p7s_;
+  Property_t perm_action_validity_p7s_;
 
 private:
 
@@ -686,6 +693,34 @@ TEST_F(dds_DCPS_security_AccessControlBuiltInImpl, check_create_datawriter_date_
         ex));
 }
 
+TEST_F(dds_DCPS_security_AccessControlBuiltInImpl, check_create_datawriter_action_validity_Fail)
+{
+    ::DDS::Security::DomainId_t domain_id = 0;
+    const char * topic_name = "Triangle";
+    ::DDS::DataWriterQos qos;
+    ::DDS::PartitionQosPolicy  partition;
+    ::DDS::Security::DataTags  data_tag;
+    ::DDS::Security::SecurityException ex;
+
+    set_up_service_participant();
+    add_or_replace_property(dds_DCPS_security_AccessControlBuiltInImpl::gov_6_p7s_);
+    add_or_replace_property(dds_DCPS_security_AccessControlBuiltInImpl::perm_action_validity_p7s_);
+
+    ::DDS::Security::PermissionsHandle out_handle =
+        get_inst().validate_local_permissions(auth_plugin_.get(), 1, 0, domain_participant_qos_, ex);
+
+    partition.name.length(0);
+
+    EXPECT_FALSE(get_inst().check_create_datawriter(
+        out_handle,
+        domain_id,
+        topic_name,
+        qos,
+        partition,
+        data_tag,
+        ex));
+}
+
 TEST_F(dds_DCPS_security_AccessControlBuiltInImpl, check_create_datareader_InvalidInput)
 {
   ::DDS::Security::PermissionsHandle permissions_handle = 1;
@@ -839,6 +874,34 @@ TEST_F(dds_DCPS_security_AccessControlBuiltInImpl, check_create_datareader_defau
   partition.name.length(0);
 
   EXPECT_TRUE(get_inst().check_create_datareader(
+      permissions_handle,
+      domain_id,
+      topic_name,
+      qos,
+      partition,
+      data_tag,
+      ex));
+}
+
+TEST_F(dds_DCPS_security_AccessControlBuiltInImpl, check_create_datareader_action_validity_Fail)
+{
+  ::DDS::Security::DomainId_t domain_id = 0;
+  const char * topic_name = "Square";
+  ::DDS::DataReaderQos qos;
+  ::DDS::PartitionQosPolicy  partition;
+  ::DDS::Security::DataTags  data_tag;
+  ::DDS::Security::SecurityException ex;
+
+  set_up_service_participant();
+  add_or_replace_property(dds_DCPS_security_AccessControlBuiltInImpl::gov_6_p7s_);
+  add_or_replace_property(dds_DCPS_security_AccessControlBuiltInImpl::perm_action_validity_p7s_);
+
+  ::DDS::Security::PermissionsHandle permissions_handle =
+      get_inst().validate_local_permissions(auth_plugin_.get(), 1, 0, domain_participant_qos_, ex);
+
+  partition.name.length(0);
+
+  EXPECT_FALSE(get_inst().check_create_datareader(
       permissions_handle,
       domain_id,
       topic_name,
@@ -1091,6 +1154,45 @@ TEST_F(dds_DCPS_security_AccessControlBuiltInImpl, check_remote_datawriter_Succe
     remote_out_handle, domain_id, publication_data, ex));
 }
 
+TEST_F(dds_DCPS_security_AccessControlBuiltInImpl, check_remote_datawriter_action_validity_Fail)
+{
+  ::DDS::Security::AuthenticatedPeerCredentialToken remote_apc_token;
+  ::DDS::Security::DomainId_t domain_id = 0;
+  ::DDS::Security::PermissionsToken remote_perm_token;
+  ::DDS::Security::PublicationBuiltinTopicDataSecure publication_data;
+  ::DDS::Security::SecurityException ex;
+
+  remote_perm_token.class_id = Expected_Permissions_Token_Class_Id;
+  remote_perm_token.properties.length(1);
+  remote_perm_token.properties[0].name = "dds.perm.ca.sn";
+  remote_perm_token.properties[0].value = remote_subject_name;
+
+  std::string id(get_file_contents(mock_1_cert_file));
+  std::string pf(get_file_contents("../security/permissions/permissions_test_participant_01_ActionValidity_signed.p7s"));
+
+  remote_apc_token.class_id = Expected_Permissions_Cred_Token_Class_Id;
+  remote_apc_token.binary_properties.length(2);
+  remote_apc_token.binary_properties[0].name = "c.id";
+  remote_apc_token.binary_properties[0].value.length(static_cast<CORBA::ULong>(id.size()));
+  memcpy(remote_apc_token.binary_properties[0].value.get_buffer(), id.c_str(), id.size());
+  remote_apc_token.binary_properties[0].propagate = true;
+  remote_apc_token.binary_properties[1].name = "c.perm";
+  remote_apc_token.binary_properties[1].value.length(static_cast<CORBA::ULong>(pf.size()));
+  memcpy(remote_apc_token.binary_properties[1].value.get_buffer(), pf.c_str(), pf.size());
+  remote_apc_token.binary_properties[1].propagate = true;
+  add_or_replace_property(dds_DCPS_security_AccessControlBuiltInImpl::gov_6_p7s_);
+  get_inst().validate_local_permissions(auth_plugin_.get(), 1, 1, domain_participant_qos_, ex);
+
+  ::DDS::Security::PermissionsHandle remote_out_handle = get_inst().validate_remote_permissions(
+    auth_plugin_.get(), 1, 2, remote_perm_token, remote_apc_token, ex);
+
+  // In permissions file topic is '*'
+  publication_data.base.base.topic_name = "Triangle";
+
+  EXPECT_FALSE(get_inst().check_remote_datawriter(
+    remote_out_handle, domain_id, publication_data, ex));
+}
+
 TEST_F(dds_DCPS_security_AccessControlBuiltInImpl, check_remote_datareader_InvalidInput)
 {
   ::DDS::Security::DomainId_t domain_id = 1;
@@ -1141,6 +1243,46 @@ TEST_F(dds_DCPS_security_AccessControlBuiltInImpl, check_remote_datareader_Succe
   EXPECT_TRUE(get_inst().check_remote_datareader(
     remote_out_handle, domain_id, subscription_data, relay_only, ex));
   EXPECT_FALSE(relay_only);
+}
+
+TEST_F(dds_DCPS_security_AccessControlBuiltInImpl, check_remote_datareader_action_validity_Fail)
+{
+  ::DDS::Security::AuthenticatedPeerCredentialToken remote_apc_token;
+  ::DDS::Security::DomainId_t domain_id = 0;
+  ::DDS::Security::PermissionsToken remote_perm_token;
+  ::DDS::Security::SubscriptionBuiltinTopicDataSecure subscription_data;
+  ::DDS::Security::SecurityException ex;
+  bool relay_only = true;
+
+  remote_perm_token.class_id = Expected_Permissions_Token_Class_Id;
+  remote_perm_token.properties.length(1);
+  remote_perm_token.properties[0].name = "dds.perm.ca.sn";
+  remote_perm_token.properties[0].value = remote_subject_name;
+
+  std::string id(get_file_contents(mock_1_cert_file));
+  std::string pf(get_file_contents("../security/permissions/permissions_test_participant_01_ActionValidity_signed.p7s"));
+
+  remote_apc_token.class_id = Expected_Permissions_Cred_Token_Class_Id;
+  remote_apc_token.binary_properties.length(2);
+  remote_apc_token.binary_properties[0].name = "c.id";
+  remote_apc_token.binary_properties[0].value.length(static_cast<CORBA::ULong>(id.size()));
+  memcpy(remote_apc_token.binary_properties[0].value.get_buffer(), id.c_str(), id.size());
+  remote_apc_token.binary_properties[0].propagate = true;
+  remote_apc_token.binary_properties[1].name = "c.perm";
+  remote_apc_token.binary_properties[1].value.length(static_cast<CORBA::ULong>(pf.size()));
+  memcpy(remote_apc_token.binary_properties[1].value.get_buffer(), pf.c_str(), pf.size());
+  remote_apc_token.binary_properties[1].propagate = true;
+  add_or_replace_property(dds_DCPS_security_AccessControlBuiltInImpl::gov_6_p7s_);
+  get_inst().validate_local_permissions(auth_plugin_.get(), 1, 1, domain_participant_qos_, ex);
+
+  ::DDS::Security::PermissionsHandle remote_out_handle = get_inst().validate_remote_permissions(
+    auth_plugin_.get(), 1, 2, remote_perm_token, remote_apc_token, ex);
+
+  // In permissions file topic is '*'
+  subscription_data.base.base.topic_name = "Square";
+
+  EXPECT_FALSE(get_inst().check_remote_datareader(
+    remote_out_handle, domain_id, subscription_data, relay_only, ex));
 }
 
 TEST_F(dds_DCPS_security_AccessControlBuiltInImpl, check_remote_topic_InvalidInput)
@@ -1271,8 +1413,6 @@ TEST_F(dds_DCPS_security_AccessControlBuiltInImpl, check_remote_datawriter_regis
   // Null pointers
   EXPECT_FALSE(get_inst().check_remote_datawriter_register_instance(
     perm_handle, 0, pub_handle, key.get(), ex));
-  EXPECT_FALSE(get_inst().check_remote_datawriter_register_instance(
-    perm_handle, reader.get(), pub_handle, 0, ex));
 }
 
 TEST_F(dds_DCPS_security_AccessControlBuiltInImpl, check_remote_datawriter_register_instance_Success)
@@ -1304,8 +1444,6 @@ TEST_F(dds_DCPS_security_AccessControlBuiltInImpl, check_remote_datawriter_dispo
   // Null pointers
   EXPECT_FALSE(get_inst().check_remote_datawriter_dispose_instance(
     perm_handle, 0, pub_handle, key.get(), ex));
-  EXPECT_FALSE(get_inst().check_remote_datawriter_dispose_instance(
-    perm_handle, reader.get(), pub_handle, 0, ex));
 }
 
 TEST_F(dds_DCPS_security_AccessControlBuiltInImpl, get_permissions_token_InvalidInput)

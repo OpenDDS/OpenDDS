@@ -35,7 +35,7 @@
 namespace {
 
 void cleanup_directory(const OPENDDS_VECTOR(OPENDDS_STRING) & path,
-                       const ACE_CString & data_dir)
+                       const OpenDDS::DCPS::String& data_dir)
 {
   if (path.empty()) return;
 
@@ -73,7 +73,7 @@ public:
                   list_difference_type index,
                   ACE_Allocator * allocator,
                   const OPENDDS_VECTOR(OPENDDS_STRING) & path,
-                  const ACE_CString & data_dir)
+                  const OpenDDS::DCPS::String& data_dir)
   : sample_list_(sample_list)
   , index_(index)
   , allocator_(allocator)
@@ -162,7 +162,7 @@ private:
 
   OPENDDS_VECTOR(OPENDDS_STRING) path_;
 
-  ACE_CString data_dir_;
+  OpenDDS::DCPS::String data_dir_;
 };
 
 } // namespace
@@ -296,9 +296,8 @@ OpenDDS::DCPS::DataDurabilityCache::DataDurabilityCache(
   init();
 }
 
-OpenDDS::DCPS::DataDurabilityCache::DataDurabilityCache(
-  DDS::DurabilityQosPolicyKind kind,
-  ACE_CString & data_dir)
+OpenDDS::DCPS::DataDurabilityCache::DataDurabilityCache(DDS::DurabilityQosPolicyKind kind,
+                                                        const String& data_dir)
   : allocator_(new ACE_New_Allocator)
   , kind_(kind)
   , data_dir_(data_dir)
@@ -784,8 +783,8 @@ OpenDDS::DCPS::DataDurabilityCache::get_data(
    */
   DDS::ReturnCode_t ret =
     data_writer->register_instance_from_durable_data(handle,
-                                     move(registration_sample),
-                                     registration_timestamp);
+                                                     OPENDDS_MOVE_NS::move(registration_sample),
+                                                     registration_timestamp);
 
   if (ret != DDS::RETCODE_OK)
     return false;
@@ -835,7 +834,7 @@ OpenDDS::DCPS::DataDurabilityCache::get_data(
                      sample_length);
       mb->wr_ptr(sample_length);
 
-      const DDS::ReturnCode_t ret = data_writer->write(move(mb),
+      const DDS::ReturnCode_t ret = data_writer->write(OPENDDS_MOVE_NS::move(mb),
                                                        handle,
                                                        source_timestamp,
                                                        0 /* no content filtering */,

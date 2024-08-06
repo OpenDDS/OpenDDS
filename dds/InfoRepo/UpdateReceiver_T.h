@@ -84,13 +84,6 @@ private:
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
-#if defined (ACE_TEMPLATES_REQUIRE_SOURCE)
 #include "UpdateReceiver_T.cpp"
-#endif /* ACE_TEMPLATES_REQUIRE_SOURCE */
-
-#if defined (ACE_TEMPLATES_REQUIRE_PRAGMA)
-#pragma message ("UpdateReceiver_T.cpp template inst")
-#pragma implementation ("UpdateReceiver_T.cpp")
-#endif /* ACE_TEMPLATES_REQUIRE_PRAGMA */
 
 #endif  /* UPDATE_RECEIVER_T_H */

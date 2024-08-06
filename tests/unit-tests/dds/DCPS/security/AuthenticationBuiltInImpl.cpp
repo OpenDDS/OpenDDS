@@ -3,8 +3,9 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifdef OPENDDS_SECURITY
+#include <dds/OpenDDSConfigWrapper.h>
 
+#if OPENDDS_CONFIG_SECURITY
 #include <dds/DCPS/GuidUtils.h>
 #include <dds/DCPS/Serializer.h>
 #include <dds/DCPS/security/SSL/Certificate.h>
@@ -273,7 +274,7 @@ TEST_F(dds_DCPS_security_AuthenticationBuiltInImpl, ValidateLocalIdentity_Succes
 TEST_F(dds_DCPS_security_AuthenticationBuiltInImpl, GetIdentityToken_Success)
 {
   // From this cmd:  openssl x509 -noout -subject -in certs/identity/test_participant_01_cert.pem
-  std::string cert_sn("C = AU, ST = Some-State, O = Internet Widgits Pty Ltd, CN = Ozzie Ozmann");
+  std::string cert_sn("CN = Ozzie Ozmann, O = Internet Widgits Pty Ltd, ST = Some-State, C = AU");
 
   // Same thing but with certs/identity/identity_ca_cert.pem
   std::string ca_sn("C = US, ST = MO, L = Saint Louis, O = Object Computing (Test Identity CA), CN = Object Computing (Test Identity CA), emailAddress = info@objectcomputing.com");

@@ -21,6 +21,7 @@
 #include <dds/DCPS/Qos_Helper.h>
 #include <dds/DCPS/Marked_Default_Qos.h>
 #include <dds/DCPS/Message_Block_Ptr.h>
+#include <dds/DCPS/EncapsulationHeader.h>
 
 #include <dds/OpenddsDcpsExtTypeSupportImpl.h>
 
@@ -94,6 +95,7 @@ public:
     , callbacks_expected_(0)
     , inline_qos_mode_(DEFAULT_QOS)
   {
+    TransportClient::set_guid(pub_id_);
   }
 
   virtual ~SimpleDataWriter() {}
@@ -226,8 +228,8 @@ int DDS_TEST::test(ACE_TString host, u_short port)
     std::cerr << "ERROR: Failed to cast to RtpsUdpInst\n";
     return 1;
   }
-  rtps_inst->datalink_release_delay_ = 0;
-  rtps_inst->heartbeat_period_ = TimeDuration::from_msec(100);
+  rtps_inst->datalink_release_delay(0);
+  rtps_inst->heartbeat_period(TimeDuration::from_msec(100));
 
   TransportConfig_rch cfg = TheTransportRegistry->create_config("cfg");
   cfg->instances_.push_back(inst);
@@ -247,6 +249,7 @@ int DDS_TEST::test(ACE_TString host, u_short port)
   remote.participantId(0xefcdab89); // guidPrefix2
   remote.entityKey(0x452310);
   remote.entityKind(ENTITYKIND_USER_READER_WITH_KEY);
+  GUID_t remote_guid(remote);
 
   LocatorSeq locators;
   locators.length(1);
@@ -254,16 +257,18 @@ int DDS_TEST::test(ACE_TString host, u_short port)
 
   size_t size_locator = 0;
   serialized_size(locators_encoding, size_locator, locators);
+  serialized_size(locators_encoding, size_locator, VENDORID_OPENDDS);
   ACE_Message_Block mb_locator(size_locator + 1);
   Serializer ser_loc(&mb_locator, locators_encoding);
   if (!(ser_loc << locators) ||
+      !(ser_loc << VENDORID_OPENDDS) ||
       !(ser_loc << ACE_OutputCDR::from_boolean(false))) { // requires inline QoS
     std::cerr << "publisher serialize locators failed\n";
     return 1;
   }
 
   SimpleDataWriter sdw(local_guid);
-  sdw.enable_transport(true /*reliable*/, false /*durable*/);
+  sdw.enable_transport(true /*reliable*/, false /*durable*/, 0);
   AssociationData subscription;
   subscription.remote_id_ = remote;
   subscription.remote_reliable_ = false;
@@ -543,7 +548,7 @@ int DDS_TEST::test(ACE_TString host, u_short port)
   }
 
   // Allow enough time for a HEARTBEAT message to be generated
-  ACE_OS::sleep((rtps_inst->heartbeat_period_ * 2.0).value());
+  ACE_OS::sleep((rtps_inst->heartbeat_period() * 2.0).value());
 
 
   // 3. cleanup

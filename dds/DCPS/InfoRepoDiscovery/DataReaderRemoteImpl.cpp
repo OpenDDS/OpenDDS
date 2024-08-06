@@ -33,23 +33,13 @@ DataReaderRemoteImpl::detach_parent()
 }
 
 void
-DataReaderRemoteImpl::add_association(const GUID_t& yourId,
-                                      const WriterAssociation& writer,
+DataReaderRemoteImpl::add_association(const WriterAssociation& writer,
                                       bool active)
 {
-  if (DCPS_debug_level) {
-    LogGuid writer_log(yourId);
-    LogGuid reader_log(writer.writerId);
-    ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) DataReaderRemoteImpl::add_association - ")
-               ACE_TEXT("local %C remote %C\n"),
-               writer_log.c_str(),
-               reader_log.c_str()));
-  }
-
   // the local copy of parent_ is necessary to prevent race condition
   RcHandle<DataReaderCallbacks> parent = parent_.lock();
   if (parent) {
-    parent->add_association(yourId, writer, active);
+    parent->add_association(writer, active);
   }
 }
 

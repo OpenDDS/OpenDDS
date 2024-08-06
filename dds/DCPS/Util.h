@@ -6,6 +6,8 @@
 #ifndef OPENDDS_DCPS_UTIL_H
 #define OPENDDS_DCPS_UTIL_H
 
+#include <dds/Versioned_Namespace.h>
+
 #include <ace/CDR_Base.h>
 
 #include <cstring>

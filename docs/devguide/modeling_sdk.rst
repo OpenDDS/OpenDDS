@@ -1,4 +1,4 @@
-.. _modeling_sdk--modeling-sdk:
+.. _modeling_sdk:
 
 ############
 Modeling SDK
@@ -35,21 +35,19 @@ This diagram includes any package structures to be included in the model along w
 Zero or more of the policy or data definition elements can be included.
 Zero or one DCPS elements definition can be included in any given model.
 
-.. _modeling_sdk--reffigure5:
+.. figure:: images/modeling_data_definitions.png
+  :scale: 50%
 
-.. image:: images/10000001000003BA000005345220EFBC3B2965C5.png
-
-**Figure  Graphical modeling of the data definitions**
+  Graphical modeling of the data definitions
 
 Creating separate models for QoS policies only, data definitions only, or DCPS elements only is supported.
 References to other models allows externally defined models to be included in a model.
 This allows sharing of data definitions and QoS policies among different DCPS models as well as including externally defined data in a new set of data definitions.
 
-.. _modeling_sdk--reffigure6:
+.. figure:: images/modeling_dcps_entities.png
+  :scale: 50%
 
-.. image:: images/10000001000003CA00000534AF32FC1EC2AA656B.png
-
-**Figure  Graphical modeling of the DCPS entities**
+  Graphical modeling of the DCPS entities
 
 .. _modeling_sdk--code-generation:
 
@@ -68,8 +66,7 @@ Code generation is performed on a single model at a time and includes the abilit
 
 It is possible to generate model variations (distinct customizations of the same model) that can then be created within the same application or different applications.
 It is also possible to specify locations to search for header files and link libraries at build time.
-
-See section :ref:`modeling_sdk--generated-code`, “Generated Code” for details.
+See :ref:`modeling_sdk--generated-code` for details.
 
 .. _modeling_sdk--programming:
 
@@ -82,8 +79,7 @@ Programming
 In order to use the middleware defined by models, applications need to link in the generated code.
 This is done through header files and link libraries.
 Support for building applications using the MPC portable build tool is included in the generated files for a model.
-
-See section :ref:`modeling_sdk--developing-applications`, “Developing Applications” for details.
+See :ref:`modeling_sdk--developing-applications` for details.
 
 .. _modeling_sdk--installation-and-getting-started:
 
@@ -116,35 +112,34 @@ Installation
 ..
     Sect<11.2.2>
 
-#. From Eclipse, open the Help menu and select Install New Software.
+.. figure:: images/modeling_sdk_install.png
+  :scale: 150%
 
-.. _modeling_sdk--reffigure7:
+  Eclipse Software Installation Dialog
 
-.. image:: images/100000000000018A000001582B13D316CA761B88.png
+#. From Eclipse, open the "Help" menu and select "Install New Software".
 
-**Figure  Eclipse Software Installation Dialog**
+#. Click the hyperlink for "Available Software Sites".
 
-* Click the hyperlink for Available Software Sites.
+#. The standard ``eclipse.org`` sites (Eclipse Project Updates and Galileo) should be enabled.
+   If they are disabled, enable them now.
 
-* The standard ``eclipse.org`` sites (Eclipse Project Updates and Galileo) should be enabled.
-  If they are disabled, enable them now.
+#. Add a new Site entry named OpenDDS with URL http://download.opendds.org/modeling/eclipse_44/
 
-* Add a new Site entry named OpenDDS with URL http://download.opendds.org/modeling/eclipse_44/
+#. Click OK to close the Preferences dialog and return to the Install dialog.
 
-* Click OK to close the Preferences dialog and return to the Install dialog.
+#. In the "Work with" combo box, select the new entry for OpenDDS.
 
-* In the “Work with” combo box, select the new entry for OpenDDS.
+#. Select the "OpenDDS Modeling SDK" and click Next.
 
-* Select the “OpenDDS Modeling SDK” and click Next.
+#. Review the "Install Details" list and click Next.
+   Review the license, select Accept (if you do accept it), and click Finish.
 
-* Review the “Install Details” list and click Next.
-  Review the license, select Accept (if you do accept it), and click Finish.
+#. Eclipse will download the OpenDDS plug-ins and various plug-ins from ``eclipse.org`` that they depend on.
+   There will be a security warning because the OpenDDS plug-ins are not signed.
+   There also may be a prompt to accept a certificate from ``eclipse.org``.
 
-* Eclipse will download the OpenDDS plug-ins and various plug-ins from ``eclipse.org`` that they depend on.
-  There will be a security warning because the OpenDDS plug-ins are not signed.
-  There also may be a prompt to accept a certificate from ``eclipse.org``.
-
-* Eclipse will prompt the user to restart in order to use the newly installed software.
+#. Eclipse will prompt the user to restart in order to use the newly installed software.
 
 .. _modeling_sdk--getting-started:
 
@@ -159,7 +154,7 @@ Open it by going to the Window menu and selecting Open Perspective -> Other -> O
 
 To get started using the OpenDDS Modeling SDK, see the help content installed in Eclipse.
 Start by going to the Help menu and selecting Help Contents.
-There is a top-level item for “``OpenDDS Modeling SDK Guide``” that contains all of the OpenDDS-specific content describing the modeling and code generation activities.
+There is a top-level item for ``OpenDDS Modeling SDK Guide`` that contains all of the OpenDDS-specific content describing the modeling and code generation activities.
 
 .. _modeling_sdk--developing-applications:
 
@@ -234,12 +229,8 @@ Generated Code
     Sect<11.3.2>
 
 The OpenDDS Modeling SDK generates model-specific code for use by an OpenDDS Modeling SDK application.
-Starting with a .codegen file (which refers to an ``.opendds`` model file), the files described in :ref:`Table 11-1 <modeling_sdk--reftable35>`.
+Starting with a .codegen file (which refers to an ``.opendds`` model file), the files described in the table below.
 The process of generating code is documented in the Eclipse help.
-
-.. _modeling_sdk--reftable35:
-
-**Table  Generated Files**
 
 .. list-table::
    :header-rows: 1
@@ -250,15 +241,15 @@ The process of generating code is documented in the Eclipse help.
 
    * - ``<ModelName>.idl``
 
-     - Data types from the model’s ``DataLib``
+     - Data types from the model's ``DataLib``
 
    * - ``<ModelName>_T.h``
 
-     - C++ class from the model’s ``DcpsLib``
+     - C++ class from the model's ``DcpsLib``
 
    * - ``<ModelName>_T.cpp``
 
-     - C++ implementation of the model’s ``DcpsLib``
+     - C++ implementation of the model's ``DcpsLib``
 
    * - ``<ModelName>.mpc``
 
@@ -270,7 +261,7 @@ The process of generating code is documented in the Eclipse help.
 
    * - ``<ModelName>_paths.mpb``
 
-     - MPC base project with paths, see section :ref:`modeling_sdk--dependencies-between-models`
+     - MPC base project with paths, see :ref:`modeling_sdk--dependencies-between-models`
 
    * - ``<ModelName>Traits.h``
 
@@ -412,16 +403,16 @@ It is recommended that Modeling SDK applications catch both ``CORBA::Exception``
 
     int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     {
-      try {
-        // Create and use OpenDDS Modeling SDK (see sections below)
-      } catch (const CORBA::Exception& e) {
-        // Handle exception and return non-zero
-      } catch (const OpenDDS::DCPS::Transport::Exception& te) {
-        // Handle exception and return non-zero
-      } catch (const std::exception& ex) {
-        // Handle exception and return non-zero
-      }
-      return 0;
+      try {
+        // Create and use OpenDDS Modeling SDK (see below)
+      } catch (const CORBA::Exception& e) {
+        // Handle exception and return non-zero
+      } catch (const OpenDDS::DCPS::Transport::Exception& te) {
+        // Handle exception and return non-zero
+      } catch (const std::exception& ex) {
+        // Handle exception and return non-zero
+      }
+      return 0;
     }
 
 .. _modeling_sdk--instantiation:
@@ -443,7 +434,7 @@ The Service provides this interface for entity creation:
 
     DDS::DomainParticipant_var participant(Elements::Participants::Values part);
     DDS::TopicDescription_var topic(Elements::Participants::Values part,
-                                    Elements::Topics::Values topic);
+                                    Elements::Topics::Values topic);
     DDS::Publisher_var publisher(Elements::Publishers::Values publisher);
     DDS::Subscriber_var subscriber(Elements::Subscribers::Values subscriber);
     DDS::DataWriter_var writer(Elements::DataWriters::Values writer);
@@ -465,26 +456,26 @@ Using the ``writer()`` method shown above, ``MinimalPublisher.cpp`` continues:
 
     int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     {
-      try {
-        OpenDDS::Model::Application application(argc, argv);
-        MinimalLib::DefaultMinimalType model(application, argc, argv);
+      try {
+        OpenDDS::Model::Application application(argc, argv);
+        MinimalLib::DefaultMinimalType model(application, argc, argv);
 
-        using OpenDDS::Model::MinimalLib::Elements;
-        DDS::DataWriter_var writer = model.writer(Elements::DataWriters::writer);
+        using OpenDDS::Model::MinimalLib::Elements;
+        DDS::DataWriter_var writer = model.writer(Elements::DataWriters::writer);
 
 What remains is to narrow the ``DataWriter`` to a type-specific data writer, and send samples.
 
 .. code-block:: cpp
 
-        data1::MessageDataWriter_var msg_writer =
-            data1::MessageDataWriter::_narrow(writer);
-        data1::Message message;
-        // Populate message and send
-        message.text = "Worst. Movie. Ever.";
-        DDS::ReturnCode_t error = msg_writer->write(message, DDS::HANDLE_NIL);
-        if (error != DDS::RETCODE_OK) {
-          // Handle error
-        }
+        data1::MessageDataWriter_var msg_writer =
+          data1::MessageDataWriter::_narrow(writer);
+        data1::Message message;
+        // Populate message and send
+        message.text = "Worst. Movie. Ever.";
+        DDS::ReturnCode_t error = msg_writer->write(message, DDS::HANDLE_NIL);
+        if (error != DDS::RETCODE_OK) {
+          // Handle error
+        }
 
 In total our publishing application, ``MinimalPublisher.cpp``, looks like this:
 
@@ -498,28 +489,28 @@ In total our publishing application, ``MinimalPublisher.cpp``, looks like this:
 
     int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     {
-      try {
-        OpenDDS::Model::Application application(argc, argv);
-        MinimalLib::DefaultMinimalType model(application, argc, argv);
+      try {
+        OpenDDS::Model::Application application(argc, argv);
+        MinimalLib::DefaultMinimalType model(application, argc, argv);
 
-        using OpenDDS::Model::MinimalLib::Elements;
-        DDS::DataWriter_var writer = model.writer(Elements::DataWriters::writer);
+        using OpenDDS::Model::MinimalLib::Elements;
+        DDS::DataWriter_var writer = model.writer(Elements::DataWriters::writer);
 
-        data1::MessageDataWriter_var msg_writer =
-            data1::MessageDataWriter::_narrow(writer);
-        data1::Message message;
-        // Populate message and send
-        message.text = "Worst. Movie. Ever.";
-        DDS::ReturnCode_t error = msg_writer->write(message, DDS::HANDLE_NIL);
-        if (error != DDS::RETCODE_OK) {
-          // Handle error
-        }
-      } catch (const CORBA::Exception& e) {
-        // Handle exception and return non-zero
-      } catch (const std::exception& ex) {
-        // Handle exception and return non-zero
-      }
-      return 0;
+        data1::MessageDataWriter_var msg_writer =
+          data1::MessageDataWriter::_narrow(writer);
+        data1::Message message;
+        // Populate message and send
+        message.text = "Worst. Movie. Ever.";
+        DDS::ReturnCode_t error = msg_writer->write(message, DDS::HANDLE_NIL);
+        if (error != DDS::RETCODE_OK) {
+          // Handle error
+        }
+      } catch (const CORBA::Exception& e) {
+        // Handle exception and return non-zero
+      } catch (const std::exception& ex) {
+        // Handle exception and return non-zero
+      }
+      return 0;
     }
 
 Note this minimal example ignores logging and synchronization, which are issues that are not specific to the OpenDDS Modeling SDK.
@@ -549,48 +540,48 @@ Subscribers can create a listener by deriving a class from ``NullReaderListener`
 
     class ReaderListener : public OpenDDS::Model::NullReaderListener {
     public:
-      virtual void on_data_available(DDS::DataReader_ptr reader)
-                            ACE_THROW_SPEC((CORBA::SystemException)) {
-        data1::MessageDataReader_var reader_i =
-          data1::MessageDataReader::_narrow(reader);
+      virtual void on_data_available(DDS::DataReader_ptr reader)
+        ACE_THROW_SPEC((CORBA::SystemException)) {
+        data1::MessageDataReader_var reader_i =
+          data1::MessageDataReader::_narrow(reader);
 
-        if (!reader_i) {
-          // Handle error
-          ACE_OS::exit(-1);
-        }
+        if (!reader_i) {
+          // Handle error
+          ACE_OS::exit(-1);
+        }
 
-        data1::Message msg;
-        DDS::SampleInfo info;
+        data1::Message msg;
+        DDS::SampleInfo info;
 
-        // Read until no more messages
-        while (true) {
-          DDS::ReturnCode_t error = reader_i->take_next_sample(msg, info);
-          if (error == DDS::RETCODE_OK) {
-            if (info.valid_data) {
-              std::cout << "Message: " << msg.text.in() << std::endl;
-            }
-          } else {
-            if (error != DDS::RETCODE_NO_DATA) {
-              // Handle error
-            }
-            break;
-          }
-        }
-      }
+        // Read until no more messages
+        while (true) {
+          DDS::ReturnCode_t error = reader_i->take_next_sample(msg, info);
+          if (error == DDS::RETCODE_OK) {
+            if (info.valid_data) {
+              std::cout << "Message: " << msg.text.in() << std::endl;
+            }
+          } else {
+            if (error != DDS::RETCODE_NO_DATA) {
+              // Handle error
+            }
+            break;
+          }
+        }
+      }
     };
 
 In the main function, create a data reader from the service object:
 
 .. code-block:: cpp
 
-        DDS::DataReader_var reader = model.reader(Elements::DataReaders::reader);
+        DDS::DataReader_var reader = model.reader(Elements::DataReaders::reader);
 
 Naturally, the ``DataReaderListener`` must be associated with the data reader in order to get its callbacks.
 
 .. code-block:: cpp
 
-        DDS::DataReaderListener_var listener(new ReaderListener);
-        reader->set_listener(listener, OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+        DDS::DataReaderListener_var listener(new ReaderListener);
+        reader->set_listener(listener, OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
 The remaining subscriber code has the same requirements of any OpenDDS Modeling SDK application, in that it must initialize the OpenDDS library through an ``OpenDDS::Modeling::Application`` object, and create a Service object with the proper DCPS model Elements class and traits class.
 
@@ -607,63 +598,63 @@ An example subscribing application, ``MinimalSubscriber.cpp``, follows.
 
     class ReaderListener : public OpenDDS::Model::NullReaderListener {
     public:
-      virtual void on_data_available(DDS::DataReader_ptr reader)
-                            ACE_THROW_SPEC((CORBA::SystemException)) {
-        data1::MessageDataReader_var reader_i =
-          data1::MessageDataReader::_narrow(reader);
+      virtual void on_data_available(DDS::DataReader_ptr reader)
+      ACE_THROW_SPEC((CORBA::SystemException)) {
+        data1::MessageDataReader_var reader_i =
+          data1::MessageDataReader::_narrow(reader);
 
-        if (!reader_i) {
-          // Handle error
-          ACE_OS::exit(-1);
-        }
+        if (!reader_i) {
+          // Handle error
+          ACE_OS::exit(-1);
+        }
 
-        data1::Message msg;
-        DDS::SampleInfo info;
+        data1::Message msg;
+        DDS::SampleInfo info;
 
-        // Read until no more messages
-        while (true) {
-          DDS::ReturnCode_t error = reader_i->take_next_sample(msg, info);
-          if (error == DDS::RETCODE_OK) {
-            if (info.valid_data) {
-              std::cout << "Message: " << msg.text.in() << std::endl;
-            }
-          } else {
-            if (error != DDS::RETCODE_NO_DATA) {
-              // Handle error
-            }
-            break;
-          }
-        }
-      }
+        // Read until no more messages
+        while (true) {
+          DDS::ReturnCode_t error = reader_i->take_next_sample(msg, info);
+          if (error == DDS::RETCODE_OK) {
+            if (info.valid_data) {
+              std::cout << "Message: " << msg.text.in() << std::endl;
+            }
+          } else {
+            if (error != DDS::RETCODE_NO_DATA) {
+              // Handle error
+            }
+            break;
+          }
+        }
+      }
     };
 
     int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     {
-      try {
-        OpenDDS::Model::Application application(argc, argv);
-        MinimalLib::DefaultMinimalType model(application, argc, argv);
+      try {
+        OpenDDS::Model::Application application(argc, argv);
+        MinimalLib::DefaultMinimalType model(application, argc, argv);
 
-        using OpenDDS::Model::MinimalLib::Elements;
+        using OpenDDS::Model::MinimalLib::Elements;
 
-        DDS::DataReader_var reader = model.reader(Elements::DataReaders::reader);
+        DDS::DataReader_var reader = model.reader(Elements::DataReaders::reader);
 
-        DDS::DataReaderListener_var listener(new ReaderListener);
-        reader->set_listener(listener, OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+        DDS::DataReaderListener_var listener(new ReaderListener);
+        reader->set_listener(listener, OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
-        // Call on_data_available in case there are samples which are waiting
-        listener->on_data_available(reader);
+        // Call on_data_available in case there are samples which are waiting
+        listener->on_data_available(reader);
 
-        // At this point the application can wait for an exteral “stop” indication
-        // such as blocking until the user terminates the program with Ctrl-C.
+        // At this point the application can wait for an exteral "stop" indication
+        // such as blocking until the user terminates the program with Ctrl-C.
 
-      } catch (const CORBA::Exception& e) {
-        e._tao_print_exception("Exception caught in main():");
-        return -1;
-      } catch (const std::exception& ex) {
-        // Handle error
-        return -1;
-      }
-      return 0;
+      } catch (const CORBA::Exception& e) {
+        e._tao_print_exception("Exception caught in main():");
+        return -1;
+      } catch (const std::exception& ex) {
+        // Handle error
+        return -1;
+      }
+      return 0;
     }
 
 .. _modeling_sdk--mpc-projects:
@@ -680,7 +671,7 @@ This is in addition to the dcpsexe base from which non-Modeling SDK projects inh
 .. code-block:: mpc
 
     project(*Publisher) : dcpsexe, dds_model {
-      // project configuration
+      // project configuration
     }
 
 The generated model library will generate an MPC project file and base project file in the target directory, and take care of building the model shared library.
@@ -689,9 +680,9 @@ OpenDDS modeling applications must both (1) include the generated model library 
 .. code-block:: mpc
 
     project(*Publisher) : dcpsexe, dds_model {
-      // project configuration
-      libs  += Minimal
-      after += Minimal
+      // project configuration
+      libs  += Minimal
+      after += Minimal
     }
 
 Both of these can be accomplished by inheriting from the model library's project base, named after the model library.
@@ -699,7 +690,7 @@ Both of these can be accomplished by inheriting from the model library's project
 .. code-block:: mpc
 
     project(*Publisher) : dcpsexe, dds_model, Minimal {
-      // project configuration
+      // project configuration
     }
 
 Note that the ``Minimal.mpb`` file must now be found by MPC during project file creation.
@@ -710,31 +701,31 @@ Using either form, the MPC file must tell the build system where to look for the
 .. code-block:: mpc
 
     project(*Publisher) : dcpsexe, dds_model, Minimal {
-      // project configuration
-      libpaths += model
+      // project configuration
+      libpaths += model
     }
 
 This setting based upon what was provided to the Target Folder setting in the Codegen file editor.
 
 Finally, like any other MPC project, its source files must be included:
 
-::
+.. code-block:: mpc
 
-      Source_Files {
-        MinimalPublisher.cpp
-      }
+      Source_Files {
+        MinimalPublisher.cpp
+      }
 
 The final MPC project looks like this for the publisher:
 
 .. code-block:: mpc
 
     project(*Publisher) : dcpsexe, dds_model, Minimal {
-      exename   = publisher
-      libpaths += model
+      exename   = publisher
+      libpaths += model
 
-      Source_Files {
-        MinimalPublisher.cpp
-      }
+      Source_Files {
+        MinimalPublisher.cpp
+      }
     }
 
 And similar for the subscriber:
@@ -742,12 +733,12 @@ And similar for the subscriber:
 .. code-block:: mpc
 
     project(*Subscriber) : dcpsexe, dds_model, Minimal {
-      exename   = subscriber
-      libpaths += model
+      exename   = subscriber
+      libpaths += model
 
-      Source_Files {
-        MinimalSubscriber.cpp
-      }
+      Source_Files {
+        MinimalSubscriber.cpp
+      }
     }
 
 .. _modeling_sdk--dependencies-between-models:
@@ -758,7 +749,7 @@ Dependencies Between Models
 ..
     Sect<11.3.3.7>
 
-One final consideration — the generated model library could itself depend on other generated model libraries.
+One final consideration -- the generated model library could itself depend on other generated model libraries.
 For example, there could be an external data type library which is generated to a different directory.
 
 This possibility could cause a great deal of maintenance of project files, as models change their dependencies over time.
@@ -770,20 +761,20 @@ Our full MPC file looks like this:
 .. code-block:: mpc
 
     project(*Publisher) : dcpsexe, dds_model, Minimal, Minimal_paths {
-      exename   = publisher
-      libpaths += model
+      exename   = publisher
+      libpaths += model
 
-      Source_Files {
-        MinimalPublisher.cpp
-      }
+      Source_Files {
+        MinimalPublisher.cpp
+      }
     }
 
     project(*Subscriber) : dcpsexe, dds_model, Minimal, Minimal_paths {
-      exename   = subscriber
-      libpaths += model
+      exename   = subscriber
+      libpaths += model
 
-      Source_Files {
-        MinimalSubscriber.cpp
-      }
+      Source_Files {
+        MinimalSubscriber.cpp
+      }
     }
 

@@ -3,33 +3,16 @@
 #  include <key_annotationTypeSupportImpl.h>
 #  include <DynamicDataImplTypeSupportImpl.h>
 
+#  include <tests/Utils/GtestRc.h>
+#  include <tests/Utils/DataView.h>
+
 #  include <dds/DCPS/XTypes/Utils.h>
 #  include <dds/DCPS/XTypes/TypeLookupService.h>
 #  include <dds/DCPS/XTypes/DynamicDataAdapter.h>
 #  include <dds/DCPS/XTypes/DynamicDataFactory.h>
-#  include <dds/DCPS/DCPS_Utils.h>
+#  include <dds/DCPS/XTypes/DynamicDataImpl.h>
 
 #  include <gtest/gtest.h>
-
-::testing::AssertionResult retcodes_equal(
-  const char* a_expr, const char* b_expr,
-  DDS::ReturnCode_t a, DDS::ReturnCode_t b)
-{
-  if (a == b) {
-    return ::testing::AssertionSuccess();
-  }
-  return ::testing::AssertionFailure() <<
-    "Expected equality of these values:\n"
-    "  " << a_expr << "\n"
-    "    Which is: " << OpenDDS::DCPS::retcode_to_string(a) << "\n"
-    "  " << b_expr << "\n"
-    "    Which is: " << OpenDDS::DCPS::retcode_to_string(b) << "\n";
-}
-
-#define EXPECT_RC_EQ(A, B) EXPECT_PRED_FORMAT2(retcodes_equal, (A), (B))
-#define ASSERT_RC_EQ(A, B) ASSERT_PRED_FORMAT2(retcodes_equal, (A), (B))
-#define EXPECT_RC_OK(VALUE) EXPECT_RC_EQ(::DDS::RETCODE_OK, (VALUE))
-#define ASSERT_RC_OK(VALUE) ASSERT_RC_EQ(::DDS::RETCODE_OK, (VALUE))
 
 using namespace OpenDDS::DCPS;
 using namespace OpenDDS::XTypes;
@@ -285,7 +268,7 @@ TEST_F(dds_DCPS_XTypes_Utils, member_path_get_member_from_data)
   SimpleKeyStruct sample;
   sample.key = 10;
   sample.value = 20;
-  DynamicDataAdapter<SimpleKeyStruct> dda(dt, getMetaStruct<SimpleKeyStruct>(), sample);
+  DDS::DynamicData_var dda = get_dynamic_data_adapter<SimpleKeyStruct>(dt, sample);
 
   std::vector<ACE_CDR::Long> expected_values;
   expected_values.push_back(10);
@@ -293,7 +276,7 @@ TEST_F(dds_DCPS_XTypes_Utils, member_path_get_member_from_data)
   for (MemberPathVec::iterator it = keys.begin(); it != keys.end(); ++it) {
     DDS::DynamicData_var container;
     DDS::MemberId id;
-    ASSERT_RC_OK(it->get_member_from_data(&dda, container, id));
+    ASSERT_RC_OK(it->get_member_from_data(dda, container, id));
     ACE_CDR::Long value;
     ASSERT_RC_OK(container->get_int32_value(value, id));
     actual_values.push_back(value);
@@ -494,7 +477,6 @@ TEST_F(dds_DCPS_XTypes_Utils, less_than)
 
   // nested_union
   ++id;
-  /* TODO
   DDS::DynamicData_var a_nested_union;
   ASSERT_RC_OK(a->get_complex_value(a_nested_union, id));
   DDS::DynamicData_var b_nested_union;
@@ -505,7 +487,6 @@ TEST_F(dds_DCPS_XTypes_Utils, less_than)
   ASSERT_RC_OK(a_nested_union->set_char8_value(1, 'x'));
   ASSERT_RC_OK(less_than(is_less_than, a, b, Filter_All));
   ASSERT_FALSE(is_less_than);
-  */
 
   // uint32_array
   ++id;
@@ -745,6 +726,50 @@ TEST_F(dds_DCPS_XTypes_Utils, MemberPathParser)
     ASSERT_FALSE(mpp.get_next_subpath());
     ASSERT_FALSE(mpp.error);
   }
+}
+
+TEST_F(dds_DCPS_XTypes_Utils, MultidimArray)
+{
+  add_type<MultidimArrayStruct>();
+  DDS::DynamicType_var dt = get_dynamic_type<MultidimArrayStruct>();
+  OpenDDS::XTypes::DynamicDataImpl data(dt);
+  DDS::DynamicData_var arr_dd;
+  EXPECT_EQ(DDS::RETCODE_OK, data.get_complex_value(arr_dd, 0));
+  DDS::DynamicType_var arr_type = arr_dd->type();
+  DDS::TypeDescriptor_var arr_td;
+  EXPECT_EQ(DDS::RETCODE_OK, arr_type->get_descriptor(arr_td));
+
+  MultidimArrayStruct mdim_struct;
+  mdim_struct.arr[0][0] = 10;
+  mdim_struct.arr[0][1] = 20;
+  mdim_struct.arr[0][2] = 30;
+  mdim_struct.arr[1][0] = 40;
+  mdim_struct.arr[1][1] = 50;
+  mdim_struct.arr[1][2] = 60;
+  DDS::BoundSeq idx_vec;
+  idx_vec.length(2);
+  for (CORBA::ULong i = 0; i < arr_td->bound()[0]; ++i) {
+    idx_vec[0] = i;
+    for (CORBA::ULong j = 0; j < arr_td->bound()[1]; ++j) {
+      idx_vec[1] = j;
+      CORBA::ULong flat_idx;
+      EXPECT_EQ(DDS::RETCODE_OK, OpenDDS::XTypes::flat_index(flat_idx, idx_vec, arr_td->bound()));
+      EXPECT_EQ(i * arr_td->bound()[1] + j, flat_idx);
+      EXPECT_EQ(DDS::RETCODE_OK, arr_dd->set_int32_value(arr_dd->get_member_id_at_index(flat_idx),
+                                                         mdim_struct.arr[i][j]));
+    }
+  }
+
+  const unsigned char expected_cdr[] = {
+    0x00,0x00,0x00,0x18,
+    0x00,0x00,0x00,10, 0x00,0x00,0x00,20, 0x00,0x00,0x00,30,
+    0x00,0x00,0x00,40, 0x00,0x00,0x00,50, 0x00,0x00,0x00,60
+  };
+  ACE_Message_Block buffer(64);
+  OpenDDS::DCPS::Encoding xcdr2(OpenDDS::DCPS::Encoding::KIND_XCDR2, OpenDDS::DCPS::ENDIAN_BIG);
+  OpenDDS::DCPS::Serializer ser(&buffer, xcdr2);
+  ASSERT_TRUE(ser << &data);
+  EXPECT_PRED_FORMAT2(assert_DataView, expected_cdr, buffer);
 }
 
 #endif // OPENDDS_SAFETY_PROFILE

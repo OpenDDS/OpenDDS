@@ -47,6 +47,8 @@ public:
     e_SAMPLE_RECEIVED = 0x0001 << 6,
     e_SAMPLE_READ     = 0x0001 << 7,
     e_SAMPLE_TAKEN    = 0x0001 << 8,
+    e_DISPOSED        = 0x0001 << 9,
+    e_UNREGISTERED    = 0x0001 << 10,
     e_NONE            = 0x0000,
     e_ALL             = 0xffff
   };
@@ -92,6 +94,10 @@ public:
   virtual void on_sample_received(DDS::DataReader_ptr, const Sample&) {}
   virtual void on_sample_read(DDS::DataReader_ptr, const Sample&) {}
   virtual void on_sample_taken(DDS::DataReader_ptr, const Sample&) {}
+  virtual void on_disposed(DDS::DataWriter_ptr, const Sample&) {}
+  virtual void on_disposed(DDS::DataReader_ptr, const Sample&) {}
+  virtual void on_unregistered(DDS::DataWriter_ptr, const Sample&) {}
+  virtual void on_unregistered(DDS::DataReader_ptr, const Sample&) {}
 
   virtual ~Observer();
 protected:
@@ -100,7 +106,7 @@ protected:
 
 typedef RcHandle<Observer> Observer_rch;
 
-OpenDDS_Dcps_Export void
+OpenDDS_Dcps_Export bool
 vwrite(ValueWriter& vw, const Observer::Sample& sample);
 
 } // namespace DCPS

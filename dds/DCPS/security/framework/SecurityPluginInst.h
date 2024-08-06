@@ -1,6 +1,4 @@
 /*
- *
- *
  * Distributed under the OpenDDS License.
  * See: http://www.opendds.org/license.html
  */
@@ -8,22 +6,26 @@
 #ifndef OPENDDS_DCPS_SECURITY_FRAMEWORK_SECURITYPLUGININST_H
 #define OPENDDS_DCPS_SECURITY_FRAMEWORK_SECURITYPLUGININST_H
 
-#ifdef OPENDDS_SECURITY
-#include "dds/DdsSecurityCoreC.h"
-#include "dds/DCPS/security/Utility.h"
+#include "Utility.h"
+
+#include <dds/DCPS/dcps_export.h>
+
+#include <dds/DCPS/RcObject.h>
+
+#include <dds/OpenDDSConfigWrapper.h>
+
+#if OPENDDS_CONFIG_SECURITY
+#  include <dds/DdsSecurityCoreC.h>
 #endif
 
-#include "dds/DCPS/dcps_export.h"
-#include "dds/DCPS/RcObject.h"
-
-#include "ace/Synch_Traits.h"
+#include <ace/Synch_Traits.h>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
 namespace Security {
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
 using DDS::Security::Authentication_var;
 using DDS::Security::AccessControl_var;
 using DDS::Security::CryptoKeyFactory_var;
@@ -46,7 +48,7 @@ using DDS::Security::CryptoTransform_var;
 class OpenDDS_Dcps_Export SecurityPluginInst : public DCPS::RcObject {
 public:
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
   // Factory methods for the plugin specific interfaces.  A SecurityPluginInst
   // may not support creating all of these interfaces
   virtual Authentication_var create_authentication() = 0;

@@ -1,6 +1,8 @@
 #ifndef OPENDDS_SAFETY_PROFILE
 
-#include "../../../DynamicDataXcdrReadImplTypeSupportImpl.h"
+#include <DynamicDataXcdrReadImplTypeSupportImpl.h>
+
+#include <tests/Utils/GtestRc.h>
 
 #include <dds/DCPS/XTypes/TypeLookupService.h>
 #include <dds/DCPS/XTypes/DynamicTypeImpl.h>
@@ -9,6 +11,8 @@
 #include <gtest/gtest.h>
 
 using namespace OpenDDS;
+
+using OpenDDS::XTypes::MEMBER_ID_INVALID;
 
 const DCPS::Encoding xcdr2(DCPS::Encoding::KIND_XCDR2, DCPS::ENDIAN_BIG);
 const DCPS::Encoding xcdr1(DCPS::Encoding::KIND_XCDR1, DCPS::ENDIAN_BIG);
@@ -102,183 +106,170 @@ void verify_single_value_struct(DDS::DynamicData_ptr data)
   XTypes::MemberId id = data->get_member_id_at_index(0);
   EXPECT_EQ(id, ACE_CDR::ULong(0));
   DDS::ReturnCode_t ret = data->get_int32_value(my_enum, id);
-  EXPECT_EQ(ret, DDS::RETCODE_OK);
+  ASSERT_RC_OK(ret);
   EXPECT_EQ(expected.my_enum, my_enum);
 
   DDS::DynamicData_var nested_dd;
   ret = data->get_complex_value(nested_dd, id);
-  EXPECT_EQ(ret, DDS::RETCODE_OK);
-  const XTypes::MemberId random_id = 111;
-  ret = nested_dd->get_int32_value(my_enum, random_id);
-  EXPECT_EQ(ret, DDS::RETCODE_OK);
+  ASSERT_RC_OK(ret);
+  ret = nested_dd->get_int32_value(my_enum, MEMBER_ID_INVALID);
+  ASSERT_RC_OK(ret);
   EXPECT_EQ(expected.my_enum, my_enum);
 
   ACE_CDR::Long int_32;
   id = data->get_member_id_at_index(1);
   EXPECT_EQ(id, ACE_CDR::ULong(1));
   ret = data->get_int32_value(int_32, id);
-  EXPECT_EQ(ret, DDS::RETCODE_OK);
+  ASSERT_RC_OK(ret);
   EXPECT_EQ(expected.int_32, int_32);
 
-  nested_dd = 0;
   ret = data->get_complex_value(nested_dd, id);
-  EXPECT_EQ(ret, DDS::RETCODE_OK);
-  ret = nested_dd->get_int32_value(int_32, random_id);
-  EXPECT_EQ(ret, DDS::RETCODE_OK);
+  ASSERT_RC_OK(ret);
+  ret = nested_dd->get_int32_value(int_32, MEMBER_ID_INVALID);
+  ASSERT_RC_OK(ret);
   EXPECT_EQ(expected.int_32, int_32);
 
   ACE_CDR::ULong uint_32;
   id = data->get_member_id_at_index(2);
   EXPECT_EQ(id, ACE_CDR::ULong(2));
   ret = data->get_uint32_value(uint_32, id);
-  EXPECT_EQ(ret, DDS::RETCODE_OK);
+  ASSERT_RC_OK(ret);
   EXPECT_EQ(expected.uint_32, uint_32);
 
-  nested_dd = 0;
   ret = data->get_complex_value(nested_dd, id);
-  EXPECT_EQ(ret, DDS::RETCODE_OK);
-  ret = nested_dd->get_uint32_value(uint_32, random_id);
-  EXPECT_EQ(ret, DDS::RETCODE_OK);
+  ASSERT_RC_OK(ret);
+  ret = nested_dd->get_uint32_value(uint_32, MEMBER_ID_INVALID);
+  ASSERT_RC_OK(ret);
   EXPECT_EQ(expected.uint_32, uint_32);
 
   ACE_CDR::Int8 int_8;
   id = data->get_member_id_at_index(3);
   EXPECT_EQ(id, ACE_CDR::ULong(3));
   ret = data->get_int8_value(int_8, id);
-  EXPECT_EQ(ret, DDS::RETCODE_OK);
+  ASSERT_RC_OK(ret);
   EXPECT_EQ(expected.int_8, int_8);
 
-  nested_dd = 0;
   ret = data->get_complex_value(nested_dd, id);
-  EXPECT_EQ(ret, DDS::RETCODE_OK);
-  ret = nested_dd->get_int8_value(int_8, random_id);
-  EXPECT_EQ(ret, DDS::RETCODE_OK);
+  ASSERT_RC_OK(ret);
+  ret = nested_dd->get_int8_value(int_8, MEMBER_ID_INVALID);
+  ASSERT_RC_OK(ret);
   EXPECT_EQ(expected.int_8, int_8);
 
   ACE_CDR::UInt8 uint_8;
   id = data->get_member_id_at_index(4);
   EXPECT_EQ(id, ACE_CDR::ULong(4));
   ret = data->get_uint8_value(uint_8, id);
-  EXPECT_EQ(ret, DDS::RETCODE_OK);
+  ASSERT_RC_OK(ret);
   EXPECT_EQ(expected.uint_8, uint_8);
 
-  nested_dd = 0;
   ret = data->get_complex_value(nested_dd, id);
-  EXPECT_EQ(ret, DDS::RETCODE_OK);
-  ret = nested_dd->get_uint8_value(uint_8, random_id);
-  EXPECT_EQ(ret, DDS::RETCODE_OK);
+  ASSERT_RC_OK(ret);
+  ret = nested_dd->get_uint8_value(uint_8, MEMBER_ID_INVALID);
+  ASSERT_RC_OK(ret);
   EXPECT_EQ(expected.uint_8, uint_8);
 
   ACE_CDR::Int16 int_16;
   id = data->get_member_id_at_index(5);
   EXPECT_EQ(id, ACE_CDR::ULong(5));
   ret = data->get_int16_value(int_16, id);
-  EXPECT_EQ(ret, DDS::RETCODE_OK);
+  ASSERT_RC_OK(ret);
   EXPECT_EQ(expected.int_16, int_16);
 
-  nested_dd = 0;
   ret = data->get_complex_value(nested_dd, id);
-  EXPECT_EQ(ret, DDS::RETCODE_OK);
-  ret = nested_dd->get_int16_value(int_16, random_id);
-  EXPECT_EQ(ret, DDS::RETCODE_OK);
+  ASSERT_RC_OK(ret);
+  ret = nested_dd->get_int16_value(int_16, MEMBER_ID_INVALID);
+  ASSERT_RC_OK(ret);
   EXPECT_EQ(expected.int_16, int_16);
 
   ACE_CDR::UInt16 uint_16;
   id = data->get_member_id_at_index(6);
   EXPECT_EQ(id, ACE_CDR::ULong(6));
   ret = data->get_uint16_value(uint_16, id);
-  EXPECT_EQ(ret, DDS::RETCODE_OK);
+  ASSERT_RC_OK(ret);
   EXPECT_EQ(expected.uint_16, uint_16);
 
-  nested_dd = 0;
   ret = data->get_complex_value(nested_dd, id);
-  EXPECT_EQ(ret, DDS::RETCODE_OK);
-  ret = nested_dd->get_uint16_value(uint_16, random_id);
-  EXPECT_EQ(ret, DDS::RETCODE_OK);
+  ASSERT_RC_OK(ret);
+  ret = nested_dd->get_uint16_value(uint_16, MEMBER_ID_INVALID);
+  ASSERT_RC_OK(ret);
   EXPECT_EQ(expected.uint_16, uint_16);
 
   ACE_CDR::Int64 int_64;
   id = data->get_member_id_at_index(7);
   EXPECT_EQ(id, ACE_CDR::ULong(7));
   ret = data->get_int64_value(int_64, id);
-  EXPECT_EQ(ret, DDS::RETCODE_OK);
+  ASSERT_RC_OK(ret);
   EXPECT_EQ(expected.int_64, int_64);
 
-  nested_dd = 0;
   ret = data->get_complex_value(nested_dd, id);
-  EXPECT_EQ(ret, DDS::RETCODE_OK);
-  ret = nested_dd->get_int64_value(int_64, random_id);
-  EXPECT_EQ(ret, DDS::RETCODE_OK);
+  ASSERT_RC_OK(ret);
+  ret = nested_dd->get_int64_value(int_64, MEMBER_ID_INVALID);
+  ASSERT_RC_OK(ret);
   EXPECT_EQ(expected.int_64, int_64);
 
   ACE_CDR::UInt64 uint_64;
   id = data->get_member_id_at_index(8);
   EXPECT_EQ(id, ACE_CDR::ULong(8));
   ret = data->get_uint64_value(uint_64, id);
-  EXPECT_EQ(ret, DDS::RETCODE_OK);
+  ASSERT_RC_OK(ret);
   EXPECT_EQ(expected.uint_64, uint_64);
 
-  nested_dd = 0;
   ret = data->get_complex_value(nested_dd, id);
-  EXPECT_EQ(ret, DDS::RETCODE_OK);
-  ret = nested_dd->get_uint64_value(uint_64, random_id);
-  EXPECT_EQ(ret, DDS::RETCODE_OK);
+  ASSERT_RC_OK(ret);
+  ret = nested_dd->get_uint64_value(uint_64, MEMBER_ID_INVALID);
+  ASSERT_RC_OK(ret);
   EXPECT_EQ(expected.uint_64, uint_64);
 
   ACE_CDR::Float float_32;
   id = data->get_member_id_at_index(9);
   EXPECT_EQ(id, ACE_CDR::ULong(9));
   ret = data->get_float32_value(float_32, id);
-  EXPECT_EQ(ret, DDS::RETCODE_OK);
+  ASSERT_RC_OK(ret);
   EXPECT_EQ(expected.float_32, float_32);
 
-  nested_dd = 0;
   ret = data->get_complex_value(nested_dd, id);
-  EXPECT_EQ(ret, DDS::RETCODE_OK);
-  ret = nested_dd->get_float32_value(float_32, random_id);
-  EXPECT_EQ(ret, DDS::RETCODE_OK);
+  ASSERT_RC_OK(ret);
+  ret = nested_dd->get_float32_value(float_32, MEMBER_ID_INVALID);
+  ASSERT_RC_OK(ret);
   EXPECT_EQ(expected.float_32, float_32);
 
   ACE_CDR::Double float_64;
   id = data->get_member_id_at_index(10);
   EXPECT_EQ(id, ACE_CDR::ULong(10));
   ret = data->get_float64_value(float_64, id);
-  EXPECT_EQ(ret, DDS::RETCODE_OK);
+  ASSERT_RC_OK(ret);
   EXPECT_EQ(expected.float_64, float_64);
 
-  nested_dd = 0;
   ret = data->get_complex_value(nested_dd, id);
-  EXPECT_EQ(ret, DDS::RETCODE_OK);
-  ret = nested_dd->get_float64_value(float_64, random_id);
-  EXPECT_EQ(ret, DDS::RETCODE_OK);
+  ASSERT_RC_OK(ret);
+  ret = nested_dd->get_float64_value(float_64, MEMBER_ID_INVALID);
+  ASSERT_RC_OK(ret);
   EXPECT_EQ(expected.float_64, float_64);
 
   ACE_CDR::LongDouble float_128;
   id = data->get_member_id_at_index(11);
   EXPECT_EQ(id, ACE_CDR::ULong(11));
   ret = data->get_float128_value(float_128, id);
-  EXPECT_EQ(ret, DDS::RETCODE_OK);
+  ASSERT_RC_OK(ret);
   check_float128(expected.float_128, float_128);
 
-  nested_dd = 0;
   ret = data->get_complex_value(nested_dd, id);
-  EXPECT_EQ(ret, DDS::RETCODE_OK);
-  ret = nested_dd->get_float128_value(float_128, random_id);
-  EXPECT_EQ(ret, DDS::RETCODE_OK);
+  ASSERT_RC_OK(ret);
+  ret = nested_dd->get_float128_value(float_128, MEMBER_ID_INVALID);
+  ASSERT_RC_OK(ret);
   check_float128(expected.float_128, float_128);
 
   ACE_CDR::Char char_8;
   id = data->get_member_id_at_index(12);
   EXPECT_EQ(id, ACE_CDR::ULong(12));
   ret = data->get_char8_value(char_8, id);
-  EXPECT_EQ(ret, DDS::RETCODE_OK);
+  ASSERT_RC_OK(ret);
   EXPECT_EQ(expected.char_8, char_8);
 
-  nested_dd = 0;
   ret = data->get_complex_value(nested_dd, id);
-  EXPECT_EQ(ret, DDS::RETCODE_OK);
-  ret = nested_dd->get_char8_value(char_8, random_id);
-  EXPECT_EQ(ret, DDS::RETCODE_OK);
+  ASSERT_RC_OK(ret);
+  ret = nested_dd->get_char8_value(char_8, MEMBER_ID_INVALID);
+  ASSERT_RC_OK(ret);
   EXPECT_EQ(expected.char_8, char_8);
 
 #ifdef DDS_HAS_WCHAR
@@ -286,14 +277,13 @@ void verify_single_value_struct(DDS::DynamicData_ptr data)
   id = data->get_member_id_at_index(13);
   EXPECT_EQ(id, ACE_CDR::ULong(13));
   ret = data->get_char16_value(char_16, id);
-  EXPECT_EQ(ret, DDS::RETCODE_OK);
+  ASSERT_RC_OK(ret);
   EXPECT_EQ(expected.char_16, char_16);
 
-  nested_dd = 0;
   ret = data->get_complex_value(nested_dd, id);
-  EXPECT_EQ(ret, DDS::RETCODE_OK);
-  ret = nested_dd->get_char16_value(char_16, random_id);
-  EXPECT_EQ(ret, DDS::RETCODE_OK);
+  ASSERT_RC_OK(ret);
+  ret = nested_dd->get_char16_value(char_16, MEMBER_ID_INVALID);
+  ASSERT_RC_OK(ret);
   EXPECT_EQ(expected.char_16, char_16);
 #endif
 
@@ -301,102 +291,93 @@ void verify_single_value_struct(DDS::DynamicData_ptr data)
   id = data->get_member_id_at_index(14);
   EXPECT_EQ(id, ACE_CDR::ULong(14));
   ret = data->get_byte_value(byte, id);
-  EXPECT_EQ(ret, DDS::RETCODE_OK);
+  ASSERT_RC_OK(ret);
   EXPECT_EQ(expected.byte, byte);
 
-  nested_dd = 0;
   ret = data->get_complex_value(nested_dd, id);
-  EXPECT_EQ(ret, DDS::RETCODE_OK);
-  ret = nested_dd->get_byte_value(byte, random_id);
-  EXPECT_EQ(ret, DDS::RETCODE_OK);
+  ASSERT_RC_OK(ret);
+  ret = nested_dd->get_byte_value(byte, MEMBER_ID_INVALID);
+  ASSERT_RC_OK(ret);
   EXPECT_EQ(expected.byte, byte);
 
   ACE_CDR::Boolean bool_;
   id = data->get_member_id_at_index(15);
   EXPECT_EQ(id, ACE_CDR::ULong(15));
   ret = data->get_boolean_value(bool_, id);
-  EXPECT_EQ(ret, DDS::RETCODE_OK);
+  ASSERT_RC_OK(ret);
   EXPECT_EQ(expected._cxx_bool, bool_);
 
-  nested_dd = 0;
   ret = data->get_complex_value(nested_dd, id);
-  EXPECT_EQ(ret, DDS::RETCODE_OK);
-  ret = nested_dd->get_boolean_value(bool_, random_id);
-  EXPECT_EQ(ret, DDS::RETCODE_OK);
+  ASSERT_RC_OK(ret);
+  ret = nested_dd->get_boolean_value(bool_, MEMBER_ID_INVALID);
+  ASSERT_RC_OK(ret);
   EXPECT_EQ(expected._cxx_bool, bool_);
 
   ACE_CDR::Long l;
   id = data->get_member_id_at_index(16);
   EXPECT_EQ(id, ACE_CDR::ULong(16));
-  nested_dd = 0;
   ret = data->get_complex_value(nested_dd, id);
-  EXPECT_EQ(ret, DDS::RETCODE_OK);
+  ASSERT_RC_OK(ret);
   count = nested_dd->get_item_count();
   EXPECT_EQ(count, ACE_CDR::ULong(1));
   ret = nested_dd->get_int32_value(l, 0);
-  EXPECT_EQ(ret, DDS::RETCODE_OK);
+  ASSERT_RC_OK(ret);
   EXPECT_EQ(expected.nested_struct.l, l);
 
   DDS::DynamicData_var nested_dd2;
   ret = nested_dd->get_complex_value(nested_dd2, 0);
-  EXPECT_EQ(DDS::RETCODE_OK, ret);
-  ret = nested_dd2->get_int32_value(l, random_id);
-  EXPECT_EQ(DDS::RETCODE_OK, ret);
+  ASSERT_RC_OK(ret);
+  ret = nested_dd2->get_int32_value(l, MEMBER_ID_INVALID);
+  ASSERT_RC_OK(ret);
   EXPECT_EQ(expected.nested_struct.l, l);
 
   ACE_CDR::Char* str = 0;
   id = data->get_member_id_at_index(17);
   EXPECT_EQ(id, ACE_CDR::ULong(17));
   ret = data->get_string_value(str, id);
-  EXPECT_EQ(ret, DDS::RETCODE_OK);
+  ASSERT_RC_OK(ret);
   EXPECT_STREQ(expected.str.in(), str);
-  CORBA::string_free(str);
 
-  str = 0;
-  nested_dd = 0;
   ret = data->get_complex_value(nested_dd, id);
-  EXPECT_EQ(ret, DDS::RETCODE_OK);
-  ret = nested_dd->get_string_value(str, random_id);
-  EXPECT_EQ(ret, DDS::RETCODE_ERROR);
+  ASSERT_RC_OK(ret);
+  ret = nested_dd->get_string_value(str, MEMBER_ID_INVALID);
+  EXPECT_RC_EQ(ret, DDS::RETCODE_ERROR);
 
 #ifdef DDS_HAS_WCHAR
   ACE_CDR::WChar* wstr = 0;
   id = data->get_member_id_at_index(18);
   EXPECT_EQ(id, ACE_CDR::ULong(18));
   ret = data->get_wstring_value(wstr, id);
-  EXPECT_EQ(ret, DDS::RETCODE_OK);
+  ASSERT_RC_OK(ret);
   EXPECT_STREQ(expected.wstr.in(), wstr);
   CORBA::wstring_free(wstr);
 
   wstr = 0;
-  nested_dd = 0;
   ret = data->get_complex_value(nested_dd, id);
-  EXPECT_EQ(ret, DDS::RETCODE_OK);
-  ret = nested_dd->get_wstring_value(wstr, random_id);
-  EXPECT_EQ(ret, DDS::RETCODE_ERROR);
+  ASSERT_RC_OK(ret);
+  ret = nested_dd->get_wstring_value(wstr, MEMBER_ID_INVALID);
+  EXPECT_RC_EQ(ret, DDS::RETCODE_ERROR);
 #endif
 
   // Reading members out-of-order.
   ret = data->get_int32_value(int_32, 1);
-  EXPECT_EQ(ret, DDS::RETCODE_OK);
+  ASSERT_RC_OK(ret);
   EXPECT_EQ(expected.int_32, int_32);
 
-  nested_dd = 0;
   ret = data->get_complex_value(nested_dd, 1);
-  EXPECT_EQ(ret, DDS::RETCODE_OK);
-  ret = nested_dd->get_int32_value(int_32, random_id);
-  EXPECT_EQ(ret, DDS::RETCODE_OK);
+  ASSERT_RC_OK(ret);
+  ret = nested_dd->get_int32_value(int_32, MEMBER_ID_INVALID);
+  ASSERT_RC_OK(ret);
   EXPECT_EQ(expected.int_32, int_32);
 
   ret = data->get_int32_value(my_enum, 0);
-  EXPECT_EQ(ret, DDS::RETCODE_OK);
+  ASSERT_RC_OK(ret);
   EXPECT_EQ(expected.my_enum, my_enum);
 
-  nested_dd = 0;
   ret = data->get_complex_value(nested_dd, 0);
-  EXPECT_EQ(ret, DDS::RETCODE_OK);
-  ret = nested_dd->get_int32_value(my_enum, random_id);
-  EXPECT_EQ(ret, DDS::RETCODE_OK);
+  ASSERT_RC_OK(ret);
+  ret = nested_dd->get_int32_value(my_enum, MEMBER_ID_INVALID);
+  ASSERT_RC_OK(ret);
   EXPECT_EQ(expected.my_enum, my_enum);
 }
 
@@ -468,12 +449,12 @@ void verify_sequence_value_struct(DDS::DynamicData_ptr data)
 
   DDS::Int32Seq my_enums;
   DDS::ReturnCode_t ret = data->get_int32_values(my_enums, 0);
-  EXPECT_EQ(DDS::RETCODE_OK, ret);
+  ASSERT_RC_OK(ret);
   check_primitive_sequences(expected.my_enums, my_enums);
 
   DDS::DynamicData_var complex;
   ret = data->get_complex_value(complex, 0);
-  EXPECT_EQ(DDS::RETCODE_OK, ret);
+  ASSERT_RC_OK(ret);
   my_enums.length(0);
   ret = data->get_int32_values(my_enums, 0);
   check_primitive_sequences(expected.my_enums, my_enums);
@@ -484,119 +465,117 @@ void verify_sequence_value_struct(DDS::DynamicData_ptr data)
   EXPECT_EQ(XTypes::MemberId(0), id);
   ACE_CDR::Long some_enum;
   ret = complex->get_int32_value(some_enum, id);
-  EXPECT_EQ(DDS::RETCODE_OK, ret);
+  ASSERT_RC_OK(ret);
   EXPECT_EQ(expected.my_enums[0], some_enum);
 
   DDS::Int32Seq int_32s;
   ret = data->get_int32_values(int_32s, 1);
-  EXPECT_EQ(DDS::RETCODE_OK, ret);
+  ASSERT_RC_OK(ret);
   check_primitive_sequences(expected.int_32s, int_32s);
 
-  complex = 0;
   ret = data->get_complex_value(complex, 1);
-  EXPECT_EQ(DDS::RETCODE_OK, ret);
+  ASSERT_RC_OK(ret);
   count = complex->get_item_count();
   EXPECT_EQ(ACE_CDR::ULong(3), count);
   id = complex->get_member_id_at_index(1);
   ACE_CDR::Long some_int32;
   ret = complex->get_int32_value(some_int32, id);
-  EXPECT_EQ(DDS::RETCODE_OK, ret);
+  ASSERT_RC_OK(ret);
   EXPECT_EQ(expected.int_32s[1], some_int32);
 
   DDS::UInt32Seq uint_32s;
   ret = data->get_uint32_values(uint_32s, 2);
-  EXPECT_EQ(DDS::RETCODE_OK, ret);
+  ASSERT_RC_OK(ret);
   check_primitive_sequences(expected.uint_32s, uint_32s);
   ret = data->get_uint32_values(uint_32s, 3);
   EXPECT_EQ(DDS::RETCODE_ERROR, ret);
 
   DDS::Int8Seq int_8s;
   ret = data->get_int8_values(int_8s, 3);
-  EXPECT_EQ(DDS::RETCODE_OK, ret);
+  ASSERT_RC_OK(ret);
   check_primitive_sequences(expected.int_8s, int_8s);
 
   DDS::UInt8Seq uint_8s;
   ret = data->get_uint8_values(uint_8s, 4);
-  EXPECT_EQ(DDS::RETCODE_OK, ret);
+  ASSERT_RC_OK(ret);
   check_primitive_sequences(expected.uint_8s, uint_8s);
 
   DDS::Int16Seq int_16s;
   ret = data->get_int16_values(int_16s, 5);
-  EXPECT_EQ(DDS::RETCODE_OK, ret);
+  ASSERT_RC_OK(ret);
   check_primitive_sequences(expected.int_16s, int_16s);
 
   DDS::UInt16Seq uint_16s;
   ret = data->get_uint16_values(uint_16s, 6);
-  EXPECT_EQ(DDS::RETCODE_OK, ret);
+  ASSERT_RC_OK(ret);
   check_primitive_sequences(expected.uint_16s, uint_16s);
 
   DDS::Int64Seq int_64s;
   ret = data->get_int64_values(int_64s, 7);
-  EXPECT_EQ(DDS::RETCODE_OK, ret);
+  ASSERT_RC_OK(ret);
   check_primitive_sequences(expected.int_64s, int_64s);
 
   DDS::UInt64Seq uint_64s;
   ret = data->get_uint64_values(uint_64s, 8);
-  EXPECT_EQ(DDS::RETCODE_OK, ret);
+  ASSERT_RC_OK(ret);
   check_primitive_sequences(expected.uint_64s, uint_64s);
 
   DDS::Float32Seq float_32s;
   ret = data->get_float32_values(float_32s, 9);
-  EXPECT_EQ(DDS::RETCODE_OK, ret);
+  ASSERT_RC_OK(ret);
   check_primitive_sequences(expected.float_32s, float_32s);
 
   DDS::Float64Seq float_64s;
   ret = data->get_float64_values(float_64s, 10);
-  EXPECT_EQ(DDS::RETCODE_OK, ret);
+  ASSERT_RC_OK(ret);
   check_primitive_sequences(expected.float_64s, float_64s);
 
   DDS::Float128Seq float_128s;
   ret = data->get_float128_values(float_128s, 11);
-  EXPECT_EQ(DDS::RETCODE_OK, ret);
+  ASSERT_RC_OK(ret);
   check_float128_sequences(expected.float_128s, float_128s);
 
   DDS::CharSeq char_8s;
   ret = data->get_char8_values(char_8s, 12);
-  EXPECT_EQ(DDS::RETCODE_OK, ret);
+  ASSERT_RC_OK(ret);
   check_primitive_sequences(expected.char_8s, char_8s);
 
 #ifdef DDS_HAS_WCHAR
   DDS::WcharSeq char_16s;
   ret = data->get_char16_values(char_16s, 13);
-  EXPECT_EQ(DDS::RETCODE_OK, ret);
+  ASSERT_RC_OK(ret);
   check_primitive_sequences(expected.char_16s, char_16s);
 #endif
 
   DDS::ByteSeq byte_s;
   ret = data->get_byte_values(byte_s, 14);
-  EXPECT_EQ(DDS::RETCODE_OK, ret);
+  ASSERT_RC_OK(ret);
   check_primitive_sequences(expected.byte_s, byte_s);
 
   DDS::BooleanSeq bool_s;
   ret = data->get_boolean_values(bool_s, 15);
-  EXPECT_EQ(DDS::RETCODE_OK, ret);
+  ASSERT_RC_OK(ret);
   check_primitive_sequences(expected.bool_s, bool_s);
 
   DDS::StringSeq str_s;
   ret = data->get_string_values(str_s, 16);
-  EXPECT_EQ(DDS::RETCODE_OK, ret);
+  ASSERT_RC_OK(ret);
   check_string_sequences(expected.str_s, str_s);
 
 #ifdef DDS_HAS_WCHAR
   DDS::WstringSeq wstr_s;
   ret = data->get_wstring_values(wstr_s, 17);
-  EXPECT_EQ(DDS::RETCODE_OK, ret);
+  ASSERT_RC_OK(ret);
   check_string_sequences(expected.wstr_s, wstr_s);
 
-  complex = 0;
   ret = data->get_complex_value(complex, 17);
-  EXPECT_EQ(DDS::RETCODE_OK, ret);
+  ASSERT_RC_OK(ret);
   count = complex->get_item_count();
   EXPECT_EQ(ACE_CDR::ULong(2), count);
   id = complex->get_member_id_at_index(1);
   ACE_CDR::WChar* some_wstr = 0;
   ret = complex->get_wstring_value(some_wstr, id);
-  EXPECT_EQ(DDS::RETCODE_OK, ret);
+  ASSERT_RC_OK(ret);
   EXPECT_STREQ(expected.wstr_s[1].in(), some_wstr);
   CORBA::wstring_free(some_wstr);
 #endif
@@ -606,25 +585,24 @@ void verify_int32_union(DDS::DynamicData_ptr data)
 {
   ACE_CDR::Long int_32;
   DDS::ReturnCode_t ret = data->get_int32_value(int_32, 1);
-  EXPECT_EQ(ret, DDS::RETCODE_OK);
+  ASSERT_RC_OK(ret);
   EXPECT_EQ(ACE_CDR::Long(10), int_32);
 
   const XTypes::MemberId disc_id = data->get_member_id_at_index(0);
   EXPECT_EQ(XTypes::DISCRIMINATOR_ID, disc_id);
   ACE_CDR::Long disc_val;
   ret = data->get_int32_value(disc_val, disc_id);
-  EXPECT_EQ(ret, DDS::RETCODE_OK);
+  ASSERT_RC_OK(ret);
   EXPECT_EQ(disc_val, E_INT32);
-  ACE_CDR::LongLong wrong_disc_val;
-  ret = data->get_int64_value(wrong_disc_val, disc_id);
-  EXPECT_EQ(ret, DDS::RETCODE_ERROR);
+  DDS::Int8 wrong_disc_val;
+  ret = data->get_int8_value(wrong_disc_val, disc_id);
+  EXPECT_RC_EQ(ret, DDS::RETCODE_ERROR);
 
   DDS::DynamicData_var disc_data;
   ret = data->get_complex_value(disc_data, disc_id);
-  EXPECT_EQ(ret, DDS::RETCODE_OK);
-  const XTypes::MemberId any_id = 100;
-  ret = disc_data->get_int32_value(disc_val, any_id);
-  EXPECT_EQ(ret, DDS::RETCODE_OK);
+  ASSERT_RC_OK(ret);
+  ret = disc_data->get_int32_value(disc_val, XTypes::MEMBER_ID_INVALID);
+  ASSERT_RC_OK(ret);
   EXPECT_EQ(disc_val, E_INT32);
 }
 
@@ -632,25 +610,24 @@ void verify_uint32_union(DDS::DynamicData_ptr data)
 {
   ACE_CDR::ULong uint_32;
   DDS::ReturnCode_t ret = data->get_uint32_value(uint_32, 2);
-  EXPECT_EQ(ret, DDS::RETCODE_OK);
+  ASSERT_RC_OK(ret);
   EXPECT_EQ(ACE_CDR::ULong(11), uint_32);
 
   const XTypes::MemberId disc_id = data->get_member_id_at_index(0);
   EXPECT_EQ(XTypes::DISCRIMINATOR_ID, disc_id);
   ACE_CDR::Long disc_val;
   ret = data->get_int32_value(disc_val, disc_id);
-  EXPECT_EQ(ret, DDS::RETCODE_OK);
+  ASSERT_RC_OK(ret);
   EXPECT_EQ(disc_val, E_UINT32);
   ACE_CDR::Short wrong_disc_val;
   ret = data->get_int16_value(wrong_disc_val, disc_id);
-  EXPECT_EQ(ret, DDS::RETCODE_ERROR);
+  EXPECT_RC_EQ(ret, DDS::RETCODE_ERROR);
 
   DDS::DynamicData_var disc_data;
   ret = data->get_complex_value(disc_data, disc_id);
-  EXPECT_EQ(ret, DDS::RETCODE_OK);
-  const XTypes::MemberId any_id = 100;
-  ret = disc_data->get_int32_value(disc_val, any_id);
-  EXPECT_EQ(ret, DDS::RETCODE_OK);
+  ASSERT_RC_OK(ret);
+  ret = disc_data->get_int32_value(disc_val, XTypes::MEMBER_ID_INVALID);
+  ASSERT_RC_OK(ret);
   EXPECT_EQ(disc_val, E_UINT32);
 }
 
@@ -658,7 +635,7 @@ void verify_int8_union(DDS::DynamicData_ptr data)
 {
   ACE_CDR::Int8 int_8;
   DDS::ReturnCode_t ret = data->get_int8_value(int_8, 3);
-  EXPECT_EQ(ret, DDS::RETCODE_OK);
+  ASSERT_RC_OK(ret);
   EXPECT_EQ(ACE_CDR::Int8(127), int_8);
 }
 
@@ -666,7 +643,7 @@ void verify_uint8_union(DDS::DynamicData_ptr data)
 {
   ACE_CDR::UInt8 uint_8;
   DDS::ReturnCode_t ret = data->get_uint8_value(uint_8, 4);
-  EXPECT_EQ(ret, DDS::RETCODE_OK);
+  ASSERT_RC_OK(ret);
   EXPECT_EQ(ACE_CDR::UInt8(255), uint_8);
 }
 
@@ -674,7 +651,7 @@ void verify_int16_union(DDS::DynamicData_ptr data)
 {
   ACE_CDR::Short int_16;
   DDS::ReturnCode_t ret = data->get_int16_value(int_16, 5);
-  EXPECT_EQ(ret, DDS::RETCODE_OK);
+  ASSERT_RC_OK(ret);
   EXPECT_EQ(ACE_CDR::Short(9), int_16);
 }
 
@@ -682,7 +659,7 @@ void verify_uint16_union(DDS::DynamicData_ptr data)
 {
   ACE_CDR::UShort uint_16;
   DDS::ReturnCode_t ret = data->get_uint16_value(uint_16, 6);
-  EXPECT_EQ(ret, DDS::RETCODE_OK);
+  ASSERT_RC_OK(ret);
   EXPECT_EQ(ACE_CDR::UShort(5), uint_16);
 }
 
@@ -690,7 +667,7 @@ void verify_int64_union(DDS::DynamicData_ptr data)
 {
   ACE_CDR::LongLong int_64;
   DDS::ReturnCode_t ret = data->get_int64_value(int_64, 7);
-  EXPECT_EQ(ret, DDS::RETCODE_OK);
+  ASSERT_RC_OK(ret);
   EXPECT_EQ(ACE_CDR::LongLong(254), int_64);
 }
 
@@ -698,7 +675,7 @@ void verify_uint64_union(DDS::DynamicData_ptr data)
 {
   ACE_CDR::ULongLong uint_64;
   DDS::ReturnCode_t ret = data->get_uint64_value(uint_64, 8);
-  EXPECT_EQ(ret, DDS::RETCODE_OK);
+  ASSERT_RC_OK(ret);
   EXPECT_EQ(ACE_CDR::ULongLong(255), uint_64);
 }
 
@@ -706,7 +683,7 @@ void verify_float32_union(DDS::DynamicData_ptr data)
 {
   ACE_CDR::Float float_32;
   DDS::ReturnCode_t ret = data->get_float32_value(float_32, 9);
-  EXPECT_EQ(ret, DDS::RETCODE_OK);
+  ASSERT_RC_OK(ret);
   EXPECT_EQ(ACE_CDR::Float(1.0f), float_32);
 }
 
@@ -714,7 +691,7 @@ void verify_float64_union(DDS::DynamicData_ptr data)
 {
   ACE_CDR::Double float_64;
   DDS::ReturnCode_t ret = data->get_float64_value(float_64, 10);
-  EXPECT_EQ(ret, DDS::RETCODE_OK);
+  ASSERT_RC_OK(ret);
   EXPECT_EQ(ACE_CDR::Double(1.0), float_64);
 }
 
@@ -722,7 +699,7 @@ void verify_float128_union(DDS::DynamicData_ptr data)
 {
   ACE_CDR::LongDouble float_128;
   DDS::ReturnCode_t ret = data->get_float128_value(float_128, 11);
-  EXPECT_EQ(ret, DDS::RETCODE_OK);
+  ASSERT_RC_OK(ret);
   ACE_CDR::LongDouble expected;
   set_float128_value(expected);
   check_float128(expected, float_128);
@@ -732,7 +709,7 @@ void verify_char8_union(DDS::DynamicData_ptr data)
 {
   ACE_CDR::Char char_8;
   DDS::ReturnCode_t ret = data->get_char8_value(char_8, 12);
-  EXPECT_EQ(ret, DDS::RETCODE_OK);
+  ASSERT_RC_OK(ret);
   EXPECT_EQ(ACE_CDR::Char('a'), char_8);
 }
 
@@ -741,7 +718,7 @@ void verify_char16_union(DDS::DynamicData_ptr data)
 {
   ACE_CDR::WChar char_16;
   DDS::ReturnCode_t ret = data->get_char16_value(char_16, 13);
-  EXPECT_EQ(ret, DDS::RETCODE_OK);
+  ASSERT_RC_OK(ret);
   EXPECT_EQ(ACE_CDR::WChar(L'a'), char_16);
 }
 #endif
@@ -750,33 +727,31 @@ void verify_byte_union(DDS::DynamicData_ptr data)
 {
   ACE_CDR::Octet byte;
   DDS::ReturnCode_t ret = data->get_byte_value(byte, 14);
-  EXPECT_EQ(ret, DDS::RETCODE_OK);
+  ASSERT_RC_OK(ret);
   EXPECT_EQ(ACE_CDR::Octet(255), byte);
   ret = data->get_byte_value(byte, 10);
-  EXPECT_EQ(ret, DDS::RETCODE_ERROR);
+  EXPECT_RC_EQ(ret, DDS::RETCODE_ERROR);
 }
 
 void verify_bool_union(DDS::DynamicData_ptr data)
 {
   ACE_CDR::Boolean bool_;
   DDS::ReturnCode_t ret = data->get_boolean_value(bool_, 15);
-  EXPECT_EQ(ret, DDS::RETCODE_OK);
+  ASSERT_RC_OK(ret);
   EXPECT_EQ(true, bool_);
   ret = data->get_boolean_value(bool_, 10);
-  EXPECT_EQ(ret, DDS::RETCODE_ERROR);
+  EXPECT_RC_EQ(ret, DDS::RETCODE_ERROR);
 }
 
 void verify_string_union(DDS::DynamicData_ptr data)
 {
   ACE_CDR::Char* str = 0;
   DDS::ReturnCode_t ret = data->get_string_value(str, 16);
-  EXPECT_EQ(ret, DDS::RETCODE_OK);
+  ASSERT_RC_OK(ret);
   EXPECT_STREQ("abc", str);
-  CORBA::string_free(str);
 
-  str = 0;
   ret = data->get_string_value(str, 10);
-  EXPECT_EQ(ret, DDS::RETCODE_ERROR);
+  EXPECT_RC_EQ(ret, DDS::RETCODE_ERROR);
 }
 
 #ifdef DDS_HAS_WCHAR
@@ -784,13 +759,13 @@ void verify_wstring_union(DDS::DynamicData_ptr data)
 {
   ACE_CDR::WChar* wstr = 0;
   DDS::ReturnCode_t ret = data->get_wstring_value(wstr, 17);
-  EXPECT_EQ(ret, DDS::RETCODE_OK);
+  ASSERT_RC_OK(ret);
   EXPECT_STREQ(wstr, L"abc");
   CORBA::wstring_free(wstr);
 
   wstr = 0;
   ret = data->get_wstring_value(wstr, 10);
-  EXPECT_EQ(ret, DDS::RETCODE_ERROR);
+  EXPECT_RC_EQ(ret, DDS::RETCODE_ERROR);
 }
 #endif
 
@@ -798,17 +773,17 @@ void verify_enum_union(DDS::DynamicData_ptr data)
 {
   ACE_CDR::Long my_enum;
   DDS::ReturnCode_t ret = data->get_int32_value(my_enum, 18);
-  EXPECT_EQ(ret, DDS::RETCODE_OK);
+  ASSERT_RC_OK(ret);
   EXPECT_EQ(ACE_CDR::Long(9), my_enum);
   ret = data->get_int32_value(my_enum, 11);
-  EXPECT_EQ(ret, DDS::RETCODE_ERROR);
+  EXPECT_RC_EQ(ret, DDS::RETCODE_ERROR);
 }
 
 void verify_int32s_union(DDS::DynamicData_ptr data)
 {
   DDS::Int32Seq int_32s;
   DDS::ReturnCode_t ret = data->get_int32_values(int_32s, 1);
-  EXPECT_EQ(DDS::RETCODE_OK, ret);
+  ASSERT_RC_OK(ret);
   EXPECT_EQ(ACE_CDR::ULong(2), int_32s.length());
   EXPECT_EQ(ACE_CDR::Long(10), int_32s[0]);
   EXPECT_EQ(ACE_CDR::Long(11), int_32s[1]);
@@ -818,7 +793,7 @@ void verify_uint32s_union(DDS::DynamicData_ptr data)
 {
   DDS::UInt32Seq uint_32s;
   DDS::ReturnCode_t ret = data->get_uint32_values(uint_32s, 2);
-  EXPECT_EQ(DDS::RETCODE_OK, ret);
+  ASSERT_RC_OK(ret);
   EXPECT_EQ(ACE_CDR::ULong(2), uint_32s.length());
   EXPECT_EQ(ACE_CDR::ULong(0xff), uint_32s[0]);
   EXPECT_EQ(ACE_CDR::ULong(0xffff), uint_32s[1]);
@@ -828,41 +803,39 @@ void verify_array_struct(DDS::DynamicData_ptr data)
 {
   DDS::DynamicData_var array;
   DDS::ReturnCode_t ret = data->get_complex_value(array, 0);
-  EXPECT_EQ(DDS::RETCODE_OK, ret);
+  ASSERT_RC_OK(ret);
   ACE_CDR::Long l;
   XTypes::MemberId id = array->get_member_id_at_index(0);
   ret = array->get_int32_value(l, id);
-  EXPECT_EQ(DDS::RETCODE_OK, ret);
+  ASSERT_RC_OK(ret);
   EXPECT_EQ(ACE_CDR::Long(0x12), l);
   id = array->get_member_id_at_index(1);
   ret = array->get_int32_value(l, id);
-  EXPECT_EQ(DDS::RETCODE_OK, ret);
+  ASSERT_RC_OK(ret);
   EXPECT_EQ(ACE_CDR::Long(0x34), l);
 
-  array = 0;
   ret = data->get_complex_value(array, 1);
-  EXPECT_EQ(DDS::RETCODE_OK, ret);
+  ASSERT_RC_OK(ret);
   ACE_CDR::ULong ul;
   id = array->get_member_id_at_index(0);
   ret = array->get_uint32_value(ul, id);
-  EXPECT_EQ(DDS::RETCODE_OK, ret);
+  ASSERT_RC_OK(ret);
   EXPECT_EQ(ACE_CDR::ULong(0xff), ul);
   id = array->get_member_id_at_index(1);
   ret = array->get_uint32_value(ul, id);
-  EXPECT_EQ(DDS::RETCODE_OK, ret);
+  ASSERT_RC_OK(ret);
   EXPECT_EQ(ACE_CDR::ULong(0xff), ul);
 
-  array = 0;
   ret = data->get_complex_value(array, 2);
-  EXPECT_EQ(DDS::RETCODE_OK, ret);
+  ASSERT_RC_OK(ret);
   ACE_CDR::Int8 i;
   id = array->get_member_id_at_index(0);
   ret = array->get_int8_value(i, id);
-  EXPECT_EQ(DDS::RETCODE_OK, ret);
+  ASSERT_RC_OK(ret);
   EXPECT_EQ(ACE_CDR::Int8(0x01), i);
   id = array->get_member_id_at_index(1);
   ret = array->get_int8_value(i, id);
-  EXPECT_EQ(DDS::RETCODE_OK, ret);
+  ASSERT_RC_OK(ret);
   EXPECT_EQ(ACE_CDR::Int8(0x02), i);
 }
 
@@ -903,7 +876,7 @@ TEST(dds_DCPS_XTypes_DynamicDataXcdrReadImpl, Mutable_ReadValueFromStruct)
     0x00,0x00,0x00,0x06, 0,0x61,0,0x62,0,0x63 // +4+4+10=198 wstr
   };
   ACE_Message_Block msg(1024);
-  msg.copy((const char*)single_value_struct, sizeof(single_value_struct));
+  msg.copy((const char*)single_value_struct, sizeof single_value_struct);
   XTypes::DynamicDataXcdrReadImpl data(&msg, xcdr2, dt);
 
   verify_single_value_struct<MutableSingleValueStruct>(&data);
@@ -1318,37 +1291,36 @@ TEST(dds_DCPS_XTypes_DynamicDataXcdrReadImpl, Mutable_SkipNestedMembers)
 
   DDS::DynamicData_var nested_level1;
   DDS::ReturnCode_t ret = data.get_complex_value(nested_level1, 1);
-  EXPECT_EQ(DDS::RETCODE_OK, ret);
+  ASSERT_RC_OK(ret);
   ACE_CDR::Long l;
   ret = nested_level1->get_int32_value(l, 0);
-  EXPECT_EQ(DDS::RETCODE_OK, ret);
+  ASSERT_RC_OK(ret);
   EXPECT_EQ(expected.outer.l, l);
   ACE_CDR::Short s;
   ret = nested_level1->get_int16_value(s, 2);
-  EXPECT_EQ(DDS::RETCODE_OK, ret);
+  ASSERT_RC_OK(ret);
   EXPECT_EQ(expected.outer.s, s);
   DDS::DynamicData_var nested_level2;
   ret = nested_level1->get_complex_value(nested_level2, 1);
-  EXPECT_EQ(DDS::RETCODE_OK, ret);
+  ASSERT_RC_OK(ret);
   ret = nested_level2->get_int32_value(l, 0);
-  EXPECT_EQ(DDS::RETCODE_OK, ret);
+  ASSERT_RC_OK(ret);
   EXPECT_EQ(expected.outer.inner.l, l);
 
   ret = data.get_int16_value(s, 2);
-  EXPECT_EQ(DDS::RETCODE_OK, ret);
+  ASSERT_RC_OK(ret);
   EXPECT_EQ(expected.s, s);
 
-  nested_level1 = 0;
   ret = data.get_complex_value(nested_level1, 3);
-  EXPECT_EQ(DDS::RETCODE_OK, ret);
+  ASSERT_RC_OK(ret);
   ACE_CDR::ULong ul;
   ret = nested_level1->get_uint32_value(ul, 1);
-  EXPECT_EQ(DDS::RETCODE_OK, ret);
+  ASSERT_RC_OK(ret);
   EXPECT_EQ(expected.inner.ul(), ul);
 
   ACE_CDR::Int8 i;
   ret = data.get_int8_value(i, 4);
-  EXPECT_EQ(DDS::RETCODE_OK, ret);
+  ASSERT_RC_OK(ret);
   EXPECT_EQ(expected.i, i);
 
   // Test the validity of inner DynamicData when the outer one no longer exists.
@@ -1356,15 +1328,15 @@ TEST(dds_DCPS_XTypes_DynamicDataXcdrReadImpl, Mutable_SkipNestedMembers)
   {
     XTypes::DynamicDataXcdrReadImpl enclosing(&msg, xcdr2, dt);
     ret = enclosing.get_complex_value(nested, 1);
-    EXPECT_EQ(DDS::RETCODE_OK, ret);
+    ASSERT_RC_OK(ret);
   }
   ACE_CDR::Long l_val;
   ret = nested->get_int32_value(l_val, 0);
-  EXPECT_EQ(DDS::RETCODE_OK, ret);
+  ASSERT_RC_OK(ret);
   EXPECT_EQ(expected.outer.l, l_val);
   ACE_CDR::Short s_val;
   ret = nested->get_int16_value(s_val, 2);
-  EXPECT_EQ(DDS::RETCODE_OK, ret);
+  ASSERT_RC_OK(ret);
   EXPECT_EQ(expected.outer.s, s_val);
 }
 
@@ -1446,7 +1418,6 @@ TEST(dds_DCPS_XTypes_DynamicDataXcdrReadImpl, Mutable_ReadRecursiveStruct)
   EXPECT_EQ(val, ACE_CDR::Long(0x000000dd));
   id = child2_dd->get_member_id_at_index(1);
   EXPECT_EQ(id, XTypes::MemberId(1));
-  nested_children_dd = 0;
   EXPECT_EQ(DDS::RETCODE_OK, child2_dd->get_complex_value(nested_children_dd, id));
   EXPECT_EQ(ACE_CDR::ULong(0), nested_children_dd->get_item_count());
 }
@@ -2223,39 +2194,38 @@ TEST(dds_DCPS_XTypes_DynamicDataXcdrReadImpl, Appendable_SkipNestedMembers)
 
   DDS::DynamicData_var nested_level1;
   DDS::ReturnCode_t ret = data.get_complex_value(nested_level1, 1);
-  EXPECT_EQ(DDS::RETCODE_OK, ret);
+  ASSERT_RC_OK(ret);
   ACE_CDR::Octet o;
   ret = nested_level1->get_byte_value(o, 0);
-  EXPECT_EQ(DDS::RETCODE_OK, ret);
+  ASSERT_RC_OK(ret);
   EXPECT_EQ(expected.outer.o, o);
   ACE_CDR::Boolean b;
   ret = nested_level1->get_boolean_value(b, 2);
-  EXPECT_EQ(DDS::RETCODE_OK, ret);
+  ASSERT_RC_OK(ret);
   EXPECT_EQ(expected.outer.b, b);
   DDS::DynamicData_var nested_level2;
   ret = nested_level1->get_complex_value(nested_level2, 1);
-  EXPECT_EQ(DDS::RETCODE_OK, ret);
+  ASSERT_RC_OK(ret);
   ACE_CDR::Long l;
   ret = nested_level2->get_int32_value(l, 0);
-  EXPECT_EQ(DDS::RETCODE_OK, ret);
+  ASSERT_RC_OK(ret);
   EXPECT_EQ(expected.outer.inner.l, l);
 
   ACE_CDR::Int16 s;
   ret = data.get_int16_value(s, 2);
-  EXPECT_EQ(DDS::RETCODE_OK, ret);
+  ASSERT_RC_OK(ret);
   EXPECT_EQ(expected.s, s);
 
-  nested_level1 = 0;
   ret = data.get_complex_value(nested_level1, 3);
-  EXPECT_EQ(DDS::RETCODE_OK, ret);
+  ASSERT_RC_OK(ret);
   ACE_CDR::ULong ul;
   ret = nested_level1->get_uint32_value(ul, 1);
-  EXPECT_EQ(DDS::RETCODE_OK, ret);
+  ASSERT_RC_OK(ret);
   EXPECT_EQ(expected.inner.ul(), ul);
 
   ACE_CDR::Int8 i;
   ret = data.get_int8_value(i, 4);
-  EXPECT_EQ(DDS::RETCODE_OK, ret);
+  ASSERT_RC_OK(ret);
   EXPECT_EQ(expected.i, i);
 }
 
@@ -2300,38 +2270,37 @@ TEST(dds_DCPS_XTypes_DynamicDataXcdrReadImpl, Appendable_SkipNestedMembersXCDR1)
 
   DDS::DynamicData_var nested_level1;
   DDS::ReturnCode_t ret = data.get_complex_value(nested_level1, 1);
-  EXPECT_EQ(DDS::RETCODE_OK, ret);
+  ASSERT_RC_OK(ret);
   ACE_CDR::ULong ul;
   ret = nested_level1->get_uint32_value(ul, 0);
-  EXPECT_EQ(DDS::RETCODE_OK, ret);
+  ASSERT_RC_OK(ret);
   EXPECT_EQ(expected.outer.ul, ul);
   ACE_CDR::UShort us;
   ret = nested_level1->get_uint16_value(us, 2);
-  EXPECT_EQ(DDS::RETCODE_OK, ret);
+  ASSERT_RC_OK(ret);
   EXPECT_EQ(expected.outer.us, us);
   DDS::DynamicData_var nested_level2;
   ret = nested_level1->get_complex_value(nested_level2, 1);
-  EXPECT_EQ(DDS::RETCODE_OK, ret);
+  ASSERT_RC_OK(ret);
   ACE_CDR::Long l;
   ret = nested_level2->get_int32_value(l, 0);
-  EXPECT_EQ(DDS::RETCODE_OK, ret);
+  ASSERT_RC_OK(ret);
   EXPECT_EQ(expected.outer.inner.l, l);
 
   ACE_CDR::Short s;
   ret = data.get_int16_value(s, 2);
-  EXPECT_EQ(DDS::RETCODE_OK, ret);
+  ASSERT_RC_OK(ret);
   EXPECT_EQ(expected.s, s);
 
-  nested_level1 = 0;
   ret = data.get_complex_value(nested_level1, 3);
-  EXPECT_EQ(DDS::RETCODE_OK, ret);
+  ASSERT_RC_OK(ret);
   ret = nested_level1->get_uint32_value(ul, 1);
-  EXPECT_EQ(DDS::RETCODE_OK, ret);
+  ASSERT_RC_OK(ret);
   EXPECT_EQ(expected.inner.ul(), ul);
 
   ACE_CDR::Int8 i;
   ret = data.get_int8_value(i, 4);
-  EXPECT_EQ(DDS::RETCODE_OK, ret);
+  ASSERT_RC_OK(ret);
   EXPECT_EQ(expected.i, i);
 }
 
@@ -3082,38 +3051,37 @@ TEST(dds_DCPS_XTypes_DynamicDataXcdrReadImpl, Final_SkipNestedMembers)
 
   DDS::DynamicData_var nested_level1;
   DDS::ReturnCode_t ret = data.get_complex_value(nested_level1, 1);
-  EXPECT_EQ(DDS::RETCODE_OK, ret);
+  ASSERT_RC_OK(ret);
   ACE_CDR::ULong ul;
   ret = nested_level1->get_uint32_value(ul, 0);
-  EXPECT_EQ(DDS::RETCODE_OK, ret);
+  ASSERT_RC_OK(ret);
   EXPECT_EQ(expected.outer.ul, ul);
   ACE_CDR::UShort us;
   ret = nested_level1->get_uint16_value(us, 2);
-  EXPECT_EQ(DDS::RETCODE_OK, ret);
+  ASSERT_RC_OK(ret);
   EXPECT_EQ(expected.outer.us, us);
   DDS::DynamicData_var nested_level2;
   ret = nested_level1->get_complex_value(nested_level2, 1);
-  EXPECT_EQ(DDS::RETCODE_OK, ret);
+  ASSERT_RC_OK(ret);
   ACE_CDR::Long l;
   ret = nested_level2->get_int32_value(l, 0);
-  EXPECT_EQ(DDS::RETCODE_OK, ret);
+  ASSERT_RC_OK(ret);
   EXPECT_EQ(expected.outer.inner.l, l);
 
   ACE_CDR::Short s;
   ret = data.get_int16_value(s, 2);
-  EXPECT_EQ(DDS::RETCODE_OK, ret);
+  ASSERT_RC_OK(ret);
   EXPECT_EQ(expected.s, s);
 
-  nested_level1 = 0;
   ret = data.get_complex_value(nested_level1, 3);
-  EXPECT_EQ(DDS::RETCODE_OK, ret);
+  ASSERT_RC_OK(ret);
   ret = nested_level1->get_uint32_value(ul, 1);
-  EXPECT_EQ(DDS::RETCODE_OK, ret);
+  ASSERT_RC_OK(ret);
   EXPECT_EQ(expected.inner.ul(), ul);
 
   ACE_CDR::Int8 i;
   ret = data.get_int8_value(i, 4);
-  EXPECT_EQ(DDS::RETCODE_OK, ret);
+  ASSERT_RC_OK(ret);
   EXPECT_EQ(expected.i, i);
 }
 
@@ -3158,38 +3126,37 @@ TEST(dds_DCPS_XTypes_DynamicDataXcdrReadImpl, Final_SkipNestedMembersXCDR1)
 
   DDS::DynamicData_var nested_level1;
   DDS::ReturnCode_t ret = data.get_complex_value(nested_level1, 1);
-  EXPECT_EQ(DDS::RETCODE_OK, ret);
+  ASSERT_RC_OK(ret);
   ACE_CDR::ULong ul;
   ret = nested_level1->get_uint32_value(ul, 0);
-  EXPECT_EQ(DDS::RETCODE_OK, ret);
+  ASSERT_RC_OK(ret);
   EXPECT_EQ(expected.outer.ul, ul);
   ACE_CDR::UShort us;
   ret = nested_level1->get_uint16_value(us, 2);
-  EXPECT_EQ(DDS::RETCODE_OK, ret);
+  ASSERT_RC_OK(ret);
   EXPECT_EQ(expected.outer.us, us);
   DDS::DynamicData_var nested_level2;
   ret = nested_level1->get_complex_value(nested_level2, 1);
-  EXPECT_EQ(DDS::RETCODE_OK, ret);
+  ASSERT_RC_OK(ret);
   ACE_CDR::Long l;
   ret = nested_level2->get_int32_value(l, 0);
-  EXPECT_EQ(DDS::RETCODE_OK, ret);
+  ASSERT_RC_OK(ret);
   EXPECT_EQ(expected.outer.inner.l, l);
 
   ACE_CDR::Short s;
   ret = data.get_int16_value(s, 2);
-  EXPECT_EQ(DDS::RETCODE_OK, ret);
+  ASSERT_RC_OK(ret);
   EXPECT_EQ(expected.s, s);
 
-  nested_level1 = 0;
   ret = data.get_complex_value(nested_level1, 3);
-  EXPECT_EQ(DDS::RETCODE_OK, ret);
+  ASSERT_RC_OK(ret);
   ret = nested_level1->get_uint32_value(ul, 1);
-  EXPECT_EQ(DDS::RETCODE_OK, ret);
+  ASSERT_RC_OK(ret);
   EXPECT_EQ(expected.inner.ul(), ul);
 
   ACE_CDR::Int8 i;
   ret = data.get_int8_value(i, 4);
-  EXPECT_EQ(DDS::RETCODE_OK, ret);
+  ASSERT_RC_OK(ret);
   EXPECT_EQ(expected.i, i);
 }
 

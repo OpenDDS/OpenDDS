@@ -1,0 +1,50 @@
+Released 2024-02-07
+
+Download :ghrelease:`this release on GitHub <DDS-3.27>`.
+
+Read `the documentation for this release on Read the Docs <https://opendds.readthedocs.io/en/dds-3.27>`__.
+
+Additions
+=========
+
+- Complete interfaces for dealing with DynamicData and DynamicTypes. (:ghpr:`4320`, :ghpr:`4339`)
+- It is now possible to specify the :ref:`validity for individual publish/subscribe actions <dds_security--psr-validity>` in DDS Security Permission documents.  This is an OpenDDS extension. (:ghpr:`4344`)
+
+- Building with CMake
+
+  - Added new options for :ref:`how to get ACE/TAO <cmake-building-ace-tao>`. (:ghpr:`4346`)
+
+- CMake Config Package
+
+  - Added :cmake:var:`OPENDDS_ACE_VERSION` and :cmake:var:`OPENDDS_TAO_VERSION`. (:ghpr:`4346`)
+
+- Add a warning that ``@optional`` is not supported. (:ghpr:`4355`)
+- Convert discovery configurations (``repository``, static discovery, ``rtps_discovery`` including templates) to key-value store. (:ghpr:`4360`, :ghpr:`4361`, :ghpr:`4426`, :ghpr:`4411`, :ghpr:`4276`, :ghpr:`4347`)
+- Convert ICE configuration to key-value store. (:ghpr:`4360`, :ghpr:`4361`, :ghpr:`4426`, :ghpr:`4411`, :ghpr:`4276`, :ghpr:`4347`)
+- Change ``transport_template`` and ``rtps_discovery`` template processing to not generate new keys. (:ghpr:`4360`, :ghpr:`4361`, :ghpr:`4426`, :ghpr:`4411`, :ghpr:`4276`, :ghpr:`4347`)
+
+Platform Support and Dependencies
+=================================
+
+- Improved support for configure script detection of clang on Linux (:ghpr:`4449`)
+- When using Visual C++, OpenDDS can now be configured using ``--std=c++NN`` (NN = 17 or 20). (:ghpr:`4452`)
+
+Fixes
+=====
+
+- Updated the :ref:`read <xtypes--interpreting-data-samples-with-dynamicdata>` and :ref:`write <xtypes--populating-data-samples-with-dynamicdata>` semantics of DynamicData for union, expandable collections (sequence and string), and optional member of an aggregated type. (:ghpr:`4278`)
+- Fixed memory leak where instances were not cleaned up with :ref:`exclusive ownership <qos-ownership>`. (:ghpr:`4343`)
+- Removed the special handling for sequence members with length code of 5,6, or 7. (:ghpr:`4376`)
+- Reading data from a dynamic data object for a primitive type now must use ``MEMBER_ID_INVALID`` id. (:ghpr:`4376`)
+- ``create_datawriter`` and ``create_datareader`` check if the topic belongs to the same participant as the publisher/subscriber. (:ghpr:`4398`)
+- Fixed uninitialized ``durability_service`` in Topic QoS when using QoS-XML. (:ghpr:`4424`)
+
+- Fixed a bug where compiling IDL with ``-Lc++11 -Gequality`` produced code outside of a namespace that didn't compile. (:ghpr:`4450`)
+
+- ``SedpLocalAddress`` now defaults to :cfg:prop:`DCPSDefaultAddress` to behave like ``SpdpLocalAddress`` and ``local_address``. (:ghpr:`4451`)
+
+Notes
+=====
+
+- ``TheParticipantFactory*`` will now return a null pointer when :ref:`DCPSConfigFile` doesn't exist. (:ghpr:`4372`)
+
